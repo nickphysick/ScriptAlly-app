@@ -106,18 +106,18 @@ export const HELP_ARTICLE_LIST: readonly HelpArticle[] = [
   },
   {
     slug: "find-an-agent", area: "agents", title: "Find an agent", draft: true, updated: D,
-    lede: "Search by name or agency from the box above the list. Results narrow as you type.",
+    lede: "Search by name or agency from the box beside the views, above the list. Results narrow as you type.",
     guide: { page: CL, key: "search" },
-    body: "Type into `Find an agent` above the list, or press `/` to jump there. It matches any part of an agent's name or their agency, whatever the capitals.\n\n"
+    body: "Type into `Find an agent or agency` above the list, or press `/` to jump there. In full screen the box sits under the navy band. It matches any part of an agent's name or their agency, whatever the capitals.\n\n"
       + "The list narrows as you type. Clear the box to see everyone again.",
     related: ["open-an-agent", "go-full-screen", "add-an-agent", "list-health"],
   },
   {
     slug: "go-full-screen", area: "agents", title: "Go full screen", draft: true, updated: D,
-    lede: "Full screen gives the Contact list the whole page and folds the header away. Exit full screen brings it back.",
+    lede: "Full screen turns the Contact list into an address book: your agents down the left, the one you pick open beside them. Exit full screen brings the page back.",
     guide: { page: CL, key: "pin" },
-    body: "Press `Full screen` beside the Cards and List switch above the list, or press `F`. The header folds away and a navy band takes its place, carrying the page's figures and its add button. Once you have scrolled down, the same button is in the list's toolbar.\n\n"
-      + "Press `Exit full screen`, or `F` again, to bring the header back. QueryHawk remembers full screen, and whether you chose Cards or List, on this device.",
+    body: "Press `Full screen` at the right of the list's navy bar, or press `F`. The header folds away and a navy band takes its place, carrying your agents by where they stand, List health and the add button; the sidebar tucks away for more room. Pick an agent on the left, or move with ↑ and ↓, and their card opens wide on the right.\n\n"
+      + "Press `Exit full screen`, or `F` again, to bring the page back. QueryHawk remembers full screen, and whether you chose List or Cards, on this device.",
     related: ["find-an-agent", "open-an-agent", "add-an-agent"],
   },
   {
@@ -130,18 +130,18 @@ export const HELP_ARTICLE_LIST: readonly HelpArticle[] = [
   },
   {
     slug: "open-an-agent", area: "agents", title: "Open an agent's card", draft: true, updated: D,
-    lede: "Click any row to open the agent: wishlist, genres, materials and every exchange you have had.",
+    lede: "Click any agent to open their card: what they're looking for, how to reach them and every query you've sent them.",
     guide: { page: CL, key: "open" },
-    body: "Click a row on the Contact list and the agent opens in a panel on the right. The list stays where it was.\n\n"
-      + "`Profile` shows the genres they're after, their wishlist, how to query them (how to send, how long they take to reply, their response policy), what to send them, and your queries to them. `History` and `Notes` sit beside it.\n\n"
-      + "The `···` menu holds the rest, such as opening their queries in the Query Centre.",
+    body: "Click a row in List, or a card in Cards, and the agent's card slides in on the right. The list stays where it was.\n\n"
+      + "The top of the card shows what they're looking for and whether it fits your book. `Profile` shows how long they take to reply, whether they're open to queries, how to reach them, anyone else you have at the same agency, and your queries to them. `History` and `Notes` sit beside it.\n\n"
+      + "When it's your move, the box at the foot says what's next, with one button to do it. In full screen the same card opens wide beside the list.",
     related: ["edit-an-agent", "find-an-agent", "response-policy", "list-health"],
   },
   {
     slug: "edit-an-agent", area: "agents", title: "Edit an agent", draft: true, updated: D,
     lede: "Change any detail from the agent card. If a change affects your reports, the editor tells you which.",
     guide: { page: CL, key: "edit" },
-    body: "Open the agent, then press `Edit profile` at the foot of the panel. The editor has three tabs: `Details`, `What they want` and `How to query`.\n\n"
+    body: "Open the agent, then press `Edit agent` at the foot of their card. The editor has three tabs: `Details`, `What they want` and `How to query`.\n\n"
       + "When a change reaches something else, the editor says so before you save. A new reply time moves the expected date on queries waiting on that agent, and the editor shows the dates it would move. Changes to their name, their door, their genres or their response policy say what they touch too.\n\n"
       + "Press `Save changes` when you're done, or `Cancel` to leave everything as it was.",
     related: ["open-an-agent", "reply-times", "response-policy", "list-health"],
@@ -152,7 +152,7 @@ export const HELP_ARTICLE_LIST: readonly HelpArticle[] = [
     guide: { page: CL, key: "hk" },
     body: "Each agent can hold five details QueryHawk uses: their reply time, the materials they want, their genres, their wishlist and, for an agent closed to queries, the date they reopen. List health is how many of those your list has, out of all it could have.\n\n"
       + "Reply time counts most, because it is how QueryHawk works out when a query is past its expected date. If an agent doesn't state one, say so in Housekeeping and it stops counting as a gap.\n\n"
-      + "To fill gaps one at a time, press `Fill in the gaps` in the header, press the List health ring, or press `H`. Housekeeping opens beside your list. `Later` hides a gap for 30 days, but it still counts until it is filled.",
+      + "To fill gaps one at a time, press `Fill in the gaps` in the List health banner at the top of the page (or the ring in full screen's band), or press `H`. Housekeeping opens beside your list. `Later` hides a gap for 30 days, but it still counts until it is filled.",
     related: ["add-an-agent", "edit-an-agent", "reply-times", "response-policy"],
   },
   {

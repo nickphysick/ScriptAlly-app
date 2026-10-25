@@ -608,15 +608,16 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* the control each item shows, on this page, as it is now */
   const guideTarget = useCallback((k: ContactGuideKey): ChecklistTarget => {
     const vis = (sel: string) => [...document.querySelectorAll<HTMLElement>(sel)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
-    const row = () => vis(".aglist [data-nb1='name-row']");
+    /* v24 F — the rows and cards of List and Cards, and full screen's book rows */
+    const row = () => vis(".aglist [data-cl24='row'], .aglist [data-cl24='card'], [data-cl24='book-row']");
     switch (k) {
-      case "add": return { el: vis(".aglist [data-cl17='add']"), text: "Start here. Name and agency are enough; the rest can wait." };
-      /* navy-bar v1 — the address book's own controls */
-      case "search": return { el: vis(".aglist [data-nb1='find']"), text: "Type a name or an agency. The list narrows as you type." };
-      case "pin": return { el: vis(".aglist [data-nb1='full']"), text: "Press Full screen, or F. The address book fills the window; Exit full screen brings the page back." };
-      case "open": return { el: row(), text: "Click any name. Their card shows on the right." };
-      case "edit": return { el: vis(".aglist [data-nb1='edit']") ?? row(), text: "Press Edit agent. Everything on the card can be changed there." };
-      case "hk": return { el: vis(".aglist [data-cl183='fill']"), text: "Press this. Housekeeping asks for one missing detail at a time." };
+      case "add": return { el: vis(".aglist [data-cl24='add']") ?? vis("[data-cl24='band-add']"), text: "Start here. Name and agency are enough; the rest can wait." };
+      case "search": return { el: vis(".aglist [data-cl24='find']") ?? vis("[data-cl24='book-find']"), text: "Type a name or an agency. The list narrows as you type." };
+      case "pin": return { el: vis(".aglist [data-cl24='full']") ?? vis("[data-cl24='exit']"), text: "Press Full screen, or F. The list becomes an address book; Exit full screen brings the page back." };
+      case "open": return { el: row(), text: "Click any agent. Their card opens on the right." };
+      /* the card is portalled with its panel (outside .aglist); full screen's wide card has its own Edit agent */
+      case "edit": return { el: vis("[data-cl24='panel'] [data-cl24='link'][data-k='edit']") ?? vis("[data-cl24='wide-edit']") ?? row(), text: "Press Edit agent. Everything on the card can be changed there." };
+      case "hk": return { el: vis(".aglist [data-cl24='fill']") ?? vis("[data-cl24='band-health']"), text: "Press this. Housekeeping asks for one missing detail at a time." };
     }
   }, []);
   /* v17.1 §D — THE TAB'S DISMISSAL, SAVED TO THE ACCOUNT (`todoPrefs.contacts.tabDismissedAtGaps`): the gap count
