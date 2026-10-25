@@ -1,0 +1,27 @@
+[
+ {
+  "where": "both rows are on screen",
+  "ok": true,
+  "detail": "[{\"n\":\"Packages\",\"h\":33,\"tagR\":224,\"tagL\":190.296875,\"lblR\":115.8125,\"cut\":false},null,{\"n\":\"Versions\",\"h\":33,\"tagR\":224,\"tagL\":190.296875,\"lblR\":110.90625,\"cut\":false}]"
+ },
+ {
+  "where": "same height as Versions (±1)",
+  "ok": true,
+  "detail": "33 vs 33"
+ },
+ {
+  "where": "PRO tag's right edge where Versions' is (±1)",
+  "ok": true,
+  "detail": "224 vs 224"
+ },
+ {
+  "where": "the label is whole, not cut",
+  "ok": true,
+  "detail": "{\"n\":\"Packages\",\"h\":33,\"tagR\":224,\"tagL\":190.296875,\"lblR\":115.8125,\"cut\":false}"
+ },
+ {
+  "where": "the label stops before its tag",
+  "ok": true,
+  "detail": "115.8125 vs 190.296875"
+ }
+]

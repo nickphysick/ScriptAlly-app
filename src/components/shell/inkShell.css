@@ -491,6 +491,12 @@
     transition: opacity 0.16s ease, height 0.24s var(--ink-ease), margin 0.24s var(--ink-ease);
   }
   .ws-nav > .ws-glabel:first-child { margin-top: 24px; }
+  /* Dashboard on its own (25 Oct): the first heading sits 15px under Dashboard, the ref's spacing — 13 here plus
+     the row's own 2px `margin-bottom`. (The rule above now matches nothing on the desktop: the nav opens on a row.) */
+  .ws-nav > .ws-ni:first-child + .ws-glabel { margin-top: 13px; }
+  /* …and Dashboard itself sits 11px under the manuscript selector, the ref's spacing. The pin's gap is 0 in the ink
+     shell, so the room used to come from the first HEADING's margin, and with the heading gone it was 0. */
+  .ws-nav > .ws-ni:first-child { margin-top: 11px; }
   /* no rules between groups — the spacing says it */
   .ws-glabel::after { content: none; }
   .ws-ni {
@@ -711,12 +717,18 @@
   .dk-tip--rail .dk-railkbd { color: var(--ink-cream-42); }
 }
 
-/* ⚠️ THE CARD FOLDS TO THE OUTLINED BUTTON BELOW 920px OF WINDOW HEIGHT, NOT THE BRIEF'S 820 — A
+/* HISTORY (superseded by the next comment) — THE CARD FOLDS TO THE OUTLINED BUTTON BELOW 920px OF WINDOW HEIGHT, NOT THE BRIEF'S 820 — A
    MEASURED DEVIATION. The rule's intent is "fold when the column cannot hold the card", and measured
    (1440 wide, eleven rows, five labels, the selector, the card and the foot) that point is ~917px: at 900
    the literal 820 left the nav 17px short and Noteboard half under the card. The reference's own column
    (~918px of content in an 878px frame) has the same shortfall. 820 and below still get the button. */
-@media (min-width: 768px) and (max-height: 920px) {
+/* ⚠️ RE-DERIVED 25 OCT, 920 → 994 (sidebar: short labels, Dashboard on its own, Tasks always visible). Measured on
+   the new list — thirteen rows, four headings — the column holds the FULL card with every row visible only from
+   995px of window height (1512, 1440 and 1280 wide alike: the nav's overflow plus the viewport, 995 each time); the
+   folded button needs 902. The old 920 left the card up between 921 and 994 with Calendar cut at the nav's foot and
+   Corkboard below it — the reported "card covers Calendar". Below 902 the nav scrolls under its edge fade.
+   sidebarNav.measure.ts SB4 holds it: wherever the full card shows, no row is cut. */
+@media (min-width: 768px) and (max-height: 994px) {
   .ws-fbc { display: none; }
   .ws-fbb { display: flex; }
 }
@@ -1073,7 +1085,7 @@
   .ws-panel .set-rail { display: none; }
   .set-mode .ws-pin { opacity: 1; transform: none; pointer-events: auto; visibility: visible; }
   .set-mode .ws-pin > .ws-ms,
-  .set-mode .ws-pin > .ws-nav,
+  .set-mode .ws-pin > .ws-navwrap,
   .set-mode .ws-pin > .ws-fbk { display: none; }
   /* the foot row loses its gear (Settings is where you already are); the logo row its collapse toggle */
   .set-mode .ws-gear { display: none; }

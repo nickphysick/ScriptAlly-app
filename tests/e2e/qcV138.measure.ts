@@ -628,7 +628,8 @@ test.describe("Query Centre v138", () => {
     await openRoute(page, "/dashboard", SIZES[0]);
     await page.waitForTimeout(1500);
     await liftMotionSuppression(page);
-    await page.getByRole("button", { name: "Query Centre", exact: true }).first().click();
+    /* the sidebar names the Query Centre "Queries" (short labels, 25 Oct) */
+    await page.getByRole("button", { name: "Queries", exact: true }).first().click();
     const row = page.locator('.qcv-group[data-v138] [data-qcv="row"]').first();
     await row.waitFor({ state: "attached", timeout: 30_000 });
     const t0 = Date.now();

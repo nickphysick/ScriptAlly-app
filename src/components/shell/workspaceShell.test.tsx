@@ -407,7 +407,9 @@ describe("the sidebar", () => {
     const html = at("/dashboard");
     expect(html).toContain('class="ws-bmark"');
     expect(html).toContain("QueryHawk");
-    expect(srcCode.indexOf('className="ws-brand"')).toBeLessThan(srcCode.indexOf('className="ws-nav"'));
+    /* the nav's class is EdgeFadeScroll's `scrollClassName` since the nav gained its edge fade (25 Oct) */
+    expect(srcCode.indexOf('scrollClassName="ws-nav"')).toBeGreaterThan(-1);
+    expect(srcCode.indexOf('className="ws-brand"')).toBeLessThan(srcCode.indexOf('scrollClassName="ws-nav"'));
     expect(srcCode, "the sidebar card is gone").not.toContain('className="ws-phead"');
     // and NOT in the breadcrumb
     expect(html).not.toContain("ws-logotype");
@@ -459,7 +461,8 @@ describe("the sidebar", () => {
     expect(rule(".ws-gear")).toContain("width: 30px; height: 30px");
     expect(rule(".ws-gear")).toContain("border-radius: 50%");
     const html = at("/dashboard");
-    const nav = sliceBetween(html, '<nav class="ws-nav"', "</nav>", "the rendered nav");
+    /* the nav renders its attributes in EdgeFadeScroll's order since 25 Oct, so the anchor is its class, not its tag */
+    const nav = sliceBetween(html, 'class="ws-nav"', "</nav>", "the rendered nav");
     expect(nav, "the nav renders a Settings row").not.toContain(">Settings<");
     expect(nav).not.toMatch(/ws-glabel[^>]*>Account</);
     expect(html).toContain('class="ws-gear" aria-label="Settings"');

@@ -1,0 +1,37 @@
+[
+ {
+  "where": "the card and the rows are on screen",
+  "ok": true,
+  "detail": "{\"fb\":{\"top\":791.15625,\"bottom\":924.15625,\"form\":\"ws-fbc\"},\"rows\":13}"
+ },
+ {
+  "where": "no nav row's box meets the feedback card's",
+  "ok": true,
+  "detail": "{\"fb\":{\"top\":791.15625,\"bottom\":924.15625,\"form\":\"ws-fbc\"},\"under\":[]}"
+ },
+ {
+  "where": "the nav region ends above the card",
+  "ok": true,
+  "detail": "{\"navBox\":{\"top\":163.75,\"bottom\":791.15625},\"fb\":{\"top\":791.15625,\"bottom\":924.15625,\"form\":\"ws-fbc\"}}"
+ },
+ {
+  "where": "the full card shows only where every row fits",
+  "ok": true,
+  "detail": "{\"form\":\"ws-fbc\",\"over\":0,\"top\":0,\"bottomFade\":\"0\"}"
+ },
+ {
+  "where": "where the column holds it (≥995 tall), the full card shows",
+  "ok": true,
+  "detail": "{\"h\":1000,\"form\":\"ws-fbc\"}"
+ },
+ {
+  "where": "an overflowing nav shows its bottom edge fade",
+  "ok": true,
+  "detail": "{\"over\":0,\"top\":0,\"bottomFade\":\"0\"}"
+ },
+ {
+  "where": "the last Tasks row can be scrolled fully into view",
+  "ok": true,
+  "detail": "{\"name\":\"Corkboard\",\"top\":751,\"bottom\":784,\"navTop\":163.75,\"navBottom\":791.15625}"
+ }
+]

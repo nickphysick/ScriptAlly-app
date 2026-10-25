@@ -181,6 +181,8 @@
   scrollbar-width: none;
 }
 .ws-nav::-webkit-scrollbar { width: 0; height: 0; }
+/* the nav's frame (EdgeFadeScroll's outer box): the grower in the pin's column, holding the two edge fades */
+.ws-navwrap { flex: 1 1 auto; min-height: 0; }
 
 .ws-brand,
 .ws-pfoot { flex: none; }

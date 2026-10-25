@@ -31,9 +31,10 @@ import {
   Book, ChevronDown, ChevronsUpDown,
 } from "lucide-react";
 import { useScriptAllyDb } from "../../lib/db";
+import { EdgeFadeScroll } from "../EdgeFadeScroll";
 import { planLine, resolveScopedManuscript } from "../../lib/shellSidebar";
 import {
-  ShellSection, barPageName, openForHit, sectionClick, sectionRowState, shellHitFor,
+  ShellSection, barPageName, openForHit, sectionClick, sectionRowState, shellHitFor, sidebarLabel,
 } from "../../lib/workspaceShell";
 import { searchShortcut } from "./primitives";
 import { FolderTab, TabSibling } from "./FolderTab";
@@ -717,7 +718,11 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               labels are hidden by opacity/max-width and stay in the tree — never display:none —
               so a screen reader walks the same nav either way; the name must not change with the
               width. */}
-          <nav className="ws-nav" aria-label="Main">
+          {/* ⚠️ THE NAV SCROLLS IN ITS OWN REGION, WITH THE APP'S ONE EDGE FADE (25 Oct). It always did scroll —
+              `flex: 1; min-height: 0; overflow-y: auto` — but with the scrollbar hidden and no fade, a row cut at the
+              region's foot read as a row the feedback card was covering, and the rows below it as gone. The fade is
+              `EdgeFadeScroll`'s (the shell had none), in the sidebar's own ground, and the scroll element stays a <nav>. */}
+          <EdgeFadeScroll fade="var(--ink-shell, #1b2433)" outerClassName="ws-navwrap" scrollClassName="ws-nav" scrollAs="nav" aria-label="Main" scrollProbe="navscroll">
             {sections.map((sec) => (
               <React.Fragment key={sec.id}>
                 {/* ⚠️ EVERY GROUP GETS ITS HEADING NOW, DASHBOARD'S INCLUDED (sidebar metrics pass) —
@@ -727,7 +732,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                     capture, then ruled groups all the way down, and the first rule is what separates
                     the button from the nav — so WORKSPACE is no longer a heading doing nothing.
                     The rule is the label's own `::after`, so the markup stays one text node. */}
-                <div className="ws-glabel">{sec.label}</div>
+                {sec.noHeading ? null : <div className="ws-glabel">{sec.label}</div>}
                 {(sec.children ?? []).map((ch) => {
                   const on = hit?.section === sec.id && hit?.child === ch.id;
                   /* ⚠️ A ROW WITH A LIVE COUNT ("needs you") GOES BOLD AND FULL-STRENGTH, and its count is a
@@ -744,9 +749,9 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                          same way in both states rather than by a label span that collapses to 0px.
                          The tooltip is the portalled rail tip below, not a native `title` — two
                          tooltips on one hover would be one too many. */
-                      aria-label={ch.label}
+                      aria-label={sidebarLabel(ch)}
                       onClick={() => go(ch.path)}
-                      {...railTipFor(ch.label, undefined, undefined, 120, sidebar.collapsed)}
+                      {...railTipFor(sidebarLabel(ch), undefined, undefined, 120, sidebar.collapsed)}
                     >
                       <span className="ws-ic">{icons[ch.icon ?? ch.id] ?? icons[sec.id]}</span>
                       {/* ⚠️ A SPAN, SO THE LABEL CAN COLLAPSE (sidebar-collapse pack, Phase 2). A
@@ -755,7 +760,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                           pixel-identical expanded, and collapsing to zero WITH the label, where a
                           flex gap beside a zero-width child would hold itself open and park the
                           icon 5px off the rail's centre. */}
-                      <span className="ws-lbl">{ch.label}</span>
+                      <span className="ws-lbl">{sidebarLabel(ch)}</span>
                       {ch.pro ? <span className="ws-qpro" data-shell="pro" aria-label="Pro">PRO</span> : null}
                       {att && <span className="ws-ct" data-shell="count" aria-label={`${ch.count} to do`}>{inkCount(ch.count!)}</span>}
                     </button>
@@ -763,7 +768,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                 })}
               </React.Fragment>
             ))}
-          </nav>
+          </EdgeFadeScroll>
 
           {/* ⚠️ POLISH §3 — THE COLLAPSE CONTROL IS A NAV-FOOT ROW NOW. It sat as a « ghost beside
               the manuscript pill, where it competed with the pill for the head's attention and

@@ -169,7 +169,7 @@ describe("the feedback dock", () => {
     expect(theBar).not.toContain("Give feedback");
     expect(theBar).not.toContain("ws-fb");
     /* and the card is in the sidebar, after the nav and before the foot */
-    const nav = html.indexOf('<nav class="ws-nav"');
+    const nav = html.indexOf('class="ws-nav"'); // the nav's class, wherever EdgeFadeScroll puts it (25 Oct)
     const card = html.indexOf('data-shell="feedback"');
     const foot = html.indexOf('class="ws-pfoot"');
     expect(nav).toBeGreaterThan(-1);

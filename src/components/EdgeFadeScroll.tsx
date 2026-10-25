@@ -33,6 +33,8 @@ export interface EdgeFadeScrollProps {
   /** Semantics for the scroll element (e.g. role="listbox" + its label). */
   role?: string;
   "aria-label"?: string;
+  /** The scroll element's tag — "div" by default; the sidebar passes "nav" so its landmark stays a <nav>. */
+  scrollAs?: "div" | "nav";
   children: React.ReactNode;
 }
 
@@ -47,8 +49,10 @@ export const EdgeFadeScroll: React.FC<EdgeFadeScrollProps> = ({
   scrollRef,
   role,
   "aria-label": ariaLabel,
+  scrollAs = "div",
   children,
 }) => {
+  const Scroll = scrollAs;
   const innerRef = useRef<HTMLDivElement | null>(null);
   const attachScroll = useCallback(
     (node: HTMLDivElement | null) => {
@@ -112,7 +116,7 @@ export const EdgeFadeScroll: React.FC<EdgeFadeScrollProps> = ({
   return (
     <div className={outerClassName} style={{ position: "relative", display: "flex", flexDirection: "column", ...outerStyle }}>
       <div aria-hidden="true" style={overlay("top", edgeFade.top)} />
-      <div
+      <Scroll
         ref={attachScroll}
         role={role}
         aria-label={ariaLabel}
@@ -123,7 +127,7 @@ export const EdgeFadeScroll: React.FC<EdgeFadeScrollProps> = ({
         style={{ flex: "1 1 auto", minHeight: 0, overflowY: "auto", ...scrollStyle }}
       >
         {children}
-      </div>
+      </Scroll>
       <div aria-hidden="true" style={overlay("bottom", edgeFade.bottom)} />
     </div>
   );
