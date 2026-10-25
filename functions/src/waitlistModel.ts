@@ -17,7 +17,7 @@ import { createHash, randomBytes, timingSafeEqual } from "crypto";
 /* ══════════════ Constants ══════════════ */
 
 /** The founding cap. Stored on the counter doc so it can be raised without a deploy. */
-export const DEFAULT_CAP = 100;
+export const DEFAULT_CAP = 50;
 
 /**
  * ⚠️ ZERO — THE REAL COUNT SHOWS FROM THE FIRST SIGN-UP. It was 20 so that `3/100` would not sit

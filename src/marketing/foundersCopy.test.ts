@@ -49,7 +49,7 @@ describe("the hero", () => {
 
   it("the subheading, verbatim", () => {
     expect(text(FOUNDERS_LEDE)).toBe(
-      "We're looking for one hundred writers to bring their querying campaign into QueryHawk, " +
+      "We're looking for fifty writers to bring their querying campaign into QueryHawk, " +
       "use it properly, and tell us what they find. Sign up below and we'll be in touch.",
     );
   });
@@ -68,9 +68,9 @@ describe("the hero", () => {
   });
 
   /** One phrase carries weight, and it is the number of places. */
-  it("marks `one hundred writers`, and nothing else", () => {
+  it("marks `fifty writers` (the cap, 50 since 25 Oct), and nothing else", () => {
     const bold = FOUNDERS_LEDE.filter((r) => typeof r !== "string" && "b" in r);
-    expect(bold).toEqual([{ b: "one hundred writers" }]);
+    expect(bold).toEqual([{ b: "fifty writers" }]);
   });
 
   /**

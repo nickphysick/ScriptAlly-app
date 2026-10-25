@@ -261,8 +261,8 @@ describe("the settled decisions are pinned where a future edit will trip over th
     expect(REQUIRE_VERIFICATION).toBe(true);
   });
 
-  it("the cap is a hundred and the floor is zero", () => {
-    expect(DEFAULT_CAP).toBe(100);
+  it("the cap is fifty and the floor is zero", () => {
+    expect(DEFAULT_CAP).toBe(50);
     /* ⚠️ ZERO BY DECISION, NOT BY DEFAULT. The real figure is shown from the first sign-up
        because the list is seeded with genuine ones rather than padded or hidden. */
     expect(COUNTER_FLOOR).toBe(0);

@@ -31,7 +31,7 @@ describe("pricing v3: the copy is the ref's, word for word", () => {
   /* Literals on purpose: the constants are what is under test, so the expected side may not read them. */
   const MUST = [
     "Founding writers",
-    "A free QueryHawk campaign for our first 100 writers.",
+    "A free QueryHawk campaign for our first 50 writers.", /* the cap, 50 since 25 Oct */
     "We're looking for founding writers to put QueryHawk through its paces.",
     "Then, once we launch:",
     "For as long as you like",
@@ -50,7 +50,7 @@ describe("pricing v3: the copy is the ref's, word for word", () => {
     "Record your signing and any whole months left are kept as credit. They start again when you begin querying your next book.",
     "Why can I only add one manuscript right now?",
     "Adding a second manuscript is coming soon, on every pass.",
-    "What happens when the hundred founding places are gone?",
+    "What happens when the fifty founding places are gone?",
     "Founding places close, and QueryHawk opens to everyone on the plans above. Founding writers stay free for their whole campaign.",
     "Will anything here charge me today?",
     "No. Passes aren't on sale yet, and nothing changes on your account until you choose to buy one.",
@@ -90,18 +90,18 @@ describe("pricing v3: the banner", () => {
     expect(count).toBeLessThan(form);
   });
 
-  it("with no figure from the store, draws no counter and states no number but the H1's 100", () => {
+  it("with no figure from the store, draws no counter and states no number but the H1's 50", () => {
     const band = sliceBetween(html(), '<section class="mk-pv3band"', '<section class="mk-pv3soon"');
     expect(band).not.toMatch(/["\s`]mk-fmcount["\s`]/);
     expect(band).not.toMatch(/["\s`]mk-fmbar["\s`]/);
-    expect(textOf(band).match(/\d+/g)).toEqual(["100"]);
+    expect(textOf(band).match(/\d+/g)).toEqual(["50"]);
   });
 
   it("has exactly one h1, and it is the banner's", () => {
     const h = html();
     const h1s = [...h.matchAll(/<h1\b[^>]*>([\s\S]*?)<\/h1>/g)];
     expect(h1s).toHaveLength(1);
-    expect(textOf(h1s[0][1]).trim()).toBe("A free QueryHawk campaign for our first 100 writers.");
+    expect(textOf(h1s[0][1]).trim()).toBe("A free QueryHawk campaign for our first 50 writers.");
     expect(h.indexOf("<h1")).toBeGreaterThan(h.indexOf('class="mk-pv3band"'));
   });
 });

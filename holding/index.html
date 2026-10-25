@@ -165,9 +165,9 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--white);color:var(
   <div class="member">
     <div class="m-head"><span>An exclusive membership for our founding writers</span><span class="star">&#9734;</span></div>
     <div class="m-body">
-      <div class="crow"><span class="cnum" id="num">0 / 100</span><span class="cfill">spots are filling&hellip;</span></div>
+      <div class="crow"><span class="cnum" id="num">0 / 50</span><span class="cfill">spots are filling&hellip;</span></div>
       <div class="track"><i id="fill"></i></div>
-      <p class="offer">The first <b>100 founding writers</b> get 6 months free, then half price for life.</p>
+      <p class="offer">The first <b>50 founding writers</b> get 6 months free, then half price for life.</p>
       <div class="form" id="form"><input type="email" id="email" placeholder="your@email.com" aria-label="Email"><button id="join">Claim your spot</button></div>
       <p class="micro">We'll email you the moment we get going. No spam, ever.</p>
       <p class="done" id="done" hidden>You&rsquo;re in &mdash; founding writer <b id="rank">#&mdash;</b>. We&rsquo;ll be in touch.</p>
@@ -184,7 +184,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--white);color:var(
 <script>
 (function(){var n=document.querySelector('.nav');function f(){n.classList.toggle('scrolled',(window.scrollY||0)>4)}addEventListener('scroll',f,{passive:true});f();})();
 /* PLACEHOLDER — replace with real /api/waitlist wiring on deploy (GET count, POST email) */
-var CAP=100,CURRENT=0;
+var CAP=50,CURRENT=0;
 function setCount(c){var n=document.getElementById('num'),f=document.getElementById('fill');if(n)n.textContent=c+' / '+CAP;if(f)f.style.width=Math.min(100,Math.round(c/CAP*100))+'%';}
 setCount(CURRENT);
 document.getElementById('join').addEventListener('click',function(){/* real POST wired on deploy */});

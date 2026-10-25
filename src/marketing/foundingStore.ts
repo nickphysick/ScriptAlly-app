@@ -23,6 +23,7 @@
 
 import { useSyncExternalStore } from "react";
 import { joinWaitlist, fetchWaitlistCount, JoinFields, WaitlistCount } from "./waitlist";
+import { FOUNDING_CAP } from "./foundingCap";
 
 /**
  * ⚠️ `full` IS REACHABLE NOW, AND IT ARRIVES FROM THE SERVER RATHER THAN FROM ARITHMETIC.
@@ -39,6 +40,16 @@ export interface FoundingSnapshot {
   /** Real figures from the endpoint, or null. Null renders NOTHING, everywhere. */
   count: WaitlistCount | null;
 }
+
+/**
+ * ⚠️ ONE CAP FOR EVERY COUNTER (25 Oct). The claimed count is the server's; the cap every counter draws
+ * against is `FOUNDING_CAP`, applied HERE — the one place every counter's figures pass through — so
+ * the landing hero, the nav pill, the Pricing panel and the band can never disagree, and the copy
+ * that states the number reads the same constant. The server's `cap` is ignored for display: it is
+ * the counter document's stored field, which still says 100 until Nick sets it (see foundingCap.ts).
+ * `full` is still the server's to decide, never derived here.
+ */
+const withCap = (c: WaitlistCount): WaitlistCount => ({ claimed: c.claimed, cap: FOUNDING_CAP });
 
 let snapshot: FoundingSnapshot = { state: "idle", count: null };
 const listeners = new Set<() => void>();
@@ -65,7 +76,7 @@ export const ensureCount = (): void => {
   if (countRequested) return;
   countRequested = true;
   void fetchWaitlistCount().then((count) => {
-    if (count) set({ ...snapshot, count });
+    if (count) set({ ...snapshot, count: withCap(count) });
   });
 };
 
@@ -86,7 +97,7 @@ export const submitFounding = async (fields: JoinFields): Promise<void> => {
   const outcome = await joinWaitlist(fields);
   set({
     state: outcome.state,
-    count: "count" in outcome && outcome.count ? outcome.count : snapshot.count,
+    count: "count" in outcome && outcome.count ? withCap(outcome.count) : snapshot.count,
   });
 };
 

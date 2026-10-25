@@ -18,12 +18,13 @@
  */
 
 import { CopyRun } from "./CopyRuns";
+import { FOUNDING_CAP, FOUNDING_CAP_WORD } from "./foundingCap";
 
 export const PRICING_V3_DOCUMENT_TITLE = "Pricing — QueryHawk";
 
 /* ══════════════ The founding banner ══════════════ */
 export const PV3_KICKER = "Founding writers";
-export const PV3_H1 = "A free QueryHawk campaign for our first 100 writers.";
+export const PV3_H1 = `A free QueryHawk campaign for our first ${FOUNDING_CAP} writers.`;
 export const PV3_SUB = "We're looking for founding writers to put QueryHawk through its paces.";
 
 /* ══════════════ The passes — planned launch prices ══════════════
@@ -115,7 +116,7 @@ export const PV3_FAQ: Pv3Question[] = [
     a: "Adding a second manuscript is coming soon, on every pass.",
   },
   {
-    q: "What happens when the hundred founding places are gone?",
+    q: `What happens when the ${FOUNDING_CAP_WORD} founding places are gone?`,
     a: "Founding places close, and QueryHawk opens to everyone on the plans above. Founding writers " +
        "stay free for their whole campaign.",
   },
