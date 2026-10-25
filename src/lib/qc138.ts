@@ -288,12 +288,15 @@ const DETAIL_VERB: Record<string, string> = {
  * The stage's detail line: "Requested 2 Sep". None at Queried (the date is in First queried) and never "· day n".
  * `hot` (rust, upright, 600) when the row is the writer's to send and its send-by date has gone.
  */
-export function stageDetail(r: Filterable & { stageStartMs: number | null }, nowMs: number): { text: string; hot: boolean } | null {
+export function stageDetail(r: Filterable & { stageStartMs: number | null }, nowMs: number): { text: string; hot: boolean; verb: string; undated: boolean } | null {
   if (r.status === QueryStatus.QUERIED) return null;
   const verb = DETAIL_VERB[r.status] ?? "Since";
-  const text = r.stageStartMs != null ? `${verb} ${dayMonYear(r.stageStartMs, nowMs)}` : `${verb}, not dated`;
+  /* v149.1 B3 — ONE WORDING WHEREVER A DATE IS MISSING: "{step}, add date", the last two words a link to the card's
+     edit mode at that date (the row draws the link from `undated`) */
+  const undated = r.stageStartMs == null;
+  const text = undated ? `${verb}, add date` : `${verb} ${dayMonYear(r.stageStartMs!, nowMs)}`;
   const due = dueOf(r);
-  return { text, hot: r.court === "you" && due != null && due < startOfDay(nowMs) };
+  return { text, verb, undated, hot: r.court === "you" && due != null && due < startOfDay(nowMs) };
 }
 
 /** the track's four stops */
@@ -365,15 +368,18 @@ export const peekTone = (due: number | null, now: number, closed: boolean): Peek
  * "{d} until your send-by date" · "closed {d} after you queried" · "No date set". Same-day forms are said plainly.
  */
 export interface PeekSummary { head: string; line: string; hot: boolean }
+/** v149.1 B3 — the summary when nothing is dated */
+export const NO_DATES = "No dates yet";
 export function peekSummary(o: { sent: number | null; due: number | null; closedAt: number | null; closed: boolean; yours: boolean; now: number }): PeekSummary {
   const { sent, due, closedAt, closed, yours, now } = o;
   if (closed) {
-    if (sent == null || closedAt == null) return { head: "Closed", line: "closed, not dated", hot: false };
+    if (sent == null || closedAt == null) return { head: "Closed", line: NO_DATES, hot: false };
     const d = dDays(sent, closedAt);
     return { head: "Closed", line: d === 0 ? "closed the day you queried" : `closed ${gapWords(d)} after you queried`, hot: false };
   }
-  const out = sent == null ? "Out, not dated" : dDays(sent, now) === 0 ? "Out today" : `Out ${gapWords(dDays(sent, now))}`;
-  if (due == null) return { head: out, line: "No date set", hot: false };
+  if (sent == null) return { head: NO_DATES, line: "", hot: false };
+  const out = dDays(sent, now) === 0 ? "Out today" : `Out ${gapWords(dDays(sent, now))}`;
+  if (due == null) return { head: out, line: yours ? "No send-by date yet" : "No reply date yet", hot: false };
   if (peekLate(due, now)) return { head: out, line: `${gapWords(dDays(due, now))} past the date`, hot: true };
   const left = dDays(now, due);
   if (left === 0) return { head: out, line: yours ? "your send-by date is today" : "their reply date is today", hot: false };

@@ -120,7 +120,7 @@ import type { AgentEditPatch } from "../lib/saveAgentEdits";
 import type { RowSpec } from "./reading-pane/QueryTimeline";
 import type { QcRow } from "../lib/qcSummary";
 import { nextLine } from "../lib/qcRowLines";
-import { pressView, waitingBanner } from "../lib/qc149";
+import { pressView, twinTags, waitingBanner } from "../lib/qc149";
 import { PIN_KEYS, usePinList } from "./shell/useFullScreenList";
 import { listCountTitle } from "./shell/ViewTitleRow";
 import { QcWhereCard } from "./queries/centre/QcWhere141";
@@ -1761,6 +1761,8 @@ export const Queries: React.FC<{
   const [qcCardMode, setQcCardMode] = useState<CardMode>("view");
   const [qcCardFresh, setQcCardFresh] = useState<string | null>(null);
   const qcCardPendingMode = useRef<{ id: string; mode: CardMode } | null>(null);
+  /* v149.1 B3 — the row's "add date" opens the card in edit mode at its undated step */
+  const [qcEditUndated, setQcEditUndated] = useState(false);
   /* v149 Part D — the header's two flows in the same panel: a new query, and "Who replied?" */
   const [qcFlow, setQcFlow] = useState<null | { kind: "log"; agentId: string | null; manuscriptId: string | null } | { kind: "who" }>(null);
   const scriptDb = useScriptAllyDb();
@@ -2919,6 +2921,35 @@ export const Queries: React.FC<{
     const p = qcCardPendingMode.current;
     if (p && p.id === cardQueryId) { setQcCardMode(p.mode); qcCardPendingMode.current = null; } else setQcCardMode("view");
   }, [cardQueryId]);
+  /* v149.1 B6 — ON A WIDE WINDOW THE PANEL PUSHES THE LIST CARD INSTEAD OF COVERING IT. When `.ws-window` is wider than
+     1440 and the panel is open, the list card gives up exactly what it needs to end 16px left of the panel (the panel sits
+     flush with the window's right, 560 wide there), so Filters, Group by and Sort stay reachable; at 1440 or less it keeps
+     today's overlay. The amount is MEASURED from the card's resting right edge, never a constant — a constant would be
+     wrong wherever the page column stops growing. The narrowing and its release ride one 0.28s transition (qcv149.css). */
+  useEffect(() => {
+    let raf = 0;
+    const apply = () => {
+      const grp = [...document.querySelectorAll<HTMLElement>(".qcv-group[data-v138]")].find((e) => e.getBoundingClientRect().width > 0);
+      const win = [...document.querySelectorAll<HTMLElement>(".ws-window")].find((e) => e.getBoundingClientRect().width > 0);
+      const sheet = grp?.querySelector<HTMLElement>(".qc138-sheet");
+      const open = !!document.querySelector("[data-qp='panel']");
+      if (!grp || !win || !sheet) return;
+      const w = win.getBoundingClientRect();
+      if (!open || w.width <= 1440 || grp.hasAttribute("data-full")) { grp.removeAttribute("data-push"); grp.style.removeProperty("--qc149-push"); return; }
+      const now = parseFloat(grp.style.getPropertyValue("--qc149-push")) || 0;
+      const rest = sheet.getBoundingClientRect().right + (grp.hasAttribute("data-push") ? now : 0);
+      const push = Math.max(0, Math.round(rest - (w.right - 560 - 16)));
+      grp.style.setProperty("--qc149-push", `${push}px`);
+      grp.setAttribute("data-push", "");
+    };
+    const kick = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(apply); };
+    kick();
+    const t = window.setTimeout(kick, 350);
+    const win = document.querySelector(".ws-window");
+    const ro = typeof ResizeObserver !== "undefined" && win ? new ResizeObserver(kick) : null;
+    if (ro && win) ro.observe(win);
+    return () => { cancelAnimationFrame(raf); window.clearTimeout(t); ro?.disconnect(); };
+  });
   /* v138 §G — a bulk action runs each ticked query's journey in turn: when the panel closes, the next one opens.
      `stepRow` is declared far below, so the effect reaches it through a ref the render keeps current. */
   const stepRowRef = useRef<((req: OpenRequest) => void) | null>(null);
@@ -5891,12 +5922,14 @@ export const Queries: React.FC<{
           agency: ag?.name ? (ag?.agency ?? "") : "",
           email: ag?.email ?? "",
           replyWeeks: typeof ag?.responseTimeWeeks === "number" && ag.responseTimeWeeks > 0 ? ag.responseTimeWeeks : null,
-          firstQueried: row.sentMs != null ? `${fieldDay(row.sentMs)}${row.dayN != null ? ` · day ${row.dayN}` : ""}` : "Not dated",
+          firstQueried: row.sentMs != null ? `${fieldDay(row.sentMs)}${row.dayN != null ? ` · day ${row.dayN}` : ""}` : "—",
           first: (ag?.name || "").trim().split(/\s+/)[0] || null,
         }}
         steps={steps}
         freshKey={qcCardFresh === "__last" ? (steps[steps.length - 1]?.activityId ?? steps[steps.length - 1]?.key ?? null) : qcCardFresh}
         bookChips={qcBookChips(ms)}
+        focusStep={qcEditUndated && qcCardMode === "edit" ? story.find((x) => x.ms == null && x.activityId)?.activityId ?? null : null}
+        onFocused={() => setQcEditUndated(false)}
         story={story}
         nextStep={nextStepOf(storyCtx)}
         strip={stripOf(storyCtx)}
@@ -7770,6 +7803,14 @@ export const Queries: React.FC<{
               ) : (
                 qcDesk ? (
                 <QcList138
+                  onAddDate={(id) => {
+                    cardSetRef.current = qcVisible.map((r) => r.id);
+                    setQcEditUndated(true);
+                    if (cardQueryId === id) { setQcCardMode("edit"); return; }
+                    qcCardPendingMode.current = { id, mode: "edit" };
+                    onOpenQuery?.(id);
+                  }}
+                  twinTag={twinTags(queries)}
                   groupBy={qcGroup}
                   onGroup={setQcGroup}
                   toneOf={qc138Tone}
@@ -7822,7 +7863,9 @@ export const Queries: React.FC<{
                     const docs = await readQueryActivity(id);
                     const rows0 = buildTimelineRows(docs.map((d) => ({ id: d.id, ...d.data })), q0, agents.find((a) => a.id === q0.agentId) ?? null);
                     /* v138.3 — the stage comes from the row itself (`status`); a nudge or a holding reply is not a status (`kind`) */
-                    return rows0.filter((r0) => typeof r0.timeMs === "number" && Number.isFinite(r0.timeMs)).map((r0) => ({ name: r0.title, ms: r0.timeMs as number, status: r0.kind ? null : r0.status }));
+                    const dated = rows0.filter((r0) => typeof r0.timeMs === "number" && Number.isFinite(r0.timeMs));
+                    /* v149.1 B3 — nothing dated: the steps still show, evenly spaced and without a scale (ms NaN marks them) */
+                    return (dated.length ? dated : rows0).map((r0) => ({ name: r0.title, ms: dated.length ? r0.timeMs as number : NaN, status: r0.kind ? null : r0.status }));
                   }}
                   entering={qc138In === "run"}
                   /* v140 §F — the arrival plays on the load (the rows' first appearance) and on every grouping, filter

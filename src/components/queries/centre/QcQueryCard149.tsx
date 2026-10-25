@@ -137,6 +137,9 @@ export interface QcQueryCard149Props {
   freshKey?: string | null;
   /** v149.1 A1 — the book block's chips: age category · genre · word count, the present ones only */
   bookChips: string[];
+  /** v149.1 B3 — the step whose date field edit mode should open at (the row's "add date"), and that it was reached */
+  focusStep?: string | null;
+  onFocused?: () => void;
   /** v149.1 A2 — each Tracking step's part of the story, the faint next step (null when closed), and A3 the strip */
   story: StoryStep[];
   nextStep: NextStep | null;
@@ -201,6 +204,7 @@ export const QcQueryCard149: React.FC<QcQueryCard149Props> = (p) => {
   /* v149.1 A2 — "Add date" opens the edit mode at that step's date field */
   const [focusDate, setFocusDate] = useState<string | null>(null);
   const addDate = (id: string) => { setFocusDate(id); setTab("tracking"); p.onMode("edit"); };
+  useEffect(() => { if (mode === "edit" && p.focusStep) { setFocusDate(p.focusStep); setTabOwn("tracking"); p.onFocused?.(); } }, [mode, p.focusStep]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (mode === "edit") { setEd(blankEdits()); setTabOwn((t) => (t === "notes" ? "tracking" : t)); } }, [mode, r.id]);
   const stepMs = (s: CardStep): number | null => (s.activityId && ed.dates[s.activityId] != null ? parseDay(ed.dates[s.activityId], nowMs) : s.ms);
   const kept = p.steps.filter((s) => !(s.activityId && ed.removed.includes(s.activityId)));
@@ -393,7 +397,7 @@ export const QcQueryCard149: React.FC<QcQueryCard149Props> = (p) => {
                     value={ed.dates[s.activityId] ?? (s.ms != null ? fieldDay(s.ms) : "")}
                     onChange={(e) => { const v = e.target.value; setEd((x) => ({ ...x, dates: { ...x.dates, [s.activityId!]: v } })); }} />
                 ) : (
-                  <span className="mk-lc-d" data-qc149c="step-day">{s.ms != null ? stepDay(s.ms, nowMs) : "NOT DATED"}</span>
+                  <span className="mk-lc-d" data-qc149c="step-day">{s.ms != null ? stepDay(s.ms, nowMs) : ""}</span>
                 )}
                 {editing ? (
                   s.activityId && !s.root ? (

@@ -94,7 +94,8 @@ export function storySteps({ rows, query: q, manuscript, sentWithQuery }: StoryI
   const asked: { partial: StoryChip[] | null; full: StoryChip[] | null } = { partial: null, full: null };
   const iconOf = (label: string): ChipIcon => (/letter/i.test(label) ? "letter" : /synopsis/i.test(label) ? "synopsis" : /full|manuscript/i.test(label) ? "full" : "pages");
   return rows.map((r) => {
-    const base = { key: r.key, activityId: r.activityId, ms: r.timeMs ?? null };
+    /* an empty or unreadable createdAt is no date (an undated step), never NaN on the page */
+    const base = { key: r.key, activityId: r.activityId, ms: typeof r.timeMs === "number" && Number.isFinite(r.timeMs) ? r.timeMs : null };
     if (r.kind === "nudge") return { ...base, status: null, kind: "nudge", title: "Nudge sent", qualifier: methodQualifier(q.sendMethod), note: null, chips: [] };
     if (r.kind === "holding") return { ...base, status: null, kind: "holding", title: "Holding reply", qualifier: null, note: null, chips: [] };
     const s = r.status;
