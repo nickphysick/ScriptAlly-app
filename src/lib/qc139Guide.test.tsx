@@ -62,7 +62,8 @@ describe("the guide's six items and its words (v140 §G adds Pin the list, third
       ["pin", "Go full screen", "Turn the list into the whole page while you work."], /* v142 §A: the Contact list v20 wording */
       ["open", "Open a query", "Its whole story, in one panel."],
       ["resp", "Record a response", "Try it on a practice query. Nothing is saved."],
-      ["birds", "See the Birds-eye view", "Every live query on one timeline. Press B."],
+      /* v150 D — the desktop has no B key now (the drawer is retired there), so the line names none */
+      ["birds", "See the Birds-eye view", "Every live query on one timeline."],
     ]);
     expect(QC_CHECKLIST).toHaveLength(6);
     /* v140 §G — the eyebrows count six: the log card is Step 1, Pip's walkthrough (Record a response) Step 5 */

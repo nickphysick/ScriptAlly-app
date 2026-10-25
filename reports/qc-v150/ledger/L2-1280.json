@@ -1,0 +1,82 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "4 cards, 88 rows"
+ },
+ {
+  "where": "order",
+  "ok": true,
+  "detail": "you,agent,quiet,closed"
+ },
+ {
+  "where": "you count",
+  "ok": true,
+  "detail": "card 27, list 27"
+ },
+ {
+  "where": "you inset",
+  "ok": true,
+  "detail": "5.0/5.0/5.0"
+ },
+ {
+  "where": "you faces",
+  "ok": true,
+  "detail": "6 + 21 of 27"
+ },
+ {
+  "where": "agent count",
+  "ok": true,
+  "detail": "card 12, list 12"
+ },
+ {
+  "where": "agent inset",
+  "ok": true,
+  "detail": "5.0/5.0/5.0"
+ },
+ {
+  "where": "agent faces",
+  "ok": true,
+  "detail": "5 + 7 of 12"
+ },
+ {
+  "where": "quiet count",
+  "ok": true,
+  "detail": "card 32, list 32"
+ },
+ {
+  "where": "quiet inset",
+  "ok": true,
+  "detail": "5.0/5.0/5.0"
+ },
+ {
+  "where": "quiet faces",
+  "ok": true,
+  "detail": "6 + 26 of 32"
+ },
+ {
+  "where": "closed count",
+  "ok": true,
+  "detail": "card 17, list 17"
+ },
+ {
+  "where": "closed inset",
+  "ok": true,
+  "detail": "5.0/5.0/5.0"
+ },
+ {
+  "where": "closed faces",
+  "ok": true,
+  "detail": "6 + 11 of 17"
+ },
+ {
+  "where": "cards share a height",
+  "ok": true,
+  "detail": "223.2,223.2,223.2,223.2"
+ },
+ {
+  "where": "no chips",
+  "ok": true,
+  "detail": "chips drawn"
+ }
+]

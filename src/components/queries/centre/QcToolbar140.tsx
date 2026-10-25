@@ -144,10 +144,14 @@ export interface QcToolbar140Props {
   /** cards-sort-search v1 §B — the page's one sort, read and written by the Sort chip (both views since navy-bar v1) */
   sort: Qc138Sort;
   onSort: (s: Qc138Sort) => void;
+  /** v150 C — the search sits in the navy bar while unpinned */
+  findInBar?: boolean;
+  /** v150 D8 — Birds-eye's Group and Sort pills, drawn in place of the list's (their settings are Birds-eye's own) */
+  birdsTools?: React.ReactNode;
 }
 
 export const QcToolbar140: React.FC<QcToolbar140Props> = ({
-  rootRef, pinned, loading = false, groupBy, onGroup, density, onDensity, heard, find, onFind, findRef, filterCount, onClearFilters, filtersMenu, onPin, sort, onSort,
+  rootRef, pinned, loading = false, groupBy, onGroup, density, onDensity, heard, find, onFind, findRef, filterCount, onClearFilters, filtersMenu, onPin, sort, onSort, findInBar = false, birdsTools = null,
 }) => {
   const pop = usePopover<Qc140Pop>();
   const rowRef = useRef<HTMLDivElement>(null);
@@ -167,12 +171,20 @@ export const QcToolbar140: React.FC<QcToolbar140Props> = ({
           </span>
         ) : null}
         {/* A3 — in full screen the search is in this cream toolbar, a rounded white field left of Filters */}
+        {/* v150 C — unpinned too: the navy bar's own search, first (its view row above the list is retired) */}
+        {!pinned && findInBar && onFind ? (
+          <label className="qc150-bfind" data-qc150="find" data-qc140="find" data-qc138="search" data-qc149="find" data-qc144="find">
+            {FIND_ICON}
+            <input ref={findRef} value={find} onChange={(e) => onFind(e.target.value)} placeholder="Find an agent or agency" aria-label="Find an agent or agency" autoComplete="off" disabled={loading} />
+          </label>
+        ) : null}
         {pinned && onFind ? (
           <label className="qc140-find qc144-tfind" data-qc140="find" data-qc138="search" data-qc144="find-tb">
             {FIND_ICON}
             <input ref={findRef} value={find} onChange={(e) => onFind(e.target.value)} placeholder="Find an agent or agency" aria-label="Find an agent or agency" autoComplete="off" disabled={loading} />
           </label>
         ) : null}
+        {birdsTools}
         <span className="qc140-chipw qc144-first" data-qc140="filters-chip" data-on={filterCount ? "" : undefined}>
           <button type="button" ref={filRef} className="qc140-chip qc140-fil" data-qc140="filters" data-qc138="filters-btn" data-lp="qc140-filters" data-n={filterCount}
             aria-haspopup="dialog" aria-expanded={pop.open === "filters"} aria-label={filterCount ? `Filters: ${filterCount} applied` : "Filters"} disabled={loading}
@@ -192,6 +204,7 @@ export const QcToolbar140: React.FC<QcToolbar140Props> = ({
           ) : null}
         </span>
         {pop.open === "filters" && pop.anchor ? filtersMenu(pop) : null}
+        {birdsTools ? null : <>
         <span className="qc140-chipw" data-qc140="group-chip" data-on={def ? undefined : ""}>
           <button type="button" ref={grpRef} className="qc140-chip qc140-grp" data-qc140="group" data-lp="qc140-group" aria-haspopup="menu" aria-expanded={pop.open === "group"}
             aria-label={groupBy === "none" ? "Not grouped. Change grouping" : `Grouped by ${groupOpt?.label ?? ""}. Change grouping`} disabled={loading}
@@ -218,6 +231,7 @@ export const QcToolbar140: React.FC<QcToolbar140Props> = ({
         {pop.open === "sort" && pop.anchor ? (
           <SortChipMenu anchor={pop.anchor} fields={QC_SORT_FIELDS} value={sort} ns="qc1421" onChange={onSort} />
         ) : null}
+        </>}
         {/* v142 §A — no Pin on the page: "Full screen" lives in the title row (shell/ViewTitleRow). In full screen (today's
             pinned mode) the toolbar carries the icon Cards / List switch and "Exit full screen", after Filters, placed as
             on the Contact list (v20 §C). */}

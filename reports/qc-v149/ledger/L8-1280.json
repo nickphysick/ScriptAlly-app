@@ -3,7 +3,7 @@
   "lock": "L8-1280",
   "where": "population",
   "ok": true,
-  "detail": "87"
+  "detail": "88"
  },
  {
   "lock": "L8-1280",
@@ -51,7 +51,7 @@
   "lock": "L8-1280",
   "where": "N / M matches the visible order",
   "ok": true,
-  "detail": "2 / 87 vs 2 / 87"
+  "detail": "2 / 88 vs 2 / 88"
  },
  {
   "lock": "L8-1280",

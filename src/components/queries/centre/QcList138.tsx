@@ -425,6 +425,11 @@ export interface QcList138Props {
   /** v140 §F — the unpinned scroll position, for the visit: read once for the list's first draw (a reload within the
    *  visit) and again when the route comes back with its scroller at the top; written as the list scrolls unpinned. */
   scrollMemory?: { read: () => number; write: (y: number) => void };
+  /** v150 C — the search sits in the navy bar while unpinned */
+  findInBar?: boolean;
+  /** v150 D — Birds-eye: drawn in place of the headings and rows; its pills replace the bar's Group and Sort */
+  birds?: React.ReactNode;
+  birdsTools?: React.ReactNode;
   /** v149 B1 — the navy bar's "heard back" figure */
   heard?: { pct: number; of: number; total: number };
 }
@@ -436,7 +441,7 @@ export const ARRIVAL_140 = { ms: 420, easing: "cubic-bezier(.2,.8,.2,1)", from: 
 
 export const QcList138: React.FC<QcList138Props> = ({
   groups, groupBy, onGroup, toneOf, total, shown, filterCount, onClearFilters, filtersMenu, applied, band = null, loading = false, stickyOn = true, sort, density, onDensity, full, onFull,
-  selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onAddDate, twinTag = NO_TWINS, onOpenPackage, find = "", onFind, findRef, viewRow, ringId = null, folded, onFold, loadPeek, onTimeline, selected, onPick, entering = false, deadEnd = null, practice = null, arrival, scrollMemory, heard, onSort,
+  selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onAddDate, twinTag = NO_TWINS, onOpenPackage, find = "", onFind, findRef, viewRow, ringId = null, folded, onFold, loadPeek, onTimeline, selected, onPick, entering = false, deadEnd = null, practice = null, arrival, scrollMemory, heard, onSort, findInBar = false, birds = null, birdsTools = null,
 }) => {
   /* §H — the order things land in: bands and rows, one sequence, the first 16 staggered and the rest with the last */
   let seq = 0;
@@ -665,7 +670,7 @@ export const QcList138: React.FC<QcList138Props> = ({
     {/* v149 A3 — THE VIEW ROW ABOVE THE LIST (the page's: the view chips and Find), in the place navy-bar v1's pill row
         held. Full screen moved into the navy bar (B1). Not drawn in full screen, where Find is in the cream toolbar. */}
     {!full ? viewRow ?? null : null}
-    <div className="qc138-sheet" data-qc138="sheet" data-density={density} data-view="list" ref={boxRef} {...tip.handlers}>
+    <div className="qc138-sheet" data-qc138="sheet" data-density={density} data-view={birds ? "birds" : "list"} ref={boxRef} {...tip.handlers}>
       {/* v138.6 §B — THE STICKY ROW, in a wrapper that sticks under the sheet's lip and fills the lip's 12px with the
           sheet's colour. v140 §A — what sticks is the toolbar (QcToolbar140), and under it the applied-filters row while
           anything narrows the list: `useStickyStack` measures the two together, so the headings and the current group
@@ -678,10 +683,12 @@ export const QcList138: React.FC<QcList138Props> = ({
           <QcToolbar140 rootRef={boxRef} pinned={full} loading={loading} groupBy={groupBy} onGroup={onGroup} density={density} onDensity={onDensity}
             heard={heard}
             find={find} onFind={onFind} findRef={findRef} filterCount={filterCount} onClearFilters={onClearFilters ?? (() => {})}
-            filtersMenu={filtersMenu ?? (() => null)} onPin={onFull} sort={sort} onSort={(s) => onSort?.(s)} />
+            filtersMenu={filtersMenu ?? (() => null)} onPin={onFull} sort={sort} onSort={(s) => onSort?.(s)} findInBar={findInBar} birdsTools={birdsTools} />
           {applied}
         </div>
       </div>
+      {/* v150 D — Birds-eye is the list's second view: it takes the place of the headings and the rows, under the bar */}
+      {birds ? <div className="qc150-bew" data-view="birds">{birds}</div> : (<>
       {/* v149 B5 — list only: the headings are always drawn */}
       {true ? (
         <div className="qc138-heads lth" data-qc138="headings" role="row">
@@ -748,6 +755,7 @@ export const QcList138: React.FC<QcList138Props> = ({
           );
         })}
       </div>
+      </>)}
       {tip.node}
     </div>
     </>

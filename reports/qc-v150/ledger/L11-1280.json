@@ -1,0 +1,42 @@
+[
+ {
+  "where": "the list set to Next action",
+  "ok": true,
+  "detail": "Next action"
+ },
+ {
+  "where": "menu",
+  "ok": true,
+  "detail": "{\"t\":\"GROUP BIRDS-EYE BY\",\"opts\":[\"Urgency\",\"Status\",\"None\"]}"
+ },
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "[{\"label\":\"Queried\",\"n\":39,\"rows\":39},{\"label\":\"Partial requested\",\"n\":6,\"rows\":6},{\"label\":\"Partial sent\",\"n\":8,\"rows\":8},{\"label\":\"Full requested\",\"n\":7,\"rows\":7},{\"label\":\"Full sent\",\"n\":8,\"rows\":8},{\"label\":\"Revise & resubmit\",\"n\":1,\"rows\":1},{\"label\":\"Offer\",\"n\":2,\"rows\":2}]"
+ },
+ {
+  "where": "pipeline order",
+  "ok": true,
+  "detail": "Queried,Partial requested,Partial sent,Full requested,Full sent,Revise & resubmit,Offer"
+ },
+ {
+  "where": "band counts = rows",
+  "ok": true,
+  "detail": "Queried 39/39,Partial requested 6/6,Partial sent 8/8,Full requested 7/7,Full sent 8/8,Revise & resubmit 1/1,Offer 2/2"
+ },
+ {
+  "where": "band counts = the list's",
+  "ok": true,
+  "detail": "Queried 39 vs 39,Partial requested 6 vs 6,Partial sent 8 vs 8,Full requested 7 vs 7,Full sent 8 vs 8,Revise & resubmit 1 vs 1,Offer 2 vs 2"
+ },
+ {
+  "where": "time scroll held",
+  "ok": true,
+  "detail": "5520 → 5520"
+ },
+ {
+  "where": "the list's grouping held",
+  "ok": true,
+  "detail": "Status → Next action → Next action"
+ }
+]

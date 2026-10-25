@@ -9,7 +9,7 @@
   "lock": "L10-1512",
   "where": "Cancel leaves the original dates",
   "ok": true,
-  "detail": "[\"15 SEP\",\"5 OCT\"]"
+  "detail": "[\"16 SEP\",\"6 OCT\"]"
  },
  {
   "lock": "L10-1512",
@@ -21,7 +21,7 @@
   "lock": "L10-1512",
   "where": "the date persists across a reload",
   "ok": true,
-  "detail": "4 Oct 2026 vs 4 Oct 2026"
+  "detail": "5 Oct 2026 vs 5 Oct 2026"
  },
  {
   "lock": "L10-1512",

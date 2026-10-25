@@ -1,0 +1,37 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "88 rows, 12 with the agent"
+ },
+ {
+  "where": "list narrowed",
+  "ok": true,
+  "detail": "12 rows"
+ },
+ {
+  "where": "pressed navy",
+  "ok": true,
+  "detail": "true rgb(42, 58, 82)"
+ },
+ {
+  "where": "list restored",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "birds population",
+  "ok": true,
+  "detail": "71 → 12"
+ },
+ {
+  "where": "birds narrowed",
+  "ok": true,
+  "detail": "12 of 71; 0 not with the agent"
+ },
+ {
+  "where": "birds restored",
+  "ok": true,
+  "detail": ""
+ }
+]

@@ -1,9 +1,9 @@
 [
  {
   "lock": "L5-1512",
-  "where": "heard back shown",
+  "where": "heard back not in the bar (v150 B4)",
   "ok": true,
-  "detail": "52% heard back"
+  "detail": "null"
  },
  {
   "lock": "L5-1512",

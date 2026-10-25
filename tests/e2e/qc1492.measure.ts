@@ -39,11 +39,12 @@ class Ledger {
 type R = { l: number; r: number; w: number };
 const boxes = (page: Page) => page.evaluate(() => {
   const b = (s: string) => { const e = [...document.querySelectorAll<HTMLElement>(s)].find((x) => x.getBoundingClientRect().width > 0); if (!e) return null; const k = e.getBoundingClientRect(); return { l: k.left, r: k.right, w: k.width }; };
-  return { sheet: b(".ws-window"), list: b(".qcv-group[data-v138] .qc138-sheet"), card: b(".qc149-card"), ban: b(".qc149-ban"), vr: b(".qc149-vr"), panel: b("[data-qp='panel']") };
+  return { sheet: b(".ws-window"), list: b(".qcv-group[data-v138] .qc138-sheet"), card: b(".qc149-card"), cards: b("[data-qc150='cards']"), panel: b("[data-qp='panel']") };
 });
 const near = (a: number, b: number, t = 1) => Math.abs(a - b) <= t;
 const mutate = async (page: Page) => {
-  if (MUT === "L1") await page.addStyleTag({ content: ".qcv-group { --qc149-col: calc(var(--hsheet-w) - 64px) !important; }" });
+  /* v150 C1: the list's own token is the one to break */
+  if (MUT === "L1") await page.addStyleTag({ content: ".qcv-group.qcv-group.qcv-group { --qc149-list: calc(var(--hsheet-w) - 40px) !important; }" });
   if (MUT === "L2") await page.addStyleTag({ content: ".qcv-group { --qc149-w: var(--qc149-list) !important; }" });
   /* the superseded rule: 24 whenever the WINDOW is 1440 or narrower */
   if (MUT === "L2W") await page.addStyleTag({ content: "@media (min-width: 768px) and (max-width: 1440px) { .qcv-group { --qc149-in: 24px !important; } }" });
@@ -52,7 +53,8 @@ const mutate = async (page: Page) => {
   await page.waitForTimeout(200);
 };
 
-test("L1 · the list is min(S − 64, 1136), plus 80 from a 1500 sheet, centred in the sheet", async ({ page }) => {
+/* re-pointed by v150 C1: the list is min(S − 40, 1320), centred (it superseded "+80 from a 1500 sheet"; QC150 L4 too) */
+test("L1 · the list is min(S − 40, 1320), centred in the sheet (v150 C1)", async ({ page }) => {
   test.skip(!run("L1"));
   const L = new Ledger("L1");
   for (const vp of SIZES) {
@@ -62,27 +64,31 @@ test("L1 · the list is min(S − 64, 1136), plus 80 from a 1500 sheet, centred 
     L.check(`${at} population: the sheet and the list`, !!b.sheet && !!b.list, JSON.stringify(b));
     if (!b.sheet || !b.list) continue;
     const S = b.sheet.w;
-    const want = Math.min(S - 64, 1136) + (S >= 1500 ? 80 : 0);
-    L.check(`${at} width = min(S − 64, 1136) + ${S >= 1500 ? 80 : 0} (S ${S.toFixed(0)})`, near(b.list.w, want), `${b.list.w.toFixed(1)} vs ${want}`);
+    const want = Math.min(S - 40, 1320);
+    L.check(`${at} width = min(S − 40, 1320) (S ${S.toFixed(0)})`, near(b.list.w, want), `${b.list.w.toFixed(1)} vs ${want}`);
     L.check(`${at} centred in the sheet`, near((b.list.l + b.list.r) / 2, (b.sheet.l + b.sheet.r) / 2), `${((b.list.l + b.list.r) / 2).toFixed(1)} vs ${((b.sheet.l + b.sheet.r) / 2).toFixed(1)}`);
-    if (vp.width === 2560) L.check("2560: 1216 wide, not the sheet's width", near(b.list.w, 1216), b.list.w.toFixed(1));
+    if (vp.width === 2560) L.check("2560: 1320 wide, not the sheet's width (v150 C1)", near(b.list.w, 1320), b.list.w.toFixed(1));
   }
   L.done(16);
 });
 
-test("L2 · the header card, banner and view row share edges, inside the list by the inset", async ({ page }) => {
+/* re-pointed by v150: the banner and the view row are gone (A3, C2); the header card and the stat cards keep the v149.2
+   rule — the column less the inset each side, centred — while the list itself is now min(S − 40, 1320) (C1) */
+test("L2 · the header card and the stat cards share edges at the v149.2 width, centred", async ({ page }) => {
   test.skip(!run("L2"));
   const L = new Ledger("L2");
   for (const vp of SIZES) {
     await openQc(page, vp); await mutate(page);
     const b = await boxes(page);
     const at = `${vp.width}×${vp.height}`;
-    L.check(`${at} population: sheet, list, card, banner, view row`, !!b.sheet && !!b.list && !!b.card && !!b.ban && !!b.vr, JSON.stringify(b));
-    if (!b.list || !b.card || !b.ban || !b.vr || !b.sheet) continue;
-    const inset = b.sheet.w < 1100 ? 24 : 32;
-    const all = [b.card, b.ban, b.vr] as R[];
-    L.check(`${at} the three share left and right edges`, all.every((x) => near(x.l, b.card!.l) && near(x.r, b.card!.r)), all.map((x) => `${x.l.toFixed(1)}–${x.r.toFixed(1)}`).join(" · "));
-    L.check(`${at} each sits inside the list by ${inset} (S ${b.sheet.w.toFixed(0)})`, all.every((x) => near(x.l - b.list!.l, inset) && near(b.list!.r - x.r, inset)), `left ${(b.card.l - b.list.l).toFixed(1)} · right ${(b.list.r - b.card.r).toFixed(1)}`);
+    L.check(`${at} population: sheet, list, card, stat cards`, !!b.sheet && !!b.list && !!b.card && !!b.cards, JSON.stringify(b));
+    if (!b.list || !b.card || !b.cards || !b.sheet) continue;
+    const S = b.sheet.w;
+    const inset = S < 1100 ? 24 : 32;
+    const w = Math.min(S - 64, 1136) + (S >= 1500 ? 80 : 0) - 2 * inset;
+    const all = [b.card, b.cards] as R[];
+    L.check(`${at} the two share left and right edges`, all.every((x) => near(x.l, b.card!.l) && near(x.r, b.card!.r)), all.map((x) => `${x.l.toFixed(1)}–${x.r.toFixed(1)}`).join(" · "));
+    L.check(`${at} each is the column less ${inset} each side (S ${S.toFixed(0)}), centred`, all.every((x) => near(x.w, w) && near((x.l + x.r) / 2, (b.sheet!.l + b.sheet!.r) / 2)), `${b.card.w.toFixed(1)} vs ${w}`);
   }
   L.done(15);
 });

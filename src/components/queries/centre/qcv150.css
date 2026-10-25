@@ -1,0 +1,306 @@
+/* ══ Query Centre v150 (design-refs/query-centre-v150/) ═════════════════════════════════════════════════════════════
+   Part A · the page dressing: the doodle background and the tighter header card.
+   ⚠️ DESKTOP ONLY, like every Query Centre rule since v131: the phone keeps its page.
+   ⚠️ THE HEADER CARD IS THE SHARED PageHeaderCard (Versions reads it; QC149-L0). Every rule here is scoped under
+      `.qc149-hd .qc149-card`, which Versions never renders, so its card is untouched. */
+@media (min-width: 768px) {
+  /* A1 · the page sheet: the tile at 340 × 360 on the existing #f2eee8, scrolling with the page (`local`). The cards
+     and the panel paint their own grounds over it; the shell is outside this scroller. */
+  .qc-wpg.qc-wpg--v11 > .wpg-scroll {
+    background-color: #f2eee8;
+    background-image: url("/images/qc/doodle-tile.svg");
+    background-repeat: repeat;
+    background-size: 340px 360px;
+    background-attachment: local;
+  }
+
+  /* A2 · the header card: 22 above, 24 below; the title 40px with the highlighter; the hawk 140 tall */
+  .qc149-hd .qc149-card.phc.phc { padding: 22px 36px 24px; grid-template-columns: minmax(0, 1fr) 160px; }
+  .qc149-hd .qc149-card.phc.phc.phc h1 { font-size: 40px; line-height: 44px; }
+  .qc149-hd .qc149-card .hl {
+    padding: 0 5px; margin: 0 -5px;
+    background: linear-gradient(transparent 50%, #eee2d9 50%, #eee2d9 96%, transparent 96%);
+    -webkit-box-decoration-break: clone; box-decoration-break: clone;
+  }
+  .qc149-hd .qc149-card .phc-tx > p { margin-top: 14px; }
+  .qc149-hd .qc149-card .phc-art { height: 140px; }
+  .qc149-hd .qc149-card .phc-art img { width: 160px; height: 140px; object-fit: contain; object-position: right center; }
+}
+
+/* ══ Part B · the stat cards ═════════════════════════════════════════════════════════════════════════════════════
+   ⚠️ SAME WIDTH AND INSET AS THE HEADER CARD: they are children of `.qc149-hd`, which is `--qc149-w` wide (v149.2).
+   ⚠️ THE ≤1180px STEP READS THE SHEET (`--hsheet-w`) through a stepped clamp, so no viewport query decides it. */
+@media (min-width: 768px) {
+  .qc149-hd .qc150-cards {
+    --qc150-n: clamp(38px, calc(38px + (var(--hsheet-w) - 1180.5px) * 1000), 46px);
+    --qc150-d: clamp(26px, calc(26px + (var(--hsheet-w) - 1180.5px) * 1000), 30px);
+    display: grid; grid-template-columns: 1.7fr 1fr 1fr 1fr; gap: 12px; margin-top: 16px; align-items: stretch;
+  }
+  .qc150-c {
+    position: relative; box-sizing: border-box; display: flex; flex-direction: column; min-width: 0;
+    padding: 17px 20px 18px; border-radius: 14px; background: #fbf9f5; color: #1c130f;
+    box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1), 0 1px 2px rgba(28, 19, 15, 0.04); transition: box-shadow 0.12s;
+  }
+  .qc150-c:hover { box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.24), 0 1px 2px rgba(28, 19, 15, 0.04); }
+  /* the whole card is the button; what sits on it passes the press through, except its own buttons */
+  .qc150-hit { all: unset; position: absolute; inset: 0; z-index: 1; border-radius: 14px; cursor: pointer; }
+  .qc150-hit:focus-visible { outline: 2px solid #c9765d; outline-offset: 2px; }
+  .qc150-hit:disabled { cursor: default; }
+  .qc150-c > :not(.qc150-hit) { position: relative; z-index: 2; pointer-events: none; }
+  .qc150-c .qc150-show, .qc150-c .qc150-link { pointer-events: auto; }
+
+  /* the tinted head: inset from the card edge on the top and sides (the card's cream frame shows round it) */
+  .qc150-h {
+    box-sizing: border-box; display: flex; align-items: center; gap: 9px; min-width: 0;
+    margin: -12px -15px 0; padding: 11px 15px 10px; border-radius: 10px; overflow: hidden;
+  }
+  .qc150-h b { font: 400 17px/1.15 var(--sp-type) !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .qc150-h .qc150-sw { display: block; flex: none; width: 10px; height: 10px; }
+  .qc150-c--you .qc150-h { background: #efd6ca; color: #a2452a; }
+  .qc150-c--agent .qc150-h { background: #dde3ea; color: #1c130f; }
+  .qc150-c--quiet .qc150-h { background: repeating-linear-gradient(135deg, #e9e3d9 0 6px, #f1ece4 6px 12px); color: #1c130f; }
+  .qc150-c--closed .qc150-h { background: #e6e2dc; color: #1c130f; }
+  .qc150-dd {
+    position: absolute; top: 4px; right: 10px; width: 34px; height: 34px;
+    fill: none; stroke: currentColor; stroke-opacity: 0.5; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  .qc150-n { margin-top: 14px; font: 400 var(--qc150-n)/1 var(--sp-type) !important; color: #1c130f; }
+
+  /* the faces: one disc per query, overlapping by 6, ringed in the card colour */
+  .qc150-faces { display: flex; align-items: center; min-height: var(--qc150-d); margin-top: 11px; }
+  .qc150-face {
+    box-sizing: border-box; flex: none; display: grid; place-items: center; width: var(--qc150-d); height: var(--qc150-d);
+    margin-left: -6px; border-radius: 50%; font: 500 10px/1 var(--sp-mono, "JetBrains Mono", monospace) !important;
+    box-shadow: 0 0 0 2.5px #fbf9f5;
+  }
+  .qc150-face:first-child { margin-left: 0; }
+  .qc150-faces--agent .qc150-face { background: #f1ebe1; color: #2a3a52; }
+  .qc150-faces--quiet .qc150-face { background: #f3efe8; color: #8a8076; border: 1.5px dashed #c8beb1; }
+  .qc150-faces--closed .qc150-face { background: #ebe7e1; color: #a39a90; }
+  .qc150-faces--you .qc150-face { background: #fff; color: #a2452a; box-shadow: 0 0 0 2.5px #fbf9f5, inset 0 0 0 1.5px rgba(162, 69, 42, 0.5); }
+  .qc150-more { margin-left: 8px; font: 400 13px/1 var(--sp-type) !important; font-style: normal; color: #7a6f66; }
+
+  /* the detail line, pinned to the card's foot */
+  .qc150-s { margin-top: auto; padding-top: 12px; font: 400 14.5px/1.35 var(--sp-serif) !important; color: #5b4f47; }
+  .qc150-s b, .qc150-next b { font-weight: 600; color: #1c130f; }
+  .qc150-link {
+    all: unset; cursor: pointer; font: inherit; color: inherit;
+    text-decoration: underline; text-decoration-color: rgba(28, 19, 15, 0.25); text-underline-offset: 3px;
+  }
+  .qc150-link:hover { text-decoration-color: currentColor; }
+  .qc150-link:focus-visible { outline: 2px solid #c9765d; outline-offset: 2px; border-radius: 2px; }
+
+  /* Your move: "Next: …", then the discs and "Show them →" */
+  .qc150-yx { display: flex; flex-direction: column; gap: 12px; padding-top: 9px; }
+  .qc150-next { font: 400 14.5px/1.35 var(--sp-serif) !important; color: #5b4f47; }
+  .qc150-go { display: flex; align-items: center; gap: 10px; }
+  .qc150-go .qc150-faces { margin-top: 0; }
+  .qc150-show {
+    all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; height: 33px; padding: 0 14px;
+    border-radius: 9px; background: #2a3a52; color: #f4eee5; font: 400 15px/1 var(--sp-type) !important; white-space: nowrap;
+  }
+  .qc150-show:hover { background: #334763; }
+  .qc150-show:focus-visible { outline: 2px solid #c9765d; outline-offset: 2px; }
+
+  /* pressed: navy, every word cream; the head turns a cream wash on the navy so its words still read */
+  .qc150-c[data-on] { background: #2a3a52; box-shadow: 0 0 0 1px #2a3a52, 0 14px 24px -16px rgba(20, 28, 44, 0.6); }
+  .qc150-c[data-on] .qc150-h { background: rgba(244, 238, 229, 0.14); }
+  .qc150-c[data-on] :is(.qc150-h, .qc150-n, .qc150-s, .qc150-s b, .qc150-next, .qc150-next b, .qc150-more) { color: #f4eee5; }
+  .qc150-c[data-on] .qc150-face { box-shadow: 0 0 0 2.5px #2a3a52; }
+  .qc150-c[data-on] .qc150-faces--you .qc150-face { box-shadow: 0 0 0 2.5px #2a3a52, inset 0 0 0 1.5px rgba(162, 69, 42, 0.5); }
+  .qc150-c[data-on] .qc150-show { background: #f4eee5; color: #1c130f; }
+}
+
+/* ══ Part C · the list's width, its title and the view switch ════════════════════════════════════════════════════
+   ⚠️ C1 SUPERSEDES v149.2's "+80 from a 1500 sheet" FOR THE LIST ONLY: the list is min(S − 40, 1320), centred. The
+      header card and the stat cards keep the v149.2 column rule, so `--qc149-w` is pinned to that rule here rather
+      than derived from the list as it was (0-2-0, over qcv149.css's 0-1-0 on the same element). */
+@media (min-width: 768px) {
+  .qcv-group.qcv-group {
+    --qc149-w: calc(var(--qc149-col) + var(--qc149-ext) - 2 * var(--qc149-in));
+    --qc149-list: min(calc(var(--hsheet-w) - 40px), 1320px);
+  }
+  /* C2 · the title: 28 below the cards (the page's own margin), 16 above the list */
+  .qc150-lt { display: flex; flex-direction: column; align-items: center; margin: 0 0 16px; }
+  .qc150-ltt { display: flex; align-items: center; gap: 26px; width: 100%; padding: 4px 0; }
+  .qc150-ltt::before, .qc150-ltt::after { content: ""; flex: 1 1 0; min-width: 0; height: 1px; background: rgba(28, 19, 15, 0.18); }
+  .qc150-lt .qc150-ltt h2 { flex: none; margin: 0; font: 400 24px/24px var(--sp-type) !important; font-family: var(--sp-type) !important; color: #1c130f; white-space: nowrap; }
+  .qc150-lts { margin: 8px 0 0; font: italic 400 15px/21px var(--sp-serif) !important; color: #5b4f47; text-align: center; }
+  .qc150-lts b { font: 400 16px/1 var(--sp-type) !important; font-style: normal; color: #1c130f; }
+  /* C3 · the switch: a cream segmented control, centred 14 under the count line */
+  .qc150-vsw {
+    display: inline-flex; gap: 0; margin-top: 14px; padding: 4px; border-radius: 12px; background: #fbf9f5;
+    box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.12), 0 10px 18px -12px rgba(28, 19, 15, 0.4);
+  }
+  .qc150-vsw button {
+    all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 18px;
+    border-radius: 9px; font: 400 16px/1 var(--sp-type) !important; color: #5b4f47; white-space: nowrap;
+  }
+  .qc150-vsw button svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+  .qc150-vsw button:hover:not([aria-pressed="true"]):not(:disabled) { color: #1c130f; }
+  .qc150-vsw button[aria-pressed="true"] { background: #2a3a52; color: #f4eee5; }
+  .qc150-vsw button:focus-visible { outline: 2px solid #c9765d; outline-offset: 2px; }
+  /* the title is not drawn in full screen (the pinned band is the list's head there) */
+  .qcv-group[data-full] .qc150-lt { display: none; }
+}
+/* C — the navy bar's search (its view row above the list is retired): a dark well on the navy, first in the bar */
+@media (min-width: 768px) {
+  .qc140-tb .qc150-bfind {
+    box-sizing: border-box; flex: 0 1 300px; min-width: 200px; height: 34px; display: flex; align-items: center; gap: 10px;
+    padding: 0 10px 0 13px; border-radius: 9px; background: rgba(10, 18, 32, 0.32); color: rgba(244, 238, 229, 0.75);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35), 0 1px 0 rgba(244, 238, 229, 0.14);
+  }
+  .qc140-tb .qc150-bfind:focus-within { box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, 0.7); }
+  .qc140-tb .qc150-bfind svg { flex: none; }
+  .qc140-tb .qc150-bfind input { all: unset; flex: 1; min-width: 0; font: 400 15.5px/1.2 var(--sp-serif) !important; color: #f4eee5; }
+  .qc140-tb .qc150-bfind input::placeholder { color: rgba(244, 238, 229, 0.55); font: italic 400 15.5px/1.2 var(--sp-serif); }
+}
+
+/* ══ Part D · Birds-eye, inside the list card under the navy bar ════════════════════════════════════════════════
+   Columns: agent 300 · timeline · actions 210 (262 / 172 once the list is 1140 or narrower — a sheet of 1180 or less;
+   `.qcv-page` is the rows' size container). The date row has the same three columns, so the axis and every row's
+   track share one time scale to the pixel. */
+@media (min-width: 768px) {
+  .qc150-be { --aw: 300px; --xw: 210px; position: relative; background: #fff; touch-action: pan-y; }
+  @container (max-width: 1140px) { .qc150-be { --aw: 262px; --xw: 172px; } }
+  .qc150-be.is-drag, .qc150-be.is-drag * { cursor: grabbing !important; user-select: none; }
+
+  /* D3 · the date row pins flush under the navy bar (its top is the sticky toolbar's height, set from JS) */
+  .qc150-bvh {
+    position: sticky; top: var(--qc150-bvtop, 0px); z-index: 6; display: grid; grid-template-columns: var(--aw) minmax(0, 1fr) var(--xw);
+    background: #fff; border-bottom: 1px solid rgba(28, 19, 15, 0.1); box-shadow: 0 8px 14px -14px rgba(28, 19, 15, 0.5);
+  }
+  .qc150-zc { display: flex; align-items: center; padding: 12px 18px 12px 24px; }
+  .qc150-zp { display: inline-flex; align-items: center; gap: 2px; padding: 4px; border-radius: 999px; background: #f3efe8; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.08); }
+  .qc150-zp button {
+    all: unset; box-sizing: border-box; cursor: pointer; min-width: 34px; height: 34px; padding: 0 6px; border-radius: 999px;
+    display: grid; place-items: center; font: 400 15px/1 var(--sp-type) !important; color: #1c130f;
+  }
+  .qc150-zp button[aria-pressed="true"], .qc150-zp .qc150-tg { background: #2a3a52; color: #f4eee5; }
+  .qc150-zp button:focus-visible { outline: 2px solid #c9765d; outline-offset: 2px; }
+  .qc150-zp .qc150-sep { width: 1px; height: 20px; margin: 0 6px; background: rgba(28, 19, 15, 0.15); }
+  .qc150-zp .qc150-ar { min-width: 26px; font-size: 16px !important; color: #5b4f47; }
+  .qc150-zp .qc150-tg svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+  @container (max-width: 1140px) {
+    .qc150-zc { padding-left: 14px; padding-right: 10px; }
+    .qc150-zp button { min-width: 30px; height: 32px; }
+    .qc150-zp .qc150-ar { min-width: 22px; }
+    .qc150-zp .qc150-sep { margin: 0 3px; }
+  }
+
+  /* the axis: one wide track, scrolled (never rebuilt) — and D7's fade over its last 56px */
+  .qc150-ax {
+    position: relative; height: 80px; overflow: hidden; cursor: grab; user-select: none; box-shadow: inset 1px 0 0 rgba(28, 19, 15, 0.08);
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 56px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 56px), transparent);
+  }
+  .qc150-axt, .qc150-trk { position: relative; height: 100%; }
+  .qc150-mo { position: absolute; top: 0; bottom: 0; border-left: 1px solid rgba(28, 19, 15, 0.1); overflow: clip; }
+  .qc150-mo--cur { background: #f3efe8; }
+  .qc150-mo--future { background: #faf8f4; }
+  .qc150-mo span { position: sticky; left: 10px; display: inline-block; margin: 12px 10px 0; font: 400 18px/1 var(--sp-type) !important; color: #1c130f; white-space: nowrap; }
+  .qc150-mo span small { margin-left: 6px; font: 500 10px/1 var(--sp-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.1em; color: #8a8076; }
+  .qc150-tk { position: absolute; bottom: 12px; transform: translateX(-50%); font: 500 11.5px/1 var(--sp-mono, "JetBrains Mono", monospace) !important; color: #5b4f47; white-space: nowrap; }
+  .qc150-tk::before { content: ""; position: absolute; left: 50%; top: -9px; width: 1px; height: 6px; background: rgba(28, 19, 15, 0.3); }
+  .qc150-tdy {
+    position: absolute; bottom: 9px; transform: translateX(-50%); z-index: 2; padding: 4px 9px; border-radius: 7px;
+    background: #1c130f; color: #f4eee5; font: 600 10px/1.3 var(--sp-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.14em;
+  }
+  .qc150-hvt {
+    position: absolute; top: 8px; z-index: 3; display: none; transform: translateX(-50%); padding: 5px 10px; border-radius: 999px; pointer-events: none;
+    background: #1c130f; color: #f4eee5; font: 600 10px/1 var(--sp-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.14em; white-space: nowrap;
+  }
+
+  /* the rows */
+  .qc150-bvb { position: relative; padding: 14px 16px 6px; }
+  .qc150-vl { position: absolute; top: 0; bottom: 0; width: 0; z-index: 1; pointer-events: none; }
+  .qc150-vl--t { border-left: 1.5px solid #1c130f; }
+  .qc150-vl--h { display: none; border-left: 1px solid rgba(28, 19, 15, 0.22); }
+  .qc150-gb {
+    position: relative; z-index: 2; display: flex; align-items: baseline; gap: 10px; margin: 8px 0 0; padding: 8px 20px; border-radius: 12px;
+    background: #2a3a52; color: #f4eee5;
+  }
+  .qc150-gb b { font: 400 18px/1.2 var(--sp-type) !important; }
+  .qc150-gb small { font: 500 11px/1 var(--sp-mono, "JetBrains Mono", monospace) !important; opacity: 0.75; }
+  .qc150-br {
+    display: grid; grid-template-columns: calc(var(--aw) - 16px) minmax(0, 1fr) calc(var(--xw) - 16px); align-items: center; min-height: 52px;
+    border-bottom: 1px solid rgba(28, 19, 15, 0.07); cursor: pointer;
+  }
+  .qc150-br:hover { background: #faf6f0; }
+  .qc150-br.is-sel { background: #faf6f0; }
+  .qc150-br.is-sel .qc150-bar--cur { box-shadow: inset 0 0 0 2px #1c130f; }
+  .qc150-br:focus-visible { outline: 2px solid #c9765d; outline-offset: -2px; }
+  .qc150-br--last { margin-bottom: 14px; }
+  .qc150-ag { display: flex; align-items: center; gap: 11px; min-width: 0; padding-left: 8px; }
+  .qc150-d { flex: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: #2a3a52; color: #f4eee5; font: 500 10px/1 var(--sp-mono, "JetBrains Mono", monospace) !important; }
+  .qc150-who { min-width: 0; }
+  .qc150-who b { display: block; font: 600 16px/1.15 var(--sp-serif) !important; color: #1c130f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .qc150-who small { display: block; font: 400 13.5px/1.2 var(--sp-serif) !important; color: #7a6f66; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .qc150-tl {
+    position: relative; height: 52px; overflow: hidden; cursor: grab;
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 56px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 56px), transparent);
+  }
+  /* bars: the past in grey, the current stage in its tint */
+  .qc150-bar { position: absolute; top: 50%; height: 26px; margin-top: -13px; border-radius: 7px; overflow: clip; display: flex; align-items: center; cursor: pointer; transition: box-shadow 0.12s; }
+  .qc150-bar:hover { box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, 0.35); }
+  .qc150-bar--past { background: #e9e9e4; }
+  .qc150-bar--past .qc150-lb { color: #6b665e; position: static; }
+  .qc150-bar--o { box-sizing: border-box; padding-right: 22px; }
+  .qc150-lb { position: sticky; left: 0; padding: 0 14px; font: 400 14px/1 var(--sp-type) !important; color: #1c130f; white-space: nowrap; }
+  .qc150-t-q { background: #f4eee4; } .qc150-t-r { background: #f2e4df; } .qc150-t-s { background: #e4e7e1; } .qc150-t-o { background: #dde3ea; }
+  .qc150-br--w .qc150-t-q { background: #f9f4ed; } .qc150-br--w .qc150-t-s { background: #ecefea; } .qc150-br--w .qc150-t-r { background: #f7ece8; } .qc150-br--w .qc150-t-o { background: #e8edf2; }
+  .qc150-tail { position: absolute; top: 50%; z-index: 2; display: flex; align-items: center; gap: 12px; transform: translateY(-50%); white-space: nowrap; pointer-events: none; }
+  .qc150-tail--in { margin-left: 10px; }
+  .qc150-dot { flex: none; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; background: #2a3a52; box-shadow: 0 0 0 4px rgba(42, 58, 82, 0.16); }
+  .qc150-tx { font: 500 11px/1 var(--sp-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.12em; color: #2a3a52; }
+  .qc150-tail--in .qc150-tx { letter-spacing: 0.1em; color: #5b4f47; }
+  .qc150-lb2 { font: 400 14px/1 var(--sp-type) !important; color: #5b4f47; }
+  .qc150-xa { display: flex; justify-content: flex-end; padding-right: 8px; }
+  .qc150-xa button {
+    all: unset; cursor: pointer; padding: 6px 14px; border-radius: 999px; background: #fff; box-shadow: inset 0 0 0 1.5px #2a3a52;
+    font: 400 14.5px/1.2 var(--sp-type) !important; color: #1c130f; white-space: nowrap;
+  }
+  .qc150-xa button:hover { background: #2a3a52; color: #f4eee5; }
+  .qc150-xa button:focus-visible { outline: 2px solid #c9765d; outline-offset: 2px; }
+  @container (max-width: 1140px) { .qc150-xa button { font-size: 14px !important; padding: 6px 12px; } }
+  .qc150-none { margin: 24px 8px; font: italic 400 15px/1.4 var(--sp-serif) !important; color: #5b4f47; }
+  .qc150-bvc { margin: 0; padding: 12px 32px 0; border-top: 1px solid rgba(28, 19, 15, 0.08); font: italic 400 14.5px/1.4 var(--sp-serif) !important; color: #5b4f47; }
+  .qc150-bvf { margin: 0; padding: 14px 32px 16px; border-top: 1px solid rgba(28, 19, 15, 0.08); font: 500 11px/1.4 var(--sp-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.14em; color: #8a8076; }
+  .qc150-bvc + .qc150-bvf { border-top: 0; }
+  .qc150-bvf i { display: inline-block; width: 8px; height: 8px; margin: 0 2px 0 0; border-radius: 50%; background: #2a3a52; vertical-align: 1px; }
+
+  /* D8 · the Birds-eye pills, in the navy bar's place of the list's Group and Sort */
+  .qc140-tb .qc150-bvgs { display: inline-flex; align-items: center; gap: 8px; margin-left: auto; }
+  .qc150-bvp {
+    all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px;
+    border-radius: 10px; background: #fff; color: #1c130f; font: 400 15.5px/1 var(--sp-type) !important; white-space: nowrap;
+  }
+  .qc150-bvp b { font-weight: 400; }
+  .qc150-bvp:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
+  .qc150-pic { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; }
+  .qc150-pcv { width: 11px; height: 11px; opacity: 0.6; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; }
+  @container (max-width: 1140px) { .qc150-bvp b { display: none; } .qc150-bvp { padding: 0 11px; } }
+}
+.qc150-bvm {
+  position: fixed; z-index: 1000; min-width: 230px; box-sizing: border-box; padding: 8px; border-radius: 12px; background: #fff;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1), 0 18px 34px -16px rgba(28, 19, 15, 0.45);
+}
+.qc150-bvm h6 { margin: 4px 8px 6px; font: 500 10px/1.3 var(--sp-mono, "JetBrains Mono", monospace); letter-spacing: 0.16em; color: #8a8076; }
+.qc150-bvm button {
+  all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 10px; border-radius: 8px;
+  font: 400 15px/1.2 var(--sp-serif); color: #1c130f;
+}
+.qc150-bvm button:hover, .qc150-bvm button:focus-visible { background: #f6f3ee; outline: none; }
+.qc150-bvm button[aria-checked="true"] { font-weight: 600; }
+.qc150-bvm button[aria-checked="true"]::after { content: "\2713"; margin-left: auto; color: #a2452a; }
+
+/* ══ Part E · the bar ════════════════════════════════════════════════════════════════════════════════════════════
+   List: search · Filters · the grouping pill · the sort pill · Full screen. Birds-eye: search · Group · Sort · Filters ·
+   Full screen (Part D). The pills drop their "Grouped by" / "Sorted by" prefixes and show the value only, at every
+   width (v149 dropped them at ≤1440 of window only). */
+@media (min-width: 768px) {
+  .qcv-group[data-v138] .qc138-sheet .qc140-gby,
+  .qcv-group[data-v138] .qc138-sheet .qc1421-sort .sc-sby { display: none; }
+  /* the search flexes, never under 200px (and no wider than the mock's 300) */
+  .qc140-tb .qc150-bfind { flex: 1 1 260px; max-width: 300px; }
+}

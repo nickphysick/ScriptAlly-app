@@ -101,6 +101,13 @@ import { facesFor } from "../lib/qcFaces";
 import { QcCourts, QcCourtsSkeleton } from "./queries/centre/QcCourts";
 import { QcStrip } from "./queries/centre/QcStrip";
 import { QcHeader149, QcViewRow149 } from "./queries/centre/QcHeader149";
+import { QcStatCards150 } from "./queries/centre/QcStatCards150";
+import { beGroups, closedCount as beClosedCount, groupPhrase, readView150, sortPhrase, statCards, writeView150, type BeGroup, type BeSort, type QcView150 } from "../lib/qc150";
+import { QcBePills150, QcBirds150 } from "./queries/centre/QcBirds150";
+import { QcListTitle150 } from "./queries/centre/QcListTitle150";
+import { QC_SORT_FIELDS } from "../lib/cardsSort";
+import { GROUP_BY_OPTIONS } from "../lib/qcCalView";
+import { eyeRows } from "../lib/qcBirdsEye";
 import { QcLogFlow149, QcWhoReplied149, type FlowAgent, type LogAnswers } from "./queries/centre/QcFlows149";
 import { logDefaults, pieceVersions, saveLog } from "../lib/queryActions/logSave";
 import { packagesFor } from "../lib/queryActions/packages";
@@ -120,7 +127,7 @@ import type { AgentEditPatch } from "../lib/saveAgentEdits";
 import type { RowSpec } from "./reading-pane/QueryTimeline";
 import type { QcRow } from "../lib/qcSummary";
 import { nextLine } from "../lib/qcRowLines";
-import { pressView, twinTags, waitingBanner } from "../lib/qc149";
+import { pressView, twinTags } from "../lib/qc149";
 import { PIN_KEYS, usePinList } from "./shell/useFullScreenList";
 import { listCountTitle } from "./shell/ViewTitleRow";
 import { QcWhereCard } from "./queries/centre/QcWhere141";
@@ -3936,13 +3943,44 @@ export const Queries: React.FC<{
     setQcF138((f) => ({ ...f, where: k }));
     if (!k || !scroll || qcFull) return;
     requestAnimationFrame(() => {
-      const tb = [...document.querySelectorAll<HTMLElement>('[data-qc149="views-row"]')].find((e) => e.getBoundingClientRect().height > 0);
+      const tb = [...document.querySelectorAll<HTMLElement>('[data-qc150="title"]')].find((e) => e.getBoundingClientRect().height > 0);
       const sc = tb?.closest<HTMLElement>(".wpg-scroll");
       if (!tb || !sc) return;
       const top = sc.scrollTop + tb.getBoundingClientRect().top - sc.getBoundingClientRect().top - 20;
       sc.scrollTo({ top: Math.max(0, top), behavior: prefersReducedMotion() ? "auto" : "smooth" });
     });
   };
+  /* v150 C3 — the list's view: List or Birds-eye, remembered for the session (the app's view prefs are per device,
+     never per user, so the session is the honest scope) */
+  const [qcView150, setQcView150] = useState<QcView150>(() => {
+    /* `?view=calendar` (and `cal`), the old drawer's one URL, opens the page on Birds-eye */
+    try { if (readBirdsEyeOpen(window.location.search)) return "birds"; } catch { /* no window */ }
+    return readView150();
+  });
+  const pickView150 = (v: QcView150) => { setQcView150(v); writeView150(v); };
+  /* v150 D — on the desktop the old drawer is retired: a remembered `?view=calendar` opens the view, never the drawer */
+  useEffect(() => { if (qcDesk && beOpen) setBeOpen(false); }, [qcDesk, beOpen]);
+  /* v150 D8 — Birds-eye's own grouping and sort: separate from the list's, and never written to the list's memory */
+  const [qcBeGroup, setQcBeGroup] = useState<BeGroup>("urgency");
+  const [qcBeSort, setQcBeSort] = useState<BeSort>("due");
+  /* v150 D9 — over the rows the list shows (search, Filters, the stat card), closed dropped */
+  const qcBeGroups = useMemo(() => beGroups(qcVisible, qcBeGroup, qcBeSort, qcNow138),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [qcVisible, qcBeGroup, qcBeSort]);
+  const qcBeOrder = qcBeGroups.flatMap((g) => g.rows.map((r) => r.id));
+  /* v150 C2 — the count line's figures follow the active filter: the rows the list shows */
+  const qc150Sort = QC_SORT_FIELDS.find((f) => f.key === qcSort138.key);
+  const qc150SortOrder = qc150Sort?.order.find((o) => o.reversed === qcSort138.reversed)?.label ?? "";
+  const qc150Group = GROUP_BY_OPTIONS.find((o) => o.key === qcGroup);
+  const qc150ListLine = {
+    n: qcVisible.length,
+    heardPct: bandFigures(qcVisible, qcNow138).heardPct,
+    group: groupPhrase(qcGroup, qc150Group?.short ?? ""),
+    sort: sortPhrase(qcSort138.key, qcSort138.reversed, qc150SortOrder.toLowerCase(), qc150Sort?.label ?? ""),
+  };
+  const qc150BeLive = qcBeOrder.length;
+  /* v150 B2 — a stat card's detail link: that card's filter (Part D also switches the list to Birds-eye) */
+  const qc150Detail = (k: WhereKey) => { pickView150("birds"); qcShowWhere(k); };
   /* v138 §C — "Showing {n} of {N}" whenever anything narrows the list; "Clear all" clears every narrowing at once */
   const qc138Filtered = qc138FilterCount(qcF138) > 0 || qcFilter !== "all" || qcFind.trim() !== "" || !!qcCourtOn || !!qcIds;
   const qc138ClearAll = () => { setQcF138(emptyQc138Filters()); setQcFilter("all"); setQcFind(""); setQcCzCourt(null); setQcIds(null); };
@@ -5268,18 +5306,20 @@ export const Queries: React.FC<{
   /* v138 §A–B — the desktop header: the title block, the glyph row, the filter row and the pinned row */
   /* v149 Part A — the header card and the "waiting on you" banner (the Versions page's own components); the hero
      (QcHeader138) and the breakdown card (QcWhereCard) are no longer drawn on this page */
-  const qc149Banner = showGridSkeleton ? null : waitingBanner(qcScoped, qcNow138);
   const qc138Header = qcDesk ? (
     <QcHeader149
       loading={showGridSkeleton}
       msTitle={qcLineTitle}
-      banner={qc149Banner}
       onLog={() => onNavigate?.("queries", "Log a query")}
       onRecord={() => onNavigate?.("queries", "Record a response")}
-      onShowThem={() => qcShowWhere("you")}
       logDisabled={creating}
       logRef={logTriggerRef}
     >
+      {/* v150 Part B — the four stat cards: the old quick-filter chips' counts and filter (`qcF138.where`), and the
+          retired banner's "Next" on Your move */}
+      <QcStatCards150 cards={showGridSkeleton ? null : statCards(qcScoped, qcNow138)} where={qcF138.where} loading={showGridSkeleton}
+        onCard={(k) => qcShowWhere(pressView(qcF138.where, k))}
+        onDetail={(k) => qc150Detail(k)} />
       <i ref={qc138Ref} hidden />
       <BulkBar138
         anchor={qc138Ref}
@@ -5743,7 +5783,8 @@ export const Queries: React.FC<{
     const site = (ag?.website ?? "").trim();
     const nl = nextLine(row, null, now);
     const door = row.court === "closed" ? null : nextDoor(row, now);
-    const order = qcVisible.map((r) => r.id);
+    /* v150 D10 — opened from Birds-eye, ‹ › and "N / M" follow Birds-eye's visible order */
+    const order = qcView150 === "birds" && qcBeOrder.includes(q.id) ? qcBeOrder : qcVisible.map((r) => r.id);
     const idx = Math.max(0, order.indexOf(q.id));
     const first = (ag?.name || "").trim().split(/\s+/)[0] || "the agent";
     /* what was sent, as the edit mode's select and pieces read it (EditJourney's own derivations) */
@@ -6107,7 +6148,9 @@ export const Queries: React.FC<{
   useEffect(() => { if (routeActive && narrowed) tickGuide.current("find"); }, [routeActive, narrowed]);
   const realPanel = !!(qcOpenCardNode && cardQueryId && queries.some((q) => q.id === cardQueryId));
   useEffect(() => { if (routeActive && realPanel) tickGuide.current("open"); }, [routeActive, realPanel]);
-  useEffect(() => { if (routeActive && beOpen) tickGuide.current("birds"); }, [routeActive, beOpen]);
+  /* v150 D — the step ticks when the list switches to Birds-eye (the drawer on the phone) */
+  const birdsSeen = qcDesk ? qcView150 === "birds" : beOpen;
+  useEffect(() => { if (routeActive && birdsSeen) tickGuide.current("birds"); }, [routeActive, birdsSeen]);
   /* v140 §G, v142 — "Go full screen" ticks when the writer goes full screen (the button or F, walkthrough or not), never for a remembered pin
      put back on arrival. ⚠️ THE DISCRIMINATOR IS THE DEVICE'S PIN RECORD AS IT WAS ONE RENDER BEFORE THE LIST PINNED: a
      restore pins a list the device already remembers as pinned, while the writer's press is what writes it. (Reading
@@ -6160,7 +6203,10 @@ export const Queries: React.FC<{
         const first = ((ag?.name || ag?.agency || "").trim().split(/\s+/)[0]) || "the first";
         return { el: row, text: `Click ${first}'s row, or any row. The query opens in a panel on the right, with its whole story.` };
       }
-      case "birds": return { el: vis(".bvd-tab"), keyCap: "B", text: "Every live query on one timeline, so you can see what's due and what's late at a glance. Click here, or press B from anywhere on the page." };
+      /* v150 D — on the desktop the step points at the switch's Birds-eye button (the floating pill is retired there) */
+      case "birds": return vis("[data-qc150='switch'] [data-v='birds']")
+        ? { el: vis("[data-qc150='switch'] [data-v='birds']"), text: "Every live query on one timeline, so you can see what's due and what's late at a glance. Switch the list to Birds-eye here." }
+        : { el: vis(".bvd-tab"), keyCap: "B", text: "Every live query on one timeline, so you can see what's due and what's late at a glance. Click here, or press B from anywhere on the page." };
       default: return { el: null, text: "" };
     }
   }, [queries, agents, qcPin]);
@@ -7702,7 +7748,9 @@ export const Queries: React.FC<{
              * mounted so its grouping, sort and filters survive closing and reopening it. A name or
              * a bar opens the centred card over it; a row's action opens the one action drawer.
              */
-            overlay={(
+            /* v150 D — on the desktop Birds-eye is the list's second view: the floating pill and its drawer are retired
+               there. Below 768px (the phone keeps its v126 page) the drawer stays, as the phone's only Birds-eye. */
+            overlay={qcDesk ? undefined : (
               <QcBirdsDrawer
                 routeActive={routeActive}
                 rows={qcScoped}
@@ -7839,8 +7887,7 @@ export const Queries: React.FC<{
                   onDensity={setQcDensity}
                   full={qcFull}
                   onFull={qcPin.toggle}
-                  /* v149 B1 — the bar's "heard back": the breakdown card's own figure (one computation, one number) */
-                  heard={{ pct: qcBandFig.heardPct, of: qcBandFig.more + qcBandFig.passed, total: qcScoped.length }}
+                  /* v150 B4 — the bar's "heard back" moved to the list title (Part C) */
                   /* v138.2 §C — "Open the full timeline →": the row's own open, on the timeline (Tracking) tab */
                   onTimeline={(id) => { if (isPracticeId(id)) { openPip(); return; } requestPanelTab("tracking"); cardSetRef.current = qcVisible.map((r) => r.id); onOpenQuery?.(id); }}
                   /* §F — the peek reads the query's activity log through the panel's own builder */
@@ -7883,9 +7930,20 @@ export const Queries: React.FC<{
                   find={qcFind}
                   onFind={setQcFind}
                   findRef={qcSheetFindRef}
-                  viewRow={<QcViewRow149 counts={showGridSkeleton ? null : qcWhereN} total={qcScoped.length} where={qcF138.where}
-                    onView={(k) => qcShowWhere(pressView(qcF138.where, k), false)} find={qcFind} onFind={setQcFind}
-                    findRef={qcFull ? undefined : qcSheetFindRef} loading={showGridSkeleton} />}
+                  /* v150 C — the list's title, its count line and the List | Birds-eye switch replace the view row; the
+                     search moved into the navy bar */
+                  findInBar
+                  /* v150 D — Birds-eye in the list card, under the navy bar; its Group and Sort replace the list's */
+                  birds={qcView150 === "birds" && !showGridSkeleton ? (
+                    <QcBirds150 groups={qcBeGroups} banded={qcBeGroup !== "none"} nowMs={qcNow138} moves={qcMoves}
+                      selectedId={selectedQueryId} closedN={beClosedCount(qcVisible, qcNow138)}
+                      onOpen={(id) => { cardSetRef.current = qcBeOrder; onOpenQuery?.(id); }}
+                      /* the list tray's own action: the row's next move, through its panel */
+                      onAct={(id) => { const r = qcById.get(id); const req = r ? trayOpen(null, r) : null; if (req) stepRow(req); else onOpenQuery?.(id); }} />
+                  ) : null}
+                  birdsTools={qcView150 === "birds" ? <QcBePills150 group={qcBeGroup} onGroup={setQcBeGroup} sort={qcBeSort} onSort={setQcBeSort} loading={showGridSkeleton} /> : null}
+                  viewRow={<QcListTitle150 view={qcView150} onView={pickView150} loading={showGridSkeleton}
+                    list={showGridSkeleton ? null : qc150ListLine} birds={showGridSkeleton ? null : { n: qc150BeLive }} />}
                   ringId={qcKeys.ringId}
                   /* ⚠️ GROUPED AFTER THE SORT, over the rows the list is already showing, so the headings' sort
                      applies WITHIN each group for free */

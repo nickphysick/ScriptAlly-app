@@ -1,0 +1,32 @@
+[
+ {
+  "where": "the seeded row (node tests/e2e/seedQc150.mjs)",
+  "ok": true,
+  "detail": "row absent"
+ },
+ {
+  "where": "two past bars",
+  "ok": true,
+  "detail": "[\"be-past\",\"be-past\",\"be-bar\"]"
+ },
+ {
+  "where": "one current bar",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "date order",
+  "ok": true,
+  "detail": "be-past,be-past,be-bar"
+ },
+ {
+  "where": "no overlap",
+  "ok": true,
+  "detail": "619–712 715–803 806–1144"
+ },
+ {
+  "where": "current last",
+  "ok": true,
+  "detail": ""
+ }
+]
