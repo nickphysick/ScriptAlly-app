@@ -300,7 +300,8 @@ test.describe("QC1491 · L10 casing, L11 push", () => {
     L.done(4);
   });
 
-  test("L11 · at 1920 the open panel pushes the list card; at 1440 it overlays as before", async ({ page }) => {
+  /* RETIRED by v149.2 (QC1492 L3): v149.1 B6's push is removed; the panel overlays at every width. */
+  test.skip("L11 · at 1920 the open panel pushes the list card; at 1440 it overlays as before", async ({ page }) => {
     test.skip(!run("L11"));
     const L = new Ledger("L11");
     const geo = () => page.evaluate(() => {

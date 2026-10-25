@@ -66,7 +66,8 @@ for (const vp of SIZES.filter((v) => !process.env.QC149_SIZE || String(v.width) 
       L.done(14);
     });
 
-    test("L2 · the header, banner and view row share edges; the list is the inset wider each side", async ({ page }) => {
+    /* RETIRED by v149.2 (QC1492 L1 + L2): this lock held the v149 widths, which had no column cap. */
+    test.skip("L2 · the header, banner and view row share edges; the list is the inset wider each side", async ({ page }) => {
       test.skip(!run("L2"));
       const L = new Ledger(`L2-${vp.width}`);
       await openQc(page, vp);
