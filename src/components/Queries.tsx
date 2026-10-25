@@ -120,7 +120,7 @@ import type { AgentEditPatch } from "../lib/saveAgentEdits";
 import type { RowSpec } from "./reading-pane/QueryTimeline";
 import type { QcRow } from "../lib/qcSummary";
 import { nextLine } from "../lib/qcRowLines";
-import { pressView, twinTags, waitingBanner } from "../lib/qc149";
+import { pressView, twinTags } from "../lib/qc149";
 import { PIN_KEYS, usePinList } from "./shell/useFullScreenList";
 import { listCountTitle } from "./shell/ViewTitleRow";
 import { QcWhereCard } from "./queries/centre/QcWhere141";
@@ -5268,15 +5268,12 @@ export const Queries: React.FC<{
   /* v138 §A–B — the desktop header: the title block, the glyph row, the filter row and the pinned row */
   /* v149 Part A — the header card and the "waiting on you" banner (the Versions page's own components); the hero
      (QcHeader138) and the breakdown card (QcWhereCard) are no longer drawn on this page */
-  const qc149Banner = showGridSkeleton ? null : waitingBanner(qcScoped, qcNow138);
   const qc138Header = qcDesk ? (
     <QcHeader149
       loading={showGridSkeleton}
       msTitle={qcLineTitle}
-      banner={qc149Banner}
       onLog={() => onNavigate?.("queries", "Log a query")}
       onRecord={() => onNavigate?.("queries", "Record a response")}
-      onShowThem={() => qcShowWhere("you")}
       logDisabled={creating}
       logRef={logTriggerRef}
     >

@@ -1,0 +1,28 @@
+/* ══ Query Centre v150 (design-refs/query-centre-v150/) ═════════════════════════════════════════════════════════════
+   Part A · the page dressing: the doodle background and the tighter header card.
+   ⚠️ DESKTOP ONLY, like every Query Centre rule since v131: the phone keeps its page.
+   ⚠️ THE HEADER CARD IS THE SHARED PageHeaderCard (Versions reads it; QC149-L0). Every rule here is scoped under
+      `.qc149-hd .qc149-card`, which Versions never renders, so its card is untouched. */
+@media (min-width: 768px) {
+  /* A1 · the page sheet: the tile at 340 × 360 on the existing #f2eee8, scrolling with the page (`local`). The cards
+     and the panel paint their own grounds over it; the shell is outside this scroller. */
+  .qc-wpg.qc-wpg--v11 > .wpg-scroll {
+    background-color: #f2eee8;
+    background-image: url("/images/qc/doodle-tile.svg");
+    background-repeat: repeat;
+    background-size: 340px 360px;
+    background-attachment: local;
+  }
+
+  /* A2 · the header card: 22 above, 24 below; the title 40px with the highlighter; the hawk 140 tall */
+  .qc149-hd .qc149-card.phc.phc { padding: 22px 36px 24px; grid-template-columns: minmax(0, 1fr) 160px; }
+  .qc149-hd .qc149-card.phc.phc.phc h1 { font-size: 40px; line-height: 44px; }
+  .qc149-hd .qc149-card .hl {
+    padding: 0 5px; margin: 0 -5px;
+    background: linear-gradient(transparent 50%, #eee2d9 50%, #eee2d9 96%, transparent 96%);
+    -webkit-box-decoration-break: clone; box-decoration-break: clone;
+  }
+  .qc149-hd .qc149-card .phc-tx > p { margin-top: 14px; }
+  .qc149-hd .qc149-card .phc-art { height: 140px; }
+  .qc149-hd .qc149-card .phc-art img { width: 160px; height: 140px; object-fit: contain; object-position: right center; }
+}

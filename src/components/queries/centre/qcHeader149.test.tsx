@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Query Centre v149 Part A — the header's two body sentences and the banner's presence, rendered. The harness account
+ * Query Centre v149 Part A, as v150 A2/A3 left it — the header's one body sentence and the banner's absence, rendered. The harness account
  * holds several books and the list is never scoped to one, so the bold-name branch is only reachable here; QC149-L1
  * measures the other branch on the page.
  */
@@ -11,10 +11,9 @@ import { describe, it, expect } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { QcHeader149 } from "./QcHeader149";
 
-const render = (o: { msTitle?: string | null; n?: number }) => renderToStaticMarkup(
+const render = (o: { msTitle?: string | null }) => renderToStaticMarkup(
   <QcHeader149 loading={false} msTitle={o.msTitle === undefined ? "Murphy’s Day Out" : o.msTitle}
-    banner={o.n === undefined ? null : { n: o.n, noun: o.n === 1 ? "query is" : "queries are", next: "Decide on offer for Tom Ellery · tomorrow", faces: [{ key: "q1", initials: "TE", title: "Tom Ellery" }] }}
-    onLog={() => {}} onRecord={() => {}} onShowThem={() => {}} />,
+    onLog={() => {}} onRecord={() => {}} />,
 );
 
 describe("v149 A1 — the header card", () => {
@@ -22,7 +21,9 @@ describe("v149 A1 — the header card", () => {
     const html = render({});
     expect(html).toContain('Every query for <b data-qc149="ms">Murphy’s Day Out</b>, wherever it stands.');
     expect(html).toContain('data-page-title="true"');
-    expect(html).toMatch(/<h1[^>]*>Query Centre<\/h1>/);
+    /* v150 A2 — the title wears the highlighter, and the body is the first sentence only */
+    expect(html).toMatch(/<h1[^>]*><span class="hl" data-qc150="hl">Query Centre<\/span><\/h1>/);
+    expect(html).not.toContain("Log what you send");
   });
   it("says every query you’ve sent when the list holds several books, and names none", () => {
     const html = render({ msTitle: null });
@@ -31,13 +32,9 @@ describe("v149 A1 — the header card", () => {
   });
 });
 
-describe("v149 A2 — the banner is drawn only when something waits on the writer", () => {
-  it("absent at zero, present at one with the singular", () => {
-    expect(render({ n: 0 })).not.toContain('data-qc149="banner"');
+describe("v150 A3 — the banner is removed", () => {
+  it("is never drawn; its content is the Your move card", () => {
     expect(render({})).not.toContain('data-qc149="banner"');
-    const one = render({ n: 1 });
-    expect(one).toContain('data-qc149="banner"');
-    expect(one).toContain("1 query is waiting on you.");
-    expect(one).toContain("Next: Decide on offer for Tom Ellery · tomorrow");
+    expect(render({})).not.toContain("waiting on you");
   });
 });

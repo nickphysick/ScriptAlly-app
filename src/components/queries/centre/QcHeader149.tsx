@@ -14,38 +14,29 @@
  */
 import React from "react";
 import { WHERE_KEYS, WHERE_LABEL, type WhereKey } from "../../../lib/qcSummary";
-import type { WaitingBanner } from "../../../lib/qc149";
 import { PageHeaderCard } from "../../shared/PageHeaderCard";
-import { PageAlertBanner } from "../../shared/PageAlertBanner";
 import { QC_DESK_HAWK } from "./QcHeader138";
 import "./qcv149.css";
-
-const CLOCK = (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
-);
+import "./qcv150.css";
 
 export const QcHeader149: React.FC<{
   loading: boolean;
   msTitle: string | null;
-  banner: WaitingBanner | null;
   onLog: () => void;
   onRecord: () => void;
-  onShowThem: () => void;
   logDisabled?: boolean;
   logRef?: React.Ref<HTMLButtonElement>;
   children?: React.ReactNode;
-}> = ({ loading, msTitle, banner, onLog, onRecord, onShowThem, logDisabled = false, logRef, children }) => (
+}> = ({ loading, msTitle, onLog, onRecord, logDisabled = false, logRef, children }) => (
   <header className="qc149-hd" data-qc149="header" data-qcv="open-header" data-own-header="" data-loading={loading ? "" : undefined} aria-busy={loading || undefined}>
     <PageHeaderCard className="qc149-card" titleId="qc149T" data={{ "data-qc149": "card" }} titleData={{ "data-page-title": "true", "data-qc149": "title" }}
-      title="Query Centre" art={`${QC_DESK_HAWK.src}?v=${QC_DESK_HAWK.version}`}
-      body={<>{msTitle ? <>Every query for <b data-qc149="ms">{msTitle}</b>, wherever it stands.</> : "Every query you’ve sent, wherever it stands."} Log what you send, record what comes back, and QueryHawk keeps track of who you’re waiting on and when to nudge.</>}
+      /* v150 A2 — the highlighter underline (`.hl`, qcv150.css) */
+      title={<span className="hl" data-qc150="hl">Query Centre</span>} art={`${QC_DESK_HAWK.src}?v=${QC_DESK_HAWK.version}`}
+      /* v150 A2 — the first sentence only */
+      body={msTitle ? <>Every query for <b data-qc149="ms">{msTitle}</b>, wherever it stands.</> : "Every query you’ve sent, wherever it stands."}
       primary={{ label: "+ Log a query", onClick: onLog, disabled: loading || logDisabled, buttonRef: logRef, data: { "data-qcv": "oh-log", "data-qc149": "log" } }}
       secondary={{ label: "Record a response", onClick: onRecord, disabled: loading, data: { "data-qcv": "oh-record", "data-qc149": "record" } }} />
-    <PageAlertBanner className="qc149-ban" hidden={!banner || banner.n === 0} icon={CLOCK} data={{ "data-qc149": "banner" }}
-      headline={banner ? <b data-qc149="banner-n">{banner.n} {banner.noun} waiting on you.</b> : null}
-      line={banner?.next ? `Next: ${banner.next}` : ""}
-      faces={banner?.faces}
-      action={{ label: "Show them", onClick: onShowThem, data: { "data-qc149": "show" } }} />
+    {/* v150 A3 — the "your move" banner is removed; its content is the Your move stat card (QcStatCards150) */}
     {children}
   </header>
 );
