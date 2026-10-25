@@ -122,7 +122,8 @@ export const QC_CHECKLIST: readonly ChecklistItem<QcGuideKey>[] = [
   { key: "pin", title: "Go full screen", line: "Turn the list into the whole page while you work." },
   { key: "open", title: "Open a query", line: "Its whole story, in one panel." },
   { key: "resp", title: "Record a response", line: "Try it on a practice query. Nothing is saved." },
-  { key: "birds", title: "See the Birds-eye view", line: "Every live query on one timeline. Press B." },
+  /* v150 D — on the desktop it is the list's second view (the switch above the list); the phone keeps the drawer and B */
+  { key: "birds", title: "See the Birds-eye view", line: "Every live query on one timeline." },
 ];
 
 /** With no queries yet, the items that need one (§A): the practice query does not, so "resp" is never here. */
