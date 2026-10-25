@@ -56,3 +56,9 @@ Error: one state, the final one, from its first frame
 ## unit — foundingCap.test.ts
 break: functions DEFAULT_CAP back to 100 → "the server's fallback cap is the same number" fails (1 failed | 2 passed)
 break: FOUNDING_CAP 100 → "is fifty" and the server-equality case fail (2 failed)
+
+## storecap17b (after LH17 learned to read either Pricing counter)
+break: LH17 — the store's one cap removed, re-proved against the committed lock
+✘  1 [measure] › tests/e2e/landingHeroV3.measure.ts:531:3 › landing hero v3 › LH17 cap: no page says 100 places; Pricing and the phone pill state the hero's N (1.0m)
+Error: no rendered marketing page states the old cap
+1 failed
