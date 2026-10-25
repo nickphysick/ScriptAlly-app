@@ -44,8 +44,6 @@ export const HERO_CTA = "Become a founding writer";
 
 /** The plain link beside it: an in-page jump to the section break above the feature rows. */
 export const HERO_LINK = "See how it works";
-/** The pill offered once the card's story has ended (both layouts). It never loops on its own. */
-export const HERO_AGAIN = "Watch again";
 
 /* ── The hero on phones (≤760px; ref design-refs/landing-hero-mobile-v1.html) ──
    ⚠️ THE STRAPLINE IS `HERO_H1` ITSELF, NOT A SECOND STRING. On phones the desktop headline is not
@@ -87,6 +85,8 @@ export const PHONE_STORY = {
     first: "First",
     units: [["pages", "Pages"], ["chapters", "Chapters"], ["words", "Words"]],
     pages: "50", words: "5,000", chapters: "3",
+    /** The desk's sequence (v4 S2): Pages 10 → Chapters 1, then + pressed twice: 2, 3. */
+    desk: { start: "10", chapters: "1", steps: ["2", "3"], minus: "−", plus: "+" },
   },
 } as const;
 
