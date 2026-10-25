@@ -87,8 +87,8 @@ export function workspaceSections(input: WorkspaceNavInput): ShellSection[] {
       children: [
         { id: "q-centre", label: "Query Centre", path: "/queries", icon: "send" },
         /* Submission packages v26 (25 Oct): packages moved here from Materials — they are what goes out with a
-           query, so they sit with the queries. Its second line names the three things the page holds. */
-        { id: "q-pkg", label: "Submission packages", sub: "letters · synopses · packages", path: "/queries/packages", icon: "folder", pro: true },
+           query, so they sit with the queries. It is a one-line row like Versions, with the same PRO tag (v26.1). */
+        { id: "q-pkg", label: "Submission packages", path: "/queries/packages", icon: "folder", pro: true },
         { id: "q-analytics", label: "Analytics", path: "/queries/analytics", icon: "chart" },
         /* Responses v2 (15 Oct): the third Queries tab — every agent answer for the book in scope */
         { id: "q-responses", label: "Responses", path: "/queries/responses", icon: "replies" },

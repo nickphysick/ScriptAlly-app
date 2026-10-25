@@ -847,14 +847,12 @@
   }
   .ws-qpro::before { content: ""; width: 4px; height: 4px; border-radius: 50%; background: var(--ink-rose); }
   .sb-collapsed .ws-qpro { display: none; }
-  /* Submission packages v26 — a row's second line ("letters · synopses · packages"), the ref's `.side .sub2` and
-     `.side a.two`. The row grows to hold it; folded, the line goes with the label. */
-  /* the row is 9px short of holding "Submission packages" beside its tag at the shell's 248px: the right padding
-     and the icon gap give it back (measured: label 153 wide in a 144 box before) */
-  .ws-ni.two { height: auto; padding: 6px 3px 6px 10px; }
-  .ws-ni.two .ws-lbl { margin-left: 5px; max-width: none; flex: 1 1 auto; min-width: 0; }
-  .ws-sub2 { display: block; font: italic 11.5px/1.3 var(--sp-serif); color: rgba(var(--ink-cream-rgb), 0.42); margin-top: -1px; }
-  .sb-collapsed .ws-ni.two { height: 33px; padding: 0; }
+  /* v26.1 — a label too long for its row beside a PRO tag is cut short with an ellipsis and keeps 6px off the tag,
+     never clipped mid-letter under it ("Submission packages" needs 153px; the row gives a 600-weight label 140).
+     The button's aria-label always carries the whole name. */
+  .ws-ni .ws-lbl { min-width: 0; text-overflow: ellipsis; }
+  .ws-ni:has(.ws-qpro) .ws-lbl { margin-right: 6px; }
+  .sb-collapsed .ws-ni:has(.ws-qpro) .ws-lbl { margin-right: 0; }
 
   /* centred icon tiles, the selected edge pinned at the rail's left */
   .sb-collapsed .ws-ni { width: 100%; height: 33px; padding: 0; justify-content: center; }
