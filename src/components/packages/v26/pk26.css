@@ -1,0 +1,68 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Submission packages v26 — the HAND-WRITTEN additions to pk26.generated.css (which is generated; do not edit it).
+ * What lives here is what a computed-style capture cannot see: the page's place in the shell's column, focus,
+ * the animation's pause and its reduced-motion frame, and the one control the app draws differently from the ref.
+ */
+
+/* ⚠️ THE REF'S INSETS ARE FROM THE SHEET'S EDGE — header card 92, tab bar 72, everything below 48 — and they are
+   margins on the page's own children (generated). So the page takes no part in the shell's shared column: no
+   gutter, no 1360 cap, no centring. A page root that set its own padding would defeat the gutter rule silently;
+   this one opts out by name instead, and the e2e lock measures the three insets from the sheet's edges. */
+.wpg-scroll > .p6 {
+  padding-inline: 0;
+  max-width: none;
+  margin-inline: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* the letter's text: the ref draws a contenteditable `.paper`; the app uses a textarea wearing the same class */
+.p6-cx-drw textarea.p6-paper {
+  display: block;
+  width: 100%;
+  resize: vertical;
+  outline: none;
+}
+
+/* focus: one ring in Harbour, inside the page and its layers */
+.p6 :is(button, a, [role="tab"], [draggable="true"]):focus-visible,
+.p6-layer :is(button, a, [role="tab"], [role="radio"]):focus-visible {
+  outline: 2px solid #1d4b63;
+  outline-offset: 2px;
+}
+.p6-layer :is(input, textarea):focus,
+.p6 :is(input, textarea):focus {
+  box-shadow: inset 0 0 0 1.5px #2a3a52;
+  outline: none;
+}
+
+/* the animation pauses on hover, so it can be read */
+.p6-an:hover,
+.p6-an:hover * {
+  animation-play-state: paused !important;
+}
+
+/* reduced motion: the finished frame, still (the ref's own block, with the prefix) */
+@media (prefers-reduced-motion: reduce) {
+  .p6-an * { animation: none !important; }
+  .p6-an .p6-an-c { transform: translateY(134px); }
+  .p6-an .p6-an-t i { background: #f3d4d6; }
+  .p6-an .p6-an-r { opacity: 1; width: 42px; margin-left: 6px; }
+  .p6-an .p6-an-chip { opacity: 1; transform: translate(205px, 150px); }
+  .p6-an .p6-an-qx { opacity: 1; }
+  .p6-cx-drw { transition: none; }
+}
+
+/* the row controls the ref reveals on hover stay visible where nothing hovers */
+@media (hover: none) {
+  .p6 .p6-lr .p6-lr-add, .p6 .p6-lr .p6-lr-ed, .p6 .p6-exc .p6-exc-ed { opacity: 1; }
+}
+
+/* the comps dropdown shows only when it has something in it (the ref's `.cp-dd:empty{display:none}`), and the
+   field it hangs from takes the ref's focus ring — two states a single computed capture cannot tell apart */
+.p6-cx-drw.p6-on .p6-db .p6-cpk .p6-cp-in > .p6-cp-dd:not(:empty) { display: flex; }
+.p6-cx-drw.p6-on .p6-db .p6-cpk .p6-cp-in > .p6-cp-dd:empty { display: none; }
+.p6-cx-drw.p6-on .p6-db .p6-cpk .p6-cp-in > .p6-id-cpIn:focus { outline: 0; box-shadow: inset 0 0 0 1.5px #2a3a52; }

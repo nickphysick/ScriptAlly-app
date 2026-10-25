@@ -19,7 +19,8 @@ describe("it runs on ROUTE ENTRY, not on every render", () => {
     // Amendment 1 (H3) added a sibling route under the same routeKey, so the flag now excludes it; Responses v2
     // (15 Oct) added a second, excluded the same way. The law is unchanged: the Query Centre is told it is the
     // visible route only when neither sibling is on screen.
-    expect(app).toContain('routeActive={routeKey === "queries" && !queriesAnalytics && !queriesResponses}');
+    /* v26: the packages page is a Queries slot of its own, so the Query Centre stands aside for it too */
+    expect(app).toContain('routeActive={routeKey === "queries" && !queriesAnalytics && !queriesResponses && !queriesPackages}');
     expect(queries).toContain("routeActive");
   });
 

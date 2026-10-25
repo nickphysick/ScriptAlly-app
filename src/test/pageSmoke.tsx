@@ -209,13 +209,26 @@ export const signedOutDbStub: Record<string, unknown> = new Proxy(
  */
 let seeded = false;
 let signedOut = false;
+/** Extra records merged over the seeded state for one render (`renderPageSeededWith`). */
+let extra: Record<string, unknown> | null = null;
+const withExtra = (more: Record<string, unknown>): Record<string, unknown> => new Proxy(
+  { ...DB_DATA, manuscripts: [SEED_MANUSCRIPT], agents: [SEED_AGENT], queries: [SEED_QUERY], ...more },
+  {
+    get(target, key) {
+      if (typeof key === "symbol") return undefined;
+      if (key in target) return target[key as string];
+      return asyncNoop;
+    },
+    has: () => true,
+  },
+);
 
 /** Render as a logged-out visitor until `restoreSmokeUser()`. Pair them in beforeEach/afterEach. */
 export const useSignedOutDb = () => { signedOut = true; };
 export const restoreSmokeUser = () => { signedOut = false; };
 
 export const dbMock = () => ({
-  useScriptAllyDb: () => (signedOut ? signedOutDbStub : seeded ? seededDbStub : dbStub),
+  useScriptAllyDb: () => (signedOut ? signedOutDbStub : seeded ? (extra ? withExtra(extra) : seededDbStub) : dbStub),
   DbProvider: ({ children }: { children?: React.ReactNode }) => children as React.ReactElement,
 });
 
@@ -264,6 +277,22 @@ export function renderPageSeeded(node: React.ReactNode, route = "/dashboard"): s
     return renderToStaticMarkup(<MemoryRouter initialEntries={[route]}>{node}</MemoryRouter>);
   } finally {
     seeded = false;
+  }
+}
+
+/**
+ * Render against the seeded state PLUS some records of the caller's (a page whose populated path needs a
+ * collection the shared seed leaves empty — Submission packages needs a letter). Reset in a `finally`, like the
+ * flag above, so it cannot leak into a later file. The shared seed itself is unchanged for every other page.
+ */
+export function renderPageSeededWith(node: React.ReactNode, route: string, more: Record<string, unknown>): string {
+  seeded = true;
+  extra = more;
+  try {
+    return renderToStaticMarkup(<MemoryRouter initialEntries={[route]}>{node}</MemoryRouter>);
+  } finally {
+    seeded = false;
+    extra = null;
   }
 }
 

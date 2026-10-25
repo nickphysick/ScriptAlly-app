@@ -20,7 +20,7 @@ describe("crumbForPath — the route table", () => {
     expect(labels("/agents/discover")).toBe("QUERYHAWK / AGENTS / DISCOVER");
     expect(labels("/manuscripts")).toBe("QUERYHAWK / MANUSCRIPTS / YOUR MANUSCRIPTS");
     expect(labels("/manuscripts/comps")).toBe("QUERYHAWK / MANUSCRIPTS / COMPARABLE TITLES");
-    expect(labels("/manuscripts/packages")).toBe("QUERYHAWK / MANUSCRIPTS / SUBMISSION PACKAGES");
+    expect(labels("/queries/packages")).toBe("QUERYHAWK / QUERYING / SUBMISSION PACKAGES");
     expect(labels("/import")).toBe("QUERYHAWK / IMPORT");
   });
 
@@ -41,7 +41,7 @@ describe("crumbForPath — the route table", () => {
   });
 
   it("every segment except the last navigates; the last is inert; root goes to the desk", () => {
-    for (const p of ["/queries", "/todo", "/agents", "/agents/discover", "/manuscripts", "/manuscripts/comps", "/manuscripts/packages", "/import"]) {
+    for (const p of ["/queries", "/todo", "/agents", "/agents/discover", "/manuscripts", "/manuscripts/comps", "/queries/packages", "/import"]) {
       const segs = crumbForPath(p)!;
       expect(segs[0]).toEqual({ label: "QUERYHAWK", tab: "dashboard" });
       for (const seg of segs.slice(0, -1)) expect(seg.tab).toBeTruthy();
@@ -51,7 +51,7 @@ describe("crumbForPath — the route table", () => {
     expect(crumbForPath("/todo")![1].tab).toBe("queries");
     expect(crumbForPath("/agents/discover")![1].tab).toBe("agents");
     expect(crumbForPath("/manuscripts/comps")![1].tab).toBe("manuscripts");
-    expect(crumbForPath("/manuscripts/packages")![1].tab).toBe("manuscripts");
+    expect(crumbForPath("/queries/packages")![1].tab).toBe("queries");
     expect(crumbForPath("/queries")![1].tab).toBe("queries");
   });
 });

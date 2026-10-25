@@ -17,7 +17,7 @@ describe("railActiveKey — route-aware active state", () => {
     expect(railActiveKey("/agents/discover")).toBe("agents-discover");
     expect(railActiveKey("/manuscripts")).toBe("manuscripts");
     expect(railActiveKey("/manuscripts/comps")).toBe("comps");
-    expect(railActiveKey("/manuscripts/packages")).toBe("packages");
+    expect(railActiveKey("/queries/packages")).toBe("packages");
   });
 
   it("keeps Queries Hub lit under ?q= deep-selection (params are not pathname)", () => {
@@ -28,7 +28,7 @@ describe("railActiveKey — route-aware active state", () => {
   it("sub-routes light their own entry, never the parent's", () => {
     expect(railActiveKey("/agents/discover")).not.toBe("agents-db");
     expect(railActiveKey("/manuscripts/comps")).not.toBe("manuscripts");
-    expect(railActiveKey("/manuscripts/packages")).not.toBe("manuscripts");
+    expect(railActiveKey("/queries/packages")).not.toBe("manuscripts");
   });
 
   it("tolerates trailing slashes", () => {

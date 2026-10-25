@@ -29,7 +29,8 @@ const CRUMB_TABLE: Record<string, CrumbSegment[]> = {
   "/agents/discover": [ROOT, { label: "AGENTS", tab: "agents" }, { label: "DISCOVER", title: "Discover" }],
   "/manuscripts": [ROOT, { label: "MANUSCRIPTS", tab: "manuscripts" }, { label: "YOUR MANUSCRIPTS", title: "Your Manuscripts" }],
   "/manuscripts/comps": [ROOT, { label: "MANUSCRIPTS", tab: "manuscripts" }, { label: "COMPARABLE TITLES", title: "Comparable Titles" }],
-  "/manuscripts/packages": [ROOT, { label: "MANUSCRIPTS", tab: "manuscripts" }, { label: "SUBMISSION PACKAGES", title: "Submission Packages" }],
+  /* Submission packages v26: the page moved to Queries (25 Oct) */
+  "/queries/packages": [ROOT, { label: "QUERYING", tab: "queries" }, { label: "SUBMISSION PACKAGES", title: "Submission Packages" }],
   "/import": [ROOT, { label: "IMPORT", title: "Import" }],
 };
 

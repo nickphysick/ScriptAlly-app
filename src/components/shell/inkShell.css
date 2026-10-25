@@ -840,11 +840,21 @@
   /* Manuscripts v27 Part E — a row's "PRO" tag (Versions): a small pill, a 4px rose dot. Gone when the sidebar folds. */
   .ws-qpro {
     flex: none; margin-left: auto; box-sizing: border-box; display: inline-flex; align-items: center; gap: 5px;
-    height: 16px; padding: 0 7px; border-radius: 99px; background: rgba(var(--ink-cream-rgb), 0.1); color: var(--ink-rose);
-    font: 600 7.5px/1 "JetBrains Mono", monospace; letter-spacing: 0.14em;
+    height: 16px; padding: 2px 5px; border-radius: 99px; background: rgba(var(--ink-cream-rgb), 0.1); color: var(--ink-rose);
+    /* Submission packages v26: the ref's FINAL tag (its last word on `.side a .qpro`) is 7px, 2px 5px, .1em — compact
+       enough that "Submission packages" and its tag share one row. Versions wears the same tag, as in the ref. */
+    font: 600 7px/1 "JetBrains Mono", monospace; letter-spacing: 0.1em;
   }
   .ws-qpro::before { content: ""; width: 4px; height: 4px; border-radius: 50%; background: var(--ink-rose); }
   .sb-collapsed .ws-qpro { display: none; }
+  /* Submission packages v26 — a row's second line ("letters · synopses · packages"), the ref's `.side .sub2` and
+     `.side a.two`. The row grows to hold it; folded, the line goes with the label. */
+  /* the row is 9px short of holding "Submission packages" beside its tag at the shell's 248px: the right padding
+     and the icon gap give it back (measured: label 153 wide in a 144 box before) */
+  .ws-ni.two { height: auto; padding: 6px 3px 6px 10px; }
+  .ws-ni.two .ws-lbl { margin-left: 5px; max-width: none; flex: 1 1 auto; min-width: 0; }
+  .ws-sub2 { display: block; font: italic 11.5px/1.3 var(--sp-serif); color: rgba(var(--ink-cream-rgb), 0.42); margin-top: -1px; }
+  .sb-collapsed .ws-ni.two { height: 33px; padding: 0; }
 
   /* centred icon tiles, the selected edge pinned at the rail's left */
   .sb-collapsed .ws-ni { width: 100%; height: 33px; padding: 0; justify-content: center; }

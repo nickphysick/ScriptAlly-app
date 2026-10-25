@@ -86,6 +86,9 @@ export function workspaceSections(input: WorkspaceNavInput): ShellSection[] {
       def: "q-centre",
       children: [
         { id: "q-centre", label: "Query Centre", path: "/queries", icon: "send" },
+        /* Submission packages v26 (25 Oct): packages moved here from Materials — they are what goes out with a
+           query, so they sit with the queries. Its second line names the three things the page holds. */
+        { id: "q-pkg", label: "Submission packages", sub: "letters · synopses · packages", path: "/queries/packages", icon: "folder", pro: true },
         { id: "q-analytics", label: "Analytics", path: "/queries/analytics", icon: "chart" },
         /* Responses v2 (15 Oct): the third Queries tab — every agent answer for the book in scope */
         { id: "q-responses", label: "Responses", path: "/queries/responses", icon: "replies" },
@@ -117,9 +120,12 @@ export function workspaceSections(input: WorkspaceNavInput): ShellSection[] {
        That is the inverse of the failure this file's header warns about: not a nav entry without
        a route, but a route without a nav entry. Both leave the sidebar lying about the shape of
        the app, and only one of them is visible from inside the nav model. */
+    /* ⚠️ RENAMED "YOUR BOOK" (Submission packages v26, 25 Oct): Submission packages moved to Queries, and what
+       is left here is the book itself — the manuscript, its versions and the titles it is compared with. The id
+       stays "materials" so the rail rib and every section lookup keyed on it are unchanged. */
     {
       id: "materials",
-      label: "Materials",
+      label: "Your book",
       def: "m-ms",
       children: [
         { id: "m-ms", label: "Manuscripts", path: "/manuscripts", icon: "library" },
@@ -127,7 +133,6 @@ export function workspaceSections(input: WorkspaceNavInput): ShellSection[] {
            for now (TODO(gating): when plans return, the tag means something only to Free accounts). */
         { id: "m-ver", label: "Versions", path: "/manuscripts/versions", icon: "versions", pro: true },
         { id: "m-comps", label: "Comparable titles", path: "/manuscripts/comps", icon: "books" },
-        { id: "m-pkg", label: "Submission packages", path: "/manuscripts/packages", icon: "folder" },
       ],
     },
     /* ⚠️ ITS ROWS ARE `TODO_ROUTES` — the one definition of the To-do pages (labels, paths,

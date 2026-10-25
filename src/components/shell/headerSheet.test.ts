@@ -15,7 +15,7 @@ const decls = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "");
 
 describe("which routes have a header sheet, and which a panel", () => {
   it("header panel v2: every workspace route has a panel and no sheet; Help, Plans and Import keep the sheet", () => {
-    for (const r of ["/queries", "/queries/analytics", "/agents", "/agents/discover", "/manuscripts", "/manuscripts/comps", "/manuscripts/packages", "/todo", "/todo/calendar", "/todo/corkboard"]) {
+    for (const r of ["/queries", "/queries/analytics", "/agents", "/agents/discover", "/manuscripts", "/manuscripts/comps", "/queries/packages", "/todo", "/todo/calendar", "/todo/corkboard"]) {
       expect(hasHeaderPanel(r), r).toBe(true);
       expect(hasHeaderSheet(r), r).toBe(false);
     }

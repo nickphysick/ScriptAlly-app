@@ -21,6 +21,7 @@ import { TodoRoute } from "./components/todo/TodoRoute";
 import { Agents } from "./components/Agents";
 import { DiscoverPage } from "./components/agents/discover1/DiscoverPage";
 import { SubmissionPackages } from "./components/SubmissionPackages";
+import { PACKAGES_PATH, packagesRedirectFor } from "./lib/packagesRoute";
 import { DiaryLab } from "./components/dashboard/DiaryLab";
 import { ManuscriptPage } from "./components/manuscripts/v12/ManuscriptPage";
 import { ComparableTitlesPage } from "./components/manuscripts/ComparableTitlesPage";
@@ -288,9 +289,10 @@ export function pathFor(tab: string, subPageName?: string): string {
     case "todo": return "/todo";
     case "agents": return subPageName === "Discover new agents" ? "/agents/discover" : "/agents";
     case "manuscripts": {
-      if (subPageName === "Submission packages") return "/manuscripts/packages";
-      /* the dashboard's quick action — the packages page's Builder tab, where a package is made */
-      if (subPageName === "New package") return "/manuscripts/packages?tab=builder";
+      /* Submission packages v26: the page lives under Queries now (/manuscripts/packages redirects) */
+      if (subPageName === "Submission packages") return "/queries/packages";
+      /* the dashboard's quick action — the packages page's New package dialog */
+      if (subPageName === "New package") return "/queries/packages?tab=builder";
       if (subPageName === "Comparable titles") return "/manuscripts/comps";
       if (subPageName === "Versions") return "/manuscripts/versions";
       return "/manuscripts";
@@ -563,6 +565,9 @@ function AppContent() {
      would send a bookmark to the dashboard. The query string and hash travel with it (`?q=` deep links). */
   const todoRedirect = todoRedirectFor(path, location.search, location.hash);
   if (todoRedirect) return <Navigate to={todoRedirect} replace />;
+  /* Submission packages v26: /manuscripts/packages moved to /queries/packages — above the guard, same reason */
+  const packagesRedirect = packagesRedirectFor(path, location.search, location.hash);
+  if (packagesRedirect) return <Navigate to={packagesRedirect} replace />;
 
   // Any unknown path lands on the dashboard. All the early returns above (dev labs, marketing,
   // auth, onboarding, focus) run first, so a logged-out deep link keeps its URL until sign-in.
@@ -615,9 +620,10 @@ function AppContent() {
   const queriesAnalytics = path === "/queries/analytics";
   /* Responses v2 — the third Queries tab; like Analytics it is its own slot, and the Query Centre stands aside */
   const queriesResponses = path === "/queries/responses";
+  /* Submission packages v26 — the packages page is a Queries slot of its own, like Analytics */
+  const queriesPackages = path === PACKAGES_PATH;
   const todoPage = todoPageForPath(path);
   const agentsDiscover = path === "/agents/discover";
-  const manuscriptsPackages = path === "/manuscripts/packages";
   const manuscriptsComps = path === "/manuscripts/comps";
   const manuscriptsVersions = path === "/manuscripts/versions";
 
@@ -652,13 +658,13 @@ function AppContent() {
         {/* The Queries desk owns its internal scroll (no page scrollbar). F12: the page renders
             its OWN chrome (F12Page — its own crumb header + centred --maxw column), so the slot has
             no contentVariant cap; the .t-f12 root paints the oat ground edge-to-edge. */}
-        <StagePage active={routeKey === "queries" && !queriesAnalytics && !queriesResponses} layout="fill" clip>
+        <StagePage active={routeKey === "queries" && !queriesAnalytics && !queriesResponses && !queriesPackages} layout="fill" clip>
           <Queries searchQuery={searchQuery} onNavigate={handleNavigate} activeSubPage={queriesSub} inShell
             statusFilter={queriesStatus} view={queriesView}
             onSelectView={() => { const n = new URLSearchParams(params); n.delete("view"); n.delete("q"); navigate({ pathname: "/queries", search: n.toString() ? `?${n.toString()}` : "" }); }}
             onOpenQuery={(id) => { const n = new URLSearchParams(params); n.set("q", id); n.delete("view"); navigate({ pathname: "/queries", search: `?${n.toString()}` }); }}
             createSeed={createQuerySeed} onCreateSeedConsumed={() => setCreateQuerySeed(null)}
-            routeActive={routeKey === "queries" && !queriesAnalytics && !queriesResponses} />
+            routeActive={routeKey === "queries" && !queriesAnalytics && !queriesResponses && !queriesPackages} />
         </StagePage>
 
         {/* Amendment 1 (H3) — Analytics is a real destination so the nav carries no dead link.
@@ -684,6 +690,9 @@ function AppContent() {
         </StagePage>
 
         {/* Responses v2 (15 Oct) — every agent answer for the book in scope. A flowing page in the shared grid. */}
+        <StagePage active={queriesPackages} layout="fill" clip>
+          <SubmissionPackages active={queriesPackages} onNavigate={handleNavigate} />
+        </StagePage>
         <StagePage active={queriesResponses} layout="fill" clip>
           <ResponsesPage onNavigate={handleNavigate} routeActive={queriesResponses} />
         </StagePage>
@@ -737,9 +746,7 @@ function AppContent() {
             Contact list (no variant) 2400, Discover (`work`) 1600, Manuscripts (`read`)
             1200 — four width regimes across six pages that share two tokens. */}
         <StagePage active={routeKey === "manuscripts"} layout="fill">
-          {manuscriptsPackages ? (
-            <SubmissionPackages />
-          ) : manuscriptsComps ? (
+          {manuscriptsComps ? (
             <ComparableTitlesPage onNavigate={handleNavigate} />
           ) : manuscriptsVersions ? (
             /* Versions v2 (23 Oct) — the Versions page, built to design-refs/versions-v2. It replaces Versions v1
@@ -753,7 +760,7 @@ function AppContent() {
             <ManuscriptPage
               onNavigate={handleNavigate}
               openId={manuscriptView}
-              active={routeKey === "manuscripts" && !manuscriptsPackages && !manuscriptsComps && !manuscriptsVersions}
+              active={routeKey === "manuscripts" && !manuscriptsComps && !manuscriptsVersions}
             />
           )}
         </StagePage>

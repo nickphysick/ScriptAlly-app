@@ -36,7 +36,7 @@ export const WORKSPACE_SHELL_PATHS = new Set([
   "/agents",
   "/agents/discover",
   "/manuscripts",
-  "/manuscripts/packages",
+  "/queries/packages",
   "/manuscripts/comps",
   "/manuscripts/versions", // Manuscripts v27 Part E — the interim Versions page
   // Data entry against your own records — it belongs beside the queries it creates.

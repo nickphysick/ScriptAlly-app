@@ -397,7 +397,10 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
       /* comps v2 (27 Sep): the page's own group under `.cpv-page`, the scroller's direct child */
       ["Comparable titles", "components/manuscripts/compsV2.css", [".cpv-page", ".cpv-group", ".cpv-main"]],
       /* packages v2 (27 Sep): the same shape as comps — its own group under `.ppv-page` */
-      ["Submission packages", "components/packages/packagesV2.css", [".ppv-page", ".ppv-group", ".ppv-main"]],
+      /* Submission packages v26 (25 Oct): the root is `.p6`; it fills the scroll row and opts out of the shared
+         column by name (pk26.css), because the ref's insets are measured from the sheet's edge */
+      ["Submission packages", "components/packages/v26/pk26.css", [".wpg-scroll > .p6"]],
+      ["Submission packages", "components/packages/v26/pk26.generated.css", [".p6"]],
       ["Analytics", "components/shell/workspaceShell.css", [".qa-wrap"]],
     ];
       /* ⚠️ EXTRACT THE VALUE, NEVER LOOK AHEAD PAST IT — and this file already says so, about a
@@ -440,10 +443,10 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
         .not.toContain("contentVariant");
     }
     const pkg = readFileSync(resolve(__dirname, "../SubmissionPackages.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
-    /* packages v2 (27 Sep): the root is `.ppv-page` and states NO inline style at all — its padding
-       lives in packagesV2.css, which the chain above reads */
-    expect(pkg, "the Packages root changed shape — this assertion no longer reads it").toContain('className="ppv-page" data-ppv="page"');
-    expect(pkg, "Packages styles its root inline — invisible to every stylesheet lock").not.toMatch(/className="ppv-page"[^>]*style=/);
+    /* Submission packages v26 (25 Oct): the root is `.p6` and states NO inline style at all — what it says about
+       its width lives in pk26.css / pk26.generated.css, which the chain above reads */
+    expect(pkg, "the Packages root changed shape — this assertion no longer reads it").toContain('className={`p6${empty ? " p6-new" : ""}`} data-pk26="page"');
+    expect(pkg, "Packages styles its root inline — invisible to every stylesheet lock").not.toMatch(/data-pk26="page"[^>]*style=/);
   });
 
   /* ⚠️ NO PAGE MAY RE-STATE A WIDTH. The caps lived on five page stylesheets and a per-page gutter
@@ -455,7 +458,8 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
       ["Manuscripts", "components/manuscripts/manuscripts.css"],
       ["Comparable titles", "components/manuscripts/compsV2.css"],
       ["Discover", "components/agents/discover1/discover1.css"],
-      ["Submission packages", "components/packages/packagesV2.css"],
+      ["Submission packages", "components/packages/v26/pk26.css"],
+      ["Submission packages", "components/packages/v26/pk26.generated.css"],
       /* ⚠️ QUERY CENTRE JOINED THE CENSUS LAST, and it was the alias's only caller. */
       ["Query Centre", "components/shell/f12.css"],
     ];

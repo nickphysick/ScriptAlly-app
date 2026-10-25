@@ -35,6 +35,8 @@ export interface ShellChild {
   urgent?: boolean;
   /** Manuscripts v27 Part E — a small "PRO" tag after the label (Versions). Shown to everyone for now. */
   pro?: boolean;
+  /** Submission packages v26 — a second, smaller line under the label ("letters · synopses · packages"). */
+  sub?: string;
   /** The row's OWN icon key. Every destination carries one now — the flat nav has no parent row
    *  to inherit from, and a row without an icon in a list of rows with them reads as broken. */
   icon?: string;

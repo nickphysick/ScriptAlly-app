@@ -7,7 +7,8 @@
  */
 import { describe, it, expect, vi, afterEach } from "vitest";
 import React from "react";
-import { renderPage, renderPageSeeded, noNavigate, setActiveManuscript } from "../test/pageSmoke";
+import { renderPage, renderPageSeeded, renderPageSeededWith, noNavigate, setActiveManuscript } from "../test/pageSmoke";
+import { ComponentType } from "../types";
 
 vi.mock("../lib/db", async () => (await import("../test/pageSmoke")).dbMock());
 vi.mock("../lib/firebase", async () => (await import("../test/pageSmoke")).firebaseMock());
@@ -196,34 +197,41 @@ describe("/manuscripts/comps renders", () => {
   });
 });
 
-describe("/manuscripts/packages renders", () => {
-  it("renders without throwing with no materials", () => {
-    expect(() => renderPage(<SubmissionPackages />, "/manuscripts/packages")).not.toThrow();
+/* Submission packages v26 (25 Oct): the page lives at /queries/packages. Smoked empty (no manuscript; a manuscript
+   with no letters or synopses — the promise and its animation) and POPULATED (a letter in a sent package), because
+   the builder, its packing list and Results only execute once there is something to put in a package. */
+describe("/queries/packages renders", () => {
+  const LETTER = { id: "v1", manuscriptId: "m1", userId: "u1", componentType: ComponentType.QUERY_LETTER, versionName: "Hook-first", fileAttached: false, createdDate: "2026-01-02T00:00:00.000Z", notes: "Names two comps", contentDraft: "Dear agent" };
+  const PACKAGE = { id: "pk1", manuscriptId: "m1", userId: "u1", packageName: "Standard UK", queryLetterVersionId: "v1", synopsisVersionId: "", samplePagesVersionId: "", status: "Active", createdDate: "2026-01-03T00:00:00.000Z", icon: "crown" };
+
+  it("renders without throwing with no manuscript", () => {
+    expect(() => renderPage(<SubmissionPackages />, "/queries/packages")).not.toThrow();
   });
 
-  it("…and produces its own chrome", () => {
-    /* v4 Part A: the centred light header — its title keeps data-page-title and counts packages in use */
-    const html = renderPage(<SubmissionPackages />, "/manuscripts/packages");
-    expect(html).toContain('data-page-title="" data-pk4="title"');
-    expect(html).toContain("packages in use");
-  });
-
-  it("renders without throwing once a manuscript is active", () => {
+  it("a manuscript with no letters or synopses is the empty state: the promise, its steps and the animation", () => {
     setActiveManuscript();
-    expect(() => renderPageSeeded(<SubmissionPackages />, "/manuscripts/packages")).not.toThrow();
+    const html = renderPageSeeded(<SubmissionPackages />, "/queries/packages");
+    expect(html).toContain('data-pk26="hero"');
+    expect(html).toContain("Build your first package");
+    expect(html).toContain('class="p6-pb-stage p6-an"');
+    expect(html).not.toContain('data-pk26="header"');
+    /* the same tabs, builder (a draft first package) and Results, in their empty states */
+    expect(html).toContain('data-pk26="tabs"');
+    expect(html).toContain("My first package");
+    expect(html).toContain("Nothing to compare yet.");
   });
 
-  /* v4 Part F: a manuscript with no packages is the empty page — the navy panel and its h1, "How it works" with
-     its example, "Ways to get started" — and none of the populated page's header card, filters or sheets. */
-  it("…and with no packages it is the empty page", () => {
+  it("populated: the navy header, the tabs, the open package's packing list and Your materials", () => {
     setActiveManuscript();
-    const html = renderPageSeeded(<SubmissionPackages />, "/manuscripts/packages");
-    expect(html).toContain('data-pk4="empty-panel"');
-    expect(html).toContain("ready to send");
-    expect(html).toContain('data-pk4="example"');
-    expect(html).toContain('data-pk4="ways"');
-    expect(html).not.toContain('data-pk4="summary"');
-    expect(html).not.toContain('data-pk4="pkg-sheet"');
+    const html = renderPageSeededWith(<SubmissionPackages />, "/queries/packages", { versions: [LETTER], packages: [PACKAGE] });
+    expect(html).toContain('data-pk26="header"');
+    expect(html).toContain("Bundle it. Send it. Know what went.");
+    expect(html).toContain('data-pk26="open"');
+    expect(html).toContain(">Standard UK<");
+    expect(html).toContain("Needs a version");
+    expect(html).toContain('data-pk26="lib"');
+    expect(html).toContain(">Hook-first<");
+    expect(html).not.toContain('data-pk26="hero"');
   });
 });
 

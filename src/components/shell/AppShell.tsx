@@ -561,7 +561,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
         <button type="button" className="sa-ymenu-row" onClick={() => { setYouOpen(false); goPath("/todo"); }}>
           <ListChecks aria-hidden="true" /> To-do
         </button>
-        <button type="button" className="sa-ymenu-row" onClick={() => { setYouOpen(false); goPath("/manuscripts/packages"); }}>
+        <button type="button" className="sa-ymenu-row" onClick={() => { setYouOpen(false); goPath("/queries/packages"); }}>
           <Package aria-hidden="true" /> Submission packages
         </button>
         <button type="button" className="sa-ymenu-row" onClick={() => { setYouOpen(false); goPath("/import"); }}>

@@ -51,7 +51,7 @@ export const RAIL_GROUPS: RailGroup[] = [
     items: [
       { key: "manuscripts", label: "Your manuscripts", tab: "manuscripts", path: "/manuscripts" },
       { key: "comps", label: "Comparable titles", tab: "manuscripts", sub: "Comparable titles", path: "/manuscripts/comps" },
-      { key: "packages", label: "Submission packages", tab: "manuscripts", sub: "Submission packages", path: "/manuscripts/packages" },
+      { key: "packages", label: "Submission packages", tab: "manuscripts", sub: "Submission packages", path: "/queries/packages" },
     ],
   },
 ];
