@@ -74,8 +74,8 @@ export function usePk26Model() {
   /* ── the materials, as the page lists them ──
      ⚠️ A PUT-AWAY MATERIAL STILL HAS A WAY BACK: the Query letters and Synopses tables list put-away ones last, and
      their drawer offers "Bring it back". Your materials (the builder) offers only the live ones. */
-  const lettersAll = useMemo<MaterialRow[]>(() => rowsOf("let"), [versions, msId, msPkgs, msQueries, rowsById]); // eslint-disable-line react-hooks/exhaustive-deps
-  const synopsesAll = useMemo<MaterialRow[]>(() => rowsOf("syn"), [versions, msId, msPkgs, msQueries, rowsById]); // eslint-disable-line react-hooks/exhaustive-deps
+  const lettersAll = useMemo<MaterialRow[]>(() => rowsOf("let"), [versions, msId, msPkgs, msQueries, rowsById, active]); // eslint-disable-line react-hooks/exhaustive-deps
+  const synopsesAll = useMemo<MaterialRow[]>(() => rowsOf("syn"), [versions, msId, msPkgs, msQueries, rowsById, active]); // eslint-disable-line react-hooks/exhaustive-deps
   const letters = useMemo(() => lettersAll.filter((m) => !m.retired), [lettersAll]);
   const synopses = useMemo(() => synopsesAll.filter((m) => !m.retired), [synopsesAll]);
   function rowsOf(kind: "let" | "syn"): MaterialRow[] {
@@ -84,13 +84,14 @@ export function usePk26Model() {
     const byNew = (a: { createdDate: string }, b: { createdDate: string }) => (a.createdDate < b.createdDate ? 1 : a.createdDate > b.createdDate ? -1 : 0);
     const mine = versions.filter((v) => v.manuscriptId === msId && v.componentType === type);
     const list = [...mine.filter((v) => v.status !== "Retired").sort(byNew), ...mine.filter((v) => v.status === "Retired").sort(byNew)];
-    return list.map((v, i) => ({
+    return list.map((v) => ({
       id: v.id, kind, name: v.versionName, summary: v.notes ?? "", text: v.contentDraft ?? "",
       compIds: Array.isArray(v.compIds) ? v.compIds : null, words: typeof v.wordCount === "number" ? v.wordCount : null,
       createdDate: v.createdDate,
       sent: materialSplit(v.id, kind === "let" ? "letter" : "synopsis", msPkgs, msQueries, rowsById).sent,
       inPackages: live.filter((p) => p[field] === v.id),
-      inUse: i === 0 && v.status !== "Retired", retired: v.status === "Retired",
+      /* "In use" = in the active package (the one new queries go out with), as in the ref */
+      inUse: !!active && active[field] === v.id && v.status !== "Retired", retired: v.status === "Retired",
     }));
   }
   const bookVersions = useMemo(() => readVersions(activeMs).filter((v) => !v.archived), [activeMs]);
