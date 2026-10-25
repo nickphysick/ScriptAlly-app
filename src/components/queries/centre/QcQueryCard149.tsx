@@ -25,6 +25,7 @@ import { StatusDot } from "../../StatusDot";
 import { QueryStatus } from "../../../types";
 import { MONTHS_SHORT } from "../../../lib/dates";
 import { STAGE_NAME, WHERE_LABEL, whereItStands, type QcRow, type WhereKey } from "../../../lib/qcSummary";
+import { STRIP_TINT, type AgentView, type ChipIcon, type NextStep, type StoryStep, type Strip } from "../../../lib/qcCardStory";
 import "../../../marketing/heroCard.css";
 import "./qcv149card.css";
 
@@ -105,6 +106,23 @@ export function parseDay(s: string, nowMs: number): number | null {
 const CLOCK = <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true"><circle cx="8" cy="8" r="6" /><path d="M8 4.5V8l2.5 1.5" /></svg>;
 const DOC = <svg width="11" height="12" viewBox="0 0 11 12" fill="none" stroke="currentColor" strokeWidth="1.1" aria-hidden="true"><rect x="1" y="1" width="9" height="10" rx=".5" /><path d="M3 4h5M3 6h5M3 8h3" /></svg>;
 const LEFT = <svg viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 4l-6 6 6 6" /></svg>;
+/* v149.1 — the mock's own marks (design-refs/query-centre-v149-1/query-card-panel-v2.html) */
+const BOOK = <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#5f5a53" strokeWidth="1.6" strokeLinejoin="round"><path d="M3.5 5.5c2.8-1.3 5.8-1.3 8.5.6 2.7-1.9 5.7-1.9 8.5-.6v13c-2.8-1.3-5.8-1.3-8.5.6-2.7-1.9-5.7-1.9-8.5-.6z" /><path d="M12 6.1v13" /></svg>;
+const CHIP_ICON: Record<ChipIcon, React.ReactNode> = {
+  letter: <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"><rect x="3" y="2" width="10" height="12" rx="1.4" /><path d="M5.5 5.5h5M5.5 8h5M5.5 10.5h3" strokeLinecap="round" /></svg>,
+  synopsis: <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"><path d="M3 4h10M3 8h10M3 12h6" /></svg>,
+  pages: <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"><rect x="4.5" y="4" width="8.5" height="10" rx="1.2" /><path d="M3 11.5V3.2c0-.7.5-1.2 1.2-1.2h6.3" /></svg>,
+  full: <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"><rect x="3" y="2" width="10" height="12" rx="1.4" /><path d="M3 11h10" /></svg>,
+  bell: <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"><path d="M4.5 11h7l-1-1.4V7a2.5 2.5 0 0 0-5 0v2.6zM7 12.6a1.1 1.1 0 0 0 2 0" /></svg>,
+  notes: <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"><path d="M3 4h10M3 8h10M3 12h6" /></svg>,
+};
+const TICK = <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" /></svg>;
+/** a nudge is not a status: the ring with a bell (the landing card's own) */
+const NUDGE_G = <svg className="qc149c-g" viewBox="0 0 20 20" width="17" height="17" fill="none" stroke="#1c130f" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5" fill="#fff" /><path d="M7 12.5h6l-.9-1.2V9a2.1 2.1 0 0 0-4.2 0v2.3zM9.2 14h1.6" /></svg>;
+const HOLD_G = <svg className="qc149c-g" viewBox="0 0 20 20" width="17" height="17" fill="none" stroke="#1c130f" strokeWidth="1.5" aria-hidden="true"><circle cx="10" cy="10" r="7.5" fill="#fff" /><path d="M7 10h6" strokeLinecap="round" /></svg>;
+/** the next step's mark: a dashed, faint ring */
+const NEXT_G = <svg className="qc149c-g" viewBox="0 0 20 20" width="17" height="17" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="#fff" stroke="#a59a90" strokeWidth="1.5" strokeDasharray="2 2" /></svg>;
+const SPARK = <svg viewBox="0 0 20 20" width="17" height="17" fill="currentColor" aria-hidden="true"><path d="M10 2l1.6 5.2L17 9l-5.4 1.8L10 16l-1.6-5.2L3 9l5.4-1.8z" /></svg>;
 const RIGHT = <svg viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M8 4l6 6-6 6" /></svg>;
 
 export interface QcQueryCard149Props {
@@ -117,7 +135,12 @@ export interface QcQueryCard149Props {
   steps: CardStep[];
   /** the step to light briefly (just added) */
   freshKey?: string | null;
-  stand: { heading: string; text: string } | null;
+  /** v149.1 A1 — the book block's chips: age category · genre · word count, the present ones only */
+  bookChips: string[];
+  /** v149.1 A2 — each Tracking step's part of the story, the faint next step (null when closed), and A3 the strip */
+  story: StoryStep[];
+  nextStep: NextStep | null;
+  strip: Strip;
   due: { line: string; hot: boolean } | null;
   /** the row's next move; `close` when it is closing the query (the quiet row then drops its own Close query) */
   primary: { label: string; respond: boolean; close?: boolean } | null;
@@ -134,6 +157,11 @@ export interface QcQueryCard149Props {
   onCloseQuery: () => void;
   onContactList: () => void;
   onCopyEmail: () => void;
+  /** v149.1 A5 — the Agent tab's parts, and the agent form opened at a field ("+ Add …", "Edit agent") */
+  agentView: AgentView;
+  wishlist: { text: string; genres: { label: string; hit: boolean }[] };
+  contact: { email: string; website: string; websiteHref: string | null; submission: string | null };
+  onAgentField: (field: "wishlist" | "email" | "website" | "method" | null) => void;
   onOpenPiece: (label: string) => void;
   onAddNote: (text: string) => void;
   onRespond: (k: RespChoice, dayMs: number, note: string) => Promise<boolean>;
@@ -170,6 +198,9 @@ export const QcQueryCard149: React.FC<QcQueryCard149Props> = (p) => {
 
   /* ── edit ── */
   const [ed, setEd] = useState<CardEdits>(blankEdits);
+  /* v149.1 A2 — "Add date" opens the edit mode at that step's date field */
+  const [focusDate, setFocusDate] = useState<string | null>(null);
+  const addDate = (id: string) => { setFocusDate(id); setTab("tracking"); p.onMode("edit"); };
   useEffect(() => { if (mode === "edit") { setEd(blankEdits()); setTabOwn((t) => (t === "notes" ? "tracking" : t)); } }, [mode, r.id]);
   const stepMs = (s: CardStep): number | null => (s.activityId && ed.dates[s.activityId] != null ? parseDay(ed.dates[s.activityId], nowMs) : s.ms);
   const kept = p.steps.filter((s) => !(s.activityId && ed.removed.includes(s.activityId)));
@@ -223,18 +254,26 @@ export const QcQueryCard149: React.FC<QcQueryCard149Props> = (p) => {
       <span className="mk-lc-pill qc149c-pill" data-qc149c="pill" style={{ background: tone.pill }}><StatusDot status={r.status} overrideSize={15} />{STAGE_NAME[r.status]}</span>
     </div>
   );
+  /* v149.1 A1 — the landing card's book tile beside QUERYING, the title and its chips: age category · genre · word
+     count (each only when the record has it), then the package chip in its lilac */
   const book = (
-    <div className="mk-lc-ms qc149c-ms">
-      <small>QUERYING</small>
-      <b data-qc149c="book">{p.msTitle ?? "No manuscript"}</b>
-      {editing && p.packageChoices.length ? (
-        <select className="qc149c-pksel" data-qc149c="pkg-select" aria-label="Package" value={ed.packageKey ?? p.packageKey ?? ""}
-          onChange={(e) => setEd((x) => ({ ...x, packageKey: e.target.value }))}>
-          {p.packageChoices.map((c) => <option key={c.key} value={c.key}>{c.label}</option>)}
-        </select>
-      ) : (
-        <div className="mk-lc-chips"><span data-qc149c="package">{packageChip(p.packageName)}</span></div>
-      )}
+    <div className="mk-lc-ms qc149c-ms" data-qc149c="book-block">
+      <span className="qc149c-bk" data-qc149c="book-tile" aria-hidden="true">{BOOK}</span>
+      <div className="qc149c-bkt">
+        <small>QUERYING</small>
+        <b data-qc149c="book">{p.msTitle ?? "No manuscript"}</b>
+        {editing && p.packageChoices.length ? (
+          <select className="qc149c-pksel" data-qc149c="pkg-select" aria-label="Package" value={ed.packageKey ?? p.packageKey ?? ""}
+            onChange={(e) => setEd((x) => ({ ...x, packageKey: e.target.value }))}>
+            {p.packageChoices.map((c) => <option key={c.key} value={c.key}>{c.label}</option>)}
+          </select>
+        ) : (
+          <div className="mk-lc-chips qc149c-mc">
+            {p.bookChips.map((c) => <span key={c} data-qc149c="book-chip">{c}</span>)}
+            <span className="qc149c-pk" data-qc149c="package">{p.packageName ? packageChip(p.packageName) : "No package"}</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 
@@ -292,7 +331,53 @@ export const QcQueryCard149: React.FC<QcQueryCard149Props> = (p) => {
 
   const panes = (
     <>
-      <div className="qc149c-pane" data-qc149c="pane" data-pane="tracking" hidden={tab !== "tracking"} role="tabpanel">
+      <div className="qc149c-pane qc149c-trk" data-qc149c="pane" data-pane="tracking" hidden={tab !== "tracking"} role="tabpanel">
+        {!editing ? (
+          <>
+            <ol className="qc149c-story" data-qc149c="steps">
+              {p.story.length + (p.nextStep ? 1 : 0) > 1 ? <i className="qc149c-srail" aria-hidden="true" /> : null}
+              {p.story.map((s) => (
+                <li key={s.key} className={`qc149c-st${p.freshKey && (s.activityId === p.freshKey || s.key === p.freshKey) ? " fresh" : ""}`}
+                  data-qc149c="step" data-status={s.status ?? undefined} data-kind={s.kind ?? undefined} data-activity={s.activityId}>
+                  {s.kind === "nudge" ? NUDGE_G : s.kind === "holding" ? HOLD_G : s.status ? <span className="qc149c-g"><StatusDot status={s.status} overrideSize={17} /></span> : HOLD_G}
+                  <div className="qc149c-sb">
+                    <div className="qc149c-tl">
+                      <span className="qc149c-t" data-qc149c="step-title">{s.title}{s.qualifier ? <> <em data-qc149c="step-qual">{s.qualifier}</em></> : null}</span>
+                      {s.ms != null ? <span className="qc149c-d" data-qc149c="step-day">{stepDay(s.ms, nowMs)}</span>
+                        : s.activityId ? <button type="button" className="qc149c-adddate" data-qc149c="add-date" onClick={() => addDate(s.activityId!)}>Add date</button>
+                        : <span className="qc149c-d" data-qc149c="step-day" />}
+                    </div>
+                    {s.note ? <div className="qc149c-sub" data-qc149c="step-note">“{s.note}”</div> : null}
+                    {s.chips.length ? (
+                      <div className="qc149c-chs" data-qc149c="chips">
+                        {s.chips.map((c) => (
+                          <span key={c.label} className={`qc149c-ch${c.tone === "plain" ? "" : ` ${c.tone}`}`} data-qc149c="chip" data-tone={c.tone}>
+                            {c.tone === "ok" ? TICK : CHIP_ICON[c.icon]}{c.label}
+                          </span>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                </li>
+              ))}
+              {p.nextStep ? (
+                <li className="qc149c-st next" data-qc149c="next-step">
+                  {NEXT_G}
+                  <div className="qc149c-sb">
+                    <div className="qc149c-tl"><span className="qc149c-t" data-qc149c="next-title">{p.nextStep.title}</span></div>
+                    <div className="qc149c-sub" data-qc149c="next-why">{p.nextStep.why}</div>
+                  </div>
+                </li>
+              ) : null}
+            </ol>
+            {/* v149.1 A3 — the action strip, at the foot of the pane: what is happening, the choice, and the next move */}
+            <div className="qc149c-strip" data-qc149c="strip" data-kind={p.strip.kind} style={{ background: STRIP_TINT[where] }}>
+              {SPARK}
+              <p><b data-qc149c="strip-bold">{p.strip.bold}</b>{p.strip.sub ? <span data-qc149c="strip-sub">{p.strip.sub}</span> : null}</p>
+              {p.strip.button && p.primary ? <button type="button" className="qc149c-sbtn" data-qc149c="strip-btn" onClick={p.onPrimary}>{p.strip.button}</button> : null}
+            </div>
+          </>
+        ) : (
         <ol className="mk-lc-steps qc149c-steps" data-qc149c="steps">
           {p.steps.length > 1 ? <i className="mk-lc-rail qc149c-rail" aria-hidden="true" /> : null}
           {p.steps.map((s, i) => {
@@ -303,7 +388,8 @@ export const QcQueryCard149: React.FC<QcQueryCard149Props> = (p) => {
                 <span className="qc142-g" aria-hidden="true">{s.status ? <StatusDot status={s.status} overrideSize={15} /> : <i className="qc142-dot" />}</span>
                 <span className="mk-lc-t" data-qc149c="step-title">{s.title}</span>
                 {editing && s.activityId && !gone ? (
-                  <input className="qc149c-ed-d" data-qc149c="step-date" aria-label={`${s.title}: date`}
+                  <input className="qc149c-ed-d" data-qc149c="step-date" aria-label={`${s.title}: date`} autoFocus={focusDate === s.activityId}
+                    onFocus={() => { if (focusDate === s.activityId) setFocusDate(null); }}
                     value={ed.dates[s.activityId] ?? (s.ms != null ? fieldDay(s.ms) : "")}
                     onChange={(e) => { const v = e.target.value; setEd((x) => ({ ...x, dates: { ...x.dates, [s.activityId!]: v } })); }} />
                 ) : (
@@ -335,17 +421,13 @@ export const QcQueryCard149: React.FC<QcQueryCard149Props> = (p) => {
             </li>
           ) : null}
         </ol>
+        )}
         {editing && !ed.added && p.stepChoices.length ? (
           <button type="button" className="qc149c-addstep" data-qc149c="add-step" onClick={() => setEd((x) => ({ ...x, added: { kind: "", date: fieldDay(nowMs) } }))}>+ Add a step</button>
         ) : null}
-        {!editing && p.stand ? (
-          <div className="qc149c-stand" data-qc149c="stand" style={{ ["--qc149c-sb" as string]: tone.pill, ["--qc149c-sf" as string]: tone.fg }}>
-            <small>{p.stand.heading}</small>
-            <p>{p.stand.text}</p>
-          </div>
-        ) : null}
       </div>
       <div className="qc149c-pane" data-qc149c="pane" data-pane="agent" hidden={tab !== "agent"} role="tabpanel">
+        {!editing ? <AgentPane p={p} first={p.agent.first} /> : (
         <div className="qc149c-pg">
           <dl className="qc149c-kv">
             {([
@@ -375,6 +457,7 @@ export const QcQueryCard149: React.FC<QcQueryCard149Props> = (p) => {
             </div>
           )}
         </div>
+        )}
       </div>
       <div className="qc149c-pane" data-qc149c="pane" data-pane="materials" hidden={tab !== "materials"} role="tabpanel">
         <div className="qc149c-pg qc149c-mt">
@@ -409,14 +492,15 @@ export const QcQueryCard149: React.FC<QcQueryCard149Props> = (p) => {
           </div>
         ) : (
           <>
-            <div className="mk-lc-ft qc149c-ft">
-              {p.due ? <span className={p.due.hot ? "mk-late" : undefined} data-qc149c="due" data-hot={p.due.hot ? "" : undefined}>{CLOCK}<em>{p.due.line}</em></span> : <span />}
-              {p.primary ? <button type="button" className="qc149c-primary" data-qc149c="primary" onClick={p.onPrimary}>{p.primary.label}</button> : null}
-            </div>
-            <div className="qc149c-more" data-qc149c="more">
+            {/* v149.1 A4 — two rows: the due line, then the three links and ‹ N / M ›; the primary is the strip's button */}
+            <div className="qc149c-ft2" data-qc149c="footer">
+              <div className="qc149c-l1" data-qc149c="foot-l1">
+                {p.due ? <span className={`qc149c-w${p.due.hot ? " hot" : ""}`} data-qc149c="due" data-hot={p.due.hot ? "" : undefined}>{CLOCK}<em>{p.due.line}</em></span> : null}
+              </div>
+            <div className="qc149c-more qc149c-l2" data-qc149c="more">
               <button type="button" data-qc149c="record" onClick={() => p.onMode("respond")}>Record a response</button>
               <button type="button" data-qc149c="edit" onClick={() => p.onMode("edit")}>Edit query</button>
-              {r.court !== "closed" && !p.primary?.close ? <button type="button" data-qc149c="close-query" onClick={p.onCloseQuery}>Close query</button> : null}
+              {r.court !== "closed" ? <button type="button" data-qc149c="close-query" onClick={p.onCloseQuery}>Close query</button> : null}
               <span className="qc149c-sp" />
               <span className="qc149c-nvb" data-qc149c="nav">
                 <button type="button" data-qc149c="prev" aria-label="Previous query" disabled={p.index <= 0} onClick={() => p.onStep(-1)}>{LEFT}</button>
@@ -424,8 +508,65 @@ export const QcQueryCard149: React.FC<QcQueryCard149Props> = (p) => {
                 <button type="button" data-qc149c="next" aria-label="Next query" disabled={p.index >= p.total - 1} onClick={() => p.onStep(1)}>{RIGHT}</button>
               </span>
             </div>
+            </div>
           </>
         )}
+      </div>
+    </div>
+  );
+};
+
+/** v149.1 A5 — the Agent tab: what they're looking for, four facts, every query to them, how to reach them */
+const MAIL = <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5" /><path d="M3.5 7.5l8.5 6 8.5-6" /></svg>;
+const WEB = <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" /></svg>;
+const FORM = <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2" /><path d="M9 8h6M9 12h6M9 16h3" /></svg>;
+const AgentPane: React.FC<{ p: QcQueryCard149Props; first: string | null }> = ({ p, first }) => {
+  const who = first || "the agent";
+  return (
+    <div className="qc149c-pg qc149c-ag" data-qc149c="agent-pane">
+      <div className="qc149c-wl" data-qc149c="wishlist">
+        <span className="qc149c-k">What {first ? `${first}’s` : "they’re"} looking for</span>
+        {p.wishlist.text ? <q data-qc149c="wish-text">{p.wishlist.text}</q>
+          : <button type="button" className="qc149c-add" data-qc149c="wish-add" onClick={() => p.onAgentField("wishlist")}>+ Add their wishlist</button>}
+        {p.wishlist.genres.length ? (
+          <div className="qc149c-gs">{p.wishlist.genres.map((g) => <span key={g.label} className={g.hit ? "hit" : undefined} data-qc149c="genre" data-hit={g.hit ? "" : undefined}>{g.label}</span>)}</div>
+        ) : null}
+      </div>
+      <div className="qc149c-facts" data-qc149c="facts">
+        {p.agentView.facts.map((f) => (
+          <div key={f.key} data-qc149c="fact" data-k={f.key} data-known={f.known ? "" : undefined}>
+            <span className="qc149c-k">{f.label}</span><b>{f.value}</b>{f.sub ? <small>{f.sub}</small> : null}
+          </div>
+        ))}
+      </div>
+      <div className="qc149c-hist" data-qc149c="history">
+        <span className="qc149c-k">You and {who}</span>
+        {p.agentView.history.map((h) => (
+          <div key={h.id} className="qc149c-hrow" data-qc149c="hist-row" data-id={h.id} data-current={h.current ? "" : undefined}>
+            <span className="qc149c-hg"><StatusDot status={h.status} overrideSize={17} /></span>
+            <span className="qc149c-ht">{h.title}{h.when ? <em> · {h.when}</em> : null}</span>
+            <span className={`qc149c-hs${h.current ? " cur" : ""}`}>{STAGE_NAME[h.status] ?? h.status}</span>
+          </div>
+        ))}
+      </div>
+      <div className="qc149c-ct" data-qc149c="contact">
+        <span className="qc149c-k">Contact</span>
+        <div className="qc149c-crow" data-qc149c="ct-row" data-k="email">{MAIL}
+          {p.contact.email ? <><span className="qc149c-cv">{p.contact.email}</span><button type="button" className="qc149c-act" data-qc149c="ct-act" onClick={p.onCopyEmail}>COPY</button></>
+            : <button type="button" className="qc149c-add" data-qc149c="ct-add" onClick={() => p.onAgentField("email")}>+ Add email</button>}
+        </div>
+        <div className="qc149c-crow" data-qc149c="ct-row" data-k="website">{WEB}
+          {p.contact.website ? <><span className="qc149c-cv">{p.contact.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}</span>{p.contact.websiteHref ? <a className="qc149c-act" data-qc149c="ct-act" href={p.contact.websiteHref} target="_blank" rel="noreferrer">OPEN</a> : null}</>
+            : <button type="button" className="qc149c-add" data-qc149c="ct-add" onClick={() => p.onAgentField("website")}>+ Add website</button>}
+        </div>
+        <div className="qc149c-crow" data-qc149c="ct-row" data-k="submission">{FORM}
+          {p.contact.submission ? <span className="qc149c-cv">{p.contact.submission}</span>
+            : <button type="button" className="qc149c-add" data-qc149c="ct-add" onClick={() => p.onAgentField("method")}>+ Add how {who} takes queries</button>}
+        </div>
+      </div>
+      <div className="qc149c-lk">
+        <button type="button" className="qc149c-lnk" data-qc149c="contact-list" onClick={p.onContactList}>Open in Contact list</button>
+        <button type="button" className="qc149c-lnk" data-qc149c="edit-agent" onClick={() => p.onAgentField(null)}>Edit agent</button>
       </div>
     </div>
   );

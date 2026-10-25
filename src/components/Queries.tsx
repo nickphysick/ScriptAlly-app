@@ -216,6 +216,8 @@ import { QueryAgentTab, type AgentHistoryRow } from "./queries/QueryAgentTab";
 import { QueryLogSheet } from "./queries/QueryLogSheet";
 import { queriesForAgent } from "../lib/agentList";
 import { openAgentCard } from "../lib/agentCardStore";
+import { agentView as qcAgentView, bookChips as qcBookChips, nextStepOf, storySteps, stripOf, submissionWords } from "../lib/qcCardStory";
+import { hrefFor } from "../lib/quickAdd";
 import { rungFacts } from "../lib/queryPanelRungs";
 import { queryMaterialsToRows, draftMaterialsToQuery, draftExpectedOverrideIso } from "../lib/queryDraft";
 import { parseQty } from "../lib/createQty";
@@ -5712,8 +5714,14 @@ export const Queries: React.FC<{
     const sv = sentView(q, packages);
     const capWord = (t: string) => t.replace(/^./, (c) => c.toUpperCase());
     const sent = sv.pieces.map((pc) => ({ label: pc.key === "sample" && pc.value ? capWord(pc.value.split(" · ")[0]) : pc.label }));
-    const sv0 = qcStandView(ledger, row, now);
-    const stand = { heading: sv0.heading, text: sv0.paragraph.map((x) => x.text).join("") };
+    /* v149.1 Part A — the story, the next step, the strip and the Agent tab, every value from the record (lib/qcCardStory) */
+    const firstName = (ag?.name || "").trim().split(/\s+/)[0] || ag?.agency || "the agent";
+    const storyCtx = { row, first: firstName, nowMs: now, agentWeeks: typeof ag?.responseTimeWeeks === "number" && ag.responseTimeWeeks > 0 ? ag.responseTimeWeeks : null };
+    const story = storySteps({ rows: ledger, query: q, manuscript: ms, sentWithQuery: sent.map((x) => x.label) });
+    const toAgent = queries.filter((x) => x.agentId === q.agentId);
+    const msGenres = [ms?.genre, ...((ms as { subGenres?: string[] } | null)?.subGenres ?? [])].filter(Boolean).map((g) => String(g).trim().toLowerCase());
+    const agView = qcAgentView(ag, toAgent, (id) => manuscripts.find((m) => m.id === id)?.title ?? "A manuscript", q.id, now);
+    const site = (ag?.website ?? "").trim();
     const nl = nextLine(row, null, now);
     const door = row.court === "closed" ? null : nextDoor(row, now);
     const order = qcVisible.map((r) => r.id);
@@ -5888,7 +5896,20 @@ export const Queries: React.FC<{
         }}
         steps={steps}
         freshKey={qcCardFresh === "__last" ? (steps[steps.length - 1]?.activityId ?? steps[steps.length - 1]?.key ?? null) : qcCardFresh}
-        stand={stand}
+        bookChips={qcBookChips(ms)}
+        story={story}
+        nextStep={nextStepOf(storyCtx)}
+        strip={stripOf(storyCtx)}
+        agentView={agView}
+        wishlist={{ text: (ag?.mswlNotes ?? "").trim(), genres: (ag?.genres ?? []).map((g) => ({ label: g, hit: msGenres.includes(g.trim().toLowerCase()) })) }}
+        contact={{ email: (ag?.email ?? "").trim(), website: site, websiteHref: site ? hrefFor(site) ?? null : null, submission: submissionWords(ag) }}
+        onAgentField={(f) => {
+          if (!ag) return;
+          if (f === null) openAgentCard(ag.id, { tab: "who", from: "qc" });
+          else if (f === "wishlist") openAgentCard(ag.id, { tab: "want", focus: "wishlist", from: "qc" });
+          else if (f === "method") openAgentCard(ag.id, { tab: "work", focus: "method", from: "qc" });
+          else openAgentCard(ag.id, { tab: "who", focus: f, from: "qc" });
+        }}
         due={row.court === "closed" ? { line: nl.line, hot: false } : { line: nl.line, hot: nl.hot }}
         primary={door ? { label: door.label, respond: door.mode === "resp", close: door.mode === "close" } : null}
         index={idx}
