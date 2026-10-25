@@ -1,0 +1,37 @@
+[
+ {
+  "where": "population: the seeded query is listed",
+  "ok": true,
+  "detail": "qc1491-q1 not in the list"
+ },
+ {
+  "where": "the book tile with its icon",
+  "ok": false,
+  "detail": "{\"tile\":false,\"chips\":[],\"pkg\":\"NO PACKAGE\"}"
+ },
+ {
+  "where": "age category and genre (the manuscript's)",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "where": "word count 0 is no chip — absent, not blank",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "the package chip reads No package",
+  "ok": true,
+  "detail": "NO PACKAGE"
+ },
+ {
+  "where": "population: a manuscript with a word count",
+  "ok": false,
+  "detail": "{\"tile\":false,\"chips\":[],\"pkg\":\"NO PACKAGE\"}"
+ },
+ {
+  "where": "…its word count chip reads '92,000 words'",
+  "ok": false,
+  "detail": "[]"
+ }
+]

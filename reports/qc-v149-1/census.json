@@ -1,0 +1,368 @@
+{
+ "counts": {
+  "queries": 87,
+  "agents": 52,
+  "manuscripts": 6,
+  "steps": 113
+ },
+ "queryFields": {
+  "id": 87,
+  "sendMethod": 87,
+  "packageId": 87,
+  "personalisationNotes": 87,
+  "manuscriptId": 87,
+  "status": 87,
+  "agentId": 87,
+  "dateSent": 87,
+  "userId": 87,
+  "sentHow": 47,
+  "sentPackageEdition": 23,
+  "sentPackageId": 23,
+  "lastStatusChange": 22,
+  "materialsWanted": 12,
+  "partialRequestedDate": 10,
+  "sentPackageName": 9,
+  "fullRequestedDate": 9,
+  "hasAgentResponded": 9,
+  "revisionRound": 8,
+  "partialSentDate": 8,
+  "rejectedDate": 7,
+  "fullSentDate": 5,
+  "sentMaterials": 4,
+  "sentVersions": 4,
+  "writerExpectedDate": 4,
+  "responseReceivedAt": 4,
+  "nudgeDate": 3,
+  "expectedSendDate": 2,
+  "materialsRequestedQuantity": 1,
+  "materialsRequestedType": 1,
+  "sentCorrectedFrom": 1,
+  "sentCorrectedAt": 1,
+  "offerDate": 1
+ },
+ "stepFields": {
+  "q": 113,
+  "id": 113,
+  "note": 113,
+  "createdAt": 113,
+  "type": 113,
+  "queryId": 99,
+  "resultingStatus": 93,
+  "eventKey": 76,
+  "reconstructed": 76,
+  "agentName": 39,
+  "manuscriptTitle": 33,
+  "reminderDate": 6
+ },
+ "agentFields": {
+  "id": 52,
+  "submissionMethod": 52,
+  "materialsWanted": 52,
+  "mswlNotes": 52,
+  "lastCheckedDate": 52,
+  "notes": 52,
+  "dateAdded": 52,
+  "genres": 52,
+  "submissionStatus": 52,
+  "name": 52,
+  "userId": 52,
+  "agency": 52,
+  "website": 52,
+  "email": 52,
+  "responseTimeWeeks": 33,
+  "country": 29,
+  "city": 29,
+  "starRating": 28,
+  "setAside": 27,
+  "bluesky": 27,
+  "agentNotes": 27,
+  "socials": 27,
+  "instagram": 27,
+  "noResponseMeansNo": 27,
+  "importedNeedsReview": 27,
+  "twitter": 27,
+  "notePreview": 5,
+  "mswlCheckedAt": 2,
+  "reopensOn": 1
+ },
+ "msFields": {
+  "id": 6,
+  "userId": 6,
+  "wordCount": 6,
+  "status": 6,
+  "statusChangedDate": 6,
+  "logline": 6,
+  "title": 6,
+  "genre": 6,
+  "ageCategory": 6,
+  "comps": 6,
+  "shelved": 5,
+  "bookVersions": 3,
+  "setting": 1,
+  "activePackageId": 1
+ },
+ "stepTypes": {
+  "Queried": 44,
+  "Partial Requested": 13,
+  "Partial Sent": 13,
+  "Rejected": 11,
+  "Full Sent": 11,
+  "Full Requested": 10,
+  "Nudge sent": 6,
+  "No Response": 2,
+  "Revise & Resubmit": 1,
+  "Offer": 1,
+  "Withdrawn": 1
+ },
+ "stepEventKeys": {
+  "none": 37,
+  "query_sent": 28,
+  "partial_requested": 11,
+  "full_requested": 9,
+  "pass": 9,
+  "partial_sent": 8,
+  "full_sent": 6,
+  "closed_no_reply": 2,
+  "rr_requested": 1,
+  "offer": 1,
+  "withdrawn": 1
+ },
+ "stepSamples": [
+  {
+   "q": "cor-move-a",
+   "type": "Partial Requested",
+   "note": "Marcus asked for the first fifty pages."
+  },
+  {
+   "q": "msv12-q-3",
+   "type": "Partial Requested",
+   "note": "Partial manuscript requested",
+   "eventKey": "partial_requested"
+  },
+  {
+   "q": "msv12-q-4",
+   "type": "Full Requested",
+   "note": "Full manuscript requested",
+   "eventKey": "full_requested"
+  },
+  {
+   "q": "msv12-q-5",
+   "type": "Full Sent",
+   "note": "Full manuscript sent",
+   "eventKey": "full_sent"
+  },
+  {
+   "q": "msv12-q-6",
+   "type": "Rejected",
+   "note": "Rejection received",
+   "eventKey": "pass"
+  },
+  {
+   "q": "msv12-q-8",
+   "type": "No Response",
+   "note": "Query closed — no response",
+   "eventKey": "closed_no_reply"
+  },
+  {
+   "q": "rej-query-1",
+   "type": "Rejected",
+   "note": "Rejection received",
+   "eventKey": "pass"
+  },
+  {
+   "q": "rj-dupe",
+   "type": "Nudge sent",
+   "note": "Follow-up reminder set for 30 Nov 2026"
+  },
+  {
+   "q": "rj-dupe",
+   "type": "Full Sent",
+   "note": "Full manuscript sent to Tobias Hark at Hark Literary"
+  },
+  {
+   "q": "rj-dupe",
+   "type": "Full Requested",
+   "note": "Full manuscript requested",
+   "eventKey": "full_requested"
+  },
+  {
+   "q": "rj-nudge",
+   "type": "Nudge sent",
+   "note": "Follow-up reminder set for 15 Nov 2026"
+  },
+  {
+   "q": "rj-nudge",
+   "type": "Nudge sent",
+   "note": "Follow-up reminder set for 15 Nov 2026"
+  }
+ ],
+ "msSamples": [
+  {
+   "id": "cv25-ms",
+   "title": "Murphy's Day Out",
+   "ageCategory": "Adult",
+   "genre": "Thriller",
+   "wordCount": 50000
+  },
+  {
+   "id": "cv25-ms-empty",
+   "title": "Murphy's Day Out",
+   "ageCategory": "Adult",
+   "genre": "Thriller",
+   "wordCount": 50000
+  },
+  {
+   "id": "msv12-ms",
+   "title": "Harbour of Glass",
+   "ageCategory": "Adult",
+   "genre": "Thriller",
+   "wordCount": 50000
+  },
+  {
+   "id": "seed-ms-1",
+   "title": "The Smoke Test",
+   "ageCategory": "Adult",
+   "genre": "Literary Fiction",
+   "wordCount": 92000
+  },
+  {
+   "id": "seed-ms-2",
+   "title": "The Quiet Second",
+   "ageCategory": "Adult",
+   "genre": "Literary Fiction",
+   "wordCount": 74000
+  },
+  {
+   "id": "thin-ms",
+   "title": "The Quiet Fixture",
+   "ageCategory": "Adult",
+   "genre": "Literary Fiction",
+   "wordCount": 88000
+  }
+ ],
+ "agentSamples": [
+  {
+   "id": "clv-fx-never",
+   "name": "Imogen Vale",
+   "mswl": "",
+   "genres": [
+    "Thriller",
+    "Suspense"
+   ],
+   "status": "Open",
+   "email": "",
+   "website": "",
+   "method": "Email",
+   "lastChecked": "2026-10-11T22:19:39.061Z"
+  },
+  {
+   "id": "clv-fx-reopen",
+   "name": "Tomas Keller",
+   "mswl": "",
+   "genres": [
+    "Crime"
+   ],
+   "rt": 8,
+   "status": "Closed",
+   "reopensOn": "2026-11-01",
+   "email": "",
+   "website": "",
+   "method": "Email",
+   "lastChecked": "2026-10-11T22:19:39.061Z"
+  },
+  {
+   "id": "clv-fx-stale",
+   "name": "Ingrid Marsh",
+   "mswl": "Quiet novels with a strong sense of plac",
+   "genres": [
+    "Literary fiction"
+   ],
+   "rt": 10,
+   "status": "Open",
+   "email": "",
+   "website": "",
+   "method": "Email",
+   "lastChecked": "2026-10-11T22:19:39.061Z"
+  },
+  {
+   "id": "clv-fx-stub0",
+   "name": "Edda Kron",
+   "mswl": "High-concept suspense with a one-line ho",
+   "genres": [
+    "Thriller"
+   ],
+   "rt": 0,
+   "status": "Open",
+   "email": "",
+   "website": "",
+   "method": "Email",
+   "lastChecked": "2026-10-11T22:19:39.061Z"
+  },
+  {
+   "id": "clv181-bare",
+   "name": "Wren Tallis",
+   "mswl": "",
+   "genres": [],
+   "status": "Open",
+   "email": "",
+   "website": "",
+   "method": "Email",
+   "lastChecked": "2026-10-22T15:56:01.370Z"
+  },
+  {
+   "id": "cv25-agent-01",
+   "name": "Eleanor Whitfield",
+   "mswl": "",
+   "genres": [
+    "Thriller"
+   ],
+   "status": "Open",
+   "email": "",
+   "website": "",
+   "method": "Email",
+   "lastChecked": "2026-02-01T12:00:00.000Z"
+  }
+ ],
+ "dupes": [
+  {
+   "name": "Jonathan Marsh",
+   "agents": [
+    {
+     "id": "cv25-agent-09",
+     "agency": "The Marsh Agency"
+    }
+   ],
+   "queries": [
+    {
+     "id": "cv25-q-09",
+     "agentId": "cv25-agent-09",
+     "manuscriptId": "cv25-ms",
+     "status": "Full Requested",
+     "dateSent": "2026-09-24T12:00:00.000Z",
+     "sentPackageId": "cv25-pkg-light",
+     "packageId": "cv25-pkg-light"
+    }
+   ]
+  },
+  {
+   "name": "Eleanor Whitfield",
+   "agents": [
+    {
+     "id": "cv25-agent-01",
+     "agency": "Greenfield Literary"
+    }
+   ],
+   "queries": [
+    {
+     "id": "cv25-q-01",
+     "agentId": "cv25-agent-01",
+     "manuscriptId": "cv25-ms",
+     "status": "Rejected",
+     "dateSent": "2026-03-14T12:00:00.000Z",
+     "packageId": "cv25-pkg-orig"
+    }
+   ]
+  }
+ ],
+ "allCaps": []
+}

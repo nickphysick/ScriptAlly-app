@@ -1,0 +1,27 @@
+[
+ {
+  "where": "population: both rows",
+  "ok": true,
+  "detail": "{\"l1\":true,\"l2\":true,\"order\":true,\"due\":true,\"links\":[\"record\",\"edit\",\"close-query\"],\"pos\":\"72 / 91\",\"primary\":true}"
+ },
+ {
+  "where": "row 1 is the status line, above row 2",
+  "ok": true,
+  "detail": "{\"l1\":true,\"l2\":true,\"order\":true,\"due\":true,\"links\":[\"record\",\"edit\",\"close-query\"],\"pos\":\"72 / 91\",\"primary\":true}"
+ },
+ {
+  "where": "row 2: Record a response · Edit query · Close query",
+  "ok": true,
+  "detail": "[\"record\",\"edit\",\"close-query\"]"
+ },
+ {
+  "where": "…then N / M",
+  "ok": true,
+  "detail": "72 / 91"
+ },
+ {
+  "where": "no separate primary link",
+  "ok": false,
+  "detail": "true"
+ }
+]
