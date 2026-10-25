@@ -103,7 +103,11 @@ None is new.
 
 ## Dev deploy
 
-See the closing record in this folder's commit history; it goes onto `dev/hm31-pv4-qc1492-dh41-cl24-hm32-pk26`.
+Dev was serving the v26.1 deploy (`index-CN7x9BIo.js`). This change (19f80e8d) was merged onto the same dev branch:
+**`dev/hm31-pv4-qc1492-dh41-cl24-hm32-pk26` 7b327c34**, with no conflicts.
+- **Gates on the merge:** tsc clean; build clean; vitest 661 files, 10,433 passed.
+- **Deployed** from a clean worktree. **Dev now serves `index-Bq_JbPw1.js`.**
+- **Smoke:** SB1–SB4, 10/10 tests, pass against the deployed site.
 
 ## Open for Nick
 
