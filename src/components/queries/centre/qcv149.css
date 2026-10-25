@@ -3,9 +3,8 @@
    sheet states only where they sit, the Query Centre's illustration size, and the view row.
 
    ⚠️ WIDTHS (A4): the list card is the content column's full width; the header card, the banner and the view row share
-      one narrower width, inset --qc149-in each side from the list (the column is --hero-w, the list's own): 32px, or 24px at a window of 1440 or less (the
-      1280 screens draw the narrow layout and the 1512 ones the wide, so the breakpoint is the WINDOW's, as navy-bar v1
-      found for its own "≤1440").
+      one narrower width, inset --qc149-in each side from the list: 24px while the sheet S is under 1100px, else 32px (v149.2 ruling:
+      the mock's table — 24 at a 1280 window, 32 at 1440, 1512 and 1920; the earlier "window ≤ 1440" rule gave 24 at 1440).
    ⚠️ THE TOP is the Versions card's own gap below the window's top (`.vv2 .hb`'s 24px); QC149-L1 asserts the two equal. */
 @media (min-width: 768px) {
   /* v149.2 A — THE PAGE COLUMN IS CAPPED (the mock's, design-refs/query-centre-v149/). S is the sheet (`--hsheet-w`):
@@ -14,7 +13,8 @@
      ⚠️ v149 A4 stated no maximum, so all four stretched with `--hero-w` (S − 48, up to 1600). `--hero-w` is the shared
         hero frame other pages read, so the cap is the Query Centre's own token, never a change to it. */
   .qcv-group {
-    --qc149-in: 32px;
+    /* 24 under a 1100px sheet, else 32 — a stepped clamp on S, so the window's width never decides it */
+    --qc149-in: clamp(24px, calc(24px + (var(--hsheet-w) - 1099.5px) * 1000), 32px);
     --qc149-col: min(calc(var(--hsheet-w) - 64px), 1136px);
     --qc149-ext: clamp(0px, calc((var(--hsheet-w) - 1499.5px) * 1000), 80px);
     --qc149-list: calc(var(--qc149-col) + var(--qc149-ext));
@@ -68,7 +68,6 @@
   .qcv-group .qc149-find input::placeholder { color: rgba(28, 19, 15, 0.45); font: italic 400 15.5px/1.2 var(--sp-serif); }
 }
 @media (min-width: 768px) and (max-width: 1440px) {
-  .qcv-group { --qc149-in: 24px; }
   .qc149-sw { display: none; }
 }
 

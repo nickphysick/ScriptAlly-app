@@ -1,6 +1,6 @@
 [
  {
-  "where": "1280×800 population: list, card, banner, view row",
+  "where": "1280×800 population: sheet, list, card, banner, view row",
   "ok": true,
   "detail": "{\"sheet\":{\"l\":248,\"r\":1272,\"w\":1024},\"list\":{\"l\":280,\"r\":1240,\"w\":960},\"card\":{\"l\":304,\"r\":1216,\"w\":912},\"ban\":{\"l\":304,\"r\":1216,\"w\":912},\"vr\":{\"l\":304,\"r\":1216,\"w\":912},\"panel\":null}"
  },
@@ -10,27 +10,27 @@
   "detail": "304.0–1216.0 · 304.0–1216.0 · 304.0–1216.0"
  },
  {
-  "where": "1280×800 each sits inside the list by 24",
+  "where": "1280×800 each sits inside the list by 24 (S 1024)",
   "ok": true,
   "detail": "left 24.0 · right 24.0"
  },
  {
-  "where": "1440×900 population: list, card, banner, view row",
+  "where": "1440×900 population: sheet, list, card, banner, view row",
   "ok": true,
-  "detail": "{\"sheet\":{\"l\":248,\"r\":1432,\"w\":1184},\"list\":{\"l\":280,\"r\":1400,\"w\":1120},\"card\":{\"l\":304,\"r\":1376,\"w\":1072},\"ban\":{\"l\":304,\"r\":1376,\"w\":1072},\"vr\":{\"l\":304,\"r\":1376,\"w\":1072},\"panel\":null}"
+  "detail": "{\"sheet\":{\"l\":248,\"r\":1432,\"w\":1184},\"list\":{\"l\":280,\"r\":1400,\"w\":1120},\"card\":{\"l\":312,\"r\":1368,\"w\":1056},\"ban\":{\"l\":312,\"r\":1368,\"w\":1056},\"vr\":{\"l\":312,\"r\":1368,\"w\":1056},\"panel\":null}"
  },
  {
   "where": "1440×900 the three share left and right edges",
   "ok": true,
-  "detail": "304.0–1376.0 · 304.0–1376.0 · 304.0–1376.0"
+  "detail": "312.0–1368.0 · 312.0–1368.0 · 312.0–1368.0"
  },
  {
-  "where": "1440×900 each sits inside the list by 24",
+  "where": "1440×900 each sits inside the list by 32 (S 1184)",
   "ok": true,
-  "detail": "left 24.0 · right 24.0"
+  "detail": "left 32.0 · right 32.0"
  },
  {
-  "where": "1512×900 population: list, card, banner, view row",
+  "where": "1512×900 population: sheet, list, card, banner, view row",
   "ok": true,
   "detail": "{\"sheet\":{\"l\":248,\"r\":1504,\"w\":1256},\"list\":{\"l\":308,\"r\":1444,\"w\":1136},\"card\":{\"l\":340,\"r\":1412,\"w\":1072},\"ban\":{\"l\":340,\"r\":1412,\"w\":1072},\"vr\":{\"l\":340,\"r\":1412,\"w\":1072},\"panel\":null}"
  },
@@ -40,12 +40,12 @@
   "detail": "340.0–1412.0 · 340.0–1412.0 · 340.0–1412.0"
  },
  {
-  "where": "1512×900 each sits inside the list by 32",
+  "where": "1512×900 each sits inside the list by 32 (S 1256)",
   "ok": true,
   "detail": "left 32.0 · right 32.0"
  },
  {
-  "where": "1920×1080 population: list, card, banner, view row",
+  "where": "1920×1080 population: sheet, list, card, banner, view row",
   "ok": true,
   "detail": "{\"sheet\":{\"l\":248,\"r\":1912,\"w\":1664},\"list\":{\"l\":472,\"r\":1688,\"w\":1216},\"card\":{\"l\":504,\"r\":1656,\"w\":1152},\"ban\":{\"l\":504,\"r\":1656,\"w\":1152},\"vr\":{\"l\":504,\"r\":1656,\"w\":1152},\"panel\":null}"
  },
@@ -55,12 +55,12 @@
   "detail": "504.0–1656.0 · 504.0–1656.0 · 504.0–1656.0"
  },
  {
-  "where": "1920×1080 each sits inside the list by 32",
+  "where": "1920×1080 each sits inside the list by 32 (S 1664)",
   "ok": true,
   "detail": "left 32.0 · right 32.0"
  },
  {
-  "where": "2560×1440 population: list, card, banner, view row",
+  "where": "2560×1440 population: sheet, list, card, banner, view row",
   "ok": true,
   "detail": "{\"sheet\":{\"l\":248,\"r\":2552,\"w\":2304},\"list\":{\"l\":792,\"r\":2008,\"w\":1216},\"card\":{\"l\":824,\"r\":1976,\"w\":1152},\"ban\":{\"l\":824,\"r\":1976,\"w\":1152},\"vr\":{\"l\":824,\"r\":1976,\"w\":1152},\"panel\":null}"
  },
@@ -70,7 +70,7 @@
   "detail": "824.0–1976.0 · 824.0–1976.0 · 824.0–1976.0"
  },
  {
-  "where": "2560×1440 each sits inside the list by 32",
+  "where": "2560×1440 each sits inside the list by 32 (S 2304)",
   "ok": true,
   "detail": "left 32.0 · right 32.0"
  }

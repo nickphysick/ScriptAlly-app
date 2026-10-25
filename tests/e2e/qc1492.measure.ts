@@ -4,10 +4,11 @@
  *
  * Query Centre v149.2 — the QC1492 locks: the capped page column (L1), the inner blocks inside it (L2), and the panel
  * overlaying the list again (L3). Each proves its population first, and each was red first (the v149.1 build, or its
- * named mutation: QC1492_MUTATE=L1|L2|L3, each applied in the page; see the report).
+ * named mutation: QC1492_MUTATE=L1|L2|L2W|L3, each applied in the page; see the report).
  *
  * S is the sheet's width (`.ws-window`). The list is min(S − 64, 1136) + (S ≥ 1500 ? 80 : 0), centred in the sheet;
- * the header card, banner and view row are the list less the inset each side: 32 above a 1440 window, 24 at or below.
+ * the header card, banner and view row are the list less the inset each side: 24 while S is under 1100, else 32 (the
+ * v149.2 ruling: the mock's table, 32 at a 1440 window). L2W is the old window rule restored, which must fail at 1440.
  */
 import { test, expect, type Page } from "@playwright/test";
 import { mkdirSync, writeFileSync } from "node:fs";
@@ -44,6 +45,8 @@ const near = (a: number, b: number, t = 1) => Math.abs(a - b) <= t;
 const mutate = async (page: Page) => {
   if (MUT === "L1") await page.addStyleTag({ content: ".qcv-group { --qc149-col: calc(var(--hsheet-w) - 64px) !important; }" });
   if (MUT === "L2") await page.addStyleTag({ content: ".qcv-group { --qc149-w: var(--qc149-list) !important; }" });
+  /* the superseded rule: 24 whenever the WINDOW is 1440 or narrower */
+  if (MUT === "L2W") await page.addStyleTag({ content: "@media (min-width: 768px) and (max-width: 1440px) { .qcv-group { --qc149-in: 24px !important; } }" });
   /* B6 restored: above a 1440 window the open panel narrows the list by its own width */
   if (MUT === "L3") await page.addStyleTag({ content: "@media (min-width: 1441px) { body:has([data-qp='panel']) .qcv-group[data-v138] .qc138-sheet.qc138-sheet { margin-right: 560px !important; } }" });
   await page.waitForTimeout(200);
@@ -74,12 +77,12 @@ test("L2 · the header card, banner and view row share edges, inside the list by
     await openQc(page, vp); await mutate(page);
     const b = await boxes(page);
     const at = `${vp.width}×${vp.height}`;
-    L.check(`${at} population: list, card, banner, view row`, !!b.list && !!b.card && !!b.ban && !!b.vr, JSON.stringify(b));
-    if (!b.list || !b.card || !b.ban || !b.vr) continue;
-    const inset = vp.width > 1440 ? 32 : 24;
+    L.check(`${at} population: sheet, list, card, banner, view row`, !!b.sheet && !!b.list && !!b.card && !!b.ban && !!b.vr, JSON.stringify(b));
+    if (!b.list || !b.card || !b.ban || !b.vr || !b.sheet) continue;
+    const inset = b.sheet.w < 1100 ? 24 : 32;
     const all = [b.card, b.ban, b.vr] as R[];
     L.check(`${at} the three share left and right edges`, all.every((x) => near(x.l, b.card!.l) && near(x.r, b.card!.r)), all.map((x) => `${x.l.toFixed(1)}–${x.r.toFixed(1)}`).join(" · "));
-    L.check(`${at} each sits inside the list by ${inset}`, all.every((x) => near(x.l - b.list!.l, inset) && near(b.list!.r - x.r, inset)), `left ${(b.card.l - b.list.l).toFixed(1)} · right ${(b.list.r - b.card.r).toFixed(1)}`);
+    L.check(`${at} each sits inside the list by ${inset} (S ${b.sheet.w.toFixed(0)})`, all.every((x) => near(x.l - b.list!.l, inset) && near(b.list!.r - x.r, inset)), `left ${(b.card.l - b.list.l).toFixed(1)} · right ${(b.list.r - b.card.r).toFixed(1)}`);
   }
   L.done(15);
 });
