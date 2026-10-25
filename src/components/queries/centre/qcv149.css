@@ -8,7 +8,18 @@
       found for its own "≤1440").
    ⚠️ THE TOP is the Versions card's own gap below the window's top (`.vv2 .hb`'s 24px); QC149-L1 asserts the two equal. */
 @media (min-width: 768px) {
-  .qcv-group { --qc149-in: 32px; --qc149-w: calc(var(--hero-w) - 2 * var(--qc149-in)); }
+  /* v149.2 A — THE PAGE COLUMN IS CAPPED (the mock's, design-refs/query-centre-v149/). S is the sheet (`--hsheet-w`):
+       column = min(S − 64, 1136), centred; the list is the column plus 40 each side once S reaches 1500 (a stepped
+       clamp, so no script decides it); the header card, banner and view row are the list less the inset each side.
+     ⚠️ v149 A4 stated no maximum, so all four stretched with `--hero-w` (S − 48, up to 1600). `--hero-w` is the shared
+        hero frame other pages read, so the cap is the Query Centre's own token, never a change to it. */
+  .qcv-group {
+    --qc149-in: 32px;
+    --qc149-col: min(calc(var(--hsheet-w) - 64px), 1136px);
+    --qc149-ext: clamp(0px, calc((var(--hsheet-w) - 1499.5px) * 1000), 80px);
+    --qc149-list: calc(var(--qc149-col) + var(--qc149-ext));
+    --qc149-w: calc(var(--qc149-list) - 2 * var(--qc149-in));
+  }
   .qcv-group > .qc149-hd {
     box-sizing: border-box; width: var(--qc149-w); margin: 24px 0 0 calc(50% - var(--qc149-w) / 2);
     display: flex; flex-direction: column;
@@ -68,8 +79,6 @@
   /* B1 · the frame: white, a hairline and a soft drop, 20px corners */
   .qcv-group[data-v138]:not([data-full]) .qc138-sheet.qc138-sheet {
     border-radius: 20px; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.11), 0 18px 30px -28px rgba(28, 19, 15, 0.35);
-    /* v149.1 B6 — the push's narrowing and its release, one ease */
-    margin-right: var(--qc149-push, 0px); transition: margin-right 0.28s ease;
   }
   .qcv-group[data-v138]:not([data-full]) .qc138-sheet .qc140-tbw, .qcv-group[data-v138]:not([data-full]) .qc138-sheet .qc140-tb { border-radius: 20px 20px 0 0; }
   /* B1 · the navy bar: "37% heard back" on the left; Filters · Group by · Sort · Full screen on the right */

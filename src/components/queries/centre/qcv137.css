@@ -16,7 +16,8 @@
   /* 0-4-0, to beat `.qc13 .qcv-page.qcw` (qcvWorkspace.css) */
   .qcv-group.qc13 > .qcv-page.qcw {
     grid-row: 3; justify-self: start; box-sizing: border-box; max-width: none;
-    --qc137-w: min(1600px, calc(var(--hsheet-w) - 48px));
+    /* v149.2 A — the list is the Query Centre's capped column (qcv149.css `--qc149-list`), not S − 48 up to 1600 */
+    --qc137-w: var(--qc149-list, min(1600px, calc(var(--hsheet-w) - 48px)));
     width: var(--qc137-w);
     margin: 40px 0 90px calc(50% - var(--qc137-w) / 2);
   }

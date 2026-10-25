@@ -2921,35 +2921,6 @@ export const Queries: React.FC<{
     const p = qcCardPendingMode.current;
     if (p && p.id === cardQueryId) { setQcCardMode(p.mode); qcCardPendingMode.current = null; } else setQcCardMode("view");
   }, [cardQueryId]);
-  /* v149.1 B6 — ON A WIDE WINDOW THE PANEL PUSHES THE LIST CARD INSTEAD OF COVERING IT. When `.ws-window` is wider than
-     1440 and the panel is open, the list card gives up exactly what it needs to end 16px left of the panel (the panel sits
-     flush with the window's right, 560 wide there), so Filters, Group by and Sort stay reachable; at 1440 or less it keeps
-     today's overlay. The amount is MEASURED from the card's resting right edge, never a constant — a constant would be
-     wrong wherever the page column stops growing. The narrowing and its release ride one 0.28s transition (qcv149.css). */
-  useEffect(() => {
-    let raf = 0;
-    const apply = () => {
-      const grp = [...document.querySelectorAll<HTMLElement>(".qcv-group[data-v138]")].find((e) => e.getBoundingClientRect().width > 0);
-      const win = [...document.querySelectorAll<HTMLElement>(".ws-window")].find((e) => e.getBoundingClientRect().width > 0);
-      const sheet = grp?.querySelector<HTMLElement>(".qc138-sheet");
-      const open = !!document.querySelector("[data-qp='panel']");
-      if (!grp || !win || !sheet) return;
-      const w = win.getBoundingClientRect();
-      if (!open || w.width <= 1440 || grp.hasAttribute("data-full")) { grp.removeAttribute("data-push"); grp.style.removeProperty("--qc149-push"); return; }
-      const now = parseFloat(grp.style.getPropertyValue("--qc149-push")) || 0;
-      const rest = sheet.getBoundingClientRect().right + (grp.hasAttribute("data-push") ? now : 0);
-      const push = Math.max(0, Math.round(rest - (w.right - 560 - 16)));
-      grp.style.setProperty("--qc149-push", `${push}px`);
-      grp.setAttribute("data-push", "");
-    };
-    const kick = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(apply); };
-    kick();
-    const t = window.setTimeout(kick, 350);
-    const win = document.querySelector(".ws-window");
-    const ro = typeof ResizeObserver !== "undefined" && win ? new ResizeObserver(kick) : null;
-    if (ro && win) ro.observe(win);
-    return () => { cancelAnimationFrame(raf); window.clearTimeout(t); ro?.disconnect(); };
-  });
   /* v138 §G — a bulk action runs each ticked query's journey in turn: when the panel closes, the next one opens.
      `stepRow` is declared far below, so the effect reaches it through a ref the render keeps current. */
   const stepRowRef = useRef<((req: OpenRequest) => void) | null>(null);
