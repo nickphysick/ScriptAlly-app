@@ -1,0 +1,92 @@
+[
+ {
+  "where": "1440×900 population: a live row",
+  "ok": true,
+  "detail": "thin-q-close"
+ },
+ {
+  "where": "1440×900 the panel is open",
+  "ok": true,
+  "detail": "{\"l\":912,\"r\":1432,\"w\":520}"
+ },
+ {
+  "where": "1440×900 the list's edges are identical, panel closed and open",
+  "ok": true,
+  "detail": "272.0–1408.0 → 272.0–1408.0"
+ },
+ {
+  "where": "1440×900 the panel's left edge is left of the list's right edge (it overlays)",
+  "ok": true,
+  "detail": "912.0 vs 1408.0"
+ },
+ {
+  "where": "1440×900 during an action the scrim is visible",
+  "ok": true,
+  "detail": "{\"on\":true,\"op\":\"1\"}"
+ },
+ {
+  "where": "1440×900 …and the list still has not moved",
+  "ok": true,
+  "detail": "272.0–1408.0"
+ },
+ {
+  "where": "1512×900 population: a live row",
+  "ok": true,
+  "detail": "thin-q-close"
+ },
+ {
+  "where": "1512×900 the panel is open",
+  "ok": true,
+  "detail": "{\"l\":944,\"r\":1504,\"w\":560}"
+ },
+ {
+  "where": "1512×900 the list's edges are identical, panel closed and open",
+  "ok": true,
+  "detail": "272.0–1480.0 → 272.0–1480.0"
+ },
+ {
+  "where": "1512×900 the panel's left edge is left of the list's right edge (it overlays)",
+  "ok": true,
+  "detail": "944.0 vs 1480.0"
+ },
+ {
+  "where": "1512×900 during an action the scrim is visible",
+  "ok": true,
+  "detail": "{\"on\":true,\"op\":\"1\"}"
+ },
+ {
+  "where": "1512×900 …and the list still has not moved",
+  "ok": true,
+  "detail": "272.0–1480.0"
+ },
+ {
+  "where": "1920×1080 population: a live row",
+  "ok": true,
+  "detail": "thin-q-close"
+ },
+ {
+  "where": "1920×1080 the panel is open",
+  "ok": true,
+  "detail": "{\"l\":1352,\"r\":1912,\"w\":560}"
+ },
+ {
+  "where": "1920×1080 the list's edges are identical, panel closed and open",
+  "ok": false,
+  "detail": "280.0–1880.0 → 280.0–1336.0"
+ },
+ {
+  "where": "1920×1080 the panel's left edge is left of the list's right edge (it overlays)",
+  "ok": false,
+  "detail": "1352.0 vs 1336.0"
+ },
+ {
+  "where": "1920×1080 during an action the scrim is visible",
+  "ok": true,
+  "detail": "{\"on\":true,\"op\":\"1\"}"
+ },
+ {
+  "where": "1920×1080 …and the list still has not moved",
+  "ok": false,
+  "detail": "280.0–1336.0"
+ }
+]
