@@ -68,7 +68,8 @@ describe("⚠️ the TASKS section renders — same grammar, three rows, in orde
      left the nav: Settings is the foot's gear again (reversing P5, Nick's call). */
   it("the groups run in the work's order — Workspace first, Tasks last, no Account", () => {
     const labels = [...html.matchAll(/ws-glabel[^>]*>([^<]+)</g)].map((m) => m[1]);
-    expect(labels).toEqual(["Workspace", "Queries", "Agents", "Materials", "Tasks"]);
+    /* Submission packages v26 (25 Oct): the Materials group is "Your book" now */
+    expect(labels).toEqual(["Workspace", "Queries", "Agents", "Your book", "Tasks"]);
     expect(html).toContain(">Dashboard<");
     // the nav renders no Settings row; the foot's gear is the door (SB5)
     const nav = sliceBetween(html, '<nav class="ws-nav"', "</nav>", "the sidebar nav");

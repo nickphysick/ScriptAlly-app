@@ -22,7 +22,7 @@ export const NO_HEADER_SHEET_ROUTES: readonly string[] = ["/dashboard", "/accoun
  *    is ON SCREEN, because an empty state shares its route with the populated page. The lists remain as the census the
  *    locks are written against (tests/e2e/sh2Lib.ts, hp2Lib.ts).
  */
-export const HEADER_PANEL_ROUTES: readonly string[] = ["/queries", "/queries/analytics", "/agents", "/agents/discover", "/manuscripts", "/manuscripts/comps", "/manuscripts/packages", "/todo", "/todo/calendar", "/todo/corkboard", "/import"];
+export const HEADER_PANEL_ROUTES: readonly string[] = ["/queries", "/queries/analytics", "/agents", "/agents/discover", "/manuscripts", "/manuscripts/comps", "/queries/packages", "/todo", "/todo/calendar", "/todo/corkboard", "/import"];
 
 const under = (list: readonly string[], pathname: string) => list.some((r) => pathname === r || pathname.startsWith(`${r}/`));
 /** the routes whose populated page has a panel header */

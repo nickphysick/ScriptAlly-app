@@ -17,7 +17,7 @@ export const LIVING_ROUTES = [
   "/queries",
   "/agents",
   "/todo",
-  "/manuscripts/packages",
+  "/queries/packages",
   "/manuscripts/comps",
   "/queries/analytics",
 ] as const;

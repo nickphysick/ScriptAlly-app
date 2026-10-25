@@ -17,7 +17,9 @@ describe("barPageName — the sidebar's own section heading and label", () => {
   it("names each page under its heading", () => {
     expect(name("/agents")).toEqual({ section: "Agents", name: "Contact list" });
     expect(name("/queries")).toEqual({ section: "Queries", name: "Query Centre" });
-    expect(name("/manuscripts/comps")).toEqual({ section: "Materials", name: "Comparable titles" });
+    /* Submission packages v26: the Materials group is "Your book"; the packages page sits under Queries */
+    expect(name("/manuscripts/comps")).toEqual({ section: "Your book", name: "Comparable titles" });
+    expect(name("/queries/packages")).toEqual({ section: "Queries", name: "Submission packages" });
     expect(name("/todo/calendar")).toEqual({ section: "Tasks", name: "Calendar" });
     expect(name("/account/profile")).toEqual({ section: "Account", name: "Settings" });
   });

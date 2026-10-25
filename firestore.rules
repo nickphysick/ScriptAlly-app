@@ -133,6 +133,8 @@ service cloud.firestore {
         // `synopsisVersionId`. No relationship between the two is asserted anywhere; whether this is
         // their master or a separate scratch copy is an open product question.
         && (!data.keys().hasAny(['synopsis']) || (data.synopsis is string && data.synopsis.size() <= 32768))
+        // Submission packages v26 — the manuscript's named extras ({id, name, files?}), which its packages tick.
+        && (!data.keys().hasAny(['extras']) || (data.extras is list && data.extras.size() <= 60))
         // Manuscripts v12 — the hero's two facts (Nick's ruling, 25 Sep): optional strings at
         // logline's cap, cleared by OMITTING the key like elevatorPitch and synopsis above. Until
         // these two clauses a CREATE carrying either key was accepted with no type check at all.
@@ -305,6 +307,11 @@ service cloud.firestore {
         && (!data.keys().hasAny(['edition']) || (data.edition is int && data.edition >= 1 && data.edition <= 1000))
         && (!data.keys().hasAny(['editions']) || (data.editions is list && data.editions.size() <= 200))
         && (!data.keys().hasAny(['retiredAt']) || (data.retiredAt is string && data.retiredAt.size() <= 64))
+        // SUBMISSION PACKAGES v26 (25 Oct): the package's icon (one of twelve, outside the freeze like the name) and
+        // the named extras it sends, by id. `extraIds` is CONTENTS — frozen with the slots below — and its names
+        // travel in `otherMaterials`, which is what the send flow and every query's frozen summary read.
+        && (!data.keys().hasAny(['icon']) || data.icon in ['box', 'crown', 'globe', 'flag', 'feather', 'flask', 'star', 'bolt', 'heart', 'compass', 'pen', 'key'])
+        && (!data.keys().hasAny(['extraIds']) || (data.extraIds is list && data.extraIds.size() <= 24))
         && data.status is string && (data.status == 'Active' || data.status == 'Retired')
         && data.createdDate is string && data.createdDate.size() <= 64;
     }
@@ -895,7 +902,9 @@ service cloud.firestore {
             'elevatorPitch', 'synopsis',
             // Manuscripts v12 — the hero's setting and series, and nothing else (the ruling was
             // narrow; tests/rules asserts a declared-but-unlisted field like coverUrl stays out).
-            'setting', 'series'
+            'setting', 'series',
+            // Submission packages v26 — the named extras its packages send
+            'extras'
           ])
         );
 
@@ -927,11 +936,10 @@ service cloud.firestore {
       match /packages/{packageId} {
         allow get, delete: if isOwner(userId) && isValidId(packageId);
         allow list: if isOwner(userId);
-        // ⚠️ THE LETTER IS REQUIRED ON CREATE AND ONLY ON CREATE. Nothing new may be written without
-        // a covering letter; an existing record that predates the rule stays repairable. Putting it
-        // inside isValidPackage would apply it to update too — see the note there.
-        allow create: if isOwner(userId) && isValidId(packageId) && isValidPackage(incoming(), userId)
-          && incoming().queryLetterVersionId.size() >= 1;
+        // ⚠️ SUBMISSION PACKAGES v26 (25 Oct): A PACKAGE MAY START EMPTY. "Start from: Empty" makes a package
+        // the writer fills by dragging pieces in; it reads "Needs a letter" until it has one. The letter used to
+        // be required here, on create only. Nothing can go out without one: the send drawer reads `ql`.
+        allow create: if isOwner(userId) && isValidId(packageId) && isValidPackage(incoming(), userId);
         // ⚠️ A SENT PACKAGE'S CONTENTS ARE IMMUTABLE, AND THIS IS THE GUARANTEE — not the client
         // check beside it. Once `firstSentAt` exists the three slot fields cannot change, so every
         // query that used this package keeps reporting what the agent actually received. The name,
@@ -942,9 +950,14 @@ service cloud.firestore {
         // edit the slots, and the guarantee is a formality. `hasAny` on the CHANGED keys is what
         // says "you may add it, you may never touch it again".
         allow update: if isOwner(userId) && isValidId(packageId) && isValidPackage(incoming(), userId)
-          && incoming().diff(existing()).affectedKeys().hasOnly(['packageName', 'queryLetterVersionId', 'synopsisVersionId', 'samplePagesVersionId', 'otherMaterials', 'status', 'firstSentAt', 'bookVersionId', 'note', 'noteEditedAt', 'edition', 'editions', 'retiredAt'])
+          && incoming().diff(existing()).affectedKeys().hasOnly(['packageName', 'queryLetterVersionId', 'synopsisVersionId', 'samplePagesVersionId', 'otherMaterials', 'status', 'firstSentAt', 'bookVersionId', 'note', 'noteEditedAt', 'edition', 'editions', 'retiredAt', 'icon', 'extraIds'])
           && (
             !existing().keys().hasAny(['firstSentAt'])
+            // v26: THE OTHER-MATERIALS MIGRATION. A package written before named extras gains `extraIds` ONCE,
+            // naming the one extra its `otherMaterials` text became — the text itself does not change, so what
+            // the package says it sends does not change either, and no edition starts.
+            || (!existing().keys().hasAny(['extraIds'])
+                && incoming().diff(existing()).affectedKeys().hasOnly(['extraIds']))
             // ⚠️ THE VERSION JOINS THE FROZEN SET, and it is the same argument as the other three:
             // a package that has gone out is a record of what the agent received, and the shape of
             // the book it carried is part of that record. Left mutable, a writer could retro-fit a
@@ -952,7 +965,7 @@ service cloud.firestore {
             // requests that arrived on something else.
             // ⚠️ AND THE OTHER MATERIALS AND THE EDITION FIELDS JOIN IT (Part B): they are contents,
             // so outside an edition bump they are as fixed as the slots.
-            || !incoming().diff(existing()).affectedKeys().hasAny(['queryLetterVersionId', 'synopsisVersionId', 'samplePagesVersionId', 'firstSentAt', 'bookVersionId', 'otherMaterials', 'edition', 'editions'])
+            || !incoming().diff(existing()).affectedKeys().hasAny(['queryLetterVersionId', 'synopsisVersionId', 'samplePagesVersionId', 'firstSentAt', 'bookVersionId', 'otherMaterials', 'edition', 'editions', 'extraIds'])
             // ⚠️ THE NEXT EDITION (Part B §B1). A sent package's contents change ONLY by starting its
             // next edition: the number goes up by exactly one and the list grows by exactly one, so
             // every earlier edition — what the agents received — is kept. The stamp and the sample

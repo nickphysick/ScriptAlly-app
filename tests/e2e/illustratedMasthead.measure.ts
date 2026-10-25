@@ -25,7 +25,7 @@ import { openRoute } from "./measure";
    it had been drawing art on the rule without being held to it). Comparable titles has no art until
    Nick supplies it (D6), so it stays in WITHOUT_ART. */
 /* Submission packages joined with its padded archivist (packages v2, 27 Sep; D8). */
-const WITH_ART = ["/queries", "/agents", "/manuscripts/packages"];
+const WITH_ART = ["/queries", "/agents", "/queries/packages"];
 const WITHOUT_ART = ["/todo", "/queries/analytics", "/manuscripts/comps"];
 
 async function open(page: Page, path: string, w: number) {

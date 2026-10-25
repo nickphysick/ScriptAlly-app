@@ -415,6 +415,8 @@ export interface Manuscript {
    * limit (D6) — orderings of one book are one book. Locked in bookVersions.test.ts.
    */
   bookVersions?: BookVersion[];
+  /** Submission packages v26 — the named extras its packages can send (see `PackageExtra`). Absent = none yet. */
+  extras?: PackageExtra[];
   /**
    * Versions v2 (D2) — the version new queries go out with ("In use"). Exactly one once any version exists, set in
    * ONE write that replaces the previous value. Absent on a pre-v2 manuscript; `lib/versionsV2.inUseId` then reads
@@ -551,6 +553,39 @@ export interface PackageEdition {
   synopsisVersionId: string;
   bookVersionId?: string;
   otherMaterials?: string;
+  /** Submission packages v26 — the named extras it held (ids on the manuscript's `extras`). Their NAMES are in
+   *  `otherMaterials` and in `summary`, frozen with the edition. Absent on an edition written before extras. */
+  extraIds?: string[];
+}
+
+/**
+ * Submission packages v26 — the twelve icons a package can wear, so it can be spotted in the Query Centre.
+ * Outside the slot freeze, like the name and the note: an icon is filing, not a claim about what went.
+ */
+export const PACKAGE_ICONS = ["box", "crown", "globe", "flag", "feather", "flask", "star", "bolt", "heart", "compass", "pen", "key"] as const;
+export type PackageIcon = typeof PACKAGE_ICONS[number];
+
+/**
+ * Submission packages v26 — a named extra: whatever an agency asks for that is not a letter, a synopsis or pages
+ * ("Author bio", "Marketing plan"). Saved on the MANUSCRIPT so every one of its packages can tick it.
+ * ⚠️ It replaces `SubmissionPackage.otherMaterials` as free text: a package ticks extras by id, and its
+ *    `otherMaterials` is kept as the ticked extras' NAMES, joined — the one string the send flow, the edition
+ *    engine and every query's frozen summary already read. So a query records which extras went, by name, as
+ *    they were called on the day, and ticking one on a sent package starts its next edition.
+ * `files` waits for Firebase Storage on dev (Phase 5 is stopped): absent until then.
+ */
+export interface PackageExtra {
+  id: string;
+  name: string;
+  files?: MaterialFile[];
+}
+
+/** An attached file (Submission packages v26, Phase 5 — not yet live: Storage is not set up on dev). */
+export interface MaterialFile {
+  name: string;
+  size: number;
+  path: string;
+  addedAt: string;
 }
 
 export interface SubmissionPackage {
@@ -563,9 +598,10 @@ export interface SubmissionPackage {
    * `isValidPackage` requires all three to be present. Single source: `UNFILLED_SLOT` /
    * `isSlotFilled` in `lib/packageMetrics.ts`.
    *
-   * ⚠️ ONLY THE COVERING LETTER IS REQUIRED. Letter-only and letter-plus-synopsis are real
-   * submission shapes, so the other two may be `""` by the writer's stated choice. The rule
-   * enforces `queryLetterVersionId.size() >= 1`; the other two only enforce the key's presence.
+   * ⚠️ NONE IS REQUIRED TO EXIST (Submission packages v26, 25 Oct). A package can start empty ("Start from:
+   * Empty") and be filled by dragging pieces in; it reads "Needs a letter" until it has one, and "Ready" once it
+   * has a letter and a version. Letter-only and letter-plus-synopsis are still real submission shapes. The rule
+   * used to require `queryLetterVersionId.size() >= 1` on create; it now only enforces the keys' presence.
    */
   queryLetterVersionId: string;
   synopsisVersionId: string;
@@ -649,6 +685,11 @@ export interface SubmissionPackage {
    * `undefined`, and a stored `""` would be a claim that the writer answered the question.
    */
   otherMaterials?: string;
+  /** Submission packages v26 — the named extras it sends, by id (the manuscript's `extras`). Contents, so frozen
+   *  with the slots once sent; `otherMaterials` carries their names. Absent = written before extras. */
+  extraIds?: string[];
+  /** Submission packages v26 — its icon. Absent reads as "box". */
+  icon?: PackageIcon;
   status: RecordStatus;
   createdDate: string; // ISO String
 }

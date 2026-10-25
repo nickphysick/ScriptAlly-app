@@ -7,7 +7,7 @@ const ROUTES: [string, string][] = [
   ["/todo", "todo"], ["/todo/calendar", "calendar"], ["/todo/corkboard", "noteboard"],
   ["/agents", "contact-list"], ["/agents/discover", "discover"],
   ["/manuscripts", "manuscripts"], ["/manuscripts/comps", "comps"],
-  ["/manuscripts/packages", "packages"], ["/import", "import"],
+  ["/queries/packages", "packages"], ["/import", "import"],
 ];
 async function open(page: Page, p: string, w: number) {
   await openRoute(page, p, { width: w, height: 900 });

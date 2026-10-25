@@ -197,8 +197,9 @@ describe("the rule — proven against the deployed database by rulesProbe, asser
       "!existing().keys().hasAny(['firstSentAt'])");
     /* retargeted (Part B, 28 Sep): the other materials and the edition fields JOIN the frozen set —
        outside an edition bump (asserted in packageEditions.test.ts) they are as fixed as the slots */
+    /* retargeted (Submission packages v26): the named extras' ids join it too — they are contents */
     expect(rules).toMatch(
-      /affectedKeys\(\)\.hasAny\(\['queryLetterVersionId', 'synopsisVersionId', 'samplePagesVersionId', 'firstSentAt', 'bookVersionId', 'otherMaterials', 'edition', 'editions'\]\)/);
+      /affectedKeys\(\)\.hasAny\(\['queryLetterVersionId', 'synopsisVersionId', 'samplePagesVersionId', 'firstSentAt', 'bookVersionId', 'otherMaterials', 'edition', 'editions', 'extraIds'\]\)/);
   });
 
   it("the stamp is write-once — it is in the SAME forbidden set", () => {

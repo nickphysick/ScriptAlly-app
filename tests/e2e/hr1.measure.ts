@@ -65,7 +65,8 @@ const PAGES: PageMap[] = [
   { key: "analytics", route: "/queries/analytics", header: "[data-a21='header']", eyebrow: "[data-a21='eyebrow']", title: "[data-a21='title']", byline: "[data-a21='byline']", acts: "[data-a21='acts']", right: "[data-a21='card']", rightTokenW: true, content: ".a21-desk" },
   { key: "responses", route: "/queries/responses", header: "[data-rsp='header']", eyebrow: "[data-rsp='eyebrow']", title: ".rsp-hd h1", byline: "[data-rsp='byline']", acts: "[data-rsp='acts']", right: "[data-rsp='card']", content: ".rsp-pos" },
   { key: "discover", route: "/agents/discover", header: "[data-dv1='header']", eyebrow: "[data-dv1='header'] [data-dv1='eyebrow']", title: ".dv1-hd h1", byline: "[data-dv1='byline']", acts: "[data-dv1='header'] [data-dv1='acts']", right: "[data-dv1='header'] .dv1-card", rightTokenW: true, content: ".dv1-hd + *", init: "live" },
-  { key: "packages", route: "/manuscripts/packages", header: "[data-pk4='header']", eyebrow: ".pk4-hd .pk4-ey", title: ".pk4-hd h1", byline: ".pk4-hd .pk4-by", acts: ".pk4-hd .pk4-acts", right: "[data-pk4='summary']", content: ".pk4-hd .pk4-fr" },
+  /* RETIRED FOR SUBMISSION PACKAGES (v26, 25 Oct): its hero is the ref's own navy card, 92 in from the sheet's edges,
+     held by PK26-W (tests/e2e/pk26.measure.ts) rather than by the shared hero geometry. */
   { key: "todo", route: "/todo", header: "[data-td5='header']", eyebrow: ".td5-hd .td5-ey", title: ".td5-hd h1", byline: ".td5-hd .td5-by", acts: ".td5-hd .td5-acts", right: "[data-td5='card']", content: ".td5-hd .td5-fr" },
 ];
 
@@ -73,7 +74,8 @@ const MUTATIONS: Record<string, string> = {
   "HR1-1": `:root, .ws-app, .ws-app.sheet-wide { --hero-top: 42px !important; }`,
   "HR1-3": `.rsp-hd .rsp-left { margin-left: 0 !important; }`,
   "HR1-4": `.qc138-hd .qc138-hawk { height: calc(var(--hero-art-h) + 20px) !important; }`,
-  "HR1-5": `.pk4-hd .pk4-tr { margin-right: 0 !important; }`,
+  /* RE-POINTED (Submission packages v26): the v4 header it broke is gone; the To-do header's right column is the same law */
+  "HR1-5": `.td5-hd .td5-tr { margin-right: 0 !important; }`,
   "HR1-6": `.a21-desk { margin-top: 54px !important; }`,
   "HR1-7": `.dv1-hd h1.dv1-title { margin-left: 4px !important; }`,
   "HR1-8": `.ms21-hd3, [data-slh='header'] { margin-top: 6px !important; }`,

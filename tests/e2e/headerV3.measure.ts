@@ -32,7 +32,7 @@ const PANEL_BG = "rgb(45, 58, 80)";
 /* Corkboard v1 §B: /todo/corkboard (the Noteboard renamed) is a NUMBER page — "8 notes pinned to your corkboard". */
 /* RE-POINTED (Contact list v16, 12 Oct): the Contact list is a TITLE page now ("Every agent, in one place"), as the
    Query Centre became in v137. Its number, its hidden counts sentence and H3's sum went with the number. */
-/* RETIRED (Submission packages v4, 14 Oct): /manuscripts/packages left the number panel for the centred light header
+/* RETIRED (Submission packages v4, 14 Oct): /queries/packages left the number panel for the centred light header
    ("{n} packages in use", page-local, OWN_HEADER_ROUTES); PK4 A1 holds it. Its WORDS and ROWS entries went with it. */
 /* To-do list v5 (15 Oct): /todo LEFT the NUMBER pages — its header is page-local ("{n} tasks in your tray", OWN_HEADER_ROUTES);
    TD5 A1 holds it, n against the sidebar badge. Its WORDS entry and its tile check went with it. */

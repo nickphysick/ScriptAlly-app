@@ -22,7 +22,7 @@ const PAGES: [string, string][] = [
   ["Contact list", "/agents"],
   ["Discover", "/agents/discover"],
   ["Manuscripts", "/manuscripts"],
-  ["Submission packages", "/manuscripts/packages"],
+  ["Submission packages", "/queries/packages"],
   ["Analytics", "/queries/analytics"],
   ["To-do", "/todo"],
   ["Calendar", "/todo/calendar"],

@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "PK26-E",
+  "where": "the package is on its 2nd edition",
+  "ok": true,
+  "detail": "edition=2"
+ },
+ {
+  "lock": "PK26-E",
+  "where": "its current letter is Letter B",
+  "ok": true,
+  "detail": "pk26-let-b"
+ },
+ {
+  "lock": "PK26-E",
+  "where": "its 1st edition kept Letter A",
+  "ok": true,
+  "detail": "[[1,\"pk26-let-a\"],[2,\"pk26-let-b\"]]"
+ },
+ {
+  "lock": "PK26-E",
+  "where": "the sent query is still credited to the 1st edition",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "PK26-E",
+  "where": "…and still says what went",
+  "ok": true,
+  "detail": "Query letter Letter A"
+ }
+]

@@ -141,9 +141,15 @@ describe("The IA renders what exists — and nothing else", () => {
      they made the nav a second control surface for a page that already had one, so the two could
      disagree about what you were looking at — and they forced counts into a navigation column,
      which is how a nav becomes a dashboard. Two real destinations now. */
-  it("Queries carries exactly Query Centre, Analytics and Responses", () => {
-    /* Responses v2 (15 Oct) is a routed page with its own slot, so it is a destination, not a filter */
-    expect(byId("queries").children!.map((c) => c.label)).toEqual(["Query Centre", "Analytics", "Responses"]);
+  it("Queries carries exactly Query Centre, Submission packages, Analytics and Responses", () => {
+    /* Responses v2 (15 Oct) is a routed page with its own slot, so it is a destination, not a filter.
+       Submission packages v26 (25 Oct) moved here from Materials: what goes out with a query sits with the queries,
+       and its row carries the second line and the PRO tag. "Your book" keeps Manuscripts, Versions, Comparable titles. */
+    expect(byId("queries").children!.map((c) => c.label)).toEqual(["Query Centre", "Submission packages", "Analytics", "Responses"]);
+    const pkg = byId("queries").children!.find((c) => c.label === "Submission packages")!;
+    expect(pkg).toMatchObject({ path: "/queries/packages", sub: "letters · synopses · packages", pro: true });
+    expect(byId("materials").label).toBe("Your book");
+    expect(byId("materials").children!.map((c) => c.label)).toEqual(["Manuscripts", "Versions", "Comparable titles"]);
   });
 
   it("no filter child survives in the nav", () => {

@@ -31,7 +31,7 @@ export const SIZES = [
 /** Every workspace route the shell renders (routeTiers' WORKSPACE_PATHS). */
 export const BAR_ROUTES = [
   "/dashboard", "/queries", "/queries/analytics", "/agents", "/agents/discover",
-  "/manuscripts", "/manuscripts/comps", "/manuscripts/packages",
+  "/manuscripts", "/manuscripts/comps", "/queries/packages",
   "/todo", "/todo/calendar", "/todo/corkboard", "/import", "/account/profile", "/plans", "/help",
 ] as const;
 
@@ -318,7 +318,7 @@ export function judgeFull(L: Ledger, r: NonNullable<Awaited<ReturnType<typeof re
 /** The six living routes (living headers v3; src/lib/livingRoutes.ts — restated, because a Playwright file
  *  cannot import a module tree that reaches CSS). Their full header takes the v3 ref's geometry, has no
  *  eyebrow, and the bar carries their name from first paint. */
-export const LIVING_ROUTES: readonly string[] = ["/queries", "/agents", "/todo", "/manuscripts/packages", "/manuscripts/comps", "/queries/analytics"];
+export const LIVING_ROUTES: readonly string[] = ["/queries", "/agents", "/todo", "/queries/packages", "/manuscripts/comps", "/queries/analytics"];
 
 /** The header's three tops, absolute, for the §4.4 comparison between pages. */
 export async function readTops(page: Page) {

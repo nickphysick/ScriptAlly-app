@@ -64,24 +64,27 @@ describe("the materials band replaces the rail's register (D1)", () => {
     }
   });
 
-  /* ⚠️ RETARGETED ONTO PACKAGES v4 (14 Oct). The Materials rail is retired; the page's ONE materials surface is the
-     materials sheet (`MaterialsSheet`, three columns), and a put-away material keeps its way back: each column's
-     "Show put away" lists them, and a put-away one's drawer offers Restore. The laws are unchanged: one materials
-     surface, and a put-away material always has a way back. */
-  it("⚠️ ONE materials surface — the v4 materials sheet — and none of the retired ones", () => {
+  /* ⚠️ RETARGETED ONTO PACKAGES v26 (25 Oct). The materials live in TWO views by design (the ref draws both): Your
+     materials beside the open package, to drag from, and the Query letters / Synopses tables, to read and edit. Your
+     materials is mounted ONCE, inside the builder; none of the retired surfaces is back; and a put-away material keeps
+     its way back — the tables list put-away ones last, tagged, and their drawer offers "Bring it back". */
+  it("⚠️ Your materials once, inside the builder — and none of the retired surfaces", () => {
     const d = decls(page);
-    expect(d.match(/<MaterialsSheet\b/g) ?? [], "the materials sheet is mounted exactly once").toHaveLength(1);
-    for (const gone of ["PkgMaterials", "PageRail", "MaterialsBand", "BuilderRail", "PackagesBand", "TrackingBand", "FootnoteBand"]) {
+    expect(d.match(/<Pk26Builder\b/g) ?? [], "the builder is mounted exactly once").toHaveLength(1);
+    const builder = decls(read("../components/packages/v26/Pk26Builder.tsx"));
+    expect(builder.match(/data-pk26="lib"/g) ?? [], "Your materials is drawn exactly once").toHaveLength(1);
+    for (const gone of ["MaterialsSheet", "PkgMaterials", "PageRail", "MaterialsBand", "BuilderRail", "PackagesBand", "TrackingBand", "FootnoteBand"]) {
       expect(d, `${gone} is back on the page`).not.toMatch(new RegExp(`<${gone}\\b`));
     }
   });
 
   it("⚠️ AND A PUT-AWAY MATERIAL STILL HAS A WAY BACK", () => {
-    const sheet = decls(read("../components/packages/v4/PkgSheets4.tsx"));
-    expect(sheet).toContain('data-pk4="show-away"');
-    expect(sheet).toMatch(/\{open \? <div className="pk4-awaylist">\{away\.map\(row\)\}<\/div> : null\}/);
-    const drawer = decls(read("../components/packages/v4/PkgDrawer4.tsx"));
-    expect(drawer).toMatch(/m\.retired \? \([\s\S]{0,200}data-pk4="restore" onClick=\{\(\) => void model\.restoreMat\(m\)\}/);
+    const table = decls(read("../components/packages/v26/Pk26Materials.tsx"));
+    expect(table).toContain("model.lettersAll : model.synopsesAll");
+    expect(table).toContain("m.retired ? <em>Put away</em>");
+    const drawer = decls(read("../components/packages/v26/Pk26Drawer.tsx"));
+    expect(drawer).toMatch(/data-pk26=\{m\.retired \? "restore" : "put-away"\}/);
+    expect(drawer).toContain("if (m.retired) await model.bringBack(m)");
   });
 });
 
@@ -94,13 +97,12 @@ describe("every entry point names its type (D3)", () => {
 
   /* ⚠️ RETARGETED ONTO PACKAGES v2: every `+ Add` names its kind, and the modal is keyed on it, so
      a Letters add after a Synopses add is a fresh mount, never a stale draft. */
-  it("every + Add names its kind, and the modal is keyed on it", () => {
-    const rail = decls(read("../components/packages/PkgMaterials.tsx"));
-    expect(rail).toContain("data-add={k} onClick={(e) => onAdd(k, e.currentTarget)}");
-    /* retargeted (Part B, 28 Sep): the key also carries the material being EDITED, so opening Edit on
-       a second letter remounts the modal with that letter's text — the law (keyed on its kind) holds */
-    /* v4 (14 Oct): the material form is the drawer's, keyed on its kind and the material it edits */
-    expect(decls(read("../components/packages/v4/PkgDrawer4.tsx"))).toContain("key={`mf:${view.d.editId ?? view.d.kind}");
+  /* v26 (25 Oct): Your materials' "+ Write or paste…" and the tables' "+ Add" both name their kind, and the drawer's
+     form is keyed on the material it edits (or on the kind it adds), so a second letter is a fresh mount. */
+  it("every + Add names its kind, and the drawer's form is keyed on it", () => {
+    expect(decls(read("../components/packages/v26/Pk26Builder.tsx"))).toContain("onClick={() => onNewMaterial(lib)}");
+    expect(decls(page)).toContain('onAdd={() => setDrawer({ m: "newmat", kind: tab })}');
+    expect(decls(read("../components/packages/v26/Pk26Drawer.tsx"))).toContain("key={view.m === \"mat\" ? view.id : `new-${view.kind}`}");
   });
 });
 

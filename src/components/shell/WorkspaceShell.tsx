@@ -738,7 +738,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                     <button
                       type="button"
                       key={ch.id}
-                      className={`ws-ni${on ? " on" : ""}${att ? " att" : ""}`}
+                      className={`ws-ni${on ? " on" : ""}${att ? " att" : ""}${ch.sub ? " two" : ""}`}
                       aria-current={on ? "page" : undefined}
                       /* v3 (L9): AN EXPLICIT NAME, identical to the label, so the link is named the
                          same way in both states rather than by a label span that collapses to 0px.
@@ -755,7 +755,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                           pixel-identical expanded, and collapsing to zero WITH the label, where a
                           flex gap beside a zero-width child would hold itself open and park the
                           icon 5px off the rail's centre. */}
-                      <span className="ws-lbl">{ch.label}</span>
+                      <span className="ws-lbl">{ch.label}{ch.sub ? <span className="ws-sub2" data-shell="sub">{ch.sub}</span> : null}</span>
                       {ch.pro ? <span className="ws-qpro" data-shell="pro" aria-label="Pro">PRO</span> : null}
                       {att && <span className="ws-ct" data-shell="count" aria-label={`${ch.count} to do`}>{inkCount(ch.count!)}</span>}
                     </button>

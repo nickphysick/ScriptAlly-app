@@ -49,7 +49,7 @@ const ROUTES = [
   { name: "Discover", route: "/agents/discover", root: ".dv1-wpg" },
   { name: "Manuscripts", route: "/manuscripts", root: ".msv-wpg" },
   { name: "Comparable titles", route: "/manuscripts/comps", root: ".ct-wpg" },
-  { name: "Submission packages", route: "/manuscripts/packages", root: ".pkgw-wpg" },
+  { name: "Submission packages", route: "/queries/packages", root: ".pkgw-wpg" },
   { name: "To-do list", route: "/todo", root: ".tpl-wpg" },
   { name: "Calendar", route: "/todo/calendar", root: ".tpl-wpg" },
   { name: "Noteboard", route: "/todo/corkboard", root: ".tpl-wpg" },

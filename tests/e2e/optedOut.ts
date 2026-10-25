@@ -46,7 +46,7 @@
 export const OPTED_OUT: readonly string[] = ["Query Centre", "Contact list", "Manuscripts", "Comparable titles", "Submission packages", "To-do list", "Analytics", "Discover"];
 
 /** Routes of the opted-out pages, for suites whose census is keyed by route rather than by name. */
-export const OPTED_OUT_ROUTES: readonly string[] = ["/queries", "/agents", "/manuscripts", "/manuscripts/comps", "/manuscripts/packages", "/todo", "/queries/analytics", "/agents/discover"];
+export const OPTED_OUT_ROUTES: readonly string[] = ["/queries", "/agents", "/manuscripts", "/manuscripts/comps", "/queries/packages", "/todo", "/queries/analytics", "/agents/discover"];
 
 export const isOptedOut = (nameOrRoute: string): boolean =>
   OPTED_OUT.includes(nameOrRoute) || OPTED_OUT_ROUTES.includes(nameOrRoute);

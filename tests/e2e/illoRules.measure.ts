@@ -30,14 +30,14 @@ const BORDER_PAGES: { name: string; route: string; cls: string }[] = [
   { name: "Discover",            route: "/agents/discover",      cls: "dv1-wpg"   },
   { name: "Manuscripts",         route: "/manuscripts",          cls: "msv-wpg"  },
   { name: "Comparable titles",   route: "/manuscripts/comps",    cls: "ct-wpg"   },
-  { name: "Submission packages", route: "/manuscripts/packages", cls: "pkgw-wpg" },
+  { name: "Submission packages", route: "/queries/packages", cls: "pkgw-wpg" },
   { name: "To-do list",          route: "/todo",                 cls: "td5-wpg"  },
   { name: "Calendar",            route: "/todo/calendar",        cls: "tpl-wpg"  },
   { name: "Noteboard",           route: "/todo/corkboard",       cls: "tpl-wpg"  },
 ];
 
 const TRIAL = [
-  { name: "Submission packages", route: "/manuscripts/packages", cls: "pkgw-wpg", settles: true  },
+  { name: "Submission packages", route: "/queries/packages", cls: "pkgw-wpg", settles: true  },
   /* ⚠️ QUERY CENTRE SCROLLS NOW. It was `fill` — nothing to scroll, so its masthead never left and
      the bar was unreachable. Its browsing view is an ordinary scrolling page, which is what the
      two-view split is FOR, so this expectation inverts with the page rather than being relaxed. */

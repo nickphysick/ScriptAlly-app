@@ -820,4 +820,34 @@ console.log("\nHousekeeping prefs by leaf — todoPrefs.contacts, noteboard and 
   console.log(`  ${back ? "✅" : "❌"} ${"todoPrefs restored to its exact prior state".padEnd(44)} ${back ? "" : "— THE ACCOUNT HAS CHANGED"}`);
 }
 
+/* ── Submission packages v26 (25 Oct) ──────────────────────────────────────────────────────────────
+ * A package may start EMPTY; its icon is outside the freeze; its named extras' ids are contents, frozen with the
+ * slots, except for the one-time migration (ids added to a package written before extras, its text unchanged); and
+ * the manuscript holds its extras. Every write is on a probe package of its own, deleted at the end.
+ */
+console.log("\nSubmission packages v26 — empty packages, icons, named extras:");
+{
+  const pref = doc(db, "users", uid, "packages", "probe-pk26");
+  const base = { id: "probe-pk26", manuscriptId: "seed-ms-1", userId: uid, packageName: "Probe v26", queryLetterVersionId: "",
+    synopsisVersionId: "", samplePagesVersionId: "", status: "Active", createdDate: new Date().toISOString(), edition: 1 };
+  await attempt("create with no letter (Start from: Empty)", "v26 P2", () => setDoc(pref, { ...base, icon: "crown", extraIds: [] }));
+  await attempt("icon on an unsent package", "v26 P2", () => updateDoc(pref, { icon: "globe" }));
+  await attempt("an icon outside the twelve is refused…", "v26 P2 (expect DENIED)", () => updateDoc(pref, { icon: "rocket" }));
+  /* the migration shape: a package written before extras, then sent */
+  await attempt("…set up: legacy text, then the stamp", "setup", async () => {
+    await setDoc(pref, { ...base, otherMaterials: "Author bio" });
+    await updateDoc(pref, { firstSentAt: new Date().toISOString() });
+  });
+  await attempt("SENT package gains extraIds once (migration)", "v26 P6", () => updateDoc(pref, { extraIds: ["probe-ext-1"] }));
+  await attempt("SENT package changes extraIds w/o an edition…", "v26 P6 (expect DENIED)", () => updateDoc(pref, { extraIds: ["probe-ext-1", "probe-ext-2"], otherMaterials: "Author bio, CV" }));
+  await attempt("SENT package: extras change WITH the next edition", "v26 P6", () => updateDoc(pref, { extraIds: ["probe-ext-1", "probe-ext-2"], otherMaterials: "Author bio, CV", edition: 2, editions: [{ n: 1 }, { n: 2 }] }));
+  await attempt("SENT package: icon still writable", "v26 P2", () => updateDoc(pref, { icon: "star" }));
+  try { await deleteDoc(pref); console.log("  · probe package removed"); } catch (e) { console.log(`  ⚠️  could not remove probe-pk26: ${e.message}`); }
+
+  const mref = doc(db, "users", uid, "manuscripts", "seed-ms-1");
+  const had = (await getDoc(mref)).data()?.extras;
+  await attempt("manuscript extras", "v26 P6", () => updateDoc(mref, { extras: [{ id: "probe-ext-1", name: "Probe extra" }] }),
+    () => updateDoc(mref, { extras: had === undefined ? deleteField() : had }));
+}
+
 process.exit(0);

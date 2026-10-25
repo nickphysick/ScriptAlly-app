@@ -100,7 +100,7 @@ test("five sessions on dev", async ({ page }) => {
   await page.screenshot({ path: "reports/all-sessions/3-calendar.png" });
 
   /* ── 4 · submission packages ──────────────────────────────────────────────────────────────── */
-  await page.goto("/manuscripts/packages");
+  await page.goto("/queries/packages");
   await page.waitForTimeout(6000);
   const pkg = await page.evaluate(`(() => {
     const vis = ${VIS};

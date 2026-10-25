@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "PK26-R",
+  "where": "path",
+  "ok": true,
+  "detail": "/queries/packages"
+ },
+ {
+  "lock": "PK26-R",
+  "where": "query kept",
+  "ok": true,
+  "detail": "?pkg=pk26-pkg-sent"
+ },
+ {
+  "lock": "PK26-R",
+  "where": "that package is open",
+  "ok": true,
+  "detail": "pk26-pkg-sent"
+ },
+ {
+  "lock": "PK26-R",
+  "where": "its button is the selected one",
+  "ok": true,
+  "detail": "Sent one"
+ }
+]
