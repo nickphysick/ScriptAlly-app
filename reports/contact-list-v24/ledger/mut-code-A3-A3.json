@@ -1,0 +1,98 @@
+[
+ {
+  "lock": "A3",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "chips 5 rows 52"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 All = every row",
+  "ok": true,
+  "detail": "All 52 rows 52"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 you count = its rows",
+  "ok": true,
+  "detail": "chip 4 rows 4"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 agent count = its rows",
+  "ok": true,
+  "detail": "chip 7 rows 7"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 none count = its rows",
+  "ok": true,
+  "detail": "chip 38 rows 38"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 closed count = its rows",
+  "ok": true,
+  "detail": "chip 3 rows 3"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 Your move shows exactly its agents",
+  "ok": true,
+  "detail": "rows 4 (you) chip 4"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 chip AND Filters",
+  "ok": true,
+  "detail": "rows 4 [{\"k\":\"you\",\"open\":true},{\"k\":\"you\",\"open\":true},{\"k\":\"you\",\"open\":true},{\"k\":\"you\",\"open\":true}]"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "chips 5 rows 52"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 All = every row",
+  "ok": true,
+  "detail": "All 52 rows 52"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 you count = its rows",
+  "ok": true,
+  "detail": "chip 4 rows 4"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 agent count = its rows",
+  "ok": true,
+  "detail": "chip 7 rows 7"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 none count = its rows",
+  "ok": true,
+  "detail": "chip 38 rows 38"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 closed count = its rows",
+  "ok": true,
+  "detail": "chip 3 rows 3"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 Your move shows exactly its agents",
+  "ok": true,
+  "detail": "rows 4 (you) chip 4"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 chip AND Filters",
+  "ok": true,
+  "detail": "rows 4 [{\"k\":\"you\",\"open\":true},{\"k\":\"you\",\"open\":true},{\"k\":\"you\",\"open\":true},{\"k\":\"you\",\"open\":true}]"
+ }
+]

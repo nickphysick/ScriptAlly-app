@@ -1,0 +1,158 @@
+[
+ {
+  "lock": "A1",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "qc {\"card\":{\"l\":340,\"r\":1412,\"t\":129.75,\"b\":377.828125,\"w\":1072,\"h\":248.078125},\"ban\":{\"l\":340,\"r\":1412,\"t\":399.828125,\"b\":471.828125,\"w\":1072,\"h\":72},\"vr\":{\"l\":340,\"r\":1412,\"t\":499.828125,\"b\":537.828125,\"w\":1072,\"h\":38},\"sheet\":{\"l\":308,\"r\":1444,\"t\":551.828125,\"b\":8907.625,\"w\":1136,\"h\":8355.796875}} cl {\"card\":{\"l\":380,\"r\":1452,\"t\":129.75,\"b\":377.828125,\"w\":1072,\"h\":248.078125},\"ban\":{\"l\":380,\"r\":1452,\"t\":399.828125,\"b\":481.828125,\"w\":1072,\"h\":82},\"vr\":{\"l\":340,\"r\":1412,\"t\":509.828125,\"b\":547.828125,\"w\":1072,\"h\":38},\"sheet\":{\"l\":308,\"r\":1444,\"t\":561.828125,\"b\":5083.828125,\"w\":1136,\"h\":4522}}"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 card left",
+  "ok": false,
+  "detail": "qc 340.0 cl 380.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 card right",
+  "ok": false,
+  "detail": "qc 1412.0 cl 1452.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 ban left",
+  "ok": false,
+  "detail": "qc 340.0 cl 380.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 ban right",
+  "ok": false,
+  "detail": "qc 1412.0 cl 1452.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 vr left",
+  "ok": true,
+  "detail": "qc 340.0 cl 340.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 vr right",
+  "ok": true,
+  "detail": "qc 1412.0 cl 1412.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 sheet left",
+  "ok": true,
+  "detail": "qc 308.0 cl 308.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 sheet right",
+  "ok": true,
+  "detail": "qc 1444.0 cl 1444.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 card top",
+  "ok": true,
+  "detail": "qc 129.75 cl 129.75"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 card→banner gap",
+  "ok": true,
+  "detail": "qc 22.0 cl 22.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 banner→row gap",
+  "ok": true,
+  "detail": "qc 28.0 cl 28.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 row→sheet gap",
+  "ok": true,
+  "detail": "qc 14.0 cl 14.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "qc {\"card\":{\"l\":304,\"r\":1216,\"t\":129.75,\"b\":377.828125,\"w\":912,\"h\":248.078125},\"ban\":{\"l\":304,\"r\":1216,\"t\":399.828125,\"b\":471.828125,\"w\":912,\"h\":72},\"vr\":{\"l\":304,\"r\":1216,\"t\":499.828125,\"b\":537.828125,\"w\":912,\"h\":38},\"sheet\":{\"l\":280,\"r\":1240,\"t\":551.828125,\"b\":8907.625,\"w\":960,\"h\":8355.796875}} cl {\"card\":{\"l\":344,\"r\":1256,\"t\":129.75,\"b\":377.828125,\"w\":912,\"h\":248.078125},\"ban\":{\"l\":344,\"r\":1256,\"t\":399.828125,\"b\":498.828125,\"w\":912,\"h\":99},\"vr\":{\"l\":304,\"r\":1216,\"t\":526.828125,\"b\":564.828125,\"w\":912,\"h\":38},\"sheet\":{\"l\":280,\"r\":1240,\"t\":578.828125,\"b\":5100.828125,\"w\":960,\"h\":4522}}"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 card left",
+  "ok": false,
+  "detail": "qc 304.0 cl 344.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 card right",
+  "ok": false,
+  "detail": "qc 1216.0 cl 1256.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 ban left",
+  "ok": false,
+  "detail": "qc 304.0 cl 344.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 ban right",
+  "ok": false,
+  "detail": "qc 1216.0 cl 1256.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 vr left",
+  "ok": true,
+  "detail": "qc 304.0 cl 304.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 vr right",
+  "ok": true,
+  "detail": "qc 1216.0 cl 1216.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 sheet left",
+  "ok": true,
+  "detail": "qc 280.0 cl 280.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 sheet right",
+  "ok": true,
+  "detail": "qc 1240.0 cl 1240.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 card top",
+  "ok": true,
+  "detail": "qc 129.75 cl 129.75"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 card→banner gap",
+  "ok": true,
+  "detail": "qc 22.0 cl 22.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 banner→row gap",
+  "ok": true,
+  "detail": "qc 28.0 cl 28.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 row→sheet gap",
+  "ok": true,
+  "detail": "qc 14.0 cl 14.0"
+ }
+]

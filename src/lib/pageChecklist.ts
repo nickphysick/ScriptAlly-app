@@ -82,9 +82,9 @@ export type ContactGuideKey = "add" | "search" | "pin" | "open" | "edit" | "hk";
 export const CONTACT_CHECKLIST: readonly ChecklistItem<ContactGuideKey>[] = [
   { key: "add", title: "Add an agent", line: "One you'd love to query is a good start." },
   { key: "search", title: "Search for an agent", line: "Find anyone on your list by name or agency." },
-  /* Contact list v19 §K, v20 §G — the third of six: "Go full screen". Its spotlight is the title row's Full screen button,
-     and it ticks when the list goes full screen. The key stays "pin", so a tick already earned is kept. */
-  { key: "pin", title: "Go full screen", line: "Turn the list into the whole page while you work." },
+  /* Contact list v19 §K, v20 §G, v24 F — the third of six: "Go full screen". Its spotlight is the list's navy bar's Full
+     screen button, and it ticks when the list goes full screen. The key stays "pin", so a tick already earned is kept. */
+  { key: "pin", title: "Go full screen", line: "Turn the list into an address book while you work." },
   { key: "open", title: "Open an agent's card", line: "Everything you know about them, in one place." },
   { key: "edit", title: "Edit an agent", line: "Fix a detail, or add what they're looking for." },
   { key: "hk", title: "Do some housekeeping", line: "Fill in one gap and watch List health climb." },

@@ -69,7 +69,8 @@ export async function openCl(page: Page, vp: VP, o: CLOpt = {}) {
   }, o);
   await openApp(page, `/agents${o.full ? "?full=1" : ""}`, vp);
   /* the base build has no address book: its rows stand in, so a red-first run records readings rather than timing out */
-  await page.locator(`${BOOK_ROW}, .clv-group:not([data-loading]) .clv-row`).first().waitFor({ timeout: 30_000 });
+  /* Contact list v24: the normal page's rows are the List sheet's (`data-cl24="row"`); the book is full screen's */
+  await page.locator(`${BOOK_ROW}, [data-cl24='row'], .clv-group:not([data-loading]) .clv-row`).first().waitFor({ timeout: 30_000 });
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(1200);
 }

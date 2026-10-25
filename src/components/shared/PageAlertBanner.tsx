@@ -20,6 +20,9 @@ export interface PageAlertBannerProps {
   line: React.ReactNode;
   /** the icon inside the disc; the warning triangle by default */
   icon?: React.ReactNode;
+  /** Contact list v24 A2 — something to lead with IN PLACE OF the icon disc (the List-health ring). Versions and the
+   *  Query Centre never pass it, so their banners render exactly as before (QC149-L0). */
+  lead?: React.ReactNode;
   faces?: readonly BannerFace[];
   action?: { label: React.ReactNode; onClick?: () => void; data?: Data };
   /** "rust" is the only tone today (Versions and the Query Centre both draw it) */
@@ -38,12 +41,12 @@ export const WARNING_ICON = (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3.5 2.8 19.5h18.4z" /><path d="M12 10v4.2M12 17.2v.1" /></svg>
 );
 
-export const PageAlertBanner: React.FC<PageAlertBannerProps> = ({ headline, line, icon = WARNING_ICON, faces, action, tone = "rust", hidden, id, headlineId, facesId, classPrefix, className, role = "status", data }) => {
+export const PageAlertBanner: React.FC<PageAlertBannerProps> = ({ headline, line, icon = WARNING_ICON, lead, faces, action, tone = "rust", hidden, id, headlineId, facesId, classPrefix, className, role = "status", data }) => {
   if (hidden) return null;
   const c = (part: string) => (classPrefix ? `pab${part} ${classPrefix}${part}` : `pab${part}`);
   return (
     <div className={[c(""), `pab--${tone}`, className].filter(Boolean).join(" ")} id={id} role={role} {...data}>
-      <span className={c("-i")} aria-hidden="true">{icon}</span>
+      {lead != null ? <span className={c("-lead")}>{lead}</span> : <span className={c("-i")} aria-hidden="true">{icon}</span>}
       <div className={c("-t")}>
         <p className={c("-h")} id={headlineId}>{headline}</p>
         <p className={c("-s")}>{line}</p>
