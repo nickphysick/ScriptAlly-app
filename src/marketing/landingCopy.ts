@@ -89,6 +89,12 @@ export const PHONE_STORY = {
     /** The desk's sequence (v4 S2): Pages 10 → Chapters 1, then + pressed twice: 2, 3. */
     desk: { start: "10", chapters: "1", steps: ["2", "3"], minus: "−", plus: "+" },
   },
+  /** v3.2 (F3) — the face the card flips to when a request lands (phones): the band, the title, and one
+      line as [before, in bold, after]. */
+  flip: {
+    partial: { tag: "Partial requested", day: "Day 36", title: "Eleanor wants to read more!", line: ["A partial request: ", "the first 3 chapters", "."] },
+    full: { tag: "Full requested", day: "Day 99", title: "Eleanor wants the full!", line: ["A full request: ", "the whole manuscript", "."] },
+  },
 } as const;
 
 /**
