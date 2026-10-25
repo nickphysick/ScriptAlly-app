@@ -15,6 +15,12 @@
 .mk-hc-pile :where(span, div, p, b, i, em, small, li, ol) { font-family: inherit; }
 
 .mk-hc-pile { position: absolute; inset: 0; transform-origin: 0 0; pointer-events: none; }
+/* ⚠️ THE DESK PILE IS NEVER THE PAGE'S SCROLL ANCHOR (v4). Its cards drift with the pointer — which
+   since v4 really runs (v3's never did: it read a null host) — and a `translate` changing on the anchor
+   node suppresses scroll anchoring, so the nav's 16px condense went uncompensated and the hero's "See
+   how it works" jump landed 16px off (landingColoursV2 N3). Excluding the pile restores the baseline
+   exactly. Desk only: the phone pile has no drift and keeps every value it had. */
+.mk-hc-pile:not(.mk-hc-pile--phone) { overflow-anchor: none; }
 
 .mk-lc {
   position: absolute; left: 688px; top: 14px; width: 486px; box-sizing: border-box; padding: 7px;
