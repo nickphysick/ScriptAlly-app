@@ -455,7 +455,13 @@ export const AgentCardWide24: React.FC<AgentCard24Props & { extras: WideExtras }
                     {extras.next ? <li className="next">{NEXT_RING}<span className="t">{extras.next.title}</span><span className={`d${extras.next.due ? " due" : ""}`}>{extras.next.date}</span></li> : null}
                   </ol>
                 </>
-              ) : <p className="cl24w-noq">No queries to {m.first} yet.</p>}
+              ) : m.view.history.length ? (
+                /* the set is the active book's; the facts are across books — so say which book, and show the others */
+                <>
+                  <p className="cl24w-noq" data-cl24="noq">{p.bookTitle ? `Not queried for ${p.bookTitle} yet.` : `No queries to ${m.first} yet.`}</p>
+                  <YouAnd rows={m.view.history} first={m.first} onOpenQuery={p.onOpenQuery} />
+                </>
+              ) : <p className="cl24w-noq" data-cl24="noq">No queries to {m.first} yet.</p>}
               <Call call={m.call} p={p} button={false} />
               <span className="qc149c-k">Notes</span>
               <Notes p={p} first={m.first} />
