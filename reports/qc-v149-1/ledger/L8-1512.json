@@ -1,0 +1,32 @@
+[
+ {
+  "where": "population: a row with nothing sent",
+  "ok": true,
+  "detail": "{\"row\":true,\"tiles\":0,\"add\":\"hidden\"}"
+ },
+ {
+  "where": "at rest: no icons",
+  "ok": true,
+  "detail": "{\"row\":true,\"tiles\":0,\"add\":\"hidden\"}"
+ },
+ {
+  "where": "at rest: no + Add",
+  "ok": true,
+  "detail": "{\"row\":true,\"tiles\":0,\"add\":\"hidden\"}"
+ },
+ {
+  "where": "on hover: + Add",
+  "ok": true,
+  "detail": "visible"
+ },
+ {
+  "where": "population: rows with sent items",
+  "ok": true,
+  "detail": "{\"n\":70,\"states\":[\"sent\"]}"
+ },
+ {
+  "where": "every icon shown is a sent item (no faded placeholders)",
+  "ok": true,
+  "detail": "{\"n\":70,\"states\":[\"sent\"]}"
+ }
+]

@@ -1,0 +1,22 @@
+[
+ {
+  "where": "population: the contact list rendered agents",
+  "ok": true,
+  "detail": "no agents"
+ },
+ {
+  "where": "MARGOT ELLIS now reads Margot Ellis",
+  "ok": true,
+  "detail": "absent"
+ },
+ {
+  "where": "Imke de Vries is unchanged",
+  "ok": true,
+  "detail": "changed or absent"
+ },
+ {
+  "where": "the migration changed exactly the one name",
+  "ok": true,
+  "detail": "name-case: changed 1 · backup reports/qc-v149-1/name-case-LS4ymFFCEvhN82advZQJ5zkr7sv2.json"
+ }
+]

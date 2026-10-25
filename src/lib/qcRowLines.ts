@@ -109,10 +109,10 @@ export function nextLine(r: QcRow, c: ComingUp | null, nowMs: number): NextLine 
   if (court === "you") {
     const hot = left != null && (over || left <= 2);
     if (r.status === QueryStatus.OFFER) {
-      const line = exp == null ? "NO DATE SET" : over ? `WAS DUE ${upWeekDate(exp)}` : `BY ${upWeekDate(exp)} · ${plural(left!, "DAY", "DAYS")} LEFT`;
+      const line = exp == null ? "NO DATE YET" : over ? `WAS DUE ${upWeekDate(exp)}` : `BY ${upWeekDate(exp)} · ${plural(left!, "DAY", "DAYS")} LEFT`;
       return { phrase, line, hot };
     }
-    const line = exp == null ? "NO DATE SET" : over ? plural(-left!, "DAY OVER", "DAYS OVER") : `BY ${upDate(exp, nowMs)} · ${plural(left!, "DAY", "DAYS")}`;
+    const line = exp == null ? "NO DATE YET" : over ? plural(-left!, "DAY OVER", "DAYS OVER") : `BY ${upDate(exp, nowMs)} · ${plural(left!, "DAY", "DAYS")}`;
     return { phrase, line, hot };
   }
 

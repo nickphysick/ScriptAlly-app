@@ -1,0 +1,37 @@
+[
+ {
+  "where": "population: the seeded undated query",
+  "ok": true,
+  "detail": "{\"row\":true,\"sub\":\"Sent, add date\",\"first\":\"Add date\",\"link\":true}"
+ },
+ {
+  "where": "its sub-line reads 'Sent, add date', the last two words a link",
+  "ok": true,
+  "detail": "{\"row\":true,\"sub\":\"Sent, add date\",\"first\":\"Add date\",\"link\":true}"
+ },
+ {
+  "where": "First queried reads 'Add date'",
+  "ok": true,
+  "detail": "{\"row\":true,\"sub\":\"Sent, add date\",\"first\":\"Add date\",\"link\":true}"
+ },
+ {
+  "where": "the hover summary reads 'No dates yet'",
+  "ok": true,
+  "detail": "No dates yet\nOpen the full timeline →\nQuery sent\nPartial sent"
+ },
+ {
+  "where": "…its steps evenly spaced, without a scale",
+  "ok": true,
+  "detail": "{\"text\":\"No dates yet\\nOpen the full timeline →\\nQuery sent\\nPartial sent\",\"even\":true,\"axis\":0,\"stops\":2}"
+ },
+ {
+  "where": "no 'Not dated' / 'No date set' on the list",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "…nor in the card",
+  "ok": true,
+  "detail": "[]"
+ }
+]

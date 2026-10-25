@@ -1,0 +1,22 @@
+[
+ {
+  "where": "population: the contact list rendered agents",
+  "ok": true,
+  "detail": "no agents"
+ },
+ {
+  "where": "MARGOT ELLIS now reads Margot Ellis",
+  "ok": false,
+  "detail": "still in capitals"
+ },
+ {
+  "where": "Imke de Vries is unchanged",
+  "ok": true,
+  "detail": "changed or absent"
+ },
+ {
+  "where": "the migration changed exactly the one name",
+  "ok": false,
+  "detail": "skipped"
+ }
+]

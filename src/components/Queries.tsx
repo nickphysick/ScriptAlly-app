@@ -120,7 +120,7 @@ import type { AgentEditPatch } from "../lib/saveAgentEdits";
 import type { RowSpec } from "./reading-pane/QueryTimeline";
 import type { QcRow } from "../lib/qcSummary";
 import { nextLine } from "../lib/qcRowLines";
-import { pressView, waitingBanner } from "../lib/qc149";
+import { pressView, twinTags, waitingBanner } from "../lib/qc149";
 import { PIN_KEYS, usePinList } from "./shell/useFullScreenList";
 import { listCountTitle } from "./shell/ViewTitleRow";
 import { QcWhereCard } from "./queries/centre/QcWhere141";
@@ -216,6 +216,8 @@ import { QueryAgentTab, type AgentHistoryRow } from "./queries/QueryAgentTab";
 import { QueryLogSheet } from "./queries/QueryLogSheet";
 import { queriesForAgent } from "../lib/agentList";
 import { openAgentCard } from "../lib/agentCardStore";
+import { agentView as qcAgentView, bookChips as qcBookChips, nextStepOf, storySteps, stripOf, submissionWords, undatedIds } from "../lib/qcCardStory";
+import { hrefFor } from "../lib/quickAdd";
 import { rungFacts } from "../lib/queryPanelRungs";
 import { queryMaterialsToRows, draftMaterialsToQuery, draftExpectedOverrideIso } from "../lib/queryDraft";
 import { parseQty } from "../lib/createQty";
@@ -1759,6 +1761,8 @@ export const Queries: React.FC<{
   const [qcCardMode, setQcCardMode] = useState<CardMode>("view");
   const [qcCardFresh, setQcCardFresh] = useState<string | null>(null);
   const qcCardPendingMode = useRef<{ id: string; mode: CardMode } | null>(null);
+  /* v149.1 B3 — the row's "add date" opens the card in edit mode at its undated step */
+  const [qcEditUndated, setQcEditUndated] = useState(false);
   /* v149 Part D — the header's two flows in the same panel: a new query, and "Who replied?" */
   const [qcFlow, setQcFlow] = useState<null | { kind: "log"; agentId: string | null; manuscriptId: string | null } | { kind: "who" }>(null);
   const scriptDb = useScriptAllyDb();
@@ -2917,6 +2921,35 @@ export const Queries: React.FC<{
     const p = qcCardPendingMode.current;
     if (p && p.id === cardQueryId) { setQcCardMode(p.mode); qcCardPendingMode.current = null; } else setQcCardMode("view");
   }, [cardQueryId]);
+  /* v149.1 B6 — ON A WIDE WINDOW THE PANEL PUSHES THE LIST CARD INSTEAD OF COVERING IT. When `.ws-window` is wider than
+     1440 and the panel is open, the list card gives up exactly what it needs to end 16px left of the panel (the panel sits
+     flush with the window's right, 560 wide there), so Filters, Group by and Sort stay reachable; at 1440 or less it keeps
+     today's overlay. The amount is MEASURED from the card's resting right edge, never a constant — a constant would be
+     wrong wherever the page column stops growing. The narrowing and its release ride one 0.28s transition (qcv149.css). */
+  useEffect(() => {
+    let raf = 0;
+    const apply = () => {
+      const grp = [...document.querySelectorAll<HTMLElement>(".qcv-group[data-v138]")].find((e) => e.getBoundingClientRect().width > 0);
+      const win = [...document.querySelectorAll<HTMLElement>(".ws-window")].find((e) => e.getBoundingClientRect().width > 0);
+      const sheet = grp?.querySelector<HTMLElement>(".qc138-sheet");
+      const open = !!document.querySelector("[data-qp='panel']");
+      if (!grp || !win || !sheet) return;
+      const w = win.getBoundingClientRect();
+      if (!open || w.width <= 1440 || grp.hasAttribute("data-full")) { grp.removeAttribute("data-push"); grp.style.removeProperty("--qc149-push"); return; }
+      const now = parseFloat(grp.style.getPropertyValue("--qc149-push")) || 0;
+      const rest = sheet.getBoundingClientRect().right + (grp.hasAttribute("data-push") ? now : 0);
+      const push = Math.max(0, Math.round(rest - (w.right - 560 - 16)));
+      grp.style.setProperty("--qc149-push", `${push}px`);
+      grp.setAttribute("data-push", "");
+    };
+    const kick = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(apply); };
+    kick();
+    const t = window.setTimeout(kick, 350);
+    const win = document.querySelector(".ws-window");
+    const ro = typeof ResizeObserver !== "undefined" && win ? new ResizeObserver(kick) : null;
+    if (ro && win) ro.observe(win);
+    return () => { cancelAnimationFrame(raf); window.clearTimeout(t); ro?.disconnect(); };
+  });
   /* v138 §G — a bulk action runs each ticked query's journey in turn: when the panel closes, the next one opens.
      `stepRow` is declared far below, so the effect reaches it through a ref the render keeps current. */
   const stepRowRef = useRef<((req: OpenRequest) => void) | null>(null);
@@ -5707,13 +5740,22 @@ export const Queries: React.FC<{
     const ag = (activeAgent ?? null) as Agent | null;
     const ms = (activeMs ?? null) as Manuscript | null;
     const now = Date.now();
-    const ledger = [...buildTimelineRows(trackingEvents, q, ag)].sort((a, b) => (a.timeMs ?? 0) - (b.timeMs ?? 0));
+    /* v149.1 B3 — a step with no date stays undated (the shared builder reads it as now) and sorts last */
+    const noDate = undatedIds(trackingEvents as { id?: unknown; createdAt?: unknown }[]);
+    const ledger = [...buildTimelineRows(trackingEvents, q, ag)].map((r0) => (r0.activityId && noDate.has(r0.activityId) ? { ...r0, timeMs: undefined } : r0))
+      .sort((a, b) => (a.timeMs ?? Infinity) - (b.timeMs ?? Infinity));
     const steps: CardStep[] = ledger.map((r0, i) => ({ key: r0.key, activityId: r0.activityId, title: r0.title, ms: r0.timeMs ?? null, status: r0.kind ? null : r0.status, root: i === 0 }));
     const sv = sentView(q, packages);
     const capWord = (t: string) => t.replace(/^./, (c) => c.toUpperCase());
     const sent = sv.pieces.map((pc) => ({ label: pc.key === "sample" && pc.value ? capWord(pc.value.split(" · ")[0]) : pc.label }));
-    const sv0 = qcStandView(ledger, row, now);
-    const stand = { heading: sv0.heading, text: sv0.paragraph.map((x) => x.text).join("") };
+    /* v149.1 Part A — the story, the next step, the strip and the Agent tab, every value from the record (lib/qcCardStory) */
+    const firstName = (ag?.name || "").trim().split(/\s+/)[0] || ag?.agency || "the agent";
+    const storyCtx = { row, first: firstName, nowMs: now, agentWeeks: typeof ag?.responseTimeWeeks === "number" && ag.responseTimeWeeks > 0 ? ag.responseTimeWeeks : null };
+    const story = storySteps({ rows: ledger, query: q, manuscript: ms, sentWithQuery: sent.map((x) => x.label) });
+    const toAgent = queries.filter((x) => x.agentId === q.agentId);
+    const msGenres = [ms?.genre, ...((ms as { subGenres?: string[] } | null)?.subGenres ?? [])].filter(Boolean).map((g) => String(g).trim().toLowerCase());
+    const agView = qcAgentView(ag, toAgent, (id) => manuscripts.find((m) => m.id === id)?.title ?? "A manuscript", q.id, now);
+    const site = (ag?.website ?? "").trim();
     const nl = nextLine(row, null, now);
     const door = row.court === "closed" ? null : nextDoor(row, now);
     const order = qcVisible.map((r) => r.id);
@@ -5883,12 +5925,27 @@ export const Queries: React.FC<{
           agency: ag?.name ? (ag?.agency ?? "") : "",
           email: ag?.email ?? "",
           replyWeeks: typeof ag?.responseTimeWeeks === "number" && ag.responseTimeWeeks > 0 ? ag.responseTimeWeeks : null,
-          firstQueried: row.sentMs != null ? `${fieldDay(row.sentMs)}${row.dayN != null ? ` · day ${row.dayN}` : ""}` : "Not dated",
+          firstQueried: row.sentMs != null ? `${fieldDay(row.sentMs)}${row.dayN != null ? ` · day ${row.dayN}` : ""}` : "—",
           first: (ag?.name || "").trim().split(/\s+/)[0] || null,
         }}
         steps={steps}
         freshKey={qcCardFresh === "__last" ? (steps[steps.length - 1]?.activityId ?? steps[steps.length - 1]?.key ?? null) : qcCardFresh}
-        stand={stand}
+        bookChips={qcBookChips(ms)}
+        focusStep={qcEditUndated && qcCardMode === "edit" ? story.find((x) => x.ms == null && x.activityId)?.activityId ?? null : null}
+        onFocused={() => setQcEditUndated(false)}
+        story={story}
+        nextStep={nextStepOf(storyCtx)}
+        strip={stripOf(storyCtx)}
+        agentView={agView}
+        wishlist={{ text: (ag?.mswlNotes ?? "").trim(), genres: (ag?.genres ?? []).map((g) => ({ label: g, hit: msGenres.includes(g.trim().toLowerCase()) })) }}
+        contact={{ email: (ag?.email ?? "").trim(), website: site, websiteHref: site ? hrefFor(site) ?? null : null, submission: submissionWords(ag) }}
+        onAgentField={(f) => {
+          if (!ag) return;
+          if (f === null) openAgentCard(ag.id, { tab: "who", from: "qc" });
+          else if (f === "wishlist") openAgentCard(ag.id, { tab: "want", focus: "wishlist", from: "qc" });
+          else if (f === "method") openAgentCard(ag.id, { tab: "work", focus: "method", from: "qc" });
+          else openAgentCard(ag.id, { tab: "who", focus: f, from: "qc" });
+        }}
         due={row.court === "closed" ? { line: nl.line, hot: false } : { line: nl.line, hot: nl.hot }}
         primary={door ? { label: door.label, respond: door.mode === "resp", close: door.mode === "close" } : null}
         index={idx}
@@ -7749,6 +7806,14 @@ export const Queries: React.FC<{
               ) : (
                 qcDesk ? (
                 <QcList138
+                  onAddDate={(id) => {
+                    cardSetRef.current = qcVisible.map((r) => r.id);
+                    setQcEditUndated(true);
+                    if (cardQueryId === id) { setQcCardMode("edit"); return; }
+                    qcCardPendingMode.current = { id, mode: "edit" };
+                    onOpenQuery?.(id);
+                  }}
+                  twinTag={twinTags(queries)}
                   groupBy={qcGroup}
                   onGroup={setQcGroup}
                   toneOf={qc138Tone}
@@ -7799,9 +7864,13 @@ export const Queries: React.FC<{
                     const q0 = qcById.get(id)?.query;
                     if (!q0) return [];
                     const docs = await readQueryActivity(id);
-                    const rows0 = buildTimelineRows(docs.map((d) => ({ id: d.id, ...d.data })), q0, agents.find((a) => a.id === q0.agentId) ?? null);
+                    const evs = docs.map((d) => ({ id: d.id, ...d.data }));
+                    const noDate = undatedIds(evs as { id?: unknown; createdAt?: unknown }[]);
+                    const rows0 = buildTimelineRows(evs, q0, agents.find((a) => a.id === q0.agentId) ?? null).map((r0) => (r0.activityId && noDate.has(r0.activityId) ? { ...r0, timeMs: undefined } : r0));
                     /* v138.3 — the stage comes from the row itself (`status`); a nudge or a holding reply is not a status (`kind`) */
-                    return rows0.filter((r0) => typeof r0.timeMs === "number" && Number.isFinite(r0.timeMs)).map((r0) => ({ name: r0.title, ms: r0.timeMs as number, status: r0.kind ? null : r0.status }));
+                    const dated = rows0.filter((r0) => typeof r0.timeMs === "number" && Number.isFinite(r0.timeMs));
+                    /* v149.1 B3 — nothing dated: the steps still show, evenly spaced and without a scale (ms NaN marks them) */
+                    return (dated.length ? dated : rows0).map((r0) => ({ name: r0.title, ms: dated.length ? r0.timeMs as number : NaN, status: r0.kind ? null : r0.status }));
                   }}
                   entering={qc138In === "run"}
                   /* v140 §F — the arrival plays on the load (the rows' first appearance) and on every grouping, filter

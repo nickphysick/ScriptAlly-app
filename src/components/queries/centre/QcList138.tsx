@@ -193,7 +193,23 @@ const Peek: React.FC<{ events: readonly PeekEvent[] | null; due: number | null; 
     ro.observe(el);
     return () => { live = false; ro.disconnect(); };
   }, []);
-  const S = events ? tl4Stops(events, { due, now: nowMs, closed, yours }) : null;
+  /* v149.1 B3 — NOTHING DATED: the steps evenly spaced, no axis, no durations (there is no scale to draw) */
+  const undated = !!events && events.length > 0 && events.every((e) => !Number.isFinite(e.ms));
+  const S = events && !undated ? tl4Stops(events, { due, now: nowMs, closed, yours }) : null;
+  if (undated && events) {
+    return (
+      <div ref={ref} className="qc138-peek qc138-tl4 qc138-peek--even" data-qcv="peek" data-undated="" aria-hidden="true">
+        <div className="qc138-even" data-qcv="peek-even">
+          {events.map((e, i) => (
+            <span key={`${e.name}-${i}`} className="qc138-evs" data-qcv="peek-stop" style={{ left: `${events.length === 1 ? 0 : (i / (events.length - 1)) * 100}%` }}>
+              {e.status ? <StatusDot status={e.status} overrideSize={14} /> : <i className="qc138-mk-dot" />}
+              <small>{e.name}</small>
+            </span>
+          ))}
+        </div>
+      </div>
+    );
+  }
   const lay = S && W ? tl4Layout(S, W, tl4Measure, nowMs) : null;
   void fonts;
   const over = !!S?.some((s) => s.kind === "was");
@@ -304,6 +320,7 @@ const PeekLab: React.FC<{ nowMs: number }> = ({ nowMs }) => {
 
 /** "What you sent" (v138.5 §F): the package chip, as wide as its name up to the column (or "+ Add" when nothing is
     recorded), over the four material icons; with no package and something recorded, the icons alone on line 1 */
+const NO_TWINS: ReadonlyMap<string, string> = new Map();
 const SentCell138: React.FC<{ row: QcRow; pkg: SubmissionPackage | null; nowMs: number; onAdd: () => void; onPackage: () => void }> = ({ row, pkg, nowMs, onAdd, onPackage }) => {
   const m = sentCell(row, pkg, nowMs);
   return (
@@ -320,7 +337,8 @@ const SentCell138: React.FC<{ row: QcRow; pkg: SubmissionPackage | null; nowMs: 
         </button>
       ) : null}
       <span className="qc138-mic" data-qcv="sent-icons">
-        {m.tiles.map((t) => (
+        {/* v149.1 B2 — only what was sent: the faded placeholders for unsent items are gone */}
+        {m.tiles.filter((t) => t.state === "sent").map((t) => (
           <span key={t.kind} className={`qc138-tile${t.state === "sent" ? " on" : ""}`} data-qcv="sent-tile" data-kind={t.kind} data-state={t.state}
             tabIndex={0} role="img" aria-label={`${t.name}: ${t.line}`} data-tip={t.name} data-tl={t.line}>
             <Mark kind={t.kind} />
@@ -371,6 +389,10 @@ export interface QcList138Props {
   onEdit?: (id: string) => void;
   onClose?: (id: string) => void;
   onAddSent?: (id: string) => void;
+  /** v149.1 B3 — "add date": the query's card, in edit mode, at its undated step */
+  onAddDate?: (id: string) => void;
+  /** v149.1 B4 — a later query to the same agent for the same book: "RESUBMISSION" or "V2", from the record */
+  twinTag?: ReadonlyMap<string, string>;
   onOpenPackage?: (packageId: string | null) => void;
   find?: string;
   /** v138.1 §F — the search, in the navy row */
@@ -414,7 +436,7 @@ export const ARRIVAL_140 = { ms: 420, easing: "cubic-bezier(.2,.8,.2,1)", from: 
 
 export const QcList138: React.FC<QcList138Props> = ({
   groups, groupBy, onGroup, toneOf, total, shown, filterCount, onClearFilters, filtersMenu, applied, band = null, loading = false, stickyOn = true, sort, density, onDensity, full, onFull,
-  selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onOpenPackage, find = "", onFind, findRef, viewRow, ringId = null, folded, onFold, loadPeek, onTimeline, selected, onPick, entering = false, deadEnd = null, practice = null, arrival, scrollMemory, heard, onSort,
+  selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onAddDate, twinTag = NO_TWINS, onOpenPackage, find = "", onFind, findRef, viewRow, ringId = null, folded, onFold, loadPeek, onTimeline, selected, onPick, entering = false, deadEnd = null, practice = null, arrival, scrollMemory, heard, onSort,
 }) => {
   /* §H — the order things land in: bands and rows, one sequence, the first 16 staggered and the rest with the last */
   let seq = 0;
@@ -580,17 +602,23 @@ export const QcList138: React.FC<QcList138Props> = ({
           </button>
           <span className="qc138-agt">
             <b data-qcv="row-name" title={r.agentName}>{hl(r.agentName)}</b>
-            <small data-qcv="row-agency">{hl(r.agency)}</small>
+            <small data-qcv="row-agency">{hl(r.agency)}{twinTag.get(r.id) ? <em className="qc138-twin" data-qcv="row-twin">{twinTag.get(r.id)}</em> : null}</small>
           </span>
         </div>
         <div className="qc138-fq" data-qcv="row-first">
-          <span className="qc138-fqd" data-qcv="row-first-date">{r.sentMs != null ? firstQueried(r.sentMs, nowMs) : "Not dated"}</span>
+          {r.sentMs != null ? <span className="qc138-fqd" data-qcv="row-first-date">{firstQueried(r.sentMs, nowMs)}</span>
+            : <button type="button" className="qc138-fqd qc138-adddate" data-qcv="row-first-date" data-undated=""
+              onClick={(e) => { e.stopPropagation(); onAddDate?.(r.id); }}>Add date</button>}
           {r.dayN != null ? <span className="qc138-fqn" data-qcv="row-day">day {r.dayN}</span> : null}
         </div>
         <div className="qc138-st" data-qcv="row-stand">
           <div className="qc138-ws1"><StatusDot status={r.status} overrideSize={12} /><span>{STAGE_NAME[r.status]}</span></div>
           <Track level={trackLevel(r)} yours={yours} closed={closed} />
-          {detail ? <div className={`qc138-sub${detail.hot ? " hot" : ""}`} data-qcv="row-standline" data-hot={detail.hot || undefined}>{detail.text}</div> : null}
+          {detail ? (
+            <div className={`qc138-sub${detail.hot ? " hot" : ""}`} data-qcv="row-standline" data-hot={detail.hot || undefined} data-undated={detail.undated ? "" : undefined}>
+              {detail.undated ? <>{detail.verb}, <button type="button" className="qc138-adddate" data-qcv="row-adddate" onClick={(e) => { e.stopPropagation(); onAddDate?.(r.id); }}>add date</button></> : detail.text}
+            </div>
+          ) : null}
         </div>
         <div className="qc138-snt" data-qcv="row-sent">
           <SentCell138 row={r} pkg={pkg} nowMs={nowMs} onAdd={() => (onAddSent ?? onEdit)?.(r.id)} onPackage={() => onOpenPackage?.(pkgId)} />

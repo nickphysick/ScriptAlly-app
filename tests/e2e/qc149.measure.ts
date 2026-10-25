@@ -311,8 +311,9 @@ for (const vp of SIZES.filter((v) => !process.env.QC149_SIZE || String(v.width) 
       const want = `${today.getDate()} ${MON[today.getMonth()]}`;
       L.check("Tracking gains Full requested, dated today", steps.some((s) => /full requested/i.test(s.t) && s.d === want), JSON.stringify(steps.slice(-2)));
       L.check("the pill reads Full requested", /Full requested/.test((await text(page, `${CARD} [data-qc149c='pill']`)) ?? ""), String(await text(page, `${CARD} [data-qc149c='pill']`)));
-      const primary = await text(page, `${CARD} [data-qc149c='primary']`);
-      L.check("the primary is Mark full sent", primary === "Mark full sent", String(primary));
+      /* v149.1 (QC1491 L12) — RE-POINTED: the primary is the action strip's button, in the strip's short words (A3/A4) */
+      const primary = await text(page, `${CARD} [data-qc149c='strip-btn']`);
+      L.check("the primary is the strip's Mark sent", primary === "Mark sent", String(primary));
       const rowNow = await page.evaluate((id) => document.querySelector<HTMLElement>(`.qc138-sheet [data-qcv='row'][data-id="${id}"]`)?.dataset.status ?? null, r.id);
       L.check("the row in the list moved on", rowNow === "Full Requested", String(rowNow));
       L.check("UNDONE: the account is put back", await undo(page), "no undo bar — the account has been changed");

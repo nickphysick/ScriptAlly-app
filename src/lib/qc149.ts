@@ -68,3 +68,34 @@ export function waitingBanner(rows: readonly QcRow[], nowMs: number): WaitingBan
 
 /** a chip press: pressing the chosen one goes back to All */
 export const pressView = (current: ViewKey, k: ViewKey): ViewKey => (k === null || k === current ? null : k);
+
+/**
+ * v149.1 B4 — THE SAME AGENT TWICE, FOR THE SAME BOOK. When two queries go to one agent for one manuscript, every one
+ * after the first is tagged from the record: "RESUBMISSION" when it says it is a requery (`requery`), "V{n}" when it
+ * went with a different book version than the ones before it (n counts the versions in the order they were first
+ * sent). Neither — the record cannot tell them apart — is a true duplicate and gets no tag (reported, never guessed).
+ */
+export function twinTags(queries: readonly { id: string; agentId: string; manuscriptId: string; dateSent?: string | null; requery?: boolean; bookVersionId?: string | null }[]): Map<string, string> {
+  const out = new Map<string, string>();
+  const groups = new Map<string, typeof queries[number][]>();
+  for (const q of queries) {
+    if (!q.agentId || !q.manuscriptId) continue;
+    const k = `${q.agentId}|${q.manuscriptId}`;
+    groups.set(k, [...(groups.get(k) ?? []), q]);
+  }
+  const t = (v: string | null | undefined) => { const x = v ? Date.parse(v) : NaN; return Number.isFinite(x) ? x : Infinity; };
+  for (const g of groups.values()) {
+    if (g.length < 2) continue;
+    const ordered = [...g].sort((a, b) => t(a.dateSent) - t(b.dateSent) || a.id.localeCompare(b.id));
+    const versions: string[] = [];
+    ordered.forEach((q, i) => {
+      const v = q.bookVersionId ?? "";
+      const seen = versions.includes(v);
+      if (!seen) versions.push(v);
+      if (i === 0) return;
+      if (q.requery) out.set(q.id, "RESUBMISSION");
+      else if (!seen && v) out.set(q.id, `V${versions.indexOf(v) + 1}`);
+    });
+  }
+  return out;
+}
