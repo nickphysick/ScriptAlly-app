@@ -211,3 +211,22 @@ export function rowDue(x: Pick<AgentFacts, "stand" | "q">, nowMs: number): strin
   if (q.expectedMs == null) return null;
   return q.expectedMs < nowMs ? "DUE NOW" : dm(q.expectedMs).toUpperCase();
 }
+
+/* ── the List row's "Your query" cell ────────────────────────────────────────────────────────────────────────── */
+
+const ROW_NEXT: Record<string, string> = { ...CALL_BUTTON, "Record your answer": "Decide on offer" };
+/**
+ * The cell's second line. Your move: the next step and its date, in rust ("Send the partial · By 30 Sep", "Nudge ·
+ * Due now"). Querying and Closed: "Sent 6 May". Null when there is nothing to say.
+ */
+export function rowSecond(x: Pick<AgentFacts, "stand" | "q">, nowMs: number): { text: string; due: boolean } | null {
+  const q = x.q;
+  if (!q) return null;
+  if (x.stand === "you") {
+    const door = nextDoor(q as QcRow, nowMs);
+    const what = door ? ROW_NEXT[door.label] ?? door.label : "Your move";
+    const when = q.court === "agent" || (q.expectedMs != null && q.expectedMs < nowMs) ? "Due now" : q.expectedMs != null ? `By ${dm(q.expectedMs)}` : null;
+    return { text: when ? `${what} · ${when}` : what, due: true };
+  }
+  return q.sentMs != null ? { text: `Sent ${dm(q.sentMs)}`, due: false } : null;
+}

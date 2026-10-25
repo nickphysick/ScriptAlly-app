@@ -45,6 +45,8 @@ import {
 } from "../../lib/agentCardStore";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { ContactHeader24, ContactViewRow24 } from "./contact/ContactHeader24";
+import { ContactSheet24, SheetSkeleton } from "./contact/ContactSheet24";
+import type { ContactView } from "../../lib/contactListMemory";
 import { bannerFigures, inSet, setCounts, type SetKey } from "../../lib/contactV24";
 import { type AgentFacts, ContactFilters, GroupKey, SORT_OPTIONS, SortKey as ContactSortKey, agentFacts, emptyContactFilters, matchesContactFilters, sortFacts } from "../../lib/contactList";
 import { bookGenreHit, bookGenres } from "../../lib/genreMatch";
@@ -158,7 +160,12 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const [sortKey, setSortKeyRaw] = useState<ContactSortKey>(() => rememberedView.sort);
   const [reversed, setReversed] = useState<boolean>(() => rememberedView.reversed);
   /* choosing a sort resets the direction to its natural order (§5) */
-  useEffect(() => { writeListView({ group: groupKey, sort: sortKey, reversed }); }, [groupKey, sortKey, reversed]);
+  /* v24 B1 — the view (List or Cards) and the grouping, per device; both read before the first paint */
+  const [view, setView] = useState<ContactView>(() => rememberedView.view);
+  const [byStatus, setByStatus] = useState<boolean>(() => rememberedView.byStatus);
+  useEffect(() => { writeListView({ group: groupKey, sort: sortKey, reversed, view, byStatus }); }, [groupKey, sortKey, reversed, view, byStatus]);
+  /* v24 B2 — the agent whose card is open (Part C draws it); its row and card are marked */
+  const [cardId, setCardId] = useState<string | null>(null);
   useEffect(() => { writeListVisit({ filters, search, glance }); }, [filters, search, glance]);
   const pop = usePopover<ContactPop>();
   /* v16 §E — FULL SCREEN is the shared `useFullScreenList` (Comparable titles v25 built it for both pages): the URL
@@ -863,7 +870,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             addRef={addBtnRef} onAdd={openAdd} onFill={openHk}
             onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined} />
         )}
-        {pageState === "settling" && <BookSkeleton />}
+        {pageState === "settling" && (full ? <BookSkeleton /> : <SheetSkeleton />)}
         <div className="clv-main" ref={mainColRef}>
 
         {/* LIVING HEADERS §3 — the blank account is `ContactEmpty` above, in place of this whole group;
@@ -879,8 +886,16 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         <>
         <ContactViewRow24 counts={counts} total={factsAll.length} set={set} onSet={setSet}
           find={search} onFind={setSearch} loading={false} />
-        {/* navy-bar v1 B1 — THE ADDRESS BOOK: one box of two columns in place of Cards and List, their title row, the
-            navy toolbar, the filter strip and the list body. It docks 20px from the top and the list scrolls inside it. */}
+        {!fullOn ? (
+          <ContactSheet24 pool={visibleFacts} all={factsAll} view={view} onView={setView} grouped={byStatus} onGrouped={setByStatus}
+            sortKey={sortKey} reversed={reversed} onSort={(v) => { setSortKeyRaw(v.key); setReversed(v.reversed); }}
+            filters={filters} onFilters={setFilters} onClearAll={clearFilters} full={fullOn} onFull={togglePin}
+            genreWord={(raw) => genreLabel(raw, personalGenres)} genreHit={bookHit} personalGenres={personalGenres} nowMs={nowMs}
+            openId={cardId} onOpen={setCardId} search={search}
+            onLog={(id) => openQueryDrawer({ mode: "log", agentId: id, ...(scoped?.id ? { manuscriptId: scoped.id } : {}) })}
+            onEdit={(id, tab, focus) => openAgentCard(id, { tab, focus, from: "row" })}
+            onExport={(rows) => downloadAgentsCsv(rows, (raw) => genreLabel(raw, personalGenres))} />
+        ) : (
         <ContactBook
           pool={visibleFacts} all={factsAll} narrowed={anyActive}
           search={search} onSearch={setSearch}
@@ -903,6 +918,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
           onNotes={async (id, text) => (await writeAgentPatch(id, { notes: text })).ok}
           onExport={(rows) => downloadAgentsCsv(rows, (raw) => genreLabel(raw, personalGenres))}
         />
+        )}
         </>
         )}
         </>

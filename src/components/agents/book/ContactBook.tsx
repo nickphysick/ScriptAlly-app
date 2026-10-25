@@ -363,7 +363,7 @@ export const ContactBook: React.FC<ContactBookProps> = (p) => {
 
 /* ── the Filters pop-over: genres with counts, Open to queries only, and the footer ─────────────────────────── */
 
-const FilterMenu: React.FC<{
+export const FilterMenu: React.FC<{
   anchor: HTMLElement; filters: ContactFilters; onFilters: (f: ContactFilters) => void; genres: { key: string; label: string; n: number }[];
   openN: number; showing: number; total: number; onExport: () => void;
 }> = ({ anchor, filters: f, onFilters, genres, openN, showing, total, onExport }) => {
