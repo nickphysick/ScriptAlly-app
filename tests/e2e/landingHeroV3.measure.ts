@@ -543,12 +543,18 @@ test.describe("landing hero v3", () => {
     await stub(page); await open(page, { width: 1440, height: 860 }); await page.waitForSelector(".mk-places:not(.mk-places--wait)");
     const hero = await page.evaluate(() => document.querySelector<HTMLElement>(".mk-places")!.dataset.left);
     await stub(page); await page.goto("/pricing", { waitUntil: "load" }); await page.waitForTimeout(1500);
-    const pricing = await page.evaluate(() => document.querySelector(".mk-fmtally")?.textContent);
+    /* Pricing's N, from whichever counter it draws: v3's tally ("3/50" — claimed of cap) or v4's line
+       ("47 places left", on dev while the Pricing v4 branch is unmerged). Both come from the store. */
+    const pricing = await page.evaluate(() => {
+      const tally = document.querySelector(".mk-fmtally")?.textContent?.match(/^(\d+)\/(\d+)$/);
+      if (tally) return String(Number(tally[2]) - Number(tally[1]));
+      return document.querySelector(".mk-fmmeta")?.textContent?.match(/^(\d+) places left$/)?.[1];
+    });
     await page.setViewportSize({ width: 390, height: 844 }); await stub(page); await page.goto("/", { waitUntil: "load" }); await page.waitForTimeout(1500);
     const pill = await page.evaluate(() => document.querySelector(".mk-navpill-c .mk-sr")?.textContent);
     console.log("LH17", JSON.stringify({ hero, pricing, pill }));
     expect(hero, "population: the hero's N").toBe("47");
-    expect(pricing, "Pricing states the same claimed share of the same cap").toBe("3/50");
+    expect(pricing, "Pricing states the same N against the same cap").toBe("47");
     expect(pill, "the phone pill states the same N").toBe("47 places left");
   });
 
