@@ -307,3 +307,20 @@ export const submissionWords = (a: Pick<Agent, "submissionMethod"> | null): stri
 
 /** the strip's tint per set (the panel's court) */
 export const STRIP_TINT: Record<WhereKey, string> = { you: "#f5e6df", agent: "#e2e6e0", quiet: "#efeae2", closed: "#e4e1db" };
+
+/**
+ * v149.1 B3 — WHICH STEPS HAVE NO DATE. The shared timeline builder (QueryTimeline's `buildTimelineRows`) reads a step
+ * with no `createdAt` as NOW, which is right for what it draws and wrong here: the card and the hover timeline must say
+ * "add date", never show today. This reads the raw log: an id whose `createdAt` is empty or unreadable is undated.
+ */
+export function undatedIds(events: readonly { id?: unknown; createdAt?: unknown }[]): Set<string> {
+  const out = new Set<string>();
+  for (const e of events) {
+    if (typeof e.id !== "string") continue;
+    const v = e.createdAt as { toDate?: () => Date; seconds?: number } | string | number | null | undefined;
+    const ok = !!v && ((typeof v === "object" && (typeof v.toDate === "function" || typeof v.seconds === "number"))
+      || ((typeof v === "string" || typeof v === "number") && Number.isFinite(new Date(v).getTime())));
+    if (!ok) out.add(e.id);
+  }
+  return out;
+}

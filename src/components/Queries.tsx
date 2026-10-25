@@ -216,7 +216,7 @@ import { QueryAgentTab, type AgentHistoryRow } from "./queries/QueryAgentTab";
 import { QueryLogSheet } from "./queries/QueryLogSheet";
 import { queriesForAgent } from "../lib/agentList";
 import { openAgentCard } from "../lib/agentCardStore";
-import { agentView as qcAgentView, bookChips as qcBookChips, nextStepOf, storySteps, stripOf, submissionWords } from "../lib/qcCardStory";
+import { agentView as qcAgentView, bookChips as qcBookChips, nextStepOf, storySteps, stripOf, submissionWords, undatedIds } from "../lib/qcCardStory";
 import { hrefFor } from "../lib/quickAdd";
 import { rungFacts } from "../lib/queryPanelRungs";
 import { queryMaterialsToRows, draftMaterialsToQuery, draftExpectedOverrideIso } from "../lib/queryDraft";
@@ -5740,7 +5740,10 @@ export const Queries: React.FC<{
     const ag = (activeAgent ?? null) as Agent | null;
     const ms = (activeMs ?? null) as Manuscript | null;
     const now = Date.now();
-    const ledger = [...buildTimelineRows(trackingEvents, q, ag)].sort((a, b) => (a.timeMs ?? 0) - (b.timeMs ?? 0));
+    /* v149.1 B3 — a step with no date stays undated (the shared builder reads it as now) and sorts last */
+    const noDate = undatedIds(trackingEvents as { id?: unknown; createdAt?: unknown }[]);
+    const ledger = [...buildTimelineRows(trackingEvents, q, ag)].map((r0) => (r0.activityId && noDate.has(r0.activityId) ? { ...r0, timeMs: undefined } : r0))
+      .sort((a, b) => (a.timeMs ?? Infinity) - (b.timeMs ?? Infinity));
     const steps: CardStep[] = ledger.map((r0, i) => ({ key: r0.key, activityId: r0.activityId, title: r0.title, ms: r0.timeMs ?? null, status: r0.kind ? null : r0.status, root: i === 0 }));
     const sv = sentView(q, packages);
     const capWord = (t: string) => t.replace(/^./, (c) => c.toUpperCase());
@@ -7861,7 +7864,9 @@ export const Queries: React.FC<{
                     const q0 = qcById.get(id)?.query;
                     if (!q0) return [];
                     const docs = await readQueryActivity(id);
-                    const rows0 = buildTimelineRows(docs.map((d) => ({ id: d.id, ...d.data })), q0, agents.find((a) => a.id === q0.agentId) ?? null);
+                    const evs = docs.map((d) => ({ id: d.id, ...d.data }));
+                    const noDate = undatedIds(evs as { id?: unknown; createdAt?: unknown }[]);
+                    const rows0 = buildTimelineRows(evs, q0, agents.find((a) => a.id === q0.agentId) ?? null).map((r0) => (r0.activityId && noDate.has(r0.activityId) ? { ...r0, timeMs: undefined } : r0));
                     /* v138.3 — the stage comes from the row itself (`status`); a nudge or a holding reply is not a status (`kind`) */
                     const dated = rows0.filter((r0) => typeof r0.timeMs === "number" && Number.isFinite(r0.timeMs));
                     /* v149.1 B3 — nothing dated: the steps still show, evenly spaced and without a scale (ms NaN marks them) */

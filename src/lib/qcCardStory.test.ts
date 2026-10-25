@@ -6,7 +6,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { QueryStatus, type Query } from "../types";
-import { agentView, bookChips, partialAsked, span, storySteps, type StoryRow } from "./qcCardStory";
+import { agentView, bookChips, partialAsked, span, storySteps, undatedIds, type StoryRow } from "./qcCardStory";
 
 const q = (o: Partial<Query> = {}): Query => ({ id: "q1", userId: "u", agentId: "a1", manuscriptId: "m1", status: QueryStatus.FULL_SENT, dateSent: "2026-01-10", sendMethod: "Email", ...o } as Query);
 const row = (status: QueryStatus, day: number, o: Partial<StoryRow> = {}): StoryRow => ({ key: `${status}-${day}`, activityId: `act-${day}`, status, timeMs: Date.UTC(2026, 0, day), title: status, ...o });
@@ -63,5 +63,13 @@ describe("span", () => {
   it("days, weeks, months, then years from a year on", () => {
     const d = (n: number) => span(0, n * 86_400_000);
     expect([d(5), d(21), d(90), d(435)]).toEqual(["5 days", "3 weeks", "3 months", "1.2 years"]);
+  });
+});
+
+describe("v149.1 B3 — a step with no date stays undated", () => {
+  it("an empty or unreadable createdAt is undated; a Timestamp, an ISO string or a number is dated", () => {
+    const ids = undatedIds([{ id: "a", createdAt: "" }, { id: "b", createdAt: "not a date" }, { id: "c", createdAt: "2026-03-01" },
+      { id: "d", createdAt: { toDate: () => new Date() } }, { id: "e", createdAt: 1_700_000_000_000 }, { id: "f" }]);
+    expect([...ids].sort()).toEqual(["a", "b", "f"]);
   });
 });
