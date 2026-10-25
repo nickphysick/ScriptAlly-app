@@ -44,7 +44,8 @@ import {
   useAgentCardRequest,
 } from "../../lib/agentCardStore";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { ContactLightHeader } from "./contact/ContactLightHeader";
+import { ContactHeader24, ContactViewRow24 } from "./contact/ContactHeader24";
+import { bannerFigures, inSet, setCounts, type SetKey } from "../../lib/contactV24";
 import { type AgentFacts, ContactFilters, GroupKey, SORT_OPTIONS, SortKey as ContactSortKey, agentFacts, emptyContactFilters, matchesContactFilters, sortFacts } from "../../lib/contactList";
 import { bookGenreHit, bookGenres } from "../../lib/genreMatch";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
@@ -61,10 +62,8 @@ import "./contact/contactV14.css";
    the Cards and List views), and they also style the light header (`cl17-hd`), the group and the scroller's foot. */
 import "./contact/contactV19.css";
 import "./contact/contactV20.css";
-import { nextStep } from "../../lib/contactNextStep";
-import { BLANK_GLANCE } from "./contact/ContactStrip";
 import { genreLabel } from "../../lib/genres";
-import { glanceModel, glanceOf, type GlanceKey } from "../../lib/contactGlance";
+import { glanceOf, type GlanceKey } from "../../lib/contactGlance";
 import { usePinList } from "../shell/useFullScreenList";
 import { fitsGenre } from "../../lib/contactStrip";
 import { RAIL_GROUPS } from "../shell/railNav";
@@ -148,7 +147,11 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const [filters, setFilters] = useState<ContactFilters>(() => rememberedVisit?.filters ?? emptyContactFilters());
   /* v16 §B — THE "AT A GLANCE" GROUP the list is filtered to (Not queried · Querying · Closed), or null. It sits
      BESIDE the chips: both apply, a chip change leaves it alone, and "Clear all" clears both. */
-  const [glance, setGlance] = useState<GlanceKey | null>(() => rememberedVisit?.glance ?? null);
+  /* v24 — the "At a glance" group retired with the light header; the view row's set (below) replaced it. The visit's
+     stored glance is no longer read, so a remembered one cannot filter the list unseen. */
+  const [glance, setGlance] = useState<GlanceKey | null>(null);
+  /* v24 A3 — THE VIEW ROW'S SET (and full screen's segments): one single-select over `AgentFacts.stand`, for the visit */
+  const [set, setSet] = useState<SetKey | null>(null);
   const [search, setSearch] = useState(() => searchQuery?.trim() || rememberedVisit?.search || "");
   /* v16 §C / v19 baked 2: the page opens UNGROUPED, A to Z by surname; the column headings sort (there is no sort pill) */
   const [groupKey] = useState<GroupKey>(() => rememberedView.group);
@@ -247,16 +250,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
    * list — never a second ordering pass that could disagree.
    */
   const nowMs = useMemo(() => Date.now(), [qcRows]);
-  /* ── v15 §4 — THE NEXT STEP, over the UNFILTERED agent set (§9): the list's filters and Find never reach it.
-     ⚠️ DECLARED HERE, above `inPool` — the ready-only mode reads `readyIds` at render (the TDZ order rule). */
-  const todayIso = useMemo(() => {
-    const d = new Date(nowMs);
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-  }, [nowMs]);
-  const step = useMemo(
-    () => nextStep({ agents, queries, msId: scoped?.id ?? null, book, todayIso }),
-    [agents, queries, scoped, book, todayIso],
-  );
   /* v13 §3 — THE NUMBERS STRIP: over the agents the list shows BEFORE filtering, never the filtered set.
      v14 §1.3: its figures are facts, not controls — the carousel they filled is retired. */
   const factsAll = useMemo(
@@ -269,20 +262,17 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     (x: AgentFacts) => matchesAgentSearch(x.agent, search) && (!glance || glanceOf(x) === glance),
     [search, glance],
   );
-  /* v16 §B — the strip's figures, over every agent (never the filtered view) */
-  const glanceM = useMemo(
-    () => glanceModel({ facts: factsAll, rows: qcRows, msId: scoped?.id ?? null, readyIds: step.ready.map((a) => a.id), nowMs }),
-    [factsAll, qcRows, scoped, step, nowMs],
-  );
   /* v19 §F — the menu counts each choice itself (`wouldShow`, under Find and the band's group): the v14 faceted counts and
      the genre tallies it fed are retired with the strip */
   const visibleFacts = useMemo(
-    () => sortFacts(factsAll.filter((x) => inPool(x) && matchesContactFilters(x, filters)), sortKey, reversed),
-    [factsAll, inPool, filters, sortKey, reversed],
+    () => sortFacts(factsAll.filter((x) => inPool(x) && inSet(x, set) && matchesContactFilters(x, filters)), sortKey, reversed),
+    [factsAll, inPool, set, filters, sortKey, reversed],
   );
   /* v17 §B — anything narrowing the list: a filter, the summary card's group, or Find */
-  const anyActive = contactFilterCount(filters) > 0 || !!glance || search.trim() !== "";
-  const clearFilters = useCallback(() => { setFilters(emptyContactFilters()); setSearch(""); setGlance(null); }, [setFilters]);
+  const anyActive = contactFilterCount(filters) > 0 || !!glance || !!set || search.trim() !== "";
+  const clearFilters = useCallback(() => { setFilters(emptyContactFilters()); setSearch(""); setGlance(null); setSet(null); }, [setFilters]);
+  /* v24 A3 — each chip's count, over every agent (never the filtered view) */
+  const counts = useMemo(() => setCounts(factsAll), [factsAll]);
   /* the band's "your move": agents with a live query whose next step is the writer's (the census's own count) */
   /**
    * Loading · blank account · list — the page's three states, derived once in `agentList.ts` and
@@ -552,6 +542,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* v18.1 §B.4 — the agent panel's "Fill in": a run over that agent's tasks only */
   const [hkRun, setHkRun] = useState<{ id: string; seq: number } | null>(null);
   const health = useMemo(() => listHealth(agents, hk), [agents, hk]);
+  /* v24 A2 — the banner's figures: Housekeeping's gap count, the agents they belong to, and four faces */
+  const banner = useMemo(() => bannerFigures(hk), [hk]);
   /* v18 §F.1 — the drawer's figures: the same score, with its held and possible points */
   const listH = useMemo(() => healthOf(agents, hk), [agents, hk]);
   /* v18 §F.3 — the intro's flag, in Housekeeping's own store (beside v17.1's tab dismissal) */
@@ -859,22 +851,17 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         {/* v13 §8 — the loading beat: the group draws its own components as shimmering shapes, inert */}
         {/* v138.6 §A — a pinned list hides its header from the first frame, settling included (a restored pin must not
             flash the header while the list loads) */}
-        <div className="clv-group" data-full={full && (showList || pageState === "settling") ? "" : undefined} data-loading={pageState === "settling" ? "" : undefined}
+        <div className="clv-group" data-v24="" data-full={full && (showList || pageState === "settling") ? "" : undefined} data-loading={pageState === "settling" ? "" : undefined}
           aria-busy={pageState === "settling" || undefined}
           inert={pageState === "settling" || undefined}>
         {/* v17 §A — THE ONE LIGHT HEADER, on the page colour: the title block, the cut-out hawk, and the summary
             card that is the page's figures and its group filter (the strip's own `glance` state). Over a LIST
             only, and while settling: the blank account's page is ContactEmpty. */}
         {(showList || pageState === "settling") && (
-          <ContactLightHeader loading={pageState !== "list"} total={pageState === "list" ? factsAll.length : null}
-            msTitle={scoped?.title?.trim() || null} model={pageState === "list" ? glanceM : BLANK_GLANCE} active={glance}
-            onGroup={(k) => setGlance((g) => (g === k ? null : k))}
-            addRef={addBtnRef} onAdd={openAdd}
-            health={pageState === "list" ? health : null} onHealth={openHk}
-            onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined}>
-            {/* v17 §C — the pin line: the header's foot */}
-            <i className="cl17-sentinel" data-cl17="pin-sentinel" aria-hidden="true" />
-          </ContactLightHeader>
+          <ContactHeader24 loading={pageState !== "list"} msTitle={scoped?.title?.trim() || null}
+            health={pageState === "list" ? health : null} banner={pageState === "list" ? banner : null}
+            addRef={addBtnRef} onAdd={openAdd} onFill={openHk}
+            onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined} />
         )}
         {pageState === "settling" && <BookSkeleton />}
         <div className="clv-main" ref={mainColRef}>
@@ -890,6 +877,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             then the rows. The title bar, its hawk and its two pills are gone. */}
         {showList && (
         <>
+        <ContactViewRow24 counts={counts} total={factsAll.length} set={set} onSet={setSet}
+          find={search} onFind={setSearch} loading={false} />
         {/* navy-bar v1 B1 — THE ADDRESS BOOK: one box of two columns in place of Cards and List, their title row, the
             navy toolbar, the filter strip and the list body. It docks 20px from the top and the list scrolls inside it. */}
         <ContactBook
