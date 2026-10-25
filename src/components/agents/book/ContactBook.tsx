@@ -101,7 +101,7 @@ const I = {
 };
 
 /** the agent's first social on record (X, Bluesky, Instagram, any other), else their MSWL page */
-function socialOf(a: AgentFacts["agent"]): string {
+export function socialOf(a: AgentFacts["agent"]): string {
   const direct = [a.twitter, a.bluesky, a.instagram].map((s) => (s ?? "").trim()).find(Boolean);
   if (direct) return direct;
   const other = (a.socials ?? []).find((s) => !/mswl/i.test(s.platform) && s.handle.trim());

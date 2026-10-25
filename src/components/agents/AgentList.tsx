@@ -46,8 +46,12 @@ import {
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { ContactHeader24, ContactViewRow24 } from "./contact/ContactHeader24";
 import { ContactSheet24, SheetSkeleton } from "./contact/ContactSheet24";
+import { AgentCard24 } from "./contact/AgentCard24";
+import { AgentCardPanel24 } from "./contact/AgentCardPanel24";
+import { agentHistory } from "../../lib/agentHistory";
+import { destroyManifest } from "../../lib/cascade";
 import type { ContactView } from "../../lib/contactListMemory";
-import { bannerFigures, inSet, setCounts, type SetKey } from "../../lib/contactV24";
+import { bannerFigures, inSet, setCounts, setGroups, type SetKey } from "../../lib/contactV24";
 import { type AgentFacts, ContactFilters, GroupKey, SORT_OPTIONS, SortKey as ContactSortKey, agentFacts, emptyContactFilters, matchesContactFilters, sortFacts } from "../../lib/contactList";
 import { bookGenreHit, bookGenres } from "../../lib/genreMatch";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
@@ -111,7 +115,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const { key: locationKey } = useLocation();
   const {
     agents, queries, manuscripts, activities, collectionsReady, userTasks, addUserTask, deleteUserTask, resolveTaskFlag,
-    currentUser, updateUserPaths,
+    currentUser, updateUserPaths, deleteAgent, taskFlags,
   } = useScriptAllyDb();
 
   /* ⚠️ THE MANUSCRIPT IS THE SWITCHER'S OWN (v11 §10) — the SAME resolver the shell's chip
@@ -310,6 +314,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const showList = pageState === "list" && !showEmpty;
   /* v16 §E — full screen is on only over a list, on this page's own route */
   const fullOn = full && showList;
+  const fullRef = useRef(fullOn);
+  fullRef.current = fullOn;
   /* v19 §G — THE SCROLL POSITION, FOR THE VISIT. Saved (once a frame) while the list is on screen; put back once when the
      list first draws (a reload within the visit) and when the route comes back with its scroller at the top. A reveal
      handed in from another page wins. A new visit has nothing stored, so it opens at the top. */
@@ -377,13 +383,14 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const openPanel = useCallback((agentId: string, edit?: { tab?: AgentCardOptions["tab"]; focus?: AgentCardOptions["focus"]; prefill?: AgentCardOptions["prefill"] }) => {
     if (!agents.some((a) => a.id === agentId)) return;
     setHkOpenRef.current(false);
-    setBookReq({ id: agentId, seq: Date.now() });
+    /* v24 C — outside full screen a door opens the agent's card; in full screen it selects the agent in the book */
+    if (fullRef.current) setBookReq({ id: agentId, seq: Date.now() }); else setCardId(agentId);
     if (edit) openAgentCard(agentId, { tab: edit.tab ?? "who", focus: edit.focus, prefill: edit.prefill, from: "row" });
   }, [agents]);
   /* a link to `?agent=` selects that agent and docks, then the parameter goes */
   useEffect(() => {
     if (!active || !panelParam || !collectionsReady) return;
-    if (agents.some((a) => a.id === panelParam)) setBookReq({ id: panelParam, seq: Date.now() });
+    if (agents.some((a) => a.id === panelParam)) { if (fullRef.current) setBookReq({ id: panelParam, seq: Date.now() }); else setCardId(panelParam); }
     setPanelParam(null, "replace");
   }, [active, panelParam, collectionsReady, agents, setPanelParam]);
   /* an id the list does not hold (deleted, or a stale link) clears itself once the agents can answer */
@@ -395,7 +402,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     return () => window.removeEventListener("sa:agent-panel-close", on);
   }, [setPanelParam]);
   /* while one of this agent's queries has the box (opened from the Queries tab), the agent's panel stands aside */
-  const openId = panelId;
+  const openId = panelId ?? cardId;
   /** the list's current order and filter */
   /** OPEN this agent — a row, a strip, a key */
   /* kept under its old name for the doors that asked for the card's editor at a field */
@@ -773,6 +780,28 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     return commitAgentEdits(firestoreDb, currentUser.id, id, patch);
   }, [sandbox, currentUser]);
 
+  /* ── v24 C · THE AGENT CARD, in the Query Centre's panel (outside full screen) ── */
+  const cardFacts = cardId && !fullOn ? factsAll.find((x) => x.agent.id === cardId) ?? null : null;
+  /* going full screen hands the open agent to the book, and the panel closes */
+  useEffect(() => {
+    if (fullOn && cardId) { setBookReq({ id: cardId, seq: Date.now() }); setCardId(null); }
+  }, [fullOn, cardId]);
+  /* an agent that is no longer on file closes its card */
+  useEffect(() => { if (cardId && collectionsReady && !agents.some((a) => a.id === cardId)) setCardId(null); }, [cardId, agents, collectionsReady]);
+  const titleOf = useCallback((msId: string) => manuscripts.find((m) => m.id === msId)?.title?.trim() || "Untitled manuscript", [manuscripts]);
+  const cardQueries = useMemo(() => (cardFacts ? queries.filter((q) => q.agentId === cardFacts.agent.id) : []), [cardFacts, queries]);
+  const cardHistory = useMemo(
+    () => (cardFacts ? agentHistory({ agent: cardFacts.agent, queries: cardQueries, activities, notes: [], titleOf, nowMs }) : []),
+    [cardFacts, cardQueries, activities, titleOf, nowMs],
+  );
+  const cardDeletes = useMemo(
+    () => (cardFacts ? destroyManifest("agent", cardFacts.agent.id, { queries, activities, taskFlags }).queries : 0),
+    [cardFacts, queries, activities, taskFlags],
+  );
+  /* ‹ › step through the list in the order it is DRAWN: grouped by Status, the groups' runs; else the sorted pool */
+  const drawnOrder = useMemo(() => (byStatus ? setGroups(visibleFacts).flatMap((g) => g.ids) : visibleFacts.map((x) => x.agent.id)), [byStatus, visibleFacts]);
+  const cardIndex = cardFacts ? drawnOrder.indexOf(cardFacts.agent.id) : -1;
+
   return (
     <div className="aglist">
       <div className="agl-page">
@@ -919,6 +948,29 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
           onExport={(rows) => downloadAgentsCsv(rows, (raw) => genreLabel(raw, personalGenres))}
         />
         )}
+        {cardFacts && active ? (
+          <AgentCardPanel24 agentId={cardFacts.agent.id} onClose={() => setCardId(null)}>
+            <AgentCard24 x={cardFacts} all={factsAll} nowMs={nowMs} bookTitle={scoped?.title?.trim() || null}
+              genreWord={(raw) => genreLabel(raw, personalGenres)} genreHit={bookHit}
+              queries={cardQueries} titleOf={titleOf} history={cardHistory}
+              index={cardIndex} total={drawnOrder.length}
+              onStep={(d) => { const n = drawnOrder[cardIndex + d]; if (n) setCardId(n); }}
+              onClose={() => setCardId(null)}
+              onJourney={(mode, queryId) => openQueryDrawer({ mode: mode as "resp", queryId })}
+              onLog={() => openQueryDrawer({ mode: "log", agentId: cardFacts.agent.id, ...(scoped?.id ? { manuscriptId: scoped.id } : {}) })}
+              onEdit={(tab, focus) => openAgentCard(cardFacts.agent.id, { tab: tab ?? "who", focus, from: "row" })}
+              onOpenQuery={(queryId) => navigate(`/queries?q=${encodeURIComponent(queryId)}`)}
+              onNotes={async (text) => (await writeAgentPatch(cardFacts.agent.id, { notes: text })).ok}
+              fit={null} colleagues={null} onOpenAgent={(id) => setCardId(id)}
+              deleteQueries={cardDeletes}
+              onDelete={() => {
+                const id = cardFacts.agent.id;
+                const name = (cardFacts.agent.name ?? "").trim() || cardFacts.agent.agency;
+                setCardId(null);
+                void deleteAgent(id).catch(() => setNotice({ text: `Couldn’t delete ${name} — try again.`, kind: "failed", agentId: id, canUndo: false }));
+              }} />
+          </AgentCardPanel24>
+        ) : null}
         </>
         )}
         </>
