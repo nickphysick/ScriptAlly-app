@@ -18,7 +18,8 @@
  *   PV4-5 the fold: at 1440×900 and 1280×800 the H1, the counter, the form and the toggle are on
  *         screen without scrolling
  *   shots (PV4_SHOTS=1): the top closed and open, Pro plans with the questions on question 1, the
- *         result — at 1440×900, 1280×800 and 390×844, beside the ref at the same sizes
+ *         result — at 1440×900 and 1280×800, beside the ref at the same sizes (390 moved to
+ *         pricingMobile.measure.ts, 25 Oct)
  *
  *   PV4_MUTATE=<name>  applies a lock's named break in the page, to prove the lock goes red.
  *
@@ -240,7 +241,9 @@ test("shots: top closed and open, Pro plans on question 1, the result — app be
   test.skip(!process.env.PV4_SHOTS);
   test.setTimeout(240_000);
   mkdirSync(SHOTS, { recursive: true });
-  for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }, { width: 390, height: 844 }]) {
+  /* RETARGET (pricing on phones, 25 Oct): 390 is gone from this pass. At ≤760px /pricing renders its
+     phone tree, which `pricingMobile.measure.ts`'s own shots photograph beside the phone ref. */
+  for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
     const sides: [string, string, Record<string, string>][] = [
       ["app", "/pricing", { more: ".mk-fbmore", link: ".mk-pv4suit", plans: ".mk-pv4plans", next: ".mk-jynext", btn: ".mk-pv4how button", res: ".mk-jyplan" }],
       ["ref", REF, { more: ".fbmore", link: ".suit-link", plans: ".plansbox", next: ".jy-step:not([hidden]) .jy-next", btn: ".suit button", res: ".jy-plan" }],

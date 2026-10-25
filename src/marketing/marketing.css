@@ -1950,6 +1950,475 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   .mk-pv4 .mk-pv4soon, .mk-pv4 .mk-pv4sect { padding: 0 12px; }
 }
 
+/* ══════════════ Pricing on phones (public /pricing ≤760px, ref design-refs/pricing-page-mobile-v1.html, 25 Oct) ══════════════
+   `PricingPhone.tsx` renders this tree at and below 760px (`usePhone`); above it the v4 block above
+   renders and none of these rules has anything to match — every selector here names a `.mk-pv*`
+   class that only the phone tree emits, or `:has()` of one.
+   ⚠️ VALUES ARE THE REF'S OWN, read from its stylesheet's "the page" section. Where the ref and a
+   marketing token say the same thing the token is used: --mk-ink-shell is its --ink, --mk-lower its
+   --oat, --mk-hero-ground its --paper, --mk-blush-mid its #fcf4f0. Its `rgba(28,19,15,.08)` hairline
+   has no token in the tier and is stated, as the desktop box states it.
+   ⚠️ EVERY SELECTOR IS `.mk-pvm .x` (0-2-0) OR `.mk-scope .x` WITH `!important`, for the reason the
+   v4 block states: brand.tsx names bare `p, span, div, button, input, label` at 0-0-1 and forces
+   `h1, h2, h3` with `!important`. `.mk-pvlayer` is the root of the parts portalled out of the sheet
+   (the questions sheet and the sticky bar) and takes the same reset. */
+
+/* ── The ink runs on 150px under the nav; the sheet starts there with 20px top corners (ref .mtop, .msheet) ──
+   ⚠️ THE SHEET IS A BLOCK FORMATTING CONTEXT (`flow-root`) AND SO IS THE PAGE'S ROOT. The box's −116px
+   margin must lift the box and nothing else: in a block that is not a BFC a first child's negative
+   top margin collapses through its parents, and the oat sheet would rise with it and swallow the ink.
+   The draft of this design had exactly that bug; `pricingMobile.measure.ts` locks the sheet's top.
+   ⚠️ `overflow: visible`, because the box and its perched drawing are meant to leave the sheet. */
+.mk-sheet:has(.mk-pvm) {
+  display: flow-root; margin-top: 150px; overflow: visible;
+  border-top-left-radius: 20px; border-top-right-radius: 20px;
+}
+.mk-pvm {
+  display: flow-root; padding: 0 14px 46px;
+  font-family: var(--mk-f-serif); color: var(--mk-nearblack);
+  /* The ref's body states no line-height, so its text sits at `normal`. */
+  line-height: normal;
+}
+/* ⚠️ `*`, NOT A SECOND `:where(p, span, …)` LIST. 0-1-0 beats brand.tsx's 0-0-1 either way, and the
+   v4 block's element list already names every one of those elements — the sheet-wide "one property
+   per selector" sweep reads a comma as a selector boundary, so a second list would read as each
+   element declaring `font-family` twice. */
+.mk-pvm *, .mk-pvlayer * { font-family: inherit; }
+
+/* ── The founding box (ref .fbx) ── */
+.mk-pvm .mk-pvbox {
+  position: relative; z-index: 2; margin-top: -116px;
+  border: 1px solid rgba(28, 19, 15, .08); border-radius: 20px;
+  box-shadow: 0 1px 2px rgba(28, 19, 15, .05), 0 22px 44px -24px rgba(28, 19, 15, .35);
+  /* ⚠️ COLOUR AND IMAGE SEPARATELY, NEVER THE SHORTHAND: a gradient that failed to parse would leave
+     the box see-through over the ink. White to 52%, #fcf4f0 at 74%, blush at 100%, top to bottom. */
+  background-color: #fff;
+  background-image: linear-gradient(180deg, #fff 0%, #fff 52%, var(--mk-blush-mid) 74%, var(--mk-blush) 100%);
+}
+/* Perched on the box's top-right corner, mirrored so the hawks face the headline. Decorative. */
+.mk-pvm .mk-pvart {
+  position: absolute; right: 8px; top: -58px; width: 112px; height: auto; max-width: none;
+  transform: scaleX(-1); pointer-events: none; filter: drop-shadow(0 6px 8px rgba(0, 0, 0, .12));
+}
+.mk-pvm .mk-pvin { padding: 24px 20px 4px; }
+.mk-pvm .mk-pvtag {
+  display: inline-block; padding: 5px 11px; border-radius: 999px; background: var(--mk-blush); color: var(--mk-rust);
+  font-family: var(--mk-f-mono); font-weight: 600; font-size: .58rem; line-height: 1.2;
+  letter-spacing: .2em; text-transform: uppercase;
+}
+.mk-scope .mk-pvh1 {
+  font-family: var(--mk-f-display) !important; font-weight: 400;
+  font-size: 1.85rem; line-height: 1.14; letter-spacing: -.01em; color: var(--mk-nearblack); margin: 16px 0 0;
+}
+.mk-pvm .mk-pvsub { margin: 12px 0 0; font-size: 1.04rem; line-height: 1.5; color: var(--mk-body); }
+
+/* The counter: `FoundingCounter`'s `left` shape — a 5px rust bar and one mono line (ref .cnt). */
+.mk-pvm .mk-pvcount .mk-fmcount { max-width: none; margin: 20px 0 0; }
+.mk-pvm .mk-pvcount .mk-fmbar { background: rgba(28, 19, 15, .1); }
+.mk-pvm .mk-pvcount .mk-fmfill { background: var(--mk-rust); opacity: 1; }
+.mk-pvm .mk-pvcount .mk-fmmeta {
+  margin: 8px 0 0; font-family: var(--mk-f-mono); font-weight: 600; font-size: .62rem; line-height: 1.2;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--mk-nearblack);
+}
+
+/* The claim form: the field, then a full-width 52px button, stacked (ref .form).
+   ⚠️ THE FIELD IS 16px, SO A PHONE DOES NOT ZOOM THE PAGE WHEN IT TAKES FOCUS (iOS zooms below 16). */
+.mk-pvm .mk-pvform { display: grid; gap: 10px; margin-top: 14px; }
+.mk-pvm .mk-pvform input {
+  box-sizing: border-box; width: 100%; height: 52px; border-radius: 999px; border: 1px solid var(--mk-hair);
+  padding: 0 22px; font-family: var(--mk-f-serif); font-weight: 400; font-size: 16px;
+  color: var(--mk-nearblack); background: #fff;
+}
+.mk-pvm .mk-pvform input::placeholder { color: var(--mk-blush-ph); }
+.mk-pvm .mk-pvform input:focus { outline: 2px solid var(--mk-navy); outline-offset: 2px; }
+.mk-pvm .mk-pvform .mk-btn {
+  height: 52px; padding: 0; border: 0; justify-content: center;
+  font-family: var(--mk-f-serif); font-weight: 600; font-size: 1.02rem;
+}
+/* ⚠️ NO LIFT ON HOVER. A phone keeps `:hover` stuck on whatever was last tapped, so the shared navy
+   button's lift and shadow would stay on after the tap; the ref darkens on `:active` only. */
+.mk-pvm .mk-pvform .mk-btn:hover { background: var(--mk-navy); transform: none; box-shadow: none; }
+.mk-pvm .mk-pvform .mk-btn:active { background: var(--mk-navy-hov); }
+.mk-pvm .mk-pvin .mk-betanote { margin: 10px 0 0; font-size: .85rem; line-height: 1.45; }
+.mk-pvm .mk-pvin .mk-betamsg { margin: 14px 0 0; }
+
+/* ── What founding writers get (ref .more, .detail) ── */
+.mk-pvm .mk-pvmore {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; padding: 20px 0 22px; margin: 0; border: 0; background: none; cursor: pointer;
+  font-family: var(--mk-f-mono); font-weight: 500; font-size: .62rem; line-height: 1;
+  letter-spacing: .2em; text-transform: uppercase; color: var(--mk-nearblack);
+}
+.mk-pvm .mk-pvmore::before, .mk-pvm .mk-pvmore::after { content: ""; width: 36px; height: 1px; background: var(--mk-hair); }
+.mk-pvm .mk-pvchev {
+  display: block; width: 13px; height: 13px; fill: none; stroke: var(--mk-rust); stroke-width: 2;
+  stroke-linecap: round; stroke-linejoin: round; transition: transform .25s;
+}
+.mk-pvm .mk-pvmore[aria-expanded="true"] .mk-pvchev { transform: rotate(180deg); }
+.mk-pvm .mk-pvmore:focus-visible { outline: 2px solid var(--mk-navy); outline-offset: -4px; }
+/* ⚠️ OPEN, THE TOGGLE IS ON THE PANEL'S PAPER WITH THE BOX'S BOTTOM CORNERS, so no strip of the box's
+   gradient shows between the panel and it: the two are adjacent boxes with no gap. */
+.mk-pvm .mk-pvbox--open .mk-pvmore { background: var(--mk-hero-ground); border-radius: 0 0 20px 20px; padding-top: 18px; }
+.mk-pvm .mk-pvdetail { background: var(--mk-hero-ground); border-top: 1px dashed var(--mk-hair); padding: 20px 0 6px; }
+.mk-pvm .mk-pvdetail[hidden] { display: none; }
+/* The four points: a scroll-snapped row of cards, 82% wide so the next one peeks in. */
+.mk-pvm .mk-pvperks {
+  display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory;
+  padding: 2px 20px 6px; scroll-padding: 0 20px; scrollbar-width: none;
+}
+.mk-pvm .mk-pvperks::-webkit-scrollbar { display: none; }
+.mk-pvm .mk-pvperk {
+  flex: 0 0 82%; scroll-snap-align: start; background: #fff; border-radius: 16px; padding: 18px;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, .08), 0 6px 14px -10px rgba(28, 19, 15, .2);
+}
+.mk-pvm .mk-pvperki { width: 40px; height: 40px; border-radius: 50%; background: var(--mk-blush); display: grid; place-items: center; }
+.mk-pvm .mk-pvperki svg {
+  width: 19px; height: 19px; fill: none; stroke: var(--mk-rust); stroke-width: 1.6;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.mk-scope .mk-pvperkh {
+  font-family: var(--mk-f-display) !important; font-weight: 400;
+  font-size: 1.08rem; line-height: 1.3; margin: 14px 0 0; color: var(--mk-nearblack);
+}
+.mk-pvm .mk-pvperkp { margin: 6px 0 0; font-size: .95rem; line-height: 1.5; color: var(--mk-body); }
+/* The current dot widens to a rust pill and follows the swipe. */
+.mk-pvm .mk-pvdots { display: flex; justify-content: center; gap: 6px; margin: 12px 0 0; }
+.mk-pvm .mk-pvdots i {
+  display: block; width: 6px; height: 6px; border-radius: 999px; background: rgba(28, 19, 15, .18);
+  transition: width .2s, background .2s;
+}
+.mk-pvm .mk-pvdots i.mk-on { width: 18px; background: var(--mk-rust); }
+/* How it works: a navy card, the three numbered steps down a thin line. */
+.mk-pvm .mk-pvsteps { margin: 18px 20px 0; padding: 16px 18px 18px; border-radius: 16px; background: var(--mk-navy); color: #fff; }
+.mk-pvm .mk-pvstepsh {
+  margin: 0; font-family: var(--mk-f-mono); font-weight: 500; font-size: .58rem; line-height: 1.2;
+  letter-spacing: .2em; text-transform: uppercase; color: rgba(var(--mk-cream-rgb), .7);
+}
+.mk-pvm .mk-pvsteps ol { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 14px; position: relative; }
+.mk-pvm .mk-pvsteps ol::before {
+  content: ""; position: absolute; left: 12px; top: 12px; bottom: 12px; width: 1px; background: rgba(var(--mk-cream-rgb), .3);
+}
+.mk-pvm .mk-pvsteps li { position: relative; display: flex; align-items: center; gap: 12px; font-size: 1rem; line-height: 1.35; color: #fff; }
+.mk-pvm .mk-pvsteps li span {
+  width: 25px; height: 25px; flex: none; border-radius: 50%; display: grid; place-items: center;
+  background: var(--mk-terra); color: var(--mk-nearblack);
+  font-family: var(--mk-f-mono); font-weight: 600; font-size: .7rem; line-height: 1;
+}
+/* ── Then, once we launch: the Free / Pro switch and the two cards (ref .launch, .seg, .track, .tier) ── */
+.mk-pvm .mk-pvlaunch { margin-top: 38px; }
+.mk-pvm .mk-pvlaunchh {
+  margin: 0 4px; font-family: var(--mk-f-display); font-weight: 400; font-size: 1.25rem; line-height: 1.3;
+}
+.mk-pvm .mk-pvseg {
+  position: relative; display: grid; grid-template-columns: 1fr 1fr; margin: 14px 4px 0; padding: 4px;
+  border-radius: 999px; background: #e6e0d6;
+}
+.mk-pvm .mk-pvthumb {
+  position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 4px); border-radius: 999px;
+  background: #fff; box-shadow: 0 2px 6px rgba(28, 19, 15, .12);
+  transition: transform .28s cubic-bezier(.22, .8, .3, 1);
+}
+.mk-pvm .mk-pvseg[data-on="1"] .mk-pvthumb { transform: translateX(100%); }
+.mk-pvm .mk-pvseg button {
+  position: relative; z-index: 1; height: 44px; border: 0; background: none; cursor: pointer;
+  font-family: var(--mk-f-serif); font-weight: 600; font-size: .98rem; line-height: 1; color: rgba(28, 19, 15, .56);
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+}
+.mk-pvm .mk-pvseg button[aria-selected="true"] { color: var(--mk-nearblack); }
+.mk-pvm .mk-pvseg button:focus-visible { outline: 2px solid var(--mk-navy); outline-offset: 2px; border-radius: 999px; }
+.mk-pvm .mk-pvseg small {
+  font-family: var(--mk-f-mono); font-weight: 500; font-size: .56rem; line-height: 1;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--mk-rust);
+}
+/* ⚠️ `align-items: flex-start`: each card keeps its own height — a short Free card is never
+   stretched to Pro's. `position: relative` makes the track the cards' offset parent, which is what
+   the switch's scroll arithmetic measures from. */
+.mk-pvm .mk-pvtrack {
+  position: relative; display: flex; align-items: flex-start; gap: 12px; overflow-x: auto;
+  scroll-snap-type: x mandatory; margin: 14px -14px 0; padding: 8px 18px 10px; scroll-padding: 0 18px;
+  scrollbar-width: none;
+}
+.mk-pvm .mk-pvtrack::-webkit-scrollbar { display: none; }
+.mk-pvm .mk-pvtier {
+  flex: 0 0 calc(100% - 26px); scroll-snap-align: start; background: #fff; border-radius: 22px; padding: 7px;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, .08), 0 16px 30px -20px rgba(28, 19, 15, .3);
+}
+.mk-pvm .mk-pvtierin { border-radius: 16px; padding: 22px 20px; height: 100%; }
+.mk-pvm .mk-pvtier--pro .mk-pvtierin { background: var(--mk-navy); color: var(--mk-cream); }
+.mk-scope .mk-pvtname {
+  font-family: var(--mk-f-display) !important; font-weight: 400; font-size: 1.35rem; line-height: 1.2; margin: 0;
+  color: inherit;
+}
+.mk-pvm .mk-pvtier--pro .mk-pvtname { color: #fff; }
+.mk-pvm .mk-pv4price { display: flex; align-items: flex-start; gap: 3px; margin-top: 10px; }
+.mk-pvm .mk-pv4cur { font-family: var(--mk-f-display); font-weight: 400; font-size: 1.15rem; line-height: 1; margin-top: 6px; }
+.mk-pvm .mk-pv4amt { font-family: var(--mk-f-display); font-weight: 400; font-size: 2.6rem; line-height: 1; letter-spacing: -.02em; }
+.mk-pvm .mk-pv4from, .mk-pvm .mk-pv4per {
+  font-family: var(--mk-f-mono); font-weight: 500; font-size: .6rem; line-height: 1;
+  letter-spacing: .14em; text-transform: uppercase; opacity: .75;
+}
+.mk-pvm .mk-pv4from { margin: 12px 6px 0 0; }
+.mk-pvm .mk-pv4per { align-self: flex-end; margin: 0 0 6px 8px; }
+.mk-pvm .mk-pvtsub { margin: 8px 0 0; font-size: .98rem; color: #5a4636; }
+.mk-pvm .mk-pvtier--pro .mk-pvtsub { color: rgba(var(--mk-cream-rgb), .82); }
+.mk-pvm .mk-pvtlist {
+  list-style: none; margin: 16px 0 0; padding: 14px 0 0; border-top: 1px dashed rgba(90, 70, 54, .3);
+  display: grid; gap: 9px; font-size: .98rem; color: #3a2e27;
+}
+.mk-pvm .mk-pvtier--pro .mk-pvtlist { border-top-color: rgba(var(--mk-cream-rgb), .3); color: var(--mk-cream); }
+.mk-pvm .mk-pvtlist li { position: relative; padding-left: 20px; line-height: 1.4; }
+.mk-pvm .mk-pvtlist li::before {
+  content: ""; position: absolute; left: 2px; top: .52em; width: 7px; height: 7px; border-radius: 50%; background: var(--mk-rust);
+}
+.mk-pvm .mk-pvtier--pro .mk-pvtlist li::before { background: var(--mk-terra); }
+.mk-pvm .mk-pvtlist li.mk-pvplus { padding-left: 0; font-weight: 600; }
+.mk-pvm .mk-pvtlist li.mk-pvplus::before { display: none; }
+.mk-pvm .mk-pvtnote {
+  margin: 16px 0 0; padding: 12px 14px; border-radius: 12px; background: rgba(var(--mk-cream-rgb), .08);
+  font-size: .9rem; line-height: 1.45; color: rgba(var(--mk-cream-rgb), .88);
+}
+
+/* ── Pro plans (ref .plans, .pgrid, .pt) ── */
+.mk-pvm .mk-pvplans { margin: 30px 0 0; padding: 18px 12px 14px; border: 1px solid var(--mk-hair); border-radius: 24px; }
+.mk-scope .mk-pvplanst {
+  font-family: var(--mk-f-display) !important; font-weight: 400; font-size: 1.2rem; line-height: 1.3; margin: 0 6px;
+  color: var(--mk-nearblack);
+}
+.mk-pvm .mk-pvplanss { margin: 4px 6px 0; font-size: .95rem; color: rgba(28, 19, 15, .56); }
+.mk-pvm .mk-pvpgrid {
+  list-style: none; margin: 14px 0 0; display: grid; grid-template-columns: 1fr 1fr; gap: 7px; padding: 7px;
+  background: #fff; border-radius: 20px;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, .08), 0 14px 30px -20px rgba(28, 19, 15, .28);
+}
+.mk-pvm .mk-pvpt {
+  background: var(--mk-cream); border-radius: 14px; padding: 14px 14px 12px; min-height: 112px;
+  display: flex; flex-direction: column; transition: background .3s;
+}
+.mk-pvm .mk-pvptname { margin: 0; font-family: var(--mk-f-display); font-weight: 400; font-size: .98rem; line-height: 1.2; color: #5a4636; }
+.mk-pvm .mk-pvptprice {
+  display: block; margin-top: 8px; font-family: var(--mk-f-display); font-weight: 400; font-size: 1.75rem; line-height: 1;
+  letter-spacing: -.02em; color: var(--mk-nearblack);
+}
+.mk-pvm .mk-pvptline {
+  margin-top: auto; padding-top: 10px; font-family: var(--mk-f-mono); font-weight: 500; font-size: .54rem; line-height: 1.5;
+  letter-spacing: .12em; text-transform: uppercase; color: #5a4636;
+}
+.mk-pvm .mk-pvptline em { font-style: normal; color: var(--mk-rust); display: block; }
+.mk-pvm .mk-pvpt--fit { background: var(--mk-navy); }
+.mk-pvm .mk-pvpt--fit .mk-pvptname { color: rgba(var(--mk-cream-rgb), .8); }
+.mk-pvm .mk-pvpt--fit .mk-pvptprice { color: #fff; }
+.mk-pvm .mk-pvpt--fit .mk-pvptline { color: rgba(var(--mk-cream-rgb), .75); }
+.mk-pvm .mk-pvpt--fit .mk-pvptline em { color: #f2c3ae; }
+.mk-pvm .mk-pvfittag {
+  align-self: flex-start; margin: -2px 0 8px; padding: 3px 7px; border-radius: 999px; background: var(--mk-terra);
+  color: var(--mk-nearblack); font-family: var(--mk-f-mono); font-weight: 600; font-size: .5rem; line-height: 1.2;
+  letter-spacing: .12em; text-transform: uppercase;
+}
+.mk-pvm .mk-pvsuit {
+  display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; height: 50px; margin-top: 12px;
+  border-radius: 999px; border: 1px solid rgba(162, 69, 42, .4); background: #fff; color: var(--mk-rust);
+  font-family: var(--mk-f-serif); font-weight: 600; font-size: 1rem; cursor: pointer;
+}
+.mk-pvm .mk-pvsuit svg {
+  width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round;
+}
+.mk-pvm .mk-pvsuit:focus-visible { outline: 2px solid var(--mk-navy); outline-offset: 2px; }
+.mk-pvm .mk-pvplansnote { margin: 10px 6px 0; font-size: .82rem; line-height: 1.45; color: var(--mk-label); text-align: center; }
+
+/* ── Questions, as an accordion (ref .faq, .qa) ── */
+.mk-pvm .mk-pvfaq { margin-top: 40px; }
+.mk-scope .mk-pvfaqh {
+  font-family: var(--mk-f-display) !important; font-weight: 400; font-size: 1.5rem; line-height: 1.2; margin: 0 4px 12px;
+  color: var(--mk-nearblack);
+}
+.mk-pvm .mk-pvqa { border-top: 1px solid var(--mk-hair); }
+.mk-pvm .mk-pvqa:last-child { border-bottom: 1px solid var(--mk-hair); }
+.mk-pvm .mk-pvqa > button {
+  display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 16px; padding: 17px 4px;
+  border: 0; background: none; text-align: left; cursor: pointer;
+  font-family: var(--mk-f-serif); font-weight: 600; font-size: 1.02rem; line-height: 1.35; color: var(--mk-nearblack);
+}
+.mk-pvm .mk-pvqa > button:focus-visible { outline: 2px solid var(--mk-navy); outline-offset: -2px; }
+.mk-pvm .mk-pvpm {
+  flex: none; width: 26px; height: 26px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 1px var(--mk-hair);
+  display: grid; place-items: center; transition: transform .25s, background .2s;
+}
+.mk-pvm .mk-pvpm svg { width: 12px; height: 12px; stroke: var(--mk-rust); stroke-width: 2; stroke-linecap: round; }
+.mk-pvm .mk-pvqa--open .mk-pvpm { transform: rotate(45deg); background: var(--mk-blush); }
+.mk-pvm .mk-pvqaa { margin: 0; padding: 0 40px 18px 4px; font-size: 1rem; line-height: 1.55; color: var(--mk-body); }
+.mk-pvm .mk-pvqaa[hidden] { display: none; }
+.mk-pvm .mk-pvsuitlink { color: var(--mk-rust); font-weight: 600; text-decoration: none; border-bottom: 1px solid var(--mk-rust); }
+
+/* ── The sticky sign-up (ref .stick), portalled into `.mk-scope` ──
+   ⚠️ `visibility` FOLLOWS THE SLIDE, so a hidden bar cannot be tabbed to or read out. */
+.mk-pvlayer.mk-pvstick {
+  position: fixed; left: 12px; right: 12px; bottom: 14px; z-index: 50; box-sizing: border-box;
+  display: flex; align-items: center; gap: 12px; padding: 8px 8px 8px 18px; border-radius: 999px;
+  background: var(--mk-ink-shell); color: var(--mk-cream); box-shadow: 0 14px 30px -10px rgba(0, 0, 0, .45);
+  transform: translateY(140%); visibility: hidden;
+  transition: transform .3s cubic-bezier(.22, .8, .3, 1), visibility 0s linear .3s;
+  font-family: var(--mk-f-serif);
+}
+.mk-pvlayer.mk-pvstick.mk-on { transform: none; visibility: visible; transition: transform .3s cubic-bezier(.22, .8, .3, 1), visibility 0s; }
+.mk-pvlayer.mk-pvstick p {
+  margin: 0; flex: 1; font-family: var(--mk-f-mono); font-weight: 600; font-size: .6rem; line-height: 1.3;
+  letter-spacing: .14em; text-transform: uppercase;
+}
+.mk-pvlayer.mk-pvstick p span { display: block; color: rgba(var(--mk-cream-rgb), .6); font-weight: 500; }
+.mk-pvlayer.mk-pvstick button {
+  height: 44px; padding: 0 20px; border: 0; border-radius: 999px; background: var(--mk-cream); color: var(--mk-nearblack);
+  font-family: var(--mk-f-serif); font-weight: 600; font-size: .95rem; cursor: pointer;
+}
+.mk-pvlayer.mk-pvstick button:focus-visible { outline: 2px solid var(--mk-terra); outline-offset: 2px; }
+/* ⚠️ WHILE THE BAR SHOWS, THE PAGE ENDS 74px LOWER (its 60px plus its 14px inset), so the footer's
+   last link can always be scrolled clear of it. */
+.mk-scope:has(.mk-pvstick.mk-on) { padding-bottom: 74px; }
+
+/* ── Which plan suits me best? — the bottom sheet (ref .scrim, .jsheet), portalled into `.mk-scope` ──
+   ⚠️ CLOSED IT IS STILL MOUNTED, SO ITS ANSWERS SURVIVE — and `visibility` follows the slide (the
+   component also sets `inert`), so nothing in a closed sheet can be reached. Above the nav (60). */
+.mk-pvlayer.mk-pvjs { font-family: var(--mk-f-serif); color: var(--mk-nearblack); line-height: normal; }
+.mk-pvlayer .mk-pvscrim {
+  position: fixed; inset: 0; z-index: 90; background: rgba(17, 22, 32, .45); opacity: 0; pointer-events: none;
+  transition: opacity .3s;
+}
+.mk-pvlayer .mk-pvsheet {
+  position: fixed; left: 0; right: 0; bottom: 0; height: 90%; z-index: 91; box-sizing: border-box;
+  background: #fff; border-radius: 24px 24px 0 0; display: flex; flex-direction: column;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, .25);
+  transform: translateY(102%); visibility: hidden;
+  transition: transform .38s cubic-bezier(.22, .8, .3, 1), visibility 0s linear .38s;
+}
+.mk-pvlayer.mk-open .mk-pvscrim { opacity: 1; pointer-events: auto; }
+.mk-pvlayer.mk-open .mk-pvsheet { transform: none; visibility: visible; transition: transform .38s cubic-bezier(.22, .8, .3, 1), visibility 0s; }
+.mk-pvlayer .mk-pvgrab { width: 40px; height: 5px; border-radius: 999px; background: rgba(28, 19, 15, .18); margin: 9px auto 0; flex: none; }
+.mk-pvlayer .mk-pvjshead { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px 0 22px; flex: none; }
+.mk-scope .mk-pvjsh {
+  font-family: var(--mk-f-display) !important; font-weight: 400; font-size: 1.08rem; line-height: 1.2; margin: 0;
+  color: var(--mk-nearblack);
+}
+.mk-pvlayer .mk-pvjsx {
+  width: 36px; height: 36px; border-radius: 50%; border: 0; background: #f2eee8; display: grid; place-items: center;
+  cursor: pointer; padding: 0;
+}
+.mk-pvlayer .mk-pvjsx svg { width: 13px; height: 13px; stroke: var(--mk-nearblack); stroke-width: 2; stroke-linecap: round; }
+.mk-pvlayer .mk-pvjsmeta { display: flex; align-items: center; gap: 12px; padding: 14px 22px 0; flex: none; }
+.mk-pvlayer .mk-pvjsprog { flex: 1; height: 4px; border-radius: 999px; background: rgba(28, 19, 15, .08); overflow: hidden; }
+.mk-pvlayer .mk-pvjsprog span { display: block; height: 100%; background: var(--mk-rust); border-radius: 999px; transition: width .35s; }
+.mk-pvlayer .mk-pvjscount {
+  font-family: var(--mk-f-mono); font-weight: 500; font-size: .56rem; line-height: 1; letter-spacing: .16em;
+  text-transform: uppercase; color: rgba(28, 19, 15, .56); white-space: nowrap;
+}
+.mk-pvlayer .mk-pvjsbody { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 22px 22px 20px; scrollbar-width: none; }
+.mk-pvlayer .mk-pvjsbody::-webkit-scrollbar { display: none; }
+.mk-pvlayer .mk-pvq { margin: 0 0 18px; font-family: var(--mk-f-display); font-weight: 400; font-size: 1.5rem; line-height: 1.22; }
+.mk-pvlayer .mk-pvq:focus { outline: none; }
+.mk-pvlayer .mk-pvsubq { margin: 22px 0 10px; font-weight: 600; }
+.mk-pvlayer .mk-pvopts { display: grid; gap: 9px; }
+.mk-pvlayer .mk-pvopt {
+  position: relative; display: block; width: 100%; text-align: left; padding: 15px 16px 15px 48px; border-radius: 14px;
+  border: 1px solid var(--mk-hair); background: #fff; color: var(--mk-nearblack); cursor: pointer;
+  font-family: var(--mk-f-serif); font-weight: 600; font-size: 1.02rem; line-height: 1.3;
+}
+.mk-pvlayer .mk-pvopt small { display: block; margin-top: 3px; font-weight: 400; font-size: .9rem; color: rgba(28, 19, 15, .56); }
+.mk-pvlayer .mk-pvopt::before {
+  content: ""; position: absolute; left: 17px; top: 17px; width: 17px; height: 17px; border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, .3); transition: box-shadow .15s;
+}
+.mk-pvlayer .mk-pvopt[aria-pressed="true"] { border-color: var(--mk-navy); box-shadow: inset 0 0 0 1px var(--mk-navy); background: var(--mk-hero-ground); }
+.mk-pvlayer .mk-pvopt[aria-pressed="true"]::before { box-shadow: inset 0 0 0 5.5px var(--mk-navy); }
+.mk-pvlayer .mk-pvopt:focus-visible { outline: 2px solid var(--mk-navy); outline-offset: 2px; }
+.mk-pvlayer .mk-pvopts--row { grid-template-columns: 1fr 1fr 1fr; }
+.mk-pvlayer .mk-pvopts--row .mk-pvopt { padding: 14px 8px; text-align: center; font-size: .95rem; }
+.mk-pvlayer .mk-pvopts--row .mk-pvopt::before { display: none; }
+.mk-pvlayer .mk-pvagents { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 6px 0 0; }
+.mk-pvlayer .mk-pvstepper { display: flex; align-items: center; gap: 6px; }
+.mk-pvlayer .mk-pvstepper button {
+  width: 56px; height: 56px; border-radius: 50%; border: 1px solid var(--mk-hair); background: #fff; padding: 0;
+  font-family: var(--mk-f-sans); font-weight: 400; font-size: 1.6rem; line-height: 1; color: var(--mk-navy); cursor: pointer;
+}
+.mk-pvlayer .mk-pvstepper output {
+  min-width: 100px; text-align: center; font-family: var(--mk-f-display); font-weight: 400; font-size: 3rem; line-height: 1;
+}
+.mk-pvlayer .mk-pvagents--idk .mk-pvstepper { opacity: .35; }
+.mk-pvlayer .mk-pvidk {
+  height: 44px; padding: 0 22px; border-radius: 999px; border: 1px solid var(--mk-hair); background: #fff;
+  font-family: var(--mk-f-serif); font-weight: 600; font-size: .98rem; color: var(--mk-nearblack); cursor: pointer;
+}
+.mk-pvlayer .mk-pvidk[aria-pressed="true"] { background: var(--mk-navy); border-color: var(--mk-navy); color: #fff; }
+.mk-pvlayer .mk-pvins {
+  margin: 18px 0 0; padding: 14px 16px; border-radius: 14px; background: var(--mk-blush);
+  font-size: 1rem; line-height: 1.5; color: #4a3a30; animation: mkJyRise .35s ease;
+}
+.mk-pvlayer .mk-pvjsfoot {
+  flex: none; display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  padding: 12px 18px 26px 22px; border-top: 1px solid rgba(28, 19, 15, .08); background: #fff;
+}
+.mk-pvlayer .mk-pvjsback {
+  border: 0; background: none; padding: 8px 0; cursor: pointer;
+  font-family: var(--mk-f-serif); font-weight: 600; font-size: 1rem; color: var(--mk-navy);
+}
+/* Hidden on the first question and the result, keeping its place so Next does not move. */
+.mk-pvlayer .mk-pvjsback.mk-off { visibility: hidden; }
+.mk-pvlayer .mk-pvjsnext {
+  flex: 1; max-width: 220px; height: 52px; padding: 0; border: 0; justify-content: center;
+  font-family: var(--mk-f-serif); font-weight: 600; font-size: 1.02rem;
+}
+.mk-pvlayer .mk-pvjsnext:hover { background: var(--mk-navy); transform: none; box-shadow: none; }
+.mk-pvlayer .mk-pvjsnext:active { background: var(--mk-navy-hov); }
+.mk-pvlayer .mk-pvjsnext:disabled { background: rgba(42, 58, 82, .18); border-color: transparent; cursor: default; transform: none; box-shadow: none; }
+
+/* The result: the estimate, the navy plan card, then why (ref .res-*). */
+.mk-pvlayer .mk-pvresk {
+  margin: 0; font-family: var(--mk-f-mono); font-weight: 500; font-size: .58rem; line-height: 1.2;
+  letter-spacing: .18em; text-transform: uppercase; color: rgba(28, 19, 15, .56);
+}
+.mk-pvlayer .mk-pvresbig { margin: 6px 0 0; font-family: var(--mk-f-display); font-weight: 400; font-size: 2.15rem; line-height: 1.12; }
+.mk-pvlayer .mk-pvresbig:focus { outline: none; }
+.mk-pvlayer .mk-pvrescard {
+  position: relative; margin: 26px 2px 22px; padding: 22px 20px 20px; border-radius: 18px;
+  background: var(--mk-navy); color: var(--mk-cream);
+  box-shadow: 0 0 0 6px #fff, 0 0 0 7px rgba(28, 19, 15, .08), 0 18px 34px -16px rgba(28, 19, 15, .4);
+}
+.mk-pvlayer .mk-pvresflag {
+  position: absolute; top: -11px; left: 18px; padding: 5px 10px; border-radius: 999px;
+  background: var(--mk-nearblack); color: var(--mk-cream);
+  font-family: var(--mk-f-mono); font-weight: 600; font-size: .54rem; line-height: 1; letter-spacing: .18em; text-transform: uppercase;
+}
+.mk-scope .mk-pvresname {
+  font-family: var(--mk-f-display) !important; font-weight: 400; font-size: 1.3rem; line-height: 1.2; margin: 0; color: #fff;
+}
+.mk-pvlayer .mk-pv4price { display: flex; align-items: flex-start; gap: 3px; margin-top: 10px; }
+.mk-pvlayer .mk-pv4cur { font-family: var(--mk-f-display); font-weight: 400; font-size: 1.15rem; line-height: 1; margin-top: 6px; color: #fff; }
+.mk-pvlayer .mk-pv4amt { font-family: var(--mk-f-display); font-weight: 400; font-size: 2.6rem; line-height: 1; letter-spacing: -.02em; color: #fff; }
+.mk-pvlayer .mk-pvrespm {
+  margin: 6px 0 0; font-family: var(--mk-f-mono); font-weight: 500; font-size: .6rem; line-height: 1.3;
+  letter-spacing: .14em; text-transform: uppercase; color: rgba(var(--mk-cream-rgb), .8);
+}
+.mk-pvlayer .mk-pvrestail {
+  margin: 14px 0 0; padding-top: 12px; border-top: 1px dashed rgba(var(--mk-cream-rgb), .3); font-size: 1rem; line-height: 1.5;
+}
+.mk-pvlayer .mk-pvreswhy { margin: 8px 0 0; font-size: 1rem; line-height: 1.55; color: var(--mk-body); }
+.mk-pvlayer .mk-pvresprep {
+  margin: 12px 0 0; padding: 12px 14px; border-radius: 12px; background: var(--mk-blush); font-size: .95rem; line-height: 1.5; color: #4a3a30;
+}
+.mk-pvlayer .mk-pvresagain {
+  margin-top: 18px; border: 0; background: none; padding: 0; cursor: pointer; border-bottom: 1px solid rgba(42, 58, 82, .35);
+  font-family: var(--mk-f-serif); font-weight: 600; font-size: 1rem; color: var(--mk-navy);
+}
+.mk-pvlayer .mk-pvressrc { margin: 18px 0 0; font-size: .8rem; line-height: 1.45; color: var(--mk-label); }
+.mk-pvlayer .mk-pvressrc a { color: inherit; text-decoration: underline; }
+
+/* ⚠️ AFTER THE RULES IT OVERRIDES: a media query confers no specificity. Under reduced motion the
+   sheet appears in place, the thumb, chevron and + do not turn or slide, and the notes do not rise. */
+@media (prefers-reduced-motion: reduce) {
+  .mk-pvm .mk-pvchev, .mk-pvm .mk-pvdots i, .mk-pvm .mk-pvthumb, .mk-pvm .mk-pvpm, .mk-pvm .mk-pvpt,
+  .mk-pvlayer.mk-pvstick, .mk-pvlayer.mk-pvstick.mk-on,
+  .mk-pvlayer .mk-pvscrim, .mk-pvlayer .mk-pvsheet, .mk-pvlayer.mk-open .mk-pvsheet,
+  .mk-pvlayer .mk-pvjsprog span, .mk-pvlayer .mk-pvopt::before { transition: none; }
+  .mk-pvlayer .mk-pvins { animation: none; }
+}
+
 /* ══════════════ Shared footer (every public page) ══════════════
    ⚠️ ONE AUTHORITATIVE BLOCK, REWRITTEN RATHER THAN PATCHED (17 Sep). The footer's rules had
    spread to four places — a base rule beside the banner, a 1080px padding override, a 760px column

@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * ⚠️ THE EXPECTED VALUES ARE THE REF'S OWN OUTPUT. `campaignEstimate.ref.json` is written by
- * `scripts/pricing-v4-refoutputs.mjs`, which drives design-refs/pricing-page-v2.html's script in a
- * browser with the clock pinned — 810 answer combinations on two dates, "I don't know" and "Not
+ * `scripts/pricing-mobile-refoutputs.mjs`, which drives design-refs/pricing-page-mobile-v1.html's
+ * script in a browser with the clock pinned (pricing on phones, 25 Oct: it superseded the desktop
+ * ref's recording, from which it differs only in the two tails that sold a month at £5.99) — 810 answer combinations on two dates, "I don't know" and "Not
  * sure yet" included, with the note the ref shows under each answer. Nothing here is a value
  * reasoned from reading the arithmetic.
  */
@@ -28,6 +29,9 @@ describe("estimateCampaign agrees with the ref, case for case", () => {
     /* every branch of the output is entered at least once */
     expect(new Set(cases.map((c) => c.fit))).toEqual(new Set([3, 6, 12]));
     expect(new Set(cases.map((c) => c.tail)).size).toBe(4);
+    /* ⚠️ THE 24 OCT POLICY: a plan is extended by QueryHawk getting in touch; no tail sells a month. */
+    expect(cases.filter((c) => c.tail.includes("we'll be in touch with options to extend")).length).toBe(321);
+    expect(cases.some((c) => c.tail.includes("£"))).toBe(false);
     expect(cases.some((c) => c.label === "About a year or more")).toBe(true);
     expect(cases.filter((c) => c.answers.agentsUnknown).length).toBe(90);
     expect(cases.filter((c) => c.answers.pace === "unsure").length).toBe(270);

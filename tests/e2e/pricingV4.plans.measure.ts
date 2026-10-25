@@ -14,7 +14,11 @@ import { test, expect } from "@playwright/test";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { openRoute } from "./measure";
 
-const DIR = "reports/pricing-v4/plans";
+/* ⚠️ A PACK THAT RE-RUNS THIS POINTS IT AT ITS OWN FOLDER (`PV4_PLANS_DIR`). /plans draws the
+   signed-in account's live data, so a capture from another day can differ by a few pixels with no
+   code change at all (measured 25 Oct: 43px of the sidebar, against the untouched v4 build too).
+   Before and after must be captured the same day, base build then changed build. */
+const DIR = process.env.PV4_PLANS_DIR ?? "reports/pricing-v4/plans";
 const MODE = process.env.PV4_PLANS ?? "after";
 
 for (const vp of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {

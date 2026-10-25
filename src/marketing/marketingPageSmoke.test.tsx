@@ -27,7 +27,7 @@ vi.mock("../components/toast/ToastProvider", async () => (await import("../test/
 import { Landing } from "./Landing";
 import { MarketingShell } from "./MarketingShell";
 import { PricingPage } from "./PricingPage";
-import { PRO_PLANS, ADD_MONTH_PRICE, perMonth } from "./pricingCopy";
+import { PRO_PLANS, perMonth } from "./pricingCopy";
 import { LegalPage } from "./LegalPage";
 import { AboutPage } from "./AboutPage";
 import { ContactPage } from "./ContactPage";
@@ -148,9 +148,11 @@ describe("the public pricing page sells nothing and writes nothing", () => {
     const text = textOf(renderPage(<PricingPage onNavigate={noNavigate} />, "/pricing"));
     const amounts = [...text.matchAll(/£\s*([\d.,]+)/g)].map((m) => m[1]);
     expect(amounts.length, "the sweep found prices (not vacuous)").toBeGreaterThan(1);
-    const allowed = new Set(["0", ADD_MONTH_PRICE, ...PRO_PLANS.map((p) => p.price), ...PRO_PLANS.map(perMonth)]);
+    const allowed = new Set(["0", ...PRO_PLANS.map((p) => p.price), ...PRO_PLANS.map(perMonth)]);
     for (const a of amounts) expect(allowed, `£${a} has a source`).toContain(a);
     expect(text, "the old monthly figure is not this page's").not.toContain("£4.99");
+    /* ⚠️ AND NO "ADD A MONTH" PRICE: plans are extended by QueryHawk getting in touch (24 Oct). */
+    expect(text).not.toContain("5.99");
   });
 
   /**

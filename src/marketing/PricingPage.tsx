@@ -27,7 +27,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   PRICING_DOCUMENT_TITLE, PV4_KICKER, PV4_H1, PV4_SUB, PV4_MORE, PV4_LESS, PV4_PERKS,
-  PV4_STEPS_H, PV4_STEPS, type Pv4Perk, PV4_LAUNCH_LINE, PV4_FREE, PV4_PRO,
+  PV4_STEPS_H, PV4_STEPS, PV4_LAUNCH_LINE, PV4_FREE, PV4_PRO,
   PRO_FROM, PV4_FAQ_H2, PV4_FAQ, PV4_SOURCE_NOTE, PRO_PLANS, PLANS_TITLE, PLANS_SUB, planMonths,
   planPrice, planTileLine, SUIT_LINK, SUIT_HIDE,
 } from "./pricingCopy";
@@ -35,16 +35,9 @@ import { FoundingSignup, FoundingCounter } from "./FoundingSignup";
 import { CampaignJourney } from "./CampaignJourney";
 import { Runs } from "./CopyRuns";
 import { FOUNDING_ART, artUrl } from "./brandArt";
-
-/** A price as the ref draws it: an optional "from", a small £, the figure, an optional unit. */
-const Price: React.FC<{ amount: string; from?: string; per?: string }> = ({ amount, from, per }) => (
-  <div className="mk-pv4price">
-    {from && <span className="mk-pv4from">{from}</span>}
-    <span className="mk-pv4cur">£</span>
-    <span className="mk-pv4amt">{amount}</span>
-    {per && <span className="mk-pv4per">{per}</span>}
-  </div>
-);
+import { usePhone } from "./usePhone";
+import { Price, PERK_ICON } from "./pricingParts";
+import { PricingPhone } from "./PricingPhone";
 
 /**
  * ⚠️ THE QUESTIONS SCROLL INTO VIEW IN SCRIPT, NEVER BY CHANGING THE HASH. The app reads
@@ -57,14 +50,6 @@ const scrollToQuestions = () => {
   if (!target) return;
   const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
   target.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
-};
-
-/** The four perk cards' line drawings — the ref's inline SVGs, path for path. */
-const PERK_ICON: Record<Pv4Perk["icon"], React.ReactNode> = {
-  gift: <><path d="M20 12v9H4v-9" /><path d="M2 7h20v5H2z" /><path d="M12 21V7" /><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" /><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" /></>,
-  chat: <><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /><path d="M8 9h8M8 13h5" /></>,
-  import: <><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" /><path d="M14 3v6h6" /><path d="M12 18v-6M9 15l3 3 3-3" /></>,
-  people: <><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20a6.5 6.5 0 0 1 13 0" /><path d="M17 4.5a3.5 3.5 0 0 1 0 7" /><path d="M18.5 14.5A6.5 6.5 0 0 1 21.5 20" /></>,
 };
 
 /**
@@ -140,12 +125,24 @@ const FoundingBox: React.FC<{ onNavigate: (tab: string, subPageName?: string) =>
   );
 };
 
+/**
+ * ⚠️ AT AND BELOW 760px THE PAGE IS A DIFFERENT TREE (`PricingPhone`, ref
+ * design-refs/pricing-page-mobile-v1.html), switched by `usePhone` — the landing's own breakpoint, as
+ * the landing switches to `HeroPhone`. Above it the v4 page below renders exactly as it did. One tree
+ * at a time, never both: each opens on its own founding box and carries the page's one h1.
+ * The document title belongs to the route, so it is set here for both.
+ */
 export const PricingPage: React.FC<{ onNavigate: (tab: string, subPageName?: string) => void }> = ({ onNavigate }) => {
   useEffect(() => {
     const prev = document.title;
     document.title = PRICING_DOCUMENT_TITLE;
     return () => { document.title = prev; };
   }, []);
+  const phone = usePhone();
+  return phone ? <PricingPhone onNavigate={onNavigate} /> : <PricingDesktop onNavigate={onNavigate} />;
+};
+
+const PricingDesktop: React.FC<{ onNavigate: (tab: string, subPageName?: string) => void }> = ({ onNavigate }) => {
 
   /* "Which plan suits me best?": the questions are hidden until the link (or the FAQ's link) opens
      them; the plan they arrive at turns its tile navy. Their answers survive closing them. */

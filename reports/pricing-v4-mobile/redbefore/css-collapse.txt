@@ -1,0 +1,86 @@
+
+Running 3 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.4s)
+PVM-2 @390 {"navBottom":60,"sheetTop":94,"box":[94,605.546875],"artTop":37,"t":"matrix(-1, 0, 0, 1, 0, 0)"}
+  ✘  2 [measure] › tests/e2e/pricingMobile.measure.ts:157:3 › PVM-2 @390: the box straddles the join, the drawing is mirrored and perched, the sheet has not moved up (758ms)
+PVM-2 @375 {"navBottom":60,"sheetTop":94,"box":[94,605.546875],"artTop":37,"t":"matrix(-1, 0, 0, 1, 0, 0)"}
+  ✘  3 [measure] › tests/e2e/pricingMobile.measure.ts:157:3 › PVM-2 @375: the box straddles the join, the drawing is mirrored and perched, the sheet has not moved up (732ms)
+
+
+  1) [measure] › tests/e2e/pricingMobile.measure.ts:157:3 › PVM-2 @390: the box straddles the join, the drawing is mirrored and perched, the sheet has not moved up 
+
+    Error: the box's top is above the sheet's
+
+    expect(received).toBeLessThan(expected)
+
+    Expected: < 94
+    Received:   94
+
+      163 |     const t = await page.locator(".mk-pvart").evaluate((e) => getComputedStyle(e).transform);
+      164 |     console.log(`PVM-2 @${vp.width}`, JSON.stringify({ navBottom: nav.bottom, sheetTop: sheet.top, box: [bx.top, bx.bottom], artTop: art.top, t }));
+    > 165 |     expect.soft(bx.top, "the box's top is above the sheet's").toBeLessThan(sheet.top);
+          |                                                               ^
+      166 |     expect.soft(bx.bottom, "the box's bottom is below the sheet's top").toBeGreaterThan(sheet.top);
+      167 |     expect.soft(t, "the drawing is mirrored").toBe("matrix(-1, 0, 0, 1, 0, 0)");
+      168 |     expect.soft(art.top, "the drawing's top is above the box's").toBeLessThan(bx.top);
+        at /Users/nickphysick/ScriptAlly-pv4m/tests/e2e/pricingMobile.measure.ts:165:63
+
+    Error: the sheet starts 150px under the nav (flow-root)
+
+    expect(received).toBeLessThan(expected)
+
+    Expected: < 0.5
+    Received:   116
+
+      174 |        as well reproduces the draft's bug and turns it red (`collapse`). The `flow-root`s stay: they
+      175 |        are the page's own guarantee, and the flex column is the shell's to change. */
+    > 176 |     expect.soft(Math.abs(sheet.top - (nav.bottom + 150)), "the sheet starts 150px under the nav (flow-root)").toBeLessThan(0.5);
+          |                                                                                                               ^
+      177 |   });
+      178 | }
+      179 |
+        at /Users/nickphysick/ScriptAlly-pv4m/tests/e2e/pricingMobile.measure.ts:176:111
+
+    Error Context: test-results/pricingMobile.measure.ts-P-37198--the-sheet-has-not-moved-up-measure/error-context.md
+
+  2) [measure] › tests/e2e/pricingMobile.measure.ts:157:3 › PVM-2 @375: the box straddles the join, the drawing is mirrored and perched, the sheet has not moved up 
+
+    Error: the box's top is above the sheet's
+
+    expect(received).toBeLessThan(expected)
+
+    Expected: < 94
+    Received:   94
+
+      163 |     const t = await page.locator(".mk-pvart").evaluate((e) => getComputedStyle(e).transform);
+      164 |     console.log(`PVM-2 @${vp.width}`, JSON.stringify({ navBottom: nav.bottom, sheetTop: sheet.top, box: [bx.top, bx.bottom], artTop: art.top, t }));
+    > 165 |     expect.soft(bx.top, "the box's top is above the sheet's").toBeLessThan(sheet.top);
+          |                                                               ^
+      166 |     expect.soft(bx.bottom, "the box's bottom is below the sheet's top").toBeGreaterThan(sheet.top);
+      167 |     expect.soft(t, "the drawing is mirrored").toBe("matrix(-1, 0, 0, 1, 0, 0)");
+      168 |     expect.soft(art.top, "the drawing's top is above the box's").toBeLessThan(bx.top);
+        at /Users/nickphysick/ScriptAlly-pv4m/tests/e2e/pricingMobile.measure.ts:165:63
+
+    Error: the sheet starts 150px under the nav (flow-root)
+
+    expect(received).toBeLessThan(expected)
+
+    Expected: < 0.5
+    Received:   116
+
+      174 |        as well reproduces the draft's bug and turns it red (`collapse`). The `flow-root`s stay: they
+      175 |        are the page's own guarantee, and the flex column is the shell's to change. */
+    > 176 |     expect.soft(Math.abs(sheet.top - (nav.bottom + 150)), "the sheet starts 150px under the nav (flow-root)").toBeLessThan(0.5);
+          |                                                                                                               ^
+      177 |   });
+      178 | }
+      179 |
+        at /Users/nickphysick/ScriptAlly-pv4m/tests/e2e/pricingMobile.measure.ts:176:111
+
+    Error Context: test-results/pricingMobile.measure.ts-P-d89b9--the-sheet-has-not-moved-up-measure/error-context.md
+
+  2 failed
+    [measure] › tests/e2e/pricingMobile.measure.ts:157:3 › PVM-2 @390: the box straddles the join, the drawing is mirrored and perched, the sheet has not moved up 
+    [measure] › tests/e2e/pricingMobile.measure.ts:157:3 › PVM-2 @375: the box straddles the join, the drawing is mirrored and perched, the sheet has not moved up 
+  1 passed (20.0s)
