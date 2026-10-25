@@ -16,7 +16,8 @@ import { Pic, PicBare } from "./icons";
 import type { Pk26Model } from "./usePk26Model";
 
 /** `version`: a new package opened from Versions' "Add to a package" starts with that version as its pages. */
-export type DialogView = { m: "new"; version?: string } | { m: "edit"; id: string };
+/** `focus: "note"` opens Package details with "Who it's for" focused (the header bar's "+ Add a note", v26.1). */
+export type DialogView = { m: "new"; version?: string } | { m: "edit"; id: string; focus?: "note" };
 
 export const Pk26Dialog: React.FC<{ model: Pk26Model; view: DialogView | null; onClose: () => void; onCreated: (id: string) => void }> = ({ model, view, onClose, onCreated }) => {
   useEscapeLayer(!!view, onClose, ESC_LEVEL.pageModal);
@@ -25,14 +26,14 @@ export const Pk26Dialog: React.FC<{ model: Pk26Model; view: DialogView | null; o
   return createPortal(
     <div className="p6-layer">
       <div className="p6-pdlg" data-pk26="dialog" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-        <Body key={view.m === "edit" ? view.id : "new"} model={model} p={p} version={view.m === "new" ? view.version : undefined} onClose={onClose} onCreated={onCreated} />
+        <Body key={view.m === "edit" ? view.id : "new"} model={model} p={p} version={view.m === "new" ? view.version : undefined} focusNote={view.m === "edit" && view.focus === "note"} onClose={onClose} onCreated={onCreated} />
       </div>
     </div>,
     document.body,
   );
 };
 
-const Body: React.FC<{ model: Pk26Model; p: SubmissionPackage | null; version?: string; onClose: () => void; onCreated: (id: string) => void }> = ({ model, p, version, onClose, onCreated }) => {
+const Body: React.FC<{ model: Pk26Model; p: SubmissionPackage | null; version?: string; focusNote?: boolean; onClose: () => void; onCreated: (id: string) => void }> = ({ model, p, version, focusNote, onClose, onCreated }) => {
   const [name, setName] = useState(p?.packageName ?? "");
   const [note, setNote] = useState(p?.note ?? "");
   const [ic, setIc] = useState<PackageIcon>(p ? iconOf(p) : "star");
@@ -41,7 +42,8 @@ const Body: React.FC<{ model: Pk26Model; p: SubmissionPackage | null; version?: 
   const [err, setErr] = useState(false);
   const [busy, setBusy] = useState(false);
   const nameRef = useRef<HTMLInputElement | null>(null);
-  useEffect(() => { const t = setTimeout(() => nameRef.current?.focus(), 30); return () => clearTimeout(t); }, []);
+  const noteRef = useRef<HTMLInputElement | null>(null);
+  useEffect(() => { const t = setTimeout(() => (focusNote ? noteRef : nameRef).current?.focus(), 30); return () => clearTimeout(t); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const ok = async () => {
     if (busy) return;
@@ -70,7 +72,7 @@ const Body: React.FC<{ model: Pk26Model; p: SubmissionPackage | null; version?: 
       </div>
       <div className="p6-pd-b">
         <label className="p6-pd-f"><span>Name</span><input ref={nameRef} className={`p6-id-pdName${err ? " p6-err" : ""}`} value={name} placeholder="e.g. Standard UK, US agents, Agents who want 50 pages" autoComplete="off" onChange={(e) => { setName(e.target.value); setErr(false); }} onKeyDown={onEnter} /></label>
-        <label className="p6-pd-f"><span>Who it’s for <em>optional</em></span><input className="p6-id-pdNote" value={note} placeholder="e.g. Agents who ask for a synopsis" autoComplete="off" onChange={(e) => setNote(e.target.value)} onKeyDown={onEnter} /></label>
+        <label className="p6-pd-f"><span>Who it’s for <em>optional</em></span><input ref={noteRef} className="p6-id-pdNote" value={note} placeholder="e.g. Agents who ask for a synopsis" autoComplete="off" onChange={(e) => setNote(e.target.value)} onKeyDown={onEnter} /></label>
         <div className="p6-pd-f"><span>Icon <em>so you can spot it in the Query Centre</em></span>
           <div className="p6-pd-ics" role="radiogroup" aria-label="Icon">
             {PACKAGE_ICONS.map((k) => <button type="button" key={k} role="radio" aria-checked={ic === k} aria-label={k} onClick={() => setIc(k)}><PicBare ic={k} /></button>)}

@@ -27,7 +27,7 @@ export const Pk26Results: React.FC<{ model: Pk26Model; onSeeQueries: (ids: strin
   const rows = useMemo(() => resultRows(items), [items]);
   const total = items.reduce((a, x) => a + x.s.sent, 0);
   const lead = resultsLead(rows, kind);
-  const pick = rows.find((r) => r.item.id === sel) ?? rows.find((r) => !r.early && !r.notSent) ?? rows[0] ?? null;
+  const pick = rows.find((r) => r.item.id === sel) ?? rows.find((r) => !r.early && !r.notSent && !r.retired) ?? rows.find((r) => !r.retired) ?? rows[0] ?? null;
   const iconFor = (it: (typeof items)[number]) => kind === "pk"
     ? <span className="p6-rs-ic p6-pk"><Pic ic={iconOf(it.ref as SubmissionPackage)} /></span>
     : kind === "ver"
@@ -54,10 +54,10 @@ export const Pk26Results: React.FC<{ model: Pk26Model; onSeeQueries: (ids: strin
                 <p className="p6-rs-lead">{lead.best ? <b>{lead.best}</b> : null}{lead.text}</p>
                 <div className="p6-rs-ax"><span>Asked for more</span><span>Sent</span></div>
                 {rows.map((r) => (
-                  <button type="button" key={r.item.id} className={`p6-rs-r${r.item.id === pick.item.id ? " p6-on" : ""}${r.early ? " p6-early" : ""}`}
-                    data-rsel={r.item.id} title={`${r.item.name}: ${r.item.s.requests} of ${r.item.s.answered} answered asked for more`} onClick={() => setSel(r.item.id)}>
+                  <button type="button" key={r.item.id} className={`p6-rs-r${r.item.id === pick.item.id ? " p6-on" : ""}${r.early || r.retired ? " p6-early" : ""}`}
+                    data-rsel={r.item.id} data-retired={r.retired ? "" : undefined} title={`${r.item.name}: ${r.item.s.requests} of ${r.item.s.answered} answered asked for more`} onClick={() => setSel(r.item.id)}>
                     <span className="p6-rs-n">{iconFor(r.item)}<b>{r.item.name}</b></span>
-                    <span className="p6-rs-bar"><span className="p6-rs-trk"><i style={{ width: `${r.bar}%` }} /></span><em>{r.label}</em></span>
+                    <span className="p6-rs-bar"><span className="p6-rs-trk"><i style={{ width: `${r.bar}%` }} /></span><em className={r.notSent || r.retired ? "p6-quiet" : undefined}>{r.label}</em></span>
                     <span className="p6-rs-s">{r.item.s.sent}</span>
                   </button>
                 ))}
@@ -90,11 +90,13 @@ const Detail: React.FC<{
           <div className="p6-rs-fn">
             {bars.map(([l, v]) => <div key={l} className="p6-fn-r"><span>{l}</span><span className="p6-fn-b"><i style={{ width: `${(v / s.sent) * 100}%` }} /></span><b>{v}</b></div>)}
           </div>
-          <div className="p6-rs-t">
-            <div><b>{pctOf(rate)}</b><span>asked for more{warn || all == null ? "" : ` · you average ${pctOf(all)}`}</span></div>
-            <div><b>{days ?? "–"}</b><span>days to a reply, on average</span></div>
-          </div>
-          {warn ? <p className="p6-rs-warn">{warn}</p> : null}
+          {/* v26.1: too early → the two stat tiles are not drawn; the "Give it {n} more" message takes their place */}
+          {warn ? <p className="p6-rs-warn">{warn}</p> : (
+            <div className="p6-rs-t">
+              <div><b>{pctOf(rate)}</b><span>asked for more{all == null ? "" : ` · you average ${pctOf(all)}`}</span></div>
+              <div><b>{days ?? "–"}</b><span>days to a reply, on average</span></div>
+            </div>
+          )}
           <button type="button" className="p6-cx-lnk p6-rs-go" onClick={() => onSeeQueries(qs.map((q) => q.id))}>{qs.length === 1 ? "See this query" : `See these ${qs.length} queries`} in the Query Centre</button>
         </>
       ) : <p className="p6-rs-warn">Nothing has gone out with this {RESULTS_NOUN[kind]} yet.</p>}

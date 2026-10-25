@@ -121,6 +121,15 @@ After the deploy, `rulesProbe.mjs`'s v26 section read every case as intended (bo
 The text is unchanged, so no edition started. `otherMaterials` is kept as the joined names of the ticked extras: the
 send drawer, the edition engine and every query's frozen summary already read that one string.
 
+## 6b. Dev deploy
+
+Pushed `submission-packages-v26` (tip includes 4423fb25). Dev was serving `dev/hm31-pv4-qc1492-dh41-cl24-hm32`
+(`index-B3rTkS_C.js`, one step past this branch's base), so the deploy is that branch merged with v26:
+**`dev/hm31-pv4-qc1492-dh41-cl24-hm32-pk26` 00821194**. The only conflict was the ref manifest (both entries kept).
+Gates passed on the merge: tsc clean; build clean; vitest all green once `functions/node_modules` was linked in the
+fresh worktree. It was deployed from a clean worktree, and dev now serves **`index-DQ4bM-WA.js`**. PK26-R and PK26-W
+pass against the deployed site.
+
 ## 7. Open for Nick
 
 1. **Free / Pro split.** Plan gating is unchanged: the page is open to all (`PACKAGES_OPEN_TO_ALL`), and the PRO

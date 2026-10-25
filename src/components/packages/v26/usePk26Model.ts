@@ -103,6 +103,12 @@ export function usePk26Model() {
   })).sort((a, b) => Number(b.inUse) - Number(a.inUse) || (a.original === b.original ? b.num - a.num : a.original ? 1 : -1)),
   [bookVersions, msPkgs, msQueries, rowsById, live, activeMs]);
 
+  /* archived versions — only Results lists them (under the others, "Retired"); the builder never offers them */
+  const archivedVersionRows = useMemo<VersionRow[]>(() => readVersions(activeMs).filter((v) => v.archived).map((v) => ({
+    id: v.id, num: v.num, original: v.original, name: v.name, summary: v.changes[0] ?? "",
+    sent: materialSplit(v.id, "version", msPkgs, msQueries, rowsById).sent, inPackages: [], inUse: false,
+  })), [activeMs, msPkgs, msQueries, rowsById]);
+
   const matName = useCallback((kind: PieceKind, id: string | undefined | null): string | null => {
     if (!id) return null;
     if (kind === "ver") return bookVersions.find((v) => v.id === id)?.name ?? null;
@@ -359,17 +365,24 @@ export function usePk26Model() {
 
   /* ── Results ── */
   const overallSplit = useMemo(() => overall(msPkgs, msQueries, rowsById), [msPkgs, msQueries, rowsById]);
-  const resultItems = useCallback((kind: ResultsKind): { id: string; name: string; s: Split; ref: SubmissionPackage | MaterialRow | VersionRow | null }[] => {
-    if (kind === "pk") return msPkgs.map((p) => ({ id: p.id, name: p.packageName, s: base.allSplit(p), ref: p }));
+  /* ⚠️ v26.1: RESULTS LISTS THE BUILDER'S SET. msPkgs is this manuscript's packages only (a deleted package is not
+     in the collection at all); a RETIRED one is listed under the others, "Retired", and never ranked. The same rule
+     for put-away letters and synopses and archived versions. It was `msPkgs` with no flag, so a retired package
+     ranked beside the live ones while the builder did not show it. */
+  type Item = { id: string; name: string; s: Split; retired?: boolean; ref: SubmissionPackage | MaterialRow | VersionRow | null };
+  const resultItems = useCallback((kind: ResultsKind): Item[] => {
+    if (kind === "pk") return msPkgs.map((p) => ({ id: p.id, name: p.packageName, s: base.allSplit(p), retired: p.status === "Retired", ref: p }));
     if (kind === "ver") {
-      const out: { id: string; name: string; s: Split; ref: VersionRow | null }[] = versionRows.map((v) => ({ id: v.id, name: v.name, s: materialSplit(v.id, "version", msPkgs, msQueries, rowsById), ref: v }));
+      const vs = (v: VersionRow) => materialSplit(v.id, "version", msPkgs, msQueries, rowsById);
+      const out: Item[] = versionRows.map((v) => ({ id: v.id, name: v.name, s: vs(v), ref: v }));
       const nr = materialSplit(null, "version", msPkgs, msQueries, rowsById);
       if (nr.sent) out.push({ id: "__none", name: "Not recorded", s: nr, ref: null });
+      for (const v of archivedVersionRows) out.push({ id: v.id, name: v.name, s: vs(v), retired: true, ref: v });
       return out;
     }
-    const list = kind === "let" ? letters : synopses;
-    return list.map((m) => ({ id: m.id, name: m.name, s: materialSplit(m.id, kind === "let" ? "letter" : "synopsis", msPkgs, msQueries, rowsById), ref: m }));
-  }, [msPkgs, msQueries, rowsById, versionRows, letters, synopses, base]);
+    const list = kind === "let" ? lettersAll : synopsesAll;
+    return list.map((m) => ({ id: m.id, name: m.name, s: materialSplit(m.id, kind === "let" ? "letter" : "synopsis", msPkgs, msQueries, rowsById), retired: m.retired, ref: m }));
+  }, [msPkgs, msQueries, rowsById, versionRows, archivedVersionRows, lettersAll, synopsesAll, base]);
   /** The queries behind a Results row (for the detail card and the Query Centre link). */
   const resultQueries = useCallback((kind: ResultsKind, id: string) => {
     if (kind === "pk") return base.creditedQueries(msPkgs.find((p) => p.id === id)!);

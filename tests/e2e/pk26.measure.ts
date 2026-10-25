@@ -61,6 +61,10 @@ const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   /* the drawer's header fill runs to the rim, over the inner border */
   "PK26-D": { css: `.p6-cx-drw .p6-dh { margin-left: -8px !important; margin-right: -8px !important; }` },
   /* rank everything, the too-early too */
+  /* v26.1 — the packages row goes back to two lines' height and loses the right padding that sets its tag's edge */
+  "PK26-N": { css: `button.ws-ni[aria-label="Submission packages"] { height: 48px !important; padding-right: 3px !important; }` },
+  /* v26.1 — the stuck bar's ground reaches only the ref's 32px past the tabs */
+  "PK26-T": { css: `.p6 .p6-ptabs::before { left: -32px !important; right: -32px !important; }` },
   "PK26-S": { js: `document.addEventListener('DOMContentLoaded', () => { const put = () => { for (const r of document.querySelectorAll('.p6-rs-r.p6-early')) { r.classList.remove('p6-early'); const em = r.querySelector('.p6-rs-bar em'); if (em && em.textContent === 'Too early') em.textContent = '50%'; } }; new MutationObserver(put).observe(document.body, { subtree: true, childList: true, characterData: true, attributes: true }); put(); })` },
 };
 
@@ -242,4 +246,133 @@ test("PK26-S Results: under the threshold it is shown, Too early, and never rank
   L.check("the unsent one reads Not sent", r.rows.some((x) => x.name === "Drag target" && x.label === "Not sent"), JSON.stringify(r.rows));
   L.check("the footnote states the threshold", /fewer than \d+ answers are shown but not ranked/.test(r.foot), r.foot);
   L.done(5);
+});
+
+/* ══ v26.1 ═══════════════════════════════════════════════════════════════════════════════════════════
+   Each was red on the deployed v26 build (SA_E2E_BASE_URL=dev, before these fixes) and, where named above, under its
+   in-page break. */
+
+/* ── PK26-N · the sidebar row is Versions' structure ── */
+for (const size of SIZES) {
+  test(`PK26-N the Submission packages row matches Versions at ${size.width}`, async ({ page }) => {
+    test.setTimeout(180_000);
+    const L = new Ledger(`PK26-N-${size.width}`);
+    await open(page, size);
+    const r = await page.evaluate(() => ["Submission packages", "Versions"].map((n) => {
+      const b = [...document.querySelectorAll(`button.ws-ni[aria-label="${n}"]`)].find((e) => (e as HTMLElement).offsetParent) as HTMLElement | undefined;
+      if (!b) return null;
+      const t = b.querySelector(".ws-qpro"), l = b.querySelector(".ws-lbl");
+      const R = (e: Element | null) => (e ? e.getBoundingClientRect() : null);
+      return { h: b.getBoundingClientRect().height, tagR: R(t)?.right ?? null, tagL: R(t)?.left ?? null, lblR: R(l)?.right ?? null, lines: b.querySelectorAll(".ws-sub2, [data-shell=\"sub\"]").length, text: (l?.textContent ?? "").trim() };
+    }));
+    const [pk, ver] = r;
+    L.check("both rows are on screen", !!pk && !!ver, JSON.stringify(r));
+    if (pk && ver) {
+      L.check("same height as Versions (±1)", Math.abs(pk.h - ver.h) <= 1, `${pk.h} vs ${ver.h}`);
+      L.check("PRO tag's right edge where Versions' is (±1)", pk.tagR != null && ver.tagR != null && Math.abs(pk.tagR - ver.tagR) <= 1, `${pk.tagR} vs ${ver.tagR}`);
+      L.check("no second line", pk.lines === 0, String(pk.lines));
+      L.check("the label is \"Submission packages\"", pk.text === "Submission packages", pk.text);
+      L.check("the label stops before its tag", pk.lblR != null && pk.tagL != null && pk.lblR <= pk.tagL + 0.5, `${pk.lblR} vs ${pk.tagL}`);
+    }
+    L.done(6);
+  });
+}
+
+/* ── PK26-T · the stuck tab bar is ground from sheet edge to sheet edge ── */
+for (const size of SIZES) {
+  test(`PK26-T the stuck tab bar spans the sheet at ${size.width}`, async ({ page }) => {
+    test.setTimeout(180_000);
+    const L = new Ledger(`PK26-T-${size.width}`);
+    await open(page, size, "/queries/packages", "seed-ms-1");
+    const r = await page.evaluate(async () => {
+      const s = [...document.querySelectorAll(".wpg-scroll")].find((x) => x.querySelector('[data-pk26="page"]')) as HTMLElement;
+      const bar = s.querySelector('[data-pk26="tabs"]') as HTMLElement;
+      const restTop = bar.getBoundingClientRect().top - s.getBoundingClientRect().top;
+      const lib = s.querySelector('[data-pk26="lib"]') as HTMLElement;
+      s.scrollTop += lib.getBoundingClientRect().top - s.getBoundingClientRect().top + 60;
+      await new Promise((res) => requestAnimationFrame(() => requestAnimationFrame(res)));
+      const sb = s.getBoundingClientRect(), b = bar.getBoundingClientRect();
+      const pcs = getComputedStyle(bar, "::before");
+      const tab = (bar.querySelector('[role="tab"]') as HTMLElement).getBoundingClientRect();
+      return { restTop, top: b.top - sb.top, scrolled: s.scrollTop, sheet: [sb.left, sb.right], band: [b.left + parseFloat(pcs.left), b.right - parseFloat(pcs.right)], tabL: tab.left - sb.left };
+    });
+    L.check("the page scrolled and the bar is stuck at the top", r.scrolled > 0 && r.restTop > 1 && Math.abs(r.top) <= 1, JSON.stringify(r));
+    L.check("its ground starts at the sheet's left edge (±1)", Math.abs(r.band[0] - r.sheet[0]) <= 1, `${r.band[0]} vs ${r.sheet[0]}`);
+    L.check("…and ends at its right edge (±1)", Math.abs(r.band[1] - r.sheet[1]) <= 1, `${r.band[1]} vs ${r.sheet[1]}`);
+    L.check("the tabs are still 72px in (±1)", Math.abs(r.tabL - 72) <= 1, r.tabL.toFixed(1));
+    L.done(4);
+  });
+}
+
+/* ── PK26-M · Your materials: one-line names, "In use" unbroken, never the type as a summary ── */
+test("PK26-M material rows: one-line names, no type for a summary", async ({ page }) => {
+  test.setTimeout(180_000);
+  const L = new Ledger("PK26-M");
+  await open(page, SIZES[1]);
+  const r = await page.evaluate(() => {
+    const pg = [...document.querySelectorAll('[data-pk26="page"]')].find((e) => (e as HTMLElement).offsetParent) as HTMLElement;
+    const rows = [...pg.querySelectorAll('[data-pk26="lib"] .p6-lr')].map((row) => {
+      const b = row.querySelector("b") as HTMLElement, nm = b.querySelector(".p6-nm") as HTMLElement | null;
+      const lh = parseFloat(getComputedStyle(b).fontSize) * 1.6;
+      return { name: nm?.textContent ?? b.textContent ?? "", title: nm?.getAttribute("title") ?? null, oneLine: b.getBoundingClientRect().height <= lh, small: row.querySelector("small")?.textContent ?? null };
+    });
+    const smalls = [...pg.querySelectorAll('[data-pk26="lib"] small, [data-pk26="open"] .p6-mr-tx small')].map((e) => (e.textContent ?? "").trim());
+    return { rows, smalls };
+  });
+  const long = r.rows.find((x) => x.name.startsWith("The longer comps-forward letter"));
+  L.check("the long letter is listed", !!long, JSON.stringify(r.rows.map((x) => x.name)));
+  L.check("…its name is one line", !!long && long.oneLine, JSON.stringify(long));
+  L.check("…with the full name as its title", !!long && long.title === long.name, JSON.stringify(long));
+  L.check("every name is one line", r.rows.every((x) => x.oneLine), JSON.stringify(r.rows.filter((x) => !x.oneLine)));
+  L.check("no summary is the type", !r.smalls.some((t) => t === "Query letter" || t === "Synopsis"), JSON.stringify(r.smalls));
+  L.done(5);
+});
+
+/* ── PK26-H · the header note: one line, or "+ Add a note" that opens the details with the note focused ── */
+test("PK26-H the package note is one line, or + Add a note", async ({ page }) => {
+  test.setTimeout(180_000);
+  const L = new Ledger("PK26-H");
+  await open(page, SIZES[1]);
+  await vis(page, '.p6-pkb[title="Sent one"]').click(); await page.waitForTimeout(400);
+  const withNote = await page.evaluate(() => {
+    const h = [...document.querySelectorAll('[data-pk26="open"] .p6-po-tt')].find((e) => (e as HTMLElement).offsetParent) as HTMLElement;
+    const sm = h.querySelector("small") as HTMLElement;
+    const h3 = h.querySelector("h3") as HTMLElement;
+    return { text: sm?.textContent ?? "", h: sm?.getBoundingClientRect().height ?? 0, fs: sm ? parseFloat(getComputedStyle(sm).fontSize) : 0, cut: sm ? sm.scrollWidth > sm.clientWidth : false, h3h: h3.getBoundingClientRect().height, h3fs: parseFloat(getComputedStyle(h3).fontSize) };
+  });
+  L.check("the note is one line at 1280", withNote.h > 0 && withNote.h <= withNote.fs * 1.6, JSON.stringify(withNote));
+  L.check("…cut short (it is longer than the room)", withNote.cut, JSON.stringify(withNote));
+  L.check("the name and its pencil keep one line", withNote.h3h <= withNote.h3fs * 1.6, JSON.stringify(withNote));
+  await vis(page, '.p6-pkb[title="Drag target"]').click(); await page.waitForTimeout(400);
+  const add = vis(page, '[data-pk26="open"] .p6-po-addnote');
+  L.check("no note: + Add a note", (await add.count()) === 1 && (await add.textContent()) === "+ Add a note", String(await add.count()));
+  if (await add.count()) {
+    await add.click(); await page.waitForTimeout(500);
+    const focused = await page.evaluate(() => (document.activeElement as HTMLElement | null)?.className ?? "");
+    L.check("…it opens Package details with the note focused", /p6-id-pdNote/.test(focused), focused);
+    await page.keyboard.press("Escape");
+  } else L.check("…it opens Package details with the note focused", false, "no link");
+  L.done(5);
+});
+
+/* ── PK26-RT · Results follows the builder's set: a retired package is listed last, "Retired", never ranked ── */
+test("PK26-RT Results: a retired package is listed last, Retired, and never ranked", async ({ page }) => {
+  test.setTimeout(180_000);
+  const L = new Ledger("PK26-RT");
+  await open(page, SIZES[0]);
+  const r = await page.evaluate(() => {
+    const pg = [...document.querySelectorAll('[data-pk26="page"]')].find((e) => (e as HTMLElement).offsetParent) as HTMLElement;
+    const builder = [...pg.querySelectorAll(".p6-pkb:not(.p6-new)")].map((b) => b.getAttribute("title"));
+    const root = pg.querySelector('[data-pk26="results"]') as HTMLElement;
+    const rows = [...root.querySelectorAll(".p6-rs-r")].map((b) => ({ name: b.querySelector(".p6-rs-n b")?.textContent ?? "", label: b.querySelector(".p6-rs-bar em")?.textContent ?? "", on: b.classList.contains("p6-on") }));
+    return { builder, rows, lead: root.querySelector(".p6-rs-lead")?.textContent ?? "" };
+  });
+  const names = r.rows.map((x) => x.name);
+  L.check("the builder does not show the retired package", !r.builder.includes("Retired one"), JSON.stringify(r.builder));
+  L.check("Results lists it", names.includes("Retired one"), JSON.stringify(names));
+  L.check("…last", names[names.length - 1] === "Retired one", JSON.stringify(names));
+  L.check("…reading Retired", r.rows.find((x) => x.name === "Retired one")?.label === "Retired", JSON.stringify(r.rows));
+  L.check("…not the one shown in detail, nor named in the lead", !r.rows.find((x) => x.name === "Retired one")?.on && !/^Retired one/.test(r.lead), JSON.stringify(r));
+  L.check("every other row is a builder package", names.filter((n) => n !== "Retired one").every((n) => r.builder.includes(n)), JSON.stringify({ names, builder: r.builder }));
+  L.done(6);
 });

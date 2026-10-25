@@ -10,7 +10,7 @@ import { QueryStatus, type Manuscript, type Query, type SubmissionPackage } from
 import { MIN_SENDS_FOR_CLAIM, packageSplit, qualifies, ranked, tally } from "./packageReplies";
 import {
   askRate, BAR_MAX, copyName, extraNamed, extraSuggestions, extrasLine, iconOf, offersNewExtra, otherMaterialsMigration,
-  packageFoot, rankedOnly, readiness, readinessLabel, resultRows, resultsFoot, resultsLead, sendSplit, compsLine,
+  materialSummary, packageFoot, rankedOnly, readiness, readinessLabel, resultRows, resultsFoot, resultsLead, sendSplit, compsLine,
 } from "./packagesV26";
 import { packagesRedirectFor } from "./packagesRoute";
 import { contentsChanged, editionRecord } from "./packageEditions";
@@ -166,6 +166,44 @@ describe("Results — packageReplies' figures, its threshold, its order", () => 
     const p = pkg({ id: "p1" });
     const qs = [q("a", QueryStatus.PARTIAL_REQUESTED, { sentHow: "package", sentPackageId: "p1" }), q("b", QueryStatus.REJECTED, { sentHow: "package", sentPackageId: "p1" })];
     expect(packageSplit(p, qs, new Map())).toEqual(tally(qs, new Map()));
+  });
+});
+
+describe("v26.1 — Results follows the builder's set", () => {
+  const S = (requests: number, passes: number) =>
+    ({ sent: requests + passes, requests, otherReplies: passes, out: 0, noReply: 0, withdrawnEarly: 0, replies: requests + passes, answered: requests + passes, rate: null });
+  /* a RETIRED item with the best figures of all: it must still come last, read "Retired", and never be ranked */
+  const items = [
+    { id: "old", name: "Retired one", s: S(5, 0), retired: true },
+    { id: "a", name: "Alpha", s: S(2, 2) },
+    { id: "b", name: "Beta", s: S(3, 1) },
+  ];
+  it("a retired item is listed under the others, whatever its figures", () => {
+    expect(resultRows(items).map((r) => r.item.id)).toEqual(["b", "a", "old"]);
+  });
+  it("…reads Retired and is never ranked", () => {
+    const rows = resultRows(items);
+    expect(rows.find((r) => r.item.id === "old")!.label).toBe("Retired");
+    expect(rankedOnly(rows).map((r) => r.item.id)).toEqual(["b", "a"]);
+    expect(resultsLead(rows, "pk").best).toBe("Beta");
+  });
+  it("the footnote states the average only when there is one", () => {
+    const none = { ...S(0, 0), sent: 3, answered: 0 };
+    expect(resultsFoot(none, "pk")).toBe(`Packages with fewer than ${MIN_SENDS_FOR_CLAIM} answers are shown but not ranked.`);
+    expect(resultsFoot(S(1, 1), "pk")).toMatch(/^Your average across everything: 50%\. /);
+  });
+});
+
+describe("v26.1 — a material's second line", () => {
+  it("its own summary wins", () => expect(materialSummary("Hook first, comps second", 3, 1)).toBe("Hook first, comps second"));
+  it("else what it did, leaving out the zeros", () => {
+    expect(materialSummary("", 2, 1)).toBe("sent 2 · in 1 package");
+    expect(materialSummary("  ", 0, 3)).toBe("in 3 packages");
+    expect(materialSummary(undefined, 4, 0)).toBe("sent 4");
+  });
+  it("else nothing — never the type", () => {
+    expect(materialSummary("", 0, 0)).toBe("");
+    for (const t of [materialSummary("", 0, 0), materialSummary("", 1, 1)]) expect(t).not.toMatch(/Query letter|Synopsis/);
   });
 });
 

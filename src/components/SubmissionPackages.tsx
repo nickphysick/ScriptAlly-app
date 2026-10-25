@@ -90,7 +90,7 @@ export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab:
         {tab === "pk" ? (
           <div className="p6-id-vPk">
             <Pk26Builder model={model} current={current} onSelect={setCurId}
-                onNewPackage={() => setDialog({ m: "new" })} onEditPackage={(p) => setDialog({ m: "edit", id: p.id })}
+                onNewPackage={() => setDialog({ m: "new" })} onEditPackage={(p, focus) => setDialog({ m: "edit", id: p.id, ...(focus ? { focus } : {}) })}
                 onOpenMaterial={(k, id) => setDrawer(k === "ext" ? { m: "ext", id } : { m: "mat", kind: k, id })}
                 onNewMaterial={openNewMaterial} onOpenVersions={goVersions} onOpenComps={goComps} />
             <Pk26Results model={model} empty={empty} onSeeQueries={goQueries} />
