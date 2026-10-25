@@ -191,4 +191,11 @@ which carries every part of the story) and `list-1920-panel-open.png`.
 
 ## 10 · Integration and deploy
 
-*(below)*
+- Dev served `dev/hm31-pv4-qc149` (90184d04, `index-Cbftfy9e.js`), checked again before cutting.
+- **Integration branch `dev/hm31-pv4-qc1491`**: cut from it, with `query-centre-v149-1` merged in: **f4403a8c**, a tree
+  identical to the branch tip.
+- **Re-run there:** tsc clean · production build clean (no warnings) · Vitest 10,367 passed, the same three `functions/`
+  reds · QC1491 all locks green at both sizes · the Versions L0 lock 0 styles / 0 px at both sizes.
+- **Deployed to dev only** (hosting, `--config firebase.dev.json --project scriptally-dev`) from that worktree at the pushed
+  tip, with the served hash checked in the same command. **Dev now serves `index-pQgTRP-n.js`.**
+- **Not merged to `main`.** Prod untouched; no rules or functions deployed.
