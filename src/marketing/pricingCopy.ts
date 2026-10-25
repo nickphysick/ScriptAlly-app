@@ -19,12 +19,13 @@
  */
 
 import { CopyRun } from "./CopyRuns";
+import { FOUNDING_CAP, FOUNDING_CAP_WORD } from "./foundingCap";
 
 export const PRICING_DOCUMENT_TITLE = "Pricing — QueryHawk";
 
 /* ══════════════ The founding box ══════════════ */
 export const PV4_KICKER = "Founding writers";
-export const PV4_H1 = "A free QueryHawk campaign for our first 100 writers.";
+export const PV4_H1 = `A free QueryHawk campaign for our first ${FOUNDING_CAP} writers.`;
 export const PV4_SUB = "We're looking for founding writers to put QueryHawk through its paces.";
 
 /** The toggle at the box's foot: its label closed, and open. */

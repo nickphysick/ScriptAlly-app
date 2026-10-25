@@ -40,7 +40,7 @@ describe("pricing v4: the copy is the ref's, word for word", () => {
   /* Literals on purpose: the constants are what is under test, so the expected side may not read them. */
   const BOX = [
     "Founding writers",
-    "A free QueryHawk campaign for our first 100 writers.",
+    "A free QueryHawk campaign for our first 50 writers.", /* the cap, 50 since 25 Oct */
     "We're looking for founding writers to put QueryHawk through its paces.",
     "What founding writers get",
     "The full power of QueryHawk, completely free of charge",
@@ -134,12 +134,12 @@ describe("pricing v4: the founding box", () => {
     expect(count).toBeLessThan(form);
   });
 
-  it("with no figure from the store, draws no counter and states no number but the H1's 100", () => {
+  it("with no figure from the store, draws no counter and states no number but the H1's 50", () => {
     /* Up to the perks panel: its "How it works" steps are numbered 1–3, which are not a places figure. */
     const band = sliceBetween(html(), '<section class="mk-fb"', 'class="mk-fbdetail"');
     expect(band).not.toMatch(/["\s`]mk-fmcount["\s`]/);
     expect(band).not.toMatch(/["\s`]mk-fmbar["\s`]/);
-    expect(textOf(band).match(/\d+/g)).toEqual(["100"]);
+    expect(textOf(band).match(/\d+/g)).toEqual(["50"]);
     expect(band).not.toContain("places left");
   });
 
@@ -176,7 +176,7 @@ describe("pricing v4: the founding box", () => {
     const h = html();
     const h1s = [...h.matchAll(/<h1\b[^>]*>([\s\S]*?)<\/h1>/g)];
     expect(h1s).toHaveLength(1);
-    expect(textOf(h1s[0][1]).trim()).toBe("A free QueryHawk campaign for our first 100 writers.");
+    expect(textOf(h1s[0][1]).trim()).toBe("A free QueryHawk campaign for our first 50 writers.");
     expect(h.indexOf("<h1")).toBeGreaterThan(h.indexOf('<section class="mk-fb"'));
   });
 });

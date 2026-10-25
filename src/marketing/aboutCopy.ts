@@ -14,6 +14,7 @@
  */
 
 import { CopyRun } from "./CopyRuns";
+import { FOUNDING_CAP_WORD } from "./foundingCap";
 
 export const ABOUT_DOCUMENT_TITLE = "About — QueryHawk";
 
@@ -170,7 +171,7 @@ export const ABOUT_FOUNDER_ROLE = "Founder";
 /* ══════════════ The way out ══════════════ */
 export const ABOUT_CLOSE_HEADING = "Querying soon, or querying now?";
 export const ABOUT_CLOSE_BODY =
-  "We're opening QueryHawk to its first hundred writers. Six months free, half price after " +
+  `We're opening QueryHawk to its first ${FOUNDING_CAP_WORD} writers. Six months free, half price after ` +
   "that for as long as you need it, and a say in what gets built next.";
 export const ABOUT_CLOSE_CTA = "Become a founding writer";
 export const ABOUT_CLOSE_LINK = "See the plans";

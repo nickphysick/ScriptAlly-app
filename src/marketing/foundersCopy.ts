@@ -25,6 +25,7 @@
  */
 
 import { CopyRun } from "./CopyRuns";
+import { FOUNDING_CAP_WORD } from "./foundingCap";
 
 export const FOUNDERS_DOCUMENT_TITLE = "Founding Writers — QueryHawk";
 
@@ -48,7 +49,7 @@ export const FOUNDERS_H1 = "Help get things off the ground.";
  */
 export const FOUNDERS_LEDE: CopyRun[] = [
   "We're looking for ",
-  { b: "one hundred writers" },
+  { b: `${FOUNDING_CAP_WORD} writers` },
   " to bring their querying campaign into QueryHawk, use it properly, and tell us what they find. " +
   "Sign up below and we'll be in touch.",
 ];

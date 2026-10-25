@@ -403,8 +403,12 @@ test.describe("LC2", () => {
       expect(footY, "the hero's foot is on screen").toBeLessThanOrEqual(vp.height);
       const [foot] = await pixels(page, [[24, footY]]);
       console.log(`LC2 H1 @${vp.width}`, JSON.stringify({ top, foot, title: hero.color }));
-      expect(near(top, [251, 249, 245], 2), `top ${top}`).toBe(true);
-      expect(near(foot, [238, 235, 229], 2), `foot ${foot}`).toBe(true);
+      /* RETARGET (desktop hero v4.1, 25 Oct): at 900px and up the hero sits in a white card over the
+         navy, and the nav's ink carries on into its top; its ground below the card runs from the oat
+         to the band's top colour (#efece6). The 761–899px stacked hero keeps the paper white. */
+      const carded = vp.width >= 900;
+      expect(near(top, carded ? INK : [251, 249, 245], 2), `top ${top}`).toBe(true);
+      expect(near(foot, carded ? [239, 236, 230] : [238, 235, 229], 2), `foot ${foot}`).toBe(true);
       expect(hero.color).toBe("rgb(28, 19, 15)");
     }
   });
@@ -431,6 +435,10 @@ test.describe("LC2", () => {
       /* RETARGET (phone hero, 23 Oct): on the landing at ≤760px the navy stage meets the bar square, so
          the sheet's top corners are 0 there and only its bottom arcs are read. */
       const phoneLanding = route === "/" && vp.width <= PHONE;
+      /* RETARGET (desktop hero v4.1, 25 Oct): at 900px and up the landing's hero carries the nav's ink on
+         into its top, so the sheet's top arcs AND the point 20px in are ink there (still 18px corners,
+         just ink against ink); only the bottom is read as light-inside-ink, and the top is held ink. */
+      const navyLanding = route === "/" && vp.width >= 900;
       expect(s!.radii, `${route} @${vp.width}`).toEqual(phoneLanding ? ["0px", "0px", "18px", "18px"] : ["18px", "18px", "18px", "18px"]);
       expect(s!.overflow, `${route} @${vp.width}: horizontal overflow`).toBeLessThanOrEqual(0);
       expect(Math.abs(s!.footTop - s!.docBottom), "the footer starts where the sheet ends").toBeLessThanOrEqual(0.5);
@@ -447,7 +455,8 @@ test.describe("LC2", () => {
       await page.waitForTimeout(80);
       const by = await page.evaluate(() => document.querySelector(".mk-sheet")!.getBoundingClientRect().bottom);
       const botPx = await pixels(page, [[L + 2, by - 3], [R - 2, by - 3], [L + 20, by - 21], [R - 20, by - 21]]);
-      for (const [name, px] of (phoneLanding ? [["bottom", botPx]] : [["top", topPx], ["bottom", botPx]]) as Array<readonly [string, number[][]]>) {
+      if (navyLanding) expect(topPx.every((p) => near(p, INK, 2)), `${route} @${vp.width} the top is the navy carrying on: ${JSON.stringify(topPx)}`).toBe(true);
+      for (const [name, px] of (phoneLanding || navyLanding ? [["bottom", botPx]] : [["top", topPx], ["bottom", botPx]]) as Array<readonly [string, number[][]]>) {
         expect(near(px[0], INK, 2) && near(px[1], INK, 2), `${route} @${vp.width} ${name} arcs are ink: ${JSON.stringify(px.slice(0, 2))}`).toBe(true);
         expect(lum(px[2]) > 0.7 && lum(px[3]) > 0.7, `${route} @${vp.width} ${name} 20px in is light: ${JSON.stringify(px.slice(2))}`).toBe(true);
       }

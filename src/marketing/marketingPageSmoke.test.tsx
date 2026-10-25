@@ -53,7 +53,7 @@ const PUBLIC_ROUTES: [path: string, node: () => React.ReactElement, mustContain:
      route renders. The h1's own text is asserted whole by the hero describe below. */
   ["/", () => <Landing onNavigate={noNavigate} />, "Hunting for literary agent representation?"],
   /* Retarget, same law (pricing v3, 21 Oct): the page opens on the founding band and its h1 changed. */
-  ["/pricing", () => <PricingPage onNavigate={noNavigate} />, "A free QueryHawk campaign for our first 100 writers."],
+  ["/pricing", () => <PricingPage onNavigate={noNavigate} />, "A free QueryHawk campaign for our first 50 writers."],
   /* Retarget, same law (21 Oct): the h1 is three block spans now, so the sentence is not one
      uninterrupted run in the markup; the navy band's hit line is, and only this route renders it. */
   ["/about", () => <AboutPage onNavigate={noNavigate} />, "That gap is where good stories go to die."],
@@ -689,7 +689,7 @@ describe("the sign-up the landing does carry", () => {
     for (const s of [
       "You're on the list",
       "already on the list",
-      "All hundred founding places are claimed",
+      "All fifty founding places are claimed",
       "Sign-ups are briefly unavailable",
       "That didn&#x27;t send",
     ]) expect(h).not.toContain(s);

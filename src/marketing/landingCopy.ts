@@ -15,6 +15,7 @@
 
 import { CopyRun } from "./CopyRuns";
 import { supportMailto } from "../lib/companyInfo";
+import { FOUNDING_CAP, FOUNDING_CAP_WORD } from "./foundingCap";
 
 /* ⚠️ THE HERO IS ONE HEADLINE, ONE SUB, TWO ACTIONS — LANDING HERO v3 (20 Oct, ref
    design-refs/landing-hero-v3.html). "The hunt begins." and the "expert querying companion" sub are
@@ -237,7 +238,7 @@ export const FOUNDING_SENT =
 export const FOUNDING_DUPE =
   "You're already on the list — no need to sign up twice. Your invite is still coming.";
 export const FOUNDING_FULL =
-  "All hundred founding places are claimed. Join the waiting list and we'll be in touch as the " +
+  `All ${FOUNDING_CAP_WORD} founding places are claimed. Join the waiting list and we'll be in touch as the ` +
   "next stage opens.";
 export const FOUNDING_ERROR: CopyRun[] = [
   "That didn't send. Check the address and try again, or ",
@@ -283,6 +284,9 @@ export const navPlacesLeft = (left: number) => `${left} places left`;
 /** "63 places left" from the two figures the endpoint answered with: /pricing's counter line.
  *  A builder for the reason the two above are — no subtraction at a render site, and never below 0. */
 export const foundingPlacesLeftLabel = (claimed: number, cap: number) => navPlacesLeft(Math.max(0, cap - claimed));
+/** The desktop hero's places counter (v4.1): the number in bold, then this; and its spoken label. */
+export const HERO_PLACES_REST = " places left";
+export const heroPlacesLabel = (left: number, cap: number) => `${left} of ${cap} founding places left`;
 
 export const FOUNDING_NOTE: CopyRun[] = [
   "We'll only use your address to send your invite. ",
@@ -532,10 +536,10 @@ export const PRICING_TIERS: PricingTier[] = [
     key: "founding",
     name: "Founding Writer",
     illoAlt: "A hawk wearing a scarf, holding a rolled manuscript under one wing.",
-    tag: "Available now · 100 places",
+    tag: `Available now · ${FOUNDING_CAP} places`,
     price: "Free",
     priceUnit: "for six months",
-    summary: "For the hundred writers who put QueryHawk through its paces.",
+    summary: `For the ${FOUNDING_CAP_WORD} writers who put QueryHawk through its paces.`,
     /* ⚠️ NO FIGURE AND NO STRUCK-THROUGH PRICE. The ref draws "£0 for six months" against a
        struck "£7/mo" and then "half price for life"; both halves of that are arithmetic on a
        number nobody has set. `FOUNDING_RATE_AFTER` is where a real one goes. */
