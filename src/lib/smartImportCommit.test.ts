@@ -193,6 +193,12 @@ describe('commitSmartImport — orchestration', () => {
     expect(provisional).toBe(true);
   });
 
+  it('v149.1 B5 — an agent name in capitals is written title-cased; a mixed-case one exactly as given', async () => {
+    const { deps } = makeDeps();
+    await commitSmartImport(deps as any, result([agent({ ref: 'a1', name: 'PRIYA RAMAN' }), agent({ ref: 'a2', name: 'bell hooks', agency: 'Beta' })], [q({ agentRef: 'a1', status: QueryStatus.QUERIED })]), 'ms1');
+    expect((deps.addAgent as any).mock.calls.map((c: any[]) => c[0].name)).toEqual(['Priya Raman', 'bell hooks']);
+  });
+
   it('writes an agency-only (no-name) agent with an empty name', async () => {
     const { deps } = makeDeps();
     const out = await commitSmartImport(deps as any, result([agent({ name: '', agency: 'Curtis Brown' })], [q({ status: QueryStatus.QUERIED })]), 'ms1');
