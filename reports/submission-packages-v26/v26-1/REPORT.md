@@ -104,7 +104,11 @@ These are in `v26-1/before/` (the deployed v26) and `v26-1/after/` (this branch)
 
 ## Dev deploy
 
-See the commit that adds this report and the closing message: it goes onto `dev/hm31-pv4-qc1492-dh41-cl24-hm32-pk26`.
+Dev was serving the v26 deploy (`index-DQ4bM-WA.js`). v26.1 was merged onto the same dev branch as before:
+**`dev/hm31-pv4-qc1492-dh41-cl24-hm32-pk26` b9f2fd35** = 00821194 + 6662db13 + 6464f763, with no conflicts.
+- **Gates on the merge:** tsc clean; build clean; vitest 661 files, 10,433 passed, 3 skipped.
+- **Deployed** from a clean worktree. **Dev now serves `index-CN7x9BIo.js`.**
+- **Smoke:** PK26-N (1512), PK26-T (1280), PK26-RT, PK26-H and PK26-M all pass against the deployed site.
 
 ## Open for Nick
 
