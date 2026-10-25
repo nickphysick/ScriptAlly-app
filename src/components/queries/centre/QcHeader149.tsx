@@ -53,9 +53,11 @@ export const QcViewRow149: React.FC<{
   onFind: (v: string) => void;
   findRef?: React.Ref<HTMLInputElement>;
   loading: boolean;
-}> = ({ counts, total, where, onView, find, onFind, findRef, loading }) => (
+  /** v150 B4 — false: the chips are retired (the stat cards replace them); Find stays until Part E moves it */
+  views?: boolean;
+}> = ({ counts, total, where, onView, find, onFind, findRef, loading, views = true }) => (
   <div className="qc149-vr" data-qc149="views-row">
-    <div className="qc149-vs" role="group" aria-label="Views" data-qc149="views">
+    {views ? <div className="qc149-vs" role="group" aria-label="Views" data-qc149="views">
       <button type="button" className="qc149-v" data-qc149="view" data-k="all" data-n={counts ? total : undefined} aria-pressed={where === null}
         disabled={loading} onClick={() => onView(null)}>
         <b>{counts ? total : ""}</b><span>All</span>
@@ -67,7 +69,7 @@ export const QcViewRow149: React.FC<{
           <b>{counts ? counts[k] : ""}</b><span>{WHERE_LABEL[k].label}</span>
         </button>
       ))}
-    </div>
+    </div> : <span />}
     <label className="qc149-find" data-qc149="find" data-qc140="find" data-qc138="search" data-qc144="find">
       <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4.5 4.5" /></svg>
       <input ref={findRef} value={find} onChange={(e) => onFind(e.target.value)} placeholder="Find an agent or agency" aria-label="Find an agent or agency" autoComplete="off" disabled={loading} />

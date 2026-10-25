@@ -26,3 +26,88 @@
   .qc149-hd .qc149-card .phc-art { height: 140px; }
   .qc149-hd .qc149-card .phc-art img { width: 160px; height: 140px; object-fit: contain; object-position: right center; }
 }
+
+/* ══ Part B · the stat cards ═════════════════════════════════════════════════════════════════════════════════════
+   ⚠️ SAME WIDTH AND INSET AS THE HEADER CARD: they are children of `.qc149-hd`, which is `--qc149-w` wide (v149.2).
+   ⚠️ THE ≤1180px STEP READS THE SHEET (`--hsheet-w`) through a stepped clamp, so no viewport query decides it. */
+@media (min-width: 768px) {
+  .qc149-hd .qc150-cards {
+    --qc150-n: clamp(38px, calc(38px + (var(--hsheet-w) - 1180.5px) * 1000), 46px);
+    --qc150-d: clamp(26px, calc(26px + (var(--hsheet-w) - 1180.5px) * 1000), 30px);
+    display: grid; grid-template-columns: 1.7fr 1fr 1fr 1fr; gap: 12px; margin-top: 16px; align-items: stretch;
+  }
+  .qc150-c {
+    position: relative; box-sizing: border-box; display: flex; flex-direction: column; min-width: 0;
+    padding: 17px 20px 18px; border-radius: 14px; background: #fbf9f5; color: #1c130f;
+    box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1), 0 1px 2px rgba(28, 19, 15, 0.04); transition: box-shadow 0.12s;
+  }
+  .qc150-c:hover { box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.24), 0 1px 2px rgba(28, 19, 15, 0.04); }
+  /* the whole card is the button; what sits on it passes the press through, except its own buttons */
+  .qc150-hit { all: unset; position: absolute; inset: 0; z-index: 1; border-radius: 14px; cursor: pointer; }
+  .qc150-hit:focus-visible { outline: 2px solid #c9765d; outline-offset: 2px; }
+  .qc150-hit:disabled { cursor: default; }
+  .qc150-c > :not(.qc150-hit) { position: relative; z-index: 2; pointer-events: none; }
+  .qc150-c .qc150-show, .qc150-c .qc150-link { pointer-events: auto; }
+
+  /* the tinted head: inset from the card edge on the top and sides (the card's cream frame shows round it) */
+  .qc150-h {
+    box-sizing: border-box; display: flex; align-items: center; gap: 9px; min-width: 0;
+    margin: -12px -15px 0; padding: 11px 15px 10px; border-radius: 10px; overflow: hidden;
+  }
+  .qc150-h b { font: 400 17px/1.15 var(--sp-type) !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .qc150-h .qc150-sw { display: block; flex: none; width: 10px; height: 10px; }
+  .qc150-c--you .qc150-h { background: #efd6ca; color: #a2452a; }
+  .qc150-c--agent .qc150-h { background: #dde3ea; color: #1c130f; }
+  .qc150-c--quiet .qc150-h { background: repeating-linear-gradient(135deg, #e9e3d9 0 6px, #f1ece4 6px 12px); color: #1c130f; }
+  .qc150-c--closed .qc150-h { background: #e6e2dc; color: #1c130f; }
+  .qc150-dd {
+    position: absolute; top: 4px; right: 10px; width: 34px; height: 34px;
+    fill: none; stroke: currentColor; stroke-opacity: 0.5; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  .qc150-n { margin-top: 14px; font: 400 var(--qc150-n)/1 var(--sp-type) !important; color: #1c130f; }
+
+  /* the faces: one disc per query, overlapping by 6, ringed in the card colour */
+  .qc150-faces { display: flex; align-items: center; min-height: var(--qc150-d); margin-top: 11px; }
+  .qc150-face {
+    box-sizing: border-box; flex: none; display: grid; place-items: center; width: var(--qc150-d); height: var(--qc150-d);
+    margin-left: -6px; border-radius: 50%; font: 500 10px/1 var(--sp-mono, "JetBrains Mono", monospace) !important;
+    box-shadow: 0 0 0 2.5px #fbf9f5;
+  }
+  .qc150-face:first-child { margin-left: 0; }
+  .qc150-faces--agent .qc150-face { background: #f1ebe1; color: #2a3a52; }
+  .qc150-faces--quiet .qc150-face { background: #f3efe8; color: #8a8076; border: 1.5px dashed #c8beb1; }
+  .qc150-faces--closed .qc150-face { background: #ebe7e1; color: #a39a90; }
+  .qc150-faces--you .qc150-face { background: #fff; color: #a2452a; box-shadow: 0 0 0 2.5px #fbf9f5, inset 0 0 0 1.5px rgba(162, 69, 42, 0.5); }
+  .qc150-more { margin-left: 8px; font: 400 13px/1 var(--sp-type) !important; font-style: normal; color: #7a6f66; }
+
+  /* the detail line, pinned to the card's foot */
+  .qc150-s { margin-top: auto; padding-top: 12px; font: 400 14.5px/1.35 var(--sp-serif) !important; color: #5b4f47; }
+  .qc150-s b, .qc150-next b { font-weight: 600; color: #1c130f; }
+  .qc150-link {
+    all: unset; cursor: pointer; font: inherit; color: inherit;
+    text-decoration: underline; text-decoration-color: rgba(28, 19, 15, 0.25); text-underline-offset: 3px;
+  }
+  .qc150-link:hover { text-decoration-color: currentColor; }
+  .qc150-link:focus-visible { outline: 2px solid #c9765d; outline-offset: 2px; border-radius: 2px; }
+
+  /* Your move: "Next: …", then the discs and "Show them →" */
+  .qc150-yx { display: flex; flex-direction: column; gap: 12px; padding-top: 9px; }
+  .qc150-next { font: 400 14.5px/1.35 var(--sp-serif) !important; color: #5b4f47; }
+  .qc150-go { display: flex; align-items: center; gap: 10px; }
+  .qc150-go .qc150-faces { margin-top: 0; }
+  .qc150-show {
+    all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; height: 33px; padding: 0 14px;
+    border-radius: 9px; background: #2a3a52; color: #f4eee5; font: 400 15px/1 var(--sp-type) !important; white-space: nowrap;
+  }
+  .qc150-show:hover { background: #334763; }
+  .qc150-show:focus-visible { outline: 2px solid #c9765d; outline-offset: 2px; }
+
+  /* pressed: navy, every word cream; the head turns a cream wash on the navy so its words still read */
+  .qc150-c[data-on] { background: #2a3a52; box-shadow: 0 0 0 1px #2a3a52, 0 14px 24px -16px rgba(20, 28, 44, 0.6); }
+  .qc150-c[data-on] .qc150-h { background: rgba(244, 238, 229, 0.14); }
+  .qc150-c[data-on] :is(.qc150-h, .qc150-n, .qc150-s, .qc150-s b, .qc150-next, .qc150-next b, .qc150-more) { color: #f4eee5; }
+  .qc150-c[data-on] .qc150-face { box-shadow: 0 0 0 2.5px #2a3a52; }
+  .qc150-c[data-on] .qc150-faces--you .qc150-face { box-shadow: 0 0 0 2.5px #2a3a52, inset 0 0 0 1.5px rgba(162, 69, 42, 0.5); }
+  .qc150-c[data-on] .qc150-show { background: #f4eee5; color: #1c130f; }
+}

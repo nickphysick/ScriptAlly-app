@@ -101,6 +101,8 @@ import { facesFor } from "../lib/qcFaces";
 import { QcCourts, QcCourtsSkeleton } from "./queries/centre/QcCourts";
 import { QcStrip } from "./queries/centre/QcStrip";
 import { QcHeader149, QcViewRow149 } from "./queries/centre/QcHeader149";
+import { QcStatCards150 } from "./queries/centre/QcStatCards150";
+import { statCards } from "../lib/qc150";
 import { QcLogFlow149, QcWhoReplied149, type FlowAgent, type LogAnswers } from "./queries/centre/QcFlows149";
 import { logDefaults, pieceVersions, saveLog } from "../lib/queryActions/logSave";
 import { packagesFor } from "../lib/queryActions/packages";
@@ -3943,6 +3945,8 @@ export const Queries: React.FC<{
       sc.scrollTo({ top: Math.max(0, top), behavior: prefersReducedMotion() ? "auto" : "smooth" });
     });
   };
+  /* v150 B2 — a stat card's detail link: that card's filter (Part D also switches the list to Birds-eye) */
+  const qc150Detail = (k: WhereKey) => { qcShowWhere(k); };
   /* v138 §C — "Showing {n} of {N}" whenever anything narrows the list; "Clear all" clears every narrowing at once */
   const qc138Filtered = qc138FilterCount(qcF138) > 0 || qcFilter !== "all" || qcFind.trim() !== "" || !!qcCourtOn || !!qcIds;
   const qc138ClearAll = () => { setQcF138(emptyQc138Filters()); setQcFilter("all"); setQcFind(""); setQcCzCourt(null); setQcIds(null); };
@@ -5277,6 +5281,11 @@ export const Queries: React.FC<{
       logDisabled={creating}
       logRef={logTriggerRef}
     >
+      {/* v150 Part B — the four stat cards: the old quick-filter chips' counts and filter (`qcF138.where`), and the
+          retired banner's "Next" on Your move */}
+      <QcStatCards150 cards={showGridSkeleton ? null : statCards(qcScoped, qcNow138)} where={qcF138.where} loading={showGridSkeleton}
+        onCard={(k) => qcShowWhere(pressView(qcF138.where, k))}
+        onDetail={(k) => qc150Detail(k)} />
       <i ref={qc138Ref} hidden />
       <BulkBar138
         anchor={qc138Ref}
@@ -7836,8 +7845,7 @@ export const Queries: React.FC<{
                   onDensity={setQcDensity}
                   full={qcFull}
                   onFull={qcPin.toggle}
-                  /* v149 B1 — the bar's "heard back": the breakdown card's own figure (one computation, one number) */
-                  heard={{ pct: qcBandFig.heardPct, of: qcBandFig.more + qcBandFig.passed, total: qcScoped.length }}
+                  /* v150 B4 — the bar's "heard back" moved to the list title (Part C) */
                   /* v138.2 §C — "Open the full timeline →": the row's own open, on the timeline (Tracking) tab */
                   onTimeline={(id) => { if (isPracticeId(id)) { openPip(); return; } requestPanelTab("tracking"); cardSetRef.current = qcVisible.map((r) => r.id); onOpenQuery?.(id); }}
                   /* §F — the peek reads the query's activity log through the panel's own builder */
@@ -7880,7 +7888,7 @@ export const Queries: React.FC<{
                   find={qcFind}
                   onFind={setQcFind}
                   findRef={qcSheetFindRef}
-                  viewRow={<QcViewRow149 counts={showGridSkeleton ? null : qcWhereN} total={qcScoped.length} where={qcF138.where}
+                  viewRow={<QcViewRow149 views={false} counts={showGridSkeleton ? null : qcWhereN} total={qcScoped.length} where={qcF138.where}
                     onView={(k) => qcShowWhere(pressView(qcF138.where, k), false)} find={qcFind} onFind={setQcFind}
                     findRef={qcFull ? undefined : qcSheetFindRef} loading={showGridSkeleton} />}
                   ringId={qcKeys.ringId}
