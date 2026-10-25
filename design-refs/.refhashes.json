@@ -749,7 +749,13 @@
     "design-refs/landing-hero-mobile-v3.html": "9c830d5c74e5e703bf81267fb60cbd4be34de4d60141284e60ed1ae907a0f425",
     "design-refs/landing-hero-mobile-v3-1.html": "192b25f882a8233683256748953b73278b08bf7ab0f96eee60a80b8cbff25554",
     "design-refs/pricing-page-v2.html": "54441ed0bc9a387b5898ef338cc78cd0541fefb5eb3ac0cc42fd08c84e3fe503",
-    "design-refs/query-centre-v149/query-centre-v149.html": "1448f6d1d1bd955ecfd86550d9a14b7e51ec4ed6b97a25c08d71b165ce9b070c"
+    "design-refs/query-centre-v149/query-centre-v149.html": "1448f6d1d1bd955ecfd86550d9a14b7e51ec4ed6b97a25c08d71b165ce9b070c",
+    "design-refs/query-centre-v149-1/query-card-panel-v2.html": "534645d5ecefd2d33b97bc06952c48021204e5e3b5dbc14584cc338d5703c952",
+    "design-refs/query-centre-v149-1/now-agent.png": "1e8f96a570b47b80b80b26030d8c941f7ebf41b32c373b8cd01c7d7ebfa633c2",
+    "design-refs/query-centre-v149-1/now-tracking.png": "79205a388e74202aa4f992917262dc442137d06eadf916b41c0622020285c5d7",
+    "design-refs/query-centre-v149-1/screens/card-agent.png": "acc8386045ae981cf51b4e9085f2c63209fe5dbc4284e23b9670bb4441c84ef3",
+    "design-refs/query-centre-v149-1/screens/card-tracking.png": "15346ffd6b4862140b637fd155c1205f789cd60c63758c0d411992a4c00721ae",
+    "design-refs/query-centre-v149-1/screens/compare.png": "6329441dffe3583815d5f064bb611328d7dc8a683f035d5f82102263d52e2dbb"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",
