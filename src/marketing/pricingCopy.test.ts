@@ -8,13 +8,12 @@
  */
 import { describe, it, expect } from "vitest";
 import {
-  PRO_PLANS, perMonth, planPerMonthLine, PRO_FROM, planFor, planTileLine, planPrice, planMonths, ADD_MONTH_PRICE,
+  PRO_PLANS, perMonth, planPerMonthLine, PRO_FROM, planFor, planTileLine, planPrice, planMonths,
 } from "./pricingCopy";
 
 describe("the Pro plan table", () => {
   it("states the planned launch prices", () => {
     expect(PRO_PLANS.map((p) => [p.months, p.price])).toEqual([[1, "7.99"], [3, "19"], [6, "29"], [12, "45"]]);
-    expect(ADD_MONTH_PRICE).toBe("5.99");
   });
   it("derives each per-month figure from the price", () => {
     expect(PRO_PLANS.map(perMonth)).toEqual(["7.99", "6.33", "4.83", "3.75"]);

@@ -83,8 +83,6 @@ export const PRO_PLANS: ProPlan[] = [
   { months: 6, price: "29", saving: 40 },
   { months: 12, price: "45", saving: 53 },
 ];
-/** Adding one month to a plan. */
-export const ADD_MONTH_PRICE = "5.99";
 
 /** £ a month for a plan, to the penny: 19 / 3 → "6.33". */
 export const perMonth = (p: ProPlan): string => (Number(p.price) / p.months).toFixed(2);
@@ -287,3 +285,24 @@ export const PV4_SOURCE_NOTE: CopyRun[] = [
   { link: "QueryTracker figures", href: "https://rejectomancy.com/2023/09/28/query-quest-what-are-my-chances-part-ii/" },
   ") and the reply windows agencies state.",
 ];
+
+/* ══════════════ On phones (design-refs/pricing-page-mobile-v1.html, 25 Oct) ══════════════
+   ⚠️ ONLY WHAT THE PHONE SAYS DIFFERENTLY IS NEW HERE. Every other word on the phone page — the box,
+   the perks, the steps, the tiers, the plans, the eight questions, the four journey questions and
+   their notes — is read from the constants above, so the two widths cannot come to disagree. */
+/** The Pro side of the Free / Pro switch carries its "from" figure, read from the plan table. */
+export const SEG_PRO_FROM = `${PV4_PRO.from} £${PRO_FROM}`;
+/** Under the "Which plan suits me best?" button. */
+export const SUIT_NOTE = "Four quick questions, about a minute.";
+/** A plan tile's mono line on a phone: the per-month figure, then the saving on a line of its own. */
+export const planTileLines = (p: ProPlan): { lead: string; save: string | null } =>
+  p.saving === null ? { lead: "Add to any plan", save: null } : { lead: `£${perMonth(p)} a month`, save: `save ${p.saving}%` };
+/** The three novel lengths as the phone's row of short cards. Same values as `JY_LENGTHS`. */
+export const JY_LENGTHS_SHORT: JyOption<"s" | "m" | "l">[] = [
+  { v: "s", title: "Under 80k" },
+  { v: "m", title: "80k to 110k" },
+  { v: "l", title: "Over 110k" },
+];
+/** The sheet's footer button on the result, and its close control's name. */
+export const JY_SEE_IN_PLANS = "See it in the plans";
+export const JY_CLOSE = "Close";

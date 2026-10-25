@@ -1917,6 +1917,162 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   .mk-pv4 .mk-pv4soon, .mk-pv4 .mk-pv4sect { padding: 0 12px; }
 }
 
+/* ══════════════ Pricing on phones (public /pricing ≤760px, ref design-refs/pricing-page-mobile-v1.html, 25 Oct) ══════════════
+   `PricingPhone.tsx` renders this tree at and below 760px (`usePhone`); above it the v4 block above
+   renders and none of these rules has anything to match — every selector here names a `.mk-pv*`
+   class that only the phone tree emits, or `:has()` of one.
+   ⚠️ VALUES ARE THE REF'S OWN, read from its stylesheet's "the page" section. Where the ref and a
+   marketing token say the same thing the token is used: --mk-ink-shell is its --ink, --mk-lower its
+   --oat, --mk-hero-ground its --paper, --mk-blush-mid its #fcf4f0. Its `rgba(28,19,15,.08)` hairline
+   has no token in the tier and is stated, as the desktop box states it.
+   ⚠️ EVERY SELECTOR IS `.mk-pvm .x` (0-2-0) OR `.mk-scope .x` WITH `!important`, for the reason the
+   v4 block states: brand.tsx names bare `p, span, div, button, input, label` at 0-0-1 and forces
+   `h1, h2, h3` with `!important`. `.mk-pvlayer` is the root of the parts portalled out of the sheet
+   (the questions sheet and the sticky bar) and takes the same reset. */
+
+/* ── The ink runs on 150px under the nav; the sheet starts there with 20px top corners (ref .mtop, .msheet) ──
+   ⚠️ THE SHEET IS A BLOCK FORMATTING CONTEXT (`flow-root`) AND SO IS THE PAGE'S ROOT. The box's −116px
+   margin must lift the box and nothing else: in a block that is not a BFC a first child's negative
+   top margin collapses through its parents, and the oat sheet would rise with it and swallow the ink.
+   The draft of this design had exactly that bug; `pricingMobile.measure.ts` locks the sheet's top.
+   ⚠️ `overflow: visible`, because the box and its perched drawing are meant to leave the sheet. */
+.mk-sheet:has(.mk-pvm) {
+  display: flow-root; margin-top: 150px; overflow: visible;
+  border-top-left-radius: 20px; border-top-right-radius: 20px;
+}
+.mk-pvm {
+  display: flow-root; padding: 0 14px 46px;
+  font-family: var(--mk-f-serif); color: var(--mk-nearblack);
+  /* The ref's body states no line-height, so its text sits at `normal`. */
+  line-height: normal;
+}
+/* ⚠️ `*`, NOT A SECOND `:where(p, span, …)` LIST. 0-1-0 beats brand.tsx's 0-0-1 either way, and the
+   v4 block's element list already names every one of those elements — the sheet-wide "one property
+   per selector" sweep reads a comma as a selector boundary, so a second list would read as each
+   element declaring `font-family` twice. */
+.mk-pvm *, .mk-pvlayer * { font-family: inherit; }
+
+/* ── The founding box (ref .fbx) ── */
+.mk-pvm .mk-pvbox {
+  position: relative; z-index: 2; margin-top: -116px;
+  border: 1px solid rgba(28, 19, 15, .08); border-radius: 20px;
+  box-shadow: 0 1px 2px rgba(28, 19, 15, .05), 0 22px 44px -24px rgba(28, 19, 15, .35);
+  /* ⚠️ COLOUR AND IMAGE SEPARATELY, NEVER THE SHORTHAND: a gradient that failed to parse would leave
+     the box see-through over the ink. White to 52%, #fcf4f0 at 74%, blush at 100%, top to bottom. */
+  background-color: #fff;
+  background-image: linear-gradient(180deg, #fff 0%, #fff 52%, var(--mk-blush-mid) 74%, var(--mk-blush) 100%);
+}
+/* Perched on the box's top-right corner, mirrored so the hawks face the headline. Decorative. */
+.mk-pvm .mk-pvart {
+  position: absolute; right: 8px; top: -58px; width: 112px; height: auto; max-width: none;
+  transform: scaleX(-1); pointer-events: none; filter: drop-shadow(0 6px 8px rgba(0, 0, 0, .12));
+}
+.mk-pvm .mk-pvin { padding: 24px 20px 4px; }
+.mk-pvm .mk-pvtag {
+  display: inline-block; padding: 5px 11px; border-radius: 999px; background: var(--mk-blush); color: var(--mk-rust);
+  font-family: var(--mk-f-mono); font-weight: 600; font-size: .58rem; line-height: 1.2;
+  letter-spacing: .2em; text-transform: uppercase;
+}
+.mk-scope .mk-pvh1 {
+  font-family: var(--mk-f-display) !important; font-weight: 400;
+  font-size: 1.85rem; line-height: 1.14; letter-spacing: -.01em; color: var(--mk-nearblack); margin: 16px 0 0;
+}
+.mk-pvm .mk-pvsub { margin: 12px 0 0; font-size: 1.04rem; line-height: 1.5; color: var(--mk-body); }
+
+/* The counter: `FoundingCounter`'s `left` shape — a 5px rust bar and one mono line (ref .cnt). */
+.mk-pvm .mk-pvcount .mk-fmcount { max-width: none; margin: 20px 0 0; }
+.mk-pvm .mk-pvcount .mk-fmbar { background: rgba(28, 19, 15, .1); }
+.mk-pvm .mk-pvcount .mk-fmfill { background: var(--mk-rust); opacity: 1; }
+.mk-pvm .mk-pvcount .mk-fmmeta {
+  margin: 8px 0 0; font-family: var(--mk-f-mono); font-weight: 600; font-size: .62rem; line-height: 1.2;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--mk-nearblack);
+}
+
+/* The claim form: the field, then a full-width 52px button, stacked (ref .form).
+   ⚠️ THE FIELD IS 16px, SO A PHONE DOES NOT ZOOM THE PAGE WHEN IT TAKES FOCUS (iOS zooms below 16). */
+.mk-pvm .mk-pvform { display: grid; gap: 10px; margin-top: 14px; }
+.mk-pvm .mk-pvform input {
+  box-sizing: border-box; width: 100%; height: 52px; border-radius: 999px; border: 1px solid var(--mk-hair);
+  padding: 0 22px; font-family: var(--mk-f-serif); font-weight: 400; font-size: 16px;
+  color: var(--mk-nearblack); background: #fff;
+}
+.mk-pvm .mk-pvform input::placeholder { color: var(--mk-blush-ph); }
+.mk-pvm .mk-pvform input:focus { outline: 2px solid var(--mk-navy); outline-offset: 2px; }
+.mk-pvm .mk-pvform .mk-btn {
+  height: 52px; padding: 0; border: 0; justify-content: center;
+  font-family: var(--mk-f-serif); font-weight: 600; font-size: 1.02rem;
+}
+.mk-pvm .mk-pvform .mk-btn:active { background: var(--mk-navy-hov); }
+.mk-pvm .mk-pvin .mk-betanote { margin: 10px 0 0; font-size: .85rem; line-height: 1.45; }
+.mk-pvm .mk-pvin .mk-betamsg { margin: 14px 0 0; }
+
+/* ── What founding writers get (ref .more, .detail) ── */
+.mk-pvm .mk-pvmore {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; padding: 20px 0 22px; margin: 0; border: 0; background: none; cursor: pointer;
+  font-family: var(--mk-f-mono); font-weight: 500; font-size: .62rem; line-height: 1;
+  letter-spacing: .2em; text-transform: uppercase; color: var(--mk-nearblack);
+}
+.mk-pvm .mk-pvmore::before, .mk-pvm .mk-pvmore::after { content: ""; width: 36px; height: 1px; background: var(--mk-hair); }
+.mk-pvm .mk-pvchev {
+  display: block; width: 13px; height: 13px; fill: none; stroke: var(--mk-rust); stroke-width: 2;
+  stroke-linecap: round; stroke-linejoin: round; transition: transform .25s;
+}
+.mk-pvm .mk-pvmore[aria-expanded="true"] .mk-pvchev { transform: rotate(180deg); }
+.mk-pvm .mk-pvmore:focus-visible { outline: 2px solid var(--mk-navy); outline-offset: -4px; }
+/* ⚠️ OPEN, THE TOGGLE IS ON THE PANEL'S PAPER WITH THE BOX'S BOTTOM CORNERS, so no strip of the box's
+   gradient shows between the panel and it: the two are adjacent boxes with no gap. */
+.mk-pvm .mk-pvbox--open .mk-pvmore { background: var(--mk-hero-ground); border-radius: 0 0 20px 20px; padding-top: 18px; }
+.mk-pvm .mk-pvdetail { background: var(--mk-hero-ground); border-top: 1px dashed var(--mk-hair); padding: 20px 0 6px; }
+.mk-pvm .mk-pvdetail[hidden] { display: none; }
+/* The four points: a scroll-snapped row of cards, 82% wide so the next one peeks in. */
+.mk-pvm .mk-pvperks {
+  display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory;
+  padding: 2px 20px 6px; scroll-padding: 0 20px; scrollbar-width: none;
+}
+.mk-pvm .mk-pvperks::-webkit-scrollbar { display: none; }
+.mk-pvm .mk-pvperk {
+  flex: 0 0 82%; scroll-snap-align: start; background: #fff; border-radius: 16px; padding: 18px;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, .08), 0 6px 14px -10px rgba(28, 19, 15, .2);
+}
+.mk-pvm .mk-pvperki { width: 40px; height: 40px; border-radius: 50%; background: var(--mk-blush); display: grid; place-items: center; }
+.mk-pvm .mk-pvperki svg {
+  width: 19px; height: 19px; fill: none; stroke: var(--mk-rust); stroke-width: 1.6;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.mk-scope .mk-pvperkh {
+  font-family: var(--mk-f-display) !important; font-weight: 400;
+  font-size: 1.08rem; line-height: 1.3; margin: 14px 0 0; color: var(--mk-nearblack);
+}
+.mk-pvm .mk-pvperkp { margin: 6px 0 0; font-size: .95rem; line-height: 1.5; color: var(--mk-body); }
+/* The current dot widens to a rust pill and follows the swipe. */
+.mk-pvm .mk-pvdots { display: flex; justify-content: center; gap: 6px; margin: 12px 0 0; }
+.mk-pvm .mk-pvdots i {
+  display: block; width: 6px; height: 6px; border-radius: 999px; background: rgba(28, 19, 15, .18);
+  transition: width .2s, background .2s;
+}
+.mk-pvm .mk-pvdots i.mk-on { width: 18px; background: var(--mk-rust); }
+/* How it works: a navy card, the three numbered steps down a thin line. */
+.mk-pvm .mk-pvsteps { margin: 18px 20px 0; padding: 16px 18px 18px; border-radius: 16px; background: var(--mk-navy); color: #fff; }
+.mk-pvm .mk-pvstepsh {
+  margin: 0; font-family: var(--mk-f-mono); font-weight: 500; font-size: .58rem; line-height: 1.2;
+  letter-spacing: .2em; text-transform: uppercase; color: rgba(var(--mk-cream-rgb), .7);
+}
+.mk-pvm .mk-pvsteps ol { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 14px; position: relative; }
+.mk-pvm .mk-pvsteps ol::before {
+  content: ""; position: absolute; left: 12px; top: 12px; bottom: 12px; width: 1px; background: rgba(var(--mk-cream-rgb), .3);
+}
+.mk-pvm .mk-pvsteps li { position: relative; display: flex; align-items: center; gap: 12px; font-size: 1rem; line-height: 1.35; color: #fff; }
+.mk-pvm .mk-pvsteps li span {
+  width: 25px; height: 25px; flex: none; border-radius: 50%; display: grid; place-items: center;
+  background: var(--mk-terra); color: var(--mk-nearblack);
+  font-family: var(--mk-f-mono); font-weight: 600; font-size: .7rem; line-height: 1;
+}
+/* ⚠️ AFTER THE RULES IT OVERRIDES: a media query confers no specificity. */
+@media (prefers-reduced-motion: reduce) {
+  .mk-pvm .mk-pvchev, .mk-pvm .mk-pvdots i { transition: none; }
+}
+
 /* ══════════════ Shared footer (every public page) ══════════════
    ⚠️ ONE AUTHORITATIVE BLOCK, REWRITTEN RATHER THAN PATCHED (17 Sep). The footer's rules had
    spread to four places — a base rule beside the banner, a 1080px padding override, a 760px column

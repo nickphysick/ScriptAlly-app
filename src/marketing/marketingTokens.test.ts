@@ -811,6 +811,9 @@ describe("the hero grid aligns per item, and overlaps by construction", () => {
       /* /pricing's founding box laid across the join between the ink and the sheet (pricing v4,
          24 Oct, ref pricing-page-v2): the sheet starts 150px lower on that page to make the room. */
       ".mk-pv4 .mk-fb",
+      /* the same box on a phone (pricing on phones, 25 Oct, ref pricing-page-mobile-v1): −116px into
+         the 150px of ink the sheet starts below, so it straddles the join as the desktop box does. */
+      ".mk-pvm .mk-pvbox",
       /* each vision point is a card drawn OUTWARD: its padding is paid back by an equal negative
          margin, so the picture, heading and body keep their column (landing colours v2) */
       ".mk-vpoint",

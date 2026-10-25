@@ -19,7 +19,7 @@
  * rule of thumb, and the source note under the journey states where its figures come from.
  */
 
-import { planFor, planPerMonthLine, ADD_MONTH_PRICE, type ProPlan } from "./pricingCopy";
+import { planFor, planPerMonthLine, type ProPlan } from "./pricingCopy";
 
 export type Stage = "prep" | "ready" | "already";
 export type Kind = "novel" | "nonfic" | "pb";
@@ -128,8 +128,12 @@ export const estimateCampaign = (a: CampaignAnswers, today: Date): CampaignEstim
 
   const fit = fitFor(months);
   const over = months - fit;
-  const tail = months > 13 ? `If you're still querying after that, add a month at a time for £${ADD_MONTH_PRICE}.`
-    : over > 0.25 ? `If your last replies run late, add a month for £${ADD_MONTH_PRICE}.`
+  /* ⚠️ A PLAN IS EXTENDED BY QUERYHAWK GETTING IN TOUCH, NOT BY BUYING A MONTH (Nick, 24 Oct). The two
+     tails that ran past the plan used to sell an extra month at £5.99; both now say what happens
+     instead, word for word as design-refs/pricing-page-mobile-v1.html's script prints them. The page
+     states no price the policy does not have. */
+  const tail = months > 13 ? "If you're still querying after that, we'll be in touch with options to extend."
+    : over > 0.25 ? "If your last replies run late, we'll be in touch with options to extend."
     : fit - months > 2 ? "It leaves room for slow replies, or for revising if an agent asks."
     : "There's a little room in it for slow replies.";
 
