@@ -56,7 +56,7 @@ import { AgentCardPanel24 } from "./contact/AgentCardPanel24";
 import { agentHistory } from "../../lib/agentHistory";
 import { destroyManifest } from "../../lib/cascade";
 import type { ContactView } from "../../lib/contactListMemory";
-import { bannerFigures, inSet, setCounts, setGroups, wideNext, type SetKey } from "../../lib/contactV24";
+import { bannerFigures, colleaguesOf, genreFit, inSet, setCounts, setGroups, wideNext, type SetKey } from "../../lib/contactV24";
 import { type AgentFacts, ContactFilters, GroupKey, SORT_OPTIONS, SortKey as ContactSortKey, agentFacts, emptyContactFilters, matchesContactFilters, sortFacts } from "../../lib/contactList";
 import { bookGenreHit, bookGenres } from "../../lib/genreMatch";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
@@ -809,7 +809,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       onEdit: (tab, focus) => openAgentCard(id, { tab: tab ?? "who", focus, from: "row" }),
       onOpenQuery: (queryId) => navigate(`/queries?q=${encodeURIComponent(queryId)}`),
       onNotes: async (text) => (await writeAgentPatch(id, { notes: text })).ok,
-      fit: null, colleagues: null, onOpenAgent,
+      /* v24 E1/E2 — the genre fit against the book in scope, and the agent's colleagues at the agency */
+      fit: genreFit(x.agent.genres, book, scoped?.title ?? null, (raw) => genreLabel(raw, personalGenres)),
+      colleagues: colleaguesOf(x, factsAll), onOpenAgent,
       deleteQueries: destroyManifest("agent", id, { queries, activities, taskFlags }).queries,
       onDelete: () => {
         const name = (x.agent.name ?? "").trim() || x.agent.agency;
@@ -952,7 +954,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
           genreWord={(raw) => genreLabel(raw, personalGenres)} onExit={togglePin} nowMs={nowMs} selectRequest={bookReq}
           onExport={(rows) => downloadAgentsCsv(rows, (raw) => genreLabel(raw, personalGenres))}
           renderCard={(x, index, total, onStep, onSelect) => (
-            <AgentCardWide24 {...cardPropsFor(x, index, total, onStep, onSelect)}
+            /* a colleague opened from the wide card goes through the book's request: it clears a set or filter hiding them */
+            <AgentCardWide24 {...cardPropsFor(x, index, total, onStep, (id) => { void onSelect; setBookReq({ id, seq: Date.now() }); })}
               extras={{
                 materials: materialRowsFromAgent(x.agent.materialsWanted).filter((r) => r.on).map(materialWords),
                 steps: x.q && x.stand !== "none" ? bookSteps(x.q).map((st, k) => ({ key: `${st.status}-${k}`, status: st.status, label: st.label, date: stepDate(st.dateMs), current: st.current })) : [],
