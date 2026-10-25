@@ -66,6 +66,25 @@ export const HERO_PHONE_TAGS = ["Adult", "Literary fiction", "94,000 words"] as 
    The footer's two halves at each turn of the story, and the two tags that float up beside a line.
    Every string the phone story writes comes from here; the card's own markup (the five lines, the
    reminder, the final panel) is shared with the desktop card and stays in it. */
+/**
+ * ⚠️ AN AGENT IS NAMED, NEVER "SHE" OR "HE" (25 Oct, both layouts). The app does not know an agent's
+ * pronouns and never asks, so a note that refers to the agent uses their FIRST name, or "the agent"
+ * ("The agent" at the start of a sentence) when none is saved. Never she, her, he or him.
+ */
+export const agentRef = (first: string | null | undefined, opts: { start?: boolean } = {}): string => {
+  const f = (first ?? "").trim();
+  return f || (opts.start ? "The agent" : "the agent");
+};
+/** The demo card's agent (Eleanor Whitfield), by first name: what the hero's notes call the agent by. */
+export const HERO_AGENT_FIRST = "Eleanor";
+/** The popover's label — what the agent asked for. */
+export const askedLabel = (first: string | null | undefined) => `${agentRef(first, { start: true })} asked for`;
+/** The two congratulations faces' titles (phones, v3.2). */
+export const flipTitles = (first: string | null | undefined) => ({
+  partial: `${agentRef(first, { start: true })} wants to read more!`,
+  full: `${agentRef(first, { start: true })} wants the full!`,
+});
+
 export const PHONE_STORY = {
   foot: {
     sent: ["Reply expected by 9 May", "Record a response"],
@@ -82,7 +101,7 @@ export const PHONE_STORY = {
   },
   /** v3.1 (C2) — what Eleanor asked for: the popover under the status pill, flicked Words then Chapters. */
   asked: {
-    label: "She asked for",
+    label: askedLabel(HERO_AGENT_FIRST),
     first: "First",
     units: [["pages", "Pages"], ["chapters", "Chapters"], ["words", "Words"]],
     pages: "50", words: "5,000", chapters: "3",
@@ -92,8 +111,8 @@ export const PHONE_STORY = {
   /** v3.2 (F3) — the face the card flips to when a request lands (phones): the band, the title, and one
       line as [before, in bold, after]. */
   flip: {
-    partial: { tag: "Partial requested", day: "Day 36", title: "Eleanor wants to read more!", line: ["A partial request: ", "the first 3 chapters", "."] },
-    full: { tag: "Full requested", day: "Day 99", title: "Eleanor wants the full!", line: ["A full request: ", "the whole manuscript", "."] },
+    partial: { tag: "Partial requested", day: "Day 36", title: flipTitles(HERO_AGENT_FIRST).partial, line: ["A partial request: ", "the first 3 chapters", "."] },
+    full: { tag: "Full requested", day: "Day 99", title: flipTitles(HERO_AGENT_FIRST).full, line: ["A full request: ", "the whole manuscript", "."] },
   },
 } as const;
 

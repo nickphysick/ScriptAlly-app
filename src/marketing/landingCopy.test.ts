@@ -60,7 +60,7 @@ describe("landing copy — verbatim locks", () => {
     expect(HERO_PHONE_MS).toBe("Lord of the Wings");
     expect(HERO_PHONE_MS_FRONT).toBe("The Taloned Mr Ripley");
     expect(Object.values(PHONE_STORY.chips).map((c) => c[0])).toEqual(["Task created", "Task complete", "Reminder set"]);
-    expect(PHONE_STORY.asked.label).toBe("She asked for");
+    expect(PHONE_STORY.asked.label, "the agent named, never she (25 Oct)").toBe("Eleanor asked for");
     const src = (await import("node:fs")).readFileSync(new URL("./landingCopy.ts", import.meta.url), "utf8");
     for (const gone of ["Who are you querying?", "Logging query…", "PHONE_DASH", "PHONE_PICK", "PHONE_FORM", "PHONE_RESPONSE", "PHONE_PILLS", "Your manuscript", "Your novel", "Lead future queries with the opening voice"]) {
       expect(src.includes(gone), `retired: ${gone}`).toBe(false);
