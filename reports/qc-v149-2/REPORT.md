@@ -83,4 +83,5 @@ Both are `test.skip` with the reason beside them.
 - Integration branch **`dev/hm31-pv4-qc1492`**: cut from `dev/hm31-pv4-qc1491` (42b2d956, which dev was serving), with `query-centre-v149-2` merged in (17843e85). Pushed.
 - Gates there match the baseline: tsc 0, build clean, Vitest 10,367 passed, plus the same three `functions/` reds. QC1492 L1–L3 and QC1491 (22 passed, L11 skipped as retired) were run on that build and all pass.
 - **Dev deploy:** hosting only, `--config firebase.dev.json --project scriptally-dev`, from that clean tree. Served before: `index-pQgTRP-n.js`. **Served after: `index-DPSsooOm.js`.**
+- **Redeploy after the inset ruling (25 Oct):** `query-centre-v149-2` (20d2bf39) merged into `dev/hm31-pv4-qc1492` (b14900ab). Gates there match the baseline; QC1492 L1–L3 and QC1491 (22 passed, L11 skipped) pass on that build. Served before: `index-DPSsooOm.js`. **Served after: `index-Bz1d7ECX.js`.**
 - Prod is untouched, and nothing is merged to `main`.
