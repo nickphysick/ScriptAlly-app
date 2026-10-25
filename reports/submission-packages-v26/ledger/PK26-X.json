@@ -15,7 +15,7 @@
   "lock": "PK26-X",
   "where": "the 1st edition (what went) has no extras",
   "ok": true,
-  "detail": "{\"queryLetterVersionId\":\"pk26-let-a\",\"synopsisVersionId\":\"\",\"n\":1,\"versions\":[\"pk26-let-a\"],\"summary\":\"Query letter Letter A\",\"startedAt\":\"2026-09-20T17:17:51.858Z\"}"
+  "detail": "{\"synopsisVersionId\":\"\",\"n\":1,\"versions\":[\"pk26-let-a\"],\"startedAt\":\"2026-09-20T18:45:12.590Z\",\"summary\":\"Query letter Letter A\",\"queryLetterVersionId\":\"pk26-let-a\"}"
  },
  {
   "lock": "PK26-X",

@@ -3,7 +3,7 @@
   "lock": "PK26-S",
   "where": "the sent package is listed",
   "ok": true,
-  "detail": "[{\"name\":\"Sent one\",\"early\":true,\"label\":\"Too early\"},{\"name\":\"Drag target\",\"early\":false,\"label\":\"Not sent\"}]"
+  "detail": "[{\"name\":\"Sent one\",\"early\":true,\"label\":\"Too early\"},{\"name\":\"Drag target\",\"early\":false,\"label\":\"Not sent\"},{\"name\":\"Retired one\",\"early\":true,\"label\":\"Retired\"}]"
  },
  {
   "lock": "PK26-S",
@@ -21,12 +21,12 @@
   "lock": "PK26-S",
   "where": "the unsent one reads Not sent",
   "ok": true,
-  "detail": "[{\"name\":\"Sent one\",\"early\":true,\"label\":\"Too early\"},{\"name\":\"Drag target\",\"early\":false,\"label\":\"Not sent\"}]"
+  "detail": "[{\"name\":\"Sent one\",\"early\":true,\"label\":\"Too early\"},{\"name\":\"Drag target\",\"early\":false,\"label\":\"Not sent\"},{\"name\":\"Retired one\",\"early\":true,\"label\":\"Retired\"}]"
  },
  {
   "lock": "PK26-S",
   "where": "the footnote states the threshold",
   "ok": true,
-  "detail": "Your average across everything: –. Packages with fewer than 4 answers are shown but not ranked. Bars run to 50%; the faint line marks 25%."
+  "detail": "Your average across everything: 0%. Packages with fewer than 4 answers are shown but not ranked. Bars run to 50%; the faint line marks 25%."
  }
 ]

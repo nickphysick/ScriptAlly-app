@@ -143,13 +143,17 @@ export const RESULTS_NOUN: Record<ResultsKind, string> = { pk: "package", let: "
 export const askRate = (s: Split): number | null => (s.answered ? s.requests / s.answered : null);
 export const pctOf = (r: number | null): string => (r == null ? "–" : `${Math.round(r * 100)}%`);
 
-export interface ResultItem { id: string; name: string; s: Split }
+/** `retired`: a retired package, a put-away letter or synopsis, an archived version — listed under the others,
+ *  "Retired", never ranked (v26.1). Deleted items and other manuscripts' never reach this list at all. */
+export interface ResultItem { id: string; name: string; s: Split; retired?: boolean }
 export interface ResultRowView<T extends ResultItem = ResultItem> {
   item: T;
   rate: number | null;
   /** counted but under the threshold: shown, hatched, not ranked */
   early: boolean;
   notSent: boolean;
+  /** retired / put away / archived: shown under the live ones, never ranked */
+  retired: boolean;
   /** the bar's width, as a percentage of the track (bars run to 50%) */
   bar: number;
   label: string;
@@ -158,19 +162,21 @@ export interface ResultRowView<T extends ResultItem = ResultItem> {
 export const BAR_MAX = 0.5;
 
 export function resultRows<T extends ResultItem>(items: readonly T[]): ResultRowView<T>[] {
-  const order = ranked(items.map((it) => ({ ...it, name: it.name, s: it.s })));
-  return order.map((o) => {
-    const it = items.find((x) => x.id === o.id)!;
+  /* the live items in packageReplies' house order, then the retired ones in the same order beneath them */
+  const orderOf = (list: readonly T[]) => ranked(list.map((it) => ({ ...it, name: it.name, s: it.s }))).map((o) => list.find((x) => x.id === o.id)!);
+  const order = [...orderOf(items.filter((it) => !it.retired)), ...orderOf(items.filter((it) => !!it.retired))];
+  return order.map((it) => {
     const rate = askRate(it.s);
+    const retired = !!it.retired;
     const notSent = it.s.sent === 0;
     const early = !notSent && !qualifies(it.s);
     const bar = notSent || rate == null ? 0 : Math.max(2, Math.min(1, rate / BAR_MAX) * 100);
-    return { item: it, rate, early, notSent, bar, label: notSent ? "Not sent" : early ? "Too early" : pctOf(rate) };
+    return { item: it, rate, early, notSent, retired, bar, label: retired ? "Retired" : notSent ? "Not sent" : early ? "Too early" : pctOf(rate) };
   });
 }
 
 /** The ranked rows only (qualifying, in packageReplies' house order). */
-export const rankedOnly = <T extends ResultItem>(rows: readonly ResultRowView<T>[]): ResultRowView<T>[] => rows.filter((r) => !r.early && !r.notSent);
+export const rankedOnly = <T extends ResultItem>(rows: readonly ResultRowView<T>[]): ResultRowView<T>[] => rows.filter((r) => !r.early && !r.notSent && !r.retired);
 
 /** The lead sentence: the best and the lowest ranked, or why there is no comparison yet. */
 export function resultsLead(rows: readonly ResultRowView[], kind: ResultsKind): { best: string | null; text: string } {
@@ -187,7 +193,10 @@ export function resultsLead(rows: readonly ResultRowView[], kind: ResultsKind): 
 export function resultsFoot(overall: Split, kind: ResultsKind): string {
   const noun = RESULTS_NOUN[kind];
   const plural = noun === "synopsis" ? "Synopses" : `${noun[0].toUpperCase()}${noun.slice(1)}s`;
-  return `Your average across everything: ${pctOf(askRate(overall))}. ${plural} with fewer than ${MIN_SENDS_FOR_CLAIM} answers are shown but not ranked. Bars run to 50%; the faint line marks 25%.`;
+  const threshold = `${plural} with fewer than ${MIN_SENDS_FOR_CLAIM} answers are shown but not ranked.`;
+  /* v26.1: the average is stated only when there is one; otherwise just the threshold sentence */
+  const avg = askRate(overall);
+  return avg == null ? threshold : `Your average across everything: ${pctOf(avg)}. ${threshold} Bars run to 50%; the faint line marks 25%.`;
 }
 
 /** The detail card's extra figures, from Analytics' rows: full requests and average days to a reply. */
@@ -220,6 +229,17 @@ export function namedAgents(names: readonly string[]): string {
 }
 
 /* ── the materials tables ── */
+/** A material's second line (v26.1): its own summary, else "sent {n} · in {m} packages" with any zero part left out,
+ *  else nothing. NEVER the type ("Query letter", "Synopsis") — the row's icon and its tab already say that. */
+export function materialSummary(own: string | null | undefined, sent: number, inPackages: number): string {
+  const s = (own ?? "").trim();
+  if (s) return s;
+  const parts: string[] = [];
+  if (sent > 0) parts.push(`sent ${sent}`);
+  if (inPackages > 0) parts.push(`in ${inPackages} package${inPackages === 1 ? "" : "s"}`);
+  return parts.join(" · ");
+}
+
 /** "The Trees, Small Pleasures +1" — the first two comps and a count of the rest. */
 export function compsLine(names: readonly string[]): { text: string; more: number } | null {
   if (!names.length) return null;

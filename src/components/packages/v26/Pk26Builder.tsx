@@ -15,7 +15,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import type { SubmissionPackage } from "../../../types";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
-import { extraSuggestions, headerFigures, iconOf, offersNewExtra, packageFoot, readiness, readinessLabel } from "../../../lib/packagesV26";
+import { extraSuggestions, headerFigures, iconOf, materialSummary, offersNewExtra, packageFoot, readiness, readinessLabel } from "../../../lib/packagesV26";
 import { Mark, Pic } from "./icons";
 import type { MaterialRow, PieceKind, Pk26Model, VersionRow } from "./usePk26Model";
 
@@ -35,7 +35,7 @@ export interface BuilderProps {
   current: SubmissionPackage | null;
   onSelect: (id: string) => void;
   onNewPackage: () => void;
-  onEditPackage: (p: SubmissionPackage) => void;
+  onEditPackage: (p: SubmissionPackage, focus?: "note") => void;
   onOpenMaterial: (kind: "let" | "syn" | "ext", id: string) => void;
   onNewMaterial: (kind: LibTab) => void;
   onOpenVersions: () => void;
@@ -119,12 +119,14 @@ export const Pk26Builder: React.FC<BuilderProps> = ({ model, current, onSelect, 
               const key = `${lib}:${m.id}`;
               const used = inThis(lib, m.id);
               const isVer = lib === "ver";
-              const sum = isVer ? (m as VersionRow).summary : (m as MaterialRow).summary || (lib === "let" ? "Query letter" : (m as MaterialRow).words ? `${(m as MaterialRow).words!.toLocaleString("en-GB")} words` : "Synopsis");
+              /* v26.1: own summary (· sent n), else "sent n · in m packages", never the type */
+              const own = isVer ? (m as VersionRow).summary : (m as MaterialRow).summary;
+              const sum = own ? `${own}${m.sent ? ` · sent ${m.sent}` : ""}` : materialSummary("", m.sent, m.inPackages.length);
               return (
                 <div key={m.id} className={`p6-lr${ghost === key ? " p6-ghost" : ""}`} draggable onDragStart={onDragStart(lib, m.id)} onDragEnd={onDragEnd} data-drag={key}>
                   <span className="p6-lr-g" aria-hidden="true"><i /><i /><i /><i /><i /><i /></span>
                   <span className={`p6-tic p6-t-${lib}`}>{isVer ? vnum(m as VersionRow) : <Mark k={lib} />}</span>
-                  <span><b>{m.name}{m.inUse ? <em>In use</em> : null}</b><small>{sum}{m.sent ? ` · sent ${m.sent}` : ""}</small></span>
+                  <span className="p6-lr-tx"><b><span className="p6-nm" title={m.name}>{m.name}</span>{m.inUse ? <em>In use</em> : null}</b>{sum ? <small>{sum}</small> : null}</span>
                   {!isVer ? <button type="button" className="p6-lr-ed" aria-label={`Edit ${m.name}`} onClick={() => onOpenMaterial(lib as "let" | "syn", m.id)}><Mark k="pen" /></button> : null}
                   <button type="button" className="p6-lr-add" disabled={used} onClick={() => void put(lib, m.id)}>{used ? "In package" : "Add"}</button>
                 </div>
@@ -150,7 +152,7 @@ const OpenPackage: React.FC<{
   dragK: PieceKind | null;
   over: PieceKind | null;
   slotProps: (k: PieceKind) => React.HTMLAttributes<HTMLDivElement>;
-  onEdit: (p: SubmissionPackage) => void;
+  onEdit: (p: SubmissionPackage, focus?: "note") => void;
   onOpenMaterial: (kind: "let" | "syn" | "ext", id: string) => void;
   onOpenVersions: () => void;
 }> = ({ model, p, isActive, dragK, over, slotProps, onEdit, onOpenMaterial, onOpenVersions }) => {
@@ -178,7 +180,7 @@ const OpenPackage: React.FC<{
         );
       } else {
         const m = (k === "let" ? model.letters : model.synopses).find((x) => x.id === id);
-        const sum = m ? (m.summary || (k === "syn" && m.words ? `${m.words.toLocaleString("en-GB")} words` : k === "let" ? "Query letter" : "Synopsis")) : "";
+        const sum = m ? materialSummary(m.summary, m.sent, m.inPackages.length) : "";
         body = (
           <div className="p6-mr-it">
             <i className={`p6-tic p6-t-${k}`}><Mark k={k} /></i>
@@ -205,13 +207,17 @@ const OpenPackage: React.FC<{
       <div className="p6-po-h">
         <button type="button" className="p6-po-ic" aria-label="Change icon" onClick={() => !draft && onEdit(p)}><Pic ic={iconOf(p)} /></button>
         <div className="p6-po-tt">
-          <h3>{p.packageName}<button type="button" className="p6-po-ed" aria-label={`Rename or edit ${p.packageName}`} onClick={() => !draft && onEdit(p)}><Mark k="pen" /></button></h3>
-          <small>{p.note || "Add a note: who is this for?"}</small>
+          <h3><span className="p6-po-nm" title={p.packageName}>{p.packageName}</span><button type="button" className="p6-po-ed" aria-label={`Rename or edit ${p.packageName}`} onClick={() => !draft && onEdit(p)}><Mark k="pen" /></button></h3>
+          {/* v26.1: a real note is one line, cut short (full text in the title); none → a quiet "+ Add a note" that opens
+              Package details with the note focused. The draft keeps its own placeholder line. */}
+          {p.note
+            ? <small className="p6-po-note" title={p.note}>{p.note}</small>
+            : draft ? null : <button type="button" className="p6-po-addnote" onClick={() => onEdit(p, "note")}>+ Add a note</button>}
         </div>
         <span className="p6-sp" />
         <div className="p6-po-st">
           {ready === "ready" ? <span className="p6-pill p6-ok">Ready</span> : <span className="p6-pill p6-no">{readinessLabel(ready)}</span>}
-          <span className="p6-po-n">{figs ? <>{figs.sent} sent · <b>{figs.more}</b> asked for more</> : "Not sent yet"}</span>
+          <span className="p6-po-n">{figs ? <><span className="p6-nw">{figs.sent} sent ·</span> <span className="p6-nw"><b>{figs.more}</b> asked for more</span></> : "Not sent yet"}</span>
           {isActive ? <span className="p6-pill p6-act">Active</span> : <button type="button" className="p6-po-mk" onClick={() => void model.makeActive(p)}>Make active</button>}
         </div>
       </div>

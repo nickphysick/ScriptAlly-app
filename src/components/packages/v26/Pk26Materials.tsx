@@ -7,7 +7,7 @@
  * the material drawer.
  */
 import React from "react";
-import { compsLine, iconOf } from "../../../lib/packagesV26";
+import { compsLine, iconOf, materialSummary } from "../../../lib/packagesV26";
 import { Mark, Pic } from "./icons";
 import type { MaterialRow, Pk26Model } from "./usePk26Model";
 
@@ -39,7 +39,7 @@ export const Pk26Materials: React.FC<{
             const cl = L ? compsLine(compNames(m)) : null;
             return (
               <button type="button" key={m.id} className="p6-xtb-r" data-mat={`${kind}:${m.id}`} onClick={() => onOpen(m.id)}>
-                <span className="p6-xtb-n"><i className={`p6-tic p6-t-${kind}`}><Mark k={kind} /></i><span><b>{m.name}{m.inUse ? <em>In use</em> : m.retired ? <em>Put away</em> : null}</b><small>{m.summary || (L ? "Query letter" : "Synopsis")}</small></span></span>
+                <span className="p6-xtb-n"><i className={`p6-tic p6-t-${kind}`}><Mark k={kind} /></i><span><b>{m.name}{m.inUse ? <em>In use</em> : m.retired ? <em>Put away</em> : null}</b>{materialSummary(m.summary, m.sent, m.inPackages.length) ? <small>{materialSummary(m.summary, m.sent, m.inPackages.length)}</small> : null}</span></span>
                 <span className="p6-xtb-c">{L
                   ? (cl ? <>{cl.text}{cl.more ? <> <i>+{cl.more}</i></> : null}</> : <i className="p6-o">None</i>)
                   : (m.words ? `${m.words.toLocaleString("en-GB")} words` : <i className="p6-o">Not counted</i>)}</span>

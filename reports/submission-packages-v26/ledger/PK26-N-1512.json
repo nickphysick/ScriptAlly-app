@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "PK26-N-1512",
+  "where": "both rows are on screen",
+  "ok": true,
+  "detail": "[{\"h\":33,\"tagR\":224,\"tagL\":190.296875,\"lblR\":184.296875,\"lines\":0,\"text\":\"Submission packages\"},{\"h\":33,\"tagR\":224,\"tagL\":190.296875,\"lblR\":110.90625,\"lines\":0,\"text\":\"Versions\"}]"
+ },
+ {
+  "lock": "PK26-N-1512",
+  "where": "same height as Versions (±1)",
+  "ok": true,
+  "detail": "33 vs 33"
+ },
+ {
+  "lock": "PK26-N-1512",
+  "where": "PRO tag's right edge where Versions' is (±1)",
+  "ok": true,
+  "detail": "224 vs 224"
+ },
+ {
+  "lock": "PK26-N-1512",
+  "where": "no second line",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "PK26-N-1512",
+  "where": "the label is \"Submission packages\"",
+  "ok": true,
+  "detail": "Submission packages"
+ },
+ {
+  "lock": "PK26-N-1512",
+  "where": "the label stops before its tag",
+  "ok": true,
+  "detail": "184.296875 vs 190.296875"
+ }
+]

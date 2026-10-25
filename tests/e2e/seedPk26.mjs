@@ -9,6 +9,8 @@
  *   pk26-pkg-open             an unsent, EMPTY package — the drag target (B1)
  *   pk26-pkg-sent             a SENT package holding Letter A, its 1st edition, with pk26-q1 credited to that edition
  *   pk26-ext                  one named extra on the manuscript ("Author bio"), ticked by nothing
+ *   pk26-pkg-old              a RETIRED package with one query (pk26-q2, passed) — Results lists it last, "Retired" (v26.1)
+ *   pk26-let-c                a letter with a long name, for the one-line name (v26.1); the sent package carries a note
  *
  *   node tests/e2e/seedPk26.mjs           # write (clean first)
  *   node tests/e2e/seedPk26.mjs --dump    # print the sent package and its query, as stored
@@ -71,12 +73,13 @@ const letter = (id, name, days, type = "Query Letter") => b.set(ref("versions", 
 letter("pk26-let-a", "Letter A", 40);
 letter("pk26-let-b", "Letter B", 20);
 letter("pk26-syn", "One-page", 30, "Synopsis");
+letter("pk26-let-c", "The longer comps-forward letter for agents in London, Dublin and Edinburgh", 10);
 b.set(ref("packages", "pk26-pkg-open"), {
   id: "pk26-pkg-open", userId: uid, manuscriptId: "pk26-ms", packageName: "Drag target", queryLetterVersionId: "", synopsisVersionId: "",
   samplePagesVersionId: "", status: "Active", createdDate: iso(5), edition: 1, icon: "flask", extraIds: [],
 });
 b.set(ref("packages", "pk26-pkg-sent"), {
-  id: "pk26-pkg-sent", userId: uid, manuscriptId: "pk26-ms", packageName: "Sent one", queryLetterVersionId: "pk26-let-a", synopsisVersionId: "",
+  id: "pk26-pkg-sent", userId: uid, manuscriptId: "pk26-ms", packageName: "Sent one", note: "For agents who ask for a synopsis and the first three chapters, in the UK and Ireland", queryLetterVersionId: "pk26-let-a", synopsisVersionId: "",
   samplePagesVersionId: "", status: "Active", createdDate: iso(35), edition: 1, firstSentAt: iso(30), icon: "crown", extraIds: [],
 });
 b.set(ref("queries", "pk26-q1"), {
@@ -84,6 +87,15 @@ b.set(ref("queries", "pk26-q1"), {
   personalisationNotes: "", packageId: "pk26-pkg-sent", sentHow: "package", sentPackageId: "pk26-pkg-sent", sentPackageEdition: 1,
   sentPackageName: "Sent one", sentMaterials: "Query letter Letter A", sentVersions: ["pk26-let-a"],
 });
+b.set(ref("packages", "pk26-pkg-old"), {
+  id: "pk26-pkg-old", userId: uid, manuscriptId: "pk26-ms", packageName: "Retired one", queryLetterVersionId: "pk26-let-a", synopsisVersionId: "",
+  samplePagesVersionId: "", status: "Retired", createdDate: iso(60), edition: 1, firstSentAt: iso(55), icon: "box", extraIds: [],
+});
+b.set(ref("queries", "pk26-q2"), {
+  id: "pk26-q2", userId: uid, agentId: "seed-agent-2", manuscriptId: "pk26-ms", dateSent: iso(55), status: "Rejected", sendMethod: "Email",
+  personalisationNotes: "", packageId: "pk26-pkg-old", sentHow: "package", sentPackageId: "pk26-pkg-old", sentPackageEdition: 1,
+  sentPackageName: "Retired one", sentMaterials: "Query letter Letter A", sentVersions: ["pk26-let-a"], lastStatusChange: iso(40),
+});
 await b.commit();
-console.log("wrote pk26-ms: 2 letters, a synopsis, an empty package, a sent package with one credited query, one extra");
+console.log("wrote pk26-ms: 3 letters, a synopsis, an empty package, a sent package with one credited query, a retired package with one, one extra");
 process.exit(0);

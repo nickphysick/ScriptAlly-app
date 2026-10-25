@@ -68,3 +68,62 @@
 .p6-cx-drw.p6-on .p6-db .p6-cpk .p6-cp-in > .p6-cp-dd:not(:empty) { display: flex; }
 .p6-cx-drw.p6-on .p6-db .p6-cpk .p6-cp-in > .p6-cp-dd:empty { display: none; }
 .p6-cx-drw.p6-on .p6-db .p6-cpk .p6-cp-in > .p6-id-cpIn:focus { outline: 0; box-shadow: inset 0 0 0 1.5px #2a3a52; }
+
+/* v26.1 — "Not sent" and "Retired" read in the same quiet italic as "Too early" (`.p6-early … > em` above) */
+.p6 .p6-rs-list .p6-rs-r .p6-rs-bar > em.p6-quiet {
+  color: rgba(28,19,15,0.58);
+  font-family: var(--sp-serif);
+  font-size: 13px;
+  font-style: italic;
+}
+
+/* v26.1 — the open package's note: ONE line at every width, cut short (the full text is the title). Without a note,
+   a quiet "+ Add a note" in the same secondary colour, underlined on hover. */
+.p6 .p6-po-h .p6-po-tt > .p6-po-note {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.p6 .p6-po-h .p6-po-tt > .p6-po-addnote {
+  display: block;
+  margin-top: 2px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: rgba(244,238,229,0.62);
+  font: italic 400 13.5px/normal var(--sp-serif);
+  text-align: left;
+  cursor: pointer;
+}
+.p6 .p6-po-h .p6-po-tt > .p6-po-addnote:hover,
+.p6 .p6-po-h .p6-po-tt > .p6-po-addnote:focus-visible { text-decoration: underline; text-underline-offset: 2px; }
+
+/* v26.1 — Your materials: the name is one line, cut short (title = the full name); "In use" never wraps or squeezes it */
+.p6 .p6-lib-list .p6-lr > span.p6-lr-tx { min-width: 0; }
+.p6 .p6-lr span.p6-lr-tx > b { min-width: 0; }
+.p6 .p6-lr span.p6-lr-tx > b > .p6-nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.p6 .p6-lr span.p6-lr-tx > b > em { flex: none; white-space: nowrap; }
+
+/* v26.1 — the tab bar, once stuck, is ground from sheet edge to sheet edge (as the Contact list's pinned row is):
+   its background reaches back by exactly the inset that puts the tabs 72px in, so nothing scrolling beneath shows
+   at either side. ONE token owns both numbers. (The ref's band reached only 32px past the tabs.) */
+.p6 { --p6-tab-in: 72px; }
+.p6 .p6-ptabs { margin-left: var(--p6-tab-in); margin-right: var(--p6-tab-in); }
+.p6 .p6-ptabs::before { left: calc(-1 * var(--p6-tab-in)); right: calc(-1 * var(--p6-tab-in)); }
+/* …and the name keeps its line too: at 1280 the status cluster takes most of the bar, and the title column shrank
+   until the pencil wrapped under the name. The name is cut short instead (title = the full name); the pencil stays. */
+/* The title column never goes narrower than its name (up to 260px, beyond which the name is cut); the note takes the
+   column's width without setting it (width 0 + min-width 100%), and it is the status figures that wrap instead. */
+.p6 .p6-po-h .p6-po-tt { flex: 1 1 auto; min-width: auto; }
+.p6 .p6-po-h .p6-po-tt > h3 { display: flex; flex-wrap: nowrap; min-width: 0; max-width: 260px; }
+.p6 .p6-po-h .p6-po-tt > .p6-po-note { width: 0; min-width: 100%; }
+.p6 .p6-po-h .p6-po-st { min-width: 0; flex-shrink: 1; }
+.p6 .p6-po-st .p6-po-n { white-space: normal; text-align: right; min-width: 0; }
+.p6 .p6-po-h .p6-po-tt > h3 > .p6-po-nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.p6 .p6-po-h .p6-po-tt > h3 > .p6-po-ed { flex: none; }
+/* ⚠️ brand.tsx names bare spans as the sans face on every route: the two name spans take their row's face */
+.p6 .p6-po-h .p6-po-tt > h3 > .p6-po-nm,
+.p6 .p6-lr span.p6-lr-tx > b > .p6-nm { font: inherit !important; }
+/* the figures break between their two phrases, never inside one */
+.p6 .p6-po-st .p6-po-n > .p6-nw { white-space: nowrap; font: inherit !important; }
+.p6 .p6-po-st .p6-po-n > .p6-nw > b { color: #fff; font-family: var(--sp-serif); font-weight: 600; }
