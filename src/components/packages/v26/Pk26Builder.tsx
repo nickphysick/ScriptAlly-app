@@ -14,6 +14,7 @@
  */
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import type { SubmissionPackage } from "../../../types";
+import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import { extraSuggestions, headerFigures, iconOf, offersNewExtra, packageFoot, readiness, readinessLabel } from "../../../lib/packagesV26";
 import { Mark, Pic } from "./icons";
 import type { MaterialRow, PieceKind, Pk26Model, VersionRow } from "./usePk26Model";
@@ -42,7 +43,7 @@ export interface BuilderProps {
 }
 
 export const Pk26Builder: React.FC<BuilderProps> = ({ model, current, onSelect, onNewPackage, onEditPackage, onOpenMaterial, onNewMaterial, onOpenVersions, onOpenComps }) => {
-  const { live, active, letters, synopses, versionRows, extras, activeMs } = model;
+  const { live, active, letters, synopses, versionRows, activeMs } = model;
   const [lib, setLib] = useState<LibTab>("let");
   const [dragK, setDragK] = useState<PieceKind | null>(null);
   const [over, setOver] = useState<PieceKind | null>(null);
@@ -138,7 +139,6 @@ export const Pk26Builder: React.FC<BuilderProps> = ({ model, current, onSelect, 
           </p>
         </aside>
       </div>
-      {extras && null}
     </section>
   );
 };
@@ -248,11 +248,11 @@ const AddExtra: React.FC<{ model: Pk26Model; p: SubmissionPackage }> = ({ model,
     if (!open) return;
     input.current?.focus();
     const down = (e: PointerEvent) => { if (box.current && !box.current.contains(e.target as Node)) setOpen(false); };
-    const key = (e: KeyboardEvent) => { if (e.key === "Escape") { e.stopPropagation(); setOpen(false); } };
     document.addEventListener("pointerdown", down);
-    document.addEventListener("keydown", key, true);
-    return () => { document.removeEventListener("pointerdown", down); document.removeEventListener("keydown", key, true); };
+    return () => document.removeEventListener("pointerdown", down);
   }, [open]);
+  /* Escape closes the popover first, on the app's one escape stack (never a second capture listener) */
+  useEscapeLayer(open, () => setOpen(false), ESC_LEVEL.page);
   const add = async (name: string) => { if (!name.trim()) return; setOpen(false); setV(""); await model.addExtra(p, name); };
   const sug = extraSuggestions(v, model.extras);
   return (
