@@ -44,7 +44,19 @@ import {
   useAgentCardRequest,
 } from "../../lib/agentCardStore";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { ContactLightHeader } from "./contact/ContactLightHeader";
+import { ContactHeader24, ContactViewRow24 } from "./contact/ContactHeader24";
+import { ContactSheet24, SheetSkeleton } from "./contact/ContactSheet24";
+import { AgentCard24, AgentCardWide24, type AgentCard24Props } from "./contact/AgentCard24";
+import { ContactAddressBook24 } from "./contact/ContactAddressBook24";
+import { bookSteps, stepDate } from "../../lib/contactBook";
+import { materialRowsFromAgent } from "../../lib/agentMaterials";
+import { materialWords } from "../../lib/agentPanel";
+import type { AgentFacts as Facts24 } from "../../lib/contactList";
+import { AgentCardPanel24 } from "./contact/AgentCardPanel24";
+import { agentHistory } from "../../lib/agentHistory";
+import { destroyManifest } from "../../lib/cascade";
+import type { ContactView } from "../../lib/contactListMemory";
+import { bannerFigures, colleaguesOf, genreFit, inSet, setCounts, setGroups, wideNext, type SetKey } from "../../lib/contactV24";
 import { type AgentFacts, ContactFilters, GroupKey, SORT_OPTIONS, SortKey as ContactSortKey, agentFacts, emptyContactFilters, matchesContactFilters, sortFacts } from "../../lib/contactList";
 import { bookGenreHit, bookGenres } from "../../lib/genreMatch";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
@@ -61,10 +73,8 @@ import "./contact/contactV14.css";
    the Cards and List views), and they also style the light header (`cl17-hd`), the group and the scroller's foot. */
 import "./contact/contactV19.css";
 import "./contact/contactV20.css";
-import { nextStep } from "../../lib/contactNextStep";
-import { BLANK_GLANCE } from "./contact/ContactStrip";
 import { genreLabel } from "../../lib/genres";
-import { glanceModel, glanceOf, type GlanceKey } from "../../lib/contactGlance";
+import { glanceOf, type GlanceKey } from "../../lib/contactGlance";
 import { usePinList } from "../shell/useFullScreenList";
 import { fitsGenre } from "../../lib/contactStrip";
 import { RAIL_GROUPS } from "../shell/railNav";
@@ -76,7 +86,6 @@ import { PageChecklist, type ChecklistTarget } from "../shell/guide/PageChecklis
 import { useAgentsHold } from "../../lib/contactLoadHold";
 import { CONTACT_ADD_FIRST, CONTACT_CHECKLIST, CONTACT_NEEDS_AN_AGENT, GUIDE_HIDDEN_PATH, GUIDE_SEEN_PATH, GUIDE_UNHIDE_PATH, contactGuideOf, guideDonePath, nextGuideAfter, type ContactGuideKey } from "../../lib/pageChecklist";
 import { readSkipped } from "../../lib/guideHub";
-import { BookSkeleton, ContactBook } from "./book/ContactBook";
 import { downloadAgentsCsv } from "../../lib/agentCsv";
 import "./agentList.css";
 
@@ -110,7 +119,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const { key: locationKey } = useLocation();
   const {
     agents, queries, manuscripts, activities, collectionsReady, userTasks, addUserTask, deleteUserTask, resolveTaskFlag,
-    currentUser, updateUserPaths,
+    currentUser, updateUserPaths, deleteAgent, taskFlags,
   } = useScriptAllyDb();
 
   /* ⚠️ THE MANUSCRIPT IS THE SWITCHER'S OWN (v11 §10) — the SAME resolver the shell's chip
@@ -148,14 +157,23 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const [filters, setFilters] = useState<ContactFilters>(() => rememberedVisit?.filters ?? emptyContactFilters());
   /* v16 §B — THE "AT A GLANCE" GROUP the list is filtered to (Not queried · Querying · Closed), or null. It sits
      BESIDE the chips: both apply, a chip change leaves it alone, and "Clear all" clears both. */
-  const [glance, setGlance] = useState<GlanceKey | null>(() => rememberedVisit?.glance ?? null);
+  /* v24 — the "At a glance" group retired with the light header; the view row's set (below) replaced it. The visit's
+     stored glance is no longer read, so a remembered one cannot filter the list unseen. */
+  const [glance, setGlance] = useState<GlanceKey | null>(null);
+  /* v24 A3 — THE VIEW ROW'S SET (and full screen's segments): one single-select over `AgentFacts.stand`, for the visit */
+  const [set, setSet] = useState<SetKey | null>(null);
   const [search, setSearch] = useState(() => searchQuery?.trim() || rememberedVisit?.search || "");
   /* v16 §C / v19 baked 2: the page opens UNGROUPED, A to Z by surname; the column headings sort (there is no sort pill) */
   const [groupKey] = useState<GroupKey>(() => rememberedView.group);
   const [sortKey, setSortKeyRaw] = useState<ContactSortKey>(() => rememberedView.sort);
   const [reversed, setReversed] = useState<boolean>(() => rememberedView.reversed);
   /* choosing a sort resets the direction to its natural order (§5) */
-  useEffect(() => { writeListView({ group: groupKey, sort: sortKey, reversed }); }, [groupKey, sortKey, reversed]);
+  /* v24 B1 — the view (List or Cards) and the grouping, per device; both read before the first paint */
+  const [view, setView] = useState<ContactView>(() => rememberedView.view);
+  const [byStatus, setByStatus] = useState<boolean>(() => rememberedView.byStatus);
+  useEffect(() => { writeListView({ group: groupKey, sort: sortKey, reversed, view, byStatus }); }, [groupKey, sortKey, reversed, view, byStatus]);
+  /* v24 B2 — the agent whose card is open (Part C draws it); its row and card are marked */
+  const [cardId, setCardId] = useState<string | null>(null);
   useEffect(() => { writeListVisit({ filters, search, glance }); }, [filters, search, glance]);
   const pop = usePopover<ContactPop>();
   /* v16 §E — FULL SCREEN is the shared `useFullScreenList` (Comparable titles v25 built it for both pages): the URL
@@ -168,7 +186,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
      owns F. The URL still carries it and Esc still leaves it last. */
   /* v19 §A — the pin no longer holds the sidebar at its icons: pinned, the list is the whole sheet and the sidebar
      stays as the writer left it (the mock's pinned state) */
-  const { full, setFull } = usePinList("agents", { routeActive: active, scroller: fullScroller, holdSidebar: false, store: CONTACT_PIN_STORE });
+  /* v24 D — full screen is the address book, and the sidebar folds to its icons while it is on (the hook's default, as
+     on the Query Centre and in the v24 mock); v19 §A had held it open */
+  const { full, setFull } = usePinList("agents", { routeActive: active, scroller: fullScroller, store: CONTACT_PIN_STORE });
   /* v19 §A — pin and unpin in one view transition (old out 220ms, new in 300ms); instant under reduced motion or
      where the browser has none. */
   const togglePin = useCallback(() => {
@@ -247,16 +267,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
    * list — never a second ordering pass that could disagree.
    */
   const nowMs = useMemo(() => Date.now(), [qcRows]);
-  /* ── v15 §4 — THE NEXT STEP, over the UNFILTERED agent set (§9): the list's filters and Find never reach it.
-     ⚠️ DECLARED HERE, above `inPool` — the ready-only mode reads `readyIds` at render (the TDZ order rule). */
-  const todayIso = useMemo(() => {
-    const d = new Date(nowMs);
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-  }, [nowMs]);
-  const step = useMemo(
-    () => nextStep({ agents, queries, msId: scoped?.id ?? null, book, todayIso }),
-    [agents, queries, scoped, book, todayIso],
-  );
   /* v13 §3 — THE NUMBERS STRIP: over the agents the list shows BEFORE filtering, never the filtered set.
      v14 §1.3: its figures are facts, not controls — the carousel they filled is retired. */
   const factsAll = useMemo(
@@ -269,20 +279,17 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     (x: AgentFacts) => matchesAgentSearch(x.agent, search) && (!glance || glanceOf(x) === glance),
     [search, glance],
   );
-  /* v16 §B — the strip's figures, over every agent (never the filtered view) */
-  const glanceM = useMemo(
-    () => glanceModel({ facts: factsAll, rows: qcRows, msId: scoped?.id ?? null, readyIds: step.ready.map((a) => a.id), nowMs }),
-    [factsAll, qcRows, scoped, step, nowMs],
-  );
   /* v19 §F — the menu counts each choice itself (`wouldShow`, under Find and the band's group): the v14 faceted counts and
      the genre tallies it fed are retired with the strip */
   const visibleFacts = useMemo(
-    () => sortFacts(factsAll.filter((x) => inPool(x) && matchesContactFilters(x, filters)), sortKey, reversed),
-    [factsAll, inPool, filters, sortKey, reversed],
+    () => sortFacts(factsAll.filter((x) => inPool(x) && inSet(x, set) && matchesContactFilters(x, filters)), sortKey, reversed),
+    [factsAll, inPool, set, filters, sortKey, reversed],
   );
   /* v17 §B — anything narrowing the list: a filter, the summary card's group, or Find */
-  const anyActive = contactFilterCount(filters) > 0 || !!glance || search.trim() !== "";
-  const clearFilters = useCallback(() => { setFilters(emptyContactFilters()); setSearch(""); setGlance(null); }, [setFilters]);
+  const anyActive = contactFilterCount(filters) > 0 || !!glance || !!set || search.trim() !== "";
+  const clearFilters = useCallback(() => { setFilters(emptyContactFilters()); setSearch(""); setGlance(null); setSet(null); }, [setFilters]);
+  /* v24 A3 — each chip's count, over every agent (never the filtered view) */
+  const counts = useMemo(() => setCounts(factsAll), [factsAll]);
   /* the band's "your move": agents with a live query whose next step is the writer's (the census's own count) */
   /**
    * Loading · blank account · list — the page's three states, derived once in `agentList.ts` and
@@ -313,6 +320,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const showList = pageState === "list" && !showEmpty;
   /* v16 §E — full screen is on only over a list, on this page's own route */
   const fullOn = full && showList;
+  const fullRef = useRef(fullOn);
+  fullRef.current = fullOn;
   /* v19 §G — THE SCROLL POSITION, FOR THE VISIT. Saved (once a frame) while the list is on screen; put back once when the
      list first draws (a reload within the visit) and when the route comes back with its scroller at the top. A reveal
      handed in from another page wins. A new visit has nothing stored, so it opens at the top. */
@@ -380,13 +389,14 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const openPanel = useCallback((agentId: string, edit?: { tab?: AgentCardOptions["tab"]; focus?: AgentCardOptions["focus"]; prefill?: AgentCardOptions["prefill"] }) => {
     if (!agents.some((a) => a.id === agentId)) return;
     setHkOpenRef.current(false);
-    setBookReq({ id: agentId, seq: Date.now() });
+    /* v24 C — outside full screen a door opens the agent's card; in full screen it selects the agent in the book */
+    if (fullRef.current) setBookReq({ id: agentId, seq: Date.now() }); else setCardId(agentId);
     if (edit) openAgentCard(agentId, { tab: edit.tab ?? "who", focus: edit.focus, prefill: edit.prefill, from: "row" });
   }, [agents]);
   /* a link to `?agent=` selects that agent and docks, then the parameter goes */
   useEffect(() => {
     if (!active || !panelParam || !collectionsReady) return;
-    if (agents.some((a) => a.id === panelParam)) setBookReq({ id: panelParam, seq: Date.now() });
+    if (agents.some((a) => a.id === panelParam)) { if (fullRef.current) setBookReq({ id: panelParam, seq: Date.now() }); else setCardId(panelParam); }
     setPanelParam(null, "replace");
   }, [active, panelParam, collectionsReady, agents, setPanelParam]);
   /* an id the list does not hold (deleted, or a stale link) clears itself once the agents can answer */
@@ -398,7 +408,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     return () => window.removeEventListener("sa:agent-panel-close", on);
   }, [setPanelParam]);
   /* while one of this agent's queries has the box (opened from the Queries tab), the agent's panel stands aside */
-  const openId = panelId;
+  const openId = panelId ?? cardId;
   /** the list's current order and filter */
   /** OPEN this agent — a row, a strip, a key */
   /* kept under its old name for the doors that asked for the card's editor at a field */
@@ -552,6 +562,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* v18.1 §B.4 — the agent panel's "Fill in": a run over that agent's tasks only */
   const [hkRun, setHkRun] = useState<{ id: string; seq: number } | null>(null);
   const health = useMemo(() => listHealth(agents, hk), [agents, hk]);
+  /* v24 A2 — the banner's figures: Housekeeping's gap count, the agents they belong to, and four faces */
+  const banner = useMemo(() => bannerFigures(hk), [hk]);
   /* v18 §F.1 — the drawer's figures: the same score, with its held and possible points */
   const listH = useMemo(() => healthOf(agents, hk), [agents, hk]);
   /* v18 §F.3 — the intro's flag, in Housekeeping's own store (beside v17.1's tab dismissal) */
@@ -596,15 +608,16 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* the control each item shows, on this page, as it is now */
   const guideTarget = useCallback((k: ContactGuideKey): ChecklistTarget => {
     const vis = (sel: string) => [...document.querySelectorAll<HTMLElement>(sel)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
-    const row = () => vis(".aglist [data-nb1='name-row']");
+    /* v24 F — the rows and cards of List and Cards, and full screen's book rows */
+    const row = () => vis(".aglist [data-cl24='row'], .aglist [data-cl24='card'], [data-cl24='book-row']");
     switch (k) {
-      case "add": return { el: vis(".aglist [data-cl17='add']"), text: "Start here. Name and agency are enough; the rest can wait." };
-      /* navy-bar v1 — the address book's own controls */
-      case "search": return { el: vis(".aglist [data-nb1='find']"), text: "Type a name or an agency. The list narrows as you type." };
-      case "pin": return { el: vis(".aglist [data-nb1='full']"), text: "Press Full screen, or F. The address book fills the window; Exit full screen brings the page back." };
-      case "open": return { el: row(), text: "Click any name. Their card shows on the right." };
-      case "edit": return { el: vis(".aglist [data-nb1='edit']") ?? row(), text: "Press Edit agent. Everything on the card can be changed there." };
-      case "hk": return { el: vis(".aglist [data-cl183='fill']"), text: "Press this. Housekeeping asks for one missing detail at a time." };
+      case "add": return { el: vis(".aglist [data-cl24='add']") ?? vis("[data-cl24='band-add']"), text: "Start here. Name and agency are enough; the rest can wait." };
+      case "search": return { el: vis(".aglist [data-cl24='find']") ?? vis("[data-cl24='book-find']"), text: "Type a name or an agency. The list narrows as you type." };
+      case "pin": return { el: vis(".aglist [data-cl24='full']") ?? vis("[data-cl24='exit']"), text: "Press Full screen, or F. The list becomes an address book; Exit full screen brings the page back." };
+      case "open": return { el: row(), text: "Click any agent. Their card opens on the right." };
+      /* the card is portalled with its panel (outside .aglist); full screen's wide card has its own Edit agent */
+      case "edit": return { el: vis("[data-cl24='panel'] [data-cl24='link'][data-k='edit']") ?? vis("[data-cl24='wide-edit']") ?? row(), text: "Press Edit agent. Everything on the card can be changed there." };
+      case "hk": return { el: vis(".aglist [data-cl24='fill']") ?? vis("[data-cl24='band-health']"), text: "Press this. Housekeeping asks for one missing detail at a time." };
     }
   }, []);
   /* v17.1 §D — THE TAB'S DISMISSAL, SAVED TO THE ACCOUNT (`todoPrefs.contacts.tabDismissedAtGaps`): the gap count
@@ -774,6 +787,44 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     return commitAgentEdits(firestoreDb, currentUser.id, id, patch);
   }, [sandbox, currentUser]);
 
+  /* ── v24 C · THE AGENT CARD, in the Query Centre's panel (outside full screen) ── */
+  const cardFacts = cardId && !fullOn ? factsAll.find((x) => x.agent.id === cardId) ?? null : null;
+  /* going full screen hands the open agent to the book, and the panel closes */
+  useEffect(() => {
+    if (fullOn && cardId) { setBookReq({ id: cardId, seq: Date.now() }); setCardId(null); }
+  }, [fullOn, cardId]);
+  /* an agent that is no longer on file closes its card */
+  useEffect(() => { if (cardId && collectionsReady && !agents.some((a) => a.id === cardId)) setCardId(null); }, [cardId, agents, collectionsReady]);
+  const titleOf = useCallback((msId: string) => manuscripts.find((m) => m.id === msId)?.title?.trim() || "Untitled manuscript", [manuscripts]);
+  /** v24 C/D — ONE card-props builder for the panel's card and full screen's wide card */
+  const cardPropsFor = (x: Facts24, index: number, total: number, onStep: (d: -1 | 1) => void, onOpenAgent: (id: string) => void, onClose?: () => void): AgentCard24Props => {
+    const id = x.agent.id;
+    const toAgent = queries.filter((q) => q.agentId === id);
+    return {
+      x, all: factsAll, nowMs, bookTitle: scoped?.title?.trim() || null,
+      genreWord: (raw) => genreLabel(raw, personalGenres), genreHit: bookHit,
+      queries: toAgent, titleOf, history: agentHistory({ agent: x.agent, queries: toAgent, activities, notes: [], titleOf, nowMs }),
+      index, total, onStep, onClose,
+      onJourney: (mode, queryId) => openQueryDrawer({ mode: mode as "resp", queryId }),
+      onLog: () => openQueryDrawer({ mode: "log", agentId: id, ...(scoped?.id ? { manuscriptId: scoped.id } : {}) }),
+      onEdit: (tab, focus) => openAgentCard(id, { tab: tab ?? "who", focus, from: "row" }),
+      onOpenQuery: (queryId) => navigate(`/queries?q=${encodeURIComponent(queryId)}`),
+      onNotes: async (text) => (await writeAgentPatch(id, { notes: text })).ok,
+      /* v24 E1/E2 — the genre fit against the book in scope, and the agent's colleagues at the agency */
+      fit: genreFit(x.agent.genres, book, scoped?.title ?? null, (raw) => genreLabel(raw, personalGenres)),
+      colleagues: colleaguesOf(x, factsAll), onOpenAgent,
+      deleteQueries: destroyManifest("agent", id, { queries, activities, taskFlags }).queries,
+      onDelete: () => {
+        const name = (x.agent.name ?? "").trim() || x.agent.agency;
+        onClose?.();
+        void deleteAgent(id).catch(() => setNotice({ text: `Couldn’t delete ${name} — try again.`, kind: "failed", agentId: id, canUndo: false }));
+      },
+    };
+  };
+  /* ‹ › step through the list in the order it is DRAWN: grouped by Status, the groups' runs; else the sorted pool */
+  const drawnOrder = useMemo(() => (byStatus ? setGroups(visibleFacts).flatMap((g) => g.ids) : visibleFacts.map((x) => x.agent.id)), [byStatus, visibleFacts]);
+  const cardIndex = cardFacts ? drawnOrder.indexOf(cardFacts.agent.id) : -1;
+
   return (
     <div className="aglist">
       <div className="agl-page">
@@ -859,24 +910,19 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         {/* v13 §8 — the loading beat: the group draws its own components as shimmering shapes, inert */}
         {/* v138.6 §A — a pinned list hides its header from the first frame, settling included (a restored pin must not
             flash the header while the list loads) */}
-        <div className="clv-group" data-full={full && (showList || pageState === "settling") ? "" : undefined} data-loading={pageState === "settling" ? "" : undefined}
+        <div className="clv-group" data-v24="" data-full={full && (showList || pageState === "settling") ? "" : undefined} data-loading={pageState === "settling" ? "" : undefined}
           aria-busy={pageState === "settling" || undefined}
           inert={pageState === "settling" || undefined}>
         {/* v17 §A — THE ONE LIGHT HEADER, on the page colour: the title block, the cut-out hawk, and the summary
             card that is the page's figures and its group filter (the strip's own `glance` state). Over a LIST
             only, and while settling: the blank account's page is ContactEmpty. */}
         {(showList || pageState === "settling") && (
-          <ContactLightHeader loading={pageState !== "list"} total={pageState === "list" ? factsAll.length : null}
-            msTitle={scoped?.title?.trim() || null} model={pageState === "list" ? glanceM : BLANK_GLANCE} active={glance}
-            onGroup={(k) => setGlance((g) => (g === k ? null : k))}
-            addRef={addBtnRef} onAdd={openAdd}
-            health={pageState === "list" ? health : null} onHealth={openHk}
-            onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined}>
-            {/* v17 §C — the pin line: the header's foot */}
-            <i className="cl17-sentinel" data-cl17="pin-sentinel" aria-hidden="true" />
-          </ContactLightHeader>
+          <ContactHeader24 loading={pageState !== "list"} msTitle={scoped?.title?.trim() || null}
+            health={pageState === "list" ? health : null} banner={pageState === "list" ? banner : null}
+            addRef={addBtnRef} onAdd={openAdd} onFill={openHk}
+            onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined} />
         )}
-        {pageState === "settling" && <BookSkeleton />}
+        {pageState === "settling" && <SheetSkeleton />}
         <div className="clv-main" ref={mainColRef}>
 
         {/* LIVING HEADERS §3 — the blank account is `ContactEmpty` above, in place of this whole group;
@@ -890,30 +936,40 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             then the rows. The title bar, its hawk and its two pills are gone. */}
         {showList && (
         <>
-        {/* navy-bar v1 B1 — THE ADDRESS BOOK: one box of two columns in place of Cards and List, their title row, the
-            navy toolbar, the filter strip and the list body. It docks 20px from the top and the list scrolls inside it. */}
-        <ContactBook
-          pool={visibleFacts} all={factsAll} narrowed={anyActive}
-          search={search} onSearch={setSearch}
-          filters={filters} onFilters={setFilters} onClearAll={clearFilters}
+        <ContactViewRow24 counts={counts} total={factsAll.length} set={set} onSet={setSet}
+          find={search} onFind={setSearch} loading={false} />
+        {!fullOn ? (
+          <ContactSheet24 pool={visibleFacts} all={factsAll} view={view} onView={setView} grouped={byStatus} onGrouped={setByStatus}
+            sortKey={sortKey} reversed={reversed} onSort={(v) => { setSortKeyRaw(v.key); setReversed(v.reversed); }}
+            filters={filters} onFilters={setFilters} onClearAll={clearFilters} full={fullOn} onFull={togglePin}
+            genreWord={(raw) => genreLabel(raw, personalGenres)} genreHit={bookHit} personalGenres={personalGenres} nowMs={nowMs}
+            openId={cardId} onOpen={setCardId} search={search}
+            onLog={(id) => openQueryDrawer({ mode: "log", agentId: id, ...(scoped?.id ? { manuscriptId: scoped.id } : {}) })}
+            onEdit={(id, tab, focus) => openAgentCard(id, { tab, focus, from: "row" })}
+            onExport={(rows) => downloadAgentsCsv(rows, (raw) => genreLabel(raw, personalGenres))} />
+        ) : (
+        <ContactAddressBook24 pool={visibleFacts} all={factsAll} counts={counts} set={set} onSet={setSet}
+          health={pageState === "list" ? health : null} onFill={openHk} onAdd={openAdd}
+          search={search} onSearch={setSearch} filters={filters} onFilters={setFilters} onClearAll={clearFilters}
           sortKey={sortKey} reversed={reversed} onSort={(v) => { setSortKeyRaw(v.key); setReversed(v.reversed); }}
-          genreWord={(raw) => genreLabel(raw, personalGenres)} genreHit={bookHit}
-          bookTitle={scoped?.title?.trim() || null} nowMs={nowMs}
-          full={fullOn} onFull={togglePin} active={active}
-          selectRequest={bookReq}
-          onEdit={(id, tab, focus) => openAgentCard(id, { tab: tab ?? "who", focus, from: "row" })}
-          onMore={(id) => openAgentCard(id, { from: "button" })}
-          onJourney={(id, mode, queryId) => {
-            if (mode === "log" || !queryId) { openQueryDrawer({ mode: "log", agentId: id, ...(scoped?.id ? { manuscriptId: scoped.id } : {}) }); return; }
-            if (mode === "edit") { openAgentCard(id, { tab: "who", from: "row" }); return; }
-            openQueryDrawer({ mode, queryId });
-          }}
-          onOpenQuery={(queryId) => navigate(`/queries?q=${encodeURIComponent(queryId)}`)}
-          gapsOf={(id) => { const g = agentGapLine(hk, id); return g ? `Missing: ${g.words.join(", ")}` : null; }}
-          onFillIn={(id) => { setHkRun({ id, seq: Date.now() }); setHkOpen(true); }}
-          onNotes={async (id, text) => (await writeAgentPatch(id, { notes: text })).ok}
+          genreWord={(raw) => genreLabel(raw, personalGenres)} onExit={togglePin} nowMs={nowMs} selectRequest={bookReq}
           onExport={(rows) => downloadAgentsCsv(rows, (raw) => genreLabel(raw, personalGenres))}
-        />
+          renderCard={(x, index, total, onStep, onSelect) => (
+            /* a colleague opened from the wide card goes through the book's request: it clears a set or filter hiding them */
+            <AgentCardWide24 {...cardPropsFor(x, index, total, onStep, (id) => { void onSelect; setBookReq({ id, seq: Date.now() }); })}
+              extras={{
+                materials: materialRowsFromAgent(x.agent.materialsWanted).filter((r) => r.on).map(materialWords),
+                steps: x.q && x.stand !== "none" ? bookSteps(x.q).map((st, k) => ({ key: `${st.status}-${k}`, status: st.status, label: st.label, date: stepDate(st.dateMs), current: st.current })) : [],
+                next: wideNext(x, nowMs),
+              }} />
+          )} />
+        )}
+        {cardFacts && active ? (
+          <AgentCardPanel24 agentId={cardFacts.agent.id} onClose={() => setCardId(null)}>
+            <AgentCard24 {...cardPropsFor(cardFacts, cardIndex, drawnOrder.length,
+              (d) => { const n = drawnOrder[cardIndex + d]; if (n) setCardId(n); }, (id) => setCardId(id), () => setCardId(null))} />
+          </AgentCardPanel24>
+        ) : null}
         </>
         )}
         </>

@@ -37,23 +37,30 @@ describe("the view — per device (qh.cl.view)", () => {
     expect(LIST_VIEW_VERSION).toBe(1);
   });
   /* RETARGETED (Contact list v20 §G): the record carries the view too; a first ever visit opens in List */
-  it("a first ever visit reads unpinned, ungrouped, Surname A to Z, in List", () => {
-    expect(readListView()).toEqual({ group: "none", sort: "surname", reversed: false, pinned: false, view: "list" });
+  /* v24 B1: a first visit is grouped by Status (`byStatus`); `group` is kept as written and no longer read */
+  it("a first ever visit reads unpinned, grouped by Status, Surname A to Z, in List", () => {
+    expect(readListView()).toEqual({ group: "none", sort: "surname", reversed: false, pinned: false, view: "list", byStatus: true });
     expect(DEFAULT_LIST_VIEW()).toEqual(readListView());
   });
   it("it lives in localStorage, never sessionStorage", () => {
     writeListView({ group: "status", sort: "added", reversed: true, pinned: true });
     expect(g.window!.sessionStorage.length).toBe(0);
-    expect(JSON.parse(g.window!.localStorage.getItem(LIST_VIEW_KEY)!)).toEqual({ v: 1, group: "status", sort: "added", reversed: true, pinned: true, view: "list" });
-    expect(readListView()).toEqual({ group: "status", sort: "added", reversed: true, pinned: true, view: "list" });
+    expect(JSON.parse(g.window!.localStorage.getItem(LIST_VIEW_KEY)!)).toEqual({ v: 1, group: "status", sort: "added", reversed: true, pinned: true, view: "list", byStatus: true });
+    expect(readListView()).toEqual({ group: "status", sort: "added", reversed: true, pinned: true, view: "list", byStatus: true });
   });
   it("v20 §G — the view is remembered; a record from before v20 (no view) reads List and keeps everything else", () => {
     writeListView({ view: "cards" });
     expect(readListView().view).toBe("cards");
     g.window!.localStorage.setItem(LIST_VIEW_KEY, JSON.stringify({ v: 1, group: "status", sort: "added", reversed: false, pinned: true }));
-    expect(readListView()).toEqual({ group: "status", sort: "added", reversed: false, pinned: true, view: "list" });
+    expect(readListView()).toEqual({ group: "status", sort: "added", reversed: false, pinned: true, view: "list", byStatus: true });
     g.window!.localStorage.setItem(LIST_VIEW_KEY, JSON.stringify({ v: 1, group: "none", sort: "surname", reversed: false, pinned: false, view: "grid" }));
     expect(readListView().view).toBe("list");
+  });
+  it("v24 B1 — the grouping is remembered; a record from before v24 (no byStatus) reads grouped", () => {
+    writeListView({ byStatus: false });
+    expect(readListView().byStatus).toBe(false);
+    g.window!.localStorage.setItem(LIST_VIEW_KEY, JSON.stringify({ v: 1, group: "none", sort: "surname", reversed: false, pinned: false, view: "cards" }));
+    expect(readListView()).toEqual({ group: "none", sort: "surname", reversed: false, pinned: false, view: "cards", byStatus: true });
   });
   it("a write is a patch over what is stored", () => {
     writeListView({ group: "country" });

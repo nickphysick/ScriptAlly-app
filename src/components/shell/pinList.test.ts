@@ -18,13 +18,17 @@ describe("QC138.6 A1 · one pin for both lists", () => {
     it(`${page}: uses usePinList("${page}") and PinListButton`, () => {
       const src = code(file) + (page === "queries" ? code("src/components/queries/centre/QcList138.tsx") : "");
       expect(src).toMatch(new RegExp(`usePinList\\("${page}"`));
-      /* RETARGETED (navy-bar-address-book v1, B4/B5): the Contact list's pin is the address book's "Full screen" /
-         "Exit full screen" button, in the navy strip over the card (ContactBook) */
+      /* RETARGETED (Contact list v24 B1/D2): the Contact list's pin is the list sheet's "Full screen" button in its navy
+         bar (ContactSheet24) and full screen's "Exit full screen" in the cream row (ContactAddressBook24). The
+         navy-bar v1 box that carried both (book/ContactBook) is deleted. The law is unchanged: one pin, the shared hook. */
       if (page === "agents") {
-        expect(src).toMatch(/<ContactBook\b/);
-        const head = code("src/components/agents/book/ContactBook.tsx");
-        expect(head).toMatch(/data-pin-list=""/);
-        expect(head).toMatch(/aria-pressed=\{full\}/);
+        expect(src).toMatch(/<ContactSheet24\b/);
+        expect(src).toMatch(/<ContactAddressBook24\b/);
+        const sheet = code("src/components/agents/contact/ContactSheet24.tsx");
+        expect(sheet).toMatch(/data-pin-list=""/);
+        expect(sheet).toMatch(/aria-pressed=\{p\.full\}/);
+        const book = code("src/components/agents/contact/ContactAddressBook24.tsx");
+        expect(book).toMatch(/data-pin-list=""/);
       } else {
         /* RETARGETED (Query Centre v140 §A/§B): the Query Centre's pin is the toolbar's own cream "Pin list" / "Unpin"
            button (QcToolbar140), drawn by the list's one toolbar component, as the Contact list's is */
