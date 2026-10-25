@@ -25,6 +25,16 @@
  *        does not move with the pointer, while the cards do
  *   LH12 entrance (v4): no back card animates translate on load; the front's first keyframe is scale .86
  *   LH13 copy (v4): "The Taloned Mr Ripley" on the front card, "Lord of the Wings" on every back card
+ *   LH14 carded (v4.1): at 1440 × 860, 1280 × 720 and 1204 × 594 the white card exists, the copy's
+ *        centre is within 8px of the card's, and the pile's overhangs above and below differ by ≤16px;
+ *        where the pile is taller than the card it breaks out at both edges
+ *   LH15 seam (v4.1): every pixel row from inside the nav down into the navy band, sampled in a column
+ *        away from the card, is the nav's ink #1b2433
+ *   LH16 counter (v4.1): under the actions; "N places left" with N from the shared store against the
+ *        cap of 50; its fill is (cap − N) / cap of the track
+ *   LH17 cap (v4.1): no rendered marketing page says "first 100" or "100 places"; Pricing and the phone
+ *        pill state the same N as the landing hero
+ *   LH18 reduced motion (v4.1): the counter's first visible state is already its final value
  *
  * The public page needs no sign-in, so this file opens it itself. Run it without the setup project:
  *   SA_E2E_BASE_URL=http://127.0.0.1:<port> npx playwright test landingHeroV3 --project measure --no-deps
@@ -52,6 +62,10 @@ const CSS_BREAKS: Record<string, string> = {
   LH7b: ".mk-lc-cast{left:-420px!important}",
   LH9: ".mk-pillpop{margin-top:40px!important}",
   LH11: ".mk-hfly{z-index:10!important}",
+  LH14: ".mk-hcard{top:0!important;bottom:auto!important;height:200px!important}",
+  LH15: ".mk-herowrap.mk-herowrap--carded{background-image:none!important;box-shadow:none!important}",
+  LH15b: ".mk-herowrap.mk-herowrap--carded{box-shadow:none!important}",
+  LH16: ".mk-places-bar i{width:90%!important}",
 };
 
 async function open(page: Page, vp: { width: number; height: number }, reduce = false) {
@@ -223,7 +237,10 @@ test.describe("landing hero v3", () => {
   /* LH5 RETIRED (v4 S4): there is no nudge form on the desk — Nudge is pressed and the reminder goes
      straight to "You nudged Eleanor". Its "nothing dims the card" claim had nothing left to hold. */
 
-  test("LH6 the band's heading is on screen and on one line; the front card is centred on the copy", async ({ page }) => {
+  /* GEOMETRY MOVED (v4.1): the copy and the pile are both centred on the white card now, so the front
+     card alone is no longer on the copy's centre (15px off at 1204 × 594, by design). The clause
+     becomes "the copy is centred on the card"; the pile's centring on it is LH14's. */
+  test("LH6 the band's heading is on screen and on one line; the copy is centred on the card", async ({ page }) => {
     for (const vp of [{ width: 1204, height: 594 }, { width: 1440, height: 780 }, { width: 1920, height: 1080 }]) {
       await open(page, vp);
       await settle(page);
@@ -233,7 +250,7 @@ test.describe("landing hero v3", () => {
         const tops = new Set(Array.from(rg.getClientRects()).filter((x) => x.width > 0).map((x) => Math.round(x.top)));
         const hb = h.getBoundingClientRect();
         const cp = document.querySelector(".mk-herocopy")!.getBoundingClientRect();
-        const fr = document.querySelector('[data-hc="front"]')!.getBoundingClientRect();
+        const fr = document.querySelector(".mk-hcard")!.getBoundingClientRect();
         return { top: hb.top, bottom: hb.bottom, lines: tops.size, vh: innerHeight,
                  copyMid: cp.top + cp.height / 2, cardMid: fr.top + fr.height / 2 };
       });
@@ -242,7 +259,7 @@ test.describe("landing hero v3", () => {
       expect(r.top, `@${vp.width}: the band's heading starts on screen`).toBeGreaterThanOrEqual(0);
       expect(r.bottom, `@${vp.width}: …and ends above the fold`).toBeLessThanOrEqual(r.vh);
       expect(r.lines, `@${vp.width}: on one line`).toBe(1);
-      expect(Math.abs(r.cardMid - r.copyMid), `@${vp.width}: the card's centre on the copy's`).toBeLessThanOrEqual(8);
+      expect(Math.abs(r.cardMid - r.copyMid), `@${vp.width}: the copy's centre on the white card's`).toBeLessThanOrEqual(8);
       await shot(page, `hero-${vp.width}x${vp.height}`);
     }
   });
@@ -426,6 +443,128 @@ test.describe("landing hero v3", () => {
     console.log("LH13", JSON.stringify(r));
     expect(r.front).toBe("The Taloned Mr Ripley");
     expect(r.backs, "population: four back cards").toEqual(Array(4).fill("Lord of the Wings"));
+  });
+
+  /* ═════ v4.1: the hero in a card over the navy, the places counter, the cap of 50 ═════ */
+  /** The endpoint, answering as the real server does today: its stored cap is still 100. */
+  const stub = (page: Page, count = 3, cap = 100) =>
+    page.route("**/api/waitlist**", (r) => r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ visible: true, cap, count }) }));
+
+  test("LH14 carded: the card, the copy centred in it, the pile breaking out evenly", async ({ page }) => {
+    test.setTimeout(120000);
+    const seen: string[] = [];
+    for (const vp of [{ width: 1440, height: 860 }, { width: 1280, height: 720 }, { width: 1204, height: 594 }]) {
+      await stub(page);
+      await open(page, vp);
+      await settle(page);
+      const r = await page.evaluate(() => {
+        const c = document.querySelector(".mk-hcard")?.getBoundingClientRect();
+        if (!c || !c.height) return null;
+        const cards = Array.from(document.querySelectorAll<HTMLElement>(".mk-hc-pile .mk-lc")).filter((e) => e.offsetParent).map((e) => e.getBoundingClientRect());
+        const cp = document.querySelector(".mk-herocopy")!.getBoundingClientRect();
+        const top = Math.min(...cards.map((x) => x.top)), bot = Math.max(...cards.map((x) => x.bottom));
+        return { n: cards.length, over: c.top - top, under: bot - c.bottom, copyMid: (cp.top + cp.bottom) / 2 - (c.top + c.bottom) / 2, pileH: bot - top, cardH: c.height };
+      });
+      seen.push(`${vp.width}x${vp.height}: ${r ? `over ${r.over.toFixed(1)} under ${r.under.toFixed(1)} copy ${r.copyMid.toFixed(1)}` : "no card"}`);
+      expect(r, `@${vp.width}: the white card exists`).not.toBeNull();
+      expect(r!.n, "population: the visible cards").toBeGreaterThanOrEqual(3);
+      expect(Math.abs(r!.copyMid), `@${vp.width}: the copy is centred in the card`).toBeLessThanOrEqual(8);
+      expect(Math.abs(r!.over - r!.under), `@${vp.width}: the pile breaks out evenly (above ${r!.over.toFixed(1)}, below ${r!.under.toFixed(1)})`).toBeLessThanOrEqual(16);
+      /* ⚠️ At 1204 × 594 the card's own floor (copy + 90) is taller than the pile — as in the ref — so
+         the pile sits inside it, evenly; it can only break out where it is the taller of the two. */
+      if (r!.pileH > r!.cardH) {
+        expect(r!.over, `@${vp.width}: the pile's top is above the card's`).toBeGreaterThan(0);
+        expect(r!.under, `@${vp.width}: its bottom below the card's`).toBeGreaterThan(0);
+      }
+      await shot(page, `carded-${vp.width}x${vp.height}`);
+    }
+    console.log("LH14", seen.join(" · "));
+  });
+
+  test("LH15 seam: the nav's ink runs into the navy band with no row of any other colour", async ({ page }) => {
+    await stub(page);
+    await open(page, { width: 1440, height: 860 });
+    await settle(page);
+    const box = await page.evaluate(() => {
+      const nav = document.querySelector(".mk-navwrap")!.getBoundingClientRect(), card = document.querySelector(".mk-hcard")!.getBoundingClientRect();
+      return { navTop: nav.top, navBottom: nav.bottom, cardLeft: card.left, cardTop: card.top };
+    });
+    /* A column 20px in from the left, clear of the card (which starts 64 frame units in), from the
+       middle of the nav down to the card's top — all of it must be the nav's ink. */
+    const x = 20, y0 = Math.round((box.navTop + box.navBottom) / 2), y1 = Math.round(box.cardTop) - 2;
+    const png = await page.screenshot({ clip: { x, y: y0, width: 1, height: y1 - y0 } });
+    const rows = await page.evaluate(async (b64) => {
+      const i = new Image(); await new Promise((r) => { i.onload = r; i.src = "data:image/png;base64," + b64; });
+      const c = document.createElement("canvas"); c.width = i.width; c.height = i.height; const g = c.getContext("2d")!; g.drawImage(i, 0, 0);
+      const d = g.getImageData(0, 0, 1, i.height).data, out: number[][] = [];
+      for (let k = 0; k < d.length; k += 4) out.push([d[k], d[k + 1], d[k + 2]]);
+      return out;
+    }, png.toString("base64"));
+    const off = rows.map((p, k) => ({ y: y0 + k, p })).filter(({ p }) => Math.abs(p[0] - 27) > 1 || Math.abs(p[1] - 36) > 1 || Math.abs(p[2] - 51) > 1);
+    console.log("LH15", JSON.stringify({ x, y0, y1, rows: rows.length, off: off.slice(0, 5) }));
+    expect(x, "the column is clear of the card").toBeLessThan(box.cardLeft);
+    expect(rows.length, "population: the rows from the nav to the card").toBeGreaterThan(20);
+    expect(off, "every row is #1b2433").toEqual([]);
+  });
+
+  test("LH16 counter: under the actions, N from the shared store against 50, the fill (cap − N) / cap", async ({ page }) => {
+    await stub(page, 3, 100);
+    await open(page, { width: 1440, height: 860 });
+    await page.waitForSelector(".mk-places:not(.mk-places--wait)");
+    await page.waitForTimeout(2200); // the count-down ends 1.8s after mount
+    const r = await page.evaluate(() => {
+      const pl = document.querySelector<HTMLElement>(".mk-places")!, acts = document.querySelector(".mk-heroctas")!.getBoundingClientRect();
+      const bar = pl.querySelector(".mk-places-bar")!.getBoundingClientRect(), fill = pl.querySelector(".mk-places-bar i")!.getBoundingClientRect();
+      const b = pl.getBoundingClientRect();
+      return { text: pl.querySelector("span")!.textContent, label: pl.getAttribute("aria-label"), left: pl.dataset.left, cap: pl.dataset.cap, top: b.top, x: b.left, actsBottom: acts.bottom, actsLeft: acts.left, share: fill.width / bar.width };
+    });
+    console.log("LH16", JSON.stringify(r));
+    expect(r.top, "the counter is under the actions").toBeGreaterThan(r.actsBottom);
+    expect(Math.abs(r.x - r.actsLeft), "and aligned with them").toBeLessThanOrEqual(1);
+    expect(r.cap, "the cap every counter draws against").toBe("50");
+    expect(r.left, "N is the cap less the store's claimed count").toBe("47");
+    expect(r.text, "it reads N places left").toBe("47 places left");
+    expect(r.label).toBe("47 of 50 founding places left");
+    expect(Math.abs(r.share - 3 / 50), "the fill is (cap − N) / cap of the track").toBeLessThan(.005);
+  });
+
+  test("LH17 cap: no page says 100 places; Pricing and the phone pill state the hero's N", async ({ page }) => {
+    test.setTimeout(90000);
+    const bad: string[] = [];
+    for (const route of ["/", "/pricing", "/founders", "/about", "/contact"]) {
+      await stub(page);
+      await open(page, { width: 1440, height: 860 });
+      if (route !== "/") await page.goto(route, { waitUntil: "load" });
+      await page.waitForTimeout(800);
+      const text = await page.evaluate(() => document.body.innerText);
+      for (const t of ["first 100", "100 places", "hundred founding", "first hundred", "one hundred writers"]) if (text.toLowerCase().includes(t)) bad.push(`${route}: ${t}`);
+    }
+    expect(bad, "no rendered marketing page states the old cap").toEqual([]);
+    await stub(page); await open(page, { width: 1440, height: 860 }); await page.waitForSelector(".mk-places:not(.mk-places--wait)");
+    const hero = await page.evaluate(() => document.querySelector<HTMLElement>(".mk-places")!.dataset.left);
+    await stub(page); await page.goto("/pricing", { waitUntil: "load" }); await page.waitForTimeout(1500);
+    const pricing = await page.evaluate(() => document.querySelector(".mk-fmtally")?.textContent);
+    await page.setViewportSize({ width: 390, height: 844 }); await stub(page); await page.goto("/", { waitUntil: "load" }); await page.waitForTimeout(1500);
+    const pill = await page.evaluate(() => document.querySelector(".mk-navpill-c .mk-sr")?.textContent);
+    console.log("LH17", JSON.stringify({ hero, pricing, pill }));
+    expect(hero, "population: the hero's N").toBe("47");
+    expect(pricing, "Pricing states the same claimed share of the same cap").toBe("3/50");
+    expect(pill, "the phone pill states the same N").toBe("47 places left");
+  });
+
+  test("LH18 reduced motion: the counter's first visible state is its final value", async ({ page }) => {
+    await page.addInitScript(() => {
+      const seen: string[] = []; (window as unknown as { __lh18: string[] }).__lh18 = seen;
+      const tick = () => { const pl = document.querySelector(".mk-places:not(.mk-places--wait)"); if (pl) { const t = pl.querySelector("span")!.textContent!; const w = (pl.querySelector(".mk-places-bar i") as HTMLElement).style.width; if (seen[seen.length - 1] !== t + "|" + w) seen.push(t + "|" + w); } if (seen.length < 5 && performance.now() < 6000) requestAnimationFrame(tick); };
+      requestAnimationFrame(tick);
+    });
+    await stub(page, 3, 100);
+    await open(page, { width: 1440, height: 860 }, true);
+    await page.waitForTimeout(2500);
+    const seen = await page.evaluate(() => (window as unknown as { __lh18: string[] }).__lh18);
+    console.log("LH18", JSON.stringify(seen));
+    expect(seen.length, "population: the counter appeared").toBeGreaterThan(0);
+    expect(seen, "one state, the final one, from its first frame").toEqual(["47 places left|6%"]);
   });
 
   test("LH8 the pile is decorative; the headline is the page's only h1", async ({ page }) => {

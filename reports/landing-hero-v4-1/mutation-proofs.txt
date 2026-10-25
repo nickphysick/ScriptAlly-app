@@ -1,0 +1,58 @@
+Desktop hero v4.1 — red-before proofs (25 Oct). Each lock run against one named break at http://127.0.0.1:4731 (vite preview of build:dev), the endpoint stubbed as the real server answers today (cap 100, count 3). Source breaks restored from path-derived backups.
+
+## css-LH14
+break: LH14 — LH3_MUTATE=LH14: the card pinned to the hero's top, 200px tall
+✘  1 [measure] › tests/e2e/landingHeroV3.measure.ts:453:3 › landing hero v3 › LH14 carded: the card, the copy centred in it, the pile breaking out evenly (4.3s)
+Error: @1440: the copy is centred in the card
+1 failed
+
+## refformula
+break: LH14 — the ref's own pile placement restored (front card's centre at the card's middle − 10 × scale): proves the stated deviation is what makes the break-out even
+✘  1 [measure] › tests/e2e/landingHeroV3.measure.ts:453:3 › landing hero v3 › LH14 carded: the card, the copy centred in it, the pile breaking out evenly (4.4s)
+Error: @1440: the pile breaks out evenly (above 14.2, below 44.8)
+1 failed
+
+## css-LH15
+break: LH15 — LH3_MUTATE=LH15: the carded navy and its seam shadow removed
+✘  1 [measure] › tests/e2e/landingHeroV3.measure.ts:484:3 › landing hero v3 › LH15 seam: the nav's ink runs into the navy band with no row of any other colour (4.4s)
+Error: every row is #1b2433
+1 failed
+
+## css-LH15b
+break: LH15 — LH3_MUTATE=LH15b: ONLY the 3px seam shadow removed. STAYS GREEN, honestly: the app has no hairline between the nav and the hero to cover (the sheet's corners show the same ink), so the shadow is belt and braces and the lock guards the navy
+✓  1 [measure] › tests/e2e/landingHeroV3.measure.ts:484:3 › landing hero v3 › LH15 seam: the nav's ink runs into the navy band with no row of any other colour (4.3s)
+1 passed (4.7s)
+
+## css-LH16
+break: LH16 — LH3_MUTATE=LH16: the fill forced to 90%
+✘  1 [measure] › tests/e2e/landingHeroV3.measure.ts:510:3 › landing hero v3 › LH16 counter: under the actions, N from the shared store against 50, the fill (cap − N) / cap (2.7s)
+Error: the fill is (cap − N) / cap of the track
+1 failed
+
+## storecap
+break: LH16 — the store's one cap removed (counters draw against the server's 100)
+✘  1 [measure] › tests/e2e/landingHeroV3.measure.ts:510:3 › landing hero v3 › LH16 counter: under the actions, N from the shared store against 50, the fill (cap − N) / cap (2.8s)
+Error: the cap every counter draws against
+1 failed
+
+## storecap17
+break: LH17 — the same break, read by the cap lock (Pricing then says "3/100 places claimed")
+✘  1 [measure] › tests/e2e/landingHeroV3.measure.ts:531:3 › landing hero v3 › LH17 cap: no page says 100 places; Pricing and the phone pill state the hero's N (6.1s)
+Error: no rendered marketing page states the old cap
+1 failed
+
+## h1old
+break: LH17 — Pricing's H1 back to "first 100 writers"
+✘  1 [measure] › tests/e2e/landingHeroV3.measure.ts:531:3 › landing hero v3 › LH17 cap: no page says 100 places; Pricing and the phone pill state the hero's N (6.1s)
+Error: no rendered marketing page states the old cap
+1 failed
+
+## reduce
+break: LH18 — the counter's reduced-motion guard removed (it counts down under reduced motion)
+✘  1 [measure] › tests/e2e/landingHeroV3.measure.ts:555:3 › landing hero v3 › LH18 reduced motion: the counter's first visible state is its final value (3.1s)
+Error: one state, the final one, from its first frame
+1 failed
+
+## unit — foundingCap.test.ts
+break: functions DEFAULT_CAP back to 100 → "the server's fallback cap is the same number" fails (1 failed | 2 passed)
+break: FOUNDING_CAP 100 → "is fifty" and the server-equality case fail (2 failed)

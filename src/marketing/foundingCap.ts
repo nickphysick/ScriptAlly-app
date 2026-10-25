@@ -3,7 +3,7 @@
  *
  * Every counter (the landing hero's places counter, the nav's pill, the Pricing page's panel and the
  * sealed band) draws "places left" against this, through `foundingStore`, and every copy string that
- * states the number derives it from here. `functionsCap.test.ts` holds the server's `DEFAULT_CAP`
+ * states the number derives it from here. `foundingCap.test.ts` holds the server's `DEFAULT_CAP`
  * (functions/src/waitlistModel.ts) equal to it.
  *
  * ⚠️ THE SERVER'S ENFORCED CAP IS THE COUNTER DOCUMENT'S OWN `cap` FIELD (`counters/waitlist`), with
