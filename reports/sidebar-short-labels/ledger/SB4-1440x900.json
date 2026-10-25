@@ -17,21 +17,21 @@
  {
   "where": "the folded button where the full card would cut a row",
   "ok": true,
-  "detail": "{\"form\":\"ws-fbb\",\"over\":2,\"top\":0,\"bottomFade\":\"0\"}"
+  "detail": "{\"form\":\"ws-fbb\",\"over\":0,\"top\":0,\"bottomFade\":\"0\"}"
  },
  {
-  "where": "where the column holds it (≥995 tall), the full card shows",
+  "where": "where the column holds it (≥967 tall), the full card shows",
   "ok": true,
   "detail": "{\"h\":900,\"form\":\"ws-fbb\"}"
  },
  {
   "where": "an overflowing nav shows its bottom edge fade",
   "ok": true,
-  "detail": "{\"over\":2,\"top\":0,\"bottomFade\":\"0\"}"
+  "detail": "{\"over\":0,\"top\":0,\"bottomFade\":\"0\"}"
  },
  {
   "where": "the last Tasks row can be scrolled fully into view",
   "ok": true,
-  "detail": "{\"name\":\"Corkboard\",\"top\":751,\"bottom\":784,\"navTop\":163.75,\"navBottom\":784.15625}"
+  "detail": "{\"name\":\"Corkboard\",\"top\":732,\"bottom\":765,\"navTop\":163.75,\"navBottom\":784.15625}"
  }
 ]

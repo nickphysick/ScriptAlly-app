@@ -20,7 +20,7 @@
   "detail": "{\"form\":\"ws-fbc\",\"over\":0,\"top\":0,\"bottomFade\":\"0\"}"
  },
  {
-  "where": "where the column holds it (≥995 tall), the full card shows",
+  "where": "where the column holds it (≥967 tall), the full card shows",
   "ok": true,
   "detail": "{\"h\":1000,\"form\":\"ws-fbc\"}"
  },
@@ -32,6 +32,6 @@
  {
   "where": "the last Tasks row can be scrolled fully into view",
   "ok": true,
-  "detail": "{\"name\":\"Corkboard\",\"top\":751,\"bottom\":784,\"navTop\":163.75,\"navBottom\":798.859375}"
+  "detail": "{\"name\":\"Corkboard\",\"top\":732,\"bottom\":765,\"navTop\":163.75,\"navBottom\":798.859375}"
  }
 ]
