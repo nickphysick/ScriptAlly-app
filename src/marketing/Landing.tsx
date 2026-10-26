@@ -25,6 +25,7 @@ import { FeatureRows } from "./FeatureRows";
 import { Vision } from "./Vision";
 import { FoundingBand } from "./FoundingBand";
 import { FeatureStory } from "./FeatureStory";
+import { JoinBar } from "./JoinBar";
 import { FoundingClose } from "./FoundingClose";
 import { DOCUMENT_TITLE } from "./landingCopy";
 
@@ -65,6 +66,8 @@ export const Landing: React.FC<{ onNavigate: (tab: string, subPageName?: string)
   return (
     <div>
       {phone ? <HeroPhone onNavigate={onNavigate}>{lower}</HeroPhone> : <><Hero onNavigate={onNavigate} />{lower}</>}
+      {/* Phones only, this page only (landing on phones v2): the founding ask that follows you down. */}
+      {phone && <JoinBar />}
     </div>
   );
 };

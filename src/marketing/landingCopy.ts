@@ -474,6 +474,10 @@ export const VISION_NAVY: Record<string, string> = {
 };
 export const VISION_NAVY_LINK = "Read our story →";
 
+/* The join bar that follows a reader down the landing page on phones. Its count's words are
+   `navPlacesLeft`, so the bar and the strip's screen-reader line say it the same way. */
+export const JOIN_BAR_CTA = "Join";
+
 /* The closing founding card (phones; it replaces the founding band there). The pill is the band's own
    eyebrow and the list is `FOUNDING_GETS`, so the offer is stated in one place. */
 export const CLOSE_HEADING = "Help get things off the ground.";
