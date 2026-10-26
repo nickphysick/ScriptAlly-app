@@ -8,9 +8,10 @@
  * the otherMaterials migration), the fix-or-new save of a letter or synopsis, and a new version offered to the
  * packages that use its parent.
  *
- * ⚠️ EVERY CONTENTS CHANGE GOES THROUGH db.updatePackage, which starts a sent package's next edition rather than
- *    refusing. The undo of an edit that started an edition is revertPackageEdition — never a write of the old
- *    slots, which would be another contents change and start a third.
+ * ⚠️ SUBMISSION PACKAGES v40: A PACKAGE THAT HAS GONE OUT IS LOCKED (lib/packagesV40). Nothing here starts an
+ *    edition any more: a contents change to a locked package is refused, and the way on is "New package from
+ *    this" (`duplicate`), which records `copiedFromId` and leaves the original untouched. Make active, Retire and
+ *    Delete follow the stage (canMakeActive / canRetire / canDelete).
  */
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { deleteField } from "firebase/firestore";
@@ -19,7 +20,6 @@ import { useToast } from "../../toast/ToastProvider";
 import { ComponentType, type CompTitle, type PackageExtra, type PackageIcon, type SubmissionPackage } from "../../../types";
 import { createPayload, countWords } from "../../../lib/materialDraft";
 import { isVersionSent } from "../../../lib/versionLock";
-import { editionNumber, ordinal } from "../../../lib/packageEditions";
 import { materialQueries, materialSplit, overall, packageSplit, type Split } from "../../../lib/packageReplies";
 import { newCompId, withCompIds } from "../../../lib/compUsage";
 import { newBookVersionId, readVersions, saveNewVersion } from "../../../lib/bookVersions";
@@ -27,6 +27,8 @@ import {
   copyName, extraNamed, extrasLine, extrasOf, iconOf, otherMaterialsMigration, sendSplit, type ResultsKind,
 } from "../../../lib/packagesV26";
 import { usePackagesModel } from "../v4/usePackagesModel";
+import { canDelete, canMakeActive, canRetire, copyFields, copyToast, isLocked } from "../../../lib/packagesV40";
+import { LOCKED_NOTE, LOCKED_WHY } from "../../../lib/packageMetrics";
 
 export type PieceKind = "let" | "syn" | "ver";
 const FIELD: Record<PieceKind, "queryLetterVersionId" | "synopsisVersionId" | "bookVersionId"> = {
@@ -135,24 +137,20 @@ export function usePk26Model() {
   }, [activeMs, collectionsReady, msPkgs]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ── package writes ── */
-  /** Change a package's contents; a sent package starts its next edition. Returns false on refusal. */
+  /** Change a package's contents. A locked package (out with agents, or retired) never changes: refused, with why. */
   const changeContents = async (p: SubmissionPackage, fields: Parameters<typeof updatePackage>[1], message: string): Promise<boolean> => {
-    const sent = base.goneOut(p) || !!p.firstSentAt;
+    if (isLocked(p)) { showToast({ message: `${LOCKED_NOTE}. ${LOCKED_WHY}` }); return false; }
     const err = await updatePackage(p.id, fields);
     if (err) { showToast({ message: err }); return false; }
     const prev = p;
-    const starts = !!p.firstSentAt;
     showToast({
-      message: starts ? `${message} Its ${ordinal(editionNumber(prev) + 1)} edition starts now; queries already sent keep what they went with.` : message,
-      undo: starts
-        ? async () => { const e = await revertPackageEdition(prev); if (e) showToast({ message: e }); }
-        : async () => {
-          const back: Parameters<typeof updatePackage>[1] = {};
-          for (const k of Object.keys(fields) as (keyof typeof fields)[]) (back as Record<string, unknown>)[k] = (prev as unknown as Record<string, unknown>)[k] ?? (k === "otherMaterials" ? "" : k === "extraIds" ? [] : "");
-          await updatePackage(prev.id, back);
-        },
+      message,
+      undo: async () => {
+        const back: Parameters<typeof updatePackage>[1] = {};
+        for (const k of Object.keys(fields) as (keyof typeof fields)[]) (back as Record<string, unknown>)[k] = (prev as unknown as Record<string, unknown>)[k] ?? (k === "otherMaterials" ? "" : k === "extraIds" ? [] : "");
+        await updatePackage(prev.id, back);
+      },
     });
-    void sent;
     return true;
   };
 
@@ -255,20 +253,46 @@ export function usePk26Model() {
     return id;
   };
 
-  /** Delete — refused for a package that has gone out with queries, with the reason. */
+  /** Delete (A7) — only a package that has never gone out; refused otherwise, with the reason. */
   const deletePkg = async (p: SubmissionPackage): Promise<boolean> => {
     const n = packageSplit(p, msQueries, rowsById).sent;
-    if (base.goneOut(p)) {
+    if (!canDelete(p) || base.goneOut(p)) {
       showToast({ message: `${p.packageName} has gone out with ${n || "some"} quer${n === 1 ? "y" : "ies"}, so it's kept. Make another package active instead.` });
       return false;
     }
     return base.deletePkg(p);
   };
 
+  /** Make active (A5) — a Ready package, or one out with agents that isn't active already. Exactly one is active. */
   const makeActive = async (p: SubmissionPackage) => {
+    if (!canMakeActive(p, active?.id)) return;
     const prev = activeMs?.activePackageId ?? "";
     await setActivePackage(msId, p.id);
     showToast({ message: `New queries now go out with ${p.packageName}.`, undo: () => setActivePackage(msId, prev) });
+  };
+
+  /**
+   * A4 — "New package from this": the same letter, synopsis, pages, extras, icon and note, named "{name} 2" (or the
+   * next free number), nothing sent, `copiedFromId` the original's id. The original is not written to. Returns the
+   * new package's id; the page opens it in the workbench and scrolls to it.
+   */
+  const duplicate = async (p: SubmissionPackage): Promise<string | null> => {
+    const f = copyFields(p, msPkgs.map((x) => x.packageName));
+    const res = await addPackage(f);
+    if (!res.success || !res.id) { showToast({ message: res.error ?? "That didn't save. Try again." }); return null; }
+    const id = res.id;
+    showToast({ message: copyToast(f.packageName, p.packageName), undo: async () => { await deletePackage(id); } });
+    return id;
+  };
+
+  /** A6 — Retire: a package that is out and not active ("Make another package active before retiring this one."). */
+  const retire = async (p: SubmissionPackage): Promise<boolean> => {
+    if (!canRetire(p, active?.id)) {
+      showToast({ message: active?.id === p.id ? "Make another package active before retiring this one." : `${p.packageName} hasn't gone out, so it can be deleted instead.` });
+      return false;
+    }
+    await base.retirePkg(p);
+    return true;
   };
 
   /* ── material writes ── */
@@ -355,7 +379,8 @@ export function usePk26Model() {
     let n = 0;
     for (const id of ids) {
       const p = msPkgs.find((x) => x.id === id);
-      if (!p) continue;
+      /* v40: a locked package keeps the pages it went out with */
+      if (!p || isLocked(p)) continue;
       const err = await updatePackage(p.id, { bookVersionId: versionId });
       if (!err) n++;
     }
@@ -402,7 +427,7 @@ export function usePk26Model() {
   return {
     ...base,
     extras, comps, letters, synopses, lettersAll, synopsesAll, versionRows, matName, splitOf, currentSplit, overallSplit,
-    putPiece, removePiece, toggleExtra, addExtra, renameExtra, saveDetails, createPackage, deletePkg, makeActive,
+    putPiece, removePiece, toggleExtra, addExtra, renameExtra, saveDetails, createPackage, deletePkg, makeActive, duplicate, retire,
     addMaterial, saveMaterial, materialSent, putAwayMat, bringBack, addComp, saveVersion, useVersionIn, resultItems, resultQueries, wentTo,
   };
 }

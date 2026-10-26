@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "L5-L6",
+  "where": "head to head has two cards",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "lock": "L5-L6",
+  "where": "A is Standard at 40%, 2 of 5 sent",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "L5-L6",
+  "where": "…its funnel: Sent 5 · Replied 3 · Asked for more 2 · Full request 1",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "L5-L6",
+  "where": "B is Standard 2, 1 of 4, too early for a %",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "L5-L6",
+  "where": "the verdict: only the letter differs, too early",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "L5-L6",
+  "where": "the scoreboard ranks Standard and shows Standard 2 unranked as early",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "lock": "L5-L6",
+  "where": "the summary: 9 sent with a package (withdrawn out), 33%, 1 of 3 to compare",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "L5-L6",
+  "where": "Tests lists exactly Standard 2",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "lock": "L5-L6",
+  "where": "…Running, testing the letter",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "L5-L6",
+  "where": "…footer: 1 to go",
+  "ok": false,
+  "detail": ""
+ }
+]

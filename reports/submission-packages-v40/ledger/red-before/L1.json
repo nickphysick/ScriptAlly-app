@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "L1",
+  "where": "an open package on the workbench",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L1",
+  "where": "…and it is not a locked one",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L1",
+  "where": "the shelf drawer opens",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L1",
+  "where": "…with no slot to drop on",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L1",
+  "where": "…no Add",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L1",
+  "where": "…no extra to tick",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L1",
+  "where": "…and says it is locked",
+  "ok": false,
+  "detail": ""
+ }
+]
