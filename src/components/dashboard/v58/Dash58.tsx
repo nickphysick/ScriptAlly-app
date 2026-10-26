@@ -4,10 +4,9 @@
  *
  * DASHBOARD v58 — one screen (ref design-refs/dashboard/dashboard-v58.html).
  *
- * The header is the book being queried. Two framed cards down the left: active queries (today's
- * card and chart) over closed queries. The right column has no container: a typewriter title, one
- * item in focus, and the rest of the list under it. The activity feed is a drawer behind a
- * floating tab.
+ * The header is the book being queried. Down the left, the active-queries chart over the Closed and
+ * Agents on file hoop cards (v60). Down the right (v71), the task card, which cycles through the
+ * plan's items, over the founding writer card. The activity feed is a drawer behind a folder tab.
  *
  * ⚠️ NOTHING HERE WRITES A STATUS. Every action opens the flow that does: the query drawer
  * (`openQueryDrawer`), the agent card, or a route.
@@ -23,7 +22,9 @@ import { liveCount, undatedLiveCount } from "../../../lib/dashBreakdown";
 import { closedTile } from "../../../lib/dashClosed";
 import { assembleBoardColumns } from "../../../lib/todoColumns";
 import { todoRows } from "../../../lib/dashTodo";
-import { dashList, focusOf, startingPlan, type ListAction } from "../../../lib/dashList";
+import { dashList, startingPlan, type ListAction } from "../../../lib/dashList";
+import { buildQcRows } from "../../../lib/qcSummary";
+import type { TaskCtx } from "../../../lib/dashTaskCard";
 import { gettingStartedRows } from "../../../lib/dashEmpty";
 import { feedEntries } from "../../../lib/dashFeed";
 import { todayCount } from "../../../lib/dashFeedDrawer";
@@ -38,9 +39,10 @@ import { readImportNotice, clearImportNotice, onImportNoticeChange, noticeHeadli
 import { DashPopupProvider } from "../DashPopup";
 import { OneScreenChart } from "../OneScreenChart";
 import { Dash58Header } from "./Dash58Header";
-import { Dash58List } from "./Dash58List";
+import { Dash71Right } from "../v71/Dash71Right";
+import { Dash71Task } from "../v71/Dash71Task";
 import { Dash58Feed, FeedTab } from "./Dash58Feed";
-import { Dash59Panel, type PulseState } from "../v59/Dash59Panel";
+import { Dash71Founding, type FwState } from "../v71/Dash71Founding";
 import { agentCoverage, firstUseTiles, isPreQuery, type TileKey } from "../../../lib/dashFirstUse";
 import { QueriesDoor, AgentsDoor, AgentsSnap, ClosedHoop, AgentsHoop } from "../v60/Dash60Left";
 import { Dash60Lift } from "../v60/Dash60Lift";
@@ -48,7 +50,7 @@ import { SpotProvider, WhereStart } from "../v60/WhereStart";
 import type { StartKey } from "../../../lib/dashFirstUse";
 import { switcherStanding } from "../../../lib/manuscriptStanding";
 import { openNewAgentCard } from "../../../lib/agentCardStore";
-import { openFeedback } from "../../../lib/feedbackStore";
+import { openFeedback, subscribeFeedbackSent } from "../../../lib/feedbackStore";
 import { pulseWeeks, readEcho, writeEcho, type Mood } from "../../../lib/weeklyPulse";
 import { readWeeklyPulse, sendWeeklyPulse } from "../../../lib/weeklyPulseClient";
 import "../oneScreen.css";
@@ -56,6 +58,8 @@ import "./dash58.css";
 import "../v59/dash59.css";
 /* ⚠️ LAST: the bundle orders sheets by first import, and v60's rules win ties against v58's and v59's */
 import "../v60/dash60.css";
+/* ⚠️ AND v71 LAST OF ALL: its rules win ties against v58–v60's */
+import "../v71/dash71.css";
 
 export interface Dash58Props {
   loading: boolean;
@@ -84,8 +88,6 @@ export const DASH_SHADOW = { src: "/images/hawk-shadow.png", version: 1 };
 /** The first paint's whole length: the end dot finishes at 900 + 300 = 1200ms; a little after. */
 export const PAINT_MS = 1400;
 
-/** The panel's height below which its note's second sentence gives way (dash59.css `max-height: 178px`). */
-export const PANEL_FULL_H = 179;
 
 /** "14 Mar 2026" from an ISO date, read as written (no timezone arithmetic). */
 const noticeDate = (iso: string | null): string => {
@@ -195,9 +197,11 @@ export const Dash58: React.FC<Dash58Props> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scopedTasks, userTasks, queries, scopedQueries, agents, manuscripts, taskFlags, scopedActivities, activities, activeManuscript, currentUser, now, aid.drop.join(","), empty, versions, scopeId]);
 
-  const [step, setStep] = useState(0);
-  const focus = useMemo(() => focusOf(plan, step), [plan, step]);
-  useEffect(() => { if (step !== focus.index) setStep(focus.index); }, [step, focus.index]);
+  /* v71: the task card reads the Query Centre's own rows for the dates it draws */
+  const taskCtx = useMemo<TaskCtx>(
+    () => ({ queries, agents, qcRows: buildQcRows(scopedQueries, agents, scopedActivities, now.getTime()), nowMs: now.getTime() }),
+    [queries, agents, scopedQueries, scopedActivities, now],
+  );
 
   /* ── the feed ── */
   const feed30 = useMemo(
@@ -251,44 +255,54 @@ export const Dash58: React.FC<Dash58Props> = ({
     else run(a);
   };
 
-  /* ── the founding writer panel's weekly pulse (v59) ──
-     One answer per ISO week, changeable within it. The face fills at once and the call runs; only
-     the server's yes shows "Noted" and moves this week's dot. A failure clears the face back to what
-     was stored and says so. The read of the five weeks never holds the panel back. */
+  /* ── the founding writer card (v71): the weekly pulse, then the one feedback panel ──
+     One answer per ISO week, changeable within it. A press fills the face and the call runs; ONLY
+     the server's yes moves the card to Noted (never sooner than 180ms after the press). A refusal
+     keeps it on Ask, clears the face back to what was stored and says so. "Sent" is this visit only:
+     the one feedback panel reported a note sent after one of this card's doors opened it. */
   const pulseUid = currentUser?.id ?? "";
-  const weeks = useMemo(() => pulseWeeks(now), [now]);
-  const thisWeek = weeks[4];
-  const [pulseHistory, setPulseHistory] = useState<(Mood | null)[]>([null, null, null, null, null]);
+  const thisWeek = useMemo(() => pulseWeeks(now)[4], [now]);
   const [pulseStored, setPulseStored] = useState<Mood | null>(null);
   const [pulseChosen, setPulseChosen] = useState<Mood | null>(null);
-  const [pulseState, setPulseState] = useState<PulseState>("idle");
+  const [pulseSending, setPulseSending] = useState(false);
+  const [pulseFailed, setPulseFailed] = useState(false);
+  const [fwState, setFwState] = useState<FwState>("ask");
   useEffect(() => {
     if (!pulseUid) return undefined;
     let live = true;
     const echo = readEcho(pulseUid, thisWeek);
-    if (echo) { setPulseStored(echo); setPulseChosen(echo); setPulseState("noted"); setPulseHistory((h) => [...h.slice(0, 4), echo]); }
-    void readWeeklyPulse(pulseUid, weeks).then((read) => {
-      if (!live) return;
-      const now4 = read[4] ?? echo;
-      setPulseHistory([...read.slice(0, 4), now4]);
-      if (read[4]) { setPulseStored(read[4]); setPulseChosen((c) => c ?? read[4]); setPulseState((st) => (st === "idle" ? "noted" : st)); }
+    if (echo) { setPulseStored(echo); setPulseChosen(echo); setFwState((st) => (st === "ask" ? "noted" : st)); }
+    void readWeeklyPulse(pulseUid, [thisWeek]).then(([read]) => {
+      if (!live || !read) return;
+      setPulseStored(read);
+      setPulseChosen((c) => c ?? read);
+      setFwState((st) => (st === "ask" ? "noted" : st));
     });
     return () => { live = false; };
-  }, [pulseUid, thisWeek, weeks]);
+  }, [pulseUid, thisWeek]);
   const choosePulse = (m: Mood) => {
-    if (!pulseUid || pulseState === "sending") return;
+    if (!pulseUid || pulseSending) return;
+    const pressed = Date.now();
     setPulseChosen(m);
-    setPulseState("sending");
+    setPulseSending(true);
+    setPulseFailed(false);
     sendWeeklyPulse(m, thisWeek).then(() => {
       writeEcho(pulseUid, thisWeek, m);
       setPulseStored(m);
-      setPulseHistory((h) => [...h.slice(0, 4), m]);
-      setPulseState("noted");
+      window.setTimeout(() => { setPulseSending(false); setFwState("noted"); }, Math.max(0, 180 - (Date.now() - pressed)));
     }, () => {
       setPulseChosen(pulseStored);
-      setPulseState("failed");
+      setPulseSending(false);
+      setPulseFailed(true);
     });
   };
+  const fwOpened = useRef(false);
+  const fwFeedback = () => { fwOpened.current = true; openFeedback(); };
+  useEffect(() => subscribeFeedbackSent(() => {
+    if (!fwOpened.current) return;
+    fwOpened.current = false;
+    setFwState("sent");
+  }), []);
 
   /* ── the page's own scrollport: the height the one screen fills ──
      ⚠️ MEASURED, NEVER `100vh`: the page starts under the top bar. `--d58-chrome` is the rest of
@@ -339,116 +353,14 @@ export const Dash58: React.FC<Dash58Props> = ({
     return () => { ro?.disconnect(); window.removeEventListener("resize", schedule); if (frame) window.cancelAnimationFrame(frame); };
   }, []);
 
-  /* ── the timeline gives way first (v59) ──
-     The pack's order of giving way is the focus card's timeline, THEN the panel's second sentence.
-     A media query cannot keep that order on every shell: the real header is taller than the ref's
-     (the beta strip, the book's title block), so at 1696×820 the panel lost its second sentence with
-     the timeline still showing. So it is MEASURED: while the timeline shows and the panel is below
-     the height that keeps both sentences, the timeline goes; it comes back only when the panel would
-     still keep them with the timeline's own height returned (the remembered height is the
-     hysteresis, so the two never chase each other). */
-  const [tight, setTight] = useState(false);
-  const tightRef = useRef(false);
-  const stagesH = useRef(0);
-  useLayoutEffect(() => {
-    const root = rootRef.current;
-    if (!root || loading) return undefined;
-    const check = () => {
-      const panel = root.querySelector<HTMLElement>('[data-d58="panel"][data-loading="0"]');
-      const ph = panel?.getBoundingClientRect().height ?? 0;
-      if (ph <= 0) return; // not laid out (another page is on screen)
-      if (!tightRef.current) {
-        const st = root.querySelector<HTMLElement>('[data-d58="focus-stages"]');
-        if (st && st.offsetHeight > 0 && ph < PANEL_FULL_H) {
-          const cs = getComputedStyle(st);
-          stagesH.current = st.offsetHeight + (parseFloat(cs.marginTop) || 0) + (parseFloat(cs.marginBottom) || 0);
-          tightRef.current = true;
-          setTight(true);
-        }
-      } else if (ph - stagesH.current >= PANEL_FULL_H) {
-        tightRef.current = false;
-        setTight(false);
-      }
-    };
-    check();
-    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(() => check()) : null;
-    const col = root.querySelector('[data-d58="right"]');
-    if (col) ro?.observe(col);
-    window.addEventListener("resize", check);
-    return () => { ro?.disconnect(); window.removeEventListener("resize", check); };
-  }, [loading, focus.item?.key]);
-
-  const hoopNeedRef = useRef(0);
-  /* ── v60: the left column's floor in the querying state — what the two hoop cards need ──
-     Each card's width, less its legend's box, plus the legend's NATURAL width (a Range over each row,
-     which is the text's own width whatever the column does — so this cannot feed back on itself). */
-  useLayoutEffect(() => {
-    const root = rootRef.current;
-    if (!root) return undefined;
-    const measure = () => {
-      /* while loading, the floor is the one the last loaded page measured: the hoops' figures (and
-         "+n this week") are not known yet, and a narrower column would jump when they land */
-      if (loading) {
-        const v = shape.hoopNeed > 0 ? `${shape.hoopNeed}px` : "";
-        if (root.style.getPropertyValue("--d60-hoop-need") !== v) { if (v) root.style.setProperty("--d60-hoop-need", v); else root.style.removeProperty("--d60-hoop-need"); }
-        return;
-      }
-      let need = 0;
-      const width = (el: Element) => { const r = document.createRange(); r.selectNodeContents(el); return r.getBoundingClientRect().width; };
-      for (const card of root.querySelectorAll<HTMLElement>(".d60-hoopcard")) {
-        const hl = card.querySelector<HTMLElement>(".d60-hl");
-        const row = card.querySelector<HTMLElement>(".os-bandrow");
-        if (!hl || card.offsetWidth <= 0) continue;
-        /* ⚠️ READ UNWRAPPED: a cramped card wraps its labels (the container query), and a wrapped width
-           read back as the need would hold the column at the cramped size for ever. `nowrap` for the
-           instant of the read, in a layout effect, so nothing is painted that way. */
-        const lis = [...hl.querySelectorAll<HTMLElement>("li, .d60-ready")];
-        for (const li of lis) li.style.whiteSpace = "nowrap";
-        let natural = 0;
-        for (const li of hl.querySelectorAll("li")) natural = Math.max(natural, width(li));
-        /* ⚠️ FROM FIXED PARTS, never "card − legend box + natural": the legend is shrink-to-fit, so with
-           room to spare its box IS its natural width and that sum is just the card's own width — a
-           floor that ratchets wider on every load. The card's chrome, the body's padding, the hoop
-           and the gap do not depend on the column. */
-        const hb = card.querySelector<HTMLElement>(".d60-hb");
-        const hoop = card.querySelector<HTMLElement>(".d60-hoop");
-        if (hb && hoop) {
-          const cs = getComputedStyle(hb);
-          const chrome = card.offsetWidth - hb.clientWidth;
-          need = Math.max(need, chrome + (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0) + hoop.offsetWidth + (parseFloat(cs.columnGap) || 0) + natural);
-        }
-        /* and the band: its title and its link side by side, with the row's gap */
-        if (row) {
-          const kids = [...row.children] as HTMLElement[];
-          const sum = kids.reduce((t, k) => t + width(k), 0) + Math.max(0, kids.length - 1) * (parseFloat(getComputedStyle(row).columnGap) || 12);
-          need = Math.max(need, card.offsetWidth - row.clientWidth + sum);
-        }
-        for (const li of lis) li.style.whiteSpace = "";
-      }
-      const n = need > 0 ? Math.ceil(need) : 0;
-      /* remembered for the next loading page the moment it changes — the shape effect below runs before
-         the webfonts land, and a floor written then is the narrower one */
-      if (n > 0 && n !== hoopNeedRef.current) writeShape({ ...readShape(), hoopNeed: n });
-      hoopNeedRef.current = n;
-      const v = need > 0 ? `${Math.ceil(need)}px` : "";
-      if (root.style.getPropertyValue("--d60-hoop-need") !== v) {
-        if (v) root.style.setProperty("--d60-hoop-need", v); else root.style.removeProperty("--d60-hoop-need");
-      }
-    };
-    measure();
-    window.addEventListener("resize", measure);
-    void document.fonts?.ready.then(measure);
-    return () => window.removeEventListener("resize", measure);
-  });
-
   /* ── what the loading page should be the shape of: this account's last loaded page ── */
   const [shape] = useState(() => readShape());
-  const focusRef = useRef<HTMLDivElement>(null);
+  const focusRef = useRef<HTMLElement | null>(null);
   useEffect(() => {
     if (loading) return;
     const h = focusRef.current?.getBoundingClientRect().height ?? 0;
-    writeShape({ focusH: h > 0 ? Math.round(h) : shape.focusH, closed: closed && closed.total === 0 ? "none" : "some", today: unseen > 0, pre: empty, agents: agents.length > 0, hoopNeed: hoopNeedRef.current || shape.hoopNeed });
-  }, [loading, focus.item?.key, closed, unseen, shape.focusH, empty, agents.length]);
+    writeShape({ focusH: h > 0 ? Math.round(h) : shape.focusH, closed: closed && closed.total === 0 ? "none" : "some", today: unseen > 0, pre: empty, agents: agents.length > 0, hoopNeed: shape.hoopNeed });
+  }, [loading, plan, closed, unseen, shape.focusH, empty, agents.length]);
 
   /* ── v60: first use, and the two hoops ──
      While loading, the page draws whichever state the shape memory last saw, so the swap never
@@ -521,7 +433,7 @@ export const Dash58: React.FC<Dash58Props> = ({
   const title = (activeManuscript?.title ?? "").trim();
 
   return (
-    <div ref={rootRef} className="os-root d58" data-paint={paint ? "1" : undefined} data-tight={tight ? "1" : undefined} style={noticeListH > 0 ? ({ ["--d58-notice-list-h" as string]: `${noticeListH}px` } as React.CSSProperties) : undefined}>
+    <div ref={rootRef} className="os-root d58" data-mode={pre ? "pre" : "q"} data-paint={paint ? "1" : undefined} style={noticeListH > 0 ? ({ ["--d58-notice-list-h" as string]: `${noticeListH}px` } as React.CSSProperties) : undefined}>
       <DashPopupProvider rootRef={rootRef}>
         <div className="d58-page" data-d58="page" data-loading={loading ? "1" : "0"}>
           {notice && <ImportNoticeRow notice={notice} onDismiss={dismissNotice} onListHeight={setNoticeListH} />}
@@ -571,27 +483,19 @@ export const Dash58: React.FC<Dash58Props> = ({
                 </>
               )}
             </div>
-            <Dash58List
-              loading={loading}
-              focusH={shape.focusH}
-              plan={plan}
-              focus={focus}
-              focusRef={focusRef}
-              onStep={setStep}
-              onView={viewTask}
-              onRun={run}
-              onAll={() => onNavigate("todo")}
-              onAddAgent={() => onNavigate("agents", "Add an agent")}
+            <Dash71Right
+              task={<Dash71Task loading={loading} plan={plan} ctx={taskCtx} onView={viewTask} innerRef={focusRef} />}
               lift={pre ? <Dash60Lift loading={loading} tiles={tiles} hasAgents={hasAgents} onTile={onTile} /> : undefined}
               panel={
-                <Dash59Panel
+                <Dash71Founding
                   loading={loading}
-                  history={pulseHistory}
+                  state={fwState}
                   chosen={pulseChosen}
-                  state={pulseState}
+                  sending={pulseSending}
+                  failed={pulseFailed}
                   onChoose={choosePulse}
-                  onChange={() => setPulseState("idle")}
-                  onFeedback={openFeedback}
+                  onChange={() => { setPulseFailed(false); setFwState("ask"); }}
+                  onFeedback={fwFeedback}
                 />
               }
             />

@@ -196,62 +196,13 @@
 }
 .d58-listbar { display: block; width: 44px; height: 3px; margin-top: 8px; border-radius: 2px; background: var(--d58-rust); }
 
-.d58-focus {
-  flex: none;
-  position: relative;
-  z-index: 1;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 0 0 1px var(--d58-ink-10), 0 14px 28px -20px rgba(28, 19, 15, 0.45);
-  overflow: hidden;
-}
-.d58-fband { display: flex; align-items: center; gap: 10px; min-height: 24px; padding: 9px 14px 9px 16px; }
-.d58-fpill {
-  font-family: var(--d58-mono) !important; font-size: 10px; font-weight: 600; letter-spacing: 0.18em; line-height: 13px;
-  padding: 4px 8px; border-radius: 6px; background: var(--d58-navy); color: var(--d58-cream); white-space: nowrap;
-}
-.d58-fpos {
-  margin-left: auto; display: flex; align-items: center; gap: 6px;
-  font-family: var(--d58-mono) !important; font-size: 10px; letter-spacing: 0.14em; color: var(--d58-ink-62); white-space: nowrap;
-}
-.d58-fpos button {
-  box-sizing: border-box; width: 24px; height: 24px; padding: 0; border-radius: 50%;
-  border: 1px solid rgba(28, 19, 15, 0.2); background: rgba(255, 255, 255, 0.75); color: var(--d58-ink);
-  font-family: var(--d58-mono) !important; font-size: 13px; line-height: 1; cursor: pointer;
-}
-.d58-fpos button[disabled] { opacity: 0.4; cursor: default; }
-.d58-fbody { padding: 14px 18px 4px; }
-.d58-fwho { display: flex; align-items: center; gap: 12px; min-width: 0; }
-.d58-disc {
-  flex: none; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center;
-  font-family: var(--d58-mono) !important; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
-}
-.d58-disc--house { }
-.d58-fsay { margin: 0; font-family: var(--d58-serif) !important; font-weight: 400; font-size: 20px; line-height: 24px; color: var(--d58-ink); }
-.d58-fsay b { font-weight: 600; }
-.d58-ffact { display: block; margin-top: 4px; font-family: var(--d58-mono) !important; font-size: 9.5px; letter-spacing: 0.15em; line-height: 13px; color: var(--d58-ink-42); }
-.d58-fwho > div { min-width: 0; }
-.d58-stages { position: relative; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); margin: 14px 0 2px; }
-/* each stage draws the line back to the one before it, centre to centre, so two stages and four
-   are joined by the same rule */
-.d58-stage + .d58-stage::before { content: ""; position: absolute; top: 7px; height: 1px; right: 50%; width: 100%; background: var(--d58-ink-18); }
-.d58-stage { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 0; }
-.d58-stage > i { position: relative; z-index: 1; display: grid; place-items: center; width: 23px; height: 15px; background: #fff; }
-.d58-stage b { margin-top: 10px; font-family: var(--d58-type) !important; font-weight: 400; font-size: 11.5px; line-height: 1; white-space: nowrap; color: var(--d58-ink); }
-.d58-stage small { margin-top: 8px; font-family: var(--d58-mono) !important; font-size: 9px; letter-spacing: 0.08em; line-height: 11px; color: var(--d58-ink-42); }
-.d58-fnote { margin: 12px 0 4px; font-family: var(--d58-serif) !important; font-size: 15px; line-height: 1.45; color: var(--d58-ink-62); }
-.d58-ffoot {
-  display: flex; align-items: center; justify-content: space-between; gap: 10px;
-  margin-top: 10px; padding: 11px 16px 12px 18px; border-top: 1px solid var(--d58-ink-10);
-}
-.d58-ffoot > span { font-family: var(--d58-serif) !important; font-size: 14px; color: var(--d58-ink-62); min-width: 0; }
-
+/* ⚠️ v58's focus card (`.d58-focus` and its band, body, stages and foot) is RETIRED by Dashboard v71:
+   the task card (v71/dash71.css) replaced it. `.d58-cal`, its date tile, is kept for the task card. */
 .d58-cal { flex: none; width: 42px; border-radius: 8px; overflow: hidden; background: #fff; box-shadow: 0 0 0 1px var(--d58-ink-10); text-align: center; }
 .d58-cal small { display: block; padding: 2px 0; background: var(--d58-navy); color: var(--d58-cream); font-family: var(--d58-mono) !important; font-size: 8.5px; letter-spacing: 0.12em; line-height: 12px; }
 .d58-cal b { display: block; padding: 3px 0 4px; font-family: var(--d58-type) !important; font-weight: 400; font-size: 18px; line-height: 20px; color: var(--d58-ink); }
 
-.d58-fpos button:focus-visible, .d58-link:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
-.d58-extra { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.d58-link:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
 .d58-quietline { margin: 0 0 4px; font-family: var(--d58-serif) !important; font-size: 15.5px; line-height: 1.45; color: var(--d58-ink-62); }
 
 /* ── the drawer (portalled: `.d58-layer`) ──────────────────────────────────────────────────── */
@@ -372,8 +323,6 @@
 .d58-sk * { visibility: hidden; }
 .d58-title.d58-sk { width: 9em; max-width: 100%; }
 .d58-byline > span.d58-sk { width: 8em; }
-.d58-focus.is-loading { box-shadow: 0 0 0 1px var(--d58-ink-10); }
-.d58-focus.is-loading .d58-fband { background: rgba(28, 19, 15, 0.05); }
 
 /* ── the steps ─────────────────────────────────────────────────────────────────────────────── */
 
@@ -388,11 +337,6 @@
   .d58 .os-cardttl { font-size: 23px; line-height: 26px; }
   .d58 .os-lead > .os-frame > :not(.os-band) { margin-inline: 18px; }
   .d58 .d58-listtitle { font-size: 21px; line-height: 25.2px; }
-  .d58-fsay { font-size: 17.5px; line-height: 21px; }
-}
-/* a short window: the tiles go back to one row, and the focus card keeps to its sentence */
-@media (max-height: 779px) {
-  .d58-stages, .d58-fnote { display: none; }
 }
 /* below the supported size the page flows: one column, and each card its own height */
 @media (max-width: 1099px) {
@@ -446,8 +390,8 @@
    its loaded size and nothing moves when the data lands. Page chrome is not a card: the header's
    buttons and the feed tab stay. A zero computed from data that has not arrived is never shown. */
 .d58-skcard * { visibility: hidden !important; }
-.d58-skcard :is(.os-frame, .d59-fwframe) { visibility: visible !important; }
-.d58-skcard :is(.os-band, .d58-fband, .d59-fwband) {
+.d58-skcard :is(.os-frame, .d71-fwframe) { visibility: visible !important; }
+.d58-skcard :is(.os-band, .d71-fwband) {
   visibility: visible !important;
   background: linear-gradient(90deg, #e7e1d9 0%, #f1ece6 45%, #e7e1d9 90%) !important;
   background-size: 220% 100% !important;
@@ -455,7 +399,7 @@
   color: transparent !important; box-shadow: none !important;
 }
 @keyframes d58-sk-shimmer { from { background-position: 110% 0; } to { background-position: -110% 0; } }
-@media (prefers-reduced-motion: reduce) { .d58-skcard :is(.os-band, .d58-fband, .d59-fwband) { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .d58-skcard :is(.os-band, .d71-fwband) { animation: none; } }
 
 /* ── THE IMPORT'S ROW (import review v1, Part D; ref design-refs/onboarding/import-review-v1/feed-import.dc.html)
    A white card under the day heading, unlike the flat rows around it: the one event that says what a whole

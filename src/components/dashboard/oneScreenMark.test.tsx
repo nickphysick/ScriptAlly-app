@@ -103,10 +103,11 @@ describe("every dashboard container header carries one mark", () => {
     "Chart": "OneScreenChart.tsx",
     "Left": "v60/Dash60Left.tsx",
     "Lift": "v60/Dash60Lift.tsx",
-    "List": "v58/Dash58List.tsx",
+    "Right": "v71/Dash71Right.tsx",
+    "Task": "v71/Dash71Task.tsx",
     "Feed": "v58/Dash58Feed.tsx",
     "Header": "v58/Dash58Header.tsx",
-    "Panel": "v59/Dash59Panel.tsx",
+    "Founding": "v71/Dash71Founding.tsx",
   };
   it("no card on the page carries one, and the component is still live elsewhere", () => {
     let total = 0;

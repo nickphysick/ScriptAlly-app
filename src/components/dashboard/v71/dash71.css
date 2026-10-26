@@ -1,0 +1,695 @@
+/* ══ DASHBOARD v71 — the desk header, the cycling task card, the founding writer card ═════════════
+   Ref: design-refs/dashboard-v71/dashboard-v71.html, read rendered (its CSS is layered patches).
+   On top of v58–v60. Loaded LAST (Dash58 imports it after dash60.css), so equal-specificity rules
+   here win ties against the earlier sheets.
+
+   ⚠️ brand.tsx forces a face on bare `p, span, div, button` and on every h1/h2/h3 at runtime,
+   injected last: every face named here is `!important`, and headings take two classes. */
+
+/* ── A · the header: a desk-ink panel ──────────────────────────────────────────────────────────
+   The panel reads `--ink-shell`, the shell's own ink (the ref draws #1d2432; the token is #1b2433).
+   ⚠️ THE TOKEN IS READ, NEVER RESTATED — the H1 lock compares the panel's computed background with
+   the token's, so a literal here goes red the day the shell's ink moves. */
+.d58 .d71-head {
+  position: relative;
+  box-sizing: border-box;
+  margin: var(--d71-head-top, 18px) 0 16px;
+  padding: 16px 28px 18px;
+  gap: 24px;
+  border-radius: 16px;
+  background: var(--ink-shell, #1b2433);
+  box-shadow: 0 8px 22px rgba(29, 36, 50, 0.22);
+}
+/* the terracotta rule on the panel's bottom inner edge, 28px in from each side */
+.d58 .d71-head::after {
+  content: "";
+  position: absolute;
+  left: 28px;
+  right: 28px;
+  bottom: 0;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: linear-gradient(90deg, #d9967a, transparent 60%);
+  opacity: 0.55;
+  pointer-events: none;
+}
+.d58 .d71-head .d58-eyebrow { color: #d9967a; }
+.d58 .d71-head .d58-title {
+  color: #f6f1e8;
+  font-size: clamp(34px, 2.9vw, 44px);
+  line-height: 1.08;
+}
+.d58 .d71-head .d58-byline::before { background: rgba(246, 241, 232, 0.4); }
+.d58 .d71-head .d58-byline::after { background: rgba(246, 241, 232, 0.18); }
+.d58 .d71-head .d58-byline > span { color: rgba(246, 241, 232, 0.75); }
+/* the loading page: the skeleton bars are cream on the ink, not ink on ink */
+.d58 .d71-head .d58-sk { background: rgba(246, 241, 232, 0.1); }
+
+/* the three buttons: one family, icon first */
+.d58 .d71-head .d58-btns { gap: 10px; }
+.d58 .d71-hb {
+  box-sizing: border-box;
+  height: 44px;
+  padding: 0 18px 0 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  border: 0;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 0 0 1px rgba(246, 241, 232, 0.18);
+  color: #f6f1e8;
+  font-family: var(--d58-serif) !important;
+  font-size: 15.5px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.14s ease, box-shadow 0.14s ease, transform 0.14s ease;
+}
+.d58 .d71-hb > span { font-family: inherit !important; }
+.d58 .d71-hb svg { flex: none; width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.d58 .d71-hb:hover { background: rgba(255, 255, 255, 0.1); box-shadow: inset 0 0 0 1px rgba(246, 241, 232, 0.32); }
+.d58 .d71-hb:focus-visible { outline: 2px solid #f4efe6; outline-offset: 2px; }
+.d58 .d71-hb--pri { background: #f4efe6; color: var(--d58-ink); box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25); }
+.d58 .d71-hb--pri svg { stroke: #a2452a; }
+.d58 .d71-hb--pri:hover { background: #fff; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25); transform: translateY(-1px); }
+
+/* first use: "Where do I start?" sits in the button row as a ghost on the ink */
+.d58 .d71-head .wds-btn {
+  height: 44px;
+  padding: 0 18px 0 7px;
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 0 0 1px rgba(246, 241, 232, 0.18);
+  color: #f6f1e8;
+  font-size: 15.5px;
+  font-weight: 600;
+}
+.d58 .d71-head .wds-btn:hover { background: rgba(255, 255, 255, 0.1); box-shadow: inset 0 0 0 1px rgba(246, 241, 232, 0.32); }
+.d58 .d71-head .wds-btn.is-open, .d58 .d71-head .wds-btn:focus-visible { box-shadow: inset 0 0 0 1px rgba(246, 241, 232, 0.32), 0 0 0 2px #f4efe6; }
+.d58 .d71-head .wds-qm { width: 30px; height: 30px; background: #f4efe6; }
+
+@media (max-width: 1400px) {
+  .d58 .d71-hb, .d58 .d71-head .wds-btn { height: 40px; font-size: 14.5px; }
+}
+/* below 1200px of window the two ghosts fold to 40px icon-only squares; the primary keeps its words */
+@media (max-width: 1199px) {
+  .d58 .d71-hb:not(.d71-hb--pri) { width: 40px; padding: 0; justify-content: center; }
+  .d58 .d71-hb:not(.d71-hb--pri) .d71-hbl { display: none; }
+}
+/* a short window: a tighter panel and a smaller title */
+@media (max-height: 780px) {
+  .d58 .d71-head { padding: 10px 24px 12px; margin-bottom: 14px; }
+  .d58 .d71-head .d58-title { font-size: 34px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .d58 .d71-hb { transition: none; }
+  .d58 .d71-hb--pri:hover { transform: none; }
+}
+
+/* ── B · the layout, while querying (`.d58[data-mode="q"]`) ────────────────────────────────────
+   Two columns, each its own two-row grid filling the body's height — so the bottoms of the Closed,
+   Agents and founding cards line up by construction: every column ends where the body ends.
+   Before the first query (`data-mode="pre"`) the page is v60.1's and none of this applies. */
+.d58[data-mode="q"] .d58-body {
+  grid-template-columns: minmax(0, 1.72fr) minmax(0, 1fr);
+  gap: 16px;
+}
+/* ⚠️ THE CHART'S ROW HAS A FLOOR (140px; the smallest measured chart card is ~150, at 1280×650). With
+   `minmax(0, 1fr)` a taller hoop row simply crushed the chart towards nothing, and the page still read as
+   "one screen" — the G1 lock's own mutation (hoops at 320px) passed. With a floor, too much below it
+   overflows and is caught. */
+.d58[data-mode="q"] .d58-left {
+  display: grid;
+  grid-template-rows: minmax(140px, 1fr) auto;
+  gap: 16px;
+}
+/* the hoop row: its content's height, never under 200px (180 on a short window) */
+.d58[data-mode="q"] .d60-hoops { gap: 16px; min-height: 200px; }
+.d58[data-mode="q"] .d60-hoops > .d60-card { height: 100%; }
+.d58[data-mode="q"] .d71-right {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) var(--d71-fw-h, 194px);
+  gap: 16px;
+  padding-bottom: 0;
+}
+.d71-taskslot, .d71-fwslot { min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+.d71-fwslot > * { flex: 1 1 0; min-height: 0; }
+
+/* ⚠️ THE BOTTOM: the lowest cards end 14px above the Activity feed tab's top. The tab (34px) sits
+   on the SHEET's bottom edge, so the cards end 48px above the sheet's bottom; what already lies
+   between the page and the sheet's bottom (`--d58-inset-b`, measured by the page) is subtracted. */
+.d58[data-mode="q"] .d58-page { padding-bottom: max(0px, calc(48px - var(--d58-inset-b, 0px))); }
+
+@media (max-height: 819px) {
+  .d58[data-mode="q"] .d60-hoops { min-height: 180px; }
+}
+@media (max-height: 760px) {
+  .d58[data-mode="q"] { --d71-fw-h: 128px; }
+  .d58[data-mode="q"] .d58-page { padding-bottom: max(0px, calc(46px - var(--d58-inset-b, 0px))); }
+}
+/* below the supported width the page flows (v58's own step): one column, each card its own height */
+@media (max-width: 1099px) {
+  .d58[data-mode="q"] .d58-body { grid-template-columns: minmax(0, 1fr); }
+  .d58[data-mode="q"] .d71-right { grid-template-rows: auto var(--d71-fw-h, 194px); }
+}
+
+/* ── C · the task card ─────────────────────────────────────────────────────────────────────────
+   One card, the full height of its row. The head and the progress segments sit on the kind's tint
+   (`--d71-tint`), the kicker on its accent (`--d71-accent`); the page sets both per item. */
+.d71-task {
+  flex: 1 1 0;
+  min-height: 0;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(28, 19, 15, 0.08);
+  color: var(--d58-ink);
+  --d71-tint: #f1eee9;
+  --d71-accent: #2a3a52;
+}
+.d71-th {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px 10px 18px;
+  background: var(--d71-tint);
+  transition: background-color 450ms cubic-bezier(0.22, 0.8, 0.3, 1);
+}
+.d58 .d71-kick {
+  padding: 4px 9px;
+  border-radius: 6px;
+  background: var(--d71-accent);
+  color: #fff;
+  font-family: var(--d58-mono) !important;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  line-height: 14px;
+  white-space: nowrap;
+  transition: background-color 450ms cubic-bezier(0.22, 0.8, 0.3, 1);
+}
+.d58 .d71-pos {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--d58-mono) !important;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: rgba(28, 19, 15, 0.55);
+  white-space: nowrap;
+}
+.d58 .d71-pos > span { font-family: inherit !important; }
+.d58 .d71-pos button {
+  box-sizing: border-box;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.1);
+  color: var(--d58-ink);
+  font-family: var(--d58-mono) !important;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+}
+.d58 .d71-pos button:focus-visible, .d58 .d71-view:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
+
+/* the progress segments: under the head, inside the tint */
+.d71-prog {
+  flex: none;
+  display: flex;
+  gap: 4px;
+  padding: 0 18px 8px;
+  background: var(--d71-tint);
+  transition: background-color 450ms cubic-bezier(0.22, 0.8, 0.3, 1);
+}
+.d71-prog > i { position: relative; flex: 1 1 0; height: 3px; border-radius: 2px; overflow: hidden; background: rgba(28, 19, 15, 0.1); }
+.d71-prog > i.is-past { background: var(--d71-accent); opacity: 0.5; }
+.d71-prog > i > b { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: var(--d71-accent); }
+.d71-prog > i > b.is-full { width: 100%; }
+.d71-prog > i > b.is-running { animation: d71Fill linear forwards; }
+@keyframes d71Fill { from { width: 0; } to { width: 100%; } }
+
+/* the body: vertically centred in what the head and foot leave */
+.d71-tb {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 14px;
+  padding: 18px 22px 6px;
+  animation: d71In 450ms cubic-bezier(0.22, 0.8, 0.3, 1) backwards;
+}
+@keyframes d71In { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.d71-tb--none { padding-bottom: 18px; }
+.d71-who { display: flex; align-items: center; gap: 13px; min-width: 0; }
+.d71-whot { min-width: 0; }
+.d58 .d71-av {
+  flex: none;
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-family: var(--d58-mono) !important;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  background: #2a3a52;
+  color: #fff;
+}
+.d58 .d71-av--send { background: #a2452a; color: #fff; }
+.d58 .d71-av--nudge { background: #fff; color: #2a3a52; box-shadow: inset 0 0 0 1.5px #2a3a52; }
+.d58 .d71-av--close { background: #a9a39b; color: #fff; }
+.d58 .d71-cal { width: 52px; }
+.d58 .d71-task .d71-title {
+  margin: 0;
+  font-family: var(--d58-serif) !important;
+  font-weight: 400;
+  font-size: clamp(20px, 1.7vw, 25px);
+  line-height: 1.2;
+  color: var(--d58-ink);
+}
+.d58 .d71-task .d71-title b { font-weight: 600; }
+.d58 .d71-sub {
+  display: block;
+  margin-top: 3px;
+  font-family: var(--d58-mono) !important;
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  line-height: 13px;
+  text-transform: uppercase;
+  color: rgba(28, 19, 15, 0.55);
+}
+.d58 .d71-line {
+  margin: 0;
+  font-family: var(--d58-serif) !important;
+  font-size: 15.5px;
+  line-height: 1.5;
+  color: rgba(28, 19, 15, 0.72);
+}
+
+/* the reply-window bar: solid from the send to the expected date, hatched from there to today */
+.d71-win { position: relative; }
+.d71-wbar { position: relative; display: flex; height: 10px; border-radius: 5px; background: #f1eee9; }
+.d71-wbar > i { display: block; height: 100%; }
+.d71-ok { border-radius: 5px 0 0 5px; background: #2a3a52; }
+.d71-task[data-kind="close"] .d71-ok { background: #a9a39b; }
+.d71-ov {
+  border-radius: 0 5px 5px 0;
+  background-image: repeating-linear-gradient(45deg, var(--d71-accent) 0, var(--d71-accent) 4px, transparent 4px, transparent 8px);
+  opacity: 0.55;
+}
+.d71-cmark { position: absolute; top: -5px; bottom: -5px; width: 2px; margin-left: -1px; background: var(--d58-ink); }
+.d58 .d71-cmark em {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  margin-bottom: 3px;
+  transform: translateX(-50%);
+  font-family: var(--d58-mono) !important;
+  font-style: normal;
+  font-size: 8.5px;
+  letter-spacing: 0.08em;
+  line-height: 12px;
+  color: var(--d58-ink);
+  white-space: nowrap;
+}
+/* the close marker's words stand above the bar: room for them, so they never meet the sentence above
+   (measured on the close card at 1512: they sat on its last line); near an end they hang from the
+   marker towards the middle instead of centring, so they never run past the card */
+.d71-task[data-kind="close"] .d71-win { margin-top: 16px; }
+.d58 .d71-cmark.is-end em { left: auto; right: -1px; transform: none; }
+.d58 .d71-cmark.is-start em { left: -1px; transform: none; }
+.d71-wlab { position: relative; height: 13px; margin-top: 6px; }
+.d58 .d71-wlab > span {
+  position: absolute;
+  top: 0;
+  font-family: var(--d58-mono) !important;
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  line-height: 13px;
+  color: rgba(28, 19, 15, 0.55);
+  white-space: nowrap;
+}
+.d71-wlab > span:first-child { left: 0; }
+.d71-wlab > .d71-wexp { transform: translateX(-50%); }
+.d58 .d71-wlab > .d71-wtoday { right: 0; color: var(--d71-accent); font-weight: 600; }
+
+/* the step chips: done steps filled; the step still to do DASHED — "not happened yet" */
+.d71-steps { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+.d58 .d71-steps > b { font-weight: 400; color: rgba(28, 19, 15, 0.55); }
+.d58 .d71-step {
+  box-sizing: border-box;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-family: var(--d58-type) !important;
+  font-size: 13px;
+  line-height: 13px;
+  white-space: nowrap;
+}
+.d58 .d71-step small { font-family: var(--d58-mono) !important; font-size: 9px; letter-spacing: 0.04em; opacity: 0.75; }
+.d58 .d71-step.is-done { background: #e8eef6; color: #2a3a52; border: 1.5px solid transparent; }
+.d58 .d71-step.is-todo { background: transparent; color: #a2452a; border: 1.5px dashed #a2452a; }
+.d58 .d71-step.is-todo small { opacity: 0.6; }
+
+/* the foot */
+.d71-tf {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  padding: 12px 20px 14px;
+  border-top: 1px solid rgba(28, 19, 15, 0.1);
+}
+.d58 .d71-view {
+  flex: none;
+  padding: 9px 16px;
+  border: 0;
+  border-radius: 11px;
+  background: #2a3a52;
+  color: #fff;
+  font-family: var(--d58-serif) !important;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 21px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.d58 .d71-then {
+  flex: 1 1 0;
+  min-width: 0;
+  font-family: var(--d58-serif) !important;
+  font-size: 13px;
+  color: rgba(28, 19, 15, 0.55);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* loading: the card's own frame, its band shimmering, nothing inside */
+.d71-task.is-loading .d71-tb { animation: none; }
+.d58-skcard .d71-th { visibility: visible !important; background: linear-gradient(90deg, #e7e1d9 0%, #f1ece6 45%, #e7e1d9 90%) !important; background-size: 220% 100% !important; animation: d58-sk-shimmer 1.4s linear infinite; }
+
+/* a short window: the body keeps to its title and its picture */
+@media (max-height: 760px) {
+  .d58 .d71-line, .d58 .d71-cmark em, .d71-wlab, .d58 .d71-then { display: none; }
+  .d71-task[data-kind="close"] .d71-win { margin-top: 0; }
+  .d58 .d71-av, .d58 .d71-cal { width: 40px; height: 40px; }
+  .d58 .d71-task .d71-title { font-size: 17px; }
+  .d71-tb { padding: 12px 18px 4px; }
+  .d71-tf { padding: 8px 16px 10px; }
+}
+
+/* the hover lift: the two new cards join the page's other cards */
+.d58 :is(.d71-task, .d71-fw) { transition: transform 180ms cubic-bezier(0.22, 0.8, 0.3, 1), box-shadow 180ms ease; }
+.d58 :is(.d71-task, .d71-fw):hover { z-index: 4; transform: translateY(-2px); box-shadow: 0 12px 26px rgba(28, 19, 15, 0.16), 0 2px 6px rgba(28, 19, 15, 0.08); }
+
+@media (prefers-reduced-motion: reduce) {
+  .d71-tb, .d71-prog > i > b.is-running { animation: none; }
+  .d71-th, .d71-prog, .d58 .d71-kick { transition: none; }
+  .d58 :is(.d71-task, .d71-fw) { transition: none; }
+  .d58 :is(.d71-task, .d71-fw):hover { transform: none; }
+}
+
+/* ── D · the founding writer card ──────────────────────────────────────────────────────────────
+   A white card (radius 16, 6px of rim), a 1px burgundy frame inside it, a navy band, a soft pink
+   body. ⚠️ THE OUTER CARD IS THE SIZE CONTAINER (the art column is `26cqw` of it, the signature
+   needs 420px of it); the frame and its grid sit inside, because a container query cannot restyle
+   its own container. */
+.d71-fw {
+  /* SIZE, not inline-size: the card's height always comes from its slot (a fixed row while querying,
+     the column's leftover before the first query), never its content — so it can answer to its own
+     height as well as its width */
+  container: d71fw / size;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  min-height: 0;
+  padding: 6px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(28, 19, 15, 0.08);
+}
+.d71-fwframe {
+  position: relative;
+  box-sizing: border-box;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 11px;
+  overflow: hidden;
+}
+/* the burgundy hairline, drawn over the band so the frame reads continuous */
+.d71-fwframe::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(124, 58, 42, 0.45);
+  border-radius: 11px;
+  pointer-events: none;
+}
+.d71-fwband {
+  flex: none;
+  box-sizing: border-box;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 16px 0 18px;
+  border-radius: 11px 11px 0 0;
+  background: #2a3a52;
+  color: #fff;
+}
+.d58 .d71-fwband > span {
+  font-family: var(--d58-type) !important;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  color: #fff;
+  white-space: nowrap;
+}
+.d58 .d71-fwmore {
+  flex: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font-family: var(--d58-serif) !important;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: #fff;
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.55);
+  text-underline-offset: 4px;
+  white-space: nowrap;
+}
+.d58 .d71-fwmore:focus-visible { outline: 2px solid #fff; outline-offset: 2px; border-radius: 2px; }
+.d71-fwbody {
+  flex: 1 1 0;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: clamp(84px, 26cqw, 128px) minmax(0, 1fr);
+  /* ⚠️ A DEFINITE ROW: the art's `max-height: min(…, 100%)` resolves against the row, so the row must not be
+     sized by the art — with an `auto` row the art set it, and before the first query the card grew 30px
+     past its column at 1280×800 (DB60 P10). */
+  grid-template-rows: minmax(0, 1fr);
+  align-items: center;
+  border-radius: 0 0 11px 11px;
+  background: #f3e0d7;
+}
+/* the art: vertically centred, never taller than its room — its own ground shadow shows in full */
+.d71-fwart {
+  box-sizing: border-box;
+  align-self: stretch;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 0 10px 8px;
+}
+.d71-fwart img { display: block; max-width: 100%; max-height: min(96px, 100%); width: auto; height: auto; object-fit: contain; }
+.d71-fwtxt {
+  box-sizing: border-box;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  padding: 12px 18px 12px 4px;
+  animation: d71FwIn 300ms cubic-bezier(0.22, 0.8, 0.3, 1) backwards;
+}
+@keyframes d71FwIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.d58 .d71-fw .d71-fwh {
+  margin: 0;
+  font-family: var(--d58-type) !important;
+  font-weight: 400;
+  font-size: clamp(16px, 1.2vw, 19px);
+  line-height: 1.2;
+  color: var(--d58-ink);
+  overflow-wrap: anywhere;
+}
+.d58 .d71-fwline {
+  margin: 0;
+  font-family: var(--d58-serif) !important;
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: rgba(28, 19, 15, 0.72);
+}
+.d58 .d71-fwline b { font-weight: 600; color: var(--d58-ink); }
+.d58 .d71-fwline.d71-fwfail { color: #a2452a; }
+.d71-fwrow { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 14px; margin-top: 3px; min-width: 0; }
+.d58 .d71-sig {
+  font-family: "Caveat", cursive !important;
+  font-size: 18px;
+  line-height: 1;
+  color: #a2452a;
+  white-space: nowrap;
+}
+/* the founder's full signature shows only when the card is at least 420px wide */
+@container d71fw (max-width: 419px) { .d58 .d71-sig--full { display: none; } }
+/* a short card: the line goes first, in all three states; the heading, the faces and the buttons stay */
+@container d71fw (max-height: 149px) { .d58 .d71-fwline { display: none; } }
+.d71-faces { display: flex; gap: 8px; }
+.d58 .d71-face {
+  position: relative;
+  box-sizing: border-box;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.3);
+  color: var(--d58-ink);
+  cursor: pointer;
+  transition: transform 0.14s ease, background-color 0.14s ease;
+}
+.d71-face svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.d58 .d71-face:hover { transform: translateY(-2px); background: #fff7f3; }
+.d58 .d71-face.on { background: var(--d58-ink); color: #fff; box-shadow: none; }
+.d58 .d71-face:disabled { cursor: default; }
+.d58 .d71-face:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+/* the label: an ink pill above, on hover and on keyboard focus — never a native title */
+.d58 .d71-face::after {
+  content: attr(data-label);
+  position: absolute;
+  bottom: calc(100% + 7px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--d58-ink);
+  color: #fff;
+  font-family: var(--d58-serif) !important;
+  font-size: 12px;
+  line-height: 1.3;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+  z-index: 5;
+}
+.d58 .d71-face:hover::after, .d58 .d71-face:focus-visible::after { opacity: 1; }
+.d58 .d71-say {
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 10px;
+  background: #2a3a52;
+  color: #fff;
+  font-family: var(--d58-serif) !important;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.d58 .d71-lnk {
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font-family: var(--d58-serif) !important;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: rgba(28, 19, 15, 0.6);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  white-space: nowrap;
+}
+.d58 :is(.d71-say, .d71-lnk):focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+
+/* first use: the same card at the column's own height; the art may grow to 118px */
+/* v60's 150px floor — and 128px below 820px of window: the ink header is taller than v60's bare one, and
+   at 1280×800 the lift-off tiles, the hairline and a 150px card overran the column by 15px (DB60 P10).
+   The card's line gives way below 150px of card (the container query below), the same thing that goes
+   first on a short window. (The column is at this floor at every measured size: the card never grows.) */
+.d58[data-mode="pre"] .d58-right > .d71-fw { flex: 1 1 0; min-height: 150px; }
+@media (max-height: 819px) { .d58[data-mode="pre"] .d58-right > .d71-fw { min-height: 128px; } }
+.d58[data-mode="pre"] .d71-fwart img { max-height: min(118px, 100%); }
+
+/* a short window: the line goes in all three states; nothing is cut */
+@media (max-height: 760px) {
+  .d58 .d71-fwline { display: none; }
+  .d58 .d71-face { width: 26px; height: 26px; }
+  .d71-face svg { width: 16px; height: 16px; }
+  .d58 .d71-sig { font-size: 15px; }
+  .d58 .d71-say { padding: 5px 11px; font-size: 13px; }
+  .d71-fwtxt { padding: 6px 12px 6px 2px; }
+  .d71-fwart img { max-height: min(66px, 100%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .d71-fwtxt { animation: none; }
+  .d58 .d71-face { transition: none; }
+  .d58 .d71-face:hover { transform: none; }
+}
+
+/* a narrow card (the 1100–1280px windows): the band's two texts share 330px or less, so its padding
+   and gap tighten and "Tell us anything →" steps down a size — measured, nothing leaves the frame */
+@container d71fw (max-width: 330px) {
+  .d71-fwband { padding: 0 10px 0 12px; gap: 6px; }
+  .d58 .d71-fwband > span { letter-spacing: 0.02em; font-size: 11.5px; }
+  .d58 .d71-fwmore { font-size: 12px; text-underline-offset: 3px; }
+}
+/* the narrowest supported card (271px at an 1100px window, measured): the band's texts need ~275px at
+   the 330px step's sizes, so they step down once more */
+@container d71fw (max-width: 290px) {
+  .d71-fwband { padding: 0 10px; }
+  .d58 .d71-fwband > span { letter-spacing: 0; font-size: 10.5px; }
+  .d58 .d71-fwmore { font-size: 11px; }
+}
+
+/* ── a window 700px tall or less: what gives way first (measured — see the report) ─────────────────
+   The real shell carries the beta strip (42px) that the reference does not, and at 650–680px of window
+   the chart card got 152–182px against the 216 its band, plot floor and axis need. So, in this order:
+   the header's byline goes (≈33px), the gaps under the header and between the chart and the hoops
+   tighten (14→10, 16→12), and the chart's plot floor drops from v58's 120px to 80px. Measured at
+   1366×650: the chart's frame then holds its band, plot and axis with nothing over. */
+@media (max-height: 700px) {
+  .d58[data-mode="q"] .d71-head { margin-bottom: 10px; }
+  .d58[data-mode="q"] .d71-head .d58-byline { display: none; }
+  .d58[data-mode="q"] .d58-left { gap: 12px; }
+  .d58[data-mode="q"] .os-lead .os-acplot { min-height: 80px; }
+}

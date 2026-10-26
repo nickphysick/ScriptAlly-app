@@ -29,7 +29,7 @@ import { ShellTopBar } from "./ShellV2";
 import { BetaStrip } from "./BetaStrip";
 import { DeletionBanner } from "../settings/DeletionBanner";
 import { FeedbackDock } from "./FeedbackDock";
-import { subscribeFeedback } from "../../lib/feedbackStore";
+import { notifyFeedbackSent, subscribeFeedback } from "../../lib/feedbackStore";
 import { WorkspaceShell } from "./WorkspaceShell";
 import { workspaceSections } from "../../lib/workspaceNav";
 import { AccountMenu } from "./AccountMenu";
@@ -585,13 +585,15 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
       {/* ⚠️ THE RECEIPT IS THE PANEL'S OWN "Got it" STATE. `useTodoToast` is the app's toast, and
           it is PAGE-scoped: the hook returns a toast object its caller renders, so using it here
           would mean mounting a second toast surface app-wide beside the one every To-do page
-          already draws. The seam is kept so a shell-level toast can take it the day one exists. */}
+          already draws. The seam is kept so a shell-level toast can take it the day one exists.
+          Dashboard v71: the seam publishes the send (`feedbackStore`), so the founding writer card
+          can say "Sent. Thank you." — nothing in the dock changes. */}
       <FeedbackDock
         uid={currentUser?.id}
         email={currentUser?.email ?? null}
         open={feedbackOpen}
         onOpenChange={setFeedbackOpen}
-        onReceipt={() => {}}
+        onReceipt={() => notifyFeedbackSent()}
       />
 
       </div>{/* closes .sv2-app.ws-host — EVERYTHING except the strip stays inside it, deliberately:

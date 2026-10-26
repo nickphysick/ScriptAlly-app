@@ -115,7 +115,8 @@ const readFrame = (page: Page) => page.evaluate(() => {
     plot: box(q('[data-d58="active"] .os-acplot')),
     /* RE-POINTED (Dashboard v60): the closed card is the Closed hoop card */
     closed: box(q('[data-d60="closed-hoop"]')),
-    focus: box(q('[data-d58="focus"]')),
+    /* RE-POINTED (Dashboard v71): the focus card is replaced by the task card */
+    focus: box(q('[data-d71="task"]')),
     tab: box(q('[data-d58="tab"]')),
     listTitle: box(q('[data-d58="list-title"]')),
     clips: {
@@ -123,12 +124,12 @@ const readFrame = (page: Page) => page.evaluate(() => {
       closedFrame: clip('[data-d60="closed-hoop"] .os-frame'),
       closedBody: clip('[data-d60="closed-hoop"] .d60-hb'),
       tiles: clip('[data-d60="closed-legend"]'),
-      focus: clip('[data-d58="focus"]'),
+      focus: clip('[data-d71="task"]'),
     },
     escapes: {
       active: escapes('[data-d58="active"]', [".os-mentor"]),
       closed: escapes('[data-d60="closed-hoop"]'),
-      focus: escapes('[data-d58="focus"]'),
+      focus: escapes('[data-d71="task"]'),
     },
     /* the only things that may scroll: the list and the drawer body */
     scrollers: [...document.querySelectorAll<HTMLElement>('[data-d58="page"] *')]
@@ -159,8 +160,12 @@ test("DB58 F1–F3 — one screen, never clipped, and the chart gives way", asyn
     /* REWRITTEN (Dashboard v59): the list and its scroller are retired, so nothing on the page scrolls */
     L.check("F2", `${w} scrolling regions`, f.page && f.scrollers.length === 0, `scrolls: ${f.scrollers.join(", ") || "none"}`);
     L.check("F2", `${w} closed inside the window`, !!f.closed && f.closed.b <= vp.height, `closed card bottom ${f.closed?.b} in ${vp.height}`);
-    L.check("F3", `${w} chart floor`, !!f.plot && f.plot.h >= 120, `chart ${f.plot?.h}`);
-    L.check("F2", `${w} tab clear of the title`, !!f.tab && !!f.listTitle && f.tab.y > f.listTitle.b, `tab top ${f.tab?.y} · title bottom ${f.listTitle?.b}`);
+    /* REWRITTEN (Dashboard v71): below 700px of window the plot's floor gives way to 80px — the desk header
+       and the real shell's beta strip leave the chart 152–182px there against the 216 a 120px plot needs */
+    const plotFloor = vp.height <= 700 ? 80 : 120;
+    L.check("F3", `${w} chart floor`, !!f.plot && f.plot.h >= plotFloor - 0.5, `chart ${f.plot?.h} ≥ ${plotFloor}`);
+    /* REWRITTEN (Dashboard v71): the list title is retired; the cards end 14px above the tab (DB71 L2) */
+    L.check("F2", `${w} tab clear of the task card`, !!f.tab && !!f.focus && f.tab.y > f.focus.b, `tab top ${f.tab?.y} · task card bottom ${f.focus?.b}`);
     if (f.closed && f.plot) seen[w] = { closed: f.closed.h, plot: f.plot.h };
     await shot(page, "page", vp);
   }
@@ -234,9 +239,10 @@ test("DB58 H1 — the header is the book", async ({ page }) => {
     /* retargeted by v60.1: the constant "— NOW QUERYING —" is retired; the eyebrow names the sidebar's status (DB601 S1) */
     L.check("H1", `${w} eyebrow`, !!h.sideStatus && h.eyebrow === `— ${h.sideStatus.toUpperCase()} —`, `"${h.eyebrow}" against the sidebar's "${h.sideStatus}"`);
     L.check("H1", `${w} no counts`, !!h.headerDigits && h.headerDigits.length === 0 && (h.underByline?.length ?? 1) === 0, `digits in the header: ${h.headerDigits?.join(",") || "none"}`);
-    L.check("H1", `${w} Add an agent`, h.addAgent === (vp.width >= 1440) && h.log && h.record, `add an agent visible: ${h.addAgent} at ${vp.width}`);
+    /* REWRITTEN (Dashboard v71): all three buttons show at every size (below 1200px the two ghosts are icon-only — DB71 H1) */
+    L.check("H1", `${w} Add an agent`, h.addAgent && h.log && h.record, `add an agent visible: ${h.addAgent} at ${vp.width}`);
     L.check("H1", `${w} centred`, h.centres.book != null && h.centres.btns != null && Math.abs(h.centres.book - h.centres.btns) <= 4, `book ${h.centres.book} · buttons ${h.centres.btns}`);
-    L.check("H1", `${w} no raised ground`, h.bg === "rgba(0, 0, 0, 0)" && h.shadow === "none", `${h.bg} · ${h.shadow}`);
+    /* RETIRED (Dashboard v71): "no raised ground" — the header IS a raised desk-ink panel now (DB71 H1 holds it) */
     L.check("H1", `${w} typewriter, one line`, /Special Elite/.test(h.titleFace ?? "") && h.titleLines === 1, `${h.titleFace} · ${h.titleLines} line(s)`);
   }
   L.done(16);
@@ -249,61 +255,35 @@ test("DB58 H1 — the header is the book", async ({ page }) => {
 
 /* ── R1 · R2 · R3 ──────────────────────────────────────────────────────────────────────────── */
 
+/* REWRITTEN (Dashboard v71): the right column's first card is the task card, which walks the plan's items in
+   order — so the fixed order survives as WHICH group its first item comes from, and how many it holds. */
 const readRight = (page: Page) => page.evaluate(() => {
-  const q = (s: string) => document.querySelector<HTMLElement>(s);
-  const right = q('[data-d58="right"]');
-  const body = q('[data-d58="body"]');
-  const painted: string[] = [];
-  for (let e: HTMLElement | null = right; e && body && body.contains(e); e = e.parentElement) {
-    const cs = getComputedStyle(e);
-    if (cs.backgroundColor !== "rgba(0, 0, 0, 0)" || cs.backgroundImage !== "none" || cs.boxShadow !== "none" || parseFloat(cs.borderTopWidth) + parseFloat(cs.borderLeftWidth) > 0) {
-      painted.push(`${e.getAttribute("data-d58")}: ${cs.backgroundColor} ${cs.boxShadow}`);
-    }
-  }
-  const title = q('[data-d58="list-title"]');
-  const bar = q('[data-d58="list-bar"]');
-  const rows = [...document.querySelectorAll<HTMLElement>('[data-d58="row"]')];
-  const focus = q('[data-d58="focus"]');
+  const c = document.querySelector<HTMLElement>('[data-d71="task"][data-loading="0"]');
   return {
-    right: !!right,
-    painted,
-    order: right ? [...right.children].map((c) => c.getAttribute("data-d58") ?? [...c.children].map((x) => x.getAttribute("data-d58")).join("+")) : [],
-    title: title?.textContent?.trim() ?? null,
-    titleFace: title ? getComputedStyle(title).fontFamily : null,
-    bar: bar ? { w: bar.getBoundingClientRect().width, h: bar.getBoundingClientRect().height, bg: getComputedStyle(bar).backgroundColor } : null,
-    focus: focus ? { group: focus.getAttribute("data-group"), key: focus.getAttribute("data-key"), label: q('[data-d58="focus-label"]')?.textContent?.trim(), pos: q('[data-d58="focus-pos"]')?.textContent?.replace(/[‹›]/g, "").trim() ?? null, act: q('[data-d58="focus-act"]')?.textContent?.trim(), text: q('[data-d58="focus-say"]')?.textContent?.trim() } : null,
-    then: q('[data-d58="then"]')?.innerText.replace(/\s+/g, " ").trim() ?? null,
-    groups: [...document.querySelectorAll<HTMLElement>('[data-d58="group"]')].map((g) => ({ key: g.getAttribute("data-group"), label: g.querySelector("span")?.textContent?.trim(), n: Number(g.querySelector("b")?.textContent) })),
-    rows: rows.map((r) => ({ key: r.getAttribute("data-key"), group: r.getAttribute("data-group") })),
-    counts: right ? JSON.parse(right.getAttribute("data-counts") ?? "{}") as Record<string, number> : {},
-    extras: [...document.querySelectorAll<HTMLElement>('[data-d58="coming-extra"] button')].map((b) => b.innerText.replace(/\s+/g, " ").trim()),
-    list: (() => { const l = q('[data-d58="list"]'); return l ? { pb: getComputedStyle(l).paddingBottom, oy: getComputedStyle(l).overflowY } : null; })(),
+    right: !!document.querySelector('[data-d58="right"]'),
+    focus: c && c.dataset.kind !== "none" ? {
+      group: c.dataset.group ?? null, key: c.dataset.key ?? null, kind: c.dataset.kind ?? "",
+      label: c.querySelector('[data-d71="kicker"]')?.textContent?.trim() ?? null,
+      pos: c.querySelector('[data-d71="pos-text"]')?.textContent?.trim() ?? null,
+      act: c.querySelector('[data-d71="view"]')?.textContent?.trim() ?? null,
+    } : null,
+    counts: c ? JSON.parse(c.getAttribute("data-counts") ?? "{}") as Record<string, number> : {},
   };
 });
 
-test("DB58 R1 — the right column has no container", async ({ page }) => {
-  const L = new Ledger("right");
-  for (const vp of [SIZES[0], SIZES[2]]) {
-    await openDash(page, vp);
-    const r = await readRight(page);
-    const w = tag(vp);
-    /* REWRITTEN (Dashboard v59): no rows — the column is the title, one focus card, a hairline and the panel (DB59 R1) */
-    L.check("R1", `${w} population`, r.right && !!r.focus && r.rows.length === 0, `focus ${r.focus?.key} · ${r.rows.length} rows`);
-    L.check("R1", `${w} nothing painted behind it`, r.right && r.painted.length === 0, r.painted.join(" | ") || "nothing");
-    L.check("R1", `${w} order`, /^list-head>focus>(coming-extra>)?rule>panel$/.test(r.order.join(">")), r.order.join(">"));
-    L.check("R1", `${w} title`, r.title === "What's on the list today?" && /Special Elite/.test(r.titleFace ?? ""), `"${r.title}" in ${r.titleFace}`);
-    L.check("R1", `${w} the rust bar`, !!r.bar && Math.abs(r.bar.w - 44) <= 0.5 && Math.abs(r.bar.h - 3) <= 0.5 && r.bar.bg === "rgb(176, 96, 62)", JSON.stringify(r.bar));
-    /* RETIRED (Dashboard v59): "the list scrolls inside, clear of the tab" — the list is on the To-do page */
-  }
-  L.done(10);
-});
+/* ⚠️ RETIRED BY DASHBOARD v71: DB58 R1 ("the right column has no container": the title, the rust bar,
+   the order list-head > focus > rule > panel). The querying column is two cards now — DB71 L1 holds its
+   order and the absence of the title, "All {n}" and the hairline. */
 
 const LABEL: Record<string, string> = { req: "AGENTS ARE WAITING", nudge: "WORTH A NUDGE", quiet: "GONE QUIET", house: "HOUSEKEEPING", ready: "READY TO QUERY", coming: "COMING UP" };
 const ORDER = ["req", "nudge", "quiet", "house", "ready", "coming"];
 
+const KIND_KICKER: Record<string, string> = { nudge: "TIME TO NUDGE", close: "CONSIDER CLOSING", send: "YOUR MOVE · SEND" };
+
 test("DB58 R2 — the fixed order, on the rendered page", async ({ page }) => {
   const L = new Ledger("order");
   const vp = SIZES[0];
+  await page.emulateMedia({ reducedMotion: "reduce" }); // the card stays put while it is read
   /* each state is the account's own items with the earlier groups left out */
   const states: { name: string; drop: string[] }[] = [
     { name: "A as the account stands", drop: [] },
@@ -319,35 +299,28 @@ test("DB58 R2 — the fixed order, on the rendered page", async ({ page }) => {
     const live = ORDER.filter((k) => !s.drop.includes(k) && (r.counts[k] ?? 0) > 0);
     const work = live.filter((k) => ["req", "nudge", "quiet", "house"].includes(k));
     const expectFirst = work[0] ?? (live.includes("ready") ? "ready" : "coming");
-    const expectGroups = work.length ? work : [expectFirst];
-    L.check("R2", `${s.name} · population`, !!r.focus || expectFirst === "coming", `counts ${JSON.stringify(r.counts)}`);
+    const shown = work.length ? work : [expectFirst];
+    const n = shown.reduce((t, k) => t + (r.counts[k] ?? 0), 0);
+    L.check("R2", `${s.name} · population`, !!r.focus || n === 0, `counts ${JSON.stringify(r.counts)}`);
     if (r.focus) tally[r.focus.group ?? "?"] = (tally[r.focus.group ?? "?"] ?? 0) + 1;
-    L.check("R2", `${s.name} · the focus is the first group`, (r.focus?.group ?? "coming") === expectFirst, `focus ${r.focus?.group} · expected ${expectFirst} from ${JSON.stringify(r.counts)}`);
-    L.check("R2", `${s.name} · label`, !r.focus || r.focus.label === LABEL[r.focus.group ?? ""], `"${r.focus?.label}"`);
-    /* RETIRED (Dashboard v59): "groups in order, none skipped" and "the row groups never go backwards" —
-       the rows are on the To-do page; the order survives as WHICH group the focus card holds (above) */
-    void expectGroups;
-    const n = r.counts[expectFirst] ?? 0;
-    L.check("R2", `${s.name} · the count`, !r.focus || (n > 1 ? r.focus.pos === `1 OF ${n}` : !r.focus.pos), `"${r.focus?.pos}" for ${n}`);
-    /* RETIRED (Dashboard v59): "Then or Also" — the row is gone; "All {n} →" is DB59 R1 */
-    if (expectFirst === "coming") {
-      L.check("R2", `${s.name} · Add an agent and Discover agents`, r.extras.length === 2 && /Add an agent/.test(r.extras[0]) && /Discover agents/.test(r.extras[1]) && /SOON/.test(r.extras[1]), r.extras.join(" | "));
-    }
-    /* › steps through the first group only */
+    L.check("R2", `${s.name} · the first item is the first group's`, (r.focus?.group ?? "coming") === expectFirst, `first ${r.focus?.group} · expected ${expectFirst} from ${JSON.stringify(r.counts)}`);
+    L.check("R2", `${s.name} · label`, !r.focus || r.focus.label === (KIND_KICKER[r.focus.kind] ?? LABEL[r.focus.group ?? ""]), `"${r.focus?.label}" (${r.focus?.kind})`);
+    L.check("R2", `${s.name} · the count is every item shown`, !r.focus || (n > 1 ? r.focus.pos === `1 OF ${n}` : !r.focus.pos), `"${r.focus?.pos}" for ${n}`);
+    L.check("R2", `${s.name} · View task`, !r.focus || r.focus.act === "View task →", `"${r.focus?.act}"`);
+    /* RETIRED (Dashboard v71): the coming-up "Add an agent / Discover agents" pair — the column is two cards */
     if (r.focus && n > 1) {
       const first = r.focus.key;
-      await page.locator('[data-d58="focus-next"]').click();
+      await page.locator('[data-d71="next"]').click();
       await page.waitForTimeout(250);
       const r2 = await readRight(page);
-      L.check("R2", `${s.name} · › steps to the second`, r2.focus?.pos === `2 OF ${n}` && r2.focus.key !== first && r2.focus.group === expectFirst, `"${r2.focus?.pos}" · ${first} → ${r2.focus?.key}`);
-      /* RETIRED (Dashboard v59): "the first goes back into the list, first" — there is no list */
+      L.check("R2", `${s.name} · › steps to the second`, r2.focus?.pos === `2 OF ${n}` && r2.focus.key !== first, `"${r2.focus?.pos}" · ${first} → ${r2.focus?.key}`);
     }
     const name = s.name[0] === "C" ? "state-housekeeping" : s.name[0] === "D" ? "state-ready" : s.name[0] === "E" ? "state-coming-up" : null;
     if (name) for (const v of [SIZES[0], SIZES[2]]) { await openDash(page, v, { __SA_DASH_DROP: s.drop }); await shot(page, name, v); }
   }
-  console.log(`  R2 focus groups seen: ${JSON.stringify(tally)}`);
+  console.log(`  R2 first groups seen: ${JSON.stringify(tally)}`);
   L.check("R2", "more than one state was entered", Object.keys(tally).length >= 3, JSON.stringify(tally));
-  L.done(18);
+  L.done(22);
 });
 
 /* RETIRED (Dashboard v59): DB58 R3 — "an action opens the flow and writes nothing". The tick went with
