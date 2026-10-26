@@ -128,19 +128,19 @@ async function answer(page: Page, label: string) {
   await page.locator(".mk-pv4how button", { hasText: label }).first().click();
 }
 
-test("PV4-3 the questions open, gate each step, and turn exactly the fitting tile navy", async ({ page }) => {
+test("PV4-3 the questions open, gate each step, and check and flag exactly the fitting row", async ({ page }) => {
   await open(page, { width: 1440, height: 900 }, true);
   const how = page.locator("#how-long");
   await expect(how, "hidden until the link opens it").toBeHidden();
-  await page.click(".mk-pv4suit");
+  await page.click(".mk-lsuit");
   await expect(how).toBeVisible();
-  await expect(page.locator(".mk-pv4suit")).toHaveAttribute("aria-expanded", "true");
-  await expect(page.locator(".mk-pv4suit")).toHaveText("Hide the questions");
+  await expect(page.locator(".mk-lsuit")).toHaveAttribute("aria-expanded", "true");
+  await expect(page.locator(".mk-lsuit")).toHaveText("Hide the questions");
   await page.waitForTimeout(500);
   await expect(page.locator(".mk-jyq"), "focus moves to the first question").toBeFocused();
 
   const next = page.locator(".mk-jynext");
-  expect(await page.locator(".mk-pv4ptile--fit").count(), "no tile navy before a result").toBe(0);
+  expect(await page.locator(".mk-rung--fit").count(), "no row flagged before a result").toBe(0);
   await expect(next, "question 1 opens with Next disabled").toBeDisabled();
   await answer(page, "Getting ready");
   await expect(next).toBeEnabled();
@@ -179,18 +179,19 @@ test("PV4-3 the questions open, gate each step, and turn exactly the fitting til
   await expect(page.locator(".mk-jybig")).toHaveText(want.label);
   await expect(page.locator(".mk-jywhy")).toHaveText(want.why);
   expect(Number(await page.locator(".mk-jyplan").getAttribute("data-fit"))).toBe(want.fit);
-  /* The fit reaches the tiles in an effect after the result paints — wait for it, never sample. */
-  await expect(page.locator(".mk-pv4ptile--fit")).toHaveCount(1);
-  const navy = await page.locator(".mk-pv4ptile--fit").evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.m));
-  console.log("PV4-3", JSON.stringify({ label: want.label, fit: want.fit, navy }));
-  expect(navy, "exactly the fitting tile is navy").toEqual([String(want.fit)]);
-  const bg = await page.locator(".mk-pv4ptile--fit").evaluate((e) => getComputedStyle(e).backgroundColor);
-  expect(bg, "and it is the navy").toBe("rgb(42, 58, 82)");
+  /* RETARGET (pricing ladder, 26 Oct): the tiles are gone; the fit reaches the Pro card's ladder in an
+     effect after the result paints — wait for it, never sample. */
+  await expect(page.locator(".mk-rung--fit")).toHaveCount(1);
+  const flagged = await page.locator(".mk-rung--fit").evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.m));
+  const checked = await page.locator('.mk-rung[aria-checked="true"]').evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.m));
+  console.log("PV4-3", JSON.stringify({ label: want.label, fit: want.fit, flagged, checked }));
+  expect(flagged, "exactly the fitting row is flagged").toEqual([String(want.fit)]);
+  expect(checked, "and it is the one checked").toEqual([String(want.fit)]);
 });
 
 test("PV4-4 the faces", async ({ page }) => {
   await open(page, { width: 1440, height: 900 }, true);
-  await page.click(".mk-pv4suit");
+  await page.click(".mk-lsuit");
   await page.waitForTimeout(500);
   /* ⚠️ `fonts.load`, NOT `fonts.check` ALONE: a face is fetched when something first asks for it, so
      a check made before that answers false about a page that is fine. `load` resolves with the faces
@@ -212,10 +213,10 @@ test("PV4-4 the faces", async ({ page }) => {
     expect(f.family, sel).toBe(family);
     if (weight) expect(f.weight, `${sel} weight`).toBe(weight);
   };
-  for (const s of [".mk-fbh1", ".mk-pv4pprice", ".mk-jyq"]) await expectFace(s, "Special Elite", "400");
+  for (const s of [".mk-fbh1", ".mk-rungprice", ".mk-jyq"]) await expectFace(s, "Special Elite", "400");
   await expectFace(".mk-fbsub", "Source Serif 4");
   await expectFace(".mk-fbform button", "Source Serif 4");
-  await expectFace(".mk-pv4suit", "Source Serif 4");
+  await expectFace(".mk-lsuit", "Source Serif 4");
   for (const s of [".mk-fbtag", ".mk-fbcount .mk-fmmeta", ".mk-fbmore"]) await expectFace(s, "JetBrains Mono");
   /* the estimate, after a short drive */
   await answer(page, "Ready to start"); await page.click(".mk-jynext");
@@ -245,7 +246,7 @@ test("shots: top closed and open, Pro plans on question 1, the result — app be
      phone tree, which `pricingMobile.measure.ts`'s own shots photograph beside the phone ref. */
   for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
     const sides: [string, string, Record<string, string>][] = [
-      ["app", "/pricing", { more: ".mk-fbmore", link: ".mk-pv4suit", plans: ".mk-pv4plans", next: ".mk-jynext", btn: ".mk-pv4how button", res: ".mk-jyplan" }],
+      ["app", "/pricing", { more: ".mk-fbmore", link: ".mk-lsuit", plans: ".mk-lpair", next: ".mk-jynext", btn: ".mk-pv4how button", res: ".mk-jyplan" }],
       ["ref", REF, { more: ".fbmore", link: ".suit-link", plans: ".plansbox", next: ".jy-step:not([hidden]) .jy-next", btn: ".suit button", res: ".jy-plan" }],
     ];
     for (const [side, url, s] of sides) {

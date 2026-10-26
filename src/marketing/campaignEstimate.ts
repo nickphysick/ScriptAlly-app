@@ -128,12 +128,12 @@ export const estimateCampaign = (a: CampaignAnswers, today: Date): CampaignEstim
 
   const fit = fitFor(months);
   const over = months - fit;
-  /* ⚠️ A PLAN IS EXTENDED BY QUERYHAWK GETTING IN TOUCH, NOT BY BUYING A MONTH (Nick, 24 Oct). The two
-     tails that ran past the plan used to sell an extra month at £5.99; both now say what happens
-     instead, word for word as design-refs/pricing-page-mobile-v1.html's script prints them. The page
-     states no price the policy does not have. */
-  const tail = months > 13 ? "If you're still querying after that, we'll be in touch with options to extend."
-    : over > 0.25 ? "If your last replies run late, we'll be in touch with options to extend."
+  /* ⚠️ A PLAN CARRIES ON MONTH BY MONTH ONCE IT ENDS (Nick, 26 Oct; ref pricing-plans-ladder-v1.html's
+     wording panel). The two tails that run past the plan say so, and nothing more: the roll-on's price
+     and the reminder live in the small print and the FAQ, so the result card does not restate them.
+     (Before: 24 Oct "we'll be in touch with options to extend"; before that, a month at £5.99.) */
+  const tail = months > 13 ? "If you're still querying after that, your plan simply carries on month by month."
+    : over > 0.25 ? "If your last replies run late, your plan simply carries on month by month until you're done."
     : fit - months > 2 ? "It leaves room for slow replies, or for revising if an agent asks."
     : "There's a little room in it for slow replies.";
 

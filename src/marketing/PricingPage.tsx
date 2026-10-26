@@ -27,16 +27,16 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   PRICING_DOCUMENT_TITLE, PV4_KICKER, PV4_H1, PV4_SUB, PV4_MORE, PV4_LESS, PV4_PERKS,
-  PV4_STEPS_H, PV4_STEPS, PV4_LAUNCH_LINE, PV4_FREE, PV4_PRO,
-  PRO_FROM, PV4_FAQ_H2, PV4_FAQ, PV4_SOURCE_NOTE, PRO_PLANS, PLANS_TITLE, PLANS_SUB, planMonths,
-  planPrice, planTileLine, SUIT_LINK, SUIT_HIDE,
+  PV4_STEPS_H, PV4_STEPS, PV4_LAUNCH_LINE, PV4_FAQ_H2, PV4_FAQ, PV4_SOURCE_NOTE, SUIT_LINK, SUIT_HIDE,
+  LADDER_DEFAULT,
 } from "./pricingCopy";
+import { FreeCard, ProCard, Compass, type Months } from "./PricingPlans";
 import { FoundingSignup, FoundingCounter } from "./FoundingSignup";
 import { CampaignJourney } from "./CampaignJourney";
 import { Runs } from "./CopyRuns";
 import { FOUNDING_ART, artUrl } from "./brandArt";
 import { usePhone } from "./usePhone";
-import { Price, PERK_ICON } from "./pricingParts";
+import { PERK_ICON } from "./pricingParts";
 import { PricingPhone } from "./PricingPhone";
 
 /**
@@ -145,9 +145,11 @@ export const PricingPage: React.FC<{ onNavigate: (tab: string, subPageName?: str
 const PricingDesktop: React.FC<{ onNavigate: (tab: string, subPageName?: string) => void }> = ({ onNavigate }) => {
 
   /* "Which plan suits me best?": the questions are hidden until the link (or the FAQ's link) opens
-     them; the plan they arrive at turns its tile navy. Their answers survive closing them. */
+     them; the plan they arrive at is checked in the ladder and flagged. Their answers survive closing them. */
   const [suitOpen, setSuitOpen] = useState(false);
-  const [fit, setFit] = useState<number | null>(null);
+  const [fit, setFit] = useState<Months | null>(null);
+  /* The ladder's checked row: 6 months until the reader picks another, or a result picks the one that fits. */
+  const [selected, setSelected] = useState<Months>(LADDER_DEFAULT);
   const [focusKey, setFocusKey] = useState(0);
   const pending = useRef(false);
   const openQuestions = () => { pending.current = true; setSuitOpen(true); };
@@ -165,72 +167,43 @@ const PricingDesktop: React.FC<{ onNavigate: (tab: string, subPageName?: string)
     e.preventDefault();
     if (suitOpen) scrollToQuestions(); else openQuestions();
   };
-  const onFit = useCallback((m: number) => setFit(m), []);
+  /* A result checks the row that fits and flags it — exactly one row, the estimate's. */
+  const onFit = useCallback((m: Months) => { setFit(m); setSelected(m); }, []);
 
   return (
     <div className="mk-pv4">
       <FoundingBox onNavigate={onNavigate} />
 
-      {/* ── Then, once we launch: the two tiers, hanging over the band's lower edge ── */}
+      {/* ── Then, once we launch: Free and Pro side by side, the four Pro lengths as a ladder inside the
+          Pro card (pricing ladder, 26 Oct; ref pricing-plans-ladder-v1.html). The separate Pro plans box
+          and its four tiles are gone: the ladder IS the plans. ── */}
       <section className="mk-pv4soon" aria-labelledby="mk-pv4-launch">
         <p id="mk-pv4-launch" className="mk-pv4launch">{PV4_LAUNCH_LINE}</p>
-        <div className="mk-pv4tiers">
-          <article className="mk-pv4tier mk-pv4tier--free">
-            <h2 className="mk-pv4tname">{PV4_FREE.name}</h2>
-            <Price amount={PV4_FREE.price} />
-            <p className="mk-pv4tsub">{PV4_FREE.sub}</p>
-            <ul className="mk-pv4tlist">
-              {PV4_FREE.list.map((f) => <li key={f}>{f}</li>)}
-            </ul>
-          </article>
-          <article className="mk-pv4tier mk-pv4tier--pro">
-            <h2 className="mk-pv4tname">{PV4_PRO.name}</h2>
-            <Price amount={PRO_FROM} from={PV4_PRO.from} per={PV4_PRO.per} />
-            <p className="mk-pv4tsub">{PV4_PRO.sub}</p>
-            <ul className="mk-pv4tlist">
-              <li className="mk-pv4plus">{PV4_PRO.plus}</li>
-              {PV4_PRO.list.map((f) => <li key={f}>{f}</li>)}
-            </ul>
-            <p className="mk-pv4flex">{PV4_PRO.flex}</p>
-          </article>
+        <div className="mk-lpair">
+          <FreeCard />
+          <ProCard
+            selected={selected}
+            fit={fit}
+            onSelect={setSelected}
+            suit={
+              <button
+                type="button"
+                className="mk-lsuit"
+                aria-expanded={suitOpen}
+                aria-controls="how-long"
+                onClick={toggleQuestions}
+              >
+                <Compass />{suitOpen ? SUIT_HIDE : SUIT_LINK}
+              </button>
+            }
+          />
         </div>
 
-        {/* ── Pro plans: one hairline container round the four plans and the questions. The prices are
-            the one table in `pricingCopy.ts`. ── */}
-        <div className="mk-pv4plans">
-          <div className="mk-pv4phead">
-            <div>
-              <h2 className="mk-pv4ptitle">{PLANS_TITLE}</h2>
-              <p className="mk-pv4psub">{PLANS_SUB}</p>
-            </div>
-            <button
-              type="button"
-              className="mk-pv4suit"
-              aria-expanded={suitOpen}
-              aria-controls="how-long"
-              onClick={toggleQuestions}
-            >
-              {suitOpen ? SUIT_HIDE : SUIT_LINK}
-            </button>
-          </div>
-          <ul className="mk-pv4pgrid">
-            {PRO_PLANS.map((p) => {
-              const line = planTileLine(p);
-              return (
-                <li className={"mk-pv4ptile" + (p.months === fit ? " mk-pv4ptile--fit" : "")} key={p.months} data-m={p.months}>
-                  <p className="mk-pv4pname">{planMonths(p.months)}</p>
-                  <b className="mk-pv4pprice">{planPrice(p)}</b>
-                  <small className="mk-pv4pline">{line.lead}{line.save && <em>{line.save}</em>}</small>
-                </li>
-              );
-            })}
-          </ul>
-
-          {/* ── Which plan suits me best? — hidden until the link opens it ── */}
-          <div className="mk-pv4how" id="how-long" hidden={!suitOpen}>
-            <CampaignJourney onFit={onFit} focusKey={focusKey} />
-            <p className="mk-pv4source"><Runs runs={PV4_SOURCE_NOTE} onNavigate={onNavigate} /></p>
-          </div>
+        {/* ── Which plan suits me best? — inline, directly beneath the cards, hidden until the link (or the
+            FAQ's link) opens it. The container keeps the old Pro plans box's width, hairline and radius. ── */}
+        <div className="mk-pv4how" id="how-long" hidden={!suitOpen}>
+          <CampaignJourney onFit={onFit} focusKey={focusKey} />
+          <p className="mk-pv4source"><Runs runs={PV4_SOURCE_NOTE} onNavigate={onNavigate} /></p>
         </div>
       </section>
 

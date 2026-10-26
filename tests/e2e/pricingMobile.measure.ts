@@ -10,12 +10,12 @@
  *   PVM-2 the box         across the join; the drawing mirrored and perched above it; the sheet not moved
  *   PVM-3 the first screen  H1, counter, field, Claim and the toggle all on screen at 390 × 844
  *   PVM-4 the carousel    swiping to the third perk moves the current dot to the third
- *   PVM-5 the tiers       switch and track agree after a tap and after a swipe; Free shorter than Pro
+ *   PVM-5 RETIRED (26 Oct) with the swipe track — the tabs are pricingLadder.measure.ts PL-3
  *   PVM-6 the sheet       modal: focus held, page still; Escape returns focus; the result lights one tile
  *   PVM-7 the sticky bar  hidden by the form, shown once it is gone, hidden by the sheet, absent with
  *                         no figure, never over the footer's links; its button brings the field back
  *   PVM-8 the accordion   a question opens with aria-expanded and shows its answer
- *   PVM-9 the copy        no "pass", no £5.99 in any of the four tails, the eight questions verbatim
+ *   PVM-9 RETIRED (26 Oct) into pricingLadder.measure.ts PL-5, at both widths
  *   PVM-10 the faces      Special Elite 400 / Source Serif 4 / JetBrains Mono where the ref puts them
  *
  *   PVM_MUTATE=<name>  applies a lock's named CSS break in the page, to prove it goes red.
@@ -38,9 +38,6 @@ const TODAY = "2026-10-24T12:00:00";
 const SHOTS = "reports/pricing-v4-mobile/shots";
 const REF = "file://" + resolve("design-refs/pricing-page-mobile-v1.html");
 const MUTATE = process.env.PVM_MUTATE ?? "";
-/* Read, not imported: Playwright's loader wants an import attribute for JSON, which the app's
-   TypeScript config does not take. */
-const refCases = JSON.parse(readFileSync(resolve("src/marketing/campaignEstimate.ref.json"), "utf8")) as unknown[];
 const PHONES = [{ width: 390, height: 844 }, { width: 375, height: 667 }];
 
 /** Each lock's named CSS break, applied after load. */
@@ -56,7 +53,6 @@ const MUTATIONS: Record<string, string> = {
   /* PVM-3 */
   fold: ".mk-pvm .mk-pvin{padding-top:300px!important}",
   /* PVM-5 */
-  stretch: ".mk-pvm .mk-pvtrack{align-items:stretch!important}",
   /* PVM-7 */
   stickshow: ".mk-pvlayer.mk-pvstick{transform:none!important;visibility:visible!important}",
   stickpad: ".mk-scope:has(.mk-pvstick.mk-on){padding-bottom:0!important}",
@@ -211,43 +207,17 @@ for (const vp of PHONES) {
   });
 }
 
-/* ═══════════════ PVM-5 the tiers ═══════════════ */
-for (const vp of PHONES) {
-  test(`PVM-5 @${vp.width}: the switch and the track agree after a tap and after a swipe; Free is shorter than Pro`, async ({ page }) => {
-    await open(page, vp);
-    const sel = () => page.$$eval(".mk-pvseg [role=tab]", (b) => b.map((x) => x.getAttribute("aria-selected")));
-    const where = () => page.locator(".mk-pvtrack").evaluate((el) => {
-      const [free, pro] = [...el.querySelectorAll<HTMLElement>(".mk-pvtier")];
-      return { left: el.scrollLeft, free: free.offsetLeft - 18, pro: Math.min(pro.offsetLeft - 18, el.scrollWidth - el.clientWidth) };
-    });
-    expect(await sel()).toEqual(["true", "false"]);
-    await page.click(".mk-pvseg [role=tab]:nth-of-type(2)");
-    await page.waitForTimeout(400);
-    let w = await where();
-    console.log(`PVM-5 @${vp.width} tap Pro`, JSON.stringify(w), await sel());
-    expect(await sel(), "a tap on Pro selects Pro").toEqual(["false", "true"]);
-    expect(Math.abs(w.left - w.pro), "…and scrolls the track to the Pro card").toBeLessThan(2);
-    /* A swipe back to Free. */
-    await page.locator(".mk-pvtrack").evaluate((el) => el.scrollTo({ left: 0, behavior: "instant" as ScrollBehavior }));
-    await page.waitForTimeout(250);
-    w = await where();
-    console.log(`PVM-5 @${vp.width} swipe Free`, JSON.stringify(w), await sel());
-    expect(await sel(), "a swipe back moves the switch to Free").toEqual(["true", "false"]);
-    const thumb = await page.locator(".mk-pvseg").getAttribute("data-on");
-    expect(thumb, "…and the thumb with it").toBe("0");
-    const free = await rect(page, "#mk-pvtier-free"), pro = await rect(page, "#mk-pvtier-pro");
-    console.log(`PVM-5 @${vp.width} heights free ${free.height} pro ${pro.height}`);
-    expect(free.height, "the Free card keeps its own height").toBeLessThan(pro.height);
-  });
-}
+/* PVM-5 (the Free / Pro swipe track) is RETIRED with the track (pricing ladder, 26 Oct): the phone shows
+   pinned tabs over one card now, locked by pricingLadder.measure.ts PL-3. See RETIRED-pricing-ladder.md. */
 
 /* ═══════════════ PVM-6 the sheet ═══════════════ */
 for (const vp of PHONES) {
-  test(`PVM-6 @${vp.width}: the sheet is modal, Escape returns focus, and the result lights exactly one tile`, async ({ page }) => {
+  /* RETARGET (pricing ladder, 26 Oct): opened from the Pro card's link; what "See it in the plans" does
+     to the ladder and the tabs is pricingLadder.measure.ts PL-2's, so this case ends at the close. */
+  test(`PVM-6 @${vp.width}: the sheet is modal, Escape returns focus, and "See it in the plans" closes it`, async ({ page }) => {
     await open(page, vp);
-    const plansTop = await docTop(page, ".mk-pvplans");
-    await scrollTo(page, plansTop - 120);
-    await page.click(".mk-pvsuit");
+    await scrollTo(page, (await docTop(page, ".mk-pvlaunch")) - 60);
+    await page.click(".mk-pvm .mk-lsuit");
     await expect(page.locator(".mk-pvjs")).toHaveClass(/mk-open/);
     const inSheet = () => page.evaluate(() => !!document.activeElement && !!document.querySelector(".mk-pvsheet")!.contains(document.activeElement));
     expect.soft(await inSheet(), "focus moved into the sheet").toBe(true);
@@ -268,7 +238,7 @@ for (const vp of PHONES) {
     await page.keyboard.press("Escape");
     await expect(page.locator(".mk-pvjs")).not.toHaveClass(/mk-open/);
     const back = await page.evaluate(() => document.activeElement?.className ?? "");
-    expect.soft(back, "focus returned to the opener").toContain("mk-pvsuit");
+    expect.soft(back, "focus returned to the opener").toContain("mk-lsuit");
     expect.soft(await page.evaluate(() => getComputedStyle(document.documentElement).overflow), "the page scrolls again").not.toBe("hidden");
     /* Open from the FAQ's link this time, drive to case (a)'s result, and see it in the plans. */
     await page.locator(".mk-pvqa > button", { hasText: "Which plan should I choose?" }).click();
@@ -277,17 +247,7 @@ for (const vp of PHONES) {
     await drive(page, CASE_A);
     await page.click(".mk-pvsheet .mk-pvjsnext");
     await expect(page.locator(".mk-pvjs")).not.toHaveClass(/mk-open/);
-    /* ⚠️ WAIT FOR THE SCROLL TO ARRIVE, not for a fixed time: it starts 300ms after the close and is
-       smooth, so a reading taken on a timer is a reading of the page in flight. */
-    await settleScroll(page);
-    const want = estimateCampaign({ stage: "prep", kind: "novel", len: "m", agents: 40, agentsUnknown: true, pace: "unsure" }, new Date(TODAY)).fit;
-    const lit = await page.$$eval(".mk-pvpt--fit", (t) => t.map((x) => Number((x as HTMLElement).dataset.m)));
-    const plans = await rect(page, ".mk-pvplans");
-    console.log(`PVM-6 @${vp.width} lit ${JSON.stringify(lit)} want ${want} plansTop ${plans.top.toFixed(1)}`);
-    expect(lit, "exactly one tile is navy, the estimate's").toEqual([want]);
-    expect(await page.locator(".mk-pvpt--fit").evaluate((e) => getComputedStyle(e).backgroundColor), "and it is the navy").toBe("rgb(42, 58, 82)");
-    expect(plans.top, "Pro plans was brought into view, under the nav").toBeGreaterThanOrEqual(55);
-    expect(plans.top, "…near the top of the screen").toBeLessThan(vp.height / 2);
+    expect.soft(await page.evaluate(() => getComputedStyle(document.documentElement).overflow), "the page scrolls again after the result").not.toBe("hidden");
   });
 }
 
@@ -303,8 +263,8 @@ for (const vp of PHONES) {
     await scrollTo(page, await docTop(page, ".mk-pvlaunch"));
     expect.soft(await shown(), "shown once the form has scrolled away").toBe(true);
     /* hidden while the questions sheet is open */
-    await scrollTo(page, (await docTop(page, ".mk-pvplans")) - 120);
-    await page.click(".mk-pvsuit");
+    await scrollTo(page, (await docTop(page, ".mk-pvlaunch")) - 60);
+    await page.click(".mk-pvm .mk-lsuit");
     await expect(page.locator(".mk-pvjs")).toHaveClass(/mk-open/);
     expect.soft(await shown(), "hidden while the sheet is open").toBe(false);
     await page.keyboard.press("Escape");
@@ -358,52 +318,9 @@ test("PVM-8 opening a question sets aria-expanded and shows its answer", async (
   expect(a.height, "…with its text").toBeGreaterThan(40);
 });
 
-/* ═══════════════ PVM-9 the copy ═══════════════ */
-/** The ref's eight questions, read from the ref's own script — the page must say them verbatim. */
-const REF_QAS: [string, string][] = (() => {
-  const src = readFileSync(resolve("design-refs/pricing-page-mobile-v1.html"), "utf8");
-  const start = src.indexOf("const QAS = [");
-  const end = src.indexOf("];", start);
-  if (start < 0 || end < 0) throw new Error("the ref's QAS array was not found");
-  return new Function("return " + src.slice(start + "const QAS = ".length, end + 1))() as [string, string][];
-})();
-const flat = (s: string) => s.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
-test("PVM-9 no 'pass', no £5.99 in any of the four tails, and the eight questions verbatim", async ({ page }) => {
-  test.setTimeout(180_000);
-  await open(page, { width: 390, height: 844 });
-  /* Every question open, so the answers are read as shown. */
-  for (const b of await page.locator(".mk-pvqa > button").all()) await b.click();
-  const qa = await page.$$eval(".mk-pvqa", (els) => els.map((e) => [e.querySelector("button span")!.textContent!, (e.querySelector(".mk-pvqaa") as HTMLElement).innerText]));
-  expect.soft(REF_QAS.length, "the ref has eight questions (not vacuous)").toBe(8);
-  expect.soft(qa.map(([q, a]) => [q, flat(a)]), "the eight questions and answers, verbatim").toEqual(REF_QAS.map(([q, a]) => [q, flat(a)]));
-  /* One case per tail, from the ref's own recording on this date. */
-  const today = TODAY.slice(0, 10);
-  const byTail = new Map<string, CampaignAnswers>();
-  for (const c of refCases as { today: string; answers: CampaignAnswers; tail: string }[]) if (c.today === today && !byTail.has(c.tail)) byTail.set(c.tail, c.answers);
-  expect.soft(byTail.size, "the four tails are all exercised").toBe(4);
-  const seen: string[] = [];
-  await scrollTo(page, (await docTop(page, ".mk-pvplans")) - 120);
-  for (const [tail, a] of byTail) {
-    await page.click(".mk-pvsuit");
-    await expect(page.locator(".mk-pvjs")).toHaveClass(/mk-open/);
-    if (await page.locator(".mk-pvsheet .mk-pvres").count()) await page.click(".mk-pvsheet .mk-pvresagain");
-    await drive(page, { ...a, agents: a.agentsUnknown ? "idk" : a.agents });
-    const got = await page.locator(".mk-pvsheet .mk-pvrestail").innerText();
-    seen.push(got);
-    expect.soft(got, "the tail is the estimate module's").toBe(estimateCampaign(a, new Date(TODAY)).tail);
-    expect.soft(got, "and the ref's").toBe(tail);
-    expect.soft(await page.locator(".mk-pvsheet").innerText(), "no £5.99 in any result").not.toMatch(/5\.99/);
-    await page.keyboard.press("Escape");
-    await expect(page.locator(".mk-pvjs")).not.toHaveClass(/mk-open/);
-  }
-  console.log("PVM-9 tails", JSON.stringify(seen));
-  /* The whole page, sheet included, open: no "pass" or "passes" anywhere. */
-  await page.click(".mk-pvsuit");
-  const text = await page.evaluate(() => document.body.innerText);
-  const passes = text.match(/\bpass(es)?\b/gi) ?? [];
-  expect.soft(passes, "the page never calls a plan a pass").toEqual([]);
-  expect.soft(text, "no £5.99 anywhere on the page").not.toMatch(/5\.99/);
-});
+/* PVM-9 (the copy) is RETIRED into pricingLadder.measure.ts PL-5 (26 Oct), which checks the same things
+   at both widths against the ladder ref's wording: no "pass", no £5.99 or "options to extend", the four
+   tails, and the eight questions verbatim. See RETIRED-pricing-ladder.md. */
 
 /* ═══════════════ PVM-10 the faces ═══════════════ */
 test("PVM-10 the faces: Special Elite 400, Source Serif 4 and JetBrains Mono where the ref puts them", async ({ page }) => {
@@ -426,14 +343,14 @@ test("PVM-10 the faces: Special Elite 400, Source Serif 4 and JetBrains Mono whe
     if (weight) expect.soft(f.weight, `${sel} weight`).toBe(weight);
   };
   await expectFace(".mk-pvh1", "Special Elite", "400");
-  await expectFace(".mk-pvptprice", "Special Elite", "400");
+  await expectFace(".mk-rungprice", "Special Elite", "400");
   await expectFace(".mk-pvsub", "Source Serif 4");
   await expectFace(".mk-pvform button[type=submit]", "Source Serif 4");
-  await expectFace(".mk-pvsuit", "Source Serif 4");
+  await expectFace(".mk-pvm .mk-lsuit", "Source Serif 4");
   await expectFace(".mk-pvmore", "JetBrains Mono");
   await expectFace(".mk-pvcount .mk-fmmeta", "JetBrains Mono");
-  await scrollTo(page, (await docTop(page, ".mk-pvplans")) - 120);
-  await page.click(".mk-pvsuit");
+  await scrollTo(page, (await docTop(page, ".mk-pvlaunch")) - 60);
+  await page.click(".mk-pvm .mk-lsuit");
   await expect(page.locator(".mk-pvjs")).toHaveClass(/mk-open/);
   await expectFace(".mk-pvsheet .mk-pvq", "Special Elite", "400");
   await expectFace(".mk-pvsheet .mk-pvopt", "Source Serif 4");
@@ -465,11 +382,11 @@ test("shots: the seven phones beside the ref's, and the top and result at 375 ×
       await page.click(".mk-pvmore");
       await scrollTo(page, (await docTop(page, ".mk-pvlaunch")) - 10 - 60);
       await shoot("3-tiers");
-      await scrollTo(page, (await docTop(page, ".mk-pvplans")) - 120);
+      await scrollTo(page, (await docTop(page, ".mk-pvlaunch")) - 60);
       await shoot("4-plans");
     }
-    await scrollTo(page, (await docTop(page, ".mk-pvplans")) - 120);
-    await page.click(".mk-pvsuit");
+    await scrollTo(page, (await docTop(page, ".mk-pvlaunch")) - 60);
+    await page.click(".mk-pvm .mk-lsuit");
     const pick = (t: string) => page.locator(".mk-pvsheet .mk-pvopt, .mk-pvsheet .mk-pvidk", { hasText: t }).first().click();
     await pick("Getting ready"); await page.click(".mk-pvjsnext");
     await pick("A novel"); await pick("80k to 110k");

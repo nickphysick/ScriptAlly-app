@@ -811,7 +811,9 @@
     "design-refs/dashboard-v71/screens/ref-page-1512x900@2x.png": "84e62d8ac86b5e620aee5ddd4a313c5e58a2d1f721c32982ef1ab34aeac1125c",
     "design-refs/dashboard-v71/screens/ref-page-1920x1080@2x.png": "1a3717129277aeb9bc58cdb943442719560cc5e0dbbe2a11fb757d5b38085838",
     "design-refs/dashboard-v71/screens/ref-task-close-1512x900@2x.png": "ad78acc1752565eb04fd83924d2e3b0da4c38c2635f13d568d0fb12f089a1572",
-    "design-refs/dashboard-v71/screens/ref-task-send-1512x900@2x.png": "0e0df347e8343e020e38f382d1243e615d8f014a2afc37df093a78b43224c7c7"
+    "design-refs/dashboard-v71/screens/ref-task-send-1512x900@2x.png": "0e0df347e8343e020e38f382d1243e615d8f014a2afc37df093a78b43224c7c7",
+    "design-refs/pricing-plans-ladder-v1.html": "18dc9e187044bf9b416739dde44cf56cef30ac25c91ba65697cfd7e0abd87f19",
+    "design-refs/pricing-phone-plans-v1.html": "1cb478717150b5e2ec2c2ed33b8e6f020e3e0a33694597b525da2ef1bc786594"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history \u2014 its hero and empty state carry forward.",

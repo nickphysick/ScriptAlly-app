@@ -15,9 +15,10 @@ vi.mock("../lib/db", async () => (await import("../test/pageSmoke")).dbMock());
 vi.mock("../lib/firebase", async () => (await import("../test/pageSmoke")).firebaseMock());
 vi.mock("../components/toast/ToastProvider", async () => (await import("../test/pageSmoke")).toastMock());
 
-import { PricingPhone, perkIndex } from "./PricingPhone";
+import { PricingPhone, perkIndex, tabStep } from "./PricingPhone";
 import { PricingPage } from "./PricingPage";
-import { PV4_FAQ, PV4_PERKS, PV4_STEPS, faqText, PRO_PLANS, planTileLines } from "./pricingCopy";
+import { ladderStep } from "./PricingPlans";
+import { PV4_FAQ, PV4_PERKS, PV4_STEPS, faqText } from "./pricingCopy";
 
 const html = () => renderPage(<PricingPhone onNavigate={noNavigate} />, "/pricing");
 const text = (h: string) => h.replace(/<[^>]+>/g, " ").replace(/&#x27;/g, "'").replace(/&amp;/g, "&").replace(/\s+/g, " ");
@@ -49,14 +50,24 @@ describe("the phone tree", () => {
     expect(h.match(/aria-controls="mk-pvqa-\d"/g)?.length).toBe(PV4_FAQ.length);
     expect(h.match(/class="mk-pvqaa" id="mk-pvqa-\d" hidden=""/g)?.length).toBe(PV4_FAQ.length);
   });
-  it("the Free / Pro switch is a tablist with Free selected", () => {
+  /* 26 Oct (ref pricing-phone-plans-v1.html, layout A): pinned Free / Pro tabs, Pro open on arrival. */
+  it("the Free / Pro switch is a tablist with Pro selected, and only Pro's panel shows", () => {
     const h = html();
-    expect(h).toMatch(/class="mk-pvseg" role="tablist"/);
-    expect(h).toMatch(/role="tab" id="mk-pvtab-free" aria-selected="true"/);
-    expect(h).toMatch(/role="tab" id="mk-pvtab-pro" aria-selected="false"/);
+    expect(h).toMatch(/class="mk-pvtabsin" role="tablist"/);
+    expect(h).toMatch(/role="tab" id="mk-pvtab-free" aria-selected="false" aria-controls="mk-pvpanel-free" tabindex="-1"/);
+    expect(h).toMatch(/role="tab" id="mk-pvtab-pro" aria-selected="true" aria-controls="mk-pvpanel-pro" tabindex="0"/);
+    expect(h).toMatch(/role="tabpanel" id="mk-pvpanel-free" aria-labelledby="mk-pvtab-free" hidden=""/);
+    expect(h).toMatch(/role="tabpanel" id="mk-pvpanel-pro" aria-labelledby="mk-pvtab-pro">/);
   });
-  it("no plan is lit before the questions have been answered", () => {
-    expect(html()).not.toContain("mk-pvpt--fit");
+  it("the Pro card's ladder opens on 6 months, and no row is flagged before the questions", () => {
+    const h = html();
+    expect(h.match(/role="radio" aria-checked="true"/g)?.length).toBe(1);
+    expect(h).toMatch(/role="radio" aria-checked="true" tabindex="0" data-m="6"/);
+    expect(h).not.toContain("mk-rung--fit");
+  });
+  it("has no swipe track and no Pro plans section", () => {
+    const h = html();
+    for (const gone of ["mk-pvtrack", "mk-pvseg", "mk-pvplans", "mk-pvpgrid", "mk-pvpt"]) expect(h, gone).not.toContain(gone);
   });
 });
 
@@ -68,12 +79,9 @@ describe("the parts", () => {
     expect(perkIndex(9999, 262, 4)).toBe(3);
     expect(perkIndex(100, 0, 4)).toBe(0);
   });
-  it("a tile's phone line puts the saving on its own line, and the one-month plan reads 'Add to any plan'", () => {
-    expect(PRO_PLANS.map(planTileLines)).toEqual([
-      { lead: "Add to any plan", save: null },
-      { lead: "£6.33 a month", save: "save 20%" },
-      { lead: "£4.83 a month", save: "save 40%" },
-      { lead: "£3.75 a month", save: "save 53%" },
-    ]);
+  it("the arrow keys move between the two tabs, and round the ladder's four rows", () => {
+    expect([tabStep(1, "ArrowLeft"), tabStep(0, "ArrowRight"), tabStep(1, "Home"), tabStep(0, "End"), tabStep(0, "a")]).toEqual([0, 1, 0, 1, null]);
+    expect([ladderStep(6, "ArrowDown"), ladderStep(12, "ArrowDown"), ladderStep(1, "ArrowUp"), ladderStep(6, "Home"), ladderStep(3, "End"), ladderStep(6, " ")])
+      .toEqual([12, 1, 12, 1, 12, null]);
   });
 });

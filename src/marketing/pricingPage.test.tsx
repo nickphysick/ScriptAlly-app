@@ -25,6 +25,7 @@ import { stepAnswered, stepInsight, BLANK_ANSWERS } from "./CampaignJourney";
 import { sliceBetween } from "../test/sliceBetween";
 import {
   PV4_H1, PV4_SUB, PV4_LAUNCH_LINE, PV4_FREE, PV4_PRO, PV4_FAQ, PV4_PERKS, PV4_STEPS, faqText,
+  PRO_CHOOSE, LADDER_SMALL,
 } from "./pricingCopy";
 
 const html = () => renderPage(<PricingPage onNavigate={noNavigate} />, "/pricing");
@@ -59,14 +60,15 @@ describe("pricing v4: the copy is the ref's, word for word", () => {
     "For as long as you like",
     "One manuscript", "Up to 20 agents", "Unlimited queries and response tracking", "To-do list",
     "Bring your list across with Smart Import",
-    "A plan sized to your campaign. No subscription.", "Everything in Free, plus:",
+    /* 26 Oct: the Pro card is the ladder (ref pricing-plans-ladder-v1.html, option 3) */
+    "Choose how long to start with.", "Everything in Free, plus:",
     "Unlimited agents", "Manuscript versions, one for each draft", "Submission packages and materials tracking",
     "Smart email drop", "The Scout",
-    "Pick 1, 3, 6 or 12 months. It never renews automatically, and we'll be in touch with options before it ends.",
+    "Renews monthly at £7.99 once your plan ends. Cancel any time.",
   ];
   const PLANS = [
-    "Pro plans", "Every Pro feature, for as long as your campaign runs.", "Which plan suits me best?",
-    "1 month", "£7.99", "Add to any plan",
+    "Which plan suits me best?",
+    "1 month", "£7.99", "The monthly rate",
     "3 months", "£19", "£6.33 a month · save 20%",
     "6 months", "£29", "£4.83 a month · save 40%",
     "12 months", "£45", "£3.75 a month · save 53%",
@@ -79,18 +81,19 @@ describe("pricing v4: the copy is the ref's, word for word", () => {
     ["What's the difference between Free and Pro?",
       "Free covers the essentials: one manuscript, up to 20 agents, and every query and response tracked. Pro adds the tools that make querying smarter, from manuscript versions and submission packages to Smart email drop and The Scout."],
     ["Is Pro a subscription?",
-      "No. You choose a plan that matches how long you expect to be querying, from one month to twelve, and it simply ends on its date. We'll remind you a week before, so you're never charged for something you didn't ask for."],
+      /* 26 Oct: the monthly roll-on (ref pricing-plans-ladder-v1.html, its wording panel) */
+      "Yes, but a flexible one. You start with a plan that matches how long you expect to be querying, from one month to twelve. If you're still going when it ends, it carries on month by month at £7.99 until you cancel. We'll remind you a week before."],
     ["Which plan should I choose?",
       "Querying usually takes longer than writers expect, often six months or more once agents start reading full manuscripts. Answer four quick questions under Which plan suits me best? and we'll suggest one for you."],
     ["What if my campaign runs longer than planned?",
-      "Before your current plan ends, we'll get in touch with options to extend it. Whatever you decide, you'll never lose your data."],
+      "There's nothing you need to do. Your plan simply carries on month by month, and you'll never lose your data."],
     ["What if I sign with an agent before my plan runs out?",
-      "Congratulations! There's nothing you need to do. Your plan will simply run to the end of its months, and it won't renew automatically."],
+      "Congratulations! Record your signing and we'll offer to stop your renewal there and then. Your plan runs to the end of the months you've paid for."],
     ["Can I bring across the spreadsheet I already use?",
       "Yes. Smart Import will read your list and turn your agents and queries into a smart QueryHawk database, so you don't have to start again."],
   ];
 
-  it("renders every line: the box, its panel, the tiers, the plan tiles and the eight questions", () => {
+  it("renders every line: the box, its panel, the tiers, the ladder and the eight questions", () => {
     const t = textOf(html());
     for (const line of [...BOX, ...TIERS, ...PLANS, ...FAQ.flat()]) expect(t, line).toContain(line);
   });
@@ -103,7 +106,8 @@ describe("pricing v4: the copy is the ref's, word for word", () => {
     expect(PV4_LAUNCH_LINE).toBe(TIERS[0]);
     expect([...PV4_FREE.list]).toEqual(TIERS.slice(2, 7));
     expect([...PV4_PRO.list]).toEqual(TIERS.slice(9, 14));
-    expect(PV4_PRO.flex).toBe(TIERS[14]);
+    expect(PRO_CHOOSE).toBe(TIERS[7]);
+    expect(LADDER_SMALL).toBe(TIERS[14]);
     expect(PV4_FAQ.map((qa) => [qa.q, faqText(qa.a)])).toEqual(FAQ);
   });
 
@@ -182,24 +186,27 @@ describe("pricing v4: the founding box", () => {
 });
 
 describe("pricing v4: the questions", () => {
-  it("are hidden behind a real disclosure, inside the Pro plans container, under the tiles", () => {
+  /* 26 Oct: the link is in the Pro card, and the questions open directly beneath the two cards. */
+  it("are hidden behind a real disclosure in the Pro card, and open beneath the two cards", () => {
     const h = html();
-    const plans = sliceBetween(h, 'class="mk-pv4plans"', 'class="mk-pv4sect"');
-    const link = /<button[^>]*class="mk-pv4suit"[^>]*>([^<]*)<\/button>/.exec(plans);
-    expect(link, "the link is in the container").toBeTruthy();
+    const soon = sliceBetween(h, 'class="mk-pv4soon"', 'class="mk-pv4sect"');
+    const pro = sliceBetween(soon, 'class="mk-lcard mk-lcard--pro"', 'id="how-long"');
+    const link = /<button[^>]*class="mk-lsuit"[^>]*>([\s\S]*?)<\/button>/.exec(pro);
+    expect(link, "the link is in the Pro card").toBeTruthy();
     expect(link![0]).toContain('aria-expanded="false"');
     expect(link![0]).toContain('aria-controls="how-long"');
-    expect(link![1]).toBe("Which plan suits me best?");
-    expect(plans.indexOf('class="mk-pv4pgrid"')).toBeLessThan(plans.indexOf('id="how-long"'));
-    expect(/<div class="mk-pv4how" id="how-long"([^>]*)>/.exec(plans)![1]).toMatch(/\shidden=""/);
+    expect(link![1].replace(/<[^>]+>/g, "")).toBe("Which plan suits me best?");
+    expect(soon.indexOf('class="mk-lpair"')).toBeLessThan(soon.indexOf('id="how-long"'));
+    expect(/<div class="mk-pv4how" id="how-long"([^>]*)>/.exec(soon)![1]).toMatch(/\shidden=""/);
   });
-  it("open on question 1 with Next disabled, nothing pre-selected and no tile navy", () => {
+  it("open on question 1 with Next disabled, nothing pre-selected and no row flagged", () => {
     const h = html();
     expect(h).toContain("Question 1 of 4");
     const next = /<button[^>]*class="[^"]*mk-jynext[^"]*"[^>]*>/.exec(h)![0];
     expect(next).toMatch(/\sdisabled=""/);
     expect(h).not.toContain('aria-pressed="true"');
-    expect(h).not.toContain("mk-pv4ptile--fit");
+    expect(h).not.toContain("mk-rung--fit");
+    expect(h).not.toContain("mk-rungflag");
   });
   it("each step opens only once it is answered, and a novel needs its length", () => {
     const blank = BLANK_ANSWERS;

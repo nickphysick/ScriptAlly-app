@@ -8,7 +8,7 @@
  *
  * ⚠️ IT WRITES NOTHING AND SELLS NOTHING. The answers live in this component's state and go nowhere;
  * the plan card names a planned launch plan and offers no way to buy it. The one thing it tells its
- * host is which plan fits (`onFit`), so the host can turn that plan's tile navy.
+ * host is which plan fits (`onFit`), so the host can check and flag that plan's row in the ladder.
  *
  * ⚠️ NOTHING IS PRE-SELECTED. The agents stepper opens at 40 and needs no answer, as in the ref; every
  * other question keeps Next disabled until it is answered, a novel needing its length as well.
