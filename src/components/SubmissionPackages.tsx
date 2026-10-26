@@ -26,7 +26,7 @@ import { Pk26Tabs, type PageTab } from "./packages/v26/Pk26Tabs";
 import { Pk26Builder } from "./packages/v26/Pk26Builder";
 import { Pk40Shelf, Pk40ShelfDrawer } from "./packages/v26/Pk40Shelf";
 import { shelfPackages, workbenchPackages } from "../lib/packagesV40";
-import { Pk26Results } from "./packages/v26/Pk26Results";
+import { Pk40Tracking } from "./packages/v26/Pk40Tracking";
 import { Pk26Materials } from "./packages/v26/Pk26Materials";
 import { Pk26Drawer, type DrawerView } from "./packages/v26/Pk26Drawer";
 import { Pk26Dialog, type DialogView } from "./packages/v26/Pk26Dialog";
@@ -113,7 +113,7 @@ export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab:
                 onNewPackage={() => setDialog({ m: "new" })} onDuplicate={(p) => void duplicate(p)} onEditPackage={(p, focus) => setDialog({ m: "edit", id: p.id, ...(focus ? { focus } : {}) })}
                 onOpenMaterial={(k, id) => setDrawer(k === "ext" ? { m: "ext", id } : { m: "mat", kind: k, id })}
                 onNewMaterial={openNewMaterial} onOpenVersions={goVersions} onOpenComps={goComps} />
-            <Pk26Results model={model} empty={empty} onSeeQueries={goQueries} />
+            <Pk40Tracking model={model} onDuplicate={(p) => void duplicate(p)} />
           </div>
         ) : (
           <Pk26Materials model={model} kind={tab} onOpen={(id) => setDrawer({ m: "mat", kind: tab, id })} onAdd={() => setDrawer({ m: "newmat", kind: tab })} onOpenComps={goComps} />

@@ -189,3 +189,25 @@
 .p6 .p6-lc .p6-lc-s > span { min-width: 0; }
 .p6 .p6-lc-s span > b, .p6 .p6-lc-s span > small { white-space: normal; }
 .p6 .p6-lc > em { min-width: 16px; }
+
+/* F4 — a running test's card. The ref's frozen state lists no test (its seeded pair never reaches the Tests view), so
+   the capture holds nothing for these; they are the ref's own authored rules, with the prefix, and with the pill in the typewriter, sentence case (I, no
+   small mono capitals). The grid itself was captured (two columns, from the computed state). */
+.p6 .p6-tp-t .p6-tp-ts .p6-tp-ci { align-items: center; background-color: #1d4b63; border-radius: 10px; color: #f4eee5; display: grid; flex: 0 0 auto; height: 34px; justify-items: center; width: 34px; }
+.p6 .p6-tp-t { border-radius: 18px; background: #fff; overflow: hidden; box-shadow: 0 1px 2px rgba(28,19,15,.05), 0 20px 36px -28px rgba(28,19,15,.45), inset 0 0 0 1px rgba(28,19,15,.08); }
+.p6 .p6-tp-t > header { padding: 16px 18px 12px; border-bottom: 1px solid rgba(28,19,15,.07); }
+.p6 .p6-tp-t > header > b { display: block; margin-top: 8px; font: 400 19px var(--sp-type); }
+.p6 .p6-tp-t > header > small { display: block; margin-top: 3px; font: 400 14px var(--sp-serif); color: rgba(28,19,15,.65); }
+.p6 .p6-tp-t .p6-tp-st { display: inline-flex; padding: 3px 9px; border-radius: 999px; font: 400 12px var(--sp-type); letter-spacing: 0; text-transform: none; }
+.p6 .p6-tp-t .p6-tp-st.p6-run { background: #fbf3e3; color: #8a6420; }
+.p6 .p6-tp-t .p6-tp-st.p6-tie { background: #efe9e0; color: rgba(28,19,15,.6); }
+.p6 .p6-tp-t .p6-tp-st.p6-done { background: #1d4b63; color: #fff; }
+.p6 .p6-tp-t .p6-tp-tb { display: grid; grid-template-columns: 1fr 30px 1fr; align-items: center; padding: 16px 18px; }
+.p6 .p6-tp-t .p6-tp-ts { display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 12px; background: #f6f3ee; }
+.p6 .p6-tp-t .p6-tp-ts b { display: block; font: 400 15px var(--sp-type); }
+.p6 .p6-tp-t .p6-tp-ts small { font: italic 12.5px var(--sp-serif); color: rgba(28,19,15,.55); }
+.p6 .p6-tp-t .p6-tp-tv { margin-left: auto; font: 400 24px var(--sp-type); color: #1d4b63; }
+.p6 .p6-tp-t .p6-tp-tv em { font: italic 13px var(--sp-serif); color: rgba(28,19,15,.5); }
+.p6 .p6-tp-t .p6-tp-arr { text-align: center; color: rgba(28,19,15,.35); font-size: 18px; }
+.p6 .p6-tp-t > footer { padding: 0 18px 16px; font: italic 13.5px var(--sp-serif); color: rgba(28,19,15,.6); }
+.p6 .p6-tp-none { font: italic 13.5px var(--sp-serif); color: rgba(28,19,15,.45); }

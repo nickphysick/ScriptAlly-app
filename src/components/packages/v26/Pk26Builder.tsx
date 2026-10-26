@@ -144,7 +144,7 @@ export const Pk26Builder: React.FC<BuilderProps> = ({ model, bench, shelf, curre
                     return (
                       <button type="button" key={x.id} className={`p6-pkb${on ? " p6-on" : ""}`} aria-pressed={on} title={x.packageName} data-pkid={x.id}
                         onClick={() => x.id !== DRAFT_ID && onSelect(x.id)}>
-                        <span className="p6-pkb-ic"><Pic ic={iconOf(x)} /></span><b>{x.packageName}</b>{active?.id === x.id || x.id === DRAFT_ID ? <em>Active</em> : null}
+                        <span className="p6-pkb-ic"><Pic ic={iconOf(x)} /></span><b>{x.packageName}</b>{/* the ref hides "Active" on a draft (`.pkb[data-stage=draft] em`) */ active?.id === x.id && st !== "draft" ? <em>Active</em> : null}
                         <span className={`p6-pkb-st p6-${STAGE_CLASS[st]}`} title={STAGE_TITLE[st]} />
                       </button>
                     );

@@ -262,8 +262,12 @@ for (const size of SIZES) {
     });
     const want = Math.min(1600, r.sheet.w - 96);
     const centred = (b: { l: number; w: number } | null) => !!b && Math.abs(b.l - (r.sheet.l + (r.sheet.w - b.w) / 2)) <= 1;
-    for (const [k, b] of [["the shelf", r.shelf], ["the workbench frame", r.wb], ["the tracking body", r.tp]] as const) {
-      L.check(`${k} is ${want}px wide (±1)`, !!b && Math.abs(b.w - want) <= 1, JSON.stringify({ b, want }));
+    /* ⚠️ B's single width is not the ref's for the tracking body: the ref widens it to sheet − 48 once the sheet is
+       1200 or narrower (`@container sheet (max-width:1200px){.tp-body{width:calc(100% - 48px)}}`), measured in the
+       ref at 1440 and 1280 (1144 and 984 against 1096 and 936 for the shelf). The ref is the oracle. */
+    const wantTp = r.sheet.w <= 1200 ? r.sheet.w - 48 : want;
+    for (const [k, b, w] of [["the shelf", r.shelf, want], ["the workbench frame", r.wb, want], ["the tracking body", r.tp, wantTp]] as const) {
+      L.check(`${k} is ${w}px wide (±1)`, !!b && Math.abs(b.w - w) <= 1, JSON.stringify({ b, want: w }));
       L.check(`${k} is centred (±1)`, centred(b), JSON.stringify({ b, sheet: r.sheet }));
     }
     L.check("the workbench header's art sits left of its title", !!r.art && !!r.ttl && r.art.r <= r.ttl.l, JSON.stringify({ art: r.art, ttl: r.ttl }));
