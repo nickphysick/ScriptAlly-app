@@ -44,7 +44,7 @@ import {
   useAgentCardRequest,
 } from "../../lib/agentCardStore";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { ContactHeader24, ContactViewRow24 } from "./contact/ContactHeader24";
+import { ContactHeader25 } from "./contact/ContactHeader24";
 import { ContactSheet24, SheetSkeleton } from "./contact/ContactSheet24";
 import { AgentCard24, AgentCardWide24, type AgentCard24Props } from "./contact/AgentCard24";
 import { ContactAddressBook24 } from "./contact/ContactAddressBook24";
@@ -910,16 +910,15 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         {/* v13 §8 — the loading beat: the group draws its own components as shimmering shapes, inert */}
         {/* v138.6 §A — a pinned list hides its header from the first frame, settling included (a restored pin must not
             flash the header while the list loads) */}
-        <div className="clv-group" data-v24="" data-full={full && (showList || pageState === "settling") ? "" : undefined} data-loading={pageState === "settling" ? "" : undefined}
+        <div className="clv-group" data-v24="" data-v25="" data-full={full && (showList || pageState === "settling") ? "" : undefined} data-loading={pageState === "settling" ? "" : undefined}
           aria-busy={pageState === "settling" || undefined}
           inert={pageState === "settling" || undefined}>
         {/* v17 §A — THE ONE LIGHT HEADER, on the page colour: the title block, the cut-out hawk, and the summary
             card that is the page's figures and its group filter (the strip's own `glance` state). Over a LIST
             only, and while settling: the blank account's page is ContactEmpty. */}
         {(showList || pageState === "settling") && (
-          <ContactHeader24 loading={pageState !== "list"} msTitle={scoped?.title?.trim() || null}
-            health={pageState === "list" ? health : null} banner={pageState === "list" ? banner : null}
-            addRef={addBtnRef} onAdd={openAdd} onFill={openHk}
+          <ContactHeader25 loading={pageState !== "list"} msTitle={scoped?.title?.trim() || null}
+            addRef={addBtnRef} onAdd={openAdd}
             onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined} />
         )}
         {pageState === "settling" && <SheetSkeleton />}
@@ -936,14 +935,12 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             then the rows. The title bar, its hawk and its two pills are gone. */}
         {showList && (
         <>
-        <ContactViewRow24 counts={counts} total={factsAll.length} set={set} onSet={setSet}
-          find={search} onFind={setSearch} loading={false} />
         {!fullOn ? (
           <ContactSheet24 pool={visibleFacts} all={factsAll} view={view} onView={setView} grouped={byStatus} onGrouped={setByStatus}
             sortKey={sortKey} reversed={reversed} onSort={(v) => { setSortKeyRaw(v.key); setReversed(v.reversed); }}
             filters={filters} onFilters={setFilters} onClearAll={clearFilters} full={fullOn} onFull={togglePin}
             genreWord={(raw) => genreLabel(raw, personalGenres)} genreHit={bookHit} personalGenres={personalGenres} nowMs={nowMs}
-            openId={cardId} onOpen={setCardId} search={search}
+            openId={cardId} onOpen={setCardId} search={search} onSearch={setSearch}
             onLog={(id) => openQueryDrawer({ mode: "log", agentId: id, ...(scoped?.id ? { manuscriptId: scoped.id } : {}) })}
             onEdit={(id, tab, focus) => openAgentCard(id, { tab, focus, from: "row" })}
             onExport={(rows) => downloadAgentsCsv(rows, (raw) => genreLabel(raw, personalGenres))} />

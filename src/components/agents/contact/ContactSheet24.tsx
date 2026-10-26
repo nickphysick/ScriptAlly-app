@@ -91,6 +91,8 @@ export interface ContactSheet24Props {
   onEdit: (id: string, tab: AgentCardTab, focus?: AgentCardField) => void;
   onExport: (rows: readonly AgentFacts[]) => void;
   search: string;
+  /** v25 A3 — Find is the navy bar's own search well, first in the bar */
+  onSearch: (v: string) => void;
 }
 
 const COLS: { key: SortKey | null; label: string }[] = [
@@ -136,6 +138,10 @@ export const ContactSheet24: React.FC<ContactSheet24Props> = (p) => {
   return (
     <div className="cl24-sheet" data-cl24="sheet" data-view={p.view} ref={sheetRef}>
       <div className="cl24-bar" data-cl24="bar" ref={barRef}>
+        <label className="qc150-bfind" data-cl24="find" data-cl25="find" data-nb1="find">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4.5 4.5" /></svg>
+          <input value={p.search} onChange={(e) => p.onSearch(e.target.value)} placeholder="Find an agent or agency" aria-label="Find an agent or agency" autoComplete="off" />
+        </label>
         <span className="cl24-vt" role="tablist" aria-label="How the agents are drawn" data-cl24="switch" onKeyDown={switchKey}>
           {(["list", "cards"] as const).map((v) => (
             <button key={v} type="button" role="tab" data-cl24="view-tab" data-v={v} aria-selected={p.view === v} tabIndex={p.view === v ? 0 : -1}
@@ -156,7 +162,7 @@ export const ContactSheet24: React.FC<ContactSheet24Props> = (p) => {
         <SortChipButton fields={CL_SORT_FIELDS} value={{ key: p.sortKey, reversed: p.reversed }} open={pop.open === "sort"} className="cl24-ch cl24-sort" ns="cl24"
           onToggle={(a) => pop.toggle("sort", a)} toolbar={() => barRef.current} />
         <button type="button" className="cl24-fs" data-cl24="full" data-nb1="full" data-pin-list="" aria-pressed={p.full} aria-keyshortcuts="F" aria-label="Full screen" onClick={p.onFull}>
-          {FULL_ICON}<span className="cl24-fsl">Full screen</span>
+          {FULL_ICON}<span className="cl24-fslb">Full screen</span>
         </button>
       </div>
 

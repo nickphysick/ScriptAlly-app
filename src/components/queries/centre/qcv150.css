@@ -2,7 +2,9 @@
    Part A · the page dressing: the doodle background and the tighter header card.
    ⚠️ DESKTOP ONLY, like every Query Centre rule since v131: the phone keeps its page.
    ⚠️ THE HEADER CARD IS THE SHARED PageHeaderCard (Versions reads it; QC149-L0). Every rule here is scoped under
-      `.qc149-hd .qc149-card`, which Versions never renders, so its card is untouched. */
+      `.qc149-hd .qc149-card`, which Versions never renders, so its card is untouched. Contact list v25 A2 shares the
+      card's values: the selectors are widened to `.cl25-hd .cl25-card` (same specificity), and its highlighter's
+      powder blue is the Contact list's own rule (contactV25.css). */
 @media (min-width: 768px) {
   /* A1 · the page sheet: the tile at 340 × 360 on the existing #f2eee8, scrolling with the page (`local`). The cards
      and the panel paint their own grounds over it; the shell is outside this scroller. */
@@ -15,16 +17,16 @@
   }
 
   /* A2 · the header card: 22 above, 24 below; the title 40px with the highlighter; the hawk 140 tall */
-  .qc149-hd .qc149-card.phc.phc { padding: 22px 36px 24px; grid-template-columns: minmax(0, 1fr) 160px; }
-  .qc149-hd .qc149-card.phc.phc.phc h1 { font-size: 40px; line-height: 44px; }
-  .qc149-hd .qc149-card .hl {
+  :is(.qc149-hd .qc149-card, .cl25-hd .cl25-card).phc.phc { padding: 22px 36px 24px; grid-template-columns: minmax(0, 1fr) 160px; }
+  :is(.qc149-hd .qc149-card, .cl25-hd .cl25-card).phc.phc.phc h1 { font-size: 40px; line-height: 44px; }
+  :is(.qc149-hd .qc149-card, .cl25-hd .cl25-card) .hl {
     padding: 0 5px; margin: 0 -5px;
     background: linear-gradient(transparent 50%, #eee2d9 50%, #eee2d9 96%, transparent 96%);
     -webkit-box-decoration-break: clone; box-decoration-break: clone;
   }
-  .qc149-hd .qc149-card .phc-tx > p { margin-top: 14px; }
-  .qc149-hd .qc149-card .phc-art { height: 140px; }
-  .qc149-hd .qc149-card .phc-art img { width: 160px; height: 140px; object-fit: contain; object-position: right center; }
+  :is(.qc149-hd .qc149-card, .cl25-hd .cl25-card) .phc-tx > p { margin-top: 14px; }
+  :is(.qc149-hd .qc149-card, .cl25-hd .cl25-card) .phc-art { height: 140px; }
+  :is(.qc149-hd .qc149-card, .cl25-hd .cl25-card) .phc-art img { width: 160px; height: 140px; object-fit: contain; object-position: right center; }
 }
 
 /* ══ Part B · the stat cards ═════════════════════════════════════════════════════════════════════════════════════
@@ -144,17 +146,18 @@
   /* the title is not drawn in full screen (the pinned band is the list's head there) */
   .qcv-group[data-full] .qc150-lt { display: none; }
 }
-/* C — the navy bar's search (its view row above the list is retired): a dark well on the navy, first in the bar */
+/* C — the navy bar's search (its view row above the list is retired): a dark well on the navy, first in the bar.
+   Contact list v25 A3 shares it: the selectors are widened to its bar, `.cl24-bar` (same specificity). */
 @media (min-width: 768px) {
-  .qc140-tb .qc150-bfind {
+  :is(.qc140-tb, .cl24-bar) .qc150-bfind {
     box-sizing: border-box; flex: 0 1 300px; min-width: 200px; height: 34px; display: flex; align-items: center; gap: 10px;
     padding: 0 10px 0 13px; border-radius: 9px; background: rgba(10, 18, 32, 0.32); color: rgba(244, 238, 229, 0.75);
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35), 0 1px 0 rgba(244, 238, 229, 0.14);
   }
-  .qc140-tb .qc150-bfind:focus-within { box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, 0.7); }
-  .qc140-tb .qc150-bfind svg { flex: none; }
-  .qc140-tb .qc150-bfind input { all: unset; flex: 1; min-width: 0; font: 400 15.5px/1.2 var(--sp-serif) !important; color: #f4eee5; }
-  .qc140-tb .qc150-bfind input::placeholder { color: rgba(244, 238, 229, 0.55); font: italic 400 15.5px/1.2 var(--sp-serif); }
+  :is(.qc140-tb, .cl24-bar) .qc150-bfind:focus-within { box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, 0.7); }
+  :is(.qc140-tb, .cl24-bar) .qc150-bfind svg { flex: none; }
+  :is(.qc140-tb, .cl24-bar) .qc150-bfind input { all: unset; flex: 1; min-width: 0; font: 400 15.5px/1.2 var(--sp-serif) !important; color: #f4eee5; }
+  :is(.qc140-tb, .cl24-bar) .qc150-bfind input::placeholder { color: rgba(244, 238, 229, 0.55); font: italic 400 15.5px/1.2 var(--sp-serif); }
 }
 
 /* ══ Part D · Birds-eye, inside the list card under the navy bar ════════════════════════════════════════════════
@@ -302,7 +305,7 @@
   .qcv-group[data-v138] .qc138-sheet .qc140-gby,
   .qcv-group[data-v138] .qc138-sheet .qc1421-sort .sc-sby { display: none; }
   /* the search flexes, never under 200px (and no wider than the mock's 300) */
-  .qc140-tb .qc150-bfind { flex: 1 1 260px; max-width: 300px; }
+  :is(.qc140-tb, .cl24-bar) .qc150-bfind { flex: 1 1 260px; max-width: 300px; }
 }
 
 /* ══ Query Centre v150.1 (design-refs/query-centre-v150-1/) — SUPERSEDES v150 above where they differ ═════════════════
@@ -353,7 +356,7 @@
    Full screen. Birds-eye's pills sit in the list pills' slot, so nothing moves to the middle, and keep their words at
    every width. Every word in the bar, and in the group and sort menus, is Special Elite, upright. */
 @media (min-width: 768px) {
-  .qc140-tb .qc150-bfind.qc150-bfind { flex: 0 1 420px; max-width: none; margin-right: auto; }
+  :is(.qc140-tb, .cl24-bar) .qc150-bfind.qc150-bfind { flex: 0 1 420px; max-width: none; margin-right: auto; }
   .qc140-tb .qc150-bvgs.qc150-bvgs { margin-left: 0; }
   .qc150-bvp b { display: inline !important; }
   .qc150-bvp { padding: 0 14px !important; }

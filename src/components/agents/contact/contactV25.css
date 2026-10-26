@@ -1,0 +1,23 @@
+/* ══ Contact list v25 (design-refs/contact-list-v25/) — the Query Centre v150 / v150.1 dressing, in the Contact list's
+   own colours. Every rule names `.clv-group[data-v25]`, `.cl25-*` or a `:has()` on the page's own scroller, so it holds
+   only on this page. Desktop only, like v24: the phone keeps its page. */
+
+/* ══ Part A ═══════════════════════════════════════════════════════════════════════════════════════════════════════
+   A1 · the page sheet: the Contact list's OWN doodle tile (not the Query Centre's), 340 × 360 on #f2eee8, scrolling with
+   the page (`local`), as the Query Centre v150 lays its own. Only over the normal page: never in full screen (the
+   address book covers the sheet and its ground is plain), never on the empty states (no v25 group renders there). */
+@media (min-width: 768px) {
+  .agl-wpg > .wpg-scroll:has(.clv-group[data-v25]:not([data-full])) {
+    background-color: #f2eee8;
+    background-image: url("/images/contact/doodle-tile.svg");
+    background-repeat: repeat;
+    background-size: 340px 360px;
+    background-attachment: local;
+  }
+  /* A2 · the highlighter: the Query Centre's shape (qcv150.css), the Contact list's powder blue */
+  .cl25-hd .cl25-card.cl25-card .hl {
+    background: linear-gradient(transparent 50%, #e3e8ef 50%, #e3e8ef 96%, transparent 96%);
+    /* brand.tsx names bare spans as the body sans: the highlighter's span takes the title's typewriter */
+    font-family: inherit !important; font-size: inherit !important; line-height: inherit !important;
+  }
+}

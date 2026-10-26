@@ -78,7 +78,7 @@ export function bannerFigures(m: Pick<HkModel, "items">): BannerFigures {
   return { gaps: m.items.length, agents: seen.size, faces };
 }
 /** "20 details are missing" / "1 detail is missing" */
-export const missingWords = (n: number): string => (n === 1 ? "1 detail is missing" : `${n} details are missing`);
+/* v25 A3 — `missingWords` retired with the banner it worded */
 
 /* ── E1 · the genre fit ──────────────────────────────────────────────────────────────────────────────────────── */
 
