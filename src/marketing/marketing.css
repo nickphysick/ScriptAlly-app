@@ -2885,14 +2885,17 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 /* The six features: a story you scroll down. The picture panel sticks under the 60px bar
    (`--mk-nav-h` at this width) and takes half the screen below it, never more than 420px; it is sticky
    inside this section only, so after the last caption it scrolls away and the vision rises beneath. */
-.mk-story { position: relative; padding: 0 0 20px; scroll-margin-top: var(--mk-nav-h); }
+/* v3 (ref landing-mobile-v3.html `.p3`, `.s3`, `.tl`): one feature per flick. `--mk-ph` is the panel's
+   height, read by the panel, its picture and each caption's height and snap margin, so the four can
+   never disagree. The story has no bottom padding in v3: the closing beat follows the sixth caption. */
+.mk-story { --mk-ph: min(calc((100svh - var(--mk-nav-h)) / 2), 420px); position: relative; scroll-margin-top: var(--mk-nav-h); }
 .mk-spimg {
   position: sticky; top: var(--mk-nav-h); z-index: 2; box-sizing: border-box;
-  height: min(calc((100svh - var(--mk-nav-h)) / 2), 420px); padding: 6px 14px 0;
+  height: var(--mk-ph); padding: 6px 14px 0;
   background: var(--mk-lower);
 }
 .mk-spimg img {
-  position: absolute; left: 14px; right: 14px; top: 6px; width: calc(100% - 28px); height: calc(100% - 48px);
+  position: absolute; left: 14px; right: 14px; top: 6px; width: calc(100% - 28px); height: calc(var(--mk-ph) - 48px);
   max-width: none; object-fit: contain; background: #f5e6df; border-radius: 18px;
   opacity: 0; transition: opacity .45s;
 }
@@ -2900,11 +2903,41 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-spbar { position: absolute; left: 14px; right: 14px; bottom: 16px; display: flex; gap: 5px; }
 .mk-spbar i { flex: 1; height: 4px; border-radius: 2px; background: rgba(28, 19, 15, .12); transition: background .3s; }
 .mk-spbar i.mk-on { background: var(--mk-navy); }
-.mk-spt { min-height: 300px; padding: 20px 24px 0; opacity: .28; transition: opacity .35s; }
-.mk-spt:last-child { min-height: 380px; }
-.mk-spt.mk-on { opacity: 1; }
-.mk-spt .mk-spth3 { margin: 0 0 8px; font: 400 25px/1.18 var(--mk-f-display) !important; color: #1c130f; }
-.mk-spt p { margin: 0; font: 400 16.5px/1.55 var(--mk-f-serif); color: rgba(28, 19, 15, .78); }
+/* Each caption is exactly the room beneath the panel, and a snap point whose margin is the bar plus
+   the panel — so a snapped caption sits directly under the picture. */
+.mk-s3 {
+  height: calc(100svh - var(--mk-nav-h) - var(--mk-ph)); box-sizing: border-box; padding: 14px 24px 0;
+  scroll-snap-align: start; scroll-snap-stop: always; scroll-margin-top: calc(var(--mk-nav-h) + var(--mk-ph));
+  opacity: .25; transition: opacity .3s;
+}
+.mk-s3.mk-on { opacity: 1; }
+/* ⚠️ A 14px BLOCK, NOT AN INLINE SPAN ON THE CAPTION'S LINE: inline, its line box takes the caption's
+   inherited 24px strut and the heading lands 10px lower than the ref's (whose strut is 14px). */
+.mk-s3n { display: block; height: 14px; font: 500 11px/14px var(--mk-f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--mk-rust); }
+.mk-s3 .mk-s3h3 { margin: 8px 0 6px; font: 400 24px/1.16 var(--mk-f-display) !important; color: #1c130f; }
+.mk-s3 p { margin: 0; font: 400 16px/1.5 var(--mk-f-serif); color: rgba(28, 19, 15, .78); }
+.mk-s3 ul { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; }
+.mk-s3 li { display: grid; grid-template-columns: 20px 1fr; gap: 8px; font: 400 15px/1.35 var(--mk-f-serif); color: #1c130f; }
+.mk-s3 li span { font: inherit; }
+
+/* S5 (landing on phones v3): on a screen as short as 360 × 640 the three points and the join bar do
+   not fit, so the third point is dropped at that height only. 375 × 667 keeps all three (see the v3
+   report: two of its captions still meet the bar). */
+@media (max-width: 760px) and (max-height: 660px) { .mk-s3 li:nth-child(3) { display: none; } }
+
+/* The closing beat: on the light ground, 55svh tall, snapping under the bar, with the top of the navy
+   vision showing beneath it. */
+.mk-tl {
+  height: 55svh; box-sizing: border-box; padding: 7svh 24px 0; text-align: center;
+  scroll-snap-align: start; scroll-margin-top: var(--mk-nav-h);
+}
+.mk-tl .mk-tl1 { margin: 30px 0 10px; font: 400 34px/1.1 var(--mk-f-display); color: #1c130f; }
+.mk-tl .mk-tl2 { margin: 0 auto; max-width: 280px; font: 400 17px/1.5 var(--mk-f-serif); color: rgba(28, 19, 15, .75); }
+.mk-tla { display: block; margin-top: 20px; font: 400 24px/1 var(--mk-f-serif); color: var(--mk-rust); }
+
+/* The page snaps only while the story is on it (phones, the landing page), and only to the captions and
+   the beat. `proximity`: a scroll that ends far from them is left where it is. */
+@media (max-width: 760px) { html:has(.mk-story) { scroll-snap-type: y proximity; } }
 
 /* The vision on navy: the page's one swipe carousel. Text on navy is white; the label is pink. */
 .mk-vision.mk-vision--navy { background: #1b2433; margin-top: 0; padding: 36px 0 30px; }
@@ -3003,5 +3036,6 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 /* ⚠️ AFTER THE RULES IT OVERRIDES: a media query confers no specificity, so an earlier reduced-motion
    block would lose to the story's, the carousel's and the join bar's rules on source order. */
 @media (prefers-reduced-motion: reduce) {
-  .mk-spimg img, .mk-spt, .mk-spbar i, .mk-vdots i, .mk-jbar { transition: none; }
+  .mk-spimg img, .mk-s3, .mk-spbar i, .mk-vdots i, .mk-jbar { transition: none; }
+  html:has(.mk-story) { scroll-snap-type: none; }
 }

@@ -57,6 +57,8 @@ const MUTATIONS: Record<string, string> = {
   /* RETARGETED (landing on phones v1, 26 Oct): the pill is gone; the phone's founding offer is the strip. */
   N2p: ".mk-fs{background:#1b2433!important}",
   V1p: ".mk-vision.mk-vision--navy{background:#e9e6e0!important}",
+  /* v3: page snapping switched off, so the phone's jump lands on the band rather than on caption 1. */
+  N3s: "html:has(.mk-story){scroll-snap-type:none!important}",
   N3p: "@media (max-width:760px){.mk-scope .mk-nav{height:72px!important}}",
   H1p: ".mk-hp-stage{background:#ffffff!important}",
   S1p: ".mk-sheet{border-top-left-radius:18px!important;border-top-right-radius:18px!important}",
@@ -368,6 +370,23 @@ test.describe("LC2", () => {
     expect(read).toBe(ROUTES.length * NAV_VPS.length);
     for (const vp of VPS) {
       await open(page, "/", vp);
+      if (vp.width <= PHONE) {
+        /* RETARGET (landing on phones v3, 26 Oct): the page snaps to the feature captions on a phone, and
+           the band sits just above the first of them, so the jump is pulled on to caption 1's snap: it
+           lands directly under the picture (the band line scrolls under the bar). Measured stable. */
+        await page.evaluate(() => window.scrollTo(0, 0));
+        await page.click(".mk-hp-how"); await page.waitForTimeout(1200);
+        /* ⚠️ Caption 1 always follows the panel in flow, so "under the picture" alone holds snapped or not;
+           what the snap decides is that the panel is STUCK under the bar, which is asserted too. */
+        const land = await page.evaluate(() => ({
+          gap: document.querySelector(".mk-s3")!.getBoundingClientRect().top - document.querySelector(".mk-spimg")!.getBoundingClientRect().bottom,
+          panel: document.querySelector(".mk-spimg")!.getBoundingClientRect().top - document.querySelector(".mk-navwrap")!.getBoundingClientRect().bottom,
+        }));
+        console.log(`LC2 N3 anchor @${vp.width}: caption 1 ${land.gap.toFixed(2)} from the picture, the picture ${land.panel.toFixed(2)} from the bar`);
+        expect(Math.abs(land.panel), `anchor landing @${vp.width}: the picture is stuck under the bar`).toBeLessThanOrEqual(1);
+        expect(Math.abs(land.gap), `anchor landing @${vp.width}: caption 1 snapped under the picture`).toBeLessThanOrEqual(2);
+        continue;
+      }
       const gap = await anchorGap(page);
       console.log(`LC2 N3 anchor @${vp.width}: ${gap.toFixed(2)} (was ${Number(base.anchor[key(vp)]).toFixed(2)})`);
       /* RETARGET (phone hero, 23 Oct): at ≤760px the jump is the drawer's link and the band lands AT the
