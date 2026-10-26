@@ -56,7 +56,7 @@ const MUTATIONS: Record<string, string> = {
   /* The phone retargets' own breaks (phone hero, 23 Oct) — each turns only the ≤760px branch red. */
   /* RETARGETED (landing on phones v1, 26 Oct): the pill is gone; the phone's founding offer is the strip. */
   N2p: ".mk-fs{background:#1b2433!important}",
-  V1p: ".mk-vision.mk-vision--rows{background:#e9e6e0!important}",
+  V1p: ".mk-vision.mk-vision--navy{background:#e9e6e0!important}",
   N3p: "@media (max-width:760px){.mk-scope .mk-nav{height:72px!important}}",
   H1p: ".mk-hp-stage{background:#ffffff!important}",
   S1p: ".mk-sheet{border-top-left-radius:18px!important;border-top-right-radius:18px!important}",
@@ -480,16 +480,16 @@ test.describe("LC2", () => {
     for (const vp of VPS) {
       await open(page, "/", vp);
       if (vp.width <= PHONE) {
-        /* RETARGET (landing on phones v1, 26 Oct): on a phone the band is white with three compact
-           rows, as the ref draws it; the stone band with white cards is the desktop's. */
+        /* RETARGET (landing on phones v2, 26 Oct): on a phone the vision is the navy carousel of three
+           cards (v1's white rows are gone); the stone band with white cards is the desktop's. */
         const p = await page.evaluate(() => ({
           band: getComputedStyle(document.querySelector(".mk-vision")!).backgroundColor,
-          rows: document.querySelectorAll(".mk-vision .mk-vrow").length,
-          cards: document.querySelectorAll(".mk-vision .mk-vpoint").length,
+          cards: document.querySelectorAll(".mk-vision .mk-vn").length,
+          desk: document.querySelectorAll(".mk-vision .mk-vpoint").length,
         }));
-        expect(p.band, `@${vp.width}: the phone's vision band is white`).toBe("rgb(255, 255, 255)");
-        expect(p.rows, `@${vp.width}: three rows`).toBe(3);
-        expect(p.cards, `@${vp.width}: and no cards`).toBe(0);
+        expect(p.band, `@${vp.width}: the phone's vision band is navy`).toBe("rgb(27, 36, 51)");
+        expect(p.cards, `@${vp.width}: three carousel cards`).toBe(3);
+        expect(p.desk, `@${vp.width}: and none of the desktop's cards`).toBe(0);
         continue;
       }
       const v = await page.evaluate(() => ({
