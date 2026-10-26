@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "B2",
+  "where": "Who replied population",
+  "ok": true,
+  "detail": "Who replied open"
+ },
+ {
+  "lock": "B2",
+  "where": "Who replied",
+  "ok": false,
+  "detail": "title \"null\" line \"null\""
+ },
+ {
+  "lock": "B2",
+  "where": "via Who replied respond population",
+  "ok": true,
+  "detail": "respond mode open"
+ },
+ {
+  "lock": "B2",
+  "where": "via Who replied respond title, no line before a pick",
+  "ok": false,
+  "detail": "title \"null\" line \"null\""
+ },
+ {
+  "lock": "B2",
+  "where": "via Who replied partial line",
+  "ok": false,
+  "detail": "partial: \"undefined…\""
+ },
+ {
+  "lock": "B2",
+  "where": "via Who replied full line",
+  "ok": false,
+  "detail": "full: \"undefined…\""
+ },
+ {
+  "lock": "B2",
+  "where": "via Who replied pass line",
+  "ok": false,
+  "detail": "pass: \"undefined…\""
+ },
+ {
+  "lock": "B2",
+  "where": "via Who replied offer line",
+  "ok": false,
+  "detail": "offer: \"undefined…\""
+ },
+ {
+  "lock": "B2",
+  "where": "from a query card respond population",
+  "ok": true,
+  "detail": "respond mode open"
+ },
+ {
+  "lock": "B2",
+  "where": "from a query card respond title, no line before a pick",
+  "ok": false,
+  "detail": "title \"null\" line \"null\""
+ },
+ {
+  "lock": "B2",
+  "where": "from a query card partial line",
+  "ok": false,
+  "detail": "partial: \"undefined…\""
+ },
+ {
+  "lock": "B2",
+  "where": "from a query card full line",
+  "ok": false,
+  "detail": "full: \"undefined…\""
+ },
+ {
+  "lock": "B2",
+  "where": "from a query card pass line",
+  "ok": false,
+  "detail": "pass: \"undefined…\""
+ },
+ {
+  "lock": "B2",
+  "where": "from a query card offer line",
+  "ok": false,
+  "detail": "offer: \"undefined…\""
+ }
+]

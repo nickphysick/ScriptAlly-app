@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "B1",
+  "where": "Contact list population",
+  "ok": true,
+  "detail": "the log flow open"
+ },
+ {
+  "lock": "B1",
+  "where": "Contact list first text",
+  "ok": true,
+  "detail": "first \"Logging new query\""
+ },
+ {
+  "lock": "B1",
+  "where": "Contact list line",
+  "ok": true,
+  "detail": "line \"Another one out the door – good work. Let’s get th…\""
+ },
+ {
+  "lock": "B1",
+  "where": "Contact list no art",
+  "ok": true,
+  "detail": "0 img(s) in the header"
+ },
+ {
+  "lock": "B1",
+  "where": "Contact list no band label",
+  "ok": true,
+  "detail": "\"New query\" absent"
+ },
+ {
+  "lock": "B1",
+  "where": "Contact list after an agent",
+  "ok": true,
+  "detail": "after choosing: \"Logging new query\""
+ },
+ {
+  "lock": "B1",
+  "where": "Query Centre population",
+  "ok": true,
+  "detail": "the log flow open"
+ },
+ {
+  "lock": "B1",
+  "where": "Query Centre first text",
+  "ok": true,
+  "detail": "first \"Logging new query\""
+ },
+ {
+  "lock": "B1",
+  "where": "Query Centre line",
+  "ok": true,
+  "detail": "line \"Another one out the door – good work. Let’s get th…\""
+ },
+ {
+  "lock": "B1",
+  "where": "Query Centre no art",
+  "ok": true,
+  "detail": "0 img(s) in the header"
+ },
+ {
+  "lock": "B1",
+  "where": "Query Centre no band label",
+  "ok": true,
+  "detail": "\"New query\" absent"
+ },
+ {
+  "lock": "B1",
+  "where": "Query Centre after an agent",
+  "ok": true,
+  "detail": "after choosing: \"Logging new query\""
+ }
+]

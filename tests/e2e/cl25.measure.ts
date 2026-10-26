@@ -13,7 +13,6 @@
  * ⚠️ F1's n IS READ FROM FIRESTORE (cl25QueriesByBook.mjs), never from the page it checks.
  */
 import { test, type Page } from "@playwright/test";
-import { execFileSync } from "node:child_process";
 import { BASE, Ledger, MUT, SIZES, box, mutate, mutateJs, openCl24, openQc149, scrollTo, sheetW } from "./cl25Lib";
 
 const T = { timeout: 8000 };
@@ -92,61 +91,10 @@ test("CL25-A1 A2 · the doodle sheet, the banner and chips gone, the highlighter
   A2.done(BASE ? 0 : 6);
 });
 
-/* ═════════ B · At a glance ═════════ */
-test("CL25-B1 B2 · four cards, their counts and faces; Querying filters you + agent; List health opens Housekeeping", async ({ page }) => {
-  test.setTimeout(300_000);
-  const B1 = new Ledger("B1"), B2 = new Ledger("B2");
-  const HEIGHT: Record<number, number> = { 1512: 103, 1280: 95 };
-  for (const vp of SIZES) {
-    const at = `${vp.width}`;
-    await openCl24(page, vp);
-    await mutate(page, "B1", ".cl25-hd .qc150-glance .qc150-cards.qc150-cards { grid-template-columns: 1.7fr 1fr 1fr 1fr !important; }");
-    const cards = await all(page, "[data-cl25='card']");
-    const faces = await all(page, "[data-cl25='faces']");
-    const counts = await all(page, "[data-cl25='count']");
-    const groups = await rowsByGroup(page);
-    B1.check(`${at} population`, cards.length > 0 && Object.keys(groups).length > 0, `${cards.length} cards, ${Object.keys(groups).length} list groups`);
-    B1.check(`${at} order`, cards.map((c) => c.k).join() === "health,none,querying,closed", `order ${cards.map((c) => c.k).join()}`);
-    const w = cards.map((c) => c.w);
-    B1.check(`${at} equal widths`, w.length === 4 && Math.max(...w) - Math.min(...w) <= 1, `widths ${w.map(f1).join(" / ")}`);
-    const want: Record<string, number> = { none: groups.none ?? 0, querying: (groups.you ?? 0) + (groups.agent ?? 0), closed: groups.closed ?? 0 };
-    cards.forEach((c, i) => {
-      if (c.k === "health") { B1.check(`${at} health figure`, /^\d+%$/.test(counts[i]?.text ?? ""), `List health reads "${counts[i]?.text}"`); return; }
-      const n = Number(counts[i]?.text);
-      B1.check(`${at} ${c.k} count`, n === want[c.k], `${c.k} card ${n}, the list's ${c.k === "querying" ? "Your move + Querying" : c.k} rows ${want[c.k]}`);
-      const fc = faces[i];
-      B1.check(`${at} ${c.k} faces`, Number(fc?.n) + Number(fc?.more) === n, `${fc?.n} faces + ${fc?.more} more = ${Number(fc?.n) + Number(fc?.more)} against ${n}`);
-    });
-    const hs = cards.map((c) => c.h);
-    B1.check(`${at} heights`, hs.length === 4 && hs.every((h) => near(h, HEIGHT[vp.width], 4)), `heights ${hs.map(f1).join(" / ")} against ${HEIGHT[vp.width]}`);
-
-    /* B2 — Querying: exactly the you + agent rows, pressed navy; again: everyone */
-    const total = Object.values(groups).reduce((a, b) => a + b, 0);
-    await page.locator("[data-cl25='card'][data-k='querying'] [data-cl25='hit']").first().click(T).catch(() => {});
-    await page.waitForTimeout(500);
-    const g2 = await rowsByGroup(page);
-    const on = await page.evaluate(() => { const c = [...document.querySelectorAll<HTMLElement>("[data-cl25='card'][data-k='querying']")].find((e) => e.offsetWidth); return c ? getComputedStyle(c).backgroundColor : ""; });
-    const keys = Object.keys(g2);
-    B2.check(`${at} population`, total > 0 && want.querying > 0, `${total} rows, ${want.querying} querying`);
-    B2.check(`${at} querying rows`, keys.every((k) => k === "you" || k === "agent") && (g2.you ?? 0) + (g2.agent ?? 0) === want.querying, `after Querying: ${JSON.stringify(g2)}, want ${want.querying} you + agent`);
-    B2.check(`${at} pressed navy`, on === "rgb(42, 58, 82)", `pressed card ${on}`);
-    await page.locator("[data-cl25='card'][data-k='querying'] [data-cl25='hit']").first().click(T).catch(() => {});
-    await page.waitForTimeout(500);
-    const g3 = await rowsByGroup(page);
-    const back = Object.values(g3).reduce((a, b) => a + b, 0);
-    B2.check(`${at} all again`, back === total, `after a second press ${back} rows, want ${total}`);
-    /* List health: Housekeeping opens, the list keeps every row, the card is never pressed */
-    await page.locator("[data-cl25='card'][data-k='health'] [data-cl25='hit']").first().click(T).catch(() => {});
-    await page.waitForTimeout(900);
-    const hk = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".hdr.is-in")].some((e) => e.getBoundingClientRect().width > 0));
-    const hPressed = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-cl25='card'][data-k='health']")].some((e) => e.hasAttribute("data-on") || e.querySelector("[aria-pressed='true']")));
-    const g4 = await rowsByGroup(page);
-    B2.check(`${at} health opens Housekeeping`, hk, `Housekeeping ${hk ? "open" : "not open"}`);
-    B2.check(`${at} health never filters`, Object.values(g4).reduce((a, b) => a + b, 0) === total && !hPressed, `rows ${Object.values(g4).reduce((a, b) => a + b, 0)} of ${total}; pressed ${hPressed}`);
-  }
-  B1.done(BASE ? 0 : 22);
-  B2.done(BASE ? 0 : 12);
-});
+/* ═════════ B · At a glance ═════════
+   ⚠️ RETIRED BY CONTACT LIST v25.1 A: v25 B's four tinted-head cards are replaced by one ledger card, held by CL251-A1
+   (four equal cells, no gap, rules between, shown + N) and CL251-A2 (Querying = Your move + With the agent, pressed pale
+   with a navy bar, a second press shows all, List health opens Housekeeping). */
 
 /* ═════════ C · the list title ═════════ */
 test("CL25-C1 · the title and count line on the list's left; the switch at its right, level with the count line", async ({ page }) => {
@@ -192,7 +140,7 @@ test("CL25-D1 D2 · one width for every block; the bar's order, its typewriter, 
     const S = await sheetW(page);
     const W = Math.min(S - 48, 1200);
     const b = {
-      card: await box(page, "[data-cl25='hd-card']"), glance: await box(page, "[data-cl25='glance']"),
+      card: await box(page, "[data-cl25='hd-card']"), /* re-pointed (v25.1 A): At a glance is the ledger */ glance: await box(page, "[data-cl251='glance']"),
       title: await box(page, "[data-cl25='title']"), sheet: await box(page, "[data-cl24='sheet']"),
     };
     const got = Object.entries(b).filter(([, v]) => v);
@@ -255,64 +203,7 @@ test("CL25-E1 · at 2560 the book is ≤1600 and centred, the band spans the she
   E1.done(BASE ? 0 : 11);
 });
 
-/* ═════════ F · the drawers' moment ═════════ */
-test("CL25-F1 · Log shows query no. {queries + 1} and Record 'Someone wrote back.', on both pages; neither after an agent is chosen", async ({ page }) => {
-  test.setTimeout(300_000);
-  const F1 = new Ledger("F1");
-  const byBook = JSON.parse(execFileSync("node", ["tests/e2e/cl25QueriesByBook.mjs"], { encoding: "utf8" }).trim().split("\n").pop() ?? "{}") as Record<string, number>;
-  F1.check("population", Object.keys(byBook).length > 0, `queries by book ${JSON.stringify(byBook)}`);
-  const vp = SIZES[0];
-  const moment = (kind: string) => page.evaluate((k) => {
-    const e = [...document.querySelectorAll<HTMLElement>(`.dmo[data-dmo='${k}']`)].find((x) => x.getBoundingClientRect().width > 0);
-    return e ? { no: e.querySelector("[data-dmo='no']")?.textContent ?? "", book: e.querySelector("[data-dmo='book']")?.textContent ?? "", title: e.querySelector("[data-dmo='title']")?.textContent ?? "" } : null;
-  }, kind);
-  const checkLog = (where: string, m: { no: string; book: string; title: string } | null) => {
-    F1.check(`${where} log shown`, !!m, `the moment ${m ? "shown" : "missing"}`);
-    if (!m) return;
-    const want = (byBook[m.book] ?? NaN) + 1;
-    F1.check(`${where} log n`, m.no === `no. ${want}`, `"${m.no}" for ${m.book}, Firestore says ${byBook[m.book]} queries → no. ${want}`);
-  };
-  const close = async () => { await page.keyboard.press("Escape"); await page.waitForTimeout(500); await page.keyboard.press("Escape"); await page.waitForTimeout(500); };
-  /* the Contact list: the shell's Log a query and Record a response */
-  await openCl24(page, vp);
-  await page.locator(".ws-cap--bar .ws-capl").first().click(T).catch(() => {});
-  await page.waitForTimeout(1200);
-  /* ⚠️ A FALSE PREMISE, RECORDED RATHER THAN ASSERTED: the shell's "Log a query" (invokeCapture "query") takes the
-     writer to the Query Centre, as it did before v25, and every log door that stays on the Contact list (a row's, the
-     agent card's) arrives with the agent chosen, where the moment is rightly not drawn. So the moment is held to show
-     after the Contact list's own door, wherever that door lands. */
-  F1.check("Contact list log door lands", true, `the shell's Log a query from /agents lands on ${new URL(page.url()).pathname}`);
-  checkLog("Contact list", await moment("log"));
-  /* choose the first agent: the moment goes */
-  await page.locator("[data-qad-body] button:has(b)").first().click(T).catch(() => {});
-  await page.waitForTimeout(700);
-  F1.check("Contact list after an agent", !(await moment("log")), "the log moment after an agent is chosen");
-  await close();
-  /* Escape PARKS a journey with answers (decision 8): clear the parked one, or the next door meets the clash */
-  await page.evaluate(() => { try { sessionStorage.removeItem("qh.parkedJourney"); } catch { /* private mode */ } });
-  await openCl24(page, vp);
-  await page.locator(".ws-cap--bar .ws-capr").first().click(T).catch(() => {});
-  await page.waitForTimeout(300);
-  await page.locator("[data-cap='record']").first().click(T).catch(() => {});
-  await page.waitForTimeout(1200);
-  F1.check("Contact list record door stays", new URL(page.url()).pathname === "/agents", `the record door left the page at ${new URL(page.url()).pathname}`);
-  const rec = await moment("record");
-  F1.check("Contact list record", rec?.title === "Someone wrote back.", `record title "${rec?.title ?? "missing"}"`);
-  await close();
-  /* the Query Centre: its header's two doors */
-  await openQc149(page, vp);
-  await page.locator("[data-qc149='log']").first().click(T).catch(() => {});
-  await page.waitForTimeout(1200);
-  checkLog("Query Centre", await moment("log"));
-  await page.locator("[data-qc149f='agent']").first().click(T).catch(() => {});
-  await page.waitForTimeout(700);
-  F1.check("Query Centre after an agent", !(await moment("log")), "the log moment after an agent is chosen");
-  await close();
-  await openQc149(page, vp);
-  await page.locator("[data-qc149='record']").first().click(T).catch(() => {});
-  await page.waitForTimeout(1200);
-  const qrec = await moment("record");
-  F1.check("Query Centre record", qrec?.title === "Someone wrote back.", `record title "${qrec?.title ?? "missing"}"`);
-  void scrollTo;
-  F1.done(BASE ? 0 : 11);
-});
+/* ═════════ F · the drawers' moment ═════════
+   ⚠️ RETIRED BY CONTACT LIST v25.1 B: the cream panel ("query no. {n}", "Someone wrote back.") is replaced by the flow's
+   header, held by CL251-B1 (Logging new query, on both pages, surviving an agent), B2 (Recording response and the four
+   answer lines) and B3 (Adding new agent). cl25QueriesByBook.mjs is kept for the record. */

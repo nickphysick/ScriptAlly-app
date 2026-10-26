@@ -10,7 +10,6 @@
  * CHECK the method differs from how the agent takes queries · BLOCK nothing marked as sent ·
  * CHECK the materials differ from the agent's guidelines · CHECK a nudge before the reply date.
  */
-import { DrawerMoment } from "../../shared/DrawerMoment";
 import { previousQueryFor } from "../../../lib/requery";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { materialsToQuery, saveLog, type IfNo } from "../../../lib/queryActions/logSave";
@@ -485,8 +484,6 @@ export function LogJourney({ req, today, children }: JourneyProps) {
   const view: JourneyView = {
     eyebrow: "LOG A QUERY",
     title: "Log a query",
-    /* Contact list v25 F — the moment, until an agent is chosen: query no. {queries already logged for the book + 1} */
-    moment: agent ? undefined : <DrawerMoment kind="log" n={forBook.length + 1} title={ms?.title?.trim() || null} />,
     verb: "log",
     verbDone: "logged",
     button: "Log query",

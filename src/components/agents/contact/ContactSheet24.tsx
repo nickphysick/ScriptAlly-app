@@ -92,9 +92,12 @@ export interface ContactSheet24Props {
   onSearch: (v: string) => void;
 }
 
-const COLS: { key: SortKey | null; label: string }[] = [
-  { key: "surname", label: "Agent" }, { key: null, label: "Genres" }, { key: "reply", label: "Replies in" },
-  { key: null, label: "Submissions" }, { key: "status", label: "Your query" }, { key: "added", label: "Added" },
+/* v25.1 E1/E3/E4 — five columns, every heading a sort: Agent · Genres · Replies in · Your query · Your rating. The
+   Submissions column is gone (a closed-and-not-queried agent says so in Your query), Added gave way to Your rating
+   (still on the agent card), and at ≤1440 of window the last column drops. */
+const COLS: { key: SortKey; label: string }[] = [
+  { key: "surname", label: "Agent" }, { key: "fit", label: "Genres" }, { key: "reply", label: "Replies in" },
+  { key: "urgency", label: "Your query" }, { key: "rating", label: "Your rating" },
 ];
 
 export const ContactSheet24: React.FC<ContactSheet24Props> = (p) => {
@@ -104,22 +107,8 @@ export const ContactSheet24: React.FC<ContactSheet24Props> = (p) => {
   const byId = useMemo(() => new Map(p.all.map((x) => [x.agent.id, x])), [p.all]);
   const groups = useMemo(() => (p.grouped ? setGroups(p.pool) : [{ key: null as SetKey | null, label: "", ids: p.pool.map((x) => x.agent.id) }]), [p.grouped, p.pool]);
 
-  /* v25 D2 — AT 1440 OF SHEET OR LESS Filters and Full screen go icon-only. The sheet is the window less the shell's
-     published insets (`--ink-sheet-l/-r` on <html>, which WorkspaceShell keeps current), read on every resize. */
-  const [narrowSheet, setNarrowSheet] = useState(false);
-  useLayoutEffect(() => {
-    const read = () => {
-      const cs = getComputedStyle(document.documentElement);
-      const s = window.innerWidth - (parseFloat(cs.getPropertyValue("--ink-sheet-l")) || 0) - (parseFloat(cs.getPropertyValue("--ink-sheet-r")) || 0);
-      setNarrowSheet(s <= 1440);
-    };
-    read();
-    window.addEventListener("resize", read);
-    const el = sheetRef.current;
-    const ro = typeof ResizeObserver !== "undefined" && el ? new ResizeObserver(read) : null;
-    if (ro && el) ro.observe(el);
-    return () => { window.removeEventListener("resize", read); ro?.disconnect(); };
-  }, []);
+  /* v25.1 C3 — the bar folds at 1440 of WINDOW, the Query Centre's rule (contactV24.css's media query); v25's
+     sheet-measured `data-s1440` is retired */
 
   /* Cards: three across from a sheet of 1,100px, measured before paint and on every resize */
   const [across, setAcross] = useState(3);
@@ -143,7 +132,7 @@ export const ContactSheet24: React.FC<ContactSheet24Props> = (p) => {
   const sortBy = (k: SortKey) => p.onSort({ key: k, reversed: p.sortKey === k ? !p.reversed : false });
 
   return (
-    <div className="cl24-sheet" data-cl24="sheet" data-view={p.view} data-s1440={narrowSheet ? "" : undefined} ref={sheetRef}>
+    <div className="cl24-sheet" data-cl24="sheet" data-view={p.view} ref={sheetRef}>
       <div className="cl24-bar" data-cl24="bar" ref={barRef}>
         <label className="qc150-bfind" data-cl24="find" data-cl25="find" data-nb1="find">
           <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4.5 4.5" /></svg>
@@ -155,8 +144,8 @@ export const ContactSheet24: React.FC<ContactSheet24Props> = (p) => {
           {I.filt}<span className="cl24-cl">Filters</span>{filterN ? <em className="cl24-n" data-cl24="filters-n">{filterN}</em> : null}
         </button>
         <button type="button" className="cl24-ch" data-cl24="group" aria-haspopup="menu" aria-expanded={pop.open === "group"}
-          aria-label={`Grouped by ${p.grouped ? "Status" : "nothing"}. Change the grouping`} data-cl25="group" onClick={(e) => pop.toggle("group", e.currentTarget)}>
-          {GROUP_ICON150}<b>{p.grouped ? "Status" : "None"}</b>{I.cv}
+          aria-label={p.grouped ? "Grouped by Status. Change the grouping" : "Not grouped. Group the list"} data-cl25="group" onClick={(e) => pop.toggle("group", e.currentTarget)}>
+          {GROUP_ICON150}<b>{p.grouped ? "Status" : "Group"}</b>{I.cv}
         </button>
         <SortChipButton fields={CL_SORT_FIELDS} value={{ key: p.sortKey, reversed: p.reversed }} open={pop.open === "sort"} className="cl24-ch cl24-sort" ns="cl24"
           onToggle={(a) => pop.toggle("sort", a)} toolbar={() => barRef.current} />
@@ -174,13 +163,12 @@ export const ContactSheet24: React.FC<ContactSheet24Props> = (p) => {
         <div className="cl24-tbl" data-cl24="table" role="table" aria-label="Agents">
           <div className="cl24-th" role="row" data-cl24="heads">
             {COLS.map((c, i) => (
-              <span key={c.label} role="columnheader" data-col={i + 1}
-                aria-sort={c.key && c.key === p.sortKey ? (p.reversed ? "descending" : "ascending") : undefined}>
-                {c.key ? (
-                  <button type="button" className={c.key === p.sortKey ? "on" : undefined} onClick={() => sortBy(c.key!)}>
-                    {c.label}{c.key === p.sortKey ? <i aria-hidden="true">{p.reversed ? " ↑" : " ↓"}</i> : null}
-                  </button>
-                ) : c.label}
+              <span key={c.label} role="columnheader" data-col={i + 1} data-key={c.key}
+                aria-sort={c.key === p.sortKey ? (p.reversed ? "descending" : "ascending") : "none"}>
+                {/* v25.1 E4 — every heading sorts: a first click in its first direction, a second reverses it */}
+                <button type="button" className={c.key === p.sortKey ? "on" : undefined} data-cl251="head" data-key={c.key} onClick={() => sortBy(c.key)}>
+                  <span>{c.label}</span><i aria-hidden="true">{c.key === p.sortKey && p.reversed ? "↑" : "↓"}</i>
+                </button>
               </span>
             ))}
           </div>
@@ -253,13 +241,15 @@ const Row: React.FC<{ x: AgentFacts; p: ContactSheet24Props }> = ({ x, p }) => {
   const a = x.agent;
   const name = agentPrimary(a);
   const agency = (a.name ?? "").trim() ? (a.agency ?? "").trim() : "";
+  /* v25.1 E2 — the book's matching genres first, at most two tags, then "+n"; one line */
   const genres = a.genres ?? [];
-  const shown = genres.slice(0, 3);
+  const ordered = [...genres.filter((g) => p.genreHit(g)), ...genres.filter((g) => !p.genreHit(g))];
+  const shown = ordered.slice(0, 2);
   const weeks = typeof a.responseTimeWeeks === "number" && a.responseTimeWeeks > 0 ? a.responseTimeWeeks : null;
   const rule = a.noResponseMeansNo === true ? "no reply means no" : a.noResponseMeansNo === false ? "always replies" : null;
   const email = (a.email ?? "").trim();
   const site = (a.website ?? "").trim();
-  const added = addedLabel(a);
+  const stars = typeof a.starRating === "number" && a.starRating > 0 ? Math.min(5, Math.round(a.starRating)) : 0;
   const second = rowSecond(x, p.nowMs);
   const q = x.q;
   const on = p.openId === a.id;
@@ -273,11 +263,15 @@ const Row: React.FC<{ x: AgentFacts; p: ContactSheet24Props }> = ({ x, p }) => {
         <StateDisc x={x} />
         <span className="cl24-whot"><b>{name}</b>{agency ? <small>{agency}</small> : null}</span>
       </span>
-      <span role="cell" className="cl24-gen" data-cl24="genres">
+      <span role="cell" className="cl24-gen" data-cl24="genres" data-total={genres.length}>
         {shown.length ? (
           <>
-            {shown.map((g) => <span key={g} className={`cl24-tag${p.genreHit(g) ? " hit" : ""}`} data-hit={p.genreHit(g) ? "" : undefined}>{p.genreWord(g)}</span>)}
-            {genres.length > shown.length ? <span className="cl24-tag">+{genres.length - shown.length}</span> : null}
+            {shown.map((g) => (
+              <span key={g} className={`cl24-tag${p.genreHit(g) ? " hit" : ""}`} data-hit={p.genreHit(g) ? "" : undefined} data-cl251="genre">
+                {p.genreHit(g) ? <i aria-hidden="true">✓ </i> : null}{p.genreWord(g)}
+              </span>
+            ))}
+            {genres.length > shown.length ? <em className="cl251-gmore" data-cl251="genre-more" data-n={genres.length - shown.length}>+{genres.length - shown.length}</em> : null}
           </>
         ) : <button type="button" className="cl24-add" data-cl24="add-genres" onClick={() => p.onEdit(a.id, "want", "genres")}>+ Add genres</button>}
       </span>
@@ -285,12 +279,9 @@ const Row: React.FC<{ x: AgentFacts; p: ContactSheet24Props }> = ({ x, p }) => {
         {weeks ? <><b>About {weeks} {weeks === 1 ? "week" : "weeks"}</b>{rule ? <small>{rule}</small> : null}</>
           : <button type="button" className="cl24-add" data-cl24="add-reply" onClick={() => p.onEdit(a.id, "work", "reply")}>+ Add</button>}
       </span>
-      <span role="cell" className={`cl24-door cl24-door--${x.door}`} data-cl24="door">
-        <i aria-hidden="true" />{x.door === "open" ? "Open" : x.door === "closed" ? "Closed" : "Not known"}
-      </span>
       <span role="cell" className="cl24-qs" data-cl24="query">
         {x.stand === "none" || !q ? (
-          x.door === "closed" ? <span className="cl24-shut">Closed to queries</span>
+          x.door === "closed" ? <span className="cl24-shut cl251-shut" data-cl251="closed-tag">Closed to queries</span>
             : <button type="button" className="cl24-lq" data-cl24="log" onClick={() => p.onLog(a.id)}>{I.plus}Log a query</button>
         ) : (
           <>
@@ -299,7 +290,12 @@ const Row: React.FC<{ x: AgentFacts; p: ContactSheet24Props }> = ({ x, p }) => {
           </>
         )}
       </span>
-      <span role="cell" className="cl24-ad" data-col="6" data-cl24="added">{added ? added.replace(/ \d{4}$/, "") : ""}</span>
+      {/* v25.1 E3 — Your rating, the last column: five stars, or "Not rated" */}
+      <span role="cell" className="cl24-ad cl251-rate" data-col="5" data-cl251="rating" data-n={stars}>
+        {stars ? (
+          <span className="cl251-stars" aria-label={`Rated ${stars} of 5`}>{[1, 2, 3, 4, 5].map((n) => <i key={n} className={n <= stars ? "on" : undefined} aria-hidden="true">★</i>)}</span>
+        ) : <em className="cl251-unrated">Not rated</em>}
+      </span>
       <span className="cl24-qa" data-cl24="quick">
         {email ? <button type="button" title="Copy email" aria-label={`Copy ${name}’s email`} data-cl24="copy-email" onClick={() => copy(email)}>{I.mail}</button> : null}
         {site ? <a href={hrefFor(site) ?? undefined} target="_blank" rel="noreferrer noopener" title="Open website" aria-label={`Open ${name}’s website`} data-cl24="open-site">{I.web}</a> : null}

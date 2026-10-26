@@ -1,0 +1,101 @@
+/* ══ Contact list v25.1 (design-refs/contact-list-v25-1/) ══════════════════════════════════════════════════════════
+   Desktop only, like v24 and v25: the phone keeps its page. The ≤1440 steps follow the WINDOW (C3), as the Query
+   Centre's do. */
+
+/* ══ Part A · At a glance, one ledger card ════════════════════════════════════════════════════════════════════════ */
+@media (min-width: 768px) {
+  /* C1 — "At a glance" is "Every agent on file"'s size (Special Elite 24 / 24), 30 under the header card */
+  .cl25-hd .cl251-glance { margin-top: 30px; }
+  .cl25-hd .cl251-glance h3.cl251-gh {
+    display: flex; align-items: center; gap: 26px; margin: 0 0 14px; padding: 4px 0;
+    font: 400 24px/24px var(--sp-type) !important; font-family: var(--sp-type) !important; color: #1c130f; white-space: nowrap;
+  }
+  .cl25-hd .cl251-glance .cl251-gh::after { content: ""; flex: 1 1 0; min-width: 0; height: 1px; background: rgba(28, 19, 15, 0.18); }
+
+  /* the card: white, radius 14, a hairline ring and a soft shadow; four equal cells, no gap, a rule between neighbours */
+  .cl251-led {
+    box-sizing: border-box; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; overflow: hidden;
+    border-radius: 14px; background: #fff;
+    box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1), 0 10px 24px -18px rgba(28, 19, 15, 0.35);
+  }
+  .cl251-cell {
+    all: unset; box-sizing: border-box; position: relative; display: flex; flex-direction: column; gap: 14px; min-width: 0;
+    padding: 18px 22px; cursor: pointer; background: #fff; transition: background-color 0.12s;
+  }
+  .cl251-cell + .cl251-cell { box-shadow: inset 1px 0 0 rgba(28, 19, 15, 0.09); }
+  .cl251-cell:hover:not(:disabled):not([data-on]) { background: #faf8f5; }
+  .cl251-cell:focus-visible { outline: 2px solid #2a3a52; outline-offset: -2px; }
+  .cl251-cell:disabled { cursor: default; }
+  /* pressed: a pale wash and a 3px navy bar along the bottom edge (kept with the rule beside it) */
+  .cl251-cell[data-on] { background: #f2f4f8; box-shadow: inset 0 -3px 0 #2a3a52; }
+  .cl251-cell + .cl251-cell[data-on] { box-shadow: inset 1px 0 0 rgba(28, 19, 15, 0.09), inset 0 -3px 0 #2a3a52; }
+
+  /* row 1: the swatch, the label, and List health's gaps at the right */
+  .cl251-r1 { display: flex; align-items: center; gap: 9px; min-width: 0; }
+  .cl251-sw.cl251-sw { display: block; flex: none; width: 10px; height: 10px; }
+  .cl251-r1 b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 17px/1.15 var(--sp-type) !important; color: #1c130f; }
+  .cl251-gaps { margin-left: auto; flex: none; font: 400 14px/1.15 var(--sp-type) !important; font-style: normal; color: #a2452a; white-space: nowrap; }
+
+  /* row 2: the count on the left; the ring or the faces on the right, 6px up so their centres meet the numerals' middle */
+  .cl251-r2 { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; min-height: 44px; min-width: 0; }
+  .cl251-n { flex: none; font: 400 44px/1 var(--sp-type) !important; color: #1c130f; }
+  .cl251-ring, .cl251-faces { position: relative; top: -6px; flex: none; }
+  .cl251-ring { display: block; width: 44px; height: 44px; }
+  .cl251-ring .cl17-rg { position: absolute; inset: 0; display: block; width: 44px; height: 44px; margin: 0; }
+  .cl251-ring .cl17-rg svg { position: absolute; inset: 0; display: block; width: 44px; height: 44px; }
+  .cl251-ring .cl17-pc { display: none !important; }
+  /* the ring's gaps in the light rust */
+  .cl251-ring [data-cl17="ring-gaps"] { stroke: #e6c9bd; stroke-opacity: 1; }
+
+  .cl251-faces { display: flex; align-items: center; min-width: 0; }
+  .cl251-faces .cl251-face.cl24-dsc {
+    --d: 28px; margin-left: -3px; font-size: 9.5px !important; box-shadow: 0 0 0 2.5px #fff;
+  }
+  .cl251-faces .cl251-face:first-child { margin-left: 0; }
+  .cl251-faces .cl251-face.cl24-dsc--you { box-shadow: 0 0 0 2.5px #fff; }
+  .cl251-cell[data-on] .cl251-faces .cl251-face { box-shadow: 0 0 0 2.5px #f2f4f8; }
+  .cl251-more { margin-left: 7px; font: 400 13px/1 var(--sp-type) !important; font-style: normal; color: #7a6f66; white-space: nowrap; }
+}
+/* ≤1440 of WINDOW: tighter cells, a smaller count and discs */
+@media (min-width: 768px) and (max-width: 1440px) {
+  .cl251-cell { padding: 16px; }
+  .cl251-n { font-size: 36px !important; }
+  .cl251-faces .cl251-face.cl24-dsc { --d: 24px; font-size: 8.5px !important; }
+}
+@media (prefers-reduced-motion: reduce) { .cl251-cell { transition: none; } }
+
+/* ══ Part E · the List's rows and heading sorts ═══════════════════════════════════════════════════════════════════ */
+@media (min-width: 768px) {
+  /* E4 — every heading a sort: the sorted one navy with ↓ / ↑ and a 2px navy underline under its label; the others
+     show a faint arrow on hover; keyboard focus a ring */
+  .cl24-th button[data-cl251="head"] { display: inline-flex; align-items: center; gap: 6px; padding: 6px 0; }
+  .cl24-th button[data-cl251="head"] > span { box-shadow: inset 0 -2px 0 transparent; padding-bottom: 3px; }
+  .cl24-th button[data-cl251="head"] > i { font-style: normal; opacity: 0; transition: opacity 0.12s; }
+  .cl24-th button[data-cl251="head"]:hover > i { opacity: 0.45; }
+  .cl24-th button[data-cl251="head"].on { color: #2a3a52; }
+  .cl24-th button[data-cl251="head"].on > span { box-shadow: inset 0 -2px 0 #2a3a52; }
+  .cl24-th button[data-cl251="head"].on > i { opacity: 1; }
+  .cl24-th button[data-cl251="head"]:focus-visible { outline: 2px solid #2a3a52; outline-offset: 3px; border-radius: 3px; }
+
+  /* E2 — a matching tag: "✓ THRILLER", its powder fill and a navy ring; "+n" in the typewriter */
+  .cl24-gen .cl24-tag { flex: none; }
+  .cl24-gen .cl24-tag.hit { box-shadow: inset 0 0 0 1px rgba(42, 58, 82, 0.45); }
+  .cl24-gen .cl24-tag.hit > i { font-style: normal; margin-right: 2px; }
+  .cl251-gmore { flex: none; margin-left: 3px; font: 400 13px/1 var(--sp-type) !important; font-style: normal; color: #7a6f66; white-space: nowrap; }
+
+  /* E1 — "Closed to queries", in Your query, for an agent closed and not queried */
+  .cl24-shut.cl251-shut {
+    display: inline-flex; align-items: center; height: 26px; padding: 0 11px; border-radius: 999px; background: #ece8e2;
+    font: 500 10px/1 var(--sp-mono, "JetBrains Mono", monospace) !important; font-style: normal; letter-spacing: 0.12em; text-transform: uppercase;
+    color: #6b5f52; white-space: nowrap;
+  }
+
+  /* E3 — Your rating: five 14px stars, 1px apart, rust on and sand off; "Not rated" in italic grey */
+  .cl251-rate { display: flex; align-items: center; }
+  .cl251-stars { display: inline-flex; gap: 1px; }
+  .cl251-stars i { font: normal 400 14px/1 var(--sp-serif); color: #d9cfc4; }
+  .cl251-stars i.on { color: #a2452a; }
+  .cl251-unrated { font: italic 400 14px var(--sp-serif) !important; color: rgba(28, 19, 15, 0.45); }
+  .cl24-sort .sc-dir { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .cl24-th button[data-cl251="head"] > i { transition: none; } }

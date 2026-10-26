@@ -632,7 +632,9 @@ export function contactGroups(
 
 /* ── sorting (v14 §4) — within groups when grouped ── */
 
-export type SortKey = "surname" | "agency" | "reply" | "activity" | "status" | "added";
+export type SortKey = "surname" | "agency" | "reply" | "activity" | "status" | "added" | "fit" | "urgency" | "rating";
+/** Contact list v25.1 E4 — the List's five headings, each a sort; the pill, the menu and the remembered sort offer these */
+export const HEADING_SORTS: readonly SortKey[] = ["surname", "fit", "reply", "urgency", "rating"];
 /** each with its italic line and the direction toggle's two words */
 export const SORT_OPTIONS: { key: SortKey; label: string; line: string; dir: [string, string] }[] = [
   { key: "surname", label: "Surname", line: "By family name", dir: ["A to Z", "Z to A"] },
@@ -642,6 +644,10 @@ export const SORT_OPTIONS: { key: SortKey; label: string; line: string; dir: [st
   { key: "status", label: "Status", line: "Furthest along first", dir: ["Furthest along first", "Least far first"] },
   /* v19 §C — the Date added heading: newest first, a record with no readable date last either way */
   { key: "added", label: "Date added", line: "Newest first", dir: ["Newest first", "Oldest first"] },
+  /* v25.1 E4 — the Genres, Your query and Your rating headings */
+  { key: "fit", label: "Genre fit", line: "Most matches with the book first", dir: ["Best fit first", "Weakest fit first"] },
+  { key: "urgency", label: "Urgency", line: "The soonest dated next step first", dir: ["Most urgent first", "Least urgent first"] },
+  { key: "rating", label: "Your rating", line: "Unrated last, either way", dir: ["Highest first", "Lowest first"] },
 ];
 
 /** v19 §C/§J — when the agent was added, from the record's own `dateAdded` (ISO); null when it does not parse */
@@ -661,7 +667,26 @@ export function addedLabel(a: Pick<Agent, "dateAdded">): string | null {
  * Sort within groups. ⚠️ REVERSED KEEPS THE MISSING LAST (the house law): reversing a list whose tail is
  * "unknown" would otherwise lead with the agents nobody can sort. Names are never missing.
  */
-export function sortFacts(facts: readonly AgentFacts[], key: SortKey, reversed = false): AgentFacts[] {
+/** v25.1 E4 — what two of the heading sorts need beyond the facts: the day, and how many of an agent's genres match the
+ *  book in scope (the page's own genre match, `genreHit`) */
+export interface SortCtx { nowMs: number; fitOf: (x: AgentFacts) => number }
+
+/** v25.1 E4 — "Your query", most urgent first: a dated next step (soonest first; a your-move step with no date after the
+ *  dated ones), then by stage (Full sent, Partial sent, Queried, then a closed query, "Passed"), then not queried */
+const STAGE_TIER: Record<string, number> = { "Full Sent": 0, "Partial Sent": 1, "Queried": 2 };
+export function urgencyOf(x: Pick<AgentFacts, "stand" | "q">, nowMs: number): [number, number] {
+  const q = x.q;
+  if (!q || x.stand === "none") return [2, 0];
+  if (x.stand === "you") {
+    /* a nudge due is due now; a send or a decision is due by its date */
+    const due = q.court === "agent" ? Math.min(q.expectedMs ?? nowMs, nowMs) : q.expectedMs;
+    return [0, due ?? Number.MAX_SAFE_INTEGER];
+  }
+  /* with the agent, by stage; then a closed query ("Passed") */
+  return [1, x.stand === "closed" ? 3 : STAGE_TIER[String(q.status)] ?? 2.5];
+}
+
+export function sortFacts(facts: readonly AgentFacts[], key: SortKey, reversed = false, ctx?: SortCtx): AgentFacts[] {
   const by = [...facts];
   const name = (x: AgentFacts) => (x.agent.name.trim() || x.agent.agency).toLowerCase();
   const sur = (a: AgentFacts, b: AgentFacts) => surnameOf(a.agent).localeCompare(surnameOf(b.agent)) || name(a).localeCompare(name(b));
@@ -672,10 +697,27 @@ export function sortFacts(facts: readonly AgentFacts[], key: SortKey, reversed =
   const missing: Partial<Record<SortKey, (x: AgentFacts) => boolean>> = {
     reply: (x) => weeks(x) == null, activity: (x) => active(x) == null, added: (x) => addedMs(x.agent) == null,
   };
+  /* v25.1 E4 — the new heading sorts: the primary key alone turns with the direction; ties ALWAYS fall back to surname
+     A–Z, and an unrated agent (or, for reply, an unknown time) stays last both ways */
+  const turn = reversed ? -1 : 1;
+  if (key === "fit") {
+    const fit = ctx?.fitOf ?? (() => 0);
+    return by.sort((a, b) => turn * (fit(b) - fit(a)) || sur(a, b));
+  }
+  if (key === "rating") {
+    const r = (x: AgentFacts) => (typeof x.rating === "number" && x.rating > 0 ? x.rating : null);
+    return by.sort((a, b) => { const x = r(a), y = r(b); if (x == null || y == null) return x == null && y == null ? sur(a, b) : x == null ? 1 : -1; return turn * (y - x) || sur(a, b); });
+  }
+  if (key === "urgency") {
+    const now = ctx?.nowMs ?? Date.now();
+    return by.sort((a, b) => { const [ta, va] = urgencyOf(a, now), [tb, vb] = urgencyOf(b, now); return turn * (ta - tb || va - vb) || sur(a, b); });
+  }
+  if (key === "reply") {
+    return by.sort((a, b) => { const x = weeks(a), y = weeks(b); if (x == null || y == null) return x == null && y == null ? sur(a, b) : x == null ? 1 : -1; return turn * (x - y) || sur(a, b); });
+  }
   switch (key) {
     case "surname": by.sort(sur); break;
     case "agency": by.sort((a, b) => deThe(a.agent.agency || "\uffff").toLowerCase().localeCompare(deThe(b.agent.agency || "\uffff").toLowerCase()) || sur(a, b)); break;
-    case "reply": by.sort((a, b) => (weeks(a) ?? 999) - (weeks(b) ?? 999) || sur(a, b)); break;
     case "activity": by.sort((a, b) => (active(b) ?? 0) - (active(a) ?? 0) || sur(a, b)); break;
     case "status": by.sort((a, b) => rank(a) - rank(b) || sur(a, b)); break;
     case "added": by.sort((a, b) => (addedMs(b.agent) ?? -Infinity) - (addedMs(a.agent) ?? -Infinity) || sur(a, b)); break;

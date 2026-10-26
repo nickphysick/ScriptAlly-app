@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "C1",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "19px/20px · 24px/24px"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 same size",
+  "ok": false,
+  "detail": "At a glance 19px/20px · Every agent on file 24px/24px"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "19px/20px · 24px/24px"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 same size",
+  "ok": false,
+  "detail": "At a glance 19px/20px · Every agent on file 24px/24px"
+ }
+]

@@ -41,7 +41,6 @@ export const ContactListTitle25: React.FC<{
         {words ? (
           <>
             {words.of != null ? <><b data-cl25="count-n">{words.n}</b> of <span data-cl25="count-of">{words.of}</span> {words.agents}</> : <><b data-cl25="count-n">{words.n}</b> {words.agents}</>}
-            {words.pct != null ? <> &nbsp;·&nbsp; <b data-cl25="count-pct">{words.pct}%</b> list health</> : null}
             {" "}&nbsp;·&nbsp; {words.how}
           </>
         ) : " "}

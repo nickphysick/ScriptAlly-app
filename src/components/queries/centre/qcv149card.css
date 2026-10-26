@@ -151,6 +151,9 @@ textarea.qc149c-inp { height: auto; min-height: 70px; padding: 10px 12px; line-h
 /* ── D · the header flows: the new query card and "Who replied?" ── */
 .qc149f .qc149f-band { display: flex; align-items: center; justify-content: space-between; background: #efe9df; color: #5b524a; }
 .qc149f .qc149f-pick { flex: 1 1 auto !important; min-height: 0; display: flex; flex-direction: column; padding: 18px 20px 6px; }
+/* Contact list v25.1 B — the header is taller than the band it replaced: the label and the search keep their height,
+   the list beneath them takes what is left (they were squeezed into each other) */
+.qc149f .qc149f-pick > :not(.qc149f-ags) { flex: none; }
 .qc149f .qc149f-srch { display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 14px; border-radius: 10px; background: #f5f1ea; box-shadow: inset 0 1px 2px rgba(28, 19, 15, 0.08); }
 .qc149f .qc149f-srch input { all: unset; flex: 1; font: 400 17px var(--sp-serif); }
 .qc149f .qc149f-srch input::placeholder { font-style: italic; color: #9a948b; }

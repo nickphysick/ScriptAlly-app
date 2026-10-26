@@ -158,8 +158,6 @@ export function DrawerShell({ view, mode, open, initialStep, initialSeen, from, 
         <QadHead from={panel ? (panel.backLabel ?? (panel.back === false ? null : backWords(panel.first))) : from} onFrom={leave} eyebrow={view.eyebrow} title={panel ? panel.title : view.title} who={view.who} onClose={requestClose} back={!!panel} />
 
         <div className="qad-body" ref={bodyRef} data-qad-body>
-          {/* Contact list v25 F — the moment, above the first step's label; it scrolls with the body */}
-          {cur === 0 && view.moment ? view.moment : null}
           {view.steps.length ? (
             <>
               <div className="qad-stepper" data-qad-stepper>

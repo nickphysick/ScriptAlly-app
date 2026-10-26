@@ -297,8 +297,9 @@ describe("v14 §4 — grouping partitions the ordered list; sorting orders withi
     if (labels.includes(NOT_RECORDED)) expect(labels[labels.length - 1]).toBe(NOT_RECORDED);
     expect(labels.some((l) => /England|Scotland|Wales/.test(l))).toBe(false);
   });
-  it("the six sorts, each with its direction words (v19 §C adds Date added)", () => {
-    expect(SORT_OPTIONS_V12.map((o) => o.label)).toEqual(["Surname", "Agency", "Response time", "Recent activity", "Status", "Date added"]);
+  /* re-pointed (v25.1 E4): three heading sorts join the six */
+  it("the nine sorts, each with its direction words (v19 §C adds Date added; v25.1 the heading sorts)", () => {
+    expect(SORT_OPTIONS_V12.map((o) => o.label)).toEqual(["Surname", "Agency", "Response time", "Recent activity", "Status", "Date added", "Genre fit", "Urgency", "Your rating"]);
     expect(SORT_OPTIONS_V12.find((o) => o.key === "added")?.dir).toEqual(["Newest first", "Oldest first"]);
     expect(SORT_OPTIONS_V12[0].dir).toEqual(["A to Z", "Z to A"]);
   });
@@ -317,8 +318,11 @@ describe("v14 §4 — grouping partitions the ordered list; sorting orders withi
     expect(noWindow).toBeGreaterThan(0);
     for (const x of fwd.slice(noWindow)) expect(stated(x)).toBe(false);
     const rev = sortFacts(facts, "reply", true);
-    const has = (xs: typeof fwd) => xs.filter(stated).map((x) => x.agent.id);
-    expect(has(rev)).toEqual([...has(fwd)].reverse());
+    /* re-pointed (v25.1 E4): reversed turns the WEEKS, while ties stay A to Z by surname, so the stated rows are no
+       longer the forward order reversed; they are slowest first */
+    const wk = (xs: typeof fwd) => xs.filter(stated).map((x) => x.agent.responseTimeWeeks as number);
+    expect(wk(rev)).toEqual([...wk(fwd)].sort((a, b) => b - a));
+    expect(wk(rev).length).toBe(wk(fwd).length);
     for (const x of rev.slice(rev.findIndex((y) => !stated(y)))) expect(stated(x)).toBe(false);
     expect(sortFacts(facts, "surname", true).map((x) => x.agent.id)).toEqual(sortFacts(facts, "surname").map((x) => x.agent.id).reverse());
   });

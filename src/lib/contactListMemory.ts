@@ -23,7 +23,7 @@
  */
 import {
   type ContactFilters, emptyContactFilters, GROUP_OPTIONS, type GroupKey, OPEN_CHOICES, type OpenChoice,
-  QUERIED_CHOICES, type QueriedChoice, SORT_OPTIONS, type SortKey, STATUS_CHOICES, type StatusKey,
+  QUERIED_CHOICES, type QueriedChoice, SORT_OPTIONS, HEADING_SORTS, type SortKey, STATUS_CHOICES, type StatusKey,
 } from "./contactList";
 import { GLANCE_KEYS, type GlanceKey } from "./contactGlance";
 
@@ -61,7 +61,8 @@ export function sanitiseListView(raw: unknown): ListView | null {
   const d = DEFAULT_LIST_VIEW();
   return {
     group: oneOf<GroupKey>(r.group, GROUP_OPTIONS.map((g) => g.key), d.group),
-    sort: oneOf<SortKey>(r.sort, SORT_OPTIONS.map((s) => s.key), d.sort),
+    /* v25.1 E4 — only the five heading sorts are remembered; an older key (status, added…) reads as A to Z */
+    sort: oneOf<SortKey>(r.sort, HEADING_SORTS, d.sort),
     reversed: r.reversed === true,
     pinned: r.pinned === true,
     view: oneOf<ContactView>(r.view, CONTACT_VIEWS, d.view),

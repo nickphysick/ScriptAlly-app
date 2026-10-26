@@ -23,13 +23,14 @@ export const QC_SORT_FIELDS: readonly SortField<Qc138SortKey>[] = [
   { key: "changed", label: "Last changed", order: [{ label: "Newest first", reversed: true }, { label: "Oldest first", reversed: false }] },
 ];
 
-/** Contact list: its four sortable headings, in their order (Agent sorts by surname) */
+/** Contact list v25.1 E4/E5 — its five headings, in their order, each a sort; the pill says the choice in words (no
+ *  arrow): "Name A–Z", "Best genre fit", "Quickest reply", "Most urgent", "Highest rated", and their reverses */
 export const CL_SORT_FIELDS: readonly SortField<SortKey>[] = [
-  /* Contact list v25 D2 — the bar's pill says "Name A–Z ↓" (the menu keeps "Surname") */
-  { key: "surname", label: "Surname", order: AZ, chip: (r) => (r ? "Name Z–A" : "Name A–Z") },
-  { key: "added", label: "Date added", order: [{ label: "Newest first", reversed: false }, { label: "Oldest first", reversed: true }] },
-  { key: "reply", label: "Reply time", order: [{ label: "Fastest first", reversed: false }, { label: "Slowest first", reversed: true }] },
-  { key: "status", label: "Query status", order: [{ label: "Furthest on", reversed: false }, { label: "Earliest first", reversed: true }] },
+  { key: "surname", label: "Name", order: AZ, chip: (r) => (r ? "Name Z–A" : "Name A–Z") },
+  { key: "fit", label: "Genre fit", order: [{ label: "Best fit first", reversed: false }, { label: "Weakest fit first", reversed: true }], chip: (r) => (r ? "Weakest genre fit" : "Best genre fit") },
+  { key: "reply", label: "Reply time", order: [{ label: "Quickest first", reversed: false }, { label: "Slowest first", reversed: true }], chip: (r) => (r ? "Slowest reply" : "Quickest reply") },
+  { key: "urgency", label: "Urgency", order: [{ label: "Most urgent first", reversed: false }, { label: "Least urgent first", reversed: true }], chip: (r) => (r ? "Least urgent" : "Most urgent") },
+  { key: "rating", label: "Your rating", order: [{ label: "Highest first", reversed: false }, { label: "Lowest first", reversed: true }], chip: (r) => (r ? "Lowest rated" : "Highest rated") },
 ];
 
 /**

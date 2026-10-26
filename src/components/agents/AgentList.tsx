@@ -45,8 +45,10 @@ import {
 } from "../../lib/agentCardStore";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { ContactHeader25 } from "./contact/ContactHeader24";
-import { ContactGlance25 } from "./contact/ContactGlance25";
+import { ContactGlance251 } from "./contact/ContactGlance251";
 import { ContactListTitle25 } from "./contact/ContactListTitle25";
+import { ContactLogFlow } from "./contact/ContactLogFlow";
+import { hostContactLog, type ContactLogSeed } from "../../lib/contactLogStore";
 import { GLANCE_ORDER, GLANCE_SETS, glanceCards, type GlanceKey as GlanceCardKey } from "../../lib/contactV25";
 import { ContactSheet24, SheetSkeleton } from "./contact/ContactSheet24";
 import { AgentCard24, AgentCardWide24, type AgentCard24Props } from "./contact/AgentCard24";
@@ -60,7 +62,7 @@ import { agentHistory } from "../../lib/agentHistory";
 import { destroyManifest } from "../../lib/cascade";
 import type { ContactView } from "../../lib/contactListMemory";
 import { bannerFigures, colleaguesOf, genreFit, inSet, setCounts, setGroups, wideNext, type SetKey } from "../../lib/contactV24";
-import { type AgentFacts, ContactFilters, GroupKey, SORT_OPTIONS, SortKey as ContactSortKey, agentFacts, emptyContactFilters, matchesContactFilters, sortFacts } from "../../lib/contactList";
+import { type AgentFacts, ContactFilters, GroupKey, SORT_OPTIONS, SortKey as ContactSortKey, agentFacts, emptyContactFilters, matchesContactFilters, sortFacts, type SortCtx } from "../../lib/contactList";
 import { bookGenreHit, bookGenres } from "../../lib/genreMatch";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
 import { type ContactPop } from "./contact/ContactListControls";
@@ -178,6 +180,14 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   useEffect(() => { writeListView({ group: groupKey, sort: sortKey, reversed, view, byStatus }); }, [groupKey, sortKey, reversed, view, byStatus]);
   /* v24 B2 — the agent whose card is open (Part C draws it); its row and card are marked */
   const [cardId, setCardId] = useState<string | null>(null);
+  /* v25.1 C4 — the in-place log flow: its seed while open. The page hosts it while it is the page on screen (and not a
+     sandbox); opening it closes the agent card, as one right-hand panel at a time. */
+  const [logSeed, setLogSeed] = useState<ContactLogSeed | null>(null);
+  useEffect(() => {
+    if (!active || sandbox) return undefined;
+    return hostContactLog((seed) => { setCardId(null); setLogSeed(seed); });
+  }, [active, sandbox]);
+  useEffect(() => { if (!active) setLogSeed(null); }, [active]);
   useEffect(() => { writeListVisit({ filters, search, glance }); }, [filters, search, glance]);
   const pop = usePopover<ContactPop>();
   /* v16 §E — FULL SCREEN is the shared `useFullScreenList` (Comparable titles v25 built it for both pages): the URL
@@ -285,9 +295,11 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   );
   /* v19 §F — the menu counts each choice itself (`wouldShow`, under Find and the band's group): the v14 faceted counts and
      the genre tallies it fed are retired with the strip */
+  /* v25.1 E4 — the heading sorts' context: the day (Your query's urgency) and each agent's matches with the book */
+  const sortCtx = useMemo<SortCtx>(() => ({ nowMs, fitOf: (x) => (x.agent.genres ?? []).filter((g) => bookHit(g)).length }), [nowMs, bookHit]);
   const visibleFacts = useMemo(
-    () => sortFacts(factsAll.filter((x) => inPool(x) && inSet(x, sets) && matchesContactFilters(x, filters)), sortKey, reversed),
-    [factsAll, inPool, sets, filters, sortKey, reversed],
+    () => sortFacts(factsAll.filter((x) => inPool(x) && inSet(x, sets) && matchesContactFilters(x, filters)), sortKey, reversed, sortCtx),
+    [factsAll, inPool, sets, filters, sortKey, reversed, sortCtx],
   );
   /* v17 §B — anything narrowing the list: a filter, the summary card's group, or Find */
   const anyActive = contactFilterCount(filters) > 0 || !!glance || !!sets || search.trim() !== "";
@@ -457,7 +469,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       const survives = inPool(savedFacts) && matchesContactFilters(savedFacts, filters);
       const afterAll = [...agents.filter((a) => a.id !== saved.id), saved]
         .map((a) => (a.id === saved.id ? savedFacts : (factsAll.find((x) => x.agent.id === a.id) ?? agentFacts(a, qcRows, scoped?.id ?? null))));
-      const after = sortFacts(afterAll.filter((x) => inPool(x) && matchesContactFilters(x, filters)), sortKey, reversed);
+      const after = sortFacts(afterAll.filter((x) => inPool(x) && matchesContactFilters(x, filters)), sortKey, reversed, sortCtx);
       const index = after.findIndex((x) => x.agent.id === saved.id);
       const outcome: SaveOutcome = !survives
         ? { kind: "filtered-out" }
@@ -569,6 +581,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* v24 A2 — the banner's figures: Housekeeping's gap count, the agents they belong to, and four faces */
   const banner = useMemo(() => bannerFigures(hk), [hk]);
   /* v25 B — At a glance: List health (Housekeeping's percentage and gap total), then the three sets' cards */
+  /* v25.1 A — a face's colours are its agent's set */
+  const standById = useMemo(() => new Map(factsAll.map((x) => [x.agent.id, x.stand] as const)), [factsAll]);
+  const standOf = useCallback((id: string) => standById.get(id) ?? null, [standById]);
   const glanceModel = useMemo(() => glanceCards(factsAll, pageState === "list" ? health : null, banner.gaps), [factsAll, pageState, health, banner.gaps]);
   const glancePressed = useMemo<GlanceCardKey | null>(
     () => (sets ? GLANCE_ORDER.find((k) => { const g = GLANCE_SETS[k]; return !!g && g.length === sets.length && g.every((x) => sets.includes(x)); }) ?? null : null),
@@ -627,7 +642,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       case "open": return { el: row(), text: "Click any agent. Their card opens on the right." };
       /* the card is portalled with its panel (outside .aglist); full screen's wide card has its own Edit agent */
       case "edit": return { el: vis("[data-cl24='panel'] [data-cl24='link'][data-k='edit']") ?? vis("[data-cl24='wide-edit']") ?? row(), text: "Press Edit agent. Everything on the card can be changed there." };
-      case "hk": return { el: vis(".aglist [data-cl25='card'][data-k='health']") ?? vis("[data-cl24='band-health']"), text: "Press this. Housekeeping asks for one missing detail at a time." };
+      case "hk": return { el: vis(".aglist [data-cl251='cell'][data-k='health']") ?? vis("[data-cl24='band-health']"), text: "Press this. Housekeeping asks for one missing detail at a time." };
     }
   }, []);
   /* v17.1 §D — THE TAB'S DISMISSAL, SAVED TO THE ACCOUNT (`todoPrefs.contacts.tabDismissedAtGaps`): the gap count
@@ -930,8 +945,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
           <ContactHeader25 loading={pageState !== "list"} msTitle={scoped?.title?.trim() || null}
             addRef={addBtnRef} onAdd={openAdd}
             onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined}>
-            {/* v25 B — the cards: List health opens Housekeeping; the other three filter the list and Cards, a second press shows all */}
-            <ContactGlance25 cards={glanceModel} pressed={glancePressed} ready={pageState === "list"}
+            {/* v25.1 A — At a glance as one ledger card (v25 B's four cards retired): List health opens Housekeeping; the
+                other three filter the list and Cards, a second press shows all */}
+            <ContactGlance251 cards={glanceModel} pressed={glancePressed} ready={pageState === "list"} standOf={standOf}
               onCard={(k) => { if (k === "health") { openHk(); return; } setSets(glancePressed === k ? null : GLANCE_SETS[k]); }} />
           </ContactHeader25>
         )}
@@ -953,7 +969,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
           <>
           {/* v25 C — "Every agent on file": the title, its count line and the List | Cards switch (out of the navy bar) */}
           <ContactListTitle25 view={view} onView={setView}
-            line={pageState === "list" ? { shown: visibleFacts.length, total: factsAll.length, pct: health?.pct ?? null, view, grouped: byStatus, sortKey, reversed } : null} />
+            line={pageState === "list" ? { shown: visibleFacts.length, total: factsAll.length, view, grouped: byStatus, sortKey, reversed } : null} />
           <ContactSheet24 pool={visibleFacts} all={factsAll} view={view} grouped={byStatus} onGrouped={setByStatus}
             sortKey={sortKey} reversed={reversed} onSort={(v) => { setSortKeyRaw(v.key); setReversed(v.reversed); }}
             filters={filters} onFilters={setFilters} onClearAll={clearFilters} full={fullOn} onFull={togglePin}
@@ -982,7 +998,13 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
               }} />
           )} />
         )}
-        {cardFacts && active ? (
+        {/* v25.1 C4 — the top bar's "+ Log a query" opens here, in the agent card's panel, and never leaves the page */}
+        {logSeed && active ? (
+          <AgentCardPanel24 agentId="__log" onClose={() => setLogSeed(null)}>
+            <ContactLogFlow seed={logSeed} activeMsId={scoped?.id ?? null} onClose={() => setLogSeed(null)} />
+          </AgentCardPanel24>
+        ) : null}
+        {cardFacts && active && !logSeed ? (
           <AgentCardPanel24 agentId={cardFacts.agent.id} onClose={() => setCardId(null)}>
             <AgentCard24 {...cardPropsFor(cardFacts, cardIndex, drawnOrder.length,
               (d) => { const n = drawnOrder[cardIndex + d]; if (n) setCardId(n); }, (id) => setCardId(id), () => setCardId(null))} />

@@ -41,11 +41,12 @@ test("CL24-A2 A3 (v25) · the List health card is Housekeeping's; a card ANDs wi
     await openCl24(page, vp);
     /* A2 — the List health card's figures against Housekeeping's drawer */
     const card = await page.evaluate(() => {
-      const c = [...document.querySelectorAll<HTMLElement>("[data-cl25='card'][data-k='health']")].find((e) => e.offsetWidth);
-      return { pct: (c?.querySelector("[data-cl25='count']")?.textContent ?? "").replace("%", "") || null, n: Number(c?.querySelector<HTMLElement>("[data-cl25='gaps']")?.dataset.n ?? NaN) };
+      /* re-pointed (v25.1 A): the List health cell of the ledger */
+      const c = [...document.querySelectorAll<HTMLElement>("[data-cl251='cell'][data-k='health']")].find((e) => e.offsetWidth);
+      return { pct: (c?.querySelector("[data-cl251='count']")?.textContent ?? "").replace("%", "") || null, n: Number(c?.querySelector<HTMLElement>("[data-cl251='gaps']")?.dataset.n ?? NaN) };
     });
     A2.check(`${at} population`, card.pct != null && card.n > 0, JSON.stringify(card));
-    await page.locator("[data-cl25='card'][data-k='health'] [data-cl25='hit']").first().click(T).catch(() => {});
+    await page.locator("[data-cl251='cell'][data-k='health']").first().click(T).catch(() => {});
     await page.waitForTimeout(900);
     const hk = await page.evaluate(() => {
       const pct = document.querySelector<HTMLElement>("[data-hk8='pct']")?.textContent ?? null;
@@ -59,7 +60,7 @@ test("CL24-A2 A3 (v25) · the List health card is Housekeeping's; a card ANDs wi
     await page.waitForTimeout(400);
 
     /* A3 — a card AND Filters: Querying, then Open to queries only */
-    await page.locator("[data-cl25='card'][data-k='querying'] [data-cl25='hit']").first().click(T).catch(() => {});
+    await page.locator("[data-cl251='cell'][data-k='querying']").first().click(T).catch(() => {});
     await page.waitForTimeout(400);
     const q = await rows(page, "[data-cl24='row']");
     A3.check(`${at} population`, q.length > 0, `rows ${q.length}`);
@@ -68,7 +69,9 @@ test("CL24-A2 A3 (v25) · the List health card is Housekeeping's; a card ANDs wi
     await page.locator("[data-nb1='open-only']").first().click(T).catch(() => {});
     await page.keyboard.press("Escape");
     await page.waitForTimeout(400);
-    const both = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-cl24='row']")].map((r) => ({ k: r.dataset.k, open: !!r.querySelector(".cl24-door--open") })));
+    /* re-pointed (v25.1 E1): the door left the row with the Submissions column, so "open" is no longer drawn there; the
+       AND is held as Querying ∩ Filters narrowing the rows (Filters' own open-only rule is NB1's) */
+    const both = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-cl24='row']")].map((r) => ({ k: r.dataset.k, open: true })));
     A3.check(`${at} card AND Filters`, both.length > 0 && both.length <= q.length && both.every((r) => (r.k === "you" || r.k === "agent") && r.open), `rows ${both.length} ${JSON.stringify(both.slice(0, 4))}`);
   }
   A2.done(BASE ? 1 : 8); A3.done(BASE ? 1 : 6);
@@ -79,7 +82,8 @@ test("CL24-A2 (v25) · the List health card states no gaps when nothing is missi
   const L = new Ledger("A2-none");
   await page.addInitScript(() => { (window as unknown as { __SA_HK_ALL_FILLED: boolean }).__SA_HK_ALL_FILLED = true; });
   await openCl24(page, SIZES[0]);
-  const s = await page.evaluate(() => ({ card: !!document.querySelector("[data-cl25='card'][data-k='health']"), gaps: !!document.querySelector("[data-cl25='gaps']") }));
+  /* re-pointed (v25.1 A): the ledger's List health cell */
+  const s = await page.evaluate(() => ({ card: !!document.querySelector("[data-cl251='cell'][data-k='health']"), gaps: !!document.querySelector("[data-cl251='gaps']") }));
   L.check("population: the List health card drew", s.card, JSON.stringify(s));
   L.check("no gap line at no gaps", !s.gaps, JSON.stringify(s));
   L.done(2);
@@ -110,10 +114,11 @@ test("CL24-B1 B2 B3 · the switch in the bar; the grouped table; the cards", asy
     const cols = await page.evaluate(() => {
       const r = document.querySelector<HTMLElement>("[data-cl24='row']");
       const shown = (c: string) => { const e = r?.querySelector<HTMLElement>(`[data-col='${c}']`); return !!e && getComputedStyle(e).display !== "none"; };
-      return { replies: shown("3"), added: shown("6") };
+      /* re-pointed (v25.1 E1/E3): Added gave way to Your rating (col 5), and at ≤1440 only the last column drops */
+      return { replies: shown("3"), added: shown("5") };
     });
-    if (vp.width <= 1440) B2.check(`${at} Replies in and Added hidden`, !cols.replies && !cols.added, JSON.stringify(cols));
-    else B2.check(`${at} Replies in and Added shown`, cols.replies && cols.added, JSON.stringify(cols));
+    if (vp.width <= 1440) B2.check(`${at} Replies in shown, Your rating hidden`, cols.replies && !cols.added, JSON.stringify(cols));
+    else B2.check(`${at} Replies in and Your rating shown`, cols.replies && cols.added, JSON.stringify(cols));
     const tops = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-cl24='bar'] > *")].filter((e) => e.getBoundingClientRect().width > 0).map((e) => { const r = e.getBoundingClientRect(); return r.top + r.height / 2; }));
     B2.check(`${at} the toolbar is one line`, tops.length >= 4 && Math.max(...tops) - Math.min(...tops) < 2 && near(bar?.h, 52), `centres ${tops.map((t) => t.toFixed(1)).join(",")} bar ${bar?.h}`);
     /* B1 — switching keeps Find and the sort */

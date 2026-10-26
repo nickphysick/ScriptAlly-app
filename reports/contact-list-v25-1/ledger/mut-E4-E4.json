@@ -1,0 +1,302 @@
+[
+ {
+  "lock": "E4",
+  "where": "surname first population",
+  "ok": true,
+  "detail": "4 groups"
+ },
+ {
+  "lock": "E4",
+  "where": "surname first pill",
+  "ok": true,
+  "detail": "pill \"Name A–Z\""
+ },
+ {
+  "lock": "E4",
+  "where": "surname first count line",
+  "ok": true,
+  "detail": "line \"53 agents  ·  grouped by status, A to Z\""
+ },
+ {
+  "lock": "E4",
+  "where": "surname first heading",
+  "ok": true,
+  "detail": "sorted heading surname"
+ },
+ {
+  "lock": "E4",
+  "where": "surname first order within groups",
+  "ok": true,
+  "detail": "in order"
+ },
+ {
+  "lock": "E4",
+  "where": "surname reversed population",
+  "ok": true,
+  "detail": "4 groups"
+ },
+ {
+  "lock": "E4",
+  "where": "surname reversed pill",
+  "ok": true,
+  "detail": "pill \"Name Z–A\""
+ },
+ {
+  "lock": "E4",
+  "where": "surname reversed count line",
+  "ok": true,
+  "detail": "line \"53 agents  ·  grouped by status, Z to A\""
+ },
+ {
+  "lock": "E4",
+  "where": "surname reversed heading",
+  "ok": true,
+  "detail": "sorted heading surname"
+ },
+ {
+  "lock": "E4",
+  "where": "surname reversed order within groups",
+  "ok": true,
+  "detail": "in order"
+ },
+ {
+  "lock": "E4",
+  "where": "fit first population",
+  "ok": true,
+  "detail": "4 groups"
+ },
+ {
+  "lock": "E4",
+  "where": "fit first pill",
+  "ok": true,
+  "detail": "pill \"Best genre fit\""
+ },
+ {
+  "lock": "E4",
+  "where": "fit first count line",
+  "ok": true,
+  "detail": "line \"53 agents  ·  grouped by status, best genre fit first\""
+ },
+ {
+  "lock": "E4",
+  "where": "fit first heading",
+  "ok": true,
+  "detail": "sorted heading fit"
+ },
+ {
+  "lock": "E4",
+  "where": "fit first order within groups",
+  "ok": true,
+  "detail": "in order"
+ },
+ {
+  "lock": "E4",
+  "where": "fit reversed population",
+  "ok": true,
+  "detail": "4 groups"
+ },
+ {
+  "lock": "E4",
+  "where": "fit reversed pill",
+  "ok": true,
+  "detail": "pill \"Weakest genre fit\""
+ },
+ {
+  "lock": "E4",
+  "where": "fit reversed count line",
+  "ok": true,
+  "detail": "line \"53 agents  ·  grouped by status, weakest genre fit first\""
+ },
+ {
+  "lock": "E4",
+  "where": "fit reversed heading",
+  "ok": true,
+  "detail": "sorted heading fit"
+ },
+ {
+  "lock": "E4",
+  "where": "fit reversed order within groups",
+  "ok": true,
+  "detail": "in order"
+ },
+ {
+  "lock": "E4",
+  "where": "reply first population",
+  "ok": true,
+  "detail": "4 groups"
+ },
+ {
+  "lock": "E4",
+  "where": "reply first pill",
+  "ok": true,
+  "detail": "pill \"Quickest reply\""
+ },
+ {
+  "lock": "E4",
+  "where": "reply first count line",
+  "ok": true,
+  "detail": "line \"53 agents  ·  grouped by status, quickest reply first\""
+ },
+ {
+  "lock": "E4",
+  "where": "reply first heading",
+  "ok": true,
+  "detail": "sorted heading reply"
+ },
+ {
+  "lock": "E4",
+  "where": "reply first order within groups",
+  "ok": true,
+  "detail": "in order"
+ },
+ {
+  "lock": "E4",
+  "where": "reply reversed population",
+  "ok": true,
+  "detail": "4 groups"
+ },
+ {
+  "lock": "E4",
+  "where": "reply reversed pill",
+  "ok": true,
+  "detail": "pill \"Slowest reply\""
+ },
+ {
+  "lock": "E4",
+  "where": "reply reversed count line",
+  "ok": true,
+  "detail": "line \"53 agents  ·  grouped by status, slowest reply first\""
+ },
+ {
+  "lock": "E4",
+  "where": "reply reversed heading",
+  "ok": true,
+  "detail": "sorted heading reply"
+ },
+ {
+  "lock": "E4",
+  "where": "reply reversed order within groups",
+  "ok": false,
+  "detail": "none: ,,,,,,16,12,10,10,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,6,6,6,6,6,6,6,4,4,4"
+ },
+ {
+  "lock": "E4",
+  "where": "urgency first population",
+  "ok": true,
+  "detail": "4 groups"
+ },
+ {
+  "lock": "E4",
+  "where": "urgency first pill",
+  "ok": true,
+  "detail": "pill \"Most urgent\""
+ },
+ {
+  "lock": "E4",
+  "where": "urgency first count line",
+  "ok": true,
+  "detail": "line \"53 agents  ·  grouped by status, most urgent first\""
+ },
+ {
+  "lock": "E4",
+  "where": "urgency first heading",
+  "ok": true,
+  "detail": "sorted heading urgency"
+ },
+ {
+  "lock": "E4",
+  "where": "urgency first order within groups",
+  "ok": true,
+  "detail": "in order"
+ },
+ {
+  "lock": "E4",
+  "where": "urgency reversed population",
+  "ok": true,
+  "detail": "4 groups"
+ },
+ {
+  "lock": "E4",
+  "where": "urgency reversed pill",
+  "ok": true,
+  "detail": "pill \"Least urgent\""
+ },
+ {
+  "lock": "E4",
+  "where": "urgency reversed count line",
+  "ok": true,
+  "detail": "line \"53 agents  ·  grouped by status, least urgent first\""
+ },
+ {
+  "lock": "E4",
+  "where": "urgency reversed heading",
+  "ok": true,
+  "detail": "sorted heading urgency"
+ },
+ {
+  "lock": "E4",
+  "where": "urgency reversed order within groups",
+  "ok": true,
+  "detail": "in order"
+ },
+ {
+  "lock": "E4",
+  "where": "rating first population",
+  "ok": true,
+  "detail": "4 groups"
+ },
+ {
+  "lock": "E4",
+  "where": "rating first pill",
+  "ok": true,
+  "detail": "pill \"Highest rated\""
+ },
+ {
+  "lock": "E4",
+  "where": "rating first count line",
+  "ok": true,
+  "detail": "line \"53 agents  ·  grouped by status, highest rated first\""
+ },
+ {
+  "lock": "E4",
+  "where": "rating first heading",
+  "ok": true,
+  "detail": "sorted heading rating"
+ },
+ {
+  "lock": "E4",
+  "where": "rating first order within groups",
+  "ok": true,
+  "detail": "in order"
+ },
+ {
+  "lock": "E4",
+  "where": "rating reversed population",
+  "ok": true,
+  "detail": "4 groups"
+ },
+ {
+  "lock": "E4",
+  "where": "rating reversed pill",
+  "ok": true,
+  "detail": "pill \"Lowest rated\""
+ },
+ {
+  "lock": "E4",
+  "where": "rating reversed count line",
+  "ok": true,
+  "detail": "line \"53 agents  ·  grouped by status, lowest rated first\""
+ },
+ {
+  "lock": "E4",
+  "where": "rating reversed heading",
+  "ok": true,
+  "detail": "sorted heading rating"
+ },
+ {
+  "lock": "E4",
+  "where": "rating reversed order within groups",
+  "ok": true,
+  "detail": "in order"
+ }
+]

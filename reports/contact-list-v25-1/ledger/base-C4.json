@@ -1,0 +1,20 @@
+[
+ {
+  "lock": "C4",
+  "where": "population",
+  "ok": true,
+  "detail": "the top bar's Log a query pressed"
+ },
+ {
+  "lock": "C4",
+  "where": "stays on /agents",
+  "ok": false,
+  "detail": "path /queries"
+ },
+ {
+  "lock": "C4",
+  "where": "opens the panel",
+  "ok": false,
+  "detail": "the log flow in the panel missing"
+ }
+]

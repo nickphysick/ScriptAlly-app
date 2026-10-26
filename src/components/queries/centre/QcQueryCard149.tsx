@@ -28,6 +28,7 @@ import { STAGE_NAME, WHERE_LABEL, whereItStands, type QcRow, type WhereKey } fro
 import { STRIP_TINT, type AgentView, type ChipIcon, type NextStep, type StoryStep, type Strip } from "../../../lib/qcCardStory";
 import "../../../marketing/heroCard.css";
 import "./qcv149card.css";
+import { FlowHead, FLOW_WORDS, RECORD_LINE } from "../../shared/FlowHead";
 
 
 /** the band's tint and ink, and the pill's ground, per set (the landing card's With you / With the agent / Closed;
@@ -283,12 +284,18 @@ export const QcQueryCard149: React.FC<QcQueryCard149Props> = (p) => {
 
   /* ── respond mode ── */
   if (mode === "respond") {
+    /* Contact list v25.1 B — the band is the header: "Recording response", and the answer's line once one is picked (it
+       changes with the pick). The mode's own "Recording a response" label goes: the header says it. */
+    const head = (
+      <FlowHead title={FLOW_WORDS.record.title} line={pick ? RECORD_LINE[pick] : null} onClose={p.onClose} closeLabel="Close the query"
+        data={{ "data-qc149c": "band" }} closeData={{ "data-qc149c": "close" }}
+        right={r.dayN != null ? <span className="mk-lc-day" data-qc149c="day"><span className="mk-odo-dk">Day</span> <span>{r.dayN}</span></span> : null} />
+    );
     return (
       <div className="qc149c qcv-legacy" data-qc149c="card" data-mode="respond" data-id={r.id} data-where={where}>
         <div className="mk-lc-in qc149c-in">
-          {band}{agentRow}{book}
+          {head}{agentRow}{book}
           <div className="qc149c-md" data-qc149c="respond">
-            <div className="qc149c-lb">Recording a response</div>
             <h3 className="qc149c-h3">What did {first} say?</h3>
             <div role="radiogroup" aria-label={`What did ${first} say?`}>
               {RESP.map((o) => (

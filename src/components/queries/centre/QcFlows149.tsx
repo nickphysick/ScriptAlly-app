@@ -18,7 +18,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { StatusDot } from "../../StatusDot";
 import { SubmissionMethod, type QueryStatus } from "../../../types";
 import { fieldDay, parseDay } from "./QcQueryCard149";
-import { DrawerMoment } from "../../shared/DrawerMoment";
+import { FlowHead, FLOW_WORDS } from "../../shared/FlowHead";
 import "../../../marketing/heroCard.css";
 import "./qcv149card.css";
 
@@ -40,13 +40,11 @@ export const QcLogFlow149: React.FC<{
   agents: FlowAgent[];
   seedAgentId: string | null;
   bookTitle: string;
-  /** Contact list v25 F — the queries already logged for this book (the moment says "query no. {logged + 1}") */
-  logged: number;
   packages: FlowPackage[];
   defaultPackageId: string | null;
   onClose: () => void;
   onSave: (a: LogAnswers) => Promise<boolean>;
-}> = ({ nowMs, agents, seedAgentId, bookTitle, logged, packages, defaultPackageId, onClose, onSave }) => {
+}> = ({ nowMs, agents, seedAgentId, bookTitle, packages, defaultPackageId, onClose, onSave }) => {
   const [agentId, setAgentId] = useState<string | null>(() => (seedAgentId && agents.some((a) => a.id === seedAgentId && !a.querying) ? seedAgentId : null));
   const [find, setFind] = useState("");
   const agent = agents.find((a) => a.id === agentId) ?? null;
@@ -81,14 +79,11 @@ export const QcLogFlow149: React.FC<{
   const shown = agents.filter((a) => !q || norm(`${a.name} ${a.agency}`).includes(q));
   const open = shown.filter((a) => !a.querying).sort((a, b) => a.name.localeCompare(b.name));
   const busyWith = shown.filter((a) => a.querying).sort((a, b) => a.name.localeCompare(b.name));
+  /* Contact list v25.1 B — the band is the header: "Logging new query" and its line, on both steps; the Day chip, once
+     an agent is chosen, sits beside the × */
   const band = (
-    <div className="mk-lc-band qc149f-band" data-qc149f="band">
-      <span>New query</span>
-      <span className="qc149c-rt">
-        {agent ? <span className="mk-lc-day"><span className="mk-odo-dk">Day</span> <span>0</span></span> : null}
-        <button type="button" className="qc149c-x" data-qc149f="close" aria-label="Close" onClick={onClose}>×</button>
-      </span>
-    </div>
+    <FlowHead title={FLOW_WORDS.log.title} line={FLOW_WORDS.log.line} onClose={onClose} data={{ "data-qc149f": "band" }} closeData={{ "data-qc149f": "close" }}
+      right={agent ? <span className="mk-lc-day"><span className="mk-odo-dk">Day</span> <span>0</span></span> : null} />
   );
 
   if (!agent) {
@@ -96,8 +91,6 @@ export const QcLogFlow149: React.FC<{
       <div className="qc149f qcv-legacy" data-qc149f="log" data-step="pick">
         <div className="mk-lc-in qc149c-in">
           {band}
-          {/* Contact list v25 F — the moment, above the first step's label (gone once an agent is chosen) */}
-          <DrawerMoment kind="log" n={logged + 1} title={bookTitle} />
           <div className="qc149f-pick">
             <span className="qc149c-lb">Who are you querying?</span>
             <label className="qc149f-srch">{SEARCH}<input ref={findRef} value={find} onChange={(e) => setFind(e.target.value)} placeholder="Find an agent in your Contact list" aria-label="Find an agent in your Contact list" /></label>
@@ -194,13 +187,9 @@ export const QcWhoReplied149: React.FC<{ items: WhoItem[]; onPick: (id: string) 
   return (
     <div className="qc149f qcv-legacy" data-qc149f="who">
       <div className="mk-lc-in qc149c-in">
-        <div className="mk-lc-band qc149f-band" data-qc149f="band">
-          <span>Recording a response</span>
-          <span className="qc149c-rt"><button type="button" className="qc149c-x" data-qc149f="close" aria-label="Close" onClick={onClose}>×</button></span>
-        </div>
+        {/* Contact list v25.1 B — the header: "Recording response", no line until an answer is picked (respond mode) */}
+        <FlowHead title={FLOW_WORDS.record.title} onClose={onClose} data={{ "data-qc149f": "band" }} closeData={{ "data-qc149f": "close" }} />
         <div className="qc149f-pg2">
-          {/* Contact list v25 F — the moment, above the first step's label; it scrolls with the step */}
-          <DrawerMoment kind="record" />
           <h4>Step 1 of 2</h4>
           <div className="qc149f-ttl">Who replied?</div>
           <label className="qc149f-srch">{SEARCH}<input ref={ref} value={find} onChange={(e) => setFind(e.target.value)} placeholder="Find the agent" aria-label="Find the agent" /></label>
