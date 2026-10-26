@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "D1",
+  "where": "1512 population",
+  "ok": false,
+  "detail": "1 of 4 blocks found"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 lefts",
+  "ok": true,
+  "detail": "sheet 308.0"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 rights",
+  "ok": true,
+  "detail": "sheet 1444.0"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 width",
+  "ok": false,
+  "detail": "list 1136.0 against min(S − 48, 1200) = 1200.0 (S 1256.0)"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 population",
+  "ok": false,
+  "detail": "1 of 4 blocks found"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 lefts",
+  "ok": true,
+  "detail": "sheet 280.0"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 rights",
+  "ok": true,
+  "detail": "sheet 1240.0"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 width",
+  "ok": false,
+  "detail": "list 960.0 against min(S − 48, 1200) = 976.0 (S 1024.0)"
+ }
+]

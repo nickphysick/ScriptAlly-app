@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "B2",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "53 rows, 11 querying"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 querying rows",
+  "ok": false,
+  "detail": "after Querying: {\"agent\":7}, want 11 you + agent"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 pressed navy",
+  "ok": false,
+  "detail": "pressed card rgb(251, 249, 245)"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 all again",
+  "ok": false,
+  "detail": "after a second press 7 rows, want 53"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 health opens Housekeeping",
+  "ok": true,
+  "detail": "Housekeeping open"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 health never filters",
+  "ok": false,
+  "detail": "rows 7 of 53; pressed false"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "53 rows, 11 querying"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 querying rows",
+  "ok": false,
+  "detail": "after Querying: {\"agent\":7}, want 11 you + agent"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 pressed navy",
+  "ok": false,
+  "detail": "pressed card rgb(251, 249, 245)"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 all again",
+  "ok": false,
+  "detail": "after a second press 7 rows, want 53"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 health opens Housekeeping",
+  "ok": true,
+  "detail": "Housekeeping open"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 health never filters",
+  "ok": false,
+  "detail": "rows 7 of 53; pressed false"
+ }
+]

@@ -29,7 +29,7 @@ export const ContactHeader25: React.FC<{
   children?: React.ReactNode;
 }> = ({ loading, msTitle, onAdd, addRef, onDiscover, children }) => (
   <header className="cl24-hd cl25-hd" data-cl24="header" data-cl25="header" data-own-header="" data-loading={loading ? "" : undefined} aria-busy={loading || undefined}>
-    <PageHeaderCard className="cl24-card cl25-card" titleId="cl24T" data={{ "data-cl24": "hd-card", "data-cl25": "card" }}
+    <PageHeaderCard className="cl24-card cl25-card" titleId="cl24T" data={{ "data-cl24": "hd-card", "data-cl25": "hd-card" }}
       titleData={{ "data-page-title": "true", "data-cl24": "title" }}
       title={<span className="hl" data-cl25="hl">Contact list</span>} art={CONTACT_ART}
       body={<>Every agent you might query{msTitle ? <> with <b data-cl24="ms">{msTitle}</b></> : null}, and how to reach them.</>}

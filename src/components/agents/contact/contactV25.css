@@ -59,7 +59,7 @@
   .cl25-hx { display: inline-flex; align-items: center; gap: 12px; flex: none; }
   .cl25-ring {
     position: relative; display: block; flex: none; overflow: hidden;
-    width: clamp(0px, calc((var(--hsheet-w) - 1440.5px) * 1000), 46px); height: 46px;
+    width: clamp(0px, calc((var(--hsheet-w) - 1440.5px) * 1000), 46px); height: clamp(0px, calc((var(--hsheet-w) - 1440.5px) * 1000), 46px);
     margin-right: clamp(-12px, calc((var(--hsheet-w) - 1440.5px) * 1000), 0px);
   }
   .cl25-ring .cl17-rg { position: absolute; inset: 0; display: block; width: 46px; height: 46px; margin: 0; }
