@@ -19,6 +19,7 @@
  * otherwise sit under the drawer) — the flow itself is untouched. Free users see no link: the drawer
  * does not sell.
  */
+import { DrawerMoment } from "../../shared/DrawerMoment";
 import React, { useMemo, useState } from "react";
 import { useScriptAllyDb } from "../../../lib/db";
 import { PASTE_RESPONSE_EVENT, closeQueryDrawer } from "../../../lib/queryActions/drawerStore";
@@ -95,6 +96,8 @@ export function QueryPicker({ onPick, seed, hadOpen, children }: { onPick: (quer
     eyebrow: "RECORD A RESPONSE",
     title: "Record a response",
     verb: "save", verbDone: "saved", button: "Save", ok: false, pickOnly: true,
+    /* Contact list v25 F — the moment over "Who replied?", when no query was open (with one open, the picker is a step) */
+    moment: hadOpen ? undefined : <DrawerMoment kind="record" />,
     steps: [{ title: "The query", summary: "", body }],
     saves: [],
     dirty: t.length > 0,

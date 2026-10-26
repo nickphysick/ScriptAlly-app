@@ -1,0 +1,14 @@
+/* Contact list v25 Part F — the drawer's moment (DrawerMoment.tsx). Cream, radius 12, 14/14/4 round it, the text 160
+   in from the left, at least 132 tall, the drawing at its bottom left; above the first step's label, scrolling with it.
+   ⚠️ The h3 is forced to the brand serif by brand.tsx: two classes and !important take the typewriter back. */
+.dmo {
+  position: relative; box-sizing: border-box; flex: none; min-height: 132px; margin: 14px 14px 4px; padding: 20px 22px 20px 160px;
+  border-radius: 12px; background: #f5f1ea; overflow: hidden;
+}
+.dmo .dmo-art { position: absolute; display: block; height: auto; pointer-events: none; }
+.dmo--log .dmo-art { left: 4px; bottom: -6px; width: 150px; }
+.dmo--record .dmo-art { left: 10px; bottom: -14px; width: 142px; }
+.dmo h3.dmo-t { margin: 0; font: 400 25px/1.15 var(--sp-type) !important; font-family: var(--sp-type) !important; color: #1c130f; letter-spacing: 0; text-transform: none; }
+.dmo p.dmo-l { margin: 8px 0 0; font: italic 400 16px/1.45 var(--sp-serif) !important; color: #5b4f47; }
+.dmo p.dmo-l b { font: normal 600 16px/1.45 var(--sp-serif) !important; color: #1c130f; }
+@media (prefers-reduced-motion: reduce) { .dmo, .dmo * { animation: none !important; transition: none !important; } }
