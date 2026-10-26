@@ -32,6 +32,11 @@ describe("recordOf", () => {
     expect(r.rows.find((x) => x.id === "g")!.status).toBe("sent");
     expect(r.rows.find((x) => x.id === "g")!.statusLabel).toBe("Sent");
   });
+  it("lifts one note to the top when asked, whatever its status", () => {
+    const lifted = recordOf(DOCS, (d) => d.id === "a");
+    expect(lifted.rows.map((x) => x.id)).toEqual(["a", "d", "c", "b", "e", "f", "g"]);
+    expect(lifted.sent).toBe(7);
+  });
   it("is empty for no docs", () => {
     expect(recordOf([])).toEqual({ sent: 0, changed: 0, rows: [] });
   });

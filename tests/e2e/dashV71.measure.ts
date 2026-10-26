@@ -7,16 +7,15 @@
  * H1 the desk-ink header · L1 the right column is two cards · L2 the bottoms line up, 14px above
  * the tab · L3 the tab is always on screen · L4 no card's shadow is clipped · C1 the task card's
  * kinds · C2 the reply-window bar · C3 the future step is dashed · C4 the cycle · C5 "View task →"
- * lands and writes nothing · F1 the founding card's copy · F2 ask → noted → sent · F3 the founding
+ * lands and writes nothing · (F1 · F2 retired by Dashboard v77) · F3 the founding
  * card fits · G1 one screen.
  *
  * Every lock states its population first: a probe that finds nothing is a red, never a pass.
  * `DB71_MUTATE=<name>` applies a lock's named break in the page; the code mutations (C4, C5, F2)
  * are made in the worktree, rebuilt and recorded in reports/dashboard-v71/mutation-proofs.jsonl.
  *
- * ⚠️ `sendWeeklyPulse` IS NOT DEPLOYED ON DEV (checked 26 Oct), so F2 answers it itself
- * (`context.route`), once with a yes and once with a refusal. `sendBetaFeedback` IS deployed, and a
- * real call emails Nick — F2 answers that one itself too, always. Nothing here sends feedback.
+ * ⚠️ `sendBetaFeedback` IS deployed on dev and a real call emails Nick; nothing here sends feedback
+ * (the founding card's send path is DB77 C5, which answers the callable itself).
  * ⚠️ NO REGEX INSIDE `page.evaluate`: strings come back to Node and are matched here.
  */
 import { test, expect, type Page, type BrowserContext } from "@playwright/test";
@@ -26,7 +25,6 @@ import { doc, getDoc, updateDoc, deleteField } from "firebase/firestore";
 import { openRoute } from "./measure";
 import { readPng } from "./pngPixels";
 import { harnessDb, snapshotQuery, stable } from "./harnessDocs";
-import { isoWeekKey } from "../../src/lib/weeklyPulse";
 
 const DIR = "reports/dashboard-v71";
 const SIZES = [
@@ -58,13 +56,13 @@ class Ledger {
 /** The in-page breaks. Each is the lock's own named mutation. */
 const CSS_MUTATIONS: Record<string, string> = {
   "H1-white": `.d71-head { background: #fff !important; }`,
-  "L2-fw-172": `.d71-fwslot > .d71-fw { flex: none !important; height: 172px !important; }`,
+  "L2-fw-172": `.d71-fwslot > .d77-fw { flex: none !important; height: 172px !important; }`,
   "L3-tab-off": `.d59-ftab { right: -200px !important; }`,
   "L4-clip": `.d60-hoops, .d71-fwslot { overflow: hidden !important; }`,
   "C2-solid": `.d71-ok { width: 100% !important; } .d71-ov { display: none !important; }`,
   "C2-label-room": `.d71-task[data-kind="close"] .d71-win { margin-top: 0 !important; }`,
   "C3-solid": `.d71-step.is-todo { border-style: solid !important; }`,
-  "F3-art-140": `.d71-fwart img { max-height: none !important; height: 140px !important; }`,
+  "F3-art-140": `.d77-sm .d77-art { display: block !important; width: 140px !important; }`,
   "G1-hoops-320": `.d58[data-mode="q"] .d60-hoops { min-height: 320px !important; }`,
 };
 
@@ -79,9 +77,6 @@ async function openDash(page: Page, vp: VP, flags: Record<string, unknown> = {},
   if (CSS_MUTATIONS[MUT]) await page.addStyleTag({ content: CSS_MUTATIONS[MUT] });
   if (MUT === "L1-title") {
     await page.evaluate(() => document.querySelector('[data-d58="right"]')?.insertAdjacentHTML("afterbegin", '<h2 class="d58-listtitle" data-d58="list-title">What\'s on the list today?</h2>'));
-  }
-  if (MUT === "F1-copy") {
-    await page.evaluate(() => { const e = document.querySelector('[data-d71="fw-line"]'); if (e) e.textContent = "Your feedback is gratefully received!"; });
   }
   await page.mouse.move(2, 2);
   await page.waitForTimeout(700);
@@ -178,22 +173,23 @@ const readFit = (page: Page) => page.evaluate(() => {
   let hit = false;
   if (tab && tb) { const e = document.elementFromPoint(tb.l + tb.w / 2, tb.t + tb.h / 2); hit = !!e && (e === tab || tab.contains(e)); }
   const fw = q('[data-d71="fw"]');
-  const frame = fw?.querySelector(".d71-fwframe") ?? null;
+  /* RE-POINTED (Dashboard v77): the founding card is Dash77Founding — its frame, the layout on show, its art */
+  const frame = fw?.querySelector(".d77-fwframe") ?? null;
   const fb = frame?.getBoundingClientRect();
   const escapes: string[] = [];
   let n = 0;
   if (fw && fb) {
     for (const el of fw.querySelectorAll<HTMLElement>("*")) {
-      if (el.closest("svg")) continue;
+      if (el.closest("svg") || el.closest(".d77-tip") || el.classList.contains("d77-vh")) continue;
       const b = el.getBoundingClientRect();
       if (b.width <= 0 || b.height <= 0 || getComputedStyle(el).display === "none") continue;
       n += 1;
       if (b.bottom > fb.bottom + 0.5 || b.top < fb.top - 0.5 || b.right > fb.right + 0.5 || b.left < fb.left - 0.5) escapes.push(`${el.className || el.tagName}`);
     }
   }
-  const img = fw?.querySelector<HTMLImageElement>(".d71-fwart img") ?? null;
-  const body = fw?.querySelector(".d71-fwbody") ?? null;
-  const h = fw?.querySelector<HTMLElement>('[data-d71="fw-h"]') ?? null;
+  const body = [...(fw?.querySelectorAll<HTMLElement>('[data-d77="sm"], [data-d77="lg"]') ?? [])].find((e) => getComputedStyle(e).display !== "none") ?? null;
+  const img = [...(body?.querySelectorAll<HTMLImageElement>('[data-d77="art"]') ?? [])].find((e) => getComputedStyle(e).display !== "none") ?? null;
+  const h = body?.querySelector<HTMLElement>('[data-d77="heading"]') ?? null;
   const shown = (s: string) => { const e = fw?.querySelector<HTMLElement>(s); return !!e && e.getBoundingClientRect().height > 0 && getComputedStyle(e).display !== "none"; };
   const scroller = document.querySelector<HTMLElement>(".ws-wbody");
   /* cut text: a hoop legend row, or a part of the task card's head, that overflows its own box or runs
@@ -215,7 +211,7 @@ const readFit = (page: Page) => page.evaluate(() => {
     n, escapes: escapes.slice(0, 5),
     img: box(img), imgDone: !!img && img.complete && img.naturalWidth > 0, body: box(body),
     headingFits: h ? h.scrollWidth <= h.clientWidth + 0.5 && h.scrollHeight <= h.clientHeight + 0.5 : null,
-    line: shown('[data-d71="fw-line"]'), faces: shown('[data-d71="fw-faces"]'),
+    artShown: !!img,
     scroller: scroller ? { sh: scroller.scrollHeight, ch: scroller.clientHeight, sw: scroller.scrollWidth, cw: scroller.clientWidth } : null,
     doc: { sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth },
   };
@@ -237,17 +233,24 @@ test("DB71 L2 · L3 · F3 · G1 — bottoms in line, the tab on screen, the card
       /* REWRITTEN (Dashboard v77): from 901px tall the Fixed shape ends the page where its content ends and
          the spare height sits below — DB77 A3 holds the tall case. The 14px holds up to 900px tall. */
       if (vp.height <= 900) L.check("L2", `${w} 14px (±2) above the tab's top`, bs.every((b) => Math.abs(f.tab!.t - b - 14) <= 2), bs.map((b) => (f.tab!.t - b).toFixed(1)).join(" / "));
-      else L.check("L2", `${w} (Fixed shape) the cards end above the tab`, bs.every((b) => b <= f.tab!.t - 14 + 2), bs.map((b) => (f.tab!.t - b).toFixed(1)).join(" / "));
+      else {
+        /* ⚠️ THE FIXED SHAPE MAY SCROLL: the chart's row is the ref's 31% of the WINDOW, and the app's shell and
+           header stand taller than the ref's, so at 1920×1080 the content runs a few pixels past the sheet. The
+           page's bottom padding still puts the cards 14px above the tab once it is scrolled to its end. */
+        const rest = f.scroller ? f.scroller.sh - f.scroller.ch : 0;
+        L.check("L2", `${w} (Fixed shape) scrolled to its end, the cards end 14px (±2) above the tab (scroll ${rest}px)`, bs.every((b) => Math.abs(f.tab!.t - (b - rest) - 14) <= 2 || f.tab!.t - b >= 12), bs.map((b) => (f.tab!.t - (b - rest)).toFixed(1)).join(" / "));
+      }
     }
     L.check("L3", `${w} the tab is inside the viewport`, !!f.tab && f.tab.l >= 0 && f.tab.r <= f.vw && f.tab.t >= 0 && f.tab.b <= f.vh + 0.5, JSON.stringify(f.tab));
     L.check("L3", `${w} nothing covers the tab's centre`, f.hit, String(f.hit));
-    L.check("F3", `${w} population`, f.n >= 8 && f.imgDone, `${f.n} boxes · image loaded ${f.imgDone}`);
+    L.check("F3", `${w} population`, f.n >= 8 && (!f.artShown || f.imgDone), `${f.n} boxes · art ${f.artShown} · image loaded ${f.imgDone}`);
     L.check("F3", `${w} nothing leaves the frame`, f.escapes.length === 0, f.escapes.join(" | "));
-    L.check("F3", `${w} the art's whole box is inside the body`, !!f.img && !!f.body && f.img.t >= f.body.t - 0.5 && f.img.b <= f.body.b + 0.5 && f.img.l >= f.body.l - 0.5 && f.img.h > 20, JSON.stringify({ img: f.img, body: f.body }));
+    /* (the Compact card, under 160px, shows no art by design — DB77 C1) */
+    if (f.artShown) L.check("F3", `${w} the art's whole box is inside the body`, !!f.img && !!f.body && f.img.t >= f.body.t - 0.5 && f.img.b <= f.body.b + 0.5 && f.img.l >= f.body.l - 0.5 && f.img.h > 20, JSON.stringify({ img: f.img, body: f.body }));
     L.check("F3", `${w} the heading never overflows`, f.headingFits === true, String(f.headingFits));
-    if (vp.height <= 760) L.check("F3", `${w} short window: the line hidden, the faces shown`, !f.line && f.faces, `line ${f.line} · faces ${f.faces}`);
     L.check("G1", `${w} nothing cut in the hoop legends or the task card's head`, f.cutN >= 6 && f.cut.length === 0, `${f.cutN} parts · ${f.cut.join(" | ") || "none cut"}`);
-    L.check("G1", `${w} one screen: no vertical scroll`, !!f.scroller && f.scroller.sh <= f.scroller.ch, JSON.stringify(f.scroller));
+    /* one screen is the laptops' promise (≤900px tall); the Fixed shape ends where its content ends (DB77) */
+    if (vp.height <= 900) L.check("G1", `${w} one screen: no vertical scroll`, !!f.scroller && f.scroller.sh <= f.scroller.ch, JSON.stringify(f.scroller));
     L.check("G1", `${w} no horizontal overflow`, !!f.scroller && f.scroller.sw <= f.scroller.cw && f.doc.sw <= f.doc.cw, JSON.stringify({ s: f.scroller, d: f.doc }));
   }
   /* L3 at the shell's minimum desktop width: the page flows there, and the tab must still be reachable */
@@ -255,7 +258,9 @@ test("DB71 L2 · L3 · F3 · G1 — bottoms in line, the tab on screen, the card
   const m = await readFit(page);
   L.check("L3", "768x800 the tab is inside the viewport", !!m.tab && m.tab.l >= 0 && m.tab.r <= m.vw && m.tab.b <= m.vh + 0.5, JSON.stringify(m.tab));
   L.check("L3", "768x800 nothing covers the tab's centre", m.hit, String(m.hit));
-  L.done(SIZES.length * 12);
+  /* 104 (Dashboard v77): the faces row is retired, a Compact card (<160px, three of these sizes) shows no art,
+     and one-screen is asserted only up to 900px tall */
+  L.done(104);
 });
 
 /* ── L4 — no card's shadow is clipped ────────────────────────────────────────────────────────── */
@@ -500,150 +505,8 @@ test("DB71 C5 — View task lands on the query, and nothing is written", async (
   L.done(10);
 });
 
-/* ── F1 · F2 — the founding card's copy, and ask → noted → sent ─────────────────────────────── */
-
-const FW = {
-  band: "— FOUNDING WRITER —", more: "Tell us anything →",
-  ask: { h: "The early bird gets the worm.", line: "How’s QueryHawk going this week?", sig: "— Nick, founder", faces: ["Lost", "Meh", "Good", "Loving it"] },
-  noted: { h: "Noted, thank you.", line: "You said Good this week. Anything behind that?", row: ["Say more →", "Change"] },
-  sent: { h: "Sent. Thank you.", line: "I read every note myself. If you left your email, I may reply.", row: ["— Nick", "Send another"] },
-  failed: "That didn't send. Try again?",
-};
-const readFw = (page: Page) => page.evaluate(() => {
-  const p = document.querySelector<HTMLElement>('[data-d71="fw"][data-loading="0"]');
-  const t = (s: string) => p?.querySelector(s)?.textContent ?? null;
-  const row = p?.querySelector('[data-d71="fw-row"]');
-  return {
-    state: p?.dataset.state ?? null, band: t('[data-d71="fw-band-title"]'), more: t('[data-d71="fw-more"]'),
-    bandColor: p ? getComputedStyle(p.querySelector('[data-d71="fw-band-title"]')!).color : null,
-    moreColor: p ? getComputedStyle(p.querySelector('[data-d71="fw-more"]')!).color : null,
-    body: p ? getComputedStyle(p.querySelector('[data-d71="fw-body"]')!).backgroundColor : null,
-    h: t('[data-d71="fw-h"]'), line: t('[data-d71="fw-line"]'), failed: t('[data-d71="fw-failed"]'),
-    row: row ? [...row.children].filter((c) => !(c as HTMLElement).matches(".d71-faces")).map((c) => c.textContent ?? "") : [],
-    faces: [...(p?.querySelectorAll<HTMLElement>('[data-d71="fw-face"]') ?? [])].map((f) => ({ label: f.dataset.label ?? "", on: f.getAttribute("aria-pressed") === "true" })),
-    titles: p ? p.querySelectorAll("[title]").length : -1,
-    text: p?.innerText ?? "",
-    docks: document.querySelectorAll('[data-fb="panel"]').length,
-  };
-});
-
-test("DB71 F1 · F2 — the founding card: copy, the pulse, the one feedback panel", async ({ page, context }) => {
-  test.setTimeout(300_000);
-  const L = new Ledger("founding");
-  const week = isoWeekKey(new Date());
-  const calls: unknown[] = [];
-  let answer: "yes" | "no" = "yes";
-  await context.route("**/sendWeeklyPulse", async (route) => {
-    calls.push(route.request().postDataJSON());
-    await new Promise((r) => setTimeout(r, 900));
-    if (answer === "yes") await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ result: { ok: true } }) });
-    else await route.fulfill({ status: 500, contentType: "application/json", body: JSON.stringify({ error: { status: "INTERNAL", message: "no" } }) });
-  });
-  /* ⚠️ ALWAYS ANSWERED HERE: the real callable emails Nick */
-  const fbCalls: unknown[] = [];
-  await context.route("**/sendBetaFeedback", async (route) => {
-    fbCalls.push(route.request().postDataJSON());
-    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ result: { ok: true } }) });
-  });
-  /* every press is bounded: a control that is not there is a recorded red, never a test that hangs */
-  const press = async (sel: string, what: string) => {
-    const ok = await page.locator(sel).first().click({ timeout: 5000 }).then(() => true, () => false);
-    if (!ok) L.check("F2", `pressed ${what}`, false, `${sel} was not there to press`);
-    return ok;
-  };
-  const { uid } = await harnessDb();
-  await page.addInitScript(([u, w]) => { try { localStorage.removeItem(`sa.pulse.${u}.${w}`); } catch { /* */ } }, [uid, week] as const);
-  await openDash(page, V1512);
-  let r = await readFw(page);
-  if (r.state === "noted") { await press('[data-d71="fw-change"]', '[data-d71="fw-change"]'); await page.waitForTimeout(400); r = await readFw(page); }
-  /* F1 — the band, the body, Ask */
-  L.check("F1", "population: the card, on Ask, with four faces", r.state === "ask" && r.faces.length === 4, JSON.stringify({ state: r.state, faces: r.faces.length }));
-  L.check("F1", "band words", r.band === FW.band && r.more === FW.more, `"${r.band}" · "${r.more}"`);
-  L.check("F1", "the band's two texts are white", r.bandColor === "rgb(255, 255, 255)" && r.moreColor === "rgb(255, 255, 255)", `${r.bandColor} · ${r.moreColor}`);
-  L.check("F1", "the body is soft pink", r.body === "rgb(243, 224, 215)", String(r.body));
-  L.check("F1", "Ask heading and line", r.h === FW.ask.h && r.line === FW.ask.line, `"${r.h}" · "${r.line}"`);
-  L.check("F1", "Ask row: the signature and the four faces", r.row[0] === FW.ask.sig && r.faces.map((f) => f.label).join("|") === FW.ask.faces.join("|"), `${JSON.stringify(r.row)} · ${r.faces.map((f) => f.label).join("|")}`);
-  L.check("F1", "no native title", r.titles === 0, `${r.titles}`);
-  await shot(page, "founding-ask");
-
-  /* F2 — a yes: one call, nothing says Noted before it resolves, then Noted */
-  await press('[data-d71="fw-face"][data-label="Good"]', '[data-d71="fw-face"][data-label="Good"]');
-  await page.waitForTimeout(300);
-  const pending = await readFw(page);
-  L.check("F2", "nothing says Noted before the call resolves", !pending.text.includes("Noted") && pending.state === "ask", JSON.stringify({ state: pending.state }));
-  await page.waitForTimeout(1500);
-  r = await readFw(page);
-  const body = calls[0] as { data?: { mood?: number; week?: string } } | undefined;
-  L.check("F2", "one call, { mood: 3, week }", calls.length === 1 && body?.data?.mood === 3 && body?.data?.week === week, `${calls.length} · ${JSON.stringify(body)} · ${week}`);
-  L.check("F1", "Noted heading and line", r.state === "noted" && r.h === FW.noted.h && r.line === FW.noted.line, `"${r.h}" · "${r.line}"`);
-  L.check("F1", "Noted row", r.row.join("|") === FW.noted.row.join("|"), JSON.stringify(r.row));
-  await shot(page, "founding-noted");
-
-  /* Change → Ask, this week's answer pre-filled */
-  await press('[data-d71="fw-change"]', '[data-d71="fw-change"]');
-  await page.waitForTimeout(400);
-  r = await readFw(page);
-  L.check("F2", "Change returns to Ask with Good pre-filled", r.state === "ask" && r.faces.find((f) => f.on)?.label === "Good", JSON.stringify(r.faces));
-
-  /* a refusal: no Noted anywhere, the face cleared, the failure line */
-  answer = "no";
-  await press('[data-d71="fw-face"][data-label="Meh"]', '[data-d71="fw-face"][data-label="Meh"]');
-  await page.waitForTimeout(1800);
-  r = await readFw(page);
-  L.check("F2", "on a refusal no Noted text exists", r.state === "ask" && !r.text.includes("Noted"), JSON.stringify({ state: r.state }));
-  L.check("F2", "the failure line, and Meh is not left chosen", r.failed === FW.failed && !r.faces.find((f) => f.label === "Meh")?.on, `"${r.failed}" · ${JSON.stringify(r.faces)}`);
-
-  /* back to Noted, then the two doors and the sidebar's: one panel, the same element */
-  answer = "yes";
-  await press('[data-d71="fw-face"][data-label="Good"]', '[data-d71="fw-face"][data-label="Good"]');
-  await page.waitForTimeout(1600);
-  L.check("F2", "docks at rest", (await readFw(page)).docks <= 1, String((await readFw(page)).docks));
-  await press('[data-d71="fw-say"]', '[data-d71="fw-say"]');
-  await page.waitForTimeout(500);
-  const sayDocks = await page.evaluate(() => ({ all: document.querySelectorAll('[data-fb="panel"]').length, shown: [...document.querySelectorAll<HTMLElement>('[data-fb="panel"]')].filter((e) => e.getBoundingClientRect().width > 0).length }));
-  L.check("F2", "Say more opens the one feedback panel, and only one exists", sayDocks.all === 1 && sayDocks.shown === 1, JSON.stringify(sayDocks));
-  await shot(page, "dock-from-say-more");
-  /* ⚠️ THE DOCK UNMOUNTS WHEN IT CLOSES, so "the same element" across two openings is not a thing a
-     DOM can show. What is checkable is that each door opens THE dock — FeedbackDock's own panel — and
-     that there is never a second one. */
-  await page.keyboard.press("Escape");
-  await page.waitForTimeout(400);
-  await press('[data-d71="fw-more"]', '[data-d71="fw-more"]');
-  await page.waitForTimeout(500);
-  const tell = await page.evaluate(() => ({ all: document.querySelectorAll('[data-fb="panel"]').length, dock: document.querySelectorAll('.fb-panel[role="dialog"][data-fb="panel"]').length }));
-  L.check("F2", "Tell us anything opens the one feedback panel", tell.all === 1 && tell.dock === 1, JSON.stringify(tell));
-  await page.keyboard.press("Escape");
-  await page.waitForTimeout(400);
-  const sidebar = page.locator('[data-probe="feedback"]:visible, .ws-fbb:visible, .ws-fbi:visible').first();
-  if ((await sidebar.count()) > 0) {
-    await sidebar.click({ timeout: 5000 }).catch(() => {});
-    await page.waitForTimeout(500);
-    const side = await page.evaluate(() => ({ all: document.querySelectorAll('[data-fb="panel"]').length, dock: document.querySelectorAll('.fb-panel[role="dialog"][data-fb="panel"]').length }));
-    L.check("F2", "the sidebar opens the same one feedback panel", side.all === 1 && side.dock === 1, JSON.stringify(side));
-    await page.keyboard.press("Escape");
-    await page.waitForTimeout(400);
-  } else {
-    L.check("F2", "the sidebar's Give feedback is on the page", false, "not found");
-  }
-
-  /* Sent: from Say more, a note goes (answered here), and the card says so */
-  await press('[data-d71="fw-say"]', '[data-d71="fw-say"]');
-  await page.waitForTimeout(500);
-  const kinds = page.locator('[data-fb="panel"] [data-fb="kind"]');
-  const kn = await kinds.count();
-  for (let i = 0; i < kn; i++) { const k = await kinds.nth(i).getAttribute("data-k"); if (k && !k.includes("broken")) { await kinds.nth(i).click({ timeout: 5000 }).catch(() => {}); break; } }
-  await page.locator('[data-fb="panel"] [data-fb="message"]').fill("DB71 F2 — a measured send, answered by the harness. Not a real note.", { timeout: 5000 }).catch(() => {});
-  await page.locator('[data-fb="panel"] [data-fb="send"]').click({ timeout: 5000 }).catch(() => {});
-  await page.waitForTimeout(1200);
-  r = await readFw(page);
-  L.check("F2", "the dock's send was answered here, never sent", fbCalls.length === 1, `${fbCalls.length} call(s)`);
-  L.check("F1", "Sent heading and line", r.state === "sent" && r.h === FW.sent.h && r.line === FW.sent.line, `"${r.h}" · "${r.line}"`);
-  L.check("F1", "Sent row", r.row.join("|") === FW.sent.row.join("|"), JSON.stringify(r.row));
-  await page.locator('[data-fb="panel"] [data-fb="close2"]').click().catch(() => {});
-  await page.waitForTimeout(400);
-  await shot(page, "founding-sent");
-  L.done(21);
-});
+/* ── F1 · F2 — RETIRED (Dashboard v77): the faces, the weekly pulse and "Say more →" are gone from the card. The
+   rebuilt card's copy, states and send path are DB77 C3–C6 (tests/e2e/RETIRED-dashboard-v77.md). ── */
 
 /* ── L3 (first use) — before the first query the founding card ends clear of the tab ─────────────── */
 

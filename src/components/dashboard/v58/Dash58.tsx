@@ -42,7 +42,7 @@ import { Dash58Header } from "./Dash58Header";
 import { Dash71Right } from "../v71/Dash71Right";
 import { Dash71Task } from "../v71/Dash71Task";
 import { Dash58Feed, FeedTab } from "./Dash58Feed";
-import { Dash71Founding, type FwState } from "../v71/Dash71Founding";
+import { Dash77Founding } from "../v77/Dash77Founding";
 import { agentCoverage, firstUseTiles, isPreQuery, type TileKey } from "../../../lib/dashFirstUse";
 import { QueriesDoor, AgentsDoor, AgentsSnap, ClosedHoop, AgentsHoop } from "../v60/Dash60Left";
 import { Dash60Lift } from "../v60/Dash60Lift";
@@ -50,9 +50,6 @@ import { SpotProvider, WhereStart } from "../v60/WhereStart";
 import type { StartKey } from "../../../lib/dashFirstUse";
 import { switcherStanding } from "../../../lib/manuscriptStanding";
 import { openNewAgentCard } from "../../../lib/agentCardStore";
-import { openFeedback, subscribeFeedbackSent } from "../../../lib/feedbackStore";
-import { pulseWeeks, readEcho, writeEcho, type Mood } from "../../../lib/weeklyPulse";
-import { readWeeklyPulse, sendWeeklyPulse } from "../../../lib/weeklyPulseClient";
 import "../oneScreen.css";
 import "./dash58.css";
 import "../v59/dash59.css";
@@ -257,54 +254,10 @@ export const Dash58: React.FC<Dash58Props> = ({
     else run(a);
   };
 
-  /* ── the founding writer card (v71): the weekly pulse, then the one feedback panel ──
-     One answer per ISO week, changeable within it. A press fills the face and the call runs; ONLY
-     the server's yes moves the card to Noted (never sooner than 180ms after the press). A refusal
-     keeps it on Ask, clears the face back to what was stored and says so. "Sent" is this visit only:
-     the one feedback panel reported a note sent after one of this card's doors opened it. */
-  const pulseUid = currentUser?.id ?? "";
-  const thisWeek = useMemo(() => pulseWeeks(now)[4], [now]);
-  const [pulseStored, setPulseStored] = useState<Mood | null>(null);
-  const [pulseChosen, setPulseChosen] = useState<Mood | null>(null);
-  const [pulseSending, setPulseSending] = useState(false);
-  const [pulseFailed, setPulseFailed] = useState(false);
-  const [fwState, setFwState] = useState<FwState>("ask");
-  useEffect(() => {
-    if (!pulseUid) return undefined;
-    let live = true;
-    const echo = readEcho(pulseUid, thisWeek);
-    if (echo) { setPulseStored(echo); setPulseChosen(echo); setFwState((st) => (st === "ask" ? "noted" : st)); }
-    void readWeeklyPulse(pulseUid, [thisWeek]).then(([read]) => {
-      if (!live || !read) return;
-      setPulseStored(read);
-      setPulseChosen((c) => c ?? read);
-      setFwState((st) => (st === "ask" ? "noted" : st));
-    });
-    return () => { live = false; };
-  }, [pulseUid, thisWeek]);
-  const choosePulse = (m: Mood) => {
-    if (!pulseUid || pulseSending) return;
-    const pressed = Date.now();
-    setPulseChosen(m);
-    setPulseSending(true);
-    setPulseFailed(false);
-    sendWeeklyPulse(m, thisWeek).then(() => {
-      writeEcho(pulseUid, thisWeek, m);
-      setPulseStored(m);
-      window.setTimeout(() => { setPulseSending(false); setFwState("noted"); }, Math.max(0, 180 - (Date.now() - pressed)));
-    }, () => {
-      setPulseChosen(pulseStored);
-      setPulseSending(false);
-      setPulseFailed(true);
-    });
-  };
-  const fwOpened = useRef(false);
-  const fwFeedback = () => { fwOpened.current = true; openFeedback(); };
-  useEffect(() => subscribeFeedbackSent(() => {
-    if (!fwOpened.current) return;
-    fwOpened.current = false;
-    setFwState("sent");
-  }), []);
+  /* ── the founding writer card (v77): the four kinds of feedback and the writer's record. It sends through
+     the dock's own path (`lib/sendFeedback`) and reads the writer's own `betaFeedback` live; the weekly pulse
+     (v59–v71) is no longer on the dashboard. */
+  const fwUid = currentUser?.id ?? null;
 
   /* ── the page's own scrollport: the height the one screen fills ──
      ⚠️ MEASURED, NEVER `100vh`: the page starts under the top bar. `--d58-chrome` is the rest of
@@ -554,16 +507,7 @@ export const Dash58: React.FC<Dash58Props> = ({
               task={<Dash71Task loading={loading} plan={plan} ctx={taskCtx} onView={viewTask} innerRef={focusRef} />}
               lift={pre ? <Dash60Lift loading={loading} tiles={tiles} hasAgents={hasAgents} onTile={onTile} /> : undefined}
               panel={
-                <Dash71Founding
-                  loading={loading}
-                  state={fwState}
-                  chosen={pulseChosen}
-                  sending={pulseSending}
-                  failed={pulseFailed}
-                  onChoose={choosePulse}
-                  onChange={() => { setPulseFailed(false); setFwState("ask"); }}
-                  onFeedback={fwFeedback}
-                />
+                <Dash77Founding loading={loading} uid={fwUid} />
               }
             />
           </div>

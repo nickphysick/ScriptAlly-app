@@ -62,9 +62,15 @@ export function tooltipOf(d: FeedbackDoc): string {
 
 const RANK: Record<FeedbackStatus, number> = { built: 0, fixed: 0, planned: 1, read: 2, sent: 3 };
 
-/** The record: built/fixed (newest statusAt first), then planned, then read, then sent (newest createdAt first). */
-export function recordOf(docs: readonly FeedbackDoc[]): Omit<FeedbackRecord, "loading" | "error"> {
+/**
+ * The record: built/fixed (newest statusAt first), then planned, then read, then sent (newest createdAt first).
+ * `first` lifts one note to the top whatever its status: the card's just-sent note heads the record while the
+ * card says thank you (the pack, C3), and drops back into its place once the writer moves on.
+ */
+export function recordOf(docs: readonly FeedbackDoc[], first?: (d: FeedbackDoc) => boolean): Omit<FeedbackRecord, "loading" | "error"> {
+  const lift = (d: FeedbackDoc) => (first && first(d) ? 0 : 1);
   const sorted = [...docs].sort((a, b) => {
+    if (lift(a) !== lift(b)) return lift(a) - lift(b);
     const sa = statusOf(a.status), sb = statusOf(b.status);
     if (RANK[sa] !== RANK[sb]) return RANK[sa] - RANK[sb];
     if (RANK[sa] === 0) return (b.statusAt ?? 0) - (a.statusAt ?? 0) || (b.createdAt ?? 0) - (a.createdAt ?? 0);
@@ -77,12 +83,16 @@ export function recordOf(docs: readonly FeedbackDoc[]): Omit<FeedbackRecord, "lo
   };
 }
 
+/** The same note: one kind, one message (the pending note and the doc the snapshot later carries). */
+export const sameNote = (a: Pick<FeedbackDoc, "kind" | "message">, b: Pick<FeedbackDoc, "kind" | "message">) =>
+  a.kind === b.kind && (a.message ?? "").trim() === (b.message ?? "").trim();
+
 /**
  * The card's just-sent notes, shown at once and dropped the moment the live snapshot carries them (the
  * same kind and the same message). A pending note is always "sent" and always newest.
  */
 export function mergePending(docs: readonly FeedbackDoc[], pending: readonly FeedbackDoc[]): FeedbackDoc[] {
-  const live = pending.filter((p) => !docs.some((d) => d.kind === p.kind && (d.message ?? "").trim() === (p.message ?? "").trim()));
+  const live = pending.filter((p) => !docs.some((d) => sameNote(d, p)));
   return [...docs, ...live];
 }
 
