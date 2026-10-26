@@ -796,7 +796,7 @@ describe("the hero grid aligns per item, and overlaps by construction", () => {
    * The hero's rules are not contiguous, and a positional slice over a file that does not group
    * by feature answers a question nobody asked.
    */
-  it("…and the whole sheet's negative margins are the eight that are meant to be there", () => {
+  it("…and the whole sheet's negative margins are the nine that are meant to be there", () => {
     const owners = new Set<string>();
     for (const m of marketing.matchAll(/(?:^|\n)([^@{}][^{}]*?)\{([^{}]*)\}/g)) {
       if (/margin[^:]*:\s*[^;]*-\d/.test(m[2])) m[1].split(",").forEach((x) => owners.add(x.trim()));
@@ -820,7 +820,10 @@ describe("the hero grid aligns per item, and overlaps by construction", () => {
       /* each vision point is a card drawn OUTWARD: its padding is paid back by an equal negative
          margin, so the picture, heading and body keep their column (landing colours v2) */
       ".mk-vpoint",
-    ]);
+      /* the phone vision's navy rising 6px into the feature story's foot, so its rounded top corners
+         meet the last caption with no seam (landing on phones v4, ref `.nv{margin-top:-6px}`) */
+      ".mk-vision.mk-vision--navy",
+    ].sort());
   });
 
   /**

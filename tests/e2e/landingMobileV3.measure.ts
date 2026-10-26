@@ -18,7 +18,7 @@
  *   LS_MUTATE=<name>   apply one lock's named break in the page, to prove that lock goes red
  */
 import { test, expect, Page } from "@playwright/test";
-import { FEATURE_STORY, featureStoryLabel, STORY_MORE_HEADING } from "../../src/marketing/landingCopy";
+import { FEATURE_STORY, featureStoryLabel, VISION_NAVY_HEADING as STORY_MORE_HEADING } from "../../src/marketing/landingCopy";
 
 const MUTATE = process.env.LS_MUTATE ?? "";
 const P390 = { width: 390, height: 844 }, P360 = { width: 360, height: 640 };

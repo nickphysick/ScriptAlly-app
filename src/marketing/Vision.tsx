@@ -23,7 +23,7 @@
 
 import React, { useCallback, useRef, useState } from "react";
 import {
-  VISION_HEADING, VISION_POINTS, VISION_LINK, VISION_NAVY, VISION_NAVY_LABEL, VISION_NAVY_ARIA, VISION_NAVY_LINK,
+  VISION_HEADING, VISION_POINTS, VISION_LINK, VISION_NAVY, VISION_NAVY_HEADING, VISION_NAVY_LEAD, VISION_NAVY_ARIA, VISION_NAVY_LINK,
 } from "./landingCopy";
 import { usePhone } from "./usePhone";
 
@@ -41,14 +41,16 @@ const PLATES: Record<string, { width: number; height: number; version: string }>
 };
 
 /**
- * On phones (≤760px; landing on phones v2, 26 Oct; ref design-refs/landing-mobile-v2.html
- * `.vwrap.navy`, `.vn`, `.dots`): the page's one swipe carousel, on navy. The label in pink mono,
- * then the three points — each the picture on a cream tile, the heading in white Special Elite and the
- * body in white at 78% — with the next card peeking, snapping to centre, three dots beneath (the
- * active one pink), and "Read our story →" to /about. Text on navy is always white; labels are pink.
+ * On phones (≤760px; landing on phones v4, 26 Oct; ref design-refs/landing-mobile-v4.html `.nv`,
+ * `.vbf`, `.vbr`/`.vbt`): navy with rounded top corners, starting straight after the feature story.
+ * "And so much more." and its lead (v3's closing beat, folded in), then ONE cream frame holding the
+ * three pictures stacked — only the current one shows, cross-fading — and beneath it the three lines
+ * you swipe. Swiping the lines changes the picture and the active dot; then "Read our story →".
+ * Text on navy is always white; the active dot is pink.
  *
- * ⚠️ THE CARD IN VIEW IS DERIVED FROM THE SCROLL POSITION (whichever card's centre is nearest the
- * strip's), never kept as a counter. ← / → move one card; under reduced motion the move jumps.
+ * ⚠️ THE LINE IN VIEW IS DERIVED FROM THE SCROLL POSITION (whichever line's centre is nearest the
+ * strip's), never kept as a counter, and the frame and the dots both read it. ← / → move one line;
+ * under reduced motion the move jumps and the picture swaps instantly.
  */
 const reduce = () =>
   typeof window !== "undefined" && !!window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -74,19 +76,22 @@ const VisionNavy: React.FC<{ onNavigate: (tab: string, subPageName?: string) => 
   };
   return (
     <section className="mk-vision mk-vision--navy" aria-labelledby="mk-vision-h">
-      <h2 id="mk-vision-h" className="mk-vk">{VISION_NAVY_LABEL}</h2>
+      <h2 id="mk-vision-h" className="mk-nk">{VISION_NAVY_HEADING}</h2>
+      <p className="mk-nl">{VISION_NAVY_LEAD}</p>
+      <div className="mk-vbf" aria-hidden="true">
+        {VISION_POINTS.map((point, i) => {
+          const plate = PLATES[point.image];
+          return <img key={point.key} className={i === at ? "mk-on" : undefined} src={point.image + "?v=" + plate.version} alt="" width={plate.width} height={plate.height} loading="lazy" />;
+        })}
+      </div>
       <div className="mk-vrail" ref={rail} onScroll={onScroll} onKeyDown={onKey}
            tabIndex={0} role="region" aria-label={VISION_NAVY_ARIA}>
-        {VISION_POINTS.map((point) => {
-          const plate = PLATES[point.image];
-          return (
-            <div className="mk-vn" key={point.key}>
-              <img src={point.image + "?v=" + plate.version} alt="" width={plate.width} height={plate.height} loading="lazy" />
-              <h3 className="mk-vnh3">{point.heading}</h3>
-              <p>{VISION_NAVY[point.key]}</p>
-            </div>
-          );
-        })}
+        {VISION_POINTS.map((point) => (
+          <div className="mk-vbt" key={point.key}>
+            <h3 className="mk-vbth3">{point.heading}</h3>
+            <p>{VISION_NAVY[point.key]}</p>
+          </div>
+        ))}
       </div>
       <div className="mk-vdots" aria-hidden="true">
         {VISION_POINTS.map((p, i) => <i key={p.key} className={i === at ? "mk-on" : undefined} />)}

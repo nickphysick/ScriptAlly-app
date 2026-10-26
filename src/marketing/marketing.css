@@ -2391,44 +2391,36 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
    report: two of its captions still meet the bar). */
 @media (max-width: 760px) and (max-height: 660px) { .mk-s3 li:nth-child(3) { display: none; } }
 
-/* The closing beat: on the light ground, 55svh tall, snapping under the bar, with the top of the navy
-   vision showing beneath it. */
-.mk-tl {
-  height: 55svh; box-sizing: border-box; padding: 7svh 24px 0; text-align: center;
-  scroll-snap-align: start; scroll-margin-top: var(--mk-nav-h);
-}
-.mk-tl .mk-tl1 { margin: 30px 0 10px; font: 400 34px/1.1 var(--mk-f-display); color: #1c130f; }
-.mk-tl .mk-tl2 { margin: 0 auto; max-width: 280px; font: 400 17px/1.5 var(--mk-f-serif); color: rgba(28, 19, 15, .75); }
-.mk-tla { display: block; margin-top: 20px; font: 400 24px/1 var(--mk-f-serif); color: var(--mk-rust); }
-
-/* The page snaps only while the story is on it (phones, the landing page), and only to the captions and
-   the beat. `proximity`: a scroll that ends far from them is left where it is. */
+/* The page snaps only while the story is on it (phones, the landing page), and only to the six
+   captions (v4 folded v3's closing beat into the vision). `proximity`: a scroll that ends far from them is left where it is. */
 @media (max-width: 760px) { html:has(.mk-story) { scroll-snap-type: y proximity; } }
 
-/* The vision on navy: the page's one swipe carousel. Text on navy is white; the label is pink. */
-.mk-vision.mk-vision--navy { background: #1b2433; margin-top: 0; padding: 36px 0 30px; }
-.mk-vision--navy .mk-vk {
-  margin: 0 22px 18px; font: 500 11px/1 var(--mk-f-mono) !important; letter-spacing: .16em;
-  text-transform: uppercase; color: #e8b4a3;
+/* The vision on navy (v4, ref landing-mobile-v4.html `.nv`, `.nk`, `.nl`, `.vbf`, `.vbr`/`.vbt`):
+   rounded top corners, 6px up into the story's foot, the heading and the lead, ONE cream frame whose
+   pictures cross-fade, and the line carousel beneath it. Text on navy is white; the active dot pink. */
+.mk-vision.mk-vision--navy { background: #1b2433; color: #fff; margin-top: -6px; padding: 40px 0 30px; border-radius: 26px 26px 0 0; }
+.mk-vision--navy .mk-nk { margin: 0 24px 10px; font: 400 32px/1.1 var(--mk-f-display) !important; color: #fff; }
+.mk-vision--navy .mk-nl { margin: 0 24px 26px; max-width: 320px; font: 400 17px/1.5 var(--mk-f-serif); color: rgba(255, 255, 255, .78); }
+.mk-vbf { position: relative; height: 300px; margin: 0 24px; background: #f4f1ea; border-radius: 20px; overflow: hidden; }
+.mk-vbf img {
+  position: absolute; inset: 20px; width: calc(100% - 40px); height: calc(100% - 40px); max-width: none;
+  object-fit: contain; opacity: 0; transition: opacity .45s;
 }
+.mk-vbf img.mk-on { opacity: 1; }
 .mk-vrail {
-  display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory;
-  padding: 0 24px 8px; margin: 0; scrollbar-width: none; overscroll-behavior-x: contain;
+  display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory;
+  padding: 0 24px 6px; margin: 18px 0 0; scrollbar-width: none; overscroll-behavior-x: contain;
 }
 .mk-vrail::-webkit-scrollbar { display: none; }
 .mk-vrail:focus-visible { outline: 2px solid #e8b4a3; outline-offset: 2px; }
-.mk-vn { flex: 0 0 320px; scroll-snap-align: center; }
-.mk-vn img {
-  display: block; width: 100%; height: 240px; max-width: none; object-fit: contain; box-sizing: border-box;
-  background: #f4f1ea; border-radius: 18px; padding: 18px;
-}
-.mk-vn .mk-vnh3 { margin: 18px 0 8px; font: 400 26px/1.15 var(--mk-f-display) !important; color: #fff; }
-.mk-vn p { margin: 0; font: 400 15.5px/1.5 var(--mk-f-serif); color: rgba(255, 255, 255, .78); }
+.mk-vbt { flex: 0 0 330px; scroll-snap-align: center; }
+.mk-vbt .mk-vbth3 { margin: 0 0 8px; font: 400 28px/1.12 var(--mk-f-display) !important; color: #fff; }
+.mk-vbt p { margin: 0; font: 400 16px/1.5 var(--mk-f-serif); color: rgba(255, 255, 255, .75); }
 .mk-vdots { display: flex; justify-content: center; gap: 6px; margin: 14px 0 6px; }
 .mk-vdots i { width: 6px; height: 6px; border-radius: 3px; background: rgba(255, 255, 255, .22); transition: width .2s, background .2s; }
 .mk-vdots i.mk-on { width: 18px; background: #e8b4a3; }
 .mk-vlink {
-  display: inline-block; margin: 16px 22px 0; font: 500 15px/1 var(--mk-f-serif); color: #fff;
+  display: inline-block; margin: 14px 24px 0; font: 500 15px/1 var(--mk-f-serif); color: #fff;
   text-decoration: underline; text-decoration-color: #e8b4a3; text-underline-offset: 6px; text-decoration-thickness: 1.5px;
 }
 
@@ -2502,6 +2494,6 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 /* ⚠️ AFTER THE RULES IT OVERRIDES: a media query confers no specificity, so an earlier reduced-motion
    block would lose to the story's, the carousel's and the join bar's rules on source order. */
 @media (prefers-reduced-motion: reduce) {
-  .mk-spimg img, .mk-s3, .mk-spbar i, .mk-vdots i, .mk-jbar { transition: none; }
+  .mk-spimg img, .mk-s3, .mk-spbar i, .mk-vdots i, .mk-vbf img, .mk-jbar { transition: none; }
   html:has(.mk-story) { scroll-snap-type: none; }
 }

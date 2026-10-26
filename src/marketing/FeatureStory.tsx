@@ -6,11 +6,11 @@
  * margin the bar plus the panel), so one flick lands the next caption directly under the picture.
  * A caption is a "N of 6" label, the heading, one line and three ticked points. The one whose top has
  * passed 72% of the viewport is current: full opacity, the panel cross-fades (0.45s) to its picture,
- * and the six-step bar fills to it. After the sixth, a closing beat ("And so much more.") snaps under
- * the bar with the top of the navy vision showing beneath it. The desktop rows are unchanged.
+ * and the six-step bar fills to it. Straight after the sixth caption the navy vision begins (v4 folded
+ * v3's closing beat into its top). The desktop rows are unchanged.
  *
  * ⚠️ THE PAGE SNAPS WITH CSS ALONE: `html` takes `scroll-snap-type: y proximity` while this section is
- * on the page (phones, the landing only), and nothing but the captions and the beat is a snap point,
+ * on the page (phones, the landing only), and nothing but the six captions is a snap point,
  * so the hero, the vision, the closing card and the footer scroll freely. No script moves the scroll
  * position. Reduced motion: no snapping and no cross-fade.
  *
@@ -27,7 +27,7 @@
  * Reduced motion: the picture swaps instantly (no cross-fade); everything else is the same.
  */
 import React, { useEffect, useRef, useState } from "react";
-import { FEATURE_ROWS, FEATURE_STORY, BAND_HEADING, featureStoryLabel, STORY_MORE_HEADING, STORY_MORE_LINE } from "./landingCopy";
+import { FEATURE_ROWS, FEATURE_STORY, BAND_HEADING, featureStoryLabel } from "./landingCopy";
 import { ILLUSTRATIONS } from "./FeatureRows";
 
 /** A caption is current once its top has passed this share of the viewport's height (the ref's .72). */
@@ -65,7 +65,6 @@ export const FeatureStory: React.FC = () => {
   const rows = FEATURE_STORY.map((c) => FEATURE_ROWS.find((r) => r.key === c.key)!);
 
   return (
-    <>
     <section className="mk-story" id="mk-features" aria-label={BAND_HEADING}>
       <div className="mk-spimg">
         {rows.map((row, i) => {
@@ -91,12 +90,5 @@ export const FeatureStory: React.FC = () => {
         ))}
       </div>
     </section>
-    {/* The closing beat, outside the story's section so the picture has let go of the bar by now. */}
-    <div className="mk-tl">
-      <p className="mk-tl1">{STORY_MORE_HEADING}</p>
-      <p className="mk-tl2">{STORY_MORE_LINE}</p>
-      <span className="mk-tla" aria-hidden="true">↓</span>
-    </div>
-    </>
   );
 };
