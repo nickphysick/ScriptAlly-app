@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "C4",
+  "where": "population: more than one task, with segments",
+  "ok": true,
+  "detail": "12 segment(s)"
+ },
+ {
+  "lock": "C4",
+  "where": "› steps",
+  "ok": true,
+  "detail": "0 → 1"
+ },
+ {
+  "lock": "C4",
+  "where": "it advances 7s (±300ms) after the release",
+  "ok": true,
+  "detail": "7008ms"
+ },
+ {
+  "lock": "C4",
+  "where": "hovered for 10s, it holds",
+  "ok": true,
+  "detail": "2 → 2"
+ },
+ {
+  "lock": "C4",
+  "where": "held, the current segment shows full",
+  "ok": true,
+  "detail": "is-full"
+ },
+ {
+  "lock": "C4",
+  "where": "reduced motion: no advance in 15s",
+  "ok": true,
+  "detail": "0 → 0"
+ }
+]

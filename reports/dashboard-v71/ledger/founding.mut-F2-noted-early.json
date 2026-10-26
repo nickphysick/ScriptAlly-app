@@ -1,0 +1,134 @@
+[
+ {
+  "lock": "F1",
+  "where": "population: the card, on Ask, with four faces",
+  "ok": true,
+  "detail": "{\"state\":\"ask\",\"faces\":4}"
+ },
+ {
+  "lock": "F1",
+  "where": "band words",
+  "ok": true,
+  "detail": "\"— FOUNDING WRITER —\" · \"Tell us anything →\""
+ },
+ {
+  "lock": "F1",
+  "where": "the band's two texts are white",
+  "ok": true,
+  "detail": "rgb(255, 255, 255) · rgb(255, 255, 255)"
+ },
+ {
+  "lock": "F1",
+  "where": "the body is soft pink",
+  "ok": true,
+  "detail": "rgb(243, 224, 215)"
+ },
+ {
+  "lock": "F1",
+  "where": "Ask heading and line",
+  "ok": true,
+  "detail": "\"The early bird gets the worm.\" · \"How’s QueryHawk going this week?\""
+ },
+ {
+  "lock": "F1",
+  "where": "Ask row: the signature and the four faces",
+  "ok": true,
+  "detail": "[\"— Nick, founder\"] · Lost|Meh|Good|Loving it"
+ },
+ {
+  "lock": "F1",
+  "where": "no native title",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F2",
+  "where": "nothing says Noted before the call resolves",
+  "ok": false,
+  "detail": "{\"state\":\"noted\"}"
+ },
+ {
+  "lock": "F2",
+  "where": "one call, { mood: 3, week }",
+  "ok": true,
+  "detail": "1 · {\"data\":{\"mood\":3,\"week\":\"2026-W44\"}} · 2026-W44"
+ },
+ {
+  "lock": "F1",
+  "where": "Noted heading and line",
+  "ok": true,
+  "detail": "\"Noted, thank you.\" · \"You said Good this week. Anything behind that?\""
+ },
+ {
+  "lock": "F1",
+  "where": "Noted row",
+  "ok": true,
+  "detail": "[\"Say more →\",\"Change\"]"
+ },
+ {
+  "lock": "F2",
+  "where": "Change returns to Ask with Good pre-filled",
+  "ok": true,
+  "detail": "[{\"label\":\"Lost\",\"on\":false},{\"label\":\"Meh\",\"on\":false},{\"label\":\"Good\",\"on\":true},{\"label\":\"Loving it\",\"on\":false}]"
+ },
+ {
+  "lock": "F2",
+  "where": "on a refusal no Noted text exists",
+  "ok": false,
+  "detail": "{\"state\":\"noted\"}"
+ },
+ {
+  "lock": "F2",
+  "where": "the failure line, and Meh is not left chosen",
+  "ok": false,
+  "detail": "\"null\" · []"
+ },
+ {
+  "lock": "F2",
+  "where": "pressed [data-d71=\"fw-face\"][data-label=\"Good\"]",
+  "ok": false,
+  "detail": "[data-d71=\"fw-face\"][data-label=\"Good\"] was not there to press"
+ },
+ {
+  "lock": "F2",
+  "where": "docks at rest",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F2",
+  "where": "Say more opens the one feedback panel, and only one exists",
+  "ok": true,
+  "detail": "{\"all\":1,\"shown\":1}"
+ },
+ {
+  "lock": "F2",
+  "where": "Tell us anything opens the one feedback panel",
+  "ok": true,
+  "detail": "{\"all\":1,\"dock\":1}"
+ },
+ {
+  "lock": "F2",
+  "where": "the sidebar opens the same one feedback panel",
+  "ok": true,
+  "detail": "{\"all\":1,\"dock\":1}"
+ },
+ {
+  "lock": "F2",
+  "where": "the dock's send was answered here, never sent",
+  "ok": true,
+  "detail": "1 call(s)"
+ },
+ {
+  "lock": "F1",
+  "where": "Sent heading and line",
+  "ok": true,
+  "detail": "\"Sent. Thank you.\" · \"I read every note myself. If you left your email, I may reply.\""
+ },
+ {
+  "lock": "F1",
+  "where": "Sent row",
+  "ok": true,
+  "detail": "[\"— Nick\",\"Send another\"]"
+ }
+]

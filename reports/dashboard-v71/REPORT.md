@@ -14,7 +14,7 @@ manifest). Five parts, one commit each:
 | E′ | `eb106bc6` | before the first query, the founding card fits at 1280×800 |
 | E″ | `d12bbef4` | the close marker's words clear the sentence above the bar |
 | E‴ | `ce0f7889` | nothing cut in the hoop legends or the task card's head (v60's hoop floor restored) |
-| E⁗ | _see the tail_ | before the first query, the founding card ends clear of the feed tab |
+| E⁗ | `36e73141` | before the first query, the founding card ends clear of the feed tab |
 
 ## False premises
 
@@ -227,3 +227,37 @@ the header taller than v60's bare one. So, earlier than the reference:
 Things only Nick can do:
 - **Deploy `sendWeeklyPulse` and the `betaPulse` rules on dev**, or the faces fail there today.
 - **Decide whether the card should walk every item (built) or only the first group** (false premise 2).
+
+
+## Final readings (clean tree, `36e73141`, local dev build)
+
+| Suite | Result |
+|---|---|
+| DB71 (`dashV71.measure.ts`) | **10 / 10 passed** (H1, L1, L2·L3·F3·G1 at nine sizes and 768, L4, C1–C3, C4, C5, F1·F2, L3 first use) |
+| DB58 | 6 / 6 passed |
+| DB59 | 7 / 7 passed |
+| DB60 | 5 / 5 passed |
+| Unit | tsc clean; Vitest 643 files, 9,899 passed, 3 skipped (baseline 641 / 9,884) |
+| Builds | `build:prod` and `build:dev` clean (no CSS diagnostics) |
+
+DB58 L1 once read "the hold is real — data-loading 0" (the 6s dev hold had expired before the read) and
+passed on the rerun and in the final run: a timing flake in the harness, not a layout reading.
+
+## Shots (`reports/dashboard-v71/shots/`, beside the reference PNGs)
+
+- The page at every reference size: `page-1920x1080`, `page-1512x900`, `page-1440x900`, `page-1366x768`,
+  `page-1280x800`, `page-1288x660`, `page-1366x650`, `page-1280x650`, `page-1100x800`.
+- The task card: `task-nudge-1512x900`, `task-close-1512x900`, `task-send-1512x900`.
+- The founding card: `founding-ask-1512x900`, `founding-noted-1512x900`, `founding-sent-1512x900`, and
+  `dock-from-say-more-1512x900` (the one FeedbackDock, opened from "Say more →").
+- Day one: `day-one-1512x900`, `day-one-1440x900`, `day-one-1280x800`.
+
+## Branch, tip, dev
+
+- **Branch `dashboard-v71`**, pushed; not merged to `main`.
+- **Dev serves `index-BPhr9Jhq.js`**, deployed from `a3da291d` on **`dev/db71-plad-db71f`** — hosting only,
+  `scriptally-dev`. That is the integration dev already carried (`dev/db71-plad`: Query Centre v150.1,
+  packages v26, pricing on phones and the pricing-ladder pack, which another stream had stacked on my
+  first dev deploy) plus v71's final commits. Deploying `dashboard-v71` alone would have wiped them.
+  ⚠️ **A redeploy from `dev/db71-plad` would drop v71's fit fixes** — the next deploy should start from
+  `dev/db71-plad-db71f`.

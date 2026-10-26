@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "L1",
+  "where": "population: the right column was found",
+  "ok": true,
+  "detail": "list-title>task-slot>fw-slot"
+ },
+ {
+  "lock": "L1",
+  "where": "exactly the task card, then the founding card",
+  "ok": false,
+  "detail": "list-title>task-slot>fw-slot · task true · fw true"
+ },
+ {
+  "lock": "L1",
+  "where": "no list title anywhere",
+  "ok": false,
+  "detail": "title text present"
+ },
+ {
+  "lock": "L1",
+  "where": "no All {n}, hairline or list rows",
+  "ok": false,
+  "detail": "1 retired element(s)"
+ },
+ {
+  "lock": "L1",
+  "where": "Closed and Agents side by side under the chart",
+  "ok": true,
+  "detail": "{\"chart\":{\"l\":309,\"r\":1015.96875,\"t\":274.09375,\"b\":627.75},\"closed\":{\"l\":309,\"r\":654.484375,\"t\":643.75,\"b\":843.75},\"agents\":{\"l\":670.484375,\"r\":1015.96875,\"t\":643.75,\"b\":843.75}}"
+ }
+]

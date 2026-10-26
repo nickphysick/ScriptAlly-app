@@ -1,0 +1,164 @@
+[
+ {
+  "lock": "H1",
+  "where": "1512x900 population",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "H1",
+  "where": "1512x900 the panel's background is --ink-shell",
+  "ok": false,
+  "detail": "rgb(255, 255, 255) vs token rgb(27, 36, 51)"
+ },
+ {
+  "lock": "H1",
+  "where": "1512x900 title cream",
+  "ok": true,
+  "detail": "rgb(246, 241, 232)"
+ },
+ {
+  "lock": "H1",
+  "where": "1512x900 eyebrow terracotta",
+  "ok": true,
+  "detail": "rgb(217, 150, 122)"
+ },
+ {
+  "lock": "H1",
+  "where": "1512x900 first is Log a query, cream, rust icon, icon first",
+  "ok": true,
+  "detail": "{\"id\":\"btn-log\",\"bg\":\"rgb(244, 239, 230)\",\"icon\":\"rgb(162, 69, 42)\",\"w\":144.234375,\"h\":44,\"aria\":\"Log a query\",\"label\":true,\"iconFirst\":true}"
+ },
+ {
+  "lock": "H1",
+  "where": "1512x900 the secondaries show their words",
+  "ok": true,
+  "detail": "[{\"id\":\"btn-record\",\"bg\":\"rgba(255, 255, 255, 0.05)\",\"icon\":\"rgb(246, 241, 232)\",\"w\":192.484375,\"h\":44,\"aria\":\"Record a response\",\"label\":true,\"iconFirst\":true},{\"id\":\"btn-agent\",\"bg\":\"rgba(255, 255, 255, 0.05)\",\"icon\":\"rgb(246, 241, 232)\",\"w\":153.5625,\"h\":44,\"aria\":\"Add an agent\",\"label\":true,\"iconFirst\":true}]"
+ },
+ {
+  "lock": "H1",
+  "where": "1512x900 button height 44",
+  "ok": true,
+  "detail": "44,44,44"
+ },
+ {
+  "lock": "H1",
+  "where": "1440x900 population",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "H1",
+  "where": "1440x900 the panel's background is --ink-shell",
+  "ok": false,
+  "detail": "rgb(255, 255, 255) vs token rgb(27, 36, 51)"
+ },
+ {
+  "lock": "H1",
+  "where": "1440x900 title cream",
+  "ok": true,
+  "detail": "rgb(246, 241, 232)"
+ },
+ {
+  "lock": "H1",
+  "where": "1440x900 eyebrow terracotta",
+  "ok": true,
+  "detail": "rgb(217, 150, 122)"
+ },
+ {
+  "lock": "H1",
+  "where": "1440x900 first is Log a query, cream, rust icon, icon first",
+  "ok": true,
+  "detail": "{\"id\":\"btn-log\",\"bg\":\"rgb(244, 239, 230)\",\"icon\":\"rgb(162, 69, 42)\",\"w\":144.234375,\"h\":44,\"aria\":\"Log a query\",\"label\":true,\"iconFirst\":true}"
+ },
+ {
+  "lock": "H1",
+  "where": "1440x900 the secondaries show their words",
+  "ok": true,
+  "detail": "[{\"id\":\"btn-record\",\"bg\":\"rgba(255, 255, 255, 0.05)\",\"icon\":\"rgb(246, 241, 232)\",\"w\":192.484375,\"h\":44,\"aria\":\"Record a response\",\"label\":true,\"iconFirst\":true},{\"id\":\"btn-agent\",\"bg\":\"rgba(255, 255, 255, 0.05)\",\"icon\":\"rgb(246, 241, 232)\",\"w\":153.5625,\"h\":44,\"aria\":\"Add an agent\",\"label\":true,\"iconFirst\":true}]"
+ },
+ {
+  "lock": "H1",
+  "where": "1440x900 button height 44",
+  "ok": true,
+  "detail": "44,44,44"
+ },
+ {
+  "lock": "H1",
+  "where": "1280x800 population",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "H1",
+  "where": "1280x800 the panel's background is --ink-shell",
+  "ok": false,
+  "detail": "rgb(255, 255, 255) vs token rgb(27, 36, 51)"
+ },
+ {
+  "lock": "H1",
+  "where": "1280x800 title cream",
+  "ok": true,
+  "detail": "rgb(246, 241, 232)"
+ },
+ {
+  "lock": "H1",
+  "where": "1280x800 eyebrow terracotta",
+  "ok": true,
+  "detail": "rgb(217, 150, 122)"
+ },
+ {
+  "lock": "H1",
+  "where": "1280x800 first is Log a query, cream, rust icon, icon first",
+  "ok": true,
+  "detail": "{\"id\":\"btn-log\",\"bg\":\"rgb(244, 239, 230)\",\"icon\":\"rgb(162, 69, 42)\",\"w\":139.546875,\"h\":40,\"aria\":\"Log a query\",\"label\":true,\"iconFirst\":true}"
+ },
+ {
+  "lock": "H1",
+  "where": "1280x800 the secondaries show their words",
+  "ok": true,
+  "detail": "[{\"id\":\"btn-record\",\"bg\":\"rgba(255, 255, 255, 0.05)\",\"icon\":\"rgb(246, 241, 232)\",\"w\":185.015625,\"h\":40,\"aria\":\"Record a response\",\"label\":true,\"iconFirst\":true},{\"id\":\"btn-agent\",\"bg\":\"rgba(255, 255, 255, 0.05)\",\"icon\":\"rgb(246, 241, 232)\",\"w\":148.328125,\"h\":40,\"aria\":\"Add an agent\",\"label\":true,\"iconFirst\":true}]"
+ },
+ {
+  "lock": "H1",
+  "where": "1280x800 button height 40",
+  "ok": true,
+  "detail": "40,40,40"
+ },
+ {
+  "lock": "H1",
+  "where": "1100x800 population",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "H1",
+  "where": "1100x800 the panel's background is --ink-shell",
+  "ok": false,
+  "detail": "rgb(255, 255, 255) vs token rgb(27, 36, 51)"
+ },
+ {
+  "lock": "H1",
+  "where": "1100x800 title cream",
+  "ok": true,
+  "detail": "rgb(246, 241, 232)"
+ },
+ {
+  "lock": "H1",
+  "where": "1100x800 eyebrow terracotta",
+  "ok": true,
+  "detail": "rgb(217, 150, 122)"
+ },
+ {
+  "lock": "H1",
+  "where": "1100x800 first is Log a query, cream, rust icon, icon first",
+  "ok": true,
+  "detail": "{\"id\":\"btn-log\",\"bg\":\"rgb(244, 239, 230)\",\"icon\":\"rgb(162, 69, 42)\",\"w\":139.546875,\"h\":40,\"aria\":\"Log a query\",\"label\":true,\"iconFirst\":true}"
+ },
+ {
+  "lock": "H1",
+  "where": "1100x800 the two secondaries are icon-only with aria-labels",
+  "ok": true,
+  "detail": "[{\"id\":\"btn-record\",\"bg\":\"rgba(255, 255, 255, 0.05)\",\"icon\":\"rgb(246, 241, 232)\",\"w\":40,\"h\":40,\"aria\":\"Record a response\",\"label\":false,\"iconFirst\":true},{\"id\":\"btn-agent\",\"bg\":\"rgba(255, 255, 255, 0.05)\",\"icon\":\"rgb(246, 241, 232)\",\"w\":40,\"h\":40,\"aria\":\"Add an agent\",\"label\":false,\"iconFirst\":true}]"
+ }
+]
