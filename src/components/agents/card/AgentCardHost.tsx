@@ -62,7 +62,8 @@ import { flagKeyForTask } from "../../../lib/taskFlags";
 import { destroyManifest } from "../../../lib/cascade";
 import { AgentCardFrame, type AgentCardFrameHandle } from "./AgentCardFrame";
 import { AgentQuickView, type QuickFoot } from "./AgentQuickView";
-import { AgentCardEditor, type EditorSaveResult } from "./AgentCardEditor";
+import { AgentEditMode, type EditorSaveResult } from "./AgentEditMode";
+import { useAgentSave } from "./useAgentSave";
 import { AgentPanelNew } from "../panel/AgentPanelNew";
 import { ESC_LEVEL, EscapeRaise } from "../../../lib/escapeStack";
 import { useToast } from "../../toast/ToastProvider";
@@ -99,13 +100,20 @@ export const AgentCardHost: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbo
   /* RETIRE THE ADD-AGENT POP-UP — THE NEW-AGENT PANEL'S FRAME IS MOUNTED HERE, ONCE, for every page: the session
      portals the editor into its act slot. It used to be the Contact list's alone, which is why every other page's
      "Add an agent" fell back to the old centred pop-up. */
+  /* Contact list v25.2 C3 — THE CENTRED EDITOR IS RETIRED: every editor request — a new agent, or an existing one
+     asked for at a tab, a field or with carried answers — is the agent panel holding the card's edit mode */
+  const panel = isEditorRequest(req);
   return (
     <>
-      {req.host === "panel" && req.agentId === null && <AgentPanelNew over={req.over === "drawer"} />}
+      {panel && <AgentPanelNew over={req.over === "drawer"} edit={req.agentId !== null} />}
       <AgentCardSession key={req.seq} sandbox={sandbox} />
     </>
   );
 };
+
+/** v25.2 C3 — a request that wants the editor: a new agent, or an existing one at a tab, a field or with answers */
+const isEditorRequest = (r: AgentCardOptions & { agentId: string | null }): boolean =>
+  r.agentId === null || r.host === "panel" || !!r.tab || !!r.focus || !!r.prefill;
 
 /** The row's box on screen now — the exit shrinks back into it. Rows carry `data-agent-card`. */
 const rowBoxOf = (agentId: string): AgentCardOrigin | null => {
@@ -184,15 +192,9 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
      quick view. The carried answers belong to THAT opening — the pencil later starts clean. */
   /* Contact list v16 §F — hosted in the agent's side panel there is no quick view: the editor is all there is */
   /* v18.3 §D — a NEW agent can be hosted there too: "+ Add an agent" opens the panel's act view with the empty editor */
-  const inPanel = req?.host === "panel";
-  const [editing, setEditingRaw] = useState<EditTarget | null>(
-    req?.tab || inPanel ? { tab: req?.tab ?? "who", focus: req?.focus, prefill: req?.prefill } : null,
-  );
-  /** leaving the editor: back to the quick view — or, in the panel, the session is over */
-  const setEditing = useCallback((t: EditTarget | null) => {
-    if (t === null && inPanel) { closeAgentCard(); return; }
-    setEditingRaw(t);
-  }, [inPanel]);
+  /* v25.2 C3 — every editor is the panel's: the centred card is the quick view alone */
+  const inPanel = !!req && isEditorRequest(req);
+  const editing: EditTarget | null = inPanel ? { tab: req?.tab ?? "who", focus: req?.focus, prefill: req?.prefill } : null;
   /* the panel's act slot, looked up once the panel has drawn it (the panel hears the same store a frame later) */
   const [panelSlot, setPanelSlot] = useState<Element | null>(null);
   useLayoutEffect(() => {
@@ -255,66 +257,22 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
   );
 
   /**
-   * SAVE: ONLY what changed (`cardPatch`), through `commitAgentEdits` — sanitised, atomic, with the
-   * reply-time deadline fan-out riding the same batch (`computeAgentDeadlineWrites`) and a wishlist
-   * edit stamping `mswlCheckedAt` in the same write. The card narrows back to the quick view and
-   * says what else moved.
+   * SAVE (v25.2 C): the one save every editing shape shares (`useAgentSave` — only what changed, through
+   * `commitCardSave`, the deadline fan-out, the data-quality flag, the reopen reminder, the snapshot Undo). The panel
+   * closes and the toast says what moved, with the Undo.
    */
+  const { saveDraft } = useAgentSave({ writeAgent: sandbox?.writeAgent, editCtx });
   const onEditorSave = useCallback(async (d: CardDraft, base: CardDraft): Promise<EditorSaveResult> => {
     if (!agent) return { ok: false, error: "That agent is no longer on your list." };
-    const patch = cardPatch(agent, base, d, new Date().toISOString());
-    if (Object.keys(patch).length === 0) { setEditing(null); return { ok: true }; }
-    const notes = alsoChanges(agent, toContactDraft(agent, base, d), editCtx);
-    const before = { ...agent } as Agent;
-    const after = applyPatch(agent, patch);
-    /* DECISION 13: a save that leaves the door closed with a new reopening date adds the reopen
-       reminder — the quick view's own task — and the saved line says so; never without a date */
-    const due = reminderOnSave(before, after);
-    let reminderId: string | undefined;
-    const addReminder = async () => {
-      const task = due ? reopenReminder(after) : null;
-      if (task) { try { reminderId = await addUserTask(task); } catch { reminderId = undefined; } }
-    };
-    let res: SaveAgentResult;
-    let undo: (() => Promise<QuickFoot | null>) | undefined;
-    if (sandbox?.writeAgent) {
-      const write = sandbox.writeAgent;
-      res = await write(agent.id, patch);
-      if (!("error" in res)) await addReminder();
-      /* the lab's cast has nothing but the agent, and the reminder the save added, to put back */
-      undo = once(async () => {
-        const r = await write(before.id, inversePatch(before, patch));
-        if ("error" in r) return { text: `Couldn’t undo: ${r.error}` };
-        if (reminderId) await deleteUserTask(reminderId);
-        emitAgentCardEvent({ type: "undone", agentId: before.id });
-        return { text: "Undone." };
-      });
-    } else {
-      if (!currentUser) return { ok: false, error: "Not signed in." };
-      /* the ONE save path, shared with Housekeeping's fixes (lib/agentCardSave): the snapshot first,
-         the deadline fan-out in the same batch, the data-quality flag, then the reminder — which the
-         snapshot's task set covers, so Undo deletes it */
-      const out = await commitCardSave({
-        uid: currentUser.id, agent, queries, patch, resolveTaskFlag, afterCommit: addReminder,
-      });
-      res = out.res;
-      if (out.undo) {
-        const restore = out.undo;
-        undo = once(async () => {
-          if (!(await restore())) return { text: "Couldn’t undo the save." };
-          emitAgentCardEvent({ type: "undone", agentId: agent.id });
-          return { text: "Undone." };
-        });
-      }
+    const r = await saveDraft(agent, base, d);
+    if (!r.ok) return { ok: false, error: (r as { error: string }).error };
+    if (!r.nothing) {
+      const undo = r.undo;
+      showToast({ message: r.line, ...(undo ? { undo: async () => { await undo(); } } : {}) });
     }
-    /* "in", not `!res.ok`: with strictNullChecks off a boolean discriminant does not narrow */
-    if ("error" in res) return { ok: false, error: res.error };
-    /* the line claims a reminder only when the task came back with an id */
-    setHandover({ foot: { text: cardSavedLine(notes, reminderId ? due : null), undo }, pulse: savedPulse(changedTabs(base, d)) });
-    emitAgentCardEvent({ type: "saved", agentId: agent.id, before, after, undo });
-    setEditing(null);
+    closeAgentCard();
     return { ok: true };
-  }, [agent, editCtx, sandbox, currentUser, queries, resolveTaskFlag, addUserTask, deleteUserTask]);
+  }, [agent, saveDraft, showToast]);
 
   /**
    * The create — through the SAME `addAgent` path every other creator uses (free-tier cap,
@@ -414,11 +372,11 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
     try { await deleteAgent(id); } catch { emitAgentCardEvent({ type: "delete-failed", agentId: id, name }); }
   }, [agent, deleteAgent]);
 
-  /** THE one way into the editor. */
+  /** THE one way into the editor (v25.2 C3): the agent panel, on this agent in edit mode at the field. */
   const openEditor = useCallback((tab: AgentCardTab, focus?: AgentCardField) => {
-    setHandover(null);
-    setEditing({ tab, focus });
-  }, []);
+    if (!agentId) return;
+    openAgentCard(agentId, { tab, focus, host: "panel", from: "button" });
+  }, [agentId]);
 
   /** What the dock chip shows and how the card hears back — for a journey started here, and for a
    *  parked one resumed while this card is open (Continuity: Resume). */
@@ -487,61 +445,22 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
 
   if (inEditor) {
     const target: EditTarget = isNew ? { tab: "who", focus: "name", prefill: req.prefill } : editing!;
-    const name = isNew ? "New agent" : `Editing ${(agent!.name ?? "").trim() || agent!.agency}`;
-    if (inPanel) {
-      if (!panelSlot || !panelSlot.isConnected) return null;
-      return createPortal(
-        /* over the query drawer, the editor and its popups hear Escape before the drawer does */
-        <EscapeRaise.Provider value={req.over === "drawer" ? ESC_LEVEL.drawerPopup : 0}>
-        <div className="ac apn-edit" data-ap="edit">
-          <AgentCardEditor
-            variant="panel"
-            mode={isNew ? "new" : "edit"} agent={isNew ? null : agent} prefill={target.prefill} personal={personal} tab={target.tab} focus={target.focus}
-            agents={agents} msGenre={scoped?.genre ?? null} genrePool={genrePool} personalGenres={personalLabels} allGenres={AGENT_GENRES}
-            isHit={genreHit} nowMs={nowMs} alsoFor={alsoFor} notes={storedNotes} earlierNote={agent?.notes ?? ""}
-            onSave={isNew ? (dd) => onCreateAgent(dd) : onEditorSave} onLeave={() => closeAgentCard()} onOpenAgent={(id) => openAgentCard(id, { tab: "who", host: "panel" })}
-            onNewGenre={onNewGenre} onAddNote={onAddNote} onEditNote={onEditNote} onDeleteNote={onDeleteNote} bindLeave={editorLeave}
-          />
-        </div>
-        </EscapeRaise.Provider>,
-        panelSlot,
-      );
-    }
-    return (
-      <AgentCardFrame
-        ref={frameRef}
-        big
-        ariaLabel={name}
-        originRect={req.originRect ?? null}
-        onScrim={() => editorLeave.current?.()}
-      >
-        <AgentCardEditor
-          mode={isNew ? "new" : "edit"}
-          agent={isNew ? null : agent}
-          prefill={target.prefill}
-          personal={personal}
-          tab={target.tab}
-          focus={target.focus}
-          agents={agents}
-          msGenre={scoped?.genre ?? null}
-          genrePool={genrePool}
-          personalGenres={personalLabels}
-          allGenres={AGENT_GENRES}
-          isHit={genreHit}
-          nowMs={nowMs}
-          alsoFor={alsoFor}
-          notes={storedNotes}
-          earlierNote={agent?.notes ?? ""}
-          onSave={isNew ? (d) => onCreateAgent(d) : onEditorSave}
-          onLeave={isNew ? () => void requestClose() : () => setEditing(null)}
-          onOpenAgent={(id) => openAgentCard(id, { from: "button" })}
-          onNewGenre={onNewGenre}
-          onAddNote={onAddNote}
-          onEditNote={onEditNote}
-          onDeleteNote={onDeleteNote}
-          bindLeave={editorLeave}
+    if (!panelSlot || !panelSlot.isConnected) return null;
+    return createPortal(
+      /* over the query drawer, the editor and its popups hear Escape before the drawer does */
+      <EscapeRaise.Provider value={req.over === "drawer" ? ESC_LEVEL.drawerPopup : 0}>
+        <AgentEditMode
+          mode={isNew ? "new" : "edit"} agent={isNew ? null : agent} prefill={target.prefill} focus={target.focus}
+          band={!isNew} defaultCountry={isNew ? "GB" : undefined}
+          personal={personal} agents={agents} msGenre={scoped?.genre ?? null} genrePool={genrePool} personalGenres={personalLabels} allGenres={AGENT_GENRES}
+          isHit={genreHit} nowMs={nowMs} alsoFor={alsoFor}
+          notes={isNew ? undefined : { stored: storedNotes, earlier: agent?.notes ?? "", onAdd: onAddNote, onEdit: onEditNote, onDelete: onDeleteNote }}
+          onSave={isNew ? (dd) => onCreateAgent(dd) : onEditorSave} onLeave={() => closeAgentCard()}
+          onOpenAgent={(id) => openAgentCard(id, { tab: "who", host: "panel" })}
+          onNewGenre={onNewGenre} bindLeave={editorLeave}
         />
-      </AgentCardFrame>
+      </EscapeRaise.Provider>,
+      panelSlot,
     );
   }
 

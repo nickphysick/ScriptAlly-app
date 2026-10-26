@@ -15,7 +15,8 @@ import { emptyCardDraft, encodeMats, problemsOf } from "../../../lib/cardDraft";
 
 const strip = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/[^\n]*/gm, "");
 const host = readFileSync(new URL("../card/AgentCardHost.tsx", import.meta.url), "utf8");
-const editor = readFileSync(new URL("../card/AgentCardEditor.tsx", import.meta.url), "utf8");
+/* re-pointed (Contact list v25.2 C2): the editor is the card's edit mode now (AgentCardEditor is deleted) */
+const editor = readFileSync(new URL("../card/AgentEditMode.tsx", import.meta.url), "utf8");
 
 describe("a new agent is born the way the house births agents", () => {
   it("the empty draft carries ABSENCE where the writer has said nothing — no window, no rule, no method, no country, no materials", () => {
@@ -53,9 +54,12 @@ describe("a new agent is born the way the house births agents", () => {
 });
 
 describe("FILL IN stays unbuilt, and the v11 card's parked pieces are gone with it", () => {
-  it("the add card sorts a pasted link and fetches nothing — no FILL IN control", () => {
+  /* re-pointed (Contact list v25.2 C3): "Paste a link" lived only in the retired CENTRED add card — the panel's
+     add form, which every door has opened since the add-agent pop-up was retired, never had it — so it went with the
+     modal. What stays asserted is the part that matters: nothing in the editor fetches a page. */
+  it("the edit mode fetches nothing — no FILL IN control, and the retired paste sorter is not rebuilt", () => {
     const src = strip(editor);
-    expect(src, "the paste field is gone").toContain('data-ae="paste"');
+    expect(src, "the paste sorter came back without a ruling").not.toContain('data-ae="paste"');
     expect(src, "a FILL IN control appeared — nothing in the app reads a web page, so it cannot act").not.toMatch(/>\s*FILL IN\s*</);
   });
 

@@ -66,7 +66,15 @@ import { type AgentFacts, ContactFilters, GroupKey, SORT_OPTIONS, SortKey as Con
 import { bookGenreHit, bookGenres } from "../../lib/genreMatch";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
 import { type ContactPop } from "./contact/ContactListControls";
-import { escapeDepth } from "../../lib/escapeStack";
+import { ESC_LEVEL, escapeDepth } from "../../lib/escapeStack";
+import { AgentEditMode } from "./card/AgentEditMode";
+import { useAgentSave } from "./card/useAgentSave";
+import { useEditOptions } from "./card/useEditOptions";
+import { useAgentNotes } from "./card/useAgentNotes";
+import { inlineFor, type CardEditKit } from "./contact/AgentCard24";
+import { useToast } from "../toast/ToastProvider";
+import { setAgentEditInterceptor } from "../../lib/agentCardStore";
+import type { InlineField } from "./card/InlineEdits";
 import { usePopover } from "../shell/ListPills";
 import { CONTACT_PIN_STORE, readListView, readListVisit, writeListView, writeListVisit } from "../../lib/contactListMemory";
 import { resolveScopedManuscript } from "../../lib/shellSidebar";
@@ -402,13 +410,31 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
      an add) now selects the agent in the address book and docks the box to it; a door that asked for the editor opens
      the agent card's editor at that field. */
   const [bookReq, setBookReq] = useState<{ id: string; seq: number } | null>(null);
+  /* v25.2 C — an edit request for the card on screen: an inline field, or the card's edit mode (at a field, with any
+     carried answers). The card acts on it once, by its seq. */
+  const [editReq, setEditReq] = useState<{ id: string; seq: number; inline?: InlineField; edit?: { focus?: AgentCardOptions["focus"]; prefill?: AgentCardOptions["prefill"] } } | null>(null);
   const openPanel = useCallback((agentId: string, edit?: { tab?: AgentCardOptions["tab"]; focus?: AgentCardOptions["focus"]; prefill?: AgentCardOptions["prefill"] }) => {
     if (!agents.some((a) => a.id === agentId)) return;
     setHkOpenRef.current(false);
     /* v24 C — outside full screen a door opens the agent's card; in full screen it selects the agent in the book */
     if (fullRef.current) setBookReq({ id: agentId, seq: Date.now() }); else setCardId(agentId);
-    if (edit) openAgentCard(agentId, { tab: edit.tab ?? "who", focus: edit.focus, prefill: edit.prefill, from: "row" });
+    /* v25.2 C1/C3 — a door asking for a field opens it IN THE CARD: in place where an inline edit holds it, else the
+       card's edit mode at that field (carried answers always go to the edit mode); the centred editor is retired */
+    if (edit) {
+      const inline = edit.prefill ? null : inlineFor(edit.focus);
+      setEditReq({ id: agentId, seq: Date.now(), ...(inline ? { inline } : { edit: { focus: edit.focus, prefill: edit.prefill } }) });
+    }
   }, [agents]);
+  /* v25.2 C3 — while this page is on screen, an edit asked for anywhere (Housekeeping, a task, the palette) opens in
+     the page's own card rather than a second panel over it */
+  useEffect(() => {
+    if (!active || sandbox) return undefined;
+    return setAgentEditInterceptor((id, o) => {
+      if (!agents.some((a) => a.id === id)) return false;
+      openPanel(id, { tab: o.tab, focus: o.focus, prefill: o.prefill });
+      return true;
+    });
+  }, [active, sandbox, agents, openPanel]);
   /* a link to `?agent=` selects that agent and docks, then the parameter goes */
   useEffect(() => {
     if (!active || !panelParam || !collectionsReady) return;
@@ -822,6 +848,71 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   useEffect(() => { if (cardId && collectionsReady && !agents.some((a) => a.id === cardId)) setCardId(null); }, [cardId, agents, collectionsReady]);
   const titleOf = useCallback((msId: string) => manuscripts.find((m) => m.id === msId)?.title?.trim() || "Untitled manuscript", [manuscripts]);
   /** v24 C/D — ONE card-props builder for the panel's card and full screen's wide card */
+  /* ── v25.2 C · editing inside the agent card ── */
+  const editOpts = useEditOptions(scoped?.genre ?? null);
+  const { saveDraft } = useAgentSave({ writeAgent: sandbox?.writeAgent, editCtx: hkEditCtx });
+  const { showToast } = useToast();
+  /* the open card's stored notes (the retired centred editor's Notes, kept in the edit mode) */
+  const notesAgent = cardId ? agents.find((a) => a.id === cardId) ?? null : null;
+  const cardNotes = useAgentNotes(notesAgent, currentUser?.id ?? null, writeAgentPatch);
+  /* picking another agent while the edit mode has changes asks first (the drawer's discard confirm); the pick waits */
+  const editLeave = useRef<(() => void) | null>(null);
+  const pendingPick = useRef<string | null>(null);
+  const pickCard = useCallback((id: string) => {
+    if (editLeave.current && id !== cardId) { pendingPick.current = id; editLeave.current(); return; }
+    setCardId(id);
+  }, [cardId]);
+  /** what a card needs to edit its agent in place — one save path (`useAgentSave`), the app's genre lists */
+  const editKitFor = (agent: Agent): CardEditKit => {
+    const first = ((agent.name ?? "").trim().split(/\s+/)[0] || (agent.agency ?? "").trim() || "the agent");
+    const req = editReq && editReq.id === agent.id ? editReq : null;
+    return {
+      draft: draftOf(agent, personalGenres),
+      genre: {
+        options: { ms: scoped?.genre ?? null, pool: editOpts.genrePool, personal: editOpts.personalLabels, all: [...editOpts.allGenres] },
+        isHit: bookHit, onNew: editOpts.onNewGenre,
+      },
+      save: async (change) => {
+        const base = draftOf(agent, personalGenres);
+        const r = await saveDraft(agent, base, { ...base, ...change }, { emit: false });
+        if (!r.ok) { showToast({ message: `Couldn’t save that: ${(r as { error: string }).error}` }); return false; }
+        const undo = r.undo;
+        showToast({ message: `Saved to ${first}’s profile`, ...(undo ? { undo: async () => { await undo(); } } : {}) });
+        return true;
+      },
+      renderEdit: ({ focus, wide, onDone }) => {
+        const done = () => {
+          editLeave.current = null;
+          onDone();
+          const n = pendingPick.current;
+          pendingPick.current = null;
+          if (n) setCardId(n);
+        };
+        return (
+          <AgentEditMode
+            key={`${agent.id}:${req?.seq ?? 0}`}
+            mode="edit" agent={agent} focus={focus} prefill={req?.edit?.prefill} wide={wide}
+            personal={editOpts.personal} agents={agents} msGenre={scoped?.genre ?? null} genrePool={editOpts.genrePool}
+            personalGenres={editOpts.personalLabels} allGenres={editOpts.allGenres} isHit={bookHit} nowMs={nowMs}
+            alsoFor={(d, base) => alsoChanges(agent, toContactDraft(agent, base, d), hkEditCtx)}
+            onSave={async (d, base) => {
+              const r = await saveDraft(agent, base, d);
+              if (!r.ok) return { ok: false, error: (r as { error: string }).error };
+              done();
+              return { ok: true };
+            }}
+            onLeave={done}
+            onOpenAgent={(id) => { done(); pickCard(id); }}
+            onNewGenre={editOpts.onNewGenre}
+            notes={!wide && notesAgent?.id === agent.id ? { stored: cardNotes.storedNotes, earlier: agent.notes ?? "", onAdd: cardNotes.onAddNote, onEdit: cardNotes.onEditNote, onDelete: cardNotes.onDeleteNote } : undefined}
+            escLevel={ESC_LEVEL.card}
+            bindLeave={editLeave}
+          />
+        );
+      },
+      request: req ? { seq: req.seq, inline: req.inline, edit: req.edit ? { focus: req.edit.focus } : undefined } : null,
+    };
+  };
   const cardPropsFor = (x: Facts24, index: number, total: number, onStep: (d: -1 | 1) => void, onOpenAgent: (id: string) => void, onClose?: () => void): AgentCard24Props => {
     const id = x.agent.id;
     const toAgent = queries.filter((q) => q.agentId === id);
@@ -832,7 +923,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       index, total, onStep, onClose,
       onJourney: (mode, queryId) => openQueryDrawer({ mode: mode as "resp", queryId }),
       onLog: () => openQueryDrawer({ mode: "log", agentId: id, ...(scoped?.id ? { manuscriptId: scoped.id } : {}) }),
-      onEdit: (tab, focus) => openAgentCard(id, { tab: tab ?? "who", focus, from: "row" }),
+      onEdit: (tab, focus) => openPanel(id, { tab: tab ?? "who", focus }),
+      edit: editKitFor(x.agent),
       onOpenQuery: (queryId) => navigate(`/queries?q=${encodeURIComponent(queryId)}`),
       onNotes: async (text) => (await writeAgentPatch(id, { notes: text })).ok,
       /* v24 E1/E2 — the genre fit against the book in scope, and the agent's colleagues at the agency */
@@ -974,9 +1066,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             sortKey={sortKey} reversed={reversed} onSort={(v) => { setSortKeyRaw(v.key); setReversed(v.reversed); }}
             filters={filters} onFilters={setFilters} onClearAll={clearFilters} full={fullOn} onFull={togglePin}
             genreWord={(raw) => genreLabel(raw, personalGenres)} genreHit={bookHit} personalGenres={personalGenres} nowMs={nowMs}
-            openId={cardId} onOpen={setCardId} search={search} onSearch={setSearch}
+            openId={cardId} onOpen={pickCard} search={search} onSearch={setSearch}
             onLog={(id) => openQueryDrawer({ mode: "log", agentId: id, ...(scoped?.id ? { manuscriptId: scoped.id } : {}) })}
-            onEdit={(id, tab, focus) => openAgentCard(id, { tab, focus, from: "row" })}
+            onEdit={(id, tab, focus) => openPanel(id, { tab, focus })}
             onExport={(rows) => downloadAgentsCsv(rows, (raw) => genreLabel(raw, personalGenres))} />
           </>
         ) : (
@@ -1007,7 +1099,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         {cardFacts && active && !logSeed ? (
           <AgentCardPanel24 agentId={cardFacts.agent.id} onClose={() => setCardId(null)}>
             <AgentCard24 {...cardPropsFor(cardFacts, cardIndex, drawnOrder.length,
-              (d) => { const n = drawnOrder[cardIndex + d]; if (n) setCardId(n); }, (id) => setCardId(id), () => setCardId(null))} />
+              (d) => { const n = drawnOrder[cardIndex + d]; if (n) pickCard(n); }, (id) => pickCard(id), () => setCardId(null))} />
           </AgentCardPanel24>
         ) : null}
         </>

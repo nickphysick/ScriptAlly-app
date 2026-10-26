@@ -168,7 +168,7 @@ describe("§1 · addQuery no longer seeds the agency's window", () => {
    incident it recorded (a probe clicking `.agl-done` hit DISCARD, because a shared chassis was
    named for one of its two actions) stays worth knowing, and the agent card's editor does not
    recreate the shape: its foot's Cancel and Save are separately marked buttons
-   (`data-ae="cancel"` / `data-ae="save"`, AgentCardEditor.tsx) with no shared class named for
+   (`data-ae="cancel"` / `data-ae="save"`, AgentEditMode.tsx since v25.2) with no shared class named for
    either action. The WRITE path the incident
    exonerated — draft diff → deletes → `deleteField()` — is unchanged and is asserted by the
    saveAgentEdits suite, not here. Recoverable at 2d160183's parent. */

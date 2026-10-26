@@ -5703,7 +5703,8 @@ export const Queries: React.FC<{
                     };
                   })}
                   onOpenContactList={() => onNavigate?.("agents")}
-                  onEditAgent={() => openAgentCard(activeAgent.id, { from: "qc" })}
+                  /* Contact list v25.2 C3 — "Edit agent ›" opens the agent panel in edit mode (the centred editor is retired) */
+                  onEditAgent={() => openAgentCard(activeAgent.id, { tab: "who", host: "panel", from: "qc" })}
                 />
               ) : undefined) : null;
   const qpNotesTab = panelRow && activeQuery ? ((
