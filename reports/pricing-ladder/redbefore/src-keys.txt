@@ -1,0 +1,184 @@
+
+Running 5 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.7s)
+PL-1 @1440 [["1","false"],["3","false"],["6","true"],["12","false"]]
+  ✘  2 [measure] › tests/e2e/pricingLadder.measure.ts:110:3 › PL-1 @1440: the ladder is four radios, 6 months on load, one checked at a time (980ms)
+PL-1 @1280 [["1","false"],["3","false"],["6","true"],["12","false"]]
+  ✘  3 [measure] › tests/e2e/pricingLadder.measure.ts:110:3 › PL-1 @1280: the ladder is four radios, 6 months on load, one checked at a time (843ms)
+PL-1 @390 [["1","false"],["3","false"],["6","true"],["12","false"]]
+  ✘  4 [measure] › tests/e2e/pricingLadder.measure.ts:110:3 › PL-1 @390: the ladder is four radios, 6 months on load, one checked at a time (840ms)
+PL-1 @375 [["1","false"],["3","false"],["6","true"],["12","false"]]
+  ✘  5 [measure] › tests/e2e/pricingLadder.measure.ts:110:3 › PL-1 @375: the ladder is four radios, 6 months on load, one checked at a time (897ms)
+
+
+  1) [measure] › tests/e2e/pricingLadder.measure.ts:110:3 › PL-1 @1440: the ladder is four radios, 6 months on load, one checked at a time 
+
+    Error: ArrowDown checks the next row
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Array [
+    -   "6",
+    +   "3",
+      ]
+
+      129 |     await page.keyboard.press("ArrowDown");
+      130 |     r = await rows(page);
+    > 131 |     expect.soft(r.filter((x) => x.checked === "true").map((x) => x.m), "ArrowDown checks the next row").toEqual(["6"]);
+          |                                                                                                         ^
+      132 |     expect.soft(await page.evaluate(() => (document.activeElement as HTMLElement | null)?.dataset.m), "…and focuses it").toBe("6");
+      133 |     expect.soft(await page.locator(".mk-ladder:visible .mk-rung--fit").count(), "nothing is flagged without a result").toBe(0);
+      134 |   });
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:131:105
+
+    Error: …and focuses it
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "6"
+    Received: "3"
+
+      130 |     r = await rows(page);
+      131 |     expect.soft(r.filter((x) => x.checked === "true").map((x) => x.m), "ArrowDown checks the next row").toEqual(["6"]);
+    > 132 |     expect.soft(await page.evaluate(() => (document.activeElement as HTMLElement | null)?.dataset.m), "…and focuses it").toBe("6");
+          |                                                                                                                          ^
+      133 |     expect.soft(await page.locator(".mk-ladder:visible .mk-rung--fit").count(), "nothing is flagged without a result").toBe(0);
+      134 |   });
+      135 | }
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:132:122
+
+    Error Context: test-results/pricingLadder.measure.ts-P-5fe1d--load-one-checked-at-a-time-measure/error-context.md
+
+  2) [measure] › tests/e2e/pricingLadder.measure.ts:110:3 › PL-1 @1280: the ladder is four radios, 6 months on load, one checked at a time 
+
+    Error: ArrowDown checks the next row
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Array [
+    -   "6",
+    +   "3",
+      ]
+
+      129 |     await page.keyboard.press("ArrowDown");
+      130 |     r = await rows(page);
+    > 131 |     expect.soft(r.filter((x) => x.checked === "true").map((x) => x.m), "ArrowDown checks the next row").toEqual(["6"]);
+          |                                                                                                         ^
+      132 |     expect.soft(await page.evaluate(() => (document.activeElement as HTMLElement | null)?.dataset.m), "…and focuses it").toBe("6");
+      133 |     expect.soft(await page.locator(".mk-ladder:visible .mk-rung--fit").count(), "nothing is flagged without a result").toBe(0);
+      134 |   });
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:131:105
+
+    Error: …and focuses it
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "6"
+    Received: "3"
+
+      130 |     r = await rows(page);
+      131 |     expect.soft(r.filter((x) => x.checked === "true").map((x) => x.m), "ArrowDown checks the next row").toEqual(["6"]);
+    > 132 |     expect.soft(await page.evaluate(() => (document.activeElement as HTMLElement | null)?.dataset.m), "…and focuses it").toBe("6");
+          |                                                                                                                          ^
+      133 |     expect.soft(await page.locator(".mk-ladder:visible .mk-rung--fit").count(), "nothing is flagged without a result").toBe(0);
+      134 |   });
+      135 | }
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:132:122
+
+    Error Context: test-results/pricingLadder.measure.ts-P-cab2c--load-one-checked-at-a-time-measure/error-context.md
+
+  3) [measure] › tests/e2e/pricingLadder.measure.ts:110:3 › PL-1 @390: the ladder is four radios, 6 months on load, one checked at a time 
+
+    Error: ArrowDown checks the next row
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Array [
+    -   "6",
+    +   "3",
+      ]
+
+      129 |     await page.keyboard.press("ArrowDown");
+      130 |     r = await rows(page);
+    > 131 |     expect.soft(r.filter((x) => x.checked === "true").map((x) => x.m), "ArrowDown checks the next row").toEqual(["6"]);
+          |                                                                                                         ^
+      132 |     expect.soft(await page.evaluate(() => (document.activeElement as HTMLElement | null)?.dataset.m), "…and focuses it").toBe("6");
+      133 |     expect.soft(await page.locator(".mk-ladder:visible .mk-rung--fit").count(), "nothing is flagged without a result").toBe(0);
+      134 |   });
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:131:105
+
+    Error: …and focuses it
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "6"
+    Received: "3"
+
+      130 |     r = await rows(page);
+      131 |     expect.soft(r.filter((x) => x.checked === "true").map((x) => x.m), "ArrowDown checks the next row").toEqual(["6"]);
+    > 132 |     expect.soft(await page.evaluate(() => (document.activeElement as HTMLElement | null)?.dataset.m), "…and focuses it").toBe("6");
+          |                                                                                                                          ^
+      133 |     expect.soft(await page.locator(".mk-ladder:visible .mk-rung--fit").count(), "nothing is flagged without a result").toBe(0);
+      134 |   });
+      135 | }
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:132:122
+
+    Error Context: test-results/pricingLadder.measure.ts-P-bead5--load-one-checked-at-a-time-measure/error-context.md
+
+  4) [measure] › tests/e2e/pricingLadder.measure.ts:110:3 › PL-1 @375: the ladder is four radios, 6 months on load, one checked at a time 
+
+    Error: ArrowDown checks the next row
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Array [
+    -   "6",
+    +   "3",
+      ]
+
+      129 |     await page.keyboard.press("ArrowDown");
+      130 |     r = await rows(page);
+    > 131 |     expect.soft(r.filter((x) => x.checked === "true").map((x) => x.m), "ArrowDown checks the next row").toEqual(["6"]);
+          |                                                                                                         ^
+      132 |     expect.soft(await page.evaluate(() => (document.activeElement as HTMLElement | null)?.dataset.m), "…and focuses it").toBe("6");
+      133 |     expect.soft(await page.locator(".mk-ladder:visible .mk-rung--fit").count(), "nothing is flagged without a result").toBe(0);
+      134 |   });
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:131:105
+
+    Error: …and focuses it
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "6"
+    Received: "3"
+
+      130 |     r = await rows(page);
+      131 |     expect.soft(r.filter((x) => x.checked === "true").map((x) => x.m), "ArrowDown checks the next row").toEqual(["6"]);
+    > 132 |     expect.soft(await page.evaluate(() => (document.activeElement as HTMLElement | null)?.dataset.m), "…and focuses it").toBe("6");
+          |                                                                                                                          ^
+      133 |     expect.soft(await page.locator(".mk-ladder:visible .mk-rung--fit").count(), "nothing is flagged without a result").toBe(0);
+      134 |   });
+      135 | }
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:132:122
+
+    Error Context: test-results/pricingLadder.measure.ts-P-79fe4--load-one-checked-at-a-time-measure/error-context.md
+
+  4 failed
+    [measure] › tests/e2e/pricingLadder.measure.ts:110:3 › PL-1 @1440: the ladder is four radios, 6 months on load, one checked at a time 
+    [measure] › tests/e2e/pricingLadder.measure.ts:110:3 › PL-1 @1280: the ladder is four radios, 6 months on load, one checked at a time 
+    [measure] › tests/e2e/pricingLadder.measure.ts:110:3 › PL-1 @390: the ladder is four radios, 6 months on load, one checked at a time 
+    [measure] › tests/e2e/pricingLadder.measure.ts:110:3 › PL-1 @375: the ladder is four radios, 6 months on load, one checked at a time 
+  1 passed (23.7s)

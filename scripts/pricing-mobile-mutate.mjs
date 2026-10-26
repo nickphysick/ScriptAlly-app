@@ -27,16 +27,12 @@ const COPY = "src/marketing/pricingCopy.ts";
 const BREAKS = {
   /* PVM-4: the dots no longer follow the swipe */
   dots: [[PHONE, "card > 0 ? Math.min(count - 1, Math.max(0, Math.round(left / (card + 10)))) : 0", "0"]],
-  /* PVM-5: a tap selects but no longer moves the track */
-  tiertap: [[PHONE, "    el.scrollTo({ left, behavior: scrollBehavior() });\n  };", "  };"]],
-  /* PVM-5: a swipe no longer moves the switch */
-  tierswipe: [[PHONE, "    setOn(el.scrollLeft > pro.offsetLeft / 2 ? 1 : 0);", "    void pro;"]],
-  /* PVM-6: four breaks in one build, each caught by its own soft assertion */
+  /* PVM-6: three breaks in one build, each caught by its own soft assertion. (The tile break and PVM-5's
+     and PVM-9's breaks were retired with their locks, 26 Oct; the ladder's are pricing-ladder-mutate.mjs.) */
   sheet: [
     [SHEET, 'if (e.key !== "Tab" || !dialog.current) return;', "return;"],
     [SHEET, '    els.forEach((e) => { e.style.overflow = "hidden"; });', "    void els;"],
     [PHONE, "    opener.current?.focus({ preventScroll: true });\n  }, []);", "  }, []);"],
-    [PHONE, '"mk-pvpt" + (p.months === fit ? " mk-pvpt--fit" : "")', '"mk-pvpt" + (fit !== null ? " mk-pvpt--fit" : "")'],
   ],
   /* PVM-7 / 7b: shown without a figure, shown over the open sheet, and the field left unfocused */
   sticky: [
@@ -44,12 +40,6 @@ const BREAKS = {
     [PHONE, "  if (!host || !live || !count) return null;\n  const on = away && !blocked;", "  if (!host || !live) return null;\n  const on = away;"],
     [PHONE, "<p>{foundingPlacesLeftLabel(count.claimed, count.cap)}", "<p>{count ? foundingPlacesLeftLabel(count.claimed, count.cap) : \"\"}"],
     [PHONE, "    window.setTimeout(() => field?.focus({ preventScroll: true }), reduceMotion() ? 0 : 450);", "    void field;"],
-  ],
-  /* PVM-9: the £5.99 tail back, a "pass" on the page, and one question reworded */
-  copy: [
-    [EST, "\"If your last replies run late, we'll be in touch with options to extend.\"", "\"If your last replies run late, add a month for £5.99.\""],
-    [COPY, 'export const SUIT_NOTE = "Four quick questions, about a minute.";', 'export const SUIT_NOTE = "Four quick questions to find your pass.";'],
-    [COPY, '    q: "Is Pro a subscription?",', '    q: "Is Pro a subscription plan?",'],
   ],
 };
 
