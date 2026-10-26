@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "E4",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "52 rows with a hover group"
+ },
+ {
+  "lock": "E4",
+  "where": "1512 no overlap",
+  "ok": false,
+  "detail": "52 rows — cv25-agent-06: group 1077–1216 over text 1075–1195"
+ },
+ {
+  "lock": "E4",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "52 rows with a hover group"
+ },
+ {
+  "lock": "E4",
+  "where": "1280 no overlap",
+  "ok": false,
+  "detail": "52 rows — cv25-agent-06: group 849–988 over text 857–978"
+ }
+]

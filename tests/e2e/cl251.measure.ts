@@ -277,7 +277,8 @@ test("CL251-E1 E2 E3 · no Submissions; Closed to queries; genres on one line, m
           shown: tags.length, more: Number(more?.dataset.n ?? 0), add: !!g.querySelector("[data-cl24='add-genres']"),
           closed: !!r.querySelector("[data-cl251='closed-tag']"), log: !!r.querySelector("[data-cl24='log']"), door: !!r.querySelector("[data-cl24='door']"),
           /* re-pointed (v25.2 A7): the rating is the tally — lit bars, and "—" when unrated (was stars and "Not rated") */
-          stars: rate ? rate.querySelectorAll("[data-cl252='bar'].on").length : null, unrated: rate ? rate.querySelector("[data-cl252='tally-label']")?.textContent === "—" : null,
+          /* re-pointed again (v25.3): an unrated agent's rating cell is blank — no tally at all */
+          stars: rate ? rate.querySelectorAll("[data-cl252='bar'].on").length : null, unrated: rate ? !rate.querySelector("[data-cl252='tally']") : null,
         };
       });
       return { heads, rows };

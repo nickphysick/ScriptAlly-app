@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "E4",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "52 rows with a hover group"
+ },
+ {
+  "lock": "E4",
+  "where": "1512 no overlap",
+  "ok": true,
+  "detail": "52 rows clear"
+ },
+ {
+  "lock": "E4",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "52 rows with a hover group"
+ },
+ {
+  "lock": "E4",
+  "where": "1280 no overlap",
+  "ok": true,
+  "detail": "52 rows clear"
+ }
+]

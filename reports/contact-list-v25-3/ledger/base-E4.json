@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "E4",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "28 rows with a hover group"
+ },
+ {
+  "lock": "E4",
+  "where": "1512 no overlap",
+  "ok": true,
+  "detail": "28 rows clear"
+ },
+ {
+  "lock": "E4",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "28 rows with a hover group"
+ },
+ {
+  "lock": "E4",
+  "where": "1280 no overlap",
+  "ok": false,
+  "detail": "3 rows — seed-agent-1: group 1196–1230 over text 927–1230"
+ }
+]
