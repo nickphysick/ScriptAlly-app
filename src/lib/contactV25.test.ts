@@ -5,7 +5,7 @@
  * Contact list v25 Part B — "At a glance" as a pure derivation (`glanceCards`) and the set filter that takes a list.
  */
 import { describe, expect, it } from "vitest";
-import { GLANCE_ORDER, GLANCE_SETS, gapsWord, glanceCards } from "./contactV25";
+import { GLANCE_ORDER, GLANCE_SETS, countLine, gapsWord, glanceCards, sortWords } from "./contactV25";
 import { inSet, setCounts, type SetKey } from "./contactV24";
 import type { AgentFacts } from "./contactList";
 
@@ -69,5 +69,26 @@ describe("inSet takes a list of sets (v25 B2)", () => {
     expect(q).toEqual(["a", "b", "c", "d", "e"]);
     expect(FACTS.filter((x) => inSet(x, null)).length).toBe(FACTS.length);
     expect(FACTS.filter((x) => inSet(x, "none")).map((x) => x.agent.id)).toEqual(["f", "g"]);
+  });
+});
+
+describe("the list title's count line (v25 C)", () => {
+  const base = { shown: 41, total: 41, pct: 93, view: "list" as const, grouped: true, sortKey: "surname" as const, reversed: false };
+  it("the default: 41 agents · 93% list health · grouped by status, A to Z", () => {
+    expect(countLine(base)).toEqual({ n: 41, of: null, agents: "agents", pct: 93, how: "grouped by status, A to Z" });
+  });
+  it("Cards: as cards, grouped by status", () => {
+    expect(countLine({ ...base, view: "cards" }).how).toBe("as cards, grouped by status");
+  });
+  it("filtered: 19 of 41 agents", () => {
+    const l = countLine({ ...base, shown: 19 });
+    expect([l.n, l.of, l.agents]).toEqual([19, 41, "agents"]);
+  });
+  it("ungrouped, and the sort's words follow the direction", () => {
+    expect(countLine({ ...base, grouped: false, reversed: true }).how).toBe("Z to A");
+    expect(sortWords("added", false)).toBe("newest first");
+  });
+  it("one agent", () => {
+    expect(countLine({ ...base, shown: 1, total: 1 }).agents).toBe("agent");
   });
 });

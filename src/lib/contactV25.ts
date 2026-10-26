@@ -17,7 +17,7 @@
  *    drawn, so the row accounts for every agent.
  */
 import { agentInitials, agentPrimary } from "./agentDisplay";
-import type { AgentFacts } from "./contactList";
+import type { AgentFacts, SortKey } from "./contactList";
 import type { SetKey } from "./contactV24";
 
 export type GlanceKey = "health" | "none" | "querying" | "closed";
@@ -60,3 +60,36 @@ export function glanceCards(facts: readonly AgentFacts[], health: { pct: number 
 
 /** "20 gaps" / "1 gap" */
 export const gapsWord = (n: number): string => `${n} ${n === 1 ? "gap" : "gaps"}`;
+
+/* ══ Part C · the list title's count line ═════════════════════════════════════════════════════════════════════════ */
+
+
+export interface CountLine {
+  /** the agents the list is showing */
+  shown: number;
+  /** every agent on file */
+  total: number;
+  /** List health, or null while Housekeeping has not run */
+  pct: number | null;
+  view: "list" | "cards";
+  grouped: boolean;
+  sortKey: SortKey;
+  reversed: boolean;
+}
+const SORT_WORDS: Partial<Record<SortKey, [string, string]>> = {
+  surname: ["A to Z", "Z to A"],
+  added: ["newest first", "oldest first"],
+  reply: ["fastest reply first", "slowest reply first"],
+  status: ["furthest on first", "earliest first"],
+};
+/** the sort in words: "A to Z", "newest first" */
+export const sortWords = (k: SortKey, reversed: boolean): string => (SORT_WORDS[k] ?? SORT_WORDS.surname!)[reversed ? 1 : 0];
+
+/** "41 agents · 93% list health · grouped by status, A to Z", in parts the title draws */
+export function countLine(c: CountLine): { n: number; of: number | null; agents: string; pct: number | null; how: string } {
+  const filtered = c.shown !== c.total;
+  const how = c.view === "cards"
+    ? `as cards, ${c.grouped ? "grouped by status" : sortWords(c.sortKey, c.reversed)}`
+    : c.grouped ? `grouped by status, ${sortWords(c.sortKey, c.reversed)}` : sortWords(c.sortKey, c.reversed);
+  return { n: c.shown, of: filtered ? c.total : null, agents: (filtered ? c.total : c.shown) === 1 ? "agent" : "agents", pct: c.pct, how };
+}

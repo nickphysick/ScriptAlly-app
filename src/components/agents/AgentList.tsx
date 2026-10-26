@@ -46,6 +46,7 @@ import {
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { ContactHeader25 } from "./contact/ContactHeader24";
 import { ContactGlance25 } from "./contact/ContactGlance25";
+import { ContactListTitle25 } from "./contact/ContactListTitle25";
 import { GLANCE_ORDER, GLANCE_SETS, glanceCards, type GlanceKey as GlanceCardKey } from "../../lib/contactV25";
 import { ContactSheet24, SheetSkeleton } from "./contact/ContactSheet24";
 import { AgentCard24, AgentCardWide24, type AgentCard24Props } from "./contact/AgentCard24";
@@ -949,7 +950,11 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         {showList && (
         <>
         {!fullOn ? (
-          <ContactSheet24 pool={visibleFacts} all={factsAll} view={view} onView={setView} grouped={byStatus} onGrouped={setByStatus}
+          <>
+          {/* v25 C — "Every agent on file": the title, its count line and the List | Cards switch (out of the navy bar) */}
+          <ContactListTitle25 view={view} onView={setView}
+            line={pageState === "list" ? { shown: visibleFacts.length, total: factsAll.length, pct: health?.pct ?? null, view, grouped: byStatus, sortKey, reversed } : null} />
+          <ContactSheet24 pool={visibleFacts} all={factsAll} view={view} grouped={byStatus} onGrouped={setByStatus}
             sortKey={sortKey} reversed={reversed} onSort={(v) => { setSortKeyRaw(v.key); setReversed(v.reversed); }}
             filters={filters} onFilters={setFilters} onClearAll={clearFilters} full={fullOn} onFull={togglePin}
             genreWord={(raw) => genreLabel(raw, personalGenres)} genreHit={bookHit} personalGenres={personalGenres} nowMs={nowMs}
@@ -957,6 +962,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             onLog={(id) => openQueryDrawer({ mode: "log", agentId: id, ...(scoped?.id ? { manuscriptId: scoped.id } : {}) })}
             onEdit={(id, tab, focus) => openAgentCard(id, { tab, focus, from: "row" })}
             onExport={(rows) => downloadAgentsCsv(rows, (raw) => genreLabel(raw, personalGenres))} />
+          </>
         ) : (
         <ContactAddressBook24 pool={visibleFacts} all={factsAll} counts={counts}
           /* the band's segments are single sets; At a glance's Querying (two) lights none of them and "All" neither */

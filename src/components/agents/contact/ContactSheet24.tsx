@@ -55,8 +55,6 @@ export const StateDisc: React.FC<{ x: AgentFacts; size?: number; className?: str
 );
 
 const I = {
-  list: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><path d="M2.5 4h11M2.5 8h11M2.5 12h11" /></svg>,
-  cards: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" aria-hidden="true"><rect x="2" y="2" width="5" height="5" rx="1" /><rect x="9" y="2" width="5" height="5" rx="1" /><rect x="2" y="9" width="5" height="5" rx="1" /><rect x="9" y="9" width="5" height="5" rx="1" /></svg>,
   filt: <svg className="cl24-ic" viewBox="0 0 20 20" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M3 5.5h14M5.5 10h9M8 14.5h4" /></svg>,
   grp: <svg className="cl24-ic" viewBox="0 0 20 20" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M3.5 5.5h13M3.5 10h13M3.5 14.5h13" /></svg>,
   cv: <svg className="cl24-cv" viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M3 4.5l3 3 3-3" /></svg>,
@@ -70,7 +68,6 @@ export interface ContactSheet24Props {
   pool: readonly AgentFacts[];
   all: readonly AgentFacts[];
   view: ContactView;
-  onView: (v: ContactView) => void;
   grouped: boolean;
   onGrouped: (g: boolean) => void;
   sortKey: SortKey;
@@ -127,13 +124,6 @@ export const ContactSheet24: React.FC<ContactSheet24Props> = (p) => {
   );
   const openN = p.all.filter((x) => x.openKey === "open").length;
   const sortBy = (k: SortKey) => p.onSort({ key: k, reversed: p.sortKey === k ? !p.reversed : false });
-  const switchKey = (e: React.KeyboardEvent) => {
-    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
-    e.preventDefault();
-    const next: ContactView = p.view === "list" ? "cards" : "list";
-    p.onView(next);
-    requestAnimationFrame(() => barRef.current?.querySelector<HTMLButtonElement>(`[data-cl24="view-tab"][data-v="${next}"]`)?.focus());
-  };
 
   return (
     <div className="cl24-sheet" data-cl24="sheet" data-view={p.view} ref={sheetRef}>
@@ -142,14 +132,7 @@ export const ContactSheet24: React.FC<ContactSheet24Props> = (p) => {
           <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4.5 4.5" /></svg>
           <input value={p.search} onChange={(e) => p.onSearch(e.target.value)} placeholder="Find an agent or agency" aria-label="Find an agent or agency" autoComplete="off" />
         </label>
-        <span className="cl24-vt" role="tablist" aria-label="How the agents are drawn" data-cl24="switch" onKeyDown={switchKey}>
-          {(["list", "cards"] as const).map((v) => (
-            <button key={v} type="button" role="tab" data-cl24="view-tab" data-v={v} aria-selected={p.view === v} tabIndex={p.view === v ? 0 : -1}
-              onClick={() => p.onView(v)}>
-              {v === "list" ? I.list : I.cards}<span>{v === "list" ? "List" : "Cards"}</span>
-            </button>
-          ))}
-        </span>
+        {/* v25 C — the List | Cards switch moved out of the bar, to the list's title row (ContactListTitle25) */}
         <span className="cl24-sp" />
         <button type="button" className="cl24-ch cl24-ch--fil" data-cl24="filters" data-nb1="filters" aria-haspopup="dialog" aria-expanded={pop.open === "filters"}
           aria-label={filterN ? `Filters: ${filterN} applied` : "Filters"} onClick={(e) => pop.toggle("filters", e.currentTarget)}>

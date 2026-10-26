@@ -53,17 +53,7 @@
     height: 52px; padding: 0 14px 0 20px; background: #2a3a52; border-radius: 20px 20px 0 0; color: #f4eee5;
   }
   .cl24-sheet .cl24-sp { flex: 1; }
-  /* B1 · the switch: a segmented control on the navy */
-  .cl24-vt { display: inline-flex; gap: 2px; padding: 3px; border-radius: 10px; background: rgba(244, 238, 229, 0.12); }
-  .cl24-vt button {
-    all: unset; box-sizing: border-box; display: inline-flex; align-items: center; gap: 7px; height: 30px; padding: 0 13px 0 11px;
-    border-radius: 7px; color: rgba(244, 238, 229, 0.72); cursor: pointer;
-  }
-  .cl24-vt button span { font: 400 15px/1 var(--sp-type) !important; color: inherit; }
-  .cl24-vt button svg { width: 15px; height: 15px; flex: none; }
-  .cl24-vt button:hover { color: #f4eee5; background: rgba(244, 238, 229, 0.08); }
-  .cl24-vt button[aria-selected="true"] { background: #f4eee5; color: #2a3a52; }
-  .cl24-vt button:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
+  /* v25 C — the switch left the bar for the list's title row (ContactListTitle25) */
   /* B1 · the chips on the right: white, 34 tall */
   .cl24-sheet .cl24-ch {
     all: unset; box-sizing: border-box; flex: none; display: inline-flex; align-items: center; gap: 9px; height: 34px; padding: 0 12px 0 14px;
