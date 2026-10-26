@@ -55,8 +55,9 @@ const MUTATIONS: Record<string, string> = {
   T1: ".mk-foot{border-top:1px solid #e7ddd2!important}",
   /* The phone retargets' own breaks (phone hero, 23 Oct) — each turns only the ≤760px branch red. */
   /* RETARGETED (landing on phones v1, 26 Oct): the pill is gone; the phone's founding offer is the strip. */
-  N2p: ".mk-fs{background:#1b2433!important}",
-  V1p: ".mk-vision.mk-vision--navy{background:#e9e6e0!important}",
+  /* RETARGETED (landing on phones v4): the strip is gone; the phone's bar holds the "Log in" pill. */
+  N2p: ".mk-lg{background:#e8b4a3!important}",
+  V1p: ".mk-vbf img{opacity:1!important}",
   /* v3: page snapping switched off, so the phone's jump lands on the band rather than on caption 1. */
   N3s: "html:has(.mk-story){scroll-snap-type:none!important}",
   N3p: "@media (max-width:760px){.mk-scope .mk-nav{height:72px!important}}",
@@ -305,14 +306,14 @@ test.describe("LC2", () => {
         const brand = document.querySelector(".mk-nav .mk-brand")!;
         const word = brand.querySelector(".mk-navword");
         const c = word ? getComputedStyle(word) : null;
-        /* RETARGET (landing on phones v1, 26 Oct): at ≤760px the bar holds no primary at all — the
-           founding offer is the strip ABOVE the bar, a lighter navy with white type. */
+        /* RETARGET (landing on phones v4, 26 Oct): at ≤760px the bar holds no primary button — its right
+           side is the tinted "Log in" pill, white on white at 10% (the strip above the bar is gone). */
         const primary = document.querySelector(".mk-navright .mk-btn");
-        const strip = document.querySelector(".mk-fs"), stripT = document.querySelector(".mk-fs-t");
+        const lg = document.querySelector(".mk-lg");
         const btn = primary ? getComputedStyle(primary) : null;
         return {
-          primary: !!primary, stripBg: strip ? getComputedStyle(strip).backgroundColor : null,
-          stripFg: stripT ? getComputedStyle(stripT).color : null,
+          primary: !!primary, stripBg: lg ? getComputedStyle(lg).backgroundColor : null,
+          stripFg: lg ? getComputedStyle(lg).color : null,
           imgs: Array.from(brand.querySelectorAll("img")).map((i) => i.getAttribute("src") ?? ""),
           text: word?.textContent ?? null, color: c?.color ?? null, family: c?.fontFamily ?? null,
           name: brand.getAttribute("aria-label"),
@@ -328,7 +329,7 @@ test.describe("LC2", () => {
       expect(w.name).toBe("QueryHawk home");
       if (vp.width <= PHONE) {
         expect(w.primary, `@${vp.width}: the phone bar holds no primary`).toBe(false);
-        expect(w.stripBg, `@${vp.width}: the founding strip is the lighter navy`).toBe("rgb(38, 50, 74)");
+        expect(w.stripBg, `@${vp.width}: the Log in pill is white at 10%`).toBe("rgba(255, 255, 255, 0.1)");
         expect(w.stripFg, `@${vp.width}: with white type`).toBe("rgb(255, 255, 255)");
       } else {
         expect(w.btnBg).toBe("rgb(243, 238, 230)");
@@ -507,15 +508,19 @@ test.describe("LC2", () => {
     for (const vp of VPS) {
       await open(page, "/", vp);
       if (vp.width <= PHONE) {
-        /* RETARGET (landing on phones v2, 26 Oct): on a phone the vision is the navy carousel of three
-           cards (v1's white rows are gone); the stone band with white cards is the desktop's. */
+        /* RETARGET (landing on phones v4, 26 Oct): on a phone the vision is navy with ONE frame of three
+           pictures (one showing) over three lines; the stone band with white cards is the desktop's. */
         const p = await page.evaluate(() => ({
           band: getComputedStyle(document.querySelector(".mk-vision")!).backgroundColor,
-          cards: document.querySelectorAll(".mk-vision .mk-vn").length,
+          frames: document.querySelectorAll(".mk-vision .mk-vbf").length,
+          showing: Array.from(document.querySelectorAll(".mk-vision .mk-vbf img")).filter((i) => +getComputedStyle(i).opacity > 0.9).length,
+          lines: document.querySelectorAll(".mk-vision .mk-vbt").length,
           desk: document.querySelectorAll(".mk-vision .mk-vpoint").length,
         }));
         expect(p.band, `@${vp.width}: the phone's vision band is navy`).toBe("rgb(27, 36, 51)");
-        expect(p.cards, `@${vp.width}: three carousel cards`).toBe(3);
+        expect(p.frames, `@${vp.width}: one frame`).toBe(1);
+        expect(p.showing, `@${vp.width}: showing one picture`).toBe(1);
+        expect(p.lines, `@${vp.width}: three lines`).toBe(3);
         expect(p.desk, `@${vp.width}: and none of the desktop's cards`).toBe(0);
         continue;
       }

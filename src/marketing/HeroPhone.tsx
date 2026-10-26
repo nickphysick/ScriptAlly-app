@@ -102,7 +102,7 @@ export const HeroPhone: React.FC<{
   const wrap = useRef<HTMLDivElement>(null);
   /* The drawer's state lives in refs and classes, never React state: the sheet holds the whole rest
      of the page, and the card above must never re-render. */
-  const st = useRef({ grown: false, k: K_REST, kGrown: K_GROWN, run: 0, stageH: 0, rest: REST, off: 0 });
+  const st = useRef({ grown: false, k: K_REST, kGrown: K_GROWN, run: 0, stageH: 0, rest: REST });
 
   const parts = () => {
     const el = wrap.current;
@@ -158,11 +158,7 @@ export const HeroPhone: React.FC<{
       p0.pile.dataset.kGrown = s.kGrown.toFixed(3);
       if (s.grown) s.k = s.kGrown;
     }
-    /* D1 (landing on phones v2): the founding strip sits above the bar and scrolls away first, so the
-       drawer's travel to the bar is the strip's height longer — the corners, the handle and the grab
-       all measure to the bar, as they did before the strip existed. */
-    s.off = document.querySelector<HTMLElement>(".mk-fs")?.offsetHeight || 0;
-    s.run = s.off + s.stageH - (s.grown ? rest + GROW_BY : rest);
+    s.run = s.stageH - (s.grown ? rest + GROW_BY : rest);
     onScroll();
   }, [onScroll]);
 
@@ -178,7 +174,7 @@ export const HeroPhone: React.FC<{
       window.setTimeout(() => { p0.hero.style.transition = ""; }, 900);
     }
     s.k = s.kGrown;
-    s.run = s.off + s.stageH - s.rest - GROW_BY;
+    s.run = s.stageH - s.rest - GROW_BY;
     onScroll();
   }, [onScroll]);
   const onGrow = useCallback(() => grow(false), [grow]);

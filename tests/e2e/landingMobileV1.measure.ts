@@ -1,10 +1,7 @@
 /**
  * The landing page on phones, v1 (26 Oct; ref design-refs/landing-mobile-v1.html) — the rendered locks.
  *
- *   LM1 strip (390 and 375): the founding strip is above the bar, 40px, rgb(38, 50, 74), its type white;
- *       its fill is the share of places TAKEN (the ref's 6px minimum aside); it scrolls away while the
- *       bar stays at top 0; the bar holds no pill and no segments; before the live figure arrives it
- *       renders no number and no track
+ *   LM1 RETIRED (landing on phones v4): the founding strip is gone — see landingMobileV4's LT1.
  *   LM2 RETIRED (landing on phones v2): the swipe strip is gone — see landingMobileV2.
  *   LM3 vision: "Make querying straightforward." is on the landing, and "Make querying simple." is on
  *       no public page at any width (its compact-rows half retired with the rows in v2)
@@ -13,7 +10,7 @@
  *   LM5 offer copy: no public page, at 390 or 1440, says "six months", "Six months free", "Half price"
  *       or "for life" (named exemptions: Pricing's FAQ answers on how long a campaign runs, which are
  *       about the campaign and not the offer — main's v3 sentence and the Pricing v4 branch's)
- *   LM6 reduced motion: the strip's first count on screen is the final one (the swipe half retired)
+ *   LM6 RETIRED (landing on phones v4): it read the strip's count, and the strip is gone.
  *
  * The public page needs no sign-in. Run without the setup project:
  *   SA_E2E_BASE_URL=http://127.0.0.1:<port> npx playwright test landingMobileV1 --project measure --no-deps
@@ -36,9 +33,6 @@ const GETS = [
 
 /** Each lock's named break, as a stylesheet; the rest act on the page in `open`. */
 const CSS_BREAKS: Record<string, string> = {
-  LM1: ".mk-fs{position:fixed!important;top:0;left:0;right:0;z-index:80}",
-  LM1b: ".mk-fs-tr b{width:90%!important}",
-  LM1c: ".mk-fs{height:48px!important}",
   LM4: ".mk-ccart{top:12px!important}",
   LM4b: ".mk-claimband{display:none!important}",
 };
@@ -69,28 +63,9 @@ async function open(page: Page, vp: { width: number; height: number }, o: { rout
     };
     new MutationObserver(fix).observe(document, { subtree: true, childList: true, characterData: true });
   }, rw);
-  if (MUTATE === "LM1d") await page.addInitScript(() => {
-    /* The pill put back in the phone bar. */
-    const t = setInterval(() => { const r = document.querySelector(".mk-navright"); if (!r) return; clearInterval(t); const b = document.createElement("button"); b.className = "mk-navpill"; b.innerHTML = '<span class="mk-navpill-t">Become a founding writer</span><span class="mk-navpill-c"><i><b class="mk-on"></b><b></b></i><em>48 places left</em></span>'; r.appendChild(b); }, 20);
-  });
-  if (MUTATE === "LM1e") await page.addInitScript(() => {
-    /* A placeholder number in the strip before the live figure. */
-    /* …present only while there is no live figure, as a placeholder would be. */
-    setInterval(() => {
-      const s = document.querySelector(".mk-fs"); if (!s) return;
-      const fake = s.querySelector(".lm-fake");
-      if (!s.querySelector(".mk-fs-tr")) { if (!fake) { const n = document.createElement("span"); n.className = "lm-fake"; n.textContent = "50 left"; s.appendChild(n); } }
-      else fake?.remove();
-    }, 5);
-  });
   if (MUTATE === "LM4c") await page.addInitScript(() => {
     /* The card's list one bullet short. */
     new MutationObserver(() => { const l = document.querySelectorAll(".mk-cclist li"); if (l.length === 4) l[3].remove(); }).observe(document, { subtree: true, childList: true });
-  });
-  if (MUTATE === "LM6b") await page.addInitScript(() => {
-    /* The reduced-motion check blinded, so the strip counts down anyway. */
-    const mm = window.matchMedia.bind(window);
-    window.matchMedia = (q: string) => (q.includes("reduce") ? { ...mm("(min-width: 1px) and (max-width: 0px)"), matches: false, media: q } as MediaQueryList : mm(q));
   });
   await page.goto(o.route ?? "/", { waitUntil: "commit" });
   await page.waitForSelector(".mk-navwrap", { state: "attached" });
@@ -102,61 +77,10 @@ async function open(page: Page, vp: { width: number; height: number }, o: { rout
 test.describe("landing on phones v1", () => {
   test.use({ storageState: { cookies: [], origins: [] } });
 
-  test("LM1 strip: above the bar, 40px, navy and white; the fill is the share taken; it scrolls away; no pill; no number before the count", async ({ page }) => {
-    test.setTimeout(120000);
-    for (const vp of PHONES) {
-      await open(page, vp);
-      await page.waitForTimeout(2600); // the count-down is over by 2.0s
-      const r = await page.evaluate(() => {
-        const s = document.querySelector<HTMLElement>(".mk-fs")!, bar = document.querySelector(".mk-navwrap")!;
-        const sb = s.getBoundingClientRect(), bb = bar.getBoundingClientRect();
-        const tr = s.querySelector(".mk-fs-tr")?.getBoundingClientRect().width ?? 0, b = s.querySelector(".mk-fs-tr b")?.getBoundingClientRect().width ?? 0;
-        const types = [".mk-fs-t"].map((q) => getComputedStyle(s.querySelector(q)!).color);
-        return {
-          top: sb.top, h: sb.height, bottom: sb.bottom, barTop: bb.top, bg: getComputedStyle(s).backgroundColor, types,
-          tr, b, n: (s.querySelector(".mk-fs-n") as HTMLElement | null)?.innerText ?? null,
-          pills: document.querySelectorAll(".mk-nav .mk-navpill, .mk-nav .mk-navpill-c, .mk-navwrap .mk-on").length,
-          barText: (document.querySelector(".mk-nav") as HTMLElement).innerText.trim(),
-        };
-      });
-      console.log(`LM1 @${vp.width}`, JSON.stringify(r));
-      expect(r.n, `@${vp.width}: population — the live count`).toBe("36 left");
-      expect(r.top, `@${vp.width}: the strip is the first thing on the page`).toBe(0);
-      expect(r.h, `@${vp.width}: 40px tall`).toBe(40);
-      expect(Math.abs(r.bottom - r.barTop), `@${vp.width}: and the bar sits right under it`).toBeLessThanOrEqual(.5);
-      expect(r.bg).toBe("rgb(38, 50, 74)");
-      expect(r.types, "its words are white").toEqual(["rgb(255, 255, 255)"]);
-      expect(r.tr, "population: a track").toBeGreaterThan(40);
-      expect(Math.abs(r.b - Math.max(6, r.tr * (50 - 36) / 50)), `@${vp.width}: the fill is (cap − left) / cap of the track`).toBeLessThanOrEqual(1);
-      expect(r.pills, `@${vp.width}: no pill or segment bar in the phone bar`).toBe(0);
-      expect(r.barText, `@${vp.width}: the bar is the brand and the menu`).toBe("QueryHawk");
-      await page.evaluate(() => window.scrollTo({ top: 300, behavior: "instant" }));
-      await page.waitForTimeout(300);
-      const s = await page.evaluate(() => ({ strip: document.querySelector(".mk-fs")!.getBoundingClientRect().bottom, bar: document.querySelector(".mk-navwrap")!.getBoundingClientRect().top }));
-      console.log(`LM1 @${vp.width} scrolled`, JSON.stringify(s));
-      expect(s.strip, `@${vp.width}: the strip has scrolled away`).toBeLessThanOrEqual(0);
-      expect(s.bar, `@${vp.width}: the bar stays at the top`).toBe(0);
-    }
-    /* Before the figure: sample every frame while the count is held back. */
-    await open(page, PHONES[0], { count: "hold" });
-    const early = await page.evaluate(() => new Promise<{ frames: number; digits: string[]; tracks: number }>((done) => {
-      const R = { frames: 0, digits: [] as string[], tracks: 0 }, t0 = performance.now();
-      const loop = () => {
-        const s = document.querySelector<HTMLElement>(".mk-fs");
-        if (s) { R.frames++; if (/\d/.test(s.textContent ?? "") && R.digits.length < 3) R.digits.push(s.textContent ?? ""); if (s.querySelector(".mk-fs-tr")) R.tracks++; }
-        if (performance.now() - t0 < 2000) requestAnimationFrame(loop); else done(R);
-      };
-      requestAnimationFrame(loop);
-    }));
-    console.log("LM1 before the count", JSON.stringify(early));
-    expect(early.frames, "population: the strip was read before the count arrived").toBeGreaterThan(60);
-    expect(early.digits, "no number before the live figure").toEqual([]);
-    expect(early.tracks, "and no track").toBe(0);
-  });
 
 
   /* RETIRED HALF (landing on phones v2, 26 Oct): the three compact rows are gone — the phone's vision
-     is the navy carousel, locked in landingMobileV2's LV3. The sweep below stands. */
+     is the navy vision (since v4 one frame with lines you swipe), locked in landingMobileV4's LT3. The sweep below stands. */
   test("LM3 vision: straightforward on the landing, and never simple anywhere", async ({ page }) => {
     test.setTimeout(180000);
     const hits: string[] = []; let pages = 0;
@@ -230,20 +154,4 @@ test.describe("landing on phones v1", () => {
     expect(hits, "no retired offer wording on any public page").toEqual([]);
   });
 
-  test("LM6 reduced motion: the strip's first count is its final one", async ({ page }) => {
-    test.setTimeout(60000);
-    await page.addInitScript(() => {
-      const seen: string[] = [];
-      (window as unknown as { __lm6: string[] }).__lm6 = seen;
-      const loop = () => { const n = document.querySelector<HTMLElement>(".mk-fs-n"); const t = n?.textContent ?? ""; if (t && seen[seen.length - 1] !== t) seen.push(t); requestAnimationFrame(loop); };
-      requestAnimationFrame(loop);
-    });
-    await open(page, PHONES[0], { reduce: true });
-    await page.waitForTimeout(2600);
-    const seen = await page.evaluate(() => (window as unknown as { __lm6: string[] }).__lm6);
-    console.log("LM6 counts", JSON.stringify(seen));
-    expect(seen, "the only count ever on screen is the final one").toEqual(["36 left"]);
-    /* RETIRED HALF (landing on phones v2): the swipe strip is gone; the reduced-motion claims about
-       the story's picture and the join bar are landingMobileV2's LV6. */
-  });
 });

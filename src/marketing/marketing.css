@@ -552,8 +552,9 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 
 /* ── Phones: one 60px ink row (23 Oct, ref design-refs/landing-hero-mobile-v1.html `.m-nav`) ──
    Mark (26px) and "QueryHawk" in Source Serif 4, then the burger, whose panel and behaviour are
-   unchanged. Every pre-login page gets it. (Since landing on phones v1, 26 Oct, the founding offer is
-   the strip ABOVE this bar, `FoundingStrip`; the pill that sat in the bar is deleted.)
+   unchanged. Every pre-login page gets it. (Since landing on phones v4, 26 Oct, the bar's right side is
+   one tinted pill, `.mk-lg` — "Log in", or "Open dashboard" signed in; v1's founding strip and the
+   pill that sat in the bar before it are both deleted.)
    ⚠️ DECLARED AFTER THE 600 BLOCK, AND THAT ORDER IS LOAD-BEARING: it UNDOES that block's wrap (the
    row is the mark and the burger, so it fits at 320+), and both are
    single-class media rules at equal specificity, so the later one wins.
@@ -580,29 +581,19 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   .mk-sheet:has(.mk-hp) { border-top-left-radius: 0; border-top-right-radius: 0; }
 }
 
-/* The founding strip (phones only; landing on phones v1, ref design-refs/landing-mobile-v1.html
-   `.fs.fsC`). A 40px band in a lighter navy than the bar, above it and in flow, so it scrolls away
-   while the bar stays stuck. Every value is the ref's. The pill it replaced (`.mk-navpill`) is gone.
-   ⚠️ EACH PART DECLARES ITS OWN FAMILY: `brand.tsx` gives every bare `span` the app's body face.
-   ⚠️ TEXT ON NAVY IS WHITE, and the count's pink is the one exception the ref draws. */
-.mk-fs { display: none; }
+/* "Log in" on phones (landing on phones v4, 26 Oct; ref design-refs/landing-mobile-v4.html `.lg`): a
+   tinted pill on the ink bar — white text, white at 10%, no outline and no underline in any state. The
+   same pill holds "Open dashboard" for a signed-in visitor. v1's founding strip above the bar is gone.
+   ⚠️ IT DECLARES ITS FAMILY: `brand.tsx` gives every bare `button` the app's body face. */
+.mk-lg { display: none; }
 @media (max-width: 760px) {
-  .mk-fs {
-    display: flex; align-items: center; gap: 10px; height: 40px; box-sizing: border-box; padding: 0 14px;
-    flex: none; white-space: nowrap; background: #26324a; color: #fff; text-decoration: none;
-    font: 400 14px/1 var(--mk-f-serif);
+  .mk-lg {
+    display: inline-flex; align-items: center; height: 36px; box-sizing: border-box; padding: 0 14px;
+    border: 0; border-radius: 18px; background: rgba(255, 255, 255, .1); color: #fff; cursor: pointer;
+    font: 500 15px/1 var(--mk-f-sans); text-decoration: none; white-space: nowrap;
   }
-  .mk-fs-t { font: 600 14px/1 var(--mk-f-serif); color: #fff; }
-  .mk-fs-tr {
-    flex: 1; min-width: 40px; height: 6px; position: relative; border-radius: 999px;
-    background: rgba(255, 255, 255, .14);
-  }
-  .mk-fs-tr b { position: absolute; left: 0; top: 0; bottom: 0; min-width: 6px; border-radius: 999px; background: #e8b4a3; }
-  .mk-fs-n {
-    font: 500 12px/1 var(--mk-f-mono); letter-spacing: .02em; color: #e8b4a3;
-    font-variant-numeric: tabular-nums;
-  }
-  .mk-fs:focus-visible { outline: 2px solid #e8b4a3; outline-offset: -2px; }
+  .mk-lg:hover, .mk-lg:focus, .mk-lg:active { text-decoration: none; color: #fff; }
+  .mk-lg:focus-visible { outline: 2px solid #e8b4a3; outline-offset: 2px; }
 }
 
 /* ── The sheet: one light surface between the ink nav and the ink footer ──
@@ -2925,44 +2916,36 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
    report: two of its captions still meet the bar). */
 @media (max-width: 760px) and (max-height: 660px) { .mk-s3 li:nth-child(3) { display: none; } }
 
-/* The closing beat: on the light ground, 55svh tall, snapping under the bar, with the top of the navy
-   vision showing beneath it. */
-.mk-tl {
-  height: 55svh; box-sizing: border-box; padding: 7svh 24px 0; text-align: center;
-  scroll-snap-align: start; scroll-margin-top: var(--mk-nav-h);
-}
-.mk-tl .mk-tl1 { margin: 30px 0 10px; font: 400 34px/1.1 var(--mk-f-display); color: #1c130f; }
-.mk-tl .mk-tl2 { margin: 0 auto; max-width: 280px; font: 400 17px/1.5 var(--mk-f-serif); color: rgba(28, 19, 15, .75); }
-.mk-tla { display: block; margin-top: 20px; font: 400 24px/1 var(--mk-f-serif); color: var(--mk-rust); }
-
-/* The page snaps only while the story is on it (phones, the landing page), and only to the captions and
-   the beat. `proximity`: a scroll that ends far from them is left where it is. */
+/* The page snaps only while the story is on it (phones, the landing page), and only to the six
+   captions (v4 folded v3's closing beat into the vision). `proximity`: a scroll that ends far from them is left where it is. */
 @media (max-width: 760px) { html:has(.mk-story) { scroll-snap-type: y proximity; } }
 
-/* The vision on navy: the page's one swipe carousel. Text on navy is white; the label is pink. */
-.mk-vision.mk-vision--navy { background: #1b2433; margin-top: 0; padding: 36px 0 30px; }
-.mk-vision--navy .mk-vk {
-  margin: 0 22px 18px; font: 500 11px/1 var(--mk-f-mono) !important; letter-spacing: .16em;
-  text-transform: uppercase; color: #e8b4a3;
+/* The vision on navy (v4, ref landing-mobile-v4.html `.nv`, `.nk`, `.nl`, `.vbf`, `.vbr`/`.vbt`):
+   rounded top corners, 6px up into the story's foot, the heading and the lead, ONE cream frame whose
+   pictures cross-fade, and the line carousel beneath it. Text on navy is white; the active dot pink. */
+.mk-vision.mk-vision--navy { background: #1b2433; color: #fff; margin-top: -6px; padding: 40px 0 30px; border-radius: 26px 26px 0 0; }
+.mk-vision--navy .mk-nk { margin: 0 24px 10px; font: 400 32px/1.1 var(--mk-f-display) !important; color: #fff; }
+.mk-vision--navy .mk-nl { margin: 0 24px 26px; max-width: 320px; font: 400 17px/1.5 var(--mk-f-serif); color: rgba(255, 255, 255, .78); }
+.mk-vbf { position: relative; height: 300px; margin: 0 24px; background: #f4f1ea; border-radius: 20px; overflow: hidden; }
+.mk-vbf img {
+  position: absolute; inset: 20px; width: calc(100% - 40px); height: calc(100% - 40px); max-width: none;
+  object-fit: contain; opacity: 0; transition: opacity .45s;
 }
+.mk-vbf img.mk-on { opacity: 1; }
 .mk-vrail {
-  display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory;
-  padding: 0 24px 8px; margin: 0; scrollbar-width: none; overscroll-behavior-x: contain;
+  display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory;
+  padding: 0 24px 6px; margin: 18px 0 0; scrollbar-width: none; overscroll-behavior-x: contain;
 }
 .mk-vrail::-webkit-scrollbar { display: none; }
 .mk-vrail:focus-visible { outline: 2px solid #e8b4a3; outline-offset: 2px; }
-.mk-vn { flex: 0 0 320px; scroll-snap-align: center; }
-.mk-vn img {
-  display: block; width: 100%; height: 240px; max-width: none; object-fit: contain; box-sizing: border-box;
-  background: #f4f1ea; border-radius: 18px; padding: 18px;
-}
-.mk-vn .mk-vnh3 { margin: 18px 0 8px; font: 400 26px/1.15 var(--mk-f-display) !important; color: #fff; }
-.mk-vn p { margin: 0; font: 400 15.5px/1.5 var(--mk-f-serif); color: rgba(255, 255, 255, .78); }
+.mk-vbt { flex: 0 0 330px; scroll-snap-align: center; }
+.mk-vbt .mk-vbth3 { margin: 0 0 8px; font: 400 28px/1.12 var(--mk-f-display) !important; color: #fff; }
+.mk-vbt p { margin: 0; font: 400 16px/1.5 var(--mk-f-serif); color: rgba(255, 255, 255, .75); }
 .mk-vdots { display: flex; justify-content: center; gap: 6px; margin: 14px 0 6px; }
 .mk-vdots i { width: 6px; height: 6px; border-radius: 3px; background: rgba(255, 255, 255, .22); transition: width .2s, background .2s; }
 .mk-vdots i.mk-on { width: 18px; background: #e8b4a3; }
 .mk-vlink {
-  display: inline-block; margin: 16px 22px 0; font: 500 15px/1 var(--mk-f-serif); color: #fff;
+  display: inline-block; margin: 14px 24px 0; font: 500 15px/1 var(--mk-f-serif); color: #fff;
   text-decoration: underline; text-decoration-color: #e8b4a3; text-underline-offset: 6px; text-decoration-thickness: 1.5px;
 }
 
@@ -3036,6 +3019,6 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 /* ⚠️ AFTER THE RULES IT OVERRIDES: a media query confers no specificity, so an earlier reduced-motion
    block would lose to the story's, the carousel's and the join bar's rules on source order. */
 @media (prefers-reduced-motion: reduce) {
-  .mk-spimg img, .mk-s3, .mk-spbar i, .mk-vdots i, .mk-jbar { transition: none; }
+  .mk-spimg img, .mk-s3, .mk-spbar i, .mk-vdots i, .mk-vbf img, .mk-jbar { transition: none; }
   html:has(.mk-story) { scroll-snap-type: none; }
 }

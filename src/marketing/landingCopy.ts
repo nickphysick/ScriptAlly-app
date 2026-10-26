@@ -309,9 +309,6 @@ export const navPlacesLeft = (left: number) => `${left} places left`;
 /** "63 places left" from the two figures the endpoint answered with: /pricing's counter line.
  *  A builder for the reason the two above are — no subtraction at a render site, and never below 0. */
 export const foundingPlacesLeftLabel = (claimed: number, cap: number) => navPlacesLeft(Math.max(0, cap - claimed));
-/** The founding strip's count on phones (landing on phones v1): "48 left". The strip's screen-reader
-    line is still `navPlacesLeft`, the whole phrase. */
-export const stripPlacesLeft = (left: number) => `${left} left`;
 /** The desktop hero's places counter (v4.1): the number in bold, then this; and its spoken label. */
 export const HERO_PLACES_REST = " places left";
 export const heroPlacesLabel = (left: number, cap: number) => `${left} of ${cap} founding places left`;
@@ -476,23 +473,22 @@ export const FEATURE_STORY: FeatureCard[] = [
     points: ["From a spreadsheet, notes or memory", "Smart Import sets it up for you", "Or start fresh in minutes"] },
 ];
 
-/* The closing beat between the story and the vision. */
-export const STORY_MORE_HEADING = "And so much more.";
-export const STORY_MORE_LINE = "That's QueryHawk, your smart querying companion. And here's why we built it:";
-
-/* The vision on navy: the label, the three points' phone bodies (keyed to `VISION_POINTS`, whose
-   headings are shared — "Make querying straightforward." included), and the way out to /about. */
-export const VISION_NAVY_LABEL = "Our vision is simple";
-export const VISION_NAVY_ARIA = "Our vision, swipe across";
+/* The vision on navy (landing on phones v4, ref landing-mobile-v4.html `.nv`): v3's closing beat folded
+   into its top — the heading and the lead — then one frame and the three lines you swipe, each a
+   point's short line keyed to `VISION_POINTS` (whose headings are shared — "Make querying
+   straightforward." included), and the way out to /about. */
+export const VISION_NAVY_HEADING = "And so much more.";
+export const VISION_NAVY_LEAD = "That's QueryHawk, your smart querying companion. And here are the principles we built it on:";
+export const VISION_NAVY_ARIA = "Our principles, swipe across";
 export const VISION_NAVY: Record<string, string> = {
-  stories: "A captivating story should never be lost to a sub-par querying campaign. There's a dangerous gap between writing and querying. QueryHawk bridges it.",
-  simple: "Stop shooting from the hip. Everything you need to make targeted decisions at the right time.",
-  write: "Less time trawling through spreadsheets, more time doing what you love.",
+  stories: "A captivating story should never be lost to a sub-par querying campaign.",
+  simple: "Everything you need to make the right call at the right time.",
+  write: "Less time in spreadsheets, more time doing what you love.",
 };
 export const VISION_NAVY_LINK = "Read our story →";
 
 /* The join bar that follows a reader down the landing page on phones. Its count's words are
-   `navPlacesLeft`, so the bar and the strip's screen-reader line say it the same way. */
+   `navPlacesLeft`, the same phrase the other places-left lines use. */
 export const JOIN_BAR_CTA = "Join";
 
 /* The closing founding card (phones; it replaces the founding band there). The pill is the band's own

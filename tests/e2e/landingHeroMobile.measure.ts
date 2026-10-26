@@ -11,8 +11,8 @@
  *        radius, and the hero is still in the DOM, sticky, behind it
  *   HM3  sign-up: after the story's FIRST run, unscrolled, the sign-up shows and is a FoundingSignup;
  *        scrolled first, it never appears
- *   HM4  counter (rewritten, landing on phones v1): the founding STRIP counts down from the cap to the
- *        places left and its fill is the share taken; no count, no number
+ *   HM4  RETIRED (landing on phones v4): the phone bar carries no counter now — the join bar and the
+ *        closing card do (landingMobileV2 LV4, landingMobileV1 LM4).
  *   HM5  copy: "No more winging it." is on the rendered page exactly once, at 390 and at 1440
  *   HM6  reduced motion (phones): the static end state, footer under the grown drawer, nothing moving
  *   HM7  phones draw no cast shadow; the fly-past is the versioned file, flown once along its curve
@@ -58,7 +58,6 @@ const CSS_BREAKS: Record<string, string> = {
   HM1: ".mk-hc-pile--phone{transform:translate(-560px,30px) scale(.8)!important}",
   HM2: ".mk-hp-stage{position:relative!important}",
   HM3: ".mk-hp-sheet--grown .mk-hp-su{visibility:hidden!important;max-height:0!important}",
-  HM4: ".mk-fs-tr b{width:80%!important}",
   HM6: ".mk-hp-fly{display:block!important}",
   HM1v3: ".mk-hp-hero{top:-40px!important}",
   HM16: ".mk-pillpop{margin-top:40px!important}",
@@ -178,9 +177,9 @@ test.describe("landing hero on phones", () => {
     await page.waitForTimeout(800);
     /* The drawer's resting height is at least 250 and grows on a tall phone (24 Oct), so the travel is
        read from the page: the stage less the drawer as it actually rests. */
-    /* REWRITTEN (landing on phones v1, 26 Oct): the founding strip sits above the bar in flow, so it
-       scrolls away first — the travel to the header's foot is the strip's height longer. */
-    const run = await page.evaluate(() => window.innerHeight - document.querySelector(".mk-nav")!.getBoundingClientRect().height + parseFloat(getComputedStyle(document.querySelector(".mk-hp-sheet")!).marginTop) + (document.querySelector<HTMLElement>(".mk-fs")?.offsetHeight ?? 0));
+    /* (landing on phones v4, 26 Oct: the founding strip above the bar is gone, so the travel is again
+       the stage less the resting drawer.) */
+    const run = await page.evaluate(() => window.innerHeight - document.querySelector(".mk-nav")!.getBoundingClientRect().height + parseFloat(getComputedStyle(document.querySelector(".mk-hp-sheet")!).marginTop));
     expect(run, "the travel is the stage less the resting drawer").toBeGreaterThan(400);
     await page.evaluate((y) => window.scrollTo(0, y), run);
     await page.waitForTimeout(300);
@@ -242,42 +241,6 @@ test.describe("landing hero on phones", () => {
 
   /* REWRITTEN (v2 P4): the number counts DOWN from the cap to the places left, never up from 0 —
      sampled through the run, every reading lies between them and none rises. */
-  /* REWRITTEN (landing on phones v1, 26 Oct): the pill and its ten segments are gone; the counter is
-     the founding strip above the bar — "N left" counting down, and a fill for the share taken. */
-  test("HM4 counter: the strip counts down from 50 to 36 left, its fill the share taken; no count, no number", async ({ page }) => {
-    await open(page, { width: 390, height: 844 }, { count: { claimed: 14, cap: 50 } });
-    const seen: number[] = [];
-    for (let i = 0; i < 14; i++) {
-      const t = await page.evaluate(() => (document.querySelector(".mk-fs-n") as HTMLElement | null)?.innerText ?? "");
-      const n = Number(/^(\d+) left$/.exec(t)?.[1]);
-      if (Number.isFinite(n)) seen.push(n);
-      await page.waitForTimeout(150);
-    }
-    console.log("HM4 run", seen.join(" "));
-    expect(seen.length, "population: the counter was read through its run").toBeGreaterThan(8);
-    expect(seen[0], "it starts at the cap, or on its way down from it").toBeGreaterThan(36);
-    for (let i = 1; i < seen.length; i++) expect(seen[i], `reading ${i} never rises`).toBeLessThanOrEqual(seen[i - 1]);
-    expect(Math.min(...seen), "and never goes below the places left").toBeGreaterThanOrEqual(36);
-    await page.waitForTimeout(600); // the count is over by 2.0s
-    const r = await page.evaluate(() => {
-      const tr = document.querySelector(".mk-fs-tr")!.getBoundingClientRect().width;
-      const b = document.querySelector(".mk-fs-tr b")!.getBoundingClientRect().width;
-      return { n: (document.querySelector(".mk-fs-n") as HTMLElement).innerText, tr, b, sr: document.querySelector(".mk-fs .mk-sr")?.textContent };
-    });
-    console.log("HM4 live", JSON.stringify(r));
-    expect(r.n).toBe("36 left");
-    expect(r.sr, "a reader hears the whole phrase").toBe("36 places left");
-    expect(Math.abs(r.b - Math.max(6, r.tr * 14 / 50)), "the fill is the share taken").toBeLessThanOrEqual(1);
-    await open(page, { width: 390, height: 844 }, { count: null });
-    await page.waitForTimeout(1500);
-    const n = await page.evaluate(() => ({
-      text: (document.querySelector(".mk-fs") as HTMLElement).innerText.trim(),
-      track: !!document.querySelector(".mk-fs-tr"),
-    }));
-    console.log("HM4 none", JSON.stringify(n));
-    expect(n.text, "no count: the words only").toBe("Become a founding writer");
-    expect(n.track, "and no track").toBe(false);
-  });
 
   test("HM5 copy: the phrase is on the rendered page exactly once, at 390 and 1440", async ({ page }) => {
     for (const vp of [{ width: 390, height: 844 }, { width: 1440, height: 900 }]) {

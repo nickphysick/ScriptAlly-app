@@ -15,7 +15,6 @@ import "./marketing.css";
 import { marketingNavState, MarketingNavUser } from "./marketingNav";
 import { BRAND_MARK, artUrl } from "./brandArt";
 import { MarketingFooter } from "./MarketingFooter";
-import { FoundingStrip } from "./FoundingStrip";
 import { usePhone } from "./usePhone";
 
 /* ── The brand artwork: the hawk and the drawn wordmark ──
@@ -143,9 +142,8 @@ export const MarketingShell: React.FC<{
   }, [menuOpen, closeMenu]);
 
   const nav = marketingNavState(user);
-  /* At and below 760px (landing on phones v1, 26 Oct) the anon CTA is the founding STRIP above the
-     bar, with its live places-left count; the bar itself is the logo and the menu, nothing else.
-     Mounted only there, so the count-down starts when the strip is actually on screen. */
+  /* At and below 760px the bar is the logo, one tinted pill ("Log in", or "Open dashboard" signed in)
+     and the menu (landing on phones v4, 26 Oct; v1's founding strip above the bar is gone). */
   const phone = usePhone();
 
   const toFeatures = () => {
@@ -175,9 +173,6 @@ export const MarketingShell: React.FC<{
           the first in-flow boxes on the page. */}
       <div className="mk-navsentinel mk-navsentinel--condense" ref={condenseRef} aria-hidden="true" />
       <div className="mk-navsentinel mk-navsentinel--release" ref={releaseRef} aria-hidden="true" />
-      {/* ⚠️ IN FLOW, ABOVE THE STICKY BAR, so it scrolls away while the bar stays stuck at the top.
-          It is after the two sentinels, which must stay first in flow (see above). */}
-      {phone && nav.mode === "anon" && <FoundingStrip path={path} onNavigate={onNavigate} />}
       <div className={"mk-navwrap" + (scrolled ? " mk-scrolled" : "")}>
         <nav className="mk-nav" aria-label="Marketing">
           <button type="button" className="mk-brand mk-brand-link" onClick={() => onNavigate("landing")} aria-label="QueryHawk home">
@@ -206,17 +201,25 @@ export const MarketingShell: React.FC<{
             ))}
           </div>
           <div className="mk-navright">
+            {/* Phones (landing on phones v4, 26 Oct): one tinted pill — "Log in" to the sign-in route the
+                desktop's Log in uses, or, signed in, the desktop's "Open dashboard". The founding offer
+                is the drawer's sign-up, the join bar and the closing card; the strip is gone. */}
+            {phone ? (
+              nav.mode === "anon" ? (
+                <button type="button" className="mk-lg" onClick={() => { window.location.hash = "#/login"; }}>Log in</button>
+              ) : (
+                <button type="button" className="mk-lg" onClick={() => onNavigate("dashboard")}>{nav.primaryLabel}</button>
+              )
+            ) : (<>
             {nav.showLogIn && (
               <button type="button" className="mk-login" onClick={() => { window.location.hash = "#/login"; }}>
                 Log in
               </button>
             )}
             {nav.mode === "anon" ? (
-              phone ? null : (
-                <button type="button" className="mk-btn mk-btn--cream" onClick={() => onNavigate("founders")}>
-                  {nav.primaryLabel}
-                </button>
-              )
+              <button type="button" className="mk-btn mk-btn--cream" onClick={() => onNavigate("founders")}>
+                {nav.primaryLabel}
+              </button>
             ) : (
               <>
                 <button type="button" className="mk-btn mk-btn--cream" onClick={() => onNavigate("dashboard")}>
@@ -225,6 +228,7 @@ export const MarketingShell: React.FC<{
                 <span className="mk-avatar" aria-hidden="true">{nav.avatarInitial}</span>
               </>
             )}
+            </>)}
           </div>
           <button
             type="button"

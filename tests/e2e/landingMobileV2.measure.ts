@@ -7,8 +7,8 @@
  *       is no longer stuck and sits above the vision
  *   LV2 no swipe: the feature section holds no horizontal scroller, and the page body never scrolls
  *       sideways at 390, 375 or 360
- *   LV3 vision: the section is rgb(27, 36, 51); it holds exactly one horizontal carousel of three
- *       cards; scrolling to card 2 makes dot 2 the active one (an 18px pink pill); the headings are white
+ *   LV3 RETIRED (landing on phones v4): the navy carousel of cards is now one frame with lines you
+ *       swipe — see landingMobileV4's LT3.
  *   LV4 join bar: hidden while the hero is on screen; visible over the features; hidden while the
  *       closing card's top is above 85% of the viewport; it takes the reader to the founding sign-up;
  *       its button is rgb(232, 180, 163) with black text; no number before the live figure; absent on
@@ -37,12 +37,11 @@ const CSS_BREAKS: Record<string, string> = {
   LV1e: ".mk-story{display:contents!important}",
   LV2: ".mk-spsteps{display:flex!important;overflow-x:auto!important}.mk-s3{flex:0 0 300px!important}",
   LV2b: "html,body{overflow-x:visible!important}.mk-sheet{overflow:visible!important}.mk-s3{width:600px!important}",
-  LV3: ".mk-vision.mk-vision--navy{background:#ffffff!important}",
-  LV3b: ".mk-vdots i.mk-on{width:6px!important;background:rgba(255,255,255,.22)!important}",
-  LV3c: ".mk-vn .mk-vnh3{color:#1c130f!important}",
-  LV3d: ".mk-vrail{overflow-x:visible!important}",
   LV4: ".mk-jbar{transform:none!important;opacity:1!important}",
   LV4c: ".mk-jbj{background:#2a3a52!important;color:#ffffff!important}",
+  /* The drawer's real travel made longer than the travel HeroPhone measured (a stage taller than the
+     one it sized), so its corners square off and the grab handle stops short of the real bar. */
+  LV5: ".mk-hp-stage{height:900px!important}",
   LV6: ".mk-spimg img{transition:opacity .45s!important}",
   LV6b: ".mk-jbar{transition:transform .35s!important}",
 };
@@ -81,11 +80,6 @@ async function open(page: Page, vp: { width: number; height: number }, o: { rout
   if (MUTATE === "LV4f") await page.addInitScript(() => {
     /* The bar put on every page. */
     setInterval(() => { const s = document.querySelector(".mk-scope"); if (location.pathname !== "/" && s && !s.querySelector(".mk-jbar")) { const a = document.createElement("a"); a.className = "mk-jbar"; s.appendChild(a); } }, 50);
-  });
-  if (MUTATE === "LV5") await page.addInitScript(() => {
-    /* The drawer's travel measured without the strip, as before D1. */
-    const d = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "offsetHeight")!;
-    Object.defineProperty(HTMLElement.prototype, "offsetHeight", { configurable: true, get(this: HTMLElement) { return this.classList?.contains("mk-fs") ? 0 : d.get!.call(this); } });
   });
   await page.goto(o.route ?? "/", { waitUntil: "commit" });
   await page.waitForSelector(".mk-navwrap", { state: "attached" });
@@ -127,7 +121,9 @@ test.describe("landing on phones v2", () => {
       const after = await page.evaluate(() => ({ top: document.querySelector(".mk-spimg")!.getBoundingClientRect().top, bottom: document.querySelector(".mk-spimg")!.getBoundingClientRect().bottom, vision: document.querySelector(".mk-vision--navy")!.getBoundingClientRect().top }));
       console.log(`LV1 @${vp.width} after`, JSON.stringify(after));
       expect(after.top, `@${vp.width}: after the story the panel has let go of the bar`).toBeLessThan(59);
-      expect(after.bottom, `@${vp.width}: and sits above the vision`).toBeLessThanOrEqual(after.vision + 1);
+      /* REWRITTEN (landing on phones v4, 26 Oct): the vision rises 6px into the story's foot (the ref's
+         `.nv{margin-top:-6px}`), so the panel may end up to 6px below the vision's top — never more. */
+      expect(after.bottom, `@${vp.width}: and sits above the vision, bar the ref's 6px tuck`).toBeLessThanOrEqual(after.vision + 6 + 1);
     }
   });
 
@@ -151,28 +147,6 @@ test.describe("landing on phones v2", () => {
     }
   });
 
-  test("LV3 vision: navy, one carousel of three, card 2 lights dot 2, white headings", async ({ page }) => {
-    test.setTimeout(60000);
-    await open(page, P390);
-    await page.waitForSelector(".mk-vision--navy", { state: "attached" });
-    await scrollTo(page, ".mk-vision--navy", 0, 0.1); await page.waitForTimeout(400);
-    const r = await page.evaluate(() => {
-      const v = document.querySelector<HTMLElement>(".mk-vision--navy")!;
-      const carousels = Array.from(v.querySelectorAll<HTMLElement>("*")).filter((e) => /auto|scroll/.test(getComputedStyle(e).overflowX) && e.scrollWidth > e.clientWidth + 1);
-      return { bg: getComputedStyle(v).backgroundColor, carousels: carousels.length, cards: carousels[0]?.children.length ?? 0, heads: Array.from(v.querySelectorAll(".mk-vnh3")).map((h) => getComputedStyle(h).color) };
-    });
-    console.log("LV3", JSON.stringify(r));
-    expect(r.bg).toBe("rgb(27, 36, 51)");
-    expect(r.carousels, "exactly one horizontal carousel").toBe(1);
-    expect(r.cards, "of three cards").toBe(3);
-    expect(r.heads, "the headings are white").toEqual(["rgb(255, 255, 255)", "rgb(255, 255, 255)", "rgb(255, 255, 255)"]);
-    await page.evaluate(() => { const r = document.querySelector<HTMLElement>(".mk-vrail")!, c = r.children[1] as HTMLElement; r.scrollLeft = c.offsetLeft - (r.clientWidth - c.offsetWidth) / 2; });
-    await page.waitForTimeout(500);
-    const dots = await page.evaluate(() => Array.from(document.querySelectorAll(".mk-vdots i")).map((d) => [d.getBoundingClientRect().width, getComputedStyle(d).backgroundColor]));
-    console.log("LV3 dots", JSON.stringify(dots));
-    expect(dots.length, "population: three dots").toBe(3);
-    expect(dots.map((d, i) => (d[0] === 18 && d[1] === "rgb(232, 180, 163)" ? i : -1)).filter((i) => i >= 0), "dot 2 is the active one, an 18px pink pill").toEqual([1]);
-  });
 
   test("LV4 join bar: hidden over the hero, shown over the features, hidden with the card; pink Join; live or absent; landing only", async ({ page }) => {
     test.setTimeout(120000);
