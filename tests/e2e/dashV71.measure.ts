@@ -21,6 +21,7 @@
  */
 import { test, expect, type Page, type BrowserContext } from "@playwright/test";
 import { mkdirSync, writeFileSync } from "node:fs";
+import { execSync } from "node:child_process";
 import { doc, getDoc, updateDoc, deleteField } from "firebase/firestore";
 import { openRoute } from "./measure";
 import { readPng } from "./pngPixels";
@@ -195,7 +196,20 @@ const readFit = (page: Page) => page.evaluate(() => {
   const h = fw?.querySelector<HTMLElement>('[data-d71="fw-h"]') ?? null;
   const shown = (s: string) => { const e = fw?.querySelector<HTMLElement>(s); return !!e && e.getBoundingClientRect().height > 0 && getComputedStyle(e).display !== "none"; };
   const scroller = document.querySelector<HTMLElement>(".ws-wbody");
+  /* cut text: a hoop legend row, or a part of the task card's head, that overflows its own box or runs
+     past its card's edge (found at 1100×800: "1 OF 3" off the task card, "Querying" clipped) */
+  const cut: string[] = [];
+  let cutN = 0;
+  for (const el of document.querySelectorAll<HTMLElement>('.d60-hl li, [data-d71="head"] > *, [data-d71="pos"] > *')) {
+    const r = el.getBoundingClientRect();
+    if (r.width <= 0 || getComputedStyle(el).display === "none") continue;
+    cutN += 1;
+    const card = el.closest<HTMLElement>(".d60-card, [data-d71='task']")?.getBoundingClientRect();
+    const over = el.scrollWidth > el.clientWidth + 1 && el.tagName !== "BUTTON";
+    if (over || (card && (r.right > card.right - 0.5 || r.left < card.left + 0.5))) cut.push(`${el.className || el.tagName} "${(el.textContent ?? "").trim().slice(0, 24)}"`);
+  }
   return {
+    cut, cutN,
     closed: box(q('[data-d60="closed-hoop"]')), agents: box(q('[data-d60="agents-hoop"]')), fw: box(fw), tab: tb, hit,
     vw: window.innerWidth, vh: window.innerHeight,
     n, escapes: escapes.slice(0, 5),
@@ -229,6 +243,7 @@ test("DB71 L2 · L3 · F3 · G1 — bottoms in line, the tab on screen, the card
     L.check("F3", `${w} the art's whole box is inside the body`, !!f.img && !!f.body && f.img.t >= f.body.t - 0.5 && f.img.b <= f.body.b + 0.5 && f.img.l >= f.body.l - 0.5 && f.img.h > 20, JSON.stringify({ img: f.img, body: f.body }));
     L.check("F3", `${w} the heading never overflows`, f.headingFits === true, String(f.headingFits));
     if (vp.height <= 760) L.check("F3", `${w} short window: the line hidden, the faces shown`, !f.line && f.faces, `line ${f.line} · faces ${f.faces}`);
+    L.check("G1", `${w} nothing cut in the hoop legends or the task card's head`, f.cutN >= 6 && f.cut.length === 0, `${f.cutN} parts · ${f.cut.join(" | ") || "none cut"}`);
     L.check("G1", `${w} one screen: no vertical scroll`, !!f.scroller && f.scroller.sh <= f.scroller.ch, JSON.stringify(f.scroller));
     L.check("G1", `${w} no horizontal overflow`, !!f.scroller && f.scroller.sw <= f.scroller.cw && f.doc.sw <= f.doc.cw, JSON.stringify({ s: f.scroller, d: f.doc }));
   }
@@ -237,7 +252,7 @@ test("DB71 L2 · L3 · F3 · G1 — bottoms in line, the tab on screen, the card
   const m = await readFit(page);
   L.check("L3", "768x800 the tab is inside the viewport", !!m.tab && m.tab.l >= 0 && m.tab.r <= m.vw && m.tab.b <= m.vh + 0.5, JSON.stringify(m.tab));
   L.check("L3", "768x800 nothing covers the tab's centre", m.hit, String(m.hit));
-  L.done(SIZES.length * 11);
+  L.done(SIZES.length * 12);
 });
 
 /* ── L4 — no card's shadow is clipped ────────────────────────────────────────────────────────── */
@@ -625,4 +640,33 @@ test("DB71 F1 · F2 — the founding card: copy, the pulse, the one feedback pan
   await page.waitForTimeout(400);
   await shot(page, "founding-sent");
   L.done(21);
+});
+
+/* ── L3 (first use) — before the first query the founding card ends clear of the tab ─────────────── */
+
+test.describe("first use", () => {
+  /* the pre-query manuscript exists only while DB60's own seeder holds it, and is cleaned after */
+  const seed = (mode: "" | "--clean") => execSync(`node tests/e2e/seedDash60.mjs ${mode}`, { stdio: "pipe" }).toString().trim();
+  test.beforeAll(() => { seed(""); });
+  test.afterAll(() => { seed("--clean"); });
+  test("DB71 L3 (first use) — the founding card is never under the Activity feed tab", async ({ page }) => {
+    test.setTimeout(300_000);
+    const L = new Ledger("first-use");
+    for (const vp of [V1512, { width: 1440, height: 900 }, { width: 1280, height: 800 }, { width: 1920, height: 1080 }]) {
+      for (const flags of [{ __SA_DASH_NO_AGENTS: true }, { __SA_DASH_NO_AGENTS: undefined }]) {
+        await openDash(page, vp, flags, PRE);
+        const r = await page.evaluate(() => {
+          const b = (s: string) => { const e = [...document.querySelectorAll<HTMLElement>(s)].find((x) => x.getBoundingClientRect().height > 0); if (!e) return null; const k = e.getBoundingClientRect(); return { l: k.left, r: k.right, t: k.top, b: k.bottom }; };
+          return { mode: document.querySelector<HTMLElement>(".d58")?.dataset.mode ?? null, fw: b('[data-d71="fw"]'), tab: b('[data-d58="tab"]') };
+        });
+        const w = `${tag(vp)} ${flags.__SA_DASH_NO_AGENTS ? "day one" : "agents, no queries"}`;
+        L.check("L3", `${w} population: the first-use page, the card and the tab`, r.mode === "pre" && !!r.fw && !!r.tab, JSON.stringify(r));
+        if (r.fw && r.tab) {
+          const overlapX = r.fw.r > r.tab.l && r.fw.l < r.tab.r;
+          L.check("L3", `${w} the card ends above the tab`, !overlapX || r.fw.b <= r.tab.t - 8, `card bottom ${r.fw.b.toFixed(1)} · tab top ${r.tab.t.toFixed(1)} · gap ${(r.tab.t - r.fw.b).toFixed(1)}`);
+        }
+      }
+    }
+    L.done(16);
+  });
 });
