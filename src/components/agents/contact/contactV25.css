@@ -114,8 +114,29 @@
   .clv-group[data-v25] .cl24-sheet[data-s1440] :is(.cl24-cl, .cl24-fslb) { display: none; }
   .clv-group[data-v25] .cl24-sheet[data-s1440] .cl24-fs { width: 34px; padding: 0; justify-content: center; }
 
-  /* D3 · the full-screen cream row: its words in Special Elite, upright (its sort pill already drops the prefix) */
+  /* D3 · the full-screen cream row: its words in Special Elite, upright, and its sort pill drops the prefix at every
+     width (v24 dropped it at a window of 1440 or less only) */
   .cl24-ftool :is(button, input, b, span, em, i, small, label), .cl24-ftool input::placeholder {
     font-family: var(--sp-type) !important; font-style: normal !important;
+  }
+  .cl24-ftool .cl24-sort .sc-sby { display: none; }
+}
+
+/* ══ Part E · full screen, capped at 1600 ══════════════════════════════════════════════════════════════════════════
+   The band and the cream row stay full-bleed (their grounds span the sheet); their CONTENTS move in by the one gutter
+   G = max(0, (S − 1600) / 2), and the address book itself is at most 1600 wide, centred, a hairline each side, on the
+   sheet's #f2eee8. Below a sheet of 1600, G is 0 and nothing moves. Only above a 1440 window: at or below it the band
+   keeps v24's narrow insets, and a sheet that narrow cannot exceed 1600 anyway. */
+@media (min-width: 1441px) {
+  .cl24-ab { --cl25-g: max(0px, calc((var(--hsheet-w) - 1600px) / 2)); }
+  .cl24-ab .cl24-fband { padding-left: calc(var(--cl25-g) + 250px); padding-right: calc(var(--cl25-g) + 22px); }
+  .cl24-ab .cl24-ftool { padding-left: calc(var(--cl25-g) + 250px); padding-right: calc(var(--cl25-g) + 14px); }
+  .cl24-ab .cl24-fart { left: calc(var(--cl25-g) + 22px); }
+  .cl24-ab .cl24-fband.tight { padding-left: calc(var(--cl25-g) + 200px); }
+  .cl24-ab.tight .cl24-ftool { padding-left: calc(var(--cl25-g) + 200px); }
+  .cl24-ab.tight .cl24-fart { left: calc(var(--cl25-g) + 16px); }
+  .cl24-ab .cl24-fsb {
+    box-sizing: border-box; width: 100%; max-width: 1600px; margin: 0 auto;
+    box-shadow: -1px 0 0 rgba(28, 19, 15, 0.08), 1px 0 0 rgba(28, 19, 15, 0.08);
   }
 }
