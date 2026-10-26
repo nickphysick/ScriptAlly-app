@@ -329,6 +329,12 @@
   color: var(--d58-ink);
   white-space: nowrap;
 }
+/* the close marker's words stand above the bar: room for them, so they never meet the sentence above
+   (measured on the close card at 1512: they sat on its last line); near an end they hang from the
+   marker towards the middle instead of centring, so they never run past the card */
+.d71-task[data-kind="close"] .d71-win { margin-top: 16px; }
+.d58 .d71-cmark.is-end em { left: auto; right: -1px; transform: none; }
+.d58 .d71-cmark.is-start em { left: -1px; transform: none; }
 .d71-wlab { position: relative; height: 13px; margin-top: 6px; }
 .d58 .d71-wlab > span {
   position: absolute;
@@ -404,6 +410,7 @@
 /* a short window: the body keeps to its title and its picture */
 @media (max-height: 760px) {
   .d58 .d71-line, .d58 .d71-cmark em, .d71-wlab, .d58 .d71-then { display: none; }
+  .d71-task[data-kind="close"] .d71-win { margin-top: 0; }
   .d58 .d71-av, .d58 .d71-cal { width: 40px; height: 40px; }
   .d58 .d71-task .d71-title { font-size: 17px; }
   .d71-tb { padding: 12px 18px 4px; }

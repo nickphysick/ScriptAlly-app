@@ -37,7 +37,7 @@ const Bar: React.FC<{ m: TaskCardModel }> = ({ m }) => {
         <i className="d71-ok" data-d71="bar-solid" style={{ width: pct(b.solid) }} />
         <i className="d71-ov" data-d71="bar-over" style={{ width: pct(1 - b.solid) }} />
         {b.close != null && (
-          <span className="d71-cmark" data-d71="close-mark" style={{ left: pct(b.close) }}>
+          <span className={`d71-cmark${b.close > 0.72 ? " is-end" : b.close < 0.28 ? " is-start" : ""}`} data-d71="close-mark" style={{ left: pct(b.close) }}>
             {b.closeLabel && <em>{b.closeLabel}</em>}
           </span>
         )}

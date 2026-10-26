@@ -12,3 +12,4 @@
 {"mutation":"C4-ignore-hover","lock":"C4","exit":1,"reading":"2 red · hovered for 10s, it holds — 2 → 3"}
 {"mutation":"C5-write","lock":"C5","exit":1,"reading":"3 red · nudge nothing written — the query changed"}
 {"mutation":"F2-noted-early","lock":"F2","exit":1,"reading":"4 red · nothing says Noted before the call resolves — {\"state\":\"noted\"}"}
+{"mutation":"C2-label-room","lock":"C2","exit":1,"reading":"1 red · close: the marker's words clear the sentence and stay in the card — {\"em\":{\"l\":1232.84375,\"r\":1360.015625,\"t\":506.796875,\"b\":518.796875},\"line\":{\"l\":1053.96875,\"r\":1421,\"t\":443.046875,\"b\":512.796875},\"card\":{"}

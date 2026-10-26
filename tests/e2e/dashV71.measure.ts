@@ -61,6 +61,7 @@ const CSS_MUTATIONS: Record<string, string> = {
   "L3-tab-off": `.d59-ftab { right: -200px !important; }`,
   "L4-clip": `.d60-hoops, .d71-fwslot { overflow: hidden !important; }`,
   "C2-solid": `.d71-ok { width: 100% !important; } .d71-ov { display: none !important; }`,
+  "C2-label-room": `.d71-task[data-kind="close"] .d71-win { margin-top: 0 !important; }`,
   "C3-solid": `.d71-step.is-todo { border-style: solid !important; }`,
   "F3-art-140": `.d71-fwart img { max-height: none !important; height: 140px !important; }`,
   "G1-hoops-320": `.d58[data-mode="q"] .d60-hoops { min-height: 320px !important; }`,
@@ -358,6 +359,12 @@ test("DB71 C1 · C2 · C3 — nudge, close and send, as tabled", async ({ page }
       if (kind === "close") {
         const want = b.close != null ? b.tl + Math.min(1, Math.max(0, (b.close - b.sent) / (b.today - b.sent))) * b.tw : null;
         L.check("C2", "close: the marker sits at the threshold (±2px)", b.mark != null && want != null && Math.abs(b.mark - want) <= 2, `${b.mark} vs ${want}`);
+        /* its words: clear of the sentence above, and inside the card (found on the close card at 1512) */
+        const w2 = await page.evaluate(() => {
+          const r = (s: string) => { const e = document.querySelector(`[data-d71="task"] ${s}`); if (!e) return null; const b = e.getBoundingClientRect(); return { l: b.left, r: b.right, t: b.top, b: b.bottom }; };
+          return { em: r('[data-d71="close-mark"] em'), line: r('[data-d71="line"]'), card: r(".d71-tb") };
+        });
+        L.check("C2", "close: the marker's words clear the sentence and stay in the card", !!w2.em && !!w2.line && !!w2.card && w2.em.t >= w2.line.b && w2.em.l >= w2.card.l && w2.em.r <= w2.card.r, JSON.stringify(w2));
       }
       /* the dates are the query's own: the send is the document's, checked against Firestore */
       if (r.query) {
