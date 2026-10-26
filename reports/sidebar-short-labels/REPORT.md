@@ -140,3 +140,8 @@ those sizes.
 - **Shell suites:** the same 8 fail on this build as before, with the same messages.
 
 **Gates:** tsc clean; production build clean; vitest 660 files, 10,430 passed.
+
+**Dev deploy:** merged onto `dev/hm31-pv4-qc1492-dh41-cl24-hm32-pk26` as **223f2453**, with no conflicts.
+- **Gates on the merge:** tsc clean; build clean; vitest 661 files, 10,433 passed.
+- **Deployed** from a clean worktree. **Dev now serves `index-CshX-PZa.js`.**
+- **Smoke:** SB4 passes at all five sizes on the deployed site.

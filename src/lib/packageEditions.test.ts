@@ -183,13 +183,18 @@ describe("sentPackageName — the name as it was on the day (Nick, 28 Sep)", () 
   });
 });
 
-describe("PE2 · the rule allows a sent package's contents to change ONLY by starting its next edition", () => {
+/* ⚠️ RETARGETED (Submission packages v40, 26 Oct): editions are SWITCHED OFF. A sent package's contents never change
+   again — not with an edition, not without — so the branches that let it start (and undo) an edition are gone. The
+   fields stay validated, so packages that already hold several editions stay readable. */
+describe("PE2 · v40: a sent package's contents never change, with or without an edition", () => {
   const rules = decls(read("firestore.rules"));
   const i = rules.indexOf("match /packages/{packageId}");
   const block = rules.slice(i, rules.indexOf("match /attachments/", i));
-  it("up by exactly one, the list longer by exactly one, stamp and sample slot untouched", () => {
-    expect(block).toContain("incoming().get('edition', 1) == existing().get('edition', 1) + 1");
-    expect(block).toContain("incoming().get('editions', []).size() == existing().get('editions', [0]).size() + 1");
+  it("no branch lets the edition go up or down", () => {
+    expect(block).not.toContain("existing().get('edition', 1) + 1");
+    expect(block).not.toContain("existing().get('edition', 1) - 1");
+    /* the freeze still names every content field, the edition ones included */
+    expect(block).toContain("!incoming().diff(existing()).affectedKeys().hasAny(['queryLetterVersionId', 'synopsisVersionId', 'samplePagesVersionId', 'firstSentAt', 'bookVersionId', 'otherMaterials', 'edition', 'editions', 'extraIds'])");
   });
   it("the stale-stamp lift removes the stamp and changes nothing else", () => {
     expect(block).toMatch(/affectedKeys\(\)\.hasOnly\(\['firstSentAt'\]\)\s*&& !incoming\(\)\.keys\(\)\.hasAny\(\['firstSentAt'\]\)/);

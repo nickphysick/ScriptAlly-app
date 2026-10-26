@@ -188,7 +188,8 @@ export function usePackagesModel() {
     if (wasActive) await clearActive();
     await retirePackage(p.id);
     showToast({
-      message: wasActive ? `Retired ${p.packageName}. Its history stays, and new queries no longer start from it.` : `Retired ${p.packageName}. Its history stays.`,
+      /* v40: the ref's words */
+      message: `Retired ${p.packageName}. Its results are kept.`,
       undo: async () => { await restorePackage(p.id); if (wasActive) await setActivePackage(msId, p.id); },
     });
   };
@@ -202,7 +203,7 @@ export function usePackagesModel() {
     const ok = await deletePackage(p.id);
     if (!ok) { showToast({ message: `${p.packageName} couldn't be deleted.` }); return false; }
     showToast({
-      message: `Deleted ${p.packageName}.`,
+      message: `Deleted ${p.packageName}. It never went out, so nothing is lost.`,
       undo: async () => {
         const r = await addPackage({
           manuscriptId: p.manuscriptId, packageName: p.packageName, queryLetterVersionId: p.queryLetterVersionId,

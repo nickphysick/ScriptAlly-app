@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "L2",
+  "where": "the drawer offers New package from this",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "L2",
+  "where": "a new package was made",
+  "ok": false,
+  "detail": "[\"Draft one\",\"Old one\",\"Ready one\",\"Standard\",\"Standard 2\"]"
+ },
+ {
+  "lock": "L2",
+  "where": "…named Standard 3 (the next free number)",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "L2",
+  "where": "…copied from Standard",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "L2",
+  "where": "…and not sent",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "L2",
+  "where": "the original is byte-for-byte unchanged",
+  "ok": false,
+  "detail": "diff"
+ },
+ {
+  "lock": "L2",
+  "where": "the toast says so",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "L2",
+  "where": "the copy is the open package",
+  "ok": false,
+  "detail": "null vs undefined"
+ }
+]

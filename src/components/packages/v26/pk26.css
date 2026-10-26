@@ -127,3 +127,104 @@
 /* the figures break between their two phrases, never inside one */
 .p6 .p6-po-st .p6-po-n > .p6-nw { white-space: nowrap; font: inherit !important; }
 .p6 .p6-po-st .p6-po-n > .p6-nw > b { color: #fff; font-family: var(--sp-serif); font-weight: 600; }
+
+/* ══ v40 — what the frozen-state capture could not see ═════════════════════════════════════════════════════════ */
+/* E3: the quiet empty slot is ONE treatment for all three slots. The ref's frozen state only had an empty synopsis on
+   the workbench (and an empty letter in its brand-new state), so the capture scoped the frame to those; the ref's own
+   rule is `#pkOpen .mf .slt .mr-em`, every slot. */
+.p6 .p6-mr.p6-slt .p6-mr-em {
+  align-items: center;
+  background-color: transparent;
+  border-radius: 12px;
+  color: rgba(28,19,15,0.58);
+  display: flex;
+  flex: 1 1 0%;
+  flex-direction: column;
+  font-family: var(--sp-serif);
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  gap: 6px;
+  justify-content: center;
+  justify-items: center;
+  line-height: normal;
+  outline: 1.5px dashed rgba(28,19,15,0.14);
+  outline-offset: -1.5px;
+  padding: 18px;
+  text-align: center;
+}
+.p6 .p6-mr.p6-slt[data-slot="ver"] .p6-mr-em .p6-em-ic { border-radius: 50%; }
+.p6 .p6-mr-em .p6-em-ic > b { font: 400 14px var(--sp-type); }
+/* a Draft package's stage chip and selector mark — seen only in the brand-new state, so captured only there */
+.p6 .p6-po-st .p6-draft.p6-lc-chip {
+  align-items: center;
+  background-color: rgba(255,255,255,0.14);
+  border-radius: 999px;
+  box-shadow: none;
+  color: #fff;
+  display: flex;
+  font: 400 12px/normal var(--sp-type);
+  gap: 6px;
+  height: 26px;
+  letter-spacing: 0;
+  padding: 3px 10px;
+  text-transform: none;
+}
+.p6 .p6-pkb .p6-draft.p6-pkb-st {
+  align-items: center;
+  background-color: transparent;
+  border-radius: 50%;
+  box-shadow: currentcolor 0px 0px 0px 2px inset;
+  display: grid;
+  font-family: var(--sp-type);
+  height: 18px;
+  justify-items: center;
+  margin-left: 2px;
+  width: 18px;
+}
+/* the stepper never runs past the open package: the ref's steps are `flex: 0 0 auto`, which holds for the words its
+   frozen state shows; a draft that needs both pieces says "Add a query letter and pages", and in the app's narrower
+   sheet the third step was cut at the panel's edge. The steps may shrink and their lines wrap instead. */
+/* `!important` because the generated `.p6-lc-s:not(.p6-dn):not(.p6-on)` (0-5-0) states `flex: 0 0 auto` */
+.p6 .p6-lc .p6-lc-s { flex-shrink: 1 !important; min-width: 0 !important; }
+.p6 .p6-lc .p6-lc-s > span { min-width: 0; }
+.p6 .p6-lc-s span > b, .p6 .p6-lc-s span > small { white-space: normal; }
+.p6 .p6-lc > em { min-width: 16px; }
+
+/* F4 — a running test's card. The ref's frozen state lists no test (its seeded pair never reaches the Tests view), so
+   the capture holds nothing for these; they are the ref's own authored rules, with the prefix, and with the pill in the typewriter, sentence case (I, no
+   small mono capitals). The grid itself was captured (two columns, from the computed state). */
+.p6 .p6-tp-t .p6-tp-ts .p6-tp-ci { align-items: center; background-color: #1d4b63; border-radius: 10px; color: #f4eee5; display: grid; flex: 0 0 auto; height: 34px; justify-items: center; width: 34px; }
+.p6 .p6-tp-t { border-radius: 18px; background: #fff; overflow: hidden; box-shadow: 0 1px 2px rgba(28,19,15,.05), 0 20px 36px -28px rgba(28,19,15,.45), inset 0 0 0 1px rgba(28,19,15,.08); }
+.p6 .p6-tp-t > header { padding: 16px 18px 12px; border-bottom: 1px solid rgba(28,19,15,.07); }
+.p6 .p6-tp-t > header > b { display: block; margin-top: 8px; font: 400 19px var(--sp-type); }
+.p6 .p6-tp-t > header > small { display: block; margin-top: 3px; font: 400 14px var(--sp-serif); color: rgba(28,19,15,.65); }
+.p6 .p6-tp-t .p6-tp-st { display: inline-flex; padding: 3px 9px; border-radius: 999px; font: 400 12px var(--sp-type); letter-spacing: 0; text-transform: none; }
+.p6 .p6-tp-t .p6-tp-st.p6-run { background: #fbf3e3; color: #8a6420; }
+.p6 .p6-tp-t .p6-tp-st.p6-tie { background: #efe9e0; color: rgba(28,19,15,.6); }
+.p6 .p6-tp-t .p6-tp-st.p6-done { background: #1d4b63; color: #fff; }
+.p6 .p6-tp-t .p6-tp-tb { display: grid; grid-template-columns: 1fr 30px 1fr; align-items: center; padding: 16px 18px; }
+.p6 .p6-tp-t .p6-tp-ts { display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 12px; background: #f6f3ee; }
+.p6 .p6-tp-t .p6-tp-ts b { display: block; font: 400 15px var(--sp-type); }
+.p6 .p6-tp-t .p6-tp-ts small { font: italic 12.5px var(--sp-serif); color: rgba(28,19,15,.55); }
+.p6 .p6-tp-t .p6-tp-tv { margin-left: auto; font: 400 24px var(--sp-type); color: #1d4b63; }
+.p6 .p6-tp-t .p6-tp-tv em { font: italic 13px var(--sp-serif); color: rgba(28,19,15,.5); }
+.p6 .p6-tp-t .p6-tp-arr { text-align: center; color: rgba(28,19,15,.35); font-size: 18px; }
+.p6 .p6-tp-t > footer { padding: 0 18px 16px; font: italic 13.5px var(--sp-serif); color: rgba(28,19,15,.6); }
+.p6 .p6-tp-none { font: italic 13.5px var(--sp-serif); color: rgba(28,19,15,.45); }
+
+/* I — no small mono capitals anywhere on the page. The ref's animation still labels its packed package "READY" in 8px
+   mono capitals (an earlier layer the v40 sweep did not reach); it reads in the typewriter, sentence case, sized to
+   the 42px the chip opens to. */
+.p6.p6-new .p6-an-ph .p6-an-r { font: 400 10px/normal var(--sp-type); letter-spacing: 0; text-transform: none; }
+/* I, the material drawer's labels (its one change in v40): section headings and field labels were 9.5px mono
+   capitals; they read in the typewriter, sentence case, as the shelf drawer's headings and the slot labels do. */
+.p6-cx-drw.p6-on .p6-db > h5 { font: 400 16px/normal var(--sp-type); letter-spacing: 0; text-transform: none; }
+.p6-cx-drw.p6-on .p6-fld2 label > span { font: 400 14px/normal var(--sp-type); letter-spacing: 0; text-transform: none; color: #1c130f; }
+
+/* How it works (v40): the diagram's reduced-motion frame, the ref's own — everything shown, nothing moving */
+@media (prefers-reduced-motion: reduce) {
+  .p6-hwm .p6-hw2 * { animation: none !important; opacity: 1 !important; transform: none !important; }
+}
+/* …and it pauses on hover, as the v26 animation does, so it can be read */
+.p6-hwm .p6-hw2:hover, .p6-hwm .p6-hw2:hover * { animation-play-state: paused !important; }

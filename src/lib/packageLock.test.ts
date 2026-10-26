@@ -122,9 +122,9 @@ describe("the copy states the fact and offers the way on", () => {
     expect(LOCKED_NOTE).toBe("Locked — this package has been sent");
     /* rewritten (packages v2): LOCKED_WHY follows the card's lock line */
     expect(LOCKED_WHY).toContain("so your records stay true");
-    /* retargeted (Part B, 28 Sep): the way on is no longer "duplicate it" — an edit to a sent
-       package starts its next edition, so that is what the reason says */
-    expect(LOCKED_WHY).toContain("starts a new edition");
+    /* retargeted (v40, 26 Oct): editions are switched off — the way on is a new package made from it */
+    expect(LOCKED_WHY).toContain("make a new package from it");
+    expect(LOCKED_WHY).not.toContain("edition");
   });
 });
 
@@ -133,9 +133,10 @@ describe("the client refuses the write, and says why", () => {
   const db = decls(read("src/lib/db.tsx"));
 
   it("updatePackage checks the lock before writing", () => {
-    /* retargeted (Part B, 28 Sep): a sent package's contents no longer refuse — they START ITS NEXT
-       EDITION, worked out before the write; only the sample slot (not content) still refuses */
-    expect(db).toMatch(/if \(live && isPackageLocked\(live\)\) \{[\s\S]{0,500}samplePagesVersionId[\s\S]{0,400}nextEdition\(live,/);
+    /* retargeted (v40, 26 Oct): a locked package's contents REFUSE again — every slot and the extras — and no
+       edition is started anywhere in updatePackage */
+    expect(db).toMatch(/if \(live && isPackageLocked\(live\)\) \{[\s\S]{0,400}"queryLetterVersionId", "synopsisVersionId", "samplePagesVersionId", "bookVersionId", "otherMaterials", "extraIds"[\s\S]{0,400}return `\$\{LOCKED_NOTE\}\. \$\{LOCKED_WHY\}`/);
+    expect(db).not.toContain("nextEdition(");
   });
 
   it("it RETURNS the reason rather than throwing or shrugging", () => {

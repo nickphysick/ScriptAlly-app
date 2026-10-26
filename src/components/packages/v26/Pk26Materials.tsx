@@ -26,7 +26,7 @@ export const Pk26Materials: React.FC<{
     <section className="p6-lx" data-pk26="materials" data-kind={kind}>
       <div className={`p6-lx2 p6-t-${kind}`}>
         <header className="p6-lx2-h">
-          <div className="p6-lx-art" aria-hidden="true"><span>Art<small>{L ? "Hawk sealing a letter" : "Hawk with spectacles"}</small></span></div>
+          <div className="p6-lx-art" aria-hidden="true" data-art="lx"><span>Art<small>{L ? "Hawk sealing a letter" : "Hawk with spectacles"}</small></span></div>
           <div className="p6-lx2-t">
             <h2>{L ? "Query letters" : "Synopses"}</h2>
             <p>{L ? <>Every letter you’ve written, and the comps each one names. Comps come from your <button type="button" className="p6-cx-lnk" onClick={onOpenComps}>Comparable titles</button> library.</> : "One page, two pages: whatever agents ask for. A synopsis only goes to agents who want one."}</p>

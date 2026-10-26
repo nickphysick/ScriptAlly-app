@@ -840,7 +840,8 @@ console.log("\nSubmission packages v26 — empty packages, icons, named extras:"
   });
   await attempt("SENT package gains extraIds once (migration)", "v26 P6", () => updateDoc(pref, { extraIds: ["probe-ext-1"] }));
   await attempt("SENT package changes extraIds w/o an edition…", "v26 P6 (expect DENIED)", () => updateDoc(pref, { extraIds: ["probe-ext-1", "probe-ext-2"], otherMaterials: "Author bio, CV" }));
-  await attempt("SENT package: extras change WITH the next edition", "v26 P6", () => updateDoc(pref, { extraIds: ["probe-ext-1", "probe-ext-2"], otherMaterials: "Author bio, CV", edition: 2, editions: [{ n: 1 }, { n: 2 }] }));
+  /* v40: editions are switched off — a sent package's extras never change, with or without an edition */
+  await attempt("SENT package: extras WITH an edition…", "v40 P1 (expect DENIED)", () => updateDoc(pref, { extraIds: ["probe-ext-1", "probe-ext-2"], otherMaterials: "Author bio, CV", edition: 2, editions: [{ n: 1 }, { n: 2 }] }));
   await attempt("SENT package: icon still writable", "v26 P2", () => updateDoc(pref, { icon: "star" }));
   try { await deleteDoc(pref); console.log("  · probe package removed"); } catch (e) { console.log(`  ⚠️  could not remove probe-pk26: ${e.message}`); }
 
@@ -848,6 +849,32 @@ console.log("\nSubmission packages v26 — empty packages, icons, named extras:"
   const had = (await getDoc(mref)).data()?.extras;
   await attempt("manuscript extras", "v26 P6", () => updateDoc(mref, { extras: [{ id: "probe-ext-1", name: "Probe extra" }] }),
     () => updateDoc(mref, { extras: had === undefined ? deleteField() : had }));
+}
+
+/* ── Submission packages v40 (26 Oct) ──────────────────────────────────────────────────────────────
+ * A package that has gone out is LOCKED: its letter, synopsis, pages and extras never change again, with or without
+ * an edition. A change is a new package made from it, which records `copiedFromId` — set on create, never after.
+ */
+console.log("\nSubmission packages v40 — the lock and copiedFromId:");
+{
+  const pref = doc(db, "users", uid, "packages", "probe-pk40");
+  const cref = doc(db, "users", uid, "packages", "probe-pk40c");
+  const base = { id: "probe-pk40", manuscriptId: "seed-ms-1", userId: uid, packageName: "Probe v40", queryLetterVersionId: "probe-let",
+    synopsisVersionId: "", samplePagesVersionId: "", status: "Active", createdDate: new Date().toISOString(), edition: 1, extraIds: [] };
+  await attempt("…set up: a package, then the stamp", "setup", async () => { await setDoc(pref, base); await updateDoc(pref, { firstSentAt: new Date().toISOString() }); });
+  await attempt("SENT package: the letter changes…", "v40 P1 (expect DENIED)", () => updateDoc(pref, { queryLetterVersionId: "probe-let-2" }));
+  await attempt("SENT package: the synopsis changes…", "v40 P1 (expect DENIED)", () => updateDoc(pref, { synopsisVersionId: "probe-syn" }));
+  await attempt("SENT package: the pages change…", "v40 P1 (expect DENIED)", () => updateDoc(pref, { bookVersionId: "probe-ver" }));
+  await attempt("SENT package: extraIds change…", "v40 P1 (expect DENIED)", () => updateDoc(pref, { extraIds: ["probe-ext-1"], otherMaterials: "Author bio" }));
+  await attempt("SENT package: the letter WITH an edition…", "v40 P1 (expect DENIED)", () => updateDoc(pref, { queryLetterVersionId: "probe-let-2", edition: 2, editions: [{ n: 1 }, { n: 2 }] }));
+  await attempt("SENT package: name, note and icon", "v40 P1", () => updateDoc(pref, { packageName: "Probe v40 renamed", note: "probe", icon: "star" }));
+  await attempt("SENT package: retire", "v40 P1", () => updateDoc(pref, { status: "Retired", retiredAt: new Date().toISOString() }));
+  await attempt("create with copiedFromId", "v40 P1", () => setDoc(cref, { ...base, id: "probe-pk40c", copiedFromId: "probe-pk40" }));
+  await attempt("copiedFromId changes…", "v40 P1 (expect DENIED)", () => updateDoc(cref, { copiedFromId: "probe-other" }));
+  await attempt("copiedFromId removed…", "v40 P1 (expect DENIED)", () => updateDoc(cref, { copiedFromId: deleteField() }));
+  await attempt("UNSENT copy: the letter changes", "v40 P1", () => updateDoc(cref, { queryLetterVersionId: "probe-let-2" }));
+  for (const r of [pref, cref]) { try { await deleteDoc(r); } catch (e) { console.log(`  ⚠️  could not remove ${r.id}: ${e.message}`); } }
+  console.log("  · probe packages removed");
 }
 
 process.exit(0);

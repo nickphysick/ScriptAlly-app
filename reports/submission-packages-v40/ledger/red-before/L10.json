@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "L10",
+  "where": "pk40-ms: the shelf renders",
+  "ok": false,
+  "detail": "shelf"
+ },
+ {
+  "lock": "L10",
+  "where": "pk40-ms: the workbench renders",
+  "ok": false,
+  "detail": "wbf"
+ },
+ {
+  "lock": "L10",
+  "where": "pk40-ms: tracking renders",
+  "ok": false,
+  "detail": "tp"
+ },
+ {
+  "lock": "L10",
+  "where": "pk40-new: the shelf renders",
+  "ok": false,
+  "detail": "shelf"
+ },
+ {
+  "lock": "L10",
+  "where": "pk40-new: the workbench renders",
+  "ok": false,
+  "detail": "wbf"
+ },
+ {
+  "lock": "L10",
+  "where": "pk40-new: tracking renders",
+  "ok": false,
+  "detail": "tp"
+ },
+ {
+  "lock": "L10",
+  "where": "no console errors",
+  "ok": true,
+  "detail": "[]"
+ }
+]

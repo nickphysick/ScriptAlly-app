@@ -299,6 +299,10 @@ service cloud.firestore {
         // but cannot QUERY for the queries that hold this package: the derived form is not
         // expressible in the one place enforcement has to happen.
         && (!data.keys().hasAny(['firstSentAt']) || (data.firstSentAt is string && data.firstSentAt.size() <= 64))
+        // ⚠️ SUBMISSION PACKAGES v40: WHICH PACKAGE THIS ONE WAS MADE FROM ("New package from this"). Optional, set on
+        // CREATE only: it is not in the update rule's allowlist below, so it can never be added, changed or removed later.
+        && (!data.keys().hasAny(['copiedFromId'])
+            || (data.copiedFromId is string && data.copiedFromId.size() >= 1 && data.copiedFromId.size() <= 128))
         // ⚠️ FREE TEXT, OPTIONAL, AND ABSENT WHEN EMPTY. `hasAny` rather than `is string` because an
         // unanswered question has no key at all; a stored `""` would claim the writer answered it.
         && (!data.keys().hasAny(['otherMaterials']) || (data.otherMaterials is string && data.otherMaterials.size() <= 512))
@@ -966,18 +970,10 @@ service cloud.firestore {
             // ⚠️ AND THE OTHER MATERIALS AND THE EDITION FIELDS JOIN IT (Part B): they are contents,
             // so outside an edition bump they are as fixed as the slots.
             || !incoming().diff(existing()).affectedKeys().hasAny(['queryLetterVersionId', 'synopsisVersionId', 'samplePagesVersionId', 'firstSentAt', 'bookVersionId', 'otherMaterials', 'edition', 'editions', 'extraIds'])
-            // ⚠️ THE NEXT EDITION (Part B §B1). A sent package's contents change ONLY by starting its
-            // next edition: the number goes up by exactly one and the list grows by exactly one, so
-            // every earlier edition — what the agents received — is kept. The stamp and the sample
-            // slot (not content, Nick 28 Sep) still never move here.
-            || (!incoming().diff(existing()).affectedKeys().hasAny(['firstSentAt', 'samplePagesVersionId'])
-                && incoming().get('edition', 1) == existing().get('edition', 1) + 1
-                && incoming().get('editions', []).size() == existing().get('editions', [0]).size() + 1)
-            // THE UNDO OF THAT EDIT: back by exactly one, the list shorter by exactly one — the edition it
-            // removes is seconds old, and the client refuses once any query has gone out with it.
-            || (!incoming().diff(existing()).affectedKeys().hasAny(['firstSentAt', 'samplePagesVersionId'])
-                && incoming().get('edition', 1) == existing().get('edition', 1) - 1
-                && incoming().get('editions', [0]).size() == existing().get('editions', []).size() - 1)
+            // ⚠️ SUBMISSION PACKAGES v40: NO MORE EDITIONS. Once a package has gone out it is LOCKED — its letter,
+            // synopsis, pages and extras never change again (a change is a NEW package, made from it). The branches
+            // that let a sent package start its next edition, and undo one, are gone; packages that already hold
+            // several editions stay readable, as they are.
             // ⚠️ THE STALE-STAMP LIFT (Nick, 28 Sep): removing the stamp, and nothing else, when undo or a
             // correction has left no query pointing at the package. A rule cannot QUERY for those queries,
             // so the client decides; what the rule holds is that the lift carries no other change.

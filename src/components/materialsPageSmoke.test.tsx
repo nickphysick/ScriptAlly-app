@@ -215,10 +215,11 @@ describe("/queries/packages renders", () => {
     expect(html).toContain("Build your first package");
     expect(html).toContain('class="p6-pb-stage p6-an"');
     expect(html).not.toContain('data-pk26="header"');
-    /* the same tabs, builder (a draft first package) and Results, in their empty states */
+    /* the same tabs, workbench (a draft first package) and Tracking, in their empty states (v40: Tracking's Warming up
+       replaces v26's "Nothing to compare yet.") */
     expect(html).toContain('data-pk26="tabs"');
     expect(html).toContain("My first package");
-    expect(html).toContain("Nothing to compare yet.");
+    expect(html).toContain("Your first comparison shows once two packages have each gone out with 5 queries.");
   });
 
   it("populated: the navy header, the tabs, the open package's packing list and Your materials", () => {
@@ -228,7 +229,9 @@ describe("/queries/packages renders", () => {
     expect(html).toContain("Bundle it. Send it. Know what went.");
     expect(html).toContain('data-pk26="open"');
     expect(html).toContain(">Standard UK<");
-    expect(html).toContain("Needs a version");
+    /* v40: the stage chip and the stepper say what a draft needs (the v26 "Needs a version" pill is retired) */
+    expect(html).toContain('data-stage="draft"');
+    expect(html).toContain("Add pages to make it ready.");
     expect(html).toContain('data-pk26="lib"');
     expect(html).toContain(">Hook-first<");
     expect(html).not.toContain('data-pk26="hero"');

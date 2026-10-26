@@ -661,6 +661,12 @@ export interface SubmissionPackage {
    */
   firstSentAt?: string;
   /**
+   * SUBMISSION PACKAGES v40: the package this one was made from ("New package from this"). Set on create only — the
+   * rules keep it out of every update — so a copy and its original stay a pair, and Tracking & performance's Tests
+   * can compare them. Absent on every package made from scratch.
+   */
+  copiedFromId?: string;
+  /**
    * PACKAGE EDITIONS (docs/contracts/package-editions.md §C2, Part B 28 Sep). `edition` is the
    * current one, from 1; `editions` keeps every one oldest first, for ever, so a past edition can be
    * shown and offered in corrections. A change to a SENT package's contents — its letter, its

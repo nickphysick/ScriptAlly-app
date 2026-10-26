@@ -106,7 +106,7 @@ export const isSent = (p: Pick<SubmissionPackage, "firstSentAt">): boolean => !!
 /** The copy the card's lock line shows — kept in step with packageMetrics.LOCKED_WHY. */
 /* the date through a fixed month table — en-GB's short month renders "Sept" in some engines */
 export const lockLine = (sentAt: string): string =>
-  `First sent on ${dayMonth(sentAt)}, so what went out stays as it went. Editing it starts a new edition; queries already sent keep theirs.`;
+  `First sent on ${dayMonth(sentAt)}, so what went out stays as it went. To change it, make a new package from it.`;
 
 /**
  * The hero art (v2.1, E3) — Nick's boxes image: the Archivist carrying a tall stack of archive boxes.

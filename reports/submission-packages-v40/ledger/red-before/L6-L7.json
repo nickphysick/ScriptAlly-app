@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "L6-L7",
+  "where": "letters: two cards",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "lock": "L6-L7",
+  "where": "Hook-first: 7 sent (withdrawn out), 29%",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "lock": "L6-L7",
+  "where": "Comps-forward: 1 of 4, 1 more to go",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "lock": "L6-L7",
+  "where": "synopses: One-page and No synopsis",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "lock": "L6-L7",
+  "where": "No synopsis counts exactly 2 (0 of 2)",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "L6-L7",
+  "where": "One-page: 9 sent, 33%",
+  "ok": false,
+  "detail": "[]"
+ }
+]

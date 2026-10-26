@@ -120,7 +120,7 @@ import { computeResponseDeadline } from "./responseDeadline";
    usage line must agree about "does a package hold this", so both go through one function rather
    than each filtering the three slot fields for itself. */
 import { packagesUsingVersion, isPackageLocked, LOCKED_PACKAGE_FIELDS, LOCKED_NOTE, LOCKED_WHY, materialsLinkWrites } from "./packageMetrics";
-import { nextEdition, contentsChanged, summaryFrom } from "./packageEditions";
+import { contentsChanged } from "./packageEditions";
 import { isVersionSent } from "./versionLock";
 import { letterFixed } from "./compUsage";
 import { writerExpectedWrite, WRITER_EXPECTED_FIELD, WRITER_EXPECTED_SET_AT_FIELD } from "./expectedDate";
@@ -1971,18 +1971,17 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   ): Promise<string | null> => {
     if (!currentUser) return "Authentication required.";
     const live = packages.find((p) => p.id === id);
-    /* ⚠️ A SENT PACKAGE'S CONTENTS NO LONGER REFUSE — THEY START ITS NEXT EDITION (Part B §B1).
-       The queries already sent keep the edition they went out as, so the record stays true; what
-       changes is the package from now on. Only the sample slot, which is not content (Nick, 28 Sep),
-       still refuses on a sent package: it is the `""` sentinel everywhere today. */
-    let bump: ReturnType<typeof nextEdition> = null;
+    /* ⚠️ SUBMISSION PACKAGES v40: A PACKAGE THAT HAS GONE OUT IS LOCKED, AND NOTHING STARTS AN EDITION ANY MORE.
+       Its letter, synopsis, pages and extras never change again; a change is a new package made from it
+       ("New package from this"). The name, the note and the icon are filing, outside the lock. The rules say the same
+       thing; this says it in words, so a refusal never reaches the writer as "Database transaction error".
+       The one exception is the other-materials migration: a package written before named extras gains `extraIds`
+       ONCE, naming what its `otherMaterials` text already says — what went does not change. */
     if (live && isPackageLocked(live)) {
-      if ("samplePagesVersionId" in fields && (fields.samplePagesVersionId ?? "") !== (live.samplePagesVersionId ?? "")) {
-        return `${LOCKED_NOTE}. ${LOCKED_WHY}`;
-      }
-      const ms = manuscripts.find((m) => m.id === live.manuscriptId);
-      bump = nextEdition(live, { ...live, ...fields }, new Date().toISOString(),
-        summaryFrom(versions, ms?.bookVersions ?? []));
+      const contents = ["queryLetterVersionId", "synopsisVersionId", "samplePagesVersionId", "bookVersionId", "otherMaterials", "extraIds"] as const;
+      const migration = Object.keys(fields).length === 1 && "extraIds" in fields && live.extraIds === undefined;
+      const changes = contents.some((k) => k in fields && JSON.stringify(fields[k] ?? "") !== JSON.stringify(live[k] ?? ""));
+      if (changes && !migration) return `${LOCKED_NOTE}. ${LOCKED_WHY}`;
     }
     /* ⚠️ CLEARING A FREE-TEXT FIELD IS AN UNSET, NOT AN EMPTY STRING. The caller sends what the
        input holds; the conversion lives here so no caller can drift. The three version slots use
@@ -1998,10 +1997,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       payload[k] = t ? t : deleteField();
       if (k === "note" && !t) payload.noteEditedAt = deleteField();
     }
-    if (bump) {
-      payload.edition = bump.edition;
-      payload.editions = bump.editions;
-    } else if (live && !isPackageLocked(live) && live.editions?.length && contentsChanged(live, { ...live, ...fields })) {
+    if (live && !isPackageLocked(live) && live.editions?.length && contentsChanged(live, { ...live, ...fields })) {
       /* an unsent draft changed: a stored 1st edition would now describe contents nobody received */
       payload.editions = deleteField();
     }
