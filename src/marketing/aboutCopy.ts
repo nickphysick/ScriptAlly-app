@@ -171,7 +171,9 @@ export const ABOUT_FOUNDER_ROLE = "Founder";
 /* ══════════════ The way out ══════════════ */
 export const ABOUT_CLOSE_HEADING = "Querying soon, or querying now?";
 export const ABOUT_CLOSE_BODY =
-  `We're opening QueryHawk to its first ${FOUNDING_CAP_WORD} writers. Six months free, half price after ` +
-  "that for as long as you need it, and a say in what gets built next.";
+  /* ⚠️ 26 Oct (landing on phones v1): the offer is no longer "six months free, half price after"; the
+     sentence states the new terms in `FOUNDING_GETS`'s words. */
+  `We're opening QueryHawk to its first ${FOUNDING_CAP_WORD} writers: QueryHawk Pro free for your ` +
+  "entire querying campaign, a direct line to the founder, and a say in what gets built next.";
 export const ABOUT_CLOSE_CTA = "Become a founding writer";
 export const ABOUT_CLOSE_LINK = "See the plans";

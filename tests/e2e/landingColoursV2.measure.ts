@@ -54,7 +54,12 @@ const MUTATIONS: Record<string, string> = {
       ".mk-claimnum,.mk-claimof,.mk-claimleft,.mk-fmmeta,.mk-fmtally{color:#f4eee5!important}",
   T1: ".mk-foot{border-top:1px solid #e7ddd2!important}",
   /* The phone retargets' own breaks (phone hero, 23 Oct) — each turns only the ≤760px branch red. */
-  N2p: ".mk-navpill{background:#1b2433!important}",
+  /* RETARGETED (landing on phones v1, 26 Oct): the pill is gone; the phone's founding offer is the strip. */
+  /* RETARGETED (landing on phones v4): the strip is gone; the phone's bar holds the "Log in" pill. */
+  N2p: ".mk-lg{background:#e8b4a3!important}",
+  V1p: ".mk-vbf img{opacity:1!important}",
+  /* v3: page snapping switched off, so the phone's jump lands on the band rather than on caption 1. */
+  N3s: "html:has(.mk-story){scroll-snap-type:none!important}",
   N3p: "@media (max-width:760px){.mk-scope .mk-nav{height:72px!important}}",
   H1p: ".mk-hp-stage{background:#ffffff!important}",
   S1p: ".mk-sheet{border-top-left-radius:18px!important;border-top-right-radius:18px!important}",
@@ -301,13 +306,18 @@ test.describe("LC2", () => {
         const brand = document.querySelector(".mk-nav .mk-brand")!;
         const word = brand.querySelector(".mk-navword");
         const c = word ? getComputedStyle(word) : null;
-        /* RETARGET (phone hero): at ≤760px the anon primary is the founding pill — the same cream on ink. */
-        const btn = getComputedStyle(document.querySelector(".mk-navright .mk-btn, .mk-navright .mk-navpill")!);
+        /* RETARGET (landing on phones v4, 26 Oct): at ≤760px the bar holds no primary button — its right
+           side is the tinted "Log in" pill, white on white at 10% (the strip above the bar is gone). */
+        const primary = document.querySelector(".mk-navright .mk-btn");
+        const lg = document.querySelector(".mk-lg");
+        const btn = primary ? getComputedStyle(primary) : null;
         return {
+          primary: !!primary, stripBg: lg ? getComputedStyle(lg).backgroundColor : null,
+          stripFg: lg ? getComputedStyle(lg).color : null,
           imgs: Array.from(brand.querySelectorAll("img")).map((i) => i.getAttribute("src") ?? ""),
           text: word?.textContent ?? null, color: c?.color ?? null, family: c?.fontFamily ?? null,
           name: brand.getAttribute("aria-label"),
-          btnBg: btn.backgroundColor, btnFg: btn.color,
+          btnBg: btn?.backgroundColor ?? null, btnFg: btn?.color ?? null,
         };
       });
       expect(w.imgs.filter((s) => /title/.test(s)), `@${vp.width}: the wordmark is not a picture`).toEqual([]);
@@ -317,8 +327,14 @@ test.describe("LC2", () => {
       /* RETARGET (phone hero): the phone row sets the wordmark in Source Serif 4 700, per its ref. */
       expect(w.family ?? "").toMatch(vp.width <= PHONE ? /Source Serif 4/ : /Playfair Display/);
       expect(w.name).toBe("QueryHawk home");
-      expect(w.btnBg).toBe("rgb(243, 238, 230)");
-      expect(w.btnFg).toBe("rgb(27, 36, 51)");
+      if (vp.width <= PHONE) {
+        expect(w.primary, `@${vp.width}: the phone bar holds no primary`).toBe(false);
+        expect(w.stripBg, `@${vp.width}: the Log in pill is white at 10%`).toBe("rgba(255, 255, 255, 0.1)");
+        expect(w.stripFg, `@${vp.width}: with white type`).toBe("rgb(255, 255, 255)");
+      } else {
+        expect(w.btnBg).toBe("rgb(243, 238, 230)");
+        expect(w.btnFg).toBe("rgb(27, 36, 51)");
+      }
       if (vp.width <= 1080) await page.click(".mk-burger");
       const links = await inks(page, vp.width <= 1080 ? ".mk-navpanel button" : ".mk-links button, .mk-login");
       console.log(`LC2 N2 @${vp.width}`, links.map((l) => `${l.text} ${l.ratio.toFixed(2)}`).join(" · "));
@@ -355,6 +371,23 @@ test.describe("LC2", () => {
     expect(read).toBe(ROUTES.length * NAV_VPS.length);
     for (const vp of VPS) {
       await open(page, "/", vp);
+      if (vp.width <= PHONE) {
+        /* RETARGET (landing on phones v3, 26 Oct): the page snaps to the feature captions on a phone, and
+           the band sits just above the first of them, so the jump is pulled on to caption 1's snap: it
+           lands directly under the picture (the band line scrolls under the bar). Measured stable. */
+        await page.evaluate(() => window.scrollTo(0, 0));
+        await page.click(".mk-hp-how"); await page.waitForTimeout(1200);
+        /* ⚠️ Caption 1 always follows the panel in flow, so "under the picture" alone holds snapped or not;
+           what the snap decides is that the panel is STUCK under the bar, which is asserted too. */
+        const land = await page.evaluate(() => ({
+          gap: document.querySelector(".mk-s3")!.getBoundingClientRect().top - document.querySelector(".mk-spimg")!.getBoundingClientRect().bottom,
+          panel: document.querySelector(".mk-spimg")!.getBoundingClientRect().top - document.querySelector(".mk-navwrap")!.getBoundingClientRect().bottom,
+        }));
+        console.log(`LC2 N3 anchor @${vp.width}: caption 1 ${land.gap.toFixed(2)} from the picture, the picture ${land.panel.toFixed(2)} from the bar`);
+        expect(Math.abs(land.panel), `anchor landing @${vp.width}: the picture is stuck under the bar`).toBeLessThanOrEqual(1);
+        expect(Math.abs(land.gap), `anchor landing @${vp.width}: caption 1 snapped under the picture`).toBeLessThanOrEqual(2);
+        continue;
+      }
       const gap = await anchorGap(page);
       console.log(`LC2 N3 anchor @${vp.width}: ${gap.toFixed(2)} (was ${Number(base.anchor[key(vp)]).toFixed(2)})`);
       /* RETARGET (phone hero, 23 Oct): at ≤760px the jump is the drawer's link and the band lands AT the
@@ -470,6 +503,23 @@ test.describe("LC2", () => {
     test.skip(CAPTURE);
     for (const vp of VPS) {
       await open(page, "/", vp);
+      if (vp.width <= PHONE) {
+        /* RETARGET (landing on phones v4, 26 Oct): on a phone the vision is navy with ONE frame of three
+           pictures (one showing) over three lines; the stone band with white cards is the desktop's. */
+        const p = await page.evaluate(() => ({
+          band: getComputedStyle(document.querySelector(".mk-vision")!).backgroundColor,
+          frames: document.querySelectorAll(".mk-vision .mk-vbf").length,
+          showing: Array.from(document.querySelectorAll(".mk-vision .mk-vbf img")).filter((i) => +getComputedStyle(i).opacity > 0.9).length,
+          lines: document.querySelectorAll(".mk-vision .mk-vbt").length,
+          desk: document.querySelectorAll(".mk-vision .mk-vpoint").length,
+        }));
+        expect(p.band, `@${vp.width}: the phone's vision band is navy`).toBe("rgb(27, 36, 51)");
+        expect(p.frames, `@${vp.width}: one frame`).toBe(1);
+        expect(p.showing, `@${vp.width}: showing one picture`).toBe(1);
+        expect(p.lines, `@${vp.width}: three lines`).toBe(3);
+        expect(p.desk, `@${vp.width}: and none of the desktop's cards`).toBe(0);
+        continue;
+      }
       const v = await page.evaluate(() => ({
         band: getComputedStyle(document.querySelector(".mk-vision")!).backgroundColor,
         cards: Array.from(document.querySelectorAll(".mk-vision .mk-vpoint")).map((c) => {
@@ -500,7 +550,10 @@ test.describe("LC2", () => {
       }
     };
     const P = ".mk-claimcard ";
-    for (const vp of VPS) {
+    /* RETARGET (landing on phones v1, 26 Oct): the navy band is the desktop's; on a phone the landing
+       closes on the founding card (landingMobileV1's LM4), so this reads the two desktop widths. */
+    const DESK = VPS.filter((v) => v.width > PHONE);
+    for (const vp of DESK) {
       for (const state of ["idle", "invalid", "sending", "sent", "dupe", "full", "error", "down"] as const) {
         const mock: Mock = state === "idle" || state === "invalid" ? "count" : state === "sending" ? "hold" : state;
         await open(page, "/", vp, mock);
@@ -539,7 +592,7 @@ test.describe("LC2", () => {
       }
     }
     console.log("LC2 F1 states measured:", measured.length);
-    expect(measured.length).toBe(8 * VPS.length);
+    expect(measured.length).toBe(8 * DESK.length);
   });
 
   test("F2 the same parts on a light ground keep a dark-on-light treatment", async ({ page }) => {

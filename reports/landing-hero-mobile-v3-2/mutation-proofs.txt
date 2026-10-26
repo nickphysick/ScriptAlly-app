@@ -1,0 +1,11 @@
+HM18 on HM18 →  1 failed | Error: Day 36: the card turns in through edge-on (rotateY passes ±90°)
+HM18b on HM18 →  1 failed | Error: the face shows exactly twice in a run, at Day 36 and Day 99
+HM18c on HM18 →  1 failed | Error: the popover is never visible while the face is
+HM19 on HM19 →  1 failed | Error: the lowest piece's centre is still above the title's top edge
+HM20 on HM20 →  1 failed | Error: no she/he/her/him on the card at any frame
+HM21 on HM21 →  1 failed | Error: no frame shows a face
+HM21b on HM21 →  1 failed | Error: no frame turns the card about Y
+LH19 on LH19 →  1 failed | Error: no frame has a .mk-cgx element on the desk
+LH19b on LH19 →  1 failed | Error: no card is turned about Y
+LH20 on LH20 →  1 failed | Error: no she/he/her/him on the card at any frame
+done

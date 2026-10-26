@@ -11,7 +11,8 @@
  *        radius, and the hero is still in the DOM, sticky, behind it
  *   HM3  sign-up: after the story's FIRST run, unscrolled, the sign-up shows and is a FoundingSignup;
  *        scrolled first, it never appears
- *   HM4  counter: counts down from the cap to the places left; no count, no number
+ *   HM4  RETIRED (landing on phones v4): the phone bar carries no counter now — the join bar and the
+ *        closing card do (landingMobileV2 LV4, landingMobileV1 LM4).
  *   HM5  copy: "No more winging it." is on the rendered page exactly once, at 390 and at 1440
  *   HM6  reduced motion (phones): the static end state, footer under the grown drawer, nothing moving
  *   HM7  phones draw no cast shadow; the fly-past is the versioned file, flown once along its curve
@@ -21,8 +22,16 @@
  *   HM14 chips (v3.1, rewritten): "Task created", "Task complete" and "Reminder set" each appear INSIDE
  *        their own line's chip row (.mk-lc-att), wholly inside the screen, and are gone within 3.5s; no
  *        floating pill element exists at any moment
- *   HM16 popover (v3.1): "She asked for" drops from the status pill — its top within 16px below the
- *        pill — and is gone before "Partial requested" starts typing
+ *   HM16 popover (v3.1; v3.2 longer loop): "Eleanor asked for" drops from the status pill — its top
+ *        within 16px below the pill — and is gone before "Partial requested" starts typing
+ *   HM18 flip (v3.2): the card's face (.mk-cgx) shows exactly twice a run, at Day 36 and Day 99; on the
+ *        way in and on the way out the card turns through edge-on (rotateY passes ±90°); the popover is
+ *        never visible while the face is; the face is gone before the popover opens and before "Full
+ *        requested" types
+ *   HM19 confetti (v3.2): every piece's centre stays above the face's title at every frame
+ *   HM20 wording (v3.2): across a whole run no she/he/her/him anywhere on the card; the popover reads
+ *        "Eleanor asked for"
+ *   HM21 reduced motion (v3.2): no flip — no visible face, and the card never leaves the page's plane
  *   HM17 buttons (v3.1): Join is ink navy rgb(42, 58, 82); See how it works has no fill and an underline
  *   HM15 loop: after a full story the front card leaves and a fresh one reads Day 1 within 2s; the
  *        drawer grows once and stays grown
@@ -37,6 +46,7 @@
 import { test, expect, Page } from "@playwright/test";
 import { mkdirSync } from "node:fs";
 import { resolve } from "node:path";
+import { WORDING_RECORDER, WordingRec, pronounHits, breakWording } from "./heroWording";
 
 const MUTATE = process.env.HM_MUTATE ?? "";
 const SHOTS = !!process.env.HM_SHOTS;
@@ -48,12 +58,16 @@ const CSS_BREAKS: Record<string, string> = {
   HM1: ".mk-hc-pile--phone{transform:translate(-560px,30px) scale(.8)!important}",
   HM2: ".mk-hp-stage{position:relative!important}",
   HM3: ".mk-hp-sheet--grown .mk-hp-su{visibility:hidden!important;max-height:0!important}",
-  HM4: ".mk-navpill-c{display:none!important}",
   HM6: ".mk-hp-fly{display:block!important}",
   HM1v3: ".mk-hp-hero{top:-40px!important}",
   HM16: ".mk-pillpop{margin-top:40px!important}",
   HM17: ".mk-hp-suform .mk-btn{background:#a2452a!important}",
   HM17b: ".mk-hp-how{background:#2a3a52!important;text-decoration:none!important}",
+  /* v3.2: the card held flat (no turn), the face left showing, the popover shown over the face. */
+  HM18: '[data-hc="front"]{transform:rotate(.8deg)!important}',
+  HM18b: ".mk-cgx{opacity:1!important}",
+  HM18c: ".mk-pillpop{opacity:1!important}",
+  HM19: ".mk-cgx .mk-fx{top:96%!important}",
 };
 
 type Count = { claimed: number; cap: number } | null;
@@ -82,6 +96,20 @@ async function open(page: Page, vp: { width: number; height: number }, o: { redu
         pile.appendChild(img);
       }, 20);
     });
+  }
+  if (MUTATE === "HM20") await breakWording(page);
+  if (MUTATE === "HM21" || MUTATE === "HM21b") {
+    /* A flip under reduced motion: a visible face on the card, or the card turned about Y. */
+    const face = MUTATE === "HM21";
+    await page.addInitScript((face) => {
+      const t = setInterval(() => {
+        const front = document.querySelector<HTMLElement>('[data-hc="front"]');
+        if (!front) return;
+        clearInterval(t);
+        if (face) { const g = document.createElement("div"); g.className = "mk-cgx"; g.setAttribute("style", "display:block!important;opacity:1"); front.appendChild(g); }
+        else front.style.setProperty("transform", "rotate(.8deg) perspective(1600px) rotateY(30deg)", "important");
+      }, 20);
+    }, face);
   }
   await page.goto("/", { waitUntil: "commit" });
   await page.waitForSelector(vp.width <= 760 ? ".mk-hp" : ".mk-herotitle", { state: "attached" });
@@ -149,6 +177,8 @@ test.describe("landing hero on phones", () => {
     await page.waitForTimeout(800);
     /* The drawer's resting height is at least 250 and grows on a tall phone (24 Oct), so the travel is
        read from the page: the stage less the drawer as it actually rests. */
+    /* (landing on phones v4, 26 Oct: the founding strip above the bar is gone, so the travel is again
+       the stage less the resting drawer.) */
     const run = await page.evaluate(() => window.innerHeight - document.querySelector(".mk-nav")!.getBoundingClientRect().height + parseFloat(getComputedStyle(document.querySelector(".mk-hp-sheet")!).marginTop));
     expect(run, "the travel is the stage less the resting drawer").toBeGreaterThan(400);
     await page.evaluate((y) => window.scrollTo(0, y), run);
@@ -211,40 +241,6 @@ test.describe("landing hero on phones", () => {
 
   /* REWRITTEN (v2 P4): the number counts DOWN from the cap to the places left, never up from 0 —
      sampled through the run, every reading lies between them and none rises. */
-  test("HM4 counter: counts down from 50 to 36 places left, 3 of 10 segments; no count, no number", async ({ page }) => {
-    await open(page, { width: 390, height: 844 }, { count: { claimed: 14, cap: 50 } });
-    const seen: number[] = [];
-    for (let i = 0; i < 14; i++) {
-      const t = await page.evaluate(() => document.querySelector(".mk-navpill-c em")?.textContent ?? "");
-      const n = Number(/^(\d+) places left$/.exec(t)?.[1]);
-      if (Number.isFinite(n)) seen.push(n);
-      await page.waitForTimeout(150);
-    }
-    console.log("HM4 run", seen.join(" "));
-    expect(seen.length, "population: the counter was read through its run").toBeGreaterThan(8);
-    expect(seen[0], "it starts at the cap, or on its way down from it").toBeGreaterThan(36);
-    for (let i = 1; i < seen.length; i++) expect(seen[i], `reading ${i} never rises`).toBeLessThanOrEqual(seen[i - 1]);
-    expect(Math.min(...seen), "and never goes below the places left").toBeGreaterThanOrEqual(36);
-    await page.waitForTimeout(600); // the count is over by 2.0s
-    const r = await page.evaluate(() => ({
-      text: (document.querySelector(".mk-navpill") as HTMLElement).innerText,
-      segs: document.querySelectorAll(".mk-navpill-c b").length,
-      on: document.querySelectorAll(".mk-navpill-c b.mk-on").length,
-    }));
-    console.log("HM4 live", JSON.stringify(r));
-    expect(r.segs, "population: ten segments").toBe(10);
-    expect(r.text).toContain("36 places left");
-    expect(r.on).toBe(3);
-    await open(page, { width: 390, height: 844 }, { count: null });
-    await page.waitForTimeout(1500);
-    const n = await page.evaluate(() => ({
-      text: (document.querySelector(".mk-navpill") as HTMLElement).innerText.trim(),
-      segs: document.querySelectorAll(".mk-navpill-c b").length,
-    }));
-    console.log("HM4 none", JSON.stringify(n));
-    expect(n.text, "no count: the first line only").toBe("Become a founding writer");
-    expect(n.segs).toBe(0);
-  });
 
   test("HM5 copy: the phrase is on the rendered page exactly once, at 390 and 1440", async ({ page }) => {
     for (const vp of [{ width: 390, height: 844 }, { width: 1440, height: 900 }]) {
@@ -437,9 +433,9 @@ test.describe("landing hero on phones", () => {
     test.setTimeout(240000);
     let k0 = 0;
     for (const vp of [{ width: 390, height: 844 }, { width: 375, height: 667 }]) {
-      const r = await record(page, vp, 27000);
+      const r = await record(page, vp, 37000); // v3.2: the two flips make a run ~33s
       console.log(`HM14 @${vp.width}`, JSON.stringify({ floating: r.floating, chips: r.tags.map((x) => ({ text: x.text, line: x.lineIdx, inAtt: x.inAtt, tag: x.tag?.map((v) => +v.toFixed(1)), held: x.goneAt && x.shownAt ? Math.round(x.goneAt - x.shownAt) : null })) }));
-      /* The first run only: by 27s the loop's second run may have made its own. */
+      /* The first run only: by 37s the loop's second run may have made its own. */
       expect(r.out, `@${vp.width}: population — the first run ended`).not.toBeNull();
       const first = r.tags.filter((x) => x.createdAt < r.out!);
       const want: [string, number][] = [["Task created", 1], ["Task complete", 2], ["Reminder set", 3]];
@@ -459,8 +455,9 @@ test.describe("landing hero on phones", () => {
   });
 
   test("HM16 popover: it drops from the status pill and is gone before Partial requested types", async ({ page }) => {
+    /* v3.2: the label names the agent — HM20 sweeps the run for it; this case keeps the geometry. */
     test.setTimeout(120000);
-    const r = await record(page, { width: 390, height: 844 }, 14000);
+    const r = await record(page, { width: 390, height: 844 }, 16000); // v3.2: the partial's flip comes first
     console.log("HM16", JSON.stringify(r.pop));
     expect(r.pop.shownAt, "population: the popover came in").not.toBeNull();
     expect(r.pop.gap!, "its top is below the pill").toBeGreaterThanOrEqual(0);
@@ -500,5 +497,149 @@ test.describe("landing hero on phones", () => {
     expect(fresh!.t - r.out!, "within 2s of the card leaving").toBeLessThanOrEqual(2000);
     expect(fresh!.band).toBe("With the agent");
     expect(r.grownEvents, "the drawer grows once, after the first run, and stays grown").toEqual(["grow"]);
+  });
+
+  /* ── v3.2: the flip ─────────────────────────────────────────────────────────────────────────────
+     One frame-by-frame recording of the card's first run: its turn about Y (from the computed matrix:
+     θ = atan2(−m13, m11), the rest rotation of .8° about Z being too small to matter), the face's and
+     the popover's opacity, the day, each face's band, the moment "Partial requested" and "Full
+     requested" type their first letter, and the confetti against the face's title. */
+  type Frame = [t: number, theta: number, face: number, pop: number, day: string];
+  type FlipRec = {
+    frames: Frame[]; bands: string[]; partialAt: number | null; fullAt: number | null; out: number | null;
+    fx: { frames: number; pieces: number; worst: number | null; worstAt: number | null };
+  };
+  const FLIP_RECORDER = () => {
+    const R: FlipRec = { frames: [], bands: [], partialAt: null, fullAt: null, out: null, fx: { frames: 0, pieces: 0, worst: null, worstAt: null } };
+    (window as unknown as { __hf: FlipRec }).__hf = R;
+    let started = false;
+    const loop = () => {
+      const t = document.timeline.currentTime as number;
+      const front = document.querySelector<HTMLElement>('[data-hc="front"]');
+      if (front) {
+        const m = new DOMMatrix(getComputedStyle(front).transform);
+        const theta = Math.atan2(-m.m13, m.m11) * 180 / Math.PI;
+        const g = front.querySelector<HTMLElement>(".mk-cgx"), pop = front.querySelector<HTMLElement>(".mk-pillpop");
+        const face = g ? +getComputedStyle(g).opacity : 0, pp = pop ? +getComputedStyle(pop).opacity : 0;
+        R.frames.push([Math.round(t), +theta.toFixed(1), +face.toFixed(2), +pp.toFixed(2), document.querySelector('[data-hc="day"]')?.getAttribute("data-n") ?? ""]);
+        if (g && face > .5) {
+          const b = g.querySelector(".mk-cgx-band")?.textContent ?? "";
+          if (R.bands[R.bands.length - 1] !== b) R.bands.push(b);
+          const title = g.querySelector<HTMLElement>(".mk-cgx-t");
+          const fx = [...g.querySelectorAll<HTMLElement>(".mk-fx")].filter((f) => +getComputedStyle(f).opacity > 0);
+          if (title && fx.length) {
+            R.fx.frames++; R.fx.pieces = Math.max(R.fx.pieces, fx.length);
+            const top = title.getBoundingClientRect().top;
+            for (const f of fx) { const r = f.getBoundingClientRect(), d = (r.top + r.bottom) / 2 - top; if (R.fx.worst === null || d > R.fx.worst) { R.fx.worst = d; R.fx.worstAt = Math.round(t); } }
+          }
+        }
+        const steps = [...front.querySelectorAll<HTMLElement>(".mk-lc-step")];
+        const typed = (k: string) => { const st = steps.find((x) => (x.textContent ?? "").startsWith(k)); const c = st?.querySelector<HTMLElement>(".mk-lc-t span"); return !!c && +getComputedStyle(c).opacity > 0; };
+        /* The card mounts on its finished state (Day 99, every line typed) for a few frames before the
+           story starts, so a line counts as typing only once the story has opened on Day 1. */
+        if (R.frames[R.frames.length - 1][4] === "1") started = true;
+        if (started && R.partialAt === null && typed("Partial requested")) R.partialAt = Math.round(t);
+        if (started && R.fullAt === null && typed("Full requested")) R.fullAt = Math.round(t);
+        if (R.out === null) for (const a of front.getAnimations()) if (JSON.stringify((a.effect as KeyframeEffect).getKeyframes()).includes("-130%") && a.startTime != null) R.out = (a.startTime as number) + (a.effect!.getTiming().delay as number);
+      }
+      requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
+  };
+  async function recordFlip(page: Page, ms: number) {
+    await page.addInitScript(FLIP_RECORDER);
+    await open(page, { width: 390, height: 844 });
+    await page.waitForTimeout(ms);
+    return page.evaluate(() => (window as unknown as { __hf: FlipRec }).__hf);
+  }
+  /* The face's showings: contiguous runs of frames with the face more than half in. */
+  const episodes = (fr: Frame[]) => {
+    const eps: { start: number; end: number; i0: number; i1: number; day: string }[] = [];
+    fr.forEach((f, i) => {
+      const on = f[2] > .5, last = eps[eps.length - 1];
+      if (on && (!last || last.i1 !== i - 1)) eps.push({ start: f[0], end: f[0], i0: i, i1: i, day: f[4] });
+      else if (on) { last.end = f[0]; last.i1 = i; }
+    });
+    return eps;
+  };
+  /* The turn passes edge-on when two neighbouring frames sit on opposite sides of it: one past +45°,
+     the next past −45° (or the reverse). Going through 0° instead would need the small angles between. */
+  const passesEdgeOn = (fr: Frame[], from: number, to: number) => {
+    for (let i = Math.max(1, from); i <= Math.min(fr.length - 1, to); i++) {
+      const a = fr[i - 1][1], b = fr[i][1];
+      if (fr[i][0] - fr[i - 1][0] < 80 && ((a > 45 && b < -45) || (a < -45 && b > 45))) return [a, b];
+    }
+    return null;
+  };
+
+  test("HM18 flip: the face shows twice, at Day 36 and Day 99, turning through edge-on; never over the popover", async ({ page }) => {
+    test.setTimeout(180000);
+    const r = await recordFlip(page, 36000);
+    const eps = episodes(r.frames).filter((e) => r.out === null || e.start < r.out);
+    const popOn = r.frames.find((f) => f[3] > .05)?.[0] ?? null;
+    const both = r.frames.filter((f) => f[2] > .05 && f[3] > .05);
+    const turns = eps.map((e) => ({ day: e.day, in: passesEdgeOn(r.frames, e.i0 - 30, e.i0 + 3), out: passesEdgeOn(r.frames, e.i1 - 3, e.i1 + 30) }));
+    console.log("HM18", JSON.stringify({ frames: r.frames.length, out: r.out, eps: eps.map(({ start, end, day }) => ({ start, end, day })), bands: r.bands, turns, popOn, both: both.length, partialAt: r.partialAt, fullAt: r.fullAt }));
+    expect(r.frames.length, "population: the card was sampled every frame").toBeGreaterThan(1200);
+    expect(r.out, "population: the first run ended").not.toBeNull();
+    expect(eps.map((e) => e.day), "the face shows exactly twice in a run, at Day 36 and Day 99").toEqual(["36", "99"]);
+    expect(r.bands, "its band names the request and the day").toEqual(["Partial requestedDay 36", "Full requestedDay 99"]);
+    turns.forEach((x) => {
+      expect(x.in, `Day ${x.day}: the card turns in through edge-on (rotateY passes ±90°)`).not.toBeNull();
+      expect(x.out, `Day ${x.day}: and back out through it`).not.toBeNull();
+    });
+    expect(both.length, "the popover is never visible while the face is").toBe(0);
+    expect(popOn, "population: the popover opened").not.toBeNull();
+    expect(eps[0].end, "the partial's face is gone before the popover opens").toBeLessThan(popOn!);
+    expect(r.partialAt, "population: Partial requested typed, after the partial's face").toBeGreaterThan(eps[0].end);
+    expect(r.fullAt, "population: Full requested typed").not.toBeNull();
+    expect(eps[1].end, "the full's face is gone before Full requested types").toBeLessThan(r.fullAt!);
+    expect(r.frames.find((f) => f[0] >= r.fullAt!)![2], "and is still gone on the frame its first letter appears").toBeLessThan(.05);
+  });
+
+  test("HM19 confetti: every piece's centre stays above the face's title", async ({ page }) => {
+    test.setTimeout(180000);
+    const r = await recordFlip(page, 30000);
+    console.log("HM19", JSON.stringify(r.fx));
+    expect(r.fx.frames, "population: frames with confetti in the air").toBeGreaterThan(20);
+    expect(r.fx.pieces, "population: the burst is 18 pieces").toBe(18);
+    expect(r.fx.worst!, "the lowest piece's centre is still above the title's top edge").toBeLessThan(0);
+  });
+
+  test("HM20 wording: no she or he anywhere on the card across a run; the popover reads Eleanor asked for", async ({ page }) => {
+    test.setTimeout(180000);
+    await page.addInitScript(WORDING_RECORDER);
+    await open(page, { width: 390, height: 844 });
+    await page.waitForTimeout(36000);
+    const r = await page.evaluate(() => (window as unknown as { __hw: WordingRec }).__hw);
+    const hits = pronounHits(r.texts);
+    console.log("HM20", JSON.stringify({ frames: r.frames, distinct: r.texts.length, labels: r.labels, faces: r.texts.filter((t) => t.includes("wants")).map((t) => t.match(/[A-Z][a-z ]+ wants[^|]*/)?.[0]).filter((x, i, a) => a.indexOf(x) === i), hits }));
+    expect(r.frames, "population: a whole run sampled").toBeGreaterThan(1200);
+    expect(r.texts.some((t) => t.includes("Full requested")), "population: the run reached Full requested").toBe(true);
+    expect(r.texts.some((t) => t.includes("wants the full!")), "population: the full's face was read").toBe(true);
+    expect(hits, "no she/he/her/him on the card at any frame").toEqual([]);
+    expect(r.labels, "the popover names the agent").toEqual(["Eleanor asked for"]);
+  });
+
+  test("HM21 reduced motion: no flip — no visible face, and the card stays flat", async ({ page }) => {
+    test.setTimeout(60000);
+    await open(page, { width: 390, height: 844 }, { reduce: true });
+    const r = await page.evaluate(() => new Promise<{ frames: number; faces: number; turned: number }>((done) => {
+      const R = { frames: 0, faces: 0, turned: 0 }, t0 = performance.now();
+      const loop = () => {
+        const front = document.querySelector<HTMLElement>('[data-hc="front"]');
+        if (front) {
+          R.frames++;
+          document.querySelectorAll<HTMLElement>(".mk-cgx").forEach((g) => { const c = getComputedStyle(g); if (c.display !== "none" && +c.opacity > 0) R.faces++; });
+          if (!new DOMMatrix(getComputedStyle(front).transform).is2D) R.turned++;
+        }
+        if (performance.now() - t0 < 8000) requestAnimationFrame(loop); else done(R);
+      };
+      requestAnimationFrame(loop);
+    }));
+    console.log("HM21", JSON.stringify(r));
+    expect(r.frames, "population: the card was sampled").toBeGreaterThan(200);
+    expect(r.faces, "no frame shows a face").toBe(0);
+    expect(r.turned, "no frame turns the card about Y").toBe(0);
   });
 });

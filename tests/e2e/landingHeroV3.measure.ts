@@ -35,6 +35,11 @@
  *   LH17 cap (v4.1): no rendered marketing page says "first 100" or "100 places"; Pricing and the phone
  *        pill state the same N as the landing hero
  *   LH18 reduced motion (v4.1): the counter's first visible state is already its final value
+ *   LH19 no flip on the desk (phone v3.2): across a whole run at 1440 × 780 there is never a .mk-cgx
+ *        element, and no card is ever turned about Y (every computed transform is 2D, no keyframe
+ *        names rotateY)
+ *   LH20 wording (v3.2): across a whole run no she/he/her/him anywhere on the card; the popover reads
+ *        "Eleanor asked for"
  *
  * The public page needs no sign-in, so this file opens it itself. Run it without the setup project:
  *   SA_E2E_BASE_URL=http://127.0.0.1:<port> npx playwright test landingHeroV3 --project measure --no-deps
@@ -46,6 +51,7 @@
 import { test, expect, Page } from "@playwright/test";
 import { mkdirSync } from "node:fs";
 import { resolve } from "node:path";
+import { WORDING_RECORDER, WordingRec, pronounHits, breakWording } from "./heroWording";
 
 const MUTATE = process.env.LH3_MUTATE ?? "";
 const SHOTS = !!process.env.LH3_SHOTS;
@@ -66,6 +72,8 @@ const CSS_BREAKS: Record<string, string> = {
   LH15: ".mk-herowrap.mk-herowrap--carded{background-image:none!important;box-shadow:none!important}",
   LH15b: ".mk-herowrap.mk-herowrap--carded{box-shadow:none!important}",
   LH16: ".mk-places-bar i{width:90%!important}",
+  /* v3.2: the desk's front card turned about Y. */
+  LH19b: '[data-hc="front"]{transform:perspective(1600px) rotateY(24deg)!important}',
 };
 
 async function open(page: Page, vp: { width: number; height: number }, reduce = false) {
@@ -528,7 +536,7 @@ test.describe("landing hero v3", () => {
     expect(Math.abs(r.share - 3 / 50), "the fill is (cap − N) / cap of the track").toBeLessThan(.005);
   });
 
-  test("LH17 cap: no page says 100 places; Pricing and the phone pill state the hero's N", async ({ page }) => {
+  test("LH17 cap: no page says 100 places; Pricing and the phone's join bar state the hero's N", async ({ page }) => {
     test.setTimeout(90000);
     const bad: string[] = [];
     for (const route of ["/", "/pricing", "/founders", "/about", "/contact"]) {
@@ -551,11 +559,12 @@ test.describe("landing hero v3", () => {
       return document.querySelector(".mk-fmmeta")?.textContent?.match(/^(\d+) places left$/)?.[1];
     });
     await page.setViewportSize({ width: 390, height: 844 }); await stub(page); await page.goto("/", { waitUntil: "load" }); await page.waitForTimeout(1500);
-    const pill = await page.evaluate(() => document.querySelector(".mk-navpill-c .mk-sr")?.textContent);
+    /* RETARGETED (landing on phones v4, 26 Oct): the strip is gone; the phone's count is the join bar's. */
+    const pill = await page.evaluate(() => document.querySelector(".mk-jbar .mk-jbc")?.textContent);
     console.log("LH17", JSON.stringify({ hero, pricing, pill }));
     expect(hero, "population: the hero's N").toBe("47");
     expect(pricing, "Pricing states the same N against the same cap").toBe("47");
-    expect(pill, "the phone pill states the same N").toBe("47 places left");
+    expect(pill, "the phone's join bar states the same N").toBe("47 places left");
   });
 
   test("LH18 reduced motion: the counter's first visible state is its final value", async ({ page }) => {
@@ -582,5 +591,55 @@ test.describe("landing hero v3", () => {
     }));
     expect(r.hidden).toBe("true");
     expect(r.h1s).toEqual(["No more winging it."]);
+  });
+
+  test("LH19 no flip on the desk: no face element and no turn about Y across a whole run", async ({ page }) => {
+    test.setTimeout(120000);
+    if (MUTATE === "LH19") await page.addInitScript(() => {
+      /* A face put on the desk's front card, as the phone's flip would. */
+      setTimeout(() => { const f = document.querySelector('[data-hc="front"]'); if (f) { const g = document.createElement("div"); g.className = "mk-cgx"; f.appendChild(g); } }, 3000);
+    });
+    await page.addInitScript(() => {
+      const R = { frames: 0, cards: 0, cgx: 0, turned: [] as string[], rotateKf: 0 };
+      (window as unknown as { __lhf: typeof R }).__lhf = R;
+      const loop = () => {
+        const cards = document.querySelectorAll<HTMLElement>(".mk-hc-pile [data-hc]");
+        if (cards.length) {
+          R.frames++; R.cards = Math.max(R.cards, cards.length);
+          if (document.querySelector(".mk-cgx")) R.cgx++;
+          cards.forEach((c) => {
+            const tr = getComputedStyle(c).transform;
+            if (tr !== "none" && !new DOMMatrix(tr).is2D && R.turned.length < 5) R.turned.push(`${c.getAttribute("data-hc")}: ${tr.slice(0, 60)}`);
+            for (const a of c.getAnimations()) if (JSON.stringify((a.effect as KeyframeEffect).getKeyframes()).includes("rotateY")) R.rotateKf++;
+          });
+        }
+        requestAnimationFrame(loop);
+      };
+      requestAnimationFrame(loop);
+    });
+    await open(page, { width: 1440, height: 780 });
+    await page.waitForTimeout(31000); // a whole desk run is ~29s
+    const r = await page.evaluate(() => (window as unknown as { __lhf: { frames: number; cards: number; cgx: number; turned: string[]; rotateKf: number } }).__lhf);
+    console.log("LH19", JSON.stringify(r));
+    expect(r.frames, "population: a whole run sampled every frame").toBeGreaterThan(1200);
+    expect(r.cards, "population: the pile's cards were read").toBeGreaterThan(1);
+    expect(r.cgx, "no frame has a .mk-cgx element on the desk").toBe(0);
+    expect(r.turned, "no card is turned about Y").toEqual([]);
+    expect(r.rotateKf, "no animation on a card names rotateY").toBe(0);
+  });
+
+  test("LH20 wording: no she or he anywhere on the card across a run; the popover reads Eleanor asked for", async ({ page }) => {
+    test.setTimeout(120000);
+    if (MUTATE === "LH20") await breakWording(page);
+    await page.addInitScript(WORDING_RECORDER);
+    await open(page, { width: 1440, height: 780 });
+    await page.waitForTimeout(31000);
+    const r = await page.evaluate(() => (window as unknown as { __hw: WordingRec }).__hw);
+    const hits = pronounHits(r.texts);
+    console.log("LH20", JSON.stringify({ frames: r.frames, distinct: r.texts.length, labels: r.labels, hits }));
+    expect(r.frames, "population: a whole run sampled").toBeGreaterThan(1200);
+    expect(r.texts.some((t) => t.includes("Full requested")), "population: the run reached Full requested").toBe(true);
+    expect(hits, "no she/he/her/him on the card at any frame").toEqual([]);
+    expect(r.labels, "the popover names the agent").toEqual(["Eleanor asked for"]);
   });
 });

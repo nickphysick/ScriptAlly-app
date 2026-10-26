@@ -15,7 +15,6 @@ import "./marketing.css";
 import { marketingNavState, MarketingNavUser } from "./marketingNav";
 import { BRAND_MARK, artUrl } from "./brandArt";
 import { MarketingFooter } from "./MarketingFooter";
-import { FoundingNavPill } from "./FoundingNavPill";
 import { usePhone } from "./usePhone";
 
 /* ── The brand artwork: the hawk and the drawn wordmark ──
@@ -143,8 +142,8 @@ export const MarketingShell: React.FC<{
   }, [menuOpen, closeMenu]);
 
   const nav = marketingNavState(user);
-  /* At and below 760px the anon CTA is the founding pill with its live places-left counter. Mounted
-     only there, so the count-up starts when the pill is actually on screen. */
+  /* At and below 760px the bar is the logo, one tinted pill ("Log in", or "Open dashboard" signed in)
+     and the menu (landing on phones v4, 26 Oct; v1's founding strip above the bar is gone). */
   const phone = usePhone();
 
   const toFeatures = () => {
@@ -202,17 +201,25 @@ export const MarketingShell: React.FC<{
             ))}
           </div>
           <div className="mk-navright">
+            {/* Phones (landing on phones v4, 26 Oct): one tinted pill — "Log in" to the sign-in route the
+                desktop's Log in uses, or, signed in, the desktop's "Open dashboard". The founding offer
+                is the drawer's sign-up, the join bar and the closing card; the strip is gone. */}
+            {phone ? (
+              nav.mode === "anon" ? (
+                <button type="button" className="mk-lg" onClick={() => { window.location.hash = "#/login"; }}>Log in</button>
+              ) : (
+                <button type="button" className="mk-lg" onClick={() => onNavigate("dashboard")}>{nav.primaryLabel}</button>
+              )
+            ) : (<>
             {nav.showLogIn && (
               <button type="button" className="mk-login" onClick={() => { window.location.hash = "#/login"; }}>
                 Log in
               </button>
             )}
             {nav.mode === "anon" ? (
-              phone ? <FoundingNavPill onGo={() => onNavigate("founders")} /> : (
-                <button type="button" className="mk-btn mk-btn--cream" onClick={() => onNavigate("founders")}>
-                  {nav.primaryLabel}
-                </button>
-              )
+              <button type="button" className="mk-btn mk-btn--cream" onClick={() => onNavigate("founders")}>
+                {nav.primaryLabel}
+              </button>
             ) : (
               <>
                 <button type="button" className="mk-btn mk-btn--cream" onClick={() => onNavigate("dashboard")}>
@@ -221,6 +228,7 @@ export const MarketingShell: React.FC<{
                 <span className="mk-avatar" aria-hidden="true">{nav.avatarInitial}</span>
               </>
             )}
+            </>)}
           </div>
           <button
             type="button"

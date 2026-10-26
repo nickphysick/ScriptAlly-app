@@ -60,7 +60,7 @@ describe("landing copy — verbatim locks", () => {
     expect(HERO_PHONE_MS).toBe("Lord of the Wings");
     expect(HERO_PHONE_MS_FRONT).toBe("The Taloned Mr Ripley");
     expect(Object.values(PHONE_STORY.chips).map((c) => c[0])).toEqual(["Task created", "Task complete", "Reminder set"]);
-    expect(PHONE_STORY.asked.label).toBe("She asked for");
+    expect(PHONE_STORY.asked.label, "the agent named, never she (25 Oct)").toBe("Eleanor asked for");
     const src = (await import("node:fs")).readFileSync(new URL("./landingCopy.ts", import.meta.url), "utf8");
     for (const gone of ["Who are you querying?", "Logging query…", "PHONE_DASH", "PHONE_PICK", "PHONE_FORM", "PHONE_RESPONSE", "PHONE_PILLS", "Your manuscript", "Your novel", "Lead future queries with the opening voice"]) {
       expect(src.includes(gone), `retired: ${gone}`).toBe(false);
@@ -107,7 +107,7 @@ describe("landing copy — verbatim locks", () => {
     expect(VISION_LINK).toBe("Read our story");
     expect(VISION_POINTS.map((p) => p.heading)).toEqual([
       "Get good stories told.",
-      "Make querying simple.",
+      "Make querying straightforward.", // C2, 26 Oct (was "Make querying simple.")
       "Let writers write.",
     ]);
     expect(VISION_POINTS[0].body).toBe(
@@ -319,11 +319,12 @@ describe("landing copy — verbatim locks", () => {
     expect(FOUNDING_EYEBROW).toBe("Founding writers");
     expect(FOUNDING_HEADING).toBe("Join as a founding writer");
     expect(FOUNDING_GET_LEAD).toBe("You get:");
+    /* REWRITTEN (26 Oct, landing on phones v1 C1): the offer's four terms, in this order. */
     expect(FOUNDING_GETS).toEqual([
-      "Early access to QueryHawk",
+      "QueryHawk Pro, free for your entire querying campaign",
       "A direct line to the founder",
-      "The full experience free of charge for 6 months",
-      "Half price for as long as you need it after that",
+      "Smart Import to bring your list across",
+      "An exclusive Early Bird discount for the writers you invite when we launch",
     ]);
     /* ⚠️ `FOUNDING_IN_RETURN`, NOT `FOUNDING_ASK` — that name belongs to the retired hero panel and
        is held in the absent-exports list above. Reusing it would have left that lock green about a

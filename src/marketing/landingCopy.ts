@@ -66,6 +66,25 @@ export const HERO_PHONE_TAGS = ["Adult", "Literary fiction", "94,000 words"] as 
    The footer's two halves at each turn of the story, and the two tags that float up beside a line.
    Every string the phone story writes comes from here; the card's own markup (the five lines, the
    reminder, the final panel) is shared with the desktop card and stays in it. */
+/**
+ * ⚠️ AN AGENT IS NAMED, NEVER "SHE" OR "HE" (25 Oct, both layouts). The app does not know an agent's
+ * pronouns and never asks, so a note that refers to the agent uses their FIRST name, or "the agent"
+ * ("The agent" at the start of a sentence) when none is saved. Never she, her, he or him.
+ */
+export const agentRef = (first: string | null | undefined, opts: { start?: boolean } = {}): string => {
+  const f = (first ?? "").trim();
+  return f || (opts.start ? "The agent" : "the agent");
+};
+/** The demo card's agent (Eleanor Whitfield), by first name: what the hero's notes call the agent by. */
+export const HERO_AGENT_FIRST = "Eleanor";
+/** The popover's label — what the agent asked for. */
+export const askedLabel = (first: string | null | undefined) => `${agentRef(first, { start: true })} asked for`;
+/** The two congratulations faces' titles (phones, v3.2). */
+export const flipTitles = (first: string | null | undefined) => ({
+  partial: `${agentRef(first, { start: true })} wants to read more!`,
+  full: `${agentRef(first, { start: true })} wants the full!`,
+});
+
 export const PHONE_STORY = {
   foot: {
     sent: ["Reply expected by 9 May", "Record a response"],
@@ -82,12 +101,18 @@ export const PHONE_STORY = {
   },
   /** v3.1 (C2) — what Eleanor asked for: the popover under the status pill, flicked Words then Chapters. */
   asked: {
-    label: "She asked for",
+    label: askedLabel(HERO_AGENT_FIRST),
     first: "First",
     units: [["pages", "Pages"], ["chapters", "Chapters"], ["words", "Words"]],
     pages: "50", words: "5,000", chapters: "3",
     /** The desk's sequence (v4 S2): Pages 10 → Chapters 1, then + pressed twice: 2, 3. */
     desk: { start: "10", chapters: "1", steps: ["2", "3"], minus: "−", plus: "+" },
+  },
+  /** v3.2 (F3) — the face the card flips to when a request lands (phones): the band, the title, and one
+      line as [before, in bold, after]. */
+  flip: {
+    partial: { tag: "Partial requested", day: "Day 36", title: flipTitles(HERO_AGENT_FIRST).partial, line: ["A partial request: ", "the first 3 chapters", "."] },
+    full: { tag: "Full requested", day: "Day 99", title: flipTitles(HERO_AGENT_FIRST).full, line: ["A full request: ", "the whole manuscript", "."] },
   },
 } as const;
 
@@ -152,10 +177,10 @@ export const BAND_HEADING =
    was right.
 
    ⚠️ AND THE FOUR LINES BELOW ARE PROMISES THE PRODUCT HAS TO KEEP, in the same class as the
-   About page's: early access, a direct line, six months free, and half price afterwards for as
-   long as they need it. The last is a PERMANENT pricing commitment and it is stated on two pages
-   — `FOUNDERS_DEAL`'s sweetener is the same promise in different words. If the terms change, both
-   change together. If one stops being true the fix is the product, not the sentence. */
+   About page's: Pro free for a whole querying campaign, a direct line, Smart Import, and an Early
+   Bird discount for the writers a founder invites (26 Oct — the offer that replaced "six months free,
+   then half price"). `FOUNDERS_DEAL` states the same terms in its own words, so if the terms change,
+   both change together. If one stops being true the fix is the product, not the sentence. */
 export const FOUNDING_EYEBROW = "Founding writers";
 export const FOUNDING_HEADING = "Join as a founding writer";
 
@@ -170,10 +195,10 @@ export const FOUNDING_GET_LEAD = "You get:";
  * two read wrong, and the shorter one is the one that would win.
  */
 export const FOUNDING_GETS = [
-  "Early access to QueryHawk",
+  "QueryHawk Pro, free for your entire querying campaign",
   "A direct line to the founder",
-  "The full experience free of charge for 6 months",
-  "Half price for as long as you need it after that",
+  "Smart Import to bring your list across",
+  "An exclusive Early Bird discount for the writers you invite when we launch",
 ] as const;
 
 /**
@@ -405,7 +430,7 @@ export const VISION_POINTS: VisionPoint[] = [
   {
     key: "simple",
     image: "/images/make-querying-simple.png",
-    heading: "Make querying simple.",
+    heading: "Make querying straightforward.",
     body: "Stop shooting from the hip. We'll crunch the data and give you everything you need to " +
       "make targeted decisions at the right time.",
   },
@@ -419,6 +444,59 @@ export const VISION_POINTS: VisionPoint[] = [
 
 /** The band's one way out, to /about. A button, because marketing routes go through `onNavigate`. */
 export const VISION_LINK = "Read our story";
+
+/* ══════════════ The landing page on phones (≤760px; landing on phones v3, 26 Oct) ══════════════
+   ref design-refs/landing-mobile-v3.html (the story and its closing beat; v2's ref for the rest).
+   Every string is the ref's, verbatim.
+
+   ⚠️ ONE FEATURE PER FLICK: each caption is a "N of 6" label, the heading, one short line and three
+   ticked points, in the ref's order — "Updates log themselves" third, "Your list so far comes with
+   you" last. Each names its row by `key`, so the picture, its size and its version still come from
+   `FEATURE_ROWS` and the desktop rows' table. */
+export interface FeatureCard { key: FeatureRow["key"]; heading: string; line: string; points: [string, string, string] }
+
+/** "3 of 6" — the caption's place in the story. */
+export const featureStoryLabel = (n: number, of: number) => `${n} of ${of}`;
+
+export const FEATURE_STORY: FeatureCard[] = [
+  { key: "track", heading: "Every query tracked, from start to finish", line: "A full history for everything you've sent, so nothing slips through the cracks.",
+    points: ["Queries, partials and fulls on one card", "Reply-by dates worked out for you", "Nudge reminders when an agent goes quiet"] },
+  { key: "agents", heading: "Your agents on file", line: "Not just a name and an email.",
+    points: ["Wish lists and what they ask for", "Typical response times", "Every interaction in one timeline"] },
+  { key: "email", heading: "Updates log themselves", line: "Paste a sent or received email and QueryHawk suggests the updates.",
+    points: ["Works with any email you paste in", "Suggestions, never automatic changes", "You always have the final say"] },
+  { key: "packages", heading: "Curate and compare packages", line: "Bundle your materials and see what gets requests.",
+    points: ["Letters, synopses and samples together", "Attach a package to any query", "See which combinations get interest"] },
+  { key: "comps", heading: "Compile your comparable titles", line: "Build the comps that position your book.",
+    points: ["A library of comparable titles", "Add them to your query letters", "Track which ones resonate"] },
+  { key: "import", heading: "Your list so far comes with you", line: "Already querying? Bring it all across.",
+    points: ["From a spreadsheet, notes or memory", "Smart Import sets it up for you", "Or start fresh in minutes"] },
+];
+
+/* The vision on navy (landing on phones v4, ref landing-mobile-v4.html `.nv`): v3's closing beat folded
+   into its top — the heading and the lead — then one frame and the three lines you swipe, each a
+   point's short line keyed to `VISION_POINTS` (whose headings are shared — "Make querying
+   straightforward." included), and the way out to /about. */
+export const VISION_NAVY_HEADING = "And so much more.";
+export const VISION_NAVY_LEAD = "That's QueryHawk, your smart querying companion. And here are the principles we built it on:";
+export const VISION_NAVY_ARIA = "Our principles, swipe across";
+export const VISION_NAVY: Record<string, string> = {
+  stories: "A captivating story should never be lost to a sub-par querying campaign.",
+  simple: "Everything you need to make the right call at the right time.",
+  write: "Less time in spreadsheets, more time doing what you love.",
+};
+export const VISION_NAVY_LINK = "Read our story →";
+
+/* The join bar that follows a reader down the landing page on phones. Its count's words are
+   `navPlacesLeft`, the same phrase the other places-left lines use. */
+export const JOIN_BAR_CTA = "Join";
+
+/* The closing founding card (phones; it replaces the founding band there). The pill is the band's own
+   eyebrow and the list is `FOUNDING_GETS`, so the offer is stated in one place. */
+export const CLOSE_HEADING = "Help get things off the ground.";
+export const CLOSE_LEAD = `We're looking for ${FOUNDING_CAP} writers to put QueryHawk through its paces. You get:`;
+export const CLOSE_NOTE = "All we ask is occasional feedback to help shape QueryHawk.";
+export const CLOSE_LINK = "How being a founding writer works →";
 
 /* ══════════════ Pricing (public, marketing tier) ══════════════
    ⚠️ THREE FIGURES ARE UNSET AND NOTHING HERE MAY INVENT THEM. The design this page was rebuilt

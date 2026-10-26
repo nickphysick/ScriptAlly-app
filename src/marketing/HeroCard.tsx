@@ -150,7 +150,7 @@ function makeStory(root: HTMLElement, hooks: StoryHooks = {}) {
   };
   /* ⚠️ WHAT DIFFERS BETWEEN THE TWO LAYOUTS, AND NOTHING ELSE (desktop v4): the stamp's step — the
      desktop ref's `stamp` returns t+240, the phone ref's t+340 — and the popover's sequence. */
-  const SHORT = hooks.phone ? { stampStep: 340, pop: "flick" as const } : { stampStep: 240, pop: "stepper" as const };
+  const SHORT = hooks.phone ? { stampStep: 340, pop: "flick" as const, flip: true } : { stampStep: 240, pop: "stepper" as const, flip: false };
   let tilt = 0; const tilts = [-1.4, 1.1, -.6, 1.6, -1, .8];
   function stamp(el: Element, t: number, r?: number | null, fill?: FillMode) {
     r = r != null ? r : tilts[(tilt++) % tilts.length];
@@ -325,6 +325,59 @@ function makeStory(root: HTMLElement, hooks: StoryHooks = {}) {
     return { pop: g, w: { sg: g.querySelector<HTMLElement>(".mk-seg")!, n: g.querySelector<HTMLElement>(".mk-smp-n")! }, plus: g.querySelector<HTMLElement>('[data-pm="plus"]') };
   }
 
+  /* v3.2 (F1–F3) — the card flips over to celebrate a request (phones only): a turn about the vertical
+     axis away to 90°, the congratulations face swapped in edge-on, the turn back in from −90° with a
+     slight overshoot, a hold, then the same two halves back to the card. A small burst of confetti
+     fans UP from the disc as the face lands. The ref's `flip()`, with its timings; returns the moment
+     the card is face up again. Every animation and timer goes through `A`/`later`, so a loop or an
+     unmount cancels it with everything else (F6). */
+  const POPPER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l5.5-14 8.5 8.5z"/><path d="M9.5 6l8.5 8.5"/><path d="M14 4.5c.6 1 .5 2-.2 2.8M19.5 10c-1-.6-2-.5-2.8.2M17 3.5l.4 1.4M20.5 7l-1.4.4M12 2.5v1.2"/></svg>';
+  const FX = ["#a2452a", "#2a3a52", "#7f9a83", "#e0b9a8", "#c98a3a"];
+  function flip(kind: "partial" | "full", t: number) {
+    let g = front.querySelector<HTMLElement>(".mk-cgx");
+    if (!g) { g = document.createElement("div"); g.className = "mk-cgx"; g.setAttribute("aria-hidden", "true"); front.appendChild(g); }
+    const face = g, d = PHONE_STORY.flip[kind];
+    later(() => {
+      face.replaceChildren();
+      const band = document.createElement("div"); band.className = "mk-cgx-band";
+      const tag = document.createElement("span"); tag.textContent = d.tag;
+      const day = document.createElement("span"); day.textContent = d.day;
+      band.append(tag, day);
+      const body = document.createElement("div"); body.className = "mk-cgx-body";
+      const disc = document.createElement("div"); disc.className = "mk-cgx-disc"; disc.innerHTML = POPPER;
+      const title = document.createElement("div"); title.className = "mk-cgx-t"; title.textContent = d.title;
+      const line = document.createElement("div"); line.className = "mk-cgx-l";
+      const strong = document.createElement("b"); strong.textContent = d.line[1];
+      line.append(d.line[0], strong, d.line[2]);
+      body.append(disc, title, line); face.append(band, body);
+      /* ⚠️ THE REF'S EXPRESSION, VERBATIM. Its second term mixes the drawer's top in viewport pixels (594)
+         with the card's top in stage pixels (64) — 60px apart — so it is not the height visible above the
+         drawer and the first term (card height − 44) always wins: the body centres over 661 card units,
+         part of it under the drawer. That is the picture that was approved, so it is reproduced. */
+      face.style.setProperty("--mk-cgx-h", Math.min(front.offsetHeight - 44, (594 - 64) / 0.73 - 60) + "px");
+      for (let i = 0; i < 18; i++) { const f = document.createElement("i"); f.className = "mk-fx"; f.style.background = FX[i % FX.length]; disc.appendChild(f); }
+    }, t - 30);
+    const base = `rotate(${PHONE_FRONT_ROTATE}deg) perspective(1600px)`, H1 = 260, H2 = 340, HOLD = 1900, ez1 = "cubic-bezier(.5,0,.9,.5)", ez2 = "cubic-bezier(.15,.9,.3,1.15)";
+    A(front, [{ transform: base + " rotateY(0deg)" }, { transform: base + " rotateY(90deg)" }], { duration: H1, delay: t, easing: ez1, fill: "none" });
+    A(face, [{ opacity: 1 }, { opacity: 1 }], { duration: H2 + HOLD + H1, delay: t + H1, fill: "none" });
+    A(front, [{ transform: base + " rotateY(-90deg)" }, { transform: base + " rotateY(0deg)" }], { duration: H2, delay: t + H1, easing: ez2, fill: "none" });
+    // a small burst from the disc as it lands
+    later(() => {
+      face.querySelectorAll<HTMLElement>(".mk-fx").forEach((f, i) => {
+        const a = Math.PI * (-1.08 + (i / 17) * 1.16) + (Math.random() - .5) * .12, r = 72 + Math.random() * 58, rot = (Math.random() * 540 - 270) | 0;
+        A(f, [
+          { opacity: 1, transform: "translate(-50%,-50%) rotate(0deg) scale(.6)" },
+          { opacity: 1, transform: `translate(calc(-50% + ${Math.cos(a) * r}px),calc(-50% + ${Math.sin(a) * r}px)) rotate(${rot}deg) scale(1)`, offset: .55 },
+          { opacity: 0, transform: `translate(calc(-50% + ${Math.cos(a) * r * 1.15}px),calc(-50% + ${Math.sin(a) * r * 1.15 + 26}px)) rotate(${rot * 1.4}deg) scale(.9)` },
+        ], { duration: 1300, easing: "cubic-bezier(.2,.7,.3,1)", fill: "forwards" });
+      });
+    }, t + H1 + 120);
+    const back = t + H1 + H2 + HOLD;
+    A(front, [{ transform: base + " rotateY(0deg)" }, { transform: base + " rotateY(-90deg)" }], { duration: H1, delay: back, easing: ez1, fill: "none" });
+    A(front, [{ transform: base + " rotateY(90deg)" }, { transform: base + " rotateY(0deg)" }], { duration: H2, delay: back + H1, easing: "cubic-bezier(.2,.8,.3,1)", fill: "none" });
+    return back + H1 + H2;
+  }
+
   /**
    * One query, Query sent to Full requested in about 24 seconds, then the card is dealt away to the
    * left, a fresh one comes in from the right, and the story plays again, for ever. On a phone, after
@@ -355,7 +408,8 @@ function makeStory(root: HTMLElement, hooks: StoryHooks = {}) {
     /* C2 — what Eleanor asked for drops from the pill: Pages 50, flicked to Words 5,000 then Chapters 3,
        tucked back up, and only then does "Partial requested" type in with its chip. The ref's times. */
     {
-      const Q = PHONE_STORY.asked, { pop, w, plus } = getPop(); let u = pr + 250;
+      /* v3.2 (F1): on a phone the card flips to celebrate first; the popover drops 200ms after it is face up. */
+      const Q = PHONE_STORY.asked, { pop, w, plus } = getPop(); let u = SHORT.flip ? flip("partial", pr + 80) + 200 : pr + 250;
       const first = SHORT.pop === "stepper" ? Q.desk.start : Q.pages;
       later(() => { const k = front.getBoundingClientRect().width / front.offsetWidth, pb = pill.getBoundingClientRect(), c = front.getBoundingClientRect(); pop.style.top = ((pb.bottom - c.top) / k + 8) + "px"; segReset(w, first); }, u - 20);
       A(pop, [{ opacity: 0, transform: "translateY(-8px) scale(.9)" }, { opacity: 1, transform: "none" }], { duration: 280, delay: u, fill: "both", easing: "cubic-bezier(.2,.8,.2,1)" });
@@ -392,7 +446,8 @@ function makeStory(root: HTMLElement, hooks: StoryHooks = {}) {
     reveal(parts[4].st, e + 2600); knots.push([e + 2700, 88]);
     const Fu = climb(waits[4]!, 88, 99, e + 2700) - 320;
     court(YOU, Fu); setPill("freq", Fu); foot(F.full[0], F.full[1], true, Fu);
-    e = step(parts[4], Fu);
+    /* v3.2 (F1): and again for the full, before its line types in (150ms after it is face up). */
+    e = step(parts[4], SHORT.flip ? flip("full", Fu + 80) + 150 : Fu);
     e = stamp(pf, e + 150, -1.2);
     A(pfIcon, [{ opacity: 0, transform: "scale(0) rotate(-90deg)" }, { opacity: 1, transform: "scale(1.3) rotate(10deg)", offset: .7 }, { opacity: 1, transform: "none" }], { duration: 520, delay: e, easing: BOUNCE });
     e = type(pfText, e + 60, 9); stamp(pfBtn, e + 100, 1.5);
@@ -407,7 +462,7 @@ function makeStory(root: HTMLElement, hooks: StoryHooks = {}) {
   function start(lead: number) { LEAD = lead || 0; stop(); if (reduceMotion()) return; looped = false; playShort(false); }
   /* Unmount: cancel everything and take back the dots this run added, so a second run (StrictMode,
      a remount) starts from the markup rather than from the leftovers of the first. */
-  function dispose() { cancelAll(); waits.forEach((w) => w?.remove()); slotWait.remove(); root.querySelectorAll(".mk-taskchip, .mk-pillpop").forEach((g) => g.remove()); }
+  function dispose() { cancelAll(); waits.forEach((w) => w?.remove()); slotWait.remove(); root.querySelectorAll(".mk-taskchip, .mk-pillpop, .mk-cgx").forEach((g) => g.remove()); }
   setStatic();
   return { start, stop, dispose };
 }

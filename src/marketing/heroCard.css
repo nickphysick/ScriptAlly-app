@@ -345,6 +345,25 @@
 }
 .mk-seg span { position: relative; z-index: 1; padding: 7px 10px 6px; font: 400 13px/1 var(--mk-f-display); color: rgba(28,19,15,.62); transition: color .2s; }
 .mk-seg span.mk-on { color: #fff; }
+/* v3.2 (F3) — the congratulations face the phone card flips to (the ref's `.cgx`): inside the card with
+   the card's radius, white with its hairline; a blush band; the body centred in the part of the card
+   visible above the drawer (`--mk-cgx-h`, set by the story); a blush disc with a soft halo and the rust
+   party popper; the title in the typewriter face; one serif line; and the confetti (`.mk-fx`). The
+   title and line are not h3/p: the brand stylesheet forces heading faces with !important. */
+.mk-cgx { --mk-cgx-h: 560px; /* the ref's default; the story writes the visible height inline */ position: absolute; inset: 0; z-index: 40; border-radius: 14px; overflow: hidden; opacity: 0; pointer-events: none; background: #fff; box-shadow: inset 0 0 0 1px #d9c8ba; }
+.mk-cgx-band {
+  height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: #f5e6df; color: #7c3a2a;
+  font: 500 12px/1 var(--mk-f-mono); letter-spacing: .16em; text-transform: uppercase;
+}
+.mk-cgx-body { position: absolute; left: 0; right: 0; top: 44px; height: var(--mk-cgx-h); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 40px; }
+.mk-cgx-disc { position: relative; width: 96px; height: 96px; border-radius: 50%; background: #f5e6df; display: grid; place-items: center; color: #a2452a; box-shadow: 0 0 0 10px rgba(245,230,223,.45); }
+.mk-cgx-disc svg { width: 46px; height: 46px; }
+.mk-cgx-t { margin: 34px 0 0; font: 400 44px/1.08 var(--mk-f-display); letter-spacing: -.01em; color: #1c130f; }
+.mk-cgx-l { margin: 18px 0 0; font: 400 22px/1.45 var(--mk-f-serif); color: rgba(28,19,15,.72); }
+.mk-cgx-l b { font-weight: 600; color: #1c130f; }
+.mk-cgx .mk-fx { position: absolute; left: 50%; top: 50%; width: 10px; height: 16px; border-radius: 2px; opacity: 0; }
+@media (prefers-reduced-motion: reduce) { .mk-cgx { display: none; } }
+
 /* The desk's popover (v4 S2): the desktop ref's last declarations — larger number and segments, and
    the round +/− steppers (`.pillpop .pm`). The phone's popover takes none of these. */
 .mk-pillpop--desk .mk-smp { gap: 6px; }

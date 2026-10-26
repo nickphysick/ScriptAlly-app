@@ -24,6 +24,9 @@ import { StatusBand } from "./StatusBand";
 import { FeatureRows } from "./FeatureRows";
 import { Vision } from "./Vision";
 import { FoundingBand } from "./FoundingBand";
+import { FeatureStory } from "./FeatureStory";
+import { JoinBar } from "./JoinBar";
+import { FoundingClose } from "./FoundingClose";
 import { DOCUMENT_TITLE } from "./landingCopy";
 
 export const Landing: React.FC<{ onNavigate: (tab: string, subPageName?: string) => void }> = ({ onNavigate }) => {
@@ -43,13 +46,16 @@ export const Landing: React.FC<{ onNavigate: (tab: string, subPageName?: string)
   const lower = (
       <div className="mk-lower">
         <StatusBand />
-        <FeatureRows />
+        {/* Phones (landing on phones v2, 26 Oct): the six features are a story you scroll down under a
+            half-screen picture, the vision is a navy carousel, and the page closes on a short founding
+            card that hands on to /founders. The desktop is unchanged. */}
+        {phone ? <FeatureStory /> : <FeatureRows />}
         {/* ⚠️ THE WHITE BAND SITS BETWEEN THE ROWS AND THE OFFER, AND THE ORDER IS THE ARGUMENT.
             The rows say what the product does; this says why it exists; the founding band asks for
             something. Moved above the rows it would ask a reader to care before they know what
             they are looking at, and below the offer nobody would reach it. */}
         <Vision onNavigate={onNavigate} />
-        <FoundingBand onNavigate={onNavigate} />
+        {phone ? <FoundingClose onNavigate={onNavigate} /> : <FoundingBand onNavigate={onNavigate} />}
       {/* ⚠️ LINKS, NOT SPANS. These were inert text for as long as the pages did not exist — which
           is a worse answer than an unfinished page, because a reader cannot tell the difference
           between "no policy yet" and "the link is broken". The footer is now shared, so a page
@@ -60,6 +66,8 @@ export const Landing: React.FC<{ onNavigate: (tab: string, subPageName?: string)
   return (
     <div>
       {phone ? <HeroPhone onNavigate={onNavigate}>{lower}</HeroPhone> : <><Hero onNavigate={onNavigate} />{lower}</>}
+      {/* Phones only, this page only (landing on phones v2): the founding ask that follows you down. */}
+      {phone && <JoinBar />}
     </div>
   );
 };

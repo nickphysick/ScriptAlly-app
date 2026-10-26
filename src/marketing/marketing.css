@@ -551,10 +551,12 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 }
 
 /* ── Phones: one 60px ink row (23 Oct, ref design-refs/landing-hero-mobile-v1.html `.m-nav`) ──
-   Mark (26px) and "QueryHawk" in Source Serif 4, then the founding pill (`FoundingNavPill`), then the
-   burger, whose panel and behaviour are unchanged. Every pre-login page gets it.
+   Mark (26px) and "QueryHawk" in Source Serif 4, then the burger, whose panel and behaviour are
+   unchanged. Every pre-login page gets it. (Since landing on phones v4, 26 Oct, the bar's right side is
+   one tinted pill, `.mk-lg` — "Log in", or "Open dashboard" signed in; v1's founding strip and the
+   pill that sat in the bar before it are both deleted.)
    ⚠️ DECLARED AFTER THE 600 BLOCK, AND THAT ORDER IS LOAD-BEARING: it UNDOES that block's wrap (the
-   pill is narrower than the CTA it replaces, so the row fits again at 320+), and both are
+   row is the mark and the burger, so it fits at 320+), and both are
    single-class media rules at equal specificity, so the later one wins.
    ⚠️ THE ROW IS 60px IN BOTH STATES. The condense only ever changed padding and the wordmark's size;
    here neither changes, because the landing's sticky stage sits at `top: var(--mk-nav-h)` and a bar
@@ -579,22 +581,19 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   .mk-sheet:has(.mk-hp) { border-top-left-radius: 0; border-top-right-radius: 0; }
 }
 
-/* The founding pill: cream, 42px, two lines — the offer, then ten segments and the places left.
-   ⚠️ IT DECLARES ITS FAMILIES: `brand.tsx` gives every bare `button` and `span` the app's body face. */
-.mk-navpill {
-  height: 42px; box-sizing: border-box; padding: 0 13px; border: 0; border-radius: 21px;
-  background: var(--mk-cream-btn); color: var(--mk-ink-shell); cursor: pointer;
-  display: inline-flex; flex-direction: column; align-items: stretch; justify-content: center; gap: 4px;
-  font-family: var(--mk-f-sans); text-align: left;
-}
-.mk-navpill-t { font: 600 12.5px/1 var(--mk-f-sans); white-space: nowrap; }
-.mk-navpill-c { display: flex; align-items: center; gap: 7px; font-family: var(--mk-f-sans); }
-.mk-navpill-c i { display: flex; gap: 2px; flex: 1; }
-.mk-navpill-c b { flex: 1; height: 4px; border-radius: 1px; background: rgba(27, 36, 51, .14); }
-.mk-navpill-c b.mk-on { background: var(--mk-rust); }
-.mk-navpill-c em {
-  font: 600 9.5px/1 var(--mk-f-sans); font-style: normal; color: var(--mk-rust);
-  white-space: nowrap; font-variant-numeric: tabular-nums;
+/* "Log in" on phones (landing on phones v4, 26 Oct; ref design-refs/landing-mobile-v4.html `.lg`): a
+   tinted pill on the ink bar — white text, white at 10%, no outline and no underline in any state. The
+   same pill holds "Open dashboard" for a signed-in visitor. v1's founding strip above the bar is gone.
+   ⚠️ IT DECLARES ITS FAMILY: `brand.tsx` gives every bare `button` the app's body face. */
+.mk-lg { display: none; }
+@media (max-width: 760px) {
+  .mk-lg {
+    display: inline-flex; align-items: center; height: 36px; box-sizing: border-box; padding: 0 14px;
+    border: 0; border-radius: 18px; background: rgba(255, 255, 255, .1); color: #fff; cursor: pointer;
+    font: 500 15px/1 var(--mk-f-sans); text-decoration: none; white-space: nowrap;
+  }
+  .mk-lg:hover, .mk-lg:focus, .mk-lg:active { text-decoration: none; color: #fff; }
+  .mk-lg:focus-visible { outline: 2px solid #e8b4a3; outline-offset: 2px; }
 }
 
 /* ── The sheet: one light surface between the ink nav and the ink footer ──
@@ -2468,4 +2467,165 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   .mk-formcard { padding: 24px 20px 22px; }
   .mk-cmailcard { flex-direction: column; align-items: flex-start; gap: 12px; }
   .mk-cart { max-width: 220px; margin-left: auto; margin-right: auto; }
+}
+
+/* ══════════════ The landing page on phones, below the hero (landing on phones v1, 26 Oct) ══════════════
+   ref design-refs/landing-mobile-v1.html for `.close`/`.ccard`, and landing-mobile-v2.html for the
+   feature story and the navy vision (below). Every value is the ref's. Only phones render these classes (`usePhone`), so none
+   of them can reach the desktop layout.
+   ⚠️ HEADINGS READ THE FACE TOKENS WITH `!important` AND TWO CLASSES: `brand.tsx` forces every bare
+   h2/h3 to the brand family at runtime, and a single-class rule loses between two important
+   declarations. Spans and paragraphs declare their family too, for the same file's sake. */
+
+/* ── v2 (26 Oct, ref design-refs/landing-mobile-v2.html), superseding v1's swipe strip and vision rows ──
+   Values are the ref's LAST declaration of each rule (it restates `.sp.big` for the real page). */
+
+/* The six features: a story you scroll down. The picture panel sticks under the 60px bar
+   (`--mk-nav-h` at this width) and takes half the screen below it, never more than 420px; it is sticky
+   inside this section only, so after the last caption it scrolls away and the vision rises beneath. */
+/* v3 (ref landing-mobile-v3.html `.p3`, `.s3`, `.tl`): one feature per flick. `--mk-ph` is the panel's
+   height, read by the panel, its picture and each caption's height and snap margin, so the four can
+   never disagree. The story has no bottom padding in v3: the closing beat follows the sixth caption. */
+.mk-story { --mk-ph: min(calc((100svh - var(--mk-nav-h)) / 2), 420px); position: relative; scroll-margin-top: var(--mk-nav-h); }
+.mk-spimg {
+  position: sticky; top: var(--mk-nav-h); z-index: 2; box-sizing: border-box;
+  height: var(--mk-ph); padding: 6px 14px 0;
+  background: var(--mk-lower);
+}
+.mk-spimg img {
+  position: absolute; left: 14px; right: 14px; top: 6px; width: calc(100% - 28px); height: calc(var(--mk-ph) - 48px);
+  max-width: none; object-fit: contain; background: #f5e6df; border-radius: 18px;
+  opacity: 0; transition: opacity .45s;
+}
+.mk-spimg img.mk-on { opacity: 1; }
+.mk-spbar { position: absolute; left: 14px; right: 14px; bottom: 16px; display: flex; gap: 5px; }
+.mk-spbar i { flex: 1; height: 4px; border-radius: 2px; background: rgba(28, 19, 15, .12); transition: background .3s; }
+.mk-spbar i.mk-on { background: var(--mk-navy); }
+/* Each caption is exactly the room beneath the panel, and a snap point whose margin is the bar plus
+   the panel — so a snapped caption sits directly under the picture. */
+.mk-s3 {
+  height: calc(100svh - var(--mk-nav-h) - var(--mk-ph)); box-sizing: border-box; padding: 14px 24px 0;
+  scroll-snap-align: start; scroll-snap-stop: always; scroll-margin-top: calc(var(--mk-nav-h) + var(--mk-ph));
+  opacity: .25; transition: opacity .3s;
+}
+.mk-s3.mk-on { opacity: 1; }
+/* ⚠️ A 14px BLOCK, NOT AN INLINE SPAN ON THE CAPTION'S LINE: inline, its line box takes the caption's
+   inherited 24px strut and the heading lands 10px lower than the ref's (whose strut is 14px). */
+.mk-s3n { display: block; height: 14px; font: 500 11px/14px var(--mk-f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--mk-rust); }
+.mk-s3 .mk-s3h3 { margin: 8px 0 6px; font: 400 24px/1.16 var(--mk-f-display) !important; color: #1c130f; }
+.mk-s3 p { margin: 0; font: 400 16px/1.5 var(--mk-f-serif); color: rgba(28, 19, 15, .78); }
+.mk-s3 ul { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; }
+.mk-s3 li { display: grid; grid-template-columns: 20px 1fr; gap: 8px; font: 400 15px/1.35 var(--mk-f-serif); color: #1c130f; }
+.mk-s3 li span { font: inherit; }
+
+/* S5 (landing on phones v3): on a screen as short as 360 × 640 the three points and the join bar do
+   not fit, so the third point is dropped at that height only. 375 × 667 keeps all three (see the v3
+   report: two of its captions still meet the bar). */
+@media (max-width: 760px) and (max-height: 660px) { .mk-s3 li:nth-child(3) { display: none; } }
+
+/* The page snaps only while the story is on it (phones, the landing page), and only to the six
+   captions (v4 folded v3's closing beat into the vision). `proximity`: a scroll that ends far from them is left where it is. */
+@media (max-width: 760px) { html:has(.mk-story) { scroll-snap-type: y proximity; } }
+
+/* The vision on navy (v4, ref landing-mobile-v4.html `.nv`, `.nk`, `.nl`, `.vbf`, `.vbr`/`.vbt`):
+   rounded top corners, 6px up into the story's foot, the heading and the lead, ONE cream frame whose
+   pictures cross-fade, and the line carousel beneath it. Text on navy is white; the active dot pink. */
+.mk-vision.mk-vision--navy { background: #1b2433; color: #fff; margin-top: -6px; padding: 40px 0 30px; border-radius: 26px 26px 0 0; }
+.mk-vision--navy .mk-nk { margin: 0 24px 10px; font: 400 32px/1.1 var(--mk-f-display) !important; color: #fff; }
+.mk-vision--navy .mk-nl { margin: 0 24px 26px; max-width: 320px; font: 400 17px/1.5 var(--mk-f-serif); color: rgba(255, 255, 255, .78); }
+.mk-vbf { position: relative; height: 300px; margin: 0 24px; background: #f4f1ea; border-radius: 20px; overflow: hidden; }
+.mk-vbf img {
+  position: absolute; inset: 20px; width: calc(100% - 40px); height: calc(100% - 40px); max-width: none;
+  object-fit: contain; opacity: 0; transition: opacity .45s;
+}
+.mk-vbf img.mk-on { opacity: 1; }
+.mk-vrail {
+  display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory;
+  padding: 0 24px 6px; margin: 18px 0 0; scrollbar-width: none; overscroll-behavior-x: contain;
+}
+.mk-vrail::-webkit-scrollbar { display: none; }
+.mk-vrail:focus-visible { outline: 2px solid #e8b4a3; outline-offset: 2px; }
+.mk-vbt { flex: 0 0 330px; scroll-snap-align: center; }
+.mk-vbt .mk-vbth3 { margin: 0 0 8px; font: 400 28px/1.12 var(--mk-f-display) !important; color: #fff; }
+.mk-vbt p { margin: 0; font: 400 16px/1.5 var(--mk-f-serif); color: rgba(255, 255, 255, .75); }
+.mk-vdots { display: flex; justify-content: center; gap: 6px; margin: 14px 0 6px; }
+.mk-vdots i { width: 6px; height: 6px; border-radius: 3px; background: rgba(255, 255, 255, .22); transition: width .2s, background .2s; }
+.mk-vdots i.mk-on { width: 18px; background: #e8b4a3; }
+.mk-vlink {
+  display: inline-block; margin: 14px 24px 0; font: 500 15px/1 var(--mk-f-serif); color: #fff;
+  text-decoration: underline; text-decoration-color: #e8b4a3; text-underline-offset: 6px; text-decoration-thickness: 1.5px;
+}
+
+/* The closing founding card, on the light ground: white fading to blush, the hawks on its top-right
+   corner, breaking its top edge (absolutely placed, so they take no room in the card). */
+.mk-close { padding: 64px 16px 44px; }
+.mk-ccard {
+  position: relative; border-radius: 20px; padding: 22px 20px;
+  background: linear-gradient(160deg, #fff 0%, #fff 55%, #f7ece7 100%);
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, .06), 0 20px 40px -28px rgba(28, 19, 15, .45);
+}
+.mk-ccart { position: absolute; right: -4px; top: -58px; width: 138px; height: auto; max-width: none; }
+.mk-ccpill {
+  display: inline-block; font: 600 10.5px/1 var(--mk-f-mono); letter-spacing: .16em; text-transform: uppercase;
+  /* ⚠️ RUST, NOT THE REF'S BURGUNDY (#7c3a2a): burgundy is retired from this sheet (landing colours
+     v2) and rust is the one red on light, so the pill reads the token. */
+  color: var(--mk-rust); background: #f5e6df; border-radius: 999px; padding: 7px 10px;
+}
+.mk-ccard .mk-cch2 { font: 400 28px/1.12 var(--mk-f-display) !important; margin: 14px 0 10px; max-width: 220px; color: #1c130f; }
+.mk-cclead { font: 400 15.5px/1.5 var(--mk-f-serif); color: rgba(28, 19, 15, .78); margin: 0 0 14px; }
+.mk-cclist { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 10px; }
+.mk-cclist li { display: grid; grid-template-columns: 22px 1fr; gap: 8px; font: 400 15.5px/1.4 var(--mk-f-serif); color: #1c130f; }
+.mk-cclist li svg { margin-top: 1px; }
+.mk-cclist li span { font: inherit; }
+.mk-ccform { display: grid; gap: 8px; }
+.mk-ccform input[type="email"] {
+  height: 48px; box-sizing: border-box; border-radius: 12px; border: 1px solid rgba(28, 19, 15, .2); background: #fff;
+  padding: 0 14px; font: 400 16px/1 var(--mk-f-serif); color: #1c130f; width: 100%;
+}
+.mk-ccform input[type="email"]::placeholder { color: rgba(28, 19, 15, .4); }
+.mk-ccform input[type="email"]:focus { outline: none; border-color: var(--mk-navy); box-shadow: 0 0 0 3px rgba(42, 58, 82, .15); }
+.mk-ccform .mk-btn {
+  height: 48px; border-radius: 12px; background: var(--mk-navy); color: #fff; border: 0; width: 100%;
+  font: 600 16px/1 var(--mk-f-serif); justify-content: center;
+}
+.mk-ccform .mk-btn:hover { background: var(--mk-navy); }
+.mk-ccard .mk-betanote { margin: 8px 0 0; font-size: 12px; line-height: 1.4; }
+.mk-ccard .mk-places { margin-top: 16px; width: auto; }
+.mk-ccard .mk-places-bar { height: 4px; border-radius: 2px; background: #e9e4dd; overflow: hidden; }
+.mk-ccard .mk-places span { margin-top: 9px; font: 500 11px/1 var(--mk-f-mono); letter-spacing: .16em; text-transform: uppercase; color: #1c130f; }
+.mk-ccnote { font: 400 13px/1.45 var(--mk-f-serif); color: rgba(28, 19, 15, .6); margin: 12px 0 0; }
+.mk-ccmore {
+  display: inline-flex; gap: 6px; align-items: center; margin-top: 18px;
+  font: 500 15px/1 var(--mk-f-serif); color: var(--mk-navy);
+  text-decoration: underline; text-decoration-color: var(--mk-rust); text-underline-offset: 6px; text-decoration-thickness: 1.5px;
+}
+/* The join bar (landing on phones v2; ref `.bbar`): navy, floating 12px above the bottom plus the
+   safe-area inset and 10px from each side, hidden below the fold until `JoinBar` shows it. Text on navy
+   is white and its count is pink; text on the pink Join is black. Each part declares its family —
+   `brand.tsx` gives bare `b` and `span` the app's body face. */
+.mk-jbar {
+  position: fixed; left: 10px; right: 10px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); z-index: 70;
+  display: flex; align-items: center; gap: 12px; padding: 10px 10px 10px 16px; border-radius: 16px;
+  background: #1b2433; color: #fff; box-shadow: 0 14px 30px -12px rgba(0, 0, 0, .5); text-decoration: none;
+  transform: translateY(130%); opacity: 0; pointer-events: none;
+  transition: transform .35s cubic-bezier(.2, .8, .2, 1), opacity .25s;
+}
+.mk-jbar.mk-on { transform: none; opacity: 1; pointer-events: auto; }
+.mk-jbt { flex: 1; display: grid; gap: 6px; }
+.mk-jbt b { font: 600 15px/1.1 var(--mk-f-serif); color: #fff; }
+.mk-jbc { display: flex; align-items: center; gap: 8px; font: 500 11px/1 var(--mk-f-mono); letter-spacing: .06em; color: #e8b4a3; }
+.mk-jbc i { width: 64px; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, .16); overflow: hidden; }
+.mk-jbc em { display: block; min-width: 4px; height: 100%; background: #e8b4a3; }
+.mk-jbj {
+  height: 40px; padding: 0 18px; border-radius: 12px; background: #e8b4a3; color: #1c130f;
+  display: grid; place-items: center; font: 600 15px/1 var(--mk-f-serif);
+}
+.mk-jbar:focus-visible { outline: 2px solid #e8b4a3; outline-offset: 2px; }
+@media (min-width: 761px) { .mk-jbar { display: none; } }
+
+/* ⚠️ AFTER THE RULES IT OVERRIDES: a media query confers no specificity, so an earlier reduced-motion
+   block would lose to the story's, the carousel's and the join bar's rules on source order. */
+@media (prefers-reduced-motion: reduce) {
+  .mk-spimg img, .mk-s3, .mk-spbar i, .mk-vdots i, .mk-vbf img, .mk-jbar { transition: none; }
+  html:has(.mk-story) { scroll-snap-type: none; }
 }
