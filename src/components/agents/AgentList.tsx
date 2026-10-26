@@ -45,7 +45,7 @@ import {
 } from "../../lib/agentCardStore";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { ContactHeader25 } from "./contact/ContactHeader24";
-import { ContactGlance25 } from "./contact/ContactGlance25";
+import { ContactGlance251 } from "./contact/ContactGlance251";
 import { ContactListTitle25 } from "./contact/ContactListTitle25";
 import { GLANCE_ORDER, GLANCE_SETS, glanceCards, type GlanceKey as GlanceCardKey } from "../../lib/contactV25";
 import { ContactSheet24, SheetSkeleton } from "./contact/ContactSheet24";
@@ -569,6 +569,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* v24 A2 — the banner's figures: Housekeeping's gap count, the agents they belong to, and four faces */
   const banner = useMemo(() => bannerFigures(hk), [hk]);
   /* v25 B — At a glance: List health (Housekeeping's percentage and gap total), then the three sets' cards */
+  /* v25.1 A — a face's colours are its agent's set */
+  const standById = useMemo(() => new Map(factsAll.map((x) => [x.agent.id, x.stand] as const)), [factsAll]);
+  const standOf = useCallback((id: string) => standById.get(id) ?? null, [standById]);
   const glanceModel = useMemo(() => glanceCards(factsAll, pageState === "list" ? health : null, banner.gaps), [factsAll, pageState, health, banner.gaps]);
   const glancePressed = useMemo<GlanceCardKey | null>(
     () => (sets ? GLANCE_ORDER.find((k) => { const g = GLANCE_SETS[k]; return !!g && g.length === sets.length && g.every((x) => sets.includes(x)); }) ?? null : null),
@@ -930,8 +933,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
           <ContactHeader25 loading={pageState !== "list"} msTitle={scoped?.title?.trim() || null}
             addRef={addBtnRef} onAdd={openAdd}
             onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined}>
-            {/* v25 B — the cards: List health opens Housekeeping; the other three filter the list and Cards, a second press shows all */}
-            <ContactGlance25 cards={glanceModel} pressed={glancePressed} ready={pageState === "list"}
+            {/* v25.1 A — At a glance as one ledger card (v25 B's four cards retired): List health opens Housekeeping; the
+                other three filter the list and Cards, a second press shows all */}
+            <ContactGlance251 cards={glanceModel} pressed={glancePressed} ready={pageState === "list"} standOf={standOf}
               onCard={(k) => { if (k === "health") { openHk(); return; } setSets(glancePressed === k ? null : GLANCE_SETS[k]); }} />
           </ContactHeader25>
         )}
