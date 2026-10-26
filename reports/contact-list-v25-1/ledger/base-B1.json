@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "B1",
+  "where": "Contact list population",
+  "ok": false,
+  "detail": "the log flow missing"
+ },
+ {
+  "lock": "B1",
+  "where": "Query Centre population",
+  "ok": true,
+  "detail": "the log flow open"
+ },
+ {
+  "lock": "B1",
+  "where": "Query Centre first text",
+  "ok": false,
+  "detail": "first \"NEW QUERY\""
+ },
+ {
+  "lock": "B1",
+  "where": "Query Centre line",
+  "ok": false,
+  "detail": "line \"undefined…\""
+ },
+ {
+  "lock": "B1",
+  "where": "Query Centre no art",
+  "ok": false,
+  "detail": "-1 img(s) in the header"
+ },
+ {
+  "lock": "B1",
+  "where": "Query Centre no band label",
+  "ok": true,
+  "detail": "\"New query\" absent"
+ },
+ {
+  "lock": "B1",
+  "where": "Query Centre after an agent",
+  "ok": false,
+  "detail": "after choosing: \"null\""
+ }
+]

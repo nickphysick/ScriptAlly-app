@@ -263,7 +263,7 @@ const Row: React.FC<{ x: AgentFacts; p: ContactSheet24Props }> = ({ x, p }) => {
         <StateDisc x={x} />
         <span className="cl24-whot"><b>{name}</b>{agency ? <small>{agency}</small> : null}</span>
       </span>
-      <span role="cell" className="cl24-gen" data-cl24="genres">
+      <span role="cell" className="cl24-gen" data-cl24="genres" data-total={genres.length}>
         {shown.length ? (
           <>
             {shown.map((g) => (

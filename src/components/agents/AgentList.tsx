@@ -642,7 +642,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       case "open": return { el: row(), text: "Click any agent. Their card opens on the right." };
       /* the card is portalled with its panel (outside .aglist); full screen's wide card has its own Edit agent */
       case "edit": return { el: vis("[data-cl24='panel'] [data-cl24='link'][data-k='edit']") ?? vis("[data-cl24='wide-edit']") ?? row(), text: "Press Edit agent. Everything on the card can be changed there." };
-      case "hk": return { el: vis(".aglist [data-cl25='card'][data-k='health']") ?? vis("[data-cl24='band-health']"), text: "Press this. Housekeeping asks for one missing detail at a time." };
+      case "hk": return { el: vis(".aglist [data-cl251='cell'][data-k='health']") ?? vis("[data-cl24='band-health']"), text: "Press this. Housekeeping asks for one missing detail at a time." };
     }
   }, []);
   /* v17.1 §D — THE TAB'S DISMISSAL, SAVED TO THE ACCOUNT (`todoPrefs.contacts.tabDismissedAtGaps`): the gap count

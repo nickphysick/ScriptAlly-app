@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "A1",
+  "where": "1512 population",
+  "ok": false,
+  "detail": "0 ledger card(s), 0 cells"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 equal widths",
+  "ok": false,
+  "detail": "widths "
+ },
+ {
+  "lock": "A1",
+  "where": "1512 no gap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A1",
+  "where": "1512 rules between",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A1",
+  "where": "1512 label tops",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A1",
+  "where": "1512 count bottoms",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A1",
+  "where": "1512 right sits on the count",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A1",
+  "where": "1280 population",
+  "ok": false,
+  "detail": "0 ledger card(s), 0 cells"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 equal widths",
+  "ok": false,
+  "detail": "widths "
+ },
+ {
+  "lock": "A1",
+  "where": "1280 no gap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A1",
+  "where": "1280 rules between",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A1",
+  "where": "1280 label tops",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A1",
+  "where": "1280 count bottoms",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A1",
+  "where": "1280 right sits on the count",
+  "ok": true,
+  "detail": ""
+ }
+]

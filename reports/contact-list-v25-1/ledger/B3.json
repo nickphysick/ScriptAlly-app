@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "B3",
+  "where": "population",
+  "ok": true,
+  "detail": "the new-agent panel open"
+ },
+ {
+  "lock": "B3",
+  "where": "title",
+  "ok": true,
+  "detail": "title \"Adding new agent\""
+ },
+ {
+  "lock": "B3",
+  "where": "line",
+  "ok": true,
+  "detail": "line \"Fill out your agent profile with all the detail yo…\""
+ },
+ {
+  "lock": "B3",
+  "where": "the editor's tabs unchanged",
+  "ok": true,
+  "detail": "Details · What they want · How to query"
+ }
+]
