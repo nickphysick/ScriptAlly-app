@@ -18,6 +18,19 @@ export function subscribeFeedback(f: Listener): () => void {
   return () => { subs.delete(f); };
 }
 
+/* ── Dashboard v71 — the receipt: a note was SENT from the one panel ──
+   The dock already reports a send through its `onReceipt` prop; the shell, which mounts it, publishes
+   that here so a page can hear it (the founding writer card moves to "Sent. Thank you."). Nothing in
+   the dock's form, copy or callable changes. */
+const sentSubs = new Set<Listener>();
+/** The shell calls this from the dock's `onReceipt`. */
+export function notifyFeedbackSent(): void { for (const f of [...sentSubs]) f(); }
+/** A page subscribes; returns the unsubscribe. */
+export function subscribeFeedbackSent(f: Listener): () => void {
+  sentSubs.add(f);
+  return () => { sentSubs.delete(f); };
+}
+
 /* ── Help system v1, Part E — where the panel opens, which page it was opened on, and the draft ── */
 
 /** The sidebar's Give feedback buttons (three shapes, one shown at a time) register here; the panel sits beside the

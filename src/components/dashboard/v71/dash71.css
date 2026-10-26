@@ -416,3 +416,227 @@
   .d58 :is(.d71-task, .d71-fw) { transition: none; }
   .d58 :is(.d71-task, .d71-fw):hover { transform: none; }
 }
+
+/* ── D · the founding writer card ──────────────────────────────────────────────────────────────
+   A white card (radius 16, 6px of rim), a 1px burgundy frame inside it, a navy band, a soft pink
+   body. ⚠️ THE OUTER CARD IS THE SIZE CONTAINER (the art column is `26cqw` of it, the signature
+   needs 420px of it); the frame and its grid sit inside, because a container query cannot restyle
+   its own container. */
+.d71-fw {
+  container: d71fw / inline-size;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  min-height: 0;
+  padding: 6px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(28, 19, 15, 0.08);
+}
+.d71-fwframe {
+  position: relative;
+  box-sizing: border-box;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 11px;
+  overflow: hidden;
+}
+/* the burgundy hairline, drawn over the band so the frame reads continuous */
+.d71-fwframe::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(124, 58, 42, 0.45);
+  border-radius: 11px;
+  pointer-events: none;
+}
+.d71-fwband {
+  flex: none;
+  box-sizing: border-box;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 16px 0 18px;
+  border-radius: 11px 11px 0 0;
+  background: #2a3a52;
+  color: #fff;
+}
+.d58 .d71-fwband > span {
+  font-family: var(--d58-type) !important;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  color: #fff;
+  white-space: nowrap;
+}
+.d58 .d71-fwmore {
+  flex: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font-family: var(--d58-serif) !important;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: #fff;
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.55);
+  text-underline-offset: 4px;
+  white-space: nowrap;
+}
+.d58 .d71-fwmore:focus-visible { outline: 2px solid #fff; outline-offset: 2px; border-radius: 2px; }
+.d71-fwbody {
+  flex: 1 1 0;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: clamp(84px, 26cqw, 128px) minmax(0, 1fr);
+  align-items: center;
+  border-radius: 0 0 11px 11px;
+  background: #f3e0d7;
+}
+/* the art: vertically centred, never taller than its room — its own ground shadow shows in full */
+.d71-fwart {
+  box-sizing: border-box;
+  align-self: stretch;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 0 10px 8px;
+}
+.d71-fwart img { display: block; max-width: 100%; max-height: min(96px, 100%); width: auto; height: auto; object-fit: contain; }
+.d71-fwtxt {
+  box-sizing: border-box;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  padding: 12px 18px 12px 4px;
+  animation: d71FwIn 300ms cubic-bezier(0.22, 0.8, 0.3, 1) backwards;
+}
+@keyframes d71FwIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.d58 .d71-fw .d71-fwh {
+  margin: 0;
+  font-family: var(--d58-type) !important;
+  font-weight: 400;
+  font-size: clamp(16px, 1.2vw, 19px);
+  line-height: 1.2;
+  color: var(--d58-ink);
+  overflow-wrap: anywhere;
+}
+.d58 .d71-fwline {
+  margin: 0;
+  font-family: var(--d58-serif) !important;
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: rgba(28, 19, 15, 0.72);
+}
+.d58 .d71-fwline b { font-weight: 600; color: var(--d58-ink); }
+.d58 .d71-fwline.d71-fwfail { color: #a2452a; }
+.d71-fwrow { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 14px; margin-top: 3px; min-width: 0; }
+.d58 .d71-sig {
+  font-family: "Caveat", cursive !important;
+  font-size: 18px;
+  line-height: 1;
+  color: #a2452a;
+  white-space: nowrap;
+}
+/* the founder's full signature shows only when the card is at least 420px wide */
+@container d71fw (max-width: 419px) { .d58 .d71-sig--full { display: none; } }
+.d71-faces { display: flex; gap: 8px; }
+.d58 .d71-face {
+  position: relative;
+  box-sizing: border-box;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.3);
+  color: var(--d58-ink);
+  cursor: pointer;
+  transition: transform 0.14s ease, background-color 0.14s ease;
+}
+.d71-face svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.d58 .d71-face:hover { transform: translateY(-2px); background: #fff7f3; }
+.d58 .d71-face.on { background: var(--d58-ink); color: #fff; box-shadow: none; }
+.d58 .d71-face:disabled { cursor: default; }
+.d58 .d71-face:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+/* the label: an ink pill above, on hover and on keyboard focus — never a native title */
+.d58 .d71-face::after {
+  content: attr(data-label);
+  position: absolute;
+  bottom: calc(100% + 7px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--d58-ink);
+  color: #fff;
+  font-family: var(--d58-serif) !important;
+  font-size: 12px;
+  line-height: 1.3;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+  z-index: 5;
+}
+.d58 .d71-face:hover::after, .d58 .d71-face:focus-visible::after { opacity: 1; }
+.d58 .d71-say {
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 10px;
+  background: #2a3a52;
+  color: #fff;
+  font-family: var(--d58-serif) !important;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.d58 .d71-lnk {
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font-family: var(--d58-serif) !important;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: rgba(28, 19, 15, 0.6);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  white-space: nowrap;
+}
+.d58 :is(.d71-say, .d71-lnk):focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+
+/* first use: the same card at the column's own height; the art may grow to 118px */
+.d58[data-mode="pre"] .d58-right > .d71-fw { flex: 1 1 0; min-height: 150px; }
+.d58[data-mode="pre"] .d71-fwart img { max-height: min(118px, 100%); }
+
+/* a short window: the line goes in all three states; nothing is cut */
+@media (max-height: 760px) {
+  .d58 .d71-fwline { display: none; }
+  .d58 .d71-face { width: 26px; height: 26px; }
+  .d71-face svg { width: 16px; height: 16px; }
+  .d58 .d71-sig { font-size: 15px; }
+  .d58 .d71-say { padding: 5px 11px; font-size: 13px; }
+  .d71-fwtxt { padding: 6px 12px 6px 2px; }
+  .d71-fwart img { max-height: min(66px, 100%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .d71-fwtxt { animation: none; }
+  .d58 .d71-face { transition: none; }
+  .d58 .d71-face:hover { transform: none; }
+}
