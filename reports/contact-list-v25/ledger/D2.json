@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "D2",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "9 elements in the bar"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 order",
+  "ok": true,
+  "detail": "find 296.0 < 1090.3 < 1143.3 < 1277.9 < 1428.0 (search · Filters · group · sort · Full screen)"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 typewriter",
+  "ok": true,
+  "detail": "all 9 Special Elite, upright"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 placeholder",
+  "ok": true,
+  "detail": "placeholder \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 no prefixes",
+  "ok": true,
+  "detail": "\"Grouped by\"/\"Sorted by\" absent"
+ },
+ {
+  "lock": "D2",
+  "where": "1512 group icon",
+  "ok": true,
+  "detail": "group icon 18.0×18.0"
+ },
+ {
+  "lock": "D2",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "9 elements in the bar"
+ },
+ {
+  "lock": "D2",
+  "where": "1280 order",
+  "ok": true,
+  "detail": "find 292.0 < 862.3 < 915.3 < 1049.9 < 1200.0 (search · Filters · group · sort · Full screen)"
+ },
+ {
+  "lock": "D2",
+  "where": "1280 typewriter",
+  "ok": true,
+  "detail": "all 9 Special Elite, upright"
+ },
+ {
+  "lock": "D2",
+  "where": "1280 placeholder",
+  "ok": true,
+  "detail": "placeholder \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "D2",
+  "where": "1280 no prefixes",
+  "ok": true,
+  "detail": "\"Grouped by\"/\"Sorted by\" absent"
+ },
+ {
+  "lock": "D2",
+  "where": "1280 group icon",
+  "ok": true,
+  "detail": "group icon 18.0×18.0"
+ }
+]

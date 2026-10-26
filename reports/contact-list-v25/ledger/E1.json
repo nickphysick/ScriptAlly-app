@@ -1,0 +1,68 @@
+[
+ {
+  "lock": "E1",
+  "where": "2560 population",
+  "ok": true,
+  "detail": "book true band true body true art true"
+ },
+ {
+  "lock": "E1",
+  "where": "2560 book width",
+  "ok": true,
+  "detail": "book 1600.0"
+ },
+ {
+  "lock": "E1",
+  "where": "2560 centred",
+  "ok": true,
+  "detail": "left gap 442.0 · right gap 442.0"
+ },
+ {
+  "lock": "E1",
+  "where": "2560 band spans",
+  "ok": true,
+  "detail": "band 68.0–2552.0 · sheet 68.0–2552.0"
+ },
+ {
+  "lock": "E1",
+  "where": "2560 archivist",
+  "ok": true,
+  "detail": "archivist 532.0 against 532.0 (G 442.0)"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "book true band true body true art true"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 book width",
+  "ok": true,
+  "detail": "book 1436.0"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 centred",
+  "ok": true,
+  "detail": "left gap 0.0 · right gap 0.0"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 band spans",
+  "ok": true,
+  "detail": "band 68.0–1504.0 · sheet 68.0–1504.0"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 archivist",
+  "ok": true,
+  "detail": "archivist 90.0 against 90.0 (G 0.0)"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 unmoved",
+  "ok": true,
+  "detail": "book 68.0–1504.0 fills the sheet 68.0–1504.0"
+ }
+]

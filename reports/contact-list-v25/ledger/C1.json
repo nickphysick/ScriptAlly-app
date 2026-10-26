@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "C1",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "sheet true title true line true switch true"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 title left",
+  "ok": true,
+  "detail": "title 276.0 · list 276.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 count line left",
+  "ok": true,
+  "detail": "count line ink 276.0 · list 276.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 switch right",
+  "ok": true,
+  "detail": "switch 1476.0 · list 1476.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 switch foot",
+  "ok": true,
+  "detail": "switch bottom 578.9 · count line bottom 578.9"
+ },
+ {
+  "lock": "C1",
+  "where": "1512 not in the bar",
+  "ok": true,
+  "detail": "a switch is not in the navy bar"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "sheet true title true line true switch true"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 title left",
+  "ok": true,
+  "detail": "title 272.0 · list 272.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 count line left",
+  "ok": true,
+  "detail": "count line ink 272.0 · list 272.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 switch right",
+  "ok": true,
+  "detail": "switch 1248.0 · list 1248.0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 switch foot",
+  "ok": true,
+  "detail": "switch bottom 571.4 · count line bottom 571.4"
+ },
+ {
+  "lock": "C1",
+  "where": "1280 not in the bar",
+  "ok": true,
+  "detail": "a switch is not in the navy bar"
+ }
+]

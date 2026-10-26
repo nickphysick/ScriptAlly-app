@@ -1,0 +1,56 @@
+[
+ {
+  "lock": "F1",
+  "where": "population",
+  "ok": true,
+  "detail": "queries by book {\"The Smoke Test\":52,\"Murphy's Day Out\":14,\"Harbour of Glass\":8,\"The Quiet Second\":2,\"The Quiet Fixture\":10}"
+ },
+ {
+  "lock": "F1",
+  "where": "Contact list log door lands",
+  "ok": true,
+  "detail": "the shell's Log a query from /agents lands on /queries"
+ },
+ {
+  "lock": "F1",
+  "where": "Contact list log shown",
+  "ok": false,
+  "detail": "the moment missing"
+ },
+ {
+  "lock": "F1",
+  "where": "Contact list after an agent",
+  "ok": true,
+  "detail": "the log moment after an agent is chosen"
+ },
+ {
+  "lock": "F1",
+  "where": "Contact list record door stays",
+  "ok": true,
+  "detail": "the record door left the page at /agents"
+ },
+ {
+  "lock": "F1",
+  "where": "Contact list record",
+  "ok": false,
+  "detail": "record title \"missing\""
+ },
+ {
+  "lock": "F1",
+  "where": "Query Centre log shown",
+  "ok": false,
+  "detail": "the moment missing"
+ },
+ {
+  "lock": "F1",
+  "where": "Query Centre after an agent",
+  "ok": true,
+  "detail": "the log moment after an agent is chosen"
+ },
+ {
+  "lock": "F1",
+  "where": "Query Centre record",
+  "ok": false,
+  "detail": "record title \"missing\""
+ }
+]

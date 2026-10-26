@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "B1",
+  "where": "1512 population",
+  "ok": false,
+  "detail": "0 cards, 4 list groups"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 order",
+  "ok": false,
+  "detail": "order "
+ },
+ {
+  "lock": "B1",
+  "where": "1512 equal widths",
+  "ok": false,
+  "detail": "widths "
+ },
+ {
+  "lock": "B1",
+  "where": "1512 heights",
+  "ok": false,
+  "detail": "heights  against 103"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 population",
+  "ok": false,
+  "detail": "0 cards, 4 list groups"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 order",
+  "ok": false,
+  "detail": "order "
+ },
+ {
+  "lock": "B1",
+  "where": "1280 equal widths",
+  "ok": false,
+  "detail": "widths "
+ },
+ {
+  "lock": "B1",
+  "where": "1280 heights",
+  "ok": false,
+  "detail": "heights  against 95"
+ }
+]

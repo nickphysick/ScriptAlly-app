@@ -25,6 +25,8 @@ export interface SortField<K extends string> {
   label: string;
   /** the order switch's two words, each with the direction it sets (in the order they are drawn) */
   order: [{ label: string; reversed: boolean }, { label: string; reversed: boolean }];
+  /** the chip's own words, by direction, where they differ from `label` (Contact list v25: "Name A–Z" / "Name Z–A") */
+  chip?: (reversed: boolean) => string;
 }
 export interface SortValue<K extends string> { key: K; reversed: boolean }
 
@@ -72,7 +74,7 @@ export function SortChipButton<K extends string>({ fields, value, open, onToggle
       onClick={(e) => onToggle(e.currentTarget)}>
       {SORT_ICON}
       <em className="sc-sby">Sorted by</em>
-      <b className="sc-f" data-sc="field">{f?.label ?? "Order"}</b>
+      <b className="sc-f" data-sc="field">{f ? (f.chip ? f.chip(value.reversed) : f.label) : "Order"}</b>
       <i className="sc-dir" data-sc="dir" data-reversed={value.reversed ? "true" : "false"} aria-hidden="true">{value.reversed ? "↑" : "↓"}</i>
     </button>
   );

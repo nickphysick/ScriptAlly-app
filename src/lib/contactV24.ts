@@ -37,7 +37,9 @@ export function setCounts(facts: readonly Pick<AgentFacts, "stand">[]): SetCount
   for (const x of facts) c[x.stand] += 1;
   return c;
 }
-export const inSet = (x: Pick<AgentFacts, "stand">, set: SetKey | null): boolean => !set || x.stand === set;
+/** v25 B2 — a list of sets too (At a glance's Querying is Your move + With the agent) */
+export const inSet = (x: Pick<AgentFacts, "stand">, set: SetKey | readonly SetKey[] | null): boolean =>
+  !set || (typeof set === "string" ? x.stand === set : set.length === 0 || set.includes(x.stand));
 
 /** the list's groups: one run per set in SET_ORDER, the agents in the order they were handed (already sorted) */
 export interface SetGroup { key: SetKey; label: string; ids: string[] }
@@ -78,7 +80,7 @@ export function bannerFigures(m: Pick<HkModel, "items">): BannerFigures {
   return { gaps: m.items.length, agents: seen.size, faces };
 }
 /** "20 details are missing" / "1 detail is missing" */
-export const missingWords = (n: number): string => (n === 1 ? "1 detail is missing" : `${n} details are missing`);
+/* v25 A3 — `missingWords` retired with the banner it worded */
 
 /* ── E1 · the genre fit ──────────────────────────────────────────────────────────────────────────────────────── */
 

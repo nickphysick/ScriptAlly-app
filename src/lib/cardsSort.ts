@@ -25,7 +25,8 @@ export const QC_SORT_FIELDS: readonly SortField<Qc138SortKey>[] = [
 
 /** Contact list: its four sortable headings, in their order (Agent sorts by surname) */
 export const CL_SORT_FIELDS: readonly SortField<SortKey>[] = [
-  { key: "surname", label: "Surname", order: AZ },
+  /* Contact list v25 D2 — the bar's pill says "Name A–Z ↓" (the menu keeps "Surname") */
+  { key: "surname", label: "Surname", order: AZ, chip: (r) => (r ? "Name Z–A" : "Name A–Z") },
   { key: "added", label: "Date added", order: [{ label: "Newest first", reversed: false }, { label: "Oldest first", reversed: true }] },
   { key: "reply", label: "Reply time", order: [{ label: "Fastest first", reversed: false }, { label: "Slowest first", reversed: true }] },
   { key: "status", label: "Query status", order: [{ label: "Furthest on", reversed: false }, { label: "Earliest first", reversed: true }] },

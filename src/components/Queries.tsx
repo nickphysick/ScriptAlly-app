@@ -6063,7 +6063,7 @@ export const Queries: React.FC<{
       return true;
     };
     return (
-      <QcLogFlow149 nowMs={now} agents={flowAgents} seedAgentId={qcFlow.agentId} bookTitle={ms.title || "Untitled manuscript"}
+      <QcLogFlow149 nowMs={now} agents={flowAgents} seedAgentId={qcFlow.agentId} bookTitle={ms.title || "Untitled manuscript"} logged={forBook.length}
         packages={cards.map((c) => ({ id: c.id, name: c.name, ql: c.ql, syn: c.syn, sample: !!c.bookVersion }))}
         defaultPackageId={ms.activePackageId && cards.some((c) => c.id === ms.activePackageId) ? ms.activePackageId : null}
         onClose={() => setQcFlow(null)} onSave={onSaveLog} />

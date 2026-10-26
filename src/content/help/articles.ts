@@ -106,9 +106,9 @@ export const HELP_ARTICLE_LIST: readonly HelpArticle[] = [
   },
   {
     slug: "find-an-agent", area: "agents", title: "Find an agent", draft: true, updated: D,
-    lede: "Search by name or agency from the box beside the views, above the list. Results narrow as you type.",
+    lede: "Search by name or agency from the box at the left of the list's navy bar. Results narrow as you type.",
     guide: { page: CL, key: "search" },
-    body: "Type into `Find an agent or agency` above the list, or press `/` to jump there. In full screen the box sits under the navy band. It matches any part of an agent's name or their agency, whatever the capitals.\n\n"
+    body: "Type into `Find an agent or agency`, the first thing in the list's navy bar, or press `/` to jump there. In full screen the box sits under the navy band. It matches any part of an agent's name or their agency, whatever the capitals.\n\n"
       + "The list narrows as you type. Clear the box to see everyone again.",
     related: ["open-an-agent", "go-full-screen", "add-an-agent", "list-health"],
   },
@@ -152,7 +152,7 @@ export const HELP_ARTICLE_LIST: readonly HelpArticle[] = [
     guide: { page: CL, key: "hk" },
     body: "Each agent can hold five details QueryHawk uses: their reply time, the materials they want, their genres, their wishlist and, for an agent closed to queries, the date they reopen. List health is how many of those your list has, out of all it could have.\n\n"
       + "Reply time counts most, because it is how QueryHawk works out when a query is past its expected date. If an agent doesn't state one, say so in Housekeeping and it stops counting as a gap.\n\n"
-      + "To fill gaps one at a time, press `Fill in the gaps` in the List health banner at the top of the page (or the ring in full screen's band), or press `H`. Housekeeping opens beside your list. `Later` hides a gap for 30 days, but it still counts until it is filled.",
+      + "To fill gaps one at a time, press the List health card under At a glance (or the ring in full screen's band), or press `H`. Housekeeping opens beside your list. `Later` hides a gap for 30 days, but it still counts until it is filled.",
     related: ["add-an-agent", "edit-an-agent", "reply-times", "response-policy"],
   },
   {

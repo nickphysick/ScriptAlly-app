@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "A2",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "QC card found, CL card found"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 padding",
+  "ok": false,
+  "detail": "QC 22/36/24/36 · CL 30/40/32/40"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 art box",
+  "ok": true,
+  "detail": "QC 160.0×140.0 · CL 160.0×140.0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "QC card found, CL card found"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 padding",
+  "ok": false,
+  "detail": "QC 22/36/24/36 · CL 30/40/32/40"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 art box",
+  "ok": true,
+  "detail": "QC 160.0×140.0 · CL 160.0×140.0"
+ }
+]

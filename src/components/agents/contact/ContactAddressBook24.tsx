@@ -44,6 +44,8 @@ export interface AddressBook24Props {
   all: readonly AgentFacts[];
   counts: SetCounts;
   set: SetKey | null;
+  /** v25 B2 — At a glance's Querying (two sets) is applied: no segment is lit, and "All" is not either */
+  multi?: boolean;
   onSet: (k: SetKey | null) => void;
   health: { pct: number; gaps: number } | null;
   onFill: () => void;
@@ -164,7 +166,7 @@ export const ContactAddressBook24: React.FC<AddressBook24Props> = (p) => {
       <div className="cl24-fsh" data-cl24="book-top">
         <img className="cl24-fart" data-cl24="book-art" src={CONTACT_ART} alt="" aria-hidden="true" draggable={false} />
         <div className={`cl24-fband${tight ? " tight" : ""}`} data-cl24="band" ref={bandRef}>
-          <button type="button" className="cl24-fhero" data-cl24="band-count" aria-pressed={p.set === null} onClick={() => p.onSet(null)}>
+          <button type="button" className="cl24-fhero" data-cl24="band-count" aria-pressed={p.set === null && !p.multi} onClick={() => p.onSet(null)}>
             <b>{total}</b><span className="cl24-fw">{total === 1 ? "agent on file" : "agents on file"}</span><span className="cl24-fs2">{total === 1 ? "agent" : "agents"}</span>
           </button>
           <span className="cl24-fdiv" aria-hidden="true" />

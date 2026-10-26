@@ -11,9 +11,10 @@
  *    "Next" and "Show them", so nothing else on a card is pressable.
  * ⚠️ THE HEAD IS INSET FROM THE CARD ON THREE SIDES (≈5px), so the card's cream frame shows all round the tint.
  */
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React, { useMemo } from "react";
 import type { WhereKey } from "../../../lib/qcSummary";
 import type { StatCard } from "../../../lib/qc150";
+import { GlanceCards, type GlanceItem } from "../../shared/GlanceCards";
 import "./qcv150.css";
 
 /* the head doodles, lifted from the mock's background set: a feather, a plane, a sleeping envelope, a stamp */
@@ -32,65 +33,18 @@ export const QcStatCards150: React.FC<{
   onCard: (k: WhereKey) => void;
   loading: boolean;
 }> = ({ cards, where, onCard, loading }) => {
-  /* v150.1 §3 — HOW MANY DISCS FIT beside the count, measured per card: a 237px card at a 1280 window cannot hold six
-     discs and "+N" beside a two-digit count. The discs shown are cut to the room and "+N" grows to match, so the row
-     still accounts for every query (shown + N = the count). */
-  const gridRef = useRef<HTMLDivElement>(null);
-  const [room, setRoom] = useState<Record<string, number>>({});
-  useLayoutEffect(() => {
-    const g = gridRef.current;
-    if (!g) return undefined;
-    const read = () => {
-      const out: Record<string, number> = {};
-      g.querySelectorAll<HTMLElement>("[data-qc150='card']").forEach((c) => {
-        const body = c.querySelector<HTMLElement>("[data-qc150='body']"), n = c.querySelector<HTMLElement>("[data-qc150='count']");
-        if (!body || !n) return;
-        const cs = getComputedStyle(body);
-        const d = parseFloat(getComputedStyle(c.querySelector<HTMLElement>(".qc150-face") ?? body).width) || 30;
-        const avail = body.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - n.offsetWidth - (parseFloat(cs.columnGap) || 16) - 40;
-        out[c.dataset.k!] = Math.max(1, Math.floor((avail - d) / (d - 6)) + 1);
-      });
-      setRoom((r) => (JSON.stringify(r) === JSON.stringify(out) ? r : out));
-    };
-    read();
-    if (typeof ResizeObserver === "undefined") return undefined;
-    const ro = new ResizeObserver(read);
-    ro.observe(g);
-    return () => ro.disconnect();
-  }, [cards]);
+  /* Contact list v25 B2 — THE CARDS ARE THE SHARED `GlanceCards` (lifted from here, the DOM unchanged): this wrapper
+     names the Query Centre's four courts, their doodles and swatches, and the `data-qc150` probes. */
+  const items = useMemo<GlanceItem[]>(() => (cards ?? SKELETON).map((c) => ({
+    key: c.key, label: c.label, figure: c.count, total: c.count, faces: c.faces, tone: c.key,
+    swatch: `qc149-sw qc149-sw--${SWATCH[c.key]} qc150-sw`, doodle: DOODLE[c.key],
+    ariaLabel: `${c.label}: ${c.count} ${c.count === 1 ? "query" : "queries"}. ${where === c.key ? "Showing only these; press to show all" : "Show only these"}`,
+  })), [cards, where]);
   return (
-  /* v150.1 §3 — "At a glance": the heading, then four equal cards, each a head over one row (the count, then the faces).
-     The detail lines, Your move's "Next" and "Show them" are gone. */
-  <section className="qc150-glance" data-qc150="glance" aria-labelledby="qc1501-gh">
-    <h3 id="qc1501-gh" className="qc150-gh" data-qc150="glance-title">At a glance</h3>
-    <div className="qc150-cards" data-qc150="cards" aria-busy={loading || undefined} ref={gridRef}>
-      {(cards ?? SKELETON).map((c) => {
-        const on = where === c.key;
-        const fit = room[c.key] ?? c.faces.length;
-        const faces = c.faces.slice(0, Math.min(c.faces.length, fit));
-        const more = c.count - faces.length;
-        return (
-          <div key={c.key} className={`qc150-c qc150-c--${c.key}`} data-qc150="card" data-k={c.key} data-on={on ? "" : undefined}>
-            <button type="button" className="qc150-hit" data-qc150="hit" aria-pressed={on} disabled={loading || !cards}
-              aria-label={`${c.label}: ${c.count} ${c.count === 1 ? "query" : "queries"}. ${on ? "Showing only these; press to show all" : "Show only these"}`}
-              onClick={() => onCard(c.key)} />
-            <span className="qc150-h" data-qc150="head">
-              <i className={`qc149-sw qc149-sw--${SWATCH[c.key]} qc150-sw`} aria-hidden="true" />
-              <b>{c.label}</b>
-              {DOODLE[c.key]}
-            </span>
-            <span className="qc150-body" data-qc150="body">
-              <span className="qc150-n" data-qc150="count">{cards ? c.count : ""}</span>
-              <span className={`qc150-faces qc150-faces--${c.key}`} data-qc150="faces" data-n={faces.length} data-more={more}>
-                {faces.map((f) => <span key={f.key} className="qc150-face" title={f.title}>{f.initials}</span>)}
-                {more > 0 ? <i className="qc150-more" data-qc150="more">+{more}</i> : null}
-              </span>
-            </span>
-          </div>
-        );
-      })}
-    </div>
-  </section>
+    /* v150.1 §3 — "At a glance": the heading, then four equal cards, each a head over one row (the count, then the faces).
+       The detail lines, Your move's "Next" and "Show them" are gone. */
+    <GlanceCards items={items} pressed={where} onCard={(k) => onCard(k as WhereKey)} ready={!!cards} loading={loading}
+      probe="qc150" headingId="qc1501-gh" />
   );
 };
 

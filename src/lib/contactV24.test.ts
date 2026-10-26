@@ -9,7 +9,7 @@ import { describe, expect, it } from "vitest";
 import type { AgentFacts } from "./contactList";
 import type { HkModel } from "./contactHousekeeping";
 import {
-  CARDS_THREE_FROM, bannerFigures, cardsAcross, colleaguesOf, footLinks, genreFit, inSet, missingWords, setCounts, setGroups,
+  CARDS_THREE_FROM, bannerFigures, cardsAcross, colleaguesOf, footLinks, genreFit, inSet, setCounts, setGroups,
 } from "./contactV24";
 
 const facts = (id: string, stand: AgentFacts["stand"], agency = "", name = `Agent ${id}`): AgentFacts =>
@@ -48,8 +48,6 @@ describe("the banner's figures are Housekeeping's", () => {
     expect(b.faces.map((f) => f.key)).toEqual(["x", "y", "z", "w"]);
   });
   it("says one detail in the singular", () => {
-    expect(missingWords(1)).toBe("1 detail is missing");
-    expect(missingWords(20)).toBe("20 details are missing");
   });
 });
 

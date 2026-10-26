@@ -50,7 +50,7 @@ test("CL24 shots", async ({ page }) => {
       await shot(page, `05-agent-card-same-agency-${w}`);
       await page.keyboard.press("Escape");
     }
-    await page.locator("[data-cl24='view-tab'][data-v='cards']").first().click();
+    await page.locator("[data-cl25='view-tab'][data-v='cards']").first().click();
     await page.waitForTimeout(600);
     await scrollTo(page, 560);
     await shot(page, `06-cards-${w}`);
@@ -58,7 +58,7 @@ test("CL24 shots", async ({ page }) => {
     await page.waitForTimeout(900);
     await shot(page, `07-cards-agent-card-${w}`);
     await page.keyboard.press("Escape");
-    await page.locator("[data-cl24='view-tab'][data-v='list']").first().click();
+    await page.locator("[data-cl25='view-tab'][data-v='list']").first().click();
     /* full screen */
     await openCl24(page, vp, { full: true });
     await page.waitForTimeout(600);

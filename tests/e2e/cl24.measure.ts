@@ -26,43 +26,26 @@ async function rows(page: Page, sel: string) {
 }
 const near = (a: number | undefined, b: number | undefined, d = 1) => a != null && b != null && Math.abs(a - b) <= d;
 
-/* ═════════ A · the header, the banner, the view row ═════════ */
-test("CL24-A1 A2 A3 · the header against the Query Centre's; the banner is Housekeeping's; the chips are the sets", async ({ page }) => {
-  const A1 = new Ledger("A1"), A2 = new Ledger("A2"), A3 = new Ledger("A3");
+/* ═════════ A · the header, the banner, the view row ═════════
+   ⚠️ CONTACT LIST v25 RETIRED THE BANNER AND THE VIEW ROW (Part A3); their jobs moved to At a glance.
+   · CL24-A1 (the header's boxes against the Query Centre v149's card, banner and view row) is RETIRED: the Query
+     Centre v150 retired its own banner and row, and the one width both pages now share is CL25-D1's lock.
+   · CL24-A2 (the banner's figures are Housekeeping's) is RE-POINTED to the List health card: its percentage and its
+     gap line are Housekeeping's drawer's. The "k agents" reading is retired: the card states no k.
+   · CL24-A3 (each chip's count is its rows; a chip shows exactly those) is RETIRED for CL25-B1/B2, which hold the
+     cards to the same rows. Its "AND with Filters" reading is RE-POINTED to the Querying card. */
+test("CL24-A2 A3 (v25) · the List health card is Housekeeping's; a card ANDs with Filters", async ({ page }) => {
+  const A2 = new Ledger("A2"), A3 = new Ledger("A3");
   for (const vp of SIZES) {
     const at = `${vp.width}`;
-    /* the Query Centre's boxes */
-    await openQc149(page, vp);
-    const qc = {
-      card: await box(page, ".qc149-card"), ban: await box(page, ".qc149-ban"), vr: await box(page, ".qc149-vr"), sheet: await box(page, ".qc138-sheet"),
-    };
-    /* the Contact list's */
     await openCl24(page, vp);
-    await mutate(page, "A1", ".clv-group[data-v24] > .cl24-hd { margin-left: calc(50% - var(--cl24-w) / 2 + 40px) !important; }");
-    const cl = {
-      card: await box(page, "[data-cl24='hd-card']"), ban: await box(page, "[data-cl24='banner']"), vr: await box(page, "[data-cl24='views-row']"), sheet: await box(page, "[data-cl24='sheet']"),
-    };
-    A1.check(`${at} population`, !!(qc.card && qc.vr && qc.sheet && cl.card && cl.vr && cl.sheet), `qc ${JSON.stringify(qc)} cl ${JSON.stringify(cl)}`);
-    for (const k of ["card", "ban", "vr", "sheet"] as const) {
-      if (!qc[k] || !cl[k]) { A1.check(`${at} ${k}`, false, `missing (qc ${!!qc[k]}, cl ${!!cl[k]})`); continue; }
-      A1.check(`${at} ${k} left`, near(qc[k]!.l, cl[k]!.l), `qc ${qc[k]!.l.toFixed(1)} cl ${cl[k]!.l.toFixed(1)}`);
-      A1.check(`${at} ${k} right`, near(qc[k]!.r, cl[k]!.r), `qc ${qc[k]!.r.toFixed(1)} cl ${cl[k]!.r.toFixed(1)}`);
-    }
-    A1.check(`${at} card top`, near(qc.card?.t, cl.card?.t), `qc ${qc.card?.t} cl ${cl.card?.t}`);
-    if (qc.ban && cl.ban && qc.card && cl.card && qc.vr && cl.vr) {
-      A1.check(`${at} card→banner gap`, near(qc.ban.t - qc.card!.b, cl.ban.t - cl.card!.b), `qc ${(qc.ban.t - qc.card!.b).toFixed(1)} cl ${(cl.ban.t - cl.card!.b).toFixed(1)}`);
-      A1.check(`${at} banner→row gap`, near(qc.vr!.t - qc.ban.b, cl.vr!.t - cl.ban.b), `qc ${(qc.vr!.t - qc.ban.b).toFixed(1)} cl ${(cl.vr!.t - cl.ban.b).toFixed(1)}`);
-    }
-    const g = (x: typeof qc) => (x.sheet && x.vr ? x.sheet.t - x.vr.b : NaN);
-    A1.check(`${at} row→sheet gap`, near(g(qc), g(cl)), `qc ${g(qc).toFixed(1)} cl ${g(cl).toFixed(1)}`);
-
-    /* A2 — the banner's figures against Housekeeping's drawer */
-    const ban = await page.evaluate(() => {
-      const t = (s: string) => document.querySelector<HTMLElement>(s);
-      return { pct: t("[data-cl24='banner-pct']")?.textContent ?? null, n: Number(t("[data-cl24='banner-n']")?.dataset.n ?? NaN), k: Number(t("[data-cl24='banner-k']")?.dataset.n ?? NaN), ring: t("[data-cl24='ring'] [data-cl17='ring-pct']")?.textContent ?? null };
+    /* A2 — the List health card's figures against Housekeeping's drawer */
+    const card = await page.evaluate(() => {
+      const c = [...document.querySelectorAll<HTMLElement>("[data-cl25='card'][data-k='health']")].find((e) => e.offsetWidth);
+      return { pct: (c?.querySelector("[data-cl25='count']")?.textContent ?? "").replace("%", "") || null, n: Number(c?.querySelector<HTMLElement>("[data-cl25='gaps']")?.dataset.n ?? NaN) };
     });
-    A2.check(`${at} population`, ban.pct != null && ban.n > 0 && ban.k > 0, JSON.stringify(ban));
-    await page.locator("[data-cl24='fill']").first().click(T).catch(() => {});
+    A2.check(`${at} population`, card.pct != null && card.n > 0, JSON.stringify(card));
+    await page.locator("[data-cl25='card'][data-k='health'] [data-cl25='hit']").first().click(T).catch(() => {});
     await page.waitForTimeout(900);
     const hk = await page.evaluate(() => {
       const pct = document.querySelector<HTMLElement>("[data-hk8='pct']")?.textContent ?? null;
@@ -70,45 +53,35 @@ test("CL24-A1 A2 A3 · the header against the Query Centre's; the banner is Hous
       return { pct: pct ? pct.replace("%", "") : null, gaps: gaps != null ? Number(gaps) : NaN };
     });
     A2.check(`${at} drawer read`, hk.pct != null && Number.isFinite(hk.gaps), JSON.stringify(hk));
-    A2.check(`${at} ring % = Housekeeping's`, ban.pct === hk.pct && (ban.ring ?? "").replace("%", "") === hk.pct, `banner ${ban.pct} ring ${ban.ring} drawer ${hk.pct}`);
-    A2.check(`${at} n = Housekeeping's gaps`, ban.n === hk.gaps, `banner ${ban.n} drawer ${hk.gaps}`);
-    A2.check(`${at} k agents, at least one and no more than the gaps`, ban.k >= 1 && ban.k <= ban.n, `k ${ban.k} n ${ban.n}`);
+    A2.check(`${at} % = Housekeeping's`, card.pct === hk.pct, `card ${card.pct} drawer ${hk.pct}`);
+    A2.check(`${at} n = Housekeeping's gaps`, card.n === hk.gaps, `card ${card.n} drawer ${hk.gaps}`);
     await page.keyboard.press("Escape");
     await page.waitForTimeout(400);
 
-    /* A3 — each chip's count is the agents in that set; a chip shows exactly those; chips and Filters combine */
-    const chips = await rows(page, "[data-cl24='view']");
-    const all = await rows(page, "[data-cl24='row']");
-    A3.check(`${at} population`, chips.length === 5 && all.length > 0, `chips ${chips.length} rows ${all.length}`);
-    const total = Number(chips.find((c) => c.k === "all")?.n ?? NaN);
-    A3.check(`${at} All = every row`, total === all.length, `All ${total} rows ${all.length}`);
-    for (const k of ["you", "agent", "none", "closed"]) {
-      const n = Number(chips.find((c) => c.k === k)?.n ?? NaN);
-      A3.check(`${at} ${k} count = its rows`, n === all.filter((r) => r.k === k).length, `chip ${n} rows ${all.filter((r) => r.k === k).length}`);
-    }
-    await page.locator("[data-cl24='view'][data-k='you']").first().click(T).catch(() => {});
+    /* A3 — a card AND Filters: Querying, then Open to queries only */
+    await page.locator("[data-cl25='card'][data-k='querying'] [data-cl25='hit']").first().click(T).catch(() => {});
     await page.waitForTimeout(400);
-    const you = await rows(page, "[data-cl24='row']");
-    const youN = Number(chips.find((c) => c.k === "you")?.n ?? NaN);
-    A3.check(`${at} Your move shows exactly its agents`, you.length === youN && you.every((r) => r.k === "you"), `rows ${you.length} (${[...new Set(you.map((r) => r.k))].join(",")}) chip ${youN}`);
-    /* AND with Filters: Open to queries only */
+    const q = await rows(page, "[data-cl24='row']");
+    A3.check(`${at} population`, q.length > 0, `rows ${q.length}`);
+    A3.check(`${at} Querying shows Your move and Querying`, q.every((r) => r.k === "you" || r.k === "agent"), [...new Set(q.map((r) => r.k))].join(","));
     await page.locator("[data-cl24='filters']").first().click(T).catch(() => {});
     await page.locator("[data-nb1='open-only']").first().click(T).catch(() => {});
     await page.keyboard.press("Escape");
     await page.waitForTimeout(400);
     const both = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-cl24='row']")].map((r) => ({ k: r.dataset.k, open: !!r.querySelector(".cl24-door--open") })));
-    A3.check(`${at} chip AND Filters`, both.length > 0 && both.length <= you.length && both.every((r) => r.k === "you" && r.open), `rows ${both.length} ${JSON.stringify(both.slice(0, 4))}`);
+    A3.check(`${at} card AND Filters`, both.length > 0 && both.length <= q.length && both.every((r) => (r.k === "you" || r.k === "agent") && r.open), `rows ${both.length} ${JSON.stringify(both.slice(0, 4))}`);
   }
-  A1.done(BASE ? 1 : 26); A2.done(BASE ? 1 : 10); A3.done(BASE ? 1 : 16);
+  A2.done(BASE ? 1 : 8); A3.done(BASE ? 1 : 6);
 });
 
-test("CL24-A2 · the banner is absent when nothing is missing", async ({ page }) => {
+test("CL24-A2 (v25) · the List health card states no gaps when nothing is missing", async ({ page }) => {
+  /* re-pointed: the banner it held absent is retired; the card's gap line is what must go at no gaps */
   const L = new Ledger("A2-none");
   await page.addInitScript(() => { (window as unknown as { __SA_HK_ALL_FILLED: boolean }).__SA_HK_ALL_FILLED = true; });
   await openCl24(page, SIZES[0]);
-  const s = await page.evaluate(() => ({ header: !!document.querySelector("[data-cl24='hd-card']"), banner: !!document.querySelector("[data-cl24='banner']") }));
-  L.check("population: the header drew", s.header, JSON.stringify(s));
-  L.check("no banner at no gaps", !s.banner, JSON.stringify(s));
+  const s = await page.evaluate(() => ({ card: !!document.querySelector("[data-cl25='card'][data-k='health']"), gaps: !!document.querySelector("[data-cl25='gaps']") }));
+  L.check("population: the List health card drew", s.card, JSON.stringify(s));
+  L.check("no gap line at no gaps", !s.gaps, JSON.stringify(s));
   L.done(2);
 });
 
@@ -121,10 +94,10 @@ test("CL24-B1 B2 B3 · the switch in the bar; the grouped table; the cards", asy
     await mutate(page, "B2", ".cl24-th > [data-col], .cl24-tr > [data-col] { display: block !important; }");
     await mutate(page, "B3", ".cl24-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important; }");
     await mutate(page, "B3x", ".cl24-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important; }");
-    /* B1 — in the bar, on the left */
-    const bar = await box(page, "[data-cl24='bar']"), sw = await box(page, "[data-cl24='switch']");
+    /* B1 — RE-POINTED (v25 C): the switch left the bar for the list's title row, above it (CL25-C1 holds its place) */
+    const bar = await box(page, "[data-cl24='bar']"), sw = await box(page, "[data-cl25='switch']");
     B1.check(`${at} population`, !!bar && !!sw, `bar ${!!bar} switch ${!!sw}`);
-    B1.check(`${at} switch inside the navy bar, at its left`, !!bar && !!sw && sw.t >= bar.t && sw.b <= bar.b && sw.l - bar.l < 40, `bar ${JSON.stringify(bar)} sw ${JSON.stringify(sw)}`);
+    B1.check(`${at} switch above the navy bar, not in it`, !!bar && !!sw && sw.b <= bar.t, `bar ${JSON.stringify(bar)} sw ${JSON.stringify(sw)}`);
     /* B2 — headings in order, discs match their group, the narrow columns, one-line toolbar */
     await scrollTo(page, 0);
     const heads = await rows(page, "[data-cl24='group-head']");
@@ -148,7 +121,7 @@ test("CL24-B1 B2 B3 · the switch in the bar; the grouped table; the cards", asy
     await page.locator("[data-cl24='heads'] button", { hasText: "Your query" }).first().click(T).catch(() => {});
     await page.waitForTimeout(300);
     const before = await rows(page, "[data-cl24='row']");
-    await page.locator("[data-cl24='view-tab'][data-v='cards']").first().click(T).catch(() => {});
+    await page.locator("[data-cl25='view-tab'][data-v='cards']").first().click(T).catch(() => {});
     await page.waitForTimeout(500);
     /* B3 — card order is the rows' order, and how many across */
     const cards = await rows(page, "[data-cl24='card']");
@@ -161,7 +134,7 @@ test("CL24-B1 B2 B3 · the switch in the bar; the grouped table; the cards", asy
       return new Set(ls).size;
     });
     B3.check(`${at} ${vp.width >= 1512 ? 3 : 2} across`, across === (vp.width >= 1512 ? 3 : 2), `across ${across}`);
-    await page.locator("[data-cl24='view-tab'][data-v='list']").first().click(T).catch(() => {});
+    await page.locator("[data-cl25='view-tab'][data-v='list']").first().click(T).catch(() => {});
     await page.waitForTimeout(400);
     const after = await rows(page, "[data-cl24='row']");
     const find = await page.locator("[data-cl24='find'] input").first().inputValue().catch(() => "");
