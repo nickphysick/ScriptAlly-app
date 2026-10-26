@@ -85,6 +85,8 @@ export interface ListItem {
   note: string | null;
   /** a coming-up item's date tile */
   date: { dow: string; day: string } | null;
+  /** the board card's task type, for a board item (Dashboard v71's task card reads which send it is) */
+  taskType?: string | null;
 }
 
 export interface ListGroup { key: ListGroupKey; label: string; items: ListItem[] }
@@ -232,6 +234,7 @@ export function boardItems(i: BoardInput): Partial<Record<ListGroupKey, ListItem
       actLabel: ACT[card?.taskType ?? ""] ?? "Open",
       action: { kind: "drawer", request: { ...door } },
       stages, note, date: null,
+      taskType: card?.taskType ?? null,
     });
   }
   return out;

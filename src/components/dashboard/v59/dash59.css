@@ -36,33 +36,10 @@
   line-height: 1.3;
   white-space: nowrap;
 }
-/* ── the focus card: a rust left edge, and the timeline gives way earlier ──────────────────── */
-
-.d58-focus::before {
-  content: "";
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  width: 6px;
-  background: #a2452a;
-  z-index: 2;
-  pointer-events: none;
-}
-.d58 .d58-fband { padding-left: 24px; }
-.d58 .d58-fbody { padding-left: 28px; }
-.d58 .d58-ffoot { padding-left: 28px; }
-/* a laptop-sized window: the focus card's timeline is the first thing to go, before the founder's note */
-@media (max-height: 819px) and (max-width: 1400px) {
-  .d58 .d58-stages { display: none; }
-}
-
-/* measured: the timeline goes before the panel's second sentence would (Dash58 `tight`) */
-.d58[data-tight="1"] .d58-stages { display: none; }
-/* a short window (700px tall and less): the focus card and the title row give back a little air, so
-   the panel keeps its 22px over the folder tab at the 650px floor with the real shell's header */
+/* a short window (700px tall and less): the title row gives back a little air (before the first query,
+   "Ready for lift off?" uses this row; v71 retired the focus card's half of this rule) */
 @media (max-height: 700px) {
   .d58 .d58-listhead { margin-bottom: 10px; }
-  .d58 .d58-fbody { padding-top: 8px; }
-  .d58 .d58-ffoot { margin-top: 6px; padding-top: 8px; padding-bottom: 9px; }
 }
 
 /* ── the hairline ──────────────────────────────────────────────────────────────────────────── */
@@ -430,17 +407,17 @@
 @media (prefers-reduced-motion: reduce) { .d59-hawkshadow { animation: none; } }
 
 /* ── the hover lift: a hovered card lifts and comes forward of the shadow ─────────────────────── */
-.d58 :is(.d58-active > .os-card, .d58-left .d60-card, .d58-focus, .d59-fw) {
+.d58 :is(.d58-active > .os-card, .d58-left .d60-card, .d59-fw) {
   transition: transform 180ms cubic-bezier(0.22, 0.8, 0.3, 1), box-shadow 180ms ease;
 }
-.d58 :is(.d58-active > .os-card, .d58-left .d60-card, .d58-focus, .d59-fw):hover {
+.d58 :is(.d58-active > .os-card, .d58-left .d60-card, .d59-fw):hover {
   z-index: 4;
   transform: translateY(-2px);
   box-shadow: 0 12px 26px rgba(28, 19, 15, 0.16), 0 2px 6px rgba(28, 19, 15, 0.08);
 }
 @media (prefers-reduced-motion: reduce) {
-  .d58 :is(.d58-active > .os-card, .d58-left .d60-card, .d58-focus, .d59-fw) { transition: none; }
-  .d58 :is(.d58-active > .os-card, .d58-left .d60-card, .d58-focus, .d59-fw):hover { transform: none; }
+  .d58 :is(.d58-active > .os-card, .d58-left .d60-card, .d59-fw) { transition: none; }
+  .d58 :is(.d58-active > .os-card, .d58-left .d60-card, .d59-fw):hover { transform: none; }
 }
 
 /* ── the Activity feed folder tab ──────────────────────────────────────────────────────────── */

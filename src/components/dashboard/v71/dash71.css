@@ -149,3 +149,270 @@
   .d58[data-mode="q"] .d58-body { grid-template-columns: minmax(0, 1fr); }
   .d58[data-mode="q"] .d71-right { grid-template-rows: auto var(--d71-fw-h, 194px); }
 }
+
+/* ── C · the task card ─────────────────────────────────────────────────────────────────────────
+   One card, the full height of its row. The head and the progress segments sit on the kind's tint
+   (`--d71-tint`), the kicker on its accent (`--d71-accent`); the page sets both per item. */
+.d71-task {
+  flex: 1 1 0;
+  min-height: 0;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(28, 19, 15, 0.08);
+  color: var(--d58-ink);
+  --d71-tint: #f1eee9;
+  --d71-accent: #2a3a52;
+}
+.d71-th {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px 10px 18px;
+  background: var(--d71-tint);
+  transition: background-color 450ms cubic-bezier(0.22, 0.8, 0.3, 1);
+}
+.d58 .d71-kick {
+  padding: 4px 9px;
+  border-radius: 6px;
+  background: var(--d71-accent);
+  color: #fff;
+  font-family: var(--d58-mono) !important;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  line-height: 14px;
+  white-space: nowrap;
+  transition: background-color 450ms cubic-bezier(0.22, 0.8, 0.3, 1);
+}
+.d58 .d71-pos {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--d58-mono) !important;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: rgba(28, 19, 15, 0.55);
+  white-space: nowrap;
+}
+.d58 .d71-pos > span { font-family: inherit !important; }
+.d58 .d71-pos button {
+  box-sizing: border-box;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.1);
+  color: var(--d58-ink);
+  font-family: var(--d58-mono) !important;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+}
+.d58 .d71-pos button:focus-visible, .d58 .d71-view:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
+
+/* the progress segments: under the head, inside the tint */
+.d71-prog {
+  flex: none;
+  display: flex;
+  gap: 4px;
+  padding: 0 18px 8px;
+  background: var(--d71-tint);
+  transition: background-color 450ms cubic-bezier(0.22, 0.8, 0.3, 1);
+}
+.d71-prog > i { position: relative; flex: 1 1 0; height: 3px; border-radius: 2px; overflow: hidden; background: rgba(28, 19, 15, 0.1); }
+.d71-prog > i.is-past { background: var(--d71-accent); opacity: 0.5; }
+.d71-prog > i > b { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: var(--d71-accent); }
+.d71-prog > i > b.is-full { width: 100%; }
+.d71-prog > i > b.is-running { animation: d71Fill linear forwards; }
+@keyframes d71Fill { from { width: 0; } to { width: 100%; } }
+
+/* the body: vertically centred in what the head and foot leave */
+.d71-tb {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 14px;
+  padding: 18px 22px 6px;
+  animation: d71In 450ms cubic-bezier(0.22, 0.8, 0.3, 1) backwards;
+}
+@keyframes d71In { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.d71-tb--none { padding-bottom: 18px; }
+.d71-who { display: flex; align-items: center; gap: 13px; min-width: 0; }
+.d71-whot { min-width: 0; }
+.d58 .d71-av {
+  flex: none;
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-family: var(--d58-mono) !important;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  background: #2a3a52;
+  color: #fff;
+}
+.d58 .d71-av--send { background: #a2452a; color: #fff; }
+.d58 .d71-av--nudge { background: #fff; color: #2a3a52; box-shadow: inset 0 0 0 1.5px #2a3a52; }
+.d58 .d71-av--close { background: #a9a39b; color: #fff; }
+.d58 .d71-cal { width: 52px; }
+.d58 .d71-task .d71-title {
+  margin: 0;
+  font-family: var(--d58-serif) !important;
+  font-weight: 400;
+  font-size: clamp(20px, 1.7vw, 25px);
+  line-height: 1.2;
+  color: var(--d58-ink);
+}
+.d58 .d71-task .d71-title b { font-weight: 600; }
+.d58 .d71-sub {
+  display: block;
+  margin-top: 3px;
+  font-family: var(--d58-mono) !important;
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  line-height: 13px;
+  text-transform: uppercase;
+  color: rgba(28, 19, 15, 0.55);
+}
+.d58 .d71-line {
+  margin: 0;
+  font-family: var(--d58-serif) !important;
+  font-size: 15.5px;
+  line-height: 1.5;
+  color: rgba(28, 19, 15, 0.72);
+}
+
+/* the reply-window bar: solid from the send to the expected date, hatched from there to today */
+.d71-win { position: relative; }
+.d71-wbar { position: relative; display: flex; height: 10px; border-radius: 5px; background: #f1eee9; }
+.d71-wbar > i { display: block; height: 100%; }
+.d71-ok { border-radius: 5px 0 0 5px; background: #2a3a52; }
+.d71-task[data-kind="close"] .d71-ok { background: #a9a39b; }
+.d71-ov {
+  border-radius: 0 5px 5px 0;
+  background-image: repeating-linear-gradient(45deg, var(--d71-accent) 0, var(--d71-accent) 4px, transparent 4px, transparent 8px);
+  opacity: 0.55;
+}
+.d71-cmark { position: absolute; top: -5px; bottom: -5px; width: 2px; margin-left: -1px; background: var(--d58-ink); }
+.d58 .d71-cmark em {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  margin-bottom: 3px;
+  transform: translateX(-50%);
+  font-family: var(--d58-mono) !important;
+  font-style: normal;
+  font-size: 8.5px;
+  letter-spacing: 0.08em;
+  line-height: 12px;
+  color: var(--d58-ink);
+  white-space: nowrap;
+}
+.d71-wlab { position: relative; height: 13px; margin-top: 6px; }
+.d58 .d71-wlab > span {
+  position: absolute;
+  top: 0;
+  font-family: var(--d58-mono) !important;
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  line-height: 13px;
+  color: rgba(28, 19, 15, 0.55);
+  white-space: nowrap;
+}
+.d71-wlab > span:first-child { left: 0; }
+.d71-wlab > .d71-wexp { transform: translateX(-50%); }
+.d58 .d71-wlab > .d71-wtoday { right: 0; color: var(--d71-accent); font-weight: 600; }
+
+/* the step chips: done steps filled; the step still to do DASHED — "not happened yet" */
+.d71-steps { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+.d58 .d71-steps > b { font-weight: 400; color: rgba(28, 19, 15, 0.55); }
+.d58 .d71-step {
+  box-sizing: border-box;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-family: var(--d58-type) !important;
+  font-size: 13px;
+  line-height: 13px;
+  white-space: nowrap;
+}
+.d58 .d71-step small { font-family: var(--d58-mono) !important; font-size: 9px; letter-spacing: 0.04em; opacity: 0.75; }
+.d58 .d71-step.is-done { background: #e8eef6; color: #2a3a52; border: 1.5px solid transparent; }
+.d58 .d71-step.is-todo { background: transparent; color: #a2452a; border: 1.5px dashed #a2452a; }
+.d58 .d71-step.is-todo small { opacity: 0.6; }
+
+/* the foot */
+.d71-tf {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  padding: 12px 20px 14px;
+  border-top: 1px solid rgba(28, 19, 15, 0.1);
+}
+.d58 .d71-view {
+  flex: none;
+  padding: 9px 16px;
+  border: 0;
+  border-radius: 11px;
+  background: #2a3a52;
+  color: #fff;
+  font-family: var(--d58-serif) !important;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 21px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.d58 .d71-then {
+  flex: 1 1 0;
+  min-width: 0;
+  font-family: var(--d58-serif) !important;
+  font-size: 13px;
+  color: rgba(28, 19, 15, 0.55);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* loading: the card's own frame, its band shimmering, nothing inside */
+.d71-task.is-loading .d71-tb { animation: none; }
+.d58-skcard .d71-th { visibility: visible !important; background: linear-gradient(90deg, #e7e1d9 0%, #f1ece6 45%, #e7e1d9 90%) !important; background-size: 220% 100% !important; animation: d58-sk-shimmer 1.4s linear infinite; }
+
+/* a short window: the body keeps to its title and its picture */
+@media (max-height: 760px) {
+  .d58 .d71-line, .d58 .d71-cmark em, .d71-wlab, .d58 .d71-then { display: none; }
+  .d58 .d71-av, .d58 .d71-cal { width: 40px; height: 40px; }
+  .d58 .d71-task .d71-title { font-size: 17px; }
+  .d71-tb { padding: 12px 18px 4px; }
+  .d71-tf { padding: 8px 16px 10px; }
+}
+
+/* the hover lift: the two new cards join the page's other cards */
+.d58 :is(.d71-task, .d71-fw) { transition: transform 180ms cubic-bezier(0.22, 0.8, 0.3, 1), box-shadow 180ms ease; }
+.d58 :is(.d71-task, .d71-fw):hover { z-index: 4; transform: translateY(-2px); box-shadow: 0 12px 26px rgba(28, 19, 15, 0.16), 0 2px 6px rgba(28, 19, 15, 0.08); }
+
+@media (prefers-reduced-motion: reduce) {
+  .d71-tb, .d71-prog > i > b.is-running { animation: none; }
+  .d71-th, .d71-prog, .d58 .d71-kick { transition: none; }
+  .d58 :is(.d71-task, .d71-fw) { transition: none; }
+  .d58 :is(.d71-task, .d71-fw):hover { transform: none; }
+}

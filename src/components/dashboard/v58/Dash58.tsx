@@ -4,10 +4,9 @@
  *
  * DASHBOARD v58 — one screen (ref design-refs/dashboard/dashboard-v58.html).
  *
- * The header is the book being queried. Two framed cards down the left: active queries (today's
- * card and chart) over closed queries. The right column has no container: a typewriter title, one
- * item in focus, and the rest of the list under it. The activity feed is a drawer behind a
- * floating tab.
+ * The header is the book being queried. Down the left, the active-queries chart over the Closed and
+ * Agents on file hoop cards (v60). Down the right (v71), the task card, which cycles through the
+ * plan's items, over the founding writer card. The activity feed is a drawer behind a folder tab.
  *
  * ⚠️ NOTHING HERE WRITES A STATUS. Every action opens the flow that does: the query drawer
  * (`openQueryDrawer`), the agent card, or a route.
@@ -23,7 +22,9 @@ import { liveCount, undatedLiveCount } from "../../../lib/dashBreakdown";
 import { closedTile } from "../../../lib/dashClosed";
 import { assembleBoardColumns } from "../../../lib/todoColumns";
 import { todoRows } from "../../../lib/dashTodo";
-import { dashList, focusOf, startingPlan, type ListAction } from "../../../lib/dashList";
+import { dashList, startingPlan, type ListAction } from "../../../lib/dashList";
+import { buildQcRows } from "../../../lib/qcSummary";
+import type { TaskCtx } from "../../../lib/dashTaskCard";
 import { gettingStartedRows } from "../../../lib/dashEmpty";
 import { feedEntries } from "../../../lib/dashFeed";
 import { todayCount } from "../../../lib/dashFeedDrawer";
@@ -38,7 +39,8 @@ import { readImportNotice, clearImportNotice, onImportNoticeChange, noticeHeadli
 import { DashPopupProvider } from "../DashPopup";
 import { OneScreenChart } from "../OneScreenChart";
 import { Dash58Header } from "./Dash58Header";
-import { Dash58List } from "./Dash58List";
+import { Dash71Right } from "../v71/Dash71Right";
+import { Dash71Task } from "../v71/Dash71Task";
 import { Dash58Feed, FeedTab } from "./Dash58Feed";
 import { Dash59Panel, type PulseState } from "../v59/Dash59Panel";
 import { agentCoverage, firstUseTiles, isPreQuery, type TileKey } from "../../../lib/dashFirstUse";
@@ -86,8 +88,6 @@ export const DASH_SHADOW = { src: "/images/hawk-shadow.png", version: 1 };
 /** The first paint's whole length: the end dot finishes at 900 + 300 = 1200ms; a little after. */
 export const PAINT_MS = 1400;
 
-/** The panel's height below which its note's second sentence gives way (dash59.css `max-height: 178px`). */
-export const PANEL_FULL_H = 179;
 
 /** "14 Mar 2026" from an ISO date, read as written (no timezone arithmetic). */
 const noticeDate = (iso: string | null): string => {
@@ -197,9 +197,11 @@ export const Dash58: React.FC<Dash58Props> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scopedTasks, userTasks, queries, scopedQueries, agents, manuscripts, taskFlags, scopedActivities, activities, activeManuscript, currentUser, now, aid.drop.join(","), empty, versions, scopeId]);
 
-  const [step, setStep] = useState(0);
-  const focus = useMemo(() => focusOf(plan, step), [plan, step]);
-  useEffect(() => { if (step !== focus.index) setStep(focus.index); }, [step, focus.index]);
+  /* v71: the task card reads the Query Centre's own rows for the dates it draws */
+  const taskCtx = useMemo<TaskCtx>(
+    () => ({ queries, agents, qcRows: buildQcRows(scopedQueries, agents, scopedActivities, now.getTime()), nowMs: now.getTime() }),
+    [queries, agents, scopedQueries, scopedActivities, now],
+  );
 
   /* ── the feed ── */
   const feed30 = useMemo(
@@ -341,53 +343,14 @@ export const Dash58: React.FC<Dash58Props> = ({
     return () => { ro?.disconnect(); window.removeEventListener("resize", schedule); if (frame) window.cancelAnimationFrame(frame); };
   }, []);
 
-  /* ── the timeline gives way first (v59) ──
-     The pack's order of giving way is the focus card's timeline, THEN the panel's second sentence.
-     A media query cannot keep that order on every shell: the real header is taller than the ref's
-     (the beta strip, the book's title block), so at 1696×820 the panel lost its second sentence with
-     the timeline still showing. So it is MEASURED: while the timeline shows and the panel is below
-     the height that keeps both sentences, the timeline goes; it comes back only when the panel would
-     still keep them with the timeline's own height returned (the remembered height is the
-     hysteresis, so the two never chase each other). */
-  const [tight, setTight] = useState(false);
-  const tightRef = useRef(false);
-  const stagesH = useRef(0);
-  useLayoutEffect(() => {
-    const root = rootRef.current;
-    if (!root || loading) return undefined;
-    const check = () => {
-      const panel = root.querySelector<HTMLElement>('[data-d58="panel"][data-loading="0"]');
-      const ph = panel?.getBoundingClientRect().height ?? 0;
-      if (ph <= 0) return; // not laid out (another page is on screen)
-      if (!tightRef.current) {
-        const st = root.querySelector<HTMLElement>('[data-d58="focus-stages"]');
-        if (st && st.offsetHeight > 0 && ph < PANEL_FULL_H) {
-          const cs = getComputedStyle(st);
-          stagesH.current = st.offsetHeight + (parseFloat(cs.marginTop) || 0) + (parseFloat(cs.marginBottom) || 0);
-          tightRef.current = true;
-          setTight(true);
-        }
-      } else if (ph - stagesH.current >= PANEL_FULL_H) {
-        tightRef.current = false;
-        setTight(false);
-      }
-    };
-    check();
-    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(() => check()) : null;
-    const col = root.querySelector('[data-d58="right"]');
-    if (col) ro?.observe(col);
-    window.addEventListener("resize", check);
-    return () => { ro?.disconnect(); window.removeEventListener("resize", check); };
-  }, [loading, focus.item?.key]);
-
   /* ── what the loading page should be the shape of: this account's last loaded page ── */
   const [shape] = useState(() => readShape());
-  const focusRef = useRef<HTMLDivElement>(null);
+  const focusRef = useRef<HTMLElement | null>(null);
   useEffect(() => {
     if (loading) return;
     const h = focusRef.current?.getBoundingClientRect().height ?? 0;
     writeShape({ focusH: h > 0 ? Math.round(h) : shape.focusH, closed: closed && closed.total === 0 ? "none" : "some", today: unseen > 0, pre: empty, agents: agents.length > 0, hoopNeed: shape.hoopNeed });
-  }, [loading, focus.item?.key, closed, unseen, shape.focusH, empty, agents.length]);
+  }, [loading, plan, closed, unseen, shape.focusH, empty, agents.length]);
 
   /* ── v60: first use, and the two hoops ──
      While loading, the page draws whichever state the shape memory last saw, so the swap never
@@ -460,7 +423,7 @@ export const Dash58: React.FC<Dash58Props> = ({
   const title = (activeManuscript?.title ?? "").trim();
 
   return (
-    <div ref={rootRef} className="os-root d58" data-mode={pre ? "pre" : "q"} data-paint={paint ? "1" : undefined} data-tight={tight ? "1" : undefined} style={noticeListH > 0 ? ({ ["--d58-notice-list-h" as string]: `${noticeListH}px` } as React.CSSProperties) : undefined}>
+    <div ref={rootRef} className="os-root d58" data-mode={pre ? "pre" : "q"} data-paint={paint ? "1" : undefined} style={noticeListH > 0 ? ({ ["--d58-notice-list-h" as string]: `${noticeListH}px` } as React.CSSProperties) : undefined}>
       <DashPopupProvider rootRef={rootRef}>
         <div className="d58-page" data-d58="page" data-loading={loading ? "1" : "0"}>
           {notice && <ImportNoticeRow notice={notice} onDismiss={dismissNotice} onListHeight={setNoticeListH} />}
@@ -510,14 +473,8 @@ export const Dash58: React.FC<Dash58Props> = ({
                 </>
               )}
             </div>
-            <Dash58List
-              loading={loading}
-              focusH={shape.focusH}
-              plan={plan}
-              focus={focus}
-              focusRef={focusRef}
-              onStep={setStep}
-              onView={viewTask}
+            <Dash71Right
+              task={<Dash71Task loading={loading} plan={plan} ctx={taskCtx} onView={viewTask} innerRef={focusRef} />}
               lift={pre ? <Dash60Lift loading={loading} tiles={tiles} hasAgents={hasAgents} onTile={onTile} /> : undefined}
               panel={
                 <Dash59Panel
