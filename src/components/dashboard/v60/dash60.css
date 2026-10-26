@@ -37,9 +37,9 @@
 .d58 .d60-bl:focus-visible, .d58 .d60-ready:focus-visible, .d58 .d60-wa:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 3px; border-radius: 2px; }
 
 /* ── the two hoops, beneath the full-width chart ─────────────────────────────────────────────── */
-/* ⚠️ RETIRED BY DASHBOARD v71: the hoop-need column floor (`--d60-hoop-need`). The querying grid is
-   v71's `1.72fr 1fr` (dash71.css), which gives the hoops more room than v60's split; a cramped card
-   still wraps its labels (the container query below) rather than cutting them. */
+/* ⚠️ MOVED BY DASHBOARD v71: the hoop-need column floor (`--d60-hoop-need`, measured by the page) now feeds
+   v71's querying grid in dash71.css, as the left column's minimum. (Retiring it outright cut the legends
+   at 1440×900 and 1100×800 — DB71 G1.) A cramped card still wraps its labels (the container query below). */
 .d60-hoops {
   flex: none;
   display: grid;

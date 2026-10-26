@@ -195,7 +195,20 @@ const readFit = (page: Page) => page.evaluate(() => {
   const h = fw?.querySelector<HTMLElement>('[data-d71="fw-h"]') ?? null;
   const shown = (s: string) => { const e = fw?.querySelector<HTMLElement>(s); return !!e && e.getBoundingClientRect().height > 0 && getComputedStyle(e).display !== "none"; };
   const scroller = document.querySelector<HTMLElement>(".ws-wbody");
+  /* cut text: a hoop legend row, or a part of the task card's head, that overflows its own box or runs
+     past its card's edge (found at 1100×800: "1 OF 3" off the task card, "Querying" clipped) */
+  const cut: string[] = [];
+  let cutN = 0;
+  for (const el of document.querySelectorAll<HTMLElement>('.d60-hl li, [data-d71="head"] > *, [data-d71="pos"] > *')) {
+    const r = el.getBoundingClientRect();
+    if (r.width <= 0 || getComputedStyle(el).display === "none") continue;
+    cutN += 1;
+    const card = el.closest<HTMLElement>(".d60-card, [data-d71='task']")?.getBoundingClientRect();
+    const over = el.scrollWidth > el.clientWidth + 1 && el.tagName !== "BUTTON";
+    if (over || (card && (r.right > card.right - 0.5 || r.left < card.left + 0.5))) cut.push(`${el.className || el.tagName} "${(el.textContent ?? "").trim().slice(0, 24)}"`);
+  }
   return {
+    cut, cutN,
     closed: box(q('[data-d60="closed-hoop"]')), agents: box(q('[data-d60="agents-hoop"]')), fw: box(fw), tab: tb, hit,
     vw: window.innerWidth, vh: window.innerHeight,
     n, escapes: escapes.slice(0, 5),
@@ -229,6 +242,7 @@ test("DB71 L2 · L3 · F3 · G1 — bottoms in line, the tab on screen, the card
     L.check("F3", `${w} the art's whole box is inside the body`, !!f.img && !!f.body && f.img.t >= f.body.t - 0.5 && f.img.b <= f.body.b + 0.5 && f.img.l >= f.body.l - 0.5 && f.img.h > 20, JSON.stringify({ img: f.img, body: f.body }));
     L.check("F3", `${w} the heading never overflows`, f.headingFits === true, String(f.headingFits));
     if (vp.height <= 760) L.check("F3", `${w} short window: the line hidden, the faces shown`, !f.line && f.faces, `line ${f.line} · faces ${f.faces}`);
+    L.check("G1", `${w} nothing cut in the hoop legends or the task card's head`, f.cutN >= 6 && f.cut.length === 0, `${f.cutN} parts · ${f.cut.join(" | ") || "none cut"}`);
     L.check("G1", `${w} one screen: no vertical scroll`, !!f.scroller && f.scroller.sh <= f.scroller.ch, JSON.stringify(f.scroller));
     L.check("G1", `${w} no horizontal overflow`, !!f.scroller && f.scroller.sw <= f.scroller.cw && f.doc.sw <= f.doc.cw, JSON.stringify({ s: f.scroller, d: f.doc }));
   }
@@ -237,7 +251,7 @@ test("DB71 L2 · L3 · F3 · G1 — bottoms in line, the tab on screen, the card
   const m = await readFit(page);
   L.check("L3", "768x800 the tab is inside the viewport", !!m.tab && m.tab.l >= 0 && m.tab.r <= m.vw && m.tab.b <= m.vh + 0.5, JSON.stringify(m.tab));
   L.check("L3", "768x800 nothing covers the tab's centre", m.hit, String(m.hit));
-  L.done(SIZES.length * 11);
+  L.done(SIZES.length * 12);
 });
 
 /* ── L4 — no card's shadow is clipped ────────────────────────────────────────────────────────── */
