@@ -1,0 +1,7 @@
+{"lock":"A1","mutation":"(natural) the unmodified v77 build","result":"RED every kind: no band, no title (\"\"), the kicker pill present, the pager outside a band"}
+{"lock":"A2","mutation":"(natural) the unmodified v77 build","result":"RED band -1.0 against the chart band's 46.0, every kind"}
+{"lock":"A3","mutation":"(natural) the unmodified v77 build at 254px","result":"RED send d71-tb 175/133; nudge d71-wexp outside the card (items 15, 18, 19)"}
+{"lock":"A1","mutation":"A1-tint (the band painted v71's nudge tint)","result":"RED all four kinds rgb(232, 238, 246)"}
+{"lock":"A2","mutation":"A2-tall (16px band padding)","result":"RED band 52.0 against 46.0, every kind"}
+{"lock":"A3","mutation":"A3-tall-body (60px body padding)","result":"RED send d71-tb 152-166/145"}
+{"lock":"A3","mutation":"A3-label (the expected label centred at the bar's end, as v77)","result":"RED nudge: d71-wexp outside the card and over Today, items 11, 12, …"}

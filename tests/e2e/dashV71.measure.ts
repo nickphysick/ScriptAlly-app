@@ -196,7 +196,7 @@ const readFit = (page: Page) => page.evaluate(() => {
      past its card's edge (found at 1100×800: "1 OF 3" off the task card, "Querying" clipped) */
   const cut: string[] = [];
   let cutN = 0;
-  for (const el of document.querySelectorAll<HTMLElement>('.d60-hl li, [data-d71="head"] > *, [data-d71="pos"] > *')) {
+  for (const el of document.querySelectorAll<HTMLElement>('.d60-hl li, [data-d71="band"] > *, [data-d71="pos"] > *')) {
     const r = el.getBoundingClientRect();
     if (r.width <= 0 || getComputedStyle(el).display === "none") continue;
     cutN += 1;
@@ -294,11 +294,14 @@ const readCard = (page: Page) => page.evaluate(() => {
   const c = document.querySelector<HTMLElement>('[data-d71="task"][data-loading="0"]');
   if (!c) return null;
   const pos = c.querySelector('[data-d71="pos-text"]')?.textContent ?? "1 OF 1";
-  const head = c.querySelector<HTMLElement>('[data-d71="head"]');
-  const kick = c.querySelector<HTMLElement>('[data-d71="kicker"]');
+  /* RE-POINTED (Dashboard v93): the head is the kind band; its title replaces the kicker pill, and the progress
+     segments' accent is read off a past or current segment */
+  const head = c.querySelector<HTMLElement>('[data-d71="band"]');
+  const kick = c.querySelector<HTMLElement>('[data-d71="band-title"]');
+  const seg = c.querySelector<HTMLElement>('[data-d71="segment"].is-now > b, [data-d71="segment"] > b');
   return {
     index: Number(c.dataset.index ?? 0), pos, kind: c.dataset.kind ?? "", key: c.dataset.key ?? "", query: c.dataset.query ?? "",
-    kicker: kick?.textContent ?? "", headBg: head ? getComputedStyle(head).backgroundColor : "", kickBg: kick ? getComputedStyle(kick).backgroundColor : "",
+    kicker: kick?.textContent ?? "", headBg: head ? getComputedStyle(head).backgroundColor : "", kickBg: seg ? getComputedStyle(seg).backgroundColor : "",
     title: c.querySelector('[data-d71="title"]')?.textContent ?? "", who: c.querySelector('[data-d71="title"] b')?.textContent ?? "",
   };
 });
@@ -325,10 +328,11 @@ async function goTo(page: Page, index: number) {
   }
 }
 
+/* RE-POINTED (Dashboard v93): the kicker becomes the band's title, the tint the band's colour (DB93 A1 owns them) */
 const TABLE: Record<string, { kicker: string; tint: string; accent: string }> = {
-  nudge: { kicker: "TIME TO NUDGE", tint: "rgb(232, 238, 246)", accent: "rgb(42, 58, 82)" },
-  close: { kicker: "CONSIDER CLOSING", tint: "rgb(239, 235, 229)", accent: "rgb(125, 112, 100)" },
-  send: { kicker: "YOUR MOVE · SEND", tint: "rgb(244, 231, 225)", accent: "rgb(162, 69, 42)" },
+  nudge: { kicker: "Time to nudge", tint: "rgb(42, 58, 82)", accent: "rgb(42, 58, 82)" },
+  close: { kicker: "Consider closing", tint: "rgb(228, 223, 215)", accent: "rgb(125, 112, 100)" },
+  send: { kicker: "Your move", tint: "rgb(162, 69, 42)", accent: "rgb(162, 69, 42)" },
 };
 
 test("DB71 C1 · C2 · C3 — nudge, close and send, as tabled", async ({ page }) => {

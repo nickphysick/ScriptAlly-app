@@ -161,8 +161,8 @@
 }
 
 /* ── C · the task card ─────────────────────────────────────────────────────────────────────────
-   One card, the full height of its row. The head and the progress segments sit on the kind's tint
-   (`--d71-tint`), the kicker on its accent (`--d71-accent`); the page sets both per item. */
+   One card, the full height of its row. The head is the kind band (`--d71-band`, `--d71-band-ink`, v93); the
+   progress segments take the kind's accent (`--d71-accent`); the page sets all three per item. */
 .d71-task {
   container: d71task / inline-size;
   flex: 1 1 0;
@@ -177,73 +177,85 @@
   background: #fff;
   box-shadow: 0 2px 12px rgba(28, 19, 15, 0.08);
   color: var(--d58-ink);
-  --d71-tint: #f1eee9;
+  --d71-band: #5f7591;
+  --d71-band-ink: #ffffff;
   --d71-accent: #2a3a52;
 }
+/* ⚠️ DASHBOARD v93 — THE HEAD IS THE KIND BAND (ref design-refs/dashboard-v93/, option A). The same height and type as
+   the chart card's band (dash58.css: 10px of padding and a 26px Special Elite title on a 26px line, 9px and 23px
+   below a 1440px window), on the kind's colour (`--d71-band`, `--d71-band-ink`, set per item from KIND_STYLE). The
+   pager sits in the band at the right. The v71 kicker pill and tinted head are retired. */
 .d71-th {
   flex: none;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding: 10px 14px 10px 18px;
-  background: var(--d71-tint);
+  min-width: 0;
+  padding: 10px 14px 10px 22px;
+  background: var(--d71-band);
+  color: var(--d71-band-ink);
   transition: background-color 450ms cubic-bezier(0.22, 0.8, 0.3, 1);
 }
-.d58 .d71-kick {
-  padding: 4px 9px;
-  border-radius: 6px;
-  background: var(--d71-accent);
-  color: #fff;
-  font-family: var(--d58-mono) !important;
-  font-size: 10.5px;
-  font-weight: 600;
-  letter-spacing: 0.2em;
-  line-height: 14px;
+.d58 .d71-bandttl {
+  min-width: 0;
+  font-family: var(--d58-type) !important;
+  font-size: 26px;
+  line-height: 26px;
+  font-weight: 400;
+  letter-spacing: 0;
   white-space: nowrap;
-  transition: background-color 450ms cubic-bezier(0.22, 0.8, 0.3, 1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: inherit;
+}
+@media (max-width: 1439px) {
+  .d71-th { padding: 9px 12px 9px 18px; }
+  .d58 .d71-bandttl { font-size: 23px; }
 }
 .d58 .d71-pos {
+  flex: none;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   font-family: var(--d58-mono) !important;
   font-size: 10px;
   letter-spacing: 0.16em;
-  color: rgba(28, 19, 15, 0.55);
+  color: inherit;
+  opacity: 0.92;
   white-space: nowrap;
 }
 .d58 .d71-pos > span { font-family: inherit !important; }
 .d58 .d71-pos button {
   box-sizing: border-box;
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   padding: 0;
   display: grid;
   place-items: center;
   border: 0;
   border-radius: 50%;
-  background: #fff;
-  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.1);
-  color: var(--d58-ink);
+  /* v93: on a dark band the round buttons are a white wash; on stone they are white (the ref's .pg) */
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
   font-family: var(--d58-mono) !important;
   font-size: 13px;
   line-height: 1;
   cursor: pointer;
 }
 .d58 .d71-pos button:focus-visible, .d58 .d71-view:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
+.d71-th[data-ink="dark"] .d71-pos button { background: #fff; color: var(--d58-ink); }
+.d71-th[data-ink="light"] .d71-pos button:focus-visible { outline-color: #fff; }
 
-/* the progress segments: under the head, inside the tint */
+/* the progress segments: just under the band, on the card's white (v93); past and current in the kind's accent */
 .d71-prog {
   flex: none;
   display: flex;
   gap: 4px;
-  padding: 0 18px 8px;
-  background: var(--d71-tint);
-  transition: background-color 450ms cubic-bezier(0.22, 0.8, 0.3, 1);
+  padding: 8px 18px 0;
 }
 .d71-prog > i { position: relative; flex: 1 1 0; height: 3px; border-radius: 2px; overflow: hidden; background: rgba(28, 19, 15, 0.1); }
-.d71-prog > i.is-past { background: var(--d71-accent); opacity: 0.5; }
+.d71-prog > i.is-past { background: var(--d71-accent); opacity: 0.45; }
 .d71-prog > i > b { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: var(--d71-accent); }
 .d71-prog > i > b.is-full { width: 100%; }
 .d71-prog > i > b.is-running { animation: d71Fill linear forwards; }
@@ -355,7 +367,8 @@
   white-space: nowrap;
 }
 .d71-wlab > span:first-child { left: 0; }
-.d71-wlab > .d71-wexp { transform: translateX(-50%); }
+/* v93: placed in pixels by Dash71Task (`placeExpected`), never centred by a transform */
+.d71-wlab > .d71-wexp { transform: none; }
 .d58 .d71-wlab > .d71-wtoday { right: 0; color: var(--d71-accent); font-weight: 600; }
 
 /* the step chips: done steps filled; the step still to do DASHED — "not happened yet" */
@@ -412,7 +425,26 @@
 
 /* loading: the card's own frame, its band shimmering, nothing inside */
 .d71-task.is-loading .d71-tb { animation: none; }
-.d58-skcard .d71-th { visibility: visible !important; background: linear-gradient(90deg, #e7e1d9 0%, #f1ece6 45%, #e7e1d9 90%) !important; background-size: 220% 100% !important; animation: d58-sk-shimmer 1.4s linear infinite; }
+.d58-skcard .d71-th { visibility: visible !important; color: transparent !important; background: linear-gradient(90deg, #e7e1d9 0%, #f1ece6 45%, #e7e1d9 90%) !important; background-size: 220% 100% !important; animation: d58-sk-shimmer 1.4s linear infinite; }
+
+/* ⚠️ DASHBOARD v93 — THE 254px TASK CARD (≤900px tall, where the right column gives the founding card up to 290px):
+   the ref's tighter sizes (founding-tiers-how-v92 `.istall`): a 21px title, a 42px picture, a 14px line, a shorter
+   foot. A close or send item does not fit its sentence as well as its bar or steps in 254px (measured: 242 and 220
+   against ~146), so in this shape the sentence gives way for those two kinds — as it already does for every kind
+   below 760px — and the bar, the steps and the title stay whole. Nothing is clamped or cut. */
+@media (max-height: 900px) {
+  .d71-tb { gap: 7px; padding: 10px 20px 4px; }
+  .d58 .d71-av, .d58 .d71-cal { width: 42px; height: 42px; }
+  .d71-who { gap: 12px; }
+  .d58 .d71-task .d71-title { font-size: 21px; line-height: 1.3; }
+  .d58 .d71-line { font-size: 14px; line-height: 1.45; }
+  .d58 .d71-tb:is([data-kind="close"], [data-kind="send"]) .d71-line { display: none; }
+  .d71-tb[data-kind="close"] .d71-win { margin-top: 15px; }
+  .d71-wlab { margin-top: 4px; }
+  .d58 .d71-step { padding: 4px 8px; font-size: 12.5px; }
+  .d71-tf { padding: 9px 16px 10px; }
+  .d58 .d71-view { padding: 6px 14px; font-size: 14px; line-height: 20px; }
+}
 
 /* a short window: the body keeps to its title and its picture */
 @media (max-height: 760px) {
@@ -430,7 +462,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .d71-tb, .d71-prog > i > b.is-running { animation: none; }
-  .d71-th, .d71-prog, .d58 .d71-kick { transition: none; }
+  .d71-th { transition: none; }
   .d58 .d71-task { transition: none; }
   .d58 .d71-task:hover { transform: none; }
 }
@@ -455,10 +487,13 @@
 /* a narrow task card: "N OF M" gives way, the arrows and the segments stay. ⚠️ 340px, NOT 300 (v77): the
    head needs ~324px for the longest kicker ("AGENTS ARE WAITING") beside "‹ 1 OF 34 ›", and a card between
    300 and 340 cut the position (DB71 G1, red at baseline on 26 Oct once the account's counts grew). */
-@container d71task (max-width: 340px) { .d58 .d71-pos > span { display: none; } }
+/* v93: the band holds the kind's title and the pager. The pager's "N OF M" needs ~60px the title cannot spare in a
+   card under 420px (measured: "Agents are waiting" is 252px at 26px against 213 with the text shown), so there it keeps
+   its arrows only; under 300px (an 1100px window) the title steps down to 16px so the longest still fits whole. */
+@container d71task (max-width: 419px) { .d58 .d71-pos > span { display: none; } }
+@container d71task (max-width: 299px) { .d58 .d71-bandttl { font-size: 16px; } }
 /* below 1200px of window the page's side gutter narrows, for the hoops and the task card */
 /* ⚠️ 250px, NOT 270 (v77): at 1100×800 the Agents legend's "21 Querying" needed 8px more than a 270px task
    card left the hoops (DB71 G1, red at baseline on 26 Oct once the account's counts grew). */
 @media (max-width: 1199px) { .d58[data-mode="q"] { --d58-gutter: 20px; --d71-right-floor: 250px; } }
-/* …and a task card under 280px tightens its kicker, so "AGENTS ARE WAITING" and ‹ › still share the head */
-@container d71task (max-width: 280px) { .d58 .d71-kick { letter-spacing: 0.12em; padding: 4px 7px; } }
+

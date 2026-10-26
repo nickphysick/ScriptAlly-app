@@ -16,7 +16,7 @@
  * ⚠️ THE CHANGE OF ITEM IS NOT ANNOUNCED: the region's `aria-live` is off, so a screen reader is not
  * interrupted every seven seconds.
  */
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { ListAction, ListItem, ListPlan } from "../../../lib/dashList";
 import { DWELL_MS, segmentWindow, taskCardModel, type TaskCardModel, type TaskCtx } from "../../../lib/dashTaskCard";
 
@@ -50,9 +50,38 @@ function useMatches(query: string): boolean {
 
 const reduced = () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
+/**
+ * v93 — THE "Expected" LABEL IS PLACED BY MEASURING, because it shares a 13px row with "Queried …" (left) and
+ * "Today · …" (right). Centred on its point where there is room; slid to sit just clear of either end label where
+ * there is not; hidden only when the row cannot hold all three. (An expected date still in the future clamps its
+ * point to today, which is exactly where "Today" is drawn — found by DB93 A3.)
+ */
+const LABEL_GAP = 10;
+function placeExpected(row: HTMLElement | null) {
+  const e = row?.querySelector<HTMLElement>(".d71-wexp");
+  if (!row || !e) return;
+  const start = row.querySelector<HTMLElement>("span:first-child");
+  const today = row.querySelector<HTMLElement>(".d71-wtoday");
+  const W = row.clientWidth, ew = e.offsetWidth;
+  const lo = (start?.offsetWidth ?? 0) + LABEL_GAP, hi = W - (today?.offsetWidth ?? 0) - LABEL_GAP - ew;
+  const x = Math.min(Math.max(Number(e.dataset.at ?? 0) * W - ew / 2, lo), hi);
+  const fits = W > 0 && hi >= lo;
+  e.style.left = `${x}px`;
+  e.style.visibility = fits ? "" : "hidden";
+}
+
 const Bar: React.FC<{ m: TaskCardModel; probe: boolean }> = ({ m, probe }) => {
   const b = m.bar!;
   const pct = (x: number) => `${(x * 100).toFixed(3)}%`;
+  const rowRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const row = rowRef.current;
+    placeExpected(row);
+    if (!row || typeof ResizeObserver === "undefined") return undefined;
+    const ro = new ResizeObserver(() => placeExpected(row));
+    ro.observe(row);
+    return () => ro.disconnect();
+  });
   return (
     <div className="d71-win" data-d71={probe ? "bar" : undefined} {...(probe ? { "data-sent": b.sentMs, "data-expected": b.expectedMs ?? "", "data-close": b.closeMs ?? "", "data-today": b.todayMs } : {})}>
       <div className="d71-wbar">
@@ -64,9 +93,9 @@ const Bar: React.FC<{ m: TaskCardModel; probe: boolean }> = ({ m, probe }) => {
           </span>
         )}
       </div>
-      <div className="d71-wlab">
+      <div className="d71-wlab" ref={rowRef}>
         <span data-d71={probe ? "bar-sent" : undefined}>{b.sentLabel}</span>
-        {b.expectedLabel && <span className="d71-wexp" data-d71={probe ? "bar-expected" : undefined} style={{ left: pct(b.solid) }}>{b.expectedLabel}</span>}
+        {b.expectedLabel && <span className="d71-wexp" data-d71={probe ? "bar-expected" : undefined} data-at={b.solid} style={{ left: pct(b.solid) }}>{b.expectedLabel}</span>}
         <span className="d71-wtoday" data-d71={probe ? "bar-today" : undefined}>{b.todayLabel}</span>
       </div>
     </div>
@@ -156,7 +185,7 @@ export const Dash71Task: React.FC<{
   if (loading) {
     return (
       <section className="d71-task is-loading d58-skcard" data-sk="card" data-d71="task" data-loading="1" aria-hidden="true">
-        <div className="d71-th"><span className="d71-kick">LOADING</span></div>
+        <div className="d71-th"><span className="d71-bandttl">Loading</span></div>
         <div className="d71-tb" />
         <div className="d71-tf" />
       </section>
@@ -186,18 +215,20 @@ export const Dash71Task: React.FC<{
       data-counts={counts}
       data-query={m.queryId ?? undefined}
       data-index={at}
+      data-label={m.bandTitle}
       data-held={held ? "1" : "0"}
       role="region"
       aria-label="Your tasks"
       aria-live="off"
-      style={{ ["--d71-tint" as string]: m.tint, ["--d71-accent" as string]: m.accent } as React.CSSProperties}
+      style={{ ["--d71-band" as string]: m.band, ["--d71-band-ink" as string]: m.bandInk, ["--d71-accent" as string]: m.accent } as React.CSSProperties}
       onMouseEnter={hold}
       onMouseLeave={onLeave}
       onFocus={hold}
       onBlur={onBlur}
     >
-      <div className="d71-th" data-d71="head">
-        <span className="d71-kick" data-d71="kicker">{m.kicker}</span>
+      {/* v93: the head is the kind band — its title, and the pager at the right */}
+      <div className="d71-th" data-d71="band" data-ink={m.bandInk === "#ffffff" ? "light" : "dark"}>
+        <span className="d71-bandttl" data-d71="band-title">{m.bandTitle}</span>
         {n > 1 && (
           <span className="d71-pos" data-d71="pos">
             <button type="button" aria-label="Previous task" data-d71="prev" onClick={() => step(-1)}>‹</button>
