@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "E5",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "53 rows with pills; fixture 3 shown + 4"
+ },
+ {
+  "lock": "E5",
+  "where": "1512 whole pills",
+  "ok": false,
+  "detail": "1 rows — cl253fx-ag: 731,894,1065 past 890"
+ },
+ {
+  "lock": "E5",
+  "where": "1512 shown + n = genres",
+  "ok": true,
+  "detail": "all"
+ },
+ {
+  "lock": "E5",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "53 rows with pills; fixture 3 shown + 4"
+ },
+ {
+  "lock": "E5",
+  "where": "1280 whole pills",
+  "ok": false,
+  "detail": "1 rows — cl253fx-ag: 731,895,1066 past 905"
+ },
+ {
+  "lock": "E5",
+  "where": "1280 shown + n = genres",
+  "ok": true,
+  "detail": "all"
+ }
+]

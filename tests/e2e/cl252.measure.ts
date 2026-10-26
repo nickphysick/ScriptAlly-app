@@ -120,7 +120,8 @@ test("CL252-A1 A2 A3 A5 A6 A7 · the QueryHawk row", async ({ page }) => {
         L.A3.check(`${at} ${r.id} matches first`, hits.every((h, i) => i === 0 || !h || hits[i - 1]), hits.map((h) => (h ? "m" : "o")).join(""));
         for (const p of r.pills) L.A3.check(`${at} ${r.id} pill colour`, p.bg === (p.hit ? "rgb(227, 232, 239)" : "rgb(246, 242, 236)"), `${p.hit ? "match" : "other"} ${p.bg}`);
         L.A3.check(`${at} ${r.id} one line`, r.pills.every((p) => p.h <= 27 && Math.abs(p.top - (r.pills[0]?.top ?? p.top)) < 1), r.pills.map((p) => p.h.toFixed(0)).join(","));
-        L.A3.check(`${at} ${r.id} shown + n = genres`, a.genres === 0 ? r.none : r.pills.length + r.more === a.genres, `${r.pills.length}+${r.more} vs ${a.genres}`);
+        /* re-pointed (v25.3): an agent with no genres has a blank cell — no "No genres yet" placeholder */
+        L.A3.check(`${at} ${r.id} shown + n = genres`, a.genres === 0 ? r.pills.length === 0 && !r.none : r.pills.length + r.more === a.genres, `${r.pills.length}+${r.more} vs ${a.genres}`);
       }
       /* A5 */
       if (r.status) {
@@ -139,14 +140,17 @@ test("CL252-A1 A2 A3 A5 A6 A7 · the QueryHawk row", async ({ page }) => {
         if (r.next) L.A5.check(`${at} ${r.id} next step rust`, r.next === INK_NEXT, r.next);
       }
       /* A6 */
-      if (a) {
+      /* re-pointed (v25.3): only a row WITH a wishlist has the line; a row without one has none at all */
+      if (a && !a.mswl) L.A6.check(`${at} ${r.id} no wishlist, no line`, !r.wl, r.wl ? `a line: "${r.wl.text}"` : "none");
+      if (a && a.mswl) {
         L.A6.check(`${at} ${r.id} wishlist spans`, !!r.wl && !!r.name && Math.abs(r.wl.l - r.name.l) <= 2 && Math.abs(r.wl.r - r.rowR) <= 2 && !r.genreCellHasWl,
           r.wl && r.name ? `l ${r.wl.l.toFixed(1)}/${r.name.l.toFixed(1)} r ${r.wl.r.toFixed(1)}/${r.rowR.toFixed(1)}${r.genreCellHasWl ? " (in genres)" : ""}` : "no line");
-        if (r.wl) L.A6.check(`${at} ${r.id} one line`, r.wl.h <= 24 && (a.mswl ? r.wl.lines === 1 : /No wishlist yet/.test(r.wl.text)), `${r.wl.h.toFixed(1)}px · ${a.mswl ? `${r.wl.lines} line(s)` : r.wl.text}`);
+        if (r.wl) L.A6.check(`${at} ${r.id} one line`, r.wl.h <= 24 && r.wl.lines === 1, `${r.wl.h.toFixed(1)}px · ${r.wl.lines} line(s)`);
       }
       /* A7 (≤1440 the rating column is hidden; it is read where it shows) */
       if (a && vp.width > 1440) {
-        L.A7.check(`${at} ${r.id} tally`, !!r.tally && r.tally.bars === 5 && r.tally.lit === (a.stars ?? 0) && r.tally.label === (a.stars ? `${a.stars}/5` : "—"),
+        /* re-pointed (v25.3): an unrated agent's cell is blank (no empty bars, no dash); the card keeps its empty bars */
+        L.A7.check(`${at} ${r.id} tally`, a.stars ? !!r.tally && r.tally.bars === 5 && r.tally.lit === a.stars && r.tally.label === `${a.stars}/5` : !r.tally,
           r.tally ? `${r.tally.lit}/${r.tally.bars} "${r.tally.label}" vs ${a.stars}` : "no tally");
       }
     }
@@ -157,13 +161,16 @@ test("CL252-A1 A2 A3 A5 A6 A7 · the QueryHawk row", async ({ page }) => {
 test("CL252-A8 · missing details never show + Add at rest", async ({ page }) => {
   test.setTimeout(300_000);
   const A8 = new Ledger("A8");
+  /* re-pointed (Contact list v25.3): a row with gaps is now found from Firestore (the gaps no longer print), and on hover
+     it shows the ONE gap action ("Fill in … gaps →") — never a per-cell "+ Add", at rest or on hover */
+  const D = data();
   for (const vp of SIZES) {
     const at = `${vp.width}`;
     await openCl24(page, vp);
     await mutate(page, "A8", "[data-cl252='hadd'] { display: inline-flex !important; }");
     await toList(page);
     const R = await rows(page);
-    const gappy = R.filter((r) => /No wishlist yet|No genres yet|—/.test(r.text) || r.text.includes("—"));
+    const gappy = R.filter((r) => D.agents[r.id] && (!D.agents[r.id].mswl || D.agents[r.id].genres === 0));
     A8.check(`${at} population`, R.length >= 8 && gappy.length >= 3, `${R.length} rows, ${gappy.length} with a gap`);
     const atRest = R.filter((r) => r.text.includes("+ Add"));
     A8.check(`${at} none at rest`, atRest.length === 0, `${atRest.length} rows show "+ Add"`);
@@ -172,7 +179,7 @@ test("CL252-A8 · missing details never show + Add at rest", async ({ page }) =>
       await page.locator(`[data-cl24='row'][data-id='${id}']`).first().hover();
       await page.waitForTimeout(250);
       const t = await page.evaluate((i) => (document.querySelector<HTMLElement>(`[data-cl24='row'][data-id='${i}']`)?.innerText ?? ""), id);
-      A8.check(`${at} on hover`, t.includes("+ Add"), t.replace(/\s+/g, " ").slice(0, 120));
+      A8.check(`${at} on hover`, !t.includes("+ Add") && /Fill in \d+ gaps? →/.test(t), t.replace(/\s+/g, " ").slice(0, 120));
       await page.mouse.move(3, 3);
     }
   }

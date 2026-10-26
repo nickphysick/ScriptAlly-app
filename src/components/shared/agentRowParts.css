@@ -76,3 +76,6 @@
   letter-spacing: 0; text-transform: none; font: 400 14px/1 var(--sp-type) !important;
 }
 .qc149c .qc149c-gs .cl252-pill.hit { background: #e3e8ef; color: #2a3a52; box-shadow: none; }
+
+/* v25.3 — a fitted row of pills takes its cell's width; while it measures, nothing is painted wrongly (one frame) */
+.cl252-pills.fit { display: flex; width: 100%; }

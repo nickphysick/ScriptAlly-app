@@ -281,6 +281,24 @@ export function agentGapLine(model: Pick<HkModel, "byAgent">, agentId: string): 
   return { n: row.items.length, keys: row.items.map((i) => i.key), words: row.items.map((i) => GAP_DETAIL[i.gap].toLowerCase()) };
 }
 
+/**
+ * Contact list v25.3 — a List row's ONE gap action ("Fill in {n} gaps →"): this agent's visible Housekeeping items —
+ * the same count the agent panel's gap line and the drawer show — and the first of them in Housekeeping's own order
+ * (points, then queried, then name), which is the field the card's edit mode opens at. Null when the agent has none.
+ */
+export function agentGapAction(model: Pick<HkModel, "byAgent">, agentId: string): { n: number; first: GapKey } | null {
+  const row = model.byAgent.find((r) => r.agent.id === agentId);
+  if (!row || row.items.length === 0) return null;
+  return { n: row.items.length, first: row.items[0].gap };
+}
+/** where each gap opens in the card's edit mode */
+export const GAP_FOCUS: Record<GapKey, { tab: "who" | "want" | "work"; focus: "reply" | "materials" | "genres" | "wishlist" | "reopen" }> = {
+  reply: { tab: "work", focus: "reply" }, materials: { tab: "want", focus: "materials" }, genres: { tab: "want", focus: "genres" },
+  wishlist: { tab: "want", focus: "wishlist" }, reopen: { tab: "work", focus: "reopen" },
+};
+/** the button's words: "Fill in 1 gap", "Fill in 3 gaps" */
+export const fillGapsWords = (n: number): string => `Fill in ${n} ${n === 1 ? "gap" : "gaps"}`;
+
 /** "Best place to start" (Contact list v13 §2 order), or null when there are no gaps. */
 export function bestPlaceToStart(items: readonly HkItem[], book: HkBook): Run[] | null {
   if (!items.length) return null;
