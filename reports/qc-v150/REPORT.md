@@ -133,7 +133,15 @@ The data differs from the mock's: the harness account has 87–88 queries, sever
 
 ## Dev
 
-See the deploy section below.
+- Dev moved during the pack: it served `dev/hm31-pv4-qc1492-dh41-cl24-hm32-pk26` (`index-CN7x9BIo.js`) at the start
+  and `dev/pk26-pvm` (b9ce299b, pricing on phones; `index-Cq-MSqjH.js`, confirmed by building it) at deploy time.
+- Integration branch **`dev/pk26-pvm-qc150`** (212fb14f) = `dev/pk26-pvm` + `query-centre-v150`. The one conflict was
+  `design-refs/.refhashes.json` (both sides added entries; both kept). Gates there: tsc clean, build clean, Vitest
+  663 files green (`functions/` needs its node_modules linked in a fresh worktree), Playwright: QC150 24/24, the L13
+  suites green apart from the three baseline reds.
+- Deployed to dev (hosting only) from a clean checkout of the pushed tip, with the served hash checked in the same
+  command: **dev serves `index-D8CuUQO2.js`**. QC150 L1, L2, L5 and L12 re-run against the deployed site: green.
+- Not merged to main. Prod not touched.
 
 ## Left undone, and why
 
