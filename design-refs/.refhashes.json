@@ -797,7 +797,8 @@
     "design-refs/query-centre-v150-1/screens/05-full-list-1280.png": "db5d36ed0a97a6853cbfb1f628a583af157653cb7744ccdff957af3ff509c200",
     "design-refs/query-centre-v150-1/screens/05-full-list-1512.png": "6e2dec3a0a9c81fd30bf198b29812e1ad5b664c89063c0293856f83728bc7b2f",
     "design-refs/query-centre-v150-1/screens/06-full-birdseye-1280.png": "b7e87b6cc57936c8ca876f0f888ca5592aaacb43dddc53001c3b43efd94b7ea5",
-    "design-refs/query-centre-v150-1/screens/06-full-birdseye-1512.png": "1c1a07f9d44dece75900ec7fb8be7a61dd1794ebe4687286d50812f685a59ff2"
+    "design-refs/query-centre-v150-1/screens/06-full-birdseye-1512.png": "1c1a07f9d44dece75900ec7fb8be7a61dd1794ebe4687286d50812f685a59ff2",
+    "design-refs/contact-list-v25/contact-list-v25.html": "5331c7d3c9ca1aafc0704c1f0a4ad7cf084c0ebb4f1cd2504133ec45c28950a9"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",
