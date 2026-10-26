@@ -79,13 +79,14 @@ describe("pricing v4: the copy is the ref's, word for word", () => {
     ["What's the difference between Free and Pro?",
       "Free covers the essentials: one manuscript, up to 20 agents, and every query and response tracked. Pro adds the tools that make querying smarter, from manuscript versions and submission packages to Smart email drop and The Scout."],
     ["Is Pro a subscription?",
-      "No. You choose a plan that matches how long you expect to be querying, from one month to twelve, and it simply ends on its date. We'll remind you a week before, so you're never charged for something you didn't ask for."],
+      /* 26 Oct: the monthly roll-on (ref pricing-plans-ladder-v1.html, its wording panel) */
+      "Yes, but a flexible one. You start with a plan that matches how long you expect to be querying, from one month to twelve. If you're still going when it ends, it carries on month by month at £7.99 until you cancel. We'll remind you a week before."],
     ["Which plan should I choose?",
       "Querying usually takes longer than writers expect, often six months or more once agents start reading full manuscripts. Answer four quick questions under Which plan suits me best? and we'll suggest one for you."],
     ["What if my campaign runs longer than planned?",
-      "Before your current plan ends, we'll get in touch with options to extend it. Whatever you decide, you'll never lose your data."],
+      "There's nothing you need to do. Your plan simply carries on month by month, and you'll never lose your data."],
     ["What if I sign with an agent before my plan runs out?",
-      "Congratulations! There's nothing you need to do. Your plan will simply run to the end of its months, and it won't renew automatically."],
+      "Congratulations! Record your signing and we'll offer to stop your renewal there and then. Your plan runs to the end of the months you've paid for."],
     ["Can I bring across the spreadsheet I already use?",
       "Yes. Smart Import will read your list and turn your agents and queries into a smart QueryHawk database, so you don't have to start again."],
   ];

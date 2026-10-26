@@ -9,6 +9,7 @@
 import { describe, it, expect } from "vitest";
 import {
   PRO_PLANS, perMonth, planPerMonthLine, PRO_FROM, planFor, planTileLine, planPrice, planMonths,
+  ROLL_ON_PRICE, PRO_CHOOSE, LADDER_SMALL, planRungLine, LADDER_DEFAULT, TAB_FREE_SMALL, TAB_PRO_SMALL,
 } from "./pricingCopy";
 
 describe("the Pro plan table", () => {
@@ -37,5 +38,21 @@ describe("the Pro plan table", () => {
     expect(PRO_PLANS.map((p) => { const l = planTileLine(p); return l.lead + (l.save ?? ""); })).toEqual([
       "Add to any plan", "£6.33 a month · save 20%", "£4.83 a month · save 40%", "£3.75 a month · save 53%",
     ]);
+  });
+  /* 26 Oct: the ladder inside the Pro card and the quiet roll-on (ref pricing-plans-ladder-v1.html). */
+  it("prints the ladder's rows: the one-month plan is the monthly rate, the rest their saving", () => {
+    expect(PRO_PLANS.map((p) => { const l = planRungLine(p); return l.lead + (l.save ?? ""); })).toEqual([
+      "The monthly rate", "£6.33 a month · save 20%", "£4.83 a month · save 40%", "£3.75 a month · save 53%",
+    ]);
+    expect(LADDER_DEFAULT).toBe(6);
+    expect(PRO_CHOOSE).toBe("Choose how long to start with.");
+  });
+  it("the roll-on is the table's one-month price, and the small print is the ref's line", () => {
+    expect(ROLL_ON_PRICE).toBe(planFor(1).price);
+    expect(LADDER_SMALL).toBe("Renews monthly at £7.99 once your plan ends. Cancel any time.");
+  });
+  it("the phone's tabs carry each plan's price", () => {
+    expect(TAB_FREE_SMALL).toBe("£0");
+    expect(TAB_PRO_SMALL).toBe("from £3.75 a month");
   });
 });

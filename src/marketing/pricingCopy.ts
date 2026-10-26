@@ -103,6 +103,25 @@ export const planTileLine = (p: ProPlan): { lead: string; save: string | null } 
 /** "1 month", "3 months". */
 export const planMonths = (m: number): string => `${m} month${m > 1 ? "s" : ""}`;
 
+/* ══════════════ The Pro ladder, and the monthly roll-on (26 Oct; ref pricing-plans-ladder-v1.html) ══════════════
+   ⚠️ EVERY PLAN CARRIES ON MONTH BY MONTH AT THE ONE-MONTH PRICE ONCE IT ENDS, UNTIL THE WRITER CANCELS
+   (Nick, 26 Oct). It is said QUIETLY: one line of small print under the lengths, and in full only in the
+   FAQ. It is page copy for a planned launch — there is no payment path and nothing here bills anyone.
+   The price is the table's one-month figure, never a second literal. */
+export const ROLL_ON_PRICE = planFor(1).price;
+/** Under "Pro", above the four lengths. */
+export const PRO_CHOOSE = "Choose how long to start with.";
+/** The small print under the lengths — the page's only mention of renewal outside the FAQ. */
+export const LADDER_SMALL = `Renews monthly at £${ROLL_ON_PRICE} once your plan ends. Cancel any time.`;
+/** The ladder's radiogroup name, for screen readers. */
+export const LADDER_LABEL = "Plan length";
+/** A row's mono line, in two runs so the saving can carry its own colour: the one-month plan reads
+ *  "The monthly rate"; the rest "£6.33 a month · " then "save 20%". */
+export const planRungLine = (p: ProPlan): { lead: string; save: string | null } =>
+  p.saving === null ? { lead: "The monthly rate", save: null } : { lead: `£${perMonth(p)} a month · `, save: `save ${p.saving}%` };
+/** The length the ladder selects before any result. */
+export const LADDER_DEFAULT: ProPlan["months"] = 6;
+
 /* ══════════════ Then, once we launch ══════════════ */
 export const PV4_LAUNCH_LINE = "Then, once we launch:";
 
@@ -166,9 +185,9 @@ export const PV4_FAQ: Pv4Question[] = [
   },
   {
     q: "Is Pro a subscription?",
-    a: ["No. You choose a plan that matches how long you expect to be querying, from one month to twelve, and " +
-        "it simply ends on its date. We'll remind you a week before, so you're never charged for something " +
-        "you didn't ask for."],
+    a: ["Yes, but a flexible one. You start with a plan that matches how long you expect to be querying, from " +
+        "one month to twelve. If you're still going when it ends, it carries on month by month at " +
+        `£${ROLL_ON_PRICE} until you cancel. We'll remind you a week before.`],
   },
   {
     q: "Which plan should I choose?",
@@ -181,13 +200,13 @@ export const PV4_FAQ: Pv4Question[] = [
   },
   {
     q: "What if my campaign runs longer than planned?",
-    a: ["Before your current plan ends, we'll get in touch with options to extend it. Whatever you decide, " +
-        "you'll never lose your data."],
+    a: ["There's nothing you need to do. Your plan simply carries on month by month, and you'll never lose " +
+        "your data."],
   },
   {
     q: "What if I sign with an agent before my plan runs out?",
-    a: ["Congratulations! There's nothing you need to do. Your plan will simply run to the end of its months, " +
-        "and it won't renew automatically."],
+    a: ["Congratulations! Record your signing and we'll offer to stop your renewal there and then. Your plan " +
+        "runs to the end of the months you've paid for."],
   },
   {
     q: "Can I bring across the spreadsheet I already use?",
@@ -292,6 +311,10 @@ export const PV4_SOURCE_NOTE: CopyRun[] = [
    their notes — is read from the constants above, so the two widths cannot come to disagree. */
 /** The Pro side of the Free / Pro switch carries its "from" figure, read from the plan table. */
 export const SEG_PRO_FROM = `${PV4_PRO.from} £${PRO_FROM}`;
+/** The phone's pinned Free / Pro tabs (26 Oct; ref pricing-phone-plans-v1.html, layout A): each tab
+ *  names its plan with its price beneath, so Free is never out of sight. Read from the tables. */
+export const TAB_FREE_SMALL = `£${PV4_FREE.price}`;
+export const TAB_PRO_SMALL = `${PV4_PRO.from} £${PRO_FROM} ${PV4_PRO.per}`;
 /** Under the "Which plan suits me best?" button. */
 export const SUIT_NOTE = "Four quick questions, about a minute.";
 /** A plan tile's mono line on a phone: the per-month figure, then the saving on a line of its own. */

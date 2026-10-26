@@ -8,6 +8,10 @@
  * ref's recording, from which it differs only in the two tails that sold a month at £5.99) — 810 answer combinations on two dates, "I don't know" and "Not
  * sure yet" included, with the note the ref shows under each answer. Nothing here is a value
  * reasoned from reading the arithmetic.
+ *
+ * ⚠️ EXCEPT THE TWO TAILS THAT RUN PAST THE PLAN (26 Oct). The ladder ref states their new wording
+ * but has no estimate script to record from, so `scripts/pricing-ladder-tails.mjs` substituted exactly
+ * those two sentences in the recording (206 and 115 cases) and nothing else.
  */
 import { describe, it, expect } from "vitest";
 import refCases from "./campaignEstimate.ref.json";
@@ -29,8 +33,10 @@ describe("estimateCampaign agrees with the ref, case for case", () => {
     /* every branch of the output is entered at least once */
     expect(new Set(cases.map((c) => c.fit))).toEqual(new Set([3, 6, 12]));
     expect(new Set(cases.map((c) => c.tail)).size).toBe(4);
-    /* ⚠️ THE 24 OCT POLICY: a plan is extended by QueryHawk getting in touch; no tail sells a month. */
-    expect(cases.filter((c) => c.tail.includes("we'll be in touch with options to extend")).length).toBe(321);
+    /* ⚠️ THE 26 OCT POLICY: a plan carries on month by month; no tail sells a month or promises a call. */
+    expect(cases.filter((c) => c.tail === "If you're still querying after that, your plan simply carries on month by month.").length).toBe(206);
+    expect(cases.filter((c) => c.tail === "If your last replies run late, your plan simply carries on month by month until you're done.").length).toBe(115);
+    expect(cases.some((c) => /options to extend|never renew|won't renew/.test(c.tail))).toBe(false);
     expect(cases.some((c) => c.tail.includes("£"))).toBe(false);
     expect(cases.some((c) => c.label === "About a year or more")).toBe(true);
     expect(cases.filter((c) => c.answers.agentsUnknown).length).toBe(90);

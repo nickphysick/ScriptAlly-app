@@ -688,7 +688,9 @@
     "design-refs/landing-hero-mobile-v2.html": "116249277c60b304dd7d894f7bfa597529d1379b8b7af6430b4f821628c3d603",
     "design-refs/landing-hero-mobile-v3.html": "9c830d5c74e5e703bf81267fb60cbd4be34de4d60141284e60ed1ae907a0f425",
     "design-refs/pricing-page-v2.html": "54441ed0bc9a387b5898ef338cc78cd0541fefb5eb3ac0cc42fd08c84e3fe503",
-    "design-refs/pricing-page-mobile-v1.html": "0d81bf25d95a5b2f23b7998f657d590471d5b3f83f0317f7d1f7d6bae16769d7"
+    "design-refs/pricing-page-mobile-v1.html": "0d81bf25d95a5b2f23b7998f657d590471d5b3f83f0317f7d1f7d6bae16769d7",
+    "design-refs/pricing-plans-ladder-v1.html": "18dc9e187044bf9b416739dde44cf56cef30ac25c91ba65697cfd7e0abd87f19",
+    "design-refs/pricing-phone-plans-v1.html": "1cb478717150b5e2ec2c2ed33b8e6f020e3e0a33694597b525da2ef1bc786594"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",
