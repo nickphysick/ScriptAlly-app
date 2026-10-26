@@ -306,9 +306,6 @@ export const foundingRemainingLabel = (claimed: number, cap: number) =>
 
 /** The phone nav's founding pill, beneath its ten segments: a BUILDER, never a number in a string. */
 export const navPlacesLeft = (left: number) => `${left} places left`;
-/** The founding strip's count on phones (landing on phones v1): "48 left". The strip's screen-reader
-    line is still `navPlacesLeft`, the whole phrase. */
-export const stripPlacesLeft = (left: number) => `${left} left`;
 /** The desktop hero's places counter (v4.1): the number in bold, then this; and its spoken label. */
 export const HERO_PLACES_REST = " places left";
 export const heroPlacesLabel = (left: number, cap: number) => `${left} of ${cap} founding places left`;
