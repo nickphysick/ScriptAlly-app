@@ -1260,11 +1260,15 @@ service cloud.firestore {
     match /contactMessages/{id} { allow read: if isAdmin(); allow write: if false; }
     match /contactSenders/{id}  { allow read, write: if false; }
 
-    // ROUTE: Beta feedback dock — NO client writes, admin-only reads.
-    // Same shape and same reasoning as contactMessages: the dock posts to the `sendBetaFeedback`
-    // callable, which writes via the Admin SDK and bypasses these rules. A report names a fault in
-    // the writer's own work in progress, so it is between them and the desk.
-    match /betaFeedback/{id} { allow read: if isAdmin(); allow write: if false; }
+    // ROUTE: Beta feedback dock — NO client writes. The dock (and the dashboard's founding writer card)
+    // post to the `sendBetaFeedback` callable, which writes via the Admin SDK and bypasses these rules.
+    // A report names a fault in the writer's own work in progress, so it is between them and the desk:
+    // an admin reads all, and since Dashboard v77 a writer reads their own (and nobody else's).
+    // Dashboard v77 — the founding writer card's record: a writer reads their OWN feedback (a get, or a
+    // list filtered `where uid == me`; a query the rules cannot prove is theirs is denied). `uid` is set by
+    // the `sendBetaFeedback` callable from the verified token, never the body. Still no client writes:
+    // Nick sets `status`, `title` and `statusAt` by hand in the console (betaFeedbackCore.ts documents them).
+    match /betaFeedback/{id} { allow read: if isAdmin() || (isSignedIn() && resource.data.uid == request.auth.uid); allow write: if false; }
 
     // ROUTE: Weekly pulse (Dashboard v59) — NO client writes. The founding writer panel's faces post
     // to the `sendWeeklyPulse` callable, which sets `betaPulse/{uid}_{week}` via the Admin SDK. A

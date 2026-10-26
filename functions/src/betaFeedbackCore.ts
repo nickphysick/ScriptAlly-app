@@ -9,6 +9,13 @@
  * ⚠️ A SCREENSHOT PATH MUST BE THE CALLER'S OWN — `betaFeedback/{their uid}/…`. A path under anyone else's uid is refused.
  * ⚠️ THE WRITE COMES FIRST, AND AN EMAIL FAILURE NEVER FAILS THE CALL. Feedback that was stored is feedback; the email is
  *    a notification about it. A failed send is logged and recorded on the document (`emailed: false`, `emailError`).
+ *
+ * DASHBOARD v77 — THREE FIELDS THIS FUNCTION NEVER WRITES. Nick sets them by hand in the Firebase console, and the
+ * founding writer card reads them back (owner-only, `src/lib/feedbackRecord.ts`):
+ *   status    "read" | "planned" | "built" | "fixed"   absent = sent. Changed = built + fixed.
+ *   title     string, ≤ 120, the short public title    absent = the message's first 60 characters, quoted
+ *   statusAt  timestamp, when the status was reached    absent = the tooltip carries no result date
+ * ⚠️ Never add them to `cleanFeedback` or the write below: they are the desk's answer, not the writer's note.
  */
 import type { RenderedEmail, SendOutcome, SendOverrides } from "./email";
 

@@ -36,6 +36,7 @@ import {
   appVersionLabel, describeBrowser, feedbackSentLines, takesScreenshot,
 } from "../../lib/beta";
 import { clearFeedbackDraft, feedbackAnchor, feedbackDraft, feedbackPage, setFeedbackDraft, type FeedbackDraft } from "../../lib/feedbackStore";
+import { sendFeedback } from "../../lib/sendFeedback";
 
 declare const __QH_BUILD_DATE__: string | undefined;
 const BUILD = typeof __QH_BUILD_DATE__ !== "undefined" ? __QH_BUILD_DATE__ : undefined;
@@ -159,9 +160,8 @@ export const FeedbackDock: React.FC<{
         const [{ getStorage, ref, uploadBytes }, { app }] = await Promise.all([import("firebase/storage"), import("../../lib/firebase")]);
         await uploadBytes(ref(getStorage(app), screenshotPath), d.shot.file, { contentType: d.shot.file.type });
       }
-      const { getFunctions, httpsCallable } = await import("firebase/functions");
-      const call = httpsCallable(getFunctions(undefined, "europe-west2"), "sendBetaFeedback");
-      await call({
+      /* Dashboard v77: the call lives in lib/sendFeedback (the founding writer card posts through it too) */
+      await sendFeedback({
         kind, message: d.message.trim(),
         severity: kind === "Something's broken" ? d.severity ?? "" : "",
         wantsReply: d.reply, pageName, route: location.pathname, viewport,

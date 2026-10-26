@@ -46,6 +46,8 @@ import {
   deleteField,
   getDocs,
   collection,
+  query,
+  where,
 } from 'firebase/firestore';
 import { beforeAll, afterAll, afterEach, describe, it } from 'vitest';
 
@@ -1816,5 +1818,56 @@ describe('/betaPulse', () => {
     await assertFails(setDoc(doc(aliceCtx().firestore(), 'betaPulse', `${ALICE}_2026-W42`), { uid: ALICE, week: '2026-W42', mood: 4 }));
     await assertFails(setDoc(doc(adminCtx().firestore(), 'betaPulse', `${ALICE}_2026-W42`), { uid: ALICE, week: '2026-W42', mood: 4 }));
     await assertFails(setDoc(doc(unauthed().firestore(), 'betaPulse', 'x_2026-W42'), { uid: 'x', week: '2026-W42', mood: 1 }));
+  });
+});
+
+// Dashboard v77 — the founding writer card's record. Written only by the `sendBetaFeedback` callable
+// (Admin SDK); Nick sets `status`, `title` and `statusAt` by hand in the console. A writer reads their
+// OWN feedback (one doc, or a list filtered to their uid); an admin reads all; no client writes.
+describe('/betaFeedback', () => {
+  const seed = async (id: string, uid: string) => asAdmin(async (ctx) => {
+    await setDoc(doc(ctx.firestore(), 'betaFeedback', id), { uid, kind: 'An idea', message: 'A bulk nudge', createdAt: new Date() });
+  });
+
+  it('the owner can get one of their own', async () => {
+    await seed('fb-alice-1', ALICE);
+    await assertSucceeds(getDoc(doc(aliceCtx().firestore(), 'betaFeedback', 'fb-alice-1')));
+  });
+
+  it('the owner can list their own, filtered to their uid', async () => {
+    await seed('fb-alice-1', ALICE);
+    await seed('fb-bob-1', BOB);
+    await assertSucceeds(getDocs(query(collection(aliceCtx().firestore(), 'betaFeedback'), where('uid', '==', ALICE))));
+  });
+
+  it('another signed-in writer is denied a get', async () => {
+    await seed('fb-alice-1', ALICE);
+    await assertFails(getDoc(doc(bobCtx().firestore(), 'betaFeedback', 'fb-alice-1')));
+  });
+
+  it('another signed-in writer is denied a list (of the collection, or of someone else\'s uid)', async () => {
+    await seed('fb-alice-1', ALICE);
+    await assertFails(getDocs(collection(bobCtx().firestore(), 'betaFeedback')));
+    await assertFails(getDocs(query(collection(bobCtx().firestore(), 'betaFeedback'), where('uid', '==', ALICE))));
+  });
+
+  it('an unauthenticated caller can read nothing', async () => {
+    await seed('fb-alice-1', ALICE);
+    await assertFails(getDoc(doc(unauthed().firestore(), 'betaFeedback', 'fb-alice-1')));
+    await assertFails(getDocs(collection(unauthed().firestore(), 'betaFeedback')));
+  });
+
+  it('an admin reads any', async () => {
+    await seed('fb-alice-1', ALICE);
+    await assertSucceeds(getDoc(doc(adminCtx().firestore(), 'betaFeedback', 'fb-alice-1')));
+  });
+
+  it('no client writes: not the owner, not an admin, not a stranger', async () => {
+    await assertFails(setDoc(doc(aliceCtx().firestore(), 'betaFeedback', 'fb-new'), { uid: ALICE, kind: 'An idea', message: 'x' }));
+    await assertFails(setDoc(doc(adminCtx().firestore(), 'betaFeedback', 'fb-new'), { uid: ALICE, kind: 'An idea', message: 'x' }));
+    await assertFails(setDoc(doc(unauthed().firestore(), 'betaFeedback', 'fb-new'), { uid: 'x', kind: 'An idea', message: 'x' }));
+    await seed('fb-alice-1', ALICE);
+    await assertFails(updateDoc(doc(aliceCtx().firestore(), 'betaFeedback', 'fb-alice-1'), { status: 'built' }));
+    await assertFails(deleteDoc(doc(aliceCtx().firestore(), 'betaFeedback', 'fb-alice-1')));
   });
 });

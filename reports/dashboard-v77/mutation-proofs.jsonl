@@ -2,3 +2,8 @@
 {"mutation":"A1-fill","lock":"A1","exit":1,"reading":"3 red · 1920x1080 chart height = clamp(300, 0.31 × 1440.0, 540) = 446.4 (±2) — chart 367.8"}
 {"mutation":"A4-uncapped","lock":"A4","exit":1,"reading":"2 red · 1920x1080 the body and the header are ≤ 1440px wide — body 1542.0 · header 1542.0"}
 {"mutation":"A2-no-stack","lock":"A2","exit":1,"reading":"1 red · the card's height is identical (±1) across the cycle — 207.0–373.8 (spread 166.8)"}
+{"lock":"B4","mutation":"recordOf does not sort","result":"RED 1 failed | 14 passed (order)"}
+{"lock":"B4","mutation":"changed counts planned","result":"RED 1 failed | 14 passed (counts)"}
+{"lock":"B4","mutation":"title never cut at 60","result":"RED 1 failed | 14 passed (title >60)"}
+{"lock":"B2","mutation":"before the rule change (admin-only read)","result":"RED 2 failed (owner get, owner list) | 5 passed"}
+{"lock":"B2","mutation":"read allowed to any signed-in user","result":"RED 2 failed (bob get, bob list)"}
