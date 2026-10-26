@@ -104,22 +104,8 @@ export const ContactSheet24: React.FC<ContactSheet24Props> = (p) => {
   const byId = useMemo(() => new Map(p.all.map((x) => [x.agent.id, x])), [p.all]);
   const groups = useMemo(() => (p.grouped ? setGroups(p.pool) : [{ key: null as SetKey | null, label: "", ids: p.pool.map((x) => x.agent.id) }]), [p.grouped, p.pool]);
 
-  /* v25 D2 — AT 1440 OF SHEET OR LESS Filters and Full screen go icon-only. The sheet is the window less the shell's
-     published insets (`--ink-sheet-l/-r` on <html>, which WorkspaceShell keeps current), read on every resize. */
-  const [narrowSheet, setNarrowSheet] = useState(false);
-  useLayoutEffect(() => {
-    const read = () => {
-      const cs = getComputedStyle(document.documentElement);
-      const s = window.innerWidth - (parseFloat(cs.getPropertyValue("--ink-sheet-l")) || 0) - (parseFloat(cs.getPropertyValue("--ink-sheet-r")) || 0);
-      setNarrowSheet(s <= 1440);
-    };
-    read();
-    window.addEventListener("resize", read);
-    const el = sheetRef.current;
-    const ro = typeof ResizeObserver !== "undefined" && el ? new ResizeObserver(read) : null;
-    if (ro && el) ro.observe(el);
-    return () => { window.removeEventListener("resize", read); ro?.disconnect(); };
-  }, []);
+  /* v25.1 C3 — the bar folds at 1440 of WINDOW, the Query Centre's rule (contactV24.css's media query); v25's
+     sheet-measured `data-s1440` is retired */
 
   /* Cards: three across from a sheet of 1,100px, measured before paint and on every resize */
   const [across, setAcross] = useState(3);
@@ -143,7 +129,7 @@ export const ContactSheet24: React.FC<ContactSheet24Props> = (p) => {
   const sortBy = (k: SortKey) => p.onSort({ key: k, reversed: p.sortKey === k ? !p.reversed : false });
 
   return (
-    <div className="cl24-sheet" data-cl24="sheet" data-view={p.view} data-s1440={narrowSheet ? "" : undefined} ref={sheetRef}>
+    <div className="cl24-sheet" data-cl24="sheet" data-view={p.view} ref={sheetRef}>
       <div className="cl24-bar" data-cl24="bar" ref={barRef}>
         <label className="qc150-bfind" data-cl24="find" data-cl25="find" data-nb1="find">
           <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4.5 4.5" /></svg>
@@ -155,8 +141,8 @@ export const ContactSheet24: React.FC<ContactSheet24Props> = (p) => {
           {I.filt}<span className="cl24-cl">Filters</span>{filterN ? <em className="cl24-n" data-cl24="filters-n">{filterN}</em> : null}
         </button>
         <button type="button" className="cl24-ch" data-cl24="group" aria-haspopup="menu" aria-expanded={pop.open === "group"}
-          aria-label={`Grouped by ${p.grouped ? "Status" : "nothing"}. Change the grouping`} data-cl25="group" onClick={(e) => pop.toggle("group", e.currentTarget)}>
-          {GROUP_ICON150}<b>{p.grouped ? "Status" : "None"}</b>{I.cv}
+          aria-label={p.grouped ? "Grouped by Status. Change the grouping" : "Not grouped. Group the list"} data-cl25="group" onClick={(e) => pop.toggle("group", e.currentTarget)}>
+          {GROUP_ICON150}<b>{p.grouped ? "Status" : "Group"}</b>{I.cv}
         </button>
         <SortChipButton fields={CL_SORT_FIELDS} value={{ key: p.sortKey, reversed: p.reversed }} open={pop.open === "sort"} className="cl24-ch cl24-sort" ns="cl24"
           onToggle={(a) => pop.toggle("sort", a)} toolbar={() => barRef.current} />

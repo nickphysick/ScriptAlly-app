@@ -69,8 +69,6 @@ export interface CountLine {
   shown: number;
   /** every agent on file */
   total: number;
-  /** List health, or null while Housekeeping has not run */
-  pct: number | null;
   view: "list" | "cards";
   grouped: boolean;
   sortKey: SortKey;
@@ -85,11 +83,12 @@ const SORT_WORDS: Partial<Record<SortKey, [string, string]>> = {
 /** the sort in words: "A to Z", "newest first" */
 export const sortWords = (k: SortKey, reversed: boolean): string => (SORT_WORDS[k] ?? SORT_WORDS.surname!)[reversed ? 1 : 0];
 
-/** "41 agents · 93% list health · grouped by status, A to Z", in parts the title draws */
-export function countLine(c: CountLine): { n: number; of: number | null; agents: string; pct: number | null; how: string } {
+/** "41 agents · grouped by status, A to Z", in parts the title draws (v25.1 C2: List health left the line; its cell
+ *  in At a glance states the percentage) */
+export function countLine(c: CountLine): { n: number; of: number | null; agents: string; how: string } {
   const filtered = c.shown !== c.total;
   const how = c.view === "cards"
     ? `as cards, ${c.grouped ? "grouped by status" : sortWords(c.sortKey, c.reversed)}`
     : c.grouped ? `grouped by status, ${sortWords(c.sortKey, c.reversed)}` : sortWords(c.sortKey, c.reversed);
-  return { n: c.shown, of: filtered ? c.total : null, agents: (filtered ? c.total : c.shown) === 1 ? "agent" : "agents", pct: c.pct, how };
+  return { n: c.shown, of: filtered ? c.total : null, agents: (filtered ? c.total : c.shown) === 1 ? "agent" : "agents", how };
 }

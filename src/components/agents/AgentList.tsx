@@ -47,6 +47,8 @@ import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { ContactHeader25 } from "./contact/ContactHeader24";
 import { ContactGlance251 } from "./contact/ContactGlance251";
 import { ContactListTitle25 } from "./contact/ContactListTitle25";
+import { ContactLogFlow } from "./contact/ContactLogFlow";
+import { hostContactLog, type ContactLogSeed } from "../../lib/contactLogStore";
 import { GLANCE_ORDER, GLANCE_SETS, glanceCards, type GlanceKey as GlanceCardKey } from "../../lib/contactV25";
 import { ContactSheet24, SheetSkeleton } from "./contact/ContactSheet24";
 import { AgentCard24, AgentCardWide24, type AgentCard24Props } from "./contact/AgentCard24";
@@ -178,6 +180,14 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   useEffect(() => { writeListView({ group: groupKey, sort: sortKey, reversed, view, byStatus }); }, [groupKey, sortKey, reversed, view, byStatus]);
   /* v24 B2 — the agent whose card is open (Part C draws it); its row and card are marked */
   const [cardId, setCardId] = useState<string | null>(null);
+  /* v25.1 C4 — the in-place log flow: its seed while open. The page hosts it while it is the page on screen (and not a
+     sandbox); opening it closes the agent card, as one right-hand panel at a time. */
+  const [logSeed, setLogSeed] = useState<ContactLogSeed | null>(null);
+  useEffect(() => {
+    if (!active || sandbox) return undefined;
+    return hostContactLog((seed) => { setCardId(null); setLogSeed(seed); });
+  }, [active, sandbox]);
+  useEffect(() => { if (!active) setLogSeed(null); }, [active]);
   useEffect(() => { writeListVisit({ filters, search, glance }); }, [filters, search, glance]);
   const pop = usePopover<ContactPop>();
   /* v16 §E — FULL SCREEN is the shared `useFullScreenList` (Comparable titles v25 built it for both pages): the URL
@@ -957,7 +967,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
           <>
           {/* v25 C — "Every agent on file": the title, its count line and the List | Cards switch (out of the navy bar) */}
           <ContactListTitle25 view={view} onView={setView}
-            line={pageState === "list" ? { shown: visibleFacts.length, total: factsAll.length, pct: health?.pct ?? null, view, grouped: byStatus, sortKey, reversed } : null} />
+            line={pageState === "list" ? { shown: visibleFacts.length, total: factsAll.length, view, grouped: byStatus, sortKey, reversed } : null} />
           <ContactSheet24 pool={visibleFacts} all={factsAll} view={view} grouped={byStatus} onGrouped={setByStatus}
             sortKey={sortKey} reversed={reversed} onSort={(v) => { setSortKeyRaw(v.key); setReversed(v.reversed); }}
             filters={filters} onFilters={setFilters} onClearAll={clearFilters} full={fullOn} onFull={togglePin}
@@ -986,7 +996,13 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
               }} />
           )} />
         )}
-        {cardFacts && active ? (
+        {/* v25.1 C4 — the top bar's "+ Log a query" opens here, in the agent card's panel, and never leaves the page */}
+        {logSeed && active ? (
+          <AgentCardPanel24 agentId="__log" onClose={() => setLogSeed(null)}>
+            <ContactLogFlow seed={logSeed} activeMsId={scoped?.id ?? null} onClose={() => setLogSeed(null)} />
+          </AgentCardPanel24>
+        ) : null}
+        {cardFacts && active && !logSeed ? (
           <AgentCardPanel24 agentId={cardFacts.agent.id} onClose={() => setCardId(null)}>
             <AgentCard24 {...cardPropsFor(cardFacts, cardIndex, drawnOrder.length,
               (d) => { const n = drawnOrder[cardIndex + d]; if (n) setCardId(n); }, (id) => setCardId(id), () => setCardId(null))} />

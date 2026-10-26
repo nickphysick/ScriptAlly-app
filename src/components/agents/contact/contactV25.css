@@ -67,9 +67,7 @@
   /* the bar's words at v150.1's sizes (the search 15, the pills 15.5, Full screen 14.5) */
   .clv-group[data-v25] .cl24-bar .qc150-bfind input, .clv-group[data-v25] .cl24-bar .qc150-bfind input::placeholder { font-size: 15px !important; }
   .clv-group[data-v25] .cl24-sheet .cl24-ch .cl24-cl { font-size: 15.5px !important; }
-  /* at 1440 of sheet or less (`data-s1440`, measured): Filters and Full screen go icon-only */
-  .clv-group[data-v25] .cl24-sheet[data-s1440] :is(.cl24-cl, .cl24-fslb) { display: none; }
-  .clv-group[data-v25] .cl24-sheet[data-s1440] .cl24-fs { width: 34px; padding: 0; justify-content: center; }
+  /* v25.1 C3 — the sheet-measured fold (`data-s1440`) is retired: the bar folds at 1440 of WINDOW (contactV24.css) */
 
   /* D3 · the full-screen cream row: its words in Special Elite, upright, and its sort pill drops the prefix at every
      width (v24 dropped it at a window of 1440 or less only) */

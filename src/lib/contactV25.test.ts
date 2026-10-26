@@ -73,9 +73,9 @@ describe("inSet takes a list of sets (v25 B2)", () => {
 });
 
 describe("the list title's count line (v25 C)", () => {
-  const base = { shown: 41, total: 41, pct: 93, view: "list" as const, grouped: true, sortKey: "surname" as const, reversed: false };
-  it("the default: 41 agents · 93% list health · grouped by status, A to Z", () => {
-    expect(countLine(base)).toEqual({ n: 41, of: null, agents: "agents", pct: 93, how: "grouped by status, A to Z" });
+  const base = { shown: 41, total: 41, view: "list" as const, grouped: true, sortKey: "surname" as const, reversed: false };
+  it("the default: 41 agents · grouped by status, A to Z (v25.1 C2: no list health)", () => {
+    expect(countLine(base)).toEqual({ n: 41, of: null, agents: "agents", how: "grouped by status, A to Z" });
   });
   it("Cards: as cards, grouped by status", () => {
     expect(countLine({ ...base, view: "cards" }).how).toBe("as cards, grouped by status");

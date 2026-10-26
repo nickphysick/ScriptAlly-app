@@ -4,10 +4,11 @@
 
 /* ══ Part A · At a glance, one ledger card ════════════════════════════════════════════════════════════════════════ */
 @media (min-width: 768px) {
-  .cl25-hd .cl251-glance { margin-top: 22px; }
+  /* C1 — "At a glance" is "Every agent on file"'s size (Special Elite 24 / 24), 30 under the header card */
+  .cl25-hd .cl251-glance { margin-top: 30px; }
   .cl25-hd .cl251-glance h3.cl251-gh {
     display: flex; align-items: center; gap: 26px; margin: 0 0 14px; padding: 4px 0;
-    font: 400 19px/20px var(--sp-type) !important; font-family: var(--sp-type) !important; color: #1c130f; white-space: nowrap;
+    font: 400 24px/24px var(--sp-type) !important; font-family: var(--sp-type) !important; color: #1c130f; white-space: nowrap;
   }
   .cl25-hd .cl251-glance .cl251-gh::after { content: ""; flex: 1 1 0; min-width: 0; height: 1px; background: rgba(28, 19, 15, 0.18); }
 
