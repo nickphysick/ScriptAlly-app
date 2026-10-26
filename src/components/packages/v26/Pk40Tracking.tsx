@@ -16,13 +16,14 @@ import React, { useMemo, useState } from "react";
 import type { SubmissionPackage } from "../../../types";
 import { iconOf } from "../../../lib/packagesV26";
 import {
-  headToHeadDefaults, headToHeadVerdict, MIN_SENT_FOR_RATE, packageStage, piecesDiffer, PIECES, rankColumn, testFooter, testState,
-  type Facts,
+  headToHeadDefaults, headToHeadVerdict, matLeader, matVerdict, MIN_SENT_FOR_RATE, orderMatCards, packageStage, piecesDiffer, PIECES,
+  rankColumn, testFooter, testState, type Facts, type MatCard,
 } from "../../../lib/packagesV40";
-import { Pic } from "./icons";
+import { Mark, Pic } from "./icons";
 import type { Pk26Model } from "./usePk26Model";
 
-type View = "a" | "b" | "c";
+export type TrackView = "a" | "b" | "c";
+type View = TrackView;
 const MIN = MIN_SENT_FOR_RATE;
 
 /** The four-row funnel under a card's big figure (ref `tfun`). */
@@ -38,9 +39,8 @@ export const ReplyDays: React.FC<{ f: Facts }> = ({ f }) => (f.days != null
   ? <p className="p6-tp-d">Replies take {f.days} days on average</p>
   : f.replied ? null : <p className="p6-tp-d">No replies yet</p>);
 
-export const Pk40Tracking: React.FC<{ model: Pk26Model; onDuplicate: (p: SubmissionPackage) => void }> = ({ model, onDuplicate }) => {
+export const Pk40Tracking: React.FC<{ model: Pk26Model; view: View; onView: (v: View) => void; onDuplicate: (p: SubmissionPackage) => void }> = ({ model, view, onView: setView, onDuplicate }) => {
   const { msPkgs, active, letters, synopses, versionRows, matName } = model;
-  const [view, setView] = useState<View>("a");
   const live = useMemo(() => msPkgs.filter((p) => { const s = packageStage(p); return s === "ready" || s === "out"; }), [msPkgs]);
   const factsById = useMemo(() => new Map(msPkgs.map((p) => [p.id, model.facts(p)])), [msPkgs, model]);
   const fx = (p: SubmissionPackage) => factsById.get(p.id)!;
@@ -194,6 +194,77 @@ export const Pk40Tracking: React.FC<{ model: Pk26Model; onDuplicate: (p: Submiss
           ))}
         </div>
         {body}
+      </div>
+    </section>
+  );
+};
+
+/* ══ G · Tracking & performance on the Query letters and Synopses tabs (ref `#tpm`, `tmRender`) ══════════════════ */
+
+type Card = MatCard & { pk: SubmissionPackage[] };
+
+/**
+ * One card per letter (or synopsis), and for synopses a "No synopsis" card counting the queries that went out with the
+ * synopsis slot empty (H3: credited from what each query recorded). Cards that have reached MIN_SENT_FOR_RATE come
+ * first; the leader is 10 points clear of the next, both at the threshold.
+ */
+export const Pk40MatTracking: React.FC<{ model: Pk26Model; kind: "let" | "syn"; onSeeTests: () => void }> = ({ model, kind, onSeeTests }) => {
+  const L = kind === "let";
+  const noun = L ? "letter" : "synopsis", nouns = L ? "letters" : "synopses";
+  const field = L ? "queryLetterVersionId" : "synopsisVersionId";
+  const { msPkgs } = model;
+  const cards = useMemo<Card[]>(() => {
+    const list: Card[] = (L ? model.letters : model.synopses).map((m) => ({ id: m.id, name: m.name, f: model.pieceFacts(kind, m.id), pk: msPkgs.filter((p) => p[field] === m.id) }));
+    if (!L) list.push({ id: "none", name: "No synopsis", none: true, f: model.pieceFacts("syn", "none"), pk: msPkgs.filter((p) => !(p.synopsisVersionId ?? "").trim()) });
+    return orderMatCards(list);
+  }, [L, kind, field, model, msPkgs]);
+  const tot = cards.reduce((a, c) => a + c.f.n, 0);
+  const lead = matLeader(cards);
+  const vd = matVerdict(cards, kind);
+
+  return (
+    <section className="p6-tp p6-tpm" data-pk40="tpm" aria-labelledby="p6-tpmT">
+      <div className="p6-tp-band">
+        <h2 id="p6-tpmT">Which {noun} gets agents asking for more?</h2>
+        <p>{L ? "Every query that went out with a letter counts here, whichever package it was in." : "Every query that went out with a synopsis counts here, and so do the ones that went without."}</p>
+        <span className="p6-tp-arw" aria-hidden="true">↓</span>
+      </div>
+      <div className="p6-tp-body">
+        {!tot ? (
+          <div className="p6-tp-wait">
+            <div className="p6-tp-art" data-art="tpm"><span>Illustration<small>A hawk with a stopwatch</small></span></div>
+            <div>
+              <h3>This fills in once two {nouns} have each gone out with {MIN} queries.</h3>
+              <p>Then you’ll see which {noun} gets agents asking for more, how many replied, and how long they took.</p>
+            </div>
+          </div>
+        ) : (
+          <div className="p6-tp-hh">
+            <p className="p6-tp-vd p6-tm-vd"><b>{vd.lead}</b> {vd.rest}</p>
+            <div className="p6-tm-g">
+              {cards.map((c) => {
+                const f = c.f, on = c === lead;
+                return (
+                  <article key={c.id} className={`p6-tm-c${on ? " p6-lead" : ""}${c.none ? " p6-none" : ""}`} data-mat={c.id}>
+                    <header>
+                      <span className="p6-tm-ic">{c.none ? <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15" /></svg> : <Mark k={kind} />}</span>
+                      <span className="p6-tm-n"><b>{c.name}</b><small>{c.pk.length ? `In ${c.pk.map((p) => p.packageName).join(", ")}` : "Not in a package yet"}</small></span>
+                      {on ? <em>Ahead</em> : null}
+                    </header>
+                    <div className="p6-tp-big">
+                      {f.pct != null
+                        ? <><b>{f.pct}<small>%</small></b><span>asked for more<em>{f.more} of {f.n} sent</em></span></>
+                        : <><b className="p6-e">{f.n ? `${f.more} of ${f.n}` : "–"}</b><span>asked for more<em>{f.n ? `Too early for a %: ${MIN - f.n} more to go` : "Not sent yet"}</em></span></>}
+                    </div>
+                    <Funnel f={f} />
+                    <ReplyDays f={f} />
+                  </article>
+                );
+              })}
+            </div>
+            <p className="p6-tm-foot">A {noun}’s results include whatever else went out with it. For a fair test, make a new package from one that’s out and change only the {noun}. <button type="button" onClick={onSeeTests}>See your tests</button></p>
+          </div>
+        )}
       </div>
     </section>
   );
