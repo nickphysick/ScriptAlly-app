@@ -13,8 +13,8 @@
  *   LM4 closing card: at 390 the landing has the closing card and no FoundingBand; at 1440 the band
  *       and no card; the hawks overlap the card's top edge; its list is C1 exactly; its link is /founders
  *   LM5 offer copy: no public page, at 390 or 1440, says "six months", "Six months free", "Half price"
- *       or "for life" (one named exemption: Pricing's FAQ answer on how long a campaign runs, which is
- *       about the campaign and not the offer)
+ *       or "for life" (named exemptions: Pricing's FAQ answers on how long a campaign runs, which are
+ *       about the campaign and not the offer — main's v3 sentence and the Pricing v4 branch's)
  *   LM6 reduced motion: the strip's first count on screen is the final one; the swipe never
  *       smooth-scrolls
  *
@@ -266,14 +266,15 @@ test.describe("landing on phones v1", () => {
 
   test("LM5 offer copy: no public page says six months, Half price or for life", async ({ page }) => {
     test.setTimeout(180000);
-    /* The one named exemption: Pricing's FAQ on how long a first campaign runs — the campaign's length,
-       not the offer's. It is removed, by its exact words, before the sweep reads the page. */
-    const EXEMPT = "Most first campaigns run around six months";
+    /* The named exemptions: Pricing's FAQ on how long a campaign runs — the campaign's length, not the
+       offer's. main's Pricing (v3) says it one way and the Pricing v4 branch (on dev, unmerged) another;
+       each is removed, by its exact words, before the sweep reads the page. */
+    const EXEMPT = ["Most first campaigns run around six months", "often six months or more once agents start reading full manuscripts"];
     const BANNED = ["six months", "Six months free", "Half price", "for life"];
     const hits: string[] = []; let pages = 0, chars = 0;
     for (const vp of [PHONES[0], DESK]) for (const route of ROUTES) {
       await open(page, vp, { route }); await page.waitForTimeout(500);
-      const t = (await page.evaluate(() => document.body.textContent ?? "")).split(EXEMPT).join("");
+      const t = EXEMPT.reduce((acc, e) => acc.split(e).join(""), await page.evaluate(() => document.body.textContent ?? ""));
       pages++; chars += t.length;
       for (const b of BANNED) if (t.includes(b)) hits.push(`${route} @${vp.width}: "${b}"`);
     }
