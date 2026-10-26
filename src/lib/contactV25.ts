@@ -77,8 +77,12 @@ export interface CountLine {
 const SORT_WORDS: Partial<Record<SortKey, [string, string]>> = {
   surname: ["A to Z", "Z to A"],
   added: ["newest first", "oldest first"],
-  reply: ["fastest reply first", "slowest reply first"],
+  reply: ["quickest reply first", "slowest reply first"],
   status: ["furthest on first", "earliest first"],
+  /* v25.1 E5 — the heading sorts' words */
+  fit: ["best genre fit first", "weakest genre fit first"],
+  urgency: ["most urgent first", "least urgent first"],
+  rating: ["highest rated first", "lowest rated first"],
 };
 /** the sort in words: "A to Z", "newest first" */
 export const sortWords = (k: SortKey, reversed: boolean): string => (SORT_WORDS[k] ?? SORT_WORDS.surname!)[reversed ? 1 : 0];

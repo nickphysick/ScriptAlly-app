@@ -43,16 +43,20 @@ describe("the view — per device (qh.cl.view)", () => {
     expect(DEFAULT_LIST_VIEW()).toEqual(readListView());
   });
   it("it lives in localStorage, never sessionStorage", () => {
-    writeListView({ group: "status", sort: "added", reversed: true, pinned: true });
+    writeListView({ group: "status", sort: "rating", reversed: true, pinned: true });
     expect(g.window!.sessionStorage.length).toBe(0);
-    expect(JSON.parse(g.window!.localStorage.getItem(LIST_VIEW_KEY)!)).toEqual({ v: 1, group: "status", sort: "added", reversed: true, pinned: true, view: "list", byStatus: true });
-    expect(readListView()).toEqual({ group: "status", sort: "added", reversed: true, pinned: true, view: "list", byStatus: true });
+    expect(JSON.parse(g.window!.localStorage.getItem(LIST_VIEW_KEY)!)).toEqual({ v: 1, group: "status", sort: "rating", reversed: true, pinned: true, view: "list", byStatus: true });
+    expect(readListView()).toEqual({ group: "status", sort: "rating", reversed: true, pinned: true, view: "list", byStatus: true });
   });
   it("v20 §G — the view is remembered; a record from before v20 (no view) reads List and keeps everything else", () => {
     writeListView({ view: "cards" });
     expect(readListView().view).toBe("cards");
+    g.window!.localStorage.setItem(LIST_VIEW_KEY, JSON.stringify({ v: 1, group: "status", sort: "rating", reversed: false, pinned: true }));
+    expect(readListView()).toEqual({ group: "status", sort: "rating", reversed: false, pinned: true, view: "list", byStatus: true });
+    /* v25.1 E4 — only the five heading sorts are remembered (the fixtures above moved from "added" to "rating"); an
+       older key reads as A to Z */
     g.window!.localStorage.setItem(LIST_VIEW_KEY, JSON.stringify({ v: 1, group: "status", sort: "added", reversed: false, pinned: true }));
-    expect(readListView()).toEqual({ group: "status", sort: "added", reversed: false, pinned: true, view: "list", byStatus: true });
+    expect(readListView().sort).toBe("surname");
     g.window!.localStorage.setItem(LIST_VIEW_KEY, JSON.stringify({ v: 1, group: "none", sort: "surname", reversed: false, pinned: false, view: "grid" }));
     expect(readListView().view).toBe("list");
   });

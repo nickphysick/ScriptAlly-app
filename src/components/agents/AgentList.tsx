@@ -62,7 +62,7 @@ import { agentHistory } from "../../lib/agentHistory";
 import { destroyManifest } from "../../lib/cascade";
 import type { ContactView } from "../../lib/contactListMemory";
 import { bannerFigures, colleaguesOf, genreFit, inSet, setCounts, setGroups, wideNext, type SetKey } from "../../lib/contactV24";
-import { type AgentFacts, ContactFilters, GroupKey, SORT_OPTIONS, SortKey as ContactSortKey, agentFacts, emptyContactFilters, matchesContactFilters, sortFacts } from "../../lib/contactList";
+import { type AgentFacts, ContactFilters, GroupKey, SORT_OPTIONS, SortKey as ContactSortKey, agentFacts, emptyContactFilters, matchesContactFilters, sortFacts, type SortCtx } from "../../lib/contactList";
 import { bookGenreHit, bookGenres } from "../../lib/genreMatch";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
 import { type ContactPop } from "./contact/ContactListControls";
@@ -295,9 +295,11 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   );
   /* v19 §F — the menu counts each choice itself (`wouldShow`, under Find and the band's group): the v14 faceted counts and
      the genre tallies it fed are retired with the strip */
+  /* v25.1 E4 — the heading sorts' context: the day (Your query's urgency) and each agent's matches with the book */
+  const sortCtx = useMemo<SortCtx>(() => ({ nowMs, fitOf: (x) => (x.agent.genres ?? []).filter((g) => bookHit(g)).length }), [nowMs, bookHit]);
   const visibleFacts = useMemo(
-    () => sortFacts(factsAll.filter((x) => inPool(x) && inSet(x, sets) && matchesContactFilters(x, filters)), sortKey, reversed),
-    [factsAll, inPool, sets, filters, sortKey, reversed],
+    () => sortFacts(factsAll.filter((x) => inPool(x) && inSet(x, sets) && matchesContactFilters(x, filters)), sortKey, reversed, sortCtx),
+    [factsAll, inPool, sets, filters, sortKey, reversed, sortCtx],
   );
   /* v17 §B — anything narrowing the list: a filter, the summary card's group, or Find */
   const anyActive = contactFilterCount(filters) > 0 || !!glance || !!sets || search.trim() !== "";
@@ -467,7 +469,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       const survives = inPool(savedFacts) && matchesContactFilters(savedFacts, filters);
       const afterAll = [...agents.filter((a) => a.id !== saved.id), saved]
         .map((a) => (a.id === saved.id ? savedFacts : (factsAll.find((x) => x.agent.id === a.id) ?? agentFacts(a, qcRows, scoped?.id ?? null))));
-      const after = sortFacts(afterAll.filter((x) => inPool(x) && matchesContactFilters(x, filters)), sortKey, reversed);
+      const after = sortFacts(afterAll.filter((x) => inPool(x) && matchesContactFilters(x, filters)), sortKey, reversed, sortCtx);
       const index = after.findIndex((x) => x.agent.id === saved.id);
       const outcome: SaveOutcome = !survives
         ? { kind: "filtered-out" }
