@@ -52,11 +52,13 @@ export const Dash58Header: React.FC<Dash58HeaderProps> = ({ loading, title, auth
   <header className="d58-header d71-head" data-d58="header" data-ms-title={title} data-author={author}>
     <div className="d58-book" data-d58="book">
       <div className="d58-eyebrow" data-d58="eyebrow" data-status={status ?? ""}>{loading ? " " : dashEyebrow(status) || " "}</div>
-      {/* the title is the page's h1; while loading it holds its line and says nothing */}
-      <h1 className={`d58-title${loading ? " d58-sk" : ""}`} data-d58="title" data-page-title="">{loading ? " " : title || DASH_NO_BOOK}</h1>
+      {/* the title is the page's h1; while loading it holds its line and says nothing.
+          ⚠️ A NO-BREAK SPACE, never a plain one: a block holding only a collapsible space has no line box,
+          so the loading header was 56px shorter than the loaded one (DB58/DB59 L1, DB60 P10 caught it). */}
+      <h1 className={`d58-title${loading ? " d58-sk" : ""}`} data-d58="title" data-page-title="">{loading ? "\u00a0" : title || DASH_NO_BOOK}</h1>
       {(loading || author) && (
         <p className="d58-byline" data-d58="byline-row">
-          <span className={loading ? "d58-sk" : undefined} data-d58="byline">{loading ? " " : `by ${author}`}</span>
+          <span className={loading ? "d58-sk" : undefined} data-d58="byline">{loading ? "\u00a0" : `by ${author}`}</span>
         </p>
       )}
     </div>

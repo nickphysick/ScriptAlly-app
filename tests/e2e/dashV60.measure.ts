@@ -122,7 +122,8 @@ const read = (page: Page) => page.evaluate(() => {
     closedHoop: !!q('[data-d60="closed-hoop"]'), closedAny: !!document.querySelector('[data-d58="closed"], [data-d60="closed-hoop"]'),
     closedText: left ? /No reply|Passed on/.test(left.innerText) : false,
     liftTitle: q('[data-d60="lift-title"]')?.textContent ?? null, listTitle: q('[data-d58="list-title"]')?.textContent ?? null,
-    focus: !!q('[data-d58="focus"]'), all: !!q('[data-d58="list-all"]'), ways: [...document.querySelectorAll<HTMLElement>('[data-d60="way"]')].map((w) => ({ key: w.dataset.key, done: w.dataset.done === "1", status: w.querySelector('[data-d60="way-status"]')?.textContent?.trim() ?? "" })),
+    /* RE-POINTED (Dashboard v71): the focus card is the task card; "All {n}" is retired */
+    focus: !!q('[data-d71="task"]'), all: !!q('[data-d58="list-all"]'), ways: [...document.querySelectorAll<HTMLElement>('[data-d60="way"]')].map((w) => ({ key: w.dataset.key, done: w.dataset.done === "1", status: w.querySelector('[data-d60="way-status"]')?.textContent?.trim() ?? "" })),
     liftDone: q('[data-d60="lift-done"]')?.textContent ?? null,
     slate, slateBands, drawings,
     cov: (() => { const e = q('[data-d60="agents-hoop"], [data-d60="agents-snap"]'); return e ? JSON.parse(e.getAttribute("data-cov") ?? "null") : null; })(),
@@ -156,7 +157,8 @@ test("DB60 P1 P2 P3 P6 P7 P10 — the swap, the slate, the hoops, nothing closed
       const wantPre = onMs(s.ms) === 0; // the chart's own predicate, read from the data
       /* P1 — both columns follow the one predicate */
       L.check("P1", `${w} left follows the predicate`, wantPre ? r.pre === "1" && r.queriesDoor && !r.chart : r.pre === "0" && r.chart && !r.queriesDoor, `pre ${r.pre} · door ${r.queriesDoor} · chart ${r.chart} · expected ${wantPre ? "pre" : "querying"}`);
-      L.check("P1", `${w} right follows the predicate`, wantPre ? r.liftTitle === "Ready for lift off?" && !r.focus && !r.all : r.listTitle === "What's on the list today?" && r.focus && !r.liftTitle, `lift "${r.liftTitle}" · list "${r.listTitle}" · focus ${r.focus}`);
+      /* REWRITTEN (Dashboard v71): while querying the column is the task card, with no list title */
+      L.check("P1", `${w} right follows the predicate`, wantPre ? r.liftTitle === "Ready for lift off?" && !r.focus && !r.all : !r.listTitle && r.focus && !r.liftTitle && !r.all, `lift "${r.liftTitle}" · list "${r.listTitle}" · task card ${r.focus}`);
       /* P2 — the agents band is the Contact list's slate */
       L.check("P2", `${w} slate band`, r.slateBands.length === 1 && r.slateBands[0] === r.slate && r.slate !== "rgba(0, 0, 0, 0)", `${r.slateBands.join(",")} · --clv-slate ${r.slate}`);
       if (s.key === "C") {
@@ -174,7 +176,9 @@ test("DB60 P1 P2 P3 P6 P7 P10 — the swap, the slate, the hoops, nothing closed
         L.check("P7", `${w} the agents door carries a glyph or the snapshot, no drawing`, s.key === "A" ? r.agentsDoor : r.agentsSnap, `door ${r.agentsDoor} · snap ${r.agentsSnap}`);
       }
       /* P10 — fit: no page scroll, nothing past the sheet, nothing cut, the panel above its floor */
-      const floor = vp.height < 700 ? 124 : 150;
+      /* REWRITTEN (Dashboard v71): while querying the founding card is a fixed 194px (128 at 760 tall and
+         under); before the first query it keeps v60's floor */
+      const floor = s.key === "C" ? (vp.height <= 760 ? 128 : 194) : vp.height < 700 ? 124 : 150;
       L.check("P10", `${w} one screen`, r.scroller.sh <= r.scroller.ch + 1 && r.scroller.sw <= r.scroller.cw + 1, `${r.scroller.sh}/${r.scroller.ch} · ${r.scroller.sw}/${r.scroller.cw}`);
       L.check("P10", `${w} nothing past the sheet`, r.past.length === 0, r.past.join(" | ") || "none");
       L.check("P10", `${w} nothing cut`, r.cut.length === 0, r.cut.slice(0, 4).join(" | ") || "none");
@@ -267,7 +271,7 @@ test("DB60 P8 — the tiles' done states", async ({ page }) => {
 
 test("DB60 P10 — loading draws the state it last saw, at its loaded size", async ({ page }) => {
   const L = new Ledger("loading");
-  const boxes = () => page.evaluate(() => ["[data-d60=\"queries-door\"]", "[data-d60=\"agents-snap\"]", "[data-d58=\"active\"]", "[data-d60=\"hoops\"]", "[data-d60=\"ways\"]", "[data-d58=\"focus\"]", "[data-d58=\"panel\"]"].map((s) => {
+  const boxes = () => page.evaluate(() => ["[data-d60=\"queries-door\"]", "[data-d60=\"agents-snap\"]", "[data-d58=\"active\"]", "[data-d60=\"hoops\"]", "[data-d60=\"ways\"]", "[data-d71=\"task\"]", "[data-d58=\"panel\"]"].map((s) => {
     const e = [...document.querySelectorAll<HTMLElement>(s)].find((x) => x.getBoundingClientRect().height > 0);
     if (!e) return null;
     const r = e.getBoundingClientRect();

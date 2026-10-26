@@ -32,7 +32,7 @@ const Bar: React.FC<{ m: TaskCardModel }> = ({ m }) => {
   const b = m.bar!;
   const pct = (x: number) => `${(x * 100).toFixed(3)}%`;
   return (
-    <div className="d71-win" data-d71="bar">
+    <div className="d71-win" data-d71="bar" data-sent={b.sentMs} data-expected={b.expectedMs ?? ""} data-close={b.closeMs ?? ""} data-today={b.todayMs}>
       <div className="d71-wbar">
         <i className="d71-ok" data-d71="bar-solid" style={{ width: pct(b.solid) }} />
         <i className="d71-ov" data-d71="bar-over" style={{ width: pct(1 - b.solid) }} />
@@ -97,6 +97,8 @@ export const Dash71Task: React.FC<{
   }, [plan]);
   const models = useMemo(() => items.map((it) => taskCardModel(it, labelOf.get(it.key) ?? "", ctx)), [items, labelOf, ctx]);
   const n = models.length;
+  /* the plan's group counts, for the order lock (DB58 R2) */
+  const counts = useMemo(() => JSON.stringify(Object.fromEntries(plan.groups.map((g) => [g.key, g.items.length]))), [plan]);
 
   const [index, setIndex] = useState(0);
   const at = n ? Math.min(index, n - 1) : 0;
@@ -140,7 +142,7 @@ export const Dash71Task: React.FC<{
 
   if (n === 0) {
     return (
-      <section className="d71-task" data-d71="task" data-loading="0" data-kind="none" role="region" aria-label="Your tasks" aria-live="off" ref={setRefs}>
+      <section className="d71-task" data-d71="task" data-loading="0" data-kind="none" data-counts={counts} role="region" aria-label="Your tasks" aria-live="off" ref={setRefs}>
         <div className="d71-tb d71-tb--none"><p className="d58-quietline" data-d58="focus-none">{CAUGHT_UP}</p></div>
       </section>
     );
@@ -157,6 +159,8 @@ export const Dash71Task: React.FC<{
       data-loading="0"
       data-kind={m.kind}
       data-key={m.key}
+      data-group={items[at].group}
+      data-counts={counts}
       data-query={m.queryId ?? undefined}
       data-index={at}
       data-held={held ? "1" : "0"}

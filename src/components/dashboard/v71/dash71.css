@@ -115,9 +115,13 @@
   grid-template-columns: minmax(0, 1.72fr) minmax(0, 1fr);
   gap: 16px;
 }
+/* ⚠️ THE CHART'S ROW HAS A FLOOR (140px; the smallest measured chart card is ~150, at 1280×650). With
+   `minmax(0, 1fr)` a taller hoop row simply crushed the chart towards nothing, and the page still read as
+   "one screen" — the G1 lock's own mutation (hoops at 320px) passed. With a floor, too much below it
+   overflows and is caught. */
 .d58[data-mode="q"] .d58-left {
   display: grid;
-  grid-template-rows: minmax(0, 1fr) auto;
+  grid-template-rows: minmax(140px, 1fr) auto;
   gap: 16px;
 }
 /* the hoop row: its content's height, never under 200px (180 on a short window) */
@@ -495,6 +499,10 @@
   min-height: 0;
   display: grid;
   grid-template-columns: clamp(84px, 26cqw, 128px) minmax(0, 1fr);
+  /* ⚠️ A DEFINITE ROW: the art's `max-height: min(…, 100%)` resolves against the row, so the row must not be
+     sized by the art — with an `auto` row the art set it, and before the first query the card grew 30px
+     past its column at 1280×800 (DB60 P10). */
+  grid-template-rows: minmax(0, 1fr);
   align-items: center;
   border-radius: 0 0 11px 11px;
   background: #f3e0d7;
@@ -639,4 +647,32 @@
   .d71-fwtxt { animation: none; }
   .d58 .d71-face { transition: none; }
   .d58 .d71-face:hover { transform: none; }
+}
+
+/* a narrow card (the 1100–1280px windows): the band's two texts share 330px or less, so its padding
+   and gap tighten and "Tell us anything →" steps down a size — measured, nothing leaves the frame */
+@container d71fw (max-width: 330px) {
+  .d71-fwband { padding: 0 10px 0 12px; gap: 6px; }
+  .d58 .d71-fwband > span { letter-spacing: 0.02em; font-size: 11.5px; }
+  .d58 .d71-fwmore { font-size: 12px; text-underline-offset: 3px; }
+}
+/* the narrowest supported card (271px at an 1100px window, measured): the band's texts need ~275px at
+   the 330px step's sizes, so they step down once more */
+@container d71fw (max-width: 290px) {
+  .d71-fwband { padding: 0 10px; }
+  .d58 .d71-fwband > span { letter-spacing: 0; font-size: 10.5px; }
+  .d58 .d71-fwmore { font-size: 11px; }
+}
+
+/* ── a window 700px tall or less: what gives way first (measured — see the report) ─────────────────
+   The real shell carries the beta strip (42px) that the reference does not, and at 650–680px of window
+   the chart card got 152–182px against the 216 its band, plot floor and axis need. So, in this order:
+   the header's byline goes (≈33px), the gaps under the header and between the chart and the hoops
+   tighten (14→10, 16→12), and the chart's plot floor drops from v58's 120px to 80px. Measured at
+   1366×650: the chart's frame then holds its band, plot and axis with nothing over. */
+@media (max-height: 700px) {
+  .d58[data-mode="q"] .d71-head { margin-bottom: 10px; }
+  .d58[data-mode="q"] .d71-head .d58-byline { display: none; }
+  .d58[data-mode="q"] .d58-left { gap: 12px; }
+  .d58[data-mode="q"] .os-lead .os-acplot { min-height: 80px; }
 }

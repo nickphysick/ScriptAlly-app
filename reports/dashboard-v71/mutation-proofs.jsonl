@@ -1,0 +1,14 @@
+{"mutation":"H1-white","lock":"H1","exit":1,"reading":"4 red · 1512x900 the panel's background is --ink-shell — rgb(255, 255, 255) vs token rgb(27, 36, 51)"}
+{"mutation":"L1-title","lock":"L1","exit":1,"reading":"3 red · exactly the task card, then the founding card — list-title>task-slot>fw-slot · task true · fw true"}
+{"mutation":"L2-fw-172","lock":"L2","exit":1,"reading":"18 red · 1920x1080 the three bottoms are equal (±1) — 1023.8 / 1023.8 / 1001.8"}
+{"mutation":"L3-tab-off","lock":"L3","exit":1,"reading":"20 red · 1920x1080 the tab is inside the viewport — {\"l\":1915.96875,\"r\":2112,\"t\":1038,\"b\":1072,\"w\":196.03125,\"h\":34}"}
+{"mutation":"L4-clip","lock":"L4","exit":1,"reading":"6 red · 1512x900 closed: 6px under its edge is darker than the ground 30px down — x 482 · 242,238,232 vs 242,238,232"}
+{"mutation":"C1-close-title","lock":"C1","exit":1,"reading":"1 red · close title — \"Close Priya Nair?\" vs \"Close your query to ?\""}
+{"mutation":"C2-solid","lock":"C2","exit":1,"reading":"4 red · nudge the solid part ends at the expected date (±2px) — 1421.0 vs 1278.7"}
+{"mutation":"C3-solid","lock":"C3","exit":1,"reading":"1 red · the step still to do is dashed and unfilled — {\"todo\":true,\"style\":[\"solid\",\"solid\",\"solid\",\"solid\"],\"bg\":\"rgba(0, 0, 0, 0)\",\"text\":\"Full sent —\"}"}
+{"mutation":"F1-copy","lock":"F1","exit":1,"reading":"1 red · Ask heading and line — \"The early bird gets the worm.\" · \"Your feedback is gratefully received!\""}
+{"mutation":"F3-art-140","lock":"F3","exit":1,"reading":"6 red · 1288x660 nothing leaves the frame — IMG"}
+{"mutation":"G1-hoops-320","lock":"G1","exit":1,"reading":"3 red · 1288x660 one screen: no vertical scroll — {\"sh\":618,\"ch\":546,\"sw\":1010,\"cw\":1010}"}
+{"mutation":"C4-ignore-hover","lock":"C4","exit":1,"reading":"2 red · hovered for 10s, it holds — 2 → 3"}
+{"mutation":"C5-write","lock":"C5","exit":1,"reading":"3 red · nudge nothing written — the query changed"}
+{"mutation":"F2-noted-early","lock":"F2","exit":1,"reading":"4 red · nothing says Noted before the call resolves — {\"state\":\"noted\"}"}
