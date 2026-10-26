@@ -445,23 +445,37 @@ export const VISION_POINTS: VisionPoint[] = [
 /** The band's one way out, to /about. A button, because marketing routes go through `onNavigate`. */
 export const VISION_LINK = "Read our story";
 
-/* ══════════════ The landing page on phones (≤760px; landing on phones v2, 26 Oct) ══════════════
-   ref design-refs/landing-mobile-v2.html. Every string is the ref's, verbatim.
+/* ══════════════ The landing page on phones (≤760px; landing on phones v3, 26 Oct) ══════════════
+   ref design-refs/landing-mobile-v3.html (the story and its closing beat; v2's ref for the rest).
+   Every string is the ref's, verbatim.
 
-   ⚠️ THE STORY'S CAPTIONS ARE NOT THE ROWS' PARAGRAPHS, AND THE ORDER IS THE REF'S: "Updates log
-   themselves" third, "Your list so far comes with you" last. Each caption names its row by `key`, so
-   the picture, its size and its version still come from `FEATURE_ROWS` and the desktop rows' table —
-   one image per feature, however it is laid out. (v1's swipe cards and short vision lines are gone.) */
-export interface FeatureCard { key: FeatureRow["key"]; heading: string; body: string }
+   ⚠️ ONE FEATURE PER FLICK: each caption is a "N of 6" label, the heading, one short line and three
+   ticked points, in the ref's order — "Updates log themselves" third, "Your list so far comes with
+   you" last. Each names its row by `key`, so the picture, its size and its version still come from
+   `FEATURE_ROWS` and the desktop rows' table. */
+export interface FeatureCard { key: FeatureRow["key"]; heading: string; line: string; points: [string, string, string] }
+
+/** "3 of 6" — the caption's place in the story. */
+export const featureStoryLabel = (n: number, of: number) => `${n} of ${of}`;
 
 export const FEATURE_STORY: FeatureCard[] = [
-  { key: "track", heading: "Every query tracked, from start to finish", body: "A full history for everything you've sent, plus timely nudge reminders so nothing slips through the cracks." },
-  { key: "agents", heading: "Your agents on file", body: "Their wish list, response time, the sample they ask for, and every interaction you've had." },
-  { key: "email", heading: "Updates log themselves", body: "Paste a sent or received email and QueryHawk suggests the updates. You always have the final say." },
-  { key: "packages", heading: "Curate and compare packages", body: "Bundle letters, synopses and samples, and see which combinations get interest." },
-  { key: "comps", heading: "Compile your comparable titles", body: "Build a library of comps and track which ones resonate with agents." },
-  { key: "import", heading: "Your list so far comes with you", body: "Bring your spreadsheet or notes across with Smart Import, or start fresh." },
+  { key: "track", heading: "Every query tracked, from start to finish", line: "A full history for everything you've sent, so nothing slips through the cracks.",
+    points: ["Queries, partials and fulls on one card", "Reply-by dates worked out for you", "Nudge reminders when an agent goes quiet"] },
+  { key: "agents", heading: "Your agents on file", line: "Not just a name and an email.",
+    points: ["Wish lists and what they ask for", "Typical response times", "Every interaction in one timeline"] },
+  { key: "email", heading: "Updates log themselves", line: "Paste a sent or received email and QueryHawk suggests the updates.",
+    points: ["Works with any email you paste in", "Suggestions, never automatic changes", "You always have the final say"] },
+  { key: "packages", heading: "Curate and compare packages", line: "Bundle your materials and see what gets requests.",
+    points: ["Letters, synopses and samples together", "Attach a package to any query", "See which combinations get interest"] },
+  { key: "comps", heading: "Compile your comparable titles", line: "Build the comps that position your book.",
+    points: ["A library of comparable titles", "Add them to your query letters", "Track which ones resonate"] },
+  { key: "import", heading: "Your list so far comes with you", line: "Already querying? Bring it all across.",
+    points: ["From a spreadsheet, notes or memory", "Smart Import sets it up for you", "Or start fresh in minutes"] },
 ];
+
+/* The closing beat between the story and the vision. */
+export const STORY_MORE_HEADING = "And so much more.";
+export const STORY_MORE_LINE = "That's QueryHawk, your smart querying companion. And here's why we built it:";
 
 /* The vision on navy: the label, the three points' phone bodies (keyed to `VISION_POINTS`, whose
    headings are shared — "Make querying straightforward." included), and the way out to /about. */
