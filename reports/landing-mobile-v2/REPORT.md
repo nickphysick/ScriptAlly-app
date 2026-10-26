@@ -135,3 +135,7 @@ On both, the current caption is fully readable beneath the panel.
 - The navy vision carousel is there.
 - The join bar is hidden over the hero, shown over the features, and hidden with the closing card on screen.
 - The drawer's corners and grab handle reach the bar.
+
+## Correction to a commit message
+
+`a2437a17` ("the run report and screenshots") says it also carries the three re-aimed breaks (LV1e, LV4b, LV4f). It does not: those edits were already in `1fcc6eec` (the locks), and `a2437a17` holds only this report and `shots/`.
