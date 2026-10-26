@@ -178,9 +178,9 @@ test("DB60 P1 P2 P3 P6 P7 P10 — the swap, the slate, the hoops, nothing closed
       /* P10 — fit: no page scroll, nothing past the sheet, nothing cut, the panel above its floor */
       /* REWRITTEN (Dashboard v71): while querying the founding card is a fixed 194px (128 at 760 tall and
          under); before the first query it keeps v60's floor */
-      const floor = s.key === "C" ? (vp.height <= 760 ? 128 : 194) : vp.height < 820 ? 128 : 150;
-      /* ⚠️ AND BEFORE THE FIRST QUERY IT IS 128 BELOW 820px OF WINDOW (Dashboard v71): the ink header is
-         taller than v60's, and at 1280×800 a 150px card overran the column by 15px */
+      const floor = s.key === "C" ? (vp.height <= 760 ? 128 : 194) : 112;
+      /* ⚠️ AND BEFORE THE FIRST QUERY IT IS 112 (Dashboard v71): with the ink header taller than v60's, a
+         150px card ran 27–41px under the feed tab at 1280–1512 (DB71 L3, first use) */
       L.check("P10", `${w} one screen`, r.scroller.sh <= r.scroller.ch + 1 && r.scroller.sw <= r.scroller.cw + 1, `${r.scroller.sh}/${r.scroller.ch} · ${r.scroller.sw}/${r.scroller.cw}`);
       L.check("P10", `${w} nothing past the sheet`, r.past.length === 0, r.past.join(" | ") || "none");
       L.check("P10", `${w} nothing cut`, r.cut.length === 0, r.cut.slice(0, 4).join(" | ") || "none");
