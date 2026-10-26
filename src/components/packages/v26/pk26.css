@@ -185,7 +185,8 @@
 /* the stepper never runs past the open package: the ref's steps are `flex: 0 0 auto`, which holds for the words its
    frozen state shows; a draft that needs both pieces says "Add a query letter and pages", and in the app's narrower
    sheet the third step was cut at the panel's edge. The steps may shrink and their lines wrap instead. */
-.p6 .p6-lc .p6-lc-s { flex-shrink: 1; min-width: 0; }
+/* `!important` because the generated `.p6-lc-s:not(.p6-dn):not(.p6-on)` (0-5-0) states `flex: 0 0 auto` */
+.p6 .p6-lc .p6-lc-s { flex-shrink: 1 !important; min-width: 0 !important; }
 .p6 .p6-lc .p6-lc-s > span { min-width: 0; }
 .p6 .p6-lc-s span > b, .p6 .p6-lc-s span > small { white-space: normal; }
 .p6 .p6-lc > em { min-width: 16px; }

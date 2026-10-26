@@ -109,7 +109,8 @@ export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab:
           inUseVersionNum={inUse ? (inUse.original ? "O" : String(inUse.num)) : null} onVersions={goVersions} onComps={goComps} />
         {tab === "pk" ? (
           <div className="p6-id-vPk">
-            {empty ? null : <Pk40Shelf model={model} shelf={shelf} onOpen={(p) => setShelfId(p.id)} />}
+            {/* always drawn: brand new, it says "Nothing has gone out yet…" (the ref's new state) */}
+            <Pk40Shelf model={model} shelf={shelf} onOpen={(p) => setShelfId(p.id)} />
             <Pk26Builder model={model} bench={bench} shelf={shelf} current={current} onSelect={setCurId}
                 onNewPackage={() => setDialog({ m: "new" })} onDuplicate={(p) => void duplicate(p)} onEditPackage={(p, focus) => setDialog({ m: "edit", id: p.id, ...(focus ? { focus } : {}) })}
                 onOpenMaterial={(k, id) => setDrawer(k === "ext" ? { m: "ext", id } : { m: "mat", kind: k, id })}
