@@ -88,7 +88,12 @@ The data is the harness account's (88 queries, several books, 26 Oct), not the m
 
 ## Dev
 
-See the deploy section appended below.
+- Dev served `dev/pk26-pvm-qc150` (`index-D8CuUQO2.js`, v150) throughout, and this branch fast-forwards from it, so the
+  integration branch **`dev/pk26-pvm-qc1501`** is this branch's tip (6dc96dd9 at deploy). The gates and locks above
+  ran on that tree.
+- Deployed to dev (hosting only) from a clean checkout of the pushed tip, with the served hash checked in the same
+  command: **dev serves `index-DGKZrxAU.js`**. QC1501 L1, L3, L5 and L7 re-run against the deployed site: green.
+- Not merged to main. Prod not touched.
 
 ## Left undone, and why
 
