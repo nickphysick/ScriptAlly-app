@@ -21,8 +21,10 @@
  * because it is a standalone document with nowhere to navigate to.
  */
 
-import React from "react";
-import { VISION_HEADING, VISION_POINTS, VISION_LINK, VISION_SHORT } from "./landingCopy";
+import React, { useCallback, useRef, useState } from "react";
+import {
+  VISION_HEADING, VISION_POINTS, VISION_LINK, VISION_NAVY, VISION_NAVY_LABEL, VISION_NAVY_ARIA, VISION_NAVY_LINK,
+} from "./landingCopy";
 import { usePhone } from "./usePhone";
 
 /* Each plate's own facts, keyed by file. The SIZE is the file's pixel size, so a point reserves its
@@ -39,32 +41,64 @@ const PLATES: Record<string, { width: number; height: number; version: string }>
 };
 
 /**
- * On phones (≤760px; landing on phones v1, 26 Oct; ref design-refs/landing-mobile-v1.html
- * `.vis`, `.vpt.row`): the same white band and heading, and the three points as compact rows — a 76px
- * picture left, the heading and a one-line body right. The ref draws no "Read our story" link on a
- * phone, so there is none; /about is in the nav and the footer.
+ * On phones (≤760px; landing on phones v2, 26 Oct; ref design-refs/landing-mobile-v2.html
+ * `.vwrap.navy`, `.vn`, `.dots`): the page's one swipe carousel, on navy. The label in pink mono,
+ * then the three points — each the picture on a cream tile, the heading in white Special Elite and the
+ * body in white at 78% — with the next card peeking, snapping to centre, three dots beneath (the
+ * active one pink), and "Read our story →" to /about. Text on navy is always white; labels are pink.
+ *
+ * ⚠️ THE CARD IN VIEW IS DERIVED FROM THE SCROLL POSITION (whichever card's centre is nearest the
+ * strip's), never kept as a counter. ← / → move one card; under reduced motion the move jumps.
  */
-const VisionRows: React.FC = () => (
-  <section className="mk-vision mk-vision--rows" aria-labelledby="mk-vision-h">
-    <h2 id="mk-vision-h" className="mk-visionh2">{VISION_HEADING}</h2>
-    {VISION_POINTS.map((point) => {
-      const plate = PLATES[point.image];
-      return (
-        <div className="mk-vrow" key={point.key}>
-          <img src={point.image + "?v=" + plate.version} alt="" width={plate.width} height={plate.height} loading="lazy" />
-          <div>
-            <h3 className="mk-vrowh3">{point.heading}</h3>
-            <p>{VISION_SHORT[point.key]}</p>
-          </div>
-        </div>
-      );
-    })}
-  </section>
-);
+const reduce = () =>
+  typeof window !== "undefined" && !!window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+const VisionNavy: React.FC<{ onNavigate: (tab: string, subPageName?: string) => void }> = ({ onNavigate }) => {
+  const rail = useRef<HTMLDivElement>(null);
+  const [at, setAt] = useState(0);
+  const cards = () => Array.from(rail.current?.children ?? []) as HTMLElement[];
+  const onScroll = useCallback(() => {
+    const r = rail.current; if (!r) return;
+    const mid = r.scrollLeft + r.clientWidth / 2;
+    let k = 0, best = Infinity;
+    cards().forEach((c, i) => { const d = Math.abs(c.offsetLeft + c.offsetWidth / 2 - mid); if (d < best) { best = d; k = i; } });
+    setAt((was) => (was === k ? was : k));
+  }, []);
+  const go = (k: number) => {
+    const r = rail.current, c = cards()[k]; if (!r || !c) return;
+    r.scrollTo({ left: c.offsetLeft - (r.clientWidth - c.offsetWidth) / 2, behavior: reduce() ? "auto" : "smooth" });
+  };
+  const onKey = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowRight") { e.preventDefault(); go(Math.min(VISION_POINTS.length - 1, at + 1)); }
+    if (e.key === "ArrowLeft") { e.preventDefault(); go(Math.max(0, at - 1)); }
+  };
+  return (
+    <section className="mk-vision mk-vision--navy" aria-labelledby="mk-vision-h">
+      <h2 id="mk-vision-h" className="mk-vk">{VISION_NAVY_LABEL}</h2>
+      <div className="mk-vrail" ref={rail} onScroll={onScroll} onKeyDown={onKey}
+           tabIndex={0} role="region" aria-label={VISION_NAVY_ARIA}>
+        {VISION_POINTS.map((point) => {
+          const plate = PLATES[point.image];
+          return (
+            <div className="mk-vn" key={point.key}>
+              <img src={point.image + "?v=" + plate.version} alt="" width={plate.width} height={plate.height} loading="lazy" />
+              <h3 className="mk-vnh3">{point.heading}</h3>
+              <p>{VISION_NAVY[point.key]}</p>
+            </div>
+          );
+        })}
+      </div>
+      <div className="mk-vdots" aria-hidden="true">
+        {VISION_POINTS.map((p, i) => <i key={p.key} className={i === at ? "mk-on" : undefined} />)}
+      </div>
+      <a className="mk-vlink" href="/about" onClick={(e) => { e.preventDefault(); onNavigate("about"); }}>{VISION_NAVY_LINK}</a>
+    </section>
+  );
+};
 
 export const Vision: React.FC<{ onNavigate: (tab: string, subPageName?: string) => void }> = ({ onNavigate }) => {
   const phone = usePhone();
-  return phone ? <VisionRows /> : (
+  return phone ? <VisionNavy onNavigate={onNavigate} /> : (
   <section className="mk-vision" aria-labelledby="mk-vision-h">
     <div className="mk-visionin">
       <h2 id="mk-vision-h" className="mk-visionh2">{VISION_HEADING}</h2>

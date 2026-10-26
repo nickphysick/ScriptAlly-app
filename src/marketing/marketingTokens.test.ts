@@ -248,6 +248,10 @@ const LOWER_READERS = [
   ".mk-herowrap.mk-herowrap--carded",
   /* the sheet itself: every page continues on the oat */
   ".mk-sheet",
+  /* the phone feature story's sticky picture panel (landing on phones v2, 26 Oct): it is the lower
+     ground itself, painted opaque so the captions vanish as they scroll up under it — the token, not a
+     copy of its value, so the colour still has one home */
+  ".mk-spimg",
 ].sort();
 
 describe("two surfaces, and the step between them is real", () => {

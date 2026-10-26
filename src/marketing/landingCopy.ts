@@ -445,36 +445,34 @@ export const VISION_POINTS: VisionPoint[] = [
 /** The band's one way out, to /about. A button, because marketing routes go through `onNavigate`. */
 export const VISION_LINK = "Read our story";
 
-/* ══════════════ The landing page on phones (≤760px; landing on phones v1, 26 Oct) ══════════════
-   ref design-refs/landing-mobile-v1.html. Every string is the ref's, verbatim.
+/* ══════════════ The landing page on phones (≤760px; landing on phones v2, 26 Oct) ══════════════
+   ref design-refs/landing-mobile-v2.html. Every string is the ref's, verbatim.
 
-   ⚠️ THE SWIPE CARDS ARE SHORTER THAN THE ROWS AND IN A DIFFERENT ORDER, AND THAT IS THE REF'S.
-   A 300px card holds two or three lines of body, not a paragraph; and the import card closes the set
-   ("Your list so far comes with you" last). Each card names its row by `key`, so the picture, its
-   size and its version still come from `FEATURE_ROWS` and the desktop rows' table — one image per
-   feature, however it is laid out. */
+   ⚠️ THE STORY'S CAPTIONS ARE NOT THE ROWS' PARAGRAPHS, AND THE ORDER IS THE REF'S: "Updates log
+   themselves" third, "Your list so far comes with you" last. Each caption names its row by `key`, so
+   the picture, its size and its version still come from `FEATURE_ROWS` and the desktop rows' table —
+   one image per feature, however it is laid out. (v1's swipe cards and short vision lines are gone.) */
 export interface FeatureCard { key: FeatureRow["key"]; heading: string; body: string }
 
-export const FEATURE_SWIPE_LABEL = "Six things it does";
-/** "1 / 6" — the card in view, of how many. */
-export const featureSwipeCount = (n: number, of: number) => `${n} / ${of}`;
-export const FEATURE_SWIPE_ARIA = "Features, swipe across";
-
-export const FEATURE_SWIPE: FeatureCard[] = [
-  { key: "track", heading: "Every query tracked, from start to finish", body: "A full history for everything you've sent, plus timely nudge reminders." },
-  { key: "agents", heading: "Your agents on file", body: "Their wish list, response time, the sample they ask for, and every interaction." },
-  { key: "email", heading: "Updates log themselves", body: "Paste a sent or received email and QueryHawk suggests the updates. You have final say." },
+export const FEATURE_STORY: FeatureCard[] = [
+  { key: "track", heading: "Every query tracked, from start to finish", body: "A full history for everything you've sent, plus timely nudge reminders so nothing slips through the cracks." },
+  { key: "agents", heading: "Your agents on file", body: "Their wish list, response time, the sample they ask for, and every interaction you've had." },
+  { key: "email", heading: "Updates log themselves", body: "Paste a sent or received email and QueryHawk suggests the updates. You always have the final say." },
   { key: "packages", heading: "Curate and compare packages", body: "Bundle letters, synopses and samples, and see which combinations get interest." },
-  { key: "comps", heading: "Compile your comparable titles", body: "Build a library of comps and track which ones resonate." },
+  { key: "comps", heading: "Compile your comparable titles", body: "Build a library of comps and track which ones resonate with agents." },
   { key: "import", heading: "Your list so far comes with you", body: "Bring your spreadsheet or notes across with Smart Import, or start fresh." },
 ];
 
-/** The vision points' one-line bodies on phones, keyed to `VISION_POINTS`; the headings are shared. */
-export const VISION_SHORT: Record<string, string> = {
-  stories: "A captivating story should never be lost to a sub-par querying campaign.",
-  simple: "Everything you need to make targeted decisions at the right time.",
-  write: "Less time in spreadsheets, more time doing what you love.",
+/* The vision on navy: the label, the three points' phone bodies (keyed to `VISION_POINTS`, whose
+   headings are shared — "Make querying straightforward." included), and the way out to /about. */
+export const VISION_NAVY_LABEL = "Our vision is simple";
+export const VISION_NAVY_ARIA = "Our vision, swipe across";
+export const VISION_NAVY: Record<string, string> = {
+  stories: "A captivating story should never be lost to a sub-par querying campaign. There's a dangerous gap between writing and querying. QueryHawk bridges it.",
+  simple: "Stop shooting from the hip. Everything you need to make targeted decisions at the right time.",
+  write: "Less time trawling through spreadsheets, more time doing what you love.",
 };
+export const VISION_NAVY_LINK = "Read our story →";
 
 /* The closing founding card (phones; it replaces the founding band there). The pill is the band's own
    eyebrow and the list is `FOUNDING_GETS`, so the offer is stated in one place. */
