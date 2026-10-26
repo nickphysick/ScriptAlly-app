@@ -5,15 +5,15 @@
  * The feedback panel (Help system v1, Part E — design-refs/help-system-v1, screens 08 to 11). It opens from the
  * sidebar's Give feedback, from the Help menu's, and from the beta strip; there is one panel, mounted once by AppShell.
  *
- *   header    blush: the hawk, "Tell us what you found", "Every message reaches Nick, the founder.", ✕ (the draft is kept)
+ *   header    blush: the hawk, "Tell us what you found", "Every message reaches our founder.", ✕ (the draft is kept)
  *   kind      four tiles in a radio group; nothing below shows until one is chosen, and the question follows the kind
  *   broken    "How much is it in your way?" — three optional pills
  *   broken or confusing   a screenshot: add, drop or paste one image (5 MB), sent only if added
  *   reply     "Reply to {email} if it needs one", on by default
  *   context   "Sent with it: …", closed by default: the page's name, the browser in plain words, the window, the version,
  *             the account — and, in sage, what is never sent
- *   foot      "⌘ ↵ to send" and Send to Nick (navy), disabled until there is a kind and a message
- *   sent      the hawk again, "Got it, thank you", where any reply will come from, "— Nick, founder"
+ *   foot      "⌘ ↵ to send" and Tell us (navy), disabled until there is a kind and a message
+ *   sent      the hawk again, "Got it, thank you", where any reply will come from, "— The QueryHawk team"
  *
  * ⚠️ IT CAPTURES CONTEXT AND SHOWS THE WRITER EXACTLY WHAT IT CAPTURED — and NEVER page content, form values, or a line
  *    of anyone's manuscript. The page name and the button it opens beside are REGISTERED with `lib/feedbackStore` by the

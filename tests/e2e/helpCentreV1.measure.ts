@@ -142,14 +142,14 @@ test("HC1-H3 · search: 'partial' lists Partial requested first; a body word is 
       await input.fill("zzqxv");
       await page.waitForTimeout(150);
       const nores = await page.evaluate(() => (document.querySelector("[data-hc='no-results']") as HTMLElement | null)?.innerText ?? "");
-      L.check(`${w} nonsense: the no-result line`, /Nothing matches "zzqxv"\. Try a status name or a page name, or ask Nick\./.test(nores), JSON.stringify(nores));
+      L.check(`${w} nonsense: the no-result line`, /Nothing matches "zzqxv"\. Try a status name or a page name, or ask us\./.test(nores), JSON.stringify(nores));
       await vis(page, "[data-hc='ask-nick']").click();
       await page.locator("[data-fb='panel']").waitFor({ timeout: 8000 }).catch(() => {});
       const fb = await page.evaluate(() => ({
         kind: (document.querySelector("[data-fb='kind'][aria-checked='true']") as HTMLElement | null)?.dataset.k ?? null,
         msg: (document.querySelector("[data-fb='message']") as HTMLTextAreaElement | null)?.value ?? null,
       }));
-      L.check(`${w} ask Nick opens the panel on Something's confusing`, fb.kind === "Something's confusing", JSON.stringify(fb));
+      L.check(`${w} ask us opens the panel on Something's confusing`, fb.kind === "Something's confusing", JSON.stringify(fb));
       L.check(`${w} with the search text as the message`, fb.msg === "zzqxv", JSON.stringify(fb));
       await page.keyboard.press("Escape");
       await page.evaluate(() => { try { sessionStorage.clear(); } catch { /* none */ } });

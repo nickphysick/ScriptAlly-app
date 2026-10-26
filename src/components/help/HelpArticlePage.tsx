@@ -55,7 +55,7 @@ function Helpful({ slug }: { slug: string }) {
       ) : state === "yes" ? (
         <span data-hc="helpful-thanks">Thanks. That helps us know what to keep.</span>
       ) : state === "sent" ? (
-        <span data-hc="helpful-sent">Thanks. That goes straight to Nick.</span>
+        <span data-hc="helpful-sent">Thanks. That goes straight to us.</span>
       ) : (
         <>
           <label htmlFor="hc-missing">What was missing?</label>

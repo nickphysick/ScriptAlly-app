@@ -78,7 +78,7 @@ function HelpSearch({ inputRef }: { inputRef: React.RefObject<HTMLInputElement |
             )) : (
               <div className="hc-nores" data-hc="no-results">
                 Nothing matches "{term}". Try a status name or a page name, or{" "}
-                <button type="button" className="hc-linkb" data-hc="ask-nick" onClick={() => { setOpen(false); askNick(term); }}><b>ask Nick</b></button>.
+                <button type="button" className="hc-linkb" data-hc="ask-nick" onClick={() => { setOpen(false); askNick(term); }}><b>ask us</b></button>.
               </div>
             )}
           </div>

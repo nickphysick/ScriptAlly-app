@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * Help Centre v1 — what the home and an article share: dates, the two body marks, what the account has done, the
- * status key drawn by StatusDot, and "ask Nick".
+ * status key drawn by StatusDot, and "ask us" (`askNick`; the name stays).
  */
 import React from "react";
 import { StatusDot } from "../StatusDot";
@@ -79,7 +79,7 @@ export function StatusKeyList() {
   );
 }
 
-/* ── ask Nick: the feedback panel, "Something's confusing", the words already typed ── */
+/* ── ask us (askNick): the feedback panel, "Something's confusing", the words already typed ── */
 export function askNick(message: string) {
   setFeedbackDraft({ ...EMPTY_DRAFT, kind: "Something's confusing", message });
   openFeedback();
