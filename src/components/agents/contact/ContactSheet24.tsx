@@ -37,6 +37,9 @@ import { agentsWord, cardsAcross, rowSecond, setGroups, SET_LABEL, type SetKey }
 import { hrefFor } from "../../../lib/quickAdd";
 import type { ContactView } from "../../../lib/contactListMemory";
 import "./contactV24.css";
+import { GenrePills, NIB, QueryPill, Tally, Track } from "../../shared/agentRowParts";
+import "./contactV252.css";
+import { daysSinceSent } from "../../../lib/queryTrack";
 
 export const SET_GLYPH: Record<SetKey, QueryStatus | null> = {
   you: QueryStatus.PARTIAL_REQUESTED, agent: QueryStatus.QUERIED, none: null, closed: QueryStatus.REJECTED,
@@ -96,7 +99,7 @@ export interface ContactSheet24Props {
    Submissions column is gone (a closed-and-not-queried agent says so in Your query), Added gave way to Your rating
    (still on the agent card), and at ≤1440 of window the last column drops. */
 const COLS: { key: SortKey; label: string }[] = [
-  { key: "surname", label: "Agent" }, { key: "fit", label: "Genres" }, { key: "reply", label: "Replies in" },
+  { key: "surname", label: "Agent" }, { key: "fit", label: "What they want" }, { key: "reply", label: "Replies in" },
   { key: "urgency", label: "Your query" }, { key: "rating", label: "Your rating" },
 ];
 
@@ -237,64 +240,73 @@ const GroupMenu: React.FC<{ anchor: HTMLElement; grouped: boolean; onGrouped: (g
 };
 
 /* ── a List row ─────────────────────────────────────────────────────────────────────────────────────────────── */
+/* v25.2 A — the QueryHawk row: the typewriter name over agency · city in mono; the genre pills; replies in; the status
+   pill with its day count over the track and the next step; the tally bars; and, as a second grid row spanning every
+   column from the name's left edge, the wishlist behind the nib. A missing detail is a quiet dash or "No … yet" at
+   rest; its "+ Add" shows only while the row is hovered or focused (A8). */
 const Row: React.FC<{ x: AgentFacts; p: ContactSheet24Props }> = ({ x, p }) => {
   const a = x.agent;
   const name = agentPrimary(a);
   const agency = (a.name ?? "").trim() ? (a.agency ?? "").trim() : "";
-  /* v25.1 E2 — the book's matching genres first, at most two tags, then "+n"; one line */
+  const sub = [agency, x.loc].filter(Boolean).join(" · ");
   const genres = a.genres ?? [];
-  const ordered = [...genres.filter((g) => p.genreHit(g)), ...genres.filter((g) => !p.genreHit(g))];
-  const shown = ordered.slice(0, 2);
   const weeks = typeof a.responseTimeWeeks === "number" && a.responseTimeWeeks > 0 ? a.responseTimeWeeks : null;
   const rule = a.noResponseMeansNo === true ? "no reply means no" : a.noResponseMeansNo === false ? "always replies" : null;
+  const wish = (a.mswlNotes ?? "").trim();
   const email = (a.email ?? "").trim();
   const site = (a.website ?? "").trim();
-  const stars = typeof a.starRating === "number" && a.starRating > 0 ? Math.min(5, Math.round(a.starRating)) : 0;
-  const second = rowSecond(x, p.nowMs);
   const q = x.q;
+  const queried = !!q && x.stand !== "none";
+  const second = queried ? rowSecond(x, p.nowMs) : null;
+  const closed = queried && q!.court === "closed";
+  const day = queried && !closed ? daysSinceSent(q!.sentMs, p.nowMs) : null;
   const on = p.openId === a.id;
   const open = () => p.onOpen(a.id);
+  const add = (label: string, tab: AgentCardTab, focus: AgentCardField, k: string) => (
+    <button type="button" className="cl252-hadd" data-cl252="hadd" data-k={k} onClick={() => p.onEdit(a.id, tab, focus)}>{label}</button>
+  );
   return (
-    <div role="row" tabIndex={0} className="cl24-tr" data-cl24="row" data-nb1="name-row" data-id={a.id} data-k={x.stand} aria-current={on ? "true" : undefined}
+    <div role="row" tabIndex={0} className="cl24-tr cl252-tr" data-cl24="row" data-nb1="name-row" data-id={a.id} data-k={x.stand} aria-current={on ? "true" : undefined}
       aria-label={`${name}${agency ? `, ${agency}` : ""}`}
       onClick={(e) => { if ((e.target as HTMLElement).closest("button, a")) return; open(); }}
       onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); open(); } }}>
       <span role="cell" className="cl24-who">
         <StateDisc x={x} />
-        <span className="cl24-whot"><b>{name}</b>{agency ? <small>{agency}</small> : null}</span>
+        <span className="cl24-whot cl252-whot"><b data-cl252="name">{name}</b>{sub ? <small data-cl252="agency">{sub}</small> : null}</span>
       </span>
-      <span role="cell" className="cl24-gen" data-cl24="genres" data-total={genres.length}>
-        {shown.length ? (
-          <>
-            {shown.map((g) => (
-              <span key={g} className={`cl24-tag${p.genreHit(g) ? " hit" : ""}`} data-hit={p.genreHit(g) ? "" : undefined} data-cl251="genre">
-                {p.genreHit(g) ? <i aria-hidden="true">✓ </i> : null}{p.genreWord(g)}
-              </span>
-            ))}
-            {genres.length > shown.length ? <em className="cl251-gmore" data-cl251="genre-more" data-n={genres.length - shown.length}>+{genres.length - shown.length}</em> : null}
-          </>
-        ) : <button type="button" className="cl24-add" data-cl24="add-genres" onClick={() => p.onEdit(a.id, "want", "genres")}>+ Add genres</button>}
+      <span role="cell" className="cl24-gen cl252-gen" data-cl24="genres" data-total={genres.length}>
+        <GenrePills genres={genres} hit={p.genreHit} word={p.genreWord} />
+        {genres.length ? null : add("+ Add", "want", "genres", "genres")}
       </span>
-      <span role="cell" className="cl24-c2" data-col="3">
-        {weeks ? <><b>About {weeks} {weeks === 1 ? "week" : "weeks"}</b>{rule ? <small>{rule}</small> : null}</>
-          : <button type="button" className="cl24-add" data-cl24="add-reply" onClick={() => p.onEdit(a.id, "work", "reply")}>+ Add</button>}
+      <span role="cell" className="cl24-c2 cl252-rep" data-col="3" data-cl252="replies">
+        {weeks ? <><b>~{weeks} {weeks === 1 ? "wk" : "wks"}</b>{rule ? <small>{rule}</small> : null}</>
+          : <><span className="cl252-dash">—</span>{add("+ Add", "work", "reply", "reply")}</>}
       </span>
-      <span role="cell" className="cl24-qs" data-cl24="query">
-        {x.stand === "none" || !q ? (
+      <span role="cell" className="cl24-qs cl252-qs" data-cl24="query">
+        {!queried ? (
           x.door === "closed" ? <span className="cl24-shut cl251-shut" data-cl251="closed-tag">Closed to queries</span>
-            : <button type="button" className="cl24-lq" data-cl24="log" onClick={() => p.onLog(a.id)}>{I.plus}Log a query</button>
+            : <span className="cl252-nq"><em>Not queried</em><button type="button" className="cl252-hlog" data-cl24="log" onClick={() => p.onLog(a.id)}>{I.plus}Log a query</button></span>
         ) : (
           <>
-            <span className="cl24-ql"><StatusDot status={q.status as QueryStatus} overrideSize={15} />{STAGE_NAME[q.status as keyof typeof STAGE_NAME] ?? String(q.status)}</span>
-            {second ? <small className={second.due ? "due" : undefined} data-cl24="query-next">{second.text}</small> : null}
+            <span className="cl252-ql1">
+              <QueryPill status={q!.status} />
+              {day != null ? <span className="cl252-day" data-cl252="day" data-n={day}>DAY {day}</span> : null}
+            </span>
+            <span className="cl252-ql2">
+              <Track status={q!.status} dates={q!.query} />
+              {second?.due ? <span className="cl252-next" data-cl252="next">{second.text}</span>
+                : <span className="cl252-sent" data-cl252="sent">{closed ? "Closed" : second?.text ?? ""}</span>}
+            </span>
           </>
         )}
       </span>
-      {/* v25.1 E3 — Your rating, the last column: five stars, or "Not rated" */}
-      <span role="cell" className="cl24-ad cl251-rate" data-col="5" data-cl251="rating" data-n={stars}>
-        {stars ? (
-          <span className="cl251-stars" aria-label={`Rated ${stars} of 5`}>{[1, 2, 3, 4, 5].map((n) => <i key={n} className={n <= stars ? "on" : undefined} aria-hidden="true">★</i>)}</span>
-        ) : <em className="cl251-unrated">Not rated</em>}
+      <span role="cell" className="cl24-ad cl252-rate" data-col="5" data-cl251="rating" data-n={x.agent.starRating ?? 0}>
+        <Tally n={a.starRating} />
+      </span>
+      <span className="cl252-wl" data-cl252="wishlist" role="cell">
+        {NIB}
+        {wish ? <span className="cl252-wq" data-cl252="wish-text"><i aria-hidden="true">“</i>{wish}<i aria-hidden="true">”</i></span>
+          : <span className="cl252-wnone"><em>No wishlist yet</em>{add("+ Add their wishlist", "want", "wishlist", "wishlist")}</span>}
       </span>
       <span className="cl24-qa" data-cl24="quick">
         {email ? <button type="button" title="Copy email" aria-label={`Copy ${name}’s email`} data-cl24="copy-email" onClick={() => copy(email)}>{I.mail}</button> : null}

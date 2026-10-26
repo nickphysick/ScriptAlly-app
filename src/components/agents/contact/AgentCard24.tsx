@@ -42,6 +42,7 @@ import { monthLabel, monthKey } from "../../../lib/agentHistory";
 import "../../queries/centre/qcv149card.css";
 import "../../../marketing/heroCard.css";
 import "./contactV24.css";
+import { GenrePills, QueryPill, Tally } from "../../shared/agentRowParts";
 
 /** the band's tint and ink per set: the Query Centre's CARD_TONE, and "Not queried yet" the pack's #f5f1ea / #6b5f52 */
 export const SET_TONE: Record<SetKey, { bg: string; fg: string; pill: string }> = {
@@ -131,17 +132,16 @@ export const Band: React.FC<{ x: AgentFacts; right: ReturnType<typeof bandRight>
   </div>
 );
 
-export const Stars: React.FC<{ n: number | undefined }> = ({ n }) => (typeof n === "number" && n > 0 ? (
-  <div className="cl24c-stars" data-cl24="rating" data-n={n} aria-label={`Your rating: ${n} of 5`}>
-    {[1, 2, 3, 4, 5].map((k) => <i key={k} className={k <= n ? "on" : undefined} aria-hidden="true">★</i>)}
-    <small>your rating</small>
+/* v25.2 A7 — the tally bars replace the stars: five bars and "n/5", or empty bars and "—" when unrated */
+export const Stars: React.FC<{ n: number | undefined; onSet?: (n: 1 | 2 | 3 | 4 | 5) => void }> = ({ n, onSet }) => (
+  <div className="cl24c-stars cl252-crate" data-cl24="rating" data-n={typeof n === "number" ? n : 0}>
+    <Tally n={n} onSet={onSet} />
   </div>
-) : null);
+);
 
-export const StagePill: React.FC<{ x: AgentFacts; pill: string }> = ({ x, pill }) => (x.q && x.stand !== "none" ? (
-  <span className="mk-lc-pill qc149c-pill" data-cl24="pill" style={{ background: pill }}>
-    <StatusDot status={x.q.status as QueryStatus} overrideSize={15} />{STAGE_NAME[x.q.status as keyof typeof STAGE_NAME] ?? String(x.q.status)}
-  </span>
+/* v25.2 A5 — the card's header wears the row's status pill (one component, shared) */
+export const StagePill: React.FC<{ x: AgentFacts; pill?: string }> = ({ x }) => (x.q && x.stand !== "none" ? (
+  <QueryPill status={x.q.status} data={{ "data-cl24": "pill" }} />
 ) : null);
 
 export const Wishlist: React.FC<{ p: AgentCard24Props; first: string; heading?: boolean }> = ({ p, first, heading = true }) => {
@@ -153,8 +153,9 @@ export const Wishlist: React.FC<{ p: AgentCard24Props; first: string; heading?: 
       {heading ? <span className="qc149c-k">What {first}’s looking for</span> : null}
       {text ? <q data-cl24="wish-text">{text}</q>
         : <button type="button" className="qc149c-add" data-cl24="wish-add" onClick={() => p.onEdit("want", "wishlist")}>+ Add their wishlist</button>}
+      {/* v25.2 A3 — the row's genre pills, every genre, matches first */}
       {genres.length ? (
-        <div className="qc149c-gs">{genres.map((g) => <span key={g} className={p.genreHit(g) ? "hit" : undefined} data-cl24="genre" data-hit={p.genreHit(g) ? "" : undefined}>{p.genreWord(g)}</span>)}</div>
+        <div className="qc149c-gs cl252-cgs" data-cl24="genres"><GenrePills genres={genres} hit={p.genreHit} word={p.genreWord} max={genres.length} className="wrap" /></div>
       ) : <div className="qc149c-gs"><button type="button" className="qc149c-add cl24c-gadd" data-cl24="genres-add" onClick={() => p.onEdit("want", "genres")}>+ Add genres</button></div>}
       {p.fit ? <div className={`cl24c-fit${p.fit.hit ? "" : " no"}`} data-cl24="fit" data-hit={p.fit.hit ? "" : undefined}>{p.fit.text}</div> : null}
     </div>

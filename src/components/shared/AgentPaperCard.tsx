@@ -21,6 +21,7 @@
  */
 import React from "react";
 import "./agentPaperCard.css";
+import { GenrePills } from "./agentRowParts";
 
 export type PaperStatus = "you" | "none" | "querying" | "closed";
 /** v18.2 §B — every band, in every variant and every state: the list header's slate */
@@ -130,8 +131,9 @@ export const AgentPaperCard: React.FC<{
   ));
   const genres = ghost ? <span className="apc-chips">{bar(110, 26)}{bar(80, 26)}</span>
     : d.genres.length ? (
+      /* Contact list v25.2 A3 — the row's genre pills, one component */
       <span className="apc-chips" data-apc="genres">
-        {d.genres.map((g) => <span key={g.label} className={`apc-chip${g.hit ? " is-hit" : ""}`} data-hit={g.hit ? "true" : undefined}>{g.hit ? "✓ " : ""}{g.label}</span>)}
+        <GenrePills genres={d.genres.map((g) => g.label)} hit={(l) => d.genres.some((g) => g.label === l && g.hit)} word={(l) => l} max={d.genres.length} className="wrap" />
       </span>
     ) : add("genres", "+ Add their genres");
   const wish = ghost ? <span className="apc-lines">{bar(260)}{bar(200)}</span>
