@@ -27,6 +27,7 @@ import { CL_SORT_FIELDS } from "../../../lib/cardsSort";
 import { SortChipButton, SortChipMenu } from "../../shell/SortChip";
 import { usePopover } from "../../shell/ListPills";
 import { FULL_ICON } from "../../shell/ViewTitleRow";
+import { GROUP_ICON150 } from "../../queries/centre/QcToolbar140";
 import { FilterMenu } from "./ContactFilters24";
 import { AgentPaperCard, type PaperAddKey } from "../../shared/AgentPaperCard";
 import { paperDataOf } from "../../../lib/contactCards";
@@ -56,7 +57,6 @@ export const StateDisc: React.FC<{ x: AgentFacts; size?: number; className?: str
 
 const I = {
   filt: <svg className="cl24-ic" viewBox="0 0 20 20" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M3 5.5h14M5.5 10h9M8 14.5h4" /></svg>,
-  grp: <svg className="cl24-ic" viewBox="0 0 20 20" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M3.5 5.5h13M3.5 10h13M3.5 14.5h13" /></svg>,
   cv: <svg className="cl24-cv" viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M3 4.5l3 3 3-3" /></svg>,
   mail: <svg viewBox="0 0 16 16" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><rect x="2" y="3.5" width="12" height="9" rx="1.4" /><path d="m2.5 4.3 5.5 4.4 5.5-4.4" /></svg>,
   web: <svg viewBox="0 0 16 16" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><circle cx="8" cy="8" r="6" /><path d="M2 8h12M8 2c2 2 2 10 0 12M8 2c-2 2-2 10 0 12" /></svg>,
@@ -104,6 +104,23 @@ export const ContactSheet24: React.FC<ContactSheet24Props> = (p) => {
   const byId = useMemo(() => new Map(p.all.map((x) => [x.agent.id, x])), [p.all]);
   const groups = useMemo(() => (p.grouped ? setGroups(p.pool) : [{ key: null as SetKey | null, label: "", ids: p.pool.map((x) => x.agent.id) }]), [p.grouped, p.pool]);
 
+  /* v25 D2 — AT 1440 OF SHEET OR LESS Filters and Full screen go icon-only. The sheet is the window less the shell's
+     published insets (`--ink-sheet-l/-r` on <html>, which WorkspaceShell keeps current), read on every resize. */
+  const [narrowSheet, setNarrowSheet] = useState(false);
+  useLayoutEffect(() => {
+    const read = () => {
+      const cs = getComputedStyle(document.documentElement);
+      const s = window.innerWidth - (parseFloat(cs.getPropertyValue("--ink-sheet-l")) || 0) - (parseFloat(cs.getPropertyValue("--ink-sheet-r")) || 0);
+      setNarrowSheet(s <= 1440);
+    };
+    read();
+    window.addEventListener("resize", read);
+    const el = sheetRef.current;
+    const ro = typeof ResizeObserver !== "undefined" && el ? new ResizeObserver(read) : null;
+    if (ro && el) ro.observe(el);
+    return () => { window.removeEventListener("resize", read); ro?.disconnect(); };
+  }, []);
+
   /* Cards: three across from a sheet of 1,100px, measured before paint and on every resize */
   const [across, setAcross] = useState(3);
   useLayoutEffect(() => {
@@ -126,21 +143,20 @@ export const ContactSheet24: React.FC<ContactSheet24Props> = (p) => {
   const sortBy = (k: SortKey) => p.onSort({ key: k, reversed: p.sortKey === k ? !p.reversed : false });
 
   return (
-    <div className="cl24-sheet" data-cl24="sheet" data-view={p.view} ref={sheetRef}>
+    <div className="cl24-sheet" data-cl24="sheet" data-view={p.view} data-s1440={narrowSheet ? "" : undefined} ref={sheetRef}>
       <div className="cl24-bar" data-cl24="bar" ref={barRef}>
         <label className="qc150-bfind" data-cl24="find" data-cl25="find" data-nb1="find">
           <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4.5 4.5" /></svg>
           <input value={p.search} onChange={(e) => p.onSearch(e.target.value)} placeholder="Find an agent or agency" aria-label="Find an agent or agency" autoComplete="off" />
         </label>
         {/* v25 C — the List | Cards switch moved out of the bar, to the list's title row (ContactListTitle25) */}
-        <span className="cl24-sp" />
         <button type="button" className="cl24-ch cl24-ch--fil" data-cl24="filters" data-nb1="filters" aria-haspopup="dialog" aria-expanded={pop.open === "filters"}
           aria-label={filterN ? `Filters: ${filterN} applied` : "Filters"} onClick={(e) => pop.toggle("filters", e.currentTarget)}>
           {I.filt}<span className="cl24-cl">Filters</span>{filterN ? <em className="cl24-n" data-cl24="filters-n">{filterN}</em> : null}
         </button>
         <button type="button" className="cl24-ch" data-cl24="group" aria-haspopup="menu" aria-expanded={pop.open === "group"}
-          aria-label={`Grouped by ${p.grouped ? "Status" : "nothing"}. Change the grouping`} onClick={(e) => pop.toggle("group", e.currentTarget)}>
-          {I.grp}<em className="cl24-gby">Grouped by</em><b>{p.grouped ? "Status" : "None"}</b>{I.cv}
+          aria-label={`Grouped by ${p.grouped ? "Status" : "nothing"}. Change the grouping`} data-cl25="group" onClick={(e) => pop.toggle("group", e.currentTarget)}>
+          {GROUP_ICON150}<b>{p.grouped ? "Status" : "None"}</b>{I.cv}
         </button>
         <SortChipButton fields={CL_SORT_FIELDS} value={{ key: p.sortKey, reversed: p.reversed }} open={pop.open === "sort"} className="cl24-ch cl24-sort" ns="cl24"
           onToggle={(a) => pop.toggle("sort", a)} toolbar={() => barRef.current} />

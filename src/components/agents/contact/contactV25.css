@@ -85,3 +85,37 @@
   .clv-group[data-v25] .cl25-lt .qc150-vsw { grid-column: 2; grid-row: 1 / span 2; align-self: end; margin-top: 0; }
   .clv-group[data-v25][data-full] .cl25-lt { display: none; }
 }
+
+/* ══ Part D · the navy bar and one width ═══════════════════════════════════════════════════════════════════════════
+   D1 · ONE WIDTH: the header card, At a glance, the title and the list sheet share W = min(S − 48, 1200), centred (S is
+   the sheet) — the Query Centre v150.1's §1. Both v24 tokens read the one value, so the header and the list cannot
+   drift apart (0-3-0, over contactV24.css's 0-2-0 on the same element). */
+@media (min-width: 768px) {
+  .clv-group[data-v24][data-v25] {
+    --cl25-w: min(calc(var(--hsheet-w) - 48px), 1200px);
+    --cl24-w: var(--cl25-w);
+    --cl24-list: var(--cl25-w);
+  }
+
+  /* D2 · the bar, as v150.1's: the search well first and pushed left (qcv150.css), then Filters · the group pill · the
+     sort pill · Full screen. The pills say their value only: the "Grouped by" / "Sorted by" prefixes go, at every
+     width. Every word in the bar, and in its group and sort menus, is Special Elite, upright. */
+  .clv-group[data-v25] .cl24-sheet .cl24-sort .sc-sby { display: none; }
+  .clv-group[data-v25] .cl24-sheet .cl24-ch .qc140-ic.gic { flex: none; width: 18px; height: 18px; color: #2a3a52; }
+  .clv-group[data-v25] .cl24-sheet .cl24-bar :is(button, input, b, span, em, i, small, label),
+  .clv-group[data-v25] .cl24-sheet .cl24-bar input::placeholder,
+  :is([data-cl24="group-menu"], [data-cl24="sort-menu"]) :is(*, h6, button, b, small, span) {
+    font-family: var(--sp-type) !important; font-style: normal !important;
+  }
+  /* the bar's words at v150.1's sizes (the search 15, the pills 15.5, Full screen 14.5) */
+  .clv-group[data-v25] .cl24-bar .qc150-bfind input, .clv-group[data-v25] .cl24-bar .qc150-bfind input::placeholder { font-size: 15px !important; }
+  .clv-group[data-v25] .cl24-sheet .cl24-ch .cl24-cl { font-size: 15.5px !important; }
+  /* at 1440 of sheet or less (`data-s1440`, measured): Filters and Full screen go icon-only */
+  .clv-group[data-v25] .cl24-sheet[data-s1440] :is(.cl24-cl, .cl24-fslb) { display: none; }
+  .clv-group[data-v25] .cl24-sheet[data-s1440] .cl24-fs { width: 34px; padding: 0; justify-content: center; }
+
+  /* D3 · the full-screen cream row: its words in Special Elite, upright (its sort pill already drops the prefix) */
+  .cl24-ftool :is(button, input, b, span, em, i, small, label), .cl24-ftool input::placeholder {
+    font-family: var(--sp-type) !important; font-style: normal !important;
+  }
+}
