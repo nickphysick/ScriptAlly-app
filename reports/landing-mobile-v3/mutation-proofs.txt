@@ -1,0 +1,15 @@
+LS1 on LS1 →  1 failed | Error: html's scroll-snap-type is y proximity (none)
+LS1b on LS1 →  1 failed | Error: every caption stops the flick
+LS1c on LS1 →  1 failed | Error: a caption's scroll-margin-top is 60 + the panel (60)
+LS1d on LS1 →  1 failed | Error: exactly seven page snap points
+LS1e on LS1 →  1 failed | Error: picture 3 is the visible one
+LS2 on LS2 →  1 failed | Error: caption 1 at 390×844: 3 points
+LS2b on LS2 →  1 failed | Error: caption 4's label
+LS3 on LS3 →  1 failed | Error: the vision's top is on screen beneath it
+LS3b on LS3 →  1 failed | Error: "And so much more." appears once
+LS4 on LS4 →  1 failed | Error: no snapping
+LS4b on LS4 →  1 failed | Error: no cross-fade (0.45s)
+LV2 on LV2 →  1 failed | Error: @390: no horizontal scroller in the features
+LV2b on LV2 →  1 failed | Error: @390: the page body never scrolls sideways
+N3s on N3 →  1 failed | Error: anchor landing @390: the picture is stuck under the bar
+done

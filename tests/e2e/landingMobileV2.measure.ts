@@ -2,7 +2,7 @@
  * The landing page on phones, v2 (26 Oct; ref design-refs/landing-mobile-v2.html) — the rendered locks.
  *
  *   LV1 story (390 × 844, 375 × 667): the picture panel is sticky at top 60 and its height is
- *       min((innerHeight − 60) / 2, 420) within 2px; with caption 3 past 84% of the viewport, picture 3
+ *       min((innerHeight − 60) / 2, 420) within 2px; with caption 3 past 72% of the viewport (v3), picture 3
  *       is the visible one and three progress steps are filled; once the story has gone by, the panel
  *       is no longer stuck and sits above the vision
  *   LV2 no swipe: the feature section holds no horizontal scroller, and the page body never scrolls
@@ -35,8 +35,8 @@ const CSS_BREAKS: Record<string, string> = {
   LV1d: ".mk-spbar i.mk-on{background:rgba(28,19,15,.12)!important}",
   /* The panel still sticky, but its section's bounds taken away, so it would stay stuck past the story. */
   LV1e: ".mk-story{display:contents!important}",
-  LV2: ".mk-spsteps{display:flex!important;overflow-x:auto!important}.mk-spt{flex:0 0 300px!important}",
-  LV2b: "html,body{overflow-x:visible!important}.mk-sheet{overflow:visible!important}.mk-spt{width:600px!important}",
+  LV2: ".mk-spsteps{display:flex!important;overflow-x:auto!important}.mk-s3{flex:0 0 300px!important}",
+  LV2b: "html,body{overflow-x:visible!important}.mk-sheet{overflow:visible!important}.mk-s3{width:600px!important}",
   LV3: ".mk-vision.mk-vision--navy{background:#ffffff!important}",
   LV3b: ".mk-vdots i.mk-on{width:6px!important;background:rgba(255,255,255,.22)!important}",
   LV3c: ".mk-vn .mk-vnh3{color:#1c130f!important}",
@@ -105,18 +105,19 @@ test.describe("landing on phones v2", () => {
     test.setTimeout(120000);
     for (const vp of [P390, P375]) {
       await open(page, vp);
-      await page.waitForSelector(".mk-spt", { state: "attached" });
-      await scrollTo(page, ".mk-spt", 2, 0.6); await page.waitForTimeout(800);
+      await page.waitForSelector(".mk-s3", { state: "attached" });
+      await scrollTo(page, ".mk-s3", 2, 0.6); await page.waitForTimeout(800);
       const r = await page.evaluate(() => {
         const p = document.querySelector<HTMLElement>(".mk-spimg")!, b = p.getBoundingClientRect(), c = getComputedStyle(p);
         const imgs = Array.from(p.querySelectorAll("img")).map((i) => +getComputedStyle(i).opacity);
         const steps = Array.from(p.querySelectorAll(".mk-spbar i")).map((i) => getComputedStyle(i).backgroundColor);
-        const cap = document.querySelectorAll(".mk-spt")[2].getBoundingClientRect().top;
+        const cap = document.querySelectorAll(".mk-s3")[2].getBoundingClientRect().top;
         return { position: c.position, top: b.top, h: b.height, H: innerHeight, imgs, filled: steps.filter((s) => s === "rgb(42, 58, 82)").length, steps: steps.length, cap };
       });
       console.log(`LV1 @${vp.width}`, JSON.stringify(r));
       expect(r.imgs.length, "population: six pictures").toBe(6);
-      expect(r.cap, "precondition: caption 3 is past 84% of the viewport").toBeLessThan(r.H * 0.84);
+      /* REWRITTEN (landing on phones v3, 26 Oct): a caption is current once its top has passed 72%. */
+      expect(r.cap, "precondition: caption 3 is past 72% of the viewport").toBeLessThan(r.H * 0.72);
       expect(r.position).toBe("sticky");
       expect(Math.abs(r.top - 60), `@${vp.width}: stuck at 60`).toBeLessThanOrEqual(1);
       expect(Math.abs(r.h - Math.min((r.H - 60) / 2, 420)), `@${vp.width}: min((innerHeight − 60) / 2, 420)`).toBeLessThanOrEqual(2);
@@ -134,9 +135,9 @@ test.describe("landing on phones v2", () => {
     test.setTimeout(120000);
     for (const vp of [P390, P375, P360]) {
       await open(page, vp);
-      await page.waitForSelector(".mk-spt", { state: "attached" });
+      await page.waitForSelector(".mk-s3", { state: "attached" });
       for (const k of [0, 3, 5]) {
-        await scrollTo(page, ".mk-spt", k, 0.6); await page.waitForTimeout(300);
+        await scrollTo(page, ".mk-s3", k, 0.6); await page.waitForTimeout(300);
         const r = await page.evaluate(() => {
           const scrollers = Array.from(document.querySelectorAll<HTMLElement>(".mk-story, .mk-story *")).filter((e) => /auto|scroll/.test(getComputedStyle(e).overflowX) && e.scrollWidth > e.clientWidth + 1).length;
           return { n: document.querySelectorAll(".mk-story *").length, scrollers, sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth, sx: scrollX };
@@ -185,7 +186,7 @@ test.describe("landing on phones v2", () => {
     const hero = await read();
     expect(hero, "population: the bar is on the landing page").not.toBeNull();
     expect(hero!.visible, "hidden while the hero is on screen").toBe(false);
-    await scrollTo(page, ".mk-spt", 2, 0.6); await page.waitForTimeout(700);
+    await scrollTo(page, ".mk-s3", 2, 0.6); await page.waitForTimeout(700);
     const feat = await read();
     expect(feat!.visible, "visible over the features").toBe(true);
     expect(feat!.text).toBe("Become a founding writer | 48 places left | Join");
@@ -197,7 +198,7 @@ test.describe("landing on phones v2", () => {
     console.log("LV4", JSON.stringify({ hero, feat, card, cardTop }));
     expect(cardTop, "precondition: the card's top is above 85% of the viewport").toBeLessThan(0.85);
     expect(card!.visible, "hidden while the closing card is on screen").toBe(false);
-    await scrollTo(page, ".mk-spt", 2, 0.6); await page.waitForTimeout(700);
+    await scrollTo(page, ".mk-s3", 2, 0.6); await page.waitForTimeout(700);
     expect((await read())!.visible, "scrolling back brings it back").toBe(true);
     await page.click(".mk-jbar"); await page.waitForTimeout(1200);
     const target = await page.evaluate(() => ({ path: location.pathname, focus: document.activeElement?.id ?? "" }));
@@ -249,15 +250,15 @@ test.describe("landing on phones v2", () => {
   test("LV6 reduced motion: no cross-fade on the picture, no slide on the join bar", async ({ page }) => {
     test.setTimeout(60000);
     await open(page, P390, { reduce: true });
-    await page.waitForSelector(".mk-spt", { state: "attached" });
+    await page.waitForSelector(".mk-s3", { state: "attached" });
     const t = await page.evaluate(() => ({
       img: getComputedStyle(document.querySelector(".mk-spimg img")!).transitionDuration,
       bar: getComputedStyle(document.querySelector(".mk-jbar")!).transitionDuration,
     }));
-    await scrollTo(page, ".mk-spt", 0, 0.6); await page.waitForTimeout(400);
+    await scrollTo(page, ".mk-s3", 0, 0.6); await page.waitForTimeout(400);
     /* Move to caption 2 and read the pictures on the next frames: an instant swap has no frame between. */
     const frames = await page.evaluate(() => new Promise<number[][]>((done) => {
-      const e = document.querySelectorAll(".mk-spt")[1]; window.scrollTo({ top: e.getBoundingClientRect().top + scrollY - innerHeight * 0.6, behavior: "instant" });
+      const e = document.querySelectorAll(".mk-s3")[1]; window.scrollTo({ top: e.getBoundingClientRect().top + scrollY - innerHeight * 0.6, behavior: "instant" });
       const out: number[][] = []; let k = 0;
       const loop = () => { out.push(Array.from(document.querySelectorAll(".mk-spimg img")).map((i) => +(+getComputedStyle(i).opacity).toFixed(2))); if (++k < 10) requestAnimationFrame(loop); else done(out); };
       requestAnimationFrame(loop);
