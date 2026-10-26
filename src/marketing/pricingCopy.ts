@@ -94,12 +94,6 @@ export const planPerMonthLine = (p: ProPlan): string =>
 export const PRO_FROM = PRO_PLANS.map(perMonth).sort((a, b) => Number(a) - Number(b))[0];
 /** "£19", as a tile and the result card print it. */
 export const planPrice = (p: ProPlan): string => `£${p.price}`;
-/**
- * A plan tile's foot line, in two runs so the saving can carry its own colour: the one-month plan
- * reads "Add to any plan"; the rest "£6.33 a month · " then "save 20%".
- */
-export const planTileLine = (p: ProPlan): { lead: string; save: string | null } =>
-  p.saving === null ? { lead: "Add to any plan", save: null } : { lead: `£${perMonth(p)} a month · `, save: `save ${p.saving}%` };
 /** "1 month", "3 months". */
 export const planMonths = (m: number): string => `${m} month${m > 1 ? "s" : ""}`;
 

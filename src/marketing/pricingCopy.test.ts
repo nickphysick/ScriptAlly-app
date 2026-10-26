@@ -8,7 +8,7 @@
  */
 import { describe, it, expect } from "vitest";
 import {
-  PRO_PLANS, perMonth, planPerMonthLine, PRO_FROM, planFor, planTileLine, planPrice, planMonths,
+  PRO_PLANS, perMonth, planPerMonthLine, PRO_FROM, planFor, planPrice, planMonths,
   ROLL_ON_PRICE, PRO_CHOOSE, LADDER_SMALL, planRungLine, LADDER_DEFAULT, TAB_FREE_SMALL, TAB_PRO_SMALL,
 } from "./pricingCopy";
 
@@ -35,9 +35,6 @@ describe("the Pro plan table", () => {
   it("prints the ref's tiles: name, price and foot line", () => {
     expect(PRO_PLANS.map((p) => planMonths(p.months))).toEqual(["1 month", "3 months", "6 months", "12 months"]);
     expect(PRO_PLANS.map(planPrice)).toEqual(["£7.99", "£19", "£29", "£45"]);
-    expect(PRO_PLANS.map((p) => { const l = planTileLine(p); return l.lead + (l.save ?? ""); })).toEqual([
-      "Add to any plan", "£6.33 a month · save 20%", "£4.83 a month · save 40%", "£3.75 a month · save 53%",
-    ]);
   });
   /* 26 Oct: the ladder inside the Pro card and the quiet roll-on (ref pricing-plans-ladder-v1.html). */
   it("prints the ladder's rows: the one-month plan is the monthly rate, the rest their saving", () => {
