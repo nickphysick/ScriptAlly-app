@@ -1,0 +1,134 @@
+[
+ {
+  "lock": "A1",
+  "where": "population: the task card cycled through its items",
+  "ok": true,
+  "detail": "34 items"
+ },
+ {
+  "lock": "A1",
+  "where": "other: a known kind",
+  "ok": true,
+  "detail": "other"
+ },
+ {
+  "lock": "A1",
+  "where": "other: band rgb(95, 117, 145), title ink rgb(255, 255, 255)",
+  "ok": false,
+  "detail": "rgb(232, 238, 246) · rgb(255, 255, 255)"
+ },
+ {
+  "lock": "A1",
+  "where": "other: title \"Agents are waiting\"",
+  "ok": true,
+  "detail": "\"Agents are waiting\""
+ },
+ {
+  "lock": "A1",
+  "where": "other: Special Elite, the pager in the band, the kicker pill gone",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Co · pager true · kicker gone true"
+ },
+ {
+  "lock": "A2",
+  "where": "other: band 46.0 = chart band 46.0 (±1)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A1",
+  "where": "send: a known kind",
+  "ok": true,
+  "detail": "send"
+ },
+ {
+  "lock": "A1",
+  "where": "send: band rgb(162, 69, 42), title ink rgb(255, 255, 255)",
+  "ok": false,
+  "detail": "rgb(232, 238, 246) · rgb(255, 255, 255)"
+ },
+ {
+  "lock": "A1",
+  "where": "send: title \"Your move\"",
+  "ok": true,
+  "detail": "\"Your move\""
+ },
+ {
+  "lock": "A1",
+  "where": "send: Special Elite, the pager in the band, the kicker pill gone",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Co · pager true · kicker gone true"
+ },
+ {
+  "lock": "A2",
+  "where": "send: band 46.0 = chart band 46.0 (±1)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A1",
+  "where": "nudge: a known kind",
+  "ok": true,
+  "detail": "nudge"
+ },
+ {
+  "lock": "A1",
+  "where": "nudge: band rgb(42, 58, 82), title ink rgb(255, 255, 255)",
+  "ok": false,
+  "detail": "rgb(232, 238, 246) · rgb(255, 255, 255)"
+ },
+ {
+  "lock": "A1",
+  "where": "nudge: title \"Time to nudge\"",
+  "ok": true,
+  "detail": "\"Time to nudge\""
+ },
+ {
+  "lock": "A1",
+  "where": "nudge: Special Elite, the pager in the band, the kicker pill gone",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Co · pager true · kicker gone true"
+ },
+ {
+  "lock": "A2",
+  "where": "nudge: band 46.0 = chart band 46.0 (±1)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A1",
+  "where": "close: a known kind",
+  "ok": true,
+  "detail": "close"
+ },
+ {
+  "lock": "A1",
+  "where": "close: band rgb(228, 223, 215), title ink rgb(28, 19, 15)",
+  "ok": false,
+  "detail": "rgb(232, 238, 246) · rgb(28, 19, 15)"
+ },
+ {
+  "lock": "A1",
+  "where": "close: title \"Consider closing\"",
+  "ok": true,
+  "detail": "\"Consider closing\""
+ },
+ {
+  "lock": "A1",
+  "where": "close: Special Elite, the pager in the band, the kicker pill gone",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Co · pager true · kicker gone true"
+ },
+ {
+  "lock": "A2",
+  "where": "close: band 46.0 = chart band 46.0 (±1)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A1",
+  "where": "all four kinds were visited",
+  "ok": true,
+  "detail": "other,send,nudge,close"
+ }
+]

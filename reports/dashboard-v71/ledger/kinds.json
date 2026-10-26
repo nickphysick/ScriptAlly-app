@@ -9,13 +9,13 @@
   "lock": "C1",
   "where": "nudge kicker",
   "ok": true,
-  "detail": "\"TIME TO NUDGE\""
+  "detail": "\"Time to nudge\""
  },
  {
   "lock": "C1",
   "where": "nudge tint",
   "ok": true,
-  "detail": "rgb(232, 238, 246)"
+  "detail": "rgb(42, 58, 82)"
  },
  {
   "lock": "C1",
@@ -33,19 +33,19 @@
   "lock": "C2",
   "where": "nudge population: the bar and its dates",
   "ok": true,
-  "detail": "{\"sent\":1785110400000,\"expected\":1789948800000,\"close\":null,\"today\":1793038757113,\"tl\":1056.875,\"tr\":1432,\"tw\":375.125,\"sr\":1285.796875,\"overShown\":true,\"overR\":1431.984375,\"overImg\":\"repeating-linear-gradient(45deg, rgb(42, 58, 82) 0px, rgb(42, 58, 82) 4px, rgba(0, 0, 0, 0) 4px, rgba(0, 0, 0, 0) 8px)\",\"mark\":null}"
+  "detail": "{\"sent\":1785110400000,\"expected\":1789948800000,\"close\":null,\"today\":1793056564345,\"tl\":1054.875,\"tr\":1434,\"tw\":379.125,\"sr\":1285.71875,\"overShown\":true,\"overR\":1433.984375,\"overImg\":\"repeating-linear-gradient(45deg, rgb(42, 58, 82) 0px, rgb(42, 58, 82) 4px, rgba(0, 0, 0, 0) 4px, rgba(0, 0, 0, 0) 8px)\",\"mark\":null}"
  },
  {
   "lock": "C2",
   "where": "nudge the solid part ends at the expected date (±2px)",
   "ok": true,
-  "detail": "1285.8 vs 1285.8"
+  "detail": "1285.7 vs 1285.7"
  },
  {
   "lock": "C2",
   "where": "nudge the hatched part runs to the end",
   "ok": true,
-  "detail": "1431.984375 vs 1432 · repeating-linear-gradient(45deg, rgb(42,"
+  "detail": "1433.984375 vs 1434 · repeating-linear-gradient(45deg, rgb(42,"
  },
  {
   "lock": "C2",
@@ -57,13 +57,13 @@
   "lock": "C1",
   "where": "close kicker",
   "ok": true,
-  "detail": "\"CONSIDER CLOSING\""
+  "detail": "\"Consider closing\""
  },
  {
   "lock": "C1",
   "where": "close tint",
   "ok": true,
-  "detail": "rgb(239, 235, 229)"
+  "detail": "rgb(228, 223, 215)"
  },
  {
   "lock": "C1",
@@ -81,7 +81,7 @@
   "lock": "C2",
   "where": "close population: the bar and its dates",
   "ok": true,
-  "detail": "{\"sent\":1785715200000,\"expected\":1790553600000,\"close\":1791763200000,\"today\":1793038757113,\"tl\":1056.875,\"tr\":1432,\"tw\":375.125,\"sr\":1304.703125,\"overShown\":true,\"overR\":1431.984375,\"overImg\":\"repeating-linear-gradient(45deg, rgb(125, 112, 100) 0px, rgb(125, 112, 100) 4px, rgba(0, 0, 0, 0) 4px, rgba(0, 0, 0, 0) 8px)\",\"mark\":1366.65625}"
+  "detail": "{\"sent\":1785715200000,\"expected\":1790553600000,\"close\":1791763200000,\"today\":1793056564345,\"tl\":1054.875,\"tr\":1434,\"tw\":379.125,\"sr\":1304.734375,\"overShown\":true,\"overR\":1433.984375,\"overImg\":\"repeating-linear-gradient(45deg, rgb(125, 112, 100) 0px, rgb(125, 112, 100) 4px, rgba(0, 0, 0, 0) 4px, rgba(0, 0, 0, 0) 8px)\",\"mark\":1367.203125}"
  },
  {
   "lock": "C2",
@@ -93,19 +93,19 @@
   "lock": "C2",
   "where": "close the hatched part runs to the end",
   "ok": true,
-  "detail": "1431.984375 vs 1432 · repeating-linear-gradient(45deg, rgb(125"
+  "detail": "1433.984375 vs 1434 · repeating-linear-gradient(45deg, rgb(125"
  },
  {
   "lock": "C2",
   "where": "close: the marker sits at the threshold (±2px)",
   "ok": true,
-  "detail": "1366.65625 vs 1366.6638041280848"
+  "detail": "1367.203125 vs 1367.2076799005233"
  },
  {
   "lock": "C2",
   "where": "close: the marker's words clear the sentence and stay in the card",
   "ok": true,
-  "detail": "{\"em\":{\"l\":1241.484375,\"r\":1368.65625,\"t\":514.796875,\"b\":526.796875},\"line\":{\"l\":1056.875,\"r\":1432,\"t\":435.046875,\"b\":504.796875},\"card\":{\"l\":1034.875,\"r\":1454,\"t\":329.09375,\"b\":567.75}}"
+  "detail": "{\"em\":{\"l\":1242.03125,\"r\":1369.203125,\"t\":410.5625,\"b\":422.5625},\"line\":{\"l\":0,\"r\":0,\"t\":0,\"b\":0},\"card\":{\"l\":1034.875,\"r\":1454,\"t\":331.09375,\"b\":485.75}}"
  },
  {
   "lock": "C2",
@@ -117,13 +117,13 @@
   "lock": "C1",
   "where": "send kicker",
   "ok": true,
-  "detail": "\"YOUR MOVE · SEND\""
+  "detail": "\"Your move\""
  },
  {
   "lock": "C1",
   "where": "send tint",
   "ok": true,
-  "detail": "rgb(244, 231, 225)"
+  "detail": "rgb(162, 69, 42)"
  },
  {
   "lock": "C1",

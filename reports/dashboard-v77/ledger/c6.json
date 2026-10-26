@@ -8,8 +8,8 @@
  {
   "lock": "C6",
   "where": "2560x1440 sent = 0: no stats line",
-  "ok": false,
-  "detail": "[\"0 sent\"]"
+  "ok": true,
+  "detail": "[]"
  },
  {
   "lock": "C6",
@@ -32,8 +32,8 @@
  {
   "lock": "C6",
   "where": "1440x900 sent = 0: no stats line",
-  "ok": false,
-  "detail": "[\"0 sent\"]"
+  "ok": true,
+  "detail": "[]"
  },
  {
   "lock": "C6",

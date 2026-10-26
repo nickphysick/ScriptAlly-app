@@ -1,0 +1,740 @@
+[
+ {
+  "lock": "A3",
+  "where": "population: the items of the cycle",
+  "ok": true,
+  "detail": "34"
+ },
+ {
+  "lock": "A3",
+  "where": "item 1 (other): the card is 254px (±2)",
+  "ok": true,
+  "detail": "254.0"
+ },
+ {
+  "lock": "A3",
+  "where": "item 1 (other): every element inside the card",
+  "ok": true,
+  "detail": "15 · none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 1 (other): nothing scrolls inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 2 (send): the card is 254px (±2)",
+  "ok": true,
+  "detail": "254.0"
+ },
+ {
+  "lock": "A3",
+  "where": "item 2 (send): every element inside the card",
+  "ok": true,
+  "detail": "22 · none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 2 (send): nothing scrolls inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 3 (send): the card is 254px (±2)",
+  "ok": true,
+  "detail": "254.0"
+ },
+ {
+  "lock": "A3",
+  "where": "item 3 (send): every element inside the card",
+  "ok": true,
+  "detail": "22 · none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 3 (send): nothing scrolls inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 4 (send): the card is 254px (±2)",
+  "ok": true,
+  "detail": "254.0"
+ },
+ {
+  "lock": "A3",
+  "where": "item 4 (send): every element inside the card",
+  "ok": true,
+  "detail": "22 · none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 4 (send): nothing scrolls inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 5 (send): the card is 254px (±2)",
+  "ok": true,
+  "detail": "254.0"
+ },
+ {
+  "lock": "A3",
+  "where": "item 5 (send): every element inside the card",
+  "ok": true,
+  "detail": "22 · none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 5 (send): nothing scrolls inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 6 (send): the card is 254px (±2)",
+  "ok": true,
+  "detail": "254.0"
+ },
+ {
+  "lock": "A3",
+  "where": "item 6 (send): every element inside the card",
+  "ok": true,
+  "detail": "22 · none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 6 (send): nothing scrolls inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 7 (send): the card is 254px (±2)",
+  "ok": true,
+  "detail": "254.0"
+ },
+ {
+  "lock": "A3",
+  "where": "item 7 (send): every element inside the card",
+  "ok": true,
+  "detail": "22 · none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 7 (send): nothing scrolls inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 8 (send): the card is 254px (±2)",
+  "ok": true,
+  "detail": "254.0"
+ },
+ {
+  "lock": "A3",
+  "where": "item 8 (send): every element inside the card",
+  "ok": true,
+  "detail": "22 · none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 8 (send): nothing scrolls inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 9 (send): the card is 254px (±2)",
+  "ok": true,
+  "detail": "254.0"
+ },
+ {
+  "lock": "A3",
+  "where": "item 9 (send): every element inside the card",
+  "ok": true,
+  "detail": "22 · none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 9 (send): nothing scrolls inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 10 (send): the card is 254px (±2)",
+  "ok": true,
+  "detail": "254.0"
+ },
+ {
+  "lock": "A3",
+  "where": "item 10 (send): every element inside the card",
+  "ok": true,
+  "detail": "22 · none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 10 (send): nothing scrolls inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 11 (nudge): the card is 254px (±2)",
+  "ok": true,
+  "detail": "254.0"
+ },
+ {
+  "lock": "A3",
+  "where": "item 11 (nudge): every element inside the card",
+  "ok": false,
+  "detail": "24 · d71-wexp"
+ },
+ {
+  "lock": "A3",
+  "where": "item 11 (nudge): nothing scrolls inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 11 (nudge): the bar's labels do not overlap",
+  "ok": false,
+  "detail": "3 labels"
+ },
+ {
+  "lock": "A3",
+  "where": "item 12 (nudge): the card is 254px (±2)",
+  "ok": true,
+  "detail": "254.0"
+ },
+ {
+  "lock": "A3",
+  "where": "item 12 (nudge): every element inside the card",
+  "ok": false,
+  "detail": "24 · d71-wexp"
+ },
+ {
+  "lock": "A3",
+  "where": "item 12 (nudge): nothing scrolls inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 12 (nudge): the bar's labels do not overlap",
+  "ok": false,
+  "detail": "3 labels"
+ },
+ {
+  "lock": "A3",
+  "where": "item 13 (nudge): the card is 254px (±2)",
+  "ok": true,
+  "detail": "254.0"
+ },
+ {
+  "lock": "A3",
+  "where": "item 13 (nudge): every element inside the card",
+  "ok": false,
+  "detail": "24 · d71-wexp"
+ },
+ {
+  "lock": "A3",
+  "where": "item 13 (nudge): nothing scrolls inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 13 (nudge): the bar's labels do not overlap",
+  "ok": false,
+  "detail": "3 labels"
+ },
+ {
+  "lock": "A3",
+  "where": "item 14 (nudge): the card is 254px (±2)",
+  "ok": true,
+  "detail": "254.0"
+ },
+ {
+  "lock": "A3",
+  "where": "item 14 (nudge): every element inside the card",
+  "ok": false,
+  "detail": "24 · d71-wexp"
+ },
+ {
+  "lock": "A3",
+  "where": "item 14 (nudge): nothing scrolls inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 14 (nudge): the bar's labels do not overlap",
+  "ok": false,
+  "detail": "3 labels"
+ },
+ {
+  "lock": "A3",
+  "where": "item 15 (nudge): the card is 254px (±2)",
+  "ok": true,
+  "detail": "254.0"
+ },
+ {
+  "lock": "A3",
+  "where": "item 15 (nudge): every element inside the card",
+  "ok": false,
+  "detail": "23 · d71-wexp"
+ },
+ {
+  "lock": "A3",
+  "where": "item 15 (nudge): nothing scrolls inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 15 (nudge): the bar's labels do not overlap",
+  "ok": false,
+  "detail": "3 labels"
+ },
+ {
+  "lock": "A3",
+  "where": "item 16 (nudge): the card is 254px (±2)",
+  "ok": true,
+  "detail": "254.0"
+ },
+ {
+  "lock": "A3",
+  "where": "item 16 (nudge): every element inside the card",
+  "ok": false,
+  "detail": "24 · d71-wexp"
+ },
+ {
+  "lock": "A3",
+  "where": "item 16 (nudge): nothing scrolls inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 16 (nudge): the bar's labels do not overlap",
+  "ok": false,
+  "detail": "3 labels"
+ },
+ {
+  "lock": "A3",
+  "where": "item 17 (nudge): the card is 254px (±2)",
+  "ok": true,
+  "detail": "254.0"
+ },
+ {
+  "lock": "A3",
+  "where": "item 17 (nudge): every element inside the card",
+  "ok": false,
+  "detail": "24 · d71-wexp"
+ },
+ {
+  "lock": "A3",
+  "where": "item 17 (nudge): nothing scrolls inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 17 (nudge): the bar's labels do not overlap",
+  "ok": false,
+  "detail": "3 labels"
+ },
+ {
+  "lock": "A3",
+  "where": "item 18 (nudge): the card is 254px (±2)",
+  "ok": true,
+  "detail": "254.0"
+ },
+ {
+  "lock": "A3",
+  "where": "item 18 (nudge): every element inside the card",
+  "ok": false,
+  "detail": "23 · d71-wexp"
+ },
+ {
+  "lock": "A3",
+  "where": "item 18 (nudge): nothing scrolls inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 18 (nudge): the bar's labels do not overlap",
+  "ok": false,
+  "detail": "3 labels"
+ },
+ {
+  "lock": "A3",
+  "where": "item 19 (nudge): the card is 254px (±2)",
+  "ok": true,
+  "detail": "254.0"
+ },
+ {
+  "lock": "A3",
+  "where": "item 19 (nudge): every element inside the card",
+  "ok": false,
+  "detail": "23 · d71-wexp"
+ },
+ {
+  "lock": "A3",
+  "where": "item 19 (nudge): nothing scrolls inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 19 (nudge): the bar's labels do not overlap",
+  "ok": false,
+  "detail": "3 labels"
+ },
+ {
+  "lock": "A3",
+  "where": "item 20 (nudge): the card is 254px (±2)",
+  "ok": true,
+  "detail": "254.0"
+ },
+ {
+  "lock": "A3",
+  "where": "item 20 (nudge): every element inside the card",
+  "ok": false,
+  "detail": "24 · d71-wexp"
+ },
+ {
+  "lock": "A3",
+  "where": "item 20 (nudge): nothing scrolls inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 20 (nudge): the bar's labels do not overlap",
+  "ok": false,
+  "detail": "3 labels"
+ },
+ {
+  "lock": "A3",
+  "where": "item 21 (nudge): the card is 254px (±2)",
+  "ok": true,
+  "detail": "254.0"
+ },
+ {
+  "lock": "A3",
+  "where": "item 21 (nudge): every element inside the card",
+  "ok": false,
+  "detail": "24 · d71-wexp"
+ },
+ {
+  "lock": "A3",
+  "where": "item 21 (nudge): nothing scrolls inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 21 (nudge): the bar's labels do not overlap",
+  "ok": false,
+  "detail": "3 labels"
+ },
+ {
+  "lock": "A3",
+  "where": "item 22 (close): the card is 254px (±2)",
+  "ok": true,
+  "detail": "254.0"
+ },
+ {
+  "lock": "A3",
+  "where": "item 22 (close): every element inside the card",
+  "ok": true,
+  "detail": "24 · none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 22 (close): nothing scrolls inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 22 (close): the bar's labels do not overlap",
+  "ok": true,
+  "detail": "2 labels"
+ },
+ {
+  "lock": "A3",
+  "where": "item 23 (close): the card is 254px (±2)",
+  "ok": true,
+  "detail": "254.0"
+ },
+ {
+  "lock": "A3",
+  "where": "item 23 (close): every element inside the card",
+  "ok": true,
+  "detail": "24 · none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 23 (close): nothing scrolls inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 23 (close): the bar's labels do not overlap",
+  "ok": true,
+  "detail": "2 labels"
+ },
+ {
+  "lock": "A3",
+  "where": "item 24 (close): the card is 254px (±2)",
+  "ok": true,
+  "detail": "254.0"
+ },
+ {
+  "lock": "A3",
+  "where": "item 24 (close): every element inside the card",
+  "ok": true,
+  "detail": "23 · none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 24 (close): nothing scrolls inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 24 (close): the bar's labels do not overlap",
+  "ok": true,
+  "detail": "2 labels"
+ },
+ {
+  "lock": "A3",
+  "where": "item 25 (close): the card is 254px (±2)",
+  "ok": true,
+  "detail": "254.0"
+ },
+ {
+  "lock": "A3",
+  "where": "item 25 (close): every element inside the card",
+  "ok": true,
+  "detail": "24 · none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 25 (close): nothing scrolls inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 25 (close): the bar's labels do not overlap",
+  "ok": true,
+  "detail": "2 labels"
+ },
+ {
+  "lock": "A3",
+  "where": "item 26 (close): the card is 254px (±2)",
+  "ok": true,
+  "detail": "254.0"
+ },
+ {
+  "lock": "A3",
+  "where": "item 26 (close): every element inside the card",
+  "ok": true,
+  "detail": "24 · none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 26 (close): nothing scrolls inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 26 (close): the bar's labels do not overlap",
+  "ok": true,
+  "detail": "2 labels"
+ },
+ {
+  "lock": "A3",
+  "where": "item 27 (close): the card is 254px (±2)",
+  "ok": true,
+  "detail": "254.0"
+ },
+ {
+  "lock": "A3",
+  "where": "item 27 (close): every element inside the card",
+  "ok": true,
+  "detail": "24 · none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 27 (close): nothing scrolls inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 27 (close): the bar's labels do not overlap",
+  "ok": true,
+  "detail": "2 labels"
+ },
+ {
+  "lock": "A3",
+  "where": "item 28 (close): the card is 254px (±2)",
+  "ok": true,
+  "detail": "254.0"
+ },
+ {
+  "lock": "A3",
+  "where": "item 28 (close): every element inside the card",
+  "ok": true,
+  "detail": "24 · none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 28 (close): nothing scrolls inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 28 (close): the bar's labels do not overlap",
+  "ok": true,
+  "detail": "2 labels"
+ },
+ {
+  "lock": "A3",
+  "where": "item 29 (close): the card is 254px (±2)",
+  "ok": true,
+  "detail": "254.0"
+ },
+ {
+  "lock": "A3",
+  "where": "item 29 (close): every element inside the card",
+  "ok": true,
+  "detail": "24 · none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 29 (close): nothing scrolls inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 29 (close): the bar's labels do not overlap",
+  "ok": true,
+  "detail": "2 labels"
+ },
+ {
+  "lock": "A3",
+  "where": "item 30 (other): the card is 254px (±2)",
+  "ok": true,
+  "detail": "254.0"
+ },
+ {
+  "lock": "A3",
+  "where": "item 30 (other): every element inside the card",
+  "ok": true,
+  "detail": "16 · none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 30 (other): nothing scrolls inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 31 (other): the card is 254px (±2)",
+  "ok": true,
+  "detail": "254.0"
+ },
+ {
+  "lock": "A3",
+  "where": "item 31 (other): every element inside the card",
+  "ok": true,
+  "detail": "16 · none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 31 (other): nothing scrolls inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 32 (other): the card is 254px (±2)",
+  "ok": true,
+  "detail": "254.0"
+ },
+ {
+  "lock": "A3",
+  "where": "item 32 (other): every element inside the card",
+  "ok": true,
+  "detail": "16 · none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 32 (other): nothing scrolls inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 33 (other): the card is 254px (±2)",
+  "ok": true,
+  "detail": "254.0"
+ },
+ {
+  "lock": "A3",
+  "where": "item 33 (other): every element inside the card",
+  "ok": true,
+  "detail": "16 · none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 33 (other): nothing scrolls inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 34 (other): the card is 254px (±2)",
+  "ok": true,
+  "detail": "254.0"
+ },
+ {
+  "lock": "A3",
+  "where": "item 34 (other): every element inside the card",
+  "ok": true,
+  "detail": "16 · none"
+ },
+ {
+  "lock": "A3",
+  "where": "item 34 (other): nothing scrolls inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "A3",
+  "where": "all four kinds were visited",
+  "ok": true,
+  "detail": "other,send,nudge,close"
+ }
+]

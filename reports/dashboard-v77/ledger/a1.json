@@ -27,12 +27,12 @@
   "lock": "A1",
   "where": "1680x1050 population: the body and the chart",
   "ok": true,
-  "detail": "{\"bodyW\":1302,\"chartH\":520.796875}"
+  "detail": "{\"bodyW\":1324,\"chartH\":520.796875}"
  },
  {
   "lock": "A1",
   "where": "1680x1050 chart height = clamp(300, 0.31 × 1680, 540) = 520.8 (±2)",
   "ok": true,
-  "detail": "chart 520.8 (body 1302.0)"
+  "detail": "chart 520.8 (body 1324.0)"
  }
 ]

@@ -1,0 +1,92 @@
+[
+ {
+  "lock": "C6",
+  "where": "1440x900 population",
+  "ok": true,
+  "detail": "{\"task\":265.90625,\"fw\":290,\"fwB\":843.75,\"hoopsB\":843.75,\"tabT\":858}"
+ },
+ {
+  "lock": "C6",
+  "where": "1440x900 the founding card is 290 (±2)",
+  "ok": true,
+  "detail": "290.0"
+ },
+ {
+  "lock": "C6",
+  "where": "1440x900 the task card keeps at least 254 (−2)",
+  "ok": true,
+  "detail": "265.9"
+ },
+ {
+  "lock": "C6",
+  "where": "1440x900 the columns' bottoms are equal (±1)",
+  "ok": true,
+  "detail": "843.8 / 843.8"
+ },
+ {
+  "lock": "C6",
+  "where": "1440x900 14px (±2) above the Activity feed tab",
+  "ok": true,
+  "detail": "14.3"
+ },
+ {
+  "lock": "C6",
+  "where": "1366x768 population",
+  "ok": true,
+  "detail": "{\"task\":254,\"fw\":194.28125,\"fwB\":711.75,\"hoopsB\":711.75,\"tabT\":726}"
+ },
+ {
+  "lock": "C6",
+  "where": "1366x768 the founding card is at most 290, at least 194",
+  "ok": true,
+  "detail": "194.3"
+ },
+ {
+  "lock": "C6",
+  "where": "1366x768 the task card keeps at least 254 (−2)",
+  "ok": true,
+  "detail": "254.0"
+ },
+ {
+  "lock": "C6",
+  "where": "1366x768 the columns' bottoms are equal (±1)",
+  "ok": true,
+  "detail": "711.8 / 711.8"
+ },
+ {
+  "lock": "C6",
+  "where": "1366x768 14px (±2) above the Activity feed tab",
+  "ok": true,
+  "detail": "14.3"
+ },
+ {
+  "lock": "C6",
+  "where": "1512x900 population",
+  "ok": true,
+  "detail": "{\"task\":263.65625,\"fw\":290,\"fwB\":843.75,\"hoopsB\":843.75,\"tabT\":858}"
+ },
+ {
+  "lock": "C6",
+  "where": "1512x900 the founding card is 290 (±2)",
+  "ok": true,
+  "detail": "290.0"
+ },
+ {
+  "lock": "C6",
+  "where": "1512x900 the task card keeps at least 254 (−2)",
+  "ok": true,
+  "detail": "263.7"
+ },
+ {
+  "lock": "C6",
+  "where": "1512x900 the columns' bottoms are equal (±1)",
+  "ok": true,
+  "detail": "843.8 / 843.8"
+ },
+ {
+  "lock": "C6",
+  "where": "1512x900 14px (±2) above the Activity feed tab",
+  "ok": true,
+  "detail": "14.3"
+ }
+]

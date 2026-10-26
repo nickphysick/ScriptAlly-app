@@ -8,8 +8,8 @@
  {
   "lock": "C5",
   "where": "the payload carries {kind, message, wantsReply: true, severity: \"\", pageName}",
-  "ok": false,
-  "detail": "{\"kind\":\"An idea\",\"message\":\"Show me which agents read my partial.\",\"wantsReply\":false,\"severity\":\"\",\"pageName\":\"Dashboard\"}"
+  "ok": true,
+  "detail": "{\"kind\":\"An idea\",\"message\":\"Show me which agents read my partial.\",\"wantsReply\":true,\"severity\":\"\",\"pageName\":\"Dashboard\"}"
  },
  {
   "lock": "C5",
