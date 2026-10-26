@@ -1,0 +1,56 @@
+[
+ {
+  "lock": "C5",
+  "where": "failure: one call was made",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "C5",
+  "where": "the payload carries {kind, message, wantsReply: true, severity: \"\", pageName}",
+  "ok": false,
+  "detail": "{\"kind\":\"An idea\",\"message\":\"Show me which agents read my partial.\",\"wantsReply\":false,\"severity\":\"\",\"pageName\":\"Dashboard\"}"
+ },
+ {
+  "lock": "C5",
+  "where": "failure: still writing, the text kept, the line shown",
+  "ok": true,
+  "detail": "{\"state\":\"write\",\"value\":\"Show me which agents read my partial.\",\"failed\":[\"That didn't send. Try again?\"]}"
+ },
+ {
+  "lock": "C5",
+  "where": "success: the card is sent",
+  "ok": true,
+  "detail": "sent"
+ },
+ {
+  "lock": "C5",
+  "where": "success: the new note heads the record, as Sent",
+  "ok": true,
+  "detail": "{\"title\":\"“Show me which agents read my partial.”\",\"label\":\"Sent\",\"status\":\"sent\"}"
+ },
+ {
+  "lock": "C5",
+  "where": "success: the sent count ticks up by one",
+  "ok": true,
+  "detail": "6 · 6 sent · 2 changed QueryHawk"
+ },
+ {
+  "lock": "C5",
+  "where": "success: a second call was made",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "C5",
+  "where": "sent (Big): a pill opens the form again",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C5",
+  "where": "Cancel: back to idle, the text cleared",
+  "ok": true,
+  "detail": "idle"
+ }
+]

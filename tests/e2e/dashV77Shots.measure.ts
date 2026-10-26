@@ -17,3 +17,19 @@ test("DB77 shots", async ({ page }) => {
     await page.screenshot({ path: `reports/dashboard-v77/shots/${process.env.DB77_TAG ?? "page"}-${vp.width}x${vp.height}-${st}.png` });
   }
 });
+
+/** The task card on a tall window, at its first item of each kind (DB77_TASKS=1). */
+test("DB77 task shots", async ({ page }) => {
+  test.skip(!process.env.DB77_TASKS, "set DB77_TASKS=1");
+  test.setTimeout(300_000);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await openDash(page, { width: 1920, height: 1080 }, { __SA_FEEDBACK_ROWS: FIXTURE_ROWS });
+  const n = Number((await page.locator('[data-d71="pos-text"]').first().textContent())?.split(" OF ")[1] ?? 1);
+  const want = new Set(["nudge", "close", "send"]);
+  for (let i = 0; i < n && want.size; i++) {
+    const kind = await page.locator('[data-d71="task"]').first().getAttribute("data-kind");
+    if (kind && want.has(kind)) { want.delete(kind); await page.mouse.move(2, 2); await page.screenshot({ path: `reports/dashboard-v77/shots/task-${kind}-1920x1080.png` }); }
+    await page.locator('[data-d71="next"]').click();
+    await page.waitForTimeout(120);
+  }
+});

@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "C6",
+  "where": "2560x1440 population: the card with nothing sent",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "C6",
+  "where": "2560x1440 sent = 0: no stats line",
+  "ok": false,
+  "detail": "[\"0 sent\"]"
+ },
+ {
+  "lock": "C6",
+  "where": "2560x1440 sent = 0: no record block",
+  "ok": true,
+  "detail": "0/0"
+ },
+ {
+  "lock": "C6",
+  "where": "2560x1440 changed = 0: \"3 sent\"",
+  "ok": true,
+  "detail": "[\"3 sent\"]"
+ },
+ {
+  "lock": "C6",
+  "where": "1440x900 population: the card with nothing sent",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "C6",
+  "where": "1440x900 sent = 0: no stats line",
+  "ok": false,
+  "detail": "[\"0 sent\"]"
+ },
+ {
+  "lock": "C6",
+  "where": "1440x900 sent = 0: no record block",
+  "ok": true,
+  "detail": "0/0"
+ },
+ {
+  "lock": "C6",
+  "where": "1440x900 changed = 0: \"3 sent\"",
+  "ok": true,
+  "detail": "[\"3 sent\"]"
+ }
+]
