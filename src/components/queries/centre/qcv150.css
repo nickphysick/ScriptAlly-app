@@ -31,9 +31,10 @@
 
 /* ══ Part B · the stat cards ═════════════════════════════════════════════════════════════════════════════════════
    ⚠️ SAME WIDTH AND INSET AS THE HEADER CARD: they are children of `.qc149-hd`, which is `--qc149-w` wide (v149.2).
+   ⚠️ Contact list v25 B2 shares the cards (shared/GlanceCards): the `.qc149-hd` rules are widened to `.cl25-hd`.
    ⚠️ THE ≤1180px STEP READS THE SHEET (`--hsheet-w`) through a stepped clamp, so no viewport query decides it. */
 @media (min-width: 768px) {
-  .qc149-hd .qc150-cards {
+  :is(.qc149-hd, .cl25-hd) .qc150-cards {
     --qc150-n: clamp(38px, calc(38px + (var(--hsheet-w) - 1180.5px) * 1000), 46px);
     --qc150-d: clamp(26px, calc(26px + (var(--hsheet-w) - 1180.5px) * 1000), 30px);
     display: grid; grid-template-columns: 1.7fr 1fr 1fr 1fr; gap: 12px; margin-top: 16px; align-items: stretch;
@@ -319,16 +320,16 @@
   }
 
   /* §3 · "At a glance": 30 below the header card, 12 above the cards; four equal cards, a head over one row */
-  .qc149-hd .qc150-glance {
+  :is(.qc149-hd, .cl25-hd) .qc150-glance {
     --qc1501-lab: clamp(14px, calc(14px + (var(--hsheet-w) - 1180.5px) * 1000), 17px);
     --qc1501-n: clamp(36px, calc(36px + (var(--hsheet-w) - 1180.5px) * 1000), 40px);
     --qc1501-gap: clamp(12px, calc(12px + (var(--hsheet-w) - 1180.5px) * 1000), 16px);
     margin-top: 30px;
   }
-  .qc149-hd .qc150-glance .qc150-gh {
+  :is(.qc149-hd, .cl25-hd) .qc150-glance .qc150-gh {
     margin: 0 0 12px; padding-left: 4px; font: 400 28px/1.1 var(--sp-type) !important; font-family: var(--sp-type) !important; color: #1c130f;
   }
-  .qc149-hd .qc150-glance .qc150-cards { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 0; }
+  :is(.qc149-hd, .cl25-hd) .qc150-glance .qc150-cards { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 0; }
   .qc150-glance .qc150-c { padding: 5px 5px 12px; }
   .qc150-glance .qc150-h { margin: 0 0 8px; padding: 9px 14px; }
   .qc150-glance .qc150-h b { font-size: var(--qc1501-lab) !important; }

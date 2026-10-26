@@ -45,6 +45,8 @@ import {
 } from "../../lib/agentCardStore";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { ContactHeader25 } from "./contact/ContactHeader24";
+import { ContactGlance25 } from "./contact/ContactGlance25";
+import { GLANCE_ORDER, GLANCE_SETS, glanceCards, type GlanceKey as GlanceCardKey } from "../../lib/contactV25";
 import { ContactSheet24, SheetSkeleton } from "./contact/ContactSheet24";
 import { AgentCard24, AgentCardWide24, type AgentCard24Props } from "./contact/AgentCard24";
 import { ContactAddressBook24 } from "./contact/ContactAddressBook24";
@@ -160,8 +162,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* v24 — the "At a glance" group retired with the light header; the view row's set (below) replaced it. The visit's
      stored glance is no longer read, so a remembered one cannot filter the list unseen. */
   const [glance, setGlance] = useState<GlanceKey | null>(null);
-  /* v24 A3 — THE VIEW ROW'S SET (and full screen's segments): one single-select over `AgentFacts.stand`, for the visit */
-  const [set, setSet] = useState<SetKey | null>(null);
+  /* v24 A3 — THE SET (full screen's segments, and since v25 B2 At a glance's cards): over `AgentFacts.stand`, for the
+     visit. A list since v25: At a glance's Querying is two sets, Your move and With the agent. */
+  const [sets, setSets] = useState<readonly SetKey[] | null>(null);
   const [search, setSearch] = useState(() => searchQuery?.trim() || rememberedVisit?.search || "");
   /* v16 §C / v19 baked 2: the page opens UNGROUPED, A to Z by surname; the column headings sort (there is no sort pill) */
   const [groupKey] = useState<GroupKey>(() => rememberedView.group);
@@ -282,12 +285,12 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* v19 §F — the menu counts each choice itself (`wouldShow`, under Find and the band's group): the v14 faceted counts and
      the genre tallies it fed are retired with the strip */
   const visibleFacts = useMemo(
-    () => sortFacts(factsAll.filter((x) => inPool(x) && inSet(x, set) && matchesContactFilters(x, filters)), sortKey, reversed),
-    [factsAll, inPool, set, filters, sortKey, reversed],
+    () => sortFacts(factsAll.filter((x) => inPool(x) && inSet(x, sets) && matchesContactFilters(x, filters)), sortKey, reversed),
+    [factsAll, inPool, sets, filters, sortKey, reversed],
   );
   /* v17 §B — anything narrowing the list: a filter, the summary card's group, or Find */
-  const anyActive = contactFilterCount(filters) > 0 || !!glance || !!set || search.trim() !== "";
-  const clearFilters = useCallback(() => { setFilters(emptyContactFilters()); setSearch(""); setGlance(null); setSet(null); }, [setFilters]);
+  const anyActive = contactFilterCount(filters) > 0 || !!glance || !!sets || search.trim() !== "";
+  const clearFilters = useCallback(() => { setFilters(emptyContactFilters()); setSearch(""); setGlance(null); setSets(null); }, [setFilters]);
   /* v24 A3 — each chip's count, over every agent (never the filtered view) */
   const counts = useMemo(() => setCounts(factsAll), [factsAll]);
   /* the band's "your move": agents with a live query whose next step is the writer's (the census's own count) */
@@ -564,6 +567,12 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const health = useMemo(() => listHealth(agents, hk), [agents, hk]);
   /* v24 A2 — the banner's figures: Housekeeping's gap count, the agents they belong to, and four faces */
   const banner = useMemo(() => bannerFigures(hk), [hk]);
+  /* v25 B — At a glance: List health (Housekeeping's percentage and gap total), then the three sets' cards */
+  const glanceModel = useMemo(() => glanceCards(factsAll, pageState === "list" ? health : null, banner.gaps), [factsAll, pageState, health, banner.gaps]);
+  const glancePressed = useMemo<GlanceCardKey | null>(
+    () => (sets ? GLANCE_ORDER.find((k) => { const g = GLANCE_SETS[k]; return !!g && g.length === sets.length && g.every((x) => sets.includes(x)); }) ?? null : null),
+    [sets],
+  );
   /* v18 §F.1 — the drawer's figures: the same score, with its held and possible points */
   const listH = useMemo(() => healthOf(agents, hk), [agents, hk]);
   /* v18 §F.3 — the intro's flag, in Housekeeping's own store (beside v17.1's tab dismissal) */
@@ -617,7 +626,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       case "open": return { el: row(), text: "Click any agent. Their card opens on the right." };
       /* the card is portalled with its panel (outside .aglist); full screen's wide card has its own Edit agent */
       case "edit": return { el: vis("[data-cl24='panel'] [data-cl24='link'][data-k='edit']") ?? vis("[data-cl24='wide-edit']") ?? row(), text: "Press Edit agent. Everything on the card can be changed there." };
-      case "hk": return { el: vis(".aglist [data-cl24='fill']") ?? vis("[data-cl24='band-health']"), text: "Press this. Housekeeping asks for one missing detail at a time." };
+      case "hk": return { el: vis(".aglist [data-cl25='card'][data-k='health']") ?? vis("[data-cl24='band-health']"), text: "Press this. Housekeeping asks for one missing detail at a time." };
     }
   }, []);
   /* v17.1 §D — THE TAB'S DISMISSAL, SAVED TO THE ACCOUNT (`todoPrefs.contacts.tabDismissedAtGaps`): the gap count
@@ -919,7 +928,11 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         {(showList || pageState === "settling") && (
           <ContactHeader25 loading={pageState !== "list"} msTitle={scoped?.title?.trim() || null}
             addRef={addBtnRef} onAdd={openAdd}
-            onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined} />
+            onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined}>
+            {/* v25 B — the cards: List health opens Housekeeping; the other three filter the list and Cards, a second press shows all */}
+            <ContactGlance25 cards={glanceModel} pressed={glancePressed} ready={pageState === "list"}
+              onCard={(k) => { if (k === "health") { openHk(); return; } setSets(glancePressed === k ? null : GLANCE_SETS[k]); }} />
+          </ContactHeader25>
         )}
         {pageState === "settling" && <SheetSkeleton />}
         <div className="clv-main" ref={mainColRef}>
@@ -945,7 +958,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             onEdit={(id, tab, focus) => openAgentCard(id, { tab, focus, from: "row" })}
             onExport={(rows) => downloadAgentsCsv(rows, (raw) => genreLabel(raw, personalGenres))} />
         ) : (
-        <ContactAddressBook24 pool={visibleFacts} all={factsAll} counts={counts} set={set} onSet={setSet}
+        <ContactAddressBook24 pool={visibleFacts} all={factsAll} counts={counts}
+          /* the band's segments are single sets; At a glance's Querying (two) lights none of them and "All" neither */
+          set={sets && sets.length === 1 ? sets[0] : null} multi={!!sets && sets.length > 1} onSet={(k) => setSets(k ? [k] : null)}
           health={pageState === "list" ? health : null} onFill={openHk} onAdd={openAdd}
           search={search} onSearch={setSearch} filters={filters} onFilters={setFilters} onClearAll={clearFilters}
           sortKey={sortKey} reversed={reversed} onSort={(v) => { setSortKeyRaw(v.key); setReversed(v.reversed); }}
