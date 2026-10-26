@@ -1,0 +1,272 @@
+[
+ {
+  "lock": "C2",
+  "where": "1280x650 idle population: the card in that state, with its parts",
+  "ok": true,
+  "detail": "{\"state\":\"idle\",\"n\":13}"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x650 idle every element lies inside the card's frame",
+  "ok": false,
+  "detail": "d77-kinds | BUTTON"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x650 idle no box inside the card scrolls (scroll ≤ client)",
+  "ok": false,
+  "detail": "d77-fwframe 141/116 | d77-fwbody d77-sm 111/86 | d77-tx 105/74 | d77-v 105/74"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x650 write population: the card in that state, with its parts",
+  "ok": true,
+  "detail": "{\"state\":\"write\",\"n\":15}"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x650 write every element lies inside the card's frame",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x650 write no box inside the card scrolls (scroll ≤ client)",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x650 sent population: the card in that state, with its parts",
+  "ok": true,
+  "detail": "{\"state\":\"sent\",\"n\":9}"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x650 sent every element lies inside the card's frame",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x650 sent no box inside the card scrolls (scroll ≤ client)",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 idle population: the card in that state, with its parts",
+  "ok": true,
+  "detail": "{\"state\":\"idle\",\"n\":16}"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 idle every element lies inside the card's frame",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 idle no box inside the card scrolls (scroll ≤ client)",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 write population: the card in that state, with its parts",
+  "ok": true,
+  "detail": "{\"state\":\"write\",\"n\":15}"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 write every element lies inside the card's frame",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 write no box inside the card scrolls (scroll ≤ client)",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 sent population: the card in that state, with its parts",
+  "ok": true,
+  "detail": "{\"state\":\"sent\",\"n\":10}"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 sent every element lies inside the card's frame",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 sent no box inside the card scrolls (scroll ≤ client)",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1440x900 idle population: the card in that state, with its parts",
+  "ok": true,
+  "detail": "{\"state\":\"idle\",\"n\":16}"
+ },
+ {
+  "lock": "C2",
+  "where": "1440x900 idle every element lies inside the card's frame",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1440x900 idle no box inside the card scrolls (scroll ≤ client)",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1440x900 write population: the card in that state, with its parts",
+  "ok": true,
+  "detail": "{\"state\":\"write\",\"n\":15}"
+ },
+ {
+  "lock": "C2",
+  "where": "1440x900 write every element lies inside the card's frame",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1440x900 write no box inside the card scrolls (scroll ≤ client)",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1440x900 sent population: the card in that state, with its parts",
+  "ok": true,
+  "detail": "{\"state\":\"sent\",\"n\":10}"
+ },
+ {
+  "lock": "C2",
+  "where": "1440x900 sent every element lies inside the card's frame",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1440x900 sent no box inside the card scrolls (scroll ≤ client)",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 idle population: the card in that state, with its parts",
+  "ok": true,
+  "detail": "{\"state\":\"idle\",\"n\":28}"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 idle every element lies inside the card's frame",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 idle no box inside the card scrolls (scroll ≤ client)",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 write population: the card in that state, with its parts",
+  "ok": true,
+  "detail": "{\"state\":\"write\",\"n\":22}"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 write every element lies inside the card's frame",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 write no box inside the card scrolls (scroll ≤ client)",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 sent population: the card in that state, with its parts",
+  "ok": true,
+  "detail": "{\"state\":\"sent\",\"n\":28}"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 sent every element lies inside the card's frame",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 sent no box inside the card scrolls (scroll ≤ client)",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 idle population: the card in that state, with its parts",
+  "ok": true,
+  "detail": "{\"state\":\"idle\",\"n\":31}"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 idle every element lies inside the card's frame",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 idle no box inside the card scrolls (scroll ≤ client)",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 write population: the card in that state, with its parts",
+  "ok": true,
+  "detail": "{\"state\":\"write\",\"n\":22}"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 write every element lies inside the card's frame",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 write no box inside the card scrolls (scroll ≤ client)",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 sent population: the card in that state, with its parts",
+  "ok": true,
+  "detail": "{\"state\":\"sent\",\"n\":31}"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 sent every element lies inside the card's frame",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 sent no box inside the card scrolls (scroll ≤ client)",
+  "ok": true,
+  "detail": "none"
+ }
+]

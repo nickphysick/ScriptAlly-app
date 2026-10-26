@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "L4",
+  "where": "1512x900 population",
+  "ok": true,
+  "detail": "three cards and the tab"
+ },
+ {
+  "lock": "L4",
+  "where": "1512x900 closed: 6px under its edge is darker than the ground 30px down",
+  "ok": true,
+  "detail": "x 474 · 240,236,230 vs 242,238,232"
+ },
+ {
+  "lock": "L4",
+  "where": "1512x900 agents: 6px under its edge is darker than the ground 30px down",
+  "ok": true,
+  "detail": "x 843 · 240,236,230 vs 242,238,232"
+ },
+ {
+  "lock": "L4",
+  "where": "1512x900 founding: 6px under its edge is darker than the ground 30px down",
+  "ok": true,
+  "detail": "x 1200 · 239,235,229 vs 242,238,232"
+ },
+ {
+  "lock": "L4",
+  "where": "1280x800 population",
+  "ok": true,
+  "detail": "three cards and the tab"
+ },
+ {
+  "lock": "L4",
+  "where": "1280x800 closed: 6px under its edge is darker than the ground 30px down",
+  "ok": true,
+  "detail": "x 430 · 240,236,230 vs 242,238,232"
+ },
+ {
+  "lock": "L4",
+  "where": "1280x800 agents: 6px under its edge is darker than the ground 30px down",
+  "ok": true,
+  "detail": "x 742 · 240,236,230 vs 242,238,232"
+ },
+ {
+  "lock": "L4",
+  "where": "1280x800 founding: 6px under its edge is darker than the ground 30px down",
+  "ok": true,
+  "detail": "x 984 · 229,225,219 vs 232,228,222"
+ }
+]

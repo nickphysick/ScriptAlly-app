@@ -1,0 +1,152 @@
+[
+ {
+  "lock": "C1",
+  "where": "population: a nudge, a close and a send (full requested) are on the card",
+  "ok": true,
+  "detail": "{\"other\":6,\"send\":9,\"nudge\":11,\"close\":8}"
+ },
+ {
+  "lock": "C1",
+  "where": "nudge kicker",
+  "ok": true,
+  "detail": "\"TIME TO NUDGE\""
+ },
+ {
+  "lock": "C1",
+  "where": "nudge tint",
+  "ok": true,
+  "detail": "rgb(232, 238, 246)"
+ },
+ {
+  "lock": "C1",
+  "where": "nudge accent",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "C1",
+  "where": "nudge title",
+  "ok": true,
+  "detail": "\"Nudge Tom Ellery\" vs \"Nudge Tom Ellery\""
+ },
+ {
+  "lock": "C2",
+  "where": "nudge population: the bar and its dates",
+  "ok": true,
+  "detail": "{\"sent\":1785110400000,\"expected\":1789948800000,\"close\":null,\"today\":1793011378032,\"tl\":1053.96875,\"tr\":1421,\"tw\":367.03125,\"sr\":1421,\"overShown\":false,\"overR\":0,\"overImg\":\"repeating-linear-gradient(45deg, rgb(42, 58, 82) 0px, rgb(42, 58, 82) 4px, rgba(0, 0, 0, 0) 4px, rgba(0, 0, 0, 0) 8px)\",\"mark\":null}"
+ },
+ {
+  "lock": "C2",
+  "where": "nudge the solid part ends at the expected date (±2px)",
+  "ok": false,
+  "detail": "1421.0 vs 1278.7"
+ },
+ {
+  "lock": "C2",
+  "where": "nudge the hatched part runs to the end",
+  "ok": false,
+  "detail": "0 vs 1421 · repeating-linear-gradient(45deg, rgb(42,"
+ },
+ {
+  "lock": "C2",
+  "where": "nudge the bar starts on a send the query document records (same day)",
+  "ok": true,
+  "detail": "2026-07-27T00:00:00.000Z vs 2026-07-27"
+ },
+ {
+  "lock": "C1",
+  "where": "close kicker",
+  "ok": true,
+  "detail": "\"CONSIDER CLOSING\""
+ },
+ {
+  "lock": "C1",
+  "where": "close tint",
+  "ok": true,
+  "detail": "rgb(239, 235, 229)"
+ },
+ {
+  "lock": "C1",
+  "where": "close accent",
+  "ok": true,
+  "detail": "rgb(125, 112, 100)"
+ },
+ {
+  "lock": "C1",
+  "where": "close title",
+  "ok": true,
+  "detail": "\"Close your query to Priya Nair?\" vs \"Close your query to Priya Nair?\""
+ },
+ {
+  "lock": "C2",
+  "where": "close population: the bar and its dates",
+  "ok": true,
+  "detail": "{\"sent\":1785715200000,\"expected\":1790553600000,\"close\":1791763200000,\"today\":1793011378032,\"tl\":1053.96875,\"tr\":1421,\"tw\":367.03125,\"sr\":1421,\"overShown\":false,\"overR\":0,\"overImg\":\"repeating-linear-gradient(45deg, rgb(125, 112, 100) 0px, rgb(125, 112, 100) 4px, rgba(0, 0, 0, 0) 4px, rgba(0, 0, 0, 0) 8px)\",\"mark\":1358.203125}"
+ },
+ {
+  "lock": "C2",
+  "where": "close the solid part ends at the expected date (±2px)",
+  "ok": false,
+  "detail": "1421.0 vs 1297.4"
+ },
+ {
+  "lock": "C2",
+  "where": "close the hatched part runs to the end",
+  "ok": false,
+  "detail": "0 vs 1421 · repeating-linear-gradient(45deg, rgb(125"
+ },
+ {
+  "lock": "C2",
+  "where": "close: the marker sits at the threshold (±2px)",
+  "ok": true,
+  "detail": "1358.203125 vs 1358.210914906647"
+ },
+ {
+  "lock": "C2",
+  "where": "close the bar starts on a send the query document records (same day)",
+  "ok": true,
+  "detail": "2026-08-03T00:00:00.000Z vs 2026-08-03"
+ },
+ {
+  "lock": "C1",
+  "where": "send kicker",
+  "ok": true,
+  "detail": "\"YOUR MOVE · SEND\""
+ },
+ {
+  "lock": "C1",
+  "where": "send tint",
+  "ok": true,
+  "detail": "rgb(244, 231, 225)"
+ },
+ {
+  "lock": "C1",
+  "where": "send accent",
+  "ok": true,
+  "detail": "rgb(162, 69, 42)"
+ },
+ {
+  "lock": "C1",
+  "where": "send title",
+  "ok": true,
+  "detail": "\"Send your full to Tobias Hark\" vs \"Send your full to Tobias Hark\""
+ },
+ {
+  "lock": "C3",
+  "where": "population: done steps and one step still to do",
+  "ok": true,
+  "detail": "[\"Queried 13 Jul\",\"Full requested 9 Sep\",\"Full sent —\"]"
+ },
+ {
+  "lock": "C3",
+  "where": "the step still to do is dashed and unfilled",
+  "ok": true,
+  "detail": "{\"todo\":true,\"style\":[\"dashed\",\"dashed\",\"dashed\",\"dashed\"],\"bg\":\"rgba(0, 0, 0, 0)\",\"text\":\"Full sent —\"}"
+ },
+ {
+  "lock": "C3",
+  "where": "the done steps are filled and not dashed",
+  "ok": true,
+  "detail": "[{\"todo\":false,\"style\":[\"solid\",\"solid\",\"solid\",\"solid\"],\"bg\":\"rgb(232, 238, 246)\",\"text\":\"Queried 13 Jul\"},{\"todo\":false,\"style\":[\"solid\",\"solid\",\"solid\",\"solid\"],\"bg\":\"rgb(232, 238, 246)\",\"text\":\"Full requested 9 Sep\"}]"
+ }
+]

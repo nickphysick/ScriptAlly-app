@@ -1,0 +1,98 @@
+[
+ {
+  "lock": "L3",
+  "where": "1512x900 day one population: the first-use page, the card and the tab",
+  "ok": true,
+  "detail": "{\"mode\":\"pre\",\"fw\":{\"l\":966.921875,\"r\":1453.984375,\"t\":715.421875,\"b\":835.75},\"tab\":{\"l\":1229.96875,\"r\":1426,\"t\":858,\"b\":892}}"
+ },
+ {
+  "lock": "L3",
+  "where": "1512x900 day one the card ends above the tab",
+  "ok": true,
+  "detail": "card bottom 835.8 · tab top 858.0 · gap 22.3"
+ },
+ {
+  "lock": "L3",
+  "where": "1512x900 agents, no queries population: the first-use page, the card and the tab",
+  "ok": true,
+  "detail": "{\"mode\":\"pre\",\"fw\":{\"l\":966.921875,\"r\":1453.984375,\"t\":715.421875,\"b\":835.75},\"tab\":{\"l\":1229.96875,\"r\":1426,\"t\":858,\"b\":892}}"
+ },
+ {
+  "lock": "L3",
+  "where": "1512x900 agents, no queries the card ends above the tab",
+  "ok": true,
+  "detail": "card bottom 835.8 · tab top 858.0 · gap 22.3"
+ },
+ {
+  "lock": "L3",
+  "where": "1440x900 day one population: the first-use page, the card and the tab",
+  "ok": true,
+  "detail": "{\"mode\":\"pre\",\"fw\":{\"l\":925.953125,\"r\":1381.984375,\"t\":729.140625,\"b\":841.140625},\"tab\":{\"l\":1157.96875,\"r\":1354,\"t\":858,\"b\":892}}"
+ },
+ {
+  "lock": "L3",
+  "where": "1440x900 day one the card ends above the tab",
+  "ok": true,
+  "detail": "card bottom 841.1 · tab top 858.0 · gap 16.9"
+ },
+ {
+  "lock": "L3",
+  "where": "1440x900 agents, no queries population: the first-use page, the card and the tab",
+  "ok": true,
+  "detail": "{\"mode\":\"pre\",\"fw\":{\"l\":925.953125,\"r\":1381.984375,\"t\":729.140625,\"b\":841.140625},\"tab\":{\"l\":1157.96875,\"r\":1354,\"t\":858,\"b\":892}}"
+ },
+ {
+  "lock": "L3",
+  "where": "1440x900 agents, no queries the card ends above the tab",
+  "ok": true,
+  "detail": "card bottom 841.1 · tab top 858.0 · gap 16.9"
+ },
+ {
+  "lock": "L3",
+  "where": "1280x800 day one population: the first-use page, the card and the tab",
+  "ok": true,
+  "detail": "{\"mode\":\"pre\",\"fw\":{\"l\":833.6875,\"r\":1237.984375,\"t\":637.15625,\"b\":749.15625},\"tab\":{\"l\":1013.96875,\"r\":1210,\"t\":758,\"b\":792}}"
+ },
+ {
+  "lock": "L3",
+  "where": "1280x800 day one the card ends above the tab",
+  "ok": true,
+  "detail": "card bottom 749.2 · tab top 758.0 · gap 8.8"
+ },
+ {
+  "lock": "L3",
+  "where": "1280x800 agents, no queries population: the first-use page, the card and the tab",
+  "ok": true,
+  "detail": "{\"mode\":\"pre\",\"fw\":{\"l\":833.6875,\"r\":1237.984375,\"t\":637.15625,\"b\":749.15625},\"tab\":{\"l\":1013.96875,\"r\":1210,\"t\":758,\"b\":792}}"
+ },
+ {
+  "lock": "L3",
+  "where": "1280x800 agents, no queries the card ends above the tab",
+  "ok": true,
+  "detail": "card bottom 749.2 · tab top 758.0 · gap 8.8"
+ },
+ {
+  "lock": "L3",
+  "where": "1920x1080 day one population: the first-use page, the card and the tab",
+  "ok": true,
+  "detail": "{\"mode\":\"pre\",\"fw\":{\"l\":1190.515625,\"r\":1799.984375,\"t\":663.640625,\"b\":1015.75},\"tab\":{\"l\":1575.96875,\"r\":1772,\"t\":1038,\"b\":1072}}"
+ },
+ {
+  "lock": "L3",
+  "where": "1920x1080 day one the card ends above the tab",
+  "ok": true,
+  "detail": "card bottom 1015.8 · tab top 1038.0 · gap 22.3"
+ },
+ {
+  "lock": "L3",
+  "where": "1920x1080 agents, no queries population: the first-use page, the card and the tab",
+  "ok": true,
+  "detail": "{\"mode\":\"pre\",\"fw\":{\"l\":1190.515625,\"r\":1799.984375,\"t\":663.640625,\"b\":1015.75},\"tab\":{\"l\":1575.96875,\"r\":1772,\"t\":1038,\"b\":1072}}"
+ },
+ {
+  "lock": "L3",
+  "where": "1920x1080 agents, no queries the card ends above the tab",
+  "ok": true,
+  "detail": "card bottom 1015.8 · tab top 1038.0 · gap 22.3"
+ }
+]

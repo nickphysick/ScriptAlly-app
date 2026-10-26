@@ -1,0 +1,19 @@
+{"mutation":"A3-fw-fixed","lock":"A3","exit":1,"reading":"2 red · 1920x1080 the left and right columns end together (±1) — hoops 936.7 · founding 858.0"}
+{"mutation":"A1-fill","lock":"A1","exit":1,"reading":"3 red · 1920x1080 chart height = clamp(300, 0.31 × 1440.0, 540) = 446.4 (±2) — chart 367.8"}
+{"mutation":"A4-uncapped","lock":"A4","exit":1,"reading":"2 red · 1920x1080 the body and the header are ≤ 1440px wide — body 1542.0 · header 1542.0"}
+{"mutation":"A2-no-stack","lock":"A2","exit":1,"reading":"1 red · the card's height is identical (±1) across the cycle — 207.0–373.8 (spread 166.8)"}
+{"lock":"B4","mutation":"recordOf does not sort","result":"RED 1 failed | 14 passed (order)"}
+{"lock":"B4","mutation":"changed counts planned","result":"RED 1 failed | 14 passed (counts)"}
+{"lock":"B4","mutation":"title never cut at 60","result":"RED 1 failed | 14 passed (title >60)"}
+{"lock":"B2","mutation":"before the rule change (admin-only read)","result":"RED 2 failed (owner get, owner list) | 5 passed"}
+{"lock":"B2","mutation":"read allowed to any signed-in user","result":"RED 2 failed (bob get, bob list)"}
+{"lock":"A1","mutation":"A1-body (the pack text: 31% of the body width)","result":"RED chart 446.4 vs 540 at 1920; 520.8 vs 540 at 2560; 403.6 vs 520.8 at 1680"}
+{"lock":"D1","mutation":"D1-nick (the dock subhead reads \"Every message reaches Nick, the founder.\")","result":"RED the open dock names no Nick; the dock says Every message reaches our founder."}
+{"lock":"C1","mutation":"C1-no-variant (always the Laptop layout)","result":"RED 1920x1080 Laptop where Big·3; 2560x1440 Laptop where Big·4"}
+{"lock":"C2","mutation":"C2-wide-art (a 150px drawing in every small card)","result":"RED 1280x650 idle: kinds leave the frame; fwframe 141/116, tx 105/74"}
+{"lock":"C2","mutation":"(natural) before the Compact write tightening","result":"RED 1280x650 write: d77-tx 80/74"}
+{"lock":"C3","mutation":"C3-copy (the heading reads \"We'd love your feedback, says Nick.\")","result":"RED idle heading + no Nick, at 1440 and 2560"}
+{"lock":"C4","mutation":"C4-green (the Read pill on #5c8a4f)","result":"RED hue 107 sat 27% at 1440 and 2560"}
+{"lock":"C5","mutation":"code: wantsReply false","result":"RED payload carries wantsReply false"}
+{"lock":"C5","mutation":"(natural) before the just-sent note was lifted to the top","result":"RED the first row was Snooze a nudge / Built, not the note as Sent"}
+{"lock":"C6","mutation":"code: the stats line drawn at sent = 0","result":"RED [\"0 sent\"] at 2560 and 1440"}

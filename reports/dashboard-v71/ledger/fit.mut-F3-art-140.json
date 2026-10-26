@@ -1,0 +1,656 @@
+[
+ {
+  "lock": "L2",
+  "where": "1920x1080 population",
+  "ok": true,
+  "detail": "{\"c\":true,\"a\":true,\"fw\":true,\"tab\":true}"
+ },
+ {
+  "lock": "L2",
+  "where": "1920x1080 the three bottoms are equal (±1)",
+  "ok": true,
+  "detail": "1029.5 / 1029.5 / 1029.5"
+ },
+ {
+  "lock": "L2",
+  "where": "1920x1080 (Fixed shape) scrolled to its end, the cards end 14px (±2) above the tab (scroll 6px)",
+  "ok": true,
+  "detail": "14.5 / 14.5 / 14.5"
+ },
+ {
+  "lock": "L3",
+  "where": "1920x1080 the tab is inside the viewport",
+  "ok": true,
+  "detail": "{\"l\":1575.96875,\"r\":1772,\"t\":1038,\"b\":1072,\"w\":196.03125,\"h\":34}"
+ },
+ {
+  "lock": "L3",
+  "where": "1920x1080 nothing covers the tab's centre",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "F3",
+  "where": "1920x1080 population",
+  "ok": true,
+  "detail": "13 boxes · art true · image loaded true"
+ },
+ {
+  "lock": "F3",
+  "where": "1920x1080 nothing leaves the frame",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F3",
+  "where": "1920x1080 the art's whole box is inside the body",
+  "ok": true,
+  "detail": "{\"img\":{\"l\":1296.46875,\"r\":1412.46875,\"t\":788.3125,\"b\":904.3125,\"w\":116,\"h\":116},\"body\":{\"l\":1282.46875,\"r\":1794,\"t\":700.015625,\"b\":1023.453125,\"w\":511.53125,\"h\":323.4375}}"
+ },
+ {
+  "lock": "F3",
+  "where": "1920x1080 the heading never overflows",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "G1",
+  "where": "1920x1080 nothing cut in the hoop legends or the task card's head",
+  "ok": true,
+  "detail": "13 parts · none cut"
+ },
+ {
+  "lock": "G1",
+  "where": "1920x1080 no horizontal overflow",
+  "ok": true,
+  "detail": "{\"s\":{\"sh\":972,\"ch\":966,\"sw\":1664,\"cw\":1664},\"d\":{\"sw\":1920,\"cw\":1920}}"
+ },
+ {
+  "lock": "L2",
+  "where": "1512x900 population",
+  "ok": true,
+  "detail": "{\"c\":true,\"a\":true,\"fw\":true,\"tab\":true}"
+ },
+ {
+  "lock": "L2",
+  "where": "1512x900 the three bottoms are equal (±1)",
+  "ok": true,
+  "detail": "843.8 / 843.8 / 843.8"
+ },
+ {
+  "lock": "L2",
+  "where": "1512x900 14px (±2) above the tab's top",
+  "ok": true,
+  "detail": "14.3 / 14.3 / 14.3"
+ },
+ {
+  "lock": "L3",
+  "where": "1512x900 the tab is inside the viewport",
+  "ok": true,
+  "detail": "{\"l\":1229.96875,\"r\":1426,\"t\":858,\"b\":892,\"w\":196.03125,\"h\":34}"
+ },
+ {
+  "lock": "L3",
+  "where": "1512x900 nothing covers the tab's centre",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "F3",
+  "where": "1512x900 population",
+  "ok": true,
+  "detail": "13 boxes · art true · image loaded true"
+ },
+ {
+  "lock": "F3",
+  "where": "1512x900 nothing leaves the frame",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F3",
+  "where": "1512x900 the art's whole box is inside the body",
+  "ok": true,
+  "detail": "{\"img\":{\"l\":1046.875,\"r\":1186.875,\"t\":691.75,\"b\":831.75,\"w\":140,\"h\":140},\"body\":{\"l\":1040.875,\"r\":1448,\"t\":685.75,\"b\":837.75,\"w\":407.125,\"h\":152}}"
+ },
+ {
+  "lock": "F3",
+  "where": "1512x900 the heading never overflows",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "G1",
+  "where": "1512x900 nothing cut in the hoop legends or the task card's head",
+  "ok": true,
+  "detail": "13 parts · none cut"
+ },
+ {
+  "lock": "G1",
+  "where": "1512x900 one screen: no vertical scroll",
+  "ok": true,
+  "detail": "{\"sh\":786,\"ch\":786,\"sw\":1256,\"cw\":1256}"
+ },
+ {
+  "lock": "G1",
+  "where": "1512x900 no horizontal overflow",
+  "ok": true,
+  "detail": "{\"s\":{\"sh\":786,\"ch\":786,\"sw\":1256,\"cw\":1256},\"d\":{\"sw\":1512,\"cw\":1512}}"
+ },
+ {
+  "lock": "L2",
+  "where": "1440x900 population",
+  "ok": true,
+  "detail": "{\"c\":true,\"a\":true,\"fw\":true,\"tab\":true}"
+ },
+ {
+  "lock": "L2",
+  "where": "1440x900 the three bottoms are equal (±1)",
+  "ok": true,
+  "detail": "843.8 / 843.8 / 843.8"
+ },
+ {
+  "lock": "L2",
+  "where": "1440x900 14px (±2) above the tab's top",
+  "ok": true,
+  "detail": "14.3 / 14.3 / 14.3"
+ },
+ {
+  "lock": "L3",
+  "where": "1440x900 the tab is inside the viewport",
+  "ok": true,
+  "detail": "{\"l\":1157.96875,\"r\":1354,\"t\":858,\"b\":892,\"w\":196.03125,\"h\":34}"
+ },
+ {
+  "lock": "L3",
+  "where": "1440x900 nothing covers the tab's centre",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "F3",
+  "where": "1440x900 population",
+  "ok": true,
+  "detail": "13 boxes · art true · image loaded true"
+ },
+ {
+  "lock": "F3",
+  "where": "1440x900 nothing leaves the frame",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F3",
+  "where": "1440x900 the art's whole box is inside the body",
+  "ok": true,
+  "detail": "{\"img\":{\"l\":1024,\"r\":1164,\"t\":691.75,\"b\":831.75,\"w\":140,\"h\":140},\"body\":{\"l\":1018,\"r\":1376,\"t\":685.75,\"b\":837.75,\"w\":358,\"h\":152}}"
+ },
+ {
+  "lock": "F3",
+  "where": "1440x900 the heading never overflows",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "G1",
+  "where": "1440x900 nothing cut in the hoop legends or the task card's head",
+  "ok": true,
+  "detail": "13 parts · none cut"
+ },
+ {
+  "lock": "G1",
+  "where": "1440x900 one screen: no vertical scroll",
+  "ok": true,
+  "detail": "{\"sh\":786,\"ch\":786,\"sw\":1184,\"cw\":1184}"
+ },
+ {
+  "lock": "G1",
+  "where": "1440x900 no horizontal overflow",
+  "ok": true,
+  "detail": "{\"s\":{\"sh\":786,\"ch\":786,\"sw\":1184,\"cw\":1184},\"d\":{\"sw\":1440,\"cw\":1440}}"
+ },
+ {
+  "lock": "L2",
+  "where": "1366x768 population",
+  "ok": true,
+  "detail": "{\"c\":true,\"a\":true,\"fw\":true,\"tab\":true}"
+ },
+ {
+  "lock": "L2",
+  "where": "1366x768 the three bottoms are equal (±1)",
+  "ok": true,
+  "detail": "711.8 / 711.8 / 711.8"
+ },
+ {
+  "lock": "L2",
+  "where": "1366x768 14px (±2) above the tab's top",
+  "ok": true,
+  "detail": "14.3 / 14.3 / 14.3"
+ },
+ {
+  "lock": "L3",
+  "where": "1366x768 the tab is inside the viewport",
+  "ok": true,
+  "detail": "{\"l\":1103.96875,\"r\":1300,\"t\":726,\"b\":760,\"w\":196.03125,\"h\":34}"
+ },
+ {
+  "lock": "L3",
+  "where": "1366x768 nothing covers the tab's centre",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "F3",
+  "where": "1366x768 population",
+  "ok": true,
+  "detail": "13 boxes · art true · image loaded true"
+ },
+ {
+  "lock": "F3",
+  "where": "1366x768 nothing leaves the frame",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F3",
+  "where": "1366x768 the art's whole box is inside the body",
+  "ok": true,
+  "detail": "{\"img\":{\"l\":958.78125,\"r\":1098.78125,\"t\":559.75,\"b\":699.75,\"w\":140,\"h\":140},\"body\":{\"l\":952.78125,\"r\":1318,\"t\":553.75,\"b\":705.75,\"w\":365.21875,\"h\":152}}"
+ },
+ {
+  "lock": "F3",
+  "where": "1366x768 the heading never overflows",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "G1",
+  "where": "1366x768 nothing cut in the hoop legends or the task card's head",
+  "ok": true,
+  "detail": "13 parts · none cut"
+ },
+ {
+  "lock": "G1",
+  "where": "1366x768 one screen: no vertical scroll",
+  "ok": true,
+  "detail": "{\"sh\":654,\"ch\":654,\"sw\":1110,\"cw\":1110}"
+ },
+ {
+  "lock": "G1",
+  "where": "1366x768 no horizontal overflow",
+  "ok": true,
+  "detail": "{\"s\":{\"sh\":654,\"ch\":654,\"sw\":1110,\"cw\":1110},\"d\":{\"sw\":1366,\"cw\":1366}}"
+ },
+ {
+  "lock": "L2",
+  "where": "1280x800 population",
+  "ok": true,
+  "detail": "{\"c\":true,\"a\":true,\"fw\":true,\"tab\":true}"
+ },
+ {
+  "lock": "L2",
+  "where": "1280x800 the three bottoms are equal (±1)",
+  "ok": true,
+  "detail": "743.8 / 743.8 / 743.8"
+ },
+ {
+  "lock": "L2",
+  "where": "1280x800 14px (±2) above the tab's top",
+  "ok": true,
+  "detail": "14.3 / 14.3 / 14.3"
+ },
+ {
+  "lock": "L3",
+  "where": "1280x800 the tab is inside the viewport",
+  "ok": true,
+  "detail": "{\"l\":1013.96875,\"r\":1210,\"t\":758,\"b\":792,\"w\":196.03125,\"h\":34}"
+ },
+ {
+  "lock": "L3",
+  "where": "1280x800 nothing covers the tab's centre",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "F3",
+  "where": "1280x800 population",
+  "ok": true,
+  "detail": "13 boxes · art true · image loaded true"
+ },
+ {
+  "lock": "F3",
+  "where": "1280x800 nothing leaves the frame",
+  "ok": false,
+  "detail": "d77-kinds | BUTTON"
+ },
+ {
+  "lock": "F3",
+  "where": "1280x800 the art's whole box is inside the body",
+  "ok": true,
+  "detail": "{\"img\":{\"l\":926,\"r\":1066,\"t\":591.75,\"b\":731.75,\"w\":140,\"h\":140},\"body\":{\"l\":912,\"r\":1232,\"t\":585.75,\"b\":737.75,\"w\":320,\"h\":152}}"
+ },
+ {
+  "lock": "F3",
+  "where": "1280x800 the heading never overflows",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "G1",
+  "where": "1280x800 nothing cut in the hoop legends or the task card's head",
+  "ok": true,
+  "detail": "12 parts · none cut"
+ },
+ {
+  "lock": "G1",
+  "where": "1280x800 one screen: no vertical scroll",
+  "ok": true,
+  "detail": "{\"sh\":686,\"ch\":686,\"sw\":1024,\"cw\":1024}"
+ },
+ {
+  "lock": "G1",
+  "where": "1280x800 no horizontal overflow",
+  "ok": true,
+  "detail": "{\"s\":{\"sh\":686,\"ch\":686,\"sw\":1024,\"cw\":1024},\"d\":{\"sw\":1280,\"cw\":1280}}"
+ },
+ {
+  "lock": "L2",
+  "where": "1288x660 population",
+  "ok": true,
+  "detail": "{\"c\":true,\"a\":true,\"fw\":true,\"tab\":true}"
+ },
+ {
+  "lock": "L2",
+  "where": "1288x660 the three bottoms are equal (±1)",
+  "ok": true,
+  "detail": "605.8 / 605.8 / 605.8"
+ },
+ {
+  "lock": "L2",
+  "where": "1288x660 14px (±2) above the tab's top",
+  "ok": true,
+  "detail": "12.3 / 12.3 / 12.3"
+ },
+ {
+  "lock": "L3",
+  "where": "1288x660 the tab is inside the viewport",
+  "ok": true,
+  "detail": "{\"l\":1025.96875,\"r\":1222,\"t\":618,\"b\":652,\"w\":196.03125,\"h\":34}"
+ },
+ {
+  "lock": "L3",
+  "where": "1288x660 nothing covers the tab's centre",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "F3",
+  "where": "1288x660 population",
+  "ok": true,
+  "detail": "13 boxes · art true · image loaded true"
+ },
+ {
+  "lock": "F3",
+  "where": "1288x660 nothing leaves the frame",
+  "ok": false,
+  "detail": "d77-kinds | BUTTON"
+ },
+ {
+  "lock": "F3",
+  "where": "1288x660 the art's whole box is inside the body",
+  "ok": true,
+  "detail": "{\"img\":{\"l\":926,\"r\":1066,\"t\":519.75,\"b\":593.75,\"w\":140,\"h\":74},\"body\":{\"l\":912,\"r\":1240,\"t\":513.75,\"b\":599.75,\"w\":328,\"h\":86}}"
+ },
+ {
+  "lock": "F3",
+  "where": "1288x660 the heading never overflows",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "G1",
+  "where": "1288x660 nothing cut in the hoop legends or the task card's head",
+  "ok": true,
+  "detail": "12 parts · none cut"
+ },
+ {
+  "lock": "G1",
+  "where": "1288x660 one screen: no vertical scroll",
+  "ok": true,
+  "detail": "{\"sh\":546,\"ch\":546,\"sw\":1032,\"cw\":1032}"
+ },
+ {
+  "lock": "G1",
+  "where": "1288x660 no horizontal overflow",
+  "ok": true,
+  "detail": "{\"s\":{\"sh\":546,\"ch\":546,\"sw\":1032,\"cw\":1032},\"d\":{\"sw\":1288,\"cw\":1288}}"
+ },
+ {
+  "lock": "L2",
+  "where": "1366x650 population",
+  "ok": true,
+  "detail": "{\"c\":true,\"a\":true,\"fw\":true,\"tab\":true}"
+ },
+ {
+  "lock": "L2",
+  "where": "1366x650 the three bottoms are equal (±1)",
+  "ok": true,
+  "detail": "595.8 / 595.8 / 595.8"
+ },
+ {
+  "lock": "L2",
+  "where": "1366x650 14px (±2) above the tab's top",
+  "ok": true,
+  "detail": "12.3 / 12.3 / 12.3"
+ },
+ {
+  "lock": "L3",
+  "where": "1366x650 the tab is inside the viewport",
+  "ok": true,
+  "detail": "{\"l\":1103.96875,\"r\":1300,\"t\":608,\"b\":642,\"w\":196.03125,\"h\":34}"
+ },
+ {
+  "lock": "L3",
+  "where": "1366x650 nothing covers the tab's centre",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "F3",
+  "where": "1366x650 population",
+  "ok": true,
+  "detail": "13 boxes · art true · image loaded true"
+ },
+ {
+  "lock": "F3",
+  "where": "1366x650 nothing leaves the frame",
+  "ok": false,
+  "detail": "d77-kinds | BUTTON | BUTTON"
+ },
+ {
+  "lock": "F3",
+  "where": "1366x650 the art's whole box is inside the body",
+  "ok": true,
+  "detail": "{\"img\":{\"l\":966.78125,\"r\":1106.78125,\"t\":509.75,\"b\":583.75,\"w\":140,\"h\":74},\"body\":{\"l\":952.78125,\"r\":1318,\"t\":503.75,\"b\":589.75,\"w\":365.21875,\"h\":86}}"
+ },
+ {
+  "lock": "F3",
+  "where": "1366x650 the heading never overflows",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "G1",
+  "where": "1366x650 nothing cut in the hoop legends or the task card's head",
+  "ok": true,
+  "detail": "13 parts · none cut"
+ },
+ {
+  "lock": "G1",
+  "where": "1366x650 one screen: no vertical scroll",
+  "ok": true,
+  "detail": "{\"sh\":536,\"ch\":536,\"sw\":1110,\"cw\":1110}"
+ },
+ {
+  "lock": "G1",
+  "where": "1366x650 no horizontal overflow",
+  "ok": true,
+  "detail": "{\"s\":{\"sh\":536,\"ch\":536,\"sw\":1110,\"cw\":1110},\"d\":{\"sw\":1366,\"cw\":1366}}"
+ },
+ {
+  "lock": "L2",
+  "where": "1280x650 population",
+  "ok": true,
+  "detail": "{\"c\":true,\"a\":true,\"fw\":true,\"tab\":true}"
+ },
+ {
+  "lock": "L2",
+  "where": "1280x650 the three bottoms are equal (±1)",
+  "ok": true,
+  "detail": "595.8 / 595.8 / 595.8"
+ },
+ {
+  "lock": "L2",
+  "where": "1280x650 14px (±2) above the tab's top",
+  "ok": true,
+  "detail": "12.3 / 12.3 / 12.3"
+ },
+ {
+  "lock": "L3",
+  "where": "1280x650 the tab is inside the viewport",
+  "ok": true,
+  "detail": "{\"l\":1017.96875,\"r\":1214,\"t\":608,\"b\":642,\"w\":196.03125,\"h\":34}"
+ },
+ {
+  "lock": "L3",
+  "where": "1280x650 nothing covers the tab's centre",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "F3",
+  "where": "1280x650 population",
+  "ok": true,
+  "detail": "13 boxes · art true · image loaded true"
+ },
+ {
+  "lock": "F3",
+  "where": "1280x650 nothing leaves the frame",
+  "ok": false,
+  "detail": "d77-kinds | BUTTON"
+ },
+ {
+  "lock": "F3",
+  "where": "1280x650 the art's whole box is inside the body",
+  "ok": true,
+  "detail": "{\"img\":{\"l\":926,\"r\":1066,\"t\":509.75,\"b\":583.75,\"w\":140,\"h\":74},\"body\":{\"l\":912,\"r\":1232,\"t\":503.75,\"b\":589.75,\"w\":320,\"h\":86}}"
+ },
+ {
+  "lock": "F3",
+  "where": "1280x650 the heading never overflows",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "G1",
+  "where": "1280x650 nothing cut in the hoop legends or the task card's head",
+  "ok": true,
+  "detail": "12 parts · none cut"
+ },
+ {
+  "lock": "G1",
+  "where": "1280x650 one screen: no vertical scroll",
+  "ok": true,
+  "detail": "{\"sh\":536,\"ch\":536,\"sw\":1024,\"cw\":1024}"
+ },
+ {
+  "lock": "G1",
+  "where": "1280x650 no horizontal overflow",
+  "ok": true,
+  "detail": "{\"s\":{\"sh\":536,\"ch\":536,\"sw\":1024,\"cw\":1024},\"d\":{\"sw\":1280,\"cw\":1280}}"
+ },
+ {
+  "lock": "L2",
+  "where": "1100x800 population",
+  "ok": true,
+  "detail": "{\"c\":true,\"a\":true,\"fw\":true,\"tab\":true}"
+ },
+ {
+  "lock": "L2",
+  "where": "1100x800 the three bottoms are equal (±1)",
+  "ok": true,
+  "detail": "743.8 / 743.8 / 743.8"
+ },
+ {
+  "lock": "L2",
+  "where": "1100x800 14px (±2) above the tab's top",
+  "ok": true,
+  "detail": "14.3 / 14.3 / 14.3"
+ },
+ {
+  "lock": "L3",
+  "where": "1100x800 the tab is inside the viewport",
+  "ok": true,
+  "detail": "{\"l\":847.96875,\"r\":1044,\"t\":758,\"b\":792,\"w\":196.03125,\"h\":34}"
+ },
+ {
+  "lock": "L3",
+  "where": "1100x800 nothing covers the tab's centre",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "F3",
+  "where": "1100x800 population",
+  "ok": true,
+  "detail": "13 boxes · art true · image loaded true"
+ },
+ {
+  "lock": "F3",
+  "where": "1100x800 nothing leaves the frame",
+  "ok": false,
+  "detail": "d77-kinds | BUTTON | BUTTON | BUTTON"
+ },
+ {
+  "lock": "F3",
+  "where": "1100x800 the art's whole box is inside the body",
+  "ok": true,
+  "detail": "{\"img\":{\"l\":840,\"r\":980,\"t\":591.75,\"b\":731.75,\"w\":140,\"h\":140},\"body\":{\"l\":828,\"r\":1066,\"t\":585.75,\"b\":737.75,\"w\":238,\"h\":152}}"
+ },
+ {
+  "lock": "F3",
+  "where": "1100x800 the heading never overflows",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "G1",
+  "where": "1100x800 nothing cut in the hoop legends or the task card's head",
+  "ok": true,
+  "detail": "12 parts · none cut"
+ },
+ {
+  "lock": "G1",
+  "where": "1100x800 one screen: no vertical scroll",
+  "ok": true,
+  "detail": "{\"sh\":686,\"ch\":686,\"sw\":844,\"cw\":844}"
+ },
+ {
+  "lock": "G1",
+  "where": "1100x800 no horizontal overflow",
+  "ok": true,
+  "detail": "{\"s\":{\"sh\":686,\"ch\":686,\"sw\":844,\"cw\":844},\"d\":{\"sw\":1100,\"cw\":1100}}"
+ },
+ {
+  "lock": "L3",
+  "where": "768x800 the tab is inside the viewport",
+  "ok": true,
+  "detail": "{\"l\":515.96875,\"r\":712,\"t\":758,\"b\":792,\"w\":196.03125,\"h\":34}"
+ },
+ {
+  "lock": "L3",
+  "where": "768x800 nothing covers the tab's centre",
+  "ok": true,
+  "detail": "true"
+ }
+]

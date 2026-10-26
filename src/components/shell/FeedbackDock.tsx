@@ -5,15 +5,15 @@
  * The feedback panel (Help system v1, Part E — design-refs/help-system-v1, screens 08 to 11). It opens from the
  * sidebar's Give feedback, from the Help menu's, and from the beta strip; there is one panel, mounted once by AppShell.
  *
- *   header    blush: the hawk, "Tell us what you found", "Every message reaches Nick, the founder.", ✕ (the draft is kept)
+ *   header    blush: the hawk, "Tell us what you found", "Every message reaches our founder.", ✕ (the draft is kept)
  *   kind      four tiles in a radio group; nothing below shows until one is chosen, and the question follows the kind
  *   broken    "How much is it in your way?" — three optional pills
  *   broken or confusing   a screenshot: add, drop or paste one image (5 MB), sent only if added
  *   reply     "Reply to {email} if it needs one", on by default
  *   context   "Sent with it: …", closed by default: the page's name, the browser in plain words, the window, the version,
  *             the account — and, in sage, what is never sent
- *   foot      "⌘ ↵ to send" and Send to Nick (navy), disabled until there is a kind and a message
- *   sent      the hawk again, "Got it, thank you", where any reply will come from, "— Nick, founder"
+ *   foot      "⌘ ↵ to send" and Tell us (navy), disabled until there is a kind and a message
+ *   sent      the hawk again, "Got it, thank you", where any reply will come from, "— The QueryHawk team"
  *
  * ⚠️ IT CAPTURES CONTEXT AND SHOWS THE WRITER EXACTLY WHAT IT CAPTURED — and NEVER page content, form values, or a line
  *    of anyone's manuscript. The page name and the button it opens beside are REGISTERED with `lib/feedbackStore` by the
@@ -36,6 +36,7 @@ import {
   appVersionLabel, describeBrowser, feedbackSentLines, takesScreenshot,
 } from "../../lib/beta";
 import { clearFeedbackDraft, feedbackAnchor, feedbackDraft, feedbackPage, setFeedbackDraft, type FeedbackDraft } from "../../lib/feedbackStore";
+import { sendFeedback } from "../../lib/sendFeedback";
 
 declare const __QH_BUILD_DATE__: string | undefined;
 const BUILD = typeof __QH_BUILD_DATE__ !== "undefined" ? __QH_BUILD_DATE__ : undefined;
@@ -159,9 +160,8 @@ export const FeedbackDock: React.FC<{
         const [{ getStorage, ref, uploadBytes }, { app }] = await Promise.all([import("firebase/storage"), import("../../lib/firebase")]);
         await uploadBytes(ref(getStorage(app), screenshotPath), d.shot.file, { contentType: d.shot.file.type });
       }
-      const { getFunctions, httpsCallable } = await import("firebase/functions");
-      const call = httpsCallable(getFunctions(undefined, "europe-west2"), "sendBetaFeedback");
-      await call({
+      /* Dashboard v77: the call lives in lib/sendFeedback (the founding writer card posts through it too) */
+      await sendFeedback({
         kind, message: d.message.trim(),
         severity: kind === "Something's broken" ? d.severity ?? "" : "",
         wantsReply: d.reply, pageName, route: location.pathname, viewport,

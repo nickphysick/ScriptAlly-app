@@ -1,0 +1,80 @@
+[
+ {
+  "lock": "C1",
+  "where": "1280x650 population: the card, and the record holds 5 docs",
+  "ok": true,
+  "detail": "{\"h\":128,\"sent\":5}"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x650 the card (128px tall) is Compact",
+  "ok": true,
+  "detail": "Compact"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x650 Compact has no stats line",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "C1",
+  "where": "1366x768 population: the card, and the record holds 5 docs",
+  "ok": true,
+  "detail": "{\"h\":194,\"sent\":5}"
+ },
+ {
+  "lock": "C1",
+  "where": "1366x768 the card (194px tall) is Laptop",
+  "ok": true,
+  "detail": "Laptop"
+ },
+ {
+  "lock": "C1",
+  "where": "1366x768 Laptop shows the stats line",
+  "ok": true,
+  "detail": "[\"5 sent · 2 changed QueryHawk\"]"
+ },
+ {
+  "lock": "C1",
+  "where": "1440x900 population: the card, and the record holds 5 docs",
+  "ok": true,
+  "detail": "{\"h\":194,\"sent\":5}"
+ },
+ {
+  "lock": "C1",
+  "where": "1440x900 the card (194px tall) is Laptop",
+  "ok": true,
+  "detail": "Laptop"
+ },
+ {
+  "lock": "C1",
+  "where": "1440x900 Laptop shows the stats line",
+  "ok": true,
+  "detail": "[\"5 sent · 2 changed QueryHawk\"]"
+ },
+ {
+  "lock": "C1",
+  "where": "1920x1080 population: the card, and the record holds 5 docs",
+  "ok": true,
+  "detail": "{\"h\":365.4375,\"sent\":5}"
+ },
+ {
+  "lock": "C1",
+  "where": "1920x1080 the card (365px tall) is Big·3",
+  "ok": false,
+  "detail": "Laptop"
+ },
+ {
+  "lock": "C1",
+  "where": "2560x1440 population: the card, and the record holds 5 docs",
+  "ok": true,
+  "detail": "{\"h\":412.6875,\"sent\":5}"
+ },
+ {
+  "lock": "C1",
+  "where": "2560x1440 the card (413px tall) is Big·4",
+  "ok": false,
+  "detail": "Laptop"
+ }
+]

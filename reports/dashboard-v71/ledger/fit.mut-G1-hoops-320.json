@@ -1,0 +1,626 @@
+[
+ {
+  "lock": "L2",
+  "where": "1920x1080 population",
+  "ok": true,
+  "detail": "{\"c\":true,\"a\":true,\"fw\":true,\"tab\":true}"
+ },
+ {
+  "lock": "L2",
+  "where": "1920x1080 the three bottoms are equal (±1)",
+  "ok": true,
+  "detail": "1023.8 / 1023.8 / 1023.8"
+ },
+ {
+  "lock": "L2",
+  "where": "1920x1080 14px (±2) above the tab's top",
+  "ok": true,
+  "detail": "14.3 / 14.3 / 14.3"
+ },
+ {
+  "lock": "L3",
+  "where": "1920x1080 the tab is inside the viewport",
+  "ok": true,
+  "detail": "{\"l\":1626.96875,\"r\":1823,\"t\":1038,\"b\":1072,\"w\":196.03125,\"h\":34}"
+ },
+ {
+  "lock": "L3",
+  "where": "1920x1080 nothing covers the tab's centre",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "F3",
+  "where": "1920x1080 population",
+  "ok": true,
+  "detail": "17 boxes · image loaded true"
+ },
+ {
+  "lock": "F3",
+  "where": "1920x1080 nothing leaves the frame",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F3",
+  "where": "1920x1080 the art's whole box is inside the body",
+  "ok": true,
+  "detail": "{\"img\":{\"l\":1315.96875,\"r\":1411.96875,\"t\":893.75,\"b\":989.75,\"w\":96,\"h\":96},\"body\":{\"l\":1295.96875,\"r\":1845,\"t\":865.75,\"b\":1017.75,\"w\":549.03125,\"h\":152}}"
+ },
+ {
+  "lock": "F3",
+  "where": "1920x1080 the heading never overflows",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "G1",
+  "where": "1920x1080 one screen: no vertical scroll",
+  "ok": true,
+  "detail": "{\"sh\":966,\"ch\":966,\"sw\":1642,\"cw\":1642}"
+ },
+ {
+  "lock": "G1",
+  "where": "1920x1080 no horizontal overflow",
+  "ok": true,
+  "detail": "{\"s\":{\"sh\":966,\"ch\":966,\"sw\":1642,\"cw\":1642},\"d\":{\"sw\":1920,\"cw\":1920}}"
+ },
+ {
+  "lock": "L2",
+  "where": "1512x900 population",
+  "ok": true,
+  "detail": "{\"c\":true,\"a\":true,\"fw\":true,\"tab\":true}"
+ },
+ {
+  "lock": "L2",
+  "where": "1512x900 the three bottoms are equal (±1)",
+  "ok": true,
+  "detail": "843.8 / 843.8 / 843.8"
+ },
+ {
+  "lock": "L2",
+  "where": "1512x900 14px (±2) above the tab's top",
+  "ok": true,
+  "detail": "14.3 / 14.3 / 14.3"
+ },
+ {
+  "lock": "L3",
+  "where": "1512x900 the tab is inside the viewport",
+  "ok": true,
+  "detail": "{\"l\":1218.96875,\"r\":1415,\"t\":858,\"b\":892,\"w\":196.03125,\"h\":34}"
+ },
+ {
+  "lock": "L3",
+  "where": "1512x900 nothing covers the tab's centre",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "F3",
+  "where": "1512x900 population",
+  "ok": true,
+  "detail": "16 boxes · image loaded true"
+ },
+ {
+  "lock": "F3",
+  "where": "1512x900 nothing leaves the frame",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F3",
+  "where": "1512x900 the art's whole box is inside the body",
+  "ok": true,
+  "detail": "{\"img\":{\"l\":1045.96875,\"r\":1141.703125,\"t\":713.875,\"b\":809.609375,\"w\":95.734375,\"h\":95.734375},\"body\":{\"l\":1037.96875,\"r\":1437,\"t\":685.75,\"b\":837.75,\"w\":399.03125,\"h\":152}}"
+ },
+ {
+  "lock": "F3",
+  "where": "1512x900 the heading never overflows",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "G1",
+  "where": "1512x900 one screen: no vertical scroll",
+  "ok": true,
+  "detail": "{\"sh\":786,\"ch\":786,\"sw\":1234,\"cw\":1234}"
+ },
+ {
+  "lock": "G1",
+  "where": "1512x900 no horizontal overflow",
+  "ok": true,
+  "detail": "{\"s\":{\"sh\":786,\"ch\":786,\"sw\":1234,\"cw\":1234},\"d\":{\"sw\":1512,\"cw\":1512}}"
+ },
+ {
+  "lock": "L2",
+  "where": "1440x900 population",
+  "ok": true,
+  "detail": "{\"c\":true,\"a\":true,\"fw\":true,\"tab\":true}"
+ },
+ {
+  "lock": "L2",
+  "where": "1440x900 the three bottoms are equal (±1)",
+  "ok": true,
+  "detail": "843.8 / 843.8 / 843.8"
+ },
+ {
+  "lock": "L2",
+  "where": "1440x900 14px (±2) above the tab's top",
+  "ok": true,
+  "detail": "14.3 / 14.3 / 14.3"
+ },
+ {
+  "lock": "L3",
+  "where": "1440x900 the tab is inside the viewport",
+  "ok": true,
+  "detail": "{\"l\":1146.96875,\"r\":1343,\"t\":858,\"b\":892,\"w\":196.03125,\"h\":34}"
+ },
+ {
+  "lock": "L3",
+  "where": "1440x900 nothing covers the tab's centre",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "F3",
+  "where": "1440x900 population",
+  "ok": true,
+  "detail": "16 boxes · image loaded true"
+ },
+ {
+  "lock": "F3",
+  "where": "1440x900 nothing leaves the frame",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F3",
+  "where": "1440x900 the art's whole box is inside the body",
+  "ok": true,
+  "detail": "{\"img\":{\"l\":1000.4375,\"r\":1089.296875,\"t\":717.3125,\"b\":806.171875,\"w\":88.859375,\"h\":88.859375},\"body\":{\"l\":992.4375,\"r\":1364.984375,\"t\":685.75,\"b\":837.75,\"w\":372.546875,\"h\":152}}"
+ },
+ {
+  "lock": "F3",
+  "where": "1440x900 the heading never overflows",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "G1",
+  "where": "1440x900 one screen: no vertical scroll",
+  "ok": true,
+  "detail": "{\"sh\":786,\"ch\":786,\"sw\":1162,\"cw\":1162}"
+ },
+ {
+  "lock": "G1",
+  "where": "1440x900 no horizontal overflow",
+  "ok": true,
+  "detail": "{\"s\":{\"sh\":786,\"ch\":786,\"sw\":1162,\"cw\":1162},\"d\":{\"sw\":1440,\"cw\":1440}}"
+ },
+ {
+  "lock": "L2",
+  "where": "1366x768 population",
+  "ok": true,
+  "detail": "{\"c\":true,\"a\":true,\"fw\":true,\"tab\":true}"
+ },
+ {
+  "lock": "L2",
+  "where": "1366x768 the three bottoms are equal (±1)",
+  "ok": false,
+  "detail": "723.5 / 723.5 / 711.8"
+ },
+ {
+  "lock": "L2",
+  "where": "1366x768 14px (±2) above the tab's top",
+  "ok": false,
+  "detail": "2.5 / 2.5 / 14.3"
+ },
+ {
+  "lock": "L3",
+  "where": "1366x768 the tab is inside the viewport",
+  "ok": true,
+  "detail": "{\"l\":1092.96875,\"r\":1289,\"t\":726,\"b\":760,\"w\":196.03125,\"h\":34}"
+ },
+ {
+  "lock": "L3",
+  "where": "1366x768 nothing covers the tab's centre",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "F3",
+  "where": "1366x768 population",
+  "ok": true,
+  "detail": "16 boxes · image loaded true"
+ },
+ {
+  "lock": "F3",
+  "where": "1366x768 nothing leaves the frame",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F3",
+  "where": "1366x768 the art's whole box is inside the body",
+  "ok": true,
+  "detail": "{\"img\":{\"l\":957.875,\"r\":1042.71875,\"t\":587.328125,\"b\":672.171875,\"w\":84.84375,\"h\":84.84375},\"body\":{\"l\":949.875,\"r\":1307,\"t\":553.75,\"b\":705.75,\"w\":357.125,\"h\":152}}"
+ },
+ {
+  "lock": "F3",
+  "where": "1366x768 the heading never overflows",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "G1",
+  "where": "1366x768 one screen: no vertical scroll",
+  "ok": true,
+  "detail": "{\"sh\":654,\"ch\":654,\"sw\":1088,\"cw\":1088}"
+ },
+ {
+  "lock": "G1",
+  "where": "1366x768 no horizontal overflow",
+  "ok": true,
+  "detail": "{\"s\":{\"sh\":654,\"ch\":654,\"sw\":1088,\"cw\":1088},\"d\":{\"sw\":1366,\"cw\":1366}}"
+ },
+ {
+  "lock": "L2",
+  "where": "1280x800 population",
+  "ok": true,
+  "detail": "{\"c\":true,\"a\":true,\"fw\":true,\"tab\":true}"
+ },
+ {
+  "lock": "L2",
+  "where": "1280x800 the three bottoms are equal (±1)",
+  "ok": true,
+  "detail": "743.8 / 743.8 / 743.8"
+ },
+ {
+  "lock": "L2",
+  "where": "1280x800 14px (±2) above the tab's top",
+  "ok": true,
+  "detail": "14.3 / 14.3 / 14.3"
+ },
+ {
+  "lock": "L3",
+  "where": "1280x800 the tab is inside the viewport",
+  "ok": true,
+  "detail": "{\"l\":1002.96875,\"r\":1199,\"t\":758,\"b\":792,\"w\":196.03125,\"h\":34}"
+ },
+ {
+  "lock": "L3",
+  "where": "1280x800 nothing covers the tab's centre",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "F3",
+  "where": "1280x800 population",
+  "ok": true,
+  "detail": "16 boxes · image loaded true"
+ },
+ {
+  "lock": "F3",
+  "where": "1280x800 nothing leaves the frame",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F3",
+  "where": "1280x800 the art's whole box is inside the body",
+  "ok": true,
+  "detail": "{\"img\":{\"l\":903.5,\"r\":980.125,\"t\":623.4375,\"b\":700.0625,\"w\":76.625,\"h\":76.625},\"body\":{\"l\":895.5,\"r\":1221,\"t\":585.75,\"b\":737.75,\"w\":325.5,\"h\":152}}"
+ },
+ {
+  "lock": "F3",
+  "where": "1280x800 the heading never overflows",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "G1",
+  "where": "1280x800 one screen: no vertical scroll",
+  "ok": true,
+  "detail": "{\"sh\":686,\"ch\":686,\"sw\":1002,\"cw\":1002}"
+ },
+ {
+  "lock": "G1",
+  "where": "1280x800 no horizontal overflow",
+  "ok": true,
+  "detail": "{\"s\":{\"sh\":686,\"ch\":686,\"sw\":1002,\"cw\":1002},\"d\":{\"sw\":1280,\"cw\":1280}}"
+ },
+ {
+  "lock": "L2",
+  "where": "1288x660 population",
+  "ok": true,
+  "detail": "{\"c\":true,\"a\":true,\"fw\":true,\"tab\":true}"
+ },
+ {
+  "lock": "L2",
+  "where": "1288x660 the three bottoms are equal (±1)",
+  "ok": false,
+  "detail": "723.5 / 723.5 / 605.8"
+ },
+ {
+  "lock": "L2",
+  "where": "1288x660 14px (±2) above the tab's top",
+  "ok": false,
+  "detail": "-105.5 / -105.5 / 12.3"
+ },
+ {
+  "lock": "L3",
+  "where": "1288x660 the tab is inside the viewport",
+  "ok": true,
+  "detail": "{\"l\":1014.96875,\"r\":1211,\"t\":618,\"b\":652,\"w\":196.03125,\"h\":34}"
+ },
+ {
+  "lock": "L3",
+  "where": "1288x660 nothing covers the tab's centre",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "F3",
+  "where": "1288x660 population",
+  "ok": true,
+  "detail": "15 boxes · image loaded true"
+ },
+ {
+  "lock": "F3",
+  "where": "1288x660 nothing leaves the frame",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F3",
+  "where": "1288x660 the art's whole box is inside the body",
+  "ok": true,
+  "detail": "{\"img\":{\"l\":914.234375,\"r\":980.234375,\"t\":523.75,\"b\":589.75,\"w\":66,\"h\":66},\"body\":{\"l\":900.546875,\"r\":1229,\"t\":513.75,\"b\":599.75,\"w\":328.453125,\"h\":86}}"
+ },
+ {
+  "lock": "F3",
+  "where": "1288x660 the heading never overflows",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "F3",
+  "where": "1288x660 short window: the line hidden, the faces shown",
+  "ok": true,
+  "detail": "line false · faces true"
+ },
+ {
+  "lock": "G1",
+  "where": "1288x660 one screen: no vertical scroll",
+  "ok": false,
+  "detail": "{\"sh\":618,\"ch\":546,\"sw\":1010,\"cw\":1010}"
+ },
+ {
+  "lock": "G1",
+  "where": "1288x660 no horizontal overflow",
+  "ok": true,
+  "detail": "{\"s\":{\"sh\":618,\"ch\":546,\"sw\":1010,\"cw\":1010},\"d\":{\"sw\":1288,\"cw\":1288}}"
+ },
+ {
+  "lock": "L2",
+  "where": "1366x650 population",
+  "ok": true,
+  "detail": "{\"c\":true,\"a\":true,\"fw\":true,\"tab\":true}"
+ },
+ {
+  "lock": "L2",
+  "where": "1366x650 the three bottoms are equal (±1)",
+  "ok": false,
+  "detail": "723.5 / 723.5 / 595.8"
+ },
+ {
+  "lock": "L2",
+  "where": "1366x650 14px (±2) above the tab's top",
+  "ok": false,
+  "detail": "-115.5 / -115.5 / 12.3"
+ },
+ {
+  "lock": "L3",
+  "where": "1366x650 the tab is inside the viewport",
+  "ok": true,
+  "detail": "{\"l\":1092.96875,\"r\":1289,\"t\":608,\"b\":642,\"w\":196.03125,\"h\":34}"
+ },
+ {
+  "lock": "L3",
+  "where": "1366x650 nothing covers the tab's centre",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "F3",
+  "where": "1366x650 population",
+  "ok": true,
+  "detail": "15 boxes · image loaded true"
+ },
+ {
+  "lock": "F3",
+  "where": "1366x650 nothing leaves the frame",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F3",
+  "where": "1366x650 the art's whole box is inside the body",
+  "ok": true,
+  "detail": "{\"img\":{\"l\":967.296875,\"r\":1033.296875,\"t\":513.75,\"b\":579.75,\"w\":66,\"h\":66},\"body\":{\"l\":949.875,\"r\":1307,\"t\":503.75,\"b\":589.75,\"w\":357.125,\"h\":86}}"
+ },
+ {
+  "lock": "F3",
+  "where": "1366x650 the heading never overflows",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "F3",
+  "where": "1366x650 short window: the line hidden, the faces shown",
+  "ok": true,
+  "detail": "line false · faces true"
+ },
+ {
+  "lock": "G1",
+  "where": "1366x650 one screen: no vertical scroll",
+  "ok": false,
+  "detail": "{\"sh\":618,\"ch\":536,\"sw\":1088,\"cw\":1088}"
+ },
+ {
+  "lock": "G1",
+  "where": "1366x650 no horizontal overflow",
+  "ok": true,
+  "detail": "{\"s\":{\"sh\":618,\"ch\":536,\"sw\":1088,\"cw\":1088},\"d\":{\"sw\":1366,\"cw\":1366}}"
+ },
+ {
+  "lock": "L2",
+  "where": "1280x650 population",
+  "ok": true,
+  "detail": "{\"c\":true,\"a\":true,\"fw\":true,\"tab\":true}"
+ },
+ {
+  "lock": "L2",
+  "where": "1280x650 the three bottoms are equal (±1)",
+  "ok": false,
+  "detail": "723.5 / 723.5 / 595.8"
+ },
+ {
+  "lock": "L2",
+  "where": "1280x650 14px (±2) above the tab's top",
+  "ok": false,
+  "detail": "-115.5 / -115.5 / 12.3"
+ },
+ {
+  "lock": "L3",
+  "where": "1280x650 the tab is inside the viewport",
+  "ok": true,
+  "detail": "{\"l\":1006.96875,\"r\":1203,\"t\":608,\"b\":642,\"w\":196.03125,\"h\":34}"
+ },
+ {
+  "lock": "L3",
+  "where": "1280x650 nothing covers the tab's centre",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "F3",
+  "where": "1280x650 population",
+  "ok": true,
+  "detail": "15 boxes · image loaded true"
+ },
+ {
+  "lock": "F3",
+  "where": "1280x650 nothing leaves the frame",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F3",
+  "where": "1280x650 the art's whole box is inside the body",
+  "ok": true,
+  "detail": "{\"img\":{\"l\":908.8125,\"r\":974.8125,\"t\":513.75,\"b\":579.75,\"w\":66,\"h\":66},\"body\":{\"l\":895.5,\"r\":1221,\"t\":503.75,\"b\":589.75,\"w\":325.5,\"h\":86}}"
+ },
+ {
+  "lock": "F3",
+  "where": "1280x650 the heading never overflows",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "F3",
+  "where": "1280x650 short window: the line hidden, the faces shown",
+  "ok": true,
+  "detail": "line false · faces true"
+ },
+ {
+  "lock": "G1",
+  "where": "1280x650 one screen: no vertical scroll",
+  "ok": false,
+  "detail": "{\"sh\":618,\"ch\":536,\"sw\":1002,\"cw\":1002}"
+ },
+ {
+  "lock": "G1",
+  "where": "1280x650 no horizontal overflow",
+  "ok": true,
+  "detail": "{\"s\":{\"sh\":618,\"ch\":536,\"sw\":1002,\"cw\":1002},\"d\":{\"sw\":1280,\"cw\":1280}}"
+ },
+ {
+  "lock": "L2",
+  "where": "1100x800 population",
+  "ok": true,
+  "detail": "{\"c\":true,\"a\":true,\"fw\":true,\"tab\":true}"
+ },
+ {
+  "lock": "L2",
+  "where": "1100x800 the three bottoms are equal (±1)",
+  "ok": true,
+  "detail": "743.8 / 743.8 / 743.8"
+ },
+ {
+  "lock": "L2",
+  "where": "1100x800 14px (±2) above the tab's top",
+  "ok": true,
+  "detail": "14.3 / 14.3 / 14.3"
+ },
+ {
+  "lock": "L3",
+  "where": "1100x800 the tab is inside the viewport",
+  "ok": true,
+  "detail": "{\"l\":822.96875,\"r\":1019,\"t\":758,\"b\":792,\"w\":196.03125,\"h\":34}"
+ },
+ {
+  "lock": "L3",
+  "where": "1100x800 nothing covers the tab's centre",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "F3",
+  "where": "1100x800 population",
+  "ok": true,
+  "detail": "16 boxes · image loaded true"
+ },
+ {
+  "lock": "F3",
+  "where": "1100x800 nothing leaves the frame",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F3",
+  "where": "1100x800 the art's whole box is inside the body",
+  "ok": true,
+  "detail": "{\"img\":{\"l\":789.671875,\"r\":865.671875,\"t\":623.75,\"b\":699.75,\"w\":76,\"h\":76},\"body\":{\"l\":781.671875,\"r\":1040.984375,\"t\":585.75,\"b\":737.75,\"w\":259.3125,\"h\":152}}"
+ },
+ {
+  "lock": "F3",
+  "where": "1100x800 the heading never overflows",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "G1",
+  "where": "1100x800 one screen: no vertical scroll",
+  "ok": true,
+  "detail": "{\"sh\":686,\"ch\":686,\"sw\":822,\"cw\":822}"
+ },
+ {
+  "lock": "G1",
+  "where": "1100x800 no horizontal overflow",
+  "ok": true,
+  "detail": "{\"s\":{\"sh\":686,\"ch\":686,\"sw\":822,\"cw\":822},\"d\":{\"sw\":1100,\"cw\":1100}}"
+ },
+ {
+  "lock": "L3",
+  "where": "768x800 the tab is inside the viewport",
+  "ok": true,
+  "detail": "{\"l\":504.96875,\"r\":701,\"t\":758,\"b\":792,\"w\":196.03125,\"h\":34}"
+ },
+ {
+  "lock": "L3",
+  "where": "768x800 nothing covers the tab's centre",
+  "ok": true,
+  "detail": "true"
+ }
+]

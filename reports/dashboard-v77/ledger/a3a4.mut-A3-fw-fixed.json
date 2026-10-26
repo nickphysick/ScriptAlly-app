@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "A3",
+  "where": "1920x1080 population: the hoops, the founding card, the body",
+  "ok": true,
+  "detail": "{\"left\":true,\"fw\":true,\"body\":true}"
+ },
+ {
+  "lock": "A3",
+  "where": "1920x1080 the left and right columns end together (±1)",
+  "ok": false,
+  "detail": "hoops 936.7 · founding 858.0"
+ },
+ {
+  "lock": "A3",
+  "where": "1920x1080 the founding card is at least 194px",
+  "ok": true,
+  "detail": "194.0"
+ },
+ {
+  "lock": "A4",
+  "where": "1920x1080 the body and the header are ≤ 1440px wide",
+  "ok": true,
+  "detail": "body 1440.0 · header 1440.0"
+ },
+ {
+  "lock": "A5",
+  "where": "1920x1080 the Activity feed tab is on screen",
+  "ok": true,
+  "detail": "{\"l\":1575.96875,\"r\":1772,\"t\":1038,\"b\":1072,\"w\":196.03125,\"h\":34}"
+ },
+ {
+  "lock": "A3",
+  "where": "2560x1440 population: the hoops, the founding card, the body",
+  "ok": true,
+  "detail": "{\"left\":true,\"fw\":true,\"body\":true}"
+ },
+ {
+  "lock": "A3",
+  "where": "2560x1440 the left and right columns end together (±1)",
+  "ok": false,
+  "detail": "hoops 1011.1 · founding 810.8"
+ },
+ {
+  "lock": "A3",
+  "where": "2560x1440 the founding card is at least 194px",
+  "ok": true,
+  "detail": "194.0"
+ },
+ {
+  "lock": "A4",
+  "where": "2560x1440 the body and the header are ≤ 1680px wide",
+  "ok": true,
+  "detail": "body 1680.0 · header 1680.0"
+ },
+ {
+  "lock": "A5",
+  "where": "2560x1440 the Activity feed tab is on screen",
+  "ok": true,
+  "detail": "{\"l\":2015.96875,\"r\":2212,\"t\":1398,\"b\":1432,\"w\":196.03125,\"h\":34}"
+ }
+]
