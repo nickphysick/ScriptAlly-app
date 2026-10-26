@@ -380,76 +380,13 @@ export const Dash58: React.FC<Dash58Props> = ({
     return () => { ro?.disconnect(); window.removeEventListener("resize", check); };
   }, [loading, focus.item?.key]);
 
-  const hoopNeedRef = useRef(0);
-  /* ── v60: the left column's floor in the querying state — what the two hoop cards need ──
-     Each card's width, less its legend's box, plus the legend's NATURAL width (a Range over each row,
-     which is the text's own width whatever the column does — so this cannot feed back on itself). */
-  useLayoutEffect(() => {
-    const root = rootRef.current;
-    if (!root) return undefined;
-    const measure = () => {
-      /* while loading, the floor is the one the last loaded page measured: the hoops' figures (and
-         "+n this week") are not known yet, and a narrower column would jump when they land */
-      if (loading) {
-        const v = shape.hoopNeed > 0 ? `${shape.hoopNeed}px` : "";
-        if (root.style.getPropertyValue("--d60-hoop-need") !== v) { if (v) root.style.setProperty("--d60-hoop-need", v); else root.style.removeProperty("--d60-hoop-need"); }
-        return;
-      }
-      let need = 0;
-      const width = (el: Element) => { const r = document.createRange(); r.selectNodeContents(el); return r.getBoundingClientRect().width; };
-      for (const card of root.querySelectorAll<HTMLElement>(".d60-hoopcard")) {
-        const hl = card.querySelector<HTMLElement>(".d60-hl");
-        const row = card.querySelector<HTMLElement>(".os-bandrow");
-        if (!hl || card.offsetWidth <= 0) continue;
-        /* ⚠️ READ UNWRAPPED: a cramped card wraps its labels (the container query), and a wrapped width
-           read back as the need would hold the column at the cramped size for ever. `nowrap` for the
-           instant of the read, in a layout effect, so nothing is painted that way. */
-        const lis = [...hl.querySelectorAll<HTMLElement>("li, .d60-ready")];
-        for (const li of lis) li.style.whiteSpace = "nowrap";
-        let natural = 0;
-        for (const li of hl.querySelectorAll("li")) natural = Math.max(natural, width(li));
-        /* ⚠️ FROM FIXED PARTS, never "card − legend box + natural": the legend is shrink-to-fit, so with
-           room to spare its box IS its natural width and that sum is just the card's own width — a
-           floor that ratchets wider on every load. The card's chrome, the body's padding, the hoop
-           and the gap do not depend on the column. */
-        const hb = card.querySelector<HTMLElement>(".d60-hb");
-        const hoop = card.querySelector<HTMLElement>(".d60-hoop");
-        if (hb && hoop) {
-          const cs = getComputedStyle(hb);
-          const chrome = card.offsetWidth - hb.clientWidth;
-          need = Math.max(need, chrome + (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0) + hoop.offsetWidth + (parseFloat(cs.columnGap) || 0) + natural);
-        }
-        /* and the band: its title and its link side by side, with the row's gap */
-        if (row) {
-          const kids = [...row.children] as HTMLElement[];
-          const sum = kids.reduce((t, k) => t + width(k), 0) + Math.max(0, kids.length - 1) * (parseFloat(getComputedStyle(row).columnGap) || 12);
-          need = Math.max(need, card.offsetWidth - row.clientWidth + sum);
-        }
-        for (const li of lis) li.style.whiteSpace = "";
-      }
-      const n = need > 0 ? Math.ceil(need) : 0;
-      /* remembered for the next loading page the moment it changes — the shape effect below runs before
-         the webfonts land, and a floor written then is the narrower one */
-      if (n > 0 && n !== hoopNeedRef.current) writeShape({ ...readShape(), hoopNeed: n });
-      hoopNeedRef.current = n;
-      const v = need > 0 ? `${Math.ceil(need)}px` : "";
-      if (root.style.getPropertyValue("--d60-hoop-need") !== v) {
-        if (v) root.style.setProperty("--d60-hoop-need", v); else root.style.removeProperty("--d60-hoop-need");
-      }
-    };
-    measure();
-    window.addEventListener("resize", measure);
-    void document.fonts?.ready.then(measure);
-    return () => window.removeEventListener("resize", measure);
-  });
-
   /* ── what the loading page should be the shape of: this account's last loaded page ── */
   const [shape] = useState(() => readShape());
   const focusRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (loading) return;
     const h = focusRef.current?.getBoundingClientRect().height ?? 0;
-    writeShape({ focusH: h > 0 ? Math.round(h) : shape.focusH, closed: closed && closed.total === 0 ? "none" : "some", today: unseen > 0, pre: empty, agents: agents.length > 0, hoopNeed: hoopNeedRef.current || shape.hoopNeed });
+    writeShape({ focusH: h > 0 ? Math.round(h) : shape.focusH, closed: closed && closed.total === 0 ? "none" : "some", today: unseen > 0, pre: empty, agents: agents.length > 0, hoopNeed: shape.hoopNeed });
   }, [loading, focus.item?.key, closed, unseen, shape.focusH, empty, agents.length]);
 
   /* ── v60: first use, and the two hoops ──
@@ -523,7 +460,7 @@ export const Dash58: React.FC<Dash58Props> = ({
   const title = (activeManuscript?.title ?? "").trim();
 
   return (
-    <div ref={rootRef} className="os-root d58" data-paint={paint ? "1" : undefined} data-tight={tight ? "1" : undefined} style={noticeListH > 0 ? ({ ["--d58-notice-list-h" as string]: `${noticeListH}px` } as React.CSSProperties) : undefined}>
+    <div ref={rootRef} className="os-root d58" data-mode={pre ? "pre" : "q"} data-paint={paint ? "1" : undefined} data-tight={tight ? "1" : undefined} style={noticeListH > 0 ? ({ ["--d58-notice-list-h" as string]: `${noticeListH}px` } as React.CSSProperties) : undefined}>
       <DashPopupProvider rootRef={rootRef}>
         <div className="d58-page" data-d58="page" data-loading={loading ? "1" : "0"}>
           {notice && <ImportNoticeRow notice={notice} onDismiss={dismissNotice} onListHeight={setNoticeListH} />}
@@ -581,9 +518,6 @@ export const Dash58: React.FC<Dash58Props> = ({
               focusRef={focusRef}
               onStep={setStep}
               onView={viewTask}
-              onRun={run}
-              onAll={() => onNavigate("todo")}
-              onAddAgent={() => onNavigate("agents", "Add an agent")}
               lift={pre ? <Dash60Lift loading={loading} tiles={tiles} hasAgents={hasAgents} onTile={onTile} /> : undefined}
               panel={
                 <Dash59Panel

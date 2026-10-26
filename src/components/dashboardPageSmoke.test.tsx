@@ -81,7 +81,10 @@ describe("/dashboard renders", () => {
     /* ⚠️ RETARGETED (Dashboard v58): the header no longer states a figure — it is the book. The
        populated landmarks are the title-page eyebrow and the list column's own title. */
     expect(html).toContain("— QUERYING —"); // v60.1: the eyebrow is the sidebar's status (fixture: Querying), no longer a constant
-    expect(html).toContain("What&#x27;s on the list today?");
+    /* ⚠️ RETARGETED (Dashboard v71): "What's on the list today?" is retired with the list's title row.
+       The right column's landmark is the task card's region, labelled "Your tasks". */
+    expect(html).not.toContain("What&#x27;s on the list today?");
+    expect(html).toContain('aria-label="Your tasks"');
     /* ⚠️ "Querying goals" IS NOT A LANDMARK ON THIS PAGE ANY MORE (ref v22) — the card leaves the
        dashboard with the two-column layout. `Activity` is the right column's own name and is the
        landmark that replaces it, so this census still spans all three regions of the page. */

@@ -106,3 +106,46 @@
   .d58 .d71-hb { transition: none; }
   .d58 .d71-hb--pri:hover { transform: none; }
 }
+
+/* ── B · the layout, while querying (`.d58[data-mode="q"]`) ────────────────────────────────────
+   Two columns, each its own two-row grid filling the body's height — so the bottoms of the Closed,
+   Agents and founding cards line up by construction: every column ends where the body ends.
+   Before the first query (`data-mode="pre"`) the page is v60.1's and none of this applies. */
+.d58[data-mode="q"] .d58-body {
+  grid-template-columns: minmax(0, 1.72fr) minmax(0, 1fr);
+  gap: 16px;
+}
+.d58[data-mode="q"] .d58-left {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 16px;
+}
+/* the hoop row: its content's height, never under 200px (180 on a short window) */
+.d58[data-mode="q"] .d60-hoops { gap: 16px; min-height: 200px; }
+.d58[data-mode="q"] .d60-hoops > .d60-card { height: 100%; }
+.d58[data-mode="q"] .d71-right {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) var(--d71-fw-h, 194px);
+  gap: 16px;
+  padding-bottom: 0;
+}
+.d71-taskslot, .d71-fwslot { min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+.d71-fwslot > * { flex: 1 1 0; min-height: 0; }
+
+/* ⚠️ THE BOTTOM: the lowest cards end 14px above the Activity feed tab's top. The tab (34px) sits
+   on the SHEET's bottom edge, so the cards end 48px above the sheet's bottom; what already lies
+   between the page and the sheet's bottom (`--d58-inset-b`, measured by the page) is subtracted. */
+.d58[data-mode="q"] .d58-page { padding-bottom: max(0px, calc(48px - var(--d58-inset-b, 0px))); }
+
+@media (max-height: 819px) {
+  .d58[data-mode="q"] .d60-hoops { min-height: 180px; }
+}
+@media (max-height: 760px) {
+  .d58[data-mode="q"] { --d71-fw-h: 128px; }
+  .d58[data-mode="q"] .d58-page { padding-bottom: max(0px, calc(46px - var(--d58-inset-b, 0px))); }
+}
+/* below the supported width the page flows (v58's own step): one column, each card its own height */
+@media (max-width: 1099px) {
+  .d58[data-mode="q"] .d58-body { grid-template-columns: minmax(0, 1fr); }
+  .d58[data-mode="q"] .d71-right { grid-template-rows: auto var(--d71-fw-h, 194px); }
+}

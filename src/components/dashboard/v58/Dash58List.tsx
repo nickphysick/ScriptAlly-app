@@ -2,29 +2,27 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * DASHBOARD v59 — "What's on the list today?" (ref design-refs/dashboard-v59/dashboard-v59.html)
+ * DASHBOARD — the right column.
  *
- * No container: the title with "All {n} →", ONE item in focus as a card, a hairline, then the
- * founding writer panel. The rest of the list lives on the To-do page. The order and every item
- * come from `lib/dashList`.
+ * DASHBOARD v71 (ref design-refs/dashboard-v71/): while querying the column is TWO CARDS and
+ * nothing else — the task card filling the height, then the founding writer card at a fixed
+ * height. v59's title ("What's on the list today?"), "All {n} →", the hairline and the Then rows
+ * are retired. Before the first query the column is v60.1's, unchanged: "Ready for lift off?",
+ * the hairline, then the founding writer card.
  *
- * ⚠️ THE DASHBOARD NEVER COMPLETES A TASK. The focus card's button reads "View task →" for every
- * kind and opens the place where the task is done properly (`viewTask` in Dash58), where what was
- * sent, when to chase and any notes are recorded. The v58 rows and their tick are retired.
+ * ⚠️ THE DASHBOARD NEVER COMPLETES A TASK. The card's button reads "View task →" for every kind
+ * and opens the place where the task is done properly (`viewTask` in Dash58).
  */
 import React from "react";
 import { AgentDisc } from "../../shared/AgentDisc";
 import { StatusDot } from "../../StatusDot";
-import { type ListAction, type ListGroup, type ListItem, type ListPlan, type ListTone } from "../../../lib/dashList";
-import { DISCOVER_LIVE } from "../../../lib/discoverShared";
-
-export const LIST_TITLE = "What's on the list today?";
+import { type ListAction, type ListItem, type ListPlan, type ListTone } from "../../../lib/dashList";
 
 const BAND: Record<ListTone, string> = {
   you: "var(--state-you)", queried: "var(--state-queried)", agent: "var(--state-agent)",
   offer: "var(--state-offer)", closed: "var(--state-closed)", house: "#e4e9f0",
 };
-/** The focus card's one button, for every kind (v59). */
+/** The task card's one button, for every kind (v59). */
 export const VIEW_TASK = "View task";
 
 const Say: React.FC<{ item: ListItem }> = ({ item }) => (
@@ -82,58 +80,40 @@ export const Dash58List: React.FC<{
   loading: boolean;
   focusH: number;
   plan: ListPlan;
-  focus: { item: ListItem | null; index: number; of: number; rest: ListGroup[] };
+  focus: { item: ListItem | null; index: number; of: number };
   focusRef: React.Ref<HTMLDivElement>;
   onStep: (n: number) => void;
-  /** the focus card's "View task →": opens where the task is completed, never writes */
+  /** the task card's "View task →": opens where the task is completed, never writes */
   onView: (a: ListAction) => void;
-  onRun: (a: ListAction) => void;
-  onAll: () => void;
-  onAddAgent: () => void;
-  /** the founding writer panel, below the hairline */
+  /** the founding writer card */
   panel: React.ReactNode;
-  /** v60: before the first query, "Ready for lift off?" takes the title row AND the focus card */
+  /** before the first query, "Ready for lift off?" takes the task card's place (v60) */
   lift?: React.ReactNode;
-}> = ({ loading, focusH, plan, focus, focusRef, onStep, onView, onRun, onAll, onAddAgent, panel, lift }) => {
-  const counts = Object.fromEntries(plan.groups.map((g) => [g.key, g.items.length]));
+}> = ({ loading, focusH, plan, focus, focusRef, onStep, onView, panel, lift }) => {
+  if (lift) {
+    return (
+      <section className="d58-right" data-d58="right" data-mode="pre" aria-label="Getting started">
+        {lift}
+        <hr className="d59-rule" data-d58="rule" />
+        {panel}
+      </section>
+    );
+  }
   const first = plan.groups[0];
-  const coming = !loading && first?.key === "coming";
-  /* "All {n} →" always goes to the To-do page: the full list lives there (v59) */
-  const allLabel = `All ${plan.items.length}`;
   return (
-    <section className="d58-right" data-d58="right" data-counts={JSON.stringify(counts)} aria-label="To-do list">
-      {lift ?? (
-        <>
-      <div className="d58-listhead" data-d58="list-head">
-        <div className="d59-titlerow" data-d58="title-row">
-          <h2 className={`d58-listtitle${loading ? " d58-sk" : ""}`} data-d58="list-title">{LIST_TITLE}</h2>
-          {!loading && plan.items.length > 0 && (
-            <button type="button" className="d59-all" data-d58="list-all" onClick={onAll}>{allLabel} →</button>
-          )}
-        </div>
-        <span className="d58-listbar" data-d58="list-bar" aria-hidden="true" />
+    <section className="d58-right d71-right" data-d58="right" data-mode="q" aria-label="Your tasks">
+      <div className="d71-taskslot" data-d71="task-slot">
+        {loading ? (
+          <div className="d58-focus is-loading d58-skcard" data-sk="card" data-d58="focus" style={{ height: focusH }} aria-hidden="true">
+            <div className="d58-fband"><span className="d58-fpill d58-sk">LOADING</span></div>
+          </div>
+        ) : focus.item ? (
+          <FocusCard item={focus.item} index={focus.index} of={focus.of} innerRef={focusRef} onStep={onStep} onRun={onView} label={first.label} />
+        ) : (
+          <div data-d58="focus-none"><p className="d58-quietline">No dates are set on your live queries yet. Add an agent to keep the list moving.</p></div>
+        )}
       </div>
-      {loading ? (
-        <div className="d58-focus is-loading d58-skcard" data-sk="card" data-d58="focus" style={{ height: focusH }} aria-hidden="true">
-          <div className="d58-fband"><span className="d58-fpill d58-sk">LOADING</span></div>
-        </div>
-      ) : focus.item ? (
-        <FocusCard item={focus.item} index={focus.index} of={focus.of} innerRef={focusRef} onStep={onStep} onRun={onView} label={first.label} />
-      ) : (
-        <div data-d58="focus-none"><p className="d58-quietline">No dates are set on your live queries yet. Add an agent to keep the list moving.</p></div>
-      )}
-      {coming && (
-        <div className="d58-extra" data-d58="coming-extra">
-          <button type="button" className="d58-btn d58-btn--pri d58-btn--sm" onClick={onAddAgent}>Add an agent</button>
-          <button type="button" className="d58-btn d58-btn--sm" disabled={!DISCOVER_LIVE} onClick={() => onRun({ kind: "route", tab: "agents", sub: "Discover" })}>
-            Discover agents {!DISCOVER_LIVE && <span className="d58-soon">SOON</span>}
-          </button>
-        </div>
-      )}
-        </>
-      )}
-      <hr className="d59-rule" data-d58="rule" />
-      {panel}
+      <div className="d71-fwslot" data-d71="fw-slot">{panel}</div>
     </section>
   );
 };

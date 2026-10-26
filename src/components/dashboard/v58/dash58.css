@@ -251,7 +251,6 @@
 .d58-cal b { display: block; padding: 3px 0 4px; font-family: var(--d58-type) !important; font-weight: 400; font-size: 18px; line-height: 20px; color: var(--d58-ink); }
 
 .d58-fpos button:focus-visible, .d58-link:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
-.d58-extra { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
 .d58-quietline { margin: 0 0 4px; font-family: var(--d58-serif) !important; font-size: 15.5px; line-height: 1.45; color: var(--d58-ink-62); }
 
 /* ── the drawer (portalled: `.d58-layer`) ──────────────────────────────────────────────────── */

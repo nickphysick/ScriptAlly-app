@@ -37,23 +37,9 @@
 .d58 .d60-bl:focus-visible, .d58 .d60-ready:focus-visible, .d58 .d60-wa:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 3px; border-radius: 2px; }
 
 /* ── the two hoops, beneath the full-width chart ─────────────────────────────────────────────── */
-/* ⚠️ THE LEFT COLUMN IS NEVER NARROWER THAN THE TWO HOOPS NEED. The ref's split widens in this state
-   (687/442 at 1512, 599/318 at 1280, unchanged at 1709) and that is not a stated rule: its grid is
-   `1.32fr 1fr`, so the hoops' unbreakable legends push the column. Reproduced deliberately, for this
-   state only, so a legend is never cut; before the first query the split stays v59's. */
-/* ⚠️ MEASURED, NOT `min-content`: every `.os-card` is a size container, which hides its content's width
-   from the grid. The page publishes `--d60-hoop-need` (Dash58: each card's width less its legend's box
-   plus the legend's natural width, a Range over its rows — which cannot feed back on the column). */
-/* ⚠️ AND CAPPED, so the RIGHT column never drops below what v59's right column needs: its title at the
-   19px floor plus "All n →" (19 × 15.2 + 90 = 379 → 380). The ref lets its right column go to 318 at
-   1280, where its own focus band wraps; here v59's right column stays unchanged, and where the cap
-   binds the hoop legends wrap their labels instead of being cut (the container query below). */
-.d58 .d58-body:has(> .d58-left > .d60-hoops) {
-  --d60-right-floor: 380px;
-  grid-template-columns:
-    minmax(min(calc(2 * var(--d60-hoop-need, 0px) + var(--d58-gap)), calc(100% - var(--d60-right-floor) - var(--d58-gap))), 1.32fr)
-    minmax(var(--d60-right-floor), 1fr);
-}
+/* ⚠️ RETIRED BY DASHBOARD v71: the hoop-need column floor (`--d60-hoop-need`). The querying grid is
+   v71's `1.72fr 1fr` (dash71.css), which gives the hoops more room than v60's split; a cramped card
+   still wraps its labels (the container query below) rather than cutting them. */
 .d60-hoops {
   flex: none;
   display: grid;
