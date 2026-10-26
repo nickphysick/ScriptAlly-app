@@ -64,8 +64,6 @@ export interface JourneyView {
    * would be wrong the moment a query is picked.
    */
   pickOnly?: boolean;
-  /** Contact list v25 F — the drawer's moment (shared/DrawerMoment), drawn at the top of the FIRST step only */
-  moment?: React.ReactNode;
   /** A box the review shows under its verdict, above YOUR ANSWERS — Log's "This is exactly your ‹name› package" (§A2). */
   reviewNote?: React.ReactNode;
   /**

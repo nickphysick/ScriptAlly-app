@@ -12,11 +12,11 @@
  */
 import React, { useLayoutEffect, useState } from "react";
 import { SidePanel } from "../../shell/SidePanel";
-import { QadHead } from "../../queryActions/QadHead";
+import { FlowHead, FLOW_WORDS } from "../../shared/FlowHead";
 import "../../queries/queryPanelHost.css";
 import "./agentPanel.css";
 
-export const ADD_AGENT_LINE = "Name and agency are enough to start. Everything else can wait for Housekeeping.";
+/* v25.1 B — ADD_AGENT_LINE retired with the ink head (FLOW_WORDS.agent carries the line) */
 
 /** ✕ is the editor's Escape, as Edit profile's is: a draft with answers asks before it goes */
 const escape = () => window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
@@ -44,8 +44,9 @@ export const AgentPanelNew: React.FC<{ over?: boolean }> = ({ over = false }) =>
       attrs={{ "data-ap": "panel-new", "data-ap-acting": "new", "data-ap-over": over ? "drawer" : undefined }}>
       <div className="qad-root qad-root--panel is-open apn-actroot" data-ap="act" data-ap-act="new">
         <div className="qad-drawer qad-drawer--panel" role="group" aria-label="Add an agent">
-          <QadHead onFrom={escape} eyebrow="NEW AGENT" title="Add an agent" onClose={escape}
-            who={<p className="apn-newline" data-ap="new-line">{ADD_AGENT_LINE}</p>} />
+          {/* Contact list v25.1 B — the head is the flow header: "Adding new agent" and its line (the ink head, its
+              eyebrow, quill and line are retired); ✕ is still the editor's Escape */}
+          <FlowHead title={FLOW_WORDS.agent.title} line={FLOW_WORDS.agent.line} onClose={escape} data={{ "data-ap": "new-head" }} />
           <div className="apn-actslot" data-ap-act-slot="" />
         </div>
       </div>

@@ -1,0 +1,17 @@
+/* Contact list v25.1 Part B — the flow's header (FlowHead.tsx): the band, made a header. */
+.flh {
+  position: relative; box-sizing: border-box; flex: none; display: flex; align-items: flex-start; gap: 12px;
+  padding: 20px 20px 18px 26px; background: #f3eee8; border-bottom: 1px solid #e7dfd4; color: #1c130f;
+}
+.flh .flh-tx { flex: 1 1 auto; min-width: 0; }
+.flh h3.flh-t { margin: 0; font: 400 26px/1.15 var(--sp-type) !important; font-family: var(--sp-type) !important; color: #1c130f; letter-spacing: 0; text-transform: none; }
+.flh p.flh-l { margin: 8px 0 0; font: italic 400 16px/1.5 var(--sp-serif) !important; color: #5b4f47; animation: flh-in 250ms ease-out both; }
+@keyframes flh-in { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
+.flh .flh-rt { flex: none; display: inline-flex; align-items: center; gap: 10px; margin-top: 2px; }
+.flh .flh-x {
+  all: unset; box-sizing: border-box; cursor: pointer; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%;
+  font: 400 22px/1 var(--sp-serif); color: #1c130f;
+}
+.flh .flh-x:hover { background: rgba(28, 19, 15, 0.06); }
+.flh .flh-x:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .flh p.flh-l { animation: none; } }
