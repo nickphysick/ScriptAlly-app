@@ -783,7 +783,21 @@
     "design-refs/query-centre-v150/screens/09-group-status-1280.png": "69d8ea405e875eeb47925023f1939085049d163566a3fd9a7755d64323216822",
     "design-refs/query-centre-v150/screens/09-group-status-1512.png": "aeffd72b9c08c3a40683b42df984bc28336ac77b2188620c1e6625265b83b095",
     "design-refs/query-centre-v150/screens/10-birdseye-card-1280.png": "35d469d5e00b147cacf505712d410644de1c0f07270a18dd8aaf5c7e61885297",
-    "design-refs/query-centre-v150/screens/10-birdseye-card-1512.png": "104c08e4b77cd9539b8fbcaf967c7c0f66bfc9a86131bbe0f3d0e896a8ec63f7"
+    "design-refs/query-centre-v150/screens/10-birdseye-card-1512.png": "104c08e4b77cd9539b8fbcaf967c7c0f66bfc9a86131bbe0f3d0e896a8ec63f7",
+    "design-refs/query-centre-v150-1/query-centre-v150-1.html": "7104a555c635d1aaff6f6d121ec30ed902ca4500f2c94a83c7fd789856874f48",
+    "design-refs/query-centre-v150-1/doodle-tile.svg": "c86595145f883b2be5dd6154ed958dacd6a3dcf4631298aa0052ee038f5b7a63",
+    "design-refs/query-centre-v150-1/screens/01-top-1280.png": "e6acda442372aaa3b9624d581ab38501b8e9148379e373fdf426afd10f397671",
+    "design-refs/query-centre-v150-1/screens/01-top-1512.png": "def37768ee83b026c784eb3233b8afc0f4c04ed217178c315246b7caf88c3f90",
+    "design-refs/query-centre-v150-1/screens/02-list-1280.png": "00becbc8274bd2bf827867f177c63de53a43bf5fd9eb56483c7da62ccf8b4c60",
+    "design-refs/query-centre-v150-1/screens/02-list-1512.png": "2ad2132b9f2354df6a94d634aa8316623992d31c67632ad6a26f6a725d5248d6",
+    "design-refs/query-centre-v150-1/screens/03-birdseye-hover-1280.png": "6171577ff61bd68f20a49a84eafa94c79a2a8c717b7160c51d4cd1657ba50ce8",
+    "design-refs/query-centre-v150-1/screens/03-birdseye-hover-1512.png": "0eebfa019f7d2469ae22a9d091ac0d06314a8681b2843ea727e6e2b268719cff",
+    "design-refs/query-centre-v150-1/screens/04-birdseye-group-menu-1280.png": "cff5133ea4fdd4e5dcc537b5a4d637bc19aa94a850589ec58d79ab1177ffaccf",
+    "design-refs/query-centre-v150-1/screens/04-birdseye-group-menu-1512.png": "2e6e7e98e7d53746bd1d848e3d8ad561040ba36203be3d6b05b4114a76ca12a4",
+    "design-refs/query-centre-v150-1/screens/05-full-list-1280.png": "db5d36ed0a97a6853cbfb1f628a583af157653cb7744ccdff957af3ff509c200",
+    "design-refs/query-centre-v150-1/screens/05-full-list-1512.png": "6e2dec3a0a9c81fd30bf198b29812e1ad5b664c89063c0293856f83728bc7b2f",
+    "design-refs/query-centre-v150-1/screens/06-full-birdseye-1280.png": "b7e87b6cc57936c8ca876f0f888ca5592aaacb43dddc53001c3b43efd94b7ea5",
+    "design-refs/query-centre-v150-1/screens/06-full-birdseye-1512.png": "1c1a07f9d44dece75900ec7fb8be7a61dd1794ebe4687286d50812f685a59ff2"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",

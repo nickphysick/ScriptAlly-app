@@ -304,3 +304,15 @@
   /* the search flexes, never under 200px (and no wider than the mock's 300) */
   .qc140-tb .qc150-bfind { flex: 1 1 260px; max-width: 300px; }
 }
+
+/* ══ Query Centre v150.1 (design-refs/query-centre-v150-1/) — SUPERSEDES v150 above where they differ ═════════════════
+   §1 · ONE WIDTH: the header card, "At a glance", "Your queries" and the list card share W = min(S − 48, 1200), centred
+   (S is the sheet). The list no longer steps wider than the blocks above it. Both tokens read the one value. */
+@media (min-width: 768px) {
+  .qcv-group.qcv-group.qcv-group {
+    --qc1501-w: min(calc(var(--hsheet-w) - 48px), 1200px);
+    --qc149-w: var(--qc1501-w);
+    --qc149-list: var(--qc1501-w);
+  }
+
+}
