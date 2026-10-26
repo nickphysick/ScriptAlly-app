@@ -690,7 +690,21 @@
     "design-refs/landing-hero-mobile-v3-1.html": "192b25f882a8233683256748953b73278b08bf7ab0f96eee60a80b8cbff25554",
     "design-refs/landing-hero-v4.html": "252494bfe70dcd6b84f97cbd36d79bb2e33f7a0ef66fac9262535aa763f7503e",
     "design-refs/landing-hero-v4-1.html": "a39bbbb70109c966a506a0bc8ac20e58a540fbe50e2d076d34811c342a6ab5ee",
-    "design-refs/landing-hero-mobile-v3-2.html": "6b7c8cff64b8c09163720836c2394cea431a0bf6c7afc28370e802fe1678b48a"
+    "design-refs/landing-hero-mobile-v3-2.html": "6b7c8cff64b8c09163720836c2394cea431a0bf6c7afc28370e802fe1678b48a",
+    "design-refs/dashboard-v71/dashboard-v71.html": "5b9a0c3f8ee87eeab32db812d178ee1bef04b4feb0ce0d9581a278ebff4635eb",
+    "design-refs/dashboard-v71/screens/ref-feed-open-1512x900@2x.png": "0d162488e7628b44e92111b393519e5c68835c61d98b6db7131dbb9d3011fcb7",
+    "design-refs/dashboard-v71/screens/ref-feedback-drawer-1512x900@2x.png": "6808b99366c0c3a012f45bfd51833c5d97e2973291ae0e2af48dfd70e64500da",
+    "design-refs/dashboard-v71/screens/ref-feedback-thanks-1512x900@2x.png": "62cdb13b476b9f9c342175a6e7c106ea0ff20b4c02d61dac57defac1af28bf5f",
+    "design-refs/dashboard-v71/screens/ref-founding-noted-1512x900@2x.png": "07f714cff6f537762ed4c36e164e8db3fb54ef1d214faa61422ee0d34b865293",
+    "design-refs/dashboard-v71/screens/ref-founding-sent-1512x900@2x.png": "03dad4f958fa51c96138c731562a3c4148f7e0cb27184965b81a71329ee1004e",
+    "design-refs/dashboard-v71/screens/ref-page-1280x800@2x.png": "5de14070c8528e138ec4ad0fe06cbb453ec0b657179fb700d6e028b55653de0b",
+    "design-refs/dashboard-v71/screens/ref-page-1288x660@2x.png": "ba01949aa92a2e89ca1c0b03177cc3a82ab41e8d5fcb32dfe738e62ce364cec2",
+    "design-refs/dashboard-v71/screens/ref-page-1366x650@2x.png": "426b51a24b22b42c6f3ef13a2c9a78669342804c3db6d3aec1088ef82d334a83",
+    "design-refs/dashboard-v71/screens/ref-page-1440x900@2x.png": "4dd1f9273a8064510e75f86500eb5149f6083730765624ef2252f20bfb1c06da",
+    "design-refs/dashboard-v71/screens/ref-page-1512x900@2x.png": "84e62d8ac86b5e620aee5ddd4a313c5e58a2d1f721c32982ef1ab34aeac1125c",
+    "design-refs/dashboard-v71/screens/ref-page-1920x1080@2x.png": "1a3717129277aeb9bc58cdb943442719560cc5e0dbbe2a11fb757d5b38085838",
+    "design-refs/dashboard-v71/screens/ref-task-close-1512x900@2x.png": "ad78acc1752565eb04fd83924d2e3b0da4c38c2635f13d568d0fb12f089a1572",
+    "design-refs/dashboard-v71/screens/ref-task-send-1512x900@2x.png": "0e0df347e8343e020e38f382d1243e615d8f014a2afc37df093a78b43224c7c7"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",

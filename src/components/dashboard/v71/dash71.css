@@ -1,0 +1,108 @@
+/* ══ DASHBOARD v71 — the desk header, the cycling task card, the founding writer card ═════════════
+   Ref: design-refs/dashboard-v71/dashboard-v71.html, read rendered (its CSS is layered patches).
+   On top of v58–v60. Loaded LAST (Dash58 imports it after dash60.css), so equal-specificity rules
+   here win ties against the earlier sheets.
+
+   ⚠️ brand.tsx forces a face on bare `p, span, div, button` and on every h1/h2/h3 at runtime,
+   injected last: every face named here is `!important`, and headings take two classes. */
+
+/* ── A · the header: a desk-ink panel ──────────────────────────────────────────────────────────
+   The panel reads `--ink-shell`, the shell's own ink (the ref draws #1d2432; the token is #1b2433).
+   ⚠️ THE TOKEN IS READ, NEVER RESTATED — the H1 lock compares the panel's computed background with
+   the token's, so a literal here goes red the day the shell's ink moves. */
+.d58 .d71-head {
+  position: relative;
+  box-sizing: border-box;
+  margin: var(--d71-head-top, 18px) 0 16px;
+  padding: 16px 28px 18px;
+  gap: 24px;
+  border-radius: 16px;
+  background: var(--ink-shell, #1b2433);
+  box-shadow: 0 8px 22px rgba(29, 36, 50, 0.22);
+}
+/* the terracotta rule on the panel's bottom inner edge, 28px in from each side */
+.d58 .d71-head::after {
+  content: "";
+  position: absolute;
+  left: 28px;
+  right: 28px;
+  bottom: 0;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: linear-gradient(90deg, #d9967a, transparent 60%);
+  opacity: 0.55;
+  pointer-events: none;
+}
+.d58 .d71-head .d58-eyebrow { color: #d9967a; }
+.d58 .d71-head .d58-title {
+  color: #f6f1e8;
+  font-size: clamp(34px, 2.9vw, 44px);
+  line-height: 1.08;
+}
+.d58 .d71-head .d58-byline::before { background: rgba(246, 241, 232, 0.4); }
+.d58 .d71-head .d58-byline::after { background: rgba(246, 241, 232, 0.18); }
+.d58 .d71-head .d58-byline > span { color: rgba(246, 241, 232, 0.75); }
+/* the loading page: the skeleton bars are cream on the ink, not ink on ink */
+.d58 .d71-head .d58-sk { background: rgba(246, 241, 232, 0.1); }
+
+/* the three buttons: one family, icon first */
+.d58 .d71-head .d58-btns { gap: 10px; }
+.d58 .d71-hb {
+  box-sizing: border-box;
+  height: 44px;
+  padding: 0 18px 0 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  border: 0;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 0 0 1px rgba(246, 241, 232, 0.18);
+  color: #f6f1e8;
+  font-family: var(--d58-serif) !important;
+  font-size: 15.5px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.14s ease, box-shadow 0.14s ease, transform 0.14s ease;
+}
+.d58 .d71-hb > span { font-family: inherit !important; }
+.d58 .d71-hb svg { flex: none; width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.d58 .d71-hb:hover { background: rgba(255, 255, 255, 0.1); box-shadow: inset 0 0 0 1px rgba(246, 241, 232, 0.32); }
+.d58 .d71-hb:focus-visible { outline: 2px solid #f4efe6; outline-offset: 2px; }
+.d58 .d71-hb--pri { background: #f4efe6; color: var(--d58-ink); box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25); }
+.d58 .d71-hb--pri svg { stroke: #a2452a; }
+.d58 .d71-hb--pri:hover { background: #fff; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25); transform: translateY(-1px); }
+
+/* first use: "Where do I start?" sits in the button row as a ghost on the ink */
+.d58 .d71-head .wds-btn {
+  height: 44px;
+  padding: 0 18px 0 7px;
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 0 0 1px rgba(246, 241, 232, 0.18);
+  color: #f6f1e8;
+  font-size: 15.5px;
+  font-weight: 600;
+}
+.d58 .d71-head .wds-btn:hover { background: rgba(255, 255, 255, 0.1); box-shadow: inset 0 0 0 1px rgba(246, 241, 232, 0.32); }
+.d58 .d71-head .wds-btn.is-open, .d58 .d71-head .wds-btn:focus-visible { box-shadow: inset 0 0 0 1px rgba(246, 241, 232, 0.32), 0 0 0 2px #f4efe6; }
+.d58 .d71-head .wds-qm { width: 30px; height: 30px; background: #f4efe6; }
+
+@media (max-width: 1400px) {
+  .d58 .d71-hb, .d58 .d71-head .wds-btn { height: 40px; font-size: 14.5px; }
+}
+/* below 1200px of window the two ghosts fold to 40px icon-only squares; the primary keeps its words */
+@media (max-width: 1199px) {
+  .d58 .d71-hb:not(.d71-hb--pri) { width: 40px; padding: 0; justify-content: center; }
+  .d58 .d71-hb:not(.d71-hb--pri) .d71-hbl { display: none; }
+}
+/* a short window: a tighter panel and a smaller title */
+@media (max-height: 780px) {
+  .d58 .d71-head { padding: 10px 24px 12px; margin-bottom: 14px; }
+  .d58 .d71-head .d58-title { font-size: 34px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .d58 .d71-hb { transition: none; }
+  .d58 .d71-hb--pri:hover { transform: none; }
+}

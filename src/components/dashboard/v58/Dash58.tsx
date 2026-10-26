@@ -56,6 +56,8 @@ import "./dash58.css";
 import "../v59/dash59.css";
 /* ⚠️ LAST: the bundle orders sheets by first import, and v60's rules win ties against v58's and v59's */
 import "../v60/dash60.css";
+/* ⚠️ AND v71 LAST OF ALL: its rules win ties against v58–v60's */
+import "../v71/dash71.css";
 
 export interface Dash58Props {
   loading: boolean;
