@@ -1,0 +1,134 @@
+[
+ {
+  "lock": "B1",
+  "where": "rows population",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "B1",
+  "where": "row 0",
+  "ok": false,
+  "detail": "{\"bg\":\"rgb(208, 122, 92)\",\"after\":\"\\\"!\\\"\",\"aw\":17,\"abg\":\"rgb(201, 118, 93)\"}"
+ },
+ {
+  "lock": "B1",
+  "where": "row 1",
+  "ok": false,
+  "detail": "{\"bg\":\"rgb(208, 122, 92)\",\"after\":\"\\\"!\\\"\",\"aw\":17,\"abg\":\"rgb(201, 118, 93)\"}"
+ },
+ {
+  "lock": "B1",
+  "where": "row 2",
+  "ok": false,
+  "detail": "{\"bg\":\"rgb(208, 122, 92)\",\"after\":\"\\\"!\\\"\",\"aw\":17,\"abg\":\"rgb(201, 118, 93)\"}"
+ },
+ {
+  "lock": "B1",
+  "where": "row 3",
+  "ok": false,
+  "detail": "{\"bg\":\"rgb(208, 122, 92)\",\"after\":\"\\\"!\\\"\",\"aw\":17,\"abg\":\"rgb(201, 118, 93)\"}"
+ },
+ {
+  "lock": "B1",
+  "where": "glance face 0 no badge",
+  "ok": false,
+  "detail": "{\"bg\":\"rgb(208, 122, 92)\",\"after\":\"none\",\"aw\":17,\"abg\":\"rgb(201, 118, 93)\"}"
+ },
+ {
+  "lock": "B1",
+  "where": "glance face 1 no badge",
+  "ok": false,
+  "detail": "{\"bg\":\"rgb(208, 122, 92)\",\"after\":\"none\",\"aw\":17,\"abg\":\"rgb(201, 118, 93)\"}"
+ },
+ {
+  "lock": "B1",
+  "where": "glance face 2 no badge",
+  "ok": false,
+  "detail": "{\"bg\":\"rgb(208, 122, 92)\",\"after\":\"none\",\"aw\":17,\"abg\":\"rgb(201, 118, 93)\"}"
+ },
+ {
+  "lock": "B1",
+  "where": "glance face 3 no badge",
+  "ok": false,
+  "detail": "{\"bg\":\"rgb(208, 122, 92)\",\"after\":\"none\",\"aw\":17,\"abg\":\"rgb(201, 118, 93)\"}"
+ },
+ {
+  "lock": "B1",
+  "where": "card head",
+  "ok": false,
+  "detail": "[{\"bg\":\"rgb(208, 122, 92)\",\"after\":\"\\\"!\\\"\",\"aw\":17,\"abg\":\"rgb(201, 118, 93)\"}]"
+ },
+ {
+  "lock": "B1",
+  "where": "cards population",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "B1",
+  "where": "card 0",
+  "ok": false,
+  "detail": "{\"bg\":\"rgb(208, 122, 92)\",\"after\":\"\\\"!\\\"\",\"aw\":17,\"abg\":\"rgb(201, 118, 93)\"}"
+ },
+ {
+  "lock": "B1",
+  "where": "card 1",
+  "ok": false,
+  "detail": "{\"bg\":\"rgb(208, 122, 92)\",\"after\":\"\\\"!\\\"\",\"aw\":17,\"abg\":\"rgb(201, 118, 93)\"}"
+ },
+ {
+  "lock": "B1",
+  "where": "card 2",
+  "ok": false,
+  "detail": "{\"bg\":\"rgb(208, 122, 92)\",\"after\":\"\\\"!\\\"\",\"aw\":17,\"abg\":\"rgb(201, 118, 93)\"}"
+ },
+ {
+  "lock": "B1",
+  "where": "card 3",
+  "ok": false,
+  "detail": "{\"bg\":\"rgb(208, 122, 92)\",\"after\":\"\\\"!\\\"\",\"aw\":17,\"abg\":\"rgb(201, 118, 93)\"}"
+ },
+ {
+  "lock": "B1",
+  "where": "book population",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "B1",
+  "where": "book 0",
+  "ok": false,
+  "detail": "{\"bg\":\"rgb(208, 122, 92)\",\"after\":\"\\\"!\\\"\",\"aw\":17,\"abg\":\"rgb(201, 118, 93)\"}"
+ },
+ {
+  "lock": "B1",
+  "where": "book 1",
+  "ok": false,
+  "detail": "{\"bg\":\"rgb(208, 122, 92)\",\"after\":\"\\\"!\\\"\",\"aw\":17,\"abg\":\"rgb(201, 118, 93)\"}"
+ },
+ {
+  "lock": "B1",
+  "where": "book 2",
+  "ok": false,
+  "detail": "{\"bg\":\"rgb(208, 122, 92)\",\"after\":\"\\\"!\\\"\",\"aw\":17,\"abg\":\"rgb(201, 118, 93)\"}"
+ },
+ {
+  "lock": "B1",
+  "where": "book 3",
+  "ok": false,
+  "detail": "{\"bg\":\"rgb(208, 122, 92)\",\"after\":\"\\\"!\\\"\",\"aw\":17,\"abg\":\"rgb(201, 118, 93)\"}"
+ },
+ {
+  "lock": "B1",
+  "where": "wide head 0",
+  "ok": false,
+  "detail": "{\"bg\":\"rgb(208, 122, 92)\",\"after\":\"\\\"!\\\"\",\"aw\":17,\"abg\":\"rgb(201, 118, 93)\"}"
+ },
+ {
+  "lock": "B1",
+  "where": "no rust disc",
+  "ok": false,
+  "detail": "6"
+ }
+]

@@ -1,0 +1,332 @@
+[
+ {
+  "lock": "A7",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "53 rows"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 cv25-agent-06 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 cv25-agent-08 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 cv25-agent-09 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 cv25-agent-07 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 cv25-agent-05 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 cv25-agent-13 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 cv25-agent-10 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 cv25-agent-04 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 cv25-agent-11 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 cv25-agent-03 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 cv25-agent-14 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 msv12-agent-4 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 seed-cal-near tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs 4"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 seed-cal-soon tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs 4"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 seed-cal-passed20 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs 4"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 seed-agent-12 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs 2"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 qc150l9-ag tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs 4"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 seed-cal-bang tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs 4"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 seed-agent-9 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs 4"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 seed-agent-2 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs 2"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 thin-ag-remind tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs 4"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 seed-cal-passed865 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs 4"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 seed-agent-1 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs 1"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 seed-agent-nowin-1 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs 3"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 rj-agent-2 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs 4"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 clv-fx-reopen tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 msv12-agent-1 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 clv-fx-stub0 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 seed-agent-11 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs 1"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 seed-agent-7 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs 2"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 seed-agent-8 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs 3"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 clv-fx-stale tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs 4"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 seed-agent-4 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs 4"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 seed-agent-6 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs 1"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 seed-agent-nowin-2 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs 3"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 msv12-agent-5 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 rj-agent-3 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs 4"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 thin-ag-chase tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs 4"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 msv12-agent-6 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 rej-agent-1 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs 4"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 thin-ag-gap tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs 4"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 seed-agent-3 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs 3"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 msv12-agent-2 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 clv181-bare tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 clv-fx-never tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 rj-agent-1 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs 4"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 thin-ag-close tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs 4"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 seed-agent-10 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs 5"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 msv12-agent-3 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 seed-agent-5 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs 5"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 cv25-agent-12 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 cv25-agent-02 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 cv25-agent-01 tally",
+  "ok": false,
+  "detail": "0/0 \"null\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "53 rows"
+ }
+]

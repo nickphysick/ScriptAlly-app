@@ -1,0 +1,92 @@
+[
+ {
+  "lock": "C2",
+  "where": "population (fields from source)",
+  "ok": true,
+  "detail": "name, agency, city, email, website, mswl, wishlist, materials, weeks, nrn, method, door, country, wishlist-count, compose"
+ },
+ {
+  "lock": "C2",
+  "where": "1512 edit mode in the card",
+  "ok": true,
+  "detail": "[\"who\",\"want\",\"work\",\"reach\",\"notes\"]"
+ },
+ {
+  "lock": "C2",
+  "where": "1512 four sections",
+  "ok": true,
+  "detail": "who,want,work,reach,notes"
+ },
+ {
+  "lock": "C2",
+  "where": "1512 band",
+  "ok": true,
+  "detail": "Editing Clara×"
+ },
+ {
+  "lock": "C2",
+  "where": "1512 section heads typewriter",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "C2",
+  "where": "1512 every old field",
+  "ok": true,
+  "detail": "15 present"
+ },
+ {
+  "lock": "C2",
+  "where": "1512 Reopens when Closed",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "C2",
+  "where": "1512 × asks to discard",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C2",
+  "where": "1280 edit mode in the card",
+  "ok": true,
+  "detail": "[\"who\",\"want\",\"work\",\"reach\",\"notes\"]"
+ },
+ {
+  "lock": "C2",
+  "where": "1280 four sections",
+  "ok": true,
+  "detail": "who,want,work,reach,notes"
+ },
+ {
+  "lock": "C2",
+  "where": "1280 band",
+  "ok": true,
+  "detail": "Editing Clara×"
+ },
+ {
+  "lock": "C2",
+  "where": "1280 section heads typewriter",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "C2",
+  "where": "1280 every old field",
+  "ok": true,
+  "detail": "15 present"
+ },
+ {
+  "lock": "C2",
+  "where": "1280 Reopens when Closed",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "C2",
+  "where": "1280 × asks to discard",
+  "ok": true,
+  "detail": "true"
+ }
+]

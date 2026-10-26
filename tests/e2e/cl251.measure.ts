@@ -198,8 +198,11 @@ test("CL251-B1 B2 B3 · the headers: Logging new query, Recording response and i
   B3.check("population", !!ag, `the new-agent panel ${ag ? "open" : "missing"}`);
   B3.check("title", ag?.title === "Adding new agent", `title "${ag?.title}"`);
   B3.check("line", ag?.line === AGENT_LINE, `line "${ag?.line?.slice(0, 50)}…"`);
-  const tabs = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-ap='panel-new'] [data-ae='tabs'] [role='tab']")].map((t) => t.textContent?.trim()));
-  B3.check("the editor's tabs unchanged", tabs.join("|").startsWith("Details") && tabs.length === 3, tabs.join(" · "));
+  /* re-pointed (Contact list v25.2 C2): the new-agent state is the card's edit mode under its v25.1 header — the old
+     editor's three tabs are its sections now (Who they are, What they're looking for, How to query them, How to reach
+     them). What B3 guards is that the editor under the header is whole: the sections, and the name field first. */
+  const tabs = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-ap='panel-new'] [data-cl252='edit-mode'] [data-cl252='sec']")].map((t) => t.dataset.sec ?? ""));
+  B3.check("the editor under the header is whole", ["who", "want", "work", "reach"].every((k) => tabs.includes(k)) && !!(await page.$("[data-ap='panel-new'] [data-ae='name']")), tabs.join(" · "));
   doneAll([B1, BASE ? 0 : 12], [B2, BASE ? 0 : 14], [B3, BASE ? 0 : 4]);
 });
 
@@ -262,8 +265,10 @@ test("CL251-E1 E2 E3 · no Submissions; Closed to queries; genres on one line, m
       const heads = [...document.querySelectorAll<HTMLElement>("[data-cl24='heads'] [role='columnheader']")].filter(vis).map((h) => h.innerText.replace(/[↓↑]/g, "").trim().toLowerCase());
       const rows = [...document.querySelectorAll<HTMLElement>("[data-cl24='row']")].filter(vis).map((r) => {
         const g = r.querySelector<HTMLElement>("[data-cl24='genres']")!;
-        const tags = [...g.querySelectorAll<HTMLElement>("[data-cl251='genre']")];
-        const more = g.querySelector<HTMLElement>("[data-cl251='genre-more']");
+        /* re-pointed (Contact list v25.2 A3): the genres are the shared pills (data-cl252="pill"/"pill-more"); the law —
+           one line, matches first and ticked, shown + n = the agent's genres — is unchanged */
+        const tags = [...g.querySelectorAll<HTMLElement>("[data-cl252='pill']")];
+        const more = g.querySelector<HTMLElement>("[data-cl252='pill-more']");
         const rate = r.querySelector<HTMLElement>("[data-cl251='rating']");
         return {
           id: r.dataset.id ?? "", k: r.dataset.k ?? "",
@@ -271,7 +276,8 @@ test("CL251-E1 E2 E3 · no Submissions; Closed to queries; genres on one line, m
           hits: tags.map((t) => t.hasAttribute("data-hit")), ticks: tags.map((t) => /✓/.test(t.textContent ?? "")),
           shown: tags.length, more: Number(more?.dataset.n ?? 0), add: !!g.querySelector("[data-cl24='add-genres']"),
           closed: !!r.querySelector("[data-cl251='closed-tag']"), log: !!r.querySelector("[data-cl24='log']"), door: !!r.querySelector("[data-cl24='door']"),
-          stars: rate ? rate.querySelectorAll(".cl251-stars i.on").length : null, unrated: rate ? /Not rated/.test(rate.innerText) : null,
+          /* re-pointed (v25.2 A7): the rating is the tally — lit bars, and "—" when unrated (was stars and "Not rated") */
+          stars: rate ? rate.querySelectorAll("[data-cl252='bar'].on").length : null, unrated: rate ? rate.querySelector("[data-cl252='tally-label']")?.textContent === "—" : null,
         };
       });
       return { heads, rows };
@@ -311,8 +317,9 @@ test("CL251-E4 E5 · every heading sorts, both ways; the pill and the count line
   const read = () => page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-cl24='table'] [data-cl24='group']")].filter((g) => g.offsetHeight).map((g) => ({
     k: g.dataset.k ?? "",
     rows: [...g.querySelectorAll<HTMLElement>("[data-cl24='row']")].map((r) => {
-      const wk = /About (\d+) weeks?/.exec(r.querySelector<HTMLElement>("[data-col='3']")?.innerText ?? "");
-      return { id: r.dataset.id ?? "", name: r.querySelector(".cl24-whot b")?.textContent ?? "", weeks: wk ? Number(wk[1]) : null, hits: r.querySelectorAll("[data-cl251='genre'][data-hit]").length, stage: r.querySelector(".cl24-ql")?.textContent?.trim() ?? "" };
+      /* re-pointed (v25.2 A4/A3/A5): "~6 wks" (was "About 6 weeks"), the shared pills, the status pill — same facts read */
+      const wk = /~(\d+) wks?/.exec(r.querySelector<HTMLElement>("[data-col='3']")?.innerText ?? "");
+      return { id: r.dataset.id ?? "", name: r.querySelector(".cl24-whot b")?.textContent ?? "", weeks: wk ? Number(wk[1]) : null, hits: r.querySelectorAll("[data-cl252='pill'][data-hit]").length, stage: r.querySelector("[data-cl252='qpill']")?.textContent?.trim() ?? "" };
     }),
   })));
   const pillAndLine = () => page.evaluate(() => {

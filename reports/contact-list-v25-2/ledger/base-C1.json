@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "C1",
+  "where": "population",
+  "ok": true,
+  "detail": "cv25-agent-05"
+ },
+ {
+  "lock": "C1",
+  "where": "wishlist opens in the card",
+  "ok": false,
+  "detail": "{\"inCard\":false,\"legacy\":3,\"panels\":0}"
+ },
+ {
+  "lock": "C1",
+  "where": "genres open in the card",
+  "ok": false,
+  "detail": "{\"inCard\":false,\"legacy\":3,\"panels\":0}"
+ },
+ {
+  "lock": "C1",
+  "where": "replies open in the card",
+  "ok": false,
+  "detail": "{\"inCard\":false,\"legacy\":3,\"panels\":0}"
+ },
+ {
+  "lock": "C1",
+  "where": "replies warning",
+  "ok": false,
+  "detail": ""
+ }
+]

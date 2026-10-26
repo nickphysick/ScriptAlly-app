@@ -117,7 +117,8 @@ test("CL24-B1 B2 B3 · the switch in the bar; the grouped table; the cards", asy
       /* re-pointed (v25.1 E1/E3): Added gave way to Your rating (col 5), and at ≤1440 only the last column drops */
       return { replies: shown("3"), added: shown("5") };
     });
-    if (vp.width <= 1440) B2.check(`${at} Replies in shown, Your rating hidden`, cols.replies && !cols.added, JSON.stringify(cols));
+    /* re-pointed (v25.2 A1): at ≤1440 of window Replies in drops as well as Your rating — Agent · What they want · Your query */
+    if (vp.width <= 1440) B2.check(`${at} Replies in and Your rating hidden`, !cols.replies && !cols.added, JSON.stringify(cols));
     else B2.check(`${at} Replies in and Your rating shown`, cols.replies && cols.added, JSON.stringify(cols));
     const tops = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-cl24='bar'] > *")].filter((e) => e.getBoundingClientRect().width > 0).map((e) => { const r = e.getBoundingClientRect(); return r.top + r.height / 2; }));
     B2.check(`${at} the toolbar is one line`, tops.length >= 4 && Math.max(...tops) - Math.min(...tops) < 2 && near(bar?.h, 52), `centres ${tops.map((t) => t.toFixed(1)).join(",")} bar ${bar?.h}`);

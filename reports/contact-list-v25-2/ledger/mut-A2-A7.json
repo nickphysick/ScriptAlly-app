@@ -1,0 +1,332 @@
+[
+ {
+  "lock": "A7",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "53 rows"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 cv25-agent-06 tally",
+  "ok": true,
+  "detail": "0/5 \"—\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 cv25-agent-08 tally",
+  "ok": true,
+  "detail": "0/5 \"—\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 cv25-agent-09 tally",
+  "ok": true,
+  "detail": "0/5 \"—\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 cv25-agent-07 tally",
+  "ok": true,
+  "detail": "0/5 \"—\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 cv25-agent-05 tally",
+  "ok": true,
+  "detail": "0/5 \"—\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 cv25-agent-13 tally",
+  "ok": true,
+  "detail": "0/5 \"—\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 cv25-agent-10 tally",
+  "ok": true,
+  "detail": "0/5 \"—\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 cv25-agent-04 tally",
+  "ok": true,
+  "detail": "0/5 \"—\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 cv25-agent-11 tally",
+  "ok": true,
+  "detail": "0/5 \"—\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 cv25-agent-03 tally",
+  "ok": true,
+  "detail": "0/5 \"—\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 cv25-agent-14 tally",
+  "ok": true,
+  "detail": "0/5 \"—\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 msv12-agent-4 tally",
+  "ok": true,
+  "detail": "0/5 \"—\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 seed-cal-near tally",
+  "ok": true,
+  "detail": "4/5 \"4/5\" vs 4"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 seed-cal-soon tally",
+  "ok": true,
+  "detail": "4/5 \"4/5\" vs 4"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 seed-cal-passed20 tally",
+  "ok": true,
+  "detail": "4/5 \"4/5\" vs 4"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 seed-agent-12 tally",
+  "ok": true,
+  "detail": "2/5 \"2/5\" vs 2"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 qc150l9-ag tally",
+  "ok": true,
+  "detail": "4/5 \"4/5\" vs 4"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 seed-cal-bang tally",
+  "ok": true,
+  "detail": "4/5 \"4/5\" vs 4"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 seed-agent-9 tally",
+  "ok": true,
+  "detail": "4/5 \"4/5\" vs 4"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 seed-agent-2 tally",
+  "ok": true,
+  "detail": "2/5 \"2/5\" vs 2"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 thin-ag-remind tally",
+  "ok": true,
+  "detail": "4/5 \"4/5\" vs 4"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 seed-cal-passed865 tally",
+  "ok": true,
+  "detail": "4/5 \"4/5\" vs 4"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 seed-agent-1 tally",
+  "ok": true,
+  "detail": "1/5 \"1/5\" vs 1"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 seed-agent-nowin-1 tally",
+  "ok": true,
+  "detail": "3/5 \"3/5\" vs 3"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 rj-agent-2 tally",
+  "ok": true,
+  "detail": "4/5 \"4/5\" vs 4"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 clv-fx-reopen tally",
+  "ok": true,
+  "detail": "0/5 \"—\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 msv12-agent-1 tally",
+  "ok": true,
+  "detail": "0/5 \"—\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 clv-fx-stub0 tally",
+  "ok": true,
+  "detail": "0/5 \"—\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 seed-agent-11 tally",
+  "ok": true,
+  "detail": "1/5 \"1/5\" vs 1"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 seed-agent-7 tally",
+  "ok": true,
+  "detail": "2/5 \"2/5\" vs 2"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 seed-agent-8 tally",
+  "ok": true,
+  "detail": "3/5 \"3/5\" vs 3"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 clv-fx-stale tally",
+  "ok": true,
+  "detail": "4/5 \"4/5\" vs 4"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 seed-agent-4 tally",
+  "ok": true,
+  "detail": "4/5 \"4/5\" vs 4"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 seed-agent-6 tally",
+  "ok": true,
+  "detail": "1/5 \"1/5\" vs 1"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 seed-agent-nowin-2 tally",
+  "ok": true,
+  "detail": "3/5 \"3/5\" vs 3"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 msv12-agent-5 tally",
+  "ok": true,
+  "detail": "0/5 \"—\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 rj-agent-3 tally",
+  "ok": true,
+  "detail": "4/5 \"4/5\" vs 4"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 thin-ag-chase tally",
+  "ok": true,
+  "detail": "4/5 \"4/5\" vs 4"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 msv12-agent-6 tally",
+  "ok": true,
+  "detail": "0/5 \"—\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 rej-agent-1 tally",
+  "ok": true,
+  "detail": "4/5 \"4/5\" vs 4"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 thin-ag-gap tally",
+  "ok": true,
+  "detail": "4/5 \"4/5\" vs 4"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 seed-agent-3 tally",
+  "ok": true,
+  "detail": "3/5 \"3/5\" vs 3"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 msv12-agent-2 tally",
+  "ok": true,
+  "detail": "0/5 \"—\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 clv181-bare tally",
+  "ok": true,
+  "detail": "0/5 \"—\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 clv-fx-never tally",
+  "ok": true,
+  "detail": "0/5 \"—\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 rj-agent-1 tally",
+  "ok": true,
+  "detail": "4/5 \"4/5\" vs 4"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 thin-ag-close tally",
+  "ok": true,
+  "detail": "4/5 \"4/5\" vs 4"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 seed-agent-10 tally",
+  "ok": true,
+  "detail": "5/5 \"5/5\" vs 5"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 msv12-agent-3 tally",
+  "ok": true,
+  "detail": "0/5 \"—\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 seed-agent-5 tally",
+  "ok": true,
+  "detail": "5/5 \"5/5\" vs 5"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 cv25-agent-12 tally",
+  "ok": true,
+  "detail": "0/5 \"—\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 cv25-agent-02 tally",
+  "ok": true,
+  "detail": "0/5 \"—\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1512 cv25-agent-01 tally",
+  "ok": true,
+  "detail": "0/5 \"—\" vs null"
+ },
+ {
+  "lock": "A7",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "53 rows"
+ }
+]
