@@ -1270,6 +1270,11 @@ service cloud.firestore {
     // Nick sets `status`, `title` and `statusAt` by hand in the console (betaFeedbackCore.ts documents them).
     match /betaFeedback/{id} { allow read: if isAdmin() || (isSignedIn() && resource.data.uid == request.auth.uid); allow write: if false; }
 
+    // ROUTE: Founding writer stats (Dashboard v93) — NO client writes. The foundingStats functions recompute every
+    // writer's contributions, tier and standing from betaFeedback (Admin SDK) on any feedback write and nightly. A
+    // writer reads their OWN doc; an admin reads all.
+    match /foundingStats/{userId} { allow read: if isAdmin() || (isSignedIn() && request.auth.uid == userId); allow write: if false; }
+
     // ROUTE: Weekly pulse (Dashboard v59) — NO client writes. The founding writer panel's faces post
     // to the `sendWeeklyPulse` callable, which sets `betaPulse/{uid}_{week}` via the Admin SDK. A
     // writer reads their own weeks (the panel's history dots); an admin reads all.

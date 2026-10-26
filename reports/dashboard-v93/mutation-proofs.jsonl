@@ -5,3 +5,11 @@
 {"lock":"A2","mutation":"A2-tall (16px band padding)","result":"RED band 52.0 against 46.0, every kind"}
 {"lock":"A3","mutation":"A3-tall-body (60px body padding)","result":"RED send d71-tb 152-166/145"}
 {"lock":"A3","mutation":"A3-label (the expected label centred at the bar's end, as v77)","result":"RED nudge: d71-wexp outside the card and over Today, items 11, 12, …"}
+{"lock":"B (unit)","mutation":"(natural) the module absent","result":"RED Cannot find module './foundingContributions'"}
+{"lock":"B (unit)","mutation":"no weekly cap / counted:false ignored / a level may fall / a four-word floor","result":"RED 4 / 1 / 2 / 1 failed of 20"}
+{"lock":"B (unit)","mutation":"topPct rounded to the nearest 5, not up","result":"survived the first suite (2 of 11 → 20 either way); a 3-of-11 case added, then RED 1 failed"}
+{"lock":"B (rules)","mutation":"(natural) no rule (default deny)","result":"RED the owner reads their own; an admin reads it"}
+{"lock":"B (rules)","mutation":"read allowed to any signed-in writer","result":"RED another writer cannot read it"}
+{"lock":"B (emulator)","mutation":"the store ignores stored peaks","result":"RED built is worth four, and the level never falls"}
+{"lock":"B (trigger)","mutation":"Functions emulator, demo project","result":"a status set on a betaFeedback doc wrote foundingStats {contributions 1, fledgling} within 1s"}
+{"lock":"B3 (unit)","mutation":"the client's Scout minimum drifted to 7","result":"RED the tier table is the server's"}
