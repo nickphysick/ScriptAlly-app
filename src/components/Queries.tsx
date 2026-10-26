@@ -104,7 +104,7 @@ import { QcHeader149, QcViewRow149 } from "./queries/centre/QcHeader149";
 import { QcStatCards150 } from "./queries/centre/QcStatCards150";
 import { beGroups, closedCount as beClosedCount, groupPhrase, readView150, sortPhrase, statCards, writeView150, type BeGroup, type BeSort, type QcView150 } from "../lib/qc150";
 import { QcBePills150, QcBirds150 } from "./queries/centre/QcBirds150";
-import { QcListTitle150 } from "./queries/centre/QcListTitle150";
+import { QcListTitle150, QcViewSwitch150 } from "./queries/centre/QcListTitle150";
 import { QC_SORT_FIELDS } from "../lib/cardsSort";
 import { GROUP_BY_OPTIONS } from "../lib/qcCalView";
 import { eyeRows } from "../lib/qcBirdsEye";
@@ -7938,6 +7938,8 @@ export const Queries: React.FC<{
                       /* the list tray's own action: the row's next move, through its panel */
                       onAct={(id) => { const r = qcById.get(id); const req = r ? trayOpen(null, r) : null; if (req) stepRow(req); else onOpenQuery?.(id); }} />
                   ) : null}
+                  /* v150.1 §7 — in full screen the switch moves into the toolbar (the Your queries block is hidden there) */
+                  fullSwitch={<QcViewSwitch150 compact view={qcView150} onView={pickView150} loading={showGridSkeleton} />}
                   birdsTools={qcView150 === "birds" ? <QcBePills150 group={qcBeGroup} onGroup={setQcBeGroup} sort={qcBeSort} onSort={setQcBeSort} loading={showGridSkeleton} /> : null}
                   viewRow={<QcListTitle150 view={qcView150} onView={pickView150} loading={showGridSkeleton}
                     list={showGridSkeleton ? null : qc150ListLine} birds={showGridSkeleton ? null : { n: qc150BeLive }} />}

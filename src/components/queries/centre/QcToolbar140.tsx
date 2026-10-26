@@ -152,10 +152,12 @@ export interface QcToolbar140Props {
   findInBar?: boolean;
   /** v150 D8 — Birds-eye's Group and Sort pills, drawn in place of the list's (their settings are Birds-eye's own) */
   birdsTools?: React.ReactNode;
+  /** v150.1 §7 — the compact List | Birds-eye switch, first in the full-screen toolbar */
+  switcher?: React.ReactNode;
 }
 
 export const QcToolbar140: React.FC<QcToolbar140Props> = ({
-  rootRef, pinned, loading = false, groupBy, onGroup, density, onDensity, heard, find, onFind, findRef, filterCount, onClearFilters, filtersMenu, onPin, sort, onSort, findInBar = false, birdsTools = null,
+  rootRef, pinned, loading = false, groupBy, onGroup, density, onDensity, heard, find, onFind, findRef, filterCount, onClearFilters, filtersMenu, onPin, sort, onSort, findInBar = false, birdsTools = null, switcher = null,
 }) => {
   const pop = usePopover<Qc140Pop>();
   const rowRef = useRef<HTMLDivElement>(null);
@@ -182,6 +184,8 @@ export const QcToolbar140: React.FC<QcToolbar140Props> = ({
             <input ref={findRef} value={find} onChange={(e) => onFind(e.target.value)} placeholder="Find an agent or agency" aria-label="Find an agent or agency" autoComplete="off" disabled={loading} />
           </label>
         ) : null}
+        {/* v150.1 §7 — in full screen the List | Birds-eye switch is the toolbar's first item, before the search */}
+        {pinned ? switcher : null}
         {pinned && onFind ? (
           <label className="qc140-find qc144-tfind" data-qc140="find" data-qc138="search" data-qc144="find-tb">
             {FIND_ICON}

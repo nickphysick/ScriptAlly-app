@@ -118,8 +118,9 @@ export const QcBirds150: React.FC<{
 
   /* ── the one offset, and applying it ── */
   const off = useRef(0);
-  /** the date at the view's left edge, so a re-laid scale (a filter, a resize) keeps the reader where they were */
-  const leftDate = useRef<number | null>(null);
+  /** v150.1 §7 — the date at the view's CENTRE, so a re-laid scale (full screen, a resize, a filter) keeps the reader
+      where they were: entering or leaving full screen keeps the centre date and the zoom */
+  const centreDate = useRef<number | null>(null);
   const placed = useRef(false);
   const anim = useRef(0);
   const W = scale?.width ?? 0;
@@ -129,7 +130,7 @@ export const QcBirds150: React.FC<{
     if (!root || !ax || !scale) return;
     off.current = clamp(off.current);
     const o = off.current;
-    leftDate.current = scale.r0 + (o / scale.ppd) * DAY;
+    centreDate.current = scale.r0 + ((o + ax.clientWidth / 2) / scale.ppd) * DAY;
     root.querySelectorAll<HTMLElement>("[data-qc150-tl]").forEach((el) => { el.scrollLeft = o; });
     const V = ax.clientWidth;
     /* a measured width can be a pixel off the painted one, so "wholly in view" keeps 2px clear of each edge */
@@ -163,8 +164,8 @@ export const QcBirds150: React.FC<{
   useLayoutEffect(() => {
     if (!scale) return;
     if (pendingCentre.current != null) { off.current = beX(scale, pendingCentre.current) - viewW / 2; pendingCentre.current = null; }
-    else if (!placed.current || leftDate.current == null) { off.current = home(); placed.current = true; }
-    else off.current = beX(scale, leftDate.current);
+    else if (!placed.current || centreDate.current == null) { off.current = home(); placed.current = true; }
+    else off.current = beX(scale, centreDate.current) - viewW / 2;
     apply();
   }, [scale, laid, home, apply, viewW]);
 

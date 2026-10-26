@@ -430,6 +430,8 @@ export interface QcList138Props {
   /** v150 D — Birds-eye: drawn in place of the headings and rows; its pills replace the bar's Group and Sort */
   birds?: React.ReactNode;
   birdsTools?: React.ReactNode;
+  /** v150.1 §7 — the compact switch for the full-screen toolbar */
+  fullSwitch?: React.ReactNode;
   /** v149 B1 — the navy bar's "heard back" figure */
   heard?: { pct: number; of: number; total: number };
 }
@@ -441,7 +443,7 @@ export const ARRIVAL_140 = { ms: 420, easing: "cubic-bezier(.2,.8,.2,1)", from: 
 
 export const QcList138: React.FC<QcList138Props> = ({
   groups, groupBy, onGroup, toneOf, total, shown, filterCount, onClearFilters, filtersMenu, applied, band = null, loading = false, stickyOn = true, sort, density, onDensity, full, onFull,
-  selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onAddDate, twinTag = NO_TWINS, onOpenPackage, find = "", onFind, findRef, viewRow, ringId = null, folded, onFold, loadPeek, onTimeline, selected, onPick, entering = false, deadEnd = null, practice = null, arrival, scrollMemory, heard, onSort, findInBar = false, birds = null, birdsTools = null,
+  selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onAddDate, twinTag = NO_TWINS, onOpenPackage, find = "", onFind, findRef, viewRow, ringId = null, folded, onFold, loadPeek, onTimeline, selected, onPick, entering = false, deadEnd = null, practice = null, arrival, scrollMemory, heard, onSort, findInBar = false, birds = null, birdsTools = null, fullSwitch = null,
 }) => {
   /* §H — the order things land in: bands and rows, one sequence, the first 16 staggered and the rest with the last */
   let seq = 0;
@@ -683,7 +685,7 @@ export const QcList138: React.FC<QcList138Props> = ({
           <QcToolbar140 rootRef={boxRef} pinned={full} loading={loading} groupBy={groupBy} onGroup={onGroup} density={density} onDensity={onDensity}
             heard={heard}
             find={find} onFind={onFind} findRef={findRef} filterCount={filterCount} onClearFilters={onClearFilters ?? (() => {})}
-            filtersMenu={filtersMenu ?? (() => null)} onPin={onFull} sort={sort} onSort={(s) => onSort?.(s)} findInBar={findInBar} birdsTools={birdsTools} />
+            filtersMenu={filtersMenu ?? (() => null)} onPin={onFull} sort={sort} onSort={(s) => onSort?.(s)} findInBar={findInBar} birdsTools={birdsTools} switcher={fullSwitch} />
           {applied}
         </div>
       </div>
