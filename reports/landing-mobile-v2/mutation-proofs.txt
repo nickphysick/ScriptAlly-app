@@ -1,0 +1,22 @@
+LV1 on LV1 →  1 failed | Error: expect(received).toBe(expected) // Object.is equality
+LV1b on LV1 →  1 failed | Error: @390: min((innerHeight − 60) / 2, 420)
+LV1c on LV1 →  1 failed | Error: @390: picture 3 is the visible one
+LV1d on LV1 →  1 failed | Error: @390: three steps filled
+LV2 on LV2 →  1 failed | Error: @390: no horizontal scroller in the features
+LV2b on LV2 →  1 failed | Error: @390: the page body never scrolls sideways
+LV3 on LV3 →  1 failed | Error: expect(received).toBe(expected) // Object.is equality
+LV3b on LV3 →  1 failed | Error: dot 2 is the active one, an 18px pink pill
+LV3c on LV3 →  1 failed | Error: the headings are white
+LV3d on LV3 →  1 failed | Error: exactly one horizontal carousel
+LV4 on LV4 →  1 failed | Error: hidden while the hero is on screen
+LV4c on LV4 →  1 failed | Error: the Join button is pink
+LV4d on LV4 →  1 failed | Error: no number before the live figure
+LV4e on LV4 →  1 failed | Error: it takes the reader to the founding sign-up
+LV5 on LV5 →  1 failed | Error: the corners are still rounded short of the bar
+LV6 on LV6 →  1 failed | Error: no cross-fade on the picture (0.45s)
+LV6b on LV6 →  1 failed | Error: no slide on the join bar (0.35s)
+V1p on V1 →  1 failed | Error: @390: the phone's vision band is navy
+LV1e on LV1 →  1 failed | Error: @390: after the story the panel has let go of the bar
+LV4b on LV4 →  1 failed | Error: hidden while the closing card is on screen
+LV4f on LV4 →  1 failed | Error: not on /about
+done

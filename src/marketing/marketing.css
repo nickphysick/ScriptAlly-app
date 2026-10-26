@@ -2872,51 +2872,66 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 }
 
 /* ══════════════ The landing page on phones, below the hero (landing on phones v1, 26 Oct) ══════════════
-   ref design-refs/landing-mobile-v1.html: `.swipe`/`.rail`/`.fc`/`.dots`, `.vis`/`.vpt.row`, and
-   `.close`/`.ccard`. Every value is the ref's. Only phones render these classes (`usePhone`), so none
+   ref design-refs/landing-mobile-v1.html for `.close`/`.ccard`, and landing-mobile-v2.html for the
+   feature story and the navy vision (below). Every value is the ref's. Only phones render these classes (`usePhone`), so none
    of them can reach the desktop layout.
    ⚠️ HEADINGS READ THE FACE TOKENS WITH `!important` AND TWO CLASSES: `brand.tsx` forces every bare
    h2/h3 to the brand family at runtime, and a single-class rule loses between two important
    declarations. Spans and paragraphs declare their family too, for the same file's sake. */
 
-/* The six features: one horizontal strip. The rail runs edge to edge (the section has no side
-   padding; the head and the rail carry the ref's 22px themselves — the ref's −22px margin would be a
-   ninth negative margin in a sheet that holds them to eight), snaps each card to the centre, and
-   shows no scrollbar. It never declares
-   `scroll-behavior: smooth`, so the keyboard's move is the only motion and reduced motion can stop it. */
-.mk-swipeband { scroll-margin-top: var(--mk-nav-h); }
-.mk-swipehead { display: flex; justify-content: space-between; align-items: baseline; margin: 0 0 12px; padding: 0 22px; }
-.mk-swipehead span {
-  font: 500 11px/1 var(--mk-f-mono); letter-spacing: .1em; text-transform: uppercase; color: rgba(28, 19, 15, .5);
-}
-.mk-rail {
-  display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory;
-  padding: 0 22px 6px; scrollbar-width: none; overscroll-behavior-x: contain;
-}
-.mk-rail::-webkit-scrollbar { display: none; }
-.mk-rail:focus-visible { outline: 2px solid var(--mk-rust); outline-offset: 2px; }
-.mk-fc {
-  flex: 0 0 300px; scroll-snap-align: center; background: #fff; border-radius: 16px; overflow: hidden;
-  box-shadow: 0 1px 0 rgba(28, 19, 15, .06), 0 10px 24px -18px rgba(28, 19, 15, .35);
-}
-.mk-fc img {
-  display: block; width: 100%; height: 190px; max-width: none;
-  object-fit: cover; object-position: center top; background: #f5e6df;
-}
-.mk-fcbody { padding: 14px 16px 18px; }
-.mk-fc .mk-fch3 { margin: 0 0 6px; font: 600 18px/1.25 var(--mk-f-serif) !important; color: #1c130f; }
-.mk-fcbody p { margin: 0; font: 400 14.5px/1.5 var(--mk-f-serif); color: rgba(28, 19, 15, .74); }
-.mk-dots { display: flex; justify-content: center; gap: 6px; margin: 14px 0 6px; }
-.mk-dots i { width: 6px; height: 6px; border-radius: 3px; background: rgba(28, 19, 15, .18); transition: width .2s, background .2s; }
-.mk-dots i.mk-on { width: 18px; background: var(--mk-navy); }
+/* ── v2 (26 Oct, ref design-refs/landing-mobile-v2.html), superseding v1's swipe strip and vision rows ──
+   Values are the ref's LAST declaration of each rule (it restates `.sp.big` for the real page). */
 
-/* The vision band as three compact rows: a 76px picture left, the heading and one line right. */
-.mk-vision.mk-vision--rows { background: #fff; margin-top: 28px; padding: 36px 22px 10px; }
-.mk-vision--rows .mk-visionh2 { font: 400 26px/1.2 var(--mk-f-display) !important; margin: 0 0 22px; color: #1c130f; text-align: left; }
-.mk-vrow { display: grid; grid-template-columns: 76px 1fr; gap: 14px; align-items: center; margin: 0 0 18px; }
-.mk-vrow img { display: block; width: 76px; height: auto; max-width: none; margin: 0; }
-.mk-vrow .mk-vrowh3 { margin: 0 0 3px; font: 600 17px/1.25 var(--mk-f-serif) !important; color: #1c130f; }
-.mk-vrow p { margin: 0; font: 400 14.5px/1.45 var(--mk-f-serif); color: rgba(28, 19, 15, .74); }
+/* The six features: a story you scroll down. The picture panel sticks under the 60px bar
+   (`--mk-nav-h` at this width) and takes half the screen below it, never more than 420px; it is sticky
+   inside this section only, so after the last caption it scrolls away and the vision rises beneath. */
+.mk-story { position: relative; padding: 0 0 20px; scroll-margin-top: var(--mk-nav-h); }
+.mk-spimg {
+  position: sticky; top: var(--mk-nav-h); z-index: 2; box-sizing: border-box;
+  height: min(calc((100svh - var(--mk-nav-h)) / 2), 420px); padding: 6px 14px 0;
+  background: var(--mk-lower);
+}
+.mk-spimg img {
+  position: absolute; left: 14px; right: 14px; top: 6px; width: calc(100% - 28px); height: calc(100% - 48px);
+  max-width: none; object-fit: contain; background: #f5e6df; border-radius: 18px;
+  opacity: 0; transition: opacity .45s;
+}
+.mk-spimg img.mk-on { opacity: 1; }
+.mk-spbar { position: absolute; left: 14px; right: 14px; bottom: 16px; display: flex; gap: 5px; }
+.mk-spbar i { flex: 1; height: 4px; border-radius: 2px; background: rgba(28, 19, 15, .12); transition: background .3s; }
+.mk-spbar i.mk-on { background: var(--mk-navy); }
+.mk-spt { min-height: 300px; padding: 20px 24px 0; opacity: .28; transition: opacity .35s; }
+.mk-spt:last-child { min-height: 380px; }
+.mk-spt.mk-on { opacity: 1; }
+.mk-spt .mk-spth3 { margin: 0 0 8px; font: 400 25px/1.18 var(--mk-f-display) !important; color: #1c130f; }
+.mk-spt p { margin: 0; font: 400 16.5px/1.55 var(--mk-f-serif); color: rgba(28, 19, 15, .78); }
+
+/* The vision on navy: the page's one swipe carousel. Text on navy is white; the label is pink. */
+.mk-vision.mk-vision--navy { background: #1b2433; margin-top: 0; padding: 36px 0 30px; }
+.mk-vision--navy .mk-vk {
+  margin: 0 22px 18px; font: 500 11px/1 var(--mk-f-mono) !important; letter-spacing: .16em;
+  text-transform: uppercase; color: #e8b4a3;
+}
+.mk-vrail {
+  display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory;
+  padding: 0 24px 8px; margin: 0; scrollbar-width: none; overscroll-behavior-x: contain;
+}
+.mk-vrail::-webkit-scrollbar { display: none; }
+.mk-vrail:focus-visible { outline: 2px solid #e8b4a3; outline-offset: 2px; }
+.mk-vn { flex: 0 0 320px; scroll-snap-align: center; }
+.mk-vn img {
+  display: block; width: 100%; height: 240px; max-width: none; object-fit: contain; box-sizing: border-box;
+  background: #f4f1ea; border-radius: 18px; padding: 18px;
+}
+.mk-vn .mk-vnh3 { margin: 18px 0 8px; font: 400 26px/1.15 var(--mk-f-display) !important; color: #fff; }
+.mk-vn p { margin: 0; font: 400 15.5px/1.5 var(--mk-f-serif); color: rgba(255, 255, 255, .78); }
+.mk-vdots { display: flex; justify-content: center; gap: 6px; margin: 14px 0 6px; }
+.mk-vdots i { width: 6px; height: 6px; border-radius: 3px; background: rgba(255, 255, 255, .22); transition: width .2s, background .2s; }
+.mk-vdots i.mk-on { width: 18px; background: #e8b4a3; }
+.mk-vlink {
+  display: inline-block; margin: 16px 22px 0; font: 500 15px/1 var(--mk-f-serif); color: #fff;
+  text-decoration: underline; text-decoration-color: #e8b4a3; text-underline-offset: 6px; text-decoration-thickness: 1.5px;
+}
 
 /* The closing founding card, on the light ground: white fading to blush, the hawks on its top-right
    corner, breaking its top edge (absolutely placed, so they take no room in the card). */
@@ -2961,8 +2976,32 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   font: 500 15px/1 var(--mk-f-serif); color: var(--mk-navy);
   text-decoration: underline; text-decoration-color: var(--mk-rust); text-underline-offset: 6px; text-decoration-thickness: 1.5px;
 }
-/* ⚠️ AFTER THE RULE IT OVERRIDES: a media query confers no specificity, so an earlier reduced-motion
-   block would lose to `.mk-dots i` on source order. */
+/* The join bar (landing on phones v2; ref `.bbar`): navy, floating 12px above the bottom plus the
+   safe-area inset and 10px from each side, hidden below the fold until `JoinBar` shows it. Text on navy
+   is white and its count is pink; text on the pink Join is black. Each part declares its family —
+   `brand.tsx` gives bare `b` and `span` the app's body face. */
+.mk-jbar {
+  position: fixed; left: 10px; right: 10px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); z-index: 70;
+  display: flex; align-items: center; gap: 12px; padding: 10px 10px 10px 16px; border-radius: 16px;
+  background: #1b2433; color: #fff; box-shadow: 0 14px 30px -12px rgba(0, 0, 0, .5); text-decoration: none;
+  transform: translateY(130%); opacity: 0; pointer-events: none;
+  transition: transform .35s cubic-bezier(.2, .8, .2, 1), opacity .25s;
+}
+.mk-jbar.mk-on { transform: none; opacity: 1; pointer-events: auto; }
+.mk-jbt { flex: 1; display: grid; gap: 6px; }
+.mk-jbt b { font: 600 15px/1.1 var(--mk-f-serif); color: #fff; }
+.mk-jbc { display: flex; align-items: center; gap: 8px; font: 500 11px/1 var(--mk-f-mono); letter-spacing: .06em; color: #e8b4a3; }
+.mk-jbc i { width: 64px; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, .16); overflow: hidden; }
+.mk-jbc em { display: block; min-width: 4px; height: 100%; background: #e8b4a3; }
+.mk-jbj {
+  height: 40px; padding: 0 18px; border-radius: 12px; background: #e8b4a3; color: #1c130f;
+  display: grid; place-items: center; font: 600 15px/1 var(--mk-f-serif);
+}
+.mk-jbar:focus-visible { outline: 2px solid #e8b4a3; outline-offset: 2px; }
+@media (min-width: 761px) { .mk-jbar { display: none; } }
+
+/* ⚠️ AFTER THE RULES IT OVERRIDES: a media query confers no specificity, so an earlier reduced-motion
+   block would lose to the story's, the carousel's and the join bar's rules on source order. */
 @media (prefers-reduced-motion: reduce) {
-  .mk-dots i { transition: none; }
+  .mk-spimg img, .mk-spt, .mk-spbar i, .mk-vdots i, .mk-jbar { transition: none; }
 }

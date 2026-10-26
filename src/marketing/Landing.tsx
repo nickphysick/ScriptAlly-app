@@ -24,7 +24,8 @@ import { StatusBand } from "./StatusBand";
 import { FeatureRows } from "./FeatureRows";
 import { Vision } from "./Vision";
 import { FoundingBand } from "./FoundingBand";
-import { FeatureSwipe } from "./FeatureSwipe";
+import { FeatureStory } from "./FeatureStory";
+import { JoinBar } from "./JoinBar";
 import { FoundingClose } from "./FoundingClose";
 import { DOCUMENT_TITLE } from "./landingCopy";
 
@@ -45,9 +46,10 @@ export const Landing: React.FC<{ onNavigate: (tab: string, subPageName?: string)
   const lower = (
       <div className="mk-lower">
         <StatusBand />
-        {/* Phones (landing on phones v1, 26 Oct): the six features are one swipe strip, and the page
-            closes on a short founding card that hands on to /founders. The desktop is unchanged. */}
-        {phone ? <FeatureSwipe /> : <FeatureRows />}
+        {/* Phones (landing on phones v2, 26 Oct): the six features are a story you scroll down under a
+            half-screen picture, the vision is a navy carousel, and the page closes on a short founding
+            card that hands on to /founders. The desktop is unchanged. */}
+        {phone ? <FeatureStory /> : <FeatureRows />}
         {/* ⚠️ THE WHITE BAND SITS BETWEEN THE ROWS AND THE OFFER, AND THE ORDER IS THE ARGUMENT.
             The rows say what the product does; this says why it exists; the founding band asks for
             something. Moved above the rows it would ask a reader to care before they know what
@@ -64,6 +66,8 @@ export const Landing: React.FC<{ onNavigate: (tab: string, subPageName?: string)
   return (
     <div>
       {phone ? <HeroPhone onNavigate={onNavigate}>{lower}</HeroPhone> : <><Hero onNavigate={onNavigate} />{lower}</>}
+      {/* Phones only, this page only (landing on phones v2): the founding ask that follows you down. */}
+      {phone && <JoinBar />}
     </div>
   );
 };
