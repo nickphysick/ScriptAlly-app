@@ -364,3 +364,20 @@
     font-family: var(--sp-type) !important; font-style: normal !important;
   }
 }
+
+/* §6 · BIRDS-EYE: the actions column is gone — the timeline (axis and rows) runs to 16px from the card's right edge —
+   and a row's action fades in at its right end on hover, on keyboard focus within the row, and on the selected row,
+   over a 56px fade to the hover colour, so bars and labels fade out before the button. */
+@media (min-width: 768px) {
+  .qc150-be.qc150-be { --xw: 16px; }
+  @container (max-width: 1140px) { .qc150-be.qc150-be { --xw: 16px; } }
+  .qc150-be .qc150-br { position: relative; }
+  .qc150-be .qc150-xa {
+    position: absolute; top: 0; bottom: 0; right: 0; z-index: 3; display: flex; align-items: center; padding: 0 8px 0 72px;
+    background: linear-gradient(90deg, rgba(250, 246, 240, 0), #faf6f0 56px); opacity: 0; pointer-events: none; transition: opacity 0.14s;
+  }
+  .qc150-be .qc150-xa:empty { display: none; }
+  .qc150-be .qc150-br:hover .qc150-xa, .qc150-be .qc150-br.is-sel .qc150-xa, .qc150-be .qc150-br:focus-within .qc150-xa { opacity: 1; pointer-events: auto; }
+  .qc150-be .qc150-br:hover, .qc150-be .qc150-br:focus-within { background: #faf6f0; }
+}
+@media (prefers-reduced-motion: reduce) { .qc150-be .qc150-xa { transition: none; } }
