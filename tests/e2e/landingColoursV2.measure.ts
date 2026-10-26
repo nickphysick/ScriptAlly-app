@@ -54,7 +54,9 @@ const MUTATIONS: Record<string, string> = {
       ".mk-claimnum,.mk-claimof,.mk-claimleft,.mk-fmmeta,.mk-fmtally{color:#f4eee5!important}",
   T1: ".mk-foot{border-top:1px solid #e7ddd2!important}",
   /* The phone retargets' own breaks (phone hero, 23 Oct) — each turns only the ≤760px branch red. */
-  N2p: ".mk-navpill{background:#1b2433!important}",
+  /* RETARGETED (landing on phones v1, 26 Oct): the pill is gone; the phone's founding offer is the strip. */
+  N2p: ".mk-fs{background:#1b2433!important}",
+  V1p: ".mk-vision.mk-vision--rows{background:#e9e6e0!important}",
   N3p: "@media (max-width:760px){.mk-scope .mk-nav{height:72px!important}}",
   H1p: ".mk-hp-stage{background:#ffffff!important}",
   S1p: ".mk-sheet{border-top-left-radius:18px!important;border-top-right-radius:18px!important}",
@@ -299,13 +301,18 @@ test.describe("LC2", () => {
         const brand = document.querySelector(".mk-nav .mk-brand")!;
         const word = brand.querySelector(".mk-navword");
         const c = word ? getComputedStyle(word) : null;
-        /* RETARGET (phone hero): at ≤760px the anon primary is the founding pill — the same cream on ink. */
-        const btn = getComputedStyle(document.querySelector(".mk-navright .mk-btn, .mk-navright .mk-navpill")!);
+        /* RETARGET (landing on phones v1, 26 Oct): at ≤760px the bar holds no primary at all — the
+           founding offer is the strip ABOVE the bar, a lighter navy with white type. */
+        const primary = document.querySelector(".mk-navright .mk-btn");
+        const strip = document.querySelector(".mk-fs"), stripT = document.querySelector(".mk-fs-t");
+        const btn = primary ? getComputedStyle(primary) : null;
         return {
+          primary: !!primary, stripBg: strip ? getComputedStyle(strip).backgroundColor : null,
+          stripFg: stripT ? getComputedStyle(stripT).color : null,
           imgs: Array.from(brand.querySelectorAll("img")).map((i) => i.getAttribute("src") ?? ""),
           text: word?.textContent ?? null, color: c?.color ?? null, family: c?.fontFamily ?? null,
           name: brand.getAttribute("aria-label"),
-          btnBg: btn.backgroundColor, btnFg: btn.color,
+          btnBg: btn?.backgroundColor ?? null, btnFg: btn?.color ?? null,
         };
       });
       expect(w.imgs.filter((s) => /title/.test(s)), `@${vp.width}: the wordmark is not a picture`).toEqual([]);
@@ -315,8 +322,14 @@ test.describe("LC2", () => {
       /* RETARGET (phone hero): the phone row sets the wordmark in Source Serif 4 700, per its ref. */
       expect(w.family ?? "").toMatch(vp.width <= PHONE ? /Source Serif 4/ : /Playfair Display/);
       expect(w.name).toBe("QueryHawk home");
-      expect(w.btnBg).toBe("rgb(243, 238, 230)");
-      expect(w.btnFg).toBe("rgb(27, 36, 51)");
+      if (vp.width <= PHONE) {
+        expect(w.primary, `@${vp.width}: the phone bar holds no primary`).toBe(false);
+        expect(w.stripBg, `@${vp.width}: the founding strip is the lighter navy`).toBe("rgb(38, 50, 74)");
+        expect(w.stripFg, `@${vp.width}: with white type`).toBe("rgb(255, 255, 255)");
+      } else {
+        expect(w.btnBg).toBe("rgb(243, 238, 230)");
+        expect(w.btnFg).toBe("rgb(27, 36, 51)");
+      }
       if (vp.width <= 1080) await page.click(".mk-burger");
       const links = await inks(page, vp.width <= 1080 ? ".mk-navpanel button" : ".mk-links button, .mk-login");
       console.log(`LC2 N2 @${vp.width}`, links.map((l) => `${l.text} ${l.ratio.toFixed(2)}`).join(" · "));
@@ -466,6 +479,19 @@ test.describe("LC2", () => {
     test.skip(CAPTURE);
     for (const vp of VPS) {
       await open(page, "/", vp);
+      if (vp.width <= PHONE) {
+        /* RETARGET (landing on phones v1, 26 Oct): on a phone the band is white with three compact
+           rows, as the ref draws it; the stone band with white cards is the desktop's. */
+        const p = await page.evaluate(() => ({
+          band: getComputedStyle(document.querySelector(".mk-vision")!).backgroundColor,
+          rows: document.querySelectorAll(".mk-vision .mk-vrow").length,
+          cards: document.querySelectorAll(".mk-vision .mk-vpoint").length,
+        }));
+        expect(p.band, `@${vp.width}: the phone's vision band is white`).toBe("rgb(255, 255, 255)");
+        expect(p.rows, `@${vp.width}: three rows`).toBe(3);
+        expect(p.cards, `@${vp.width}: and no cards`).toBe(0);
+        continue;
+      }
       const v = await page.evaluate(() => ({
         band: getComputedStyle(document.querySelector(".mk-vision")!).backgroundColor,
         cards: Array.from(document.querySelectorAll(".mk-vision .mk-vpoint")).map((c) => {
@@ -496,7 +522,10 @@ test.describe("LC2", () => {
       }
     };
     const P = ".mk-claimcard ";
-    for (const vp of VPS) {
+    /* RETARGET (landing on phones v1, 26 Oct): the navy band is the desktop's; on a phone the landing
+       closes on the founding card (landingMobileV1's LM4), so this reads the two desktop widths. */
+    const DESK = VPS.filter((v) => v.width > PHONE);
+    for (const vp of DESK) {
       for (const state of ["idle", "invalid", "sending", "sent", "dupe", "full", "error", "down"] as const) {
         const mock: Mock = state === "idle" || state === "invalid" ? "count" : state === "sending" ? "hold" : state;
         await open(page, "/", vp, mock);
@@ -535,7 +564,7 @@ test.describe("LC2", () => {
       }
     }
     console.log("LC2 F1 states measured:", measured.length);
-    expect(measured.length).toBe(8 * VPS.length);
+    expect(measured.length).toBe(8 * DESK.length);
   });
 
   test("F2 the same parts on a light ground keep a dark-on-light treatment", async ({ page }) => {
