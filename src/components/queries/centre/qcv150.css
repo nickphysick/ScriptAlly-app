@@ -315,4 +315,22 @@
     --qc149-list: var(--qc1501-w);
   }
 
+  /* §3 · "At a glance": 30 below the header card, 12 above the cards; four equal cards, a head over one row */
+  .qc149-hd .qc150-glance {
+    --qc1501-lab: clamp(14px, calc(14px + (var(--hsheet-w) - 1180.5px) * 1000), 17px);
+    --qc1501-n: clamp(36px, calc(36px + (var(--hsheet-w) - 1180.5px) * 1000), 40px);
+    --qc1501-gap: clamp(12px, calc(12px + (var(--hsheet-w) - 1180.5px) * 1000), 16px);
+    margin-top: 30px;
+  }
+  .qc149-hd .qc150-glance .qc150-gh {
+    margin: 0 0 12px; padding-left: 4px; font: 400 28px/1.1 var(--sp-type) !important; font-family: var(--sp-type) !important; color: #1c130f;
+  }
+  .qc149-hd .qc150-glance .qc150-cards { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 0; }
+  .qc150-glance .qc150-c { padding: 5px 5px 12px; }
+  .qc150-glance .qc150-h { margin: 0 0 8px; padding: 9px 14px; }
+  .qc150-glance .qc150-h b { font-size: var(--qc1501-lab) !important; }
+  .qc150-glance .qc150-body { display: flex; align-items: center; gap: var(--qc1501-gap); min-width: 0; padding-left: 13px; }
+  .qc150-glance .qc150-n { flex: none; margin: 0; font-size: var(--qc1501-n) !important; }
+  .qc150-glance .qc150-faces { flex: 0 1 auto; min-width: 0; margin: 0; flex-wrap: nowrap; }
+
 }

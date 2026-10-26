@@ -3979,8 +3979,6 @@ export const Queries: React.FC<{
     sort: sortPhrase(qcSort138.key, qcSort138.reversed, qc150SortOrder.toLowerCase(), qc150Sort?.label ?? ""),
   };
   const qc150BeLive = qcBeOrder.length;
-  /* v150 B2 — a stat card's detail link: that card's filter (Part D also switches the list to Birds-eye) */
-  const qc150Detail = (k: WhereKey) => { pickView150("birds"); qcShowWhere(k); };
   /* v138 §C — "Showing {n} of {N}" whenever anything narrows the list; "Clear all" clears every narrowing at once */
   const qc138Filtered = qc138FilterCount(qcF138) > 0 || qcFilter !== "all" || qcFind.trim() !== "" || !!qcCourtOn || !!qcIds;
   const qc138ClearAll = () => { setQcF138(emptyQc138Filters()); setQcFilter("all"); setQcFind(""); setQcCzCourt(null); setQcIds(null); };
@@ -5318,8 +5316,7 @@ export const Queries: React.FC<{
       {/* v150 Part B — the four stat cards: the old quick-filter chips' counts and filter (`qcF138.where`), and the
           retired banner's "Next" on Your move */}
       <QcStatCards150 cards={showGridSkeleton ? null : statCards(qcScoped, qcNow138)} where={qcF138.where} loading={showGridSkeleton}
-        onCard={(k) => qcShowWhere(pressView(qcF138.where, k))}
-        onDetail={(k) => qc150Detail(k)} />
+        onCard={(k) => qcShowWhere(pressView(qcF138.where, k))} />
       <i ref={qc138Ref} hidden />
       <BulkBar138
         anchor={qc138Ref}
