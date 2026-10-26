@@ -14,7 +14,7 @@
  * ⚠️ A STATUS IS DRAWN ONLY BY StatusDot, in ink: the track's current node is a StatusDot laid over the line drawing,
  *    never a circle drawn to look like one.
  */
-import React from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import { StatusDot } from "../StatusDot";
 import { QueryStatus } from "../../types";
 import { STAGE_NAME } from "../../lib/qcSummary";
@@ -31,18 +31,59 @@ export const GenrePills: React.FC<{
   /** what an empty list says; null draws nothing */
   empty?: React.ReactNode;
   className?: string;
-}> = ({ genres, hit, word, max = 3, empty = "No genres yet", className }) => {
+  /** Contact list v25.3 — fit the cell: as many WHOLE pills as the measured width holds (matches first), then "+n";
+   *  never a pill cut in half. `max` still caps it. */
+  fit?: boolean;
+}> = ({ genres, hit, word, max = 3, empty = "No genres yet", className, fit = false }) => {
   const ordered = [...genres.filter((g) => hit(g)), ...genres.filter((g) => !hit(g))];
-  const shown = ordered.slice(0, max);
-  if (!shown.length) return empty == null ? null : <em className="cl252-none" data-cl252="pills-none">{empty}</em>;
+  const cap = Math.min(max, ordered.length);
+  /* fit: measure with every candidate laid out (one frame, before paint), then keep the whole ones that fit */
+  const [k, setK] = useState<number | null>(null);
+  const boxRef = useRef<HTMLSpanElement>(null);
+  const widthRef = useRef(-1);
+  const key = ordered.join("\u0001");
+  useLayoutEffect(() => { if (fit) setK(null); }, [fit, key]);
+  useLayoutEffect(() => {
+    if (!fit || k !== null) return;
+    const box = boxRef.current;
+    if (!box) return;
+    const cw = box.clientWidth;
+    widthRef.current = cw;
+    const left = box.getBoundingClientRect().left;
+    const pills = [...box.querySelectorAll<HTMLElement>("[data-cl252='pill']")];
+    const more = box.querySelector<HTMLElement>("[data-cl252='pill-more']");
+    const gap = parseFloat(getComputedStyle(box).columnGap || "6") || 6;
+    const moreW = more ? more.getBoundingClientRect().width : 24;
+    let n = 0;
+    for (let i = 0; i < pills.length; i++) {
+      const right = pills[i].getBoundingClientRect().right - left;
+      const rest = ordered.length - (i + 1);
+      if (right + (rest > 0 ? gap + moreW : 0) <= cw + 0.5) n = i + 1; else break;
+    }
+    setK(n);
+  }, [fit, k, key, ordered.length]);
+  /* a new width measures again */
+  useLayoutEffect(() => {
+    if (!fit || typeof ResizeObserver === "undefined") return undefined;
+    const box = boxRef.current;
+    if (!box) return undefined;
+    const ro = new ResizeObserver(() => { if (Math.abs(box.clientWidth - widthRef.current) > 0.5) setK(null); });
+    ro.observe(box);
+    return () => ro.disconnect();
+  }, [fit]);
+  const count = fit ? (k ?? cap) : cap;
+  const shown = ordered.slice(0, count);
+  const rest = ordered.length - shown.length;
+  if (!ordered.length) return empty == null ? null : <em className="cl252-none" data-cl252="pills-none">{empty}</em>;
   return (
-    <span className={`cl252-pills${className ? ` ${className}` : ""}`} data-cl252="pills" data-total={genres.length} data-shown={shown.length}>
+    <span ref={boxRef} className={`cl252-pills${fit ? " fit" : ""}${className ? ` ${className}` : ""}`} data-cl252="pills" data-total={genres.length} data-shown={shown.length}
+      data-measuring={fit && k === null ? "" : undefined}>
       {shown.map((g) => (
         <span key={g} className={`cl252-pill${hit(g) ? " hit" : ""}`} data-cl252="pill" data-hit={hit(g) ? "" : undefined}>
           {hit(g) ? "✓ " : null}{word(g)}
         </span>
       ))}
-      {genres.length > shown.length ? <em className="cl252-more" data-cl252="pill-more" data-n={genres.length - shown.length}>+{genres.length - shown.length}</em> : null}
+      {rest > 0 || (fit && k === null) ? <em className="cl252-more" data-cl252="pill-more" data-n={rest}>+{fit && k === null ? ordered.length : rest}</em> : null}
     </span>
   );
 };

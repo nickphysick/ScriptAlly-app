@@ -24,7 +24,7 @@ import { ContactEmptyPage } from "./contact/ContactEmptyPage";
 import { useLivingCountOverride } from "../../lib/livingHeaderReview";
 import { hkAllFilled } from "../../lib/hkReviewAid";
 import { INTRO_PATH_V18, dismissPath, dismissedAtGaps, introSeenOf, listHealth, nextDismissed, tabShown } from "../../lib/contactHealth";
-import { agentGapLine, hasPassedOn, hkModel, savedLine, wishlistCheckin, type HkAgentCtx, type HkBook, type HkItem } from "../../lib/contactHousekeeping";
+import { GAP_FOCUS, agentGapAction, agentGapLine, hasPassedOn, hkModel, savedLine, wishlistCheckin, type HkAgentCtx, type HkBook, type HkItem } from "../../lib/contactHousekeeping";
 import {
   contactPrefsOf, laterPath, readHkView, settledPath, settledRestorePath, showAllPath, wishlistEveryPath, wishlistNextPath,
   writeHkView, type HkView, type WishlistEvery,
@@ -1069,6 +1069,16 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             openId={cardId} onOpen={pickCard} search={search} onSearch={setSearch}
             onLog={(id) => openQueryDrawer({ mode: "log", agentId: id, ...(scoped?.id ? { manuscriptId: scoped.id } : {}) })}
             onEdit={(id, tab, focus) => openPanel(id, { tab, focus })}
+            /* v25.3 — the row's one gap action: Housekeeping's count, and the card's EDIT MODE at the first gap in
+               Housekeeping's order (never an inline box: the action is "fill in the gaps", plural) */
+            gapOf={(id) => agentGapAction(hk, id)}
+            onFillGaps={(id) => {
+              const g = agentGapAction(hk, id);
+              if (!g || !agents.some((x) => x.id === id)) return;
+              setHkOpenRef.current(false);
+              if (fullRef.current) setBookReq({ id, seq: Date.now() }); else setCardId(id);
+              setEditReq({ id, seq: Date.now(), edit: { focus: GAP_FOCUS[g.first].focus } });
+            }}
             onExport={(rows) => downloadAgentsCsv(rows, (raw) => genreLabel(raw, personalGenres))} />
           </>
         ) : (

@@ -1,0 +1,25 @@
+/*
+ * Contact list v25.3 (design-refs/contact-list-v25-3/) — the List row stops advertising what is missing: empty cells are
+ * blank, a row with no wishlist has no wishlist line (and is one line shorter), and the row's gaps are one hover action,
+ * "Fill in {n} gaps →", first in the quick-action group, in the group's shape (radius 9, the same ring and shadow).
+ */
+@media (min-width: 768px) {
+  .cl24-tr.cl252-tr.cl253-nowl { min-height: 76px; }
+  .cl24-qa > .cl253-fill {
+    width: auto; padding: 1px 13px 0; white-space: nowrap; color: #a2452a;
+    font: 400 14px/33px var(--sp-type) !important;
+  }
+  .cl24-qa > .cl253-fill:hover, .cl24-qa > .cl253-fill:focus-visible { background: #a2452a; color: #fff; }
+  .cl24-qa > .cl253-fill:focus-visible { outline: 2px solid #a2452a; outline-offset: 2px; }
+}
+@media (min-width: 768px) and (max-width: 1440px) {
+  /* ≤1440 of window the rating column has gone, so the hover group would lie over Your query: a fourth, empty track
+     at the row's end is reserved for it (the headings have none for it to hold), and the copy and website icons drop,
+     so only "Fill in {n} gaps →" is shown there */
+  .cl24-sheet { --cl24-cols: minmax(0, 2.2fr) minmax(0, 2.5fr) minmax(0, 2.4fr) 132px; }
+  .cl252-tr .cl24-qa > .cl253-ic { display: none; }
+}
+@media (min-width: 768px) {
+  /* the "Closed to queries" tag hugs its words: Your query is a flex column (v25.2), which stretched it across the cell */
+  .cl252-qs > .cl251-shut { align-self: flex-start; }
+}
