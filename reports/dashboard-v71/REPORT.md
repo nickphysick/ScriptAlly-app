@@ -10,7 +10,11 @@ manifest). Five parts, one commit each:
 | B | `ec6ec722` | the layout: two columns, two cards on the right, bottoms in line |
 | C | `c679c25f` | the task card: one card, cycling through the writer's tasks |
 | D | `e15254ce` | the founding writer card: pink, navy band, ask → noted → sent |
-| E | _see the tail_ | fit, the DB71 locks, the retired and rewritten locks, this report |
+| E | `19891ec6` | fit, the DB71 locks, the retired and rewritten locks |
+| E′ | `eb106bc6` | before the first query, the founding card fits at 1280×800 |
+| E″ | `d12bbef4` | the close marker's words clear the sentence above the bar |
+| E‴ | `ce0f7889` | nothing cut in the hoop legends or the task card's head (v60's hoop floor restored) |
+| E⁗ | _see the tail_ | before the first query, the founding card ends clear of the feed tab |
 
 ## False premises
 
@@ -48,7 +52,7 @@ manifest). Five parts, one commit each:
 | Header: the three buttons | **restyled**: icon first, cream primary, two ghosts; below 1200px the ghosts are icon-only |
 | Header: "Where do I start?" (first use only; it does not show when querying) | **kept** in the button row, restyled as a ghost on the ink |
 | `Dash60Left`: the chart (`OneScreenChart`), Closed hoop, Agents hoop | **kept as built**; the grid around them changes |
-| v60's hoop-need column floor (`--d60-hoop-need`, its CSS rule and the page's measurement) | **retired**: v71's `1.72fr 1fr` grid replaces it |
+| v60's hoop-need column floor (`--d60-hoop-need`, the page's measurement) | **kept, and fed into v71's grid** as the left column's minimum. I retired it in Part B and that was wrong: the legends were cut at 1440×900 and 1100×800 (see Fit) |
 | Right column: "What's on the list today?" title row | **retired** (querying) — still used by "Ready for lift off?" before the first query |
 | Right column: "All {n} →" | **retired** |
 | Right column: the focus card (`d58-focus`: band, ‹ ›, timeline stages, rust edge, "View task →") | **replaced** by the task card; `Dash58List.tsx` deleted |
@@ -179,3 +183,47 @@ Two findings from proving them:
   run (`seed-pkgq-2`, `cor-move-b`, `rj-dupe`: all restored).
 
 The C1 population on the harness account: 34 items — 11 nudge, 8 close, 9 send, 6 other.
+
+
+## Fit — what the measurements changed, and why
+
+The pack's sizes (1920×1080, 1512×900, 1440×900, 1366×768, 1280×800, 1288×660, 1366×650, 1280×650,
+1100×800), plus 768×800 for the tab, with the real shell. Each item below was found by a lock or a
+shot and is now locked.
+
+1. **The loading header was 56px shorter than the loaded one** (DB58 L1, DB59 L1, DB60 P10): the title
+   and byline placeholders held a plain space, which has no line box. They hold a no-break space.
+2. **Before the first query the founding card ran past its column** — 15px past the sheet at 1280×800
+   (DB60 P10), and, found next in the day-one shot, **27–41px under the Activity feed tab at 1280–1512**
+   (`main`'s v60.1 panel ends clear of it). A new lock, DB71 L3 (first use), holds the card at least 8px
+   above the tab in both first-use states at four sizes; it was red on `ce0f7889`. The card is a size
+   container: its line goes under 150px of card, a compact treatment (no signature, 26px faces, tighter
+   padding) under 130px; its day-one floor is 112px; the hairline above it is 8/6 instead of 24/10.
+3. **The close marker's words sat on the sentence above the bar** (the close card's shot). The bar
+   keeps 16px for them; near an end they hang towards the middle.
+4. **The hoop legends were cut** — the Closed legend at 1440×900, the Agents legend at 1100×800 — and
+   "1 OF 3" ran off a 270px task card at 1100. v60's measured hoop floor feeds v71's grid; the task card
+   keeps 300px (270 below a 1200px window, where its "N OF M" gives way); the page's gutter is 20px
+   below 1200.
+5. **G1 passed under its own break** until the chart's row had a floor (140px).
+
+## For Nick — what the real header forced to give way earlier than the reference
+
+The reference has no beta strip; the real shell carries one (42px), and the ink panel's padding makes
+the header taller than v60's bare one. So, earlier than the reference:
+
+- **Below 700px of window height:** the header's byline ("by Bethany Carter") is hidden, the gaps under
+  the header and between the chart and the hoops tighten (14→10, 16→12), and **the chart's plot floor
+  drops from v58's 120px to 80px.** Without this the chart overflowed its frame at 1366×650, 1280×680,
+  1280×650 and 1288×660 (it needs 216px; it had 152–182). The reference at 1366×650 keeps its byline
+  and draws a taller chart. DB58 F3's floor row says so.
+- **Before the first query,** the founding card is compact at every measured size (floor 112px against
+  v60's 150): no line, no signature, smaller faces; and the hairline above it is tighter. Without this it
+  sat under the Activity feed tab. Worth a look at 1440×900 in day one, where the squeeze is greatest.
+- **At 1100–1199px of window,** the task card is 270px and drops its "N OF M" (the segments and ‹ ›
+  stay); the two header ghosts are icon-only (as the pack says); the founding card's band type steps
+  down twice.
+
+Things only Nick can do:
+- **Deploy `sendWeeklyPulse` and the `betaPulse` rules on dev**, or the faces fail there today.
+- **Decide whether the card should walk every item (built) or only the first group** (false premise 2).
