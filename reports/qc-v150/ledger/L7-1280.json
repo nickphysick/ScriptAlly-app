@@ -2,7 +2,7 @@
  {
   "where": "6w home population",
   "ok": true,
-  "detail": "71 rows, 149 boxes, 7 axis labels"
+  "detail": "71 rows, 151 boxes, 7 axis labels"
  },
  {
   "where": "6w home overlap",
@@ -17,7 +17,7 @@
  {
   "where": "6w back 500 population",
   "ok": true,
-  "detail": "65 rows, 66 boxes, 8 axis labels"
+  "detail": "71 rows, 74 boxes, 8 axis labels"
  },
  {
   "where": "6w back 500 overlap",
@@ -32,7 +32,7 @@
  {
   "where": "6w forward 900 population",
   "ok": true,
-  "detail": "7 rows, 11 boxes, 8 axis labels"
+  "detail": "47 rows, 91 boxes, 6 axis labels"
  },
  {
   "where": "6w forward 900 overlap",
@@ -47,7 +47,7 @@
  {
   "where": "3m home population",
   "ok": true,
-  "detail": "71 rows, 152 boxes, 13 axis labels"
+  "detail": "71 rows, 156 boxes, 15 axis labels"
  },
  {
   "where": "3m home overlap",
@@ -62,7 +62,7 @@
  {
   "where": "3m back 500 population",
   "ok": true,
-  "detail": "37 rows, 39 boxes, 16 axis labels"
+  "detail": "55 rows, 63 boxes, 15 axis labels"
  },
  {
   "where": "3m back 500 overlap",
@@ -77,7 +77,7 @@
  {
   "where": "3m forward 900 population",
   "ok": true,
-  "detail": "7 rows, 8 boxes, 16 axis labels"
+  "detail": "47 rows, 89 boxes, 15 axis labels"
  },
  {
   "where": "3m forward 900 overlap",
@@ -92,7 +92,7 @@
  {
   "where": "6m home population",
   "ok": true,
-  "detail": "71 rows, 159 boxes, 16 axis labels"
+  "detail": "71 rows, 171 boxes, 29 axis labels"
  },
  {
   "where": "6m home overlap",
@@ -107,7 +107,7 @@
  {
   "where": "6m back 500 population",
   "ok": true,
-  "detail": "13 rows, 13 boxes, 19 axis labels"
+  "detail": "24 rows, 24 boxes, 32 axis labels"
  },
  {
   "where": "6m back 500 overlap",
@@ -122,7 +122,7 @@
  {
   "where": "6m forward 900 population",
   "ok": true,
-  "detail": "26 rows, 30 boxes, 18 axis labels"
+  "detail": "49 rows, 100 boxes, 29 axis labels"
  },
  {
   "where": "6m forward 900 overlap",
@@ -137,6 +137,6 @@
  {
   "where": "boxes measured",
   "ok": true,
-  "detail": "627"
+  "detail": "919"
  }
 ]

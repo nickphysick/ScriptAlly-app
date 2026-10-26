@@ -12,12 +12,12 @@
  {
   "where": "1440×900 the list's edges are identical, panel closed and open",
   "ok": true,
-  "detail": "268.0–1412.0 → 268.0–1412.0"
+  "detail": "272.0–1408.0 → 272.0–1408.0"
  },
  {
   "where": "1440×900 the panel's left edge is left of the list's right edge (it overlays)",
   "ok": true,
-  "detail": "912.0 vs 1412.0"
+  "detail": "912.0 vs 1408.0"
  },
  {
   "where": "1440×900 during an action the scrim is visible",
@@ -27,7 +27,7 @@
  {
   "where": "1440×900 …and the list still has not moved",
   "ok": true,
-  "detail": "268.0–1412.0"
+  "detail": "272.0–1408.0"
  },
  {
   "where": "1512×900 population: a live row",
@@ -42,12 +42,12 @@
  {
   "where": "1512×900 the list's edges are identical, panel closed and open",
   "ok": true,
-  "detail": "268.0–1484.0 → 268.0–1484.0"
+  "detail": "276.0–1476.0 → 276.0–1476.0"
  },
  {
   "where": "1512×900 the panel's left edge is left of the list's right edge (it overlays)",
   "ok": true,
-  "detail": "944.0 vs 1484.0"
+  "detail": "944.0 vs 1476.0"
  },
  {
   "where": "1512×900 during an action the scrim is visible",
@@ -57,7 +57,7 @@
  {
   "where": "1512×900 …and the list still has not moved",
   "ok": true,
-  "detail": "268.0–1484.0"
+  "detail": "276.0–1476.0"
  },
  {
   "where": "1920×1080 population: a live row",
@@ -72,12 +72,12 @@
  {
   "where": "1920×1080 the list's edges are identical, panel closed and open",
   "ok": true,
-  "detail": "420.0–1740.0 → 420.0–1740.0"
+  "detail": "480.0–1680.0 → 480.0–1680.0"
  },
  {
   "where": "1920×1080 the panel's left edge is left of the list's right edge (it overlays)",
   "ok": true,
-  "detail": "1352.0 vs 1740.0"
+  "detail": "1352.0 vs 1680.0"
  },
  {
   "where": "1920×1080 during an action the scrim is visible",
@@ -87,6 +87,6 @@
  {
   "where": "1920×1080 …and the list still has not moved",
   "ok": true,
-  "detail": "420.0–1740.0"
+  "detail": "480.0–1680.0"
  }
 ]

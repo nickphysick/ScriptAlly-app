@@ -2,76 +2,76 @@
  {
   "where": "1280×800 population: sheet, list, card, stat cards",
   "ok": true,
-  "detail": "{\"sheet\":{\"l\":248,\"r\":1272,\"w\":1024},\"list\":{\"l\":268,\"r\":1252,\"w\":984},\"card\":{\"l\":304,\"r\":1216,\"w\":912},\"cards\":{\"l\":304,\"r\":1216,\"w\":912},\"panel\":null}"
+  "detail": "{\"sheet\":{\"l\":248,\"r\":1272,\"w\":1024},\"list\":{\"l\":272,\"r\":1248,\"w\":976},\"card\":{\"l\":272,\"r\":1248,\"w\":976},\"cards\":{\"l\":272,\"r\":1248,\"w\":976},\"panel\":null}"
  },
  {
   "where": "1280×800 the two share left and right edges",
   "ok": true,
-  "detail": "304.0–1216.0 · 304.0–1216.0"
+  "detail": "272.0–1248.0 · 272.0–1248.0"
  },
  {
-  "where": "1280×800 each is the column less 24 each side (S 1024), centred",
+  "where": "1280×800 each is the column less 0 each side (S 1024), centred",
   "ok": true,
-  "detail": "912.0 vs 912"
+  "detail": "976.0 vs 976"
  },
  {
   "where": "1440×900 population: sheet, list, card, stat cards",
   "ok": true,
-  "detail": "{\"sheet\":{\"l\":248,\"r\":1432,\"w\":1184},\"list\":{\"l\":268,\"r\":1412,\"w\":1144},\"card\":{\"l\":312,\"r\":1368,\"w\":1056},\"cards\":{\"l\":312,\"r\":1368,\"w\":1056},\"panel\":null}"
+  "detail": "{\"sheet\":{\"l\":248,\"r\":1432,\"w\":1184},\"list\":{\"l\":272,\"r\":1408,\"w\":1136},\"card\":{\"l\":272,\"r\":1408,\"w\":1136},\"cards\":{\"l\":272,\"r\":1408,\"w\":1136},\"panel\":null}"
  },
  {
   "where": "1440×900 the two share left and right edges",
   "ok": true,
-  "detail": "312.0–1368.0 · 312.0–1368.0"
+  "detail": "272.0–1408.0 · 272.0–1408.0"
  },
  {
-  "where": "1440×900 each is the column less 32 each side (S 1184), centred",
+  "where": "1440×900 each is the column less 0 each side (S 1184), centred",
   "ok": true,
-  "detail": "1056.0 vs 1056"
+  "detail": "1136.0 vs 1136"
  },
  {
   "where": "1512×900 population: sheet, list, card, stat cards",
   "ok": true,
-  "detail": "{\"sheet\":{\"l\":248,\"r\":1504,\"w\":1256},\"list\":{\"l\":268,\"r\":1484,\"w\":1216},\"card\":{\"l\":340,\"r\":1412,\"w\":1072},\"cards\":{\"l\":340,\"r\":1412,\"w\":1072},\"panel\":null}"
+  "detail": "{\"sheet\":{\"l\":248,\"r\":1504,\"w\":1256},\"list\":{\"l\":276,\"r\":1476,\"w\":1200},\"card\":{\"l\":276,\"r\":1476,\"w\":1200},\"cards\":{\"l\":276,\"r\":1476,\"w\":1200},\"panel\":null}"
  },
  {
   "where": "1512×900 the two share left and right edges",
   "ok": true,
-  "detail": "340.0–1412.0 · 340.0–1412.0"
+  "detail": "276.0–1476.0 · 276.0–1476.0"
  },
  {
-  "where": "1512×900 each is the column less 32 each side (S 1256), centred",
+  "where": "1512×900 each is the column less 0 each side (S 1256), centred",
   "ok": true,
-  "detail": "1072.0 vs 1072"
+  "detail": "1200.0 vs 1200"
  },
  {
   "where": "1920×1080 population: sheet, list, card, stat cards",
   "ok": true,
-  "detail": "{\"sheet\":{\"l\":248,\"r\":1912,\"w\":1664},\"list\":{\"l\":420,\"r\":1740,\"w\":1320},\"card\":{\"l\":504,\"r\":1656,\"w\":1152},\"cards\":{\"l\":504,\"r\":1656,\"w\":1152},\"panel\":null}"
+  "detail": "{\"sheet\":{\"l\":248,\"r\":1912,\"w\":1664},\"list\":{\"l\":480,\"r\":1680,\"w\":1200},\"card\":{\"l\":480,\"r\":1680,\"w\":1200},\"cards\":{\"l\":480,\"r\":1680,\"w\":1200},\"panel\":null}"
  },
  {
   "where": "1920×1080 the two share left and right edges",
   "ok": true,
-  "detail": "504.0–1656.0 · 504.0–1656.0"
+  "detail": "480.0–1680.0 · 480.0–1680.0"
  },
  {
-  "where": "1920×1080 each is the column less 32 each side (S 1664), centred",
+  "where": "1920×1080 each is the column less 0 each side (S 1664), centred",
   "ok": true,
-  "detail": "1152.0 vs 1152"
+  "detail": "1200.0 vs 1200"
  },
  {
   "where": "2560×1440 population: sheet, list, card, stat cards",
   "ok": true,
-  "detail": "{\"sheet\":{\"l\":248,\"r\":2552,\"w\":2304},\"list\":{\"l\":740,\"r\":2060,\"w\":1320},\"card\":{\"l\":824,\"r\":1976,\"w\":1152},\"cards\":{\"l\":824,\"r\":1976,\"w\":1152},\"panel\":null}"
+  "detail": "{\"sheet\":{\"l\":248,\"r\":2552,\"w\":2304},\"list\":{\"l\":800,\"r\":2000,\"w\":1200},\"card\":{\"l\":800,\"r\":2000,\"w\":1200},\"cards\":{\"l\":800,\"r\":2000,\"w\":1200},\"panel\":null}"
  },
  {
   "where": "2560×1440 the two share left and right edges",
   "ok": true,
-  "detail": "824.0–1976.0 · 824.0–1976.0"
+  "detail": "800.0–2000.0 · 800.0–2000.0"
  },
  {
-  "where": "2560×1440 each is the column less 32 each side (S 2304), centred",
+  "where": "2560×1440 each is the column less 0 each side (S 2304), centred",
   "ok": true,
-  "detail": "1152.0 vs 1152"
+  "detail": "1200.0 vs 1200"
  }
 ]

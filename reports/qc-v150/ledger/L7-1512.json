@@ -17,7 +17,7 @@
  {
   "where": "6w back 500 population",
   "ok": true,
-  "detail": "71 rows, 74 boxes, 7 axis labels"
+  "detail": "71 rows, 73 boxes, 7 axis labels"
  },
  {
   "where": "6w back 500 overlap",
@@ -32,7 +32,7 @@
  {
   "where": "6w forward 900 population",
   "ok": true,
-  "detail": "47 rows, 91 boxes, 7 axis labels"
+  "detail": "59 rows, 102 boxes, 7 axis labels"
  },
  {
   "where": "6w forward 900 overlap",
@@ -47,7 +47,7 @@
  {
   "where": "3m home population",
   "ok": true,
-  "detail": "71 rows, 156 boxes, 14 axis labels"
+  "detail": "71 rows, 157 boxes, 15 axis labels"
  },
  {
   "where": "3m home overlap",
@@ -62,7 +62,7 @@
  {
   "where": "3m back 500 population",
   "ok": true,
-  "detail": "55 rows, 63 boxes, 16 axis labels"
+  "detail": "68 rows, 82 boxes, 16 axis labels"
  },
  {
   "where": "3m back 500 overlap",
@@ -77,7 +77,7 @@
  {
   "where": "3m forward 900 population",
   "ok": true,
-  "detail": "47 rows, 90 boxes, 15 axis labels"
+  "detail": "59 rows, 105 boxes, 14 axis labels"
  },
  {
   "where": "3m forward 900 overlap",
@@ -92,7 +92,7 @@
  {
   "where": "6m home population",
   "ok": true,
-  "detail": "71 rows, 171 boxes, 29 axis labels"
+  "detail": "71 rows, 166 boxes, 29 axis labels"
  },
  {
   "where": "6m home overlap",
@@ -107,7 +107,7 @@
  {
   "where": "6m back 500 population",
   "ok": true,
-  "detail": "24 rows, 24 boxes, 31 axis labels"
+  "detail": "43 rows, 46 boxes, 32 axis labels"
  },
  {
   "where": "6m back 500 overlap",
@@ -122,7 +122,7 @@
  {
   "where": "6m forward 900 population",
   "ok": true,
-  "detail": "49 rows, 99 boxes, 29 axis labels"
+  "detail": "59 rows, 113 boxes, 28 axis labels"
  },
  {
   "where": "6m forward 900 overlap",
@@ -137,6 +137,6 @@
  {
   "where": "boxes measured",
   "ok": true,
-  "detail": "919"
+  "detail": "995"
  }
 ]

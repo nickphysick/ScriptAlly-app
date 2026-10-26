@@ -2,112 +2,112 @@
  {
   "where": "population",
   "ok": true,
-  "detail": "1310 nodes, 72 cells, 142 marked"
+  "detail": "1323 nodes, 72 cells, 142 marked"
  },
  {
   "where": "step 1 no rebuild",
   "ok": true,
-  "detail": "1310/1310 nodes, 142/142 the same elements"
+  "detail": "1323/1323 nodes, 142/142 the same elements"
  },
  {
   "where": "step 1 one offset",
   "ok": true,
-  "detail": "5490–5490 (was 5520)"
+  "detail": "6984–6984 (was 7014)"
  },
  {
   "where": "step 2 no rebuild",
   "ok": true,
-  "detail": "1310/1310 nodes, 142/142 the same elements"
+  "detail": "1323/1323 nodes, 142/142 the same elements"
  },
  {
   "where": "step 2 one offset",
   "ok": true,
-  "detail": "5460–5460 (was 5490)"
+  "detail": "6954–6954 (was 6984)"
  },
  {
   "where": "step 3 no rebuild",
   "ok": true,
-  "detail": "1310/1310 nodes, 142/142 the same elements"
+  "detail": "1323/1323 nodes, 142/142 the same elements"
  },
  {
   "where": "step 3 one offset",
   "ok": true,
-  "detail": "5430–5430 (was 5460)"
+  "detail": "6924–6924 (was 6954)"
  },
  {
   "where": "step 4 no rebuild",
   "ok": true,
-  "detail": "1310/1310 nodes, 142/142 the same elements"
+  "detail": "1323/1323 nodes, 142/142 the same elements"
  },
  {
   "where": "step 4 one offset",
   "ok": true,
-  "detail": "5400–5400 (was 5430)"
+  "detail": "6894–6894 (was 6924)"
  },
  {
   "where": "step 5 no rebuild",
   "ok": true,
-  "detail": "1310/1310 nodes, 142/142 the same elements"
+  "detail": "1323/1323 nodes, 142/142 the same elements"
  },
  {
   "where": "step 5 one offset",
   "ok": true,
-  "detail": "5370–5370 (was 5400)"
+  "detail": "6864–6864 (was 6894)"
  },
  {
   "where": "step 6 no rebuild",
   "ok": true,
-  "detail": "1310/1310 nodes, 142/142 the same elements"
+  "detail": "1323/1323 nodes, 142/142 the same elements"
  },
  {
   "where": "step 6 one offset",
   "ok": true,
-  "detail": "5340–5340 (was 5370)"
+  "detail": "6834–6834 (was 6864)"
  },
  {
   "where": "step 7 no rebuild",
   "ok": true,
-  "detail": "1310/1310 nodes, 142/142 the same elements"
+  "detail": "1323/1323 nodes, 142/142 the same elements"
  },
  {
   "where": "step 7 one offset",
   "ok": true,
-  "detail": "5310–5310 (was 5340)"
+  "detail": "6804–6804 (was 6834)"
  },
  {
   "where": "step 8 no rebuild",
   "ok": true,
-  "detail": "1310/1310 nodes, 142/142 the same elements"
+  "detail": "1323/1323 nodes, 142/142 the same elements"
  },
  {
   "where": "step 8 one offset",
   "ok": true,
-  "detail": "5280–5280 (was 5310)"
+  "detail": "6774–6774 (was 6804)"
  },
  {
   "where": "step 9 no rebuild",
   "ok": true,
-  "detail": "1310/1310 nodes, 142/142 the same elements"
+  "detail": "1323/1323 nodes, 142/142 the same elements"
  },
  {
   "where": "step 9 one offset",
   "ok": true,
-  "detail": "5250–5250 (was 5280)"
+  "detail": "6744–6744 (was 6774)"
  },
  {
   "where": "step 10 no rebuild",
   "ok": true,
-  "detail": "1310/1310 nodes, 142/142 the same elements"
+  "detail": "1323/1323 nodes, 142/142 the same elements"
  },
  {
   "where": "step 10 one offset",
   "ok": true,
-  "detail": "5220–5220 (was 5250)"
+  "detail": "6714–6714 (was 6744)"
  },
  {
   "where": "momentum ≥3 frames",
   "ok": true,
-  "detail": "5001 → 4947 → 4899 → 4855 → 4816"
+  "detail": "6472 → 6399 → 6333 → 6274 → 6221"
  },
  {
   "where": "a drag opens nothing",

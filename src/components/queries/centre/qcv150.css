@@ -394,3 +394,5 @@
   .qc140-tb .qc150-vsw--c button svg { width: 15px; height: 15px; }
   .qc140-tb .qc150-vsw--c button[aria-pressed="true"] { background: #2a3a52; color: #f4eee5; }
 }
+/* §5 · the pair's gap is the bar's own (10), so Birds-eye's pills sit exactly where the list's do (QC1501 L5 found 8) */
+@media (min-width: 768px) { .qc140-tb .qc150-bvgs.qc150-bvgs { gap: 10px; } }

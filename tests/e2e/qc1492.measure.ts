@@ -45,7 +45,8 @@ const near = (a: number, b: number, t = 1) => Math.abs(a - b) <= t;
 const mutate = async (page: Page) => {
   /* v150 C1: the list's own token is the one to break */
   if (MUT === "L1") await page.addStyleTag({ content: ".qcv-group.qcv-group.qcv-group { --qc149-list: calc(var(--hsheet-w) - 40px) !important; }" });
-  if (MUT === "L2") await page.addStyleTag({ content: ".qcv-group { --qc149-w: var(--qc149-list) !important; }" });
+  /* v150.1: the header and the list are one width, so the break is a header 64px narrower than the list */
+  if (MUT === "L2") await page.addStyleTag({ content: ".qcv-group.qcv-group.qcv-group { --qc149-w: calc(var(--qc149-list) - 64px) !important; }" });
   /* the superseded rule: 24 whenever the WINDOW is 1440 or narrower */
   if (MUT === "L2W") await page.addStyleTag({ content: "@media (min-width: 768px) and (max-width: 1440px) { .qcv-group { --qc149-in: 24px !important; } }" });
   /* B6 restored: above a 1440 window the open panel narrows the list by its own width */
@@ -54,7 +55,7 @@ const mutate = async (page: Page) => {
 };
 
 /* re-pointed by v150 C1: the list is min(S − 40, 1320), centred (it superseded "+80 from a 1500 sheet"; QC150 L4 too) */
-test("L1 · the list is min(S − 40, 1320), centred in the sheet (v150 C1)", async ({ page }) => {
+test("L1 · the list is min(S − 48, 1200), centred in the sheet (v150.1 §1)", async ({ page }) => {
   test.skip(!run("L1"));
   const L = new Ledger("L1");
   for (const vp of SIZES) {
@@ -64,17 +65,18 @@ test("L1 · the list is min(S − 40, 1320), centred in the sheet (v150 C1)", as
     L.check(`${at} population: the sheet and the list`, !!b.sheet && !!b.list, JSON.stringify(b));
     if (!b.sheet || !b.list) continue;
     const S = b.sheet.w;
-    const want = Math.min(S - 40, 1320);
-    L.check(`${at} width = min(S − 40, 1320) (S ${S.toFixed(0)})`, near(b.list.w, want), `${b.list.w.toFixed(1)} vs ${want}`);
+    /* re-pointed again by v150.1 §1: W = min(S − 48, 1200) */
+    const want = Math.min(S - 48, 1200);
+    L.check(`${at} width = min(S − 48, 1200) (S ${S.toFixed(0)})`, near(b.list.w, want), `${b.list.w.toFixed(1)} vs ${want}`);
     L.check(`${at} centred in the sheet`, near((b.list.l + b.list.r) / 2, (b.sheet.l + b.sheet.r) / 2), `${((b.list.l + b.list.r) / 2).toFixed(1)} vs ${((b.sheet.l + b.sheet.r) / 2).toFixed(1)}`);
-    if (vp.width === 2560) L.check("2560: 1320 wide, not the sheet's width (v150 C1)", near(b.list.w, 1320), b.list.w.toFixed(1));
+    if (vp.width === 2560) L.check("2560: 1200 wide, not the sheet's width (v150.1 §1)", near(b.list.w, 1200), b.list.w.toFixed(1));
   }
   L.done(16);
 });
 
 /* re-pointed by v150: the banner and the view row are gone (A3, C2); the header card and the stat cards keep the v149.2
    rule — the column less the inset each side, centred — while the list itself is now min(S − 40, 1320) (C1) */
-test("L2 · the header card and the stat cards share edges at the v149.2 width, centred", async ({ page }) => {
+test("L2 · the header card and the stat cards share edges at W = min(S − 48, 1200), centred (v150.1 §1)", async ({ page }) => {
   test.skip(!run("L2"));
   const L = new Ledger("L2");
   for (const vp of SIZES) {
@@ -84,8 +86,9 @@ test("L2 · the header card and the stat cards share edges at the v149.2 width, 
     L.check(`${at} population: sheet, list, card, stat cards`, !!b.sheet && !!b.list && !!b.card && !!b.cards, JSON.stringify(b));
     if (!b.list || !b.card || !b.cards || !b.sheet) continue;
     const S = b.sheet.w;
-    const inset = S < 1100 ? 24 : 32;
-    const w = Math.min(S - 64, 1136) + (S >= 1500 ? 80 : 0) - 2 * inset;
+    /* re-pointed by v150.1 §1: the header and the cards are W too, the list's own width */
+    const inset = 0;
+    const w = Math.min(S - 48, 1200);
     const all = [b.card, b.cards] as R[];
     L.check(`${at} the two share left and right edges`, all.every((x) => near(x.l, b.card!.l) && near(x.r, b.card!.r)), all.map((x) => `${x.l.toFixed(1)}–${x.r.toFixed(1)}`).join(" · "));
     L.check(`${at} each is the column less ${inset} each side (S ${S.toFixed(0)}), centred`, all.every((x) => near(x.w, w) && near((x.l + x.r) / 2, (b.sheet!.l + b.sheet!.r) / 2)), `${b.card.w.toFixed(1)} vs ${w}`);

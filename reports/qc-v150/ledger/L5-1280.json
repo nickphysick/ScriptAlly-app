@@ -2,7 +2,7 @@
  {
   "where": "title text",
   "ok": true,
-  "detail": "Here’s every query you’ve sent"
+  "detail": "Your queries"
  },
  {
   "where": "list line",
@@ -10,14 +10,14 @@
   "detail": "88 queries · 52% heard back · grouped by status, soonest due first"
  },
  {
-  "where": "switch centred",
+  "where": "switch at the list's right",
   "ok": true,
-  "detail": "760.0 vs 760.0"
+  "detail": "1248.0 vs 1248.0"
  },
  {
-  "where": "switch under the line",
+  "where": "switch bottom-aligned with the count line",
   "ok": true,
-  "detail": "663.5 vs 649.5"
+  "detail": "576.3 vs 576.3"
  },
  {
   "where": "no switch in the bar",

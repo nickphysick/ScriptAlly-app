@@ -158,7 +158,8 @@ for (const vp of SIZES) {
         L.check(`${x.k} count`, x.n === n(x.k), `card ${x.n}, list ${n(x.k)}`);
         L.check(`${x.k} inset`, x.inset.every((v) => v >= 4 && v <= 6), x.inset.map((v) => v.toFixed(1)).join("/"));
         const cap = x.k === "agent" ? 5 : 6;
-        L.check(`${x.k} faces`, x.faces === Math.min(cap, x.n) && x.more === x.n - x.faces, `${x.faces} + ${x.more} of ${x.n}`);
+        /* re-pointed by v150.1 §3: the discs are cut to the card's room, and "+N" grows to match */
+        L.check(`${x.k} faces`, x.faces >= 1 && x.faces <= Math.min(cap, x.n) && x.faces + x.more === x.n, `${x.faces} + ${x.more} of ${x.n}`);
       }
       L.check("cards share a height", Math.max(...c.map((x) => x.h)) - Math.min(...c.map((x) => x.h)) < 1, c.map((x) => x.h.toFixed(1)).join());
       L.check("no chips", (await count(page, "[data-qc149='views']")) === 0, "chips drawn");
@@ -205,13 +206,14 @@ for (const vp of SIZES) {
       L.check("population", !!(b.sheet && b.list && b.title && b.card && b.cards), JSON.stringify(b));
       if (b.sheet && b.list && b.title && b.card && b.cards) {
         const S = b.sheet.w;
-        const lw = Math.min(S - 40, 1320);
+        /* re-pointed by v150.1 §1: one width, W = min(S − 48, 1200), for the list and every block above it */
+        const lw = Math.min(S - 48, 1200);
         L.check("list width", Math.abs(b.list.w - lw) <= 1, `${b.list.w.toFixed(1)} vs ${lw}`);
         L.check("list centred", Math.abs((b.list.l - b.sheet.l) - (b.sheet.r - b.list.r)) <= 1, `${(b.list.l - b.sheet.l).toFixed(1)} / ${(b.sheet.r - b.list.r).toFixed(1)}`);
         L.check("title edges", Math.abs(b.title.l - b.list.l) <= 1 && Math.abs(b.title.r - b.list.r) <= 1, `${b.title.l.toFixed(1)}–${b.title.r.toFixed(1)} vs ${b.list.l.toFixed(1)}–${b.list.r.toFixed(1)}`);
-        const col = Math.min(S - 64, 1136), ext = S >= 1500 ? 80 : 0, inset = S < 1100 ? 24 : 32, hw = col + ext - 2 * inset;
-        L.check("header v149.2", Math.abs(b.card.w - hw) <= 1, `${b.card.w.toFixed(1)} vs ${hw}`);
-        L.check("cards v149.2", Math.abs(b.cards.w - hw) <= 1 && Math.abs(b.cards.l - b.card.l) <= 1, `${b.cards.w.toFixed(1)} vs ${hw}`);
+        const hw = Math.min(S - 48, 1200);
+        L.check("header at W (v150.1)", Math.abs(b.card.w - hw) <= 1 && Math.abs(b.card.l - b.list.l) <= 1, `${b.card.w.toFixed(1)} vs ${hw}`);
+        L.check("cards at W (v150.1)", Math.abs(b.cards.w - hw) <= 1 && Math.abs(b.cards.l - b.card.l) <= 1, `${b.cards.w.toFixed(1)} vs ${hw}`);
       }
       L.done(6);
     });
@@ -224,15 +226,16 @@ for (const vp of SIZES) {
         const v = (s: string) => [...document.querySelectorAll<HTMLElement>(s)].find((x) => x.getBoundingClientRect().height > 0);
         const t = v("[data-qc150='title-text']"), c = v("[data-qc150='count-line']"), sw = v("[data-qc150='switch']"), list = v(".qc138-sheet");
         return { t: t?.textContent ?? "", c: c?.textContent?.replace(/\s+/g, " ").trim() ?? "", cb: c?.getBoundingClientRect().bottom ?? 0,
-          sw: sw ? { cx: sw.getBoundingClientRect().left + sw.getBoundingClientRect().width / 2, top: sw.getBoundingClientRect().top } : null,
-          lcx: list ? list.getBoundingClientRect().left + list.getBoundingClientRect().width / 2 : 0,
+          sw: sw ? { r: sw.getBoundingClientRect().right, b: sw.getBoundingClientRect().bottom, top: sw.getBoundingClientRect().top } : null,
+          lr: list ? list.getBoundingClientRect().right : 0,
           inBar: document.querySelectorAll(".qc140-tb [data-qc150='switch'], .qc140-tb [data-v='birds']").length };
       });
       const a = await read();
-      L.check("title text", a.t === "Here’s every query you’ve sent", a.t);
+      /* re-pointed by v150.1 §4: "Your queries", left-aligned, the switch at the list's right edge beside the count line */
+      L.check("title text", a.t === "Your queries", a.t);
       L.check("list line", /^\d+ quer(y|ies) · \d+% heard back · (grouped by [a-z' ]+|not grouped), .+/.test(a.c), a.c);
-      L.check("switch centred", !!a.sw && Math.abs(a.sw.cx - a.lcx) <= 1, `${a.sw?.cx.toFixed(1)} vs ${a.lcx.toFixed(1)}`);
-      L.check("switch under the line", !!a.sw && a.sw.top >= a.cb, `${a.sw?.top.toFixed(1)} vs ${a.cb.toFixed(1)}`);
+      L.check("switch at the list's right", !!a.sw && Math.abs(a.sw.r - a.lr) <= 1, `${a.sw?.r.toFixed(1)} vs ${a.lr.toFixed(1)}`);
+      L.check("switch bottom-aligned with the count line", !!a.sw && Math.abs(a.sw.b - a.cb) <= 4, `${a.sw?.b.toFixed(1)} vs ${a.cb.toFixed(1)}`);
       L.check("no switch in the bar", a.inBar === 0, String(a.inBar));
       await toView(page, "birds");
       const b = await read();

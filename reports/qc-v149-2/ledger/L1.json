@@ -2,12 +2,12 @@
  {
   "where": "1280×800 population: the sheet and the list",
   "ok": true,
-  "detail": "{\"sheet\":{\"l\":248,\"r\":1272,\"w\":1024},\"list\":{\"l\":268,\"r\":1252,\"w\":984},\"card\":{\"l\":304,\"r\":1216,\"w\":912},\"cards\":{\"l\":304,\"r\":1216,\"w\":912},\"panel\":null}"
+  "detail": "{\"sheet\":{\"l\":248,\"r\":1272,\"w\":1024},\"list\":{\"l\":272,\"r\":1248,\"w\":976},\"card\":{\"l\":272,\"r\":1248,\"w\":976},\"cards\":{\"l\":272,\"r\":1248,\"w\":976},\"panel\":null}"
  },
  {
-  "where": "1280×800 width = min(S − 40, 1320) (S 1024)",
+  "where": "1280×800 width = min(S − 48, 1200) (S 1024)",
   "ok": true,
-  "detail": "984.0 vs 984"
+  "detail": "976.0 vs 976"
  },
  {
   "where": "1280×800 centred in the sheet",
@@ -17,12 +17,12 @@
  {
   "where": "1440×900 population: the sheet and the list",
   "ok": true,
-  "detail": "{\"sheet\":{\"l\":248,\"r\":1432,\"w\":1184},\"list\":{\"l\":268,\"r\":1412,\"w\":1144},\"card\":{\"l\":312,\"r\":1368,\"w\":1056},\"cards\":{\"l\":312,\"r\":1368,\"w\":1056},\"panel\":null}"
+  "detail": "{\"sheet\":{\"l\":248,\"r\":1432,\"w\":1184},\"list\":{\"l\":272,\"r\":1408,\"w\":1136},\"card\":{\"l\":272,\"r\":1408,\"w\":1136},\"cards\":{\"l\":272,\"r\":1408,\"w\":1136},\"panel\":null}"
  },
  {
-  "where": "1440×900 width = min(S − 40, 1320) (S 1184)",
+  "where": "1440×900 width = min(S − 48, 1200) (S 1184)",
   "ok": true,
-  "detail": "1144.0 vs 1144"
+  "detail": "1136.0 vs 1136"
  },
  {
   "where": "1440×900 centred in the sheet",
@@ -32,12 +32,12 @@
  {
   "where": "1512×900 population: the sheet and the list",
   "ok": true,
-  "detail": "{\"sheet\":{\"l\":248,\"r\":1504,\"w\":1256},\"list\":{\"l\":268,\"r\":1484,\"w\":1216},\"card\":{\"l\":340,\"r\":1412,\"w\":1072},\"cards\":{\"l\":340,\"r\":1412,\"w\":1072},\"panel\":null}"
+  "detail": "{\"sheet\":{\"l\":248,\"r\":1504,\"w\":1256},\"list\":{\"l\":276,\"r\":1476,\"w\":1200},\"card\":{\"l\":276,\"r\":1476,\"w\":1200},\"cards\":{\"l\":276,\"r\":1476,\"w\":1200},\"panel\":null}"
  },
  {
-  "where": "1512×900 width = min(S − 40, 1320) (S 1256)",
+  "where": "1512×900 width = min(S − 48, 1200) (S 1256)",
   "ok": true,
-  "detail": "1216.0 vs 1216"
+  "detail": "1200.0 vs 1200"
  },
  {
   "where": "1512×900 centred in the sheet",
@@ -47,12 +47,12 @@
  {
   "where": "1920×1080 population: the sheet and the list",
   "ok": true,
-  "detail": "{\"sheet\":{\"l\":248,\"r\":1912,\"w\":1664},\"list\":{\"l\":420,\"r\":1740,\"w\":1320},\"card\":{\"l\":504,\"r\":1656,\"w\":1152},\"cards\":{\"l\":504,\"r\":1656,\"w\":1152},\"panel\":null}"
+  "detail": "{\"sheet\":{\"l\":248,\"r\":1912,\"w\":1664},\"list\":{\"l\":480,\"r\":1680,\"w\":1200},\"card\":{\"l\":480,\"r\":1680,\"w\":1200},\"cards\":{\"l\":480,\"r\":1680,\"w\":1200},\"panel\":null}"
  },
  {
-  "where": "1920×1080 width = min(S − 40, 1320) (S 1664)",
+  "where": "1920×1080 width = min(S − 48, 1200) (S 1664)",
   "ok": true,
-  "detail": "1320.0 vs 1320"
+  "detail": "1200.0 vs 1200"
  },
  {
   "where": "1920×1080 centred in the sheet",
@@ -62,12 +62,12 @@
  {
   "where": "2560×1440 population: the sheet and the list",
   "ok": true,
-  "detail": "{\"sheet\":{\"l\":248,\"r\":2552,\"w\":2304},\"list\":{\"l\":740,\"r\":2060,\"w\":1320},\"card\":{\"l\":824,\"r\":1976,\"w\":1152},\"cards\":{\"l\":824,\"r\":1976,\"w\":1152},\"panel\":null}"
+  "detail": "{\"sheet\":{\"l\":248,\"r\":2552,\"w\":2304},\"list\":{\"l\":800,\"r\":2000,\"w\":1200},\"card\":{\"l\":800,\"r\":2000,\"w\":1200},\"cards\":{\"l\":800,\"r\":2000,\"w\":1200},\"panel\":null}"
  },
  {
-  "where": "2560×1440 width = min(S − 40, 1320) (S 2304)",
+  "where": "2560×1440 width = min(S − 48, 1200) (S 2304)",
   "ok": true,
-  "detail": "1320.0 vs 1320"
+  "detail": "1200.0 vs 1200"
  },
  {
   "where": "2560×1440 centred in the sheet",
@@ -75,8 +75,8 @@
   "detail": "1400.0 vs 1400.0"
  },
  {
-  "where": "2560: 1320 wide, not the sheet's width (v150 C1)",
+  "where": "2560: 1200 wide, not the sheet's width (v150.1 §1)",
   "ok": true,
-  "detail": "1320.0"
+  "detail": "1200.0"
  }
 ]

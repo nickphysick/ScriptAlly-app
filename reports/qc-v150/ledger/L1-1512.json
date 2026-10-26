@@ -2,7 +2,7 @@
  {
   "where": "sheet tile",
   "ok": true,
-  "detail": "url(\"http://127.0.0.1:4650/images/qc/doodle-tile.svg\")"
+  "detail": "url(\"http://127.0.0.1:4660/images/qc/doodle-tile.svg\")"
  },
  {
   "where": "tile size",

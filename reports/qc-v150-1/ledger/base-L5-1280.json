@@ -1,0 +1,47 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "{\"A\":{\"first\":true,\"filters\":{\"l\":867.1875,\"r\":910.1875,\"w\":43},\"group\":{\"l\":920.1875,\"r\":1043.859375,\"w\":123.671875},\"sort\":{\"l\":1053.859375,\"r\":1192,\"w\":138.140625},\"full\":{\"l\":1204,\"r\":1238,\"w\":34}},\"B\":{\"first\":true,\"filters\":{\"l\":1149,\"r\":1192,\"w\":43},\"group\":{\"l\":806.5,\"r\":864.5,\"w\":58},\"sort\":{\"l\":872.5,\"r\":930.5,\"w\":58},\"full\":{\"l\":1204,\"r\":1238,\"w\":34}}}"
+ },
+ {
+  "where": "search first (list)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "search first (birds)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "order (birds)",
+  "ok": false,
+  "detail": "1149 807 873 1204"
+ },
+ {
+  "where": "Full screen right edge",
+  "ok": true,
+  "detail": "1238.0 vs 1238.0"
+ },
+ {
+  "where": "Full screen left",
+  "ok": true,
+  "detail": "1204.0 vs 1204.0"
+ },
+ {
+  "where": "sort left",
+  "ok": false,
+  "detail": "moved -181.4, widths differ 80.1"
+ },
+ {
+  "where": "group left",
+  "ok": false,
+  "detail": "moved -113.7, widths differ 145.8"
+ },
+ {
+  "where": "Filters left",
+  "ok": false,
+  "detail": "moved 281.8, widths differ 145.8"
+ }
+]

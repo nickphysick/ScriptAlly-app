@@ -12,7 +12,7 @@
  {
   "where": "you count",
   "ok": true,
-  "detail": "card 27, list 27"
+  "detail": "card 26, list 26"
  },
  {
   "where": "you inset",
@@ -22,7 +22,7 @@
  {
   "where": "you faces",
   "ok": true,
-  "detail": "6 + 21 of 27"
+  "detail": "6 + 20 of 26"
  },
  {
   "where": "agent count",
@@ -42,7 +42,7 @@
  {
   "where": "quiet count",
   "ok": true,
-  "detail": "card 32, list 32"
+  "detail": "card 33, list 33"
  },
  {
   "where": "quiet inset",
@@ -52,7 +52,7 @@
  {
   "where": "quiet faces",
   "ok": true,
-  "detail": "6 + 26 of 32"
+  "detail": "6 + 27 of 33"
  },
  {
   "where": "closed count",
@@ -72,7 +72,7 @@
  {
   "where": "cards share a height",
   "ok": true,
-  "detail": "215.7,215.7,215.7,215.7"
+  "detail": "102.5,102.5,102.5,102.5"
  },
  {
   "where": "no chips",
