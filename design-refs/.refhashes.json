@@ -814,7 +814,8 @@
     "design-refs/dashboard-v71/screens/ref-task-send-1512x900@2x.png": "0e0df347e8343e020e38f382d1243e615d8f014a2afc37df093a78b43224c7c7",
     "design-refs/pricing-plans-ladder-v1.html": "18dc9e187044bf9b416739dde44cf56cef30ac25c91ba65697cfd7e0abd87f19",
     "design-refs/pricing-phone-plans-v1.html": "1cb478717150b5e2ec2c2ed33b8e6f020e3e0a33694597b525da2ef1bc786594",
-    "design-refs/contact-list-v25/contact-list-v25.html": "5331c7d3c9ca1aafc0704c1f0a4ad7cf084c0ebb4f1cd2504133ec45c28950a9"
+    "design-refs/contact-list-v25/contact-list-v25.html": "5331c7d3c9ca1aafc0704c1f0a4ad7cf084c0ebb4f1cd2504133ec45c28950a9",
+    "design-refs/contact-list-v25-1/contact-list-v25-1.html": "bb13428411a2bf32cbcc7aad8f6492f66c2e84242183d4b03c09ba976298d1d6"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",
