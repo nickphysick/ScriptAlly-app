@@ -1,0 +1,48 @@
+
+Running 20 tests using 1 worker
+
+  ✓   1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (20.1s)
+PL-1 @1440 [["1","false"],["3","false"],["6","true"],["12","false"]]
+  ✓   2 [measure] › tests/e2e/pricingLadder.measure.ts:110:3 › PL-1 @1440: the ladder is four radios, 6 months on load, one checked at a time (2.9s)
+PL-1 @1280 [["1","false"],["3","false"],["6","true"],["12","false"]]
+  ✓   3 [measure] › tests/e2e/pricingLadder.measure.ts:110:3 › PL-1 @1280: the ladder is four radios, 6 months on load, one checked at a time (2.7s)
+PL-1 @390 [["1","false"],["3","false"],["6","true"],["12","false"]]
+  ✓   4 [measure] › tests/e2e/pricingLadder.measure.ts:110:3 › PL-1 @390: the ladder is four radios, 6 months on load, one checked at a time (2.9s)
+PL-1 @375 [["1","false"],["3","false"],["6","true"],["12","false"]]
+  ✓   5 [measure] › tests/e2e/pricingLadder.measure.ts:110:3 › PL-1 @375: the ladder is four radios, 6 months on load, one checked at a time (2.4s)
+PL-2 @1440 how {"w":952,"b":"1px solid rgba(28, 19, 15, 0.13)","r":"26px"} below pair 28.0
+PL-2 @1440 case 6 [{"m":"6","checked":"true","role":"radio","flag":"Fits your campaign","visible":true}]
+PL-2 @1440 case 12 [{"m":"12","checked":"true","role":"radio","flag":"Fits your campaign","visible":true}]
+  ✓   6 [measure] › tests/e2e/pricingLadder.measure.ts:139:3 › PL-2 @1440: a result opens beneath the cards and checks and flags exactly the fitting row (2.7s)
+PL-2 @1280 how {"w":952,"b":"1px solid rgba(28, 19, 15, 0.13)","r":"26px"} below pair 28.0
+PL-2 @1280 case 6 [{"m":"6","checked":"true","role":"radio","flag":"Fits your campaign","visible":true}]
+PL-2 @1280 case 12 [{"m":"12","checked":"true","role":"radio","flag":"Fits your campaign","visible":true}]
+  ✓   7 [measure] › tests/e2e/pricingLadder.measure.ts:139:3 › PL-2 @1280: a result opens beneath the cards and checks and flags exactly the fitting row (16.3s)
+PL-2 @390 {"tab":"true","nav":60,"tabsTop":60,"tabsBottom":139.515625,"card":139.015625,"focus":"12","want":"12","checked":["12"]}
+  ✓   8 [measure] › tests/e2e/pricingLadder.measure.ts:169:3 › PL-2 @390: "See it in the plans" opens Pro, checks and flags the fitting row, and brings it into view (4.5s)
+PL-2 @375 {"tab":"true","nav":60,"tabsTop":60,"tabsBottom":139.515625,"card":139.015625,"focus":"12","want":"12","checked":["12"]}
+  ✓   9 [measure] › tests/e2e/pricingLadder.measure.ts:169:3 › PL-2 @375: "See it in the plans" opens Pro, checks and flags the fitting row, and brings it into view (4.8s)
+PL-3 @390 {"nav":60,"tabs":60,"card":-183.984375}
+  ✓  10 [measure] › tests/e2e/pricingLadder.measure.ts:211:3 › PL-3 @390: Pro on load, Free shows only Free, pinned while Pro scrolls, arrow keys move (2.9s)
+PL-3 @375 {"nav":60,"tabs":60,"card":-183.984375}
+  ✓  11 [measure] › tests/e2e/pricingLadder.measure.ts:211:3 › PL-3 @375: Pro on load, Free shows only Free, pinned while Pro scrolls, arrow keys move (2.5s)
+PL-4 @1440 [[".mk-pv4plans",0],[".mk-pv4pgrid",0],[".mk-pv4ptile",0],[".mk-pvplans",0],[".mk-pvpgrid",0],[".mk-pvpt",0],[".mk-pvtrack",0],[".mk-pvseg",0],[".mk-pvtier",0]]
+  ✓  12 [measure] › tests/e2e/pricingLadder.measure.ts:245:3 › PL-4 @1440: no Pro plans container, no plan tiles, no swipe track (2.5s)
+PL-4 @1280 [[".mk-pv4plans",0],[".mk-pv4pgrid",0],[".mk-pv4ptile",0],[".mk-pvplans",0],[".mk-pvpgrid",0],[".mk-pvpt",0],[".mk-pvtrack",0],[".mk-pvseg",0],[".mk-pvtier",0]]
+  ✓  13 [measure] › tests/e2e/pricingLadder.measure.ts:245:3 › PL-4 @1280: no Pro plans container, no plan tiles, no swipe track (2.5s)
+PL-4 @390 [[".mk-pv4plans",0],[".mk-pv4pgrid",0],[".mk-pv4ptile",0],[".mk-pvplans",0],[".mk-pvpgrid",0],[".mk-pvpt",0],[".mk-pvtrack",0],[".mk-pvseg",0],[".mk-pvtier",0]]
+  ✓  14 [measure] › tests/e2e/pricingLadder.measure.ts:245:3 › PL-4 @390: no Pro plans container, no plan tiles, no swipe track (2.6s)
+PL-4 @375 [[".mk-pv4plans",0],[".mk-pv4pgrid",0],[".mk-pv4ptile",0],[".mk-pvplans",0],[".mk-pvpgrid",0],[".mk-pvpt",0],[".mk-pvtrack",0],[".mk-pvseg",0],[".mk-pvtier",0]]
+  ✓  15 [measure] › tests/e2e/pricingLadder.measure.ts:245:3 › PL-4 @375: no Pro plans container, no plan tiles, no swipe track (2.1s)
+PL-5 @1440 tails ["If your last replies run late, your plan simply carries on month by month until you're done.","If you're still querying after that, your plan simply carries on month by month."]
+  ✓  16 [measure] › tests/e2e/pricingLadder.measure.ts:281:3 › PL-5 @1440: the small print once, the FAQ and tails verbatim, none of the retired words (3.8s)
+PL-5 @1280 tails ["If your last replies run late, your plan simply carries on month by month until you're done.","If you're still querying after that, your plan simply carries on month by month."]
+  ✓  17 [measure] › tests/e2e/pricingLadder.measure.ts:281:3 › PL-5 @1280: the small print once, the FAQ and tails verbatim, none of the retired words (3.9s)
+PL-5 @390 tails ["If your last replies run late, your plan simply carries on month by month until you're done.","If you're still querying after that, your plan simply carries on month by month."]
+  ✓  18 [measure] › tests/e2e/pricingLadder.measure.ts:281:3 › PL-5 @390: the small print once, the FAQ and tails verbatim, none of the retired words (4.0s)
+PL-5 @375 tails ["If your last replies run late, your plan simply carries on month by month until you're done.","If you're still querying after that, your plan simply carries on month by month."]
+  ✓  19 [measure] › tests/e2e/pricingLadder.measure.ts:281:3 › PL-5 @375: the small print once, the FAQ and tails verbatim, none of the retired words (4.9s)
+  -  20 [measure] › tests/e2e/pricingLadder.measure.ts:324:1 › shots: desktop closed and with a 6-month result; phone Pro, Free and a 12-month result
+
+  1 skipped
+  19 passed (1.5m)
