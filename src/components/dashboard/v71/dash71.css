@@ -427,7 +427,10 @@
    needs 420px of it); the frame and its grid sit inside, because a container query cannot restyle
    its own container. */
 .d71-fw {
-  container: d71fw / inline-size;
+  /* SIZE, not inline-size: the card's height always comes from its slot (a fixed row while querying,
+     the column's leftover before the first query), never its content — so it can answer to its own
+     height as well as its width */
+  container: d71fw / size;
   box-sizing: border-box;
   position: relative;
   z-index: 1;
@@ -557,6 +560,8 @@
 }
 /* the founder's full signature shows only when the card is at least 420px wide */
 @container d71fw (max-width: 419px) { .d58 .d71-sig--full { display: none; } }
+/* a short card: the line goes first, in all three states; the heading, the faces and the buttons stay */
+@container d71fw (max-height: 149px) { .d58 .d71-fwline { display: none; } }
 .d71-faces { display: flex; gap: 8px; }
 .d58 .d71-face {
   position: relative;
@@ -630,7 +635,12 @@
 .d58 :is(.d71-say, .d71-lnk):focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
 
 /* first use: the same card at the column's own height; the art may grow to 118px */
+/* v60's 150px floor — and 128px below 820px of window: the ink header is taller than v60's bare one, and
+   at 1280×800 the lift-off tiles, the hairline and a 150px card overran the column by 15px (DB60 P10).
+   The card's line gives way below 150px of card (the container query below), the same thing that goes
+   first on a short window. (The column is at this floor at every measured size: the card never grows.) */
 .d58[data-mode="pre"] .d58-right > .d71-fw { flex: 1 1 0; min-height: 150px; }
+@media (max-height: 819px) { .d58[data-mode="pre"] .d58-right > .d71-fw { min-height: 128px; } }
 .d58[data-mode="pre"] .d71-fwart img { max-height: min(118px, 100%); }
 
 /* a short window: the line goes in all three states; nothing is cut */
