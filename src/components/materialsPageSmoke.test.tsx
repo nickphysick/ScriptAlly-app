@@ -228,7 +228,9 @@ describe("/queries/packages renders", () => {
     expect(html).toContain("Bundle it. Send it. Know what went.");
     expect(html).toContain('data-pk26="open"');
     expect(html).toContain(">Standard UK<");
-    expect(html).toContain("Needs a version");
+    /* v40: the stage chip and the stepper say what a draft needs (the v26 "Needs a version" pill is retired) */
+    expect(html).toContain('data-stage="draft"');
+    expect(html).toContain("Add pages to make it ready.");
     expect(html).toContain('data-pk26="lib"');
     expect(html).toContain(">Hook-first<");
     expect(html).not.toContain('data-pk26="hero"');

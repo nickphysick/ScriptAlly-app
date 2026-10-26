@@ -27,7 +27,7 @@ import {
   copyName, extraNamed, extrasLine, extrasOf, iconOf, otherMaterialsMigration, sendSplit, type ResultsKind,
 } from "../../../lib/packagesV26";
 import { usePackagesModel } from "../v4/usePackagesModel";
-import { canDelete, canMakeActive, canRetire, copyFields, copyToast, isLocked } from "../../../lib/packagesV40";
+import { canDelete, canMakeActive, canRetire, copyFields, copyToast, dayMonth, factsOf, isLocked, packageQueries, queriesWithPiece, type Facts, type PieceContext, type PieceKind as V40Kind } from "../../../lib/packagesV40";
 import { LOCKED_NOTE, LOCKED_WHY } from "../../../lib/packageMetrics";
 
 export type PieceKind = "let" | "syn" | "ver";
@@ -415,6 +415,28 @@ export function usePk26Model() {
     return materialQueries(id === "__none" ? null : id, k, msPkgs, msQueries);
   }, [base, msPkgs, msQueries]);
 
+  /* ── v40 figures (H): every count is versionsV2's — sent excludes withdrawn, "asked for more" is Analytics'
+     reachedRequest, a share shows from MIN_SENT_FOR_RATE sent. A package counts every query credited to it; a piece
+     counts every query that recorded it, whichever package it was in (H3). ── */
+  const pieceCtx = useMemo<PieceContext>(() => ({
+    packages: msPkgs, materials: versions.filter((v) => v.manuscriptId === msId), versions: readVersions(activeMs),
+  }), [msPkgs, versions, msId, activeMs]);
+  const facts = useCallback((p: Pick<SubmissionPackage, "id">): Facts => factsOf(packageQueries(p, msQueries), rowsById), [msQueries, rowsById]);
+  const pieceFacts = useCallback((kind: V40Kind, id: string): Facts => factsOf(queriesWithPiece(msQueries, kind, id, pieceCtx), rowsById), [msQueries, pieceCtx, rowsById]);
+  /** Who got a package (the shelf drawer's list): in the order they went, as the ref lists them. */
+  const whoGot = useCallback((p: Pick<SubmissionPackage, "id">) => packageQueries(p, msQueries)
+    .filter((q) => q.status !== "Withdrawn")
+    .sort((a, b) => (rowsById.get(a.id)?.sentMs ?? 0) - (rowsById.get(b.id)?.sentMs ?? 0))
+    .map((q) => {
+      const a = agents.find((x) => x.id === q.agentId);
+      const name = a?.name ?? "An agent no longer on file";
+      const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]!.toUpperCase()).join("");
+      const ms = rowsById.get(q.id)?.sentMs ?? null;
+      const date = dayMonth(ms);
+      const st = String(q.status);
+      return { id: q.id, initials, name, agency: a?.agency ?? "", date, status: st.charAt(0) + st.slice(1).toLowerCase() };
+    }), [msQueries, rowsById, agents]);
+
   /** Who a material went to — agent names, newest first. */
   const wentTo = useCallback((kind: "let" | "syn" | "ext", id: string): { names: string[]; ids: string[] } => {
     let qs = kind === "ext"
@@ -429,6 +451,7 @@ export function usePk26Model() {
     extras, comps, letters, synopses, lettersAll, synopsesAll, versionRows, matName, splitOf, currentSplit, overallSplit,
     putPiece, removePiece, toggleExtra, addExtra, renameExtra, saveDetails, createPackage, deletePkg, makeActive, duplicate, retire,
     addMaterial, saveMaterial, materialSent, putAwayMat, bringBack, addComp, saveVersion, useVersionIn, resultItems, resultQueries, wentTo,
+    facts, pieceFacts, pieceCtx, whoGot,
   };
 }
 

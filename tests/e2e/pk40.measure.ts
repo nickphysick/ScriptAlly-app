@@ -136,7 +136,11 @@ test("L2 New package from this copies the pieces and leaves the original as it w
   L.check("…named Standard 3 (the next free number)", made?.name === "Standard 3", String(made?.name));
   L.check("…copied from Standard", made?.copiedFromId === "pk40-std", String(made?.copiedFromId));
   L.check("…and not sent", made?.firstSentAt === false, String(made?.firstSentAt));
-  L.check("the original is byte-for-byte unchanged", JSON.stringify(before["pk40-std"]) === JSON.stringify(after["pk40-std"]), "diff");
+  /* every field and value, compared with the keys sorted: two reads of one unchanged document need not list its
+     fields in the same order, so a raw JSON.stringify reported a difference that was only ordering */
+  const canon = (v: unknown): unknown => (Array.isArray(v) ? v.map(canon) : v && typeof v === "object" ? Object.fromEntries(Object.keys(v as object).sort().map((k) => [k, canon((v as Record<string, unknown>)[k])])) : v);
+  const b0 = JSON.stringify(canon(before["pk40-std"])), b1 = JSON.stringify(canon(after["pk40-std"]));
+  L.check("the original is byte-for-byte unchanged", !!before["pk40-std"] && b0 === b1, b0 === b1 ? "same" : `${b0} → ${b1}`);
   L.check("the toast says so", /Made Standard 3 from Standard\. Standard stays as it was\./.test(toast), toast);
   const openId = await page.locator(`${pg} [data-pk40="open"]`).first().getAttribute("data-pkg", { timeout: 4000 }).catch(() => null);
   L.check("the copy is the open package", !!made && openId === made.id, `${openId} vs ${made?.id}`);

@@ -127,3 +127,65 @@
 /* the figures break between their two phrases, never inside one */
 .p6 .p6-po-st .p6-po-n > .p6-nw { white-space: nowrap; font: inherit !important; }
 .p6 .p6-po-st .p6-po-n > .p6-nw > b { color: #fff; font-family: var(--sp-serif); font-weight: 600; }
+
+/* ══ v40 — what the frozen-state capture could not see ═════════════════════════════════════════════════════════ */
+/* E3: the quiet empty slot is ONE treatment for all three slots. The ref's frozen state only had an empty synopsis on
+   the workbench (and an empty letter in its brand-new state), so the capture scoped the frame to those; the ref's own
+   rule is `#pkOpen .mf .slt .mr-em`, every slot. */
+.p6 .p6-mr.p6-slt .p6-mr-em {
+  align-items: center;
+  background-color: transparent;
+  border-radius: 12px;
+  color: rgba(28,19,15,0.58);
+  display: flex;
+  flex: 1 1 0%;
+  flex-direction: column;
+  font-family: var(--sp-serif);
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  gap: 6px;
+  justify-content: center;
+  justify-items: center;
+  line-height: normal;
+  outline: 1.5px dashed rgba(28,19,15,0.14);
+  outline-offset: -1.5px;
+  padding: 18px;
+  text-align: center;
+}
+.p6 .p6-mr.p6-slt[data-slot="ver"] .p6-mr-em .p6-em-ic { border-radius: 50%; }
+.p6 .p6-mr-em .p6-em-ic > b { font: 400 14px var(--sp-type); }
+/* a Draft package's stage chip and selector mark — seen only in the brand-new state, so captured only there */
+.p6 .p6-po-st .p6-draft.p6-lc-chip {
+  align-items: center;
+  background-color: rgba(255,255,255,0.14);
+  border-radius: 999px;
+  box-shadow: none;
+  color: #fff;
+  display: flex;
+  font: 400 12px/normal var(--sp-type);
+  gap: 6px;
+  height: 26px;
+  letter-spacing: 0;
+  padding: 3px 10px;
+  text-transform: none;
+}
+.p6 .p6-pkb .p6-draft.p6-pkb-st {
+  align-items: center;
+  background-color: transparent;
+  border-radius: 50%;
+  box-shadow: currentcolor 0px 0px 0px 2px inset;
+  display: grid;
+  font-family: var(--sp-type);
+  height: 18px;
+  justify-items: center;
+  margin-left: 2px;
+  width: 18px;
+}
+/* the stepper never runs past the open package: the ref's steps are `flex: 0 0 auto`, which holds for the words its
+   frozen state shows; a draft that needs both pieces says "Add a query letter and pages", and in the app's narrower
+   sheet the third step was cut at the panel's edge. The steps may shrink and their lines wrap instead. */
+.p6 .p6-lc .p6-lc-s { flex-shrink: 1; min-width: 0; }
+.p6 .p6-lc .p6-lc-s > span { min-width: 0; }
+.p6 .p6-lc-s span > b, .p6 .p6-lc-s span > small { white-space: normal; }
+.p6 .p6-lc > em { min-width: 16px; }

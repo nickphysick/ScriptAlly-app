@@ -17,6 +17,7 @@
  *    when the query recorded its pieces, else its package's credited edition, and the pages through Versions v2's
  *    `resolveQueryVersion`. A query that recorded nothing is credited to no piece.
  */
+import { dayMonth as formatDayMonth } from "./dates";
 import { ComponentType, type ManuscriptVersion, type Query, type SubmissionPackage } from "../types";
 import type { AnalyticsRow } from "./analytics";
 import type { V2Version } from "./bookVersions";
@@ -236,3 +237,6 @@ export function matVerdict<T extends MatCard>(cards: readonly T[], kind: "let" |
   const second = ready.find((c) => c !== lead)!;
   return { lead: `${nm(lead)} is ahead.`, rest: `${lead.f.raw}% asked for more from ${lead.f.n} sent, against ${second.f.raw}% for ${second.none ? "no synopsis" : second.name}.` };
 }
+
+/* "12 Sep", as the ref writes it — the app's one formatter (lib/dates), from a millisecond count */
+export const dayMonth = (ms: number | null | undefined): string => (ms == null || !Number.isFinite(ms) ? "" : formatDayMonth(ms));
