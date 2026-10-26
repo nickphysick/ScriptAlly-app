@@ -52,7 +52,7 @@ export const SetGlyph: React.FC<{ k: SetKey; size?: number }> = ({ k, size = 17 
   const s = SET_GLYPH[k];
   return s ? <StatusDot status={s} overrideSize={size} /> : NQ_RING;
 };
-/** the state disc: dashed navy ring (not queried) · navy (querying) · rust with a pale ring (your move) · grey (closed) */
+/** the state disc: dashed navy ring (not queried) · navy (querying) · navy with a rust "!" (your move, v25.2 B) · grey (closed) */
 export const StateDisc: React.FC<{ x: AgentFacts; size?: number; className?: string }> = ({ x, size, className }) => (
   <span className={`cl24-dsc cl24-dsc--${x.stand}${className ? ` ${className}` : ""}`} data-cl24="disc" data-k={x.stand} aria-hidden="true"
     style={size ? ({ "--d": `${size}px` } as React.CSSProperties) : undefined}>{agentInitials(x.agent).slice(0, 2)}</span>
@@ -330,7 +330,7 @@ const Card: React.FC<{ x: AgentFacts; p: ContactSheet24Props }> = ({ x, p }) => 
       onClick={(e) => { if ((e.target as HTMLElement).closest("a, button")) return; open(); }}
       onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); open(); } }}>
       {/* v20 §F — a card whose next step is the writer's wears the app's pink band */}
-      <AgentPaperCard variant="framed" data={data} tone={x.stand === "you" ? "pink" : undefined}
+      <AgentPaperCard variant="framed" data={data} tone={x.stand === "you" ? "pink" : undefined} yourMove={x.stand === "you"}
         onAdd={(k) => { const t = ADD_TARGET[k]; p.onEdit(x.agent.id, t.tab, t.focus); }} />
     </div>
   );

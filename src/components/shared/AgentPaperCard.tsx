@@ -94,7 +94,9 @@ export const AgentPaperCard: React.FC<{
    *  the app's pink with rust words, which only the Contact list's Cards view asks for, on a card whose next step is the
    *  writer's. The agent panel and Housekeeping never pass it. */
   tone?: "pink";
-}> = ({ variant, data: d, onAdd, className, panel, tone }) => {
+  /** Contact list v25.2 B — a your-move agent: the disc is navy with the rust "!" */
+  yourMove?: boolean;
+}> = ({ variant, data: d, onAdd, className, panel, tone, yourMove }) => {
   if (variant === "panel" && panel) {
     return (
       <div className={`apc apc--panel${className ? ` ${className}` : ""}`} data-apc="card" data-variant="panel" data-status={d.status}>
@@ -108,7 +110,7 @@ export const AgentPaperCard: React.FC<{
           </div>
           <div className="apc-scroll" data-apc="scroll" {...panel.scrollAttrs}>
             <div className="apc-head" data-apc="head">
-              <span className="apc-disc" aria-hidden="true">{d.initials}</span>
+              <span className={`apc-disc${yourMove ? " cl252-yd" : ""}`} data-cl252={yourMove ? "yd" : undefined} aria-hidden="true">{d.initials}</span>
               <div className="apc-who">
                 <h2 className="apc-nm" data-apc="name" data-ap="name" ref={panel.nameRef} tabIndex={-1}>{d.name}</h2>
                 {[d.agency?.trim(), d.city?.trim()].filter(Boolean).length ? <span className="apc-ag" data-ap="place">{[d.agency?.trim(), d.city?.trim()].filter(Boolean).join(" · ")}</span> : null}
@@ -161,7 +163,7 @@ export const AgentPaperCard: React.FC<{
           {!ghost && d.stars ? <Stars n={d.stars} /> : null}
         </div>
         <div className="apc-head" data-apc="head">
-          <span className="apc-disc" aria-hidden="true">{ghost ? null : d.initials}</span>
+          <span className={`apc-disc${yourMove ? " cl252-yd" : ""}`} data-cl252={yourMove ? "yd" : undefined} aria-hidden="true">{ghost ? null : d.initials}</span>
           <div className="apc-who">
             {ghost ? <>{bar(150, 18)}{bar(110)}{bar(170)}</> : (
               <>

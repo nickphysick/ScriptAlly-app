@@ -45,3 +45,34 @@
 .cl252-pills.wrap { flex-wrap: wrap; overflow: visible; }
 /* brand.tsx names bare spans as the sans: the pill's words take the pill's face */
 .cl252-qpill > span:not([class]) { font: inherit !important; color: inherit; }
+
+/* ══ B · the your-move disc: navy with cream initials and a rust "!" (the rust/blush disc is retired) ══
+   The badge is a 17px rust disc at the top right (−3, −3) with a 2px halo in the colour of the surface under it
+   (--halo). At a glance's faces are navy with no badge (contactV251.css). */
+.cl24-dsc.cl24-dsc--you { position: relative; background: #2a3a52; color: #f4eee5; box-shadow: none; --halo: #fff; }
+.cl24-dsc.cl24-dsc--you::after, .cl252-yd::after {
+  content: "!"; position: absolute; top: -3px; right: -3px; box-sizing: border-box; width: 17px; height: 17px; border-radius: 50%;
+  display: grid; place-items: center; background: #c9765d; color: #fff; font: 700 11px/17px var(--sp-serif) !important; letter-spacing: 0;
+  text-align: center; box-shadow: 0 0 0 2px var(--halo, #fff); text-transform: none;
+}
+.cl251-faces .cl251-face.cl24-dsc--you::after { content: none; display: none; }
+.cl24-tr .cl24-dsc--you { --halo: #fff; }
+.cl24-tr:hover .cl24-dsc--you { --halo: #faf8f5; }
+.cl24-tr[aria-current="true"] .cl24-dsc--you { --halo: #f3f5f9; }
+.cl24-br .cl24-dsc--you { --halo: #fff; }
+.cl24-br:hover .cl24-dsc--you { --halo: #faf8f5; }
+.cl24-br[aria-current="true"] .cl24-dsc--you { --halo: #eef2f7; }
+/* Cards (AgentPaperCard) and the drawer pickers' rows draw their own disc; a your-move one wears the same */
+.apc .apc-disc.cl252-yd { position: relative; background: #2a3a52; color: #f4eee5; --halo: #fff; }
+.qc149f .qc149f-d.cl252-yd { position: relative; background: #2a3a52; color: #f4eee5; box-shadow: none; --halo: #fff; }
+.qc149f .qc149f-ag:hover .qc149f-d.cl252-yd { --halo: #f6f2ec; }
+
+
+/* inside the agent card the genre row's own chip rule (`.qc149c .qc149c-gs span`, qcv149card.css) styles every span:
+   the pills restate themselves above it */
+.qc149c .qc149c-gs .cl252-pills { padding: 0; border-radius: 0; background: none; box-shadow: none; letter-spacing: 0; text-transform: none; }
+.qc149c .qc149c-gs .cl252-pill {
+  height: 26px; padding: 0 10px; border-radius: 7px; background: #f6f2ec; color: #3d332d; box-shadow: inset 0 0 0 1px #e4dace;
+  letter-spacing: 0; text-transform: none; font: 400 14px/1 var(--sp-type) !important;
+}
+.qc149c .qc149c-gs .cl252-pill.hit { background: #e3e8ef; color: #2a3a52; box-shadow: none; }

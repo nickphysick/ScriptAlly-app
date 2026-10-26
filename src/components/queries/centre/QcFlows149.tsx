@@ -21,6 +21,7 @@ import { fieldDay, parseDay } from "./QcQueryCard149";
 import { FlowHead, FLOW_WORDS } from "../../shared/FlowHead";
 import "../../../marketing/heroCard.css";
 import "./qcv149card.css";
+import "../../shared/agentRowParts.css";
 
 const SEARCH = <svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="#2a3a52" strokeWidth="1.9" strokeLinecap="round" aria-hidden="true"><circle cx="8.6" cy="8.6" r="5.6" /><path d="M12.8 12.8l4 4" /></svg>;
 const VIA: { k: SubmissionMethod; label: string }[] = [
@@ -180,7 +181,8 @@ export const QcWhoReplied149: React.FC<{ items: WhoItem[]; onPick: (id: string) 
   const you = shown.filter((i) => i.you);
   const row = (i: WhoItem) => (
     <button key={i.id} type="button" className="qc149f-ag" data-qc149f="who-item" data-id={i.id} data-group={i.you ? "you" : "waiting"} onClick={() => onPick(i.id)}>
-      <span className="qc149f-d">{i.initials}</span><span><b>{i.name}</b><small>{i.agency}</small></span>
+      {/* Contact list v25.2 B — a reply waiting on the writer: the navy disc with the rust "!" */}
+      <span className={`qc149f-d${i.you ? " cl252-yd" : ""}`} data-cl252={i.you ? "yd" : undefined}>{i.initials}</span><span><b>{i.name}</b><small>{i.agency}</small></span>
       <span className={`qc149f-st${i.you ? " y" : ""}`}><StatusDot status={i.status} overrideSize={13} />{i.statusLabel}</span>
     </button>
   );

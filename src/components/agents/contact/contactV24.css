@@ -190,14 +190,15 @@
   .cl24-card:hover > .apc { transform: none; }
 }
 
-/* the state disc: dashed navy ring (not queried) · navy (querying) · rust with a pale ring (your move) · grey (closed) */
+/* the state disc: dashed navy ring (not queried) · navy (querying) · navy with a rust "!" (your move) · grey (closed) */
 .cl24-dsc {
   --d: 44px; box-sizing: border-box; flex: none; width: var(--d); height: var(--d); border-radius: 50%; display: grid; place-items: center;
   font: 600 calc(var(--d) * 0.273) / 1 var(--sp-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.04em;
 }
 .cl24-dsc--none { background: #fff; color: #2a3a52; outline: 1.5px dashed rgba(42, 58, 82, 0.7); outline-offset: -2px; }
 .cl24-dsc--agent { background: #2a3a52; color: #f4eee5; }
-.cl24-dsc--you { background: #d07a5c; color: #fff; box-shadow: 0 0 0 3px #f8e3da; }
+/* v25.2 B — the rust/blush your-move disc is retired: navy, like Querying, with the rust "!" (shared/agentRowParts.css) */
+.cl24-dsc--you { background: #2a3a52; color: #f4eee5; }
 .cl24-dsc--closed { background: #ebe7e2; color: rgba(28, 19, 15, 0.5); }
 .cl24-nq { flex: none; color: #1c130f; }
 
