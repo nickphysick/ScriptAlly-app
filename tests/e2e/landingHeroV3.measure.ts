@@ -536,7 +536,7 @@ test.describe("landing hero v3", () => {
     expect(Math.abs(r.share - 3 / 50), "the fill is (cap − N) / cap of the track").toBeLessThan(.005);
   });
 
-  test("LH17 cap: no page says 100 places; Pricing and the phone strip state the hero's N", async ({ page }) => {
+  test("LH17 cap: no page says 100 places; Pricing and the phone's join bar state the hero's N", async ({ page }) => {
     test.setTimeout(90000);
     const bad: string[] = [];
     for (const route of ["/", "/pricing", "/founders", "/about", "/contact"]) {
@@ -559,12 +559,12 @@ test.describe("landing hero v3", () => {
       return document.querySelector(".mk-fmmeta")?.textContent?.match(/^(\d+) places left$/)?.[1];
     });
     await page.setViewportSize({ width: 390, height: 844 }); await stub(page); await page.goto("/", { waitUntil: "load" }); await page.waitForTimeout(1500);
-    /* RETARGETED (landing on phones v1, 26 Oct): the phone's counter is the founding strip now. */
-    const pill = await page.evaluate(() => document.querySelector(".mk-fs .mk-sr")?.textContent);
+    /* RETARGETED (landing on phones v4, 26 Oct): the strip is gone; the phone's count is the join bar's. */
+    const pill = await page.evaluate(() => document.querySelector(".mk-jbar .mk-jbc")?.textContent);
     console.log("LH17", JSON.stringify({ hero, pricing, pill }));
     expect(hero, "population: the hero's N").toBe("47");
     expect(pricing, "Pricing states the same N against the same cap").toBe("47");
-    expect(pill, "the phone strip states the same N").toBe("47 places left");
+    expect(pill, "the phone's join bar states the same N").toBe("47 places left");
   });
 
   test("LH18 reduced motion: the counter's first visible state is its final value", async ({ page }) => {

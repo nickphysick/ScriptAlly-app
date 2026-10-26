@@ -1,14 +1,13 @@
 /**
  * The landing page on phones, v3 (26 Oct; ref design-refs/landing-mobile-v3.html) — the rendered locks.
  *
- *   LS1 snap (390 × 844): html's scroll-snap-type is "y proximity"; there are exactly seven page snap
- *       points (the six captions and the closing beat), each with scroll-snap-stop "always" except
- *       the beat; a caption's scroll-margin-top is 60 + the panel's height within 2px; snapping to
+ *   LS1 snap (390 × 844): html's scroll-snap-type is "y proximity"; there are exactly six page snap
+ *       points (the six captions; v4 removed the closing beat), each with scroll-snap-stop "always"; a caption's scroll-margin-top is 60 + the panel's height within 2px; snapping to
  *       caption 3 leaves its top within 2px of the panel's bottom and makes picture 3 current
  *   LS2 captions (390 × 844 and 360 × 640): six, each with its "N of 6" label, its heading, its line
  *       and exactly three points — two at 360 × 640, where S5 drops the third — matching landingCopy
- *   LS3 closing beat: "And so much more." appears once, after the sixth caption and before the
- *       vision; at its snap position the vision's top is on screen
+ *   LS3 RETIRED (landing on phones v4): the closing beat is folded into the vision — see
+ *       landingMobileV4's LT3.
  *   LS4 reduced motion: no snapping (scroll-snap-type none) and no cross-fade on the picture
  *
  * The v2 locks (landingMobileV2: LV1–LV6) still cover the panel's geometry, no sideways scroll, the
@@ -18,7 +17,7 @@
  *   LS_MUTATE=<name>   apply one lock's named break in the page, to prove that lock goes red
  */
 import { test, expect, Page } from "@playwright/test";
-import { FEATURE_STORY, featureStoryLabel, VISION_NAVY_HEADING as STORY_MORE_HEADING } from "../../src/marketing/landingCopy";
+import { FEATURE_STORY, featureStoryLabel } from "../../src/marketing/landingCopy";
 
 const MUTATE = process.env.LS_MUTATE ?? "";
 const P390 = { width: 390, height: 844 }, P360 = { width: 360, height: 640 };
@@ -29,7 +28,6 @@ const CSS_BREAKS: Record<string, string> = {
   LS1c: ".mk-s3{scroll-margin-top:60px!important}",
   LS1d: ".mk-ccard{scroll-snap-align:start!important}",
   LS1e: ".mk-spimg img.mk-on{opacity:0!important}.mk-spimg img:first-child{opacity:1!important}",
-  LS3: ".mk-tl{height:120svh!important}",
   LS4: "html:has(.mk-story){scroll-snap-type:y proximity!important}",
   LS4b: ".mk-spimg img{transition:opacity .45s!important}",
 };
@@ -45,10 +43,6 @@ async function open(page: Page, vp: { width: number; height: number }, o: { redu
   if (MUTATE === "LS2b") await page.addInitScript(() => {
     /* A caption's label wrong. */
     new MutationObserver(() => { const n = document.querySelectorAll(".mk-s3n")[3]; if (n && n.textContent !== "4 OF 7") n.textContent = "4 OF 7"; }).observe(document, { subtree: true, childList: true, characterData: true });
-  });
-  if (MUTATE === "LS3b") await page.addInitScript(() => {
-    /* The beat's heading stated a second time, before the story. */
-    new MutationObserver(() => { const st = document.querySelector(".mk-story"); if (st && !document.querySelector(".ls-dupe")) { const p = document.createElement("p"); p.className = "ls-dupe"; p.textContent = "And so much more."; st.before(p); } }).observe(document, { subtree: true, childList: true });
   });
   await page.goto("/", { waitUntil: "commit" });
   await page.waitForSelector(".mk-s3", { state: "attached" });
@@ -80,8 +74,9 @@ test.describe("landing on phones v3", () => {
     console.log("LS1", JSON.stringify(r));
     /* Computed styles drop a value's default, so "y proximity" serialises as "y". */
     expect(["y", "y proximity"], `html's scroll-snap-type is y proximity (${r.type})`).toContain(r.type);
-    expect(r.points.length, "exactly seven page snap points").toBe(7);
-    expect(r.points.map((p) => p[0]), "six captions, then the closing beat").toEqual(["mk-s3", "mk-s3", "mk-s3", "mk-s3", "mk-s3", "mk-s3", "mk-tl"]);
+    /* REWRITTEN (landing on phones v4, 26 Oct): the closing beat is gone, so the six captions are all. */
+    expect(r.points.length, "exactly six page snap points").toBe(6);
+    expect(r.points.map((p) => p[0]), "the six captions").toEqual(["mk-s3", "mk-s3", "mk-s3", "mk-s3", "mk-s3", "mk-s3"]);
     expect(r.points.slice(0, 6).map((p) => p[1]), "every caption stops the flick").toEqual(Array(6).fill("always"));
     for (const m of r.margins) expect(Math.abs(m - (60 + r.panel)), `a caption's scroll-margin-top is 60 + the panel (${m})`).toBeLessThanOrEqual(2);
     await page.evaluate(() => document.querySelectorAll(".mk-s3")[2].scrollIntoView({ block: "start", behavior: "instant" }));
@@ -120,27 +115,6 @@ test.describe("landing on phones v3", () => {
     }
   });
 
-  test("LS3 closing beat: once, after the sixth caption and before the vision, with the vision on screen", async ({ page }) => {
-    test.setTimeout(60000);
-    await open(page, P390);
-    const r = await page.evaluate((h) => {
-      const all = Array.from(document.querySelectorAll("body *")).filter((e) => e.children.length === 0 && (e.textContent ?? "").trim() === h);
-      const beat = all[0], last = document.querySelectorAll(".mk-s3")[5], vision = document.querySelector(".mk-vision--navy");
-      const after = (a: Element, b: Element) => !!(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
-      return { count: all.length, afterSixth: !!beat && after(last, beat), beforeVision: !!beat && !!vision && after(beat, vision) };
-    }, STORY_MORE_HEADING);
-    console.log("LS3", JSON.stringify(r));
-    expect(r.count, `"${STORY_MORE_HEADING}" appears once`).toBe(1);
-    expect(r.afterSixth, "after the sixth caption").toBe(true);
-    expect(r.beforeVision, "and before the vision").toBe(true);
-    await page.evaluate(() => document.querySelector(".mk-tl")!.scrollIntoView({ block: "start", behavior: "instant" }));
-    await page.waitForTimeout(800);
-    const s = await page.evaluate(() => ({ beat: document.querySelector(".mk-tl")!.getBoundingClientRect().top, vision: document.querySelector(".mk-vision--navy")!.getBoundingClientRect().top, H: innerHeight }));
-    console.log("LS3 at the beat", JSON.stringify(s));
-    expect(Math.abs(s.beat - 60), "the beat snaps under the bar").toBeLessThanOrEqual(2);
-    expect(s.vision, "the vision's top is on screen beneath it").toBeLessThan(s.H);
-    expect(s.vision).toBeGreaterThan(s.beat);
-  });
 
   test("LS4 reduced motion: no snapping and no cross-fade", async ({ page }) => {
     test.setTimeout(60000);

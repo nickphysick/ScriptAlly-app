@@ -1,0 +1,19 @@
+LT1 on LT1 →  1 failed | Error: /: no founding strip
+LT1b on LT1 →  1 failed | Error: /: on white at 10%
+LT1c on LT1 →  1 failed | Error: /: no underline
+LT1d on LT1 →  1 failed | Error: /: still stuck at 0 once scrolled
+LT1e on LT1 →  1 failed | Error: Log in goes to the sign-in route
+LT3 on LT3 →  1 failed | Error: the vision starts straight after the sixth caption (gap 120)
+LT3b on LT3 →  1 failed | Error: rounded top corners
+LT3c on LT3 →  1 failed | Error: picture 3 is the visible one
+LT3d on LT3 →  1 failed | Error: every heading is white (rgb(255, 255, 255),rgb(28, 19, 15),rgb(28, 19, 15),rgb(28, 19, 15))
+LT3e on LT3 →  1 failed | Error: no closing beat
+LT3f on LT3 →  1 failed | Error: expect(received).toContain(expected) // indexOf
+LT4 on LT4 →  1 failed | Error: no cross-fade (0.45s,0.45s,0.45s)
+LS1d on LS1 →  1 failed | Error: exactly six page snap points
+N2p on N2 →  1 failed | Error: @390: the Log in pill is white at 10%
+V1p on V1 →  1 failed | Error: @390: showing one picture
+LT2 on LT2 →  1 failed | Error: still rounded short of the bar
+LV5 on LV5 →  1 failed | Error: the corners are still rounded short of the bar
+LV1e on LV1 →  1 failed | Error: @390: after the story the panel has let go of the bar
+done
