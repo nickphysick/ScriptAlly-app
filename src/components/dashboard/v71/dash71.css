@@ -576,6 +576,16 @@
 @container d71fw (max-width: 419px) { .d58 .d71-sig--full { display: none; } }
 /* a short card: the line goes first, in all three states; the heading, the faces and the buttons stay */
 @container d71fw (max-height: 149px) { .d58 .d71-fwline { display: none; } }
+/* a very short card (first use, under 130px): the short window's treatment, and the signature goes */
+@container d71fw (max-height: 129px) {
+  .d71-fwtxt { padding: 6px 12px 6px 2px; gap: 4px; }
+  .d58 .d71-face { width: 26px; height: 26px; }
+  .d71-face svg { width: 16px; height: 16px; }
+  .d58 .d71-sig { display: none; }
+  .d58 .d71-say { padding: 5px 11px; font-size: 13px; }
+  .d71-fwart img { max-height: min(66px, 100%); }
+  .d71-fwrow { margin-top: 0; }
+}
 .d71-faces { display: flex; gap: 8px; }
 .d58 .d71-face {
   position: relative;
@@ -649,12 +659,12 @@
 .d58 :is(.d71-say, .d71-lnk):focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
 
 /* first use: the same card at the column's own height; the art may grow to 118px */
-/* v60's 150px floor — and 128px below 820px of window: the ink header is taller than v60's bare one, and
-   at 1280×800 the lift-off tiles, the hairline and a 150px card overran the column by 15px (DB60 P10).
-   The card's line gives way below 150px of card (the container query below), the same thing that goes
-   first on a short window. (The column is at this floor at every measured size: the card never grows.) */
-.d58[data-mode="pre"] .d58-right > .d71-fw { flex: 1 1 0; min-height: 150px; }
-@media (max-height: 819px) { .d58[data-mode="pre"] .d58-right > .d71-fw { min-height: 128px; } }
+/* ⚠️ BEFORE THE FIRST QUERY THE CARD MUST END CLEAR OF THE FEED TAB (DB71 L3, first use) — and with the ink
+   header taller than v60's bare one, v60's 150px floor ran it 27–41px under the tab at 1280–1512. So here
+   the hairline above it tightens (24/10 → 8/6) and its floor is 112px; below 130px of card it takes the
+   compact treatment (below). (The column sits at this floor at every measured size: the card never grows.) */
+.d58[data-mode="pre"] .d58-right > .d71-fw { flex: 1 1 0; min-height: 112px; }
+.d58[data-mode="pre"] .d58-right > .d59-rule { margin: 8px 0 6px; }
 .d58[data-mode="pre"] .d71-fwart img { max-height: min(118px, 100%); }
 
 /* a short window: the line goes in all three states; nothing is cut */

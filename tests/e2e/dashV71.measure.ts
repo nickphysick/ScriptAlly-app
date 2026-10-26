@@ -21,6 +21,7 @@
  */
 import { test, expect, type Page, type BrowserContext } from "@playwright/test";
 import { mkdirSync, writeFileSync } from "node:fs";
+import { execSync } from "node:child_process";
 import { doc, getDoc, updateDoc, deleteField } from "firebase/firestore";
 import { openRoute } from "./measure";
 import { readPng } from "./pngPixels";
@@ -639,4 +640,33 @@ test("DB71 F1 · F2 — the founding card: copy, the pulse, the one feedback pan
   await page.waitForTimeout(400);
   await shot(page, "founding-sent");
   L.done(21);
+});
+
+/* ── L3 (first use) — before the first query the founding card ends clear of the tab ─────────────── */
+
+test.describe("first use", () => {
+  /* the pre-query manuscript exists only while DB60's own seeder holds it, and is cleaned after */
+  const seed = (mode: "" | "--clean") => execSync(`node tests/e2e/seedDash60.mjs ${mode}`, { stdio: "pipe" }).toString().trim();
+  test.beforeAll(() => { seed(""); });
+  test.afterAll(() => { seed("--clean"); });
+  test("DB71 L3 (first use) — the founding card is never under the Activity feed tab", async ({ page }) => {
+    test.setTimeout(300_000);
+    const L = new Ledger("first-use");
+    for (const vp of [V1512, { width: 1440, height: 900 }, { width: 1280, height: 800 }, { width: 1920, height: 1080 }]) {
+      for (const flags of [{ __SA_DASH_NO_AGENTS: true }, { __SA_DASH_NO_AGENTS: undefined }]) {
+        await openDash(page, vp, flags, PRE);
+        const r = await page.evaluate(() => {
+          const b = (s: string) => { const e = [...document.querySelectorAll<HTMLElement>(s)].find((x) => x.getBoundingClientRect().height > 0); if (!e) return null; const k = e.getBoundingClientRect(); return { l: k.left, r: k.right, t: k.top, b: k.bottom }; };
+          return { mode: document.querySelector<HTMLElement>(".d58")?.dataset.mode ?? null, fw: b('[data-d71="fw"]'), tab: b('[data-d58="tab"]') };
+        });
+        const w = `${tag(vp)} ${flags.__SA_DASH_NO_AGENTS ? "day one" : "agents, no queries"}`;
+        L.check("L3", `${w} population: the first-use page, the card and the tab`, r.mode === "pre" && !!r.fw && !!r.tab, JSON.stringify(r));
+        if (r.fw && r.tab) {
+          const overlapX = r.fw.r > r.tab.l && r.fw.l < r.tab.r;
+          L.check("L3", `${w} the card ends above the tab`, !overlapX || r.fw.b <= r.tab.t - 8, `card bottom ${r.fw.b.toFixed(1)} · tab top ${r.tab.t.toFixed(1)} · gap ${(r.tab.t - r.fw.b).toFixed(1)}`);
+        }
+      }
+    }
+    L.done(16);
+  });
 });
