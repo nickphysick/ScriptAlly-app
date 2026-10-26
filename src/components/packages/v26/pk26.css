@@ -156,6 +156,7 @@
 .p6 .p6-mr.p6-slt[data-slot="ver"] .p6-mr-em .p6-em-ic { border-radius: 50%; }
 .p6 .p6-mr-em .p6-em-ic > b { font: 400 14px var(--sp-type); }
 /* a Draft package's stage chip and selector mark — seen only in the brand-new state, so captured only there */
+.p6 .p6-po-st .p6-draft.p6-lc-chip::before { content: "✎"; }
 .p6 .p6-po-st .p6-draft.p6-lc-chip {
   align-items: center;
   background-color: rgba(255,255,255,0.14);
