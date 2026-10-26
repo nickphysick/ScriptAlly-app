@@ -25,14 +25,15 @@ import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from
 import { createPortal } from "react-dom";
 import {
   PV4_KICKER, PV4_H1, PV4_SUB, PV4_MORE, PV4_LESS, PV4_PERKS, PV4_STEPS_H, PV4_STEPS,
-  PV4_LAUNCH_LINE, PV4_FREE, PV4_PRO, PRO_FROM, SEG_PRO_FROM, PLANS_TITLE, PLANS_SUB, PRO_PLANS,
-  planMonths, planPrice, planTileLines, SUIT_LINK, SUIT_NOTE, JY_FITS, PV4_FAQ_H2, PV4_FAQ,
+  PV4_LAUNCH_LINE, PV4_FREE, PV4_PRO, TAB_FREE_SMALL, TAB_PRO_SMALL, SUIT_LINK, PV4_FAQ_H2, PV4_FAQ,
+  LADDER_DEFAULT,
 } from "./pricingCopy";
 import { FoundingSignup, FoundingCounter, formIsVisible } from "./FoundingSignup";
 import { useFounding } from "./foundingStore";
 import { foundingPlacesLeftLabel, FOUNDING_CTA } from "./landingCopy";
 import { FOUNDING_ART, artUrl } from "./brandArt";
-import { PERK_ICON, Price } from "./pricingParts";
+import { PERK_ICON } from "./pricingParts";
+import { FreeCard, ProCard, Compass, type Months } from "./PricingPlans";
 import { PlanSheetPhone } from "./PlanSheetPhone";
 
 type Nav = (tab: string, subPageName?: string) => void;
@@ -115,119 +116,78 @@ const reduceMotion = () =>
   typeof window !== "undefined" && !!window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const scrollBehavior = (): ScrollBehavior => (reduceMotion() ? "auto" : "smooth");
 
+/** The tab an arrow key moves to: two tabs, so left / right / Home / End each land on one. */
+export const tabStep = (from: number, key: string): number | null =>
+  key === "ArrowRight" || key === "ArrowLeft" ? 1 - from : key === "Home" ? 0 : key === "End" ? 1 : null;
+
 /**
- * Then, once we launch: a Free / Pro switch over the two cards in a scroll-snapped track (ref .seg,
- * .track). Tapping a side scrolls the track to that card; swiping the track moves the switch.
+ * Then, once we launch, on a phone (pricing ladder, 26 Oct; ref design-refs/pricing-phone-plans-v1.html,
+ * layout A): a Free / Pro switch pinned at the top of the section while it scrolls, and ONE plan at a
+ * time beneath it. Pro is open on arrival. Each tab carries its plan's price, so Free is never out of
+ * sight. There is no swiping.
  *
- * ⚠️ A TAP'S OWN SCROLL DOES NOT MOVE THE SWITCH BACK. The ref derives the switch from every scroll
- * event, so tapping Pro lit Pro, then the smooth scroll's first frames (still nearer Free) lit Free,
- * then Pro again. While a tap's scroll is travelling the handler waits for it to arrive.
- * ⚠️ THE CARDS KEEP THEIR OWN HEIGHTS (`align-items: flex-start` in the sheet): a short Free card is
- * not stretched to Pro's. The draft of this design stretched it; `pricingMobile.measure.ts` locks it.
+ * ⚠️ IT REPLACES THE FREE / PRO SWIPE TRACK AND THE PHONE'S PRO PLANS SECTION, BOTH DELETED. The Pro
+ * card is the desktop's (`PricingPlans.tsx`): the same ladder, the same small print, the same link —
+ * which here opens the questions sheet.
+ * ⚠️ THE TABS ARE A REAL TABLIST: roving focus (only the selected tab is in the tab order), the arrow
+ * keys move between them and select as they go, each panel is a `tabpanel` labelled by its tab, and the
+ * hidden panel is `hidden`, not merely moved.
+ * ⚠️ PINNED UNDER THE NAV (`top: var(--mk-nav-h)`) for as long as the section is on screen — the sticky
+ * element's range is this section, so it lets go when the questions below arrive.
  */
-const TiersPhone: React.FC = () => {
-  const [on, setOn] = useState(0);
-  const track = useRef<HTMLDivElement | null>(null);
-  const seeking = useRef<number | null>(null);
-  const cards = () => [...(track.current?.querySelectorAll<HTMLElement>(".mk-pvtier") ?? [])];
-  const go = (i: number) => {
-    const el = track.current, card = cards()[i];
-    setOn(i);
-    if (!el || !card) return;
-    const left = Math.max(0, Math.min(card.offsetLeft - 18, el.scrollWidth - el.clientWidth));
-    seeking.current = Math.abs(el.scrollLeft - left) < 2 ? null : left;
-    el.scrollTo({ left, behavior: scrollBehavior() });
+const PlansPhone = React.forwardRef<HTMLElement, {
+  tab: number; onTab: (i: number) => void;
+  selected: Months; fit: Months | null; onSelect: (m: Months) => void;
+  onSuit: (opener: HTMLElement) => void;
+}>(({ tab, onTab, selected, fit, onSelect, onSuit }, ref) => {
+  const onKey = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const to = tabStep(tab, e.key);
+    if (to === null) return;
+    e.preventDefault();
+    onTab(to);
+    e.currentTarget.querySelectorAll<HTMLElement>("[role=tab]")[to]?.focus();
   };
-  const onScroll = () => {
-    const el = track.current, pro = cards()[1];
-    if (!el || !pro) return;
-    if (seeking.current !== null) {
-      if (Math.abs(el.scrollLeft - seeking.current) >= 2) return;
-      seeking.current = null;
-    }
-    setOn(el.scrollLeft > pro.offsetLeft / 2 ? 1 : 0);
-  };
-  const tab = (i: number, label: React.ReactNode, id: string) => (
+  const tabBtn = (i: number, id: string, name: string, small: string) => (
     <button
       type="button"
       role="tab"
       id={`mk-pvtab-${id}`}
-      aria-selected={on === i}
-      aria-controls={`mk-pvtier-${id}`}
-      onClick={() => go(i)}
+      aria-selected={tab === i}
+      aria-controls={`mk-pvpanel-${id}`}
+      tabIndex={tab === i ? 0 : -1}
+      onClick={() => onTab(i)}
     >
-      {label}
+      <span>{name}</span><small>{small}</small>
     </button>
   );
   return (
-    <section className="mk-pvlaunch" aria-labelledby="mk-pvm-launch">
+    <section className="mk-pvlaunch" aria-labelledby="mk-pvm-launch" ref={ref}>
       <p id="mk-pvm-launch" className="mk-pvlaunchh">{PV4_LAUNCH_LINE}</p>
-      <div className="mk-pvseg" role="tablist" aria-labelledby="mk-pvm-launch" data-on={on}>
-        <span className="mk-pvthumb" aria-hidden="true" />
-        {tab(0, PV4_FREE.name, "free")}
-        {tab(1, <>{PV4_PRO.name} <small>{SEG_PRO_FROM}</small></>, "pro")}
+      <div className="mk-pvtabs">
+        <div className="mk-pvtabsin" role="tablist" aria-labelledby="mk-pvm-launch" data-on={tab} onKeyDown={onKey}>
+          <span className="mk-pvtabsthumb" aria-hidden="true" />
+          {tabBtn(0, "free", PV4_FREE.name, TAB_FREE_SMALL)}
+          {tabBtn(1, "pro", PV4_PRO.name, TAB_PRO_SMALL)}
+        </div>
       </div>
-      <div className="mk-pvtrack" ref={track} onScroll={onScroll}>
-        <article className="mk-pvtier" id="mk-pvtier-free" role="tabpanel" aria-labelledby="mk-pvtab-free">
-          <div className="mk-pvtierin">
-            <h2 className="mk-pvtname">{PV4_FREE.name}</h2>
-            <Price amount={PV4_FREE.price} />
-            <p className="mk-pvtsub">{PV4_FREE.sub}</p>
-            <ul className="mk-pvtlist">{PV4_FREE.list.map((f) => <li key={f}>{f}</li>)}</ul>
-          </div>
-        </article>
-        <article className="mk-pvtier mk-pvtier--pro" id="mk-pvtier-pro" role="tabpanel" aria-labelledby="mk-pvtab-pro">
-          <div className="mk-pvtierin">
-            <h2 className="mk-pvtname">{PV4_PRO.name}</h2>
-            <Price amount={PRO_FROM} from={PV4_PRO.from} per={PV4_PRO.per} />
-            <p className="mk-pvtsub">{PV4_PRO.sub}</p>
-            <ul className="mk-pvtlist">
-              <li className="mk-pvplus">{PV4_PRO.plus}</li>
-              {PV4_PRO.list.map((f) => <li key={f}>{f}</li>)}
-            </ul>
-            <p className="mk-pvtnote">{PV4_PRO.flex}</p>
-          </div>
-        </article>
+      <div className="mk-pvpanel" role="tabpanel" id="mk-pvpanel-free" aria-labelledby="mk-pvtab-free" hidden={tab !== 0}>
+        <FreeCard />
+      </div>
+      <div className="mk-pvpanel" role="tabpanel" id="mk-pvpanel-pro" aria-labelledby="mk-pvtab-pro" hidden={tab !== 1}>
+        <ProCard
+          selected={selected}
+          fit={fit}
+          onSelect={onSelect}
+          suit={
+            <button type="button" className="mk-lsuit" aria-haspopup="dialog" onClick={(e) => onSuit(e.currentTarget)}>
+              <Compass />{SUIT_LINK}
+            </button>
+          }
+        />
       </div>
     </section>
   );
-};
-
-/** The compass on "Which plan suits me best?" — the ref's own drawing. */
-const Compass = () => (
-  <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M15.5 8.5l-2 5-5 2 2-5z" /></svg>
-);
-
-/**
- * Pro plans: the four plans as a 2 × 2 grid in a white-rimmed sheet, then the button that opens the
- * questions. The plan the questions arrive at turns navy and carries the "Fits your campaign" tag —
- * a real element, so the words are copy rather than a stylesheet's `content`.
- */
-const PlansPhone = React.forwardRef<HTMLElement, { fit: number | null; onSuit: (opener: HTMLElement) => void }>(
-  ({ fit, onSuit }, ref) => (
-    <section className="mk-pvplans" aria-labelledby="mk-pvm-plans" ref={ref}>
-      <h2 id="mk-pvm-plans" className="mk-pvplanst">{PLANS_TITLE}</h2>
-      <p className="mk-pvplanss">{PLANS_SUB}</p>
-      <ul className="mk-pvpgrid">
-        {PRO_PLANS.map((p) => {
-          const line = planTileLines(p);
-          return (
-            <li className={"mk-pvpt" + (p.months === fit ? " mk-pvpt--fit" : "")} key={p.months} data-m={p.months}>
-              {p.months === fit && <span className="mk-pvfittag">{JY_FITS}</span>}
-              <p className="mk-pvptname">{planMonths(p.months)}</p>
-              <b className="mk-pvptprice">{planPrice(p)}</b>
-              <small className="mk-pvptline">{line.lead}{line.save && <em>{line.save}</em>}</small>
-            </li>
-          );
-        })}
-      </ul>
-      <button type="button" className="mk-pvsuit" aria-haspopup="dialog" onClick={(e) => onSuit(e.currentTarget)}>
-        <Compass />{SUIT_LINK}
-      </button>
-      <p className="mk-pvplansnote">{SUIT_NOTE}</p>
-    </section>
-  ),
-);
+});
 PlansPhone.displayName = "PlansPhone";
 
 /**
@@ -315,34 +275,42 @@ export const PricingPhone: React.FC<{ onNavigate: Nav }> = ({ onNavigate }) => {
      sheet's stacking context. Found once the page is mounted. */
   const [host, setHost] = useState<Element | null>(null);
   useLayoutEffect(() => { setHost(root.current?.closest(".mk-scope") ?? null); }, []);
-  /* The questions sheet: open, closed, and the plan it last arrived at (which turns its tile navy). */
+  /* The questions sheet: open or closed; and the plans: which tab, which length is checked, and the
+     length a result arrived at (checked and flagged "Fits your campaign"). Pro is open on arrival. */
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [fit, setFit] = useState<number | null>(null);
+  const [tab, setTab] = useState(1);
+  const [selected, setSelected] = useState<Months>(LADDER_DEFAULT);
+  const [fit, setFit] = useState<Months | null>(null);
   const opener = useRef<HTMLElement | null>(null);
   const openSheet = useCallback((el: HTMLElement) => { opener.current = el; setSheetOpen(true); }, []);
   const closeSheet = useCallback(() => {
     setSheetOpen(false);
     opener.current?.focus({ preventScroll: true });
   }, []);
-  /* "See it in the plans": close, then bring Pro plans into view under the nav (the ref's 70px is
-     its 58px nav plus 12; here the nav's own height plus the same 10). Focus goes to the plans'
-     own button rather than back to the opener — the FAQ's link would scroll the page back down. */
+  /* "See it in the plans" (26 Oct): close the sheet, open the Pro tab, and bring the Pro card into view
+     just below the pinned tabs, with focus on its checked row — the one the result flagged. Waits a
+     frame for the Pro panel to be shown before measuring it. */
   const seePlans = useCallback(() => {
     setSheetOpen(false);
-    const section = plans.current;
-    if (!section) return;
-    section.querySelector<HTMLElement>(".mk-pvsuit")?.focus({ preventScroll: true });
-    window.setTimeout(() => {
-      const navH = document.querySelector(".mk-navwrap")?.getBoundingClientRect().height ?? 0;
-      window.scrollTo({ top: section.getBoundingClientRect().top + window.scrollY - navH - 10, behavior: scrollBehavior() });
-    }, reduceMotion() ? 0 : 300);
+    setTab(1);
+    window.requestAnimationFrame(() => {
+      const section = plans.current;
+      const card = section?.querySelector<HTMLElement>("#mk-pvpanel-pro");
+      if (!section || !card) return;
+      section.querySelector<HTMLElement>('#mk-pvpanel-pro [role=radio][aria-checked="true"]')?.focus({ preventScroll: true });
+      window.setTimeout(() => {
+        const navH = document.querySelector(".mk-navwrap")?.getBoundingClientRect().height ?? 0;
+        const tabsH = section.querySelector(".mk-pvtabs")?.getBoundingClientRect().height ?? 0;
+        window.scrollTo({ top: card.getBoundingClientRect().top + window.scrollY - navH - tabsH, behavior: scrollBehavior() });
+      }, reduceMotion() ? 0 : 300);
+    });
   }, []);
-  const onFit = useCallback((m: number) => setFit(m), []);
+  /* A result checks the row that fits and flags it — exactly one row, the estimate's. */
+  const onFit = useCallback((m: Months) => { setFit(m); setSelected(m); }, []);
   return (
     <div className="mk-pvm" ref={root}>
       <FoundingBoxPhone onNavigate={onNavigate} formArea={formArea} />
-      <TiersPhone />
-      <PlansPhone ref={plans} fit={fit} onSuit={openSheet} />
+      <PlansPhone ref={plans} tab={tab} onTab={setTab} selected={selected} fit={fit} onSelect={setSelected} onSuit={openSheet} />
       <FaqPhone onSuit={openSheet} />
       <StickyClaim host={host} formArea={formArea} blocked={sheetOpen} />
       <PlanSheetPhone host={host} open={sheetOpen} onClose={closeSheet} onSeePlans={seePlans} onFit={onFit} onNavigate={onNavigate} />

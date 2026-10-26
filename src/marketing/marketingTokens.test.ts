@@ -814,11 +814,9 @@ describe("the hero grid aligns per item, and overlaps by construction", () => {
       /* the same box on a phone (pricing on phones, 25 Oct, ref pricing-page-mobile-v1): −116px into
          the 150px of ink the sheet starts below, so it straddles the join as the desktop box does. */
       ".mk-pvm .mk-pvbox",
-      /* the "Fits your campaign" tag drawn 2px up into its tile's top padding, the ref's own value */
-      ".mk-pvm .mk-pvfittag",
-      /* the phone's Free / Pro track reaching past the sheet's 14px gutter to the screen's edges, so
-         the card it is not showing can peek in at the edge (same ref) */
-      ".mk-pvm .mk-pvtrack",
+      /* the phone's pinned Free / Pro tabs reaching past the sheet's 14px gutter to the screen's edges,
+         so the oat behind them hides what scrolls under (26 Oct, ref pricing-phone-plans-v1, layout A) */
+      ".mk-pvm .mk-pvtabs",
       /* each vision point is a card drawn OUTWARD: its padding is paid back by an equal negative
          margin, so the picture, heading and body keep their column (landing colours v2) */
       ".mk-vpoint",
