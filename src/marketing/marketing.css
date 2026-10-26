@@ -551,10 +551,11 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 }
 
 /* ── Phones: one 60px ink row (23 Oct, ref design-refs/landing-hero-mobile-v1.html `.m-nav`) ──
-   Mark (26px) and "QueryHawk" in Source Serif 4, then the founding pill (`FoundingNavPill`), then the
-   burger, whose panel and behaviour are unchanged. Every pre-login page gets it.
+   Mark (26px) and "QueryHawk" in Source Serif 4, then the burger, whose panel and behaviour are
+   unchanged. Every pre-login page gets it. (Since landing on phones v1, 26 Oct, the founding offer is
+   the strip ABOVE this bar, `FoundingStrip`; the pill that sat in the bar is deleted.)
    ⚠️ DECLARED AFTER THE 600 BLOCK, AND THAT ORDER IS LOAD-BEARING: it UNDOES that block's wrap (the
-   pill is narrower than the CTA it replaces, so the row fits again at 320+), and both are
+   row is the mark and the burger, so it fits at 320+), and both are
    single-class media rules at equal specificity, so the later one wins.
    ⚠️ THE ROW IS 60px IN BOTH STATES. The condense only ever changed padding and the wordmark's size;
    here neither changes, because the landing's sticky stage sits at `top: var(--mk-nav-h)` and a bar
@@ -579,22 +580,29 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   .mk-sheet:has(.mk-hp) { border-top-left-radius: 0; border-top-right-radius: 0; }
 }
 
-/* The founding pill: cream, 42px, two lines — the offer, then ten segments and the places left.
-   ⚠️ IT DECLARES ITS FAMILIES: `brand.tsx` gives every bare `button` and `span` the app's body face. */
-.mk-navpill {
-  height: 42px; box-sizing: border-box; padding: 0 13px; border: 0; border-radius: 21px;
-  background: var(--mk-cream-btn); color: var(--mk-ink-shell); cursor: pointer;
-  display: inline-flex; flex-direction: column; align-items: stretch; justify-content: center; gap: 4px;
-  font-family: var(--mk-f-sans); text-align: left;
-}
-.mk-navpill-t { font: 600 12.5px/1 var(--mk-f-sans); white-space: nowrap; }
-.mk-navpill-c { display: flex; align-items: center; gap: 7px; font-family: var(--mk-f-sans); }
-.mk-navpill-c i { display: flex; gap: 2px; flex: 1; }
-.mk-navpill-c b { flex: 1; height: 4px; border-radius: 1px; background: rgba(27, 36, 51, .14); }
-.mk-navpill-c b.mk-on { background: var(--mk-rust); }
-.mk-navpill-c em {
-  font: 600 9.5px/1 var(--mk-f-sans); font-style: normal; color: var(--mk-rust);
-  white-space: nowrap; font-variant-numeric: tabular-nums;
+/* The founding strip (phones only; landing on phones v1, ref design-refs/landing-mobile-v1.html
+   `.fs.fsC`). A 40px band in a lighter navy than the bar, above it and in flow, so it scrolls away
+   while the bar stays stuck. Every value is the ref's. The pill it replaced (`.mk-navpill`) is gone.
+   ⚠️ EACH PART DECLARES ITS OWN FAMILY: `brand.tsx` gives every bare `span` the app's body face.
+   ⚠️ TEXT ON NAVY IS WHITE, and the count's pink is the one exception the ref draws. */
+.mk-fs { display: none; }
+@media (max-width: 760px) {
+  .mk-fs {
+    display: flex; align-items: center; gap: 10px; height: 40px; box-sizing: border-box; padding: 0 14px;
+    flex: none; white-space: nowrap; background: #26324a; color: #fff; text-decoration: none;
+    font: 400 14px/1 var(--mk-f-serif);
+  }
+  .mk-fs-t { font: 600 14px/1 var(--mk-f-serif); color: #fff; }
+  .mk-fs-tr {
+    flex: 1; min-width: 40px; height: 6px; position: relative; border-radius: 999px;
+    background: rgba(255, 255, 255, .14);
+  }
+  .mk-fs-tr b { position: absolute; left: 0; top: 0; bottom: 0; min-width: 6px; border-radius: 999px; background: #e8b4a3; }
+  .mk-fs-n {
+    font: 500 12px/1 var(--mk-f-mono); letter-spacing: .02em; color: #e8b4a3;
+    font-variant-numeric: tabular-nums;
+  }
+  .mk-fs:focus-visible { outline: 2px solid #e8b4a3; outline-offset: -2px; }
 }
 
 /* ── The sheet: one light surface between the ink nav and the ink footer ──
@@ -2861,4 +2869,100 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   .mk-formcard { padding: 24px 20px 22px; }
   .mk-cmailcard { flex-direction: column; align-items: flex-start; gap: 12px; }
   .mk-cart { max-width: 220px; margin-left: auto; margin-right: auto; }
+}
+
+/* ══════════════ The landing page on phones, below the hero (landing on phones v1, 26 Oct) ══════════════
+   ref design-refs/landing-mobile-v1.html: `.swipe`/`.rail`/`.fc`/`.dots`, `.vis`/`.vpt.row`, and
+   `.close`/`.ccard`. Every value is the ref's. Only phones render these classes (`usePhone`), so none
+   of them can reach the desktop layout.
+   ⚠️ HEADINGS READ THE FACE TOKENS WITH `!important` AND TWO CLASSES: `brand.tsx` forces every bare
+   h2/h3 to the brand family at runtime, and a single-class rule loses between two important
+   declarations. Spans and paragraphs declare their family too, for the same file's sake. */
+
+/* The six features: one horizontal strip. The rail runs edge to edge (the section has no side
+   padding; the head and the rail carry the ref's 22px themselves — the ref's −22px margin would be a
+   ninth negative margin in a sheet that holds them to eight), snaps each card to the centre, and
+   shows no scrollbar. It never declares
+   `scroll-behavior: smooth`, so the keyboard's move is the only motion and reduced motion can stop it. */
+.mk-swipeband { scroll-margin-top: var(--mk-nav-h); }
+.mk-swipehead { display: flex; justify-content: space-between; align-items: baseline; margin: 0 0 12px; padding: 0 22px; }
+.mk-swipehead span {
+  font: 500 11px/1 var(--mk-f-mono); letter-spacing: .1em; text-transform: uppercase; color: rgba(28, 19, 15, .5);
+}
+.mk-rail {
+  display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory;
+  padding: 0 22px 6px; scrollbar-width: none; overscroll-behavior-x: contain;
+}
+.mk-rail::-webkit-scrollbar { display: none; }
+.mk-rail:focus-visible { outline: 2px solid var(--mk-rust); outline-offset: 2px; }
+.mk-fc {
+  flex: 0 0 300px; scroll-snap-align: center; background: #fff; border-radius: 16px; overflow: hidden;
+  box-shadow: 0 1px 0 rgba(28, 19, 15, .06), 0 10px 24px -18px rgba(28, 19, 15, .35);
+}
+.mk-fc img {
+  display: block; width: 100%; height: 190px; max-width: none;
+  object-fit: cover; object-position: center top; background: #f5e6df;
+}
+.mk-fcbody { padding: 14px 16px 18px; }
+.mk-fc .mk-fch3 { margin: 0 0 6px; font: 600 18px/1.25 var(--mk-f-serif) !important; color: #1c130f; }
+.mk-fcbody p { margin: 0; font: 400 14.5px/1.5 var(--mk-f-serif); color: rgba(28, 19, 15, .74); }
+.mk-dots { display: flex; justify-content: center; gap: 6px; margin: 14px 0 6px; }
+.mk-dots i { width: 6px; height: 6px; border-radius: 3px; background: rgba(28, 19, 15, .18); transition: width .2s, background .2s; }
+.mk-dots i.mk-on { width: 18px; background: var(--mk-navy); }
+
+/* The vision band as three compact rows: a 76px picture left, the heading and one line right. */
+.mk-vision.mk-vision--rows { background: #fff; margin-top: 28px; padding: 36px 22px 10px; }
+.mk-vision--rows .mk-visionh2 { font: 400 26px/1.2 var(--mk-f-display) !important; margin: 0 0 22px; color: #1c130f; text-align: left; }
+.mk-vrow { display: grid; grid-template-columns: 76px 1fr; gap: 14px; align-items: center; margin: 0 0 18px; }
+.mk-vrow img { display: block; width: 76px; height: auto; max-width: none; margin: 0; }
+.mk-vrow .mk-vrowh3 { margin: 0 0 3px; font: 600 17px/1.25 var(--mk-f-serif) !important; color: #1c130f; }
+.mk-vrow p { margin: 0; font: 400 14.5px/1.45 var(--mk-f-serif); color: rgba(28, 19, 15, .74); }
+
+/* The closing founding card, on the light ground: white fading to blush, the hawks on its top-right
+   corner, breaking its top edge (absolutely placed, so they take no room in the card). */
+.mk-close { padding: 64px 16px 44px; }
+.mk-ccard {
+  position: relative; border-radius: 20px; padding: 22px 20px;
+  background: linear-gradient(160deg, #fff 0%, #fff 55%, #f7ece7 100%);
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, .06), 0 20px 40px -28px rgba(28, 19, 15, .45);
+}
+.mk-ccart { position: absolute; right: -4px; top: -58px; width: 138px; height: auto; max-width: none; }
+.mk-ccpill {
+  display: inline-block; font: 600 10.5px/1 var(--mk-f-mono); letter-spacing: .16em; text-transform: uppercase;
+  /* ⚠️ RUST, NOT THE REF'S BURGUNDY (#7c3a2a): burgundy is retired from this sheet (landing colours
+     v2) and rust is the one red on light, so the pill reads the token. */
+  color: var(--mk-rust); background: #f5e6df; border-radius: 999px; padding: 7px 10px;
+}
+.mk-ccard .mk-cch2 { font: 400 28px/1.12 var(--mk-f-display) !important; margin: 14px 0 10px; max-width: 220px; color: #1c130f; }
+.mk-cclead { font: 400 15.5px/1.5 var(--mk-f-serif); color: rgba(28, 19, 15, .78); margin: 0 0 14px; }
+.mk-cclist { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 10px; }
+.mk-cclist li { display: grid; grid-template-columns: 22px 1fr; gap: 8px; font: 400 15.5px/1.4 var(--mk-f-serif); color: #1c130f; }
+.mk-cclist li svg { margin-top: 1px; }
+.mk-cclist li span { font: inherit; }
+.mk-ccform { display: grid; gap: 8px; }
+.mk-ccform input[type="email"] {
+  height: 48px; box-sizing: border-box; border-radius: 12px; border: 1px solid rgba(28, 19, 15, .2); background: #fff;
+  padding: 0 14px; font: 400 16px/1 var(--mk-f-serif); color: #1c130f; width: 100%;
+}
+.mk-ccform input[type="email"]::placeholder { color: rgba(28, 19, 15, .4); }
+.mk-ccform input[type="email"]:focus { outline: none; border-color: var(--mk-navy); box-shadow: 0 0 0 3px rgba(42, 58, 82, .15); }
+.mk-ccform .mk-btn {
+  height: 48px; border-radius: 12px; background: var(--mk-navy); color: #fff; border: 0; width: 100%;
+  font: 600 16px/1 var(--mk-f-serif); justify-content: center;
+}
+.mk-ccform .mk-btn:hover { background: var(--mk-navy); }
+.mk-ccard .mk-betanote { margin: 8px 0 0; font-size: 12px; line-height: 1.4; }
+.mk-ccard .mk-places { margin-top: 16px; width: auto; }
+.mk-ccard .mk-places-bar { height: 4px; border-radius: 2px; background: #e9e4dd; overflow: hidden; }
+.mk-ccard .mk-places span { margin-top: 9px; font: 500 11px/1 var(--mk-f-mono); letter-spacing: .16em; text-transform: uppercase; color: #1c130f; }
+.mk-ccnote { font: 400 13px/1.45 var(--mk-f-serif); color: rgba(28, 19, 15, .6); margin: 12px 0 0; }
+.mk-ccmore {
+  display: inline-flex; gap: 6px; align-items: center; margin-top: 18px;
+  font: 500 15px/1 var(--mk-f-serif); color: var(--mk-navy);
+  text-decoration: underline; text-decoration-color: var(--mk-rust); text-underline-offset: 6px; text-decoration-thickness: 1.5px;
+}
+/* ⚠️ AFTER THE RULE IT OVERRIDES: a media query confers no specificity, so an earlier reduced-motion
+   block would lose to `.mk-dots i` on source order. */
+@media (prefers-reduced-motion: reduce) {
+  .mk-dots i { transition: none; }
 }

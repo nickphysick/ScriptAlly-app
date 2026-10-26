@@ -117,27 +117,24 @@ describe("the deal", () => {
   });
 
   it("kickers and headings, verbatim", () => {
-    expect(FOUNDERS_DEAL.map((c) => c.kicker)).toEqual(["The deal", "The sweetener", "A direct line"]);
+    /* REWRITTEN (26 Oct, landing on phones v1 C3): the interim terms, until the page is redesigned. */
+    expect(FOUNDERS_DEAL.map((c) => c.kicker)).toEqual(["The deal", "For your friends", "A direct line"]);
     expect(FOUNDERS_DEAL.map((c) => c.heading)).toEqual([
-      "Six months free",
-      "Half price after that",
+      "A free campaign",
+      "An Early Bird discount",
       "You shape what's built",
     ]);
   });
 
   /**
-   * ⚠️ THE FIRST TWO ARE PROMISES THE PRODUCT HAS TO KEEP, and the second is a PERMANENT pricing
-   * commitment stated on two pages — the band's "Half price for as long as you need it after
-   * that" is the same promise in different words. If the terms change, both change together.
+   * ⚠️ THE FIRST TWO ARE PROMISES THE PRODUCT HAS TO KEEP, stated on two pages — the band's
+   * `FOUNDING_GETS` carries the same two terms. If the terms change, both change together.
+   * (REWRITTEN 26 Oct: "six months free, then half price" is no longer the offer.)
    */
   it("the offer and the sweetener, verbatim", () => {
-    expect(FOUNDERS_DEAL[0].body).toBe(
-      "The full version of QueryHawk, with nothing held back. Every feature, every tool, no card " +
-      "needed.",
-    );
+    expect(FOUNDERS_DEAL[0].body).toBe("Full QueryHawk Pro, free for your entire querying campaign. No card needed.");
     expect(FOUNDERS_DEAL[1].body).toBe(
-      "If you stay, you'll never pay full price. A founding writer's rate for as long as you're " +
-      "querying.",
+      "An exclusive discount for the friends and fellow writers you invite when we launch.",
     );
   });
 

@@ -177,10 +177,10 @@ export const BAND_HEADING =
    was right.
 
    ⚠️ AND THE FOUR LINES BELOW ARE PROMISES THE PRODUCT HAS TO KEEP, in the same class as the
-   About page's: early access, a direct line, six months free, and half price afterwards for as
-   long as they need it. The last is a PERMANENT pricing commitment and it is stated on two pages
-   — `FOUNDERS_DEAL`'s sweetener is the same promise in different words. If the terms change, both
-   change together. If one stops being true the fix is the product, not the sentence. */
+   About page's: Pro free for a whole querying campaign, a direct line, Smart Import, and an Early
+   Bird discount for the writers a founder invites (26 Oct — the offer that replaced "six months free,
+   then half price"). `FOUNDERS_DEAL` states the same terms in its own words, so if the terms change,
+   both change together. If one stops being true the fix is the product, not the sentence. */
 export const FOUNDING_EYEBROW = "Founding writers";
 export const FOUNDING_HEADING = "Join as a founding writer";
 
@@ -195,10 +195,10 @@ export const FOUNDING_GET_LEAD = "You get:";
  * two read wrong, and the shorter one is the one that would win.
  */
 export const FOUNDING_GETS = [
-  "Early access to QueryHawk",
+  "QueryHawk Pro, free for your entire querying campaign",
   "A direct line to the founder",
-  "The full experience free of charge for 6 months",
-  "Half price for as long as you need it after that",
+  "Smart Import to bring your list across",
+  "An exclusive Early Bird discount for the writers you invite when we launch",
 ] as const;
 
 /**
@@ -309,6 +309,9 @@ export const navPlacesLeft = (left: number) => `${left} places left`;
 /** "63 places left" from the two figures the endpoint answered with: /pricing's counter line.
  *  A builder for the reason the two above are — no subtraction at a render site, and never below 0. */
 export const foundingPlacesLeftLabel = (claimed: number, cap: number) => navPlacesLeft(Math.max(0, cap - claimed));
+/** The founding strip's count on phones (landing on phones v1): "48 left". The strip's screen-reader
+    line is still `navPlacesLeft`, the whole phrase. */
+export const stripPlacesLeft = (left: number) => `${left} left`;
 /** The desktop hero's places counter (v4.1): the number in bold, then this; and its spoken label. */
 export const HERO_PLACES_REST = " places left";
 export const heroPlacesLabel = (left: number, cap: number) => `${left} of ${cap} founding places left`;
@@ -430,7 +433,7 @@ export const VISION_POINTS: VisionPoint[] = [
   {
     key: "simple",
     image: "/images/make-querying-simple.png",
-    heading: "Make querying simple.",
+    heading: "Make querying straightforward.",
     body: "Stop shooting from the hip. We'll crunch the data and give you everything you need to " +
       "make targeted decisions at the right time.",
   },
@@ -444,6 +447,44 @@ export const VISION_POINTS: VisionPoint[] = [
 
 /** The band's one way out, to /about. A button, because marketing routes go through `onNavigate`. */
 export const VISION_LINK = "Read our story";
+
+/* ══════════════ The landing page on phones (≤760px; landing on phones v1, 26 Oct) ══════════════
+   ref design-refs/landing-mobile-v1.html. Every string is the ref's, verbatim.
+
+   ⚠️ THE SWIPE CARDS ARE SHORTER THAN THE ROWS AND IN A DIFFERENT ORDER, AND THAT IS THE REF'S.
+   A 300px card holds two or three lines of body, not a paragraph; and the import card closes the set
+   ("Your list so far comes with you" last). Each card names its row by `key`, so the picture, its
+   size and its version still come from `FEATURE_ROWS` and the desktop rows' table — one image per
+   feature, however it is laid out. */
+export interface FeatureCard { key: FeatureRow["key"]; heading: string; body: string }
+
+export const FEATURE_SWIPE_LABEL = "Six things it does";
+/** "1 / 6" — the card in view, of how many. */
+export const featureSwipeCount = (n: number, of: number) => `${n} / ${of}`;
+export const FEATURE_SWIPE_ARIA = "Features, swipe across";
+
+export const FEATURE_SWIPE: FeatureCard[] = [
+  { key: "track", heading: "Every query tracked, from start to finish", body: "A full history for everything you've sent, plus timely nudge reminders." },
+  { key: "agents", heading: "Your agents on file", body: "Their wish list, response time, the sample they ask for, and every interaction." },
+  { key: "email", heading: "Updates log themselves", body: "Paste a sent or received email and QueryHawk suggests the updates. You have final say." },
+  { key: "packages", heading: "Curate and compare packages", body: "Bundle letters, synopses and samples, and see which combinations get interest." },
+  { key: "comps", heading: "Compile your comparable titles", body: "Build a library of comps and track which ones resonate." },
+  { key: "import", heading: "Your list so far comes with you", body: "Bring your spreadsheet or notes across with Smart Import, or start fresh." },
+];
+
+/** The vision points' one-line bodies on phones, keyed to `VISION_POINTS`; the headings are shared. */
+export const VISION_SHORT: Record<string, string> = {
+  stories: "A captivating story should never be lost to a sub-par querying campaign.",
+  simple: "Everything you need to make targeted decisions at the right time.",
+  write: "Less time in spreadsheets, more time doing what you love.",
+};
+
+/* The closing founding card (phones; it replaces the founding band there). The pill is the band's own
+   eyebrow and the list is `FOUNDING_GETS`, so the offer is stated in one place. */
+export const CLOSE_HEADING = "Help get things off the ground.";
+export const CLOSE_LEAD = `We're looking for ${FOUNDING_CAP} writers to put QueryHawk through its paces. You get:`;
+export const CLOSE_NOTE = "All we ask is occasional feedback to help shape QueryHawk.";
+export const CLOSE_LINK = "How being a founding writer works →";
 
 /* ══════════════ Pricing (public, marketing tier) ══════════════
    ⚠️ THREE FIGURES ARE UNSET AND NOTHING HERE MAY INVENT THEM. The design this page was rebuilt

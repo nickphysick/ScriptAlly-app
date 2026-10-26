@@ -1,0 +1,22 @@
+LM1 on LM1 →  1 failed | Error: @390: and the bar sits right under it
+LM1b on LM1 →  1 failed | Error: @390: the fill is (cap − left) / cap of the track
+LM1c on LM1 →  1 failed | Error: @390: 40px tall
+LM1d on LM1 →  1 failed | Error: @390: no pill or segment bar in the phone bar
+LM2 on LM2 →  1 failed | Error: @390: the third dot is the active one, an 18px navy pill
+LM2b on LM2 →  1 failed | Error: @390: the third dot is the active one, an 18px navy pill
+LM2c on LM2 →  1 failed | Error: @390: the count
+LM3 on LM3 →  1 failed | Error: expect(received).toContain(expected) // indexOf
+LM3b on LM3 →  1 failed | Error: three rows, each picture 76px wide
+LM4 on LM4 →  1 failed | Error: the hawks overlap the card's top edge (103.8 < 91.8 < 241.8)
+LM4b on LM4 →  1 failed | Error: at 1440 the landing has the founding band
+LM4c on LM4 →  1 failed | Error: the card's list is C1, exactly
+LM5 on LM5 →  1 failed | Error: no retired offer wording on any public page
+LM6 on LM6 →  1 failed | Error: the strip declares no smooth scrolling
+LM6b on LM6 →  1 failed | Error: the only count ever on screen is the final one
+HM2 on HM2 →  1 failed  2 passed (48.2s) | Error: expect(received).toBe(expected) // Object.is equality
+N2p on N2 →  1 failed | Error: @390: the founding strip is the lighter navy
+V1p on V1 →  1 failed | Error: @390: the phone's vision band is white
+LM1e on LM1 →  1 failed | Error: no number before the live figure
+HM4 on HM4 →  1 failed | Error: the fill is the share taken
+LM2d on LM2 →  1 failed | Error: @390: the page body never scrolls sideways
+done

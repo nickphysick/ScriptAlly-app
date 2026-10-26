@@ -34,7 +34,8 @@ import { FEATURE_ROWS } from "./landingCopy";
    ⚠️ `smart-email-drop` IS ALSO NEW ARTWORK, not just a smaller file. The repo shipped the previous
    drawing because the replacement could not be got under budget with the tooling that existed; that
    is no longer true, so the row finally shows what it was meant to. */
-const ILLUSTRATIONS: Record<string, { width: number; height: number; version: string }> = {
+/* Exported for the phone's swipe strip (`FeatureSwipe`), which draws the same six pictures. */
+export const ILLUSTRATIONS: Record<string, { width: number; height: number; version: string }> = {
   "/images/track-agent-queries.png": { width: 1600, height: 1166, version: "10aedb0e" },
   "/images/home-for-your-agents.png": { width: 1600, height: 1250, version: "2e426b48" },
   "/images/journey-so-far.png": { width: 1600, height: 1250, version: "c7f381b1" },

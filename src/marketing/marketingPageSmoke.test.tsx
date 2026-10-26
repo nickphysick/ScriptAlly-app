@@ -560,8 +560,9 @@ describe("the founding sign-up — one on the landing, in the band", () => {
     const list = /<ul class="mk-claimlist">([\s\S]*?)<\/ul>/.exec(h);
     expect(list, "the offer renders as a list").toBeTruthy();
     expect(list![1].match(/<li>/g) ?? [], "four items").toHaveLength(4);
-    expect(list![1]).toContain("Early access to QueryHawk");
-    expect(list![1]).toContain("The full experience free of charge for 6 months");
+    /* REWRITTEN (26 Oct, C1): the offer's new terms. */
+    expect(list![1]).toContain("QueryHawk Pro, free for your entire querying campaign");
+    expect(list![1]).toContain("Smart Import to bring your list across");
     expect(h).toContain("All we ask is that you give us occasional feedback");
   });
 
@@ -738,8 +739,9 @@ describe("the Founding Writers page", () => {
 
   it("states the offer, the sweetener and the direct line", () => {
     const h = html();
-    expect(h).toContain("Six months free");
-    expect(h).toContain("Half price after that");
+    /* REWRITTEN (26 Oct, C3): the interim deal cards. */
+    expect(h).toContain("A free campaign");
+    expect(h).toContain("An Early Bird discount");
     expect(h).toContain("You shape what&#x27;s built");
     expect(h).toContain("Straight to the founder.");
     expect(h).toContain("Nick — QueryHawk&#x27;s founder");
