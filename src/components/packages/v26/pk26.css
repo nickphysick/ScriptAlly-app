@@ -211,3 +211,19 @@
 .p6 .p6-tp-t .p6-tp-arr { text-align: center; color: rgba(28,19,15,.35); font-size: 18px; }
 .p6 .p6-tp-t > footer { padding: 0 18px 16px; font: italic 13.5px var(--sp-serif); color: rgba(28,19,15,.6); }
 .p6 .p6-tp-none { font: italic 13.5px var(--sp-serif); color: rgba(28,19,15,.45); }
+
+/* I — no small mono capitals anywhere on the page. The ref's animation still labels its packed package "READY" in 8px
+   mono capitals (an earlier layer the v40 sweep did not reach); it reads in the typewriter, sentence case, sized to
+   the 42px the chip opens to. */
+.p6.p6-new .p6-an-ph .p6-an-r { font: 400 10px/normal var(--sp-type); letter-spacing: 0; text-transform: none; }
+/* I, the material drawer's labels (its one change in v40): section headings and field labels were 9.5px mono
+   capitals; they read in the typewriter, sentence case, as the shelf drawer's headings and the slot labels do. */
+.p6-cx-drw.p6-on .p6-db > h5 { font: 400 16px/normal var(--sp-type); letter-spacing: 0; text-transform: none; }
+.p6-cx-drw.p6-on .p6-fld2 label > span { font: 400 14px/normal var(--sp-type); letter-spacing: 0; text-transform: none; color: #1c130f; }
+
+/* How it works (v40): the diagram's reduced-motion frame, the ref's own — everything shown, nothing moving */
+@media (prefers-reduced-motion: reduce) {
+  .p6-hwm .p6-hw2 * { animation: none !important; opacity: 1 !important; transform: none !important; }
+}
+/* …and it pauses on hover, as the v26 animation does, so it can be read */
+.p6-hwm .p6-hw2:hover, .p6-hwm .p6-hw2:hover * { animation-play-state: paused !important; }

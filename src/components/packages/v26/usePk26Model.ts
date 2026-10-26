@@ -239,6 +239,8 @@ export function usePk26Model() {
       ...(pc?.kind === "ver" ? {} : src?.bookVersionId ? { bookVersionId: src.bookVersionId } : !src && activeMs.inUseBookVersionId ? { bookVersionId: activeMs.inUseBookVersionId } : {}),
       ...(src?.otherMaterials ? { otherMaterials: src.otherMaterials } : {}),
       extraIds: src ? [...(src.extraIds ?? [])] : [],
+      /* v40: a package started from a copy is a copy (A4) — it records where it came from, so Tests can compare them */
+      ...(src ? { copiedFromId: src.id } : {}),
       icon: d.icon,
       ...(d.note.trim() ? { note: d.note.trim(), noteEditedAt: new Date().toISOString() } : {}),
     });

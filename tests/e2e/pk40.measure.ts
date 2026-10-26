@@ -207,7 +207,9 @@ async function monoCensus(page: Page): Promise<string[]> {
     for (const r of roots) {
       for (const e of [r, ...r.querySelectorAll("*")] as HTMLElement[]) {
         if (!e.offsetParent && getComputedStyle(e).position !== "fixed") continue;
-        if (!(e.innerText ?? "").trim()) continue;
+        /* only an element that holds text itself: a container whose own (inherited, unused) style is mono capitals
+           while every child sets its own face is not text a reader sees */
+        if (![...e.childNodes].some((n) => n.nodeType === 3 && (n.textContent ?? "").trim())) continue;
         if (e.closest('[data-art]')) continue;
         const cs = getComputedStyle(e);
         if (/mono/i.test(cs.fontFamily) && cs.textTransform === "uppercase") out.push(`${e.tagName}.${e.className}: ${(e.innerText ?? "").trim().slice(0, 30)}`);
@@ -228,14 +230,23 @@ test("L8 no visible element on the page is mono AND uppercase", async ({ page })
     }
     await page.locator(`${pg} [data-pk26="tabs"] .p6-lead`).first().click({ timeout: 5000 }).catch(() => {});
     await page.waitForTimeout(300);
-    for (const [what, sel] of [["New package dialog", '[data-pk40="wbh"] button'], ["How it works", '[data-pk26="header"] .p6-hd-g']] as const) {
+    for (const [what, sel, layer] of [["New package dialog", '[data-pk40="wbh"] button', ".p6-pdlg"], ["How it works", ".p6-hd-s", '[data-pk26="hwm"]']] as const) {
       const b = page.locator(`${pg} ${sel}`).first();
       if (await b.count()) { await b.click({ timeout: 5000 }).catch(() => {}); await page.waitForTimeout(600); }
+      /* the census over a layer means nothing unless the layer is on screen */
+      L.check(`${ms} · ${what} opened`, (await page.locator(layer).count()) > 0, layer);
       const hits = await monoCensus(page);
       L.check(`${ms} · ${what}: no mono capitals`, hits.length === 0, JSON.stringify(hits.slice(0, 8)));
       await page.keyboard.press("Escape"); await page.waitForTimeout(300);
     }
     if (ms === "pk40-ms") {
+      /* the material drawer: its section headings and field labels were the page's last mono capitals */
+      await page.locator(`${pg} [data-pk26="lib"] .p6-lr-ed`).first().click({ timeout: 5000 }).catch(() => {});
+      await page.waitForTimeout(700);
+      L.check(`${ms} · the material drawer opened`, (await page.locator(".p6-cx-drw.p6-on").count()) === 1, "drawer");
+      const dh = await monoCensus(page);
+      L.check(`${ms} · the material drawer: no mono capitals`, dh.length === 0, JSON.stringify(dh.slice(0, 8)));
+      await page.keyboard.press("Escape"); await page.waitForTimeout(400);
       await page.locator(`${pg} [data-pk40="tile"]`).first().click({ timeout: 5000 }).catch(() => {});
       await page.waitForTimeout(500);
       const hits = await monoCensus(page);
@@ -244,7 +255,7 @@ test("L8 no visible element on the page is mono AND uppercase", async ({ page })
       await page.keyboard.press("Escape");
     }
   }
-  L.done(12);
+  L.done(18);
 });
 
 /* ── L9 · the Contact list width ── */
