@@ -547,10 +547,11 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 }
 
 /* ── Phones: one 60px ink row (23 Oct, ref design-refs/landing-hero-mobile-v1.html `.m-nav`) ──
-   Mark (26px) and "QueryHawk" in Source Serif 4, then the founding pill (`FoundingNavPill`), then the
-   burger, whose panel and behaviour are unchanged. Every pre-login page gets it.
+   Mark (26px) and "QueryHawk" in Source Serif 4, then the burger, whose panel and behaviour are
+   unchanged. Every pre-login page gets it. (Since landing on phones v1, 26 Oct, the founding offer is
+   the strip ABOVE this bar, `FoundingStrip`; the pill that sat in the bar is deleted.)
    ⚠️ DECLARED AFTER THE 600 BLOCK, AND THAT ORDER IS LOAD-BEARING: it UNDOES that block's wrap (the
-   pill is narrower than the CTA it replaces, so the row fits again at 320+), and both are
+   row is the mark and the burger, so it fits at 320+), and both are
    single-class media rules at equal specificity, so the later one wins.
    ⚠️ THE ROW IS 60px IN BOTH STATES. The condense only ever changed padding and the wordmark's size;
    here neither changes, because the landing's sticky stage sits at `top: var(--mk-nav-h)` and a bar
@@ -575,22 +576,29 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   .mk-sheet:has(.mk-hp) { border-top-left-radius: 0; border-top-right-radius: 0; }
 }
 
-/* The founding pill: cream, 42px, two lines — the offer, then ten segments and the places left.
-   ⚠️ IT DECLARES ITS FAMILIES: `brand.tsx` gives every bare `button` and `span` the app's body face. */
-.mk-navpill {
-  height: 42px; box-sizing: border-box; padding: 0 13px; border: 0; border-radius: 21px;
-  background: var(--mk-cream-btn); color: var(--mk-ink-shell); cursor: pointer;
-  display: inline-flex; flex-direction: column; align-items: stretch; justify-content: center; gap: 4px;
-  font-family: var(--mk-f-sans); text-align: left;
-}
-.mk-navpill-t { font: 600 12.5px/1 var(--mk-f-sans); white-space: nowrap; }
-.mk-navpill-c { display: flex; align-items: center; gap: 7px; font-family: var(--mk-f-sans); }
-.mk-navpill-c i { display: flex; gap: 2px; flex: 1; }
-.mk-navpill-c b { flex: 1; height: 4px; border-radius: 1px; background: rgba(27, 36, 51, .14); }
-.mk-navpill-c b.mk-on { background: var(--mk-rust); }
-.mk-navpill-c em {
-  font: 600 9.5px/1 var(--mk-f-sans); font-style: normal; color: var(--mk-rust);
-  white-space: nowrap; font-variant-numeric: tabular-nums;
+/* The founding strip (phones only; landing on phones v1, ref design-refs/landing-mobile-v1.html
+   `.fs.fsC`). A 40px band in a lighter navy than the bar, above it and in flow, so it scrolls away
+   while the bar stays stuck. Every value is the ref's. The pill it replaced (`.mk-navpill`) is gone.
+   ⚠️ EACH PART DECLARES ITS OWN FAMILY: `brand.tsx` gives every bare `span` the app's body face.
+   ⚠️ TEXT ON NAVY IS WHITE, and the count's pink is the one exception the ref draws. */
+.mk-fs { display: none; }
+@media (max-width: 760px) {
+  .mk-fs {
+    display: flex; align-items: center; gap: 10px; height: 40px; box-sizing: border-box; padding: 0 14px;
+    flex: none; white-space: nowrap; background: #26324a; color: #fff; text-decoration: none;
+    font: 400 14px/1 var(--mk-f-serif);
+  }
+  .mk-fs-t { font: 600 14px/1 var(--mk-f-serif); color: #fff; }
+  .mk-fs-tr {
+    flex: 1; min-width: 40px; height: 6px; position: relative; border-radius: 999px;
+    background: rgba(255, 255, 255, .14);
+  }
+  .mk-fs-tr b { position: absolute; left: 0; top: 0; bottom: 0; min-width: 6px; border-radius: 999px; background: #e8b4a3; }
+  .mk-fs-n {
+    font: 500 12px/1 var(--mk-f-mono); letter-spacing: .02em; color: #e8b4a3;
+    font-variant-numeric: tabular-nums;
+  }
+  .mk-fs:focus-visible { outline: 2px solid #e8b4a3; outline-offset: -2px; }
 }
 
 /* ── The sheet: one light surface between the ink nav and the ink footer ──
