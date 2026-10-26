@@ -60,6 +60,8 @@ import "../v59/dash59.css";
 import "../v60/dash60.css";
 /* ⚠️ AND v71 LAST OF ALL: its rules win ties against v58–v60's */
 import "../v71/dash71.css";
+/* ⚠️ AND v77 AFTER IT */
+import "../v77/dash77.css";
 
 export interface Dash58Props {
   loading: boolean;

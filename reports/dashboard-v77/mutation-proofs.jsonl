@@ -1,0 +1,4 @@
+{"mutation":"A3-fw-fixed","lock":"A3","exit":1,"reading":"2 red · 1920x1080 the left and right columns end together (±1) — hoops 936.7 · founding 858.0"}
+{"mutation":"A1-fill","lock":"A1","exit":1,"reading":"3 red · 1920x1080 chart height = clamp(300, 0.31 × 1440.0, 540) = 446.4 (±2) — chart 367.8"}
+{"mutation":"A4-uncapped","lock":"A4","exit":1,"reading":"2 red · 1920x1080 the body and the header are ≤ 1440px wide — body 1542.0 · header 1542.0"}
+{"mutation":"A2-no-stack","lock":"A2","exit":1,"reading":"1 red · the card's height is identical (±1) across the cycle — 207.0–373.8 (spread 166.8)"}

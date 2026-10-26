@@ -234,7 +234,10 @@ test("DB71 L2 · L3 · F3 · G1 — bottoms in line, the tab on screen, the card
     if (f.closed && f.agents && f.fw && f.tab) {
       const bs = [f.closed.b, f.agents.b, f.fw.b];
       L.check("L2", `${w} the three bottoms are equal (±1)`, Math.max(...bs) - Math.min(...bs) <= 1, bs.map((b) => b.toFixed(1)).join(" / "));
-      L.check("L2", `${w} 14px (±2) above the tab's top`, bs.every((b) => Math.abs(f.tab!.t - b - 14) <= 2), bs.map((b) => (f.tab!.t - b).toFixed(1)).join(" / "));
+      /* REWRITTEN (Dashboard v77): from 901px tall the Fixed shape ends the page where its content ends and
+         the spare height sits below — DB77 A3 holds the tall case. The 14px holds up to 900px tall. */
+      if (vp.height <= 900) L.check("L2", `${w} 14px (±2) above the tab's top`, bs.every((b) => Math.abs(f.tab!.t - b - 14) <= 2), bs.map((b) => (f.tab!.t - b).toFixed(1)).join(" / "));
+      else L.check("L2", `${w} (Fixed shape) the cards end above the tab`, bs.every((b) => b <= f.tab!.t - 14 + 2), bs.map((b) => (f.tab!.t - b).toFixed(1)).join(" / "));
     }
     L.check("L3", `${w} the tab is inside the viewport`, !!f.tab && f.tab.l >= 0 && f.tab.r <= f.vw && f.tab.t >= 0 && f.tab.b <= f.vh + 0.5, JSON.stringify(f.tab));
     L.check("L3", `${w} nothing covers the tab's centre`, f.hit, String(f.hit));

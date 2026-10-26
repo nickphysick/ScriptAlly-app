@@ -26,32 +26,54 @@ export const VIEW_TASK = "View task";
 /** v60.1's caught-up line, in the same card */
 export const CAUGHT_UP = "No dates are set on your live queries yet. Add an agent to keep the list moving.";
 
+/**
+ * DASHBOARD v77 — THE FIXED SHAPE (a window ≥901px tall and ≥1100px wide, while querying): the task card is
+ * its NATURAL height, so every item of the cycle is rendered into ONE grid cell and the card is the tallest
+ * item's height by construction — it never changes height as it cycles. Below that the card fills its row
+ * and renders only the item on show, exactly as v71 (DB71's probes read the first matching element).
+ * ⚠️ THIS ONLY DECIDES WHETHER TO STACK. The height is the grid's, never a measurement.
+ */
+export const FIXED_SHAPE_QUERY = "(min-height: 901px) and (min-width: 1100px)";
+function useMatches(query: string): boolean {
+  const get = () => typeof window !== "undefined" && !!window.matchMedia?.(query).matches;
+  const [m, setM] = useState(get);
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return undefined;
+    const mq = window.matchMedia(query);
+    const on = () => setM(mq.matches);
+    on();
+    mq.addEventListener?.("change", on);
+    return () => mq.removeEventListener?.("change", on);
+  }, [query]);
+  return m;
+}
+
 const reduced = () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
-const Bar: React.FC<{ m: TaskCardModel }> = ({ m }) => {
+const Bar: React.FC<{ m: TaskCardModel; probe: boolean }> = ({ m, probe }) => {
   const b = m.bar!;
   const pct = (x: number) => `${(x * 100).toFixed(3)}%`;
   return (
-    <div className="d71-win" data-d71="bar" data-sent={b.sentMs} data-expected={b.expectedMs ?? ""} data-close={b.closeMs ?? ""} data-today={b.todayMs}>
+    <div className="d71-win" data-d71={probe ? "bar" : undefined} {...(probe ? { "data-sent": b.sentMs, "data-expected": b.expectedMs ?? "", "data-close": b.closeMs ?? "", "data-today": b.todayMs } : {})}>
       <div className="d71-wbar">
-        <i className="d71-ok" data-d71="bar-solid" style={{ width: pct(b.solid) }} />
-        <i className="d71-ov" data-d71="bar-over" style={{ width: pct(1 - b.solid) }} />
+        <i className="d71-ok" data-d71={probe ? "bar-solid" : undefined} style={{ width: pct(b.solid) }} />
+        <i className="d71-ov" data-d71={probe ? "bar-over" : undefined} style={{ width: pct(1 - b.solid) }} />
         {b.close != null && (
-          <span className={`d71-cmark${b.close > 0.72 ? " is-end" : b.close < 0.28 ? " is-start" : ""}`} data-d71="close-mark" style={{ left: pct(b.close) }}>
+          <span className={`d71-cmark${b.close > 0.72 ? " is-end" : b.close < 0.28 ? " is-start" : ""}`} data-d71={probe ? "close-mark" : undefined} style={{ left: pct(b.close) }}>
             {b.closeLabel && <em>{b.closeLabel}</em>}
           </span>
         )}
       </div>
       <div className="d71-wlab">
-        <span data-d71="bar-sent">{b.sentLabel}</span>
-        {b.expectedLabel && <span className="d71-wexp" data-d71="bar-expected" style={{ left: pct(b.solid) }}>{b.expectedLabel}</span>}
-        <span className="d71-wtoday" data-d71="bar-today">{b.todayLabel}</span>
+        <span data-d71={probe ? "bar-sent" : undefined}>{b.sentLabel}</span>
+        {b.expectedLabel && <span className="d71-wexp" data-d71={probe ? "bar-expected" : undefined} style={{ left: pct(b.solid) }}>{b.expectedLabel}</span>}
+        <span className="d71-wtoday" data-d71={probe ? "bar-today" : undefined}>{b.todayLabel}</span>
       </div>
     </div>
   );
 };
 
-const Body: React.FC<{ m: TaskCardModel }> = ({ m }) => (
+const Body: React.FC<{ m: TaskCardModel; probe?: boolean }> = ({ m, probe = true }) => (
   <>
     <div className="d71-who">
       {m.date ? (
@@ -60,18 +82,18 @@ const Body: React.FC<{ m: TaskCardModel }> = ({ m }) => (
         <span className={`d71-av d71-av--${m.kind}`} aria-hidden="true">{m.initials}</span>
       )}
       <div className="d71-whot">
-        <h3 className="d71-title" data-d71="title">{m.pre}{m.who && <b>{m.who}</b>}{m.post}</h3>
-        {m.sub && <small className="d71-sub" data-d71="sub">{m.sub}</small>}
+        <h3 className="d71-title" data-d71={probe ? "title" : undefined}>{m.pre}{m.who && <b>{m.who}</b>}{m.post}</h3>
+        {m.sub && <small className="d71-sub" data-d71={probe ? "sub" : undefined}>{m.sub}</small>}
       </div>
     </div>
-    {m.line && <p className="d71-line" data-d71="line">{m.line}</p>}
-    {m.bar && <Bar m={m} />}
+    {m.line && <p className="d71-line" data-d71={probe ? "line" : undefined}>{m.line}</p>}
+    {m.bar && <Bar m={m} probe={probe} />}
     {m.steps && (
-      <div className="d71-steps" data-d71="steps">
+      <div className="d71-steps" data-d71={probe ? "steps" : undefined}>
         {m.steps.map((s, i) => (
           <React.Fragment key={`${s.label}-${i}`}>
             {i > 0 && <b aria-hidden="true">›</b>}
-            <span className={s.done ? "d71-step is-done" : "d71-step is-todo"} data-d71={s.done ? "step-done" : "step-todo"}>
+            <span className={s.done ? "d71-step is-done" : "d71-step is-todo"} data-d71={probe ? (s.done ? "step-done" : "step-todo") : undefined}>
               {s.label} <small>{s.date}</small>
             </span>
           </React.Fragment>
@@ -100,6 +122,7 @@ export const Dash71Task: React.FC<{
   /* the plan's group counts, for the order lock (DB58 R2) */
   const counts = useMemo(() => JSON.stringify(Object.fromEntries(plan.groups.map((g) => [g.key, g.items.length]))), [plan]);
 
+  const stack = useMatches(FIXED_SHAPE_QUERY);
   const [index, setIndex] = useState(0);
   const at = n ? Math.min(index, n - 1) : 0;
   /* a plan that shrinks under the reader never leaves the card pointing past its end */
@@ -195,9 +218,24 @@ export const Dash71Task: React.FC<{
           })}
         </div>
       )}
-      <div className="d71-tb" key={`${m.key}-${at}`} data-d71="body">
-        <Body m={m} />
-      </div>
+      {stack && n > 1 ? (
+        /* every item in one cell: the card is the tallest item's height and never jumps (v77) */
+        <div className="d71-tbstack" data-d71="stack">
+          {models.map((x, i) => i === at ? (
+            <div className="d71-tb" key={`${x.key}-${at}`} data-d71="body" data-kind={x.kind}>
+              <Body m={x} />
+            </div>
+          ) : (
+            <div className="d71-tb is-ghost" key={`ghost-${x.key}`} data-kind={x.kind} aria-hidden="true" inert={true} style={{ visibility: "hidden" }}>
+              <Body m={x} probe={false} />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="d71-tb" key={`${m.key}-${at}`} data-d71="body" data-kind={m.kind}>
+          <Body m={m} />
+        </div>
+      )}
       <div className="d71-tf" data-d71="foot">
         <button type="button" className="d71-view" data-d71="view" onClick={() => onView(items[at].action)}>{VIEW_TASK} →</button>
         {next && <span className="d71-then" data-d71="then">Then: {next.plain}</span>}

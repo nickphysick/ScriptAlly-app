@@ -1,0 +1,30 @@
+/* ══ DASHBOARD v77 — big screens, and the founding writer card rebuilt around feedback ════════════════
+   Ref: design-refs/dashboard-v77/dashboard-v77.html ("Fixed shape" is normative) and founding-card-v76.html.
+   Loaded LAST (Dash58 imports it after dash71.css), so equal-specificity rules here win ties. */
+
+/* ── A1 · the width cap, both modes, every height ──────────────────────────────────────────────────
+   The header panel and the body are 1440px wide at most, centred; from a 2200px window, 1680px. The page's
+   own side gutters sit outside the cap (`.d58-page` pays them as padding), so nothing changes at laptop
+   widths, where the content is narrower than the cap. */
+.d58 .d58-page { max-width: calc(1440px + 2 * var(--d58-gutter)); }
+@media (min-width: 2200px) { .d58 .d58-page { max-width: calc(1680px + 2 * var(--d58-gutter)); } }
+
+/* ── A2 · the Fixed shape: a window ≥901px tall and ≥1100px wide, while querying ─────────────────────
+   The body stops filling the window; the page ends where its content ends and the spare height sits below
+   in the sheet. Left: the chart's row is clamp(300px, 31% of the BODY's width, 540px) — the body is the
+   size container, so `cqw` is the body's — over the hoops at their natural height. Right: the task card at
+   its natural height (its items stacked in one cell, Dash71Task), and the founding card takes the rest of
+   the column, never under 194px. The two columns are one grid row, so their bottoms line up.
+   ⚠️ KEEP THE QUERY IN STEP WITH `FIXED_SHAPE_QUERY` in v71/Dash71Task.tsx. Below 901px tall: v71 exactly. */
+@media (min-height: 901px) and (min-width: 1100px) {
+  .d58[data-mode="q"] { height: auto; }
+  .d58[data-mode="q"] .d58-page { flex: none; }
+  .d58[data-mode="q"] .d58-body { flex: none; container-type: inline-size; align-items: stretch; }
+  .d58[data-mode="q"] .d58-left { grid-template-rows: clamp(300px, 31cqw, 540px) auto; }
+  .d58[data-mode="q"] .d71-right { grid-template-rows: auto minmax(194px, 1fr); }
+  .d58[data-mode="q"] .d71-taskslot > .d71-task { flex: none; }
+  .d58[data-mode="q"] .d71-task .d71-tb { flex: none; padding: 18px 22px 16px; }
+  /* the stack: every item in one cell; the inactive ones are hidden, inert and aria-hidden (Dash71Task) */
+  .d58[data-mode="q"] .d71-tbstack { display: grid; }
+  .d58[data-mode="q"] .d71-tbstack > .d71-tb { grid-area: 1 / 1; }
+}
