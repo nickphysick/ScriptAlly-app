@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "A8",
+  "where": "1512 population",
+  "ok": false,
+  "detail": "53 rows, 0 with a gap"
+ },
+ {
+  "lock": "A8",
+  "where": "1512 none at rest",
+  "ok": false,
+  "detail": "20 rows show \"+ Add\""
+ },
+ {
+  "lock": "A8",
+  "where": "1280 population",
+  "ok": false,
+  "detail": "53 rows, 0 with a gap"
+ },
+ {
+  "lock": "A8",
+  "where": "1280 none at rest",
+  "ok": false,
+  "detail": "20 rows show \"+ Add\""
+ }
+]

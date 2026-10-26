@@ -1,0 +1,1922 @@
+[
+ {
+  "lock": "A3",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "53 rows"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-06 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-06 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-06 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-08 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-08 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-08 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-09 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-09 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-09 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-07 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-07 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-07 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-05 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-05 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-05 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-13 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-13 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-13 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-10 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-10 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-10 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-04 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-04 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-04 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-11 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-11 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-11 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-03 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-03 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-03 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-14 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-14 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-14 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 msv12-agent-4 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 msv12-agent-4 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 msv12-agent-4 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-cal-near matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-cal-near one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-cal-near shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-cal-soon matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-cal-soon one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-cal-soon shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-cal-passed20 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-cal-passed20 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-cal-passed20 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-12 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-12 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-12 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 qc150l9-ag matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 qc150l9-ag one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 qc150l9-ag shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-cal-bang matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-cal-bang one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-cal-bang shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-9 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-9 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-9 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-2 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-2 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-2 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 thin-ag-remind matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 thin-ag-remind one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 thin-ag-remind shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-cal-passed865 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-cal-passed865 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-cal-passed865 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-1 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-1 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-1 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-nowin-1 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-nowin-1 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-nowin-1 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 rj-agent-2 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 rj-agent-2 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 rj-agent-2 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 clv-fx-reopen matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 clv-fx-reopen one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 clv-fx-reopen shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 msv12-agent-1 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 msv12-agent-1 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 msv12-agent-1 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 clv-fx-stub0 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 clv-fx-stub0 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 clv-fx-stub0 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-11 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-11 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-11 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-7 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-7 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-7 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-8 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-8 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-8 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 clv-fx-stale matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 clv-fx-stale one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 clv-fx-stale shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-4 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-4 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-4 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-6 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-6 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-6 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-nowin-2 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-nowin-2 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-nowin-2 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 msv12-agent-5 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 msv12-agent-5 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 msv12-agent-5 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 rj-agent-3 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 rj-agent-3 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 rj-agent-3 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 thin-ag-chase matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 thin-ag-chase one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 thin-ag-chase shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 msv12-agent-6 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 msv12-agent-6 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 msv12-agent-6 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 rej-agent-1 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 rej-agent-1 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 rej-agent-1 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 thin-ag-gap matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 thin-ag-gap one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 thin-ag-gap shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-3 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-3 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-3 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 msv12-agent-2 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 msv12-agent-2 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 msv12-agent-2 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 clv181-bare matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 clv181-bare one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 clv181-bare shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 0"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 clv-fx-never matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 clv-fx-never one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 clv-fx-never shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 2"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 rj-agent-1 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 rj-agent-1 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 rj-agent-1 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 thin-ag-close matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 thin-ag-close one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 thin-ag-close shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-10 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-10 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-10 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 msv12-agent-3 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 msv12-agent-3 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 msv12-agent-3 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-5 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-5 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 seed-agent-5 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-12 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-12 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-12 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-02 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-02 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-02 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-01 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-01 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1512 cv25-agent-01 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "53 rows"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-06 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-06 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-06 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-08 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-08 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-08 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-09 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-09 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-09 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-07 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-07 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-07 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-05 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-05 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-05 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-13 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-13 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-13 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-10 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-10 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-10 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-04 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-04 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-04 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-11 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-11 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-11 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-03 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-03 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-03 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-14 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-14 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-14 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 msv12-agent-4 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 msv12-agent-4 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 msv12-agent-4 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-cal-near matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-cal-near one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-cal-near shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-cal-soon matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-cal-soon one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-cal-soon shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-cal-passed20 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-cal-passed20 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-cal-passed20 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-12 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-12 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-12 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 qc150l9-ag matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 qc150l9-ag one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 qc150l9-ag shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-cal-bang matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-cal-bang one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-cal-bang shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-9 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-9 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-9 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-2 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-2 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-2 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 thin-ag-remind matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 thin-ag-remind one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 thin-ag-remind shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-cal-passed865 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-cal-passed865 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-cal-passed865 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-1 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-1 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-1 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-nowin-1 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-nowin-1 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-nowin-1 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 rj-agent-2 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 rj-agent-2 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 rj-agent-2 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 clv-fx-reopen matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 clv-fx-reopen one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 clv-fx-reopen shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 msv12-agent-1 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 msv12-agent-1 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 msv12-agent-1 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 clv-fx-stub0 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 clv-fx-stub0 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 clv-fx-stub0 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-11 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-11 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-11 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-7 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-7 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-7 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-8 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-8 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-8 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 clv-fx-stale matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 clv-fx-stale one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 clv-fx-stale shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-4 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-4 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-4 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-6 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-6 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-6 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-nowin-2 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-nowin-2 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-nowin-2 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 msv12-agent-5 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 msv12-agent-5 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 msv12-agent-5 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 rj-agent-3 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 rj-agent-3 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 rj-agent-3 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 thin-ag-chase matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 thin-ag-chase one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 thin-ag-chase shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 msv12-agent-6 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 msv12-agent-6 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 msv12-agent-6 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 rej-agent-1 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 rej-agent-1 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 rej-agent-1 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 thin-ag-gap matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 thin-ag-gap one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 thin-ag-gap shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-3 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-3 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-3 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 msv12-agent-2 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 msv12-agent-2 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 msv12-agent-2 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 clv181-bare matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 clv181-bare one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 clv181-bare shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 0"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 clv-fx-never matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 clv-fx-never one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 clv-fx-never shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 2"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 rj-agent-1 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 rj-agent-1 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 rj-agent-1 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 thin-ag-close matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 thin-ag-close one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 thin-ag-close shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-10 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-10 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-10 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 msv12-agent-3 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 msv12-agent-3 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 msv12-agent-3 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-5 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-5 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 seed-agent-5 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-12 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-12 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-12 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-02 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-02 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-02 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-01 matches first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-01 one line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A3",
+  "where": "1280 cv25-agent-01 shown + n = genres",
+  "ok": false,
+  "detail": "0+0 vs 1"
+ }
+]

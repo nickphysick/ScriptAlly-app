@@ -68,11 +68,18 @@ export interface CardDraft {
   door: "open" | "closed" | null;
   /** an ISO date, or "" — not announced */
   reopens: string;
+  /** Contact list v25.2 C — your rating, 1–5; null is unrated (the origin, never written back) */
+  rating: number | null;
+  /** v25.2 C — the agency's submission form, kept as a `socials` entry ({ platform: "Submission form" }): the record
+   *  has no field of its own for it, and a social entry needs no rules change */
+  form: string;
+  /** v25.2 C — the agent's social: a platform from the app's list and a handle */
+  social: { platform: string; handle: string };
 }
 
 /** Every field the editor edits, by the tab it lives on. */
 export const TAB_FIELDS: Record<Exclude<CardTab, "notes">, (keyof CardDraft)[]> = {
-  who: ["name", "agency", "country", "city", "email", "website", "mswl"],
+  who: ["name", "agency", "country", "city", "email", "website", "mswl", "rating", "form", "social"],
   want: ["genres", "wishlist", "mats"],
   work: ["weeks", "nrn", "method", "door", "reopens"],
 };
@@ -92,6 +99,21 @@ export function methodOf(stored: string | undefined | null): SubmissionMethod | 
 }
 
 const isMswl = (s: AgentSocial | undefined) => (s?.platform ?? "").trim().toLowerCase() === "mswl";
+/** v25.2 C — the platform a submission form is kept under in `socials` */
+export const FORM_PLATFORM = "Submission form";
+export const isFormSocial = (s: AgentSocial | undefined) => (s?.platform ?? "").trim().toLowerCase() === FORM_PLATFORM.toLowerCase();
+/** the platforms mirrored into a discrete field the agent database still reads */
+const MIRROR: Record<string, "twitter" | "bluesky" | "instagram"> = { "X / Twitter": "twitter", Bluesky: "bluesky", Instagram: "instagram" };
+/** The agent's social as the card reads it: the first `socials` entry that is neither the MSWL link nor the
+ *  submission form, else a mirrored discrete handle (X, Bluesky, Instagram), else none. */
+export function socialOfAgent(a: Pick<Agent, "socials" | "twitter" | "bluesky" | "instagram">): { platform: string; handle: string } {
+  const s = (a.socials ?? []).find((x) => !isMswl(x) && !isFormSocial(x) && (x.handle ?? "").trim());
+  if (s) return { platform: s.platform, handle: s.handle.trim() };
+  if ((a.twitter ?? "").trim()) return { platform: "X / Twitter", handle: a.twitter!.trim() };
+  if ((a.bluesky ?? "").trim()) return { platform: "Bluesky", handle: a.bluesky!.trim() };
+  if ((a.instagram ?? "").trim()) return { platform: "Instagram", handle: a.instagram!.trim() };
+  return { platform: "", handle: "" };
+}
 
 /** The four rows, from the one parser. Legacy records holding two sample units keep the first. */
 export function matsOf(materialsWanted: readonly string[] | undefined): CardMats {
@@ -128,6 +150,9 @@ export function draftOf(a: Agent, personal: PersonalGenre[] = []): CardDraft {
     method: methodOf(a.submissionMethod),
     door: ((k) => (k === "unknown" ? null : k))(doorOf(a)),
     reopens: (a.reopensOn ?? "").trim(),
+    rating: typeof a.starRating === "number" && a.starRating > 0 ? a.starRating : null,
+    form: (a.socials ?? []).find(isFormSocial)?.handle ?? "",
+    social: socialOfAgent(a),
   };
 }
 
@@ -144,6 +169,7 @@ export function emptyCardDraft(): CardDraft {
     genres: [], wishlist: "",
     mats: { ql: false, syn: { on: false, len: null }, smp: { on: false, unit: "Chapters", qty: UNIT_CFG.Chapters.def }, oth: { on: false, text: "" } },
     weeks: null, nrn: null, method: null, door: "open", reopens: "",
+    rating: null, form: "", social: { platform: "", handle: "" },
   };
 }
 
@@ -208,7 +234,7 @@ export function hostOf(v: string): string {
 }
 export const emailOk = (v: string): boolean => !v.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim());
 
-export type CardProblemKey = "name" | "email" | "website" | "mswl" | "oth";
+export type CardProblemKey = "name" | "email" | "website" | "mswl" | "form" | "oth";
 /** The draft's problems, in the order the foot names the first. Save waits on any of them. */
 export function problemsOf(d: CardDraft): Partial<Record<CardProblemKey, string>> {
   const p: Partial<Record<CardProblemKey, string>> = {};
@@ -216,11 +242,12 @@ export function problemsOf(d: CardDraft): Partial<Record<CardProblemKey, string>
   if (!emailOk(d.email)) p.email = "That isn’t an email address yet";
   if (!linkOk(d.website)) p.website = "That doesn’t look like a link";
   if (!linkOk(d.mswl)) p.mswl = "That doesn’t look like a link";
+  if (!linkOk(d.form)) p.form = "That doesn’t look like a link";
   if (d.mats.oth.on && !d.mats.oth.text.trim()) p.oth = "Say what the other material is, or untick it";
   return p;
 }
 export const PROBLEM_TAB: Record<CardProblemKey, Exclude<CardTab, "notes">> = {
-  name: "who", email: "who", website: "who", mswl: "who", oth: "want",
+  name: "who", email: "who", website: "who", mswl: "who", form: "who", oth: "want",
 };
 
 /* ── the patch a save sends ──────────────────────────────────────────────────────────────── */
@@ -238,6 +265,31 @@ export function socialsWithMswl(socials: readonly AgentSocial[] | undefined, url
   return list;
 }
 
+/** `socials` with the submission form set to `url` (or removed) — every other entry kept, in place. */
+export function socialsWithForm(socials: readonly AgentSocial[], url: string): AgentSocial[] {
+  const list = [...socials];
+  const at = list.findIndex(isFormSocial);
+  const handle = hrefFor(url) ?? "";
+  if (at >= 0) {
+    if (handle) list[at] = { ...list[at], handle };
+    else list.splice(at, 1);
+  } else if (handle) list.push({ platform: FORM_PLATFORM, handle });
+  return list;
+}
+
+/** `socials` with the agent's one social changed: the entry it was read from rewritten (or removed), else added. */
+export function socialsWithSocial(socials: readonly AgentSocial[], was: { platform: string; handle: string }, now: { platform: string; handle: string }): AgentSocial[] {
+  const list = [...socials];
+  const at = list.findIndex((x) => !isMswl(x) && !isFormSocial(x) && x.platform === was.platform && x.handle.trim() === was.handle);
+  const handle = now.handle.trim();
+  const entry = { platform: now.platform || "Other", handle };
+  if (at >= 0) {
+    if (handle) list[at] = entry;
+    else list.splice(at, 1);
+  } else if (handle) list.push(entry);
+  return list;
+}
+
 /**
  * The write for this draft against the record it opened from: ONLY the changed fields. `nowIso`
  * stamps `mswlCheckedAt` when the wishlist changed — editing it IS checking it.
@@ -251,7 +303,23 @@ export function cardPatch(a: Agent, base: CardDraft, d: CardDraft, nowIso: strin
   /* the location law: "not set" is the key OMITTED, never "" */
   if (changed.has("city")) patch.city = d.city.trim() || null;
   if (changed.has("country")) patch.country = d.country || null;
-  if (changed.has("mswl")) patch.socials = socialsWithMswl(a.socials, d.mswl);
+  /* v25.2 C — the MSWL link, the submission form and the social all live in `socials`: one rewrite carries every
+     change, each entry kept in its place byte for byte unless it is the one that changed */
+  if (changed.has("mswl") || changed.has("form") || changed.has("social")) {
+    let list = changed.has("mswl") ? socialsWithMswl(a.socials, d.mswl) : [...(a.socials ?? [])];
+    if (changed.has("form")) list = socialsWithForm(list, d.form);
+    if (changed.has("social")) {
+      const was = socialOfAgent(a);
+      list = socialsWithSocial(list, was, d.social);
+      /* a mirrored platform writes its discrete field too; leaving one clears the old discrete field */
+      const wasKey = MIRROR[was.platform];
+      const nowKey = MIRROR[d.social.platform];
+      if (wasKey && wasKey !== nowKey && (a[wasKey] ?? "").trim()) patch[wasKey] = "";
+      if (nowKey) patch[nowKey] = d.social.handle.trim();
+    }
+    patch.socials = list;
+  }
+  if (changed.has("rating") && d.rating != null) patch.starRating = Math.max(1, Math.min(5, Math.round(d.rating)));
   if (changed.has("genres")) patch.genres = [...d.genres];
   if (changed.has("wishlist")) {
     patch.mswlNotes = d.wishlist.trim();

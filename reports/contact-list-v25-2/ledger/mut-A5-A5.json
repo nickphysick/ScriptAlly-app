@@ -1,0 +1,530 @@
+[
+ {
+  "lock": "A5",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "14 rows with a status, 4 with a next step"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-06 node is the StatusDot",
+  "ok": false,
+  "detail": "<circle cx=\"6\" cy=\"6\" r=\"4.2\" fill=\"#2a3"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-06 past = stage",
+  "ok": true,
+  "detail": "1 vs 1 (Partial Requested)"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-06 day = days since sent",
+  "ok": true,
+  "detail": "54 vs 54"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-06 next step rust",
+  "ok": true,
+  "detail": "rgb(162, 69, 42)"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-08 node is the StatusDot",
+  "ok": false,
+  "detail": "<circle cx=\"6\" cy=\"6\" r=\"4.2\" fill=\"#2a3"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-08 past = stage",
+  "ok": true,
+  "detail": "3 vs 3 (Offer)"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-08 day = days since sent",
+  "ok": true,
+  "detail": "65 vs 65"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-08 next step rust",
+  "ok": true,
+  "detail": "rgb(162, 69, 42)"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-09 node is the StatusDot",
+  "ok": false,
+  "detail": "<circle cx=\"6\" cy=\"6\" r=\"4.2\" fill=\"#2a3"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-09 past = stage",
+  "ok": true,
+  "detail": "2 vs 2 (Full Requested)"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-09 day = days since sent",
+  "ok": true,
+  "detail": "32 vs 32"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-09 next step rust",
+  "ok": true,
+  "detail": "rgb(162, 69, 42)"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-07 node is the StatusDot",
+  "ok": false,
+  "detail": "<circle cx=\"6\" cy=\"6\" r=\"4.2\" fill=\"#2a3"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-07 past = stage",
+  "ok": true,
+  "detail": "1 vs 1 (Partial Requested)"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-07 day = days since sent",
+  "ok": true,
+  "detail": "46 vs 46"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-07 next step rust",
+  "ok": true,
+  "detail": "rgb(162, 69, 42)"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-05 node is the StatusDot",
+  "ok": false,
+  "detail": "<circle cx=\"6\" cy=\"6\" r=\"4.2\" fill=\"#2a3"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-05 past = stage",
+  "ok": true,
+  "detail": "1 vs 1 (Partial Sent)"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-05 day = days since sent",
+  "ok": true,
+  "detail": "145 vs 145"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-13 node is the StatusDot",
+  "ok": false,
+  "detail": "<circle cx=\"6\" cy=\"6\" r=\"4.2\" fill=\"#2a3"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-13 past = stage",
+  "ok": true,
+  "detail": "0 vs 0 (Queried)"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-13 day = days since sent",
+  "ok": true,
+  "detail": "26 vs 26"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-10 node is the StatusDot",
+  "ok": false,
+  "detail": "<circle cx=\"6\" cy=\"6\" r=\"4.2\" fill=\"#2a3"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-10 past = stage",
+  "ok": true,
+  "detail": "2 vs 2 (Full Sent)"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-10 day = days since sent",
+  "ok": true,
+  "detail": "145 vs 145"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-04 node is the StatusDot",
+  "ok": false,
+  "detail": "<circle cx=\"6\" cy=\"6\" r=\"4.2\" fill=\"#2a3"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-04 past = stage",
+  "ok": true,
+  "detail": "0 vs 0 (Queried)"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-04 day = days since sent",
+  "ok": true,
+  "detail": "128 vs 128"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-11 node is the StatusDot",
+  "ok": false,
+  "detail": "<circle cx=\"6\" cy=\"6\" r=\"4.2\" fill=\"#2a3"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-11 past = stage",
+  "ok": true,
+  "detail": "1 vs 1 (Partial Sent)"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-11 day = days since sent",
+  "ok": true,
+  "detail": "106 vs 106"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-03 node is the StatusDot",
+  "ok": false,
+  "detail": "<circle cx=\"6\" cy=\"6\" r=\"4.2\" fill=\"#2a3"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-03 past = stage",
+  "ok": true,
+  "detail": "0 vs 0 (Queried)"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-03 day = days since sent",
+  "ok": true,
+  "detail": "117 vs 117"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-14 node is the StatusDot",
+  "ok": false,
+  "detail": "<circle cx=\"6\" cy=\"6\" r=\"4.2\" fill=\"#2a3"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-14 past = stage",
+  "ok": true,
+  "detail": "0 vs 0 (Queried)"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-14 day = days since sent",
+  "ok": true,
+  "detail": "28 vs 28"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-12 node is the StatusDot",
+  "ok": false,
+  "detail": "<circle cx=\"6\" cy=\"6\" r=\"4.2\" fill=\"#2a3"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-12 closed sits on the furthest reached",
+  "ok": true,
+  "detail": "0 vs 0"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-02 node is the StatusDot",
+  "ok": false,
+  "detail": "<circle cx=\"6\" cy=\"6\" r=\"4.2\" fill=\"#2a3"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-02 closed sits on the furthest reached",
+  "ok": true,
+  "detail": "0 vs 0"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-01 node is the StatusDot",
+  "ok": false,
+  "detail": "<circle cx=\"6\" cy=\"6\" r=\"4.2\" fill=\"#2a3"
+ },
+ {
+  "lock": "A5",
+  "where": "1512 cv25-agent-01 closed sits on the furthest reached",
+  "ok": true,
+  "detail": "0 vs 0"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "14 rows with a status, 4 with a next step"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-06 node is the StatusDot",
+  "ok": false,
+  "detail": "<circle cx=\"6\" cy=\"6\" r=\"4.2\" fill=\"#2a3"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-06 past = stage",
+  "ok": true,
+  "detail": "1 vs 1 (Partial Requested)"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-06 day = days since sent",
+  "ok": true,
+  "detail": "54 vs 54"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-06 next step rust",
+  "ok": true,
+  "detail": "rgb(162, 69, 42)"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-08 node is the StatusDot",
+  "ok": false,
+  "detail": "<circle cx=\"6\" cy=\"6\" r=\"4.2\" fill=\"#2a3"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-08 past = stage",
+  "ok": true,
+  "detail": "3 vs 3 (Offer)"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-08 day = days since sent",
+  "ok": true,
+  "detail": "65 vs 65"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-08 next step rust",
+  "ok": true,
+  "detail": "rgb(162, 69, 42)"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-09 node is the StatusDot",
+  "ok": false,
+  "detail": "<circle cx=\"6\" cy=\"6\" r=\"4.2\" fill=\"#2a3"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-09 past = stage",
+  "ok": true,
+  "detail": "2 vs 2 (Full Requested)"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-09 day = days since sent",
+  "ok": true,
+  "detail": "32 vs 32"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-09 next step rust",
+  "ok": true,
+  "detail": "rgb(162, 69, 42)"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-07 node is the StatusDot",
+  "ok": false,
+  "detail": "<circle cx=\"6\" cy=\"6\" r=\"4.2\" fill=\"#2a3"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-07 past = stage",
+  "ok": true,
+  "detail": "1 vs 1 (Partial Requested)"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-07 day = days since sent",
+  "ok": true,
+  "detail": "46 vs 46"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-07 next step rust",
+  "ok": true,
+  "detail": "rgb(162, 69, 42)"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-05 node is the StatusDot",
+  "ok": false,
+  "detail": "<circle cx=\"6\" cy=\"6\" r=\"4.2\" fill=\"#2a3"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-05 past = stage",
+  "ok": true,
+  "detail": "1 vs 1 (Partial Sent)"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-05 day = days since sent",
+  "ok": true,
+  "detail": "145 vs 145"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-13 node is the StatusDot",
+  "ok": false,
+  "detail": "<circle cx=\"6\" cy=\"6\" r=\"4.2\" fill=\"#2a3"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-13 past = stage",
+  "ok": true,
+  "detail": "0 vs 0 (Queried)"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-13 day = days since sent",
+  "ok": true,
+  "detail": "26 vs 26"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-10 node is the StatusDot",
+  "ok": false,
+  "detail": "<circle cx=\"6\" cy=\"6\" r=\"4.2\" fill=\"#2a3"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-10 past = stage",
+  "ok": true,
+  "detail": "2 vs 2 (Full Sent)"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-10 day = days since sent",
+  "ok": true,
+  "detail": "145 vs 145"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-04 node is the StatusDot",
+  "ok": false,
+  "detail": "<circle cx=\"6\" cy=\"6\" r=\"4.2\" fill=\"#2a3"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-04 past = stage",
+  "ok": true,
+  "detail": "0 vs 0 (Queried)"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-04 day = days since sent",
+  "ok": true,
+  "detail": "128 vs 128"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-11 node is the StatusDot",
+  "ok": false,
+  "detail": "<circle cx=\"6\" cy=\"6\" r=\"4.2\" fill=\"#2a3"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-11 past = stage",
+  "ok": true,
+  "detail": "1 vs 1 (Partial Sent)"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-11 day = days since sent",
+  "ok": true,
+  "detail": "106 vs 106"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-03 node is the StatusDot",
+  "ok": false,
+  "detail": "<circle cx=\"6\" cy=\"6\" r=\"4.2\" fill=\"#2a3"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-03 past = stage",
+  "ok": true,
+  "detail": "0 vs 0 (Queried)"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-03 day = days since sent",
+  "ok": true,
+  "detail": "117 vs 117"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-14 node is the StatusDot",
+  "ok": false,
+  "detail": "<circle cx=\"6\" cy=\"6\" r=\"4.2\" fill=\"#2a3"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-14 past = stage",
+  "ok": true,
+  "detail": "0 vs 0 (Queried)"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-14 day = days since sent",
+  "ok": true,
+  "detail": "28 vs 28"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-12 node is the StatusDot",
+  "ok": false,
+  "detail": "<circle cx=\"6\" cy=\"6\" r=\"4.2\" fill=\"#2a3"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-12 closed sits on the furthest reached",
+  "ok": true,
+  "detail": "0 vs 0"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-02 node is the StatusDot",
+  "ok": false,
+  "detail": "<circle cx=\"6\" cy=\"6\" r=\"4.2\" fill=\"#2a3"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-02 closed sits on the furthest reached",
+  "ok": true,
+  "detail": "0 vs 0"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-01 node is the StatusDot",
+  "ok": false,
+  "detail": "<circle cx=\"6\" cy=\"6\" r=\"4.2\" fill=\"#2a3"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 cv25-agent-01 closed sits on the furthest reached",
+  "ok": true,
+  "detail": "0 vs 0"
+ }
+]

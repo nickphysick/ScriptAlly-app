@@ -1,0 +1,68 @@
+[
+ {
+  "lock": "C1",
+  "where": "population",
+  "ok": true,
+  "detail": "cv25-agent-05"
+ },
+ {
+  "lock": "C1",
+  "where": "wishlist opens in the card",
+  "ok": true,
+  "detail": "{\"inCard\":true,\"legacy\":0,\"panels\":0}"
+ },
+ {
+  "lock": "C1",
+  "where": "toast",
+  "ok": true,
+  "detail": "Saved to Sophie’s profileUNDO✕"
+ },
+ {
+  "lock": "C1",
+  "where": "written (read back)",
+  "ok": true,
+  "detail": "\"CL252 probe 1793045292032\""
+ },
+ {
+  "lock": "C1",
+  "where": "undo pressed",
+  "ok": true,
+  "detail": "Undo"
+ },
+ {
+  "lock": "C1",
+  "where": "restored (read back)",
+  "ok": true,
+  "detail": "\"\""
+ },
+ {
+  "lock": "C1",
+  "where": "genres open in the card",
+  "ok": true,
+  "detail": "{\"inCard\":true,\"legacy\":0,\"panels\":0}"
+ },
+ {
+  "lock": "C1",
+  "where": "genre input offers list genres",
+  "ok": true,
+  "detail": "Literary Fiction · Action & adventure · Commercial fiction · Contemporary · Dystopian · Fantasy"
+ },
+ {
+  "lock": "C1",
+  "where": "replies open in the card",
+  "ok": true,
+  "detail": "{\"inCard\":true,\"legacy\":0,\"panels\":0}"
+ },
+ {
+  "lock": "C1",
+  "where": "replies warning",
+  "ok": true,
+  "detail": "This sets when QueryHawk suggests a nudge for your queries to Sophie."
+ },
+ {
+  "lock": "C1",
+  "where": "email row opens in place",
+  "ok": true,
+  "detail": "{\"inCard\":true,\"legacy\":0,\"panels\":0}"
+ }
+]

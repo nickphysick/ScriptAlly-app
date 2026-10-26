@@ -264,3 +264,6 @@
 .spanel.apn--over { z-index: 74; }
 .spanel-scrim:has(+ .spanel.apn--over) { z-index: 73; }
 @media (min-width: 900px) { .spanel.qsp.apn--over { top: 8px; } }
+
+/* Contact list v25.2 C — the agent edit mode (AgentEditMode) fills the panel's act slot, its foot pinned */
+.apn .apn-actslot > .cl252-em { flex: 1 1 auto; min-height: 0; height: auto; }

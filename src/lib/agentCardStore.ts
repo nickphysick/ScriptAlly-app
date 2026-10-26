@@ -86,7 +86,21 @@ const giveFocusBack = () => {
   window.requestAnimationFrame(() => { if (el.isConnected) el.focus(); });
 };
 
+/**
+ * Contact list v25.2 C3 — ON THE CONTACT LIST, AN EDIT OPENS IN THE PAGE'S OWN CARD. While that page is on screen it
+ * registers here; a request asking for an editor (a tab, a field or carried answers) goes to it, so the agent's card
+ * turns into the editor there instead of a second panel opening over it. Elsewhere — and for a plain open — the
+ * app-level host answers as before.
+ */
+type EditInterceptor = (agentId: string, opts: AgentCardOptions) => boolean;
+let interceptor: EditInterceptor | null = null;
+export function setAgentEditInterceptor(fn: EditInterceptor | null): () => void {
+  interceptor = fn;
+  return () => { if (interceptor === fn) interceptor = null; };
+}
+
 export function openAgentCard(agentId: string, opts: AgentCardOptions = {}): void {
+  if (interceptor && (opts.tab || opts.focus || opts.prefill) && interceptor(agentId, opts)) return;
   returnFocus = null;
   current = { ...opts, agentId, seq: ++seq };
   notify();

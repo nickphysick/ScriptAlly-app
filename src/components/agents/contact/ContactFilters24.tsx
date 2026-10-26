@@ -16,7 +16,8 @@ import "./contactFilters24.css";
 export function socialOf(a: AgentFacts["agent"]): string {
   const direct = [a.twitter, a.bluesky, a.instagram].map((s) => (s ?? "").trim()).find(Boolean);
   if (direct) return direct;
-  const other = (a.socials ?? []).find((s) => !/mswl/i.test(s.platform) && s.handle.trim());
+  /* v25.2 C — the submission form is kept in `socials` too, and is not a social */
+  const other = (a.socials ?? []).find((s) => !/mswl/i.test(s.platform) && !/^submission form$/i.test(s.platform.trim()) && s.handle.trim());
   if (other) return other.handle.trim();
   return mswlLinkOf(a) ?? "";
 }

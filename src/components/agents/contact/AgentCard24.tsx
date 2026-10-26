@@ -42,6 +42,9 @@ import { monthLabel, monthKey } from "../../../lib/agentHistory";
 import "../../queries/centre/qcv149card.css";
 import "../../../marketing/heroCard.css";
 import "./contactV24.css";
+import { GenrePills, QueryPill, Tally } from "../../shared/agentRowParts";
+import type { CardDraft } from "../../../lib/cardDraft";
+import { type GenreKit, type InlineField, InlineContact, InlineGenres, InlineReplies, InlineWishlist } from "../card/InlineEdits";
 
 /** the band's tint and ink per set: the Query Centre's CARD_TONE, and "Not queried yet" the pack's #f5f1ea / #6b5f52 */
 export const SET_TONE: Record<SetKey, { bg: string; fg: string; pill: string }> = {
@@ -89,7 +92,58 @@ export interface AgentCard24Props {
   /** Remove: what the delete takes with it, and the delete itself */
   deleteQueries: number;
   onDelete: () => void;
+  /** Contact list v25.2 C — editing inside the card: the inline edits and the card's edit mode (absent: the card
+   *  hands every edit to `onEdit`, as before) */
+  edit?: CardEditKit;
 }
+
+/** v25.2 C — what the card needs to edit in place: the agent as a draft, the genre lists, one inline save, the edit
+ *  mode, and a request from outside (a row's "+ Add", a gap, "Edit agent") to open one of them */
+export interface CardEditKit {
+  draft: CardDraft;
+  genre: GenreKit;
+  /** an inline edit's save; true when it landed (the toast is the caller's) */
+  save: (change: Partial<CardDraft>) => Promise<boolean>;
+  /** the card's edit mode for this agent */
+  renderEdit: (o: { focus?: AgentCardField; wide?: boolean; onDone: () => void }) => React.ReactNode;
+  request: { seq: number; inline?: InlineField; edit?: { focus?: AgentCardField } } | null;
+}
+
+/** where a door's field opens: in place when an inline edit holds it, else the edit mode at that field */
+export function inlineFor(focus?: AgentCardField): InlineField | null {
+  switch (focus) {
+    case "wishlist": return "wishlist";
+    case "genres": return "genres";
+    case "reply": case "nrmn": return "replies";
+    case "email": return "email";
+    case "website": return "website";
+    case "mswl": return "social";
+    default: return null;
+  }
+}
+
+/** the card's editing state: an inline field, or the edit mode — never both; reset when the agent changes */
+export function useCardEdit(p: AgentCard24Props) {
+  const [inline, setInline] = useState<InlineField | null>(null);
+  const [editing, setEditing] = useState<{ focus?: AgentCardField } | null>(null);
+  const id = p.x.agent.id;
+  useEffect(() => { setInline(null); setEditing(null); }, [id]);
+  const seq = p.edit?.request?.seq;
+  useEffect(() => {
+    const r = p.edit?.request;
+    if (!r) return;
+    if (r.inline) { setEditing(null); setInline(r.inline); } else if (r.edit) { setInline(null); setEditing(r.edit); }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- a request is acted on once, by its seq
+  }, [seq]);
+  /** a door asking for a field: in place where it can be, else the edit mode at it; the old hand-off without a kit */
+  const openAt = (tab?: AgentCardTab, focus?: AgentCardField) => {
+    if (!p.edit) { p.onEdit(tab, focus); return; }
+    const f = inlineFor(focus);
+    if (f) { setEditing(null); setInline(f); } else { setInline(null); setEditing({ focus }); }
+  };
+  return { inline, setInline, editing, setEditing, openAt };
+}
+export type CardEdit = ReturnType<typeof useCardEdit>;
 
 /* ── the shared pieces (the wide card in full screen reuses them) ───────────────────────────────────────────── */
 
@@ -131,71 +185,103 @@ export const Band: React.FC<{ x: AgentFacts; right: ReturnType<typeof bandRight>
   </div>
 );
 
-export const Stars: React.FC<{ n: number | undefined }> = ({ n }) => (typeof n === "number" && n > 0 ? (
-  <div className="cl24c-stars" data-cl24="rating" data-n={n} aria-label={`Your rating: ${n} of 5`}>
-    {[1, 2, 3, 4, 5].map((k) => <i key={k} className={k <= n ? "on" : undefined} aria-hidden="true">★</i>)}
-    <small>your rating</small>
+/* v25.2 A7 — the tally bars replace the stars: five bars and "n/5", or empty bars and "—" when unrated */
+export const Stars: React.FC<{ n: number | undefined; onSet?: (n: 1 | 2 | 3 | 4 | 5) => void }> = ({ n, onSet }) => (
+  <div className="cl24c-stars cl252-crate" data-cl24="rating" data-n={typeof n === "number" ? n : 0}>
+    <Tally n={n} onSet={onSet} />
   </div>
+);
+
+/* v25.2 A5 — the card's header wears the row's status pill (one component, shared) */
+export const StagePill: React.FC<{ x: AgentFacts; pill?: string }> = ({ x }) => (x.q && x.stand !== "none" ? (
+  <QueryPill status={x.q.status} data={{ "data-cl24": "pill" }} />
 ) : null);
 
-export const StagePill: React.FC<{ x: AgentFacts; pill: string }> = ({ x, pill }) => (x.q && x.stand !== "none" ? (
-  <span className="mk-lc-pill qc149c-pill" data-cl24="pill" style={{ background: pill }}>
-    <StatusDot status={x.q.status as QueryStatus} overrideSize={15} />{STAGE_NAME[x.q.status as keyof typeof STAGE_NAME] ?? String(x.q.status)}
-  </span>
-) : null);
-
-export const Wishlist: React.FC<{ p: AgentCard24Props; first: string; heading?: boolean }> = ({ p, first, heading = true }) => {
+export const Wishlist: React.FC<{ p: AgentCard24Props; first: string; heading?: boolean; ed: CardEdit }> = ({ p, first, heading = true, ed }) => {
   const a = p.x.agent;
   const text = (a.mswlNotes ?? "").trim();
   const genres = a.genres ?? [];
+  const k = p.edit;
+  const done = () => ed.setInline(null);
   return (
     <div className="qc149c-wl cl24c-wl" data-cl24="wishlist">
-      {heading ? <span className="qc149c-k">What {first}’s looking for</span> : null}
-      {text ? <q data-cl24="wish-text">{text}</q>
-        : <button type="button" className="qc149c-add" data-cl24="wish-add" onClick={() => p.onEdit("want", "wishlist")}>+ Add their wishlist</button>}
-      {genres.length ? (
-        <div className="qc149c-gs">{genres.map((g) => <span key={g} className={p.genreHit(g) ? "hit" : undefined} data-cl24="genre" data-hit={p.genreHit(g) ? "" : undefined}>{p.genreWord(g)}</span>)}</div>
-      ) : <div className="qc149c-gs"><button type="button" className="qc149c-add cl24c-gadd" data-cl24="genres-add" onClick={() => p.onEdit("want", "genres")}>+ Add genres</button></div>}
+      {heading ? (
+        <span className="qc149c-k">What {first}’s looking for
+          {k && ed.inline !== "wishlist" ? <button type="button" className="cl252-hedit" data-cl252="wish-edit" onClick={() => ed.setInline("wishlist")}>Edit</button> : null}
+        </span>
+      ) : null}
+      {/* v25.2 C1 — the wishlist edits in place */}
+      {k && ed.inline === "wishlist" ? <InlineWishlist draft={k.draft} save={k.save} onDone={done} />
+        : text ? <q data-cl24="wish-text" className={k ? "cl252-wclick" : undefined} onClick={k ? () => ed.setInline("wishlist") : undefined}>{text}</q>
+        : <button type="button" className="qc149c-add" data-cl24="wish-add" onClick={() => ed.openAt("want", "wishlist")}>+ Add their wishlist</button>}
+      {/* v25.2 A3 — the row's genre pills, every genre, matches first; C1 — and they edit in place */}
+      {k && ed.inline === "genres" ? <InlineGenres draft={k.draft} kit={k.genre} save={k.save} onDone={done} />
+        : genres.length ? (
+        <div className={`qc149c-gs cl252-cgs${k ? " cl252-wclick" : ""}`} data-cl24="genres" onClick={k ? (e) => { if (!(e.target as HTMLElement).closest("button")) ed.setInline("genres"); } : undefined}>
+          <GenrePills genres={genres} hit={p.genreHit} word={p.genreWord} max={genres.length} className="wrap" />
+          {k ? <button type="button" className="cl252-gplus" data-cl252="genre-plus" onClick={() => ed.setInline("genres")}>+ Genre</button> : null}
+        </div>
+      ) : <div className="qc149c-gs"><button type="button" className="qc149c-add cl24c-gadd" data-cl24="genres-add" onClick={() => ed.openAt("want", "genres")}>+ Add genres</button></div>}
       {p.fit ? <div className={`cl24c-fit${p.fit.hit ? "" : " no"}`} data-cl24="fit" data-hit={p.fit.hit ? "" : undefined}>{p.fit.text}</div> : null}
     </div>
   );
 };
 
-export const Facts: React.FC<{ facts: readonly FactCell[]; grid2?: boolean }> = ({ facts, grid2 }) => (
-  <div className={`qc149c-facts${grid2 ? " cl24c-g2" : ""}`} data-cl24="facts">
-    {facts.map((f) => (
-      <div key={f.key} data-cl24="fact" data-k={f.key} data-known={f.known ? "" : undefined}>
-        <span className="qc149c-k">{f.label}</span><b>{f.value}</b>{f.sub ? <small>{f.sub}</small> : null}
-      </div>
-    ))}
-  </div>
-);
+export const Facts: React.FC<{ facts: readonly FactCell[]; grid2?: boolean; p?: AgentCard24Props; ed?: CardEdit; first?: string }> = ({ facts, grid2, p, ed, first }) => {
+  const k = p?.edit;
+  /* v25.2 C1 — clicking Replies in edits the reply time and policy in place, where the facts were */
+  if (k && ed?.inline === "replies") return <InlineReplies draft={k.draft} first={first ?? "them"} save={k.save} onDone={() => ed.setInline(null)} />;
+  return (
+    <div className={`qc149c-facts${grid2 ? " cl24c-g2" : ""}`} data-cl24="facts">
+      {facts.map((f) => (
+        <div key={f.key} data-cl24="fact" data-k={f.key} data-known={f.known ? "" : undefined}
+          className={k && f.key === "reply" ? "cl252-fclick" : undefined} role={k && f.key === "reply" ? "button" : undefined} tabIndex={k && f.key === "reply" ? 0 : undefined}
+          onClick={k && f.key === "reply" ? () => ed?.setInline("replies") : undefined}
+          onKeyDown={k && f.key === "reply" ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); ed?.setInline("replies"); } } : undefined}>
+          <span className="qc149c-k">{f.label}</span><b>{f.value}</b>{f.sub ? <small>{f.sub}</small> : null}
+        </div>
+      ))}
+    </div>
+  );
+};
 
-export const Contact: React.FC<{ p: AgentCard24Props; first: string; heading?: boolean }> = ({ p, first, heading = true }) => {
+export const Contact: React.FC<{ p: AgentCard24Props; first: string; heading?: boolean; ed: CardEdit }> = ({ p, first, heading = true, ed }) => {
   const a = p.x.agent;
   const email = (a.email ?? "").trim();
   const site = (a.website ?? "").trim();
   const href = site ? hrefFor(site) : null;
   const method = methodAnswer(a.submissionMethod);
   const social = socialOf(a);
+  const k = p.edit;
+  const form = k ? k.draft.form.trim() : "";
+  const formHref = form ? hrefFor(form) : null;
+  const done = () => ed.setInline(null);
+  /* v25.2 C1 — "+ Add …" turns its row into an input, in place */
+  const editing = (key: "email" | "website" | "form" | "social") => (k && ed.inline === key ? <InlineContact k={key} draft={k.draft} save={k.save} onDone={done} /> : null);
   return (
     <div className="qc149c-ct" data-cl24="contact">
       {heading ? <span className="qc149c-k">Contact</span> : null}
       <div className="qc149c-crow" data-cl24="ct-row" data-k="email">{ICON.mail}
-        {email ? <><span className="qc149c-cv">{email}</span><button type="button" className="qc149c-act" data-cl24="ct-act" onClick={() => copy(email)}>COPY</button></>
-          : <button type="button" className="qc149c-add" data-cl24="ct-add" onClick={() => p.onEdit("who", "email")}>+ Add email</button>}
+        {editing("email") ?? (email ? <><span className="qc149c-cv">{email}</span><button type="button" className="qc149c-act" data-cl24="ct-act" onClick={() => copy(email)}>COPY</button></>
+          : <button type="button" className="qc149c-add" data-cl24="ct-add" onClick={() => ed.openAt("who", "email")}>+ Add email</button>)}
       </div>
       <div className="qc149c-crow" data-cl24="ct-row" data-k="website">{ICON.web}
-        {site ? <><span className="qc149c-cv">{site.replace(/^https?:\/\//, "").replace(/\/$/, "")}</span>{href ? <a className="qc149c-act" data-cl24="ct-act" href={href} target="_blank" rel="noreferrer noopener">OPEN</a> : null}</>
-          : <button type="button" className="qc149c-add" data-cl24="ct-add" onClick={() => p.onEdit("who", "website")}>+ Add website</button>}
+        {editing("website") ?? (site ? <><span className="qc149c-cv">{site.replace(/^https?:\/\//, "").replace(/\/$/, "")}</span>{href ? <a className="qc149c-act" data-cl24="ct-act" href={href} target="_blank" rel="noreferrer noopener">OPEN</a> : null}</>
+          : <button type="button" className="qc149c-add" data-cl24="ct-add" onClick={() => ed.openAt("who", "website")}>+ Add website</button>)}
       </div>
+      {k ? (
+        <div className="qc149c-crow" data-cl24="ct-row" data-k="form">{ICON.form}
+          {editing("form") ?? (form ? <><span className="qc149c-cv">Submission form</span>{formHref ? <a className="qc149c-act" data-cl24="ct-act" href={formHref} target="_blank" rel="noreferrer noopener">OPEN</a> : null}</>
+            : <button type="button" className="qc149c-add" data-cl24="ct-add" data-k="form" onClick={() => ed.setInline("form")}>+ Add submission form</button>)}
+        </div>
+      ) : null}
       <div className="qc149c-crow" data-cl24="ct-row" data-k="method">{ICON.form}
         {method ? <span className="qc149c-cv">{method}</span>
-          : <button type="button" className="qc149c-add" data-cl24="ct-add" onClick={() => p.onEdit("work", "method")}>+ Add how {first} takes queries</button>}
+          : <button type="button" className="qc149c-add" data-cl24="ct-add" onClick={() => ed.openAt("work", "method")}>+ Add how {first} takes queries</button>}
       </div>
       <div className="qc149c-crow" data-cl24="ct-row" data-k="social">{ICON.at}
-        {social ? <><span className="qc149c-cv">{social}</span><button type="button" className="qc149c-act" data-cl24="ct-act" onClick={() => copy(social)}>COPY</button></>
-          : <button type="button" className="qc149c-add" data-cl24="ct-add" onClick={() => p.onEdit("who", "mswl")}>+ Add social</button>}
+        {editing("social") ?? (social ? <><span className="qc149c-cv">{social}</span><button type="button" className="qc149c-act" data-cl24="ct-act" onClick={() => copy(social)}>COPY</button></>
+          : <button type="button" className="qc149c-add" data-cl24="ct-add" onClick={() => (k ? ed.setInline("social") : ed.openAt("who", "mswl"))}>+ Add social</button>)}
       </div>
     </div>
   );
@@ -285,7 +371,7 @@ export const History: React.FC<{ entries: readonly HistEntry[]; first: string; n
 };
 
 /** the footer: the clock line, the links by set, ‹ n / M › */
-export const Foot: React.FC<{ p: AgentCard24Props; set: SetKey; wide?: boolean }> = ({ p, set, wide }) => {
+export const Foot: React.FC<{ p: AgentCard24Props; set: SetKey; wide?: boolean; ed?: CardEdit }> = ({ p, set, wide, ed }) => {
   const a = p.x.agent;
   const added = addedLabel(a);
   const [confirm, setConfirm] = useState(false);
@@ -296,7 +382,8 @@ export const Foot: React.FC<{ p: AgentCard24Props; set: SetKey; wide?: boolean }
   const ready = !heavy || canDestroy(typed.toLowerCase(), name.toLowerCase(), false);
   const q = p.x.q;
   const act = (k: FootLink) => {
-    if (k === "edit") p.onEdit("who");
+    /* v25.2 C2 — "Edit agent" turns this card into the editor */
+    if (k === "edit") { if (p.edit && ed) ed.setEditing({}); else p.onEdit("who"); }
     else if (k === "log") p.onLog();
     else if (k === "remove") setConfirm(true);
     else if (q && k === "record") p.onJourney("resp", q.id);
@@ -342,8 +429,19 @@ export type CardTab24 = "profile" | "history" | "notes";
 export const AgentCard24: React.FC<AgentCard24Props> = (p) => {
   const m = useCardModel(p);
   const { x } = p;
+  const ed = useCardEdit(p);
   const [tab, setTab] = useState<CardTab24>("profile");
   useEffect(() => { setTab("profile"); }, [x.agent.id]);
+  /* an inline field on the Profile tab brings the Profile tab forward */
+  useEffect(() => { if (ed.inline === "replies" || ed.inline === "email" || ed.inline === "website" || ed.inline === "form" || ed.inline === "social") setTab("profile"); }, [ed.inline]);
+  /* v25.2 C2 — Edit agent: the card itself becomes the editor */
+  if (p.edit && ed.editing) {
+    return (
+      <div className="qc149c qcv-legacy cl24c cl252-cedit" data-cl24="agent-card" data-id={x.agent.id} data-k={x.stand} data-editing="">
+        <div className="mk-lc-in qc149c-in cl252-cedin">{p.edit.renderEdit({ focus: ed.editing.focus, onDone: () => ed.setEditing(null) })}</div>
+      </div>
+    );
+  }
   return (
     <div className="qc149c qcv-legacy cl24c" data-cl24="agent-card" data-id={x.agent.id} data-k={x.stand}>
       <div className="mk-lc-in qc149c-in">
@@ -353,11 +451,11 @@ export const AgentCard24: React.FC<AgentCard24Props> = (p) => {
           <div className="qc149c-who">
             <div className="mk-lc-nm qcv-open-nm" data-cl24="card-name">{agentPrimary(m.a)}</div>
             <div className="mk-lc-ag">{[(m.a.name ?? "").trim() ? (m.a.agency ?? "").trim() : "", x.loc].filter(Boolean).join(" · ")}</div>
-            <Stars n={m.a.starRating} />
+            <Stars n={m.a.starRating} onSet={p.edit ? (n) => void p.edit!.save({ rating: n }) : undefined} />
           </div>
           <StagePill x={x} pill={m.tone.pill} />
         </div>
-        <div className="cl24c-box"><Wishlist p={p} first={m.first} /></div>
+        <div className="cl24c-box"><Wishlist p={p} first={m.first} ed={ed} /></div>
         <div className="mk-lc-tabs qc149c-tabs" role="tablist" aria-label="The agent">
           {(["profile", "history", "notes"] as const).map((t) => (
             <button key={t} type="button" role="tab" className="qc149c-tab" data-cl24="tab" data-tab={t} aria-selected={tab === t} onClick={() => setTab(t)}>
@@ -368,8 +466,8 @@ export const AgentCard24: React.FC<AgentCard24Props> = (p) => {
         <div className="qc149c-pane cl24c-pane" role="tabpanel" data-cl24="pane" data-pane={tab}>
           {tab === "profile" ? (
             <div className="qc149c-pg">
-              <Facts facts={m.facts} />
-              <Contact p={p} first={m.first} />
+              <Facts facts={m.facts} p={p} ed={ed} first={m.first} />
+              <Contact p={p} first={m.first} ed={ed} />
               <AlsoAt p={p} />
               <YouAnd rows={m.view.history} first={m.first} onOpenQuery={p.onOpenQuery} />
             </div>
@@ -380,7 +478,7 @@ export const AgentCard24: React.FC<AgentCard24Props> = (p) => {
           )}
           <Call call={m.call} p={p} />
         </div>
-        <Foot p={p} set={x.stand} />
+        <Foot p={p} set={x.stand} ed={ed} />
       </div>
     </div>
   );
@@ -402,6 +500,7 @@ export interface WideExtras {
 export const AgentCardWide24: React.FC<AgentCard24Props & { extras: WideExtras }> = (p) => {
   const m = useCardModel(p);
   const { x, extras } = p;
+  const ed = useCardEdit(p);
   const primary = m.call?.kind === "you" ? { label: m.call.button, run: () => p.onJourney((m.call as Extract<CallBox, { kind: "you" }>).door.mode, (m.call as Extract<CallBox, { kind: "you" }>).queryId) }
     : m.call?.kind === "log" ? { label: "Log a query", run: p.onLog }
     : x.stand === "agent" && x.q ? { label: "Record a response", run: () => p.onJourney("resp", x.q!.id) }
@@ -416,29 +515,33 @@ export const AgentCardWide24: React.FC<AgentCard24Props & { extras: WideExtras }
             <div className="cl24w-who">
               <div className="cl24w-nm" data-cl24="card-name">{agentPrimary(m.a)}</div>
               <div className="cl24w-agy">{[(m.a.name ?? "").trim() ? (m.a.agency ?? "").trim() : "", x.loc].filter(Boolean).join(" · ")}</div>
-              <Stars n={m.a.starRating} />
+              <Stars n={m.a.starRating} onSet={p.edit ? (n) => void p.edit!.save({ rating: n }) : undefined} />
             </div>
             <span className="cl24w-pillw"><StagePill x={x} pill={m.tone.pill} /></span>
             <div className="cl24w-acts">
               {primary ? <button type="button" className="p" data-cl24="wide-primary" onClick={primary.run}>{primary.label}</button> : null}
-              <button type="button" className="s" data-cl24="wide-edit" data-nb1="edit" onClick={() => p.onEdit("who")}>Edit agent</button>
+              <button type="button" className="s" data-cl24="wide-edit" data-nb1="edit" onClick={() => (p.edit ? ed.setEditing({}) : p.onEdit("who"))}>Edit agent</button>
             </div>
           </div>
+          {/* v25.2 C2 — the wide card in edit mode: its four sections two by two */}
+          {p.edit && ed.editing ? (
+            <div className="cl24w-bd cl252-wedit" data-cl24="wide-body" data-editing="">{p.edit.renderEdit({ focus: ed.editing.focus, wide: true, onDone: () => ed.setEditing(null) })}</div>
+          ) : (
           <div className="cl24w-bd" data-cl24="wide-body">
             <section className="sa" data-cl24="col" data-col="a">
               <h3>What {m.first}’s looking for</h3>
-              <Wishlist p={p} first={m.first} heading={false} />
+              <Wishlist p={p} first={m.first} heading={false} ed={ed} />
               <span className="qc149c-k">What to send</span>
               <div className="cl24w-mats" data-cl24="materials">
                 {extras.materials.length ? extras.materials.map((t) => <span key={t}>{ICON.form}{t}</span>)
-                  : <button type="button" className="mt" onClick={() => p.onEdit("want", "materials")}>+ Add what they ask for</button>}
+                  : <button type="button" className="mt" onClick={() => ed.openAt("want", "materials")}>+ Add what they ask for</button>}
               </div>
               <AlsoAt p={p} />
             </section>
             <section className="sb" data-cl24="col" data-col="b">
               <h3>How to reach {m.first}</h3>
-              <Facts facts={m.facts} grid2 />
-              <Contact p={p} first={m.first} heading={false} />
+              <Facts facts={m.facts} grid2 p={p} ed={ed} first={m.first} />
+              <Contact p={p} first={m.first} heading={false} ed={ed} />
             </section>
             <section className="sc" data-cl24="col" data-col="c">
               <h3>You and {m.first}</h3>
@@ -467,7 +570,8 @@ export const AgentCardWide24: React.FC<AgentCard24Props & { extras: WideExtras }
               <Notes p={p} first={m.first} />
             </section>
           </div>
-          <Foot p={p} set={x.stand} wide />
+          )}
+          {p.edit && ed.editing ? null : <Foot p={p} set={x.stand} wide ed={ed} />}
         </div>
       </div>
     </div>
