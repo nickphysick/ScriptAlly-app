@@ -1,0 +1,23 @@
+{"lock":"A1","mutation":"(natural) the unmodified v77 build","result":"RED every kind: no band, no title (\"\"), the kicker pill present, the pager outside a band"}
+{"lock":"A2","mutation":"(natural) the unmodified v77 build","result":"RED band -1.0 against the chart band's 46.0, every kind"}
+{"lock":"A3","mutation":"(natural) the unmodified v77 build at 254px","result":"RED send d71-tb 175/133; nudge d71-wexp outside the card (items 15, 18, 19)"}
+{"lock":"A1","mutation":"A1-tint (the band painted v71's nudge tint)","result":"RED all four kinds rgb(232, 238, 246)"}
+{"lock":"A2","mutation":"A2-tall (16px band padding)","result":"RED band 52.0 against 46.0, every kind"}
+{"lock":"A3","mutation":"A3-tall-body (60px body padding)","result":"RED send d71-tb 152-166/145"}
+{"lock":"A3","mutation":"A3-label (the expected label centred at the bar's end, as v77)","result":"RED nudge: d71-wexp outside the card and over Today, items 11, 12, …"}
+{"lock":"B (unit)","mutation":"(natural) the module absent","result":"RED Cannot find module './foundingContributions'"}
+{"lock":"B (unit)","mutation":"no weekly cap / counted:false ignored / a level may fall / a four-word floor","result":"RED 4 / 1 / 2 / 1 failed of 20"}
+{"lock":"B (unit)","mutation":"topPct rounded to the nearest 5, not up","result":"survived the first suite (2 of 11 → 20 either way); a 3-of-11 case added, then RED 1 failed"}
+{"lock":"B (rules)","mutation":"(natural) no rule (default deny)","result":"RED the owner reads their own; an admin reads it"}
+{"lock":"B (rules)","mutation":"read allowed to any signed-in writer","result":"RED another writer cannot read it"}
+{"lock":"B (emulator)","mutation":"the store ignores stored peaks","result":"RED built is worth four, and the level never falls"}
+{"lock":"B (trigger)","mutation":"Functions emulator, demo project","result":"a status set on a betaFeedback doc wrote foundingStats {contributions 1, fledgling} within 1s"}
+{"lock":"B3 (unit)","mutation":"the client's Scout minimum drifted to 7","result":"RED the tier table is the server's"}
+{"lock":"C1","mutation":"C1-no-variant (always Full)","result":"RED 1366x768 Full where Medium; 1280x650 Full where Compact"}
+{"lock":"C2","mutation":"(natural) before the narrow tightening","result":"RED 1440x900 0 and 1 with waiting: the ladder past the card (frame 286/278, 281/278); 1366x768 0 with waiting 187/182"}
+{"lock":"C2","mutation":"(natural, DB71 F3) the narrowest card, 1100x800","result":"RED 250px card: the band title 277/210, the body 7–25px past the card at 0, 6 and 25"}
+{"lock":"C3","mutation":"C3-all-colour (every ladder head in full colour)","result":"RED full-colour heads 5 at 0, 1, 6 and 11"}
+{"lock":"C4","mutation":"C4-copy (the stat line reads \"Nick says: 6 contributions.\")","result":"RED the stat line and no Nick, every case"}
+{"lock":"C5","mutation":"C5-dim-inert (the dim layer ignores clicks)","result":"RED dim: the panel stays open"}
+{"lock":"C6","mutation":"C6-fw-194 (v77's 194px row)","result":"RED the founding card 194.0 at 1440x900 and 1512x900 (as v77 measured in §0.4)"}
+{"lock":"C7","mutation":"C7-green (the band painted #5c8a4f)","result":"RED rgb(92, 138, 79)"}

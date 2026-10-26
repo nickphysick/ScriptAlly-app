@@ -1923,3 +1923,37 @@ describe('/betaFeedback', () => {
     await assertFails(deleteDoc(doc(aliceCtx().firestore(), 'betaFeedback', 'fb-alice-1')));
   });
 });
+
+// Dashboard v93 — the founding card's contributions. Written only by the foundingStats functions (Admin SDK); a writer
+// reads their OWN doc; an admin reads all; no client writes.
+describe('/foundingStats', () => {
+  const statsDoc = (ctx: RulesTestContext, uid: string) => doc(ctx.firestore(), 'foundingStats', uid);
+  const seed = (uid: string) => asAdmin(async (ctx) => {
+    await setDoc(statsDoc(ctx, uid), { contributions: 6, waiting: 1, tier: 'archivist', peakTier: 'archivist', nextTier: 'scout', toNext: 2, topPct: null });
+  });
+
+  it('the owner reads their own', async () => {
+    await seed(ALICE);
+    await assertSucceeds(getDoc(statsDoc(aliceCtx(), ALICE)));
+  });
+  it('another writer cannot read it', async () => {
+    await seed(ALICE);
+    await assertFails(getDoc(statsDoc(bobCtx(), ALICE)));
+    await assertFails(getDocs(collection(bobCtx().firestore(), 'foundingStats')));
+  });
+  it('signed out cannot read it', async () => {
+    await seed(ALICE);
+    await assertFails(getDoc(statsDoc(unauthed(), ALICE)));
+  });
+  it('an admin reads it', async () => {
+    await seed(ALICE);
+    await assertSucceeds(getDoc(statsDoc(adminCtx(), ALICE)));
+  });
+  it('no client writes, not even the owner', async () => {
+    await assertFails(setDoc(statsDoc(aliceCtx(), ALICE), { contributions: 99 }));
+    await seed(ALICE);
+    await assertFails(updateDoc(statsDoc(aliceCtx(), ALICE), { contributions: 99 }));
+    await assertFails(deleteDoc(statsDoc(aliceCtx(), ALICE)));
+    await assertFails(setDoc(statsDoc(adminCtx(), ALICE), { contributions: 99 }));
+  });
+});

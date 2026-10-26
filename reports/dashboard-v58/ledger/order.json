@@ -1,0 +1,188 @@
+[
+ {
+  "lock": "R2",
+  "where": "A as the account stands · population",
+  "ok": true,
+  "detail": "counts {\"req\":10,\"nudge\":11,\"quiet\":8,\"house\":5}"
+ },
+ {
+  "lock": "R2",
+  "where": "A as the account stands · the first item is the first group's",
+  "ok": true,
+  "detail": "first req · expected req from {\"req\":10,\"nudge\":11,\"quiet\":8,\"house\":5}"
+ },
+ {
+  "lock": "R2",
+  "where": "A as the account stands · label",
+  "ok": true,
+  "detail": "\"Agents are waiting\" (other)"
+ },
+ {
+  "lock": "R2",
+  "where": "A as the account stands · the count is every item shown",
+  "ok": true,
+  "detail": "\"1 OF 34\" for 34"
+ },
+ {
+  "lock": "R2",
+  "where": "A as the account stands · View task",
+  "ok": true,
+  "detail": "\"View task →\""
+ },
+ {
+  "lock": "R2",
+  "where": "A as the account stands · › steps to the second",
+  "ok": true,
+  "detail": "\"2 OF 34\" · task-offer-seed-query-12 → task-full-rj-dupe"
+ },
+ {
+  "lock": "R2",
+  "where": "B no agents waiting · population",
+  "ok": true,
+  "detail": "counts {\"nudge\":11,\"quiet\":8,\"house\":5}"
+ },
+ {
+  "lock": "R2",
+  "where": "B no agents waiting · the first item is the first group's",
+  "ok": true,
+  "detail": "first nudge · expected nudge from {\"nudge\":11,\"quiet\":8,\"house\":5}"
+ },
+ {
+  "lock": "R2",
+  "where": "B no agents waiting · label",
+  "ok": true,
+  "detail": "\"Time to nudge\" (nudge)"
+ },
+ {
+  "lock": "R2",
+  "where": "B no agents waiting · the count is every item shown",
+  "ok": true,
+  "detail": "\"1 OF 24\" for 24"
+ },
+ {
+  "lock": "R2",
+  "where": "B no agents waiting · View task",
+  "ok": true,
+  "detail": "\"View task →\""
+ },
+ {
+  "lock": "R2",
+  "where": "B no agents waiting · › steps to the second",
+  "ok": true,
+  "detail": "\"2 OF 24\" · task-nudge-seed-pkgq-2 → task-nudge-seed-pkgq-9"
+ },
+ {
+  "lock": "R2",
+  "where": "C housekeeping only · population",
+  "ok": true,
+  "detail": "counts {\"house\":5}"
+ },
+ {
+  "lock": "R2",
+  "where": "C housekeeping only · the first item is the first group's",
+  "ok": true,
+  "detail": "first house · expected house from {\"house\":5}"
+ },
+ {
+  "lock": "R2",
+  "where": "C housekeeping only · label",
+  "ok": true,
+  "detail": "\"Housekeeping\" (other)"
+ },
+ {
+  "lock": "R2",
+  "where": "C housekeeping only · the count is every item shown",
+  "ok": true,
+  "detail": "\"1 OF 5\" for 5"
+ },
+ {
+  "lock": "R2",
+  "where": "C housekeeping only · View task",
+  "ok": true,
+  "detail": "\"View task →\""
+ },
+ {
+  "lock": "R2",
+  "where": "C housekeeping only · › steps to the second",
+  "ok": true,
+  "detail": "\"2 OF 5\" · hk:reply → hk:materials"
+ },
+ {
+  "lock": "R2",
+  "where": "D ready to query · population",
+  "ok": true,
+  "detail": "counts {\"ready\":6}"
+ },
+ {
+  "lock": "R2",
+  "where": "D ready to query · the first item is the first group's",
+  "ok": true,
+  "detail": "first ready · expected ready from {\"ready\":6}"
+ },
+ {
+  "lock": "R2",
+  "where": "D ready to query · label",
+  "ok": true,
+  "detail": "\"Ready to query\" (other)"
+ },
+ {
+  "lock": "R2",
+  "where": "D ready to query · the count is every item shown",
+  "ok": true,
+  "detail": "\"1 OF 6\" for 6"
+ },
+ {
+  "lock": "R2",
+  "where": "D ready to query · View task",
+  "ok": true,
+  "detail": "\"View task →\""
+ },
+ {
+  "lock": "R2",
+  "where": "D ready to query · › steps to the second",
+  "ok": true,
+  "detail": "\"2 OF 6\" · ready:thin-ag-chase → ready:thin-ag-close"
+ },
+ {
+  "lock": "R2",
+  "where": "E coming up · population",
+  "ok": true,
+  "detail": "counts {\"coming\":7}"
+ },
+ {
+  "lock": "R2",
+  "where": "E coming up · the first item is the first group's",
+  "ok": true,
+  "detail": "first coming · expected coming from {\"coming\":7}"
+ },
+ {
+  "lock": "R2",
+  "where": "E coming up · label",
+  "ok": true,
+  "detail": "\"Coming up\" (other)"
+ },
+ {
+  "lock": "R2",
+  "where": "E coming up · the count is every item shown",
+  "ok": true,
+  "detail": "\"1 OF 7\" for 7"
+ },
+ {
+  "lock": "R2",
+  "where": "E coming up · View task",
+  "ok": true,
+  "detail": "\"View task →\""
+ },
+ {
+  "lock": "R2",
+  "where": "E coming up · › steps to the second",
+  "ok": true,
+  "detail": "\"2 OF 7\" · coming:seed-query-2 → coming:seed-query-1"
+ },
+ {
+  "lock": "R2",
+  "where": "more than one state was entered",
+  "ok": true,
+  "detail": "{\"req\":1,\"nudge\":1,\"house\":1,\"ready\":1,\"coming\":1}"
+ }
+]

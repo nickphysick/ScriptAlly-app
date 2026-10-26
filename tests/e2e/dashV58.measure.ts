@@ -263,7 +263,8 @@ const readRight = (page: Page) => page.evaluate(() => {
     right: !!document.querySelector('[data-d58="right"]'),
     focus: c && c.dataset.kind !== "none" ? {
       group: c.dataset.group ?? null, key: c.dataset.key ?? null, kind: c.dataset.kind ?? "",
-      label: c.querySelector('[data-d71="kicker"]')?.textContent?.trim() ?? null,
+      /* RE-POINTED (Dashboard v93): the kicker pill is retired; the band's title names the kind */
+      label: c.querySelector('[data-d71="band-title"]')?.textContent?.trim() ?? null,
       pos: c.querySelector('[data-d71="pos-text"]')?.textContent?.trim() ?? null,
       act: c.querySelector('[data-d71="view"]')?.textContent?.trim() ?? null,
     } : null,
@@ -275,10 +276,10 @@ const readRight = (page: Page) => page.evaluate(() => {
    the order list-head > focus > rule > panel). The querying column is two cards now — DB71 L1 holds its
    order and the absence of the title, "All {n}" and the hairline. */
 
-const LABEL: Record<string, string> = { req: "AGENTS ARE WAITING", nudge: "WORTH A NUDGE", quiet: "GONE QUIET", house: "HOUSEKEEPING", ready: "READY TO QUERY", coming: "COMING UP" };
+const LABEL: Record<string, string> = { req: "Agents are waiting", nudge: "Worth a nudge", quiet: "Gone quiet", house: "Housekeeping", ready: "Ready to query", coming: "Coming up" };
 const ORDER = ["req", "nudge", "quiet", "house", "ready", "coming"];
 
-const KIND_KICKER: Record<string, string> = { nudge: "TIME TO NUDGE", close: "CONSIDER CLOSING", send: "YOUR MOVE · SEND" };
+const KIND_KICKER: Record<string, string> = { nudge: "Time to nudge", close: "Consider closing", send: "Your move" };
 
 test("DB58 R2 — the fixed order, on the rendered page", async ({ page }) => {
   const L = new Ledger("order");

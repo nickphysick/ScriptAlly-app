@@ -56,13 +56,13 @@ class Ledger {
 /** The in-page breaks. Each is the lock's own named mutation. */
 const CSS_MUTATIONS: Record<string, string> = {
   "H1-white": `.d71-head { background: #fff !important; }`,
-  "L2-fw-172": `.d71-fwslot > .d77-fw { flex: none !important; height: 172px !important; }`,
+  "L2-fw-172": `.d71-fwslot > .d93-fw { flex: none !important; height: 172px !important; }`,
   "L3-tab-off": `.d59-ftab { right: -200px !important; }`,
   "L4-clip": `.d60-hoops, .d71-fwslot { overflow: hidden !important; }`,
   "C2-solid": `.d71-ok { width: 100% !important; } .d71-ov { display: none !important; }`,
   "C2-label-room": `.d71-task[data-kind="close"] .d71-win { margin-top: 0 !important; }`,
   "C3-solid": `.d71-step.is-todo { border-style: solid !important; }`,
-  "F3-art-140": `.d77-sm .d77-art { display: block !important; width: 140px !important; }`,
+  "F3-art-140": `.d93-med { width: 160px !important; height: 160px !important; }`,
   "G1-hoops-320": `.d58[data-mode="q"] .d60-hoops { min-height: 320px !important; }`,
 };
 
@@ -174,29 +174,30 @@ const readFit = (page: Page) => page.evaluate(() => {
   if (tab && tb) { const e = document.elementFromPoint(tb.l + tb.w / 2, tb.t + tb.h / 2); hit = !!e && (e === tab || tab.contains(e)); }
   const fw = q('[data-d71="fw"]');
   /* RE-POINTED (Dashboard v77): the founding card is Dash77Founding — its frame, the layout on show, its art */
-  const frame = fw?.querySelector(".d77-fwframe") ?? null;
+  /* RE-POINTED (Dashboard v93): the founding card is Dash93Founding — its frame, the variant on show, its picture */
+  const frame = fw?.querySelector(".d93-frame") ?? null;
   const fb = frame?.getBoundingClientRect();
   const escapes: string[] = [];
   let n = 0;
   if (fw && fb) {
     for (const el of fw.querySelectorAll<HTMLElement>("*")) {
-      if (el.closest("svg") || el.closest(".d77-tip") || el.classList.contains("d77-vh")) continue;
+      if (el.closest("svg")) continue;
       const b = el.getBoundingClientRect();
       if (b.width <= 0 || b.height <= 0 || getComputedStyle(el).display === "none") continue;
       n += 1;
       if (b.bottom > fb.bottom + 0.5 || b.top < fb.top - 0.5 || b.right > fb.right + 0.5 || b.left < fb.left - 0.5) escapes.push(`${el.className || el.tagName}`);
     }
   }
-  const body = [...(fw?.querySelectorAll<HTMLElement>('[data-d77="sm"], [data-d77="lg"]') ?? [])].find((e) => getComputedStyle(e).display !== "none") ?? null;
-  const img = [...(body?.querySelectorAll<HTMLImageElement>('[data-d77="art"]') ?? [])].find((e) => getComputedStyle(e).display !== "none") ?? null;
-  const h = body?.querySelector<HTMLElement>('[data-d77="heading"]') ?? null;
+  const body = [...(fw?.querySelectorAll<HTMLElement>('[data-d93="full"], [data-d93="compact"]') ?? [])].find((e) => getComputedStyle(e).display !== "none") ?? null;
+  const img = [...(body?.querySelectorAll<HTMLImageElement>(".d93-med img, .d93-chd img") ?? [])].find((e) => getComputedStyle(e).display !== "none") ?? null;
+  const h = body?.querySelector<HTMLElement>('[data-d93="title"], [data-d93="compact-line"]') ?? null;
   const shown = (s: string) => { const e = fw?.querySelector<HTMLElement>(s); return !!e && e.getBoundingClientRect().height > 0 && getComputedStyle(e).display !== "none"; };
   const scroller = document.querySelector<HTMLElement>(".ws-wbody");
   /* cut text: a hoop legend row, or a part of the task card's head, that overflows its own box or runs
      past its card's edge (found at 1100×800: "1 OF 3" off the task card, "Querying" clipped) */
   const cut: string[] = [];
   let cutN = 0;
-  for (const el of document.querySelectorAll<HTMLElement>('.d60-hl li, [data-d71="head"] > *, [data-d71="pos"] > *')) {
+  for (const el of document.querySelectorAll<HTMLElement>('.d60-hl li, [data-d71="band"] > *, [data-d71="pos"] > *')) {
     const r = el.getBoundingClientRect();
     if (r.width <= 0 || getComputedStyle(el).display === "none") continue;
     cutN += 1;
@@ -294,11 +295,14 @@ const readCard = (page: Page) => page.evaluate(() => {
   const c = document.querySelector<HTMLElement>('[data-d71="task"][data-loading="0"]');
   if (!c) return null;
   const pos = c.querySelector('[data-d71="pos-text"]')?.textContent ?? "1 OF 1";
-  const head = c.querySelector<HTMLElement>('[data-d71="head"]');
-  const kick = c.querySelector<HTMLElement>('[data-d71="kicker"]');
+  /* RE-POINTED (Dashboard v93): the head is the kind band; its title replaces the kicker pill, and the progress
+     segments' accent is read off a past or current segment */
+  const head = c.querySelector<HTMLElement>('[data-d71="band"]');
+  const kick = c.querySelector<HTMLElement>('[data-d71="band-title"]');
+  const seg = c.querySelector<HTMLElement>('[data-d71="segment"].is-now > b, [data-d71="segment"] > b');
   return {
     index: Number(c.dataset.index ?? 0), pos, kind: c.dataset.kind ?? "", key: c.dataset.key ?? "", query: c.dataset.query ?? "",
-    kicker: kick?.textContent ?? "", headBg: head ? getComputedStyle(head).backgroundColor : "", kickBg: kick ? getComputedStyle(kick).backgroundColor : "",
+    kicker: kick?.textContent ?? "", headBg: head ? getComputedStyle(head).backgroundColor : "", kickBg: seg ? getComputedStyle(seg).backgroundColor : "",
     title: c.querySelector('[data-d71="title"]')?.textContent ?? "", who: c.querySelector('[data-d71="title"] b')?.textContent ?? "",
   };
 });
@@ -325,10 +329,11 @@ async function goTo(page: Page, index: number) {
   }
 }
 
+/* RE-POINTED (Dashboard v93): the kicker becomes the band's title, the tint the band's colour (DB93 A1 owns them) */
 const TABLE: Record<string, { kicker: string; tint: string; accent: string }> = {
-  nudge: { kicker: "TIME TO NUDGE", tint: "rgb(232, 238, 246)", accent: "rgb(42, 58, 82)" },
-  close: { kicker: "CONSIDER CLOSING", tint: "rgb(239, 235, 229)", accent: "rgb(125, 112, 100)" },
-  send: { kicker: "YOUR MOVE · SEND", tint: "rgb(244, 231, 225)", accent: "rgb(162, 69, 42)" },
+  nudge: { kicker: "Time to nudge", tint: "rgb(42, 58, 82)", accent: "rgb(42, 58, 82)" },
+  close: { kicker: "Consider closing", tint: "rgb(228, 223, 215)", accent: "rgb(125, 112, 100)" },
+  send: { kicker: "Your move", tint: "rgb(162, 69, 42)", accent: "rgb(162, 69, 42)" },
 };
 
 test("DB71 C1 · C2 · C3 — nudge, close and send, as tabled", async ({ page }) => {

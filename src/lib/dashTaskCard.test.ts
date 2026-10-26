@@ -41,28 +41,29 @@ describe("the kind of each item", () => {
     expect(kindOf({ group: "req", taskType: "offer_received" })).toBe("other");
     expect(kindOf({ group: "house", taskType: null })).toBe("other");
     const other = taskCardModel(item("house", "x", "", null, { pre: "Add genres for ", who: "Ann", action: { kind: "route", tab: "agents" } }), "Housekeeping", ctx);
-    expect([other.kicker, other.tint, other.plain]).toEqual(["HOUSEKEEPING", "#f1eee9", "add genres for Ann"]);
+    expect([other.bandTitle, other.band, other.bandInk, other.plain]).toEqual(["Housekeeping", "#5f7591", "#ffffff", "add genres for Ann"]);
   });
 });
 
-describe("C1 — kickers, tints, accents and titles, as tabled", () => {
+describe("C1 — bands (v93), accents and titles, as tabled", () => {
   it("nudge", () => {
     const m = taskCardModel(item("nudge", "q1", "Priya Raman", "nudge_overdue"), "Worth a nudge", ctx);
-    expect([m.kicker, m.tint, m.accent, `${m.pre}${m.who}${m.post}`]).toEqual(["TIME TO NUDGE", "#e8eef6", "#2a3a52", "Nudge Priya Raman"]);
+    expect([m.bandTitle, m.band, m.bandInk, m.accent, `${m.pre}${m.who}${m.post}`]).toEqual(["Time to nudge", "#2a3a52", "#ffffff", "#2a3a52", "Nudge Priya Raman"]);
     expect(m.line).toMatch(/^No reply since you queried on \d+ [A-Z][a-z]+\. Priya’s usual reply time is six weeks\.$/);
     expect(m.line).not.toMatch(/\b(he|she|his|her)\b/i);
   });
   it("close — the title is exactly 'Close your query to {Name}?'", () => {
     const m = taskCardModel(item("quiet", "q2", "Tom Okafor", "no_response_close"), "Gone quiet", ctx);
-    expect([m.kicker, m.tint, m.accent]).toEqual(["CONSIDER CLOSING", "#efebe5", "#7d7064"]);
+    expect([m.bandTitle, m.band, m.bandInk, m.accent]).toEqual(["Consider closing", "#e4dfd7", "#1c130f", "#7d7064"]);
     expect(`${m.pre}${m.who}${m.post}`).toBe("Close your query to Tom Okafor?");
     expect(m.line).toBe("Fifteen weeks without a reply, eleven past the expected date. Closing it keeps your pipeline honest, and you can reopen it any time.");
   });
   it("send", () => {
     const m = taskCardModel(item("req", "q3", "Jonathan Marsh", "full_requested"), "Agents are waiting", ctx);
-    expect([m.kicker, m.tint, m.accent, `${m.pre}${m.who}`]).toEqual(["YOUR MOVE · SEND", "#f4e7e1", "#a2452a", "Send your full to Jonathan Marsh"]);
+    expect([m.bandTitle, m.band, m.bandInk, m.accent, `${m.pre}${m.who}`]).toEqual(["Your move", "#a2452a", "#ffffff", "#a2452a", "Send your full to Jonathan Marsh"]);
     expect(m.line).toMatch(/^The Marsh Agency asked for the full on \d+ [A-Z][a-z]+\. It’s been with you nine weeks\.$/);
-    expect(KIND_STYLE.send.kicker).toBe("YOUR MOVE · SEND");
+    expect(KIND_STYLE.send.title).toBe("Your move");
+    expect(KIND_STYLE.other.title).toBeNull();
   });
 });
 

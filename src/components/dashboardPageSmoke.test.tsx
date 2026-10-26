@@ -56,8 +56,8 @@ describe("/dashboard renders", () => {
     expect(html).toContain("No queries out yet.");
     expect(html).toContain("No agents yet."); // v60.1 copy (was "Your list starts here.")
     expect(html).toContain("Where do I start?"); // v60.1: the one header button before the first query
-    /* RETARGETED (Dashboard v77): the founding writer card is rebuilt around feedback */
-    expect(html).toContain("We’d love to hear your feedback.");
+    /* RETARGETED (Dashboard v93): the founding card is "Your contributions"; its band names it while its stats load */
+    expect(html).toContain("You’re a QueryHawk founding writer");
   });
 
   /**

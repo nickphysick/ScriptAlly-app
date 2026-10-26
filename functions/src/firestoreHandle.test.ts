@@ -115,6 +115,9 @@ describe("the Firestore handle has exactly one home", () => {
       "waitlistRetention.ts",
       /* the tenth (Dashboard v59): the founding writer panel's weekly pulse writes betaPulse */
       "weeklyPulse.ts",
+      /* the eleventh (Dashboard v93): it reads every betaFeedback doc and writes every foundingStats doc, and its
+         trigger names the same DATABASE_ID — so on prod it listens to the named database, not a (default) */
+      "foundingStats.ts",
     ];
     /* ⚠️ RECONCILED AGAINST index.ts RATHER THAN TRUSTED AS A HAND-WRITTEN LIST — a literal here
      * goes stale the day a ninth function is exported, and goes stale silently. */

@@ -3,7 +3,7 @@
   "lock": "A2",
   "where": "population: the task card holds more than one item",
   "ok": true,
-  "detail": "{\"h\":373.75,\"kind\":\"other\",\"index\":0,\"pos\":\"1 OF 34\"}"
+  "detail": "{\"h\":375.75,\"kind\":\"other\",\"index\":0,\"pos\":\"1 OF 34\"}"
  },
  {
   "lock": "A2",
@@ -21,6 +21,6 @@
   "lock": "A2",
   "where": "the card's height is identical (±1) across the cycle",
   "ok": true,
-  "detail": "373.8–373.8 (spread 0.0)"
+  "detail": "375.8–375.8 (spread 0.0)"
  }
 ]

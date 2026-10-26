@@ -1,0 +1,1196 @@
+[
+ {
+  "lock": "C2",
+  "where": "1440x900 0 population",
+  "ok": true,
+  "detail": "{\"n\":43,\"v\":\"Full\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1440x900 0 (Full) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1440x900 0 (Full) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C3",
+  "where": "0: five rungs",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "C3",
+  "where": "0: full-colour heads = level 0",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "C3",
+  "where": "0: no current head, every head faded",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "C3",
+  "where": "0: the medallion's Fledgling is at 45% and the ring empty",
+  "ok": true,
+  "detail": "0.45 · ring 0.000"
+ },
+ {
+  "lock": "C2",
+  "where": "1440x900 0 +2 waiting population",
+  "ok": true,
+  "detail": "{\"n\":44,\"v\":\"Full\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1440x900 0 +2 waiting (Full) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1440x900 0 +2 waiting (Full) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1440x900 1 population",
+  "ok": true,
+  "detail": "{\"n\":47,\"v\":\"Full\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1440x900 1 (Full) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1440x900 1 (Full) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C3",
+  "where": "1: five rungs",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "C3",
+  "where": "1: full-colour heads = level 1",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "C3",
+  "where": "1: exactly one current head",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "C2",
+  "where": "1440x900 1 +2 waiting population",
+  "ok": true,
+  "detail": "{\"n\":47,\"v\":\"Full\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1440x900 1 +2 waiting (Full) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1440x900 1 +2 waiting (Full) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1440x900 6 population",
+  "ok": true,
+  "detail": "{\"n\":48,\"v\":\"Full\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1440x900 6 (Full) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1440x900 6 (Full) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C3",
+  "where": "6: five rungs",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "C3",
+  "where": "6: full-colour heads = level 2",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "C3",
+  "where": "6: exactly one current head",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "C3",
+  "where": "6: the ring is (6 − 3) ÷ (8 − 3) = 0.6",
+  "ok": true,
+  "detail": "0.600"
+ },
+ {
+  "lock": "C2",
+  "where": "1440x900 6 +2 waiting population",
+  "ok": true,
+  "detail": "{\"n\":48,\"v\":\"Full\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1440x900 6 +2 waiting (Full) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1440x900 6 +2 waiting (Full) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1440x900 11 population",
+  "ok": true,
+  "detail": "{\"n\":48,\"v\":\"Full\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1440x900 11 (Full) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1440x900 11 (Full) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C3",
+  "where": "11: five rungs",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "C3",
+  "where": "11: full-colour heads = level 3",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "C3",
+  "where": "11: exactly one current head",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "C2",
+  "where": "1440x900 11 +2 waiting population",
+  "ok": true,
+  "detail": "{\"n\":48,\"v\":\"Full\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1440x900 11 +2 waiting (Full) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1440x900 11 +2 waiting (Full) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1440x900 25 population",
+  "ok": true,
+  "detail": "{\"n\":46,\"v\":\"Full\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1440x900 25 (Full) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1440x900 25 (Full) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C3",
+  "where": "25: five rungs",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "C3",
+  "where": "25: full-colour heads = level 5",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "C3",
+  "where": "25: exactly one current head",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "C3",
+  "where": "25: the ring is full at QueryHawk",
+  "ok": true,
+  "detail": "1.000"
+ },
+ {
+  "lock": "C2",
+  "where": "1440x900 25 +2 waiting population",
+  "ok": true,
+  "detail": "{\"n\":46,\"v\":\"Full\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1440x900 25 +2 waiting (Full) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1440x900 25 +2 waiting (Full) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 0 population",
+  "ok": true,
+  "detail": "{\"n\":17,\"v\":\"Medium\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 0 (Medium) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 0 (Medium) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 0 +2 waiting population",
+  "ok": true,
+  "detail": "{\"n\":18,\"v\":\"Medium\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 0 +2 waiting (Medium) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 0 +2 waiting (Medium) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 1 population",
+  "ok": true,
+  "detail": "{\"n\":21,\"v\":\"Medium\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 1 (Medium) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 1 (Medium) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 1 +2 waiting population",
+  "ok": true,
+  "detail": "{\"n\":21,\"v\":\"Medium\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 1 +2 waiting (Medium) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 1 +2 waiting (Medium) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 6 population",
+  "ok": true,
+  "detail": "{\"n\":22,\"v\":\"Medium\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 6 (Medium) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 6 (Medium) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 6 +2 waiting population",
+  "ok": true,
+  "detail": "{\"n\":22,\"v\":\"Medium\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 6 +2 waiting (Medium) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 6 +2 waiting (Medium) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 11 population",
+  "ok": true,
+  "detail": "{\"n\":22,\"v\":\"Medium\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 11 (Medium) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 11 (Medium) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 11 +2 waiting population",
+  "ok": true,
+  "detail": "{\"n\":22,\"v\":\"Medium\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 11 +2 waiting (Medium) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 11 +2 waiting (Medium) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 25 population",
+  "ok": true,
+  "detail": "{\"n\":20,\"v\":\"Medium\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 25 (Medium) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 25 (Medium) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 25 +2 waiting population",
+  "ok": true,
+  "detail": "{\"n\":20,\"v\":\"Medium\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 25 +2 waiting (Medium) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1366x768 25 +2 waiting (Medium) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x650 0 population",
+  "ok": true,
+  "detail": "{\"n\":10,\"v\":\"Compact\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x650 0 (Compact) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x650 0 (Compact) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x650 0 +2 waiting population",
+  "ok": true,
+  "detail": "{\"n\":10,\"v\":\"Compact\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x650 0 +2 waiting (Compact) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x650 0 +2 waiting (Compact) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x650 1 population",
+  "ok": true,
+  "detail": "{\"n\":10,\"v\":\"Compact\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x650 1 (Compact) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x650 1 (Compact) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x650 1 +2 waiting population",
+  "ok": true,
+  "detail": "{\"n\":10,\"v\":\"Compact\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x650 1 +2 waiting (Compact) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x650 1 +2 waiting (Compact) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x650 6 population",
+  "ok": true,
+  "detail": "{\"n\":10,\"v\":\"Compact\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x650 6 (Compact) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x650 6 (Compact) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x650 6 +2 waiting population",
+  "ok": true,
+  "detail": "{\"n\":10,\"v\":\"Compact\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x650 6 +2 waiting (Compact) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x650 6 +2 waiting (Compact) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x650 11 population",
+  "ok": true,
+  "detail": "{\"n\":10,\"v\":\"Compact\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x650 11 (Compact) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x650 11 (Compact) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x650 11 +2 waiting population",
+  "ok": true,
+  "detail": "{\"n\":10,\"v\":\"Compact\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x650 11 +2 waiting (Compact) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x650 11 +2 waiting (Compact) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x650 25 population",
+  "ok": true,
+  "detail": "{\"n\":10,\"v\":\"Compact\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x650 25 (Compact) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x650 25 (Compact) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x650 25 +2 waiting population",
+  "ok": true,
+  "detail": "{\"n\":10,\"v\":\"Compact\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x650 25 +2 waiting (Compact) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x650 25 +2 waiting (Compact) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 0 population",
+  "ok": true,
+  "detail": "{\"n\":43,\"v\":\"Full\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 0 (Full) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 0 (Full) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 0 +2 waiting population",
+  "ok": true,
+  "detail": "{\"n\":44,\"v\":\"Full\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 0 +2 waiting (Full) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 0 +2 waiting (Full) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 1 population",
+  "ok": true,
+  "detail": "{\"n\":47,\"v\":\"Full\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 1 (Full) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 1 (Full) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 1 +2 waiting population",
+  "ok": true,
+  "detail": "{\"n\":47,\"v\":\"Full\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 1 +2 waiting (Full) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 1 +2 waiting (Full) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 6 population",
+  "ok": true,
+  "detail": "{\"n\":48,\"v\":\"Full\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 6 (Full) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 6 (Full) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 6 +2 waiting population",
+  "ok": true,
+  "detail": "{\"n\":48,\"v\":\"Full\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 6 +2 waiting (Full) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 6 +2 waiting (Full) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 11 population",
+  "ok": true,
+  "detail": "{\"n\":48,\"v\":\"Full\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 11 (Full) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 11 (Full) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 11 +2 waiting population",
+  "ok": true,
+  "detail": "{\"n\":48,\"v\":\"Full\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 11 +2 waiting (Full) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 11 +2 waiting (Full) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 25 population",
+  "ok": true,
+  "detail": "{\"n\":46,\"v\":\"Full\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 25 (Full) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 25 (Full) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 25 +2 waiting population",
+  "ok": true,
+  "detail": "{\"n\":46,\"v\":\"Full\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 25 +2 waiting (Full) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 25 +2 waiting (Full) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 0 population",
+  "ok": true,
+  "detail": "{\"n\":43,\"v\":\"Full\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 0 (Full) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 0 (Full) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 0 +2 waiting population",
+  "ok": true,
+  "detail": "{\"n\":44,\"v\":\"Full\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 0 +2 waiting (Full) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 0 +2 waiting (Full) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 1 population",
+  "ok": true,
+  "detail": "{\"n\":47,\"v\":\"Full\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 1 (Full) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 1 (Full) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 1 +2 waiting population",
+  "ok": true,
+  "detail": "{\"n\":47,\"v\":\"Full\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 1 +2 waiting (Full) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 1 +2 waiting (Full) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 6 population",
+  "ok": true,
+  "detail": "{\"n\":48,\"v\":\"Full\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 6 (Full) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 6 (Full) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 6 +2 waiting population",
+  "ok": true,
+  "detail": "{\"n\":48,\"v\":\"Full\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 6 +2 waiting (Full) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 6 +2 waiting (Full) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 11 population",
+  "ok": true,
+  "detail": "{\"n\":48,\"v\":\"Full\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 11 (Full) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 11 (Full) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 11 +2 waiting population",
+  "ok": true,
+  "detail": "{\"n\":48,\"v\":\"Full\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 11 +2 waiting (Full) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 11 +2 waiting (Full) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 25 population",
+  "ok": true,
+  "detail": "{\"n\":46,\"v\":\"Full\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 25 (Full) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 25 (Full) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 25 +2 waiting population",
+  "ok": true,
+  "detail": "{\"n\":46,\"v\":\"Full\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 25 +2 waiting (Full) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "2560x1440 25 +2 waiting (Full) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1100x800 0 population",
+  "ok": true,
+  "detail": "{\"n\":17,\"v\":\"Medium\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1100x800 0 (Medium) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1100x800 0 (Medium) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1100x800 0 +2 waiting population",
+  "ok": true,
+  "detail": "{\"n\":18,\"v\":\"Medium\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1100x800 0 +2 waiting (Medium) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1100x800 0 +2 waiting (Medium) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1100x800 1 population",
+  "ok": true,
+  "detail": "{\"n\":21,\"v\":\"Medium\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1100x800 1 (Medium) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1100x800 1 (Medium) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1100x800 1 +2 waiting population",
+  "ok": true,
+  "detail": "{\"n\":21,\"v\":\"Medium\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1100x800 1 +2 waiting (Medium) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1100x800 1 +2 waiting (Medium) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1100x800 6 population",
+  "ok": true,
+  "detail": "{\"n\":22,\"v\":\"Medium\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1100x800 6 (Medium) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1100x800 6 (Medium) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1100x800 6 +2 waiting population",
+  "ok": true,
+  "detail": "{\"n\":22,\"v\":\"Medium\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1100x800 6 +2 waiting (Medium) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1100x800 6 +2 waiting (Medium) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1100x800 11 population",
+  "ok": true,
+  "detail": "{\"n\":22,\"v\":\"Medium\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1100x800 11 (Medium) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1100x800 11 (Medium) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1100x800 11 +2 waiting population",
+  "ok": true,
+  "detail": "{\"n\":22,\"v\":\"Medium\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1100x800 11 +2 waiting (Medium) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1100x800 11 +2 waiting (Medium) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1100x800 25 population",
+  "ok": true,
+  "detail": "{\"n\":20,\"v\":\"Medium\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1100x800 25 (Medium) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1100x800 25 (Medium) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1100x800 25 +2 waiting population",
+  "ok": true,
+  "detail": "{\"n\":20,\"v\":\"Medium\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "1100x800 25 +2 waiting (Medium) every element inside the card",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "1100x800 25 +2 waiting (Medium) nothing scrolls or is cut inside it",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "C2",
+  "where": "all three variants were visited",
+  "ok": true,
+  "detail": "Full,Medium,Compact"
+ }
+]

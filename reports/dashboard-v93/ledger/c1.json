@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "C1",
+  "where": "1440x900 population: the card, seeded with 6 contributions",
+  "ok": true,
+  "detail": "{\"h\":290,\"n\":48,\"variant\":\"Full\"}"
+ },
+ {
+  "lock": "C1",
+  "where": "1440x900 the card (290px tall) is Full",
+  "ok": true,
+  "detail": "Full"
+ },
+ {
+  "lock": "C1",
+  "where": "1366x768 population: the card, seeded with 6 contributions",
+  "ok": true,
+  "detail": "{\"h\":194.28125,\"n\":22,\"variant\":\"Medium\"}"
+ },
+ {
+  "lock": "C1",
+  "where": "1366x768 the card (194px tall) is Medium",
+  "ok": true,
+  "detail": "Medium"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x650 population: the card, seeded with 6 contributions",
+  "ok": true,
+  "detail": "{\"h\":128,\"n\":10,\"variant\":\"Compact\"}"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x650 the card (128px tall) is Compact",
+  "ok": true,
+  "detail": "Compact"
+ },
+ {
+  "lock": "C1",
+  "where": "1920x1080 population: the card, seeded with 6 contributions",
+  "ok": true,
+  "detail": "{\"h\":363.4375,\"n\":48,\"variant\":\"Full\"}"
+ },
+ {
+  "lock": "C1",
+  "where": "1920x1080 the card (363px tall) is Full",
+  "ok": true,
+  "detail": "Full"
+ },
+ {
+  "lock": "C1",
+  "where": "1920x1080 the content is centred vertically (±4)",
+  "ok": true,
+  "detail": "off 1.0"
+ },
+ {
+  "lock": "C1",
+  "where": "2560x1440 population: the card, seeded with 6 contributions",
+  "ok": true,
+  "detail": "{\"h\":410.6875,\"n\":48,\"variant\":\"Full\"}"
+ },
+ {
+  "lock": "C1",
+  "where": "2560x1440 the card (411px tall) is Full",
+  "ok": true,
+  "detail": "Full"
+ },
+ {
+  "lock": "C1",
+  "where": "2560x1440 the content is centred vertically (±4)",
+  "ok": true,
+  "detail": "off 1.0"
+ }
+]

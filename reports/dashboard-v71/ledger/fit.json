@@ -33,7 +33,7 @@
   "lock": "F3",
   "where": "1920x1080 population",
   "ok": true,
-  "detail": "13 boxes · art true · image loaded true"
+  "detail": "40 boxes · art true · image loaded true"
  },
  {
   "lock": "F3",
@@ -45,7 +45,7 @@
   "lock": "F3",
   "where": "1920x1080 the art's whole box is inside the body",
   "ok": true,
-  "detail": "{\"img\":{\"l\":1296.46875,\"r\":1412.46875,\"t\":788.3125,\"b\":904.3125,\"w\":116,\"h\":116},\"body\":{\"l\":1282.46875,\"r\":1794,\"t\":700.015625,\"b\":1023.453125,\"w\":511.53125,\"h\":323.4375}}"
+  "detail": "{\"img\":{\"l\":1317.0625,\"r\":1409.875,\"t\":780.765625,\"b\":873.578125,\"w\":92.8125,\"h\":92.8125},\"body\":{\"l\":1282.46875,\"r\":1794,\"t\":716.015625,\"b\":1023.453125,\"w\":511.53125,\"h\":307.4375}}"
  },
  {
   "lock": "F3",
@@ -99,7 +99,7 @@
   "lock": "F3",
   "where": "1512x900 population",
   "ok": true,
-  "detail": "13 boxes · art true · image loaded true"
+  "detail": "40 boxes · art true · image loaded true"
  },
  {
   "lock": "F3",
@@ -111,7 +111,7 @@
   "lock": "F3",
   "where": "1512x900 the art's whole box is inside the body",
   "ok": true,
-  "detail": "{\"img\":{\"l\":1046.875,\"r\":1138.875,\"t\":715.75,\"b\":807.75,\"w\":92,\"h\":92},\"body\":{\"l\":1040.875,\"r\":1448,\"t\":685.75,\"b\":837.75,\"w\":407.125,\"h\":152}}"
+  "detail": "{\"img\":{\"l\":1066.3203125,\"r\":1123.4296875,\"t\":630.1328125,\"b\":687.2421875,\"w\":57.109375,\"h\":57.109375},\"body\":{\"l\":1040.875,\"r\":1448,\"t\":603.75,\"b\":837.75,\"w\":407.125,\"h\":234}}"
  },
  {
   "lock": "F3",
@@ -171,7 +171,7 @@
   "lock": "F3",
   "where": "1440x900 population",
   "ok": true,
-  "detail": "13 boxes · art true · image loaded true"
+  "detail": "40 boxes · art true · image loaded true"
  },
  {
   "lock": "F3",
@@ -183,7 +183,7 @@
   "lock": "F3",
   "where": "1440x900 the art's whole box is inside the body",
   "ok": true,
-  "detail": "{\"img\":{\"l\":1024,\"r\":1100,\"t\":723.75,\"b\":799.75,\"w\":76,\"h\":76},\"body\":{\"l\":1018,\"r\":1376,\"t\":685.75,\"b\":837.75,\"w\":358,\"h\":152}}"
+  "detail": "{\"img\":{\"l\":1043.4453125,\"r\":1100.5546875,\"t\":630.1328125,\"b\":687.2421875,\"w\":57.109375,\"h\":57.109375},\"body\":{\"l\":1018,\"r\":1376,\"t\":603.75,\"b\":837.75,\"w\":358,\"h\":234}}"
  },
  {
   "lock": "F3",
@@ -195,7 +195,7 @@
   "lock": "G1",
   "where": "1440x900 nothing cut in the hoop legends or the task card's head",
   "ok": true,
-  "detail": "13 parts · none cut"
+  "detail": "12 parts · none cut"
  },
  {
   "lock": "G1",
@@ -243,7 +243,7 @@
   "lock": "F3",
   "where": "1366x768 population",
   "ok": true,
-  "detail": "13 boxes · art true · image loaded true"
+  "detail": "14 boxes · art true · image loaded true"
  },
  {
   "lock": "F3",
@@ -255,7 +255,7 @@
   "lock": "F3",
   "where": "1366x768 the art's whole box is inside the body",
   "ok": true,
-  "detail": "{\"img\":{\"l\":958.78125,\"r\":1050.78125,\"t\":583.75,\"b\":675.75,\"w\":92,\"h\":92},\"body\":{\"l\":952.78125,\"r\":1318,\"t\":553.75,\"b\":705.75,\"w\":365.21875,\"h\":152}}"
+  "detail": "{\"img\":{\"l\":978.2265625,\"r\":1035.3359375,\"t\":607.0546875,\"b\":664.1640625,\"w\":57.109375,\"h\":57.109375},\"body\":{\"l\":952.78125,\"r\":1318,\"t\":567.46875,\"b\":705.75,\"w\":365.21875,\"h\":138.28125}}"
  },
  {
   "lock": "F3",
@@ -267,7 +267,7 @@
   "lock": "G1",
   "where": "1366x768 nothing cut in the hoop legends or the task card's head",
   "ok": true,
-  "detail": "13 parts · none cut"
+  "detail": "12 parts · none cut"
  },
  {
   "lock": "G1",
@@ -315,13 +315,19 @@
   "lock": "F3",
   "where": "1280x800 population",
   "ok": true,
-  "detail": "12 boxes · art false · image loaded false"
+  "detail": "14 boxes · art true · image loaded true"
  },
  {
   "lock": "F3",
   "where": "1280x800 nothing leaves the frame",
   "ok": true,
   "detail": ""
+ },
+ {
+  "lock": "F3",
+  "where": "1280x800 the art's whole box is inside the body",
+  "ok": true,
+  "detail": "{\"img\":{\"l\":937.4453125,\"r\":994.5546875,\"t\":631.7421875,\"b\":688.8515625,\"w\":57.109375,\"h\":57.109375},\"body\":{\"l\":912,\"r\":1232,\"t\":584.84375,\"b\":737.75,\"w\":320,\"h\":152.90625}}"
  },
  {
   "lock": "F3",
@@ -381,13 +387,19 @@
   "lock": "F3",
   "where": "1288x660 population",
   "ok": true,
-  "detail": "12 boxes · art false · image loaded false"
+  "detail": "10 boxes · art true · image loaded true"
  },
  {
   "lock": "F3",
   "where": "1288x660 nothing leaves the frame",
   "ok": true,
   "detail": ""
+ },
+ {
+  "lock": "F3",
+  "where": "1288x660 the art's whole box is inside the body",
+  "ok": true,
+  "detail": "{\"img\":{\"l\":926,\"r\":966,\"t\":543.75,\"b\":583.75,\"w\":40,\"h\":40},\"body\":{\"l\":912,\"r\":1240,\"t\":527.75,\"b\":599.75,\"w\":328,\"h\":72}}"
  },
  {
   "lock": "F3",
@@ -447,13 +459,19 @@
   "lock": "F3",
   "where": "1366x650 population",
   "ok": true,
-  "detail": "12 boxes · art false · image loaded false"
+  "detail": "10 boxes · art true · image loaded true"
  },
  {
   "lock": "F3",
   "where": "1366x650 nothing leaves the frame",
   "ok": true,
   "detail": ""
+ },
+ {
+  "lock": "F3",
+  "where": "1366x650 the art's whole box is inside the body",
+  "ok": true,
+  "detail": "{\"img\":{\"l\":966.78125,\"r\":1006.78125,\"t\":533.75,\"b\":573.75,\"w\":40,\"h\":40},\"body\":{\"l\":952.78125,\"r\":1318,\"t\":517.75,\"b\":589.75,\"w\":365.21875,\"h\":72}}"
  },
  {
   "lock": "F3",
@@ -465,7 +483,7 @@
   "lock": "G1",
   "where": "1366x650 nothing cut in the hoop legends or the task card's head",
   "ok": true,
-  "detail": "13 parts · none cut"
+  "detail": "12 parts · none cut"
  },
  {
   "lock": "G1",
@@ -513,13 +531,19 @@
   "lock": "F3",
   "where": "1280x650 population",
   "ok": true,
-  "detail": "12 boxes · art false · image loaded false"
+  "detail": "10 boxes · art true · image loaded true"
  },
  {
   "lock": "F3",
   "where": "1280x650 nothing leaves the frame",
   "ok": true,
   "detail": ""
+ },
+ {
+  "lock": "F3",
+  "where": "1280x650 the art's whole box is inside the body",
+  "ok": true,
+  "detail": "{\"img\":{\"l\":926,\"r\":966,\"t\":533.75,\"b\":573.75,\"w\":40,\"h\":40},\"body\":{\"l\":912,\"r\":1232,\"t\":517.75,\"b\":589.75,\"w\":320,\"h\":72}}"
  },
  {
   "lock": "F3",
@@ -579,13 +603,19 @@
   "lock": "F3",
   "where": "1100x800 population",
   "ok": true,
-  "detail": "12 boxes · art false · image loaded false"
+  "detail": "14 boxes · art true · image loaded true"
  },
  {
   "lock": "F3",
   "where": "1100x800 nothing leaves the frame",
   "ok": true,
   "detail": ""
+ },
+ {
+  "lock": "F3",
+  "where": "1100x800 the art's whole box is inside the body",
+  "ok": true,
+  "detail": "{\"img\":{\"l\":848.015625,\"r\":887.984375,\"t\":603.84375,\"b\":643.8125,\"w\":39.96875,\"h\":39.96875},\"body\":{\"l\":828,\"r\":1066,\"t\":581.46875,\"b\":737.75,\"w\":238,\"h\":156.28125}}"
  },
  {
   "lock": "F3",

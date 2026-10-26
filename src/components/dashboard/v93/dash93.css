@@ -1,0 +1,322 @@
+/* ══ DASHBOARD v93 — the founding card: "Your contributions" (Dash93Founding), its panel, and the laptop rows ═════════
+   Ref: design-refs/dashboard-v93/founding-tiers-how-v92.html (normative; values read from the ref rendered in the same
+   browser, because its stylesheet is cumulative). Loaded LAST (Dash58 imports it after dash77.css).
+   ⚠️ NO GREEN ANYWHERE: rust, burgundy, the rose band and the pink. */
+
+/* ── C5 · the right column while querying, ≤900px tall (v77's Fixed shape above that is unchanged) ───────────────────
+   The founding card takes up to 290px, the task card keeps at least 254px. At ≤760px tall v71/v77's 128px row stays (it
+   gives the Compact variant). Below 1100px wide the page flows as before. */
+@media (max-height: 900px) and (min-height: 761px) and (min-width: 1100px) {
+  .d58[data-mode="q"] .d71-right { grid-template-rows: minmax(254px, 1fr) minmax(194px, 290px); }
+}
+
+/* ── the card ──────────────────────────────────────────────────────────────────────────────────────────────────────
+   v77's shell (a white card, 6px of rim, a burgundy hairline, radius 16), the ref's rose band and pink body. ⚠️ THE CARD
+   IS A SIZE CONTAINER: its height comes from its slot, never its content, so the variant answers to its own height. */
+.d93-fw {
+  container: d93fw / size;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  min-height: 0;
+  padding: 6px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(28, 19, 15, 0.08);
+  color: var(--d58-ink);
+}
+.d71-fwslot > .d93-fw { flex: 1 1 0; min-height: 0; }
+.d58[data-mode="pre"] .d58-right > .d93-fw { flex: 1 1 0; min-height: 112px; }
+.d93-frame {
+  position: relative;
+  box-sizing: border-box;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 11px;
+  overflow: hidden;
+  background: #f5e3db;
+}
+.d93-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(124, 58, 42, 0.42);
+  border-radius: 11px;
+  pointer-events: none;
+  z-index: 3;
+}
+/* the band: pale rose with soft 135° white stripes, a burgundy typewriter title, no hawks */
+.d93-band {
+  flex: none;
+  box-sizing: border-box;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  background: #ecc8ba repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.32) 0 7px, rgba(255, 255, 255, 0) 7px 14px);
+  color: #5a2418;
+}
+.d58 .d93-band > span {
+  min-width: 0;
+  font-family: var(--d58-type) !important;
+  font-size: 17px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: inherit;
+}
+
+/* Full: the medallion and the text column, then the ladder */
+.d93-full {
+  flex: 1 1 0;
+  min-height: 0;
+  min-width: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 16px 14px;
+}
+/* the medallion and the text column are one small grid, so the stat line can leave the column when the card is
+   narrow (below) — in the ref's own 494px card the column holds it */
+.d93-top { flex: none; display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 16px; align-content: center; align-items: center; min-width: 0; }
+.d93-top > .d93-med { grid-row: 1 / span 4; }
+.d93-mt { display: contents; }
+.d93-mt > * { grid-column: 2; min-width: 0; }
+.d93-med { position: relative; width: 98px; height: 98px; flex: none; }
+.d93-med svg { display: block; width: 100%; height: 100%; }
+.d93-med img {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 71.4%;
+  height: 71.4%;
+  object-fit: contain;
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(0 5px 4px rgba(124, 58, 42, 0.15));
+}
+.d93-med.is-head img { border-radius: 50%; object-fit: cover; filter: none; }
+.d93-med.is-none img { opacity: 0.45; }
+.d93-krow { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 2px 8px; }
+.d58 .d93-kick {
+  font-family: var(--d58-mono) !important;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  line-height: 1.35;
+  color: #a2452a;
+}
+.d58 .d93-how {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font-family: var(--d58-serif) !important;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: rgba(28, 19, 15, 0.65);
+  white-space: nowrap;
+}
+.d58 .d93-how > span { text-decoration: underline; text-decoration-color: rgba(28, 19, 15, 0.3); text-underline-offset: 3px; }
+.d58 .d93-how > i {
+  display: grid;
+  place-items: center;
+  width: 15px;
+  height: 15px;
+  box-sizing: border-box;
+  border-radius: 50%;
+  border: 1.3px solid currentColor;
+  font-family: var(--d58-serif) !important;
+  font-size: 9.5px;
+  font-style: italic;
+  font-weight: 700;
+  line-height: 1;
+}
+.d58 .d93-how:hover { color: var(--d58-ink); }
+.d58 .d93-how:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; border-radius: 3px; }
+/* ⚠️ brand.tsx forces every h3's face with !important; two classes and !important win it back */
+.d58 .d93-fw .d93-ttl {
+  margin: 2px 0 0;
+  font-family: var(--d58-type) !important;
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 1.15;
+  color: var(--d58-ink);
+}
+.d58 .d93-blurb {
+  margin: 0 0 4px;
+  font-family: var(--d58-serif) !important;
+  font-size: 13.5px;
+  font-style: italic;
+  line-height: 1.35;
+  color: rgba(28, 19, 15, 0.62);
+}
+.d58 .d93-stat {
+  margin: 0;
+  font-family: var(--d58-serif) !important;
+  font-size: 13px;
+  line-height: 1.4;
+  color: rgba(28, 19, 15, 0.8);
+}
+.d58 .d93-stat b { font-weight: 600; color: var(--d58-ink); white-space: nowrap; }
+.d58 .d93-stat b.is-rust { color: #a2452a; }
+
+/* the ladder: five heads joined by a line; passed tiers full colour with a rust ring, the current one larger, the rest grey */
+.d93-lad {
+  flex: none;
+  list-style: none;
+  margin: 0;
+  padding: 8px 0 0;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  position: relative;
+  border-top: 1px dashed rgba(124, 58, 42, 0.3);
+}
+.d93-lad::before { content: ""; position: absolute; left: 10%; right: 10%; top: 25px; height: 2px; background: rgba(124, 58, 42, 0.18); }
+.d93-lad li { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 0; }
+.d93-hd { width: 34px; height: 34px; border-radius: 50%; overflow: hidden; background: #fbefe9; box-shadow: 0 0 0 2px rgba(124, 58, 42, 0.25); position: relative; z-index: 1; display: block; }
+.d93-hd img { width: 100%; height: 100%; object-fit: cover; display: block; filter: grayscale(1); opacity: 0.45; }
+.d93-lad li.is-done .d93-hd img, .d93-lad li.is-you .d93-hd img { filter: none; opacity: 1; }
+.d93-lad li.is-done .d93-hd { box-shadow: 0 0 0 2px #a2452a; }
+.d93-lad li.is-you .d93-hd { width: 40px; height: 40px; margin-top: -3px; box-shadow: 0 0 0 3px #a2452a, 0 4px 10px -4px rgba(124, 58, 42, 0.6); }
+.d58 .d93-lad b { font-family: var(--d58-serif) !important; font-size: 11.5px; font-weight: 600; line-height: 1.15; color: rgba(28, 19, 15, 0.5); margin-top: 3px; white-space: nowrap; }
+.d58 .d93-lad li.is-done b, .d58 .d93-lad li.is-you b { color: var(--d58-ink); }
+.d58 .d93-lad small { font-family: var(--d58-mono) !important; font-size: 8.5px; font-weight: 600; letter-spacing: 0.08em; line-height: 1.4; color: rgba(28, 19, 15, 0.42); }
+
+/* Compact: one row — the current head, the line, How it works */
+.d93-compact { display: none; flex: 1 1 0; min-height: 0; min-width: 0; align-items: center; gap: 10px; padding: 6px 14px; box-sizing: border-box; }
+.d93-chd { flex: none; width: 40px; height: 40px; border-radius: 50%; overflow: hidden; background: #fbefe9; box-shadow: 0 0 0 3px #a2452a; }
+.d93-chd img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.d93-chd.is-none { box-shadow: 0 0 0 2px rgba(124, 58, 42, 0.25); }
+.d93-chd.is-none img { opacity: 0.45; }
+.d58 .d93-cline { flex: 1 1 auto; min-width: 0; margin: 0; font-family: var(--d58-serif) !important; font-size: 12.5px; line-height: 1.3; color: var(--d58-ink); }
+
+/* loading: the frame and the band shimmer, nothing inside — the shared `.d58-skcard` rule in dash58.css */
+
+/* the hover lift, as the page's other cards */
+.d58 .d93-fw { transition: transform 180ms cubic-bezier(0.22, 0.8, 0.3, 1), box-shadow 180ms ease; }
+.d58 .d93-fw:hover { z-index: 4; transform: translateY(-2px); box-shadow: 0 12px 26px rgba(28, 19, 15, 0.16), 0 2px 6px rgba(28, 19, 15, 0.08); }
+
+/* ⚠️ THE VARIANT SWITCH COMES AFTER THE LAYOUTS' OWN RULES: a container query confers no specificity.
+   Medium (150–269px of card): no ladder, an 80px medallion. Compact (<150): the one row. Big (≥340, the Fixed shape):
+   the content centred vertically, the medallion up to 130px. */
+/* ⚠️ NARROWER THAN THE REF'S CARD (494px): the app's right column is 330–377px on laptops. Measured at 1440×900 (370px)
+   the text column is ~200px and the ref's arrangement ran 36px past the card. Under 440px of card the medallion is 80px,
+   the title 21px, and the stat line leaves the column to run the card's full width under the medallion's row. */
+@container d93fw (max-width: 439px) {
+  .d93-top { column-gap: 14px; }
+  .d93-med { width: 80px; height: 80px; }
+  .d93-top > .d93-med { grid-row: 1 / span 3; }
+  .d93-top > .d93-mt > .d93-stat { grid-column: 1 / -1; margin-top: 8px; }
+  .d58 .d93-fw .d93-ttl { font-size: 21px; }
+  .d58 .d93-blurb { font-size: 12.5px; margin-bottom: 0; }
+  .d58 .d93-kick { letter-spacing: 0.1em; }
+  .d93-full { gap: 8px; padding: 8px 14px 10px; }
+  .d93-top > .d93-mt > .d93-stat { margin-top: 6px; }
+  .d58 .d93-blurb { line-height: 1.3; }
+  /* before the first contribution the title is a sentence ("Your first contribution makes you a Fledgling") */
+  .d58 .d93-fw[data-tier="none"] .d93-ttl { font-size: 18px; line-height: 1.2; }
+}
+/* the band's title is ~300px at 17px: under 360px of card it steps to 15px so it stays whole */
+@container d93fw (max-width: 359px) { .d58 .d93-band > span { font-size: 15px; } .d93-band { padding: 0 14px; } }
+/* the narrowest card (250px at an 1100px window, measured): the band's title takes two lines at 14px inside the same
+   44px band, the medallion is 56px, and the column's type steps down once more — nothing is dropped */
+@container d93fw (max-width: 299px) {
+  .d58 .d93-band > span { font-size: 14px; line-height: 1.2; white-space: normal; overflow: visible; }
+  .d93-band { padding: 0 12px; }
+  .d93-top { column-gap: 10px; }
+  .d93-med, .d93-top > .d93-med { width: 56px; height: 56px; }
+  .d58 .d93-kick { font-size: 9px; letter-spacing: 0.06em; }
+  .d58 .d93-fw .d93-ttl { font-size: 18px; }
+  .d58 .d93-fw[data-tier="none"] .d93-ttl { font-size: 16px; }
+  /* before the first contribution the title is a sentence: it and its line take the full width under the medallion */
+  .d93-fw[data-tier="none"] .d93-top > .d93-med { grid-row: 1 / span 1; }
+  .d93-fw[data-tier="none"] .d93-top > .d93-mt > :is(.d93-ttl, .d93-blurb) { grid-column: 1 / -1; }
+  .d58 .d93-blurb { font-size: 12px; }
+  .d58 .d93-stat { font-size: 12px; line-height: 1.35; }
+  .d93-full { padding: 8px 12px 8px; }
+  .d58 .d93-lad b { font-size: 10px; }
+  .d58 .d93-lad small { font-size: 8px; }
+}
+@container d93fw (max-height: 269px) {
+  .d93-lad { display: none; }
+  .d93-med { width: 80px; height: 80px; }
+  .d93-full { justify-content: center; }
+}
+@container d93fw (max-height: 149px) {
+  .d93-frame > .d93-full { display: none; }
+  .d93-frame > .d93-compact { display: flex; }
+}
+@container d93fw (min-height: 340px) {
+  .d93-full { justify-content: center; }
+  .d93-med { width: 130px; height: 130px; }
+}
+
+/* ── the "How it works" panel: portalled to <body>, so every colour is stated here, and its faces are READ from the
+   `:root` tokens in shell/primitives.css (never named: marketingTokens.test.ts counts the files that name them) ──────────────────────────────────── */
+.d93-dim { position: fixed; inset: 0; z-index: 80; background: rgba(28, 19, 15, 0.28); opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+.d93-dim.on { opacity: 1; pointer-events: auto; }
+.d93-panel {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  bottom: 16px;
+  width: 440px;
+  max-width: calc(100vw - 32px);
+  z-index: 81;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #fdf9f5;
+  color: #1c130f;
+  box-shadow: 0 20px 50px -20px rgba(28, 19, 15, 0.5);
+  transform: translateX(calc(100% + 24px));
+  transition: transform 0.28s cubic-bezier(0.22, 0.8, 0.3, 1);
+  font-family: var(--sp-serif);
+}
+.d93-panel.on { transform: none; }
+.d93-ph {
+  flex: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 18px 20px 14px;
+  background: #ecc8ba repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.32) 0 7px, rgba(255, 255, 255, 0) 7px 14px);
+}
+.d93-pkick { font: 600 9.5px/1.35 var(--sp-mono); letter-spacing: 0.16em; color: #a2452a; }
+.d93-panel .d93-ptitle { margin: 2px 0 0; font-family: var(--sp-type) !important; font-weight: 400; font-size: 26px; line-height: 1.15; color: #5a2418; }
+.d93-px { flex: none; width: 30px; height: 30px; border: 0; border-radius: 50%; background: rgba(255, 255, 255, 0.6); cursor: pointer; font: 600 14px/1 var(--sp-serif); color: #1c130f; }
+.d93-px:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.d93-pb { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 16px 20px 22px; }
+.d93-lead { margin: 0 0 14px; font: 400 14.5px/1.5 var(--sp-serif); color: rgba(28, 19, 15, 0.85); }
+.d93-lead b { color: #1c130f; }
+.d93-panel .d93-ph3 { margin: 16px 0 8px; font-family: var(--sp-mono) !important; font-weight: 600; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: #a2452a; }
+.d93-flock { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.d93-flock li { display: grid; grid-template-columns: 36px 1fr auto; grid-template-rows: auto auto; column-gap: 10px; align-items: center; }
+.d93-fhd { grid-row: 1 / 3; width: 36px; height: 36px; border-radius: 50%; overflow: hidden; box-shadow: 0 0 0 2px rgba(124, 58, 42, 0.3); background: #fbefe9; }
+.d93-fhd img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.d93-flock b { font: 400 15px var(--sp-type); }
+.d93-flock small { justify-self: end; font: 600 9.5px var(--sp-mono); letter-spacing: 0.08em; color: rgba(28, 19, 15, 0.5); }
+.d93-flock em { grid-column: 2 / 4; font: italic 400 12.5px var(--sp-serif); color: rgba(28, 19, 15, 0.65); }
+.d93-counts { width: 100%; border-collapse: collapse; font: 400 13.5px var(--sp-serif); }
+.d93-counts td { padding: 6px 0; border-bottom: 1px solid rgba(124, 58, 42, 0.12); }
+.d93-counts td:last-child { width: 40px; text-align: right; font: 400 15px var(--sp-type); }
+.d93-counts tr.is-bonus td { color: #a2452a; font-weight: 600; border-bottom: 0; }
+.d93-fair { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 7px; font: 400 13.5px/1.45 var(--sp-serif); color: rgba(28, 19, 15, 0.82); }
+.d93-fair b { color: #1c130f; }
+.d93-pfoot { margin: 16px 0 0; padding-top: 12px; border-top: 1px dashed rgba(124, 58, 42, 0.3); font: 400 13px var(--sp-serif); color: rgba(28, 19, 15, 0.7); }
+.d93-pfoot b { color: #1c130f; }
+
+@media (prefers-reduced-motion: reduce) {
+  .d93-dim, .d93-panel { transition: none; }
+  .d58 .d93-fw { transition: none; }
+  .d58 .d93-fw:hover { transform: none; }
+}

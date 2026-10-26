@@ -839,7 +839,20 @@
     "design-refs/landing-mobile-v4.html": "10c9c7900a9bf506b4af92423f1317b5867946c7ec74fc972c5aabacda2fd363",
     "design-refs/contact-list-v25-2/contact-list-v25-2.html": "4352985f98f8e9e256ce31c911c0cfdfd72eddaea8310628865926b0c1179dff",
     "design-refs/submission-packages-v40/submission-packages-v40.html": "1d539f8ccc2ff2779917b35168122180245b772f3baaf25ebd4b663a2b335547",
-    "design-refs/contact-list-v25-3/contact-list-v25-3.html": "462c8d5b9f13d48cc1a040490b3df760e327b7585155274b9af169f4d9555e26"
+    "design-refs/contact-list-v25-3/contact-list-v25-3.html": "462c8d5b9f13d48cc1a040490b3df760e327b7585155274b9af169f4d9555e26",
+    "design-refs/dashboard-v93/assets/tier-head-archivist.png": "1df344826a44bc7b4c3be3d1fc06be234f7cb3f4872d639bb330d3328fdd1492",
+    "design-refs/dashboard-v93/assets/tier-head-fledgling.png": "3c02f26956bc5035203779be00f9c98aa18fd3cb0019f0ac5a5af7fad36a390d",
+    "design-refs/dashboard-v93/assets/tier-head-mentor.png": "2370820489dd61ba6f819c939c08850addf43ef4b24ec923632ddb79ed32c28e",
+    "design-refs/dashboard-v93/assets/tier-head-queryhawk.png": "2bea3cc3583ffcea0ae9cadaff070547dc9da20874d16e11d1c940dd7dc1240c",
+    "design-refs/dashboard-v93/assets/tier-head-scout.png": "23829a2235ceb79519c935e7bac700909adc8bf4d199eac94b0b070154e3b22f",
+    "design-refs/dashboard-v93/founding-characters-v91.html": "5221f350ae612ff27318a56ac873ba3a8dd03e3723d85f7ffb2aab7b59014d42",
+    "design-refs/dashboard-v93/founding-tiers-how-v92.html": "339124d8d173bd534db67ec504c157c6e79c1eb862b4a9915fdd0b655be46a9c",
+    "design-refs/dashboard-v93/shots/card-archivist-6.png": "a312b0f55d231e39b873aecd2674b02266807c0d6f6200c5a4abff929ce54d4a",
+    "design-refs/dashboard-v93/shots/card-fledgling-1.png": "de4f586c71e46fbfb2dc3735a5f2ba48f2413b6aed8292d17eca2325ad5248e0",
+    "design-refs/dashboard-v93/shots/card-scout-11.png": "95b977b047b882643b628734f1507aa3a10549252203e10cfc10306e83ff41bc",
+    "design-refs/dashboard-v93/shots/how-it-works-panel.png": "6b235c662e7e58ee70094a66e40ab8c781ae4eb2f3a0376102c293098ab7b3f9",
+    "design-refs/dashboard-v93/shots/task-head-A.png": "ed72d5d098242c2a7c03a0ca23db60882a8df8129bea0fe574e01f8aba102c3b",
+    "design-refs/dashboard-v93/task-founding-options-v78.html": "bcac74715cddf1d9450fc52f4961b7e848b30cf098bacf072392701e1ec2c254"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",

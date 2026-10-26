@@ -15,7 +15,7 @@
   "lock": "C4",
   "where": "it advances 7s (±300ms) after the release",
   "ok": true,
-  "detail": "7004ms"
+  "detail": "7006ms"
  },
  {
   "lock": "C4",

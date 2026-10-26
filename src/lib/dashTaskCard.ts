@@ -34,12 +34,17 @@ export const MAX_SEGMENTS = 12;
 const DAY = 86_400_000;
 const WEEK = 7 * DAY;
 
-/** The table's kickers, tints and accents. "other" keeps v60.1's own label. */
-export const KIND_STYLE: Record<TaskKind, { kicker: string | null; tint: string; accent: string }> = {
-  nudge: { kicker: "TIME TO NUDGE", tint: "#e8eef6", accent: "#2a3a52" },
-  close: { kicker: "CONSIDER CLOSING", tint: "#efebe5", accent: "#7d7064" },
-  send: { kicker: "YOUR MOVE · SEND", tint: "#f4e7e1", accent: "#a2452a" },
-  other: { kicker: null, tint: "#f1eee9", accent: "#2a3a52" },
+/**
+ * Dashboard v93 — THE KIND BAND (ref design-refs/dashboard-v93/, option A). The card's head is a full band like the
+ * chart's: the kind is its title in sentence case ("other" uses the item's own label, e.g. "Housekeeping"), on the
+ * kind's colour. `accent` colours the progress segments under the band. The v71 kicker pill and tinted head are
+ * retired, with their `kicker` and `tint`.
+ */
+export const KIND_STYLE: Record<TaskKind, { title: string | null; band: string; bandInk: string; accent: string }> = {
+  nudge: { title: "Time to nudge", band: "#2a3a52", bandInk: "#ffffff", accent: "#2a3a52" },
+  close: { title: "Consider closing", band: "#e4dfd7", bandInk: "#1c130f", accent: "#7d7064" },
+  send: { title: "Your move", band: "#a2452a", bandInk: "#ffffff", accent: "#a2452a" },
+  other: { title: null, band: "#5f7591", bandInk: "#ffffff", accent: "#5f7591" },
 };
 
 /** The task types whose card is a request for pages, and the word for what was asked for. */
@@ -81,8 +86,10 @@ export interface TaskStep { label: string; date: string; done: boolean }
 export interface TaskCardModel {
   key: string;
   kind: TaskKind;
-  kicker: string;
-  tint: string;
+  /** the band's title: the kind, or the item's own label for "other" */
+  bandTitle: string;
+  band: string;
+  bandInk: string;
   accent: string;
   /** the title, split round the name so the name can be set bold */
   pre: string;
@@ -172,7 +179,7 @@ export function taskCardModel(item: ListItem, label: string, ctx: TaskCtx): Task
   const first = firstName(agent);
   const agency = (agent?.agency ?? "").trim();
   const base = {
-    key: item.key, kind, kicker: style.kicker ?? label.toUpperCase(), tint: style.tint, accent: style.accent,
+    key: item.key, kind, bandTitle: style.title ?? label, band: style.band, bandInk: style.bandInk, accent: style.accent,
     sub: item.agency || item.fact, initials: item.initials, date: item.date, queryId,
   };
 

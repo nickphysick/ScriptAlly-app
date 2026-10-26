@@ -390,8 +390,8 @@
    its loaded size and nothing moves when the data lands. Page chrome is not a card: the header's
    buttons and the feed tab stay. A zero computed from data that has not arrived is never shown. */
 .d58-skcard * { visibility: hidden !important; }
-.d58-skcard :is(.os-frame, .d77-fwframe) { visibility: visible !important; }
-.d58-skcard :is(.os-band, .d77-fwband) {
+.d58-skcard :is(.os-frame, .d93-frame) { visibility: visible !important; }
+.d58-skcard :is(.os-band, .d93-band) {
   visibility: visible !important;
   background: linear-gradient(90deg, #e7e1d9 0%, #f1ece6 45%, #e7e1d9 90%) !important;
   background-size: 220% 100% !important;
@@ -399,7 +399,7 @@
   color: transparent !important; box-shadow: none !important;
 }
 @keyframes d58-sk-shimmer { from { background-position: 110% 0; } to { background-position: -110% 0; } }
-@media (prefers-reduced-motion: reduce) { .d58-skcard :is(.os-band, .d77-fwband) { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .d58-skcard :is(.os-band, .d93-band) { animation: none; } }
 
 /* ── THE IMPORT'S ROW (import review v1, Part D; ref design-refs/onboarding/import-review-v1/feed-import.dc.html)
    A white card under the day heading, unlike the flat rows around it: the one event that says what a whole
