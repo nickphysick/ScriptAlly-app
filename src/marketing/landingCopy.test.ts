@@ -107,7 +107,7 @@ describe("landing copy — verbatim locks", () => {
     expect(VISION_LINK).toBe("Read our story");
     expect(VISION_POINTS.map((p) => p.heading)).toEqual([
       "Get good stories told.",
-      "Make querying simple.",
+      "Make querying straightforward.", // C2, 26 Oct (was "Make querying simple.")
       "Let writers write.",
     ]);
     expect(VISION_POINTS[0].body).toBe(
@@ -319,11 +319,12 @@ describe("landing copy — verbatim locks", () => {
     expect(FOUNDING_EYEBROW).toBe("Founding writers");
     expect(FOUNDING_HEADING).toBe("Join as a founding writer");
     expect(FOUNDING_GET_LEAD).toBe("You get:");
+    /* REWRITTEN (26 Oct, landing on phones v1 C1): the offer's four terms, in this order. */
     expect(FOUNDING_GETS).toEqual([
-      "Early access to QueryHawk",
+      "QueryHawk Pro, free for your entire querying campaign",
       "A direct line to the founder",
-      "The full experience free of charge for 6 months",
-      "Half price for as long as you need it after that",
+      "Smart Import to bring your list across",
+      "An exclusive Early Bird discount for the writers you invite when we launch",
     ]);
     /* ⚠️ `FOUNDING_IN_RETURN`, NOT `FOUNDING_ASK` — that name belongs to the retired hero panel and
        is held in the absent-exports list above. Reusing it would have left that lock green about a

@@ -22,7 +22,8 @@
  */
 
 import React from "react";
-import { VISION_HEADING, VISION_POINTS, VISION_LINK } from "./landingCopy";
+import { VISION_HEADING, VISION_POINTS, VISION_LINK, VISION_SHORT } from "./landingCopy";
+import { usePhone } from "./usePhone";
 
 /* Each plate's own facts, keyed by file. The SIZE is the file's pixel size, so a point reserves its
    box before the picture arrives rather than jumping when it does; CSS sizes it to the figure.
@@ -37,7 +38,33 @@ const PLATES: Record<string, { width: number; height: number; version: string }>
   "/images/let-writers-write.png": { width: 347, height: 440, version: "d481eb31" },
 };
 
-export const Vision: React.FC<{ onNavigate: (tab: string, subPageName?: string) => void }> = ({ onNavigate }) => (
+/**
+ * On phones (≤760px; landing on phones v1, 26 Oct; ref design-refs/landing-mobile-v1.html
+ * `.vis`, `.vpt.row`): the same white band and heading, and the three points as compact rows — a 76px
+ * picture left, the heading and a one-line body right. The ref draws no "Read our story" link on a
+ * phone, so there is none; /about is in the nav and the footer.
+ */
+const VisionRows: React.FC = () => (
+  <section className="mk-vision mk-vision--rows" aria-labelledby="mk-vision-h">
+    <h2 id="mk-vision-h" className="mk-visionh2">{VISION_HEADING}</h2>
+    {VISION_POINTS.map((point) => {
+      const plate = PLATES[point.image];
+      return (
+        <div className="mk-vrow" key={point.key}>
+          <img src={point.image + "?v=" + plate.version} alt="" width={plate.width} height={plate.height} loading="lazy" />
+          <div>
+            <h3 className="mk-vrowh3">{point.heading}</h3>
+            <p>{VISION_SHORT[point.key]}</p>
+          </div>
+        </div>
+      );
+    })}
+  </section>
+);
+
+export const Vision: React.FC<{ onNavigate: (tab: string, subPageName?: string) => void }> = ({ onNavigate }) => {
+  const phone = usePhone();
+  return phone ? <VisionRows /> : (
   <section className="mk-vision" aria-labelledby="mk-vision-h">
     <div className="mk-visionin">
       <h2 id="mk-vision-h" className="mk-visionh2">{VISION_HEADING}</h2>
@@ -68,4 +95,5 @@ export const Vision: React.FC<{ onNavigate: (tab: string, subPageName?: string) 
       </button>
     </div>
   </section>
-);
+  );
+};

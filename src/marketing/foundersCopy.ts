@@ -9,19 +9,13 @@
  *
  * ⚠️ AND THIS PAGE MAKES PROMISES THE PRODUCT HAS TO KEEP. Three of them are commitments rather
  * than adjectives, in the same class as the About page's:
- *   · six months of Pro, free
- *   · a founding rate "for as long as you're querying your manuscript" — a PERMANENT pricing
- *     commitment, stated here and on three other surfaces as "half price for as long as you need
- *     it" (16 Sep: "for life" is retired everywhere, being a stronger promise than the product
- *     needs to make)
+ *   · QueryHawk Pro, free for your entire querying campaign (26 Oct: this replaced "six months
+ *     free, then a founding rate", on every surface at once)
+ *   · an Early Bird discount for the writers a founder invites when we launch
  *   · "your data is never the experiment … exportable from day one"
  * If one stops being true the fix is the product, not the sentence.
  *
- * ⚠️ THERE IS A TIMING GAP IN THE OFFER AND IT IS DELIBERATELY NOT PAPERED OVER HERE. The hero
- * says the first hundred writers come in "totally free of charge"; the sweetener says half price.
- * Nothing on the page says when one becomes the other. The likely home for that clause is the
- * sweetener card — flagged for Nick, not written, because inventing the terms of a pricing
- * commitment is not a copy edit.
+ * ⚠️ THE DEAL CARDS ARE AN INTERIM FIX (landing on phones v1, C3) until this page is redesigned.
  */
 
 import { CopyRun } from "./CopyRuns";
@@ -36,8 +30,8 @@ export const FOUNDERS_H1 = "Help get things off the ground.";
  * ⚠️ IT NO LONGER SAYS "totally free of charge", AND THE LOCK ON THOSE COMMAS WENT WITH THE PHRASE.
  * They were load-bearing while the clause sat mid-sentence — without them it read as attached to
  * "the full version of QueryHawk", i.e. as describing the PRODUCT rather than the OFFER. The lede
- * states the ask now and the terms are on the perk cards beneath it, where "Six months free" is
- * unambiguous because it is a heading rather than a clause. A lock asserting punctuation that no
+ * states the ask now and the terms are on the perk cards beneath it, where they are
+ * unambiguous because each is a heading rather than a clause. A lock asserting punctuation that no
  * longer exists is a lock on a sentence the page has left behind.
  *
  * ⚠️ "use it properly" IS THE ASK AND IT IS DELIBERATELY BLUNT. The earlier lede said "let us know
@@ -89,22 +83,21 @@ export interface DealCard {
    The adjectives went: "the full force of QueryHawk", "an arsenal of time-saving Pro features",
    "a tailored suite of querying analytics" were the product selling itself inside the one section
    that is supposed to be stating terms plainly. */
+/* ⚠️ INTERIM (26 Oct, landing on phones v1 C3): the offer is no longer "six months free, then half
+   price", so the first two cards state the new terms until this page is redesigned. The keys stay, so
+   nothing that reads them moves; the third card is unchanged. */
 export const FOUNDERS_DEAL: DealCard[] = [
   {
     key: "deal",
     kicker: "The deal",
-    heading: "Six months free",
-    body:
-      "The full version of QueryHawk, with nothing held back. Every feature, every tool, no card " +
-      "needed.",
+    heading: "A free campaign",
+    body: "Full QueryHawk Pro, free for your entire querying campaign. No card needed.",
   },
   {
     key: "sweetener",
-    kicker: "The sweetener",
-    heading: "Half price after that",
-    body:
-      "If you stay, you'll never pay full price. A founding writer's rate for as long as you're " +
-      "querying.",
+    kicker: "For your friends",
+    heading: "An Early Bird discount",
+    body: "An exclusive discount for the friends and fellow writers you invite when we launch.",
   },
   {
     key: "line",
