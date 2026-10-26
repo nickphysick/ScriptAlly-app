@@ -33,9 +33,13 @@ export type Qc140Pop = "group" | "filters" | "sort";
 const CARET = (
   <svg className="qc140-cv" viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M3 4.5l3 3 3-3" /></svg>
 );
-const STACK_ICON = (
-  <svg className="qc140-ic" viewBox="0 0 20 20" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M3.5 5.5h13M3.5 10h13M3.5 14.5h13" /></svg>
+/* v150.1 §5 — the group icon: two stacked rounded boxes, each with a short label line (the mock's `svg.gic`) */
+export const GROUP_ICON150 = (
+  <svg className="qc140-ic gic" viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <rect x="2.5" y="2.5" width="15" height="6" rx="1.6" /><path d="M5.5 5.5h4" /><rect x="2.5" y="11.5" width="15" height="6" rx="1.6" /><path d="M5.5 14.5h4" />
+  </svg>
 );
+const STACK_ICON = GROUP_ICON150;
 const FILTER_ICON = (
   <svg className="qc140-ic" viewBox="0 0 20 20" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M3 5.5h14M5.5 10h9M8 14.5h4" /></svg>
 );
@@ -184,7 +188,6 @@ export const QcToolbar140: React.FC<QcToolbar140Props> = ({
             <input ref={findRef} value={find} onChange={(e) => onFind(e.target.value)} placeholder="Find an agent or agency" aria-label="Find an agent or agency" autoComplete="off" disabled={loading} />
           </label>
         ) : null}
-        {birdsTools}
         <span className="qc140-chipw qc144-first" data-qc140="filters-chip" data-on={filterCount ? "" : undefined}>
           <button type="button" ref={filRef} className="qc140-chip qc140-fil" data-qc140="filters" data-qc138="filters-btn" data-lp="qc140-filters" data-n={filterCount}
             aria-haspopup="dialog" aria-expanded={pop.open === "filters"} aria-label={filterCount ? `Filters: ${filterCount} applied` : "Filters"} disabled={loading}
@@ -204,7 +207,8 @@ export const QcToolbar140: React.FC<QcToolbar140Props> = ({
           ) : null}
         </span>
         {pop.open === "filters" && pop.anchor ? filtersMenu(pop) : null}
-        {birdsTools ? null : <>
+        {/* v150.1 §5 — Birds-eye's pills take exactly the list pills' slot and order; only their menus differ */}
+        {birdsTools ? birdsTools : <>
         <span className="qc140-chipw" data-qc140="group-chip" data-on={def ? undefined : ""}>
           <button type="button" ref={grpRef} className="qc140-chip qc140-grp" data-qc140="group" data-lp="qc140-group" aria-haspopup="menu" aria-expanded={pop.open === "group"}
             aria-label={groupBy === "none" ? "Not grouped. Change grouping" : `Grouped by ${groupOpt?.label ?? ""}. Change grouping`} disabled={loading}

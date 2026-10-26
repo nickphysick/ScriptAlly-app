@@ -348,3 +348,19 @@
   .qcv-group .qc150-lt .qc150-lts b { font: 400 14.5px/1.4 var(--sp-type) !important; color: #1c130f; }
   .qcv-group .qc150-lt .qc150-vsw { grid-area: v; align-self: end; margin: 0; }
 }
+
+/* §5 · THE NAVY BAR: one layout and one typeface in both views — search (pushed left) | Filters | group | sort |
+   Full screen. Birds-eye's pills sit in the list pills' slot, so nothing moves to the middle, and keep their words at
+   every width. Every word in the bar, and in the group and sort menus, is Special Elite, upright. */
+@media (min-width: 768px) {
+  .qc140-tb .qc150-bfind.qc150-bfind { flex: 0 1 420px; max-width: none; margin-right: auto; }
+  .qc140-tb .qc150-bvgs.qc150-bvgs { margin-left: 0; }
+  .qc150-bvp b { display: inline !important; }
+  .qc150-bvp { padding: 0 14px !important; }
+  .qc150-pic.gic, .qc140-ic.gic { width: 18px; height: 18px; stroke-linejoin: round; }
+  .qcv-group[data-v138] .qc138-sheet .qc140-tb :is(button, input, b, span, em, i, small, label),
+  .qcv-group[data-v138] .qc138-sheet .qc140-tb input::placeholder,
+  :is([data-qc140="group-menu"], [data-qc1421="sort-menu"], .qc150-bvm) :is(*, h6, button, b, small, span) {
+    font-family: var(--sp-type) !important; font-style: normal !important;
+  }
+}

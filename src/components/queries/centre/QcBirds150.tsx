@@ -419,7 +419,8 @@ const Tail: React.FC<{ L: Laid; tx: number }> = ({ L, tx }) => {
 
 /* ══ D8 · the Birds-eye pills in the navy bar: Group and Sort, separate from the list's ══ */
 type BePop = "group" | "sort";
-const GROUP_IC = <svg className="qc150-pic" viewBox="0 0 20 20" aria-hidden="true"><path d="M3.5 5.5h13M3.5 10h13M3.5 14.5h13" /></svg>;
+/* v150.1 §5 — the same two-box group icon as the list's pill */
+const GROUP_IC = <svg className="qc150-pic gic" viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="2.5" width="15" height="6" rx="1.6" /><path d="M5.5 5.5h4" /><rect x="2.5" y="11.5" width="15" height="6" rx="1.6" /><path d="M5.5 14.5h4" /></svg>;
 const SORT_IC = <svg className="qc150-pic" viewBox="0 0 20 20" aria-hidden="true"><path d="M6 4v12M3.5 13.5 6 16l2.5-2.5M14 16V4m-2.5 2.5L14 4l2.5 2.5" /></svg>;
 const CARET = <svg className="qc150-pcv" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5l3 3 3-3" /></svg>;
 
