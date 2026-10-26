@@ -56,13 +56,13 @@ class Ledger {
 /** The in-page breaks. Each is the lock's own named mutation. */
 const CSS_MUTATIONS: Record<string, string> = {
   "H1-white": `.d71-head { background: #fff !important; }`,
-  "L2-fw-172": `.d71-fwslot > .d77-fw { flex: none !important; height: 172px !important; }`,
+  "L2-fw-172": `.d71-fwslot > .d93-fw { flex: none !important; height: 172px !important; }`,
   "L3-tab-off": `.d59-ftab { right: -200px !important; }`,
   "L4-clip": `.d60-hoops, .d71-fwslot { overflow: hidden !important; }`,
   "C2-solid": `.d71-ok { width: 100% !important; } .d71-ov { display: none !important; }`,
   "C2-label-room": `.d71-task[data-kind="close"] .d71-win { margin-top: 0 !important; }`,
   "C3-solid": `.d71-step.is-todo { border-style: solid !important; }`,
-  "F3-art-140": `.d77-sm .d77-art { display: block !important; width: 140px !important; }`,
+  "F3-art-140": `.d93-med { width: 160px !important; height: 160px !important; }`,
   "G1-hoops-320": `.d58[data-mode="q"] .d60-hoops { min-height: 320px !important; }`,
 };
 
@@ -174,22 +174,23 @@ const readFit = (page: Page) => page.evaluate(() => {
   if (tab && tb) { const e = document.elementFromPoint(tb.l + tb.w / 2, tb.t + tb.h / 2); hit = !!e && (e === tab || tab.contains(e)); }
   const fw = q('[data-d71="fw"]');
   /* RE-POINTED (Dashboard v77): the founding card is Dash77Founding — its frame, the layout on show, its art */
-  const frame = fw?.querySelector(".d77-fwframe") ?? null;
+  /* RE-POINTED (Dashboard v93): the founding card is Dash93Founding — its frame, the variant on show, its picture */
+  const frame = fw?.querySelector(".d93-frame") ?? null;
   const fb = frame?.getBoundingClientRect();
   const escapes: string[] = [];
   let n = 0;
   if (fw && fb) {
     for (const el of fw.querySelectorAll<HTMLElement>("*")) {
-      if (el.closest("svg") || el.closest(".d77-tip") || el.classList.contains("d77-vh")) continue;
+      if (el.closest("svg")) continue;
       const b = el.getBoundingClientRect();
       if (b.width <= 0 || b.height <= 0 || getComputedStyle(el).display === "none") continue;
       n += 1;
       if (b.bottom > fb.bottom + 0.5 || b.top < fb.top - 0.5 || b.right > fb.right + 0.5 || b.left < fb.left - 0.5) escapes.push(`${el.className || el.tagName}`);
     }
   }
-  const body = [...(fw?.querySelectorAll<HTMLElement>('[data-d77="sm"], [data-d77="lg"]') ?? [])].find((e) => getComputedStyle(e).display !== "none") ?? null;
-  const img = [...(body?.querySelectorAll<HTMLImageElement>('[data-d77="art"]') ?? [])].find((e) => getComputedStyle(e).display !== "none") ?? null;
-  const h = body?.querySelector<HTMLElement>('[data-d77="heading"]') ?? null;
+  const body = [...(fw?.querySelectorAll<HTMLElement>('[data-d93="full"], [data-d93="compact"]') ?? [])].find((e) => getComputedStyle(e).display !== "none") ?? null;
+  const img = [...(body?.querySelectorAll<HTMLImageElement>(".d93-med img, .d93-chd img") ?? [])].find((e) => getComputedStyle(e).display !== "none") ?? null;
+  const h = body?.querySelector<HTMLElement>('[data-d93="title"], [data-d93="compact-line"]') ?? null;
   const shown = (s: string) => { const e = fw?.querySelector<HTMLElement>(s); return !!e && e.getBoundingClientRect().height > 0 && getComputedStyle(e).display !== "none"; };
   const scroller = document.querySelector<HTMLElement>(".ws-wbody");
   /* cut text: a hoop legend row, or a part of the task card's head, that overflows its own box or runs

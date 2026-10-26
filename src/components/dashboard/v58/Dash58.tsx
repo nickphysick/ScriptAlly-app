@@ -42,7 +42,7 @@ import { Dash58Header } from "./Dash58Header";
 import { Dash71Right } from "../v71/Dash71Right";
 import { Dash71Task } from "../v71/Dash71Task";
 import { Dash58Feed, FeedTab } from "./Dash58Feed";
-import { Dash77Founding } from "../v77/Dash77Founding";
+import { Dash93Founding } from "../v93/Dash93Founding";
 import { agentCoverage, firstUseTiles, isPreQuery, type TileKey } from "../../../lib/dashFirstUse";
 import { QueriesDoor, AgentsDoor, AgentsSnap, ClosedHoop, AgentsHoop } from "../v60/Dash60Left";
 import { Dash60Lift } from "../v60/Dash60Lift";
@@ -59,6 +59,7 @@ import "../v60/dash60.css";
 import "../v71/dash71.css";
 /* ⚠️ AND v77 AFTER IT */
 import "../v77/dash77.css";
+import "../v93/dash93.css";
 
 export interface Dash58Props {
   loading: boolean;
@@ -254,9 +255,8 @@ export const Dash58: React.FC<Dash58Props> = ({
     else run(a);
   };
 
-  /* ── the founding writer card (v77): the four kinds of feedback and the writer's record. It sends through
-     the dock's own path (`lib/sendFeedback`) and reads the writer's own `betaFeedback` live; the weekly pulse
-     (v59–v71) is no longer on the dashboard. */
+  /* ── the founding writer card (v93): "Your contributions" — the writer's level, read live from their own
+     `foundingStats` doc. Feedback itself is given in the sidebar's Give feedback (FeedbackDock). */
   const fwUid = currentUser?.id ?? null;
 
   /* ── the page's own scrollport: the height the one screen fills ──
@@ -507,7 +507,7 @@ export const Dash58: React.FC<Dash58Props> = ({
               task={<Dash71Task loading={loading} plan={plan} ctx={taskCtx} onView={viewTask} innerRef={focusRef} />}
               lift={pre ? <Dash60Lift loading={loading} tiles={tiles} hasAgents={hasAgents} onTile={onTile} /> : undefined}
               panel={
-                <Dash77Founding loading={loading} uid={fwUid} />
+                <Dash93Founding loading={loading} uid={fwUid} />
               }
             />
           </div>

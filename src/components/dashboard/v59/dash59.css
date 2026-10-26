@@ -55,7 +55,7 @@
 @media (max-height: 779px) { .d59-rule { margin: 16px 0 6px; } }
 
 /* ── the founding writer panel (`.d59-fw`) is RETIRED by Dashboard v71: the founding writer card
-   (v71/Dash71Founding, since replaced by v77/Dash77Founding) replaced it, without the history dots or "This week?". */
+   (v71/Dash71Founding, since replaced by v77's and then v93's card) replaced it, without the history dots or "This week?". */
 
 /* ── the sheet layer: what is placed in the page SHEET rather than the page ──────────────────
    The folder tab and the hawk's shadow sit in `.ws-window`, so neither moves with the page's content.
