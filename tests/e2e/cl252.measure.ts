@@ -279,8 +279,9 @@ test("CL252-C1 · inline edits open in the card, save, toast and undo", async ({
       await page.keyboard.press("Escape"); await page.keyboard.press("Escape");
       await page.waitForTimeout(300);
     }
-    /* Replies in */
-    await page.locator(`${card} [data-cl24='fact'][data-k='reply']`).first().click(T).catch(() => {});
+    /* Replies in — re-pointed (v25.5 A1): the four-fact grid left Profile; the reply scale (How {first} works) is the
+       door to the same inline Replies edit, with the reply time or "Reply time not known yet" */
+    await page.locator(`${card} [data-cl255='scale']`).first().click(T).catch(() => {});
     await page.waitForTimeout(400);
     o = await opened("replies");
     C1.check("replies open in the card", o.inCard && o.legacy === 0, JSON.stringify(o));
