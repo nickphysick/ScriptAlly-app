@@ -1,0 +1,68 @@
+[
+ {
+  "lock": "G3",
+  "where": "population",
+  "ok": true,
+  "detail": "3 waiting past, 3 your move, 1 offer, 2 closed"
+ },
+ {
+  "lock": "G3",
+  "where": "seed-cal-near one block per query",
+  "ok": false,
+  "detail": "0 blocks, 1 queries"
+ },
+ {
+  "lock": "G3",
+  "where": "seed-cal-passed20 one block per query",
+  "ok": false,
+  "detail": "0 blocks, 1 queries"
+ },
+ {
+  "lock": "G3",
+  "where": "seed-agent-9 one block per query",
+  "ok": false,
+  "detail": "0 blocks, 3 queries"
+ },
+ {
+  "lock": "G3",
+  "where": "cv25-agent-06 one block per query",
+  "ok": false,
+  "detail": "0 blocks, 1 queries"
+ },
+ {
+  "lock": "G3",
+  "where": "cv25-agent-08 one block per query",
+  "ok": false,
+  "detail": "0 blocks, 1 queries"
+ },
+ {
+  "lock": "G3",
+  "where": "cv25-agent-09 one block per query",
+  "ok": false,
+  "detail": "0 blocks, 1 queries"
+ },
+ {
+  "lock": "G3",
+  "where": "cv25-agent-12 one block per query",
+  "ok": false,
+  "detail": "0 blocks, 1 queries"
+ },
+ {
+  "lock": "G3",
+  "where": "cv25-agent-02 one block per query",
+  "ok": false,
+  "detail": "0 blocks, 1 queries"
+ },
+ {
+  "lock": "G3",
+  "where": "cv25-agent-05 one block per query",
+  "ok": false,
+  "detail": "0 blocks, 1 queries"
+ },
+ {
+  "lock": "G3",
+  "where": "branches: a story of three or more steps, a bar with rust",
+  "ok": false,
+  "detail": "0 long stories, 0 bars past"
+ }
+]

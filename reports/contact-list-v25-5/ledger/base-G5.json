@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "G5",
+  "where": "1512 population (a wide card)",
+  "ok": true,
+  "detail": "{\"b\":[],\"c\":[],\"facts\":true,\"cls\":\"\",\"story\":false}"
+ },
+ {
+  "lock": "G5",
+  "where": "1512 column 2: How and Reach",
+  "ok": false,
+  "detail": "[] facts true"
+ },
+ {
+  "lock": "G5",
+  "where": "1512 column 3: the story",
+  "ok": false,
+  "detail": "[] story false"
+ },
+ {
+  "lock": "G5",
+  "where": "1512 the panel's pieces",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "G5",
+  "where": "1280 population (a wide card)",
+  "ok": true,
+  "detail": "{\"b\":[],\"c\":[],\"facts\":true,\"cls\":\"\",\"story\":false}"
+ },
+ {
+  "lock": "G5",
+  "where": "1280 column 2: How and Reach",
+  "ok": false,
+  "detail": "[] facts true"
+ },
+ {
+  "lock": "G5",
+  "where": "1280 column 3: the story",
+  "ok": false,
+  "detail": "[] story false"
+ },
+ {
+  "lock": "G5",
+  "where": "1280 the panel's pieces",
+  "ok": false,
+  "detail": ""
+ }
+]
