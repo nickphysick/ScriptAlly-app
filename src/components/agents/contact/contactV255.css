@@ -1,0 +1,105 @@
+/*
+ * Contact list v25.5 (design-refs/contact-list-v25-5/) — the agent card's Profile (How {first} works · Reach {first})
+ * and History (You and {first}). Not media-scoped: the panel card and the wide card both draw them. The card portals to
+ * document.body, so every colour is a literal (no page token reaches it).
+ */
+.cl255-sec { display: flex; flex-direction: column; }
+.cl255-sec + .cl255-sec { margin-top: 20px; }
+.cl255-h { display: flex; align-items: center; gap: 9px; margin: 0 0 12px; font: 400 18px/1.2 var(--sp-type) !important; color: #1c130f; }
+.cl255-h > svg { width: 18px; height: 18px; color: #2a3a52; flex: none; }
+.cl255-h > span { font: inherit !important; color: inherit; }
+.cl255-hr { margin-left: auto; font: italic 400 13.5px/1.2 var(--sp-serif) !important; color: #7a746c; }
+
+/* A1 · the reply scale and the waiting bar share the panel */
+.cl255-w { box-sizing: border-box; display: flex; flex-direction: column; width: 100%; padding: 14px 16px; border-radius: 12px; background: #f6f3ee; text-align: left; }
+button.cl255-w { all: unset; box-sizing: border-box; display: flex; flex-direction: column; width: 100%; padding: 14px 16px; border-radius: 12px; background: #f6f3ee; cursor: pointer; }
+button.cl255-w:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.cl255-mt { font: italic 400 15px/1.35 var(--sp-serif) !important; color: #9a928a; }
+.cl255-bar { display: flex; gap: 4px; }
+.cl255-bar > i { flex: 1; height: 10px; border-radius: 3px; box-shadow: inset 0 0 0 1px #d8d0c4; }
+.cl255-scale .cl255-bar > i.f { background: rgba(42, 58, 82, 0.85); box-shadow: none; }
+.cl255-bar.wt > i { background: #e1d9ce; box-shadow: none; }
+.cl255-bar.wt > i.navy { background: #2a3a52; }
+.cl255-bar.wt > i.rust { background: #c9765d; }
+.cl255-sc { display: flex; justify-content: space-between; margin-top: 5px; font: 500 9.5px/1.2 var(--sp-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.12em; text-transform: uppercase; color: #a39b91; }
+.cl255-sc > span { font: inherit !important; }
+.cl255-cap { margin-top: 8px; font: italic 400 14.5px/1.4 var(--sp-serif) !important; color: #5b4f47; }
+.cl255-cap.solo { margin-top: 0; }
+.cl255-cap > b { font: 400 16px/1.3 var(--sp-type) !important; font-style: normal; color: #1c130f; }
+.cl255-cap > b.late { color: #a2452a; }
+.cl255-cap > i { font: inherit !important; color: inherit; }
+
+.cl255-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+.cl255-tile {
+  all: unset; box-sizing: border-box; display: flex; flex-direction: column; align-items: flex-start; gap: 5px; min-width: 0;
+  padding: 12px 14px; border-radius: 12px; box-shadow: inset 0 0 0 1px #ece6de; background: #fff; text-align: left; cursor: pointer;
+}
+.cl255-tile:hover { box-shadow: inset 0 0 0 1px #2a3a52; }
+.cl255-tile:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.cl255-tile > small { font: italic 400 13px/1.3 var(--sp-serif) !important; color: #8a837b; }
+.cl255-dch, .cl255-hw { display: inline-flex; align-items: center; gap: 8px; font: 400 16px/1.3 var(--sp-type) !important; color: #1c130f; }
+.cl255-dch > i { width: 9px; height: 9px; border-radius: 50%; flex: none; background: #4e7d60; box-shadow: 0 0 0 3px rgba(78, 125, 96, 0.15); }
+.cl255-dch.closed > i { background: #b5aea6; box-shadow: none; }
+.cl255-dch.unknown > i { background: none; box-shadow: inset 0 0 0 1.3px #8a857e; }
+.cl255-hw > svg { width: 17px; height: 17px; color: #2a3a52; flex: none; }
+
+/* A2 · the contact rows */
+.cl255-rows { display: flex; flex-direction: column; gap: 8px; }
+.cl255-r {
+  all: unset; box-sizing: border-box; display: flex; align-items: center; gap: 12px; width: 100%; min-width: 0;
+  padding: 9px 12px 9px 9px; border-radius: 12px; background: #fff; box-shadow: inset 0 0 0 1px #ece6de; color: #1c130f;
+  cursor: pointer; text-decoration: none; transition: box-shadow 0.12s;
+}
+.cl255-r:hover, .cl255-r:focus-visible { box-shadow: inset 0 0 0 1px #2a3a52; }
+.cl255-r:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.cl255-d { width: 34px; height: 34px; border-radius: 50%; background: #e3e8ef; display: grid; place-items: center; flex: none; }
+.cl255-d > svg { width: 17px; height: 17px; color: #2a3a52; }
+.cl255-v { min-width: 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font: 400 16px/1.35 var(--sp-serif) !important; color: #1c130f; }
+.cl255-a { font: 400 13.5px/1 var(--sp-type) !important; color: #2a3a52; opacity: 0; transition: opacity 0.12s; }
+.cl255-r:hover .cl255-a, .cl255-r:focus-visible .cl255-a { opacity: 1; }
+.cl255-r--mt { background: none; box-shadow: none; border: 1px dashed #d6cdc1; padding: 8px 11px 8px 8px; }
+.cl255-r--mt:hover, .cl255-r--mt:focus-visible { box-shadow: none; border-color: #2a3a52; }
+.cl255-r--mt .cl255-d { background: #f3efe9; }
+.cl255-r--mt .cl255-d > svg { color: #9a928a; }
+.cl255-r--mt .cl255-v { font: italic 400 16px/1.35 var(--sp-serif) !important; color: #9a928a; }
+
+/* B · the story */
+.cl255-blk + .cl255-blk { margin-top: 18px; padding-top: 16px; border-top: 1px solid #ece6de; }
+.cl255-bk {
+  all: unset; cursor: pointer; display: block; margin: -4px 0 10px; font: 500 10px/1.3 var(--sp-mono, "JetBrains Mono", monospace) !important;
+  letter-spacing: 0.16em; text-transform: uppercase; color: #8a857e;
+}
+.cl255-bk:hover { color: #2a3a52; }
+.cl255-bk:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.cl255-wait + .cl255-tl { margin-top: 14px; }
+.cl255-tl { list-style: none; margin: 0; padding: 0; }
+.cl255-tl > li { position: relative; display: flex; align-items: center; gap: 12px; padding: 7px 0; }
+.cl255-tl > li + li::before { content: ""; position: absolute; left: 8px; top: -9px; height: 18px; border-left: 1.5px solid #d8d1c7; }
+.cl255-tl > li.nx::before { border-left-style: dashed; border-color: #e0bfb2; }
+.cl255-tl .g { width: 18px; display: grid; place-items: center; flex: none; }
+.cl255-tl > li > b { font: 400 15.5px/1.3 var(--sp-serif) !important; color: #5b4f47; }
+.cl255-tl > li.cur > b { font-weight: 600 !important; color: #1c130f; }
+.cl255-tl > li > em { margin-left: auto; font: 400 13px/1 var(--sp-type) !important; font-style: normal; color: #8a857e; white-space: nowrap; }
+.cl255-tl > li.nx > b { font-style: italic !important; color: #a2452a; }
+.cl255-tl > li.nx > em { color: #a2452a; }
+.cl255-nx { width: 13px; height: 13px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px #c9765d; background: #fff; }
+.cl255-dot { width: 6px; height: 6px; border-radius: 50%; background: #8a857e; }
+.cl255-tl > li.nd > b { font-style: italic !important; }
+.cl255-tl > li.qt { padding-top: 0; }
+.cl255-tl > li.qt::before { display: none; }
+.cl255-tl > li.qt > q { font: italic 400 14px/1.4 var(--sp-serif) !important; color: #7a746c; }
+
+.cl255-none { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 12px; border: 1.5px dashed #d6cdc1; }
+.cl255-nqg { display: grid; place-items: center; color: #2a3a52; }
+.cl255-nqg svg { width: 22px; height: 22px; }
+.cl255-none b { display: block; font: 400 16px/1.3 var(--sp-type) !important; color: #1c130f; }
+.cl255-none small { display: block; margin-top: 3px; font: italic 400 13.5px/1.35 var(--sp-serif) !important; color: #7a746c; }
+
+/* D · "Your move" as a group or summary: the rust "!" disc */
+.cl255-ym {
+  display: inline-grid; place-items: center; width: var(--ym, 17px); height: var(--ym, 17px); border-radius: 50%; flex: none;
+  background: #c9765d; color: #fff; font: 700 calc(var(--ym, 17px) * 0.65)/1 var(--sp-serif) !important;
+}
+/* the band's Your move key: the disc in the swatch's place */
+.cl24-fseg--you > span::before { display: none; }
+.cl24-fseg--you > span > .cl255-ym { align-self: center; }

@@ -54,6 +54,7 @@ import { ContactSheet24, SheetSkeleton } from "./contact/ContactSheet24";
 import { AgentCard24, AgentCardWide24, type AgentCard24Props } from "./contact/AgentCard24";
 import { ContactAddressBook24 } from "./contact/ContactAddressBook24";
 import { bookSteps, stepDate } from "../../lib/contactBook";
+import { heardWords, replyWeeksOf, storyBlocks } from "../../lib/contactStory255";
 import { materialRowsFromAgent } from "../../lib/agentMaterials";
 import { materialWords } from "../../lib/agentPanel";
 import type { AgentFacts as Facts24 } from "../../lib/contactList";
@@ -928,6 +929,11 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       onLog: () => openQueryDrawer({ mode: "log", agentId: id, ...(scoped?.id ? { manuscriptId: scoped.id } : {}) }),
       onEdit: (tab, focus) => openPanel(id, { tab: tab ?? "who", focus }),
       edit: editKitFor(x.agent),
+      /* v25.5 B — the History tab's query story: every query to the agent on any manuscript, newest first */
+      story: (() => {
+        const rows = agentRows(qcRows, id, null);
+        return { blocks: storyBlocks(rows, toAgent, activities, (ms) => titleOf(ms) || null, replyWeeksOf(x.agent), nowMs), heard: heardWords(rows) };
+      })(),
       /* v25.4 D — the Profile tab's "{n} details missing": Housekeeping's count, and its first gap's field */
       gaps: (() => { const g = agentGapAction(hk, id); return g ? { n: g.n, focus: GAP_FOCUS[g.first].focus, tab: GAP_FOCUS[g.first].tab } : null; })(),
       onOpenQuery: (queryId) => navigate(`/queries?q=${encodeURIComponent(queryId)}`),

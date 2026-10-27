@@ -12,7 +12,8 @@
  *              "Day n" while a query is live, else "Added d Mon"; ×
  *   agent row  the state disc, the name, agency · location, your rating; the stage pill once queried
  *   cream box  what they're looking for, their genres (the book's outlined), then the fit line (Part E)
- *   tabs       Profile (four facts · Contact · Also at (Part E) · You and {first}) · History · Notes
+ *   tabs       Profile (v25.5 A: How {first} works · Reach {first} · Also at) · History (v25.5 B: You and {first}, the
+ *              query story) · Notes
  *   call box   Your move: the Query Centre's own next move (`nextDoor`), one button. Not queried: Log a query, or
  *              "Hold off" while a colleague is live (Part E). Querying and Closed: none.
  *   footer     "Added …" (+ "· imported"), the links by set, ‹ n / M › through the visible list
@@ -45,6 +46,8 @@ import "./contactV24.css";
 import { GenrePills, QueryPill, Tally } from "../../shared/agentRowParts";
 import type { CardDraft } from "../../../lib/cardDraft";
 import { type GenreKit, type InlineField, InlineContact, InlineGenres, InlineReplies, InlineWishlist } from "../card/InlineEdits";
+import { HowWorks, Reach, YouAndStory } from "./AgentCardParts255";
+import type { StoryBlock } from "../../../lib/contactStory255";
 
 /** the band's tint and ink per set: the Query Centre's CARD_TONE, and "Not queried yet" the pack's #f5f1ea / #6b5f52 */
 export const SET_TONE: Record<SetKey, { bg: string; fg: string; pill: string }> = {
@@ -98,6 +101,9 @@ export interface AgentCard24Props {
   /** Contact list v25.4 D — Housekeeping's gaps for the agent: the count, and the field the edit mode opens at (null:
    *  none, and the Profile tab says nothing about gaps) */
   gaps?: { n: number; focus: AgentCardField; tab: AgentCardTab } | null;
+  /** Contact list v25.5 B — the History tab's query story: every query to the agent, newest first, and the heading's
+   *  "waiting to hear back" / "heard back" (lib/contactStory255) */
+  story?: { blocks: StoryBlock[]; heard: string | null };
 }
 
 /** v25.2 C — what the card needs to edit in place: the agent as a draft, the genre lists, one inline save, the edit
@@ -481,15 +487,17 @@ export const AgentCard24: React.FC<AgentCard24Props> = (p) => {
         </div>
         <div className="qc149c-pane cl24c-pane" role="tabpanel" data-cl24="pane" data-pane={tab}>
           {tab === "profile" ? (
-            <div className="qc149c-pg">
+            /* v25.5 A — Profile is the contact card: how the agent works, how to reach them, their colleagues. Nothing
+               about your query (that is History's). v25.4 D's gap line stays at the top. */
+            <div className="qc149c-pg cl255-pg" data-cl255="profile">
               <GapLine p={p} ed={ed} />
-              <Facts facts={m.facts} p={p} ed={ed} first={m.first} />
-              <Contact p={p} first={m.first} ed={ed} />
+              <HowWorks p={p} ed={ed} first={m.first} />
+              <Reach p={p} ed={ed} first={m.first} />
               <AlsoAt p={p} />
-              <YouAnd rows={m.view.history} first={m.first} onOpenQuery={p.onOpenQuery} />
             </div>
           ) : tab === "history" ? (
-            <div className="qc149c-pg"><History entries={p.history} first={m.first} nowMs={p.nowMs} onOpenQuery={p.onOpenQuery} /></div>
+            /* v25.5 B — History is the query story */
+            <div className="qc149c-pg cl255-pg" data-cl255="history"><YouAndStory blocks={p.story?.blocks ?? []} heard={p.story?.heard ?? null} first={m.first} onOpenQuery={p.onOpenQuery} /></div>
           ) : (
             <div className="qc149c-pg"><Notes p={p} first={m.first} /></div>
           )}
@@ -555,33 +563,13 @@ export const AgentCardWide24: React.FC<AgentCard24Props & { extras: WideExtras }
               </div>
               <AlsoAt p={p} />
             </section>
+            {/* v25.5 C — the same pieces as the panel card: How {first} works and Reach {first}; then the query story */}
             <section className="sb" data-cl24="col" data-col="b">
-              <h3>How to reach {m.first}</h3>
-              <Facts facts={m.facts} grid2 p={p} ed={ed} first={m.first} />
-              <Contact p={p} first={m.first} heading={false} ed={ed} />
+              <HowWorks p={p} ed={ed} first={m.first} />
+              <Reach p={p} ed={ed} first={m.first} />
             </section>
             <section className="sc" data-cl24="col" data-col="c">
-              <h3>You and {m.first}</h3>
-              {extras.steps.length ? (
-                <>
-                  {p.bookTitle ? <span className="qc149c-k">{p.bookTitle}</span> : null}
-                  <ol className="cl24w-steps" data-cl24="steps">
-                    {extras.steps.map((s) => (
-                      <li key={s.key} className={s.current ? "now" : undefined}>
-                        {s.current ? <span className="cl24w-tk"><StatusDot status={s.status} overrideSize={17} /></span> : RING_TICK}
-                        <span className="t">{s.label}</span><span className="d">{s.date}</span>
-                      </li>
-                    ))}
-                    {extras.next ? <li className="next">{NEXT_RING}<span className="t">{extras.next.title}</span><span className={`d${extras.next.due ? " due" : ""}`}>{extras.next.date}</span></li> : null}
-                  </ol>
-                </>
-              ) : m.view.history.length ? (
-                /* the set is the active book's; the facts are across books — so say which book, and show the others */
-                <>
-                  <p className="cl24w-noq" data-cl24="noq">{p.bookTitle ? `Not queried for ${p.bookTitle} yet.` : `No queries to ${m.first} yet.`}</p>
-                  <YouAnd rows={m.view.history} first={m.first} onOpenQuery={p.onOpenQuery} />
-                </>
-              ) : <p className="cl24w-noq" data-cl24="noq">No queries to {m.first} yet.</p>}
+              <YouAndStory blocks={p.story?.blocks ?? []} heard={p.story?.heard ?? null} first={m.first} onOpenQuery={p.onOpenQuery} />
               <Call call={m.call} p={p} button={false} />
               <span className="qc149c-k">Notes</span>
               <Notes p={p} first={m.first} />
