@@ -1529,6 +1529,7 @@ export const Dashboard: React.FC<{
         versions={versions}
         smartImportUsage={smartImportUsage}
         onNavigate={onNavigate}
+        onFoundingSeen={(tier) => updateUserProfile({ foundingSeenTier: tier })}
       />
 
       {/* Slide-In Tasks Panel (Part 3) */}

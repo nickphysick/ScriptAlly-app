@@ -9,6 +9,8 @@
  *   B3  compose per kind (callable mocked): question, placeholder, kind sent; the chip is the kind; Send disabled when
  *       empty; a refusal keeps the text; the Compact card opens the sidebar's panel preset to the kind
  *   B4  sent: the copy at tier 0 and tier ≥1; the crack is drawn after 1.5s
+ *   C1  the celebration: plays once when the rank is above the rank seen, writes foundingSeenTier, a reload shows idle;
+ *       a skipped rank celebrates the highest only; the words; the timeline; reduced motion shows the end state
  *   S1  nothing cut, every state × the seven sizes
  *   S2  no green; no "Nick"; at 370px the three labels whole
  *
@@ -17,6 +19,10 @@
 import { test, type Page } from "@playwright/test";
 import { Ledger, SIZES, STATS, fit, mockCallable, openDash, tag, type VP } from "./db105Lib";
 import { liftMotionSuppression } from "./measure";
+import { execFileSync } from "node:child_process";
+
+/** The harness account's stored seen-rank on dev (tests/e2e/foundingSeen.mjs): "absent" or "0"–"5". */
+const seenOnDev = (...args: string[]) => execFileSync("node", ["tests/e2e/foundingSeen.mjs", ...args], { encoding: "utf8" }).trim().split("\n").pop() ?? "";
 
 const card = '[data-d105="card"]';
 const vis = (page: Page, sel: string) => page.locator(`${card} ${sel}`).filter({ visible: true }).first();
@@ -222,6 +228,14 @@ test("DB105 S1 — nothing cut, for every state at every size", async ({ page })
       await openDash(page, vp, { __SA_FOUNDING_STATS: STATS[st] });
       await s1Read(L, page, `${tag(vp)} idle-${st}`, "idle");
     }
+    /* the celebration, at its end state (reduced motion), through the dev seen-rank aid — nothing is written */
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    for (const st of ["fledgling", "mentor", "queryhawk"]) {
+      await openDash(page, vp, { __SA_FOUNDING_STATS: STATS[st], __SA_FOUNDING_SEEN: 0 });
+      await page.locator(`${card}[data-state="celebrate"]`).waitFor({ timeout: 8000 }).catch(() => {});
+      await s1Read(L, page, `${tag(vp)} celebrate-${st}`, "celebrate");
+    }
+    await page.emulateMedia({ reducedMotion: "no-preference" });
     if (isCompact(vp)) continue; /* the Compact card composes in the sidebar's panel (B3) */
     for (const st of ["egg", "mentor"]) {
       await mockCallable(page, "ok");
@@ -250,7 +264,7 @@ test("DB105 S1 — nothing cut, for every state at every size", async ({ page })
       await page.unrouteAll({ behavior: "ignoreErrors" });
     }
   }
-  L.done(400);
+  L.done(500);
 });
 
 /* ── S2 ── */
@@ -296,3 +310,74 @@ test("DB105 S2 — no green, no Nick, and at 370px the three labels whole", asyn
   }
   L.done(26);
 });
+
+/* ── C1 ── */
+test("DB105 C1 — the celebration plays once, records the rank, and a reload shows idle; a skipped rank celebrates the highest", async ({ page }) => {
+  test.setTimeout(300_000);
+  const L = new Ledger("c1");
+  const vp = { width: 1440, height: 900 };
+  const before = seenOnDev("get");
+  L.check("C1", "the harness account starts with no seen-rank", before === "absent", before);
+  try {
+    /* the real path: peak 1 > seen (absent = 0) → the hatch plays, and foundingSeenTier = 1 is WRITTEN to the account */
+    await openDash(page, vp, { __SA_FOUNDING_STATS: STATS.fledgling, __SA_FOUNDING_SEEN: "real" });
+    await page.locator(`${card}[data-state="celebrate"]`).waitFor({ timeout: 8000 }).catch(() => {});
+    const t = await page.locator(card).first().getAttribute("data-state");
+    L.check("C1", "peak 1 > seen 0: the hatch plays", t === "celebrate" && (await page.locator(`${card} [data-d105="celebrate"]`).getAttribute("data-tier")) === "1", String(t));
+    L.check("C1", "the words", (await text(page, '[data-d105="cel-kicker"]')) === "YOU’VE HATCHED" && (await text(page, '[data-d105="cel-title"]')) === "Meet your Fledgling"
+      && (await text(page, '[data-d105="cel-body"]')) === "Just hatched, and already helping. Two more notes and you become an Archivist." && (await text(page, '[data-d105="give-more"]')) === "Give more feedback",
+      [await text(page, '[data-d105="cel-kicker"]'), await text(page, '[data-d105="cel-title"]'), await text(page, '[data-d105="cel-body"]')].join(" | "));
+    let stored = "";
+    for (let i = 0; i < 10 && stored !== "1"; i++) { await page.waitForTimeout(800); stored = seenOnDev("get"); }
+    L.check("C1", "foundingSeenTier = 1 is written", stored === "1", stored);
+    await page.reload();
+    await page.locator('[data-d105="card"][data-loading="0"]').first().waitFor({ timeout: 20000 }).catch(() => {});
+    await page.waitForTimeout(1200);
+    L.check("C1", "a reload shows idle at Fledgling, no replay", (await page.locator(card).first().getAttribute("data-state")) === "idle" && (await text(page, '[data-d105="photo-label"]')) === "FLEDGLING", `${await page.locator(card).first().getAttribute("data-state")} ${await text(page, '[data-d105="photo-label"]')}`);
+    /* Give more feedback → idle */
+    await openDash(page, vp, { __SA_FOUNDING_STATS: STATS.fledgling, __SA_FOUNDING_SEEN: 0 });
+    await page.locator(`${card}[data-state="celebrate"]`).waitFor({ timeout: 8000 }).catch(() => {});
+    await vis(page, '[data-d105="give-more"]').click();
+    L.check("C1", "Give more feedback returns to idle", (await page.locator(card).first().getAttribute("data-state")) === "idle", "");
+    /* a skipped rank: seen 0, shown 4 → one celebration, of the Mentor, recorded as 4 */
+    await openDash(page, vp, { __SA_FOUNDING_STATS: STATS.mentor, __SA_FOUNDING_SEEN: 0 });
+    await page.locator(`${card}[data-state="celebrate"]`).waitFor({ timeout: 8000 }).catch(() => {});
+    L.check("C1", "a skipped rank celebrates the highest (4)", (await page.locator(`${card} [data-d105="celebrate"]`).getAttribute("data-tier")) === "4" && (await text(page, '[data-d105="cel-kicker"]')) === "YOU’VE RANKED UP" && (await text(page, '[data-d105="cel-title"]')) === "You’re now a Mentor", await text(page, '[data-d105="cel-title"]'));
+    L.check("C1", "…and records 4", (await page.evaluate(() => (window as unknown as { __SA_FOUNDING_SEEN_WRITTEN?: number }).__SA_FOUNDING_SEEN_WRITTEN)) === 4, "");
+    L.check("C1", "the rank-up draws no egg", await page.locator(`${card} .d105-hx.is-rankup .d105-stop`).evaluate((e) => getComputedStyle(e).display === "none"), "");
+    /* seen ≥ shown: no celebration */
+    await openDash(page, vp, { __SA_FOUNDING_STATS: STATS.mentor, __SA_FOUNDING_SEEN: 4 });
+    await page.waitForTimeout(800);
+    L.check("C1", "seen 4, shown 4: idle", (await page.locator(card).first().getAttribute("data-state")) === "idle", "");
+    /* the timeline (motion lifted): words hidden before 1.9s, shown after; the bird out, the halves gone */
+    await openDash(page, vp, { __SA_FOUNDING_STATS: STATS.fledgling, __SA_FOUNDING_SEEN: 0 });
+    await liftMotionSuppression(page);
+    await page.reload();
+    await page.locator(`${card}[data-state="celebrate"]`).waitFor({ timeout: 15000 });
+    const read = () => page.evaluate(() => {
+      const c = document.querySelector('[data-d105="celebrate"]');
+      const o = (s: string) => Number(getComputedStyle(c!.querySelector(s)!).opacity);
+      return { words: o(".d105-ct"), bird: o(".d105-sfl"), top: o(".d105-stop"), burst: o(".d105-sb") };
+    });
+    await page.waitForTimeout(500);
+    const early = await read();
+    await page.waitForTimeout(2300);
+    const late = await read();
+    L.check("C1", "at 0.5s: the words not yet, the egg whole, the bird hidden", early.words < 0.05 && early.top > 0.95 && early.bird < 0.05, JSON.stringify(early));
+    L.check("C1", "at 2.8s: the words, the bird out, the top half gone, the burst on", late.words > 0.95 && late.bird > 0.95 && late.top < 0.05 && late.burst > 0.95, JSON.stringify(late));
+    /* reduced motion: the end state at once */
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await openDash(page, vp, { __SA_FOUNDING_STATS: STATS.fledgling, __SA_FOUNDING_SEEN: 0 });
+    await page.locator(`${card}[data-state="celebrate"]`).waitFor({ timeout: 8000 }).catch(() => {});
+    const still = await read();
+    L.check("C1", "reduced motion: the end state, no animation", still.words > 0.95 && still.bird > 0.95 && still.top < 0.05, JSON.stringify(still));
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    /* the onboarding ghost passes no writer: no celebration (unit: celebrateTier(…, false)) */
+  } finally {
+    seenOnDev("clear");
+  }
+  const after = seenOnDev("get");
+  L.check("C1", "the account is put back (absent)", after === "absent", after);
+  L.done(14);
+});
+

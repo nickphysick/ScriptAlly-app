@@ -41,6 +41,7 @@ export const CSS_MUTATIONS: Record<string, string> = {
   "S2-squeeze": `.d105-btns { display: flex !important; width: 210px !important; } .d105-btn { flex: 1 1 0 !important; flex-direction: row !important; white-space: nowrap !important; min-width: 0 !important; overflow: hidden !important; text-overflow: ellipsis !important; }`,
   "B2-all-colour": `.d105-hd.is-future img { filter: none !important; opacity: 1 !important; }`,
   "B4-no-crack": `.d105-hx.is-sent .d105-zz { animation: none !important; }`,
+  "C1-no-end-state": `.d105-hx.is-hatch .d105-sfl { opacity: 0 !important; }`,
   "D1-dim-inert": `.d105-dim { pointer-events: none !important; }`,
 };
 
@@ -56,6 +57,10 @@ export const STATS: Record<string, Record<string, unknown>> = {
 
 /** The dev aid `window.__SA_FOUNDING_SEEN` overrides the stored seen-rank (lib/foundingCard) — default: everything seen. */
 export async function openDash(page: Page, vp: VP, flags: Record<string, unknown> = {}, extraCss = "") {
+  /* everything seen unless a lock asks otherwise; "real" means no aid at all — the account's own stored rank */
+  const f0: Record<string, unknown> = { __SA_FOUNDING_SEEN: 5, ...flags };
+  if (f0.__SA_FOUNDING_SEEN === "real") delete f0.__SA_FOUNDING_SEEN;
+  flags = f0;
   await page.addInitScript(([f]) => {
     Object.assign(window, f);
     try { localStorage.setItem("scriptally_active_manuscript_id", "seed-ms-1"); } catch { /* private mode */ }

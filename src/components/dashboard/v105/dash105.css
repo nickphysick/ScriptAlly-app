@@ -282,9 +282,36 @@
 @keyframes d105-wob { 0%, 60%, 100% { transform: rotate(0); } 68% { transform: rotate(-6deg); } 76% { transform: rotate(5deg); } 84% { transform: rotate(-3deg); } }
 @keyframes d105-in { from { opacity: 0; } to { opacity: 1; } }
 
+/* the hatch (tier 1), exactly as the ref: the egg shakes 0.9s; the top half flies up and right, turning, and fades
+   (0.7s from 0.9s); the bottom half sinks and fades; the Fledgling rises out of the nest with an overshoot from 1.15s;
+   the starburst scales in at 1.5s and turns; the words fade in at 1.9s */
+.d105-hx.is-hatch .d105-zz { stroke-dashoffset: 0; }
+.d105-hx.is-hatch .d105-stop { animation: d105-shake 0.9s ease-in-out, d105-fly 0.7s 0.9s cubic-bezier(0.3, 0.6, 0.4, 1) forwards; }
+.d105-hx.is-hatch .d105-sbot { animation: d105-shake 0.9s ease-in-out, d105-sink 0.5s 1s ease-out forwards; }
+.d105-hx.is-hatch .d105-sfl { animation: d105-rise 0.7s 1.15s cubic-bezier(0.2, 1.5, 0.4, 1) forwards; }
+.d105-hx.is-hatch .d105-sb { animation: d105-burst 0.6s 1.5s ease-out forwards, d105-spin 20s 1.5s linear infinite; }
+.d105-cel.is-hatch .d105-ct { animation: d105-in 0.4s 1.9s ease-out both; }
+/* a rank-up (tiers 2–5): the same burst and pop with that tier's head, and no egg */
+.d105-hx.is-rankup :is(.d105-stop, .d105-sbot, .d105-snest) { display: none; }
+.d105-hx.is-rankup .d105-sfl { width: 64%; height: 64%; animation: d105-pop 0.6s 0.15s cubic-bezier(0.2, 1.4, 0.4, 1) forwards; }
+.d105-hx.is-rankup .d105-sb { top: 50%; animation: d105-burst 0.6s 0.5s ease-out forwards, d105-spin 20s 0.5s linear infinite; }
+.d105-cel.is-rankup .d105-ct { animation: d105-in 0.4s 0.9s ease-out both; }
+@keyframes d105-shake { 0%, 100% { transform: rotate(0); } 10% { transform: rotate(-9deg); } 20% { transform: rotate(8deg); } 30% { transform: rotate(-9deg); } 40% { transform: rotate(8deg); } 50% { transform: rotate(-7deg); } 60% { transform: rotate(6deg); } 70% { transform: rotate(-4deg); } 80% { transform: rotate(3deg); } }
+@keyframes d105-fly { to { transform: translate(28%, -58%) rotate(70deg); opacity: 0; } }
+@keyframes d105-sink { to { transform: translateY(13%); opacity: 0; } }
+@keyframes d105-rise { from { transform: translate(-50%, -10%) scale(0.4); opacity: 0; } to { transform: translate(-50%, -62%) scale(1); opacity: 1; } }
+@keyframes d105-pop { from { transform: translate(-50%, -50%) scale(0.4); opacity: 0; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
+@keyframes d105-burst { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: scale(1); } }
+@keyframes d105-spin { to { transform: rotate(360deg); } }
+
 @media (prefers-reduced-motion: reduce) {
   .d105-fw *, .d105-fw *::before, .d105-fw *::after { animation: none !important; transition: none !important; }
   .d105-hx.is-sent .d105-zz { stroke-dashoffset: 0; }
+  /* the celebration's END STATE, with no motion: the halves gone, the bird out, the burst still */
+  .d105-hx.is-hatch :is(.d105-stop, .d105-sbot) { opacity: 0; }
+  .d105-hx.is-hatch .d105-sfl { opacity: 1; transform: translate(-50%, -62%) scale(1); }
+  .d105-hx.is-rankup .d105-sfl { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  .d105-hx:is(.is-hatch, .is-rankup) .d105-sb { opacity: 1; }
 }
 
 /* ══ THE STEPS — after the layouts' own rules: a container query confers no specificity ═══════════════════════════════ */
@@ -391,10 +418,23 @@
   .d105-fw .d105-st .d105-p { font-size: 11px; line-height: 1.32; }
   .d105-sent, .d105-cel { gap: 10px; padding: 6px 12px; }
   .d105-fw .d105-wq { font-size: 14px; }
+  .d105-cel .d105-st { gap: 3px; }
+  .d105-cel .d105-sa { margin-top: 2px; }
+  .d105-cel .d105-give { padding: 4px 10px; font-size: 12.5px; }
 }
 
 /* under 150px tall (the 128px Compact card) — the strip, then one row of round buttons */
 @container d105fw (max-height: 149px) {
   .d105-idle { display: none; }
   .d105-compact { display: flex; }
+  /* the celebration in one row: the art, the title, the button (the kicker and the line are in How it works) */
+  .d105-cel { gap: 10px; padding: 4px 14px; }
+  .d105-cel .d105-hx { width: 56px; height: 56px; border-radius: 10px; }
+  .d105-cel .d105-hx .d105-scene { inset: 3px; }
+  .d105-fw .d105-cel :is(.d105-kick, .d105-celbody) { display: none; }
+  .d105-cel .d105-ct { flex-direction: row; align-items: center; justify-content: space-between; gap: 10px; }
+  .d105-fw .d105-cel .d105-h { font-size: 15px; }
+  .d105-cel .d105-sa { margin-top: 0; }
+  .d105-cel .d105-give { padding: 5px 11px; font-size: 12.5px; }
 }
+
