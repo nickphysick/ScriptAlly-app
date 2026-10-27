@@ -20,7 +20,7 @@ import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "re
 import { StatusDot } from "../../StatusDot";
 import { QueryStatus } from "../../../types";
 import { agentPrimary } from "../../../lib/agentDisplay";
-import { type AgentFacts, type ContactFilters, type SortKey, genreList } from "../../../lib/contactList";
+import { type AgentFacts, type ContactFilters, type SortKey, genreList, hasMissingDetails } from "../../../lib/contactList";
 import { THUMB_LETTERS, bookSections, thumbShown } from "../../../lib/contactBook";
 import { CL_SORT_FIELDS } from "../../../lib/cardsSort";
 import { SortChipButton, SortChipMenu } from "../../shell/SortChip";
@@ -267,6 +267,7 @@ export const ContactAddressBook24: React.FC<AddressBook24Props> = (p) => {
       </div>
       {pop.open === "filters" && pop.anchor ? (
         <FilterMenu anchor={pop.anchor} filters={p.filters} onFilters={p.onFilters} genres={allGenres} openN={all.filter((x) => x.openKey === "open").length}
+          missingN={all.filter(hasMissingDetails).length}
           showing={pool.length} total={all.length} onExport={() => p.onExport(pool)} />
       ) : null}
       {pop.open === "sort" && pop.anchor ? (

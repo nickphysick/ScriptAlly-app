@@ -33,15 +33,15 @@ import { AgentPaperCard, type PaperAddKey } from "../../shared/AgentPaperCard";
 import { paperDataOf } from "../../../lib/contactCards";
 import type { PersonalGenre } from "../../../lib/genres";
 import type { AgentCardField, AgentCardTab } from "../../../lib/agentCardStore";
-import { agentsWord, cardsAcross, rowSecond, setGroups, SET_LABEL, type SetKey } from "../../../lib/contactV24";
-import { hrefFor } from "../../../lib/quickAdd";
+import { agentsWord, cardsAcross, setGroups, SET_LABEL, type SetKey } from "../../../lib/contactV24";
 import type { ContactView } from "../../../lib/contactListMemory";
 import "./contactV24.css";
-import { GenrePills, NIB, QueryPill, Tally, Track } from "../../shared/agentRowParts";
-import { fillGapsWords } from "../../../lib/contactHousekeeping";
+import { GenrePills, NIB, Tally } from "../../shared/agentRowParts";
 import "./contactV252.css";
 import "./contactV253.css";
-import { daysSinceSent } from "../../../lib/queryTrack";
+import "./contactV254.css";
+import { profileLink, queryLine } from "../../../lib/contactRow254";
+import { hasMissingDetails } from "../../../lib/contactList";
 
 export const SET_GLYPH: Record<SetKey, QueryStatus | null> = {
   you: QueryStatus.PARTIAL_REQUESTED, agent: QueryStatus.QUERIED, none: null, closed: QueryStatus.REJECTED,
@@ -67,7 +67,6 @@ const I = {
   web: <svg viewBox="0 0 16 16" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><circle cx="8" cy="8" r="6" /><path d="M2 8h12M8 2c2 2 2 10 0 12M8 2c-2 2-2 10 0 12" /></svg>,
   plus: <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><path d="M8 3v10M3 8h10" /></svg>,
 };
-const copy = (text: string) => { void navigator.clipboard?.writeText(text).catch(() => {}); };
 
 export interface ContactSheet24Props {
   pool: readonly AgentFacts[];
@@ -92,20 +91,20 @@ export interface ContactSheet24Props {
   onLog: (id: string) => void;
   onEdit: (id: string, tab: AgentCardTab, focus?: AgentCardField) => void;
   onExport: (rows: readonly AgentFacts[]) => void;
-  /** Contact list v25.3 — the row's one gap action: Housekeeping's count for the agent (null: no gaps), and its door */
-  gapOf?: (agentId: string) => { n: number } | null;
+  /** Contact list v25.4 C — the sparse-profile link's door: the card's edit mode at the agent's first missing field
+   *  (v25.3's order). The row has no gap action of its own any more (v25.4 D). */
   onFillGaps?: (agentId: string) => void;
   search: string;
   /** v25 A3 — Find is the navy bar's own search well, first in the bar */
   onSearch: (v: string) => void;
 }
 
-/* v25.1 E1/E3/E4 — five columns, every heading a sort: Agent · Genres · Replies in · Your query · Your rating. The
-   Submissions column is gone (a closed-and-not-queried agent says so in Your query), Added gave way to Your rating
-   (still on the agent card), and at ≤1440 of window the last column drops. */
-const COLS: { key: SortKey; label: string }[] = [
-  { key: "surname", label: "Agent" }, { key: "fit", label: "What they want" }, { key: "reply", label: "Replies in" },
-  { key: "urgency", label: "Your query" }, { key: "rating", label: "Your rating" },
+/* v25.1 E1/E3/E4 — every heading a sort. v25.4 A — the order is Agent · What they want · Replies in · Your rating ·
+   Your query, and at ≤1440 of window Your rating drops. `col` is the cell's `data-col`: Your rating keeps 5 (the
+   column that drops), Your query is 4. */
+const COLS: { key: SortKey; label: string; col: number }[] = [
+  { key: "surname", label: "Agent", col: 1 }, { key: "fit", label: "What they want", col: 2 }, { key: "reply", label: "Replies in", col: 3 },
+  { key: "rating", label: "Your rating", col: 5 }, { key: "urgency", label: "Your query", col: 4 },
 ];
 
 export const ContactSheet24: React.FC<ContactSheet24Props> = (p) => {
@@ -170,8 +169,8 @@ export const ContactSheet24: React.FC<ContactSheet24Props> = (p) => {
       ) : p.view === "list" ? (
         <div className="cl24-tbl" data-cl24="table" role="table" aria-label="Agents">
           <div className="cl24-th" role="row" data-cl24="heads">
-            {COLS.map((c, i) => (
-              <span key={c.label} role="columnheader" data-col={i + 1} data-key={c.key}
+            {COLS.map((c) => (
+              <span key={c.label} role="columnheader" data-col={c.col} data-key={c.key}
                 aria-sort={c.key === p.sortKey ? (p.reversed ? "descending" : "ascending") : "none"}>
                 {/* v25.1 E4 — every heading sorts: a first click in its first direction, a second reverses it */}
                 <button type="button" className={c.key === p.sortKey ? "on" : undefined} data-cl251="head" data-key={c.key} onClick={() => sortBy(c.key)}>
@@ -210,6 +209,7 @@ export const ContactSheet24: React.FC<ContactSheet24Props> = (p) => {
 
       {pop.open === "filters" && pop.anchor ? (
         <FilterMenu anchor={pop.anchor} filters={p.filters} onFilters={p.onFilters} genres={allGenres} openN={openN}
+          missingN={p.all.filter(hasMissingDetails).length}
           showing={p.pool.length} total={p.all.length} onExport={() => p.onExport(p.pool)} />
       ) : null}
       {pop.open === "sort" && pop.anchor ? (
@@ -245,13 +245,16 @@ const GroupMenu: React.FC<{ anchor: HTMLElement; grouped: boolean; onGrouped: (g
 };
 
 /* ── a List row ─────────────────────────────────────────────────────────────────────────────────────────────── */
-/* v25.2 A — the QueryHawk row: the typewriter name over agency · city in mono; the genre pills; replies in; the status
-   pill with its day count over the track and the next step; the tally bars; and, as a second grid row spanning every
-   column from the name's left edge, the wishlist behind the nib.
-   v25.3 — A ROW DOES NOT ADVERTISE WHAT IS MISSING: an empty cell is blank (no dash, no "No … yet", no "+ Add"), a row
-   with no wishlist has no wishlist line, and an unrated agent's rating cell is empty. The row's gaps are ONE action on
-   hover — "Fill in {n} gaps →", Housekeeping's count — first in the hover group, opening the card's edit mode at the
-   first missing field. The pills fit their cell: whole pills only, then "+n". */
+/* v25.2 A — the QueryHawk row: the typewriter name over agency · city in mono; the genre pills; replies in; the tally
+   bars; and, as a second grid row spanning every column from the name's left edge, the wishlist behind the nib.
+   v25.3 — A ROW DOES NOT ADVERTISE WHAT IS MISSING: an empty cell is blank and a row with no wishlist has no wishlist
+   line. The pills fit their cell: whole pills only, then "+n".
+   v25.4 — SIMPLER ROWS: Your rating comes before Your query; Your query is ONE line (the stage's StatusDot and
+   "Queried" or "Queried · {stage}"; "Not queried" with the dotted ring) — the status pill, day count, track and next
+   step are gone from the row, the disc's "!" carries urgency; an agent with no genres shows one link, "Fill in
+   {first}'s profile →", spanning Replies in too when there is no reply time; and the row has no hover actions but
+   "Log a query" on a not-queried agent (the gaps button and the copy / website icons are gone: the card's contact
+   rows hold those, and gaps live in the card, Housekeeping and the Missing details filter). */
 const Row: React.FC<{ x: AgentFacts; p: ContactSheet24Props }> = ({ x, p }) => {
   const a = x.agent;
   const name = agentPrimary(a);
@@ -262,16 +265,13 @@ const Row: React.FC<{ x: AgentFacts; p: ContactSheet24Props }> = ({ x, p }) => {
   const rule = a.noResponseMeansNo === true ? "no reply means no" : a.noResponseMeansNo === false ? "always replies" : null;
   const wish = (a.mswlNotes ?? "").trim();
   const rated = typeof a.starRating === "number" && a.starRating > 0;
-  const email = (a.email ?? "").trim();
-  const site = (a.website ?? "").trim();
   const q = x.q;
   const queried = !!q && x.stand !== "none";
-  const second = queried ? rowSecond(x, p.nowMs) : null;
-  const closed = queried && q!.court === "closed";
-  const day = queried && !closed ? daysSinceSent(q!.sentMs, p.nowMs) : null;
-  const gap = p.gapOf?.(a.id) ?? null;
+  const line = queried ? queryLine(q!.status) : null;
+  const link = profileLink(a);
   const on = p.openId === a.id;
   const open = () => p.onOpen(a.id);
+  const fill = () => (p.onFillGaps ? p.onFillGaps(a.id) : p.onEdit(a.id, "want", "genres"));
   return (
     <div role="row" tabIndex={0} className={`cl24-tr cl252-tr${wish ? "" : " cl253-nowl"}`} data-cl24="row" data-nb1="name-row" data-id={a.id} data-k={x.stand} aria-current={on ? "true" : undefined}
       aria-label={`${name}${agency ? `, ${agency}` : ""}`}
@@ -281,32 +281,34 @@ const Row: React.FC<{ x: AgentFacts; p: ContactSheet24Props }> = ({ x, p }) => {
         <StateDisc x={x} />
         <span className="cl24-whot cl252-whot"><b data-cl252="name">{name}</b>{sub ? <small data-cl252="agency">{sub}</small> : null}</span>
       </span>
-      <span role="cell" className="cl24-gen cl252-gen" data-cl24="genres" data-total={genres.length}>
-        <GenrePills genres={genres} hit={p.genreHit} word={p.genreWord} max={Infinity} empty={null} fit />
-      </span>
-      <span role="cell" className="cl24-c2 cl252-rep" data-col="3" data-cl252="replies">
-        {weeks ? <><b>~{weeks} {weeks === 1 ? "wk" : "wks"}</b>{rule ? <small>{rule}</small> : null}</> : null}
-      </span>
-      <span role="cell" className="cl24-qs cl252-qs" data-cl24="query">
-        {!queried ? (
-          x.door === "closed" ? <span className="cl24-shut cl251-shut" data-cl251="closed-tag">Closed to queries</span>
-            : <span className="cl252-nq"><em>Not queried</em><button type="button" className="cl252-hlog" data-cl24="log" onClick={() => p.onLog(a.id)}>{I.plus}Log a query</button></span>
-        ) : (
-          <>
-            <span className="cl252-ql1">
-              <QueryPill status={q!.status} />
-              {day != null ? <span className="cl252-day" data-cl252="day" data-n={day}>DAY {day}</span> : null}
-            </span>
-            <span className="cl252-ql2">
-              <Track status={q!.status} dates={q!.query} />
-              {second?.due ? <span className="cl252-next" data-cl252="next">{second.text}</span>
-                : <span className="cl252-sent" data-cl252="sent">{closed ? "Closed" : second?.text ?? ""}</span>}
-            </span>
-          </>
-        )}
-      </span>
+      {link ? (
+        <span role="cell" className={`cl24-gen cl254-pl${link.span2 ? " cl254-span2" : ""}`} data-cl24="genres" data-total={0} data-cl254="profile-cell" data-span={link.span2 ? 2 : 1}>
+          <button type="button" className="cl254-fillp" data-cl254="profile-link" onClick={fill}>{link.words}</button>
+        </span>
+      ) : (
+        <span role="cell" className="cl24-gen cl252-gen" data-cl24="genres" data-total={genres.length}>
+          <GenrePills genres={genres} hit={p.genreHit} word={p.genreWord} max={Infinity} empty={null} fit />
+        </span>
+      )}
+      {link?.span2 ? null : (
+        <span role="cell" className="cl24-c2 cl252-rep" data-col="3" data-cl252="replies">
+          {weeks ? <><b>~{weeks} {weeks === 1 ? "wk" : "wks"}</b>{rule ? <small>{rule}</small> : null}</> : null}
+        </span>
+      )}
       <span role="cell" className="cl24-ad cl252-rate" data-col="5" data-cl251="rating" data-n={rated ? a.starRating : 0}>
         {rated ? <Tally n={a.starRating} /> : null}
+      </span>
+      <span role="cell" className="cl24-qs cl252-qs cl254-qs" data-col="4" data-cl24="query">
+        {!queried ? (
+          x.door === "closed" ? <span className="cl24-shut cl251-shut" data-cl251="closed-tag">Closed to queries</span>
+            : <span className="cl254-q cl254-q--nq" data-cl254="query-line" data-status="none">{NQ_RING}<em>Not queried</em>
+              <button type="button" className="cl252-hlog" data-cl24="log" onClick={() => p.onLog(a.id)}>{I.plus}Log a query</button></span>
+        ) : (
+          <span className="cl254-q" data-cl254="query-line" data-status={q!.status}>
+            <StatusDot status={q!.status} overrideSize={15} />
+            <span className="cl254-qt">{line!.head}{line!.stage ? <><i className="cl254-dot"> · </i>{line!.stage}</> : null}</span>
+          </span>
+        )}
       </span>
       {wish ? (
         <span className="cl252-wl" data-cl252="wishlist" role="cell">
@@ -314,13 +316,6 @@ const Row: React.FC<{ x: AgentFacts; p: ContactSheet24Props }> = ({ x, p }) => {
           <span className="cl252-wq" data-cl252="wish-text"><i aria-hidden="true">“</i>{wish}<i aria-hidden="true">”</i></span>
         </span>
       ) : null}
-      <span className="cl24-qa" data-cl24="quick">
-        {gap && p.onFillGaps ? (
-          <button type="button" className="cl253-fill" data-cl253="fill" data-n={gap.n} onClick={() => p.onFillGaps!(a.id)}>{fillGapsWords(gap.n)} →</button>
-        ) : null}
-        {email ? <button type="button" className="cl253-ic" title="Copy email" aria-label={`Copy ${name}’s email`} data-cl24="copy-email" onClick={() => copy(email)}>{I.mail}</button> : null}
-        {site ? <a href={hrefFor(site) ?? undefined} className="cl253-ic" target="_blank" rel="noreferrer noopener" title="Open website" aria-label={`Open ${name}’s website`} data-cl24="open-site">{I.web}</a> : null}
-      </span>
     </div>
   );
 };

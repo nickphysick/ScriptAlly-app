@@ -139,6 +139,7 @@ export function sanitiseListVisit(raw: unknown): ListVisit | null {
     always: sf.always === true,
     genres: Array.isArray(sf.genres) ? [...new Set(sf.genres.filter((x): x is string => typeof x === "string" && x.trim().length > 0 && x.length <= 80))].slice(0, 20) : [],
     genreMode: sf.genreMode === "all" ? "all" : "any",
+    missing: sf.missing === true,
   };
   const scroll = typeof r.scroll === "number" && Number.isFinite(r.scroll) && r.scroll > 0 ? Math.min(Math.round(r.scroll), 1_000_000) : d.scroll;
   return {

@@ -72,115 +72,13 @@ test("CL253-E1 · empty cells are blank, at rest and on hover; no wishlist, no l
   E1.done(10);
 });
 
-/* ═════════ E2 · one action, Housekeeping's count ═════════ */
-test("CL253-E2 · a row with gaps shows exactly one Fill in action, first in the group, n = Housekeeping's count", async ({ page }) => {
-  test.setTimeout(300_000);
-  const E2 = new Ledger("E2");
-  const vp = SIZES[0];
-  await openCl24(page, vp);
-  /* Housekeeping's own figures: the drawer's By agent view, each agent's gap chips */
-  await page.locator("[data-cl251='cell'][data-k='health']").first().click(T).catch(() => {});
-  await page.waitForTimeout(1200);
-  await page.locator("[data-hkv='view'][data-v='agent']").first().click(T).catch(() => {});
-  await page.waitForTimeout(800);
-  const hk = await page.evaluate(() => Object.fromEntries([...document.querySelectorAll<HTMLElement>("[data-hk8='agent-row']")].map((r) => [r.dataset.agent ?? "", r.querySelectorAll("[data-hk8='gap-chip']").length])));
-  E2.check("population (Housekeeping)", Object.keys(hk).length >= 3, `${Object.keys(hk).length} agents with gaps`);
-  await page.keyboard.press("Escape"); await page.waitForTimeout(400);
-  await openCl24(page, vp);
-  await toList(page);
-  const R = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-cl24='table'] [data-cl24='row']")].filter((r) => r.offsetHeight).map((r) => {
-    const qa = r.querySelector<HTMLElement>("[data-cl24='quick']");
-    const fills = qa ? [...qa.querySelectorAll<HTMLElement>("button, a")].filter((b) => /^Fill in \d+ gaps? →$/.test((b.textContent ?? "").trim())) : [];
-    const first = qa ? [...qa.children].find((c) => getComputedStyle(c).display !== "none") : null;
-    return { id: r.dataset.id ?? "", n: fills.length, first: !!first && fills[0] === first, words: fills[0]?.textContent?.trim() ?? "", count: Number(/(\d+)/.exec(fills[0]?.textContent ?? "")?.[1] ?? 0) };
-  }));
-  E2.check("population (rows)", R.length >= 8 && R.some((r) => r.n === 1), `${R.length} rows, ${R.filter((r) => r.n).length} with the action`);
-  for (const r of R) {
-    const want = hk[r.id] ?? 0;
-    if (want) {
-      E2.check(`${r.id} one action, first`, r.n === 1 && r.first, `${r.n} button(s)${r.first ? "" : ", not first"}`);
-      E2.check(`${r.id} n = Housekeeping`, r.count === want && r.words === `Fill in ${want} ${want === 1 ? "gap" : "gaps"} →`, `"${r.words}" vs ${want}`);
-    } else E2.check(`${r.id} no gaps, no action`, r.n === 0, `${r.n} button(s)`);
-  }
-  /* shown on hover */
-  const id = R.find((r) => r.n === 1)?.id;
-  if (id) {
-    await page.locator(`[data-cl24='row'][data-id='${id}']`).first().hover();
-    await page.waitForTimeout(250);
-    const vis = await page.evaluate((i) => { const b = document.querySelector<HTMLElement>(`[data-cl24='row'][data-id='${i}'] [data-cl253='fill']`); return !!b && b.getBoundingClientRect().width > 0 && Number(getComputedStyle(b.parentElement!).opacity) > 0.9; }, id);
-    E2.check("shown on hover", vis, String(vis));
-  }
-  E2.done(20);
-});
-
-/* ═════════ E3 · lands in the edit mode at the first gap ═════════ */
-test("CL253-E3 · the action opens the panel in edit mode, focus in the first missing field", async ({ page }) => {
-  test.setTimeout(300_000);
-  const E3 = new Ledger("E3");
-  const vp = SIZES[0];
-  await openCl24(page, vp);
-  await page.locator("[data-cl251='cell'][data-k='health']").first().click(T).catch(() => {});
-  await page.waitForTimeout(1200);
-  await page.locator("[data-hkv='view'][data-v='agent']").first().click(T).catch(() => {});
-  await page.waitForTimeout(800);
-  const firsts = await page.evaluate(() => Object.fromEntries([...document.querySelectorAll<HTMLElement>("[data-hk8='agent-row']")].map((r) => [r.dataset.agent ?? "", (r.querySelector<HTMLElement>("[data-hk8='gap-chip']")?.dataset.key ?? "").split(":").pop() ?? ""])));
-  await page.keyboard.press("Escape"); await page.waitForTimeout(300);
-  const FIELD: Record<string, string> = { reply: "[data-ae='weeks']", genres: "[data-ae='genres']", wishlist: "[data-ae='wishlist']", materials: "[data-ae='materials']", reopen: "[data-f='reopens']" };
-  const ids = ["clv181-bare", ...Object.keys(firsts).filter((k) => k !== "clv181-bare" && firsts[k] !== firsts["clv181-bare"]).slice(0, 2)];
-  E3.check("population", ids.every((i) => firsts[i]), ids.map((i) => `${i}:${firsts[i]}`).join(" "));
-  for (const id of ids) {
-    await openCl24(page, vp);
-    await toList(page);
-    await page.locator(`[data-cl24='row'][data-id='${id}']`).first().scrollIntoViewIfNeeded();
-    await page.locator(`[data-cl24='row'][data-id='${id}']`).first().hover();
-    await page.locator(`[data-cl24='row'][data-id='${id}'] [data-cl253='fill']`).first().click(T).catch(() => {});
-    await page.waitForTimeout(1000);
-    const m = await page.evaluate((sel) => {
-      const em = document.querySelector("[data-cl24='panel'] [data-cl252='edit-mode']");
-      const a = document.activeElement as HTMLElement | null;
-      return { em: !!em, inField: !!a && !!em && !!a.closest(sel), at: a ? `${a.tagName.toLowerCase()} ${a.getAttribute("data-ae") ?? a.closest("[data-ae]")?.getAttribute("data-ae") ?? ""}` : "none" };
-    }, FIELD[firsts[id]] ?? "[data-none]");
-    E3.check(`${id} edit mode`, m.em, String(m.em));
-    E3.check(`${id} focus in ${firsts[id]}`, m.inField, m.at);
-    await page.keyboard.press("Escape"); await page.waitForTimeout(300);
-  }
-  E3.done(5);
-});
-
-/* ═════════ E4 · the group never lies over Your query's text ═════════ */
-test("CL253-E4 · the hover group does not cover the Your query cell's text", async ({ page }) => {
-  test.setTimeout(300_000);
-  const E4 = new Ledger("E4");
-  for (const vp of SIZES) {
-    const at = `${vp.width}`;
-    await openCl24(page, vp);
-    await mutate(page, "E4", ".cl252-tr .cl24-qa { right: 260px !important; }");
-    await toList(page);
-    const ids = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-cl24='table'] [data-cl24='row']")].filter((r) => r.offsetHeight && r.querySelector("[data-cl24='quick'] > *")).map((r) => r.dataset.id ?? ""));
-    E4.check(`${at} population`, ids.length >= 5, `${ids.length} rows with a hover group`);
-    let worst = ""; let hits = 0;
-    for (const id of ids) {
-      await focusRow(page, id);
-      await page.waitForTimeout(60);
-      const o = await page.evaluate((i) => {
-        const r = document.querySelector<HTMLElement>(`[data-cl24='row'][data-id='${i}']`)!;
-        const kids = [...r.querySelectorAll<HTMLElement>("[data-cl24='quick'] > *")].filter((k) => getComputedStyle(k).display !== "none" && k.getBoundingClientRect().width > 0);
-        if (!kids.length) return null;
-        const g = { l: Math.min(...kids.map((k) => k.getBoundingClientRect().left)), r: Math.max(...kids.map((k) => k.getBoundingClientRect().right)), t: Math.min(...kids.map((k) => k.getBoundingClientRect().top)), b: Math.max(...kids.map((k) => k.getBoundingClientRect().bottom)) };
-        const q = r.querySelector<HTMLElement>("[data-cl24='query']")!;
-        const boxes: DOMRect[] = [];
-        const walk = document.createTreeWalker(q, NodeFilter.SHOW_TEXT);
-        for (let n = walk.nextNode(); n; n = walk.nextNode()) { if (!(n.textContent ?? "").trim()) continue; const rg = document.createRange(); rg.selectNodeContents(n); boxes.push(...rg.getClientRects()); }
-        for (const e of q.querySelectorAll<HTMLElement>("[data-cl252='qpill'], [data-cl252='track'], .cl251-shut")) boxes.push(e.getBoundingClientRect());
-        const hit = boxes.find((b) => b.width > 0 && b.left < g.r - 0.5 && b.right > g.l + 0.5 && b.top < g.b - 0.5 && b.bottom > g.t + 0.5);
-        return hit ? `group ${g.l.toFixed(0)}–${g.r.toFixed(0)} over text ${hit.left.toFixed(0)}–${hit.right.toFixed(0)}` : "";
-      }, id);
-      if (o) { hits += 1; worst ||= `${id}: ${o}`; }
-    }
-    E4.check(`${at} no overlap`, hits === 0, hits ? `${hits} rows — ${worst}` : `${ids.length} rows clear`);
-  }
-  E4.done(4);
-});
+/* ═════════ E2 · E3 · E4 — RETIRED by Contact list v25.4 D ═════════
+   E2 (one "Fill in {n} gaps" action per row, n = Housekeeping's count), E3 (it opens the edit mode at the first gap)
+   and E4 (the hover group never lies over Your query) all measured v25.3's hover button, which v25.4 removes from the
+   row with the copy / website icons. Their laws moved rather than lapsed: CL254-F4 asserts the row has no hover
+   action but "Log a query"; F6 holds the card's "{n} details missing" and the Missing details filter to Housekeeping's
+   count; F3 holds the sparse-profile link's door to the edit mode at the first gap. Recover the cases from
+   `contact-list-v25-3` if the button ever returns. */
 
 /* ═════════ E5 · whole pills ═════════ */
 test("CL253-E5 · every pill is whole inside its cell; shown + n = genres", async ({ page }) => {

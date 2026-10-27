@@ -24,12 +24,7 @@ function doneAll(...xs: [Ledger, number][]) {
 }
 type Data = { agents: Record<string, { stars: number | null; genres: number; mswl: string; email: string }>; queries: { id: string; agentId: string; status: string; sent: number | null; partial: boolean; full: boolean; offer: boolean }[] };
 const data = (): Data => JSON.parse(execFileSync("node", ["tests/e2e/cl252Data.mjs"], { encoding: "utf8" }));
-/** the stage each live status sits on — written here, never read from the page */
-const STAGE: Record<string, number> = {
-  Queried: 0, "Partial Requested": 1, "Partial Sent": 1, "Full Requested": 2, "Full Sent": 2, "Revise & Resubmit": 2, Resubmitted: 2, Offer: 3, Signed: 3,
-};
-const CLOSED = new Set(["Rejected", "No Response", "Withdrawn"]);
-const INK_NEXT = "rgb(162, 69, 42)";
+/* v25.4: the track's stage table, the closed set and the next step's rust went with A5's pill and track (re-pointed below) */
 
 /** scroll the visible page so the list's title is near the top */
 async function toList(page: Page) {
@@ -69,7 +64,11 @@ async function rows(page: Page) {
       /* the line STARTS where its content starts: the nib, level with the name (the element's own box begins at the
          grid column, 58px earlier — its padding is the disc and the gap) */
       wl: wl ? { l: nib ? nib.getBoundingClientRect().left : wl.getBoundingClientRect().left, r: wl.getBoundingClientRect().right, h: wl.getBoundingClientRect().height, lines: lines(wq), text: wl.innerText.trim() } : null,
-      status: qp?.dataset.status ?? null,
+      /* re-pointed (v25.4 B): the row's query is ONE line (`[data-cl254='query-line']`) — the status pill is gone, so the
+         status is read off the line; `old` counts any pill, track, day or next step left in the row (there must be none) */
+      status: qp?.dataset.status ?? (() => { const s = r.querySelector<HTMLElement>("[data-cl254='query-line']")?.dataset.status; return s && s !== "none" ? s : null; })(),
+      line: (() => { const l = r.querySelector<HTMLElement>("[data-cl254='query-line']"); return l ? { glyph: !!l.querySelector("svg, [role='img']"), text: (l.innerText || "").trim() } : null; })(),
+      old: r.querySelectorAll("[data-cl252='qpill'], [data-cl252='track'], [data-cl252='day'], [data-cl252='next']").length,
       node: node ? { svg: node.querySelector("svg")?.innerHTML ?? "", pill: qp?.querySelector("svg")?.innerHTML ?? "" } : null,
       past: r.querySelectorAll("[data-cl252='track-past']").length,
       day: r.querySelector<HTMLElement>("[data-cl252='day']") ? Number(r.querySelector<HTMLElement>("[data-cl252='day']")!.dataset.n) : null,
@@ -96,7 +95,8 @@ test("CL252-A1 A2 A3 A5 A6 A7 · the QueryHawk row", async ({ page }) => {
     await toList(page);
     /* A1 · the headings */
     const heads = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-cl24='heads'] > [role='columnheader']")].filter((h) => h.getBoundingClientRect().width > 0 && getComputedStyle(h).display !== "none").map((h) => (h.innerText || "").replace(/[↓↑]/g, "").trim().toLowerCase()));
-    const want = vp.width > 1440 ? ["agent", "what they want", "replies in", "your query", "your rating"] : ["agent", "what they want", "your query"];
+    /* re-pointed (v25.4 A): Your rating before Your query, and Replies in back at ≤1440 (Your rating drops there) */
+    const want = vp.width > 1440 ? ["agent", "what they want", "replies in", "your rating", "your query"] : ["agent", "what they want", "replies in", "your query"];
     L.A1.check(`${at} headings`, heads.join("|") === want.join("|"), heads.join(" · "));
     /* every heading still sorts: pressing "What they want" turns its arrow on */
     await page.locator("[data-cl251='head'][data-key='fit']").first().click(T).catch(() => {});
@@ -107,8 +107,8 @@ test("CL252-A1 A2 A3 A5 A6 A7 · the QueryHawk row", async ({ page }) => {
     const R = await rows(page);
     L.A1.check(`${at} population`, R.length >= 8, `${R.length} rows`);
     for (const k of Object.values(L)) if (k !== L.A1 && k !== L.A5) k.check(`${at} population`, R.length >= 8, `${R.length} rows`);
-    /* A5's subject is the queried rows: a status pill, a track and (somewhere) a dated next step */
-    L.A5.check(`${at} population`, R.filter((r) => r.status).length >= 3 && R.some((r) => r.next), `${R.filter((r) => r.status).length} rows with a status, ${R.filter((r) => r.next).length} with a next step`);
+    /* re-pointed (v25.4 B): A5's subject is the queried rows' ONE line — the pill, track, day and next step left the row */
+    L.A5.check(`${at} population`, R.filter((r) => r.status).length >= 3, `${R.filter((r) => r.status).length} rows with a status`);
     for (const r of R) {
       const a = D.agents[r.id];
       /* A2 */
@@ -123,21 +123,12 @@ test("CL252-A1 A2 A3 A5 A6 A7 · the QueryHawk row", async ({ page }) => {
         /* re-pointed (v25.3): an agent with no genres has a blank cell — no "No genres yet" placeholder */
         L.A3.check(`${at} ${r.id} shown + n = genres`, a.genres === 0 ? r.pills.length === 0 && !r.none : r.pills.length + r.more === a.genres, `${r.pills.length}+${r.more} vs ${a.genres}`);
       }
-      /* A5 */
+      /* A5 — re-pointed (v25.4 B): the status pill with its day count over the track and the next step was v25.2's;
+         v25.4 replaces it with one line — the stage's StatusDot and "Queried" / "Queried · {stage}" (CL254-F2 holds the
+         words to Firestore). What survives here: the line exists with its glyph, and nothing of v25.2's is left. */
       if (r.status) {
-        L.A5.check(`${at} ${r.id} node is the StatusDot`, !!r.node && r.node.svg.length > 0 && r.node.svg === r.node.pill, r.node ? r.node.svg.slice(0, 40) : "no node");
-        const qs = D.queries.filter((q) => q.agentId === r.id && q.status === r.status);
-        const stage = CLOSED.has(r.status) ? null : STAGE[r.status];
-        if (stage != null) L.A5.check(`${at} ${r.id} past = stage`, r.past === stage, `${r.past} vs ${stage} (${r.status})`);
-        if (CLOSED.has(r.status) && qs.length) {
-          const reached = (q: Data["queries"][number]) => (q.offer ? 3 : q.full ? 2 : q.partial ? 1 : 0);
-          L.A5.check(`${at} ${r.id} closed sits on the furthest reached`, qs.some((q) => reached(q) === r.past), `${r.past} vs ${qs.map(reached).join("/")}`);
-        }
-        if (r.day != null) {
-          const days = qs.filter((q) => q.sent != null).map((q) => Math.floor((Date.now() - q.sent!) / 86_400_000));
-          L.A5.check(`${at} ${r.id} day = days since sent`, days.some((d) => Math.abs(d - r.day!) <= 1), `${r.day} vs ${days.join("/")}`);
-        }
-        if (r.next) L.A5.check(`${at} ${r.id} next step rust`, r.next === INK_NEXT, r.next);
+        L.A5.check(`${at} ${r.id} one line with its glyph`, !!r.line && r.line.glyph && /^Queried( · .+)?$/.test(r.line.text), r.line ? `"${r.line.text}"` : "no line");
+        L.A5.check(`${at} ${r.id} no pill, track, day or next step`, r.old === 0, `${r.old}`);
       }
       /* A6 */
       /* re-pointed (v25.3): only a row WITH a wishlist has the line; a row without one has none at all */
@@ -179,7 +170,9 @@ test("CL252-A8 · missing details never show + Add at rest", async ({ page }) =>
       await page.locator(`[data-cl24='row'][data-id='${id}']`).first().hover();
       await page.waitForTimeout(250);
       const t = await page.evaluate((i) => (document.querySelector<HTMLElement>(`[data-cl24='row'][data-id='${i}']`)?.innerText ?? ""), id);
-      A8.check(`${at} on hover`, !t.includes("+ Add") && /Fill in \d+ gaps? →/.test(t), t.replace(/\s+/g, " ").slice(0, 120));
+      /* re-pointed (v25.4 D): the row's gap action is retired — on hover a row with gaps shows no "+ Add" and no gaps
+         button either (CL254-F4 holds the row's hover actions; F3 the sparse-profile link) */
+      A8.check(`${at} on hover`, !t.includes("+ Add") && !/Fill in \d+ gaps? →/.test(t), t.replace(/\s+/g, " ").slice(0, 120));
       await page.mouse.move(3, 3);
     }
   }

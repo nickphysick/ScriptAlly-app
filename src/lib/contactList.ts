@@ -254,6 +254,9 @@ export interface AgentFacts {
   rating: number | null;
   genres: string[];
   lastMs: number | null;
+  /** Contact list v25.4 — Housekeeping's gap count for the agent (`agentGapAction(hk, id).n`), set by the page that
+   *  owns Housekeeping's model; absent reads as 0. The "Missing details" filter reads it. */
+  gaps?: number;
 }
 
 export function agentFacts(a: Agent, rows: readonly QcRow[], msId: string | null): AgentFacts {
@@ -344,9 +347,11 @@ export interface ContactFilters {
   /** genre KEYS (`genreKey`) — canonical ids for anything picked from the app's genre list */
   genres: string[];
   genreMode: GenreMode;
+  /** v25.4 D — "Missing details": agents with any Housekeeping gap (`AgentFacts.gaps > 0`) */
+  missing?: boolean;
 }
 export const emptyContactFilters = (): ContactFilters =>
-  ({ status: [], action: false, open: "either", queried: "either", mats: false, always: false, genres: [], genreMode: "any" });
+  ({ status: [], action: false, open: "either", queried: "either", mats: false, always: false, genres: [], genreMode: "any", missing: false });
 export const OPEN_CHOICES: { key: OpenChoice; label: string }[] = [
   { key: "either", label: "Either" }, { key: "open", label: "Open now" }, { key: "closed", label: "Closed for now" },
   { key: "unknown", label: DOOR_NOT_KNOWN },
@@ -354,8 +359,8 @@ export const OPEN_CHOICES: { key: OpenChoice; label: string }[] = [
 export const QUERIED_CHOICES: { key: QueriedChoice; label: string }[] = [
   { key: "either", label: "Either" }, { key: "yes", label: "Queried" }, { key: "no", label: "Not queried yet" },
 ];
-export type FilterSection = "status" | "action" | "open" | "queried" | "mats" | "always" | "genres";
-export const FILTER_SECTIONS: FilterSection[] = ["status", "action", "open", "queried", "mats", "always", "genres"];
+export type FilterSection = "status" | "action" | "open" | "queried" | "mats" | "always" | "genres" | "missing";
+export const FILTER_SECTIONS: FilterSection[] = ["status", "action", "open", "queried", "mats", "always", "genres", "missing"];
 /** how many filters are on — one per applied-filters chip (search is not a filter here and is never counted) */
 export const contactFilterCount = (f: ContactFilters): number => appliedFilters(f, (k) => k).length;
 
@@ -415,6 +420,7 @@ export function appliedFilters(f: ContactFilters, genreLabel: (k: string) => str
   if (f.queried !== "either") out.push({ key: "queried", label: f.queried === "yes" ? "Queried" : "Not queried yet", drop: (g) => ({ ...g, queried: "either" }) });
   if (f.mats) out.push({ key: "mats", label: "Missing materials", drop: (g) => ({ ...g, mats: false }) });
   if (f.always) out.push({ key: "always", label: "Always replies", drop: (g) => ({ ...g, always: false }) });
+  if (f.missing) out.push({ key: "missing", label: "Missing details", drop: (g) => ({ ...g, missing: false }) });
   if (f.genres.length) {
     out.push({
       key: "genres", label: `Genre: ${genreLabel(f.genres[0])}${f.genres.length > 1 ? ` +${f.genres.length - 1}` : ""}`,
@@ -453,6 +459,8 @@ export const isClosedNow = (x: Pick<AgentFacts, "openKey">) => x.openKey === "cl
 export const isDoorUnknown = (x: Pick<AgentFacts, "openKey">) => x.openKey === "unstated";
 export const isMissingMaterials = (x: Pick<AgentFacts, "agent">) => (x.agent.materialsWanted ?? []).length === 0;
 export const isAlwaysResponds = (x: Pick<AgentFacts, "agent">) => x.agent.noResponseMeansNo === false;
+/** v25.4 D — any Housekeeping gap: the count the card's "{n} details missing" line states */
+export const hasMissingDetails = (x: Pick<AgentFacts, "gaps">) => (x.gaps ?? 0) > 0;
 
 const sectionMatch: Record<FilterSection, (x: AgentFacts, f: ContactFilters) => boolean> = {
   status: (x, f) => f.status.length === 0 || f.status.includes(x.status14),
@@ -461,6 +469,7 @@ const sectionMatch: Record<FilterSection, (x: AgentFacts, f: ContactFilters) => 
   queried: (x, f) => f.queried === "either" || (f.queried === "yes" ? isQueried(x) : !isQueried(x)),
   mats: (x, f) => !f.mats || isMissingMaterials(x),
   always: (x, f) => !f.always || isAlwaysResponds(x),
+  missing: (x, f) => !f.missing || hasMissingDetails(x),
   genres: (x, f) => {
     if (f.genres.length === 0) return true;
     const mine = new Set(x.genres.map(genreKey));

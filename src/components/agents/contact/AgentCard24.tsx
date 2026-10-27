@@ -95,6 +95,9 @@ export interface AgentCard24Props {
   /** Contact list v25.2 C — editing inside the card: the inline edits and the card's edit mode (absent: the card
    *  hands every edit to `onEdit`, as before) */
   edit?: CardEditKit;
+  /** Contact list v25.4 D — Housekeeping's gaps for the agent: the count, and the field the edit mode opens at (null:
+   *  none, and the Profile tab says nothing about gaps) */
+  gaps?: { n: number; focus: AgentCardField; tab: AgentCardTab } | null;
 }
 
 /** v25.2 C — what the card needs to edit in place: the agent as a draft, the genre lists, one inline save, the edit
@@ -426,6 +429,19 @@ export const Foot: React.FC<{ p: AgentCard24Props; set: SetKey; wide?: boolean; 
 
 export type CardTab24 = "profile" | "history" | "notes";
 
+/** v25.4 D — the Profile tab's gap line, "{n} details missing · Fill them in →", at the top; absent at 0. The link opens
+ *  the card's edit mode at the first missing field (Housekeeping's order). */
+export const GapLine: React.FC<{ p: AgentCard24Props; ed: CardEdit }> = ({ p, ed }) => {
+  const g = p.gaps;
+  if (!g || g.n <= 0) return null;
+  const go = () => { if (p.edit) { ed.setInline(null); ed.setEditing({ focus: g.focus }); } else p.onEdit(g.tab, g.focus); };
+  return (
+    <p className="cl254-gapl" data-cl254="gap-line" data-n={g.n}>
+      {g.n} {g.n === 1 ? "detail" : "details"} missing · <button type="button" data-cl254="gap-fill" onClick={go}>Fill them in →</button>
+    </p>
+  );
+};
+
 export const AgentCard24: React.FC<AgentCard24Props> = (p) => {
   const m = useCardModel(p);
   const { x } = p;
@@ -466,6 +482,7 @@ export const AgentCard24: React.FC<AgentCard24Props> = (p) => {
         <div className="qc149c-pane cl24c-pane" role="tabpanel" data-cl24="pane" data-pane={tab}>
           {tab === "profile" ? (
             <div className="qc149c-pg">
+              <GapLine p={p} ed={ed} />
               <Facts facts={m.facts} p={p} ed={ed} first={m.first} />
               <Contact p={p} first={m.first} ed={ed} />
               <AlsoAt p={p} />

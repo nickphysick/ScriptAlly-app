@@ -1,0 +1,53 @@
+/*
+ * Contact list v25.4 (design-refs/contact-list-v25-4/) — simpler rows. The columns read Agent · What they want ·
+ * Replies in · Your rating · Your query (Your rating drops at ≤1440 of window); Your query is one line; an agent with
+ * no genres shows one profile link (spanning Replies in when there is no reply time); and the row has no hover
+ * actions but "Log a query" on a not-queried agent.
+ */
+@media (min-width: 768px) {
+  /* Your query's floor (244) is its longest one line — 15 of glyph, 9 of gap and "Queried · Closed with no reply" at
+     219 — so a stage never ellipsises above 1440 either; the fractions are the pack's (measured: at 1512 the plain
+     1.7fr gave 193px of text for "Queried · Partial requested", which needs 194) */
+  .cl24-sheet { --cl24-cols: minmax(0, 2.2fr) minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 0.9fr) minmax(244px, 1.7fr); }
+  /* the rating no longer hides on hover: nothing lies over it */
+  .cl24-tr:hover .cl24-ad, .cl24-tr:focus-within .cl24-ad { visibility: visible; }
+
+  /* B · Your query, one line */
+  .cl24-qs.cl254-qs { gap: 0; }
+  .cl254-q {
+    display: flex; align-items: center; gap: 9px; min-width: 0; white-space: nowrap;
+    font: 400 15.5px/1.3 var(--sp-serif) !important; color: #1c130f;
+  }
+  .cl254-q > svg, .cl254-q > span:first-child:not(.cl254-qt) { flex: none; }
+  .cl254-qt { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: inherit !important; color: inherit; }
+  .cl254-qt .cl254-dot { font: inherit !important; font-style: normal; color: #9a928a; }
+  .cl254-q--nq { color: #8a837b; }
+  .cl254-q--nq > em { font: italic 400 15.5px/1.3 var(--sp-serif) !important; color: #8a837b; white-space: nowrap; }
+  .cl254-q--nq > .cl24-nq { width: 15px; height: 15px; color: #8a837b; }
+  .cl254-q--nq > .cl252-hlog { margin-left: 4px; }
+
+  /* C · the sparse-profile link: always shown, spanning Replies in when there is no reply time */
+  .cl254-pl { overflow: hidden; }
+  .cl24-tr > .cl254-span2 { grid-column: span 2; }
+  .cl254-fillp {
+    all: unset; cursor: pointer; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    font: 400 14.5px/1.4 var(--sp-type) !important; color: #2a3a52;
+    text-decoration: underline; text-decoration-color: rgba(42, 58, 82, 0.35); text-underline-offset: 4px;
+  }
+  .cl254-fillp:hover { text-decoration-color: #2a3a52; }
+  .cl254-fillp:focus-visible { outline: 2px solid #2a3a52; outline-offset: 3px; border-radius: 2px; }
+}
+@media (min-width: 768px) and (max-width: 1440px) {
+  /* ≤1440: Agent · What they want · Replies in · Your query — Your rating drops, Replies in comes back */
+  .cl24-sheet { --cl24-cols: minmax(0, 1.9fr) minmax(0, 1.9fr) minmax(0, 0.9fr) minmax(0, 1.9fr); }
+  .cl24-th > [data-col="3"], .cl24-tr > [data-col="3"] { display: block; }
+  .cl24-th > [data-col="3"] { display: inline-flex; }
+}
+
+/* D · the card's Profile tab: "{n} details missing · Fill them in →" (not media-scoped: the card is the card) */
+.cl254-gapl { margin: 0; font: italic 400 14px/1.4 var(--sp-serif) !important; color: #7a746c; }
+.cl254-gapl > button {
+  all: unset; cursor: pointer; font: italic 400 14px/1.4 var(--sp-serif) !important; color: #2a3a52;
+  text-decoration: underline; text-decoration-color: rgba(42, 58, 82, 0.35); text-underline-offset: 3px;
+}
+.cl254-gapl > button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }

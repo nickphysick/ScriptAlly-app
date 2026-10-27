@@ -288,7 +288,8 @@ test("CL251-E1 E2 E3 · no Submissions; Closed to queries; genres on one line, m
     E1.check(`${at} no Submissions`, !m.heads.includes("submissions"), m.heads.join(" · "));
     E1.check(`${at} the tag and no Log a query`, r.filter((x) => x.closed).every((x) => !x.log && x.k === "none"), `${r.filter((x) => x.closed && x.log).length} tagged rows with a Log a query`);
     E1.check(`${at} no door text`, r.every((x) => !x.door), `${r.filter((x) => x.door).length} rows with a door`);
-    E1.check(`${at} last column`, m.heads[m.heads.length - 1] === (vp.width > 1440 ? "your rating" : "your query"), `last heading "${m.heads[m.heads.length - 1]}"`);
+    /* re-pointed (v25.4 A): Your rating now comes BEFORE Your query, so Your query is the last column at every width */
+    E1.check(`${at} last column`, m.heads[m.heads.length - 1] === "your query", `last heading "${m.heads[m.heads.length - 1]}"`);
 
     const withTags = r.filter((x) => x.shown > 0);
     E2.check(`${at} population`, withTags.length > 0 && withTags.some((x) => x.hits.some(Boolean)), `${withTags.length} rows with genres, ${withTags.filter((x) => x.hits.some(Boolean)).length} with a match`);
@@ -300,7 +301,8 @@ test("CL251-E1 E2 E3 · no Submissions; Closed to queries; genres on one line, m
     if (vp.width > 1440) {
       const rated = r.filter((x) => truth[x.id]?.stars);
       E3.check(`${at} population`, rated.length > 0 && r.some((x) => truth[x.id] && truth[x.id].stars == null), `${rated.length} rated rows`);
-      E3.check(`${at} last heading`, m.heads[m.heads.length - 1] === "your rating", `last "${m.heads[m.heads.length - 1]}"`);
+      /* re-pointed (v25.4 A): Your rating is the second-last heading, just before Your query */
+      E3.check(`${at} rating before Your query`, m.heads[m.heads.length - 2] === "your rating" && m.heads[m.heads.length - 1] === "your query", `last two "${m.heads.slice(-2).join(" · ")}"`);
       const bad3 = r.filter((x) => truth[x.id] && (truth[x.id].stars ? x.stars !== truth[x.id].stars : !x.unrated));
       E3.check(`${at} stars = starRating`, bad3.length === 0, `${bad3.length} rows disagree with Firestore`);
     }

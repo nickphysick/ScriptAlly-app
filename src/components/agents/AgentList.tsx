@@ -289,11 +289,49 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
    * list — never a second ordering pass that could disagree.
    */
   const nowMs = useMemo(() => Date.now(), [qcRows]);
+  /* v25.4 D — Housekeeping's model is built BEFORE the list's facts, which carry its per-agent gap count (the
+     "Missing details" filter reads it); everything it reads is declared above.
+     ── Housekeeping v2 (Contact list v13 §6) ───────────────────────────────────────────────
+     The gap model over the WHOLE list. "Live" is any live query whatever the manuscript — the
+     reply window fans out to every query, so the scope chip has no say there; "fits", "queried" and
+     "passed" (ruling Q6) read the manuscript in scope. The reopen flag reads the writer's own undone
+     dated tasks (ruling b), so completing the reminder in To-do reopens the gap here by construction. */
+  const hkToday = useMemo(() => new Date(nowMs), [nowMs]);
+  const hkPrefs = useMemo(() => contactPrefsOf(currentUser, hkToday), [currentUser, hkToday]);
+  const hkReopenTaskById = useMemo(() => {
+    const m = new Map<string, boolean>();
+    for (const t of userTasks ?? []) {
+      if (t.agentId && !t.done && (t.dueDate ?? "").trim()) m.set(t.agentId, true);
+    }
+    return m;
+  }, [userTasks]);
+  const hkCtxById = useMemo(() => {
+    const m = new Map<string, HkAgentCtx>();
+    const msId = scoped?.id ?? null;
+    for (const a of agents) {
+      m.set(a.id, {
+        live: agentRows(qcRows, a.id, null).some((r) => r.court !== "closed"),
+        fits: fitsGenre(a, book),
+        queried: queries.some((q) => q.agentId === a.id && (!msId || q.manuscriptId === msId)),
+        passedOn: hasPassedOn(a, queries, msId),
+        hasReopenTask: hkReopenTaskById.get(a.id) ?? false,
+      });
+    }
+    return m;
+  }, [agents, qcRows, queries, scoped, book, hkReopenTaskById]);
+  const hkCtxOf = useCallback((a: Agent): HkAgentCtx => hkCtxById.get(a.id)
+    ?? { live: false, fits: false, queried: false, passedOn: false, hasReopenTask: false }, [hkCtxById]);
+  const hkAll = useMemo(() => hkModel(agents, hkCtxOf, hkPrefs), [agents, hkCtxOf, hkPrefs]);
+  /* dev only: the review aid that shows an all-filled list (lib/hkReviewAid); production reads `hkAll` */
+  const hkAllFilledAid = import.meta.env.MODE !== "production" && hkAllFilled();
+  const hk = useMemo(() => (hkAllFilledAid
+    ? hkModel(agents.filter((a) => (hkAll.gapsById.get(a.id)?.length ?? 0) === 0), hkCtxOf, hkPrefs)
+    : hkAll), [hkAllFilledAid, hkAll, agents, hkCtxOf, hkPrefs]);
   /* v13 §3 — THE NUMBERS STRIP: over the agents the list shows BEFORE filtering, never the filtered set.
      v14 §1.3: its figures are facts, not controls — the carousel they filled is retired. */
   const factsAll = useMemo(
-    () => agents.map((a) => agentFacts(a, qcRows, scoped?.id ?? null)),
-    [agents, qcRows, scoped],
+    () => agents.map((a) => ({ ...agentFacts(a, qcRows, scoped?.id ?? null), gaps: agentGapAction(hk, a.id)?.n ?? 0 })),
+    [agents, qcRows, scoped, hk],
   );
   /* ruling Q5: "takes the book" — any of the agent's genres matching the main genre or any subGenre */
   /* the pool: Find and the "At a glance" group — so every chip's count is faceted under them */
@@ -492,6 +530,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       /* the outcome, against the NEW pipeline (the old saveOutcome read the retired filter set):
          does the saved record still match the pool and the panel, and where does it land */
       const savedFacts = agentFacts(saved, qcRows, scoped?.id ?? null);
+      savedFacts.gaps = agentGapAction(hk, saved.id)?.n ?? 0;
       const survives = inPool(savedFacts) && matchesContactFilters(savedFacts, filters);
       const afterAll = [...agents.filter((a) => a.id !== saved.id), saved]
         .map((a) => (a.id === saved.id ? savedFacts : (factsAll.find((x) => x.agent.id === a.id) ?? agentFacts(a, qcRows, scoped?.id ?? null))));
@@ -559,42 +598,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     openPanel(id);
   }, [agents, openPanel]);
 
-  /* ── Housekeeping v2 (Contact list v13 §6) ───────────────────────────────────────────────
-     The gap model over the WHOLE list. "Live" is any live query whatever the manuscript — the
-     reply window fans out to every query, so the scope chip has no say there; "fits", "queried" and
-     "passed" (ruling Q6) read the manuscript in scope. The reopen flag reads the writer's own undone
-     dated tasks (ruling b), so completing the reminder in To-do reopens the gap here by construction. */
-  const hkToday = useMemo(() => new Date(nowMs), [nowMs]);
-  const hkPrefs = useMemo(() => contactPrefsOf(currentUser, hkToday), [currentUser, hkToday]);
-  const hkReopenTaskById = useMemo(() => {
-    const m = new Map<string, boolean>();
-    for (const t of userTasks ?? []) {
-      if (t.agentId && !t.done && (t.dueDate ?? "").trim()) m.set(t.agentId, true);
-    }
-    return m;
-  }, [userTasks]);
-  const hkCtxById = useMemo(() => {
-    const m = new Map<string, HkAgentCtx>();
-    const msId = scoped?.id ?? null;
-    for (const a of agents) {
-      m.set(a.id, {
-        live: agentRows(qcRows, a.id, null).some((r) => r.court !== "closed"),
-        fits: fitsGenre(a, book),
-        queried: queries.some((q) => q.agentId === a.id && (!msId || q.manuscriptId === msId)),
-        passedOn: hasPassedOn(a, queries, msId),
-        hasReopenTask: hkReopenTaskById.get(a.id) ?? false,
-      });
-    }
-    return m;
-  }, [agents, qcRows, queries, scoped, book, hkReopenTaskById]);
-  const hkCtxOf = useCallback((a: Agent): HkAgentCtx => hkCtxById.get(a.id)
-    ?? { live: false, fits: false, queried: false, passedOn: false, hasReopenTask: false }, [hkCtxById]);
-  const hkAll = useMemo(() => hkModel(agents, hkCtxOf, hkPrefs), [agents, hkCtxOf, hkPrefs]);
-  /* dev only: the review aid that shows an all-filled list (lib/hkReviewAid); production reads `hkAll` */
-  const hkAllFilledAid = import.meta.env.MODE !== "production" && hkAllFilled();
-  const hk = useMemo(() => (hkAllFilledAid
-    ? hkModel(agents.filter((a) => (hkAll.gapsById.get(a.id)?.length ?? 0) === 0), hkCtxOf, hkPrefs)
-    : hkAll), [hkAllFilledAid, hkAll, agents, hkCtxOf, hkPrefs]);
   const hkCheckin = useMemo(() => wishlistCheckin(agents, hkCtxOf, hkPrefs, hkToday), [agents, hkCtxOf, hkPrefs, hkToday]);
   const hkBook: HkBook = useMemo(() => ({ title: scoped?.title?.trim() || null, genre: scoped?.genre?.trim() || null, genres: book }), [scoped, book]);
   const [hkOpen, setHkOpen] = useState(false);
@@ -925,6 +928,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       onLog: () => openQueryDrawer({ mode: "log", agentId: id, ...(scoped?.id ? { manuscriptId: scoped.id } : {}) }),
       onEdit: (tab, focus) => openPanel(id, { tab: tab ?? "who", focus }),
       edit: editKitFor(x.agent),
+      /* v25.4 D — the Profile tab's "{n} details missing": Housekeeping's count, and its first gap's field */
+      gaps: (() => { const g = agentGapAction(hk, id); return g ? { n: g.n, focus: GAP_FOCUS[g.first].focus, tab: GAP_FOCUS[g.first].tab } : null; })(),
       onOpenQuery: (queryId) => navigate(`/queries?q=${encodeURIComponent(queryId)}`),
       onNotes: async (text) => (await writeAgentPatch(id, { notes: text })).ok,
       /* v24 E1/E2 — the genre fit against the book in scope, and the agent's colleagues at the agency */
@@ -1069,15 +1074,14 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             openId={cardId} onOpen={pickCard} search={search} onSearch={setSearch}
             onLog={(id) => openQueryDrawer({ mode: "log", agentId: id, ...(scoped?.id ? { manuscriptId: scoped.id } : {}) })}
             onEdit={(id, tab, focus) => openPanel(id, { tab, focus })}
-            /* v25.3 — the row's one gap action: Housekeeping's count, and the card's EDIT MODE at the first gap in
-               Housekeeping's order (never an inline box: the action is "fill in the gaps", plural) */
-            gapOf={(id) => agentGapAction(hk, id)}
+            /* v25.4 C — the sparse-profile link's door: the card's EDIT MODE at the agent's first gap in Housekeeping's
+               order (v25.3's), or at genres when Housekeeping holds none for them (a gap put off with Later) */
             onFillGaps={(id) => {
+              if (!agents.some((x) => x.id === id)) return;
               const g = agentGapAction(hk, id);
-              if (!g || !agents.some((x) => x.id === id)) return;
               setHkOpenRef.current(false);
               if (fullRef.current) setBookReq({ id, seq: Date.now() }); else setCardId(id);
-              setEditReq({ id, seq: Date.now(), edit: { focus: GAP_FOCUS[g.first].focus } });
+              setEditReq({ id, seq: Date.now(), edit: { focus: g ? GAP_FOCUS[g.first].focus : "genres" } });
             }}
             onExport={(rows) => downloadAgentsCsv(rows, (raw) => genreLabel(raw, personalGenres))} />
           </>

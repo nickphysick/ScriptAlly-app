@@ -27,13 +27,15 @@ export function socialOf(a: AgentFacts["agent"]): string {
 export const FilterMenu: React.FC<{
   anchor: HTMLElement; filters: ContactFilters; onFilters: (f: ContactFilters) => void; genres: { key: string; label: string; n: number }[];
   openN: number; showing: number; total: number; onExport: () => void;
-}> = ({ anchor, filters: f, onFilters, genres, openN, showing, total, onExport }) => {
+  /** v25.4 D — how many agents have any Housekeeping gap (the "Missing details" toggle; absent: no toggle) */
+  missingN?: number;
+}> = ({ anchor, filters: f, onFilters, genres, openN, showing, total, onExport, missingN }) => {
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
   useLayoutEffect(() => {
     const r = anchor.getBoundingClientRect();
     setPos({ top: r.bottom + 8, left: Math.max(12, Math.min(r.left, window.innerWidth - 332)) });
   }, [anchor]);
-  const any = f.genres.length > 0 || f.open === "open";
+  const any = f.genres.length > 0 || f.open === "open" || !!f.missing;
   const toggleGenre = (k: string) => onFilters({ ...f, genres: f.genres.includes(k) ? f.genres.filter((g) => g !== k) : [...f.genres, k], genreMode: "any" });
   return createPortal(
     <div className="lpop nb1-pop" data-lpop="filters" data-nb1="filter-menu" role="dialog" aria-label="Filter agents" style={{ top: pos?.top ?? -9999, left: pos?.left ?? -9999 }}>
@@ -50,6 +52,15 @@ export const FilterMenu: React.FC<{
         onClick={() => onFilters({ ...f, open: f.open === "open" ? "either" : "open" })}>
         <span className="nb1-bx" aria-hidden="true">{f.open === "open" ? "✓" : ""}</span>Open to queries only<em>{openN}</em>
       </button>
+      {missingN != null ? (
+        <>
+          <h6 className="nb1-gap">Profiles</h6>
+          <button type="button" className="nb1-ck" data-nb1="missing" data-cl254="missing-filter" aria-pressed={!!f.missing}
+            onClick={() => onFilters({ ...f, missing: !f.missing })}>
+            <span className="nb1-bx" aria-hidden="true">{f.missing ? "✓" : ""}</span>Missing details<em>{missingN}</em>
+          </button>
+        </>
+      ) : null}
       <div className="nb1-mf" data-nb1="filter-foot">
         <span data-nb1="filter-count">{showing} of {total} showing</span>
         {any ? <button type="button" data-nb1="filter-clear" onClick={() => onFilters(emptyContactFilters())}>Clear filters</button> : null}
