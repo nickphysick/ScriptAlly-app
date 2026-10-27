@@ -92,6 +92,8 @@ service cloud.firestore {
         // Querying goals (one-screen dashboard §6) — ONLY the target is stored; progress derives.
         // Absent-or-valid: an int target 1–999, a period from the closed set.
         && (!data.keys().hasAny(['goalTarget']) || (data.goalTarget is int && data.goalTarget >= 1 && data.goalTarget <= 999))
+        // Dashboard v105: the founding card's celebration plays once per new rank — the rank last celebrated, 0 (Egg) to 5.
+        && (!data.keys().hasAny(['foundingSeenTier']) || (data.foundingSeenTier is int && data.foundingSeenTier >= 0 && data.foundingSeenTier <= 5))
         && (!data.keys().hasAny(['goalPeriod']) || (data.goalPeriod is string && (data.goalPeriod == 'quarter' || data.goalPeriod == 'month' || data.goalPeriod == 'year')))
         // Querying goals — the APPEND-ONLY list of intents that supersedes the two fields above.
         // Each entry is {target: int 1-999 | null, cadence: 'week'|'fortnight'|'month' | null,
@@ -849,7 +851,7 @@ service cloud.firestore {
       allow read, delete: if isOwner(userId);
       allow create: if isOwner(userId) && isValidUser(incoming());
       allow update: if isOwner(userId) && isValidUser(incoming()) && (
-        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'plan', 'trialStartDate', 'subscriptionStatus', 'onboardingComplete', 'queryingStage', 'homeCountry', 'queriesTheme', 'hasSeenTour', 'personalGenres', 'mutedTaskRules', 'tourSeenAt', 'tags', 'goalTarget', 'goalPeriod', 'queryingGoals', 'tourCompletedAt', 'tourDismissed', 'todoPrefs', 'notifyPrefs', 'discoverPrefs', 'marketingConsent', 'workspacePrefs', 'scheduledDeletion'])
+        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'plan', 'trialStartDate', 'subscriptionStatus', 'onboardingComplete', 'queryingStage', 'homeCountry', 'queriesTheme', 'hasSeenTour', 'personalGenres', 'mutedTaskRules', 'tourSeenAt', 'tags', 'goalTarget', 'goalPeriod', 'queryingGoals', 'tourCompletedAt', 'tourDismissed', 'todoPrefs', 'notifyPrefs', 'discoverPrefs', 'marketingConsent', 'workspacePrefs', 'scheduledDeletion', 'foundingSeenTier'])
         /**
          * ⚠️ A CLIENT MAY NOT CHANGE ITS OWN `plan` — THIS LINE IS THE WHOLE GUARD.
          *

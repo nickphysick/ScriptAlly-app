@@ -11,6 +11,9 @@
  * - Tiers by total: Fledgling 1 · Archivist 3 · Scout 8 · Mentor 15 · QueryHawk 25.
  * - Standing: writers with ≥1 contribution, ranked by total; topPct = rank ÷ N × 100 rounded UP to 5, shown only
  *   when N ≥ 10 and topPct ≤ 50.
+ * - THE FOUNDING NUMBER (Dashboard v105) is a waitlist place: a `verified` entry with a whole, positive `position`,
+ *   joined to an account by the email's hash. Nothing else gives a number — a writer with no proven place has none,
+ *   and the card says "FOUNDING WRITER" without one (Nick's ruling, 27 Oct). Never a sign-up order.
  * - ⚠️ A LEVEL NEVER GOES DOWN. A total is recomputed from scratch, so a status change can lower it; the stored tier is
  *   the higher of the derived tier and the stored `peakTier`.
  */
@@ -131,14 +134,18 @@ export interface FoundingStats {
   topPct: number | null;
 }
 
-/** Every writer at once: their docs grouped by uid, and the peaks already stored. */
+/**
+ * Every writer at once: their docs grouped by uid, the peaks already stored, and `others` — writers who hold a founding
+ * place but may have sent nothing yet (Dashboard v105), so their number reaches the card before their first note.
+ */
 export function computeAll(
   docs: readonly FeedbackFacts[],
   peaks: ReadonlyMap<string, TierKey | null>,
+  others: readonly string[] = [],
 ): Map<string, FoundingStats> {
   const byUid = new Map<string, FeedbackFacts[]>();
   for (const d of docs) if (d.uid) byUid.set(d.uid, [...(byUid.get(d.uid) ?? []), d]);
-  for (const uid of peaks.keys()) if (!byUid.has(uid)) byUid.set(uid, []);
+  for (const uid of [...peaks.keys(), ...others]) if (!byUid.has(uid)) byUid.set(uid, []);
   const totals = new Map<string, WriterTotals>();
   for (const [uid, list] of byUid) totals.set(uid, writerTotals(list));
   const every = [...totals.values()].map((t) => t.contributions);
@@ -147,4 +154,23 @@ export function computeAll(
     out.set(uid, { contributions: t.contributions, waiting: t.waiting, ...tierState(t.contributions, peaks.get(uid) ?? null), topPct: topPct(t.contributions, every) });
   }
   return out;
+}
+
+/** One `waitlist` doc as the founding number needs it (dates as epoch ms, or null). */
+export interface PlaceFacts { status?: unknown; position?: unknown; verifiedAt: number | null; createdAt: number | null }
+export interface Place { foundingNo: number; joinedAt: number | null }
+
+/** The waitlist proves a place: verified, with a whole, positive position. Anything else is no number at all. */
+export function placeFrom(w: PlaceFacts | null | undefined): Place | null {
+  if (!w || w.status !== "verified") return null;
+  const n = w.position;
+  if (typeof n !== "number" || !Number.isInteger(n) || n < 1) return null;
+  return { foundingNo: n, joinedAt: w.verifiedAt ?? w.createdAt ?? null };
+}
+
+/** The newest note the writer sent, counted or not (epoch ms), or null when none is dated. */
+export function lastSentAt(docs: readonly FeedbackFacts[]): number | null {
+  let at: number | null = null;
+  for (const d of docs) if (d.createdAt != null && (at == null || d.createdAt > at)) at = d.createdAt;
+  return at;
 }

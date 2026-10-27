@@ -1872,6 +1872,23 @@ describe('/betaFeedback', () => {
   });
 });
 
+// Dashboard v105 — the celebration's seen-mark: the owner may write foundingSeenTier, an integer 0–5, and nothing else may.
+describe('/users foundingSeenTier (DB105 A2)', () => {
+  const seed = () => asAdmin(async (ctx) => { await setDoc(doc(ctx.firestore(), 'users', ALICE), validUser(ALICE)); });
+  it('the owner writes an integer 0–5', async () => {
+    await seed();
+    for (const v of [0, 1, 5]) await assertSucceeds(updateDoc(doc(aliceCtx().firestore(), 'users', ALICE), { foundingSeenTier: v }));
+  });
+  it('refuses anything else', async () => {
+    await seed();
+    for (const v of [6, -1, 2.5, '2', null, true]) await assertFails(updateDoc(doc(aliceCtx().firestore(), 'users', ALICE), { foundingSeenTier: v }));
+  });
+  it('another writer cannot set it', async () => {
+    await seed();
+    await assertFails(updateDoc(doc(bobCtx().firestore(), 'users', ALICE), { foundingSeenTier: 1 }));
+  });
+});
+
 // Dashboard v93 — the founding card's contributions. Written only by the foundingStats functions (Admin SDK); a writer
 // reads their OWN doc; an admin reads all; no client writes.
 describe('/foundingStats', () => {

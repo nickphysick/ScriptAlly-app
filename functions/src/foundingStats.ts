@@ -13,16 +13,25 @@
  *    plus anyone already holding a `foundingStats` doc (their peak is kept). A writer with no doc reads as 0.
  * ⚠️ A LEVEL NEVER GOES DOWN: the stored `peakTier` is read back and the shown tier is never below it.
  *
+ * ⚠️ THE FOUNDING NUMBER (Dashboard v105) IS AN EMAIL JOIN, AND ONLY THAT. No account is linked to the waitlist, so each
+ *    sign-in email is normalised and hashed exactly as the waitlist keys its docs (`waitlistModel`), and a `verified`
+ *    entry's `position` becomes `foundingNo`. A writer with no proven place gets `foundingNo: null`. Writers who hold a
+ *    place are added to the population so the number reaches them before their first note. `lastSentAt` is the newest
+ *    note's `createdAt`.
+ *
  * Runs on any `betaFeedback` write (a status set in the console) and nightly at 03:00 Europe/London.
  */
 import { onDocumentWritten } from "firebase-functions/v2/firestore";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import { FieldValue, Timestamp, type Firestore } from "firebase-admin/firestore";
 import { DATABASE_ID, db } from "./firestore";
-import { computeAll, TIERS, type FeedbackFacts, type TierKey } from "./foundingContributions";
+import { getAuth } from "firebase-admin/auth";
+import { computeAll, lastSentAt, placeFrom, TIERS, type FeedbackFacts, type Place, type TierKey } from "./foundingContributions";
+import { emailHash, normaliseEmail } from "./waitlistModel";
 
 export const STATS_COLLECTION = "foundingStats";
 const FEEDBACK = "betaFeedback";
+const WAITLIST = "waitlist";
 
 const toMs = (v: unknown): number | null => {
   if (v instanceof Timestamp) return v.toMillis();
@@ -33,22 +42,56 @@ const toMs = (v: unknown): number | null => {
 };
 const isTier = (v: unknown): v is TierKey => typeof v === "string" && TIERS.some((t) => t.key === v);
 
+export interface Account { uid: string; email?: string | null }
+export interface RecomputeDeps { listUsers?: () => Promise<Account[]> }
+
+/** Every sign-in account's uid and email (the Admin SDK pages through them; the volume is small). */
+async function listAllUsers(): Promise<Account[]> {
+  const out: Account[] = [];
+  let token: string | undefined;
+  do {
+    const page = await getAuth().listUsers(1000, token);
+    for (const u of page.users) out.push({ uid: u.uid, email: u.email ?? null });
+    token = page.pageToken;
+  } while (token);
+  return out;
+}
+
 /** Read everything, compute everyone, write every stats doc. Returns how many were written. */
-export async function recomputeFoundingStats(store: Firestore = db): Promise<number> {
-  const [feedback, stats] = await Promise.all([store.collection(FEEDBACK).get(), store.collection(STATS_COLLECTION).get()]);
+export async function recomputeFoundingStats(store: Firestore = db, deps: RecomputeDeps = {}): Promise<number> {
+  const [feedback, stats, waitlist, accounts] = await Promise.all([
+    store.collection(FEEDBACK).get(), store.collection(STATS_COLLECTION).get(), store.collection(WAITLIST).get(),
+    (deps.listUsers ?? listAllUsers)(),
+  ]);
   const docs: FeedbackFacts[] = feedback.docs.map((d) => {
     const x = d.data();
     return { uid: typeof x.uid === "string" ? x.uid : null, status: typeof x.status === "string" ? x.status : null, counted: typeof x.counted === "boolean" ? x.counted : null, message: typeof x.message === "string" ? x.message : null, createdAt: toMs(x.createdAt) };
   });
   const peaks = new Map<string, TierKey | null>(stats.docs.map((d) => [d.id, isTier(d.get("peakTier")) ? d.get("peakTier") : null]));
-  const all = computeAll(docs, peaks);
+  const byHash = new Map(waitlist.docs.map((d) => [d.id, d]));
+  const places = new Map<string, Place>();
+  for (const a of accounts) {
+    const email = normaliseEmail(a.email);
+    if (!email) continue;
+    const w = byHash.get(emailHash(email));
+    const p = w ? placeFrom({ status: w.get("status"), position: w.get("position"), verifiedAt: toMs(w.get("verifiedAt")), createdAt: toMs(w.get("createdAt")) }) : null;
+    if (p) places.set(a.uid, p);
+  }
+  const all = computeAll(docs, peaks, [...places.keys()]);
   const entries = [...all.entries()];
+  const ts = (ms: number | null) => (ms == null ? null : Timestamp.fromMillis(ms));
   for (let i = 0; i < entries.length; i += 400) {
     const batch = store.batch();
-    for (const [uid, s] of entries.slice(i, i + 400)) batch.set(store.collection(STATS_COLLECTION).doc(uid), { ...s, updatedAt: FieldValue.serverTimestamp() });
+    for (const [uid, s] of entries.slice(i, i + 400)) {
+      const place = places.get(uid) ?? null;
+      batch.set(store.collection(STATS_COLLECTION).doc(uid), {
+        ...s, foundingNo: place?.foundingNo ?? null, joinedAt: ts(place?.joinedAt ?? null),
+        lastSentAt: ts(lastSentAt(docs.filter((d) => d.uid === uid))), updatedAt: FieldValue.serverTimestamp(),
+      });
+    }
     await batch.commit();
   }
-  console.info(JSON.stringify({ event: "founding.stats", writers: entries.length, feedback: docs.length }));
+  console.info(JSON.stringify({ event: "founding.stats", writers: entries.length, feedback: docs.length, places: places.size }));
   return entries.length;
 }
 

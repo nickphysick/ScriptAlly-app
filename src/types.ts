@@ -124,6 +124,8 @@ export interface User {
    * destructive write for no gain; reading them would resurrect a cadence that no longer exists.
    */
   goalTarget?: number;
+  /** Dashboard v105: the founding rank last celebrated (0 Egg … 5 QueryHawk); the celebration plays when the shown rank is higher. */
+  foundingSeenTier?: number;
   goalPeriod?: "quarter" | "month" | "year";
   /**
    * Querying goals — an APPEND-ONLY list of intents, and the only thing about a goal that is

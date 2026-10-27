@@ -3,7 +3,7 @@
  */
 import { describe, it, expect } from "vitest";
 import {
-  TIERS, computeAll, eligible, isoWeekLondon, tierState, topPct, waiting, wordCount, writerTotals, type FeedbackFacts,
+  TIERS, computeAll, eligible, isoWeekLondon, lastSentAt, placeFrom, tierState, topPct, waiting, wordCount, writerTotals, type FeedbackFacts,
 } from "./foundingContributions";
 
 const D = (iso: string) => Date.parse(iso);
@@ -136,5 +136,41 @@ describe("computeAll", () => {
     expect(out.get("b")).toMatchObject({ contributions: 1, waiting: 1 });
     /* a writer with a stored peak and no docs left keeps their level */
     expect(out.get("c")).toMatchObject({ contributions: 0, tier: "archivist", peakTier: "archivist" });
+  });
+});
+
+/* DB105 A1 — the founding number, the day it was taken and the newest note. */
+describe("placeFrom (the waitlist proves a place)", () => {
+  it("a verified entry with a whole-number position is a place", () => {
+    expect(placeFrom({ status: "verified", position: 23, verifiedAt: D("2026-09-01T09:00:00Z"), createdAt: D("2026-08-31T09:00:00Z") }))
+      .toEqual({ foundingNo: 23, joinedAt: D("2026-09-01T09:00:00Z") });
+  });
+  it("joinedAt falls back to createdAt, then to null", () => {
+    expect(placeFrom({ status: "verified", position: 4, verifiedAt: null, createdAt: D("2026-08-31T09:00:00Z") })).toEqual({ foundingNo: 4, joinedAt: D("2026-08-31T09:00:00Z") });
+    expect(placeFrom({ status: "verified", position: 4, verifiedAt: null, createdAt: null })).toEqual({ foundingNo: 4, joinedAt: null });
+  });
+  it("no place without verification or a real position — never a guessed number", () => {
+    for (const status of ["pending", "waiting", "unsubscribed", undefined]) expect(placeFrom({ status, position: 9, verifiedAt: null, createdAt: null })).toBeNull();
+    for (const position of [null, undefined, 0, -1, 2.5, "7"]) expect(placeFrom({ status: "verified", position, verifiedAt: null, createdAt: null })).toBeNull();
+    expect(placeFrom(null)).toBeNull();
+  });
+});
+
+describe("lastSentAt (the newest note, counted or not)", () => {
+  it("is the newest createdAt of the writer's docs", () => {
+    expect(lastSentAt([doc({ createdAt: D("2026-10-01T10:00:00Z") }), doc({ status: null, message: "hi", createdAt: D("2026-10-21T10:00:00Z") }), doc({ createdAt: null })]))
+      .toBe(D("2026-10-21T10:00:00Z"));
+  });
+  it("null with no dated docs", () => {
+    expect(lastSentAt([])).toBeNull();
+    expect(lastSentAt([doc({ createdAt: null })])).toBeNull();
+  });
+});
+
+describe("computeAll — writers who hold a place but have sent nothing", () => {
+  it("are written too, at zero", () => {
+    const out = computeAll([doc({ uid: "a" })], new Map(), ["placed"]);
+    expect(out.get("placed")).toMatchObject({ contributions: 0, waiting: 0, tier: null, nextTier: "fledgling", toNext: 1 });
+    expect(out.get("a")).toMatchObject({ contributions: 1 });
   });
 });
