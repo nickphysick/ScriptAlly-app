@@ -27,7 +27,7 @@ import { SortChipButton, SortChipMenu } from "../../shell/SortChip";
 import { usePopover } from "../../shell/ListPills";
 import { FilterMenu } from "./ContactFilters24";
 import { CONTACT_ART } from "./ContactHeader24";
-import { StateDisc } from "./ContactSheet24";
+import { StateDisc, YourMoveMark } from "./ContactSheet24";
 import { SET_LABEL, SET_ORDER, rowDue, type SetCounts, type SetKey } from "../../../lib/contactV24";
 import "./contactV24.css";
 
@@ -174,7 +174,8 @@ export const ContactAddressBook24: React.FC<AddressBook24Props> = (p) => {
             {SET_ORDER.map((k) => (
               <button key={k} type="button" className={`cl24-fseg cl24-fseg--${k}`} data-cl24="band-seg" data-k={k} data-n={p.counts[k]} aria-pressed={p.set === k}
                 style={{ "--w": Math.max(p.counts[k], 3), "--c": SEG_COLOUR[k] } as React.CSSProperties} onClick={() => p.onSet(p.set === k ? null : k)}>
-                <i aria-hidden="true" /><span><b>{p.counts[k]}</b>{SET_LABEL[k]}</span>
+                {/* v25.5 D — Your move's key is the rust "!" disc (14px here), not a swatch */}
+                <i aria-hidden="true" /><span>{k === "you" ? <YourMoveMark size={14} /> : null}<b>{p.counts[k]}</b>{SET_LABEL[k]}</span>
               </button>
             ))}
           </div>

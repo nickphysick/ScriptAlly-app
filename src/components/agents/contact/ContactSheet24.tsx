@@ -40,6 +40,7 @@ import { GenrePills, NIB, Tally } from "../../shared/agentRowParts";
 import "./contactV252.css";
 import "./contactV253.css";
 import "./contactV254.css";
+import "./contactV255.css";
 import { profileLink, queryLine } from "../../../lib/contactRow254";
 import { hasMissingDetails } from "../../../lib/contactList";
 
@@ -50,7 +51,13 @@ export const SET_GLYPH: Record<SetKey, QueryStatus | null> = {
 export const NQ_RING = (
   <svg className="cl24-nq" viewBox="0 0 14 14" width="15" height="15" aria-hidden="true"><circle cx="7" cy="7" r="5.6" fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="1.6 2" /></svg>
 );
+/** v25.5 D — "Your move" as a GROUP or SUMMARY is the rust "!" disc used on the agent icons (17px; 14 in full screen's
+ *  band). A single stage keeps its own StatusDot. */
+export const YourMoveMark: React.FC<{ size?: number }> = ({ size = 17 }) => (
+  <span className="cl255-ym" data-cl255="ym" aria-hidden="true" style={{ "--ym": `${size}px` } as React.CSSProperties}>!</span>
+);
 export const SetGlyph: React.FC<{ k: SetKey; size?: number }> = ({ k, size = 17 }) => {
+  if (k === "you") return <YourMoveMark size={size} />;
   const s = SET_GLYPH[k];
   return s ? <StatusDot status={s} overrideSize={size} /> : NQ_RING;
 };
@@ -196,7 +203,7 @@ export const ContactSheet24: React.FC<ContactSheet24Props> = (p) => {
             <section key={g.key ?? "all"} className="cl24-cgs" data-cl24="card-group" data-k={g.key ?? "all"}>
               {g.key ? (
                 <div className="cl24-rh" data-cl24="card-head" data-k={g.key}>
-                  <SetGlyph k={g.key} size={18} /><b>{SET_LABEL[g.key]}</b><small>{agentsWord(g.ids.length)}</small><hr />
+                  <SetGlyph k={g.key} size={g.key === "you" ? 17 : 18} /><b>{SET_LABEL[g.key]}</b><small>{agentsWord(g.ids.length)}</small><hr />
                 </div>
               ) : null}
               <div className="cl24-grid">
