@@ -1,0 +1,764 @@
+[
+ {
+  "lock": "F3",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "1 with a reply time, 2 without"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 cv25-agent-06 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 cv25-agent-08 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 cv25-agent-09 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 cv25-agent-07 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 cv25-agent-05 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 cv25-agent-13 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 cv25-agent-10 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 cv25-agent-04 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 cv25-agent-11 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 cv25-agent-03 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 cv25-agent-14 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 msv12-agent-4 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 seed-cal-near has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 seed-cal-soon has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 seed-cal-passed20 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 seed-agent-12 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 qc150l9-ag has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 seed-cal-bang has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 seed-agent-9 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 seed-agent-2 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 thin-ag-remind has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 seed-cal-passed865 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 seed-agent-1 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 seed-agent-nowin-1 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 rj-agent-2 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 clv-fx-reopen has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 msv12-agent-1 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 clv-fx-stub0 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 seed-agent-11 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 seed-agent-7 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 seed-agent-8 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 clv-fx-stale has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 cl254fx-rep one link, shown at rest",
+  "ok": false,
+  "detail": "1 link(s), 0 shown"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 cl254fx-rep words",
+  "ok": true,
+  "detail": "Fill in Clara’s profile →"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 cl254fx-rep stays in What they want",
+  "ok": true,
+  "detail": "cell 596–905, replies from 927"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 seed-agent-4 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 seed-agent-6 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 seed-agent-nowin-2 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 msv12-agent-5 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 rj-agent-3 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 thin-ag-chase has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 msv12-agent-6 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 rej-agent-1 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 thin-ag-gap has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 seed-agent-3 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 msv12-agent-2 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 clv181-bare one link, shown at rest",
+  "ok": false,
+  "detail": "1 link(s), 0 shown"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 clv181-bare words",
+  "ok": true,
+  "detail": "Fill in Wren’s profile →"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 clv181-bare spans What they want and Replies in",
+  "ok": true,
+  "detail": "cell 596–1051 vs 596–1051"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 clv-fx-never has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 rj-agent-1 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 thin-ag-close has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 seed-agent-10 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 cl254fx-none one link, shown at rest",
+  "ok": false,
+  "detail": "1 link(s), 0 shown"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 cl254fx-none words",
+  "ok": true,
+  "detail": "Fill in Ottoline’s profile →"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 cl254fx-none spans What they want and Replies in",
+  "ok": true,
+  "detail": "cell 596–1051 vs 596–1051"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 msv12-agent-3 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 seed-agent-5 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 cv25-agent-12 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 cv25-agent-02 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1512 cv25-agent-01 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "1 with a reply time, 2 without"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 cv25-agent-06 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 cv25-agent-08 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 cv25-agent-09 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 cv25-agent-07 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 cv25-agent-05 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 cv25-agent-13 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 cv25-agent-10 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 cv25-agent-04 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 cv25-agent-11 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 cv25-agent-03 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 cv25-agent-14 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 msv12-agent-4 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 seed-cal-near has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 seed-cal-soon has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 seed-cal-passed20 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 seed-agent-12 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 qc150l9-ag has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 seed-cal-bang has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 seed-agent-9 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 seed-agent-2 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 thin-ag-remind has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 seed-cal-passed865 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 seed-agent-1 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 seed-agent-nowin-1 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 rj-agent-2 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 clv-fx-reopen has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 msv12-agent-1 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 clv-fx-stub0 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 seed-agent-11 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 seed-agent-7 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 seed-agent-8 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 clv-fx-stale has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 cl254fx-rep one link, shown at rest",
+  "ok": false,
+  "detail": "1 link(s), 0 shown"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 cl254fx-rep words",
+  "ok": true,
+  "detail": "Fill in Clara’s profile →"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 cl254fx-rep stays in What they want",
+  "ok": true,
+  "detail": "cell 564–815, replies from 837"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 seed-agent-4 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 seed-agent-6 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 seed-agent-nowin-2 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 msv12-agent-5 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 rj-agent-3 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 thin-ag-chase has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 msv12-agent-6 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 rej-agent-1 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 thin-ag-gap has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 seed-agent-3 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 msv12-agent-2 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 clv181-bare one link, shown at rest",
+  "ok": false,
+  "detail": "1 link(s), 0 shown"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 clv181-bare words",
+  "ok": true,
+  "detail": "Fill in Wren’s profile →"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 clv181-bare spans What they want and Replies in",
+  "ok": true,
+  "detail": "cell 564–956 vs 564–956"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 clv-fx-never has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 rj-agent-1 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 thin-ag-close has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 seed-agent-10 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 cl254fx-none one link, shown at rest",
+  "ok": false,
+  "detail": "1 link(s), 0 shown"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 cl254fx-none words",
+  "ok": true,
+  "detail": "Fill in Ottoline’s profile →"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 cl254fx-none spans What they want and Replies in",
+  "ok": true,
+  "detail": "cell 564–956 vs 564–956"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 msv12-agent-3 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 seed-agent-5 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 cv25-agent-12 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 cv25-agent-02 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "1280 cv25-agent-01 has genres, no link",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F3",
+  "where": "click population",
+  "ok": true,
+  "detail": "cl254fx-rep:materials cl254fx-none:reply"
+ },
+ {
+  "lock": "F3",
+  "where": "cl254fx-rep opens edit mode at materials",
+  "ok": true,
+  "detail": "{\"edit\":true,\"inField\":true,\"active\":\"BUTTON.ae-bx\"}"
+ },
+ {
+  "lock": "F3",
+  "where": "cl254fx-none opens edit mode at reply",
+  "ok": true,
+  "detail": "{\"edit\":true,\"inField\":true,\"active\":\"BUTTON.\"}"
+ }
+]

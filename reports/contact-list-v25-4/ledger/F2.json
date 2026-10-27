@@ -1,0 +1,1118 @@
+[
+ {
+  "lock": "F2",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "14 queried (Partial Requested, Offer, Full Requested, Partial Sent, Queried, Full Sent, Rejected), 35 not queried"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 no pill, day count or track in any row",
+  "ok": true,
+  "detail": "0 rows with one"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-06 stage is theirs",
+  "ok": true,
+  "detail": "Partial Requested in [Partial Requested]"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-06 words",
+  "ok": true,
+  "detail": "\"Queried · Partial requested\" vs \"Queried · Partial requested\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-06 glyph matches",
+  "ok": true,
+  "detail": "glyph \"Partial Requested\" for Partial Requested"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-06 one line",
+  "ok": true,
+  "detail": "1 line boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-08 stage is theirs",
+  "ok": true,
+  "detail": "Offer in [Offer]"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-08 words",
+  "ok": true,
+  "detail": "\"Queried · Offer\" vs \"Queried · Offer\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-08 glyph matches",
+  "ok": true,
+  "detail": "glyph \"Offer\" for Offer"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-08 one line",
+  "ok": true,
+  "detail": "1 line boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-09 stage is theirs",
+  "ok": true,
+  "detail": "Full Requested in [Full Requested]"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-09 words",
+  "ok": true,
+  "detail": "\"Queried · Full requested\" vs \"Queried · Full requested\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-09 glyph matches",
+  "ok": true,
+  "detail": "glyph \"Full Requested\" for Full Requested"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-09 one line",
+  "ok": true,
+  "detail": "1 line boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-07 stage is theirs",
+  "ok": true,
+  "detail": "Partial Requested in [Partial Requested]"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-07 words",
+  "ok": true,
+  "detail": "\"Queried · Partial requested\" vs \"Queried · Partial requested\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-07 glyph matches",
+  "ok": true,
+  "detail": "glyph \"Partial Requested\" for Partial Requested"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-07 one line",
+  "ok": true,
+  "detail": "1 line boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-05 stage is theirs",
+  "ok": true,
+  "detail": "Partial Sent in [Partial Sent]"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-05 words",
+  "ok": true,
+  "detail": "\"Queried · Partial sent\" vs \"Queried · Partial sent\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-05 glyph matches",
+  "ok": true,
+  "detail": "glyph \"Partial Sent\" for Partial Sent"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-05 one line",
+  "ok": true,
+  "detail": "1 line boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-13 stage is theirs",
+  "ok": true,
+  "detail": "Queried in [Queried]"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-13 words",
+  "ok": true,
+  "detail": "\"Queried\" vs \"Queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-13 glyph matches",
+  "ok": true,
+  "detail": "glyph \"Queried\" for Queried"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-13 one line",
+  "ok": true,
+  "detail": "1 line boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-10 stage is theirs",
+  "ok": true,
+  "detail": "Full Sent in [Full Sent]"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-10 words",
+  "ok": true,
+  "detail": "\"Queried · Full sent\" vs \"Queried · Full sent\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-10 glyph matches",
+  "ok": true,
+  "detail": "glyph \"Full Sent\" for Full Sent"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-10 one line",
+  "ok": true,
+  "detail": "1 line boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-04 stage is theirs",
+  "ok": true,
+  "detail": "Queried in [Queried]"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-04 words",
+  "ok": true,
+  "detail": "\"Queried\" vs \"Queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-04 glyph matches",
+  "ok": true,
+  "detail": "glyph \"Queried\" for Queried"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-04 one line",
+  "ok": true,
+  "detail": "1 line boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-11 stage is theirs",
+  "ok": true,
+  "detail": "Partial Sent in [Partial Sent]"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-11 words",
+  "ok": true,
+  "detail": "\"Queried · Partial sent\" vs \"Queried · Partial sent\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-11 glyph matches",
+  "ok": true,
+  "detail": "glyph \"Partial Sent\" for Partial Sent"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-11 one line",
+  "ok": true,
+  "detail": "1 line boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-03 stage is theirs",
+  "ok": true,
+  "detail": "Queried in [Queried]"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-03 words",
+  "ok": true,
+  "detail": "\"Queried\" vs \"Queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-03 glyph matches",
+  "ok": true,
+  "detail": "glyph \"Queried\" for Queried"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-03 one line",
+  "ok": true,
+  "detail": "1 line boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-14 stage is theirs",
+  "ok": true,
+  "detail": "Queried in [Queried]"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-14 words",
+  "ok": true,
+  "detail": "\"Queried\" vs \"Queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-14 glyph matches",
+  "ok": true,
+  "detail": "glyph \"Queried\" for Queried"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-14 one line",
+  "ok": true,
+  "detail": "1 line boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-12 stage is theirs",
+  "ok": true,
+  "detail": "Rejected in [Rejected]"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-12 words",
+  "ok": true,
+  "detail": "\"Queried · Passed\" vs \"Queried · Passed\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-12 glyph matches",
+  "ok": true,
+  "detail": "glyph \"Rejected\" for Rejected"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-12 one line",
+  "ok": true,
+  "detail": "1 line boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-02 stage is theirs",
+  "ok": true,
+  "detail": "Rejected in [Rejected]"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-02 words",
+  "ok": true,
+  "detail": "\"Queried · Passed\" vs \"Queried · Passed\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-02 glyph matches",
+  "ok": true,
+  "detail": "glyph \"Rejected\" for Rejected"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-02 one line",
+  "ok": true,
+  "detail": "1 line boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-01 stage is theirs",
+  "ok": true,
+  "detail": "Rejected in [Rejected]"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-01 words",
+  "ok": true,
+  "detail": "\"Queried · Passed\" vs \"Queried · Passed\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-01 glyph matches",
+  "ok": true,
+  "detail": "glyph \"Rejected\" for Rejected"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 cv25-agent-01 one line",
+  "ok": true,
+  "detail": "1 line boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1512 msv12-agent-4 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 seed-cal-near Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 seed-cal-soon Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 seed-cal-passed20 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 seed-agent-12 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 qc150l9-ag Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 seed-cal-bang Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 seed-agent-9 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 seed-agent-2 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 thin-ag-remind Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 seed-cal-passed865 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 seed-agent-nowin-1 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 rj-agent-2 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 msv12-agent-1 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 clv-fx-stub0 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 seed-agent-7 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 seed-agent-8 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 clv-fx-stale Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 seed-agent-4 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 seed-agent-nowin-2 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 msv12-agent-5 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 rj-agent-3 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 thin-ag-chase Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 msv12-agent-6 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 rej-agent-1 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 thin-ag-gap Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 seed-agent-3 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 msv12-agent-2 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 clv181-bare Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 clv-fx-never Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 rj-agent-1 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 thin-ag-close Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 seed-agent-10 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 msv12-agent-3 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1512 seed-agent-5 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "14 queried (Partial Requested, Offer, Full Requested, Partial Sent, Queried, Full Sent, Rejected), 35 not queried"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 no pill, day count or track in any row",
+  "ok": true,
+  "detail": "0 rows with one"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-06 stage is theirs",
+  "ok": true,
+  "detail": "Partial Requested in [Partial Requested]"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-06 words",
+  "ok": true,
+  "detail": "\"Queried · Partial requested\" vs \"Queried · Partial requested\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-06 glyph matches",
+  "ok": true,
+  "detail": "glyph \"Partial Requested\" for Partial Requested"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-06 one line",
+  "ok": true,
+  "detail": "1 line boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-08 stage is theirs",
+  "ok": true,
+  "detail": "Offer in [Offer]"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-08 words",
+  "ok": true,
+  "detail": "\"Queried · Offer\" vs \"Queried · Offer\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-08 glyph matches",
+  "ok": true,
+  "detail": "glyph \"Offer\" for Offer"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-08 one line",
+  "ok": true,
+  "detail": "1 line boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-09 stage is theirs",
+  "ok": true,
+  "detail": "Full Requested in [Full Requested]"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-09 words",
+  "ok": true,
+  "detail": "\"Queried · Full requested\" vs \"Queried · Full requested\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-09 glyph matches",
+  "ok": true,
+  "detail": "glyph \"Full Requested\" for Full Requested"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-09 one line",
+  "ok": true,
+  "detail": "1 line boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-07 stage is theirs",
+  "ok": true,
+  "detail": "Partial Requested in [Partial Requested]"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-07 words",
+  "ok": true,
+  "detail": "\"Queried · Partial requested\" vs \"Queried · Partial requested\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-07 glyph matches",
+  "ok": true,
+  "detail": "glyph \"Partial Requested\" for Partial Requested"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-07 one line",
+  "ok": true,
+  "detail": "1 line boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-05 stage is theirs",
+  "ok": true,
+  "detail": "Partial Sent in [Partial Sent]"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-05 words",
+  "ok": true,
+  "detail": "\"Queried · Partial sent\" vs \"Queried · Partial sent\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-05 glyph matches",
+  "ok": true,
+  "detail": "glyph \"Partial Sent\" for Partial Sent"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-05 one line",
+  "ok": true,
+  "detail": "1 line boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-13 stage is theirs",
+  "ok": true,
+  "detail": "Queried in [Queried]"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-13 words",
+  "ok": true,
+  "detail": "\"Queried\" vs \"Queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-13 glyph matches",
+  "ok": true,
+  "detail": "glyph \"Queried\" for Queried"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-13 one line",
+  "ok": true,
+  "detail": "1 line boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-10 stage is theirs",
+  "ok": true,
+  "detail": "Full Sent in [Full Sent]"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-10 words",
+  "ok": true,
+  "detail": "\"Queried · Full sent\" vs \"Queried · Full sent\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-10 glyph matches",
+  "ok": true,
+  "detail": "glyph \"Full Sent\" for Full Sent"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-10 one line",
+  "ok": true,
+  "detail": "1 line boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-04 stage is theirs",
+  "ok": true,
+  "detail": "Queried in [Queried]"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-04 words",
+  "ok": true,
+  "detail": "\"Queried\" vs \"Queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-04 glyph matches",
+  "ok": true,
+  "detail": "glyph \"Queried\" for Queried"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-04 one line",
+  "ok": true,
+  "detail": "1 line boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-11 stage is theirs",
+  "ok": true,
+  "detail": "Partial Sent in [Partial Sent]"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-11 words",
+  "ok": true,
+  "detail": "\"Queried · Partial sent\" vs \"Queried · Partial sent\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-11 glyph matches",
+  "ok": true,
+  "detail": "glyph \"Partial Sent\" for Partial Sent"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-11 one line",
+  "ok": true,
+  "detail": "1 line boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-03 stage is theirs",
+  "ok": true,
+  "detail": "Queried in [Queried]"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-03 words",
+  "ok": true,
+  "detail": "\"Queried\" vs \"Queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-03 glyph matches",
+  "ok": true,
+  "detail": "glyph \"Queried\" for Queried"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-03 one line",
+  "ok": true,
+  "detail": "1 line boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-14 stage is theirs",
+  "ok": true,
+  "detail": "Queried in [Queried]"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-14 words",
+  "ok": true,
+  "detail": "\"Queried\" vs \"Queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-14 glyph matches",
+  "ok": true,
+  "detail": "glyph \"Queried\" for Queried"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-14 one line",
+  "ok": true,
+  "detail": "1 line boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-12 stage is theirs",
+  "ok": true,
+  "detail": "Rejected in [Rejected]"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-12 words",
+  "ok": true,
+  "detail": "\"Queried · Passed\" vs \"Queried · Passed\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-12 glyph matches",
+  "ok": true,
+  "detail": "glyph \"Rejected\" for Rejected"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-12 one line",
+  "ok": true,
+  "detail": "1 line boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-02 stage is theirs",
+  "ok": true,
+  "detail": "Rejected in [Rejected]"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-02 words",
+  "ok": true,
+  "detail": "\"Queried · Passed\" vs \"Queried · Passed\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-02 glyph matches",
+  "ok": true,
+  "detail": "glyph \"Rejected\" for Rejected"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-02 one line",
+  "ok": true,
+  "detail": "1 line boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-01 stage is theirs",
+  "ok": true,
+  "detail": "Rejected in [Rejected]"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-01 words",
+  "ok": true,
+  "detail": "\"Queried · Passed\" vs \"Queried · Passed\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-01 glyph matches",
+  "ok": true,
+  "detail": "glyph \"Rejected\" for Rejected"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 cv25-agent-01 one line",
+  "ok": true,
+  "detail": "1 line boxes"
+ },
+ {
+  "lock": "F2",
+  "where": "1280 msv12-agent-4 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 seed-cal-near Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 seed-cal-soon Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 seed-cal-passed20 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 seed-agent-12 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 qc150l9-ag Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 seed-cal-bang Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 seed-agent-9 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 seed-agent-2 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 thin-ag-remind Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 seed-cal-passed865 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 seed-agent-nowin-1 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 rj-agent-2 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 msv12-agent-1 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 clv-fx-stub0 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 seed-agent-7 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 seed-agent-8 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 clv-fx-stale Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 seed-agent-4 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 seed-agent-nowin-2 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 msv12-agent-5 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 rj-agent-3 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 thin-ag-chase Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 msv12-agent-6 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 rej-agent-1 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 thin-ag-gap Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 seed-agent-3 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 msv12-agent-2 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 clv181-bare Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 clv-fx-never Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 rj-agent-1 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 thin-ag-close Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 seed-agent-10 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 msv12-agent-3 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ },
+ {
+  "lock": "F2",
+  "where": "1280 seed-agent-5 Not queried",
+  "ok": true,
+  "detail": "\"Not queried\""
+ }
+]

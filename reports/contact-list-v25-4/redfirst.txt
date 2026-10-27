@@ -1,0 +1,61 @@
+== BASE
+[F1] 9/12 green
+[F2] 0/186 green
+    +   "1512 seed-cal-passed20 Not queried — \"\"",
+    +   "1512 seed-cal-passed865 Not queried — \"\"",
+    +   "1280 seed-cal-passed20 Not queried — \"\"",
+    +   "1280 seed-cal-passed865 Not queried — \"\"",
+[F3] 107/121 green
+  ✗ F4 · 1512 seed-cal-passed20 no gaps button, no icons — 1 gaps, 1 icons
+  ✗ F4 · 1512 seed-cal-passed20 Log a query only — log 1; others [Fill in 1 gap → | Copy Cormac Bligh’s email]
+  ✗ F4 · 1280 seed-cal-passed20 no gaps button, no icons — 1 gaps, 0 icons
+  ✗ F4 · 1280 seed-cal-passed20 Log a query only — log 1; others [Fill in 1 gap →]
+[F4] 2/42 green
+    +   "1512 seed-cal-passed20 no gaps button, no icons — 1 gaps, 1 icons",
+    +   "1512 seed-cal-passed20 Log a query only — log 1; others [Fill in 1 gap → | Copy Cormac Bligh’s email]",
+    +   "1280 seed-cal-passed20 no gaps button, no icons — 1 gaps, 0 icons",
+    +   "1280 seed-cal-passed20 Log a query only — log 1; others [Fill in 1 gap →]",
+[F5] 2/4 green
+[F6] 2/7 green
+  6 failed
+  1 passed (3.4m)
+== MUT F1
+  ✗ F1 · 1512 order — Agent · What they want · Replies in · Your query · Your rating
+[F1] 12/13 green
+  1 failed
+  1 passed (36.8s)
+== MUT F2
+  ✗ F2 · 1512 no pill, day count or track in any row — 53 rows with one
+  ✗ F2 · 1512 cv25-agent-06 one line — 0 line boxes
+  ✗ F2 · 1512 cv25-agent-08 one line — 0 line boxes
+  ✗ F2 · 1512 cv25-agent-09 one line — 0 line boxes
+  ✗ F2 · 1512 cv25-agent-07 one line — 0 line boxes
+  ✗ F2 · 1512 cv25-agent-05 one line — 0 line boxes
+== MUT F3
+  ✗ F3 · 1512 cl254fx-rep one link, shown at rest — 1 link(s), 0 shown
+  ✗ F3 · 1512 clv181-bare one link, shown at rest — 1 link(s), 0 shown
+  ✗ F3 · 1512 cl254fx-none one link, shown at rest — 1 link(s), 0 shown
+  ✗ F3 · 1280 cl254fx-rep one link, shown at rest — 1 link(s), 0 shown
+  ✗ F3 · 1280 clv181-bare one link, shown at rest — 1 link(s), 0 shown
+  ✗ F3 · 1280 cl254fx-none one link, shown at rest — 1 link(s), 0 shown
+== MUT F4
+  ✗ F4 · 1512 msv12-agent-4 no gaps button, no icons — 1 gaps, 0 icons
+  ✗ F4 · 1512 msv12-agent-4 Log a query only — log 1; others [Fill in 2 gaps →]
+  ✗ F4 · 1512 seed-cal-near no gaps button, no icons — 1 gaps, 0 icons
+  ✗ F4 · 1512 seed-cal-near Log a query only — log 1; others [Fill in 2 gaps →]
+  ✗ F4 · 1512 seed-cal-soon no gaps button, no icons — 1 gaps, 0 icons
+  ✗ F4 · 1512 seed-cal-soon Log a query only — log 1; others [Fill in 2 gaps →]
+== MUT F5
+  ✗ F5 · 1280 none clipped or wrapped — "Queried · Partial requested" clip true lines 1; "Queried · Full requested" clip true lines 1; "Queried · Partial requested" clip true lines 1
+[F5] 3/4 green
+  1 failed
+  1 passed (34.2s)
+== MUT F6
+  ✗ F6 · cv25-agent-10 line = Housekeeping's 2 — 3 details missing · Fill them in →
+  ✗ F6 · cv25-agent-06 line = Housekeeping's 2 — 3 details missing · Fill them in →
+  ✗ F6 · cv25-agent-04 line = Housekeeping's 2 — 3 details missing · Fill them in →
+[F6] 6/9 green
+  1 failed
+  1 passed (1.1m)
+
+[exited with code 0]

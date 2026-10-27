@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "F5",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "53 cells"
+ },
+ {
+  "lock": "F5",
+  "where": "1280 none clipped or wrapped",
+  "ok": false,
+  "detail": "\"Queried · Partial requested\" clip true lines 1; \"Queried · Full requested\" clip true lines 1; \"Queried · Partial requested\" clip true lines 1"
+ },
+ {
+  "lock": "F5",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "53 cells"
+ },
+ {
+  "lock": "F5",
+  "where": "1512 none clipped or wrapped",
+  "ok": true,
+  "detail": "none"
+ }
+]
