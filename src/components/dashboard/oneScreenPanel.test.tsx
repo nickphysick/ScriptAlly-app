@@ -172,7 +172,7 @@ describe("the card is the ref's paper, and it reads its values from tokens", () 
 describe("the band era is over, and nothing of it is left reachable", () => {
   const bare = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
   /* the page's files since Dashboard v58 */
-  const files = ["OneScreenChart", "v58/Dash58", "v60/Dash60Left", "v60/Dash60Lift", "v71/Dash71Right", "v71/Dash71Task", "v58/Dash58Feed", "v58/Dash58Header", "v93/Dash93Founding"];
+  const files = ["OneScreenChart", "v58/Dash58", "v60/Dash60Left", "v60/Dash60Lift", "v71/Dash71Right", "v71/Dash71Task", "v58/Dash58Feed", "v58/Dash58Header", "v105/Dash105Founding"];
 
   it("⚠️ no band rule survives in the sheet", () => {
     for (const sel of [".os-ahead", ".os-th2", ".os-lh", ".os-ll", ".os-bandkey", ".os-lbody"]) {

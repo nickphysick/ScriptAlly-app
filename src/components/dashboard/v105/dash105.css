@@ -1,0 +1,400 @@
+/* ══ DASHBOARD v105 — the founding card as a press ID (Dash105Founding) ════════════════════════════════════════════════
+   Ref: design-refs/dashboard-v105/founding-flow-v104.html (normative; every value below was READ from the ref rendered
+   in Chromium, because its stylesheet is cumulative — several selectors are declared more than once).
+   ⚠️ NO GREEN ANYWHERE: rose, burgundy, rust, navy and ink.
+   ⚠️ THE CARD IS A SIZE CONTAINER: its height comes from its slot, never its content, so every step below answers to the
+      card's OWN width and height (the right column is 250–377px on laptops against the ref's 494). */
+
+.d105-fw {
+  container: d105fw / size;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  min-height: 0;
+  padding: 6px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(28, 19, 15, 0.08);
+  color: var(--d58-ink);
+}
+.d71-fwslot > .d105-fw { flex: 1 1 0; min-height: 0; }
+.d58[data-mode="pre"] .d58-right > .d105-fw { flex: 1 1 0; min-height: 112px; }
+.d105-fw *, .d105-fw *::before, .d105-fw *::after { box-sizing: border-box; }
+
+.d105-frame {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 11px;
+  overflow: hidden;
+  background: #fffaf6;
+}
+.d105-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(124, 58, 42, 0.35);
+  border-radius: 11px;
+  pointer-events: none;
+  z-index: 3;
+}
+/* ⚠️ brand.tsx names p/span/div/button the body sans at runtime: every text rule below states its own family. */
+.d105-fw :is(p, b, em, small, button, textarea, li) { font-family: var(--d58-serif); }
+.d105-fw p { margin: 0; }
+.d105-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ── the ID strip: the ref's rose stripes, the mark, the name, the number, the ⓘ ─────────────────────────────────── */
+.d105-strip {
+  flex: none;
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #ecc8ba repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.32) 0 7px, rgba(255, 255, 255, 0) 7px 14px);
+  color: #5a2418;
+}
+.d105-mark { width: 26px; height: 26px; flex: none; border-radius: 50%; display: block; }
+.d105-shead {
+  display: none;
+  width: 24px; height: 24px; flex: none;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 0 0 1.5px #5a2418;
+  place-items: center;
+}
+.d105-shead img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.d105-shead .d105-hnest { width: 21px; }
+.d105-id { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.d105-fw .d105-name {
+  min-width: 0;
+  font-family: var(--d58-type) !important;
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 1.2;
+  color: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.d105-fw .d105-no {
+  flex: none;
+  font-family: var(--d58-mono) !important;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 10px;
+  line-height: 1.3;
+  letter-spacing: 0.18em;
+  color: inherit;
+  white-space: nowrap;
+}
+.d105-info {
+  flex: none;
+  width: 26px; height: 26px;
+  margin-left: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.55);
+  color: #5a2418;
+  cursor: pointer;
+}
+.d105-info:hover { background: #fff; }
+.d105-info:focus-visible { outline: 2px solid #5a2418; outline-offset: 2px; }
+.d105-info svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+
+/* ── the body ── */
+.d105-body { flex: 1 1 0; min-height: 0; min-width: 0; display: flex; }
+.d105-fw .d105-h { font-family: var(--d58-type) !important; font-weight: 400; font-size: 18px; line-height: 1.2; color: var(--d58-ink); }
+.d105-fw .d105-p { font-size: 12.5px; line-height: 1.4; color: rgba(28, 19, 15, 0.7); }
+
+/* idle */
+.d105-idle { flex-direction: column; }
+.d105-pv { flex: 1 1 0; min-height: 0; display: flex; gap: 16px; align-items: center; padding: 10px 16px 8px; }
+.d105-photo {
+  grid-area: photo;
+  width: 104px; height: 116px; flex: none;
+  border-radius: 8px;
+  background: #f5e3db;
+  box-shadow: inset 0 0 0 1px rgba(124, 58, 42, 0.2);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  overflow: hidden;
+}
+.d105-photo .d105-nest { width: 78px; display: block; }
+.d105-phead { width: 100%; flex: 1 1 0; min-height: 0; object-fit: cover; display: block; }
+.d105-photo:has(.d105-phead) { justify-content: flex-start; gap: 0; }
+.d105-photo:has(.d105-phead) small { padding: 4px 0 5px; }
+.d105-phx { position: relative; width: 86px; height: 72px; flex: none; overflow: hidden; }
+.d105-fw .d105-photo small { font-family: var(--d58-mono) !important; font-weight: 600; font-size: 8.5px; line-height: 1.4; letter-spacing: 0.14em; color: #5a2418; }
+.d105-pvr { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.d105-pvr > .d105-h { grid-area: h; white-space: nowrap; }
+.d105-pvr > .d105-p { grid-area: p; }
+.d105-btns { grid-area: btns; display: flex; gap: 6px; margin-top: 4px; }
+.d105-btn {
+  display: flex; align-items: center; gap: 5px;
+  padding: 6px 9px;
+  border: 1px solid rgba(28, 19, 15, 0.14);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--d58-ink);
+  font-weight: 600; font-size: 12px; line-height: 1.35;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform 0.12s, border-color 0.12s;
+}
+.d105-btn:hover { border-color: var(--d58-ink); transform: translateY(-1px); }
+.d105-btn:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
+.d105-fw .d105-btn span { font-family: inherit; }
+.d105-btn i, .d105-cbtn { display: grid; place-items: center; color: var(--d58-ink); }
+.d105-btn svg, .d105-cbtn svg, .d105-wic svg {
+  width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+}
+
+/* the ranks strip */
+.d105-ranks {
+  flex: none;
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 14px 8px;
+  border-top: 1px dashed rgba(28, 19, 15, 0.15);
+  background: #fbf2ed;
+}
+.d105-heads { list-style: none; margin: 0; padding: 0; display: flex; gap: 2px; flex: none; }
+.d105-hd {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.12);
+  display: grid; place-items: center;
+}
+.d105-hd img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.d105-hd.is-future img { filter: grayscale(1); opacity: 0.55; }
+.d105-hd.is-you { box-shadow: 0 0 0 1.5px var(--d58-ink); }
+.d105-hd .d105-hnest { width: 17px; display: block; }
+.d105-fw .d105-note { flex: 1 1 auto; min-width: 0; font-size: 11.5px; line-height: 1.35; color: rgba(28, 19, 15, 0.68); }
+
+/* Compact (under 150px of card): one row of round buttons — the sidebar's panel takes the note */
+.d105-compact { display: none; flex: 1 1 0; min-height: 0; align-items: center; gap: 10px; padding: 0 14px; }
+.d105-cbtn {
+  width: 32px; height: 32px; flex: none;
+  padding: 0;
+  border: 1px solid rgba(28, 19, 15, 0.14);
+  border-radius: 50%;
+  background: #fff;
+  cursor: pointer;
+  transition: transform 0.12s, border-color 0.12s;
+}
+.d105-cbtn:hover { border-color: var(--d58-ink); transform: translateY(-1px); }
+.d105-cbtn:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
+.d105-fw .d105-cline { display: none; }
+
+/* write */
+.d105-write { flex-direction: column; gap: 8px; padding: 12px 16px; }
+.d105-wh { display: flex; align-items: center; gap: 10px; flex: none; }
+.d105-wic { width: 30px; height: 30px; flex: none; border-radius: 50%; background: #f5e3db; display: grid; place-items: center; color: var(--d58-ink); }
+.d105-fw .d105-wq { flex: 1 1 auto; min-width: 0; font-family: var(--d58-type) !important; font-size: 18px; line-height: 1.2; color: var(--d58-ink); }
+.d105-wx { flex: none; border: 0; background: none; padding: 1px 6px; font-weight: 600; font-size: 14px; color: rgba(28, 19, 15, 0.5); cursor: pointer; }
+.d105-wx:hover { color: var(--d58-ink); }
+.d105-chips { display: flex; flex-wrap: wrap; gap: 6px; flex: none; }
+.d105-chip {
+  border: 1px solid rgba(28, 19, 15, 0.15); border-radius: 999px; background: #fff;
+  padding: 4px 10px; font-weight: 600; font-size: 12px; line-height: 1.35; color: var(--d58-ink); cursor: pointer; white-space: nowrap;
+}
+.d105-chip.on { background: var(--d58-ink); border-color: var(--d58-ink); color: #fff; }
+.d105-wrow { flex: 1 1 0; min-height: 0; display: flex; gap: 8px; align-items: flex-end; }
+.d105-fw .d105-ta {
+  flex: 1 1 auto; align-self: stretch; min-width: 0;
+  min-height: 60px;
+  resize: none;
+  border: 1px solid rgba(28, 19, 15, 0.15);
+  border-radius: 10px;
+  background: #fff;
+  padding: 9px 11px;
+  font-size: 14px; line-height: 1.45;
+  color: var(--d58-ink);
+}
+.d105-ta:focus { outline: 2px solid rgba(42, 58, 82, 0.25); border-color: var(--d58-navy); }
+.d105-wf { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.d105-fw .d105-wn { min-width: 0; font-style: italic; font-size: 12px; line-height: 1.35; color: rgba(28, 19, 15, 0.55); }
+.d105-fw .d105-wn.is-err { color: #a2452a; font-style: normal; font-weight: 600; }
+.d105-send, .d105-give {
+  flex: none;
+  border: 0; border-radius: 9px;
+  background: var(--d58-navy); color: #fff;
+  padding: 7px 14px;
+  font-weight: 600; font-size: 13.5px; line-height: 1.4;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: 0 2px 6px -3px rgba(42, 58, 82, 0.6);
+}
+.d105-send:disabled { opacity: 0.4; cursor: default; }
+.d105-send:focus-visible, .d105-give:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
+.d105-send--side { display: none; }
+
+/* sent and the celebration: the art box, then the words */
+.d105-sent, .d105-cel { align-items: center; gap: 18px; padding: 12px 20px; }
+.d105-hx { position: relative; width: 132px; height: 132px; flex: none; border-radius: 14px; background: #f5e3db; overflow: hidden; }
+.d105-st { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.d105-sa { display: flex; align-items: center; gap: 14px; margin-top: 6px; }
+.d105-lnk { border: 0; background: none; padding: 0; font-weight: 600; font-size: 13px; line-height: 1.3; color: var(--d58-ink); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.d105-fw .d105-kick { font-family: var(--d58-mono) !important; font-weight: 600; font-size: 9.5px; line-height: 1.35; letter-spacing: 0.16em; color: #a2452a; }
+.d105-hxhead {
+  position: absolute; left: 50%; top: 50%; width: 104px; height: 104px; margin: -52px 0 0 -52px;
+  border-radius: 50%; object-fit: cover;
+  box-shadow: 0 0 0 3px #fff, 0 10px 22px -10px rgba(90, 36, 24, 0.6);
+}
+.d105-tick {
+  position: absolute; right: 14px; bottom: 14px; width: 24px; height: 24px; border-radius: 50%;
+  display: grid; place-items: center; background: var(--d58-ink); color: #fff; font: 600 13px/1 var(--d58-serif); font-style: normal;
+  box-shadow: 0 0 0 2px #fff;
+}
+
+/* the hatch scene (the ref's .scene, its parts and its keyframes) */
+.d105-scene { position: absolute; inset: 6px; }
+.d105-scene svg { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; }
+.d105-sfl {
+  position: absolute; left: 50%; top: 50%; width: 52%; height: 52%;
+  border-radius: 50%; object-fit: cover;
+  transform: translate(-50%, -10%) scale(0.4); opacity: 0;
+  box-shadow: 0 0 0 2px #fff;
+}
+.d105-sb {
+  position: absolute; left: 50%; top: 44%; width: 125%; height: 125%; transform-origin: center;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: repeating-conic-gradient(rgba(255, 255, 255, 0.75) 0 9deg, transparent 9deg 18deg);
+  opacity: 0;
+}
+.d105-zz { stroke-dasharray: 60; stroke-dashoffset: 60; }
+.d105-stop, .d105-sbot { transform-origin: 50% 70%; }
+/* sent (and idle HATCHING): the crack draws on, the halves wobble */
+.d105-hx.is-sent .d105-zz { animation: d105-draw 1s 0.3s ease-out forwards; }
+.d105-hx.is-sent :is(.d105-stop, .d105-sbot), .d105-phx :is(.d105-stop, .d105-sbot) { animation: d105-wob 1.6s 0.4s ease-in-out infinite; }
+.d105-phx .d105-scene { inset: 0; }
+.d105-phx .d105-zz { stroke-dashoffset: 0; }
+.d105-sent .d105-st { animation: d105-in 0.4s 0.5s ease-out both; }
+@keyframes d105-draw { to { stroke-dashoffset: 0; } }
+@keyframes d105-wob { 0%, 60%, 100% { transform: rotate(0); } 68% { transform: rotate(-6deg); } 76% { transform: rotate(5deg); } 84% { transform: rotate(-3deg); } }
+@keyframes d105-in { from { opacity: 0; } to { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .d105-fw *, .d105-fw *::before, .d105-fw *::after { animation: none !important; transition: none !important; }
+  .d105-hx.is-sent .d105-zz { stroke-dashoffset: 0; }
+}
+
+/* ══ THE STEPS — after the layouts' own rules: a container query confers no specificity ═══════════════════════════════ */
+
+/* 330–459px wide (1440: 370) — the name over the number; an 84×96 photo; the buttons a full-width three-column grid */
+@container d105fw (max-width: 459px) {
+  .d105-strip { padding: 8px 12px 8px 14px; }
+  .d105-id { flex-direction: column; align-items: flex-start; justify-content: center; gap: 1px; }
+  .d105-fw .d105-name { max-width: 100%; font-size: 16px; }
+  .d105-fw .d105-no { font-size: 9px; letter-spacing: 0.14em; }
+  .d105-info { margin-left: 4px; }
+  .d105-pv {
+    display: grid;
+    grid-template-columns: 84px minmax(0, 1fr);
+    grid-template-areas: "photo h" "photo p" "btns btns";
+    grid-template-rows: auto auto auto;
+    align-content: center;
+    column-gap: 12px; row-gap: 5px;
+    padding: 8px 12px 8px;
+  }
+  .d105-pvr { display: contents; }
+  .d105-photo { width: 84px; height: 96px; align-self: start; }
+  .d105-photo .d105-nest { width: 64px; }
+  .d105-phx { width: 72px; height: 60px; }
+  .d105-pvr > .d105-h { white-space: normal; text-wrap: balance; align-self: end; }
+  .d105-pvr > .d105-p { align-self: start; }
+  .d105-btns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 3px; }
+  .d105-btn { flex-direction: column; justify-content: center; gap: 3px; padding: 6px 4px; text-align: center; }
+  /* the heads over the note, so the note has the card's width and keeps to three lines (beside them it took four) */
+  .d105-ranks { flex-direction: column; align-items: flex-start; padding: 6px 12px 7px; gap: 4px; }
+  .d105-write { padding: 10px 12px; gap: 7px; }
+  .d105-sent, .d105-cel { gap: 12px; padding: 10px 14px; }
+  .d105-hx { width: 96px; height: 96px; }
+  .d105-hxhead { width: 76px; height: 76px; margin: -38px 0 0 -38px; }
+  .d105-tick { right: 8px; bottom: 8px; width: 20px; height: 20px; font-size: 11px; }
+  .d105-fw .d105-st .d105-p { font-size: 12px; line-height: 1.38; }
+}
+
+/* under 330px wide (1100: 250) — no photo in the body: the writer's rank moves into the strip as a 24px head */
+@container d105fw (max-width: 329px) {
+  .d105-mark { display: none; }
+  .d105-shead { display: grid; }
+  .d105-pv { grid-template-columns: minmax(0, 1fr); grid-template-areas: "h" "p" "btns"; }
+  .d105-photo { display: none; }
+  .d105-btns { gap: 4px; }
+  .d105-btn { padding: 5px 2px; font-size: 11.5px; line-height: 1.25; white-space: normal; text-wrap: balance; }
+  .d105-fw .d105-no { font-size: 8.5px; letter-spacing: 0.08em; }
+  .d105-hx { width: 56px; height: 56px; border-radius: 10px; }
+  .d105-hx .d105-scene { inset: 3px; }
+  .d105-hxhead { width: 46px; height: 46px; margin: -23px 0 0 -23px; }
+  .d105-tick { right: 3px; bottom: 3px; width: 17px; height: 17px; font-size: 10px; }
+  .d105-sent, .d105-cel { gap: 10px; padding: 8px 12px; }
+  .d105-fw .d105-st .d105-h { font-size: 15px; }
+  .d105-fw .d105-st .d105-p { font-size: 11px; line-height: 1.32; }
+  /* compose: the two chips take two rows here, so everything else tightens round them */
+  .d105-write { padding: 6px 12px; gap: 4px; }
+  .d105-wic { width: 22px; height: 22px; }
+  .d105-fw .d105-wq { font-size: 15px; }
+  .d105-chips { gap: 4px; }
+  .d105-chip { padding: 2px 8px; font-size: 11.5px; }
+  .d105-fw .d105-ta { font-size: 13px; line-height: 1.3; padding: 5px 8px; min-height: 46px; }
+}
+
+/* under 230px tall (the 194px Medium card) — the ranks strip folds to its six heads (its note is in How it works) */
+@container d105fw (max-height: 229px) {
+  .d105-fw .d105-note { display: none; }
+  .d105-ranks { padding: 5px 12px; justify-content: flex-start; }
+  .d105-mark { display: none; }
+  .d105-shead { display: grid; }
+  .d105-photo { display: none; }
+  .d105-pv { display: flex; flex-direction: column; align-items: stretch; justify-content: center; gap: 5px; padding: 4px 12px; }
+  .d105-pvr { display: flex; flex-direction: column; gap: 5px; }
+  .d105-pvr > :is(.d105-h, .d105-p) { align-self: auto; white-space: normal; }
+  .d105-fw .d105-pvr > .d105-p { font-size: 12px; line-height: 1.35; }
+  .d105-ranks { flex-direction: row; align-items: center; }
+  .d105-btns { display: flex; flex-wrap: nowrap; margin-top: 0; }
+  .d105-btn { flex: 1 1 0; min-width: 0; flex-direction: row; justify-content: center; padding: 5px 6px; }
+  /* compose: the note under the textarea gives way to a Send beside it, so the textarea keeps two lines */
+  .d105-write { padding: 7px 12px; gap: 5px; }
+  .d105-wic { width: 24px; height: 24px; }
+  .d105-fw .d105-wq { font-size: 16px; }
+  .d105-chip { padding: 2px 9px; }
+  .d105-wf { display: none; }
+  .d105-send--side { display: block; }
+  .d105-fw .d105-ta { min-height: 50px; padding: 6px 9px; line-height: 1.35; }
+  .d105-hx { width: 72px; height: 72px; border-radius: 10px; }
+  .d105-hxhead { width: 58px; height: 58px; margin: -29px 0 0 -29px; }
+  .d105-sent, .d105-cel { gap: 12px; padding: 6px 14px; }
+  .d105-fw .d105-st .d105-h { font-size: 16px; }
+  .d105-fw .d105-st .d105-p { font-size: 11.5px; line-height: 1.35; }
+  .d105-sa { margin-top: 2px; }
+}
+
+/* under 200px tall (the 194px Medium card at laptop widths): the line under the headline gives way to the buttons */
+@container d105fw (max-height: 199px) {
+  .d105-pvr > .d105-p { display: none; }
+}
+
+/* narrow AND short (1100×800: 250×212) — the narrow art and words win over the short step's */
+@container d105fw (max-width: 329px) and (max-height: 229px) {
+  .d105-hx { width: 56px; height: 56px; }
+  .d105-hxhead { width: 46px; height: 46px; margin: -23px 0 0 -23px; }
+  .d105-fw .d105-st .d105-h { font-size: 15px; }
+  .d105-fw .d105-st .d105-p { font-size: 11px; line-height: 1.32; }
+  .d105-sent, .d105-cel { gap: 10px; padding: 6px 12px; }
+  .d105-fw .d105-wq { font-size: 14px; }
+}
+
+/* under 150px tall (the 128px Compact card) — the strip, then one row of round buttons */
+@container d105fw (max-height: 149px) {
+  .d105-idle { display: none; }
+  .d105-compact { display: flex; }
+}

@@ -42,7 +42,7 @@ import { Dash58Header } from "./Dash58Header";
 import { Dash71Right } from "../v71/Dash71Right";
 import { Dash71Task } from "../v71/Dash71Task";
 import { Dash58Feed, FeedTab } from "./Dash58Feed";
-import { Dash93Founding } from "../v93/Dash93Founding";
+import { Dash105Founding } from "../v105/Dash105Founding";
 import { agentCoverage, firstUseTiles, isPreQuery, type TileKey } from "../../../lib/dashFirstUse";
 import { QueriesDoor, AgentsDoor, AgentsSnap, ClosedHoop, AgentsHoop } from "../v60/Dash60Left";
 import { Dash60Lift } from "../v60/Dash60Lift";
@@ -60,6 +60,7 @@ import "../v71/dash71.css";
 /* ⚠️ AND v77 AFTER IT */
 import "../v77/dash77.css";
 import "../v93/dash93.css";
+import "../v105/dash105.css";
 
 export interface Dash58Props {
   loading: boolean;
@@ -77,6 +78,8 @@ export interface Dash58Props {
   now?: Date;
   /** v60: the "Import your journey" tile reads the entitlement from it */
   smartImportUsage?: SmartImportUsage | null;
+  /** v105: records the founding rank last celebrated (users.foundingSeenTier). Absent (the onboarding ghost) → no celebration, no write. */
+  onFoundingSeen?: (tier: number) => void | Promise<void>;
 }
 
 const NO_AID: DashAid = { drop: [], noClosed: false, noAgents: false };
@@ -146,6 +149,7 @@ const ImportNoticeRow: React.FC<{ notice: ImportNotice; onDismiss: () => void; o
 export const Dash58: React.FC<Dash58Props> = ({
   loading: dataLoading, queries, agents: agentsIn, manuscripts, tasks, userTasks, activities, taskFlags, currentUser,
   activeManuscript, onNavigate, now: nowProp, versions = [], smartImportUsage = null,
+  onFoundingSeen,
 }) => {
   /* one clock per mount: a new Date on every render would rebuild every derivation below */
   const [mountedAt] = useState(() => new Date());
@@ -255,8 +259,8 @@ export const Dash58: React.FC<Dash58Props> = ({
     else run(a);
   };
 
-  /* ── the founding writer card (v93): "Your contributions" — the writer's level, read live from their own
-     `foundingStats` doc. Feedback itself is given in the sidebar's Give feedback (FeedbackDock). */
+  /* ── the founding writer card (v105): a press ID — the writer's name and founding number, feedback composed in the
+     card, the rank read live from their own `foundingStats` doc. The sidebar's Give feedback (FeedbackDock) is unchanged. */
   const fwUid = currentUser?.id ?? null;
 
   /* ── the page's own scrollport: the height the one screen fills ──
@@ -507,7 +511,7 @@ export const Dash58: React.FC<Dash58Props> = ({
               task={<Dash71Task loading={loading} plan={plan} ctx={taskCtx} onView={viewTask} innerRef={focusRef} />}
               lift={pre ? <Dash60Lift loading={loading} tiles={tiles} hasAgents={hasAgents} onTile={onTile} /> : undefined}
               panel={
-                <Dash93Founding loading={loading} uid={fwUid} />
+                <Dash105Founding loading={loading} uid={fwUid} name={currentUser?.name ?? null} seenTier={currentUser?.foundingSeenTier ?? null} onSeen={onFoundingSeen} />
               }
             />
           </div>

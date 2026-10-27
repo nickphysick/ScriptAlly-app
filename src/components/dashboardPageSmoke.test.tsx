@@ -57,7 +57,8 @@ describe("/dashboard renders", () => {
     expect(html).toContain("No agents yet."); // v60.1 copy (was "Your list starts here.")
     expect(html).toContain("Where do I start?"); // v60.1: the one header button before the first query
     /* RETARGETED (Dashboard v93): the founding card is "Your contributions"; its band names it while its stats load */
-    expect(html).toContain("You’re a QueryHawk founding writer");
+    /* RETARGETED (Dashboard v105): the founding card is a press ID; its strip says FOUNDING WRITER while its stats load */
+    expect(html).toContain("FOUNDING WRITER");
   });
 
   /**
@@ -93,7 +94,7 @@ describe("/dashboard renders", () => {
        page has measured it, so a static render cannot see it (`DB59 T1` holds it on the rendered
        page). The right column's third landmark is the founding writer panel. */
     /* RETARGETED (Dashboard v77): the rebuilt card's band */
-    expect(html).toContain("You’re a QueryHawk founding writer");
+    expect(html).toContain("FOUNDING WRITER");
     /* ⚠️ DAY ONE HAS STOOD DOWN, asserted on the CHART's own invitation. The first try used the
        rail's "The story starts with your first query." — which is the empty ACTIVITY FEED's line and
        shows on the seeded fixture too, so it discriminated nothing. A day-one check has to name copy

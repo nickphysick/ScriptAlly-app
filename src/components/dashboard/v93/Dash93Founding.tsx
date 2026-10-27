@@ -63,7 +63,7 @@ const HowButton: React.FC<{ onOpen: (el: HTMLButtonElement) => void; open: boole
   </button>
 );
 
-const HowPanel: React.FC<{ open: boolean; onClose: () => void; id: string; titleId: string }> = ({ open, onClose, id, titleId }) => {
+export const HowPanel: React.FC<{ open: boolean; onClose: () => void; id: string; titleId: string }> = ({ open, onClose, id, titleId }) => {
   const closeRef = useRef<HTMLButtonElement>(null);
   useEscapeLayer(open, onClose, ESC_LEVEL.pageDrawer);
   useEffect(() => { if (open) requestAnimationFrame(() => closeRef.current?.focus()); }, [open]);
