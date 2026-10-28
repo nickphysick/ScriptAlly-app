@@ -31,8 +31,8 @@ export const ART: Record<string, { sel: string; crosses: boolean }> = {
   "/queries": { sel: ".qcoh img", crosses: false },
   "/agents": { sel: '[data-cl15="header-art"] img', crosses: false },
   "/manuscripts": { sel: ".ms21-art img", crosses: false },
-  /* Submission packages v26: the Archivist and his boxes sit in the navy card's own art slot */
-  "/queries/packages": { sel: '[data-pk26="header"] .p6-hd-art img', crosses: false },
+  /* Submission packages v39: the Archivist and his boxes sit in the Contact list card's own art slot */
+  "/queries/packages": { sel: '[data-pk26="header"] .phc-art img', crosses: false },
 };
 /** Section bands: the element whose box is the band, and where its tint is painted. */
 export const BANDS: readonly { route: string; sel: string; pseudo: string | null }[] = [

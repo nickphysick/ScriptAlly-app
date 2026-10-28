@@ -225,11 +225,15 @@ describe("/queries/packages renders", () => {
     expect(html).not.toContain('data-pk38="show"');
   });
 
-  it("populated: the navy header, the labels, the open package's packing list and Your materials", () => {
+  it("populated: the Contact list's header, the labels, the open package's packing list and Your materials", () => {
     setActiveManuscript();
     const html = renderPageSeededWith(<SubmissionPackages />, "/queries/packages", { versions: [LETTER], packages: [PACKAGE] });
     expect(html).toContain('data-pk26="header"');
-    expect(html).toContain("Bundle it. Send it. Know what went.");
+    /* v39 A: the Contact list's header card — the title in its highlighter, the Pro stamp, the one-line lede */
+    expect(html).toContain('data-pk39="hd-card"');
+    expect(html).toContain(">Submission packages<");
+    expect(html).toContain('title="Included with your Pro plan"');
+    expect(html).not.toContain("Bundle it. Send it. Know what went.");
     expect(html).toContain('data-pk26="open"');
     expect(html).toContain(">Standard UK<");
     /* v40: the stage chip and the stepper say what a draft needs (the v26 "Needs a version" pill is retired) */
@@ -240,7 +244,6 @@ describe("/queries/packages renders", () => {
     expect(html).not.toContain('data-pk26="hero"');
     /* v38: the label for the package, and no tab bar or tab page */
     expect(html).toContain('data-pkid="pk1"');
-    expect(html).toContain("Pick one to change it below, or open its figures.");
     expect(html).not.toContain('data-pk26="tabs"');
     expect(html).not.toContain('data-pk26="materials"');
   });

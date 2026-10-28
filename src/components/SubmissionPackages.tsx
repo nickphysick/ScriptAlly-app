@@ -27,7 +27,8 @@ import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "re
 import { useLocation, useNavigate } from "react-router-dom";
 import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 import { usePk26Model } from "./packages/v26/usePk26Model";
-import { HowItWorks, Pk26Header, Pk26Hero } from "./packages/v26/Pk26Header";
+import { HowItWorks, Pk26Hero } from "./packages/v26/Pk26Header";
+import { Pk39Header } from "./packages/v26/Pk39Header";
 import { Pk26Builder, type LibTab } from "./packages/v26/Pk26Builder";
 import { Pk38Labels } from "./packages/v26/Pk38Labels";
 import { Pk38Drawer } from "./packages/v26/Pk38Drawer";
@@ -39,6 +40,7 @@ import "./packages/v26/pk40.generated.css";
 import "./packages/v26/pk26.css";
 import "./packages/v26/pk38.generated.css";
 import "./packages/v26/pk38.css";
+import "./packages/v26/pk39.css";
 
 export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab: string, sub?: string) => void }> = ({ active: routeActive = true }) => {
   const model = usePk26Model();
@@ -108,10 +110,10 @@ export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab:
   const openNewMaterial = (k: "let" | "syn" | "ver") => setDrawer(k === "ver" ? { m: "newver", parentId: null } : { m: "newmat", kind: k });
 
   return (
-    <WorkspacePageGrid scrollLabel="Submission packages" masthead={null}>
+    <WorkspacePageGrid className="pk39-wpg" scrollLabel="Submission packages" masthead={null}>
       <div ref={rootRef} className={`p6${empty ? " p6-new" : ""}`} data-pk26="page">
         {empty ? <Pk26Hero onBuild={() => part("builder")?.scrollIntoView({ block: "start", behavior: "smooth" })} onHow={() => setHow(true)} />
-          : <Pk26Header count={collectionsReady ? live.length : null} title={activeMs?.title ?? null} onNew={() => setDialog({ m: "new" })} onHow={() => setHow(true)} />}
+          : <Pk39Header title={activeMs?.title ?? null} onNew={() => setDialog({ m: "new" })} onHow={() => setHow(true)} />}
         <Pk38Labels model={model} currentId={current?.id ?? null} showRetired={showRetired} onShowRetired={setShowRetired}
           onPick={(p) => setCurId(p.id)} onOpenRetired={(p) => setPkdId(p.id)} onNew={() => setDialog({ m: "new" })} />
         <div className="p6-id-vPk">

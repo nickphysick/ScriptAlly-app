@@ -41,11 +41,8 @@ export const Pic: React.FC<{ ic: PackageIcon; cls?: string }> = ({ ic, cls = "p6
 /** The bare paths, for the icon chooser's buttons (the ref draws those svgs without `p6-pic`). */
 export const PicBare: React.FC<{ ic: PackageIcon }> = ({ ic }) => <svg viewBox="0 0 20 20" aria-hidden="true">{PICS[ic]}</svg>;
 
-/** The two inline arrows the ref draws in its pills and buttons. */
+/** The inline arrow the ref draws in its pills and buttons. */
 export const Chevron: React.FC = () => <svg viewBox="0 0 20 20" aria-hidden="true">{P("M8 5l5 5-5 5")}</svg>;
-export const PlayRing: React.FC = () => (
-  <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7.5" /><path d="M8.3 7l5 3-5 3z" fill="currentColor" stroke="none" /></svg>
-);
 
 /** The padlock (v40's `LK`): beside "Out with agents" on the stepper and in the locked builder's foot. */
 export const Lock: React.FC = () => (

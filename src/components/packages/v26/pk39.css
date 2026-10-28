@@ -1,0 +1,49 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Submission packages v39 — the hand-written rules beside pk39.generated.css (design-refs/submission-packages-v39/).
+ *   A. the header: the Contact list v25's card values, stated for `.pk39-hd` (contactV25.css / qcv150.css name only
+ *      their own pages), with this page's highlighter and Pro stamp;
+ *   C. every rule a package's colour drives (`--pc`; the capture normalised colours to Harbour);
+ *   …  and the rest of each part as it lands.
+ * Desktop only, like the Contact list's: below 768px the shared card keeps its own defaults.
+ */
+
+/* the page's scroller is the ref's `sheet` container: its 1200px rules are container queries on p9sheet */
+@media (min-width: 768px) {
+  .pk39-wpg > .wpg-scroll { container: p9sheet / inline-size; }
+}
+
+/* ══ A · the header (the Contact list's: min(sheet − 48, 1200) wide, centred, 24 below the sheet's top) ══ */
+@media (min-width: 768px) {
+  .p6 > .pk39-hd {
+    --pk39-hd-w: min(calc(var(--hsheet-w) - 48px), 1200px);
+    box-sizing: border-box; width: var(--pk39-hd-w); margin: 24px 0 0 calc(50% - var(--pk39-hd-w) / 2);
+  }
+  .pk39-hd .pk39-card.phc.phc { padding: 22px 36px 24px; grid-template-columns: minmax(0, 1fr) 160px; }
+  .pk39-hd .pk39-card.phc.phc.phc h1 { font-size: 40px; line-height: 44px; }
+  .pk39-hd .pk39-card .phc-tx > p { margin-top: 14px; }
+  .pk39-hd .pk39-card .phc-art { height: 140px; }
+  .pk39-hd .pk39-card .phc-art img { width: 160px; height: 140px; object-fit: contain; object-position: right center; }
+  /* the highlighter: the Contact list's shape, pale Harbour */
+  .pk39-hd .pk39-card.pk39-card .hl {
+    padding: 0 5px; margin: 0 -5px;
+    background: linear-gradient(transparent 50%, #cfe1ea 50%, #cfe1ea 96%, transparent 96%);
+    -webkit-box-decoration-break: clone; box-decoration-break: clone;
+    /* brand.tsx names bare spans as the body sans: the highlighter's span takes the title's typewriter */
+    font-family: inherit !important; font-size: inherit !important; line-height: inherit !important;
+  }
+}
+/* the Pro stamp (ref `.pro-st`): a navy pill, mono capitals, the sidebar PRO pill's terracotta dot. The card's own
+   `.phc-tag` wrapper is unset so the stamp is the one box the tooltip belongs to. */
+.pk39-hd .pk39-card .phc-tag { all: unset; display: inline-flex; margin-left: 4px; }
+.pk39-hd .pk39-card .pk39-pro {
+  display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px 0 8px; border-radius: 12px;
+  background: #2a3a52; color: #f4eee5; font: 500 10.5px/1 "JetBrains Mono", monospace !important; letter-spacing: 0.16em;
+  text-transform: uppercase; cursor: default; white-space: nowrap;
+}
+.pk39-hd .pk39-card .pk39-pro::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #e0a188; }
+@container p9sheet (max-width: 1200px) {
+  .pk39-hd .pk39-card .pk39-pro { height: 22px; }
+}
