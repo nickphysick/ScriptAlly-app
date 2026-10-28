@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "C2",
+  "where": "3 answers: warming-up cards",
+  "ok": true,
+  "detail": "3 drawn, want 3"
+ },
+ {
+  "lock": "C2",
+  "where": "3 answers: showcase items",
+  "ok": true,
+  "detail": "0 showcase items"
+ },
+ {
+  "lock": "C2",
+  "where": "3 answers: the need",
+  "ok": true,
+  "detail": "3 of 5 answers needed. 2 more and this fills in."
+ },
+ {
+  "lock": "C2",
+  "where": "5 answers: warming-up cards",
+  "ok": true,
+  "detail": "0 drawn, want 0"
+ },
+ {
+  "lock": "C2",
+  "where": "5 answers: showcase items",
+  "ok": true,
+  "detail": "3 showcase items"
+ },
+ {
+  "lock": "C2",
+  "where": "22 answers: warming-up cards",
+  "ok": true,
+  "detail": "0 drawn, want 0"
+ },
+ {
+  "lock": "C2",
+  "where": "22 answers: showcase items",
+  "ok": true,
+  "detail": "3 showcase items"
+ }
+]

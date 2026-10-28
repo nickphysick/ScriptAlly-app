@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "F2",
+  "where": "month headings",
+  "ok": true,
+  "detail": "[\"October 2026\",\"September 2026\",\"August 2026\",\"July 2026\"]"
+ },
+ {
+  "lock": "F2",
+  "where": "months newest first",
+  "ok": true,
+  "detail": "[\"October 2026\",\"September 2026\",\"August 2026\",\"July 2026\"]"
+ },
+ {
+  "lock": "F2",
+  "where": "rows by Answered, newest first",
+  "ok": true,
+  "detail": "15 rows"
+ },
+ {
+  "lock": "F2",
+  "where": "Queried: no month headings",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F2",
+  "where": "Queried, newest first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F2",
+  "where": "Queried again: oldest first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F2",
+  "where": "Took, longest first",
+  "ok": true,
+  "detail": ""
+ }
+]

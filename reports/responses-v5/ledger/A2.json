@@ -1,0 +1,146 @@
+[
+ {
+  "lock": "A2",
+  "where": "@1512 sum",
+  "ok": true,
+  "detail": "{\"more\":7,\"passed\":11,\"noReply\":4,\"waiting\":12} vs sent 34"
+ },
+ {
+  "lock": "A2",
+  "where": "@1512 nos = the wall's rows",
+  "ok": true,
+  "detail": "11+4 vs 15 rows"
+ },
+ {
+  "lock": "A2",
+  "where": "@1512 more = ref",
+  "ok": true,
+  "detail": "app 7 · ref 7"
+ },
+ {
+  "lock": "A2",
+  "where": "@1512 passed = ref",
+  "ok": true,
+  "detail": "app 11 · ref 11"
+ },
+ {
+  "lock": "A2",
+  "where": "@1512 noReply = ref",
+  "ok": true,
+  "detail": "app 4 · ref 4"
+ },
+ {
+  "lock": "A2",
+  "where": "@1512 waiting = ref",
+  "ok": true,
+  "detail": "app 12 · ref 12"
+ },
+ {
+  "lock": "A2",
+  "where": "@1512 more → more",
+  "ok": true,
+  "detail": "section top 20.2"
+ },
+ {
+  "lock": "A2",
+  "where": "@1512 passed → wall",
+  "ok": true,
+  "detail": "section top 20.1"
+ },
+ {
+  "lock": "A2",
+  "where": "@1512 passed sets the wall to passed",
+  "ok": true,
+  "detail": "aria-pressed true"
+ },
+ {
+  "lock": "A2",
+  "where": "@1512 noReply → wall",
+  "ok": true,
+  "detail": "section top 20.1"
+ },
+ {
+  "lock": "A2",
+  "where": "@1512 noReply sets the wall to noReply",
+  "ok": true,
+  "detail": "aria-pressed true"
+ },
+ {
+  "lock": "A2",
+  "where": "@1512 waiting → timing",
+  "ok": true,
+  "detail": "section top 20.2"
+ },
+ {
+  "lock": "A2",
+  "where": "@1280 sum",
+  "ok": true,
+  "detail": "{\"more\":7,\"passed\":11,\"noReply\":4,\"waiting\":12} vs sent 34"
+ },
+ {
+  "lock": "A2",
+  "where": "@1280 nos = the wall's rows",
+  "ok": true,
+  "detail": "11+4 vs 15 rows"
+ },
+ {
+  "lock": "A2",
+  "where": "@1280 more = ref",
+  "ok": true,
+  "detail": "app 7 · ref 7"
+ },
+ {
+  "lock": "A2",
+  "where": "@1280 passed = ref",
+  "ok": true,
+  "detail": "app 11 · ref 11"
+ },
+ {
+  "lock": "A2",
+  "where": "@1280 noReply = ref",
+  "ok": true,
+  "detail": "app 4 · ref 4"
+ },
+ {
+  "lock": "A2",
+  "where": "@1280 waiting = ref",
+  "ok": true,
+  "detail": "app 12 · ref 12"
+ },
+ {
+  "lock": "A2",
+  "where": "@1280 more → more",
+  "ok": true,
+  "detail": "section top 20.2"
+ },
+ {
+  "lock": "A2",
+  "where": "@1280 passed → wall",
+  "ok": true,
+  "detail": "section top 20.0"
+ },
+ {
+  "lock": "A2",
+  "where": "@1280 passed sets the wall to passed",
+  "ok": true,
+  "detail": "aria-pressed true"
+ },
+ {
+  "lock": "A2",
+  "where": "@1280 noReply → wall",
+  "ok": true,
+  "detail": "section top 20.0"
+ },
+ {
+  "lock": "A2",
+  "where": "@1280 noReply sets the wall to noReply",
+  "ok": true,
+  "detail": "aria-pressed true"
+ },
+ {
+  "lock": "A2",
+  "where": "@1280 waiting → timing",
+  "ok": true,
+  "detail": "section top 19.7"
+ }
+]

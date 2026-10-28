@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "H1",
+  "where": "While you wait",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "H1",
+  "where": "three example rows",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "H1",
+  "where": "no glance cards yet",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "H1",
+  "where": "the populated page arrives",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "H1",
+  "where": "…with no reload",
+  "ok": true,
+  "detail": "0 loads, marker 1"
+ },
+ {
+  "lock": "H1",
+  "where": "…and the empty page has gone",
+  "ok": true,
+  "detail": ""
+ }
+]

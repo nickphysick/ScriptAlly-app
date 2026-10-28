@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "D1",
+  "where": "@1512 four bars",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "D1",
+  "where": "@1512 w2 segments sum to the bar",
+  "ok": true,
+  "detail": "2 vs 2"
+ },
+ {
+  "lock": "D1",
+  "where": "@1512 w4 segments sum to the bar",
+  "ok": true,
+  "detail": "9 vs 9"
+ },
+ {
+  "lock": "D1",
+  "where": "@1512 w8 segments sum to the bar",
+  "ok": true,
+  "detail": "11 vs 11"
+ },
+ {
+  "lock": "D1",
+  "where": "@1512 over segments sum to the bar",
+  "ok": true,
+  "detail": "0 vs 0"
+ },
+ {
+  "lock": "D1",
+  "where": "@1512 bars sum to answered",
+  "ok": true,
+  "detail": "22 vs 22"
+ },
+ {
+  "lock": "D1",
+  "where": "@1512 totals = ref",
+  "ok": true,
+  "detail": "app 2,9,11,0 · ref 2,9,11,0"
+ },
+ {
+  "lock": "D1",
+  "where": "@1280 four bars",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "D1",
+  "where": "@1280 w2 segments sum to the bar",
+  "ok": true,
+  "detail": "2 vs 2"
+ },
+ {
+  "lock": "D1",
+  "where": "@1280 w4 segments sum to the bar",
+  "ok": true,
+  "detail": "9 vs 9"
+ },
+ {
+  "lock": "D1",
+  "where": "@1280 w8 segments sum to the bar",
+  "ok": true,
+  "detail": "11 vs 11"
+ },
+ {
+  "lock": "D1",
+  "where": "@1280 over segments sum to the bar",
+  "ok": true,
+  "detail": "0 vs 0"
+ },
+ {
+  "lock": "D1",
+  "where": "@1280 bars sum to answered",
+  "ok": true,
+  "detail": "22 vs 22"
+ },
+ {
+  "lock": "D1",
+  "where": "@1280 totals = ref",
+  "ok": true,
+  "detail": "app 2,9,11,0 · ref 2,9,11,0"
+ }
+]

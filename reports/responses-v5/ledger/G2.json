@@ -1,0 +1,116 @@
+[
+ {
+  "lock": "G2",
+  "where": "card button",
+  "ok": true,
+  "detail": "scrim alpha 0.450 within 250ms"
+ },
+ {
+  "lock": "G2",
+  "where": "card button",
+  "ok": true,
+  "detail": ".qad-head 1"
+ },
+ {
+  "lock": "G2",
+  "where": "card button",
+  "ok": true,
+  "detail": "role=dialog 1"
+ },
+ {
+  "lock": "G2",
+  "where": "card button",
+  "ok": true,
+  "detail": "scrim after Esc 0.000"
+ },
+ {
+  "lock": "G2",
+  "where": "card button",
+  "ok": true,
+  "detail": "scrollTop 627 → 627 after cancel"
+ },
+ {
+  "lock": "G2",
+  "where": "row primary",
+  "ok": true,
+  "detail": "scrim alpha 0.450 within 250ms"
+ },
+ {
+  "lock": "G2",
+  "where": "row primary",
+  "ok": true,
+  "detail": ".qad-head 1"
+ },
+ {
+  "lock": "G2",
+  "where": "row primary",
+  "ok": true,
+  "detail": "role=dialog 1"
+ },
+ {
+  "lock": "G2",
+  "where": "row primary",
+  "ok": true,
+  "detail": "scrim after Esc 0.000"
+ },
+ {
+  "lock": "G2",
+  "where": "row primary",
+  "ok": true,
+  "detail": "scrollTop 3545 → 3545 after cancel"
+ },
+ {
+  "lock": "G2",
+  "where": "header",
+  "ok": true,
+  "detail": "scrim alpha 0.450 within 250ms"
+ },
+ {
+  "lock": "G2",
+  "where": "header",
+  "ok": true,
+  "detail": ".qad-head 1"
+ },
+ {
+  "lock": "G2",
+  "where": "header",
+  "ok": true,
+  "detail": "role=dialog 1"
+ },
+ {
+  "lock": "G2",
+  "where": "header",
+  "ok": true,
+  "detail": "scrim after Esc 0.000"
+ },
+ {
+  "lock": "G2",
+  "where": "header",
+  "ok": true,
+  "detail": "scrollTop 0 → 0 after cancel"
+ },
+ {
+  "lock": "G2",
+  "where": "record a no",
+  "ok": true,
+  "detail": "Passed 11 → 12"
+ },
+ {
+  "lock": "G2",
+  "where": "record a no",
+  "ok": true,
+  "detail": "tally strokes 15 → 16"
+ },
+ {
+  "lock": "G2",
+  "where": "record a no",
+  "ok": true,
+  "detail": "card 0, row 1"
+ },
+ {
+  "lock": "G2",
+  "where": "undo was offered (the account is restored)",
+  "ok": true,
+  "detail": ""
+ }
+]

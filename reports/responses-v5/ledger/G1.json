@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "G1",
+  "where": "a request card (full requested): opens its answer",
+  "ok": true,
+  "detail": "panel rs5-q-full-2 · source rs5-q-full-2"
+ },
+ {
+  "lock": "G1",
+  "where": "a request card (full requested): the URL names it",
+  "ok": true,
+  "detail": "http://127.0.0.1:4517/queries/responses?answer=rs5-q-full-2"
+ },
+ {
+  "lock": "G1",
+  "where": "a request card (full requested): footer",
+  "ok": true,
+  "detail": "Mark full sent (sent)"
+ },
+ {
+  "lock": "G1",
+  "where": "an offer card: opens its answer",
+  "ok": true,
+  "detail": "panel rs5-q-full-1 · source rs5-q-full-1"
+ },
+ {
+  "lock": "G1",
+  "where": "an offer card: the URL names it",
+  "ok": true,
+  "detail": "http://127.0.0.1:4517/queries/responses?answer=rs5-q-full-1"
+ },
+ {
+  "lock": "G1",
+  "where": "an offer card: footer",
+  "ok": true,
+  "detail": "Answer the offer (offer)"
+ },
+ {
+  "lock": "G1",
+  "where": "a quote (revise and resubmit): opens its answer",
+  "ok": true,
+  "detail": "panel rs5-q-full-4 · source rs5-q-full-4"
+ },
+ {
+  "lock": "G1",
+  "where": "a quote (revise and resubmit): the URL names it",
+  "ok": true,
+  "detail": "http://127.0.0.1:4517/queries/responses?answer=rs5-q-full-4"
+ },
+ {
+  "lock": "G1",
+  "where": "a quote (revise and resubmit): footer",
+  "ok": true,
+  "detail": "Record the resubmission (sent)"
+ },
+ {
+  "lock": "G1",
+  "where": "a list row: opens its answer",
+  "ok": true,
+  "detail": "panel rs5-q-full-10 · source rs5-q-full-10"
+ },
+ {
+  "lock": "G1",
+  "where": "a list row: the URL names it",
+  "ok": true,
+  "detail": "http://127.0.0.1:4517/queries/responses?answer=rs5-q-full-10"
+ },
+ {
+  "lock": "G1",
+  "where": "a list row: footer",
+  "ok": true,
+  "detail": "Edit the response (edit)"
+ }
+]

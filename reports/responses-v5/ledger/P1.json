@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "P1",
+  "where": "1512",
+  "ok": true,
+  "detail": "navy bar 12.0 from the sheet top"
+ },
+ {
+  "lock": "P1",
+  "where": "1512",
+  "ok": true,
+  "detail": "headings 181.8 directly under the bar 181.8"
+ },
+ {
+  "lock": "P1",
+  "where": "1512",
+  "ok": true,
+  "detail": "month heading under the stack: [{\"t\":223.75,\"b\":267.75}] vs 223.8"
+ },
+ {
+  "lock": "P1",
+  "where": "1512",
+  "ok": true,
+  "detail": "pinned true"
+ },
+ {
+  "lock": "P1",
+  "where": "1512",
+  "ok": true,
+  "detail": "1px walk from 3747: 2 flips, drift 0"
+ },
+ {
+  "lock": "P1",
+  "where": "1280",
+  "ok": true,
+  "detail": "navy bar 12.0 from the sheet top"
+ },
+ {
+  "lock": "P1",
+  "where": "1280",
+  "ok": true,
+  "detail": "headings 181.8 directly under the bar 181.8"
+ },
+ {
+  "lock": "P1",
+  "where": "1280",
+  "ok": true,
+  "detail": "month heading under the stack: [{\"t\":223.75,\"b\":267.75}] vs 223.8"
+ },
+ {
+  "lock": "P1",
+  "where": "1280",
+  "ok": true,
+  "detail": "pinned true"
+ },
+ {
+  "lock": "P1",
+  "where": "1280",
+  "ok": true,
+  "detail": "1px walk from 4236: 2 flips, drift 0"
+ }
+]

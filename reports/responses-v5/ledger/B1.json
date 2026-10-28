@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "B1",
+  "where": "@1512 cards",
+  "ok": true,
+  "detail": "7 cards"
+ },
+ {
+  "lock": "B1",
+  "where": "@1512 both kinds present",
+  "ok": true,
+  "detail": "[true,true,true,true,false,false,false]"
+ },
+ {
+  "lock": "B1",
+  "where": "@1512 every your-move card before every other",
+  "ok": true,
+  "detail": "[true,true,true,true,false,false,false]"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 cards",
+  "ok": true,
+  "detail": "7 cards"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 both kinds present",
+  "ok": true,
+  "detail": "[true,true,true,true,false,false,false]"
+ },
+ {
+  "lock": "B1",
+  "where": "@1280 every your-move card before every other",
+  "ok": true,
+  "detail": "[true,true,true,true,false,false,false]"
+ }
+]

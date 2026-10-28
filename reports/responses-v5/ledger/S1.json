@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "S1",
+  "where": "square",
+  "ok": true,
+  "detail": "preview 1080,1080"
+ },
+ {
+  "lock": "S1",
+  "where": "names",
+  "ok": true,
+  "detail": "Agent names starts off"
+ },
+ {
+  "lock": "S1",
+  "where": "names",
+  "ok": true,
+  "detail": "full names on the canvas: []"
+ },
+ {
+  "lock": "S1",
+  "where": "save",
+  "ok": true,
+  "detail": "file queryhawk-wall-of-no.png"
+ },
+ {
+  "lock": "S1",
+  "where": "save",
+  "ok": true,
+  "detail": "no request during save"
+ }
+]

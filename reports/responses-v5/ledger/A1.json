@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "A1",
+  "where": "@1512 w",
+  "ok": true,
+  "detail": "app 1159.3 · ref 1159.8"
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 h",
+  "ok": true,
+  "detail": "app 311.2 · ref 311.2"
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 pt",
+  "ok": true,
+  "detail": "app 34.0 · ref 34.0"
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 pl",
+  "ok": true,
+  "detail": "app 46.0 · ref 46.0"
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 r",
+  "ok": true,
+  "detail": "app 22.0 · ref 22.0"
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 fs",
+  "ok": true,
+  "detail": "app 54.0 · ref 54.0"
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 pfs",
+  "ok": true,
+  "detail": "app 18.5 · ref 18.5"
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 bh",
+  "ok": true,
+  "detail": "app 48.0 · ref 48.0"
+ },
+ {
+  "lock": "A1",
+  "where": "@1512 iw",
+  "ok": true,
+  "detail": "app 300.0 · ref 300.0"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 w",
+  "ok": true,
+  "detail": "app 942.1 · ref 942.6"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 h",
+  "ok": true,
+  "detail": "app 311.2 · ref 311.2"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 pt",
+  "ok": true,
+  "detail": "app 34.0 · ref 34.0"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 pl",
+  "ok": true,
+  "detail": "app 46.0 · ref 46.0"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 r",
+  "ok": true,
+  "detail": "app 22.0 · ref 22.0"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 fs",
+  "ok": true,
+  "detail": "app 54.0 · ref 54.0"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 pfs",
+  "ok": true,
+  "detail": "app 18.5 · ref 18.5"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 bh",
+  "ok": true,
+  "detail": "app 48.0 · ref 48.0"
+ },
+ {
+  "lock": "A1",
+  "where": "@1280 iw",
+  "ok": true,
+  "detail": "app 300.0 · ref 300.0"
+ }
+]

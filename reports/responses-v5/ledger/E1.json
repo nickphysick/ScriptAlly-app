@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "E1",
+  "where": "all = pass + req",
+  "ok": true,
+  "detail": "{\"all\":6,\"pass\":5,\"req\":1}"
+ },
+ {
+  "lock": "E1",
+  "where": "all: cards = its count",
+  "ok": true,
+  "detail": "6 cards, chip 6"
+ },
+ {
+  "lock": "E1",
+  "where": "pass: cards = its count",
+  "ok": true,
+  "detail": "5 cards, chip 5"
+ },
+ {
+  "lock": "E1",
+  "where": "pass: only its kind",
+  "ok": true,
+  "detail": "[\"passed\"]"
+ },
+ {
+  "lock": "E1",
+  "where": "req: cards = its count",
+  "ok": true,
+  "detail": "1 cards, chip 1"
+ },
+ {
+  "lock": "E1",
+  "where": "req: only its kind",
+  "ok": true,
+  "detail": "[\"more\"]"
+ }
+]

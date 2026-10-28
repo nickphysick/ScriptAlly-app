@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "C1",
+  "where": "full three figures",
+  "ok": true,
+  "detail": "[\"53%\",\"21%\",\"25 days\"]"
+ },
+ {
+  "lock": "C1",
+  "where": "full figure 1",
+  "ok": true,
+  "detail": "app 53% · ref 53%"
+ },
+ {
+  "lock": "C1",
+  "where": "full figure 2",
+  "ok": true,
+  "detail": "app 21% · ref 21%"
+ },
+ {
+  "lock": "C1",
+  "where": "full figure 3",
+  "ok": true,
+  "detail": "app 25 days · ref 25 days"
+ },
+ {
+  "lock": "C1",
+  "where": "early three figures",
+  "ok": true,
+  "detail": "[\"6%\",\"0%\",\"28 days\"]"
+ },
+ {
+  "lock": "C1",
+  "where": "early figure 1",
+  "ok": true,
+  "detail": "app 6% · ref 6%"
+ },
+ {
+  "lock": "C1",
+  "where": "early figure 2",
+  "ok": true,
+  "detail": "app 0% · ref 0%"
+ },
+ {
+  "lock": "C1",
+  "where": "early figure 3",
+  "ok": true,
+  "detail": "app 28 days · ref 28 days"
+ }
+]
