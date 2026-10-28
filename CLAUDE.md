@@ -1598,6 +1598,10 @@ when `TodoDock` and `TaskPane` briefly coexisted. Retiring the pane becomes its 
 - **The sticky day heading's box reaches 12px either side of its words,** so a tinted row passes wholly under it.
 - **Locks:** `tests/e2e/feedDrawerV2.measure.ts` A1–A3, B1–B7 (`FD2_MUTATE=<lock>`); B6 compares with a capture of the build before the pack (`FD2_CAPTURE=1`). The whole family table and the offer's journey are held at unit (`feedFamily.test.ts`): the harness account has no offer.
 
+## Dashboard v116 — hover detail (28 Oct; refs design-refs/dashboard-v116/; report reports/dashboard-v116/REPORT.md; branch `dashboard-v116`, on `dashboard-v105`, NOT merged)
+- Dashboard v116: chart week callout; Closed/Agents ring slices and key rows show a stepped HoverStack (≤5, +N more, always on screen, slice swells); mini query/agent cards use a bust icon; agent headers coloured by status; the founding card tilts −1.8° and its header swaps to contributions on hover.
+- ⚠️ The founding card's tilt is the `rotate` property, so every bounding rect of it is ~6px taller and ~9px wider than its layout box. Locks about its LAYOUT read it straight (`STRAIGHT` in dashV71/77/93, `fit()` in db105Lib); a new one must do the same or it will see overlaps and misaligned bottoms that are not there.
+
 ## Dashboard v105 — the founding card as a press ID (27 Oct; refs design-refs/dashboard-v105/; report reports/dashboard-v105/REPORT.md; branch `dashboard-v105`, on `dashboard-v93`, NOT merged)
 - Dashboard v105: the founding card is a press ID (name + FOUNDING WRITER · No. in the strip, ⓘ → How it works slides). Feedback is composed in the card (like → Something I liked; don’t → broken/confusing chip; idea → An idea). Sent at tier 0 cracks the egg; the hatch/rank-up plays once when peakTier > users.foundingSeenTier.
 - ⚠️ The number is the waitlist's or none (Nick, 27 Oct): `foundingNo` is a verified waitlist entry's `position`, joined to the account by the email's hash; no proven place → "FOUNDING WRITER" with no number. Never a sign-up order. On dev (27 Oct) no account holds one.
