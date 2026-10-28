@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "C1",
+  "where": "the harness account starts with no seen-rank",
+  "ok": true,
+  "detail": "absent"
+ },
+ {
+  "lock": "C1",
+  "where": "peak 1 > seen 0: the hatch plays",
+  "ok": true,
+  "detail": "celebrate"
+ },
+ {
+  "lock": "C1",
+  "where": "the words",
+  "ok": true,
+  "detail": "YOU’VE HATCHED | Meet your Fledgling | Just hatched, and already helping. Two more notes and you become an Archivist."
+ },
+ {
+  "lock": "C1",
+  "where": "foundingSeenTier = 1 is written",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "C1",
+  "where": "a reload shows idle at Fledgling, no replay",
+  "ok": true,
+  "detail": "idle FLEDGLING"
+ },
+ {
+  "lock": "C1",
+  "where": "Give more feedback returns to idle",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "a skipped rank celebrates the highest (4)",
+  "ok": true,
+  "detail": "You’re now a Mentor"
+ },
+ {
+  "lock": "C1",
+  "where": "…and records 4",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "the rank-up draws no egg",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "seen 4, shown 4: idle",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "at 0.5s: the words not yet, the egg whole, the bird hidden",
+  "ok": true,
+  "detail": "{\"words\":0,\"bird\":0,\"top\":1,\"burst\":0}"
+ },
+ {
+  "lock": "C1",
+  "where": "at 2.8s: the words, the bird out, the top half gone, the burst on",
+  "ok": true,
+  "detail": "{\"words\":1,\"bird\":1,\"top\":0,\"burst\":1}"
+ },
+ {
+  "lock": "C1",
+  "where": "reduced motion: the end state, no animation",
+  "ok": true,
+  "detail": "{\"words\":1,\"bird\":1,\"top\":0,\"burst\":1}"
+ },
+ {
+  "lock": "C1",
+  "where": "the account is put back (absent)",
+  "ok": true,
+  "detail": "absent"
+ }
+]

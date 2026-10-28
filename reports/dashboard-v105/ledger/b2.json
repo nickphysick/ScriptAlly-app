@@ -1,0 +1,134 @@
+[
+ {
+  "lock": "B2",
+  "where": "egg population: six heads",
+  "ok": true,
+  "detail": "6"
+ },
+ {
+  "lock": "B2",
+  "where": "egg the photo",
+  "ok": true,
+  "detail": "egg"
+ },
+ {
+  "lock": "B2",
+  "where": "egg the label",
+  "ok": true,
+  "detail": "EGG"
+ },
+ {
+  "lock": "B2",
+  "where": "egg colour heads",
+  "ok": true,
+  "detail": "1 of 6"
+ },
+ {
+  "lock": "B2",
+  "where": "egg exactly one current, ringed in ink, at 0",
+  "ok": true,
+  "detail": "[0]"
+ },
+ {
+  "lock": "B2",
+  "where": "hatching population: six heads",
+  "ok": true,
+  "detail": "6"
+ },
+ {
+  "lock": "B2",
+  "where": "hatching the photo",
+  "ok": true,
+  "detail": "hatching"
+ },
+ {
+  "lock": "B2",
+  "where": "hatching the label",
+  "ok": true,
+  "detail": "HATCHING"
+ },
+ {
+  "lock": "B2",
+  "where": "hatching colour heads",
+  "ok": true,
+  "detail": "1 of 6"
+ },
+ {
+  "lock": "B2",
+  "where": "hatching exactly one current, ringed in ink, at 0",
+  "ok": true,
+  "detail": "[0]"
+ },
+ {
+  "lock": "B2",
+  "where": "fledgling population: six heads",
+  "ok": true,
+  "detail": "6"
+ },
+ {
+  "lock": "B2",
+  "where": "fledgling the photo",
+  "ok": true,
+  "detail": "head"
+ },
+ {
+  "lock": "B2",
+  "where": "fledgling the label",
+  "ok": true,
+  "detail": "FLEDGLING"
+ },
+ {
+  "lock": "B2",
+  "where": "fledgling the head is the tier's, and drawn",
+  "ok": true,
+  "detail": "/images/founding/tiers/fledgling-head.png true"
+ },
+ {
+  "lock": "B2",
+  "where": "fledgling colour heads",
+  "ok": true,
+  "detail": "2 of 6"
+ },
+ {
+  "lock": "B2",
+  "where": "fledgling exactly one current, ringed in ink, at 1",
+  "ok": true,
+  "detail": "[1]"
+ },
+ {
+  "lock": "B2",
+  "where": "mentor population: six heads",
+  "ok": true,
+  "detail": "6"
+ },
+ {
+  "lock": "B2",
+  "where": "mentor the photo",
+  "ok": true,
+  "detail": "head"
+ },
+ {
+  "lock": "B2",
+  "where": "mentor the label",
+  "ok": true,
+  "detail": "MENTOR"
+ },
+ {
+  "lock": "B2",
+  "where": "mentor the head is the tier's, and drawn",
+  "ok": true,
+  "detail": "/images/founding/tiers/mentor-head.png true"
+ },
+ {
+  "lock": "B2",
+  "where": "mentor colour heads",
+  "ok": true,
+  "detail": "5 of 6"
+ },
+ {
+  "lock": "B2",
+  "where": "mentor exactly one current, ringed in ink, at 4",
+  "ok": true,
+  "detail": "[4]"
+ }
+]

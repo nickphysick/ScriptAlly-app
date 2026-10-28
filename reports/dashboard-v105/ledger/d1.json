@@ -1,0 +1,116 @@
+[
+ {
+  "lock": "D1",
+  "where": "opens: centred, 520 wide, three slides, focus inside",
+  "ok": true,
+  "detail": "{\"w\":520,\"cx\":0,\"cy\":0,\"n\":3,\"focus\":\"next\"}"
+ },
+ {
+  "lock": "D1",
+  "where": "v93's panel is gone",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "D1",
+  "where": "slide 1: its title, no Back, the first dot a pill, Next",
+  "ok": true,
+  "detail": "{\"t\":\"Tell us anything\",\"back\":false,\"dots\":[\"on\",\"\",\"\"],\"next\":\"Next\"}"
+ },
+ {
+  "lock": "D1",
+  "where": "the title is typewriter",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "D1",
+  "where": "Next → slide 2, Back shown",
+  "ok": true,
+  "detail": "{\"t\":\"Climb the ranks\",\"dots\":[\"\",\"on\",\"\"]}"
+ },
+ {
+  "lock": "D1",
+  "where": "slide 2's words",
+  "ok": true,
+  "detail": "One note hatches your Fledgling. Then 3, 8, 15 and 25 notes take you all the way to QueryHawk. Your rank never goes down."
+ },
+ {
+  "lock": "D1",
+  "where": "→ slide 3, and its button is Got it",
+  "ok": true,
+  "detail": "{\"t\":\"Get thanked\",\"next\":\"Got it\"}"
+ },
+ {
+  "lock": "D1",
+  "where": "slide 3's fair-play line",
+  "ok": true,
+  "detail": "Fair play: up to 3 notes a week count, a sentence or more, in your own words."
+ },
+ {
+  "lock": "D1",
+  "where": "← back to slide 2",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "D1",
+  "where": "Back → slide 1",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "D1",
+  "where": "Tab stays inside the modal",
+  "ok": true,
+  "detail": "0 of 12 left it"
+ },
+ {
+  "lock": "D1",
+  "where": "esc: reopens at slide 1",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "D1",
+  "where": "esc: closes, focus back on the ⓘ",
+  "ok": true,
+  "detail": "{\"open\":false,\"focus\":\"info\"}"
+ },
+ {
+  "lock": "D1",
+  "where": "dim: reopens at slide 1",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "D1",
+  "where": "dim: closes, focus back on the ⓘ",
+  "ok": true,
+  "detail": "{\"open\":false,\"focus\":\"info\"}"
+ },
+ {
+  "lock": "D1",
+  "where": "close: reopens at slide 1",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "D1",
+  "where": "close: closes, focus back on the ⓘ",
+  "ok": true,
+  "detail": "{\"open\":false,\"focus\":\"info\"}"
+ },
+ {
+  "lock": "D1",
+  "where": "gotit: reopens at slide 1",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "D1",
+  "where": "gotit: closes, focus back on the ⓘ",
+  "ok": true,
+  "detail": "{\"open\":false,\"focus\":\"info\"}"
+ }
+]
