@@ -157,7 +157,7 @@ export const RspCarousel = React.forwardRef<HTMLElement, {
 
   const many = items.length >= 2;
   return (
-    <section className="rsp-pos" data-rsp="carousel" aria-labelledby="rsp-pos-h" ref={ref}>
+    <section className="rsp-pos" data-rsp="carousel" data-rsp5-sec="more" aria-labelledby="rsp-pos-h" ref={ref}>
       <div className="rsp-poshd">
         <div>
           <div className="rsp-plab">ASKED FOR MORE</div>

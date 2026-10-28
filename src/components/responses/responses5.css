@@ -1,0 +1,122 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Responses v5 (`/queries/responses`; ref design-refs/responses-v5/responses-v5.html). Every value here is read from
+ * the reference's own stylesheet; its class is named beside each block.
+ *
+ * ⚠️ THE PAGE IS ONE COLUMN: the workspace grid's (max 1360, the gutter inside the cap), which is the reference's
+ *    `.col` (`width: min(100%, 1360px); padding-inline: clamp(20px, 3.2vw, 52px)`). The full-width bands keep their
+ *    content in that column and reach the sheet's edges with a spread shadow clipped to their own height (the Contact
+ *    list v15 band's method), so nothing here has to know the sheet's width.
+ * ⚠️ THE SHARED PIECES KEEP THEIR OWN STYLESHEETS (pageHeaderCard.css, qcv150.css). The rules below only size them to
+ *    this page, scoped under `.rsp5`, as the Query Centre and the Contact list scope their own.
+ * ⚠️ brand.tsx forces h1–h3 into its serif with !important and names bare spans as the body sans: each face is stated
+ *    with two classes and !important.
+ */
+.rsp5, .rsp5-layer {
+  --r5-ink: #1c130f; --r5-i72: rgba(28, 19, 15, 0.72); --r5-i58: rgba(28, 19, 15, 0.58); --r5-i45: rgba(28, 19, 15, 0.45);
+  --r5-i16: rgba(28, 19, 15, 0.16); --r5-i10: rgba(28, 19, 15, 0.1); --r5-i06: rgba(28, 19, 15, 0.06);
+  --r5-shell: #1b2433; --r5-cr: #f4eee5; --r5-cr66: rgba(244, 238, 229, 0.66); --r5-cr42: rgba(244, 238, 229, 0.42);
+  --r5-page: #f2eee8; --r5-paper: #fbf9f5; --r5-navy: #2a3a52; --r5-harbour: #1f4a66; --r5-rust: #a2452a;
+  --r5-blush: #f5e2da; --r5-blush-d: #e8c8bc;
+  --r5-q: #f7efe3; --r5-q-d: #e7d9bd; --r5-ag: #e0e5dd; --r5-you: #f5e6df; --r5-you-d: #e8c9bb; --r5-of: #d7e0e8;
+  --r5-cl: #e4e1db; --r5-cl-d: #cfc9c1;
+  --r5-machine: var(--sp-type); --r5-serif: var(--sp-serif); --r5-mono: var(--font-mono);
+  color: var(--r5-ink); font-family: var(--r5-serif);
+}
+.rsp5 { box-sizing: border-box; min-width: 0; padding-bottom: 8px; }
+
+/* the sheet's doodle ground (the reference's `.sheet` tile = the Query Centre v150's `doodle-tile.svg`) */
+@media (min-width: 768px) {
+  .rsp5-wpg > .wpg-scroll {
+    background-color: #f2eee8; background-image: url("/images/qc/doodle-tile.svg"); background-repeat: repeat;
+    background-size: 340px 360px; background-attachment: local;
+  }
+}
+
+/* ═════ the sections' headings (`.sec`, `.h2row`, `.h2`, `.art`) ═════ */
+.rsp5 [data-rsp5-sec] { scroll-margin-top: 20px; }
+.rsp5 .rsp5-sec { margin-top: 64px; }
+.rsp5 .rsp5-h2row { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 22px; }
+.rsp5 .rsp5-h2 { display: flex; align-items: center; gap: 16px; min-width: 0; }
+.rsp5 .rsp5-h2 h2.rsp5-h2t { margin: 0; font: 400 31px/1.05 var(--r5-machine) !important; letter-spacing: -0.01em; text-wrap: balance; color: var(--r5-ink); }
+.rsp5 .rsp5-sub { margin: 6px 0 0; font: 400 16px/1.5 var(--r5-serif); color: var(--r5-i72); max-width: 62ch; }
+.rsp5 .rsp5-sub b { font-weight: 600; color: var(--r5-ink); }
+.rsp5 .rsp5-sub b.is-rust { color: var(--r5-rust); }
+/* D10 — an illustration slot is a dashed placeholder until the art is supplied */
+.rsp5-art {
+  box-sizing: border-box; flex: none; display: flex; align-items: center; justify-content: center; text-align: center;
+  border: 1.5px dashed var(--r5-i16); border-radius: 12px; padding: 6px; background: rgba(255, 255, 255, 0.35);
+  font: italic 11px/1.3 var(--r5-serif); color: var(--r5-i45);
+}
+.rsp5-art.rsp5-art--sm { width: 64px; height: 64px; font-size: 9.5px; }
+
+/* ═════ the title card (`.tc`) — the shared PageHeaderCard at the reference's size ═════ */
+.rsp5 .rsp5-card.phc.phc {
+  margin-top: 22px; padding: 34px 44px 34px 46px; gap: 24px; border-radius: 22px; background: var(--r5-paper);
+  grid-template-columns: minmax(0, 1fr) auto;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset, 0 10px 30px -18px rgba(28, 19, 15, 0.35), 0 0 0 1px var(--r5-i06);
+}
+.rsp5 .rsp5-card.phc.phc.phc h1 { font: 400 54px/1 var(--r5-machine) !important; letter-spacing: -0.01em; }
+.rsp5 .rsp5-card .hl { background: linear-gradient(transparent 58%, var(--r5-blush) 58%, var(--r5-blush) 92%, transparent 92%); padding: 0 6px; margin-left: -6px; }
+.rsp5 .rsp5-card .phc-tx > p { margin: 16px 0 0; max-width: 56ch; font: 400 18.5px/1.5 var(--r5-serif); color: var(--r5-i72); }
+.rsp5 .rsp5-card .phc-tx > p b { font-weight: 600; color: var(--r5-ink); }
+.rsp5 .rsp5-card .phc-b { gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+.rsp5 .rsp5-card .phc-b button { height: 48px; padding: 0 22px; border-radius: 12px; font: 400 16px var(--r5-machine) !important; white-space: nowrap; }
+.rsp5 .rsp5-card .phc-p { background: var(--r5-navy); color: #fff; box-shadow: 0 2px 0 rgba(0, 0, 0, 0.18); }
+.rsp5 .rsp5-card .phc-p:hover { background: #22314a; }
+.rsp5 .rsp5-card .phc-s { border: 0; background: #fff; box-shadow: inset 0 0 0 1px var(--r5-i16); }
+.rsp5 .rsp5-card .phc-s:hover { box-shadow: inset 0 0 0 1px var(--r5-i45); }
+.rsp5 .rsp5-card .phc-art { height: auto; display: block; }
+.rsp5 .rsp5-card .phc-art img { display: block; width: 300px; max-width: 100%; height: auto; margin: -10px 0 -18px; filter: none; }
+
+/* ═════ at a glance (`.glance`, `.gc`) — the shared GlanceCards at the reference's size ═════ */
+.rsp5 .rsp5-glance { margin-top: 44px; }
+@media (min-width: 768px) {
+  .rsp5 .rsp5-glance .qc150-glance { margin: 0; }
+  .rsp5 .rsp5-glance h3.qc150-gh { margin: 0 0 22px; padding: 0; font: 400 31px/1.05 var(--r5-machine) !important; letter-spacing: -0.01em; color: var(--r5-ink); }
+  .rsp5 .rsp5-glance .qc150-cards { --qc150-d: 28px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin: 0; }
+  .rsp5 .rsp5-glance .qc150-c {
+    padding: 6px 6px 14px; gap: 12px; border-radius: 14px; background: var(--r5-paper);
+    box-shadow: 0 0 0 1px var(--r5-i10), 0 6px 16px -14px rgba(28, 19, 15, 0.5); transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .rsp5 .rsp5-glance .qc150-c:hover { transform: translateY(-2px); box-shadow: 0 0 0 1px var(--r5-i16), 0 12px 22px -16px rgba(28, 19, 15, 0.55); }
+  .rsp5 .rsp5-glance .qc150-h { height: 38px; margin: 0; padding: 0 12px; gap: 10px; border-radius: 9px; color: var(--r5-ink); }
+  .rsp5 .rsp5-glance .qc150-h b { flex: 0 1 auto; font: 400 17px/1.15 var(--r5-machine) !important; }
+  .rsp5 .rsp5-glance .rsp5-gfact { margin-left: auto; flex: none; font: italic 13px/1 var(--r5-serif); color: var(--r5-i58); white-space: nowrap; }
+  .rsp5 .rsp5-glance .rsp5-gd { display: block; flex: none; width: 9px; height: 9px; border-radius: 50%; }
+  .rsp5 .rsp5-glance .qc150-c--rs-more .qc150-h { background: var(--r5-you); }
+  .rsp5 .rsp5-glance .qc150-c--rs-passed .qc150-h { background: var(--r5-cl); }
+  .rsp5 .rsp5-glance .qc150-c--rs-noReply .qc150-h { background: repeating-linear-gradient(135deg, var(--r5-cl) 0 6px, #ebe8e3 6px 12px); }
+  .rsp5 .rsp5-glance .qc150-c--rs-waiting .qc150-h { background: var(--r5-q); }
+  .rsp5 .rsp5-glance .rsp5-gd--more { background: var(--r5-rust); }
+  .rsp5 .rsp5-glance .rsp5-gd--passed { background: #9b938a; }
+  .rsp5 .rsp5-glance .rsp5-gd--noReply { background: none; box-shadow: inset 0 0 0 1.6px #9b938a; }
+  .rsp5 .rsp5-glance .rsp5-gd--waiting { background: #c9a873; }
+  .rsp5 .rsp5-glance .qc150-body { display: flex; align-items: center; gap: 14px; min-width: 0; padding: 0 12px; }
+  .rsp5 .rsp5-glance .qc150-n { flex: none; margin: 0; font: 400 44px/1 var(--r5-machine) !important; }
+  .rsp5 .rsp5-glance .qc150-faces { flex: 0 1 auto; min-width: 0; margin: 0; flex-wrap: nowrap; overflow: hidden; }
+  .rsp5 .rsp5-glance .qc150-face { width: 28px; height: 28px; margin-left: -4px; font: 500 8.5px/1 var(--r5-mono) !important; background: var(--r5-paper); color: var(--r5-i72); box-shadow: 0 0 0 1.5px var(--r5-cl-d); }
+  .rsp5 .rsp5-glance .qc150-face:first-child { margin-left: 0; }
+  .rsp5 .rsp5-glance .qc150-faces--rs-more .qc150-face { box-shadow: 0 0 0 1.5px var(--r5-you-d); color: var(--r5-rust); }
+  .rsp5 .rsp5-glance .qc150-faces--rs-waiting .qc150-face { box-shadow: 0 0 0 1.5px var(--r5-q-d); }
+  .rsp5 .rsp5-glance .qc150-more { margin-left: 6px; font: 500 11px/1 var(--r5-mono) !important; color: var(--r5-i58); }
+}
+.rsp5 .rsp5-gline { margin: 14px 2px 0; font: 400 15px/1.5 var(--r5-serif); color: var(--r5-i72); }
+.rsp5 .rsp5-gline b { font-weight: 600; color: var(--r5-ink); }
+
+@media (max-width: 1180px) {
+  .rsp5 .rsp5-glance .qc150-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 900px) {
+  .rsp5 .rsp5-card.phc.phc { grid-template-columns: minmax(0, 1fr); }
+  .rsp5 .rsp5-card .phc-art img { width: 200px; justify-self: end; margin-top: -8px; }
+  .rsp5 .rsp5-card.phc.phc.phc h1 { font-size: 40px !important; }
+}
+@media (max-width: 560px) {
+  .rsp5 .rsp5-card.phc.phc { padding: 24px 20px; }
+  .rsp5 .rsp5-card .phc-art img { width: 150px; }
+  .rsp5 .rsp5-glance .qc150-cards { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) { .rsp5 .rsp5-glance .qc150-c { transition: none; } }

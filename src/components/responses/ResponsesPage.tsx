@@ -22,12 +22,12 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useScriptAllyDb } from "../../lib/db";
 import { resolveScopedManuscript } from "../../lib/shellSidebar";
 import { buildQcRows } from "../../lib/qcSummary";
-import { answerFoot, carouselOrder, firstNameOf, respCounts, respItems, stillOut, type NoKind, type RespItem } from "../../lib/responses";
+import { answerFoot, carouselOrder, firstNameOf, goneQuiet, noteSplit, pageCounts, respCounts, respItems, stillOut, waitingRows, type NoKind, type RespItem } from "../../lib/responses";
 import type { QcRow } from "../../lib/qcSummary";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
 import { openResponsePicker, responsePickerHosted } from "../../lib/queryPanelStore";
 import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
-import { RspHeader, RspSummaryCard } from "./RspHeader";
+import { Rsp5Glance, Rsp5TitleCard, type GlanceFacts, type GlanceKey } from "./Rsp5Head";
 import { RspCarousel } from "./RspCarousel";
 import { RspPanel, type AnswerTab } from "./RspPanel";
 import { RspBanner, RspList, RspTally } from "./RspNos";
@@ -35,6 +35,7 @@ import { RspShare } from "./RspShare";
 import { RspEmpty, RspZeroNos } from "./RspEmpty";
 import { AppFooter } from "../shell/AppFooter";
 import "./responses.css";
+import "./responses5.css";
 
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 const reduced = () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -58,7 +59,15 @@ export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) 
     const own = ms ? queries.filter((q) => q.manuscriptId === ms.id) : [];
     const rows = buildQcRows(own, agents, activities, nowMs);
     const items = respItems(rows);
-    return { nowMs, rows, items, counts: respCounts(items), more: carouselOrder(items), out: stillOut(rows) };
+    const counts = respCounts(items), page = pageCounts(items, rows);
+    /* the glance cards' faces: newest answer first (newest query first for the still waiting) */
+    const newest = (g: RespItem<QcRow>["group"]) => items.filter((i) => i.group === g).sort((a, b) => (b.answerMs ?? 0) - (a.answerMs ?? 0)).map((i) => i.row);
+    const waiting = waitingRows(rows).slice().sort((a, b) => (b.sentMs ?? 0) - (a.sentMs ?? 0));
+    const glance: GlanceFacts = {
+      counts: page, rows: { more: newest("more"), passed: newest("passed"), noReply: newest("noReply"), waiting },
+      yourMove: items.filter((i) => i.yourMove).length, withNote: noteSplit(items).withNote, goneQuiet: goneQuiet(rows, nowMs).length,
+    };
+    return { nowMs, rows, items, counts, page, glance, more: carouselOrder(items), out: stillOut(rows) };
     /* location.key: a switch of book re-opens the route, and the book is read from storage */
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queries, activities, agents, ms?.id, location.key]);
@@ -101,13 +110,23 @@ export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) 
   const moreRef = useRef<HTMLElement | null>(null);
   const shareRef = useRef<HTMLElement | null>(null);
   const scrollTo = (el: HTMLElement | null, block: ScrollLogicalPosition) => el?.scrollIntoView({ block, behavior: reduced() ? "auto" : "smooth" });
+  /* v5 · the sections a glance card or a "→" link goes to, by id inside this page (every page stays mounted) */
+  const pageRef = useRef<HTMLDivElement | null>(null);
+  const goSection = useCallback((id: "more" | "timing" | "wall" | "words") => {
+    const el = pageRef.current?.querySelector<HTMLElement>(`[data-rsp5-sec="${id}"]`);
+    el?.scrollIntoView({ block: "start", behavior: reduced() ? "auto" : "smooth" });
+  }, []);
+  const pressGlance = useCallback((k: GlanceKey) => {
+    if (k === "passed" || k === "noReply") { setKind(k); goSection("wall"); }
+    else goSection(k === "more" ? "more" : "timing");
+  }, [goSection]);
 
   return (
-    <WorkspacePageGrid scrollLabel="Responses" masthead={null}>
+    <WorkspacePageGrid scrollLabel="Responses" masthead={null} className="rsp5-wpg">
       {/* the outer element takes the grid's gutter (`.wpg-scroll > *`); the column inside breaks out of it to the
           list width, as packages v4's `.ppv-page > .pk4-col` does */}
       <div className="rsp-page">
-      <div className="rsp rsp-col" data-rsp="page">
+      <div className="rsp rsp5" data-rsp="page" ref={pageRef}>
         {/* Part F · nothing answered for this book: the empty page, and none of the populated page's parts. It
             switches to the populated page the moment the first answer is recorded, with no reload. */}
         {ready && counts.answered === 0 ? (
@@ -117,11 +136,8 @@ export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) 
             onImport={() => navigate("/import")} />
         ) : (
           <>
-            <RspHeader loading={!ready} answered={ready ? counts.answered : null} msTitle={msTitle}
-              hasNos={ready && counts.passed + counts.noReply > 0}
-              onRecord={openRecordPicker} onShare={() => scrollTo(shareRef.current, "center")}
-              card={<RspSummaryCard counts={counts} kind={kind} loading={!ready}
-                onMore={() => scrollTo(moreRef.current, "start")} onKind={pressKind} />} />
+            <Rsp5TitleCard msTitle={msTitle} empty={false} loading={!ready} onRecord={openRecordPicker} onSecond={() => goSection("wall")} />
+            <Rsp5Glance facts={ready ? model.glance : null} onCard={pressGlance} />
             {ready ? (
               <RspCarousel ref={moreRef} items={model.more} nowMs={nowMs} msTitle={msTitle} stillOut={model.out}
                 selectedId={openId} onOpen={openAnswer} onAct={act} onRecord={openRecordPicker} />
