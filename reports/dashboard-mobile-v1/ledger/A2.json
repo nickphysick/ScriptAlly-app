@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "A2",
+  "where": "390x844 the search sheet opens with the field focused",
+  "ok": true,
+  "detail": "{\"open\":true,\"top\":[true,true,true,true],\"focus\":\"search-input\",\"recent\":3}"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 it is on top everywhere, right edge included",
+  "ok": true,
+  "detail": "[true,true,true,true]"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 Recent rows with nothing typed",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 typing ranks the palette's corpus",
+  "ok": true,
+  "detail": "Callo → [\"Wren Calloway\",\"Wren Calloway\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 Cancel closes it and returns focus to Search",
+  "ok": true,
+  "detail": "{\"open\":false,\"focus\":\"Search\"}"
+ },
+ {
+  "lock": "A2",
+  "where": "375x667 the search sheet opens with the field focused",
+  "ok": true,
+  "detail": "{\"open\":true,\"top\":[true,true,true,true],\"focus\":\"search-input\",\"recent\":3}"
+ },
+ {
+  "lock": "A2",
+  "where": "375x667 it is on top everywhere, right edge included",
+  "ok": true,
+  "detail": "[true,true,true,true]"
+ },
+ {
+  "lock": "A2",
+  "where": "375x667 Recent rows with nothing typed",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "A2",
+  "where": "375x667 typing ranks the palette's corpus",
+  "ok": true,
+  "detail": "Callo → [\"Wren Calloway\",\"Wren Calloway\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "375x667 Cancel closes it and returns focus to Search",
+  "ok": true,
+  "detail": "{\"open\":false,\"focus\":\"Search\"}"
+ }
+]

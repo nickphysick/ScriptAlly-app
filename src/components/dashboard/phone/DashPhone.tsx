@@ -10,6 +10,7 @@
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { createPortal } from "react-dom";
 import type { Activity, Agent, Manuscript, ManuscriptVersion, Query, SmartImportUsage, Task, TaskFlag, User, UserTask } from "../../../types";
 import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
 import { PhoneSearch, PhoneTopBar, type PhoneActions } from "./PhoneTopBar";
@@ -200,13 +201,18 @@ export const DashPhone: React.FC<DashPhoneProps> = (props) => {
           }}
         />
       )}
-      {searchOpen && (
+      {/* ⚠️ PORTALLED: a fixed child cannot rise out of the shell's stacking context, and the window's edge shading painted
+          over the sheet's right edge. Under <body>, in the token-carrying `.dm1-layer` host, it covers the whole screen. */}
+      {searchOpen && createPortal(
+        <div className="dm1-layer">
         <PhoneSearch
           agents={agents} queries={queries} manuscripts={manuscripts}
           onClose={closeSearch}
           onOpenQuery={(id) => onNavigate("queries", id)}
           onOpenAgent={(name) => { setSearchQuery?.(name); navigate("/agents"); }}
         />
+        </div>,
+        document.body,
       )}
       {/* the FeedbackDock has no backdrop of its own; on this page its sheet sits over this scrim (CSS shows it
           only while the dock is open), and a tap on the scrim closes the dock the way Escape does */}

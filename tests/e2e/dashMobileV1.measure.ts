@@ -112,7 +112,8 @@ test("DM1-A1 · the phone top bar", async ({ page }) => {
     L.check("A1", `${where} + reads × while open (rotated 45°)`, /matrix\(0\.7071/.test(menu.rot), menu.rot);
     L.check("A1", `${where} aria-expanded true while open`, menu.expanded === "true", String(menu.expanded));
     /* outside tap */
-    await page.mouse.click(vp.width / 2, vp.height - 200);
+    /* on the bar's mark: outside the menu and the +, and inert, so the tap closes the menu and opens nothing */
+    await page.mouse.click(ctl.mark!.l + 15, ctl.mark!.t + 15);
     await page.waitForTimeout(200);
     const afterOutside = await page.locator('[data-dm1="menu"]').count();
     L.check("A1", `${where} an outside tap closes the menu`, afterOutside === 0, String(afterOutside));
@@ -462,4 +463,64 @@ test("DM1-E1 · the desktop furniture is gone on phones, and stays on the deskto
     for (const [name, sel] of FURNITURE.slice(0, 5)) L.check("E1", `${tag(vp)} ${name} still renders`, (await count(sel)) >= 1, sel);
   }
   L.done(28);
+});
+
+test("DM1-F1 · no sideways scroll, and every tap target is at least 40px", async ({ page }) => {
+  const L = new Ledger("F1");
+  for (const vp of PHONES) {
+    await openDash(page, vp);
+    if (MUT === "F1-wide") await page.addStyleTag({ content: `.dm1-hero { width: 420px !important; }` });
+    if (MUT === "F1-small") await page.addStyleTag({ content: `.dm1-ic { width: 30px !important; height: 30px !important; }` });
+    const r = await page.evaluate(() => {
+      const port = [...document.querySelectorAll<HTMLElement>(".ws-wbody")].find((e) => e.getBoundingClientRect().height > 0);
+      const doc = document.documentElement;
+      const root = document.querySelector<HTMLElement>('[data-dm1="page"]');
+      const vis = (e: Element) => { const b = (e as HTMLElement).getBoundingClientRect(); return b.width > 0 && b.height > 0; };
+      const targets = [...(root?.querySelectorAll<HTMLElement>('button, a, [role="link"], [role="menuitem"], input') ?? [])].filter(vis)
+        .map((e) => { const b = e.getBoundingClientRect(); return { name: (e.getAttribute("aria-label") || e.textContent || e.className || "").toString().trim().slice(0, 40), w: Math.round(b.width * 10) / 10, h: Math.round(b.height * 10) / 10 }; });
+      return {
+        doc: doc.scrollWidth - doc.clientWidth,
+        port: port ? port.scrollWidth - port.clientWidth : null,
+        root: root ? root.getBoundingClientRect().width : null,
+        targets,
+      };
+    });
+    L.check("F1", `${tag(vp)} population: tap targets`, r.targets.length >= 10, String(r.targets.length));
+    L.check("F1", `${tag(vp)} no sideways scroll (document)`, r.doc <= 0, String(r.doc));
+    L.check("F1", `${tag(vp)} no sideways scroll (the page's scroller)`, r.port !== null && r.port <= 0, String(r.port));
+    L.check("F1", `${tag(vp)} the page is the window's width`, r.root === vp.width, String(r.root));
+    const small = r.targets.filter((t) => t.w < 40 || t.h < 40);
+    L.check("F1", `${tag(vp)} every tap target ≥ 40px`, small.length === 0, JSON.stringify(small));
+  }
+  L.done(10);
+});
+
+test("DM1-A2 · the search sheet", async ({ page }) => {
+  const L = new Ledger("A2");
+  for (const vp of PHONES) {
+    await openDash(page, vp);
+    const where = tag(vp);
+    if (MUT === "A2-short") await page.addStyleTag({ content: `.dm1-search { right: 12px !important; }` });
+    await page.locator('[data-dm1="top"] [aria-label="Search"]').first().click({ timeout: 5000 }).catch(() => {});
+    await page.waitForTimeout(300);
+    const cover = await page.evaluate(() => {
+      const s = document.querySelector<HTMLElement>('[data-dm1="search"]');
+      const pts = [[2, 200], [innerWidth - 2, 200], [innerWidth - 2, innerHeight - 140], [innerWidth / 2, innerHeight / 2]];
+      return { open: !!s, top: pts.map(([x, y]) => !!s && s.contains(document.elementFromPoint(x, y))), focus: document.activeElement?.getAttribute("data-dm1"), recent: document.querySelectorAll('[data-dm1="search-rows"] li').length };
+    });
+    L.check("A2", `${where} the search sheet opens with the field focused`, cover.open && cover.focus === "search-input", JSON.stringify(cover));
+    L.check("A2", `${where} it is on top everywhere, right edge included`, cover.top.every(Boolean), JSON.stringify(cover.top));
+    L.check("A2", `${where} Recent rows with nothing typed`, cover.recent >= 1, String(cover.recent));
+    const first = await page.evaluate(() => document.querySelector('[data-dm1="search-rows"] li b')?.textContent ?? "");
+    const word = first.split(" ").slice(-1)[0] ?? "";
+    await page.keyboard.type(word.slice(0, 5));
+    await page.waitForTimeout(200);
+    const found = await page.evaluate(() => [...document.querySelectorAll('[data-dm1="search-rows"] li b')].map((b) => b.textContent ?? ""));
+    L.check("A2", `${where} typing ranks the palette's corpus`, found.length >= 1 && found.some((n) => n.toLowerCase().includes(word.slice(0, 5).toLowerCase())), `${word.slice(0, 5)} → ${JSON.stringify(found.slice(0, 4))}`);
+    await page.locator('[data-dm1="search-cancel"]').click({ timeout: 5000 }).catch(() => {});
+    await page.waitForTimeout(200);
+    const after = await page.evaluate(() => ({ open: !!document.querySelector('[data-dm1="search"]'), focus: document.activeElement?.getAttribute("aria-label") }));
+    L.check("A2", `${where} Cancel closes it and returns focus to Search`, !after.open && after.focus === "Search", JSON.stringify(after));
+  }
+  L.done(10);
 });

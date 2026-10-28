@@ -57,7 +57,9 @@ export const PhoneUpNext: React.FC<{
         {loading ? <p className="dm1-herottl">&nbsp;</p> : hero ? (
           <>
             <p className="dm1-herottl" data-dm1="hero-title">{hero.m.pre}{hero.m.who}{hero.m.post}</p>
-            {(hero.m.line ?? hero.it.fact) && <p className="dm1-heroline" data-dm1="hero-line">{hero.m.line ?? hero.it.fact}</p>}
+            {/* the desktop card's own sentence, and only that: where it has none, the phone states none (the list's
+                mono fact line is an uppercase system tag, which the phone does not use) */}
+            {hero.m.line && <p className="dm1-heroline" data-dm1="hero-line">{hero.m.line}</p>}
             {hero.m.steps && (
               <ol className="dm1-steps" data-dm1="steps">
                 {hero.m.steps.map((s, i) => (
@@ -86,7 +88,7 @@ export const PhoneUpNext: React.FC<{
                   <span className="dm1-rdisc" style={{ background: t.disc, color: t.glyph }} aria-hidden="true"><Icon /></span>
                   <span className="dm1-rtxt">
                     <span className="dm1-rttl">{m.pre}<b>{m.who}</b>{m.post}</span>
-                    <span className="dm1-rline">{m.line ?? it.fact}</span>
+                    {m.line && <span className="dm1-rline">{m.line}</span>}
                   </span>
                   <ChevronRight className="dm1-chev" aria-hidden="true" />
                 </button>

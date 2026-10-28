@@ -1,0 +1,152 @@
+[
+ {
+  "lock": "D1",
+  "where": "egg: population, the row",
+  "ok": true,
+  "detail": "{\"title\":\"Founding writer · Egg\",\"line\":\"0 sent · 1 more to hatch. Tell us something.\"}"
+ },
+ {
+  "lock": "D1",
+  "where": "egg: the title names the rank",
+  "ok": true,
+  "detail": "Founding writer · Egg"
+ },
+ {
+  "lock": "D1",
+  "where": "egg: the line is v105's figures",
+  "ok": true,
+  "detail": "0 sent · 1 more to hatch. Tell us something. vs 0 sent · 1 more to hatch. Tell us something."
+ },
+ {
+  "lock": "D1",
+  "where": "egg: the count agrees with the desktop card",
+  "ok": true,
+  "detail": "desktop \"NO CONTRIBUTIONS YET\" vs phone \"0 sent · 1 more to hatch. Tell us something.\""
+ },
+ {
+  "lock": "D1",
+  "where": "fledgling: population, the row",
+  "ok": true,
+  "detail": "{\"title\":\"Founding writer · Fledgling\",\"line\":\"1 sent · 2 more to Archivist. Tell us something.\"}"
+ },
+ {
+  "lock": "D1",
+  "where": "fledgling: the title names the rank",
+  "ok": true,
+  "detail": "Founding writer · Fledgling"
+ },
+ {
+  "lock": "D1",
+  "where": "fledgling: the line is v105's figures",
+  "ok": true,
+  "detail": "1 sent · 2 more to Archivist. Tell us something. vs 1 sent · 2 more to Archivist. Tell us something."
+ },
+ {
+  "lock": "D1",
+  "where": "fledgling: the count agrees with the desktop card",
+  "ok": true,
+  "detail": "desktop \"1 CONTRIBUTION · 2 TO ARCHIVIST\" vs phone \"1 sent · 2 more to Archivist. Tell us something.\""
+ },
+ {
+  "lock": "D1",
+  "where": "mentor: population, the row",
+  "ok": true,
+  "detail": "{\"title\":\"Founding writer · Mentor\",\"line\":\"16 sent · 9 more to QueryHawk. Tell us something.\"}"
+ },
+ {
+  "lock": "D1",
+  "where": "mentor: the title names the rank",
+  "ok": true,
+  "detail": "Founding writer · Mentor"
+ },
+ {
+  "lock": "D1",
+  "where": "mentor: the line is v105's figures",
+  "ok": true,
+  "detail": "16 sent · 9 more to QueryHawk. Tell us something. vs 16 sent · 9 more to QueryHawk. Tell us something."
+ },
+ {
+  "lock": "D1",
+  "where": "mentor: the count agrees with the desktop card",
+  "ok": true,
+  "detail": "desktop \"16 CONTRIBUTIONS · 9 TO QUERYHAWK\" vs phone \"16 sent · 9 more to QueryHawk. Tell us something.\""
+ },
+ {
+  "lock": "D1",
+  "where": "queryhawk: population, the row",
+  "ok": true,
+  "detail": "{\"title\":\"Founding writer · QueryHawk\",\"line\":\"25 sent · top rank. Tell us something.\"}"
+ },
+ {
+  "lock": "D1",
+  "where": "queryhawk: the title names the rank",
+  "ok": true,
+  "detail": "Founding writer · QueryHawk"
+ },
+ {
+  "lock": "D1",
+  "where": "queryhawk: the line is v105's figures",
+  "ok": true,
+  "detail": "25 sent · top rank. Tell us something. vs 25 sent · top rank. Tell us something."
+ },
+ {
+  "lock": "D1",
+  "where": "queryhawk: the count agrees with the desktop card",
+  "ok": true,
+  "detail": "desktop \"25 CONTRIBUTIONS · TOP RANK\" vs phone \"25 sent · top rank. Tell us something.\""
+ },
+ {
+  "lock": "D1",
+  "where": "the founding row opens the feedback sheet",
+  "ok": true,
+  "detail": "{\"top\":519.25,\"bottom\":844,\"left\":0,\"w\":390,\"vh\":844,\"vw\":390,\"scrim\":\"block\"}"
+ },
+ {
+  "lock": "D1",
+  "where": "the sheet sits over a scrim",
+  "ok": true,
+  "detail": "block"
+ },
+ {
+  "lock": "D1",
+  "where": "Esc closes the sheet and the scrim",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "D1",
+  "where": "Recent: population, two rows",
+  "ok": true,
+  "detail": "[{\"t\":\"Full sent · Wren Calloway\",\"d\":\"15 Oct\"},{\"t\":\"Full requested · Wren Calloway\",\"d\":\"30 Sep\"}]"
+ },
+ {
+  "lock": "D1",
+  "where": "Activity feed opens the feed",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "D1",
+  "where": "…as a bottom sheet",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "D1",
+  "where": "Recent's rows are the feed's first two",
+  "ok": false,
+  "detail": "{\"recent\":[{\"t\":\"Full sent · Wren Calloway\",\"d\":\"15 Oct\"},{\"t\":\"Full requested · Wren Calloway\",\"d\":\"30 Sep\"}]}"
+ },
+ {
+  "lock": "D1",
+  "where": "order: stats, Up next, founding, Recent",
+  "ok": true,
+  "detail": "{\"stats\":{\"t\":127,\"b\":480.015625},\"up\":{\"t\":502.015625,\"b\":970.21875},\"found\":{\"t\":992.21875,\"b\":1062.21875},\"recent\":{\"t\":1084.21875,\"b\":1262.21875}}"
+ },
+ {
+  "lock": "D1",
+  "where": "22px between sections",
+  "ok": true,
+  "detail": "[22,22,22]"
+ }
+]
