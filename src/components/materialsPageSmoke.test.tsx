@@ -242,6 +242,16 @@ describe("/queries/packages renders", () => {
     expect(html).toContain('data-pk26="lib"');
     expect(html).toContain(">Hook-first<");
     expect(html).not.toContain('data-pk26="hero"');
+    /* v39 D–F: the label over two cards, the package's own header (picker tile, name in place, one stage, Figures), the
+       quiet foot with the details link, and no stepper row */
+    expect(html).toContain(">Build, view and edit<");
+    expect(html).toContain('data-pk39="lib-head"');
+    expect(html).toContain('data-pk39="pkg-head"');
+    expect(html).toContain('aria-label="Change icon and colour"');
+    expect(html).toContain('aria-label="Package name"');
+    expect((html.match(/data-pk39="stage"/g) ?? []).length).toBe(1);
+    expect(html).toContain(">Note, copy or delete…<");
+    expect(html).not.toContain("p6-lc-s");
     /* v38: the label for the package, and no tab bar or tab page */
     expect(html).toContain('data-pkid="pk1"');
     expect(html).not.toContain('data-pk26="tabs"');

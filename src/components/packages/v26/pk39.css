@@ -82,3 +82,80 @@
 .p9-pkl .p9-pkl-row .p9-pkl-b > em,
 .p9-pkl .p9-pkl-row .p9-on.p9-pkl-b[aria-pressed="true"] > em { font: 400 11.5px/18px var(--sp-type) !important; letter-spacing: 0 !important; text-transform: none !important; }
 .p9-pkl .p9-pkl-k .p9-ill > i { font: 400 10px/1 var(--sp-type) !important; letter-spacing: 0 !important; text-transform: none !important; }
+
+/* ══ D · the builder (Pk26Builder): the section, the colour, and what no captured state shows ══ */
+/* the section's own box (the ref's `.pb-build` under v39.2/v39.9: no panel, 14 / 48 / 96) */
+/* the ref's 96 below the builder is carried by v40's guidelines, which sit 24 under the cards */
+.p6 > .p9-pb-build { box-sizing: border-box; margin: 14px 48px 24px; padding: 0; background: none; border: 0; box-shadow: none; }
+/* the package's header in its colour, and the icon's ink on the cream tile (ref `.po-h`, `.po-ic`) */
+.p9-pb-grid.p9-v39 .p9-pk-open .p9-po-h { background: var(--pc, #1d4b63) !important; }
+.p9-pb-grid.p9-v39 .p9-po-h .p9-po-ic { color: var(--pc, #1d4b63) !important; }
+.p9-pb-grid.p9-v39 .p9-po-h .p9-po-ic:focus-visible .p9-po-icx { opacity: 1; }
+.p9-pb-grid.p9-v39 .p9-po-h .p9-po-ic[disabled] { cursor: default; }
+.p9-pb-grid.p9-v39 .p9-po-h .p9-po-ic[disabled] .p9-po-icx { display: none; }
+/* Edit and ✕ show on row hover and focus, and always on touch (ref `.mr-ac`) */
+.p9-pb-grid.p9-v39 .p9-mf .p9-mr .p9-mr-ac:focus-within { opacity: 1; }
+@media (hover: none) { .p9-pb-grid.p9-v39 .p9-mf .p9-mr .p9-mr-ac { opacity: 1; } }
+/* the padlock after "Out with agents" (Nick, 28 Oct: the lock moves from the name to the stage) */
+.p9-pb-grid.p9-v39 .p9-stg .p9-stg-lk { display: inline-grid; place-items: center; margin-left: -2px; color: rgba(255, 255, 255, 0.75); cursor: default; }
+.p9-pb-grid.p9-v39 .p9-stg .p9-stg-lk svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.5; }
+/* "Add a note: who is this for?" is the note line itself, pressable (v26.1's "+ Add a note", in the ref's words) */
+.p9-pb-grid.p9-v39 .p9-po-tt > small .p9-po-addnote { all: unset; cursor: pointer; font: inherit; color: inherit; }
+.p9-pb-grid.p9-v39 .p9-po-tt > small .p9-po-addnote:hover { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+.p9-pb-grid.p9-v39 .p9-po-tt > small .p9-po-addnote:focus-visible { outline: 2px solid #fff; outline-offset: 2px; border-radius: 3px; }
+.p9-pb-grid.p9-v39 .p9-po-tt > small { display: block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* rename in place: the keyboard focus state of the dashed underline (ref `.po-nm[contenteditable]:focus`) */
+.p9-pb-grid.p9-v39 .p9-po-tt .p9-po-nm:not(.p9-locked):focus { outline: 0; background: rgba(255, 255, 255, 0.12); border-bottom-color: #fff; }
+/* copied from (v40): one quiet line under the header */
+.p9-pb-grid.p9-v39 .p9-pk-open .p9-lc-from { padding: 12px 26px 0; font: italic 400 14px/1.45 var(--sp-serif); color: rgba(28, 19, 15, 0.62); }
+/* a locked slot that went empty (v38): the empty box's grammar, solid rather than dashed */
+.p9-pb-grid.p9-v39 .p9-mr .p9-mr-em.p9-mr-em--lk { outline: 0; background: rgba(28, 19, 15, 0.03); font-style: italic; font-weight: 400; color: rgba(28, 19, 15, 0.55); }
+/* the foot's links (Make a copy and Retire on a locked package, beside "Note, copy or delete…") */
+.p9-pb-grid.p9-v39 .p9-po-foot .p9-po-lkb { display: inline-flex; gap: 16px; flex: none; }
+/* dragging (ref v26 `.dragging .mf .slt` / `.slt.over`, `.lr.ghost`): the matching row lights, the rest dim */
+.p9-pk-open.p9-dragging .p9-mf .p9-slt { opacity: 0.4 !important; }
+.p9-pk-open.p9-dragging .p9-mf .p9-slt.p9-ok { opacity: 1 !important; }
+.p9-pk-open.p9-dragging .p9-mf .p9-slt.p9-ok :is(.p9-mr-em, .p9-mr-it) { outline: 2px dashed #1d4b63; outline-offset: 4px; border-radius: 12px; }
+.p9-pk-open .p9-mf .p9-slt.p9-over :is(.p9-mr-em, .p9-mr-it) { background: #e9f1f4; }
+.p9-pb-grid.p9-v39 .p9-lib-list .p9-lr.p9-ghost { opacity: 0.4; }
+/* put-away materials in Your materials (v38): quieter, opened rather than dragged */
+.p9-pb-grid.p9-v39 .p9-lib-list .p9-lr.p9-lr--away { opacity: 0.62; cursor: default; }
+.p9-pb-grid.p9-v39 .p9-lib-list .p9-lr.p9-lr--away .p9-lr-g { visibility: hidden; }
+.p9-pb-grid.p9-v39 .p9-lib-list .p9-lr .p9-lr-add.p9-lr-open { font-style: normal; }
+.p9-pb-grid.p9-v39 .p9-lib-list .p9-lib-away { display: block; margin: 10px 10px 2px; }
+.p9-pb-grid.p9-v39 .p9-lib-list .p9-lib-empty { margin: 14px 10px; font: italic 400 14px/1.45 var(--sp-serif); color: rgba(28, 19, 15, 0.58); }
+/* v40's guidelines and start card, under the page root with no panel */
+.p6 > .p9-gl { margin: 0 48px 96px; background: none; box-shadow: none; }
+.p9-pk-open .p6-pk-open.p9-pk-start { padding: 28px 30px; }
+
+/* ══ E · the icon-and-colour picker (ref `.icp`, one block, ported by hand) ══ */
+.p9-icp { position: fixed; z-index: 80; box-sizing: border-box; width: 300px; padding: 16px; border-radius: 14px; background: #fff;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1), 0 20px 40px -16px rgba(28, 19, 15, 0.4); font-family: var(--sp-serif); color: #1c130f; }
+/* the ref's mono capitals ("ICON", "COLOUR") read in the typewriter, sentence case (v40's ruling) */
+.p9-icp .p9-icp-k { margin: 0 0 8px; font: 400 13px/1.2 var(--sp-type); color: rgba(28, 19, 15, 0.58); }
+.p9-icp .p9-icp-ics { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: 16px; }
+.p9-icp .p9-icp-ics button { height: 38px; padding: 0; border: 0; border-radius: 8px; background: #f6f2ec; color: #1c130f; cursor: pointer; display: grid; place-items: center; }
+.p9-icp .p9-icp-ics button svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; }
+.p9-icp .p9-icp-ics button[aria-pressed="true"] { background: var(--pc, #1d4b63); color: #fff; }
+.p9-icp .p9-icp-cols { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; }
+.p9-icp .p9-icp-cols button { aspect-ratio: 1; padding: 0; border: 0; border-radius: 50%; background: var(--sw); cursor: pointer; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08); }
+.p9-icp .p9-icp-cols button[aria-pressed="true"] { box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--sw); }
+.p9-icp button:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
+.p9-icp .p9-icp-f { margin: 14px 0 0; font: italic 400 12.5px/1.45 var(--sp-serif); color: rgba(28, 19, 15, 0.58); }
+
+/* ══ D · the empty slot, for every slot: the capture only ever saw an empty Synopsis, so the generated rule names
+   `.p9-t-syn`; this is the same rule (v39.2 `.v39 .mr-em`) for all three ══ */
+.p9-pb-grid.p9-v39 .p9-mr.p9-slt .p9-mr-em {
+  display: flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 14px; border-radius: 12px;
+  outline: 1.5px dashed rgba(28, 19, 15, 0.16); outline-offset: -1.5px;
+  font: 600 13.5px/normal var(--sp-serif); letter-spacing: 0.01em; color: rgba(28, 19, 15, 0.42);
+}
+
+/* ══ D · v40's ruling, carried: no small mono capitals. The slot labels, the stage words and the art placeholders read
+   in the typewriter, sentence case. The two mono labels v39 names are kept: "Build, view and edit" and the Pro stamp. ══ */
+.p9-pb-grid.p9-v39 .p9-mr .p9-mr-l > span { font: 400 14px/1.3 var(--sp-type) !important; letter-spacing: 0 !important; text-transform: none !important; color: rgba(28, 19, 15, 0.7) !important; }
+.p9-pb-grid.p9-v39 .p9-stg .p9-stg-s { font-family: var(--sp-type) !important; font-size: 12.5px; font-weight: 400 !important; letter-spacing: 0 !important; text-transform: none !important; }
+.p9-pb-grid.p9-v39 .p9-ill > i { font: 400 10px/1 var(--sp-type) !important; letter-spacing: 0 !important; text-transform: none !important; }
+@container p9sheet (max-width: 1200px) {
+  .p9-pb-grid.p9-v39 .p9-stg .p9-stg-s:not(.p9-on) { font-size: 0; }
+}

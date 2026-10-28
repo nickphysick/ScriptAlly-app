@@ -83,7 +83,8 @@ describe("the materials band replaces the rail's register (D1)", () => {
     const table = decls(read("../components/packages/v26/Pk26Builder.tsx"));
     expect(table).toContain("model.lettersAll.filter((m) => m.retired)");
     expect(table).toContain("model.synopsesAll.filter((m) => m.retired)");
-    expect(table).toContain("<em>Put away</em>");
+    /* the row still says "Put away" (v39 moved the words from a tag into its quiet line: the law, not the spelling) */
+    expect(table).toContain("<small>Put away");
     expect(table).toContain("onOpenMaterial(lib as \"let\" | \"syn\", m.id)");
     const drawer = decls(read("../components/packages/v26/Pk26Drawer.tsx"));
     expect(drawer).toMatch(/data-pk26=\{m\.retired \? "restore" : "put-away"\}/);
