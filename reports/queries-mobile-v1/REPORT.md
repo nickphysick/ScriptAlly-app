@@ -127,7 +127,12 @@ The baseline's first Vitest run showed three red files under `functions/`: the w
 
 ## 7. Dev
 
-See the note at the foot of this commit's follow-up: the merge onto dev's current integration, its branch, and the bundle served.
+- **Dev moved during the pack** from `39c5768f` (`index-Cg9wZ_F1.js`) to `1f694e78` (`index-BzLemNDD.js`: dashboard v118 + submission packages v39.1), confirmed by building that tip.
+- **The integration branch** is `dev/pk391-qm1` = `1f694e78` + this branch, merge `07cec344`, pushed. The only conflict was `.refhashes.json` (both sides added entries).
+- **Gates there:** tsc clean (root, functions); Vitest 686 files · 10,704 passed · 3 skipped; build clean.
+- **Locks there:** QM1 9/9, dashboard phone 8/8, QC150 25/25, QC1501 15/15.
+- **Deployed:** hosting only, to `scriptally-dev`, after a check that refused to run unless dev still served `index-BzLemNDD.js`. **Dev now serves `index-DRG_02T1.js`**, and QM1's tab case passes against the live site. Prod is untouched; nothing is merged to main.
+- **On a phone:** open https://scriptally-dev.web.app/queries signed in. On a desktop browser, use the device toolbar at 390 × 844 (the page needs 760px or narrower) and reload.
 
 ## 8. Not done, and why
 
