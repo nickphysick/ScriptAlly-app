@@ -35,7 +35,9 @@ import { workspaceSections } from "../../lib/workspaceNav";
 import { AccountMenu } from "./AccountMenu";
 import { usePalette } from "./usePalette";
 import { ShellScope, useShellNavCounts } from "./ShellSidebar";
-import { MobileChromeContext, MobileDetailSpec } from "./mobileChrome";
+import { MobileChromeContext, MobileDetailSpec, useIsMobile } from "./mobileChrome";
+import { buildQcRows } from "../../lib/qcSummary";
+import { phoneScopeId, yourMoveBadge } from "../../lib/queriesPhone";
 import { MobileSheet } from "./MobileSheet";
 import { BottomTabBar } from "../BottomTabBar";
 import { STAGE_SCROLL_ID } from "../../lib/stageScroll";
@@ -208,7 +210,7 @@ export const WORKSPACE_ICONS: Record<string, React.ReactNode> = {
 export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, searchQuery, setSearchQuery, theme, children }) => {
   // The palette's corpus reads these — already in memory on every route (DbProvider), so the
   // palette never fetches. currentUser/logout feed the mobile you-menu (Mobile Pass 1).
-  const { agents, queries, manuscripts, currentUser, logout } = useScriptAllyDb();
+  const { agents, queries, manuscripts, activities, currentUser, logout } = useScriptAllyDb();
 
   /* ⚠️ ONE FIGURE IN THE NAV NOW (Amendment 1, H5). The Queries attention count went with the
      filter children: with the sidebar carrying destinations rather than views, there is nothing
@@ -334,6 +336,17 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
     },
     [navigate, setSearchQuery]
   );
+  /* Queries on a phone v1 — the tab bar's Queries badge: the Your-move count on the manuscript the phone page is scoped
+     to (lib/queriesPhone, the same derivation as the page's first chip). Phones only; the desktop never builds it. */
+  const phoneNav = useIsMobile();
+  const tabBadge = useMemo(() => {
+    if (!phoneNav) return 0;
+    let stored: string | null = null;
+    try { stored = window.localStorage.getItem("scriptally_active_manuscript_id"); } catch { /* storage refused */ }
+    const now = Date.now();
+    return yourMoveBadge(buildQcRows(queries, agents, activities, now), phoneScopeId(manuscripts, stored), now);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phoneNav, queries, agents, activities, manuscripts, pathname]);
 
   return (
     /**
@@ -530,7 +543,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
 
       {/* The floating tab-bar capsule (<md). It stands down while the active route shows a
           pushed detail screen (baked decision 5) — the detail's own affordances take the foot. */}
-      <BottomTabBar activeTab={routeKey} onNavigate={onNavigate} hidden={activeMobileDetail !== null} />
+      <BottomTabBar pathname={pathname} onGo={goPath} onMore={() => setYouOpen(true)} badge={tabBadge} hidden={activeMobileDetail !== null} />
 
       {/* THE YOU-MENU (Mobile Pass 1, concept frame 07) — the avatar's sheet: user block with
           the plan as PLAIN SLATE TEXT (no Pro card), then the demoted destinations. Rows route
