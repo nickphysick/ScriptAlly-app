@@ -269,7 +269,12 @@ export function cheerFrom(prev: ReadonlyMap<string, string>, rows: readonly { id
 
 export interface CheerWords { headline: string; line: string; stats: { n: string; label: string }[]; button: string }
 const ORD = ["first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth", "tenth"];
-const ordinal = (n: number): string => ORD[n - 1] ?? `${n}th`;
+/** "second", "tenth", then 11th, 21st, 22nd, 23rd, 101st, 111th */
+export const ordinal = (n: number): string => {
+  if (n >= 1 && n <= ORD.length) return ORD[n - 1];
+  const t = n % 100, u = n % 10;
+  return `${n}${t >= 11 && t <= 13 ? "th" : u === 1 ? "st" : u === 2 ? "nd" : u === 3 ? "rd" : "th"}`;
+};
 
 /** the celebration's words, from the manuscript's own queries */
 export function cheerWords(kind: Cheer, r: QcRow, rows: readonly QcRow[], msTitle: string | null, nowMs: number): CheerWords {

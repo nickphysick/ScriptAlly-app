@@ -206,7 +206,7 @@
 .qm1-qc .qc149c-nx { position: relative; margin: 14px 12px 0; padding: 14px; border-radius: 18px; background: #f3efe8; }
 .qm1-qc .qc149c-nxart { position: absolute; right: 10px; top: -10px; width: 52px; height: auto; transform: rotate(12deg); pointer-events: none; }
 .qm1-qc .qc149c-nx small { display: block; text-transform: uppercase; letter-spacing: 0.08em; color: #8a8076; font: 700 11px/1.3 var(--qm-ui) !important; }
-.qm1-qc .qc149c-nx b { display: block; margin: 4px 0 2px; padding-right: 44px; color: var(--qm-ink); font: 600 18px/1.25 var(--qm-se) !important; }
+.qm1-qc .qc149c-nx b { display: block; margin: 4px 0 2px; padding-right: 64px; color: var(--qm-ink); font: 600 18px/1.25 var(--qm-se) !important; }
 .qm1-qc .qc149c-nx p { margin: 0 0 12px; color: #5b4f47; font: italic 400 15px/1.35 var(--qm-se) !important; }
 .qm1-qc .qc149c-nxbtns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .qm1-qc .qc149c-nxb {
@@ -216,6 +216,9 @@
 }
 .qm1-qc .qc149c-nxb.primary { background: var(--qm-navybtn); color: #fff; border-color: var(--qm-navyd); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 3px 0 var(--qm-navyd), 0 6px 12px -6px rgba(20, 30, 50, 0.45); }
 .qm1-qc .qc149c-nxbtns > :only-child { grid-column: 1 / -1; }
+
+/* the agent's name in serif 22px, as the landing card's */
+.qm1-qc [data-qc149c="name"] { font: 600 22px/1.1 var(--qm-se) !important; }
 
 /* the footer: the due line left, ‹ N / M › right, on one line (Edit and Close are in the ⋯ menu) */
 .qm1-qc [data-qc149c="footer"] { display: flex; align-items: center; justify-content: space-between; gap: 8px; }

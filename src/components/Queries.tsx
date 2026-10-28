@@ -6425,10 +6425,28 @@ export const Queries: React.FC<{
   const guideFlowShown = pipFlow ?? guideFlow;
   useEffect(() => { setGuideWalk(!!guideFlowShown || !!walk); }, [guideFlowShown, walk]);
 
+  /**
+   * THE ONE QUERY PANEL HOST (Query panel v1: one mount for every door), built here so both returns place the same element.
+   * Queries on a phone v1 — on the phone page it serves only what other pages ask for (`extPanel`) and the practice walk:
+   * the phone page draws its own `?q` card, and the picker and the header's flows are the desktop's. Its contents there are
+   * the open card the base drew at this width, never the phone layout.
+   */
+  const queryPanelOn = qmPhone
+    ? !!(pipShown || (extPanel && qcOpenCardNode && cardQueryId))
+    : !!(pipShown || (qcOpenCardNode && cardQueryId) || picking || qcFlowNode);
+  const queryPanelHost = queryPanelOn ? (
+    <QueryPanelHost id={qcFlowNode && qcFlow ? `__${qcFlow.kind}` : pipShown ? PIP_ID : qcOpenCardNode && cardQueryId ? cardQueryId : PICKER_PANEL_ID} from={extPanel && !pipShown ? extPanel.from : "queries"}
+      step={qcFlowNode ? false : pipShown ? pipStepOpen : (qaOpen && qaPanel) || !!correcting || !!deskVerb || (picking && !(qcOpenCardNode && cardQueryId))}
+      onClose={qcFlowNode ? () => setQcFlow(null) : pipShown ? () => endWalk(walkRef.current === "done" ? "clear" : "early") : fromAgent ? backToAgent : closeQueryCard}>
+      {qcFlowNode ?? (pipShown ? pipPanel : qcOpenCardNode && cardQueryId ? (qmPhone ? qcOpenCardNode : (qcCardNode ?? qcOpenCardNode)) : null)}
+    </QueryPanelHost>
+  ) : null;
+
   /* Queries on a phone v1 — every hook above has run; at 760px and narrower the page is the phone page, and above it
      nothing here changes. The open query's card is the one built above, laid out for a phone. */
   if (qmPhone) {
     return (
+      <>
       <QueriesPhone
         routeActive={routeActive}
         loading={qcLoad.loading}
@@ -6443,6 +6461,11 @@ export const Queries: React.FC<{
         onOrder={(ids) => { qmOrderRef.current = ids; }}
         onEditQuery={() => setQcCardMode("edit")}
       />
+      {/* ⚠️ THE QUERY PANEL STILL OPENS FROM OTHER PAGES ON A PHONE: `openQueryPanel` (the phone dashboard's View task,
+          the agent panel, search) is drawn by this page's ONE host whichever route is on screen. Found by the dashboard's
+          C1 lock, after the phone return first left the host out. */}
+      {queryPanelHost}
+      </>
     );
   }
 
@@ -8146,13 +8169,7 @@ export const Queries: React.FC<{
               and never the panel: the journey's form is portalled into this element's slot. */}
           {/* v139 §B — the same one host holds the practice query's panel while it is open (built over Pip's in-memory
               object); the page's own query and the picker otherwise. Opening Pip closes any real query first. */}
-          {(pipShown || (qcOpenCardNode && cardQueryId) || picking || qcFlowNode) && (
-            <QueryPanelHost id={qcFlowNode && qcFlow ? `__${qcFlow.kind}` : pipShown ? PIP_ID : qcOpenCardNode && cardQueryId ? cardQueryId : PICKER_PANEL_ID} from={extPanel && !pipShown ? extPanel.from : "queries"}
-              step={qcFlowNode ? false : pipShown ? pipStepOpen : (qaOpen && qaPanel) || !!correcting || !!deskVerb || (picking && !(qcOpenCardNode && cardQueryId))}
-              onClose={qcFlowNode ? () => setQcFlow(null) : pipShown ? () => endWalk(walkRef.current === "done" ? "clear" : "early") : fromAgent ? backToAgent : closeQueryCard}>
-              {qcFlowNode ?? (pipShown ? pipPanel : qcOpenCardNode && cardQueryId ? (qcCardNode ?? qcOpenCardNode) : null)}
-            </QueryPanelHost>
-          )}
+          {queryPanelHost}
           </>
         ) : (
         <div data-qc-fade={fadeIn ? "in" : undefined} className="f12-body">

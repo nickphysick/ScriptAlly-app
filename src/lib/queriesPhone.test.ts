@@ -10,7 +10,7 @@ import { QueryStatus, type Agent, type Query } from "../types";
 import { buildQcRows, whereItStands } from "./qcSummary";
 import {
   allSections, cheerFrom, cheerWords, chipCounts, comingUp, defaultChip, headerLine, pastDueRows, phoneScopeId, rowsFor,
-  stampFor, waitingGroups, yourMoveBadge, yourMoveGroups, COMING_DAYS,
+  stampFor, waitingGroups, yourMoveBadge, yourMoveGroups, COMING_DAYS, ordinal,
 } from "./queriesPhone";
 
 const DAY = 86_400_000;
@@ -119,6 +119,9 @@ describe("the celebration", () => {
     expect(cheerFrom(prev, [{ id: "a", status: "Partial Requested" }])).toEqual({ id: "a", kind: "partial" });
     expect(cheerFrom(prev, [{ id: "c", status: "Offer" }])).toEqual({ id: "c", kind: "offer" });
     expect(cheerFrom(prev, [{ id: "c", status: "Partial Sent" }])).toBeNull();
+  });
+  it("says ordinals in words to ten, then with the right suffix (never \"23th\")", () => {
+    expect([1, 2, 10, 11, 12, 13, 21, 22, 23, 101, 111].map(ordinal)).toEqual(["first", "second", "tenth", "11th", "12th", "13th", "21st", "22nd", "23rd", "101st", "111th"]);
   });
   it("its words come from the manuscript's own queries", () => {
     const row = ROWS.find((r) => r.id === "q2")!;
