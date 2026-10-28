@@ -589,6 +589,9 @@ export const Queries: React.FC<{
      pane shows. Both panes stay mounted (translated, never display:none'd), so the list's
      scroll survives the push for free. */
   const isMobile = useIsMobile();
+  /* Queries on a phone v1 — at 760px and narrower the page is `QueriesPhone` (see the return at the foot). Declared up here
+     because the response picker's subscription below must know it (a later declaration would be a TDZ read). */
+  const qmPhone = useQm1Phone();
   const { setMobileDetail } = useMobileChrome();
   const [mobileView, setMobileView] = useState<"list" | "detail">("list");
   const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
@@ -2413,7 +2416,9 @@ export const Queries: React.FC<{
   const openIdRef = useRef<string | null>(null);
   const queriesRef = useRef<Query[]>([]);
   const agentsRef = useRef<Agent[]>([]);
-  useEffect(() => subscribeResponsePicker(() => {
+  /* ⚠️ NOT ON THE PHONE PAGE: this page hosts the picker in its own panel, which the phone page does not draw — so while
+     the phone page is on screen it must not claim the picker, and "Record a response" falls through to the drawer. */
+  useEffect(() => (qmPhone ? undefined : subscribeResponsePicker(() => {
     if (qcFlowGate.current.desk && qcFlowGate.current.active) { setQcFlow({ kind: "who" }); return; }
     const had = openIdRef.current;
     const q = had ? queriesRef.current.find((x) => x.id === had) : undefined;
@@ -2421,7 +2426,7 @@ export const Queries: React.FC<{
     pendingStepRef.current = { mode: "resp", hadOpen: q?.id, panel: { name: "", agency: "", first: (ag?.name || "").trim().split(/\s+/)[0] ?? "", back: !!q } };
     setPicking(true);
     bumpStep((n) => n + 1);
-  }), []);
+  })), [qmPhone]);
   /* the picker chose: the panel becomes that query's — `?q` on this page, the store's request anywhere else */
   const pickOpenRef = useRef<(id: string) => void>(() => {});
   useEffect(() => subscribeDrawerPick((id) => pickOpenRef.current(id)), []);
@@ -2530,8 +2535,6 @@ export const Queries: React.FC<{
   const qc138Ref = useRef<HTMLDivElement>(null);
   /* Query Centre v131 renders at ≥768px; the phone keeps the v126 page exactly (QC15) */
   const qcDesk = useDeskWidth();
-  /* Queries on a phone v1 — at 760px and narrower the page is `QueriesPhone` (see the return below) */
-  const qmPhone = useQm1Phone();
   const qmOrderRef = useRef<string[]>([]);
   qcFlowGate.current = { desk: qcDesk, active: routeActive };
   /* v138.6 §A — the pin is the shared hook (`usePinList`, the Contact list's too): held sidebar, remembered per page

@@ -201,7 +201,7 @@
 .qm1-qc { margin: 4px 12px 0; }
 .qm1-qc .qc149c { margin: 0; max-width: none; width: 100%; border-radius: 24px; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.08), 0 10px 24px -14px rgba(28, 19, 15, 0.35); }
 /* the chips and dates read at 11px or more on a phone (the mock's 9.5 is too small) */
-.qm1-qc :is(.qc149c-mc span, .qc149c-pk, .qc149c-ch, .qc149c-d, .mk-lc-ag, .qc149c-k, [data-qc149c="foot-l1"], [data-qc149c="pos"], .qc149c-nx small) { font-size: 11px !important; }
+.qm1-qc :is(.qc149c-mc span, .qc149c-pk, .qc149c-ch, .qc149c-d, .mk-lc-d, .mk-lc-ag, .qc149c-k, [data-qc149c="foot-l1"], [data-qc149c="due"], [data-qc149c="due"] em, [data-qc149c="pos"], .qc149c-nx small) { font-size: 11px !important; }
 
 .qm1-qc .qc149c-nx { position: relative; margin: 14px 12px 0; padding: 14px; border-radius: 18px; background: #f3efe8; }
 .qm1-qc .qc149c-nxart { position: absolute; right: 10px; top: -10px; width: 52px; height: auto; transform: rotate(12deg); pointer-events: none; }

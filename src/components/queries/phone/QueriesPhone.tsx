@@ -462,6 +462,8 @@ const PhoneRow: React.FC<{ r: QcRow; nowMs: number; bar?: boolean; onOpen: () =>
   const [x, setX] = useState(0);
   const [dragging, setDragging] = useState(false);
   const g = useRef<{ x0: number; y0: number; base: number; axis: "x" | "y" | null; moved: boolean } | null>(null);
+  /* a drag ends with a click on the same element (a mouse always fires one); it belongs to the drag, not to the row */
+  const dragged = useRef(false);
   const settle = (v: number) => setX(v < -ACT_W ? -2 * ACT_W : v > ACT_W / 2 ? ACT_W : 0);
   const onDown = (e: React.PointerEvent) => {
     if (!live || (e.pointerType === "mouse" && e.button !== 0)) return;
@@ -484,7 +486,7 @@ const PhoneRow: React.FC<{ r: QcRow; nowMs: number; bar?: boolean; onOpen: () =>
     const s = g.current;
     g.current = null;
     setDragging(false);
-    if (s?.moved) settle(x);
+    if (s?.moved) { dragged.current = true; settle(x); }
   };
   const run = (mode: "resp" | "nudge" | "close") => { setX(0); openQueryDrawer({ mode, queryId: r.id }); };
   return (
@@ -503,7 +505,7 @@ const PhoneRow: React.FC<{ r: QcRow; nowMs: number; bar?: boolean; onOpen: () =>
       <button
         type="button" className={`qm1-in${dragging ? " drag" : ""}`} style={{ transform: x ? `translateX(${x}px)` : undefined }}
         onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}
-        onClick={() => { if (x !== 0) { setX(0); return; } onOpen(); }}
+        onClick={() => { if (dragged.current) { dragged.current = false; return; } if (x !== 0) { setX(0); return; } onOpen(); }}
       >
         <span className={`qm1-av ${tint(r, nowMs)}`} aria-hidden="true">{r.initials}</span>
         <span className="qm1-tx">
