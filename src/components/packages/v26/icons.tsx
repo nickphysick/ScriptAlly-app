@@ -37,7 +37,7 @@ const PICS: Record<PackageIcon, React.ReactNode> = {
   key: <><circle cx="6.5" cy="13.5" r="3.5" />{P("M9 11l7.5-7.5M14 6l2 2M12.5 7.5l1.5 1.5")}</>,
 };
 /** A package's icon — the ref's `pic()`: an svg carrying `p6-pic`. */
-export const Pic: React.FC<{ ic: PackageIcon }> = ({ ic }) => <svg viewBox="0 0 20 20" className="p6-pic" aria-hidden="true">{PICS[ic]}</svg>;
+export const Pic: React.FC<{ ic: PackageIcon; cls?: string }> = ({ ic, cls = "p6-pic" }) => <svg viewBox="0 0 20 20" className={cls} aria-hidden="true">{PICS[ic]}</svg>;
 /** The bare paths, for the icon chooser's buttons (the ref draws those svgs without `p6-pic`). */
 export const PicBare: React.FC<{ ic: PackageIcon }> = ({ ic }) => <svg viewBox="0 0 20 20" aria-hidden="true">{PICS[ic]}</svg>;
 
@@ -45,4 +45,9 @@ export const PicBare: React.FC<{ ic: PackageIcon }> = ({ ic }) => <svg viewBox="
 export const Chevron: React.FC = () => <svg viewBox="0 0 20 20" aria-hidden="true">{P("M8 5l5 5-5 5")}</svg>;
 export const PlayRing: React.FC = () => (
   <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7.5" /><path d="M8.3 7l5 3-5 3z" fill="currentColor" stroke="none" /></svg>
+);
+
+/** The padlock (v40's `LK`): beside "Out with agents" on the stepper and in the locked builder's foot. */
+export const Lock: React.FC = () => (
+  <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.6" /><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" /></svg>
 );
