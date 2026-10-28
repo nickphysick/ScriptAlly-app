@@ -22,19 +22,22 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useScriptAllyDb } from "../../lib/db";
 import { resolveScopedManuscript } from "../../lib/shellSidebar";
 import { buildQcRows } from "../../lib/qcSummary";
-import { answerFoot, carouselOrder, firstNameOf, respCounts, respItems, stillOut, type NoKind, type RespItem } from "../../lib/responses";
+import { carouselOrder, firstNameOf, goneQuiet, isEarlyDays, noteSplit, pageCounts, respCounts, respItems, stillOut, waitingRows, type NoKind, type RespItem } from "../../lib/responses";
 import type { QcRow } from "../../lib/qcSummary";
-import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
+import { openQueryDrawer, type DrawerMode } from "../../lib/queryActions/drawerStore";
 import { openResponsePicker, responsePickerHosted } from "../../lib/queryPanelStore";
 import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
-import { RspHeader, RspSummaryCard } from "./RspHeader";
+import { Rsp5Glance, Rsp5TitleCard, type GlanceFacts, type GlanceKey } from "./Rsp5Head";
 import { RspCarousel } from "./RspCarousel";
-import { RspPanel, type AnswerTab } from "./RspPanel";
-import { RspBanner, RspList, RspTally } from "./RspNos";
-import { RspShare } from "./RspShare";
-import { RspEmpty, RspZeroNos } from "./RspEmpty";
+import { Rsp5Band, Rsp5Showcase } from "./Rsp5Insights";
+import { Rsp5Timing } from "./Rsp5Timing";
+import { Rsp5Words } from "./Rsp5Words";
+import { RspPanel } from "./RspPanel";
+import { Rsp5Wall, type AgentFacts } from "./RspNos";
+import { RspEmpty } from "./RspEmpty";
 import { AppFooter } from "../shell/AppFooter";
 import "./responses.css";
+import "./responses5.css";
 
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 const reduced = () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -58,7 +61,17 @@ export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) 
     const own = ms ? queries.filter((q) => q.manuscriptId === ms.id) : [];
     const rows = buildQcRows(own, agents, activities, nowMs);
     const items = respItems(rows);
-    return { nowMs, rows, items, counts: respCounts(items), more: carouselOrder(items), out: stillOut(rows) };
+    const counts = respCounts(items), page = pageCounts(items, rows);
+    /* the glance cards' faces: newest answer first (newest query first for the still waiting) */
+    const newest = (g: RespItem<QcRow>["group"]) => items.filter((i) => i.group === g).sort((a, b) => (b.answerMs ?? 0) - (a.answerMs ?? 0)).map((i) => i.row);
+    const waiting = waitingRows(rows).slice().sort((a, b) => (b.sentMs ?? 0) - (a.sentMs ?? 0));
+    const glance: GlanceFacts = {
+      counts: page, rows: { more: newest("more"), passed: newest("passed"), noReply: newest("noReply"), waiting },
+      yourMove: items.filter((i) => i.yourMove).length, withNote: noteSplit(items).withNote, goneQuiet: goneQuiet(rows, nowMs).length,
+    };
+    /* the timing line's "gone past the reply time the agent gives": the gone-quiet queries that HAVE a reply date */
+    const quietDated = goneQuiet(rows, nowMs).filter((r) => r.expectedMs != null).length;
+    return { nowMs, rows, items, counts, page, glance, quietDated, more: carouselOrder(items), out: stillOut(rows) };
     /* location.key: a switch of book re-opens the route, and the book is read from storage */
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queries, activities, agents, ms?.id, location.key]);
@@ -69,11 +82,10 @@ export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) 
   const answerParam = new URLSearchParams(location.search).get("answer");
   const openItem = ready && answerParam ? model.items.find((i) => i.id === answerParam) ?? null : null;
   const openId = openItem?.id ?? null;
-  const [tab, setTab] = useState<AnswerTab>("answer");
   const go = useCallback((id: string | null, replace = false) => {
     navigate({ pathname: "/queries/responses", search: id ? `?answer=${encodeURIComponent(id)}` : "" }, { replace });
   }, [navigate]);
-  const openAnswer = useCallback((i: RespItem<QcRow>) => { setTab("answer"); go(i.id, !!answerParam); }, [go, answerParam]);
+  const openAnswer = useCallback((i: RespItem<QcRow>) => { go(i.id, !!answerParam); }, [go, answerParam]);
   const closeAnswer = useCallback(() => go(null), [go]);
   /* the list's rows as shown (↑ ↓ walk them); a carousel card has no neighbours */
   const [visible, setVisible] = useState<string[]>([]);
@@ -83,15 +95,20 @@ export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) 
     next: at >= 0 && at < visible.length - 1 ? () => go(visible[at + 1], true) : null,
   };
   /* a card's own button runs its journey IN the panel: the panel opens on that answer first, then the journey steps in */
-  const [pending, setPending] = useState<string | null>(null);
-  const act = useCallback((i: RespItem<QcRow>) => { setPending(i.id); openAnswer(i); }, [openAnswer]);
+  const [pending, setPending] = useState<{ id: string; mode: DrawerMode } | null>(null);
+  const act = useCallback((i: RespItem<QcRow>, mode: DrawerMode) => { setPending({ id: i.id, mode }); openAnswer(i); }, [openAnswer]);
   useEffect(() => {
-    if (!pending || openId !== pending || !openItem) return;
+    if (!pending || openId !== pending.id || !openItem) return;
     setPending(null);
     const r = openItem.row, first = firstNameOf(r.agentName);
-    const mode = answerFoot(openItem, model.nowMs).act;
-    if (mode !== "edit") openQueryDrawer({ mode, queryId: openItem.id, panel: { name: r.agentName, agency: r.agency, first, backLabel: `Back to ${first}` } });
-  }, [pending, openId, openItem, model.nowMs]);
+    openQueryDrawer({ mode: pending.mode, queryId: openItem.id, panel: { name: r.agentName, agency: r.agency, first, backLabel: `Back to ${first}` } });
+  }, [pending, openId, openItem]);
+
+  /* the agent's own facts the wall reads (the reply time they give; whether no reply means no) */
+  const agentFacts = useCallback((i: RespItem<QcRow>): AgentFacts => {
+    const a = agents.find((x) => x.id === i.row.query.agentId);
+    return { weeks: a?.responseTimeWeeks && a.responseTimeWeeks > 0 ? a.responseTimeWeeks : null, nrmn: !!a?.noResponseMeansNo };
+  }, [agents]);
 
   /* Passed / No reply: ONE state with the list's segmented control (Part C). Pressing it again clears it. */
   const [kind, setKind] = useState<NoKind | null>(null);
@@ -99,49 +116,62 @@ export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) 
 
   /* Asked for more scrolls its carousel band into view; "Share your wall of no" the share sheet */
   const moreRef = useRef<HTMLElement | null>(null);
-  const shareRef = useRef<HTMLElement | null>(null);
   const scrollTo = (el: HTMLElement | null, block: ScrollLogicalPosition) => el?.scrollIntoView({ block, behavior: reduced() ? "auto" : "smooth" });
+  /* v5 · the sections a glance card or a "→" link goes to, by id inside this page (every page stays mounted) */
+  const pageRef = useRef<HTMLDivElement | null>(null);
+  const goSection = useCallback((id: "more" | "timing" | "wall" | "words") => {
+    /* ⚠️ COMPUTED, NOT scrollIntoView: the wall's pin sets the scroller's scroll-padding for keyboard row-walking, and
+       scrollIntoView adds it, so a section landed ~146px down instead of 20 (RS5 A2 found it). */
+    const el = pageRef.current?.querySelector<HTMLElement>(`[data-rsp5-sec="${id}"]`);
+    const sc = el?.closest<HTMLElement>(".wpg-scroll");
+    if (!el || !sc) return;
+    sc.scrollTo({ top: sc.scrollTop + el.getBoundingClientRect().top - sc.getBoundingClientRect().top - 20, behavior: reduced() ? "auto" : "smooth" });
+  }, []);
+  const pressGlance = useCallback((k: GlanceKey) => {
+    if (k === "passed" || k === "noReply") { setKind(k); goSection("wall"); }
+    else goSection(k === "more" ? "more" : "timing");
+  }, [goSection]);
 
   return (
-    <WorkspacePageGrid scrollLabel="Responses" masthead={null}>
+    <WorkspacePageGrid scrollLabel="Responses" masthead={null} className="rsp5-wpg">
       {/* the outer element takes the grid's gutter (`.wpg-scroll > *`); the column inside breaks out of it to the
           list width, as packages v4's `.ppv-page > .pk4-col` does */}
       <div className="rsp-page">
-      <div className="rsp rsp-col" data-rsp="page">
+      <div className="rsp rsp5" data-rsp="page" ref={pageRef}>
         {/* Part F · nothing answered for this book: the empty page, and none of the populated page's parts. It
             switches to the populated page the moment the first answer is recorded, with no reload. */}
         {ready && counts.answered === 0 ? (
-          <RspEmpty msTitle={msTitle} stillOut={model.out} onRecord={openRecordPicker}
-            onQueryCentre={() => navigate("/queries")}
-            onPastReplyTime={() => navigate("/queries?status=attention")}
-            onImport={() => navigate("/import")} />
+          <RspEmpty msTitle={msTitle} rows={model.rows} nowMs={nowMs} onRecord={openRecordPicker}
+            weeksOf={(r) => { const a = agents.find((x) => x.id === r.query.agentId); return a?.responseTimeWeeks && a.responseTimeWeeks > 0 ? a.responseTimeWeeks : null; }}
+            onQueryCentre={() => navigate("/queries")} onTodo={() => navigate("/todo")} />
         ) : (
           <>
-            <RspHeader loading={!ready} answered={ready ? counts.answered : null} msTitle={msTitle}
-              hasNos={ready && counts.passed + counts.noReply > 0}
-              onRecord={openRecordPicker} onShare={() => scrollTo(shareRef.current, "center")}
-              card={<RspSummaryCard counts={counts} kind={kind} loading={!ready}
-                onMore={() => scrollTo(moreRef.current, "start")} onKind={pressKind} />} />
+            <Rsp5TitleCard msTitle={msTitle} empty={false} loading={!ready} onRecord={openRecordPicker} onSecond={() => goSection("wall")} />
+            <Rsp5Glance facts={ready ? model.glance : null} onCard={pressGlance} />
             {ready ? (
-              <RspCarousel ref={moreRef} items={model.more} nowMs={nowMs} msTitle={msTitle} stillOut={model.out}
-                selectedId={openId} onOpen={openAnswer} onAct={act} onRecord={openRecordPicker} />
+              <RspCarousel ref={moreRef} items={model.more} nowMs={nowMs} msTitle={msTitle}
+                selectedId={openId} onOpen={openAnswer} onAct={act} />
             ) : null}
-            {ready ? <RspBanner /> : null}
-            {ready && counts.passed + counts.noReply > 0 ? (
+            {ready ? (
               <>
-                <RspTally items={model.items} />
-                <RspList items={model.items} nowMs={nowMs} kind={kind} onKind={setKind} selectedId={openId} onOpen={openAnswer} active={!!routeActive} onVisible={setVisible} />
-                <RspShare ref={shareRef} nos={model.items.filter((i) => i.group !== "more")} title={msTitle} />
+                <Rsp5Band counts={model.page} items={model.items} few={isEarlyDays(counts.answered)} />
+                <Rsp5Showcase items={model.items} answered={counts.answered} few={isEarlyDays(counts.answered)} nowMs={nowMs} onGo={goSection} />
+                <Rsp5Timing items={model.items} waiting={model.page.waiting} quiet={model.quietDated} />
+                <Rsp5Words items={model.items} nowMs={nowMs} onOpen={openAnswer} />
               </>
-            ) : ready ? <RspZeroNos /> : null}
+            ) : null}
+            {ready ? (
+              <Rsp5Wall items={model.items} nowMs={nowMs} msTitle={msTitle} kind={kind} onKind={setKind} selectedId={openId}
+                onOpen={openAnswer} active={!!routeActive} agentFacts={agentFacts} onVisible={setVisible} />
+            ) : null}
           </>
         )}
         {ready ? <div className="rsp-foot"><AppFooter onNavigate={(t, sub) => onNavigate?.(t, sub)} /></div> : null}
       </div>
       </div>
       {openItem && routeActive ? (
-        <RspPanel item={openItem} agent={agents.find((a) => a.id === openItem.row.query.agentId) ?? null} nowMs={nowMs} msTitle={msTitle}
-          tab={tab} onTab={setTab} onClose={closeAnswer} walk={walk} readLog={readQueryActivity}
+        <RspPanel item={openItem} agent={agents.find((a) => a.id === openItem.row.query.agentId) ?? null} nowMs={nowMs}
+          onClose={closeAnswer} walk={walk} readLog={readQueryActivity}
           onOpenInQc={() => navigate({ pathname: "/queries", search: `?q=${encodeURIComponent(openItem.id)}` })} />
       ) : null}
     </WorkspacePageGrid>

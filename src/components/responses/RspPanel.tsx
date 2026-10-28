@@ -2,85 +2,75 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Responses v2 Part D — THE ANSWER IN THE SIDE PANEL. A carousel card or a list row opens here, in query panel v2's
- * own container (`shell/SidePanel`, the `.qsp` dress) and masthead, as the Contact list's agent panel does: browsing
- * is light, and acting dims the page and wears the action drawer.
+ * Responses v5 Phase 8 (ref `openAnswer`, the answer drawer) — THE ANSWER IN THE SIDE PANEL. A request card, a quote, a
+ * timing bar's agent or a list row opens here, in query panel v2's own container (`shell/SidePanel`), as v2 did.
  *
- * ⚠️ ONE CONTAINER, NOT A COPY OF IT. The panel is `SidePanel` with the query panel's class (`qsp`) and the query
- *    card's own class names (`qcv-open-*`), so the box, the masthead, the tabs, the scrolling body and the footer are
- *    Query panel v2's rules. This file states only what is the answer's: the top edge, the pill, the stand card's
- *    words, the feedback card and the index card.
- * ⚠️ EVERY ACTION RUNS IN THIS PANEL: the footer's primary opens the built journey with the query chosen and `panel`
- *    set, so its form steps into this panel's slot (the drawer's own mechanism). The journeys' fields, copy and
- *    writes are their own. "Edit the response" is the built correction path: the edit journey on the closing entry.
- * ⚠️ THE STAND CARD, THE INDEX CARD AND THE FOOT ARE `lib/responses` (`answerStand`, `answerIndex`, `answerFoot`):
- *    built only from recorded facts, a missing one dropped, never invented.
- * ⚠️ ONE PANEL AT A TIME: it claims the right-hand panel as "answer" and closes when another claims it.
+ * ⚠️ THE CONTAINER, THE DEEP LINK AND THE JOURNEYS ARE v2's: `SidePanel` with the query panel's class, `?answer=`, ↑ ↓
+ *    J K walking the list's visible rows, one right-hand panel at a time, focus returned to where the answer came from,
+ *    and every action opening the built journey in this panel's slot ("Edit the response" is the edit journey on the
+ *    closing entry). What changed is what is inside: the reference's navy masthead, a status strip in the state's
+ *    colour, What they said, six facts and The journey.
+ * ⚠️ EVERY LINE IS A RECORDED FACT: a date nothing records is a dash, never a guess; "as their guidelines say" appears
+ *    only where the agent's own record says no reply means no.
  */
 import React, { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
-import type { Agent, Query } from "../../types";
+import type { Agent } from "../../types";
 import { QueryStatus } from "../../types";
 import type { QcRow } from "../../lib/qcSummary";
-import { answerFoot, answerIndex, answerStand, firstNameOf, respDate, type RespItem } from "../../lib/responses";
+import { FAR_WORDS, firstAnswer, firstNameOf, hasNote, plural, respDate, type RespItem } from "../../lib/responses";
 import { claimRightPanel, releaseRightPanel, subscribeRightPanel } from "../../lib/queryPanelStore";
-import { askDrawerToLeave, currentDrawerRequest, openQueryDrawer, subscribeDrawer } from "../../lib/queryActions/drawerStore";
+import { askDrawerToLeave, currentDrawerRequest, openQueryDrawer, subscribeDrawer, type DrawerMode } from "../../lib/queryActions/drawerStore";
 import { ESC_LEVEL, useEscapeLayer } from "../../lib/escapeStack";
 import { SHORTCUTS, isEditableTarget, matchesShortcut } from "../../lib/shortcuts";
-import { formatQueryMaterials } from "../../lib/materials";
+import { StatusDot } from "../StatusDot";
 import { SidePanel } from "../shell/SidePanel";
-import { StandCard } from "../queries/panel/StandCard";
-import { QueryLedger } from "../queries/panel/QueryLedger";
-import { buildTimelineRows } from "../reading-pane/QueryTimeline";
-import type { StandCardView } from "../../lib/standCard";
+import { cardAct, STEP_WORD } from "./RspCarousel";
 import "../queries/queryPanelHost.css";
-import "../queries/centre/qcvOpenPanel.css";
-import "../queries/panel/queryLedger.css";
-import "./responses.css";
+import "./responses5.css";
 
 type Item = RespItem<QcRow>;
-export type AnswerTab = "answer" | "time";
-/** the 5px top edge, by the answer */
-export const EDGE: Record<Item["group"], string> = { more: "#b0603e", passed: "#7c7168", noReply: "#b5aca4" };
-const PILL: Record<string, string> = {
-  partial: "Asked for a partial", full: "Asked for the full", rr: "Asked for a revision", offer: "Made an offer", passed: "Passed", noReply: "No reply",
-};
 
-/** what went before the answer: the query's own materials, then any pages the agent had already read */
-export function theySaw(i: Item): string | null {
-  const parts: string[] = [];
-  const q = formatQueryMaterials(i.row.query.materialsWanted);
-  if (q) parts.push(q);
-  const sentBefore = (s: QueryStatus) => i.row.history.spans.some((x) => x.status === s && (i.answerMs == null || x.startMs <= i.answerMs) && !(i.state === "sent" && x.status === sentStatusOf(i)));
-  if (sentBefore(QueryStatus.PARTIAL_SENT)) parts.push("A partial");
-  if (sentBefore(QueryStatus.FULL_SENT)) parts.push("The full manuscript");
-  return parts.length ? parts.join(" · ") : null;
+/** the status strip's colour, by the answer (the reference's `col`) */
+export const stripTone = (i: Item): "of" | "you" | "ag" | "cl" =>
+  i.group !== "more" ? "cl" : i.state === "offer" ? "of" : i.yourMove ? "you" : "ag";
+
+/** the footer's primary and the journey it runs: a request's own card action, else Edit the response */
+export function panelAct(i: Item): { label: string; mode: DrawerMode } {
+  if (i.group === "more") { const a = cardAct(i); return { label: a.label, mode: a.mode }; }
+  return { label: "Edit the response", mode: "edit" };
 }
-const sentStatusOf = (i: Item): QueryStatus | null => (i.answer === "partial" ? QueryStatus.PARTIAL_SENT : i.answer === "full" ? QueryStatus.FULL_SENT : null);
+
+/** What they said, when there is no note: one sentence of what the record says */
+export function saidPlain(i: Item, f: { weeks: number | null; nrmn: boolean }): string {
+  if (i.group === "noReply") {
+    const w = i.waitDays != null ? Math.round(i.waitDays / 7) : null;
+    return `No reply.${w != null ? ` Closed after ${plural(w, "week", "weeks")}${f.nrmn ? ", as their guidelines say no reply means no" : ""}.` : ""}`;
+  }
+  if (i.group === "passed") return "A form reply, with no personal note.";
+  const asked = i.answer === "partial" ? "Asked for a partial." : i.answer === "full" ? "Asked for the full manuscript." : i.answer === "offer" ? "Made an offer of representation." : "Asked for a revision.";
+  return `${asked} No note recorded.`;
+}
 
 export const RspPanel: React.FC<{
   item: Item;
   agent: Agent | null;
   nowMs: number;
-  msTitle: string | null;
-  tab: AnswerTab;
-  onTab: (t: AnswerTab) => void;
   onClose: () => void;
   /** ↑ ↓ J K: the list's visible rows; null where there is no neighbour (a carousel card has none) */
   walk: { prev: (() => void) | null; next: (() => void) | null };
   onOpenInQc: () => void;
   readLog: (queryId: string) => Promise<{ id: string; data: Record<string, unknown> }[]>;
-}> = ({ item, agent, nowMs, msTitle, tab, onTab, onClose, walk, onOpenInQc, readLog }) => {
+}> = ({ item, agent, nowMs, onClose, walk, onOpenInQc, readLog }) => {
   const r = item.row;
   const first = firstNameOf(r.agentName);
-  const stand = answerStand(item, msTitle, nowMs);
-  const foot = answerFoot(item, nowMs);
-  const index = answerIndex(item, nowMs, theySaw(item));
-  const feedback = item.group === "passed" ? item.note : null;
+  const facts = { weeks: agent?.responseTimeWeeks && agent.responseTimeWeeks > 0 ? agent.responseTimeWeeks : null, nrmn: !!agent?.noResponseMeansNo };
+  const fa = firstAnswer(item);
+  const act = panelAct(item);
+  const note = hasNote(item) ? item.note : null;
 
   /* a journey stepped into this panel (the drawer's request carries `panel`) */
   const drawerReq = useSyncExternalStore(subscribeDrawer, currentDrawerRequest, currentDrawerRequest);
   const acting = !!drawerReq?.panel;
-
   const closeRef = useRef(onClose);
   closeRef.current = onClose;
   useEscapeLayer(!acting, () => closeRef.current(), ESC_LEVEL.pageDrawer);
@@ -91,7 +81,7 @@ export const RspPanel: React.FC<{
     const off = subscribeRightPanel((o) => { if (o && o !== "answer") closeRef.current(); });
     return () => { off(); releaseRightPanel("answer"); if (currentDrawerRequest()?.panel) askDrawerToLeave(); };
   }, []);
-  /* a journey belongs to the answer it was opened on: another row asks it to leave (parked with answers, else cancelled) */
+  /* a journey belongs to the answer it was opened on: another row asks it to leave */
   const firstId = useRef(true);
   useEffect(() => {
     if (firstId.current) { firstId.current = false; return; }
@@ -105,7 +95,7 @@ export const RspPanel: React.FC<{
     const on = (e: KeyboardEvent) => {
       const down = matchesShortcut(SHORTCUTS.respDown, e), up = matchesShortcut(SHORTCUTS.respUp, e);
       if ((!down && !up) || walkRef.current.acting || isEditableTarget(e.target)) return;
-      if (e.target instanceof HTMLElement && e.target.closest('[role="menu"], [role="tablist"]')) return;
+      if (e.target instanceof HTMLElement && e.target.closest('[role="menu"], [role="dialog"]:not([data-rsn="panel"])')) return;
       const go = down ? walkRef.current.walk.next : walkRef.current.walk.prev;
       if (!go) return;
       e.preventDefault();
@@ -115,15 +105,16 @@ export const RspPanel: React.FC<{
     return () => window.removeEventListener("keydown", on);
   }, []);
 
-  /* focus arrives on the name; it returns to the row or card the answer came from when the panel closes */
-  const nameRef = useRef<HTMLHeadingElement>(null);
+  /* focus arrives on the close button; it returns to the row, card or quote the answer came from when the panel closes */
+  const closeBtn = useRef<HTMLButtonElement>(null);
   const idRef = useRef(item.id);
   idRef.current = item.id;
   useEffect(() => {
-    const t = window.setTimeout(() => nameRef.current?.focus({ preventScroll: true }), 0);
+    const t = window.setTimeout(() => closeBtn.current?.focus({ preventScroll: true }), 60);
     return () => {
       window.clearTimeout(t);
-      const back = [...document.querySelectorAll<HTMLElement>(`[data-rsp="row"][data-id="${idRef.current}"], [data-rsp="pcard"][data-id="${idRef.current}"] [data-rsp="pcard-open"]`)]
+      const id = idRef.current;
+      const back = [...document.querySelectorAll<HTMLElement>(`[data-rsp5="row"][data-id="${id}"], [data-rsp5="req"][data-id="${id}"] [data-rsp5="req-open"], [data-rsp5="note"][data-id="${id}"]`)]
         .find((e) => e.getBoundingClientRect().height > 0);
       back?.focus({ preventScroll: true });
     };
@@ -142,7 +133,7 @@ export const RspPanel: React.FC<{
     return () => window.removeEventListener("resize", read);
   }, []);
 
-  /* the query's own log: the Timeline tab's ledger, and the closing entry "Edit the response" corrects */
+  /* the query's own log: the closing entry "Edit the response" corrects */
   const [log, setLog] = useState<{ id: string; data: Record<string, unknown> }[] | null>(null);
   useEffect(() => {
     let live = true;
@@ -150,81 +141,63 @@ export const RspPanel: React.FC<{
     readLog(item.id).then((l) => { if (live) setLog(l); }).catch(() => { if (live) setLog([]); });
     return () => { live = false; };
   }, [item.id, r.query, readLog]);
-  const rows = log ? buildTimelineRows(log.map((d) => ({ id: d.id, ...d.data })), r.query as Query, agent).slice().reverse() : null;
   const closingEntry = log ? [...log].reverse().find((d) => ((d.data.resultingStatus ?? d.data.type) as string) === r.status)?.id ?? null : null;
-
-  const act = () => {
+  const run = () => {
     const panel = { name: r.agentName, agency: r.agency, first, backLabel: `Back to ${first}` };
-    if (foot.act === "edit") {
-      if (closingEntry) openQueryDrawer({ mode: "edit", queryId: item.id, entryId: closingEntry, panel });
-      else openQueryDrawer({ mode: "edit", queryId: item.id, panel });
-      return;
-    }
-    openQueryDrawer({ mode: foot.act, queryId: item.id, panel });
+    if (act.mode === "edit" && closingEntry) openQueryDrawer({ mode: "edit", queryId: item.id, entryId: closingEntry, panel });
+    else openQueryDrawer({ mode: act.mode, queryId: item.id, panel });
   };
 
-  const view: StandCardView = {
-    tone: item.group === "more" ? "you" : "closed", heading: stand.heading, figure: stand.figure, past: stand.hot,
-    paragraph: stand.paragraph, bar: null, links: [],
-  } as StandCardView;
-  const pillDate = item.group !== "more" && item.answerMs != null ? ` · ${respDate(item.answerMs, nowMs)}` : "";
-
+  const d = (ms: number | null) => (ms == null ? "–" : respDate(ms, nowMs));
+  const answerWord = note ? "With a note" : item.group === "noReply" ? "No reply" : item.group === "passed" ? "Form reply" : "Request";
+  const journey: { status: QueryStatus; ms: number }[] = [
+    ...(item.queriedMs != null ? [{ status: QueryStatus.QUERIED, ms: item.queriedMs }] : []),
+    ...r.history.spans.filter((s) => s.status !== QueryStatus.QUERIED && STEP_WORD[s.status]).map((s) => ({ status: s.status, ms: s.startMs })),
+  ];
   return (
-    <SidePanel label={`${r.agentName}, answer`} step={acting} dim={acting} className="qsp rsn rsp-layer"
-      style={{ ...(top != null ? { "--qsp-top": `${top}px` } : {}), "--rs-edge": EDGE[item.group] } as React.CSSProperties}
+    <SidePanel label={`${r.agentName}, answer`} step={acting} dim={acting} className="qsp rsn rsp5-layer"
+      style={{ ...(top != null ? { "--qsp-top": `${top}px` } : {}) } as React.CSSProperties}
       attrs={{ "data-rsn": "panel", "data-rsn-id": item.id, "data-group": item.group, "data-rsn-acting": acting ? drawerReq?.mode ?? "step" : undefined }}>
-      <aside className="qcv-open qcv-own rsn-card" data-rsn="card" data-tab={tab} aria-label={r.agentName}>
-        <div className="qcv-open-fr">
-          <header className="qcv-open-mast" data-rsn="mast">
-            <div className="qcv-open-who">
-              <span className={`qcv-open-ini rsn-ini${item.group === "more" ? "" : " is-closed"}`} data-rsn="disc" aria-hidden="true">{r.initials}</span>
-              <div className="qcv-open-whotx">
-                <h2 className="qcv-open-nm" data-rsn="name" ref={nameRef} tabIndex={-1}>{r.agentName}</h2>
-                <span className="qcv-open-ag" data-rsn="agency">{r.agency}</span>
-              </div>
-              <span className="rsn-nav">
-                <button type="button" aria-label="Previous answer" data-rsn="prev" disabled={!walk.prev || acting} onClick={() => walk.prev?.()}>{"↑"}</button>
-                <button type="button" aria-label="Next answer" data-rsn="next" disabled={!walk.next || acting} onClick={() => walk.next?.()}>{"↓"}</button>
-              </span>
-              <button type="button" className="qcv-open-x" data-rsn="close" aria-label="Close this answer" onClick={onClose}><span aria-hidden="true">{"×"}</span></button>
-            </div>
-            <p className="qcv-open-line rsn-line">
-              <span className="qcv-open-pill rsn-pill" data-rsn="pill"><i className="rsn-dot" aria-hidden="true" />{PILL[item.answer]}{pillDate}</span>
-              <button type="button" className="rsn-qc" data-rsn="open-qc" onClick={onOpenInQc}>Open in the Query Centre {"↗"}</button>
-            </p>
-            <div className="qcv-open-tabs" role="tablist" aria-label="Answer detail">
-              <button type="button" role="tab" aria-selected={tab === "answer"} data-rsn-tab="answer" onClick={() => onTab("answer")}>The answer</button>
-              <button type="button" role="tab" aria-selected={tab === "time"} data-rsn-tab="time" onClick={() => onTab("time")}>{rows ? `Timeline · ${rows.length}` : "Timeline"}</button>
-            </div>
-          </header>
-
-          <div className="qcv-open-body">
-            <div className="qcv-open-tab rsn-body" role="tabpanel" data-rsn="body">
-              {tab === "answer" ? (
-                <>
-                  <div className="rsn-stand" data-rsn="stand" data-group={item.group}><StandCard view={view} /></div>
-                  {feedback ? (
-                    <figure className="rsn-quote" data-rsn="feedback">
-                      <span className="rsn-qlab">THEIR FEEDBACK</span>
-                      <blockquote>{"“"}{feedback}{"”"}</blockquote>
-                    </figure>
-                  ) : null}
-                  <dl className="rsn-index" data-rsn="index">
-                    {index.map((x) => <div key={x.key} className="rsn-ir" data-rsn-row={x.key}><dt>{x.label}</dt><dd>{x.answer}</dd></div>)}
-                  </dl>
-                </>
-              ) : rows ? (
-                rows.length ? <QueryLedger rows={rows} nowMs={nowMs} /> : <p className="rsn-none">Nothing recorded on this query yet.</p>
-              ) : <p className="rsn-none">Loading the timeline…</p>}
-            </div>
+      <aside className="rsp5-drw" data-rsn="card" aria-label={r.agentName}>
+        <header className="rsp5-dmh" data-rsn="mast">
+          <span className="rsp5-disc rsp5-disc--w" aria-hidden="true">{r.initials}</span>
+          <span className="rsp5-dwho"><b data-rsn="name">{r.agentName}</b><i data-rsn="agency">{r.agency}</i></span>
+          <span className="rsp5-dnav">
+            <button type="button" aria-label="Previous answer" data-rsn="prev" disabled={!walk.prev || acting} onClick={() => walk.prev?.()}>{"↑"}</button>
+            <button type="button" aria-label="Next answer" data-rsn="next" disabled={!walk.next || acting} onClick={() => walk.next?.()}>{"↓"}</button>
+          </span>
+          <button type="button" className="rsp5-dx" ref={closeBtn} data-rsn="close" aria-label="Close this answer" onClick={onClose}>{"×"}</button>
+        </header>
+        <div className="rsp5-dst" data-rsn="status" data-tone={stripTone(item)}>
+          <StatusDot status={r.status} overrideSize={16} decorative />{STEP_WORD[r.status] ?? r.status}
+        </div>
+        <div className="rsp5-dbody" data-rsn="body">
+          <div>
+            <h5>What they said</h5>
+            {note ? <p className="rsp5-dq" data-rsn="said">{"“"}{note}{"”"}</p> : <p className="rsp5-dplain" data-rsn="said">{saidPlain(item, facts)}</p>}
           </div>
-
-          <div className="qcv-open-ft" data-rsn="foot">
-            <p className="qcv-open-stand rsn-status"><b data-rsn="status">{foot.status}</b>{foot.detail ? <span className={foot.hot ? "is-hot" : undefined} data-rsn="status-detail">{foot.detail}</span> : null}</p>
+          <div className="rsp5-dfacts" data-rsn="facts">
+            <div><small>Queried</small><b>{d(item.queriedMs)}</b></div>
+            <div><small>{item.group === "noReply" ? "Closed" : "Answered"}</small><b>{d(item.answerMs)}</b></div>
+            <div><small>First answer took</small><b>{fa ? plural(fa.days, "day", "days") : "–"}</b></div>
+            <div><small>They give</small><b>{facts.weeks ? plural(facts.weeks, "week", "weeks") : "Not saved"}</b></div>
+            <div><small>Got as far as</small><b>{FAR_WORDS[item.furthest].replace("The full manuscript", "The full")}</b></div>
+            <div><small>Answer</small><b>{answerWord}</b></div>
           </div>
-          <div className="qcv-open-doors" data-rsn="doors">
-            <button type="button" className="qcv-open-act" data-rsn="primary" data-act={foot.act} disabled={acting} onClick={act}>{foot.label}</button>
-          </div>
+          {journey.length ? (
+            <div>
+              <h5>The journey</h5>
+              <ol className="rsp5-djo" data-rsn="journey">
+                {journey.map((j, k) => (
+                  <li key={`${j.status}-${k}`}><StatusDot status={j.status} overrideSize={15} decorative /><span>{STEP_WORD[j.status]}</span><small>{respDate(j.ms, nowMs).toUpperCase()}</small></li>
+                ))}
+              </ol>
+            </div>
+          ) : null}
+        </div>
+        <div className="rsp5-dfoot" data-rsn="doors">
+          <button type="button" className="rsp5-sb" data-rsn="primary" data-act={act.mode} disabled={acting} onClick={run}>{act.label}</button>
+          <button type="button" className="rsp5-sb rsp5-sb--w" data-rsn="open-qc" onClick={onOpenInQc}>Open in the Query Centre</button>
         </div>
       </aside>
     </SidePanel>
