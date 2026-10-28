@@ -96,5 +96,5 @@ None. Every card reads what the dashboard already had loaded (queries, activitie
 - **The Closed stack's place:** just right of the key, per the text. The ref overlaps the key's line ends. It's a one-number change if you want the ref's placement.
 - **Neither list has a per-category filter**, so clicking a slice or row opens the whole closed list, or the Contact list. Adding the filters is follow-up work.
 - **"Stage not dated" is a fourth row in the week callout** whenever such queries exist. Without it, the rows would not add up to the count.
-- **Dev: NOT deployed.** Dev serves `index-C2Fx9WTc.js`, the Submission packages v38 stack, and v39 is committed on top of it by a session that was active at the time (`53246c1c`, which builds as `index-BsasSL7F.js`). Deploying would have put this branch over that session's next step, so it waits for your go-ahead. The clean base is the pk39 stack plus this branch; it is hosting-only, because nothing server-side changed. Prod is untouched.
-- **Pushed:** `dashboard-v105` (as you asked). `dashboard-v116` is local only.
+- **Dev: deployed 28 Oct**, hosting only, from a clean worktree. The build is the Submission packages v39 stack (`53246c1c`) with this branch merged (`568a3056`, on `dev/…-pk38-pk39-db116`), and dev serves `index-CCukoHg6.js`. The only merge conflict was `design-refs/.refhashes.json`, which got a union of both sides' new refs. Prod is untouched.
+- **Pushed:** `dashboard-v105` and `dashboard-v116`.
