@@ -1,0 +1,2036 @@
+[
+ {
+  "lock": "S1",
+  "where": "1100x800 idle-egg population",
+  "ok": true,
+  "detail": "44 boxes · 18 leaves · idle"
+ },
+ {
+  "lock": "S1",
+  "where": "1100x800 idle-egg every box inside the card",
+  "ok": false,
+  "detail": "div.d105-photo[photo] 840.0,471.9→944.0,587.9 vs 1066.0,737.8 | svg.d105-nest[egg] 860.0,494.3→924.0,547.6 vs 1066.0,737.8 | div.d105-ranks[ranks] 828.0,592.7→1066.0,743.3 vs 1066.0,737.8"
+ },
+ {
+  "lock": "S1",
+  "where": "1100x800 idle-egg nothing scrolls",
+  "ok": false,
+  "detail": "div.d105-frame 206 in 200 | div.d105-body[idle] 159 in 153"
+ },
+ {
+  "lock": "S1",
+  "where": "1100x800 idle-egg no text cut",
+  "ok": false,
+  "detail": "button.d105-btn[kind] text 73 in 67 | button.d105-btn[kind] text 77 in 67"
+ },
+ {
+  "lock": "S1",
+  "where": "1100x800 idle-egg nothing sits on anything else",
+  "ok": false,
+  "detail": "b.d105-name[name] × svg.d105-nest[egg] (50.0×2.2) | b.d105-name[name] × small.[photo-label] (18.9×11.0) | p.d105-h[title] × p.d105-note[note] (80.0×37.4)"
+ },
+ {
+  "lock": "S1",
+  "where": "1100x800 idle-hatching population",
+  "ok": true,
+  "detail": "43 boxes · 18 leaves · idle"
+ },
+ {
+  "lock": "S1",
+  "where": "1100x800 idle-hatching every box inside the card",
+  "ok": false,
+  "detail": "div.d105-photo[photo] 840.0,471.9→944.0,587.9 vs 1066.0,737.8 | div.d105-ranks[ranks] 828.0,592.7→1066.0,743.3 vs 1066.0,737.8 | p.d105-note[note] 974.0,598.7→1054.0,738.3 vs 1066.0,737.8"
+ },
+ {
+  "lock": "S1",
+  "where": "1100x800 idle-hatching nothing scrolls",
+  "ok": false,
+  "detail": "div.d105-frame 206 in 200 | div.d105-body[idle] 159 in 153"
+ },
+ {
+  "lock": "S1",
+  "where": "1100x800 idle-hatching no text cut",
+  "ok": false,
+  "detail": "button.d105-btn[kind] text 73 in 67 | button.d105-btn[kind] text 77 in 67"
+ },
+ {
+  "lock": "S1",
+  "where": "1100x800 idle-hatching nothing sits on anything else",
+  "ok": false,
+  "detail": "div.d105-phx × b.d105-name[name] (54.0×5.5) | b.d105-name[name] × small.[photo-label] (43.2×7.7) | em.d105-no[no] × small.[photo-label] (43.2×3.2)"
+ },
+ {
+  "lock": "S1",
+  "where": "1100x800 idle-fledgling population",
+  "ok": true,
+  "detail": "44 boxes · 18 leaves · idle"
+ },
+ {
+  "lock": "S1",
+  "where": "1100x800 idle-fledgling every box inside the card",
+  "ok": false,
+  "detail": "div.d105-photo[photo] 840.0,471.9→944.0,587.9 vs 1066.0,737.8 | img.d105-phead 840.0,471.9→944.0,567.0 vs 1066.0,737.8 | div.d105-ranks[ranks] 828.0,592.7→1066.0,743.3 vs 1066.0,737.8"
+ },
+ {
+  "lock": "S1",
+  "where": "1100x800 idle-fledgling nothing scrolls",
+  "ok": false,
+  "detail": "div.d105-frame 206 in 200 | div.d105-body[idle] 159 in 153"
+ },
+ {
+  "lock": "S1",
+  "where": "1100x800 idle-fledgling no text cut",
+  "ok": false,
+  "detail": "button.d105-btn[kind] text 73 in 67 | button.d105-btn[kind] text 77 in 67"
+ },
+ {
+  "lock": "S1",
+  "where": "1100x800 idle-fledgling nothing sits on anything else",
+  "ok": false,
+  "detail": "img. × img.d105-phead (24.0×18.0) | img. × small.[photo-label] (2.3×6.0) | b.d105-name[name] × img.d105-phead (63.6×19.2)"
+ },
+ {
+  "lock": "S1",
+  "where": "1100x800 idle-mentor population",
+  "ok": true,
+  "detail": "44 boxes · 18 leaves · idle"
+ },
+ {
+  "lock": "S1",
+  "where": "1100x800 idle-mentor every box inside the card",
+  "ok": false,
+  "detail": "div.d105-photo[photo] 840.0,471.9→944.0,587.9 vs 1066.0,737.8 | img.d105-phead 840.0,471.9→944.0,567.0 vs 1066.0,737.8 | div.d105-ranks[ranks] 828.0,592.7→1066.0,743.3 vs 1066.0,737.8"
+ },
+ {
+  "lock": "S1",
+  "where": "1100x800 idle-mentor nothing scrolls",
+  "ok": false,
+  "detail": "div.d105-frame 206 in 200 | div.d105-body[idle] 159 in 153"
+ },
+ {
+  "lock": "S1",
+  "where": "1100x800 idle-mentor no text cut",
+  "ok": false,
+  "detail": "button.d105-btn[kind] text 73 in 67 | button.d105-btn[kind] text 77 in 67"
+ },
+ {
+  "lock": "S1",
+  "where": "1100x800 idle-mentor nothing sits on anything else",
+  "ok": false,
+  "detail": "img. × img.d105-phead (24.0×18.0) | b.d105-name[name] × img.d105-phead (63.6×19.2) | em.d105-no[no] × img.d105-phead (70.0×1.4)"
+ },
+ {
+  "lock": "S1",
+  "where": "1100x800 idle-nonumber population",
+  "ok": true,
+  "detail": "44 boxes · 18 leaves · idle"
+ },
+ {
+  "lock": "S1",
+  "where": "1100x800 idle-nonumber every box inside the card",
+  "ok": false,
+  "detail": "div.d105-photo[photo] 840.0,471.9→944.0,587.9 vs 1066.0,737.8 | svg.d105-nest[egg] 860.0,494.3→924.0,547.6 vs 1066.0,737.8 | div.d105-ranks[ranks] 828.0,592.7→1066.0,743.3 vs 1066.0,737.8"
+ },
+ {
+  "lock": "S1",
+  "where": "1100x800 idle-nonumber nothing scrolls",
+  "ok": false,
+  "detail": "div.d105-frame 206 in 200 | div.d105-body[idle] 159 in 153"
+ },
+ {
+  "lock": "S1",
+  "where": "1100x800 idle-nonumber no text cut",
+  "ok": false,
+  "detail": "button.d105-btn[kind] text 73 in 67 | button.d105-btn[kind] text 77 in 67"
+ },
+ {
+  "lock": "S1",
+  "where": "1100x800 idle-nonumber nothing sits on anything else",
+  "ok": false,
+  "detail": "b.d105-name[name] × svg.d105-nest[egg] (50.0×2.2) | b.d105-name[name] × small.[photo-label] (18.9×11.0) | p.d105-h[title] × p.d105-note[note] (80.0×37.4)"
+ },
+ {
+  "lock": "S1",
+  "where": "1100x800 egg: the like button can be pressed",
+  "ok": false,
+  "detail": "[data-d105=\"kind\"][data-k=\"like\"]"
+ },
+ {
+  "lock": "S1",
+  "where": "1100x800 mentor: the like button can be pressed",
+  "ok": false,
+  "detail": "[data-d105=\"kind\"][data-k=\"like\"]"
+ },
+ {
+  "lock": "S1",
+  "where": "1280x650 idle-egg population",
+  "ok": true,
+  "detail": "43 boxes · 17 leaves · idle"
+ },
+ {
+  "lock": "S1",
+  "where": "1280x650 idle-egg every box inside the card",
+  "ok": false,
+  "detail": "div.d105-photo[photo] 924.0,426.9→1028.0,542.9 vs 1232.0,589.8 | svg.d105-nest[egg] 944.0,449.3→1008.0,502.6 vs 1232.0,589.8 | div.d105-pvr 924.0,547.9→1220.0,623.1 vs 1232.0,589.8"
+ },
+ {
+  "lock": "S1",
+  "where": "1280x650 idle-egg nothing scrolls",
+  "ok": false,
+  "detail": "div.d105-frame 149 in 116 | div.d105-body[idle] 102 in 69"
+ },
+ {
+  "lock": "S1",
+  "where": "1280x650 idle-egg no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1280x650 idle-egg nothing sits on anything else",
+  "ok": false,
+  "detail": "svg.d105-hnest[egg] × svg.d105-nest[egg] (4.5×14.0) | b.d105-name[name] × svg.d105-nest[egg] (50.0×19.2) | em.d105-no[no] × small.[photo-label] (18.9×4.4)"
+ },
+ {
+  "lock": "S1",
+  "where": "1280x650 idle-hatching population",
+  "ok": true,
+  "detail": "42 boxes · 17 leaves · idle"
+ },
+ {
+  "lock": "S1",
+  "where": "1280x650 idle-hatching every box inside the card",
+  "ok": false,
+  "detail": "div.d105-photo[photo] 924.0,426.9→1028.0,542.9 vs 1232.0,589.8 | div.d105-pvr 924.0,547.9→1220.0,623.1 vs 1232.0,589.8 | p.d105-h[title] 924.0,547.9→1220.0,591.1 vs 1232.0,589.8"
+ },
+ {
+  "lock": "S1",
+  "where": "1280x650 idle-hatching nothing scrolls",
+  "ok": false,
+  "detail": "div.d105-frame 149 in 116 | div.d105-body[idle] 102 in 69"
+ },
+ {
+  "lock": "S1",
+  "where": "1280x650 idle-hatching no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1280x650 idle-hatching nothing sits on anything else",
+  "ok": false,
+  "detail": "div.d105-phx × svg.d105-hnest[egg] (8.5×17.3) | div.d105-phx × b.d105-name[name] (54.0×19.2) | div.d105-phx × em.d105-no[no] (54.0×4.0)"
+ },
+ {
+  "lock": "S1",
+  "where": "1280x650 idle-fledgling population",
+  "ok": true,
+  "detail": "43 boxes · 17 leaves · idle"
+ },
+ {
+  "lock": "S1",
+  "where": "1280x650 idle-fledgling every box inside the card",
+  "ok": false,
+  "detail": "div.d105-photo[photo] 924.0,426.9→1028.0,542.9 vs 1232.0,589.8 | img.d105-phead 924.0,426.9→1028.0,522.0 vs 1232.0,589.8 | div.d105-pvr 924.0,547.9→1220.0,623.1 vs 1232.0,589.8"
+ },
+ {
+  "lock": "S1",
+  "where": "1280x650 idle-fledgling nothing scrolls",
+  "ok": false,
+  "detail": "div.d105-frame 149 in 116 | div.d105-body[idle] 102 in 69"
+ },
+ {
+  "lock": "S1",
+  "where": "1280x650 idle-fledgling no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1280x650 idle-fledgling nothing sits on anything else",
+  "ok": false,
+  "detail": "img. × img.d105-phead (24.0×24.0) | b.d105-name[name] × img.d105-phead (63.6×19.2) | em.d105-no[no] × img.d105-phead (70.0×11.0)"
+ },
+ {
+  "lock": "S1",
+  "where": "1280x650 idle-mentor population",
+  "ok": true,
+  "detail": "43 boxes · 17 leaves · idle"
+ },
+ {
+  "lock": "S1",
+  "where": "1280x650 idle-mentor every box inside the card",
+  "ok": false,
+  "detail": "div.d105-photo[photo] 924.0,426.9→1028.0,542.9 vs 1232.0,589.8 | img.d105-phead 924.0,426.9→1028.0,522.0 vs 1232.0,589.8 | div.d105-pvr 924.0,547.9→1220.0,623.1 vs 1232.0,589.8"
+ },
+ {
+  "lock": "S1",
+  "where": "1280x650 idle-mentor nothing scrolls",
+  "ok": false,
+  "detail": "div.d105-frame 149 in 116 | div.d105-body[idle] 102 in 69"
+ },
+ {
+  "lock": "S1",
+  "where": "1280x650 idle-mentor no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1280x650 idle-mentor nothing sits on anything else",
+  "ok": false,
+  "detail": "img. × img.d105-phead (24.0×24.0) | b.d105-name[name] × img.d105-phead (63.6×19.2) | em.d105-no[no] × img.d105-phead (70.0×11.0)"
+ },
+ {
+  "lock": "S1",
+  "where": "1280x650 idle-nonumber population",
+  "ok": true,
+  "detail": "43 boxes · 17 leaves · idle"
+ },
+ {
+  "lock": "S1",
+  "where": "1280x650 idle-nonumber every box inside the card",
+  "ok": false,
+  "detail": "div.d105-photo[photo] 924.0,426.9→1028.0,542.9 vs 1232.0,589.8 | svg.d105-nest[egg] 944.0,449.3→1008.0,502.6 vs 1232.0,589.8 | div.d105-pvr 924.0,547.9→1220.0,623.1 vs 1232.0,589.8"
+ },
+ {
+  "lock": "S1",
+  "where": "1280x650 idle-nonumber nothing scrolls",
+  "ok": false,
+  "detail": "div.d105-frame 149 in 116 | div.d105-body[idle] 102 in 69"
+ },
+ {
+  "lock": "S1",
+  "where": "1280x650 idle-nonumber no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1280x650 idle-nonumber nothing sits on anything else",
+  "ok": false,
+  "detail": "svg.d105-hnest[egg] × svg.d105-nest[egg] (4.5×14.0) | b.d105-name[name] × svg.d105-nest[egg] (50.0×19.2) | em.d105-no[no] × small.[photo-label] (18.9×4.4)"
+ },
+ {
+  "lock": "S1",
+  "where": "1366x768 idle-egg population",
+  "ok": true,
+  "detail": "43 boxes · 17 leaves · idle"
+ },
+ {
+  "lock": "S1",
+  "where": "1366x768 idle-egg every box inside the card",
+  "ok": false,
+  "detail": "div.d105-photo[photo] 964.8,521.9→1068.8,637.9 vs 1318.0,705.8"
+ },
+ {
+  "lock": "S1",
+  "where": "1366x768 idle-egg nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1366x768 idle-egg no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1366x768 idle-egg nothing sits on anything else",
+  "ok": false,
+  "detail": "svg.d105-hnest[egg] × svg.d105-nest[egg] (4.5×11.9) | b.d105-name[name] × svg.d105-nest[egg] (50.0×6.4) | em.d105-no[no] × svg.d105-nest[egg] (50.0×11.7)"
+ },
+ {
+  "lock": "S1",
+  "where": "1366x768 idle-hatching population",
+  "ok": true,
+  "detail": "42 boxes · 17 leaves · idle"
+ },
+ {
+  "lock": "S1",
+  "where": "1366x768 idle-hatching every box inside the card",
+  "ok": false,
+  "detail": "div.d105-photo[photo] 964.8,521.9→1068.8,637.9 vs 1318.0,705.8"
+ },
+ {
+  "lock": "S1",
+  "where": "1366x768 idle-hatching nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1366x768 idle-hatching no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1366x768 idle-hatching nothing sits on anything else",
+  "ok": false,
+  "detail": "div.d105-phx × svg.d105-hnest[egg] (8.5×15.2) | div.d105-phx × b.d105-name[name] (54.0×9.7) | div.d105-phx × em.d105-no[no] (54.0×11.7)"
+ },
+ {
+  "lock": "S1",
+  "where": "1366x768 idle-fledgling population",
+  "ok": true,
+  "detail": "43 boxes · 17 leaves · idle"
+ },
+ {
+  "lock": "S1",
+  "where": "1366x768 idle-fledgling every box inside the card",
+  "ok": false,
+  "detail": "div.d105-photo[photo] 964.8,521.9→1068.8,637.9 vs 1318.0,705.8 | img.d105-phead 964.8,521.9→1068.8,617.0 vs 1318.0,705.8"
+ },
+ {
+  "lock": "S1",
+  "where": "1366x768 idle-fledgling nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1366x768 idle-fledgling no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1366x768 idle-fledgling nothing sits on anything else",
+  "ok": false,
+  "detail": "img. × img.d105-phead (24.0×24.0) | b.d105-name[name] × img.d105-phead (63.6×19.2) | em.d105-no[no] × img.d105-phead (70.0×11.7)"
+ },
+ {
+  "lock": "S1",
+  "where": "1366x768 idle-mentor population",
+  "ok": true,
+  "detail": "43 boxes · 17 leaves · idle"
+ },
+ {
+  "lock": "S1",
+  "where": "1366x768 idle-mentor every box inside the card",
+  "ok": false,
+  "detail": "div.d105-photo[photo] 964.8,521.9→1068.8,637.9 vs 1318.0,705.8 | img.d105-phead 964.8,521.9→1068.8,617.0 vs 1318.0,705.8"
+ },
+ {
+  "lock": "S1",
+  "where": "1366x768 idle-mentor nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1366x768 idle-mentor no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1366x768 idle-mentor nothing sits on anything else",
+  "ok": false,
+  "detail": "img. × img.d105-phead (24.0×24.0) | b.d105-name[name] × img.d105-phead (63.6×19.2) | em.d105-no[no] × img.d105-phead (70.0×11.7)"
+ },
+ {
+  "lock": "S1",
+  "where": "1366x768 idle-nonumber population",
+  "ok": true,
+  "detail": "43 boxes · 17 leaves · idle"
+ },
+ {
+  "lock": "S1",
+  "where": "1366x768 idle-nonumber every box inside the card",
+  "ok": false,
+  "detail": "div.d105-photo[photo] 964.8,521.9→1068.8,637.9 vs 1318.0,705.8"
+ },
+ {
+  "lock": "S1",
+  "where": "1366x768 idle-nonumber nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1366x768 idle-nonumber no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1366x768 idle-nonumber nothing sits on anything else",
+  "ok": false,
+  "detail": "svg.d105-hnest[egg] × svg.d105-nest[egg] (4.5×11.9) | b.d105-name[name] × svg.d105-nest[egg] (50.0×6.4) | em.d105-no[no] × svg.d105-nest[egg] (50.0×11.7)"
+ },
+ {
+  "lock": "S1",
+  "where": "1366x768 egg: the like button can be pressed",
+  "ok": false,
+  "detail": "[data-d105=\"kind\"][data-k=\"like\"]"
+ },
+ {
+  "lock": "S1",
+  "where": "1366x768 mentor: the like button can be pressed",
+  "ok": false,
+  "detail": "[data-d105=\"kind\"][data-k=\"like\"]"
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 idle-egg population",
+  "ok": true,
+  "detail": "43 boxes · 18 leaves · idle"
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 idle-egg every box inside the card",
+  "ok": false,
+  "detail": "button.d105-btn[kind] 1349.5,728.4→1422.0,758.6 vs 1376.0,837.8 | span. 1372.5,735.4→1417.0,751.6 vs 1376.0,837.8"
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 idle-egg nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 idle-egg no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 idle-egg nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 idle-hatching population",
+  "ok": true,
+  "detail": "42 boxes · 18 leaves · idle"
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 idle-hatching every box inside the card",
+  "ok": false,
+  "detail": "button.d105-btn[kind] 1349.5,728.4→1422.0,758.6 vs 1376.0,837.8 | span. 1372.5,735.4→1417.0,751.6 vs 1376.0,837.8"
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 idle-hatching nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 idle-hatching no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 idle-hatching nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 idle-fledgling population",
+  "ok": true,
+  "detail": "43 boxes · 18 leaves · idle"
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 idle-fledgling every box inside the card",
+  "ok": false,
+  "detail": "button.d105-btn[kind] 1349.5,728.4→1422.0,758.6 vs 1376.0,837.8 | span. 1372.5,735.4→1417.0,751.6 vs 1376.0,837.8"
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 idle-fledgling nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 idle-fledgling no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 idle-fledgling nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 idle-mentor population",
+  "ok": true,
+  "detail": "43 boxes · 18 leaves · idle"
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 idle-mentor every box inside the card",
+  "ok": false,
+  "detail": "button.d105-btn[kind] 1349.5,728.4→1422.0,758.6 vs 1376.0,837.8 | span. 1372.5,735.4→1417.0,751.6 vs 1376.0,837.8"
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 idle-mentor nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 idle-mentor no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 idle-mentor nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 idle-nonumber population",
+  "ok": true,
+  "detail": "43 boxes · 18 leaves · idle"
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 idle-nonumber every box inside the card",
+  "ok": false,
+  "detail": "button.d105-btn[kind] 1349.5,728.4→1422.0,758.6 vs 1376.0,837.8 | span. 1372.5,735.4→1417.0,751.6 vs 1376.0,837.8"
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 idle-nonumber nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 idle-nonumber no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 idle-nonumber nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 write-like egg population",
+  "ok": true,
+  "detail": "18 boxes · 10 leaves · write"
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 write-like egg every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 write-like egg nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 write-like egg no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 write-like egg nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 write-dont egg population",
+  "ok": true,
+  "detail": "21 boxes · 12 leaves · write"
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 write-dont egg every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 write-dont egg nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 write-dont egg no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 write-dont egg nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 write-idea egg population",
+  "ok": true,
+  "detail": "18 boxes · 10 leaves · write"
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 write-idea egg every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 write-idea egg nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 write-idea egg no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 write-idea egg nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 sent egg population",
+  "ok": true,
+  "detail": "13 boxes · 8 leaves · sent"
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 sent egg every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 sent egg nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 sent egg no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 sent egg nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 write-like mentor population",
+  "ok": true,
+  "detail": "18 boxes · 10 leaves · write"
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 write-like mentor every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 write-like mentor nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 write-like mentor no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 write-like mentor nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 write-dont mentor population",
+  "ok": true,
+  "detail": "21 boxes · 12 leaves · write"
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 write-dont mentor every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 write-dont mentor nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 write-dont mentor no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 write-dont mentor nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 write-idea mentor population",
+  "ok": true,
+  "detail": "18 boxes · 10 leaves · write"
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 write-idea mentor every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 write-idea mentor nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 write-idea mentor no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 write-idea mentor nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 sent mentor population",
+  "ok": true,
+  "detail": "13 boxes · 8 leaves · sent"
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 sent mentor every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 sent mentor nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 sent mentor no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1440x900 sent mentor nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 idle-egg population",
+  "ok": true,
+  "detail": "43 boxes · 18 leaves · idle"
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 idle-egg every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 idle-egg nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 idle-egg no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 idle-egg nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 idle-hatching population",
+  "ok": true,
+  "detail": "42 boxes · 18 leaves · idle"
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 idle-hatching every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 idle-hatching nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 idle-hatching no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 idle-hatching nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 idle-fledgling population",
+  "ok": true,
+  "detail": "43 boxes · 18 leaves · idle"
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 idle-fledgling every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 idle-fledgling nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 idle-fledgling no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 idle-fledgling nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 idle-mentor population",
+  "ok": true,
+  "detail": "43 boxes · 18 leaves · idle"
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 idle-mentor every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 idle-mentor nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 idle-mentor no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 idle-mentor nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 idle-nonumber population",
+  "ok": true,
+  "detail": "43 boxes · 18 leaves · idle"
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 idle-nonumber every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 idle-nonumber nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 idle-nonumber no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 idle-nonumber nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 write-like egg population",
+  "ok": true,
+  "detail": "18 boxes · 10 leaves · write"
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 write-like egg every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 write-like egg nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 write-like egg no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 write-like egg nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 write-dont egg population",
+  "ok": true,
+  "detail": "21 boxes · 12 leaves · write"
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 write-dont egg every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 write-dont egg nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 write-dont egg no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 write-dont egg nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 write-idea egg population",
+  "ok": true,
+  "detail": "18 boxes · 10 leaves · write"
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 write-idea egg every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 write-idea egg nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 write-idea egg no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 write-idea egg nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 sent egg population",
+  "ok": true,
+  "detail": "13 boxes · 8 leaves · sent"
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 sent egg every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 sent egg nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 sent egg no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 sent egg nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 write-like mentor population",
+  "ok": true,
+  "detail": "18 boxes · 10 leaves · write"
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 write-like mentor every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 write-like mentor nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 write-like mentor no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 write-like mentor nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 write-dont mentor population",
+  "ok": true,
+  "detail": "21 boxes · 12 leaves · write"
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 write-dont mentor every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 write-dont mentor nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 write-dont mentor no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 write-dont mentor nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 write-idea mentor population",
+  "ok": true,
+  "detail": "18 boxes · 10 leaves · write"
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 write-idea mentor every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 write-idea mentor nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 write-idea mentor no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 write-idea mentor nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 sent mentor population",
+  "ok": true,
+  "detail": "13 boxes · 8 leaves · sent"
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 sent mentor every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 sent mentor nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 sent mentor no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1512x900 sent mentor nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 idle-egg population",
+  "ok": true,
+  "detail": "43 boxes · 18 leaves · idle"
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 idle-egg every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 idle-egg nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 idle-egg no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 idle-egg nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 idle-hatching population",
+  "ok": true,
+  "detail": "42 boxes · 18 leaves · idle"
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 idle-hatching every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 idle-hatching nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 idle-hatching no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 idle-hatching nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 idle-fledgling population",
+  "ok": true,
+  "detail": "43 boxes · 18 leaves · idle"
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 idle-fledgling every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 idle-fledgling nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 idle-fledgling no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 idle-fledgling nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 idle-mentor population",
+  "ok": true,
+  "detail": "43 boxes · 18 leaves · idle"
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 idle-mentor every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 idle-mentor nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 idle-mentor no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 idle-mentor nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 idle-nonumber population",
+  "ok": true,
+  "detail": "43 boxes · 18 leaves · idle"
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 idle-nonumber every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 idle-nonumber nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 idle-nonumber no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 idle-nonumber nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 write-like egg population",
+  "ok": true,
+  "detail": "18 boxes · 10 leaves · write"
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 write-like egg every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 write-like egg nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 write-like egg no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 write-like egg nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 write-dont egg population",
+  "ok": true,
+  "detail": "21 boxes · 12 leaves · write"
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 write-dont egg every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 write-dont egg nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 write-dont egg no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 write-dont egg nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 write-idea egg population",
+  "ok": true,
+  "detail": "18 boxes · 10 leaves · write"
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 write-idea egg every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 write-idea egg nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 write-idea egg no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 write-idea egg nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 sent egg population",
+  "ok": true,
+  "detail": "13 boxes · 8 leaves · sent"
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 sent egg every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 sent egg nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 sent egg no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 sent egg nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 write-like mentor population",
+  "ok": true,
+  "detail": "18 boxes · 10 leaves · write"
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 write-like mentor every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 write-like mentor nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 write-like mentor no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 write-like mentor nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 write-dont mentor population",
+  "ok": true,
+  "detail": "21 boxes · 12 leaves · write"
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 write-dont mentor every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 write-dont mentor nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 write-dont mentor no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 write-dont mentor nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 write-idea mentor population",
+  "ok": true,
+  "detail": "18 boxes · 10 leaves · write"
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 write-idea mentor every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 write-idea mentor nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 write-idea mentor no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 write-idea mentor nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 sent mentor population",
+  "ok": true,
+  "detail": "13 boxes · 8 leaves · sent"
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 sent mentor every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 sent mentor nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 sent mentor no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "1920x1080 sent mentor nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 idle-egg population",
+  "ok": true,
+  "detail": "43 boxes · 18 leaves · idle"
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 idle-egg every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 idle-egg nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 idle-egg no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 idle-egg nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 idle-hatching population",
+  "ok": true,
+  "detail": "42 boxes · 18 leaves · idle"
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 idle-hatching every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 idle-hatching nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 idle-hatching no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 idle-hatching nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 idle-fledgling population",
+  "ok": true,
+  "detail": "43 boxes · 18 leaves · idle"
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 idle-fledgling every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 idle-fledgling nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 idle-fledgling no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 idle-fledgling nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 idle-mentor population",
+  "ok": true,
+  "detail": "43 boxes · 18 leaves · idle"
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 idle-mentor every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 idle-mentor nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 idle-mentor no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 idle-mentor nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 idle-nonumber population",
+  "ok": true,
+  "detail": "43 boxes · 18 leaves · idle"
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 idle-nonumber every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 idle-nonumber nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 idle-nonumber no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 idle-nonumber nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 write-like egg population",
+  "ok": true,
+  "detail": "18 boxes · 10 leaves · write"
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 write-like egg every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 write-like egg nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 write-like egg no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 write-like egg nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 write-dont egg population",
+  "ok": true,
+  "detail": "21 boxes · 12 leaves · write"
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 write-dont egg every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 write-dont egg nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 write-dont egg no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 write-dont egg nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 write-idea egg population",
+  "ok": true,
+  "detail": "18 boxes · 10 leaves · write"
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 write-idea egg every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 write-idea egg nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 write-idea egg no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 write-idea egg nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 sent egg population",
+  "ok": true,
+  "detail": "13 boxes · 8 leaves · sent"
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 sent egg every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 sent egg nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 sent egg no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 sent egg nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 write-like mentor population",
+  "ok": true,
+  "detail": "18 boxes · 10 leaves · write"
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 write-like mentor every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 write-like mentor nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 write-like mentor no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 write-like mentor nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 write-dont mentor population",
+  "ok": true,
+  "detail": "21 boxes · 12 leaves · write"
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 write-dont mentor every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 write-dont mentor nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 write-dont mentor no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 write-dont mentor nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 write-idea mentor population",
+  "ok": true,
+  "detail": "18 boxes · 10 leaves · write"
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 write-idea mentor every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 write-idea mentor nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 write-idea mentor no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 write-idea mentor nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 sent mentor population",
+  "ok": true,
+  "detail": "13 boxes · 8 leaves · sent"
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 sent mentor every box inside the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 sent mentor nothing scrolls",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 sent mentor no text cut",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S1",
+  "where": "2560x1440 sent mentor nothing sits on anything else",
+  "ok": true,
+  "detail": ""
+ }
+]
