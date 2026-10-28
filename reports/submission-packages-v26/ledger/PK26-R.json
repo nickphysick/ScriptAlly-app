@@ -19,7 +19,7 @@
  },
  {
   "lock": "PK26-R",
-  "where": "its button is the selected one",
+  "where": "its label is the selected one",
   "ok": true,
   "detail": "Sent one"
  }

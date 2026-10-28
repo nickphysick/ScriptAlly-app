@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "L1",
+  "where": "the page rendered (labels present)",
+  "ok": true,
+  "detail": "labels"
+ },
+ {
+  "lock": "L1",
+  "where": "no tab bar",
+  "ok": false,
+  "detail": "tabs"
+ },
+ {
+  "lock": "L1",
+  "where": "no Letters/Synopses page",
+  "ok": true,
+  "detail": "materials"
+ },
+ {
+  "lock": "L1",
+  "where": "Your materials is on the page",
+  "ok": true,
+  "detail": "lib"
+ },
+ {
+  "lock": "L1",
+  "where": "Your materials' tabs read",
+  "ok": true,
+  "detail": "[\"Letters 2=false\",\"Synopses 1=true\",\"Versions 2=false\"]"
+ },
+ {
+  "lock": "L1",
+  "where": "?tab=syn → Synopses selected",
+  "ok": true,
+  "detail": "[\"Letters 2=false\",\"Synopses 1=true\",\"Versions 2=false\"]"
+ },
+ {
+  "lock": "L1",
+  "where": "…and only Synopses",
+  "ok": true,
+  "detail": "[\"Letters 2=false\",\"Synopses 1=true\",\"Versions 2=false\"]"
+ },
+ {
+  "lock": "L1",
+  "where": "…listing the synopsis",
+  "ok": true,
+  "detail": "[\"One-page In use sent 10 · in 2 packages In package\"]"
+ }
+]

@@ -17,7 +17,8 @@ import type { Pk26Model } from "./usePk26Model";
 
 /** `version`: a new package opened from Versions' "Add to a package" starts with that version as its pages. */
 /** `focus: "note"` opens Package details with "Who it's for" focused (the header bar's "+ Add a note", v26.1). */
-export type DialogView = { m: "new"; version?: string } | { m: "edit"; id: string; focus?: "note" };
+/** `copyOf` (v38): the package drawer's "Make a copy" opens New package with "a copy of {name}" chosen. */
+export type DialogView = { m: "new"; version?: string; copyOf?: string } | { m: "edit"; id: string; focus?: "note" };
 
 export const Pk26Dialog: React.FC<{ model: Pk26Model; view: DialogView | null; onClose: () => void; onCreated: (id: string) => void }> = ({ model, view, onClose, onCreated }) => {
   useEscapeLayer(!!view, onClose, ESC_LEVEL.pageModal);
@@ -26,19 +27,20 @@ export const Pk26Dialog: React.FC<{ model: Pk26Model; view: DialogView | null; o
   return createPortal(
     <div className="p6-layer">
       <div className="p6-pdlg" data-pk26="dialog" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-        <Body key={view.m === "edit" ? view.id : "new"} model={model} p={p} version={view.m === "new" ? view.version : undefined} focusNote={view.m === "edit" && view.focus === "note"} onClose={onClose} onCreated={onCreated} />
+        <Body key={view.m === "edit" ? view.id : `new-${view.copyOf ?? ""}`} model={model} p={p} version={view.m === "new" ? view.version : undefined} copyOf={view.m === "new" ? view.copyOf : undefined} focusNote={view.m === "edit" && view.focus === "note"} onClose={onClose} onCreated={onCreated} />
       </div>
     </div>,
     document.body,
   );
 };
 
-const Body: React.FC<{ model: Pk26Model; p: SubmissionPackage | null; version?: string; focusNote?: boolean; onClose: () => void; onCreated: (id: string) => void }> = ({ model, p, version, focusNote, onClose, onCreated }) => {
+const Body: React.FC<{ model: Pk26Model; p: SubmissionPackage | null; version?: string; copyOf?: string; focusNote?: boolean; onClose: () => void; onCreated: (id: string) => void }> = ({ model, p, version, copyOf, focusNote, onClose, onCreated }) => {
   const [name, setName] = useState(p?.packageName ?? "");
   const [note, setNote] = useState(p?.note ?? "");
   const [ic, setIc] = useState<PackageIcon>(p ? iconOf(p) : "star");
-  const used = model.active;
-  const [from, setFrom] = useState<string>("empty");
+  /* the copy offered: the package "Make a copy" came from, else the active one */
+  const used = (copyOf ? model.msPkgs.find((x) => x.id === copyOf) : null) ?? model.active;
+  const [from, setFrom] = useState<string>(copyOf && used?.id === copyOf ? copyOf : "empty");
   const [err, setErr] = useState(false);
   const [busy, setBusy] = useState(false);
   const nameRef = useRef<HTMLInputElement | null>(null);

@@ -1,0 +1,56 @@
+[
+ {
+  "lock": "L11",
+  "where": "pk40-ms: labels renders",
+  "ok": true,
+  "detail": "labels"
+ },
+ {
+  "lock": "L11",
+  "where": "pk40-ms: band renders",
+  "ok": true,
+  "detail": "band"
+ },
+ {
+  "lock": "L11",
+  "where": "pk40-ms: agg renders",
+  "ok": true,
+  "detail": "agg"
+ },
+ {
+  "lock": "L11",
+  "where": "pk40-ms: the builder renders",
+  "ok": true,
+  "detail": "wbf"
+ },
+ {
+  "lock": "L11",
+  "where": "pk40-new: labels renders",
+  "ok": true,
+  "detail": "labels"
+ },
+ {
+  "lock": "L11",
+  "where": "pk40-new: band renders",
+  "ok": true,
+  "detail": "band"
+ },
+ {
+  "lock": "L11",
+  "where": "pk40-new: agg renders",
+  "ok": true,
+  "detail": "agg"
+ },
+ {
+  "lock": "L11",
+  "where": "pk40-new: the builder renders",
+  "ok": true,
+  "detail": "wbf"
+ },
+ {
+  "lock": "L11",
+  "where": "no console errors",
+  "ok": true,
+  "detail": "[]"
+ }
+]

@@ -215,14 +215,17 @@ describe("/queries/packages renders", () => {
     expect(html).toContain("Build your first package");
     expect(html).toContain('class="p6-pb-stage p6-an"');
     expect(html).not.toContain('data-pk26="header"');
-    /* the same tabs, workbench (a draft first package) and Tracking, in their empty states (v40: Tracking's Warming up
-       replaces v26's "Nothing to compare yet.") */
-    expect(html).toContain('data-pk26="tabs"');
+    /* v38: one page, no tabs — the labels row, the builder (a draft first package) and Results, empty: the band's
+       empty line, no totals and the dashed "Nothing to show yet." (L7's unit half) */
+    expect(html).not.toContain('data-pk26="tabs"');
+    expect(html).toContain('data-pk38="labels"');
     expect(html).toContain("My first package");
-    expect(html).toContain("Your first comparison shows once two packages have each gone out with 5 queries.");
+    expect(html).toContain("Once you’ve logged queries with a package, this shows what’s working.");
+    expect(html).toContain('data-pk38="empty"');
+    expect(html).not.toContain('data-pk38="show"');
   });
 
-  it("populated: the navy header, the tabs, the open package's packing list and Your materials", () => {
+  it("populated: the navy header, the labels, the open package's packing list and Your materials", () => {
     setActiveManuscript();
     const html = renderPageSeededWith(<SubmissionPackages />, "/queries/packages", { versions: [LETTER], packages: [PACKAGE] });
     expect(html).toContain('data-pk26="header"');
@@ -235,6 +238,11 @@ describe("/queries/packages renders", () => {
     expect(html).toContain('data-pk26="lib"');
     expect(html).toContain(">Hook-first<");
     expect(html).not.toContain('data-pk26="hero"');
+    /* v38: the label for the package, and no tab bar or tab page */
+    expect(html).toContain('data-pkid="pk1"');
+    expect(html).toContain("Pick one to change it below, or open its figures.");
+    expect(html).not.toContain('data-pk26="tabs"');
+    expect(html).not.toContain('data-pk26="materials"');
   });
 });
 

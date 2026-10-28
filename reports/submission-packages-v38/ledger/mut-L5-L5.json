@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "L5",
+  "where": "Doing best is Standard (the one ranked package)",
+  "ok": false,
+  "detail": "{\"h\":\"Standard 2\",\"d\":\"40% of agents asked for more: 2 of 5, against your 30% average.\",\"bars\":[\"Standard 40%\",\"Standard 2 –\",\"Old one –\"]}"
+ },
+ {
+  "lock": "L5",
+  "where": "…40% of agents asked for more: 2 of 5, against your 30% average.",
+  "ok": true,
+  "detail": "40% of agents asked for more: 2 of 5, against your 30% average."
+ },
+ {
+  "lock": "L5",
+  "where": "…Standard 2 is hatched in its bars (too early)",
+  "ok": true,
+  "detail": "[\"Standard 40%\",\"Standard 2 –\",\"Old one –\"]"
+ },
+ {
+  "lock": "L5",
+  "where": "Sent the most is Standard 2, out to 4",
+  "ok": true,
+  "detail": "{\"h\":\"Standard 2\",\"d\":\"Out to 4 agents.\",\"bars\":[\"Standard 5\",\"Standard 2 4\",\"Old one 1\"]}"
+ },
+ {
+  "lock": "L5",
+  "where": "Still to prove is a live, unsent package",
+  "ok": true,
+  "detail": "{\"h\":\"Draft one\",\"d\":\"Not sent yet. It needs a letter and pages before it can go.\",\"bars\":[]}"
+ },
+ {
+  "lock": "L5",
+  "where": "Hook-first: drawn",
+  "ok": true,
+  "detail": "{\"h\":\"Hook-first\",\"d\":\"33% of the 6 agents who got it asked for more.\",\"bars\":[\"Hook-first 33%\",\"Comps-forward –\"]}"
+ },
+ {
+  "lock": "L5",
+  "where": "Hook-first: 33% of the 6 agents who got it asked for more.",
+  "ok": true,
+  "detail": "33% of the 6 agents who got it asked for more."
+ },
+ {
+  "lock": "L5",
+  "where": "One-page: drawn",
+  "ok": true,
+  "detail": "{\"h\":\"One-page\",\"d\":\"33% of the 9 agents who got it asked for more.\",\"bars\":[\"One-page 33%\"]}"
+ },
+ {
+  "lock": "L5",
+  "where": "One-page: 33% of the 9 agents who got it asked for more.",
+  "ok": true,
+  "detail": "33% of the 9 agents who got it asked for more."
+ },
+ {
+  "lock": "L5",
+  "where": "Fast-paced opening: drawn",
+  "ok": true,
+  "detail": "{\"h\":\"Fast-paced opening\",\"d\":\"30% of the 10 agents who got it asked for more.\",\"bars\":[\"Fast-paced opening 30%\"]}"
+ },
+ {
+  "lock": "L5",
+  "where": "Fast-paced opening: 30% of the 10 agents who got it asked for more.",
+  "ok": true,
+  "detail": "30% of the 10 agents who got it asked for more."
+ },
+ {
+  "lock": "L5",
+  "where": "winners are read",
+  "ok": true,
+  "detail": "[\"Standard 2\",\"Hook-first\",\"One-page\",\"Fast-paced opening\"]"
+ },
+ {
+  "lock": "L5",
+  "where": "no winner is under the threshold",
+  "ok": false,
+  "detail": "[\"Standard 2\",\"Hook-first\",\"One-page\",\"Fast-paced opening\"]"
+ },
+ {
+  "lock": "L5",
+  "where": "band totals: 10 · 60% · 30%",
+  "ok": true,
+  "detail": "10 queries sent with a package | 60% got a reply | 30% asked for more"
+ }
+]

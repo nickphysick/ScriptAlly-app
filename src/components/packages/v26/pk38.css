@@ -1,0 +1,64 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Submission packages v38 — the hand-written rules beside pk38.generated.css. Three kinds, each the ref's own
+ * authored rule with the `p8-` prefix:
+ *   1. what the capture cannot see: an SVG's own children (the ring's circles), and states the frozen mock never
+ *      reaches (the hatched "Too early" piece, the locked builder);
+ *   2. v40's ruling that this page carries no small mono capitals — the ref's kickers and tags read in the
+ *      typewriter, sentence case, at the size its neighbours use (Nick, 27 Oct, over the v38 mock);
+ *   3. reduced motion.
+ */
+
+/* ── 1. the ring (ref `.rg circle`, `.pkl-b .rg circle`, `.dst .rg circle`, `.pkl-b.on .rg circle`) ── */
+.p8-rg svg { transform: rotate(-90deg); }
+.p8-rg circle { fill: none; stroke: #eef0ef; stroke-width: 5; }
+.p8-rg circle.p8-v { stroke: #1d4b63; stroke-linecap: round; }
+.p8-rg.p8-early circle.p8-v { stroke: rgba(29, 75, 99, 0.4); stroke-linecap: butt; }
+.p8-pkl-b .p8-rg circle { stroke-width: 6; }
+.p8-pkl-b.p8-on .p8-rg circle { stroke: rgba(255, 255, 255, 0.2); }
+.p8-pkl-b.p8-on .p8-rg circle.p8-v { stroke: #fff; }
+
+/* ── 1. a kind with nothing ranked (ref `.ac-m.ghost`, `.ag3.none`): the hatched placeholder card ── */
+.p8-agg3 .p8-ag2-v .p8-ac-m.p8-ghost {
+  position: absolute; left: 0; top: 0; width: 250px; height: 150px; border-radius: 12px; transform: rotate(-1deg);
+  background: repeating-linear-gradient(135deg, #f4f0ea 0 6px, #efeae2 6px 12px); box-shadow: none;
+}
+.p8-agg3 .p8-ag3.p8-none .p8-ag2-v { cursor: default; }
+.p8-agg3 .p8-ag3.p8-none > h3 .p8-o { font-style: italic; color: rgba(28, 19, 15, 0.55); }
+
+/* ── 2. no mono capitals (v40's ruling): typewriter, sentence case ── */
+.p8-pkl .p8-pkl-k,
+.p8-agg3 .p8-ag3 .p8-ag3-k,
+.p8-db > h5 { font: 400 16px/normal var(--sp-type); letter-spacing: 0; text-transform: none; }
+.p8-bnr .p8-bnr-tx .p8-bnr-k { font: 400 17px/normal var(--sp-type); letter-spacing: 0; text-transform: none; color: rgba(244, 238, 229, 0.75); }
+.p8-db .p8-dpz .p8-dpz-l { font: 400 14px/normal var(--sp-type); letter-spacing: 0; text-transform: none; }
+.p8-pkl .p8-pkl-row .p8-pkl-b > em,
+.p8-pkl .p8-pkl-row .p8-on.p8-pkl-b[aria-pressed="true"] > em,
+.p8-agg3 .p8-ac-h .p8-a,
+.p8-agg3 .p8-ac-pk .p8-ac-h > em:not(.p8-a) { font: 400 12px/normal var(--sp-type); letter-spacing: 0; text-transform: none; }
+.p8-agg3 .p8-ac-m.p8-t-let .p8-am-h span > small,
+.p8-agg3 .p8-ac-m.p8-t-syn .p8-am-h span > small,
+.p8-agg3 .p8-ac-m.p8-t-ver .p8-am-h span > small { font: 400 12px/normal var(--sp-type); letter-spacing: 0; text-transform: none; }
+.p8-bnr .p8-bnr-in .p8-bnr-art,
+.p8-bnr .p8-bnr-in .p8-bnr-art > span { font-family: var(--sp-type); font-size: 11px; letter-spacing: 0; text-transform: none; }
+
+/* ── 3. reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .p8-agg3 .p8-ac-pk, .p8-agg3 .p8-ac-m { transition: none !important; }
+}
+
+/* ── 1. the locked builder (v38 over v40's lock): no ref state draws it, so these are written to the builder's own
+   grammar — the quiet empty slot for a slot that went empty, and the foot's own line and buttons ── */
+.p6 .p6-pk-locked .p6-mr-em--lk { display: flex; align-items: center; min-height: 44px; padding: 0 16px; border-radius: 10px;
+  background: rgba(28, 19, 15, 0.03); font: italic 400 15px/1.4 var(--sp-serif); color: rgba(28, 19, 15, 0.55); }
+.p6 .p6-po-foot.p6-po-foot--lk { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.p6 .p6-po-foot--lk > span:first-child { display: inline-flex; align-items: center; gap: 8px; }
+.p6 .p6-po-foot--lk > span:first-child svg { width: 14px; height: 14px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; }
+.p6 .p6-po-foot--lk .p6-po-lkb { display: inline-flex; gap: 14px; flex: none; }
+
+/* ── 1. put-away materials in Your materials: quieter, opened rather than dragged ── */
+.p6 .p6-lib-list .p6-lr.p6-lr--away { opacity: 0.62; cursor: default; }
+.p6 .p6-lib-list .p6-lr.p6-lr--away .p6-lr-g { visibility: hidden; }
+.p6 .p6-lib-list .p6-lib-away { display: block; margin: 10px 12px 2px; }

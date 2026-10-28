@@ -27,6 +27,7 @@ import {
   copyName, extraNamed, extrasLine, extrasOf, iconOf, otherMaterialsMigration, sendSplit, type ResultsKind,
 } from "../../../lib/packagesV26";
 import { usePackagesModel } from "../v4/usePackagesModel";
+import { figOf, type Fig, type Item as V38Item } from "../../../lib/packagesV38";
 import { canDelete, canMakeActive, canRetire, copyFields, copyToast, dayMonth, factsOf, isLocked, packageQueries, queriesWithPiece, type Facts, type PieceContext, type PieceKind as V40Kind } from "../../../lib/packagesV40";
 import { LOCKED_NOTE, LOCKED_WHY } from "../../../lib/packageMetrics";
 
@@ -448,8 +449,17 @@ export function usePk26Model() {
     return { names: qs.map((q) => agents.find((a) => a.id === q.agentId)?.name ?? "").filter(Boolean), ids: qs.map((q) => q.id) };
   }, [msQueries, msPkgs, rowsById, agents]);
 
+  /* ── v38 figures: every count is packageReplies' (first answer; materials edition-true; ranked from
+     MIN_SENDS_FOR_CLAIM answered). The labels, the package drawer and Results read only these. ── */
+  const figPk = useCallback((p: SubmissionPackage): Fig => figOf(base.allSplit(p), base.creditedQueries(p), rowsById), [base, rowsById]);
+  const figItems = useCallback((kind: ResultsKind): (V38Item & { ref: SubmissionPackage | MaterialRow | VersionRow })[] =>
+    resultItems(kind).filter((i) => i.ref).map((i) => ({ id: i.id, name: i.name, retired: !!i.retired, ref: i.ref!, f: figOf(i.s, resultQueries(kind, i.id), rowsById) })),
+  [resultItems, resultQueries, rowsById]);
+  const figAll = useMemo(() => figOf(overallSplit, msPkgs.flatMap((p) => base.creditedQueries(p)), rowsById), [overallSplit, msPkgs, base, rowsById]);
+
   return {
     ...base,
+    figPk, figItems, figAll,
     extras, comps, letters, synopses, lettersAll, synopsesAll, versionRows, matName, splitOf, currentSplit, overallSplit,
     putPiece, removePiece, toggleExtra, addExtra, renameExtra, saveDetails, createPackage, deletePkg, makeActive, duplicate, retire,
     addMaterial, saveMaterial, materialSent, putAwayMat, bringBack, addComp, saveVersion, useVersionIn, resultItems, resultQueries, wentTo,

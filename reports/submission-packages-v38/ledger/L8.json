@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "L8",
+  "where": "pk40-ms · the page: no mono capitals",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L8",
+  "where": "pk40-ms · New package dialog opened",
+  "ok": true,
+  "detail": ".p6-pdlg"
+ },
+ {
+  "lock": "L8",
+  "where": "pk40-ms · New package dialog: no mono capitals",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L8",
+  "where": "pk40-ms · How it works opened",
+  "ok": true,
+  "detail": "[data-pk26=\"hwm\"]"
+ },
+ {
+  "lock": "L8",
+  "where": "pk40-ms · How it works: no mono capitals",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L8",
+  "where": "pk40-ms · the material drawer opened",
+  "ok": true,
+  "detail": "drawer"
+ },
+ {
+  "lock": "L8",
+  "where": "pk40-ms · the material drawer: no mono capitals",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L8",
+  "where": "pk40-ms · the package drawer opened",
+  "ok": true,
+  "detail": "pkd"
+ },
+ {
+  "lock": "L8",
+  "where": "pk40-ms · the package drawer: no mono capitals",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L8",
+  "where": "pk40-new · the page: no mono capitals",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L8",
+  "where": "pk40-new · New package dialog opened",
+  "ok": true,
+  "detail": ".p6-pdlg"
+ },
+ {
+  "lock": "L8",
+  "where": "pk40-new · New package dialog: no mono capitals",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L8",
+  "where": "pk40-new · How it works opened",
+  "ok": true,
+  "detail": "[data-pk26=\"hwm\"]"
+ },
+ {
+  "lock": "L8",
+  "where": "pk40-new · How it works: no mono capitals",
+  "ok": true,
+  "detail": "[]"
+ }
+]

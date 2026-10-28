@@ -1,0 +1,20 @@
+[
+ {
+  "lock": "L4",
+  "where": "there are showcases (3 on the fixture)",
+  "ok": false,
+  "detail": "[\"best:pk40-std\",\"most:pk40-std2\",\"prove:pk40-draft\",\"best:pk40-std\"]"
+ },
+ {
+  "lock": "L4",
+  "where": "no package twice",
+  "ok": false,
+  "detail": "[\"pk40-std\",\"pk40-std2\",\"pk40-draft\",\"pk40-std\"]"
+ },
+ {
+  "lock": "L4",
+  "where": "the three slots, in order",
+  "ok": false,
+  "detail": "[\"best:pk40-std\",\"most:pk40-std2\",\"prove:pk40-draft\",\"best:pk40-std\"]"
+ }
+]

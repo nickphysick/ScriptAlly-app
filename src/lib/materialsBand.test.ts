@@ -79,9 +79,12 @@ describe("the materials band replaces the rail's register (D1)", () => {
   });
 
   it("⚠️ AND A PUT-AWAY MATERIAL STILL HAS A WAY BACK", () => {
-    const table = decls(read("../components/packages/v26/Pk26Materials.tsx"));
-    expect(table).toContain("model.lettersAll : model.synopsesAll");
-    expect(table).toContain("m.retired ? <em>Put away</em>");
+    /* v38: the Query letters / Synopses tables are gone; Your materials (the builder) lists put-away ones on request */
+    const table = decls(read("../components/packages/v26/Pk26Builder.tsx"));
+    expect(table).toContain("model.lettersAll.filter((m) => m.retired)");
+    expect(table).toContain("model.synopsesAll.filter((m) => m.retired)");
+    expect(table).toContain("<em>Put away</em>");
+    expect(table).toContain("onOpenMaterial(lib as \"let\" | \"syn\", m.id)");
     const drawer = decls(read("../components/packages/v26/Pk26Drawer.tsx"));
     expect(drawer).toMatch(/data-pk26=\{m\.retired \? "restore" : "put-away"\}/);
     expect(drawer).toContain("if (m.retired) await model.bringBack(m)");
@@ -101,7 +104,8 @@ describe("every entry point names its type (D3)", () => {
      form is keyed on the material it edits (or on the kind it adds), so a second letter is a fresh mount. */
   it("every + Add names its kind, and the drawer's form is keyed on it", () => {
     expect(decls(read("../components/packages/v26/Pk26Builder.tsx"))).toContain("onClick={() => onNewMaterial(lib)}");
-    expect(decls(page)).toContain('onAdd={() => setDrawer({ m: "newmat", kind: tab })}');
+    /* v38: the Query letters / Synopses tables (and their + Add) are gone; Your materials' + Add is the one route */
+    expect(decls(page)).toContain('setDrawer(k === "ver" ? { m: "newver", parentId: null } : { m: "newmat", kind: k })');
     expect(decls(read("../components/packages/v26/Pk26Drawer.tsx"))).toContain("key={view.m === \"mat\" ? view.id : `new-${view.kind}`}");
   });
 });

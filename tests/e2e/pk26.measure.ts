@@ -13,6 +13,10 @@
  *   PK26-D   the drawer's header fill stops at the inner border (measured against the drawer's border box)
  *   PK26-S   Results: an item under packageReplies' threshold is shown "Too early" and is not ranked
  *
+ * ⚠️ v38 (27 Oct): PK26-E, X, S, T and RT are RETIRED (they changed a sent package, which v40 locks, or read v26's
+ *    Results and the tab bar, both gone); R, W, D and H are retargeted onto the labels row and Your materials.
+ *    tests/e2e/RETIRED-submission-packages-v38.md lists each. pk38.measure.ts holds the page's v38 locks.
+ *
  * Each lock was proved red before its green was believed: `PK26_MUTATE=<lock>` applies its named in-page break (the
  * table below) or, for the decisions the code makes, `node tests/e2e/pk26Mutate.mjs <lock>` edits the source in this
  * worktree (rebuild, run, `--restore`). The ledger `reports/submission-packages-v26/ledger/mut-<lock>.json` records it.
@@ -64,8 +68,6 @@ const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   /* v26.1 — the packages row goes back to two lines' height and loses the right padding that sets its tag's edge */
   "PK26-N": { css: `button.ws-ni[aria-label="Packages"] { height: 48px !important; padding-right: 3px !important; }` },
   /* v26.1 — the stuck bar's ground reaches only the ref's 32px past the tabs */
-  "PK26-T": { css: `.p6 .p6-ptabs::before { left: -32px !important; right: -32px !important; }` },
-  "PK26-S": { js: `document.addEventListener('DOMContentLoaded', () => { const put = () => { for (const r of document.querySelectorAll('.p6-rs-r.p6-early')) { r.classList.remove('p6-early'); const em = r.querySelector('.p6-rs-bar em'); if (em && em.textContent === 'Too early') em.textContent = '50%'; } }; new MutationObserver(put).observe(document.body, { subtree: true, childList: true, characterData: true, attributes: true }); put(); })` },
 };
 
 async function open(page: Page, size: { width: number; height: number }, route = "/queries/packages", ms = MS) {
@@ -93,8 +95,9 @@ test("PK26-R the old address redirects with its query and opens that package", a
   L.check("query kept", url.searchParams.get("pkg") === "pk26-pkg-sent", url.search);
   const openId = await vis(page, '[data-pk26="open"]').getAttribute("data-pkg");
   L.check("that package is open", openId === "pk26-pkg-sent", String(openId));
-  const pressed = await vis(page, '.p6-pkb[aria-pressed="true"] b').textContent();
-  L.check("its button is the selected one", pressed === "Sent one", String(pressed));
+  /* v38: the package buttons are the labels row; the sent package opens (locked) in the builder */
+  const pressed = await vis(page, '[data-pk38="labels"] .p8-pkl-b[aria-pressed="true"] .p8-pkl-t b').textContent();
+  L.check("its label is the selected one", pressed === "Sent one", String(pressed));
   L.done(4);
 });
 
@@ -108,14 +111,15 @@ for (const size of SIZES) {
       const root = [...document.querySelectorAll('[data-pk26="page"]')].find((e) => (e as HTMLElement).offsetParent) as HTMLElement;
       const sheet = (root.closest(".ws-window") as HTMLElement).getBoundingClientRect();
       const ins = (sel: string) => { const b = (root.querySelector(sel) as HTMLElement).getBoundingClientRect(); return [b.left - sheet.left, sheet.right - b.right]; };
-      return { header: ins(".p6-hd-in"), tabs: ins(".p6-ptabs"), build: ins(".p6-pb-build"), results: ins(".p6-rs") };
+      /* v38: the tab bar and v26's Results are gone (the band's width is pk38's L6); the header and the builder stay */
+      return { header: ins(".p6-hd-in"), build: ins(".p6-pb-build") };
     });
-    for (const [k, want] of [["header", 92], ["tabs", 72], ["build", 48], ["results", 48]] as const) {
+    for (const [k, want] of [["header", 92], ["build", 48]] as const) {
       const [l, rt] = r[k];
       L.check(`${k} left`, Math.abs(l - want) <= 1, `${l.toFixed(1)} (want ${want})`);
       L.check(`${k} right`, Math.abs(rt - want) <= 1, `${rt.toFixed(1)} (want ${want})`);
     }
-    L.done(8);
+    L.done(4);
   });
 }
 
@@ -159,43 +163,7 @@ test("PK26-B only the matching row takes a drop; Add does the same by keyboard",
   L.done(6);
 });
 
-/* ── PK26-E / PK26-X ────────────────────────────────────────────────────────────────────────────── */
-test("PK26-E a sent package's new letter starts its next edition; the sent query keeps the old", async ({ page }) => {
-  test.setTimeout(240_000);
-  const L = new Ledger("PK26-E");
-  seed();
-  await open(page, SIZES[0], "/queries/packages?pkg=pk26-pkg-sent");
-  await vis(page, '.p6-lr[data-drag="let:pk26-let-b"] .p6-lr-add').click();
-  await page.waitForTimeout(2000);
-  const d = dump();
-  const p = d["pk26-pkg-sent"]!, q = d["pk26-q1"]!;
-  const eds = (p.editions as { n: number; queryLetterVersionId: string }[] | undefined) ?? [];
-  L.check("the package is on its 2nd edition", p.edition === 2, `edition=${p.edition}`);
-  L.check("its current letter is Letter B", p.queryLetterVersionId === "pk26-let-b", String(p.queryLetterVersionId));
-  L.check("its 1st edition kept Letter A", eds.find((e) => e.n === 1)?.queryLetterVersionId === "pk26-let-a", JSON.stringify(eds.map((e) => [e.n, e.queryLetterVersionId])));
-  L.check("the sent query is still credited to the 1st edition", q.sentPackageEdition === 1, String(q.sentPackageEdition));
-  L.check("…and still says what went", q.sentMaterials === "Query letter Letter A", String(q.sentMaterials));
-  seed();
-  L.done(5);
-});
-
-test("PK26-X ticking an extra on a sent package does not change the sent query's extras", async ({ page }) => {
-  test.setTimeout(240_000);
-  const L = new Ledger("PK26-X");
-  seed();
-  await open(page, SIZES[0], "/queries/packages?pkg=pk26-pkg-sent");
-  await vis(page, '[data-pk26="open"] .p6-exc button[aria-pressed]').first().click();
-  await page.waitForTimeout(2000);
-  const d = dump();
-  const p = d["pk26-pkg-sent"]!, q = d["pk26-q1"]!;
-  const eds = (p.editions as { n: number; otherMaterials?: string; extraIds?: string[] }[] | undefined) ?? [];
-  L.check("the package now sends the extra", JSON.stringify(p.extraIds) === '["pk26-ext"]' && p.otherMaterials === "Author bio", `${JSON.stringify(p.extraIds)} · ${p.otherMaterials}`);
-  L.check("ticking it started the next edition", p.edition === 2, `edition=${p.edition}`);
-  L.check("the 1st edition (what went) has no extras", !eds.find((e) => e.n === 1)?.otherMaterials && !(eds.find((e) => e.n === 1)?.extraIds ?? []).length, JSON.stringify(eds[0] ?? null));
-  L.check("the sent query's record is unchanged", q.sentMaterials === "Query letter Letter A" && q.sentPackageEdition === 1, `${q.sentMaterials} · ed ${q.sentPackageEdition}`);
-  seed();
-  L.done(4);
-});
+/* PK26-E / PK26-X — RETIRED with v38 (27 Oct); see tests/e2e/RETIRED-submission-packages-v38.md */
 
 /* ── PK26-D ─────────────────────────────────────────────────────────────────────────────────────── */
 for (const size of SIZES) {
@@ -203,8 +171,8 @@ for (const size of SIZES) {
     test.setTimeout(180_000);
     const L = new Ledger(`PK26-D-${size.width}`);
     await open(page, size);
-    await vis(page, '[data-pk26="tabs"] .p6-t-let').click();
-    await vis(page, '[data-pk26="materials"] .p6-xtb-r[data-mat]').click();
+    /* v38: the Query letters table is gone; Your materials' pencil opens the same drawer */
+    await vis(page, '[data-pk26="lib"] .p6-lr-ed').click();
     await page.waitForTimeout(900);
     const r = await page.evaluate(() => {
       const d = document.querySelector('[data-pk26="drawer"]') as HTMLElement;
@@ -228,29 +196,7 @@ for (const size of SIZES) {
   });
 }
 
-/* ── PK26-S ─────────────────────────────────────────────────────────────────────────────────────── */
-test("PK26-S Results: under the threshold it is shown, Too early, and never ranked", async ({ page }) => {
-  test.setTimeout(180_000);
-  const L = new Ledger("PK26-S");
-  await open(page, SIZES[0]);
-  const r = await page.evaluate(() => {
-    const root = [...document.querySelectorAll('[data-pk26="results"]')].find((e) => (e as HTMLElement).offsetParent) as HTMLElement;
-    const rows = [...root.querySelectorAll(".p6-rs-r")].map((b) => ({ name: b.querySelector(".p6-rs-n b")?.textContent ?? "", early: b.classList.contains("p6-early"), label: b.querySelector(".p6-rs-bar em")?.textContent ?? "" }));
-    return { rows, lead: root.querySelector(".p6-rs-lead")?.textContent ?? "", foot: root.querySelector(".p6-rs-foot")?.textContent ?? "" };
-  });
-  /* the fixture's sent package has ONE query, still waiting — sent, never answered: under any threshold */
-  const sent = r.rows.find((x) => x.name === "Sent one");
-  L.check("the sent package is listed", !!sent, JSON.stringify(r.rows));
-  L.check("…marked Too early", !!sent && sent.early && sent.label === "Too early", JSON.stringify(sent));
-  L.check("…and not named as the best in the lead", !/^Sent one gets/.test(r.lead), r.lead);
-  L.check("the unsent one reads Not sent", r.rows.some((x) => x.name === "Drag target" && x.label === "Not sent"), JSON.stringify(r.rows));
-  L.check("the footnote states the threshold", /fewer than \d+ answers are shown but not ranked/.test(r.foot), r.foot);
-  L.done(5);
-});
-
-/* ══ v26.1 ═══════════════════════════════════════════════════════════════════════════════════════════
-   Each was red on the deployed v26 build (SA_E2E_BASE_URL=dev, before these fixes) and, where named above, under its
-   in-page break. */
+/* PK26-S — RETIRED with v38 (27 Oct); see tests/e2e/RETIRED-submission-packages-v38.md */
 
 /* ── PK26-N · the sidebar row is Versions' structure ── */
 for (const size of SIZES) {
@@ -278,31 +224,7 @@ for (const size of SIZES) {
   });
 }
 
-/* ── PK26-T · the stuck tab bar is ground from sheet edge to sheet edge ── */
-for (const size of SIZES) {
-  test(`PK26-T the stuck tab bar spans the sheet at ${size.width}`, async ({ page }) => {
-    test.setTimeout(180_000);
-    const L = new Ledger(`PK26-T-${size.width}`);
-    await open(page, size, "/queries/packages", "seed-ms-1");
-    const r = await page.evaluate(async () => {
-      const s = [...document.querySelectorAll(".wpg-scroll")].find((x) => x.querySelector('[data-pk26="page"]')) as HTMLElement;
-      const bar = s.querySelector('[data-pk26="tabs"]') as HTMLElement;
-      const restTop = bar.getBoundingClientRect().top - s.getBoundingClientRect().top;
-      const lib = s.querySelector('[data-pk26="lib"]') as HTMLElement;
-      s.scrollTop += lib.getBoundingClientRect().top - s.getBoundingClientRect().top + 60;
-      await new Promise((res) => requestAnimationFrame(() => requestAnimationFrame(res)));
-      const sb = s.getBoundingClientRect(), b = bar.getBoundingClientRect();
-      const pcs = getComputedStyle(bar, "::before");
-      const tab = (bar.querySelector('[role="tab"]') as HTMLElement).getBoundingClientRect();
-      return { restTop, top: b.top - sb.top, scrolled: s.scrollTop, sheet: [sb.left, sb.right], band: [b.left + parseFloat(pcs.left), b.right - parseFloat(pcs.right)], tabL: tab.left - sb.left };
-    });
-    L.check("the page scrolled and the bar is stuck at the top", r.scrolled > 0 && r.restTop > 1 && Math.abs(r.top) <= 1, JSON.stringify(r));
-    L.check("its ground starts at the sheet's left edge (±1)", Math.abs(r.band[0] - r.sheet[0]) <= 1, `${r.band[0]} vs ${r.sheet[0]}`);
-    L.check("…and ends at its right edge (±1)", Math.abs(r.band[1] - r.sheet[1]) <= 1, `${r.band[1]} vs ${r.sheet[1]}`);
-    L.check("the tabs are still 72px in (±1)", Math.abs(r.tabL - 72) <= 1, r.tabL.toFixed(1));
-    L.done(4);
-  });
-}
+/* PK26-T — RETIRED with v38 (27 Oct); see tests/e2e/RETIRED-submission-packages-v38.md */
 
 /* ── PK26-M · Your materials: one-line names, "In use" unbroken, never the type as a summary ── */
 test("PK26-M material rows: one-line names, no type for a summary", async ({ page }) => {
@@ -333,7 +255,7 @@ test("PK26-H the package note is one line, or + Add a note", async ({ page }) =>
   test.setTimeout(180_000);
   const L = new Ledger("PK26-H");
   await open(page, SIZES[1]);
-  await vis(page, '.p6-pkb[title="Sent one"]').click(); await page.waitForTimeout(400);
+  await vis(page, '[data-pk38="labels"] .p8-pkl-b[title="Sent one"]').click(); await page.waitForTimeout(400);
   const withNote = await page.evaluate(() => {
     const h = [...document.querySelectorAll('[data-pk26="open"] .p6-po-tt')].find((e) => (e as HTMLElement).offsetParent) as HTMLElement;
     const sm = h.querySelector("small") as HTMLElement;
@@ -343,7 +265,7 @@ test("PK26-H the package note is one line, or + Add a note", async ({ page }) =>
   L.check("the note is one line at 1280", withNote.h > 0 && withNote.h <= withNote.fs * 1.6, JSON.stringify(withNote));
   L.check("…cut short (it is longer than the room)", withNote.cut, JSON.stringify(withNote));
   L.check("the name and its pencil keep one line", withNote.h3h <= withNote.h3fs * 1.6, JSON.stringify(withNote));
-  await vis(page, '.p6-pkb[title="Drag target"]').click(); await page.waitForTimeout(400);
+  await vis(page, '[data-pk38="labels"] .p8-pkl-b[title="Drag target"]').click(); await page.waitForTimeout(400);
   const add = vis(page, '[data-pk26="open"] .p6-po-addnote');
   L.check("no note: + Add a note", (await add.count()) === 1 && (await add.textContent()) === "+ Add a note", String(await add.count()));
   if (await add.count()) {
@@ -355,24 +277,5 @@ test("PK26-H the package note is one line, or + Add a note", async ({ page }) =>
   L.done(5);
 });
 
-/* ── PK26-RT · Results follows the builder's set: a retired package is listed last, "Retired", never ranked ── */
-test("PK26-RT Results: a retired package is listed last, Retired, and never ranked", async ({ page }) => {
-  test.setTimeout(180_000);
-  const L = new Ledger("PK26-RT");
-  await open(page, SIZES[0]);
-  const r = await page.evaluate(() => {
-    const pg = [...document.querySelectorAll('[data-pk26="page"]')].find((e) => (e as HTMLElement).offsetParent) as HTMLElement;
-    const builder = [...pg.querySelectorAll(".p6-pkb:not(.p6-new)")].map((b) => b.getAttribute("title"));
-    const root = pg.querySelector('[data-pk26="results"]') as HTMLElement;
-    const rows = [...root.querySelectorAll(".p6-rs-r")].map((b) => ({ name: b.querySelector(".p6-rs-n b")?.textContent ?? "", label: b.querySelector(".p6-rs-bar em")?.textContent ?? "", on: b.classList.contains("p6-on") }));
-    return { builder, rows, lead: root.querySelector(".p6-rs-lead")?.textContent ?? "" };
-  });
-  const names = r.rows.map((x) => x.name);
-  L.check("the builder does not show the retired package", !r.builder.includes("Retired one"), JSON.stringify(r.builder));
-  L.check("Results lists it", names.includes("Retired one"), JSON.stringify(names));
-  L.check("…last", names[names.length - 1] === "Retired one", JSON.stringify(names));
-  L.check("…reading Retired", r.rows.find((x) => x.name === "Retired one")?.label === "Retired", JSON.stringify(r.rows));
-  L.check("…not the one shown in detail, nor named in the lead", !r.rows.find((x) => x.name === "Retired one")?.on && !/^Retired one/.test(r.lead), JSON.stringify(r));
-  L.check("every other row is a builder package", names.filter((n) => n !== "Retired one").every((n) => r.builder.includes(n)), JSON.stringify({ names, builder: r.builder }));
-  L.done(6);
-});
+/* PK26-RT — RETIRED with v38 (27 Oct); see tests/e2e/RETIRED-submission-packages-v38.md */
+

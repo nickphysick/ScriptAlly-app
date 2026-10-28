@@ -44,7 +44,7 @@ export const Pk26Header: React.FC<{ count: number | null; title: string | null; 
         {/* v40 (B): no eyebrow; Pro is a soft pill beside the title */}
         <h1 className="p6-id-hdT" id="p6-hdT" data-page-title>Bundle it. Send it. Know what went.<span className="p6-hb-tag p6-pro2">Pro</span></h1>
         <p className="p6-hd-l">
-          {count == null ? "Your packages" : `${count} package${count === 1 ? "" : "s"}`}{title ? <> for <b>{title}</b></> : null}. Attach one when you log a query, and every agent’s record shows exactly what went.
+          {count == null ? "Your packages" : `${count} package${count === 1 ? "" : "s"}`}{title ? <> for <b>{title}</b></> : null}. Pick one to change it below, or open its figures.
         </p>
         <div className="p6-hd-bt">
           <button type="button" className="p6-hd-p" onClick={onNew}>+ New package</button>

@@ -13,18 +13,6 @@
  },
  {
   "lock": "PK26-W-1280",
-  "where": "tabs left",
-  "ok": true,
-  "detail": "72.0 (want 72)"
- },
- {
-  "lock": "PK26-W-1280",
-  "where": "tabs right",
-  "ok": true,
-  "detail": "72.0 (want 72)"
- },
- {
-  "lock": "PK26-W-1280",
   "where": "build left",
   "ok": true,
   "detail": "48.0 (want 48)"
@@ -32,18 +20,6 @@
  {
   "lock": "PK26-W-1280",
   "where": "build right",
-  "ok": true,
-  "detail": "48.0 (want 48)"
- },
- {
-  "lock": "PK26-W-1280",
-  "where": "results left",
-  "ok": true,
-  "detail": "48.0 (want 48)"
- },
- {
-  "lock": "PK26-W-1280",
-  "where": "results right",
   "ok": true,
   "detail": "48.0 (want 48)"
  }
