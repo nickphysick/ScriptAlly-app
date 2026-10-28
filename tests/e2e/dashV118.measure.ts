@@ -282,3 +282,68 @@ test("DB118-D1 · 'Your move' in burgundy, and the step chips", async ({ page })
   L.check("D1", "population: a past segment on a 'Your move' card", withPast > 0, String(withPast));
   L.done(10);
 });
+
+test("DB118-E1 · the Closed stack's names, dates and weeks", async ({ page }) => {
+  const L = new Ledger("E1");
+  await openDash(page, { width: 1440, height: 900 });
+  const rows = await hoopRows(page, "closed-hoop");
+  const future: string[] = [];
+  let cards = 0;
+  for (const r of rows.filter((x) => x.n > 0)) {
+    const p = await page.evaluate((k) => { const e = document.querySelector<HTMLElement>(`[data-d60="closed-hoop"] [data-d116="key-row"][data-key="${k}"]`)!.getBoundingClientRect(); return { x: e.left + 12, y: e.top + e.height / 2 }; }, r.key);
+    await page.mouse.move(2, 2); await page.waitForTimeout(150);
+    await page.mouse.move(p.x, p.y, { steps: 3 }); await page.waitForTimeout(500);
+    const got = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-d116="stack"].is-on [data-d116="query-card"]')].map((c) => ({
+      id: c.dataset.id ?? "", future: c.dataset.future === "1",
+      queried: c.querySelector('[data-d116="queried"]')?.textContent ?? "", end: c.querySelector('[data-d116="end"]')?.textContent ?? "",
+      label: c.querySelector('[data-d116="name"]')?.getAttribute("aria-label") ?? "",
+    })));
+    for (const c of got) {
+      cards++;
+      if (c.future) future.push(c.id);
+      L.check("E1", `${r.key} ${c.id}: a future sent date reads "Queried —"`, !c.future || c.queried === "Queried —", JSON.stringify(c));
+      L.check("E1", `${r.key} ${c.id}: never "0 wks"`, !/^0 wk/i.test(c.end), c.end);
+      L.check("E1", `${r.key} ${c.id}: the full name is the accessible label`, c.label.length > 0, c.label);
+    }
+  }
+  L.check("E1", "population: cards read", cards >= 3, String(cards));
+  console.log("FUTURE", JSON.stringify(future));
+  /* a long name, seeded into a shown card: at least 14 characters show, and the pill folds to its icon */
+  const busyKey = [...rows].sort((a, b) => b.n - a.n)[0]?.key ?? "";
+  const p0 = await page.evaluate((k) => { const e = document.querySelector<HTMLElement>(`[data-d60="closed-hoop"] [data-d116="key-row"][data-key="${k}"]`)!.getBoundingClientRect(); return { x: e.left + 12, y: e.top + e.height / 2 }; }, busyKey);
+  await page.mouse.move(2, 2); await page.waitForTimeout(150);
+  await page.mouse.move(p0.x, p0.y, { steps: 3 }); await page.waitForTimeout(500);
+  if (MUT === "E1-narrow") await page.addStyleTag({ content: `.d116-qm .d116-nm b { max-width: 104px !important; } .d116-qm .d116-nm { min-width: 0 !important; } .d116-qm .d116-pillt { display: inline !important; }` });
+  const long = await page.evaluate(() => {
+    const b = document.querySelector<HTMLElement>('[data-d116="stack"].is-on [data-d116="query-card"] [data-d116="name"]');
+    if (!b) return null;
+    /* the account's own long-ish name ("Fenella Strand", cut to "Fenella Str…" in the report), then a longer one */
+    b.textContent = "Fenella Strathcarron-Whitby";
+    const box = b.getBoundingClientRect();
+    const t = b.firstChild as Text;
+    /* the characters a reader SEES: when the name overflows, the ellipsis takes the end of the box */
+    const probe = document.createElement("span"); probe.textContent = "…"; probe.style.font = getComputedStyle(b).font; probe.style.position = "absolute"; document.body.appendChild(probe);
+    const ell = b.scrollWidth > b.clientWidth + 0.5 ? probe.getBoundingClientRect().width : 0; probe.remove();
+    const count = () => {
+      const bx = b.getBoundingClientRect();
+      const pr = document.createElement("span"); pr.textContent = "…"; pr.style.font = getComputedStyle(b).font; pr.style.position = "absolute"; document.body.appendChild(pr);
+      const e = b.scrollWidth > b.clientWidth + 0.5 ? pr.getBoundingClientRect().width : 0; pr.remove();
+      let n = 0;
+      for (let i = 1; i <= t.length; i++) { const r = document.createRange(); r.setStart(t, 0); r.setEnd(t, i); if (r.getBoundingClientRect().right <= bx.right - e + 0.5) n = i; else break; }
+      return n;
+    };
+    void box; void ell;
+    const fitWeb = count();
+    /* and in a wider fallback face, as a reader sees it before the webfont arrives (the reported "Fenella Str…") */
+    b.style.setProperty("font-family", "Georgia, serif", "important");
+    const fitFallback = count();
+    const fit = Math.min(fitWeb, fitFallback);
+    const pillT = b.closest('[data-d116="query-card"]')!.querySelector<HTMLElement>(".d116-pillt");
+    const cardW = b.closest<HTMLElement>(".d116-qm")!.getBoundingClientRect().width;
+    return { fit, fitWeb, fitFallback, cardW, pillWords: pillT ? getComputedStyle(pillT).display !== "none" : false, ellipsis: getComputedStyle(b).textOverflow };
+  });
+  L.check("E1", "a seeded long name shows at least 14 characters", !!long && long.fit >= 14, JSON.stringify(long));
+  L.check("E1", "below 230px of card the pill is its icon alone", !!long && (long.cardW >= 230 || !long.pillWords), JSON.stringify(long));
+  L.check("E1", "past that, an ellipsis", long?.ellipsis === "ellipsis", JSON.stringify(long));
+  L.done(8);
+});

@@ -19,11 +19,12 @@ const ClosedGlyph = () => (
 );
 
 export const QueryMini: React.FC<{ c: ClosedCard; manuscript: string }> = ({ c, manuscript }) => (
-  <div className="d116-qm" data-d116="query-card" data-outcome={c.outcome} data-id={c.id}>
+  <div className="d116-qm" data-d116="query-card" data-outcome={c.outcome} data-id={c.id} data-future={c.futureSent ? "1" : undefined}>
     <div className="d116-qmw">
       <Bust />
-      <div className="d116-nm"><b data-d116="name">{c.name}</b><small data-d116="agency">{c.agency}</small></div>
-      <span className="d116-pill" data-d116="pill"><ClosedGlyph />{c.outcome === "quiet" ? "No reply" : "Passed"}</span>
+      {/* v118.1 Part E — the name takes the row; the full name is its accessible label wherever it is cut */}
+      <div className="d116-nm"><b data-d116="name" title={c.name} aria-label={c.name}>{c.name}</b><small data-d116="agency">{c.agency}</small></div>
+      <span className="d116-pill" data-d116="pill" aria-label={c.outcome === "quiet" ? "No reply" : "Passed"}><ClosedGlyph /><span className="d116-pillt">{c.outcome === "quiet" ? "No reply" : "Passed"}</span></span>
     </div>
     <div className="d116-qmm"><small>QUERYING</small><b data-d116="ms">{manuscript}</b></div>
     <div className="d116-qmf"><span data-d116="queried">Queried {c.queried}</span><span data-d116="end">{c.end}</span></div>

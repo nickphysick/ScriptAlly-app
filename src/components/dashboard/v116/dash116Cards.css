@@ -57,3 +57,16 @@
 .d60-hl li[data-d116]:focus-visible { box-shadow: 0 0 0 2px rgba(42, 58, 82, 0.35); }
 .d116-live { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
+
+/* ── v118.1 Part E — the name takes the row ─────────────────────────────────────────────────────────────────────────
+   The name used to stop at 104px, which cut "Fenella Str…" with room to spare. It now takes whatever the row leaves
+   and never fewer than 14 characters; below 230px of card the status pill folds to its icon (its words stay as the
+   pill's accessible label) so the name keeps the room. The card is a size container for exactly that rule. */
+.d116-qm { container-type: inline-size; }
+.d116-qm .d116-nm { flex: 1 1 auto; min-width: 14ch; }
+.d116-qm .d116-nm b { max-width: none; }
+.d116-qm .d116-nm small { max-width: none; }
+@container (max-width: 229.98px) {
+  .d116-qm .d116-pillt { display: none; }
+  .d116-qm .d116-pill { padding: 3px; }
+}

@@ -114,12 +114,23 @@ export function fitStack(box: { left: number; top: number; w: number; h: number 
 
 /* ── the closed cards ─────────────────────────────────────────────────────────────────────────── */
 
-export interface ClosedCard { id: string; name: string; agency: string; outcome: "quiet" | "passed"; queried: string; end: string }
+export interface ClosedCard {
+  id: string; name: string; agency: string; outcome: "quiet" | "passed"; queried: string; end: string;
+  /** v118.1 — the stored sent date is after today: shown as "—", and reported */
+  futureSent: boolean;
+}
 
 const day = (ms: number) => dayMonth(ms);
 const WEEK_MS = 7 * 86400000;
 
-export function closedCards(tile: Pick<ClosedTile, "members">, key: ClosedBucketKey, queries: readonly Query[], agents: readonly Agent[]): ClosedCard[] {
+/**
+ * v118.1 Part E — what one card in the Closed stack says.
+ *  - Queried: the query's own sent date. One in the FUTURE, or none, reads "—": nothing is invented, and `futureSent`
+ *    marks the record so it can be reported and corrected at source.
+ *  - No reply: whole weeks from the send to the close (to today where nothing dates the close), at least one where there
+ *    was any time at all — "0 wks" read as no time, which is false. No usable send: "No reply", no number.
+ */
+export function closedCards(tile: Pick<ClosedTile, "members">, key: ClosedBucketKey, queries: readonly Query[], agents: readonly Agent[], nowMs: number = Date.now()): ClosedCard[] {
   const byId = new Map(queries.map((q) => [q.id, q]));
   const ag = new Map(agents.map((a) => [a.id, a]));
   const out: ClosedCard[] = [];
@@ -127,8 +138,15 @@ export function closedCards(tile: Pick<ClosedTile, "members">, key: ClosedBucket
     const q = byId.get(id);
     if (!q) continue;
     const a = ag.get(q.agentId) ?? null;
-    const s = sentAt(q), c = closedAt(q);
+    const s0 = sentAt(q), c = closedAt(q);
+    const futureSent = s0 !== null && s0 > nowMs;
+    const s = futureSent ? null : s0;
     const quiet = key === "quiet";
+    /* `closedAt` falls back to the send when nothing dates the close; a close that is not after the send is unknown here,
+       so the weeks run to today (the counting function itself is left as it is) */
+    const end = c !== null && s !== null && c > s ? c : nowMs;
+    const span = s !== null ? end - s : 0;
+    const wks = span > 0 ? Math.max(1, Math.floor(span / WEEK_MS)) : 0;
     out.push({
       id,
       name: agentPrimary(a),
@@ -136,8 +154,9 @@ export function closedCards(tile: Pick<ClosedTile, "members">, key: ClosedBucket
       outcome: quiet ? "quiet" : "passed",
       queried: s !== null ? day(s) : "—",
       end: quiet
-        ? (s !== null && c !== null ? `${Math.max(0, Math.floor((c - s) / WEEK_MS))} wks` : "No reply")
+        ? (wks > 0 ? `${wks} ${wks === 1 ? "wk" : "wks"}` : "No reply")
         : (c !== null ? `Passed ${day(c)}` : "Passed"),
+      futureSent,
     });
   }
   return out;
