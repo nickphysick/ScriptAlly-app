@@ -41,6 +41,7 @@ import "./contactV252.css";
 import "./contactV253.css";
 import "./contactV254.css";
 import "./contactV255.css";
+import "./contactV256.css";
 import { profileLink, queryLine } from "../../../lib/contactRow254";
 import { hasMissingDetails } from "../../../lib/contactList";
 
@@ -147,6 +148,9 @@ export const ContactSheet24: React.FC<ContactSheet24Props> = (p) => {
 
   return (
     <div className="cl24-sheet" data-cl24="sheet" data-view={p.view} ref={sheetRef}>
+      {/* v25.6 A — the bar pins 12px below the sheet's top: a page-coloured strip holds the gap and fills behind the bar's
+          rounded corners, so scrolled rows never show above it. At rest the strip sits under the sheet's own clip. */}
+      <div className="cl256-pin" data-cl256="pin">
       <div className="cl24-bar" data-cl24="bar" ref={barRef}>
         <label className="qc150-bfind" data-cl24="find" data-cl25="find" data-nb1="find">
           <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4.5 4.5" /></svg>
@@ -166,6 +170,7 @@ export const ContactSheet24: React.FC<ContactSheet24Props> = (p) => {
         <button type="button" className="cl24-fs" data-cl24="full" data-nb1="full" data-pin-list="" aria-pressed={p.full} aria-keyshortcuts="F" aria-label="Full screen" onClick={p.onFull}>
           {FULL_ICON}<span className="cl24-fslb">Full screen</span>
         </button>
+      </div>
       </div>
 
       {p.pool.length === 0 ? (

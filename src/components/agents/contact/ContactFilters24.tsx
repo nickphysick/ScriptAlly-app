@@ -30,6 +30,8 @@ export const FilterMenu: React.FC<{
   /** v25.4 D — how many agents have any Housekeeping gap (the "Missing details" toggle; absent: no toggle) */
   missingN?: number;
 }> = ({ anchor, filters: f, onFilters, genres, openN, showing, total, onExport, missingN }) => {
+  /* v25.6 — capped to the window, as ListPills' panels are: At a glance's foot lines lowered the bar 29px and the panel's
+     last option ran under the window's bottom edge. It scrolls inside itself instead (its overflow is already auto). */
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
   useLayoutEffect(() => {
     const r = anchor.getBoundingClientRect();
@@ -38,7 +40,7 @@ export const FilterMenu: React.FC<{
   const any = f.genres.length > 0 || f.open === "open" || !!f.missing;
   const toggleGenre = (k: string) => onFilters({ ...f, genres: f.genres.includes(k) ? f.genres.filter((g) => g !== k) : [...f.genres, k], genreMode: "any" });
   return createPortal(
-    <div className="lpop nb1-pop" data-lpop="filters" data-nb1="filter-menu" role="dialog" aria-label="Filter agents" style={{ top: pos?.top ?? -9999, left: pos?.left ?? -9999 }}>
+    <div className="lpop nb1-pop" data-lpop="filters" data-nb1="filter-menu" role="dialog" aria-label="Filter agents" style={{ top: pos?.top ?? -9999, left: pos?.left ?? -9999, maxHeight: pos ? `calc(100vh - ${Math.round(pos.top) + 16}px)` : undefined }}>
       <h6>Genres</h6>
       <div className="nb1-gch">
         {genres.map((g) => (

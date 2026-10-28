@@ -22,14 +22,17 @@
   border-radius: 8px; background: transparent; color: #1c130f; text-align: left; cursor: pointer;
 }
 .sc-pop .sc-opt:hover, .sc-pop .sc-opt:focus-visible { background: #f6f3ee; outline: none; }
-.sc-pop .sc-opt b { font: 400 16px/22px var(--sp-serif) !important; color: #1c130f; }
-.sc-pop .sc-opt[aria-checked="true"] b { font-weight: 600 !important; }
+/* Contact list v25.6 D — every word in the menu is the typewriter, upright (Query Centre v150.1's bar rule); the
+   heading stays mono caps. The menu is shared, so the Query Centre's sort menu changes with it. One weight: the tick
+   marks the chosen field. */
+.sc-pop .sc-opt b { font: 400 15px/22px var(--sp-type) !important; font-style: normal; color: #1c130f; }
+.sc-pop .sc-opt[aria-checked="true"] b { font-weight: 400 !important; }
 .sc-pop .sc-tick { flex: none; display: inline-grid; place-items: center; width: 14px; height: 14px; color: #2a3a52; }
 .sc-pop .sc-seg { display: flex; gap: 2px; margin: 10px 0 0; padding: 3px; border-radius: 10px; background: #f4f0e9; }
 .sc-pop .sc-seg button {
   flex: 1 1 0; box-sizing: border-box; height: 34px; margin: 0; padding: 0 10px; border: 0; border-radius: 7px; background: transparent;
-  color: rgba(28, 19, 15, 0.7); cursor: pointer; white-space: nowrap; font: 400 15px/1 var(--sp-serif) !important;
+  color: rgba(28, 19, 15, 0.7); cursor: pointer; white-space: nowrap; font: 400 14.5px/1 var(--sp-type) !important; font-style: normal;
 }
 .sc-pop .sc-seg button[aria-checked="true"] { background: #2a3a52; color: #f4eee5; }
 .sc-pop .sc-seg button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
-.sc-pop .sc-note { margin: 10px 8px 0; font: italic 400 13.5px/1.4 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.6); }
+.sc-pop .sc-note { margin: 10px 8px 0; font: 400 13.5px/1.4 var(--sp-type) !important; font-style: normal; color: rgba(28, 19, 15, 0.6); }

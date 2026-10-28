@@ -20,7 +20,9 @@ import React, { useLayoutEffect, useRef, useState } from "react";
 import { HealthRing } from "./ContactLightHeader";
 import { gapsWord, type GlanceCardModel, type GlanceKey } from "../../../lib/contactV25";
 import type { SetKey } from "../../../lib/contactV24";
+import type { GlanceFoot } from "../../../lib/contactV256";
 import "./contactV251.css";
+import "./contactV256.css";
 
 const SWATCH: Record<GlanceKey, string> = { health: "you", none: "none", querying: "agent", closed: "closed" };
 const agentsN = (n: number) => `${n} ${n === 1 ? "agent" : "agents"}`;
@@ -34,7 +36,9 @@ export const ContactGlance251: React.FC<{
   ready: boolean;
   /** an agent's set, for the colours of their face */
   standOf: (agentId: string) => SetKey | null;
-}> = ({ cards, pressed, onCard, ready, standOf }) => {
+  /** v25.6 B — the foot line under each cell (lib/contactV256 `glanceFeet`); a cell whose foot is null has none */
+  feet?: Partial<Record<GlanceKey, GlanceFoot | null>>;
+}> = ({ cards, pressed, onCard, ready, standOf, feet }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [room, setRoom] = useState<Record<string, number>>({});
   useLayoutEffect(() => {
@@ -72,7 +76,7 @@ export const ContactGlance251: React.FC<{
           const faces = c.faces.slice(0, Math.min(c.faces.length, fit));
           const more = c.total - faces.length;
           return (
-            <button key={c.key} type="button" className={`cl251-cell cl251-cell--${c.key}`} data-cl251="cell" data-k={c.key} data-on={on ? "" : undefined}
+            <button key={c.key} type="button" className={`cl251-cell cl251-cell--${c.key}${health ? " cl256-navy" : ""}`} data-cl251="cell" data-k={c.key} data-on={on ? "" : undefined}
               aria-pressed={health ? undefined : on} disabled={!ready}
               aria-label={health
                 ? `List health: ${c.count}%. ${c.gaps ? `${gapsWord(c.gaps)} to fill. ` : ""}Open Housekeeping`
@@ -81,12 +85,11 @@ export const ContactGlance251: React.FC<{
               <span className="cl251-r1" data-cl251="label-row">
                 <i className={`qc149-sw cl24-sw--${SWATCH[c.key]} cl251-sw`} aria-hidden="true" />
                 <b data-cl251="label">{c.label}</b>
-                {health && ready && c.gaps ? <em className="cl251-gaps" data-cl251="gaps" data-n={c.gaps}>{gapsWord(c.gaps)} →</em> : null}
               </span>
               <span className="cl251-r2" data-cl251="row2">
                 <span className="cl251-n" data-cl251="count">{ready ? (health ? `${c.count}%` : c.count) : ""}</span>
                 {health ? (
-                  <span className="cl251-ring" data-cl251="ring" aria-hidden="true"><HealthRing pct={ready ? c.count : null} /></span>
+                  <span className="cl251-ring" data-cl251="ring" aria-hidden="true"><HealthRing pct={ready ? c.count : null} on="navy" /></span>
                 ) : (
                   <span className="cl251-faces" data-cl251="faces" data-n={faces.length} data-more={more}>
                     {faces.map((f) => (
@@ -96,6 +99,12 @@ export const ContactGlance251: React.FC<{
                   </span>
                 )}
               </span>
+              {/* v25.6 B — the foot line: italic serif with its number in the typewriter; List health's in the light rust */}
+              {ready && feet?.[c.key] ? (
+                <span className={`cl256-ft${health ? " go" : ""}`} data-cl256="foot" data-k={c.key} data-n={feet[c.key]!.n}>
+                  <b>{feet[c.key]!.n}</b> {feet[c.key]!.words}{health ? " →" : ""}
+                </span>
+              ) : null}
             </button>
           );
         })}

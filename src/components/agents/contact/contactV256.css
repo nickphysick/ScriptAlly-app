@@ -1,0 +1,65 @@
+/* ══ Contact list v25.6 (design-refs/contact-list-v25-6/) ══════════════════════════════════════════════════════════
+   Desktop only, like v24 onwards: the phone keeps its page. The ≤1440 steps follow the WINDOW. */
+
+/* ══ Part A · the list's bar pins 12px below the sheet's top ══════════════════════════════════════════════════════
+   ⚠️ THE GAP IS A STICKY STRIP IN THE PAGE COLOUR, NOT A `top: 12px` ON THE BAR. The bar's corners are rounded, so a
+      bar stuck at 12 would show rows passing behind its corners; the strip fills behind them. At rest the strip's 12px
+      sit above the sheet (margin -12, padding 12: nothing moves) and the sheet's own rounded clip hides them.
+   ⚠️ THE STRIP RUNS 14px PAST THE SHEET ON EACH SIDE (its ::before), so the sheet's hairline and shadow do not show
+      beside the gap. That needs `overflow-clip-margin` on the sheet, whose `overflow: clip` would otherwise cut it. */
+@media (min-width: 768px) {
+  .clv-group[data-v24] .cl24-sheet { overflow-clip-margin: 14px; }
+  .cl24-sheet > .cl256-pin {
+    position: sticky; top: 0; z-index: 6; box-sizing: border-box; margin-top: -12px; padding-top: 12px;
+    background: var(--ws-page);
+  }
+  .cl24-sheet > .cl256-pin::before {
+    content: ""; position: absolute; left: -14px; right: -14px; top: 0; height: 12px; background: var(--ws-page); pointer-events: none;
+  }
+  .cl24-sheet > .cl256-pin > .cl24-bar { position: relative; top: auto; z-index: 1; }
+  /* what pins under it: the headings at bar + 12, the group header under them (List); the group heads (Cards) */
+  .cl24-sheet .cl24-th { top: 64px; }
+  .cl24-sheet .cl24-gh { top: 110px; }
+  .cl24-sheet .cl24-rh { top: 64px; }
+}
+
+/* ══ Part B · At a glance: four equal cells, each with a foot line; List health in navy ═══════════════════════════
+   The cells stay v25.1's four equal columns (contactV251.css). Rows: the label, the count, then a foot line. */
+@media (min-width: 768px) {
+  .cl251-cell .cl256-ft {
+    display: block; min-width: 0; margin-top: -4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    font: italic 400 14px/1.3 var(--sp-serif) !important; color: #5b4f47;
+  }
+  .cl251-cell .cl256-ft b { font: 400 15px/1 var(--sp-type) !important; font-style: normal; color: #1c130f; }
+  .cl251-cell .cl256-ft.go, .cl251-cell .cl256-ft.go b { font: 400 14.5px/1.3 var(--sp-type) !important; font-style: normal; color: #e0a188; }
+
+  /* List health: navy, its label and count in cream, the swatch in the light rust; it never shows as pressed */
+  .cl251-cell.cl256-navy, .cl251-cell.cl256-navy:hover:not(:disabled):not([data-on]) { background: #2a3a52; }
+  .cl251-cell.cl256-navy:hover:not(:disabled) { background: #24334a; }
+  .cl251-cell.cl256-navy .cl251-r1 b, .cl251-cell.cl256-navy .cl251-n { color: #f4eee5; }
+  .cl251-cell.cl256-navy .cl251-sw.cl251-sw { background: #e0a188; }
+  .cl251-cell.cl256-navy:focus-visible { outline-color: #f4eee5; }
+  .cl251-cell.cl256-navy + .cl251-cell { box-shadow: none; }
+}
+@media (min-width: 768px) and (max-width: 1100px) { .cl251-cell .cl256-ft { font-size: 13px !important; } }
+
+/* ══ Part C · no ring in the navy bar ═══════════════════════════════════════════════════════════════════════════
+   List health lives in At a glance and Housekeeping only; the bar starts with its search well, as before v25.6. */
+
+/* ══ Part D · typewriter menus ═══════════════════════════════════════════════════════════════════════════════════
+   The Filters panel and the group menu, in the list and in full screen: every word in the typewriter, upright, as the
+   bar is (Query Centre v150.1). Section headings stay mono caps. Options 15, counts 13.5, buttons 14.5. The sort menu
+   is the shared SortChipMenu (shell/sortChip.css). */
+.lpop.nb1-pop [data-nb1="genre"], .lpop.nb1-pop .nb1-ck {
+  font: 400 15px/1.2 var(--sp-type) !important; font-style: normal !important;
+}
+.lpop.nb1-pop [data-nb1="genre"] i, .lpop.nb1-pop .nb1-ck em, .lpop.nb1-pop [data-nb1="filter-count"] {
+  font: 400 13.5px/1 var(--sp-type) !important; font-style: normal !important; letter-spacing: 0; text-transform: none;
+}
+.lpop.nb1-pop .nb1-mf button { font: 400 14.5px/1 var(--sp-type) !important; font-style: normal !important; }
+.lpop.cl24-gpop h6 {
+  font: 500 10.5px/1.2 var(--sp-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(28, 19, 15, 0.55);
+}
+.lpop.cl24-gpop .cl24-gopt b { font: 400 15px/1.2 var(--sp-type) !important; font-style: normal; }
+.lpop.cl24-gpop .cl24-gopt small { font: 400 13.5px/1.3 var(--sp-type) !important; font-style: normal; }

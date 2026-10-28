@@ -50,6 +50,7 @@ import { ContactListTitle25 } from "./contact/ContactListTitle25";
 import { ContactLogFlow } from "./contact/ContactLogFlow";
 import { hostContactLog, type ContactLogSeed } from "../../lib/contactLogStore";
 import { GLANCE_ORDER, GLANCE_SETS, glanceCards, type GlanceKey as GlanceCardKey } from "../../lib/contactV25";
+import { glanceFeet } from "../../lib/contactV256";
 import { ContactSheet24, SheetSkeleton } from "./contact/ContactSheet24";
 import { AgentCard24, AgentCardWide24, type AgentCard24Props } from "./contact/AgentCard24";
 import { ContactAddressBook24 } from "./contact/ContactAddressBook24";
@@ -607,7 +608,14 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const openHk = useCallback(() => setHkOpen(true), []);
   /* v18.1 §B.4 — the agent panel's "Fill in": a run over that agent's tasks only */
   const [hkRun, setHkRun] = useState<{ id: string; seq: number } | null>(null);
-  const health = useMemo(() => listHealth(agents, hk), [agents, hk]);
+  /* v25.6 E — a DEV-ONLY review aid: `window.__SA_CL_HEALTH = 44` shows every List health ring at that score, so the
+     CL256 H4 lock can see all three tones on one account. The MODE test is at the call site, so a production build
+     folds it to nothing and carries no trace of it. */
+  const healthStub: number | null = import.meta.env.MODE !== "production" && typeof window !== "undefined"
+    && typeof (window as unknown as { __SA_CL_HEALTH?: unknown }).__SA_CL_HEALTH === "number"
+    ? (window as unknown as { __SA_CL_HEALTH: number }).__SA_CL_HEALTH : null;
+  const health0 = useMemo(() => listHealth(agents, hk), [agents, hk]);
+  const health = useMemo(() => (healthStub === null ? health0 : { ...health0, pct: healthStub }), [health0, healthStub]);
   /* v24 A2 — the banner's figures: Housekeeping's gap count, the agents they belong to, and four faces */
   const banner = useMemo(() => bannerFigures(hk), [hk]);
   /* v25 B — At a glance: List health (Housekeeping's percentage and gap total), then the three sets' cards */
@@ -615,12 +623,15 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const standById = useMemo(() => new Map(factsAll.map((x) => [x.agent.id, x.stand] as const)), [factsAll]);
   const standOf = useCallback((id: string) => standById.get(id) ?? null, [standById]);
   const glanceModel = useMemo(() => glanceCards(factsAll, pageState === "list" ? health : null, banner.gaps), [factsAll, pageState, health, banner.gaps]);
+  /* v25.6 B — the cells' foot lines, from the same facts and Housekeeping's gap total */
+  const glanceFoot = useMemo(() => glanceFeet(factsAll, book, (raw) => genreLabel(raw, currentUser?.personalGenres ?? []), banner.gaps), [factsAll, book, currentUser?.personalGenres, banner.gaps]);
   const glancePressed = useMemo<GlanceCardKey | null>(
     () => (sets ? GLANCE_ORDER.find((k) => { const g = GLANCE_SETS[k]; return !!g && g.length === sets.length && g.every((x) => sets.includes(x)); }) ?? null : null),
     [sets],
   );
   /* v18 §F.1 — the drawer's figures: the same score, with its held and possible points */
-  const listH = useMemo(() => healthOf(agents, hk), [agents, hk]);
+  const listH0 = useMemo(() => healthOf(agents, hk), [agents, hk]);
+  const listH = useMemo(() => (healthStub === null ? listH0 : { ...listH0, pct: healthStub }), [listH0, healthStub]);
   /* v18 §F.3 — the intro's flag, in Housekeeping's own store (beside v17.1's tab dismissal) */
   const hkIntroSeen = introSeenOf(currentUser);
   const markIntroSeen = useCallback(() => { if (!hkIntroSeen) void updateUserPaths(INTRO_PATH_V18); }, [hkIntroSeen, updateUserPaths]);
@@ -1050,7 +1061,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined}>
             {/* v25.1 A — At a glance as one ledger card (v25 B's four cards retired): List health opens Housekeeping; the
                 other three filter the list and Cards, a second press shows all */}
-            <ContactGlance251 cards={glanceModel} pressed={glancePressed} ready={pageState === "list"} standOf={standOf}
+            <ContactGlance251 cards={glanceModel} pressed={glancePressed} ready={pageState === "list"} standOf={standOf} feet={glanceFoot}
               onCard={(k) => { if (k === "health") { openHk(); return; } setSets(glancePressed === k ? null : GLANCE_SETS[k]); }} />
           </ContactHeader25>
         )}
