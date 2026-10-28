@@ -1,0 +1,261 @@
+/* ── THE PHONE DASHBOARD (Dashboard on the phone v1; ref design-refs/dashboard-mobile-v1/) ────────────────────────
+   Every rule here is phone-only in effect: the page that carries `.dm1` mounts only below 768px (`useIsMobile`),
+   and the rules that reach shell chrome (`.ws-mobilebar`, the FeedbackDock's `.fb-panel`) sit inside the phone
+   media query AND under the body class the page sets while it is mounted. At 768px and wider nothing here applies. */
+
+/* `.dm1-layer` is the host for what this page portals to <body> (the search sheet): outside `.dm1`, so it carries the
+   same tokens rather than reading ones that would resolve to nothing there. */
+.dm1, .dm1-layer {
+  --dm1-ink: #1c130f;
+  --dm1-navy: #2a3a52;
+  --dm1-pink: #f5e2da;
+  --dm1-pink-ring: #eecdc3;
+  /* the faces are READ from the shell's tokens, never named: one owner per family (marketingTokens locks it) */
+  --dm1-type: var(--sp-type);
+  --dm1-serif: var(--sp-serif);
+  --dm1-gutter: 16px;
+}
+.dm1 {
+  position: relative;
+  box-sizing: border-box;
+  min-height: 100%;
+  /* ⚠️ THE PAGE'S OWN WIDTH IS ITS CONTAINER'S. The shell's columns are flex items at `min-width: auto`, so an
+     unbreakable line in here (a long manuscript title) reached them as a min-content width and widened the whole app
+     past the screen — measured 930px at 390. Containment stops any child's intrinsic width leaving this box. */
+  contain: inline-size;
+  color: var(--dm1-ink);
+  font-family: var(--dm1-serif);
+}
+/* ⚠️ brand.tsx NAMES A FACE ON BARE `p, span, div, button, label` AT RUNTIME, injected last — so inheritance is handed
+   back here (0-1-1 against its 0-0-1), and every face this sheet names on a classed element is `!important`. */
+.dm1 :is(p, span, div, button, label, b, small, li, input, h2, h3, a, time, strong, em),
+.dm1-layer :is(p, span, div, button, label, b, small, li, input, h2, h3, a, time, strong, em) { font-family: inherit; }
+.dm1 *, .dm1 *::before, .dm1 *::after, .dm1-layer *, .dm1-layer *::before, .dm1-layer *::after { box-sizing: border-box; }
+.dm1-layer { color: var(--dm1-ink); font-family: var(--dm1-serif); }
+
+/* ── Part A · the top bar ─────────────────────────────────────────────────────────────────────── */
+.dm1-top {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: 8px;
+  height: calc(50px + env(safe-area-inset-top, 0px));
+  padding: env(safe-area-inset-top, 0px) 10px 0 var(--dm1-gutter);
+  background: var(--ws-page, rgb(242, 238, 232));
+  border-bottom: 1px solid transparent;
+}
+.dm1-top.is-scrolled { border-bottom-color: rgba(28, 19, 15, 0.1); }
+.dm1-mark { flex: none; width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
+/* the shell's own phone switcher, set as the bar's title: no tile, Special Elite 18, a ⌄, ellipsised */
+.dm1-ms { flex: 1 1 auto; min-width: 0; display: flex; }
+/* ⚠️ the shell states `.sv2-scopewrap { flex: none }`, so every link of this chain is told it may shrink — without it a long
+   title widens the bar and pushes Search and + off the screen (A1's long-title reading). */
+.dm1-ms .sv2-scopewrap { position: relative; display: flex; flex: 0 1 auto; min-width: 0; max-width: 100%; }
+.dm1-ms .sv2-scope {
+  display: flex; flex: 0 1 auto; align-items: center; gap: 4px; min-width: 0; max-width: 100%;
+  min-height: 40px; padding: 0 2px; border: 0; border-radius: 8px; background: none; box-shadow: none; color: var(--dm1-ink);
+}
+.dm1-ms .sv2-scopetile, .dm1-ms .sv2-scopechev { display: none; }
+.dm1-ms .sv2-scopet {
+  flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font: 400 18px/1.2 var(--dm1-type) !important; color: var(--dm1-ink); max-width: none;
+}
+.dm1-ms .sv2-scope::after {
+  content: ""; flex: none; width: 14px; height: 14px; margin-left: 2px;
+  background: rgba(28, 19, 15, 0.55);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.dm1-ms .sv2-mspop { left: 0; right: auto; top: calc(100% + 6px); z-index: 50; max-width: calc(100vw - 32px); }
+.dm1-tools { flex: none; display: flex; align-items: center; gap: 0; }
+.dm1-ic {
+  display: grid; place-items: center; width: 40px; height: 40px; padding: 0;
+  border: 0; border-radius: 50%; background: none; color: var(--dm1-ink); cursor: pointer;
+}
+.dm1-ic > svg { width: 21px; height: 21px; stroke-width: 1.8; }
+.dm1-ic:focus-visible, .dm1-mi:focus-visible, .dm1-scancel:focus-visible, .dm1-srow:focus-visible { outline: 2px solid var(--dm1-navy); outline-offset: 2px; }
+.dm1-pluswrap { position: relative; display: block; }
+.dm1-plusdisc {
+  display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%;
+  background: var(--dm1-pink); box-shadow: inset 0 0 0 1px var(--dm1-pink-ring); color: var(--dm1-ink);
+}
+.dm1-plusdisc > svg { width: 18px; height: 18px; stroke-width: 2; transition: transform .2s ease; }
+.dm1-plus.is-open .dm1-plusdisc > svg { transform: rotate(45deg); }
+.dm1-menu {
+  position: absolute; top: calc(100% + 6px); right: 0; z-index: 50; width: 230px; padding: 6px;
+  border-radius: 16px; background: #ffffff; box-shadow: 0 12px 34px rgba(28, 19, 15, 0.18), 0 0 0 1px rgba(28, 19, 15, 0.05);
+}
+.dm1-mi {
+  display: flex; align-items: center; gap: 12px; width: 100%; min-height: 50px; padding: 6px 10px;
+  border: 0; border-radius: 12px; background: none; color: var(--dm1-ink); text-align: left; cursor: pointer;
+  font: 400 15.5px/1.25 var(--dm1-serif) !important;
+}
+.dm1-mi:hover { background: rgba(28, 19, 15, 0.04); }
+.dm1-midisc { flex: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: #f1eee9; }
+.dm1-mi.is-first .dm1-midisc { background: var(--dm1-pink); }
+.dm1-midisc > svg { width: 16px; height: 16px; stroke-width: 1.8; }
+
+/* the full-screen search */
+.dm1-search {
+  position: fixed; inset: 0; z-index: 45; overflow: auto;
+  padding: calc(env(safe-area-inset-top, 0px) + 12px) var(--dm1-gutter) 120px;
+  background: var(--ws-page, rgb(242, 238, 232));
+}
+.dm1-shead { display: flex; align-items: center; gap: 10px; }
+.dm1-sfield {
+  flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; height: 42px; padding: 0 12px;
+  border-radius: 12px; background: #ffffff; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.08);
+}
+.dm1-sfield > svg { flex: none; width: 18px; height: 18px; color: rgba(28, 19, 15, 0.55); }
+.dm1-sfield input {
+  flex: 1; min-width: 0; border: 0; outline: 0; background: none; color: var(--dm1-ink);
+  font: 400 16px/1.3 var(--dm1-serif) !important;
+}
+.dm1-scancel { flex: none; min-height: 40px; padding: 0 4px; border: 0; background: none; color: var(--dm1-navy); font: 400 16px/1 var(--dm1-serif) !important; cursor: pointer; }
+.dm1-slabel { margin: 20px 2px 8px; font: 600 14px/1.2 var(--dm1-serif) !important; color: rgba(28, 19, 15, 0.5); }
+.dm1-srows { margin: 0; }
+.dm1-srow {
+  display: flex; align-items: center; gap: 12px; width: 100%; min-height: 60px; padding: 10px 14px;
+  border: 0; background: none; color: var(--dm1-ink); text-align: left; cursor: pointer;
+}
+.dm1-sav { flex: none; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: #e9e4dd; font: 600 12px/1 var(--dm1-serif) !important; }
+.dm1-stxt { min-width: 0; display: grid; gap: 1px; }
+.dm1-stxt b { font: 400 16px/1.3 var(--dm1-serif) !important; }
+.dm1-stxt small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 13.5px/1.3 var(--dm1-serif) !important; color: rgba(28, 19, 15, 0.58); }
+.dm1-snote { margin: 14px 2px 0; font: italic 400 13.5px/1.5 var(--dm1-serif) !important; color: rgba(28, 19, 15, 0.55); }
+
+/* a white grouped list with inset 1px dividers — search, Up next's rows and Recent all use it */
+.dm1-group { list-style: none; padding: 0; margin: 0; border-radius: 16px; background: #ffffff; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.06), 0 2px 8px rgba(28, 19, 15, 0.05); overflow: hidden; }
+.dm1-group > li { position: relative; }
+.dm1-group > li + li::before { content: ""; position: absolute; top: 0; left: 62px; right: 0; height: 1px; background: rgba(28, 19, 15, 0.08); }
+
+/* the scrim under the FeedbackDock's phone sheet */
+.dm1-scrim { display: none; position: fixed; inset: 0; z-index: 58; background: rgba(28, 19, 15, 0.32); }
+
+@media (max-width: 767.98px) {
+  /* Home's own bar replaces the shell's generic phone bar, on this route only */
+  .ws-app.dash-mode .ws-mobilebar { display: none; }
+  /* the shell's FeedbackDock, presented as this page's bottom sheet while the page is mounted */
+  body.dm1-on:has(.fb-panel) .dm1-scrim { display: block; }
+  body.dm1-on .fb-panel {
+    left: 0 !important; right: 0 !important; top: auto !important; bottom: 0 !important;
+    width: 100% !important; max-width: none !important; max-height: 88vh !important; overflow: auto;
+    border-radius: 20px 20px 0 0; z-index: 60;
+    padding-bottom: calc(7px + env(safe-area-inset-bottom, 0px));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dm1-plusdisc > svg { transition: none; }
+}
+
+/* ── Part B · the stat cards ──────────────────────────────────────────────────────────────────── */
+.dm1-body { display: flex; flex-direction: column; gap: 22px; padding: 6px var(--dm1-gutter) 120px; }
+.dm1-stats { display: flex; flex-direction: column; gap: 10px; }
+.dm1-card {
+  display: block; width: 100%; margin: 0; border: 0; text-align: left; cursor: pointer; color: var(--dm1-ink);
+  border-radius: 18px; background: #ffffff;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.06), 0 2px 10px rgba(28, 19, 15, 0.06);
+}
+.dm1-card:focus-visible { outline: 2px solid var(--dm1-navy); outline-offset: 2px; }
+.dm1-active { padding: 14px 14px 12px; }
+.dm1-ahead { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.dm1-attl { display: inline-flex; align-items: center; gap: 8px; font: 600 14px/1.2 var(--dm1-serif) !important; color: var(--dm1-navy); }
+.dm1-attl > svg { width: 16px; height: 16px; stroke-width: 2; }
+.dm1-aweeks { display: inline-flex; align-items: center; gap: 2px; font: 400 13px/1.2 var(--dm1-serif) !important; color: rgba(28, 19, 15, 0.45); }
+.dm1-aweeks > svg { width: 15px; height: 15px; }
+.dm1-arow { display: flex; align-items: center; gap: 10px; min-height: 52px; margin-top: 4px; }
+.dm1-num { display: block; font: 400 28px/1.15 var(--dm1-type) !important; color: var(--dm1-ink); min-height: 32px; }
+.dm1-num--big { font-size: 40px !important; line-height: 1.2 !important; min-height: 48px; }
+.dm1-num small { margin-left: 3px; font: 400 13px/1 var(--dm1-serif) !important; color: rgba(28, 19, 15, 0.5); }
+.dm1-chip {
+  display: inline-flex; align-items: center; height: 24px; padding: 0 9px; border-radius: 8px;
+  background: #e6edf6; color: var(--dm1-navy); font: 600 12px/1 var(--dm1-serif) !important; white-space: nowrap;
+}
+.dm1-aline { margin: 4px 0 0; font: 400 13px/1.4 var(--dm1-serif) !important; color: rgba(28, 19, 15, 0.6); }
+.dm1-aline b { font-weight: 600; color: var(--dm1-ink); }
+.dm1-chart { position: relative; height: calc(84px + 20px); margin-top: 10px; touch-action: pan-y; user-select: none; -webkit-user-select: none; cursor: default; }
+.dm1-chart > svg { display: block; overflow: visible; }
+.dm1-chart--sk { border-radius: 10px; background: linear-gradient(90deg, #efebe5, #f6f3ef 50%, #efebe5); }
+.dm1-mentor { position: absolute; right: 0; top: 18px; height: auto; pointer-events: none; }
+.dm1-axis { position: absolute; left: 0; right: 0; bottom: 0; height: 16px; }
+.dm1-axis span { position: absolute; top: 2px; font: 400 11px/1 var(--dm1-serif) !important; color: rgba(28, 19, 15, 0.45); white-space: nowrap; }
+.dm1-trio { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.dm1-small { display: flex; flex-direction: column; align-items: stretch; padding: 11px; min-height: 108px; }
+.dm1-sttl { font: 600 13px/1.2 var(--dm1-serif) !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dm1-small .dm1-num { margin-top: 4px; }
+/* two lines at most: a bucket's own words ("8 passed on query") must read whole in a third of a phone */
+.dm1-sline {
+  margin-top: 2px; font: 400 12.5px/1.3 var(--dm1-serif) !important; color: rgba(28, 19, 15, 0.6);
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; overflow-wrap: anywhere;
+}
+.dm1-bar { display: flex; gap: 2px; height: 6px; margin-top: auto; padding-top: 0; border-radius: 3px; overflow: hidden; background: #f0ece6; }
+.dm1-small .dm1-bar { margin-top: 10px; }
+.dm1-bar i { display: block; min-width: 3px; height: 100%; }
+.dm1-card.is-loading .dm1-num, .dm1-card.is-loading .dm1-sline { color: transparent; }
+
+/* ── Part C · Up next ─────────────────────────────────────────────────────────────────────────── */
+.dm1-sec { display: flex; flex-direction: column; gap: 10px; }
+.dm1-sechead { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 0 2px; }
+.dm1 .dm1-h { margin: 0; font: 400 20px/1.2 var(--dm1-type) !important; color: var(--dm1-ink); letter-spacing: 0; }
+.dm1-link {
+  min-height: 40px; padding: 0 2px; border: 0; background: none; cursor: pointer; color: var(--dm1-navy);
+  font: 400 15px/1 var(--dm1-serif) !important; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px;
+}
+.dm1-link:focus-visible, .dm1-view:focus-visible, .dm1-row:focus-visible, .dm1-found:focus-visible { outline: 2px solid var(--dm1-navy); outline-offset: 2px; }
+.dm1-hero { position: relative; overflow: hidden; padding: 16px; border-radius: 20px; color: var(--dm1-ink); }
+.dm1-courier { position: absolute; top: 34px; right: -6px; width: 118px; height: auto; pointer-events: none; }
+.dm1-herohead { position: relative; display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.dm1-kicker { font: 400 16px/1.2 var(--dm1-type) !important; }
+.dm1-of { font: 400 13px/1 var(--dm1-serif) !important; color: rgba(28, 19, 15, 0.55); }
+.dm1-herottl { position: relative; margin: 10px 104px 0 0; min-height: 30px; font: 400 25px/1.2 var(--dm1-type) !important; color: var(--dm1-ink); }
+.dm1-heroline { position: relative; margin: 10px 0 0; font: 400 14.5px/1.45 var(--dm1-serif) !important; color: rgba(28, 19, 15, 0.72); }
+.dm1-steps { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 4px; margin: 12px 0 0; padding: 0; list-style: none; }
+.dm1-steps li { display: inline-flex; align-items: center; gap: 4px; }
+.dm1-step { display: inline-block; padding: 4px 8px; border-radius: 7px; background: rgba(255, 255, 255, 0.82); font: 400 13px/1.2 var(--dm1-serif) !important; color: var(--dm1-ink); white-space: nowrap; }
+.dm1-steps li.is-todo .dm1-step { background: transparent; box-shadow: none; outline: 1px dashed rgba(28, 19, 15, 0.45); outline-offset: -1px; }
+.dm1-stepsep { font-size: 11px; color: rgba(28, 19, 15, 0.4); }
+.dm1-view {
+  position: relative; display: block; width: 100%; height: 48px; margin-top: 16px; border: 0; border-radius: 12px; cursor: pointer;
+  background: var(--dm1-navy); color: #ffffff; font: 600 16px/1 var(--dm1-serif) !important;
+}
+.dm1-hero.is-loading .dm1-courier { opacity: 0.5; }
+.dm1-rows { margin-top: 0; }
+.dm1-row {
+  display: flex; align-items: center; gap: 12px; width: 100%; min-height: 64px; padding: 10px 12px 10px 14px;
+  border: 0; background: none; color: var(--dm1-ink); text-align: left; cursor: pointer;
+}
+.dm1-rdisc { flex: none; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; }
+.dm1-rdisc > svg { width: 17px; height: 17px; stroke-width: 1.9; }
+.dm1-rtxt { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.dm1-rttl { font: 400 15.5px/1.3 var(--dm1-serif) !important; color: var(--dm1-ink); }
+.dm1-rttl b { font-weight: 600; }
+.dm1-rline { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 13.5px/1.3 var(--dm1-serif) !important; color: rgba(28, 19, 15, 0.58); }
+.dm1-chev { flex: none; width: 18px; height: 18px; color: rgba(28, 19, 15, 0.4); }
+
+/* ── Part D · the founding writer row and Recent ──────────────────────────────────────────────── */
+.dm1-found {
+  display: flex; align-items: center; gap: 14px; width: 100%; padding: 12px 14px; border: 0; border-radius: 16px; cursor: pointer;
+  text-align: left; color: var(--dm1-ink);
+  background: repeating-linear-gradient(135deg, #f8e8e2 0 10px, #f4ddd5 10px 20px);
+  box-shadow: inset 0 0 0 1px #efd3c9;
+}
+.dm1-ftile { flex: none; display: grid; place-items: center; width: 46px; height: 46px; border-radius: 12px; background: #fffaf7; overflow: hidden; }
+.dm1-ftile img { width: 40px; height: 40px; object-fit: contain; }
+.dm1-ftile .dm1-nest { width: 38px; height: auto; }
+.dm1-ftxt { flex: 1; min-width: 0; display: grid; gap: 3px; }
+.dm1-fttl { font: 400 16px/1.25 var(--dm1-type) !important; }
+.dm1-fline { font: 400 13px/1.4 var(--dm1-serif) !important; color: rgba(28, 19, 15, 0.62); }
+.dm1-fdisc { background: #f1eee9; color: var(--dm1-ink); }
+.dm1-fdisc[data-family="request"], .dm1-fdisc[data-family="offer"] { background: #f5e2da; }
+.dm1-fdisc[data-family="queried"], .dm1-fdisc[data-family="sent"] { background: #e6edf6; }
+.dm1-rrow { cursor: default; }
+.dm1-rdate { flex: none; font: 400 13.5px/1 var(--dm1-serif) !important; color: rgba(28, 19, 15, 0.5); }
+.dm1-quiet { margin: 0; padding: 0 2px; font: italic 400 14px/1.4 var(--dm1-serif) !important; color: rgba(28, 19, 15, 0.55); }
+/* the activity feed, as a bottom sheet on this page (Dash58Feed portals its layer to <body>; the body class is set
+   by the page only while the feed is open from here) */
+@media (max-width: 767.98px) {
+  body.dm1-feedsheet .d58-drawer {
+    top: auto !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+    width: 100% !important; height: 88vh; max-height: 88vh; border-radius: 20px 20px 0 0;
+    transform: translateY(calc(100% + 24px));
+  }
+  body.dm1-feedsheet .d58-layer.is-in .d58-drawer { transform: none; }
+}

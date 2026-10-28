@@ -347,9 +347,9 @@
   .d58-active { flex: none; height: 380px; }
   .d58 .d58-title { white-space: normal; }
 }
+/* below 768px the page is DashPhone (Dashboard on the phone v1), so the phone gutter and the header buttons' wrap are
+   retired; the feed drawer still opens there (as DashPhone's bottom sheet), so its width rule stays */
 @media (max-width: 767px) {
-  .d58 { --d58-gutter: 14px; }
-  .d58-btns { margin-left: 0; flex-wrap: wrap; }
   .d58-drawer { width: 100vw; }
 }
 @media (prefers-reduced-motion: reduce) {

@@ -488,6 +488,10 @@ test.describe("ink shell", () => {
       return;
     }
     const ref = JSON.parse(readFileSync(refPath, "utf8"));
+    /* ⚠️ RE-POINTED BY DASHBOARD ON THE PHONE v1 (28 Oct): on Home the shell's generic phone bar is hidden, because the
+       phone dashboard draws its own top bar (mark, manuscript, Search, Feedback, +), which DM1-A1 locks. That one
+       element on that one route leaves this comparison; every other element on every route is still held to main. */
+    for (const o of [out, ref] as Record<string, Record<string, unknown>>[]) delete o["/dashboard"]?.[".ws-mobilebar"];
     expect(out, "the phone's shell against main's").toEqual(ref);
   });
 });

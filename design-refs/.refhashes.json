@@ -879,7 +879,16 @@
     "design-refs/dashboard-v116/shots/09-founding-rest-1440x900.png": "2aea4e71918bf3eb92cacd8e69b2185527a9739b9612b08e60dbddb8c69dc0b4",
     "design-refs/dashboard-v116/shots/10-founding-hover-1440x900.png": "de4d278d5675c28598d02b17219cb83a5a0728b53c4b6897e4945e3dfa674307",
     "design-refs/dashboard-v116/shots/11-onscreen-rule-agents-1440x700.png": "1eddc80bb38a2a3a05faca6c62b10a0a8566ac902dcf5b3d369dd22df6ed9c8a",
-    "design-refs/responses-v5/responses-v5.html": "292bf87fc6d25793784f9d2f5cc7f28a217ca34dad2ba371f727210d7aafc1e9"
+    "design-refs/responses-v5/responses-v5.html": "292bf87fc6d25793784f9d2f5cc7f28a217ca34dad2ba371f727210d7aafc1e9",
+    "design-refs/dashboard-mobile-v1/dashboard-mobile-v1.html": "9761eef3745f5ee6de48bd9a150c8d2fcf93ebaa200c91a74433f7904cb10788",
+    "design-refs/dashboard-mobile-v1/screens/01-top@2x.png": "f06e47f765e73b0748ba40e4430f01d53cda91685184f8bb33a5075d938de87c",
+    "design-refs/dashboard-mobile-v1/screens/02-up-next@2x.png": "bc0cd8d1be0c660f84a0b3867780f8963ff73595ef93ceac22a0e082e217dc73",
+    "design-refs/dashboard-mobile-v1/screens/03-bottom@2x.png": "1e4336d239465fd474bc75294bf6ef96a4ce94fea74e9c1d439f2fa9ba1dbb28",
+    "design-refs/dashboard-mobile-v1/screens/04-chart-scrub@2x.png": "5984000f7b19eb81e27d347024d5e5828c6eddc587198e7deb76198b8cc96053",
+    "design-refs/dashboard-mobile-v1/screens/05-plus-menu@2x.png": "872383936be3e17696409eabc14d8cf7d6387764f98002a987120ca3fc7cba88",
+    "design-refs/dashboard-mobile-v1/screens/06-search@2x.png": "2875fd5d50981c8e606463ff9a8b35bb379a16face66bc84c1ddf01f7321df03",
+    "design-refs/dashboard-mobile-v1/screens/07-feedback-sheet@2x.png": "20486afd9f97637cbbd208e3043ca70f25a0eb573ea171636b854657652eb4f4",
+    "design-refs/dashboard-mobile-v1/screens/08-tile-click-through@2x.png": "40dcbdd68244b4bb89666b3b6fed1224de9d390ab3bebba5d1856f1de6b771e4"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",

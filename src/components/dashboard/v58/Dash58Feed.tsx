@@ -55,13 +55,13 @@ const Segs: React.FC<{ say: readonly FeedSeg[] }> = ({ say }) => (
   <>{say.map((s, i) => (s.who ? <b key={i}>{s.t}</b> : s.em ? <i key={i}>{s.t}</i> : <React.Fragment key={i}>{s.t}</React.Fragment>))}</>
 );
 
-/* The two marks that are not a status. Drawn here: nothing in the app exports a bell or a gear to share. */
-const BellGlyph = () => (
+/* The two marks that are not a status. Exported so the phone dashboard's Recent rows draw the feed's own disc. */
+export const BellGlyph = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" data-d58="ev-bell">
     <path d="M6 16V11a6 6 0 1112 0v5l2 2H4z" /><path d="M10 20a2 2 0 004 0" />
   </svg>
 );
-const GearGlyph = () => (
+export const GearGlyph = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" data-d58="ev-gear">
     <circle cx="12" cy="12" r="3" /><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1" />
   </svg>

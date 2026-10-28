@@ -1,0 +1,308 @@
+[
+ {
+  "lock": "C1",
+  "where": "as found: population, the desktop's list",
+  "ok": true,
+  "detail": "[\"task-offer-seed-query-12\",\"task-full-rj-dupe\",\"task-full-rj-send\",\"task-full-seed-cal-passed865-q\"]"
+ },
+ {
+  "lock": "C1",
+  "where": "as found: the hero is task 1",
+  "ok": true,
+  "detail": "task-offer-seed-query-12 vs task-offer-seed-query-12"
+ },
+ {
+  "lock": "C1",
+  "where": "as found: the rows are tasks 2–4, in order",
+  "ok": true,
+  "detail": "[\"task-full-rj-dupe\",\"task-full-rj-send\",\"task-full-seed-cal-passed865-q\"] vs [\"task-full-rj-dupe\",\"task-full-rj-send\",\"task-full-seed-cal-passed865-q\"]"
+ },
+ {
+  "lock": "C1",
+  "where": "as found: at most three rows",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "C1",
+  "where": "as found: the hero's tint is move's",
+  "ok": true,
+  "detail": "rgb(245, 226, 218) vs #f5e2da"
+ },
+ {
+  "lock": "C1",
+  "where": "as found: row task-full-rj-dupe disc is move's",
+  "ok": true,
+  "detail": "rgb(245, 226, 218)"
+ },
+ {
+  "lock": "C1",
+  "where": "as found: row task-full-rj-send disc is move's",
+  "ok": true,
+  "detail": "rgb(245, 226, 218)"
+ },
+ {
+  "lock": "C1",
+  "where": "as found: row task-full-seed-cal-passed865-q disc is move's",
+  "ok": true,
+  "detail": "rgb(245, 226, 218)"
+ },
+ {
+  "lock": "C1",
+  "where": "as found: the courier once, in the hero",
+  "ok": true,
+  "detail": "{\"courier\":1,\"mentor\":1,\"courierInHero\":true,\"mentorInChart\":true}"
+ },
+ {
+  "lock": "C1",
+  "where": "as found: the Mentor once, on the chart",
+  "ok": true,
+  "detail": "{\"courier\":1,\"mentor\":1,\"courierInHero\":true,\"mentorInChart\":true}"
+ },
+ {
+  "lock": "C1",
+  "where": "as found: the title stops short of the courier",
+  "ok": true,
+  "detail": "{\"tr\":254,\"cl\":262}"
+ },
+ {
+  "lock": "C1",
+  "where": "drop req: population, the desktop's list",
+  "ok": true,
+  "detail": "[\"task-nudge-seed-pkgq-2\",\"task-nudge-seed-pkgq-9\",\"task-nudge-seed-query-5\",\"task-nudge-seed-query-6\"]"
+ },
+ {
+  "lock": "C1",
+  "where": "drop req: the hero is task 1",
+  "ok": true,
+  "detail": "task-nudge-seed-pkgq-2 vs task-nudge-seed-pkgq-2"
+ },
+ {
+  "lock": "C1",
+  "where": "drop req: the rows are tasks 2–4, in order",
+  "ok": true,
+  "detail": "[\"task-nudge-seed-pkgq-9\",\"task-nudge-seed-query-5\",\"task-nudge-seed-query-6\"] vs [\"task-nudge-seed-pkgq-9\",\"task-nudge-seed-query-5\",\"task-nudge-seed-query-6\"]"
+ },
+ {
+  "lock": "C1",
+  "where": "drop req: at most three rows",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "C1",
+  "where": "drop req: the hero's tint is nudge's",
+  "ok": true,
+  "detail": "rgb(230, 237, 246) vs #e6edf6"
+ },
+ {
+  "lock": "C1",
+  "where": "drop req: row task-nudge-seed-pkgq-9 disc is nudge's",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "C1",
+  "where": "drop req: row task-nudge-seed-query-5 disc is nudge's",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "C1",
+  "where": "drop req: row task-nudge-seed-query-6 disc is nudge's",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "C1",
+  "where": "drop req: the courier once, in the hero",
+  "ok": true,
+  "detail": "{\"courier\":1,\"mentor\":1,\"courierInHero\":true,\"mentorInChart\":true}"
+ },
+ {
+  "lock": "C1",
+  "where": "drop req: the Mentor once, on the chart",
+  "ok": true,
+  "detail": "{\"courier\":1,\"mentor\":1,\"courierInHero\":true,\"mentorInChart\":true}"
+ },
+ {
+  "lock": "C1",
+  "where": "drop req: the title stops short of the courier",
+  "ok": true,
+  "detail": "{\"tr\":254,\"cl\":262}"
+ },
+ {
+  "lock": "C1",
+  "where": "drop req+nudge: population, the desktop's list",
+  "ok": true,
+  "detail": "[\"task-no-res-close-cor-move-b\",\"task-no-res-close-cor-pair\",\"task-no-res-close-cor-undo\",\"task-no-res-close-rj-nudge\"]"
+ },
+ {
+  "lock": "C1",
+  "where": "drop req+nudge: the hero is task 1",
+  "ok": true,
+  "detail": "task-no-res-close-cor-move-b vs task-no-res-close-cor-move-b"
+ },
+ {
+  "lock": "C1",
+  "where": "drop req+nudge: the rows are tasks 2–4, in order",
+  "ok": true,
+  "detail": "[\"task-no-res-close-cor-pair\",\"task-no-res-close-cor-undo\",\"task-no-res-close-rj-nudge\"] vs [\"task-no-res-close-cor-pair\",\"task-no-res-close-cor-undo\",\"task-no-res-close-rj-nudge\"]"
+ },
+ {
+  "lock": "C1",
+  "where": "drop req+nudge: at most three rows",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "C1",
+  "where": "drop req+nudge: the hero's tint is close's",
+  "ok": true,
+  "detail": "rgb(236, 232, 226) vs #ece8e2"
+ },
+ {
+  "lock": "C1",
+  "where": "drop req+nudge: row task-no-res-close-cor-pair disc is close's",
+  "ok": true,
+  "detail": "rgb(236, 232, 226)"
+ },
+ {
+  "lock": "C1",
+  "where": "drop req+nudge: row task-no-res-close-cor-undo disc is close's",
+  "ok": true,
+  "detail": "rgb(236, 232, 226)"
+ },
+ {
+  "lock": "C1",
+  "where": "drop req+nudge: row task-no-res-close-rj-nudge disc is close's",
+  "ok": true,
+  "detail": "rgb(236, 232, 226)"
+ },
+ {
+  "lock": "C1",
+  "where": "drop req+nudge: the courier once, in the hero",
+  "ok": true,
+  "detail": "{\"courier\":1,\"mentor\":1,\"courierInHero\":true,\"mentorInChart\":true}"
+ },
+ {
+  "lock": "C1",
+  "where": "drop req+nudge: the Mentor once, on the chart",
+  "ok": true,
+  "detail": "{\"courier\":1,\"mentor\":1,\"courierInHero\":true,\"mentorInChart\":true}"
+ },
+ {
+  "lock": "C1",
+  "where": "drop req+nudge: the title stops short of the courier",
+  "ok": true,
+  "detail": "{\"tr\":254,\"cl\":262}"
+ },
+ {
+  "lock": "C1",
+  "where": "drop req+nudge+quiet: population, the desktop's list",
+  "ok": true,
+  "detail": "[\"hk:reply\",\"hk:materials\",\"hk:genres\",\"hk:wishlist\"]"
+ },
+ {
+  "lock": "C1",
+  "where": "drop req+nudge+quiet: the hero is task 1",
+  "ok": true,
+  "detail": "hk:reply vs hk:reply"
+ },
+ {
+  "lock": "C1",
+  "where": "drop req+nudge+quiet: the rows are tasks 2–4, in order",
+  "ok": true,
+  "detail": "[\"hk:materials\",\"hk:genres\",\"hk:wishlist\"] vs [\"hk:materials\",\"hk:genres\",\"hk:wishlist\"]"
+ },
+ {
+  "lock": "C1",
+  "where": "drop req+nudge+quiet: at most three rows",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "C1",
+  "where": "drop req+nudge+quiet: the hero's tint is house's",
+  "ok": true,
+  "detail": "rgb(232, 237, 243) vs #e8edf3"
+ },
+ {
+  "lock": "C1",
+  "where": "drop req+nudge+quiet: row hk:materials disc is house's",
+  "ok": true,
+  "detail": "rgb(95, 117, 145)"
+ },
+ {
+  "lock": "C1",
+  "where": "drop req+nudge+quiet: row hk:genres disc is house's",
+  "ok": true,
+  "detail": "rgb(95, 117, 145)"
+ },
+ {
+  "lock": "C1",
+  "where": "drop req+nudge+quiet: row hk:wishlist disc is house's",
+  "ok": true,
+  "detail": "rgb(95, 117, 145)"
+ },
+ {
+  "lock": "C1",
+  "where": "drop req+nudge+quiet: the courier once, in the hero",
+  "ok": true,
+  "detail": "{\"courier\":1,\"mentor\":1,\"courierInHero\":true,\"mentorInChart\":true}"
+ },
+ {
+  "lock": "C1",
+  "where": "drop req+nudge+quiet: the Mentor once, on the chart",
+  "ok": true,
+  "detail": "{\"courier\":1,\"mentor\":1,\"courierInHero\":true,\"mentorInChart\":true}"
+ },
+ {
+  "lock": "C1",
+  "where": "drop req+nudge+quiet: the title stops short of the courier",
+  "ok": true,
+  "detail": "{\"tr\":254,\"cl\":262}"
+ },
+ {
+  "lock": "C1",
+  "where": "all four kinds were the hero",
+  "ok": true,
+  "detail": "[\"move\",\"nudge\",\"close\",\"house\"]"
+ },
+ {
+  "lock": "C1",
+  "where": "View task (query): population, the hero's action",
+  "ok": true,
+  "detail": "{\"key\":\"task-nudge-seed-pkgq-2\",\"who\":\"Tom Ellery\",\"action\":\"query\"}"
+ },
+ {
+  "lock": "C1",
+  "where": "View task (query) opens its place",
+  "ok": true,
+  "detail": "{\"names\":[\"Query\"],\"ok\":true,\"path\":\"/dashboard\",\"who\":\"Tom Ellery\"}"
+ },
+ {
+  "lock": "C1",
+  "where": "View task (query) did not complete the task",
+  "ok": true,
+  "detail": "task-nudge-seed-pkgq-2 → task-nudge-seed-pkgq-2"
+ },
+ {
+  "lock": "C1",
+  "where": "View task (agent): population, the hero's action",
+  "ok": true,
+  "detail": "{\"key\":\"hk:reply\",\"who\":\"20 agents\",\"action\":\"agent\"}"
+ },
+ {
+  "lock": "C1",
+  "where": "View task (agent) opens its place",
+  "ok": true,
+  "detail": "{\"names\":[\"Edit agent\"],\"ok\":true,\"path\":\"/dashboard\",\"who\":\"20 agents\"}"
+ },
+ {
+  "lock": "C1",
+  "where": "View task (agent) did not complete the task",
+  "ok": true,
+  "detail": "hk:reply → hk:reply"
+ }
+]

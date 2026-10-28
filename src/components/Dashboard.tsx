@@ -51,6 +51,8 @@ import { deskNotice, sidebarBoardTiles } from "../lib/shellSidebar";
 // (settled desk): hero zone → stat row → story/diary → pipeline → Pro banner.
 import { agentPrimary, AGENT_NOT_SPECIFIED } from "../lib/agentDisplay";
 import { Dash58 } from "./dashboard/v58/Dash58";
+import { DashPhone } from "./dashboard/phone/DashPhone";
+import { useIsMobile } from "./shell/mobileChrome";
 import { StatCardFull, useStatDefs } from "./dashboard/DashboardStatsRow";
 import "./dashboard/dashboardV37.css";
 import { dataNeedTarget, openAgentCard } from "../lib/agentCardStore";
@@ -653,6 +655,9 @@ export const Dashboard: React.FC<{
   const leftColumnRef = React.useRef<HTMLDivElement>(null);
   const [leftColumnHeight, setLeftColumnHeight] = useState<number | null>(null);
   const [isMobileLayout, setIsMobileLayout] = useState(false);
+  /* Dashboard on the phone v1: below 768px the phone page renders in Dash58's place; at 768px and wider this is
+     false and the desktop render is unchanged. */
+  const phone = useIsMobile();
 
   useEffect(() => {
     const checkMobile = () => {
@@ -1515,6 +1520,24 @@ export const Dashboard: React.FC<{
           the diary, the pipeline, the to-do card, the guided empty state and the bottom Pro
           banner all leave this page. Day one is §9's job now; loading is §8's per-card
           skeletons, passed down rather than gated up here. */}
+      {phone ? (
+      <DashPhone
+        loading={!collectionsReady}
+        queries={queries}
+        agents={agents}
+        manuscripts={manuscripts}
+        tasks={tasks}
+        userTasks={userTasks}
+        activities={mergedActivities}
+        taskFlags={taskFlags}
+        currentUser={currentUser}
+        activeManuscript={activeManuscriptForKicker}
+        versions={versions}
+        smartImportUsage={smartImportUsage}
+        onNavigate={onNavigate}
+        setSearchQuery={setSearchQuery}
+      />
+      ) : (
       <Dash58
         loading={!collectionsReady}
         queries={queries}
@@ -1531,6 +1554,7 @@ export const Dashboard: React.FC<{
         onNavigate={onNavigate}
         onFoundingSeen={(tier) => updateUserProfile({ foundingSeenTier: tier })}
       />
+      )}
 
       {/* Slide-In Tasks Panel (Part 3) */}
       <AnimatePresence>

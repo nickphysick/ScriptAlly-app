@@ -16,53 +16,46 @@ const drawer = readFileSync(resolve(__dirname, "./TimelineDrawer.tsx"), "utf8");
 // Anchor before slicing (the string-spec slice law).
 const MEDIA = "@media (max-width: 767.98px)";
 
-describe("the <md dashboard stack", () => {
-  it("the mobile block exists and the new surfaces hide at md+", () => {
-    expect(css).toContain(MEDIA);
-    const before = css.split(MEDIA)[0];
-    expect(before).toContain(".sa-mdeskline,\n.sa-mtodo { display: none; }");
+/* ⚠️ REWRITTEN BY DASHBOARD ON THE PHONE v1 (28 Oct). This suite pinned the v37 phone stack's rules — the desk line's
+   hot and calm treatments, the action row and fortnight strip standing down, the pipeline's stacked pair. Below 768px the
+   dashboard is `DashPhone` now, so those rules have no consumer and are deleted; the cases below pin THAT, in both
+   directions: the old stack cannot come back beside the new page, and the page that renders on a phone is the new one.
+   Retirements are listed in tests/e2e/RETIRED-dashboard-mobile-v1.md. */
+const rules = css.replace(/\/\*[\s\S]*?\*\//g, "");
+const dash58Css = readFileSync(resolve(__dirname, "./v58/dash58.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+
+describe("below 768px the dashboard is the phone page", () => {
+  it("Dashboard renders DashPhone when useIsMobile says so, and Dash58 otherwise", () => {
+    expect(dash).toContain('import { useIsMobile } from "./shell/mobileChrome"');
+    expect(dash).toContain("const phone = useIsMobile();");
+    const branch = dash.indexOf("{phone ? (");
+    expect(branch, "the phone branch must exist").toBeGreaterThan(-1);
+    expect(dash.indexOf("<DashPhone", branch)).toBeGreaterThan(branch);
+    expect(dash.indexOf("<Dash58", branch)).toBeGreaterThan(dash.indexOf("<DashPhone", branch));
   });
 
-  it("desktop furniture stands down below md: the action row, fortnight strip", () => {
-    /* ⚠️ RETARGETED (settled desk, Phase 1). This asserted `.sa-chip` and `.sa-greet-ctas`; the
-       attention chip is RETIRED with the focus slot it opened, and the CTA row is `.sa-hero-actions`
-       now. The rule the case protects is unchanged — the desktop action surfaces stand down below
-       md, where the floating tab capsule carries them. */
-    expect(css).toContain(MEDIA);
-    const mobile = css.split(MEDIA)[1] ?? "";
-    expect(mobile).toContain(".sa-hero-actions { display: none; }");
-    /* ⚠️ ABSENCE IS ASSERTED AGAINST RULES, NOT PROSE — comments stripped first. The first draft
-       of this line failed on the CSS comment that RECORDS the retirement: the guard caught its own
-       tombstone. Third time this trap has been hit in this repo; the pattern is the fix. */
-    const rules = css.replace(/\/\*[\s\S]*?\*\//g, "");
-    expect(rules, "the chip retired with the focus slot").not.toContain(".sa-chip");
-    expect(mobile).toContain("section.dc { display: none; }"); // WhatsLive's root is a div.dc — untouched
-    expect(mobile).toContain(".wl-cf { grid-template-columns: 1fr !important");
+  it("the v37 phone stack's rules are retired, not left inert", () => {
+    /* the phone block itself — anchored before slicing, and the desktop rules above it are not this lock's business */
+    expect(rules).toContain(MEDIA);
+    const phone = rules.split(MEDIA)[1]?.split(/\n\}/)[0] ?? "";
+    expect(phone, "the phone block must exist").toContain(".sa-tlmobile");
+    for (const sel of [".sa-dashroot", ".sa-mdeskline", ".sa-mtodo", ".sa-hero-actions", ".sa-stats", ".sa-dash-panels", "section.dc", ".wl-cf", ".sa-herozone"]) {
+      expect(phone, `${sel} has no consumer on a phone`).not.toContain(sel);
+    }
+    /* and the md+ hide for the two retired surfaces goes with them */
+    expect(rules).not.toContain(".sa-mdeskline");
+    expect(rules).not.toContain(".sa-mtodo");
   });
 
-  it("THE DESK LINE: hot is a tinted card with the burgundy roundel; calm is a hairline row", () => {
-    const mobile = css.split(MEDIA)[1] ?? "";
-    expect(mobile, "the mobile block must exist").not.toBe("");
-    const hot = mobile.match(/\.sa-mdeskline\.hot \{([^}]*)\}/s)?.[1] ?? "";
-    expect(hot, "the hot rule must exist").not.toBe("");
-    expect(hot).toContain("#faf0ea");
-    expect(hot).toContain("var(--pink-b)");
-    const calm = mobile.match(/\.sa-mdeskline\.calm \{([^}]*)\}/s)?.[1] ?? "";
-    expect(calm, "the calm rule must exist").not.toBe("");
-    expect(calm).toContain("border-top");
-    expect(calm).not.toContain("background"); // no fill — never the loud one greyed out
-    expect(mobile).toContain("background: var(--burg)"); // the count roundel
+  it("Dash58's phone gutter and header-button wrap are retired; the feed drawer's width stays", () => {
+    expect(dash58Css).not.toContain("--d58-gutter: 14px");
+    expect(dash58Css).not.toMatch(/\.d58-btns \{ margin-left: 0; flex-wrap: wrap; \}/);
+    expect(dash58Css).toContain(".d58-drawer { width: 100vw; }");
   });
 
-  /* ⚠️ RETARGETED (one-screen dashboard §13): the desk line and the to-do doorway are GONE from
-     this page — the spec replaces the dashboard wholesale, and its tasks card + §11 mobile rules
-     carry the same jobs at every width. This case now pins the RETIREMENT so they cannot quietly
-     return alongside the new surfaces and double up. The CSS block they used stays in
-     dashboardV37.css for the git record; rules without consumers render nothing. */
   it("the desk line and the mobile to-do doorway are retired from the dashboard", () => {
     expect(dash).not.toContain("sa-mdeskline");
     expect(dash).not.toMatch(/["\s`]sa-mtodo["\s`]/);
-    expect(dash).toContain("OneScreenDashboard");
   });
 });
 

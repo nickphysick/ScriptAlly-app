@@ -1,0 +1,422 @@
+[
+ {
+  "lock": "B1",
+  "where": "population: the desktop's figures",
+  "ok": true,
+  "detail": "{\"title\":\"40 active queries\",\"active\":40,\"closed\":{\"quiet\":1,\"letter\":8,\"partial\":0,\"full\":2},\"cov\":{\"querying\":21,\"closed\":3,\"none\":63,\"ready\":6,\"total\":87}}"
+ },
+ {
+  "lock": "B1",
+  "where": "390x844 population: four cards",
+  "ok": true,
+  "detail": "{\"active\":{\"x\":16,\"y\":245.03125,\"w\":358,\"h\":234.984375},\"with\":{\"x\":16,\"y\":127,\"w\":112.65625,\"h\":108.03125},\"closed\":{\"x\":138.65625,\"y\":127,\"w\":112.671875,\"h\":108.03125},\"agents\":{\"x\":261.328125,\"y\":127,\"w\":112.65625,\"h\":108.03125}}"
+ },
+ {
+  "lock": "B1",
+  "where": "390x844 the page opens on the Active card, under the bar",
+  "ok": false,
+  "detail": "121 → 245.03125"
+ },
+ {
+  "lock": "B1",
+  "where": "390x844 order: Active above With agents / Closed / Agents",
+  "ok": false,
+  "detail": "{\"active\":{\"x\":16,\"y\":245.03125,\"w\":358,\"h\":234.984375},\"with\":{\"x\":16,\"y\":127,\"w\":112.65625,\"h\":108.03125},\"closed\":{\"x\":138.65625,\"y\":127,\"w\":112.671875,\"h\":108.03125},\"agents\":{\"x\":261.328125,\"y\":127,\"w\":112.65625,\"h\":108.03125}}"
+ },
+ {
+  "lock": "B1",
+  "where": "390x844 the three are equal thirds",
+  "ok": true,
+  "detail": "112.65625 112.671875 112.65625"
+ },
+ {
+  "lock": "B1",
+  "where": "390x844 gutters 16",
+  "ok": true,
+  "detail": "{\"x\":16,\"y\":245.03125,\"w\":358,\"h\":234.984375}"
+ },
+ {
+  "lock": "B1",
+  "where": "390x844 Active = the desktop chart's headline",
+  "ok": true,
+  "detail": "40 vs 40 active queries"
+ },
+ {
+  "lock": "B1",
+  "where": "390x844 Closed = the desktop hoop's total",
+  "ok": true,
+  "detail": "11 vs 11"
+ },
+ {
+  "lock": "B1",
+  "where": "390x844 Closed's bar = the hoop's buckets",
+  "ok": true,
+  "detail": "[{\"k\":\"quiet\",\"g\":1},{\"k\":\"letter\",\"g\":8},{\"k\":\"full\",\"g\":2}]"
+ },
+ {
+  "lock": "B1",
+  "where": "390x844 Agents = queried / total of the desktop's coverage",
+  "ok": false,
+  "detail": "24/68 vs {\"querying\":21,\"closed\":3,\"none\":63,\"ready\":6,\"total\":87}"
+ },
+ {
+  "lock": "B1",
+  "where": "390x844 Agents' line = the not-yet-queried",
+  "ok": false,
+  "detail": "44 to query"
+ },
+ {
+  "lock": "B1",
+  "where": "390x844 need you + With agents = Active",
+  "ok": true,
+  "detail": "10 + 30 vs 40"
+ },
+ {
+  "lock": "B1",
+  "where": "390x844 With agents' bar sums to its number",
+  "ok": true,
+  "detail": "[{\"k\":\"reading\",\"g\":10},{\"k\":\"waiting\",\"g\":20}]"
+ },
+ {
+  "lock": "B1",
+  "where": "390x844 the chip is a rise or absent",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "lock": "B1",
+  "where": "390x844 population: the chart",
+  "ok": true,
+  "detail": "{\"x\":30,\"y\":364.015625,\"w\":330,\"h\":104,\"r\":360,\"b\":468.015625}"
+ },
+ {
+  "lock": "B1",
+  "where": "390x844 the line draws twelve weeks",
+  "ok": true,
+  "detail": "12"
+ },
+ {
+  "lock": "B1",
+  "where": "390x844 scrub at 0.08: the rule snaps to week 1",
+  "ok": true,
+  "detail": "{\"week\":1,\"num\":\"34\",\"line\":\"active in the week of 17 Aug\",\"chip\":false,\"path\":\"/dashboard\"}"
+ },
+ {
+  "lock": "B1",
+  "where": "390x844 scrub at 0.08: the line names the week",
+  "ok": true,
+  "detail": "active in the week of 17 Aug"
+ },
+ {
+  "lock": "B1",
+  "where": "390x844 scrub at 0.08: the chip hides",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B1",
+  "where": "390x844 scrub at 0.08: held just after release",
+  "ok": true,
+  "detail": "active in the week of 17 Aug"
+ },
+ {
+  "lock": "B1",
+  "where": "390x844 scrub at 0.08: restores after 0.8s, and never navigates",
+  "ok": true,
+  "detail": "40 10 need you · 52 sent in all /dashboard"
+ },
+ {
+  "lock": "B1",
+  "where": "390x844 scrub at 0.5: the rule snaps to week 6",
+  "ok": true,
+  "detail": "{\"week\":6,\"num\":\"40\",\"line\":\"active in the week of 21 Sep\",\"chip\":false,\"path\":\"/dashboard\"}"
+ },
+ {
+  "lock": "B1",
+  "where": "390x844 scrub at 0.5: the line names the week",
+  "ok": true,
+  "detail": "active in the week of 21 Sep"
+ },
+ {
+  "lock": "B1",
+  "where": "390x844 scrub at 0.5: the chip hides",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B1",
+  "where": "390x844 scrub at 0.5: held just after release",
+  "ok": true,
+  "detail": "active in the week of 21 Sep"
+ },
+ {
+  "lock": "B1",
+  "where": "390x844 scrub at 0.5: restores after 0.8s, and never navigates",
+  "ok": true,
+  "detail": "40 10 need you · 52 sent in all /dashboard"
+ },
+ {
+  "lock": "B1",
+  "where": "390x844 scrub at 0.9: the rule snaps to week 10",
+  "ok": true,
+  "detail": "{\"week\":10,\"num\":\"40\",\"line\":\"active in the week of 19 Oct\",\"chip\":false,\"path\":\"/dashboard\"}"
+ },
+ {
+  "lock": "B1",
+  "where": "390x844 scrub at 0.9: the line names the week",
+  "ok": true,
+  "detail": "active in the week of 19 Oct"
+ },
+ {
+  "lock": "B1",
+  "where": "390x844 scrub at 0.9: the chip hides",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B1",
+  "where": "390x844 scrub at 0.9: held just after release",
+  "ok": true,
+  "detail": "active in the week of 19 Oct"
+ },
+ {
+  "lock": "B1",
+  "where": "390x844 scrub at 0.9: restores after 0.8s, and never navigates",
+  "ok": true,
+  "detail": "40 10 need you · 52 sent in all /dashboard"
+ },
+ {
+  "lock": "B1",
+  "where": "390x844 the chart leaves vertical scroll to the page",
+  "ok": true,
+  "detail": "pan-y"
+ },
+ {
+  "lock": "B1",
+  "where": "375x667 population: four cards",
+  "ok": true,
+  "detail": "{\"active\":{\"x\":16,\"y\":245.03125,\"w\":343,\"h\":234.984375},\"with\":{\"x\":16,\"y\":127,\"w\":107.65625,\"h\":108.03125},\"closed\":{\"x\":133.65625,\"y\":127,\"w\":107.671875,\"h\":108.03125},\"agents\":{\"x\":251.328125,\"y\":127,\"w\":107.65625,\"h\":108.03125}}"
+ },
+ {
+  "lock": "B1",
+  "where": "375x667 the page opens on the Active card, under the bar",
+  "ok": false,
+  "detail": "121 → 245.03125"
+ },
+ {
+  "lock": "B1",
+  "where": "375x667 order: Active above With agents / Closed / Agents",
+  "ok": false,
+  "detail": "{\"active\":{\"x\":16,\"y\":245.03125,\"w\":343,\"h\":234.984375},\"with\":{\"x\":16,\"y\":127,\"w\":107.65625,\"h\":108.03125},\"closed\":{\"x\":133.65625,\"y\":127,\"w\":107.671875,\"h\":108.03125},\"agents\":{\"x\":251.328125,\"y\":127,\"w\":107.65625,\"h\":108.03125}}"
+ },
+ {
+  "lock": "B1",
+  "where": "375x667 the three are equal thirds",
+  "ok": true,
+  "detail": "107.65625 107.671875 107.65625"
+ },
+ {
+  "lock": "B1",
+  "where": "375x667 gutters 16",
+  "ok": true,
+  "detail": "{\"x\":16,\"y\":245.03125,\"w\":343,\"h\":234.984375}"
+ },
+ {
+  "lock": "B1",
+  "where": "375x667 Active = the desktop chart's headline",
+  "ok": true,
+  "detail": "40 vs 40 active queries"
+ },
+ {
+  "lock": "B1",
+  "where": "375x667 Closed = the desktop hoop's total",
+  "ok": true,
+  "detail": "11 vs 11"
+ },
+ {
+  "lock": "B1",
+  "where": "375x667 Closed's bar = the hoop's buckets",
+  "ok": true,
+  "detail": "[{\"k\":\"quiet\",\"g\":1},{\"k\":\"letter\",\"g\":8},{\"k\":\"full\",\"g\":2}]"
+ },
+ {
+  "lock": "B1",
+  "where": "375x667 Agents = queried / total of the desktop's coverage",
+  "ok": true,
+  "detail": "24/87 vs {\"querying\":21,\"closed\":3,\"none\":63,\"ready\":6,\"total\":87}"
+ },
+ {
+  "lock": "B1",
+  "where": "375x667 Agents' line = the not-yet-queried",
+  "ok": true,
+  "detail": "63 to query"
+ },
+ {
+  "lock": "B1",
+  "where": "375x667 need you + With agents = Active",
+  "ok": true,
+  "detail": "10 + 30 vs 40"
+ },
+ {
+  "lock": "B1",
+  "where": "375x667 With agents' bar sums to its number",
+  "ok": true,
+  "detail": "[{\"k\":\"reading\",\"g\":10},{\"k\":\"waiting\",\"g\":20}]"
+ },
+ {
+  "lock": "B1",
+  "where": "375x667 the chip is a rise or absent",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "lock": "B1",
+  "where": "375x667 population: the chart",
+  "ok": true,
+  "detail": "{\"x\":30,\"y\":364.015625,\"w\":315,\"h\":104,\"r\":345,\"b\":468.015625}"
+ },
+ {
+  "lock": "B1",
+  "where": "375x667 the line draws twelve weeks",
+  "ok": true,
+  "detail": "12"
+ },
+ {
+  "lock": "B1",
+  "where": "375x667 scrub at 0.08: the rule snaps to week 1",
+  "ok": true,
+  "detail": "{\"week\":1,\"num\":\"34\",\"line\":\"active in the week of 17 Aug\",\"chip\":false,\"path\":\"/dashboard\"}"
+ },
+ {
+  "lock": "B1",
+  "where": "375x667 scrub at 0.08: the line names the week",
+  "ok": true,
+  "detail": "active in the week of 17 Aug"
+ },
+ {
+  "lock": "B1",
+  "where": "375x667 scrub at 0.08: the chip hides",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B1",
+  "where": "375x667 scrub at 0.08: held just after release",
+  "ok": true,
+  "detail": "active in the week of 17 Aug"
+ },
+ {
+  "lock": "B1",
+  "where": "375x667 scrub at 0.08: restores after 0.8s, and never navigates",
+  "ok": true,
+  "detail": "40 10 need you · 52 sent in all /dashboard"
+ },
+ {
+  "lock": "B1",
+  "where": "375x667 scrub at 0.5: the rule snaps to week 6",
+  "ok": true,
+  "detail": "{\"week\":6,\"num\":\"40\",\"line\":\"active in the week of 21 Sep\",\"chip\":false,\"path\":\"/dashboard\"}"
+ },
+ {
+  "lock": "B1",
+  "where": "375x667 scrub at 0.5: the line names the week",
+  "ok": true,
+  "detail": "active in the week of 21 Sep"
+ },
+ {
+  "lock": "B1",
+  "where": "375x667 scrub at 0.5: the chip hides",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B1",
+  "where": "375x667 scrub at 0.5: held just after release",
+  "ok": true,
+  "detail": "active in the week of 21 Sep"
+ },
+ {
+  "lock": "B1",
+  "where": "375x667 scrub at 0.5: restores after 0.8s, and never navigates",
+  "ok": true,
+  "detail": "40 10 need you · 52 sent in all /dashboard"
+ },
+ {
+  "lock": "B1",
+  "where": "375x667 scrub at 0.9: the rule snaps to week 10",
+  "ok": true,
+  "detail": "{\"week\":10,\"num\":\"40\",\"line\":\"active in the week of 19 Oct\",\"chip\":false,\"path\":\"/dashboard\"}"
+ },
+ {
+  "lock": "B1",
+  "where": "375x667 scrub at 0.9: the line names the week",
+  "ok": true,
+  "detail": "active in the week of 19 Oct"
+ },
+ {
+  "lock": "B1",
+  "where": "375x667 scrub at 0.9: the chip hides",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B1",
+  "where": "375x667 scrub at 0.9: held just after release",
+  "ok": true,
+  "detail": "active in the week of 19 Oct"
+ },
+ {
+  "lock": "B1",
+  "where": "375x667 scrub at 0.9: restores after 0.8s, and never navigates",
+  "ok": true,
+  "detail": "40 10 need you · 52 sent in all /dashboard"
+ },
+ {
+  "lock": "B1",
+  "where": "375x667 the chart leaves vertical scroll to the page",
+  "ok": true,
+  "detail": "pan-y"
+ },
+ {
+  "lock": "B1",
+  "where": "390x844 active card opens /^\\/queries\\?ids=/",
+  "ok": true,
+  "detail": "/queries?ids=cor-move-a%2Ccor-move-b%2Ccor-pair%2Ccor-undo%2Cprobe-dangling-pkg%2Cprobe-goalstress-today%2Cprobe-un-noagent%2Cqc150l9-q%2Crj-dupe%2Crj-nudge%2Crj-send%2Cseed-cal-bang-q%2Cseed-cal-near-q%2Cseed-cal-passed20-q%2Cseed-cal-passed865-q%2Cseed-cal-soon-q%2Cseed-pkgq-1%2Cseed-pkgq-10%2Cseed-pkgq-2%2Cseed-pkgq-3%2Cseed-pkgq-4%2Cseed-pkgq-7%2Cseed-pkgq-9%2Cseed-query-1%2Cseed-query-10%2Cseed-query-11%2Cseed-query-12%2Cseed-query-19%2Cseed-query-2%2Cseed-query-20%2Cseed-query-21%2Cseed-query-22%2Cseed-query-23%2Cseed-query-3%2Cseed-query-4%2Cseed-query-5%2Cseed-query-6%2Cseed-query-7%2Cseed-query-8%2Cseed-query-9"
+ },
+ {
+  "lock": "B1",
+  "where": "390x844 active: the filtered list's count equals the card's",
+  "ok": true,
+  "detail": "40 rows vs card 40"
+ },
+ {
+  "lock": "B1",
+  "where": "390x844 with card opens /^\\/queries\\?ids=/",
+  "ok": true,
+  "detail": "/queries?ids=cor-move-b%2Ccor-pair%2Ccor-undo%2Cprobe-dangling-pkg%2Cprobe-goalstress-today%2Cprobe-un-noagent%2Cqc150l9-q%2Crj-nudge%2Cseed-cal-bang-q%2Cseed-cal-near-q%2Cseed-cal-passed20-q%2Cseed-cal-soon-q%2Cseed-pkgq-1%2Cseed-pkgq-10%2Cseed-pkgq-2%2Cseed-pkgq-4%2Cseed-pkgq-7%2Cseed-pkgq-9%2Cseed-query-1%2Cseed-query-10%2Cseed-query-19%2Cseed-query-2%2Cseed-query-21%2Cseed-query-22%2Cseed-query-23%2Cseed-query-3%2Cseed-query-4%2Cseed-query-5%2Cseed-query-6%2Cseed-query-8"
+ },
+ {
+  "lock": "B1",
+  "where": "390x844 with: the filtered list's count equals the card's",
+  "ok": true,
+  "detail": "30 rows vs card 30"
+ },
+ {
+  "lock": "B1",
+  "where": "390x844 closed card opens /^\\/queries\\?ids=/",
+  "ok": true,
+  "detail": "/queries?ids=seed-query-18%2Crej-query-1%2Cseed-query-13%2Cseed-query-15%2Cseed-query-16%2Ccor-move-c%2Cseed-pkgq-8%2Cseed-pkgq-6%2Cseed-pkgq-5%2Cseed-query-14%2Ccor-closed"
+ },
+ {
+  "lock": "B1",
+  "where": "390x844 closed: the filtered list's count equals the card's",
+  "ok": true,
+  "detail": "11 rows vs card 11"
+ },
+ {
+  "lock": "B1",
+  "where": "390x844 agents card opens /^\\/agents$/",
+  "ok": true,
+  "detail": "/agents"
+ }
+]
