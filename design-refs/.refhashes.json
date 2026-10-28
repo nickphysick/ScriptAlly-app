@@ -878,7 +878,8 @@
     "design-refs/dashboard-v116/shots/08-agents-key-notqueried-1440x900.png": "0ba5c4f97c6f56ced0f1ec98be83a9860bf3b5d7de99e32651127b4a398d714f",
     "design-refs/dashboard-v116/shots/09-founding-rest-1440x900.png": "2aea4e71918bf3eb92cacd8e69b2185527a9739b9612b08e60dbddb8c69dc0b4",
     "design-refs/dashboard-v116/shots/10-founding-hover-1440x900.png": "de4d278d5675c28598d02b17219cb83a5a0728b53c4b6897e4945e3dfa674307",
-    "design-refs/dashboard-v116/shots/11-onscreen-rule-agents-1440x700.png": "1eddc80bb38a2a3a05faca6c62b10a0a8566ac902dcf5b3d369dd22df6ed9c8a"
+    "design-refs/dashboard-v116/shots/11-onscreen-rule-agents-1440x700.png": "1eddc80bb38a2a3a05faca6c62b10a0a8566ac902dcf5b3d369dd22df6ed9c8a",
+    "design-refs/responses-v5/responses-v5.html": "292bf87fc6d25793784f9d2f5cc7f28a217ca34dad2ba371f727210d7aafc1e9"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",

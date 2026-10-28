@@ -7,7 +7,9 @@
  */
 import { describe, expect, it } from "vitest";
 import { QueryStatus } from "../types";
+import { whereCounts } from "./qcSummary";
 import {
+  busiestBracket, firstAnswer, goneQuiet, hasNote, isEarlyDays, medianDays, nextExpected, noteItems, noteSplit, pageCounts, passDepth, pctOf, speedByKind, typicalWait, waitBrackets,
   answerFoot, answerIndex, answerStand, carouselOrder, listNos, monthGroups, nextPinned, replyPct, replyRate, respCounts, respItem, respItems, saidLine, stillOut, tallyPlan, tallySince,
   type RespRowInput,
 } from "./responses";
@@ -160,3 +162,119 @@ describe("RS2 D · the panel's words, built only from recorded facts", () => {
   });
 });
 
+
+
+/* ══ Responses v5 · Phase 1 — each assertion was run red first against the mutation named beside it ══ */
+const DAY5 = 86_400_000;
+const Q = QueryStatus;
+const at = (status: QueryStatus, sent: number, steps: [QueryStatus, number][], o: Partial<RespRowInput> = {}) =>
+  row(status, { sentMs: sent, spans: [[Q.QUERIED, sent], ...steps.map(([s, d]) => [s, sent + d * DAY5] as [QueryStatus, number])], ...o });
+const S0 = D(2026, 6, 1);
+
+describe("RS5 · the four wait brackets", () => {
+  /* mutation: count only `passed`/`more` in a bar (drop the no-reply push) → the sum falls short of answered */
+  it("bracket segments sum to each bar's total, and the bars plus the undated sum to the answered count", () => {
+    const rows = [
+      at(Q.REJECTED, S0, [[Q.REJECTED, 3]]),
+      at(Q.PARTIAL_SENT, S0, [[Q.PARTIAL_REQUESTED, 14], [Q.PARTIAL_SENT, 16]]),
+      at(Q.NO_RESPONSE, S0, [[Q.NO_RESPONSE, 60]]),
+      at(Q.FULL_REQUESTED, S0, [[Q.FULL_REQUESTED, 15]]),
+      at(Q.REJECTED, S0, [[Q.PARTIAL_REQUESTED, 30], [Q.REJECTED, 90]], { furthest: "partial" }),
+      row(Q.REJECTED, { sentMs: null }),
+      at(Q.QUERIED, S0, []),
+    ];
+    const items = respItems(rows);
+    const { bars, undated } = waitBrackets(items);
+    for (const b of bars) expect(b.more.length + b.passed.length + b.noReply.length).toBe(b.total);
+    expect(bars.reduce((n, b) => n + b.total, 0) + undated).toBe(respCounts(items).answered);
+    expect(bars.map((b) => b.total)).toEqual([2, 1, 1, 1]);
+    expect(undated).toBe(1);
+    /* the bar is placed by the FIRST answer: the pass after a partial request sits in 4 to 8 weeks as a request */
+    expect(bars[2].more.map((i) => i.answer)).toEqual(["passed"]);
+    expect(busiestBracket(bars)?.label).toBe("Within 2 weeks");
+  });
+});
+
+describe("RS5 · the typical wait", () => {
+  /* mutation: drop the `kind !== "noReply"` filter → the 200-day close lifts the median from 10 to 20 */
+  it("excludes no-reply closes", () => {
+    const items = respItems([
+      at(Q.REJECTED, S0, [[Q.REJECTED, 10]]),
+      at(Q.PARTIAL_REQUESTED, S0, [[Q.PARTIAL_REQUESTED, 4]]),
+      at(Q.REJECTED, S0, [[Q.REJECTED, 20]]),
+      at(Q.NO_RESPONSE, S0, [[Q.NO_RESPONSE, 200]]),
+    ]);
+    expect(typicalWait(items)).toBe(10);
+    expect(medianDays([])).toBeNull();
+    const sp = speedByKind(items);
+    expect([sp.more, sp.passed, sp.noReply]).toEqual([4, 20, 200]);
+    expect(sp.quickest?.first.days).toBe(4);
+  });
+  it("counts a first answer from the query, and falls back to the item's own answer when the history dates none", () => {
+    const i = respItem(row(Q.REJECTED, { sentMs: S0, spans: [], query: { rejectedDate: new Date(S0 + 9 * DAY5).toISOString() } }))!;
+    expect(firstAnswer(i)?.days).toBe(9);
+    expect(firstAnswer(respItem(row(Q.REJECTED, { sentMs: null }))!)).toBeNull();
+  });
+});
+
+describe("RS5 · how far the passes read, and the notes", () => {
+  /* mutation: count every pass as "query" → partial and full fall to 0 */
+  it("pass depth is the Query Centre's `furthest`", () => {
+    const items = respItems([
+      at(Q.REJECTED, S0, [[Q.REJECTED, 3]], { furthest: "query" }),
+      at(Q.REJECTED, S0, [[Q.REJECTED, 3]], { furthest: "partial" }),
+      at(Q.REJECTED, S0, [[Q.REJECTED, 3]], { furthest: "full" }),
+      at(Q.REJECTED, S0, [[Q.REJECTED, 3]], { furthest: "full" }),
+      at(Q.FULL_SENT, S0, [[Q.FULL_REQUESTED, 3]], { furthest: "full" }),
+    ]);
+    expect(passDepth(items)).toEqual({ query: 1, partial: 1, full: 2, total: 4 });
+  });
+  /* mutation: `hasNote` = any non-empty note → the standard rejection's text counts */
+  it("a note is a detailed rejection with text, or an R&R's notes (D5)", () => {
+    const items = respItems([
+      at(Q.REJECTED, S0, [[Q.REJECTED, 3]], { query: { rejectionFeedbackType: "detailed", rejectionFeedbackText: "Lovely voice." } }),
+      at(Q.REJECTED, S0, [[Q.REJECTED, 4]], { query: { rejectionFeedbackType: "detailed", rejectionFeedbackText: "  " } }),
+      at(Q.REJECTED, S0, [[Q.REJECTED, 5]], { query: { rejectionFeedbackType: "standard", rejectionFeedbackText: "Not for me." } }),
+      at(Q.REVISE_RESUBMIT, S0, [[Q.REVISE_RESUBMIT, 6]], { query: { rrNotes: "Tighten the middle." } }),
+      at(Q.PARTIAL_REQUESTED, S0, [[Q.PARTIAL_REQUESTED, 7]]),
+    ]);
+    expect(noteSplit(items)).toEqual({ withNote: 1, form: 2, total: 3 });
+    expect(items.filter(hasNote).map((i) => i.answer)).toEqual(["passed", "rr"]);
+    expect(noteItems(items).map((i) => i.answer)).toEqual(["rr", "passed"]);
+  });
+});
+
+describe("RS5 · gone quiet and the next expected reply are the Query Centre's", () => {
+  const nowMs = D(2026, 10, 28);
+  const w = (expectedMs: number | null, stageStartMs: number | null, status = Q.QUERIED) => ({ ...row(status, { expectedMs, expectedKind: expectedMs == null ? null : "reply" }), stageStartMs });
+  const rows = [
+    w(nowMs - 5 * DAY5, nowMs - 60 * DAY5),   /* past the reply date, inside the nudge window: NOT gone quiet */
+    w(nowMs - 40 * DAY5, nowMs - 100 * DAY5), /* past the nudge window: gone quiet */
+    w(null, nowMs - 120 * DAY5),              /* undated, long in the stage: gone quiet */
+    w(nowMs + 3 * DAY5, nowMs - 20 * DAY5),   /* still to come */
+    w(nowMs + 9 * DAY5, nowMs - 10 * DAY5),
+    w(nowMs - 40 * DAY5, nowMs - 100 * DAY5, Q.PARTIAL_SENT), /* not still waiting: Partial sent */
+  ];
+  /* mutation: re-derive as "expected date passed" → the first row counts and the figure reads 3 */
+  it("gone quiet equals the Query Centre's quiet set over the still-waiting rows", () => {
+    expect(goneQuiet(rows, nowMs)).toHaveLength(whereCounts(rows.filter((r) => r.status === Q.QUERIED), nowMs).quiet);
+    /* membership, not just the count: the naive rule also counts 2 here, but the wrong two */
+    expect(goneQuiet(rows, nowMs).map((r) => r.id)).toEqual([rows[1].id, rows[2].id]);
+  });
+  /* mutation: take the earliest expected date without the "still ahead" test → a past date is "next" */
+  it("the next reply is the earliest expected reply still ahead", () => {
+    expect(nextExpected(rows, nowMs)?.expectedMs).toBe(nowMs + 3 * DAY5);
+    expect(nextExpected(rows.slice(0, 3), nowMs)).toBeNull();
+  });
+});
+
+describe("RS5 · the page's counts", () => {
+  it("sent is answered plus still waiting; early days is 1 to 4 answers", () => {
+    const rows = [at(Q.REJECTED, S0, [[Q.REJECTED, 3]]), at(Q.PARTIAL_REQUESTED, S0, [[Q.PARTIAL_REQUESTED, 3]]), at(Q.QUERIED, S0, []), at(Q.QUERIED, S0, []), row(Q.WITHDRAWN)];
+    const c = pageCounts(respItems(rows), rows);
+    expect(c).toMatchObject({ more: 1, passed: 1, noReply: 0, waiting: 2, answered: 2, replies: 2, sent: 4 });
+    expect(pctOf(1, 4)).toBe(25);
+    expect(pctOf(1, 0)).toBeNull();
+    expect([0, 1, 4, 5].map(isEarlyDays)).toEqual([false, true, true, false]);
+  });
+});

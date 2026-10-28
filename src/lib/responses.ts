@@ -25,7 +25,7 @@
  */
 import { QueryStatus, type Query } from "../types";
 import { MONTHS_SHORT } from "./dates";
-import type { ExpectedKind, Furthest } from "./qcSummary";
+import { whereItStands, type ExpectedKind, type Furthest } from "./qcSummary";
 import type { StageHistory } from "./qcStages";
 
 const DAY = 86_400_000;
@@ -51,6 +51,8 @@ export interface RespRowInput {
   expectedKind: ExpectedKind | null;
   dayN: number | null;
   furthest: Furthest;
+  /** when the query reached the stage it stands at (the Query Centre's `stageStartMs`); the nudge window reads it */
+  stageStartMs?: number | null;
 }
 
 export interface RespItem<R extends RespRowInput = RespRowInput> {
@@ -352,3 +354,139 @@ export function answerFoot(i: RespItem, nowMs: number): { status: string; detail
     hot: false, label: "Edit the response", act: "edit",
   };
 }
+
+
+/* ══ Responses v5 (design-refs/responses-v5/responses-v5.html) — the new figures, all pure, all over the same items ══
+ * ⚠️ "GONE QUIET" AND "THE NEXT REPLY YOU CAN EXPECT" ARE THE QUERY CENTRE'S OWN: `whereItStands` (the v141.1 nudge
+ *    window) and the row's `expectedMs` / `expectedKind` (`expectedFor`). Nothing here re-derives a window or a date.
+ * ⚠️ "Still waiting" is status Queried, as v2's `stillOut`: the queries no agent has answered at all.
+ */
+export type FirstKind = "more" | "passed" | "noReply";
+export interface FirstAnswer { status: QueryStatus; kind: FirstKind; ms: number; days: number }
+const FIRST_KIND: Partial<Record<QueryStatus, FirstKind>> = {
+  [QueryStatus.PARTIAL_REQUESTED]: "more", [QueryStatus.FULL_REQUESTED]: "more", [QueryStatus.REVISE_RESUBMIT]: "more",
+  [QueryStatus.OFFER]: "more", [QueryStatus.REJECTED]: "passed", [QueryStatus.NO_RESPONSE]: "noReply",
+};
+/**
+ * The agent's FIRST answer: the first dated step after Queried that is an agent's answer (a request, an offer, a pass,
+ * or the no-reply close). Days are counted from the query. When no such step is dated in the history, the item's own
+ * answer is the only answer known, and it is used; with no dates at all, null (nothing is invented).
+ */
+export function firstAnswer(i: RespItem): FirstAnswer | null {
+  const sent = i.queriedMs;
+  if (sent == null) return null;
+  for (const s of i.row.history.spans) {
+    const kind = FIRST_KIND[s.status];
+    if (kind) return { status: s.status, kind, ms: s.startMs, days: Math.max(0, wholeDays(sent, s.startMs)) };
+  }
+  if (i.answerMs == null) return null;
+  return { status: i.row.status, kind: i.group, ms: i.answerMs, days: Math.max(0, wholeDays(sent, i.answerMs)) };
+}
+
+/** The typical (median) of a list of days: the middle value, the upper of the two middles when the count is even
+ *  (the reference's own definition, `v[floor(n/2)]`). Null for an empty list. */
+export function medianDays(list: readonly number[]): number | null {
+  if (!list.length) return null;
+  const v = list.slice().sort((a, b) => a - b);
+  return v[Math.floor(v.length / 2)];
+}
+/** D4 — "your typical wait for a reply": the median days to a first answer over requests and passes. No-reply closes are excluded: a close is the writer's act, not a reply. */
+export function typicalWait(items: readonly RespItem[]): number | null {
+  const d: number[] = [];
+  for (const i of items) { const f = firstAnswer(i); if (f && f.kind !== "noReply") d.push(f.days); }
+  return medianDays(d);
+}
+
+export interface WaitBracket<R extends RespRowInput = RespRowInput> {
+  key: "w2" | "w4" | "w8" | "over";
+  label: string;
+  more: RespItem<R>[]; passed: RespItem<R>[]; noReply: RespItem<R>[];
+  total: number;
+}
+export const BRACKETS = [
+  { key: "w2", label: "Within 2 weeks", lo: 0, hi: 14 },
+  { key: "w4", label: "2 to 4 weeks", lo: 15, hi: 28 },
+  { key: "w8", label: "4 to 8 weeks", lo: 29, hi: 56 },
+  { key: "over", label: "Over 8 weeks", lo: 57, hi: Number.POSITIVE_INFINITY },
+] as const;
+/**
+ * D4 — the four bars of "How long agents took": every answered item by the days to its FIRST answer, no-reply closes
+ * INCLUDED, each bar split by the kind of that first answer. `undated` counts the answered items with no dated first
+ * answer, so `sum(total) + undated` is always the answered count.
+ */
+export function waitBrackets<R extends RespRowInput>(items: readonly RespItem<R>[]): { bars: WaitBracket<R>[]; undated: number } {
+  const bars: WaitBracket<R>[] = BRACKETS.map((b) => ({ key: b.key, label: b.label, more: [], passed: [], noReply: [], total: 0 }));
+  let undated = 0;
+  for (const i of items) {
+    const f = firstAnswer(i);
+    if (!f) { undated++; continue; }
+    const at = BRACKETS.findIndex((b) => f.days >= b.lo && f.days <= b.hi);
+    bars[at][f.kind].push(i); bars[at].total++;
+  }
+  return { bars, undated };
+}
+/** the busiest bar ("Most of your answers came {label} after you queried"); the earliest bar wins a tie */
+export function busiestBracket(bars: readonly WaitBracket[]): WaitBracket | null {
+  let best: WaitBracket | null = null;
+  for (const b of bars) if (b.total > 0 && (!best || b.total > best.total)) best = b;
+  return best;
+}
+/** the typical first-answer wait for each kind, and the writer's quickest request (the showcase's subject card) */
+export function speedByKind<R extends RespRowInput>(items: readonly RespItem<R>[]): { more: number | null; passed: number | null; noReply: number | null; quickest: { item: RespItem<R>; first: FirstAnswer } | null } {
+  const d: Record<FirstKind, number[]> = { more: [], passed: [], noReply: [] };
+  let quickest: { item: RespItem<R>; first: FirstAnswer } | null = null;
+  for (const i of items) {
+    const f = firstAnswer(i);
+    if (!f) continue;
+    d[f.kind].push(f.days);
+    if (f.kind === "more" && (!quickest || f.days < quickest.first.days)) quickest = { item: i, first: f };
+  }
+  return { more: medianDays(d.more), passed: medianDays(d.passed), noReply: medianDays(d.noReply), quickest };
+}
+
+/** how far the passes read: at the query, after the partial, after the full (`furthest`, the Query Centre's) */
+export function passDepth(items: readonly RespItem[]): { query: number; partial: number; full: number; total: number } {
+  const out = { query: 0, partial: 0, full: 0, total: 0 };
+  for (const i of items) if (i.group === "passed") { out[i.furthest]++; out.total++; }
+  return out;
+}
+/** D5 — a personal note: a detailed rejection with its text, or the notes on a revise and resubmit */
+export const hasNote = (i: RespItem): boolean => !!i.note && ((i.group === "passed" && i.personal) || i.answer === "rr");
+/** the passes with a note against the form replies */
+export function noteSplit(items: readonly RespItem[]): { withNote: number; form: number; total: number } {
+  let withNote = 0, total = 0;
+  for (const i of items) if (i.group === "passed") { total++; if (hasNote(i)) withNote++; }
+  return { withNote, form: total - withNote, total };
+}
+/** "In their words": every item with a note, newest answer first */
+export function noteItems<R extends RespRowInput>(items: readonly RespItem<R>[]): RespItem<R>[] {
+  return items.filter(hasNote).sort((a, b) => (b.answerMs ?? 0) - (a.answerMs ?? 0) || a.id.localeCompare(b.id));
+}
+
+/** queries no agent has answered yet (status Queried), the rows themselves */
+export const waitingRows = <R extends RespRowInput>(rows: readonly R[]): R[] => rows.filter((r) => r.status === QueryStatus.QUERIED);
+/** D6 — the still-waiting queries the Query Centre calls Gone quiet: `whereItStands` over the row's own expected date */
+export function goneQuiet<R extends RespRowInput>(rows: readonly R[], nowMs: number): R[] {
+  return waitingRows(rows).filter((r) => whereItStands({ status: r.status, expectedMs: r.expectedMs, stageStartMs: r.stageStartMs ?? null }, nowMs) === "quiet");
+}
+/** the next reply you can expect: the earliest expected REPLY date still ahead, over the still-waiting queries */
+export function nextExpected<R extends RespRowInput>(rows: readonly R[], nowMs: number): R | null {
+  let best: R | null = null;
+  for (const r of waitingRows(rows)) {
+    if (r.expectedKind !== "reply" || r.expectedMs == null || r.expectedMs <= nowMs) continue;
+    if (!best || r.expectedMs < best.expectedMs!) best = r;
+  }
+  return best;
+}
+
+/** the page's counts: the three answers, the still waiting, and "sent" = answered + waiting (Withdrawn and Signed are not on the page) */
+export interface PageCounts extends RespCounts { waiting: number; replies: number; sent: number }
+export function pageCounts(items: readonly RespItem[], rows: readonly { status: QueryStatus }[]): PageCounts {
+  const c = respCounts(items), waiting = stillOut(rows);
+  return { ...c, waiting, replies: c.more + c.passed, sent: c.answered + waiting };
+}
+/** a whole percentage, or null with nothing to divide by */
+export const pctOf = (a: number, b: number): number | null => (b ? Math.round((a / b) * 100) : null);
+/** the showcase needs this many answers before it fills in; below it, the warming-up cards */
+export const WARM_NEED = 5;
+export const isEarlyDays = (answered: number): boolean => answered > 0 && answered < WARM_NEED;
