@@ -30,6 +30,7 @@ export class Ledger {
 /** The in-page breaks: each is a lock's own named mutation, applied as a stylesheet after load. */
 export const CSS_MUTATIONS: Record<string, string> = {
   "A1-no-fit": `.d116-stack { translate: 0 0 !important; }`,
+  "D1-rust": `.d58 [data-d71="band"] { background: #a2452a !important; }`,
   "C1-focus-within": `.d58 .d105-fw.d116-tilt:focus-within { rotate: 0deg !important; }`,
 };
 

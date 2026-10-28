@@ -231,3 +231,54 @@ test("DB118-C1 · the founding card keeps its tilt", async ({ page }) => {
   }
   L.done(24);
 });
+
+test("DB118-D1 · 'Your move' in burgundy, and the step chips", async ({ page }) => {
+  const L = new Ledger("D1");
+  await openDash(page, { width: 1440, height: 900 });
+  const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  let sends = 0, withSteps = 0, withPast = 0;
+  const seen = new Set<string>();
+  for (let i = 0; i < 14; i++) {
+    const r = await page.evaluate(() => {
+      const card = [...document.querySelectorAll<HTMLElement>('[data-d71="task"][data-key]')].find((e) => e.getBoundingClientRect().height > 0);
+      if (!card) return null;
+      const av = card.querySelector<HTMLElement>(".d71-av");
+      const band = card.querySelector<HTMLElement>('[data-d71="band"]');
+      const btn = card.querySelector<HTMLElement>('[data-d71="next"]');
+      const segs = [...card.querySelectorAll<HTMLElement>('[data-d71="segment"]')];
+      const past = segs.find((s) => s.classList.contains("is-past"));
+      const steps = [...card.querySelectorAll<HTMLElement>('[data-d71="step-done"], [data-d71="step-todo"]')].map((s) => ({ done: s.dataset.d71 === "step-done", label: (s.firstChild?.textContent ?? "").trim(), date: s.querySelector("small")?.textContent ?? "" }));
+      const cs = (e: HTMLElement | null | undefined) => (e ? getComputedStyle(e) : null);
+      return {
+        key: card.dataset.key ?? "", send: !!av?.classList.contains("d71-av--send"),
+        band: cs(band)?.backgroundColor, title: band?.querySelector('[data-d71="band-title"]')?.textContent, av: cs(av)?.backgroundColor, pager: cs(btn)?.backgroundColor,
+        past: past ? { bg: cs(past)!.backgroundColor, op: cs(past)!.opacity } : null, steps,
+      };
+    });
+    if (!r || seen.has(r.key)) break;
+    seen.add(r.key);
+    if (r.send) {
+      sends++;
+      L.check("D1", `${r.key}: the band is burgundy, the title white "Your move"`, r.band === "rgb(110, 52, 38)" && r.title === "Your move", `${r.band} ${r.title}`);
+      L.check("D1", `${r.key}: the avatar takes the accent`, r.av === "rgb(110, 52, 38)", String(r.av));
+      L.check("D1", `${r.key}: the pager buttons are a .18 white wash`, r.pager === "rgba(255, 255, 255, 0.18)", String(r.pager));
+      if (r.past) { withPast++; L.check("D1", `${r.key}: a past segment is rgba(110,52,38,.4)`, r.past.bg === "rgba(110, 52, 38, 0.4)" && r.past.op === "1", JSON.stringify(r.past)); }
+    }
+    if (r.steps.length) {
+      withSteps++;
+      const todo = r.steps.filter((s) => !s.done);
+      L.check("D1", `${r.key}: one dashed to-do, last`, todo.length === 1 && !r.steps[r.steps.length - 1].done, JSON.stringify(r.steps));
+      L.check("D1", `${r.key}: no stage both done and to do`, !r.steps.some((s) => s.done && s.label === todo[0]?.label), JSON.stringify(r.steps));
+      const ms = r.steps.filter((s) => s.done && /\d/.test(s.date)).map((s) => { const [d, m] = s.date.split(" "); return MON.indexOf(m) * 40 + Number(d); });
+      L.check("D1", `${r.key}: the done stages are in date order`, ms.every((v, j) => j === 0 || v >= ms[j - 1]), JSON.stringify(r.steps));
+    }
+    const next = page.locator('[data-d71="next"]').first();
+    if (!(await next.count()) || (await next.isDisabled())) break;
+    await next.click();
+    await page.waitForTimeout(250);
+  }
+  L.check("D1", "population: 'Your move' cards seen", sends > 0, String(sends));
+  L.check("D1", "population: a card with step chips", withSteps > 0, String(withSteps));
+  L.check("D1", "population: a past segment on a 'Your move' card", withPast > 0, String(withPast));
+  L.done(10);
+});

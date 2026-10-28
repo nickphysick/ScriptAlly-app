@@ -221,7 +221,7 @@ export const Dash71Task: React.FC<{
       role="region"
       aria-label="Your tasks"
       aria-live="off"
-      style={{ ["--d71-band" as string]: m.band, ["--d71-band-ink" as string]: m.bandInk, ["--d71-accent" as string]: m.accent } as React.CSSProperties}
+      style={{ ["--d71-band" as string]: m.band, ["--d71-band-ink" as string]: m.bandInk, ["--d71-accent" as string]: m.accent, ["--d71-pager" as string]: m.pager, ...(m.past ? { ["--d71-past" as string]: m.past, ["--d71-past-op" as string]: 1 } : {}) } as React.CSSProperties}
       onMouseEnter={hold}
       onMouseLeave={onLeave}
       onFocus={hold}

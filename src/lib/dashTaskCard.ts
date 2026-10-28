@@ -26,7 +26,9 @@ import { closeAfterDays, NUDGE_GRACE_DAYS } from "./taskPrecedence";
 import { numberWords } from "./livingHeaders";
 import { dayMonth, formatDate } from "./dates";
 
-export type TaskKind = "nudge" | "close" | "send" | "other";
+import { TASK_KIND, kindForGroup, type DesktopKind, type TaskKind } from "./taskKinds";
+import type { StageSpan } from "./qcStages";
+export type { TaskKind } from "./taskKinds";
 
 export const DWELL_MS = 7000;
 export const MAX_SEGMENTS = 12;
@@ -40,11 +42,13 @@ const WEEK = 7 * DAY;
  * kind's colour. `accent` colours the progress segments under the band. The v71 kicker pill and tinted head are
  * retired, with their `kicker` and `tint`.
  */
-export const KIND_STYLE: Record<TaskKind, { title: string | null; band: string; bandInk: string; accent: string }> = {
-  nudge: { title: "Time to nudge", band: "#2a3a52", bandInk: "#ffffff", accent: "#2a3a52" },
-  close: { title: "Consider closing", band: "#e4dfd7", bandInk: "#1c130f", accent: "#7d7064" },
-  send: { title: "Your move", band: "#a2452a", bandInk: "#ffffff", accent: "#a2452a" },
-  other: { title: null, band: "#5f7591", bandInk: "#ffffff", accent: "#5f7591" },
+/* v118.1 Part D — the colours are ONE map shared with the phone (lib/taskKinds), read here by kind. "Your move" is
+   burgundy #6e3426 on the desktop (Nick's ruling); the other three kinds are unchanged. */
+export const KIND_STYLE: Record<TaskKind, DesktopKind> = {
+  send: TASK_KIND.send.desktop,
+  nudge: TASK_KIND.nudge.desktop,
+  close: TASK_KIND.close.desktop,
+  other: TASK_KIND.other.desktop,
 };
 
 /** The task types whose card is a request for pages, and the word for what was asked for. */
@@ -57,11 +61,42 @@ const SEND_MATERIAL: Record<string, "partial" | "full" | "revision"> = {
 /** The step still to do, by material. */
 const TODO_STEP: Record<"partial" | "full" | "revision", string> = { partial: "Partial sent", full: "Full sent", revision: "Resubmitted" };
 
+/**
+ * ⚠️ v118.1 Part D — THE KIND IS THE TASK'S GROUP, AS ON THE PHONE (`kindForGroup`): "Agents are waiting" is the writer's
+ * move, an offer included. It used to be "send" only for a request for pages, which filed an offer as "other" (slate).
+ * What the card SAYS still depends on the task: only a request for pages gets the "Send your …" title and the step chips.
+ */
 export function kindOf(item: Pick<ListItem, "group" | "taskType">): TaskKind {
-  if (item.group === "nudge") return "nudge";
-  if (item.group === "quiet") return "close";
-  if (item.group === "req" && item.taskType && SEND_MATERIAL[item.taskType]) return "send";
-  return "other";
+  return kindForGroup(item.group);
+}
+
+/** The status a request answers, and the step still to do, by material. */
+const REQ_STATUS: Record<"partial" | "full" | "revision", QueryStatus> = { partial: QueryStatus.PARTIAL_REQUESTED, full: QueryStatus.FULL_REQUESTED, revision: QueryStatus.REVISE_RESUBMIT };
+const TODO_STATUS: Record<"partial" | "full" | "revision", QueryStatus> = { partial: QueryStatus.PARTIAL_SENT, full: QueryStatus.FULL_SENT, revision: QueryStatus.RESUBMITTED };
+
+/**
+ * v118.1 Part D — the send card's step chips: the query's dated stages in order, ending with the request, then the one
+ * step still to do, dashed. The history can carry a stage the query has since moved back from (a Full sent dated the
+ * same day as a later Full requested, measured on the account), so:
+ *  - a stage that is the step still to do is never shown as done;
+ *  - nothing dated after the request is shown;
+ *  - with no dated request, the request is shown undated.
+ */
+export function sendSteps(spans: readonly StageSpan[], material: "partial" | "full" | "revision", requested: QueryStatus = REQ_STATUS[material]): TaskStep[] {
+  const todo = { label: TODO_STEP[material], date: "—", done: false };
+  const todoStatus = TODO_STATUS[material];
+  let at = -1;
+  for (let i = spans.length - 1; i >= 0; i--) if (spans[i].status === requested) { at = i; break; }
+  if (at < 0) return [{ label: STAGE_NAME[requested], date: "", done: true }, todo];
+  const req = spans[at];
+  const done: TaskStep[] = [];
+  let last: QueryStatus | null = null;
+  for (const s of spans.slice(0, at)) {
+    if (s.status === todoStatus || s.status === requested || s.startMs > req.startMs || s.status === last) continue;
+    done.push({ label: STAGE_NAME[s.status], date: dayMonth(s.startMs), done: true });
+    last = s.status;
+  }
+  return [...done, { label: STAGE_NAME[requested], date: dayMonth(req.startMs), done: true }, todo];
 }
 
 export interface TaskBar {
@@ -91,6 +126,9 @@ export interface TaskCardModel {
   band: string;
   bandInk: string;
   accent: string;
+  /** v118.1 — a past segment's colour (null: the accent at the card's own .45) and the pager buttons' wash */
+  past: string | null;
+  pager: string;
   /** the title, split round the name so the name can be set bold */
   pre: string;
   who: string;
@@ -179,7 +217,7 @@ export function taskCardModel(item: ListItem, label: string, ctx: TaskCtx): Task
   const first = firstName(agent);
   const agency = (agent?.agency ?? "").trim();
   const base = {
-    key: item.key, kind, bandTitle: style.title ?? label, band: style.band, bandInk: style.bandInk, accent: style.accent,
+    key: item.key, kind, bandTitle: style.title ?? label, band: style.band, bandInk: style.bandInk, accent: style.accent, past: style.past, pager: style.pager,
     sub: item.agency || item.fact, initials: item.initials, date: item.date, queryId,
   };
 
@@ -219,16 +257,17 @@ export function taskCardModel(item: ListItem, label: string, ctx: TaskCtx): Task
     return { ...base, pre, who, post, line, bar, steps: null, plain: `${pre.toLowerCase()}${who}${post}` };
   }
 
-  if (kind === "send") {
-    const material = SEND_MATERIAL[item.taskType as string];
+  const material = SEND_MATERIAL[item.taskType as string];
+  if (kind === "send" && material) {
     const pre = `Send your ${material} to `;
     const asked = qc?.stageStartMs ?? null;
     const asker = agency || first || "The agent";
     const line = asked != null
       ? `${asker} asked for the ${material} on ${long(asked)}. ${ctx.nowMs - asked < DAY ? "It came in today." : `It’s been with you ${spanWords(ctx.nowMs - asked)}.`}`
       : `${asker} asked for the ${material}.`;
-    const done = (qc?.history.spans ?? []).slice(-2).map((s) => ({ label: STAGE_NAME[s.status], date: dayMonth(s.startMs), done: true }));
-    const steps: TaskStep[] = [...done, { label: TODO_STEP[material], date: "—", done: false }];
+    /* an offer's "send the full" answers the offer; every other send answers its own request */
+    const requested = item.taskType === "offer_send_full" ? QueryStatus.OFFER : REQ_STATUS[material];
+    const steps = sendSteps(qc?.history.spans ?? [], material, requested);
     return { ...base, pre, who, post: "", line, bar: null, steps, plain: `${pre.toLowerCase()}${who}` };
   }
 

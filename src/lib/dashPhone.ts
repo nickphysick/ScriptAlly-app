@@ -17,6 +17,7 @@ import { tileCourt } from "./qcSummary";
 import { CLOSED_BUCKETS, type ClosedBucketKey, type ClosedTile } from "./dashClosed";
 import type { AgentCoverage } from "./dashFirstUse";
 import type { ListItem } from "./dashList";
+import { TASK_KIND, kindForGroup, type PhoneKindStyle, type TaskKind } from "./taskKinds";
 import { TIERS, cardTier, type FoundingStats } from "./foundingStats";
 import { RANK_NAMES } from "./foundingCard";
 import { MONTHS_SHORT } from "./dates";
@@ -142,20 +143,21 @@ export type PhoneKind = "move" | "nudge" | "close" | "house";
  * ⚠️ Not the desktop card's `kindOf`, which files an offer as "other" because it is not a send — on the phone an offer
  * waiting on the writer reads as their move, which is what the req group means.
  */
-export const phoneKindOf = (item: Pick<ListItem, "group">): PhoneKind =>
-  item.group === "req" ? "move" : item.group === "nudge" ? "nudge" : item.group === "quiet" ? "close" : "house";
+export const phoneKindOf = (item: Pick<ListItem, "group">): PhoneKind => PHONE_OF[kindForGroup(item.group)];
 
 /**
  * ⚠️ THE ONE MAP. Text on these tints is always the ink; only the kicker takes the kind's colour. "Your move" is
  * the soft pink while the burgundy alternative is still being chosen — change it here and every phone surface
  * follows.
  */
-export const PHONE_KIND: Record<PhoneKind, { tint: string; ring: string | null; kicker: string; disc: string; glyph: string }> = {
-  move: { tint: "#f5e2da", ring: "#eecdc3", kicker: "#8a4030", disc: "#f5e2da", glyph: "#8a4030" },
-  nudge: { tint: "#e6edf6", ring: null, kicker: "#2a3a52", disc: "#2a3a52", glyph: "#ffffff" },
-  close: { tint: "#ece8e2", ring: null, kicker: "#6d665e", disc: "#ece8e2", glyph: "#1c130f" },
-  house: { tint: "#e8edf3", ring: null, kicker: "#5f7591", disc: "#5f7591", glyph: "#ffffff" },
+export const PHONE_KIND: Record<PhoneKind, PhoneKindStyle> = {
+  move: TASK_KIND.send.phone,
+  nudge: TASK_KIND.nudge.phone,
+  close: TASK_KIND.close.phone,
+  house: TASK_KIND.other.phone,
 };
+/** the phone's names for the four kinds */
+const PHONE_OF: Record<TaskKind, PhoneKind> = { send: "move", nudge: "nudge", close: "close", other: "house" };
 
 /** How many tasks follow the hero. */
 export const UP_NEXT_ROWS = 3;

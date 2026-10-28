@@ -236,7 +236,8 @@
   border: 0;
   border-radius: 50%;
   /* v93: on a dark band the round buttons are a white wash; on stone they are white (the ref's .pg) */
-  background: rgba(255, 255, 255, 0.16);
+  /* v118.1 — the kind's own wash (lib/taskKinds): .18 on "Your move"'s burgundy, .16 elsewhere */
+  background: var(--d71-pager, rgba(255, 255, 255, 0.16));
   color: #fff;
   font-family: var(--d58-mono) !important;
   font-size: 13px;
@@ -255,7 +256,8 @@
   padding: 8px 18px 0;
 }
 .d71-prog > i { position: relative; flex: 1 1 0; height: 3px; border-radius: 2px; overflow: hidden; background: rgba(28, 19, 15, 0.1); }
-.d71-prog > i.is-past { background: var(--d71-accent); opacity: 0.45; }
+/* v118.1 — a kind may state its past colour (Your move: rgba(110, 52, 38, .4)); otherwise the accent at .45, as before */
+.d71-prog > i.is-past { background: var(--d71-past, var(--d71-accent)); opacity: var(--d71-past-op, 0.45); }
 .d71-prog > i > b { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: var(--d71-accent); }
 .d71-prog > i > b.is-full { width: 100%; }
 .d71-prog > i > b.is-running { animation: d71Fill linear forwards; }
@@ -290,7 +292,8 @@
   background: #2a3a52;
   color: #fff;
 }
-.d58 .d71-av--send { background: #a2452a; color: #fff; }
+/* v118.1 — the kind's accent from the one map, not a literal of its own */
+.d58 .d71-av--send { background: var(--d71-accent); color: #fff; }
 .d58 .d71-av--nudge { background: #fff; color: #2a3a52; box-shadow: inset 0 0 0 1.5px #2a3a52; }
 .d58 .d71-av--close { background: #a9a39b; color: #fff; }
 .d58 .d71-cal { width: 52px; }

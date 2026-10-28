@@ -38,7 +38,8 @@ describe("the kind of each item", () => {
     expect(kindOf({ group: "nudge", taskType: "nudge_overdue" })).toBe("nudge");
     expect(kindOf({ group: "quiet", taskType: "no_response_close" })).toBe("close");
     for (const t of ["partial_requested", "full_requested", "revise_resubmit", "offer_send_full"]) expect(kindOf({ group: "req", taskType: t })).toBe("send");
-    expect(kindOf({ group: "req", taskType: "offer_received" })).toBe("other");
+    /* ⚠️ RE-POINTED BY v118.1 PART D: the kind is the task's group, so an offer waiting on the writer is "Your move" */
+    expect(kindOf({ group: "req", taskType: "offer_received" })).toBe("send");
     expect(kindOf({ group: "house", taskType: null })).toBe("other");
     const other = taskCardModel(item("house", "x", "", null, { pre: "Add genres for ", who: "Ann", action: { kind: "route", tab: "agents" } }), "Housekeeping", ctx);
     expect([other.bandTitle, other.band, other.bandInk, other.plain]).toEqual(["Housekeeping", "#5f7591", "#ffffff", "add genres for Ann"]);
@@ -60,7 +61,8 @@ describe("C1 — bands (v93), accents and titles, as tabled", () => {
   });
   it("send", () => {
     const m = taskCardModel(item("req", "q3", "Jonathan Marsh", "full_requested"), "Agents are waiting", ctx);
-    expect([m.bandTitle, m.band, m.bandInk, m.accent, `${m.pre}${m.who}`]).toEqual(["Your move", "#a2452a", "#ffffff", "#a2452a", "Send your full to Jonathan Marsh"]);
+    /* ⚠️ RE-POINTED BY v118.1 PART D: "Your move" is burgundy #6e3426 (Nick's ruling), from the one map in lib/taskKinds */
+    expect([m.bandTitle, m.band, m.bandInk, m.accent, `${m.pre}${m.who}`]).toEqual(["Your move", "#6e3426", "#ffffff", "#6e3426", "Send your full to Jonathan Marsh"]);
     expect(m.line).toMatch(/^The Marsh Agency asked for the full on \d+ [A-Z][a-z]+\. It’s been with you nine weeks\.$/);
     expect(KIND_STYLE.send.title).toBe("Your move");
     expect(KIND_STYLE.other.title).toBeNull();
