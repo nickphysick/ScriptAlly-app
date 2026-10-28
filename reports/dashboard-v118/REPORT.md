@@ -88,4 +88,6 @@ Branch `dashboard-v118`, cut from dev's integration at `39c5768f`. That is the i
 
 ## 6. Dev
 
-Deployed: see the deploy note in this report's final commit.
+**Deployed 28 Oct, hosting only, from a clean worktree.** Dev's integration had not moved (`39c5768f`, Contact list v25.6, Responses v5 and the phone dashboard), so the deploy is that integration plus this branch, a fast-forward: `636efadd` on `dev/…-db116-cl256-rsp5-dm1-db118` (pushed).
+- **Served:** dev serves `index-BbTfqWZJ.js`, checked after the deploy. It is the same bundle every lock above ran against.
+- Prod is untouched.
