@@ -1081,6 +1081,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             filters={filters} onFilters={setFilters} onClearAll={clearFilters} full={fullOn} onFull={togglePin}
             genreWord={(raw) => genreLabel(raw, personalGenres)} genreHit={bookHit} personalGenres={personalGenres} nowMs={nowMs}
             openId={cardId} onOpen={pickCard} search={search} onSearch={setSearch}
+            health={pageState === "list" ? health : null} onHealth={openHk}
             onLog={(id) => openQueryDrawer({ mode: "log", agentId: id, ...(scoped?.id ? { manuscriptId: scoped.id } : {}) })}
             onEdit={(id, tab, focus) => openPanel(id, { tab, focus })}
             /* v25.4 C — the sparse-profile link's door: the card's EDIT MODE at the agent's first gap in Housekeeping's

@@ -42,3 +42,25 @@
   .cl251-cell.cl256-navy + .cl251-cell { box-shadow: none; }
 }
 @media (min-width: 768px) and (max-width: 1100px) { .cl251-cell .cl256-ft { font-size: 13px !important; } }
+
+/* ══ Part C · List health in the bar ═════════════════════════════════════════════════════════════════════════════
+   First in the bar, before the search well: 34 tall, radius 9, a cream inset ring (.3, .7 on hover). Inside, a 24px
+   ring in healthTone's on-navy colours, "{pct}%" and "list health". At ≤1440 of window the words go. The search
+   well gives way: its basis is shared with the Query Centre's bar, so it is narrowed here only. */
+@media (min-width: 768px) {
+  .cl24-sheet .cl24-bar .cl256-hch {
+    all: unset; box-sizing: border-box; flex: none; display: inline-flex; align-items: center; gap: 8px; height: 34px;
+    padding: 0 12px 0 6px; margin-right: 4px; border-radius: 9px; cursor: pointer; color: #f4eee5;
+    box-shadow: inset 0 0 0 1px rgba(244, 238, 229, 0.3);
+  }
+  .cl24-sheet .cl24-bar .cl256-hch:hover { box-shadow: inset 0 0 0 1px rgba(244, 238, 229, 0.7); }
+  .cl24-sheet .cl24-bar .cl256-hch:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
+  .cl256-hch .cl256-hr { position: relative; flex: none; display: block; width: 24px; height: 24px; }
+  .cl256-hch .cl256-hr .cl17-rg { position: absolute; inset: 0; display: block; width: 24px; height: 24px; margin: 0; }
+  .cl256-hch .cl256-hr .cl17-rg svg { position: absolute; inset: 0; display: block; width: 24px; height: 24px; }
+  .cl256-hch .cl256-hr .cl17-pc { display: none !important; }
+  .cl256-hch > b { font: 400 16px/1 var(--sp-type) !important; color: #f4eee5; white-space: nowrap; }
+  .cl256-hch > .cl256-hw { font: 400 14px/1 var(--sp-type) !important; font-style: normal; color: rgba(244, 238, 229, 0.75); white-space: nowrap; }
+  .cl24-sheet .cl24-bar .qc150-bfind { flex: 0 1 300px; min-width: 150px; }
+}
+@media (min-width: 768px) and (max-width: 1440px) { .cl256-hch > .cl256-hw { display: none; } }

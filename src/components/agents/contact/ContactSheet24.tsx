@@ -35,6 +35,7 @@ import type { PersonalGenre } from "../../../lib/genres";
 import type { AgentCardField, AgentCardTab } from "../../../lib/agentCardStore";
 import { agentsWord, cardsAcross, setGroups, SET_LABEL, type SetKey } from "../../../lib/contactV24";
 import type { ContactView } from "../../../lib/contactListMemory";
+import { HealthRing } from "./ContactLightHeader";
 import "./contactV24.css";
 import { GenrePills, NIB, Tally } from "../../shared/agentRowParts";
 import "./contactV252.css";
@@ -102,6 +103,10 @@ export interface ContactSheet24Props {
   /** Contact list v25.4 C — the sparse-profile link's door: the card's edit mode at the agent's first missing field
    *  (v25.3's order). The row has no gap action of its own any more (v25.4 D). */
   onFillGaps?: (agentId: string) => void;
+  /** v25.6 C — List health in the bar: the ring button, first in the bar; null while the list settles (no button) */
+  health?: { pct: number } | null;
+  /** opens Housekeeping */
+  onHealth?: () => void;
   search: string;
   /** v25 A3 — Find is the navy bar's own search well, first in the bar */
   onSearch: (v: string) => void;
@@ -152,6 +157,14 @@ export const ContactSheet24: React.FC<ContactSheet24Props> = (p) => {
           rounded corners, so scrolled rows never show above it. At rest the strip sits under the sheet's own clip. */}
       <div className="cl256-pin" data-cl256="pin">
       <div className="cl24-bar" data-cl24="bar" ref={barRef}>
+        {/* v25.6 C — List health, first in the bar: a 24px ring in healthTone's on-navy colours, the score and (above
+            1440 of window) "list health". It opens Housekeeping; it pins with the bar. Full screen has its own list. */}
+        {p.health && p.onHealth ? (
+          <button type="button" className="cl256-hch" data-cl256="bar-ring" aria-label={`List health: ${p.health.pct}%. Open Housekeeping`} onClick={p.onHealth}>
+            <span className="cl256-hr" aria-hidden="true"><HealthRing pct={p.health.pct} on="navy" /></span>
+            <b>{p.health.pct}%</b><span className="cl256-hw">list health</span>
+          </button>
+        ) : null}
         <label className="qc150-bfind" data-cl24="find" data-cl25="find" data-nb1="find">
           <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4.5 4.5" /></svg>
           <input value={p.search} onChange={(e) => p.onSearch(e.target.value)} placeholder="Find an agent or agency" aria-label="Find an agent or agency" autoComplete="off" />

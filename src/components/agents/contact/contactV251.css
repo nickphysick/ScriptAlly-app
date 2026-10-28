@@ -44,8 +44,7 @@
   .cl251-ring .cl17-rg { position: absolute; inset: 0; display: block; width: 44px; height: 44px; margin: 0; }
   .cl251-ring .cl17-rg svg { position: absolute; inset: 0; display: block; width: 44px; height: 44px; }
   .cl251-ring .cl17-pc { display: none !important; }
-  /* the ring's gaps in the light rust */
-  .cl251-ring [data-cl17="ring-gaps"] { stroke: #e6c9bd; stroke-opacity: 1; }
+  /* v25.6 C — the ring's colours are healthTone's, inline on the ring (ContactLightHeader's HealthRing) */
 
   .cl251-faces { display: flex; align-items: center; min-width: 0; }
   .cl251-faces .cl251-face.cl24-dsc {

@@ -89,7 +89,7 @@ export const ContactGlance251: React.FC<{
               <span className="cl251-r2" data-cl251="row2">
                 <span className="cl251-n" data-cl251="count">{ready ? (health ? `${c.count}%` : c.count) : ""}</span>
                 {health ? (
-                  <span className="cl251-ring" data-cl251="ring" aria-hidden="true"><HealthRing pct={ready ? c.count : null} /></span>
+                  <span className="cl251-ring" data-cl251="ring" aria-hidden="true"><HealthRing pct={ready ? c.count : null} on="navy" /></span>
                 ) : (
                   <span className="cl251-faces" data-cl251="faces" data-n={faces.length} data-more={more}>
                     {faces.map((f) => (

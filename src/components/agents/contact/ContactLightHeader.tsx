@@ -19,6 +19,7 @@ import { Term } from "../../shell/Term";
 import type { GlanceKey, GlanceModel } from "../../../lib/contactGlance";
 import { GLANCE_LABEL } from "../../../lib/contactGlance";
 import { RING, RING_C, healthLabel, ringArc, type ListHealth } from "../../../lib/contactHealth";
+import { healthTone, ringColours } from "../../../lib/contactV256";
 import "../../shell/pageHeroFrame.css"; /* v138.5 — the shared inset, before the page's own sheet */
 import "./contactV17.css";
 import "./contactV18.css"; /* after v17: v18 restates some of its rules at equal specificity */
@@ -61,19 +62,23 @@ export const onFileWords = (n: number): string => (n === 1 ? "agent on file" : "
 const SEG: Record<GlanceKey, string> = { none: "n", live: "a", closed: "c" };
 
 /** List health: Housekeeping's own figures as a ring. Ink is filled in, rust is the gaps. */
-export const HealthRing: React.FC<{ pct: number | null }> = ({ pct }) => {
+/* v25.6 C — THE RING FOLLOWS THE SCORE: its arc and track are `ringColours(pct, on)` (lib/contactV256's healthTone:
+   80+ sage, 60–79 rust, under 60 deep rust), for the background it sits on. The colours are inline `style`, so an
+   older sheet's `stroke` rule cannot outrank them. While loading (pct null) the track is the faint light one. */
+export const HealthRing: React.FC<{ pct: number | null; on?: "light" | "navy" }> = ({ pct, on = "light" }) => {
   const c = RING.box / 2;
+  const col = ringColours(pct ?? 0, on);
   const arc = ringArc(pct ?? 0);
   const rot = `rotate(-90 ${c} ${c})`;
   return (
-    <span className="cl17-rg" data-cl17="ring">
+    <span className="cl17-rg" data-cl17="ring" data-tone={pct === null ? undefined : healthTone(pct)} data-on={on}>
       <svg viewBox={`0 0 ${RING.box} ${RING.box}`} aria-hidden="true">
         {/* the gaps, in rust, underneath — not drawn at 100, where its antialiased edge would show round the ink */}
         {pct === 100 ? null : (
-          <circle data-cl17="ring-gaps" cx={c} cy={c} r={RING.r} fill="none" stroke="#a2452a" strokeOpacity={pct === null ? 0.12 : 0.85} strokeWidth={RING.w} />
+          <circle data-cl17="ring-gaps" cx={c} cy={c} r={RING.r} fill="none" style={{ stroke: col.track, strokeOpacity: pct === null ? 0.4 : 1 }} strokeWidth={RING.w} />
         )}
         {pct !== null && arc.ink > 0 ? (
-          <circle data-cl17="ring-ink" cx={c} cy={c} r={RING.r} fill="none" stroke="#2a3a52" strokeWidth={RING.w} strokeLinecap="round"
+          <circle data-cl17="ring-ink" cx={c} cy={c} r={RING.r} fill="none" style={{ stroke: col.arc }} strokeWidth={RING.w} strokeLinecap="round"
             strokeDasharray={`${arc.ink} ${RING_C}`} transform={rot} />
         ) : null}
         {/* v18.3 §B — the two cream separator ticks are gone; the filled arc has a round cap */}
