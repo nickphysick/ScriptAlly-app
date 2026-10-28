@@ -298,7 +298,8 @@ test("DB105 S2 — no green, no Nick, and at 370px the three labels whole", asyn
           const s = b.querySelector("span")!; const cs = getComputedStyle(s);
           return { t: s.innerText.trim(), whole: s.scrollWidth <= s.clientWidth + 0.5 && b.scrollWidth <= b.clientWidth + 0.5 && cs.textOverflow !== "ellipsis" };
         });
-        return { n, green, text: el.innerText, labels, w: el.getBoundingClientRect().width };
+        /* RE-POINTED (v116): the card is tilted at rest, so this is the LAYOUT width, never the rotated rect's */
+        return { n, green, text: el.innerText, labels, w: el.offsetWidth };
       }, card);
       const w = `${tag(vp)} ${st}`;
       L.check("S2", `${w} population`, r.n > 40, String(r.n));

@@ -96,6 +96,13 @@ export async function fit(page: Page): Promise<Fit> {
   return page.evaluate(() => {
     const card = [...document.querySelectorAll<HTMLElement>('[data-d105="card"]')].find((e) => e.getBoundingClientRect().height > 0) ?? null;
     if (!card) return { n: 0, card: null, escapes: [], scrolls: [], clipped: [], overlaps: [], leaves: 0, state: "none" };
+    /* ⚠️ RE-POINTED (Dashboard v116): the card is tilted −1.8° at rest, and a rotated element's rects are its AXIS-ALIGNED
+       boxes — each line of text reads ~2px taller, so neighbours "overlap" on a correct card. A rotation moves no layout box,
+       so the law this check asserts is unchanged: measure the card straight (transition off, rotate 0, layout forced), then
+       put both back. */
+    const was = { r: card.style.rotate, t: card.style.transition };
+    card.style.transition = "none"; card.style.rotate = "0deg"; void card.offsetHeight;
+    try {
     const frame = card.querySelector<HTMLElement>(".d105-frame")!;
     const F = frame.getBoundingClientRect();
     const name = (e: Element) => `${e.tagName.toLowerCase()}.${(e.getAttribute("class") ?? "").split(" ")[0]}${e.getAttribute("data-d105") ? `[${e.getAttribute("data-d105")}]` : ""}`;
@@ -145,6 +152,7 @@ export async function fit(page: Page): Promise<Fit> {
     }
     const c = card.getBoundingClientRect();
     return { n, card: { w: c.width, h: c.height }, escapes, scrolls, clipped, overlaps, leaves: leaves.length, state: card.dataset.state ?? "" };
+    } finally { card.style.rotate = was.r; card.style.transition = was.t; }
   });
 }
 

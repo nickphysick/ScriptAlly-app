@@ -26,6 +26,13 @@ import { openRoute } from "./measure";
 import { readPng } from "./pngPixels";
 import { harnessDb, snapshotQuery, stable } from "./harnessDocs";
 
+/* ⚠️ RE-POINTED (Dashboard v116): the founding card is tilted −1.8° at rest, and a rotated element's bounding rect is
+   its axis-aligned box — ~6px taller and ~9px wider than the card. These checks are about LAYOUT (bottoms in line,
+   heights, spacing above the tab), which a rotation never moves, so they read the card straight. Over the Activity
+   feed tab the tilt only helps: rotate(-1.8deg) lifts the card's right-hand edge, which is the edge above the tab. */
+const STRAIGHT = `.d58 .d105-fw.d116-tilt { rotate: none !important; transition: none !important; }`;
+
+
 const DIR = "reports/dashboard-v71";
 const SIZES = [
   { width: 1920, height: 1080 }, { width: 1512, height: 900 }, { width: 1440, height: 900 }, { width: 1366, height: 768 },
@@ -226,7 +233,7 @@ test("DB71 L2 · L3 · F3 · G1 — bottoms in line, the tab on screen, the card
   test.setTimeout(600_000);
   const L = new Ledger("fit");
   for (const vp of SIZES) {
-    await openDash(page, vp);
+    await openDash(page, vp); await page.addStyleTag({ content: STRAIGHT });
     await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
     const f = await readFit(page);
     const w = tag(vp);
@@ -259,7 +266,7 @@ test("DB71 L2 · L3 · F3 · G1 — bottoms in line, the tab on screen, the card
     L.check("G1", `${w} no horizontal overflow`, !!f.scroller && f.scroller.sw <= f.scroller.cw && f.doc.sw <= f.doc.cw, JSON.stringify({ s: f.scroller, d: f.doc }));
   }
   /* L3 at the shell's minimum desktop width: the page flows there, and the tab must still be reachable */
-  await openDash(page, { width: 768, height: 800 });
+  await openDash(page, { width: 768, height: 800 }); await page.addStyleTag({ content: STRAIGHT });
   const m = await readFit(page);
   L.check("L3", "768x800 the tab is inside the viewport", !!m.tab && m.tab.l >= 0 && m.tab.r <= m.vw && m.tab.b <= m.vh + 0.5, JSON.stringify(m.tab));
   L.check("L3", "768x800 nothing covers the tab's centre", m.hit, String(m.hit));
@@ -275,7 +282,7 @@ test("DB71 L2 · L3 · F3 · G1 — bottoms in line, the tab on screen, the card
 test("DB71 L4 — the bottom cards' shadows show in full", async ({ page }) => {
   const L = new Ledger("shadow");
   for (const vp of [V1512, { width: 1280, height: 800 }]) {
-    await openDash(page, vp);
+    await openDash(page, vp); await page.addStyleTag({ content: STRAIGHT });
     const f = await readFit(page);
     const png = readPng(await page.screenshot({ animations: "disabled" }));
     const w = tag(vp);
@@ -531,7 +538,7 @@ test.describe("first use", () => {
     const L = new Ledger("first-use");
     for (const vp of [V1512, { width: 1440, height: 900 }, { width: 1280, height: 800 }, { width: 1920, height: 1080 }]) {
       for (const flags of [{ __SA_DASH_NO_AGENTS: true }, { __SA_DASH_NO_AGENTS: undefined }]) {
-        await openDash(page, vp, flags, PRE);
+        await openDash(page, vp, flags, PRE); await page.addStyleTag({ content: STRAIGHT });
         const r = await page.evaluate(() => {
           const b = (s: string) => { const e = [...document.querySelectorAll<HTMLElement>(s)].find((x) => x.getBoundingClientRect().height > 0); if (!e) return null; const k = e.getBoundingClientRect(); return { l: k.left, r: k.right, t: k.top, b: k.bottom }; };
           return { mode: document.querySelector<HTMLElement>(".d58")?.dataset.mode ?? null, fw: b('[data-d71="fw"]'), tab: b('[data-d58="tab"]') };

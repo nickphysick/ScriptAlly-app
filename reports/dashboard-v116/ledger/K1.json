@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "K1",
+  "where": "closed-hoop: population",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "K1",
+  "where": "closed-hoop: Tab reaches every slice and row",
+  "ok": true,
+  "detail": "reached "
+ },
+ {
+  "lock": "K1",
+  "where": "agents-hoop: population",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "K1",
+  "where": "agents-hoop: Tab reaches every slice and row",
+  "ok": true,
+  "detail": "reached "
+ }
+]

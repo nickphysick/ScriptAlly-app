@@ -1,0 +1,368 @@
+[
+ {
+  "lock": "C1",
+  "where": "population: the four key rows",
+  "ok": true,
+  "detail": "{\"quiet\":1,\"letter\":8,\"partial\":0,\"full\":2}"
+ },
+ {
+  "lock": "C1",
+  "where": "row quiet: one category",
+  "ok": true,
+  "detail": "closed"
+ },
+ {
+  "lock": "C1",
+  "where": "row quiet: every card fully shown",
+  "ok": true,
+  "detail": "1.00"
+ },
+ {
+  "lock": "C1",
+  "where": "row quiet: cards + more = the row's count",
+  "ok": true,
+  "detail": "1+0 vs 1"
+ },
+ {
+  "lock": "C1",
+  "where": "row quiet: only that outcome",
+  "ok": true,
+  "detail": "No reply"
+ },
+ {
+  "lock": "C2",
+  "where": "row quiet Sam Okoro: bust, name, agency, pill, manuscript, dates",
+  "ok": true,
+  "detail": "{\"bust\":true,\"name\":\"Sam Okoro\",\"agency\":\"Okoro Bell\",\"pill\":\"No reply\",\"ms\":\"The Smoke Test\",\"title\":\"The Smoke Test\",\"queried\":\"Queried 5 Aug\",\"end\":\"2 wks\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "row quiet: no initials anywhere",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "C1",
+  "where": "row letter: one category",
+  "ok": true,
+  "detail": "closed"
+ },
+ {
+  "lock": "C1",
+  "where": "row letter: every card fully shown",
+  "ok": true,
+  "detail": "1.00,1.00,1.00,1.00,1.00"
+ },
+ {
+  "lock": "C1",
+  "where": "row letter: cards + more = the row's count",
+  "ok": true,
+  "detail": "5+3 vs 8"
+ },
+ {
+  "lock": "C1",
+  "where": "row letter: only that outcome",
+  "ok": true,
+  "detail": "Passed,Passed,Passed,Passed,Passed"
+ },
+ {
+  "lock": "C1",
+  "where": "row letter: newest closed first",
+  "ok": true,
+  "detail": "Passed 30 Aug · Passed 5 Aug · Passed 5 Aug · Passed 5 Aug · Passed 9 Jul"
+ },
+ {
+  "lock": "C2",
+  "where": "row letter Imogen Rackham: bust, name, agency, pill, manuscript, dates",
+  "ok": true,
+  "detail": "{\"bust\":true,\"name\":\"Imogen Rackham\",\"agency\":\"Rackham & Hale\",\"pill\":\"Passed\",\"ms\":\"The Smoke Test\",\"title\":\"The Smoke Test\",\"queried\":\"Queried 12 Aug\",\"end\":\"Passed 30 Aug\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "row letter Elinor Hale: bust, name, agency, pill, manuscript, dates",
+  "ok": true,
+  "detail": "{\"bust\":true,\"name\":\"Elinor Hale\",\"agency\":\"Cavendish & Roe\",\"pill\":\"Passed\",\"ms\":\"The Smoke Test\",\"title\":\"The Smoke Test\",\"queried\":\"Queried 5 Aug\",\"end\":\"Passed 5 Aug\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "row letter Marcus Reed: bust, name, agency, pill, manuscript, dates",
+  "ok": true,
+  "detail": "{\"bust\":true,\"name\":\"Marcus Reed\",\"agency\":\"Reed & Partners\",\"pill\":\"Passed\",\"ms\":\"The Smoke Test\",\"title\":\"The Smoke Test\",\"queried\":\"Queried 5 Aug\",\"end\":\"Passed 5 Aug\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "row letter Priya Nair: bust, name, agency, pill, manuscript, dates",
+  "ok": true,
+  "detail": "{\"bust\":true,\"name\":\"Priya Nair\",\"agency\":\"Northbank Literary\",\"pill\":\"Passed\",\"ms\":\"The Smoke Test\",\"title\":\"The Smoke Test\",\"queried\":\"Queried 5 Aug\",\"end\":\"Passed 5 Aug\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "row letter Joan Whitfield: bust, name, agency, pill, manuscript, dates",
+  "ok": true,
+  "detail": "{\"bust\":true,\"name\":\"Joan Whitfield\",\"agency\":\"Whitfield Agency\",\"pill\":\"Passed\",\"ms\":\"The Smoke Test\",\"title\":\"The Smoke Test\",\"queried\":\"Queried 9 Jul\",\"end\":\"Passed 9 Jul\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "row letter: no initials anywhere",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "C1",
+  "where": "row letter: +N more",
+  "ok": true,
+  "detail": "+3 more"
+ },
+ {
+  "lock": "C1",
+  "where": "row partial: one category",
+  "ok": true,
+  "detail": "closed"
+ },
+ {
+  "lock": "C1",
+  "where": "row partial: every card fully shown",
+  "ok": true,
+  "detail": "1.00"
+ },
+ {
+  "lock": "C1",
+  "where": "row partial: an empty category says None yet",
+  "ok": true,
+  "detail": "[\"None yetPassed on partial\"]"
+ },
+ {
+  "lock": "C1",
+  "where": "row full: one category",
+  "ok": true,
+  "detail": "closed"
+ },
+ {
+  "lock": "C1",
+  "where": "row full: every card fully shown",
+  "ok": true,
+  "detail": "1.00,1.00"
+ },
+ {
+  "lock": "C1",
+  "where": "row full: cards + more = the row's count",
+  "ok": true,
+  "detail": "2+0 vs 2"
+ },
+ {
+  "lock": "C1",
+  "where": "row full: only that outcome",
+  "ok": true,
+  "detail": "Passed,Passed"
+ },
+ {
+  "lock": "C1",
+  "where": "row full: newest closed first",
+  "ok": true,
+  "detail": "Passed 5 Aug · Passed 19 Jul"
+ },
+ {
+  "lock": "C2",
+  "where": "row full Tom Ellery: bust, name, agency, pill, manuscript, dates",
+  "ok": true,
+  "detail": "{\"bust\":true,\"name\":\"Tom Ellery\",\"agency\":\"Curtis Vane\",\"pill\":\"Passed\",\"ms\":\"The Smoke Test\",\"title\":\"The Smoke Test\",\"queried\":\"Queried 5 Aug\",\"end\":\"Passed 5 Aug\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "row full Tom Ellery: bust, name, agency, pill, manuscript, dates",
+  "ok": true,
+  "detail": "{\"bust\":true,\"name\":\"Tom Ellery\",\"agency\":\"Curtis Vane\",\"pill\":\"Passed\",\"ms\":\"The Smoke Test\",\"title\":\"The Smoke Test\",\"queried\":\"Queried 19 Jul\",\"end\":\"Passed 19 Jul\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "row full: no initials anywhere",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "C1",
+  "where": "slice quiet: one category",
+  "ok": true,
+  "detail": "closed"
+ },
+ {
+  "lock": "C1",
+  "where": "slice quiet: every card fully shown",
+  "ok": true,
+  "detail": "1.00"
+ },
+ {
+  "lock": "C1",
+  "where": "slice quiet: cards + more = the row's count",
+  "ok": true,
+  "detail": "1+0 vs 1"
+ },
+ {
+  "lock": "C1",
+  "where": "slice quiet: only that outcome",
+  "ok": true,
+  "detail": "No reply"
+ },
+ {
+  "lock": "C2",
+  "where": "slice quiet Sam Okoro: bust, name, agency, pill, manuscript, dates",
+  "ok": true,
+  "detail": "{\"bust\":true,\"name\":\"Sam Okoro\",\"agency\":\"Okoro Bell\",\"pill\":\"No reply\",\"ms\":\"The Smoke Test\",\"title\":\"The Smoke Test\",\"queried\":\"Queried 5 Aug\",\"end\":\"2 wks\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "slice quiet: no initials anywhere",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "C1",
+  "where": "slice quiet: the slice swells ≥1.4×, the others stay",
+  "ok": false,
+  "detail": "[{\"k\":\"quiet\",\"w\":9},{\"k\":\"letter\",\"w\":9},{\"k\":\"full\",\"w\":9}] rest 9"
+ },
+ {
+  "lock": "C1",
+  "where": "slice letter: one category",
+  "ok": true,
+  "detail": "closed"
+ },
+ {
+  "lock": "C1",
+  "where": "slice letter: every card fully shown",
+  "ok": true,
+  "detail": "1.00,1.00,1.00,1.00,1.00"
+ },
+ {
+  "lock": "C1",
+  "where": "slice letter: cards + more = the row's count",
+  "ok": true,
+  "detail": "5+3 vs 8"
+ },
+ {
+  "lock": "C1",
+  "where": "slice letter: only that outcome",
+  "ok": true,
+  "detail": "Passed,Passed,Passed,Passed,Passed"
+ },
+ {
+  "lock": "C1",
+  "where": "slice letter: newest closed first",
+  "ok": true,
+  "detail": "Passed 30 Aug · Passed 5 Aug · Passed 5 Aug · Passed 5 Aug · Passed 9 Jul"
+ },
+ {
+  "lock": "C2",
+  "where": "slice letter Imogen Rackham: bust, name, agency, pill, manuscript, dates",
+  "ok": true,
+  "detail": "{\"bust\":true,\"name\":\"Imogen Rackham\",\"agency\":\"Rackham & Hale\",\"pill\":\"Passed\",\"ms\":\"The Smoke Test\",\"title\":\"The Smoke Test\",\"queried\":\"Queried 12 Aug\",\"end\":\"Passed 30 Aug\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "slice letter Elinor Hale: bust, name, agency, pill, manuscript, dates",
+  "ok": true,
+  "detail": "{\"bust\":true,\"name\":\"Elinor Hale\",\"agency\":\"Cavendish & Roe\",\"pill\":\"Passed\",\"ms\":\"The Smoke Test\",\"title\":\"The Smoke Test\",\"queried\":\"Queried 5 Aug\",\"end\":\"Passed 5 Aug\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "slice letter Marcus Reed: bust, name, agency, pill, manuscript, dates",
+  "ok": true,
+  "detail": "{\"bust\":true,\"name\":\"Marcus Reed\",\"agency\":\"Reed & Partners\",\"pill\":\"Passed\",\"ms\":\"The Smoke Test\",\"title\":\"The Smoke Test\",\"queried\":\"Queried 5 Aug\",\"end\":\"Passed 5 Aug\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "slice letter Priya Nair: bust, name, agency, pill, manuscript, dates",
+  "ok": true,
+  "detail": "{\"bust\":true,\"name\":\"Priya Nair\",\"agency\":\"Northbank Literary\",\"pill\":\"Passed\",\"ms\":\"The Smoke Test\",\"title\":\"The Smoke Test\",\"queried\":\"Queried 5 Aug\",\"end\":\"Passed 5 Aug\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "slice letter Joan Whitfield: bust, name, agency, pill, manuscript, dates",
+  "ok": true,
+  "detail": "{\"bust\":true,\"name\":\"Joan Whitfield\",\"agency\":\"Whitfield Agency\",\"pill\":\"Passed\",\"ms\":\"The Smoke Test\",\"title\":\"The Smoke Test\",\"queried\":\"Queried 9 Jul\",\"end\":\"Passed 9 Jul\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "slice letter: no initials anywhere",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "C1",
+  "where": "slice letter: the slice swells ≥1.4×, the others stay",
+  "ok": false,
+  "detail": "[{\"k\":\"quiet\",\"w\":9},{\"k\":\"letter\",\"w\":9},{\"k\":\"full\",\"w\":9}] rest 9"
+ },
+ {
+  "lock": "C1",
+  "where": "slice letter: +N more",
+  "ok": true,
+  "detail": "+3 more"
+ },
+ {
+  "lock": "C1",
+  "where": "slice partial",
+  "ok": true,
+  "detail": "no slice for a count of 0"
+ },
+ {
+  "lock": "C1",
+  "where": "slice full: one category",
+  "ok": true,
+  "detail": "closed"
+ },
+ {
+  "lock": "C1",
+  "where": "slice full: every card fully shown",
+  "ok": true,
+  "detail": "1.00,1.00"
+ },
+ {
+  "lock": "C1",
+  "where": "slice full: cards + more = the row's count",
+  "ok": true,
+  "detail": "2+0 vs 2"
+ },
+ {
+  "lock": "C1",
+  "where": "slice full: only that outcome",
+  "ok": true,
+  "detail": "Passed,Passed"
+ },
+ {
+  "lock": "C1",
+  "where": "slice full: newest closed first",
+  "ok": true,
+  "detail": "Passed 5 Aug · Passed 19 Jul"
+ },
+ {
+  "lock": "C2",
+  "where": "slice full Tom Ellery: bust, name, agency, pill, manuscript, dates",
+  "ok": true,
+  "detail": "{\"bust\":true,\"name\":\"Tom Ellery\",\"agency\":\"Curtis Vane\",\"pill\":\"Passed\",\"ms\":\"The Smoke Test\",\"title\":\"The Smoke Test\",\"queried\":\"Queried 5 Aug\",\"end\":\"Passed 5 Aug\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "slice full Tom Ellery: bust, name, agency, pill, manuscript, dates",
+  "ok": true,
+  "detail": "{\"bust\":true,\"name\":\"Tom Ellery\",\"agency\":\"Curtis Vane\",\"pill\":\"Passed\",\"ms\":\"The Smoke Test\",\"title\":\"The Smoke Test\",\"queried\":\"Queried 19 Jul\",\"end\":\"Passed 19 Jul\"}"
+ },
+ {
+  "lock": "C2",
+  "where": "slice full: no initials anywhere",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "C1",
+  "where": "slice full: the slice swells ≥1.4×, the others stay",
+  "ok": false,
+  "detail": "[{\"k\":\"quiet\",\"w\":9},{\"k\":\"letter\",\"w\":9},{\"k\":\"full\",\"w\":9}] rest 9"
+ },
+ {
+  "lock": "C1",
+  "where": "population: filled, empty and swelling categories all exercised",
+  "ok": true,
+  "detail": "filled 6 · empty 1 · swells 3"
+ }
+]

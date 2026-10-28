@@ -866,7 +866,19 @@
     "design-refs/dashboard-v105/shots/6-how-slide-2.png": "4fab77010fccd6d0524052c2d3aa971b52de6b165b1ab3a5a28a0dfb157d4b6e",
     "design-refs/dashboard-v105/shots/6-how-slide-3.png": "0ac5e93307733455ca85c5154450e2cfcd2766966cd95ce5110e92c8d69de2fd",
     "design-refs/submission-packages-v38/submission-packages-v38.html": "95205ea5dff0bea20b78064a1f8bdae8eb606f5c5c18e9a5464816b5c97f6d62",
-    "design-refs/submission-packages-v39/submission-packages-v39.html": "4e65b6fafe12afe18428eee1d6508cea094c7a947322c6574288208aa8a7c55b"
+    "design-refs/submission-packages-v39/submission-packages-v39.html": "4e65b6fafe12afe18428eee1d6508cea094c7a947322c6574288208aa8a7c55b",
+    "design-refs/dashboard-v116/dashboard-v116.html": "dd805993375616691e4150cea594dad5a29937dc675c93fb897ae31dd8009b0b",
+    "design-refs/dashboard-v116/shots/01-chart-week-1440x900.png": "3262a9d6b2bd7bdb69c96881bac6def04277c3580a4a5d69bfcec92d76d4e2be",
+    "design-refs/dashboard-v116/shots/02-closed-ring-noreply-1440x900.png": "56c0a1003cfffdfdfe67f1e2aafcf221fdde0108fb1ec14ef0d41035be21b4c6",
+    "design-refs/dashboard-v116/shots/03-closed-key-passed-1440x900.png": "82b76fca82b3228b10577a85cdcbd689dd3c75276ed7bcce6db720c8bbf473a3",
+    "design-refs/dashboard-v116/shots/04-closed-key-empty-1440x900.png": "1960a90f9d4bb272cee4f820d36f87785f6048b7c027f1b2a382f479b7477ad4",
+    "design-refs/dashboard-v116/shots/05-closed-busier-more-1440x900.png": "21a4a824227064f2450c1a3d229a6d0ce5e8daf1f9fb5031d24c927722fee632",
+    "design-refs/dashboard-v116/shots/06-agents-ring-querying-1440x900.png": "86206cffe8a6559921c11285448b07eb731326ba754822f43db6edd6f6c184c1",
+    "design-refs/dashboard-v116/shots/07-agents-ring-closed-1440x900.png": "ad84b535aa4af3d3308bfb533387fd50f5b9a34e9793a7ff05b9fa24fa5821db",
+    "design-refs/dashboard-v116/shots/08-agents-key-notqueried-1440x900.png": "0ba5c4f97c6f56ced0f1ec98be83a9860bf3b5d7de99e32651127b4a398d714f",
+    "design-refs/dashboard-v116/shots/09-founding-rest-1440x900.png": "2aea4e71918bf3eb92cacd8e69b2185527a9739b9612b08e60dbddb8c69dc0b4",
+    "design-refs/dashboard-v116/shots/10-founding-hover-1440x900.png": "de4d278d5675c28598d02b17219cb83a5a0728b53c4b6897e4945e3dfa674307",
+    "design-refs/dashboard-v116/shots/11-onscreen-rule-agents-1440x700.png": "1eddc80bb38a2a3a05faca6c62b10a0a8566ac902dcf5b3d369dd22df6ed9c8a"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",

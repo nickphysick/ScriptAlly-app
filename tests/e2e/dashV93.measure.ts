@@ -14,6 +14,13 @@
 import { test, type Page } from "@playwright/test";
 import { Ledger, MUT, STATS, TASK_254, eachTask, openDash, readFw, tag, withWaiting, type VP } from "./db93Lib";
 
+/* ⚠️ RE-POINTED (Dashboard v116): the founding card is tilted −1.8° at rest, and a rotated element's bounding rect is
+   its axis-aligned box — ~6px taller and ~9px wider than the card. These checks are about LAYOUT (bottoms in line,
+   heights, spacing above the tab), which a rotation never moves, so they read the card straight. Over the Activity
+   feed tab the tilt only helps: rotate(-1.8deg) lifts the card's right-hand edge, which is the edge above the tab. */
+const STRAIGHT = `.d58 .d105-fw.d116-tilt { rotate: none !important; transition: none !important; }`;
+
+
 const BAND: Record<string, { bg: string; ink: string; title: string | null }> = {
   nudge: { bg: "rgb(42, 58, 82)", ink: "rgb(255, 255, 255)", title: "Time to nudge" },
   close: { bg: "rgb(228, 223, 215)", ink: "rgb(28, 19, 15)", title: "Consider closing" },
@@ -123,7 +130,7 @@ test("DB93 C6 — the laptop rows: founding 290, task at least 254, the bottoms 
   test.setTimeout(300_000);
   const L = new Ledger("c6");
   for (const vp of [{ width: 1440, height: 900 }, { width: 1366, height: 768 }, { width: 1512, height: 900 }]) {
-    await openDash(page, vp, { __SA_FOUNDING_STATS: STATS["6"] });
+    await openDash(page, vp, { __SA_FOUNDING_STATS: STATS["6"] }); await page.addStyleTag({ content: STRAIGHT });
     const r = await page.evaluate(() => {
       const b = (s: string) => { const e = [...document.querySelectorAll<HTMLElement>(s)].find((x) => x.getBoundingClientRect().height > 0); return e ? e.getBoundingClientRect() : null; };
       const t = b('[data-d71="task"]'), f = b('[data-d58="panel"]'), h = b('[data-d60="hoops"]'), tab = b('[data-d58="tab"]');

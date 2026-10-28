@@ -45,7 +45,7 @@ import {
   campaignStage, clampWindowEnd, longView, MINIMAP_SEEN_KEY, rangeSentence, readWindowBack, sinceLabel,
   writeWindowBack,
 } from "../../lib/dashWindow";
-import { indexActivities, stageLabel, UNDATED_LABEL, weekMix } from "../../lib/dashWeekMix";
+import { indexActivities, UNDATED_LABEL, weekMix } from "../../lib/dashWeekMix";
 import { layoutPins, pinCopy, pinDate, pinEvents, PIN_DISC_R, PIN_KIND, type ChartPin, type PlacedEvent } from "../../lib/dashPins";
 import { DASH_ART, artUrl } from "../../lib/dashArt";
 import { StatusDot } from "../StatusDot";
@@ -53,6 +53,8 @@ import { OneScreenChartEmpty } from "./OneScreenChartEmpty";
 import { OneScreenMinimap } from "./OneScreenMinimap";
 import { OneScreenPanel } from "./OneScreenPanel";
 import { useDashPopup } from "./DashPopup";
+import { weekCallout, UNDATED_COLOR } from "../../lib/dashHover";
+import "./v116/dash116.css";
 
 const NAVY = "#2a3a52";
 const INK = "#1c130f";
@@ -185,33 +187,14 @@ export const OneScreenChart: React.FC<{
   /* ── the week's figures ── */
   const index = useMemo(() => indexActivities(activities), [activities]);
 
-  const weekContent = (i: number): React.ReactNode => {
+  /* ⚠️ DASHBOARD v116 — THE WEEK CALLOUT replaces the week's popup. Its figures are `weekMix`'s, folded
+     by `weekCallout` into Queried / Partial out / Full out (lib/dashHover); the change is on the week
+     before's own headline. The event pins keep the popup, and win: `hitAt` asks for an event first. */
+  const calloutFor = (i: number) => {
     const slot = slots[i];
     const mix = weekMix(queries, index, slot.atMs, now);
-    return (
-      <>
-        <p className="os-tip-ey">Week of {slot.label}</p>
-        <p className="os-tip-big">{mix.total.toLocaleString("en-GB")} active {mix.total === 1 ? "query" : "queries"}</p>
-        {(mix.rows.length > 0 || mix.undated > 0) && (
-          <ul className="os-tip-list">
-            {mix.rows.map((r) => (
-              <li className="os-tip-st" key={r.status}>
-                <StatusDot status={r.status} overrideSize={16} decorative />
-                <span>{stageLabel(r.status)}</span>
-                <b>{r.count.toLocaleString("en-GB")}</b>
-              </li>
-            ))}
-            {mix.undated > 0 && (
-              <li className="os-tip-st os-tip-st--undated" key="undated">
-                <i aria-hidden="true" />
-                <span>{UNDATED_LABEL}</span>
-                <b>{mix.undated.toLocaleString("en-GB")}</b>
-              </li>
-            )}
-          </ul>
-        )}
-      </>
-    );
+    const prev = i > 0 ? weekMix(queries, index, slots[i - 1].atMs, now).total : null;
+    return { slot, c: weekCallout(mix, prev) };
   };
 
   const open = (queryId: string) => { popup.release(); onOpenQuery?.(queryId); };
@@ -266,8 +249,7 @@ export const OneScreenChart: React.FC<{
     return { t: "w", i: nearestSlot(slots, x, W, values.length) };
   };
   const contentFor = (h: Hover): React.ReactNode => {
-    if (!h) return null;
-    if (h.t === "w") return weekContent(h.i);
+    if (!h || h.t === "w") return null;
     const pin = pins.find((p) => p.id === h.id);
     return pin ? eventContent(pin) : null;
   };
@@ -277,12 +259,14 @@ export const OneScreenChart: React.FC<{
     if (popup.locked()) return;
     const h = hitAt(ev);
     if (!same(h, hover)) setHover(h);
-    if (h) popup.show("chart", contentFor(h), ev.clientX, ev.clientY, cardRef.current);
+    if (h?.t === "e") popup.show("chart", contentFor(h), ev.clientX, ev.clientY, cardRef.current);
+    else popup.hide("chart");
   };
   const onLeave = () => { if (popup.locked()) return; setHover(null); popup.hide("chart"); };
   const onClick = (ev: React.MouseEvent<SVGSVGElement>) => {
     const h = hitAt(ev);
-    if (!h) return;
+    /* a week is read by hovering it; only an event pins */
+    if (!h || h.t === "w") return;
     setHover(h);
     popup.pin("chart", contentFor(h), ev.clientX, ev.clientY, cardRef.current);
   };
@@ -400,7 +384,7 @@ export const OneScreenChart: React.FC<{
                     {focusPt && (
                       <g pointerEvents="none" data-probe="chart-focus">
                         {hoverSlot && (
-                          <line x1={focusPt[0]} x2={focusPt[0]} y1={Math.min(geo.baseY, focusPt[1] + 7)} y2={geo.baseY} stroke={INK} strokeWidth={1} strokeDasharray="2 3" opacity={0.55} />
+                          <line data-d116="guide" x1={focusPt[0]} x2={focusPt[0]} y1={0} y2={H} stroke={INK} strokeWidth={1.5} strokeDasharray="4 4" opacity={0.55} />
                         )}
                         <circle cx={focusPt[0]} cy={focusPt[1]} r={5.5} fill={NAVY} stroke="#fff" strokeWidth={2.5} />
                       </g>
@@ -458,6 +442,52 @@ export const OneScreenChart: React.FC<{
                   );
                 })}
               </div>
+              {/* ⚠️ THE WEEK CALLOUT (v116): a dashed ink guide at the snapped week, and the card 10px beside it,
+                  flipped to the line's left when it would cross the card's right edge. The keyboard reaches it
+                  through the plot's own focus stop: ←/→ step a week, Esc hides it. */}
+              <span
+                className="d116-wkkey"
+                tabIndex={0}
+                role="group"
+                aria-label="Active queries by week. Use the left and right arrow keys to read each week."
+                aria-describedby={hoverSlot ? `${uid}wk` : undefined}
+                data-d116="week-key"
+                onFocus={() => { if (!popup.locked() && slots.length) setHover((h) => (h?.t === "w" ? h : { t: "w", i: slots.length - 1 })); }}
+                onBlur={() => setHover((h) => (h?.t === "w" ? null : h))}
+                onKeyDown={(ev) => {
+                  if (!slots.length) return;
+                  const at = hover?.t === "w" ? hover.i : slots.length - 1;
+                  if (ev.key === "ArrowLeft" || ev.key === "ArrowRight") { ev.preventDefault(); setHover({ t: "w", i: Math.max(0, Math.min(slots.length - 1, at + (ev.key === "ArrowLeft" ? -1 : 1))) }); }
+                  else if (ev.key === "Escape") { if (hover?.t === "w") { ev.stopPropagation(); setHover(null); } }
+                  else if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); setHover((h) => (h?.t === "w" ? null : { t: "w", i: at })); }
+                }}
+              />
+              {hoverSlot && focusPt && hover?.t === "w" && (() => {
+                const { slot, c } = calloutFor(hover.i);
+                const right = size?.carry ?? W;
+                const flip = focusPt[0] + 10 + 208 > right - 8;
+                const left = flip ? focusPt[0] - 10 - 208 : focusPt[0] + 10;
+                const parts = [...c.groups.map((g) => ({ key: g.key, n: g.n, color: g.color })), { key: "undated", n: c.undated, color: UNDATED_COLOR }].filter((g) => g.n > 0);
+                return (
+                  <div className="d116-wk" id={`${uid}wk`} data-d116="callout" data-week={slot.label} data-flip={flip ? "1" : "0"} data-x={focusPt[0].toFixed(1)} style={{ left }} role="status" aria-live="polite">
+                    <div className="d116-wkh"><small>WEEK OF</small><b>{slot.label}</b></div>
+                    <div className="d116-wkn">
+                      <b data-d116="count">{c.total.toLocaleString("en-GB")}</b>
+                      <span>active<br />{c.total === 1 ? "query" : "queries"}</span>
+                      <em data-d116="delta" data-kind={c.delta.kind}>{c.delta.text}</em>
+                    </div>
+                    <div className="d116-wks" aria-hidden="true">
+                      {parts.map((g) => <i key={g.key} data-g={g.key} data-n={g.n} style={{ flexGrow: g.n, background: g.color }} />)}
+                    </div>
+                    <ul className="d116-wkl">
+                      {c.groups.map((g) => (
+                        <li key={g.key} data-g={g.key}><span className="d116-sw" style={{ background: g.color }} aria-hidden="true" />{g.label}<b>{g.n.toLocaleString("en-GB")}</b></li>
+                      ))}
+                      {c.undated > 0 && <li data-g="undated"><span className="d116-sw" style={{ background: UNDATED_COLOR }} aria-hidden="true" />{UNDATED_LABEL}<b>{c.undated.toLocaleString("en-GB")}</b></li>}
+                    </ul>
+                  </div>
+                );
+              })()}
             </>
           )}
         </div>

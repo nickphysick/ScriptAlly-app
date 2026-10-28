@@ -1,0 +1,59 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * DASHBOARD v116 — the mini cards and the rings that answer the hover (ref design-refs/dashboard-v116/dashboard-v116.html).
+ *
+ * ⚠️ EVERY TEXT ELEMENT NAMES ITS FAMILY. `lib/brand.tsx` injects a family on bare `span`/`div`/`b` at
+ * runtime; a class outranks it, inheritance does not. And the stacks are PORTALLED to `<body>`, outside
+ * `.d58`, so they read the `:root` faces (`--sp-type`, `--sp-serif`) and state their colours as literals.
+ */
+
+/* ── C · the mini query card ──────────────────────────────────────────────────────────────────── */
+.d116-qm { position: relative; overflow: hidden; border-radius: 11px; background: #fff; box-shadow: 0 8px 18px -10px rgba(28, 19, 15, 0.5), 0 0 0 1px rgba(28, 19, 15, 0.1); }
+.d116-qm::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: #a9a39b; }
+.d116-qm[data-outcome="passed"]::before { background: #7c3a2a; }
+.d116-qm .d116-qmw { display: flex; align-items: center; gap: 7px; min-height: 34px; padding: 7px 9px 6px 12px; }
+.d116-qm .d116-bust { border: 1px solid rgba(28, 19, 15, 0.2); color: #1c130f; box-sizing: border-box; }
+.d116-qm .d116-nm { min-width: 0; }
+.d116-qm .d116-nm b { display: block; max-width: 104px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font: 700 12.5px/1.1 var(--sp-serif); color: #1c130f; }
+.d116-qm .d116-nm small { display: block; max-width: 104px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font: 500 7px/1.4 "JetBrains Mono", ui-monospace, monospace; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(28, 19, 15, 0.55); }
+.d116-qm .d116-pill { margin-left: auto; display: flex; align-items: center; gap: 3px; flex: none; white-space: nowrap; padding: 2px 6px 2px 4px; border-radius: 999px; background: #ece9e4; font: 600 9.5px/1.3 var(--sp-serif); color: #1c130f; }
+.d116-qm[data-outcome="passed"] .d116-pill { background: #f6e6df; color: #7c3a2a; }
+.d116-qm .d116-pill svg { width: 9px; height: 9px; fill: none; stroke: currentColor; stroke-width: 1.6; }
+.d116-qm .d116-qmm { margin: 0 9px 0 12px; padding: 4px 7px; border-radius: 6px; background: #f4efe8; }
+.d116-qm .d116-qmm small { display: block; font: 600 6.5px/1.4 "JetBrains Mono", ui-monospace, monospace; letter-spacing: 0.14em; color: rgba(28, 19, 15, 0.5); }
+.d116-qm .d116-qmm b { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font: 400 12px/1.3 var(--sp-type); color: #1c130f; }
+.d116-qm .d116-qmf { display: flex; justify-content: space-between; gap: 8px; padding: 5px 9px 6px 12px; font: 500 7.5px/1.4 "JetBrains Mono", ui-monospace, monospace; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(28, 19, 15, 0.5); white-space: nowrap; }
+.d116-qm.is-none { padding: 14px; text-align: center; border: 1.5px dashed rgba(28, 19, 15, 0.2); box-shadow: none; background: #fffdfa; font: 400 14px/1.3 var(--sp-type); color: rgba(28, 19, 15, 0.5); }
+.d116-qm.is-none::before { display: none; }
+.d116-qm.is-none small { display: block; font: italic 400 11.5px/1.4 var(--sp-serif); }
+
+/* ── D · the mini agent card ──────────────────────────────────────────────────────────────────── */
+.d116-am { overflow: hidden; border-radius: 11px; background: #fff; box-shadow: 0 8px 18px -10px rgba(28, 19, 15, 0.5), 0 0 0 1px rgba(28, 19, 15, 0.1); }
+/* ⚠️ THE HEADER SPANS THE CARD: a block-level flex row with no width of its own (the ref's class clash cut it short) */
+.d116-am .d116-amt { box-sizing: border-box; display: flex; align-items: center; gap: 6px; width: 100%; min-height: 34px; padding: 6px 9px; background: #2a3a52; color: #fff; }
+.d116-am[data-status="closed"] .d116-amt { background: #a9a39b; color: #fff; }
+.d116-am[data-status="none"] .d116-amt { background: #dfe6ee; color: #2a3a52; }
+.d116-am .d116-bust { width: 22px; height: 22px; background: #fff; color: #2a3a52; }
+.d116-am[data-status="closed"] .d116-bust { color: #a9a39b; }
+.d116-am[data-status="none"] .d116-bust { background: #2a3a52; color: #fff; }
+.d116-am .d116-nm { min-width: 0; }
+.d116-am .d116-nm b { display: block; max-width: 150px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font: 700 12px/1.1 var(--sp-serif); color: inherit; }
+.d116-am .d116-nm small { display: block; max-width: 150px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font: 500 6.5px/1.5 "JetBrains Mono", ui-monospace, monospace; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.8; color: inherit; }
+.d116-am .d116-amg { display: flex; flex-wrap: wrap; gap: 3px; padding: 6px 9px 8px; }
+.d116-am .d116-amg span { padding: 1px 7px; border-radius: 999px; background: #f2eee7; font: 400 10px/1.4 var(--sp-serif); color: #1c130f; }
+.d116-am .d116-amg em { font: italic 400 10px/1.4 var(--sp-serif); color: rgba(28, 19, 15, 0.5); }
+
+/* ── C/D · the rings and keys that answer the hover ───────────────────────────────────────────── */
+.d116-ring [data-d60="arc"] { transition: stroke-width 180ms ease, filter 180ms ease; }
+@media (prefers-reduced-motion: reduce) { .d116-ring [data-d60="arc"] { transition: none; } }
+.d116-ring [data-d60="arc"].is-swell { stroke-width: 13.5; filter: drop-shadow(0 2px 3px rgba(28, 19, 15, 0.35)); }
+.d116-ring svg { overflow: visible; }
+.d116-hit { cursor: pointer; pointer-events: stroke; outline: none; }
+.d116-hit:focus-visible { stroke: rgba(42, 58, 82, 0.35); }
+.d60-hl li[data-d116] { border-radius: 6px; cursor: pointer; outline: none; transition: background-color 120ms ease; }
+.d60-hl li[data-d116].is-hover, .d60-hl li[data-d116]:focus-visible { background: rgba(42, 58, 82, 0.06); }
+.d60-hl li[data-d116]:focus-visible { box-shadow: 0 0 0 2px rgba(42, 58, 82, 0.35); }
+.d116-live { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
