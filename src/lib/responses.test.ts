@@ -10,7 +10,7 @@ import { QueryStatus } from "../types";
 import { whereCounts } from "./qcSummary";
 import {
   busiestBracket, firstAnswer, goneQuiet, hasNote, isEarlyDays, medianDays, nextExpected, noteItems, noteSplit, pageCounts, passDepth, pctOf, speedByKind, typicalWait, waitBrackets,
-  answerFoot, answerIndex, answerStand, carouselOrder, listNos, monthGroups, nextPinned, replyPct, replyRate, respCounts, respItem, respItems, saidLine, stillOut, tallyPlan, tallySince,
+  carouselOrder, listNos, monthGroups, nextPinned, replyPct, replyRate, respCounts, respItem, respItems, saidLine, stillOut, tallyPlan, tallySince,
   type RespRowInput,
 } from "./responses";
 
@@ -131,42 +131,6 @@ describe("RS2 · the list, the months and the tally", () => {
     expect(nextPinned(true, -900, 10)).toBe(false);
   });
 });
-
-describe("RS2 D · the panel's words, built only from recorded facts", () => {
-  const T = "Murphy's Day Out";
-  const text = (p: { text: string }[]) => p.map((x) => x.text).join("");
-  it("each state's stand heading and primary", () => {
-    const send = respItem(row(QueryStatus.FULL_REQUESTED, { agentName: "Jonathan Marsh", expectedMs: D(2026, 10, 22), spans: [[QueryStatus.QUERIED, D(2026, 8, 21)], [QueryStatus.FULL_REQUESTED, D(2026, 10, 1)]] }))!;
-    expect(answerStand(send, T, NOW)).toMatchObject({ heading: "Send Jonathan the full", figure: "10 days left", hot: true });
-    expect(text(answerStand(send, T, NOW).paragraph)).toBe("Jonathan asked for the full of Murphy's Day Out on 1 Oct. They're expecting it by 22 Oct.");
-    expect(answerFoot(send, NOW)).toMatchObject({ label: "Mark full sent", act: "sent" });
-    const sent = respItem(row(QueryStatus.PARTIAL_SENT, { agentName: "Priya Raman", expectedMs: D(2026, 11, 10), spans: [[QueryStatus.PARTIAL_REQUESTED, D(2026, 9, 12)], [QueryStatus.PARTIAL_SENT, D(2026, 9, 15)]] }))!;
-    expect(answerStand(sent, T, NOW).heading).toBe("Waiting on Priya");
-    expect(answerFoot(sent, NOW)).toMatchObject({ label: "Record a response", act: "resp" });
-    const offer = respItem(row(QueryStatus.OFFER, { agentName: "Ann Bee", expectedMs: D(2026, 10, 20) }))!;
-    expect(answerStand(offer, T, NOW).heading).toBe("Answer Ann's offer");
-    expect(answerFoot(offer, NOW)).toMatchObject({ label: "Record your answer", act: "offer" });
-    const rr = respItem(row(QueryStatus.REVISE_RESUBMIT, { agentName: "Ann Bee" }))!;
-    expect(answerStand(rr, T, NOW)).toMatchObject({ heading: "Revise for Ann", figure: null });
-    const pass = respItem(row(QueryStatus.REJECTED, { agentName: "Daniel Okoro", query: { rejectionFeedbackType: "detailed", rejectionFeedbackText: "Strong voice." }, spans: [[QueryStatus.QUERIED, D(2026, 8, 7)], [QueryStatus.REJECTED, D(2026, 9, 2)]] }))!;
-    expect(answerStand(pass, T, NOW)).toMatchObject({ heading: "Daniel passed", figure: "2 Sep" });
-    expect(text(answerStand(pass, T, NOW).paragraph)).toBe("Daniel answered your query for Murphy's Day Out after 26 days, with a personal note. You can query Daniel again with your next book.");
-    expect(answerFoot(pass, NOW)).toMatchObject({ label: "Edit the response", act: "edit", status: "Rejected" });
-    expect(answerStand(respItem(row(QueryStatus.NO_RESPONSE))!, T, NOW).heading).toBe("Closed, no reply");
-  });
-  it("a missing fact drops its clause and its index row, and is never invented", () => {
-    const bare = respItem(row(QueryStatus.FULL_REQUESTED, { agentName: "Ann Bee", sentMs: null }))!;
-    expect(answerStand(bare, T, NOW)).toMatchObject({ figure: null, hot: false });
-    expect(text(answerStand(bare, T, NOW).paragraph)).toBe("");
-    expect(answerIndex(bare, NOW, null).map((r) => r.key)).toEqual(["reply"]);
-    const noReply = respItem(row(QueryStatus.NO_RESPONSE, { spans: [[QueryStatus.QUERIED, D(2026, 6, 1)], [QueryStatus.NO_RESPONSE, D(2026, 9, 1)]] }))!;
-    expect(answerIndex(noReply, NOW, "Query letter").map((r) => `${r.label}: ${r.answer}`)).toEqual([
-      "Queried: 1 Jun", "Closed: 1 Sep, after 92 days", "They saw: Query letter", "Reply: None. You closed it after the wait.",
-    ]);
-  });
-});
-
-
 
 /* ══ Responses v5 · Phase 1 — each assertion was run red first against the mutation named beside it ══ */
 const DAY5 = 86_400_000;

@@ -391,3 +391,34 @@
   .rsp5 .rsp5-lrow > [data-col="answered"] { display: none; }
 }
 @media (max-width: 560px) { .rsp5 .rsp5-share { padding: 22px 18px; } }
+
+/* ═════ the answer panel's contents (the reference's drawer: `.dmh`, `.dst`, `.dbody`, `.dfacts`, `.djo`, `.dfoot`) ═════
+   The box is query panel v2's (`SidePanel` + `.qsp`); everything inside is page-local. */
+.rsp5-layer .rsp5-drw { box-sizing: border-box; display: flex; flex-direction: column; height: 100%; min-height: 0; overflow: hidden; border-radius: 14px; background: var(--r5-paper); color: var(--r5-ink); font-family: var(--r5-serif); }
+.rsp5-layer .rsp5-dmh { flex: none; display: flex; align-items: flex-start; gap: 14px; padding: 18px 20px 16px; background: var(--r5-navy); color: #fff; }
+.rsp5-layer .rsp5-disc--w { background: #fff; color: var(--r5-navy); }
+.rsp5-layer .rsp5-dwho { min-width: 0; flex: 1; }
+.rsp5-layer .rsp5-dwho b { display: block; font: 400 22px/1.2 var(--r5-machine) !important; }
+.rsp5-layer .rsp5-dwho i { display: block; font: italic 15px/1.3 var(--r5-serif) !important; color: var(--r5-cr66); }
+.rsp5-layer .rsp5-dnav { display: flex; gap: 4px; }
+.rsp5-layer .rsp5-dnav button { width: 28px; height: 28px; border: 0; border-radius: 8px; background: rgba(244, 238, 229, 0.1); color: var(--r5-cr); font-size: 14px; cursor: pointer; }
+.rsp5-layer .rsp5-dnav button:disabled { opacity: 0.35; cursor: default; }
+.rsp5-layer .rsp5-dx { border: 0; background: none; color: var(--r5-cr66); font-size: 22px; line-height: 1; cursor: pointer; padding: 2px 4px; }
+.rsp5-layer .rsp5-dst { flex: none; display: flex; align-items: center; gap: 10px; padding: 13px 20px; font: 400 16px var(--r5-machine) !important; }
+.rsp5-layer .rsp5-dst[data-tone="you"] { background: var(--r5-you); }
+.rsp5-layer .rsp5-dst[data-tone="ag"] { background: var(--r5-ag); }
+.rsp5-layer .rsp5-dst[data-tone="of"] { background: var(--r5-of); }
+.rsp5-layer .rsp5-dst[data-tone="cl"] { background: var(--r5-cl); }
+.rsp5-layer .rsp5-dbody { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 18px; padding: 18px 20px 20px; }
+.rsp5-layer .rsp5-dbody h5 { margin: 0 0 8px; font: 600 14px/1.3 var(--r5-serif) !important; }
+.rsp5-layer .rsp5-dq { margin: 0; padding: 14px 16px; border-radius: 12px; background: #fff; box-shadow: inset 0 0 0 1px var(--r5-i10); font: italic 16.5px/1.5 var(--r5-serif) !important; }
+.rsp5-layer .rsp5-dplain { margin: 0; font: 400 16px/1.5 var(--r5-serif); color: var(--r5-i72); }
+.rsp5-layer .rsp5-dfacts { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; overflow: hidden; border-radius: 12px; background: var(--r5-i10); box-shadow: inset 0 0 0 1px var(--r5-i10); }
+.rsp5-layer .rsp5-dfacts div { padding: 10px 14px; background: #fff; }
+.rsp5-layer .rsp5-dfacts small { display: block; font: italic 13px/1.3 var(--r5-serif) !important; color: var(--r5-i58); }
+.rsp5-layer .rsp5-dfacts b { font: 400 16px var(--r5-machine) !important; }
+.rsp5-layer .rsp5-djo { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.rsp5-layer .rsp5-djo li { display: grid; grid-template-columns: 22px 1fr auto; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px dashed var(--r5-i10); font: 400 15px/1.3 var(--r5-serif); }
+.rsp5-layer .rsp5-djo li small { font: 500 10px var(--r5-mono) !important; color: var(--r5-i45); }
+.rsp5-layer .rsp5-dfoot { flex: none; display: flex; flex-wrap: wrap; gap: 10px; padding: 14px 20px; border-top: 1px solid var(--r5-i10); background: #fff; }
+.rsp5-layer .rsp5-sb:disabled { opacity: 0.45; cursor: default; }

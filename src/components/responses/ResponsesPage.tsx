@@ -32,7 +32,7 @@ import { RspCarousel } from "./RspCarousel";
 import { Rsp5Band, Rsp5Showcase } from "./Rsp5Insights";
 import { Rsp5Timing } from "./Rsp5Timing";
 import { Rsp5Words } from "./Rsp5Words";
-import { RspPanel, type AnswerTab } from "./RspPanel";
+import { RspPanel } from "./RspPanel";
 import { Rsp5Wall, type AgentFacts } from "./RspNos";
 import { RspEmpty } from "./RspEmpty";
 import { AppFooter } from "../shell/AppFooter";
@@ -82,11 +82,10 @@ export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) 
   const answerParam = new URLSearchParams(location.search).get("answer");
   const openItem = ready && answerParam ? model.items.find((i) => i.id === answerParam) ?? null : null;
   const openId = openItem?.id ?? null;
-  const [tab, setTab] = useState<AnswerTab>("answer");
   const go = useCallback((id: string | null, replace = false) => {
     navigate({ pathname: "/queries/responses", search: id ? `?answer=${encodeURIComponent(id)}` : "" }, { replace });
   }, [navigate]);
-  const openAnswer = useCallback((i: RespItem<QcRow>) => { setTab("answer"); go(i.id, !!answerParam); }, [go, answerParam]);
+  const openAnswer = useCallback((i: RespItem<QcRow>) => { go(i.id, !!answerParam); }, [go, answerParam]);
   const closeAnswer = useCallback(() => go(null), [go]);
   /* the list's rows as shown (↑ ↓ walk them); a carousel card has no neighbours */
   const [visible, setVisible] = useState<string[]>([]);
@@ -168,8 +167,8 @@ export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) 
       </div>
       </div>
       {openItem && routeActive ? (
-        <RspPanel item={openItem} agent={agents.find((a) => a.id === openItem.row.query.agentId) ?? null} nowMs={nowMs} msTitle={msTitle}
-          tab={tab} onTab={setTab} onClose={closeAnswer} walk={walk} readLog={readQueryActivity}
+        <RspPanel item={openItem} agent={agents.find((a) => a.id === openItem.row.query.agentId) ?? null} nowMs={nowMs}
+          onClose={closeAnswer} walk={walk} readLog={readQueryActivity}
           onOpenInQc={() => navigate({ pathname: "/queries", search: `?q=${encodeURIComponent(openItem.id)}` })} />
       ) : null}
     </WorkspacePageGrid>
