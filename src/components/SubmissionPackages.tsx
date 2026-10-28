@@ -30,6 +30,7 @@ import { usePk26Model } from "./packages/v26/usePk26Model";
 import { Pk26Hero } from "./packages/v26/Pk26Header";
 import { Pk39HowItWorks } from "./packages/v26/Pk39HowItWorks";
 import { Pk39Header } from "./packages/v26/Pk39Header";
+import { Pk39Tip } from "./packages/v26/Pk39Tip";
 import { Pk26Builder, type LibTab } from "./packages/v26/Pk26Builder";
 import { Pk39Labels } from "./packages/v26/Pk39Labels";
 import { Pk38Drawer } from "./packages/v26/Pk38Drawer";
@@ -117,6 +118,8 @@ export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab:
       <div ref={rootRef} className={`p6${empty ? " p6-new" : ""}`} data-pk26="page">
         {empty ? <Pk26Hero onBuild={() => part("builder")?.scrollIntoView({ block: "start", behavior: "smooth" })} onHow={() => setHow(true)} />
           : <Pk39Header title={activeMs?.title ?? null} onNew={() => setDialog({ m: "new" })} onHow={() => setHow(true)} />}
+        {/* v39.1 G: the one-line explainer, above Your packages; never on the brand-new page */}
+        {empty || !collectionsReady ? null : <Pk39Tip onHow={() => setHow(true)} />}
         <Pk39Labels model={model} currentId={current?.id ?? null} showRetired={showRetired} onShowRetired={setShowRetired}
           onPick={(p) => setCurId(p.id)} onOpenRetired={(p) => setPkdId(p.id)} onNew={() => setDialog({ m: "new" })} />
         <Pk26Builder model={model} retired={retired} current={current} onSelect={setCurId} onFigures={(p) => setPkdId(p.id)} lib={lib} onLib={setLib}

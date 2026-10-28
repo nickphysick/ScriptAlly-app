@@ -121,3 +121,18 @@
   .p9-pb-grid.p9-v39 .p9-po-st .p9-stp { font-size: 12.5px !important; padding: 0 11px; height: 28px; }
   .p9-pb-grid.p9-v39 .p9-po-h .p9-po-st { gap: 8px !important; }
 }
+
+/* ══ G · THE EXPLAINER (the ref's `.pk-tip` with `.tv-d`): one quiet line on #eaf1f4 above Your packages ══ */
+.p9-tip { display: block; transition: opacity 0.25s, transform 0.25s; }
+.p9-tip.p9-out { opacity: 0; transform: translateY(-6px); }
+.p9-tip .p9-tv-d { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto auto; gap: 16px; align-items: center; padding: 14px 14px 14px 18px;
+  border-radius: 12px; background: #eaf1f4; box-shadow: inset 0 0 0 1px rgba(29, 75, 99, 0.14); }
+.p9-tip .p9-td-ic { width: 34px; height: 34px; border-radius: 8px; display: grid; place-items: center; background: #1d4b63; color: #fff; }
+.p9-tip .p9-td-ic svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; }
+.p9-tip .p9-tv-d > p { margin: 0; font: 400 14.5px/1.45 var(--sp-serif); color: rgba(28, 19, 15, 0.78); }
+.p9-tip .p9-tv-d > p b { color: #1c130f; font-weight: 600; }
+.p9-tip .p9-td-l { border: 0; padding: 0; background: none; font: 600 14px var(--sp-serif); color: #1d4b63; cursor: pointer; white-space: nowrap; text-decoration: underline; text-underline-offset: 3px; }
+.p9-tip .p9-tip-x { width: 32px; height: 32px; padding: 0; border: 0; border-radius: 50%; background: none; color: rgba(28, 19, 15, 0.5); cursor: pointer; }
+.p9-tip .p9-tip-x:hover { background: rgba(29, 75, 99, 0.1); color: #1c130f; }
+.p9-tip :is(.p9-td-l, .p9-tip-x):focus-visible { outline: 2px solid #1d4b63; outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .p9-tip { transition: none; } }

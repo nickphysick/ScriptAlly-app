@@ -223,6 +223,8 @@ describe("/queries/packages renders", () => {
     expect(html).toContain("Once you’ve logged queries with a package, this shows what’s working.");
     expect(html).toContain('data-pk38="empty"');
     expect(html).not.toContain('data-pk38="show"');
+    /* v39.1 G: the brand-new page has its own explanation, so no explainer line */
+    expect(html).not.toContain('data-pk39="tip"');
   });
 
   it("populated: the Contact list's header, the labels, the open package's packing list and Your materials", () => {
@@ -244,6 +246,10 @@ describe("/queries/packages renders", () => {
     expect(html).not.toContain('data-pk26="hero"');
     /* v39 D–F: the label over two cards, the package's own header (picker tile, name in place, one status, Figures), the
        quiet foot with the details link, and no stepper row */
+    /* v39.1 G: the one-line explainer, with How it works and ✕ */
+    expect(html).toContain('data-pk39="tip"');
+    expect(html).toContain("A package is everything one agent receives:");
+    expect(html).toContain(">How it works →<");
     expect(html).toContain(">Build, view and edit<");
     expect(html).toContain('data-pk39="lib-head"');
     expect(html).toContain('data-pk39="pkg-head"');
