@@ -30,6 +30,7 @@ import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
 import { Rsp5Glance, Rsp5TitleCard, type GlanceFacts, type GlanceKey } from "./Rsp5Head";
 import { RspCarousel } from "./RspCarousel";
 import { Rsp5Band, Rsp5Showcase } from "./Rsp5Insights";
+import { Rsp5Timing } from "./Rsp5Timing";
 import { RspPanel, type AnswerTab } from "./RspPanel";
 import { RspBanner, RspList, RspTally } from "./RspNos";
 import { RspShare } from "./RspShare";
@@ -68,7 +69,9 @@ export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) 
       counts: page, rows: { more: newest("more"), passed: newest("passed"), noReply: newest("noReply"), waiting },
       yourMove: items.filter((i) => i.yourMove).length, withNote: noteSplit(items).withNote, goneQuiet: goneQuiet(rows, nowMs).length,
     };
-    return { nowMs, rows, items, counts, page, glance, more: carouselOrder(items), out: stillOut(rows) };
+    /* the timing line's "gone past the reply time the agent gives": the gone-quiet queries that HAVE a reply date */
+    const quietDated = goneQuiet(rows, nowMs).filter((r) => r.expectedMs != null).length;
+    return { nowMs, rows, items, counts, page, glance, quietDated, more: carouselOrder(items), out: stillOut(rows) };
     /* location.key: a switch of book re-opens the route, and the book is read from storage */
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queries, activities, agents, ms?.id, location.key]);
@@ -146,6 +149,7 @@ export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) 
               <>
                 <Rsp5Band counts={model.page} items={model.items} few={isEarlyDays(counts.answered)} />
                 <Rsp5Showcase items={model.items} answered={counts.answered} few={isEarlyDays(counts.answered)} nowMs={nowMs} onGo={goSection} />
+                <Rsp5Timing items={model.items} waiting={model.page.waiting} quiet={model.quietDated} />
               </>
             ) : null}
             {ready ? <RspBanner /> : null}
