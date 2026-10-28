@@ -1,0 +1,194 @@
+[
+ {
+  "lock": "C1",
+  "where": "1440x900 close: population, the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1440x900 close: How it works opened",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "C1",
+  "where": "1440x900 close: closed with the mouse, the card tilts back to −1.8°",
+  "ok": false,
+  "detail": "{\"rotate\":\"0deg\",\"swap\":0,\"inCard\":true}"
+ },
+ {
+  "lock": "C1",
+  "where": "1440x900 close: the header shows the ID again",
+  "ok": true,
+  "detail": "{\"rotate\":\"0deg\",\"swap\":0,\"inCard\":true}"
+ },
+ {
+  "lock": "C1",
+  "where": "1440x900 dim: population, the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1440x900 dim: How it works opened",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "C1",
+  "where": "1440x900 dim: closed with the mouse, the card tilts back to −1.8°",
+  "ok": false,
+  "detail": "{\"rotate\":\"0deg\",\"swap\":0,\"inCard\":true}"
+ },
+ {
+  "lock": "C1",
+  "where": "1440x900 dim: the header shows the ID again",
+  "ok": true,
+  "detail": "{\"rotate\":\"0deg\",\"swap\":0,\"inCard\":true}"
+ },
+ {
+  "lock": "C1",
+  "where": "1440x900 gotit: population, the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1440x900 gotit: How it works opened",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "C1",
+  "where": "1440x900 gotit: closed with the mouse, the card tilts back to −1.8°",
+  "ok": false,
+  "detail": "{\"rotate\":\"0deg\",\"swap\":0,\"inCard\":true}"
+ },
+ {
+  "lock": "C1",
+  "where": "1440x900 gotit: the header shows the ID again",
+  "ok": true,
+  "detail": "{\"rotate\":\"0deg\",\"swap\":0,\"inCard\":true}"
+ },
+ {
+  "lock": "C1",
+  "where": "1440x900 keyboard: straight while the ⓘ has focus",
+  "ok": true,
+  "detail": "{\"rotate\":\"0deg\",\"swap\":1,\"inCard\":true}"
+ },
+ {
+  "lock": "C1",
+  "where": "1440x900 keyboard: the swap shows while straight",
+  "ok": true,
+  "detail": "{\"rotate\":\"0deg\",\"swap\":1,\"inCard\":true}"
+ },
+ {
+  "lock": "C1",
+  "where": "1440x900 keyboard: −1.8° once Tab takes focus out",
+  "ok": true,
+  "detail": "{\"rotate\":\"-1.8deg\",\"swap\":0,\"inCard\":false}"
+ },
+ {
+  "lock": "C1",
+  "where": "1440x900 hover: straight",
+  "ok": true,
+  "detail": "{\"rotate\":\"0deg\",\"swap\":1,\"inCard\":false}"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 close: population, the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 close: How it works opened",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 close: closed with the mouse, the card tilts back to −1.8°",
+  "ok": false,
+  "detail": "{\"rotate\":\"0deg\",\"swap\":0,\"inCard\":true}"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 close: the header shows the ID again",
+  "ok": true,
+  "detail": "{\"rotate\":\"0deg\",\"swap\":0,\"inCard\":true}"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 dim: population, the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 dim: How it works opened",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 dim: closed with the mouse, the card tilts back to −1.8°",
+  "ok": false,
+  "detail": "{\"rotate\":\"0deg\",\"swap\":0,\"inCard\":true}"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 dim: the header shows the ID again",
+  "ok": true,
+  "detail": "{\"rotate\":\"0deg\",\"swap\":0,\"inCard\":true}"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 gotit: population, the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 gotit: How it works opened",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 gotit: closed with the mouse, the card tilts back to −1.8°",
+  "ok": false,
+  "detail": "{\"rotate\":\"0deg\",\"swap\":0,\"inCard\":true}"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 gotit: the header shows the ID again",
+  "ok": true,
+  "detail": "{\"rotate\":\"0deg\",\"swap\":0,\"inCard\":true}"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 keyboard: straight while the ⓘ has focus",
+  "ok": true,
+  "detail": "{\"rotate\":\"0deg\",\"swap\":1,\"inCard\":true}"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 keyboard: the swap shows while straight",
+  "ok": true,
+  "detail": "{\"rotate\":\"0deg\",\"swap\":1,\"inCard\":true}"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 keyboard: −1.8° once Tab takes focus out",
+  "ok": true,
+  "detail": "{\"rotate\":\"-1.8deg\",\"swap\":0,\"inCard\":false}"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 hover: straight",
+  "ok": true,
+  "detail": "{\"rotate\":\"0deg\",\"swap\":1,\"inCard\":false}"
+ }
+]

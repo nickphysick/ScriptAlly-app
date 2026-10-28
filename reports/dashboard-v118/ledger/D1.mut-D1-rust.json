@@ -1,0 +1,416 @@
+[
+ {
+  "lock": "D1",
+  "where": "task-offer-seed-query-12: the band is burgundy, the title white \"Your move\"",
+  "ok": false,
+  "detail": "rgb(162, 69, 42) Your move"
+ },
+ {
+  "lock": "D1",
+  "where": "task-offer-seed-query-12: the avatar takes the accent",
+  "ok": true,
+  "detail": "rgb(110, 52, 38)"
+ },
+ {
+  "lock": "D1",
+  "where": "task-offer-seed-query-12: the pager buttons are a .18 white wash",
+  "ok": true,
+  "detail": "rgba(255, 255, 255, 0.18)"
+ },
+ {
+  "lock": "D1",
+  "where": "task-full-rj-dupe: the band is burgundy, the title white \"Your move\"",
+  "ok": false,
+  "detail": "rgb(162, 69, 42) Your move"
+ },
+ {
+  "lock": "D1",
+  "where": "task-full-rj-dupe: the avatar takes the accent",
+  "ok": true,
+  "detail": "rgb(110, 52, 38)"
+ },
+ {
+  "lock": "D1",
+  "where": "task-full-rj-dupe: the pager buttons are a .18 white wash",
+  "ok": true,
+  "detail": "rgba(255, 255, 255, 0.18)"
+ },
+ {
+  "lock": "D1",
+  "where": "task-full-rj-dupe: a past segment is rgba(110,52,38,.4)",
+  "ok": true,
+  "detail": "{\"bg\":\"rgba(110, 52, 38, 0.4)\",\"op\":\"1\"}"
+ },
+ {
+  "lock": "D1",
+  "where": "task-full-rj-dupe: one dashed to-do, last",
+  "ok": true,
+  "detail": "[{\"done\":true,\"label\":\"Queried\",\"date\":\"13 Jul\"},{\"done\":true,\"label\":\"Full requested\",\"date\":\"9 Sep\"},{\"done\":false,\"label\":\"Full sent\",\"date\":\"—\"}]"
+ },
+ {
+  "lock": "D1",
+  "where": "task-full-rj-dupe: no stage both done and to do",
+  "ok": true,
+  "detail": "[{\"done\":true,\"label\":\"Queried\",\"date\":\"13 Jul\"},{\"done\":true,\"label\":\"Full requested\",\"date\":\"9 Sep\"},{\"done\":false,\"label\":\"Full sent\",\"date\":\"—\"}]"
+ },
+ {
+  "lock": "D1",
+  "where": "task-full-rj-dupe: the done stages are in date order",
+  "ok": true,
+  "detail": "[{\"done\":true,\"label\":\"Queried\",\"date\":\"13 Jul\"},{\"done\":true,\"label\":\"Full requested\",\"date\":\"9 Sep\"},{\"done\":false,\"label\":\"Full sent\",\"date\":\"—\"}]"
+ },
+ {
+  "lock": "D1",
+  "where": "task-full-rj-send: the band is burgundy, the title white \"Your move\"",
+  "ok": false,
+  "detail": "rgb(162, 69, 42) Your move"
+ },
+ {
+  "lock": "D1",
+  "where": "task-full-rj-send: the avatar takes the accent",
+  "ok": true,
+  "detail": "rgb(110, 52, 38)"
+ },
+ {
+  "lock": "D1",
+  "where": "task-full-rj-send: the pager buttons are a .18 white wash",
+  "ok": true,
+  "detail": "rgba(255, 255, 255, 0.18)"
+ },
+ {
+  "lock": "D1",
+  "where": "task-full-rj-send: a past segment is rgba(110,52,38,.4)",
+  "ok": true,
+  "detail": "{\"bg\":\"rgba(110, 52, 38, 0.4)\",\"op\":\"1\"}"
+ },
+ {
+  "lock": "D1",
+  "where": "task-full-rj-send: one dashed to-do, last",
+  "ok": true,
+  "detail": "[{\"done\":true,\"label\":\"Queried\",\"date\":\"23 Jul\"},{\"done\":true,\"label\":\"Full requested\",\"date\":\"12 Sep\"},{\"done\":false,\"label\":\"Full sent\",\"date\":\"—\"}]"
+ },
+ {
+  "lock": "D1",
+  "where": "task-full-rj-send: no stage both done and to do",
+  "ok": true,
+  "detail": "[{\"done\":true,\"label\":\"Queried\",\"date\":\"23 Jul\"},{\"done\":true,\"label\":\"Full requested\",\"date\":\"12 Sep\"},{\"done\":false,\"label\":\"Full sent\",\"date\":\"—\"}]"
+ },
+ {
+  "lock": "D1",
+  "where": "task-full-rj-send: the done stages are in date order",
+  "ok": true,
+  "detail": "[{\"done\":true,\"label\":\"Queried\",\"date\":\"23 Jul\"},{\"done\":true,\"label\":\"Full requested\",\"date\":\"12 Sep\"},{\"done\":false,\"label\":\"Full sent\",\"date\":\"—\"}]"
+ },
+ {
+  "lock": "D1",
+  "where": "task-full-seed-cal-passed865-q: the band is burgundy, the title white \"Your move\"",
+  "ok": false,
+  "detail": "rgb(162, 69, 42) Your move"
+ },
+ {
+  "lock": "D1",
+  "where": "task-full-seed-cal-passed865-q: the avatar takes the accent",
+  "ok": true,
+  "detail": "rgb(110, 52, 38)"
+ },
+ {
+  "lock": "D1",
+  "where": "task-full-seed-cal-passed865-q: the pager buttons are a .18 white wash",
+  "ok": true,
+  "detail": "rgba(255, 255, 255, 0.18)"
+ },
+ {
+  "lock": "D1",
+  "where": "task-full-seed-cal-passed865-q: a past segment is rgba(110,52,38,.4)",
+  "ok": true,
+  "detail": "{\"bg\":\"rgba(110, 52, 38, 0.4)\",\"op\":\"1\"}"
+ },
+ {
+  "lock": "D1",
+  "where": "task-full-seed-cal-passed865-q: one dashed to-do, last",
+  "ok": true,
+  "detail": "[{\"done\":true,\"label\":\"Queried\",\"date\":\"18 Apr\"},{\"done\":true,\"label\":\"Full requested\",\"date\":\"20 Sep\"},{\"done\":false,\"label\":\"Full sent\",\"date\":\"—\"}]"
+ },
+ {
+  "lock": "D1",
+  "where": "task-full-seed-cal-passed865-q: no stage both done and to do",
+  "ok": true,
+  "detail": "[{\"done\":true,\"label\":\"Queried\",\"date\":\"18 Apr\"},{\"done\":true,\"label\":\"Full requested\",\"date\":\"20 Sep\"},{\"done\":false,\"label\":\"Full sent\",\"date\":\"—\"}]"
+ },
+ {
+  "lock": "D1",
+  "where": "task-full-seed-cal-passed865-q: the done stages are in date order",
+  "ok": true,
+  "detail": "[{\"done\":true,\"label\":\"Queried\",\"date\":\"18 Apr\"},{\"done\":true,\"label\":\"Full requested\",\"date\":\"20 Sep\"},{\"done\":false,\"label\":\"Full sent\",\"date\":\"—\"}]"
+ },
+ {
+  "lock": "D1",
+  "where": "task-full-seed-pkgq-3: the band is burgundy, the title white \"Your move\"",
+  "ok": false,
+  "detail": "rgb(162, 69, 42) Your move"
+ },
+ {
+  "lock": "D1",
+  "where": "task-full-seed-pkgq-3: the avatar takes the accent",
+  "ok": true,
+  "detail": "rgb(110, 52, 38)"
+ },
+ {
+  "lock": "D1",
+  "where": "task-full-seed-pkgq-3: the pager buttons are a .18 white wash",
+  "ok": true,
+  "detail": "rgba(255, 255, 255, 0.18)"
+ },
+ {
+  "lock": "D1",
+  "where": "task-full-seed-pkgq-3: a past segment is rgba(110,52,38,.4)",
+  "ok": true,
+  "detail": "{\"bg\":\"rgba(110, 52, 38, 0.4)\",\"op\":\"1\"}"
+ },
+ {
+  "lock": "D1",
+  "where": "task-full-seed-pkgq-3: one dashed to-do, last",
+  "ok": true,
+  "detail": "[{\"done\":true,\"label\":\"Queried\",\"date\":\"25 Jun\"},{\"done\":true,\"label\":\"Full requested\",\"date\":\"25 Jun\"},{\"done\":false,\"label\":\"Full sent\",\"date\":\"—\"}]"
+ },
+ {
+  "lock": "D1",
+  "where": "task-full-seed-pkgq-3: no stage both done and to do",
+  "ok": true,
+  "detail": "[{\"done\":true,\"label\":\"Queried\",\"date\":\"25 Jun\"},{\"done\":true,\"label\":\"Full requested\",\"date\":\"25 Jun\"},{\"done\":false,\"label\":\"Full sent\",\"date\":\"—\"}]"
+ },
+ {
+  "lock": "D1",
+  "where": "task-full-seed-pkgq-3: the done stages are in date order",
+  "ok": true,
+  "detail": "[{\"done\":true,\"label\":\"Queried\",\"date\":\"25 Jun\"},{\"done\":true,\"label\":\"Full requested\",\"date\":\"25 Jun\"},{\"done\":false,\"label\":\"Full sent\",\"date\":\"—\"}]"
+ },
+ {
+  "lock": "D1",
+  "where": "task-full-seed-query-9: the band is burgundy, the title white \"Your move\"",
+  "ok": false,
+  "detail": "rgb(162, 69, 42) Your move"
+ },
+ {
+  "lock": "D1",
+  "where": "task-full-seed-query-9: the avatar takes the accent",
+  "ok": true,
+  "detail": "rgb(110, 52, 38)"
+ },
+ {
+  "lock": "D1",
+  "where": "task-full-seed-query-9: the pager buttons are a .18 white wash",
+  "ok": true,
+  "detail": "rgba(255, 255, 255, 0.18)"
+ },
+ {
+  "lock": "D1",
+  "where": "task-full-seed-query-9: a past segment is rgba(110,52,38,.4)",
+  "ok": true,
+  "detail": "{\"bg\":\"rgba(110, 52, 38, 0.4)\",\"op\":\"1\"}"
+ },
+ {
+  "lock": "D1",
+  "where": "task-full-seed-query-9: one dashed to-do, last",
+  "ok": true,
+  "detail": "[{\"done\":true,\"label\":\"Queried\",\"date\":\"8 Jul\"},{\"done\":true,\"label\":\"Partial requested\",\"date\":\"22 Jul\"},{\"done\":true,\"label\":\"Partial sent\",\"date\":\"5 Aug\"},{\"done\":true,\"label\":\"Full requested\",\"date\":\"19 Aug\"},{\"done\":false,\"label\":\"Full sent\",\"date\":\"—\"}]"
+ },
+ {
+  "lock": "D1",
+  "where": "task-full-seed-query-9: no stage both done and to do",
+  "ok": true,
+  "detail": "[{\"done\":true,\"label\":\"Queried\",\"date\":\"8 Jul\"},{\"done\":true,\"label\":\"Partial requested\",\"date\":\"22 Jul\"},{\"done\":true,\"label\":\"Partial sent\",\"date\":\"5 Aug\"},{\"done\":true,\"label\":\"Full requested\",\"date\":\"19 Aug\"},{\"done\":false,\"label\":\"Full sent\",\"date\":\"—\"}]"
+ },
+ {
+  "lock": "D1",
+  "where": "task-full-seed-query-9: the done stages are in date order",
+  "ok": true,
+  "detail": "[{\"done\":true,\"label\":\"Queried\",\"date\":\"8 Jul\"},{\"done\":true,\"label\":\"Partial requested\",\"date\":\"22 Jul\"},{\"done\":true,\"label\":\"Partial sent\",\"date\":\"5 Aug\"},{\"done\":true,\"label\":\"Full requested\",\"date\":\"19 Aug\"},{\"done\":false,\"label\":\"Full sent\",\"date\":\"—\"}]"
+ },
+ {
+  "lock": "D1",
+  "where": "task-partial-cor-move-a: the band is burgundy, the title white \"Your move\"",
+  "ok": false,
+  "detail": "rgb(162, 69, 42) Your move"
+ },
+ {
+  "lock": "D1",
+  "where": "task-partial-cor-move-a: the avatar takes the accent",
+  "ok": true,
+  "detail": "rgb(110, 52, 38)"
+ },
+ {
+  "lock": "D1",
+  "where": "task-partial-cor-move-a: the pager buttons are a .18 white wash",
+  "ok": true,
+  "detail": "rgba(255, 255, 255, 0.18)"
+ },
+ {
+  "lock": "D1",
+  "where": "task-partial-cor-move-a: a past segment is rgba(110,52,38,.4)",
+  "ok": true,
+  "detail": "{\"bg\":\"rgba(110, 52, 38, 0.4)\",\"op\":\"1\"}"
+ },
+ {
+  "lock": "D1",
+  "where": "task-partial-cor-move-a: one dashed to-do, last",
+  "ok": true,
+  "detail": "[{\"done\":true,\"label\":\"Queried\",\"date\":\"29 Jul\"},{\"done\":true,\"label\":\"Partial requested\",\"date\":\"7 Sep\"},{\"done\":false,\"label\":\"Partial sent\",\"date\":\"—\"}]"
+ },
+ {
+  "lock": "D1",
+  "where": "task-partial-cor-move-a: no stage both done and to do",
+  "ok": true,
+  "detail": "[{\"done\":true,\"label\":\"Queried\",\"date\":\"29 Jul\"},{\"done\":true,\"label\":\"Partial requested\",\"date\":\"7 Sep\"},{\"done\":false,\"label\":\"Partial sent\",\"date\":\"—\"}]"
+ },
+ {
+  "lock": "D1",
+  "where": "task-partial-cor-move-a: the done stages are in date order",
+  "ok": true,
+  "detail": "[{\"done\":true,\"label\":\"Queried\",\"date\":\"29 Jul\"},{\"done\":true,\"label\":\"Partial requested\",\"date\":\"7 Sep\"},{\"done\":false,\"label\":\"Partial sent\",\"date\":\"—\"}]"
+ },
+ {
+  "lock": "D1",
+  "where": "task-rr-seed-query-11: the band is burgundy, the title white \"Your move\"",
+  "ok": false,
+  "detail": "rgb(162, 69, 42) Your move"
+ },
+ {
+  "lock": "D1",
+  "where": "task-rr-seed-query-11: the avatar takes the accent",
+  "ok": true,
+  "detail": "rgb(110, 52, 38)"
+ },
+ {
+  "lock": "D1",
+  "where": "task-rr-seed-query-11: the pager buttons are a .18 white wash",
+  "ok": true,
+  "detail": "rgba(255, 255, 255, 0.18)"
+ },
+ {
+  "lock": "D1",
+  "where": "task-rr-seed-query-11: a past segment is rgba(110,52,38,.4)",
+  "ok": true,
+  "detail": "{\"bg\":\"rgba(110, 52, 38, 0.4)\",\"op\":\"1\"}"
+ },
+ {
+  "lock": "D1",
+  "where": "task-rr-seed-query-11: one dashed to-do, last",
+  "ok": true,
+  "detail": "[{\"done\":true,\"label\":\"Queried\",\"date\":\"8 Jul\"},{\"done\":true,\"label\":\"Revise & resubmit\",\"date\":\"8 Jul\"},{\"done\":false,\"label\":\"Resubmitted\",\"date\":\"—\"}]"
+ },
+ {
+  "lock": "D1",
+  "where": "task-rr-seed-query-11: no stage both done and to do",
+  "ok": true,
+  "detail": "[{\"done\":true,\"label\":\"Queried\",\"date\":\"8 Jul\"},{\"done\":true,\"label\":\"Revise & resubmit\",\"date\":\"8 Jul\"},{\"done\":false,\"label\":\"Resubmitted\",\"date\":\"—\"}]"
+ },
+ {
+  "lock": "D1",
+  "where": "task-rr-seed-query-11: the done stages are in date order",
+  "ok": true,
+  "detail": "[{\"done\":true,\"label\":\"Queried\",\"date\":\"8 Jul\"},{\"done\":true,\"label\":\"Revise & resubmit\",\"date\":\"8 Jul\"},{\"done\":false,\"label\":\"Resubmitted\",\"date\":\"—\"}]"
+ },
+ {
+  "lock": "D1",
+  "where": "task-partial-seed-query-20: the band is burgundy, the title white \"Your move\"",
+  "ok": false,
+  "detail": "rgb(162, 69, 42) Your move"
+ },
+ {
+  "lock": "D1",
+  "where": "task-partial-seed-query-20: the avatar takes the accent",
+  "ok": true,
+  "detail": "rgb(110, 52, 38)"
+ },
+ {
+  "lock": "D1",
+  "where": "task-partial-seed-query-20: the pager buttons are a .18 white wash",
+  "ok": true,
+  "detail": "rgba(255, 255, 255, 0.18)"
+ },
+ {
+  "lock": "D1",
+  "where": "task-partial-seed-query-20: a past segment is rgba(110,52,38,.4)",
+  "ok": true,
+  "detail": "{\"bg\":\"rgba(110, 52, 38, 0.4)\",\"op\":\"1\"}"
+ },
+ {
+  "lock": "D1",
+  "where": "task-partial-seed-query-20: one dashed to-do, last",
+  "ok": true,
+  "detail": "[{\"done\":true,\"label\":\"Queried\",\"date\":\"5 Aug\"},{\"done\":true,\"label\":\"Partial requested\",\"date\":\"19 Aug\"},{\"done\":false,\"label\":\"Partial sent\",\"date\":\"—\"}]"
+ },
+ {
+  "lock": "D1",
+  "where": "task-partial-seed-query-20: no stage both done and to do",
+  "ok": true,
+  "detail": "[{\"done\":true,\"label\":\"Queried\",\"date\":\"5 Aug\"},{\"done\":true,\"label\":\"Partial requested\",\"date\":\"19 Aug\"},{\"done\":false,\"label\":\"Partial sent\",\"date\":\"—\"}]"
+ },
+ {
+  "lock": "D1",
+  "where": "task-partial-seed-query-20: the done stages are in date order",
+  "ok": true,
+  "detail": "[{\"done\":true,\"label\":\"Queried\",\"date\":\"5 Aug\"},{\"done\":true,\"label\":\"Partial requested\",\"date\":\"19 Aug\"},{\"done\":false,\"label\":\"Partial sent\",\"date\":\"—\"}]"
+ },
+ {
+  "lock": "D1",
+  "where": "task-partial-seed-query-7: the band is burgundy, the title white \"Your move\"",
+  "ok": false,
+  "detail": "rgb(162, 69, 42) Your move"
+ },
+ {
+  "lock": "D1",
+  "where": "task-partial-seed-query-7: the avatar takes the accent",
+  "ok": true,
+  "detail": "rgb(110, 52, 38)"
+ },
+ {
+  "lock": "D1",
+  "where": "task-partial-seed-query-7: the pager buttons are a .18 white wash",
+  "ok": true,
+  "detail": "rgba(255, 255, 255, 0.18)"
+ },
+ {
+  "lock": "D1",
+  "where": "task-partial-seed-query-7: a past segment is rgba(110,52,38,.4)",
+  "ok": true,
+  "detail": "{\"bg\":\"rgba(110, 52, 38, 0.4)\",\"op\":\"1\"}"
+ },
+ {
+  "lock": "D1",
+  "where": "task-partial-seed-query-7: one dashed to-do, last",
+  "ok": true,
+  "detail": "[{\"done\":true,\"label\":\"Queried\",\"date\":\"5 Aug\"},{\"done\":true,\"label\":\"Partial requested\",\"date\":\"19 Aug\"},{\"done\":false,\"label\":\"Partial sent\",\"date\":\"—\"}]"
+ },
+ {
+  "lock": "D1",
+  "where": "task-partial-seed-query-7: no stage both done and to do",
+  "ok": true,
+  "detail": "[{\"done\":true,\"label\":\"Queried\",\"date\":\"5 Aug\"},{\"done\":true,\"label\":\"Partial requested\",\"date\":\"19 Aug\"},{\"done\":false,\"label\":\"Partial sent\",\"date\":\"—\"}]"
+ },
+ {
+  "lock": "D1",
+  "where": "task-partial-seed-query-7: the done stages are in date order",
+  "ok": true,
+  "detail": "[{\"done\":true,\"label\":\"Queried\",\"date\":\"5 Aug\"},{\"done\":true,\"label\":\"Partial requested\",\"date\":\"19 Aug\"},{\"done\":false,\"label\":\"Partial sent\",\"date\":\"—\"}]"
+ },
+ {
+  "lock": "D1",
+  "where": "population: 'Your move' cards seen",
+  "ok": true,
+  "detail": "10"
+ },
+ {
+  "lock": "D1",
+  "where": "population: a card with step chips",
+  "ok": true,
+  "detail": "9"
+ },
+ {
+  "lock": "D1",
+  "where": "population: a past segment on a 'Your move' card",
+  "ok": true,
+  "detail": "9"
+ }
+]

@@ -206,7 +206,8 @@ test("DB116 C1 · C2 — Closed: slices, key rows and the mini query cards", asy
         swells += 1;
         L.check("C1", `${where}: the slice swells ≥1.4×, the others stay`, me.w >= 1.4 * restW - 0.01 && others.every((o) => Math.abs(o.w - restW) < 0.01), `${JSON.stringify(w)} rest ${restW}`);
       }
-      if (s.more > 0) L.check("C1", `${where}: +N more`, s.moreText === `+${s.more} more`, s.moreText);
+      /* ⚠️ RE-POINTED BY v118.1 PART B: the pill now says a click shows them all (the stack takes no pointer) */
+      if (s.more > 0) L.check("C1", `${where}: +N more`, s.moreText === `+${s.more} more · click to see all`, s.moreText);
     }
   }
   L.check("C1", "population: filled, empty and swelling categories all exercised", filled >= 4 && empties >= 1 && swells >= 2, `filled ${filled} · empty ${empties} · swells ${swells}`);
@@ -316,7 +317,7 @@ test("DB116 B2 — the stack always stays on screen", async ({ page }) => {
       L.check("B2", `${tag(vp)}: cards + more = the count`, s.shown + s.more === counts[big], `${s.shown}+${s.more} vs ${counts[big]}`);
       if (vp.height <= 220) {
         reduced += s.shown < Math.min(5, counts[big]) ? 1 : 0;
-        L.check("B2", `${tag(vp)}: fewer than five when five cannot fit`, s.shown < 5 && s.moreText === `+${s.more} more`, `${s.shown} shown, ${s.moreText}`);
+        L.check("B2", `${tag(vp)}: fewer than five when five cannot fit`, s.shown < 5 && s.moreText === `+${s.more} more · click to see all`, `${s.shown} shown, ${s.moreText}`);
       }
     }
   }
@@ -461,7 +462,10 @@ test("DB116 K1 — the keyboard reaches each slice and key row", async ({ page }
     L.check("K1", `${card}: Tab reaches every slice and row`, stops.every((x) => reached.includes(x)), `reached ${reached.join(" ")}`);
     for (const stop of stops.slice(0, 3)) {
       const [kind, key] = stop.split(":");
-      await page.evaluate(([card, kind, key]) => { const el = document.querySelector<HTMLElement>(`[data-d60="${card}"] [data-d116="${kind}"][${kind === "slice" ? "data-seg" : "data-key"}="${key}"]`); (el as HTMLElement).focus(); }, [card, kind, key] as const);
+      /* ⚠️ RE-POINTED BY v118.1 PART A: only KEYBOARD focus anchors the stack to the element (a pointer press focuses a row
+         too), so the focus is put there after a key press, as a keyboard user's would be */
+      await page.keyboard.press("Shift");
+      const empty = await page.evaluate(([card, kind, key]) => { const el = document.querySelector<HTMLElement>(`[data-d60="${card}"] [data-d116="${kind}"][${kind === "slice" ? "data-seg" : "data-key"}="${key}"]`); (el as HTMLElement).focus(); return /: 0$/.test(el?.getAttribute("aria-label") ?? ""); }, [card, kind, key] as const);
       await page.waitForTimeout(SETTLE);
       const focused = await readStack(page);
       const live = (await page.locator(`[data-d60="${card}"] [data-d116="live"]`).textContent())?.trim() ?? "";
@@ -470,11 +474,15 @@ test("DB116 K1 — the keyboard reaches each slice and key row", async ({ page }
       await page.keyboard.press("Escape"); await page.waitForTimeout(SETTLE);
       const gone = await page.evaluate(() => document.querySelector('[data-d116="stack"]') === null);
       L.check("K1", `${card} ${stop}: Esc hides it`, gone, "");
-      await page.keyboard.press("Enter"); await page.waitForTimeout(SETTLE);
-      const back = await readStack(page);
-      L.check("K1", `${card} ${stop}: Enter shows it again`, !!back && back.cards.length > 0, "");
-      await page.keyboard.press("Enter"); await page.waitForTimeout(SETTLE);
-      L.check("K1", `${card} ${stop}: Enter toggles it off`, await page.evaluate(() => document.querySelector('[data-d116="stack"]') === null), "");
+      /* ⚠️ RE-POINTED BY v118.1 PART B: on a slice or row with entries, Enter opens its list, as a click does (DB118-B1 locks
+         that); the show/hide toggle is what Enter still does on a row with none */
+      if (empty) {
+        await page.keyboard.press("Enter"); await page.waitForTimeout(SETTLE);
+        const back = await readStack(page);
+        L.check("K1", `${card} ${stop}: Enter shows it again`, !!back && back.cards.length > 0, "");
+        await page.keyboard.press("Enter"); await page.waitForTimeout(SETTLE);
+        L.check("K1", `${card} ${stop}: Enter toggles it off`, await page.evaluate(() => document.querySelector('[data-d116="stack"]') === null), "");
+      }
     }
   }
   L.done(20);
