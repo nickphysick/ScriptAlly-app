@@ -101,4 +101,8 @@ It is shared by every phone page, so it is its own pack.
 
 ## 7. Dev
 
-Deployed on top of dev's integration at the time of deploy; the bundle and branch are in the deploy note below this report's commit (`dev/…-db116-cl256-rsp5-dm1`). Prod is untouched.
+**Deployed 28 Oct, hosting only, from a clean worktree.** The deployed build is dev's integration at the time (`0e760daf`, the v116 stack plus Contact list v25.6 and Responses v5) with this branch merged in: `39c5768f`, on `dev/…-db116-cl256-rsp5-dm1` (pushed).
+- **Served:** dev serves `index-Cg9wZ_F1.js`, checked after the deploy.
+- **Merge:** two conflicts, both additive: `CLAUDE.md` (Responses v5's section beside this one) and `.refhashes.json` (888 refs, all checked).
+- **Verified before deploying:** all seven DM1 locks passed on the merged build (8 passed, 5.3m).
+- Prod is untouched.
