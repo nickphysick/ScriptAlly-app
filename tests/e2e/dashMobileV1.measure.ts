@@ -47,7 +47,6 @@ test("DM1-A1 · the phone top bar", async ({ page }) => {
     if (!top) continue;
     if (MUT === "A1-overlap") await page.addStyleTag({ content: `.dm1-tools { margin-left: -120px !important; }` });
     if (MUT === "A1-no-rotate") await page.addStyleTag({ content: `.dm1-plus.is-open .dm1-plusdisc > svg { transform: none !important; }` });
-    if (MUT === "A1-no-outside") await page.addInitScript(() => { /* no-op: the break is applied below */ });
     /* the four controls: the name, Search, Feedback, Add — each visible, inside the bar and the window */
     const ctl = await page.evaluate(() => {
       const bar = [...document.querySelectorAll<HTMLElement>('[data-dm1="top"]')].find((e) => e.getBoundingClientRect().height > 0)!;
@@ -269,4 +268,173 @@ test("DM1-B1 · stat cards first", async ({ page }) => {
     }
   }
   L.done(70);
+});
+
+import { PHONE_KIND } from "../../src/lib/dashPhone";
+
+const hexToRgb = (h: string) => { const n = parseInt(h.slice(1), 16); return `rgb(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255})`; };
+
+/** The desktop task card's first four keys, stepped with its own "next". */
+const desktopKeys = async (page: Page): Promise<string[]> => {
+  const keys: string[] = [];
+  for (let i = 0; i < 4; i++) {
+    const k = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-d71="task"][data-key]')].find((e) => e.getBoundingClientRect().height > 0)?.dataset.key ?? null);
+    if (!k || keys.includes(k)) break;
+    keys.push(k);
+    const next = page.locator('[data-d71="next"]').first();
+    if (!(await next.count()) || (await next.isDisabled())) break;
+    await next.click();
+    await page.waitForTimeout(250);
+  }
+  return keys;
+};
+
+test("DM1-C1 · Up next", async ({ page }) => {
+  const L = new Ledger("C1");
+  const kinds = new Set<string>();
+  for (const drop of [[], ["req"], ["req", "nudge"], ["req", "nudge", "quiet"]] as string[][]) {
+    const label = drop.length ? `drop ${drop.join("+")}` : "as found";
+    await openDash(page, DESKTOPS[0], { __SA_DASH_DROP: drop });
+    const desk = await desktopKeys(page);
+    L.check("C1", `${label}: population, the desktop's list`, desk.length > 0, JSON.stringify(desk));
+    await openDash(page, PHONES[0], { __SA_DASH_DROP: drop });
+    if (MUT === "C1-one-tint") await page.addStyleTag({ content: `.dm1-hero { background: #f5e2da !important; }` });
+    const ph = await page.evaluate(() => {
+      const hero = document.querySelector<HTMLElement>('[data-dm1="hero"]');
+      const rows = [...document.querySelectorAll<HTMLElement>('[data-dm1="row"]')].map((r) => ({ key: r.dataset.key, kind: r.dataset.kind, disc: getComputedStyle(r.querySelector(".dm1-rdisc")!).backgroundColor }));
+      return { key: hero?.dataset.key, kind: hero?.dataset.kind, bg: hero ? getComputedStyle(hero).backgroundColor : null, of: hero?.querySelector('[data-dm1="of"]')?.textContent, rows };
+    });
+    L.check("C1", `${label}: the hero is task 1`, !!ph.key && ph.key === desk[0], `${ph.key} vs ${desk[0]}`);
+    L.check("C1", `${label}: the rows are tasks 2–4, in order`, JSON.stringify(ph.rows.map((r) => r.key)) === JSON.stringify(desk.slice(1, 4)), `${JSON.stringify(ph.rows.map((r) => r.key))} vs ${JSON.stringify(desk.slice(1, 4))}`);
+    L.check("C1", `${label}: at most three rows`, ph.rows.length <= 3, String(ph.rows.length));
+    const k = ph.kind as keyof typeof PHONE_KIND;
+    if (k && PHONE_KIND[k]) {
+      kinds.add(k);
+      L.check("C1", `${label}: the hero's tint is ${k}'s`, ph.bg === hexToRgb(PHONE_KIND[k].tint), `${ph.bg} vs ${PHONE_KIND[k].tint}`);
+    } else L.check("C1", `${label}: the hero has a kind`, false, String(ph.kind));
+    for (const r of ph.rows) {
+      const rk = r.kind as keyof typeof PHONE_KIND;
+      L.check("C1", `${label}: row ${r.key} disc is ${rk}'s`, !!PHONE_KIND[rk] && r.disc === hexToRgb(PHONE_KIND[rk].disc), `${r.disc}`);
+    }
+    /* each drawing once: the courier in the hero, the Mentor on the chart */
+    const art = await page.evaluate(() => {
+      const vis = (e: Element) => (e as HTMLElement).getBoundingClientRect().width > 0;
+      const imgs = [...document.querySelectorAll<HTMLImageElement>('[data-dm1="page"] img')].filter(vis);
+      const c = imgs.filter((i) => i.src.includes("/courier.png")), m = imgs.filter((i) => i.src.includes("/mentor-leaning"));
+      return { courier: c.length, mentor: m.length, courierInHero: c.every((i) => !!i.closest('[data-dm1="hero"]')), mentorInChart: m.every((i) => !!i.closest('[data-dm1="chart"]')) };
+    });
+    L.check("C1", `${label}: the courier once, in the hero`, art.courier === 1 && art.courierInHero, JSON.stringify(art));
+    L.check("C1", `${label}: the Mentor once, on the chart`, art.mentor === 1 && art.mentorInChart, JSON.stringify(art));
+    /* the title clears the courier */
+    const clear = await page.evaluate(() => {
+      const t = document.querySelector('[data-dm1="hero-title"]')?.getBoundingClientRect();
+      const c = document.querySelector('[data-dm1="courier"]')?.getBoundingClientRect();
+      return t && c ? { tr: t.right, cl: c.left } : null;
+    });
+    L.check("C1", `${label}: the title stops short of the courier`, !!clear && clear.tr <= clear.cl + 1, JSON.stringify(clear));
+  }
+  L.check("C1", "all four kinds were the hero", ["move", "nudge", "close", "house"].every((k) => kinds.has(k)), JSON.stringify([...kinds]));
+  /* View task opens the place the task is done, and completes nothing: a query's task opens its query card (the query
+     panel, a dialog named "Query", holding the agent); housekeeping opens the agent's editor. Each case on the drop that
+     makes it the hero, so both are exercised whatever the account holds first. */
+  const VIEW: [string[], string, RegExp][] = [[["req"], "query", /^Query$/], [["req", "nudge", "quiet"], "agent", /^Edit agent$/]];
+  for (const [drop, action, dialog] of VIEW) {
+    await openDash(page, PHONES[0], { __SA_DASH_DROP: drop });
+    const hero = await page.evaluate(() => { const h = document.querySelector<HTMLElement>('[data-dm1="hero"]'); return { key: h?.dataset.key, who: h?.dataset.who, action: h?.dataset.action }; });
+    L.check("C1", `View task (${action}): population, the hero's action`, hero.action === action, JSON.stringify(hero));
+    if (MUT === "C1-view-dead") await page.addStyleTag({ content: `[data-dm1="view-task"] { pointer-events: none !important; }` });
+    await page.locator('[data-dm1="view-task"]').first().click({ force: MUT === "C1-view-dead", timeout: 5000 }).catch(() => {});
+    await page.waitForTimeout(2000);
+    const opened = await page.evaluate(([who, re]) => {
+      const vis = (e: Element) => (e as HTMLElement).getBoundingClientRect().height > 0;
+      const d = [...document.querySelectorAll<HTMLElement>('[role="dialog"]')].filter(vis);
+      const rx = new RegExp(re);
+      return { names: d.map((x) => x.getAttribute("aria-label")), ok: d.some((x) => rx.test(x.getAttribute("aria-label") ?? "") && (!who || x.innerText.includes(who))), path: location.pathname };
+    }, [hero.action === "query" ? hero.who ?? "" : "", dialog.source] as const);
+    L.check("C1", `View task (${action}) opens its place`, opened.ok && opened.path === "/dashboard", JSON.stringify({ ...opened, who: hero.who }));
+    await closeEverything(page);
+    await openDash(page, PHONES[0], { __SA_DASH_DROP: drop });
+    const after = await page.evaluate(() => document.querySelector<HTMLElement>('[data-dm1="hero"]')?.dataset.key);
+    L.check("C1", `View task (${action}) did not complete the task`, hero.key === after, `${hero.key} → ${after}`);
+  }
+  L.done(30);
+});
+
+/* v105's own stat fixtures (db105Lib.STATS), seeded through the dev-only `__SA_FOUNDING_STATS` aid */
+const FW: Record<string, { contributions: number; waiting: number; tier: string | null; nextTier: string | null; toNext: number | null; topPct: number | null; foundingNo: number | null }> = {
+  egg: { contributions: 0, waiting: 0, tier: null, nextTier: "fledgling", toNext: 1, topPct: null, foundingNo: 23 },
+  fledgling: { contributions: 1, waiting: 0, tier: "fledgling", nextTier: "archivist", toNext: 2, topPct: null, foundingNo: 23 },
+  mentor: { contributions: 16, waiting: 0, tier: "mentor", nextTier: "queryhawk", toNext: 9, topPct: 10, foundingNo: 23 },
+  queryhawk: { contributions: 25, waiting: 0, tier: "queryhawk", nextTier: null, toNext: null, topPct: 5, foundingNo: 23 },
+};
+const RANK: Record<string, string> = { egg: "Egg", fledgling: "Fledgling", mentor: "Mentor", queryhawk: "QueryHawk" };
+const NEXT: Record<string, string> = { fledgling: "hatch", archivist: "Archivist", scout: "Scout", mentor: "Mentor", queryhawk: "QueryHawk" };
+
+test("DM1-D1 · the founding writer row and Recent", async ({ page }) => {
+  const L = new Ledger("D1");
+  for (const [k, st] of Object.entries(FW)) {
+    await openDash(page, DESKTOPS[0], { __SA_FOUNDING_STATS: st });
+    const swap = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-d105="swap"]')].find((e) => e.getBoundingClientRect().width > 0 || e.textContent)?.textContent ?? null);
+    await openDash(page, PHONES[0], { __SA_FOUNDING_STATS: st });
+    const row = await page.evaluate(() => {
+      const r = document.querySelector<HTMLElement>('[data-dm1="founding"]');
+      return r ? { title: r.querySelector('[data-dm1="founding-title"]')?.textContent, line: r.querySelector('[data-dm1="founding-line"]')?.textContent } : null;
+    });
+    L.check("D1", `${k}: population, the row`, !!row, JSON.stringify(row));
+    if (!row) continue;
+    const want = st.nextTier && st.toNext != null
+      ? `${st.contributions} sent · ${st.toNext} more to ${NEXT[st.nextTier]}. Tell us something.`
+      : `${st.contributions} sent · top rank. Tell us something.`;
+    L.check("D1", `${k}: the title names the rank`, row.title === `Founding writer · ${RANK[k]}`, String(row.title));
+    L.check("D1", `${k}: the line is v105's figures`, row.line === want, `${row.line} vs ${want}`);
+    /* and the desktop card's own header swap says the same count */
+    const deskN = swap && /^(\d+) CONTRIBUTION/.test(swap) ? Number(swap.match(/^(\d+)/)![1]) : swap === "NO CONTRIBUTIONS YET" ? 0 : NaN;
+    L.check("D1", `${k}: the count agrees with the desktop card`, deskN === st.contributions && (row.line ?? "").startsWith(`${deskN} sent`), `desktop "${swap}" vs phone "${row.line}"`);
+  }
+  /* the row opens the FeedbackDock as a bottom sheet */
+  await openDash(page, PHONES[0]);
+  await page.locator('[data-dm1="founding"]').first().click({ timeout: 5000 }).catch(() => {});
+  await page.waitForTimeout(600);
+  const fb = await page.evaluate(() => {
+    const p = document.querySelector<HTMLElement>('[data-fb="panel"]');
+    const r = p?.getBoundingClientRect();
+    const scrim = document.querySelector<HTMLElement>('[data-dm1="scrim"]');
+    return r ? { top: r.top, bottom: r.bottom, left: r.left, w: r.width, vh: innerHeight, vw: innerWidth, scrim: scrim ? getComputedStyle(scrim).display : null } : null;
+  });
+  L.check("D1", "the founding row opens the feedback sheet", !!fb && Math.abs(fb.bottom - fb.vh) < 1 && fb.left === 0 && Math.abs(fb.w - fb.vw) < 1 && fb.top > 0, JSON.stringify(fb));
+  L.check("D1", "the sheet sits over a scrim", fb?.scrim === "block", String(fb?.scrim));
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(300);
+  L.check("D1", "Esc closes the sheet and the scrim", (await page.locator('[data-fb="panel"]').count()) === 0 && (await page.evaluate(() => getComputedStyle(document.querySelector('[data-dm1="scrim"]')!).display)) === "none", "");
+
+  /* Recent: the feed's two newest, in the feed's own words */
+  await openDash(page, PHONES[0]);
+  const recent = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-dm1="recent-row"]')].map((r) => ({ t: r.querySelector(".dm1-rttl")?.textContent ?? "", d: r.querySelector("time")?.textContent ?? "" })));
+  L.check("D1", "Recent: population, two rows", recent.length === 2, JSON.stringify(recent));
+  if (MUT === "D1-no-feed") await page.addStyleTag({ content: `[data-dm1="feed-link"] { pointer-events: none !important; }` });
+  await page.locator('[data-dm1="feed-link"]').first().click({ force: MUT === "D1-no-feed", timeout: 5000 }).catch(() => {});
+  await page.waitForTimeout(1200);
+  const feed = await page.evaluate(() => {
+    const d = [...document.querySelectorAll<HTMLElement>('[data-d58="drawer"]')].find((e) => e.getBoundingClientRect().height > 0);
+    const r = d?.getBoundingClientRect();
+    const evs = d ? [...d.querySelectorAll<HTMLElement>('[data-d58="ev"]')].slice(0, 2).map((e) => e.querySelector('[data-d58="ev-tag"]')?.textContent ?? e.querySelector('[data-d58="ev-say"]')?.textContent ?? "") : [];
+    return d && r ? { label: d.getAttribute("aria-label"), top: r.top, bottom: r.bottom, w: r.width, vh: innerHeight, vw: innerWidth, evs } : null;
+  });
+  L.check("D1", "Activity feed opens the feed", feed?.label === "Activity feed", JSON.stringify(feed));
+  L.check("D1", "…as a bottom sheet", !!feed && Math.abs(feed.bottom - feed.vh) < 1 && feed.top > 0 && Math.abs(feed.w - feed.vw) < 1, JSON.stringify(feed));
+  L.check("D1", "Recent's rows are the feed's first two", !!feed && recent.length === 2 && recent.every((r, i) => !!feed.evs[i] && r.t.startsWith(feed.evs[i])), JSON.stringify({ recent, feed: feed?.evs }));
+  await page.keyboard.press("Escape");
+
+  /* page order and rhythm: stats → Up next → founding → Recent, 22 apart */
+  await openDash(page, PHONES[0]);
+  if (MUT === "D1-gap") await page.addStyleTag({ content: `.dm1-body { gap: 30px !important; }` });
+  const order = await page.evaluate(() => {
+    const y = (s: string) => { const e = document.querySelector<HTMLElement>(s); if (!e) return null; const r = e.getBoundingClientRect(); return { t: r.top, b: r.bottom }; };
+    return { stats: y('[data-dm1="stats"]'), up: y('[data-dm1="upnext"]'), found: y('[data-dm1="founding"]'), recent: y('[data-dm1="recent"]') };
+  });
+  const seq = [order.stats, order.up, order.found, order.recent];
+  L.check("D1", "order: stats, Up next, founding, Recent", seq.every(Boolean) && seq.every((s, i) => i === 0 || s!.t > seq[i - 1]!.t), JSON.stringify(order));
+  const gaps = seq.slice(1).map((s, i) => (s && seq[i] ? Math.round((s.t - seq[i]!.b) * 10) / 10 : NaN));
+  L.check("D1", "22px between sections", gaps.every((g) => Math.abs(g - 22) <= 0.5), JSON.stringify(gaps));
+  L.done(24);
 });

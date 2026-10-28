@@ -180,3 +180,42 @@
 .dm1-small .dm1-bar { margin-top: 10px; }
 .dm1-bar i { display: block; min-width: 3px; height: 100%; }
 .dm1-card.is-loading .dm1-num, .dm1-card.is-loading .dm1-sline { color: transparent; }
+
+/* ── Part C · Up next ─────────────────────────────────────────────────────────────────────────── */
+.dm1-sec { display: flex; flex-direction: column; gap: 10px; }
+.dm1-sechead { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 0 2px; }
+.dm1 .dm1-h { margin: 0; font: 400 20px/1.2 var(--dm1-type) !important; color: var(--dm1-ink); letter-spacing: 0; }
+.dm1-link {
+  min-height: 40px; padding: 0 2px; border: 0; background: none; cursor: pointer; color: var(--dm1-navy);
+  font: 400 15px/1 var(--dm1-serif) !important; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px;
+}
+.dm1-link:focus-visible, .dm1-view:focus-visible, .dm1-row:focus-visible, .dm1-found:focus-visible { outline: 2px solid var(--dm1-navy); outline-offset: 2px; }
+.dm1-hero { position: relative; overflow: hidden; padding: 16px; border-radius: 20px; color: var(--dm1-ink); }
+.dm1-courier { position: absolute; top: 34px; right: -6px; width: 118px; height: auto; pointer-events: none; }
+.dm1-herohead { position: relative; display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.dm1-kicker { font: 400 16px/1.2 var(--dm1-type) !important; }
+.dm1-of { font: 400 13px/1 var(--dm1-serif) !important; color: rgba(28, 19, 15, 0.55); }
+.dm1-herottl { position: relative; margin: 10px 104px 0 0; min-height: 30px; font: 400 25px/1.2 var(--dm1-type) !important; color: var(--dm1-ink); }
+.dm1-heroline { position: relative; margin: 10px 0 0; font: 400 14.5px/1.45 var(--dm1-serif) !important; color: rgba(28, 19, 15, 0.72); }
+.dm1-steps { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 4px; margin: 12px 0 0; padding: 0; list-style: none; }
+.dm1-steps li { display: inline-flex; align-items: center; gap: 4px; }
+.dm1-step { display: inline-block; padding: 4px 8px; border-radius: 7px; background: rgba(255, 255, 255, 0.82); font: 400 13px/1.2 var(--dm1-serif) !important; color: var(--dm1-ink); white-space: nowrap; }
+.dm1-steps li.is-todo .dm1-step { background: transparent; box-shadow: none; outline: 1px dashed rgba(28, 19, 15, 0.45); outline-offset: -1px; }
+.dm1-stepsep { font-size: 11px; color: rgba(28, 19, 15, 0.4); }
+.dm1-view {
+  position: relative; display: block; width: 100%; height: 48px; margin-top: 16px; border: 0; border-radius: 12px; cursor: pointer;
+  background: var(--dm1-navy); color: #ffffff; font: 600 16px/1 var(--dm1-serif) !important;
+}
+.dm1-hero.is-loading .dm1-courier { opacity: 0.5; }
+.dm1-rows { margin-top: 0; }
+.dm1-row {
+  display: flex; align-items: center; gap: 12px; width: 100%; min-height: 64px; padding: 10px 12px 10px 14px;
+  border: 0; background: none; color: var(--dm1-ink); text-align: left; cursor: pointer;
+}
+.dm1-rdisc { flex: none; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; }
+.dm1-rdisc > svg { width: 17px; height: 17px; stroke-width: 1.9; }
+.dm1-rtxt { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.dm1-rttl { font: 400 15.5px/1.3 var(--dm1-serif) !important; color: var(--dm1-ink); }
+.dm1-rttl b { font-weight: 600; }
+.dm1-rline { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 13.5px/1.3 var(--dm1-serif) !important; color: rgba(28, 19, 15, 0.58); }
+.dm1-chev { flex: none; width: 18px; height: 18px; color: rgba(28, 19, 15, 0.4); }

@@ -14,7 +14,18 @@ import type { Activity, Agent, Manuscript, ManuscriptVersion, Query, SmartImport
 import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
 import { PhoneSearch, PhoneTopBar, type PhoneActions } from "./PhoneTopBar";
 import { PhoneStats } from "./PhoneStats";
-import { scopeActivities, scopeQueries } from "../../../lib/manuscriptScope";
+import { PhoneUpNext } from "./PhoneUpNext";
+import { scopeActivities, scopeQueries, scopeTasks } from "../../../lib/manuscriptScope";
+import { assembleBoardColumns } from "../../../lib/todoColumns";
+import { todoRows } from "../../../lib/dashTodo";
+import { dashList, startingPlan, type ListAction } from "../../../lib/dashList";
+import { buildQcRows } from "../../../lib/qcSummary";
+import type { TaskCtx } from "../../../lib/dashTaskCard";
+import { gettingStartedRows } from "../../../lib/dashEmpty";
+import { isPreQuery } from "../../../lib/dashFirstUse";
+import { openQueryPanel } from "../../../lib/queryPanelStore";
+import { openAgentCard } from "../../../lib/agentCardStore";
+import { dashAid } from "../../../lib/dashReviewAid";
 import { closedTile } from "../../../lib/dashClosed";
 import { agentCoverage } from "../../../lib/dashFirstUse";
 import { localYMD } from "../../../lib/shellSidebar";
@@ -60,6 +71,44 @@ export const DashPhone: React.FC<DashPhoneProps> = (props) => {
     [agents, queries, activeManuscript, now],
   );
   const agentsFig = useMemo(() => agentsCard(cov), [cov]);
+
+  /* ── Up next: Dash58's own list, built the same way (the board's cards, then the contact list's, then the clock's) ── */
+  const { tasks, userTasks, taskFlags, currentUser, versions = [] } = props;
+  const msIds = useMemo(() => new Set(manuscripts.map((m) => m.id)), [manuscripts]);
+  const scopedTasks = useMemo(() => scopeTasks(tasks, queries, msIds, scopeId), [tasks, queries, msIds, scopeId]);
+  const empty = isPreQuery(scopedQueries);
+  /* the desktop's dev-only review aid (`__SA_DASH_DROP`), read behind the same call-site MODE gate Dash58 uses, so a
+     production build carries none of it; the locks use it to put each task kind first */
+  const drop = import.meta.env.MODE !== "production" ? dashAid().drop : [];
+  const plan = useMemo(() => {
+    if (empty && drop.length === 0) {
+      return startingPlan(gettingStartedRows({ manuscripts, agentCount: agents.length, queryCount: queries.length, versions, activeManuscript }), scopeId);
+    }
+    const cols = assembleBoardColumns({
+      tasks: scopedTasks, userTasks, queries, agents, manuscripts, taskFlags, activities: scopedActivities,
+      now: now.getTime(), today: localYMD(now.getTime()), mutedTaskRules: currentUser?.mutedTaskRules,
+    }).cols;
+    const cards = [...cols.todo, ...cols.today];
+    const rows = todoRows({ cards, data: { queries, agents, manuscripts, userTasks, activities: scopedActivities } });
+    return dashList({
+      rows, cards, queries, scopedQueries, agents, activities: scopedActivities, allActivities: props.activities,
+      userTasks, manuscript: activeManuscript, user: currentUser, now, drop,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scopedTasks, userTasks, queries, scopedQueries, agents, manuscripts, taskFlags, scopedActivities, props.activities, activeManuscript, currentUser, now, empty, versions, scopeId, drop.join(",")]);
+  const taskCtx = useMemo<TaskCtx>(
+    () => ({ queries, agents, qcRows: buildQcRows(scopedQueries, agents, scopedActivities, now.getTime()), nowMs: now.getTime() }),
+    [queries, agents, scopedQueries, scopedActivities, now],
+  );
+  /* ⚠️ "View task" NEVER COMPLETES A TASK — Dash58's own viewTask: a query's task opens that query in the query panel,
+     where its next step is offered; anything else opens its own flow or page. */
+  const viewTask = (a: ListAction) => {
+    const qid = a.kind === "drawer" && a.request.mode !== "log" ? a.request.queryId : undefined;
+    if (qid) openQueryPanel(qid, "dashboard");
+    else if (a.kind === "drawer") openQueryDrawer({ ...a.request });
+    else if (a.kind === "agent") openAgentCard(a.agentId, { tab: a.tab, focus: a.focus, from: "hk", sequence: a.sequence });
+    else onNavigate(a.tab, a.sub);
+  };
 
   /* the hairline under the bar arrives once the page's own scroller has moved */
   const [scrolled, setScrolled] = useState(false);
@@ -114,6 +163,7 @@ export const DashPhone: React.FC<DashPhoneProps> = (props) => {
           onClosed={() => navigate(queriesForIds(closed?.ids ?? []))}
           onAgents={() => onNavigate("agents")}
         />
+        <PhoneUpNext loading={loading} plan={plan} ctx={taskCtx} onView={viewTask} onSeeAll={() => onNavigate("todo")} />
       </div>
       {searchOpen && (
         <PhoneSearch

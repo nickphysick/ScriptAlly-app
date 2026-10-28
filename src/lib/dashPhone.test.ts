@@ -94,7 +94,7 @@ describe("the three small cards", () => {
 
 describe("Up next's kinds, in one map", () => {
   it("every task kind lands on a phone kind with a tint", () => {
-    expect((["send", "nudge", "close", "other"] as const).map(phoneKindOf)).toEqual(["move", "nudge", "close", "house"]);
+    expect((["req", "nudge", "quiet", "house", "ready", "coming"] as const).map((group) => phoneKindOf({ group }))).toEqual(["move", "nudge", "close", "house", "house", "house"]);
     expect(Object.keys(PHONE_KIND).sort()).toEqual(["close", "house", "move", "nudge"]);
   });
 });

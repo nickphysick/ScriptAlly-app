@@ -16,7 +16,7 @@ import { aggregateLedger, dailyLedger, sentAt } from "./oneScreen";
 import { tileCourt } from "./qcSummary";
 import { CLOSED_BUCKETS, type ClosedBucketKey, type ClosedTile } from "./dashClosed";
 import type { AgentCoverage } from "./dashFirstUse";
-import type { TaskKind } from "./dashTaskCard";
+import type { ListItem } from "./dashList";
 import { TIERS, cardTier, type FoundingStats } from "./foundingStats";
 import { RANK_NAMES } from "./foundingCard";
 import { MONTHS_SHORT } from "./dates";
@@ -141,8 +141,14 @@ export const ZERO_LINE = { withAgents: "None yet", closed: "Nothing closed", age
 
 export type PhoneKind = "move" | "nudge" | "close" | "house";
 
-/** The task card's four kinds on the phone. "other" (housekeeping, a ready agent, a coming date) takes the slate. */
-export const phoneKindOf = (k: TaskKind): PhoneKind => (k === "send" ? "move" : k === "nudge" ? "nudge" : k === "close" ? "close" : "house");
+/**
+ * The four kinds on the phone, by the task's LIST GROUP: "Agents are waiting" (req) is the writer's move, then nudges,
+ * then quiet queries to consider closing, and everything else (housekeeping, a ready agent, a coming date) the slate.
+ * ⚠️ Not the desktop card's `kindOf`, which files an offer as "other" because it is not a send — on the phone an offer
+ * waiting on the writer reads as their move, which is what the req group means.
+ */
+export const phoneKindOf = (item: Pick<ListItem, "group">): PhoneKind =>
+  item.group === "req" ? "move" : item.group === "nudge" ? "nudge" : item.group === "quiet" ? "close" : "house";
 
 /**
  * ⚠️ THE ONE MAP. Text on these tints is always the ink; only the kicker takes the kind's colour. "Your move" is
