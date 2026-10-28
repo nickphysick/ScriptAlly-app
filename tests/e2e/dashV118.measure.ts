@@ -176,3 +176,58 @@ test("DB118-B1 · slices and rows click through to the filtered list", async ({ 
   L.check("B1", `the "+N more" pill says a click shows them all`, busy.n <= 5 ? more === null : !!more && /^\+\d+ more · click to see all$/.test(more), `${busy.n} · ${more}`);
   L.done(30);
 });
+
+/** the founding card's rotation and whether its header shows the contributions swap */
+const tilt = (page: Page) => page.evaluate(() => {
+  const c = document.querySelector<HTMLElement>(".d105-fw.d116-tilt");
+  const swb = document.querySelector<HTMLElement>('[data-d105="swap"]');
+  return c ? { rotate: getComputedStyle(c).rotate, swap: swb ? Number(getComputedStyle(swb).opacity) : null, inCard: c.contains(document.activeElement) } : null;
+});
+
+test("DB118-C1 · the founding card keeps its tilt", async ({ page }) => {
+  const L = new Ledger("C1");
+  for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
+    const where = tag(vp);
+    /* mouse: open How it works, close it three ways, move away */
+    for (const close of ["close", "dim", "gotit"] as const) {
+      await openDash(page, vp);
+      L.check("C1", `${where} ${close}: population, the card`, !!(await tilt(page)), "");
+      await page.locator('[data-d105="info"]').first().click();
+      await page.waitForTimeout(500);
+      const open = await page.locator('[data-d105h="modal"].on').count();
+      L.check("C1", `${where} ${close}: How it works opened`, open > 0, String(open));
+      if (close === "close") await page.locator('[data-d105h="close"]').first().click();
+      else if (close === "dim") await page.mouse.click(8, vp.height - 8);
+      else {
+        for (let i = 0; i < 8; i++) { const n = page.locator('[data-d105h="next"]:visible').first(); if (!(await n.count())) break; await n.click({ timeout: 2000 }).catch(() => {}); await page.waitForTimeout(150); if (!(await page.locator('[data-d105h="modal"].on').count())) break; }
+      }
+      await page.waitForTimeout(400);
+      await page.mouse.move(4, 4);
+      await page.waitForTimeout(500);
+      const t = await tilt(page);
+      L.check("C1", `${where} ${close}: closed with the mouse, the card tilts back to −1.8°`, (await page.locator('[data-d105h="modal"].on').count()) === 0 && t?.rotate === "-1.8deg", JSON.stringify(t));
+      L.check("C1", `${where} ${close}: the header shows the ID again`, t?.swap === 0, JSON.stringify(t));
+    }
+    /* keyboard: open with Enter, close with Esc — straight while focus is inside, tilted once Tab takes it out */
+    await openDash(page, vp);
+    await page.keyboard.press("Shift");
+    await page.locator('[data-d105="info"]').first().focus();
+    await page.keyboard.press("Enter");
+    await page.waitForTimeout(500);
+    await page.keyboard.press("Escape");
+    await page.waitForTimeout(500);
+    const k1 = await tilt(page);
+    L.check("C1", `${where} keyboard: straight while the ⓘ has focus`, k1?.rotate === "0deg" && k1.inCard, JSON.stringify(k1));
+    L.check("C1", `${where} keyboard: the swap shows while straight`, k1?.swap === 1, JSON.stringify(k1));
+    for (let i = 0; i < 12 && (await tilt(page))?.inCard; i++) { await page.keyboard.press("Tab"); await page.waitForTimeout(80); }
+    await page.waitForTimeout(400);
+    const k2 = await tilt(page);
+    L.check("C1", `${where} keyboard: −1.8° once Tab takes focus out`, k2?.rotate === "-1.8deg" && !k2.inCard, JSON.stringify(k2));
+    /* hover still straightens */
+    const box = await page.locator(".d105-fw.d116-tilt").first().boundingBox();
+    await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
+    await page.waitForTimeout(500);
+    L.check("C1", `${where} hover: straight`, (await tilt(page))?.rotate === "0deg", JSON.stringify(await tilt(page)));
+  }
+  L.done(24);
+});

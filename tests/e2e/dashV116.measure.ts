@@ -413,8 +413,11 @@ test("DB116 F1 — the founding card tilts, and its header swaps to contribution
     const r2 = (await fwRead(page))!;
     L.check("F1", `${k}: and back`, r2.rotate === "-1.8deg" && r2.restOp > 0.99 && r2.swapOp < 0.01, `${r2.rotate} ${r2.restOp}/${r2.swapOp}`);
   }
-  /* focus-within does what hover does; reduced motion: no rotation */
+  /* KEYBOARD focus does what hover does; reduced motion: no rotation.
+     ⚠️ RE-POINTED BY v118.1 PART C: the card straightens on keyboard focus only (`:has(:focus-visible)`), not on any
+     focus inside it, so the focus is put there after a key press, as a keyboard user's would be. */
   await openDash(page, VP1440, { __SA_FOUNDING_STATS: STATS.fledgling });
+  await page.keyboard.press("Shift");
   await page.locator('[data-d105="info"]').first().focus();
   await page.waitForTimeout(600);
   const f = (await fwRead(page))!;
