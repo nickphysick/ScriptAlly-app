@@ -115,39 +115,9 @@ const seed = (k: string, waiting = 0) => ({ __SA_FOUNDING_STATS: withWaiting(k, 
 
 /* DB93 C1 · C2 · C3 · C4 · C7 — RETIRED by Dashboard v105 (tests/e2e/RETIRED-dashboard-v105.md): they measured the
    medallion, the ladder and the "Your contributions" copy, which the press-ID card replaces. C5 (the panel) and C6 (the
-   laptop rows) stay until v105 Part D. */
+   laptop rows) stayed until v105 Part D; C5 is retired there, C6 stays. */
 
-test("DB93 C5 — How it works: opens, closes by ✕, Esc and the dim layer; focus returns; no weekly question", async ({ page }) => {
-  test.setTimeout(400_000);
-  const L = new Ledger("c5");
-  const vp = { width: 1440, height: 900 };
-  await openDash(page, vp, { __SA_FOUNDING_STATS: STATS["6"] });
-  const state = () => page.evaluate(() => {
-    const p = document.querySelector<HTMLElement>('[data-d93="panel"]');
-    const b = p?.getBoundingClientRect();
-    const a = document.activeElement as HTMLElement | null;
-    /* RE-POINTED (Dashboard v105 Part B): the panel is opened by the press ID's ⓘ, and focus returns there */
-    return { open: !!p?.classList.contains("on"), w: b?.width ?? 0, right: b ? window.innerWidth - b.right : -1, focus: a?.dataset.d105 ?? a?.dataset.d93 ?? a?.tagName ?? "", inPanel: !!(p && a && p.contains(a)), text: p?.innerText ?? "" };
-  });
-  for (const how of ["close", "esc", "dim"] as const) {
-    await page.locator('[data-d105="info"]:visible').first().click();
-    await page.waitForTimeout(450);
-    const o = await state();
-    L.check("C5", `${how}: the panel opens, 440px at the right, focus inside it`, o.open && Math.abs(o.w - 440) <= 1 && Math.abs(o.right - 16) <= 1 && o.inPanel, JSON.stringify({ open: o.open, w: o.w, right: o.right, focus: o.focus }));
-    if (how === "close") {
-      const t = o.text.toLowerCase();
-      L.check("C5", "the panel's sections and rows", ["the flock", "what counts", "the fair-play rules", "reporting a problem we can confirm", "an idea of yours that we build", "up to 3 a week count.", "your level never goes down.", "you give feedback from give feedback in the sidebar."].every((x) => t.includes(x)), "");
-      L.check("C5", "no weekly-question rows", !t.includes("question of the week") && !t.includes("weekly question"), "");
-      L.check("C5", "the five tiers with their minimums", ["1+ contributions", "3+ contributions", "8+ contributions", "15+ contributions", "25+ contributions"].every((x) => t.includes(x)), "");
-      await page.locator('[data-d93="close"]').click();
-    } else if (how === "esc") await page.keyboard.press("Escape");
-    else await page.mouse.click(40, vp.height / 2);
-    await page.waitForTimeout(450);
-    const c = await state();
-    L.check("C5", `${how}: the panel closes and focus returns to How it works`, !c.open && c.focus === "info", JSON.stringify({ open: c.open, focus: c.focus }));
-  }
-  L.done(9);
-});
+/* DB93 C5 — RETIRED by Dashboard v105 Part D: the right-hand panel is replaced by the How it works slides (DB105 D1). */
 
 test("DB93 C6 — the laptop rows: founding 290, task at least 254, the bottoms in line", async ({ page }) => {
   test.setTimeout(300_000);

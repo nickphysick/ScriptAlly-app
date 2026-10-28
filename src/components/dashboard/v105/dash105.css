@@ -5,6 +5,12 @@
    ⚠️ THE CARD IS A SIZE CONTAINER: its height comes from its slot, never its content, so every step below answers to the
       card's OWN width and height (the right column is 250–377px on laptops against the ref's 494). */
 
+/* ── the right column while querying, ≤900px tall (moved from v93's sheet, unchanged): the founding card takes up to
+   290px and the task card keeps at least 254px. At ≤760px tall the 128px row stays (it gives the Compact card). */
+@media (max-height: 900px) and (min-height: 761px) and (min-width: 1100px) {
+  .d58[data-mode="q"] .d71-right { grid-template-rows: minmax(254px, 1fr) minmax(194px, 290px); }
+}
+
 .d105-fw {
   container: d105fw / size;
   box-sizing: border-box;
@@ -19,6 +25,9 @@
   color: var(--d58-ink);
 }
 .d71-fwslot > .d105-fw { flex: 1 1 0; min-height: 0; }
+/* the dashboard's cards lift on hover (v93's, kept) */
+.d58 .d105-fw { transition: transform 180ms cubic-bezier(0.22, 0.8, 0.3, 1), box-shadow 180ms ease; }
+.d58 .d105-fw:hover { z-index: 4; transform: translateY(-2px); box-shadow: 0 12px 26px rgba(28, 19, 15, 0.16), 0 2px 6px rgba(28, 19, 15, 0.08); }
 .d58[data-mode="pre"] .d58-right > .d105-fw { flex: 1 1 0; min-height: 112px; }
 .d105-fw *, .d105-fw *::before, .d105-fw *::after { box-sizing: border-box; }
 
@@ -238,7 +247,9 @@
 
 /* sent and the celebration: the art box, then the words */
 .d105-sent, .d105-cel { align-items: center; gap: 18px; padding: 12px 20px; }
-.d105-hx { position: relative; width: 132px; height: 132px; flex: none; border-radius: 14px; background: #f5e3db; overflow: hidden; }
+/* ⚠️ THE CLIP IS A clip-path AS WELL AS overflow: hidden — measured: Chrome let the flying egg-top's crack (an animated,
+   composited layer) out past the rounded corner at ~1s into the hatch with overflow alone. --hx-r is the one radius. */
+.d105-hx { --hx-r: 14px; position: relative; width: 132px; height: 132px; flex: none; border-radius: var(--hx-r); background: #f5e3db; overflow: hidden; clip-path: inset(0 round var(--hx-r)); }
 .d105-st { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
 .d105-sa { display: flex; align-items: center; gap: 14px; margin-top: 6px; }
 .d105-lnk { border: 0; background: none; padding: 0; font-weight: 600; font-size: 13px; line-height: 1.3; color: var(--d58-ink); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
@@ -359,7 +370,7 @@
   .d105-btns { gap: 4px; }
   .d105-btn { padding: 5px 2px; font-size: 11.5px; line-height: 1.25; white-space: normal; text-wrap: balance; }
   .d105-fw .d105-no { font-size: 8.5px; letter-spacing: 0.08em; }
-  .d105-hx { width: 56px; height: 56px; border-radius: 10px; }
+  .d105-hx { width: 56px; height: 56px; --hx-r: 10px; }
   .d105-hx .d105-scene { inset: 3px; }
   .d105-hxhead { width: 46px; height: 46px; margin: -23px 0 0 -23px; }
   .d105-tick { right: 3px; bottom: 3px; width: 17px; height: 17px; font-size: 10px; }
@@ -397,7 +408,7 @@
   .d105-wf { display: none; }
   .d105-send--side { display: block; }
   .d105-fw .d105-ta { min-height: 50px; padding: 6px 9px; line-height: 1.35; }
-  .d105-hx { width: 72px; height: 72px; border-radius: 10px; }
+  .d105-hx { width: 72px; height: 72px; --hx-r: 10px; }
   .d105-hxhead { width: 58px; height: 58px; margin: -29px 0 0 -29px; }
   .d105-sent, .d105-cel { gap: 12px; padding: 6px 14px; }
   .d105-fw .d105-st .d105-h { font-size: 16px; }
@@ -429,7 +440,7 @@
   .d105-compact { display: flex; }
   /* the celebration in one row: the art, the title, the button (the kicker and the line are in How it works) */
   .d105-cel { gap: 10px; padding: 4px 14px; }
-  .d105-cel .d105-hx { width: 56px; height: 56px; border-radius: 10px; }
+  .d105-cel .d105-hx { width: 56px; height: 56px; --hx-r: 10px; }
   .d105-cel .d105-hx .d105-scene { inset: 3px; }
   .d105-fw .d105-cel :is(.d105-kick, .d105-celbody) { display: none; }
   .d105-cel .d105-ct { flex-direction: row; align-items: center; justify-content: space-between; gap: 10px; }
@@ -438,3 +449,77 @@
   .d105-cel .d105-give { padding: 5px 11px; font-size: 12.5px; }
 }
 
+/* ══ HOW IT WORKS — the slides (Dash105How, portalled to <body>) ═══════════════════════════════════════════════════════
+   Values read from the ref's `#howB`, rendered. ⚠️ Outside every page token, so the colours are stated here and the faces
+   READ the shell's type tokens. */
+.d105-dim {
+  position: fixed; inset: 0; z-index: 90;
+  background: rgba(28, 19, 15, 0.35);
+  opacity: 0; pointer-events: none; transition: opacity 0.2s;
+}
+.d105-dim.on { opacity: 1; pointer-events: auto; }
+.d105-how {
+  position: fixed; left: 50%; top: 50%; z-index: 91;
+  width: 520px; max-width: calc(100vw - 40px);
+  transform: translate(-50%, -46%) scale(0.98);
+  opacity: 0; pointer-events: none; transition: opacity 0.22s, transform 0.22s;
+  background: #fffaf6; border-radius: 18px; overflow: hidden;
+  box-shadow: 0 30px 70px -30px rgba(28, 19, 15, 0.6);
+  color: #1c130f;
+  font-family: var(--sp-serif);
+}
+.d105-how.on { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%); }
+.d105-how *, .d105-how *::before, .d105-how *::after { box-sizing: border-box; }
+.d105-how :is(p, small, button, section, span, h3) { font-family: var(--sp-serif); }
+.d105-sr2 { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; margin: 0; }
+.d105-hx2 {
+  position: absolute; top: 14px; right: 14px; z-index: 2;
+  width: 32px; height: 32px; padding: 0; border: 0; border-radius: 50%;
+  background: rgba(255, 255, 255, 0.7); color: #1c130f; font-weight: 600; font-size: 14px; cursor: pointer;
+}
+.d105-hx2:hover { background: #fff; }
+.d105-viewport { overflow: hidden; }
+.d105-slides { display: flex; transition: transform 0.35s cubic-bezier(0.22, 0.8, 0.3, 1); }
+.d105-slide { flex: 0 0 100%; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 0 0 4px; }
+.d105-sart {
+  width: 100%; height: 190px; margin-bottom: 20px;
+  display: flex; align-items: center; justify-content: center; gap: 22px;
+  background: #ecc8ba repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.32) 0 7px, rgba(255, 255, 255, 0) 7px 14px);
+}
+/* slide 1: three white discs (⚠️ centred: the ref's sit 30px left of centre, from a cumulative rule's stray padding) */
+.d105-big { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 128px; }
+.d105-big i { width: 68px; height: 68px; border-radius: 50%; background: #fff; display: grid; place-items: center; box-shadow: 0 8px 18px -10px rgba(90, 36, 24, 0.6); }
+.d105-big svg { width: 28px; height: 28px; fill: none; stroke: #1c130f; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.d105-how .d105-big small { font-weight: 600; font-size: 12px; line-height: 1.3; color: #5a2418; }
+/* slide 2: the egg and the five heads, a staircase */
+.d105-stair { display: flex; align-items: flex-end; gap: 12px; height: 150px; padding-bottom: 6px; }
+.d105-sn { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.d105-hh {
+  width: 46px; height: 46px; border-radius: 50%; overflow: hidden; background: #fff; display: grid; place-items: center;
+  box-shadow: 0 0 0 2px #fff, 0 6px 12px -8px rgba(90, 36, 24, 0.6);
+}
+.d105-hh img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.d105-hh .d105-hnest { width: 40px; display: block; }
+.d105-how .d105-sn small { font-weight: 600; font-size: 10.5px; line-height: 1.4; color: #5a2418; }
+.d105-sn1 { margin-bottom: 12px; } .d105-sn2 { margin-bottom: 24px; } .d105-sn3 { margin-bottom: 36px; }
+.d105-sn4 { margin-bottom: 48px; } .d105-sn5 { margin-bottom: 60px; }
+/* slide 3: the gift */
+.d105-gift i { width: 96px; height: 96px; border-radius: 50%; background: #fff; display: grid; place-items: center; box-shadow: 0 10px 22px -12px rgba(90, 36, 24, 0.6); }
+.d105-gift svg { width: 44px; height: 44px; fill: none; stroke: #1c130f; stroke-width: 1.4; stroke-linejoin: round; }
+.d105-how .d105-st3 { margin: 0 0 8px; font-family: var(--sp-type) !important; font-weight: 400; font-size: 26px; line-height: 1; color: #1c130f; }
+.d105-how .d105-sp { margin: 0 36px; font-size: 15px; line-height: 1.5; color: rgba(28, 19, 15, 0.75); }
+.d105-how .d105-fp { margin-top: 12px; font-size: 12.5px; color: rgba(28, 19, 15, 0.55); }
+.d105-snav { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px 22px; }
+.d105-sback { border: 0; background: none; padding: 0; font-weight: 600; font-size: 14px; color: rgba(28, 19, 15, 0.65); cursor: pointer; }
+.d105-sdots { display: flex; gap: 6px; }
+.d105-sdots i { width: 7px; height: 7px; border-radius: 50%; background: rgba(28, 19, 15, 0.18); transition: width 0.2s; }
+.d105-sdots i.on { width: 18px; border-radius: 4px; background: #1c130f; }
+.d105-snext {
+  border: 0; border-radius: 9px; background: #2a3a52; color: #fff; padding: 7px 14px;
+  font-weight: 600; font-size: 13.5px; line-height: 1.4; cursor: pointer; white-space: nowrap;
+  box-shadow: 0 2px 6px -3px rgba(42, 58, 82, 0.6);
+}
+.d105-how button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  .d105-dim, .d105-how, .d105-slides, .d105-sdots i { transition: none; }
+}

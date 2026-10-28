@@ -11,6 +11,8 @@
  *   B4  sent: the copy at tier 0 and tier ≥1; the crack is drawn after 1.5s
  *   C1  the celebration: plays once when the rank is above the rank seen, writes foundingSeenTier, a reload shows idle;
  *       a skipped rank celebrates the highest only; the words; the timeline; reduced motion shows the end state
+ *   D1  How it works: three slides, the dots, Back / Next / Got it, arrows, Esc and the dim layer; focus trapped and
+ *       returned to the ⓘ; it reopens at slide 1; v93's panel is gone
  *   S1  nothing cut, every state × the seven sizes
  *   S2  no green; no "Nick"; at 370px the three labels whole
  *
@@ -320,7 +322,7 @@ test("DB105 C1 — the celebration plays once, records the rank, and a reload sh
   L.check("C1", "the harness account starts with no seen-rank", before === "absent", before);
   try {
     /* the real path: peak 1 > seen (absent = 0) → the hatch plays, and foundingSeenTier = 1 is WRITTEN to the account */
-    await openDash(page, vp, { __SA_FOUNDING_STATS: STATS.fledgling, __SA_FOUNDING_SEEN: "real" });
+    await openDash(page, vp, { __SA_FOUNDING_STATS: STATS.fledgling, __SA_FOUNDING_SEEN: "real", __SA_FOUNDING_WRITE: true });
     await page.locator(`${card}[data-state="celebrate"]`).waitFor({ timeout: 8000 }).catch(() => {});
     const t = await page.locator(card).first().getAttribute("data-state");
     L.check("C1", "peak 1 > seen 0: the hatch plays", t === "celebrate" && (await page.locator(`${card} [data-d105="celebrate"]`).getAttribute("data-tier")) === "1", String(t));
@@ -381,3 +383,65 @@ test("DB105 C1 — the celebration plays once, records the rank, and a reload sh
   L.done(14);
 });
 
+/* ── D1 ── */
+test("DB105 D1 — How it works: three slides, the controls, Esc and the dim layer, focus back on the ⓘ, reopens at slide 1", async ({ page }) => {
+  test.setTimeout(240_000);
+  const L = new Ledger("d1");
+  const vp = { width: 1440, height: 900 };
+  await openDash(page, vp, { __SA_FOUNDING_STATS: STATS.egg });
+  await liftMotionSuppression(page);
+  const state = () => page.evaluate(() => {
+    const m = document.querySelector<HTMLElement>('[data-d105h="modal"]');
+    const b = m?.getBoundingClientRect();
+    const a = document.activeElement as HTMLElement | null;
+    const shown = [...(m?.querySelectorAll<HTMLElement>('[data-d105h="slide"]') ?? [])].find((s) => { const r = s.getBoundingClientRect(); return r.left >= (b?.left ?? 0) - 1 && r.right <= (b?.right ?? 0) + 1; });
+    const back = m?.querySelector<HTMLElement>('[data-d105h="back"]');
+    return {
+      open: !!m?.classList.contains("on"), w: b?.width ?? 0, cx: b ? b.left + b.width / 2 - window.innerWidth / 2 : 99, cy: b ? b.top + b.height / 2 - window.innerHeight / 2 : 99,
+      slides: m?.querySelectorAll('[data-d105h="slide"]').length ?? 0, slide: Number(m?.dataset.slide ?? -1),
+      title: shown?.querySelector("h3")?.textContent ?? "", body: shown?.querySelector("p")?.textContent ?? "",
+      dots: [...(m?.querySelectorAll('[data-d105h="dots"] i') ?? [])].map((d) => d.className),
+      backShown: !!back && getComputedStyle(back).visibility !== "hidden",
+      next: m?.querySelector<HTMLElement>('[data-d105h="next"]')?.textContent ?? "",
+      focus: a?.dataset.d105 ?? a?.dataset.d105h ?? a?.tagName ?? "", inModal: !!(m && a && m.contains(a)),
+      v93: !!document.querySelector('[data-d93="panel"]'),
+      titleFont: shown ? getComputedStyle(shown.querySelector("h3")!).fontFamily : "",
+    };
+  });
+  /* a click the dim layer intercepts is a red READING, not a timeout */
+  const open = async () => { await vis(page, '[data-d105="info"]').click({ timeout: 5000 }).catch(() => undefined); await page.waitForTimeout(450); return state(); };
+  let s = await open();
+  L.check("D1", "opens: centred, 520 wide, three slides, focus inside", s.open && Math.abs(s.w - 520) <= 1 && Math.abs(s.cx) <= 1 && Math.abs(s.cy) <= 1 && s.slides === 3 && s.inModal, JSON.stringify({ w: s.w, cx: s.cx, cy: s.cy, n: s.slides, focus: s.focus }));
+  L.check("D1", "v93's panel is gone", !s.v93, "");
+  const TITLES = ["Tell us anything", "Climb the ranks", "Get thanked"];
+  L.check("D1", "slide 1: its title, no Back, the first dot a pill, Next", s.slide === 0 && s.title === TITLES[0] && !s.backShown && s.dots.join(",") === "on,," && s.next === "Next", JSON.stringify({ t: s.title, back: s.backShown, dots: s.dots, next: s.next }));
+  L.check("D1", "the title is typewriter", /Special Elite/.test(s.titleFont), s.titleFont);
+  await page.locator('[data-d105h="next"]').click(); await page.waitForTimeout(450); s = await state();
+  L.check("D1", "Next → slide 2, Back shown", s.slide === 1 && s.title === TITLES[1] && s.backShown && s.dots.join(",") === ",on,", JSON.stringify({ t: s.title, dots: s.dots }));
+  L.check("D1", "slide 2's words", s.body === "One note hatches your Fledgling. Then 3, 8, 15 and 25 notes take you all the way to QueryHawk. Your rank never goes down.", s.body);
+  await page.keyboard.press("ArrowRight"); await page.waitForTimeout(450); s = await state();
+  L.check("D1", "→ slide 3, and its button is Got it", s.slide === 2 && s.title === TITLES[2] && s.next === "Got it", JSON.stringify({ t: s.title, next: s.next }));
+  const fine = await page.locator('[data-d105h="modal"] .d105-fp').textContent();
+  L.check("D1", "slide 3's fair-play line", fine === "Fair play: up to 3 notes a week count, a sentence or more, in your own words.", String(fine));
+  await page.keyboard.press("ArrowLeft"); await page.waitForTimeout(450); s = await state();
+  L.check("D1", "← back to slide 2", s.slide === 1, String(s.slide));
+  await page.locator('[data-d105h="back"]').click(); await page.waitForTimeout(450); s = await state();
+  L.check("D1", "Back → slide 1", s.slide === 0, String(s.slide));
+  /* the trap: twelve Tabs never leave the modal */
+  let escaped = 0;
+  for (let i = 0; i < 12; i++) { await page.keyboard.press("Tab"); if (!(await state()).inModal) escaped++; }
+  L.check("D1", "Tab stays inside the modal", escaped === 0, `${escaped} of 12 left it`);
+  await page.keyboard.press("Escape"); await page.waitForTimeout(450);
+  for (const how of ["esc", "dim", "close", "gotit"] as const) {
+    s = await open();
+    L.check("D1", `${how}: reopens at slide 1`, s.open && s.slide === 0, String(s.slide));
+    if (how === "esc") await page.keyboard.press("Escape");
+    else if (how === "dim") await page.mouse.click(40, vp.height / 2);
+    else if (how === "close") await page.locator('[data-d105h="close"]').click({ timeout: 5000 }).catch(() => undefined);
+    else { for (let i = 0; i < 3; i++) { await page.locator('[data-d105h="next"]').click({ timeout: 5000 }).catch(() => undefined); await page.waitForTimeout(400); } }
+    await page.waitForTimeout(450);
+    const c = await state();
+    L.check("D1", `${how}: closes, focus back on the ⓘ`, !c.open && c.focus === "info", JSON.stringify({ open: c.open, focus: c.focus }));
+  }
+  L.done(19);
+});

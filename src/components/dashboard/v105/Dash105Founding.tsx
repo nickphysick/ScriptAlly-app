@@ -24,13 +24,12 @@ import { FEEDBACK_MAX, type FeedbackKind } from "../../../lib/beta";
 import { feedbackDraft, feedbackPage, openFeedback, setFeedbackDraft } from "../../../lib/feedbackStore";
 import { feedbackContext, sendFeedback } from "../../../lib/sendFeedback";
 import { cardTier, useFoundingStats } from "../../../lib/foundingStats";
-/* ⚠️ PART B: the ⓘ opens v93's panel until Part D's slides replace it. */
-import { HowPanel } from "../v93/Dash93Founding";
 import {
   COMPOSE, COMPOSE_NOTE, DONT_CHIPS, IDLE, RANK_NAMES, SEND_FAILED, canSend, celebrateTier, celebrationCopy, composeFor,
   idLine, sentCopy, type ComposeKey,
 } from "../../../lib/foundingCard";
 import { EggNest, HatchScene, ICONS, INFO_ICON, QUERYHAWK_MARK, headFor } from "./foundingArt";
+import { Dash105How } from "./Dash105How";
 
 export interface Dash105FoundingProps {
   loading: boolean;
@@ -45,7 +44,7 @@ export interface Dash105FoundingProps {
 
 type Mode = "idle" | "write" | "sent";
 
-type Aid = { __SA_FOUNDING_SEEN?: unknown; __SA_FOUNDING_SEEN_WRITTEN?: number };
+type Aid = { __SA_FOUNDING_SEEN?: unknown; __SA_FOUNDING_SEEN_WRITTEN?: number; __SA_FOUNDING_WRITE?: unknown };
 /**
  * ⚠️ DEV REVIEW AID: `window.__SA_FOUNDING_SEEN = n` stands in for the stored seen-rank and records the "seen" write in
  * `window.__SA_FOUNDING_SEEN_WRITTEN` instead of writing the account, so the report's shots can play every celebration
@@ -86,7 +85,7 @@ const Ranks: React.FC<{ tier: number }> = ({ tier }) => (
 );
 
 export const Dash105Founding: React.FC<Dash105FoundingProps> = ({ loading, uid, name, seenTier, onSeen }) => {
-  const { loading: statsLoading, error, stats } = useFoundingStats(uid);
+  const { loading: statsLoading, error, stats, aided } = useFoundingStats(uid);
   const [mode, setMode] = useState<Mode>("idle");
   const [kind, setKind] = useState<ComposeKey>("like");
   const [chip, setChip] = useState<FeedbackKind>(DONT_CHIPS[0].kind);
@@ -107,8 +106,12 @@ export const Dash105Founding: React.FC<Dash105FoundingProps> = ({ loading, uid, 
   /* ── the celebration: once the live stats are in, when the shown rank is above the rank last celebrated. Never over
      a note being written: it waits until the writer is back at idle or the thank-you. */
   const seen = aid ? aid.seen : seenTier;
-  /* no writer (the onboarding ghost): no celebration, aid or not */
-  const record = !onSeen ? undefined : aid ? (t: number) => { (window as unknown as Aid).__SA_FOUNDING_SEEN_WRITTEN = t; } : onSeen;
+  /* no writer (the onboarding ghost): no celebration, aid or not.
+     ⚠️ A RANK WORKED OUT FROM AID-SUPPLIED STATS IS NOT THE WRITER'S, so it is recorded in the page and never written to
+     the account — unless the page asks for the real write (`__SA_FOUNDING_WRITE`, DB105 C1). Measured: without this, a
+     suite seeding a tier through the stats aid wrote that rank to the harness account. */
+  const realWrite = !aided || (window as unknown as Aid).__SA_FOUNDING_WRITE === true;
+  const record = !onSeen ? undefined : aid || !realWrite ? (t: number) => { (window as unknown as Aid).__SA_FOUNDING_SEEN_WRITTEN = t; } : onSeen;
   const want = ready && !error ? celebrateTier(tier, seen, !!record) : null;
   useEffect(() => {
     if (want != null && celebrating == null && !recorded.current && mode !== "write") setCelebrating(want);
@@ -279,7 +282,7 @@ export const Dash105Founding: React.FC<Dash105FoundingProps> = ({ loading, uid, 
           </div>
         )}
       </div>
-      <HowPanel open={howOpen} onClose={() => { setHowOpen(false); requestAnimationFrame(() => infoRef.current?.focus()); }} id="d105-how" titleId="d105-how-h" />
+      <Dash105How open={howOpen} onClose={() => { setHowOpen(false); requestAnimationFrame(() => infoRef.current?.focus()); }} />
     </section>
   );
 };
