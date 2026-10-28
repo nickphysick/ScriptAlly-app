@@ -136,3 +136,21 @@
 .p9-tip .p9-tip-x:hover { background: rgba(29, 75, 99, 0.1); color: #1c130f; }
 .p9-tip :is(.p9-td-l, .p9-tip-x):focus-visible { outline: 2px solid #1d4b63; outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .p9-tip { transition: none; } }
+
+/* ── H · New package and Package details in the drawer (ref `#drw .pd-b`; the form is pk391.generated.css) ──
+   The generated sheet read the ref with every colour normalised to Harbour; the colour-bearing rules are restated here
+   against the CHOSEN colour (`--pc`, set on the body by pcStyle) and each swatch's own `--sw`, so they follow the pick
+   live. The header reads `--pc` through pk39.css's `.p8-dh.p8-dpk` rule. */
+.p6-cx-drw .pa-pd-ics > button[aria-checked="true"] { background-color: var(--pc, #1d4b63) !important; }
+.p6-cx-drw .pa-pd-from > button[aria-checked="true"] { box-shadow: inset 0 0 0 2px var(--pc, #1d4b63) !important; }
+.p6-cx-drw .pa-pd-cols > button { background-color: var(--sw) !important; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08) !important; border: 0; padding: 0; width: 100%; }
+.p6-cx-drw .pa-pd-cols > button[aria-checked="true"] { box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--sw) !important; }
+.p6-cx-drw .pa-pd-cols > button:focus-visible { outline: 2px solid #2d3a50; outline-offset: 4px; }
+/* the ref focused Name when it was read (2px ink ring); at rest both fields are the hairline, focus the ink */
+.p6-cx-drw .pa-pd-f .pa-id-pdName { box-shadow: inset 0 0 0 1px rgba(28,19,15,.16) !important; }
+.p6-cx-drw .pa-pd-f :is(.pa-id-pdName,.pa-id-pdNote):focus { box-shadow: inset 0 0 0 2px #2a3a52 !important; }
+.p6-cx-drw .pa-pd-f .pa-id-pdName.p6-err { box-shadow: inset 0 0 0 2px #b4553f !important; }
+/* the typewriter is the page title's and the open package's name only (Part B): the copy option's name is the serif */
+.p6-cx-drw .pa-pd-from button > b { font: 600 15px/normal var(--sp-serif) !important; }
+/* Delete package, on the foot's left when editing (the old dialog's link, in the drawer's foot) */
+.p6-cx-drw .pa-pd-del { background: none; border: 0; padding: 0; cursor: pointer; font: 600 14px/normal var(--sp-serif); color: #9b3b2e; text-decoration: underline; text-underline-offset: 3px; }
