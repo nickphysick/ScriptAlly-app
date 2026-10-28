@@ -264,12 +264,11 @@
 /* ═════ in their words (`.words`, `.chips`, `.qwall`, `.qc`) — the paper band, full width as the navy one ═════ */
 .rsp5 .rsp5-words {
   margin-top: 72px; padding-block: 58px 64px; background: var(--r5-paper);
-  box-shadow: 0 0 0 100vmax var(--r5-paper); clip-path: inset(0 -100vmax); position: relative;
+  /* the band and the reference's hairlines above and below it, all as spread shadows clipped 1px outside the band:
+     ⚠️ never positioned pseudo-elements reaching out sideways — those count toward the sheet's scroll width (RS5 L1) */
+  box-shadow: 0 0 0 100vmax var(--r5-paper), 0 -1px 0 100vmax var(--r5-i06), 0 1px 0 100vmax var(--r5-i06);
+  clip-path: inset(-1px -100vmax);
 }
-/* the reference's hairlines above and below the band reach the sheet's edges too, so they are pseudo-elements, not a border */
-.rsp5 .rsp5-words::before, .rsp5 .rsp5-words::after { content: ""; position: absolute; left: -100vmax; right: -100vmax; height: 1px; background: var(--r5-i06); }
-.rsp5 .rsp5-words::before { top: 0; }
-.rsp5 .rsp5-words::after { bottom: 0; }
 .rsp5 .rsp5-chips { display: flex; gap: 6px; padding: 4px; border-radius: 12px; background: #fff; box-shadow: inset 0 0 0 1px var(--r5-i10); }
 .rsp5 .rsp5-chip { height: 34px; padding: 0 14px; border: 0; border-radius: 9px; background: none; font: 400 14px var(--r5-machine) !important; color: var(--r5-i72); cursor: pointer; }
 .rsp5 .rsp5-chip small { margin-left: 5px; font: 500 10px var(--r5-mono) !important; color: var(--r5-i45); }

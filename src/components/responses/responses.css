@@ -29,19 +29,13 @@
 .rsp-layer { font-family: var(--rs-serif); }
 :where(.rsp, .rsp-layer) button { font: inherit; color: inherit; cursor: pointer; background: none; border: 0; padding: 0; }
 .rsp :focus-visible, .rsp-layer :focus-visible { outline: 2px solid var(--rs-navy); outline-offset: 2px; }
-.rsp .rsp-mono, .rsp-layer .rsp-mono { font: 500 10px/1.3 var(--rs-mono) !important; letter-spacing: 0.14em; text-transform: uppercase; color: var(--rs-i45); }
 
 /* ═════ the buttons and the swatches (the v2 header and its card are retired by v5: Rsp5Head.tsx) ═════ */
 .rsp .rsp-btn { display: inline-flex; align-items: center; box-sizing: border-box; height: 46px; padding: 0 20px; border-radius: 12px; white-space: nowrap; font: 400 17px/1 var(--rs-type) !important; }
 .rsp .rsp-btn--navy, .rsp-layer .rsp-btn--navy { background: var(--rs-navy); color: var(--rs-cream); }
 .rsp .rsp-btn--navy:hover:not(:disabled) { background: var(--rs-ink); }
-.rsp .rsp-btn--wht { background: #fff; color: var(--rs-ink); box-shadow: 0 0 0 1px var(--rs-i14), 0 4px 10px -6px rgba(28, 19, 15, 0.3); }
-.rsp .rsp-btn--wht:hover:not(:disabled) { box-shadow: 0 0 0 1px var(--rs-i30), 0 4px 10px -6px rgba(28, 19, 15, 0.3); }
 .rsp .rsp-btn--sm { height: 38px; padding: 0 16px; border-radius: 10px; font-size: 14.5px !important; }
 .rsp .rsp-btn:disabled { cursor: default; opacity: 0.45; }
-.rsp-sw--more { background: var(--rs-you); }
-.rsp-sw--passed { background: var(--rs-grey); }
-.rsp-sw--noReply { background: #fff; box-shadow: inset 0 0 0 1.5px var(--rs-i45); }
 
 /* ═════ the white sheets under a navy row (Query Centre v138's, page-local) ═════ */
 .rsp-ws {
@@ -57,31 +51,11 @@
 .rsp-wsh .rsp-say b { font: inherit !important; color: var(--rs-cream); }
 .rsp-wsh .rsp-say .rsp-dim { color: var(--rs-c55); }
 .rsp-wsh .rsp-say u { text-decoration: underline dotted var(--rs-peach) 2px; text-underline-offset: 6px; color: var(--rs-cream); }
-.rsp .rsp-wsh .rsp-clear { margin-left: 14px; color: var(--rs-peach); font: italic 400 15px/1.2 var(--rs-serif) !important; text-decoration: underline; text-underline-offset: 3px; }
 .rsp-wsh :focus-visible { outline: 2px solid var(--rs-peach); outline-offset: 3px; }
 .rsp-seg { display: inline-flex; flex: none; gap: 2px; padding: 3px; border-radius: 12px; box-shadow: inset 0 0 0 1px var(--rs-c25); }
 .rsp .rsp-seg button { height: 30px; padding: 0 12px; border-radius: 9px; white-space: nowrap; font: 400 14px/1 var(--rs-type) !important; color: var(--rs-c55); }
 .rsp .rsp-seg button small { margin-left: 2px; font: 500 10px/1 var(--rs-mono) !important; opacity: 0.7; }
 .rsp .rsp-seg button[aria-pressed="true"] { background: #fff; color: var(--rs-ink); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25); }
-.rsp .rsp-sumbtn { flex: none; height: 34px; padding: 0 14px; border-radius: 17px; box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, 0.55); color: var(--rs-cream); font: 400 14px/1 var(--rs-type) !important; white-space: nowrap; }
-.rsp-search {
-  flex: none; display: flex; align-items: center; gap: 10px; box-sizing: border-box; width: 250px; height: 40px; margin-left: auto; padding: 0 10px 0 14px;
-  border-radius: 12px; background: rgba(244, 238, 229, 0.1); box-shadow: inset 0 0 0 1px rgba(244, 238, 229, 0.18); color: rgba(244, 238, 229, 0.7);
-  transition: background-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
-}
-.ws-app.sheet-wide .rsp-search { width: 300px; }
-.rsp-search svg { flex: none; }
-.rsp .rsp-search input { flex: 1 1 0; min-width: 0; border: 0; outline: 0; background: none; color: var(--rs-cream); font: 400 15.5px/1.2 var(--rs-serif) !important; text-overflow: ellipsis; }
-.rsp-search input::placeholder { color: rgba(244, 238, 229, 0.55); }
-.rsp .rsp-search kbd {
-  flex: none; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; min-width: 20px; height: 20px; padding: 0 5px;
-  border: 1px solid rgba(244, 238, 229, 0.3); border-radius: 5px; font: 400 11px/1 var(--rs-mono) !important; color: rgba(244, 238, 229, 0.6);
-}
-.rsp-search:focus-within { background: var(--rs-cream); box-shadow: none; color: var(--rs-navy); }
-.rsp .rsp-search:focus-within input { color: var(--rs-ink); }
-.rsp-search:focus-within input::placeholder { color: rgba(28, 19, 15, 0.5); }
-.rsp .rsp-search:focus-within kbd { color: var(--rs-ink); border-color: rgba(28, 19, 15, 0.3); }
-@media (prefers-reduced-motion: reduce) { .rsp-search { transition: none; } }
 
 /* ═════ Part E · share: a white sheet, 22 under the list; the preview left, the switches right ═════ */
 .rsp-share { margin-top: 22px; }

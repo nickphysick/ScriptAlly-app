@@ -120,8 +120,12 @@ export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) 
   /* v5 · the sections a glance card or a "→" link goes to, by id inside this page (every page stays mounted) */
   const pageRef = useRef<HTMLDivElement | null>(null);
   const goSection = useCallback((id: "more" | "timing" | "wall" | "words") => {
+    /* ⚠️ COMPUTED, NOT scrollIntoView: the wall's pin sets the scroller's scroll-padding for keyboard row-walking, and
+       scrollIntoView adds it, so a section landed ~146px down instead of 20 (RS5 A2 found it). */
     const el = pageRef.current?.querySelector<HTMLElement>(`[data-rsp5-sec="${id}"]`);
-    el?.scrollIntoView({ block: "start", behavior: reduced() ? "auto" : "smooth" });
+    const sc = el?.closest<HTMLElement>(".wpg-scroll");
+    if (!el || !sc) return;
+    sc.scrollTo({ top: sc.scrollTop + el.getBoundingClientRect().top - sc.getBoundingClientRect().top - 20, behavior: reduced() ? "auto" : "smooth" });
   }, []);
   const pressGlance = useCallback((k: GlanceKey) => {
     if (k === "passed" || k === "noReply") { setKind(k); goSection("wall"); }

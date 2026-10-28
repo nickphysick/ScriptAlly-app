@@ -8,6 +8,9 @@
  *   rs5-ms-full   "Murphy's Day Out"   the reference's 34 queries: 22 answers, 12 still waiting
  *   rs5-ms-early  "Early Days"         the same 34 with only three answered (the reference's EARLY set)
  *   rs5-ms-empty  "Nothing Back Yet"   only the 12 that have no answer: the empty page
+ *   rs5-ms-five   "Five Answers"       the early three plus two more: exactly five answers (C2's edge)
+ *
+ *   node tests/e2e/seedRs5.mjs --answer-one   records a pass on the empty manuscript's first query (H1), live
  *
  * ⚠️ EVERY DATE IS RELATIVE TO TODAY. The reference's clock is 28 Oct 2026; each date is stored as that many days
  *    before (or after) today, so the fixture keeps its state on every day it is run.
@@ -59,6 +62,16 @@ async function clean() {
   console.log(`removed ${n}`);
 }
 if (process.argv.includes("--clean")) { await clean(); process.exit(0); }
+if (process.argv.includes("--answer-one")) {
+  const id = "rs5-q-empty-23"; /* Lena Voss, the first of the reference's twelve still waiting */
+  const b = writeBatch(db);
+  const d = new Date(Date.now() - 2 * 86_400_000).toISOString();
+  b.update(doc(db, "users", uid, "queries", id), { status: "Rejected", rejectedDate: d, lastStatusChange: d, rejectionFeedbackType: "form" });
+  b.set(doc(db, "users", uid, "queries", id, "activity", `act-status-rejected-${id}`), { type: "Rejected", resultingStatus: "Rejected", createdAt: new Date(Date.now() - 2 * 86_400_000), note: "Rejected", queryId: id, eventKey: "pass" });
+  await b.commit();
+  console.log("answered one");
+  process.exit(0);
+}
 await clean();
 
 /* the reference's Q, verbatim (n, a, s, w, st, note, due, exp) */
@@ -148,10 +161,13 @@ function query(msTag, msId, i, x, st) {
 ms("rs5-ms-full", "Murphy’s Day Out");
 ms("rs5-ms-early", "Early Days");
 ms("rs5-ms-empty", "Nothing Back Yet");
+ms("rs5-ms-five", "Five Answers");
+const FIVE = new Set([...EARLY, 'Ruth Adeyemi', 'Owen Pryce']);
 Q.forEach((x, i) => {
   query("full", "rs5-ms-full", i, x, x.st);
   query("early", "rs5-ms-early", i, x, EARLY.has(x.n) ? x.st : []);
   if (!x.st.length) query("empty", "rs5-ms-empty", i, x, []);
+  query("five", "rs5-ms-five", i, x, FIVE.has(x.n) ? x.st : []);
 });
 
 for (let i = 0; i < writes.length; i += 400) {
