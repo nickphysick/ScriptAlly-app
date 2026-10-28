@@ -12,7 +12,7 @@ import React from "react";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
-import { BottomTabBar } from "../BottomTabBar";
+import { BottomTabBar, tabFor } from "../BottomTabBar";
 
 const css = readFileSync(resolve(__dirname, "./mobileShell.css"), "utf8");
 const shellCss = readFileSync(resolve(__dirname, "./shellV2.css"), "utf8");
@@ -20,45 +20,55 @@ const appShell = readFileSync(resolve(__dirname, "./AppShell.tsx"), "utf8");
 const sheetSrc = readFileSync(resolve(__dirname, "./MobileSheet.tsx"), "utf8");
 const barSrc = readFileSync(resolve(__dirname, "../BottomTabBar.tsx"), "utf8");
 
-describe("the tab bar — a floating capsule with the nav active law", () => {
-  it("renders four tabs (Home · Queries · Agents · Scripts), route-driven active", () => {
-    const html = renderToStaticMarkup(<BottomTabBar activeTab="queries" onNavigate={() => {}} />);
+/* ⚠️ RETIRED 28 OCT (Queries on a phone v1, Nick's ruling): the four-tab floating capsule with a ground-fill pill is
+   replaced by the five-tab bar along the foot with a NAVY pill. The capsule's locks are rewritten here, not deleted. */
+describe("the tab bar — five tabs along the foot, a navy pill (Queries on a phone v1)", () => {
+  it("renders five tabs (Home · Queries · Agents · Analytics · More), path-driven active", () => {
+    const html = renderToStaticMarkup(<BottomTabBar pathname="/queries" onGo={() => {}} onMore={() => {}} />);
     expect(html).toContain("sa-mtabbar");
-    for (const label of ["Home", "Queries", "Agents", "Scripts"]) expect(html).toContain(`<span>${label}</span>`);
-    expect(html).toContain('aria-current="page"');
-    // To-do has NO tab (baked decision 2) — reached via the desk line and the you-menu
+    for (const label of ["Home", "Queries", "Agents", "Analytics", "More"]) expect(html).toContain(`>${label}</span>`);
+    expect(html).not.toContain(">Scripts<");
+    expect(html.match(/aria-current="page"/g)?.length).toBe(1);
+    expect(html).toMatch(/data-tab="queries"[^>]*aria-current="page"/);
     expect(html).not.toContain("To-do");
   });
 
-  it("stands down on pushed detail screens, and on off-tab routes lights nothing", () => {
-    expect(renderToStaticMarkup(<BottomTabBar activeTab="queries" onNavigate={() => {}} hidden />)).toBe("");
-    const offTab = renderToStaticMarkup(<BottomTabBar activeTab="todo" onNavigate={() => {}} />);
+  it("Analytics is its own tab under /queries; More is never on; off-tab routes light nothing", () => {
+    expect(tabFor("/queries/analytics")).toBe("analytics");
+    expect(tabFor("/queries")).toBe("queries");
+    expect(tabFor("/queries/packages")).toBe("queries");
+    expect(tabFor("/dashboard")).toBe("home");
+    expect(tabFor("/agents/discover")).toBe("agents");
+    expect(tabFor("/todo")).toBeNull();
+    expect(renderToStaticMarkup(<BottomTabBar pathname="/queries" onGo={() => {}} onMore={() => {}} hidden />)).toBe("");
+    const offTab = renderToStaticMarkup(<BottomTabBar pathname="/todo" onGo={() => {}} onMore={() => {}} />);
     expect(offTab).toContain("sa-mtabbar");
     expect(offTab).not.toContain('aria-current="page"');
   });
 
-  it("floats as its own capsule — inset from the edges, capsule border/radius/shadow, safe area", () => {
-    expect(css).toContain(".sa-mtabbar {");
-    const bar = css.split("@media (max-width: 767.98px)")[1]?.match(/\.sa-mtabbar \{([^}]*)\}/s)?.[1] ?? "";
-    expect(bar, "the <md .sa-mtabbar rule must exist").not.toBe("");
-    expect(bar).toContain("left: 12px");
-    expect(bar).toContain("right: 12px");
-    expect(bar).toContain("bottom: calc(14px + env(safe-area-inset-bottom))");
-    expect(bar).toContain("border: var(--shell-cap-border)");
-    expect(bar).toContain("border-radius: var(--shell-cap-radius)");
-    expect(bar).toContain("box-shadow: var(--shell-cap-shadow)");
-    expect(bar).toContain("background: var(--shell-rail)"); // v3: --shell-side is the desktop sidebar's Stone now
+  it("the Queries badge shows the count, and nothing at zero", () => {
+    expect(renderToStaticMarkup(<BottomTabBar pathname="/dashboard" onGo={() => {}} onMore={() => {}} badge={4} />)).toMatch(/class="sa-mtabbd"[^>]*>4</);
+    expect(renderToStaticMarkup(<BottomTabBar pathname="/dashboard" onGo={() => {}} onMore={() => {}} badge={0} />)).not.toContain("sa-mtabbd");
   });
 
-  it("THE NAV ACTIVE LAW — a bright surface LAID ON, ink text; never burgundy, never pink", () => {
-    expect(css).toContain(".sa-mtab.on");
-    const on = css.match(/\.sa-mtab\.on \{([^}]*)\}/s)?.[1] ?? "";
-    expect(on, "the active rule must exist").not.toBe("");
-    expect(on).toContain("background: var(--shell-active-fill)");
-    expect(on).toContain("color: var(--shell-ink)");
-    // and the component carries no colour of its own (the old inline pink/burgundy bar is gone)
-    expect(barSrc).not.toContain("#f5e2da");
-    expect(barSrc).not.toContain("designTokens");
+  it("runs along the foot, full width, with the safe area under it", () => {
+    const bar = css.split("@media (max-width: 767.98px)")[1]?.match(/\.sa-mtabbar \{([^}]*)\}/s)?.[1] ?? "";
+    expect(bar, "the <md .sa-mtabbar rule must exist").not.toBe("");
+    expect(bar).toContain("left: 0");
+    expect(bar).toContain("right: 0");
+    expect(bar).toContain("bottom: 0");
+    expect(bar).toContain("grid-template-columns: repeat(5, 1fr)");
+    expect(bar).toContain("env(safe-area-inset-bottom)");
+  });
+
+  it("THE COLOUR RULES — the chosen pill is navy with a white icon; the badge is pink with black text", () => {
+    const pill = css.match(/\.sa-mtab\.on \.sa-mtabic \{([^}]*)\}/s)?.[1] ?? "";
+    expect(pill, "the chosen pill's rule must exist").not.toBe("");
+    expect(pill).toContain("background: #2a3a52");
+    expect(pill).toContain("color: #fff");
+    const bd = css.match(/\.sa-mtabbd \{([^}]*)\}/s)?.[1] ?? "";
+    expect(bd).toContain("background: #f3c8ba");
+    expect(bd).toContain("color: #1c130f");
     expect(barSrc).not.toContain("style={{");
   });
 });

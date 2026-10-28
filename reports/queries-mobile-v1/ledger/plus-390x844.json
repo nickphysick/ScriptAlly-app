@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "L9",
+  "where": "390x844 Cancel is navy with white text",
+  "ok": true,
+  "detail": "{\"img\":\"linear-gradient(rgb(52, 72, 106), rgb(42, 58, 82))\",\"color\":\"rgb(255, 255, 255)\"}"
+ },
+ {
+  "lock": "L2",
+  "where": "390x844 the + sheet: colour rules",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L11",
+  "where": "390x844 the + sheet: the page behind is inert",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "L11",
+  "where": "390x844 the + sheet: no image twice",
+  "ok": true,
+  "detail": "[\"/images/qc/qc-list-flight.png\",\"/images/qc/courier-cutout.png\"]"
+ },
+ {
+  "lock": "L9",
+  "where": "390x844 tile-replied opens the resp journey",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "L9",
+  "where": "390x844 tile-sent opens the log journey",
+  "ok": true,
+  "detail": "true"
+ }
+]

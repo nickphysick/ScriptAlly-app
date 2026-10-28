@@ -1,0 +1,38 @@
+
+Running 2 tests using 1 worker
+
+[1/2] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/2] [measure] › tests/e2e/queriesMobileV1.measure.ts:302:1 › QM1 · the celebration · 390x844
+[measure] › tests/e2e/queriesMobileV1.measure.ts:302:1 › QM1 · the celebration · 390x844
+  ✗ L10 · Undo is on top of the celebration — false
+
+  1) [measure] › tests/e2e/queriesMobileV1.measure.ts:302:1 › QM1 · the celebration · 390x844 ──────
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 3
+
+    - Array []
+    + Array [
+    +   "L10 · Undo is on top of the celebration — false",
+    + ]
+
+       at qm1Lib.ts:29
+
+      27 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+      28 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 29 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      30 |   }
+      31 | }
+      32 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-qm1/tests/e2e/qm1Lib.ts:29:95)
+        at /Users/nickphysick/ScriptAlly-qm1/tests/e2e/queriesMobileV1.measure.ts:353:5
+
+    Error Context: test-results/queriesMobileV1.measure.ts-QM1-·-the-celebration-·-390x844-measure/error-context.md
+
+
+  1 failed
+    [measure] › tests/e2e/queriesMobileV1.measure.ts:302:1 › QM1 · the celebration · 390x844 ───────
+  1 passed (42.0s)

@@ -1,0 +1,198 @@
+
+Running 9 tests using 1 worker
+
+[1/9] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/9] [measure] › tests/e2e/queriesMobileV1.measure.ts:77:3 › QM1 · the tab · 390x844
+  1) [measure] › tests/e2e/queriesMobileV1.measure.ts:77:3 › QM1 · the tab · 390x844 ───────────────
+
+    TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+    Call log:
+      - waiting for locator('[data-qm1="page"]') to be visible
+
+
+       at qm1Lib.ts:54
+
+      52 |     await page.setViewportSize(vp);
+      53 |     await page.reload();
+    > 54 |     await page.locator('[data-qm1="page"]').waitFor({ timeout: 30_000 });
+         |                                             ^
+      55 |     await page.locator('[data-qm1="chip"][data-count]').first().waitFor({ timeout: 30_000 }).catch(() => {});
+      56 |   } else {
+      57 |     await openRoute(page, path, vp);
+        at openQ (/Users/nickphysick/ScriptAlly-qm1/tests/e2e/qm1Lib.ts:54:45)
+        at /Users/nickphysick/ScriptAlly-qm1/tests/e2e/queriesMobileV1.measure.ts:79:5
+
+    Error Context: test-results/queriesMobileV1.measure.ts-QM1-·-the-tab-·-390x844-measure/error-context.md
+
+
+[3/9] [measure] › tests/e2e/queriesMobileV1.measure.ts:77:3 › QM1 · the tab · 360x780
+  2) [measure] › tests/e2e/queriesMobileV1.measure.ts:77:3 › QM1 · the tab · 360x780 ───────────────
+
+    TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+    Call log:
+      - waiting for locator('[data-qm1="page"]') to be visible
+
+
+       at qm1Lib.ts:54
+
+      52 |     await page.setViewportSize(vp);
+      53 |     await page.reload();
+    > 54 |     await page.locator('[data-qm1="page"]').waitFor({ timeout: 30_000 });
+         |                                             ^
+      55 |     await page.locator('[data-qm1="chip"][data-count]').first().waitFor({ timeout: 30_000 }).catch(() => {});
+      56 |   } else {
+      57 |     await openRoute(page, path, vp);
+        at openQ (/Users/nickphysick/ScriptAlly-qm1/tests/e2e/qm1Lib.ts:54:45)
+        at /Users/nickphysick/ScriptAlly-qm1/tests/e2e/queriesMobileV1.measure.ts:79:5
+
+    Error Context: test-results/queriesMobileV1.measure.ts-QM1-·-the-tab-·-360x780-measure/error-context.md
+
+
+[4/9] [measure] › tests/e2e/queriesMobileV1.measure.ts:173:3 › QM1 · a query · 390x844
+  3) [measure] › tests/e2e/queriesMobileV1.measure.ts:173:3 › QM1 · a query · 390x844 ──────────────
+
+    TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+    Call log:
+      - waiting for locator('[data-qm1="page"]') to be visible
+
+
+       at qm1Lib.ts:54
+
+      52 |     await page.setViewportSize(vp);
+      53 |     await page.reload();
+    > 54 |     await page.locator('[data-qm1="page"]').waitFor({ timeout: 30_000 });
+         |                                             ^
+      55 |     await page.locator('[data-qm1="chip"][data-count]').first().waitFor({ timeout: 30_000 }).catch(() => {});
+      56 |   } else {
+      57 |     await openRoute(page, path, vp);
+        at openQ (/Users/nickphysick/ScriptAlly-qm1/tests/e2e/qm1Lib.ts:54:45)
+        at /Users/nickphysick/ScriptAlly-qm1/tests/e2e/queriesMobileV1.measure.ts:175:5
+
+    Error Context: test-results/queriesMobileV1.measure.ts-QM1-·-a-query-·-390x844-measure/error-context.md
+
+
+[5/9] [measure] › tests/e2e/queriesMobileV1.measure.ts:173:3 › QM1 · a query · 360x780
+  4) [measure] › tests/e2e/queriesMobileV1.measure.ts:173:3 › QM1 · a query · 360x780 ──────────────
+
+    TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+    Call log:
+      - waiting for locator('[data-qm1="page"]') to be visible
+
+
+       at qm1Lib.ts:54
+
+      52 |     await page.setViewportSize(vp);
+      53 |     await page.reload();
+    > 54 |     await page.locator('[data-qm1="page"]').waitFor({ timeout: 30_000 });
+         |                                             ^
+      55 |     await page.locator('[data-qm1="chip"][data-count]').first().waitFor({ timeout: 30_000 }).catch(() => {});
+      56 |   } else {
+      57 |     await openRoute(page, path, vp);
+        at openQ (/Users/nickphysick/ScriptAlly-qm1/tests/e2e/qm1Lib.ts:54:45)
+        at /Users/nickphysick/ScriptAlly-qm1/tests/e2e/queriesMobileV1.measure.ts:175:5
+
+    Error Context: test-results/queriesMobileV1.measure.ts-QM1-·-a-query-·-360x780-measure/error-context.md
+
+
+[6/9] [measure] › tests/e2e/queriesMobileV1.measure.ts:227:1 › QM1 · Coming up · 390x844
+  5) [measure] › tests/e2e/queriesMobileV1.measure.ts:227:1 › QM1 · Coming up · 390x844 ────────────
+
+    TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+    Call log:
+      - waiting for locator('[data-qm1="page"]') to be visible
+
+
+       at qm1Lib.ts:54
+
+      52 |     await page.setViewportSize(vp);
+      53 |     await page.reload();
+    > 54 |     await page.locator('[data-qm1="page"]').waitFor({ timeout: 30_000 });
+         |                                             ^
+      55 |     await page.locator('[data-qm1="chip"][data-count]').first().waitFor({ timeout: 30_000 }).catch(() => {});
+      56 |   } else {
+      57 |     await openRoute(page, path, vp);
+        at openQ (/Users/nickphysick/ScriptAlly-qm1/tests/e2e/qm1Lib.ts:54:45)
+        at /Users/nickphysick/ScriptAlly-qm1/tests/e2e/queriesMobileV1.measure.ts:230:3
+
+    Error Context: test-results/queriesMobileV1.measure.ts-QM1-·-Coming-up-·-390x844-measure/error-context.md
+
+
+[7/9] [measure] › tests/e2e/queriesMobileV1.measure.ts:272:3 › QM1 · the + sheet · 390x844
+  6) [measure] › tests/e2e/queriesMobileV1.measure.ts:272:3 › QM1 · the + sheet · 390x844 ──────────
+
+    TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+    Call log:
+      - waiting for locator('[data-qm1="page"]') to be visible
+
+
+       at qm1Lib.ts:54
+
+      52 |     await page.setViewportSize(vp);
+      53 |     await page.reload();
+    > 54 |     await page.locator('[data-qm1="page"]').waitFor({ timeout: 30_000 });
+         |                                             ^
+      55 |     await page.locator('[data-qm1="chip"][data-count]').first().waitFor({ timeout: 30_000 }).catch(() => {});
+      56 |   } else {
+      57 |     await openRoute(page, path, vp);
+        at openQ (/Users/nickphysick/ScriptAlly-qm1/tests/e2e/qm1Lib.ts:54:45)
+        at /Users/nickphysick/ScriptAlly-qm1/tests/e2e/queriesMobileV1.measure.ts:274:5
+
+    Error Context: test-results/queriesMobileV1.measure.ts-QM1-·-the-sheet-·-390x844-measure/error-context.md
+
+
+[8/9] [measure] › tests/e2e/queriesMobileV1.measure.ts:272:3 › QM1 · the + sheet · 360x780
+  7) [measure] › tests/e2e/queriesMobileV1.measure.ts:272:3 › QM1 · the + sheet · 360x780 ──────────
+
+    TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+    Call log:
+      - waiting for locator('[data-qm1="page"]') to be visible
+
+
+       at qm1Lib.ts:54
+
+      52 |     await page.setViewportSize(vp);
+      53 |     await page.reload();
+    > 54 |     await page.locator('[data-qm1="page"]').waitFor({ timeout: 30_000 });
+         |                                             ^
+      55 |     await page.locator('[data-qm1="chip"][data-count]').first().waitFor({ timeout: 30_000 }).catch(() => {});
+      56 |   } else {
+      57 |     await openRoute(page, path, vp);
+        at openQ (/Users/nickphysick/ScriptAlly-qm1/tests/e2e/qm1Lib.ts:54:45)
+        at /Users/nickphysick/ScriptAlly-qm1/tests/e2e/queriesMobileV1.measure.ts:274:5
+
+    Error Context: test-results/queriesMobileV1.measure.ts-QM1-·-the-sheet-·-360x780-measure/error-context.md
+
+
+[9/9] [measure] › tests/e2e/queriesMobileV1.measure.ts:301:1 › QM1 · the celebration · 390x844
+  8) [measure] › tests/e2e/queriesMobileV1.measure.ts:301:1 › QM1 · the celebration · 390x844 ──────
+
+    TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+    Call log:
+      - waiting for locator('[data-qm1="page"]') to be visible
+
+
+       at qm1Lib.ts:54
+
+      52 |     await page.setViewportSize(vp);
+      53 |     await page.reload();
+    > 54 |     await page.locator('[data-qm1="page"]').waitFor({ timeout: 30_000 });
+         |                                             ^
+      55 |     await page.locator('[data-qm1="chip"][data-count]').first().waitFor({ timeout: 30_000 }).catch(() => {});
+      56 |   } else {
+      57 |     await openRoute(page, path, vp);
+        at openQ (/Users/nickphysick/ScriptAlly-qm1/tests/e2e/qm1Lib.ts:54:45)
+        at /Users/nickphysick/ScriptAlly-qm1/tests/e2e/queriesMobileV1.measure.ts:304:3
+
+    Error Context: test-results/queriesMobileV1.measure.ts-QM1-·-the-celebration-·-390x844-measure/error-context.md
+
+
+  8 failed
+    [measure] › tests/e2e/queriesMobileV1.measure.ts:77:3 › QM1 · the tab · 390x844 ────────────────
+    [measure] › tests/e2e/queriesMobileV1.measure.ts:77:3 › QM1 · the tab · 360x780 ────────────────
+    [measure] › tests/e2e/queriesMobileV1.measure.ts:173:3 › QM1 · a query · 390x844 ───────────────
+    [measure] › tests/e2e/queriesMobileV1.measure.ts:173:3 › QM1 · a query · 360x780 ───────────────
+    [measure] › tests/e2e/queriesMobileV1.measure.ts:227:1 › QM1 · Coming up · 390x844 ─────────────
+    [measure] › tests/e2e/queriesMobileV1.measure.ts:272:3 › QM1 · the + sheet · 390x844 ───────────
+    [measure] › tests/e2e/queriesMobileV1.measure.ts:272:3 › QM1 · the + sheet · 360x780 ───────────
+    [measure] › tests/e2e/queriesMobileV1.measure.ts:301:1 › QM1 · the celebration · 390x844 ───────
+  1 passed (5.2m)

@@ -176,6 +176,14 @@ export interface QcQueryCard149Props {
   stepChoices: StepChoice[];
   removable: (activityId: string) => string[];
   onSaveEdits: (e: CardEdits) => Promise<boolean>;
+  /**
+   * Queries on a phone v1 — "phone" moves the strip above the tabs as "Your next step" (its sentence, its sub-line, the
+   * next move in navy and a second choice in white), drops the band's × (the phone's own ‹ Queries closes), and keeps
+   * the footer to the due line and ‹ N / M › (Edit and Close live in the phone's ⋯ menu). Absent = the desktop card.
+   */
+  layout?: "desk" | "phone";
+  /** the picture on the phone's next step (quill and ink) */
+  nextArt?: { src: string; w: number; h: number } | null;
 }
 
 const blankEdits = (): CardEdits => ({ dates: {}, removed: [], added: null, packageKey: null, pieces: {}, agent: {} });
@@ -243,12 +251,28 @@ export const QcQueryCard149: React.FC<QcQueryCard149Props> = (p) => {
   };
 
   const editing = mode === "edit";
+  const phone = p.layout === "phone";
+  /* the phone's "Your next step": the strip's own sentence and button, above the tabs */
+  const nextBlock = phone && !editing && r.court !== "closed" ? (
+    <div className="qc149c-nx" data-qc149c="next-block">
+      {p.nextArt ? <img className="qc149c-nxart" src={p.nextArt.src} width={p.nextArt.w} height={p.nextArt.h} alt="" aria-hidden="true" draggable={false} data-qm1-art="quill" /> : null}
+      <small>Your next step</small>
+      <b data-qc149c="next-sentence">{p.strip.bold}</b>
+      {p.strip.sub ? <p data-qc149c="next-sub">{p.strip.sub}</p> : null}
+      <div className="qc149c-nxbtns">
+        {p.strip.button && p.primary ? <button type="button" className="qc149c-nxb primary" data-qc149c="next-primary" onClick={p.onPrimary}>{p.strip.button}</button> : null}
+        {p.primary?.respond
+          ? <button type="button" className="qc149c-nxb" data-qc149c="next-second" onClick={p.onCloseQuery}>Close query</button>
+          : <button type="button" className="qc149c-nxb" data-qc149c="next-second" onClick={() => p.onMode("respond")}>{p.agent.first ? `${p.agent.first} replied` : "They replied"}</button>}
+      </div>
+    </div>
+  ) : null;
   const band = (
     <div className="mk-lc-band qc149c-band" data-qc149c="band" style={{ background: tone.bg, color: tone.fg }}>
       <span data-qc149c="band-word">{WHERE_LABEL[where].label}</span>
       <span className="qc149c-rt">
         {r.dayN != null ? <span className="mk-lc-day" data-qc149c="day"><span className="mk-odo-dk">Day</span> <span>{r.dayN}</span></span> : null}
-        <button type="button" className="qc149c-x" data-qc149c="close" aria-label="Close the query" onClick={p.onClose}>×</button>
+        {phone ? null : <button type="button" className="qc149c-x" data-qc149c="close" aria-label="Close the query" onClick={p.onClose}>×</button>}
       </span>
     </div>
   );
@@ -382,11 +406,11 @@ export const QcQueryCard149: React.FC<QcQueryCard149Props> = (p) => {
               ) : null}
             </ol>
             {/* v149.1 A3 — the action strip, at the foot of the pane: what is happening, the choice, and the next move */}
-            <div className="qc149c-strip" data-qc149c="strip" data-kind={p.strip.kind} style={{ background: STRIP_TINT[where] }}>
+            {phone ? null : <div className="qc149c-strip" data-qc149c="strip" data-kind={p.strip.kind} style={{ background: STRIP_TINT[where] }}>
               {SPARK}
               <p><b data-qc149c="strip-bold">{p.strip.bold}</b>{p.strip.sub ? <span data-qc149c="strip-sub">{p.strip.sub}</span> : null}</p>
               {p.strip.button && p.primary ? <button type="button" className="qc149c-sbtn" data-qc149c="strip-btn" onClick={p.onPrimary}>{p.strip.button}</button> : null}
-            </div>
+            </div>}
           </>
         ) : (
         <ol className="mk-lc-steps qc149c-steps" data-qc149c="steps">
@@ -493,7 +517,7 @@ export const QcQueryCard149: React.FC<QcQueryCard149Props> = (p) => {
       <div className="mk-lc-in qc149c-in">
         {band}
         {editing ? <div className="qc149c-edbar" data-qc149c="edit-bar"><i aria-hidden="true" />Editing this query</div> : null}
-        {agentRow}{book}{tabsRow}
+        {agentRow}{book}{nextBlock}{tabsRow}
         {panes}
         {editing ? (
           <div className="qc149c-mft">
@@ -509,9 +533,11 @@ export const QcQueryCard149: React.FC<QcQueryCard149Props> = (p) => {
                 {p.due ? <span className={`qc149c-w${p.due.hot ? " hot" : ""}`} data-qc149c="due" data-hot={p.due.hot ? "" : undefined}>{CLOCK}<em>{p.due.line}</em></span> : null}
               </div>
             <div className="qc149c-more qc149c-l2" data-qc149c="more">
+              {phone ? null : <>
               <button type="button" data-qc149c="record" onClick={() => p.onMode("respond")}>Record a response</button>
               <button type="button" data-qc149c="edit" onClick={() => p.onMode("edit")}>Edit query</button>
               {r.court !== "closed" ? <button type="button" data-qc149c="close-query" onClick={p.onCloseQuery}>Close query</button> : null}
+              </>}
               <span className="qc149c-sp" />
               <span className="qc149c-nvb" data-qc149c="nav">
                 <button type="button" data-qc149c="prev" aria-label="Previous query" disabled={p.index <= 0} onClick={() => p.onStep(-1)}>{LEFT}</button>

@@ -1,0 +1,32 @@
+
+Running 2 tests using 1 worker
+
+[1/2] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/2] [measure] › tests/e2e/queriesMobileV1.measure.ts:381:1 › QM1 · L1 desktop compare
+[measure] › tests/e2e/queriesMobileV1.measure.ts:381:1 › QM1 · L1 desktop compare
+L1 {"pixels":1360800,"diff":795185,"domSame":false}
+
+  1) [measure] › tests/e2e/queriesMobileV1.measure.ts:381:1 › QM1 · L1 desktop compare ─────────────
+
+    Error: the desktop Query Centre's pixels changed
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 0
+    Received: 795185
+
+      396 |   console.log("L1", JSON.stringify({ ...r, domSame }));
+      397 |   writeFileSync(`${DIR}/l1/result-${L1_NAME}.json`, JSON.stringify({ ...r, domSame }, null, 1));
+    > 398 |   expect(r.diff, "the desktop Query Centre's pixels changed").toBe(0);
+          |                                                               ^
+      399 |   expect(domSame, "the desktop Query Centre's DOM changed").toBe(true);
+      400 | });
+      401 |
+        at /Users/nickphysick/ScriptAlly-qm1/tests/e2e/queriesMobileV1.measure.ts:398:63
+
+    Error Context: test-results/queriesMobileV1.measure.ts-QM1-·-L1-desktop-compare-measure/error-context.md
+
+
+  1 failed
+    [measure] › tests/e2e/queriesMobileV1.measure.ts:381:1 › QM1 · L1 desktop compare ──────────────
+  1 passed (17.8s)

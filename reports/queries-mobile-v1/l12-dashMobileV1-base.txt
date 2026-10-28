@@ -1,0 +1,51 @@
+
+Running 8 tests using 1 worker
+
+[1/8] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/8] [measure] › tests/e2e/dashMobileV1.measure.ts:40:1 › DM1-A1 · the phone top bar
+[3/8] [measure] › tests/e2e/dashMobileV1.measure.ts:187:1 › DM1-B1 · stat cards first
+[measure] › tests/e2e/dashMobileV1.measure.ts:187:1 › DM1-B1 · stat cards first
+  ✗ B1 · 390x844 active: the filtered list's count equals the card's — 0 rows vs card 39
+
+  ✗ B1 · 390x844 with: the filtered list's count equals the card's — 0 rows vs card 29
+
+  ✗ B1 · 390x844 closed: the filtered list's count equals the card's — 0 rows vs card 12
+
+  1) [measure] › tests/e2e/dashMobileV1.measure.ts:187:1 › DM1-B1 · stat cards first ───────────────
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 5
+
+    - Array []
+    + Array [
+    +   "B1 · 390x844 active: the filtered list's count equals the card's — 0 rows vs card 39",
+    +   "B1 · 390x844 with: the filtered list's count equals the card's — 0 rows vs card 29",
+    +   "B1 · 390x844 closed: the filtered list's count equals the card's — 0 rows vs card 12",
+    + ]
+
+       at dm1Lib.ts:29
+
+      27 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+      28 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 29 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      30 |   }
+      31 | }
+      32 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-qm1/tests/e2e/dm1Lib.ts:29:95)
+        at /Users/nickphysick/ScriptAlly-qm1/tests/e2e/dashMobileV1.measure.ts:273:5
+
+    Error Context: test-results/dashMobileV1.measure.ts-DM1-B1-·-stat-cards-first-measure/error-context.md
+
+
+[4/8] [measure] › tests/e2e/dashMobileV1.measure.ts:295:1 › DM1-C1 · Up next
+[5/8] [measure] › tests/e2e/dashMobileV1.measure.ts:376:1 › DM1-D1 · the founding writer row and Recent
+[6/8] [measure] › tests/e2e/dashMobileV1.measure.ts:445:1 › DM1-E1 · the desktop furniture is gone on phones, and stays on the desktop
+[7/8] [measure] › tests/e2e/dashMobileV1.measure.ts:470:1 › DM1-F1 · no sideways scroll, and every tap target is at least 40px
+[8/8] [measure] › tests/e2e/dashMobileV1.measure.ts:500:1 › DM1-A2 · the search sheet
+  1 failed
+    [measure] › tests/e2e/dashMobileV1.measure.ts:187:1 › DM1-B1 · stat cards first ────────────────
+  5 did not run
+  2 passed (2.1m)

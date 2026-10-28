@@ -273,48 +273,44 @@
     cursor: pointer;
   }
 
-  /* ── the floating tab-bar capsule ── */
+  /* ── the tab bar (Queries on a phone v1, design-refs/queries-mobile-v1/; Nick's ruling of 28 Oct) ──
+     Full width along the foot, five equal tabs. The chosen tab is a NAVY pill with a white icon and an ink label; the
+     Queries badge is pink with a black number. ⚠️ Text on navy is white, text on pink is #1c130f. */
   .sa-mtabbar {
     position: fixed;
-    left: 12px;
-    right: 12px;
-    bottom: calc(14px + env(safe-area-inset-bottom));
+    left: 0;
+    right: 0;
+    bottom: 0;
     z-index: 40;
-    display: flex;
-    align-items: center;
-    padding: 0 8px;
-    height: 62px;
-    background: var(--shell-rail);
-    border: var(--shell-cap-border);
-    border-radius: var(--shell-cap-radius);
-    box-shadow: var(--shell-cap-shadow);
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+    background: #fffdf9;
+    border-top: 1px solid rgba(28, 19, 15, 0.08);
   }
   .sa-mtab {
-    flex: 1;
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 3px;
-    height: 48px;
+    gap: 2px;
+    min-height: 48px;
+    padding: 0;
     border: 0;
     background: transparent;
-    border-radius: 14px;
-    color: var(--shell-muted);
+    color: #9a9086;
     cursor: pointer;
-    padding: 0;
   }
-  .sa-mtab svg { width: 19px; height: 19px; }
-  .sa-mtab span {
-    font-family: "JetBrains Mono", monospace;
-    font-size: 8px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    font-weight: 700;
+  .sa-mtabic { display: grid; place-items: center; width: 52px; height: 32px; border-radius: 12px; }
+  .sa-mtab svg { width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+  .sa-mtablb { font: 600 10.5px/1.2 -apple-system, system-ui, "Segoe UI", sans-serif !important; }
+  .sa-mtab.on { color: #1c130f; }
+  .sa-mtab.on .sa-mtabic { background: #2a3a52; color: #fff; }
+  .sa-mtabbd {
+    position: absolute; top: -2px; left: 56%; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px;
+    background: #f3c8ba; color: #1c130f; box-shadow: 0 0 0 2px #fffdf9; text-align: center; font-style: normal;
+    font: 700 10.5px/18px -apple-system, system-ui, "Segoe UI", sans-serif !important;
   }
-  /* THE NAV ACTIVE LAW (baked decision 3): ground-fill pill, ink text — never burgundy,
-     never pink. The desktop rail's exact grammar, floated. */
-  .sa-mtab.on { background: var(--shell-active-fill); color: var(--shell-ink); }
 }
 
 /* ── APP-FEEL (Mobile Pass 1, Phase 6) ──────────────────────────────────────

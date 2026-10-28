@@ -126,7 +126,12 @@ describe("⚠️ one house — the open query is the side panel, and its tab bod
        rather than a second one), so it is still one mount for a chosen query, the picker, or Pip */
     /* v149 — retargeted, same law: the one host's condition gained the header's two flows (a new query, "Who
        replied?"), which open in this host rather than a second one */
-    expect(page).toContain("{(pipShown || (qcOpenCardNode && cardQueryId) || picking || qcFlowNode) && (");
+    /* Queries on a phone v1 (28 Oct) — retargeted, same law: the one host is built once as `queryPanelHost` so the phone
+       return and the desktop tree place the SAME element; its desktop condition is unchanged, and on the phone page it
+       serves only other pages' requests and the practice walk */
+    expect(page).toContain("const queryPanelOn = qmPhone");
+    expect(page).toContain(": !!(pipShown || (qcOpenCardNode && cardQueryId) || picking || qcFlowNode);");
+    expect(page.split("{queryPanelHost}").length - 1).toBe(2);
     expect(page).not.toContain("<QcQueryModal");
     expect(page).not.toContain("qcDocked === false && (");
   });
