@@ -22,6 +22,7 @@ import type { ClosedBucketKey, ClosedTile } from "./dashClosed";
 import { agentQueryStates } from "./contactDesk";
 import { TIERS, type FoundingStats } from "./foundingStats";
 import { closedAt, sentAt } from "./oneScreen";
+import { dayMonth } from "./dates";
 import type { WeekMix } from "./dashWeekMix";
 
 /* ── the week callout ─────────────────────────────────────────────────────────────────────────── */
@@ -115,7 +116,7 @@ export function fitStack(box: { left: number; top: number; w: number; h: number 
 
 export interface ClosedCard { id: string; name: string; agency: string; outcome: "quiet" | "passed"; queried: string; end: string }
 
-const day = (ms: number) => new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+const day = (ms: number) => dayMonth(ms);
 const WEEK_MS = 7 * 86400000;
 
 export function closedCards(tile: Pick<ClosedTile, "members">, key: ClosedBucketKey, queries: readonly Query[], agents: readonly Agent[]): ClosedCard[] {

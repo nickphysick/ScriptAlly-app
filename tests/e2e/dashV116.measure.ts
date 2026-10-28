@@ -92,4 +92,164 @@ test("DB116 A1 — the chart's week callout", async ({ page }) => {
   L.done(20);
 });
 
+/* ── shared readers for the stacks ── */
+
+/** A point on a slice's own stroke (its middle), in viewport pixels — hovering the circle's box centre would miss it. */
+async function slicePoint(page: Page, card: string, seg: string): Promise<{ x: number; y: number } | null> {
+  return page.evaluate(([card, seg]) => {
+    const c = document.querySelector<SVGCircleElement>(`[data-d60="${card}"] [data-d116="slice"][data-seg="${seg}"]`);
+    if (!c) return null;
+    const len = Number(c.getAttribute("stroke-dasharray")!.split(" ")[0]), at = -Number(c.getAttribute("stroke-dashoffset"));
+    /* the element's own rotate(-90) is in its CTM: the angle here is from 3 o'clock */
+    const a = (((at + len / 2) * 3.6) * Math.PI) / 180;
+    const m = c.getScreenCTM()!;
+    const pt = new DOMPoint(50 + 42 * Math.cos(a), 50 + 42 * Math.sin(a)).matrixTransform(m);
+    return { x: pt.x, y: pt.y };
+  }, [card, seg] as const);
+}
+
+interface StackRead { kind: string; total: number; shown: number; more: number; moreText: string; moreBox: { x: number; y: number } | null; box: { left: number; top: number; right: number; bottom: number } | null;
+  cards: { i: number; tx: number; ty: number; rot: number; op: number; id: string; outcome: string; status: string; name: string; agency: string; pill: string; ms: string; queried: string; end: string; bust: boolean; headW: number; cardW: number; headBg: string; headInk: string; none: string }[] }
+async function readStack(page: Page): Promise<StackRead | null> {
+  return page.evaluate(() => {
+    const st = document.querySelector<HTMLElement>('[data-d116="stack"]');
+    if (!st) return null;
+    const t = (el: Element | null) => (el?.textContent ?? "").trim();
+    const rcs = [...st.querySelectorAll<HTMLElement>(":scope > .d116-rc")];
+    let L = Infinity, T = Infinity, R = -Infinity, B = -Infinity;
+    const grow = (r: DOMRect) => { L = Math.min(L, r.left); T = Math.min(T, r.top); R = Math.max(R, r.right); B = Math.max(B, r.bottom); };
+    const cards = rcs.map((rc) => {
+      const m = new DOMMatrix(getComputedStyle(rc).transform);
+      grow(rc.getBoundingClientRect());
+      const card = rc.firstElementChild as HTMLElement;
+      const head = card.querySelector<HTMLElement>('[data-d116="agent-head"]');
+      return {
+        i: Number(rc.dataset.i), tx: m.e, ty: m.f, rot: (Math.atan2(m.b, m.a) * 180) / Math.PI, op: Number(getComputedStyle(rc).opacity),
+        id: card.dataset.id ?? "", outcome: card.dataset.outcome ?? "", status: card.dataset.status ?? "",
+        name: t(card.querySelector('[data-d116="name"]')), agency: t(card.querySelector('[data-d116="agency"]')), pill: t(card.querySelector('[data-d116="pill"]')),
+        ms: t(card.querySelector('[data-d116="ms"]')), queried: t(card.querySelector('[data-d116="queried"]')), end: t(card.querySelector('[data-d116="end"]')),
+        bust: !!card.querySelector(".d116-bust svg path"), headW: head ? head.offsetWidth : 0, cardW: card.offsetWidth,
+        headBg: head ? getComputedStyle(head).backgroundColor : "", headInk: head ? getComputedStyle(head).color : "",
+        none: card.matches('[data-d116="none"]') ? t(card) : "",
+      };
+    });
+    const more = st.querySelector<HTMLElement>('[data-d116="more"]');
+    if (more) grow(more.getBoundingClientRect());
+    const mr = more?.getBoundingClientRect();
+    return { kind: st.dataset.kind ?? "", total: Number(st.dataset.total), shown: Number(st.dataset.shown), more: Number(st.dataset.more), moreText: t(more),
+      moreBox: mr ? { x: mr.left, y: mr.top } : null, box: cards.length ? { left: L, top: T, right: R, bottom: B } : null, cards };
+  });
+}
+
+/** the rows of a key: their counts */
+async function keyCounts(page: Page, card: string): Promise<Record<string, number>> {
+  return page.evaluate((card) => Object.fromEntries([...document.querySelectorAll<HTMLElement>(`[data-d60="${card}"] [data-d116="key-row"]`)].map((li) => [li.dataset.key!, Number(li.querySelector("b")!.textContent)])), card);
+}
+
+const SETTLE = 750;
+const MON: Record<string, number> = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
+const dayOf = (s: string) => { const m = /(\d{1,2}) ([A-Z][a-z]{2})/.exec(s); return m ? MON[m[2]] * 31 + Number(m[1]) : null; };
+
+/* ── C1 · C2 ── */
+
+test("DB116 C1 · C2 — Closed: slices, key rows and the mini query cards", async ({ page }) => {
+  test.setTimeout(300_000);
+  const L = new Ledger("C");
+  await openDash(page, VP1440);
+  const counts = await keyCounts(page, "closed-hoop");
+  L.check("C1", "population: the four key rows", Object.keys(counts).join() === "quiet,letter,partial,full", JSON.stringify(counts));
+  const title = (await page.locator('[data-d58="header"] h1, [data-d58="header"] h2').first().textContent().catch(() => ""))?.trim() ?? "";
+  let empties = 0, filled = 0, swells = 0;
+  const restW = await page.evaluate(() => Number(getComputedStyle(document.querySelector('[data-d60="closed-hoop"] [data-d60="arc"]')!).strokeWidth.replace("px", "")));
+  for (const via of ["row", "slice"] as const) {
+    for (const k of Object.keys(counts)) {
+      await page.mouse.move(2, 2); await page.waitForTimeout(250);
+      if (via === "row") {
+        const b = (await page.locator(`[data-d60="closed-hoop"] [data-d116="key-row"][data-key="${k}"]`).boundingBox())!;
+        await page.mouse.move(b.x + 20, b.y + b.height / 2);
+      } else {
+        const p = await slicePoint(page, "closed-hoop", k);
+        if (!p) { L.check("C1", `slice ${k}`, counts[k] === 0, `no slice for a count of ${counts[k]}`); continue; }
+        await page.mouse.move(p.x, p.y);
+      }
+      await page.waitForTimeout(SETTLE);
+      const s = await readStack(page);
+      const where = `${via} ${k}`;
+      if (!s) { L.check("C1", where, false, "no stack"); continue; }
+      L.check("C1", `${where}: one category`, s.kind === "closed", s.kind);
+      L.check("C1", `${where}: every card fully shown`, s.cards.every((c) => c.op > 0.99), s.cards.map((c) => c.op.toFixed(2)).join(","));
+      if (counts[k] === 0) {
+        empties += 1;
+        L.check("C1", `${where}: an empty category says None yet`, s.cards.length === 1 && /^None yet/.test(s.cards[0].none), JSON.stringify(s.cards.map((c) => c.none)));
+        continue;
+      }
+      filled += 1;
+      L.check("C1", `${where}: cards + more = the row's count`, s.shown + s.more === counts[k] && s.cards.length === s.shown && s.shown <= 5, `${s.shown}+${s.more} vs ${counts[k]}`);
+      const want = k === "quiet" ? "No reply" : "Passed";
+      L.check("C1", `${where}: only that outcome`, s.cards.every((c) => c.pill === want && c.outcome === (k === "quiet" ? "quiet" : "passed")), s.cards.map((c) => c.pill).join(","));
+      if (k !== "quiet") {
+        const ds = s.cards.map((c) => dayOf(c.end));
+        L.check("C1", `${where}: newest closed first`, ds.every((d, i) => d !== null && (i === 0 || d <= ds[i - 1]!)), s.cards.map((c) => c.end).join(" · "));
+      }
+      /* C2: what each card carries; never initials */
+      for (const c of s.cards) {
+        L.check("C2", `${where} ${c.name}: bust, name, agency, pill, manuscript, dates`,
+          c.bust && c.name.length > 1 && c.pill.length > 0 && c.ms.length > 0 && (!title || c.ms === title) && /^Queried \d{1,2} [A-Z][a-z]{2}$/.test(c.queried) && (k === "quiet" ? /^\d+ wks$/.test(c.end) : /^Passed \d{1,2} [A-Z][a-z]{2}$/.test(c.end)),
+          JSON.stringify({ bust: c.bust, name: c.name, agency: c.agency, pill: c.pill, ms: c.ms, title, queried: c.queried, end: c.end }));
+      }
+      const initials = await page.evaluate(() => [...document.querySelectorAll('[data-d116="stack"] *')].filter((e) => !e.children.length && /^[A-Z]{2,3}$/.test((e.textContent ?? "").trim())).map((e) => e.textContent));
+      L.check("C2", `${where}: no initials anywhere`, initials.length === 0, JSON.stringify(initials));
+      if (via === "slice") {
+        const w = await page.evaluate((k) => [...document.querySelectorAll<SVGElement>('[data-d60="closed-hoop"] [data-d60="arc"]')].map((a) => ({ k: a.dataset.seg, w: Number(getComputedStyle(a).strokeWidth.replace("px", "")) })), k);
+        const me = w.find((x) => x.k === k)!, others = w.filter((x) => x.k !== k);
+        swells += 1;
+        L.check("C1", `${where}: the slice swells ≥1.4×, the others stay`, me.w >= 1.4 * restW - 0.01 && others.every((o) => Math.abs(o.w - restW) < 0.01), `${JSON.stringify(w)} rest ${restW}`);
+      }
+      if (s.more > 0) L.check("C1", `${where}: +N more`, s.moreText === `+${s.more} more`, s.moreText);
+    }
+  }
+  L.check("C1", "population: filled, empty and swelling categories all exercised", filled >= 4 && empties >= 1 && swells >= 2, `filled ${filled} · empty ${empties} · swells ${swells}`);
+  L.done(30);
+});
+
+/* ── K1 ── */
+
+test("DB116 K1 — the keyboard reaches each slice and key row", async ({ page }) => {
+  test.setTimeout(240_000);
+  const L = new Ledger("K1");
+  await openDash(page, VP1440);
+  for (const card of ["closed-hoop", "agents-hoop"]) {
+    const stops = await page.evaluate((card) => [...document.querySelectorAll<HTMLElement | SVGElement>(`[data-d60="${card}"] [data-d116="slice"], [data-d60="${card}"] [data-d116="key-row"]`)].map((e) => `${e.getAttribute("data-d116")}:${e.getAttribute("data-seg") ?? e.getAttribute("data-key")}`), card);
+    L.check("K1", `${card}: population`, stops.length >= 4, stops.join(" "));
+    /* Tab reaches every one, in order: start from the band's link and walk */
+    await page.locator(`[data-d60="${card}"]`).first().focus().catch(() => {});
+    await page.evaluate((card) => { const el = document.querySelector<HTMLElement>(`[data-d60="${card}"] [data-d116="slice"]`) as unknown as HTMLElement; el?.focus(); }, card);
+    const reached: string[] = [];
+    for (let i = 0; i < stops.length + 2; i++) {
+      const at = await page.evaluate(() => { const e = document.activeElement; return e ? `${e.getAttribute("data-d116")}:${e.getAttribute("data-seg") ?? e.getAttribute("data-key")}` : ""; });
+      if (stops.includes(at) && !reached.includes(at)) reached.push(at);
+      await page.keyboard.press("Tab");
+    }
+    L.check("K1", `${card}: Tab reaches every slice and row`, stops.every((x) => reached.includes(x)), `reached ${reached.join(" ")}`);
+    for (const stop of stops.slice(0, 3)) {
+      const [kind, key] = stop.split(":");
+      await page.evaluate(([card, kind, key]) => { const el = document.querySelector<HTMLElement>(`[data-d60="${card}"] [data-d116="${kind}"][${kind === "slice" ? "data-seg" : "data-key"}="${key}"]`); (el as HTMLElement).focus(); }, [card, kind, key] as const);
+      await page.waitForTimeout(SETTLE);
+      const focused = await readStack(page);
+      const live = (await page.locator(`[data-d60="${card}"] [data-d116="live"]`).textContent())?.trim() ?? "";
+      L.check("K1", `${card} ${stop}: focus shows the stack and the live region names it`, !!focused && focused.cards.length > 0 && focused.cards.every((c) => c.op > 0.99) && /^(No .* yet\.|\d+ (query|queries|agent|agents): .+\.)$/.test(live), `${live}`);
+      if (focused && focused.cards[0]?.name) L.check("K1", `${card} ${stop}: the live region names the first card`, live.includes(focused.cards[0].name), live);
+      await page.keyboard.press("Escape"); await page.waitForTimeout(SETTLE);
+      const gone = await page.evaluate(() => document.querySelector('[data-d116="stack"]') === null);
+      L.check("K1", `${card} ${stop}: Esc hides it`, gone, "");
+      await page.keyboard.press("Enter"); await page.waitForTimeout(SETTLE);
+      const back = await readStack(page);
+      L.check("K1", `${card} ${stop}: Enter shows it again`, !!back && back.cards.length > 0, "");
+      await page.keyboard.press("Enter"); await page.waitForTimeout(SETTLE);
+      L.check("K1", `${card} ${stop}: Enter toggles it off`, await page.evaluate(() => document.querySelector('[data-d116="stack"]') === null), "");
+    }
+  }
+  L.done(20);
+});
+
 void expect; void tag;
