@@ -33,9 +33,8 @@ import { Rsp5Band, Rsp5Showcase } from "./Rsp5Insights";
 import { Rsp5Timing } from "./Rsp5Timing";
 import { Rsp5Words } from "./Rsp5Words";
 import { RspPanel, type AnswerTab } from "./RspPanel";
-import { RspBanner, RspList, RspTally } from "./RspNos";
-import { RspShare } from "./RspShare";
-import { RspEmpty, RspZeroNos } from "./RspEmpty";
+import { Rsp5Wall, type AgentFacts } from "./RspNos";
+import { RspEmpty } from "./RspEmpty";
 import { AppFooter } from "../shell/AppFooter";
 import "./responses.css";
 import "./responses5.css";
@@ -106,13 +105,18 @@ export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) 
     openQueryDrawer({ mode: pending.mode, queryId: openItem.id, panel: { name: r.agentName, agency: r.agency, first, backLabel: `Back to ${first}` } });
   }, [pending, openId, openItem]);
 
+  /* the agent's own facts the wall reads (the reply time they give; whether no reply means no) */
+  const agentFacts = useCallback((i: RespItem<QcRow>): AgentFacts => {
+    const a = agents.find((x) => x.id === i.row.query.agentId);
+    return { weeks: a?.responseTimeWeeks && a.responseTimeWeeks > 0 ? a.responseTimeWeeks : null, nrmn: !!a?.noResponseMeansNo };
+  }, [agents]);
+
   /* Passed / No reply: ONE state with the list's segmented control (Part C). Pressing it again clears it. */
   const [kind, setKind] = useState<NoKind | null>(null);
   const pressKind = useCallback((k: NoKind) => setKind((x) => (x === k ? null : k)), []);
 
   /* Asked for more scrolls its carousel band into view; "Share your wall of no" the share sheet */
   const moreRef = useRef<HTMLElement | null>(null);
-  const shareRef = useRef<HTMLElement | null>(null);
   const scrollTo = (el: HTMLElement | null, block: ScrollLogicalPosition) => el?.scrollIntoView({ block, behavior: reduced() ? "auto" : "smooth" });
   /* v5 · the sections a glance card or a "→" link goes to, by id inside this page (every page stays mounted) */
   const pageRef = useRef<HTMLDivElement | null>(null);
@@ -154,14 +158,10 @@ export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) 
                 <Rsp5Words items={model.items} nowMs={nowMs} onOpen={openAnswer} />
               </>
             ) : null}
-            {ready ? <RspBanner /> : null}
-            {ready && counts.passed + counts.noReply > 0 ? (
-              <>
-                <RspTally items={model.items} />
-                <RspList items={model.items} nowMs={nowMs} kind={kind} onKind={setKind} selectedId={openId} onOpen={openAnswer} active={!!routeActive} onVisible={setVisible} />
-                <RspShare ref={shareRef} nos={model.items.filter((i) => i.group !== "more")} title={msTitle} />
-              </>
-            ) : ready ? <RspZeroNos /> : null}
+            {ready ? (
+              <Rsp5Wall items={model.items} nowMs={nowMs} msTitle={msTitle} kind={kind} onKind={setKind} selectedId={openId}
+                onOpen={openAnswer} active={!!routeActive} agentFacts={agentFacts} onVisible={setVisible} />
+            ) : null}
           </>
         )}
         {ready ? <div className="rsp-foot"><AppFooter onNavigate={(t, sub) => onNavigate?.(t, sub)} /></div> : null}

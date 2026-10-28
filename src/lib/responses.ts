@@ -195,7 +195,8 @@ export function carouselOrder<R extends RespRowInput>(items: readonly RespItem<R
 }
 
 /* ── the list of nos ── */
-export type NoSort = "date" | "wait" | "agent";
+/** v5 adds Queried. "wait" is the TOOK column. */
+export type NoSort = "date" | "wait" | "agent" | "queried";
 export type NoKind = "passed" | "noReply";
 export const isNo = (i: RespItem): boolean => i.group !== "more";
 export const surnameOf = (name: string): string => { const w = name.trim().split(/\s+/); return (w[w.length - 1] ?? "").toLowerCase(); };
@@ -210,6 +211,7 @@ export function listNos<R extends RespRowInput>(items: readonly RespItem<R>[], o
   return items.filter((i) => isNo(i) && (!o.kind || i.group === o.kind) && noMatches(i, o.find)).sort((a, b) => {
     if (o.sort === "wait") return dir * ((a.waitDays ?? -1) - (b.waitDays ?? -1)) || ans(b) - ans(a);
     if (o.sort === "agent") return dir * surnameOf(a.row.agentName).localeCompare(surnameOf(b.row.agentName)) || ans(b) - ans(a);
+    if (o.sort === "queried") return dir * ((a.queriedMs ?? 0) - (b.queriedMs ?? 0)) || ans(b) - ans(a);
     return dir * (ans(a) - ans(b)) || a.id.localeCompare(b.id);
   });
 }

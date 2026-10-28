@@ -52,30 +52,6 @@
 .rsp-dsc--passed { background: var(--rs-closed-disc); color: #2b2622; }
 .rsp-dsc--noReply { background: #fff; color: #2b2622; box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, 0.3); }
 
-/* ═════ Part C · the banner (full width: a spread shadow clipped to its own height, so it takes no width) ═════ */
-.rsp-banner {
-  display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 14px; box-sizing: border-box; margin-top: 0; padding: 20px 32px;
-  background: var(--rs-blush); box-shadow: 0 0 0 100vmax var(--rs-blush); clip-path: inset(0 -100vmax);
-  text-align: center; font: 400 19px/1.35 var(--rs-type) !important; color: var(--rs-ink);
-}
-.rsp-banner span { font: inherit !important; }
-.rsp-banner svg { flex: none; width: 20px; height: 20px; }
-
-/* the tally: on the oat, on the column, 46 under the banner */
-.rsp-tallysec { margin-top: 46px; }
-.rsp-hrow { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 14px; margin-bottom: 6px; }
-.rsp h2.rsp-hrow-h { margin: 0; font: 400 28px/1.1 var(--rs-type) !important; color: var(--rs-ink); }
-.rsp .rsp-hrow-m { font: 500 11px/1.3 var(--rs-mono) !important; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(28, 19, 15, 0.5); }
-.rsp-tally { padding: 14px 0 0; }
-.rsp-marks { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 18px 26px; }
-.rsp-marks svg { display: block; overflow: visible; }
-.rsp-marks svg.is-new [data-rsp="gate-ink"] path:last-child { stroke-dasharray: 60; stroke-dashoffset: 60; animation: rsp-draw 0.5s ease-out 0.3s forwards; }
-@keyframes rsp-draw { to { stroke-dashoffset: 0; } }
-.rsp-tfoot { display: flex; align-items: baseline; flex-wrap: wrap; gap: 14px; margin-top: 16px; }
-.rsp .rsp-tcap { font: 400 22px/1.3 var(--rs-type) !important; }
-.rsp .rsp-thint { font: italic 400 15px/1.4 var(--rs-serif) !important; color: var(--rs-i55); }
-.rsp .rsp-thint::before { content: ""; display: inline-block; width: 22px; height: 0; margin-right: 10px; vertical-align: middle; border-top: 1.5px dashed rgba(28, 19, 15, 0.35); }
-
 /* ═════ the white sheets under a navy row (Query Centre v138's, page-local) ═════ */
 .rsp-ws {
   position: relative; box-sizing: border-box; margin-top: 22px; background: #fff; border-radius: 20px;
@@ -115,91 +91,6 @@
 .rsp-search:focus-within input::placeholder { color: rgba(28, 19, 15, 0.5); }
 .rsp .rsp-search:focus-within kbd { color: var(--rs-ink); border-color: rgba(28, 19, 15, 0.3); }
 @media (prefers-reduced-motion: reduce) { .rsp-search { transition: none; } }
-
-/* ═════ the list of nos ═════ */
-.rsp-sentinel { display: block; height: 0; }
-.rsp-list { margin-top: 30px; overflow-anchor: none; }
-.rsp-pinwrap { position: sticky; top: 12px; z-index: 20; border-radius: 20px 20px 0 0; background: var(--rs-oat); }
-.rsp-list[data-pinned] .rsp-wsh { min-height: 60px; padding-top: 10px; padding-bottom: 10px; }
-.rsp-list[data-pinned] .rsp-heads { box-shadow: 0 10px 18px -14px rgba(28, 19, 15, 0.35); }
-.rsp-gr {
-  display: grid; grid-template-columns: minmax(220px, 1.35fr) minmax(220px, 1.7fr) 92px 112px 80px minmax(170px, 1fr);
-  column-gap: 20px; align-items: center; box-sizing: border-box; width: 100%;
-}
-.rsp-heads { padding: 12px 22px 13px 40px; background: var(--rs-head); border-bottom: 1.5px solid rgba(45, 58, 80, 0.28); }
-.rsp .rsp-hl { min-width: 0; text-align: left; white-space: nowrap; font: 600 10.5px/1.3 var(--rs-mono) !important; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(45, 58, 80, 0.62); }
-.rsp .rsp-hl.rsp-r { text-align: right; }
-.rsp button.rsp-hl:hover { color: var(--rs-navy); }
-.rsp .rsp-hl.is-on { color: var(--rs-navy); }
-.rsp .rsp-hl i { font-style: normal; color: var(--rs-rust); }
-.rsp-lbody { min-width: 0; }
-.rsp-grp { position: relative; }
-.rsp-mband {
-  position: sticky; top: var(--rs-stack, 200px); z-index: 6; display: flex; align-items: center; gap: 12px; box-sizing: border-box; height: 44px;
-  margin: 10px 18px 0; padding: 0 16px; border-radius: 10px; background: var(--rs-stone);
-}
-.rsp .rsp-mband b { font: 400 17px/1.2 var(--rs-type) !important; }
-.rsp .rsp-mband span { padding: 3px 8px; border-radius: 9px; background: rgba(255, 255, 255, 0.75); font: 500 10px/1 var(--rs-mono) !important; letter-spacing: 0.14em; }
-.rsp-rows { padding: 6px 0 4px; }
-.rsp .rsp-row { padding: 13px 22px 13px 40px; border-top: 1px solid var(--rs-i08); text-align: left; color: var(--rs-ink); }
-.rsp .rsp-rows .rsp-row:first-child { border-top: 0; }
-.rsp .rsp-row:hover { background: #f6f3ee; }
-.rsp .rsp-row[aria-current="true"] { background: #f7f3ed; box-shadow: inset 3px 0 0 var(--rs-disc); }
-.rsp-ag { display: flex; align-items: center; gap: 12px; min-width: 0; }
-.rsp-agt { min-width: 0; }
-.rsp .rsp-agt b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 600 16.5px/1.25 var(--rs-serif) !important; }
-.rsp .rsp-agt i { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: italic 400 14px/1.35 var(--rs-serif) !important; color: var(--rs-i55); }
-.rsp-said { min-width: 0; }
-.rsp .rsp-tag {
-  display: inline-flex; align-items: center; height: 24px; padding: 0 9px; border-radius: 6px; white-space: nowrap;
-  font: 600 9.5px/1 var(--rs-mono) !important; letter-spacing: 0.1em; text-transform: uppercase;
-}
-.rsp .rsp-tag--passed { background: var(--rs-stone); color: var(--rs-i60); }
-.rsp .rsp-tag--noReply { background: #fff; color: var(--rs-i60); box-shadow: inset 0 0 0 1px var(--rs-i30); }
-.rsp .rsp-said small { display: block; margin-top: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: italic 400 14px/1.35 var(--rs-serif) !important; color: var(--rs-i60); }
-.rsp .rsp-said small q { color: var(--rs-i72); }
-.rsp .rsp-dt { font: 400 15px/1.3 var(--rs-serif) !important; color: var(--rs-i72); white-space: nowrap; }
-.rsp .rsp-wt { text-align: right; white-space: nowrap; font: 400 17px/1.2 var(--rs-type) !important; }
-.rsp .rsp-wt small { margin-left: 3px; font: 400 13px/1 var(--rs-serif) !important; color: var(--rs-i55); }
-.rsp .rsp-far { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 15px/1.3 var(--rs-type) !important; color: var(--rs-i60); }
-.rsp mark { border-radius: 2px; background: #fde9a8; color: inherit; }
-.rsp-dead { padding: 44px 60px; text-align: center; }
-.rsp .rsp-dead b { display: block; font: 400 22px/1.2 var(--rs-type) !important; }
-.rsp .rsp-dead p { margin: 8px 0 16px; font: 400 16px/1.45 var(--rs-serif) !important; color: var(--rs-i72); }
-.rsp-lpad { height: 6px; }
-.rsp-lfoot {
-  display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-top: 10px; padding: 14px 22px;
-  border-top: 1px solid var(--rs-i08); background: var(--rs-paper); border-radius: 0 0 20px 20px;
-}
-.rsp .rsp-lfoot p { margin: 0; font: italic 400 13.5px/1.4 var(--rs-serif) !important; color: var(--rs-i55); }
-.rsp-key { display: flex; flex-wrap: wrap; gap: 6px 16px; font: 500 9.5px/1.3 var(--rs-mono) !important; letter-spacing: 0.1em; text-transform: uppercase; color: var(--rs-i55); }
-.rsp-key span { display: inline-flex; align-items: center; gap: 6px; }
-.rsp-key u { display: block; width: 10px; height: 10px; border-radius: 3px; }
-/* narrow: Queried goes below 1280; Answered, Got as far as and the segmented control below 900 */
-@media (max-width: 1280px) {
-  .rsp-gr { grid-template-columns: minmax(200px, 1.3fr) minmax(190px, 1.6fr) 104px 74px minmax(150px, 1fr); }
-  .rsp-c-q { display: none !important; }
-}
-/* ⚠️ AT 1100 AND BELOW THE FLEXIBLE COLUMNS GIVE: the 1280 floors (200 + 190 + 150 + the fixed tracks and gaps) need
-   ~860 of row, and a 1024 window's column is 720 — measured, the sheet scrolled sideways by 94px. "Got as far as"
-   keeps the 110 its heading needs. */
-@media (max-width: 1100px) {
-  .rsp-gr { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.6fr) 96px 66px minmax(110px, 1fr); column-gap: 16px; }
-}
-@media (max-width: 900px) {
-  .rsp-gr { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) 74px; }
-  .rsp-c-a, .rsp-c-n { display: none !important; }
-  .rsp-seg { display: none; }
-  .rsp-search, .ws-app.sheet-wide .rsp-search { width: 100%; }
-}
-@media (max-width: 767.98px) {
-  .rsp .rsp-row, .rsp-heads { padding-left: 22px; }
-}
-@media (prefers-reduced-motion: reduce) { .rsp-marks svg.is-new [data-rsp="gate-ink"] path:last-child { animation: none; stroke-dashoffset: 0; } }
-/* pinned, "↑ Summary" joins the row: at the compact width the search gives it room, so the row stays one line */
-.rsp-list[data-pinned] .rsp-search { width: 200px; }
-.ws-app.sheet-wide .rsp-list[data-pinned] .rsp-search { width: 300px; }
-@media (max-width: 900px) { .rsp-list[data-pinned] .rsp-search { width: 100%; } }
 
 /* ═════ Part D · the answer in the side panel ═════
    The container, masthead, tabs, scrolling body and foot are Query panel v2's own rules (`.qsp .qcv-open-*`,

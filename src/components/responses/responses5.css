@@ -294,3 +294,100 @@
 .rsp5-gl { margin-left: auto; display: flex; align-items: center; gap: 6px; white-space: nowrap; font: 400 13px var(--r5-machine) !important; }
 .rsp5 .rsp5-wnote { margin: 4px 0 0; font: 400 14.5px/1.5 var(--r5-serif); color: var(--r5-i58); }
 @media (prefers-reduced-motion: reduce) { .rsp5-qc { transition: none; } }
+
+/* ═════ the wall: the banner (`.banner`), the tally (`.tally`, `.tcap`) ═════ */
+.rsp5 .rsp5-banner {
+  position: relative; margin-top: 64px; padding: 22px 16px 30px; text-align: center; background: var(--r5-blush);
+  box-shadow: 0 0 0 100vmax var(--r5-blush); clip-path: inset(0 -100vmax -18px); font: 400 20px/1.4 var(--r5-machine) !important; color: var(--r5-ink);
+}
+.rsp5 .rsp5-banner::after { content: ""; position: absolute; left: 50%; bottom: -18px; width: 36px; height: 18px; transform: translateX(-50%); background: var(--r5-blush); clip-path: polygon(0 0, 100% 0, 50% 100%); }
+.rsp5 .rsp5-banner small { display: block; margin-top: 4px; font: italic 15.5px/1.4 var(--r5-serif) !important; color: var(--r5-i72); }
+.rsp5 .rsp5-wall { margin-top: 58px; }
+.rsp5-tally { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 22px; margin: 4px 0 8px; }
+.rsp5-tally svg { display: block; width: 54px; height: 57px; }
+.rsp5 .rsp5-tcap, .rsp5-tcap { font: 400 20px var(--r5-machine) !important; color: var(--r5-ink); }
+.rsp5 .rsp5-tcap small { margin-left: 10px; font: italic 15px var(--r5-serif) !important; color: var(--r5-i58); }
+
+/* ═════ the list sheet (`.lsheet`, `.lbar`, `.lhead`, `.lgrp`, `.lrow`) — a page-local copy of the Query Centre's ═════ */
+.rsp5 .rsp5-sentinel { display: block; height: 0; }
+.rsp5 .rsp5-lsheet { position: relative; margin-top: 26px; border-radius: 16px; background: #fff; box-shadow: 0 0 0 1px var(--r5-i10), 0 14px 30px -24px rgba(28, 19, 15, 0.45); overflow: clip; }
+.rsp5 .rsp5-lsheet[data-pinned] { overflow: visible; }
+.rsp5 .rsp5-pinwrap { position: sticky; top: 12px; z-index: 3; }
+.rsp5 .rsp5-lsheet:not([data-pinned]) .rsp5-pinwrap { position: relative; top: 0; }
+.rsp5 .rsp5-lbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 14px; background: var(--r5-navy); border-radius: 16px 16px 0 0; }
+.rsp5 .rsp5-lfind { flex: 1 1 220px; max-width: 300px; height: 40px; box-sizing: border-box; display: flex; align-items: center; gap: 8px; padding: 0 12px; border-radius: 10px; background: rgba(0, 0, 0, 0.18); color: var(--r5-cr42); }
+.rsp5 .rsp5-lfind input { all: unset; flex: 1; min-width: 0; color: var(--r5-cr); font: italic 15px var(--r5-serif) !important; }
+.rsp5 .rsp5-lfind input::placeholder { color: var(--r5-cr42); }
+.rsp5 .rsp5-lfind kbd { font: 500 10px var(--r5-mono); color: var(--r5-cr42); padding: 1px 6px; border-radius: 4px; box-shadow: inset 0 0 0 1px rgba(244, 238, 229, 0.25); }
+.rsp5 .rsp5-lseg { display: flex; gap: 2px; padding: 3px; border-radius: 11px; box-shadow: inset 0 0 0 1px rgba(244, 238, 229, 0.2); }
+.rsp5 .rsp5-lseg button { height: 34px; padding: 0 13px; border: 0; border-radius: 8px; background: none; color: var(--r5-cr66); font: 400 14px var(--r5-machine) !important; cursor: pointer; }
+.rsp5 .rsp5-lseg button small { margin-left: 5px; font: 500 10px var(--r5-mono) !important; opacity: 0.8; }
+.rsp5 .rsp5-lseg button[aria-pressed="true"] { background: #fff; color: var(--r5-ink); }
+.rsp5 .rsp5-sp { flex: 1; }
+.rsp5 .rsp5-fwrap { position: relative; }
+.rsp5 .rsp5-wb { height: 38px; display: flex; align-items: center; gap: 7px; padding: 0 13px; border: 0; border-radius: 9px; background: #fff; color: var(--r5-ink); font: 400 14px var(--r5-machine) !important; cursor: pointer; }
+.rsp5 .rsp5-wb small { font: 500 10px var(--r5-mono) !important; color: var(--r5-rust); }
+.rsp5 .rsp5-wb--o { background: none; color: var(--r5-cr); box-shadow: inset 0 0 0 1px rgba(244, 238, 229, 0.35); }
+.rsp5 .rsp5-fmenu { position: absolute; right: 0; top: calc(100% + 6px); z-index: 6; display: flex; flex-direction: column; gap: 2px; width: 220px; padding: 10px; border-radius: 12px; background: #fff; box-shadow: 0 0 0 1px var(--r5-i10), 0 18px 34px -18px rgba(28, 19, 15, 0.55); }
+.rsp5 .rsp5-fmenu b { margin: 6px 6px 4px; font: 600 13px var(--r5-serif) !important; color: var(--r5-i58); }
+.rsp5 .rsp5-fmenu button { padding: 7px 8px; border: 0; border-radius: 8px; background: none; text-align: left; font: 400 14.5px var(--r5-serif) !important; cursor: pointer; }
+.rsp5 .rsp5-fmenu button[aria-pressed="true"] { background: #eef2f6; font-weight: 600 !important; }
+.rsp5 .rsp5-lgr, .rsp5 .rsp5-lrow {
+  display: grid; grid-template-columns: minmax(200px, 1.5fr) 80px 80px 112px minmax(120px, 0.8fr) minmax(240px, 2fr); gap: 14px; align-items: center; padding: 0 22px;
+}
+.rsp5 .rsp5-lhead { height: 42px; background: #fff; border-bottom: 1px solid var(--r5-i10); font: 500 9.5px var(--r5-mono) !important; letter-spacing: 0.16em; color: var(--r5-i45); }
+.rsp5 .rsp5-hc { all: unset; font: inherit !important; letter-spacing: inherit; color: inherit; }
+.rsp5 button.rsp5-hc { cursor: pointer; }
+.rsp5 .rsp5-hc[data-on] { color: var(--r5-ink); }
+.rsp5 .rsp5-hc i { font-style: normal; }
+.rsp5 .rsp5-lgrp { position: sticky; top: var(--rs-stack, 0px); z-index: 2; display: flex; align-items: baseline; gap: 10px; padding: 14px 22px 10px; background: #f6f2ec; border-bottom: 1px solid var(--r5-i06); font: 400 19px var(--r5-machine) !important; }
+.rsp5 .rsp5-lsheet:not([data-pinned]) .rsp5-lgrp { top: 0; }
+.rsp5 .rsp5-lgrp small { font: 500 9.5px var(--r5-mono) !important; letter-spacing: 0.14em; color: var(--r5-i45); }
+.rsp5 .rsp5-lrow { box-sizing: border-box; width: 100%; min-height: 76px; padding-block: 12px; border: 0; border-bottom: 1px solid var(--r5-i06); background: none; text-align: left; color: var(--r5-ink); font: 400 15px var(--r5-serif); cursor: pointer; transition: background 0.12s; }
+.rsp5 .rsp5-lrow:hover, .rsp5 .rsp5-lrow[aria-current="true"] { background: #faf8f4; }
+.rsp5 .rsp5-ag { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.rsp5 .rsp5-ag .rsp5-face { width: 38px; height: 38px; font-size: 10px !important; background: var(--r5-cl); box-shadow: none; }
+.rsp5 .rsp5-ag .rsp5-face.is-nr { background: #fff; box-shadow: inset 0 0 0 1.5px var(--r5-cl-d); }
+.rsp5 .rsp5-agt { min-width: 0; }
+.rsp5 .rsp5-agt b { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font: 600 16.5px/1.3 var(--r5-serif) !important; }
+.rsp5 .rsp5-agt i { display: block; font: italic 14px/1.3 var(--r5-serif) !important; color: var(--r5-i58); }
+.rsp5 .rsp5-lrow mark { background: var(--r5-blush); color: inherit; }
+.rsp5 .rsp5-dt { font: 400 15px var(--r5-serif) !important; }
+.rsp5 .rsp5-took { font: 400 16px var(--r5-machine) !important; }
+.rsp5 .rsp5-took small { display: block; font: italic 12.5px var(--r5-serif) !important; color: var(--r5-i45); }
+.rsp5 .rsp5-vs { position: relative; display: block; width: 84px; height: 5px; margin-top: 6px; border-radius: 3px; background: #efe9e1; }
+.rsp5 .rsp5-vs i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 3px; background: #9b938a; }
+.rsp5 .rsp5-vs em { position: absolute; top: -3px; bottom: -3px; width: 2px; border-radius: 1px; background: var(--r5-ink); }
+.rsp5 .rsp5-far { display: flex; align-items: center; gap: 7px; font: 400 15px var(--r5-serif) !important; }
+.rsp5 .rsp5-said { display: flex; flex-direction: column; gap: 4px; min-width: 0; font: 400 14.5px/1.4 var(--r5-serif) !important; color: var(--r5-i72); }
+.rsp5 .rsp5-tag { align-self: flex-start; padding: 2px 9px; border-radius: 6px; background: var(--r5-cl); font: 400 12.5px var(--r5-machine) !important; color: var(--r5-ink); }
+.rsp5 .rsp5-tag.is-nr { background: none; box-shadow: inset 0 0 0 1px var(--r5-cl-d); }
+.rsp5 .rsp5-tag.is-note { background: var(--r5-blush); color: var(--r5-rust); }
+.rsp5 .rsp5-said q { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-style: italic; }
+.rsp5 .rsp5-said em { font-style: italic; color: var(--r5-i58); }
+.rsp5 .rsp5-lempty { padding: 40px 22px; text-align: center; font: italic 15px var(--r5-serif); color: var(--r5-i58); }
+/* full screen: the sheet over the window, scrolling inside itself; Escape leaves it */
+.rsp5 .rsp5-lsheet[data-full] { position: fixed; inset: 16px; z-index: 60; margin: 0; overflow: auto; }
+.rsp5 .rsp5-lsheet[data-full] .rsp5-pinwrap { position: sticky; top: 0; }
+.rsp5 .rsp5-lsheet[data-full] .rsp5-lgrp { top: var(--rs-stack-full, 96px); }
+
+/* ═════ the share card (`.share`, `.simg`) ═════ */
+.rsp5 .rsp5-share { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 40px; align-items: center; margin-top: 64px; padding: 34px 38px; border-radius: 18px; background: #fff; box-shadow: 0 0 0 1px var(--r5-i10); }
+.rsp5 .rsp5-share h3 { margin: 0; font: 400 28px var(--r5-machine) !important; }
+.rsp5 .rsp5-share p { margin: 10px 0 18px; max-width: 52ch; font: 400 16.5px/1.5 var(--r5-serif); color: var(--r5-i72); }
+.rsp5 .rsp5-b1 { height: 48px; padding: 0 22px; border: 0; border-radius: 12px; background: var(--r5-navy); color: #fff; box-shadow: 0 2px 0 rgba(0, 0, 0, 0.18); font: 400 16px var(--r5-machine) !important; cursor: pointer; }
+.rsp5 .rsp5-simg { box-sizing: border-box; aspect-ratio: 1.4; max-width: 100%; display: flex; flex-direction: column; justify-content: space-between; padding: 22px 24px; border-radius: 14px; background: var(--r5-navy); color: var(--r5-cr); box-shadow: 0 20px 40px -24px rgba(28, 19, 15, 0.6); }
+.rsp5 .rsp5-simg .rsp5-st1 { font: 400 22px var(--r5-machine) !important; }
+.rsp5 .rsp5-simg .rsp5-tally { gap: 6px; margin: 0; }
+.rsp5 .rsp5-simg .rsp5-tally svg { width: 34px; height: 36px; }
+.rsp5 .rsp5-simg .rsp5-tally svg * { stroke: var(--r5-cr) !important; }
+.rsp5 .rsp5-simg small { font: italic 14px var(--r5-serif) !important; color: var(--r5-cr66); }
+.rsp5 .rsp5-sharebuilder { margin-top: 22px; }
+@media (max-width: 1180px) {
+  .rsp5 .rsp5-share { grid-template-columns: minmax(0, 1fr); }
+  .rsp5 .rsp5-lhead { display: none; }
+  .rsp5 .rsp5-lrow { grid-template-columns: minmax(0, 1fr) auto; gap: 6px 14px; }
+  .rsp5 .rsp5-lrow > :nth-child(n+3) { grid-column: 1 / -1; }
+  .rsp5 .rsp5-lrow > [data-col="answered"] { display: none; }
+}
+@media (max-width: 560px) { .rsp5 .rsp5-share { padding: 22px 18px; } }
