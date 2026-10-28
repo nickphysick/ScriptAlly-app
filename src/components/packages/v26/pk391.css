@@ -99,3 +99,25 @@
   .p9-pb-grid.p9-v39 .p9-lib-top .p9-ill.p9-ill { background: #f7e3e3 !important; outline-color: rgba(94, 47, 58, 0.3) !important; }
   .p9-pb-grid.p9-v39 .p9-lib-top .p9-ill.p9-ill > i { color: #9b4a57 !important; }
 }
+
+/* ══ C · THE OPEN PACKAGE IS THE HERO (the ref's `fx-hero`) ══ */
+@media (min-width: 768px) {
+  /* the selected label: no ring, no glow, no lift; a 3px bar in its own colour, 18 in each side, 9 under it */
+  .p9-pkl .p9-pkl-row .p9-pkl-b.p9-on.p9-on { transform: none !important; position: relative;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -1px 0 rgba(0, 0, 0, 0.18) !important; }
+  .p9-pkl .p9-pkl-row .p9-pkl-b.p9-on::before { content: ""; position: absolute; left: 18px; right: 18px; bottom: -9px; height: 3px; border-radius: 2px; background: var(--pc, #1d4b63); }
+  /* the others step back, and come forward on hover */
+  .p9-pkl .p9-pkl-row .p9-pkl-b:not(.p9-on):not(.p9-ret) { filter: saturate(0.75); opacity: 0.8 !important; transition: opacity 0.15s, filter 0.15s; }
+  .p9-pkl .p9-pkl-row .p9-pkl-b:not(.p9-on):not(.p9-ret):hover { filter: none; opacity: 1 !important; }
+  /* the status pill: 32 tall, radius 16, white 12% on the package's colour, serif 600 13.5 white, a dot */
+  .p9-pb-grid.p9-v39 .p9-po-st .p9-stp { display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 14px; border-radius: 16px;
+    background: rgba(255, 255, 255, 0.12); font: 600 13.5px/1 var(--sp-serif) !important; color: #fff; white-space: nowrap; flex: none; }
+  .p9-pb-grid.p9-v39 .p9-po-st .p9-stp > i { flex: none; width: 8px; height: 8px; border-radius: 50%; background: #7fc89a; }
+  .p9-pb-grid.p9-v39 .p9-po-st .p9-stp.p9-stp--draft > i { background: none; box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.55); }
+  .p9-pb-grid.p9-v39 .p9-po-st .p9-stp .p9-stg-lk { display: inline-grid; place-items: center; margin-left: -2px; color: rgba(255, 255, 255, 0.75); cursor: default; }
+  .p9-pb-grid.p9-v39 .p9-po-st .p9-stp .p9-stg-lk svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.5; }
+}
+@container p9sheet (max-width: 1200px) {
+  .p9-pb-grid.p9-v39 .p9-po-st .p9-stp { font-size: 12.5px !important; padding: 0 11px; height: 28px; }
+  .p9-pb-grid.p9-v39 .p9-po-h .p9-po-st { gap: 8px !important; }
+}
