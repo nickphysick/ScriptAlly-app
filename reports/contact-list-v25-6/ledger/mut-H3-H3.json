@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "H3",
+  "where": "1512 population: rows on the list",
+  "ok": true,
+  "detail": "53"
+ },
+ {
+  "lock": "H3",
+  "where": "1512 the List health cell is navy",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "H3",
+  "where": "1512 a click opens Housekeeping",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "H3",
+  "where": "1512 no list filter changes",
+  "ok": false,
+  "detail": "rows same: false, pressed 1"
+ },
+ {
+  "lock": "H3",
+  "where": "1512 List health never shows as pressed",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "H3",
+  "where": "1280 population: rows on the list",
+  "ok": true,
+  "detail": "53"
+ },
+ {
+  "lock": "H3",
+  "where": "1280 the List health cell is navy",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "H3",
+  "where": "1280 a click opens Housekeeping",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "H3",
+  "where": "1280 no list filter changes",
+  "ok": false,
+  "detail": "rows same: false, pressed 1"
+ },
+ {
+  "lock": "H3",
+  "where": "1280 List health never shows as pressed",
+  "ok": true,
+  "detail": "false"
+ }
+]
