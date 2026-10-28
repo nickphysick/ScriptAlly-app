@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "L5",
+  "where": "it shows first",
+  "ok": true,
+  "detail": "tip"
+ },
+ {
+  "lock": "L5",
+  "where": "…with its sentence",
+  "ok": true,
+  "detail": "text"
+ },
+ {
+  "lock": "L5",
+  "where": "✕ hides it",
+  "ok": true,
+  "detail": "tip"
+ },
+ {
+  "lock": "L5",
+  "where": "…and writes the store once",
+  "ok": true,
+  "detail": "{\"n\":1,\"v\":\"1\"}"
+ },
+ {
+  "lock": "L5",
+  "where": "a reload keeps it hidden",
+  "ok": true,
+  "detail": "tip"
+ }
+]

@@ -223,6 +223,8 @@ describe("/queries/packages renders", () => {
     expect(html).toContain("Once you’ve logged queries with a package, this shows what’s working.");
     expect(html).toContain('data-pk38="empty"');
     expect(html).not.toContain('data-pk38="show"');
+    /* v39.1 G: the brand-new page has its own explanation, so no explainer line */
+    expect(html).not.toContain('data-pk39="tip"');
   });
 
   it("populated: the Contact list's header, the labels, the open package's packing list and Your materials", () => {
@@ -242,14 +244,21 @@ describe("/queries/packages renders", () => {
     expect(html).toContain('data-pk26="lib"');
     expect(html).toContain(">Hook-first<");
     expect(html).not.toContain('data-pk26="hero"');
-    /* v39 D–F: the label over two cards, the package's own header (picker tile, name in place, one stage, Figures), the
+    /* v39 D–F: the label over two cards, the package's own header (picker tile, name in place, one status, Figures), the
        quiet foot with the details link, and no stepper row */
+    /* v39.1 G: the one-line explainer, with How it works and ✕ */
+    expect(html).toContain('data-pk39="tip"');
+    expect(html).toContain("A package is everything one agent receives:");
+    expect(html).toContain(">How it works →<");
     expect(html).toContain(">Build, view and edit<");
     expect(html).toContain('data-pk39="lib-head"');
     expect(html).toContain('data-pk39="pkg-head"');
     expect(html).toContain('aria-label="Change icon and colour"');
     expect(html).toContain('aria-label="Package name"');
-    expect((html.match(/data-pk39="stage"/g) ?? []).length).toBe(1);
+    /* v39.1 C: one status pill replaces v39's three-dot stage */
+    expect((html.match(/data-pk39="status"/g) ?? []).length).toBe(1);
+    expect(html).not.toContain('data-pk39="stage"');
+    expect(html).toContain("Draft · needs pages");
     expect(html).toContain(">Note, copy or delete…<");
     expect(html).not.toContain("p6-lc-s");
     /* v38: the label for the package, and no tab bar or tab page */

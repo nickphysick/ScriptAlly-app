@@ -6,8 +6,8 @@
  * quiet "Build, view and edit" label over TWO SEPARATE CARDS with a 28px gap — Your materials (320, or 280 when the
  * sheet is 1200 or narrower; sticky) and the open package — no outer panel and no nested trays. Both headers are 84px
  * tall, so they line up: Your materials in deep berry, the package in its own colour. The package's header holds the
- * icon tile (it opens the icon-and-colour picker), the name (edited in place), the Active tag, a compact Draft — Ready —
- * Out with agents stage, "Make active" and Figures. Its contents are one aligned list: Query letter, Synopsis, Pages from,
+ * icon tile (it opens the icon-and-colour picker), the name (edited in place), the Active tag, one status pill (v39.1:
+ * "Out with agents · n sent", "Ready to send" or "Draft · needs …"), "Make active" and Figures. Its contents are one aligned list: Query letter, Synopsis, Pages from,
  * then Also sends, on a 130px label column (110 compact). Markup is the ref's `renderOpen` / `renderLib` with the `p9-`
  * prefix (pk39.generated.css); what the capture cannot see is in pk39.css.
  *
@@ -192,14 +192,15 @@ export const Pk26Builder: React.FC<BuilderProps> = ({ model, retired, current, o
               : <StartCard retired={retired} onNewPackage={onNewPackage} onDuplicate={onDuplicate} />}
           </div>
         </div>
+        {/* v40's package guidelines, kept (v39 draws none and asks for none to go). v39.1: inside the builder's own section,
+            24 under the cards, so the builder ends 96 above the results band (the ref's rhythm) */}
+        <div className="p6-wbf p9-gl">
+          <details className="p6-pkgl" data-pk40="guidelines">
+            <summary><span className="p6-pkgl-ic">i</span>Package guidelines</summary>
+            <ul>{GUIDELINES.map(([b, t]) => <li key={b}><b>{b}</b>{t}</li>)}</ul>
+          </details>
+        </div>
       </section>
-      {/* v40's package guidelines, kept (v39 draws none and asks for none to go); under the page root, with no panel */}
-      <div className="p6-wbf p9-gl">
-        <details className="p6-pkgl" data-pk40="guidelines">
-          <summary><span className="p6-pkgl-ic">i</span>Package guidelines</summary>
-          <ul>{GUIDELINES.map(([b, t]) => <li key={b}><b>{b}</b>{t}</li>)}</ul>
-        </details>
-      </div>
     </>
   );
 };
@@ -304,7 +305,9 @@ const OpenPackage: React.FC<{
   useEffect(() => { setPicker(false); }, [p.id]);
 
   const out = st === "out" || st === "retired";
-  const stages: [string, boolean][] = [["Draft", st === "draft"], ["Ready", st === "ready"], ["Out with agents", out]];
+  /* the status pill's words (ref `stg-need`): naming only what a draft is missing, joined with "and" */
+  const sent = draft ? 0 : model.figPk(p).sent;
+  const statusText = st === "retired" ? "Retired" : out ? (sent ? `Out with agents · ${sent} sent` : "Out with agents") : st === "ready" ? "Ready to send" : `Draft · needs ${need}`;
 
   const row = (k: PieceKind) => {
     const id = (p[FIELD[k]] ?? "") as string;
@@ -362,13 +365,10 @@ const OpenPackage: React.FC<{
         </div>
         <span className="p9-sp" />
         <div className="p9-po-st">
-          <span className="p9-stg" aria-label="Stage" data-pk39="stage">
-            {stages.map(([l, on], i) => (
-              <React.Fragment key={l}>
-                {i ? <i /> : null}
-                <span className={`p9-stg-s${on ? " p9-on" : ""}`} aria-current={on ? "step" : undefined}>{l}</span>
-              </React.Fragment>
-            ))}
+          {/* v39.1 C: ONE readable status pill in place of v39's three-dot stage. Green dot when out or ready; the padlock
+              (v39's ruling: the name stays renamable) follows "Out with agents". */}
+          <span className={`p9-stp p9-stp--${out ? "out" : st}`} data-pk39="status">
+            <i aria-hidden="true" />{statusText}
             {out ? <span className="p9-stg-lk" title={STAGE_LOCK_TIP} aria-label="Locked" data-pk39="stage-lock"><Lock /></span> : null}
           </span>
           {!draft && !isActive && canMakeActive(p, model.active?.id) ? <button type="button" className="p9-po-mk" onClick={() => void model.makeActive(p)}>Make active</button> : null}

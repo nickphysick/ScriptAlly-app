@@ -69,7 +69,7 @@
   "lock": "L2",
   "where": "stored as the key, never the hex",
   "ok": true,
-  "detail": "{\"id\":\"pk40-draft\",\"edition\":1,\"synopsisVersionId\":\"\",\"icon\":\"flask\",\"colour\":\"plum\",\"packageName\":\"Draft one\",\"extraIds\":[],\"createdDate\":\"2026-10-23T12:16:01.803Z\",\"status\":\"Active\",\"manuscriptId\":\"pk40-ms\",\"userId\":\"LS4ymFFCEvhN82advZQJ5zkr7sv2\",\"queryLetterVersionId\":\"\",\"samplePagesVersionId\":\"\"}"
+  "detail": "{\"samplePagesVersionId\":\"\",\"synopsisVersionId\":\"\",\"status\":\"Active\",\"colour\":\"plum\",\"manuscriptId\":\"pk40-ms\",\"queryLetterVersionId\":\"\",\"edition\":1,\"extraIds\":[],\"createdDate\":\"2026-10-23T20:44:16.533Z\",\"id\":\"pk40-draft\",\"icon\":\"flask\",\"packageName\":\"Draft one\",\"userId\":\"LS4ymFFCEvhN82advZQJ5zkr7sv2\"}"
  },
  {
   "lock": "L2",

@@ -3,7 +3,7 @@
   "lock": "L4-1280",
   "where": "both cards measured",
   "ok": true,
-  "detail": "{\"lib\":{\"x\":296,\"y\":665.3125,\"w\":280,\"h\":414,\"top\":665.3125,\"bottom\":1079.3125},\"open1\":{\"x\":604,\"y\":665.3125,\"w\":620,\"h\":518.90625,\"top\":665.3125,\"bottom\":1184.21875}}"
+  "detail": "{\"lib\":{\"x\":272,\"y\":791.34375,\"w\":280,\"h\":414,\"top\":791.34375,\"bottom\":1205.34375},\"open1\":{\"x\":576,\"y\":791.34375,\"w\":672,\"h\":518.265625,\"top\":791.34375,\"bottom\":1309.609375}}"
  },
  {
   "lock": "L4-1280",
@@ -15,13 +15,13 @@
   "lock": "L4-1280",
   "where": "…and level (equal tops)",
   "ok": true,
-  "detail": "665.3125 vs 665.3125"
+  "detail": "791.34375 vs 791.34375"
  },
  {
   "lock": "L4-1280",
-  "where": "the cards are 28 ± 1 apart",
+  "where": "the cards are 24 ± 1 apart",
   "ok": true,
-  "detail": "28"
+  "detail": "24"
  },
  {
   "lock": "L4-1280",
@@ -43,8 +43,8 @@
  },
  {
   "lock": "L4-1280",
-  "where": "exactly one stage indicator",
+  "where": "exactly one status pill and no stage",
   "ok": true,
-  "detail": "stage"
+  "detail": "status"
  }
 ]

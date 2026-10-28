@@ -1,0 +1,156 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Submission packages v39.1 (design-refs/submission-packages-v39-1/) — the delta on v39, in the order of the pack:
+ *   A · one width, the Contact list's;  E · the spacing scale (24 within, 48 between, 96 between sections);
+ *   B · type;  D · one surface system;  F · the quieter materials header;  C · the hero package and its status pill;
+ *   G · the explainer;  H · New package and Package details in the drawer.
+ * The ref's `body.fx-*` blocks are restated here against the app's own classes; no `fx-` name ships.
+ * Desktop only (≥768), as v39's own rules: the phone layout is a separate mock under review.
+ */
+
+/* ══ A · ONE WIDTH, THE CONTACT LIST'S ═══════════════════════════════════════════════════════════════════════════
+   ⚠️ READ FROM THE CONTACT LIST'S CODE, AS THE PACK ASKS: its header card is `--cl25-w: min(sheet − 48, 1200)`, centred
+   (contactV25.css), so its inset is max(24, (sheet − 1200) / 2) — 28 at 1512, 24 at 1280, 232 at 1920. The pack's
+   `max(64px, (100% − 1080px) / 2)` is the RETIRED v17 header's (`--phf-inset`); the ref's 92 / 66 / 296 follow it. The
+   Contact list's values win, so the header card AND every block under it share these edges (L1). `%` resolves against
+   the page root, which spans the sheet. */
+@media (min-width: 768px) {
+  .p6.p6 { --pk-in: max(24px, calc((100% - 1200px) / 2)); }
+  .p6 > :is(.p9-tip, .p9-pkl, .p9-pb-build, .p9-agg3) { margin-left: var(--pk-in) !important; margin-right: var(--pk-in) !important; }
+  /* the navy band runs the sheet; only its contents follow the width */
+  .p6 > .p8-bnr { padding-left: 0 !important; padding-right: 0 !important; }
+  .p6 > .p8-bnr > .p8-bnr-in { box-sizing: border-box; margin-left: var(--pk-in) !important; margin-right: var(--pk-in) !important; max-width: none !important; }
+}
+
+/* ══ E · THE SPACING SCALE (the ref's `fx-space`): 24 within a section, 48 between related blocks, 96 between sections ══ */
+@media (min-width: 768px) {
+  .p6 > .pk39-hd { margin-bottom: 48px !important; }
+  .p6 > .p9-tip { margin-top: 0 !important; margin-bottom: 48px !important; }
+  .p6 > .p9-pkl { margin-top: 0 !important; margin-bottom: 48px !important; row-gap: 24px !important; }
+  .p6 > .p9-pkl .p9-pkl-k { margin-bottom: 0 !important; }
+  .p6 > .p9-pb-build { margin-top: 0 !important; margin-bottom: 96px !important; }
+  .p6 > .p9-pb-build .p9-bk-k { margin-bottom: 24px !important; }
+  .p9-pb-grid.p9-v39.p9-v39 { gap: 24px !important; }
+  /* v40's guidelines sit inside the builder section, 24 under the cards, so the builder still ends 96 above the band */
+  .p6 > .p9-pb-build > .p9-gl { margin: 24px 0 0 !important; }
+  .p6 > .p8-bnr { margin-top: 0 !important; }
+  .p6 > .p9-agg3 { margin-top: 96px !important; margin-bottom: 96px !important; }
+  .p9-agg3 .p9-ag3-row .p9-sh2 { margin-bottom: 48px !important; }
+  .p9-agg3 .p9-ag3-row .p9-rlw { margin-top: 96px !important; gap: 48px !important; padding: 48px !important; }
+  .p9-agg3 .p9-ag3-row + .p9-ag3-row { margin-top: 96px !important; padding: 96px 0 !important; }
+  .p9-agg3 .p9-id-aggMain .p9-ag3-f { margin-top: 96px !important; }
+}
+@container p9sheet (max-width: 1200px) {
+  .p9-agg3 .p9-ag3-row .p9-rlw { margin-top: 96px !important; gap: 48px !important; padding: 48px !important; }
+}
+
+/* ══ B · TYPE: THE TYPEWRITER IS FOR EXACTLY TWO THINGS, the page title and the open package's name (Nick, 28 Oct: the
+   rule wins over the ref, which itself renders the typewriter on ~40 elements — names, figures, links, buttons).
+   Everything else in the page's blocks reads in the serif; the mono labels (Your packages, the builder's label, the
+   tabs' counts) stay mono. The header card's own buttons follow, on this page only. ══ */
+@media (min-width: 768px) {
+  .p6.p6 :is(.p9-tip, .p9-pkl, .p9-pb-build, .p8-bnr, .p9-agg3, .pk39-hd .phc-b) *:not(.p9-po-nm, .p9-pkl-h, [data-pk39="kicker"], .p9-lib-tabs em, .p9-rl-tabs em, [data-pk39="pro"]) {
+    font-family: var(--sp-serif) !important;
+  }
+  .pk39-hd .pk39-card .phc-b button { font-weight: 600 !important; font-size: 15px !important; }
+  /* "Your packages": a mono label beside its placeholder art */
+  .p9-pkl .p9-pkl-k { gap: 12px !important; }
+  .p9-pkl .p9-pkl-k .p9-pkl-h.p9-pkl-h { font: 500 11px/1.2 "JetBrains Mono", monospace !important; letter-spacing: 0.18em !important; text-transform: uppercase !important; color: rgba(28, 19, 15, 0.6) !important; }
+  .p9-pkl .p9-pkl-row .p9-pkl-b .p9-pkl-t > b { font: 600 15.5px/1.3 var(--sp-serif) !important; }
+  .p9-pb-grid.p9-v39 .p9-mh-tt .p9-id-libT.p9-id-libT { font: 600 17px/1.3 var(--sp-serif) !important; }
+  .p9-agg3 .p9-sh2 div > h2.p9-h2, .p9-agg3 .p9-sh2.p9-sh2 div > h2 { font: 600 22px/1.25 var(--sp-serif) !important; }
+  .p9-agg3 .p9-rlw .p9-rl-side > h4.p9-h4, .p9-agg3 .p9-rlw.p9-rlw .p9-rl-side > h4 { font: 600 17px/1.3 var(--sp-serif) !important; }
+  .p9-agg3 .p9-ag3-g .p9-ag3.p9-ag3 > h3 { font: 600 19px/1.3 var(--sp-serif) !important; }
+  .p8-bnr .p8-bnr-tx h2.p8-id-agT { font-family: var(--sp-serif) !important; font-weight: 600 !important; }
+  /* the open package's name: the typewriter, 30px (24 compact) */
+  .p9-pb-grid.p9-v39 .p9-po-h .p9-po-tt > h3 { font-size: 30px !important; line-height: 1.2 !important; }
+  .p9-pb-grid.p9-v39 .p9-po-tt .p9-po-nm.p9-po-nm { font-family: var(--sp-type) !important; font-size: 30px !important; font-weight: 400 !important; }
+  /* the small labels v40's ruling had moved to the typewriter now read in the serif */
+  .p9-pkl .p9-pkl-row .p9-pkl-b > em, .p9-pkl .p9-pkl-row .p9-on.p9-pkl-b[aria-pressed="true"] > em,
+  .p9-pb-grid.p9-v39 .p9-po-tt .p9-po-act { font-weight: 600 !important; font-size: 11px !important; }
+  .p9-pb-grid.p9-v39 .p9-mr .p9-mr-l > span { font-weight: 600 !important; font-size: 13.5px !important; }
+  .p9-pb-grid.p9-v39 .p9-ill > i, .p9-pkl .p9-pkl-k .p9-ill > i, .p9-agg3 .p9-ill > i { font-style: italic !important; font-size: 10px !important; }
+}
+@container p9sheet (max-width: 1200px) {
+  .p9-pb-grid.p9-v39 .p9-po-h .p9-po-tt > h3, .p9-pb-grid.p9-v39 .p9-po-tt .p9-po-nm.p9-po-nm { font-size: 24px !important; }
+}
+
+/* ══ D · ONE SURFACE SYSTEM: radius 16 for cards, 8 for controls, one card shadow (the ref's `fx-surface`) ══ */
+@media (min-width: 768px) {
+  .p6 {
+    --pk-card-sh: 0 1px 2px rgba(28, 19, 15, 0.06), 0 10px 24px -18px rgba(28, 19, 15, 0.35), 0 0 0 1px rgba(28, 19, 15, 0.06);
+  }
+  .pk39-hd .pk39-card.phc.phc { border-radius: 16px !important; box-shadow: var(--pk-card-sh) !important; }
+  .p9-pb-grid.p9-v39 .p9-pb-lib, .p9-pb-grid.p9-v39 .p9-pb-left .p9-pk-open { border-radius: 16px !important; box-shadow: var(--pk-card-sh) !important; }
+  .p9-agg3 .p9-rlw .p9-rl { border-radius: 16px !important; box-shadow: var(--pk-card-sh) !important; }
+  .p9-agg3 .p9-ag3-row .p9-rlw, .p9-agg3 .p9-id-aggMain .p9-ag3-f { border-radius: 16px !important; }
+  .p9-pkl .p9-pkl-row .p9-pkl-b, .p9-pkl .p9-pkl-row .p9-pkl-new,
+  .p9-pb-grid.p9-v39 .p9-mr.p9-slt .p9-mr-em, .p9-pb-grid.p9-v39 .p9-mr-ac .p9-mr-b, .p9-pb-grid.p9-v39 .p9-lr .p9-lr-add,
+  .pk39-hd .pk39-card .phc-b button { border-radius: 8px !important; }
+}
+
+/* ══ F · A QUIETER MATERIALS HEADER: the card's paper, a 4px deep-berry top edge, a hairline under it, the title in berry
+   (the ref's `fx-mat`). It replaces v39's solid deep-berry header and keeps its 84px, level with the package header. ══ */
+@media (min-width: 768px) {
+  .p9-pb-grid.p9-v39 .p9-pb-lib .p9-lib-top.p9-lib-top { background: #fbf9f5 !important; box-shadow: inset 0 4px 0 #5e2f3a, inset 0 -1px 0 rgba(28, 19, 15, 0.08) !important; }
+  .p9-pb-grid.p9-v39 .p9-mh-tt .p9-id-libT.p9-id-libT { color: #5e2f3a !important; }
+  .p9-pb-grid.p9-v39 .p9-lib-top .p9-ill.p9-ill { background: #f7e3e3 !important; outline-color: rgba(94, 47, 58, 0.3) !important; }
+  .p9-pb-grid.p9-v39 .p9-lib-top .p9-ill.p9-ill > i { color: #9b4a57 !important; }
+}
+
+/* ══ C · THE OPEN PACKAGE IS THE HERO (the ref's `fx-hero`) ══ */
+@media (min-width: 768px) {
+  /* the selected label: no ring, no glow, no lift; a 3px bar in its own colour, 18 in each side, 9 under it */
+  .p9-pkl .p9-pkl-row .p9-pkl-b.p9-on.p9-on { transform: none !important; position: relative;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -1px 0 rgba(0, 0, 0, 0.18) !important; }
+  .p9-pkl .p9-pkl-row .p9-pkl-b.p9-on::before { content: ""; position: absolute; left: 18px; right: 18px; bottom: -9px; height: 3px; border-radius: 2px; background: var(--pc, #1d4b63); }
+  /* the others step back, and come forward on hover */
+  .p9-pkl .p9-pkl-row .p9-pkl-b:not(.p9-on):not(.p9-ret) { filter: saturate(0.75); opacity: 0.8 !important; transition: opacity 0.15s, filter 0.15s; }
+  .p9-pkl .p9-pkl-row .p9-pkl-b:not(.p9-on):not(.p9-ret):hover { filter: none; opacity: 1 !important; }
+  /* the status pill: 32 tall, radius 16, white 12% on the package's colour, serif 600 13.5 white, a dot */
+  .p9-pb-grid.p9-v39 .p9-po-st .p9-stp { display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 14px; border-radius: 16px;
+    background: rgba(255, 255, 255, 0.12); font: 600 13.5px/1 var(--sp-serif) !important; color: #fff; white-space: nowrap; flex: none; }
+  .p9-pb-grid.p9-v39 .p9-po-st .p9-stp > i { flex: none; width: 8px; height: 8px; border-radius: 50%; background: #7fc89a; }
+  .p9-pb-grid.p9-v39 .p9-po-st .p9-stp.p9-stp--draft > i { background: none; box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.55); }
+  .p9-pb-grid.p9-v39 .p9-po-st .p9-stp .p9-stg-lk { display: inline-grid; place-items: center; margin-left: -2px; color: rgba(255, 255, 255, 0.75); cursor: default; }
+  .p9-pb-grid.p9-v39 .p9-po-st .p9-stp .p9-stg-lk svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.5; }
+}
+@container p9sheet (max-width: 1200px) {
+  .p9-pb-grid.p9-v39 .p9-po-st .p9-stp { font-size: 12.5px !important; padding: 0 11px; height: 28px; }
+  .p9-pb-grid.p9-v39 .p9-po-h .p9-po-st { gap: 8px !important; }
+}
+
+/* ══ G · THE EXPLAINER (the ref's `.pk-tip` with `.tv-d`): one quiet line on #eaf1f4 above Your packages ══ */
+.p9-tip { display: block; transition: opacity 0.25s, transform 0.25s; }
+.p9-tip.p9-out { opacity: 0; transform: translateY(-6px); }
+.p9-tip .p9-tv-d { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto auto; gap: 16px; align-items: center; padding: 14px 14px 14px 18px;
+  border-radius: 12px; background: #eaf1f4; box-shadow: inset 0 0 0 1px rgba(29, 75, 99, 0.14); }
+.p9-tip .p9-td-ic { width: 34px; height: 34px; border-radius: 8px; display: grid; place-items: center; background: #1d4b63; color: #fff; }
+.p9-tip .p9-td-ic svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; }
+.p9-tip .p9-tv-d > p { margin: 0; font: 400 14.5px/1.45 var(--sp-serif); color: rgba(28, 19, 15, 0.78); }
+.p9-tip .p9-tv-d > p b { color: #1c130f; font-weight: 600; }
+.p9-tip .p9-td-l { border: 0; padding: 0; background: none; font: 600 14px var(--sp-serif); color: #1d4b63; cursor: pointer; white-space: nowrap; text-decoration: underline; text-underline-offset: 3px; }
+.p9-tip .p9-tip-x { width: 32px; height: 32px; padding: 0; border: 0; border-radius: 50%; background: none; color: rgba(28, 19, 15, 0.5); cursor: pointer; }
+.p9-tip .p9-tip-x:hover { background: rgba(29, 75, 99, 0.1); color: #1c130f; }
+.p9-tip :is(.p9-td-l, .p9-tip-x):focus-visible { outline: 2px solid #1d4b63; outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .p9-tip { transition: none; } }
+
+/* ── H · New package and Package details in the drawer (ref `#drw .pd-b`; the form is pk391.generated.css) ──
+   The generated sheet read the ref with every colour normalised to Harbour; the colour-bearing rules are restated here
+   against the CHOSEN colour (`--pc`, set on the body by pcStyle) and each swatch's own `--sw`, so they follow the pick
+   live. The header reads `--pc` through pk39.css's `.p8-dh.p8-dpk` rule. */
+.p6-cx-drw .pa-pd-ics > button[aria-checked="true"] { background-color: var(--pc, #1d4b63) !important; }
+.p6-cx-drw .pa-pd-from > button[aria-checked="true"] { box-shadow: inset 0 0 0 2px var(--pc, #1d4b63) !important; }
+.p6-cx-drw .pa-pd-cols > button { background-color: var(--sw) !important; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08) !important; border: 0; padding: 0; width: 100%; }
+.p6-cx-drw .pa-pd-cols > button[aria-checked="true"] { box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--sw) !important; }
+.p6-cx-drw .pa-pd-cols > button:focus-visible { outline: 2px solid #2d3a50; outline-offset: 4px; }
+/* the ref focused Name when it was read (2px ink ring); at rest both fields are the hairline, focus the ink */
+.p6-cx-drw .pa-pd-f .pa-id-pdName { box-shadow: inset 0 0 0 1px rgba(28,19,15,.16) !important; }
+.p6-cx-drw .pa-pd-f :is(.pa-id-pdName,.pa-id-pdNote):focus { box-shadow: inset 0 0 0 2px #2a3a52 !important; }
+.p6-cx-drw .pa-pd-f .pa-id-pdName.p6-err { box-shadow: inset 0 0 0 2px #b4553f !important; }
+/* the typewriter is the page title's and the open package's name only (Part B): the copy option's name is the serif */
+.p6-cx-drw .pa-pd-from button > b { font: 600 15px/normal var(--sp-serif) !important; }
+/* Delete package, on the foot's left when editing (the old dialog's link, in the drawer's foot) */
+.p6-cx-drw .pa-pd-del { background: none; border: 0; padding: 0; cursor: pointer; font: 600 14px/normal var(--sp-serif); color: #9b3b2e; text-decoration: underline; text-underline-offset: 3px; }

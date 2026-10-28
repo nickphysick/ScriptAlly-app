@@ -11,9 +11,10 @@
  *   L2 Colour: a colour picked in the picker reaches the label, the builder's header, the drawer's header, the showcase
  *      card and the list tile (computed backgrounds = the palette hex); a package without the field renders Harbour.
  *      (The rules' refusal of a key outside the eight is tests/rules, emulator.)
- *   L3 Labels: the row spans the content width (±1); no label under 200; the selected label is the only one ringed
- *   L4 Builder: the two headers are the same height (±0.5) with equal tops; two separate cards 28 ± 1 apart; no stepper
- *      row; exactly one stage indicator
+ *   L3 Labels: the row spans the content width (±1); no label under 200; REWRITTEN for v39.1: no label is ringed —
+ *      the selected one carries the 3px bar beneath it instead (pk391 L3 owns the bar's geometry)
+ *   L4 Builder: the two headers are the same height (±0.5) with equal tops; two separate cards REWRITTEN for v39.1 to
+ *      24 ± 1 apart (Part E); no stepper row; exactly one status pill (v39.1 C retired the stage dots)
  *   L5 Rename (rewritten at Nick's ruling, 28 Oct): Enter writes the new name once (stored, and the label shows it),
  *      for a draft AND a sent package; Escape writes nothing; a sent package shows exactly one padlock, in the stage,
  *      and none beside the name
@@ -58,10 +59,10 @@ const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   L1: { css: `.p6 > .pk39-hd { margin-top: 44px !important; } .pk39-hd .pk39-card.pk39-card .hl { background: linear-gradient(transparent 50%, #e3e8ef 50%) !important; }` },
   /* L2: every label goes back to Harbour whatever its colour */
   L2: { css: `.p9-pkl .p9-pkl-row .p9-pkl-b.p9-pkl-b.p9-pkl-b { background-color: #1d4b63 !important; }` },
-  /* L3: the labels stop sharing the row */
-  L3: { css: `.p9-pkl .p9-pkl-row .p9-pkl-b.p9-pkl-b { flex: 0 0 150px !important; min-width: 150px !important; }` },
+  /* L3: the labels stop sharing the row, and (v39.1) the selected one is ringed again */
+  L3: { css: `.p9-pkl .p9-pkl-row .p9-pkl-b.p9-pkl-b { flex: 0 0 150px !important; min-width: 150px !important; } .p9-pkl .p9-pkl-b.p9-on.p9-on.p9-on { box-shadow: 0 0 0 4px rgba(29,75,99,.35) !important; }` },
   /* L4: the cards close up */
-  L4: { css: `.p9-pb-grid.p9-v39.p9-v39 { gap: 8px !important; }` },
+  L4: { css: `.p9-pb-grid.p9-v39.p9-v39.p9-v39 { gap: 8px !important; }`, js: watch(`const s = document.querySelector('[data-pk40="open"] [data-pk39="status"]'); if (s && !s.nextElementSibling?.matches('[data-pk39="stage"]')) { const d = document.createElement('span'); d.setAttribute('data-pk39', 'stage'); s.after(d); }`) },
   /* L5: a padlock comes back beside a sent package's name */
   L5: { js: watch(`const h = document.querySelector('[data-pk40="open"][data-stage="out"] .p9-po-tt h3'); if (h && !h.querySelector('.p9-po-lk')) { const s = document.createElement('span'); s.className = 'p9-po-lk'; s.textContent = '🔒'; h.appendChild(s); }`) },
   /* L6: the first package row is listed twice */
@@ -158,7 +159,7 @@ test("L2 a colour picked reaches the label, both headers, the showcase card and 
 
 /* ── L3 · labels ── */
 for (const size of SIZES) {
-  test(`L3 the labels row spans the content width; none under 200; one ringed at ${size.width}`, async ({ page }) => {
+  test(`L3 the labels row spans the content width; none under 200; none ringed at ${size.width}`, async ({ page }) => {
     test.setTimeout(180_000);
     const L = new Ledger(`L3-${size.width}`);
     await open(page, size);
@@ -172,16 +173,16 @@ for (const size of SIZES) {
     L.check("the row starts at the content's left (±1)", near(r.row.l, r.col.l, 1), JSON.stringify(r));
     L.check("the row spans the content width (±1)", near(r.row.w, r.col.w, 1), JSON.stringify(r));
     L.check("no label is narrower than 200", r.labels.every((x) => x.w >= 200 - 0.5), JSON.stringify(r.labels.map((x) => x.w)));
-    const ringed = r.labels.filter((x) => x.ring);
-    L.check("exactly one label is ringed", ringed.length === 1, JSON.stringify(r.labels));
-    L.check("…and it is the selected one", ringed[0]?.on === true, JSON.stringify(ringed));
+    /* v39.1 C: no ring on any label; the selected one is marked by the bar beneath it */
+    L.check("no label is ringed", r.labels.every((x) => !x.ring), JSON.stringify(r.labels));
+    L.check("exactly one label is selected", r.labels.filter((x) => x.on).length === 1, JSON.stringify(r.labels));
     L.done(6);
   });
 }
 
 /* ── L4 · the builder ── */
 for (const size of SIZES) {
-  test(`L4 two cards, 28 apart, headers level and equal; one stage and no stepper at ${size.width}`, async ({ page }) => {
+  test(`L4 two cards, 24 apart, headers level and equal; one status pill and no stepper at ${size.width}`, async ({ page }) => {
     test.setTimeout(180_000);
     const L = new Ledger(`L4-${size.width}`);
     await open(page, size);
@@ -190,12 +191,12 @@ for (const size of SIZES) {
     L.check("both cards measured", !!lib && !!open1 && !!lh && !!ph, JSON.stringify({ lib, open1 }));
     L.check("the headers are the same height (±0.5)", near(lh?.h, ph?.h, 0.5), `${lh?.h} vs ${ph?.h}`);
     L.check("…and level (equal tops)", near(lh?.top, ph?.top, 0.5), `${lh?.top} vs ${ph?.top}`);
-    L.check("the cards are 28 ± 1 apart", near((open1?.x ?? 0) - ((lib?.x ?? 0) + (lib?.w ?? 0)), 28, 1), `${(open1?.x ?? 0) - ((lib?.x ?? 0) + (lib?.w ?? 0))}`);
+    L.check("the cards are 24 ± 1 apart", near((open1?.x ?? 0) - ((lib?.x ?? 0) + (lib?.w ?? 0)), 24, 1), `${(open1?.x ?? 0) - ((lib?.x ?? 0) + (lib?.w ?? 0))}`);
     L.check(`Your materials is ${size.width === 1512 ? 320 : 280} wide`, near(lib?.w, size.width === 1512 ? 320 : 280, 1), `${lib?.w}`);
     const sep = await page.evaluate((p) => { const g = document.querySelector(`${p} [data-pk39="grid"]`)!; const cs = getComputedStyle(g); return { bg: cs.backgroundColor, shadow: cs.boxShadow, kids: [...g.children].length }; }, pg);
     L.check("no outer panel around the two cards", (sep.bg === "rgba(0, 0, 0, 0)" || sep.bg === "transparent") && sep.shadow === "none" && sep.kids === 2, JSON.stringify(sep));
     L.check("no stepper row", (await page.locator(`${pg} .p6-lc, ${pg} .p6-lc-s`).count()) === 0, "stepper");
-    L.check("exactly one stage indicator", (await page.locator(`${pg} [data-pk39="stage"]`).count()) === 1, "stage");
+    L.check("exactly one status pill and no stage", (await page.locator(`${pg} [data-pk39="status"]`).count()) === 1 && (await page.locator(`${pg} [data-pk39="stage"]`).count()) === 0, "status");
     L.done(8);
   });
 }

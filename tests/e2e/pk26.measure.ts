@@ -59,7 +59,8 @@ const MUTATIONS: Record<string, { css?: string; js?: string }> = {
      edition engine that rewrites the 1st edition from the package's new contents — the realistic way a sent query
      would come to report a letter, or an extra, that it never carried. */
   /* the header card takes the shell's shared gutter back */
-  "PK26-W": { css: `.wpg-scroll > .p6 { padding-inline: 20px !important; }` },
+  /* v39.1: the builder goes back to a fixed 48, off the header card's inset */
+  "PK26-W": { css: `.p6.p6 > .p9-pb-build { margin-left: 48px !important; margin-right: 48px !important; }` },
   /* every row accepts every drop */
   "PK26-B": { js: `document.addEventListener('dragover', (e) => { if (e.target.closest && e.target.closest('.p9-slt')) e.preventDefault(); }, true); document.addEventListener('drop', (e) => { const s = e.target.closest && e.target.closest('.p9-slt'); if (!s) return; const [k] = (e.dataTransfer.getData('text/plain') || '').split(':'); if (k && k !== s.dataset.slot) { const t = document.querySelector('.p9-slt[data-slot="' + k + '"]'); if (t) { e.stopImmediatePropagation(); t.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer: e.dataTransfer })); } } }, true);` },
   /* the drawer's header fill runs to the rim, over the inner border */
@@ -112,14 +113,15 @@ for (const size of SIZES) {
       const sheet = (root.closest(".ws-window") as HTMLElement).getBoundingClientRect();
       const ins = (sel: string) => { const b = (root.querySelector(sel) as HTMLElement).getBoundingClientRect(); return [b.left - sheet.left, sheet.right - b.right]; };
       /* v38: the tab bar and v26's Results are gone (the band's width is pk38's L6).
-         v39: the header is the Contact list's card, held to the Contact list's own boxes by pk39 L1, so only the
-         builder's inset is asserted here (the law — the builder 48 in from the sheet — is unchanged) */
-      return { build: ins(".p9-pb-build") };
+         v39.1 A REWRITE: the builder's inset is no longer a fixed 48 — it is the header card's (the Contact list's
+         card, max(24, (sheet − 1200)/2)); pk391 L1 owns that law across every block */
+      const hd = (root.querySelector(".pk39-card") as HTMLElement).getBoundingClientRect();
+      return { build: ins(".p9-pb-build"), want: [hd.left - sheet.left, sheet.right - hd.right] };
     });
-    for (const [k, want] of [["build", 48]] as const) {
+    for (const [k, want] of [["build", r.want[0]]] as const) {
       const [l, rt] = r[k];
       L.check(`${k} left`, Math.abs(l - want) <= 1, `${l.toFixed(1)} (want ${want})`);
-      L.check(`${k} right`, Math.abs(rt - want) <= 1, `${rt.toFixed(1)} (want ${want})`);
+      L.check(`${k} right`, Math.abs(rt - r.want[1]) <= 1, `${rt.toFixed(1)} (want ${want})`);
     }
     L.done(2);
   });

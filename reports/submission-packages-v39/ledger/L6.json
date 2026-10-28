@@ -39,7 +39,7 @@
   "lock": "L6",
   "where": "let: switching keeps scrollTop (±1)",
   "ok": true,
-  "detail": "2919 → 2919"
+  "detail": "3144 → 3144"
  },
  {
   "lock": "L6",
@@ -81,7 +81,7 @@
   "lock": "L6",
   "where": "syn: switching keeps scrollTop (±1)",
   "ok": true,
-  "detail": "2919 → 2919"
+  "detail": "3144 → 3144"
  },
  {
   "lock": "L6",
@@ -117,7 +117,7 @@
   "lock": "L6",
   "where": "ver: switching keeps scrollTop (±1)",
   "ok": true,
-  "detail": "2904 → 2904"
+  "detail": "3124 → 3124"
  },
  {
   "lock": "L6",

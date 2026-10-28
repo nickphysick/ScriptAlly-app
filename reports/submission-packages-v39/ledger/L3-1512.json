@@ -3,36 +3,36 @@
   "lock": "L3-1512",
   "where": "labels are drawn (4 live)",
   "ok": true,
-  "detail": "[{\"id\":\"pk40-draft\",\"w\":238.8125,\"ring\":false,\"on\":false},{\"id\":\"pk40-ready\",\"w\":238.828125,\"ring\":false,\"on\":false},{\"id\":\"pk40-std2\",\"w\":238.8125,\"ring\":false,\"on\":false},{\"id\":\"pk40-std\",\"w\":238.828125,\"ring\":true,\"on\":true}]"
+  "detail": "[{\"id\":\"pk40-draft\",\"w\":248.734375,\"ring\":false,\"on\":false},{\"id\":\"pk40-ready\",\"w\":248.75,\"ring\":false,\"on\":false},{\"id\":\"pk40-std2\",\"w\":248.75,\"ring\":false,\"on\":false},{\"id\":\"pk40-std\",\"w\":248.75,\"ring\":false,\"on\":true}]"
  },
  {
   "lock": "L3-1512",
   "where": "the row starts at the content's left (±1)",
   "ok": true,
-  "detail": "{\"row\":{\"l\":296,\"w\":1160},\"col\":{\"l\":296,\"w\":1160},\"labels\":[{\"id\":\"pk40-draft\",\"w\":238.8125,\"ring\":false,\"on\":false},{\"id\":\"pk40-ready\",\"w\":238.828125,\"ring\":false,\"on\":false},{\"id\":\"pk40-std2\",\"w\":238.8125,\"ring\":false,\"on\":false},{\"id\":\"pk40-std\",\"w\":238.828125,\"ring\":true,\"on\":true}]}"
+  "detail": "{\"row\":{\"l\":276,\"w\":1200},\"col\":{\"l\":276,\"w\":1200},\"labels\":[{\"id\":\"pk40-draft\",\"w\":248.734375,\"ring\":false,\"on\":false},{\"id\":\"pk40-ready\",\"w\":248.75,\"ring\":false,\"on\":false},{\"id\":\"pk40-std2\",\"w\":248.75,\"ring\":false,\"on\":false},{\"id\":\"pk40-std\",\"w\":248.75,\"ring\":false,\"on\":true}]}"
  },
  {
   "lock": "L3-1512",
   "where": "the row spans the content width (±1)",
   "ok": true,
-  "detail": "{\"row\":{\"l\":296,\"w\":1160},\"col\":{\"l\":296,\"w\":1160},\"labels\":[{\"id\":\"pk40-draft\",\"w\":238.8125,\"ring\":false,\"on\":false},{\"id\":\"pk40-ready\",\"w\":238.828125,\"ring\":false,\"on\":false},{\"id\":\"pk40-std2\",\"w\":238.8125,\"ring\":false,\"on\":false},{\"id\":\"pk40-std\",\"w\":238.828125,\"ring\":true,\"on\":true}]}"
+  "detail": "{\"row\":{\"l\":276,\"w\":1200},\"col\":{\"l\":276,\"w\":1200},\"labels\":[{\"id\":\"pk40-draft\",\"w\":248.734375,\"ring\":false,\"on\":false},{\"id\":\"pk40-ready\",\"w\":248.75,\"ring\":false,\"on\":false},{\"id\":\"pk40-std2\",\"w\":248.75,\"ring\":false,\"on\":false},{\"id\":\"pk40-std\",\"w\":248.75,\"ring\":false,\"on\":true}]}"
  },
  {
   "lock": "L3-1512",
   "where": "no label is narrower than 200",
   "ok": true,
-  "detail": "[238.8125,238.828125,238.8125,238.828125]"
+  "detail": "[248.734375,248.75,248.75,248.75]"
  },
  {
   "lock": "L3-1512",
-  "where": "exactly one label is ringed",
+  "where": "no label is ringed",
   "ok": true,
-  "detail": "[{\"id\":\"pk40-draft\",\"w\":238.8125,\"ring\":false,\"on\":false},{\"id\":\"pk40-ready\",\"w\":238.828125,\"ring\":false,\"on\":false},{\"id\":\"pk40-std2\",\"w\":238.8125,\"ring\":false,\"on\":false},{\"id\":\"pk40-std\",\"w\":238.828125,\"ring\":true,\"on\":true}]"
+  "detail": "[{\"id\":\"pk40-draft\",\"w\":248.734375,\"ring\":false,\"on\":false},{\"id\":\"pk40-ready\",\"w\":248.75,\"ring\":false,\"on\":false},{\"id\":\"pk40-std2\",\"w\":248.75,\"ring\":false,\"on\":false},{\"id\":\"pk40-std\",\"w\":248.75,\"ring\":false,\"on\":true}]"
  },
  {
   "lock": "L3-1512",
-  "where": "…and it is the selected one",
+  "where": "exactly one label is selected",
   "ok": true,
-  "detail": "[{\"id\":\"pk40-std\",\"w\":238.828125,\"ring\":true,\"on\":true}]"
+  "detail": "[{\"id\":\"pk40-draft\",\"w\":248.734375,\"ring\":false,\"on\":false},{\"id\":\"pk40-ready\",\"w\":248.75,\"ring\":false,\"on\":false},{\"id\":\"pk40-std2\",\"w\":248.75,\"ring\":false,\"on\":false},{\"id\":\"pk40-std\",\"w\":248.75,\"ring\":false,\"on\":true}]"
  }
 ]

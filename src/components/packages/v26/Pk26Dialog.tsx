@@ -2,8 +2,10 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Submission packages v26 — New package and Package details: one dialog (ref `#pdlg`, `pkDlg`) with a Harbour
- * header. Name (required), who it's for (optional), an icon from twelve, a colour from eight (v39), and for a new package "Start from": empty,
+ * Submission packages v26 — New package and Package details. v39.1 Part H: they open in the app's slide-out drawer (the
+ * package drawer's frame: `p6-layer` > `p6-cx-dim` + `aside.p6-cx-drw`, ref `#drw`), not a centred dialog. The header is
+ * the package's own colour and follows the chosen swatch live, before anything is saved. The form is the ref's
+ * (`pa-`, pk391.generated.css). Every handler, write and validation is v39's; only the container changed. Name (required), who it's for (optional), an icon from twelve, a colour from eight (v39), and for a new package "Start from": empty,
  * or a copy of the active package. Opened from the pencil or the icon tile it renames and re-icons a package and
  * offers "Delete package" — refused, with the reason, for one that has gone out with queries. Enter submits.
  */
@@ -23,19 +25,20 @@ export type DialogView = { m: "new"; version?: string; copyOf?: string } | { m: 
 
 export const Pk26Dialog: React.FC<{ model: Pk26Model; view: DialogView | null; onClose: () => void; onCreated: (id: string) => void }> = ({ model, view, onClose, onCreated }) => {
   useEscapeLayer(!!view, onClose, ESC_LEVEL.pageModal);
+  const [shown, setShown] = useState(false);
+  useEffect(() => { if (!view) { setShown(false); return; } const t = requestAnimationFrame(() => setShown(true)); return () => cancelAnimationFrame(t); }, [!!view]); // eslint-disable-line react-hooks/exhaustive-deps
   if (!view) return null;
   const p = view.m === "edit" ? model.msPkgs.find((x) => x.id === view.id) ?? null : null;
   return createPortal(
-    <div className="p6-layer">
-      <div className="p6-pdlg" data-pk26="dialog" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-        <Body key={view.m === "edit" ? view.id : `new-${view.copyOf ?? ""}`} model={model} p={p} version={view.m === "new" ? view.version : undefined} copyOf={view.m === "new" ? view.copyOf : undefined} focusNote={view.m === "edit" && view.focus === "note"} onClose={onClose} onCreated={onCreated} />
-      </div>
+    <div className="p6-layer" data-pk391="pd-layer">
+      <div className={`p6-cx-dim${shown ? " p6-on" : ""}`} onClick={onClose} />
+      <Body key={view.m === "edit" ? view.id : `new-${view.copyOf ?? ""}`} shown={shown} model={model} p={p} version={view.m === "new" ? view.version : undefined} copyOf={view.m === "new" ? view.copyOf : undefined} focusNote={view.m === "edit" && view.focus === "note"} onClose={onClose} onCreated={onCreated} />
     </div>,
     document.body,
   );
 };
 
-const Body: React.FC<{ model: Pk26Model; p: SubmissionPackage | null; version?: string; copyOf?: string; focusNote?: boolean; onClose: () => void; onCreated: (id: string) => void }> = ({ model, p, version, copyOf, focusNote, onClose, onCreated }) => {
+const Body: React.FC<{ shown: boolean; model: Pk26Model; p: SubmissionPackage | null; version?: string; copyOf?: string; focusNote?: boolean; onClose: () => void; onCreated: (id: string) => void }> = ({ shown, model, p, version, copyOf, focusNote, onClose, onCreated }) => {
   const [name, setName] = useState(p?.packageName ?? "");
   const [note, setNote] = useState(p?.note ?? "");
   const [ic, setIc] = useState<PackageIcon>(p ? iconOf(p) : "star");
@@ -69,38 +72,38 @@ const Body: React.FC<{ model: Pk26Model; p: SubmissionPackage | null; version?: 
   const onEnter = (e: React.KeyboardEvent) => { if (e.key === "Enter") { e.preventDefault(); void ok(); } };
 
   return (
-    <div className="p6-pd" role="dialog" aria-modal="true" aria-labelledby="p6-pdT">
-      <div className="p6-pd-h">
-        <span className="p6-pd-prev" style={pcStyle({ colour: col })}><Pic ic={ic} /></span>
-        <div><p className="p6-pd-k">{p ? "Package details" : "New package"}</p><h3 className="p6-id-pdT" id="p6-pdT">{p ? p.packageName : "Name your package"}</h3></div>
-        <button type="button" className="p6-pd-x" aria-label="Close" onClick={onClose}>✕</button>
+    <aside className={`p6-cx-drw${shown ? " p6-on" : ""}`} role="dialog" aria-modal="true" aria-labelledby="p6-pdT" data-pk26="dialog" data-pk391="pd">
+      <div className="p8-dh p8-dpk" style={pcStyle({ colour: col })} data-pk391="pd-head">
+        <span className="p8-ddisc"><Pic ic={ic} cls="p8-pic" /></span>
+        <div className="p8-tx"><h3 className="p6-id-pdT" id="p6-pdT">{p ? p.packageName : "New package"}</h3><small>{p ? "Package details" : "Name it, choose how it looks, then fill it in the builder."}</small></div>
+        <button type="button" className="p8-cx-x" aria-label="Close" onClick={onClose}>✕</button>
       </div>
-      <div className="p6-pd-b">
-        <label className="p6-pd-f"><span>Name</span><input ref={nameRef} className={`p6-id-pdName${err ? " p6-err" : ""}`} value={name} placeholder="e.g. Standard UK, US agents, Agents who want 50 pages" autoComplete="off" onChange={(e) => { setName(e.target.value); setErr(false); }} onKeyDown={onEnter} /></label>
-        <label className="p6-pd-f"><span>Who it’s for <em>optional</em></span><input ref={noteRef} className="p6-id-pdNote" value={note} placeholder="e.g. Agents who ask for a synopsis" autoComplete="off" onChange={(e) => setNote(e.target.value)} onKeyDown={onEnter} /></label>
-        <div className="p6-pd-f"><span>Icon <em>so you can spot it in the Query Centre</em></span>
-          <div className="p6-pd-ics" role="radiogroup" aria-label="Icon">
+      <div className="pa-db pa-pd-b" style={pcStyle({ colour: col })}>
+        <label className="pa-pd-f"><span>Name</span><input ref={nameRef} className={`pa-id-pdName p6-id-pdName${err ? " p6-err" : ""}`} value={name} placeholder="e.g. Standard UK, US agents, Agents who want 50 pages" autoComplete="off" onChange={(e) => { setName(e.target.value); setErr(false); }} onKeyDown={onEnter} /></label>
+        <label className="pa-pd-f"><span>Who it’s for <em>optional</em></span><input ref={noteRef} className="pa-id-pdNote p6-id-pdNote" value={note} placeholder="e.g. Agents who ask for a synopsis" autoComplete="off" onChange={(e) => setNote(e.target.value)} onKeyDown={onEnter} /></label>
+        <div className="pa-pd-f"><span>Icon <em>so you can spot it in the Query Centre</em></span>
+          <div className="pa-pd-ics" role="radiogroup" aria-label="Icon" data-pk391="pd-ics">
             {PACKAGE_ICONS.map((k) => <button type="button" key={k} role="radio" aria-checked={ic === k} aria-label={k} onClick={() => setIc(k)}><PicBare ic={k} /></button>)}
           </div>
         </div>
-        <div className="p6-pd-f"><span>Colour</span>
-          <div className="p6-pd-cols" role="radiogroup" aria-label="Colour" data-pk39="dlg-cols">
+        <div className="pa-pd-f"><span>Colour</span>
+          <div className="pa-pd-cols" role="radiogroup" aria-label="Colour" data-pk39="dlg-cols">
             {PACKAGE_COLOURS.map((c) => <button type="button" key={c.key} role="radio" aria-checked={col === c.key} aria-label={c.name} title={c.name} data-col={c.key} style={{ ["--sw" as string]: c.hex }} onClick={() => setCol(c.key)} />)}
           </div>
         </div>
         {p ? null : (
-          <div className="p6-pd-f"><span>Start from</span>
-            <div className="p6-pd-from" role="radiogroup">
+          <div className="pa-pd-f"><span>Start from</span>
+            <div className="pa-pd-from p6-pd-from" role="radiogroup">
               <button type="button" role="radio" aria-checked={from === "empty"} onClick={() => setFrom("empty")}><b>Empty</b><small>Drag pieces in yourself</small></button>
               {used ? <button type="button" role="radio" aria-checked={from === used.id} onClick={() => setFrom(used.id)}><b>A copy of {used.packageName}</b><small>Same letter, synopsis and pages. Swap what’s different.</small></button> : null}
             </div>
           </div>
         )}
       </div>
-      <div className="p6-pd-ft">
-        {p ? <button type="button" className="p6-pd-del" onClick={() => void del()}>Delete package</button> : <span />}
-        <div><button type="button" className="p6-cx-b p6-g" onClick={onClose}>Cancel</button><button type="button" className="p6-cx-b p6-p" disabled={busy} onClick={() => void ok()}>{p ? "Save" : "Create package"}</button></div>
+      <div className="p8-df">
+        {p ? <button type="button" className="pa-pd-del" data-pk391="pd-del" onClick={() => void del()}>Delete package</button> : <span />}
+        <div className="p8-bt"><button type="button" className="p8-cx-b p8-g" onClick={onClose}>Cancel</button><button type="button" className="p8-cx-b p8-p" disabled={busy} data-pk391="pd-ok" onClick={() => void ok()}>{p ? "Save" : "Create package"}</button></div>
       </div>
-    </div>
+    </aside>
   );
 };

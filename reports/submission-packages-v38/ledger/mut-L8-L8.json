@@ -13,13 +13,13 @@
  },
  {
   "lock": "L8",
-  "where": "pk40-ms · New package dialog opened",
+  "where": "pk40-ms · New package drawer opened",
   "ok": true,
-  "detail": ".p6-pdlg"
+  "detail": "[data-pk391=\"pd\"]"
  },
  {
   "lock": "L8",
-  "where": "pk40-ms · New package dialog: no mono capitals",
+  "where": "pk40-ms · New package drawer: no mono capitals",
   "ok": false,
   "detail": "[\"P.p9-ag3-d: 40% OF AGENTS ASKED FOR MORE: \",\"P.p9-ag3-d: OUT TO 4 AGENTS.\",\"P.p9-ag3-d: NOT SENT YET. IT NEEDS A LETTE\",\"P.p9-ag3-d: 33% OF THE 6 AGENTS WHO GOT IT\",\"P.p9-ag3-d: 33% OF THE 9 AGENTS WHO GOT IT\",\"P.p9-ag3-d: 30% OF THE 10 AGENTS WHO GOT I\"]"
  },
@@ -67,13 +67,13 @@
  },
  {
   "lock": "L8",
-  "where": "pk40-new · New package dialog opened",
+  "where": "pk40-new · New package drawer opened",
   "ok": true,
-  "detail": ".p6-pdlg"
+  "detail": "[data-pk391=\"pd\"]"
  },
  {
   "lock": "L8",
-  "where": "pk40-new · New package dialog: no mono capitals",
+  "where": "pk40-new · New package drawer: no mono capitals",
   "ok": true,
   "detail": "[]"
  },

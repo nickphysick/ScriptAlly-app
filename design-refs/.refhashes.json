@@ -888,7 +888,8 @@
     "design-refs/dashboard-mobile-v1/screens/05-plus-menu@2x.png": "872383936be3e17696409eabc14d8cf7d6387764f98002a987120ca3fc7cba88",
     "design-refs/dashboard-mobile-v1/screens/06-search@2x.png": "2875fd5d50981c8e606463ff9a8b35bb379a16face66bc84c1ddf01f7321df03",
     "design-refs/dashboard-mobile-v1/screens/07-feedback-sheet@2x.png": "20486afd9f97637cbbd208e3043ca70f25a0eb573ea171636b854657652eb4f4",
-    "design-refs/dashboard-mobile-v1/screens/08-tile-click-through@2x.png": "40dcbdd68244b4bb89666b3b6fed1224de9d390ab3bebba5d1856f1de6b771e4"
+    "design-refs/dashboard-mobile-v1/screens/08-tile-click-through@2x.png": "40dcbdd68244b4bb89666b3b6fed1224de9d390ab3bebba5d1856f1de6b771e4",
+    "design-refs/submission-packages-v39-1/submission-packages-v39-1.html": "934c0dfa9eef84c4f79175555be2e5fef7edb2d486a00bf3f832e0767035060d"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",

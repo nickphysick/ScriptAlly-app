@@ -1,0 +1,116 @@
+[
+ {
+  "lock": "L1-1512",
+  "where": "both cards measured",
+  "ok": true,
+  "detail": "{\"cl\":{\"x\":276,\"y\":129.75,\"w\":1200,\"h\":191.5625,\"top\":129.75,\"bottom\":321.3125,\"right\":1476},\"card\":{\"x\":276,\"y\":129.75,\"w\":1200,\"h\":191.5625,\"top\":129.75,\"bottom\":321.3125,\"right\":1476}}"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "the header card's left = the Contact list's (±1)",
+  "ok": true,
+  "detail": "276 vs 276"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "the header card's right = the Contact list's (±1)",
+  "ok": true,
+  "detail": "1476 vs 1476"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "the explainer: measured",
+  "ok": true,
+  "detail": "{\"x\":276,\"y\":369.3125,\"w\":1200,\"h\":70.03125,\"top\":369.3125,\"bottom\":439.34375,\"right\":1476}"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "the explainer: left = the card's (±1)",
+  "ok": true,
+  "detail": "276 vs 276"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "the explainer: right = the card's (±1)",
+  "ok": true,
+  "detail": "1476 vs 1476"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "the labels row: measured",
+  "ok": true,
+  "detail": "{\"x\":276,\"y\":487.34375,\"w\":1200,\"h\":136,\"top\":487.34375,\"bottom\":623.34375,\"right\":1476}"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "the labels row: left = the card's (±1)",
+  "ok": true,
+  "detail": "276 vs 276"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "the labels row: right = the card's (±1)",
+  "ok": true,
+  "detail": "1476 vs 1476"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "the builder: measured",
+  "ok": true,
+  "detail": "{\"x\":276,\"y\":671.34375,\"w\":1200,\"h\":631.265625,\"top\":671.34375,\"bottom\":1302.609375,\"right\":1476}"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "the builder: left = the card's (±1)",
+  "ok": true,
+  "detail": "276 vs 276"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "the builder: right = the card's (±1)",
+  "ok": true,
+  "detail": "1476 vs 1476"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "the band's contents: measured",
+  "ok": true,
+  "detail": "{\"x\":276,\"y\":1442.609375,\"w\":1200,\"h\":131.46875,\"top\":1442.609375,\"bottom\":1574.078125,\"right\":1476}"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "the band's contents: left = the card's (±1)",
+  "ok": true,
+  "detail": "276 vs 276"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "the band's contents: right = the card's (±1)",
+  "ok": true,
+  "detail": "1476 vs 1476"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "the results: measured",
+  "ok": true,
+  "detail": "{\"x\":276,\"y\":1714.078125,\"w\":1200,\"h\":2411.125,\"top\":1714.078125,\"bottom\":4125.203125,\"right\":1476}"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "the results: left = the card's (±1)",
+  "ok": true,
+  "detail": "276 vs 276"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "the results: right = the card's (±1)",
+  "ok": true,
+  "detail": "1476 vs 1476"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "the navy band still runs the full sheet (±1)",
+  "ok": true,
+  "detail": "{\"x\":248,\"y\":1398.609375,\"w\":1256,\"h\":219.46875,\"top\":1398.609375,\"bottom\":1618.078125,\"right\":1504} vs {\"x\":248,\"right\":1504}"
+ }
+]
