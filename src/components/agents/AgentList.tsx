@@ -50,6 +50,7 @@ import { ContactListTitle25 } from "./contact/ContactListTitle25";
 import { ContactLogFlow } from "./contact/ContactLogFlow";
 import { hostContactLog, type ContactLogSeed } from "../../lib/contactLogStore";
 import { GLANCE_ORDER, GLANCE_SETS, glanceCards, type GlanceKey as GlanceCardKey } from "../../lib/contactV25";
+import { glanceFeet } from "../../lib/contactV256";
 import { ContactSheet24, SheetSkeleton } from "./contact/ContactSheet24";
 import { AgentCard24, AgentCardWide24, type AgentCard24Props } from "./contact/AgentCard24";
 import { ContactAddressBook24 } from "./contact/ContactAddressBook24";
@@ -615,6 +616,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const standById = useMemo(() => new Map(factsAll.map((x) => [x.agent.id, x.stand] as const)), [factsAll]);
   const standOf = useCallback((id: string) => standById.get(id) ?? null, [standById]);
   const glanceModel = useMemo(() => glanceCards(factsAll, pageState === "list" ? health : null, banner.gaps), [factsAll, pageState, health, banner.gaps]);
+  /* v25.6 B — the cells' foot lines, from the same facts and Housekeeping's gap total */
+  const glanceFoot = useMemo(() => glanceFeet(factsAll, book, (raw) => genreLabel(raw, currentUser?.personalGenres ?? []), banner.gaps), [factsAll, book, currentUser?.personalGenres, banner.gaps]);
   const glancePressed = useMemo<GlanceCardKey | null>(
     () => (sets ? GLANCE_ORDER.find((k) => { const g = GLANCE_SETS[k]; return !!g && g.length === sets.length && g.every((x) => sets.includes(x)); }) ?? null : null),
     [sets],
@@ -1050,7 +1053,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined}>
             {/* v25.1 A — At a glance as one ledger card (v25 B's four cards retired): List health opens Housekeeping; the
                 other three filter the list and Cards, a second press shows all */}
-            <ContactGlance251 cards={glanceModel} pressed={glancePressed} ready={pageState === "list"} standOf={standOf}
+            <ContactGlance251 cards={glanceModel} pressed={glancePressed} ready={pageState === "list"} standOf={standOf} feet={glanceFoot}
               onCard={(k) => { if (k === "health") { openHk(); return; } setSets(glancePressed === k ? null : GLANCE_SETS[k]); }} />
           </ContactHeader25>
         )}
