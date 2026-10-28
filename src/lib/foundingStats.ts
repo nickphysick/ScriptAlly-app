@@ -27,12 +27,24 @@ export interface FoundingStats {
   nextTier: TierKey | null;
   toNext: number | null;
   topPct: number | null;
+  /** Dashboard v105: the waitlist place, or null when the waitlist proves none (the card then shows no number). */
+  foundingNo: number | null;
+  /** when that place was taken (epoch ms), or null */
+  joinedAt: number | null;
+  /** the newest note the writer sent (epoch ms), or null */
+  lastSentAt: number | null;
 }
 
-export const ZERO_STATS: FoundingStats = { contributions: 0, waiting: 0, tier: null, nextTier: "fledgling", toNext: 1, topPct: null };
+export const ZERO_STATS: FoundingStats = { contributions: 0, waiting: 0, tier: null, nextTier: "fledgling", toNext: 1, topPct: null, foundingNo: null, joinedAt: null, lastSentAt: null };
 
 const isTier = (v: unknown): v is TierKey => typeof v === "string" && TIERS.some((t) => t.key === v);
 const num = (v: unknown, d: number) => (typeof v === "number" && Number.isFinite(v) && v >= 0 ? v : d);
+/** A Firestore Timestamp (anything with toMillis) or a number → epoch ms; anything else → null. */
+const ms = (v: unknown): number | null => {
+  if (typeof v === "number" && Number.isFinite(v)) return v;
+  if (v && typeof (v as { toMillis?: unknown }).toMillis === "function") return (v as { toMillis: () => number }).toMillis();
+  return null;
+};
 
 /** A stored doc (or nothing) → the stats the card shows. Anything malformed falls back to zero, never to a guess. */
 export function statsFrom(data: Record<string, unknown> | null | undefined): FoundingStats {
@@ -44,20 +56,18 @@ export function statsFrom(data: Record<string, unknown> | null | undefined): Fou
     nextTier: isTier(data.nextTier) ? data.nextTier : data.nextTier === null ? null : "fledgling",
     toNext: typeof data.toNext === "number" ? data.toNext : null,
     topPct: typeof data.topPct === "number" ? data.topPct : null,
+    foundingNo: typeof data.foundingNo === "number" && Number.isInteger(data.foundingNo) && data.foundingNo >= 1 ? data.foundingNo : null,
+    joinedAt: ms(data.joinedAt),
+    lastSentAt: ms(data.lastSentAt),
   };
 }
 
 /** The tier's index (0–4), or -1 before the first contribution. */
 export const tierIndex = (tier: TierKey | null): number => (tier ? TIERS.findIndex((t) => t.key === tier) : -1);
 
-/** The progress ring: (contributions − this tier's minimum) ÷ (next minimum − this minimum); full at QueryHawk. */
-export function ringFraction(s: FoundingStats): number {
-  const i = tierIndex(s.tier);
-  if (i === TIERS.length - 1) return 1;
-  const lo = i >= 0 ? TIERS[i].min : 0;
-  const hi = TIERS[i + 1].min;
-  return Math.min(1, Math.max(0, (s.contributions - lo) / (hi - lo)));
-}
+/** The founding card's tier (Dashboard v105): 0 = Egg (no counted contribution), 1 Fledgling … 5 QueryHawk. It is the
+ *  SHOWN tier, which the server already holds at or above the peak, so it never falls. */
+export const cardTier = (s: FoundingStats): number => tierIndex(s.tier) + 1;
 
 type Aid = { __SA_FOUNDING_STATS?: unknown };
 
@@ -66,12 +76,13 @@ type Aid = { __SA_FOUNDING_STATS?: unknown };
  * doc") hands the card a stats doc instead of the snapshot, so a lock can see 0, 1, 6, 11 and 25 on one account. The
  * branch is dead in a production build: `MODE` is replaced statically.
  */
-export function useFoundingStats(uid: string | null | undefined): { loading: boolean; error: boolean; stats: FoundingStats } {
-  const [state, setState] = useState<{ loading: boolean; error: boolean; stats: FoundingStats }>({ loading: true, error: false, stats: ZERO_STATS });
+export function useFoundingStats(uid: string | null | undefined): { loading: boolean; error: boolean; stats: FoundingStats; aided?: boolean } {
+  const [state, setState] = useState<{ loading: boolean; error: boolean; stats: FoundingStats; aided?: boolean }>({ loading: true, error: false, stats: ZERO_STATS });
   useEffect(() => {
     if (import.meta.env.MODE !== "production" && typeof window !== "undefined" && "__SA_FOUNDING_STATS" in window) {
       const aid = (window as unknown as Aid).__SA_FOUNDING_STATS;
-      setState({ loading: false, error: false, stats: statsFrom(aid && typeof aid === "object" ? aid as Record<string, unknown> : null) });
+      /* `aided`: these stats are not the writer's, so nothing derived from them may be written to the account (v105) */
+      setState({ loading: false, error: false, aided: true, stats: statsFrom(aid && typeof aid === "object" ? aid as Record<string, unknown> : null) });
       return undefined;
     }
     if (!uid) { setState({ loading: false, error: false, stats: ZERO_STATS }); return undefined; }

@@ -852,7 +852,19 @@
     "design-refs/dashboard-v93/shots/card-scout-11.png": "95b977b047b882643b628734f1507aa3a10549252203e10cfc10306e83ff41bc",
     "design-refs/dashboard-v93/shots/how-it-works-panel.png": "6b235c662e7e58ee70094a66e40ab8c781ae4eb2f3a0376102c293098ab7b3f9",
     "design-refs/dashboard-v93/shots/task-head-A.png": "ed72d5d098242c2a7c03a0ca23db60882a8df8129bea0fe574e01f8aba102c3b",
-    "design-refs/dashboard-v93/task-founding-options-v78.html": "bcac74715cddf1d9450fc52f4961b7e848b30cf098bacf072392701e1ec2c254"
+    "design-refs/dashboard-v93/task-founding-options-v78.html": "bcac74715cddf1d9450fc52f4961b7e848b30cf098bacf072392701e1ec2c254",
+    "design-refs/dashboard-v105/founding-flow-v104.html": "2d4cd77b925b2aa8560498fa71d0e0496e958829856d14e8eed67ddf3a8dfba8",
+    "design-refs/dashboard-v105/founding-how-v102.html": "3fb690f88c1a5730ec24f0ded6635c28540bd42242cf53d9ffacae900a74d89b",
+    "design-refs/dashboard-v105/shots/1-idle-egg.png": "acc816fb5645b643d539cfa0c166ef67523fdec3228d44a24e7e86a598f206e8",
+    "design-refs/dashboard-v105/shots/2a-write-like.png": "fa9c566b5c8a127baa5038070881405983b2a38189a0afedf5ea1d69106ca6c3",
+    "design-refs/dashboard-v105/shots/2b-write-dont.png": "0859abaa56f46a06aef257c05bfe6ee756563fcfde7ae7a19735d56318665734",
+    "design-refs/dashboard-v105/shots/2c-write-idea.png": "46de41bf16449bc896576dafad7c0f729626d470ad3d45b061662c35eeaa6fe3",
+    "design-refs/dashboard-v105/shots/3-sent-cracking.png": "7343108d484d5d0cfad2d04abbb5997c7838debfb072416590c2da1754eff2ab",
+    "design-refs/dashboard-v105/shots/4-hatched.png": "34b24f3772c9f950aeaf9ceccc04fc6afa8109f3d975eaf3e80e16d2a0aacc17",
+    "design-refs/dashboard-v105/shots/5-info-in-header.png": "e8fa449565663b4e542e3dab818af57865265aaf4ce4cda975b087818a60f0f5",
+    "design-refs/dashboard-v105/shots/6-how-slide-1.png": "484be434612bc5cc07e7c925abdf40367f03b34ee4fefb331e29780c8b5b7be7",
+    "design-refs/dashboard-v105/shots/6-how-slide-2.png": "4fab77010fccd6d0524052c2d3aa971b52de6b165b1ab3a5a28a0dfb157d4b6e",
+    "design-refs/dashboard-v105/shots/6-how-slide-3.png": "0ac5e93307733455ca85c5154450e2cfcd2766966cd95ce5110e92c8d69de2fd"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",

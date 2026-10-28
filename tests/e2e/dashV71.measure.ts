@@ -56,13 +56,13 @@ class Ledger {
 /** The in-page breaks. Each is the lock's own named mutation. */
 const CSS_MUTATIONS: Record<string, string> = {
   "H1-white": `.d71-head { background: #fff !important; }`,
-  "L2-fw-172": `.d71-fwslot > .d93-fw { flex: none !important; height: 172px !important; }`,
+  "L2-fw-172": `.d71-fwslot > .d105-fw { flex: none !important; height: 172px !important; }`,
   "L3-tab-off": `.d59-ftab { right: -200px !important; }`,
   "L4-clip": `.d60-hoops, .d71-fwslot { overflow: hidden !important; }`,
   "C2-solid": `.d71-ok { width: 100% !important; } .d71-ov { display: none !important; }`,
   "C2-label-room": `.d71-task[data-kind="close"] .d71-win { margin-top: 0 !important; }`,
   "C3-solid": `.d71-step.is-todo { border-style: solid !important; }`,
-  "F3-art-140": `.d93-med { width: 160px !important; height: 160px !important; }`,
+  "F3-art-140": `.d105-photo { width: 160px !important; height: 160px !important; }`,
   "G1-hoops-320": `.d58[data-mode="q"] .d60-hoops { min-height: 320px !important; }`,
 };
 
@@ -175,7 +175,9 @@ const readFit = (page: Page) => page.evaluate(() => {
   const fw = q('[data-d71="fw"]');
   /* RE-POINTED (Dashboard v77): the founding card is Dash77Founding — its frame, the layout on show, its art */
   /* RE-POINTED (Dashboard v93): the founding card is Dash93Founding — its frame, the variant on show, its picture */
-  const frame = fw?.querySelector(".d93-frame") ?? null;
+  /* RE-POINTED (Dashboard v105): the founding card is Dash105Founding — its frame, the body on show, its photo or the
+     strip's head, and its headline (the Compact card has none: the writer's name stands in) */
+  const frame = fw?.querySelector(".d105-frame") ?? null;
   const fb = frame?.getBoundingClientRect();
   const escapes: string[] = [];
   let n = 0;
@@ -188,9 +190,11 @@ const readFit = (page: Page) => page.evaluate(() => {
       if (b.bottom > fb.bottom + 0.5 || b.top < fb.top - 0.5 || b.right > fb.right + 0.5 || b.left < fb.left - 0.5) escapes.push(`${el.className || el.tagName}`);
     }
   }
-  const body = [...(fw?.querySelectorAll<HTMLElement>('[data-d93="full"], [data-d93="compact"]') ?? [])].find((e) => getComputedStyle(e).display !== "none") ?? null;
-  const img = [...(body?.querySelectorAll<HTMLImageElement>(".d93-med img, .d93-chd img") ?? [])].find((e) => getComputedStyle(e).display !== "none") ?? null;
-  const h = body?.querySelector<HTMLElement>('[data-d93="title"], [data-d93="compact-line"]') ?? null;
+  const body = [...(fw?.querySelectorAll<HTMLElement>('[data-d105="idle"], [data-d105="compact"]') ?? [])].find((e) => getComputedStyle(e).display !== "none") ?? null;
+  /* the art is the photo box, whether it holds the tier's head (an image) or the egg (a drawing) */
+  const img = [...(body?.querySelectorAll<HTMLElement>(".d105-photo") ?? [])].find((e) => e.getBoundingClientRect().height > 0) ?? null;
+  const pic = img?.querySelector("img") ?? null;
+  const h = [...(fw?.querySelectorAll<HTMLElement>('[data-d105="title"], [data-d105="name"]') ?? [])].find((e) => e.getBoundingClientRect().height > 0) ?? null;
   const shown = (s: string) => { const e = fw?.querySelector<HTMLElement>(s); return !!e && e.getBoundingClientRect().height > 0 && getComputedStyle(e).display !== "none"; };
   const scroller = document.querySelector<HTMLElement>(".ws-wbody");
   /* cut text: a hoop legend row, or a part of the task card's head, that overflows its own box or runs
@@ -210,7 +214,7 @@ const readFit = (page: Page) => page.evaluate(() => {
     closed: box(q('[data-d60="closed-hoop"]')), agents: box(q('[data-d60="agents-hoop"]')), fw: box(fw), tab: tb, hit,
     vw: window.innerWidth, vh: window.innerHeight,
     n, escapes: escapes.slice(0, 5),
-    img: box(img), imgDone: !!img && img.complete && img.naturalWidth > 0, body: box(body),
+    img: box(img), imgDone: !!img && (!pic || (pic.complete && pic.naturalWidth > 0)), body: box(body),
     headingFits: h ? h.scrollWidth <= h.clientWidth + 0.5 && h.scrollHeight <= h.clientHeight + 0.5 : null,
     artShown: !!img,
     scroller: scroller ? { sh: scroller.scrollHeight, ch: scroller.clientHeight, sw: scroller.scrollWidth, cw: scroller.clientWidth } : null,
@@ -261,7 +265,9 @@ test("DB71 L2 · L3 · F3 · G1 — bottoms in line, the tab on screen, the card
   L.check("L3", "768x800 nothing covers the tab's centre", m.hit, String(m.hit));
   /* 104 (Dashboard v77): the faces row is retired, a Compact card (<160px, three of these sizes) shows no art,
      and one-screen is asserted only up to 900px tall */
-  L.done(104);
+  /* RE-POINTED (Dashboard v105): 103, not 104 — the press ID moves the photo into the strip on a card under 230px tall
+     or 330px wide (DB105 S1 holds those sizes), so one more size has no art row to read */
+  L.done(103);
 });
 
 /* ── L4 — no card's shadow is clipped ────────────────────────────────────────────────────────── */
