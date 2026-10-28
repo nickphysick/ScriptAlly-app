@@ -401,6 +401,8 @@ import {
 } from "lucide-react";
 import { csvCell } from "../lib/csvCell";
 import { formatDate } from "../lib/dates";
+import { QueriesPhone, useQm1Phone } from "./queries/phone/QueriesPhone";
+import { QM1_ART } from "./queries/phone/qm1Art";
 
 // Materials are rendered through the single formatQueryMaterial helper (src/lib/materials.ts) —
 // the one place a material (legacy string or structured QueryMaterial) becomes display text.
@@ -2528,6 +2530,9 @@ export const Queries: React.FC<{
   const qc138Ref = useRef<HTMLDivElement>(null);
   /* Query Centre v131 renders at ≥768px; the phone keeps the v126 page exactly (QC15) */
   const qcDesk = useDeskWidth();
+  /* Queries on a phone v1 — at 760px and narrower the page is `QueriesPhone` (see the return below) */
+  const qmPhone = useQm1Phone();
+  const qmOrderRef = useRef<string[]>([]);
   qcFlowGate.current = { desk: qcDesk, active: routeActive };
   /* v138.6 §A — the pin is the shared hook (`usePinList`, the Contact list's too): held sidebar, remembered per page
      and restored on the first frame, F and Esc, and the scroll position put back on the way out. `qcFull` keeps its
@@ -5756,7 +5761,8 @@ export const Queries: React.FC<{
      entry date edit (`editActivity`), the entry delete (`deleteTimelineEntries`, behind the same root and dependency
      guards), the sent and nudge saves, the "what was sent" correction, and the agent card's own save path. */
   const qcCardNode = (() => {
-    if (!qcDesk || !panelRow || !activeQuery || !currentUser) return null;
+    if (!(qcDesk || qmPhone) || !activeQuery || !currentUser) return null;
+    if (qcDesk && !panelRow) return null;
     const row = qcById.get(activeQuery.id);
     if (!row) return null;
     const q = activeQuery as Query;
@@ -5782,7 +5788,8 @@ export const Queries: React.FC<{
     const nl = nextLine(row, null, now);
     const door = row.court === "closed" ? null : nextDoor(row, now);
     /* v150 D10 — opened from Birds-eye, ‹ › and "N / M" follow Birds-eye's visible order */
-    const order = qcView150 === "birds" && qcBeOrder.includes(q.id) ? qcBeOrder : qcVisible.map((r) => r.id);
+    const order = qmPhone ? (qmOrderRef.current.includes(q.id) ? qmOrderRef.current : [q.id])
+      : qcView150 === "birds" && qcBeOrder.includes(q.id) ? qcBeOrder : qcVisible.map((r) => r.id);
     const idx = Math.max(0, order.indexOf(q.id));
     const first = (ag?.name || "").trim().split(/\s+/)[0] || "the agent";
     /* what was sent, as the edit mode's select and pieces read it (EditJourney's own derivations) */
@@ -5979,8 +5986,14 @@ export const Queries: React.FC<{
           .map((j) => ({ id: j.id, text: j.entryText, when: j.createdAt ? fieldDay(new Date(j.createdAt as string).getTime()) : "" }))}
         mode={qcCardMode}
         onMode={setQcCardMode}
-        onClose={fromAgent ? closeFromAgent : closeQueryCard}
-        onStep={(d) => { const nid = order[idx + d]; if (nid) { cardSetRef.current = order; onOpenQuery?.(nid); } }}
+        onClose={qmPhone ? () => setQcCardMode("view") : fromAgent ? closeFromAgent : closeQueryCard}
+        onStep={(d) => {
+          const nid = order[idx + d];
+          if (!nid) return;
+          /* the phone steps in place: one history entry for the card, whichever query it shows */
+          if (qmPhone) { const n = new URLSearchParams(window.location.search); n.set("q", nid); routerNav({ pathname: "/queries", search: `?${n}` }, { replace: true, state: window.history.state?.usr ?? null }); return; }
+          cardSetRef.current = order; onOpenQuery?.(nid);
+        }}
         onPrimary={() => { if (!door) return; if (door.mode === "resp") setQcCardMode("respond"); else stepRow({ mode: door.mode, queryId: q.id }); }}
         onCloseQuery={() => stepRow({ mode: "close", queryId: q.id })}
         onContactList={() => { if (ag) routerNav(`/agents?agent=${encodeURIComponent(ag.id)}`); else onNavigate?.("agents"); }}
@@ -5998,6 +6011,8 @@ export const Queries: React.FC<{
         stepChoices={stepChoices}
         removable={removable}
         onSaveEdits={onSaveEdits}
+        layout={qmPhone ? "phone" : undefined}
+        nextArt={qmPhone ? QM1_ART.quill : null}
       />
     );
   })();
@@ -6406,6 +6421,27 @@ export const Queries: React.FC<{
   const pipShown = !!pipPanel && !((qcOpenCardNode && cardQueryId) || picking || qcFlow);
   const guideFlowShown = pipFlow ?? guideFlow;
   useEffect(() => { setGuideWalk(!!guideFlowShown || !!walk); }, [guideFlowShown, walk]);
+
+  /* Queries on a phone v1 — every hook above has run; at 760px and narrower the page is the phone page, and above it
+     nothing here changes. The open query's card is the one built above, laid out for a phone. */
+  if (qmPhone) {
+    return (
+      <QueriesPhone
+        routeActive={routeActive}
+        loading={qcLoad.loading}
+        rows={qcRows}
+        queries={queries as Query[]}
+        agents={agents as Agent[]}
+        manuscripts={manuscripts as Manuscript[]}
+        idsFilter={idsFilter}
+        openId={selectedQueryId}
+        card={qcCardNode}
+        onNavigate={(t, sub) => onNavigate?.(t, sub)}
+        onOrder={(ids) => { qmOrderRef.current = ids; }}
+        onEditQuery={() => setQcCardMode("edit")}
+      />
+    );
+  }
 
   return (
     /* ── F12 root, headerless (shell rollout Phase 6): the v2 shell's top bar draws the crumb
