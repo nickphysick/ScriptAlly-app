@@ -888,7 +888,16 @@
     "design-refs/dashboard-mobile-v1/screens/05-plus-menu@2x.png": "872383936be3e17696409eabc14d8cf7d6387764f98002a987120ca3fc7cba88",
     "design-refs/dashboard-mobile-v1/screens/06-search@2x.png": "2875fd5d50981c8e606463ff9a8b35bb379a16face66bc84c1ddf01f7321df03",
     "design-refs/dashboard-mobile-v1/screens/07-feedback-sheet@2x.png": "20486afd9f97637cbbd208e3043ca70f25a0eb573ea171636b854657652eb4f4",
-    "design-refs/dashboard-mobile-v1/screens/08-tile-click-through@2x.png": "40dcbdd68244b4bb89666b3b6fed1224de9d390ab3bebba5d1856f1de6b771e4"
+    "design-refs/dashboard-mobile-v1/screens/08-tile-click-through@2x.png": "40dcbdd68244b4bb89666b3b6fed1224de9d390ab3bebba5d1856f1de6b771e4",
+    "design-refs/queries-mobile-v1/queries-mobile-v1.html": "2ae9c74ca98528277a5b37446029d2ad0e26bc75d9a35a67ae2959c7ad7bc57f",
+    "design-refs/queries-mobile-v1/screens/01-your-move.png": "6ab1c3353669a46a40a57ea5fab1ad6b3a7e998085cff97d361a6e0b8f950a07",
+    "design-refs/queries-mobile-v1/screens/02-all.png": "a147bc69f92904c1dc6b6ffac873389be80084b2fc39db0a6c6d4edd087c3430",
+    "design-refs/queries-mobile-v1/screens/03-waiting.png": "7d7d2c94b3a13e0b4b1184f4a2c4c56d2cf192714bac1b7fcd70c88943f5b1d6",
+    "design-refs/queries-mobile-v1/screens/04-coming-up.png": "94003055b63fb7acba8e90d0ef3926b69978882fdca946b9df78bee05c18de16",
+    "design-refs/queries-mobile-v1/screens/05-query-scrolled.png": "cf47cc96491b8985d8e6ba71872a893999c4b2c7c7fa8e6e5cc610d592f249e5",
+    "design-refs/queries-mobile-v1/screens/05-query.png": "ba61e93b2c8164da2a018954982bdd22c9cdc6eef872c8fa0a0248a832e5b576",
+    "design-refs/queries-mobile-v1/screens/06-plus.png": "898fb39ee876510c36621524fdcb9d18f1e76da7b4c1d6054021c2492d5318d2",
+    "design-refs/queries-mobile-v1/screens/07-celebrate.png": "251bf30cb4e4c1cda7af8adcb0d10658a7ef906b5c17e6f6f967dc5d815c2674"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",
