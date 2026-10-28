@@ -19,6 +19,7 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { ListAction, ListItem, ListPlan } from "../../../lib/dashList";
 import { DWELL_MS, segmentWindow, taskCardModel, type TaskCardModel, type TaskCtx } from "../../../lib/dashTaskCard";
+import "../v116/dash116Frame.css";
 
 /** The card's one button, for every kind (v59). */
 export const VIEW_TASK = "View task";

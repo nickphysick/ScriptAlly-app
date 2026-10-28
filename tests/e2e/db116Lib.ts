@@ -37,7 +37,7 @@ export const CSS_MUTATIONS: Record<string, string> = {
   "D1-short-header": `.d116-am .d116-amt { width: 60% !important; }`,
   "D1-one-colour": `.d116-am .d116-amt { background: #2a3a52 !important; color: #fff !important; }`,
   "E1-no-frame": `.d58 .d71-task::after { display: none !important; }`,
-  "F1-no-tilt": `.d116-tilt .d105-fw { rotate: none !important; }`,
+  "F1-no-tilt": `.d105-fw.d116-tilt { rotate: none !important; }`,
   "F1-no-swap": `.d105-swap .d105-swb { opacity: 0 !important; } .d105-swap .d105-swa { opacity: 1 !important; transform: none !important; }`,
 };
 

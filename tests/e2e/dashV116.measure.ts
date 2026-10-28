@@ -11,6 +11,7 @@
  */
 import { expect, test, type Page } from "@playwright/test";
 import { Ledger, openDash, tag, type VP } from "./db116Lib";
+import { STATS } from "./db105Lib";
 
 test.describe.configure({ mode: "serial" });
 
@@ -321,6 +322,119 @@ test("DB116 B2 — the stack always stays on screen", async ({ page }) => {
   }
   L.check("B2", "population: ≥3 positions at each size, and a reduced stack", tested >= 12 && reduced >= 1, `${tested} positions, ${reduced} reduced`);
   L.done(20);
+});
+
+/* ── E1 ── */
+
+test("DB116 E1 — the task card carries the hoop cards' inner frame, for every kind", async ({ page }) => {
+  test.setTimeout(240_000);
+  const L = new Ledger("E1");
+  await openDash(page, VP1440);
+  const hoop = await page.evaluate(() => {
+    const card = document.querySelector<HTMLElement>('[data-d60="closed-hoop"]')!, frame = card.querySelector<HTMLElement>(".os-frame")!;
+    const c = card.getBoundingClientRect(), f = frame.getBoundingClientRect(), cs = getComputedStyle(frame);
+    return { inset: f.left - c.left, top: f.top - c.top, color: cs.borderTopColor, width: cs.borderTopWidth, radius: cs.borderTopLeftRadius };
+  });
+  L.check("E1", "population: the Closed hoop's frame", hoop.width === "1px", JSON.stringify(hoop));
+  const kinds = new Map<string, Record<string, unknown>>();
+  for (let i = 0; i < 30 && kinds.size < 4; i++) {
+    const r = await page.evaluate(() => {
+      const t = document.querySelector<HTMLElement>('[data-d71="task"]')!;
+      const a = getComputedStyle(t, "::after"), c = t.getBoundingClientRect();
+      const band = t.querySelector<HTMLElement>(".d71-th")?.getBoundingClientRect();
+      return { kind: t.dataset.kind ?? "", content: a.display === "none" ? "none" : a.content, display: a.display, color: a.borderTopColor, width: a.borderTopWidth, radius: a.borderTopLeftRadius, inset: [a.top, a.left, a.right, a.bottom].map((v) => parseFloat(v)), bandInset: band ? [band.left - c.left, band.top - c.top, c.right - band.right] : null, bandBg: t.querySelector<HTMLElement>(".d71-th") ? getComputedStyle(t.querySelector<HTMLElement>(".d71-th")!).backgroundColor : "" };
+    });
+    if (!kinds.has(r.kind)) kinds.set(r.kind, r);
+    const next = page.locator('[data-d71="next"]');
+    if (!(await next.count())) break;
+    await next.first().click();
+    await page.waitForTimeout(350);
+  }
+  for (const [k, r] of kinds) {
+    const inset = r.inset as number[];
+    L.check("E1", `${k}: the frame line, drawn`, r.content !== "none" && r.display !== "none" && r.color === hoop.color && r.width === hoop.width && r.radius === hoop.radius, `${r.color} ${r.width} ${r.radius} vs ${hoop.color} ${hoop.width} ${hoop.radius}`);
+    L.check("E1", `${k}: at the hoop's inset`, inset.every((v) => Math.abs(v - hoop.inset) <= 0.5), `${inset} vs ${hoop.inset}`);
+    const bi = r.bandInset as number[] | null;
+    L.check("E1", `${k}: the band sits inside the frame`, !!bi && bi.every((v) => Math.abs(v - hoop.inset) <= 0.5), `${JSON.stringify(bi)} (${r.bandBg})`);
+  }
+  console.log(`  kinds on the account: ${[...kinds.keys()].join(", ")}`);
+  L.check("E1", "population: every kind on the account, Consider closing among them", kinds.has("close") && kinds.size >= 3, [...kinds.keys()].join(","));
+  L.done(8);
+});
+
+/* ── F1 ── */
+
+async function fwRead(page: Page) {
+  return page.evaluate(() => {
+    const c = document.querySelector<HTMLElement>('[data-d105="card"]');
+    if (!c) return null;
+    const a = c.querySelector<HTMLElement>(".d105-swa"), b = c.querySelector<HTMLElement>(".d105-swb");
+    const name = c.querySelector<HTMLElement>('[data-d105="name"]'), info = c.querySelector<HTMLElement>('[data-d105="info"]');
+    const off = (e: HTMLElement | null) => { let x = 0, y = 0, n: HTMLElement | null = e; while (n && n !== c) { x += n.offsetLeft; y += n.offsetTop; n = n.offsetParent as HTMLElement | null; } return { x, y }; };
+    const lh = name ? parseFloat(getComputedStyle(name).lineHeight) || parseFloat(getComputedStyle(name).fontSize) * 1.3 : 0;
+    return {
+      rotate: getComputedStyle(c).rotate,
+      rest: a?.textContent ?? "", restOp: a ? Number(getComputedStyle(a).opacity) : -1,
+      swap: b?.textContent ?? "", swapOp: b ? Number(getComputedStyle(b).opacity) : -1,
+      swapOneLine: b ? b.scrollWidth <= b.clientWidth + 1 && b.offsetHeight <= parseFloat(getComputedStyle(b).fontSize) * 2 : false,
+      nameOneLine: !!name && name.offsetHeight <= lh * 1.5,
+      info: off(info),
+      tips: c.querySelectorAll('[role="tooltip"], .fwtip, .tip, [data-d116="callout"]').length + (document.querySelector('[data-probe="dash-popup"].on') ? 1 : 0),
+    };
+  });
+}
+
+test("DB116 F1 — the founding card tilts, and its header swaps to contributions", async ({ page }) => {
+  test.setTimeout(400_000);
+  const L = new Ledger("F1");
+  const cases: [string, string, string][] = [
+    ["fledgling", "FOUNDING WRITER · No. 023", "1 CONTRIBUTION · 2 TO ARCHIVIST"],
+    ["mentor", "FOUNDING WRITER · No. 023", "16 CONTRIBUTIONS · 9 TO QUERYHAWK"],
+    ["queryhawk", "FOUNDING WRITER · No. 023", "25 CONTRIBUTIONS · TOP RANK"],
+    ["egg", "FOUNDING WRITER · No. 023", "NO CONTRIBUTIONS YET"],
+    ["nonumber", "FOUNDING WRITER", "NO CONTRIBUTIONS YET"],
+  ];
+  for (const [k, rest, swap] of cases) {
+    await openDash(page, VP1440, { __SA_FOUNDING_STATS: STATS[k] });
+    const r0 = await fwRead(page);
+    L.check("F1", `${k}: population`, !!r0, "");
+    if (!r0) continue;
+    L.check("F1", `${k}: tilted −1.8° at rest`, r0.rotate === "-1.8deg", r0.rotate);
+    L.check("F1", `${k}: the rest line`, r0.rest === rest && r0.restOp > 0.99 && r0.swapOp < 0.01, `${r0.rest} (${r0.restOp}/${r0.swapOp})`);
+    const box = (await page.locator('[data-d105="card"]').first().boundingBox())!;
+    await page.mouse.move(box.x + box.width * 0.6, box.y + box.height * 0.55);
+    await page.waitForTimeout(600);
+    const r1 = (await fwRead(page))!;
+    L.check("F1", `${k}: straight on hover`, r1.rotate === "0deg" || r1.rotate === "none", r1.rotate);
+    L.check("F1", `${k}: the header swaps`, r1.swap === swap && r1.swapOp > 0.99 && r1.restOp < 0.01, `${r1.swap} (${r1.restOp}/${r1.swapOp})`);
+    L.check("F1", `${k}: one line, the name whole, the ⓘ unmoved`, r1.swapOneLine && r1.nameOneLine && r1.info.x === r0.info.x && r1.info.y === r0.info.y, `${JSON.stringify(r0.info)} → ${JSON.stringify(r1.info)} swap1 ${r1.swapOneLine} name1 ${r1.nameOneLine}`);
+    L.check("F1", `${k}: no callout or pop-up`, r1.tips === 0, `${r1.tips}`);
+    await page.mouse.move(2, 2); await page.waitForTimeout(600);
+    const r2 = (await fwRead(page))!;
+    L.check("F1", `${k}: and back`, r2.rotate === "-1.8deg" && r2.restOp > 0.99 && r2.swapOp < 0.01, `${r2.rotate} ${r2.restOp}/${r2.swapOp}`);
+  }
+  /* focus-within does what hover does; reduced motion: no rotation */
+  await openDash(page, VP1440, { __SA_FOUNDING_STATS: STATS.fledgling });
+  await page.locator('[data-d105="info"]').first().focus();
+  await page.waitForTimeout(600);
+  const f = (await fwRead(page))!;
+  L.check("F1", "focus-within: straight, and swapped", (f.rotate === "0deg" || f.rotate === "none") && f.swapOp > 0.99, `${f.rotate} ${f.swapOp}`);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.mouse.move(2, 2); await page.locator("body").focus().catch(() => {}); await page.evaluate(() => (document.activeElement as HTMLElement)?.blur());
+  await page.waitForTimeout(400);
+  const rm = (await fwRead(page))!;
+  L.check("F1", "reduced motion: no rotation", rm.rotate === "none" || rm.rotate === "0deg", rm.rotate);
+  /* nothing cut: the tilted card's painted box lies inside the page's window */
+  await page.emulateMedia({ reducedMotion: "no-preference" }); await page.waitForTimeout(400);
+  const cut = await page.evaluate(() => {
+    const c = document.querySelector<HTMLElement>('[data-d105="card"]')!.getBoundingClientRect();
+    let n: HTMLElement | null = document.querySelector<HTMLElement>('[data-d105="card"]')!.parentElement;
+    const out: string[] = [];
+    while (n && n !== document.body) { const cs = getComputedStyle(n); if (cs.overflow !== "visible" || cs.overflowX !== "visible" || cs.overflowY !== "visible") { const r = n.getBoundingClientRect(); if (c.left < r.left - 0.5 || c.right > r.right + 0.5 || c.top < r.top - 0.5 || c.bottom > r.bottom + 0.5) out.push(`${n.className} ${r.left.toFixed(1)},${r.top.toFixed(1)}→${r.right.toFixed(1)},${r.bottom.toFixed(1)} vs card ${c.left.toFixed(1)},${c.top.toFixed(1)}→${c.right.toFixed(1)},${c.bottom.toFixed(1)}`); } n = n.parentElement; }
+    return out;
+  });
+  L.check("F1", "the tilted card is cut by no clipping ancestor", cut.length === 0, cut.join(" | "));
+  L.done(35);
 });
 
 /* ── K1 ── */
