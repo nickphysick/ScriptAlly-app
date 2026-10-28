@@ -64,3 +64,21 @@
   .cl24-sheet .cl24-bar .qc150-bfind { flex: 0 1 300px; min-width: 150px; }
 }
 @media (min-width: 768px) and (max-width: 1440px) { .cl256-hch > .cl256-hw { display: none; } }
+
+/* ══ Part D · typewriter menus ═══════════════════════════════════════════════════════════════════════════════════
+   The Filters panel and the group menu, in the list and in full screen: every word in the typewriter, upright, as the
+   bar is (Query Centre v150.1). Section headings stay mono caps. Options 15, counts 13.5, buttons 14.5. The sort menu
+   is the shared SortChipMenu (shell/sortChip.css). */
+.lpop.nb1-pop [data-nb1="genre"], .lpop.nb1-pop .nb1-ck {
+  font: 400 15px/1.2 var(--sp-type) !important; font-style: normal !important;
+}
+.lpop.nb1-pop [data-nb1="genre"] i, .lpop.nb1-pop .nb1-ck em, .lpop.nb1-pop [data-nb1="filter-count"] {
+  font: 400 13.5px/1 var(--sp-type) !important; font-style: normal !important; letter-spacing: 0; text-transform: none;
+}
+.lpop.nb1-pop .nb1-mf button { font: 400 14.5px/1 var(--sp-type) !important; font-style: normal !important; }
+.lpop.cl24-gpop h6 {
+  font: 500 10.5px/1.2 var(--sp-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(28, 19, 15, 0.55);
+}
+.lpop.cl24-gpop .cl24-gopt b { font: 400 15px/1.2 var(--sp-type) !important; font-style: normal; }
+.lpop.cl24-gpop .cl24-gopt small { font: 400 13.5px/1.3 var(--sp-type) !important; font-style: normal; }
