@@ -1,0 +1,141 @@
+/* ── THE PHONE DASHBOARD (Dashboard on the phone v1; ref design-refs/dashboard-mobile-v1/) ────────────────────────
+   Every rule here is phone-only in effect: the page that carries `.dm1` mounts only below 768px (`useIsMobile`),
+   and the rules that reach shell chrome (`.ws-mobilebar`, the FeedbackDock's `.fb-panel`) sit inside the phone
+   media query AND under the body class the page sets while it is mounted. At 768px and wider nothing here applies. */
+
+.dm1 {
+  --dm1-ink: #1c130f;
+  --dm1-navy: #2a3a52;
+  --dm1-pink: #f5e2da;
+  --dm1-pink-ring: #eecdc3;
+  /* the faces are READ from the shell's tokens, never named: one owner per family (marketingTokens locks it) */
+  --dm1-type: var(--sp-type);
+  --dm1-serif: var(--sp-serif);
+  --dm1-gutter: 16px;
+  position: relative;
+  box-sizing: border-box;
+  min-height: 100%;
+  /* ⚠️ THE PAGE'S OWN WIDTH IS ITS CONTAINER'S. The shell's columns are flex items at `min-width: auto`, so an
+     unbreakable line in here (a long manuscript title) reached them as a min-content width and widened the whole app
+     past the screen — measured 930px at 390. Containment stops any child's intrinsic width leaving this box. */
+  contain: inline-size;
+  color: var(--dm1-ink);
+  font-family: var(--dm1-serif);
+}
+/* ⚠️ brand.tsx NAMES A FACE ON BARE `p, span, div, button, label` AT RUNTIME, injected last — so inheritance is handed
+   back here (0-1-1 against its 0-0-1), and every face this sheet names on a classed element is `!important`. */
+.dm1 :is(p, span, div, button, label, b, small, li, input, h2, h3, a, time, strong, em) { font-family: inherit; }
+.dm1 *, .dm1 *::before, .dm1 *::after { box-sizing: border-box; }
+
+/* ── Part A · the top bar ─────────────────────────────────────────────────────────────────────── */
+.dm1-top {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: 8px;
+  height: calc(50px + env(safe-area-inset-top, 0px));
+  padding: env(safe-area-inset-top, 0px) 10px 0 var(--dm1-gutter);
+  background: var(--ws-page, rgb(242, 238, 232));
+  border-bottom: 1px solid transparent;
+}
+.dm1-top.is-scrolled { border-bottom-color: rgba(28, 19, 15, 0.1); }
+.dm1-mark { flex: none; width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
+/* the shell's own phone switcher, set as the bar's title: no tile, Special Elite 18, a ⌄, ellipsised */
+.dm1-ms { flex: 1 1 auto; min-width: 0; display: flex; }
+/* ⚠️ the shell states `.sv2-scopewrap { flex: none }`, so every link of this chain is told it may shrink — without it a long
+   title widens the bar and pushes Search and + off the screen (A1's long-title reading). */
+.dm1-ms .sv2-scopewrap { position: relative; display: flex; flex: 0 1 auto; min-width: 0; max-width: 100%; }
+.dm1-ms .sv2-scope {
+  display: flex; flex: 0 1 auto; align-items: center; gap: 4px; min-width: 0; max-width: 100%;
+  min-height: 40px; padding: 0 2px; border: 0; border-radius: 8px; background: none; box-shadow: none; color: var(--dm1-ink);
+}
+.dm1-ms .sv2-scopetile, .dm1-ms .sv2-scopechev { display: none; }
+.dm1-ms .sv2-scopet {
+  flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font: 400 18px/1.2 var(--dm1-type) !important; color: var(--dm1-ink); max-width: none;
+}
+.dm1-ms .sv2-scope::after {
+  content: ""; flex: none; width: 14px; height: 14px; margin-left: 2px;
+  background: rgba(28, 19, 15, 0.55);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.dm1-ms .sv2-mspop { left: 0; right: auto; top: calc(100% + 6px); z-index: 50; max-width: calc(100vw - 32px); }
+.dm1-tools { flex: none; display: flex; align-items: center; gap: 0; }
+.dm1-ic {
+  display: grid; place-items: center; width: 40px; height: 40px; padding: 0;
+  border: 0; border-radius: 50%; background: none; color: var(--dm1-ink); cursor: pointer;
+}
+.dm1-ic > svg { width: 21px; height: 21px; stroke-width: 1.8; }
+.dm1-ic:focus-visible, .dm1-mi:focus-visible, .dm1-scancel:focus-visible, .dm1-srow:focus-visible { outline: 2px solid var(--dm1-navy); outline-offset: 2px; }
+.dm1-pluswrap { position: relative; display: block; }
+.dm1-plusdisc {
+  display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%;
+  background: var(--dm1-pink); box-shadow: inset 0 0 0 1px var(--dm1-pink-ring); color: var(--dm1-ink);
+}
+.dm1-plusdisc > svg { width: 18px; height: 18px; stroke-width: 2; transition: transform .2s ease; }
+.dm1-plus.is-open .dm1-plusdisc > svg { transform: rotate(45deg); }
+.dm1-menu {
+  position: absolute; top: calc(100% + 6px); right: 0; z-index: 50; width: 230px; padding: 6px;
+  border-radius: 16px; background: #ffffff; box-shadow: 0 12px 34px rgba(28, 19, 15, 0.18), 0 0 0 1px rgba(28, 19, 15, 0.05);
+}
+.dm1-mi {
+  display: flex; align-items: center; gap: 12px; width: 100%; min-height: 50px; padding: 6px 10px;
+  border: 0; border-radius: 12px; background: none; color: var(--dm1-ink); text-align: left; cursor: pointer;
+  font: 400 15.5px/1.25 var(--dm1-serif) !important;
+}
+.dm1-mi:hover { background: rgba(28, 19, 15, 0.04); }
+.dm1-midisc { flex: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: #f1eee9; }
+.dm1-mi.is-first .dm1-midisc { background: var(--dm1-pink); }
+.dm1-midisc > svg { width: 16px; height: 16px; stroke-width: 1.8; }
+
+/* the full-screen search */
+.dm1-search {
+  position: fixed; inset: 0; z-index: 45; overflow: auto;
+  padding: calc(env(safe-area-inset-top, 0px) + 12px) var(--dm1-gutter) 120px;
+  background: var(--ws-page, rgb(242, 238, 232));
+}
+.dm1-shead { display: flex; align-items: center; gap: 10px; }
+.dm1-sfield {
+  flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; height: 42px; padding: 0 12px;
+  border-radius: 12px; background: #ffffff; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.08);
+}
+.dm1-sfield > svg { flex: none; width: 18px; height: 18px; color: rgba(28, 19, 15, 0.55); }
+.dm1-sfield input {
+  flex: 1; min-width: 0; border: 0; outline: 0; background: none; color: var(--dm1-ink);
+  font: 400 16px/1.3 var(--dm1-serif) !important;
+}
+.dm1-scancel { flex: none; min-height: 40px; padding: 0 4px; border: 0; background: none; color: var(--dm1-navy); font: 400 16px/1 var(--dm1-serif) !important; cursor: pointer; }
+.dm1-slabel { margin: 20px 2px 8px; font: 600 14px/1.2 var(--dm1-serif) !important; color: rgba(28, 19, 15, 0.5); }
+.dm1-srows { margin: 0; }
+.dm1-srow {
+  display: flex; align-items: center; gap: 12px; width: 100%; min-height: 60px; padding: 10px 14px;
+  border: 0; background: none; color: var(--dm1-ink); text-align: left; cursor: pointer;
+}
+.dm1-sav { flex: none; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: #e9e4dd; font: 600 12px/1 var(--dm1-serif) !important; }
+.dm1-stxt { min-width: 0; display: grid; gap: 1px; }
+.dm1-stxt b { font: 400 16px/1.3 var(--dm1-serif) !important; }
+.dm1-stxt small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 13.5px/1.3 var(--dm1-serif) !important; color: rgba(28, 19, 15, 0.58); }
+.dm1-snote { margin: 14px 2px 0; font: italic 400 13.5px/1.5 var(--dm1-serif) !important; color: rgba(28, 19, 15, 0.55); }
+
+/* a white grouped list with inset 1px dividers — search, Up next's rows and Recent all use it */
+.dm1-group { list-style: none; padding: 0; margin: 0; border-radius: 16px; background: #ffffff; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.06), 0 2px 8px rgba(28, 19, 15, 0.05); overflow: hidden; }
+.dm1-group > li { position: relative; }
+.dm1-group > li + li::before { content: ""; position: absolute; top: 0; left: 62px; right: 0; height: 1px; background: rgba(28, 19, 15, 0.08); }
+
+/* the scrim under the FeedbackDock's phone sheet */
+.dm1-scrim { display: none; position: fixed; inset: 0; z-index: 58; background: rgba(28, 19, 15, 0.32); }
+
+@media (max-width: 767.98px) {
+  /* Home's own bar replaces the shell's generic phone bar, on this route only */
+  .ws-app.dash-mode .ws-mobilebar { display: none; }
+  /* the shell's FeedbackDock, presented as this page's bottom sheet while the page is mounted */
+  body.dm1-on:has(.fb-panel) .dm1-scrim { display: block; }
+  body.dm1-on .fb-panel {
+    left: 0 !important; right: 0 !important; top: auto !important; bottom: 0 !important;
+    width: 100% !important; max-width: none !important; max-height: 88vh !important; overflow: auto;
+    border-radius: 20px 20px 0 0; z-index: 60;
+    padding-bottom: calc(7px + env(safe-area-inset-bottom, 0px));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dm1-plusdisc > svg { transition: none; }
+}
