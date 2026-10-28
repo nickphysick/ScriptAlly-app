@@ -2,18 +2,12 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Responses v2 Part B — ASKED FOR MORE: every request, offer and revise-and-resubmit as a carousel of large cards on
- * a paper-white band, your move first (`carouselOrder`).
+ * Responses v5 Phase 3 (ref `requests` / `reqCard`) — AGENTS WHO WANT TO READ ON: the request carousel in the landing
+ * page's query-card grammar. the order is the reference's (your move first, then the newest answer: `carouselOrder`), and v2's card actions and its in-panel journeys are kept; the card is the reference's.
  *
- * ⚠️ THE GUTTER IS THE HEADER TITLE'S LEFT EDGE, by construction: the band bleeds from the page column to the sheet
- *    by `--rs-bleed`, and its heading and its track are padded by that bleed plus the header's own `--rs-inset`.
- *    One figure, two readers; B1 measures the two edges against each other.
- * ⚠️ COPY IS BUILT ONLY FROM REAL FIELDS: a card whose answer date, due date or step dates are not recorded drops the
- *    line that would have stated them. There is no request note in the data model except a revision's (`rrNotes`),
- *    so only a revise-and-resubmit card can carry a quote.
- * ⚠️ A STATUS IS DRAWN ONLY BY `StatusDot` (the trail's glyphs, at 16).
- * ⚠️ THE CARD IS A BUTTON UNDER ITS BUTTON: a full-card `.rsp-pcopen` opens the answer in the panel; the foot's own
- *    button sits above it (z-index) and runs the card's journey.
+ * ⚠️ THE CARD OPENS THE ANSWER IN THE PANEL (a stretched button under the content); its own button runs the journey.
+ * ⚠️ NO MONO LABELS: the reference's card has none, and the page carries no eyebrows.
+ * ⚠️ `ReqCard` IS ALSO THE EMPTY PAGE'S EXAMPLE (`example`: no opener, no data-id, the button out of the tab order).
  */
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { QueryStatus } from "../../types";
@@ -21,96 +15,93 @@ import { StatusDot } from "../StatusDot";
 import { MONTHS_SHORT } from "../../lib/dates";
 import { daysLeft, plural, respDate, WHAT_WANTS, type RespItem } from "../../lib/responses";
 import type { QcRow } from "../../lib/qcSummary";
+import type { DrawerMode } from "../../lib/queryActions/drawerStore";
 
 type Item = RespItem<QcRow>;
 const reduced = () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
-/** the trail's words for each step (the reference's) */
-const STEP_WORD: Partial<Record<QueryStatus, string>> = {
+/** the steps' words (the reference's `WORD`) */
+export const STEP_WORD: Partial<Record<QueryStatus, string>> = {
   [QueryStatus.QUERIED]: "Queried",
-  [QueryStatus.PARTIAL_REQUESTED]: "Partial asked for",
+  [QueryStatus.PARTIAL_REQUESTED]: "Partial requested",
   [QueryStatus.PARTIAL_SENT]: "Partial sent",
-  [QueryStatus.FULL_REQUESTED]: "Full asked for",
+  [QueryStatus.FULL_REQUESTED]: "Full requested",
   [QueryStatus.FULL_SENT]: "Full sent",
-  [QueryStatus.REVISE_RESUBMIT]: "Revision asked for",
-  [QueryStatus.RESUBMITTED]: "Revision sent",
+  [QueryStatus.REVISE_RESUBMIT]: "Revise & resubmit",
+  [QueryStatus.RESUBMITTED]: "Resubmitted",
   [QueryStatus.OFFER]: "Offer",
+  [QueryStatus.REJECTED]: "Passed",
+  [QueryStatus.NO_RESPONSE]: "No reply",
 };
-const SHORT_DATE = (ms: number) => { const d = new Date(ms); return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()].toUpperCase()}`; };
+export const SHORT_DATE = (ms: number) => { const d = new Date(ms); return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()].toUpperCase()}`; };
 
-/** the button a card's foot carries, and the journey it runs */
-export function cardAct(i: Item): { label: string; mode: "sent" | "resp" | "offer"; navy: boolean } {
+/**
+ * The card's own action and the journey it runs. ⚠️ A revise and resubmit runs `sent`: the Query Centre's own door for
+ * an owed revision (`cardDoors`), which records the resubmission. An offer runs `offer`; everything else `resp`.
+ */
+export function cardAct(i: Item): { label: string; mode: DrawerMode; navy: boolean } {
   if (i.state === "toSend") return { label: `Mark ${i.answer === "full" ? "full" : "partial"} sent`, mode: "sent", navy: true };
-  if (i.state === "offer") return { label: "Record your answer", mode: "offer", navy: true };
+  if (i.state === "offer") return { label: "Answer the offer", mode: "offer", navy: true };
+  if (i.state === "rr") return { label: "Record the resubmission", mode: "sent", navy: true };
   return { label: "Record a response", mode: "resp", navy: false };
 }
 
-/** "Asked 1 Oct, after the partial" / "Offered 12 Sep" — null when the date is not recorded */
+/** "Asked 20 Oct, after the partial": after the partial when a partial came first, else after the query; null undated */
 export function askedLine(i: Item, nowMs: number): string | null {
   if (i.answerMs == null) return null;
-  const d = respDate(i.answerMs, nowMs);
-  if (i.answer === "offer") return `Offered ${d}`;
-  if (i.answer === "rr") return `Asked ${d}`;
-  if (i.answer === "full") return `Asked ${d}, ${i.afterPartial ? "after the partial" : "after the query"}`;
-  return `Asked ${d}, after the query`;
+  const partialFirst = i.answer !== "partial" && i.row.history.spans.some((s) => s.status === QueryStatus.PARTIAL_REQUESTED || s.status === QueryStatus.PARTIAL_SENT);
+  return `Asked ${respDate(i.answerMs, nowMs)}, ${partialFirst ? "after the partial" : "after the query"}`;
 }
 
-/** the foot's left: label, date, and its days line (rust when it is the writer's and counting, or over) */
-export function footFacts(i: Item, nowMs: number): { label: string; date: string | null; days: string | null; hot: boolean } {
-  if (i.state === "rr") return { label: "ASKED", date: i.answerMs != null ? respDate(i.answerMs, nowMs) : null, days: null, hot: false };
-  const label = i.state === "toSend" ? "SEND BY" : i.state === "offer" ? "ANSWER BY" : "REPLY EXPECTED BY";
-  if (i.dueMs == null) return { label, date: null, days: null, hot: false };
+/**
+ * The foot's left: the label, the date and the days. ⚠️ A DATE THAT HAS PASSED SHOWS NO DAYS FIGURE: "n days over"
+ * is a verdict, and the date already says when it was.
+ */
+export function footFacts(i: Item, nowMs: number): { label: string; date: string | null; days: string | null } {
+  const label = i.state === "toSend" ? "Send by" : i.state === "offer" ? "Answer by" : i.state === "rr" ? "Resubmit by" : "Reply expected by";
+  if (i.dueMs == null) return { label, date: i.state === "rr" ? "No date set" : null, days: null };
   const { n, over } = daysLeft(i.dueMs, nowMs);
-  const days = over ? `${plural(n, "day", "days")} over` : i.state === "sent" ? `${plural(n, "day", "days")} to go` : `${plural(n, "day", "days")} left`;
-  return { label, date: respDate(i.dueMs, nowMs), days, hot: i.state !== "sent" || over };
+  return { label, date: respDate(i.dueMs, nowMs), days: over ? null : `${plural(n, "day", "days")} ${i.state === "sent" ? "to go" : "left"}` };
 }
 
-const ReqCard: React.FC<{ i: Item; nowMs: number; selected: boolean; onOpen: () => void; onAct: () => void }> = ({ i, nowMs, selected, onOpen, onAct }) => {
+const tone = (i: Item): "you" | "agt" | "of" => (i.state === "offer" ? "of" : i.yourMove ? "you" : "agt");
+
+export const ReqCard: React.FC<{ i: Item; nowMs: number; selected?: boolean; onOpen?: () => void; onAct?: () => void; example?: boolean }> = ({ i, nowMs, selected, onOpen, onAct, example }) => {
   const act = cardAct(i);
   const asked = askedLine(i, nowMs);
   const foot = footFacts(i, nowMs);
-  const spans = i.row.history.spans.filter((s) => STEP_WORD[s.status]);
-  const sent = i.state === "sent";
+  const steps = i.row.history.spans.filter((s) => s.status !== QueryStatus.QUERIED && STEP_WORD[s.status]).slice(-3);
+  const what = WHAT_WANTS[i.answer as "partial"];
   return (
-    <article className={`rsp-pc${i.yourMove ? " rsp-pc--you" : " rsp-pc--agt"}`} data-rsp="pcard" data-id={i.id} data-state={i.state ?? undefined}
-      data-sel={selected ? "" : undefined}>
-      <button type="button" className="rsp-pcopen" data-rsp="pcard-open"
-        aria-label={`${i.row.agentName}: ${WHAT_WANTS[i.answer as "partial"]}${i.yourMove ? ", your move" : ", with the agent"}. Open.`} onClick={onOpen} />
-      <div className="rsp-pctop" data-rsp="pcard-strip"><span>{i.yourMove ? "YOUR MOVE" : "WITH THE AGENT"}</span>{i.row.dayN != null ? <span>DAY {i.row.dayN}</span> : null}</div>
-      <div className="rsp-pcb">
-        <div className="rsp-pcag">
-          <span className="rsp-dsc rsp-dsc--more" aria-hidden="true">{i.row.initials}</span>
-          <span className="rsp-pcwho"><b>{i.row.agentName}</b><i>{i.row.agency}</i></span>
+    <article className="rsp5-rc" data-rsp5="req" data-id={example ? undefined : i.id} data-c={tone(i)} data-state={i.state ?? undefined}
+      data-sel={selected ? "" : undefined} data-example={example ? "" : undefined}>
+      {onOpen ? <button type="button" className="rsp5-rcopen" data-rsp5="req-open"
+        aria-label={`${i.row.agentName}: ${what}${i.yourMove ? ", your move" : ", with the agent"}. Open.`} onClick={onOpen} /> : null}
+      <div className="rsp5-rch"><span>{i.yourMove ? "Your move" : "With the agent"}</span>{i.row.dayN != null ? <small>day {i.row.dayN}</small> : null}</div>
+      <div className="rsp5-rcb">
+        <div className="rsp5-who">
+          <span className="rsp5-disc" aria-hidden="true">{i.row.initials}</span>
+          <span><b>{i.row.agentName}</b><i>{i.row.agency}</i></span>
         </div>
-        <div className="rsp-pcreq" data-rsp="pcard-what">
-          <span className="rsp-mono">{i.answer === "offer" ? "HAS MADE" : sent ? "IS READING" : "WANTS TO READ"}</span>
-          <b>{WHAT_WANTS[i.answer as "partial"]}</b>
-          {asked ? <i data-rsp="pcard-asked">{asked}</i> : null}
+        <div className="rsp5-ask" data-rsp5="req-what">
+          <span className="rsp5-lbl">{i.answer === "offer" ? "Has made" : i.yourMove ? "Wants to read" : "Is reading"}</span>
+          <b>{what}</b>
+          {asked ? <small data-rsp5="req-asked">{asked}</small> : null}
         </div>
-        {i.note ? <blockquote className="rsp-pcq" data-rsp="pcard-quote">{"“"}{i.note}{"”"}</blockquote> : null}
-        {spans.length ? (
-          <ol className="rsp-pcsteps" aria-label="So far" data-rsp="pcard-trail">
-            {spans.map((s, k) => (
-              <li key={`${s.status}-${k}`} className={k === spans.length - 1 ? "is-now" : undefined}>
-                <StatusDot status={s.status} overrideSize={16} decorative />
-                <span>{STEP_WORD[s.status]}<small>{SHORT_DATE(s.startMs)}</small></span>
-              </li>
-            ))}
-          </ol>
-        ) : null}
+        {i.note ? <p className="rsp5-quote" data-rsp5="req-quote">{"“"}{i.note}{"”"}</p> : null}
+        <div className="rsp5-steps" data-rsp5="req-steps">
+          {i.queriedMs != null ? <span className="rsp5-st"><StatusDot status={QueryStatus.QUERIED} overrideSize={13} decorative />Queried <small>{SHORT_DATE(i.queriedMs)}</small></span> : null}
+          {steps.map((s, k) => (
+            <span key={`${s.status}-${k}`} className="rsp5-st"><StatusDot status={s.status} overrideSize={13} decorative />{STEP_WORD[s.status]} <small>{SHORT_DATE(s.startMs)}</small></span>
+          ))}
+        </div>
       </div>
-      <div className="rsp-pcf" data-rsp="pcard-foot">
-        <div>
-          {foot.date ? (
-            <>
-              <span className="rsp-mono">{foot.label}</span>
-              <b data-rsp="pcard-date">{foot.date}</b>{" "}
-              {foot.days ? <small className={foot.hot ? "is-hot" : undefined} data-rsp="pcard-days">{foot.days}</small> : null}
-            </>
-          ) : null}
-        </div>
-        <button type="button" className={`rsp-btn rsp-btn--sm ${act.navy ? "rsp-btn--navy" : "rsp-btn--wht"}`} data-rsp="pcard-act" data-mode={act.mode}
-          onClick={onAct}>{act.label}</button>
+      <div className="rsp5-rcf" data-rsp5="req-foot">
+        <span>
+          {foot.date ? <><span className="rsp5-lbl">{foot.label}</span><b data-rsp5="req-date">{foot.date}</b>{foot.days ? <em className={i.yourMove ? undefined : "is-calm"} data-rsp5="req-days">{foot.days}</em> : null}</> : null}
+        </span>
+        <button type="button" className={`rsp5-sb${act.navy ? "" : " rsp5-sb--w"}`} data-rsp5="req-act" data-mode={act.mode}
+          tabIndex={example ? -1 : undefined} onClick={onAct}>{act.label}</button>
       </div>
     </article>
   );
@@ -120,28 +111,21 @@ export const RspCarousel = React.forwardRef<HTMLElement, {
   items: Item[];
   nowMs: number;
   msTitle: string | null;
-  stillOut: number;
   selectedId: string | null;
   onOpen: (i: Item) => void;
-  onAct: (i: Item) => void;
-  onRecord: () => void;
-}>(({ items, nowMs, msTitle, stillOut, selectedId, onOpen, onAct, onRecord }, ref) => {
+  onAct: (i: Item, mode: DrawerMode) => void;
+}>(({ items, nowMs, msTitle, selectedId, onOpen, onAct }, ref) => {
   const track = useRef<HTMLDivElement | null>(null);
-  const [at, setAt] = useState({ i: 0, start: true, end: true });
-  const toSend = items.filter((i) => i.yourMove).length;
-
+  const [at, setAt] = useState({ start: true, end: true });
+  const ym = items.filter((i) => i.yourMove).length;
   const step = () => {
-    const c = track.current?.querySelector<HTMLElement>(".rsp-pc, .rsp-pcadd");
-    if (!c) return 400;
-    return c.getBoundingClientRect().width + parseFloat(getComputedStyle(track.current!).columnGap || "22");
+    const c = track.current?.querySelector<HTMLElement>(".rsp5-rc");
+    return c ? c.offsetWidth + 18 : 400;
   };
   const sync = useCallback(() => {
     const t = track.current;
-    if (!t) return;
-    const s = step();
-    setAt({ i: Math.min(items.length - 1, Math.max(0, Math.round(t.scrollLeft / s))), start: t.scrollLeft < 4, end: t.scrollLeft + t.clientWidth >= t.scrollWidth - 4 });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [items.length]);
+    if (t) setAt({ start: t.scrollLeft < 4, end: t.scrollLeft + t.clientWidth >= t.scrollWidth - 4 });
+  }, []);
   useEffect(() => {
     const t = track.current;
     if (!t) return undefined;
@@ -151,60 +135,38 @@ export const RspCarousel = React.forwardRef<HTMLElement, {
     t.addEventListener("scroll", on, { passive: true });
     window.addEventListener("resize", on);
     return () => { t.removeEventListener("scroll", on); window.removeEventListener("resize", on); cancelAnimationFrame(raf); };
-  }, [sync]);
+  }, [sync, items.length]);
   const by = (dir: 1 | -1) => track.current?.scrollBy({ left: dir * step(), behavior: reduced() ? "auto" : "smooth" });
-  const goTo = (k: number) => track.current?.scrollTo({ left: k * step(), behavior: reduced() ? "auto" : "smooth" });
-
-  const many = items.length >= 2;
+  const book = msTitle || "your book";
   return (
-    <section className="rsp-pos" data-rsp="carousel" data-rsp5-sec="more" aria-labelledby="rsp-pos-h" ref={ref}>
-      <div className="rsp-poshd">
-        <div>
-          <div className="rsp-plab">ASKED FOR MORE</div>
-          {/* not a heading element for its face: brand.tsx forces h2 into the brand serif */}
-          <h2 id="rsp-pos-h" className="rsp-posh">Agents who want to read on</h2>
-          <p className="rsp-posl" data-rsp="pos-line">
-            {items.length ? (
-              <><b>{items.length}</b> {items.length === 1 ? "agent wants" : "agents want"} to read more of <i>{msTitle || "your book"}</i>
-                {toSend ? <>. <b className="is-hot" data-rsp="pos-move">{toSend}</b> waiting on you.</> : ", and everything asked for has been sent."}</>
-            ) : <>When an agent asks for a partial or the full manuscript, it appears here with what to send and when.</>}
-          </p>
+    <section className="rsp5-sec" data-rsp5="requests" data-rsp5-sec="more" aria-labelledby="rsp5-more-h" ref={ref}>
+      <div className="rsp5-h2row">
+        <div className="rsp5-h2">
+          <span className="rsp5-art rsp5-art--sm" aria-hidden="true">Art: hawk reading pages</span>
+          <div>
+            <h2 id="rsp5-more-h" className="rsp5-h2t">Agents who want to read on</h2>
+            <p className="rsp5-sub" data-rsp5="requests-line">
+              {items.length
+                ? <><b>{plural(items.length, "agent", "agents")}</b> asked to read more of {book}. <b className="is-rust" data-rsp5="requests-move">{ym}</b> {ym === 1 ? "is" : "are"} waiting on you.</>
+                : <>No requests yet. When an agent asks for pages, they&rsquo;ll be here, with what they asked for and when it&rsquo;s due.</>}
+            </p>
+          </div>
         </div>
-        {many ? (
-          <div className="rsp-arrows" data-rsp="arrows">
-            <button type="button" aria-label="Previous" data-rsp="prev" disabled={at.start} onClick={() => by(-1)}>{"←"}</button>
-            <button type="button" aria-label="Next" data-rsp="next" disabled={at.end} onClick={() => by(1)}>{"→"}</button>
+        {items.length ? (
+          <div className="rsp5-carctl" data-rsp5="arrows">
+            <button type="button" className="rsp5-rb" aria-label="Previous" data-rsp5="prev" disabled={at.start} onClick={() => by(-1)}>{"←"}</button>
+            <button type="button" className="rsp5-rb" aria-label="Next" data-rsp5="next" disabled={at.end} onClick={() => by(1)}>{"→"}</button>
           </div>
         ) : null}
       </div>
-      <div className="rsp-track" ref={track} data-rsp="track" tabIndex={0} aria-label="Requests, scroll sideways"
-        onKeyDown={(e) => {
-          if (e.target !== e.currentTarget || (e.key !== "ArrowRight" && e.key !== "ArrowLeft")) return;
-          e.preventDefault();
-          by(e.key === "ArrowRight" ? 1 : -1);
-        }}>
-        {items.length ? (
-          <>
-            {items.map((i) => <ReqCard key={i.id} i={i} nowMs={nowMs} selected={selectedId === i.id} onOpen={() => onOpen(i)} onAct={() => onAct(i)} />)}
-            <button type="button" className="rsp-pcadd" data-rsp="record-request" onClick={onRecord}>
-              <b>+ Record a request</b><span>Asked for pages by email or on a call? Record it so it shows here.</span>
-            </button>
-          </>
-        ) : (
-          <div className="rsp-pcnone" data-rsp="no-requests">
-            <span className="rsp-pcnone-ico" aria-hidden="true">
-              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round"><path d="M5 2.5h7l3.5 3.5v11.5H5z" /><path d="M7.5 9h5M7.5 11.5h5M7.5 14h3" /></svg>
-            </span>
-            <div>
-              <b>No requests yet</b>
-              <p data-rsp="no-requests-line">Agents often take six to twelve weeks to reply. You have {stillOut} {stillOut === 1 ? "query" : "queries"} out with agents.</p>
-            </div>
-          </div>
-        )}
-      </div>
-      {many ? (
-        <div className="rsp-dots" data-rsp="dots" aria-hidden="true">
-          {items.map((it, k) => <i key={it.id} data-rsp="dot" data-on={k === at.i ? "" : undefined} onClick={() => goTo(k)} />)}
+      {items.length ? (
+        <div className="rsp5-car" ref={track} data-rsp5="track" tabIndex={0} aria-label="Requests, scroll sideways"
+          onKeyDown={(e) => {
+            if (e.target !== e.currentTarget || (e.key !== "ArrowRight" && e.key !== "ArrowLeft")) return;
+            e.preventDefault();
+            by(e.key === "ArrowRight" ? 1 : -1);
+          }}>
+          {items.map((i) => <ReqCard key={i.id} i={i} nowMs={nowMs} selected={selectedId === i.id} onOpen={() => onOpen(i)} onAct={() => onAct(i, cardAct(i).mode)} />)}
         </div>
       ) : null}
     </section>

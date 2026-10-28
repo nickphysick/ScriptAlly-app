@@ -24,7 +24,7 @@ import { resolveScopedManuscript } from "../../lib/shellSidebar";
 import { buildQcRows } from "../../lib/qcSummary";
 import { answerFoot, carouselOrder, firstNameOf, goneQuiet, noteSplit, pageCounts, respCounts, respItems, stillOut, waitingRows, type NoKind, type RespItem } from "../../lib/responses";
 import type { QcRow } from "../../lib/qcSummary";
-import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
+import { openQueryDrawer, type DrawerMode } from "../../lib/queryActions/drawerStore";
 import { openResponsePicker, responsePickerHosted } from "../../lib/queryPanelStore";
 import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
 import { Rsp5Glance, Rsp5TitleCard, type GlanceFacts, type GlanceKey } from "./Rsp5Head";
@@ -92,15 +92,14 @@ export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) 
     next: at >= 0 && at < visible.length - 1 ? () => go(visible[at + 1], true) : null,
   };
   /* a card's own button runs its journey IN the panel: the panel opens on that answer first, then the journey steps in */
-  const [pending, setPending] = useState<string | null>(null);
-  const act = useCallback((i: RespItem<QcRow>) => { setPending(i.id); openAnswer(i); }, [openAnswer]);
+  const [pending, setPending] = useState<{ id: string; mode: DrawerMode } | null>(null);
+  const act = useCallback((i: RespItem<QcRow>, mode: DrawerMode) => { setPending({ id: i.id, mode }); openAnswer(i); }, [openAnswer]);
   useEffect(() => {
-    if (!pending || openId !== pending || !openItem) return;
+    if (!pending || openId !== pending.id || !openItem) return;
     setPending(null);
     const r = openItem.row, first = firstNameOf(r.agentName);
-    const mode = answerFoot(openItem, model.nowMs).act;
-    if (mode !== "edit") openQueryDrawer({ mode, queryId: openItem.id, panel: { name: r.agentName, agency: r.agency, first, backLabel: `Back to ${first}` } });
-  }, [pending, openId, openItem, model.nowMs]);
+    openQueryDrawer({ mode: pending.mode, queryId: openItem.id, panel: { name: r.agentName, agency: r.agency, first, backLabel: `Back to ${first}` } });
+  }, [pending, openId, openItem]);
 
   /* Passed / No reply: ONE state with the list's segmented control (Part C). Pressing it again clears it. */
   const [kind, setKind] = useState<NoKind | null>(null);
@@ -139,8 +138,8 @@ export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) 
             <Rsp5TitleCard msTitle={msTitle} empty={false} loading={!ready} onRecord={openRecordPicker} onSecond={() => goSection("wall")} />
             <Rsp5Glance facts={ready ? model.glance : null} onCard={pressGlance} />
             {ready ? (
-              <RspCarousel ref={moreRef} items={model.more} nowMs={nowMs} msTitle={msTitle} stillOut={model.out}
-                selectedId={openId} onOpen={openAnswer} onAct={act} onRecord={openRecordPicker} />
+              <RspCarousel ref={moreRef} items={model.more} nowMs={nowMs} msTitle={msTitle}
+                selectedId={openId} onOpen={openAnswer} onAct={act} />
             ) : null}
             {ready ? <RspBanner /> : null}
             {ready && counts.passed + counts.noReply > 0 ? (

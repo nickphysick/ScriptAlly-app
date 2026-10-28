@@ -182,13 +182,16 @@ export const replyPct = (c: RespCounts): number | null => { const r = replyRate(
 export const stillOut = (rows: readonly { status: QueryStatus }[]): number => rows.filter((r) => r.status === QueryStatus.QUERIED).length;
 
 /* ── the carousel ── */
-const dueKey = (ms: number | null) => (ms == null ? Number.POSITIVE_INFINITY : ms);
-/** Your move first, soonest due first; then the rest, soonest reply expected first; ties newest answer first. */
+/**
+ * v5 (the reference's `requests`): your move first, then the newest answer first; an undated answer goes last, and
+ * the id breaks a tie so the order never depends on how the data arrived. (v2 sorted by soonest due date.)
+ */
 export function carouselOrder<R extends RespRowInput>(items: readonly RespItem<R>[]): RespItem<R>[] {
+  const key = (ms: number | null) => (ms == null ? Number.NEGATIVE_INFINITY : ms);
   return items.filter((i) => i.group === "more").slice().sort((a, b) =>
     Number(b.yourMove) - Number(a.yourMove)
-    || dueKey(a.dueMs) - dueKey(b.dueMs)
-    || (b.answerMs ?? 0) - (a.answerMs ?? 0));
+    || key(b.answerMs) - key(a.answerMs)
+    || a.id.localeCompare(b.id));
 }
 
 /* ── the list of nos ── */

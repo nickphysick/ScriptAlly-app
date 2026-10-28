@@ -72,17 +72,21 @@ describe("RS2 D1 · the counts and the reply rate", () => {
   });
 });
 
-describe("RS2 D1 · the carousel's order", () => {
-  it("your move first by soonest due, then the rest by soonest reply expected, ties newest answer first", () => {
-    const a = row(QueryStatus.PARTIAL_SENT, { id: "sent-late", expectedMs: D(2026, 11, 1) });
-    const b = row(QueryStatus.FULL_REQUESTED, { id: "send-soon", expectedMs: D(2026, 10, 20) });
-    const c = row(QueryStatus.PARTIAL_REQUESTED, { id: "send-later", expectedMs: D(2026, 10, 30) });
-    const d = row(QueryStatus.FULL_SENT, { id: "sent-soon", expectedMs: D(2026, 10, 25) });
-    const e = row(QueryStatus.OFFER, { id: "offer-undated" });
-    const f = row(QueryStatus.FULL_SENT, { id: "tie-new", expectedMs: D(2026, 11, 1), spans: [[QueryStatus.FULL_REQUESTED, D(2026, 9, 9)]] });
-    const g = row(QueryStatus.FULL_SENT, { id: "tie-old", expectedMs: D(2026, 11, 1), spans: [[QueryStatus.FULL_REQUESTED, D(2026, 9, 1)]] });
-    const order = carouselOrder(respItems([a, b, c, d, e, f, g, row(QueryStatus.REJECTED)])).map((i) => i.id);
-    expect(order).toEqual(["send-soon", "send-later", "offer-undated", "sent-soon", "tie-new", "tie-old", "sent-late"]);
+describe("RS5 B1 · the carousel's order", () => {
+  /* run red against v2's soonest-due order, which put "send-soon" (asked earliest) first */
+  it("your move first, then the newest answer first; undated last; the id breaks a tie", () => {
+    const A = (s: QueryStatus, id: string, ask: number, extra: Partial<RespRowInput> = {}) => row(s, { id, spans: [[QueryStatus.QUERIED, D(2026, 6, 1)], [s === QueryStatus.PARTIAL_SENT ? QueryStatus.PARTIAL_REQUESTED : s === QueryStatus.FULL_SENT ? QueryStatus.FULL_REQUESTED : s, ask], ...(s === QueryStatus.PARTIAL_SENT || s === QueryStatus.FULL_SENT ? [[s, ask + 1] as [QueryStatus, number]] : [])], ...extra });
+    const items = respItems([
+      A(QueryStatus.PARTIAL_SENT, "sent-new", D(2026, 10, 20)),
+      A(QueryStatus.FULL_REQUESTED, "send-old", D(2026, 9, 1), { expectedMs: D(2026, 10, 14) }),
+      A(QueryStatus.PARTIAL_REQUESTED, "send-new", D(2026, 10, 2), { expectedMs: D(2026, 11, 30) }),
+      A(QueryStatus.FULL_SENT, "sent-old", D(2026, 8, 3)),
+      row(QueryStatus.OFFER, { id: "offer-undated" }),
+      A(QueryStatus.FULL_SENT, "tie-b", D(2026, 9, 9)),
+      A(QueryStatus.FULL_SENT, "tie-a", D(2026, 9, 9)),
+      row(QueryStatus.REJECTED),
+    ]);
+    expect(carouselOrder(items).map((i) => i.id)).toEqual(["send-new", "send-old", "offer-undated", "sent-new", "tie-a", "tie-b", "sent-old"]);
   });
 });
 
