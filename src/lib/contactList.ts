@@ -396,6 +396,25 @@ export const SUBMISSION_CHOICES: { key: "either" | "open" | "closed"; label: str
   { key: "either", label: "Any" }, { key: "open", label: "Open" }, { key: "closed", label: "Closed" },
 ];
 
+/**
+ * Dashboard v118 Part B — the Contact list opened on one of the dashboard's Agents-on-file groups: `?status=` is
+ * `querying` (a live query on this manuscript), `closed` (its latest query closed) or `notq` (none on this manuscript).
+ * On arrival it sets the list's OWN status filter — the same state the filter menu sets, shown as applied and clearable —
+ * so there is no second notion of "status" in the URL layer.
+ */
+export const CONTACT_STATUS_PARAM = "status";
+export type ContactStatusParam = "querying" | "closed" | "notq";
+export const CONTACT_STATUS_KEYS: Record<ContactStatusParam, readonly StatusKey[]> = {
+  querying: ["queried", "pr", "ps", "fr", "fs", "rr", "resub", "offer"],
+  closed: ["closed", "signed"],
+  notq: ["none"],
+};
+export const statusKeysForParam = (p: string | null | undefined): StatusKey[] | null =>
+  p && Object.prototype.hasOwnProperty.call(CONTACT_STATUS_KEYS, p) ? [...CONTACT_STATUS_KEYS[p as ContactStatusParam]] : null;
+/** the dashboard's Agents-on-file keys, as the Contact list's link */
+export const contactListForStatus = (k: "querying" | "closed" | "none"): string =>
+  `/agents?${CONTACT_STATUS_PARAM}=${k === "none" ? "notq" : k}`;
+
 /** "Where your query stands": the pack's eight, plus Revise & resubmit, Resubmitted and Signed while anyone is there */
 export const STANDS_ROWS: readonly StatusKey[] = ["none", "queried", "pr", "ps", "fr", "fs", "offer", "closed"];
 export const STANDS_EXTRA: readonly StatusKey[] = ["rr", "resub", "signed"];

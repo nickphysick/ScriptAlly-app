@@ -68,6 +68,8 @@ export interface StackHover {
 export function useStackHover(
   anchorFor: (key: string, from: "slice" | "row", el: Element, pointer: Anchor | null) => Anchor,
   follows: boolean,
+  /** v118 Part B — Enter or Space opens the target's list, as a click does; false (a 0 row) falls back to showing the stack */
+  activate?: (key: string) => boolean,
 ): StackHover {
   const [st, setSt] = useState<{ key: string; anchor: Anchor; from: "slice" | "row" } | null>(null);
   /* ⚠️ A 90ms GRACE BEFORE A POINTER LEAVE HIDES IT. The key's rows sit 3–5px apart and the card lifts 2px
@@ -87,7 +89,7 @@ export function useStackHover(
   }, []);
   const toggle = (key: string, from: "slice" | "row", el: Element) => { cancel(); setSt((s) => (s?.key === key ? null : { key, from, anchor: anchorFor(key, from, el, null) })); };
   const keys = (key: string, from: "slice" | "row", ev: React.KeyboardEvent<Element>, el: Element) => {
-    if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); toggle(key, from, el); }
+    if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); if (activate?.(key)) return; toggle(key, from, el); }
     else if (ev.key === "Escape" && st) { ev.preventDefault(); ev.stopPropagation(); hideNow(); }
   };
   const pt = (ev: React.PointerEvent) => ({ x: ev.clientX, y: ev.clientY });

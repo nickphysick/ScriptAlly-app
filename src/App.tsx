@@ -663,7 +663,7 @@ function AppContent() {
             no contentVariant cap; the .t-f12 root paints the oat ground edge-to-edge. */}
         <StagePage active={routeKey === "queries" && !queriesAnalytics && !queriesResponses && !queriesPackages} layout="fill" clip>
           <Queries searchQuery={searchQuery} onNavigate={handleNavigate} activeSubPage={queriesSub} inShell
-            statusFilter={queriesStatus} view={queriesView} idsFilter={params.get("ids")}
+            statusFilter={queriesStatus} view={queriesView} idsFilter={params.get("ids")} idsLabel={params.get("from")}
             onSelectView={() => { const n = new URLSearchParams(params); n.delete("view"); n.delete("q"); navigate({ pathname: "/queries", search: n.toString() ? `?${n.toString()}` : "" }); }}
             onOpenQuery={(id) => { const n = new URLSearchParams(params); n.set("q", id); n.delete("view"); navigate({ pathname: "/queries", search: `?${n.toString()}` }); }}
             createSeed={createQuerySeed} onCreateSeedConsumed={() => setCreateQuerySeed(null)}

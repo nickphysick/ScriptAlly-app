@@ -126,13 +126,8 @@ export function agentsCard(cov: Pick<AgentCoverage, "querying" | "closed" | "non
   };
 }
 
-/**
- * ⚠️ WHERE A CARD GOES. The Query Centre lists every manuscript while the dashboard counts one, so a `?status=` link
- * lands on a different number (measured: 142 rows behind a card saying 30). The page's own `?ids=` entry point — the
- * one Submission packages' "See these queries" uses — opens exactly the card's queries. An empty set opens the page
- * whole rather than an empty list.
- */
-export const queriesForIds = (ids: readonly string[]): string => (ids.length ? `/queries?ids=${encodeURIComponent(ids.join(","))}` : "/queries");
+/** Where a card goes: exactly its own queries. The one helper lives with the Query Centre's other links. */
+export { queriesForIds } from "./queriesFilterParam";
 
 /** The quiet line a card shows when its number is 0 — a card is never empty. */
 export const ZERO_LINE = { withAgents: "None yet", closed: "Nothing closed", agents: "All queried" } as const;

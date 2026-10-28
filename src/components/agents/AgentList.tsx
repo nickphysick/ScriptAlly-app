@@ -38,7 +38,7 @@ import { commitCardSave } from "../../lib/agentCardSave";
 import type { AgentEditPatch, SaveAgentResult } from "../../lib/saveAgentEdits";
 import { commitAgentEdits } from "../../lib/saveAgentEdits";
 import { db as firestoreDb } from "../../lib/firebase";
-import { contactFilterCount, agentRows } from "../../lib/contactList";
+import { CONTACT_STATUS_PARAM, statusKeysForParam, contactFilterCount, agentRows } from "../../lib/contactList";
 import {
   AgentCardOptions, openAgentCard, openNewAgentCard, subscribeAgentCardEvents,
   useAgentCardRequest,
@@ -443,6 +443,17 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const setPanelParam = useCallback((id: string | null, how: "push" | "replace") => {
     setParams((prev) => { const n = new URLSearchParams(prev); if (id) n.set("agent", id); else n.delete("agent"); return n; }, { replace: how === "replace" });
   }, [setParams]);
+  /* Dashboard v118 Part B — `?status=querying|closed|notq` from the dashboard's Agents-on-file hoop: the list's own
+     status filter is set (shown in the applied row, clearable like any other), the search cleared, the page put at its
+     top, and the parameter taken out of the address so clearing the filter is not undone by it. */
+  const statusParam = active ? params.get(CONTACT_STATUS_PARAM) : null;
+  useEffect(() => {
+    const keys = statusKeysForParam(statusParam);
+    if (!statusParam) return;
+    if (keys) { setFilters({ ...emptyContactFilters(), status: keys }); setSearch(""); }
+    setParams((prev) => { const n = new URLSearchParams(prev); n.delete(CONTACT_STATUS_PARAM); return n; }, { replace: true });
+    requestAnimationFrame(() => { const port = document.getElementById("app-stage-scroll"); if (port) port.scrollTop = 0; });
+  }, [statusParam]); // eslint-disable-line react-hooks/exhaustive-deps
   const panelIdRef = useRef(panelId);
   panelIdRef.current = panelId;
   /** open the panel on this agent — and, when a door asks for it, the editor at a field */

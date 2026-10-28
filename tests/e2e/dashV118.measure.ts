@@ -86,3 +86,93 @@ test("DB118-A1 · every stack opens at the pointer", async ({ page }) => {
   L.check("A1", "twelve or more placements measured", placements >= 12, String(placements));
   L.done(40);
 });
+
+/** a hoop's key rows: key, label, count (from the row's own accessible name) and cursor */
+const hoopRows = (page: Page, card: string) => page.evaluate((c) => [...document.querySelectorAll<HTMLElement>(`[data-d60="${c}"] [data-d116="key-row"]`)].map((r) => {
+  const m = (r.getAttribute("aria-label") ?? "").match(/^(.*): (\d+)$/);
+  return { key: r.dataset.key ?? "", label: m?.[1] ?? "", n: Number(m?.[2] ?? NaN), cursor: getComputedStyle(r).cursor };
+}), card);
+
+/** what the page arrived at: the address, the scroll, the Query Centre's ids chip and its rows, or the Contact list's */
+const arrival = (page: Page) => page.evaluate(() => {
+  const vis = (e: Element) => (e as HTMLElement).getBoundingClientRect().height > 0;
+  const port = document.getElementById("app-stage-scroll");
+  const qids = new Set([...document.querySelectorAll<HTMLElement>("[data-qid]")].filter(vis).map((e) => e.dataset.qid));
+  const chips = [...document.querySelectorAll<HTMLElement>("button, span, li, div")].filter((e) => vis(e) && e.children.length <= 2 && / · \d+$/.test((e.textContent ?? "").trim())).map((e) => (e.textContent ?? "").trim()).slice(0, 8);
+  const rows = new Set([...document.querySelectorAll<HTMLElement>('[data-cl24="row"], [data-cl24="card"]')].filter(vis).map((e) => e.dataset.id)).size;
+  const applied = (document.body.innerText.match(/\b(Not queried|Queried|Closed|Signed|Offer)\b/g) ?? []).length;
+  return { path: location.pathname, search: location.search, top: port ? port.scrollTop : null, qids: [...qids], chips, rows, applied };
+});
+
+test("DB118-B1 · slices and rows click through to the filtered list", async ({ page }) => {
+  const L = new Ledger("B1");
+  let zeroSeen = 0;
+  const listed: Record<string, number> = {};
+  let agentsTotal = Infinity, hoopLive = 0;
+  const vp = { width: 1440, height: 900 };
+  for (const card of ["closed-hoop", "agents-hoop"] as const) {
+    await openDash(page, vp);
+    const rows = await hoopRows(page, card);
+    L.check("B1", `${card}: population, the key rows`, rows.length >= 3 && rows.every((r) => Number.isFinite(r.n)), JSON.stringify(rows));
+    L.check("B1", `${card}: a row with some`, rows.some((r) => r.n > 0), JSON.stringify(rows.map((r) => r.n)));
+    if (rows.some((r) => r.n === 0)) zeroSeen++;
+    if (card === "agents-hoop") { agentsTotal = rows.reduce((t, r) => t + r.n, 0); hoopLive = rows.filter((r) => r.key !== "none").reduce((t, r) => t + r.n, 0); }
+    for (const r of rows) {
+      const label = `${card} row ${r.key} (${r.n})`;
+      L.check("B1", `${label}: the cursor says whether it opens`, r.cursor === (r.n > 0 ? "pointer" : "default"), r.cursor);
+      for (const how of (r.n > 0 ? ["click", "enter"] : ["click"]) as ("click" | "enter")[]) {
+        await openDash(page, vp);
+        if (MUT === "B1-dead") await page.addStyleTag({ content: `[data-d116="key-row"], .d116-hit { pointer-events: none !important; }` });
+        const row = page.locator(`[data-d60="${card}"] [data-d116="key-row"][data-key="${r.key}"]`).first();
+        if (how === "click") await row.click({ timeout: 5000 }).catch(() => {});
+        else { await row.focus(); await page.keyboard.press("Enter"); }
+        await page.waitForTimeout(r.n > 0 ? 3000 : 800);
+        const a = await arrival(page);
+        if (r.n === 0) { L.check("B1", `${label} ${how}: a 0 row does nothing`, a.path === "/dashboard", a.path + a.search); continue; }
+        if (card === "closed-hoop") {
+          const ids = decodeURIComponent((a.search.match(/[?&]ids=([^&]*)/) ?? [])[1] ?? "").split(",").filter(Boolean);
+          const from = decodeURIComponent((a.search.match(/[?&]from=([^&]*)/) ?? [])[1] ?? "");
+          L.check("B1", `${label} ${how}: opens the Query Centre on exactly the slice's queries`, a.path === "/queries" && ids.length === r.n, `${a.path} · ${ids.length} ids`);
+          L.check("B1", `${label} ${how}: the arrival says what the list is`, from === r.label && a.chips.includes(`${r.label} · ${r.n}`), JSON.stringify({ from, chips: a.chips }));
+          L.check("B1", `${label} ${how}: every query on show is one of them`, a.qids.length > 0 && a.qids.every((q) => ids.includes(q as string)), `${a.qids.length} on show`);
+        } else {
+          L.check("B1", `${label} ${how}: opens the Contact list`, a.path === "/agents" && !/status=/.test(a.search), a.path + a.search);
+          /* ⚠️ "Not yet queried" is the same fact on both pages and must match exactly. Querying and Closed are not: the hoop
+             files an agent by their LATEST query on the book (agentQueryStates), the Contact list by whether ANY is still
+             live (contactStanding), so an agent with an older live query and a newer closed one is "closed" here and
+             "querying" there. The pack keeps both counting rules; the lock holds what does hold — the two together. */
+          if (r.key === "none") L.check("B1", `${label} ${how}: the list holds the hoop's number`, a.rows === r.n, `${a.rows} rows vs ${r.n}`);
+          else { listed[r.key] = a.rows; L.check("B1", `${label} ${how}: the list is filtered`, a.rows > 0 && a.rows < agentsTotal, `${a.rows} rows`); }
+        }
+        L.check("B1", `${label} ${how}: arrives at the top`, a.top === 0, String(a.top));
+        if (how === "click") {
+          await page.goBack();
+          await page.waitForTimeout(1500);
+          L.check("B1", `${label}: Back returns to the dashboard`, (await page.evaluate(() => location.pathname)) === "/dashboard", "");
+        }
+      }
+    }
+    /* a slice opens the same as its row */
+    const sl = await slicePoint(page, card, (await hoopRows(page, card)).find((r) => r.n > 0)?.key ?? "", 0.5);
+    if (sl) {
+      await openDash(page, vp);
+      const p2 = await slicePoint(page, card, (await hoopRows(page, card)).find((r) => r.n > 0)!.key, 0.5);
+      await page.mouse.click(p2!.x, p2!.y);
+      await page.waitForTimeout(3000);
+      const a = await arrival(page);
+      L.check("B1", `${card}: a slice click opens its list`, a.path === (card === "closed-hoop" ? "/queries" : "/agents"), a.path + a.search);
+    }
+  }
+  L.check("B1", "a 0 row was exercised (inert)", zeroSeen > 0, String(zeroSeen));
+  L.check("B1", "Contact list: querying + closed = the hoop's querying + closed", (listed.querying ?? NaN) + (listed.closed ?? NaN) === hoopLive, `${JSON.stringify(listed)} vs ${hoopLive}`);
+  console.log("SPLIT", JSON.stringify({ listed, hoopLive }));
+  /* the stack's hint */
+  await openDash(page, vp);
+  const busy = (await hoopRows(page, "closed-hoop")).sort((a, b) => b.n - a.n)[0];
+  const p = await page.evaluate((k) => { const r = document.querySelector<HTMLElement>(`[data-d60="closed-hoop"] [data-d116="key-row"][data-key="${k}"]`)!.getBoundingClientRect(); return { x: r.left + 10, y: r.top + r.height / 2 }; }, busy.key);
+  await page.mouse.move(p.x, p.y, { steps: 3 });
+  await page.waitForTimeout(500);
+  const more = await page.evaluate(() => document.querySelector('[data-d116="more"]')?.textContent ?? null);
+  L.check("B1", `the "+N more" pill says a click shows them all`, busy.n <= 5 ? more === null : !!more && /^\+\d+ more · click to see all$/.test(more), `${busy.n} · ${more}`);
+  L.done(30);
+});

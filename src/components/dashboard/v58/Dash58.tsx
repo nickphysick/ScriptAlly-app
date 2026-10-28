@@ -31,7 +31,9 @@ import { todayCount } from "../../../lib/dashFeedDrawer";
 import { readFeedSeen, unseenCount, writeFeedSeen } from "../../../lib/dashFeedSeen";
 import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
 import { openAgentCard } from "../../../lib/agentCardStore";
-import { queriesPathFor } from "../../../lib/queriesFilterParam";
+import { queriesForIds, queriesPathFor } from "../../../lib/queriesFilterParam";
+import { CLOSED_BUCKETS } from "../../../lib/dashClosed";
+import { contactListForStatus } from "../../../lib/contactList";
 import { dashAid, useDashHold, type DashAid } from "../../../lib/dashReviewAid";
 import { readShape, writeShape } from "../../../lib/dashShape";
 import { MONTHS_SHORT } from "../../../lib/dates";
@@ -500,8 +502,14 @@ export const Dash58: React.FC<Dash58Props> = ({
                   </div>
                   {/* v60: Closed folds into a pair of hoops beneath the full-width chart, beside Agents on file */}
                   <div className="d60-hoops" data-d60="hoops">
-                    <ClosedHoop loading={loading} tile={closed} play={paint} onSeeAll={() => navigate(queriesPathFor("closed"))} queries={scopedQueries} agents={agents} manuscript={activeManuscript?.title ?? ""} />
-                    <AgentsHoop loading={loading} cov={cov} play={paint} onReady={toContacts} agents={agents} queries={queries} msId={scopeId} />
+                    <ClosedHoop loading={loading} tile={closed} play={paint} onSeeAll={() => navigate(queriesPathFor("closed"))}
+                      /* v118 Part B — a slice or row opens the Query Centre on exactly its queries, this manuscript's only */
+                      onOpen={(k) => closed && navigate(queriesForIds(closed.members[k] ?? [], CLOSED_BUCKETS.find((b) => b.key === k)?.label))}
+                      queries={scopedQueries} agents={agents} manuscript={activeManuscript?.title ?? ""} />
+                    <AgentsHoop loading={loading} cov={cov} play={paint} onReady={toContacts}
+                      /* v118 Part B — a slice or row opens the Contact list filtered to that status */
+                      onOpen={(k) => navigate(contactListForStatus(k))}
+                      agents={agents} queries={queries} msId={scopeId} />
                   </div>
                 </>
               )}

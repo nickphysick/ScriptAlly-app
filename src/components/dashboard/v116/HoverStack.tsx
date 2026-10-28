@@ -138,7 +138,7 @@ export const HoverStack: React.FC<HoverStackProps> = ({ anchor, cards, total, ki
         );
       })}
       {more > 0 && n > 0 && (
-        <div className="d116-more" data-d116="more" style={{ top: fit.pillTop, left: (n - 1) * STEP_X }}>+{more} more</div>
+        <div className="d116-more" data-d116="more" style={{ top: fit.pillTop, left: (n - 1) * STEP_X }}>+{more} more · click to see all</div>
       )}
     </div>,
     document.body,

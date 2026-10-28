@@ -17,7 +17,7 @@
  */
 import React, { useCallback, useMemo, useRef } from "react";
 import type { ClosedTile } from "../../../lib/dashClosed";
-import { CLOSED_BUCKETS } from "../../../lib/dashClosed";
+import { type ClosedBucketKey, CLOSED_BUCKETS } from "../../../lib/dashClosed";
 import type { AgentCoverage } from "../../../lib/dashFirstUse";
 import { DASH_ART, artUrl } from "../../../lib/dashArt";
 import { CountUp } from "../v59/CountUp";
@@ -141,14 +141,16 @@ export const AgentsSnap: React.FC<{ loading: boolean; cov: AgentCoverage; onRead
  * newest closed first. The cards are `closedTile.members` — the ring's own bucketing — read by
  * `closedCards` (lib/dashHover). The hovered slice swells. Clicking one opens the closed list.
  */
-export const ClosedHoop: React.FC<{ loading: boolean; tile: ClosedTile | null; play: boolean; onSeeAll: () => void; queries?: readonly Query[]; agents?: readonly Agent[]; manuscript?: string }> = ({ loading, tile, play, onSeeAll, queries = [], agents = [], manuscript = "" }) => {
+export const ClosedHoop: React.FC<{ loading: boolean; tile: ClosedTile | null; play: boolean; onSeeAll: () => void; onOpen?: (key: ClosedBucketKey) => void; queries?: readonly Query[]; agents?: readonly Agent[]; manuscript?: string }> = ({ loading, tile, play, onSeeAll, onOpen, queries = [], agents = [], manuscript = "" }) => {
   const count = (k: string) => tile?.buckets.find((b) => b.key === k)?.count ?? 0;
   const segs: HoopSeg[] = CLOSED_BUCKETS.map((b) => ({ key: b.key, n: loading ? 0 : count(b.key), color: CLOSED_STONES[b.key] }));
   const total = loading ? 0 : tile?.total ?? 0;
   const keyRef = useRef<HTMLUListElement | null>(null);
   /* v118 Part A — at the pointer (18 right, 14 up), re-placed on every move; keyboard focus alone anchors to the element */
   const anchorFor = useCallback((_k: string, _from: "slice" | "row", el: Element, pointer: { x: number; y: number } | null) => stackAnchor(el, pointer), []);
-  const hv = useStackHover(anchorFor, true);
+  /* v118 Part B — a slice or row with any queries opens the Query Centre on exactly them; a 0 row does nothing */
+  const open = (k: string): boolean => { if (loading || count(k) === 0 || !onOpen) return false; onOpen(k as ClosedBucketKey); return true; };
+  const hv = useStackHover(anchorFor, true, open);
   /* the last category stays in hand while the stack fades out, so the exit never shows another one */
   const last = useRef<string | null>(null);
   if (hv.key) last.current = hv.key;
@@ -168,13 +170,13 @@ export const ClosedHoop: React.FC<{ loading: boolean; tile: ClosedTile | null; p
         </div>
         <div className="d60-hb">
           <Hoop segs={segs} play={play} label={`${total} closed: ${CLOSED_BUCKETS.map((b) => `${count(b.key)} ${b.label.toLowerCase()}`).join(", ")}`}
-            hit={loading ? undefined : { ...hv.slice, label: (k) => `${CLOSED_BUCKETS.find((b) => b.key === k)?.label}: ${count(k)}`, onClick: () => onSeeAll() }}>
+            hit={loading ? undefined : { ...hv.slice, label: (k) => `${CLOSED_BUCKETS.find((b) => b.key === k)?.label}: ${count(k)}`, onClick: (k) => { open(k); } }}>
             <img src={artUrl(DASH_ART.archivist)} width={DASH_ART.archivist.width} height={DASH_ART.archivist.height} alt="" decoding="async" />
           </Hoop>
           <ul className="d60-hl" data-d60="closed-legend" ref={keyRef}>
             {CLOSED_BUCKETS.map((b) => (
               <li key={b.key} className={[count(b.key) === 0 ? "is-zero" : "", hv.key === b.key ? "is-hover" : ""].filter(Boolean).join(" ") || undefined} data-d60="closed-row" data-bucket={b.key}
-                {...(loading ? {} : { ...hv.row(b.key), className: [count(b.key) === 0 ? "is-zero" : "", hv.key === b.key ? "is-hover" : ""].filter(Boolean).join(" ") || undefined, "aria-label": `${b.label}: ${count(b.key)}`, onClick: () => onSeeAll() })}>
+                {...(loading ? {} : { ...hv.row(b.key), className: [count(b.key) === 0 ? "is-zero" : "", hv.key === b.key ? "is-hover" : ""].filter(Boolean).join(" ") || undefined, "aria-label": `${b.label}: ${count(b.key)}`, "data-go": count(b.key) > 0 && onOpen ? "1" : undefined, onClick: () => { open(b.key); } })}>
                 <i style={{ background: CLOSED_STONES[b.key] }} /><b className={loading ? "d58-sk" : undefined}><CountUp n={count(b.key)} /></b>{b.label}
               </li>
             ))}
@@ -198,7 +200,7 @@ const AGENT_LABEL: Record<AgentStackKey, string> = { querying: "Querying", close
  * every move under the on-screen rule. The cards are `agentQueryStates` — the ring's own derivation — read
  * by `agentCards` (lib/dashHover). Clicking opens the Contact list.
  */
-export const AgentsHoop: React.FC<{ loading: boolean; cov: AgentCoverage; play: boolean; onReady: () => void; agents?: readonly Agent[]; queries?: readonly Query[]; msId?: string | null }> = ({ loading, cov, play, onReady, agents = [], queries = [], msId = null }) => {
+export const AgentsHoop: React.FC<{ loading: boolean; cov: AgentCoverage; play: boolean; onReady: () => void; onOpen?: (key: AgentStackKey) => void; agents?: readonly Agent[]; queries?: readonly Query[]; msId?: string | null }> = ({ loading, cov, play, onReady, onOpen, agents = [], queries = [], msId = null }) => {
   const segs: HoopSeg[] = [
     { key: "querying", n: loading ? 0 : cov.querying, color: AGENT_SEG.querying },
     { key: "closed", n: loading ? 0 : cov.closed, color: AGENT_SEG.closed },
@@ -206,13 +208,15 @@ export const AgentsHoop: React.FC<{ loading: boolean; cov: AgentCoverage; play: 
   ];
   const n = (k: string) => (k === "querying" ? cov.querying : k === "closed" ? cov.closed : cov.none);
   const anchorFor = useCallback((_k: string, _from: "slice" | "row", el: Element, pointer: { x: number; y: number } | null) => stackAnchor(el, pointer), []);
-  const hv = useStackHover(anchorFor, true);
+  /* v118 Part B — a slice or row with any agents opens the Contact list filtered to them; a 0 row does nothing */
+  const open = (k: string): boolean => { if (loading || n(k) === 0 || !onOpen) return false; onOpen(k as AgentStackKey); return true; };
+  const hv = useStackHover(anchorFor, true, open);
   const last = useRef<string | null>(null);
   if (hv.key) last.current = hv.key;
   const shownKey = (hv.key ?? last.current) as AgentStackKey | null;
   const cards: AgentCard[] = useMemo(() => (shownKey ? agentCards(agents, queries, msId, shownKey) : []), [agents, queries, msId, shownKey]);
   const live = hv.key ? announce(cards.length, ["agent", "agents"], cards.map((c) => c.name), Math.min(5, cards.length)) : "";
-  const row = (k: AgentStackKey) => (loading ? {} : { ...hv.row(k), className: [n(k) === 0 ? "is-zero" : "", hv.key === k ? "is-hover" : ""].filter(Boolean).join(" ") || undefined, "aria-label": `${AGENT_LABEL[k]}: ${n(k)}`, onClick: onReady });
+  const row = (k: AgentStackKey) => (loading ? {} : { ...hv.row(k), className: [n(k) === 0 ? "is-zero" : "", hv.key === k ? "is-hover" : ""].filter(Boolean).join(" ") || undefined, "aria-label": `${AGENT_LABEL[k]}: ${n(k)}`, "data-go": n(k) > 0 && onOpen ? "1" : undefined, onClick: () => { open(k); } });
   return (
     <div className={`os-card d60-card d60-hoopcard d60-agents${loading ? " d58-skcard" : ""}`} data-sk={loading ? "card" : undefined} data-d60="agents-hoop" role="group" aria-label="Agents on file" data-loading={loading ? "1" : "0"}
       data-cov={JSON.stringify({ querying: cov.querying, closed: cov.closed, none: cov.none, ready: cov.ready, total: cov.total })}>
@@ -225,7 +229,7 @@ export const AgentsHoop: React.FC<{ loading: boolean; cov: AgentCoverage; play: 
         </div>
         <div className="d60-hb">
           <Hoop segs={segs} play={play} label={`${cov.queried} of ${cov.total} queried: ${cov.querying} querying, ${cov.closed} closed, ${cov.none} not yet queried`}
-            hit={loading ? undefined : { ...hv.slice, label: (k) => `${AGENT_LABEL[k as AgentStackKey]}: ${n(k)}`, onClick: () => onReady() }}>
+            hit={loading ? undefined : { ...hv.slice, label: (k) => `${AGENT_LABEL[k as AgentStackKey]}: ${n(k)}`, onClick: (k) => { open(k); } }}>
             <b className={`d60-hn${loading ? " d58-sk" : ""}`} data-d60="hoop-queried"><CountUp n={cov.queried} /></b>
             <small>of {cov.total.toLocaleString("en-GB")}<br />queried</small>
           </Hoop>

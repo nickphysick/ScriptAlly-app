@@ -502,6 +502,8 @@ export const Queries: React.FC<{
    * shows every query again. It arrives as a prop, on the same seam as `statusFilter`.
    */
   idsFilter?: string | null;
+  /** Dashboard v118 — what an `?ids=` list is (`?from=`), for its chip; absent, the chip keeps Submission packages' words. */
+  idsLabel?: string | null;
   /**
    * ⚠️ THE VIEW IS A ROUTE AND ARRIVES AS A PROP, on the same seam as `statusFilter` and `?q=`.
    * `cards` is the browsing grid; `detail` is the two-pane surface. App.tsx derives it — `?q=<id>`
@@ -512,7 +514,7 @@ export const Queries: React.FC<{
   onSelectView?: (view: "cards" | "detail") => void;
   /** opening a card is a NAVIGATION — it sets `?q=<id>`, which is what puts the page in detail view */
   onOpenQuery?: (id: string) => void;
-}> = ({ searchQuery, onNavigate, activeSubPage, inShell = false, createSeed, onCreateSeedConsumed, routeActive = false, statusFilter, idsFilter = null, view = "cards", onSelectView, onOpenQuery }) => {
+}> = ({ searchQuery, onNavigate, activeSubPage, inShell = false, createSeed, onCreateSeedConsumed, routeActive = false, statusFilter, idsFilter = null, idsLabel = null, view = "cards", onSelectView, onOpenQuery }) => {
   const {
     currentUser,
     manuscripts,
@@ -2605,6 +2607,8 @@ export const Queries: React.FC<{
   useEffect(() => {
     const ids = (idsFilter ?? "").split(",").map((x) => x.trim()).filter(Boolean);
     setQcIds(ids.length ? new Set(ids) : null);
+    /* Dashboard v118 — a list opened from a link arrives at the top of the page, not where the page was last left */
+    if (ids.length && typeof window !== "undefined") requestAnimationFrame(() => { const port = document.getElementById("app-stage-scroll"); if (port) port.scrollTop = 0; });
   }, [idsFilter]);
   const [filterPopOpen, setFilterPopOpen] = useState(false);
   const [sortPopOpen, setSortPopOpen] = useState(false);
@@ -3908,7 +3912,7 @@ export const Queries: React.FC<{
     ...(qcCourtOn ? [{ key: `court:${qcCourtOn}`, label: qcCourtOn === "you" ? "Your move" : qcCourtOn === "agent" ? "With agents" : "Closed", off: () => setQcCzCourt(null) }] : []),
     ...(qcFind.trim() ? [{ key: "find", label: `“${qcFind.trim()}”`, off: () => setQcFind("") }] : []),
     /* v26 — from Submission packages' Results */
-    ...(qcIds ? [{ key: "ids", label: `${qcIds.size} from Submission packages`, off: () => setQcIds(null) }] : []),
+    ...(qcIds ? [{ key: "ids", label: idsLabel ? `${idsLabel} · ${qcIds.size}` : `${qcIds.size} from Submission packages`, off: () => setQcIds(null) }] : []),
   ];
   /* v140 §D — the quick picks' counts, over the scoped rows */
   const qc140QuickN = {

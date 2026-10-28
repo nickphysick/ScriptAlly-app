@@ -58,3 +58,8 @@
 .d116-bust { display: flex; align-items: flex-end; justify-content: center; overflow: hidden; flex: none; width: 24px; height: 24px; border-radius: 50%; }
 .d116-bust svg { width: 19px; height: 19px; margin-bottom: -3px; fill: currentColor; opacity: 0.85; }
 
+
+/* ── Dashboard v118 Part B — a hoop's slice or key row that opens its list wears the pointer; a 0 row does not ── */
+.d116-ring .d116-hit { cursor: pointer; }
+/* 0-3-1, above dash116Cards' `.d60-hl li[data-d116] { cursor: pointer }` (0-2-1) whatever the sheet order */
+.d60-hl li[data-d116="key-row"]:not([data-go="1"]) { cursor: default; }
