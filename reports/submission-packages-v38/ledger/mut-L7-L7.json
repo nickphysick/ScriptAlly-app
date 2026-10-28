@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "L7",
+  "where": "the band says what it will show",
+  "ok": true,
+  "detail": "Once you’ve logged queries with a package, this shows what’s working."
+ },
+ {
+  "lock": "L7",
+  "where": "no totals",
+  "ok": true,
+  "detail": "totals"
+ },
+ {
+  "lock": "L7",
+  "where": "the dashed message",
+  "ok": true,
+  "detail": "Nothing to show yet. Log a query with a package and its results start here."
+ },
+ {
+  "lock": "L7",
+  "where": "no showcases",
+  "ok": false,
+  "detail": "shows"
+ }
+]

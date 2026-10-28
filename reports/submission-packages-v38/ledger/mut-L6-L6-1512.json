@@ -1,0 +1,20 @@
+[
+ {
+  "lock": "L6-1512",
+  "where": "the sheet is measured",
+  "ok": true,
+  "detail": "{\"sheet\":{\"l\":248,\"w\":1256},\"band\":{\"l\":296,\"w\":1160}}"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "the band's width is the sheet's (±1)",
+  "ok": false,
+  "detail": "{\"sheet\":{\"l\":248,\"w\":1256},\"band\":{\"l\":296,\"w\":1160}}"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "the band starts at the sheet's left (±1)",
+  "ok": false,
+  "detail": "{\"sheet\":{\"l\":248,\"w\":1256},\"band\":{\"l\":296,\"w\":1160}}"
+ }
+]

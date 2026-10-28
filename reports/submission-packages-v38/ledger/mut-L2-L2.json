@@ -1,0 +1,104 @@
+[
+ {
+  "lock": "L2",
+  "where": "labels are drawn (4 live)",
+  "ok": true,
+  "detail": "[{\"id\":\"pk40-draft\",\"on\":true},{\"id\":\"pk40-ready\",\"on\":false},{\"id\":\"pk40-std2\",\"on\":false},{\"id\":\"pk40-std\",\"on\":true}]"
+ },
+ {
+  "lock": "L2",
+  "where": "pk40-std2: loads into the builder",
+  "ok": true,
+  "detail": "pk40-std2"
+ },
+ {
+  "lock": "L2",
+  "where": "pk40-std2: the header name matches the label",
+  "ok": true,
+  "detail": "Standard 2 vs Standard 2"
+ },
+ {
+  "lock": "L2",
+  "where": "pk40-std2: it is the only label marked selected",
+  "ok": false,
+  "detail": "[\"pk40-draft\",\"pk40-std2\"]"
+ },
+ {
+  "lock": "L2",
+  "where": "pk40-ready: loads into the builder",
+  "ok": true,
+  "detail": "pk40-ready"
+ },
+ {
+  "lock": "L2",
+  "where": "pk40-ready: the header name matches the label",
+  "ok": true,
+  "detail": "Ready one vs Ready one"
+ },
+ {
+  "lock": "L2",
+  "where": "pk40-ready: it is the only label marked selected",
+  "ok": false,
+  "detail": "[\"pk40-draft\",\"pk40-ready\"]"
+ },
+ {
+  "lock": "L2",
+  "where": "pk40-draft: loads into the builder",
+  "ok": true,
+  "detail": "pk40-draft"
+ },
+ {
+  "lock": "L2",
+  "where": "pk40-draft: the header name matches the label",
+  "ok": true,
+  "detail": "Draft one vs Draft one"
+ },
+ {
+  "lock": "L2",
+  "where": "pk40-draft: it is the only label marked selected",
+  "ok": false,
+  "detail": "[\"pk40-draft\",\"pk40-ready\"]"
+ },
+ {
+  "lock": "L2",
+  "where": "pk40-std: loads into the builder",
+  "ok": true,
+  "detail": "pk40-std"
+ },
+ {
+  "lock": "L2",
+  "where": "pk40-std: the header name matches the label",
+  "ok": true,
+  "detail": "Standard vs Standard"
+ },
+ {
+  "lock": "L2",
+  "where": "pk40-std: it is the only label marked selected",
+  "ok": false,
+  "detail": "[\"pk40-ready\",\"pk40-std\"]"
+ },
+ {
+  "lock": "L2",
+  "where": "Show retired brings the retired label",
+  "ok": true,
+  "detail": "old"
+ },
+ {
+  "lock": "L2",
+  "where": "the retired label opens the drawer for it",
+  "ok": true,
+  "detail": "pk40-old"
+ },
+ {
+  "lock": "L2",
+  "where": "…and does not load it into the builder",
+  "ok": true,
+  "detail": "pk40-std vs pk40-std"
+ },
+ {
+  "lock": "L2",
+  "where": "…which offers no Edit in the builder",
+  "ok": true,
+  "detail": "edit"
+ }
+]

@@ -1,0 +1,20 @@
+[
+ {
+  "lock": "L10",
+  "where": "the drawer closed",
+  "ok": true,
+  "detail": "pkd"
+ },
+ {
+  "lock": "L10",
+  "where": "New package opened with its Start from",
+  "ok": true,
+  "detail": "[\"Empty=true\",\"A copy of Standard 2=false\"]"
+ },
+ {
+  "lock": "L10",
+  "where": "…“A copy of Standard 2” chosen",
+  "ok": false,
+  "detail": "[\"Empty=true\",\"A copy of Standard 2=false\"]"
+ }
+]
