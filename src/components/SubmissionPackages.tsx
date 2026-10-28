@@ -46,6 +46,7 @@ import "./packages/v26/pk39.generated.css";
 import "./packages/v26/pk39.css";
 import "./packages/v26/pk391.generated.css";
 import "./packages/v26/pk391.css";
+import "./packages/v26/pk392.css";
 
 export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab: string, sub?: string) => void }> = ({ active: routeActive = true }) => {
   const model = usePk26Model();
