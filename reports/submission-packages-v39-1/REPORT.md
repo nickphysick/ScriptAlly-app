@@ -72,4 +72,10 @@ Proofs: `redfirst-v39-base.txt`, `mutation-proofs.txt`. Rewritten v39 locks: `te
 
 ## 7 · Dev deploy
 
-See the end of this file (filled in after the deploy).
+Dev had moved on since v39's deploy: it served `dev/…-pk38-pk39-db116-cl256-rsp5-dm1-db118` (636efadd,
+index-BbTfqWZJ.js — confirmed by building that tip and matching the hash). v39.1 was merged onto it as
+**`dev/…-rsp5-dm1-db118-pk391` (1f694e78)**; the only conflict was `design-refs/.refhashes.json` (both sides enrolled
+refs; union kept). Gates on the merged tree: tsc 0, build clean, Vitest 682 files passed — three `functions/` files
+failed only because the fresh worktree had no `functions/node_modules` (with it: 18/18, 277 passed; the merge touches
+nothing under `functions/`). Hosting deployed from that clean pushed tip with `--project scriptally-dev`.
+**Dev now serves index-BzLemNDD.js.** No rules or functions changed. Prod is Nick's.
