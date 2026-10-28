@@ -1,0 +1,47 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Submission packages v39.1 (design-refs/submission-packages-v39-1/) — the delta on v39, in the order of the pack:
+ *   A · one width, the Contact list's;  E · the spacing scale (24 within, 48 between, 96 between sections);
+ *   B · type;  D · one surface system;  F · the quieter materials header;  C · the hero package and its status pill;
+ *   G · the explainer;  H · New package and Package details in the drawer.
+ * The ref's `body.fx-*` blocks are restated here against the app's own classes; no `fx-` name ships.
+ * Desktop only (≥768), as v39's own rules: the phone layout is a separate mock under review.
+ */
+
+/* ══ A · ONE WIDTH, THE CONTACT LIST'S ═══════════════════════════════════════════════════════════════════════════
+   ⚠️ READ FROM THE CONTACT LIST'S CODE, AS THE PACK ASKS: its header card is `--cl25-w: min(sheet − 48, 1200)`, centred
+   (contactV25.css), so its inset is max(24, (sheet − 1200) / 2) — 28 at 1512, 24 at 1280, 232 at 1920. The pack's
+   `max(64px, (100% − 1080px) / 2)` is the RETIRED v17 header's (`--phf-inset`); the ref's 92 / 66 / 296 follow it. The
+   Contact list's values win, so the header card AND every block under it share these edges (L1). `%` resolves against
+   the page root, which spans the sheet. */
+@media (min-width: 768px) {
+  .p6.p6 { --pk-in: max(24px, calc((100% - 1200px) / 2)); }
+  .p6 > :is(.p9-tip, .p9-pkl, .p9-pb-build, .p9-agg3) { margin-left: var(--pk-in) !important; margin-right: var(--pk-in) !important; }
+  /* the navy band runs the sheet; only its contents follow the width */
+  .p6 > .p8-bnr { padding-left: 0 !important; padding-right: 0 !important; }
+  .p6 > .p8-bnr > .p8-bnr-in { box-sizing: border-box; margin-left: var(--pk-in) !important; margin-right: var(--pk-in) !important; max-width: none !important; }
+}
+
+/* ══ E · THE SPACING SCALE (the ref's `fx-space`): 24 within a section, 48 between related blocks, 96 between sections ══ */
+@media (min-width: 768px) {
+  .p6 > .pk39-hd { margin-bottom: 48px !important; }
+  .p6 > .p9-tip { margin-top: 0 !important; margin-bottom: 48px !important; }
+  .p6 > .p9-pkl { margin-top: 0 !important; margin-bottom: 48px !important; row-gap: 24px !important; }
+  .p6 > .p9-pkl .p9-pkl-k { margin-bottom: 0 !important; }
+  .p6 > .p9-pb-build { margin-top: 0 !important; margin-bottom: 96px !important; }
+  .p6 > .p9-pb-build .p9-bk-k { margin-bottom: 24px !important; }
+  .p9-pb-grid.p9-v39.p9-v39 { gap: 24px !important; }
+  /* v40's guidelines sit inside the builder section, 24 under the cards, so the builder still ends 96 above the band */
+  .p6 > .p9-pb-build > .p9-gl { margin: 24px 0 0 !important; }
+  .p6 > .p8-bnr { margin-top: 0 !important; }
+  .p6 > .p9-agg3 { margin-top: 96px !important; margin-bottom: 96px !important; }
+  .p9-agg3 .p9-ag3-row .p9-sh2 { margin-bottom: 48px !important; }
+  .p9-agg3 .p9-ag3-row .p9-rlw { margin-top: 96px !important; gap: 48px !important; padding: 48px !important; }
+  .p9-agg3 .p9-ag3-row + .p9-ag3-row { margin-top: 96px !important; padding: 96px 0 !important; }
+  .p9-agg3 .p9-id-aggMain .p9-ag3-f { margin-top: 96px !important; }
+}
+@container p9sheet (max-width: 1200px) {
+  .p9-agg3 .p9-ag3-row .p9-rlw { margin-top: 96px !important; gap: 48px !important; padding: 48px !important; }
+}

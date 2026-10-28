@@ -192,14 +192,15 @@ export const Pk26Builder: React.FC<BuilderProps> = ({ model, retired, current, o
               : <StartCard retired={retired} onNewPackage={onNewPackage} onDuplicate={onDuplicate} />}
           </div>
         </div>
+        {/* v40's package guidelines, kept (v39 draws none and asks for none to go). v39.1: inside the builder's own section,
+            24 under the cards, so the builder ends 96 above the results band (the ref's rhythm) */}
+        <div className="p6-wbf p9-gl">
+          <details className="p6-pkgl" data-pk40="guidelines">
+            <summary><span className="p6-pkgl-ic">i</span>Package guidelines</summary>
+            <ul>{GUIDELINES.map(([b, t]) => <li key={b}><b>{b}</b>{t}</li>)}</ul>
+          </details>
+        </div>
       </section>
-      {/* v40's package guidelines, kept (v39 draws none and asks for none to go); under the page root, with no panel */}
-      <div className="p6-wbf p9-gl">
-        <details className="p6-pkgl" data-pk40="guidelines">
-          <summary><span className="p6-pkgl-ic">i</span>Package guidelines</summary>
-          <ul>{GUIDELINES.map(([b, t]) => <li key={b}><b>{b}</b>{t}</li>)}</ul>
-        </details>
-      </div>
     </>
   );
 };
