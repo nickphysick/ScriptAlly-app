@@ -152,3 +152,121 @@ test("DM1-A1 · the phone top bar", async ({ page }) => {
   }
   L.done(60);
 });
+
+/** The phone cards' figures, read off the page. */
+const phoneFigs = (page: Page) => page.evaluate(() => {
+  const vis = (e: Element | null) => !!e && (e as HTMLElement).getBoundingClientRect().height > 0;
+  const card = (k: string) => [...document.querySelectorAll<HTMLElement>(`[data-dm1="card-${k}"]`)].find(vis) ?? null;
+  const num = (el: HTMLElement | null, sel = '[data-dm1="num"]') => {
+    const t = el?.querySelector(sel)?.firstChild?.textContent ?? "";
+    return t.trim() === "" ? null : Number(t);
+  };
+  const segs = (el: HTMLElement | null) => [...(el?.querySelectorAll<HTMLElement>('[data-dm1="bar"] i') ?? [])].map((i) => ({ k: i.dataset.k, g: Number(i.style.flexGrow) }));
+  const box = (el: HTMLElement | null) => { const r = el?.getBoundingClientRect(); return r ? { x: r.left, y: r.top, w: r.width, h: r.height } : null; };
+  const a = card("active"), w = card("with"), c = card("closed"), g = card("agents");
+  return {
+    active: num(a, '[data-dm1="active-num"]'),
+    line: a?.querySelector('[data-dm1="active-line"]')?.textContent ?? "",
+    chip: a?.querySelector('[data-dm1="chip"]')?.textContent ?? null,
+    with: num(w), withLine: w?.querySelector(".dm1-sline")?.textContent ?? "", withSegs: segs(w),
+    closed: num(c), closedLine: c?.querySelector(".dm1-sline")?.textContent ?? "", closedSegs: segs(c),
+    agents: num(g), agentsTotal: Number((g?.querySelector('[data-dm1="num"] small')?.textContent ?? "").replace("/", "")), agentsLine: g?.querySelector(".dm1-sline")?.textContent ?? "", agentsSegs: segs(g),
+    boxes: { active: box(a), with: box(w), closed: box(c), agents: box(g) },
+    weeks: document.querySelectorAll('[data-dm1="chart"]').length,
+  };
+});
+
+/** The desktop page's own figures for the same account and manuscript. */
+const desktopFigs = (page: Page) => page.evaluate(() => {
+  const t = document.querySelector('[data-probe-text="chart-title"]')?.textContent ?? "";
+  const closed = document.querySelector<HTMLElement>('[data-d60="closed-hoop"]')?.dataset.counts;
+  const cov = document.querySelector<HTMLElement>('[data-d60="agents-hoop"]')?.dataset.cov;
+  return { title: t, active: Number((t.match(/^([0-9,]+) active/) ?? [])[1]?.replace(/,/g, "") ?? NaN), closed: closed ? JSON.parse(closed) : null, cov: cov ? JSON.parse(cov) : null };
+});
+
+test("DM1-B1 · stat cards first", async ({ page }) => {
+  const L = new Ledger("B1");
+  await openDash(page, DESKTOPS[0]);
+  const desk = await desktopFigs(page);
+  L.check("B1", "population: the desktop's figures", Number.isFinite(desk.active) && !!desk.closed && !!desk.cov, JSON.stringify(desk));
+  for (const vp of PHONES) {
+    await openDash(page, vp);
+    const where = tag(vp);
+    if (MUT === "B1-order") await page.addStyleTag({ content: `.dm1-stats { flex-direction: column-reverse !important; }` });
+    const f = await phoneFigs(page);
+    L.check("B1", `${where} population: four cards`, !!f.boxes.active && !!f.boxes.with && !!f.boxes.closed && !!f.boxes.agents, JSON.stringify(f.boxes));
+    if (!f.boxes.active || !f.boxes.with || !f.boxes.closed || !f.boxes.agents) continue;
+    const top = await rectOf(page, '[data-dm1="top"]');
+    L.check("B1", `${where} the page opens on the Active card, under the bar`, !!top && f.boxes.active.y >= top.b && f.boxes.active.y - top.b <= 16, `${top?.b} → ${f.boxes.active.y}`);
+    L.check("B1", `${where} order: Active above With agents / Closed / Agents`, f.boxes.active.y + f.boxes.active.h <= f.boxes.with.y && f.boxes.with.x < f.boxes.closed.x && f.boxes.closed.x < f.boxes.agents.x, JSON.stringify(f.boxes));
+    L.check("B1", `${where} the three are equal thirds`, Math.abs(f.boxes.with.w - f.boxes.closed.w) < 1 && Math.abs(f.boxes.closed.w - f.boxes.agents.w) < 1, `${f.boxes.with.w} ${f.boxes.closed.w} ${f.boxes.agents.w}`);
+    L.check("B1", `${where} gutters 16`, Math.abs(f.boxes.active.x - 16) < 1 && Math.abs(vp.width - (f.boxes.active.x + f.boxes.active.w) - 16) < 1, JSON.stringify(f.boxes.active));
+    /* the numbers, against the desktop's own */
+    L.check("B1", `${where} Active = the desktop chart's headline`, f.active === desk.active, `${f.active} vs ${desk.title}`);
+    const closedTotal = Object.values(desk.closed as Record<string, number>).reduce((n, v) => n + v, 0);
+    L.check("B1", `${where} Closed = the desktop hoop's total`, f.closed === closedTotal, `${f.closed} vs ${closedTotal}`);
+    L.check("B1", `${where} Closed's bar = the hoop's buckets`, JSON.stringify(f.closedSegs.map((s) => [s.k, s.g])) === JSON.stringify(Object.entries(desk.closed as Record<string, number>).filter(([, v]) => v > 0)), JSON.stringify(f.closedSegs));
+    const cov = desk.cov as { querying: number; closed: number; none: number; total: number };
+    L.check("B1", `${where} Agents = queried / total of the desktop's coverage`, f.agents === cov.querying + cov.closed && f.agentsTotal === cov.total, `${f.agents}/${f.agentsTotal} vs ${JSON.stringify(cov)}`);
+    L.check("B1", `${where} Agents' line = the not-yet-queried`, cov.none > 0 ? f.agentsLine === `${cov.none} to query` : f.agentsLine === "All queried", f.agentsLine);
+    const needYou = Number((f.line.match(/^(\d+) need you/) ?? [])[1] ?? 0);
+    L.check("B1", `${where} need you + With agents = Active`, needYou + (f.with ?? NaN) === f.active, `${needYou} + ${f.with} vs ${f.active}`);
+    L.check("B1", `${where} With agents' bar sums to its number`, f.withSegs.reduce((n, s) => n + s.g, 0) === f.with, JSON.stringify(f.withSegs));
+    L.check("B1", `${where} the chip is a rise or absent`, f.chip === null || /^↑ [1-9][0-9]* this month$/.test(f.chip), String(f.chip));
+
+    /* the scrub, at three positions: the number becomes that week's, and it all comes back */
+    const chart = await rectOf(page, '[data-dm1="chart"]');
+    L.check("B1", `${where} population: the chart`, !!chart, JSON.stringify(chart));
+    if (chart) {
+      const series = await page.evaluate(() => {
+        const svg = [...document.querySelectorAll<SVGPathElement>('[data-dm1="line"]')].find((e) => e.getBoundingClientRect().width > 0);
+        return svg?.getAttribute("d") ?? "";
+      });
+      const pts = [...series.matchAll(/[ML](-?[0-9.]+),(-?[0-9.]+)/g)].map((m) => Number(m[1]));
+      L.check("B1", `${where} the line draws twelve weeks`, pts.length === 12, String(pts.length));
+      for (const frac of [0.08, 0.5, 0.9]) {
+        const x = chart.x + (chart.w - 48) * frac;
+        const y = chart.y + 40;
+        await page.mouse.move(x, y);
+        await page.mouse.down();
+        await page.waitForTimeout(80);
+        const s = await page.evaluate(() => {
+          const rule = document.querySelector<SVGLineElement>('[data-dm1="rule"]');
+          const a = [...document.querySelectorAll<HTMLElement>('[data-dm1="card-active"]')].find((e) => e.getBoundingClientRect().height > 0);
+          return { week: rule ? Number(rule.dataset.week) : null, num: a?.querySelector('[data-dm1="active-num"]')?.textContent, line: a?.querySelector('[data-dm1="active-line"]')?.textContent, chip: !!a?.querySelector('[data-dm1="chip"]'), path: location.pathname };
+        });
+        const expectWeek = Math.round(frac * 11);
+        L.check("B1", `${where} scrub at ${frac}: the rule snaps to week ${expectWeek}`, s.week === expectWeek, JSON.stringify(s));
+        L.check("B1", `${where} scrub at ${frac}: the line names the week`, /^active in the week of \d{1,2} [A-Z][a-z]{2}$/.test(s.line ?? ""), String(s.line));
+        L.check("B1", `${where} scrub at ${frac}: the chip hides`, !s.chip, "");
+        await page.mouse.up();
+        await page.waitForTimeout(150);
+        const held = await page.evaluate(() => document.querySelector('[data-dm1="active-line"]')?.textContent);
+        L.check("B1", `${where} scrub at ${frac}: held just after release`, /^active in the week of/.test(held ?? ""), String(held));
+        await page.waitForTimeout(900);
+        const back = await phoneFigs(page);
+        L.check("B1", `${where} scrub at ${frac}: restores after 0.8s, and never navigates`, back.active === f.active && back.line === f.line && s.path === "/dashboard", `${back.active} ${back.line} ${s.path}`);
+      }
+      const ta = await page.evaluate(() => getComputedStyle(document.querySelector('[data-dm1="chart"]')!).touchAction);
+      L.check("B1", `${where} the chart leaves vertical scroll to the page`, ta === "pan-y", ta);
+    }
+  }
+  /* each card lands on its list */
+  const vp = PHONES[0];
+  for (const [k, want] of [["active", /^\/queries\?ids=/], ["with", /^\/queries\?ids=/], ["closed", /^\/queries\?ids=/], ["agents", /^\/agents$/]] as const) {
+    await openDash(page, vp);
+    const figs = await phoneFigs(page);
+    /* a missing card is a failed reading, never a click that waits out the test */
+    if ((await page.locator(`[data-dm1="card-${k}"]`).count()) === 0) { L.check("B1", `${tag(vp)} ${k} card opens ${want}`, false, "no card"); continue; }
+    await page.locator(`[data-dm1="card-${k}"]`).first().click({ position: { x: 20, y: 14 } });
+    await page.waitForTimeout(2500);
+    const path = await page.evaluate(() => location.pathname + location.search);
+    L.check("B1", `${tag(vp)} ${k} card opens ${want}`, want.test(path), path);
+    if (k !== "agents") {
+      const rows = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-qcv="row"]')].filter((e) => e.getBoundingClientRect().height > 0).length);
+      const n = k === "with" ? figs.with : k === "closed" ? figs.closed : figs.active;
+      L.check("B1", `${tag(vp)} ${k}: the filtered list's count equals the card's`, rows === n, `${rows} rows vs card ${n}`);
+    }
+  }
+  L.done(70);
+});

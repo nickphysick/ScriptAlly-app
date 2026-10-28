@@ -8,11 +8,17 @@
  *
  * Order: the top bar → the stat cards → Up next → the founding writer row → Recent.
  */
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Activity, Agent, Manuscript, ManuscriptVersion, Query, SmartImportUsage, Task, TaskFlag, User, UserTask } from "../../../types";
 import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
 import { PhoneSearch, PhoneTopBar, type PhoneActions } from "./PhoneTopBar";
+import { PhoneStats } from "./PhoneStats";
+import { scopeActivities, scopeQueries } from "../../../lib/manuscriptScope";
+import { closedTile } from "../../../lib/dashClosed";
+import { agentCoverage } from "../../../lib/dashFirstUse";
+import { localYMD } from "../../../lib/shellSidebar";
+import { activeCard, agentsCard, closedCard, queriesForIds, withAgentsCard } from "../../../lib/dashPhone";
 import "./dashPhone.css";
 
 export interface DashPhoneProps {
@@ -40,6 +46,20 @@ export const DashPhone: React.FC<DashPhoneProps> = (props) => {
   const navigate = useNavigate();
   const rootRef = useRef<HTMLDivElement>(null);
   const scopeId = activeManuscript?.id ?? null;
+  /* one clock per mount, as Dash58's */
+  const [now] = useState(() => new Date());
+
+  /* ── the figures: the same calls Dash58 makes, arranged by lib/dashPhone ── */
+  const scopedQueries = useMemo(() => scopeQueries(queries, scopeId), [queries, scopeId]);
+  const scopedActivities = useMemo(() => scopeActivities(props.activities, scopeId), [props.activities, scopeId]);
+  const active = useMemo(() => activeCard(scopedQueries, now), [scopedQueries, now]);
+  const withAgents = useMemo(() => withAgentsCard(scopedQueries), [scopedQueries]);
+  const closed = useMemo(() => (loading ? null : closedCard(closedTile(scopedQueries, scopedActivities))), [loading, scopedQueries, scopedActivities]);
+  const cov = useMemo(
+    () => agentCoverage({ agents, queries, manuscript: activeManuscript, now, todayIso: localYMD(now.getTime()) }),
+    [agents, queries, activeManuscript, now],
+  );
+  const agentsFig = useMemo(() => agentsCard(cov), [cov]);
 
   /* the hairline under the bar arrives once the page's own scroller has moved */
   const [scrolled, setScrolled] = useState(false);
@@ -83,7 +103,18 @@ export const DashPhone: React.FC<DashPhoneProps> = (props) => {
         actions={actions}
         scrolled={scrolled}
       />
-      <div className="dm1-body" data-dm1="body" />
+      <div className="dm1-body" data-dm1="body">
+        {/* each card opens exactly its own queries (lib/dashPhone's `queriesForIds`). ⚠️ The Contact list takes no
+            status from the URL, so Agents opens it whole (the report says so). */}
+        <PhoneStats
+          loading={loading}
+          active={active} withAgents={withAgents} closed={closed} agents={agentsFig}
+          onActive={() => navigate(queriesForIds(active.ids))}
+          onWithAgents={() => navigate(queriesForIds(withAgents.ids))}
+          onClosed={() => navigate(queriesForIds(closed?.ids ?? []))}
+          onAgents={() => onNavigate("agents")}
+        />
+      </div>
       {searchOpen && (
         <PhoneSearch
           agents={agents} queries={queries} manuscripts={manuscripts}
