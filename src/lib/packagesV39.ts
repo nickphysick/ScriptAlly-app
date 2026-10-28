@@ -11,6 +11,7 @@
  */
 import type { CSSProperties } from "react";
 import type { PackageColour, SubmissionPackage } from "../types";
+import type { Fig } from "./packagesV38";
 
 export const PACKAGE_COLOURS: readonly { key: PackageColour; name: string; hex: string }[] = [
   { key: "harbour", name: "Harbour", hex: "#1d4b63" },
@@ -40,3 +41,32 @@ export function firstFreeColour(pkgs: readonly Pick<SubmissionPackage, "colour" 
   const used = new Set(pkgs.filter((p) => p.status !== "Retired").map((p) => colourOf(p)));
   return PACKAGE_COLOURS.find((c) => !used.has(c.key))?.key ?? "harbour";
 }
+
+/* ══ PART H · the full lists under Results ═════════════════════════════════════════════════════════════════════════
+ * ⚠️ EVERY FIGURE IS packageReplies' (lib/packagesV38 `Fig`), exactly as the top three: the same first-answer rule,
+ *    edition-true for materials, ranked from MIN_SENDS_FOR_CLAIM answers. A row and a showcase for the same item read
+ *    the same Fig, so they cannot disagree.
+ */
+
+/**
+ * The full list's order (the ref's `order`): sent before unsent, then ranked before too early, then by rate, then by
+ * sent. An under-threshold item is therefore never above a ranked one.
+ */
+export function fullListOrder<T extends { f: Fig }>(items: readonly T[]): T[] {
+  const rate = (f: Fig) => (f.ranked && f.pct != null ? f.pct : -1);
+  return [...items].sort((a, b) =>
+    (Number(b.f.sent > 0) - Number(a.f.sent > 0))
+    || (Number(b.f.ranked) - Number(a.f.ranked))
+    || (rate(b.f) - rate(a.f))
+    || (b.f.sent - a.f.sent));
+}
+
+/** A row's Rate cell (the ref's `rl-v`): a bar and a figure once ranked; a hatched bar and "Too early"; dashes and "Not sent". */
+export type RateCell = { k: "ranked"; width: number; label: string } | { k: "early"; width: 100; label: "Too early" } | { k: "none"; width: 100; label: "Not sent" };
+export function rateCell(f: Fig): RateCell {
+  if (!f.sent) return { k: "none", width: 100, label: "Not sent" };
+  if (!f.ranked || f.pct == null) return { k: "early", width: 100, label: "Too early" };
+  return { k: "ranked", width: Math.max(3, f.pct), label: `${f.pct}%` };
+}
+/** The Sent, Answered and Asked for more cells: the count, or a dash for something never sent. */
+export const countCells = (f: Fig): [string, string, string] => (f.sent ? [String(f.sent), String(f.answered), String(f.more)] : ["–", "–", "–"]);

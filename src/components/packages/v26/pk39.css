@@ -159,3 +159,41 @@
 @container p9sheet (max-width: 1200px) {
   .p9-pb-grid.p9-v39 .p9-stg .p9-stg-s:not(.p9-on) { font-size: 0; }
 }
+
+/* ══ H · Results: what the capture cannot see, and the colour ══ */
+/* the showcase card's header and the full list's tile in the package's colour (ref `.ac-pk .ac-h`, `.rl-ic`) */
+.p9-agg3 .p9-ac-pk .p9-ac-h { background: var(--pc, #1d4b63) !important; }
+.p9-agg3 .p9-ac-pk .p9-ac-h .p9-shc-ic { color: var(--pc, #1d4b63) !important; }
+.p9-agg3 .p9-rl-r .p9-rl-n .p9-rl-ic { background: var(--pc, #1d4b63) !important; color: #fff !important; }
+/* the two list panels' grounds: #f8f5f0 under Packages, #f3eee7 inside the pieces band (ref v39.11) */
+.p9-agg3 .p9-ag3-row .p9-rlw { background-color: #f8f5f0 !important; }
+.p9-agg3 .p9-ag3-row + .p9-ag3-row .p9-rlw { background-color: #f3eee7 !important; }
+/* a kind with nothing ranked (ref `.ac-m.ghost`, `.ag3.none`): the hatched placeholder card */
+.p9-agg3 .p9-ag2-v .p9-ac-m.p9-ghost {
+  position: absolute; left: 0; top: 0; width: 250px; height: 150px; border-radius: 12px; transform: rotate(-1deg);
+  background: repeating-linear-gradient(135deg, #f4f0ea 0 6px, #efeae2 6px 12px); box-shadow: none;
+}
+.p9-agg3 .p9-ag3.p9-none .p9-ag2-v { cursor: default; }
+.p9-agg3 .p9-ag3.p9-none > h3 .p9-o { font-style: italic; color: rgba(28, 19, 15, 0.55); }
+/* the empty Results (v38's message, unchanged) */
+.p9-agg3 .p9-id-aggMain .p9-rs-empty { padding: 28px; border-radius: 18px; outline: 1.5px dashed rgba(28, 19, 15, 0.16); outline-offset: -1.5px; text-align: center; font-family: var(--sp-serif); }
+.p9-agg3 .p9-id-aggMain .p9-rs-empty > b { display: block; font: 400 18px/normal var(--sp-type); }
+.p9-agg3 .p9-id-aggMain .p9-rs-empty > span { display: block; max-width: 520px; margin: 6px auto 0; font: 400 15px/22.5px var(--sp-serif); color: rgba(28, 19, 15, 0.58); }
+/* a tab's focus ring (ref `.rl-tabs button:focus-visible`) */
+.p9-agg3 .p9-rl-tabs button:focus-visible { outline: 2px solid #2d3a50; outline-offset: 3px; border-radius: 3px; }
+/* v40's ruling, carried: the showcase kickers, the card tags, the list headings and the art placeholders in the
+   typewriter, sentence case */
+.p9-agg3 .p9-ag3 .p9-ag3-k { font: 400 16px/normal var(--sp-type) !important; letter-spacing: 0 !important; text-transform: none !important; }
+.p9-agg3 .p9-ac-h .p9-a,
+.p9-agg3 .p9-ac-pk .p9-ac-h > em:not(.p9-a) { font: 400 12px/normal var(--sp-type) !important; letter-spacing: 0 !important; text-transform: none !important; }
+.p9-agg3 .p9-ac-m .p9-am-h span > small,
+.p9-agg3 .p9-ov .p9-ov-k { font: 400 12px/normal var(--sp-type) !important; letter-spacing: 0 !important; text-transform: none !important; }
+.p9-agg3 .p9-rl .p9-rl-hd > span { font: 400 13px/normal var(--sp-type) !important; letter-spacing: 0 !important; text-transform: none !important; }
+.p9-agg3 .p9-ill > i { font: 400 10px/1 var(--sp-type) !important; letter-spacing: 0 !important; text-transform: none !important; }
+/* the ref's 1200px rules for the full lists (v39.8 / v39.9 / v39.11). The generator's 1280 pass could not map the panel
+   (its selector is deepened over the two grounds), so these are stated by hand: one column, 18 apart, 56 down, 28 in. */
+@container p9sheet (max-width: 1200px) {
+  .p9-agg3 .p9-ag3-row .p9-rlw { grid-template-columns: minmax(0, 1fr) !important; gap: 18px !important; margin-top: 56px !important; padding: 28px !important; }
+  .p9-agg3 .p9-rlw .p9-rl-side { padding-top: 0 !important; max-width: 560px; }
+  .p9-agg3 .p9-rl-r .p9-rl-v { grid-template-columns: 1fr 62px !important; }
+}
