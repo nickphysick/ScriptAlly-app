@@ -1,0 +1,6 @@
+
+Running 2 tests using 1 worker
+
+[1/2] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/2] [measure] › tests/e2e/queriesMobileV1.measure.ts:368:1 › QM1 · L1 desktop capture
+  2 passed (26.7s)

@@ -133,7 +133,10 @@ test("DM1-A1 · the phone top bar", async ({ page }) => {
         await page.waitForTimeout(1500);
         const after = await openedState(page);
         /* the flow's own dialog, by its accessible name: the log journey, the response picker (the drawer's "Query"), the new-agent panel */
-        const want = label === "Log a query" ? /^Log a query$/ : label === "Add an agent" ? /^Add an agent$/ : /^Query$/;
+        /* ⚠️ RE-POINTED 28 OCT (Queries on a phone v1): "Record a response" opened the Query Centre's own side-panel picker
+           ("Query") only because the old phone Query Centre drew that panel; the phone page does not, so it now opens the
+           drawer's response journey ("Record a response"), the app's fallback wherever no panel is hosted. Either is the flow. */
+        const want = label === "Log a query" ? /^Log a query$/ : label === "Add an agent" ? /^Add an agent$/ : /^(Query|Record a response)$/;
         void expect;
         const opened = before.dialogs.length === 0 && after.dialogs.some((d) => want.test(d));
         L.check("A1", `${where} "${label}" opens its flow`, opened, JSON.stringify({ before, after }));
@@ -263,7 +266,9 @@ test("DM1-B1 · stat cards first", async ({ page }) => {
     const path = await page.evaluate(() => location.pathname + location.search);
     L.check("B1", `${tag(vp)} ${k} card opens ${want}`, want.test(path), path);
     if (k !== "agents") {
-      const rows = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-qcv="row"]')].filter((e) => e.getBoundingClientRect().height > 0).length);
+      /* ⚠️ RE-POINTED 28 OCT (Queries on a phone v1): at 390 the Query Centre is the phone page, whose rows are
+         `[data-qm1="row"]`; the claim is unchanged — the list a card opens holds exactly the card's queries. */
+      const rows = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-qm1="row"]')].filter((e) => e.getBoundingClientRect().height > 0).length);
       const n = k === "with" ? figs.with : k === "closed" ? figs.closed : figs.active;
       L.check("B1", `${tag(vp)} ${k}: the filtered list's count equals the card's`, rows === n, `${rows} rows vs card ${n}`);
     }
