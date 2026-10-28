@@ -438,3 +438,28 @@ test("DM1-D1 · the founding writer row and Recent", async ({ page }) => {
   L.check("D1", "22px between sections", gaps.every((g) => Math.abs(g - 22) <= 0.5), JSON.stringify(gaps));
   L.done(24);
 });
+
+test("DM1-E1 · the desktop furniture is gone on phones, and stays on the desktop", async ({ page }) => {
+  const L = new Ledger("E1");
+  const FURNITURE: [string, string][] = [
+    ["the desktop page", '[data-d58="page"]'],
+    ["the header's Log a query / Record a response", '[data-d58="buttons"]'],
+    ["the Closed ring card", '[data-d60="closed-hoop"]'],
+    ["the Agents ring card", '[data-d60="agents-hoop"]'],
+    ["the task pager card", '[data-d71="task"]'],
+    ["the v37 desk line", ".sa-mdeskline"],
+    ["the v37 To-do doorway", ".sa-mtodo"],
+  ];
+  const count = (sel: string) => page.evaluate((s) => [...document.querySelectorAll<HTMLElement>(s)].filter((e) => e.getBoundingClientRect().height > 0).length, sel);
+  for (const vp of PHONES) {
+    await openDash(page, vp);
+    L.check("E1", `${tag(vp)} population: the phone page`, (await count('[data-dm1="page"]')) === 1, "");
+    for (const [name, sel] of FURNITURE) L.check("E1", `${tag(vp)} no ${name}`, (await count(sel)) === 0, sel);
+  }
+  for (const vp of DESKTOPS) {
+    await openDash(page, vp);
+    L.check("E1", `${tag(vp)} no phone page`, (await count('[data-dm1="page"]')) === 0, "");
+    for (const [name, sel] of FURNITURE.slice(0, 5)) L.check("E1", `${tag(vp)} ${name} still renders`, (await count(sel)) >= 1, sel);
+  }
+  L.done(28);
+});
