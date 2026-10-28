@@ -566,6 +566,9 @@ export interface PackageEdition {
  */
 export const PACKAGE_ICONS = ["box", "crown", "globe", "flag", "feather", "flask", "star", "bolt", "heart", "compass", "pen", "key"] as const;
 export type PackageIcon = typeof PACKAGE_ICONS[number];
+/** Submission packages v39 — a package's colour, by key (lib/packagesV39 holds the names and hexes). The rules hold the same eight. */
+export const PACKAGE_COLOUR_KEYS = ["harbour", "lake", "teal", "pine", "indigo", "plum", "slate", "charcoal"] as const;
+export type PackageColour = typeof PACKAGE_COLOUR_KEYS[number];
 
 /**
  * Submission packages v26 — a named extra: whatever an agency asks for that is not a letter, a synopsis or pages
@@ -698,6 +701,9 @@ export interface SubmissionPackage {
   extraIds?: string[];
   /** Submission packages v26 — its icon. Absent reads as "box". */
   icon?: PackageIcon;
+  /** Submission packages v39 — its colour, by key. Absent reads as "harbour" (lib/packagesV39.colourOf). Filing, like the
+   *  name and the icon: outside the lock. */
+  colour?: PackageColour;
   status: RecordStatus;
   createdDate: string; // ISO String
 }

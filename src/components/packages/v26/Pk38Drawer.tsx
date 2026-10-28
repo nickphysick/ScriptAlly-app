@@ -16,8 +16,9 @@ import type { SubmissionPackage } from "../../../types";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import { iconOf } from "../../../lib/packagesV26";
 import { drawerLine, drawerStatus, earlyWarning } from "../../../lib/packagesV38";
+import { pcStyle } from "../../../lib/packagesV39";
 import { Mark, Pic } from "./icons";
-import { Ring } from "./Pk38Labels";
+import { Ring } from "./Pk39Labels";
 import type { Pk26Model } from "./usePk26Model";
 
 export const Pk38Drawer: React.FC<{
@@ -62,7 +63,7 @@ export const Pk38Drawer: React.FC<{
     <div className="p6-layer" data-pk38="drawer-layer">
       <div className={`p6-cx-dim${shown ? " p6-on" : ""}`} onClick={onClose} />
       <aside className={`p6-cx-drw${shown ? " p6-on" : ""}`} role="dialog" aria-modal="true" aria-label={p.packageName} data-pk38="pkd" data-pkg={p.id}>
-        <div className="p8-dh p8-dpk">
+        <div className="p8-dh p8-dpk" style={pcStyle(p)} data-pk39="pkd-head">
           <span className="p8-ddisc"><Pic ic={iconOf(p)} cls="p8-pic" /></span>
           <div className="p8-tx"><h3>{p.packageName}</h3><small>{[p.note, use && "Active", retired && "Retired"].filter(Boolean).join(" · ")}</small></div>
           <button type="button" className="p8-cx-x" aria-label="Close" onClick={onClose}>✕</button>

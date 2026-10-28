@@ -3,15 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * Submission packages v26 — New package and Package details: one dialog (ref `#pdlg`, `pkDlg`) with a Harbour
- * header. Name (required), who it's for (optional), an icon from twelve, and for a new package "Start from": empty,
+ * header. Name (required), who it's for (optional), an icon from twelve, a colour from eight (v39), and for a new package "Start from": empty,
  * or a copy of the active package. Opened from the pencil or the icon tile it renames and re-icons a package and
  * offers "Delete package" — refused, with the reason, for one that has gone out with queries. Enter submits.
  */
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { PACKAGE_ICONS, type PackageIcon, type SubmissionPackage } from "../../../types";
+import { PACKAGE_ICONS, type PackageColour, type PackageIcon, type SubmissionPackage } from "../../../types";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import { iconOf } from "../../../lib/packagesV26";
+import { colourOf, firstFreeColour, PACKAGE_COLOURS, pcStyle } from "../../../lib/packagesV39";
 import { Pic, PicBare } from "./icons";
 import type { Pk26Model } from "./usePk26Model";
 
@@ -38,6 +39,8 @@ const Body: React.FC<{ model: Pk26Model; p: SubmissionPackage | null; version?: 
   const [name, setName] = useState(p?.packageName ?? "");
   const [note, setNote] = useState(p?.note ?? "");
   const [ic, setIc] = useState<PackageIcon>(p ? iconOf(p) : "star");
+  /* v39 C: a new package starts on the first colour no live package uses (Harbour when all eight are taken) */
+  const [col, setCol] = useState<PackageColour>(p ? colourOf(p) : firstFreeColour(model.msPkgs));
   /* the copy offered: the package "Make a copy" came from, else the active one */
   const used = (copyOf ? model.msPkgs.find((x) => x.id === copyOf) : null) ?? model.active;
   const [from, setFrom] = useState<string>(copyOf && used?.id === copyOf ? copyOf : "empty");
@@ -52,13 +55,13 @@ const Body: React.FC<{ model: Pk26Model; p: SubmissionPackage | null; version?: 
     if (!name.trim()) { setErr(true); nameRef.current?.focus(); return; }
     setBusy(true);
     if (p) {
-      const done = await model.saveDetails(p, { name, note, icon: ic });
+      const done = await model.saveDetails(p, { name, note, icon: ic, colour: col });
       setBusy(false);
       if (done) onClose();
       return;
     }
     const known = version && model.versionRows.some((v) => v.id === version) ? version : null;
-    const id = await model.createPackage({ name, note, icon: ic, from: from === "empty" ? null : from, ...(known ? { piece: { kind: "ver" as const, id: known } } : {}) });
+    const id = await model.createPackage({ name, note, icon: ic, colour: col, from: from === "empty" ? null : from, ...(known ? { piece: { kind: "ver" as const, id: known } } : {}) });
     setBusy(false);
     if (id) { onCreated(id); onClose(); }
   };
@@ -68,7 +71,7 @@ const Body: React.FC<{ model: Pk26Model; p: SubmissionPackage | null; version?: 
   return (
     <div className="p6-pd" role="dialog" aria-modal="true" aria-labelledby="p6-pdT">
       <div className="p6-pd-h">
-        <span className="p6-pd-prev"><Pic ic={ic} /></span>
+        <span className="p6-pd-prev" style={pcStyle({ colour: col })}><Pic ic={ic} /></span>
         <div><p className="p6-pd-k">{p ? "Package details" : "New package"}</p><h3 className="p6-id-pdT" id="p6-pdT">{p ? p.packageName : "Name your package"}</h3></div>
         <button type="button" className="p6-pd-x" aria-label="Close" onClick={onClose}>✕</button>
       </div>
@@ -78,6 +81,11 @@ const Body: React.FC<{ model: Pk26Model; p: SubmissionPackage | null; version?: 
         <div className="p6-pd-f"><span>Icon <em>so you can spot it in the Query Centre</em></span>
           <div className="p6-pd-ics" role="radiogroup" aria-label="Icon">
             {PACKAGE_ICONS.map((k) => <button type="button" key={k} role="radio" aria-checked={ic === k} aria-label={k} onClick={() => setIc(k)}><PicBare ic={k} /></button>)}
+          </div>
+        </div>
+        <div className="p6-pd-f"><span>Colour</span>
+          <div className="p6-pd-cols" role="radiogroup" aria-label="Colour" data-pk39="dlg-cols">
+            {PACKAGE_COLOURS.map((c) => <button type="button" key={c.key} role="radio" aria-checked={col === c.key} aria-label={c.name} title={c.name} data-col={c.key} style={{ ["--sw" as string]: c.hex }} onClick={() => setCol(c.key)} />)}
           </div>
         </div>
         {p ? null : (

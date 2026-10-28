@@ -732,6 +732,27 @@ describe('/users/{userId}/packages', () => {
     );
   });
 
+  // Submission packages v39 (L2): a package's colour is one of eight keys, stored by key, never a hex; filing, so a
+  // package that has gone out can still be re-coloured.
+  it('v39: accepts each of the eight colour keys, and refuses any other value', async () => {
+    const db = aliceCtx().firestore();
+    for (const colour of ['harbour', 'lake', 'teal', 'pine', 'indigo', 'plum', 'slate', 'charcoal']) {
+      await assertSucceeds(setDoc(doc(db, 'users', ALICE, 'packages', `pkg-${colour}`), { ...validPackage(ALICE), id: `pkg-${colour}`, colour }));
+    }
+    for (const colour of ['red', '#1d4b63', 'Harbour', '', 7]) {
+      await assertFails(setDoc(doc(db, 'users', ALICE, 'packages', 'pkg-bad'), { ...validPackage(ALICE), id: 'pkg-bad', colour }));
+    }
+  });
+
+  it('v39: a sent package can be re-coloured, but only to one of the eight', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users', ALICE, 'packages', 'pkg-1'), { ...validPackage(ALICE), firstSentAt: '2026-10-01T00:00:00.000Z' });
+    });
+    const ref = doc(aliceCtx().firestore(), 'users', ALICE, 'packages', 'pkg-1');
+    await assertSucceeds(updateDoc(ref, { colour: 'plum' }));
+    await assertFails(updateDoc(ref, { colour: 'crimson' }));
+  });
+
   it('blocks cross-user read', async () => {
     await asAdmin(async (ctx) => {
       await setDoc(doc(ctx.firestore(), 'users', ALICE, 'packages', 'pkg-1'), validPackage(ALICE));

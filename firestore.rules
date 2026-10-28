@@ -317,6 +317,9 @@ service cloud.firestore {
         // the named extras it sends, by id. `extraIds` is CONTENTS — frozen with the slots below — and its names
         // travel in `otherMaterials`, which is what the send flow and every query's frozen summary read.
         && (!data.keys().hasAny(['icon']) || data.icon in ['box', 'crown', 'globe', 'flag', 'feather', 'flask', 'star', 'bolt', 'heart', 'compass', 'pen', 'key'])
+        // SUBMISSION PACKAGES v39 (28 Oct): the package's colour, one of eight keys (never a hex; absent reads as Harbour).
+        // Filing, like the name and the icon: outside the freeze below, so a package that has gone out can be re-coloured.
+        && (!data.keys().hasAny(['colour']) || data.colour in ['harbour', 'lake', 'teal', 'pine', 'indigo', 'plum', 'slate', 'charcoal'])
         && (!data.keys().hasAny(['extraIds']) || (data.extraIds is list && data.extraIds.size() <= 24))
         && data.status is string && (data.status == 'Active' || data.status == 'Retired')
         && data.createdDate is string && data.createdDate.size() <= 64;
@@ -956,7 +959,7 @@ service cloud.firestore {
         // edit the slots, and the guarantee is a formality. `hasAny` on the CHANGED keys is what
         // says "you may add it, you may never touch it again".
         allow update: if isOwner(userId) && isValidId(packageId) && isValidPackage(incoming(), userId)
-          && incoming().diff(existing()).affectedKeys().hasOnly(['packageName', 'queryLetterVersionId', 'synopsisVersionId', 'samplePagesVersionId', 'otherMaterials', 'status', 'firstSentAt', 'bookVersionId', 'note', 'noteEditedAt', 'edition', 'editions', 'retiredAt', 'icon', 'extraIds'])
+          && incoming().diff(existing()).affectedKeys().hasOnly(['packageName', 'queryLetterVersionId', 'synopsisVersionId', 'samplePagesVersionId', 'otherMaterials', 'status', 'firstSentAt', 'bookVersionId', 'note', 'noteEditedAt', 'edition', 'editions', 'retiredAt', 'icon', 'colour', 'extraIds'])
           && (
             !existing().keys().hasAny(['firstSentAt'])
             // v26: THE OTHER-MATERIALS MIGRATION. A package written before named extras gains `extraIds` ONCE,

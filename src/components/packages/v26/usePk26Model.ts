@@ -17,7 +17,7 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import { deleteField } from "firebase/firestore";
 import { useScriptAllyDb } from "../../../lib/db";
 import { useToast } from "../../toast/ToastProvider";
-import { ComponentType, type CompTitle, type PackageExtra, type PackageIcon, type SubmissionPackage } from "../../../types";
+import { ComponentType, type CompTitle, type PackageColour, type PackageExtra, type PackageIcon, type SubmissionPackage } from "../../../types";
 import { createPayload, countWords } from "../../../lib/materialDraft";
 import { isVersionSent } from "../../../lib/versionLock";
 import { materialQueries, materialSplit, overall, packageSplit, type Split } from "../../../lib/packageReplies";
@@ -216,11 +216,11 @@ export function usePk26Model() {
     return true;
   };
 
-  /** Name, note and icon — never contents, so never an edition. */
-  const saveDetails = async (p: SubmissionPackage, d: { name: string; note: string; icon: PackageIcon }): Promise<boolean> => {
+  /** Name, note, icon and colour — never contents, so never an edition. */
+  const saveDetails = async (p: SubmissionPackage, d: { name: string; note: string; icon: PackageIcon; colour?: PackageColour }): Promise<boolean> => {
     const prev = { packageName: p.packageName, note: p.note ?? "", icon: iconOf(p) };
     const err = await updatePackage(p.id, {
-      packageName: d.name.trim(), icon: d.icon,
+      packageName: d.name.trim(), icon: d.icon, ...(d.colour ? { colour: d.colour } : {}),
       ...(d.note.trim() !== (p.note ?? "") ? { note: d.note.trim(), noteEditedAt: new Date().toISOString() } : {}),
     });
     if (err) { showToast({ message: err }); return false; }
@@ -228,8 +228,27 @@ export function usePk26Model() {
     return true;
   };
 
+  /**
+   * v39 · the header's icon-and-colour picker and rename in place: one field, saved at once through the package
+   * writer. Filing, never contents, so a package out with agents takes it too. Returns whether it saved.
+   */
+  const setLook = async (p: SubmissionPackage, d: { icon?: PackageIcon; colour?: PackageColour; name?: string }): Promise<boolean> => {
+    const fields: Parameters<typeof updatePackage>[1] = {};
+    if (d.icon && d.icon !== iconOf(p)) fields.icon = d.icon;
+    if (d.colour && d.colour !== (p.colour ?? "harbour")) fields.colour = d.colour;
+    if (d.name !== undefined) { const n = d.name.trim(); if (n && n !== p.packageName) fields.packageName = n; }
+    if (!Object.keys(fields).length) return false;
+    const err = await updatePackage(p.id, fields);
+    if (err) { showToast({ message: err }); return false; }
+    if (fields.packageName) {
+      const prev = p.packageName;
+      showToast({ message: `Renamed to ${fields.packageName}.`, undo: async () => { await updatePackage(p.id, { packageName: prev }); } });
+    }
+    return true;
+  };
+
   /** A new package: empty, or a copy of the active one. The first package of a manuscript becomes active. */
-  const createPackage = async (d: { name: string; note: string; icon: PackageIcon; from: string | null; piece?: { kind: PieceKind; id: string } }): Promise<string | null> => {
+  const createPackage = async (d: { name: string; note: string; icon: PackageIcon; colour?: PackageColour; from: string | null; piece?: { kind: PieceKind; id: string } }): Promise<string | null> => {
     if (!activeMs) return null;
     const src = d.from ? msPkgs.find((p) => p.id === d.from) ?? null : null;
     const pc = d.piece;
@@ -242,7 +261,7 @@ export function usePk26Model() {
       extraIds: src ? [...(src.extraIds ?? [])] : [],
       /* v40: a package started from a copy is a copy (A4) — it records where it came from, so Tests can compare them */
       ...(src ? { copiedFromId: src.id } : {}),
-      icon: d.icon,
+      icon: d.icon, ...(d.colour ? { colour: d.colour } : {}),
       ...(d.note.trim() ? { note: d.note.trim(), noteEditedAt: new Date().toISOString() } : {}),
     });
     if (!res.success || !res.id) { showToast({ message: res.error ?? "That didn't save. Try again." }); return null; }
@@ -461,7 +480,7 @@ export function usePk26Model() {
     ...base,
     figPk, figItems, figAll,
     extras, comps, letters, synopses, lettersAll, synopsesAll, versionRows, matName, splitOf, currentSplit, overallSplit,
-    putPiece, removePiece, toggleExtra, addExtra, renameExtra, saveDetails, createPackage, deletePkg, makeActive, duplicate, retire,
+    putPiece, removePiece, toggleExtra, addExtra, renameExtra, saveDetails, setLook, createPackage, deletePkg, makeActive, duplicate, retire,
     addMaterial, saveMaterial, materialSent, putAwayMat, bringBack, addComp, saveVersion, useVersionIn, resultItems, resultQueries, wentTo,
     facts, pieceFacts, pieceCtx, whoGot,
   };

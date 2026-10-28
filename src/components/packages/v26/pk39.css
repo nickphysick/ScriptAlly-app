@@ -19,7 +19,7 @@
 @media (min-width: 768px) {
   .p6 > .pk39-hd {
     --pk39-hd-w: min(calc(var(--hsheet-w) - 48px), 1200px);
-    box-sizing: border-box; width: var(--pk39-hd-w); margin: 24px 0 0 calc(50% - var(--pk39-hd-w) / 2);
+    box-sizing: border-box; width: var(--pk39-hd-w); margin: 24px 0 56px calc(50% - var(--pk39-hd-w) / 2);
   }
   .pk39-hd .pk39-card.phc.phc { padding: 22px 36px 24px; grid-template-columns: minmax(0, 1fr) 160px; }
   .pk39-hd .pk39-card.phc.phc.phc h1 { font-size: 40px; line-height: 44px; }
@@ -47,3 +47,38 @@
 @container p9sheet (max-width: 1200px) {
   .pk39-hd .pk39-card .pk39-pro { height: 22px; }
 }
+
+/* ══ C · a package's colour: one variable, `--pc` (lib/packagesV39.pcStyle), drives every place a package shows. The
+   capture normalised every package to Harbour, so the generated sheet holds Harbour literals; these restate each
+   colour-driven value with `--pc`, from the ref's own rules (v39.3 / v39.4 / v39.8). ══ */
+/* the labels (ref `.pkl-b:not(.pkl-new)`): the full colour under a soft gloss */
+.p9-pkl .p9-pkl-row .p9-pkl-b { background-color: var(--pc, #1d4b63) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.32), inset 0 -1px 0 rgba(0, 0, 0, 0.18), 0 1px 2px rgba(28, 19, 15, 0.12), 0 8px 16px -10px var(--pc, #1d4b63) !important; }
+/* selected: lifted 2px, a page-coloured gap and a ring in its own colour (ref `.pkl-b.on`) */
+.p9-pkl .p9-pkl-row .p9-pkl-b.p9-on {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.32), inset 0 -1px 0 rgba(0, 0, 0, 0.18), 0 0 0 2px var(--ws-page, #f2ede6), 0 0 0 4px var(--pc, #1d4b63), 0 14px 22px -12px var(--pc, #1d4b63) !important; }
+.p9-pkl .p9-pkl-b .p9-shc-ic,
+.p9-pkl .p9-pkl-row .p9-pkl-b > em { color: var(--pc, #1d4b63) !important; }
+/* the ring on a label: white on the colour (ref `.pkl-b:not(.pkl-new) .rg circle`) */
+.p9-rg svg { transform: rotate(-90deg); }
+.p9-rg circle { fill: none; stroke-width: 6; }
+.p9-pkl .p9-pkl-b .p9-rg circle { stroke: rgba(255, 255, 255, 0.28); }
+.p9-pkl .p9-pkl-b .p9-rg circle.p9-v { stroke: #fff; stroke-linecap: round; }
+.p9-pkl .p9-pkl-b .p9-rg.p9-early circle.p9-v { stroke-linecap: butt; }
+/* the package drawer's header (ref `.dh.dpk`) and its icon disc */
+.p8-dh.p8-dpk { background: var(--pc, #1d4b63) !important; }
+.p8-dh.p8-dpk .p8-ddisc { color: var(--pc, #1d4b63) !important; }
+/* the new-package dialog: the preview tile in the colour, and the eight swatches (ref `.pd-prev`, `.pd-cols`) */
+.p6-pdlg .p6-pd .p6-pd-prev { background: #fff !important; color: var(--pc, #1d4b63) !important; box-shadow: inset 0 0 0 2px var(--pc, #1d4b63); }
+.p6-pdlg .p6-pd-cols { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; }
+.p6-pdlg .p6-pd-cols button { aspect-ratio: 1; width: 100%; height: auto; padding: 0; border: 0; border-radius: 50%; background: var(--sw); cursor: pointer;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08); }
+.p6-pdlg .p6-pd-cols button[aria-checked="true"] { box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--sw); }
+.p6-pdlg .p6-pd-cols button:focus-visible { outline: 2px solid #2d3a50; outline-offset: 4px; }
+
+/* ══ B · the labels: v40's ruling that this page carries no small mono capitals — the "Active" tab reads in the
+   typewriter, sentence case (as v38's label tab did); the two exceptions v39 names are the Pro stamp and the
+   builder's label ══ */
+.p9-pkl .p9-pkl-row .p9-pkl-b > em,
+.p9-pkl .p9-pkl-row .p9-on.p9-pkl-b[aria-pressed="true"] > em { font: 400 11.5px/18px var(--sp-type) !important; letter-spacing: 0 !important; text-transform: none !important; }
+.p9-pkl .p9-pkl-k .p9-ill > i { font: 400 10px/1 var(--sp-type) !important; letter-spacing: 0 !important; text-transform: none !important; }

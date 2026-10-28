@@ -877,4 +877,20 @@ console.log("\nSubmission packages v40 — the lock and copiedFromId:");
   console.log("  · probe packages removed");
 }
 
+/* ── Submission packages v39 (28 Oct) ──────────────────────────────────────────────────────────────
+ * A package's colour: one of eight keys, never a hex; filing, so a package that has gone out takes it too.
+ */
+console.log("\nSubmission packages v39 — the colour:");
+{
+  const pref = doc(db, "users", uid, "packages", "probe-pk39");
+  const base = { id: "probe-pk39", manuscriptId: "seed-ms-1", userId: uid, packageName: "Probe v39", queryLetterVersionId: "probe-let",
+    synopsisVersionId: "", samplePagesVersionId: "", status: "Active", createdDate: new Date().toISOString(), extraIds: [] };
+  await attempt("create with a colour", "v39 P2", () => setDoc(pref, { ...base, colour: "plum" }));
+  await attempt("a colour outside the eight is refused…", "v39 P2 (expect DENIED)", () => updateDoc(pref, { colour: "crimson" }));
+  await attempt("a hex is refused…", "v39 P2 (expect DENIED)", () => updateDoc(pref, { colour: "#1d4b63" }));
+  await attempt("…set up: the stamp", "setup", () => updateDoc(pref, { firstSentAt: new Date().toISOString() }));
+  await attempt("SENT package: colour still writable", "v39 P2", () => updateDoc(pref, { colour: "pine" }));
+  try { await deleteDoc(pref); console.log("  · probe package removed"); } catch (e) { console.log(`  ⚠️  could not remove probe-pk39: ${e.message}`); }
+}
+
 process.exit(0);

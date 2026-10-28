@@ -345,7 +345,7 @@ interface DbContextType {
    * stored empty string would be a claim that the question was answered. Keeping that conversion
    * here means the two callers cannot disagree about what empty means.
    */
-  updatePackage: (id: string, fields: Partial<Pick<SubmissionPackage, "packageName" | "queryLetterVersionId" | "synopsisVersionId" | "samplePagesVersionId" | "otherMaterials" | "bookVersionId" | "note" | "noteEditedAt" | "icon" | "extraIds">>) => Promise<string | null>;
+  updatePackage: (id: string, fields: Partial<Pick<SubmissionPackage, "packageName" | "queryLetterVersionId" | "synopsisVersionId" | "samplePagesVersionId" | "otherMaterials" | "bookVersionId" | "note" | "noteEditedAt" | "icon" | "colour" | "extraIds">>) => Promise<string | null>;
   /* ⚠️ `markPackageSent` IS RETIRED — it never had a caller. It was written in anticipation of a
      stamping surface that turned out not to need it: both real paths stamp INSIDE their own atomic
      batch (`commitQueryEdits` for the drawer, `setQueryPackage` for the pane), because a stamp that
@@ -1967,7 +1967,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
    */
   const updatePackage = async (
     id: string,
-    fields: Partial<Pick<SubmissionPackage, "packageName" | "queryLetterVersionId" | "synopsisVersionId" | "samplePagesVersionId" | "otherMaterials" | "bookVersionId" | "note" | "noteEditedAt" | "icon" | "extraIds">>,
+    fields: Partial<Pick<SubmissionPackage, "packageName" | "queryLetterVersionId" | "synopsisVersionId" | "samplePagesVersionId" | "otherMaterials" | "bookVersionId" | "note" | "noteEditedAt" | "icon" | "colour" | "extraIds">>,
   ): Promise<string | null> => {
     if (!currentUser) return "Authentication required.";
     const live = packages.find((p) => p.id === id);
