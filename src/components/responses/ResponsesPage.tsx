@@ -137,10 +137,9 @@ export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) 
         {/* Part F · nothing answered for this book: the empty page, and none of the populated page's parts. It
             switches to the populated page the moment the first answer is recorded, with no reload. */}
         {ready && counts.answered === 0 ? (
-          <RspEmpty msTitle={msTitle} stillOut={model.out} onRecord={openRecordPicker}
-            onQueryCentre={() => navigate("/queries")}
-            onPastReplyTime={() => navigate("/queries?status=attention")}
-            onImport={() => navigate("/import")} />
+          <RspEmpty msTitle={msTitle} rows={model.rows} nowMs={nowMs} onRecord={openRecordPicker}
+            weeksOf={(r) => { const a = agents.find((x) => x.id === r.query.agentId); return a?.responseTimeWeeks && a.responseTimeWeeks > 0 ? a.responseTimeWeeks : null; }}
+            onQueryCentre={() => navigate("/queries")} onTodo={() => navigate("/todo")} />
         ) : (
           <>
             <Rsp5TitleCard msTitle={msTitle} empty={false} loading={!ready} onRecord={openRecordPicker} onSecond={() => goSection("wall")} />
