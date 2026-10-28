@@ -286,7 +286,7 @@ test("L8 no visible element on the page or its layers is mono AND uppercase", as
     await open(page, SIZES[0], ms);
     const hits = await monoCensus(page);
     L.check(`${ms} · the page: no mono capitals`, hits.length === 0, JSON.stringify(hits.slice(0, 8)));
-    for (const [what, sel, layer] of [["New package dialog", '[data-pk38="labels"] .p8-pkl-new', ".p6-pdlg"], ["How it works", '[data-pk39="how"]', '[data-pk26="hwm"]']] as const) {
+    for (const [what, sel, layer] of [["New package dialog", '[data-pk38="labels"] .p8-pkl-new', ".p6-pdlg"], ["How it works", '[data-pk39="how"]', '[data-pk39="hw"]']] as const) {
       const b = page.locator(`${pg} ${sel}`).first();
       if (await b.count()) { await b.click({ timeout: 5000 }).catch(() => {}); await page.waitForTimeout(600); }
       L.check(`${ms} · ${what} opened`, (await page.locator(layer).count()) > 0, layer);

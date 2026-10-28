@@ -197,3 +197,104 @@
   .p9-agg3 .p9-rlw .p9-rl-side { padding-top: 0 !important; max-width: 560px; }
   .p9-agg3 .p9-rl-r .p9-rl-v { grid-template-columns: 1fr 62px !important; }
 }
+
+/* ══ G · How it works (Pk39HowItWorks): the ref's `.hw2` block, one unlayered block, ported verbatim with the p9- prefix,
+   its keyframes renamed p9hw2*, and the ref's font tokens mapped to the app's (--sp-type, --sp-serif). ══ */
+
+.p9-hw2{position:fixed;inset:0;z-index:430;display:grid;place-items:center;background:rgba(27,36,51,.55)}
+.p9-hw2[hidden]{display:none}
+.p9-hw2-c{position:relative;display:grid;grid-template-columns:420px 330px;gap:36px;align-items:center;padding:30px 36px 30px 30px;border-radius:22px;background:#fbf9f5;box-shadow:0 40px 90px -30px rgba(0,0,0,.6);animation:p9hw2in .22s ease-out}
+@keyframes p9hw2in{from{transform:translateY(10px) scale(.98);opacity:0}}
+.p9-hw2-x{position:absolute;top:14px;right:14px;width:34px;height:34px;border:0;border-radius:50%;background:#efe9e1;cursor:pointer;color:#1c130f;font-size:13px}
+/* the miniature page */
+.p9-hw2-pg{position:relative;height:430px;padding:14px;border-radius:16px;background:#f1ece5;box-shadow:inset 0 0 0 1px rgba(28,19,15,.07);overflow:hidden;font-family:var(--sp-serif)}
+.p9-hw2-pg [data-z]{transition:opacity .3s,filter .3s,box-shadow .3s,transform .3s}
+.p9-hw2-pg[data-s] [data-z]{opacity:.32;filter:saturate(.4)}
+.p9-hw2-pg[data-s="1"] [data-z="1"],.p9-hw2-pg[data-s="2"] [data-z="2"],.p9-hw2-pg[data-s="3"] [data-z="3"],.p9-hw2-pg[data-s="3"] [data-z="2"],.p9-hw2-pg[data-s="4"] [data-z="4"],.p9-hw2-pg[data-s="4"] [data-z="3"],.p9-hw2-pg[data-s="5"] [data-z="5"]{opacity:1;filter:none}
+.p9-hw2-pg[data-s="3"] [data-z="2"]{opacity:.85}
+.p9-hw2-pg[data-s="1"] [data-z="1"],.p9-hw2-pg[data-s="2"] [data-z="2"],.p9-hw2-pg[data-s="3"] [data-z="3"],.p9-hw2-pg[data-s="4"] [data-z="4"],.p9-hw2-pg[data-s="5"] [data-z="5"]{box-shadow:0 0 0 2px #fbf9f5,0 0 0 4px #a2452a;border-radius:10px}
+.p9-hw2-hd{display:flex;align-items:center;gap:8px;height:38px;padding:0 12px;border-radius:9px;background:#f9f7f3;box-shadow:0 0 0 1px rgba(28,19,15,.06);opacity:.4}
+.p9-hw2-hd u{display:block;height:7px;width:90px;border-radius:4px;background:#cfe1ea}.p9-hw2-hd u.p9-s{width:60px;background:#e4ddd3}.p9-hw2-hd i{margin-left:auto;width:26px;height:26px;border-radius:6px;background:#e4ddd3}
+.p9-hw2-lb{margin-top:10px;padding:6px}
+.p9-hw2-k{display:block;font:400 11px var(--sp-type);color:#1c130f;margin-bottom:6px}
+.p9-hw2-lbs{display:flex;gap:5px}
+.p9-hw2-lbs b{display:flex;align-items:center;gap:5px;height:24px;padding:0 8px;border-radius:6px;background:linear-gradient(180deg,rgba(255,255,255,.2),rgba(255,255,255,0) 50%,rgba(0,0,0,.08)),var(--c);color:#fff;font:600 9px var(--sp-serif);white-space:nowrap}
+.p9-hw2-lbs b i{width:11px;height:11px;border-radius:3px;background:#fbf6ee}
+.p9-hw2-lbs b:first-child{box-shadow:0 0 0 1.5px #f1ece5,0 0 0 3px #1d4b63}
+.p9-hw2-lbs b.p9-nw{background:none;color:#1d4b63;box-shadow:inset 0 0 0 1px rgba(28,19,15,.2);border-radius:6px;font-weight:500}
+.p9-hw2-pg.p9-go[data-s="1"] .p9-hw2-lbs b:nth-child(-n+3){animation:p9hw2pop .5s ease-out both}
+.p9-hw2-pg.p9-go[data-s="1"] .p9-hw2-lbs b:nth-child(2){animation-delay:.08s}.p9-hw2-pg.p9-go[data-s="1"] .p9-hw2-lbs b:nth-child(3){animation-delay:.16s}
+@keyframes p9hw2pop{from{transform:translateY(6px);opacity:0}}
+.p9-hw2-bd{position:relative;display:grid;grid-template-columns:112px 1fr;gap:8px;margin-top:6px}
+.p9-hw2-mt{border-radius:9px;background:#fbf9f5;box-shadow:0 0 0 1px rgba(28,19,15,.06);overflow:hidden;padding-bottom:6px}
+.p9-hw2-mt p{margin:0;padding:8px 8px;background:#f7e3e3;font:400 10px var(--sp-type);color:#5e2a35}
+.p9-hw2-tabs{display:flex;gap:5px;padding:5px 8px 4px;font:600 6.5px var(--sp-serif);color:rgba(28,19,15,.5)}
+.p9-hw2-tabs .p9-on{color:#9b4a57;box-shadow:inset 0 -1.5px 0 #9b4a57}
+.p9-hw2-mr{display:flex;gap:5px;align-items:center;padding:4px 8px}
+.p9-hw2-mr i{flex:none;width:12px;height:12px;border-radius:3px;background:#f7e3e3}
+.p9-hw2-mr span{flex:1}.p9-hw2-mr u{display:block;height:4px;border-radius:2px;background:#d9d2c8;margin:2px 0}.p9-hw2-mr u.p9-s{width:60%;background:#e8e2d9}
+.p9-hw2-pg.p9-go[data-s="2"] .p9-hw2-mr{animation:p9hw2pop .45s ease-out both}.p9-hw2-pg.p9-go[data-s="2"] .p9-hw2-mr+.p9-hw2-mr{animation-delay:.1s}.p9-hw2-pg.p9-go[data-s="2"] .p9-hw2-mr+.p9-hw2-mr+.p9-hw2-mr{animation-delay:.2s}
+.p9-hw2-pk{border-radius:9px;background:#fff;box-shadow:0 0 0 1px rgba(28,19,15,.06);overflow:hidden}
+.p9-hw2-pk>p{display:flex;align-items:center;gap:6px;margin:0;padding:8px 10px;background:#1d4b63;color:#fff;font:400 11px var(--sp-type)}
+.p9-hw2-pk>p i{width:14px;height:14px;border-radius:4px;background:#fbf6ee}
+.p9-hw2-lk{margin-left:auto;font-size:9px;opacity:0}
+.p9-hw2-sl{display:grid;grid-template-columns:52px 1fr;align-items:center;gap:6px;padding:7px 10px;border-bottom:1px solid rgba(28,19,15,.07)}
+.p9-hw2-sl:last-child{border-bottom:0}
+.p9-hw2-sl em{font:500 6px "JetBrains Mono", monospace;font-style:normal;letter-spacing:.1em;text-transform:uppercase;color:rgba(28,19,15,.5)}
+.p9-hw2-slot{display:block;min-height:20px;border-radius:5px}
+.p9-hw2-it{display:inline-flex;align-items:center;gap:5px;font:400 9.5px var(--sp-type);color:#1c130f}
+.p9-hw2-it i{width:13px;height:13px;border-radius:3px;background:#f7e3e3;font:600 7px var(--sp-serif);font-style:normal;color:#fff;display:grid;place-items:center}
+.p9-hw2-it.p9-v i{border-radius:50%;background:#2a3a52}
+.p9-hw2-fly{position:absolute;left:10px;top:62px;display:none;align-items:center;gap:5px;padding:4px 8px;border-radius:5px;background:#fff;box-shadow:0 8px 16px -6px rgba(28,19,15,.45),0 0 0 1px rgba(28,19,15,.1);font:400 9.5px var(--sp-type);color:#1c130f;z-index:3}
+.p9-hw2-fly i{width:13px;height:13px;border-radius:3px;background:#f7e3e3}
+/* step 3: a letter is dragged from materials into the empty slot */
+.p9-hw2-pg[data-s="3"] .p9-hw2-fly{display:inline-flex}
+.p9-hw2-pg.p9-go[data-s="3"] .p9-hw2-fly{animation:p9hw2drag 1.8s cubic-bezier(.5,0,.2,1) .3s both}
+@keyframes p9hw2drag{0%{transform:none;opacity:0}12%{opacity:1;transform:rotate(-3deg)}75%{transform:translate(178px,-22px) rotate(-2deg);opacity:1}88%,100%{transform:translate(178px,-22px);opacity:0}}
+.p9-hw2-pg[data-s="3"] .p9-s1 .p9-hw2-it{opacity:0}
+.p9-hw2-pg[data-s="3"] .p9-s1 .p9-hw2-slot{outline:1.5px dashed rgba(28,19,15,.2);outline-offset:-1.5px}
+.p9-hw2-pg.p9-go[data-s="3"] .p9-s1 .p9-hw2-it{animation:p9hw2land .01s linear 1.85s forwards}
+.p9-hw2-pg.p9-go[data-s="3"] .p9-s1 .p9-hw2-slot{animation:p9hw2slot .3s ease-out 1.85s forwards}
+@keyframes p9hw2land{to{opacity:1}}@keyframes p9hw2slot{to{outline-color:transparent;background:#eef4f7}}
+/* step 4: the lock and the query */
+.p9-hw2-pg[data-s="4"] .p9-hw2-lk,.p9-hw2-pg[data-s="5"] .p9-hw2-lk{opacity:1}
+.p9-hw2-pg.p9-go[data-s="4"] .p9-hw2-lk{animation:p9hw2pop .4s ease-out .9s both}
+.p9-hw2-q{display:flex;align-items:center;gap:8px;margin-top:10px;padding:8px 10px;border-radius:9px;background:#fff;box-shadow:0 0 0 1px rgba(28,19,15,.06)}
+.p9-hw2-av{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:#2a3a52;color:#fff;font:600 7.5px var(--sp-serif)}
+.p9-hw2-q b{display:block;font:400 10px var(--sp-type);color:#1c130f}
+.p9-hw2-q small{font:italic 8.5px var(--sp-serif);color:rgba(28,19,15,.6)}
+.p9-hw2-q em{font-style:normal;color:#1d4b63;font-weight:600}
+.p9-hw2-pg.p9-go[data-s="4"] .p9-hw2-q{animation:p9hw2slide .5s ease-out .3s both}
+@keyframes p9hw2slide{from{transform:translateX(-24px);opacity:0}}
+/* step 5: results */
+.p9-hw2-rs{margin-top:10px}
+.p9-hw2-bn{padding:9px 10px;border-radius:9px 9px 0 0;background:#2a3a52;color:#f4eee5;font:400 10px var(--sp-type)}
+.p9-hw2-sc{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:8px;background:#f6f2ec}
+.p9-hw2-sc span{height:26px;border-radius:5px;background:#fff;box-shadow:0 0 0 1px rgba(28,19,15,.06);padding:9px 6px;box-sizing:border-box}
+.p9-hw2-sc u{display:block;height:6px;border-radius:3px;background:#1d4b63}
+.p9-hw2-pg.p9-go[data-s="5"] .p9-hw2-sc u{animation:p9hw2grow .7s ease-out .3s both}
+@keyframes p9hw2grow{from{width:0!important}}
+.p9-hw2-pc{padding:7px 10px;border-radius:0 0 9px 9px;background:#ebe5dc;font:400 9px var(--sp-type);color:#1c130f}
+/* the words */
+.p9-hw2-n{margin:0;font:500 10px "JetBrains Mono", monospace;letter-spacing:.16em;text-transform:uppercase;color:#a2452a}
+.p9-hw2-tx h2{margin:10px 0 0;font:400 27px/1.15 var(--sp-type);color:#1c130f;min-height:62px}
+.p9-hw2-p{margin:14px 0 0;font:400 16px/1.55 var(--sp-serif);color:rgba(28,19,15,.74);min-height:150px}
+.p9-hw2-f{display:flex;align-items:center;justify-content:space-between;margin-top:22px}
+.p9-hw2-dots{display:flex;gap:6px}
+.p9-hw2-dots button{width:8px;height:8px;padding:0;border:0;border-radius:4px;background:rgba(28,19,15,.18);cursor:pointer;transition:width .2s,background .2s}
+.p9-hw2-dots button[aria-current=step]{width:22px;background:#2d3a50}
+.p9-hw2-b{display:flex;gap:8px}
+.p9-hw2-b button{height:42px;padding:0 18px;border:0;border-radius:10px;font:400 16px var(--sp-type);cursor:pointer}
+.p9-hw2-bk{background:none;color:#1c130f;box-shadow:inset 0 0 0 1px rgba(28,19,15,.2)}
+.p9-hw2-bk:disabled{opacity:.35;cursor:default}
+.p9-hw2-nx{background:#2d3a50;color:#f4eee5}.p9-hw2-nx:hover{background:#1c130f}
+@media (prefers-reduced-motion:reduce){.p9-hw2-pg *,.p9-hw2-c{animation:none!important}.p9-hw2-pg[data-s="3"] .p9-hw2-fly{display:none}.p9-hw2-pg[data-s="3"] .p9-s1 .p9-hw2-it{opacity:1}}
+/* the dialog renders on document.body, outside the page: its faces are stated, and brand.tsx's forced heading face is
+   clawed back for the typewriter title */
+.p9-hw2 .p9-hw2-c { font-family: var(--sp-serif); color: #1c130f; }
+.p9-hw2 .p9-hw2-c .p9-hw2-tx h2 { font-family: var(--sp-type) !important; font-weight: 400 !important; }
+.p9-hw2:focus { outline: 0; }
+.p9-hw2 .p9-hw2-b button:focus-visible, .p9-hw2 .p9-hw2-dots button:focus-visible, .p9-hw2 .p9-hw2-x:focus-visible { outline: 2px solid #a2452a; outline-offset: 2px; }
+/* v40's ruling, carried: the step label and the miniature's tiny slot labels read in the typewriter, sentence case */
+.p9-hw2 .p9-hw2-tx .p9-hw2-n { font: 400 14px/1.2 var(--sp-type) !important; letter-spacing: 0 !important; text-transform: none !important; }
+.p9-hw2 .p9-hw2-sl em { font: 400 7.5px/1.2 var(--sp-type) !important; letter-spacing: 0 !important; text-transform: none !important; }

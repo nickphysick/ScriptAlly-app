@@ -27,7 +27,8 @@ import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "re
 import { useLocation, useNavigate } from "react-router-dom";
 import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 import { usePk26Model } from "./packages/v26/usePk26Model";
-import { HowItWorks, Pk26Hero } from "./packages/v26/Pk26Header";
+import { Pk26Hero } from "./packages/v26/Pk26Header";
+import { Pk39HowItWorks } from "./packages/v26/Pk39HowItWorks";
 import { Pk39Header } from "./packages/v26/Pk39Header";
 import { Pk26Builder, type LibTab } from "./packages/v26/Pk26Builder";
 import { Pk39Labels } from "./packages/v26/Pk39Labels";
@@ -127,7 +128,7 @@ export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab:
       <Pk26Drawer model={model} view={routeActive ? drawer : null} go={setDrawer} onSeeQueries={goQueries} onOpenComps={goComps} />
       <Pk26Dialog model={model} view={routeActive ? dialog : null} onClose={() => setDialog(null)} onCreated={(id) => setPending({ pkg: id, scroll: true })} />
       <Pk38Drawer model={model} p={routeActive ? pkdPkg : null} onClose={() => setPkdId(null)} onCopy={copy} onEdit={editIn} onSeeQueries={goQueries} />
-      <HowItWorks open={routeActive && how} onClose={() => setHow(false)} />
+      <Pk39HowItWorks open={routeActive && how} onClose={() => setHow(false)} />
     </WorkspacePageGrid>
   );
 };
