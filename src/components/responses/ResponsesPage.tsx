@@ -22,13 +22,14 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useScriptAllyDb } from "../../lib/db";
 import { resolveScopedManuscript } from "../../lib/shellSidebar";
 import { buildQcRows } from "../../lib/qcSummary";
-import { answerFoot, carouselOrder, firstNameOf, goneQuiet, noteSplit, pageCounts, respCounts, respItems, stillOut, waitingRows, type NoKind, type RespItem } from "../../lib/responses";
+import { carouselOrder, firstNameOf, goneQuiet, isEarlyDays, noteSplit, pageCounts, respCounts, respItems, stillOut, waitingRows, type NoKind, type RespItem } from "../../lib/responses";
 import type { QcRow } from "../../lib/qcSummary";
 import { openQueryDrawer, type DrawerMode } from "../../lib/queryActions/drawerStore";
 import { openResponsePicker, responsePickerHosted } from "../../lib/queryPanelStore";
 import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
 import { Rsp5Glance, Rsp5TitleCard, type GlanceFacts, type GlanceKey } from "./Rsp5Head";
 import { RspCarousel } from "./RspCarousel";
+import { Rsp5Band, Rsp5Showcase } from "./Rsp5Insights";
 import { RspPanel, type AnswerTab } from "./RspPanel";
 import { RspBanner, RspList, RspTally } from "./RspNos";
 import { RspShare } from "./RspShare";
@@ -140,6 +141,12 @@ export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) 
             {ready ? (
               <RspCarousel ref={moreRef} items={model.more} nowMs={nowMs} msTitle={msTitle}
                 selectedId={openId} onOpen={openAnswer} onAct={act} />
+            ) : null}
+            {ready ? (
+              <>
+                <Rsp5Band counts={model.page} items={model.items} few={isEarlyDays(counts.answered)} />
+                <Rsp5Showcase items={model.items} answered={counts.answered} few={isEarlyDays(counts.answered)} nowMs={nowMs} onGo={goSection} />
+              </>
             ) : null}
             {ready ? <RspBanner /> : null}
             {ready && counts.passed + counts.noReply > 0 ? (
