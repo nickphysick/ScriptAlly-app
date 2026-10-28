@@ -26,7 +26,7 @@ import type { Agent, Query } from "../../../types";
 import { agentCards, closedCards, type AgentCard, type AgentStackKey, type ClosedCard } from "../../../lib/dashHover";
 import { HoverStack } from "../v116/HoverStack";
 import { AgentMini, QueryMini, QueryNone } from "../v116/MiniCards";
-import { announce, useStackHover } from "../v116/useStackHover";
+import { announce, stackAnchor, useStackHover } from "../v116/useStackHover";
 import { StartTag, useSpot } from "./WhereStart";
 
 /** Closed's four stone shades, light to dark, in bucket order (literal: they also draw in, never via a `var()` keyframe). */
@@ -146,17 +146,9 @@ export const ClosedHoop: React.FC<{ loading: boolean; tile: ClosedTile | null; p
   const segs: HoopSeg[] = CLOSED_BUCKETS.map((b) => ({ key: b.key, n: loading ? 0 : count(b.key), color: CLOSED_STONES[b.key] }));
   const total = loading ? 0 : tile?.total ?? 0;
   const keyRef = useRef<HTMLUListElement | null>(null);
-  /* just right of the key's longest line, at the row's height (a slice: the key's first row) */
-  const anchorFor = useCallback((k: string, from: "slice" | "row") => {
-    const ul = keyRef.current;
-    const rows = ul ? [...ul.querySelectorAll<HTMLElement>("li")] : [];
-    let right = 0;
-    for (const li of rows) { const rg = document.createRange(); rg.selectNodeContents(li); right = Math.max(right, rg.getBoundingClientRect().right); }
-    const row = from === "row" ? rows.find((li) => li.dataset.bucket === k) : rows[0];
-    const top = row ? row.getBoundingClientRect().top - 6 : 0;
-    return { x: Math.round(right + 16), y: Math.round(top) };
-  }, []);
-  const hv = useStackHover(anchorFor, false);
+  /* v118 Part A — at the pointer (18 right, 14 up), re-placed on every move; keyboard focus alone anchors to the element */
+  const anchorFor = useCallback((_k: string, _from: "slice" | "row", el: Element, pointer: { x: number; y: number } | null) => stackAnchor(el, pointer), []);
+  const hv = useStackHover(anchorFor, true);
   /* the last category stays in hand while the stack fades out, so the exit never shows another one */
   const last = useRef<string | null>(null);
   if (hv.key) last.current = hv.key;
@@ -213,11 +205,7 @@ export const AgentsHoop: React.FC<{ loading: boolean; cov: AgentCoverage; play: 
     { key: "none", n: loading ? 0 : cov.none, color: AGENT_SEG.none },
   ];
   const n = (k: string) => (k === "querying" ? cov.querying : k === "closed" ? cov.closed : cov.none);
-  const anchorFor = useCallback((_k: string, _from: "slice" | "row", el: Element, pointer: { x: number; y: number } | null) => {
-    if (pointer) return { x: Math.round(pointer.x + 18), y: Math.round(pointer.y - 14) };
-    const r = el.getBoundingClientRect();
-    return { x: Math.round(r.right + 18), y: Math.round(r.top - 14) };
-  }, []);
+  const anchorFor = useCallback((_k: string, _from: "slice" | "row", el: Element, pointer: { x: number; y: number } | null) => stackAnchor(el, pointer), []);
   const hv = useStackHover(anchorFor, true);
   const last = useRef<string | null>(null);
   if (hv.key) last.current = hv.key;

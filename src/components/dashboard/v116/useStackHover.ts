@@ -12,6 +12,26 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 export type Anchor = { x: number; y: number };
+
+/** v118 Part A — where the pointer puts a stack: 18px right of it and 14px above. */
+export const POINTER_DX = 18;
+export const POINTER_DY = -14;
+/** …and where keyboard focus puts it, the one case with no pointer: 8px right of the focused slice or row. */
+export const KEY_DX = 8;
+
+/**
+ * ⚠️ ONE ANCHOR RULE FOR BOTH HOOPS, slices and key rows alike (Dashboard v118 Part A). The Closed hoop used to anchor
+ * just right of its key at the row's height, so a slice's stack opened away from the cursor and a row's a long way to
+ * its right. The on-screen rule (HoverStack's fit) then moves it only by what would overflow.
+ */
+export function stackAnchor(el: Element, pointer: Anchor | null): Anchor {
+  if (pointer) return { x: Math.round(pointer.x + POINTER_DX), y: Math.round(pointer.y + POINTER_DY) };
+  const r = el.getBoundingClientRect();
+  return { x: Math.round(r.right + KEY_DX), y: Math.round(r.top) };
+}
+
+/** Focus the KEYBOARD put there: a pointer press focuses a row or slice too, and must not move the stack to it. */
+const keyboardFocus = (el: Element): boolean => { try { return el.matches(":focus-visible"); } catch { return true; } };
 export interface StackHover {
   key: string | null;
   anchor: Anchor | null;
@@ -79,7 +99,7 @@ export function useStackHover(
       onEnter: (key, ev) => show(key, "slice", ev.currentTarget, pt(ev)),
       onMove: (key, ev) => { if (follows) show(key, "slice", ev.currentTarget, pt(ev)); },
       onLeave: (key) => hide(key),
-      onFocus: (key, el) => show(key, "slice", el, null),
+      onFocus: (key, el) => { if (keyboardFocus(el)) show(key, "slice", el, null); },
       onBlur: (key) => hide(key),
       onKey: (key, ev, el) => keys(key, "slice", ev, el),
     },
@@ -93,7 +113,7 @@ export function useStackHover(
       onPointerEnter: (ev) => show(key, "row", ev.currentTarget, pt(ev)),
       onPointerMove: (ev) => { if (follows) show(key, "row", ev.currentTarget, pt(ev)); },
       onPointerLeave: () => hide(key),
-      onFocus: (ev) => show(key, "row", ev.currentTarget, null),
+      onFocus: (ev) => { if (keyboardFocus(ev.currentTarget)) show(key, "row", ev.currentTarget, null); },
       onBlur: () => hide(key),
       onKeyDown: (ev) => keys(key, "row", ev, ev.currentTarget),
     }),

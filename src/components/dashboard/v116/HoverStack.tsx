@@ -51,7 +51,9 @@ export const HoverStack: React.FC<HoverStackProps> = ({ anchor, cards, total, ki
   const keyRef = useRef<string | null>(null);
   useLayoutEffect(() => {
     if (anchor) {
-      if (keyRef.current !== stackKey) { keyRef.current = stackKey; setCap(STACK_MAX); setOn(false); }
+      /* ⚠️ v118 Part A — a NEW category swaps in place: the cap resets, but the stack stays on. Turning it off and on
+         again for the entrance left two frames with no stack between one row and the next. */
+      if (keyRef.current !== stackKey) { keyRef.current = stackKey; setCap(STACK_MAX); }
       setShown({ anchor, key: stackKey });
       return undefined;
     }
