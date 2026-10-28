@@ -1,0 +1,60 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * DASHBOARD v116 — the stepped HoverStack (ref design-refs/dashboard-v116/dashboard-v116.html).
+ *
+ * ⚠️ EVERY TEXT ELEMENT NAMES ITS FAMILY. `lib/brand.tsx` injects a family on bare `span`/`div`/`b` at
+ * runtime; a class outranks it, inheritance does not. And the stacks are PORTALLED to `<body>`, outside
+ * `.d58`, so they read the `:root` faces (`--sp-type`, `--sp-serif`) and state their colours as literals.
+ */
+
+/* ── B · the stepped stack ────────────────────────────────────────────────────────────────────── */
+.d116-stack {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 85;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  font-family: var(--sp-serif);
+  color: #1c130f;
+}
+.d116-stack :is(div, span, b, small, em, i, p) { font-family: inherit; }
+.d116-rc {
+  position: absolute;
+  left: 0;
+  top: 0;
+  box-sizing: border-box;
+  width: 212px;
+  opacity: 0;
+  transform: var(--at) translateY(6px);
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+.d116-stack.is-on .d116-rc {
+  opacity: 1;
+  transform: var(--at);
+  transition: opacity 280ms cubic-bezier(0.2, 0.9, 0.3, 1) calc(var(--i) * 35ms), transform 280ms cubic-bezier(0.2, 0.9, 0.3, 1) calc(var(--i) * 35ms);
+}
+.d116-more {
+  position: absolute;
+  white-space: nowrap;
+  font: 600 10px/1.5 "JetBrains Mono", ui-monospace, monospace !important;
+  letter-spacing: 0.08em;
+  color: rgba(28, 19, 15, 0.65);
+  background: #fff;
+  border-radius: 999px;
+  padding: 3px 10px;
+  box-shadow: 0 4px 10px -6px rgba(28, 19, 15, 0.5);
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+.d116-stack.is-on .d116-more { opacity: 1; transition: opacity 200ms ease 200ms; }
+@media (prefers-reduced-motion: reduce) {
+  .d116-rc, .d116-stack.is-on .d116-rc { transform: var(--at); transition: opacity 100ms linear; }
+}
+/* the head-and-shoulders bust, cropped at the bottom of its circle — never initials */
+.d116-bust { display: flex; align-items: flex-end; justify-content: center; overflow: hidden; flex: none; width: 24px; height: 24px; border-radius: 50%; }
+.d116-bust svg { width: 19px; height: 19px; margin-bottom: -3px; fill: currentColor; opacity: 0.85; }
+
