@@ -97,7 +97,9 @@ test("CL251-A1 A2 · one ledger card of four cells; a press filters, pale with a
     A1.check(`${at} no gap`, c.slice(1).every((x, i) => near(x.l, c[i].r, 0.5)), c.slice(1).map((x, i) => f1(x.l - c[i].r)).join(" / "));
     /* the rule is the cell's own inset 1px shadow on its left edge (computed: "… 1px 0px 0px 0px inset"); the first cell has none */
     const rule = /rgba\(28, 19, 15, 0\.09\) 1px 0px 0px 0px inset/;
-    A1.check(`${at} rules between`, c.slice(1).every((x) => rule.test(x.sh)) && !rule.test(c[0]?.sh ?? ""), c.map((x) => x.sh.slice(0, 44)).join(" | "));
+    /* re-pointed by Contact list v25.6: List health (cell 1) is a navy block, so its own edge divides it from cell 2 and
+       cell 2 carries no hairline; the rule is still drawn before cells 3 and 4 */
+    A1.check(`${at} rules between`, c.slice(2).every((x) => rule.test(x.sh)) && !rule.test(c[0]?.sh ?? "") && !rule.test(c[1]?.sh ?? ""), c.map((x) => x.sh.slice(0, 44)).join(" | "));
     A1.check(`${at} label tops`, c.every((x) => near(x.lt, c[0].lt)), c.map((x) => f1(x.lt)).join(" / "));
     A1.check(`${at} count bottoms`, c.every((x) => near(x.nb, c[0].nb)), c.map((x) => f1(x.nb)).join(" / "));
     A1.check(`${at} right sits on the count`, c.every((x) => Math.abs(x.rb - x.nb) <= 8), c.map((x) => `${x.k} ${f1(x.rb - x.nb)}`).join(" / "));
