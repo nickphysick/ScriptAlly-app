@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "L8-1280",
+  "where": "the band and the sheet are measured",
+  "ok": true,
+  "detail": "{\"sheetL\":248,\"sheetR\":1272,\"y\":268,\"bandL\":296,\"bandR\":1224}"
+ },
+ {
+  "lock": "L8-1280",
+  "where": "the band's ground at the sheet's left edge (±1)",
+  "ok": false,
+  "detail": "[\"242,238,232\",\"242,238,232\",\"242,238,232\"]"
+ },
+ {
+  "lock": "L8-1280",
+  "where": "…at the sheet's right edge (±1)",
+  "ok": false,
+  "detail": "[\"242,238,232\",\"242,238,232\",\"242,238,232\"]"
+ },
+ {
+  "lock": "L8-1280",
+  "where": "…and between the edge and the column",
+  "ok": false,
+  "detail": "[\"242,238,232\",\"242,238,232\",\"242,238,232\"]"
+ }
+]

@@ -3,7 +3,13 @@
   "lock": "L8",
   "where": "pk40-ms · the page: no mono capitals",
   "ok": false,
-  "detail": "[\"SPAN.p8-pkl-k: YOUR PACKAGES\"]"
+  "detail": "[\"P.p9-ag3-d: 40% OF AGENTS ASKED FOR MORE: \",\"P.p9-ag3-d: OUT TO 4 AGENTS.\",\"P.p9-ag3-d: NOT SENT YET. IT NEEDS A LETTE\",\"P.p9-ag3-d: 33% OF THE 6 AGENTS WHO GOT IT\",\"P.p9-ag3-d: 33% OF THE 9 AGENTS WHO GOT IT\",\"P.p9-ag3-d: 30% OF THE 10 AGENTS WHO GOT I\"]"
+ },
+ {
+  "lock": "L8",
+  "where": "pk40-ms · the two named mono labels are mono capitals",
+  "ok": true,
+  "detail": "[\"PRO:true\",\"BUILD, VIEW AND EDIT:true\"]"
  },
  {
   "lock": "L8",
@@ -15,19 +21,19 @@
   "lock": "L8",
   "where": "pk40-ms · New package dialog: no mono capitals",
   "ok": false,
-  "detail": "[\"SPAN.p8-pkl-k: YOUR PACKAGES\"]"
+  "detail": "[\"P.p9-ag3-d: 40% OF AGENTS ASKED FOR MORE: \",\"P.p9-ag3-d: OUT TO 4 AGENTS.\",\"P.p9-ag3-d: NOT SENT YET. IT NEEDS A LETTE\",\"P.p9-ag3-d: 33% OF THE 6 AGENTS WHO GOT IT\",\"P.p9-ag3-d: 33% OF THE 9 AGENTS WHO GOT IT\",\"P.p9-ag3-d: 30% OF THE 10 AGENTS WHO GOT I\"]"
  },
  {
   "lock": "L8",
   "where": "pk40-ms · How it works opened",
   "ok": true,
-  "detail": "[data-pk26=\"hwm\"]"
+  "detail": "[data-pk39=\"hw\"]"
  },
  {
   "lock": "L8",
   "where": "pk40-ms · How it works: no mono capitals",
   "ok": false,
-  "detail": "[\"SPAN.p8-pkl-k: YOUR PACKAGES\"]"
+  "detail": "[\"P.p9-ag3-d: 40% OF AGENTS ASKED FOR MORE: \",\"P.p9-ag3-d: OUT TO 4 AGENTS.\",\"P.p9-ag3-d: NOT SENT YET. IT NEEDS A LETTE\",\"P.p9-ag3-d: 33% OF THE 6 AGENTS WHO GOT IT\",\"P.p9-ag3-d: 33% OF THE 9 AGENTS WHO GOT IT\",\"P.p9-ag3-d: 30% OF THE 10 AGENTS WHO GOT I\"]"
  },
  {
   "lock": "L8",
@@ -39,7 +45,7 @@
   "lock": "L8",
   "where": "pk40-ms · the material drawer: no mono capitals",
   "ok": false,
-  "detail": "[\"SPAN.p8-pkl-k: YOUR PACKAGES\"]"
+  "detail": "[\"P.p9-ag3-d: 40% OF AGENTS ASKED FOR MORE: \",\"P.p9-ag3-d: OUT TO 4 AGENTS.\",\"P.p9-ag3-d: NOT SENT YET. IT NEEDS A LETTE\",\"P.p9-ag3-d: 33% OF THE 6 AGENTS WHO GOT IT\",\"P.p9-ag3-d: 33% OF THE 9 AGENTS WHO GOT IT\",\"P.p9-ag3-d: 30% OF THE 10 AGENTS WHO GOT I\"]"
  },
  {
   "lock": "L8",
@@ -51,13 +57,13 @@
   "lock": "L8",
   "where": "pk40-ms · the package drawer: no mono capitals",
   "ok": false,
-  "detail": "[\"SPAN.p8-pkl-k: YOUR PACKAGES\"]"
+  "detail": "[\"P.p9-ag3-d: 40% OF AGENTS ASKED FOR MORE: \",\"P.p9-ag3-d: OUT TO 4 AGENTS.\",\"P.p9-ag3-d: NOT SENT YET. IT NEEDS A LETTE\",\"P.p9-ag3-d: 33% OF THE 6 AGENTS WHO GOT IT\",\"P.p9-ag3-d: 33% OF THE 9 AGENTS WHO GOT IT\",\"P.p9-ag3-d: 30% OF THE 10 AGENTS WHO GOT I\"]"
  },
  {
   "lock": "L8",
   "where": "pk40-new · the page: no mono capitals",
-  "ok": false,
-  "detail": "[\"SPAN.p8-pkl-k: YOUR PACKAGES\"]"
+  "ok": true,
+  "detail": "[]"
  },
  {
   "lock": "L8",
@@ -68,19 +74,19 @@
  {
   "lock": "L8",
   "where": "pk40-new · New package dialog: no mono capitals",
-  "ok": false,
-  "detail": "[\"SPAN.p8-pkl-k: YOUR PACKAGES\"]"
+  "ok": true,
+  "detail": "[]"
  },
  {
   "lock": "L8",
   "where": "pk40-new · How it works opened",
   "ok": true,
-  "detail": "[data-pk26=\"hwm\"]"
+  "detail": "[data-pk39=\"hw\"]"
  },
  {
   "lock": "L8",
   "where": "pk40-new · How it works: no mono capitals",
-  "ok": false,
-  "detail": "[\"SPAN.p8-pkl-k: YOUR PACKAGES\"]"
+  "ok": true,
+  "detail": "[]"
  }
 ]

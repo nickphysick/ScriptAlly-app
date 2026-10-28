@@ -61,11 +61,11 @@ const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   /* L1: the tab bar comes back */
   L1: { js: watch(`const p = document.querySelector('[data-pk26="page"]'); if (p && !p.querySelector('[data-pk26="tabs"]')) { const n = document.createElement('nav'); n.dataset.pk26 = 'tabs'; n.textContent = 'Packages · Query letters · Synopses'; p.prepend(n); }`) },
   /* L2: a second label is marked selected */
-  L2: { js: watch(`const b = [...document.querySelectorAll('[data-pk38="labels"] .p8-pkl-b:not(.p8-ret)')]; const x = b.find((e) => e.getAttribute('aria-pressed') !== 'true'); if (x && b.filter((e) => e.getAttribute('aria-pressed') === 'true').length < 2) x.setAttribute('aria-pressed', 'true');`) },
+  L2: { js: watch(`const b = [...document.querySelectorAll('[data-pk38="labels"] .p9-pkl-b:not(.p9-ret)')]; const x = b.find((e) => e.getAttribute('aria-pressed') !== 'true'); if (x && b.filter((e) => e.getAttribute('aria-pressed') === 'true').length < 2) x.setAttribute('aria-pressed', 'true');`) },
   /* L3: the drawer states a rate packageReplies did not give */
   L3: { js: watch(`const b = document.querySelector('[data-pk38="pkd-rate"] .p8-dst-r b'); if (b && b.textContent !== '55%') b.textContent = '55%';`) },
   /* L4: the first Packages showcase appears twice */
-  L4: { js: watch(`const g = document.querySelector('[data-pk38="row-pk"] .p8-ag3-g'); if (g && g.children.length && g.children.length < 4) g.appendChild(g.children[0].cloneNode(true));`) },
+  L4: { js: watch(`const g = document.querySelector('[data-pk38="row-pk"] .p9-ag3-g'); if (g && g.children.length && g.children.length < 4) g.appendChild(g.children[0].cloneNode(true));`) },
   /* L5: a too-early package wins Doing best */
   L5: { js: watch(`const a = document.querySelector('[data-show^="best:"] h3'); if (a && a.textContent !== 'Standard 2') a.textContent = 'Standard 2';`) },
   /* L6: the band takes the page's column instead of the sheet */
@@ -73,11 +73,12 @@ const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   /* L7: a showcase in the empty state */
   L7: { js: watch(`const m = document.querySelector('[data-pk38="empty"]'); if (m && !document.querySelector('[data-pk38="show"]')) { const a = document.createElement('article'); a.dataset.pk38 = 'show'; m.after(a); }`) },
   /* L8: the ref's mono kicker over the labels comes back (pk38.css's override dropped) */
-  L8: { css: `.p8-pkl .p8-pkl-k { font-family: "JetBrains Mono", monospace !important; text-transform: uppercase !important; }` },
+  /* (v39: aimed at the showcase sentence, which carries no override of its own — a break the page's rules out-rank proves nothing) */
+  L8: { css: `[data-pk38="agg"] .p9-ag3 .p9-ag3-d.p9-ag3-d.p9-ag3-d { font-family: "JetBrains Mono", monospace !important; text-transform: uppercase !important; }` },
   /* L10: New package opens on Empty whatever "Make a copy" asked for */
   L10: { js: watch(`const r = [...document.querySelectorAll('.p6-pd-from [role="radio"]')]; if (r.length === 2 && r[1].getAttribute('aria-checked') === 'true') { r[1].setAttribute('aria-checked', 'false'); r[0].setAttribute('aria-checked', 'true'); }`) },
   /* L9: a ✕ on the locked package */
-  L9: { js: watch(`const o = document.querySelector('[data-pk40="open"][data-locked] .p6-mr-ac'); if (o && !o.querySelector('.p6-mr-x')) { const x = document.createElement('button'); x.className = 'p6-mr-x'; x.textContent = '✕'; o.appendChild(x); }`) },
+  L9: { js: watch(`const o = document.querySelector('[data-pk40="open"][data-locked] .p9-mr-ac'); if (o && !o.querySelector('.p9-mr-x')) { const x = document.createElement('button'); x.className = 'p9-mr-x'; x.textContent = '✕'; o.appendChild(x); }`) },
 };
 
 async function open(page: Page, size: { width: number; height: number }, ms = "pk40-ms", route = "/queries/packages") {
@@ -112,7 +113,7 @@ test("L1 no tab bar and no Letters/Synopses page; ?tab=syn opens Your materials 
   L.check("Your materials' tabs read", sel.length === 3, JSON.stringify(sel));
   L.check("?tab=syn → Synopses selected", sel.some((s) => /^Synopses/.test(s) && s.endsWith("=true")), JSON.stringify(sel));
   L.check("…and only Synopses", sel.filter((s) => s.endsWith("=true")).length === 1, JSON.stringify(sel));
-  const rows = await txt(page, `${pg} [data-pk26="lib-list"] .p6-lr`);
+  const rows = await txt(page, `${pg} [data-pk26="lib-list"] .p9-lr`);
   L.check("…listing the synopsis", rows.some((r) => r.includes("One-page")), JSON.stringify(rows));
   L.done(8);
 });
@@ -122,20 +123,20 @@ test("L2 a live label loads its package; a retired one opens the drawer; one lab
   test.setTimeout(180_000);
   const L = new Ledger("L2");
   await open(page, SIZES[0]);
-  const labels = await page.evaluate(() => [...document.querySelectorAll('[data-pk38="labels"] .p8-pkl-b')].map((b) => ({ id: b.getAttribute("data-pkid"), on: b.getAttribute("aria-pressed") === "true" })));
+  const labels = await page.evaluate(() => [...document.querySelectorAll('[data-pk38="labels"] .p9-pkl-b')].map((b) => ({ id: b.getAttribute("data-pkid"), on: b.getAttribute("aria-pressed") === "true" })));
   L.check("labels are drawn (4 live)", labels.length === 4, JSON.stringify(labels));
   for (const id of ["pk40-std2", "pk40-ready", "pk40-draft", "pk40-std"]) {
     await label(page, id).click({ timeout: 5000 }).catch(() => {});
     await page.waitForTimeout(500);
     const now = await openPkg(page);
-    const name = (await txt(page, `${pg} [data-pk40="open"] .p6-po-nm`))[0] ?? "";
-    const lname = (await txt(page, `${pg} [data-pk38="labels"] [data-pkid="${id}"] .p8-pkl-t b`))[0] ?? "";
-    const on = await page.evaluate(() => [...document.querySelectorAll('[data-pk38="labels"] .p8-pkl-b[aria-pressed="true"]')].map((b) => b.getAttribute("data-pkid")));
+    const name = (await txt(page, `${pg} [data-pk40="open"] .p9-po-nm`))[0] ?? "";
+    const lname = (await txt(page, `${pg} [data-pk38="labels"] [data-pkid="${id}"] .p9-pkl-t b`))[0] ?? "";
+    const on = await page.evaluate(() => [...document.querySelectorAll('[data-pk38="labels"] .p9-pkl-b[aria-pressed="true"]')].map((b) => b.getAttribute("data-pkid")));
     L.check(`${id}: loads into the builder`, now === id, `${now}`);
     L.check(`${id}: the header name matches the label`, !!name && name === lname, `${name} vs ${lname}`);
     L.check(`${id}: it is the only label marked selected`, on.length === 1 && on[0] === id, JSON.stringify(on));
   }
-  await page.locator(`${pg} [data-pk38="labels"] .p8-pkl-f`).first().click({ timeout: 5000 }).catch(() => {});
+  await page.locator(`${pg} [data-pk38="labels"] .p9-pkl-f`).first().click({ timeout: 5000 }).catch(() => {});
   await page.waitForTimeout(400);
   L.check("Show retired brings the retired label", (await label(page, "pk40-old").count()) === 1, "old");
   const before = await openPkg(page);
@@ -173,7 +174,7 @@ test("L3 Figures opens the drawer for the open package at packageReplies' rate; 
   /* Edit in the builder, from a showcase's drawer */
   await label(page, "pk40-std2").click({ timeout: 5000 }).catch(() => {});
   await page.waitForTimeout(300);
-  await page.locator(`${pg} [data-show="best:pk40-std"] .p8-ag2-v`).first().click({ timeout: 5000 }).catch(() => {});
+  await page.locator(`${pg} [data-show="best:pk40-std"] .p9-ag2-v`).first().click({ timeout: 5000 }).catch(() => {});
   await page.waitForTimeout(700);
   L.check("a showcase opens its package's drawer", (await page.locator('[data-pk38="pkd"][data-pkg="pk40-std"]').count()) === 1, "std drawer");
   await page.locator('[data-pk38="pkd"] [data-pk38="edit"]').first().click({ timeout: 5000 }).catch(() => {});
@@ -201,7 +202,7 @@ test("L5 every showcase's figure is packageReplies' for the fixture; nothing too
   test.setTimeout(120_000);
   const L = new Ledger("L5");
   await open(page, SIZES[0]);
-  const show = (k: string) => page.evaluate((k) => { const a = document.querySelector(`[data-show="${k}"]`) as HTMLElement | null; return a ? { h: (a.querySelector("h3") as HTMLElement).innerText.trim(), d: (a.querySelector(".p8-ag3-d") as HTMLElement).innerText.trim(), bars: [...a.querySelectorAll(".p8-ov-b")].map((b) => (b as HTMLElement).innerText.replace(/\s+/g, " ").trim()) } : null; }, k);
+  const show = (k: string) => page.evaluate((k) => { const a = document.querySelector(`[data-show="${k}"]`) as HTMLElement | null; return a ? { h: (a.querySelector("h3") as HTMLElement).innerText.trim(), d: (a.querySelector(".p9-ag3-d") as HTMLElement).innerText.trim(), bars: [...a.querySelectorAll(".p9-ov-b")].map((b) => (b as HTMLElement).innerText.replace(/\s+/g, " ").trim()) } : null; }, k);
   const best = await show("best:pk40-std");
   L.check("Doing best is Standard (the one ranked package)", best?.h === "Standard", JSON.stringify(best));
   L.check("…40% of agents asked for more: 2 of 5, against your 30% average.", best?.d === "40% of agents asked for more: 2 of 5, against your 30% average.", String(best?.d));
@@ -266,12 +267,15 @@ test("L7 no packaged queries: the empty line, the dashed message, no showcases",
 async function monoCensus(page: Page): Promise<string[]> {
   return page.evaluate(() => {
     const out: string[] = [];
-    const roots = [...document.querySelectorAll('[data-pk26="page"], .p6-layer')];
+    /* v39: the guide (.p9-hw2) and the picker (.p9-icp) render outside .p6-layer, so they are roots of their own */
+    const roots = [...document.querySelectorAll('[data-pk26="page"], .p6-layer, .p9-hw2, .p9-icp')];
     for (const r of roots) {
       for (const e of [r, ...r.querySelectorAll("*")] as HTMLElement[]) {
         if (!e.offsetParent && getComputedStyle(e).position !== "fixed") continue;
         if (![...e.childNodes].some((n) => n.nodeType === 3 && (n.textContent ?? "").trim())) continue;
         if (e.closest("[data-art]")) continue;
+        /* ⚠️ v39 names exactly two mono labels, and only these two are allowed: "Build, view and edit" and the Pro stamp */
+        if (e.matches('[data-pk39="kicker"], [data-pk39="pro"]')) continue;
         const cs = getComputedStyle(e);
         if (/mono/i.test(cs.fontFamily) && cs.textTransform === "uppercase") out.push(`${e.tagName}.${e.className}: ${(e.innerText ?? "").trim().slice(0, 30)}`);
       }
@@ -279,14 +283,18 @@ async function monoCensus(page: Page): Promise<string[]> {
     return out;
   });
 }
-test("L8 no visible element on the page or its layers is mono AND uppercase", async ({ page }) => {
+test("L8 no visible element on the page or its layers is mono AND uppercase, but v39's two named labels", async ({ page }) => {
   test.setTimeout(240_000);
   const L = new Ledger("L8");
   for (const ms of ["pk40-ms", "pk40-new"]) {
     await open(page, SIZES[0], ms);
     const hits = await monoCensus(page);
     L.check(`${ms} · the page: no mono capitals`, hits.length === 0, JSON.stringify(hits.slice(0, 8)));
-    for (const [what, sel, layer] of [["New package dialog", '[data-pk38="labels"] .p8-pkl-new', ".p6-pdlg"], ["How it works", '[data-pk39="how"]', '[data-pk39="hw"]']] as const) {
+    /* REWRITTEN for v39: the two exceptions are exactly as named — present, and mono capitals */
+    const allowed = await page.evaluate(() => [...document.querySelectorAll('[data-pk26="page"] [data-pk39="kicker"], [data-pk26="page"] [data-pk39="pro"]')]
+      .filter((e) => (e as HTMLElement).offsetParent).map((e) => { const cs = getComputedStyle(e); return `${(e as HTMLElement).innerText.trim()}:${/mono/i.test(cs.fontFamily) && cs.textTransform === "uppercase"}`; }));
+    if (ms === "pk40-ms") L.check(`${ms} · the two named mono labels are mono capitals`, allowed.length === 2 && allowed.every((a) => a.endsWith(":true")), JSON.stringify(allowed));
+    for (const [what, sel, layer] of [["New package dialog", '[data-pk38="labels"] .p9-pkl-new', ".p6-pdlg"], ["How it works", '[data-pk39="how"], .p6-pb-bt .p6-hd-s', '[data-pk39="hw"]']] as const) {
       const b = page.locator(`${pg} ${sel}`).first();
       if (await b.count()) { await b.click({ timeout: 5000 }).catch(() => {}); await page.waitForTimeout(600); }
       L.check(`${ms} · ${what} opened`, (await page.locator(layer).count()) > 0, layer);
@@ -295,7 +303,7 @@ test("L8 no visible element on the page or its layers is mono AND uppercase", as
       await page.keyboard.press("Escape"); await page.waitForTimeout(300);
     }
     if (ms === "pk40-ms") {
-      await page.locator(`${pg} [data-pk26="lib"] .p6-lr-ed`).first().click({ timeout: 5000 }).catch(() => {});
+      await page.locator(`${pg} [data-pk26="lib"] .p9-lr-ed`).first().click({ timeout: 5000 }).catch(() => {});
       await page.waitForTimeout(700);
       L.check(`${ms} · the material drawer opened`, (await page.locator(".p6-cx-drw.p6-on").count()) === 1, "drawer");
       const dh = await monoCensus(page);
@@ -309,7 +317,7 @@ test("L8 no visible element on the page or its layers is mono AND uppercase", as
       await page.keyboard.press("Escape");
     }
   }
-  L.done(14);
+  L.done(15);
 });
 
 /* ── L9 · a sent package opens locked ── */
@@ -320,11 +328,11 @@ test("L9 a sent package opens in the builder locked; a Ready one does not", asyn
   const read = () => page.evaluate(() => {
     const o = document.querySelector('[data-pk26="page"] [data-pk40="open"]') as HTMLElement | null;
     const lib = document.querySelector('[data-pk26="page"] [data-pk26="lib"]');
-    return o ? { id: o.dataset.pkg, locked: o.hasAttribute("data-locked"), x: o.querySelectorAll(".p6-mr-x").length,
-      ticks: [...o.querySelectorAll(".p6-exc > button[aria-pressed]")].filter((b) => !(b as HTMLButtonElement).disabled).length,
-      addX: o.querySelectorAll(".p6-exa-b").length, line: o.querySelectorAll('[data-pk38="lock-line"]').length,
-      libAdd: lib ? [...lib.querySelectorAll(".p6-lr-add")].filter((b) => !(b as HTMLButtonElement).disabled && /^Add$/.test((b as HTMLElement).innerText.trim())).length : -1,
-      draggable: lib ? lib.querySelectorAll('.p6-lr[draggable="true"]').length : -1 } : null;
+    return o ? { id: o.dataset.pkg, locked: o.hasAttribute("data-locked"), x: o.querySelectorAll(".p9-mr-x").length,
+      ticks: [...o.querySelectorAll(".p9-exc > button[aria-pressed]")].filter((b) => !(b as HTMLButtonElement).disabled).length,
+      addX: o.querySelectorAll(".p9-exa-b").length, line: o.querySelectorAll('[data-pk38="lock-line"]').length,
+      libAdd: lib ? [...lib.querySelectorAll(".p9-lr-add")].filter((b) => !(b as HTMLButtonElement).disabled && /^Add$/.test((b as HTMLElement).innerText.trim())).length : -1,
+      draggable: lib ? lib.querySelectorAll('.p9-lr[draggable="true"]').length : -1 } : null;
   });
   for (const [id, locked] of [["pk40-std", true], ["pk40-std2", true], ["pk40-ready", false]] as const) {
     await label(page, id).click({ timeout: 5000 }).catch(() => {});
@@ -373,7 +381,8 @@ test("L11 both manuscripts render with no console errors", async ({ page }) => {
   for (const ms of ["pk40-ms", "pk40-new"]) {
     await open(page, SIZES[0], ms);
     for (const k of ["labels", "band", "agg"]) L.check(`${ms}: ${k} renders`, (await page.locator(`${pg} [data-pk38="${k}"]`).count()) === 1, k);
-    L.check(`${ms}: the builder renders`, (await page.locator(`${pg} [data-pk40="wbf"]`).count()) === 1, "wbf");
+    /* v39: the builder is two cards with no outer panel (v40's `wbf` is gone); the law — it renders — stands */
+    L.check(`${ms}: the builder renders`, (await page.locator(`${pg} [data-pk39="builder"]`).count()) === 1, "builder");
   }
   const real = errs.filter((e) => !/favicon|ResizeObserver loop/i.test(e));
   L.check("no console errors", real.length === 0, JSON.stringify(real.slice(0, 5)));

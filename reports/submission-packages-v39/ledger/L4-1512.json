@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "L4-1512",
+  "where": "both cards measured",
+  "ok": true,
+  "detail": "{\"lib\":{\"x\":296,\"y\":583.3125,\"w\":320,\"h\":414,\"top\":583.3125,\"bottom\":997.3125},\"open1\":{\"x\":644,\"y\":583.3125,\"w\":812,\"h\":518.90625,\"top\":583.3125,\"bottom\":1102.21875}}"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "the headers are the same height (±0.5)",
+  "ok": true,
+  "detail": "84 vs 84"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "…and level (equal tops)",
+  "ok": true,
+  "detail": "583.3125 vs 583.3125"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "the cards are 28 ± 1 apart",
+  "ok": true,
+  "detail": "28"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "Your materials is 320 wide",
+  "ok": true,
+  "detail": "320"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "no outer panel around the two cards",
+  "ok": true,
+  "detail": "{\"bg\":\"rgba(0, 0, 0, 0)\",\"shadow\":\"none\",\"kids\":2}"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "no stepper row",
+  "ok": true,
+  "detail": "stepper"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "exactly one stage indicator",
+  "ok": true,
+  "detail": "stage"
+ }
+]

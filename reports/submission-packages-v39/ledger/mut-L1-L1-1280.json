@@ -1,0 +1,80 @@
+[
+ {
+  "lock": "L1-1280",
+  "where": "both cards measured",
+  "ok": true,
+  "detail": "{\"clCard\":{\"x\":272,\"y\":129.75,\"w\":976,\"h\":191.5625,\"top\":129.75,\"bottom\":321.3125},\"card\":{\"x\":272,\"y\":149.75,\"w\":976,\"h\":191.5625,\"top\":149.75,\"bottom\":341.3125}}"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "card x = the Contact list's (±1)",
+  "ok": true,
+  "detail": "272 vs 272"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "title x = the Contact list's (±1)",
+  "ok": true,
+  "detail": "308 vs 308"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "card y = the Contact list's (±1)",
+  "ok": false,
+  "detail": "149.75 vs 129.75"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "title y = the Contact list's (±1)",
+  "ok": false,
+  "detail": "171.75 vs 151.75"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "card w = the Contact list's (±1)",
+  "ok": true,
+  "detail": "976 vs 976"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "title w = the Contact list's (±1)",
+  "ok": true,
+  "detail": "712 vs 712"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "card h = the Contact list's (±1)",
+  "ok": true,
+  "detail": "191.5625 vs 191.5625"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "title h = the Contact list's (±1)",
+  "ok": true,
+  "detail": "44 vs 44"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "the highlighter is #cfe1ea",
+  "ok": false,
+  "detail": "linear-gradient(rgba(0, 0, 0, 0) 50%, rgb(227, 232, 239) 50%)"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "the title reads Submission packages",
+  "ok": true,
+  "detail": "title"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "exactly one element on the page reads Pro",
+  "ok": true,
+  "detail": "[\"SPAN.pk39-pro:PRO\"]"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "…the stamp, titled “Included with your Pro plan”",
+  "ok": true,
+  "detail": "stamp"
+ }
+]

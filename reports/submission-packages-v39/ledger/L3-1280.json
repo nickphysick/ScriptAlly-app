@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "L3-1280",
+  "where": "labels are drawn (4 live)",
+  "ok": true,
+  "detail": "[{\"id\":\"pk40-draft\",\"w\":221.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-ready\",\"w\":221.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-std2\",\"w\":221.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-std\",\"w\":221.5,\"ring\":true,\"on\":true}]"
+ },
+ {
+  "lock": "L3-1280",
+  "where": "the row starts at the content's left (±1)",
+  "ok": true,
+  "detail": "{\"row\":{\"l\":296,\"w\":928},\"col\":{\"l\":296,\"w\":928},\"labels\":[{\"id\":\"pk40-draft\",\"w\":221.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-ready\",\"w\":221.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-std2\",\"w\":221.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-std\",\"w\":221.5,\"ring\":true,\"on\":true}]}"
+ },
+ {
+  "lock": "L3-1280",
+  "where": "the row spans the content width (±1)",
+  "ok": true,
+  "detail": "{\"row\":{\"l\":296,\"w\":928},\"col\":{\"l\":296,\"w\":928},\"labels\":[{\"id\":\"pk40-draft\",\"w\":221.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-ready\",\"w\":221.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-std2\",\"w\":221.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-std\",\"w\":221.5,\"ring\":true,\"on\":true}]}"
+ },
+ {
+  "lock": "L3-1280",
+  "where": "no label is narrower than 200",
+  "ok": true,
+  "detail": "[221.5,221.5,221.5,221.5]"
+ },
+ {
+  "lock": "L3-1280",
+  "where": "exactly one label is ringed",
+  "ok": true,
+  "detail": "[{\"id\":\"pk40-draft\",\"w\":221.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-ready\",\"w\":221.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-std2\",\"w\":221.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-std\",\"w\":221.5,\"ring\":true,\"on\":true}]"
+ },
+ {
+  "lock": "L3-1280",
+  "where": "…and it is the selected one",
+  "ok": true,
+  "detail": "[{\"id\":\"pk40-std\",\"w\":221.5,\"ring\":true,\"on\":true}]"
+ }
+]

@@ -61,7 +61,7 @@ const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   /* the header card takes the shell's shared gutter back */
   "PK26-W": { css: `.wpg-scroll > .p6 { padding-inline: 20px !important; }` },
   /* every row accepts every drop */
-  "PK26-B": { js: `document.addEventListener('dragover', (e) => { if (e.target.closest && e.target.closest('.p6-slt')) e.preventDefault(); }, true); document.addEventListener('drop', (e) => { const s = e.target.closest && e.target.closest('.p6-slt'); if (!s) return; const [k] = (e.dataTransfer.getData('text/plain') || '').split(':'); if (k && k !== s.dataset.slot) { const t = document.querySelector('.p6-slt[data-slot="' + k + '"]'); if (t) { e.stopImmediatePropagation(); t.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer: e.dataTransfer })); } } }, true);` },
+  "PK26-B": { js: `document.addEventListener('dragover', (e) => { if (e.target.closest && e.target.closest('.p9-slt')) e.preventDefault(); }, true); document.addEventListener('drop', (e) => { const s = e.target.closest && e.target.closest('.p9-slt'); if (!s) return; const [k] = (e.dataTransfer.getData('text/plain') || '').split(':'); if (k && k !== s.dataset.slot) { const t = document.querySelector('.p9-slt[data-slot="' + k + '"]'); if (t) { e.stopImmediatePropagation(); t.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer: e.dataTransfer })); } } }, true);` },
   /* the drawer's header fill runs to the rim, over the inner border */
   "PK26-D": { css: `.p6-cx-drw .p6-dh { margin-left: -8px !important; margin-right: -8px !important; }` },
   /* rank everything, the too-early too */
@@ -96,7 +96,7 @@ test("PK26-R the old address redirects with its query and opens that package", a
   const openId = await vis(page, '[data-pk26="open"]').getAttribute("data-pkg");
   L.check("that package is open", openId === "pk26-pkg-sent", String(openId));
   /* v38: the package buttons are the labels row; the sent package opens (locked) in the builder */
-  const pressed = await vis(page, '[data-pk38="labels"] .p8-pkl-b[aria-pressed="true"] .p8-pkl-t b').textContent();
+  const pressed = await vis(page, '[data-pk38="labels"] .p9-pkl-b[aria-pressed="true"] .p9-pkl-t b').textContent();
   L.check("its label is the selected one", pressed === "Sent one", String(pressed));
   L.done(4);
 });
@@ -111,15 +111,17 @@ for (const size of SIZES) {
       const root = [...document.querySelectorAll('[data-pk26="page"]')].find((e) => (e as HTMLElement).offsetParent) as HTMLElement;
       const sheet = (root.closest(".ws-window") as HTMLElement).getBoundingClientRect();
       const ins = (sel: string) => { const b = (root.querySelector(sel) as HTMLElement).getBoundingClientRect(); return [b.left - sheet.left, sheet.right - b.right]; };
-      /* v38: the tab bar and v26's Results are gone (the band's width is pk38's L6); the header and the builder stay */
-      return { header: ins(".p6-hd-in"), build: ins(".p6-pb-build") };
+      /* v38: the tab bar and v26's Results are gone (the band's width is pk38's L6).
+         v39: the header is the Contact list's card, held to the Contact list's own boxes by pk39 L1, so only the
+         builder's inset is asserted here (the law — the builder 48 in from the sheet — is unchanged) */
+      return { build: ins(".p9-pb-build") };
     });
-    for (const [k, want] of [["header", 92], ["build", 48]] as const) {
+    for (const [k, want] of [["build", 48]] as const) {
       const [l, rt] = r[k];
       L.check(`${k} left`, Math.abs(l - want) <= 1, `${l.toFixed(1)} (want ${want})`);
       L.check(`${k} right`, Math.abs(rt - want) <= 1, `${rt.toFixed(1)} (want ${want})`);
     }
-    L.done(4);
+    L.done(2);
   });
 }
 
@@ -130,30 +132,30 @@ test("PK26-B only the matching row takes a drop; Add does the same by keyboard",
   seed();
   await open(page, SIZES[0], "/queries/packages?pkg=pk26-pkg-open");
   L.check("the drag target is open", (await vis(page, '[data-pk26="open"]').getAttribute("data-pkg")) === "pk26-pkg-open", "open package");
-  const letterB = vis(page, '.p6-lr[data-drag="let:pk26-let-b"]');
+  const letterB = vis(page, '.p9-lr[data-drag="let:pk26-let-b"]');
   /* while dragging: the package dims, the Query letter row alone is marked */
   await letterB.evaluate((el) => el.dispatchEvent(new DragEvent("dragstart", { bubbles: true, dataTransfer: new DataTransfer() })));
   await page.waitForTimeout(200);
   const marks = await page.evaluate(() => {
     const o = [...document.querySelectorAll('[data-pk26="open"]')].find((e) => (e as HTMLElement).offsetParent) as HTMLElement;
-    return { dragging: o.classList.contains("p6-dragging"), ok: [...o.querySelectorAll(".p6-slt.p6-ok")].map((s) => (s as HTMLElement).dataset.slot) };
+    return { dragging: o.classList.contains("p9-dragging"), ok: [...o.querySelectorAll(".p9-slt.p9-ok")].map((s) => (s as HTMLElement).dataset.slot) };
   });
   L.check("the package is marked as dragging", marks.dragging, JSON.stringify(marks));
   L.check("only the Query letter row is highlighted", JSON.stringify(marks.ok) === '["let"]', JSON.stringify(marks.ok));
   await letterB.evaluate((el) => el.dispatchEvent(new DragEvent("dragend", { bubbles: true })));
   /* onto the Synopsis row: nothing */
-  await letterB.dragTo(vis(page, '.p6-slt[data-slot="syn"]'));
+  await letterB.dragTo(vis(page, '.p9-slt[data-slot="syn"]'));
   await page.waitForTimeout(1500);
   let d = dump()["pk26-pkg-open"]!;
   L.check("a letter dropped on Synopsis changes nothing", d.queryLetterVersionId === "" && d.synopsisVersionId === "", `ql=${d.queryLetterVersionId} syn=${d.synopsisVersionId}`);
   /* onto the Query letter row: fills it */
-  await letterB.dragTo(vis(page, '.p6-slt[data-slot="let"]'));
+  await letterB.dragTo(vis(page, '.p9-slt[data-slot="let"]'));
   await page.waitForTimeout(1500);
   d = dump()["pk26-pkg-open"]!;
   L.check("dropped on Query letter, it fills it", d.queryLetterVersionId === "pk26-let-b", `ql=${d.queryLetterVersionId}`);
   /* Add, by keyboard: the synopsis */
-  await vis(page, '.p6-lib-tabs [role="tab"].p6-t-syn').click();
-  const add = vis(page, '.p6-lr[data-drag="syn:pk26-syn"] .p6-lr-add');
+  await vis(page, '.p9-lib-tabs [role="tab"].p9-t-syn').click();
+  const add = vis(page, '.p9-lr[data-drag="syn:pk26-syn"] .p9-lr-add');
   await add.focus();
   await page.keyboard.press("Enter");
   await page.waitForTimeout(1500);
@@ -172,7 +174,7 @@ for (const size of SIZES) {
     const L = new Ledger(`PK26-D-${size.width}`);
     await open(page, size);
     /* v38: the Query letters table is gone; Your materials' pencil opens the same drawer */
-    await vis(page, '[data-pk26="lib"] .p6-lr-ed').click();
+    await vis(page, '[data-pk26="lib"] .p9-lr-ed').click();
     await page.waitForTimeout(900);
     const r = await page.evaluate(() => {
       const d = document.querySelector('[data-pk26="drawer"]') as HTMLElement;
@@ -233,12 +235,13 @@ test("PK26-M material rows: one-line names, no type for a summary", async ({ pag
   await open(page, SIZES[1]);
   const r = await page.evaluate(() => {
     const pg = [...document.querySelectorAll('[data-pk26="page"]')].find((e) => (e as HTMLElement).offsetParent) as HTMLElement;
-    const rows = [...pg.querySelectorAll('[data-pk26="lib"] .p6-lr')].map((row) => {
-      const b = row.querySelector("b") as HTMLElement, nm = b.querySelector(".p6-nm") as HTMLElement | null;
+    const rows = [...pg.querySelectorAll('[data-pk26="lib"] .p9-lr')].map((row) => {
+      /* v39: the ref's row has no name span — the b is the name, and carries the title */
+      const b = row.querySelector("b") as HTMLElement, nm = b;
       const lh = parseFloat(getComputedStyle(b).fontSize) * 1.6;
       return { name: nm?.textContent ?? b.textContent ?? "", title: nm?.getAttribute("title") ?? null, oneLine: b.getBoundingClientRect().height <= lh, small: row.querySelector("small")?.textContent ?? null };
     });
-    const smalls = [...pg.querySelectorAll('[data-pk26="lib"] small, [data-pk26="open"] .p6-mr-tx small')].map((e) => (e.textContent ?? "").trim());
+    const smalls = [...pg.querySelectorAll('[data-pk26="lib"] small, [data-pk26="open"] .p9-mr-tx small')].map((e) => (e.textContent ?? "").trim());
     return { rows, smalls };
   });
   const long = r.rows.find((x) => x.name.startsWith("The longer comps-forward letter"));
@@ -255,19 +258,22 @@ test("PK26-H the package note is one line, or + Add a note", async ({ page }) =>
   test.setTimeout(180_000);
   const L = new Ledger("PK26-H");
   await open(page, SIZES[1]);
-  await vis(page, '[data-pk38="labels"] .p8-pkl-b[title="Sent one"]').click(); await page.waitForTimeout(400);
+  await vis(page, '[data-pk38="labels"] .p9-pkl-b[title="Sent one"]').click(); await page.waitForTimeout(400);
   const withNote = await page.evaluate(() => {
-    const h = [...document.querySelectorAll('[data-pk26="open"] .p6-po-tt')].find((e) => (e as HTMLElement).offsetParent) as HTMLElement;
+    const h = [...document.querySelectorAll('[data-pk26="open"] .p9-po-tt')].find((e) => (e as HTMLElement).offsetParent) as HTMLElement;
     const sm = h.querySelector("small") as HTMLElement;
     const h3 = h.querySelector("h3") as HTMLElement;
     return { text: sm?.textContent ?? "", h: sm?.getBoundingClientRect().height ?? 0, fs: sm ? parseFloat(getComputedStyle(sm).fontSize) : 0, cut: sm ? sm.scrollWidth > sm.clientWidth : false, h3h: h3.getBoundingClientRect().height, h3fs: parseFloat(getComputedStyle(h3).fontSize) };
   });
   L.check("the note is one line at 1280", withNote.h > 0 && withNote.h <= withNote.fs * 1.6, JSON.stringify(withNote));
   L.check("…cut short (it is longer than the room)", withNote.cut, JSON.stringify(withNote));
-  L.check("the name and its pencil keep one line", withNote.h3h <= withNote.h3fs * 1.6, JSON.stringify(withNote));
-  await vis(page, '[data-pk38="labels"] .p8-pkl-b[title="Drag target"]').click(); await page.waitForTimeout(400);
-  const add = vis(page, '[data-pk26="open"] .p6-po-addnote');
-  L.check("no note: + Add a note", (await add.count()) === 1 && (await add.textContent()) === "+ Add a note", String(await add.count()));
+  /* v39: the pencil is gone (the name is edited in place); the law — the name keeps one line — stands */
+  L.check("the name keeps one line", withNote.h3h <= withNote.h3fs * 1.6, JSON.stringify(withNote));
+  await vis(page, '[data-pk38="labels"] .p9-pkl-b[title="Drag target"]').click(); await page.waitForTimeout(400);
+  const add = vis(page, '[data-pk26="open"] .p9-po-addnote');
+  /* v39: the note line itself, in the ref's words ("Add a note: who is this for?"); the law — no note offers one, and it
+     opens Package details with the note focused — stands */
+  L.check("no note: Add a note", (await add.count()) === 1 && (await add.textContent()) === "Add a note: who is this for?", String(await add.count()));
   if (await add.count()) {
     await add.click(); await page.waitForTimeout(500);
     const focused = await page.evaluate(() => (document.activeElement as HTMLElement | null)?.className ?? "");

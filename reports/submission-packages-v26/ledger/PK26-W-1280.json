@@ -1,18 +1,6 @@
 [
  {
   "lock": "PK26-W-1280",
-  "where": "header left",
-  "ok": true,
-  "detail": "92.0 (want 92)"
- },
- {
-  "lock": "PK26-W-1280",
-  "where": "header right",
-  "ok": true,
-  "detail": "92.0 (want 92)"
- },
- {
-  "lock": "PK26-W-1280",
   "where": "build left",
   "ok": true,
   "detail": "48.0 (want 48)"

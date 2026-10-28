@@ -1,0 +1,98 @@
+[
+ {
+  "lock": "L5",
+  "where": "pk40-ready: the name is editable in place",
+  "ok": true,
+  "detail": "plaintext-only"
+ },
+ {
+  "lock": "L5",
+  "where": "pk40-ready: Escape restores the name",
+  "ok": true,
+  "detail": "Ready one"
+ },
+ {
+  "lock": "L5",
+  "where": "pk40-ready: …and writes nothing",
+  "ok": true,
+  "detail": "{\"toasts\":[],\"stored\":\"Ready one\"}"
+ },
+ {
+  "lock": "L5",
+  "where": "pk40-ready: one write (one rename receipt)",
+  "ok": true,
+  "detail": "[\"Renamed to Ready renamed.\\nUNDO\\n✕\"]"
+ },
+ {
+  "lock": "L5",
+  "where": "pk40-ready: stored",
+  "ok": true,
+  "detail": "Ready renamed"
+ },
+ {
+  "lock": "L5",
+  "where": "pk40-ready: the label shows it",
+  "ok": true,
+  "detail": "Ready renamed"
+ },
+ {
+  "lock": "L5",
+  "where": "pk40-ready (not sent): no padlock",
+  "ok": true,
+  "detail": "{\"stage\":0,\"name\":0}"
+ },
+ {
+  "lock": "L5",
+  "where": "pk40-std: the name is editable in place",
+  "ok": true,
+  "detail": "plaintext-only"
+ },
+ {
+  "lock": "L5",
+  "where": "pk40-std: Escape restores the name",
+  "ok": true,
+  "detail": "Standard"
+ },
+ {
+  "lock": "L5",
+  "where": "pk40-std: …and writes nothing",
+  "ok": true,
+  "detail": "{\"toasts\":[\"Renamed to Ready renamed.\\nUNDO\\n✕\",\"Renamed to Ready one.\\nUNDO\\n✕\"],\"stored\":\"Standard\"}"
+ },
+ {
+  "lock": "L5",
+  "where": "pk40-std: one write (one rename receipt)",
+  "ok": true,
+  "detail": "[\"Renamed to Ready renamed.\\nUNDO\\n✕\",\"Renamed to Ready one.\\nUNDO\\n✕\",\"Renamed to Standard renamed.\\nUNDO\\n✕\"]"
+ },
+ {
+  "lock": "L5",
+  "where": "pk40-std: stored",
+  "ok": true,
+  "detail": "Standard renamed"
+ },
+ {
+  "lock": "L5",
+  "where": "pk40-std: the label shows it",
+  "ok": true,
+  "detail": "Standard renamed"
+ },
+ {
+  "lock": "L5",
+  "where": "pk40-std (sent): exactly one padlock, in the stage",
+  "ok": true,
+  "detail": "{\"stage\":1,\"name\":0}"
+ },
+ {
+  "lock": "L5",
+  "where": "pk40-std (sent): none beside the name",
+  "ok": true,
+  "detail": "{\"stage\":1,\"name\":0}"
+ },
+ {
+  "lock": "L5",
+  "where": "pk40-std (sent): the padlock's words",
+  "ok": true,
+  "detail": "title"
+ }
+]

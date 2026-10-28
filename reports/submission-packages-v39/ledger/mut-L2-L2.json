@@ -1,0 +1,79 @@
+[
+ {
+  "lock": "L2",
+  "where": "a package without the field: its label is Harbour",
+  "ok": true,
+  "detail": "rgb(29, 75, 99)"
+ },
+ {
+  "lock": "L2",
+  "where": "…its list tile too",
+  "ok": true,
+  "detail": "rgb(29, 75, 99)"
+ },
+ {
+  "lock": "L2",
+  "where": "the picker opened",
+  "ok": true,
+  "detail": "picker"
+ },
+ {
+  "lock": "L2",
+  "where": "…with 12 icons and 8 colours",
+  "ok": true,
+  "detail": "counts"
+ },
+ {
+  "lock": "L2",
+  "where": "the label is Plum",
+  "ok": false,
+  "detail": "rgb(29, 75, 99)"
+ },
+ {
+  "lock": "L2",
+  "where": "the builder's header is Plum",
+  "ok": true,
+  "detail": "rgb(88, 58, 90)"
+ },
+ {
+  "lock": "L2",
+  "where": "the showcase card's header is Plum",
+  "ok": true,
+  "detail": "rgb(88, 58, 90)"
+ },
+ {
+  "lock": "L2",
+  "where": "the list tile is Plum",
+  "ok": true,
+  "detail": "rgb(88, 58, 90)"
+ },
+ {
+  "lock": "L2",
+  "where": "Escape closes the picker",
+  "ok": true,
+  "detail": "picker"
+ },
+ {
+  "lock": "L2",
+  "where": "…and focus returns to the tile",
+  "ok": true,
+  "detail": "focus"
+ },
+ {
+  "lock": "L2",
+  "where": "the drawer's header is Plum",
+  "ok": true,
+  "detail": "rgb(88, 58, 90)"
+ },
+ {
+  "lock": "L2",
+  "where": "stored as the key, never the hex",
+  "ok": true,
+  "detail": "{\"status\":\"Active\",\"id\":\"pk40-draft\",\"synopsisVersionId\":\"\",\"userId\":\"LS4ymFFCEvhN82advZQJ5zkr7sv2\",\"queryLetterVersionId\":\"\",\"extraIds\":[],\"createdDate\":\"2026-10-23T12:20:16.239Z\",\"edition\":1,\"manuscriptId\":\"pk40-ms\",\"colour\":\"plum\",\"samplePagesVersionId\":\"\",\"icon\":\"flask\",\"packageName\":\"Draft one\"}"
+ },
+ {
+  "lock": "L2",
+  "where": "…and the others still have no colour field (they read as Harbour)",
+  "ok": true
+ }
+]

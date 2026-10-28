@@ -1,0 +1,10 @@
+PK39 L1:  2 failed  1 passed (53.5s)  first✗:   ✗ L1-1512 · card y = the Contact list's (±1) — 149.75 vs 129.75
+PK39 L2:  1 failed  1 passed (33.7s)  first✗:   ✗ L2 · the label is Plum — rgb(29, 75, 99)
+PK39 L3:  2 failed  1 passed (40.4s)  first✗:   ✗ L3-1512 · no label is narrower than 200 — [150,150,150,150]
+PK39 L4:  2 failed  1 passed (39.0s)  first✗:   ✗ L4-1512 · the cards are 28 ± 1 apart — 8
+PK39 L5:  1 failed  1 passed (45.5s)  first✗:   ✗ L5 · pk40-ready (not sent): no padlock — {"stage":0,"name":1}
+PK39 L6:  1 failed  1 passed (30.9s)  first✗:   ✗ L6 · Every package lists the fixture's five — ["pk:pk40-std","pk:pk40-std2","pk:pk40-old","pk:pk40-draft","pk:pk40-ready","pk:pk40-std"]
+PK39 L7:  1 failed  1 passed (36.4s)  first✗:   ✗ L7 · pk40-ms: five steps — 4
+PK39 L8:  2 failed  1 passed (40.0s)  first✗:   ✗ L8-1512 · the band's ground at the sheet's left edge (±1) — ["242,238,232","242,238,232","242,238,232"]
+PK38 L8:  2 passed (39.3s)  first✗: 
+PK38 L8:  1 failed  1 passed (39.4s)  first✗:   ✗ L8 · pk40-ms · the page: no mono capitals — ["P.p9-ag3-d: 40% OF AGENTS ASKED FOR MORE: ","P.p9-ag3-d: OUT TO 4 AGENTS.","P.p9-ag3-d: NOT SE

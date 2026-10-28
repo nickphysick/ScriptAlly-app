@@ -7,6 +7,12 @@
  },
  {
   "lock": "L8",
+  "where": "pk40-ms · the two named mono labels are mono capitals",
+  "ok": true,
+  "detail": "[\"PRO:true\",\"BUILD, VIEW AND EDIT:true\"]"
+ },
+ {
+  "lock": "L8",
   "where": "pk40-ms · New package dialog opened",
   "ok": true,
   "detail": ".p6-pdlg"
@@ -21,7 +27,7 @@
   "lock": "L8",
   "where": "pk40-ms · How it works opened",
   "ok": true,
-  "detail": "[data-pk26=\"hwm\"]"
+  "detail": "[data-pk39=\"hw\"]"
  },
  {
   "lock": "L8",
@@ -75,7 +81,7 @@
   "lock": "L8",
   "where": "pk40-new · How it works opened",
   "ok": true,
-  "detail": "[data-pk26=\"hwm\"]"
+  "detail": "[data-pk39=\"hw\"]"
  },
  {
   "lock": "L8",

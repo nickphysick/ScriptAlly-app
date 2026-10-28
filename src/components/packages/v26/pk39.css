@@ -156,6 +156,7 @@
 .p9-pb-grid.p9-v39 .p9-mr .p9-mr-l > span { font: 400 14px/1.3 var(--sp-type) !important; letter-spacing: 0 !important; text-transform: none !important; color: rgba(28, 19, 15, 0.7) !important; }
 .p9-pb-grid.p9-v39 .p9-stg .p9-stg-s { font-family: var(--sp-type) !important; font-size: 12.5px; font-weight: 400 !important; letter-spacing: 0 !important; text-transform: none !important; }
 .p9-pb-grid.p9-v39 .p9-ill > i { font: 400 10px/1 var(--sp-type) !important; letter-spacing: 0 !important; text-transform: none !important; }
+.p9-pb-grid.p9-v39 .p9-po-tt .p9-po-act { font: 400 11.5px/1.3 var(--sp-type) !important; letter-spacing: 0 !important; text-transform: none !important; }
 @container p9sheet (max-width: 1200px) {
   .p9-pb-grid.p9-v39 .p9-stg .p9-stg-s:not(.p9-on) { font-size: 0; }
 }

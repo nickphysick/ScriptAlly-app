@@ -3,23 +3,23 @@
   "lock": "PK26-H",
   "where": "the note is one line at 1280",
   "ok": true,
-  "detail": "{\"text\":\"For agents who ask for a synopsis and the first three chapters, in the UK and Ireland\",\"h\":19,\"fs\":13.5,\"cut\":true,\"h3h\":28,\"h3fs\":21}"
+  "detail": "{\"text\":\"For agents who ask for a synopsis and the first three chapters, in the UK and Ireland\",\"h\":19,\"fs\":13.5,\"cut\":true,\"h3h\":22,\"h3fs\":21}"
  },
  {
   "lock": "PK26-H",
   "where": "…cut short (it is longer than the room)",
   "ok": true,
-  "detail": "{\"text\":\"For agents who ask for a synopsis and the first three chapters, in the UK and Ireland\",\"h\":19,\"fs\":13.5,\"cut\":true,\"h3h\":28,\"h3fs\":21}"
+  "detail": "{\"text\":\"For agents who ask for a synopsis and the first three chapters, in the UK and Ireland\",\"h\":19,\"fs\":13.5,\"cut\":true,\"h3h\":22,\"h3fs\":21}"
  },
  {
   "lock": "PK26-H",
-  "where": "the name and its pencil keep one line",
+  "where": "the name keeps one line",
   "ok": true,
-  "detail": "{\"text\":\"For agents who ask for a synopsis and the first three chapters, in the UK and Ireland\",\"h\":19,\"fs\":13.5,\"cut\":true,\"h3h\":28,\"h3fs\":21}"
+  "detail": "{\"text\":\"For agents who ask for a synopsis and the first three chapters, in the UK and Ireland\",\"h\":19,\"fs\":13.5,\"cut\":true,\"h3h\":22,\"h3fs\":21}"
  },
  {
   "lock": "PK26-H",
-  "where": "no note: + Add a note",
+  "where": "no note: Add a note",
   "ok": true,
   "detail": "1"
  },
