@@ -52,7 +52,8 @@ export const Pk39Labels: React.FC<{
     <nav className="p9-pkl" aria-label="Your packages" data-pk38="labels" data-pk39="labels">
       <span className="p9-pkl-k">
         <span className="p9-ill p9-ill-s" title={`Illustration: ${LABELS_ART}`} aria-hidden="true"><i>Art</i></span>
-        <h2 className="p9-pkl-h">Your packages</h2>
+        {/* v39.2 B: a real heading again, over its italic line (the ref's `.pkl-sub`) */}
+        <span className="p9-pkl-hd"><h2 className="p9-pkl-h">Your packages</h2><span className="p9-pkl-sub">Open one to change it below</span></span>
       </span>
       <div className="p9-pkl-row">
         {list.map((p) => {

@@ -27,3 +27,18 @@
     mask-image: linear-gradient(90deg, transparent 0, #000 55%, #000 100%);
   }
 }
+
+/* ══ B · "YOUR PACKAGES" IS A REAL HEADING AGAIN (screen 02) ═══════════════════════════════════════════════════════
+   Special Elite 30px/1.1 in ink, no capitals, over "Open one to change it below" (Source Serif italic 15px at ink 60%,
+   4 down). The art stays on its left, centred on the pair (16 between). This is the typewriter's third use: the page
+   title, Your packages and the open package's name (the materials tab's label is a label, not a heading).
+   v39.1's `.p9-pkl-h` sits in pk391.css's serif rule's exception list, so it keeps its face; the font is stated here. */
+@media (min-width: 768px) {
+  .p6 .p9-pkl .p9-pkl-k.p9-pkl-k { gap: 16px !important; align-items: center !important; }
+  .p6 .p9-pkl .p9-pkl-k .p9-pkl-hd { display: block; min-width: 0; }
+  .p6 .p9-pkl .p9-pkl-k .p9-pkl-h.p9-pkl-h {
+    display: block; margin: 0;
+    font: 400 30px/1.1 var(--sp-type) !important; letter-spacing: 0 !important; text-transform: none !important; color: #1c130f !important;
+  }
+  .p6 .p9-pkl .p9-pkl-k .p9-pkl-sub { display: block; margin-top: 4px; font: italic 400 15px/normal var(--sp-serif) !important; color: rgba(28, 19, 15, 0.6); }
+}

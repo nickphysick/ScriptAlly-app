@@ -46,7 +46,8 @@
   .p9-agg3 .p9-ag3-row .p9-rlw { margin-top: 96px !important; gap: 48px !important; padding: 48px !important; }
 }
 
-/* ══ B · TYPE: THE TYPEWRITER IS FOR EXACTLY TWO THINGS, the page title and the open package's name (Nick, 28 Oct: the
+/* ══ B · TYPE: THE TYPEWRITER IS FOR EXACTLY TWO THINGS, the page title and the open package's name (⚠️ v39.2 adds a
+   third, "Your packages", and the materials tab's label as its one exception: pk392.css) (Nick, 28 Oct: the
    rule wins over the ref, which itself renders the typewriter on ~40 elements — names, figures, links, buttons).
    Everything else in the page's blocks reads in the serif; the mono labels (Your packages, the builder's label, the
    tabs' counts) stay mono. The header card's own buttons follow, on this page only. ══ */
@@ -55,9 +56,7 @@
     font-family: var(--sp-serif) !important;
   }
   .pk39-hd .pk39-card .phc-b button { font-weight: 600 !important; font-size: 15px !important; }
-  /* "Your packages": a mono label beside its placeholder art */
-  .p9-pkl .p9-pkl-k { gap: 12px !important; }
-  .p9-pkl .p9-pkl-k .p9-pkl-h.p9-pkl-h { font: 500 11px/1.2 "JetBrains Mono", monospace !important; letter-spacing: 0.18em !important; text-transform: uppercase !important; color: rgba(28, 19, 15, 0.6) !important; }
+  /* "Your packages" was a mono label here; v39.2 makes it a heading again (pk392.css, Part B) */
   .p9-pkl .p9-pkl-row .p9-pkl-b .p9-pkl-t > b { font: 600 15.5px/1.3 var(--sp-serif) !important; }
   .p9-pb-grid.p9-v39 .p9-mh-tt .p9-id-libT.p9-id-libT { font: 600 17px/1.3 var(--sp-serif) !important; }
   .p9-agg3 .p9-sh2 div > h2.p9-h2, .p9-agg3 .p9-sh2.p9-sh2 div > h2 { font: 600 22px/1.25 var(--sp-serif) !important; }
