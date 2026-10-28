@@ -7,7 +7,8 @@
 import { describe, expect, it } from "vitest";
 import { queriesForIds } from "./queriesFilterParam";
 import { queriesForIds as phoneQueriesForIds } from "./dashPhone";
-import { CONTACT_STATUS_KEYS, contactListForStatus, statusKeysForParam, STATUS_CHOICES } from "./contactList";
+import { CONTACT_STATUS_GLANCE, contactListForStatus, glanceForParam } from "./contactList";
+import { GLANCE_SETS } from "./contactV25";
 
 describe("the Query Centre on exactly these queries", () => {
   it("carries the ids, and what they are when it is given", () => {
@@ -21,17 +22,15 @@ describe("the Query Centre on exactly these queries", () => {
 });
 
 describe("the Contact list's ?status=", () => {
-  it("maps the dashboard's three groups onto the list's own status filter", () => {
+  it("maps the dashboard's three groups onto the list's own At a glance cards", () => {
     expect(contactListForStatus("querying")).toBe("/agents?status=querying");
     expect(contactListForStatus("closed")).toBe("/agents?status=closed");
     expect(contactListForStatus("none")).toBe("/agents?status=notq");
-    expect(statusKeysForParam("notq")).toEqual(["none"]);
-    expect(statusKeysForParam("bogus")).toBeNull();
-    expect(statusKeysForParam(null)).toBeNull();
+    expect([glanceForParam("querying"), glanceForParam("closed"), glanceForParam("notq")]).toEqual(["querying", "closed", "none"]);
+    expect(glanceForParam("bogus")).toBeNull();
+    expect(glanceForParam(null)).toBeNull();
   });
-  it("the three groups partition every status the list knows, so each agent lands in exactly one", () => {
-    const all = Object.values(CONTACT_STATUS_KEYS).flat();
-    expect([...all].sort()).toEqual(STATUS_CHOICES.map((c) => c.key).sort());
-    expect(new Set(all).size).toBe(all.length);
+  it("every group is one of the cards that filters", () => {
+    for (const g of Object.values(CONTACT_STATUS_GLANCE)) expect(GLANCE_SETS[g]).not.toBeNull();
   });
 });

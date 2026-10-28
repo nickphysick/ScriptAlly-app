@@ -101,7 +101,8 @@ const arrival = (page: Page) => page.evaluate(() => {
   const chips = [...document.querySelectorAll<HTMLElement>("button, span, li, div")].filter((e) => vis(e) && e.children.length <= 2 && / · \d+$/.test((e.textContent ?? "").trim())).map((e) => (e.textContent ?? "").trim()).slice(0, 8);
   const rows = new Set([...document.querySelectorAll<HTMLElement>('[data-cl24="row"], [data-cl24="card"]')].filter(vis).map((e) => e.dataset.id)).size;
   const applied = (document.body.innerText.match(/\b(Not queried|Queried|Closed|Signed|Offer)\b/g) ?? []).length;
-  return { path: location.pathname, search: location.search, top: port ? port.scrollTop : null, qids: [...qids], chips, rows, applied };
+  const pressed = [...document.querySelectorAll<HTMLElement>('[data-cl251="cell"][aria-pressed="true"]')].filter(vis).map((e) => e.dataset.k);
+  return { path: location.pathname, search: location.search, top: port ? port.scrollTop : null, qids: [...qids], chips, rows, applied, pressed };
 });
 
 test("DB118-B1 · slices and rows click through to the filtered list", async ({ page }) => {
@@ -143,6 +144,14 @@ test("DB118-B1 · slices and rows click through to the filtered list", async ({ 
              "querying" there. The pack keeps both counting rules; the lock holds what does hold — the two together. */
           if (r.key === "none") L.check("B1", `${label} ${how}: the list holds the hoop's number`, a.rows === r.n, `${a.rows} rows vs ${r.n}`);
           else { listed[r.key] = a.rows; L.check("B1", `${label} ${how}: the list is filtered`, a.rows > 0 && a.rows < agentsTotal, `${a.rows} rows`); }
+          L.check("B1", `${label} ${how}: shown as applied — its At a glance card is pressed`, JSON.stringify(a.pressed) === JSON.stringify([r.key]), JSON.stringify(a.pressed));
+          if (how === "click") {
+            /* clearable: pressing the card again lets the whole list back */
+            await page.locator(`[data-cl251="cell"][data-k="${r.key}"]`).first().click({ timeout: 5000 }).catch(() => {});
+            await page.waitForTimeout(800);
+            const c2 = await arrival(page);
+            L.check("B1", `${label}: pressing the card again clears it`, c2.pressed.length === 0 && c2.rows === agentsTotal, `${c2.rows} rows, pressed ${JSON.stringify(c2.pressed)}`);
+          }
         }
         L.check("B1", `${label} ${how}: arrives at the top`, a.top === 0, String(a.top));
         if (how === "click") {

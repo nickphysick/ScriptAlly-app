@@ -398,19 +398,16 @@ export const SUBMISSION_CHOICES: { key: "either" | "open" | "closed"; label: str
 
 /**
  * Dashboard v118 Part B — the Contact list opened on one of the dashboard's Agents-on-file groups: `?status=` is
- * `querying` (a live query on this manuscript), `closed` (its latest query closed) or `notq` (none on this manuscript).
- * On arrival it sets the list's OWN status filter — the same state the filter menu sets, shown as applied and clearable —
- * so there is no second notion of "status" in the URL layer.
+ * `querying`, `closed` or `notq`. On arrival it presses the matching "At a glance" card (Querying · Closed · Not queried),
+ * which is the list's own status filter today — the card shows it pressed, and pressing it again clears it, like any
+ * other visit to that card. (The filter menu's model also holds a `status` field, but no control shows or clears it, so
+ * setting it from a link would narrow the list invisibly.) No second notion of "status" lives in the URL layer.
  */
 export const CONTACT_STATUS_PARAM = "status";
 export type ContactStatusParam = "querying" | "closed" | "notq";
-export const CONTACT_STATUS_KEYS: Record<ContactStatusParam, readonly StatusKey[]> = {
-  querying: ["queried", "pr", "ps", "fr", "fs", "rr", "resub", "offer"],
-  closed: ["closed", "signed"],
-  notq: ["none"],
-};
-export const statusKeysForParam = (p: string | null | undefined): StatusKey[] | null =>
-  p && Object.prototype.hasOwnProperty.call(CONTACT_STATUS_KEYS, p) ? [...CONTACT_STATUS_KEYS[p as ContactStatusParam]] : null;
+export const CONTACT_STATUS_GLANCE: Record<ContactStatusParam, "querying" | "closed" | "none"> = { querying: "querying", closed: "closed", notq: "none" };
+export const glanceForParam = (p: string | null | undefined): "querying" | "closed" | "none" | null =>
+  p && Object.prototype.hasOwnProperty.call(CONTACT_STATUS_GLANCE, p) ? CONTACT_STATUS_GLANCE[p as ContactStatusParam] : null;
 /** the dashboard's Agents-on-file keys, as the Contact list's link */
 export const contactListForStatus = (k: "querying" | "closed" | "none"): string =>
   `/agents?${CONTACT_STATUS_PARAM}=${k === "none" ? "notq" : k}`;
