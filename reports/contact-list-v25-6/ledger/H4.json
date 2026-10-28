@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "H4",
+  "where": "93 population: the stub reached the page",
+  "ok": true,
+  "detail": "93%"
+ },
+ {
+  "lock": "H4",
+  "where": "93 cell arc is #9fd0ad",
+  "ok": true,
+  "detail": "rgb(159, 208, 173)"
+ },
+ {
+  "lock": "H4",
+  "where": "93 cell track is rgba(244, 238, 229, 0.18)",
+  "ok": true,
+  "detail": "rgba(244, 238, 229, 0.18)"
+ },
+ {
+  "lock": "H4",
+  "where": "93 Housekeeping's arc is #9fd0ad",
+  "ok": true,
+  "detail": "rgb(159, 208, 173)"
+ },
+ {
+  "lock": "H4",
+  "where": "93 Housekeeping's track is rgba(244, 238, 229, 0.18)",
+  "ok": true,
+  "detail": "rgba(244, 238, 229, 0.18)"
+ },
+ {
+  "lock": "H4",
+  "where": "93 the cell and Housekeeping agree",
+  "ok": true,
+  "detail": "rgb(159, 208, 173) / rgb(159, 208, 173)"
+ },
+ {
+  "lock": "H4",
+  "where": "72 population: the stub reached the page",
+  "ok": true,
+  "detail": "72%"
+ },
+ {
+  "lock": "H4",
+  "where": "72 cell arc is #e0a188",
+  "ok": true,
+  "detail": "rgb(224, 161, 136)"
+ },
+ {
+  "lock": "H4",
+  "where": "72 cell track is rgba(244, 238, 229, 0.18)",
+  "ok": true,
+  "detail": "rgba(244, 238, 229, 0.18)"
+ },
+ {
+  "lock": "H4",
+  "where": "72 Housekeeping's arc is #e0a188",
+  "ok": true,
+  "detail": "rgb(224, 161, 136)"
+ },
+ {
+  "lock": "H4",
+  "where": "72 Housekeeping's track is rgba(244, 238, 229, 0.18)",
+  "ok": true,
+  "detail": "rgba(244, 238, 229, 0.18)"
+ },
+ {
+  "lock": "H4",
+  "where": "72 the cell and Housekeeping agree",
+  "ok": true,
+  "detail": "rgb(224, 161, 136) / rgb(224, 161, 136)"
+ },
+ {
+  "lock": "H4",
+  "where": "44 population: the stub reached the page",
+  "ok": true,
+  "detail": "44%"
+ },
+ {
+  "lock": "H4",
+  "where": "44 cell arc is #f0603f",
+  "ok": true,
+  "detail": "rgb(240, 96, 63)"
+ },
+ {
+  "lock": "H4",
+  "where": "44 cell track is rgba(244, 238, 229, 0.18)",
+  "ok": true,
+  "detail": "rgba(244, 238, 229, 0.18)"
+ },
+ {
+  "lock": "H4",
+  "where": "44 Housekeeping's arc is #f0603f",
+  "ok": true,
+  "detail": "rgb(240, 96, 63)"
+ },
+ {
+  "lock": "H4",
+  "where": "44 Housekeeping's track is rgba(244, 238, 229, 0.18)",
+  "ok": true,
+  "detail": "rgba(244, 238, 229, 0.18)"
+ },
+ {
+  "lock": "H4",
+  "where": "44 the cell and Housekeeping agree",
+  "ok": true,
+  "detail": "rgb(240, 96, 63) / rgb(240, 96, 63)"
+ }
+]

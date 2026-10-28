@@ -1,0 +1,146 @@
+[
+ {
+  "lock": "H1",
+  "where": "1512 list population: the bar and the scroller",
+  "ok": true,
+  "detail": "{\"sc\":{\"t\":105.75},\"bar\":{\"t\":646.703125,\"b\":698.703125,\"l\":276,\"r\":1476},\"th\":{\"t\":698.703125},\"rh\":null}"
+ },
+ {
+  "lock": "H1",
+  "where": "1512 list no jump at the moment of pinning (13 steps)",
+  "ok": false,
+  "detail": "6 of 13 off"
+ },
+ {
+  "lock": "H1",
+  "where": "1512 list the bar's top is 12 below the sheet's top",
+  "ok": false,
+  "detail": "0.0"
+ },
+ {
+  "lock": "H1",
+  "where": "1512 list the corner pixel (3px in) is page colour",
+  "ok": true,
+  "detail": "242,238,232 vs 242,238,232"
+ },
+ {
+  "lock": "H1",
+  "where": "1512 list no row pixel in the 12px above the bar (90 samples)",
+  "ok": true,
+  "detail": "0 off, first undefined"
+ },
+ {
+  "lock": "H1",
+  "where": "1512 list the headings sit directly under the bar",
+  "ok": false,
+  "detail": "169.75 vs 157.75"
+ },
+ {
+  "lock": "H1",
+  "where": "1512 cards population: the bar and the scroller",
+  "ok": true,
+  "detail": "{\"sc\":{\"t\":105.75},\"bar\":{\"t\":646.703125,\"b\":698.703125,\"l\":276,\"r\":1476},\"th\":null,\"rh\":{\"t\":712.703125}}"
+ },
+ {
+  "lock": "H1",
+  "where": "1512 cards no jump at the moment of pinning (13 steps)",
+  "ok": false,
+  "detail": "6 of 13 off"
+ },
+ {
+  "lock": "H1",
+  "where": "1512 cards the bar's top is 12 below the sheet's top",
+  "ok": false,
+  "detail": "0.0"
+ },
+ {
+  "lock": "H1",
+  "where": "1512 cards the corner pixel (3px in) is page colour",
+  "ok": true,
+  "detail": "242,238,232 vs 242,238,232"
+ },
+ {
+  "lock": "H1",
+  "where": "1512 cards no row pixel in the 12px above the bar (90 samples)",
+  "ok": true,
+  "detail": "0 off, first undefined"
+ },
+ {
+  "lock": "H1",
+  "where": "1512 cards the group head sits directly under the bar",
+  "ok": false,
+  "detail": "169.75 vs 157.75"
+ },
+ {
+  "lock": "H1",
+  "where": "1280 list population: the bar and the scroller",
+  "ok": true,
+  "detail": "{\"sc\":{\"t\":105.75},\"bar\":{\"t\":642.703125,\"b\":694.703125,\"l\":272,\"r\":1248},\"th\":{\"t\":694.703125},\"rh\":null}"
+ },
+ {
+  "lock": "H1",
+  "where": "1280 list no jump at the moment of pinning (13 steps)",
+  "ok": false,
+  "detail": "6 of 13 off"
+ },
+ {
+  "lock": "H1",
+  "where": "1280 list the bar's top is 12 below the sheet's top",
+  "ok": false,
+  "detail": "0.0"
+ },
+ {
+  "lock": "H1",
+  "where": "1280 list the corner pixel (3px in) is page colour",
+  "ok": true,
+  "detail": "242,238,232 vs 242,238,232"
+ },
+ {
+  "lock": "H1",
+  "where": "1280 list no row pixel in the 12px above the bar (75 samples)",
+  "ok": true,
+  "detail": "0 off, first undefined"
+ },
+ {
+  "lock": "H1",
+  "where": "1280 list the headings sit directly under the bar",
+  "ok": false,
+  "detail": "169.75 vs 157.75"
+ },
+ {
+  "lock": "H1",
+  "where": "1280 cards population: the bar and the scroller",
+  "ok": true,
+  "detail": "{\"sc\":{\"t\":105.75},\"bar\":{\"t\":642.703125,\"b\":694.703125,\"l\":272,\"r\":1248},\"th\":null,\"rh\":{\"t\":708.703125}}"
+ },
+ {
+  "lock": "H1",
+  "where": "1280 cards no jump at the moment of pinning (13 steps)",
+  "ok": false,
+  "detail": "6 of 13 off"
+ },
+ {
+  "lock": "H1",
+  "where": "1280 cards the bar's top is 12 below the sheet's top",
+  "ok": false,
+  "detail": "0.0"
+ },
+ {
+  "lock": "H1",
+  "where": "1280 cards the corner pixel (3px in) is page colour",
+  "ok": true,
+  "detail": "242,238,232 vs 242,238,232"
+ },
+ {
+  "lock": "H1",
+  "where": "1280 cards no row pixel in the 12px above the bar (75 samples)",
+  "ok": true,
+  "detail": "0 off, first undefined"
+ },
+ {
+  "lock": "H1",
+  "where": "1280 cards the group head sits directly under the bar",
+  "ok": false,
+  "detail": "169.75 vs 157.75"
+ }
+]
