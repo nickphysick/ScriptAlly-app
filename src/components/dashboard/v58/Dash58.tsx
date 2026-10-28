@@ -501,7 +501,7 @@ export const Dash58: React.FC<Dash58Props> = ({
                   {/* v60: Closed folds into a pair of hoops beneath the full-width chart, beside Agents on file */}
                   <div className="d60-hoops" data-d60="hoops">
                     <ClosedHoop loading={loading} tile={closed} play={paint} onSeeAll={() => navigate(queriesPathFor("closed"))} queries={scopedQueries} agents={agents} manuscript={activeManuscript?.title ?? ""} />
-                    <AgentsHoop loading={loading} cov={cov} play={paint} onReady={toContacts} />
+                    <AgentsHoop loading={loading} cov={cov} play={paint} onReady={toContacts} agents={agents} queries={queries} msId={scopeId} />
                   </div>
                 </>
               )}

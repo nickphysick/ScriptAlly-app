@@ -212,6 +212,117 @@ test("DB116 C1 · C2 — Closed: slices, key rows and the mini query cards", asy
   L.done(30);
 });
 
+/* ── D1 · B1 · B2 ── */
+
+const HEAD: Record<string, { bg: string; ink: string }> = {
+  querying: { bg: "rgb(42, 58, 82)", ink: "rgb(255, 255, 255)" },
+  closed: { bg: "rgb(169, 163, 155)", ink: "rgb(255, 255, 255)" },
+  none: { bg: "rgb(223, 230, 238)", ink: "rgb(42, 58, 82)" },
+};
+async function hoverAgents(page: Page, via: "row" | "slice", k: string, dx = 20): Promise<{ x: number; y: number } | null> {
+  await page.mouse.move(2, 2); await page.waitForTimeout(250);
+  let p: { x: number; y: number } | null;
+  if (via === "row") { const b = (await page.locator(`[data-d60="agents-hoop"] [data-d116="key-row"][data-key="${k}"]`).boundingBox())!; p = { x: b.x + dx, y: b.y + b.height / 2 }; }
+  else p = await slicePoint(page, "agents-hoop", k);
+  if (!p) return null;
+  await page.mouse.move(p.x, p.y);
+  await page.waitForTimeout(SETTLE);
+  return p;
+}
+/** the stack's own geometry: each card's step, the pill's place, read from layout (never a rotated rect) */
+async function stackGeo(page: Page) {
+  return page.evaluate(() => {
+    const st = document.querySelector<HTMLElement>('[data-d116="stack"]');
+    if (!st) return null;
+    const rcs = [...st.querySelectorAll<HTMLElement>(":scope > .d116-rc")];
+    const steps = rcs.map((rc) => { const m = new DOMMatrix(getComputedStyle(rc).transform); return { x: m.e, y: m.f, h: rc.offsetHeight, z: Number(getComputedStyle(rc).zIndex) }; });
+    const pill = st.querySelector<HTMLElement>('[data-d116="more"]');
+    return { steps, pill: pill ? { top: pill.offsetTop, left: pill.offsetLeft } : null, origin: { x: st.getBoundingClientRect().left, y: st.getBoundingClientRect().top } };
+  });
+}
+
+test("DB116 D1 · B1 — Agents: the stack per status, its header and its steps", async ({ page }) => {
+  test.setTimeout(300_000);
+  const L = new Ledger("D1-B1");
+  await openDash(page, VP1440);
+  const counts = await keyCounts(page, "agents-hoop");
+  L.check("D1", "population: the three key rows", Object.keys(counts).join() === "querying,closed,none", JSON.stringify(counts));
+  let deep = 0;
+  for (const via of ["row", "slice"] as const) for (const k of Object.keys(counts)) {
+    const p = await hoverAgents(page, via, k);
+    const where = `${via} ${k}`;
+    if (!p) { L.check("D1", where, counts[k] === 0, "no slice"); continue; }
+    const s = await readStack(page);
+    if (!s) { L.check("D1", where, false, "no stack"); continue; }
+    L.check("D1", `${where}: that status only`, s.kind === "agents" && s.cards.every((c) => c.status === k), s.cards.map((c) => c.status).join(","));
+    L.check("D1", `${where}: cards + more = the row's count, at most five`, s.shown + s.more === counts[k] && s.shown <= 5, `${s.shown}+${s.more} vs ${counts[k]}`);
+    for (const c of s.cards) {
+      L.check("D1", `${where} ${c.name}: the header is the status's colour`, c.headBg === HEAD[k].bg && c.headInk === HEAD[k].ink, `${c.headBg} / ${c.headInk}`);
+      L.check("D1", `${where} ${c.name}: the header spans the card`, c.cardW > 0 && Math.abs(c.headW - c.cardW) <= 1, `${c.headW} of ${c.cardW}`);
+      L.check("D1", `${where} ${c.name}: a bust, never initials`, c.bust && !/^[A-Z]{2,3}$/.test(c.name), c.name);
+    }
+    /* B1 · the steps */
+    const g = (await stackGeo(page))!;
+    const n = g.steps.length;
+    g.steps.forEach((st, i) => L.check("B1", `${where} card ${i} at (14i, 38i)`, Math.abs(st.x - 14 * i) <= 1 && Math.abs(st.y - 38 * i) <= 1, `(${st.x.toFixed(1)}, ${st.y.toFixed(1)})`));
+    L.check("B1", `${where}: later cards on top`, g.steps.every((st, i) => i === 0 || st.z > g.steps[i - 1].z), g.steps.map((st) => st.z).join(","));
+    L.check("B1", `${where}: at most five cards`, n <= 5, `${n}`);
+    if (g.pill) {
+      deep += 1;
+      const last = g.steps[n - 1];
+      L.check("B1", `${where}: +N more 8px under the last card, on its left edge`, Math.abs(g.pill.top - (last.y + last.h + 8)) <= 1 && Math.abs(g.pill.left - last.x) <= 1, `pill ${g.pill.top},${g.pill.left} vs ${last.y + last.h + 8},${last.x}`);
+    }
+    /* D2 · it follows the pointer: anchored 18px right of and 14px above it (the on-screen rule may then shift it) */
+    if (via === "row") {
+      const at = () => page.evaluate(() => { const st = document.querySelector<HTMLElement>('[data-d116="stack"]')!; return { x: parseFloat(st.style.left), y: parseFloat(st.style.top) }; });
+      const o = await at();
+      L.check("D1", `${where}: anchored at the pointer (18, −14)`, Math.abs(o.x - (p.x + 18)) <= 1 && Math.abs(o.y - (p.y - 14)) <= 1, `anchor ${o.x},${o.y} · pointer ${p.x.toFixed(1)},${p.y.toFixed(1)}`);
+      await page.mouse.move(p.x + 30, p.y); await page.waitForTimeout(120);
+      const o2 = await at();
+      L.check("D1", `${where}: re-placed on move`, Math.abs(o2.x - (p.x + 30 + 18)) <= 1, `${o2.x} vs ${p.x + 48}`);
+    }
+  }
+  L.check("B1", "population: a stack with +N more", deep >= 2, `${deep}`);
+  L.done(40);
+});
+
+test("DB116 B2 — the stack always stays on screen", async ({ page }) => {
+  test.setTimeout(420_000);
+  const L = new Ledger("B2");
+  let tested = 0, reduced = 0;
+  for (const vp of [{ width: 1440, height: 700 }, { width: 1280, height: 650 }, { width: 1100, height: 800 }, { width: 1280, height: 220 }] as VP[]) {
+    await openDash(page, vp);
+    const card = page.locator('[data-d60="agents-hoop"]').first();
+    await card.scrollIntoViewIfNeeded();
+    const counts = await keyCounts(page, "agents-hoop");
+    const big = Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0];
+    L.check("B2", `${tag(vp)}: population, the key rows`, !!big, JSON.stringify(counts));
+    if (!big) continue;
+    const b = (await page.locator(`[data-d60="agents-hoop"] [data-d116="key-row"][data-key="${big}"]`).boundingBox())!;
+    const cb = (await card.boundingBox())!;
+    /* the pointer near the bottom-right of the hoop card: across the row, then at the card's corner */
+    const pts = [{ x: b.x + b.width - 6, y: b.y + b.height / 2 }, { x: b.x + 10, y: b.y + b.height / 2 }, { x: Math.min(cb.x + cb.width - 8, b.x + b.width - 3), y: b.y + b.height * 0.7 }];
+    for (const p of pts) {
+      await page.mouse.move(2, 2); await page.waitForTimeout(200);
+      await page.mouse.move(b.x + 20, b.y + b.height / 2); await page.waitForTimeout(150);
+      await page.mouse.move(p.x, p.y); await page.waitForTimeout(SETTLE);
+      const s = await readStack(page);
+      if (!s?.box) { L.check("B2", `${tag(vp)} @${p.x.toFixed(0)},${p.y.toFixed(0)}`, false, "no stack"); continue; }
+      tested += 1;
+      const room = { l: s.box.left, t: s.box.top, r: vp.width - s.box.right, b: vp.height - s.box.bottom };
+      /* the painted pixels, tilted corners included */
+      L.check("B2", `${tag(vp)} @${p.x.toFixed(0)},${p.y.toFixed(0)}: inside with ≥12 to spare`, room.l >= 11.5 && room.t >= 11.5 && room.r >= 11.5 && room.b >= 11.5, JSON.stringify(Object.fromEntries(Object.entries(room).map(([k, v]) => [k, +v.toFixed(1)]))));
+      L.check("B2", `${tag(vp)}: cards + more = the count`, s.shown + s.more === counts[big], `${s.shown}+${s.more} vs ${counts[big]}`);
+      if (vp.height <= 220) {
+        reduced += s.shown < Math.min(5, counts[big]) ? 1 : 0;
+        L.check("B2", `${tag(vp)}: fewer than five when five cannot fit`, s.shown < 5 && s.moreText === `+${s.more} more`, `${s.shown} shown, ${s.moreText}`);
+      }
+    }
+  }
+  L.check("B2", "population: ≥3 positions at each size, and a reduced stack", tested >= 12 && reduced >= 1, `${tested} positions, ${reduced} reduced`);
+  L.done(20);
+});
+
 /* ── K1 ── */
 
 test("DB116 K1 — the keyboard reaches each slice and key row", async ({ page }) => {

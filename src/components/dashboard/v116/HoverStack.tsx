@@ -83,11 +83,20 @@ export const HoverStack: React.FC<HoverStackProps> = ({ anchor, cards, total, ki
     const want = stackCap(Math.min(total, cards.length), cardH, pillH, window.innerHeight);
     const nextCap = Math.min(STACK_MAX, Math.max(1, want));
     if (nextCap !== cap && cards.length > 0) { setCap(nextCap); return; }
-    let w = 0, h = 0;
-    rc.forEach((c, i) => { w = Math.max(w, i * STEP_X + c.offsetWidth); h = Math.max(h, i * STEP_Y + c.offsetHeight); });
-    const pillTop = h + STACK_GAP;
-    if (pill) { h = pillTop + pill.offsetHeight; w = Math.max(w, (rc.length - 1) * STEP_X + pill.offsetWidth); }
-    const { dx, dy } = fitStack({ left: shown.anchor.x, top: shown.anchor.y, w, h }, window.innerWidth, window.innerHeight);
+    /* each card's FINAL box: its step, then its tilt about its own centre (a tilted card's corners reach a
+       few pixels past its layout box, and the on-screen rule is about pixels) */
+    let x0 = 0, y0 = 0, x1 = 0, y1 = 0, layoutH = 0;
+    rc.forEach((c, i) => {
+      const p = stepAt(i, rc.length), w0 = c.offsetWidth, h0 = c.offsetHeight;
+      const a = (Math.abs(p.rot) * Math.PI) / 180;
+      const ew = (w0 * Math.cos(a) + h0 * Math.sin(a) - w0) / 2, eh = (w0 * Math.sin(a) + h0 * Math.cos(a) - h0) / 2;
+      x0 = Math.min(x0, p.x - ew); y0 = Math.min(y0, p.y - eh);
+      x1 = Math.max(x1, p.x + w0 + ew); y1 = Math.max(y1, p.y + h0 + eh);
+      layoutH = Math.max(layoutH, p.y + h0);
+    });
+    const pillTop = layoutH + STACK_GAP;
+    if (pill) { y1 = Math.max(y1, pillTop + pill.offsetHeight); x1 = Math.max(x1, (rc.length - 1) * STEP_X + pill.offsetWidth); }
+    const { dx, dy } = fitStack({ left: shown.anchor.x + x0, top: shown.anchor.y + y0, w: x1 - x0, h: y1 - y0 }, window.innerWidth, window.innerHeight);
     setFit((f) => (f.dx === dx && f.dy === dy && f.pillTop === pillTop ? f : { dx, dy, pillTop }));
   };
   useLayoutEffect(refit);

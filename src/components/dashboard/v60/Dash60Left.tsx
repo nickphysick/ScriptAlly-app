@@ -23,9 +23,9 @@ import { DASH_ART, artUrl } from "../../../lib/dashArt";
 import { CountUp } from "../v59/CountUp";
 import { Hoop, type HoopSeg } from "./Hoop";
 import type { Agent, Query } from "../../../types";
-import { closedCards, type ClosedCard } from "../../../lib/dashHover";
+import { agentCards, closedCards, type AgentCard, type AgentStackKey, type ClosedCard } from "../../../lib/dashHover";
 import { HoverStack } from "../v116/HoverStack";
-import { QueryMini, QueryNone } from "../v116/MiniCards";
+import { AgentMini, QueryMini, QueryNone } from "../v116/MiniCards";
 import { announce, useStackHover } from "../v116/useStackHover";
 import { StartTag, useSpot } from "./WhereStart";
 
@@ -198,12 +198,33 @@ export const ClosedHoop: React.FC<{ loading: boolean; tile: ClosedTile | null; p
   );
 };
 
-export const AgentsHoop: React.FC<{ loading: boolean; cov: AgentCoverage; play: boolean; onReady: () => void }> = ({ loading, cov, play, onReady }) => {
+const AGENT_LABEL: Record<AgentStackKey, string> = { querying: "Querying", closed: "Closed", none: "Not yet queried" };
+
+/**
+ * ⚠️ DASHBOARD v116: each slice of the ring and each row of the key shows THAT status's agents as a
+ * stepped stack of mini agent cards that follows the pointer (18px right of it, 14px above), re-placed on
+ * every move under the on-screen rule. The cards are `agentQueryStates` — the ring's own derivation — read
+ * by `agentCards` (lib/dashHover). Clicking opens the Contact list.
+ */
+export const AgentsHoop: React.FC<{ loading: boolean; cov: AgentCoverage; play: boolean; onReady: () => void; agents?: readonly Agent[]; queries?: readonly Query[]; msId?: string | null }> = ({ loading, cov, play, onReady, agents = [], queries = [], msId = null }) => {
   const segs: HoopSeg[] = [
     { key: "querying", n: loading ? 0 : cov.querying, color: AGENT_SEG.querying },
     { key: "closed", n: loading ? 0 : cov.closed, color: AGENT_SEG.closed },
     { key: "none", n: loading ? 0 : cov.none, color: AGENT_SEG.none },
   ];
+  const n = (k: string) => (k === "querying" ? cov.querying : k === "closed" ? cov.closed : cov.none);
+  const anchorFor = useCallback((_k: string, _from: "slice" | "row", el: Element, pointer: { x: number; y: number } | null) => {
+    if (pointer) return { x: Math.round(pointer.x + 18), y: Math.round(pointer.y - 14) };
+    const r = el.getBoundingClientRect();
+    return { x: Math.round(r.right + 18), y: Math.round(r.top - 14) };
+  }, []);
+  const hv = useStackHover(anchorFor, true);
+  const last = useRef<string | null>(null);
+  if (hv.key) last.current = hv.key;
+  const shownKey = (hv.key ?? last.current) as AgentStackKey | null;
+  const cards: AgentCard[] = useMemo(() => (shownKey ? agentCards(agents, queries, msId, shownKey) : []), [agents, queries, msId, shownKey]);
+  const live = hv.key ? announce(cards.length, ["agent", "agents"], cards.map((c) => c.name), Math.min(5, cards.length)) : "";
+  const row = (k: AgentStackKey) => (loading ? {} : { ...hv.row(k), className: [n(k) === 0 ? "is-zero" : "", hv.key === k ? "is-hover" : ""].filter(Boolean).join(" ") || undefined, "aria-label": `${AGENT_LABEL[k]}: ${n(k)}`, onClick: onReady });
   return (
     <div className={`os-card d60-card d60-hoopcard d60-agents${loading ? " d58-skcard" : ""}`} data-sk={loading ? "card" : undefined} data-d60="agents-hoop" role="group" aria-label="Agents on file" data-loading={loading ? "1" : "0"}
       data-cov={JSON.stringify({ querying: cov.querying, closed: cov.closed, none: cov.none, ready: cov.ready, total: cov.total })}>
@@ -215,18 +236,24 @@ export const AgentsHoop: React.FC<{ loading: boolean; cov: AgentCoverage; play: 
           </div>
         </div>
         <div className="d60-hb">
-          <Hoop segs={segs} play={play} label={`${cov.queried} of ${cov.total} queried: ${cov.querying} querying, ${cov.closed} closed, ${cov.none} not yet queried`}>
+          <Hoop segs={segs} play={play} label={`${cov.queried} of ${cov.total} queried: ${cov.querying} querying, ${cov.closed} closed, ${cov.none} not yet queried`}
+            hit={loading ? undefined : { ...hv.slice, label: (k) => `${AGENT_LABEL[k as AgentStackKey]}: ${n(k)}`, onClick: () => onReady() }}>
             <b className={`d60-hn${loading ? " d58-sk" : ""}`} data-d60="hoop-queried"><CountUp n={cov.queried} /></b>
             <small>of {cov.total.toLocaleString("en-GB")}<br />queried</small>
           </Hoop>
           <ul className="d60-hl" data-d60="agents-legend">
-            <li className={cov.querying === 0 ? "is-zero" : undefined}><i style={{ background: AGENT_SEG.querying }} /><b><CountUp n={cov.querying} /></b>Querying</li>
-            <li className={cov.closed === 0 ? "is-zero" : undefined}><i style={{ background: AGENT_SEG.closed }} /><b><CountUp n={cov.closed} /></b>Closed</li>
-            <li className={cov.none === 0 ? "is-zero" : undefined}><i style={{ background: AGENT_SEG.none }} /><b><CountUp n={cov.none} /></b>Not yet queried</li>
+            <li className={cov.querying === 0 ? "is-zero" : undefined} {...row("querying")}><i style={{ background: AGENT_SEG.querying }} /><b><CountUp n={cov.querying} /></b>Querying</li>
+            <li className={cov.closed === 0 ? "is-zero" : undefined} {...row("closed")}><i style={{ background: AGENT_SEG.closed }} /><b><CountUp n={cov.closed} /></b>Closed</li>
+            <li className={cov.none === 0 ? "is-zero" : undefined} {...row("none")}><i style={{ background: AGENT_SEG.none }} /><b><CountUp n={cov.none} /></b>Not yet queried</li>
             <li className="d60-go"><button type="button" className="d60-ready" data-d60="ready" disabled={loading} onClick={onReady}>{cov.ready} ready to query →</button></li>
           </ul>
+          <span className="d116-live" aria-live="polite" data-d116="live">{live}</span>
         </div>
       </div>
+      <HoverStack
+        anchor={hv.anchor} kind="agents" stackKey={shownKey ?? ""} total={cards.length || 1}
+        cards={cards.length ? cards.map((a) => <AgentMini key={a.id} a={a} />) : [<QueryNone key="none" label={shownKey ? AGENT_LABEL[shownKey] : ""} />]}
+      />
     </div>
   );
 };

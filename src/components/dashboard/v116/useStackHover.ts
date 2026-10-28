@@ -9,7 +9,7 @@
  * pointer). The keyboard reaches every slice and row: focus shows the stack anchored to the element,
  * Enter or Space toggles it, Esc hides it — and Esc stops there, so it never closes anything behind.
  */
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 export type Anchor = { x: number; y: number };
 export interface StackHover {
@@ -50,14 +50,25 @@ export function useStackHover(
   follows: boolean,
 ): StackHover {
   const [st, setSt] = useState<{ key: string; anchor: Anchor; from: "slice" | "row" } | null>(null);
+  /* ⚠️ A 90ms GRACE BEFORE A POINTER LEAVE HIDES IT. The key's rows sit 3–5px apart and the card lifts 2px
+     on hover, so a pointer crossing from one row to the next passes through a gap; without the grace the
+     stack blinks out and back between every pair of rows. Any show cancels a pending hide; Esc is at once. */
+  const pending = useRef<number | null>(null);
+  const cancel = () => { if (pending.current !== null) { window.clearTimeout(pending.current); pending.current = null; } };
+  useEffect(() => cancel, []);
   const show = useCallback((key: string, from: "slice" | "row", el: Element, pointer: Anchor | null) => {
+    cancel();
     setSt({ key, from, anchor: anchorFor(key, from, el, pointer) });
   }, [anchorFor]);
-  const hide = useCallback((key?: string) => setSt((s) => (key === undefined || s?.key === key ? null : s)), []);
-  const toggle = (key: string, from: "slice" | "row", el: Element) => setSt((s) => (s?.key === key ? null : { key, from, anchor: anchorFor(key, from, el, null) }));
+  const hideNow = useCallback((key?: string) => { cancel(); setSt((s) => (key === undefined || s?.key === key ? null : s)); }, []);
+  const hide = useCallback((key?: string) => {
+    cancel();
+    pending.current = window.setTimeout(() => { pending.current = null; setSt((s) => (key === undefined || s?.key === key ? null : s)); }, 90);
+  }, []);
+  const toggle = (key: string, from: "slice" | "row", el: Element) => { cancel(); setSt((s) => (s?.key === key ? null : { key, from, anchor: anchorFor(key, from, el, null) })); };
   const keys = (key: string, from: "slice" | "row", ev: React.KeyboardEvent<Element>, el: Element) => {
     if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); toggle(key, from, el); }
-    else if (ev.key === "Escape" && st) { ev.preventDefault(); ev.stopPropagation(); hide(); }
+    else if (ev.key === "Escape" && st) { ev.preventDefault(); ev.stopPropagation(); hideNow(); }
   };
   const pt = (ev: React.PointerEvent) => ({ x: ev.clientX, y: ev.clientY });
   return {
