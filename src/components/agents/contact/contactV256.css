@@ -1,0 +1,24 @@
+/* ══ Contact list v25.6 (design-refs/contact-list-v25-6/) ══════════════════════════════════════════════════════════
+   Desktop only, like v24 onwards: the phone keeps its page. The ≤1440 steps follow the WINDOW. */
+
+/* ══ Part A · the list's bar pins 12px below the sheet's top ══════════════════════════════════════════════════════
+   ⚠️ THE GAP IS A STICKY STRIP IN THE PAGE COLOUR, NOT A `top: 12px` ON THE BAR. The bar's corners are rounded, so a
+      bar stuck at 12 would show rows passing behind its corners; the strip fills behind them. At rest the strip's 12px
+      sit above the sheet (margin -12, padding 12: nothing moves) and the sheet's own rounded clip hides them.
+   ⚠️ THE STRIP RUNS 14px PAST THE SHEET ON EACH SIDE (its ::before), so the sheet's hairline and shadow do not show
+      beside the gap. That needs `overflow-clip-margin` on the sheet, whose `overflow: clip` would otherwise cut it. */
+@media (min-width: 768px) {
+  .clv-group[data-v24] .cl24-sheet { overflow-clip-margin: 14px; }
+  .cl24-sheet > .cl256-pin {
+    position: sticky; top: 0; z-index: 6; box-sizing: border-box; margin-top: -12px; padding-top: 12px;
+    background: var(--ws-page);
+  }
+  .cl24-sheet > .cl256-pin::before {
+    content: ""; position: absolute; left: -14px; right: -14px; top: 0; height: 12px; background: var(--ws-page); pointer-events: none;
+  }
+  .cl24-sheet > .cl256-pin > .cl24-bar { position: relative; top: auto; z-index: 1; }
+  /* what pins under it: the headings at bar + 12, the group header under them (List); the group heads (Cards) */
+  .cl24-sheet .cl24-th { top: 64px; }
+  .cl24-sheet .cl24-gh { top: 110px; }
+  .cl24-sheet .cl24-rh { top: 64px; }
+}
