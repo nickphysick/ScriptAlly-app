@@ -260,3 +260,37 @@
   .rsp5 .rsp5-tbar .rsp5-ttrack { grid-column: 1 / -1; grid-row: 2; }
   .rsp5 .rsp5-well { padding: 20px 16px; }
 }
+
+/* ═════ in their words (`.words`, `.chips`, `.qwall`, `.qc`) — the paper band, full width as the navy one ═════ */
+.rsp5 .rsp5-words {
+  margin-top: 72px; padding-block: 58px 64px; background: var(--r5-paper);
+  box-shadow: 0 0 0 100vmax var(--r5-paper); clip-path: inset(0 -100vmax); position: relative;
+}
+/* the reference's hairlines above and below the band reach the sheet's edges too, so they are pseudo-elements, not a border */
+.rsp5 .rsp5-words::before, .rsp5 .rsp5-words::after { content: ""; position: absolute; left: -100vmax; right: -100vmax; height: 1px; background: var(--r5-i06); }
+.rsp5 .rsp5-words::before { top: 0; }
+.rsp5 .rsp5-words::after { bottom: 0; }
+.rsp5 .rsp5-chips { display: flex; gap: 6px; padding: 4px; border-radius: 12px; background: #fff; box-shadow: inset 0 0 0 1px var(--r5-i10); }
+.rsp5 .rsp5-chip { height: 34px; padding: 0 14px; border: 0; border-radius: 9px; background: none; font: 400 14px var(--r5-machine) !important; color: var(--r5-i72); cursor: pointer; }
+.rsp5 .rsp5-chip small { margin-left: 5px; font: 500 10px var(--r5-mono) !important; color: var(--r5-i45); }
+.rsp5 .rsp5-chip[aria-pressed="true"] { background: var(--r5-navy); color: #fff; }
+.rsp5 .rsp5-chip[aria-pressed="true"] small { color: var(--r5-cr66); }
+.rsp5 .rsp5-qwall { columns: 3 300px; column-gap: 18px; }
+.rsp5-qc {
+  box-sizing: border-box; break-inside: avoid; margin: 0 0 18px; padding: 18px 20px 16px; border-radius: 14px; background: #fff;
+  box-shadow: 0 0 0 1px var(--r5-i10), 0 8px 20px -18px rgba(28, 19, 15, 0.5); cursor: pointer; transition: transform 0.15s;
+  color: var(--r5-ink); font-family: var(--r5-serif);
+}
+.rsp5-qc:not([data-example]):hover { transform: translateY(-2px); }
+.rsp5-qc[data-example] { cursor: default; }
+.rsp5-qc blockquote { margin: 0; font: italic 17px/1.5 var(--r5-serif) !important; color: var(--r5-ink); }
+.rsp5-qc blockquote::before { content: "\201C"; }
+.rsp5-qc blockquote::after { content: "\201D"; }
+.rsp5-qcf { display: flex; align-items: center; gap: 10px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--r5-i10); }
+.rsp5-face { box-sizing: border-box; flex: none; display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%; background: var(--r5-paper); box-shadow: 0 0 0 1.5px var(--r5-cl-d); color: var(--r5-i72); font: 500 8.5px var(--r5-mono) !important; }
+.rsp5-qcw { min-width: 0; }
+.rsp5-qcw b { display: block; font: 600 14.5px/1.3 var(--r5-serif) !important; }
+.rsp5-qcw span { display: block; font: 400 13px/1.3 var(--r5-serif) !important; color: var(--r5-i58); }
+.rsp5-gl { margin-left: auto; display: flex; align-items: center; gap: 6px; white-space: nowrap; font: 400 13px var(--r5-machine) !important; }
+.rsp5 .rsp5-wnote { margin: 4px 0 0; font: 400 14.5px/1.5 var(--r5-serif); color: var(--r5-i58); }
+@media (prefers-reduced-motion: reduce) { .rsp5-qc { transition: none; } }

@@ -31,6 +31,7 @@ import { Rsp5Glance, Rsp5TitleCard, type GlanceFacts, type GlanceKey } from "./R
 import { RspCarousel } from "./RspCarousel";
 import { Rsp5Band, Rsp5Showcase } from "./Rsp5Insights";
 import { Rsp5Timing } from "./Rsp5Timing";
+import { Rsp5Words } from "./Rsp5Words";
 import { RspPanel, type AnswerTab } from "./RspPanel";
 import { RspBanner, RspList, RspTally } from "./RspNos";
 import { RspShare } from "./RspShare";
@@ -150,6 +151,7 @@ export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) 
                 <Rsp5Band counts={model.page} items={model.items} few={isEarlyDays(counts.answered)} />
                 <Rsp5Showcase items={model.items} answered={counts.answered} few={isEarlyDays(counts.answered)} nowMs={nowMs} onGo={goSection} />
                 <Rsp5Timing items={model.items} waiting={model.page.waiting} quiet={model.quietDated} />
+                <Rsp5Words items={model.items} nowMs={nowMs} onOpen={openAnswer} />
               </>
             ) : null}
             {ready ? <RspBanner /> : null}
