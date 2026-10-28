@@ -30,6 +30,8 @@ import {
 } from "../../../lib/foundingCard";
 import { EggNest, HatchScene, ICONS, INFO_ICON, QUERYHAWK_MARK, headFor } from "./foundingArt";
 import { Dash105How } from "./Dash105How";
+import { founderSwap } from "../../../lib/dashHover";
+import "../v116/dash116Tilt.css";
 
 export interface Dash105FoundingProps {
   loading: boolean;
@@ -156,7 +158,7 @@ export const Dash105Founding: React.FC<Dash105FoundingProps> = ({ loading, uid, 
 
   if (!ready) {
     return (
-      <section className="d105-fw is-loading d58-skcard" data-sk="card" data-d58="panel" data-d71="fw" data-loading="1" aria-hidden="true">
+      <section className="d105-fw d116-tilt is-loading d58-skcard" data-sk="card" data-d58="panel" data-d71="fw" data-loading="1" aria-hidden="true">
         {/* the strip keeps its line while the stats load (hidden, as every loading card's contents are), so the card is
             the same box before and after, and the page's smoke can name it */}
         <div className="d105-frame"><div className="d105-strip"><div className="d105-id"><em className="d105-no">{idLine(null)}</em></div></div><div className="d105-body" /></div>
@@ -171,7 +173,7 @@ export const Dash105Founding: React.FC<Dash105FoundingProps> = ({ loading, uid, 
 
   return (
     <section
-      className="d105-fw" data-d58="panel" data-d71="fw" data-d105="card" data-loading="0" data-tier={tier} data-waiting={stats.waiting}
+      className="d105-fw d116-tilt" data-d58="panel" data-d71="fw" data-d105="card" data-loading="0" data-tier={tier} data-waiting={stats.waiting}
       data-state={state} aria-label="Founding writer"
     >
       <div className="d105-frame">
@@ -181,7 +183,12 @@ export const Dash105Founding: React.FC<Dash105FoundingProps> = ({ loading, uid, 
           <i className="d105-shead" aria-hidden="true" data-d105="strip-head">{head ? <img src={head} alt="" draggable={false} /> : <EggNest className="d105-hnest" />}</i>
           <div className="d105-id">
             <b className="d105-name" data-d105="name" title={name ?? undefined}>{name}</b>
-            <em className="d105-no" data-d105="no">{idLine(stats.foundingNo)}</em>
+            {/* ⚠️ DASHBOARD v116 — THE HEADER SWAP: on hover or focus-within, the ID line lifts out and the
+                contributions line rises in. Both are laid out in one grid cell, so the strip never reflows. */}
+            <em className="d105-no d105-swap">
+              <span className="d105-swa" data-d105="no">{idLine(stats.foundingNo)}</span>
+              <span className="d105-swb" data-d105="swap" aria-hidden="true">{founderSwap(stats)}</span>
+            </em>
           </div>
           <button
             ref={infoRef} type="button" className="d105-info" data-d105="info" aria-label="How it works" aria-haspopup="dialog"

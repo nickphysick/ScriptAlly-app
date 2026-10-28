@@ -1,0 +1,38 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * DASHBOARD v116 — the founding card's tilt and header swap (ref design-refs/dashboard-v116/, shots 09 · 10).
+ *
+ * ⚠️ THE TILT IS THE `rotate` PROPERTY, NOT `transform`. The dashboard's cards lift on hover with a
+ * `transform: translateY(-2px)` (v93's, kept); a rotation in the same property would be replaced by it, and
+ * the card would snap straight without its ease. `rotate` composes with it.
+ * ⚠️ A ROTATION MOVES NO LAYOUT BOX: nothing beside the card shifts, and the column's overflow is visible,
+ * so the corners (~6px at 370 wide) are cut by nothing.
+ */
+.d58 .d105-fw.d116-tilt {
+  rotate: -1.8deg;
+  transition: rotate 300ms cubic-bezier(0.2, 0.9, 0.3, 1.2), transform 180ms cubic-bezier(0.22, 0.8, 0.3, 1), box-shadow 180ms ease;
+}
+.d58 .d105-fw.d116-tilt:hover, .d58 .d105-fw.d116-tilt:focus-within { rotate: 0deg; }
+@media (prefers-reduced-motion: reduce) {
+  .d58 .d105-fw.d116-tilt, .d58 .d105-fw.d116-tilt:hover, .d58 .d105-fw.d116-tilt:focus-within { rotate: none; transition: none; }
+}
+
+/* the header swap: two lines in one grid cell, so the strip never reflows */
+.d105-fw .d105-no.d105-swap { display: inline-grid; justify-items: end; }
+.d105-swap > span {
+  grid-area: 1 / 1;
+  white-space: nowrap;
+  font: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  text-align: right;
+  transition: opacity 250ms ease, transform 250ms ease;
+}
+.d105-swap > .d105-swb { opacity: 0; transform: translateY(4px); }
+.d105-fw:is(:hover, :focus-within) .d105-swap > .d105-swa { opacity: 0; transform: translateY(-4px); }
+.d105-fw:is(:hover, :focus-within) .d105-swap > .d105-swb { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .d105-swap > span { transition: opacity 150ms linear; transform: none !important; }
+}

@@ -17,6 +17,13 @@ import { test, expect, type Page } from "@playwright/test";
 import { openRoute } from "./measure";
 import { FIXTURE_ROWS, Ledger, MUT as MUT77, driveFw, mockSend, openDash, tag, type FwState, type VP } from "./db77Lib";
 
+/* ⚠️ RE-POINTED (Dashboard v116): the founding card is tilted −1.8° at rest, and a rotated element's bounding rect is
+   its axis-aligned box — ~6px taller and ~9px wider than the card. These checks are about LAYOUT (bottoms in line,
+   heights, spacing above the tab), which a rotation never moves, so they read the card straight. Over the Activity
+   feed tab the tilt only helps: rotate(-1.8deg) lifts the card's right-hand edge, which is the edge above the tab. */
+const STRAIGHT = `.d58 .d105-fw.d116-tilt { rotate: none !important; transition: none !important; }`;
+
+
 const box = (page: Page, sel: string) => page.evaluate((s) => {
   const e = [...document.querySelectorAll<HTMLElement>(s)].find((x) => x.getBoundingClientRect().height > 0);
   if (!e) return null;
@@ -87,7 +94,7 @@ test("DB77 A3 · A4 — bottoms in line, founding card ≥194, the content cappe
   test.setTimeout(240_000);
   const L = new Ledger("a3a4");
   for (const vp of [{ width: 1920, height: 1080 }, { width: 2560, height: 1440 }]) {
-    await openDash(page, vp);
+    await openDash(page, vp); await page.addStyleTag({ content: STRAIGHT });
     const left = await box(page, '[data-d60="hoops"]');
     const fw = await box(page, '[data-d58="panel"]');
     const body = await box(page, '[data-d58="body"]');
