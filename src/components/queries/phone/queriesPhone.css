@@ -224,7 +224,9 @@
 .qm1-qc [data-qc149c="more"] { flex: none; }
 
 /* ── the sheets (portalled) ── */
-.qm1-layer { position: fixed; inset: 0; z-index: 90; color: var(--qm-ink); font-family: var(--qm-ui); }
+.qm1-layer { position: fixed; inset: 0; z-index: 89; color: var(--qm-ink); font-family: var(--qm-ui); }
+/* ⚠️ 89, ONE UNDER THE UNDO BAR (.qad-toast, 90): a recorded response's Undo must stay reachable over the celebration
+   (at equal z-index the later portal wins, and the celebration covered it — found by the L10 lock) */
 .qm1-dim { position: absolute; inset: 0; background: rgba(20, 16, 12, 0.42); }
 .qm1-sht { position: absolute; left: 8px; right: 8px; bottom: calc(8px + env(safe-area-inset-bottom, 0px)); padding: 8px 12px 12px; border-radius: 30px; background: #fbf8f3; }
 .qm1-grip { width: 38px; height: 5px; margin: 2px auto 12px; border-radius: 3px; background: #d6cfc4; }
@@ -238,7 +240,7 @@
 .qm1-act { min-height: 52px; padding: 0 16px; border: 0; border-radius: 16px; background: #fff; box-shadow: 0 3px 0 rgba(28, 19, 15, 0.1); text-align: left; color: var(--qm-ink); font: 600 16px/1 var(--qm-ui) !important; }
 
 /* ── the celebration ── */
-.qm1-cel { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; padding: calc(80px + env(safe-area-inset-top, 0px)) 26px calc(40px + env(safe-area-inset-bottom, 0px)); overflow-y: auto; background: #fbefe9; text-align: center; }
+.qm1-cel { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; padding: calc(80px + env(safe-area-inset-top, 0px)) 26px calc(88px + env(safe-area-inset-bottom, 0px)); overflow-y: auto; background: #fbefe9; text-align: center; }
 .qm1-celart { width: 240px; max-width: 70vw; height: auto; }
 .qm1-celh { margin: 22px 0 6px; font: 400 32px/1.1 var(--qm-tw) !important; }
 .qm1-cel p { margin: 0; color: var(--qm-mut); font: 400 17px/1.4 var(--qm-se) !important; }
