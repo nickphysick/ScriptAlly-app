@@ -26,6 +26,11 @@ import { isPreQuery } from "../../../lib/dashFirstUse";
 import { openQueryPanel } from "../../../lib/queryPanelStore";
 import { openAgentCard } from "../../../lib/agentCardStore";
 import { dashAid } from "../../../lib/dashReviewAid";
+import { PhoneFounding, PhoneRecent } from "./PhoneFoundingRecent";
+import { Dash58Feed } from "../v58/Dash58Feed";
+import { feedEntries } from "../../../lib/dashFeed";
+import { drawerEvents } from "../../../lib/dashFeedDrawer";
+import { openFeedback } from "../../../lib/feedbackStore";
 import { closedTile } from "../../../lib/dashClosed";
 import { agentCoverage } from "../../../lib/dashFirstUse";
 import { localYMD } from "../../../lib/shellSidebar";
@@ -100,6 +105,18 @@ export const DashPhone: React.FC<DashPhoneProps> = (props) => {
     () => ({ queries, agents, qcRows: buildQcRows(scopedQueries, agents, scopedActivities, now.getTime()), nowMs: now.getTime() }),
     [queries, agents, scopedQueries, scopedActivities, now],
   );
+  /* ── Recent: the feed's own entries, in the drawer's own words; the feed itself opens as this page's bottom sheet ── */
+  const feedEvents = useMemo(
+    () => (loading ? [] : drawerEvents(feedEntries({ activities: scopedActivities, queries, agents, manuscripts, now, seenAt: null }), taskCtx.qcRows)),
+    [loading, scopedActivities, queries, agents, manuscripts, now, taskCtx.qcRows],
+  );
+  const [feedOpen, setFeedOpen] = useState(false);
+  useEffect(() => {
+    if (!feedOpen) return undefined;
+    document.body.classList.add("dm1-feedsheet");
+    return () => document.body.classList.remove("dm1-feedsheet");
+  }, [feedOpen]);
+
   /* ⚠️ "View task" NEVER COMPLETES A TASK — Dash58's own viewTask: a query's task opens that query in the query panel,
      where its next step is offered; anything else opens its own flow or page. */
   const viewTask = (a: ListAction) => {
@@ -164,7 +181,25 @@ export const DashPhone: React.FC<DashPhoneProps> = (props) => {
           onAgents={() => onNavigate("agents")}
         />
         <PhoneUpNext loading={loading} plan={plan} ctx={taskCtx} onView={viewTask} onSeeAll={() => onNavigate("todo")} />
+        <PhoneFounding uid={currentUser?.id ?? null} onOpen={() => openFeedback()} />
+        <PhoneRecent loading={loading} events={feedEvents} onFeed={() => setFeedOpen(true)} />
       </div>
+      {feedOpen && (
+        <Dash58Feed
+          title={(activeManuscript?.title ?? "").trim()}
+          activities={scopedActivities}
+          queries={queries}
+          scopedQueries={scopedQueries}
+          agents={agents}
+          manuscripts={manuscripts}
+          now={now}
+          onClose={() => setFeedOpen(false)}
+          onAct={(queryId, mode) => {
+            setFeedOpen(false);
+            openQueryDrawer(mode === "offer" ? { mode, queryId, preset: { step: 1 } } : { mode, queryId });
+          }}
+        />
+      )}
       {searchOpen && (
         <PhoneSearch
           agents={agents} queries={queries} manuscripts={manuscripts}

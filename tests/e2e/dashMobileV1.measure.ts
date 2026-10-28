@@ -405,7 +405,7 @@ test("DM1-D1 · the founding writer row and Recent", async ({ page }) => {
   L.check("D1", "the sheet sits over a scrim", fb?.scrim === "block", String(fb?.scrim));
   await page.keyboard.press("Escape");
   await page.waitForTimeout(300);
-  L.check("D1", "Esc closes the sheet and the scrim", (await page.locator('[data-fb="panel"]').count()) === 0 && (await page.evaluate(() => getComputedStyle(document.querySelector('[data-dm1="scrim"]')!).display)) === "none", "");
+  L.check("D1", "Esc closes the sheet and the scrim", (await page.locator('[data-fb="panel"]').count()) === 0 && (await page.evaluate(() => { const sc = document.querySelector('[data-dm1="scrim"]'); return sc ? getComputedStyle(sc).display : "absent"; })) === "none", "");
 
   /* Recent: the feed's two newest, in the feed's own words */
   await openDash(page, PHONES[0]);
