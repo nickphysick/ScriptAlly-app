@@ -9,13 +9,13 @@
   "lock": "L3-1512",
   "where": "the row starts at the content's left (±1)",
   "ok": true,
-  "detail": "{\"row\":{\"l\":296,\"w\":1160},\"col\":{\"l\":296,\"w\":1160},\"labels\":[{\"id\":\"pk40-draft\",\"w\":150,\"ring\":false,\"on\":false},{\"id\":\"pk40-ready\",\"w\":150,\"ring\":false,\"on\":false},{\"id\":\"pk40-std2\",\"w\":150,\"ring\":false,\"on\":false},{\"id\":\"pk40-std\",\"w\":150,\"ring\":true,\"on\":true}]}"
+  "detail": "{\"row\":{\"l\":276,\"w\":1200},\"col\":{\"l\":276,\"w\":1200},\"labels\":[{\"id\":\"pk40-draft\",\"w\":150,\"ring\":false,\"on\":false},{\"id\":\"pk40-ready\",\"w\":150,\"ring\":false,\"on\":false},{\"id\":\"pk40-std2\",\"w\":150,\"ring\":false,\"on\":false},{\"id\":\"pk40-std\",\"w\":150,\"ring\":true,\"on\":true}]}"
  },
  {
   "lock": "L3-1512",
   "where": "the row spans the content width (±1)",
   "ok": true,
-  "detail": "{\"row\":{\"l\":296,\"w\":1160},\"col\":{\"l\":296,\"w\":1160},\"labels\":[{\"id\":\"pk40-draft\",\"w\":150,\"ring\":false,\"on\":false},{\"id\":\"pk40-ready\",\"w\":150,\"ring\":false,\"on\":false},{\"id\":\"pk40-std2\",\"w\":150,\"ring\":false,\"on\":false},{\"id\":\"pk40-std\",\"w\":150,\"ring\":true,\"on\":true}]}"
+  "detail": "{\"row\":{\"l\":276,\"w\":1200},\"col\":{\"l\":276,\"w\":1200},\"labels\":[{\"id\":\"pk40-draft\",\"w\":150,\"ring\":false,\"on\":false},{\"id\":\"pk40-ready\",\"w\":150,\"ring\":false,\"on\":false},{\"id\":\"pk40-std2\",\"w\":150,\"ring\":false,\"on\":false},{\"id\":\"pk40-std\",\"w\":150,\"ring\":true,\"on\":true}]}"
  },
  {
   "lock": "L3-1512",
@@ -25,14 +25,14 @@
  },
  {
   "lock": "L3-1512",
-  "where": "exactly one label is ringed",
-  "ok": true,
+  "where": "no label is ringed",
+  "ok": false,
   "detail": "[{\"id\":\"pk40-draft\",\"w\":150,\"ring\":false,\"on\":false},{\"id\":\"pk40-ready\",\"w\":150,\"ring\":false,\"on\":false},{\"id\":\"pk40-std2\",\"w\":150,\"ring\":false,\"on\":false},{\"id\":\"pk40-std\",\"w\":150,\"ring\":true,\"on\":true}]"
  },
  {
   "lock": "L3-1512",
-  "where": "…and it is the selected one",
+  "where": "exactly one label is selected",
   "ok": true,
-  "detail": "[{\"id\":\"pk40-std\",\"w\":150,\"ring\":true,\"on\":true}]"
+  "detail": "[{\"id\":\"pk40-draft\",\"w\":150,\"ring\":false,\"on\":false},{\"id\":\"pk40-ready\",\"w\":150,\"ring\":false,\"on\":false},{\"id\":\"pk40-std2\",\"w\":150,\"ring\":false,\"on\":false},{\"id\":\"pk40-std\",\"w\":150,\"ring\":true,\"on\":true}]"
  }
 ]

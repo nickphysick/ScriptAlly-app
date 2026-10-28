@@ -1,50 +1,14 @@
 [
  {
   "lock": "PK26-W-1512",
-  "where": "header left",
-  "ok": false,
-  "detail": "112.0 (want 92)"
- },
- {
-  "lock": "PK26-W-1512",
-  "where": "header right",
-  "ok": false,
-  "detail": "112.0 (want 92)"
- },
- {
-  "lock": "PK26-W-1512",
-  "where": "tabs left",
-  "ok": false,
-  "detail": "92.0 (want 72)"
- },
- {
-  "lock": "PK26-W-1512",
-  "where": "tabs right",
-  "ok": false,
-  "detail": "92.0 (want 72)"
- },
- {
-  "lock": "PK26-W-1512",
   "where": "build left",
   "ok": false,
-  "detail": "68.0 (want 48)"
+  "detail": "48.0 (want 28)"
  },
  {
   "lock": "PK26-W-1512",
   "where": "build right",
   "ok": false,
-  "detail": "68.0 (want 48)"
- },
- {
-  "lock": "PK26-W-1512",
-  "where": "results left",
-  "ok": false,
-  "detail": "68.0 (want 48)"
- },
- {
-  "lock": "PK26-W-1512",
-  "where": "results right",
-  "ok": false,
-  "detail": "68.0 (want 48)"
+  "detail": "48.0 (want 28)"
  }
 ]

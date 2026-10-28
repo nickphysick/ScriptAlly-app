@@ -3,12 +3,12 @@
   "lock": "PK26-W-1280",
   "where": "build left",
   "ok": true,
-  "detail": "48.0 (want 48)"
+  "detail": "24.0 (want 24)"
  },
  {
   "lock": "PK26-W-1280",
   "where": "build right",
   "ok": true,
-  "detail": "48.0 (want 48)"
+  "detail": "24.0 (want 24)"
  }
 ]

@@ -74,7 +74,7 @@ const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   L7: { js: watch(`const m = document.querySelector('[data-pk38="empty"]'); if (m && !document.querySelector('[data-pk38="show"]')) { const a = document.createElement('article'); a.dataset.pk38 = 'show'; m.after(a); }`) },
   /* L8: the ref's mono kicker over the labels comes back (pk38.css's override dropped) */
   /* (v39: aimed at the showcase sentence, which carries no override of its own — a break the page's rules out-rank proves nothing) */
-  L8: { css: `[data-pk38="agg"] .p9-ag3 .p9-ag3-d.p9-ag3-d.p9-ag3-d { font-family: "JetBrains Mono", monospace !important; text-transform: uppercase !important; }` },
+  L8: { css: `.p6.p6.p6 [data-pk38="agg"] .p9-ag3 .p9-ag3-d.p9-ag3-d.p9-ag3-d { font-family: "JetBrains Mono", monospace !important; text-transform: uppercase !important; }` },
   /* L10: New package opens on Empty whatever "Make a copy" asked for */
   L10: { js: watch(`const r = [...document.querySelectorAll('.p6-pd-from [role="radio"]')]; if (r.length === 2 && r[1].getAttribute('aria-checked') === 'true') { r[1].setAttribute('aria-checked', 'false'); r[0].setAttribute('aria-checked', 'true'); }`) },
   /* L9: a ✕ on the locked package */
@@ -274,8 +274,9 @@ async function monoCensus(page: Page): Promise<string[]> {
         if (!e.offsetParent && getComputedStyle(e).position !== "fixed") continue;
         if (![...e.childNodes].some((n) => n.nodeType === 3 && (n.textContent ?? "").trim())) continue;
         if (e.closest("[data-art]")) continue;
-        /* ⚠️ v39 names exactly two mono labels, and only these two are allowed: "Build, view and edit" and the Pro stamp */
-        if (e.matches('[data-pk39="kicker"], [data-pk39="pro"]')) continue;
+        /* ⚠️ v39 names exactly two mono labels: "Build, view and edit" and the Pro stamp. v39.1 adds two, both the ref's:
+           "Your packages" (Part B) and the new-package drawer's field labels (the ref's `.pd-f > span`, read as computed) */
+        if (e.matches('[data-pk39="kicker"], [data-pk39="pro"], .p9-pkl-h, [data-pk391="pd"] .pa-pd-f > span')) continue;
         const cs = getComputedStyle(e);
         if (/mono/i.test(cs.fontFamily) && cs.textTransform === "uppercase") out.push(`${e.tagName}.${e.className}: ${(e.innerText ?? "").trim().slice(0, 30)}`);
       }
@@ -283,7 +284,7 @@ async function monoCensus(page: Page): Promise<string[]> {
     return out;
   });
 }
-test("L8 no visible element on the page or its layers is mono AND uppercase, but v39's two named labels", async ({ page }) => {
+test("L8 no visible element on the page or its layers is mono AND uppercase, but v39's and v39.1's named labels", async ({ page }) => {
   test.setTimeout(240_000);
   const L = new Ledger("L8");
   for (const ms of ["pk40-ms", "pk40-new"]) {
@@ -294,7 +295,7 @@ test("L8 no visible element on the page or its layers is mono AND uppercase, but
     const allowed = await page.evaluate(() => [...document.querySelectorAll('[data-pk26="page"] [data-pk39="kicker"], [data-pk26="page"] [data-pk39="pro"]')]
       .filter((e) => (e as HTMLElement).offsetParent).map((e) => { const cs = getComputedStyle(e); return `${(e as HTMLElement).innerText.trim()}:${/mono/i.test(cs.fontFamily) && cs.textTransform === "uppercase"}`; }));
     if (ms === "pk40-ms") L.check(`${ms} · the two named mono labels are mono capitals`, allowed.length === 2 && allowed.every((a) => a.endsWith(":true")), JSON.stringify(allowed));
-    for (const [what, sel, layer] of [["New package dialog", '[data-pk38="labels"] .p9-pkl-new', ".p6-pdlg"], ["How it works", '[data-pk39="how"], .p6-pb-bt .p6-hd-s', '[data-pk39="hw"]']] as const) {
+    for (const [what, sel, layer] of [["New package drawer", '[data-pk38="labels"] .p9-pkl-new', '[data-pk391="pd"]'], ["How it works", '[data-pk39="how"], .p6-pb-bt .p6-hd-s', '[data-pk39="hw"]']] as const) {
       const b = page.locator(`${pg} ${sel}`).first();
       if (await b.count()) { await b.click({ timeout: 5000 }).catch(() => {}); await page.waitForTimeout(600); }
       L.check(`${ms} · ${what} opened`, (await page.locator(layer).count()) > 0, layer);

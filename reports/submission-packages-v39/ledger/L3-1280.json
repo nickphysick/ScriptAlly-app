@@ -3,36 +3,36 @@
   "lock": "L3-1280",
   "where": "labels are drawn (4 live)",
   "ok": true,
-  "detail": "[{\"id\":\"pk40-draft\",\"w\":221.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-ready\",\"w\":221.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-std2\",\"w\":221.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-std\",\"w\":221.5,\"ring\":true,\"on\":true}]"
+  "detail": "[{\"id\":\"pk40-draft\",\"w\":233.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-ready\",\"w\":233.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-std2\",\"w\":233.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-std\",\"w\":233.5,\"ring\":false,\"on\":true}]"
  },
  {
   "lock": "L3-1280",
   "where": "the row starts at the content's left (±1)",
   "ok": true,
-  "detail": "{\"row\":{\"l\":296,\"w\":928},\"col\":{\"l\":296,\"w\":928},\"labels\":[{\"id\":\"pk40-draft\",\"w\":221.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-ready\",\"w\":221.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-std2\",\"w\":221.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-std\",\"w\":221.5,\"ring\":true,\"on\":true}]}"
+  "detail": "{\"row\":{\"l\":272,\"w\":976},\"col\":{\"l\":272,\"w\":976},\"labels\":[{\"id\":\"pk40-draft\",\"w\":233.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-ready\",\"w\":233.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-std2\",\"w\":233.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-std\",\"w\":233.5,\"ring\":false,\"on\":true}]}"
  },
  {
   "lock": "L3-1280",
   "where": "the row spans the content width (±1)",
   "ok": true,
-  "detail": "{\"row\":{\"l\":296,\"w\":928},\"col\":{\"l\":296,\"w\":928},\"labels\":[{\"id\":\"pk40-draft\",\"w\":221.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-ready\",\"w\":221.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-std2\",\"w\":221.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-std\",\"w\":221.5,\"ring\":true,\"on\":true}]}"
+  "detail": "{\"row\":{\"l\":272,\"w\":976},\"col\":{\"l\":272,\"w\":976},\"labels\":[{\"id\":\"pk40-draft\",\"w\":233.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-ready\",\"w\":233.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-std2\",\"w\":233.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-std\",\"w\":233.5,\"ring\":false,\"on\":true}]}"
  },
  {
   "lock": "L3-1280",
   "where": "no label is narrower than 200",
   "ok": true,
-  "detail": "[221.5,221.5,221.5,221.5]"
+  "detail": "[233.5,233.5,233.5,233.5]"
  },
  {
   "lock": "L3-1280",
-  "where": "exactly one label is ringed",
+  "where": "no label is ringed",
   "ok": true,
-  "detail": "[{\"id\":\"pk40-draft\",\"w\":221.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-ready\",\"w\":221.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-std2\",\"w\":221.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-std\",\"w\":221.5,\"ring\":true,\"on\":true}]"
+  "detail": "[{\"id\":\"pk40-draft\",\"w\":233.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-ready\",\"w\":233.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-std2\",\"w\":233.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-std\",\"w\":233.5,\"ring\":false,\"on\":true}]"
  },
  {
   "lock": "L3-1280",
-  "where": "…and it is the selected one",
+  "where": "exactly one label is selected",
   "ok": true,
-  "detail": "[{\"id\":\"pk40-std\",\"w\":221.5,\"ring\":true,\"on\":true}]"
+  "detail": "[{\"id\":\"pk40-draft\",\"w\":233.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-ready\",\"w\":233.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-std2\",\"w\":233.5,\"ring\":false,\"on\":false},{\"id\":\"pk40-std\",\"w\":233.5,\"ring\":false,\"on\":true}]"
  }
 ]
