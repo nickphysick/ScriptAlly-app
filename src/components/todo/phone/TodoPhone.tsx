@@ -12,7 +12,7 @@
  *
  *  - The band: "To-do", the book chip, this week (Monday to Sunday: the day, its date, up to three dots), and the
  *    tallies. Tapping a day filters the list to it; tapping it again clears the filter.
- *  - The sheet: Tasks / Corkboard (the Corkboard is /todo/noteboard, so back works), then From earlier · Today ·
+ *  - The sheet: Tasks / Corkboard (the Corkboard is /todo/corkboard, so back works), then From earlier · Today ·
  *    Coming up · When you have a moment, empty groups not drawn.
  *  - A row: the query's status glyph in its disc (or the kind's icon), the title, one line, and a verb that OPENS the
  *    journey — nothing writes on a tap. Swipe left: Later, the existing snooze with its rules and Undo.
@@ -192,7 +192,7 @@ export const TodoPhone: React.FC = () => {
       <div className="pa-tdbody">
         <div className="pa-seg" role="tablist" aria-label="To-do">
           <button type="button" role="tab" aria-pressed="true" aria-selected="true" data-pa="seg-tasks">Tasks</button>
-          <button type="button" role="tab" aria-pressed="false" aria-selected="false" data-pa="seg-cork" onClick={() => navigate("/todo/noteboard")}>Corkboard</button>
+          <button type="button" role="tab" aria-pressed="false" aria-selected="false" data-pa="seg-cork" onClick={() => navigate("/todo/corkboard")}>Corkboard</button>
         </div>
         {day ? <p className="pa-tdfilter" data-pa="day-filter">{dayLabel(day)} · <button type="button" onClick={() => setDay(null)}>Show every day</button></p> : null}
         {groups.length ? groups.map(({ g, rows }) => (

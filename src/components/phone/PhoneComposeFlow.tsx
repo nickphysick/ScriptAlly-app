@@ -87,7 +87,10 @@ const ComposeFlow: React.FC<{ kind: ComposeKind; seed: ComposeSeed | null; onDon
     if (seed) {
       /* the composer's own edit: the same update it writes (a task keeps its date; a cleared date is a note) */
       const before = userTasks.find((x) => x.id === seed.id);
-      await updateUserTask(seed.id, { text: t, detail: detail.trim() || null, dueDate: task && due ? ymd(due) : null });
+      /* a note: the noteboard's own saveEdit writes the text alone (a dated note keeps its date); a task: the
+         composer's edit, its date and detail with it */
+      if (task) await updateUserTask(seed.id, { text: t, detail: detail.trim() || null, dueDate: due ? ymd(due) : null });
+      else await updateUserTask(seed.id, { text: t });
       onDone();
       showUndoBar({ message: "Saved.", sub: "", ...(before ? { undo: async () => { await restoreUserTask(before); } } : {}) });
       return;

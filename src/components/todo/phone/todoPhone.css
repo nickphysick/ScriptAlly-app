@@ -80,3 +80,28 @@
   .pa-later .td5-ph b { font-family: var(--pa-type) !important; }
   .pa-later .td5-ph span, .pa-later .td5-pnote, .pa-later .td5-psec p { font: 400 14.5px/1.45 var(--pa-sans) !important; color: var(--pa-ink-2); }
 }
+
+/* ── the Corkboard (Part 5C; ref .note, .nopin, .grid2, .lede at CBV A) ── */
+@media (max-width: 767.98px) {
+  .pa-cbband { margin-top: 18px; }
+  .pa-cork .pa-lede { font-size: 15px; color: var(--pa-ink-2); line-height: 1.45; margin: 0 0 16px; }
+  .pa-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 14px; }
+  .pa-note { position: relative; border: 0; border-radius: 4px; padding: 14px 12px 16px; min-height: 132px; font: 400 14px/1.35 var(--pa-sans); color: var(--pa-ink); text-align: left;
+    box-shadow: 0 2px 0 rgba(31, 38, 51, 0.06), 0 8px 14px rgba(31, 38, 51, 0.08); display: flex; flex-direction: column; justify-content: space-between; overflow-wrap: anywhere; }
+  /* the pin: the ref's dot, in navy — the phone allows no red fill, and the ref's pin is terracotta (see the report) */
+  .pa-note::before { content: ""; position: absolute; top: -6px; left: 50%; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; background: var(--pa-navy);
+    box-shadow: inset -2px -2px 0 rgba(0, 0, 0, 0.18), 0 2px 3px rgba(0, 0, 0, 0.2); }
+  .pa-note.nopin::before { display: none; }
+  .pa-notetx { display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden; }
+  .pa-note small { display: block; margin-top: 10px; color: var(--pa-muted); font-size: 12px; }
+  .pa-note.nopin { background: transparent !important; box-shadow: inset 0 0 0 1.5px #cdc5b8; display: grid; place-items: center; align-content: center; gap: 6px; color: var(--pa-muted); font-weight: 600; }
+  .pa-note.nopin svg { width: 22px; height: 22px; }
+  .pa-noteread { padding: 8px 4px 24px; font-family: var(--pa-sans); color: var(--pa-ink); }
+  .pa-noteread-tx { font-size: 17px; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .pa-noteread small { display: block; margin-top: 8px; color: var(--pa-muted); font-size: 13px; }
+  .pa-noteacts { display: flex; align-items: center; gap: 12px; margin-top: 20px; }
+  .pa-noteacts .pa-btn { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 16px; border-radius: 999px; border: 0; background: var(--pa-navy); color: #fff; font: 600 15px var(--pa-sans); }
+  .pa-noteacts .pa-btn svg { width: 18px; height: 18px; }
+  /* delete is ink text, never red */
+  .pa-notedel { min-height: 44px; padding: 0 8px; border: 0; background: none; color: var(--pa-ink); font: 600 15px var(--pa-sans); text-decoration: underline; }
+}
