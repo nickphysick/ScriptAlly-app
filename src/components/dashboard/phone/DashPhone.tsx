@@ -14,8 +14,6 @@ import { createPortal } from "react-dom";
 import type { Activity, Agent, Manuscript, ManuscriptVersion, Query, SmartImportUsage, Task, TaskFlag, User, UserTask } from "../../../types";
 import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
 import { PhoneSearch, type PhoneActions } from "./PhoneTopBar";
-import { PhoneStats } from "./PhoneStats";
-import { PhoneUpNext } from "./PhoneUpNext";
 import { scopeActivities, scopeQueries, scopeTasks } from "../../../lib/manuscriptScope";
 import { assembleBoardColumns } from "../../../lib/todoColumns";
 import { todoRows } from "../../../lib/dashTodo";
@@ -27,7 +25,16 @@ import { isPreQuery } from "../../../lib/dashFirstUse";
 import { openQueryPanel } from "../../../lib/queryPanelStore";
 import { openAgentCard } from "../../../lib/agentCardStore";
 import { dashAid } from "../../../lib/dashReviewAid";
-import { PhoneFounding, PhoneRecent } from "./PhoneFoundingRecent";
+import { FoundingCard, HomeHero, Latest, UpNextCard, WhereTheyStand, type StandKey } from "./PhoneHome";
+import { closedSplit, heroFor, readHero, writeHero, type HeroRange, type HeroSeries } from "../../../lib/phoneHome";
+import { chipCounts, phoneScopeId, rowsFor } from "../../../lib/queriesPhone";
+import { usePhoneBandSlot } from "../../phone/phoneBandStore";
+import { taskCardModel } from "../../../lib/dashTaskCard";
+import { CAUGHT_UP } from "../v71/Dash71Task";
+import { useFoundingStats, TIERS } from "../../../lib/foundingStats";
+import { foundingRow } from "../../../lib/dashPhone";
+import { Dash105How } from "../v105/Dash105How";
+import "./phoneHome.css";
 import { Dash58Feed } from "../v58/Dash58Feed";
 import { feedEntries } from "../../../lib/dashFeed";
 import { drawerEvents } from "../../../lib/dashFeedDrawer";
@@ -35,7 +42,6 @@ import { openFeedback } from "../../../lib/feedbackStore";
 import { closedTile } from "../../../lib/dashClosed";
 import { agentCoverage } from "../../../lib/dashFirstUse";
 import { localYMD } from "../../../lib/shellSidebar";
-import { activeCard, agentsCard, closedCard, queriesForIds, withAgentsCard } from "../../../lib/dashPhone";
 import "./dashPhone.css";
 
 export interface DashPhoneProps {
@@ -69,14 +75,29 @@ export const DashPhone: React.FC<DashPhoneProps> = (props) => {
   /* ── the figures: the same calls Dash58 makes, arranged by lib/dashPhone ── */
   const scopedQueries = useMemo(() => scopeQueries(queries, scopeId), [queries, scopeId]);
   const scopedActivities = useMemo(() => scopeActivities(props.activities, scopeId), [props.activities, scopeId]);
-  const active = useMemo(() => activeCard(scopedQueries, now), [scopedQueries, now]);
-  const withAgents = useMemo(() => withAgentsCard(scopedQueries), [scopedQueries]);
-  const closed = useMemo(() => (loading ? null : closedCard(closedTile(scopedQueries, scopedActivities))), [loading, scopedQueries, scopedActivities]);
-  const cov = useMemo(
-    () => agentCoverage({ agents, queries, manuscript: activeManuscript, now, todayIso: localYMD(now.getTime()) }),
-    [agents, queries, activeManuscript, now],
-  );
-  const agentsFig = useMemo(() => agentsCard(cov), [cov]);
+  /* ── the hero (Phone app v2, Part 2): the dashboard chart's own ledger, the switch remembered per device ── */
+  const [heroPick, setHeroPick] = useState(() => readHero());
+  const pickHero = (v: { series: HeroSeries; range: HeroRange }) => { setHeroPick(v); writeHero(v); };
+  const hero = useMemo(() => heroFor(scopedQueries, now, heroPick.series, heroPick.range), [scopedQueries, now, heroPick]);
+  usePhoneBandSlot("/dashboard", (
+    <HomeHero hero={hero} series={heroPick.series} range={heroPick.range}
+      onSeries={(series) => pickHero({ ...heroPick, series })} onRange={(range) => pickHero({ ...heroPick, range })}
+      onOpen={() => navigate("/queries")} />
+  ), [hero, heroPick]);
+
+  /* ── Where they stand: the Queries tab's own chip counts (whereItStands), on the book the Queries tab is scoped to ── */
+  const standScope = useMemo(() => {
+    let stored: string | null = null;
+    try { stored = window.localStorage.getItem("scriptally_active_manuscript_id"); } catch { /* storage refused */ }
+    return phoneScopeId(manuscripts, stored);
+  }, [manuscripts]);
+  const standRows = useMemo(() => {
+    const all = buildQcRows(queries, agents, props.activities, now.getTime());
+    return standScope ? all.filter((r) => r.manuscriptId === standScope) : all;
+  }, [queries, agents, props.activities, now, standScope]);
+  const stand = useMemo(() => chipCounts(standRows, now.getTime()), [standRows, now]);
+  const split = useMemo(() => closedSplit(rowsFor(standRows, "closed", now.getTime()).map((r) => r.status)), [standRows, now]);
+  const goChip = (k: StandKey | "closed") => navigate(`/queries?chip=${k}`);
 
   /* ── Up next: Dash58's own list, built the same way (the board's cards, then the contact list's, then the clock's) ── */
   const { tasks, userTasks, taskFlags, currentUser, versions = [] } = props;
@@ -128,6 +149,21 @@ export const DashPhone: React.FC<DashPhoneProps> = (props) => {
     else onNavigate(a.tab, a.sub);
   };
 
+  /* the founding writer card: the founding stats the desktop card reads (rank, and how far to the next) */
+  const { loading: fLoading, stats } = useFoundingStats(currentUser?.id ?? null);
+  const fRow = foundingRow(stats);
+  const fNext = stats.nextTier ? TIERS.find((t) => t.key === stats.nextTier) ?? null : null;
+  const fHave = Math.max(0, Math.floor(stats.contributions || 0));
+  const fProgress = fNext && stats.toNext != null ? `${fHave} of ${fHave + stats.toNext} to ${fNext.name}` : "Top rank";
+  const fPct = fNext && stats.toNext != null ? fHave / Math.max(1, fHave + stats.toNext) : 1;
+  const [howOpen, setHowOpen] = useState(false);
+  const upHero = useMemo(() => {
+    const labelOf = new Map<string, string>();
+    for (const g of plan.groups) for (const it of g.items) labelOf.set(it.key, g.label);
+    const it = plan.items[0];
+    return it ? { it, m: taskCardModel(it, labelOf.get(it.key) ?? "", taskCtx) } : null;
+  }, [plan, taskCtx]);
+
   /* the hairline under the bar arrives once the page's own scroller has moved */
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
@@ -162,24 +198,21 @@ export const DashPhone: React.FC<DashPhoneProps> = (props) => {
   };
 
   return (
-    <div ref={rootRef} className="dm1" data-dm1="page" data-loading={loading ? "1" : "0"}>
+    <div ref={rootRef} className="dm1 pa-home" data-dm1="page" data-pa="home" data-loading={loading ? "1" : "0"}>
       {/* Phone app v2 (Part 1C): the page's own top bar (PhoneTopBar) gives way to the shell's navy band, which carries
           the greeting, the book chip, search, feedback and the menu; the + is the tab bar's. Part 2 rebuilds this body. */}
       <div className="dm1-body" data-dm1="body">
-        {/* each card opens exactly its own queries (lib/dashPhone's `queriesForIds`). ⚠️ The Contact list takes no
-            status from the URL, so Agents opens it whole (the report says so). */}
-        <PhoneStats
-          loading={loading}
-          active={active} withAgents={withAgents} closed={closed} agents={agentsFig}
-          onActive={() => navigate(queriesForIds(active.ids))}
-          onWithAgents={() => navigate(queriesForIds(withAgents.ids))}
-          onClosed={() => navigate(queriesForIds(closed?.ids ?? []))}
-          onAgents={() => onNavigate("agents")}
-        />
-        <PhoneUpNext loading={loading} plan={plan} ctx={taskCtx} onView={viewTask} onSeeAll={() => onNavigate("todo")} />
-        <PhoneFounding uid={currentUser?.id ?? null} onOpen={() => openFeedback()} />
-        <PhoneRecent loading={loading} events={feedEvents} onFeed={() => setFeedOpen(true)} />
+        <WhereTheyStand counts={stand} passed={split.passed} noReply={split.noReply} onChip={goChip} />
+        <UpNextCard
+          loading={loading} total={plan.items.length} dataKey={upHero?.it.key}
+          title={upHero ? <>{upHero.m.pre}{upHero.m.who}{upHero.m.post}</> : null}
+          line={upHero?.m.line ?? null} caughtUp={CAUGHT_UP}
+          onView={() => upHero && viewTask(upHero.it.action)} onSeeAll={() => onNavigate("todo")} />
+        <Latest events={feedEvents} nowMs={now.getTime()} onResponses={() => navigate("/queries/responses")} />
+        <FoundingCard name={currentUser?.name ?? ""} rank={fRow.rank} progress={fProgress} pct={fPct} loading={fLoading}
+          onFeedback={() => openFeedback()} onHow={() => setHowOpen(true)} />
       </div>
+      <Dash105How open={howOpen} onClose={() => setHowOpen(false)} />
       {feedOpen && (
         <Dash58Feed
           title={(activeManuscript?.title ?? "").trim()}

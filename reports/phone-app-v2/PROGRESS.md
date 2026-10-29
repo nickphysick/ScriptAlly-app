@@ -11,8 +11,16 @@ Baseline gates on the base: tsc root 0, tsc functions 0, build clean, Vitest 689
 | 1 | C the band | `5f707d05` | committed |
 | 1 | D the + sheet, the menu, the book switcher | `be8fdc7c` | committed |
 | 1 | E the snackbar, the icon, the launch screen | `4e0f911c` | committed |
-| 1 | F locks, shots, report | (the commit that carries this line) | committed; dev deploy follows |
-| 2 | — | — | next |
+| 1 | F locks, shots, report | `459b5d96` | committed |
+| 1 | dev deploy | integration `a8b44524` on `dev/…-fv1-pk393-pa2-1` | dev serves `index-Ox21np2m.js` |
+| 2 | A–C Home (one commit) | `93d802c7` | committed |
+| 2 | D locks, shots, report | (the commit that carries this line) | committed; dev deploy follows |
+| 3 | — | — | next |
+
+## Dev, as of the end of Part 1
+- dev serves `index-Ox21np2m.js` = `dev/pk391-qm1-pk392-calx-pk392b-td7-fv1-pk393-pa2-1` (`a8b44524`). The next part's
+  integration branch starts from WHATEVER dev serves then (check the hash first: another session deployed mid-Part 1).
+- The integration worktree is `/Users/nickphysick/ScriptAlly-pa2-int` (needs `functions/node_modules` linked).
 
 ## Resuming
 - Read `git log --oneline -15` and this file; resume at the first phase not committed.

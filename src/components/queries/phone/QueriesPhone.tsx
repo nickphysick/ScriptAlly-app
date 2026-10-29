@@ -121,6 +121,16 @@ export const QueriesPhone: React.FC<QueriesPhoneProps> = (p) => {
   const [chip, setChipState] = useState<PhoneChip | null>(() => readChip());
   const chipOn: PhoneChip = chip ?? defaultChip(counts);
   const setChip = (c: PhoneChip) => { setChipState(c); writeChip(c); };
+  /* Phone app v2 (Part 2): Home's "Where they stand" lands on a chip by URL (`?chip=you`). This page stays mounted, so
+     the arrival is read on every navigation (location.key), applied, and the parameter taken off the address. */
+  useEffect(() => {
+    const want = params.get("chip") as PhoneChip | null;
+    if (!want || !PHONE_CHIPS.includes(want)) return;
+    setChipState(want); writeChip(want);
+    const next = new URLSearchParams(location.search); next.delete("chip");
+    navigate({ pathname: "/queries", search: next.toString() ? `?${next}` : "" }, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.key]);
   const [find, setFind] = useState("");
   const [sort, setSort] = useState<PhoneSort>("due");
   const [sortOpen, setSortOpen] = useState(false);

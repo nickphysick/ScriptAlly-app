@@ -1,0 +1,103 @@
+/* ── PHONE APP v2, PART 2 — HOME (ref design-refs/phone-app-v2/src/v2.js heroBand / screenHome2 / foundingCard;
+   app.css .card .closedline .nextc .shd .feed .fstripe .bar-h .tag). Below 768px only. ── */
+@media (max-width: 767.98px) {
+  /* the sheet: the page colour, the ref's 18px top and 16px gutters (`.sheetpg`) */
+  .dm1.pa-home { background: var(--pa-page); padding: 18px 16px 120px; font-family: var(--pa-sans); color: var(--pa-ink); }
+  .pa-home .pa-num, .pa-band .pa-num { font-family: var(--pa-type); font-weight: 400; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+  .pa-sub { font-size: 13px; color: var(--pa-muted); }
+  .pa-card { background: var(--pa-card); border-radius: var(--pa-r); box-shadow: var(--pa-sh); padding: 16px; }
+  .pa-link { border: 0; background: none; padding: 0; cursor: pointer; display: inline-flex; align-items: center; gap: 2px; font: 600 14px/1.2 var(--pa-sans) !important; color: var(--pa-navy); }
+  .pa-link .pa-chev, .pa-link .pa-chev svg { width: 14px; height: 14px; color: inherit; }
+  .pa-btn.sm { height: 38px; padding: 0 16px; font-size: 14px !important; }
+
+  /* ── the hero, in the band (ref heroBand) ── */
+  .pa-band [data-pa="band-slot"]:has(.pa-hero) { margin-top: 22px; }
+  .pa-herochips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 0 16px; }
+  .pa-herochips::-webkit-scrollbar { display: none; }
+  .pa-herochip, .pa-herorange { flex: none; height: 32px; border: 0; border-radius: 999px; cursor: pointer; font: 600 13.5px/1 var(--pa-sans) !important; }
+  .pa-herochip { padding: 0 13px; background: rgba(255, 255, 255, 0.12); color: #fff; }
+  .pa-herochip[aria-pressed="true"] { background: #fff; color: var(--pa-navy); }
+  .pa-heroopen { display: block; width: 100%; margin-top: 16px; padding: 0; border: 0; background: none; text-align: left; color: #fff; cursor: pointer; }
+  .pa-herofig { display: flex; align-items: baseline; gap: 10px; }
+  .pa-heronum { font-family: var(--pa-type); font-weight: 400; font-size: 54px; line-height: 0.9; color: #fff; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+  .pa-heronoun { font-size: 16px; color: rgba(255, 255, 255, 0.75); }
+  .pa-herochange { display: flex; align-items: center; gap: 6px; margin-top: 9px; font-size: 14px; color: rgba(255, 255, 255, 0.75); }
+  .pa-herochange b { color: #fff; }
+  .pa-herospark { display: block; width: 100%; height: 74px; margin-top: 12px; }
+  .pa-heroranges { display: flex; justify-content: space-around; margin-top: 8px; }
+  .pa-herorange { min-width: 56px; background: transparent; color: rgba(255, 255, 255, 0.7); }
+  .pa-herorange[aria-pressed="true"] { background: rgba(255, 255, 255, 0.16); color: #fff; }
+
+  /* ── Where they stand (ref PICK stats D) ── */
+  .pa-standhead { display: flex; justify-content: space-between; align-items: baseline; }
+  .pa-standt { margin: 0; font: 700 16px/1.3 var(--pa-sans) !important; color: var(--pa-ink); }
+  .pa-standbar { display: flex; gap: 3px; height: 14px; margin: 12px 0 4px; }
+  .pa-standbar i { display: block; border-radius: 4px; }
+  .pa-standkeys { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 0 -8px; }
+  .pa-standkey { text-align: left; padding: 8px; border: 0; border-radius: 12px; background: none; cursor: pointer; min-height: 44px; color: var(--pa-ink); }
+  .pa-standfig { display: flex; align-items: center; gap: 7px; }
+  .pa-standfig i { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+  .pa-standfig .pa-num { font-size: 26px; line-height: 1.1; }
+  .pa-standkey .pa-sub { display: block; margin-top: 2px; }
+  .pa-closedline {
+    display: flex; align-items: center; gap: 8px; width: 100%; margin-top: 10px; padding: 12px 0 0; min-height: 44px;
+    border: 0; border-top: 1px solid var(--pa-rule); background: none; cursor: pointer; text-align: left;
+    font: 400 13.5px/1.3 var(--pa-sans) !important; color: var(--pa-muted);
+  }
+  .pa-closedline .pa-cltx { flex: 1; }
+  .pa-closedline b { color: var(--pa-ink); font-weight: 600; }
+  .pa-closedline .pa-chev, .pa-closedline .pa-chev svg { width: 16px; height: 16px; color: var(--pa-faint); }
+
+  /* ── Up next (ref PICK next B: `.nextc` `.nh` `.nb`) ── */
+  .pa-nextc { margin-top: 16px; background: #fff; border-radius: var(--pa-r-lg); box-shadow: var(--pa-sh); overflow: hidden; }
+  .pa-nh { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--pa-blush-wash); }
+  .pa-nh .pa-nht { margin: 0; font-family: var(--pa-type) !important; font-weight: 400 !important; font-size: 18px; color: var(--pa-ink); }
+  .pa-nh .pa-link { color: var(--pa-ink); }
+  .pa-nb { display: flex; gap: 12px; align-items: center; padding: 14px 16px 16px; }
+  .pa-nbtx { flex: 1; min-width: 0; }
+  .pa-nbt { font-size: 18px; font-weight: 600; line-height: 1.25; color: var(--pa-ink); }
+  .pa-nbline { margin-top: 3px; }
+  .pa-nbtx .pa-btn { margin-top: 12px; }
+  .pa-spot { flex: none; border-radius: 50%; }
+
+  /* ── Latest (ref `.shd` `.feed .it`) ── */
+  .pa-shd { display: flex; align-items: baseline; justify-content: space-between; margin: 24px 2px 10px; }
+  .pa-shd .pa-h2 { margin: 0; font-family: var(--pa-type) !important; font-weight: 400 !important; font-size: 19px; color: var(--pa-ink); }
+  .pa-feed { padding: 4px 16px; }
+  .pa-it { display: flex; gap: 12px; align-items: flex-start; padding: 11px 0; border-bottom: 1px solid var(--pa-rule); }
+  .pa-it:last-child { border-bottom: 0; }
+  .pa-ittx { flex: 1; font-size: 14.5px; line-height: 1.35; color: var(--pa-ink); }
+  .pa-ittx b { font-weight: 600; }
+  .pa-ittx small { display: block; margin-top: 2px; font-size: 12.5px; color: var(--pa-muted); }
+  .pa-icodisc svg { width: 17px; height: 17px; color: var(--pa-ink-2); }
+
+  /* ── the founding writer card (ref `foundingCard`, `.fstripe`, `.bar-h`, `.tag`) ── */
+  .pa-fcard { padding: 0; overflow: hidden; margin-top: 22px; }
+  .pa-fstripe { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: repeating-linear-gradient(135deg, var(--pa-blush) 0 14px, var(--pa-blush-wash) 14px 28px); }
+  .pa-fst { flex: 1; min-width: 0; }
+  .pa-fname { font-family: var(--pa-type); font-size: 21px; line-height: 1.15; color: var(--pa-ink); overflow-wrap: anywhere; }
+  .pa-frole { margin-top: 2px; font-size: 13.5px; font-weight: 600; color: var(--pa-ink); }
+  .pa-fspot { width: 58px; height: 58px; flex: none; border-radius: 50%; background: #fff; display: grid; place-items: center; overflow: hidden; }
+  .pa-fspot img { width: 50px; height: 50px; object-fit: contain; }
+  .pa-fbody { padding: 14px 16px 16px; }
+  .pa-frank { display: flex; align-items: center; gap: 10px; margin: 0 0 6px; }
+  .pa-tag { display: inline-flex; align-items: center; height: 26px; padding: 0 10px; border-radius: 999px; background: var(--pa-page); font-size: 12.5px; font-weight: 500; color: var(--pa-ink-2); }
+  .pa-tag--navy { background: var(--pa-navy); color: #fff; }
+  .pa-barh { height: 10px; border-radius: 5px; background: var(--pa-fill); overflow: hidden; }
+  .pa-barh i { display: block; height: 100%; border-radius: 5px; background: var(--pa-navy); }
+  .pa-fp { margin: 14px 0 12px; font-size: 14.5px; line-height: 1.4; color: var(--pa-ink-2); }
+  .pa-fbtns { display: flex; gap: 8px; align-items: center; }
+  .pa-fbtns .pa-btn { min-height: 44px; height: 44px; }
+  .pa-fhow { margin-left: auto; white-space: nowrap; min-height: 44px; }
+}
+@media (max-width: 767.98px) {
+  /* the old body's own gutter and flex gap stand down: the sheet's 16px is the only gutter, and each card states its
+     own top margin as the ref does */
+  .pa-home .dm1-body { display: block; padding: 0; gap: 0; }
+}
+@media (max-width: 767.98px) {
+  /* ⚠️ TAP TARGETS (DM1-F1): a text link is 44px tall to the finger without moving a line of the layout — the height is
+     taken back by equal negative margins; and the small primary is 44 tall (the ref's `.btn.sm` is 38). */
+  .pa-home .pa-link, .pa-band .pa-link { min-height: 44px; margin: -13px 0; }
+  .pa-home .pa-btn.sm { height: 44px; }
+}

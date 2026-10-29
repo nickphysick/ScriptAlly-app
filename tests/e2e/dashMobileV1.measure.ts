@@ -190,6 +190,8 @@ const desktopFigs = (page: Page) => page.evaluate(() => {
 });
 
 test("DM1-B1 · stat cards first", async ({ page }) => {
+  /* ⚠️ RETIRED 29 OCT (Phone app v2, Part 2): the four stat cards are replaced by the band hero and "Where they stand" — PA2-2 H1 (the number against the desktop chart) and H3 (the counts against the Queries chips). */
+  test.skip(true, "retired by Phone app v2 Part 2");
   const L = new Ledger("B1");
   await openDash(page, DESKTOPS[0]);
   const desk = await desktopFigs(page);
@@ -300,6 +302,8 @@ const desktopKeys = async (page: Page): Promise<string[]> => {
 };
 
 test("DM1-C1 · Up next", async ({ page }) => {
+  /* ⚠️ RETIRED 29 OCT (Phone app v2, Part 2): PhoneUpNext is replaced by the Up next card — PA2-2 H5 holds it to the desktop's first task. (This case was already red on the unchanged base: its fixture expected a housekeeping card first.). */
+  test.skip(true, "retired by Phone app v2 Part 2");
   const L = new Ledger("C1");
   const kinds = new Set<string>();
   for (const drop of [[], ["req"], ["req", "nudge"], ["req", "nudge", "quiet"]] as string[][]) {
@@ -381,6 +385,8 @@ const RANK: Record<string, string> = { egg: "Egg", fledgling: "Fledgling", mento
 const NEXT: Record<string, string> = { fledgling: "hatch", archivist: "Archivist", scout: "Scout", mentor: "Mentor", queryhawk: "QueryHawk" };
 
 test("DM1-D1 · the founding writer row and Recent", async ({ page }) => {
+  /* ⚠️ RETIRED 29 OCT (Phone app v2, Part 2): the founding row and Recent are replaced by the founding card and Latest — PA2-2 H6 covers their order and colours. */
+  test.skip(true, "retired by Phone app v2 Part 2");
   const L = new Ledger("D1");
   for (const [k, st] of Object.entries(FW)) {
     await openDash(page, DESKTOPS[0], { __SA_FOUNDING_STATS: st });

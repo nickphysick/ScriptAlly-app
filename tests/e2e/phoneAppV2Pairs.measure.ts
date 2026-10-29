@@ -23,6 +23,12 @@ const PARTS: Record<string, [string, string, Step][]> = {
     ["30-book-switcher", "/dashboard", async (p) => { await p.locator('[data-pa="book-chip"]').click(); await p.waitForTimeout(900); }],
     ["31-feedback", "/dashboard", async (p) => { await p.locator('[data-pa="feedback-btn"]').click(); await p.waitForTimeout(900); }],
   ],
+  "part-2": [
+    ["01-home", "/dashboard", async (p) => { await p.locator('[data-pa="hero-series"][data-k="active"]').click(); await p.locator('[data-pa="hero-range"][data-k="3M"]').click(); await p.waitForTimeout(300); }],
+    ["02-home-scrolled", "/dashboard", async (p) => { await p.evaluate(() => { document.querySelector("#app-stage-scroll")!.scrollTop = 620; }); await p.waitForTimeout(700); }],
+    /* the ref's 03 shows Replies · All; the app has no replies series, so the nearest is Sent · All */
+    ["03-home-hero-replies", "/dashboard", async (p) => { await p.locator('[data-pa="hero-series"][data-k="sent"]').click(); await p.locator('[data-pa="hero-range"][data-k="All"]').click(); await p.waitForTimeout(300); }],
+  ],
 };
 
 const pair = async (page: Page, ref: string, app: Buffer, out: string) => {
