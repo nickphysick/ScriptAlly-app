@@ -1,0 +1,82 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * PHONE APP v2, PART 5 — the To-do tab (TodoPhone). Values from design-refs/phone-app-v2/src/app.css: `.wk`, `.wkd`,
+ * `.wdots`, `.bstats`, `.seg`, `.rowhd`, `.task`, `.tverb`, `.ico2`, `.sw .acts`. Phone only.
+ */
+@media (max-width: 767.98px) {
+  .pa-td { background: var(--pa-page); color: var(--pa-ink); font-family: var(--pa-sans); min-height: 100%; }
+  /* the ref's .sheetpg rises 24px into the band's rounded foot */
+  .pa-tdbody { position: relative; margin-top: -24px; padding: 18px 16px 120px; }
+
+  /* ── the band: the week and the tallies ── */
+  .pa-tdband { margin-top: 4px; }
+  .pa-wk { display: flex; justify-content: space-between; gap: 4px; margin-top: 14px; }
+  .pa-wkd { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 0 7px; border-radius: 16px; border: 0; background: transparent;
+    color: rgba(255, 255, 255, 0.75); font-family: var(--pa-sans); min-height: 62px; }
+  .pa-wkd .wd { font-size: 12px; }
+  .pa-wkd .wn { font-size: 19px; color: #fff; }
+  .pa-wkd .wdots { display: flex; gap: 3px; height: 5px; }
+  .pa-wkd .wdots i { width: 5px; height: 5px; border-radius: 50%; background: var(--pa-blush); }
+  .pa-wkd.on { background: #fff; color: var(--pa-navy); }
+  .pa-wkd.on .wn { color: var(--pa-navy); }
+  .pa-wkd.on .wdots i { background: var(--pa-navy); }
+  .pa-tdband .pa-bstats { display: flex; gap: 18px; margin-top: 14px; color: rgba(255, 255, 255, 0.75); font-size: 14px; flex-wrap: wrap; align-items: baseline; }
+  .pa-tdband .pa-bstats b { color: #fff; font-size: 24px; margin-right: 5px; }
+
+  /* ── the switch and the groups ── */
+  .pa-seg { display: flex; background: var(--pa-fill); border-radius: 999px; padding: 3px; margin: 2px 0 14px; }
+  .pa-seg button { flex: 1; height: 38px; border: 0; border-radius: 999px; background: transparent; font: 600 14px var(--pa-sans); color: var(--pa-ink-2); }
+  .pa-seg button[aria-pressed="true"] { background: #fff; color: var(--pa-ink); box-shadow: 0 1px 3px rgba(31, 38, 51, 0.12); }
+  .pa-tdfilter { margin: 0 0 4px; font-size: 14px; color: var(--pa-muted); }
+  .pa-tdfilter button { border: 0; background: none; padding: 0 0 0 2px; font: 600 14px var(--pa-sans); color: var(--pa-ink); text-decoration: underline; min-height: 44px; }
+  .pa-tdnone { margin: 30px 4px; color: var(--pa-muted); font-size: 15px; }
+  .pa-td .pa-rowhd { display: flex; align-items: center; gap: 8px; padding: 18px 0 6px; font-size: 13px; font-weight: 600; color: var(--pa-muted); }
+
+  /* ── a row ── */
+  .pa-td .pa-sw { position: relative; overflow: hidden; touch-action: pan-y; margin: 0 -16px; }
+  .pa-td .pa-acts { position: absolute; inset: 0; display: flex; justify-content: space-between; }
+  .pa-td .pa-acts button { width: 96px; border: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font: 600 13px var(--pa-sans); }
+  .pa-td .pa-acts svg { width: 20px; height: 20px; }
+  .pa-td .pa-acts .r { background: var(--pa-navy); color: #fff; margin-left: auto; }
+  .pa-task { position: relative; display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 16px; background: var(--pa-page); text-align: left;
+    transition: transform .32s var(--pa-spring); min-height: 64px; }
+  .pa-task::after { content: ""; position: absolute; left: 68px; right: 0; bottom: 0; height: 1px; background: var(--pa-rule); }
+  .pa-task .lt { flex: 1; min-width: 0; }
+  /* ⚠️ ONE LINE BY CLAMP, NEVER `nowrap`: a nowrap title's whole text is the row's MIN-CONTENT width, and a flex item's
+     min-content contribution ignores `min-width: 0` — so one long title widened the whole stage to 589px (measured).
+     A clamp wraps by word for sizing and shows one line. */
+  .pa-task .lt b, .pa-task .lt small { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+  .pa-task .lt b { font-weight: 600; font-size: 15.5px; line-height: 1.25; }
+  .pa-task .lt small { color: var(--pa-muted); font-size: 13px; margin-top: 2px; }
+  .pa-ico2 { width: 40px; height: 40px; flex: none; border-radius: 50%; display: grid; place-items: center; background: #fff; box-shadow: inset 0 0 0 1px var(--pa-rule); color: var(--pa-ink-2); }
+  .pa-ico2 svg { width: 19px; height: 19px; }
+  .pa-tverb { flex: none; height: 44px; padding: 0 14px; border-radius: 999px; border: 0; font: 600 14px var(--pa-sans); background: #fff; color: var(--pa-ink); box-shadow: inset 0 0 0 1px var(--pa-rule); }
+  .pa-tverb.pri { background: var(--pa-navy); color: #fff; box-shadow: none; }
+
+  /* ── Later and the tick ── */
+  .pa-later [data-pa="later-sheet"] { padding: 6px 4px 24px; }
+  /* the snooze panel is the desk's popover (SetAsidePop, its rules and words unchanged), laid out in the sheet */
+  .pa-later .td5-sapop { position: static !important; inset: auto !important; transform: none !important; box-shadow: none !important; width: auto !important;
+    max-width: none !important; max-height: none !important; min-width: 0 !important; border-radius: 0 !important; font-family: var(--pa-sans); }
+  .pa-later .td5-sapop :where(p, span, div, button, b, small) { font-family: var(--pa-sans); letter-spacing: 0; }
+  .pa-doneask { position: fixed; inset: 0; z-index: 1040; background: rgba(31, 38, 51, 0.4); display: flex; align-items: flex-end; }
+  .pa-doneask-card { width: 100%; background: #fff; border-radius: 24px 24px 0 0; padding: 22px 20px calc(22px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 6px; font-family: var(--pa-sans); }
+  .pa-doneask-card b { font-size: 17px; }
+  .pa-doneask-card span { font-size: 14px; color: var(--pa-muted); }
+  .pa-doneask-card div { display: flex; gap: 8px; margin-top: 12px; }
+  .pa-doneask-card button { flex: 1; min-height: 48px; border-radius: 999px; border: 0; font: 600 15px var(--pa-sans); }
+  .pa-doneask-card .keep { background: #fff; box-shadow: inset 0 0 0 1px var(--pa-rule); color: var(--pa-ink); }
+  .pa-doneask-card .go { background: var(--pa-navy); color: #fff; }
+}
+
+/* the borrowed snooze panel, on a phone: its words unchanged; no keyboard row (a phone has no keys to teach), the
+   refusal's tag in sentence case and ink (the phone allows no small uppercase mono labels and no red text) */
+@media (max-width: 767.98px) {
+  .pa-later .td5-pfoot { display: none; }
+  .pa-later .td5-pjn { font: 400 15px/1.45 var(--pa-sans) !important; color: var(--pa-ink); }
+  .pa-later .td5-pjn b { display: block; margin: 0 0 2px; font: 600 15px/1.3 var(--pa-sans) !important; letter-spacing: 0; text-transform: none; color: var(--pa-ink) !important; }
+  .pa-later .td5-ph b { font-family: var(--pa-type) !important; }
+  .pa-later .td5-ph span, .pa-later .td5-pnote, .pa-later .td5-psec p { font: 400 14.5px/1.45 var(--pa-sans) !important; color: var(--pa-ink-2); }
+}
