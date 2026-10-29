@@ -169,6 +169,14 @@
   .td5-root .td5-asideban b { font: italic 400 14px/1.2 var(--sp-serif) !important; letter-spacing: 0; text-transform: none; }
   .td5-root .td5-dcard .td5-pin small { font: italic 400 13px/1.2 var(--sp-serif) !important; letter-spacing: 0; text-transform: none; }
 
+  /* ═════ S7 · Done today on one line under the card: the heading line in italic serif, and its Undo ═════ */
+  .td5-root .td5-desk > .td7-done .td7-doneh { display: flex; align-items: baseline; gap: 12px; margin: 0; }
+  .td5-root .td7-doneh span { font: italic 400 15px/1.2 var(--sp-serif) !important; letter-spacing: 0; text-transform: none; color: rgba(28, 19, 15, 0.7); }
+  .td5-root .td7-doneh .td7-undo {
+    padding: 0; border: 0; background: none; cursor: pointer; color: #2a3a52; text-decoration: underline; text-underline-offset: 2px;
+    font: italic 400 15px/1.2 var(--sp-serif) !important;
+  }
+
   /* pinned: the header card, Today and the "Your tray" heading leave with the old header (the ref's `.v6-pinhide`) */
   .td5-root[data-pinned] .td7-hd, .td5-root[data-pinned] .td7-sec { display: none; }
 }

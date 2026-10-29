@@ -246,7 +246,25 @@ export const DeskCard: React.FC<DeskCardProps> = ({ item, facts, lede, stops, pa
   );
 };
 
-export const DoneToday: React.FC<{ acts: readonly ClearedAct[]; fresh: string | null; undoFor: (a: ClearedAct) => (() => void) | null; title?: string }> = ({ acts, fresh, undoFor, title = "Done today" }) => (
+/**
+ * v7 S7 — `fold`: Done today on ONE line under the desk card, "Done today · {n} cleared" in italic serif and the Undo
+ * for the most recent clearing that can still be undone; the slips fold away. Without it (the caught-up page) the
+ * slips stay as built.
+ */
+export const DoneToday: React.FC<{ acts: readonly ClearedAct[]; fresh: string | null; undoFor: (a: ClearedAct) => (() => void) | null; title?: string; fold?: boolean }> = ({ acts, fresh, undoFor, title = "Done today", fold = false }) => {
+  if (fold) {
+    const last = [...acts].sort((a, b) => b.at - a.at).find((a) => !!undoFor(a)) ?? null;
+    const undo = last ? undoFor(last) : null;
+    return (
+      <div className="td5-done td7-done" data-td5="done" data-td7="done">
+        <div className="td5-doneh td7-doneh" data-td7="done-line">
+          <span data-td5="done-n">{acts.length ? `${title} · ${acts.length} cleared` : `${title} · nothing cleared yet`}</span>
+          {undo ? <button type="button" className="td7-undo" data-td5="slip-undo" data-act={last!.id} onClick={undo}>Undo</button> : null}
+        </div>
+      </div>
+    );
+  }
+  return (
   <div className="td5-done" data-td5="done">
     <div className="td5-doneh"><b>{title}</b><span data-td5="done-n">{acts.length ? `${acts.length} cleared` : ""}</span></div>
     {acts.length ? (
@@ -264,4 +282,5 @@ export const DoneToday: React.FC<{ acts: readonly ClearedAct[]; fresh: string | 
       </div>
     ) : <div className="td5-noslips">Nothing cleared yet today.</div>}
   </div>
-);
+  );
+};

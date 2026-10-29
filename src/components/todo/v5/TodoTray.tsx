@@ -1454,7 +1454,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
                             </div>
                           </>
                         ) : loading ? null : <div className="td5-noslips">Nothing in view. Clear the filter or the search.</div>}
-                        <DoneToday acts={today} fresh={freshSlip} undoFor={undoFor} />
+                        <DoneToday acts={today} fresh={freshSlip} undoFor={undoFor} fold />
                         {/* the desk's journey slot waits here, hidden, when no journey is on the card (deskSlot.ts) */}
                         <div ref={holderRef} hidden data-td5="slot-holder" />
                       </div>
