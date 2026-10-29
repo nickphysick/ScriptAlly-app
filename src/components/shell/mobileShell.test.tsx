@@ -186,14 +186,19 @@ describe("the app-feel layer (Phase 6)", () => {
   it("the manifest is standalone with the token colours, and index.html links it", () => {
     const manifest = JSON.parse(readFileSync(resolve(__dirname, "../../../public/manifest.webmanifest"), "utf8"));
     expect(manifest.display).toBe("standalone");
-    expect(manifest.theme_color).toBe("#e7e0d5"); // --shell-ground
-    expect(manifest.background_color).toBe("#fdfbf8"); // --shell-canvas
+    /* ⚠️ RE-POINTED 29 OCT (Phone app v2, Part 1E): the installed app is the phone app, so its colours are the ink
+       navy (the launch screen's ground), and the icons are the hawk on navy in public/pwa/. */
+    expect(manifest.theme_color).toBe("#2a3a52");
+    expect(manifest.background_color).toBe("#2a3a52");
+    expect(manifest.icons.every((i: { src: string }) => i.src.startsWith("/pwa/"))).toBe(true);
     expect(manifest.icons.map((i: { sizes: string }) => i.sizes)).toEqual(
       expect.arrayContaining(["192x192", "512x512"]),
     );
     const html = readFileSync(resolve(__dirname, "../../../index.html"), "utf8");
     expect(html).toContain('rel="manifest" href="/manifest.webmanifest"');
-    expect(html).toContain('name="theme-color" content="#e7e0d5"');
+    expect(html).toContain('name="theme-color" content="#e7e0d5"'); // the browser colour at 768px and up, unchanged
+    expect(html).toContain('<meta name="theme-color" content="#2a3a52" media="(max-width: 767.98px)" />');
+    expect(html.match(/rel="apple-touch-startup-image"/g)?.length).toBeGreaterThanOrEqual(5);
     expect(html).toContain("viewport-fit=cover");
   });
 

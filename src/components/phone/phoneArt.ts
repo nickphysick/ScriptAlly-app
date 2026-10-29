@@ -4,7 +4,7 @@
  *
  * Phone app v2 — THE ONE ART TABLE (Part 1A; ref design-refs/phone-app-v2/README.md "Illustrations"). Every picture
  * on a phone screen comes from here. A slot is a real app image or `null`; a `null` slot renders the ref's dashed
- * placeholder circle (`PhoneArt`) and is NEVER filled with another drawing — the illustrator's piece replaces the
+ * placeholder circle (`PhoneArtSpot`) and is NEVER filled with another drawing — the illustrator's piece replaces the
  * null, one line here.
  *
  * ⚠️ NO SCREEN SHOWS ONE SOURCE TWICE (QM1 L11, now every phone screen). Two slots may point at one file only where no

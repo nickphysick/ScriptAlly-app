@@ -8,10 +8,21 @@
     <!-- ICO carries 32-bit alpha, so this one is transparent too — it exists because a browser asks
          for /favicon.ico at the root whether or not anything links to it. -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <!-- Mobile Pass 1: installable app shell — theme colour = the capsule ground token
-         (--shell-ground), background = the content capsule (--shell-canvas). -->
+    <!-- Phone app v2 (Part 1E): the app icon is the hawk on navy (public/pwa/, rendered from the existing mark by
+         scripts/phone-brand-images.mjs), and the launch screen is navy with the hawk and the wordmark. -->
+    <link rel="apple-touch-icon" href="/pwa/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="QueryHawk" />
+    <link rel="apple-touch-startup-image" href="/pwa/launch-750x1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" />
+    <link rel="apple-touch-startup-image" href="/pwa/launch-828x1792.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)" />
+    <link rel="apple-touch-startup-image" href="/pwa/launch-1170x2532.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)" />
+    <link rel="apple-touch-startup-image" href="/pwa/launch-1179x2556.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)" />
+    <link rel="apple-touch-startup-image" href="/pwa/launch-1290x2796.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)" />
+    <!-- Mobile Pass 1: installable app shell. Phone app v2: the manifest's colours are the navy (the installed app is
+         the phone app); the browser colour stays the old ground at 768px and up, and is navy below it. -->
     <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#2a3a52" media="(max-width: 767.98px)" />
     <meta name="theme-color" content="#e7e0d5" />
     <!-- (The Tabler icons webfont is GONE — Tier 3+4 · Phase 9: zero .ti consumers anywhere in
          src, TypeGlyph is hand-rolled SVG, and the CDN stylesheet was a render-blocking external
