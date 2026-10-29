@@ -465,7 +465,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
   /** a draft cancelled with words in it is kept for the session, and "+ Add a task" opens it again */
   const keptDraft = (): ComposeDraft | null => readSession<ComposeDraft | null>(DRAFT_KEY, null, (v): v is ComposeDraft => !!v && typeof v === "object" && typeof (v as ComposeDraft).text === "string");
   const keepDraft = (d: ComposeDraft | null) => { try { if (d) writeSession(DRAFT_KEY, d); else sessionStorage.removeItem(DRAFT_KEY); } catch { /* private mode */ } };
-  /* arrival: the Calendar's and the Corkboard's "New task" / "New note" door opens the compose card */
+  /* arrival: the Corkboard's "New task" / "New note" door opens the compose card */
   useEffect(() => {
     if (location.pathname !== "/todo") return;
     let want: string | null = null;

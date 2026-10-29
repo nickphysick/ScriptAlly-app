@@ -6,8 +6,8 @@
  * the rail writes. Pure functions of `(visible, today, days)` and nothing else.
  *
  * ⚠️ SHARED BECAUSE BOTH BOARDS NEED THEM, AND MOVED VERBATIM. They were three `useMemo` bodies in
- * `TodoCalendarPage`; the hooks stay at the call sites and only the arithmetic moved, so the two
- * pages cannot compute a different rail for the same ninety days. A second implementation here
+ * `TodoCalendarPage` (retired 29 Oct); the hooks stay at the call sites and only the arithmetic moved, so
+ * the pages cannot compute a different rail for the same ninety days. A second implementation here
  * would not disagree in detail — it would put the same date at two x positions.
  */
 

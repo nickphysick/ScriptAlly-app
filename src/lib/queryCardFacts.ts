@@ -90,7 +90,7 @@ export type Stage = "out-1" | "out-2" | "out-3" | "in-1" | "in-2" | "in-3" | "of
  *
  * ⚠️ IT DOES NOT REPLACE `Stage`, AND THAT IS A DELIBERATE OVERLAP RATHER THAN A LEFTOVER. The
  * eight-rung ladder is retired from the Query Centre, but `stageFor` is a SHARED export: the
- * To-do stream reads it in `TodoCalendarPage` (three sites, `tl-st-{stage}` band classes) and in
+ * To-do stream read it in `TodoCalendarPage` (retired 29 Oct) and reads it in
  * `TaskPane` (an inline `var(--stage-{stage})`), and `calendarStageTints.test.ts` locks the
  * calendar's own mirror against `.t-f12`'s copy. Deleting it here would blank another stream's
  * live surfaces silently and redden their lock, mid-flight. Retiring `Stage` is that stream's to

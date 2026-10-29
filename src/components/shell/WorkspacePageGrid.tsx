@@ -441,7 +441,7 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
      * `scroller` is a list — the family owns three zone classes — and on a page carrying more than
      * one of them `querySelector` would return whichever came first in the document rather than the
      * one with anything to scroll. Zero scrollable candidates means there is nothing to hand off
-     * FROM, which is a real state: Calendar does not overflow at 1440×900.
+     * FROM, which is a real state: a page whose zone holds less than its height has nothing to scroll.
      */
     const primaryScroller = (): HTMLElement | null => {
       if (!fill) return root;

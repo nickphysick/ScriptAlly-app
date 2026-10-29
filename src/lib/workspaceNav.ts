@@ -49,12 +49,11 @@ export interface WorkspaceNavInput {
  * The groups map 1:1 to the rail's ribs, which is what makes the collapsed rail a complete map of
  * the app rather than a subset of it.
  */
-/** The four To-do pages' row icons — keyed by TODO_ROUTES' own ids, so a fifth page cannot be
+/** The To-do pages' row icons — keyed by TODO_ROUTES' own ids, so a fifth page cannot be
  *  added to the routes without this map (and therefore the nav) noticing. */
 const TASKS_ICON: Record<string, string> = {
   list: "check",
   today: "sun",
-  calendar: "calendar",
   noteboard: "note",
 };
 

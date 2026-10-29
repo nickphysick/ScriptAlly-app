@@ -50,7 +50,13 @@ import { routeBase } from "./lib/helpPath";
 import { QUERIES_STATUS_PARAM, parseStatusFilter } from "./lib/queriesFilterParam";
 import { todoPageForPath, todoRedirectFor } from "./lib/todoRoutes";
 import { accountRedirectFor, accountSectionForPath } from "./lib/accountRoutes";
-import { TodoCalendarPage } from "./components/todo/TodoCalendarPage";
+/* ⚠️ THE RETIRED CALENDAR PAGE'S STYLESHEETS, PINNED WHERE ITS IMPORT USED TO SIT (29 Oct). The app ships ONE
+   stylesheet in first-import order, and `TodoCalendarPage` was the first importer of these three; deleting it moved
+   `tasksLayout.css` behind sheets imported by the Corkboard, which is a cascade change nobody asked for. Pinned here,
+   the built CSS is byte-identical to the build before the retirement (checked by `cmp`). All three are still shared. */
+import "./components/todo/tasksLayout.css";
+import "./components/todo/taskChrome.css";
+import "./components/todo/todoCalendar.css";
 import { TodoNoteboardPage } from "./components/todo/TodoNoteboardPage";
 // ⚠️ PARKED, NOT DELETED (Amendment 1, G4) — held for the public marketing site.
 // import { TopNavHost } from "./components/shell/TopNavHost";
@@ -563,7 +569,8 @@ function AppContent() {
   const accountRedirect = accountRedirectFor(path);
   if (accountRedirect) return <Navigate to={accountRedirect} replace />;
 
-  /* Corkboard v1: `/todo/noteboard` is the Corkboard's OLD address. It sits above the unknown-path guard for
+  /* Corkboard v1: `/todo/noteboard` is the Corkboard's OLD address (and, since 29 Oct, `/todo/calendar` the retired
+     Calendar page's, which lands on the To-do list). It sits above the unknown-path guard for
      the same reason the settings redirect does — the retired path is no longer a workspace path, so the guard
      would send a bookmark to the dashboard. The query string and hash travel with it (`?q=` deep links). */
   const todoRedirect = todoRedirectFor(path, location.search, location.hash);
@@ -717,10 +724,8 @@ function AppContent() {
             cannot diverge on either axis because nothing about their mounting differs at all.
             (Today's slot went with its page — tasks-consolidation P1.) */}
 
-        {/* tasks-pages P3: the Calendar is REAL — the placeholder era ends here. */}
-        <StagePage active={routeKey === "todo" && todoPage === "calendar"} layout="fillColumn" clip>
-          <TodoCalendarPage onNavigate={handleNavigate} onNavigatePath={(p) => navigate(p)} />
-        </StagePage>
+        {/* Calendar retired (29 Oct): its slot went with the page. `/todo/calendar` now redirects to `/todo`
+            (TODO_RETIRED_PATHS); the To-do list keeps its own calendar card and slide-out drawer. */}
 
         {/* tasks-pages P4: the Noteboard is REAL — the placeholder era ends for good. */}
         <StagePage active={routeKey === "todo" && todoPage === "noteboard"} layout="fillColumn" clip>

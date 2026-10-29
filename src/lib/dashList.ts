@@ -125,7 +125,7 @@ export function listPlan(found: Partial<Record<ListGroupKey, ListItem[]>>): List
     items: groups.flatMap((g) => g.items),
     thenLabel: first === "ready" || first === "coming" ? "Also" : "Then",
     all: first === "ready" ? { label: "Contact list", tab: "agents" }
-      : first === "coming" ? { label: "Calendar", tab: "todo", sub: "calendar" }
+      : first === "coming" ? { label: "To-do list", tab: "todo" }
       : { label: "All", tab: "todo" },
   };
 }

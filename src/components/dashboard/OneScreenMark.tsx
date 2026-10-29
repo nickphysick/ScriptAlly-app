@@ -29,7 +29,7 @@ import allQueriesMark from "../../assets/shell/all-queries-icon.png";
 export type MarkName =
   | "goals" | "activity" | "tasks" | "community"
   /* the page-band keys — one per page that mounts variant="band" */
-  | "queries" | "todo" | "calendar" | "contacts" | "packages" | "analytics"
+  | "queries" | "todo" | "contacts" | "packages" | "analytics"
   | "noteboard" | "discover" | "settings" | "manuscripts" | "comps";
 
 /**
@@ -94,8 +94,6 @@ const MARK: Record<MarkName, { label: string; icon: React.ReactNode; src?: strin
   },
   /* a ticked checklist on a clipboard */
   todo: { label: "check", icon: <><path d="M4 6h11M4 12h11M4 18h7" /><path d="M17 16l2 2 4-4" /></> },
-  /* a calendar leaf, one date circled */
-  calendar: { label: "cal", icon: <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M8 3v4M16 3v4M3 11h18" /></> },
   /**
    * a rolodex — cards, a spine and a phone. THE BRIEF IS THIS COMMENT AND NEVER RENDERS.
    *

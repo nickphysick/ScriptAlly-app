@@ -19,8 +19,8 @@
  * facets beside a board that can never contain work would be chrome describing another page.
  *
  * ⚠️ THE DATE IS THE DOOR. "Give it a date…" converts a note to a task with ONE write (dueDate):
- * it leaves this board, joins the To-do list's Your-tasks group and appears on the Calendar — one
- * object, three rooms. Nothing copies, nothing moves; the derivation reads the new fact.
+ * it leaves this board, joins the To-do list's Your-tasks group and appears in its calendar — one
+ * object, two rooms. Nothing copies, nothing moves; the derivation reads the new fact.
  *
  * ⚠️ DELETE IS REAL HERE — user content is the only deletable kind — so it asks first (the styled
  * confirm) and holds an 8s undo that re-creates the SAME document id through addUserTask.
@@ -176,8 +176,8 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
   };
 
   /**
-   * THE TASK DOOR. A task is made by the To-do list's own composer — the Calendar's "New task" goes the same
-   * way: a one-shot `sa.todoCompose` key that ToDoPage consumes on arrival. ⚠️ NEVER A DATELESS TASK from
+   * THE TASK DOOR. A task is made by the To-do list's own composer: a one-shot `sa.todoCompose` key that the To-do
+   * list consumes on arrival. (The retired Calendar page used the same door; this board is now its only caller.) ⚠️ NEVER A DATELESS TASK from
    * here: a dateless `UserTask` IS a note (the two-natures law), so a quick add on this page could only write
    * a note wearing a task's name.
    */
@@ -388,7 +388,7 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
 
   /**
    * ⚠️ ONE DOCUMENT, ONE WRITE EACH WAY (finish run, Phase 4 / Branch A — supersedes the
-   * projection). The date goes onto the note itself; the To-do list and the Calendar pick the
+   * projection). The date goes onto the note itself; the To-do list and its calendar pick the
    * SAME document up (userCard renders one row, cardActionYmd places it), so the duplicate row
    * the projection produced cannot exist. The note keeps its board place because the conversion
    * stamps its paper — `sortNotes` reads dated ∧ papered as "a note that became a task".

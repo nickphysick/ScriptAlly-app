@@ -187,10 +187,8 @@ import { fanCardModel } from "../lib/qcFanModel";
    would not disagree in detail, it would disagree in STRUCTURE, and the two pages would draw the
    same wait in two different places. */
 import { crossAt } from "./shared/timeline/boardParts";
-/* ⚠️ THE BOARD'S STYLESHEET, IMPORTED EXPLICITLY. It is already in the bundle at runtime —
-   every workspace page stays mounted, so `TodoCalendarPage` has loaded it — and relying on
-   that is an invisible dependency on another page continuing to exist. Named here so the
-   calendar keeps its styling if that page is ever unmounted or split out. */
+/* ⚠️ THE BOARD'S STYLESHEET, IMPORTED EXPLICITLY. The To-do Calendar page used to import it too; that page was
+   retired on 29 Oct, and this explicit import is why nothing here depended on it being mounted. */
 /* ⚠️ KEPT ON PURPOSE though this page no longer mounts the board (v11): the app ships ONE stylesheet
    whose order is the order of first import, and removing this line would move To-do's calendar sheet
    relative to everything imported between here and To-do. A reorder is a cascade change nobody asked for. */

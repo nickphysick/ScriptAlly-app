@@ -1722,7 +1722,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
 
   /**
    * ⚠️ THE ONE-SHOT COMPOSER OPEN — the sibling of `sa.agentReveal` and `sa.manuscriptReveal`,
-   * and deliberately the same idiom rather than a third mechanism. The Calendar's `New task` CTA
+   * and deliberately the same idiom rather than a third mechanism. The Corkboard's task door
    * sets the key and navigates here; a gesture, not an address — it must not survive the tab,
    * must not enter history, and fires exactly once.
    *

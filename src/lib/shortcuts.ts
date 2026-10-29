@@ -16,8 +16,8 @@
  * so an entry with no binding fails, which is the sheet's promise.
  */
 
-export type ShortcutScope = "Everywhere" | "To-do list" | "Calendar" | "A task's choices" | "Comparable titles" | "Contact list" | "Discover" | "Query Centre" | "Responses" | "The agent card";
-export const SCOPE_ORDER: readonly ShortcutScope[] = ["Everywhere", "To-do list", "Calendar", "A task's choices", "Comparable titles", "Contact list", "Discover", "Query Centre", "Responses", "The agent card"];
+export type ShortcutScope = "Everywhere" | "To-do list" | "A task's choices" | "Comparable titles" | "Contact list" | "Discover" | "Query Centre" | "Responses" | "The agent card";
+export const SCOPE_ORDER: readonly ShortcutScope[] = ["Everywhere", "To-do list", "A task's choices", "Comparable titles", "Contact list", "Discover", "Query Centre", "Responses", "The agent card"];
 
 /** One way to press it. `mod` is ⌘ on a Mac and Ctrl elsewhere; letters match either case. */
 export interface KeyChord { key: string; mod?: boolean }
@@ -52,9 +52,6 @@ export const SHORTCUTS = {
   /* To-do list v5 (desktop): the desk's action. j/k and / are the entries above, read by the same page. */
   todoAct:          { chords: [k("e"), k("Enter")], label: "Act on the task on the desk", scope: "To-do list", bound: "src/components/todo/v5/TodoTray.tsx", inFields: "stands down" },
   todoAdd:          { chords: [k("n")], label: "Add a task on the desk", scope: "To-do list", bound: "src/components/todo/v5/TodoTray.tsx", inFields: "stands down" },
-  calBack:          { chords: [k("ArrowLeft")], label: "A week earlier", scope: "Calendar", bound: "src/components/todo/TodoCalendarPage.tsx", inFields: "stands down" },
-  calForward:       { chords: [k("ArrowRight")], label: "A week later", scope: "Calendar", bound: "src/components/todo/TodoCalendarPage.tsx", inFields: "stands down" },
-  calToday:         { chords: [k("t")], label: "Back to today", scope: "Calendar", bound: "src/components/todo/TodoCalendarPage.tsx", inFields: "stands down" },
   taskChoice:       { chords: [k("1"), k("9")], label: "Choose an option by its number (1 to 9)", scope: "A task's choices", bound: "src/components/todo/TaskPane.tsx", inFields: "stands down" },
   compAdd:          { chords: [k("n")], label: "Add a comparable title", scope: "Comparable titles", bound: "src/components/manuscripts/ComparableTitlesPage.tsx", inFields: "stands down" },
   /* comps v25: the list's own keys — not in a field, and not while the drawer or the picker is open */
