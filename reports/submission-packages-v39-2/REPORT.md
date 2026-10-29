@@ -109,4 +109,12 @@ premise 7); and the fixture's letters have no summaries of their own.
 
 ## 6 · Deploy
 
-(Filled in after the deploy.)
+- **Dev had moved since v39.1's deploy.** It served `index-DRG_02T1.js`, not v39.1's `index-BzLemNDD.js`: the phone
+  pack ("Queries on a phone v1") had merged itself onto the v39.1 dev branch as `dev/pk391-qm1` (07cec344) and deployed.
+  Confirmed by building 07cec344: the bundle differs from the live one only in the embedded build date (`__QH_BUILD_DATE__`,
+  28 vs 29 Oct) and the two chunk names that follow from it.
+- v39.2 merged onto it as **`dev/pk391-qm1-pk392` (fca44895)**, pushed. The one conflict was `design-refs/.refhashes.json`;
+  both sides' entries kept. Gates on the merged tree: tsc 0, Vitest 686 files / 10,704 passed (3 skipped), build clean.
+- Hosting only, `--config firebase.dev.json --project scriptally-dev`, from that clean worktree. **Dev now serves
+  `index-CRC8gyVq.js`**; `/images/packages/packages-pattern.svg` returns 200 `image/svg+xml`. `pk392.measure.ts` L1, L2
+  and L7 pass against the live site (`SA_E2E_BASE_URL=dev`). No rules or functions changed. Prod is untouched.
