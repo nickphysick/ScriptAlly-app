@@ -114,3 +114,37 @@ button.p93-sh:focus-visible { outline: 2px solid #1d4b63; outline-offset: -2px; 
 .p93-chip.p93-on .p93-chip-ed { color: #fff; }
 .p93-chip-ed svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; }
 .p93-exts .p9-exa-b { height: 30px; padding: 0 12px; border: 0; border-radius: 15px; background: none; box-shadow: inset 0 0 0 1px rgba(29, 75, 99, 0.35); font: 600 13px var(--sp-serif); color: #1d4b63; cursor: pointer; }
+
+/* ══ Phase 3 · the preview (ref `.pv`, `.mail`): sticky at 80 while the steps scroll ══ */
+.p93-pv { position: sticky; top: 80px; min-width: 0; }
+.p93-pv-k { display: flex; justify-content: space-between; align-items: baseline; margin: 0 4px 10px; font: 500 10px/1.2 "JetBrains Mono", monospace !important; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(28, 19, 15, 0.58); }
+.p93-pv-k > span { font: inherit !important; }
+.p93-mail { border-radius: 14px; background: #fff; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.09), 0 18px 32px -22px rgba(28, 19, 15, 0.5); overflow: hidden; }
+.p93-mail-h { padding: 14px 18px; border-bottom: 1px solid rgba(28, 19, 15, 0.09); font: 14px/1.45 var(--sp-serif); }
+.p93-mail-h > div { display: grid; grid-template-columns: 60px minmax(0, 1fr); gap: 6px; padding: 2px 0; }
+.p93-mail-h span { color: rgba(28, 19, 15, 0.58); }
+.p93-mail-h b { font-weight: 400; color: #1c130f; min-width: 0; overflow-wrap: anywhere; }
+.p93-mail-h em { font-style: italic; color: rgba(28, 19, 15, 0.58); }
+.p93-mail-b { padding: 18px; min-height: 150px; font: 15px/1.6 var(--sp-serif); color: #1c130f; border-radius: 9px; }
+.p93-lt { margin: 0 0 10px; font: 15px/1.6 var(--sp-serif); }
+.p93-ph { font-style: italic; color: rgba(28, 19, 15, 0.58); }
+.p93-skl u { display: block; height: 6px; margin: 9px 0; border-radius: 3px; background: #efe9e1; }
+.p93-skl u:nth-child(2n) { width: 82%; }
+.p93-tag { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; padding: 3px 10px 3px 6px; border-radius: 12px; background: #f7e3e3; color: #9b4a57; font: 600 12px var(--sp-serif); }
+.p93-tag svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; }
+.p93-em { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 30px 0; }
+.p93-att { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 18px 18px; }
+.p93-a { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 4px 12px 4px 8px; border-radius: 9px; background: #f6f2ec; font: 600 13px/1.3 var(--sp-serif); color: #1c130f; }
+.p93-a small { display: block; font: italic 400 12px/1.3 var(--sp-serif); color: rgba(28, 19, 15, 0.58); }
+.p93-a .p93-tic { width: 26px; height: 26px; }
+.p93-a.p93-gh { background: none; outline: 1.5px dashed rgba(28, 19, 15, 0.2); outline-offset: -1.5px; padding-left: 12px; color: rgba(28, 19, 15, 0.58); font-weight: 400; font-style: italic; }
+.p93-tic.p93-t-x { background: #ece6dd; color: #6b5e52; }
+/* linking: a hovered or focused step outlines its part — a 2px Harbour ring and #eef4f7 */
+.p93-mail .p93-hl { background: #eef4f7 !important; box-shadow: 0 0 0 2px #1d4b63 !important; outline: 0 !important; }
+.p93-pv-f { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; }
+.p93-pv-b { display: inline-flex; gap: 8px; }
+.p93-btn { height: 44px; padding: 0 20px; border: 0; border-radius: 8px; font: 600 15px var(--sp-serif); cursor: pointer; }
+.p93-b1 { background: var(--sp-anthracite, #2a3a52); color: #fff; }
+.p93-b1[disabled] { background: #e4ded6; color: rgba(28, 19, 15, 0.45); cursor: default; }
+.p93-b2 { background: #fff; color: #1c130f; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.18); }
+.p93-btn:focus-visible { outline: 2px solid #1d4b63; outline-offset: 2px; }

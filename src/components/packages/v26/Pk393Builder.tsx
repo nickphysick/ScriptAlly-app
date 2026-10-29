@@ -14,6 +14,11 @@
  *   required step. Each row has an Edit pencil (the material drawer; a version opens the Versions page, which is where
  *   versions are edited); under the rows, the create links, "Send without a synopsis", and the put-away materials that
  *   lived in the retired Your materials card (their only way back). On a sent package the steps are read-only (Nick).
+ *   Phase 3 · the preview: what an agent receives, as an email. "To" an agent on the Contact list not yet queried for
+ *   this book (marked "(example)"), the subject, the letter's OPENING TEXT (`contentDraft`, never its summary), the
+ *   attachments; hovering or focusing a step outlines its part. Under it, ONE primary button: disabled and naming what is
+ *   missing, else "Log a query with it" (the existing log-a-query journey with this package chosen). Illustrative only:
+ *   it sends nothing and stores nothing.
  *
  * ⚠️ UNTIL PHASE 4 retires the old package card, this header carries only `data-pk393` markers (the old card still
  *    carries the `data-pk39` / `data-pk38` ones the existing locks read; two of each would break them).
@@ -31,6 +36,8 @@ import { pcStyle } from "../../../lib/packagesV39";
 import { Lock, Mark, Pic } from "./icons";
 import { AddExtra, DRAFT_ID, LookPicker, NameInPlace } from "./Pk26Builder";
 import type { MaterialRow, Pk26Model, VersionRow } from "./usePk26Model";
+import { greetingName, letterOpening, previewAgent, primaryLabel } from "../../../lib/packagesV393";
+import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
 
 export type StepKey = "ver" | "let" | "syn";
 const FIELD = { ver: "bookVersionId", let: "queryLetterVersionId", syn: "synopsisVersionId" } as const;
@@ -205,6 +212,60 @@ const Header: React.FC<Pk393Props & { locked: boolean; out: boolean; sent: numbe
   );
 };
 
+/** The preview: an email-style card, sticky while the steps scroll. */
+const Preview: React.FC<{ model: Pk26Model; p: SubmissionPackage; hov: string | null; locked: boolean; onChooseLetter: () => void; onEdit: (p: SubmissionPackage) => void; onDuplicate: (p: SubmissionPackage) => void }> = ({ model, p, hov, locked, onChooseLetter, onEdit, onDuplicate }) => {
+  const draft = p.id === DRAFT_ID;
+  const agent = useMemo(() => previewAgent(model.agents, model.msQueries), [model.agents, model.msQueries]);
+  const v = p.bookVersionId ? model.versionRows.find((x) => x.id === p.bookVersionId) ?? null : null;
+  const l = p.queryLetterVersionId ? model.lettersAll.find((x) => x.id === p.queryLetterVersionId) ?? null : null;
+  const y = p.synopsisVersionId ? model.synopsesAll.find((x) => x.id === p.synopsisVersionId) ?? null : null;
+  const on = new Set(p.extraIds ?? []);
+  const ext = model.extras.filter((e) => on.has(e.id));
+  const cta = primaryLabel(!!p.bookVersionId, !!p.queryLetterVersionId);
+  const hl = (k: string) => (hov === k ? " p93-hl" : "");
+  const opening = letterOpening(l?.text);
+  const title = (model.activeMs?.title ?? "").toUpperCase();
+  return (
+    <>
+      <div className="p93-pv-k"><span>What an agent receives</span><span>Preview</span></div>
+      <div className="p93-mail" data-pk393="mail">
+        <div className="p93-mail-h">
+          <div><span>To</span><b data-pk393="to">{agent ? <>{agent.name.trim() || agent.agency} <em>(example)</em></> : <>An agent <em>(example)</em></>}</b></div>
+          <div><span>Subject</span><b data-pk393="subject">Query: {title}</b></div>
+        </div>
+        <div className={`p93-mail-b${hl("let")}`} data-pk393-part="let">
+          {l ? (
+            <>
+              <p className="p93-lt">Dear {greetingName(agent)},</p>
+              <p className="p93-lt" data-pk393="opening">{opening || <i className="p93-ph">This letter has no text yet.</i>}</p>
+              <div className="p93-skl" aria-hidden="true"><u /><u /><u /></div>
+              <span className="p93-tag" data-pk393="letter-tag"><Mark k="let" />{l.name}</span>
+            </>
+          ) : (
+            <div className="p93-em"><span className="p93-ph">Your query letter goes here.</span>
+              {locked ? null : <button type="button" className="p93-lnk" data-pk393="choose-letter" onClick={onChooseLetter}>Choose a letter</button>}</div>
+          )}
+        </div>
+        <div className="p93-att" data-pk393="att">
+          {v ? <span className={`p93-a${hl("ver")}`} data-pk393-part="ver"><span className="p93-tic p93-t-v">{vnum(v)}</span><span>Opening pages<small>from {v.name} · as the agent asks</small></span></span>
+            : <span className={`p93-a p93-gh${hl("ver")}`} data-pk393-part="ver">Pages: choose a version</span>}
+          {y ? <span className={`p93-a${hl("syn")}`} data-pk393-part="syn"><span className="p93-tic p93-t-m"><Mark k="syn" /></span><span>Synopsis<small>{y.name}</small></span></span>
+            : <span className={`p93-a p93-gh${hl("syn")}`} data-pk393-part="syn">No synopsis</span>}
+          {ext.map((e) => <span key={e.id} className={`p93-a${hl("ext")}`} data-pk393-part="ext" data-id={e.id}><span className="p93-tic p93-t-x">+</span><span>{e.name}<small>if asked</small></span></span>)}
+        </div>
+      </div>
+      <div className="p93-pv-f">
+        {draft ? <span /> : <button type="button" className="p93-lnk" data-pk39="details" onClick={() => onEdit(p)}>Note, copy or delete…</button>}
+        <span className="p93-pv-b">
+          {locked ? <button type="button" className="p93-btn p93-b2" data-pk393="copy" onClick={() => onDuplicate(p)}>Make a copy</button> : null}
+          <button type="button" className="p93-btn p93-b1" data-pk393="primary" disabled={!cta.ready || draft}
+            onClick={() => openQueryDrawer({ mode: "log", manuscriptId: p.manuscriptId, packageId: p.id })}>{cta.text}</button>
+        </span>
+      </div>
+    </>
+  );
+};
+
 export const Pk393Builder: React.FC<Pk393Props> = (props) => {
   const { model, p, onDuplicate } = props;
   const draft = p.id === DRAFT_ID;
@@ -261,7 +322,9 @@ export const Pk393Builder: React.FC<Pk393Props> = (props) => {
           <AlsoSends model={model} p={p} readOnly={locked || draft} onOpenMaterial={props.onOpenMaterial} onHov={setHov} />
         </div>
       </div>
-      <aside className="p93-pv" data-pk393="preview" data-hov={hov ?? ""} />
+      <aside className="p93-pv" data-pk393="preview" data-hov={hov ?? ""}>
+        <Preview model={model} p={p} hov={hov} locked={locked} onChooseLetter={() => setOpen("let")} onEdit={(x) => props.onEdit(x)} onDuplicate={onDuplicate} />
+      </aside>
     </div>
   );
 };
