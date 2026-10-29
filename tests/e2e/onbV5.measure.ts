@@ -335,8 +335,16 @@ test.describe("OB1", () => {
           expect(f.family, `${f.id} is the typewriter face`).toMatch(/Special Elite/);
           expect(Math.abs(f.size - 18), `${f.id} size ${f.size}`).toBeLessThanOrEqual(0.5);
           expect(f.style, `${f.id} rule`).toBe("dashed");
-          expect(f.labFamily, `${f.id} label is mono`).toMatch(/JetBrains Mono/);
-          expect(f.labCase).toBe("uppercase");
+          /* RETARGET (public pages on phones v1, 29 Oct): below 768px the ACCOUNT frame's field labels
+             are sentence case in Source Sans 3 (14.5px/600, ink). The set-up screens keep mono capitals
+             at every width; that is not this lock's subject. */
+          if (vp.width < 768) {
+            expect(f.labFamily, `${f.id} label is the body face on a phone`).toMatch(/Source Sans 3/);
+            expect(f.labCase).toBe("none");
+          } else {
+            expect(f.labFamily, `${f.id} label is mono`).toMatch(/JetBrains Mono/);
+            expect(f.labCase).toBe("uppercase");
+          }
         }
       }
       await lab(page, "s=signin", vp);

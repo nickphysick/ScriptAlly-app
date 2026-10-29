@@ -336,7 +336,10 @@ test.describe("LC2", () => {
         expect(w.btnFg).toBe("rgb(27, 36, 51)");
       }
       if (vp.width <= 1080) await page.click(".mk-burger");
-      const links = await inks(page, vp.width <= 1080 ? ".mk-navpanel button" : ".mk-links button, .mk-login");
+      /* RETARGET (public pages on phones v1, 29 Oct): the phone menu now ends on a filled pink
+         "Become a founding writer" button, the join bar's own primary. It is a button on its own fill,
+         not a link on ink, so it is excluded here; P7 of publicPhonePolish.measure.ts holds it. */
+      const links = await inks(page, vp.width <= 1080 ? ".mk-navpanel button:not(.mk-navjoin)" : ".mk-links button, .mk-login");
       console.log(`LC2 N2 @${vp.width}`, links.map((l) => `${l.text} ${l.ratio.toFixed(2)}`).join(" · "));
       expect(links.length, "nav links measured").toBeGreaterThanOrEqual(5);
       for (const l of links) {
@@ -474,7 +477,14 @@ test.describe("LC2", () => {
       const navyLanding = route === "/" && vp.width >= 900;
       /* RETARGET (pricing on phones, 25 Oct; ref pricing-page-mobile-v1): at ≤760px /pricing renders its
          phone tree, whose sheet takes the ref's 20px top corners; its bottom corners stay the shell's 18. */
-      const phonePricing = route === "/pricing" && vp.width <= PHONE;
+      /* RETARGET (public pages on phones v1, 29 Oct; Nick's pick 7B): /contact on a phone opens in
+         Pricing's grammar — the same `.mk-pvm` card over the navy, so the same 20px top corners and the
+         same box laid across the sheet's top edge, read in the side gutter below. */
+      const phonePricing = (route === "/pricing" || route === "/contact") && vp.width <= PHONE;
+      /* RETARGET (public pages on phones v1, 29 Oct; Nick's pick 10C): at ≤760px /about opens all ink,
+         so the point 20px inside its top is ink against ink, as the navy landing's is; the top arcs are
+         still held ink and the bottom is still read light-inside-ink. */
+      const inkAbout = route === "/about" && vp.width <= PHONE;
       expect(s!.radii, `${route} @${vp.width}`).toEqual(phoneLanding ? ["0px", "0px", "18px", "18px"]
         : phonePricing ? ["20px", "20px", "18px", "18px"] : ["18px", "18px", "18px", "18px"]);
       expect(s!.overflow, `${route} @${vp.width}: horizontal overflow`).toBeLessThanOrEqual(0);
@@ -485,7 +495,7 @@ test.describe("LC2", () => {
          each side (10px below 640). At 390 the "20px in" point is inside the box, so on that page the
          sheet's own ground is read in its side gutter, 5px in and 60px down — past the arc. The four
          corners themselves are still the shell's and still ink-against-oat, which this lock reads. */
-      const inset: [number, number][] = route === "/pricing" ? [[L + 5, s!.top + 60], [R - 5, s!.top + 60]] : [[L + 20, s!.top + 20], [R - 20, s!.top + 20]];
+      const inset: [number, number][] = route === "/pricing" || (route === "/contact" && vp.width <= PHONE) ? [[L + 5, s!.top + 60], [R - 5, s!.top + 60]] : [[L + 20, s!.top + 20], [R - 20, s!.top + 20]];
       const topPx = await pixels(page, [[L + 2, s!.top + 2], [R - 2, s!.top + 2], ...inset]);
       /* Bring the sheet's bottom edge into the middle of the viewport, then read its corners. */
       await page.evaluate((y) => window.scrollTo(0, y - window.innerHeight / 2), s!.docBottom);
@@ -493,7 +503,8 @@ test.describe("LC2", () => {
       const by = await page.evaluate(() => document.querySelector(".mk-sheet")!.getBoundingClientRect().bottom);
       const botPx = await pixels(page, [[L + 2, by - 3], [R - 2, by - 3], [L + 20, by - 21], [R - 20, by - 21]]);
       if (navyLanding) expect(topPx.every((p) => near(p, INK, 2)), `${route} @${vp.width} the top is the navy carrying on: ${JSON.stringify(topPx)}`).toBe(true);
-      for (const [name, px] of (phoneLanding || navyLanding ? [["bottom", botPx]] : [["top", topPx], ["bottom", botPx]]) as Array<readonly [string, number[][]]>) {
+      if (inkAbout) expect(topPx.every((p) => near(p, INK, 2)), `${route} @${vp.width} the top is the ink opening: ${JSON.stringify(topPx)}`).toBe(true);
+      for (const [name, px] of (phoneLanding || navyLanding || inkAbout ? [["bottom", botPx]] : [["top", topPx], ["bottom", botPx]]) as Array<readonly [string, number[][]]>) {
         expect(near(px[0], INK, 2) && near(px[1], INK, 2), `${route} @${vp.width} ${name} arcs are ink: ${JSON.stringify(px.slice(0, 2))}`).toBe(true);
         expect(lum(px[2]) > 0.7 && lum(px[3]) > 0.7, `${route} @${vp.width} ${name} 20px in is light: ${JSON.stringify(px.slice(2))}`).toBe(true);
       }

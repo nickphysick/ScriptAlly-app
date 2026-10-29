@@ -98,7 +98,12 @@ test.describe("landing on phones v3", () => {
     for (const [vp, n] of [[P390, 3], [P360, 2]] as const) {
       await open(page, vp);
       const caps = await page.evaluate(() => Array.from(document.querySelectorAll(".mk-s3")).map((c) => ({
-        label: (c.querySelector(".mk-s3n") as HTMLElement | null)?.innerText ?? "",
+        /* RETARGET (public pages on phones v1, 29 Oct): the step counter is hidden on phones (the
+           progress bars already say where you are), so `innerText` now returns its raw DOM text rather
+           than the CSS capitals. The label is still in the DOM and still says the same thing; it is
+           read case-free below, and `shown` records that it is no longer drawn. */
+        label: ((c.querySelector(".mk-s3n") as HTMLElement | null)?.textContent ?? "").toUpperCase(),
+        shown: ((c.querySelector(".mk-s3n") as HTMLElement | null)?.getBoundingClientRect().height ?? 0) > 0,
         heading: c.querySelector("h3")?.textContent ?? "",
         line: c.querySelector("p")?.textContent ?? "",
         points: Array.from(c.querySelectorAll("li")).filter((l) => l.getBoundingClientRect().height > 0).map((l) => (l.textContent ?? "").trim()),
@@ -108,6 +113,7 @@ test.describe("landing on phones v3", () => {
       caps.forEach((c, i) => {
         const want = FEATURE_STORY[i];
         expect(c.label, `caption ${i + 1}'s label`).toBe(featureStoryLabel(i + 1, 6).toUpperCase());
+        expect(c.shown, `caption ${i + 1}'s counter is hidden on phones`).toBe(false);
         expect(c.heading).toBe(want.heading);
         expect(c.line).toBe(want.line);
         expect(c.points, `caption ${i + 1} at ${vp.width}×${vp.height}: ${n} points`).toEqual(want.points.slice(0, n));

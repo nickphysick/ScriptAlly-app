@@ -3114,6 +3114,12 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 @media (max-width: 760px) {
   .mk-pvm .mk-cmailcard { margin: 16px 0 18px; }
   .mk-contact { padding-top: 6px; }
+  /* ⚠️ THE SHEET NO LONGER CLIPS HERE, SO THE GROUND MUST NOT REACH ITS CORNERS. `.mk-sheet:has(.mk-pvm)`
+     is `overflow: visible` (the card rises out of it), and Contact's full-bleed ground layer then
+     painted square oat over the sheet's two rounded bottom corners — measured by LC2 S1 on the first
+     run of this block. On a phone `.mk-contact` IS the sheet's width, so the layer takes that width
+     and the sheet's own 18px bottom radius instead of 100vw. */
+  .mk-contact::before { left: 0; width: 100%; border-radius: 0 0 18px 18px; }
   /* Two classes and `!important` on the family: brand.tsx forces every bare h2 with `!important`. */
   .mk-contact .mk-waysh {
     font-family: var(--mk-f-display) !important; font-weight: 400; font-size: 1.4rem; line-height: 1.25;

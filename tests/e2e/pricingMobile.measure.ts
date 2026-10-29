@@ -263,7 +263,13 @@ for (const vp of PHONES) {
     await scrollTo(page, await docTop(page, ".mk-pvlaunch"));
     expect.soft(await shown(), "shown once the form has scrolled away").toBe(true);
     /* hidden while the questions sheet is open */
-    await scrollTo(page, (await docTop(page, ".mk-pvlaunch")) - 60);
+    /* RETARGET (public pages on phones v1, 29 Oct): the tab sub-lines and plan rows grew from 8.6/9px
+       capitals to 13px, so at 375 × 667 "launch − 60" left "Which plan suits me best?" 11px below the
+       fold. Playwright's click then scrolled it into view, which brought the form back on screen, and
+       the bar — correctly — stayed hidden. The scroll now also keeps the opener on screen, so the
+       claim being tested ("back once the sheet has closed") is about the same state it always was. */
+    await scrollTo(page, Math.max((await docTop(page, ".mk-pvlaunch")) - 60,
+      (await docTop(page, ".mk-pvm .mk-lsuit")) - vp.height + 120));
     await page.click(".mk-pvm .mk-lsuit");
     await expect(page.locator(".mk-pvjs")).toHaveClass(/mk-open/);
     expect.soft(await shown(), "hidden while the sheet is open").toBe(false);
@@ -348,7 +354,10 @@ test("PVM-10 the faces: Special Elite 400, Source Serif 4 and JetBrains Mono whe
   await expectFace(".mk-pvform button[type=submit]", "Source Serif 4");
   await expectFace(".mk-pvm .mk-lsuit", "Source Serif 4");
   await expectFace(".mk-pvmore", "JetBrains Mono");
-  await expectFace(".mk-pvcount .mk-fmmeta", "JetBrains Mono");
+  /* RETARGET (public pages on phones v1, 29 Oct): the counter line and the "What founding writers get"
+     label are sentence case in the body face on phones now; the button around the label keeps mono. */
+  await expectFace(".mk-pvcount .mk-fmmeta", "Source Sans 3");
+  await expectFace(".mk-pvm .mk-pvmorelbl", "Source Sans 3", "600");
   await scrollTo(page, (await docTop(page, ".mk-pvlaunch")) - 60);
   await page.click(".mk-pvm .mk-lsuit");
   await expect(page.locator(".mk-pvjs")).toHaveClass(/mk-open/);
