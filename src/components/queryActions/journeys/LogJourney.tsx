@@ -30,6 +30,7 @@ import {
 } from "../../../lib/queryActions/packages";
 import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
 import { openNewAgentCard } from "../../../lib/agentCardStore";
+import { useIsMobile } from "../../shell/mobileChrome";
 import { SentChip } from "../SentHow";
 import {
   Chip, Chips, DateField, Fl, Note, NoteLink, SampleControl, SampleLine, Seg, Toggle, Who, initialsOf,
@@ -489,6 +490,7 @@ export function LogJourney({ req, today, children }: JourneyProps) {
     button: "Log query",
     ok,
     steps,
+    live: agent ? { name: agentName(agent), agency: agencyOf(agent), book: ms?.title ?? null } : null,
     preNote: !agent ? <Note kind="info" tag="NEXT" style={{ marginTop: 22 }}>Choose the agent first. Their reply time, how they take queries and what they ask for fill in the rest.</Note> : undefined,
     saves,
     reviewNote: exact && exact.id !== exactDeclined ? (
@@ -576,10 +578,13 @@ function AgentPicker({ typed, setTyped, agents, queried, onPick }: {
     onPick(made);
   }, [waiting, agents, onPick]);
   const t = typed.trim().toLowerCase();
+  /* PHONE APP v2, PART 4 (FA B) — on a phone the picker IS the question: the whole list under the search field,
+     filtered as you type, and "Someone not on my list" always last. The desktop keeps its five suggestions. */
+  const phone = useIsMobile();
   const list = agents
     .filter((a) => !a.setAside)
     .filter((a) => !t || (a.name || "").toLowerCase().includes(t) || (a.agency || "").toLowerCase().includes(t))
-    .slice(0, 5);
+    .slice(0, phone ? undefined : 5);
   const addNew = () => openNewAgentCard({
     from: "button", host: "panel", over: "drawer",
     ...(typed.trim() ? { prefill: { name: typed.trim() } } : {}),
@@ -590,16 +595,18 @@ function AgentPicker({ typed, setTyped, agents, queried, onPick }: {
       <input className="qad-fin" autoFocus placeholder="Start typing an agent's name…" value={typed} data-qad-agent-input
         onChange={(e) => setTyped(e.target.value)} onFocus={() => setFocus(true)} onBlur={() => window.setTimeout(() => setFocus(false), 150)}
         onKeyDown={(e) => { if (e.key === "Enter" && list[0]) { e.preventDefault(); onPick(list[0]); } }} autoComplete="off" />
-      {focus || t ? (
+      {phone || focus || t ? (
         <div className="qad-sugg" data-qad-sugg>
           {list.map((a, i) => (
             <button type="button" key={a.id} className={`it${i === 0 && t ? " hi" : ""}`} onMouseDown={(e) => { e.preventDefault(); onPick(a); }} data-qad-agent={a.id}>
               <span className="qad-av">{initialsOf(a.name || a.agency || "?")}</span>
-              <span><b>{a.name || a.agency}</b><small>{(a.agency || "").toUpperCase()}{a.responseTimeWeeks ? ` · ~${a.responseTimeWeeks} WKS` : ""}</small></span>
+              <span><b>{a.name || a.agency}</b><small>{phone ? `${a.agency || ""}${a.responseTimeWeeks ? ` · about ${a.responseTimeWeeks} weeks` : ""}` : <>{(a.agency || "").toUpperCase()}{a.responseTimeWeeks ? ` · ~${a.responseTimeWeeks} WKS` : ""}</>}</small></span>
               {queried.has(a.id) ? <span className="qad-tag">ALREADY QUERIED</span> : a.noResponseMeansNo ? <span className="qad-tag">NO REPLY MEANS NO</span> : null}
             </button>
           ))}
-          {t ? <button type="button" className="new" onMouseDown={(e) => { e.preventDefault(); addNew(); }} data-qad-new-agent>+ Add “{typed.trim()}” as a new agent</button> : null}
+          {phone
+            ? <button type="button" className="new" onMouseDown={(e) => { e.preventDefault(); addNew(); }} data-qad-new-agent><b>Someone not on my list</b><small>{t ? `Add “${typed.trim()}” as you go` : "Add them as you go"}</small></button>
+            : t ? <button type="button" className="new" onMouseDown={(e) => { e.preventDefault(); addNew(); }} data-qad-new-agent>+ Add “{typed.trim()}” as a new agent</button> : null}
         </div>
       ) : null}
     </div>

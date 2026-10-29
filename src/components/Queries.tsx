@@ -5993,7 +5993,9 @@ export const Queries: React.FC<{
           .sort((a, b) => String(b.createdAt ?? "").localeCompare(String(a.createdAt ?? "")))
           .map((j) => ({ id: j.id, text: j.entryText, when: j.createdAt ? fieldDay(new Date(j.createdAt as string).getTime()) : "" }))}
         mode={qcCardMode}
-        onMode={setQcCardMode}
+        /* PHONE APP v2, PART 4 — on a phone a response is recorded in the response journey's flow layout, the same
+           walk as every other journey; the card's inline form stays the desktop's */
+        onMode={qmPhone ? (m) => { if (m === "respond") openQueryDrawer({ mode: "resp", queryId: q.id }); else setQcCardMode(m); } : setQcCardMode}
         onClose={qmPhone ? () => setQcCardMode("view") : fromAgent ? closeFromAgent : closeQueryCard}
         onStep={(d) => {
           const nid = order[idx + d];
@@ -6002,7 +6004,7 @@ export const Queries: React.FC<{
           if (qmPhone) { const n = new URLSearchParams(window.location.search); n.set("q", nid); routerNav({ pathname: "/queries", search: `?${n}` }, { replace: true, state: window.history.state?.usr ?? null }); return; }
           cardSetRef.current = order; onOpenQuery?.(nid);
         }}
-        onPrimary={() => { if (!door) return; if (door.mode === "resp") setQcCardMode("respond"); else stepRow({ mode: door.mode, queryId: q.id }); }}
+        onPrimary={() => { if (!door) return; if (door.mode === "resp" && !qmPhone) setQcCardMode("respond"); else stepRow({ mode: door.mode, queryId: q.id }); }}
         onCloseQuery={() => stepRow({ mode: "close", queryId: q.id })}
         onContactList={() => { if (ag) routerNav(`/agents?agent=${encodeURIComponent(ag.id)}`); else onNavigate?.("agents"); }}
         onCopyEmail={() => {

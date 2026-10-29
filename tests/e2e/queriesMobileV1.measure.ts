@@ -322,6 +322,11 @@ for (const vp of PHONES) {
 /* ── L10 — the celebration (WRITES, and puts it back) ───────────────────────────────────────────────────────── */
 
 test("QM1 · the celebration · 390x844", async ({ page }) => {
+  /* ⚠️ RETIRED 29 OCT (Phone app v2, Part 4): on a phone a response is recorded in the response journey's flow layout,
+     not the card's inline form this case drives, and the celebration is the ref's CEV C — its button opens the query
+     sheet rather than mark-as-sent. Its claims are PA2-4 F5 (cheers on a request, never a pass, Undo on top), F6 (the
+     stamp's words) and F8 (colours), in tests/e2e/phoneAppV2Flows.measure.ts, which write and undo the same way. */
+  test.skip(true, "retired by Phone app v2 Part 4");
   const L = new Ledger("celebrate-390x844");
   const vp: VP = PHONES[0];
   await openQ(page, vp);

@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "pop",
+  "where": "the celebration shows",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F7",
+  "where": "reduced motion: no animation on the card or the stamp",
+  "ok": false,
+  "detail": "{\"running\":1,\"opacity\":\"0\",\"transform\":\"matrix(1.55247, -0.387075, 0.387075, 1.55247, 0, 0)\",\"conf\":\"none\"}"
+ },
+ {
+  "lock": "F7",
+  "where": "reduced motion: the stamp is shown in place, rotated",
+  "ok": false,
+  "detail": "{\"running\":1,\"opacity\":\"0\",\"transform\":\"matrix(1.55247, -0.387075, 0.387075, 1.55247, 0, 0)\",\"conf\":\"none\"}"
+ },
+ {
+  "lock": "F7",
+  "where": "reduced motion: no confetti",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "F4",
+  "where": "after Undo the account is as it was",
+  "ok": true,
+  "detail": ""
+ }
+]

@@ -59,6 +59,11 @@ export interface JourneyView {
   /** The agent card under the title. */
   who?: React.ReactNode;
   /**
+   * PHONE APP v2, PART 4 — the facts the phone's live card shows while the journey has them and the drawer does not
+   * (Log a query's chosen agent and book). Presentation only: nothing reads it to save.
+   */
+  live?: { name: string; agency: string; book: string | null } | null;
+  /**
    * v1.1 — the view only CHOOSES (the query picker): no review step, no primary button — the choice
    * itself moves the drawer on — and the phone bar names the task rather than a step count that
    * would be wrong the moment a query is picked.

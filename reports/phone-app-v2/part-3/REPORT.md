@@ -89,7 +89,15 @@ The document was read back afterwards. It is a probe query that no seeder owns.
 
 ## Dev
 
-See PROGRESS.md and the integration commit message for the integration branch, its gates and the served hash.
+- **Before:** dev served `index-DB-2-vh0.js`. That is another session's deploy, `dev/…-pa2-2-td12-ppp1` (`12b3016b`: Part 2 plus To-do v12 and Public pages on phones v1). It was confirmed by building that branch locally to the same hash.
+- **Integration branch:** `dev/pk391-qm1-pk392-calx-pk392b-td7-fv1-pk393-pa2-2-td12-ppp1-pa2-3`, at `8b2f06f5`.
+  - It is `12b3016b` plus `phone-app-v2` at `1fba3a3e`, then at `504f3bd5` (S1's reader).
+  - No conflicts; CLAUDE.md auto-merged.
+- **Gates there:** tsc 0 / 0 · build clean · Vitest `Test Files 693 passed (693)` · `Tests 10752 passed | 3 skipped (10755)`.
+- **Locks there:**
+  - PA2-3 `3 passed`; PA2-2 `3 passed`.
+  - PA2-1: `8 passed, 2 skipped` and S1 red at both sizes. The badge says 37 and To-do v12's own summary says 30 (`ledger/regress/integration-part-1-tabs-390x844.json`). See "Not done" 5.
+- **After:** dev serves `index-CArPS85T.js`.
 
 ## Not done, and why — for Nick
 
@@ -97,6 +105,8 @@ See PROGRESS.md and the integration commit message for the integration branch, i
 2. **The ••• is a sheet, not the ref's popover** (false premise 3).
 3. **The parked-journey chip (z 69) sits under an open query sheet on the phone.** It shows again when the sheet closes. The parked journey's own surface is Part 4's.
 4. **Opening a journey from the sheet keeps the sheet beneath it.** Closing the journey returns to the sheet, which Q5 asserts. The ref's flow screens are Part 4's.
+
+5. **Which figure does the phone's To-do badge show?** Part 1 made it the tray's overdue + due today (37 on the harness account). To-do v12, another session's work now on dev but not on `main` or this branch, opens with "Needs you now". That leaves out Gone quiet and Housekeeping, and its summary says 30. Both are now live on dev and disagree. Following v12 means `todoDueTally` reading `lib/todoUrgent`, which only exists on the v12 branch, so the two branches must meet first. Your call which number, and when.
 
 ## Worktree
 
