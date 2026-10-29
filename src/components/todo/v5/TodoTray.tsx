@@ -29,7 +29,7 @@ import { localYMD, resolveScopedManuscript } from "../../../lib/shellSidebar";
 import type { BoardCard } from "../../../lib/todoBoard";
 import {
   NO_FILTERS, SORT_LABEL, SWEEP_NEED, TRAY_GROUPS, actionWords, comingUp, deskFacts, filtersOn, kindCounts, lede, localYmd, matches,
-  trayItem, trayOrder, whereItStands, type TrayDb, type TrayFilters, type TrayGroupId, type TrayItem, type TrayKind, type TraySort,
+  trayItem, trayOrder, whereItStands, type TrayDb, type TrayFilters, type TrayGroupId, type TrayItem, type TrayKind, type TraySort, type Upcoming,
 } from "../../../lib/todoTray";
 import { clearedThisWeek, clearedToday, type ClearedAct } from "../../../lib/todoCleared";
 import { stageHistory } from "../../../lib/qcStages";
@@ -47,7 +47,6 @@ import { ESC_LEVEL, escapeDepth, useEscapeLayer } from "../../../lib/escapeStack
 import { SHORTCUTS, isEditableTarget, matchesShortcut } from "../../../lib/shortcuts";
 import { TODO_OPEN_TASK_KEY } from "../../../lib/corkboard";
 import { setAsideItems, RULE_TITLE, RULE_PLAIN, type SetAsideItem } from "../../../lib/taskSettings";
-import { courtOf, expectedFor } from "../../../lib/qcSummary";
 import { useTodoToast } from "../useTodoToast";
 import { useConfirmAsk } from "../ConfirmAsk";
 import { useTaskCommit } from "../useTaskCommit";
@@ -64,8 +63,12 @@ import { BLANK_DRAFT, ComposeCard, dayLabel, dueOf, surfaceDay, type ComposeDraf
 import { useTagWrites } from "../useTagWrites";
 import { taskSurfaced } from "../../../lib/todoBoard";
 import { snoozeCardWrites, snoozeGroupWrites } from "../snoozeWrites";
-import { TrayHeader, TrayHeadline, TraySection } from "./TrayHeader";
-import { TrayToday, dayChip, plusDays as calPlus, shortDay, weekdayOf } from "./TrayCalendar";
+import { TrayHeader, TraySection } from "./TrayHeader";
+import { MON_LONG, dayChip, plusDays as calPlus, shortDay, weekdayOf, ymdParts } from "./TrayCalendar";
+import { CaughtAck, ComingUpCards, NeedsYouNow, NothingYetWell, type NowCardData } from "./TrayNow";
+import { isOffer, isUrgent, urgentFigures, urgentOrder } from "../../../lib/todoUrgent";
+import { STAGE_NAME } from "../../../lib/qcSummary";
+import { agentPrimary } from "../../../lib/agentDisplay";
 import { TrayCalDrawer } from "./TrayCalDrawer";
 import { TrayDialMenu, type DialOpt } from "./TrayDialMenu";
 import { lateWords, rowLines } from "../../../lib/trayRows";
@@ -80,7 +83,6 @@ import { TrayFilterRow, TrayFind } from "./TrayFilters";
 import { usePinList } from "../../shell/useFullScreenList";
 import { PinListButton } from "../../shell/PinListButton";
 import { DeskCard, Disc, DoneToday, DueWords } from "./TrayDesk";
-import { TrayCaughtUp, TrayNothingYet } from "./TrayEmpty";
 import { dayMonth, MONTHS_SHORT } from "../../../lib/dates";
 import { trayReviewState } from "../../../lib/todoReviewAid";
 import { QueryStatus, type TaskFlag, type UserTask } from "../../../types";
@@ -88,6 +90,7 @@ import "../v2/todoV2.css";
 import "./todoV5.css";
 import "./todoV52.css";
 import "./todoV7.css";
+import "./todoV12.css";
 
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 const SORT_KEY = "sa.todoTray.sort";
@@ -204,18 +207,27 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
   const toggleShut = (g: TrayGroupId) => setShutState((s) => { const x = { ...s }; if (x[g]) delete x[g]; else x[g] = true; writeSession(SHUT_KEY, x); return x; });
   const [sortOpen, setSortOpen] = useState(false);
 
-  const visible = useMemo(() => items.filter((i) => matches(i, filters, hasPin) && passesCalFilter(calFilter, calItems, i.key, calToday)),
-    [items, filters, hasPin, calFilter, calItems, calToday]);
+  /* ── v12 Phase 1 §2 · NEEDS YOU NOW: the urgent set is cut from the tray's own items (lib/todoUrgent), never from raw
+     queries; the tray holds everything else, so a task is listed once and the two add up to the sidebar's count ── */
+  const trayToday = localYmd(now);
+  const urgentKeys = useMemo(() => new Set(items.filter((i) => isUrgent(i, trayToday)).map((i) => i.key)), [items, trayToday]);
+  const urgentList = useMemo(() => urgentOrder(items.filter((i) => urgentKeys.has(i.key))), [items, urgentKeys]);
+  const rest = useMemo(() => items.filter((i) => !urgentKeys.has(i.key)), [items, urgentKeys]);
+  const visible = useMemo(() => rest.filter((i) => matches(i, filters, hasPin) && passesCalFilter(calFilter, calItems, i.key, calToday)),
+    [rest, filters, hasPin, calFilter, calItems, calToday]);
   const groups = useMemo(() => trayOrder(visible, sort), [visible, sort]);
   const ordered = useMemo(() => groups.flatMap((g) => g.items), [groups]);
   const walk = useMemo(() => groups.flatMap((g) => (shut[g.group.id] ? [] : g.items)), [groups, shut]);
-  const countFor = useCallback((f: TrayFilters) => items.filter((i) => matches(i, f, hasPin) && passesCalFilter(calFilter, calItems, i.key, calToday)).length, [items, hasPin, calFilter, calItems, calToday]);
+  const countFor = useCallback((f: TrayFilters) => rest.filter((i) => matches(i, f, hasPin) && passesCalFilter(calFilter, calItems, i.key, calToday)).length, [rest, hasPin, calFilter, calItems, calToday]);
   const anyFilter = filtersOn(filters) || !!calFilter;
   const clearAll = () => { setFilters(NO_FILTERS); setCalFilter(null); };
 
   /* ── selection ── */
   const [selKey, setSelKey] = useState<string | null>(null);
-  const sel = ordered.find((i) => i.key === selKey) ?? ordered[0] ?? null;
+  /* the desk can hold a Needs you now task (its row is not drawn in the tray); with nothing selected it opens on the
+     first of everything else, never on a card already above it */
+  const deskSeq = useMemo(() => [...urgentList, ...ordered], [urgentList, ordered]);
+  const sel = deskSeq.find((i) => i.key === selKey) ?? ordered[0] ?? urgentList[0] ?? null;
   const findRef = useRef<HTMLInputElement>(null);
   /* ⚠️ v7 §1.5 — THE TRAY'S OWN SCROLLER, NEVER THE PAGE. `scrollIntoView` scrolls every scrolling ancestor, so on
      load at 1280 a selected row pulled the whole page down past the header to the tray. The row is brought into view
@@ -251,27 +263,33 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
   /* ⚠️ "hold" FIRST: the board drops the card the instant the save lands (the local snapshot), while the drawer, the
      agent card or the sweep is still on screen over the desk. The stamp waits until that surface has gone, or the writer
      never sees it (measured: the first stamp screenshot showed it playing under the closing drawer). */
-  const [ghost, setGhost] = useState<{ item: TrayItem; index: number; next: string | null; phase: "hold" | "stamp" | "leave" } | null>(null);
+  const [ghost, setGhost] = useState<{ item: TrayItem; index: number; next: string | null; phase: "hold" | "stamp" | "leave"; fromNow: boolean; trayList: TrayItem[] } | null>(null);
   const [rise, setRise] = useState<string | null>(null);
   const [freshSlip, setFreshSlip] = useState<string | null>(null);
   const orderRef = useRef<TrayItem[]>([]);
+  const nowRef = useRef<ReadonlySet<string>>(new Set());
   const timers = useRef<number[]>([]);
   useEffect(() => () => { timers.current.forEach((t) => window.clearTimeout(t)); }, []);
   const later = (fn: () => void, ms: number) => { const t = window.setTimeout(fn, reduced() ? 0 : ms); timers.current.push(t); };
+  /* ⚠️ v12 — "THE ORDER" HERE IS THE DESK'S WHOLE SEQUENCE, Needs you now then the tray: a card finished from the
+     carousel left the board just as a row does, and must not read as "left" merely because it has no tray row */
   useLayoutEffect(() => {
-    if (!pending) { orderRef.current = ordered; return; }
-    if (ordered.some((i) => i.key === pending.key)) { orderRef.current = ordered; return; }
+    const was = nowRef.current;
+    nowRef.current = urgentKeys;
+    if (!pending) { orderRef.current = deskSeq; return; }
+    if (deskSeq.some((i) => i.key === pending.key)) { orderRef.current = deskSeq; return; }
     /* the card has LEFT the board: the write landed. The next task is chosen from the order as it stood. */
     const before = orderRef.current;
     const idx = before.findIndex((i) => i.key === pending.key);
     const item = before[idx];
     setPending(null);
-    orderRef.current = ordered;
+    orderRef.current = deskSeq;
     if (!item) return;
-    const next = before.slice(idx + 1).find((i) => ordered.some((o) => o.key === i.key))
-      ?? [...before.slice(0, idx)].reverse().find((i) => ordered.some((o) => o.key === i.key)) ?? null;
-    setGhost({ item, index: idx, next: next ? next.key : null, phase: "hold" });
-  }, [ordered, pending]);
+    const next = before.slice(idx + 1).find((i) => deskSeq.some((o) => o.key === i.key))
+      ?? [...before.slice(0, idx)].reverse().find((i) => deskSeq.some((o) => o.key === i.key)) ?? null;
+    const trayList = before.filter((i) => !was.has(i.key));
+    setGhost({ item, index: trayList.findIndex((i) => i.key === item.key), next: next ? next.key : null, phase: "hold", fromNow: was.has(item.key), trayList });
+  }, [deskSeq, pending, urgentKeys]);
   /* the surface that took the action: the query drawer, the agent card, or the sweep */
   const [surfaceOpen, setSurfaceOpen] = useState(false);
   /* v5.1 §E — the journey open ON THE DESK (a request whose slot is the desk's), and the one parked from it */
@@ -631,12 +649,6 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
   useEscapeLayer(pinned && !!filters.find, () => setFilters((f) => ({ ...f, find: "" })), ESC_LEVEL.page);
   ownLayers.current = (pin.full ? 1 : 0) + (pinned && filters.find ? 1 : 0);
   const kindActive: TrayKind | null = filters.type === "you" || filters.type === "chase" || filters.type === "tidy" ? filters.type : null;
-  const holding = queries.filter((q) => courtOf(q.status as QueryStatus) === "agent").length;
-  const pastReply = queries.filter((q) => {
-    if (courtOf(q.status as QueryStatus) !== "agent") return false;
-    const e = expectedFor(q, agents.find((a) => a.id === q.agentId));
-    return e.ms != null && e.ms < now;
-  }).length;
   const nextLand = state === "caught" ? comingUp(trayDb, now, 3) : [];
 
   /* the desk's card: the ghost while the sequence plays, else the selection */
@@ -1095,8 +1107,10 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
     document.body.classList.toggle("td5-parked-here", routeOn && !!startedKey);
     return () => { document.body.classList.remove("td5-parked-here"); };
   }, [routeOn, startedKey]);
+  /* v12 — the position line: "n of N" over the tray, or "From Needs you now" for a carousel task on the desk */
+  const deskFromNow = ghost ? ghost.fromNow : !!sel && urgentKeys.has(sel.key);
   const deskIndex = ghost ? ghost.index : sel ? ordered.findIndex((i) => i.key === sel.key) : -1;
-  const deskList = ghost ? orderRef.current : ordered;
+  const deskList = ghost ? ghost.trayList : ordered;
   const stopsFor = (i: TrayItem) => {
     if (!i.query || i.bucket === "fix" || i.bucket === "note") return [];
     const log = activities.filter((a) => a.queryId === i.query!.id);
@@ -1109,20 +1123,77 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
     if (nx) { selectRow(nx.key); scrollRowIntoView(nx.key); }
   };
 
-  /* ── v7 §1 · the top of the page: the house header card, Today (populated only), and the "Your tray" heading ── */
+  /* ── v12 Phase 1 · the top of the page: the house header card, Needs you now, and the "Everything else" heading ── */
   const header = (
-    <TrayHeader loading={loading} caught={state === "caught"} msTitle={msTitle}
-      onAdd={() => openCompose()} asideN={asideN} asideRef={asideRef} onAside={() => showView("aside")} />
+    <TrayHeader loading={loading} msTitle={msTitle} onAdd={() => openCompose()} asideN={asideN} asideRef={asideRef} onAside={() => showView("aside")}
+      nothing={state === "nothing" ? { onLog: () => openQueryDrawer({ mode: "log" }), onImport: () => navigate("/import") } : null} />
   );
-  const todaySection = state === "list" ? (
-    <TraySection title="Today" id="td7-today-h" rule className="td7-today" data={{ "data-td7": "today" }}>
-      <TrayToday today={calToday} items={calItems} buckets={calBuckets} filter={calFilter} onFilter={setCalFilter} onOpenDrawer={() => setCalDrawer(true)} />
-    </TraySection>
+  /** a card's words, from the tray item the desk would show (its group, date, lede and the desk's own primary) */
+  const firstOf = (i: TrayItem) => (i.agent?.name || i.agent?.agency || i.who || "").trim().split(/\s+/)[0] ?? "";
+  const nowCardFor = (i: TrayItem): NowCardData => {
+    const ymd = i.dial.ymd;
+    const late = !!ymd && ymd < trayToday;
+    const age = late ? lateWords(daysFrom(ymd!, trayToday)) ?? "" : "";
+    const offer = isOffer(i);
+    const g = i.group.id;
+    const own = !!i.card.userTaskId;
+    const head = g === "mine" ? "Your task" : i.group.name;
+    const right = offer ? (ymd ? `answer by ${shortDay(ymd)}` : "") : ymd === trayToday ? "due today" : late ? age : "";
+    const status = i.query?.status ? STAGE_NAME[i.query.status as QueryStatus] ?? String(i.query.status) : "";
+    const sub = own ? (ymd === trayToday ? "You set this for today." : ymd ? `You set this for ${shortDay(ymd)}.` : "")
+      : g === "chase" ? `${status ? `${status}. ` : ""}Past the date ${firstOf(i) || "the agent"} usually replies by.`
+      : (lede(i, trayDb, now).split(/(?<=\.) /)[0] ?? "");
+    const left = offer && ymd && !late ? daysFrom(trayToday, ymd) : null;
+    const foot = offer
+      ? { footLabel: "Answer by", footDate: ymd ? shortDay(ymd) : "No date", footExtra: late ? age : left != null ? `${left} ${left === 1 ? "day" : "days"} left` : "", footLate: late }
+      : ymd === trayToday ? { footLabel: "Due", footDate: "Today" }
+      : { footLabel: "Due", footDate: ymd ? shortDay(ymd) : "No date", footExtra: age, footLate: late };
+    return {
+      key: i.key, g, head, right, late: late && !!right, own, initials: i.initials, who: own ? "Your own task" : i.who,
+      agency: own ? "From your corkboard" : i.agent ? (i.agent.agency ?? "").trim() || i.whoSub : i.whoSub,
+      deed: i.deed, sub, ...foot, action: actionWords(i), white: g !== "you", due: ymd, taskType: i.card.taskType ?? (own ? "own" : undefined),
+    };
+  };
+  const nowCards = urgentList.map(nowCardFor);
+  /** a carousel card: the task on the desk, the page down to the workspace; its button starts the desk's journey too */
+  const toDesk = (key: string, start: boolean) => {
+    const it = urgentList.find((x) => x.key === key);
+    if (!it) return;
+    if (trayView !== "tray") { setPop(null); setTrayView("tray"); }
+    selectRow(key);
+    if (start) act(it);
+  };
+  const nowSection = state === "list" || state === "loading" ? (
+    <NeedsYouNow cards={nowCards} figures={urgentFigures(urgentList, trayToday)} sel={!ghost && sel ? sel.key : null} loading={loading}
+      onPress={(k) => toDesk(k, false)} onAct={(k) => toDesk(k, true)} onCalendar={() => setCalDrawer(true)} />
   ) : null;
   const trayHeading = (
-    <TraySection title="Your tray" id="td7-tray-h" className="td7-traysec" data={{ "data-td7": "tray-head" }}
-      sub={<TrayHeadline urgent={state === "list" ? { overdue: calBuckets.overdue, today: calBuckets.today } : null} caught={state === "caught"} loading={loading} />} />
+    <TraySection title="Everything else" id="td7-tray-h" className="td7-traysec" data={{ "data-td7": "tray-head" }}
+      sub={<span className="td7-sub" data-td12="rest">{loading ? "\u00a0" : `${rest.length} more, most urgent first`}</span>} />
   );
+  /* ── v12 Phase 3 · all caught up: the band, then Coming up (the next three dates `comingUp` knows) ── */
+  const longDay = (ymd: string) => { const p = ymdParts(ymd); return `${p.d} ${MON_LONG[p.m]}`; };
+  const UP_HEAD: Record<Upcoming["kind"], [string, NowCardData["g"], string]> = {
+    nudge: ["Worth a nudge", "chase", "Lands on"], check: ["Check back", "chase", "Lands on"], reply: ["Reply expected", "quiet", "Expected by"],
+    own: ["Your task", "mine", "Lands on"], back: ["Coming back", "quiet", "Lands on"],
+  };
+  const upCards = nextLand.map((u) => {
+    const a = u.agentId ? agents.find((x) => x.id === u.agentId) : undefined;
+    const name = a ? agentPrimary(a) : "";
+    const first = (name || a?.agency || "").trim().split(/\s+/)[0] ?? "";
+    const [head, g, label] = UP_HEAD[u.kind];
+    const n = daysFrom(trayToday, u.ymd);
+    const deed = u.kind === "nudge" ? `Nudge ${first}` : u.kind === "check" ? `Check back with ${first}` : u.kind === "reply" ? `Hear from ${first}`
+      : u.kind === "own" ? u.name : "Back in your tray";
+    const own = u.kind === "own";
+    const c: NowCardData = {
+      key: `up-${u.kind}-${u.ymd}-${u.queryId ?? u.name}`, g, head, right: `in ${n} ${n === 1 ? "day" : "days"}`, own,
+      initials: a ? (name || a.agency || "").trim().split(/\s+/).filter(Boolean).map((w, k, ws) => (k === 0 || k === ws.length - 1 ? w[0] : "")).join("").slice(0, 2).toUpperCase() : null,
+      who: own ? "Your own task" : name || a?.agency || u.name, agency: own ? "From your corkboard" : name ? (a?.agency ?? "").trim() : "",
+      deed: deed.trim(), sub: u.line, footLabel: label, footDate: shortDay(u.ymd), action: "Open the query", white: true,
+    };
+    return { c, onOpen: u.queryId ? () => openQueryPanel(u.queryId!, "other") : null };
+  });
   /* ── v7 S2 · one navy bar: Find and a "Filters" button in the row; the pills open as a strip under it ── */
   const [stripOpen, setStripOpen] = useState(false);
   const filterStrip = (state === "list" || state === "loading") && stripOpen ? (
@@ -1132,11 +1203,17 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
     </div>
   ) : null;
 
+  /* Find: one field, placed by the toolbar (left unpinned, right pinned) */
+  const findEl = (
+    <span className="td7-find" data-td7="nav-find">
+      <TrayFind filters={filters} setFilters={setFilters} findRef={findRef} placeholder={pinned ? "Find a task" : "Find a task, agent or agency"} pinned={pinned} disabled={loading} />
+    </span>
+  );
   /* the tray's rows, with the ghost held in place while it leaves */
   const renderRows = (g: { group: (typeof TRAY_GROUPS)[number]; items: TrayItem[] }) => {
     const rows = [...g.items];
-    if (ghost && ghost.item.group.id === g.group.id && !rows.some((r) => r.key === ghost.item.key)) {
-      const before = orderRef.current.filter((x) => x.group.id === g.group.id);
+    if (ghost && !ghost.fromNow && ghost.item.group.id === g.group.id && !rows.some((r) => r.key === ghost.item.key)) {
+      const before = ghost.trayList.filter((x) => x.group.id === g.group.id);
       const at = before.findIndex((x) => x.key === ghost.item.key);
       rows.splice(Math.max(0, Math.min(rows.length, at)), 0, ghost.item);
     }
@@ -1145,7 +1222,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
       return (
         <button key={i.key} type="button" className="td5-row2" data-td5-row={i.key} data-td5="row" data-group={i.group.id} data-bucket={i.bucket}
           data-task-type={i.card.taskType ?? (i.card.userTaskId ? "own" : undefined)} data-sweep={i.sweep ? String((i.card as BoardCard & { sweepOf?: number }).sweepOf ?? "") : undefined}
-          data-query={i.query?.id} data-cal-ymd={calYmdOf.get(i.key)} data-out={leaving ? "" : undefined} aria-current={!ghost && sel?.key === i.key ? "true" : undefined}
+          data-query={i.query?.id} data-cal-ymd={calYmdOf.get(i.key)} data-due={i.dial.ymd ?? undefined} data-out={leaving ? "" : undefined} aria-current={!ghost && sel?.key === i.key ? "true" : undefined}
           data-lit={dayHover && calYmdOf.get(i.key) === dayHover ? "" : undefined}
           data-live={working && deskItem?.key === i.key ? "" : undefined} data-bulk={bulk.has(i.key) ? "" : undefined} aria-describedby={tip?.key === i.key ? "td52-tip" : undefined}
           onMouseEnter={(e) => { setRowLit(calYmdOf.get(i.key) ?? null); showTip(i.key, e.currentTarget); }} onMouseLeave={() => { setRowLit(null); setTip(null); }}
@@ -1168,65 +1245,82 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
       <WorkspacePageGrid className="td5-wpg" scrollLabel="To-do list" masthead={null}>
         <div className="td5-group" data-td5="group">
           {state === "nothing" ? (
-            <TrayNothingYet msTitle={msTitle} onLog={() => openQueryDrawer({ mode: "log" })} onImport={() => navigate("/import")} onAdd={() => openCompose()} />
+            /* v12 Phase 4 — Nothing yet: the shared header, then the example well */
+            <>
+              {header}
+              <NothingYetWell onAdd={() => openCompose()} />
+            </>
+          ) : state === "caught" ? (
+            /* v12 Phase 3 — all caught up: the shared header, the blush band, Coming up. No sheet. */
+            <>
+              {header}
+              <CaughtAck cleared={today.length} until={nextLand[0] ? longDay(nextLand[0].ymd) : null} />
+              <ComingUpCards cards={upCards} />
+            </>
           ) : (
             <>
               {header}
-              {todaySection}
+              {nowSection}
               {trayHeading}
               <div className="td5-sheet" ref={sheetRef} data-td5="sheet"
-                data-one={state === "list" || state === "loading" ? "" : undefined} data-working={busyDesk ? "" : undefined}>
-                <div className="td5-nav" data-td5="nav">
-                  {state === "caught" ? (
-                    <p className="td5-say" data-td5="say">
-                      Nothing in your tray.{nextLand[0] ? <> The next task lands on <b>{dayMonth(nextLand[0].ms)}</b>.</> : null}
-                    </p>
-                  ) : trayView === "aside" && !working && !compose ? (
-                    /* v7 S3 — with no tab strip, the Set aside view names itself here and has its own way back */
+                data-one="" data-working={busyDesk ? "" : undefined}>
+                {/* v12 W1 — the open toolbar: a white row with a hairline. Find, Filters and the sort on the left, the pin on
+                    the right; mid-task the row says so instead; in Set aside it names the view and leads back; pinned
+                    it keeps Find, the day chip and the pin. No sentence and no key hints. */}
+                <div className="td5-nav td12-bar" data-td5="nav" data-td12="toolbar">
+                  {trayView === "aside" && !working && !compose ? (
                     <>
                       <p className="td5-say td7-asidet" data-td7="aside-say">Set aside: {asideN} {asideN === 1 ? "task" : "tasks"} waiting to come back</p>
                       <button type="button" className="td7-back" data-td7="back-to-tray" onClick={() => showView("tray")}>Back to your tray</button>
                     </>
                   ) : working || compose ? (
-                    /* v5.2 §J.1 — while a task is open on the desk, the row says so: a pulsing dot, the label, and the
-                       journey's own steps (none for the compose card) */
+                    /* v5.2 §J.1's signals, in ink on white and in plain words (their logic unchanged) */
                     <div className="td52-wtop" data-td52="in-progress-row">
-                      <i className="td52-wdot" aria-hidden="true" /><span className="td52-wlab">TASK IN PROGRESS</span>
+                      <i className="td52-wdot" aria-hidden="true" /><span className="td52-wlab">Task in progress</span>
                       {working && jSteps ? (
                         <>
                           <span className="td52-wdash" aria-hidden="true">{Array.from({ length: jSteps.n }, (_, x) => <u key={x} className={x < jSteps.k ? "d" : ""} />)}</span>
-                          <span className="td52-wst" data-td52="nav-steps">· STEP <b>{jSteps.k}</b> OF {jSteps.n}</span>
+                          <span className="td52-wst" data-td52="nav-steps">Step <b>{jSteps.k}</b> of {jSteps.n}</span>
                         </>
                       ) : null}
                     </div>
                   ) : (
-                    <div className="td5-say" data-td5="say" style={{ position: "relative", overflow: "visible" }}>
-                      {anyFilter ? (
-                        <>Showing <b>{visible.length}</b> of <b>{items.length}</b><button type="button" className="td5-clr" data-td5="clear-all" onClick={clearAll}>Clear all</button></>
-                      ) : (
-                        <>Working through <b>{visible.length} {visible.length === 1 ? "task" : "tasks"}</b>,{" "}
-                          <button type="button" className="td5-sortb" data-td5="sort" aria-haspopup="menu" aria-expanded={sortOpen} onClick={() => setSortOpen((o) => !o)}>{SORT_LABEL[sort]}</button>
-                        </>
-                      )}
-                      {sortOpen && !anyFilter ? (
-                        <div className="td5-sortmenu" role="menu" onMouseLeave={() => setSortOpen(false)}>
-                          {(Object.keys(SORT_LABEL) as TraySort[]).map((k) => (
-                            <button key={k} type="button" role="menuitemradio" aria-checked={sort === k} onClick={() => { setSort(k); setSortOpen(false); }}>{SORT_LABEL[k]}</button>
-                          ))}
-                        </div>
-                      ) : null}
-                    </div>
+                    /* unpinned: Find, Filters, the sort. Pinned (the ref's 06): Filters as its icon, the sort and the day chip on
+                       the left; Find, PINNED and the pin on the right */
+                    <>
+                      {pinned ? null : findEl}
+                      <span className="td7-find td12-tools" data-td12="tools">
+                        <button type="button" className="td7-fbtn" data-td7="filters" aria-label="Filters" aria-expanded={stripOpen} aria-controls="td7-strip"
+                          disabled={loading} onClick={() => setStripOpen((o) => !o)}>
+                          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M2 4h12M4.5 8h7M7 12h2" /></svg>
+                          <span className="td7-fbl">Filters</span>
+                        </button>
+                        <span className="td12-sortw">
+                          <button type="button" className="td12-sort" data-td5="sort" data-td12="sort" aria-haspopup="menu" aria-expanded={sortOpen} disabled={loading}
+                            onClick={() => setSortOpen((o) => !o)}>
+                            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M5 3v10M2.5 10.5 5 13l2.5-2.5M11 13V3M8.5 5.5 11 3l2.5 2.5" /></svg>
+                            {SORT_LABEL[sort].replace(/^./, (x) => x.toUpperCase())}
+                          </button>
+                          {sortOpen ? (
+                            <div className="td5-sortmenu" role="menu" onMouseLeave={() => setSortOpen(false)}>
+                              {(Object.keys(SORT_LABEL) as TraySort[]).map((k) => (
+                                <button key={k} type="button" role="menuitemradio" aria-checked={sort === k} onClick={() => { setSort(k); setSortOpen(false); }}>{SORT_LABEL[k].replace(/^./, (x) => x.toUpperCase())}</button>
+                              ))}
+                            </div>
+                          ) : null}
+                        </span>
+                      </span>
+                    </>
                   )}
-                  {pinned ? (
-                    /* v5.2 §E — what the hidden header carried: the day (Part B's figures; opens the drawer) and the
-                       calendar filter */
+                  {pinned && !working && !compose ? (
+                    /* v5.2 §E — what the hidden header carried: the day (opens the drawer) and the calendar filter */
                     <span className="td52-pinx" data-td52="pinx">
                       <button type="button" className="td52-pday" data-td52="pin-day" aria-label="Open the calendar" onClick={() => setCalDrawer(true)}>
                         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><rect x="2" y="3" width="12" height="11" rx="2" /><path d="M2 6.5h12M5.5 1.5v3M10.5 1.5v3" /></svg>
                         <span className="td52-pdt">
                           <span className="td52-pwd">{dayChip(calToday).split(" ")[0]} </span>{shortDay(calToday)}
                           {calBuckets.overdue || calBuckets.today ? (
-                            <>{calBuckets.overdue ? <> · <b>{calBuckets.overdue} OVERDUE</b></> : null}{calBuckets.today ? <span className={calBuckets.overdue ? "td52-ptail" : undefined}> <em>·</em> {calBuckets.today} due today</span> : null}</>
+                            <>{calBuckets.overdue ? <> · <b>{calBuckets.overdue} overdue</b></> : null}{calBuckets.today ? <span className={calBuckets.overdue ? "td52-ptail" : undefined}> <em>·</em> {calBuckets.today} due today</span> : null}</>
                           ) : <> · nothing due</>}
                         </span>
                       </button>
@@ -1238,32 +1332,12 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
                     </span>
                   ) : null}
                   <span className="td5-sp" />
-                  {state === "list" ? (
-                    <>
-                      {/* v7 S2 — the J / K / E hints leave the row (the keys still work, and the shortcuts sheet lists them) */}
-                      {/* in the Set aside view Find and Filters stand down: they narrow the tray, not that list, and beside
-                          the view's sentence and its way back they ran the row off its edge at 1280 (as the ref's own does) */}
-                      {working || (trayView === "aside" && !compose) ? null : (
-                        <span className="td7-find" data-td7="nav-find">
-                          <TrayFind filters={filters} setFilters={setFilters} findRef={findRef} placeholder={pinned ? "Find a task" : "Find a task, agent or agency"} pinned={pinned} disabled={loading} />
-                          <button type="button" className="td7-fbtn" data-td7="filters" aria-label="Filters" aria-expanded={stripOpen} aria-controls="td7-strip"
-                            disabled={loading} onClick={() => setStripOpen((o) => !o)}>
-                            <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M2 4h12M4.5 8h7M7 12h2" /></svg>
-                            <span className="td7-fbl">Filters</span>
-                          </button>
-                        </span>
-                      )}
-                      {pinned ? <span className="td52-pinned" data-td52="pinned-label">PINNED</span> : null}
-                      {working ? <span className="td52-wesc" data-td52="esc-back" aria-hidden="true"><kbd>Esc</kbd> STEP BACK</span> : null}
-                      <PinListButton pinned={pin.full} onToggle={pin.toggle} attrs={{ "data-td52": "pin" }} />
-                    </>
-                  ) : null}
+                  {pinned && !working && !compose && trayView === "tray" ? <>{findEl}<span className="td52-pinned" data-td52="pinned-label">PINNED</span></> : null}
+                  {working ? <span className="td52-wesc" data-td52="esc-back" aria-hidden="true"><span className="td12-key">Esc</span> step back</span> : null}
+                  <PinListButton pinned={pin.full} onToggle={pin.toggle} attrs={{ "data-td52": "pin" }} />
                 </div>
                 {filterStrip}
-                {state === "caught" ? (
-                  <TrayCaughtUp holding={holding} pastReply={pastReply} upcoming={nextLand} now={now} done={today} undoFor={undoFor} onQuery={() => navigate("/agents")} />
-                ) : (
-                  <div className="td5-body">
+                <div className="td5-body">
                     <div className="td5-tray" data-td5="tray">
                       {/* v7 S3 — the tab strip is gone: Set aside opens from the header's button, and the navy row leads back */}
                       {trayView === "aside" ? (
@@ -1323,11 +1397,12 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
                             {shut[gd.id] ? null : <div className="td5-rows">{renderRows(g)}</div>}
                           </div>
                         );
-                      }) : loading ? null : items.length ? (
+                      }) : loading ? null : rest.length ? (
                         /* v5.2 §H.2 — a helpful empty filter: what hides the rows, how many, and the one thing that clears it */
                         <div className="td5-none td52-none" data-td52="empty-filter">
                           <b>{filters.find.trim() ? <>Nothing matches “{filters.find.trim()}”.</> : "Nothing matches this filter."}</b>{" "}
-                          <span>{items.length} {items.length === 1 ? "task is" : "tasks are"} hidden by it.</span>
+                          {/* v12: the tray's own count — the tasks leading Needs you now are not hidden by a filter on the tray */}
+                          <span>{rest.length} {rest.length === 1 ? "task is" : "tasks are"} hidden by it.</span>
                           <button type="button" className="td52-nclr" data-td52="empty-clear"
                             onClick={() => (filters.find.trim() ? setFilters((f) => ({ ...f, find: "" })) : clearAll())}>{filters.find.trim() ? "Clear the search" : "Clear the filter"}</button>
                         </div>
@@ -1405,7 +1480,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
                         ) : deskItem ? (
                           <>
                             <div className="td5-pos" data-td5="pos">
-                              <span>{deskIndex + 1} of {deskList.length}</span>
+                              <span>{deskFromNow ? "From Needs you now" : `${deskIndex + 1} of ${deskList.length}`}</span>
                               {/* v7 S6 — the progress dashes are gone; "n of N" and the arrows stay */}
                               <span className="td5-sp" />
                               <button type="button" aria-label="Previous task" disabled={!!ghost || deskIndex <= 0} onClick={() => step(-1)}>‹</button>
@@ -1460,7 +1535,6 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
                       </div>
                     </div>
                   </div>
-                )}
               </div>
             </>
           )}

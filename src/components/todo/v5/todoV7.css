@@ -54,36 +54,7 @@
   .td5-group > .td7-traysec + .td5-sheet { margin-top: 0; }
 
   /* ⚠️ GREYS ARE v5.2 §F.4's (--td5-ink62 / --td5-ink70), NOT THE REF'S 55–58%: those measured 3.9–4.47:1 under TD52 F3 */
-  /* ═════ §2 · Today: one white card — the date, the three counts, the calendar button ═════ */
-  .td7-tcard {
-    display: grid; grid-template-columns: minmax(230px, 1.05fr) repeat(3, minmax(0, 1fr)) auto; align-items: center;
-    padding: 24px 26px 24px 30px; background: #fff; border-radius: 18px;
-    box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.08), 0 14px 30px -24px rgba(28, 19, 15, 0.45);
-  }
-  .td7-date { display: flex; align-items: center; gap: 14px; min-width: 0; }
-  .td5-root .td7-num { font: 400 64px/0.9 var(--sp-type); letter-spacing: -0.03em; color: #1c130f; }
-  .td5-root .td7-wd { font: 400 20px/1.15 var(--sp-type); color: #1c130f; }
-  .td5-root .td7-wd small { display: block; margin-top: 2px; font: italic 400 16px var(--sp-serif); color: var(--td5-ink62); }
-  .td5-root .td7-ct {
-    all: unset; box-sizing: border-box; align-self: stretch; display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 4px;
-    min-width: 0; padding: 2px 22px 0; border-left: 1px solid rgba(28, 19, 15, 0.1); cursor: pointer; text-align: left;
-  }
-  .td5-root .td7-ct .td7-ctl { font: 400 17px/1.2 var(--sp-serif); color: #1c130f; white-space: nowrap; }
-  .td5-root .td7-ct .td7-ctn { margin: 4px 0 2px; font: 400 46px/1 var(--sp-type); color: #1c130f; }
-  .td5-root .td7-ct .td7-cth { font: italic 400 15px var(--sp-serif); color: var(--td5-ink62); white-space: nowrap; }
-  .td5-root .td7-ct.od .td7-ctn { color: #a2452a; }
-  .td5-root .td7-ct.z { cursor: default; }
-  .td5-root .td7-ct.z .td7-ctn, .td5-root .td7-ct.z .td7-ctl { opacity: 0.45; }
-  .td5-root .td7-ct:hover:not(:disabled) { background: rgba(28, 19, 15, 0.03); }
-  .td5-root .td7-ct[aria-pressed="true"] { background: rgba(42, 58, 82, 0.05); box-shadow: inset 0 -3px 0 #2a3a52; }
-  .td5-root .td7-ct:focus-visible { outline: 2px solid #2a3a52; outline-offset: -2px; }
-  .td5-root .td7-calbtn {
-    display: inline-flex; align-items: center; gap: 9px; height: 44px; margin-left: 10px; padding: 0 18px; border: 0; border-radius: 12px;
-    background: #fff; color: #1c130f; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16); font: 400 15px var(--sp-type) !important; white-space: nowrap; cursor: pointer;
-  }
-  .td5-root .td7-calbtn:hover { box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.45); }
-  .td5-root .td7-calbtn svg { width: 16px; height: 16px; }
-  .td5-root .td7-calbtn:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+  /* §2's Today card is RETIRED BY v12 (29 Oct), rule and element: the urgent figures are Needs you now's (todoV12.css) */
 
   /* ═════ S2 · one navy bar: Find (translucent on the navy), a white "Filters" button, then the pin ═════ */
   .td5-root .td5-nav .td7-find { display: flex; align-items: center; gap: 8px; flex: none; min-width: 0; }
@@ -182,13 +153,6 @@
   .td5-root[data-pinned] .td7-hd, .td5-root[data-pinned] .td7-sec { display: none; }
 }
 
-/* the ref's ≤1440 step (its `@media (max-width:1440px)` on the Today card) */
-@media (min-width: 768px) and (max-width: 1440px) {
-  .td7-tcard { grid-template-columns: minmax(178px, 0.95fr) repeat(3, minmax(0, 1fr)) auto; padding-left: 24px; }
-  .td5-root .td7-num { font-size: 56px; }
-  .td5-root .td7-ct { padding: 2px 14px 0; }
-  .td5-root .td7-ct .td7-ctl { font-size: 16px; }
-}
 
 /* ═════ the date menu's "Pick a date" (portalled to the body, so literals, never `--td5-*`): ComposeCard's month in the
    popover — the popover widens to hold it; the month loses its own card frame there ═════ */

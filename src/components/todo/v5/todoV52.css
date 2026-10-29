@@ -131,8 +131,8 @@
 /* H.4 — a save in flight: the foot's buttons dim, "Saving…" in rust mono */
 .td5-cfoot[data-saving] button:disabled { opacity: 0.45; cursor: default; }
 .td5-cfoot .td52-saving { font: 500 10px/1 var(--font-mono) !important; letter-spacing: 0.12em; text-transform: uppercase; color: #a2452a; white-space: nowrap; }
-/* H.5 — a visible PINNED label before the pin */
-.td5-root .td5-nav .td52-pinned { flex: none; font: 500 10px/1 var(--font-mono) !important; letter-spacing: 0.14em; color: rgba(244, 238, 229, 0.8); white-space: nowrap; }
+/* H.5's PINNED label is drawn in ink on v12's white toolbar now: its rule moved to todoV12.css */
+
 /* H.7 — below 1360 the pinned day chip drops its weekday and the trailing words: "15 Oct · 8 OVERDUE" */
 @media (max-width: 1359px) {
   .td52-pday .td52-pwd, .td52-pday .td52-ptail { display: none; }

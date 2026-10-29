@@ -40,7 +40,8 @@ export const TrayFind: React.FC<{
     <input ref={findRef} value={filters.find} disabled={disabled} placeholder={placeholder} aria-label={placeholder}
       onChange={(e) => setFilters({ ...filters, find: e.target.value })}
       onKeyDown={(e) => { if (e.key === "Escape" && filters.find) { e.preventDefault(); e.stopPropagation(); setFilters({ ...filters, find: "" }); } }} />
-    <kbd aria-hidden="true">/</kbd>
+    {/* v12 W1 — the field's own key, drawn as a mark rather than a <kbd> (no key hints in the toolbar; "/" still works) */}
+    <span className="td5-fkey" aria-hidden="true">/</span>
   </label>
 );
 
