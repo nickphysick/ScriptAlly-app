@@ -21,8 +21,9 @@ Baseline gates on the base: tsc root 0, tsc functions 0, build clean, Vitest 689
 | 4 | A the flow layout and the live card | `5d3f7688` | committed |
 | 4 | B respond, mark sent, nudge, close, task, note | `3280fa0c` | committed |
 | 4 | C celebrations | `feba0f9c` | committed |
-| 4 | D locks, shots, report | see `git log` | committed |
-| 4 | dev deploy | — | next |
+| 4 | D locks, shots, report | `da0e8134` | committed |
+| 4 | dev deploy | integration `633aa338` on `dev/…-ppp1-pa2-4` | dev serves `index-BkPjilRy.js` |
+| 5 | — | — | in progress |
 
 ## Dev, as of the end of Part 1
 - (end of Part 2) dev serves `index-CRHIwewp.js` = `dev/pk391-qm1-pk392-calx-pk392b-td7-fv1-pk393-pa2-2` (`82adc7b9`). The next part's
@@ -36,6 +37,7 @@ Baseline gates on the base: tsc root 0, tsc functions 0, build clean, Vitest 689
 - e2e: `SA_E2E_BASE_URL=http://127.0.0.1:4391 npx playwright test tests/e2e/phoneAppV2Shell.measure.ts --workers=1`.
 
 ## Part 4 notes
+- (end of Part 4) dev serves `index-BkPjilRy.js` = `dev/…-td12-ppp1-pa2-4` (`633aa338`).
 - PA2-4 WRITES and undoes. Before any mutant or new writing run, list the account (scratchpad tools/added.mjs `before <file>`), and check after. Delete residue BY ID after showing it: a bulk "delete what was added" is refused by the session's safety check.
 - Part 5's "Add a note" tile should call `openPhoneCompose("note")`.
 

@@ -103,7 +103,14 @@ Every journey keeps its own message and Undo. Only the task and note flows had n
 
 ## Dev
 
-See PROGRESS.md and the integration commit for the branch, its gates and the served hash.
+- **Before:** dev served `index-CArPS85T.js`, the Part 3 integration `8b2f06f5`.
+- **Integration branch:** `dev/pk391-qm1-pk392-calx-pk392b-td7-fv1-pk393-pa2-2-td12-ppp1-pa2-4`, at `633aa338` = `8b2f06f5` + `phone-app-v2` at `da0e8134`. No conflicts; CLAUDE.md auto-merged.
+- **Gates there:** tsc 0 / 0 · build clean · Vitest `Test Files 694 passed (694)` · `Tests 10756 passed | 3 skipped (10759)`.
+- **Locks there:**
+  - PA2-4 `4 passed` (it wrote and undid; the account was checked after);
+  - PA2-3 `3 passed` · PA2-2 `3 passed`;
+  - PA2-1 `8 passed, 2 skipped`, with S1 red at both sizes: 37 against To-do v12's 30. This is the Part 3 question, unchanged.
+- **After:** dev serves `index-BkPjilRy.js`.
 
 ## Not done, and why — for Nick
 
