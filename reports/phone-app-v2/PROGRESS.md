@@ -25,8 +25,9 @@ Baseline gates on the base: tsc root 0, tsc functions 0, build clean, Vitest 689
 | 4 | dev deploy | integration `633aa338` on `dev/…-ppp1-pa2-4` | dev serves `index-BkPjilRy.js` |
 | 5 | A–B band, week, groups, rows, verbs, Later (one commit) | `ad46c604` | committed |
 | 5 | C the Corkboard | `cd55cabf` | committed |
-| 5 | D locks, shots, report (+ the two fixes the locks found) | see `git log` | committed |
-| 5 | dev deploy | — | next |
+| 5 | D locks, shots, report (+ the two fixes the locks found) | `ebf3be7f` | committed |
+| 5 | dev deploy | integration `cffcac5c` on `dev/…-ppp1-pa2-5` | dev serves `index-D7d8tr1e.js` |
+| 6 | — | — | in progress |
 
 ## Dev, as of the end of Part 1
 - (end of Part 2) dev serves `index-CRHIwewp.js` = `dev/pk391-qm1-pk392-calx-pk392b-td7-fv1-pk393-pa2-2` (`82adc7b9`). The next part's
@@ -38,6 +39,9 @@ Baseline gates on the base: tsc root 0, tsc functions 0, build clean, Vitest 689
 - Local previews: this build on :4391 (`npx vite preview --port 4391 --host 127.0.0.1`); the base build (a copy of the
   base's dist in the session scratchpad) on :4392 for S9-style desktop captures.
 - e2e: `SA_E2E_BASE_URL=http://127.0.0.1:4391 npx playwright test tests/e2e/phoneAppV2Shell.measure.ts --workers=1`.
+
+## Part 5 notes
+- (end of Part 5) dev serves `index-D7d8tr1e.js` = `dev/…-td12-ppp1-pa2-5` (`cffcac5c`). On it PA2-5 T1 cannot read v12's desktop tallies (see the Part 5 report).
 
 ## Part 4 notes
 - (end of Part 4) dev serves `index-BkPjilRy.js` = `dev/…-td12-ppp1-pa2-4` (`633aa338`).
