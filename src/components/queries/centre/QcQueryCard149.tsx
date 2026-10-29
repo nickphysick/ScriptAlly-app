@@ -29,6 +29,7 @@ import { STRIP_TINT, type AgentView, type ChipIcon, type NextStep, type StorySte
 import "../../../marketing/heroCard.css";
 import "./qcv149card.css";
 import { FlowHead, FLOW_WORDS, RECORD_LINE } from "../../shared/FlowHead";
+import { STAGE_STEPS, stageIndex } from "../../../lib/queriesPhone";
 
 
 /** the band's tint and ink, and the pill's ground, per set (the landing card's With you / With the agent / Closed;
@@ -184,6 +185,16 @@ export interface QcQueryCard149Props {
   layout?: "desk" | "phone";
   /** the picture on the phone's next step (quill and ink) */
   nextArt?: { src: string; w: number; h: number } | null;
+  /**
+   * Phone app v2, Part 3 (ref qsheet.js QH B · QB B · QL B · QN A) — the card as a pull-up SHEET: no tabs, one scroll
+   * (the stage track, the latest three steps with "See the whole story", what was sent, the agent), and "Your next step"
+   * pinned at the foot whatever the scroll. Opt-in and phone-only; every other caller passes nothing and is unchanged.
+   */
+  sheet?: boolean;
+  /** the sheet's ••• (the phone's more sheet) */
+  onMore?: () => void;
+  /** the sheet's closed foot: "View the wall" */
+  onWall?: () => void;
 }
 
 const blankEdits = (): CardEdits => ({ dates: {}, removed: [], added: null, packageKey: null, pieces: {}, agent: {} });
@@ -252,6 +263,9 @@ export const QcQueryCard149: React.FC<QcQueryCard149Props> = (p) => {
 
   const editing = mode === "edit";
   const phone = p.layout === "phone";
+  const sheetView = phone && !!p.sheet && !editing;
+  const [allStory, setAllStory] = useState(false);
+  useEffect(() => { setAllStory(false); }, [r.id]);
   /* the phone's "Your next step": the strip's own sentence and button, above the tabs */
   const nextBlock = phone && !editing && r.court !== "closed" ? (
     <div className="qc149c-nx" data-qc149c="next-block">
@@ -366,13 +380,19 @@ export const QcQueryCard149: React.FC<QcQueryCard149Props> = (p) => {
 
   const panes = (
     <>
-      <div className="qc149c-pane qc149c-trk" data-qc149c="pane" data-pane="tracking" hidden={tab !== "tracking"} role="tabpanel">
+      <div className="qc149c-pane qc149c-trk" data-qc149c="pane" data-pane="tracking" hidden={sheetView ? false : tab !== "tracking"} role="tabpanel">
         {!editing ? (
           <>
+            {sheetView ? (
+              <>
+                <StageTrack index={stageIndex(r.status, p.story.map((x) => x.status))} status={r.status} />
+                <h4 className="qc149c-qsec">The latest</h4>
+              </>
+            ) : null}
             <ol className="qc149c-story" data-qc149c="steps">
               {p.story.length + (p.nextStep ? 1 : 0) > 1 ? <i className="qc149c-srail" aria-hidden="true" /> : null}
-              {p.story.map((s) => (
-                <li key={s.key} className={`qc149c-st${p.freshKey && (s.activityId === p.freshKey || s.key === p.freshKey) ? " fresh" : ""}`}
+              {p.story.map((s, si) => (
+                <li key={s.key} className={`qc149c-st${p.freshKey && (s.activityId === p.freshKey || s.key === p.freshKey) ? " fresh" : ""}${sheetView && !allStory && si < p.story.length - 3 ? " qc149c-old" : ""}`}
                   data-qc149c="step" data-status={s.status ?? undefined} data-kind={s.kind ?? undefined} data-activity={s.activityId}>
                   {s.kind === "nudge" ? NUDGE_G : s.kind === "holding" ? HOLD_G : s.status ? <span className="qc149c-g"><StatusDot status={s.status} overrideSize={17} /></span> : HOLD_G}
                   <div className="qc149c-sb">
@@ -405,6 +425,11 @@ export const QcQueryCard149: React.FC<QcQueryCard149Props> = (p) => {
                 </li>
               ) : null}
             </ol>
+            {sheetView && p.story.length > 3 ? (
+              <button type="button" className="qc149c-whole" data-qc149c="whole-story" aria-expanded={allStory} onClick={() => setAllStory((v) => !v)}>
+                {allStory ? "Show the latest" : "See the whole story"}
+              </button>
+            ) : null}
             {/* v149.1 A3 — the action strip, at the foot of the pane: what is happening, the choice, and the next move */}
             {phone ? null : <div className="qc149c-strip" data-qc149c="strip" data-kind={p.strip.kind} style={{ background: STRIP_TINT[where] }}>
               {SPARK}
@@ -461,7 +486,8 @@ export const QcQueryCard149: React.FC<QcQueryCard149Props> = (p) => {
           <button type="button" className="qc149c-addstep" data-qc149c="add-step" onClick={() => setEd((x) => ({ ...x, added: { kind: "", date: fieldDay(nowMs) } }))}>+ Add a step</button>
         ) : null}
       </div>
-      <div className="qc149c-pane" data-qc149c="pane" data-pane="agent" hidden={tab !== "agent"} role="tabpanel">
+      <div className="qc149c-pane" data-qc149c="pane" data-pane="agent" hidden={sheetView ? false : tab !== "agent"} role="tabpanel">
+        {sheetView ? <h4 className="qc149c-qsec">About {p.agent.first || "the agent"}</h4> : null}
         {!editing ? <AgentPane p={p} first={p.agent.first} /> : (
         <div className="qc149c-pg">
           <dl className="qc149c-kv">
@@ -494,7 +520,8 @@ export const QcQueryCard149: React.FC<QcQueryCard149Props> = (p) => {
         </div>
         )}
       </div>
-      <div className="qc149c-pane" data-qc149c="pane" data-pane="materials" hidden={tab !== "materials"} role="tabpanel">
+      <div className="qc149c-pane" data-qc149c="pane" data-pane="materials" hidden={sheetView ? false : tab !== "materials"} role="tabpanel">
+        {sheetView ? <h4 className="qc149c-qsec">What you sent</h4> : null}
         <div className="qc149c-pg qc149c-mt">
           <h5>Package</h5>
           <div className="qc149c-mrow" data-qc149c="mat-package">{p.packageName ?? "No package"}
@@ -506,11 +533,38 @@ export const QcQueryCard149: React.FC<QcQueryCard149Props> = (p) => {
           )) : <div className="qc149c-mrow"><i>Nothing logged yet</i></div>}
         </div>
       </div>
-      <div className="qc149c-pane" data-qc149c="pane" data-pane="notes" hidden={tab !== "notes"} role="tabpanel">
+      <div className="qc149c-pane" data-qc149c="pane" data-pane="notes" hidden={sheetView ? true : tab !== "notes"} role="tabpanel">
         <NotesPane first={p.agent.first} notes={p.notes} onAdd={p.onAddNote} resetKey={r.id} />
       </div>
     </>
   );
+
+  if (sheetView) {
+    /* the sheet's pinned foot: the next step on a live query; on a closed one, the wall it went to (ref nextBlock) */
+    const closedFoot = r.court === "closed" ? (
+      <div className="qc149c-nx qc149c-nx--closed" data-qc149c="next-block">
+        <small>Your next step</small>
+        <b data-qc149c="next-sentence">{STAGE_NAME[r.status] ?? r.status}</b>
+        <p data-qc149c="next-sub">It’s on your Wall of no</p>
+        <div className="qc149c-nxbtns"><button type="button" className="qc149c-nxb" data-qc149c="next-wall" onClick={p.onWall}>View the wall</button></div>
+      </div>
+    ) : null;
+    return (
+      <div className="qc149c qcv-legacy qc149c--sheet" data-qc149c="card" data-mode={mode} data-id={r.id} data-where={where} data-sheet="">
+        {band}
+        <div className="qc149c-sheetbody" data-qc149c="sheet-body">
+          <div className="qc149c-sheethead">
+            {agentRow}
+            {p.onMore ? <button type="button" className="qc149c-more3" data-qc149c="more-btn" aria-label="More actions" aria-haspopup="dialog" onClick={p.onMore}>
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><circle cx="5.5" cy="12" r="1.2" fill="currentColor" /><circle cx="12" cy="12" r="1.2" fill="currentColor" /><circle cx="18.5" cy="12" r="1.2" fill="currentColor" /></svg>
+            </button> : null}
+          </div>
+          {panes}
+        </div>
+        <div className="qc149c-sheetfoot" data-qc149c="next-pinned">{nextBlock ?? closedFoot}</div>
+      </div>
+    );
+  }
 
   return (
     <div className={`qc149c qcv-legacy${editing ? " editing" : ""}`} data-qc149c="card" data-mode={mode} data-id={r.id} data-where={where}>
@@ -552,6 +606,22 @@ export const QcQueryCard149: React.FC<QcQueryCard149Props> = (p) => {
     </div>
   );
 };
+
+/** Phone app v2, Part 3 — the four-step stage track (ref qsheet.js `stageTrack`): Queried · Partial · Full · Offer, the
+ *  current step marked with its own glyph and its stage name, the steps before it filled */
+const StageTrack: React.FC<{ index: number; status: QueryStatus | string }> = ({ index, status }) => (
+  <div className="qc149c-stg" data-qc149c="stage-track" data-index={index}>
+    {STAGE_STEPS.map((w, j) => (
+      <React.Fragment key={w}>
+        {j > 0 ? <i className="qc149c-stgl" aria-hidden="true" data-on={j <= index ? "" : undefined} /> : null}
+        <div className={`qc149c-stgi${j <= index ? " on" : ""}${j === index ? " now" : ""}`} data-qc149c="stage" data-on={j <= index ? "" : undefined} data-now={j === index ? "" : undefined}>
+          <span className="qc149c-stgd">{j === index ? <StatusDot status={status} overrideSize={18} decorative /> : null}</span>
+          <span className="qc149c-stgw">{j === index ? (STAGE_NAME[status as QueryStatus] ?? w) : w}</span>
+        </div>
+      </React.Fragment>
+    ))}
+  </div>
+);
 
 /** v149.1 A5 — the Agent tab: what they're looking for, four facts, every query to them, how to reach them */
 const MAIL = <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5" /><path d="M3.5 7.5l8.5 6 8.5-6" /></svg>;

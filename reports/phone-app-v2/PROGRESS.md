@@ -14,11 +14,13 @@ Baseline gates on the base: tsc root 0, tsc functions 0, build clean, Vitest 689
 | 1 | F locks, shots, report | `459b5d96` | committed |
 | 1 | dev deploy | integration `a8b44524` on `dev/…-fv1-pk393-pa2-1` | dev serves `index-Ox21np2m.js` |
 | 2 | A–C Home (one commit) | `93d802c7` | committed |
-| 2 | D locks, shots, report | (the commit that carries this line) | committed; dev deploy follows |
-| 3 | — | — | next |
+| 2 | D locks, shots, report | `e0531aba` | committed |
+| 2 | dev deploy | integration `82adc7b9` on `dev/…-fv1-pk393-pa2-2` | dev serves `index-CRHIwewp.js` |
+| 3 | A–D Queries, the sheet, Birds-eye, locks, report (one commit) | see `git log` | committed |
+| 3 | dev deploy | — | next |
 
 ## Dev, as of the end of Part 1
-- dev serves `index-Ox21np2m.js` = `dev/pk391-qm1-pk392-calx-pk392b-td7-fv1-pk393-pa2-1` (`a8b44524`). The next part's
+- (end of Part 2) dev serves `index-CRHIwewp.js` = `dev/pk391-qm1-pk392-calx-pk392b-td7-fv1-pk393-pa2-2` (`82adc7b9`). The next part's
   integration branch starts from WHATEVER dev serves then (check the hash first: another session deployed mid-Part 1).
 - The integration worktree is `/Users/nickphysick/ScriptAlly-pa2-int` (needs `functions/node_modules` linked).
 
@@ -28,6 +30,11 @@ Baseline gates on the base: tsc root 0, tsc functions 0, build clean, Vitest 689
   base's dist in the session scratchpad) on :4392 for S9-style desktop captures.
 - e2e: `SA_E2E_BASE_URL=http://127.0.0.1:4391 npx playwright test tests/e2e/phoneAppV2Shell.measure.ts --workers=1`.
 
+## Part 3 notes
+- `pa` sheets are on the escape stack; the phone's `stepRow` opens the drawer directly; drawer 1010/1011, celebration 1050, snackbar 1100.
+- QM1's celebration WRITES and undoes. A timeout before its Undo leaves a change on `probe-dangling-pkg`, which happened once and was restored by hand (Part 3 report). Re-check the account after any red run of it.
+
 ## Open (for Nick — see each part's report)
+- Part 3: phones 761–767px get the desktop Queries page (`useQm1Phone` ≤760); the ••• is a sheet not a popover; the parked chip sits under an open sheet.
 - Part 1: the band's search (palette vs PhoneSearch); four menu tiles with no line; the one-manuscript footnote; the
   Founding chip for everyone; ink #1f2633 on blush rather than the ref's #111.

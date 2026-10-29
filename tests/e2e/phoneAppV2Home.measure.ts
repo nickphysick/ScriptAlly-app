@@ -37,7 +37,7 @@ for (const vp of PHONES) {
 
     await page.evaluate(() => { try { localStorage.removeItem("sa.phoneHero"); } catch { /* */ } });
     await openPhone(page, "/queries", vp);
-    const qline = await page.evaluate(() => ({ sent: Number(document.querySelector('[data-qm1="sent"]')?.textContent ?? NaN),
+    const qline = await page.evaluate(() => ({ sent: Number(document.querySelector('[data-pa="stat-sent"]')?.textContent ?? NaN),
       counts: Object.fromEntries([...document.querySelectorAll<HTMLElement>('[data-qm1="chip"]')].map((c) => [c.dataset.key!, Number(c.dataset.count)])) as Record<string, number> }));
     L.check("pop", `${tag(vp)} the Queries tab's own counts`, Number.isFinite(qline.sent) && Object.keys(qline.counts).length >= 4, JSON.stringify(qline));
     await page.goto("/dashboard"); await page.locator('[data-pa="hero"]').waitFor({ timeout: 20_000 }); await page.waitForTimeout(1500);

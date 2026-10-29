@@ -80,7 +80,11 @@ Each lock was proved red at 390 × 844. CSS mutations used `PA2_MUTATE`; code mu
 
 ## Dev
 
-See the closing section, filled in after the integration build.
+- **Before:** dev served `index-Ox21np2m.js`, the Part 1 integration `a8b44524`.
+- **Integration branch:** `dev/pk391-qm1-pk392-calx-pk392b-td7-fv1-pk393-pa2-2`, at `82adc7b9` = `a8b44524` + `phone-app-v2` at `e0531aba`. No conflicts.
+- **Gates there:** tsc 0 / 0 · build clean · Vitest `Test Files 692 passed (692)` · `Tests 10743 passed | 3 skipped (10746)`.
+- **Locks there:** PA2-1 `10 passed, 2 skipped` (S9 needs `PA2_L1`) · PA2-2 `3 passed`.
+- **After:** dev serves `index-CRHIwewp.js`.
 
 ## Not done, and why — for Nick
 

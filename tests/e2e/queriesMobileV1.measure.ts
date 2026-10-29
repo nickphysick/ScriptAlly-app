@@ -41,7 +41,8 @@ const colourSweep = (page: Page) => page.evaluate(() => {
     if (A > 0.9 && R > 140 && G < 120 && B < 110 && R - G > 50) out.bad.push(`rust/red fill on ${name(el)} (${bg})`);
     if (isNavy(bg, img)) {
       out.navy++;
-      for (const t of textEls(el)) if (getComputedStyle(t).color !== "rgb(255, 255, 255)") out.bad.push(`text on navy is not white: ${name(t)} (${getComputedStyle(t).color})`);
+      /* Phone app v2: white at any opacity (the ref's selected chip count is rgba(255,255,255,.75), app.css .chip b) */
+      for (const t of textEls(el)) if (getComputedStyle(t).color !== "rgb(255, 255, 255)" && !/^rgba\(255, 255, 255, /.test(getComputedStyle(t).color)) out.bad.push(`text on navy is not white: ${name(t)} (${getComputedStyle(t).color})`);
     } else if (isPink(bg, img)) {
       out.pink++;
       /* ink: #1c130f, or the phone app's ink #1f2633 (Phone app v2 rule: text on blush is ink, either) */
@@ -79,6 +80,8 @@ const heroId = (page: Page) => page.evaluate(() => document.querySelector<HTMLEl
 
 for (const vp of PHONES) {
   test(`QM1 · the tab · ${tag(vp)}`, async ({ page }) => {
+    /* ⚠️ RETIRED 29 OCT (Phone app v2, Part 3): the tab is rebuilt to the ref (Part 3): its chips, header line, rows and images are PA2-3 Q1 (chips filter), Q2 (the band line never follows a chip), Q3 (rows lead with the glyph — the reverse of L6) and Q7 (colour laws, no image twice). */
+    test.skip(true, "retired by Phone app v2 Part 3");
     const L = new Ledger(`tab-${tag(vp)}`);
     await openQ(page, vp);
     const pageOn = await page.locator('[data-qm1="page"]').count();
@@ -184,6 +187,8 @@ for (const vp of PHONES) {
 
 for (const vp of PHONES) {
   test(`QM1 · a query · ${tag(vp)}`, async ({ page, context }) => {
+    /* ⚠️ RETIRED 29 OCT (Phone app v2, Part 3): the query opens as a pull-up sheet, not a pushed screen with ‹ N / M › (Part 3); its next step and order are PA2-3 Q5. */
+    test.skip(true, "retired by Phone app v2 Part 3");
     const L = new Ledger(`query-${tag(vp)}`);
     await openQ(page, vp);
     await chip(page, "agent");
@@ -238,6 +243,8 @@ const comingDays = (page: Page) => page.evaluate(() => [...document.querySelecto
 })));
 
 test("QM1 · Coming up · 390x844", async ({ page, browser }) => {
+    /* ⚠️ RETIRED 29 OCT (Phone app v2, Part 3): Coming up retires on the phone (Part 3): the To-do tab covers dates. */
+    test.skip(true, "retired by Phone app v2 Part 3");
   const L = new Ledger("coming-390x844");
   const vp: VP = PHONES[0];
   await openQ(page, vp, { search: "?qm=coming" });

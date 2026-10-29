@@ -23,6 +23,7 @@
 import React, { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { lockStageScroll } from "../../lib/stageScroll";
+import { ESC_LEVEL, useEscapeLayer } from "../../lib/escapeStack";
 
 /**
  * Phone app v2 (Part 1D) — THE REF'S SHEET, OPT-IN (design-refs/phone-app-v2/src/app.css `.sheet` `.grab` `.scrim`;
@@ -68,7 +69,7 @@ export const MobileSheet: React.FC<{
     const prevBody = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+      if (e.key === "Escape" && !pa) {
         e.stopPropagation(); // the sheet is topmost — the key must not also reach page handlers
         onClose();
       }
@@ -79,7 +80,11 @@ export const MobileSheet: React.FC<{
       document.body.style.overflow = prevBody;
       window.removeEventListener("keydown", onKey, true);
     };
-  }, [open, onClose]);
+  }, [open, onClose, pa]);
+  /* a phone-app sheet stacks: the more sheet opens OVER the query sheet, and two window listeners would both hear
+     the key (registration order decides, not what is on top). On the escape stack the later sheet wins a tie and the
+     query drawer, at its own higher level, wins over both. */
+  useEscapeLayer(open && !!pa, onClose, ESC_LEVEL.pageDrawer);
 
   if (!open || typeof document === "undefined") return null;
   if (pa) return <PaSheet ariaLabel={ariaLabel} onClose={onClose} opts={pa}>{children}</PaSheet>;

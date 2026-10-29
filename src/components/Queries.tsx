@@ -592,6 +592,8 @@ export const Queries: React.FC<{
   /* Queries on a phone v1 — at 760px and narrower the page is `QueriesPhone` (see the return at the foot). Declared up here
      because the response picker's subscription below must know it (a later declaration would be a TDZ read). */
   const qmPhone = useQm1Phone();
+  /* Phone app v2, Part 3 — the query sheet's ••• opens the phone's more sheet; the card is built here, so the state is too */
+  const [qmMore, setQmMore] = useState(false);
   const { setMobileDetail } = useMobileChrome();
   const [mobileView, setMobileView] = useState<"list" | "detail">("list");
   const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
@@ -5746,7 +5748,8 @@ export const Queries: React.FC<{
   /** Query panel v1 — open the row's panel and step it into `req`'s journey (see `pendingStepRef`). */
   const stepRow = (req: OpenRequest) => {
     const q = req.queryId ? queries.find((x) => x.id === req.queryId) : undefined;
-    if (!q) { openQueryDrawer(req); return; }
+    /* the phone has no side panel for a step to wait for — its query sheet opens the drawer over itself */
+    if (!q || qmPhone) { openQueryDrawer(req); return; }
     const ag = agents.find((a) => a.id === q.agentId);
     const nm = (ag?.name || ag?.agency || "The agent").trim();
     pendingStepRef.current = { ...req, panel: { name: nm, agency: (ag?.name ? ag?.agency ?? "" : "").trim(), first: (ag?.name || "").trim().split(/\s+/)[0] ?? "" } };
@@ -6017,6 +6020,9 @@ export const Queries: React.FC<{
         removable={removable}
         onSaveEdits={onSaveEdits}
         layout={qmPhone ? "phone" : undefined}
+        sheet={qmPhone}
+        onMore={qmPhone ? () => setQmMore(true) : undefined}
+        onWall={qmPhone ? () => routerNav("/queries/responses") : undefined}
         nextArt={qmPhone ? QM1_ART.quill : null}
       />
     );
@@ -6462,6 +6468,10 @@ export const Queries: React.FC<{
         onNavigate={(t, sub) => onNavigate?.(t, sub)}
         onOrder={(ids) => { qmOrderRef.current = ids; }}
         onEditQuery={() => setQcCardMode("edit")}
+        moreOpen={qmMore}
+        onMoreClose={() => setQmMore(false)}
+        onDelete={(id) => { void deleteQueryWithUndo(id); }}
+        onPdf={() => { void handleDownloadPDF(); }}
       />
       {/* ⚠️ THE QUERY PANEL STILL OPENS FROM OTHER PAGES ON A PHONE: `openQueryPanel` (the phone dashboard's View task,
           the agent panel, search) is drawn by this page's ONE host whichever route is on screen. Found by the dashboard's

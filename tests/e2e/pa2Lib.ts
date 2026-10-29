@@ -44,6 +44,10 @@ export const CSS_MUTATIONS: Record<string, string> = {
   "snack-white": ".pa-snack { background: #ffffff !important; }",
   /* S8 — the + turns rust */
   "plus-rust": ".pa-plus { background: #b4553f !important; }",
+  /* Q5 — the next step unpinned: the sheet's body stops scrolling and pushes the foot out of the sheet */
+  "unpin": ".pa-qsheet .qc149c-sheetbody { overflow: visible !important; flex: none !important; }",
+  /* Q7 — the chosen chip turns rust */
+  "rust-chip": ".pa-chip[aria-pressed=\"true\"] { background: #b4553f !important; }",
   /* S9 — the phone's tab bar shown at every width */
   "desk-bar": ".pa-tabbar { display: flex !important; }",
 };

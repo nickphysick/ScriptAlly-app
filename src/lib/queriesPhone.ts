@@ -22,6 +22,7 @@ import { statRows } from "./qc150";
 import { nextDoor, nextWords } from "./queryActions/entry";
 import { dayWords, stripOf, type Strip } from "./qcCardStory";
 import { nudgePhase } from "./nudgeWindow";
+import { dayMonth } from "./dates";
 
 const DAY = 86_400_000;
 export const startOfDay = (ms: number): number => { const d = new Date(ms); d.setHours(0, 0, 0, 0); return d.getTime(); };
@@ -319,4 +320,47 @@ export function yourMoveBadge(rows: readonly QcRow[], scopeId: string | null, no
 /** the manuscript the phone page is scoped to: the shell's active key when it names a manuscript, else the first */
 export function phoneScopeId(manuscripts: readonly { id: string }[], stored: string | null): string | null {
   return stored && manuscripts.some((m) => m.id === stored) ? stored : manuscripts[0]?.id ?? null;
+}
+
+/* ── Phone app v2, Part 3 (ref design-refs/phone-app-v2/src/v2.js screenQueries2, qsheet.js stageTrack) ──────────── */
+
+/** the Queries tab's chips, in the ref's order; the default is All. SUPERSEDES Your move · All · Waiting · Coming up. */
+export const PA2_CHIPS: readonly PhoneChip[] = ["all", "you", "agent", "quiet", "closed"];
+export const PA2_CHIP_LABEL: Record<PhoneChip, string> = { all: "All", you: "With you", agent: "With the agent", quiet: "Gone quiet", closed: "Closed" };
+/** All, grouped by whose move it is, in this order (ref groupHd) */
+export const PA2_GROUPS: readonly Exclude<PhoneChip, "all">[] = ["you", "agent", "quiet", "closed"];
+
+const dm = (ms: number) => dayMonth(ms);
+
+/**
+ * A row's next-date line (ref `.row .when`): a fact about the next date, never a verdict — no "late", no "overdue".
+ * `mine` sets it in ink at 600 when the move is the writer's (ref `.when.mv`).
+ */
+export function nextDateLine(r: QcRow, nowMs: number): { text: string; mine: boolean } {
+  const w = whereItStands(r, nowMs);
+  if (w === "closed") return { text: `${STAGE_NAME[r.status as QueryStatus] ?? String(r.status)} ${dm(r.lastMs)}`, mine: false };
+  if (w === "you") {
+    /* your move is a send (a request), an answer (an offer), or — on a query still in the agent's court whose reply
+       date has passed — a nudge */
+    const request = r.status === QueryStatus.PARTIAL_REQUESTED || r.status === QueryStatus.FULL_REQUESTED || r.status === QueryStatus.REVISE_RESUBMIT;
+    const verb = r.status === QueryStatus.OFFER ? "Answer by" : request ? "Send by" : "Nudge from";
+    return { text: r.expectedMs != null ? `${verb} ${dm(r.expectedMs)}` : yourWords(r, nowMs), mine: true };
+  }
+  if (r.expectedMs == null) return { text: "No reply date", mine: false };
+  return { text: r.expectedMs < nowMs ? `Reply was expected ${dm(r.expectedMs)}` : `Reply expected by ${dm(r.expectedMs)}`, mine: false };
+}
+
+/** the four-step stage track (Queried · Partial · Full · Offer): the step a query is at, or the furthest a closed one got */
+export const STAGE_STEPS = ["Queried", "Partial", "Full", "Offer"] as const;
+export function stageIndex(status: QueryStatus | string, seen: readonly (QueryStatus | string | null | undefined)[]): number {
+  const at = (s: QueryStatus | string | null | undefined): number => {
+    switch (s) {
+      case QueryStatus.OFFER: case QueryStatus.SIGNED: return 3;
+      case QueryStatus.FULL_REQUESTED: case QueryStatus.FULL_SENT: case QueryStatus.RESUBMITTED: return 2;
+      case QueryStatus.PARTIAL_REQUESTED: case QueryStatus.PARTIAL_SENT: case QueryStatus.REVISE_RESUBMIT: return 1;
+      default: return 0;
+    }
+  };
+  const closed = status === QueryStatus.REJECTED || status === QueryStatus.NO_RESPONSE || status === QueryStatus.WITHDRAWN;
+  return closed ? Math.max(0, ...seen.map(at)) : at(status);
 }
