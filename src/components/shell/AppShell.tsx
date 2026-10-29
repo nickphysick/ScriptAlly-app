@@ -46,6 +46,8 @@ import { planLine } from "../../lib/shellSidebar";
 import { BackgroundLab } from "../dev/BackgroundLab";
 import "./contentColumn.css";
 import "./mobileShell.css";
+import "../phone/phoneTokens.css";
+import "../phone/phone.css";
 
 /* ── Stage page slot ─────────────────────────────────────────────────────── */
 
