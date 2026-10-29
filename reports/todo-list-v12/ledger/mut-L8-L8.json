@@ -1,0 +1,278 @@
+[
+ {
+  "lock": "L8",
+  "where": "1512: rows",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "L8",
+  "where": "1512: no SVG ring in any row's date",
+  "ok": false,
+  "detail": "24"
+ },
+ {
+  "lock": "L8",
+  "where": "1512: overdue rows to read",
+  "ok": true,
+  "detail": "15"
+ },
+ {
+  "lock": "L8",
+  "where": "1512: \"27 Sep\" is d Mon",
+  "ok": true,
+  "detail": "27 Sep"
+ },
+ {
+  "lock": "L8",
+  "where": "1512: \"13 mo overdue\" ends overdue",
+  "ok": true,
+  "detail": "13 mo overdue"
+ },
+ {
+  "lock": "L8",
+  "where": "1512: \"5 May\" is d Mon",
+  "ok": true,
+  "detail": "5 May"
+ },
+ {
+  "lock": "L8",
+  "where": "1512: \"6 mo overdue\" ends overdue",
+  "ok": true,
+  "detail": "6 mo overdue"
+ },
+ {
+  "lock": "L8",
+  "where": "1512: \"17 May\" is d Mon",
+  "ok": true,
+  "detail": "17 May"
+ },
+ {
+  "lock": "L8",
+  "where": "1512: \"5 mo overdue\" ends overdue",
+  "ok": true,
+  "detail": "5 mo overdue"
+ },
+ {
+  "lock": "L8",
+  "where": "1512: \"9 Jun\" is d Mon",
+  "ok": true,
+  "detail": "9 Jun"
+ },
+ {
+  "lock": "L8",
+  "where": "1512: \"5 mo overdue\" ends overdue",
+  "ok": true,
+  "detail": "5 mo overdue"
+ },
+ {
+  "lock": "L8",
+  "where": "1512: \"22 Jul\" is d Mon",
+  "ok": true,
+  "detail": "22 Jul"
+ },
+ {
+  "lock": "L8",
+  "where": "1512: \"3 mo overdue\" ends overdue",
+  "ok": true,
+  "detail": "3 mo overdue"
+ },
+ {
+  "lock": "L8",
+  "where": "1512: \"27 Jul\" is d Mon",
+  "ok": true,
+  "detail": "27 Jul"
+ },
+ {
+  "lock": "L8",
+  "where": "1512: \"3 mo overdue\" ends overdue",
+  "ok": true,
+  "detail": "3 mo overdue"
+ },
+ {
+  "lock": "L8",
+  "where": "1512: \"27 Jul\" is d Mon",
+  "ok": true,
+  "detail": "27 Jul"
+ },
+ {
+  "lock": "L8",
+  "where": "1512: \"3 mo overdue\" ends overdue",
+  "ok": true,
+  "detail": "3 mo overdue"
+ },
+ {
+  "lock": "L8",
+  "where": "1512: \"10 Aug\" is d Mon",
+  "ok": true,
+  "detail": "10 Aug"
+ },
+ {
+  "lock": "L8",
+  "where": "1512: \"3 mo overdue\" ends overdue",
+  "ok": true,
+  "detail": "3 mo overdue"
+ },
+ {
+  "lock": "L8",
+  "where": "1512: \"19 Aug\" is d Mon",
+  "ok": true,
+  "detail": "19 Aug"
+ },
+ {
+  "lock": "L8",
+  "where": "1512: \"2 mo overdue\" ends overdue",
+  "ok": true,
+  "detail": "2 mo overdue"
+ },
+ {
+  "lock": "L8",
+  "where": "1512: \"29 Aug\" is d Mon",
+  "ok": true,
+  "detail": "29 Aug"
+ },
+ {
+  "lock": "L8",
+  "where": "1512: \"2 mo overdue\" ends overdue",
+  "ok": true,
+  "detail": "2 mo overdue"
+ },
+ {
+  "lock": "L8",
+  "where": "1280: rows",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "L8",
+  "where": "1280: no SVG ring in any row's date",
+  "ok": false,
+  "detail": "24"
+ },
+ {
+  "lock": "L8",
+  "where": "1280: overdue rows to read",
+  "ok": true,
+  "detail": "15"
+ },
+ {
+  "lock": "L8",
+  "where": "1280: \"27 Sep\" is d Mon",
+  "ok": true,
+  "detail": "27 Sep"
+ },
+ {
+  "lock": "L8",
+  "where": "1280: \"13 mo overdue\" ends overdue",
+  "ok": true,
+  "detail": "13 mo overdue"
+ },
+ {
+  "lock": "L8",
+  "where": "1280: \"5 May\" is d Mon",
+  "ok": true,
+  "detail": "5 May"
+ },
+ {
+  "lock": "L8",
+  "where": "1280: \"6 mo overdue\" ends overdue",
+  "ok": true,
+  "detail": "6 mo overdue"
+ },
+ {
+  "lock": "L8",
+  "where": "1280: \"17 May\" is d Mon",
+  "ok": true,
+  "detail": "17 May"
+ },
+ {
+  "lock": "L8",
+  "where": "1280: \"5 mo overdue\" ends overdue",
+  "ok": true,
+  "detail": "5 mo overdue"
+ },
+ {
+  "lock": "L8",
+  "where": "1280: \"9 Jun\" is d Mon",
+  "ok": true,
+  "detail": "9 Jun"
+ },
+ {
+  "lock": "L8",
+  "where": "1280: \"5 mo overdue\" ends overdue",
+  "ok": true,
+  "detail": "5 mo overdue"
+ },
+ {
+  "lock": "L8",
+  "where": "1280: \"22 Jul\" is d Mon",
+  "ok": true,
+  "detail": "22 Jul"
+ },
+ {
+  "lock": "L8",
+  "where": "1280: \"3 mo overdue\" ends overdue",
+  "ok": true,
+  "detail": "3 mo overdue"
+ },
+ {
+  "lock": "L8",
+  "where": "1280: \"27 Jul\" is d Mon",
+  "ok": true,
+  "detail": "27 Jul"
+ },
+ {
+  "lock": "L8",
+  "where": "1280: \"3 mo overdue\" ends overdue",
+  "ok": true,
+  "detail": "3 mo overdue"
+ },
+ {
+  "lock": "L8",
+  "where": "1280: \"27 Jul\" is d Mon",
+  "ok": true,
+  "detail": "27 Jul"
+ },
+ {
+  "lock": "L8",
+  "where": "1280: \"3 mo overdue\" ends overdue",
+  "ok": true,
+  "detail": "3 mo overdue"
+ },
+ {
+  "lock": "L8",
+  "where": "1280: \"10 Aug\" is d Mon",
+  "ok": true,
+  "detail": "10 Aug"
+ },
+ {
+  "lock": "L8",
+  "where": "1280: \"3 mo overdue\" ends overdue",
+  "ok": true,
+  "detail": "3 mo overdue"
+ },
+ {
+  "lock": "L8",
+  "where": "1280: \"19 Aug\" is d Mon",
+  "ok": true,
+  "detail": "19 Aug"
+ },
+ {
+  "lock": "L8",
+  "where": "1280: \"2 mo overdue\" ends overdue",
+  "ok": true,
+  "detail": "2 mo overdue"
+ },
+ {
+  "lock": "L8",
+  "where": "1280: \"29 Aug\" is d Mon",
+  "ok": true,
+  "detail": "29 Aug"
+ },
+ {
+  "lock": "L8",
+  "where": "1280: \"2 mo overdue\" ends overdue",
+  "ok": true,
+  "detail": "2 mo overdue"
+ }
+]

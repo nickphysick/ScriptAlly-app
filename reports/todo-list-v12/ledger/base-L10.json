@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "L10",
+  "where": "1512: the desk card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L10",
+  "where": "1512: nothing uppercase in it",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L10",
+  "where": "1512: no small-capitals tag in its band",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L10",
+  "where": "1512: no progress dashes",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L10",
+  "where": "1280: the desk card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L10",
+  "where": "1280: nothing uppercase in it",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L10",
+  "where": "1280: no small-capitals tag in its band",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L10",
+  "where": "1280: no progress dashes",
+  "ok": true,
+  "detail": ""
+ }
+]

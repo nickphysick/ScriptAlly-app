@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "L13",
+  "where": "1512: \"You’re all caught up.\" in the band",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L13",
+  "where": "1512: the band is blush",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "L13",
+  "where": "1512: directly under the header, 44 below it (±2)",
+  "ok": false,
+  "detail": "false -1.0"
+ },
+ {
+  "lock": "L13",
+  "where": "1512: the armchair hawk",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "L13",
+  "where": "1512: the line says what is next",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L13",
+  "where": "1512: Coming up has cards",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "L13",
+  "where": "1512: no navy button in Coming up",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L13",
+  "where": "1512: no workspace sheet",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "L13",
+  "where": "1512: no Done today and no \"desk is clear\"",
+  "ok": false,
+  "detail": "{\"done\":true,\"clear\":true}"
+ },
+ {
+  "lock": "L13",
+  "where": "1280: \"You’re all caught up.\" in the band",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L13",
+  "where": "1280: the band is blush",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "L13",
+  "where": "1280: directly under the header, 44 below it (±2)",
+  "ok": false,
+  "detail": "false -1.0"
+ },
+ {
+  "lock": "L13",
+  "where": "1280: the armchair hawk",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "L13",
+  "where": "1280: the line says what is next",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L13",
+  "where": "1280: Coming up has cards",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "L13",
+  "where": "1280: no navy button in Coming up",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L13",
+  "where": "1280: no workspace sheet",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "L13",
+  "where": "1280: no Done today and no \"desk is clear\"",
+  "ok": false,
+  "detail": "{\"done\":true,\"clear\":true}"
+ }
+]

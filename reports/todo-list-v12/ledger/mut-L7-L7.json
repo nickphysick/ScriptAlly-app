@@ -1,0 +1,104 @@
+[
+ {
+  "lock": "L7",
+  "where": "tray bands found",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "L7",
+  "where": "you: no img",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "L7",
+  "where": "you: the paper band",
+  "ok": true,
+  "detail": "rgb(246, 242, 236)"
+ },
+ {
+  "lock": "L7",
+  "where": "you: the ! mark only on Your move",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "L7",
+  "where": "quiet: no img",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "L7",
+  "where": "quiet: the paper band",
+  "ok": true,
+  "detail": "rgb(246, 242, 236)"
+ },
+ {
+  "lock": "L7",
+  "where": "quiet: the ! mark only on Your move",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "L7",
+  "where": "tidy: no img",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "L7",
+  "where": "tidy: the paper band",
+  "ok": true,
+  "detail": "rgb(246, 242, 236)"
+ },
+ {
+  "lock": "L7",
+  "where": "tidy: the ! mark only on Your move",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "L7",
+  "where": "Set aside bands found",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "L7",
+  "where": "aside dismiss: no img",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L7",
+  "where": "aside dismiss: the paper band",
+  "ok": true,
+  "detail": "rgb(246, 242, 236)"
+ },
+ {
+  "lock": "L7",
+  "where": "aside dismiss: no ! mark",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L7",
+  "where": "aside rule: no img",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L7",
+  "where": "aside rule: the paper band",
+  "ok": true,
+  "detail": "rgb(246, 242, 236)"
+ },
+ {
+  "lock": "L7",
+  "where": "aside rule: no ! mark",
+  "ok": true,
+  "detail": ""
+ }
+]

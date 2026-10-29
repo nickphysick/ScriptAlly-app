@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "L2",
+  "where": "1512: cards are on the page",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "L2",
+  "where": "1512: the cards are exactly the urgent set, in urgentOrder",
+  "ok": false,
+  "detail": "0 vs 2"
+ },
+ {
+  "lock": "L2",
+  "where": "1512: no carousel task has a tray row",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L2",
+  "where": "1512: no tray row is urgent",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "L2",
+  "where": "1512: the badge was read",
+  "ok": true,
+  "detail": "54"
+ },
+ {
+  "lock": "L2",
+  "where": "1512: tray band counts + carousel = the badge",
+  "ok": true,
+  "detail": "54 + 0 vs 54"
+ },
+ {
+  "lock": "L2",
+  "where": "1512: no group folded (so the rows are the bands)",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L2",
+  "where": "1512: the rows are the bands",
+  "ok": true,
+  "detail": "54 vs 54"
+ },
+ {
+  "lock": "L2",
+  "where": "1512: the summary line counts the cards",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L2",
+  "where": "1512: Everything else says how many more",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L2",
+  "where": "1280: cards are on the page",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "L2",
+  "where": "1280: the cards are exactly the urgent set, in urgentOrder",
+  "ok": false,
+  "detail": "0 vs 2"
+ },
+ {
+  "lock": "L2",
+  "where": "1280: no carousel task has a tray row",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L2",
+  "where": "1280: no tray row is urgent",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "L2",
+  "where": "1280: the badge was read",
+  "ok": true,
+  "detail": "54"
+ },
+ {
+  "lock": "L2",
+  "where": "1280: tray band counts + carousel = the badge",
+  "ok": true,
+  "detail": "54 + 0 vs 54"
+ },
+ {
+  "lock": "L2",
+  "where": "1280: no group folded (so the rows are the bands)",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L2",
+  "where": "1280: the rows are the bands",
+  "ok": true,
+  "detail": "54 vs 54"
+ },
+ {
+  "lock": "L2",
+  "where": "1280: the summary line counts the cards",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L2",
+  "where": "1280: Everything else says how many more",
+  "ok": false,
+  "detail": "null"
+ }
+]
