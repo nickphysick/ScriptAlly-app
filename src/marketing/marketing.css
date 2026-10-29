@@ -3124,3 +3124,42 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   }
   .mk-cbtn { border-radius: 999px; min-height: 50px; }
 }
+
+/* ── B3: About on phones (Nick's picks 10C, 11B, 12B) ──
+   The opening is all ink: the aim in white in the typewriter face, the armchair drawing beneath it on
+   the ink, running straight into the (unchanged) navy gap band. The hero's full-bleed ground layer
+   takes the ink too, so no paper shows at the sides however wide the phone.
+   "How will we do it?" keeps its heading; each point becomes a white card with a 64px round spot
+   for the illustration (the dashed placeholder until the drawing arrives — the slot keeps its
+   `aria-label`, which names the plate), the heading at 1.35rem and the paragraph at 16px. The
+   01/02/03 go: the three points are not a sequence. The founder's note is one letter card with a
+   72px round photo spot. Card surfaces read Pricing's tokens. */
+@media (max-width: 760px) {
+  .mk-ahero { background-color: var(--mk-ink-shell); padding-bottom: 8px; }
+  .mk-ahero::before { background-color: var(--mk-ink-shell); }
+  .mk-scope .mk-ast { color: #fff; }
+
+  .mk-anum { display: none; }
+  .mk-band {
+    display: block; margin: 0 16px 14px; padding: 20px;
+    background: #fff; border-radius: 18px; box-shadow: var(--mk-pv-perklift);
+  }
+  .mk-band + .mk-band { border-top: 0; }
+  .mk-bandcopy { padding: 0; }
+  .mk-band .mk-aplate, .mk-aplate.mk-noteart {
+    width: 64px; height: 64px; min-height: 0; aspect-ratio: auto; max-width: none;
+    margin: 0 0 12px; padding: 0; overflow: hidden;
+    border: 2px dashed #cdbfb3; border-radius: 50%; background: #f5e6df;
+  }
+  .mk-aplate > * { display: none; }
+  .mk-scope .mk-bandcopy h2 { font-size: 1.35rem; line-height: 1.25; margin: 0 0 8px; }
+  .mk-bandcopy p { font-size: 16px; }
+
+  .mk-note {
+    display: block; margin: 0 16px 20px; padding: 24px 20px;
+    background: #fff; border-radius: 20px; box-shadow: var(--mk-pv-cardlift);
+  }
+  /* Centred, as the board draws it; the letter below it reads left-aligned. */
+  .mk-aplate.mk-noteart { width: 72px; height: 72px; margin: 0 auto 14px; }
+  .mk-notecol { padding: 0; }
+}
