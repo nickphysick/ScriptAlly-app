@@ -76,21 +76,9 @@
 .d58 .d71-hb--pri:hover { background: #fff; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25); transform: translateY(-1px); }
 
 /* first use: "Where do I start?" sits in the button row as a ghost on the ink */
-.d58 .d71-head .wds-btn {
-  height: 44px;
-  padding: 0 18px 0 7px;
-  background: rgba(255, 255, 255, 0.05);
-  box-shadow: inset 0 0 0 1px rgba(246, 241, 232, 0.18);
-  color: #f6f1e8;
-  font-size: 15.5px;
-  font-weight: 600;
-}
-.d58 .d71-head .wds-btn:hover { background: rgba(255, 255, 255, 0.1); box-shadow: inset 0 0 0 1px rgba(246, 241, 232, 0.32); }
-.d58 .d71-head .wds-btn.is-open, .d58 .d71-head .wds-btn:focus-visible { box-shadow: inset 0 0 0 1px rgba(246, 241, 232, 0.32), 0 0 0 2px #f4efe6; }
-.d58 .d71-head .wds-qm { width: 30px; height: 30px; background: #f4efe6; }
 
 @media (max-width: 1400px) {
-  .d58 .d71-hb, .d58 .d71-head .wds-btn { height: 40px; font-size: 14.5px; }
+  .d58 .d71-hb{ height: 40px; font-size: 14.5px; }
 }
 /* below 1200px of window the two ghosts fold to 40px icon-only squares; the primary keeps its words */
 @media (max-width: 1199px) {
@@ -473,7 +461,6 @@
 
 /* ── D · the founding writer card: MOVED to v77/dash77.css with the card (Dashboard v77). Only the
    first-use column's hairline stays here: it belongs to the column, not the card. ──────────────────── */
-.d58[data-mode="pre"] .d58-right > .d59-rule { margin: 8px 0 6px; }
 
 /* ── a window 700px tall or less: what gives way first (measured — see the report) ─────────────────
    The real shell carries the beta strip (42px) that the reference does not, and at 650–680px of window

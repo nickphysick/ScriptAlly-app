@@ -129,32 +129,7 @@
   white-space: nowrap;
 }
 .d58-btns { flex: none; margin-left: auto; display: flex; gap: 10px; }
-.d58-btn {
-  box-sizing: border-box;
-  height: 42px;
-  padding: 0 18px;
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  border-radius: 11px;
-  border: 1px solid var(--d58-ink-18);
-  background: #fff;
-  color: var(--d58-ink);
-  font-family: var(--d58-serif) !important;
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 1;
-  white-space: nowrap;
-  cursor: pointer;
-  box-shadow: 0 6px 14px -10px rgba(28, 19, 15, 0.4);
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
-}
-.d58-btn:hover { transform: translateY(-1px); box-shadow: 0 9px 18px -10px rgba(28, 19, 15, 0.45); }
-.d58-btn:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
-.d58-btn--pri { background: var(--d58-navy); border-color: var(--d58-navy); color: var(--d58-cream); }
 .d58-btn--sm { height: 36px; padding: 0 14px; font-size: 14px; }
-.d58-btn[disabled] { opacity: 0.6; cursor: default; transform: none; }
-.d58-btn svg { flex: none; }
 .d58-soon {
   font-family: var(--d58-mono) !important; font-size: 8.5px; font-weight: 600; letter-spacing: 0.14em;
   padding: 2px 5px; border-radius: 4px; background: rgba(28, 19, 15, 0.08); color: var(--d58-ink-62);
@@ -184,17 +159,6 @@
 }
 .d58-link:hover { color: var(--d58-ink); }
 /* ── the right column: no container ────────────────────────────────────────────────────────── */
-
-.d58-listhead { flex: none; padding: 2px 2px 0; margin-bottom: 14px; }
-.d58 .d58-listtitle {
-  margin: 0;
-  font-family: var(--d58-type) !important;
-  font-weight: 400;
-  font-size: 25px;
-  line-height: 30px;
-  color: var(--d58-ink);
-}
-.d58-listbar { display: block; width: 44px; height: 3px; margin-top: 8px; border-radius: 2px; background: var(--d58-rust); }
 
 /* ⚠️ v58's focus card (`.d58-focus` and its band, body, stages and foot) is RETIRED by Dashboard v71:
    the task card (v71/dash71.css) replaced it. `.d58-cal`, its date tile, is kept for the task card. */
@@ -331,14 +295,12 @@
 @media (max-width: 1439px) {
   .d58 { --d58-gutter: 34px; --d58-gap: 18px; }
   .d58-header { gap: 20px; }
-  .d58-btn { height: 40px; }
   .d58-btn--sm { height: 36px; }
   .d58 .d58-btn--agent { display: none; }
   .d58-byline > span { font-size: 16.5px; line-height: 23px; }
   .d58 .os-band { padding: 9px 18px; }
   .d58 .os-cardttl { font-size: 23px; line-height: 26px; }
   .d58 .os-lead > .os-frame > :not(.os-band) { margin-inline: 18px; }
-  .d58 .d58-listtitle { font-size: 21px; line-height: 25.2px; }
 }
 /* below the supported size the page flows: one column, and each card its own height */
 @media (max-width: 1099px) {
@@ -355,7 +317,7 @@
   .d58-drawer { width: 100vw; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .d58-wash, .d58-drawer, .d58-btn { transition: none; }
+  .d58-wash, .d58-drawer{ transition: none; }
 }
 
 /* ── the skipped-rows line (onboarding v5 part 2; ref design-refs/import-flow-v1) ──────────────────

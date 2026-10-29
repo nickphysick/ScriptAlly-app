@@ -4,16 +4,14 @@
  *
  * DASHBOARD v60 — the left column's new cards (ref design-refs/dashboard-v60/dashboard-v60.html).
  *
- * Before the first query: two doors — "No queries yet" (the Courier, the column's ONE drawing) and
- * "Agents on file" (a slate glyph disc, or the coverage snapshot once agents exist). Once a query
- * exists: the chart runs full width and two hoop cards sit beneath it — Closed and Agents on file.
+ * Once a query exists: the chart runs full width and two hoop cards sit beneath it — Closed and Agents on file.
+ * (Before the first query the left column is the set-up card — first visit v1; v60's two doors are retired.)
  *
  * ⚠️ AGENTS ON FILE IS A COVERAGE SNAPSHOT, NEVER A LIST — a writer may have hundreds. Its figures are
  * `agentCoverage` (lib/dashFirstUse), which is the Contact list's own derivations. Its band is the
  * Contact list's slate (`--clv-slate`, `:root`), read, never restated.
  * ⚠️ CLOSED KEEPS ITS LOOK: the same Archivist and the same four buckets as v58's closed card, from the
  * same `closedTile`, with the same "See all" target. Only the hoop is new.
- * ⚠️ "Log a query" and "Add an agent" live HERE, on the doors; the right column never repeats them.
  */
 import React, { useCallback, useMemo, useRef } from "react";
 import type { ClosedTile } from "../../../lib/dashClosed";
@@ -27,113 +25,14 @@ import { agentCards, closedCards, type AgentCard, type AgentStackKey, type Close
 import { HoverStack } from "../v116/HoverStack";
 import { AgentMini, QueryMini, QueryNone } from "../v116/MiniCards";
 import { announce, stackAnchor, useStackHover } from "../v116/useStackHover";
-import { StartTag, useSpot } from "./WhereStart";
 
 /** Closed's four stone shades, light to dark, in bucket order (literal: they also draw in, never via a `var()` keyframe). */
 export const CLOSED_STONES: Record<string, string> = { quiet: "#b9b2a8", letter: "#8c8379", partial: "#6f6962", full: "#4a443f" };
 /** Agents on file: querying (navy), closed (stone), not yet queried (the Contact list's pale slate, read) */
 export const AGENT_SEG = { querying: "#2a3a52", closed: "#c9c2b8", none: "var(--clv-slate-pale)" } as const;
 
-const PersonGlyph = () => (
-  <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="7" r="3.2" /><path d="M3.5 17c.8-3.4 3.4-5 6.5-5s5.7 1.6 6.5 5" /></svg>
-);
-const LogGlyph = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M3 13 12.5 3.5M9 3.5h3.5V7" /></svg>
-);
-
-/* ── before the first query ─────────────────────────────────────────────────────────────────── */
-
-export const QueriesDoor: React.FC<{ loading: boolean; agents: number; onLog: () => void }> = ({ loading, agents, onLog }) => {
-  const { spot, first } = useSpot("queries");
-  return (
-  <div className={`os-card d60-card d60-door${loading ? " d58-skcard" : ""}`} data-sk={loading ? "card" : undefined} data-d60="queries-door" data-spot={spot} role="group" aria-label="No queries yet">
-    <StartTag show={first} />
-    <div className="os-frame">
-      <div className="os-band d60-band--navy"><div className="os-bandrow"><h3 className="os-cardttl">No queries yet</h3></div></div>
-      <div className="d60-doorbody">
-        <div className="d60-doorart" aria-hidden="true">
-          <img data-d60="art" src={artUrl(DASH_ART.courier)} width={DASH_ART.courier.width} height={DASH_ART.courier.height} alt="" decoding="async" />
-        </div>
-        <div className="d60-doortext">
-          <h3 className="d60-doorh">No queries out yet.</h3>
-          <p className={`d60-doorp${loading ? " d58-sk" : ""}`} data-d60="queries-copy">
-            {agents > 0
-              ? `Log a query to one of your ${agents.toLocaleString("en-GB")} agents and it'll show up here.`
-              : "Log a query you've sent and it'll show up here, with any date."}
-          </p>
-          <div className="d60-doorrow">
-            <button type="button" className="d58-btn d58-btn--pri" data-d60="log" disabled={loading} onClick={onLog}><LogGlyph />Log a query</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  );
-};
-
-export const AgentsDoor: React.FC<{ loading: boolean; onAdd: () => void; onImport: () => void }> = ({ loading, onAdd, onImport }) => {
-  const { spot, first } = useSpot("agents");
-  return (
-  <div className={`os-card d60-card d60-agents${loading ? " d58-skcard" : ""}`} data-sk={loading ? "card" : undefined} data-d60="agents-door" data-spot={spot} role="group" aria-label="Agents on file">
-    <StartTag show={first} />
-    <div className="os-frame">
-      <div className="os-band d60-band--slate"><div className="os-bandrow"><h3 className="os-cardttl">Agents on file</h3><span className="d60-meta" data-d60="agents-meta">0 ON FILE</span></div></div>
-      <div className="d60-doorbody d60-doorbody--sm">
-        <span className="d60-glyph" data-d60="glyph" aria-hidden="true"><PersonGlyph /></span>
-        <div className="d60-doortext">
-          <h3 className="d60-doorh d60-doorh--sm">No agents yet.</h3>
-          <p className="d60-doorp">Add the agents you'd like to query. You can add them long before you send anything.</p>
-          <div className="d60-doorrow">
-            <button type="button" className="d58-btn d58-btn--pri" data-d60="add-agent" disabled={loading} onClick={onAdd}>+ Add an agent</button>
-            <button type="button" className="d58-btn" data-d60="import-list" disabled={loading} onClick={onImport}>Import a list</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  );
-};
-
-const Key: React.FC<{ cls: string; n: number; label: string }> = ({ cls, n, label }) => (
-  <span className={`d60-key${n === 0 ? " is-zero" : ""}`} data-d60={`key-${cls}`}><i className={`d60-sw d60-sw--${cls}`} /><b>{n}</b> {label}</span>
-);
-
-/** Agents on file once there are agents but no query: the coverage snapshot as one row. */
-export const AgentsSnap: React.FC<{ loading: boolean; cov: AgentCoverage; onReady: () => void }> = ({ loading, cov, onReady }) => {
-  const { spot, first } = useSpot("agents");
-  return (
-  <div className={`os-card d60-card d60-agents${loading ? " d58-skcard" : ""}`} data-sk={loading ? "card" : undefined} data-d60="agents-snap" data-spot={spot} role="group" aria-label="Agents on file"
-    data-cov={JSON.stringify({ querying: cov.querying, closed: cov.closed, none: cov.none, ready: cov.ready, total: cov.total })}>
-    <StartTag show={first} />
-    <div className="os-frame">
-      <div className="os-band d60-band--slate">
-        <div className="os-bandrow"><h3 className="os-cardttl">Agents on file</h3>
-          {cov.addedThisWeek > 0 && <span className="d60-meta d60-week" data-d60="agents-week">+{cov.addedThisWeek} THIS WEEK</span>}
-        </div>
-      </div>
-      <div className="d60-snap">
-        <div className="d60-snaprow">
-          <div className="d60-big"><b className={loading ? "d58-sk" : undefined} data-d60="snap-queried"><CountUp n={cov.queried} /></b><span>of {cov.total.toLocaleString("en-GB")} queried</span></div>
-          <div className="d60-bar" aria-hidden="true">
-            {cov.querying > 0 && <i className="d60-sw--querying" style={{ flex: cov.querying }} />}
-            {cov.closed > 0 && <i className="d60-sw--closed" style={{ flex: cov.closed }} />}
-            {cov.none > 0 && <i className="d60-sw--none" style={{ flex: cov.none }} />}
-          </div>
-          <div className="d60-pct">{cov.pct}%</div>
-        </div>
-        <div className="d60-keys">
-          <Key cls="querying" n={cov.querying} label="querying" />
-          <Key cls="closed" n={cov.closed} label="closed" />
-          <Key cls="none" n={cov.none} label="not yet queried" />
-          <button type="button" className="d60-ready" data-d60="ready" disabled={loading} onClick={onReady}>{cov.ready} ready to query →</button>
-        </div>
-      </div>
-    </div>
-  </div>
-  );
-};
-
-/* ── once a query exists: the two hoops ─────────────────────────────────────────────────────── */
+/* ⚠️ THE DOORS ARE RETIRED (Dashboard first visit v1, Part E): QueriesDoor, AgentsDoor and AgentsSnap drew the
+   pre-query left column, which is now the set-up card and the Mentor's tip (fv1/). Recoverable at d6726195. */
 
 /**
  * ⚠️ DASHBOARD v116: each slice of the ring and each row of the key shows THAT category's queries as a
