@@ -1,0 +1,77 @@
+{
+  "state": "s6a",
+  "label": "s6",
+  "at": "2026-10-29T00:05:42.551Z",
+  "vps": {
+    "1280": {
+      "mode": "q",
+      "leftPre": "0",
+      "rightMode": "q",
+      "header": "— READY TO QUERY —\nThe Lantern Keepers\nby Audit S6\nLog a query\nRecord a response\nAdd an agent",
+      "leftKids": [
+        "div.d58-active data-d58=active",
+        "div.d60-hoops data-d60=hoops"
+      ],
+      "rightKids": [
+        "div.d71-taskslot data-d71=task-slot",
+        "div.d71-fwslot data-d71=fw-slot"
+      ],
+      "leftText": "2 active queries\nSINCE 14 OCT\n12 Oct\n19 Oct\n26 Oct\n0 closed\nSee all →\n0\nNo reply\n0\nPassed on query\n0\nPassed on partial\n0\nPassed on full\nAgents on file\n2\nOF 3\nQUERIED\n2\nQuerying\n0\nClosed\n1\nNot yet queried\n1 ready to query →",
+      "rightText": "Ready to query\nSM\nQuery Sasha Merriman\nPELL & GORSE · FANTASY\nTakes fantasy.\nView task →\nAudit S6\nFOUNDING WRITER\nNO CONTRIBUTIONS YET\nYour feedback shapes QueryHawk\nWhat I like\nWhat I don’t\nAn idea\nEgg",
+      "founding": "Audit S6\nFOUNDING WRITER\nNO CONTRIBUTIONS YET\nYour feedback shapes QueryHawk\nWhat I like\nWhat I don’t\nAn idea\nEgg",
+      "feedTab": "Activity feed\n6\n▲",
+      "shadow": {
+        "shown": true,
+        "rect": {
+          "x": 499.8326416015625,
+          "y": -150.39212036132812,
+          "width": 1341.404541015625,
+          "height": 1216.35205078125,
+          "top": -150.39212036132812,
+          "right": 1841.2371826171875,
+          "bottom": 1065.9599304199219,
+          "left": 499.8326416015625
+        }
+      },
+      "clipped": [
+        "d105-sr \"Egg\" sw27/cw1 sh24/ch1"
+      ],
+      "scroller": null
+    },
+    "1512": {
+      "mode": "q",
+      "leftPre": "0",
+      "rightMode": "q",
+      "header": "— READY TO QUERY —\nThe Lantern Keepers\nby Audit S6\nLog a query\nRecord a response\nAdd an agent",
+      "leftKids": [
+        "div.d58-active data-d58=active",
+        "div.d60-hoops data-d60=hoops"
+      ],
+      "rightKids": [
+        "div.d71-taskslot data-d71=task-slot",
+        "div.d71-fwslot data-d71=fw-slot"
+      ],
+      "leftText": "2 active queries\nSINCE 14 OCT\n12 Oct\n19 Oct\n26 Oct\n0 closed\nSee all →\n0\nNo reply\n0\nPassed on query\n0\nPassed on partial\n0\nPassed on full\nAgents on file\n+3 this week\n2\nOF 3\nQUERIED\n2\nQuerying\n0\nClosed\n1\nNot yet queried\n1 ready to query →",
+      "rightText": "Ready to query\nSM\nQuery Sasha Merriman\nPELL & GORSE · FANTASY\nTakes fantasy.\nView task →\nAudit S6\nFOUNDING WRITER\nNO CONTRIBUTIONS YET\nEGG\nYour feedback shapes QueryHawk\nTell us what works, what doesn’t and what you’d add. We read every word.\nWhat I like\nWhat I don’t\nAn idea\nEgg\nTop contributors enter a weekly prize draw, and climbing the ranks earns a special thank-you at launch.",
+      "founding": "Audit S6\nFOUNDING WRITER\nNO CONTRIBUTIONS YET\nEGG\nYour feedback shapes QueryHawk\nTell us what works, what doesn’t and what you’d add. We read every word.\nWhat I like\nWhat I don’t\nAn idea\nEgg\nTop contributors enter a weekly prize draw, and climbing the ranks earns a special thank-you at launch.",
+      "feedTab": "Activity feed\n6\n▲",
+      "shadow": {
+        "shown": true,
+        "rect": {
+          "x": 578.796630859375,
+          "y": -150.50665283203125,
+          "width": 1341.4622802734375,
+          "height": 1216.42626953125,
+          "top": -150.50665283203125,
+          "right": 1920.2589111328125,
+          "bottom": 1065.9196166992188,
+          "left": 578.796630859375
+        }
+      },
+      "clipped": [
+        "d105-sr \"Egg\" sw27/cw1 sh24/ch1"
+      ],
+      "scroller": null
+    }
+  }
+}

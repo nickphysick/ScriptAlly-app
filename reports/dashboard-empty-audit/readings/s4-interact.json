@@ -1,0 +1,27 @@
+{
+  "feed": "Activity feed\nEverything that's happened on The Lantern Keepers\n✕\nAll\nFrom agents\nBy you\nLast 30 days\nLast 90 days\nEverything\n0\nreplies from agents\n9\nthings you did\n0\nstill need you\nToday · Wednesday 28 October\n9 UPDATES\nNO REPLY\n11:51pm\nYou closed your query to Clara Benning for The Lantern Keepers after 3 minutes without a reply\nASHDOWN & PRYCE\nQUERY SENT\n11:49pm\nYou sent your query for The Lantern Keepers to Clara Benning\nASHDOWN & PRYCE\nQUERY SENT\n11:48pm\nYou sent your query for The Lantern Keepers to Daniel Okoye\nFERNHILL AGENCY\nQUERY SENT\n11:48pm\nYou sent your query for The Lantern Keepers to Helena Marsh\nNORTHGATE LITERARY\nYou added Rufus Kell to your contact list\n11:45pm\nYou added Clara Benning to your contact list\n11:45pm\nYou added Daniel Okoye to your contact list\n11:45pm\nYou added Helena Marsh to your contact list\n11:45pm\nYou added The Lantern Keepers to your manuscripts\n11:44pm\nThat's the last 30 days.",
+  "closed": {
+    "rows": [
+      "1\nNo reply",
+      "0\nPassed on query",
+      "0\nPassed on partial",
+      "0\nPassed on full"
+    ],
+    "card": "1 closed\nSee all →\n1\nNo reply\n0\nPassed on query\n0\nPassed on partial\n0\nPassed on full",
+    "stack0": "Clara Benning\nASHDOWN & PRYCE\nQUERYING\nThe Lantern Keepers\nQUERIED 15 JUN\n19 WKS",
+    "stack1": "None yet\nPassed on query",
+    "stack2": "None yet\nPassed on partial",
+    "stack3": "None yet\nPassed on full"
+  },
+  "agents": {
+    "rows": [
+      "2\nQuerying",
+      "1\nClosed",
+      "1\nNot yet queried"
+    ],
+    "card": "Agents on file\n+4 this week\n3\nOF 4\nQUERIED\n2\nQuerying\n1\nClosed\n1\nNot yet queried\n1 ready to query →",
+    "stack0": "Helena Marsh\nNORTHGATE LITERARY\nNo genres yet\nDaniel Okoye\nFERNHILL AGENCY\nNo genres yet",
+    "stack1": "Clara Benning\nASHDOWN & PRYCE\nNo genres yet",
+    "stack2": "Rufus Kell\nLOWTHER ASSOCIATES\nNo genres yet"
+  }
+}

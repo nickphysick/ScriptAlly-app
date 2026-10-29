@@ -1,0 +1,27 @@
+{
+  "feed": "Activity feed\nEverything that's happened on The Lantern Keepers\n✕\nAll\nFrom agents\nBy you\nLast 30 days\nLast 90 days\nEverything\n0\nreplies from agents\n5\nthings you did\n0\nstill need you\nToday · Wednesday 28 October\n5 UPDATES\nQUERY SENT\n11:41pm\nYou sent your query for The Lantern Keepers to Marion Hale\nGREENLEAF LITERARY\nYou added Priya Okafor to your contact list\n11:38pm\nYou added Tobias Arden to your contact list\n11:37pm\nYou added Marion Hale to your contact list\n11:37pm\nYou added The Lantern Keepers to your manuscripts\n11:35pm\nThat's the last 30 days.",
+  "closed": {
+    "rows": [
+      "0\nNo reply",
+      "0\nPassed on query",
+      "0\nPassed on partial",
+      "0\nPassed on full"
+    ],
+    "card": "0 closed\nSee all →\n0\nNo reply\n0\nPassed on query\n0\nPassed on partial\n0\nPassed on full",
+    "stack0": "None yet\nNo reply",
+    "stack1": "None yet\nPassed on query",
+    "stack2": "None yet\nPassed on partial",
+    "stack3": "None yet\nPassed on full"
+  },
+  "agents": {
+    "rows": [
+      "1\nQuerying",
+      "0\nClosed",
+      "2\nNot yet queried"
+    ],
+    "card": "Agents on file\n+3 this week\n1\nOF 3\nQUERIED\n1\nQuerying\n0\nClosed\n2\nNot yet queried\n2 ready to query →",
+    "stack0": "Marion Hale\nGREENLEAF LITERARY\nNo genres yet",
+    "stack1": "None yet\nClosed",
+    "stack2": "Priya Okafor\nWEXFORD & LANE\nNo genres yet\nTobias Arden\nSALTMARSH AGENCY\nNo genres yet"
+  }
+}

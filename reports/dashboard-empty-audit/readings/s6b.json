@@ -1,0 +1,78 @@
+{
+  "state": "s6b",
+  "label": "s6",
+  "at": "2026-10-29T00:06:14.056Z",
+  "vps": {
+    "1280": {
+      "mode": "q",
+      "leftPre": "0",
+      "rightMode": "q",
+      "header": "— READY TO QUERY —\nThe Lantern Keepers\nby Audit S6\nLog a query\nRecord a response\nAdd an agent",
+      "leftKids": [
+        "div.d58-active data-d58=active",
+        "div.d60-hoops data-d60=hoops"
+      ],
+      "rightKids": [
+        "div.d71-taskslot data-d71=task-slot",
+        "div.d71-fwslot data-d71=fw-slot"
+      ],
+      "leftText": "3 active queries\nSINCE 14 OCT\n12 Oct\n19 Oct\n26 Oct\n0 closed\nSee all →\n0\nNo reply\n0\nPassed on query\n0\nPassed on partial\n0\nPassed on full\nAgents on file\n3\nOF 3\nQUERIED\n3\nQuerying\n0\nClosed\n0\nNot yet queried\n0 ready to query →",
+      "rightText": "Coming up\n‹\n›\nWED\n9\nReply window ends for Beatrice Lund\nQUERIED 14 OCT\nThe next date from your queries. Nothing needs doing before then.\nView task →\nThen: reply window ends for Owen Castell\nAudit S6\nFOUNDING WRITER\nNO CONTRIBUTIONS YET\nYour feedback shapes QueryHawk\nWhat I like\nWhat I don’t\nAn idea\nEgg",
+      "founding": "Audit S6\nFOUNDING WRITER\nNO CONTRIBUTIONS YET\nYour feedback shapes QueryHawk\nWhat I like\nWhat I don’t\nAn idea\nEgg",
+      "feedTab": "Activity feed\n7\n▲",
+      "shadow": {
+        "shown": true,
+        "rect": {
+          "x": 499.82769775390625,
+          "y": -150.38577270507812,
+          "width": 1341.4013671875,
+          "height": 1216.347900390625,
+          "top": -150.38577270507812,
+          "right": 1841.2290649414062,
+          "bottom": 1065.9621276855469,
+          "left": 499.82769775390625
+        }
+      },
+      "clipped": [
+        "d71-then \"Then: reply window ends for Owen Castell\" sw263/cw176 sh20/ch20",
+        "d105-sr \"Egg\" sw27/cw1 sh24/ch1"
+      ],
+      "scroller": null
+    },
+    "1512": {
+      "mode": "q",
+      "leftPre": "0",
+      "rightMode": "q",
+      "header": "— READY TO QUERY —\nThe Lantern Keepers\nby Audit S6\nLog a query\nRecord a response\nAdd an agent",
+      "leftKids": [
+        "div.d58-active data-d58=active",
+        "div.d60-hoops data-d60=hoops"
+      ],
+      "rightKids": [
+        "div.d71-taskslot data-d71=task-slot",
+        "div.d71-fwslot data-d71=fw-slot"
+      ],
+      "leftText": "3 active queries\nSINCE 14 OCT\n12 Oct\n19 Oct\n26 Oct\n0 closed\nSee all →\n0\nNo reply\n0\nPassed on query\n0\nPassed on partial\n0\nPassed on full\nAgents on file\n+3 this week\n3\nOF 3\nQUERIED\n3\nQuerying\n0\nClosed\n0\nNot yet queried\n0 ready to query →",
+      "rightText": "Coming up\n‹\n›\nWED\n9\nReply window ends for Beatrice Lund\nQUERIED 14 OCT\nThe next date from your queries. Nothing needs doing before then.\nView task →\nThen: reply window ends for Owen Castell\nAudit S6\nFOUNDING WRITER\nNO CONTRIBUTIONS YET\nEGG\nYour feedback shapes QueryHawk\nTell us what works, what doesn’t and what you’d add. We read every word.\nWhat I like\nWhat I don’t\nAn idea\nEgg\nTop contributors enter a weekly prize draw, and climbing the ranks earns a special thank-you at launch.",
+      "founding": "Audit S6\nFOUNDING WRITER\nNO CONTRIBUTIONS YET\nEGG\nYour feedback shapes QueryHawk\nTell us what works, what doesn’t and what you’d add. We read every word.\nWhat I like\nWhat I don’t\nAn idea\nEgg\nTop contributors enter a weekly prize draw, and climbing the ranks earns a special thank-you at launch.",
+      "feedTab": "Activity feed\n7\n▲",
+      "shadow": {
+        "shown": true,
+        "rect": {
+          "x": 578.7877197265625,
+          "y": -150.49517822265625,
+          "width": 1341.4564208984375,
+          "height": 1216.418701171875,
+          "top": -150.49517822265625,
+          "right": 1920.244140625,
+          "bottom": 1065.9235229492188,
+          "left": 578.7877197265625
+        }
+      },
+      "clipped": [
+        "d105-sr \"Egg\" sw27/cw1 sh24/ch1"
+      ],
+      "scroller": null
+    }
+  }
+}

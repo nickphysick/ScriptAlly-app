@@ -1,0 +1,79 @@
+{
+  "state": "s2",
+  "label": "s1",
+  "at": "2026-10-28T23:38:23.102Z",
+  "vps": {
+    "1280": {
+      "mode": "pre",
+      "leftPre": "1",
+      "rightMode": "pre",
+      "header": "— READY TO QUERY —\nThe Lantern Keepers\nby Audit S1\n?\nWhere do I start?",
+      "leftKids": [
+        "div.os-card.d60-card.d60-door data-d60=queries-door",
+        "div.os-card.d60-card.d60-agents data-d60=agents-snap data-cov={\"querying\":0,\"closed\":0,\"none\":3,\"ready\":3,\"total\":3}"
+      ],
+      "rightKids": [
+        "div.d58-listhead data-d58=list-head",
+        "div.d60-liftsub data-d60=lift-sub",
+        "div.d60-ways data-d60=ways",
+        "hr.d59-rule data-d58=rule",
+        "section.d105-fw.d116-tilt data-d58=panel data-d71=fw data-loading=0 data-d105=card data-tier=0 data-waiting=0 data-state=idle"
+      ],
+      "leftText": "No queries yet\nNo queries out yet.\nLog a query to one of your 3 agents and it'll show up here.\nLog a query\nAgents on file\n+3 THIS WEEK\n0\nof 3 queried\n0%\n0 querying\n0 closed\n3 not yet queried\n3 ready to query →",
+      "rightText": "Ready for lift off?\nYou could also:\n0 OF 4 · OPTIONAL\nImport your journey\nSmart import →\nAdd your materials\nAdd a material →\nBuild your comps\nAdd a comp →\nRecord a version\nAdd a version →\nAudit S1\nFOUNDING WRITER\nNO CONTRIBUTIONS YET",
+      "founding": "Audit S1\nFOUNDING WRITER\nNO CONTRIBUTIONS YET",
+      "feedTab": "Activity feed\n3\n▲",
+      "shadow": {
+        "shown": true,
+        "rect": {
+          "x": 499.8424072265625,
+          "y": -150.40472412109375,
+          "width": 1341.4110107421875,
+          "height": 1216.3603515625,
+          "top": -150.40472412109375,
+          "right": 1841.25341796875,
+          "bottom": 1065.9556274414062,
+          "left": 499.8424072265625
+        }
+      },
+      "clipped": [],
+      "scroller": null
+    },
+    "1512": {
+      "mode": "pre",
+      "leftPre": "1",
+      "rightMode": "pre",
+      "header": "— READY TO QUERY —\nThe Lantern Keepers\nby Audit S1\n?\nWhere do I start?",
+      "leftKids": [
+        "div.os-card.d60-card.d60-door data-d60=queries-door",
+        "div.os-card.d60-card.d60-agents data-d60=agents-snap data-cov={\"querying\":0,\"closed\":0,\"none\":3,\"ready\":3,\"total\":3}"
+      ],
+      "rightKids": [
+        "div.d58-listhead data-d58=list-head",
+        "div.d60-liftsub data-d60=lift-sub",
+        "div.d60-ways data-d60=ways",
+        "hr.d59-rule data-d58=rule",
+        "section.d105-fw.d116-tilt data-d58=panel data-d71=fw data-loading=0 data-d105=card data-tier=0 data-waiting=0 data-state=idle"
+      ],
+      "leftText": "No queries yet\nNo queries out yet.\nLog a query to one of your 3 agents and it'll show up here.\nLog a query\nAgents on file\n+3 THIS WEEK\n0\nof 3 queried\n0%\n0 querying\n0 closed\n3 not yet queried\n3 ready to query →",
+      "rightText": "Ready for lift off?\nYou could also:\n0 OF 4 · OPTIONAL\nImport your journey\nBring in the spreadsheet you've been tracking queries in.\nSmart import →\nAdd your materials\nYour letter, synopsis and opening sample, kept as versions.\nAdd a material →\nBuild your comps\nMost agents want two comparable titles in a query.\nAdd a comp →\nRecord a version\nSave the draft you're sending, so you know which one each agent got.\nAdd a version →\nAudit S1\nFOUNDING WRITER\nNO CONTRIBUTIONS YET",
+      "founding": "Audit S1\nFOUNDING WRITER\nNO CONTRIBUTIONS YET",
+      "feedTab": "Activity feed\n3\n▲",
+      "shadow": {
+        "shown": true,
+        "rect": {
+          "x": 578.805419921875,
+          "y": -150.51800537109375,
+          "width": 1341.468017578125,
+          "height": 1216.43359375,
+          "top": -150.51800537109375,
+          "right": 1920.2734375,
+          "bottom": 1065.9155883789062,
+          "left": 578.805419921875
+        }
+      },
+      "clipped": [],
+      "scroller": null
+    }
+  }
+}

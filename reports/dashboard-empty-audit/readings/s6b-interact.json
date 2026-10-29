@@ -1,0 +1,27 @@
+{
+  "feed": "Activity feed\nEverything that's happened on The Lantern Keepers\n✕\nAll\nFrom agents\nBy you\nLast 30 days\nLast 90 days\nEverything\n0\nreplies from agents\n7\nthings you did\n0\nstill need you\nToday · Thursday 29 October\n7 UPDATES\nQUERY SENT\n12:06am\nYou sent your query for The Lantern Keepers to Sasha Merriman\nPELL & GORSE\nQUERY SENT\n12:05am\nYou sent your query for The Lantern Keepers to Owen Castell\nTIDEWATER AGENCY\nQUERY SENT\n12:05am\nYou sent your query for The Lantern Keepers to Beatrice Lund\nHARROWGATE LITERARY\nYou added Sasha Merriman to your contact list\n12:04am\nYou added Owen Castell to your contact list\n12:04am\nYou added Beatrice Lund to your contact list\n12:03am\nYou added The Lantern Keepers to your manuscripts\n12:02am\nThat's the last 30 days.",
+  "closed": {
+    "rows": [
+      "0\nNo reply",
+      "0\nPassed on query",
+      "0\nPassed on partial",
+      "0\nPassed on full"
+    ],
+    "card": "0 closed\nSee all →\n0\nNo reply\n0\nPassed on query\n0\nPassed on partial\n0\nPassed on full",
+    "stack0": "None yet\nNo reply",
+    "stack1": "None yet\nPassed on query",
+    "stack2": "None yet\nPassed on partial",
+    "stack3": "None yet\nPassed on full"
+  },
+  "agents": {
+    "rows": [
+      "3\nQuerying",
+      "0\nClosed",
+      "0\nNot yet queried"
+    ],
+    "card": "Agents on file\n+3 this week\n3\nOF 3\nQUERIED\n3\nQuerying\n0\nClosed\n0\nNot yet queried\n0 ready to query →",
+    "stack0": "Sasha Merriman\nPELL & GORSE\nFantasy\nOwen Castell\nTIDEWATER AGENCY\nFantasy\nBeatrice Lund\nHARROWGATE LITERARY\nFantasy",
+    "stack1": "None yet\nClosed",
+    "stack2": "None yet\nNot yet queried"
+  }
+}

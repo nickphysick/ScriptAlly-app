@@ -1,0 +1,27 @@
+{
+  "feed": "Activity feed\nEverything that's happened on The Lantern Keepers\n✕\nAll\nFrom agents\nBy you\nLast 30 days\nLast 90 days\nEverything\n0\nreplies from agents\n9\nthings you did\n0\nstill need you\nToday · Wednesday 28 October\n9 UPDATES\nNO REPLY\n11:56pm\nYou closed your query to Nadia Sorensen for The Lantern Keepers\nKESTREL & FINCH\nNO REPLY\n11:56pm\nYou closed your query to Imogen Royle for The Lantern Keepers\nBRAMBLE HOUSE\nQUERY SENT\n11:56pm\nYou sent your query for The Lantern Keepers to Nadia Sorensen\nKESTREL & FINCH\nQUERY SENT\n11:55pm\nYou sent your query for The Lantern Keepers to Felix Achterberg\nQUAYSIDE LITERARY\nQUERY SENT\n11:55pm\nYou sent your query for The Lantern Keepers to Imogen Royle\nBRAMBLE HOUSE\nYou added Nadia Sorensen to your contact list\n11:55pm\nYou added Felix Achterberg to your contact list\n11:54pm\nYou added Imogen Royle to your contact list\n11:54pm\nYou added The Lantern Keepers to your manuscripts\n11:54pm\nThat's the last 30 days.",
+  "closed": {
+    "rows": [
+      "2\nNo reply",
+      "0\nPassed on query",
+      "0\nPassed on partial",
+      "0\nPassed on full"
+    ],
+    "card": "2 closed\nSee all →\n2\nNo reply\n0\nPassed on query\n0\nPassed on partial\n0\nPassed on full",
+    "stack0": "Nadia Sorensen\nKESTREL & FINCH\nQUERYING\nThe Lantern Keepers\nQUERIED 11 AUG\n11 WKS\nImogen Royle\nBRAMBLE HOUSE\nQUERYING\nThe Lantern Keepers\nQUERIED 2 JUN\n21 WKS",
+    "stack1": "None yet\nPassed on query",
+    "stack2": "None yet\nPassed on partial",
+    "stack3": "None yet\nPassed on full"
+  },
+  "agents": {
+    "rows": [
+      "1\nQuerying",
+      "2\nClosed",
+      "0\nNot yet queried"
+    ],
+    "card": "Agents on file\n+3 this week\n3\nOF 3\nQUERIED\n1\nQuerying\n2\nClosed\n0\nNot yet queried\n0 ready to query →",
+    "stack0": "Felix Achterberg\nQUAYSIDE LITERARY\nNo genres yet",
+    "stack1": "Nadia Sorensen\nKESTREL & FINCH\nNo genres yet\nImogen Royle\nBRAMBLE HOUSE\nNo genres yet",
+    "stack2": "None yet\nNot yet queried"
+  }
+}

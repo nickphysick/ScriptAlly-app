@@ -1,0 +1,78 @@
+{
+  "state": "s3",
+  "label": "s1",
+  "at": "2026-10-28T23:41:34.848Z",
+  "vps": {
+    "1280": {
+      "mode": "q",
+      "leftPre": "0",
+      "rightMode": "q",
+      "header": "— READY TO QUERY —\nThe Lantern Keepers\nby Audit S1\nLog a query\nRecord a response\nAdd an agent",
+      "leftKids": [
+        "div.d58-active data-d58=active",
+        "div.d60-hoops data-d60=hoops"
+      ],
+      "rightKids": [
+        "div.d71-taskslot data-d71=task-slot",
+        "div.d71-fwslot data-d71=fw-slot"
+      ],
+      "leftText": "1 active query\nSINCE 28 OCT\nThe line begins once there are two days on the record.\n0 closed\nSee all →\n0\nNo reply\n0\nPassed on query\n0\nPassed on partial\n0\nPassed on full\nAgents on file\n1\nOF 3\nQUERIED\n1\nQuerying\n0\nClosed\n2\nNot yet queried\n2 ready to query →",
+      "rightText": "Housekeeping\n‹\n›\nRW\nAdd typical reply times for 3 agents\nHELPS QUERYHAWK TELL YOU WHEN TO NUDGE\nQueryHawk uses reply times to work out when a query is worth a nudge. Without one, a query never shows up as a nudge.\nView task →\nThen: add what 3 agents ask for\nAudit S1\nFOUNDING WRITER\nNO CONTRIBUTIONS YET\nYour feedback shapes QueryHawk\nWhat I like\nWhat I don’t\nAn idea\nEgg",
+      "founding": "Audit S1\nFOUNDING WRITER\nNO CONTRIBUTIONS YET\nYour feedback shapes QueryHawk\nWhat I like\nWhat I don’t\nAn idea\nEgg",
+      "feedTab": "Activity feed\n1\n▲",
+      "shadow": {
+        "shown": true,
+        "rect": {
+          "x": 499.8179626464844,
+          "y": -150.37322998046875,
+          "width": 1341.39501953125,
+          "height": 1216.33984375,
+          "top": -150.37322998046875,
+          "right": 1841.2129821777344,
+          "bottom": 1065.9666137695312,
+          "left": 499.8179626464844
+        }
+      },
+      "clipped": [
+        "d71-then \"Then: add what 3 agents ask for\" sw195/cw176 sh20/ch20",
+        "d105-sr \"Egg\" sw27/cw1 sh24/ch1"
+      ],
+      "scroller": null
+    },
+    "1512": {
+      "mode": "q",
+      "leftPre": "0",
+      "rightMode": "q",
+      "header": "— READY TO QUERY —\nThe Lantern Keepers\nby Audit S1\nLog a query\nRecord a response\nAdd an agent",
+      "leftKids": [
+        "div.d58-active data-d58=active",
+        "div.d60-hoops data-d60=hoops"
+      ],
+      "rightKids": [
+        "div.d71-taskslot data-d71=task-slot",
+        "div.d71-fwslot data-d71=fw-slot"
+      ],
+      "leftText": "1 active query\nSINCE 28 OCT\nThe line begins once there are two days on the record.\n0 closed\nSee all →\n0\nNo reply\n0\nPassed on query\n0\nPassed on partial\n0\nPassed on full\nAgents on file\n+3 this week\n1\nOF 3\nQUERIED\n1\nQuerying\n0\nClosed\n2\nNot yet queried\n2 ready to query →",
+      "rightText": "Housekeeping\n‹\n›\nRW\nAdd typical reply times for 3 agents\nHELPS QUERYHAWK TELL YOU WHEN TO NUDGE\nQueryHawk uses reply times to work out when a query is worth a nudge. Without one, a query never shows up as a nudge.\nView task →\nThen: add what 3 agents ask for\nAudit S1\nFOUNDING WRITER\nNO CONTRIBUTIONS YET\nEGG\nYour feedback shapes QueryHawk\nTell us what works, what doesn’t and what you’d add. We read every word.\nWhat I like\nWhat I don’t\nAn idea\nEgg\nTop contributors enter a weekly prize draw, and climbing the ranks earns a special thank-you at launch.",
+      "founding": "Audit S1\nFOUNDING WRITER\nNO CONTRIBUTIONS YET\nEGG\nYour feedback shapes QueryHawk\nTell us what works, what doesn’t and what you’d add. We read every word.\nWhat I like\nWhat I don’t\nAn idea\nEgg\nTop contributors enter a weekly prize draw, and climbing the ranks earns a special thank-you at launch.",
+      "feedTab": "Activity feed\n1\n▲",
+      "shadow": {
+        "shown": true,
+        "rect": {
+          "x": 578.7921752929688,
+          "y": -150.50094604492188,
+          "width": 1341.45947265625,
+          "height": 1216.422607421875,
+          "top": -150.50094604492188,
+          "right": 1920.2516479492188,
+          "bottom": 1065.9216613769531,
+          "left": 578.7921752929688
+        }
+      },
+      "clipped": [
+        "d105-sr \"Egg\" sw27/cw1 sh24/ch1"
+      ],
+      "scroller": null
+    }
+  }
+}
