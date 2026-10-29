@@ -24,7 +24,6 @@
 /* ═════════ §E · THE PIN (replaces "Just the desk") ═════════
    Pinned: the header goes, the sheet is the window (12 from the top, the scroller less 26), Find and the day chip sit
    in the navy row. The shared PinListButton draws itself (shell/pinListButton.css). */
-.td5-root[data-pinned] .td5-hd { display: none; }
 .td5-root[data-pinned] .td5-sheet[data-one] { margin-top: 12px; height: calc(var(--td5-port, 828px) - 26px); scroll-margin-top: 12px; }
 .td5-root[data-pinned] .td5-group { padding-top: 0; }
 .td52-pinx { display: flex; align-items: center; gap: 10px; min-width: 0; }
@@ -54,12 +53,7 @@
 
 /* ═════════ §F · PRESENTATION ═════════ */
 /* F.1 — the title says what's urgent; the overdue part is rust; it ticks when the figure changes */
-.td5-hd h1.td5-title .td52-urg { display: inline-block; font: inherit !important; }
-.td5-hd h1.td5-title .td52-urg span { font: inherit !important; }
-.td5-hd h1.td5-title .td52-od { color: #a2452a; }
 /* the title fits its column (TrayHeader measures it); 0-3-1 beats v5.1's forced 0-2-1 face */
-.td5-hd h1.td5-title[data-fit] { font-size: var(--td52-fit) !important; line-height: var(--td52-fit-lh) !important; }
-.td5-hd h1.td5-title .td52-urg.tick { animation: td52Tick 0.32s cubic-bezier(.2, .8, .3, 1); }
 @keyframes td52Tick { from { transform: translateY(10px); opacity: 0.2; } to { transform: none; opacity: 1; } }
 /* F.3 — how late, under a tray dial */
 .td5-dial .td52-age {
