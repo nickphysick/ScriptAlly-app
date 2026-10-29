@@ -304,6 +304,8 @@ test("L8 no visible element on the page or its layers is mono AND uppercase, but
       await page.keyboard.press("Escape"); await page.waitForTimeout(300);
     }
     if (ms === "pk40-ms") {
+      /* v39.2: Your materials opens on Versions, which have no Edit; a letter's Edit opens the material drawer */
+      await page.locator(`${pg} [data-pk26="lib"] .p9-lib-tabs .p9-t-let`).first().click({ timeout: 5000 }).catch(() => {});
       await page.locator(`${pg} [data-pk26="lib"] .p9-lr-ed`).first().click({ timeout: 5000 }).catch(() => {});
       await page.waitForTimeout(700);
       L.check(`${ms} · the material drawer opened`, (await page.locator(".p6-cx-drw.p6-on").count()) === 1, "drawer");

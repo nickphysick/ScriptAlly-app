@@ -79,7 +79,7 @@
 /* ══ D · the builder (Pk26Builder): the section, the colour, and what no captured state shows ══ */
 /* the section's own box (the ref's `.pb-build` under v39.2/v39.9: no panel, 14 / 48 / 96) */
 /* the ref's 96 below the builder is carried by v40's guidelines, which sit 24 under the cards */
-.p6 > .p9-pb-build { box-sizing: border-box; margin: 14px 48px 24px; padding: 0; background: none; border: 0; box-shadow: none; }
+.p9-pkc > .p9-pb-build { box-sizing: border-box; margin: 14px 48px 24px; padding: 0; background: none; border: 0; box-shadow: none; }
 /* the package's header in its colour, and the icon's ink on the cream tile (ref `.po-h`, `.po-ic`) */
 .p9-pb-grid.p9-v39 .p9-pk-open .p9-po-h { background: var(--pc, #1d4b63) !important; }
 .p9-pb-grid.p9-v39 .p9-po-h .p9-po-ic { color: var(--pc, #1d4b63) !important; }

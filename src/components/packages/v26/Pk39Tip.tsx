@@ -16,7 +16,7 @@ import { guideSeen, markGuideSeen } from "../../../lib/pageGuide";
 
 export const TIP_KEY = "packages-explainer";
 export const TIP_LEAD = "A package is everything one agent receives:";
-export const TIP_REST = " your query letter, pages and, if they want one, a synopsis. Pick it when you log a query and QueryHawk records exactly what went.";
+export const TIP_REST = " the pages from a version of your book, your query letter and, if they want one, a synopsis. Pick it when you log a query and QueryHawk records exactly what went.";
 
 export const Pk39Tip: React.FC<{ onHow: () => void }> = ({ onHow }) => {
   const [gone, setGone] = useState(() => guideSeen(TIP_KEY));

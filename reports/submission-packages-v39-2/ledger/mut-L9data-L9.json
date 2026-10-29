@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "L9",
+  "where": "the packing list's first slot is the version",
+  "ok": true,
+  "detail": "[\"ver\",\"let\",\"syn\",\"ex\"]"
+ },
+ {
+  "lock": "L9",
+  "where": "…then the letter, the synopsis and Also sends",
+  "ok": true,
+  "detail": "[\"ver\",\"let\",\"syn\",\"ex\"]"
+ },
+ {
+  "lock": "L9",
+  "where": "…labelled Version over 'Sets the pages that go out'",
+  "ok": true,
+  "detail": "Version / Sets the pages that go out"
+ },
+ {
+  "lock": "L9",
+  "where": "Your materials leads with Versions and opens on it",
+  "ok": true,
+  "detail": "[[\"Versions\",\"true\"],[\"Letters\",\"false\"],[\"Synopses\",\"false\"]]"
+ },
+ {
+  "lock": "L9",
+  "where": "the pieces list leads with Versions and opens on it",
+  "ok": true,
+  "detail": "[[\"Versions\",\"true\"],[\"Query letters\",\"false\"],[\"Synopses\",\"false\"]]"
+ },
+ {
+  "lock": "L9",
+  "where": "the pieces row starts with Best opening",
+  "ok": true,
+  "detail": "[\"Best opening\",\"Best letter\",\"Best synopsis\"]"
+ },
+ {
+  "lock": "L9",
+  "where": "the drawer's What's in it starts with Version",
+  "ok": true,
+  "detail": "[\"Version\",\"Query letter\",\"Synopsis\",\"Also sends\"]"
+ },
+ {
+  "lock": "L9",
+  "where": "a saved package's stored fields are unchanged",
+  "ok": false,
+  "detail": "{\"all\":[{\"copiedFromId\":\"pk40-std\",\"firstSentAt\":true,\"id\":\"pk40-std2\",\"name\":\"Standard 2\",\"status\":\"Active\"},{\"copiedFromId\":null,\"firstSentAt\":false,\"id\":\"pk40-draft\",\"name\":\"Draft one\",\"status\":\"Ac … vs … {\"all\":[{\"copiedFromId\":\"pk40-std\",\"firstSentAt\":true,\"id\":\"pk40-std2\",\"name\":\"Standard 2\",\"status\":\"Active\"},{\"copiedFromId\":null,\"firstSentAt\":false,\"id\":\"pk40-draft\",\"name\":\"Draft one\",\"status\":\"Ac"
+ }
+]

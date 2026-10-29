@@ -7,7 +7,7 @@
  * sheet is 1200 or narrower; sticky) and the open package — no outer panel and no nested trays. Both headers are 84px
  * tall, so they line up: Your materials in deep berry, the package in its own colour. The package's header holds the
  * icon tile (it opens the icon-and-colour picker), the name (edited in place), the Active tag, one status pill (v39.1:
- * "Out with agents · n sent", "Ready to send" or "Draft · needs …"), "Make active" and Figures. Its contents are one aligned list: Query letter, Synopsis, Pages from,
+ * "Out with agents · n sent", "Ready to send" or "Draft · needs …"), "Make active" and Figures. Its contents are one aligned list: Version (v39.2: first), Query letter, Synopsis,
  * then Also sends, on a 130px label column (110 compact). Markup is the ref's `renderOpen` / `renderLib` with the `p9-`
  * prefix (pk39.generated.css); what the capture cannot see is in pk39.css.
  *
@@ -21,7 +21,7 @@
  *    test. ITS NAME STAYS EDITABLE IN PLACE (Nick, 28 Oct, over the v39 mock): renaming is filing, not misreporting,
  *    which is v40's own reasoning and what the rules allow.
  */
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { PACKAGE_ICONS, type PackageIcon, type SubmissionPackage } from "../../../types";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
@@ -37,7 +37,8 @@ export type LibTab = "let" | "syn" | "ver";
 const SLOT: Record<PieceKind, { t: string; req: boolean; empty: string }> = {
   let: { t: "Query letter", req: true, empty: "Query letter" },
   syn: { t: "Synopsis", req: false, empty: "Synopsis" },
-  ver: { t: "Pages from", req: true, empty: "Pages" },
+  /* v39.2 C: the version leads (it decides which pages go out); display order only — the stored fields are unchanged */
+  ver: { t: "Version", req: true, empty: "Version" },
 };
 const FIELD = { let: "queryLetterVersionId", syn: "synopsisVersionId", ver: "bookVersionId" } as const;
 const vnum = (v: Pick<VersionRow, "original" | "num">) => (v.original ? "O" : String(v.num));
@@ -144,7 +145,7 @@ export const Pk26Builder: React.FC<BuilderProps> = ({ model, retired, current, o
               </span>
             </div>
             <div className="p9-lib-tabs" role="tablist">
-              {([["let", "Letters", letters.length], ["syn", "Synopses", synopses.length], ["ver", "Versions", versionRows.length]] as const).map(([k, l, n]) => (
+              {([["ver", "Versions", versionRows.length], ["let", "Letters", letters.length], ["syn", "Synopses", synopses.length]] as const).map(([k, l, n]) => (
                 <button type="button" key={k} role="tab" className={`p9-t-${k}`} aria-selected={lib === k} onClick={() => setLib(k)}><Mark k={k} />{l}<em>{n}</em></button>
               ))}
             </div>
@@ -247,12 +248,21 @@ const NameInPlace: React.FC<{ model: Pk26Model; p: SubmissionPackage }> = ({ mod
 const LookPicker: React.FC<{ model: Pk26Model; p: SubmissionPackage; anchor: HTMLElement; onClose: () => void }> = ({ model, p, anchor, onClose }) => {
   const box = useRef<HTMLDivElement | null>(null);
   useEscapeLayer(true, onClose, ESC_LEVEL.page);
+  /* below the tile, 10 clear; v39.2: ABOVE it when there is no room below. It is portalled and fixed, so a picker that
+     opened under the fold could not be scrolled to (the panel's padding put the tile on the fold at 1280 × 832). */
+  const place = () => {
+    const r = anchor.getBoundingClientRect(), h = box.current?.offsetHeight ?? 0;
+    const below = r.bottom + 10, above = r.top - 10 - h;
+    return { left: r.left, top: h && below + h > window.innerHeight - 8 && above >= 8 ? above : below };
+  };
   const [pos, setPos] = useState(() => { const r = anchor.getBoundingClientRect(); return { left: r.left, top: r.bottom + 10 }; });
+  /* once the box has a height, place it for real, before the first paint */
+  useLayoutEffect(() => { setPos(place()); }, []); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     /* focus moves in on open */
     box.current?.querySelector<HTMLButtonElement>("button[aria-pressed='true']")?.focus();
     const down = (e: PointerEvent) => { const t = e.target as Node; if (box.current?.contains(t) || anchor.contains(t)) return; onClose(); };
-    const move = () => { const r = anchor.getBoundingClientRect(); setPos({ left: r.left, top: r.bottom + 10 }); };
+    const move = () => setPos(place());
     document.addEventListener("pointerdown", down, true);
     window.addEventListener("scroll", move, true);
     window.addEventListener("resize", move);
@@ -343,7 +353,7 @@ const OpenPackage: React.FC<{
     const cls = `p9-slt p9-mr p9-t-${k}${dragK ? (dragK === k ? " p9-ok" : "") : ""}${over === k ? " p9-over" : ""}`;
     return (
       <div key={k} className={cls} data-slot={k} {...(locked ? {} : slotProps(k))}>
-        <div className="p9-mr-l"><span>{S.t}</span>{S.req ? <em>Needed</em> : <em className="p9-o">Optional</em>}</div>
+        <div className="p9-mr-l"><span>{S.t}</span>{k === "ver" ? <em className="p9-vsub">Sets the pages that go out</em> : S.req ? <em>Needed</em> : <em className="p9-o">Optional</em>}</div>
         {body}
       </div>
     );
@@ -377,7 +387,7 @@ const OpenPackage: React.FC<{
       </div>
       {from ? <div className="p9-lc-from">Copied from <b>{from.packageName}</b>. Change one piece, and Results can tell you what that piece did.</div> : null}
       <div className="p9-mf">
-        {(["let", "syn", "ver"] as const).map(row)}
+        {(["ver", "let", "syn"] as const).map(row)}
         <div className="p9-mr p9-mr-ex">
           <div className="p9-mr-l"><span>Also sends</span><em className="p9-o">If asked</em></div>
           <div className="p9-ex">

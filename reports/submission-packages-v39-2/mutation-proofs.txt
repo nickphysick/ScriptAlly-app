@@ -1,30 +1,53 @@
-===== PK392_MUTATE=L1 (tests: L1)
-  ✗ L1-1280 · it has a ::before — none
-  ✗ L1-1512 · it has a ::before — none
+===== PK392_MUTATE=L1 (L1 )
+  ✗ L1-1280 · the page ground carries the packages tile — none
+  ✗ L1-1512 · the page ground carries the packages tile — none
   2 failed
-  1 passed (38.9s)
-===== PK392_MUTATE=L2 (tests: L2)
-  ✗ L2 · exactly three typewriter headings, besides the tab — [{"tag":"SPAN","cls":"hl","head":true,"text":"Submission packages"},{"tag":"H2","cls":"p9-pkl-h","head":true,"text":"Your packages"},{"tag":"B","cls":"","head":false,"text":"Draft one"},{"tag":"B","cls":"","head":false,"text":"Ready one"},{"tag":"B","cls":"","head":false,"text":"Standard 2"},{"tag":"B","cls":"","head":false,"text":"Standard"},{"tag":"SPAN","cls":"p9-po-nm","head":true,"text":"Standard"}]
+  1 passed (39.5s)
+===== PK392_MUTATE=L2 (L2 )
+  ✗ L2 · exactly three typewriter headings, besides the tab — [{"tag":"SPAN","cls":"hl","head":true,"text":"Submission packages"},{"tag":"H2","cls":"p9-pkl-h","head":true,"text":"Your packages"},{"tag":"B","cls":"",
   1 failed
-  1 passed (28.9s)
-===== PK392_MUTATE=L7 (tests: L7)
+  1 passed (28.6s)
+===== PK392_MUTATE=L7 (L7)
   ✗ L7-1280 · …in full: scrollWidth ≤ clientWidth — {"name":"Comps-forward, for agents who ask for it","sw":283,"cw":210,"to":"ellipsis","ws":"nowrap","edge":"none","add":{"vis":true,"op":"0"},"meta":"Sent 4"}
   ✗ L7-1280 · …and never ellipsised — {"name":"Comps-forward, for agents who ask for it","sw":283,"cw":210,"to":"ellipsis","ws":"nowrap","edge":"none","add":{"vis":true,"op":"0"},"meta":"Sent 4"}
   1 failed
-  2 passed (52.4s)
-===== PK392_MUTATE=L7b (tests: L7)
+  2 passed (55.4s)
+===== PK392_MUTATE=L7b (L7)
   ✗ L7-1280 · Add is hidden at rest — [{"vis":true,"op":"1"}]
   ✗ L7-1512 · Add is hidden at rest — [{"vis":true,"op":"1"}]
   2 failed
-  1 passed (51.6s)
-===== PK26_MUTATE=PK26-M (PK26-M)
-  ✗ PK26-M · …its name shows in full (scrollWidth ≤ clientWidth) — {"name":"The longer comps-forward letter for agents in London, Dublin and Edinburgh","whole":false,"cut":true,"small":null}
-  ✗ PK26-M · …and is never ellipsised — {"name":"The longer comps-forward letter for agents in London, Dublin and Edinburgh","whole":false,"cut":true,"small":null}
-  ✗ PK26-M · every name shows in full — [{"name":"The longer comps-forward letter for agents in London, Dublin and Edinburgh","whole":false,"cut":true,"small":null},{"name":"Letter B","whole":true,"cut":true,"small"
-  1 failed
-  1 passed (27.4s)
-===== PK39_MUTATE=L4tab (pk39 L4)
-  ✗ L4-1512 · the materials tab's top is the package card's top (±1) — 763.34375 vs 723.34375
-  ✗ L4-1280 · the materials tab's top is the package card's top (±1) — 845.34375 vs 805.34375
+  1 passed (1.1m)
+===== PK392_MUTATE=L8 (L8)
+  ✗ L8-1280 · its left edge is the header card's (±1) — 248 vs 272
+  ✗ L8-1280 · its right edge is the header card's (±1) — 1272 vs 1248
+  ✗ L8-1512 · its left edge is the header card's (±1) — 248 vs 276
+  ✗ L8-1512 · its right edge is the header card's (±1) — 1504 vs 1476
   2 failed
-  1 passed (39.5s)
+  1 passed (45.2s)
+===== PK392_MUTATE=L9 (L9)
+  ✗ L9 · the packing list's first slot is the version — ["let","syn","ex","ver"]
+  ✗ L9 · …then the letter, the synopsis and Also sends — ["let","syn","ex","ver"]
+  1 failed
+  1 passed (36.9s)
+===== PK392_MUTATE=L9data (L9)
+  ✗ L9 · a saved package's stored fields are unchanged — {"all":[{"copiedFromId":"pk40-std","firstSentAt":true,"id":"pk40-std2","name":"Standard 2","status":"Active"},{"copiedFromId":null,"firstSentAt":false,"id":"p
+  1 failed
+  1 passed (46.5s)
+===== PK26_MUTATE=PK26-W (PK26-W)
+  ✗ PK26-W-1512 · build left — 48.0 (want 28)
+  ✗ PK26-W-1512 · build right — 48.0 (want 28)
+  1 failed
+  1 passed (52.7s)
+===== PK391_MUTATE=L1 (pk391 L1)
+  ✗ L1-1280 · the packages panel (v39.2: it holds the labels and the builder): left = the card's (±1) — 296 vs 272
+  ✗ L1-1280 · the packages panel (v39.2: it holds the labels and the builder): right = the card's (±1) — 1224 vs 1248
+  ✗ L1-1512 · the packages panel (v39.2: it holds the labels and the builder): left = the card's (±1) — 296 vs 276
+  ✗ L1-1512 · the packages panel (v39.2: it holds the labels and the builder): right = the card's (±1) — 1456 vs 1476
+  ✗ L1-1920 · the packages panel (v39.2: it holds the labels and the builder): left = the card's (±1) — 296 vs 480
+  ✗ L1-1920 · the packages panel (v39.2: it holds the labels and the builder): right = the card's (±1) — 1864 vs 1680
+  3 failed
+  1 passed (1.3m)
+===== PK391_MUTATE=L4 (pk391 L4)
+  ✗ L4 · explainer → the packages panel 48 (±1) — 20
+  1 failed
+  1 passed (30.8s)

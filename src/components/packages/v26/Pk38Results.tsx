@@ -33,7 +33,8 @@ export const PK_HEADING = { t: "Packages", l: "Each package as a whole, as it we
 export const PC_HEADING = { t: "Letters, synopses and openings", l: "Each one on its own, whichever package it went out in.", art: "a hawk laying out a letter, a synopsis and pages on a desk" };
 export const PK_LIST = { t: "Every package", l: (n: number) => `All ${n}, best first. A package moves up once ${thresholdWords()} agents have answered it; until then it waits at the bottom as “Too early”.` };
 export const PC_LIST = { t: "Every letter, synopsis and version", l: "Each counted across every package it went out in, by the edition the agent actually got." };
-const PC_TABS: [PieceKind, string, string][] = [["let", "Query letters", "Letter"], ["syn", "Synopses", "Synopsis"], ["ver", "Versions", "Version"]];
+/* v39.2 C: Versions first, and the list opens on it */
+const PC_TABS: [PieceKind, string, string][] = [["ver", "Versions", "Version"], ["let", "Query letters", "Letter"], ["syn", "Synopses", "Synopsis"]];
 
 const Ov: React.FC<{ title: string; bars: Bar[] }> = ({ title, bars }) => (
   <div className="p9-ov">
@@ -80,7 +81,7 @@ export const Pk38Results: React.FC<{
   const tot = bandTotals(model.overallSplit);
   const avg = model.figAll.pct ?? 0;
   const pkgs = model.figItems("pk") as PkItem[];
-  const [rlk, setRlk] = useState<PieceKind>("let");
+  const [rlk, setRlk] = useState<PieceKind>("ver");
   const tabsRef = useRef<HTMLDivElement | null>(null);
   /* ⚠️ SWITCHING A TAB NEVER MOVES THE PAGE: the table's height changes, so the scroller's position is read before the
      switch and put back after it (the ref's own `scrollTop` restore), before paint. */
@@ -106,9 +107,9 @@ export const Pk38Results: React.FC<{
           {p.status === "Retired" ? <em>Retired</em> : model.active?.id === p.id ? <em className="p9-a">Active</em> : null}
         </div>
         <ul>
+          {li("ver", V?.name ?? null, V ? (V.original ? "O" : String(V.num)) : "–", "No pages")}
           {li("let", L ?? null, <Mark k="let" />, "No letter")}
           {li("syn", Y ?? null, <Mark k="syn" />, "No synopsis")}
-          {li("ver", V?.name ?? null, V ? (V.original ? "O" : String(V.num)) : "–", "No pages")}
         </ul>
       </div>
     );
@@ -163,7 +164,8 @@ export const Pk38Results: React.FC<{
   });
 
   const compNames = (m: MaterialRow) => (m.compIds ?? []).map((id) => model.comps.find((c) => c.id === id)?.title ?? "").filter(Boolean);
-  const pieces = ([["let", "Query letter", "Best letter"], ["syn", "Synopsis", "Best synopsis"], ["ver", "Pages from", "Best opening"]] as const).map(([k, lab, kk]) => {
+  /* v39.2 C: Best opening first, its card labelled Version */
+  const pieces = ([["ver", "Version", "Best opening"], ["let", "Query letter", "Best letter"], ["syn", "Synopsis", "Best synopsis"]] as const).map(([k, lab, kk]) => {
     const items = model.figItems(k);
     const w = bestPiece(items);
     if (!w) {

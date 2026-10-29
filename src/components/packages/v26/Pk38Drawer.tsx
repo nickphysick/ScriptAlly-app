@@ -72,9 +72,10 @@ export const Pk38Drawer: React.FC<{
           <p className="p8-d-sum">{drawerStatus({ retired, sent: f.sent > 0 || !!p.firstSentAt, ready })}</p>
           <h5>What’s in it</h5>
           <div className="p8-dpzs">
+            {/* v39.2 C: the version first, as everywhere the three pieces are listed */}
+            {row("ver", "Version", V?.name ?? null, V?.summary ?? "", V ? (V.original ? "O" : String(V.num)) : "–", "No version yet")}
             {row("let", "Query letter", L?.name ?? null, L?.summary ?? "", <Mark k="let" />, "No letter yet")}
             {row("syn", "Synopsis", Y?.name ?? null, Y?.summary ?? "", <Mark k="syn" />, "No synopsis")}
-            {row("ver", "Pages from", V?.name ?? null, V?.summary ?? "", V ? (V.original ? "O" : String(V.num)) : "–", "No pages yet")}
             {extras.length ? <div className="p8-dpz"><span className="p8-dpz-l">Also sends</span><span>{extras.join(", ")}</span></div> : null}
           </div>
           <h5>How it’s doing</h5>

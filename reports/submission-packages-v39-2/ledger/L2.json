@@ -3,7 +3,7 @@
   "lock": "L2",
   "where": "the census read the page (over 60 text elements)",
   "ok": true,
-  "detail": "231"
+  "detail": "239"
  },
  {
   "lock": "L2",
@@ -57,6 +57,6 @@
   "lock": "L2",
   "where": "the art sits to the left, centred on the pair (±1)",
   "ok": true,
-  "detail": "{\"mid\":516.34375,\"pair\":516.34375,\"right\":328,\"left\":344}"
+  "detail": "{\"mid\":544.34375,\"pair\":544.34375,\"right\":360,\"left\":376}"
  }
 ]
