@@ -47,6 +47,7 @@ import "./packages/v26/pk39.css";
 import "./packages/v26/pk391.generated.css";
 import "./packages/v26/pk391.css";
 import "./packages/v26/pk392.css";
+import "./packages/v26/pk393.css";
 
 export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab: string, sub?: string) => void }> = ({ active: routeActive = true }) => {
   const model = usePk26Model();
@@ -61,9 +62,8 @@ export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab:
   /** the package drawer (v38): opened from a label, "Figures" or a showcase */
   const [pkdId, setPkdId] = useState<string | null>(null);
   const [showRetired, setShowRetired] = useState(false);
-  /** Your materials' list — the builder holds it, the page sets it from a deep link */
-  /* v39.2 C: Your materials opens on Versions (the version leads the package) */
-  const [lib, setLib] = useState<LibTab>("ver");
+  /** v39.3: a deep link (`?tab=let|syn|ver`) opens that step of the builder (the Your materials list it opened is retired) */
+  const [askStep, setAskStep] = useState<LibTab | null>(null);
   const retired = useMemo(() => msPkgs.filter((p) => p.status === "Retired"), [msPkgs]);
   /* ⚠️ THE CURRENT PACKAGE IS ANY LIVE ONE (v38): the label chosen, else the active package, else the first */
   const current = useMemo(() => live.find((p) => p.id === curId) ?? (active && live.some((p) => p.id === active.id) ? active : null) ?? live[0] ?? null, [live, curId, active]);
@@ -86,7 +86,7 @@ export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab:
     if (t === "tracking") setPending({ track: true });
     /* v38: the tab pages are gone; their links open Your materials on that list */
     const lt = libTabFromParam(t);
-    if (lt) { setLib(lt); setPending({ lib: true }); }
+    if (lt) { setAskStep(lt); setPending({ lib: true }); }
     const pkg = q.get("pkg");
     if (pkg) setPending({ pkg });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -100,7 +100,7 @@ export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab:
       else { setCurId(pending.pkg); part("builder")?.scrollIntoView({ block: "start", behavior: pending.scroll ? "smooth" : "auto" }); }
     }
     if (pending.track) part("results")?.scrollIntoView({ block: "start" });
-    if (pending.lib) part("lib")?.scrollIntoView({ block: "center" });
+    if (pending.lib) part("builder")?.scrollIntoView({ block: "start" });
     setPending(null);
   }, [pending, msPkgs, retired]);
 
@@ -127,7 +127,7 @@ export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab:
         <section className="p9-pkc" aria-label="Your packages and the builder" data-pk392="panel">
         <Pk39Labels model={model} currentId={current?.id ?? null} showRetired={showRetired} onShowRetired={setShowRetired}
           onPick={(p) => setCurId(p.id)} onOpenRetired={(p) => setPkdId(p.id)} onNew={() => setDialog({ m: "new" })} />
-        <Pk26Builder model={model} retired={retired} current={current} onSelect={setCurId} onFigures={(p) => setPkdId(p.id)} lib={lib} onLib={setLib}
+        <Pk26Builder model={model} retired={retired} current={current} onSelect={setCurId} onFigures={(p) => setPkdId(p.id)} askStep={askStep}
             onNewPackage={() => setDialog({ m: "new" })} onDuplicate={copy} onEditPackage={(p, focus) => setDialog({ m: "edit", id: p.id, ...(focus ? { focus } : {}) })}
             onOpenMaterial={(k, id) => setDrawer(k === "ext" ? { m: "ext", id } : { m: "mat", kind: k, id })}
             onNewMaterial={openNewMaterial} onOpenVersions={goVersions} onOpenComps={goComps} />

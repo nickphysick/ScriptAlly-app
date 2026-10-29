@@ -900,7 +900,8 @@
     "design-refs/queries-mobile-v1/screens/06-plus.png": "898fb39ee876510c36621524fdcb9d18f1e76da7b4c1d6054021c2492d5318d2",
     "design-refs/queries-mobile-v1/screens/07-celebrate.png": "251bf30cb4e4c1cda7af8adcb0d10658a7ef906b5c17e6f6f967dc5d815c2674",
     "design-refs/submission-packages-v39-2/submission-packages-v39-2.html": "8cf26f5cc3c4d8d5b8bf492eb6a89a5a7a73fb2ee49159f78752bb8d1ff0e27b",
-    "design-refs/dashboard-first-visit-v1/dashboard-first-visit-v1.html": "550286e58797b26468d43cdbae380abf2e59d167562f3660b64ede54098faf40"
+    "design-refs/dashboard-first-visit-v1/dashboard-first-visit-v1.html": "550286e58797b26468d43cdbae380abf2e59d167562f3660b64ede54098faf40",
+    "design-refs/submission-packages-v39-3/package-builder-v39-3.html": "b334d89bf15b9cdc1b5f5dbf9d1834a4e47ff76f47ea1e504264a1bc5a8be970"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",

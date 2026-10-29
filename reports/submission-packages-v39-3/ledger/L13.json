@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "L13",
+  "where": "empty: disabled, 'Add a version and a letter to send it'",
+  "ok": true,
+  "detail": "{\"text\":\"Add a version and a letter to send it\",\"off\":true}"
+ },
+ {
+  "lock": "L13",
+  "where": "with a version: disabled, 'Add a letter to send it'",
+  "ok": true,
+  "detail": "{\"text\":\"Add a letter to send it\",\"off\":true}"
+ },
+ {
+  "lock": "L13",
+  "where": "with both: enabled, 'Log a query with it'",
+  "ok": true,
+  "detail": "{\"text\":\"Log a query with it\",\"off\":false}"
+ },
+ {
+  "lock": "L13",
+  "where": "it opens the log-a-query journey",
+  "ok": true,
+  "detail": "LOG A QUERYLog a query×1Agent and book2Check and logStep 1 of 2 · Agent and book"
+ },
+ {
+  "lock": "L13",
+  "where": "…with this package chosen (its chip is the one pressed)",
+  "ok": true,
+  "detail": "[\"Draft oneQuery letter · Fast-paced opening\"]"
+ }
+]

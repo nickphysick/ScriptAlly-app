@@ -1,0 +1,56 @@
+[
+ {
+  "lock": "L12",
+  "where": "ver: its parts are on the page",
+  "ok": true,
+  "detail": "[\"let\",\"ver\",\"syn\",\"ext\"]"
+ },
+ {
+  "lock": "L12",
+  "where": "ver: exactly its part is outlined (2px Harbour on #eef4f7)",
+  "ok": true,
+  "detail": "[{\"part\":\"ver\",\"sh\":\"rgb(29, 75, 99) 0px 0px 0px 2px\",\"bg\":\"rgb(238, 244, 247)\"}]"
+ },
+ {
+  "lock": "L12",
+  "where": "let: its parts are on the page",
+  "ok": true,
+  "detail": "[\"let\",\"ver\",\"syn\",\"ext\"]"
+ },
+ {
+  "lock": "L12",
+  "where": "let: exactly its part is outlined (2px Harbour on #eef4f7)",
+  "ok": true,
+  "detail": "[{\"part\":\"let\",\"sh\":\"rgb(29, 75, 99) 0px 0px 0px 2px\",\"bg\":\"rgb(238, 244, 247)\"}]"
+ },
+ {
+  "lock": "L12",
+  "where": "syn: its parts are on the page",
+  "ok": true,
+  "detail": "[\"let\",\"ver\",\"syn\",\"ext\"]"
+ },
+ {
+  "lock": "L12",
+  "where": "syn: exactly its part is outlined (2px Harbour on #eef4f7)",
+  "ok": true,
+  "detail": "[{\"part\":\"syn\",\"sh\":\"rgb(29, 75, 99) 0px 0px 0px 2px\",\"bg\":\"rgb(238, 244, 247)\"}]"
+ },
+ {
+  "lock": "L12",
+  "where": "ext: its parts are on the page",
+  "ok": true,
+  "detail": "[\"let\",\"ver\",\"syn\",\"ext\"]"
+ },
+ {
+  "lock": "L12",
+  "where": "ext: exactly its part is outlined (2px Harbour on #eef4f7)",
+  "ok": true,
+  "detail": "[{\"part\":\"ext\",\"sh\":\"rgb(29, 75, 99) 0px 0px 0px 2px\",\"bg\":\"rgb(238, 244, 247)\"}]"
+ },
+ {
+  "lock": "L12",
+  "where": "with no step hovered, nothing is outlined",
+  "ok": true,
+  "detail": "0"
+ }
+]

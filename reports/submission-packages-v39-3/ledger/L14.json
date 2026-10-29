@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "L14",
+  "where": "the new builder is on the page",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "L14",
+  "where": "no Your materials card",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L14",
+  "where": "no draggable rows",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L14",
+  "where": "no packing-list slot markup",
+  "ok": true,
+  "detail": "0"
+ }
+]

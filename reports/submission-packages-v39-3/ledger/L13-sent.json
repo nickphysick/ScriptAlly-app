@@ -1,0 +1,56 @@
+[
+ {
+  "lock": "L13-sent",
+  "where": "the note says what is true (Nick's copy)",
+  "ok": true,
+  "detail": "Out with 5 agents. What went stays as it went. To change anything, make a copy. The 5 already sent keep exactly what they got. Make a copy"
+ },
+ {
+  "lock": "L13-sent",
+  "where": "…with Make a copy",
+  "ok": true,
+  "detail": "copy link"
+ },
+ {
+  "lock": "L13-sent",
+  "where": "no step head is a button",
+  "ok": true,
+  "detail": "buttons"
+ },
+ {
+  "lock": "L13-sent",
+  "where": "clicking the heads opens nothing",
+  "ok": true,
+  "detail": "[{\"k\":\"ver\",\"open\":false,\"done\":true,\"disc\":\"rgb(62, 125, 90)\"},{\"k\":\"let\",\"open\":false,\"done\":true,\"disc\":\"rgb(62, 125, 90)\"},{\"k\":\"syn\",\"open\":false,\"done\":true,\"disc\":\"rgb(62, 125, 90)\"},{\"k\":\"ext\",\"open\":false,\"done\":false,\"disc\":\"rgba(0, 0, 0, 0)\"}]"
+ },
+ {
+  "lock": "L13-sent",
+  "where": "no choice rows on the page",
+  "ok": true,
+  "detail": "radios"
+ },
+ {
+  "lock": "L13-sent",
+  "where": "the extras are read-only (no toggle, no + Add)",
+  "ok": true,
+  "detail": "ext buttons"
+ },
+ {
+  "lock": "L13-sent",
+  "where": "nothing wrote to the package",
+  "ok": true,
+  "detail": "0 writes"
+ },
+ {
+  "lock": "L13-sent",
+  "where": "the primary is enabled: 'Log a query with it'",
+  "ok": true,
+  "detail": "primary"
+ },
+ {
+  "lock": "L13-sent",
+  "where": "…with Make a copy beside it",
+  "ok": true,
+  "detail": "copy button"
+ }
+]

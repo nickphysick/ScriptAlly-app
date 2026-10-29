@@ -14,7 +14,7 @@ const src = (p: string) => readFileSync(p, "utf8").replace(/\/\*[\s\S]*?\*\//g, 
 describe("Part G · How it works", () => {
   it("has five steps, in the pack's words", () => {
     expect(HOW_STEPS.map(([t]) => t)).toEqual([
-      "Pick a package, or make one", "Keep your materials in one place", "Drag them into the package", "Pick it when you log a query", "See what’s working",
+      "Pick a package, or make one", "Pick each piece", "Drag them into the package", "Pick it when you log a query", "See what’s working",
     ]);
     expect(HOW_STEPS[0][1]).toBe("Your packages sit in a row at the top. Each has its own icon and colour, so you can spot it at a glance here, in the Query Centre and in your results. Click one to open it below, or press + New.");
     /* v39.2 C: step 3 leads with the version */

@@ -121,7 +121,7 @@ test("L3 one status pill with the right words; no stage dots; nothing overlaps a
   test.setTimeout(240_000);
   const L = new Ledger("L3");
   await open(page, SIZES[0]);
-  for (const [id, want, lock] of [["pk40-std", /^Out with agents · 5 sent$/, true], ["pk40-ready", /^Ready to send$/, false], ["pk40-draft", /^Draft · needs /, false]] as const) {
+  for (const [id, want, lock] of [["pk40-std", /^Out with agents · 5 sent$/, true], ["pk40-ready", /^Ready to send$/, false], ["pk40-draft", /^0 of 2 needed$/, false]] as const) {
     await label(page, id).click(); await page.waitForTimeout(500);
     const r = await page.evaluate((p) => {
       const o = document.querySelector(`${p} [data-pk40="open"]`)!;
@@ -143,11 +143,13 @@ test("L3 one status pill with the right words; no stage dots; nothing overlaps a
     }, pg);
     L.check(`${id}: exactly one status pill`, r.n === 1, String(r.n));
     L.check(`${id}: it reads ${want}`, want.test(r.text), r.text);
-    /* 28 at 1280: the ref's @container sheet (max-width:1200px) rule; L4 holds the 32 at 1512 */
-    L.check(`${id}: it is the compact 28 tall at 1280 (±1)`, near(r.h, 28, 1), String(r.h));
-    L.check(`${id}: the padlock ${lock ? "is" : "is not"} in it`, r.lock === (lock ? 1 : 0), String(r.lock));
+    /* v39.3 REWRITE: the pill is the Steps header's (30 tall at every width, the v39.3 ref's `.bh-s`), its words are
+       "{n} of 2 needed" / "Ready to send" / "Out with agents · {n} sent", and it never holds a padlock: a sent
+       package's lock is the sent note (pk393 L13) */
+    L.check(`${id}: it is 30 tall (±1)`, near(r.h, 30, 1), String(r.h));
+    L.check(`${id}: no padlock in it${lock ? " (the sent note says it)" : ""}`, r.lock === 0, String(r.lock));
     L.check(`${id}: no stage dots`, r.dots === 0, String(r.dots));
-    L.check(`${id}: the header's parts were read`, r.leaves >= 4, String(r.leaves));
+    L.check(`${id}: the header's parts were read`, r.leaves >= 3, String(r.leaves));
     L.check(`${id}: nothing in the header overlaps at 1280`, r.hits.length === 0, JSON.stringify(r.hits));
   }
   const lb = await page.evaluate((p) => [...document.querySelectorAll(`${p} .p9-pkl-b`)].map((b) => {
@@ -174,20 +176,20 @@ test("L4 explainer → labels 48, BUILD label → cards 24, builder → band 96,
     const root = document.querySelector(p)!; const r = (s: string) => root.querySelector(s)?.getBoundingClientRect();
     /* v39.2 REWRITE: the labels and the builder sit in the packages panel, so the explainer is 48 above the PANEL and the
        band 96 below it (pk392 L8 holds 80 at 1280) */
-    const tip = r(":scope > .p9-tip"), pkl = r(":scope > .p9-pkc"), k = r(".p9-pb-build .p9-bk-k"), grid = r('[data-pk39="grid"]'), build = r(":scope > .p9-pkc"), band = r(":scope > .p8-bnr");
+    const tip = r(":scope > .p9-tip"), pkl = r(":scope > .p9-pkc"), k = r(".p9-pb-build .p9-bk-k"), grid = r('[data-pk393="builder"]'), build = r(":scope > .p9-pkc"), band = r(":scope > .p8-bnr");
     /* the top three are each results row's showcase grid; the list panel is that row's .p9-rlw */
     const pairs = [...root.querySelectorAll(".p9-agg3 .p9-ag3-row")].map((row) => { const t = row.querySelector(":scope > .p9-ag3-g"), l = row.querySelector(":scope > .p9-rlw"); return t && l ? l.getBoundingClientRect().top - t.getBoundingClientRect().bottom : null; });
     const pill = root.querySelector('[data-pk40="open"] [data-pk39="status"]')?.getBoundingClientRect().height ?? null;
     return { tipPkl: tip && pkl ? pkl.top - tip.bottom : null, kGrid: k && grid ? grid.top - k.bottom : null, buildBand: build && band ? band.top - build.bottom : null, pairs, pill };
   }, pg);
   L.check("explainer → the packages panel 48 (±1)", near(g.tipPkl ?? undefined, 48, 1), String(g.tipPkl));
-  L.check("BUILD label → cards 24 (±1)", near(g.kGrid ?? undefined, 24, 1), String(g.kGrid));
+  /* v39.3 RETARGET: the BUILD label stands 24 above the Steps + preview builder */
+  L.check("BUILD label → the builder 24 (±1)", near(g.kGrid ?? undefined, 24, 1), String(g.kGrid));
   L.check("the packages panel → navy band 96 (±1)", near(g.buildBand ?? undefined, 96, 1), String(g.buildBand));
   L.check("both results rows were read (packages and pieces)", g.pairs.length === 2 && g.pairs.every((x) => x != null), JSON.stringify(g.pairs));
   L.check("top three → list panel 96 (±1), in both rows", g.pairs.every((x) => near(x ?? undefined, 96, 1)), JSON.stringify(g.pairs));
-  /* the pill's full size (the ref's @container ≤1200 rule makes it 28 at 1280; L3 reads that) */
-  L.check("the status pill is 32 tall at 1512 (±1)", near(g.pill ?? undefined, 32, 1), String(g.pill));
-  L.done(6);
+  /* v39.3: the pill's height is L3's (30, the Steps header's) */
+  L.done(5);
 });
 
 /* ── L5 · the explainer ── */

@@ -22,7 +22,7 @@ import { useOverlay } from "../../shell/useOverlay";
 
 export const HOW_STEPS: readonly [string, string][] = [
   ["Pick a package, or make one", "Your packages sit in a row at the top. Each has its own icon and colour, so you can spot it at a glance here, in the Query Centre and in your results. Click one to open it below, or press + New."],
-  ["Keep your materials in one place", "Your materials holds every query letter, synopsis and version of your book. Write or paste a new one, attach the file, and edit it whenever you like."],
+  ["Pick each piece", "Open a step and pick your version, letter and synopsis from what you’ve saved, or write a new one there and then. The preview shows exactly what an agent will receive."],
   ["Drag them into the package", "Start with the version of your book: it decides which pages go out. Then add a query letter and, if you want one, a synopsis. Anything else agents ask for goes under Also sends."],
   ["Pick it when you log a query", "Choose the package as you log a query and every slot fills itself. Once it’s out with agents it locks, so what each agent got stays true. Change it later and the queries already sent keep what they had."],
   ["See what’s working", "Further down, How your packages are doing shows which package gets agents asking for more, then which letter, synopsis and opening inside them does best. Each one ranks once enough agents have answered."],
@@ -42,20 +42,20 @@ const Miniature: React.FC<{ s: number }> = ({ s }) => (
       </div>
     </div>
     <div className="p9-hw2-bd">
+      {/* v39.3: the builder is a step list beside an email preview (it was Your materials beside the package) */}
       <div className="p9-hw2-mt" data-z="2">
-        <p>Your materials</p>
-        <div className="p9-hw2-tabs"><span className="p9-on">Letters</span><span>Synopses</span><span>Versions</span></div>
-        <div className="p9-hw2-mr p9-r1"><i /><span><u /><u className="p9-s" /></span></div>
-        <div className="p9-hw2-mr"><i /><span><u /><u className="p9-s" /></span></div>
-        <div className="p9-hw2-mr"><i /><span><u /><u className="p9-s" /></span></div>
+        <p>Steps</p>
+        <div className="p9-hw2-mr p9-r1"><i>✓</i><span><u /><u className="p9-s" /></span></div>
+        <div className="p9-hw2-mr"><i>2</i><span><u /><u className="p9-s" /></span></div>
+        <div className="p9-hw2-mr"><i>3</i><span><u /><u className="p9-s" /></span></div>
+        <div className="p9-hw2-mr"><i>4</i><span><u /><u className="p9-s" /></span></div>
       </div>
       <div className="p9-hw2-pk" data-z="3">
-        <p><i />Standard UK<span className="p9-hw2-lk">🔒</span></p>
+        <p><i />What an agent receives</p>
+        <div className="p9-hw2-sl p9-s3"><em>Pages from</em><span className="p9-hw2-slot"><span className="p9-hw2-it p9-v"><i>1</i>Fast-paced opening</span></span></div>
         <div className="p9-hw2-sl p9-s1"><em>Query letter</em><span className="p9-hw2-slot"><span className="p9-hw2-it"><i />Hook-first</span></span></div>
         <div className="p9-hw2-sl p9-s2"><em>Synopsis</em><span className="p9-hw2-slot"><span className="p9-hw2-it"><i />One-page</span></span></div>
-        <div className="p9-hw2-sl p9-s3"><em>Pages from</em><span className="p9-hw2-slot"><span className="p9-hw2-it p9-v"><i>1</i>Fast-paced opening</span></span></div>
       </div>
-      <span className="p9-hw2-fly"><i />Hook-first</span>
     </div>
     <div className="p9-hw2-q" data-z="4"><span className="p9-hw2-av">JM</span><span><b>Jonathan Marsh</b><small>Queried today · with <em>Standard UK</em></small></span></div>
     <div className="p9-hw2-rs" data-z="5">

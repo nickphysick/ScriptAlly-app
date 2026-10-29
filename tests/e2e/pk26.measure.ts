@@ -60,12 +60,8 @@ const MUTATIONS: Record<string, { css?: string; js?: string }> = {
      would come to report a letter, or an extra, that it never carried. */
   /* the header card takes the shell's shared gutter back */
   /* v39.1: the builder goes back to a fixed 48, off the header card's inset */
-  /* v39.2: names are cut to one line again */
-  "PK26-M": { css: `[data-pk26="page"] .p9-pb-grid.p9-v39 .p9-lib-list .p9-lr.p9-lr b { white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }` },
   /* v39.2: the builder sits in the packages panel, which takes the width */
   "PK26-W": { css: `.p6.p6 > .p9-pkc { margin-left: 48px !important; margin-right: 48px !important; }` },
-  /* every row accepts every drop */
-  "PK26-B": { js: `document.addEventListener('dragover', (e) => { if (e.target.closest && e.target.closest('.p9-slt')) e.preventDefault(); }, true); document.addEventListener('drop', (e) => { const s = e.target.closest && e.target.closest('.p9-slt'); if (!s) return; const [k] = (e.dataTransfer.getData('text/plain') || '').split(':'); if (k && k !== s.dataset.slot) { const t = document.querySelector('.p9-slt[data-slot="' + k + '"]'); if (t) { e.stopImmediatePropagation(); t.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer: e.dataTransfer })); } } }, true);` },
   /* the drawer's header fill runs to the rim, over the inner border */
   "PK26-D": { css: `.p6-cx-drw .p6-dh { margin-left: -8px !important; margin-right: -8px !important; }` },
   /* rank everything, the too-early too */
@@ -131,47 +127,8 @@ for (const size of SIZES) {
   });
 }
 
-/* ── PK26-B ─────────────────────────────────────────────────────────────────────────────────────── */
-test("PK26-B only the matching row takes a drop; Add does the same by keyboard", async ({ page }) => {
-  test.setTimeout(240_000);
-  const L = new Ledger("PK26-B");
-  seed();
-  await open(page, SIZES[0], "/queries/packages?pkg=pk26-pkg-open");
-  L.check("the drag target is open", (await vis(page, '[data-pk26="open"]').getAttribute("data-pkg")) === "pk26-pkg-open", "open package");
-  /* v39.2: Your materials opens on Versions; the letters are on their own tab */
-  await vis(page, '.p9-lib-tabs [role="tab"].p9-t-let').click();
-  const letterB = vis(page, '.p9-lr[data-drag="let:pk26-let-b"]');
-  /* while dragging: the package dims, the Query letter row alone is marked */
-  await letterB.evaluate((el) => el.dispatchEvent(new DragEvent("dragstart", { bubbles: true, dataTransfer: new DataTransfer() })));
-  await page.waitForTimeout(200);
-  const marks = await page.evaluate(() => {
-    const o = [...document.querySelectorAll('[data-pk26="open"]')].find((e) => (e as HTMLElement).offsetParent) as HTMLElement;
-    return { dragging: o.classList.contains("p9-dragging"), ok: [...o.querySelectorAll(".p9-slt.p9-ok")].map((s) => (s as HTMLElement).dataset.slot) };
-  });
-  L.check("the package is marked as dragging", marks.dragging, JSON.stringify(marks));
-  L.check("only the Query letter row is highlighted", JSON.stringify(marks.ok) === '["let"]', JSON.stringify(marks.ok));
-  await letterB.evaluate((el) => el.dispatchEvent(new DragEvent("dragend", { bubbles: true })));
-  /* onto the Synopsis row: nothing */
-  await letterB.dragTo(vis(page, '.p9-slt[data-slot="syn"]'));
-  await page.waitForTimeout(1500);
-  let d = dump()["pk26-pkg-open"]!;
-  L.check("a letter dropped on Synopsis changes nothing", d.queryLetterVersionId === "" && d.synopsisVersionId === "", `ql=${d.queryLetterVersionId} syn=${d.synopsisVersionId}`);
-  /* onto the Query letter row: fills it */
-  await letterB.dragTo(vis(page, '.p9-slt[data-slot="let"]'));
-  await page.waitForTimeout(1500);
-  d = dump()["pk26-pkg-open"]!;
-  L.check("dropped on Query letter, it fills it", d.queryLetterVersionId === "pk26-let-b", `ql=${d.queryLetterVersionId}`);
-  /* Add, by keyboard: the synopsis */
-  await vis(page, '.p9-lib-tabs [role="tab"].p9-t-syn').click();
-  const add = vis(page, '.p9-lr[data-drag="syn:pk26-syn"] .p9-lr-add');
-  await add.focus();
-  await page.keyboard.press("Enter");
-  await page.waitForTimeout(1500);
-  d = dump()["pk26-pkg-open"]!;
-  L.check("Add by keyboard fills the Synopsis row", d.synopsisVersionId === "pk26-syn", `syn=${d.synopsisVersionId}`);
-  seed();
-  L.done(6);
-});
+/* PK26-B — RETIRED by v39.3 (drag and drop is retired with Your materials; a pick in the steps is pk393 L10). See
+   tests/e2e/RETIRED-submission-packages-v39-3.md */
 
 /* PK26-E / PK26-X — RETIRED with v38 (27 Oct); see tests/e2e/RETIRED-submission-packages-v38.md */
 
@@ -180,9 +137,11 @@ for (const size of SIZES) {
   test(`PK26-D the drawer's header stops at its inner border at ${size.width}`, async ({ page }) => {
     test.setTimeout(180_000);
     const L = new Ledger(`PK26-D-${size.width}`);
-    await open(page, size);
-    /* v38: the Query letters table is gone; Your materials' pencil opens the same drawer */
-    await vis(page, '[data-pk26="lib"] .p9-lr-ed').click();
+    /* v39.3: Your materials is retired; the letter step's Edit pencil opens the same drawer, on a live package */
+    await open(page, size, "/queries/packages?pkg=pk26-pkg-open");
+    await vis(page, '[data-pk393-step="let"] [data-pk393="step-head"]').click();
+    await page.waitForTimeout(300);
+    await vis(page, '[data-pk393-step="let"] [data-pk393="edit"]').click();
     await page.waitForTimeout(900);
     const r = await page.evaluate(() => {
       const d = document.querySelector('[data-pk26="drawer"]') as HTMLElement;
@@ -239,27 +198,8 @@ for (const size of SIZES) {
 /* ── PK26-M · Your materials: names in full, never the type as a summary ──
    REWRITTEN by v39.2 (Part C): a name is never cut off any more — it wraps, with no ellipsis and no title tooltip
    (it was one line with the full name as its title). The "no type for a summary" half is unchanged. */
-test("PK26-M material rows: names in full, no type for a summary", async ({ page }) => {
-  test.setTimeout(180_000);
-  const L = new Ledger("PK26-M");
-  await open(page, SIZES[1]);
-  const r = await page.evaluate(() => {
-    const pg = [...document.querySelectorAll('[data-pk26="page"]')].find((e) => (e as HTMLElement).offsetParent) as HTMLElement;
-    const rows = [...pg.querySelectorAll('[data-pk26="lib"] .p9-lr')].map((row) => {
-      const b = row.querySelector("b") as HTMLElement, cs = getComputedStyle(b);
-      return { name: b.textContent ?? "", whole: b.scrollWidth <= b.clientWidth, cut: cs.textOverflow === "ellipsis" || cs.whiteSpace === "nowrap", small: row.querySelector("small")?.textContent ?? null };
-    });
-    const smalls = [...pg.querySelectorAll('[data-pk26="lib"] small, [data-pk26="open"] .p9-mr-tx small')].map((e) => (e.textContent ?? "").trim());
-    return { rows, smalls };
-  });
-  const long = r.rows.find((x) => x.name.startsWith("The longer comps-forward letter"));
-  L.check("the long letter is listed", !!long, JSON.stringify(r.rows.map((x) => x.name)));
-  L.check("…its name shows in full (scrollWidth ≤ clientWidth)", !!long && long.whole, JSON.stringify(long));
-  L.check("…and is never ellipsised", !!long && !long.cut, JSON.stringify(long));
-  L.check("every name shows in full", r.rows.every((x) => x.whole && !x.cut), JSON.stringify(r.rows.filter((x) => !x.whole || x.cut)));
-  L.check("no summary is the type", !r.smalls.some((t) => t === "Query letter" || t === "Synopsis"), JSON.stringify(r.smalls));
-  L.done(5);
-});
+/* PK26-M — RETIRED by v39.3 (Your materials' rows are retired; the steps' choice rows show the name and summary). See
+   tests/e2e/RETIRED-submission-packages-v39-3.md */
 
 /* ── PK26-H · the header note: one line, or "+ Add a note" that opens the details with the note focused ── */
 test("PK26-H the package note is one line, or + Add a note", async ({ page }) => {

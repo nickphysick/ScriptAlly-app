@@ -1,0 +1,150 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Submission packages v39.3 (design-refs/submission-packages-v39-3/, option B · Steps + preview). The ref's values,
+ * in the app's tokens: Harbour #1d4b63 (the package colour's default; the header reads `--pc`), the navy primary
+ * `--sp-anthracite` (#2a3a52, the ref's --navy), the typewriter `--sp-type`, the serif `--sp-serif`. Desktop only (≥768),
+ * as v39's rules.
+ */
+
+/* ══ the two columns: Steps 1.05fr, the preview 1fr, 28 apart; one column when the panel is under 900 ══ */
+@media (min-width: 768px) {
+  .p6 .p9-pb-build { container: p93 / inline-size; }
+  .p93-b { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+  .p93-col { min-width: 0; }
+}
+@container p93 (max-width: 899px) {
+  .p93-b { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ══ Phase 1 · the package header (ref `.bh`): the package's colour with the gloss, radius 14, 16 / 18 ══ */
+.p93-bh {
+  display: grid; grid-template-columns: 44px minmax(0, 1fr) auto auto; gap: 14px; align-items: center;
+  padding: 16px 18px; margin-bottom: 14px; border-radius: 14px; color: #fff;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.06)), var(--pc, #1d4b63);
+}
+.p93-bh-ic { width: 44px; height: 44px; padding: 0; border: 0; border-radius: 10px; background: #fbf6ee; color: var(--pc, #1d4b63); display: grid; place-items: center; cursor: pointer; }
+.p93-bh-ic[disabled] { cursor: default; }
+.p93-bh-ic svg { width: 22px; height: 22px; }
+.p93-bh-ic:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.p93-bh-t { min-width: 0; }
+.p93-bh-t h3 { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font: 400 24px/1.25 var(--sp-type) !important; color: #fff; }
+.p93-bh-t h3 .p9-po-nm { font: 400 24px/1.25 var(--sp-type) !important; color: #fff; outline: 0; border-bottom: 1.5px dashed transparent; }
+.p93-bh-t h3 .p9-po-nm:not(.p9-locked):hover { border-bottom-color: rgba(255, 255, 255, 0.45); }
+.p93-bh-t h3 .p9-po-nm:not(.p9-locked):focus { border-bottom-color: #fff; }
+.p93-bh-t .p9-po-act { font: 600 11px/1 var(--sp-serif); font-style: normal; padding: 4px 7px; border-radius: 4px; background: #fbf6ee; color: var(--pc, #1d4b63); }
+.p93-mk { height: 26px; padding: 0 10px; border: 0; border-radius: 8px; background: rgba(255, 255, 255, 0.14); color: #fff; font: 600 12.5px var(--sp-serif); cursor: pointer; }
+.p93-mk:hover { background: rgba(255, 255, 255, 0.24); }
+.p93-bh-t small { display: block; margin-top: 2px; font: italic 14px/1.35 var(--sp-serif); color: rgba(255, 255, 255, 0.78); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.p93-addnote { padding: 0; border: 0; background: none; font: italic 14px var(--sp-serif); color: inherit; cursor: pointer; text-decoration: underline dashed rgba(255, 255, 255, 0.45); text-underline-offset: 3px; }
+.p93-bh-s { display: inline-flex; align-items: center; gap: 8px; height: 30px; padding: 0 12px; border-radius: 15px; background: rgba(255, 255, 255, 0.14); font: 600 13px/1 var(--sp-serif); white-space: nowrap; }
+.p93-bh-s > i { width: 8px; height: 8px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.7); }
+.p93-bh-s.p93-g > i { background: #7fc89a; box-shadow: none; }
+.p93-bh-f { width: 34px; height: 34px; padding: 0; border: 0; border-radius: 50%; background: rgba(255, 255, 255, 0.14); color: #fff; display: grid; place-items: center; cursor: pointer; }
+.p93-bh-f svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; }
+.p93-bh-f:hover { background: rgba(255, 255, 255, 0.24); }
+
+/* ══ the sent note (ref `.lock`, Nick's copy): #f4eee5, radius 12, a padlock ══ */
+.p93-lock { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; margin-bottom: 12px; border-radius: 12px; background: #f4eee5; font: 14px/1.45 var(--sp-serif); color: rgba(28, 19, 15, 0.78); }
+.p93-lock > svg { flex: none; width: 16px; height: 16px; margin-top: 2px; fill: none; stroke: currentColor; stroke-width: 1.6; }
+.p93-lock b { color: #1c130f; }
+.p93-lock-a { display: inline-flex; gap: 14px; margin-left: 10px; }
+.p93-lnk { padding: 0; border: 0; background: none; font: 600 14px var(--sp-serif); color: #1d4b63; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.p93-lnk.p93-q { color: rgba(28, 19, 15, 0.58); }
+.p93-lnk:focus-visible { outline: 2px solid #1d4b63; outline-offset: 2px; border-radius: 2px; }
+.p93-bh-ic .p9-pic { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ══ Phase 2 · the steps (ref `.step`): white, radius 14, a 1px ink-9% ring, 12 apart ══ */
+.p93-steps { display: grid; gap: 12px; }
+.p93-step { position: relative; border-radius: 14px; background: #fff; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.09); }
+.p93-step.p93-open { box-shadow: 0 0 0 2px #1d4b63; }
+.p93-sh { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; gap: 12px; align-items: center; width: 100%; padding: 14px 16px; border: 0; background: none; text-align: left; font: inherit; color: inherit; border-radius: 14px; }
+button.p93-sh { cursor: pointer; }
+button.p93-sh:focus-visible { outline: 2px solid #1d4b63; outline-offset: -2px; }
+.p93-sn { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font: 600 13px var(--sp-serif); color: #1c130f; box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, 0.25); }
+.p93-done .p93-sn { background: #3e7d5a; color: #fff; box-shadow: none; }
+.p93-sn svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.p93-st { min-width: 0; }
+.p93-st b { display: block; font: 600 16px/1.3 var(--sp-serif); color: #1c130f; }
+.p93-st small { display: block; font: italic 13.5px/1.4 var(--sp-serif); color: rgba(28, 19, 15, 0.58); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.p93-st .p93-pick { font-style: normal; font-weight: 600; color: #1c130f; }
+.p93-sh > em { font: italic 13px var(--sp-serif); color: rgba(28, 19, 15, 0.58); }
+.p93-done .p93-sh > em { font-style: normal; font-weight: 600; color: #1d4b63; }
+/* "Change" on hover only (and while open, and on keyboard focus) */
+.p93-done:not(.p93-open) .p93-sh > em { opacity: 0; }
+.p93-done:hover .p93-sh > em, .p93-done .p93-sh:focus-visible > em { opacity: 1; }
+.p93-sb { padding: 0 16px 14px 60px; }
+.p93-choices { display: grid; gap: 6px; }
+.p93-ch { position: relative; border-radius: 9px; background: #faf7f2; }
+.p93-ch:hover { background: #f2ece4; }
+.p93-ch.p93-sel { background: #eef4f7; box-shadow: inset 0 0 0 1.5px #1d4b63; }
+.p93-ch-b { display: grid; grid-template-columns: 30px minmax(0, 1fr) 18px; gap: 10px; align-items: center; width: 100%; padding: 9px 10px; padding-right: 46px; border: 0; border-radius: 9px; background: none; text-align: left; font: inherit; color: inherit; cursor: pointer; }
+.p93-ch-b:focus-visible { outline: 2px solid #1d4b63; outline-offset: 1px; }
+.p93-ch-t { min-width: 0; }
+.p93-ch-t b { display: block; font: 600 14.5px/1.3 var(--sp-serif); color: #1c130f; }
+.p93-ch-t small { display: block; font: italic 12.5px/1.35 var(--sp-serif); color: rgba(28, 19, 15, 0.58); }
+.p93-r { width: 18px; height: 18px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, 0.3); }
+.p93-sel .p93-r { box-shadow: inset 0 0 0 5px #1d4b63; }
+/* the Edit pencil: on hover and focus only; it sits between the text and the radio */
+.p93-ch-ed { position: absolute; top: 50%; right: 34px; transform: translateY(-50%); width: 28px; height: 28px; padding: 0; border: 0; border-radius: 6px; background: #fff; color: rgba(28, 19, 15, 0.55); display: grid; place-items: center; cursor: pointer; opacity: 0; }
+.p93-ch-ed svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; }
+.p93-ch:hover .p93-ch-ed, .p93-ch:focus-within .p93-ch-ed { opacity: 1; }
+.p93-ch-ed:hover { color: #1c130f; }
+@media (hover: none) { .p93-ch-ed { opacity: 1; } }
+.p93-tic { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; font: 600 12px var(--sp-serif); }
+.p93-tic.p93-t-v { border-radius: 50%; background: var(--sp-anthracite, #2a3a52); color: #fff; }
+.p93-tic.p93-t-m { background: #f7e3e3; color: #9b4a57; }
+.p93-tic svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; }
+.p93-new { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 8px; }
+.p93-none { margin: 0; font: italic 14px var(--sp-serif); color: rgba(28, 19, 15, 0.58); }
+.p93-away { display: grid; gap: 6px; margin-top: 8px; }
+.p93-aw { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 9px 10px; border-radius: 9px; background: #faf7f2; opacity: 0.8; }
+.p93-foot { margin: 10px 0 0; font: italic 13px/1.45 var(--sp-serif); color: rgba(28, 19, 15, 0.58); }
+.p93-foot .p93-lnk { font-size: 13px; font-style: normal; }
+/* Also sends: always open */
+.p93-exts { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 0 16px 14px 60px; }
+.p93-chip { display: inline-flex; align-items: center; height: 30px; border-radius: 15px; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.18); }
+.p93-chip > button:first-child, .p93-chip > span { height: 30px; padding: 0 12px; border: 0; background: none; font: 600 13px/30px var(--sp-serif); color: #1c130f; cursor: pointer; border-radius: 15px; }
+.p93-chip > span { cursor: default; }
+.p93-chip.p93-on { background: #1d4b63; box-shadow: none; }
+.p93-chip.p93-on > button:first-child, .p93-chip.p93-on > span { color: #fff; }
+.p93-chip-ed { width: 26px; height: 26px; margin: 0 2px 0 -6px; padding: 0; border: 0; border-radius: 50%; background: none; color: inherit; display: none; place-items: center; cursor: pointer; opacity: 0.7; }
+.p93-chip:hover .p93-chip-ed, .p93-chip:focus-within .p93-chip-ed { display: grid; }
+.p93-chip.p93-on .p93-chip-ed { color: #fff; }
+.p93-chip-ed svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; }
+.p93-exts .p9-exa-b { height: 30px; padding: 0 12px; border: 0; border-radius: 15px; background: none; box-shadow: inset 0 0 0 1px rgba(29, 75, 99, 0.35); font: 600 13px var(--sp-serif); color: #1d4b63; cursor: pointer; }
+
+/* ══ Phase 3 · the preview (ref `.pv`, `.mail`): sticky at 80 while the steps scroll ══ */
+.p93-pv { position: sticky; top: 80px; min-width: 0; }
+.p93-pv-k { display: flex; justify-content: space-between; align-items: baseline; margin: 0 4px 10px; font: 500 10px/1.2 "JetBrains Mono", monospace !important; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(28, 19, 15, 0.58); }
+.p93-pv-k > span { font: inherit !important; }
+.p93-mail { border-radius: 14px; background: #fff; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.09), 0 18px 32px -22px rgba(28, 19, 15, 0.5); overflow: hidden; }
+.p93-mail-h { padding: 14px 18px; border-bottom: 1px solid rgba(28, 19, 15, 0.09); font: 14px/1.45 var(--sp-serif); }
+.p93-mail-h > div { display: grid; grid-template-columns: 60px minmax(0, 1fr); gap: 6px; padding: 2px 0; }
+.p93-mail-h span { color: rgba(28, 19, 15, 0.58); }
+.p93-mail-h b { font-weight: 400; color: #1c130f; min-width: 0; overflow-wrap: anywhere; }
+.p93-mail-h em { font-style: italic; color: rgba(28, 19, 15, 0.58); }
+.p93-mail-b { padding: 18px; min-height: 150px; font: 15px/1.6 var(--sp-serif); color: #1c130f; border-radius: 9px; }
+.p93-lt { margin: 0 0 10px; font: 15px/1.6 var(--sp-serif); }
+.p93-ph { font-style: italic; color: rgba(28, 19, 15, 0.58); }
+.p93-skl u { display: block; height: 6px; margin: 9px 0; border-radius: 3px; background: #efe9e1; }
+.p93-skl u:nth-child(2n) { width: 82%; }
+.p93-tag { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; padding: 3px 10px 3px 6px; border-radius: 12px; background: #f7e3e3; color: #9b4a57; font: 600 12px var(--sp-serif); }
+.p93-tag svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; }
+.p93-em { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 30px 0; }
+.p93-att { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 18px 18px; }
+.p93-a { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 4px 12px 4px 8px; border-radius: 9px; background: #f6f2ec; font: 600 13px/1.3 var(--sp-serif); color: #1c130f; }
+.p93-a small { display: block; font: italic 400 12px/1.3 var(--sp-serif); color: rgba(28, 19, 15, 0.58); }
+.p93-a .p93-tic { width: 26px; height: 26px; }
+.p93-a.p93-gh { background: none; outline: 1.5px dashed rgba(28, 19, 15, 0.2); outline-offset: -1.5px; padding-left: 12px; color: rgba(28, 19, 15, 0.58); font-weight: 400; font-style: italic; }
+.p93-tic.p93-t-x { background: #ece6dd; color: #6b5e52; }
+/* linking: a hovered or focused step outlines its part — a 2px Harbour ring and #eef4f7 */
+.p93-mail .p93-hl { background: #eef4f7 !important; box-shadow: 0 0 0 2px #1d4b63 !important; outline: 0 !important; }
+.p93-pv-f { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; }
+.p93-pv-b { display: inline-flex; gap: 8px; }
+.p93-btn { height: 44px; padding: 0 20px; border: 0; border-radius: 8px; font: 600 15px var(--sp-serif); cursor: pointer; }
+.p93-b1 { background: var(--sp-anthracite, #2a3a52); color: #fff; }
+.p93-b1[disabled] { background: #e4ded6; color: rgba(28, 19, 15, 0.45); cursor: default; }
+.p93-b2 { background: #fff; color: #1c130f; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.18); }
+.p93-btn:focus-visible { outline: 2px solid #1d4b63; outline-offset: 2px; }
