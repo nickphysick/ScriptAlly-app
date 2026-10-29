@@ -1,0 +1,204 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * To-do list v7 (design-refs/todo-list-v7/todo-list-v7.html, its v6css and v7css layers) — the top of the page and the
+ * simplifications to the tray and desk. Desktop only (768px up), like the rest of v5; the phone keeps its page.
+ *
+ * ⚠️ THE PAGE'S COLUMN IS THE CONTACT LIST'S (contactV25.css `--cl25-w`, the latest header rules): the header card, Today,
+ *    "Your tray" and the sheet share one width, as the ref's do. The "Nothing yet" page keeps v5's width
+ *    (`[data-state="nothing"]` is excluded) and is otherwise untouched.
+ * ⚠️ brand.tsx forces h1–h3 with `!important` and names bare spans as the body sans: heading faces carry `!important`.
+ */
+@media (min-width: 768px) {
+  /* ONE WIDTH (Query Centre v150.1 §1, Contact list v25: `--cl25-w`): W = min(S − 48, 1200), centred, S the sheet */
+  .td5-root:not([data-state="nothing"]) .td5-group { --td5-w: min(calc(var(--hsheet-w) - 48px), 1200px); }
+  .td5-group > .td7-hd, .td5-group > .td7-sec {
+    box-sizing: border-box; width: var(--td5-w); margin-left: calc(50% - var(--td5-w) / 2);
+  }
+
+  /* ═════ §1 · the header card — the shared PageHeaderCard at the ref's size (Responses' `.rsp5-card` values) ═════ */
+  .td7-hd { position: relative; margin-top: 24px; }
+  .td7-hd .td7-card.phc.phc {
+    box-sizing: border-box; padding: 34px 44px 34px 46px; gap: 24px; border-radius: 22px; background: #fbf9f5;
+    grid-template-columns: minmax(0, 1fr) auto;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset, 0 10px 30px -18px rgba(28, 19, 15, 0.35), 0 0 0 1px rgba(28, 19, 15, 0.06);
+  }
+  .td7-hd .td7-card.phc.phc.phc h1 { font: 400 54px/1 var(--sp-type) !important; letter-spacing: -0.01em; color: #1c130f; }
+  .td7-hd .td7-card .hl {
+    background: linear-gradient(transparent 58%, #f5e2da 58%, #f5e2da 92%, transparent 92%); padding: 0 6px; margin-left: -6px;
+    -webkit-box-decoration-break: clone; box-decoration-break: clone;
+    font-family: inherit !important; font-size: inherit !important; line-height: inherit !important;
+  }
+  .td7-hd .td7-card .phc-tx > p { margin: 16px 0 0; max-width: 56ch; font: 400 18.5px/1.5 var(--sp-serif); color: rgba(28, 19, 15, 0.72); }
+  .td7-hd .td7-card .phc-tx > p b { font-weight: 600; color: #1c130f; }
+  .td7-hd .td7-card .phc-b { gap: 12px; margin-top: 26px; flex-wrap: wrap; }
+  .td7-hd .td7-card .phc-b button { height: 48px; padding: 0 22px; border-radius: 12px; font: 400 16px var(--sp-type) !important; white-space: nowrap; }
+  .td7-hd .td7-card .phc-p { border: 0; background: #2a3a52; color: #fff; box-shadow: 0 2px 0 rgba(0, 0, 0, 0.18); }
+  .td7-hd .td7-card .phc-p:hover { background: #22314a; }
+  .td7-hd .td7-card .phc-s { border: 0; background: #fff; color: #1c130f; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16); }
+  .td7-hd .td7-card .phc-s:hover { box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.45); }
+  .td7-hd .td7-card .phc-art { height: auto; display: block; }
+  .td7-hd .td7-card .phc-art img { display: block; height: 236px; width: auto; max-width: none; margin: -14px 18px -26px 0; filter: drop-shadow(0 14px 18px rgba(28, 19, 15, 0.12)); }
+  /* the loading beat: the card keeps its boxes and shows no figure (the Contact list's rule) */
+  .td7-hd[data-loading] .phc-b button { visibility: hidden; }
+
+  /* ═════ the section headings: typewriter, a hairline running to the edge (Today) ═════ */
+  .td7-sec { margin-top: 52px; }
+  .td7-h2row { display: flex; align-items: center; gap: 18px; margin-bottom: 20px; }
+  .td5-root h2.td7-h2 { margin: 0; font: 400 31px/1.05 var(--sp-type) !important; letter-spacing: -0.01em; color: #1c130f; white-space: nowrap; }
+  .td7-rule { flex: 1; height: 1px; background: rgba(28, 19, 15, 0.14); }
+  .td7-subrow { margin-top: 8px; }
+  .td5-root .td7-sub { font: italic 400 17px/1.3 var(--sp-serif); color: rgba(28, 19, 15, 0.72); }
+  .td5-root .td7-sub .td7-od { color: #a2452a; font-style: normal; font-weight: 600; }
+  .td5-group > .td7-traysec + .td5-sheet { margin-top: 0; }
+
+  /* ⚠️ GREYS ARE v5.2 §F.4's (--td5-ink62 / --td5-ink70), NOT THE REF'S 55–58%: those measured 3.9–4.47:1 under TD52 F3 */
+  /* ═════ §2 · Today: one white card — the date, the three counts, the calendar button ═════ */
+  .td7-tcard {
+    display: grid; grid-template-columns: minmax(230px, 1.05fr) repeat(3, minmax(0, 1fr)) auto; align-items: center;
+    padding: 24px 26px 24px 30px; background: #fff; border-radius: 18px;
+    box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.08), 0 14px 30px -24px rgba(28, 19, 15, 0.45);
+  }
+  .td7-date { display: flex; align-items: center; gap: 14px; min-width: 0; }
+  .td5-root .td7-num { font: 400 64px/0.9 var(--sp-type); letter-spacing: -0.03em; color: #1c130f; }
+  .td5-root .td7-wd { font: 400 20px/1.15 var(--sp-type); color: #1c130f; }
+  .td5-root .td7-wd small { display: block; margin-top: 2px; font: italic 400 16px var(--sp-serif); color: var(--td5-ink62); }
+  .td5-root .td7-ct {
+    all: unset; box-sizing: border-box; align-self: stretch; display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 4px;
+    min-width: 0; padding: 2px 22px 0; border-left: 1px solid rgba(28, 19, 15, 0.1); cursor: pointer; text-align: left;
+  }
+  .td5-root .td7-ct .td7-ctl { font: 400 17px/1.2 var(--sp-serif); color: #1c130f; white-space: nowrap; }
+  .td5-root .td7-ct .td7-ctn { margin: 4px 0 2px; font: 400 46px/1 var(--sp-type); color: #1c130f; }
+  .td5-root .td7-ct .td7-cth { font: italic 400 15px var(--sp-serif); color: var(--td5-ink62); white-space: nowrap; }
+  .td5-root .td7-ct.od .td7-ctn { color: #a2452a; }
+  .td5-root .td7-ct.z { cursor: default; }
+  .td5-root .td7-ct.z .td7-ctn, .td5-root .td7-ct.z .td7-ctl { opacity: 0.45; }
+  .td5-root .td7-ct:hover:not(:disabled) { background: rgba(28, 19, 15, 0.03); }
+  .td5-root .td7-ct[aria-pressed="true"] { background: rgba(42, 58, 82, 0.05); box-shadow: inset 0 -3px 0 #2a3a52; }
+  .td5-root .td7-ct:focus-visible { outline: 2px solid #2a3a52; outline-offset: -2px; }
+  .td5-root .td7-calbtn {
+    display: inline-flex; align-items: center; gap: 9px; height: 44px; margin-left: 10px; padding: 0 18px; border: 0; border-radius: 12px;
+    background: #fff; color: #1c130f; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16); font: 400 15px var(--sp-type) !important; white-space: nowrap; cursor: pointer;
+  }
+  .td5-root .td7-calbtn:hover { box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.45); }
+  .td5-root .td7-calbtn svg { width: 16px; height: 16px; }
+  .td5-root .td7-calbtn:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+
+  /* ═════ S2 · one navy bar: Find (translucent on the navy), a white "Filters" button, then the pin ═════ */
+  .td5-root .td5-nav .td7-find { display: flex; align-items: center; gap: 8px; flex: none; min-width: 0; }
+  .td5-root .td5-nav .td7-find .td5-find:not(.td52-pfind) {
+    display: flex; align-items: center; gap: 10px; box-sizing: border-box; flex: 0 0 280px; width: 280px; height: 42px; padding: 0 12px 0 14px; border-radius: 21px;
+    background: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.6); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  }
+  .td5-root .td5-nav .td7-find .td5-find:not(.td52-pfind):focus-within { box-shadow: inset 0 0 0 1.5px #e7a184; }
+  .td5-root .td5-nav .td7-find .td5-find:not(.td52-pfind) input { flex: 1 1 0; min-width: 0; border: 0; outline: 0; background: none; color: #fff; font: 400 15px/1.2 var(--sp-serif) !important; }
+  .td5-root .td5-nav .td7-find .td5-find:not(.td52-pfind) input::placeholder { color: rgba(255, 255, 255, 0.6); }
+  .td5-root .td5-nav .td7-find .td5-find:not(.td52-pfind) kbd {
+    flex: none; display: inline-grid; place-items: center; min-width: 18px; height: 18px; border-radius: 4px; color: rgba(255, 255, 255, 0.8);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.3); font: 400 11px/1 var(--font-mono) !important;
+  }
+  .td5-root .td5-nav .td7-fbtn {
+    display: inline-flex; align-items: center; gap: 8px; flex: none; height: 42px; margin-right: 10px; padding: 0 16px; border: 0; border-radius: 21px;
+    background: #fff; color: #1c130f; font: 400 15px/1 var(--sp-serif) !important; white-space: nowrap; cursor: pointer;
+  }
+  .td5-root .td5-nav .td7-fbtn[aria-expanded="true"] { background: #f5e2da; }
+  .td5-root .td5-nav .td7-fbtn:disabled { opacity: 0.6; cursor: default; }
+  /* pinned: Filters shrinks to its icon (its accessible name stays "Filters") */
+  .td5-root[data-pinned] .td5-nav .td7-fbtn { gap: 0; padding: 0 12px; margin-right: 6px; }
+  .td5-root[data-pinned] .td5-nav .td7-fbtn .td7-fbl { display: none; }
+  /* the filter strip: under the navy row, on paper white, the pills at the strip's size */
+  .td7-strip { display: flex; align-items: center; gap: 8px; flex: none; padding: 12px 22px; background: #fbf9f5; border-bottom: 1px solid rgba(28, 19, 15, 0.08); }
+  .td7-strip .td5-fr { display: flex; align-items: center; gap: 8px; min-width: 0; margin: 0; padding: 0; border: 0; }
+  .td5-root .td7-strip .td5-fp { height: 38px; border-radius: 19px; padding: 0 14px; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16); }
+  .td5-root .td7-strip .td5-fpw.on .td5-fp { background: #2d3a50; color: #f4eee5; box-shadow: none; padding-right: 40px; }
+  .td5-root .td7-strip .td5-fpx { top: 7px; }
+
+  /* ═════ S3 · no tab strip: the bands stick to the top of the tray's scroller; the Set aside view's way back ═════ */
+  .td5-root { --td5-striph: 0px; }
+  .td5-root .td5-sheet .td5-say.td7-asidet { font: 400 22px/1.2 var(--sp-type) !important; color: #f4eee5; }
+  .td5-root .td5-nav .td7-back {
+    flex: none; height: 40px; margin-left: 18px; padding: 0 16px; border: 0; border-radius: 12px; background: #fff; color: #1c130f;
+    font: 400 15px/1 var(--sp-type) !important; white-space: nowrap; cursor: pointer;
+  }
+  .td5-root .td5-nav .td7-back:focus-visible { outline: 2px solid #e7a184; outline-offset: 3px; }
+
+  /* ═════ S4 · plain group headings: a paper band with hairlines above and below, the typewriter name at 19px, an
+     italic count, the chevron kept; Your move alone carries the rust "!" disc. No drawings, no colour fills. ═════ */
+  .td5-root .td5-band.td7-band {
+    box-sizing: border-box; width: calc(100% + 20px); height: auto; min-height: 0; margin: 6px -10px 0; padding: 12px 18px 10px;
+    border: 0; border-top: 1px solid rgba(28, 19, 15, 0.08); border-bottom: 1px solid rgba(28, 19, 15, 0.08); border-radius: 0;
+    background: #f6f2ec; color: #1c130f; box-shadow: none; gap: 10px;
+  }
+  .td5-root .td5-band.td7-band .td5-bn, .ws-app.sheet-wide .td5-root .td5-band.td7-band .td5-bn { font: 400 19px/1.2 var(--sp-type) !important; color: #1c130f; }
+  .td5-root .td5-band.td7-band .td5-bc { padding: 0; border-radius: 0; background: none; font: italic 400 15px/1.2 var(--sp-serif) !important; letter-spacing: 0; color: var(--td5-ink70); }
+  .td5-root .td5-band.td7-band .td5-chv { color: #a2452a; }
+  .td5-root .td7-bang {
+    display: inline-grid; place-items: center; flex: none; width: 20px; height: 20px; border-radius: 50%; background: #a2452a; color: #fff;
+    font: 700 12px/1 var(--font-mono) !important;
+  }
+  .td5-root .td5-band--plain.td7-band .td5-bnote { font: italic 400 14px/1.2 var(--sp-serif) !important; letter-spacing: 0; text-transform: none; opacity: 1; color: var(--td5-ink70); }
+  .td5-root .td5-band.td7-band .td52-selall {
+    margin-left: 10px; padding: 0; border-radius: 0; background: none; box-shadow: none; color: rgba(28, 19, 15, 0.7);
+    font: italic 400 14px/1.2 var(--sp-serif) !important; letter-spacing: 0; text-transform: none; text-decoration: underline; text-underline-offset: 2px;
+  }
+
+  /* ═════ S5 · dates as words: "26 Jul" in serif (rust when overdue), the age under it in rust italic, or "No date" ═════ */
+  .td5-root .td5-row2 { grid-template-columns: 40px minmax(0, 1fr) auto; }
+  .td5-root .td7-due { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; flex: none; white-space: nowrap; text-align: right; }
+  .td5-root .td7-due .td7-dt { font: 400 16px/1.2 var(--sp-serif) !important; color: #1c130f; }
+  .td5-root .td7-due[data-kind="late"] .td7-dt { color: #a2452a; }
+  .td5-root .td7-due .td7-age { font: italic 400 13.5px/1.2 var(--sp-serif) !important; color: #a2452a; }
+  .td5-root .td7-due .td7-nd { font: italic 400 15px/1.2 var(--sp-serif) !important; color: var(--td5-ink62); }
+  .td5-root .td7-due.td52-press { cursor: pointer; border-radius: 6px; }
+  .td5-root .td7-due.td52-press:hover .td7-dt { text-decoration: underline; text-underline-offset: 3px; }
+  /* a Set aside row's day, on one line */
+  .td5-root .td5-back.td7-bdate {
+    display: inline; width: auto; height: auto; border: 0; border-radius: 0; background: none; box-shadow: none; white-space: nowrap;
+    font: 400 16px/1.2 var(--sp-serif) !important; color: #1c130f;
+  }
+
+  /* ═════ S6 · a calmer desk card: "n of N" in italic serif with no dashes; the band keeps its tint, name and status
+     (its tag is gone, in the markup); the small-capitals labels inside the card become italic serif in place ═════ */
+  .td5-root .td5-pos { font: italic 400 15px/1.2 var(--sp-serif) !important; letter-spacing: 0; text-transform: none; color: rgba(28, 19, 15, 0.62); }
+  .td5-root .td5-pos > span:first-child { font: inherit !important; }
+  .td5-root .td5-pos .td5-sp { flex: 1 1 auto; }
+  .td5-root .td5-facts .td5-fl, .td5-root .td5-where .td5-fl {
+    font: italic 400 14.5px/1.2 var(--sp-serif) !important; letter-spacing: 0; text-transform: none; color: var(--td5-ink62);
+  }
+  .td5-root .td5-tl .td5-tdl { font: italic 400 14px/1 var(--sp-serif) !important; letter-spacing: 0; text-transform: none; }
+  .td5-root .td5-asideban b { font: italic 400 14px/1.2 var(--sp-serif) !important; letter-spacing: 0; text-transform: none; }
+  .td5-root .td5-dcard .td5-pin small { font: italic 400 13px/1.2 var(--sp-serif) !important; letter-spacing: 0; text-transform: none; }
+
+  /* ═════ S7 · Done today on one line under the card: the heading line in italic serif, and its Undo ═════ */
+  .td5-root .td5-desk > .td7-done .td7-doneh { display: flex; align-items: baseline; gap: 12px; margin: 0; }
+  .td5-root .td7-doneh span { font: italic 400 15px/1.2 var(--sp-serif) !important; letter-spacing: 0; text-transform: none; color: rgba(28, 19, 15, 0.7); }
+  .td5-root .td7-doneh .td7-undo {
+    padding: 0; border: 0; background: none; cursor: pointer; color: #2a3a52; text-decoration: underline; text-underline-offset: 2px;
+    font: italic 400 15px/1.2 var(--sp-serif) !important;
+  }
+
+  /* pinned: the header card, Today and the "Your tray" heading leave with the old header (the ref's `.v6-pinhide`) */
+  .td5-root[data-pinned] .td7-hd, .td5-root[data-pinned] .td7-sec { display: none; }
+}
+
+/* the ref's ≤1440 step (its `@media (max-width:1440px)` on the Today card) */
+@media (min-width: 768px) and (max-width: 1440px) {
+  .td7-tcard { grid-template-columns: minmax(178px, 0.95fr) repeat(3, minmax(0, 1fr)) auto; padding-left: 24px; }
+  .td5-root .td7-num { font-size: 56px; }
+  .td5-root .td7-ct { padding: 2px 14px 0; }
+  .td5-root .td7-ct .td7-ctl { font-size: 16px; }
+}
+
+/* ═════ the date menu's "Pick a date" (portalled to the body, so literals, never `--td5-*`): ComposeCard's month in the
+   popover — the popover widens to hold it; the month loses its own card frame there ═════ */
+.td52-dm.td7-picking { width: 296px; }
+.td52-dm .td5-cal { width: auto; margin: 6px 0 0; padding: 8px 4px 4px; border-radius: 0; box-shadow: none; border-top: 1px solid rgba(28, 19, 15, 0.08); background: none; }
+.td52-dm .td5-calm button { width: 26px; height: 26px; border: 0; border-radius: 50%; background: none; cursor: pointer; color: #2a3a52; font: 400 16px/1 var(--sp-serif) !important; }
+.td52-dm .td5-calm button:disabled { opacity: 0.3; cursor: default; }
+.td52-dm .td5-calg button { height: 32px; border: 0; border-radius: 8px; background: none; cursor: pointer; font: 400 14px/1 var(--sp-serif) !important; color: #1c130f; }
+.td52-dm .td5-calg button:hover:not(:disabled) { background: #f2eee8; }
+.td52-dm .td5-calg button:disabled { color: rgba(28, 19, 15, 0.25); cursor: default; }
+.td52-dm .td5-calg button[data-today] { box-shadow: inset 0 0 0 1px #2a3a52; }
+.td52-dm .td5-calg button[aria-pressed="true"] { background: #2a3a52; color: #f4eee5; }
+.td52-dm .td5-calg button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 1px; }

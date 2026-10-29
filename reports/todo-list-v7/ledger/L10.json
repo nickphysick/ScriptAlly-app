@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "L10",
+  "where": "1512: pinned",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L10",
+  "where": "1512: the header card is hidden",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L10",
+  "where": "1512: Today is hidden",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L10",
+  "where": "1512: Find in the navy row",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L10",
+  "where": "1512: Filters in the navy row",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L10",
+  "where": "1512: the row does not overflow (scrollWidth ≤ clientWidth)",
+  "ok": true,
+  "detail": "1200 / 1200"
+ },
+ {
+  "lock": "L10",
+  "where": "1280: pinned",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L10",
+  "where": "1280: the header card is hidden",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L10",
+  "where": "1280: Today is hidden",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L10",
+  "where": "1280: Find in the navy row",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L10",
+  "where": "1280: Filters in the navy row",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L10",
+  "where": "1280: the row does not overflow (scrollWidth ≤ clientWidth)",
+  "ok": true,
+  "detail": "1156 / 1156"
+ }
+]

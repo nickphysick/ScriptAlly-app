@@ -37,18 +37,8 @@ export class Ledger {
 
 /** one named break per lock, applied in the page */
 export const MUTATIONS: Record<string, { css?: string; js?: string }> = {
-  /* D1b — the bands back under the tray's sticky strip (proves the overpaint read, not only the copies) */
-  D1b: { css: `[data-todo-v5] .td5-band { z-index: 10 !important; }` },
-  /* A1 — the card sets the header's height again */
-  A1: { css: `[data-todo-v5] .td52-cal { contain: none !important; container-type: normal !important; }` },
-  /* A2 — the day column at 140px */
-  A2: { css: `[data-todo-v5] .td52-cal { --cal-dayw: 140px !important; }` },
   /* E2 — the old "Just the desk" button left mounted */
   E2: { js: `(() => { const n = [...document.querySelectorAll('[data-todo-v5] [data-td5="nav"]')].find((e) => e.getBoundingClientRect().height > 0); if (n) { const b = document.createElement("button"); b.className = "td5-focusbtn"; b.dataset.td5 = "focus"; b.textContent = "Just the desk"; n.append(b); } })()` },
-  /* F1 — the title reads the tray count (the h1 restated as v5.1's "{n} tasks in your tray") */
-  F1: { js: `(() => { const h = [...document.querySelectorAll('[data-todo-v5] [data-td5="title"]')].find((e) => e.getBoundingClientRect().height > 0); const n = document.querySelectorAll('[data-todo-v5] [data-td5="row"]').length; if (h) { h.firstElementChild.textContent = n + " tasks in your tray"; h.setAttribute("aria-label", n + " tasks in your tray"); } })()` },
-  /* F1b — the title's fit undone (it pushes the card again) */
-  F1b: { css: `[data-todo-v5] .td5-hd h1.td5-title[data-fit] { font-size: 44px !important; }` },
   /* F3 — v5.1's ink 45% back on the page's labels */
   F3: { css: `[data-todo-v5] { --td5-ink62: rgba(28, 19, 15, 0.45) !important; --td5-ink70: rgba(28, 19, 15, 0.58) !important; }` },
   /* J2 — the band's title allowed to ellipsise */
@@ -57,9 +47,7 @@ export const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   J3: { js: `(() => { const t = [...document.querySelectorAll('[data-todo-v5] .td5-tray')].find((e) => e.getBoundingClientRect().height > 0); if (t) { t.style.position = "relative"; const o = document.createElement("div"); o.style.cssText = "position:absolute;inset:0;z-index:50;background:rgba(255,255,255,.4)"; t.append(o); } })()` },
   /* L1 — the pinned day chip's compact form dropped (the weekday and trailing words always shown) */
   L1: { css: `.td52-pday .td52-pwd, .td52-pday .td52-ptail { display: inline !important; }` },
-  /* D1 — the desk head's art restored */
-  D1: { js: `(() => { const h = [...document.querySelectorAll('[data-todo-v5] [data-td5="desk-head"]')].find((e) => e.getBoundingClientRect().height > 0);
-    const b = document.querySelector('[data-todo-v5] [data-td5="band-art"]'); if (h && b) { const i = document.createElement("img"); i.src = b.getAttribute("src"); i.style.cssText = "position:absolute;left:8px;top:-10px;width:46px"; h.prepend(i); } })()` },
+  /* A1, A2, D1, D1b, F1 and F1b were retired with their subjects by To-do list v7 (tests/e2e/RETIRED-todo-list-v7.md) */
 };
 export async function mutate(page: Page, lock: string) {
   const m = MUT === lock ? MUTATIONS[MUT] : null;

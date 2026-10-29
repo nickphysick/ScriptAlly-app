@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "L5",
+  "where": "no role=tablist in the tray",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L5",
+  "where": "the Set aside view shows",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L5",
+  "where": "the navy row reads \"Set aside: n tasks waiting to come back\"",
+  "ok": true,
+  "detail": "Set aside: 2 tasks waiting to come back"
+ },
+ {
+  "lock": "L5",
+  "where": "…with Back to your tray",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L5",
+  "where": "Back returns to the tray",
+  "ok": true,
+  "detail": "{\"list\":false,\"rows\":54,\"say\":false}"
+ }
+]

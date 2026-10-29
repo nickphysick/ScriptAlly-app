@@ -1,0 +1,146 @@
+[
+ {
+  "lock": "L6",
+  "where": "tray bands found",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "L6",
+  "where": "you: no img",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L6",
+  "where": "you: the paper tint",
+  "ok": true,
+  "detail": "rgb(246, 242, 236)"
+ },
+ {
+  "lock": "L6",
+  "where": "you: the ! mark only on Your move",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "L6",
+  "where": "chase: no img",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L6",
+  "where": "chase: the paper tint",
+  "ok": true,
+  "detail": "rgb(246, 242, 236)"
+ },
+ {
+  "lock": "L6",
+  "where": "chase: the ! mark only on Your move",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "L6",
+  "where": "quiet: no img",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L6",
+  "where": "quiet: the paper tint",
+  "ok": true,
+  "detail": "rgb(246, 242, 236)"
+ },
+ {
+  "lock": "L6",
+  "where": "quiet: the ! mark only on Your move",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "L6",
+  "where": "tidy: no img",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L6",
+  "where": "tidy: the paper tint",
+  "ok": true,
+  "detail": "rgb(246, 242, 236)"
+ },
+ {
+  "lock": "L6",
+  "where": "tidy: the ! mark only on Your move",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "L6",
+  "where": "mine: no img",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L6",
+  "where": "mine: the paper tint",
+  "ok": true,
+  "detail": "rgb(246, 242, 236)"
+ },
+ {
+  "lock": "L6",
+  "where": "mine: the ! mark only on Your move",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "L6",
+  "where": "Your move is among them",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L6",
+  "where": "Set aside bands found",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "L6",
+  "where": "aside dismiss: no img",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L6",
+  "where": "aside dismiss: the paper tint",
+  "ok": true,
+  "detail": "rgb(246, 242, 236)"
+ },
+ {
+  "lock": "L6",
+  "where": "aside dismiss: no ! mark",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L6",
+  "where": "aside rule: no img",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L6",
+  "where": "aside rule: the paper tint",
+  "ok": true,
+  "detail": "rgb(246, 242, 236)"
+ },
+ {
+  "lock": "L6",
+  "where": "aside rule: no ! mark",
+  "ok": true,
+  "detail": ""
+ }
+]

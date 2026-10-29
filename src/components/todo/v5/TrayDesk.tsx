@@ -60,6 +60,26 @@ export const DueDial: React.FC<{ dial: Dial; size: number; tag?: string | null; 
   );
 };
 
+/**
+ * v7 S5 — DATES AS WORDS: a tray row's date reads "26 Jul" in serif (rust when overdue) with the age under it in rust
+ * italic ("3 mo overdue"), or "No date" in muted italic. It keeps the dial's `data-td5="dial"` and title, so the row's
+ * press target for moving a date (the date menu) is the date text now. The spoken label is the dial's.
+ */
+export const DueWords: React.FC<{ dial: Dial; age?: string | null; pressable?: boolean }> = ({ dial, age = null, pressable = false }) => {
+  const spoken = dial.kind === "late" && dial.ymd ? overdueLabel(dial.ymd, londonToday(Date.now())) : null;
+  return (
+    <span className={`td7-due${pressable ? " td52-press" : ""}`} data-td5="dial" data-td7="due" data-kind={dial.kind} title={dial.title}
+      role={spoken ? "img" : undefined} aria-label={spoken ?? undefined}>
+      {dial.kind === "none" ? <i className="td7-nd" data-td7="no-date">No date</i> : (
+        <>
+          <b className="td7-dt" data-td7="date-words">{dial.day} {dial.mon}</b>
+          {age ? <small className="td7-age" data-td52="age" data-td7="age">{age}</small> : null}
+        </>
+      )}
+    </span>
+  );
+};
+
 export const Disc: React.FC<{ item: TrayItem }> = ({ item }) =>
   item.initials ? <span className="td5-disc" aria-hidden="true">{item.initials}</span> : <span className="td5-disc" data-own="" aria-hidden="true">{QUILL}</span>;
 
@@ -155,8 +175,8 @@ export const DeskCard: React.FC<DeskCardProps> = ({ item, facts, lede, stops, pa
       data-work={work ? "" : undefined} data-asided={asided ? "" : undefined}>
       {doing ? <WorkingBand key={doing.start} g={g} doing={doing} /> : (
       <div className="td5-chead" data-td5="desk-head" style={{ background: g.tint, color: g.ink }}>
+        {/* v7 S6 — the band keeps its tint, its name and the status; its small-capitals tag ("Asked of you") is gone */}
         <span className="td5-cn">{g.name}</span>
-        <span className="td5-why">{g.note}</span>
         <span className="td5-sp" />
         {item.query?.status ? (
           <span className="td5-st" data-td5="desk-status"><StatusDot status={item.query.status} overrideSize={18} decorative />{sentence(String(item.query.status))}</span>
@@ -171,7 +191,7 @@ export const DeskCard: React.FC<DeskCardProps> = ({ item, facts, lede, stops, pa
         <div className="td5-who">
           <Disc item={item} />
           <span className="td5-wn"><b>{item.who}</b>{item.whoSub ? <small>{item.whoSub}</small> : null}</span>
-          <DueDial dial={item.dial} size={60} />
+          {/* v7 S5 — the desk card's big dial is gone; the date reads in its facts and its rows */}
         </div>
         <h2 className="td5-deed" data-td5="deed">{item.deed}</h2>
         {lede ? <p className="td5-lede" data-td5="lede">{lede}</p> : null}
@@ -218,7 +238,7 @@ export const DeskCard: React.FC<DeskCardProps> = ({ item, facts, lede, stops, pa
           {onEdit ? <button type="button" className="td5-lnk" data-td5="edit" disabled={saving} onClick={onEdit}>Edit</button> : null}
           <span className="td5-sp" />
           {saving ? <span className="td52-saving" data-td52="saving" role="status">Saving…</span> : null}
-          <span className="td5-keys" aria-hidden="true"><kbd>E</kbd> {item.bucket === "note" ? "tick" : "act"}</span>
+          {/* v7 S6 — the card's "E act" hint goes with the row's J / K / E (S2); the key still works */}
         </div>
       )}
       </>)}
@@ -226,7 +246,25 @@ export const DeskCard: React.FC<DeskCardProps> = ({ item, facts, lede, stops, pa
   );
 };
 
-export const DoneToday: React.FC<{ acts: readonly ClearedAct[]; fresh: string | null; undoFor: (a: ClearedAct) => (() => void) | null; title?: string }> = ({ acts, fresh, undoFor, title = "Done today" }) => (
+/**
+ * v7 S7 — `fold`: Done today on ONE line under the desk card, "Done today · {n} cleared" in italic serif and the Undo
+ * for the most recent clearing that can still be undone; the slips fold away. Without it (the caught-up page) the
+ * slips stay as built.
+ */
+export const DoneToday: React.FC<{ acts: readonly ClearedAct[]; fresh: string | null; undoFor: (a: ClearedAct) => (() => void) | null; title?: string; fold?: boolean }> = ({ acts, fresh, undoFor, title = "Done today", fold = false }) => {
+  if (fold) {
+    const last = [...acts].sort((a, b) => b.at - a.at).find((a) => !!undoFor(a)) ?? null;
+    const undo = last ? undoFor(last) : null;
+    return (
+      <div className="td5-done td7-done" data-td5="done" data-td7="done">
+        <div className="td5-doneh td7-doneh" data-td7="done-line">
+          <span data-td5="done-n">{acts.length ? `${title} · ${acts.length} cleared` : `${title} · nothing cleared yet`}</span>
+          {undo ? <button type="button" className="td7-undo" data-td5="slip-undo" data-act={last!.id} onClick={undo}>Undo</button> : null}
+        </div>
+      </div>
+    );
+  }
+  return (
   <div className="td5-done" data-td5="done">
     <div className="td5-doneh"><b>{title}</b><span data-td5="done-n">{acts.length ? `${acts.length} cleared` : ""}</span></div>
     {acts.length ? (
@@ -244,4 +282,5 @@ export const DoneToday: React.FC<{ acts: readonly ClearedAct[]; fresh: string | 
       </div>
     ) : <div className="td5-noslips">Nothing cleared yet today.</div>}
   </div>
-);
+  );
+};

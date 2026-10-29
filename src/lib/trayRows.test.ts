@@ -5,7 +5,7 @@
  * TD52 F2 (unit) — the row's lines lead with the agent; the overdue tag's units at 5, 20 and 100 days late.
  */
 import { describe, expect, it } from "vitest";
-import { lateTag, overdueLabel, rowLines } from "./trayRows";
+import { lateTag, lateWords, overdueLabel, rowLines } from "./trayRows";
 import type { TrayItem } from "./todoTray";
 
 const item = (o: Partial<TrayItem>): TrayItem => ({ deed: "Send your partial", sub: "Ana Duarte · Duarte Words", sweep: false, bucket: "send", ...o } as TrayItem);
@@ -35,5 +35,16 @@ describe("TD52 F2 — the overdue tag", () => {
   it("spoken: Overdue since {date}", () => {
     expect(overdueLabel("2026-06-20", "2026-10-17")).toBe("Overdue since 20 June");
     expect(overdueLabel("2025-12-01", "2026-10-17")).toBe("Overdue since 1 December 2025");
+  });
+});
+
+describe("v7 S5 — lateWords: the tag's figure, said in words", () => {
+  it("days, weeks and months, with the tag's thresholds", () => {
+    expect(lateWords(1)).toBe("1 day overdue");
+    expect(lateWords(5)).toBe("5 days overdue");
+    expect(lateWords(20)).toBe("3 wk overdue");
+    expect(lateWords(95)).toBe("3 mo overdue");
+    expect(lateWords(0)).toBeNull();
+    for (const d of [1, 5, 13, 14, 30, 59, 60, 200]) expect(lateWords(d)!.split(" ")[0], String(d)).toBe(lateTag(d)!.slice(1).split(" ")[0]);
   });
 });

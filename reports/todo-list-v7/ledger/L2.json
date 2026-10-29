@@ -1,0 +1,92 @@
+[
+ {
+  "lock": "L2",
+  "where": "1512: the Today section",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L2",
+  "where": "1512: three counts, Overdue · Due today · Later",
+  "ok": true,
+  "detail": "[\"Overdue\",\"Due today\",\"Later\"]"
+ },
+ {
+  "lock": "L2",
+  "where": "1512: no month grid on the page",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L2",
+  "where": "1512: no mix bar on the page",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L2",
+  "where": "1512: Open the calendar",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L2",
+  "where": "1280: the Today section",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L2",
+  "where": "1280: three counts, Overdue · Due today · Later",
+  "ok": true,
+  "detail": "[\"Overdue\",\"Due today\",\"Later\"]"
+ },
+ {
+  "lock": "L2",
+  "where": "1280: no month grid on the page",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L2",
+  "where": "1280: no mix bar on the page",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L2",
+  "where": "1280: Open the calendar",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L2",
+  "where": "an Overdue figure to press",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L2",
+  "where": "Overdue sets aria-pressed",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "L2",
+  "where": "…and filters the tray to overdue rows",
+  "ok": true,
+  "detail": "54 → 36, all late true"
+ },
+ {
+  "lock": "L2",
+  "where": "a second press clears it",
+  "ok": true,
+  "detail": "{\"n\":54,\"pressed\":\"false\"}"
+ },
+ {
+  "lock": "L2",
+  "where": "Open the calendar opens TrayCalDrawer",
+  "ok": true,
+  "detail": ""
+ }
+]

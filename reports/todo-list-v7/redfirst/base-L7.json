@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "L7",
+  "where": "1512: rows",
+  "ok": true,
+  "detail": "54"
+ },
+ {
+  "lock": "L7",
+  "where": "1512: no SVG ring in any row's date",
+  "ok": false,
+  "detail": "54"
+ },
+ {
+  "lock": "L7",
+  "where": "1512: overdue rows to read",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: rows",
+  "ok": true,
+  "detail": "54"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: no SVG ring in any row's date",
+  "ok": false,
+  "detail": "54"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: overdue rows to read",
+  "ok": false,
+  "detail": "0"
+ }
+]

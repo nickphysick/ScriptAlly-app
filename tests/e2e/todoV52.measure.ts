@@ -4,8 +4,8 @@
  *
  * To-do list v5.2 — locks TD52, on the rendered page at 1512 × 900 and 1280 × 800 with the shell, real fonts loaded.
  *
- * ⚠️ A1 COMPARES WITH THE HEADER'S HEIGHT ON THE BUILD BEFORE THIS PACK, captured from that build into
- *    `reports/todo-list-v5-2/header-baseline.json` (`TD52_CAPTURE=1`).
+ * ⚠️ To-do list v7 RETIRED A1–A5, D1, G1 and G2's drag half, and re-pointed C1, E1, F1, F2 and F3: see
+ *    tests/e2e/RETIRED-todo-list-v7.md. v7's own locks are todoV7.measure.ts.
  * ⚠️ EVERY READING STARTS FROM THE ONE VISIBLE v5 ROOT (`window.__td5()`, td5Lib), never `document`.
  */
 import { expect, test } from "@playwright/test";
@@ -24,53 +24,9 @@ test.afterEach(async () => {
 });
 const guardDocs = async (paths: string[]) => { const s = await snapDocs(paths); dGuards.push(s); return s; };
 
-const CAPTURE = process.env.TD52_CAPTURE === "1";
-const headerHeight = (page: import("@playwright/test").Page) => page.evaluate(() => {
-  const { q } = (window as unknown as { __td5: () => { q: (s: string) => HTMLElement | null } }).__td5();
-  const h = q('[data-td5="header"]');
-  const row = q('[data-td5="header-row"]');
-  const card = q('[data-td5="card"]');
-  const b = (e: HTMLElement | null) => (e ? e.getBoundingClientRect().height : null);
-  return { header: b(h), row: b(row), card: b(card) };
-});
 
-/* ───────────────────────── §0.1 · the header's height before this pack (TD52_CAPTURE=1, base build only) ───────────────────────── */
-test("A1 capture · the populated header's height on the base build", async ({ page }) => {
-  test.skip(!CAPTURE, "TD52_CAPTURE=1 captures from the base build");
-  const out: Record<string, unknown> = { at: new Date().toISOString() };
-  for (const vp of SIZES) {
-    await openTodo(page, vp);
-    const f = await fontsReady(page);
-    expect(f.ok, `fonts: ${f.missing.join(", ")}`).toBe(true);
-    out[String(vp.width)] = await headerHeight(page);
-  }
-  mkdirSync(DIR, { recursive: true });
-  writeFileSync(`${DIR}/header-baseline.json`, JSON.stringify(out, null, 1));
-});
 
 /* ───────────────────────── A1 · the header does not get taller ───────────────────────── */
-test("TD52 A1 — the populated header's height equals the base's; the card takes the row's height", async ({ page }) => {
-  const L = new Ledger("A1");
-  const path = `${DIR}/header-baseline.json`;
-  L.check("a baseline from the base build exists", existsSync(path), path);
-  const base = existsSync(path) ? JSON.parse(readFileSync(path, "utf8")) as Record<string, { header: number; row: number }> : {};
-  for (const vp of SIZES) {
-    const w = `@${vp.width}`;
-    await openTodo(page, vp);
-    const f = await fontsReady(page);
-    L.check(`${w} real fonts loaded`, f.ok, f.missing.join(", ") || "all");
-    await mutate(page, "A1");
-    await page.waitForTimeout(300);
-    const h = await headerHeight(page);
-    const b = base[String(vp.width)];
-    /* header rules v1.1: the header's height is the shared hero's now (a 36 top, the 179 / 201 stack, 44 to the filter
-       row), not v5.2's 264 — HR1-2 and HR1-6 hold it. What stays here: it was found, and it is no shorter than the base. */
-    L.check(`${w} the header is at least the base's height (header rules v1.1 own the rest)`, !!b && h.header >= b.header - 1, `${h.header?.toFixed(1)} vs ${b?.header?.toFixed(1)}`);
-    L.check(`${w} the card is the calendar`, await page.evaluate(() => !!(window as unknown as { __td5: () => { q: (s: string) => HTMLElement | null } }).__td5().q('[data-td5="card"][data-td52="cal"]')), "");
-    L.check(`${w} the card's box is the header row's height (±1)`, near(h.card, h.row ?? -1, 1), `${h.card?.toFixed(1)} vs ${h.row?.toFixed(1)}`);
-  }
-  L.done(7);
-});
 
 /* ───────────────────────── shared in-page readers for the calendar card ───────────────────────── */
 type W = { __td5: () => { r: HTMLElement; sc: HTMLElement; q: (s: string) => HTMLElement | null; qa: (s: string) => HTMLElement[] } };
@@ -119,217 +75,15 @@ const labelKinds = (label: string) => {
 };
 
 /* ───────────────────────── A2 · nothing in the card clips ───────────────────────── */
-test("TD52 A2 — nothing inside the calendar card clips, at five widths, on three days", async ({ page }) => {
-  const L = new Ledger("A2");
-  const widths = [1600, 1512, 1440, 1366, 1280];
-  for (const width of widths) {
-    await openTodo(page, { width, height: width === 1280 ? 800 : 900 });
-    const f = await fontsReady(page);
-    L.check(`@${width} real fonts loaded`, f.ok, f.missing.join(", ") || "all");
-    await mutate(page, "A2");
-    const cells = await readCells(page);
-    const t = todayYmd();
-    const past = cells.find((c) => c.ymd < t && /\bopen\b/.test(c.cls));
-    const fut = cells.find((c) => c.ymd > t && c.dots.some((d) => !/faint/.test(d.cls)));
-    const days = [t, past?.ymd, fut?.ymd].filter(Boolean) as string[];
-    L.check(`@${width} three days to read (today, a past open day, a future day)`, days.length === 3, days.join(" "));
-    for (const ymd of days) {
-      if (ymd !== t) await pickDay(page, ymd); else await goToday(page);
-      await page.waitForTimeout(350);
-      const r = await page.evaluate(() => {
-        const { q } = (window as unknown as W).__td5();
-        const card = q('[data-td52="cal"]')!;
-        const cb = card.getBoundingClientRect();
-        const bad: string[] = [];
-        let texts = 0;
-        const walker = document.createTreeWalker(card, NodeFilter.SHOW_TEXT);
-        for (let n = walker.nextNode(); n; n = walker.nextNode()) {
-          if (!n.textContent?.trim()) continue;
-          const el = n.parentElement!;
-          if (getComputedStyle(el).visibility === "hidden" || el.closest('[aria-hidden="true"]') && el.getBoundingClientRect().width === 0) continue;
-          const rg = document.createRange(); rg.selectNodeContents(n);
-          const rs = [...rg.getClientRects()].filter((x) => x.width > 0);
-          if (!rs.length) continue;
-          texts++;
-          const cell = (el.closest('button, [role="gridcell"]') as HTMLElement) ?? card;
-          const xb = cell.getBoundingClientRect();
-          for (const x of rs) {
-            for (const [nm, b] of [["card", cb], ["cell", xb]] as const) {
-              if (x.left < b.left - 0.5 || x.right > b.right + 0.5 || x.top < b.top - 0.5 || x.bottom > b.bottom + 0.5) bad.push(`"${n.textContent.trim().slice(0, 24)}" outside its ${nm} (${x.left.toFixed(1)}–${x.right.toFixed(1)} × ${x.top.toFixed(1)}–${x.bottom.toFixed(1)} vs ${b.left.toFixed(1)}–${b.right.toFixed(1)} × ${b.top.toFixed(1)}–${b.bottom.toFixed(1)})`);
-            }
-          }
-        }
-        const els = [card, ...card.querySelectorAll<HTMLElement>("*")];
-        for (const e of els) {
-          const cs = getComputedStyle(e);
-          if (cs.display === "inline" || cs.display === "none" || e.clientHeight === 0) continue;
-          if (e.scrollWidth > e.clientWidth + 0.5) bad.push(`${e.className || e.tagName} scrollWidth ${e.scrollWidth} > ${e.clientWidth}`);
-          if (e.scrollHeight > e.clientHeight + 0.5) bad.push(`${e.className || e.tagName} scrollHeight ${e.scrollHeight} > ${e.clientHeight}`);
-          if (cs.textOverflow === "ellipsis" && cs.overflow !== "visible") bad.push(`${e.className} has text-overflow: ellipsis`);
-        }
-        return { texts, bad };
-      });
-      L.check(`@${width} ${ymd}: text nodes read`, r.texts > 20, String(r.texts));
-      L.check(`@${width} ${ymd}: nothing clips`, r.bad.length === 0, r.bad.slice(0, 4).join(" · "));
-    }
-  }
-  L.done(5 * 8);
-});
 
 /* ───────────────────────── A3 · the today panel ───────────────────────── */
-test("TD52 A3 — the four parts are the tray; the bar is in proportion; Overdue filters without scrolling", async ({ page }) => {
-  const L = new Ledger("A3");
-  for (const vp of SIZES) {
-    const w = `@${vp.width}`;
-    await openTodo(page, vp);
-    await fontsReady(page);
-    const badge = await readBadge(page);
-    const r = await page.evaluate(() => {
-      const { q, qa } = (window as unknown as W).__td5();
-      const num = (f: string) => Number(q(`[data-td52="cal-row"][data-f="${f}"] b`)?.textContent ?? NaN);
-      const u = Number((q('[data-td52="mix"] .td52-tx')?.textContent ?? "").match(/\+(\d+)/)?.[1] ?? NaN);
-      const bar = q(".td52-bar")!;
-      const segs = qa('[data-td52="mix-seg"]').map((s) => ({ k: s.dataset.k!, w: s.getBoundingClientRect().width }));
-      const gaps = parseFloat(getComputedStyle(bar).columnGap || "0") * Math.max(0, segs.length - 1);
-      return { o: num("overdue"), t: num("today"), l: num("later"), u, rows: qa('[data-td5="row"]').length, barW: bar.getBoundingClientRect().width - gaps, segs,
-        title: q('[data-td52="mix"]')?.getAttribute("title") };
-    });
-    const sum = r.o + r.t + r.l + r.u;
-    L.check(`${w} overdue + today + later + no date = the tray`, sum === r.rows, `${r.o}+${r.t}+${r.l}+${r.u} = ${sum} vs ${r.rows} rows`);
-    L.check(`${w} … = the sidebar badge`, sum === badge, `${sum} vs ${badge}`);
-    L.check(`${w} the bar's title`, r.title === "Your whole tray: overdue, due today, coming up, no date", String(r.title));
-    const want: Record<string, number> = { o: r.o, t: r.t, l: r.l, u: r.u };
-    for (const s of r.segs) L.check(`${w} segment ${s.k} ∝ its count (±2px)`, near(s.w, (r.barW * want[s.k]) / sum, 2), `${s.w.toFixed(1)} vs ${((r.barW * want[s.k]) / sum).toFixed(1)}`);
-    L.check(`${w} there are overdue items to press`, r.o > 0, String(r.o));
-    const top0 = await page.evaluate(() => (window as unknown as W).__td5().sc.scrollTop);
-    await page.evaluate(() => ((window as unknown as W).__td5().q('[data-td52="cal-row"][data-f="overdue"]') as HTMLButtonElement).click());
-    await page.waitForTimeout(500);
-    const p = await page.evaluate((today) => {
-      const { q, qa, sc } = (window as unknown as W).__td5();
-      const rows = qa('[data-td5="row"]').filter((e) => e.getBoundingClientRect().height > 0 && !e.hasAttribute("data-out"));
-      const others = qa('[data-td52="cal-row"]:not(.z), [data-td52="mix"]').filter((e) => e.dataset.f !== "overdue");
-      return {
-        n: rows.length, allOverdue: rows.every((e) => !!e.dataset.calYmd && e.dataset.calYmd < today),
-        pressed: q('[data-td52="cal-row"][data-f="overdue"]')?.getAttribute("aria-pressed"),
-        fades: others.map((e) => Number(getComputedStyle(e).opacity)),
-        chip: q('[data-td52="due-chip"]')?.textContent?.trim() ?? null, top: sc.scrollTop,
-      };
-    }, todayYmd());
-    L.check(`${w} Overdue leaves only overdue rows`, p.allOverdue && p.n === r.o, `${p.n} rows, all overdue ${p.allOverdue}`);
-    L.check(`${w} Overdue is pressed`, p.pressed === "true", String(p.pressed));
-    L.check(`${w} the other rows fade to 0.32 (±0.02)`, p.fades.length > 0 && p.fades.every((o) => near(o, 0.32, 0.02)), p.fades.join(","));
-    L.check(`${w} the Due pill shows the chip`, p.chip === "Overdue", String(p.chip));
-    L.check(`${w} nothing scrolled`, near(p.top, top0, 0.5), `${p.top} vs ${top0}`);
-    await page.evaluate(() => ((window as unknown as W).__td5().q('[data-td52="due-chip"] .td5-fpx') as HTMLButtonElement).click());
-    await page.waitForTimeout(400);
-    /* the account is shared and other sessions write to it: the rows are compared with the tray's own count read in the same
-       moment, never with a figure read before the filter */
-    const c = await page.evaluate(() => { const { q, qa } = (window as unknown as W).__td5(); return { n: qa('[data-td5="row"]').length, tab: Number(q('[data-td5="tab-tray"] b')?.textContent ?? NaN), chip: !!q('[data-td52="due-chip"]'), pressed: q('[data-td52="cal-row"][data-f="overdue"]')?.getAttribute("aria-pressed") }; });
-    L.check(`${w} × clears it`, c.n === c.tab && c.n >= r.rows - 8 && !c.chip && c.pressed === "false", JSON.stringify(c));
-  }
-  L.done(2 * 12);
-});
 
 /* ───────────────────────── A4 · another day ───────────────────────── */
-test("TD52 A4 — a future day lists its kinds; a past open day reads STILL OPEN in rust; a clear day; the foot returns", async ({ page }) => {
-  const L = new Ledger("A4");
-  const RUST = "rgb(162, 69, 42)";
-  for (const vp of SIZES) {
-    const w = `@${vp.width}`;
-    await openTodo(page, vp);
-    await fontsReady(page);
-    const t = todayYmd();
-    const cells = await readCells(page);
-    const fut = cells.filter((c) => c.ymd > t && c.dots.some((d) => !/faint/.test(d.cls)));
-    const past = cells.find((c) => c.ymd < t && /\bopen\b/.test(c.cls));
-    const clear = cells.find((c) => c.ymd > t && !c.dots.length);
-    L.check(`${w} the harness has future days with items`, fut.length > 0, String(fut.length));
-    for (const day of fut) {
-      await pickDay(page, day.ymd);
-      await page.waitForTimeout(300);
-      const want = labelKinds(day.label);
-      const d = await page.evaluate(() => {
-        const { q, qa } = (window as unknown as W).__td5();
-        return { lab: q('[data-td52="day-lab"]')?.textContent, rows: qa('[data-td52="cal-row"]').filter((e) => e.dataset.f?.startsWith("day:")).map((e) => ({ k: e.dataset.f!.slice(4), n: Number(e.querySelector("b")!.textContent), sw: e.querySelector(".td52-sw")!.className })) };
-      });
-      L.check(`${w} ${day.ymd} reads DUE THIS DAY`, d.lab === "DUE THIS DAY", String(d.lab));
-      L.check(`${w} ${day.ymd} one row per kind, each with that day's count`, JSON.stringify(Object.fromEntries(d.rows.map((x) => [x.k, x.n]))) === JSON.stringify(want), `${JSON.stringify(d.rows.map((x) => [x.k, x.n]))} vs ${JSON.stringify(want)}`);
-      const dotCls = Object.fromEntries(day.dots.map((x) => [x.kind, x.cls.split(" ")[0]]));
-      L.check(`${w} ${day.ymd} swatches match the month's dots`, d.rows.every((x) => x.sw.split(" ").includes(dotCls[x.k])), JSON.stringify(d.rows.map((x) => x.sw)));
-    }
-    L.check(`${w} the harness has a past day still open`, !!past, "");
-    if (past) {
-      await pickDay(page, past.ymd);
-      await page.waitForTimeout(300);
-      const d = await page.evaluate(() => { const { q } = (window as unknown as W).__td5(); return { lab: q('[data-td52="day-lab"]')?.textContent, ey: q('[data-td52="day-ey"]')?.textContent }; });
-      L.check(`${w} ${past.ymd} reads STILL OPEN · d DAYS LATE`, /^STILL OPEN( · \d+ DAYS LATE)?$/.test(d.lab ?? ""), String(d.lab));
-      L.check(`${w} ${past.ymd} eyebrow "d DAYS AGO"`, /^— \d+ DAYS? AGO —$/.test(d.ey ?? ""), String(d.ey));
-      const again = (await readCells(page)).find((c) => c.ymd === past.ymd)!;
-      L.check(`${w} its number is rust on the grid`, /\bsel\b/.test(again.cls) || again.numColour === RUST, again.numColour);
-      L.check(`${w} its number is rust before it is selected`, past.numColour === RUST, past.numColour);
-    }
-    L.check(`${w} the harness has a clear future day`, !!clear, "");
-    if (clear) {
-      await pickDay(page, clear.ymd);
-      await page.waitForTimeout(300);
-      const note = await page.evaluate(() => (window as unknown as W).__td5().q('[data-td52="day-note"]')?.textContent);
-      L.check(`${w} a clear day reads "A clear day."`, note === "A clear day.", String(note));
-    }
-    await goToday(page);
-    await page.waitForTimeout(300);
-    const ey = await page.evaluate(() => (window as unknown as W).__td5().q('[data-td52="day-ey"]')?.textContent);
-    L.check(`${w} the foot returns to today`, ey === "— TODAY —", String(ey));
-  }
-  L.done(2 * 10);
-});
 
 /* ───────────────────────── A5 · dots ───────────────────────── */
-test("TD52 A5 — one dot per kind present, in its colour; a snooze faint; nothing for housekeeping or the offer", async ({ page }) => {
-  const L = new Ledger("A5");
-  const COL: Record<string, string> = { send: "rgb(162, 69, 42)", nudge: "rgb(28, 19, 15)", close: "rgba(28, 19, 15, 0.38)" };
-  /* the harness holds no live snooze of a calendar kind, so one nudge is set aside until three days from now, and put
-     back after (the guard) */
-  await openTodo(page, SIZES[0]);
-  const qid = await page.evaluate(() => (window as unknown as W).__td5().q('[data-td5="row"][data-task-type="nudge_overdue"]')?.dataset.query ?? null);
-  L.check("a nudge to set aside", !!qid, String(qid));
-  const { db, uid } = await harnessDb();
-  const fp = `taskFlags/${flagId("nudge_overdue", qid ?? "")}`;
-  await guardDocs([fp]);
-  const until = new Date(Date.now() + 3 * 86_400_000); until.setUTCHours(9, 0, 0, 0);
-  const snzYmd = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/London", year: "numeric", month: "2-digit", day: "2-digit" }).format(until);
-  await setDoc(doc(db, "users", uid, "taskFlags", flagId("nudge_overdue", qid ?? "")), { id: flagId("nudge_overdue", qid ?? ""), userId: uid, taskType: "nudge_overdue", queryId: qid, snoozedUntil: until.toISOString(), snoozeCount: 1 });
-  for (const vp of SIZES) {
-    const w = `@${vp.width}`;
-    await openTodo(page, vp);
-    await fontsReady(page);
-    await goToday(page);
-    await page.evaluate(() => { const { qa } = (window as unknown as W).__td5(); const sel = qa('[data-td52="day-cell"].sel'); void sel; });
-    const cells = (await readCells(page)).filter((c) => !/\bsel\b/.test(c.cls));
-    const withDots = cells.filter((c) => c.dots.length);
-    L.check(`${w} days with dots to read`, withDots.length >= 3, String(withDots.length));
-    let faint = 0;
-    for (const c of withDots) {
-      const kinds = c.dots.map((d) => d.kind);
-      const label = labelKinds(c.label);
-      const back = (c.label.match(/(\d+) ([^,]*?) back from Set aside/g) ?? []).map((s) => /own task/.test(s) ? "mine" : /nudge/i.test(s) ? "nudge" : /clos/i.test(s) ? "close" : "send");
-      const want = [...new Set([...Object.keys(label), ...back])].sort();
-      L.check(`${w} ${c.ymd} dots = kinds present`, kinds.length === new Set(kinds).size && JSON.stringify([...kinds].sort()) === JSON.stringify(want), `${kinds} vs ${want}`);
-      for (const d of c.dots) {
-        L.check(`${w} ${c.ymd} ${d.kind} is a calendar kind`, ["send", "nudge", "close", "mine"].includes(d.kind), d.kind);
-        if (d.kind === "mine") L.check(`${w} ${c.ymd} own task is a ring`, /inset/.test(d.sh) && d.bg === "rgba(0, 0, 0, 0)", `${d.bg} ${d.sh}`);
-        else L.check(`${w} ${c.ymd} ${d.kind} in its colour`, d.bg === COL[d.kind], d.bg);
-        if (/faint/.test(d.cls)) { faint++; L.check(`${w} ${c.ymd} snoozed ${d.kind} at 0.45`, near(d.op, 0.45, 0.02), String(d.op)); }
-        else L.check(`${w} ${c.ymd} ${d.kind} full strength`, near(d.op, 1, 0.01), String(d.op));
-      }
-    }
-    L.check(`${w} a snoozed dot was read`, faint > 0, String(faint));
-    L.check(`${w} the seeded snooze is faint on ${snzYmd}`, cells.find((c) => c.ymd === snzYmd)?.dots.some((d) => d.kind === "nudge" && /faint/.test(d.cls)) ?? false, JSON.stringify(cells.find((c) => c.ymd === snzYmd)?.dots));
-  }
-  L.done(2 * 7);
-});
 
 /* ───────────────────────── C1 · the slide-out calendar ───────────────────────── */
-test("TD52 C1 — ⤢ opens the drawer; kind filters hide chips; Month and Week agree; Open on the desk selects and starts nothing; no writes", async ({ page }) => {
+test("TD52 C1 — Open the calendar opens the drawer; kind filters hide chips; Month and Week agree; Open on the desk selects and starts nothing; no writes", async ({ page }) => {
   const L = new Ledger("C1");
   for (const vp of SIZES) {
     const w = `@${vp.width}`;
@@ -338,11 +92,11 @@ test("TD52 C1 — ⤢ opens the drawer; kind filters hide chips; Month and Week 
     const writes: string[] = [];
     const onReq = (r: import("@playwright/test").Request) => { if (/google\.firestore\.v1\.Firestore\/(Write|Commit)/.test(r.url()) || (r.method() === "POST" && /:commit|:batchWrite/.test(r.url()))) writes.push(r.url()); };
     page.on("request", onReq);
-    await page.evaluate(() => ((window as unknown as W).__td5().q('[data-td52="open-drawer"]') as HTMLButtonElement).click());
+    await page.evaluate(() => ((window as unknown as W).__td5().q('[data-td7="open-calendar"]') as HTMLButtonElement).click());
     await page.waitForTimeout(500);
     const dr = page.locator('[data-td52="drawer"]');
     const box = await dr.evaluate((e) => { const b = e.getBoundingClientRect(); return { on: e.classList.contains("on"), top: b.top, right: innerWidth - b.right, bottom: innerHeight - b.bottom, w: b.width, r: getComputedStyle(e).borderTopLeftRadius }; });
-    L.check(`${w} ⤢ opens the drawer`, box.on, "");
+    L.check(`${w} Open the calendar opens the drawer (re-pointed from the retired ⤢, v7)`, box.on, "");
     L.check(`${w} the drawer sits 8 from the top, right and bottom`, near(box.top, 8, 1) && near(box.right, 8, 1) && near(box.bottom, 8, 1), JSON.stringify(box));
     L.check(`${w} width min(1180, 100vw − 110)`, near(box.w, Math.min(1180, vp.width - 110), 1), `${box.w}`);
     /* move to a month holding chips of several kinds (today's, or the one before) */
@@ -410,67 +164,6 @@ test("TD52 C1 — ⤢ opens the drawer; kind filters hide chips; Month and Week 
 
 /* ───────────────────────── D1 · one drawing per group ───────────────────────── */
 const ART_W: Record<string, number> = { you: 42, chase: 49, quiet: 50, tidy: 53, mine: 44 };
-test("TD52 D1 — one drawing per group; none in the desk head; each stands 3px above its band's floor, centred at 31; the strip never paints over one", async ({ page }) => {
-  const L = new Ledger("D1");
-  for (const vp of SIZES) {
-    const w = `@${vp.width}`;
-    await openTodo(page, vp);
-    await fontsReady(page);
-    await mutate(page, "D1");
-    await mutate(page, "D1b");
-    const r = await page.evaluate(() => {
-      const { r: root, qa, q } = (window as unknown as W).__td5();
-      const wide = !!document.querySelector(".ws-app.sheet-wide");
-      const bandH = q('[data-td5="band"]')!.getBoundingClientRect().height;
-      /* rendered on the page (a band below the fold still counts: its copy is on the page, not on the screen yet) */
-      const vis = (e: Element) => { const b = e.getBoundingClientRect(); return b.width > 0 && b.height > 0; };
-      const imgs = [...root.querySelectorAll("img")].filter(vis).map((i) => i.getAttribute("src"));
-      const head = q('[data-td5="desk-head"]');
-      const bands = qa('[data-td5="group-block"]').map((g) => {
-        const band = g.querySelector('[data-td5="band"]')!, img = band.querySelector("img")!;
-        const bb = band.getBoundingClientRect(), ib = img.getBoundingClientRect();
-        img.style.pointerEvents = "auto";
-        const hit = ib.top >= 0 ? document.elementFromPoint(ib.left + ib.width / 2, ib.top + 2) : null;
-        img.style.pointerEvents = "";
-        return { g: g.dataset.g!, src: img.getAttribute("src"), w: ib.width, cx: ib.left + ib.width / 2 - bb.left, foot: bb.bottom - ib.bottom, top: ib.top - bb.top, hitImg: hit === img, onScreen: ib.top >= 0 && ib.bottom <= innerHeight, hit: hit ? (hit.className || hit.tagName) : null };
-      });
-      return { wide, bandH, imgs, headImgs: head ? head.querySelectorAll("img").length : -1, bands };
-    });
-    const k = r.wide ? 1 : 44 / 50;
-    L.check(`${w} the desk head has no drawing`, r.headImgs === 0, String(r.headImgs));
-    L.check(`${w} groups to read`, r.bands.length >= 3, String(r.bands.length));
-    for (const b of r.bands) {
-      L.check(`${w} ${b.g}: one copy of its drawing on the page`, r.imgs.filter((x) => x === b.src).length === 1, String(r.imgs.filter((x) => x === b.src).length));
-      L.check(`${w} ${b.g}: width ${ART_W[b.g]} × ${k.toFixed(2)} (±1)`, near(b.w, ART_W[b.g] * k, 1), b.w.toFixed(1));
-      L.check(`${w} ${b.g}: centred at 31 (±1)`, near(b.cx, 31, 1), b.cx.toFixed(1));
-      L.check(`${w} ${b.g}: foot 3 above the floor (±1)`, near(b.foot, 3, 1), `${b.foot.toFixed(1)} (top ${b.top.toFixed(1)}, band ${r.bandH})`);
-      if (b.onScreen) L.check(`${w} ${b.g}: nothing paints over its top edge`, b.hitImg, String(b.hit));
-    }
-    /* stuck: scroll until a band sits under the strip, so its drawing crosses the strip's lower edge */
-    const stuck = await page.evaluate(async () => {
-      const { q, qa } = (window as unknown as W).__td5();
-      const strip = q(".td5-strip")!;
-      /* the tray scrolls itself (its strip and bands stick inside `.td5-tray`), not the page */
-      const tray = q(".td5-tray")!;
-      const bands = qa('[data-td5="band"]');
-      const second = bands[1] ?? bands[0];
-      tray.scrollTop += second.getBoundingClientRect().top - strip.getBoundingClientRect().bottom + 40;
-      await new Promise((r) => setTimeout(r, 300));
-      const sb = strip.getBoundingClientRect();
-      const band = qa('[data-td5="band"]').find((b) => Math.abs(b.getBoundingClientRect().top - sb.bottom) < 2);
-      if (!band) return { found: false, crosses: false, hit: null as string | null, hitImg: false };
-      const img = band.querySelector("img")!, ib = img.getBoundingClientRect();
-      img.style.pointerEvents = "auto";
-      const y = Math.max(ib.top + 2, sb.top + 1);
-      const hit = document.elementFromPoint(ib.left + ib.width / 2, y);
-      img.style.pointerEvents = "";
-      return { found: true, crosses: ib.top < sb.bottom - 1, hit: hit ? (hit.className || hit.tagName) : null, hitImg: hit === img };
-    });
-    L.check(`${w} a band stuck under the strip`, stuck.found && stuck.crosses, JSON.stringify(stuck));
-    L.check(`${w} its drawing crosses the strip cleanly (on top of it)`, stuck.hitImg, String(stuck.hit));
-  }
-  L.done(2 * 14);
-});
 
 /* ───────────────────────── E1 · the pin ───────────────────────── */
 const pinState = (page: import("@playwright/test").Page) => page.evaluate(() => {
@@ -535,7 +228,8 @@ test("TD52 E1 — the pin: F, the held rail, the sheet the window, Find in the n
       L.check(`${w} the second Esc unpins`, b.pressed === "false", String(b.pressed));
       L.check(`${w} the sidebar comes back as it was`, near(b.panel, panel0, 1), `${b.panel} vs ${panel0}`);
       L.check(`${w} the scroll position comes back (±2)`, near(b.scroll, y0, 2), `${b.scroll} vs ${y0}`);
-      L.check(`${w} Find is back in the filter row`, !b.findInNav && b.header !== "none", JSON.stringify({ nav: b.findInNav, hd: b.header }));
+      /* RE-POINTED (To-do list v7 S2): Find lives in the navy row pinned or not; unpinned it leaves its pinned form */
+      L.check(`${w} Find leaves its pinned form; the header is back`, !b.findInNav && b.header !== "none", JSON.stringify({ nav: b.findInNav, hd: b.header }));
       /* F stands down while typing, and while the compose card, the set-aside popover or the calendar drawer is open */
       const input = page.locator('[data-todo-v5] [data-td5="find"] input').first();
       await input.click(); await page.keyboard.type("f"); await page.waitForTimeout(400);
@@ -544,7 +238,7 @@ test("TD52 E1 — the pin: F, the held rail, the sheet the window, Find in the n
       for (const [name, open, shut] of [
         ["the compose card", async () => { await page.keyboard.press("n"); }, async () => { await page.keyboard.press("Escape"); }],
         ["the set-aside popover", async () => { await page.keyboard.press("s"); }, async () => { await page.keyboard.press("Escape"); }],
-        ["the calendar drawer", async () => { await page.evaluate(() => ((window as unknown as W).__td5().q('[data-td52="open-drawer"]') as HTMLButtonElement).click()); }, async () => { await page.keyboard.press("Escape"); }],
+        ["the calendar drawer", async () => { await page.evaluate(() => ((window as unknown as W).__td5().q('[data-td7="open-calendar"]') as HTMLButtonElement).click()); }, async () => { await page.keyboard.press("Escape"); }],
       ] as const) {
         await open(); await page.waitForTimeout(600);
         await page.keyboard.press("f"); await page.waitForTimeout(500);
@@ -597,45 +291,34 @@ test("TD52 E2 — no Just the desk control, state or class on /todo", async ({ p
 });
 
 /* ───────────────────────── F · presentation ───────────────────────── */
-test("TD52 F1 — the h1 reads Part B's overdue and today counts, the overdue part rust; caught up and empty keep v5.1's titles", async ({ page }) => {
+/* RE-POINTED (To-do list v7): the urgent words moved from the h1 to the "Your tray" line (`[data-td7="headline"]`); the
+   h1 is "To-do list" on the shared card (TD7 L1). The long-title fit half is RETIRED with the title it fitted. */
+test("TD52 F1 — the Your tray line reads Part B's overdue and today counts, the overdue part rust; the page titles", async ({ page }) => {
   const L = new Ledger("F1");
   for (const vp of SIZES) {
     const w = `@${vp.width}`;
     await openTodo(page, vp);
     await fontsReady(page);
-    await mutate(page, "F1");
-    await mutate(page, "F1b");
     const r = await page.evaluate(() => {
       const { q } = (window as unknown as W).__td5();
-      const h1 = q('[data-td5="title"]')!;
+      const line = q('[data-td7="headline"]')!;
       const num = (f: string) => Number(q(`[data-td52="cal-row"][data-f="${f}"] b`)?.textContent ?? NaN);
       const od = q('[data-td52="title-od"]');
-      return { text: (h1.textContent ?? "").trim(), label: h1.getAttribute("aria-label"), pageTitle: h1.hasAttribute("data-page-title"), o: num("overdue"), t: num("today"),
-        rust: od ? getComputedStyle(od).color : null };
+      return { text: (line.textContent ?? "").trim(), label: line.getAttribute("aria-label"), o: num("overdue"), t: num("today"), rust: od ? getComputedStyle(od).color : null };
     });
     const want = r.o || r.t ? [r.o ? `${r.o} overdue` : "", r.t ? `${r.t} due today` : ""].filter(Boolean).join(" · ") : "Nothing due today";
-    L.check(`${w} the h1 reads "${want}"`, r.text === want, `"${r.text}"`);
+    L.check(`${w} the line reads "${want}"`, r.text === want, `"${r.text}"`);
     L.check(`${w} its accessible name says the same`, r.label === want, String(r.label));
-    L.check(`${w} it keeps data-page-title`, r.pageTitle, "");
-    /* the longest title the account could reach ("33 overdue · 12 due today", whatever today's figures are): written
-       into the title, then a 1px resize re-fits it; it must stay clear of the card and keep the header's height */
-    const hd0 = await page.evaluate(() => (window as unknown as W).__td5().q('[data-td5="header"]')!.getBoundingClientRect().height);
-    await page.evaluate(() => { const s = (window as unknown as W).__td5().q('[data-td52="title-urgent"]'); if (s) s.textContent = "33 overdue · 12 due today"; });
-    await page.setViewportSize({ width: vp.width - 1, height: vp.height }); await page.waitForTimeout(300);
-    /* the failure is not an overlap: the title's column is max-content, so a title too wide PUSHES the card out of the row */
-    const gapOk = await page.evaluate(() => { const { q } = (window as unknown as W).__td5(); const h = q('[data-td5="title"]')!.getBoundingClientRect(), c = q('[data-td5="card"]')!.getBoundingClientRect(), r = q('[data-td5="header-row"]')!.getBoundingClientRect(); return { right: h.right, card: c.left, cardR: c.right, rowR: r.right, fs: getComputedStyle(q('[data-td5="title"]')!).fontSize, hd: q('[data-td5="header"]')!.getBoundingClientRect().height }; });
-    L.check(`${w} a long title fits its column: the card stays inside the row`, gapOk.cardR <= gapOk.rowR + 0.5 && gapOk.right <= gapOk.card, JSON.stringify(gapOk));
-    /* header rules v1.1 (decision 5): a long title wraps at its size and the header grows; it is never shrunk to fit */
-    L.check(`${w} …and the title keeps its size (it wraps, it never shrinks)`, near(parseFloat(gapOk.fs), 44, 0.5), `${gapOk.fs} (header ${hd0} → ${gapOk.hd})`);
-    await page.setViewportSize(vp);
     if (r.o) L.check(`${w} the overdue part is rust`, r.rust === "rgb(162, 69, 42)", String(r.rust));
   }
-  for (const [st, want] of [["caught", "Your tray is empty"], ["nothing", "Your next move,always on top"]] as const) {
+  for (const [st, want] of [["caught", "To-do list"], ["nothing", "Your next move,always on top"]] as const) {
     await openTodo(page, SIZES[0], { state: st });
     const t = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-todo-v5] [data-page-title]")].filter((e) => e.getBoundingClientRect().height > 0).map((e) => (e.textContent ?? "").trim()));
-    L.check(`${st}: keeps v5.1's title`, t.length === 1 && t[0] === want, JSON.stringify(t));
+    L.check(`${st}: the page title`, t.length === 1 && t[0] === want, JSON.stringify(t));
   }
-  L.done(13);
+  await openTodo(page, SIZES[0], { state: "caught" });
+  L.check("caught: the line reads All caught up", await page.evaluate(() => (window as unknown as W).__td5().q('[data-td7="headline"]')?.textContent === "All caught up"), "");
+  L.done(9);
 });
 
 test("TD52 F2 — rows lead with the agent; chase and close say so; overdue dials carry the right tag and a spoken label", async ({ page }) => {
@@ -681,7 +364,9 @@ test("TD52 F2 — rows lead with the agent; chase and close say so; overdue dial
       const y = m[3] ? Number(m[3]) : Number(today.slice(0, 4));
       const mi = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].indexOf(m[2]);
       const days = Math.round((Date.UTC(+today.slice(0, 4), +today.slice(5, 7) - 1, +today.slice(8, 10)) - Date.UTC(y, mi, +m[1])) / DAY);
-      const want = days < 14 ? `+${days} d` : days < 60 ? `+${Math.round(days / 7)} wk` : `+${Math.round(days / 30.4)} mo`;
+      /* RE-POINTED (To-do list v7 S5): the age reads in words — "5 days overdue", "3 wk overdue", "4 mo overdue" —
+         with the same figure and unit the tag had (lib/trayRows.lateWords) */
+      const want = days < 14 ? `${days} ${days === 1 ? "day" : "days"} overdue` : days < 60 ? `${Math.round(days / 7)} wk overdue` : `${Math.round(days / 30.4)} mo overdue`;
       if (r.tag !== want) wrong++;
       units.add((r.tag ?? "").split(" ")[1] ?? "?");
     }
@@ -705,7 +390,11 @@ test("TD52 F3 — every visible text on /todo meets 4.5:1 (3:1 large) against it
       if (where === "sheet") await page.evaluate(() => { const { sc, q } = (window as unknown as W).__td5(); sc.scrollTop += q(".td5-sheet")!.getBoundingClientRect().top - sc.getBoundingClientRect().top; });
       await page.waitForTimeout(400);
       const r = await page.evaluate(() => {
-        const { r: root } = (window as unknown as W).__td5();
+        const { r: root, sc } = (window as unknown as W).__td5();
+        /* RE-POINTED (To-do list v7): text the page's scroller has clipped is not painted. v7's "Your tray" heading sits
+           20px above the sheet with no ground of its own, so with the sheet scrolled to the top it lies above the
+           scrollport, over the shell's ink in the viewport, and was read as ink-on-ink though nobody can see it. */
+        const port = sc.getBoundingClientRect();
         const parse = (c: string) => { const m = c.match(/rgba?\(([^)]+)\)/); if (!m) return null; const p = m[1].split(/[,\s/]+/).filter(Boolean).map(Number); return { r: p[0], g: p[1], b: p[2], a: p.length > 3 ? p[3] : 1 }; };
         const over = (f: { r: number; g: number; b: number; a: number }, b: { r: number; g: number; b: number }) => ({ r: f.r * f.a + b.r * (1 - f.a), g: f.g * f.a + b.g * (1 - f.a), b: f.b * f.a + b.b * (1 - f.a) });
         const lum = (c: { r: number; g: number; b: number }) => { const f = (v: number) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }; return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b); };
@@ -733,6 +422,7 @@ test("TD52 F3 — every visible text on /todo meets 4.5:1 (3:1 large) against it
           const rg = document.createRange(); rg.selectNodeContents(t);
           const rc = [...rg.getClientRects()].find((x) => x.width > 0 && x.height > 0);
           if (!rc || rc.bottom < 0 || rc.top > innerHeight || rc.right < 0 || rc.left > innerWidth) continue;
+          if (sc.contains(el) && (rc.bottom <= port.top || rc.top >= port.bottom)) continue;
           const cs = getComputedStyle(el);
           if (cs.visibility === "hidden" || el.closest("button:disabled, [disabled], .td52-rw.z, [inert]")) continue;
           /* text over a picture is the picture's, not a ground's */
@@ -751,7 +441,9 @@ test("TD52 F3 — every visible text on /todo meets 4.5:1 (3:1 large) against it
         }
         return { n, bad };
       });
-      L.check(`${w} ${where}: texts read`, r.n > 40, String(r.n));
+      /* RE-POINTED (To-do list v7): the top screen is the header card and Today now — 16 texts at 1280, 26 at 1512 —
+         where v5.2's header carried the count card, the ring and the filter row; the sheet keeps its floor */
+      L.check(`${w} ${where}: texts read`, r.n > (where === "top" ? 12 : 40), String(r.n));
       L.check(`${w} ${where}: every text meets its ratio`, r.bad.length === 0, `${r.bad.length}: ${r.bad.slice(0, 12).join(" · ")}`);
     }
   }
@@ -759,44 +451,12 @@ test("TD52 F3 — every visible text on /todo meets 4.5:1 (3:1 large) against it
 });
 
 /* ───────────────────────── G · dates and groups ───────────────────────── */
-test("TD52 G1 — hovering a dated row lights exactly its day; hovering a day lights exactly its rows", async ({ page }) => {
-  const L = new Ledger("G1");
-  for (const vp of SIZES) {
-    const w = `@${vp.width}`;
-    await openTodo(page, vp);
-    await mutate(page, "G1");
-    const t = todayYmd();
-    const month = t.slice(0, 7);
-    /* a dated row whose day is on the visible month */
-    const key = await page.evaluate((month) => {
-      const { qa } = (window as unknown as W).__td5();
-      const r = qa('[data-td5="row"]').find((e) => e.dataset.calYmd?.startsWith(month) && e.getBoundingClientRect().height > 0);
-      return r ? { key: r.dataset.td5Row!, ymd: r.dataset.calYmd! } : null;
-    }, month);
-    L.check(`${w} a dated row on this month`, !!key, "");
-    if (!key) continue;
-    await page.locator(`[data-todo-v5] [data-td5-row="${key.key}"]`).hover();
-    await page.waitForTimeout(250);
-    const lit = await page.evaluate(() => (window as unknown as W).__td5().qa('[data-td52="day-cell"].lit').map((c) => c.dataset.ymd));
-    L.check(`${w} the row lights exactly its day`, JSON.stringify(lit) === JSON.stringify([key.ymd]), `${lit} vs ${key.ymd}`);
-    await page.mouse.move(5, 5);
-    await page.locator(`[data-todo-v5] [data-td52="day-cell"][data-ymd="${key.ymd}"]`).hover();
-    await page.waitForTimeout(250);
-    const rows = await page.evaluate((ymd) => {
-      const { qa } = (window as unknown as W).__td5();
-      return { lit: qa('[data-td5="row"][data-lit]').map((r) => r.dataset.td5Row).sort(), want: qa(`[data-td5="row"][data-cal-ymd="${ymd}"]`).map((r) => r.dataset.td5Row).sort(),
-        red: qa('[data-td5="row"][data-lit] [data-td52="row-bold"]').every((b) => getComputedStyle(b).color === "rgb(162, 69, 42)") };
-    }, key.ymd);
-    L.check(`${w} the day lights exactly its rows`, rows.lit.length > 0 && JSON.stringify(rows.lit) === JSON.stringify(rows.want), `${rows.lit.length} vs ${rows.want.length}`);
-    L.check(`${w} a lit row's name is rust`, rows.red, "");
-    await page.mouse.move(5, 5);
-    await page.waitForTimeout(200);
-    const off = await page.evaluate(() => (window as unknown as W).__td5().qa('[data-td5="row"][data-lit], [data-td52="day-cell"].lit').length);
-    L.check(`${w} leaving lights nothing`, off === 0, String(off));
-  }
-  L.done(2 * 5);
-});
 
+/* RE-POINTED (To-do list v7 S7): the slips fold away under the desk; "Done today · n cleared" carries the count */
+const doneN = (page: import("@playwright/test").Page) => page.evaluate(() => {
+  const t = [...document.querySelectorAll<HTMLElement>('[data-todo-v5] [data-td5="desk"] [data-td5="done-n"]')].find((e) => e.getBoundingClientRect().height > 0)?.textContent ?? "";
+  const m = t.match(/(\d+) cleared/); return m ? Number(m[1]) : 0;
+});
 const rowLoc = (page: import("@playwright/test").Page, key: string) => page.locator(`[data-todo-v5] [data-td5-row="${key}"]`).first();
 const toastText = (page: import("@playwright/test").Page) => page.locator(".tdb-toast").first().textContent({ timeout: 4000 }).catch(() => null);
 const pressUndo = async (page: import("@playwright/test").Page) => {
@@ -804,128 +464,6 @@ const pressUndo = async (page: import("@playwright/test").Page) => {
   if (!(await b.isVisible().catch(() => false))) return false;
   await b.click(); return true;
 };
-/* a drag, dispatched on the exact row and the exact day (Playwright's pointer drag lands on whatever is under the
-   pointer after the page scrolls to the target, which on a scrolling page is a neighbour) */
-const dragRowTo = (page: import("@playwright/test").Page, key: string, ymd: string) => page.evaluate(async ([key, ymd]) => {
-  const { q } = (window as unknown as W).__td5();
-  const row = q(`[data-td5-row="${CSS.escape(key)}"]`)!, cell = q(`[data-td52="day-cell"][data-ymd="${ymd}"]`)!;
-  const dt = new DataTransfer();
-  const fire = (el: Element, type: string) => el.dispatchEvent(new DragEvent(type, { bubbles: true, cancelable: true, dataTransfer: dt }));
-  fire(row, "dragstart");
-  await new Promise((r) => setTimeout(r, 120));
-  fire(cell, "dragenter"); fire(cell, "dragover");
-  await new Promise((r) => setTimeout(r, 120));
-  fire(cell, "drop"); fire(row, "dragend");
-}, [key, ymd] as const);
-test("TD52 G2 — moving a date: an own task by drag; a nudge by the dial menu; the guards; Undo is exact", async ({ page }) => {
-  const L = new Ledger("G2");
-  const { db, uid } = await harnessDb();
-  const vp = SIZES[0];
-  const t = todayYmd();
-  const plus = (n: number) => new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/London", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(Date.now() + n * 86_400_000));
-  /* an own task due today (surfaced), written for this run and removed by the guard */
-  const id = `zz-td52-move-${Date.now().toString(36)}`;
-  await guardDocs([`tasks/${id}`]);
-  await setDoc(doc(db, "users", uid, "tasks", id), { id, userId: uid, text: "Zz td52 move probe", done: false, dueDate: t, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
-  await openTodo(page, vp);
-  await mutate(page, "G2");
-  const key = await page.evaluate((id) => (window as unknown as W).__td5().qa('[data-td5="row"]').find((r) => r.dataset.td5Row?.includes(id))?.dataset.td5Row ?? null, id);
-  L.check("the probe task is in the tray", !!key, String(key));
-  /* the drop day: three days on, in today's month if it is there, else the next day that is on the grid */
-  const target = await page.evaluate(([a, b]) => { const { q } = (window as unknown as W).__td5(); return q(`[data-td52="day-cell"][data-ymd="${a}"]`) ? a : q(`[data-td52="day-cell"][data-ymd="${b}"]`) ? b : null; }, [plus(3), plus(1)]);
-  L.check("a future day on the grid to drop on", !!target, String(target));
-  const before = await snapDocs([`tasks/${id}`]);
-  if (key && target) {
-    await dragRowTo(page, key, target);
-    await page.waitForTimeout(1200);
-    const after = (await snapDocs([`tasks/${id}`])).get(`tasks/${id}`) as { dueDate?: string } | null;
-    L.check(`own task: the drop moves dueDate to ${target}`, after?.dueDate?.slice(0, 10) === target, String(after?.dueDate));
-    const tt = await toastText(page);
-    L.check("own task: the toast says it moved", !!tt && /Zz td52 move probe · moved to/.test(tt), String(tt));
-    L.check("own task: Undo", await pressUndo(page), "");
-    await page.waitForTimeout(1500);
-    const back = await snapDocs([`tasks/${id}`]);
-    L.check("own task: Undo restores the document byte for byte", canonOf(back.get(`tasks/${id}`)) === canonOf(before.get(`tasks/${id}`)), "");
-    /* today and the past refuse a drop */
-    await dragRowTo(page, key, t);
-    await page.waitForTimeout(900);
-    const still = await snapDocs([`tasks/${id}`]);
-    L.check("a drop on today is refused (nothing written)", canonOf(still.get(`tasks/${id}`)) === canonOf(before.get(`tasks/${id}`)), "");
-    const why = await toastText(page);
-    L.check("…and a toast says why", !!why && /today|past/i.test(why), String(why));
-  }
-  /* a nudge, by the dial menu: In a week → a snooze through clampSnooze; the row goes to Set aside */
-  await openTodo(page, vp);
-  const nudge = await page.evaluate(() => { const r = (window as unknown as W).__td5().qa('[data-td5="row"][data-task-type="nudge_overdue"]')[0]; return r ? { key: r.dataset.td5Row!, q: r.dataset.query! } : null; });
-  L.check("a nudge in the tray", !!nudge, "");
-  if (nudge) {
-    const fp = `taskFlags/${flagId("nudge_overdue", nudge.q)}`;
-    const fb = await guardDocs([fp]);
-    await rowLoc(page, nudge.key).locator('[data-td5="dial"]').click();
-    await page.waitForTimeout(400);
-    const menu = await page.evaluate(() => { const m = document.querySelector<HTMLElement>('[data-td52="dial-menu"]'); return m ? { head: m.querySelector('[data-td52="dm-head"]')?.textContent ?? "", ks: [...m.querySelectorAll<HTMLButtonElement>("[data-k]")].map((b) => `${b.dataset.k}${b.disabled ? "×" : ""}`) } : null; });
-    L.check("the dial opens the menu, not the row", !!menu && menu.head === "SET A NEW DATE", JSON.stringify(menu));
-    L.check("…Tomorrow · Monday · In a week · In a month · Pick on the calendar", !!menu && JSON.stringify(menu.ks.map((k) => k.replace("×", ""))) === JSON.stringify(["tomorrow", "monday", "week", "month", "pick"]), JSON.stringify(menu?.ks));
-    await page.locator('[data-td52="dial-menu"] [data-k="week"]').click();
-    await page.waitForTimeout(1400);
-    const flag = (await snapDocs([fp])).get(fp) as { snoozedUntil?: string } | null;
-    L.check("In a week writes a snooze", !!flag?.snoozedUntil, String(flag?.snoozedUntil));
-    const gone = await page.evaluate((k) => !(window as unknown as W).__td5().q(`[data-td5="row"][data-td5-row="${k}"]`), nudge.key);
-    L.check("…and the row leaves the tray for Set aside", gone, "");
-    const tt = await toastText(page);
-    L.check("the toast: {Agent} · set for {date}", !!tt && / · set for /.test(tt), String(tt));
-    L.check("nudge: Undo", await pressUndo(page), "");
-    await page.waitForTimeout(1500);
-    const nb = await snapDocs([fp]);
-    L.check("nudge: Undo puts the flag back as it was", canonOf(nb.get(fp)) === canonOf(fb.get(fp)), "");
-  }
-  /* the guards, read off the menu for each kind present */
-  await openTodo(page, vp);
-  const kinds = await page.evaluate(() => (window as unknown as W).__td5().qa('[data-td5="row"]').map((r) => ({ key: r.dataset.td5Row!, type: r.dataset.taskType ?? "", bucket: r.dataset.bucket! })));
-  const seen: string[] = [];
-  const openMenu = async (k: string) => { await page.keyboard.press("Escape").catch(() => {}); await rowLoc(page, k).locator('[data-td5="dial"]').click(); await page.waitForTimeout(350); return page.evaluate(() => { const m = document.querySelector<HTMLElement>('[data-td52="dial-menu"]'); return m ? { cant: !!m.querySelector('[data-td52="cant-snooze"]'), door: !!m.querySelector('[data-td52="sendby-door"]'), ks: [...m.querySelectorAll<HTMLButtonElement>("[data-k]")].map((b) => ({ k: b.dataset.k!, off: b.disabled })) } : null; }); };
-  const hk = kinds.find((x) => x.bucket === "fix");
-  if (hk) {
-    await page.keyboard.press("Escape").catch(() => {});
-    await rowLoc(page, hk.key).locator('[data-td5="dial"]').click();
-    await page.waitForTimeout(300);
-    L.check("housekeeping: the dial opens nothing", (await page.locator('[data-td52="dial-menu"]').count()) === 0, "");
-    L.check("housekeeping: the row cannot be dragged", (await rowLoc(page, hk.key).getAttribute("draggable")) !== "true", "");
-    seen.push("hk");
-  }
-  for (const r of kinds.filter((x) => x.bucket === "send").slice(0, 8)) {
-    const m = await openMenu(r.key);
-    if (m?.cant) {
-      L.check(`a passed send-by: CAN'T BE SNOOZED with its send-by door (${r.key.slice(0, 18)})`, m.door && m.ks.filter((x) => x.k !== "pick").length === 0, JSON.stringify(m));
-      seen.push("passed");
-      /* …and a drop past its ceiling (0) is refused: nothing written, a toast says why */
-      await page.keyboard.press("Escape").catch(() => {});
-      const qid = await rowLoc(page, r.key).getAttribute("data-query");
-      const fp = `taskFlags/${flagId(r.type, qid ?? "")}`;
-      const fb = await guardDocs([fp]);
-      const day = await page.evaluate(([a, b]) => { const { q } = (window as unknown as W).__td5(); return q(`[data-td52="day-cell"][data-ymd="${a}"]`) ? a : b; }, [plus(4), plus(1)]);
-      await dragRowTo(page, r.key, day);
-      await page.waitForTimeout(1200);
-      const fa = await snapDocs([fp]);
-      /* ⚠️ TWO GUARDS, ONE OBSERVABLE: v5.1's snooze writer clamps to the ceiling itself (a ceiling of 0 writes nothing),
-         so with the page's refusal removed this read stays green — the toast below is what reddens (proved) */
-      L.check("a drop past the ceiling writes nothing", canonOf(fa.get(fp)) === canonOf(fb.get(fp)), JSON.stringify(fa.get(fp)));
-      const why = await toastText(page);
-      L.check("…and says why (v5.1's words)", !!why && /Can’t be snoozed/.test(why), String(why));
-      break;
-    }
-  }
-  for (const r of kinds.filter((x) => x.bucket === "send").slice(0, 12)) {
-    const m = await openMenu(r.key);
-    if (m && !m.cant && m.ks.some((x) => x.off)) { L.check(`a capped task: days past its ceiling are disabled (${r.key.slice(0, 18)})`, m.ks.some((x) => x.off) && m.ks.some((x) => !x.off), JSON.stringify(m.ks)); seen.push("capped"); break; }
-  }
-  const offer = kinds.find((x) => x.type === "offer_received");
-  if (offer) { const m = await openMenu(offer.key); L.check("an offer: Tomorrow only", !!m && JSON.stringify(m.ks.filter((x) => x.k !== "pick" && !x.off).map((x) => x.k)) === JSON.stringify(["tomorrow"]), JSON.stringify(m?.ks)); seen.push("offer"); }
-  await page.keyboard.press("Escape").catch(() => {});
-  console.log(`[G2] guards exercised: ${seen.join(", ") || "none"}`);
-  L.check("guards exercised (housekeeping and at least one dated guard)", seen.includes("hk") && seen.length >= 2, seen.join(","));
-  L.done(20);
-});
 
 /* G3 — close several Gone quiet at once: the bulk save IS three single close-journey saves, and one Undo is exact */
 const qGuards: { before: Raw; ids: string[] }[] = [];
@@ -985,7 +523,7 @@ test("TD52 G3 — select three Gone quiet, close: each query written exactly as 
   }
   /* the BULK save: the same three, selected and closed together */
   await openTodo(page, vp);
-  const slips0 = await page.locator('[data-todo-v5] [data-td5="slip"]').count();
+  const slips0 = await doneN(page);
   for (const r of pick) await page.locator(`[data-todo-v5] [data-td5-row="${r.key}"] [data-td52="bulk-check"]`).click();
   const bar = await page.evaluate(() => ((window as unknown as W).__td5().q('[data-td52="bulk"]') as HTMLElement | null)?.innerText?.replace(/\s+/g, " ").trim() ?? null);
   L.check("the bar: '3 selected · Cancel · Close 3 queries'", bar === "3 selected Cancel Close 3 queries", String(bar));
@@ -1000,8 +538,8 @@ test("TD52 G3 — select three Gone quiet, close: each query written exactly as 
     const same = JSON.stringify(mine) === JSON.stringify(want);
     L.check(`${r.q}: the bulk wrote what a single close writes, field by field`, same && mine.length > 0, same ? `${mine.length} documents` : `bulk ${JSON.stringify(mine).slice(0, 400)} · single ${JSON.stringify(want).slice(0, 400)}`);
   }
-  const slips1 = await page.locator('[data-todo-v5] [data-td5="slip"]').count();
-  L.check("three slips land", slips1 === slips0 + 3, `${slips0} → ${slips1}`);
+  const slips1 = await doneN(page);
+  L.check("three land in Done today", slips1 === slips0 + 3, `${slips0} → ${slips1}`);
   await page.locator(".tdb-toast .tdb-toast-act").first().click();
   const back = await expect.poll(async () => diffSets(before, await readSet(ids)).length, { timeout: 30_000 }).toBe(0).then(() => true).catch(() => false);
   L.check("one Undo restores the account byte for byte", back, back ? "" : diffSets(before, await readSet(ids)).slice(0, 4).join(" · "));
@@ -1076,7 +614,7 @@ test("TD52 H1 — rows glide (none under reduced motion); a helpful empty filter
   if (key) {
     await rowLoc(page, key).click();
     await page.waitForTimeout(400);
-    const slips0 = await page.locator('[data-todo-v5] [data-td5="slip"]').count();
+    const slips0 = await doneN(page);
     await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
     await page.context().setOffline(true);
     try {
@@ -1091,9 +629,9 @@ test("TD52 H1 — rows glide (none under reduced motion); a helpful empty filter
     }
     await expect.poll(() => page.locator('[data-todo-v5] [data-td52="saving"]').count(), { timeout: 20_000 }).toBe(0);
     await page.waitForTimeout(1500);
-    const slips1 = await page.locator('[data-todo-v5] [data-td5="slip"]').count();
+    const slips1 = await doneN(page);
     L.check("released once it settled", true, "");
-    L.check("a double E started one save (one slip)", slips1 === slips0 + 1, `${slips0} → ${slips1}`);
+    L.check("a double E started one save (one cleared)", slips1 === slips0 + 1, `${slips0} → ${slips1}`);
   }
   /* (e) PINNED shows only while pinned */
   await openTodo(page, vp);
@@ -1256,7 +794,7 @@ test("TD52 J3 — the tray goes quiet, never blocked: 42% and full on hover; the
   const r = await page.evaluate((k) => {
     const { qa, q } = (window as unknown as W).__td5();
     const others = qa('[data-td5="row"]').filter((x) => x.dataset.td5Row !== k);
-    const ops = others.flatMap((x) => [".td5-tx", ".td5-disc", ".td5-dial"].map((s) => Number(getComputedStyle(x.querySelector(s)!).opacity)));
+    const ops = others.flatMap((x) => [".td5-tx", ".td5-disc", '[data-td5="dial"]'].map((s) => Number(getComputedStyle(x.querySelector(s)!).opacity)));
     const live = q(`[data-td5-row="${CSS.escape(k)}"]`)!;
     return { ops, liveTag: live.querySelector('[data-td52="in-progress"]')?.textContent ?? null, edge: getComputedStyle(live).boxShadow, band: Number(getComputedStyle(q('[data-td5="band"]')!).opacity) };
   }, k);
@@ -1266,7 +804,7 @@ test("TD52 J3 — the tray goes quiet, never blocked: 42% and full on hover; the
   L.check("…with a 4px rust edge", /rgb\(162, 69, 42\) 4px 0px 0px 0px inset/.test(r.edge), r.edge);
   const other = await page.evaluate((k) => (window as unknown as W).__td5().qa('[data-td5="row"]').find((x) => x.dataset.td5Row !== k && x.getBoundingClientRect().height > 0)!.dataset.td5Row!, k);
   await rowLoc(page, other).hover({ timeout: 4000 }).catch(() => {}); await page.waitForTimeout(300);
-  const hov = await page.evaluate((o) => { const r = (window as unknown as W).__td5().q(`[data-td5-row="${CSS.escape(o)}"]`)!; return [".td5-tx", ".td5-disc", ".td5-dial"].map((s) => Number(getComputedStyle(r.querySelector(s)!).opacity)); }, other);
+  const hov = await page.evaluate((o) => { const r = (window as unknown as W).__td5().q(`[data-td5-row="${CSS.escape(o)}"]`)!; return [".td5-tx", ".td5-disc", '[data-td5="dial"]'].map((s) => Number(getComputedStyle(r.querySelector(s)!).opacity)); }, other);
   L.check("full on hover", hov.every((o) => near(o, 1, 0.02)), hov.join(","));
   L.check("no answers yet: no tip", (await page.locator('[data-td52="tip"]').count()) === 0, "");
   /* answer something: Next marks the journey touched in most sends; a field typed is the sure way */
