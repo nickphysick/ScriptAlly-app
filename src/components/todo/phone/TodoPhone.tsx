@@ -34,6 +34,7 @@ import { agentDataQualityNeeds } from "../../../lib/agentDataQuality";
 import { SWEEP_NEED } from "../../../lib/todoTray";
 import { setAsideRules, daysBetween } from "../../../lib/todoSetAside";
 import { flagForCard } from "../../../lib/todoColumns";
+import { flagKeyForTask, taskFlagId } from "../../../lib/taskFlags";
 import { usePhoneBandSlot } from "../../phone/phoneBandStore";
 import { PhoneDisc } from "../../phone/PhoneDisc";
 import { PI } from "../../phone/phoneIcons";
@@ -70,7 +71,7 @@ const dayLabel = (ymd: string) => { const [y, m, d] = ymd.split("-").map(Number)
 
 export const TodoPhone: React.FC = () => {
   const db = useScriptAllyDb();
-  const { tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, packages, currentUser, upsertTaskFlag, dismissTask } = db;
+  const { tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, packages, currentUser, upsertTaskFlag, dismissTask, restoreTaskFlag } = db;
   const navigate = useNavigate();
   const location = useLocation();
   const routeActive = location.pathname === "/todo";
@@ -172,9 +173,14 @@ export const TodoPhone: React.FC = () => {
     const capped = Math.min(days, r?.ceiling ?? days);
     if (capped <= 0) return;
     const toDeadline = r?.deadline && !r.deadline.passed ? daysBetween(today, r.deadline.ymd) : undefined;
+    /* ⚠️ UNDO WRITES THE FLAG BACK VERBATIM, as the desk does (TodoTray `captureFlags` / `putBack`). The writer's own
+       inverse clears `snoozedUntil` and unbumps the count, which is not the same document when the flag already held an
+       old snooze — measured on the harness account: PA2-5 T5 caught it. */
+    const keys = i.card.taskType && i.card.relatedRecordId ? [flagKeyForTask(i.card.taskType, i.card.relatedRecordId)] : [];
+    const cap = keys.map((k) => { const id = taskFlagId(k); return { id, was: taskFlags.find((f) => f.id === id) ?? null }; });
     const w = snoozeCardWrites({ upsertTaskFlag, dismissTask }, i.card, capped, `until ${dayLabel(capped === days ? ymd : plusYmd(today, capped))}`, toDeadline);
     setLater(null);
-    if (w) showUndoBar({ message: w.message, sub: "", undo: w.undo });
+    if (w) showUndoBar({ message: w.message, sub: "", undo: async () => { await Promise.all(cap.map((c) => restoreTaskFlag(c.id, c.was))); } });
   };
 
   /* the panel's doors: the same journeys the desk opens from it (TodoTray `doDoor`), presets included */
@@ -198,7 +204,7 @@ export const TodoPhone: React.FC = () => {
         {groups.length ? groups.map(({ g, rows }) => (
           <section key={g} data-pa="when-group" data-when={g}>
             <div className="pa-rowhd">{WHEN_LABEL[g]} <span className="n">· {rows.length}</span></div>
-            {rows.map((i) => <TaskRow key={i.key} i={i} onAct={() => act(i)} onOpen={() => openRow(i)} onLater={() => setLater(i)} />)}
+            {rows.map((i) => <TaskRow key={i.key} i={i} day={dayOf.get(i.key) ?? null} onAct={() => act(i)} onOpen={() => openRow(i)} onLater={() => setLater(i)} />)}
           </section>
         )) : <p className="pa-tdnone" data-pa="todo-none">{day ? "Nothing falls due that day." : "Nothing to do. Every query is waiting on someone else."}</p>}
       </div>
@@ -231,7 +237,7 @@ export const TodoPhone: React.FC = () => {
 
 /* ── a row (ref taskRowV at TDR B): the swipe reveals Later; the verb opens the journey ── */
 const ACT_W = 96;
-const TaskRow: React.FC<{ i: TrayItem; onAct: () => void; onOpen: () => void; onLater: () => void }> = ({ i, onAct, onOpen, onLater }) => {
+const TaskRow: React.FC<{ i: TrayItem; day: string | null; onAct: () => void; onOpen: () => void; onLater: () => void }> = ({ i, day, onAct, onOpen, onLater }) => {
   const l = rowLines(i);
   const v = verbFor(i);
   const [x, setX] = useState(0);
@@ -249,7 +255,7 @@ const TaskRow: React.FC<{ i: TrayItem; onAct: () => void; onOpen: () => void; on
   const onUp = () => { const s = g.current; g.current = null; if (s?.moved) { dragged.current = true; setX((v0) => (v0 < -ACT_W / 2 ? -ACT_W : 0)); } };
   const lead = i.query ? <PhoneDisc status={i.query.status} size={40} /> : <span className="pa-ico2" aria-hidden="true">{i.userTask ? PI.todo : i.bucket === "fix" ? PI.edit : PI.todo}</span>;
   return (
-    <div className="pa-sw" data-pa="task-row" data-key={i.key} data-bucket={i.bucket} data-swipe={x < 0 ? "left" : undefined}>
+    <div className="pa-sw" data-pa="task-row" data-key={i.key} data-bucket={i.bucket} data-type={i.card.taskType ?? ""} data-day={day ?? ""} data-swipe={x < 0 ? "left" : undefined}>
       <div className="pa-acts"><span /><button type="button" className="r" data-pa="later" tabIndex={x < 0 ? 0 : -1} onClick={() => { setX(0); onLater(); }}>{PI.later}Later</button></div>
       <div className="pa-task" role="button" tabIndex={0} style={{ transform: x ? `translateX(${x}px)` : undefined }}
         onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}

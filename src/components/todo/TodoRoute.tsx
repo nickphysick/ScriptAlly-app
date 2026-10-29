@@ -7,6 +7,11 @@
  * `sa.todoOpenTask`) or both bind the keys.
  */
 import React, { useEffect, useState } from "react";
+/* ⚠️ KEPT AS A SIDE-EFFECT IMPORT, NOT TYPE-ONLY. The phone no longer renders ToDoPage, but its stylesheets (todo.css,
+   todoSplit.css, the shell's todoShell.css …) size the desktop Corkboard's grid too. A type-only import erased the
+   module and those sheets from the bundle, and the desktop Corkboard's scroller grew to its content (measured: port
+   786px → 1918px; PA2-1 S9 on /todo/corkboard). This keeps the bundle, and the sheets' order, exactly as before. */
+import "./ToDoPage";
 import type { ToDoPageProps } from "./ToDoPage";
 import { TodoTray } from "./v5/TodoTray";
 import { TodoPhone } from "./phone/TodoPhone";

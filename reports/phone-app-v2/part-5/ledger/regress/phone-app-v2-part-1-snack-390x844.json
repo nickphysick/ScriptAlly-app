@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "pop",
+  "where": "a Queried query with the agent",
+  "ok": true,
+  "detail": "probe-dangling-pkg"
+ },
+ {
+  "lock": "S7",
+  "where": "the snackbar is a navy pill",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(42, 58, 82)\",\"radius\":\"999px\",\"text\":\"Passed · Elinor Hale\",\"textColour\":\"rgb(255, 255, 255)\",\"undoBg\":\"rgb(232, 200, 188)\",\"undoColour\":\"rgb(31, 38, 51)\",\"pic\":true,\"aboveBar\":true,\"undoTop\":true}"
+ },
+ {
+  "lock": "S7",
+  "where": "one line of white text",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(42, 58, 82)\",\"radius\":\"999px\",\"text\":\"Passed · Elinor Hale\",\"textColour\":\"rgb(255, 255, 255)\",\"undoBg\":\"rgb(232, 200, 188)\",\"undoColour\":\"rgb(31, 38, 51)\",\"pic\":true,\"aboveBar\":true,\"undoTop\":true}"
+ },
+ {
+  "lock": "S7",
+  "where": "Undo is a blush pill with ink text",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(42, 58, 82)\",\"radius\":\"999px\",\"text\":\"Passed · Elinor Hale\",\"textColour\":\"rgb(255, 255, 255)\",\"undoBg\":\"rgb(232, 200, 188)\",\"undoColour\":\"rgb(31, 38, 51)\",\"pic\":true,\"aboveBar\":true,\"undoTop\":true}"
+ },
+ {
+  "lock": "S7",
+  "where": "the small round picture",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S7",
+  "where": "it floats above the tab bar, and Undo is on top",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(42, 58, 82)\",\"radius\":\"999px\",\"text\":\"Passed · Elinor Hale\",\"textColour\":\"rgb(255, 255, 255)\",\"undoBg\":\"rgb(232, 200, 188)\",\"undoColour\":\"rgb(31, 38, 51)\",\"pic\":true,\"aboveBar\":true,\"undoTop\":true}"
+ },
+ {
+  "lock": "S7",
+  "where": "Undo restores (the bar says it is undone)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S7",
+  "where": "the query is back with the agent",
+  "ok": true,
+  "detail": "agent"
+ }
+]

@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "pop",
+  "where": "390x844 notes on both",
+  "ok": true,
+  "detail": "8 / 8"
+ },
+ {
+  "lock": "T6",
+  "where": "390x844 the notes keep the board's order",
+  "ok": true,
+  "detail": "cbseed-n6,cbseed-n1,cbseed-n3,cbseed-n2 vs cbseed-n6,cbseed-n1,cbseed-n3,cbseed-n2"
+ },
+ {
+  "lock": "T6",
+  "where": "390x844 every tilt is within −2° … +2°",
+  "ok": true,
+  "detail": "[-0.3,-0.2,-0.3,-0.2,-0.3,-0.3,-0.3,-0.3]"
+ },
+ {
+  "lock": "T6",
+  "where": "390x844 the band counts the notes pinned",
+  "ok": true,
+  "detail": "8 vs 8"
+ },
+ {
+  "lock": "T6",
+  "where": "390x844 each note's tilt is the same across two renders",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "T8",
+  "where": "390x844 Corkboard: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": "navy 4"
+ },
+ {
+  "lock": "T8",
+  "where": "390x844 Corkboard: no image twice",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "T6",
+  "where": "390x844 Add a note opens the note flow",
+  "ok": true,
+  "detail": ""
+ }
+]

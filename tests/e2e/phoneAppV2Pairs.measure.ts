@@ -52,6 +52,10 @@ const PARTS: Record<string, [string, string, Step][]> = {
     ["11-birds-eye", "/queries", async (p) => { await p.locator('[data-pa="birds-btn"]').click(); await p.waitForTimeout(900); }],
   ],
 
+  "part-5": [
+    ["24-todo", "/todo", async (p) => { await p.waitForTimeout(500); }],
+    ["25-corkboard", "/todo/corkboard", async (p) => { await p.waitForTimeout(500); }],
+  ],
   /* screens 18 (the snackbar after a save) and 20 (the celebration) need a write; the pairs only read, so they pair
      the shots PA2-4 took mid-run (PA2_SHOTS=1) — see FROM_SHOTS */
   "part-4": [
