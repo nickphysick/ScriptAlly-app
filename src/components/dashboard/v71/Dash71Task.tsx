@@ -114,7 +114,7 @@ const Body: React.FC<{ m: TaskCardModel; probe?: boolean }> = ({ m, probe = true
   <>
     <div className="d71-who">
       {m.date ? (
-        <div className="d58-cal d71-cal" aria-hidden="true"><small>{m.date.dow}</small><b>{m.date.day}</b></div>
+        <div className="d58-cal d71-cal" aria-hidden="true"><small>{m.date.dow}</small><b>{m.date.day}</b>{m.date.mon && <span className="d71-calmon" data-d71="cal-month">{m.date.mon}</span>}</div>
       ) : (
         <span className={`d71-av d71-av--${m.kind}`} aria-hidden="true">{m.initials}</span>
       )}

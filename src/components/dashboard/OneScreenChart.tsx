@@ -38,7 +38,7 @@ import type { Activity, Agent, Manuscript, Query } from "../../types";
 import { QueryStatus } from "../../types";
 import { dailyLedger } from "../../lib/oneScreen";
 import {
-  chartGeometry, fillPath, indexAt, nearestSlot, pointOnLine, SLOT_LABEL_MIN_DAYS, weekSlots,
+  chartGeometry, fillPath, indexAt, nearestSlot, PLOT, pointOnLine, SLOT_LABEL_MIN_DAYS, weekSlots,
   type LineMode,
 } from "../../lib/dashChart";
 import {
@@ -49,7 +49,7 @@ import { indexActivities, UNDATED_LABEL, weekMix } from "../../lib/dashWeekMix";
 import { layoutPins, pinCopy, pinDate, pinEvents, PIN_DISC_R, PIN_KIND, type ChartPin, type PlacedEvent } from "../../lib/dashPins";
 import { DASH_ART, artUrl } from "../../lib/dashArt";
 import { StatusDot } from "../StatusDot";
-import { OneScreenChartEmpty } from "./OneScreenChartEmpty";
+import { BETWEEN, BETWEEN_HEADROOM, FIRST_POINT, chartEmpty } from "../../lib/dashFirstVisit";
 import { OneScreenMinimap } from "./OneScreenMinimap";
 import { OneScreenPanel } from "./OneScreenPanel";
 import { useDashPopup } from "./DashPopup";
@@ -91,11 +91,8 @@ export const OneScreenChart: React.FC<{
   /** live queries with no sent date — handed in, like `activeCount`; the chart derives no count */
   undatedCount?: number;
   now: Date;
-  /** the page's zero-query branch — the card keeps its box and shows the first-run panel */
-  empty?: boolean;
-  onSendFirst?: () => void;
   onOpenQuery?: (queryId: string) => void;
-}> = ({ loading, queries, activities, agents = [], manuscripts = [], activeCount, undatedCount = 0, now, empty = false, onSendFirst, onOpenQuery }) => {
+}> = ({ loading, queries, activities, agents = [], manuscripts = [], activeCount, undatedCount = 0, now, onOpenQuery }) => {
   const uid = useId().replace(/[^a-zA-Z0-9]/g, "");
   const popup = useDashPopup();
   const cardRef = useRef<HTMLDivElement | null>(null);
@@ -155,7 +152,16 @@ export const OneScreenChart: React.FC<{
 
   const W = size?.w ?? 0, H = size?.h ?? 0;
   const sparse = view.length < 2;
-  const geo = useMemo(() => (W > 0 && H > 0 && !sparse ? chartGeometry(values, W, H, mode) : null), [values, W, H, sparse, mode]);
+  /* first visit v1 (D1): never a blank plot — the first point under two days of data, and "Between rounds" once every
+     query has closed. Read before the title, which drops the "since" and the range control between rounds. */
+  const fv = useMemo(
+    () => (loading ? null : chartEmpty({ queries, agents, activeCount, undatedCount, sparse })),
+    [loading, queries, agents, activeCount, undatedCount, sparse],
+  );
+  const between = fv?.kind === "between";
+  /* between rounds the line's peak sits lower, under the headline (D1) — BETWEEN_HEADROOM */
+  const geo = useMemo(() => (W > 0 && H > 0 && !sparse ? chartGeometry(values, W, H, mode, between ? BETWEEN_HEADROOM : 1) : null), [values, W, H, sparse, mode, between]);
+
 
   /* ── pins ── */
   const events = useMemo(() => pinEvents(queries, activities), [queries, activities]);
@@ -284,24 +290,16 @@ export const OneScreenChart: React.FC<{
 
   const title = (
     <div className="os-bandrow">
-      <h3 className="os-cardttl" data-probe-text="chart-title">{loading ? "Active queries" : countable(activeTitle(empty ? 0 : activeCount, empty ? 0 : undatedCount))}</h3>
-      {!loading && !empty && stage === "short" && <span className="os-since" data-probe-text="chart-since">{sinceLabel(daily)}</span>}
+      <h3 className="os-cardttl" data-probe-text="chart-title">{loading ? "Active queries" : countable(activeTitle(activeCount, undatedCount))}</h3>
+      {!loading && !between && stage === "short" && <span className="os-since" data-probe-text="chart-since">{sinceLabel(daily)}</span>}
       {/* ⚠️ THE RANGE CONTROL IS IN THE BAND (the v34 mockup, 19 Sep), after the title, and the row WRAPS:
           in a card of 470px or less it takes the full line beneath the title, still on the navy. In
           the short-campaign stage there is no control — the quiet suffix above is what that stage says. */}
-      {!loading && !empty && stage === "long" && (
+      {!loading && !between && stage === "long" && (
         <OneScreenMinimap daily={daily} endIdx={end} onChange={moveWindow} label={rangeSentence(view)} arriving={arriving} />
       )}
     </div>
   );
-
-  if (empty) {
-    return (
-      <OneScreenPanel variant="os-lead" probe="chart-card" loading={loading} skel={["h", "grow", ""]} skeletonClass="d58-skcard" lift={false} band={title} innerRef={cardRef}>
-        <OneScreenChartEmpty onLogFirst={onSendFirst} />
-      </OneScreenPanel>
-    );
-  }
 
   const lastIdx = view.length - 1;
   const last = geo?.points[lastIdx];
@@ -321,6 +319,13 @@ export const OneScreenChart: React.FC<{
     <OneScreenPanel variant="os-lead" probe="chart-card" loading={loading} skel={["h", "grow", ""]} skeletonClass="d58-skcard" lift={false} band={title} innerRef={cardRef}>
       <div className="os-acplot" data-probe="plot-box">
         <div className="os-acground" aria-hidden="true" />
+        {fv && (
+          /* D1 · the chart's empty-state headline, top left of the plot */
+          <div className="fv1-chead" data-fv1="chart-head" data-kind={fv.kind}>
+            <p className="fv1-chttl">{fv.kind === "first" ? FIRST_POINT.title : BETWEEN.title}</p>
+            <p className="fv1-chp">{fv.kind === "first" ? FIRST_POINT.line : BETWEEN.line(fv.n)}</p>
+          </div>
+        )}
         {/* ⚠️ THE MENTOR: TWO DRAWINGS IN ONE ISOLATED WRAPPER, CROSS-DISSOLVED ADDITIVELY. His head
             changes shape between them, so the first must fade OUT as the second fades IN; two plain
             opacity fades dip to ~75% solid halfway and the white card flashes through the whole
@@ -332,7 +337,29 @@ export const OneScreenChart: React.FC<{
         </div>
         <div className="os-acdraw" ref={drawRef}>
           {sparse ? (
-            <div className="os-sparse on"><span>The line begins once there are two days on the record.</span></div>
+            fv?.kind === "first" ? (
+              /* D1 · the first point: a navy dot on the baseline, a dashed line on from it, and its label */
+              <div className="fv1-first" data-fv1="chart-first">
+                <svg className="fv1-firstsvg" width={W || undefined} height={H || undefined} viewBox={W && H ? `0 0 ${W} ${H}` : undefined} aria-hidden="true">
+                  {W > 0 && H > 0 && (() => {
+                    const y = H * PLOT.baseline, x = 24, top = y - 24;
+                    return (
+                      <>
+                        <line x1={0} y1={y} x2={W} y2={y} stroke="rgba(28, 19, 15, 0.12)" />
+                        <line x1={x} y1={y} x2={x} y2={top} stroke={NAVY} strokeWidth={2} />
+                        <circle cx={x} cy={top} r={7} fill={NAVY} />
+                        <line x1={x} y1={top} x2={W} y2={top} stroke={NAVY} strokeOpacity={0.15} strokeWidth={3} strokeDasharray="8 8" />
+                      </>
+                    );
+                  })()}
+                </svg>
+                <div className="fv1-firstlab" data-fv1="chart-first-label" style={H > 0 ? { top: H * PLOT.baseline - 24 - 70 } : undefined}>
+                  <b>{fv.who}</b><span>{fv.sub}</span>
+                </div>
+              </div>
+            ) : fv?.kind === "between" ? null : (
+              <div className="os-sparse on"><span>The line begins once there are two days on the record.</span></div>
+            )
           ) : (
             <>
               <svg
@@ -442,6 +469,10 @@ export const OneScreenChart: React.FC<{
                   );
                 })}
               </div>
+              {between && last && (
+                /* D1 · between rounds: the last point marked with the latest close */
+                <span className="fv1-closedmark" data-fv1="chart-closed-mark" style={{ left: last[0], top: last[1] }}>{fv.mark}</span>
+              )}
               {/* ⚠️ THE WEEK CALLOUT (v116): a dashed ink guide at the snapped week, and the card 10px beside it,
                   flipped to the line's left when it would cross the card's right edge. The keyboard reaches it
                   through the plot's own focus stop: ←/→ step a week, Esc hides it. */}
@@ -496,7 +527,7 @@ export const OneScreenChart: React.FC<{
           `::before`, so it cannot drift from the label it belongs to; a slot's flex weight is the
           number of points in its week, so a stepped chart's part-weeks stay under their days. */}
       <div className="os-acx" aria-hidden="true" data-probe="chart-axis">
-        {slots.map((s, i) => (
+        {fv?.kind === "first" && sparse ? fv.weeks.map((w) => <span key={w} className="fv1-wk">{w}</span>) : slots.map((s, i) => (
           <span
             key={`${s.label}-${i}`}
             style={s.weight !== 1 ? { flexGrow: s.weight } : undefined}

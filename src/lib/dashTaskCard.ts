@@ -136,7 +136,7 @@ export interface TaskCardModel {
   /** the mono line under the title: the agency */
   sub: string;
   initials: string;
-  date: { dow: string; day: string } | null;
+  date: { dow: string; day: string; mon?: string } | null;
   /** the one plain-English line; null for "other" where the item carries none */
   line: string | null;
   bar: TaskBar | null;

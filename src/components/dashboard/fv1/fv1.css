@@ -203,6 +203,37 @@
   .d58 .fv1-stamp.is-out { animation: none; opacity: 0; }
 }
 
+/* ── D1 · the chart's empty treatments ─────────────────────────────────────────────────────────────
+   The headline sits top-left of the plot, above the line (the ref's 46/40); the first point is drawn on the
+   baseline the line will grow from (dashChart's PLOT.baseline), and its label is the chart's dark pill. */
+.d58 .fv1-chead { position: absolute; z-index: 2; left: 22px; top: 18px; max-width: min(440px, 62%); pointer-events: none; }
+.d58 .fv1-chttl { margin: 0; font: 400 22px/1.15 var(--d58-type) !important; color: var(--d58-ink); }
+.d58 .fv1-chp { margin: 8px 0 0; font: 400 15px/1.5 var(--d58-serif) !important; color: rgba(28, 19, 15, 0.72); }
+.d58 .fv1-first { position: absolute; inset: 0; }
+.d58 .fv1-firstsvg { position: absolute; inset: 0; display: block; }
+.d58 .fv1-firstlab, .d58 .fv1-closedmark {
+  position: absolute; z-index: 2; pointer-events: none;
+  padding: 8px 12px; border-radius: 10px; background: var(--d58-ink); color: #fff; white-space: nowrap;
+}
+.d58 .fv1-firstlab { left: 36px; display: grid; gap: 2px; }
+.d58 .fv1-firstlab b { font: 400 16px/1.2 var(--d58-type) !important; color: #fff; }
+.d58 .fv1-firstlab span { font: 400 14px/1.35 var(--d58-serif) !important; color: #fff; }
+.d58 .fv1-closedmark { padding: 6px 10px; border-radius: 9px; font: 400 13px/1.2 var(--d58-serif) !important; transform: translate(calc(-100% - 10px), -50%); }
+.d58 .os-acx .fv1-wk { flex: 1 1 0; }
+/* a short card (≤819px tall): the body line gives way so the headline never sits on the line */
+@media (max-height: 819px) { .d58 .fv1-chp { display: none; } }
+
+/* ── D2/D3 · Closed and Agents with nothing to count: words, never zeros ──────────────────────────── */
+.d58 .fv1-none { align-items: center; }
+.d58 .fv1-ringnone { opacity: 0.55; }
+.d58 .fv1-nonet { min-width: 0; }
+.d58 .fv1-nonettl { margin: 0; font: 400 19px/1.2 var(--d58-type) !important; color: var(--d58-ink); }
+.d58 .fv1-nonep { margin: 6px 0 0; font: 400 14px/1.4 var(--d58-serif) !important; color: rgba(28, 19, 15, 0.72); }
+.d58 .fv1-nonet .d60-ready { margin-top: 8px; }
+
+/* ── D4 · the Coming up date tile names its month (it read "WED 9" for 9 December) ── */
+.d58 .d71-cal .d71-calmon { display: block; padding: 0 0 4px; margin-top: -3px; font: 400 11px/1.1 var(--d58-serif) !important; color: rgba(28, 19, 15, 0.62); }
+
 /* ══ SIZE-DEPENDENT RULES — LAST, so they win ties against every base rule above (they did not when they sat in
    the A3 section: the A4 base rules came after them and the ≤900px checklist never applied). ══ */
 /* ── the short window (≤859px tall, a 1280×800 laptop): the pre page still fits without scrolling ──

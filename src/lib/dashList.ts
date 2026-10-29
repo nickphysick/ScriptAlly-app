@@ -89,8 +89,8 @@ export interface ListItem {
   /** a query that agents are waiting on shows its stages; everything else shows one sentence */
   stages: ListStage[] | null;
   note: string | null;
-  /** a coming-up item's date tile */
-  date: { dow: string; day: string } | null;
+  /** a coming-up item's date tile; `mon` (first visit v1, D4) so "WED 9" says which month — the phone does not draw it */
+  date: { dow: string; day: string; mon?: string } | null;
   /** the board card's task type, for a board item (Dashboard v71's task card reads which send it is) */
   taskType?: string | null;
 }
@@ -397,7 +397,7 @@ export function comingItems(qcRows: readonly QcRow[], nowMs: number): ListItem[]
         action: { kind: "drawer" as const, request: { mode: "resp" as const, queryId: r.id } },
         stages: null,
         note: "The next date from your queries. Nothing needs doing before then.",
-        date: { dow: DOW[d.getDay()], day: String(d.getDate()) },
+        date: { dow: DOW[d.getDay()], day: String(d.getDate()), mon: MONTHS_SHORT[d.getMonth()] },
       };
     });
 }

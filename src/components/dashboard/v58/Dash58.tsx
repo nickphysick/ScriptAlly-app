@@ -255,7 +255,7 @@ export const Dash58: React.FC<Dash58Props> = ({
 
   /* ── the feed ── */
   const feed30 = useMemo(
-    () => (loading ? [] : feedEntries({ activities: scopedActivities, queries, agents, manuscripts, now, seenAt: null })),
+    () => (loading ? [] : feedEntries({ activities: scopedActivities, queries, agents, manuscripts, now, seenAt: null, honestDates: true })),
     [loading, scopedActivities, queries, agents, manuscripts, now],
   );
   const today = todayCount(feed30, now);
@@ -541,8 +541,6 @@ export const Dash58: React.FC<Dash58Props> = ({
                       activeCount={activeCount}
                       undatedCount={loading ? 0 : undatedLiveCount(scopedQueries)}
                       now={now}
-                      empty={empty}
-                      onSendFirst={() => openQueryDrawer({ mode: "log", ...(scopeId ? { manuscriptId: scopeId } : {}) })}
                     />
                   </div>
                   {/* v60: Closed folds into a pair of hoops beneath the full-width chart, beside Agents on file */}
@@ -550,11 +548,12 @@ export const Dash58: React.FC<Dash58Props> = ({
                     <ClosedHoop loading={loading} tile={closed} play={paint} onSeeAll={() => navigate(queriesPathFor("closed"))}
                       /* v118 Part B — a slice or row opens the Query Centre on exactly its queries, this manuscript's only */
                       onOpen={(k) => closed && navigate(queriesForIds(closed.members[k] ?? [], CLOSED_BUCKETS.find((b) => b.key === k)?.label))}
-                      queries={scopedQueries} agents={agents} manuscript={activeManuscript?.title ?? ""} />
+                      queries={scopedQueries} agents={agents} manuscript={activeManuscript?.title ?? ""} noneWhileLoading={shape.closed === "none"} />
                     <AgentsHoop loading={loading} cov={cov} play={paint} onReady={toContacts}
                       /* v118 Part B — a slice or row opens the Contact list filtered to that status */
                       onOpen={(k) => navigate(contactListForStatus(k))}
-                      agents={agents} queries={queries} msId={scopeId} />
+                      agents={agents} queries={queries} msId={scopeId}
+                      onDiscover={() => onNavigate("agents", "Discover")} onImport={() => onNavigate("import")} />
                   </div>
                 </>
               )}
@@ -589,6 +588,7 @@ export const Dash58: React.FC<Dash58Props> = ({
           agents={agents}
           manuscripts={manuscripts}
           now={now}
+          honestDates
           onClose={() => setFeedOpen(false)}
           onAct={(queryId, mode) => {
             /* the drawer closes first: one asking surface at a time, and the flow is not behind it */

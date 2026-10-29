@@ -117,6 +117,9 @@ export const SUMMARY_NOUN = {
   need: (n: number) => (n === 1 ? "still needs you" : "still need you"),
 };
 
+/** First visit v1 (D4): what each figure says when it is zero — words, never "0 replies from agents". */
+export const SUMMARY_NONE = { replies: "No replies yet", did: "Nothing logged yet", need: "Nothing needs you" } as const;
+
 /** How many of the feed's entries happened today — the floating tab's rust pill. */
 export const todayCount = (entries: readonly FeedEntry[], now: Date): number => {
   const today = midnight(now.getTime());

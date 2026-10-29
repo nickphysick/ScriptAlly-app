@@ -233,7 +233,7 @@
 .d58-layer.is-in .d58-drawer { transform: none; }
 .d58-dhead { flex: none; padding: 20px 24px 14px; background: var(--d58-navy); color: var(--d58-cream); }
 .d58-drow { display: flex; align-items: center; gap: 14px; }
-.d58-dart { flex: none; width: 50px; height: 50px; box-sizing: border-box; border-radius: 50%; border: 1px dashed rgba(255, 255, 255, 0.3); }
+/* the drawer head's empty dashed circle (.d58-dart) is retired (first visit v1, D4). */
 .d58-layer .d58-dtitle { margin: 0; font-family: var(--d58-type) !important; font-weight: 400; font-size: 30px; line-height: 30px; color: var(--d58-cream); }
 .d58-dsub { display: block; margin-top: 6px; font-family: var(--d58-serif) !important; font-size: 14px; line-height: 20px; color: rgba(251, 249, 245, 0.7); }
 .d58-dsub i { font-style: normal; font-family: var(--d58-type) !important; }
@@ -259,6 +259,8 @@
 .d58-sum b { font-family: var(--d58-type) !important; font-weight: 400; font-size: 28px; line-height: 28px; color: var(--d58-ink); }
 .d58-sum span { font-size: 14px; line-height: 1.2; color: var(--d58-ink-62); }
 .d58-sum .is-you b { color: var(--d58-rust); }
+/* first visit v1 (D4): a zero figure is a sentence, set as the row's words are, on the figure's line */
+.d58-sum .d58-sumnone { font-family: var(--d58-serif) !important; font-size: 15px; line-height: 28px; color: var(--d58-ink-62); }
 .d58-dbody { position: relative; flex: 1 1 0; min-height: 0; overflow-y: auto; padding: 0 24px 40px; background: var(--d58-cream); }
 /* feed drawer v2: the heading's box reaches 12px either side (its words do not move), so a tinted row, which is
    12px wider than the text column, passes wholly under it */

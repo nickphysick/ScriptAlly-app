@@ -18,7 +18,9 @@
  * ⚠️ THE ANSWER ONLY CHOOSES A PATH. It changes no data, so a writer who picked "Not yet" and then imports a
  * tracker has lost nothing.
  */
-import { QueryStatus, type Query, type User } from "../types";
+import { QueryStatus, type Agent, type Query, type User } from "../types";
+import { closedAt, sentAt } from "./oneScreen";
+import { agentPrimary } from "./agentDisplay";
 import type { UserPaths } from "./userPaths";
 import type { GettingStartedKey } from "./dashEmpty";
 import { MONTHS_SHORT } from "./dates";
@@ -189,3 +191,56 @@ export function pickStamp<W extends { kind: WinKind; msId: string | null }>(
 
 /** How long the stamp holds before it fades (the ref's 2.2s). */
 export const STAMP_HOLD_MS = 2200;
+
+/* ── D1 · the chart's two empty treatments ──────────────────────────────────────────────────────── */
+
+const dm = (ms: number): string => { const d = new Date(ms); return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()] ?? ""}`; };
+const WEEK = 7 * 86_400_000;
+
+export const FIRST_POINT = {
+  title: "Your first query is out.",
+  line: "The line starts here and grows each week as you send more. Replies, requests and passes show up on it as they happen.",
+} as const;
+export const BETWEEN = {
+  title: "Between rounds.",
+  line: (n: number) => `All ${n.toLocaleString("en-GB")} ${n === 1 ? "query is" : "queries are"} closed. Log a query when you're ready to start the next round.`,
+} as const;
+
+/** Between rounds the line is drawn against 1.6x its peak, so the plateau sits under the two-line headline: measured,
+ *  at 1512×900 the headline ends 96px into a 235px plot and the plateau now runs at 108 (it ran at 42, through it). */
+export const BETWEEN_HEADROOM = 1.6;
+
+export type ChartEmpty =
+  | { kind: "first"; who: string; sub: string; weeks: string[] }
+  | { kind: "between"; n: number; mark: string };
+
+/**
+ * What the chart says instead of a blank plot (Part D1), or null for an ordinary chart.
+ *  · "between" — queries exist and none is active (and none is waiting undated): the history stays, its last point
+ *    marked "All closed · {d MMM}" (the latest close).
+ *  · "first" — under two days of data: the first point on the baseline, labelled "Queried {agent}" over
+ *    "{agency} · {d MMM}", and the week axis that follows it.
+ */
+export function chartEmpty(input: {
+  queries: readonly Query[]; agents: readonly Agent[]; activeCount: number | null; undatedCount: number; sparse: boolean;
+}): ChartEmpty | null {
+  const { queries, agents, activeCount, undatedCount, sparse } = input;
+  if (queries.length === 0 || activeCount === null) return null;
+  if (activeCount === 0 && undatedCount === 0) {
+    const last = Math.max(...queries.map((q) => closedAt(q) ?? -Infinity));
+    return { kind: "between", n: queries.length, mark: Number.isFinite(last) ? `All closed · ${dm(last)}` : "All closed" };
+  }
+  if (!sparse) return null;
+  const dated = queries.map((q) => ({ q, at: sentAt(q) })).filter((x): x is { q: Query; at: number } => x.at !== null).sort((a, b) => a.at - b.at);
+  const first = dated[0];
+  if (!first) return null;
+  const agent = agents.find((a) => a.id === first.q.agentId) ?? null;
+  const name = agent ? agentPrimary(agent) : "";
+  const agency = (agent?.agency ?? "").trim();
+  return {
+    kind: "first",
+    who: name ? `Queried ${name}` : "Queried",
+    sub: [agency && agency.toLowerCase() !== name.toLowerCase() ? agency : "", dm(first.at)].filter(Boolean).join(" · "),
+    weeks: [0, 1, 2, 3].map((k) => dm(first.at + k * WEEK)),
+  };
+}

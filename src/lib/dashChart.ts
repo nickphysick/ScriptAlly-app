@@ -58,8 +58,13 @@ export const steppedPath = (p: readonly [number, number][]): string => {
   return d;
 };
 
-export const chartGeometry = (values: readonly number[], W: number, H: number, mode: LineMode): ChartGeometry => {
-  const top = Math.max(1, ...values);
+/**
+ * `headroom` (first visit v1, D1) scales the top the line is measured against: 1 is the ordinary chart; above 1 the
+ * peak sits lower, leaving room above it — "Between rounds" puts its headline there, so the history's plateau no
+ * longer runs through the words.
+ */
+export const chartGeometry = (values: readonly number[], W: number, H: number, mode: LineMode, headroom = 1): ChartGeometry => {
+  const top = Math.max(1, ...values) * Math.max(1, headroom);
   const points = values.map((v, i): [number, number] => [plotX(i, W, values.length), plotY(v, H, top)]);
   const line = mode === "stepped" ? steppedPath(points) : monotonePath(points);
   const peakY = points.length ? Math.min(...points.map((q) => q[1])) : H * PLOT.baseline;
