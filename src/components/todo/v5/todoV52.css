@@ -171,10 +171,10 @@
 @keyframes td52Sheen { 0%, 62% { left: -40%; } 100% { left: 120%; } }
 /* J.3 — the tray goes quiet (never blocked): other rows at 42%, full on hover or focus; bands at 60% */
 .td5-root[data-journey] .td5-row2:not([data-live]) .td5-tx, .td5-root[data-journey] .td5-row2:not([data-live]) .td5-disc,
-.td5-root[data-journey] .td5-row2:not([data-live]) .td5-dial { opacity: 0.42; transition: opacity 0.18s; }
+.td5-root[data-journey] .td5-row2:not([data-live]) :is(.td5-dial, .td7-due) { opacity: 0.42; transition: opacity 0.18s; } /* v7 S5: the date as words dims as the dial did */
 .td5-root[data-journey] .td5-row2:not([data-live]):is(:hover, :focus-visible, :focus) .td5-tx,
 .td5-root[data-journey] .td5-row2:not([data-live]):is(:hover, :focus-visible, :focus) .td5-disc,
-.td5-root[data-journey] .td5-row2:not([data-live]):is(:hover, :focus-visible, :focus) .td5-dial { opacity: 1; }
+.td5-root[data-journey] .td5-row2:not([data-live]):is(:hover, :focus-visible, :focus) :is(.td5-dial, .td7-due) { opacity: 1; }
 .td5-root[data-journey] .td5-band { opacity: 0.6; }
 /* the live row: IN PROGRESS, and a 4px rust edge inside the selected ring, breathing (4) */
 .td5-root .td52-live { display: inline-block; margin-left: 8px; padding: 2px 7px; border-radius: 6px; vertical-align: 2px; background: #2a3a52; color: #f4eee5; font: 600 8.5px/1.3 var(--font-mono) !important; letter-spacing: 0.12em; }
@@ -190,7 +190,7 @@
 @media (prefers-reduced-motion: reduce) {
   .td52-wtop .td52-wdot, .td52-wband::after, .td52-wband .td52-wtw.typing::after, .td5-root[data-journey] .td5-row2[data-live], .td5-root[data-journey] .td5-dcard[data-work] { animation: none !important; }
   .td52-wband::after { display: none; }
-  .td52-wband .td52-fill, .td5-root[data-journey] .td5-row2 .td5-tx, .td5-root[data-journey] .td5-row2 .td5-disc, .td5-root[data-journey] .td5-row2 .td5-dial { transition: none !important; }
+  .td52-wband .td52-fill, .td5-root[data-journey] .td5-row2 .td5-tx, .td5-root[data-journey] .td5-row2 .td5-disc, .td5-root[data-journey] .td5-row2 :is(.td5-dial, .td7-due) { transition: none !important; }
 }
 
 /* ═════════ §C · THE SLIDE-OUT CALENDAR (portalled to the body: literals, never `--td5-*`) ═════════ */

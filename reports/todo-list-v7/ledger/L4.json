@@ -1,0 +1,80 @@
+[
+ {
+  "lock": "L4",
+  "where": "1512: the find input is in the navy row",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L4",
+  "where": "1512: Filters is in the navy row",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L4",
+  "where": "1512: no key hints in the navy row or the tray (the find field's own \"/\" aside)",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L4",
+  "where": "1512: no N on \"+ Add a task\"",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L4",
+  "where": "1512: no find or filter row outside the sheet",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L4",
+  "where": "1280: the find input is in the navy row",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L4",
+  "where": "1280: Filters is in the navy row",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L4",
+  "where": "1280: no key hints in the navy row or the tray (the find field's own \"/\" aside)",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L4",
+  "where": "1280: no N on \"+ Add a task\"",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L4",
+  "where": "1280: no find or filter row outside the sheet",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L4",
+  "where": "Filters opens the strip under the row, with the pills",
+  "ok": true,
+  "detail": "{\"strip\":true,\"pills\":4,\"exp\":\"true\",\"bg\":\"rgb(245, 226, 218)\"}"
+ },
+ {
+  "lock": "L4",
+  "where": "…and is pink while open",
+  "ok": true,
+  "detail": "true rgb(245, 226, 218)"
+ },
+ {
+  "lock": "L4",
+  "where": "pressed again, it closes",
+  "ok": true,
+  "detail": ""
+ }
+]
