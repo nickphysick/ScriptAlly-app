@@ -46,7 +46,7 @@ export function phoneQuestion(mode: FlowMode, title: string, first: string): str
     "If it's still quiet": "If it’s still quiet?",
     "When to nudge": `When will you nudge ${who}?`,
     /* close */
-    "Where it stands": mode === "close" ? `Why are you closing ${first ? `${first}’s` : "this"} query?` : "Where it stands",
+    "Where it stands": mode === "close" ? `Why are you closing ${first ? `${first}’s` : "this"} query?` : mode === "nudge" ? `Have you nudged ${who}?` : "Where it stands",
     "Calling it": "When are you calling it?",
     "Withdrawing": "Why, and when?",
     "Their status": `When did ${who} pass?`,
@@ -55,6 +55,10 @@ export function phoneQuestion(mode: FlowMode, title: string, first: string): str
     "The others": "Who else has it?",
     "The call": `How did the call with ${who} go?`,
     "Your decision": "What have you decided?",
+    /* the task and note flows (the To-do composer's fields) */
+    "The task": "What do you need to do?",
+    "When": "When?",
+    "The note": "What do you want to remember?",
     /* correct the record */
     "Set a send-by date": "When will you send it?",
     "Edit an entry": "Which entry needs correcting?",

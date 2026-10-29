@@ -16,6 +16,10 @@
     color: var(--pa-ink); font-family: var(--pa-sans); animation: pfRise .45s var(--pa-spring);
   }
   @keyframes pfRise { from { transform: translateY(100%); } }
+  /* ⚠️ TWO CLASSES: queryDrawer.css hands every bare element inside .qad-root back to its parent's face at 0-1-0
+     (`.qad-root :where(div)`), which ties with `.pa-flow` and wins or loses on bundle order — measured, the task flow
+     rendered Source Serif. At 0-2-0 the flow's face is the phone's sans whatever order the sheets land in. */
+  .pa-flow.pa-flow { font-family: var(--pa-sans); }
 
   /* ── the band ── */
   .pf-band { flex: none; background: var(--pa-navy); color: #fff; padding: calc(8px + env(safe-area-inset-top, 0px)) 20px 36px; }

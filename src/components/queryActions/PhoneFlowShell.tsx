@@ -35,7 +35,12 @@ export interface LiveFacts {
   book: string | null;
 }
 
-export function PhoneFlowShell({ view, mode, open, initialStep, initialSeen, onCancel, onPark, onSave, stateRef, live }: ShellProps & { live: LiveFacts }) {
+export function PhoneFlowShell({ view, mode, open, initialStep, initialSeen, onCancel, onPark, onSave, stateRef, live, noPark = false }: ShellProps & {
+  /** the query card the band builds; null draws none (the task and note flows, as the ref's liveCard returns none) */
+  live: LiveFacts | null;
+  /** a flow with no parked state (task, note): Escape with answers asks "Discard this?" instead of parking */
+  noPark?: boolean;
+}) {
   const { openCal, setOpenCal } = useDrawer();
   const n = view.steps.length;
   const last = n;
@@ -81,7 +86,7 @@ export function PhoneFlowShell({ view, mode, open, initialStep, initialSeen, onC
     if (openCal) { setOpenCal(null); return; }
     if (confirm) { setConfirm(false); return; }
     if (view.leave) { view.leave.cancel(); return; }
-    if (view.dirty) { onPark(); return; }
+    if (view.dirty) { if (noPark) setConfirm(true); else onPark(); return; }
     onCancel();
   }, ESC_LEVEL.drawer);
   function requestClose() {
@@ -132,7 +137,7 @@ export function PhoneFlowShell({ view, mode, open, initialStep, initialSeen, onC
   };
 
   const curStep = cur < n ? view.steps[cur] : null;
-  const first = (live.name ?? "").trim().split(/\s+/)[0] ?? "";
+  const first = (live?.name ?? "").trim().split(/\s+/)[0] ?? "";
   const question = curStep ? phoneQuestion(mode, curStep.title, first) : CHECK_QUESTION;
   const help = curStep?.guard?.level === "check" && !curStep.ownWarn ? `${curStep.guard.msg}. You can still carry on.` : null;
   const showContinue = cur === last || !shape.single || shape.chosen;
@@ -151,7 +156,7 @@ export function PhoneFlowShell({ view, mode, open, initialStep, initialSeen, onC
           <button type="button" className="pf-ib" aria-label="Close" data-pf="close" onClick={requestClose}>{PI.close}</button>
         </div>
         {/* the query card, building itself as you answer (ref liveCard) */}
-        <div className="pf-lcard" data-pf="live">
+        {live ? <div className="pf-lcard" data-pf="live">
           <div className={`pf-lcband t-${live.court.tone}`}><span>{live.court.label}</span><span className="pf-day">Day {live.day ?? 0}</span></div>
           <div className="pf-lcag">
             {live.name
@@ -175,7 +180,7 @@ export function PhoneFlowShell({ view, mode, open, initialStep, initialSeen, onC
                 : <span key={i} className={`pf-lcf${i === cur ? " now" : ""}`} data-pf="slot" data-i={i}>{s.title}</span>))}
             </div>
           </div>
-        </div>
+        </div> : null}
       </div>
 
       <div className={`pf-sheet${dir ? ` ${dir}` : ""}`} ref={bodyRef} key={`q${cur}`} data-pf="sheet">
@@ -234,7 +239,7 @@ export function PhoneFlowShell({ view, mode, open, initialStep, initialSeen, onC
           <b>Discard this?</b><span>Nothing has been saved yet.</span>
           <div>
             <button type="button" className="keep" onClick={() => setConfirm(false)}>Keep going</button>
-            <button type="button" className="keep" data-qad-later onClick={() => { setConfirm(false); onPark(); }}>Finish later</button>
+            {noPark ? null : <button type="button" className="keep" data-qad-later onClick={() => { setConfirm(false); onPark(); }}>Finish later</button>}
             <button type="button" className="disc" onClick={() => { setConfirm(false); onCancel(); }}>Discard</button>
           </div>
         </div>

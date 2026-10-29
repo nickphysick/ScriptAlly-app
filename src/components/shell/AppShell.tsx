@@ -41,6 +41,8 @@ import { BottomTabBar, isMenuPage, tabFor } from "../BottomTabBar";
 import { PhoneBand, dayWord } from "../phone/PhoneBand";
 import { PhoneBandContext } from "../phone/phoneBandStore";
 import { PhoneBookSheet, PhoneMenu, PhonePlusSheet, type MenuTile } from "../phone/PhoneSheets";
+import { PhoneComposeHost } from "../phone/PhoneComposeFlow";
+import { openPhoneCompose } from "../../lib/phoneCompose";
 import { PI } from "../phone/phoneIcons";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
 import { TODO_OPEN_COMPOSER } from "../../lib/todoRoutes";
@@ -406,13 +408,15 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
     onReplied: () => onNavigate("queries", "Record a response"),
     onAgent: () => onNavigate("agents", "Add an agent"),
     onTask: () => {
+      /* PHONE APP v2, PART 4 — on a phone the task is added in the flow layout, wherever you are */
+      if (phoneNav) { openPhoneCompose("task"); return; }
       /* the To-do page's own one-shot composer open (sa.todoCompose); on /todo already, its event */
       if (pathname === "/todo") { window.dispatchEvent(new CustomEvent(TODO_OPEN_COMPOSER)); return; }
       try { sessionStorage.setItem("sa.todoCompose", "task"); } catch { /* private mode */ }
       goPath("/todo");
     },
     onImport: () => goPath("/import"),
-  }), [bandBookId, onNavigate, pathname, goPath]);
+  }), [bandBookId, onNavigate, pathname, goPath, phoneNav]);
 
   /* the menu's tiles — a line is an existing figure, or the tile shows its name alone */
   const menuTiles = useMemo<MenuTile[]>(() => {
@@ -698,6 +702,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
       {phoneNav ? (
         <>
           <PhonePlusSheet open={plusOpen} onClose={() => setPlusOpen(false)} doors={plusDoors} />
+          <PhoneComposeHost />
           <PhoneMenu
             open={menuOpen} onClose={() => setMenuOpen(false)}
             name={currentUser?.name ?? ""} initials={initialsOf(currentUser?.name ?? "")}
