@@ -127,10 +127,15 @@ DM1-B1's "under the bar" now measures from the band.
 
 ## Dev
 
-- **Before:** dev served `index-DQ0k846l.js`. That is `7d31b365`, the commit `phone-app-v2` was cut from.
-- **Integration branch:** `dev/pk391-qm1-pk392-calx-pk392b-td7-fv1-pa2-1`. It is `phone-app-v2` itself, because the branch is cut from the served commit and nothing needs merging. It is deployed from this worktree with the tree clean.
-- **Gates there:** as in the table above. The locks were run against a local preview of the same build.
-- **After:** see PROGRESS.md and the closing line of this part.
+- **Before deploying, dev served `index-BiS1oLzC.js`, not the `DQ0k846l` this branch was cut from.** Another session deployed while Part 1 was being built: `dev/pk391-qm1-pk392-calx-pk392b-td7-fv1-pk393` (`c3d2fc5c`), which is submission packages v39.3 on top of the same base. Its build was confirmed to be byte-identical to the served hash.
+- **Integration branch:** `dev/pk391-qm1-pk392-calx-pk392b-td7-fv1-pk393-pa2-1`, at `a8b44524` = `c3d2fc5c` + `phone-app-v2`.
+  - The one conflict was `design-refs/.refhashes.json`. Both sides had enrolled refs. It was resolved by taking dev's file and re-enrolling the 69 phone refs with `check-design-refs.mjs --update`; 970 are now guarded.
+  - Built and deployed from its own clean worktree (`/Users/nickphysick/ScriptAlly-pa2-int`).
+  - A ref I had pushed earlier under the wrong base name (`…-fv1-pa2-1`) was deleted.
+- **Gates there:** tsc root 0 · tsc functions 0 · build clean · Vitest `Test Files 691 passed (691)` · `Tests 10737 passed | 3 skipped (10740)`.
+  - The first Vitest run failed three `functions/` files only because that worktree had no `functions/node_modules` link. With the link added, everything passes.
+- **Locks there:** PA2-1 against a preview of the integration build: `10 passed, 2 skipped` (the two S9 cases, which need `PA2_L1`).
+- **After:** dev serves `index-Ox21np2m.js` (`firebase deploy --only hosting --config firebase.dev.json --project dev`).
 
 ## Not done, and why — for Nick
 
