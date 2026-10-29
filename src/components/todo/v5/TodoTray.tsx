@@ -1361,7 +1361,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
                                 const wr = wouldRaise(a.rule!);
                                 return (
                                   <article className="td5-dcard" data-td5="desk-card" data-asided="" data-kind="rule">
-                                    <div className="td5-chead" style={{ background: "#ece8e3", color: "rgba(28,19,15,.6)", paddingLeft: 24 }}><span className="td5-cn">{a.label}</span><span className="td5-why">Housekeeping</span></div>
+                                    <div className="td5-chead" style={{ background: "#ece8e3", color: "rgba(28,19,15,.6)", paddingLeft: 24 }}><span className="td5-cn">{a.label}</span></div>
                                     <div className="td5-cbody">
                                       <div className="td5-asideban" data-kind="rule" data-td5="aside-banner"><b>Switched off</b>For every agent. QueryHawk doesn’t raise these at all while it’s off.</div>
                                       <h2 className="td5-deed" data-td5="deed">{a.label}</h2>
@@ -1406,7 +1406,8 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
                           <>
                             <div className="td5-pos" data-td5="pos">
                               <span>{deskIndex + 1} of {deskList.length}</span>
-                              <span className="td5-dots" aria-hidden="true">{deskList.map((x, k) => <i key={x.key} data-on={k === deskIndex ? "" : undefined} />)}</span>
+                              {/* v7 S6 — the progress dashes are gone; "n of N" and the arrows stay */}
+                              <span className="td5-sp" />
                               <button type="button" aria-label="Previous task" disabled={!!ghost || deskIndex <= 0} onClick={() => step(-1)}>‹</button>
                               <button type="button" aria-label="Next task" disabled={!!ghost || deskIndex >= deskList.length - 1} onClick={() => step(1)}>›</button>
                             </div>

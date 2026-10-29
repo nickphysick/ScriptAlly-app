@@ -157,6 +157,18 @@
     font: 400 16px/1.2 var(--sp-serif) !important; color: #1c130f;
   }
 
+  /* ═════ S6 · a calmer desk card: "n of N" in italic serif with no dashes; the band keeps its tint, name and status
+     (its tag is gone, in the markup); the small-capitals labels inside the card become italic serif in place ═════ */
+  .td5-root .td5-pos { font: italic 400 15px/1.2 var(--sp-serif) !important; letter-spacing: 0; text-transform: none; color: rgba(28, 19, 15, 0.62); }
+  .td5-root .td5-pos > span:first-child { font: inherit !important; }
+  .td5-root .td5-pos .td5-sp { flex: 1 1 auto; }
+  .td5-root .td5-facts .td5-fl, .td5-root .td5-where .td5-fl {
+    font: italic 400 14.5px/1.2 var(--sp-serif) !important; letter-spacing: 0; text-transform: none; color: rgba(28, 19, 15, 0.6);
+  }
+  .td5-root .td5-tl .td5-tdl { font: italic 400 14px/1 var(--sp-serif) !important; letter-spacing: 0; text-transform: none; }
+  .td5-root .td5-asideban b { font: italic 400 14px/1.2 var(--sp-serif) !important; letter-spacing: 0; text-transform: none; }
+  .td5-root .td5-dcard .td5-pin small { font: italic 400 13px/1.2 var(--sp-serif) !important; letter-spacing: 0; text-transform: none; }
+
   /* pinned: the header card, Today and the "Your tray" heading leave with the old header (the ref's `.v6-pinhide`) */
   .td5-root[data-pinned] .td7-hd, .td5-root[data-pinned] .td7-sec { display: none; }
 }

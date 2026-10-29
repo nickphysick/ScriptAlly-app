@@ -175,8 +175,8 @@ export const DeskCard: React.FC<DeskCardProps> = ({ item, facts, lede, stops, pa
       data-work={work ? "" : undefined} data-asided={asided ? "" : undefined}>
       {doing ? <WorkingBand key={doing.start} g={g} doing={doing} /> : (
       <div className="td5-chead" data-td5="desk-head" style={{ background: g.tint, color: g.ink }}>
+        {/* v7 S6 — the band keeps its tint, its name and the status; its small-capitals tag ("Asked of you") is gone */}
         <span className="td5-cn">{g.name}</span>
-        <span className="td5-why">{g.note}</span>
         <span className="td5-sp" />
         {item.query?.status ? (
           <span className="td5-st" data-td5="desk-status"><StatusDot status={item.query.status} overrideSize={18} decorative />{sentence(String(item.query.status))}</span>
@@ -238,7 +238,7 @@ export const DeskCard: React.FC<DeskCardProps> = ({ item, facts, lede, stops, pa
           {onEdit ? <button type="button" className="td5-lnk" data-td5="edit" disabled={saving} onClick={onEdit}>Edit</button> : null}
           <span className="td5-sp" />
           {saving ? <span className="td52-saving" data-td52="saving" role="status">Saving…</span> : null}
-          <span className="td5-keys" aria-hidden="true"><kbd>E</kbd> {item.bucket === "note" ? "tick" : "act"}</span>
+          {/* v7 S6 — the card's "E act" hint goes with the row's J / K / E (S2); the key still works */}
         </div>
       )}
       </>)}
