@@ -7,7 +7,7 @@
  * PA2_PAIRS=<part> chooses the part's screens (the table below).
  */
 import { test, type Page } from "@playwright/test";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { DIR, PHONES, openPhone, tag } from "./pa2Lib";
 
 test.use({ deviceScaleFactor: 2 });
@@ -51,6 +51,37 @@ const PARTS: Record<string, [string, string, Step][]> = {
     ["10-query-more", "/queries", async (p) => { await openOwed(p); await p.locator('.pa-qsheet [data-qc149c="more-btn"]').click(); await p.waitForTimeout(800); }],
     ["11-birds-eye", "/queries", async (p) => { await p.locator('[data-pa="birds-btn"]').click(); await p.waitForTimeout(900); }],
   ],
+
+  /* screens 18 (the snackbar after a save) and 20 (the celebration) need a write; the pairs only read, so they pair
+     the shots PA2-4 took mid-run (PA2_SHOTS=1) — see FROM_SHOTS */
+  "part-4": [
+    ["13-plus-sheet", "/queries", async (p) => { await p.locator('[data-pa="plus"]').click(); await p.waitForTimeout(800); }],
+    ["14-log-who", "/queries", async (p) => { await logFlow(p); }],
+    ["15-log-what", "/queries", async (p) => { await logFlow(p); await p.locator('[data-qad-agent]').nth(1).dispatchEvent("mousedown"); await p.waitForTimeout(500); await contN(p, 2); }],
+    ["16-log-how", "/queries", async (p) => { await logFlow(p); await p.locator('[data-qad-agent]').nth(1).dispatchEvent("mousedown"); await p.waitForTimeout(500); await contN(p, 1); }],
+    ["17-log-check", "/queries", async (p) => { await logFlow(p); await p.locator('[data-qad-agent]').nth(1).dispatchEvent("mousedown"); await p.waitForTimeout(500); await contN(p, 6); }],
+    ["18-snackbar", "/queries", async () => {}],
+    ["19-agent-replied", "/queries", async (p) => { await sheetOf(p, '[data-qm1="row"][data-where="agent"][data-status="Queried"]'); await p.locator('.pa-qsheet [data-qc149c="next-second"], .pa-qsheet [data-qc149c="next-primary"]').filter({ hasText: /replied|response/i }).first().click(); await p.waitForTimeout(900); }],
+    ["20-celebration", "/queries", async () => {}],
+    ["21-mark-sent", "/queries", async (p) => { await sheetOf(p, '[data-qm1="row"][data-status$="Requested"]'); await p.locator('.pa-qsheet [data-qc149c="next-primary"]').click(); await p.waitForTimeout(900); await contN(p, 1); }],
+    ["22-close-query", "/queries", async (p) => { await sheetOf(p, '[data-qm1="row"][data-where="agent"]'); await p.locator('.pa-qsheet [data-qc149c="more-btn"]').click(); await p.waitForTimeout(400); await p.locator('[data-pa="more-close"]').click(); await p.waitForTimeout(900); }],
+    ["23-nudge", "/queries", async (p) => { await sheetOf(p, '[data-qm1="row"][data-where="agent"]'); await p.locator('.pa-qsheet [data-qc149c="more-btn"]').click(); await p.waitForTimeout(400); await p.locator('[data-pa="more-nudge"]').click(); await p.waitForTimeout(900); }],
+  ],
+};
+const FROM_SHOTS = new Set(["18-snackbar", "20-celebration"]);
+const logFlow = async (p: Page) => { await p.locator('[data-pa="plus"]').click(); await p.waitForTimeout(600); await p.locator('[data-pa="plus-sent"]').click(); await p.waitForTimeout(1000); };
+/* ⚠️ THE PAIRS ONLY READ: Continue stops at the check card, where the primary is the SAVE. An earlier count of
+   presses ran one past it and logged a query on the harness account (removed by id; Part 4 report). */
+const contN = async (p: Page, n: number) => {
+  for (let i = 0; i < n; i++) {
+    if (await p.locator('.pa-flow [data-pf="check"]').count()) break;
+    const b = p.locator('[data-pf="primary"]'); if (!(await b.count())) break;
+    await b.click({ timeout: 5000 }).catch(() => {}); await p.waitForTimeout(500);
+  }
+};
+const sheetOf = async (p: Page, sel: string) => {
+  await p.locator('[data-qm1="chip"][data-key="all"]').click(); await p.waitForTimeout(300);
+  await p.locator(`${sel} .pa-row`).first().click(); await p.locator('.pa-qsheet [data-qc149c="card"]').waitFor(); await p.waitForTimeout(800);
 };
 
 /* a query the writer owes something on: a request, so the sheet's pinned foot is a next step */
@@ -81,9 +112,12 @@ for (const vp of PHONES) {
     for (const [ref, path, step] of PARTS[PART] ?? []) {
       await page.goto(path); await page.locator('[data-pa="band"]').first().waitFor({ timeout: 20_000 }); await page.waitForTimeout(1800);
       await step(page);
-      const app = await page.screenshot();
+      const fromShot = `${DIR}/${PART}/shots/${ref}-${tag(vp)}.png`;
+      const app = FROM_SHOTS.has(ref) ? (existsSync(fromShot) ? readFileSync(fromShot) : null) : await page.screenshot();
+      if (!app) continue;
       writeFileSync(`${DIR}/${PART}/pairs/${ref}-app-${tag(vp)}.png`, app);
       await pair(page, ref, app, `${DIR}/${PART}/pairs/${ref}-pair-${tag(vp)}.png`);
+      if (await page.locator(".pa-flow").count()) { await page.locator('[data-pf="close"]').click().catch(() => {}); await page.waitForTimeout(300); const d = page.getByRole("button", { name: /^Discard$/ }); if (await d.count()) await d.first().click(); await page.waitForTimeout(300); }
       await page.keyboard.press("Escape"); await page.waitForTimeout(300); await page.keyboard.press("Escape"); await page.waitForTimeout(300);
     }
   });

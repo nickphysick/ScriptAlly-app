@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "F1",
+  "where": "390x844 log opens on its first step",
+  "ok": true,
+  "detail": "{\"open\":true,\"steps\":[\"Agent and book\"],\"at\":\"Agent and book\",\"question\":\"Who did you query?\"}"
+ },
+ {
+  "lock": "pop",
+  "where": "390x844 log has its five steps once an agent is chosen",
+  "ok": true,
+  "detail": "Agent and book | Sending | What you sent | Response expectations | If they don't reply"
+ },
+ {
+  "lock": "F1",
+  "where": "390x844 log: the questions walked are the journey's own steps, in order, then the check",
+  "ok": true,
+  "detail": "[\"Agent and book\",\"Sending\",\"What you sent\",\"Response expectations\",\"If they don't reply\",\"CHECK\"]"
+ },
+ {
+  "lock": "F2",
+  "where": "390x844 the live card fills a slot for each answer after the first",
+  "ok": true,
+  "detail": "[1,2,3,4]"
+ },
+ {
+  "lock": "F2",
+  "where": "390x844 a filled slot returns to its question",
+  "ok": true,
+  "detail": "Sending"
+ },
+ {
+  "lock": "F3",
+  "where": "390x844 the check card lists every answer",
+  "ok": true,
+  "detail": "[\"Agent and book\",\"Sending\",\"What you sent\",\"Response expectations\",\"If they don't reply\"]"
+ },
+ {
+  "lock": "F3",
+  "where": "390x844 a check row returns to its question, the answer kept",
+  "ok": true,
+  "detail": "Sending on=2"
+ },
+ {
+  "lock": "F3",
+  "where": "390x844 back at the check, the answer is unchanged",
+  "ok": true,
+  "detail": "Thu 29 Oct · Email → Thu 29 Oct · Email"
+ },
+ {
+  "lock": "F8",
+  "where": "390x844 the flow: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": "navy 1"
+ },
+ {
+  "lock": "F8",
+  "where": "390x844 the flow: no image twice",
+  "ok": true,
+  "detail": "[\"/images/responses/responses-wall-hawk.webp\"]"
+ },
+ {
+  "lock": "F4",
+  "where": "390x844 the log wrote something",
+  "ok": true,
+  "detail": "queries/SSnLkpGWsoDfL4YgGyU0 added, activities/act-z91bdsy4r added"
+ },
+ {
+  "lock": "F4",
+  "where": "390x844 after Undo the account is as it was, document by document",
+  "ok": false,
+  "detail": "queries/SSnLkpGWsoDfL4YgGyU0 added, activities/act-z91bdsy4r added"
+ }
+]

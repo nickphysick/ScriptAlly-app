@@ -163,7 +163,8 @@ for (const vp of PHONES) {
       ["plus-sent", (p) => p.locator('[data-qad-drawer="log"]:visible').waitFor({ timeout: 8000 }).then(() => true, () => false), "the log drawer"],
       ["plus-replied", (p) => p.locator('[data-qad-drawer]:visible, [role="dialog"]:visible').first().waitFor({ timeout: 8000 }).then(() => true, () => false), "the response journey"],
       ["plus-agent", async (p) => { const d = await p.locator('[data-ac="overlay"]:visible, [role="dialog"]:visible').first().waitFor({ timeout: 8000 }).then(() => true, () => false); return d && new URL(p.url()).pathname === "/queries"; }, "the add-agent card, in place"],
-      ["plus-task", async (p) => { await p.waitForTimeout(1500); return new URL(p.url()).pathname === "/todo"; }, "the To-do composer"],
+      /* Part 4: on a phone the task is added in the flow layout, wherever you are */
+      ["plus-task", async (p) => { await p.waitForTimeout(1200); const ok = (await p.locator('.pa-flow[data-pf="task"]').count()) === 1; if (ok) { await p.locator('[data-pf="close"]').click(); await p.waitForTimeout(300); } return ok; }, "the task flow"],
       ["plus-import", async (p) => { await p.waitForTimeout(1200); return new URL(p.url()).pathname === "/import"; }, "/import"],
     ];
     for (const [door, opened, what] of doors) {
@@ -228,8 +229,11 @@ test("PA2-1 · the snackbar · 390x844", async ({ page }) => {
   await page.locator('[data-qm1="query"] [data-qc149c="card"]').waitFor({ timeout: 20_000 });
   const primary = (await page.locator('[data-qm1="query"] [data-qc149c="next-primary"]').textContent({ timeout: 3000 }).catch(() => "")) ?? "";
   await page.locator(`[data-qm1="query"] [data-qc149c="${/response/i.test(primary) ? "next-primary" : "next-second"}"]`).click({ timeout: 8000 });
-  await page.locator('[data-qc149c="resp-opt"][data-k="pass"]').click({ timeout: 8000 });
-  await page.locator('[data-qc149c="save-response"]').click({ timeout: 8000 });
+  /* Part 4: on a phone the response is recorded in the response journey's flow layout (PA2-4) — pick Passed, walk to
+     the check card, save */
+  await page.locator('.pa-flow [data-qad-chip="pass"]').click({ timeout: 8000 });
+  for (let i = 0; i < 8 && !(await page.locator('.pa-flow [data-pf="check"]').count()); i++) { await page.locator('.pa-flow [data-pf="primary"]').click({ timeout: 8000 }); await page.waitForTimeout(400); }
+  await page.locator('.pa-flow [data-pf="primary"]').click({ timeout: 8000 });
   await page.locator("[data-qad-undo]").waitFor({ timeout: 15_000 });
   const s = await page.evaluate(() => {
     const el = document.querySelector<HTMLElement>('[data-pa="snack"]');

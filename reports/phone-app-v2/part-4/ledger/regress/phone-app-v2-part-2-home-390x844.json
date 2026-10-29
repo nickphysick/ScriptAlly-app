@@ -1,0 +1,242 @@
+[
+ {
+  "lock": "pop",
+  "where": "390x844 the desktop's figures",
+  "ok": true,
+  "detail": "{\"active\":39,\"first\":\"task-offer-seed-query-12\"}"
+ },
+ {
+  "lock": "pop",
+  "where": "390x844 the Queries tab's own counts",
+  "ok": true,
+  "detail": "{\"sent\":52,\"counts\":{\"all\":52,\"you\":16,\"agent\":6,\"quiet\":17,\"closed\":13}}"
+ },
+ {
+  "lock": "H1",
+  "where": "390x844 defaults: Active · 3M",
+  "ok": true,
+  "detail": "{\"series\":\"active\",\"range\":\"3M\",\"values\":[32,34,34,33,34,35,39,40,40,40,40,40,39],\"change\":7,\"num\":39,\"changeText\":\"+7 in the last 3 months\"}"
+ },
+ {
+  "lock": "H1",
+  "where": "390x844 active All: 133 points",
+  "ok": true,
+  "detail": "133 vs 133"
+ },
+ {
+  "lock": "H1",
+  "where": "390x844 active All: the number",
+  "ok": true,
+  "detail": "39 vs 39"
+ },
+ {
+  "lock": "H1",
+  "where": "390x844 active All: the change is last − first",
+  "ok": true,
+  "detail": "38 \"+38 since 18 Apr\""
+ },
+ {
+  "lock": "H1",
+  "where": "390x844 active 1M: 5 points",
+  "ok": true,
+  "detail": "5 vs 5"
+ },
+ {
+  "lock": "H1",
+  "where": "390x844 active 1M: the number",
+  "ok": true,
+  "detail": "39 vs 39"
+ },
+ {
+  "lock": "H1",
+  "where": "390x844 active 1M: the change is last − first",
+  "ok": true,
+  "detail": "-1 \"−1 in the last month\""
+ },
+ {
+  "lock": "H1",
+  "where": "390x844 active 3M: 13 points",
+  "ok": true,
+  "detail": "13 vs 13"
+ },
+ {
+  "lock": "H1",
+  "where": "390x844 active 3M: the number",
+  "ok": true,
+  "detail": "39 vs 39"
+ },
+ {
+  "lock": "H1",
+  "where": "390x844 active 3M: the change is last − first",
+  "ok": true,
+  "detail": "7 \"+7 in the last 3 months\""
+ },
+ {
+  "lock": "H1",
+  "where": "390x844 sent All: 133 points",
+  "ok": true,
+  "detail": "133 vs 133"
+ },
+ {
+  "lock": "H1",
+  "where": "390x844 sent All: the number",
+  "ok": true,
+  "detail": "52 vs 52"
+ },
+ {
+  "lock": "H1",
+  "where": "390x844 sent All: the change is last − first",
+  "ok": true,
+  "detail": "51 \"+51 since 18 Apr\""
+ },
+ {
+  "lock": "H1",
+  "where": "390x844 sent 1M: 5 points",
+  "ok": true,
+  "detail": "5 vs 5"
+ },
+ {
+  "lock": "H1",
+  "where": "390x844 sent 1M: the number",
+  "ok": true,
+  "detail": "52 vs 52"
+ },
+ {
+  "lock": "H1",
+  "where": "390x844 sent 1M: the change is last − first",
+  "ok": true,
+  "detail": "0 \"No change in the last month\""
+ },
+ {
+  "lock": "H1",
+  "where": "390x844 sent 3M: 13 points",
+  "ok": true,
+  "detail": "13 vs 13"
+ },
+ {
+  "lock": "H1",
+  "where": "390x844 sent 3M: the number",
+  "ok": true,
+  "detail": "52 vs 52"
+ },
+ {
+  "lock": "H1",
+  "where": "390x844 sent 3M: the change is last − first",
+  "ok": true,
+  "detail": "11 \"+11 in the last 3 months\""
+ },
+ {
+  "lock": "H2",
+  "where": "390x844 Sent · 1M survives a reload",
+  "ok": true,
+  "detail": "{\"s\":\"sent\",\"r\":\"1M\"}"
+ },
+ {
+  "lock": "H3",
+  "where": "390x844 you: 16 = the Queries chip",
+  "ok": true,
+  "detail": "16 vs 16"
+ },
+ {
+  "lock": "H3",
+  "where": "390x844 agent: 6 = the Queries chip",
+  "ok": true,
+  "detail": "6 vs 6"
+ },
+ {
+  "lock": "H3",
+  "where": "390x844 quiet: 17 = the Queries chip",
+  "ok": true,
+  "detail": "17 vs 17"
+ },
+ {
+  "lock": "H3",
+  "where": "390x844 the total is the three summed",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "H3",
+  "where": "390x844 you: lands on the you chip",
+  "ok": true,
+  "detail": "{\"chip\":\"you\",\"url\":\"\"}"
+ },
+ {
+  "lock": "H3",
+  "where": "390x844 agent: lands on the agent chip",
+  "ok": true,
+  "detail": "{\"chip\":\"agent\",\"url\":\"\"}"
+ },
+ {
+  "lock": "H3",
+  "where": "390x844 quiet: lands on the quiet chip",
+  "ok": true,
+  "detail": "{\"chip\":\"quiet\",\"url\":\"\"}"
+ },
+ {
+  "lock": "H3",
+  "where": "390x844 closed: lands on the closed chip",
+  "ok": true,
+  "detail": "{\"chip\":\"closed\",\"url\":\"\"}"
+ },
+ {
+  "lock": "H4",
+  "where": "390x844 closed: 13 = the Closed chip",
+  "ok": true,
+  "detail": "13 vs 13"
+ },
+ {
+  "lock": "H4",
+  "where": "390x844 closed: the chip shows that many rows",
+  "ok": true,
+  "detail": "13"
+ },
+ {
+  "lock": "H4",
+  "where": "390x844 the split is stated",
+  "ok": true,
+  "detail": "13 closed · 11 passed, 1 no response"
+ },
+ {
+  "lock": "H4",
+  "where": "390x844 passes + no-replies never exceed the closed count",
+  "ok": true,
+  "detail": "13 closed · 11 passed, 1 no response"
+ },
+ {
+  "lock": "H4",
+  "where": "390x844 passed = the Closed chip's Passed rows",
+  "ok": true,
+  "detail": "11 vs {\"passed\":11,\"withdrawn\":1}"
+ },
+ {
+  "lock": "H5",
+  "where": "390x844 Up next is the desktop's first task",
+  "ok": true,
+  "detail": "task-offer-seed-query-12 vs task-offer-seed-query-12"
+ },
+ {
+  "lock": "H6",
+  "where": "390x844 stand · up next · latest · founding, in that order",
+  "ok": true,
+  "detail": "[[\"stand\",481.59375],[\"upnext\",701.1875],[\"latest\",945.6875],[\"founding\",1256.8125]]"
+ },
+ {
+  "lock": "H6",
+  "where": "390x844 navy and blush grounds judged",
+  "ok": true,
+  "detail": "{\"navy\":12,\"blush\":3}"
+ },
+ {
+  "lock": "H6",
+  "where": "390x844 white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "H7",
+  "where": "390x844 no image twice",
+  "ok": true,
+  "detail": "[]"
+ }
+]

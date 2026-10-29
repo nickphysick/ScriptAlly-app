@@ -283,7 +283,8 @@ export const QueriesPhone: React.FC<QueriesPhoneProps> = (p) => {
       </MobileSheet>
 
       {cheer && cheerRow ? createPortal(
-        <div className="qm1-layer">
+        /* `pa-layer`: the portal sits under <body>, outside the shell's phone token scope (Special Elite is --pa-type) */
+        <div className="qm1-layer pa-layer">
           <Celebrate kind={cheer.kind} row={cheerRow} nowMs={nowMs} words={cheerWords(cheer.kind, cheerRow, rows.length ? rows : [cheerRow], ms?.title ?? null, Date.now())}
             onGo={() => {
               /* "See your next step" opens the query sheet, where the next step is pinned (§ Celebrations) */
