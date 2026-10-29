@@ -54,3 +54,63 @@
 .p93-lnk.p93-q { color: rgba(28, 19, 15, 0.58); }
 .p93-lnk:focus-visible { outline: 2px solid #1d4b63; outline-offset: 2px; border-radius: 2px; }
 .p93-bh-ic .p9-pic { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ══ Phase 2 · the steps (ref `.step`): white, radius 14, a 1px ink-9% ring, 12 apart ══ */
+.p93-steps { display: grid; gap: 12px; }
+.p93-step { position: relative; border-radius: 14px; background: #fff; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.09); }
+.p93-step.p93-open { box-shadow: 0 0 0 2px #1d4b63; }
+.p93-sh { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; gap: 12px; align-items: center; width: 100%; padding: 14px 16px; border: 0; background: none; text-align: left; font: inherit; color: inherit; border-radius: 14px; }
+button.p93-sh { cursor: pointer; }
+button.p93-sh:focus-visible { outline: 2px solid #1d4b63; outline-offset: -2px; }
+.p93-sn { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font: 600 13px var(--sp-serif); color: #1c130f; box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, 0.25); }
+.p93-done .p93-sn { background: #3e7d5a; color: #fff; box-shadow: none; }
+.p93-sn svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.p93-st { min-width: 0; }
+.p93-st b { display: block; font: 600 16px/1.3 var(--sp-serif); color: #1c130f; }
+.p93-st small { display: block; font: italic 13.5px/1.4 var(--sp-serif); color: rgba(28, 19, 15, 0.58); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.p93-st .p93-pick { font-style: normal; font-weight: 600; color: #1c130f; }
+.p93-sh > em { font: italic 13px var(--sp-serif); color: rgba(28, 19, 15, 0.58); }
+.p93-done .p93-sh > em { font-style: normal; font-weight: 600; color: #1d4b63; }
+/* "Change" on hover only (and while open, and on keyboard focus) */
+.p93-done:not(.p93-open) .p93-sh > em { opacity: 0; }
+.p93-done:hover .p93-sh > em, .p93-done .p93-sh:focus-visible > em { opacity: 1; }
+.p93-sb { padding: 0 16px 14px 60px; }
+.p93-choices { display: grid; gap: 6px; }
+.p93-ch { position: relative; border-radius: 9px; background: #faf7f2; }
+.p93-ch:hover { background: #f2ece4; }
+.p93-ch.p93-sel { background: #eef4f7; box-shadow: inset 0 0 0 1.5px #1d4b63; }
+.p93-ch-b { display: grid; grid-template-columns: 30px minmax(0, 1fr) 18px; gap: 10px; align-items: center; width: 100%; padding: 9px 10px; padding-right: 46px; border: 0; border-radius: 9px; background: none; text-align: left; font: inherit; color: inherit; cursor: pointer; }
+.p93-ch-b:focus-visible { outline: 2px solid #1d4b63; outline-offset: 1px; }
+.p93-ch-t { min-width: 0; }
+.p93-ch-t b { display: block; font: 600 14.5px/1.3 var(--sp-serif); color: #1c130f; }
+.p93-ch-t small { display: block; font: italic 12.5px/1.35 var(--sp-serif); color: rgba(28, 19, 15, 0.58); }
+.p93-r { width: 18px; height: 18px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, 0.3); }
+.p93-sel .p93-r { box-shadow: inset 0 0 0 5px #1d4b63; }
+/* the Edit pencil: on hover and focus only; it sits between the text and the radio */
+.p93-ch-ed { position: absolute; top: 50%; right: 34px; transform: translateY(-50%); width: 28px; height: 28px; padding: 0; border: 0; border-radius: 6px; background: #fff; color: rgba(28, 19, 15, 0.55); display: grid; place-items: center; cursor: pointer; opacity: 0; }
+.p93-ch-ed svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; }
+.p93-ch:hover .p93-ch-ed, .p93-ch:focus-within .p93-ch-ed { opacity: 1; }
+.p93-ch-ed:hover { color: #1c130f; }
+@media (hover: none) { .p93-ch-ed { opacity: 1; } }
+.p93-tic { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; font: 600 12px var(--sp-serif); }
+.p93-tic.p93-t-v { border-radius: 50%; background: var(--sp-anthracite, #2a3a52); color: #fff; }
+.p93-tic.p93-t-m { background: #f7e3e3; color: #9b4a57; }
+.p93-tic svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; }
+.p93-new { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 8px; }
+.p93-none { margin: 0; font: italic 14px var(--sp-serif); color: rgba(28, 19, 15, 0.58); }
+.p93-away { display: grid; gap: 6px; margin-top: 8px; }
+.p93-aw { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 9px 10px; border-radius: 9px; background: #faf7f2; opacity: 0.8; }
+.p93-foot { margin: 10px 0 0; font: italic 13px/1.45 var(--sp-serif); color: rgba(28, 19, 15, 0.58); }
+.p93-foot .p93-lnk { font-size: 13px; font-style: normal; }
+/* Also sends: always open */
+.p93-exts { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 0 16px 14px 60px; }
+.p93-chip { display: inline-flex; align-items: center; height: 30px; border-radius: 15px; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.18); }
+.p93-chip > button:first-child, .p93-chip > span { height: 30px; padding: 0 12px; border: 0; background: none; font: 600 13px/30px var(--sp-serif); color: #1c130f; cursor: pointer; border-radius: 15px; }
+.p93-chip > span { cursor: default; }
+.p93-chip.p93-on { background: #1d4b63; box-shadow: none; }
+.p93-chip.p93-on > button:first-child, .p93-chip.p93-on > span { color: #fff; }
+.p93-chip-ed { width: 26px; height: 26px; margin: 0 2px 0 -6px; padding: 0; border: 0; border-radius: 50%; background: none; color: inherit; display: none; place-items: center; cursor: pointer; opacity: 0.7; }
+.p93-chip:hover .p93-chip-ed, .p93-chip:focus-within .p93-chip-ed { display: grid; }
+.p93-chip.p93-on .p93-chip-ed { color: #fff; }
+.p93-chip-ed svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; }
+.p93-exts .p9-exa-b { height: 30px; padding: 0 12px; border: 0; border-radius: 15px; background: none; box-shadow: inset 0 0 0 1px rgba(29, 75, 99, 0.35); font: 600 13px var(--sp-serif); color: #1d4b63; cursor: pointer; }

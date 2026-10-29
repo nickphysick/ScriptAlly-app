@@ -138,7 +138,8 @@ export const Pk26Builder: React.FC<BuilderProps> = ({ model, retired, current, o
       <section className="p9-pb-build" aria-label="Put a package together" data-pk26="builder" data-pk39="builder">
         <p className="p9-bk-k" data-pk39="kicker">{BUILDER_KICKER}</p>
         {/* v39.3: Steps + preview */}
-        {p ? <Pk393Builder model={model} p={p} isActive={active?.id === p.id || p.id === DRAFT_ID} onFigures={onFigures} onEdit={onEditPackage} onDuplicate={onDuplicate} /> : null}
+        {p ? <Pk393Builder model={model} p={p} isActive={active?.id === p.id || p.id === DRAFT_ID} onFigures={onFigures} onEdit={onEditPackage} onDuplicate={onDuplicate}
+          onPut={put} onOpenMaterial={onOpenMaterial} onNewMaterial={onNewMaterial} onOpenVersions={onOpenVersions} onOpenComps={onOpenComps} /> : null}
         <div className="p9-pb-grid p9-v39" data-pk39="grid">
           <aside className="p9-pb-lib" aria-labelledby="p9-libT" data-pk26="lib" data-pk39="lib">
             <div className="p9-lib-top" data-pk39="lib-head">
