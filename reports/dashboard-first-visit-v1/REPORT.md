@@ -139,7 +139,14 @@ tip clamps to three. At 1512×900 and 1920×1080 every tip is whole and there is
 
 ## 7. Dev bundle and integration
 
-DEPLOY_LINE
+**Dev serves `index-DQ0k846l.js`**, built from a clean checkout of `dev/pk391-qm1-pk392-calx-pk392b-td7-fv1` at
+`8a61802b`. That branch is this branch merged onto the integration dev was serving when this finished,
+`dev/pk391-qm1-pk392-calx-pk392b-td7` at `ef5b5c12` (`index-DuL29EB3.js`, confirmed by building it). Dev had
+moved on from `d6726195` while this was built, picking up Packages v39.2b and To-do v7. The merge's one
+conflict was the ref-hash manifest, where both sides enrolled a ref; it was resolved by re-enrolling this
+pack's ref with the script. On the merged tree: tsc clean, Vitest 689 files and 10,724 passed, and a clean
+dev build. On the deployed page, S3 reads "Your first query is out." and S5 reads BETWEEN ROUNDS with
+"All closed · 29 Oct", and neither scrolls. **Prod is Nick's**, and so is merging.
 
 ## Out of scope, reported
 
