@@ -3074,3 +3074,21 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   .mk-jbc { font-family: var(--mk-f-sans); font-size: 12.5px; letter-spacing: 0; }
   .mk-seclabel { font-family: var(--mk-f-sans); font-size: 12.5px; letter-spacing: 0; }
 }
+
+/* ── B1: the footer and Contact's button ──
+   The footer: the brand block across the full width, then Product, Company and Legal in two columns
+   (Legal wraps to the second row). Every link is a 44px button with no gap between, so the list is
+   one continuous run of tap targets. The rule under each link stays as it is: it is transparent
+   until hover, and on a phone it is the tap's own feedback, so where it lands inside the 44px box is
+   not a thing a reader sees at rest.
+   Contact's "Send message" is the light-ground primary, navy, by the tokens `.mk-btn--navy` reads. */
+@media (max-width: 760px) {
+  .mk-footgrid { grid-template-columns: 1fr 1fr; gap: 8px 20px; }
+  .mk-footbrand { grid-column: 1 / -1; margin-bottom: 12px; }
+  .mk-footcol ul { gap: 0; }
+  .mk-footcol button { min-height: 44px; display: flex; align-items: center; box-sizing: border-box; }
+
+  .mk-cbtn { background: var(--mk-navy); color: #fff; }
+  .mk-cbtn:hover { background: var(--mk-navy-hov); }
+  .mk-cbtn:disabled:hover { background: var(--mk-navy); }
+}

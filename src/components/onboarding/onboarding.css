@@ -524,3 +524,8 @@
   }
   .sf--account .ws-beta { font-size: 12px; letter-spacing: .06em; padding: 1px 6px; }
 }
+/* B1: below 400px the tab's small "Your account" label goes, so the active tab's full name
+   ("Create account" or "Sign in") fits beside "Back to site". */
+@media (max-width: 399.98px) {
+  .sf--account .ws-ftg { display: none; }
+}
