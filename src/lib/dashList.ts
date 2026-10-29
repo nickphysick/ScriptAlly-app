@@ -38,7 +38,10 @@ import type { GettingStartedRow } from "./dashEmpty";
    checklist. The phone never receives it — its plans come from `startingPlan` and an unchanged `dashList`. */
 export type ListGroupKey = "req" | "nudge" | "quiet" | "start" | "house" | "ready" | "coming";
 
-export const LIST_ORDER: readonly ListGroupKey[] = ["req", "nudge", "quiet", "house", "ready", "coming"];
+/* ⚠️ THE ORDER IS THE LAW (Dashboard first visit v1, Part C): real tasks — the writer's move, nudges due, closes due —
+   always come first; then Getting started, while it is unfinished and not hidden (desktop only); then housekeeping;
+   then the two caught-up groups. */
+export const LIST_ORDER: readonly ListGroupKey[] = ["req", "nudge", "quiet", "start", "house", "ready", "coming"];
 
 export const LIST_LABEL: Record<ListGroupKey, string> = {
   req: "Agents are waiting",
@@ -119,7 +122,7 @@ const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
  */
 export function listPlan(found: Partial<Record<ListGroupKey, ListItem[]>>): ListPlan {
   const has = (k: ListGroupKey) => (found[k]?.length ?? 0) > 0;
-  const work = (["req", "nudge", "quiet", "house"] as const).filter(has);
+  const work = (["req", "nudge", "quiet", "start", "house"] as const).filter(has);
   const keys: ListGroupKey[] = work.length ? [...work] : has("ready") ? ["ready"] : ["coming"];
   const groups = keys.map((key) => ({ key, label: LIST_LABEL[key], items: found[key] ?? [] }));
   const first = keys[0];
@@ -416,6 +419,11 @@ export interface DashListInput {
   now: Date;
   /** dev review aid only: groups to leave out, so each state can be seen on a real account */
   drop?: readonly ListGroupKey[];
+  /**
+   * First visit v1 (Part C) — the desktop's Getting started page, placed after the real tasks and before
+   * housekeeping. Absent (the phone, and once it is finished or hidden) → the list is exactly as before.
+   */
+  start?: ListItem | null;
 }
 
 export function dashList(i: DashListInput): ListPlan {
@@ -427,6 +435,7 @@ export function dashList(i: DashListInput): ListPlan {
     house: houseItems({ agents: i.agents, queries: i.queries, qcRowsAll, userTasks: i.userTasks, manuscript: i.manuscript, user: i.user, now: i.now }),
     ready: readyItems({ agents: i.agents, queries: i.queries, manuscript: i.manuscript, now: i.now }),
     coming: comingItems(qcRows, nowMs),
+    ...(i.start ? { start: [i.start] } : {}),
   };
   for (const k of i.drop ?? []) found[k] = [];
   return listPlan(found);

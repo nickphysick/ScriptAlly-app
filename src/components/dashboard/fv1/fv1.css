@@ -249,3 +249,10 @@
 @container fv1setup (max-width: 640px) {
   .d58 .fv1-art { display: none; }
 }
+/* the Getting started page as one of several (Part C): its band holds the title, Hide and the pager. In a card under
+   360px (a 1280 window) that cut the title to "Getting s…" — the title and Hide step down so all three fit. */
+@container d71task (max-width: 359px) {
+  .d58 .d71-task[data-group="start"] .d71-bandttl { font-size: 18px !important; }
+  .d58 .d71-th .fv1-hide { font-size: 13px !important; padding: 2px; }
+  .d58 .d71-th .fv1-hide + .d71-pos { margin-left: 6px; }
+}

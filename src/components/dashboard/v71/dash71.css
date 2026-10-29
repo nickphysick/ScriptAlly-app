@@ -225,7 +225,8 @@
   opacity: 0.92;
   white-space: nowrap;
 }
-.d58 .d71-pos > span { font-family: inherit !important; }
+/* first visit v1: "2 of 4" in the serif at 14px, the ref's and Getting started's count's — no longer mono capitals */
+.d58 .d71-pos > span { font: 400 14px/1 var(--d58-serif) !important; letter-spacing: 0; }
 .d58 .d71-pos button {
   box-sizing: border-box;
   width: 22px;
@@ -493,7 +494,8 @@
 /* v93: the band holds the kind's title and the pager. The pager's "N OF M" needs ~60px the title cannot spare in a
    card under 420px (measured: "Agents are waiting" is 252px at 26px against 213 with the text shown), so there it keeps
    its arrows only; under 300px (an 1100px window) the title steps down to 16px so the longest still fits whole. */
-@container d71task (max-width: 419px) { .d58 .d71-pos > span { display: none; } }
+/* ⚠️ THE PAGER'S "{i} of {n}" SHOWS AT EVERY SIZE (first visit v1, Part C). It was hidden in a card under 420px,
+   which is every window below 1920 — so a writer stepping through four pages was never told there were four. */
 @container d71task (max-width: 299px) { .d58 .d71-bandttl { font-size: 16px; } }
 /* below 1200px of window the page's side gutter narrows, for the hoops and the task card */
 /* ⚠️ 250px, NOT 270 (v77): at 1100×800 the Agents legend's "21 Querying" needed 8px more than a 270px task

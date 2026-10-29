@@ -26,6 +26,11 @@ import "../v116/dash116Frame.css";
 /** The card's one button, for every kind (v59). */
 export const VIEW_TASK = "View task";
 
+/** The page after this one, or null on the last (Part C: never the first again). */
+export const thenIndex = (n: number, at: number): number | null => (at + 1 < n ? at + 1 : null);
+/** "2 of 4" — the pager's words, the ref's (first visit v1), at every size. */
+export const posText = (at: number, n: number): string => `${at + 1} of ${n}`;
+
 /** v60.1's caught-up line, in the same card */
 export const CAUGHT_UP = "No dates are set on your live queries yet. Add an agent to keep the list moving.";
 
@@ -214,7 +219,10 @@ export const Dash71Task: React.FC<{
   }
 
   const m = models[at];
-  const next = n > 1 ? models[(at + 1) % n] : null;
+  /* ⚠️ THE LAST PAGE HAS NO "Then:" (first visit v1, Part C): it used to wrap round and name the first page as
+     what came next, so the last of four housekeeping pages read "Then: add typical reply times…" — the page the
+     writer had started on. */
+  const next = thenIndex(n, at) !== null ? models[thenIndex(n, at)!] : null;
   /* the Getting started page draws its checklist, its done count and its Hide (fv1) */
   const isGsAt = (i: number) => !!gs && items[i]?.group === "start";
   const isGs = isGsAt(at);
@@ -250,7 +258,7 @@ export const Dash71Task: React.FC<{
         {n > 1 && (
           <span className="d71-pos" data-d71="pos">
             <button type="button" aria-label="Previous task" data-d71="prev" onClick={() => step(-1)}>‹</button>
-            <span data-d71="pos-text">{at + 1} OF {n}</span>
+            <span data-d71="pos-text">{posText(at, n)}</span>
             <button type="button" aria-label="Next task" data-d71="next" onClick={() => step(1)}>›</button>
           </span>
         )}

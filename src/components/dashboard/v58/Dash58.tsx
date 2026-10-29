@@ -22,7 +22,7 @@ import { liveCount, undatedLiveCount } from "../../../lib/dashBreakdown";
 import { closedTile } from "../../../lib/dashClosed";
 import { assembleBoardColumns } from "../../../lib/todoColumns";
 import { todoRows } from "../../../lib/dashTodo";
-import { dashList, gettingStartedPlan, type ListAction } from "../../../lib/dashList";
+import { dashList, gettingStartedItem, gettingStartedPlan, type ListAction } from "../../../lib/dashList";
 import { buildQcRows } from "../../../lib/qcSummary";
 import type { TaskCtx } from "../../../lib/dashTaskCard";
 import { gettingStartedRows } from "../../../lib/dashEmpty";
@@ -190,6 +190,43 @@ export const Dash58: React.FC<Dash58Props> = ({
     return closedTile(aid.noClosed ? [] : scopedQueries, scopedActivities);
   }, [loading, scopedQueries, scopedActivities, aid.noClosed]);
 
+  /* ⚠️ ABOVE THE PLAN, WHICH READS `gsOpen` DURING RENDER: a `const` read from a memo below its declaration is a
+     TDZ that tsc cannot see (CLAUDE.md). */
+  /* ── first visit v1: the set-up answer, the tip, and Getting started ──
+     ⚠️ EVERY PREFERENCE IS A PREFERENCE, NEVER A SOURCE: the answer chooses a path and an order, the tip
+     index chooses which tip opens, and Hide hides a page. None of them is read by anything that counts. */
+  const prefs = useMemo(() => dashPrefsOf(currentUser), [currentUser]);
+  /* the answer is held locally as well, so a click shows at once and the ghost (no writer) still answers */
+  const [localPath, setLocalPath] = useState<Record<string, StartPath>>({});
+  const path: StartPath = (scopeId ? localPath[scopeId] : undefined) ?? startPathOf(prefs, scopeId);
+  const choosePath = (p: StartPath) => {
+    if (!scopeId) return;
+    setLocalPath((o) => ({ ...o, [scopeId]: p }));
+    void onPrefs?.(startPathWrite(scopeId, p));
+  };
+  const logQuery = () => openQueryDrawer({ mode: "log", ...(scopeId ? { manuscriptId: scopeId } : {}) });
+  const addAgent = () => openNewAgentCard({ from: "button", host: "panel" });
+  const goGs = (go: GsLink) => {
+    if (go === "manuscript") onNavigate("manuscripts", "Add a manuscript");
+    else if (go === "agent") addAgent();
+    else if (go === "import") onNavigate("import");
+    else if (go === "log") logQuery();
+    else if (go === "materials") onNavigate("manuscripts", "Submission packages");
+    else onNavigate("manuscripts", "Comparable titles");
+  };
+  const gsRows = useMemo(() => {
+    const rows = gettingStartedRows({ manuscripts, agentCount: agents.length, queryCount: scopedQueries.length, versions, activeManuscript });
+    return gsOrder(path).map((k) => ({ key: k, done: rows.find((r) => r.key === k)?.done ?? false }));
+  }, [manuscripts, agents.length, scopedQueries.length, versions, activeManuscript, path]);
+  const gsHidden = !!scopeId && !!prefs.gsHidden[seg(scopeId)];
+  /* Getting started is a page while any row is undone and the writer has not hidden it (Part C) */
+  const gsOpen = !gsHidden && gsRows.some((r) => !r.done);
+  const gs: TaskGs = {
+    rows: gsRows, path, onGo: goGs,
+    /* "Hide" only once the first query exists: before it, Getting started is the card's whole job */
+    onHide: !empty && scopeId && onPrefs ? () => { void onPrefs(gsHideWrite(scopeId)); } : undefined,
+  };
+
   /* ── the list: the board's own cards, then the contact list's, then the clock's ── */
   const plan = useMemo(() => {
     /* first run: no query on this book yet, so the card is the one Getting started page (first visit v1) */
@@ -203,9 +240,12 @@ export const Dash58: React.FC<Dash58Props> = ({
     return dashList({
       rows, cards, queries, scopedQueries, agents, activities: scopedActivities, allActivities: activities,
       userTasks, manuscript: activeManuscript, user: currentUser, now, drop: aid.drop,
+      /* first visit v1 (Part C): Getting started stays a page — after the real tasks, before housekeeping — until
+         every row is done or the writer hides it */
+      start: gsOpen ? gettingStartedItem() : null,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [scopedTasks, userTasks, queries, scopedQueries, agents, manuscripts, taskFlags, scopedActivities, activities, activeManuscript, currentUser, now, aid.drop.join(","), empty, versions, scopeId]);
+  }, [scopedTasks, userTasks, queries, scopedQueries, agents, manuscripts, taskFlags, scopedActivities, activities, activeManuscript, currentUser, now, aid.drop.join(","), empty, versions, scopeId, gsOpen]);
 
   /* v71: the task card reads the Query Centre's own rows for the dates it draws */
   const taskCtx = useMemo<TaskCtx>(
@@ -408,39 +448,6 @@ export const Dash58: React.FC<Dash58Props> = ({
     [agents, queries, activeManuscript, now],
   );
   const toContacts = () => onNavigate("agents");
-
-  /* ── first visit v1: the set-up answer, the tip, and Getting started ──
-     ⚠️ EVERY PREFERENCE IS A PREFERENCE, NEVER A SOURCE: the answer chooses a path and an order, the tip
-     index chooses which tip opens, and Hide hides a page. None of them is read by anything that counts. */
-  const prefs = useMemo(() => dashPrefsOf(currentUser), [currentUser]);
-  /* the answer is held locally as well, so a click shows at once and the ghost (no writer) still answers */
-  const [localPath, setLocalPath] = useState<Record<string, StartPath>>({});
-  const path: StartPath = (scopeId ? localPath[scopeId] : undefined) ?? startPathOf(prefs, scopeId);
-  const choosePath = (p: StartPath) => {
-    if (!scopeId) return;
-    setLocalPath((o) => ({ ...o, [scopeId]: p }));
-    void onPrefs?.(startPathWrite(scopeId, p));
-  };
-  const logQuery = () => openQueryDrawer({ mode: "log", ...(scopeId ? { manuscriptId: scopeId } : {}) });
-  const addAgent = () => openNewAgentCard({ from: "button", host: "panel" });
-  const goGs = (go: GsLink) => {
-    if (go === "manuscript") onNavigate("manuscripts", "Add a manuscript");
-    else if (go === "agent") addAgent();
-    else if (go === "import") onNavigate("import");
-    else if (go === "log") logQuery();
-    else if (go === "materials") onNavigate("manuscripts", "Submission packages");
-    else onNavigate("manuscripts", "Comparable titles");
-  };
-  const gsRows = useMemo(() => {
-    const rows = gettingStartedRows({ manuscripts, agentCount: agents.length, queryCount: scopedQueries.length, versions, activeManuscript });
-    return gsOrder(path).map((k) => ({ key: k, done: rows.find((r) => r.key === k)?.done ?? false }));
-  }, [manuscripts, agents.length, scopedQueries.length, versions, activeManuscript, path]);
-  const gsHidden = !!scopeId && !!prefs.gsHidden[seg(scopeId)];
-  const gs: TaskGs = {
-    rows: gsRows, path, onGo: goGs,
-    /* "Hide" only once the first query exists: before it, Getting started is the card's whole job */
-    onHide: !empty && scopeId && onPrefs ? () => { void onPrefs(gsHideWrite(scopeId)); } : undefined,
-  };
 
   /* the tip: each visit to the dashboard opens on the next one (stored), ‹ › loop round */
   const [tip, setTip] = useState<number | null>(null);
