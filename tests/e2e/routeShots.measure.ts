@@ -27,7 +27,7 @@ import { ACCOUNT_SECTION_PATHS } from "../../src/lib/accountRoutes";
 const ROOT = "reports/cleanup-v12/shots";
 const TAG = process.env.SHOTS_TAG || "before";
 const MARKETING = ["/", "/pricing", "/about", "/contact", "/founders", "/terms", "/privacy"];
-const WORKSPACE = ["/dashboard", "/queries", "/queries/analytics", "/todo", "/todo/calendar", "/todo/corkboard", "/agents", "/agents/discover",
+const WORKSPACE = ["/dashboard", "/queries", "/queries/analytics", "/todo", "/todo/corkboard", "/agents", "/agents/discover",
   "/manuscripts", "/manuscripts/comps", "/queries/packages", "/import", "/account", "/plans", "/help", ...ACCOUNT_SECTION_PATHS];
 const slug = (p: string) => (p === "/" ? "home" : p.replace(/^\//, "").replace(/\//g, "-"));
 

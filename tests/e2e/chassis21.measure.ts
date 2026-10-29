@@ -22,7 +22,7 @@
 import { test, expect } from "@playwright/test";
 import { openRoute } from "./measure";
 
-const PAGES = ["/todo", "/todo/calendar", "/todo/corkboard"];
+const PAGES = ["/todo", "/todo/corkboard"];
 
 test("chassis — where the chain first exceeds the viewport", async ({ page }) => {
   const out: string[] = [];
@@ -144,26 +144,6 @@ test("chassis — the scroller ends inside the viewport, everywhere", async ({ p
   console.log("\n" + rows.join("\n"));
 });
 
-test("chassis — the Calendar's foot control is reachable", async ({ page }) => {
-  await openRoute(page, "/todo/calendar", { width: 1440, height: 900 });
-  const r = await page.evaluate(() => {
-    const btn = Array.from(document.querySelectorAll(".cal-focus button"))
-      .find((b) => /Open the list/i.test(b.textContent ?? "")) as HTMLElement | undefined;
-    if (!btn) return null;
-    const b = btn.getBoundingClientRect();
-    /* ⚠️ THE RECT MUST BE ON SCREEN BEFORE ASKING WHAT OWNS ITS PIXELS — elementsFromPoint outside
-       the viewport returns [], which satisfies a naive stacking check by returning nothing. */
-    const onScreen = b.top >= 0 && b.bottom <= window.innerHeight;
-    const stack = onScreen
-      ? document.elementsFromPoint(b.left + b.width / 2, b.top + b.height / 2)
-          .slice(0, 2).map((e) => `${e.tagName.toLowerCase()}.${(e.className || "").toString().split(" ")[0]}`)
-      : ["OFF-SCREEN"];
-    return { bottom: Math.round(b.bottom), vh: window.innerHeight, onScreen, stack };
-  });
-  console.log(`  "Open the list": ${JSON.stringify(r)}`);
-  expect(r, "the foot control is not rendered").not.toBeNull();
-  expect(r!.onScreen, `the foot control is still below the fold (bottom ${r!.bottom} vs ${r!.vh})`).toBe(true);
-});
 
 /**
  * ⚠️ THE VIEWPORT LOCK'S LAW, ASSERTED ON THE ELEMENT THAT ACTUALLY SCROLLS.

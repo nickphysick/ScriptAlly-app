@@ -104,7 +104,7 @@ describe("⚠️ CLEAR sits beside FILTERS, appears only when something narrows,
        component and its CLEAR contract stand, unmounted, and the rule they carry is asserted
        against the component itself above rather than against a caller that no longer exists.
        Wherever this ever mounts again, CLEAR resets BOTH narrowings, never half of them. */
-    for (const page of ["ToDoPage.tsx", "TodoCalendarPage.tsx", "TodoNoteboardPage.tsx"]) {
+    for (const page of ["ToDoPage.tsx", "TodoNoteboardPage.tsx"]) {
       const q = readFileSync(join(here, page), "utf8");
       expect(q, `${page} runs full width — no sidebar to clear`).not.toContain("onClearAll=");
     }
@@ -142,8 +142,8 @@ describe("⚠️ TAGS: the live list, plus an inline ＋ New tag opening the PIC
       // the per-page copies are gone
       expect(p, page).not.toContain("const createTagDef = async (tag: TagDef)");
     }
-    /* the no-second-copy half still binds on every page, the Calendar included */
-    for (const page of ["ToDoPage.tsx", "TodoCalendarPage.tsx", "TodoNoteboardPage.tsx"]) {
+    /* the no-second-copy half still binds on every page (the Calendar page was retired 29 Oct) */
+    for (const page of ["ToDoPage.tsx", "TodoNoteboardPage.tsx"]) {
       expect(readFileSync(join(here, page), "utf8"), page)
         .not.toContain("const createTagDef = async (tag: TagDef)");
     }

@@ -234,7 +234,6 @@ test.describe("Header rules v1.1", () => {
       /* Manuscripts v27 retired the manuscripts case: the v21 header it held is gone (RETIRED-manuscripts-v27.md) */
       cases.push({ name: `comps ${vp.width}`, route: "/manuscripts/comps", vp, sel: ["[data-slh='header']", "[data-slh='eyebrow']", "[data-slh='header'] h1", "[data-slh='card']"] });
       cases.push({ name: `dashboard ${vp.width}`, route: "/dashboard", vp, sel: ["[data-d58='header']", "[data-d58='eyebrow']", "[data-d58='title']", "[data-d58='buttons']"] });
-      cases.push({ name: `calendar ${vp.width}`, route: "/todo/calendar", vp, sel: ["header[data-probe='page-header']", "header[data-probe='page-header'] h1"] });
       cases.push({ name: `corkboard ${vp.width}`, route: "/todo/corkboard", vp, sel: ["header.hp3", "header.hp3 h1"] });
       cases.push({ name: `discover coming soon ${vp.width}`, route: "/agents/discover", vp, sel: ["[data-dv1='coming-soon']", "[data-dv1='coming-soon'] h1"] });
       cases.push({ name: `queries pinned ${vp.width}`, route: "/queries", vp, pinned: "queries", sel: ["[data-qc140='band']", "[data-qc140='toolbar']", "[data-qc138='headings']"] });

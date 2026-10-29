@@ -114,8 +114,11 @@ describe("⚠️ the rail's pinned values, where a source lock is the right inst
     /* ⚠️ AND THE OTHER HALF, because a rule and a renderer die separately. A class the component
        still emits with no rule left is invisible chrome nobody can style; a rule with no renderer
        is the fault this file already records. Both directions, or the retirement is half done. */
-    const page = readFileSync(join(here, "TodoCalendarPage.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
-    expect(page, "the today stem is rendered again").not.toMatch(/["\s`]tl-todaystem["\s`]/);
+    /* RE-POINTED (Calendar page retired 29 Oct): the rows are drawn by the shared timeline board now. */
+    for (const f of ["TimelineBoard.tsx", "boardParts.tsx"]) {
+      const page = readFileSync(join(here, "..", "shared", "timeline", f), "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+      expect(page, `${f}: the today stem is rendered again`).not.toMatch(/["\s`]tl-todaystem["\s`]/);
+    }
   });
 
   it("the rail's height is a token, and the columns it shares with a row are the same two", () => {

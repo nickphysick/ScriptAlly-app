@@ -50,7 +50,7 @@ const renderShell = (path: string, todo = 0) =>
     </MemoryRouter>,
   );
 
-describe("⚠️ the TASKS section renders — same grammar, three rows, in order", () => {
+describe("⚠️ the TASKS section renders — same grammar, two rows, in order", () => {
   const html = renderShell("/todo");
 
   /* ⚠️ RETARGETED TWICE, AND THE SECOND TIME REVERSES THE FIRST. The rule has always been the
@@ -78,12 +78,12 @@ describe("⚠️ the TASKS section renders — same grammar, three rows, in orde
     expect(nav).not.toContain(">Settings<");
   });
 
-  it("the three rows render in TODO_ROUTES order — and no To-do row sits under Workspace", () => {
-    /* Three since 9 Aug (tasks-consolidation P1): To-do list · Calendar · Noteboard. The rows
+  it("the two rows render in TODO_ROUTES order — and no To-do row sits under Workspace", () => {
+    /* Two since 29 Oct (the Calendar page retired): To-do list · Corkboard. The rows
        ARE the routes, so the section cannot drift from the router or the palette. */
     for (const r of TODO_ROUTES) expect(html).toContain(r.label);
     const order = TODO_ROUTES.map((r) => html.indexOf(`>${r.label}<`)).filter((i) => i >= 0);
-    expect(order).toHaveLength(3);
+    expect(order).toHaveLength(2);
     expect([...order].sort((a, b) => a - b)).toEqual(order);
     // Workspace holds Dashboard alone
     const workspace = workspaceSections({ todo: 3 }).find((s) => s.id === "workspace")!;
@@ -97,7 +97,7 @@ describe("⚠️ the TASKS section renders — same grammar, three rows, in orde
     expect(withCount.match(/class="ws-ct"/g)?.length).toBe(1);
     expect(withCount).not.toContain("sp-ct");
     const listAt = withCount.indexOf(">To-do list<");
-    const nextRowAt = withCount.indexOf(">Calendar<"); // the row after the list, since P1
+    const nextRowAt = withCount.indexOf(">Corkboard<"); // the row after the list, since the Calendar page retired
     const chipAt = withCount.indexOf("ws-ct");
     expect(chipAt).toBeGreaterThan(listAt);   // after the list row's label…
     expect(chipAt).toBeLessThan(nextRowAt);   // …and before the next row begins
@@ -123,7 +123,7 @@ describe("⚠️ the breadcrumb reads Tasks / {page} — from the same definitio
 
   it("the capsule bar's crumb (mobile) says the same", () => {
     expect(shellCrumbForPath("/todo")).toEqual({ section: "Tasks", page: "To-do list" });
-    expect(shellCrumbForPath("/todo/calendar")).toEqual({ section: "Tasks", page: "Calendar" });
+    expect(shellCrumbForPath("/todo/corkboard")).toEqual({ section: "Tasks", page: "Corkboard" });
     // and its section's pages ARE the routes — derived, not restated
     const sec = SHELL_SECTIONS.find((s) => s.key === "todo")!;
     expect(sec.label).toBe("Tasks");
@@ -131,14 +131,14 @@ describe("⚠️ the breadcrumb reads Tasks / {page} — from the same definitio
   });
 
   it("the rendered shell carries the crumb strings at each route", () => {
-    const cal = renderShell("/todo/calendar");
-    expect(cal).toContain("Tasks");
-    expect(cal).toContain("Calendar");
+    const cork = renderShell("/todo/corkboard");
+    expect(cork).toContain("Tasks");
+    expect(cork).toContain("Corkboard");
   });
 });
 
-describe("⚠️ the palette indexes all three — derived from TODO_ROUTES", () => {
-  it("three page entries, titles and paths verbatim from the routes", () => {
+describe("⚠️ the palette indexes both — derived from TODO_ROUTES", () => {
+  it("two page entries, titles and paths verbatim from the routes", () => {
     for (const r of TODO_ROUTES) {
       const entry = PALETTE_PAGES.find(
         (p) => (p.run as { path?: string }).path === r.path && p.kind === "page",
@@ -149,7 +149,8 @@ describe("⚠️ the palette indexes all three — derived from TODO_ROUTES", ()
     }
     // the established ids survive the derivation (an id is an identifier, not a caption)
     expect(PALETTE_PAGES.map((p) => p.id)).toEqual(
-      expect.arrayContaining(["page:todo", "page:todo-calendar", "page:todo-noteboard"]),
+      expect.arrayContaining(["page:todo", "page:todo-noteboard"]),
     );
+    expect(PALETTE_PAGES.map((p) => p.id)).not.toContain("page:todo-calendar");
   });
 });

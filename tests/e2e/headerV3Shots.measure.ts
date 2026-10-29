@@ -9,7 +9,7 @@ import { test, expect } from "@playwright/test";
 import { mkdirSync } from "node:fs";
 import { KILL, SIZES, open } from "./hp2Lib";
 /* the lists are restated: importing a measure file runs its tests in this one's scope */
-const ROUTES = ["/queries", "/agents", "/manuscripts/comps", "/queries/packages", "/todo", "/queries/analytics", "/agents/discover", "/manuscripts", "/todo/calendar", "/todo/corkboard"];
+const ROUTES = ["/queries", "/agents", "/manuscripts/comps", "/queries/packages", "/todo", "/queries/analytics", "/agents/discover", "/manuscripts", "/todo/corkboard"];
 
 const OUT = "reports/header-v3/shots";
 test("header v3 shots", async ({ page }) => {

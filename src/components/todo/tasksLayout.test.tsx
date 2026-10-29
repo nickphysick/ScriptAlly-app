@@ -22,7 +22,7 @@ const here = __dirname;
 const layoutSrc = readFileSync(join(here, "TasksPageLayout.tsx"), "utf8");
 const layoutCss = readFileSync(join(here, "tasksLayout.css"), "utf8");
 const listPage = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
-const calendarPage = readFileSync(join(here, "TodoCalendarPage.tsx"), "utf8");
+/* The Calendar page was RETIRED on 29 Oct — the family layout's last caller (tests/e2e/RETIRED-retire-calendar-v1.md). */
 const noteboardPage = readFileSync(join(here, "TodoNoteboardPage.tsx"), "utf8");
 const app = readFileSync(join(here, "..", "..", "App.tsx"), "utf8");
 
@@ -50,16 +50,14 @@ describe("⚠️ one token, one geometry — equal title offsets by construction
     expect(layoutCss).toContain("--tdb-chrome-gap"); // named in the warning, so the tie is stated
   });
 
-  it("the Calendar stands on the family layout — the To-do list (v2) and the Corkboard (v1) left it", () => {
+  it("no page stands on the family layout now — the To-do list (v2), the Corkboard (v1) and the Calendar (retired) left it", () => {
     /* ⚠️ TWO SINCE 28 SEP (to-do list v2). The To-do list opens with the SHARED full header over its
        own group, beside the desk rail — the Contact list's and the Query Centre's arrangement — so
        it no longer wears the family's layout, and its top edge is held by the shared header's own
        locks (pageHeaderV2) rather than by this one. The two that remain still agree by
        construction. */
-    for (const [name, src] of [["calendar", calendarPage]] as const) {
-      expect(src, name).toContain("<TasksPageLayout");
-      expect(src, name).toContain('from "./TasksPageLayout"');
-    }
+    /* ⚠️ NONE SINCE 29 OCT: the Calendar page, the layout's last caller, was retired. `TasksPageLayout` survives
+       unmounted (flagged for Nick in reports/retire-calendar-v1/REPORT.md). */
     /* ⚠️ ONE SINCE 12 OCT (Corkboard v1). The Corkboard is a NUMBER page: its panel is 260px tall, and fixed
        above an internal scroller it would leave a framed board a 400px window. It takes the To-do list's
        arrangement — the shared full header as the first row of its own scrolling group. */
@@ -124,7 +122,7 @@ describe("⚠️ one gutter, one cap — equal LEFT offsets by construction", ()
        Nick's call (align the three to the BOARD): every slot is the board's own shape, so
        nothing about the mounting can differ at all. */
     const slots = [...app.matchAll(/<StagePage[^>]*routeKey === "todo"[^>]*>/g)].map((m) => m[0]);
-    expect(slots.length).toBe(3); // list · calendar · noteboard (Today retired, P1 9 Aug)
+    expect(slots.length).toBe(2); // list · noteboard (Today retired 9 Aug; the Calendar page retired 29 Oct)
     for (const slot of slots) {
       expect(slot, slot).not.toContain("contentVariant");
       /* ⚠️ `fillColumn` SINCE 7 Aug (was `fill`): `fill` renders the slot `display: block`, which
@@ -138,7 +136,7 @@ describe("⚠️ one gutter, one cap — equal LEFT offsets by construction", ()
   it("no page wraps the layout in a capped or padded container of its own", () => {
     /* RE-POINTED (Corkboard v1): the Corkboard left the family layout (see the next-but-one case), so its
        mount is the grid, as the To-do list's is. */
-    for (const [name, src, mount] of [["list", listPage, "<TasksPageLayout"], ["calendar", calendarPage, "<TasksPageLayout"], ["noteboard", noteboardPage, "<WorkspacePageGrid"]] as const) {
+    for (const [name, src, mount] of [["list", listPage, "<TasksPageLayout"], ["noteboard", noteboardPage, "<WorkspacePageGrid"]] as const) {
       // the mount sits directly inside the page wrap — never inside a max-width/pad wrapper
       const before = src.slice(src.indexOf("return ("), src.indexOf(mount));
       expect(before, name).not.toContain("maxWidth");
@@ -305,7 +303,7 @@ describe("⚠️ every control sits above the surface it acts on, and nothing fl
        groups answer that permanently and in the open. The CONTRACT is what this file owns and it
        is untouched — absent means no aside at all, never an empty gutter (asserted against the
        rendered output above). `TodoSideContainer` survives unmounted with its own locks. */
-    for (const [name, src] of [["list", listPage], ["calendar", calendarPage], ["noteboard", noteboardPage]] as const) {
+    for (const [name, src] of [["list", listPage], ["noteboard", noteboardPage]] as const) {
       expect(src, `${name} runs full width`).not.toContain("sidebar={");
     }
   });

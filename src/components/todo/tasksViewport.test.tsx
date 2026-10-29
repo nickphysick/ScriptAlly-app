@@ -54,7 +54,7 @@ const drawsAnEdge = (ruleText: string): string[] =>
   (ruleText.match(/(?:^|[;{])\s*(border[a-z-]*)\s*:/g) ?? []).map((m) => m.replace(/[^a-z-]/g, ""));
 const layout = readFileSync(join(here, "TasksPageLayout.tsx"), "utf8");
 const board = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
-const cal = readFileSync(join(here, "TodoCalendarPage.tsx"), "utf8");
+/* The Calendar page was RETIRED on 29 Oct; its cases here went with it (tests/e2e/RETIRED-retire-calendar-v1.md). */
 /* ⚠️ THE ROW MOVED TO THE SHARED BOARD, AND ITS LAWS WENT WITH IT. `row()` — and so the lane
    COUNT it hands down — now lives in `shared/timeline/TimelineBoard.tsx`, because Query Centre
    mounts the same board. The claim below is unchanged: the page hands down a count, never a
@@ -109,7 +109,7 @@ describe("⚠️ THE PAGE NEVER SCROLLS — the frame is a window, the zones do 
   it("⚠️ THE TASKS SLOTS ARE FLEX COLUMNS — so their child can be a flex ITEM", () => {
     const app = readFileSync(join(here, "..", "..", "App.tsx"), "utf8");
     const todoSlots = [...app.matchAll(/<StagePage active=\{routeKey === "todo"[^>]*>/g)].map((m) => m[0]);
-    expect(todoSlots).toHaveLength(3); // list · calendar · noteboard (Today retired, P1 9 Aug)
+    expect(todoSlots).toHaveLength(2); // list · noteboard (Today retired 9 Aug; the Calendar page retired 29 Oct)
     for (const slot of todoSlots) {
       /* `fill` renders the slot `display: block` (isFillCol is false without a contentVariant),
          which leaves `.spine-root` resolving a percentage height. `fillColumn` makes it a flex
@@ -228,7 +228,7 @@ describe("⚠️ THE SIDEBAR IS THE TO-DO LIST'S ALONE — the other three run f
      is what this describe protects — `sidebar` is optional, and absent means no aside at all,
      never an empty gutter (asserted against the rendered output above). */
   it("⚠️ NO PAGE PASSES A SIDEBAR — all four Tasks pages run full width", () => {
-    for (const [name, src] of [["To-do list", board], ["Calendar", cal], ["Noteboard", note]] as const) {
+    for (const [name, src] of [["To-do list", board], ["Noteboard", note]] as const) {
       expect(src, `${name} must run full width`).not.toContain("sidebar={");
     }
   });
@@ -269,11 +269,10 @@ describe("⚠️ each page's scroll anatomy, per page", () => {
      and it scrolls in the family's own primitive rather than inventing an overflow of its own.
      `TasksPageLayout` already names `.tpl-zone` in its `settleOn`, so the page's Type A settle
      kept working with nothing edited in a shared file. */
-  it("the Calendar declares its own region; the Corkboard scrolls as a page", () => {
+  it("the Corkboard scrolls as a page (the Calendar page that declared its own region was retired 29 Oct)", () => {
     /* Today's clause went with the page (tasks-consolidation P1, 9 Aug). */
     /* RE-POINTED (Corkboard v1): the Corkboard has no internal zone — the grid's scroll row is its scroller. */
     expect(note).not.toContain("<TplZone");
-    expect(cal).toContain("<TplZone");
   });
 
   it("⚠️ THE BOARD FILLS AND SCROLLS: the frame takes the height, the zone takes the overflow", () => {
@@ -375,165 +374,15 @@ describe("⚠️ each page's scroll anatomy, per page", () => {
        `LANE_STEP` at length. A bare `not.toContain` over prose that names the token it forbids is
        this codebase's most-recorded false red, and it caught me one line after I wrote the fix for
        it in the rule above. */
-    const calSrc = cal.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
-    expect(calSrc, "the page is computing a position again").not.toContain("LANE_STEP");
-    expect(calSrc, "the page is computing a position again").not.toContain("laneTop");
+    /* RE-POINTED (Calendar page retired 29 Oct): the board is the one place a row's lanes are drawn now. */
+    const calSrc = calBoard.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    expect(calSrc, "the board is computing a position again").not.toContain("LANE_STEP");
+    expect(calSrc, "the board is computing a position again").not.toContain("laneTop");
   });
 });
 
-/* ⚠️ RETARGETED 22 Aug 2026 by the `calendar` session (finishing pack, Phase 4), and flagged in
-   reports/calendar-finishing.md — the SECOND assertion block in this file outside that session's
-   stated territory that its work made stale, edited rather than left red so `main` stays green for
-   the other sessions working tonight.
-
-   THE FACET CONTROL IS SUPERSEDED ON THIS PAGE, deliberately and with its reason: the ruling that
-   "the calendar uses TODO_FACETS as the single shared vocabulary" dated from when the calendar was
-   a projection of TASKS. Since the record layer it shows EVENTS — most of which are not tasks and
-   never were — and "Urgent" has no meaning applied to a query sent three weeks ago. `TODO_FACETS`
-   itself is UNTOUCHED and the board's use of it is asserted elsewhere in this file.
-
-   The two laws worth keeping survive verbatim, pointed at the new vocabulary: ONE definition
-   rather than a per-page label list, and narrowing applied where every surface reads it so it
-   cannot reach the pips and miss the panel. */
-describe("⚠️ the Calendar's tool-row filter — event kinds, calendar-local (finishing P4)", () => {
-  it("it exists, and it reads the ONE kind definition rather than a second label list", () => {
-    /* ⚠️ RETARGETED a third time, by the `calendar` session (timeline pack, Phase 3), flagged in
-       reports/calendar-timeline.md. BOTH LAWS SURVIVE VERBATIM and only the vocabulary moved:
-       `CAL_KINDS` named EVENTS by their place in the querying story, which is the right question
-       for a month of history; a timeline's rows are relationships, so the useful question is which
-       LAYER you are looking at — your turn, waiting, on the record, your tasks, carried. Five, not
-       six, and each names a thing on the board rather than a category of event. */
-    /* ⚠️ RETARGETED A FOURTH TIME, AND THIS TIME THE SUBJECT IS GONE RATHER THAN MOVED
-       (Porcelain, Phase 2). The kind chips are DELETED, not hidden, and `TimelineView.kinds` went
-       with them — four toggles that each subtracted a class of thing from a board whose whole
-       claim is that it shows the relationship entire. The honest replacement states the
-       retirement and asserts what stands in its place: the two segmented controls, which change
-       what is SHOWN OF the one derivation rather than filtering pieces out of it. */
-    const calSrcNow = cal.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
-    expect(calSrcNow, "the kind chips came back").not.toMatch(/["\s`]tl-kind["\s`]/);
-    expect(calSrcNow).not.toContain("TIMELINE_FILTERS");
-    expect(calSrcNow).not.toContain("toggleKind");
-    /* ⚠️ RETARGETED A FIFTH TIME (v40, Phase 6), AND BOTH LAWS STILL SURVIVE VERBATIM: ONE
-       definition rather than a per-page label list, and narrowing applied where every surface
-       reads it. Only the vocabulary moved again. The two segmented controls were four by the end —
-       `WHAT NEEDS YOU / MANUSCRIPT`, `ONE LIST / GROUPED`, `FULL BOARD / RIGHT NOW` and a range
-       slider — four answers to one question, each holding permanent width to state a setting made
-       once. What changes often is WHICH relationships you are looking at, and that is the tab
-       strip; how the board is arranged is set in one popover and read back off its trigger.
-       `.tl-seg2` is deleted from the stylesheet in the same commit rather than left as a rule with
-       no subject. */
-    expect(calSrcNow, "the segmented controls came back").not.toMatch(/["\s`]tl-seg2["\s`]/);
-    /* ⚠️ THE TAB STRIP IS RETIRED (v61). It named four cuts of the board while the board itself is
-       divided into six groups with different names — two vocabularies for one question, and two
-       sets of numbers that did not add up. The claim survives as its inverse: the strip is gone and
-       the sidebar's group list, whose counts DO sum, is what filters now. */
-    expect(cal, "the retired tab strip is back").not.toContain("tl-tabs");
-    /* ⚠️ RETARGETED A SIXTH TIME (v64 §E): the group list is retired in its turn — the sidebar is
-       the Notion panel, whose Filter reads the FACET MODEL (`src/lib/calendarFacets.ts`), and
-       that model is now the ONE definition this case has always been about. The tab-count table
-       survives as the panel's census plumbing. */
-    expect(cal, "the group list is back").not.toContain("gpill");
-    expect(cal, "the Notion panel is not rendered").toContain("tl-np");
-    expect(cal, "the page stopped reading the facet model").toContain("calendarFacets");
-    expect(cal).toContain("TAB_ORDER");
-    /* the narrowing still reads the ONE definition — `rowInTab` over the row's own group, the same
-       field the board's headings draw, so a tab and a heading cannot disagree about one row */
-    expect(cal).toContain("rowInTab");
-    /* ⚠️ THESE TWO WERE ASSERTING PROSE, AND ONE OF THEM WENT RED WHEN AN OBITUARY WAS TIDIED
-       (v63, section C). They read `toContain("FULL BOARD")` and `toContain("RIGHT NOW")` over RAW
-       source, and both controls were retired packs ago — the strings survived only inside comments
-       explaining the retirement, so the case was green because of the eulogy rather than the code.
-       Deleting the dead control row's CSS took the last mention of `FULL BOARD` with it and the
-       lock failed over a change that removed nothing it claimed to guard: this repo's most-recorded
-       false red, from the direction where it had ALSO been a false green for two packs.
-
-       The law they were standing in for is real and is asserted below: ONE kind definition, and the
-       narrowing applied where every surface reads it. The retired controls' names are not part of
-       it. `RIGHT NOW` in particular is now `Needs me`, a sidebar view over the same derivation. */
-    expect(decomment(cal), "a per-page kind vocabulary came back").not.toContain("KIND_LABEL");
-    /* and the superseded control is gone from the page, not merely unrendered */
-    /* ⚠️ STRIPPED, NOT RAW — and this caught me twice in one pack. The page now carries COMMENTS
-       explaining the supersession, and those comments necessarily name `TODO_FACETS`, `facetCounts`
-       and the retired classes. A bare `not.toContain` over prose that names the very token it
-       forbids is this repo's most-recorded false red; `decomment` is here for exactly this. */
-    expect(decomment(cal)).not.toMatch(/["\s`]cal-facetwrap["\s`]/);
-    expect(decomment(cal)).not.toContain("TODO_FACETS");
-  });
-
-  it("⚠️ THE BOARD'S OWN VOCABULARY IS LEFT ALONE — this page no longer consults it", () => {
-    /* the old law was that the Calendar's counts had to BE the board's, so the two could not state
-       different numbers for the same facet. There is no such risk once the two controls name
-       different things — a shared count would be a coincidence, not a guarantee — so the honest
-       successor is that the calendar reads neither the board's counts nor its labels. */
-    expect(decomment(cal)).not.toContain("facetCounts");
-    expect(decomment(cal)).not.toContain("liveBoardCards");
-  });
-
-  it("the filter is applied ONCE, inside the derivation every surface reads", () => {
-    /* ⚠️ THE LAW IS STRONGER NOW, NOT WEAKER. It used to be that two functions applied the kinds
-       and every surface called both — which held only while every surface remembered to. The
-       narrowing now happens inside `timelineWeek`, which is the ONLY producer of rows and bands,
-       so a surface cannot read an unfiltered set: there is no unfiltered set to read. */
-    expect(cal).toContain("timelineWeek(");
-    /* ⚠️ THE VIEW REACHES THE ONE DERIVATION — asserted as the argument rather than as a line of
-       source. The literal `TL_DAYS, view)` was the whole call on one line; the call grew a second
-       argument and wrapped, and the lock went red over a reformat. What it is FOR is that nothing
-       filters anywhere else, which the two clauses below say. */
-    /* ⚠️ THE WINDOW'S LENGTH IS THE RANGE'S NOW, not a module constant. `TL_DAYS = 7` is gone —
-       the five stops carry their own day counts — so the argument is `range.days`. The claim is
-       the one above: the view reaches the ONE derivation, asserted as an argument rather than as a
-       line of source. */
-    /* ⚠️ THE ARGUMENT IS `winFrom` NOW (grouped pack, Phase 6). `winStart` is the ANCHOR day and
-       the window opens a slice BEFORE it, so the first day handed to the derivation is derived
-       rather than stored. The claim is unchanged and is the one that matters: the view reaches
-       the ONE derivation, asserted as an argument rather than as a line of source. */
-    expect(cal).toMatch(/timelineWeek\(\s*\{[\s\S]{0,400}?\},\s*winFrom,\s*range\.days,\s*view,?\s*\)/);
-    expect(decomment(cal)).not.toContain("itemInKinds");
-    expect(decomment(cal)).not.toContain("recordInKinds");
-  });
-
-  /* ⚠️ RETARGETED 20 Aug 2026 by the `calendar` session (record-layer P6), which retired the week
-     view. This is the ONE assertion outside that session's stated territory that its deletion made
-     stale, and it was edited rather than left red so `main` stayed green for the other sessions
-     working tonight — flagged in reports/calendar-record-layer.md for review.
-     THE LAW IT ASSERTS IS UNCHANGED and both halves survive: the Calendar takes no `TplZone`
-     because its grid COMPRESSES to the frame instead of scrolling, and the ResizeObserver's row
-     divisor is still the number of week rows the grid holds.
-
-     ⚠️ RETARGETED A SECOND TIME, 22 Aug 2026 by the same session (finishing pack, Phase 3), for
-     the same reason and with the same flag. `const rows = 6` was true while the month grid was the
-     only grid; `Upcoming only` now shows between one and six week rows. A hard 6 against a
-     five-row grid divides the height by one row too many, so every cell is told it is SHORTER than
-     it is and the fold caps tighter than it needs to — silently, with no error and no overflow to
-     notice. The divisor is now COUNTED from the rendered cells, which is the law stated more
-     strongly than the constant ever stated it: it cannot go stale. */
-  /* ⚠️ RETARGETED A THIRD TIME, 26 Aug 2026, by the same session (timeline pack, Phase 3), and
-     this time the law itself is superseded rather than restated. The row divisor existed to feed
-     the FOLD: the grid measured how tall a week row had resolved to so it could work out how many
-     pills fitted before "+N MORE". There is no fold, no cap and no counter — a row grows to hold
-     what it holds — so there is nothing left to divide. What replaces it is the assertion above:
-     the board scrolls in a `TplZone`, which is the lock this file exists to enforce. */
-  it("⚠️ the fold's measurement is retired with the fold — nothing divides a height here", () => {
-    expect(decomment(cal)).not.toContain("calFoldCap");
-    /**
-     * ⚠️ NARROWED TO ITS OWN LAW (settled pack, Phase 5). This forbade `ResizeObserver` outright,
-     * as a proxy for the retired fold: the old one measured how tall a week row had resolved to so
-     * it could work out how many pills fitted before "+N MORE". The law is "nothing divides a
-     * HEIGHT here", and that is unchanged and asserted directly below.
-     *
-     * The page now observes the BOARD's WIDTH so the bar labels can be fitted — long form, short
-     * form, then bare. It divides nothing, measures no height, and caps no count; forbidding it
-     * would forbid the class of tool rather than the mistake, which is what a proxy does when the
-     * thing it stood in for has gone.
-     */
-    const code = decomment(cal);
-    expect(code, "a height is being divided again — the fold's own mistake")
-      .not.toMatch(/(clientHeight|offsetHeight|getBoundingClientRect\(\)\.height)[^;\n]*\//);
-    expect(code, "the fold's cap is back").not.toMatch(/MORE|foldCap|maxPills/);
-    expect(decomment(cal)).not.toContain("data-fold-short");
-    expect(decomment(cal)).not.toContain("const rows = 6;");
-  });
-});
+/* ⚠️ RETIRED (29 Oct) with the Calendar page: "the Calendar's tool-row filter — event kinds, calendar-local"
+   (four cases) had that page as its only subject. Listed in tests/e2e/RETIRED-retire-calendar-v1.md. */
 
 describe("⚠️ the board's card spacing SURVIVES the conversion", () => {
   it("the rows sit DIRECTLY in their list — nothing between the group and its cards (to-do list v2)", () => {
@@ -658,7 +507,7 @@ describe("⚠️ ONE FORM FOR THE TASK FIELDS, AND IT IS THE SETTINGS PAGE", () 
   });
 
   it("no gear in any tool row — the doors are the two named places", () => {
-    for (const [name, src] of [["Calendar", cal], ["Noteboard", note]] as const) {
+    for (const [name, src] of [["Noteboard", note]] as const) {
       expect(src, name).not.toContain("TODO_OPEN_TASK_SETTINGS");
     }
   });
@@ -701,20 +550,10 @@ describe("⚠️ THE LEFT GUTTER IS LAW — all four pages, sidebar or not", () 
     expect(note).not.toContain("<TasksPageLayout");
     expect(note).toContain('className="tpl-wpg nb-wpg"');
     expect(note).toMatch(/className="t-f12 spine-root( [a-z-]+)*"/);
-    for (const [name, src] of [
-      ["Calendar", cal],
-    ] as const) {
-      /* ⚠️ RETARGETED by the `calendar` session (journey-bars pack, Phase 2), flagged in
-         reports/calendar-bars.md. THE LAW IS UNCHANGED — all four pages wear the same column, and
-         they still wear it FIRST. What the exact string could not express is a page-scoping
-         MODIFIER alongside it: the Calendar carries `cal-timeline` so its own stylesheet can opt
-         out of the settle's reclaim spacer, which is a fact about that page and not about the
-         column. The column classes are still both present, still in this order, and still the
-         first thing on the element. */
-      expect(src, name).toMatch(/className="t-f12 spine-root( [a-z-]+)*"/);
-      expect(src, name).toContain("<TasksPageLayout");
-      // and none of them caps or centres a measure of its own
-      expect(src, name).not.toMatch(/margin(-inline)?:\s*(0 )?auto/);
+    /* ⚠️ THE CALENDAR WAS THE LAST PAGE IN THE FAMILY'S COLUMN, and it was retired on 29 Oct — so no page mounts
+       `TasksPageLayout` now. Asserted, so the layout's next caller is noticed rather than assumed. */
+    for (const [name, src] of [["To-do list", board], ["Corkboard", note]] as const) {
+      expect(src, name).not.toContain("<TasksPageLayout");
     }
     // the ONE column class is the layout's, and it is written once
     expect(layout).toContain('className="tdb-col tpl"');
@@ -843,7 +682,7 @@ describe("⚠️ WIDTHS ARE NEVER TOUCHED BY THE HEIGHT WORK", () => {
     /* No page fixes its own PIXEL width — the column is the one measure. Percentage widths are
        exempt and legitimate: they are progress-bar fills (`width: ${pct}%`), which describe a
        proportion of their own bar rather than a page dimension. */
-    for (const [name, src] of [["Calendar", cal], ["Noteboard", note], ["board", board]] as const) {
+    for (const [name, src] of [["Noteboard", note], ["board", board]] as const) {
       expect(src, name).not.toMatch(/style=\{\{[^}]*\bwidth:\s*[`"']?\d+px/);
     }
   });

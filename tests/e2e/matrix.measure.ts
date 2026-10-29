@@ -44,7 +44,6 @@ const SCROLLING: [string, string][] = [
   ["Submission packages", "/queries/packages"],
   ["Analytics", "/queries/analytics"],
   ["To-do", "/todo"],
-  ["Calendar", "/todo/calendar"],
   ["Noteboard", "/todo/corkboard"],
   ["Comparable titles", "/manuscripts/comps"],
 ];

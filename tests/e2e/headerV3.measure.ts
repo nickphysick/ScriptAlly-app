@@ -38,7 +38,7 @@ const PANEL_BG = "rgb(45, 58, 80)";
    TD5 A1 holds it, n against the sidebar badge. Its WORDS entry and its tile check went with it. */
 export const NUMBER = ["/todo/corkboard"] as const;
 /* Discover v1 (18 Oct): /agents/discover LEFT the TITLE pages — its header is page-local (OWN_HEADER_ROUTES); DV1 B1 holds it. */
-export const TITLE = ["/queries", "/agents", "/queries/analytics", "/manuscripts", "/manuscripts/comps", "/todo/calendar"] as const;
+export const TITLE = ["/queries", "/agents", "/queries/analytics", "/manuscripts", "/manuscripts/comps"] as const; // "/todo/calendar" left with the Calendar page (retired 29 Oct)
 const ALL = [...NUMBER, ...TITLE];
 const OUT_OF_SCOPE = ["/dashboard", "/account", "/help", "/plans"] as const; // "/import" left this list with onboarding v5 part 3: its page was rebuilt (lock IP1 D1 holds it now)
 /** the words after each number (the plural; a count of one reads its singular) */

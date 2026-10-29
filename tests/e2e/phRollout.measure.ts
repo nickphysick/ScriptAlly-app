@@ -4,7 +4,7 @@ import { openRoute } from "./measure";
 const OUT = "/tmp/ph"; mkdirSync(OUT, { recursive: true });
 const ROUTES: [string, string][] = [
   ["/queries", "query-centre"], ["/queries/analytics", "analytics"],
-  ["/todo", "todo"], ["/todo/calendar", "calendar"], ["/todo/corkboard", "noteboard"],
+  ["/todo", "todo"], ["/todo/corkboard", "noteboard"],
   ["/agents", "contact-list"], ["/agents/discover", "discover"],
   ["/manuscripts", "manuscripts"], ["/manuscripts/comps", "comps"],
   ["/queries/packages", "packages"], ["/import", "import"],

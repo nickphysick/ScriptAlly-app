@@ -38,17 +38,16 @@ import { join } from "node:path";
  */
 const TERRITORY = [
   "src/components/todo/todoCalendar.css",
-  "src/components/todo/TodoCalendarPage.tsx",
+  /* the Calendar page (and its two page-only libraries, calendarToolbar and calendarFacets) were RETIRED on
+     29 Oct; the board it drew is the shared timeline's, which joins the territory in its place */
+  "src/components/shared/timeline/TimelineBoard.tsx",
+  "src/components/shared/timeline/boardParts.tsx",
   "src/lib/journeyBars.ts",
   "src/lib/calendarFade.ts",
   /* v60: the six sections. Pure membership — it declares no colour at all, which is exactly
      why it belongs in the census: the law is that a calendar-owned module has NO burgundy and NO
      black, and a file that happens to contain none today still has to be swept tomorrow. */
   "src/lib/calendarSections.ts",
-  /* v63: the board's view options — grouping, sorting and the status filter */
-  "src/lib/calendarToolbar.ts",
-  /* v64: the facet model — the sidebar's filter, the move grouping, the census */
-  "src/lib/calendarFacets.ts",
   "src/lib/calendarPill.ts",
   "src/lib/cardTier.ts",
   "src/lib/timelineCopy.ts",
@@ -85,12 +84,14 @@ describe("the calendar's colour law", () => {
        goes on reading as if it covered the board — which is what happened between v39 and v40,
        from the other direction: five new modules and a list that never grew. Changing this number
        is the deliberate act of having decided what the calendar owns. */
-    expect(TERRITORY.length, "the territory changed — was that deliberate?").toBe(15);
+    expect(TERRITORY.length, "the territory changed — was that deliberate?").toBe(14); // 15 − page − toolbar − facets + the board's two files
     /* ⚠️ AND EVERY CALENDAR-OWNED MODULE THE PAGE IMPORTS IS IN IT, derived rather than trusted.
        A file added to `src/lib/` and imported by the board is inside this law whether or not
        anybody remembered to list it. */
-    const page = readFileSync(join(process.cwd(), "src/components/todo/TodoCalendarPage.tsx"), "utf8");
-    const imported = [...page.matchAll(/"\.\.\/\.\.\/lib\/([a-zA-Z]+)"/g)].map((m) => m[1]);
+    const page = ["src/components/shared/timeline/TimelineBoard.tsx", "src/components/shared/timeline/boardParts.tsx"]
+      .map((f) => readFileSync(join(process.cwd(), f), "utf8")).join("\n");
+    const imported = [...page.matchAll(/"(?:\.\.\/)+lib\/([a-zA-Z]+)"/g)].map((m) => m[1]);
+    expect(imported.length, "read no lib imports — the derivation saw nothing").toBeGreaterThan(3);
     const OWNED = /^(journeyBars|calendar[A-Z]|cardTier|timeline)/;
     const missing = imported.filter((n) => OWNED.test(n))
       .filter((n) => !TERRITORY.includes(`src/lib/${n}.ts`));

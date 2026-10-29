@@ -15,7 +15,7 @@ const decls = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "");
 
 describe("which routes have a header sheet, and which a panel", () => {
   it("header panel v2: every workspace route has a panel and no sheet; Help, Plans and Import keep the sheet", () => {
-    for (const r of ["/queries", "/queries/analytics", "/agents", "/agents/discover", "/manuscripts", "/manuscripts/comps", "/queries/packages", "/todo", "/todo/calendar", "/todo/corkboard"]) {
+    for (const r of ["/queries", "/queries/analytics", "/agents", "/agents/discover", "/manuscripts", "/manuscripts/comps", "/queries/packages", "/todo", "/todo/corkboard"]) {
       expect(hasHeaderPanel(r), r).toBe(true);
       expect(hasHeaderSheet(r), r).toBe(false);
     }
@@ -26,7 +26,7 @@ describe("which routes have a header sheet, and which a panel", () => {
   });
   it("the two lists are what they say", () => {
     expect(NO_HEADER_SHEET_ROUTES).toEqual(["/dashboard", "/account"]);
-    expect(HEADER_PANEL_ROUTES.length).toBe(11); // ten, and the Import page since onboarding v5 part 3
+    expect(HEADER_PANEL_ROUTES.length).toBe(10); // ten with the Import page (onboarding v5 part 3), less the Calendar page (retired 29 Oct)
     expect(hasHeaderSheet("/accounting")).toBe(true);
   });
 });

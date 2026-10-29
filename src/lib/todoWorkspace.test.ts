@@ -18,13 +18,14 @@ import { WORKSPACE_SHELL_PATHS } from "./shellForRoute";
 import { PALETTE_PAGES } from "./searchPalette";
 import { workspaceSections } from "./workspaceNav";
 
-describe("the three routes", () => {
-  it("are three, in the pack's order", () => {
+describe("the two routes", () => {
+  it("are two, in the pack's order", () => {
     /* ⚠️ THREE SINCE 9 Aug (tasks-consolidation P1) — Today is retired. The ranked order of the
        one list IS the plan, so a second page over an overlapping subset of the same tasks was
        the over-complication. The ORDER is still the assertion that matters: these three are one
        definition serving the nav, the palette and the route table alike. */
-    expect(TODO_ROUTES.map((r) => r.id)).toEqual(["list", "calendar", "noteboard"]);
+    /* ⚠️ TWO SINCE 29 Oct: the Calendar page is retired (its path redirects to /todo — calendarRetired.test.ts). */
+    expect(TODO_ROUTES.map((r) => r.id)).toEqual(["list", "noteboard"]);
   });
 
   it("every route is a real workspace path", () => {
@@ -35,7 +36,6 @@ describe("the three routes", () => {
      the same class of bug as the shell's /agents vs /agents/discover. */
   it("resolves the longest path first", () => {
     expect(todoPageForPath("/todo")).toBe("list");
-    expect(todoPageForPath("/todo/calendar")).toBe("calendar");
     expect(todoPageForPath("/todo/corkboard")).toBe("noteboard");
   });
 
@@ -105,8 +105,8 @@ describe("the app sidebar's TASKS section", () => {
     expect(nav.find((s) => s.id === "workspace")!.children!.map((c) => c.id)).toEqual(["dash"]);
   });
 
-  it("its three rows ARE the routes, in order, with the list as the default", () => {
-    expect(tasks.children!.map((c) => c.label)).toEqual(["To-do list", "Calendar", "Corkboard"]);
+  it("its two rows ARE the routes, in order, with the list as the default", () => {
+    expect(tasks.children!.map((c) => c.label)).toEqual(["To-do list", "Corkboard"]);
     expect(tasks.children!.map((c) => c.path)).toEqual(TODO_ROUTES.map((r) => r.path));
     expect(tasks.def).toBe("list");
     expect(tasks.children![0].path).toBe("/todo");
@@ -128,10 +128,10 @@ describe("the app sidebar's TASKS section", () => {
     expect(r.count).toBeUndefined();
   });
 
-  /* The three ROUTES still exist and are still individually reachable — one definition serves
+  /* The two ROUTES still exist and are still individually reachable — one definition serves
      the nav, the palette and the route table alike. */
-  it("all three To-do routes remain real, and remain in the palette", () => {
-    expect(TODO_ROUTES).toHaveLength(3);
+  it("both To-do routes remain real, and remain in the palette", () => {
+    expect(TODO_ROUTES).toHaveLength(2);
     for (const r of TODO_ROUTES) expect([...WORKSPACE_SHELL_PATHS], r.label).toContain(r.path);
   });
 });
@@ -241,8 +241,8 @@ describe("the window contracts are named once", () => {
   });
 
   /* ⚠️ RETARGETED (Query Centre v11, 19 Sep): the top bar's `+ New` was removed app-wide, and it was
-     this contract's ONLY announcer — checked, not assumed: `TodoCalendarPage` imports the constant
-     and never dispatches it. So the To-do page's listener currently has nobody to hear from. That
+     this contract's ONLY announcer — checked, not assumed: `TodoCalendarPage` (retired 29 Oct) imported the
+     constant and never dispatched it. So the To-do page's listener currently has nobody to hear from. That
      is recorded as a follow-up for Nick rather than fixed in a Query Centre pass; the page's own
      "Add a task" opens the composer directly and is unaffected. What this still guards: the name is
      stated once, the page still listens under that name, and the shell — which no longer draws the

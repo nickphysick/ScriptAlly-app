@@ -51,7 +51,6 @@ const ROUTES = [
   { name: "Comparable titles", route: "/manuscripts/comps", root: ".ct-wpg" },
   { name: "Submission packages", route: "/queries/packages", root: ".pkgw-wpg" },
   { name: "To-do list", route: "/todo", root: ".tpl-wpg" },
-  { name: "Calendar", route: "/todo/calendar", root: ".tpl-wpg" },
   { name: "Noteboard", route: "/todo/corkboard", root: ".tpl-wpg" },
   { name: "Dashboard", route: "/dashboard", root: ".sa-dashroot" },
 ] as const;
@@ -119,7 +118,6 @@ const ROWS: { name: RouteName; row: string | null; why?: string }[] = [
   { name: "Comparable titles",   row: null, why: "passes no toolbar to the grid" },
   { name: "Submission packages", row: null, why: "passes no toolbar to the grid" },
   { name: "To-do list",          row: ".tdb-qtool" },
-  { name: "Calendar",            row: null, why: "passes no tools to TasksPageLayout" },
   { name: "Noteboard",           row: ".wpg-tools" },
   { name: "Dashboard",           row: null, why: "exempt from the workspace grid's chrome" },
 ];

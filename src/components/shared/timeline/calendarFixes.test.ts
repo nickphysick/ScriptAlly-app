@@ -15,7 +15,7 @@
  * would find a retirement's own obituary and report it as live code.
  */
 import { describe, it, expect } from "vitest";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { sliceBetween } from "../../../test/sliceBetween";
 
@@ -26,7 +26,8 @@ const decls = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\
 const BOARD_CSS = decls(R("src/components/todo/todoCalendar.css"));
 const BOARD_TSX = decls(R("src/components/shared/timeline/TimelineBoard.tsx"));
 const QC = decls(R("src/components/Queries.tsx"));
-const TODO = decls(R("src/components/todo/TodoCalendarPage.tsx"));
+/* The To-do Calendar page — the board's last host — was RETIRED on 29 Oct, so §4's host cases went with it
+   (tests/e2e/RETIRED-retire-calendar-v1.md). The board's own files stay, unmounted, by that run's ruling. */
 
 /** every declaration block in a stylesheet, selector list and body */
 const blocks = (css: string) =>
@@ -80,33 +81,26 @@ describe("§1 · a past stage is drawn in its own state colour, faded", () => {
    its own control row — measured in tests/e2e/qcV11.measure.ts. */
 
 describe("§4 · one hover implementation, and both hosts mount it", () => {
-  it("neither page carries its own copy of the delegated pair", () => {
-    /* ⚠️ RETARGETED (v11, 19 Sep): the board has ONE host now. The Query Centre's calendar is its own
-       component (`QcCalendar`), so "both hosts share one hover" became "the one host uses the shared
-       hover, and the other page mounts no board at all" — asserted, so a second host cannot return
-       quietly with a hover of its own. */
+  it("no page mounts the board now — its last host, the Calendar page, was retired (29 Oct)", () => {
+    /* ⚠️ RETARGETED (Calendar retired, 29 Oct). The two host cases (the shared hover, real handlers) had one
+       subject, `TodoCalendarPage`, and it is deleted. What survives is the ABSENCE, asserted over every page
+       file, so a board that is mounted again arrives here and has to bring its host cases back with it. */
     expect(QC, "the Query Centre mounts the To-do board again").not.toContain("<TimelineBoard");
-    for (const [name, src] of [["TodoCalendarPage", TODO]] as const) {
-      expect(src, `${name} does not use the shared hover`).toContain("useSegHover");
-      /* the mechanism this replaced: a local `segOf` walking to `.tl-p, .tl-jc`, and a setter for a
-         hover state of the page's own. Either one back in a page is the fork returning. */
-      expect(src, `${name} declares its own segOf again`).not.toMatch(/const segOf\s*=/);
-      expect(src, `${name} holds its own hover state again`).not.toMatch(/setHoverSeg|setCalHover/);
-    }
-  });
-
-  /* ⚠️ RETIRED (Query Centre v11, 19 Sep): the Query Centre no longer mounts this board. Its calendar is
-     `queries/centre/QcCalendar` — one bar per STAGE, from the activity log — and a bar there is a plain
-     button that selects. There is no hover state on that page for a click to write. */
-
-  it("the board's host hands it real handlers, not the empty pair", () => {
-    for (const [name, src] of [["TodoCalendarPage", TODO]] as const) {
-      const board = sliceBetween(src, "<TimelineBoard", "/>", `${name}'s board mount`);
-      expect(board, `${name} still passes an empty onRowsOver`).not.toMatch(/onRowsOver=\{\(\)\s*=>\s*\{\}\}/);
-      expect(board, `${name} still passes an empty onRowsOut`).not.toMatch(/onRowsOut=\{\(\)\s*=>\s*\{\}\}/);
-      expect(board).toMatch(/onRowsOver=\{[A-Za-z]/);
-      expect(board).toMatch(/onRowsOut=\{[A-Za-z]/);
-    }
+    const walked: string[] = [];
+    const hosts: string[] = [];
+    const walk = (d: string) => {
+      for (const n of readdirSync(d)) {
+        const p = join(d, n);
+        if (statSync(p).isDirectory()) { walk(p); continue; }
+        if (!/\.tsx$/.test(n) || /\.test\.tsx$/.test(n)) continue;
+        walked.push(p);
+        if (n === "TimelineBoard.tsx") continue; // the board names itself; skipped by name, never by loosening the pattern
+        if (decls(readFileSync(p, "utf8")).includes("<TimelineBoard")) hosts.push(p);
+      }
+    };
+    walk(join(process.cwd(), "src"));
+    expect(walked.length, "a sweep over nothing proves nothing").toBeGreaterThan(300);
+    expect(hosts).toEqual([]);
   });
 
   it("the mark reveals on focus as well as on hover", () => {

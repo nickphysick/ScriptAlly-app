@@ -32,7 +32,6 @@ const BORDER_PAGES: { name: string; route: string; cls: string }[] = [
   { name: "Comparable titles",   route: "/manuscripts/comps",    cls: "ct-wpg"   },
   { name: "Submission packages", route: "/queries/packages", cls: "pkgw-wpg" },
   { name: "To-do list",          route: "/todo",                 cls: "td5-wpg"  },
-  { name: "Calendar",            route: "/todo/calendar",        cls: "tpl-wpg"  },
   { name: "Noteboard",           route: "/todo/corkboard",       cls: "tpl-wpg"  },
 ];
 

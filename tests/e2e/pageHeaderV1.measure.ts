@@ -382,7 +382,7 @@ test("§4.5 · every page of a size opens identically", async ({ page }) => {
    * a claim about both axes, and only one of them was being asked.
    */
   const seen: Record<string, { route: string; top: number; left: number; eyebrow: number; title: number }[]> = { full: [], compact: [] };
-  for (const route of ["/queries", "/agents", "/todo", "/todo/calendar", "/queries/analytics", "/manuscripts/comps", "/queries/packages", "/agents/discover"]) {
+  for (const route of ["/queries", "/agents", "/todo", "/queries/analytics", "/manuscripts/comps", "/queries/packages", "/agents/discover"]) {
     await openApp(page, route, 1440, 900);
     const r = await header(page);
     if (!r || !r.eyebrow || !r.title) { record({ area: "header", what: `§4.5 · ${route} has no header`, got: r, want: "reported" }); continue; }

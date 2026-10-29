@@ -302,10 +302,8 @@ describe("⚠️ the takeover survives; the pane's orphans do not", () => {
     const todo = read("../components/todo/ToDoPage.tsx");
     expect(todo, "the To-do page stopped mounting HousekeepingSweep — it may now look dead").toContain("<HousekeepingSweep");
     expect(todo).toContain('from "./HousekeepingSweep"');
-    const cal = read("../components/todo/TodoCalendarPage.tsx");
-    expect(cal, "the Calendar mounts the sweep again — v65 §A retired that surface")
-      .not.toContain("<HousekeepingSweep");
-    expect(cal).not.toContain("<FocusFlow");
+    /* The Calendar page's half retired with the page (29 Oct); no other page mounts the sweep. */
+    expect(read("../components/todo/TodoNoteboardPage.tsx")).not.toContain("<HousekeepingSweep");
   });
 
   /**

@@ -41,8 +41,8 @@ const here = __dirname;
  * This is a RETARGET, not a weakening: the sweep still requires a base rule for every class, and it
  * now sees more of them than it did before the move.
  */
+/* RE-POINTED (Calendar page retired 29 Oct): the page's half is gone; the board's two files carry the sweep. */
 const page = [
-  readFileSync(join(here, "TodoCalendarPage.tsx"), "utf8"),
   readFileSync(join(here, "..", "shared", "timeline", "boardParts.tsx"), "utf8"),
   readFileSync(join(here, "..", "shared", "timeline", "TimelineBoard.tsx"), "utf8"),
 ].join("\n");

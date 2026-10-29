@@ -23,7 +23,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router-dom";
 import { UserPlan } from "../../types";
 
-/* The seedable mock (tasks-pages P3): the Calendar's populated smoke needs a dated task in the
+/* The seedable mock (tasks-pages P3; the Calendar page that first needed it was retired 29 Oct): a populated smoke needs data in the
    db, and vi.mock is hoisted — so the factory reads this holder, and a test mutates it. Reset in
    afterEach so no file order matters. */
 /* ⚠️ `agents` IS SEEDABLE TOO (tasks-consolidation P2): the consolidated page's first-run panel
@@ -63,7 +63,6 @@ vi.mock("../../lib/db", () => ({
 }));
 
 import { ToDoPage } from "./ToDoPage";
-import { TodoCalendarPage } from "./TodoCalendarPage";
 import { TodoNoteboardPage } from "./TodoNoteboardPage";
 
 const render = (node: React.ReactNode) =>
@@ -165,112 +164,9 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
     expect(html).toContain("Redraft the opening chapter");
   });
 
-  /* tasks-pages P3 — the Calendar is REAL; its placeholder era ended. Smoke from day one,
-     empty AND populated (a page that only smokes its first-run panel leaves every derivation
-     unexecuted — the app-smoke law). */
+  /* ⚠️ THE CALENDAR PAGE'S THREE SMOKES RETIRED WITH THE PAGE (29 Oct) — tests/e2e/RETIRED-retire-calendar-v1.md.
+     The seed reset stays: the Noteboard's populated smoke below seeds through the same holder. */
   afterEach(() => { seed.userTasks = []; seed.agents = []; });
-
-  it("the Calendar page renders without throwing", () => {
-    expect(() => render(<TodoCalendarPage onNavigate={() => {}} />)).not.toThrow();
-  });
-
-  /* ⚠️ RETARGETED by the `calendar` session (timeline pack, Phase 3), flagged in
-     reports/calendar-timeline.md. THE LAW IS UNCHANGED — the page renders its board, its day
-     header and its tools — and the classes it names moved with the month grid.
-     ⚠️ THE LEGEND CLAUSE HAS NO SUBJECT and is not replaced. `CAL_LEGEND` taught the four CARD
-     families' colours; the timeline's grammar is five kinds, and the filter chips name all five in
-     words. A colour swatch on a chip would also fight the chip's own pink selected state — two
-     colour meanings on one control. Reported for Nick, not decided here. */
-  it("…and carries its board, its one column header and its groups", () => {
-    const html = render(<TodoCalendarPage onNavigate={() => {}} />);
-    expect(html).toContain("Calendar");
-    expect(html).toContain("tl-board");
-    /* ⚠️ ONE COLUMN HEADER, not a grid of weekday cells (Porcelain, Phase 2). `tl-head` and the
-       weekday initials went with the day grid: a board of relationships measured in months has no
-       use for "WED", and repeating the header per group restated nine dates five times down the
-       page. `tl-hrow` is the single header; `tl-dt` are the ~nine dates along it. */
-    /* ⚠️ `FULL BOARD / RIGHT NOW` IS RETIRED INTO THE VIEW STRIP (v40, Phase 6). It was a
-       two-state segment that could say "you are seeing only what is asked of you" and could not
-       say what the other cuts of the board even were; `Needs me` is the same filter with a home
-       among its peers. The smoke's claim is unchanged — the page renders its view control — so it
-       names the control that exists. */
-    /* ⚠️ AND v61 RETIRES THE VIEW STRIP ITSELF. `Needs me` was one of four tabs naming cuts of a
-       board that is divided into SIX groups with different names — two vocabularies for one
-       question. The sidebar's group list is the view control now, and it names the groups the board
-       actually draws, so the claim is unchanged again and again names the control that exists. */
-    expect(html).not.toContain("Needs me");
-    /* ⚠️ AND v64 §E RETIRES THE GROUP LIST TOO — the sidebar is the Notion panel now: Group,
-       Filter and Sort rows over the facet model. The smoke's claim is what it always was — the
-       page renders its view control — so once more it names the control that exists. */
-    expect(html).not.toContain("gpill");
-    expect(html).toContain("tl-np");
-    expect(html).toContain("tl-pr");
-    /* ⚠️ AN EMPTY BOARD IS THE SPARSE PANEL, NOT AN EMPTY TABLE WITH A HEADER OVER IT. A column
-       header above nothing teaches the shape of a board the writer does not have — the same rule
-       that omits a group heading reading "0". The populated smoke below is where the header,
-       the groups and the rows are proved. */
-    expect(html).toContain("tl-sparse");
-    expect(html).toContain("Nothing in this window");
-  });
-
-  it("…and a dated task REACHES its day (the populated smoke)", () => {
-    const today = new Date();
-    const ymd = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-    seed.userTasks = [{ id: "t1", userId: "u1", text: "Redraft the opening", done: false, dueDate: ymd, createdAt: "", updatedAt: "" }];
-    const html = render(<TodoCalendarPage onNavigate={() => {}} />);
-    expect(html).toContain("Redraft the opening");
-    /* ⚠️ A DATED TASK IS A BAR NOW (v63 §F, tasks-as-bars): created → due, a note-yellow band
-       with a checkbox and the word Task. The point chip survives only for the notes row. */
-    expect(html).toContain("tl-sband--task");
-    /* ⚠️ AND THE POPULATED BOARD IS WHERE THE CHROME IS PROVED: one column header for the whole
-       board, its ~nine dates, and the pinned group above the query groups. */
-    /* ⚠️ THE DATE ROW IS THE RAIL NOW (v36, Phase 4). `tl-hrow` was the in-card header, drawn once
-       inside the FIRST group's card — so it scrolled away with that card and a reader four groups
-       down had no dates. It is the page's own sticky rail, above every group, and its ticks are
-       proved to land on the same pixels as the lanes in `calRowWords55.measure.ts`. */
-    expect(html).toContain("tl-rail");
-    /* ⚠️ THE DATE LABEL IS A WEEK TILE NOW (v60's `data-rail="tiles"`), AND THE TICK WENT WITH IT.
-       A tile is a parchment card standing on its own date — Playfair numeral over a mono month —
-       so a tick beneath it would be a second, thinner claim about the same pixel; the ref states
-       `.wktick { display: none }` under tiles for exactly that reason. */
-    /* ⚠️ THE TILE RAIL IS RETIRED (v62). It put a bordered card on every week — thirteen objects
-       competing with the cards below them on a scale that only needs to be legible. The date row is
-       two tiers of plain type: mono month caps at their boundaries, day numerals beneath, and today
-       a filled rose circle. The claim is unchanged and again names what exists. */
-    expect(html).not.toContain("tl-rtile");
-    expect(html).toContain("tl-dt");
-    expect(html).not.toContain("tl-tick");
-    expect(html).not.toContain("tl-hrow");
-    /* the six sections, and the number column that runs down their side */
-    expect(html).toContain("tl-grp");
-    expect(html).toContain("tl-gnums");
-    /* ⚠️ THE BADGE IS NOT ASSERTED HERE, AND THAT IS THE POINT OF THE SPLIT. This fixture is a
-       dated TASK — a task carries no status, so it carries no `StatusDot` and no `.tl-medal`. An
-       assertion about the badge on this fixture would be a test handing a function an input its
-       subject cannot produce, which this repo records as testing the wrong artefact. The badge's
-       size, its overhang and its `transform: none` are measured on a real board in
-       `calSurface60.measure.ts`, where there are relationships to draw one for. */
-    /**
-     * ⚠️ THE GROUP HEADING IS A MODE SINCE v37, NOT THE DEFAULT. The board opens on ONE LIST, which
-     * has no headings at all — so "Your tasks" and its sentence are not on the page, and this
-     * assertion has been red since that shipped. The claim it was making is that a dated task
-     * REACHES the board, which is this case's whole title; the heading was how it used to be
-     * visible, never what it was about.
-     *
-     * The task's own row is what carries it now, so the assertion follows the task rather than the
-     * furniture it used to sit under.
-     */
-    expect(html).toContain("Redraft the opening");
-    expect(html).toContain("tl-rrow");
-    /* exactly ONE column header in the document, however many groups there are */
-    /* ⚠️ ONE RAIL FOR THE WHOLE BOARD, however many groups there are — the claim that used to be
-       "exactly one in-card header" and is stronger as a rail: it is the page's own and cannot
-       scroll away with a card. */
-    /* ⚠️ THE EXACT ATTRIBUTE, NEVER THE SUBSTRING. `tl-rail` is a prefix of `tl-railtl` — the
-       rail's own timeline column — so a bare split counted two and reported the rail as drawn per
-       group. The house rule, met on its own ground: a class-name lock bounds its token. */
-    expect(html.split('class="tl-rail"').length - 1, "the rail is drawn per group").toBe(1);
-  });
 
   /* tasks-pages P4 — the Noteboard is real too. Empty AND populated. */
   it("the Noteboard renders, teaches when empty, and carries no sidebar", () => {

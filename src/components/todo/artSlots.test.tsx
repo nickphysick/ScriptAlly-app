@@ -147,8 +147,10 @@ describe("⚠️ WHERE ART DOES NOT GO — the two rejections, enforced", () => 
     const noteCard = sliceBetween(noteboard, "const noteInner = (n: UserTask) => (", "const composeItem");
     expect(noteCard).not.toContain("ArtSlot");
     expect(readFileSync(join(here, "CorkBoard.tsx"), "utf8"), "the board grew art inside an item").not.toContain("ArtSlot");
-    const calendar = readFileSync(join(here, "TodoCalendarPage.tsx"), "utf8");
-    expect(calendar).not.toContain("ArtSlot"); // no pip, no cell, nowhere
+    /* the Calendar page's half retired with the page (29 Oct); its board lives on in the shared timeline */
+    for (const f of ["TimelineBoard.tsx", "boardParts.tsx"]) {
+      expect(readFileSync(join(here, "..", "shared", "timeline", f), "utf8"), f).not.toContain("ArtSlot");
+    }
   });
 
   it("the component itself names both rejections, so the next reader inherits the reasoning", () => {

@@ -56,7 +56,9 @@ describe("dashList — the order is fixed: waiting → nudge → gone quiet → 
     const plan = listPlan(make({ coming: 3 }));
     expect(plan.groups.map((g) => g.key)).toEqual(["coming"]);
     expect(LIST_LABEL[focusOf(plan, 0).item!.group].toUpperCase()).toBe("COMING UP");
-    expect(plan.all.label).toBe("Calendar");
+    /* the Calendar page was retired 29 Oct: "coming up" now opens the To-do list, which carries the calendar */
+    expect(plan.all.label).toBe("To-do list");
+    expect(plan.all.sub).toBeUndefined();
   });
 
   it("ready to query never shows beside work, and coming up never beside anything", () => {

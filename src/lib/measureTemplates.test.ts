@@ -68,14 +68,18 @@ describe("the calendar's measurement files cannot terminate their own evaluate s
   });
 
   it("finds the templates to check — a sweep over none proves nothing", () => {
+    /* ⚠️ TWO SINCE 29 OCT: the Calendar page was retired and its seventy-odd measure files with it
+       (tests/e2e/RETIRED-retire-calendar-v1.md). The scope stays the calendar's: widened to every
+       measure file, this checker misreads a `.replace("__T__", …)` templating idiom as an early close,
+       and loosening it until that stops would loosen it for every real offender too. */
     expect(FILES.length, "no calendar measure files found — the listing is broken, not the files")
-      .toBeGreaterThan(3);
+      .toBeGreaterThanOrEqual(2);
     for (const f of FILES) {
       expect(readFileSync(join(process.cwd(), f), "utf8").length, `${f} is missing or empty`)
         .toBeGreaterThan(400);
     }
     const src = FILES.map((f) => readFileSync(join(process.cwd(), f), "utf8")).join("\n");
     const n = [...src.matchAll(/page\.evaluate\(/g)].length;
-    expect(n, "no page.evaluate calls found — the extraction is broken, not the file").toBeGreaterThan(4);
+    expect(n, "no page.evaluate calls found — the extraction is broken, not the file").toBeGreaterThanOrEqual(2); // one per surviving file since 29 Oct
   });
 });

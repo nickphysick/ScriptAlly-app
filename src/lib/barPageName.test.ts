@@ -20,7 +20,7 @@ describe("barPageName — the sidebar's own section heading and label", () => {
     /* Submission packages v26: the Materials group is "Your book"; the packages page sits under Queries */
     expect(name("/manuscripts/comps")).toEqual({ section: "Your book", name: "Comparable titles" });
     expect(name("/queries/packages")).toEqual({ section: "Queries", name: "Submission packages" });
-    expect(name("/todo/calendar")).toEqual({ section: "Tasks", name: "Calendar" });
+    expect(name("/todo/corkboard")).toEqual({ section: "Tasks", name: "Corkboard" });
     expect(name("/account/profile")).toEqual({ section: "Account", name: "Settings" });
   });
   /* ⚠️ THE SIDEBAR HEADS DASHBOARD WITH "WORKSPACE" NOW (sidebar metrics pass); the bar keeps naming it

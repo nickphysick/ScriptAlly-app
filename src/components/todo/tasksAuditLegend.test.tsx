@@ -10,7 +10,14 @@ import { join } from "node:path";
 import { CAL_PIP, CAL_LEGEND } from "../../lib/todoFamily";
 
 const here = __dirname;
-const page = readFileSync(join(here, "TodoCalendarPage.tsx"), "utf8");
+/* RE-POINTED (Calendar page retired 29 Oct): "no render site" is now asserted over the board's two files and the
+   To-do list's own calendar, the surfaces that still draw a calendar. */
+const page = [
+  join(here, "..", "shared", "timeline", "TimelineBoard.tsx"),
+  join(here, "..", "shared", "timeline", "boardParts.tsx"),
+  join(here, "v5", "TrayCalendar.tsx"),
+  join(here, "v5", "TrayCalDrawer.tsx"),
+].map((f) => readFileSync(f, "utf8")).join("\n");
 const family = readFileSync(join(here, "..", "..", "lib", "todoFamily.ts"), "utf8");
 const cal = readFileSync(join(here, "..", "..", "lib", "todoCalendar.ts"), "utf8");
 const themes = readFileSync(join(here, "..", "..", "..", "design-refs", "themes.md"), "utf8");

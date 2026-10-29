@@ -30,7 +30,7 @@ export const LIGHT_HEADER_SEL = '[data-cl17="header"], [data-cl17="empty-header"
 /* RE-POINTED (Discover v1, 18 Oct): /agents/discover LEFT this list — its header is page-local (OWN_HEADER_ROUTES), the
    light two-state header or the navy panel, never the shared panel P1 measures; DV1 B1 holds it. It contributed 26 of the
    base run's 351 readings, so the floor (320) still stands at 325 without it. */
-export const WORKSPACE = ["/queries/analytics", "/agents", "/manuscripts", "/manuscripts/comps", "/queries/packages", "/todo", "/todo/calendar", "/todo/corkboard"] as const;
+export const WORKSPACE = ["/queries/analytics", "/agents", "/manuscripts", "/manuscripts/comps", "/queries/packages", "/todo", "/todo/corkboard"] as const;
 /** routes that must not change */
 export const OUT_OF_SCOPE = ["/dashboard", "/account", "/help", "/plans"] as const; // "/import" left this list with onboarding v5 part 3: its page was rebuilt (lock IP1 D1 holds it now)
 export const PANEL_BG = "rgb(45, 58, 80)";
