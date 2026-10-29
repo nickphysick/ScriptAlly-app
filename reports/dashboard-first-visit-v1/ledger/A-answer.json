@@ -1,0 +1,14 @@
+[
+ {
+  "lock": "A6",
+  "where": "the answer survives a reload",
+  "ok": true,
+  "detail": "yes → notyet → read back notyet"
+ },
+ {
+  "lock": "A7",
+  "where": "the tip moved on by one visit",
+  "ok": true,
+  "detail": "0 → 1"
+ }
+]

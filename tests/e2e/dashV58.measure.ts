@@ -277,7 +277,8 @@ const readRight = (page: Page) => page.evaluate(() => {
    order and the absence of the title, "All {n}" and the hairline. */
 
 const LABEL: Record<string, string> = { req: "Agents are waiting", nudge: "Worth a nudge", quiet: "Gone quiet", house: "Housekeeping", ready: "Ready to query", coming: "Coming up" };
-const ORDER = ["req", "nudge", "quiet", "house", "ready", "coming"];
+/* RE-POINTED (Dashboard first visit v1): Getting started is a page between the real tasks and housekeeping (Part C) */
+const ORDER = ["req", "nudge", "quiet", "start", "house", "ready", "coming"];
 
 const KIND_KICKER: Record<string, string> = { nudge: "Time to nudge", close: "Consider closing", send: "Your move" };
 
@@ -289,16 +290,17 @@ test("DB58 R2 — the fixed order, on the rendered page", async ({ page }) => {
   const states: { name: string; drop: string[] }[] = [
     { name: "A as the account stands", drop: [] },
     { name: "B no agents waiting", drop: ["req"] },
-    { name: "C housekeeping only", drop: ["req", "nudge", "quiet"] },
-    { name: "D ready to query", drop: ["req", "nudge", "quiet", "house"] },
-    { name: "E coming up", drop: ["req", "nudge", "quiet", "house", "ready"] },
+    /* RE-POINTED (first visit v1): states C–E test what FOLLOWS Getting started, so they leave it out as well */
+    { name: "C housekeeping only", drop: ["req", "nudge", "quiet", "start"] },
+    { name: "D ready to query", drop: ["req", "nudge", "quiet", "start", "house"] },
+    { name: "E coming up", drop: ["req", "nudge", "quiet", "start", "house", "ready"] },
   ];
   const tally: Record<string, number> = {};
   for (const s of states) {
     await openDash(page, vp, { __SA_DASH_DROP: s.drop });
     const r = await readRight(page);
     const live = ORDER.filter((k) => !s.drop.includes(k) && (r.counts[k] ?? 0) > 0);
-    const work = live.filter((k) => ["req", "nudge", "quiet", "house"].includes(k));
+    const work = live.filter((k) => ["req", "nudge", "quiet", "start", "house"].includes(k));
     const expectFirst = work[0] ?? (live.includes("ready") ? "ready" : "coming");
     const shown = work.length ? work : [expectFirst];
     const n = shown.reduce((t, k) => t + (r.counts[k] ?? 0), 0);
@@ -306,7 +308,7 @@ test("DB58 R2 — the fixed order, on the rendered page", async ({ page }) => {
     if (r.focus) tally[r.focus.group ?? "?"] = (tally[r.focus.group ?? "?"] ?? 0) + 1;
     L.check("R2", `${s.name} · the first item is the first group's`, (r.focus?.group ?? "coming") === expectFirst, `first ${r.focus?.group} · expected ${expectFirst} from ${JSON.stringify(r.counts)}`);
     L.check("R2", `${s.name} · label`, !r.focus || r.focus.label === (KIND_KICKER[r.focus.kind] ?? LABEL[r.focus.group ?? ""]), `"${r.focus?.label}" (${r.focus?.kind})`);
-    L.check("R2", `${s.name} · the count is every item shown`, !r.focus || (n > 1 ? r.focus.pos === `1 OF ${n}` : !r.focus.pos), `"${r.focus?.pos}" for ${n}`);
+    L.check("R2", `${s.name} · the count is every item shown`, !r.focus || (n > 1 ? r.focus.pos === `1 of ${n}` : !r.focus.pos), `"${r.focus?.pos}" for ${n}`);
     L.check("R2", `${s.name} · View task`, !r.focus || r.focus.act === "View task →", `"${r.focus?.act}"`);
     /* RETIRED (Dashboard v71): the coming-up "Add an agent / Discover agents" pair — the column is two cards */
     if (r.focus && n > 1) {
@@ -314,7 +316,7 @@ test("DB58 R2 — the fixed order, on the rendered page", async ({ page }) => {
       await page.locator('[data-d71="next"]').click();
       await page.waitForTimeout(250);
       const r2 = await readRight(page);
-      L.check("R2", `${s.name} · › steps to the second`, r2.focus?.pos === `2 OF ${n}` && r2.focus.key !== first, `"${r2.focus?.pos}" · ${first} → ${r2.focus?.key}`);
+      L.check("R2", `${s.name} · › steps to the second`, r2.focus?.pos === `2 of ${n}` && r2.focus.key !== first, `"${r2.focus?.pos}" · ${first} → ${r2.focus?.key}`);
     }
     const name = s.name[0] === "C" ? "state-housekeeping" : s.name[0] === "D" ? "state-ready" : s.name[0] === "E" ? "state-coming-up" : null;
     if (name) for (const v of [SIZES[0], SIZES[2]]) { await openDash(page, v, { __SA_DASH_DROP: s.drop }); await shot(page, name, v); }
@@ -380,7 +382,7 @@ test("DB58 A1–A2 — the activity feed: the tab, the drawer and its rows", asy
     L.check("A1", `${w} the oat wash, no dark dim`, d.wash === "rgba(242, 238, 232, 0.55)" && /blur\(2px\)/.test(d.blur ?? ""), `${d.wash} · ${d.blur}`);
     L.check("A1", `${w} width`, !!d.width && Math.abs(d.width.w - d.width.cap) <= 1.5, JSON.stringify(d.width));
     L.check("A1", `${w} focus is inside`, d.focusInside, "focus moved into the drawer");
-    L.check("A1", `${w} summary`, d.sum.length === 3 && /repl(y|ies) from/.test(d.sum[0]) && /things? you did/.test(d.sum[1]) && /still needs? you/.test(d.sum[2]), d.sum.join(" | "));
+    L.check("A1", `${w} summary`, d.sum.length === 3 && /* RE-POINTED (first visit v1, D4): a zero figure reads in words */ /repl(y|ies) from|No replies yet/.test(d.sum[0]) && /things? you did|Nothing logged yet/.test(d.sum[1]) && /still needs? you|Nothing needs you/.test(d.sum[2]), d.sum.join(" | "));
     const ins = d.evs.filter((e) => e.dir === "in"), outs = d.evs.filter((e) => e.dir === "out");
     console.log(`  A2 ${w}: ${ins.length} from agents · ${outs.length} by you · ${d.evs.filter((e) => e.need).length} open · ${d.evs.filter((e) => e.met).length} met`);
     L.check("A2", `${w} population, both kinds`, ins.length > 0 && outs.length > 0, `${ins.length} in · ${outs.length} out`);
