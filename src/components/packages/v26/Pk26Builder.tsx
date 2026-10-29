@@ -21,7 +21,7 @@
  *    test. ITS NAME STAYS EDITABLE IN PLACE (Nick, 28 Oct, over the v39 mock): renaming is filing, not misreporting,
  *    which is v40's own reasoning and what the rules allow.
  */
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { PACKAGE_ICONS, type PackageIcon, type SubmissionPackage } from "../../../types";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
@@ -248,12 +248,21 @@ const NameInPlace: React.FC<{ model: Pk26Model; p: SubmissionPackage }> = ({ mod
 const LookPicker: React.FC<{ model: Pk26Model; p: SubmissionPackage; anchor: HTMLElement; onClose: () => void }> = ({ model, p, anchor, onClose }) => {
   const box = useRef<HTMLDivElement | null>(null);
   useEscapeLayer(true, onClose, ESC_LEVEL.page);
+  /* below the tile, 10 clear; v39.2: ABOVE it when there is no room below. It is portalled and fixed, so a picker that
+     opened under the fold could not be scrolled to (the panel's padding put the tile on the fold at 1280 × 832). */
+  const place = () => {
+    const r = anchor.getBoundingClientRect(), h = box.current?.offsetHeight ?? 0;
+    const below = r.bottom + 10, above = r.top - 10 - h;
+    return { left: r.left, top: h && below + h > window.innerHeight - 8 && above >= 8 ? above : below };
+  };
   const [pos, setPos] = useState(() => { const r = anchor.getBoundingClientRect(); return { left: r.left, top: r.bottom + 10 }; });
+  /* once the box has a height, place it for real, before the first paint */
+  useLayoutEffect(() => { setPos(place()); }, []); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     /* focus moves in on open */
     box.current?.querySelector<HTMLButtonElement>("button[aria-pressed='true']")?.focus();
     const down = (e: PointerEvent) => { const t = e.target as Node; if (box.current?.contains(t) || anchor.contains(t)) return; onClose(); };
-    const move = () => { const r = anchor.getBoundingClientRect(); setPos({ left: r.left, top: r.bottom + 10 }); };
+    const move = () => setPos(place());
     document.addEventListener("pointerdown", down, true);
     window.addEventListener("scroll", move, true);
     window.addEventListener("resize", move);
