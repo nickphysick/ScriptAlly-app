@@ -16,6 +16,7 @@ import { marketingNavState, MarketingNavUser } from "./marketingNav";
 import { BRAND_MARK, artUrl } from "./brandArt";
 import { MarketingFooter } from "./MarketingFooter";
 import { usePhone } from "./usePhone";
+import { HERO_CTA } from "./landingCopy";
 
 /* ── The brand artwork: the hawk and the drawn wordmark ──
    Both sit in public/ rather than src/assets/ so they are served at stable paths — and public/ is
@@ -161,6 +162,12 @@ export const MarketingShell: React.FC<{
     { label: "Pricing", go: () => onNavigate("pricing"), current: path === "/pricing" },
     { label: "Contact", go: () => onNavigate("contact"), current: path === "/contact" },
   ];
+  /* The phone menu adds the founding page between Pricing and Contact (public pages on phones v1, 4B).
+     The bar's links and the 761–960 burger panel keep the four: on those widths the founding page is
+     the nav's own CTA. */
+  const MENU_LINKS = phone
+    ? [...LINKS.slice(0, 3), { label: "Founding writers", go: () => onNavigate("founders"), current: path === "/founders" }, LINKS[3]]
+    : LINKS;
   const pick = (go: () => void) => () => { closeMenu(); go(); };
 
   return (
@@ -247,7 +254,7 @@ export const MarketingShell: React.FC<{
             ground; it is only reachable below the breakpoint, where the links are hidden. */}
         {menuOpen && (
           <div className="mk-navpanel" id="mk-navpanel" ref={panelRef}>
-            {LINKS.map((l) => (
+            {MENU_LINKS.map((l) => (
               <button key={l.label} type="button" onClick={pick(l.go)}
                       aria-current={l.current ? "page" : undefined}>
                 {l.label}
@@ -257,6 +264,15 @@ export const MarketingShell: React.FC<{
               <button type="button" onClick={pick(() => { window.location.hash = "#/login"; })}>
                 Log in
               </button>
+            )}
+            {/* The phone menu ends on the founding offer: the landing's join bar's own primary and its
+                own destination (public pages on phones v1, 4B). Anonymous only, as the desktop CTA is. */}
+            {phone && nav.mode === "anon" && (
+              <div className="mk-navjoinwrap">
+                <button type="button" className="mk-navjoin" onClick={pick(() => onNavigate("founders"))}>
+                  {HERO_CTA}
+                </button>
+              </div>
             )}
           </div>
         )}

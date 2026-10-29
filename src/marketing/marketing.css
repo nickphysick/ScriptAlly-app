@@ -235,6 +235,9 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   --mk-pv-cardline: rgba(28, 19, 15, .08);
   --mk-pv-cardlift: 0 1px 2px rgba(28, 19, 15, .05), 0 22px 44px -24px rgba(28, 19, 15, .35);
   --mk-pv-perklift: 0 0 0 1px rgba(28, 19, 15, .08), 0 6px 14px -10px rgba(28, 19, 15, .2);
+  /* The join bar's Join pill: the phone's founding primary on ink. A token since the phone menu's
+     closing button wears it too (public pages on phones v1). */
+  --mk-join: #e8b4a3;
   /* Burgundy at low alpha — the illustration slot's placeholder chrome. Pre-computed, per the
      repo's no-colour-mix() rule. */
   --mk-illo-rim: rgba(162, 69, 42, 0.34);
@@ -3016,7 +3019,7 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-jbc i { width: 64px; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, .16); overflow: hidden; }
 .mk-jbc em { display: block; min-width: 4px; height: 100%; background: #e8b4a3; }
 .mk-jbj {
-  height: 40px; padding: 0 18px; border-radius: 12px; background: #e8b4a3; color: #1c130f;
+  height: 40px; padding: 0 18px; border-radius: 12px; background: var(--mk-join); color: #1c130f;
   display: grid; place-items: center; font: 600 15px/1 var(--mk-f-serif);
 }
 .mk-jbar:focus-visible { outline: 2px solid #e8b4a3; outline-offset: 2px; }
@@ -3078,6 +3081,9 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
     font-family: var(--mk-f-sans); font-size: 13px; letter-spacing: 0; text-transform: none;
   }
   .mk-jbc { font-family: var(--mk-f-sans); font-size: 12.5px; letter-spacing: 0; }
+  /* And Pricing's sticky founding bar ("38 places left · Founding writers"), mono capitals at .6rem,
+     found by PP1's walk down the page (the bar only shows once the box has scrolled away). */
+  .mk-pvlayer.mk-pvstick p { font-family: var(--mk-f-sans); font-size: 13px; letter-spacing: 0; text-transform: none; }
   .mk-seclabel { font-family: var(--mk-f-sans); font-size: 12.5px; letter-spacing: 0; }
 }
 
@@ -3092,7 +3098,7 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   .mk-footgrid { grid-template-columns: 1fr 1fr; gap: 8px 20px; }
   .mk-footbrand { grid-column: 1 / -1; margin-bottom: 12px; }
   .mk-footcol ul { gap: 0; }
-  .mk-footcol button { min-height: 44px; display: flex; align-items: center; box-sizing: border-box; }
+  .mk-footcol button { min-height: 44px; min-width: 44px; display: flex; align-items: center; box-sizing: border-box; }
 
   .mk-cbtn { background: var(--mk-navy); color: #fff; }
   .mk-cbtn:hover { background: var(--mk-navy-hov); }
@@ -3162,4 +3168,31 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   /* Centred, as the board draws it; the letter below it reads left-aligned. */
   .mk-aplate.mk-noteart { width: 72px; height: 72px; margin: 0 auto 14px; }
   .mk-notecol { padding: 0; }
+}
+
+/* ── C: tap targets and the phone menu ──
+   Each small link gets a 44px hit area from an empty `::after` centred on it — at least the link's own
+   box, at least 44 × 44 — so nothing it sits beside moves. `publicPhonePolish.measure.ts` P5 samples
+   the hit boxes with `elementFromPoint` (a pseudo-element hits as its element) and fails on any pair
+   that overlaps.
+   ⚠️ NOT THE "Privacy" THAT ENDS THE FOUNDING NOTES (`.mk-betanote .mk-doclink`). It closes a sentence
+   rather than standing on a line, and a 44px area there overlaps the claim button above it by 6px
+   and Pricing's "What founding writers get" below by 9px — measured, then removed.
+   The menu ends with the founding button: the join bar's pill colour, full width, 48px. */
+@media (max-width: 760px) {
+  .mk-nav .mk-brand-link, .mk-lg, .mk-burger, .mk-vlink, .mk-ccmore, .mk-lsuit, .mk-footmail,
+  .mk-cfine .mk-doclink { position: relative; }
+  .mk-nav .mk-brand-link::after, .mk-lg::after, .mk-burger::after, .mk-vlink::after, .mk-ccmore::after, .mk-lsuit::after, .mk-footmail::after,
+  .mk-cfine .mk-doclink::after {
+    content: ""; position: absolute; left: 50%; top: 50%;
+    width: max(100%, 44px); height: max(100%, 44px); transform: translate(-50%, -50%);
+  }
+
+  .mk-navjoinwrap { padding: 16px 0 4px; }
+  .mk-navpanel .mk-navjoin {
+    display: flex; align-items: center; justify-content: center; width: 100%; min-height: 48px;
+    padding: 0 18px; border: 0; border-radius: 999px; background: var(--mk-join); color: #1c130f;
+    font: 600 16px/1.2 var(--mk-f-serif); text-align: center;
+  }
+  .mk-navpanel .mk-navjoin:focus-visible { outline: 2px solid var(--mk-join); outline-offset: 3px; }
 }

@@ -375,3 +375,10 @@
   box-shadow: inset 0 0 0 1px rgba(28,19,15,.12); font: 600 16px/1 var(--mk-f-sans); color: #2a3a52;
 }
 @media (prefers-reduced-motion: reduce) { .mk-pillpop, .mk-lc-att .mk-taskchip { display: none; } }
+
+/* Public pages on phones v1 (29 Oct): the drawer's privacy note under its sign-up was 10.5px, the one
+   line on the landing under 12px once the drawer has grown (publicPhonePolish P2). 12px, and nothing
+   else about the drawer or the card above it changes. */
+@media (max-width: 760px) {
+  .mk-hp-su .mk-betanote { font-size: 12px; }
+}

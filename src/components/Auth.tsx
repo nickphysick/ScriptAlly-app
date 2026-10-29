@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useScriptAllyDb } from "../lib/db";
 import { SetupFrame, ACCOUNT_GROUP } from "./onboarding/SetupFrame";
@@ -79,6 +79,20 @@ export const Auth: React.FC<{ initialMode?: "login" | "signup"; lab?: AuthLabSta
     setErrs({});
     setBanner(null);
   };
+
+  /* ⚠️ THE SCREEN FOLLOWS THE ADDRESS (public pages on phones v1). App already listens for
+     `hashchange` (`useHash`) and hands a new `initialMode` when the address moves between #/login
+     (or #/signin) and #/signup — but this component seeded its mode from the prop once and never
+     looked again, so going from #/login to #/signup with no reload kept showing Sign in. The listener
+     stays App's; this only follows the prop it passes. Nothing is remounted, so a typed email stays. */
+  const firstMode = useRef(true);
+  useEffect(() => {
+    if (firstMode.current) { firstMode.current = false; return; }
+    if (!initialMode) return;
+    setView("auth");
+    switchMode(initialMode === "login" ? "signin" : "signup");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialMode]);
 
   // ── Email / password ────────────────────────────────────────────────────────────────────────
   const handleSubmit = async (e: React.FormEvent) => {

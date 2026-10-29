@@ -529,3 +529,25 @@
 @media (max-width: 399.98px) {
   .sf--account .ws-ftg { display: none; }
 }
+
+/* C: 44px hit areas in the account frame (public pages on phones v1). An empty `::after` on each small
+   control, so nothing visible moves. "Forgot?" reaches UP from its baseline and the eye's area sits
+   low, so the two (stacked at the field's right edge) never overlap. The recessed sibling tab grows
+   up to the tab row's full 44px. */
+@media (max-width: 767.98px) {
+  .sf--account .sf-exit, .sf--account .sf-link, .sf--account .ws-ftsib { position: relative; }
+  .sf--account .sf-exit::after, .sf--account .sf-link::after {
+    content: ""; position: absolute; left: 50%; top: 50%;
+    width: max(100%, 44px); height: max(100%, 44px); transform: translate(-50%, -50%);
+  }
+  .sf--account .sf-link--quiet::after { top: auto; bottom: 0; transform: translateX(-50%); }
+  .sf--account .sf-eye::after { content: ""; position: absolute; inset: -4px -6px -8px; }
+  .sf--account .ws-ftsib::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 44px; }
+}
+/* ⚠️ AFTER THE BLOCK ABOVE, BECAUSE IT OVERRIDES IT AT EQUAL SPECIFICITY. Below 400px the recessed
+   sibling tab shows only a sliver (29px at 360) before the row clips it, so its tap area reaches 16px
+   left, over the active tab's end, which is not a control; `z-index` puts that area above the tab. */
+@media (max-width: 399.98px) {
+  .sf--account .ws-ftsib { z-index: 1; }
+  .sf--account .ws-ftsib::after { left: -16px; }
+}
