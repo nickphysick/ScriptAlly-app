@@ -19,6 +19,7 @@
  *   node tests/e2e/seedPk40.mjs           # write (clean first)
  *   node tests/e2e/seedPk40.mjs --dump    # print the packages and the manuscript, as stored
  *   node tests/e2e/seedPk40.mjs --clean   # remove every pk40- document
+ *   node tests/e2e/seedPk40.mjs --agents     # print the agents and the agent ids queried for pk40-ms (v39.3 L11)
  *   node tests/e2e/seedPk40.mjs --long-name  # write, with the second letter named in 40 characters (v39.2 L7); a plain
  *                                            # write puts the short name back
  *
@@ -61,6 +62,13 @@ async function clean() {
 }
 
 if (process.argv.includes("--clean")) { console.log(`removed ${await clean()}`); process.exit(0); }
+if (process.argv.includes("--agents")) {
+  /* v39.3 L11: the agents on file and who has been queried for pk40-ms — the preview's "To" must be one of the others */
+  const agents = (await getDocs(collection(db, "users", uid, "agents"))).docs.map((d) => ({ id: d.id, name: d.data().name ?? "", agency: d.data().agency ?? "" }));
+  const queried = (await getDocs(collection(db, "users", uid, "queries"))).docs.map((d) => d.data()).filter((q) => q.manuscriptId === MS).map((q) => q.agentId);
+  console.log(JSON.stringify({ agents, queried }));
+  process.exit(0);
+}
 if (process.argv.includes("--dump")) {
   const out = {};
   for (const id of ["pk40-std", "pk40-std2", "pk40-ready", "pk40-draft", "pk40-old"]) out[id] = (await getDoc(ref("packages", id))).data() ?? null;
@@ -83,11 +91,14 @@ b.set(ref("manuscripts", MS), {
   ],
   inUseBookVersionId: "pk40-v1",
 });
-const mat = (id, name, days, type) => b.set(ref("versions", id), {
+const mat = (id, name, days, type, extra = {}) => b.set(ref("versions", id), {
   id, userId: uid, manuscriptId: MS, componentType: type, versionName: name, fileAttached: false,
-  createdDate: iso(days), contentType: "text", contentDraft: `${name} — Dear agent, …`, wordCount: 4,
+  createdDate: iso(days), contentType: "text", contentDraft: `${name} — Dear agent, …`, wordCount: 4, ...extra,
 });
-mat("pk40-let-a", "Hook-first", 80, "Query Letter");
+/* v39.3 L11: a letter whose STORED TEXT and summary differ, so the preview can be shown to quote the text, never the summary */
+const LETTER_A_TEXT = "Murphy has twelve hours to get his father's ashes across the Irish Sea before his sister finds out he took them. MURPHY'S DAY OUT is an 84,000-word literary mystery about grief, siblings and a very long ferry crossing.";
+const LETTER_A_SUMMARY = "Names The Trees, Small Pleasures";
+mat("pk40-let-a", "Hook-first", 80, "Query Letter", { contentDraft: LETTER_A_TEXT, notes: LETTER_A_SUMMARY, wordCount: 38 });
 /* v39.2 L7: a 40-character name, to prove the materials row never cuts a name off */
 const LONG_NAME = "Comps-forward, for agents who ask for it";
 mat("pk40-let-b", process.argv.includes("--long-name") ? LONG_NAME : "Comps-forward", 40, "Query Letter");

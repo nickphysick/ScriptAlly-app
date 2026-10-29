@@ -278,7 +278,14 @@ export const Pk393Builder: React.FC<Pk393Props> = (props) => {
   const [open, setOpen] = useState<StepKey | null | undefined>(undefined);
   const [hov, setHov] = useState<string | null>(null);
   useEffect(() => { setOpen(undefined); }, [p.id]);
-  useEffect(() => { if (props.askStep && !locked) setOpen(props.askStep); }, [props.askStep]); // eslint-disable-line react-hooks/exhaustive-deps
+  /* a deep link's step opens once, on the package it lands on (declared after the reset above, so it wins when the link
+     also switches package); a sent package's steps never open */
+  const asked = useRef<string | null>(null);
+  useEffect(() => {
+    if (!props.askStep || locked || asked.current === props.askStep) return;
+    asked.current = props.askStep;
+    setOpen(props.askStep);
+  }, [props.askStep, p.id, locked]);
   const eff: StepKey | null = locked ? null : open === undefined ? nextMissing(p) : open;
   useEscapeLayer(eff != null, () => setOpen(null), ESC_LEVEL.page);
   const pick = async (k: StepKey, id: string) => {

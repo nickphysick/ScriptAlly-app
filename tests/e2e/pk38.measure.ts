@@ -100,20 +100,23 @@ test.beforeAll(() => { console.log(seed()); });
 test.afterAll(() => { console.log(seed("--clean")); });
 
 /* ── L1 · one page, no tabs ── */
-test("L1 no tab bar and no Letters/Synopses page; ?tab=syn opens Your materials on Synopses", async ({ page }) => {
+test("L1 no tab bar and no Letters/Synopses page; ?tab=syn opens the Synopsis step", async ({ page }) => {
   test.setTimeout(180_000);
   const L = new Ledger("L1");
   await open(page, SIZES[0]);
   L.check("the page rendered (labels present)", (await page.locator(`${pg} [data-pk38="labels"]`).count()) === 1, "labels");
   L.check("no tab bar", (await page.locator(`${pg} [data-pk26="tabs"], ${pg} .p6-ptabs`).count()) === 0, "tabs");
   L.check("no Letters/Synopses page", (await page.locator(`${pg} [data-pk26="materials"]`).count()) === 0, "materials");
-  L.check("Your materials is on the page", (await page.locator(`${pg} [data-pk26="lib"]`).count()) === 1, "lib");
-  await open(page, SIZES[0], "pk40-ms", "/queries/packages?tab=syn");
-  const sel = await page.evaluate(() => [...document.querySelectorAll('[data-pk26="lib"] [role="tab"]')].map((b) => `${(b as HTMLElement).innerText.replace(/\s+/g, " ").trim()}=${b.getAttribute("aria-selected")}`));
-  L.check("Your materials' tabs read", sel.length === 3, JSON.stringify(sel));
-  L.check("?tab=syn → Synopses selected", sel.some((s) => /^Synopses/.test(s) && s.endsWith("=true")), JSON.stringify(sel));
-  L.check("…and only Synopses", sel.filter((s) => s.endsWith("=true")).length === 1, JSON.stringify(sel));
-  const rows = await txt(page, `${pg} [data-pk26="lib-list"] .p9-lr`);
+  /* v39.3 REWRITE: Your materials is retired; ?tab=syn opens the builder's Synopsis step instead */
+  L.check("the builder's steps are on the page, and no Your materials", (await page.locator(`${pg} [data-pk393-step]`).count()) === 4 && (await page.locator(`${pg} [data-pk26="lib"]`).count()) === 0, "steps");
+  /* a live package (the active one is sent, and a sent package's steps never open) */
+  await open(page, SIZES[0], "pk40-ms", "/queries/packages?tab=syn&pkg=pk40-ready");
+  await page.waitForTimeout(600);
+  const st = await page.evaluate(() => [...document.querySelectorAll('[data-pk393-step]')].map((s) => `${(s as HTMLElement).dataset.pk393Step}=${s.classList.contains("p93-open")}`));
+  L.check("the steps were read", st.length === 4, JSON.stringify(st));
+  L.check("?tab=syn → the Synopsis step is open", st.includes("syn=true"), JSON.stringify(st));
+  L.check("…and only that step", st.filter((x) => x.endsWith("=true")).length === 1, JSON.stringify(st));
+  const rows = await txt(page, `${pg} [data-pk393-step="syn"] [role=radio]`);
   L.check("…listing the synopsis", rows.some((r) => r.includes("One-page")), JSON.stringify(rows));
   L.done(8);
 });
@@ -305,8 +308,12 @@ test("L8 no visible element on the page or its layers is mono AND uppercase, but
     }
     if (ms === "pk40-ms") {
       /* v39.2: Your materials opens on Versions, which have no Edit; a letter's Edit opens the material drawer */
-      await page.locator(`${pg} [data-pk26="lib"] .p9-lib-tabs .p9-t-let`).first().click({ timeout: 5000 }).catch(() => {});
-      await page.locator(`${pg} [data-pk26="lib"] .p9-lr-ed`).first().click({ timeout: 5000 }).catch(() => {});
+      /* v39.3: a letter's Edit pencil, in the builder's letter step, opens the material drawer — on a live package (the
+         active one is sent, and a sent package's steps are read-only) */
+      await page.locator(`${pg} [data-pk39="labels"] [data-pkid="pk40-ready"]`).first().click({ timeout: 5000 }).catch(() => {});
+      await page.waitForTimeout(600);
+      await page.locator(`${pg} [data-pk393-step="let"] [data-pk393="step-head"]`).first().click({ timeout: 5000 }).catch(() => {});
+      await page.locator(`${pg} [data-pk393-step="let"] [data-pk393="edit"]`).first().click({ timeout: 5000 }).catch(() => {});
       await page.waitForTimeout(700);
       L.check(`${ms} · the material drawer opened`, (await page.locator(".p6-cx-drw.p6-on").count()) === 1, "drawer");
       const dh = await monoCensus(page);

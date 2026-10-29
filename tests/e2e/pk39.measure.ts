@@ -62,10 +62,6 @@ const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   L2: { css: `.p9-pkl .p9-pkl-row .p9-pkl-b.p9-pkl-b.p9-pkl-b { background-color: #1d4b63 !important; }` },
   /* L3: the labels stop sharing the row, and (v39.1) the selected one is ringed again */
   L3: { css: `.p9-pkl .p9-pkl-row .p9-pkl-b.p9-pkl-b { flex: 0 0 150px !important; min-width: 150px !important; } .p9-pkl .p9-pkl-b.p9-on.p9-on.p9-on { box-shadow: 0 0 0 4px rgba(29,75,99,.35) !important; }` },
-  /* L4tab (v39.2): the materials tab drops back into its card, 40 below the package card's top */
-  L4tab: { css: `.p6 .p9-pb-grid.p9-v39 .p9-pb-lib .p9-lib-top.p9-lib-top.p9-lib-top { position: static !important; }` },
-  /* L4: the cards close up */
-  L4: { css: `.p9-pb-grid.p9-v39.p9-v39.p9-v39 { gap: 8px !important; }`, js: watch(`const s = document.querySelector('[data-pk40="open"] [data-pk39="status"]'); if (s && !s.nextElementSibling?.matches('[data-pk39="stage"]')) { const d = document.createElement('span'); d.setAttribute('data-pk39', 'stage'); s.after(d); }`) },
   /* L5: a padlock comes back beside a sent package's name */
   L5: { js: watch(`const h = document.querySelector('[data-pk40="open"][data-stage="out"] .p9-po-tt h3'); if (h && !h.querySelector('.p9-po-lk')) { const s = document.createElement('span'); s.className = 'p9-po-lk'; s.textContent = '🔒'; h.appendChild(s); }`) },
   /* L6: the first package row is listed twice */
@@ -188,31 +184,11 @@ for (const size of SIZES) {
   });
 }
 
-/* ── L4 · the builder ── */
-for (const size of SIZES) {
-  test(`L4 two cards, 24 apart, the materials tab level with the package card; one status pill and no stepper at ${size.width}`, async ({ page }) => {
-    test.setTimeout(180_000);
-    const L = new Ledger(`L4-${size.width}`);
-    await open(page, size);
-    const lib = await box(page, `${pg} [data-pk39="lib"]`), lh = await box(page, `${pg} [data-pk39="lib-head"]`);
-    const open1 = await box(page, `${pg} [data-pk40="open"]`), ph = await box(page, `${pg} [data-pk39="pkg-head"]`);
-    L.check("both cards measured", !!lib && !!open1 && !!lh && !!ph, JSON.stringify({ lib, open1 }));
-    /* REWRITTEN by v39.2 (Part C): Your materials is a 40px folder tab on its card's top edge, so the two headers are no
-       longer the same height; the tab's top is level with the package card's top (pk392 L7 holds its height and colour) */
-    L.check("the materials tab's top is the package card's top (±1)", near(lh?.top, open1?.top, 1), `${lh?.top} vs ${open1?.top}`);
-    L.check("…and the package header starts there too (±0.5)", near(ph?.top, open1?.top, 0.5), `${ph?.top} vs ${open1?.top}`);
-    L.check("the cards are 24 ± 1 apart", near((open1?.x ?? 0) - ((lib?.x ?? 0) + (lib?.w ?? 0)), 24, 1), `${(open1?.x ?? 0) - ((lib?.x ?? 0) + (lib?.w ?? 0))}`);
-    L.check(`Your materials is ${size.width === 1512 ? 340 : 300} wide (v39.2)`, near(lib?.w, size.width === 1512 ? 340 : 300, 1), `${lib?.w}`);
-    const sep = await page.evaluate((p) => { const g = document.querySelector(`${p} [data-pk39="grid"]`)!; const cs = getComputedStyle(g); return { bg: cs.backgroundColor, shadow: cs.boxShadow, kids: [...g.children].length }; }, pg);
-    L.check("no outer panel around the two cards", (sep.bg === "rgba(0, 0, 0, 0)" || sep.bg === "transparent") && sep.shadow === "none" && sep.kids === 2, JSON.stringify(sep));
-    L.check("no stepper row", (await page.locator(`${pg} .p6-lc, ${pg} .p6-lc-s`).count()) === 0, "stepper");
-    L.check("exactly one status pill and no stage", (await page.locator(`${pg} [data-pk39="status"]`).count()) === 1 && (await page.locator(`${pg} [data-pk39="stage"]`).count()) === 0, "status");
-    L.done(8);
-  });
-}
+/* L4 — RETIRED by v39.3 (the two cards are retired; the builder is Steps + preview: pk393 L10–L14). See
+   tests/e2e/RETIRED-submission-packages-v39-3.md */
 
 /* ── L5 · rename in place (Nick's ruling: a sent package is renamed too; the padlock is in the stage) ── */
-test("L5 rename writes once (draft and sent), Escape writes nothing, a sent package's one padlock is in the stage", async ({ page }) => {
+test("L5 rename writes once (draft and sent), Escape writes nothing, a sent package says it is locked in its note", async ({ page }) => {
   test.setTimeout(240_000);
   const L = new Ledger("L5");
   await open(page, SIZES[0]);
@@ -235,17 +211,18 @@ test("L5 rename writes once (draft and sent), Escape writes nothing, a sent pack
     L.check(`${id}: one write (one rename receipt)`, toasts.length === before + 1, JSON.stringify(toasts));
     L.check(`${id}: stored`, stored()[id]?.packageName === to, String(stored()[id]?.packageName));
     L.check(`${id}: the label shows it`, ((await label(page, id).locator(".p9-pkl-t b").innerText()).trim()) === to, await label(page, id).locator(".p9-pkl-t b").innerText());
-    const locks = await page.evaluate((p) => { const o = document.querySelector(`${p} [data-pk40="open"]`)!; return { stage: o.querySelectorAll('[data-pk39="stage-lock"]').length, name: o.querySelectorAll(".p9-po-tt .p9-po-lk, .p9-po-tt [data-pk39='name-lock']").length }; }, pg);
+    /* v39.3 REWRITE: a sent package's lock is the sent note between the header and the steps (Nick, 29 Oct); no padlock
+       sits in the status pill or beside the name */
+    const locks = await page.evaluate((p) => { const o = document.querySelector(`${p} [data-pk40="open"]`)!; return { note: o.querySelectorAll('[data-pk393="sent-note"]').length, stage: o.querySelectorAll('[data-pk39="stage-lock"]').length, name: o.querySelectorAll(".p9-po-tt .p9-po-lk, [data-pk39='name-lock']").length }; }, pg);
     if (id === "pk40-std") {
-      L.check(`${id} (sent): exactly one padlock, in the stage`, locks.stage === 1, JSON.stringify(locks));
-      L.check(`${id} (sent): none beside the name`, locks.name === 0, JSON.stringify(locks));
-      L.check(`${id} (sent): the padlock's words`, (await page.locator(`${pg} [data-pk39="stage-lock"]`).first().getAttribute("title")) === "Locked: what each agent got stays as it was. You can still rename it; to change what goes out, make a copy.", "title");
-    } else L.check(`${id} (not sent): no padlock`, locks.stage === 0 && locks.name === 0, JSON.stringify(locks));
+      L.check(`${id} (sent): the sent note says it is locked`, locks.note === 1, JSON.stringify(locks));
+      L.check(`${id} (sent): no padlock in the pill or beside the name`, locks.stage === 0 && locks.name === 0, JSON.stringify(locks));
+    } else L.check(`${id} (not sent): no sent note, no padlock`, locks.note === 0 && locks.stage === 0 && locks.name === 0, JSON.stringify(locks));
     /* put it back */
     await name().click(); await page.keyboard.press("Meta+A"); await page.keyboard.type(from); await page.keyboard.press("Enter");
     await page.waitForTimeout(1200);
   }
-  L.done(16);
+  L.done(15); /* v39.3: the sent package's three padlock checks are two (the note, and no padlock) */
 });
 
 /* ── L6 · the full lists ── */

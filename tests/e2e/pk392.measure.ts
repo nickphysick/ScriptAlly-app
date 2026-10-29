@@ -63,14 +63,10 @@ const MUTATIONS: Record<string, string> = {
   L1: `.pk39-wpg.pk39-wpg > .wpg-scroll.wpg-scroll { background-image: none !important; }`,
   /* L2: the label names go back to the typewriter */
   L2: `[data-pk26="page"].p6.p6.p6 .p9-pkl .p9-pkl-b.p9-pkl-b b { font-family: var(--sp-type) !important; }`,
-  /* L7: names are cut off again */
-  L7: `[data-pk26="page"] .p9-pb-grid.p9-v39 .p9-lib-list .p9-lr.p9-lr b { white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }`,
   /* L8: the panel spans the whole sheet instead of the header card's width */
   L8: `.p6.p6 > .p9-pkc.p9-pkc { margin-left: 0 !important; margin-right: 0 !important; }`,
   /* L9: the packing list goes back to letter first */
   L9: `[data-pk26="page"] .p9-mf.p9-mf { display: flex !important; flex-direction: column !important; } [data-pk26="page"] .p9-mf > .p9-t-ver { order: 2 !important; }`,
-  /* L7b: Add shows at rest */
-  L7b: `[data-pk26="page"] .p9-pb-grid.p9-v39 .p9-lib-list .p9-lr.p9-lr .p9-lr-add { opacity: 1 !important; }`,
 };
 
 async function open(page: Page, size: { width: number; height: number }) {
@@ -151,7 +147,8 @@ test("L2 exactly three headings are set in the typewriter; the materials tab's l
   L.check("…the title's", rest.some((x) => /\bhl\b/.test(x.cls)), JSON.stringify(rest));
   L.check("…Your packages", rest.some((x) => /p9-pkl-h/.test(x.cls) && x.tag === "H2"), JSON.stringify(rest));
   L.check("…and the open package's name", rest.some((x) => /p9-po-nm/.test(x.cls)), JSON.stringify(rest));
-  L.check("the one exception is the materials tab's label", ex.length === 1 && ex[0].text === "Your materials", JSON.stringify(ex));
+  /* v39.3: the materials tab is retired, so there is no exception left */
+  L.check("no other typewriter text (the materials tab, the one exception, is retired)", ex.length === 0, JSON.stringify(ex));
   L.check("Your packages: Special Elite 30px/1.1 ink, no capitals", !!tw.h && /special elite/i.test(tw.h.ff) && tw.h.fs === "30px" && tw.h.lh === "33px" && tw.h.col === INK && tw.h.tt === "none", JSON.stringify(tw.h));
   L.check("under it: 'Open one to change it below', serif italic 15px at ink 60%", !!tw.sub && tw.sub.txt === "Open one to change it below" && /source serif/i.test(tw.sub.ff) && tw.sub.fs === "15px" && tw.sub.st === "italic" && tw.sub.col === "rgba(28, 19, 15, 0.6)", JSON.stringify(tw.sub));
   L.check("…4px down (±1)", near(tw.sub?.gap, 4, 1), String(tw.sub?.gap));
@@ -159,71 +156,8 @@ test("L2 exactly three headings are set in the typewriter; the materials tab's l
   L.done(10);
 });
 
-/* ── L7 · Your materials as a folder tab ── */
-for (const size of SIZES) {
-  test(`L7 the materials folder tab, and rows that never cut a name off, at ${size.width}`, async ({ page }) => {
-    test.setTimeout(240_000);
-    const L = new Ledger(`L7-${size.width}`);
-    console.log(seed("--long-name"));
-    try {
-      await open(page, size);
-      /* an unsent package, so rows offer Add: "Ready one" holds the first letter */
-      await page.locator(`${pg} [data-pk39="labels"] [data-pkid="pk40-ready"]`).first().click();
-      await page.waitForTimeout(900);
-      /* v39.2: Your materials opens on Versions; the long name and the in-package letter are on Letters */
-      await page.locator(`${pg} .p9-lib-tabs .p9-t-let`).first().click(); await page.waitForTimeout(500);
-      await page.mouse.move(2, 2);
-      const r = await page.evaluate(({ p, long }) => {
-        const root = document.querySelector(p)!;
-        const tab = root.querySelector('[data-pk39="lib-head"]') as HTMLElement, card = root.querySelector('[data-pk40="open"]') as HTMLElement;
-        const lib = root.querySelector('[data-pk39="lib"]') as HTMLElement;
-        const rows = [...root.querySelectorAll('[data-pk26="lib-list"] .p9-lr:not(.p9-lr--away)')] as HTMLElement[];
-        const rd = rows.map((row) => {
-          const b = row.querySelector("b") as HTMLElement, add = row.querySelector(".p9-lr-add") as HTMLElement | null, m = row.querySelector(".p9-lr-m") as HTMLElement | null;
-          const bs = getComputedStyle(b), mi = m?.querySelector(".p9-lr-in") as HTMLElement | null;
-          /* the "·" after "✓ In this package" is a decorative ::after, as in the ref: read it from the pseudo-element */
-          const lead = mi && m!.firstChild === mi ? `${(mi.textContent ?? "").trim()} ${getComputedStyle(mi, "::after").content.replace(/"/g, "")} ` : "";
-          return { name: b.textContent, sw: b.scrollWidth, cw: b.clientWidth, to: bs.textOverflow, ws: bs.whiteSpace, edge: getComputedStyle(row).boxShadow,
-            add: add ? { vis: getComputedStyle(add).display !== "none", op: getComputedStyle(add).opacity } : null, meta: m ? `${lead}${(m.textContent ?? "").slice(mi && lead ? (mi.textContent ?? "").length : 0)}`.replace(/\s+/g, " ").trim() : null };
-        });
-        return {
-          tab: tab ? { bg: getComputedStyle(tab).backgroundColor, h: tab.getBoundingClientRect().height, top: tab.getBoundingClientRect().top } : null,
-          card: card ? card.getBoundingClientRect().top : null, lib: lib ? lib.getBoundingClientRect().top : null,
-          rows: rd, long: rd.find((x) => x.name === long) ?? null,
-        };
-      }, { p: pg, long: LONG_NAME });
-      L.check("the tab and the package card were measured", !!r.tab && r.card != null, JSON.stringify({ tab: r.tab, card: r.card }));
-      L.check("the tab is #5e2f3a", r.tab?.bg === "rgb(94, 47, 58)", String(r.tab?.bg));
-      L.check("the tab is 40 tall (±1)", near(r.tab?.h, 40, 1), String(r.tab?.h));
-      L.check("the tab's top is the package card's top (±1)", near(r.tab?.top, r.card, 1), `${r.tab?.top} vs ${r.card}`);
-      L.check("the materials card starts 40 under the tab's top (±1)", near(r.lib != null && r.tab ? r.lib - r.tab.top : null, 40, 1), `${r.lib} vs ${r.tab?.top}`);
-      L.check("the rows were read (two letters at least)", r.rows.length >= 2, String(r.rows.length));
-      if (size.width === 1280) {
-        L.check("the 40-character name is on the page", !!r.long, JSON.stringify(r.rows.map((x) => x.name)));
-        L.check("…in full: scrollWidth ≤ clientWidth", !!r.long && r.long.sw <= r.long.cw, JSON.stringify(r.long));
-        L.check("…and never ellipsised", !!r.long && r.long.to !== "ellipsis" && r.long.ws !== "nowrap", JSON.stringify(r.long));
-      }
-      const inpk = r.rows.filter((x) => x.edge.includes(BERRY_EDGE)), others = r.rows.filter((x) => !x.edge.includes(BERRY_EDGE));
-      L.check("exactly one row has the berry edge", inpk.length === 1, JSON.stringify(r.rows.map((x) => [x.name, x.edge])));
-      L.check("…it is the row in this package, and says so first", /^✓ In this package · /.test(inpk[0]?.meta ?? ""), String(inpk[0]?.meta));
-      L.check("…and it has no Add", !!inpk[0] && (!inpk[0].add || !inpk[0].add.vis), JSON.stringify(inpk[0]?.add));
-      L.check("every row has its meta line (Sent n / Not sent yet)", r.rows.every((x) => /(Sent \d+|Not sent yet)/.test(x.meta ?? "")), JSON.stringify(r.rows.map((x) => x.meta)));
-      const withAdd = others.filter((x) => x.add?.vis);
-      L.check("the other rows offer Add", withAdd.length >= 1, JSON.stringify(others.map((x) => x.add)));
-      L.check("Add is hidden at rest", withAdd.length >= 1 && withAdd.every((x) => x.add!.op === "0"), JSON.stringify(withAdd.map((x) => x.add)));
-      /* hover, then focus: Add appears */
-      const row = page.locator(`${pg} [data-pk26="lib-list"] .p9-lr:not(.p9-lr--away)`).filter({ has: page.locator(".p9-lr-add:not([disabled])") }).first();
-      await row.hover(); await page.waitForTimeout(400);
-      const hov = await row.locator(".p9-lr-add").evaluate((e) => getComputedStyle(e).opacity);
-      L.check("Add shows on hover", hov === "1", hov);
-      await page.mouse.move(2, 2); await page.waitForTimeout(400);
-      await row.locator(".p9-lr-add").focus(); await page.waitForTimeout(400);
-      const foc = await row.locator(".p9-lr-add").evaluate((e) => getComputedStyle(e).opacity);
-      L.check("Add shows on focus", foc === "1", foc);
-      L.done(size.width === 1280 ? 16 : 13);
-    } finally { console.log(seed()); }
-  });
-}
+/* L7 — RETIRED by v39.3 (Your materials' folder tab and rows are retired: pk393 L14). See
+   tests/e2e/RETIRED-submission-packages-v39-3.md */
 
 /* ── L8 · the packages panel ── */
 for (const size of SIZES) {
@@ -239,13 +173,14 @@ for (const size of SIZES) {
       const card = root.querySelector(".pk39-card"), tip = root.querySelector(".p9-tip"), band = root.querySelector('[data-pk38="band"]');
       const cs = panel ? getComputedStyle(panel) : null;
       return {
-        has: !!panel, labels: !!panel?.querySelector('[data-pk39="labels"]'), lib: !!panel?.querySelector('[data-pk39="lib"]'), open: !!panel?.querySelector('[data-pk40="open"]'),
+        has: !!panel, labels: !!panel?.querySelector('[data-pk39="labels"]'), lib: !!panel?.querySelector('[data-pk393="builder"]'), open: !!panel?.querySelector('[data-pk40="open"]'),
         kicker: !!panel?.querySelector('[data-pk39="kicker"]'), tipIn: !!tip && !!panel?.contains(tip), bandIn: !!band && !!panel?.contains(band), tip: !!tip, band: !!band,
         p: bx(panel), card: bx(card), b: bx(band), bg: cs?.backgroundColor, rad: cs?.borderRadius,
       };
     }, pg);
     L.check("the panel is on the page", r.has, String(r.has));
-    L.check("it holds the labels, the builder label and both builder cards", r.labels && r.kicker && r.lib && r.open, JSON.stringify(r));
+    /* v39.3 RETARGET: the builder is Steps + preview (one `[data-pk393="builder"]`, which is also the open package) */
+  L.check("it holds the labels, the builder label and the builder", r.labels && r.kicker && r.lib && r.open, JSON.stringify(r));
     L.check("the explainer is on the page and outside it", r.tip && !r.tipIn, `${r.tip} ${r.tipIn}`);
     L.check("the results band is on the page and outside it", r.band && !r.bandIn, `${r.band} ${r.bandIn}`);
     L.check("its left edge is the header card's (±1)", near(r.p?.x, r.card?.x, 1), `${r.p?.x} vs ${r.card?.x}`);
@@ -273,10 +208,7 @@ test("L9 the version leads: the packing list, the drawer, the pieces row and bot
     const pk = [...root.querySelectorAll('[data-pk38="row-pieces"] .p9-ag3-k')].map((e) => (e.textContent ?? "").trim());
     return { slot: first?.dataset.slot, lab, sub, slots, lt, rt, pk };
   }, pg);
-  L.check("the packing list's first slot is the version", r.slot === "ver" && r.slots[0] === "ver", JSON.stringify(r.slots));
-  L.check("…then the letter, the synopsis and Also sends", JSON.stringify(r.slots) === JSON.stringify(["ver", "let", "syn", "ex"]), JSON.stringify(r.slots));
-  L.check("…labelled Version over 'Sets the pages that go out'", r.lab === "Version" && r.sub === "Sets the pages that go out", `${r.lab} / ${r.sub}`);
-  L.check("Your materials leads with Versions and opens on it", r.lt[0]?.[0] === "Versions" && r.lt[0]?.[1] === "true", JSON.stringify(r.lt));
+  /* v39.3: the packing list and Your materials' tabs are retired; the steps' order is pk393 L10's (version first) */
   L.check("the pieces list leads with Versions and opens on it", r.rt[0]?.[0] === "Versions" && r.rt[0]?.[1] === "true", JSON.stringify(r.rt));
   L.check("the pieces row starts with Best opening", /^best opening$/i.test(r.pk[0] ?? ""), JSON.stringify(r.pk));
   /* the drawer: Figures on the open package */
@@ -289,5 +221,5 @@ test("L9 the version leads: the packing list, the drawer, the pieces row and bot
   if (MUT === "L9data") seed("--long-name");
   const after = dump();
   L.check("a saved package's stored fields are unchanged", before === after, before === after ? "same" : `${before.slice(0, 200)} … vs … ${after.slice(0, 200)}`);
-  L.done(8);
+  L.done(4);
 });

@@ -1,0 +1,60 @@
+===== PK393_MUTATE=L10 (L10)
+  ✗ L10 · picking a version fills it and opens the letter step — [{"k":"ver","open":true,"done":false,"disc":"rgba(0, 0, 0, 0)"},{"k":"let","open":false,"done":false,"disc":"rgba(0, 0, 0, 0)"},{"k":"syn","open":fals
+  ✗ L10 · …with ONE write to the package — 0 writes
+  ✗ L10 · …through the writer (its toast) — Queries loaded | 
+  ✗ L10 · picking a letter closes every step — [{"k":"ver","open":true,"done":false,"disc":"rgba(0, 0, 0, 0)"},{"k":"let","open":false,"done":false,"disc":"rgba(0, 0, 0, 0)"},{"k":"syn","open":false,"done":false,"di
+  ✗ L10 · …and shows two green discs (#3e7d5a) — [{"k":"ver","open":true,"done":false,"disc":"rgba(0, 0, 0, 0)"},{"k":"let","open":false,"done":false,"disc":"rgba(0, 0, 0, 0)"},{"k":"syn","open":false,"done":false
+  ✗ L10 · …with ONE write to the package — 0 writes
+  1 failed
+  1 passed (59.7s)
+===== PK393_MUTATE=L11 (L11)
+  ✗ L11 · the body quotes the letter's stored text — Names The Trees, Small Pleasures
+  ✗ L11 · …cut at about 200 characters, with an ellipsis — 32
+  ✗ L11 · …and never the summary — Dear Theo,Names The Trees, Small PleasuresHook-first
+  1 failed
+  1 passed (35.2s)
+===== PK393_MUTATE=L12 (L12)
+  ✗ L12 · ver: exactly its part is outlined (2px Harbour on #eef4f7) — [{"part":"let","sh":"rgb(29, 75, 99) 0px 0px 0px 2px","bg":"rgb(238, 244, 247)"},{"part":"ver","sh":"rgb(29, 75, 99) 0px 0px 0px 2px","bg":"rgb(
+  ✗ L12 · let: exactly its part is outlined (2px Harbour on #eef4f7) — [{"part":"let","sh":"rgb(29, 75, 99) 0px 0px 0px 2px","bg":"rgb(238, 244, 247)"},{"part":"ver","sh":"rgb(29, 75, 99) 0px 0px 0px 2px","bg":"rgb(
+  ✗ L12 · syn: exactly its part is outlined (2px Harbour on #eef4f7) — [{"part":"let","sh":"rgb(29, 75, 99) 0px 0px 0px 2px","bg":"rgb(238, 244, 247)"},{"part":"ver","sh":"rgb(29, 75, 99) 0px 0px 0px 2px","bg":"rgb(
+  ✗ L12 · ext: exactly its part is outlined (2px Harbour on #eef4f7) — [{"part":"let","sh":"rgb(29, 75, 99) 0px 0px 0px 2px","bg":"rgb(238, 244, 247)"},{"part":"ver","sh":"rgb(29, 75, 99) 0px 0px 0px 2px","bg":"rgb(
+  1 failed
+  1 passed (32.8s)
+===== PK393_MUTATE=L13 (L13 disabled)
+  ✗ L13 · empty: disabled, 'Add a version and a letter to send it' — {"text":"Add a version and a letter to send it","off":false}
+  ✗ L13 · with a version: disabled, 'Add a letter to send it' — {"text":"Add a letter to send it","off":false}
+  1 failed
+  1 passed (42.6s)
+===== PK393_MUTATE=L13s (L13 a sent)
+  ✗ L13-sent · clicking the heads opens nothing — [{"k":"ver","open":true,"done":true,"disc":"rgb(62, 125, 90)"},{"k":"let","open":true,"done":true,"disc":"rgb(62, 125, 90)"},{"k":"syn","open":true,"done":true,"disc
+  1 failed
+  1 passed (33.3s)
+===== PK393_MUTATE=L14 (L14, scoped to the page)
+  ✗ L14 · no draggable rows — 1
+  1 failed
+  1 passed (31.1s)
+
+## The failing readings under each break (from ledger/mut-*.json)
+== mut-L10-L10.json
+  ✗ picking a version fills it and opens the letter step — [{"k":"ver","open":true,"done":false,"disc":"rgba(0, 0, 0, 0)"},{"k":"let","open":false,"done":false,"disc":"rgba(0, 0, 
+  ✗ …with ONE write to the package — 0 writes
+  ✗ …through the writer (its toast) — Queries loaded | 
+  ✗ picking a letter closes every step — [{"k":"ver","open":true,"done":false,"disc":"rgba(0, 0, 0, 0)"},{"k":"let","open":false,"done":false,"disc":"rgba(0, 0, 
+  ✗ …and shows two green discs (#3e7d5a) — [{"k":"ver","open":true,"done":false,"disc":"rgba(0, 0, 0, 0)"},{"k":"let","open":false,"done":false,"disc":"rgba(0, 0, 
+  ✗ …with ONE write to the package — 0 writes
+== mut-L11-L11.json
+  ✗ the body quotes the letter's stored text — Names The Trees, Small Pleasures
+  ✗ …cut at about 200 characters, with an ellipsis — 32
+  ✗ …and never the summary — Dear Theo,Names The Trees, Small PleasuresHook-first
+== mut-L12-L12.json
+  ✗ ver: exactly its part is outlined (2px Harbour on #eef4f7) — [{"part":"let","sh":"rgb(29, 75, 99) 0px 0px 0px 2px","bg":"rgb(238, 244, 247)"},{"part":"ver","sh":"rgb(29, 75, 99) 0px
+  ✗ let: exactly its part is outlined (2px Harbour on #eef4f7) — [{"part":"let","sh":"rgb(29, 75, 99) 0px 0px 0px 2px","bg":"rgb(238, 244, 247)"},{"part":"ver","sh":"rgb(29, 75, 99) 0px
+  ✗ syn: exactly its part is outlined (2px Harbour on #eef4f7) — [{"part":"let","sh":"rgb(29, 75, 99) 0px 0px 0px 2px","bg":"rgb(238, 244, 247)"},{"part":"ver","sh":"rgb(29, 75, 99) 0px
+  ✗ ext: exactly its part is outlined (2px Harbour on #eef4f7) — [{"part":"let","sh":"rgb(29, 75, 99) 0px 0px 0px 2px","bg":"rgb(238, 244, 247)"},{"part":"ver","sh":"rgb(29, 75, 99) 0px
+== mut-L13-L13.json
+  ✗ empty: disabled, 'Add a version and a letter to send it' — {"text":"Add a version and a letter to send it","off":false}
+  ✗ with a version: disabled, 'Add a letter to send it' — {"text":"Add a letter to send it","off":false}
+== mut-L13s-L13-sent.json
+  ✗ clicking the heads opens nothing — [{"k":"ver","open":true,"done":true,"disc":"rgb(62, 125, 90)"},{"k":"let","open":true,"done":true,"disc":"rgb(62, 125, 9
+== mut-L14-L14.json
+  ✗ no draggable rows — 1
