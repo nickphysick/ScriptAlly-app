@@ -14,11 +14,12 @@ Baseline gates on the base: tsc root 0, tsc functions 0, build clean, Vitest 689
 | 1 | F locks, shots, report | `459b5d96` | committed |
 | 1 | dev deploy | integration `a8b44524` on `dev/…-fv1-pk393-pa2-1` | dev serves `index-Ox21np2m.js` |
 | 2 | A–C Home (one commit) | `93d802c7` | committed |
-| 2 | D locks, shots, report | (the commit that carries this line) | committed; dev deploy follows |
+| 2 | D locks, shots, report | `e0531aba` | committed |
+| 2 | dev deploy | integration `82adc7b9` on `dev/…-fv1-pk393-pa2-2` | dev serves `index-CRHIwewp.js` |
 | 3 | — | — | next |
 
 ## Dev, as of the end of Part 1
-- dev serves `index-Ox21np2m.js` = `dev/pk391-qm1-pk392-calx-pk392b-td7-fv1-pk393-pa2-1` (`a8b44524`). The next part's
+- (end of Part 2) dev serves `index-CRHIwewp.js` = `dev/pk391-qm1-pk392-calx-pk392b-td7-fv1-pk393-pa2-2` (`82adc7b9`). The next part's
   integration branch starts from WHATEVER dev serves then (check the hash first: another session deployed mid-Part 1).
 - The integration worktree is `/Users/nickphysick/ScriptAlly-pa2-int` (needs `functions/node_modules` linked).
 
