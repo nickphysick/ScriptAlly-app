@@ -115,7 +115,7 @@
    by the page): at 1.72fr alone the Closed legend was cut at 1440×900 and the Agents legend at 1100×800.
    Capped so the task card keeps 300px (270 below a 1200px window, where its "N OF M" has given way).
    Where the cap binds the legends wrap (v60's container query). */
-.d58[data-mode="q"] .d58-body {
+.d58:is([data-mode="q"], [data-mode="pre"]) .d58-body {
   grid-template-columns:
     minmax(min(calc(2 * var(--d60-hoop-need, 0px) + 16px), calc(100% - var(--d71-right-floor, 300px) - 16px)), 1.72fr)
     minmax(0, 1fr);
@@ -133,7 +133,7 @@
 /* the hoop row: its content's height, never under 200px (180 on a short window) */
 .d58[data-mode="q"] .d60-hoops { gap: 16px; min-height: 200px; }
 .d58[data-mode="q"] .d60-hoops > .d60-card { height: 100%; }
-.d58[data-mode="q"] .d71-right {
+.d58:is([data-mode="q"], [data-mode="pre"]) .d71-right {
   display: grid;
   grid-template-rows: minmax(0, 1fr) var(--d71-fw-h, 194px);
   gap: 16px;
@@ -145,19 +145,19 @@
 /* ⚠️ THE BOTTOM: the lowest cards end 14px above the Activity feed tab's top. The tab (34px) sits
    on the SHEET's bottom edge, so the cards end 48px above the sheet's bottom; what already lies
    between the page and the sheet's bottom (`--d58-inset-b`, measured by the page) is subtracted. */
-.d58[data-mode="q"] .d58-page { padding-bottom: max(0px, calc(48px - var(--d58-inset-b, 0px))); }
+.d58:is([data-mode="q"], [data-mode="pre"]) .d58-page { padding-bottom: max(0px, calc(48px - var(--d58-inset-b, 0px))); }
 
 @media (max-height: 819px) {
   .d58[data-mode="q"] .d60-hoops { min-height: 180px; }
 }
 @media (max-height: 760px) {
-  .d58[data-mode="q"] { --d71-fw-h: 128px; }
-  .d58[data-mode="q"] .d58-page { padding-bottom: max(0px, calc(46px - var(--d58-inset-b, 0px))); }
+  .d58:is([data-mode="q"], [data-mode="pre"]) { --d71-fw-h: 128px; }
+  .d58:is([data-mode="q"], [data-mode="pre"]) .d58-page { padding-bottom: max(0px, calc(46px - var(--d58-inset-b, 0px))); }
 }
 /* below the supported width the page flows (v58's own step): one column, each card its own height */
 @media (max-width: 1099px) {
-  .d58[data-mode="q"] .d58-body { grid-template-columns: minmax(0, 1fr); }
-  .d58[data-mode="q"] .d71-right { grid-template-rows: auto var(--d71-fw-h, 194px); }
+  .d58:is([data-mode="q"], [data-mode="pre"]) .d58-body { grid-template-columns: minmax(0, 1fr); }
+  .d58:is([data-mode="q"], [data-mode="pre"]) .d71-right { grid-template-rows: auto var(--d71-fw-h, 194px); }
 }
 
 /* ── C · the task card ─────────────────────────────────────────────────────────────────────────
@@ -481,8 +481,8 @@
    tighten (14→10, 16→12), and the chart's plot floor drops from v58's 120px to 80px. Measured at
    1366×650: the chart's frame then holds its band, plot and axis with nothing over. */
 @media (max-height: 700px) {
-  .d58[data-mode="q"] .d71-head { margin-bottom: 10px; }
-  .d58[data-mode="q"] .d71-head .d58-byline { display: none; }
+  .d58:is([data-mode="q"], [data-mode="pre"]) .d71-head { margin-bottom: 10px; }
+  .d58:is([data-mode="q"], [data-mode="pre"]) .d71-head .d58-byline { display: none; }
   .d58[data-mode="q"] .d58-left { gap: 12px; }
   .d58[data-mode="q"] .os-lead .os-acplot { min-height: 80px; }
 }
@@ -498,5 +498,5 @@
 /* below 1200px of window the page's side gutter narrows, for the hoops and the task card */
 /* ⚠️ 250px, NOT 270 (v77): at 1100×800 the Agents legend's "21 Querying" needed 8px more than a 270px task
    card left the hoops (DB71 G1, red at baseline on 26 Oct once the account's counts grew). */
-@media (max-width: 1199px) { .d58[data-mode="q"] { --d58-gutter: 20px; --d71-right-floor: 250px; } }
+@media (max-width: 1199px) { .d58:is([data-mode="q"], [data-mode="pre"]) { --d58-gutter: 20px; --d71-right-floor: 250px; } }
 

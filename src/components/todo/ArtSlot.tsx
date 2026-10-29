@@ -36,7 +36,10 @@ export type ArtSlotName =
   | "agent-unknown"     // Query Centre: the agent context panel with nothing on file to report
   | "no-quick-picks"    // Query Centre stage 1: no unqueried contacts to suggest
   | "pane-unselected"   // Query Centre: the reading pane before a query is chosen
-  | "package-mark";     // the submission-package group's mark — ONE mark for every package
+  | "package-mark"      // the submission-package group's mark — ONE mark for every package
+  | "dash-mentor-standing"   // Dashboard first visit v1: the Mentor beside the top tip
+  | "dash-courier-letter"    // Dashboard first visit v1: the set-up card's "Yes" path
+  | "dash-scout-binoculars"; // Dashboard first visit v1: the set-up card's "Not yet" path
 
 interface SlotBrief {
   /** The illustrator's brief, one line — rendered as the placeholder's own caption. */
@@ -141,6 +144,24 @@ export const ART_SLOTS: Record<ArtSlotName, SlotBrief> = {
     caption: "A squared-up stack of papers tied with a ribbon",
     w: 40, h: 40,
     alt: "A small stack of prepared papers, tied",
+  },
+  /* DASHBOARD FIRST VISIT v1 (ref design-refs/dashboard-first-visit-v1/). The three drawings the pre-query
+     dashboard is waiting for — ⚠️ PLACEHOLDERS UNTIL NICK SUPPLIES THEM; each box is the ref's, so nothing moves
+     when they land. Never an image already on the page (the chart's Mentor, the Closed card's Archivist). */
+  "dash-mentor-standing": {
+    caption: "The Mentor, standing, beside the top tip.",
+    w: 110, h: 140,
+    alt: "The Mentor hawk, standing",
+  },
+  "dash-courier-letter": {
+    caption: "The courier hawk carrying a letter.",
+    w: 140, h: 118,
+    alt: "The courier hawk carrying a letter",
+  },
+  "dash-scout-binoculars": {
+    caption: "The scout hawk with binoculars.",
+    w: 140, h: 118,
+    alt: "The scout hawk looking through binoculars",
   },
   "pane-unselected": {
     caption: "A letter rack, filed and waiting for one to be drawn out",

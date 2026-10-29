@@ -34,7 +34,9 @@ import type { AgentCardField, AgentCardTab } from "./agentCardStore";
 import { MONTHS_SHORT } from "./dates";
 import type { GettingStartedRow } from "./dashEmpty";
 
-export type ListGroupKey = "req" | "nudge" | "quiet" | "house" | "ready" | "coming";
+/* ⚠️ "start" IS THE DESKTOP'S GETTING STARTED PAGE (Dashboard first visit v1): ONE item whose body is the
+   checklist. The phone never receives it — its plans come from `startingPlan` and an unchanged `dashList`. */
+export type ListGroupKey = "req" | "nudge" | "quiet" | "start" | "house" | "ready" | "coming";
 
 export const LIST_ORDER: readonly ListGroupKey[] = ["req", "nudge", "quiet", "house", "ready", "coming"];
 
@@ -42,6 +44,7 @@ export const LIST_LABEL: Record<ListGroupKey, string> = {
   req: "Agents are waiting",
   nudge: "Worth a nudge",
   quiet: "Gone quiet",
+  start: "Getting started",
   house: "Housekeeping",
   ready: "Ready to query",
   coming: "Coming up",
@@ -432,6 +435,29 @@ export function dashList(i: DashListInput): ListPlan {
 /* ── first run ─────────────────────────────────────────────────────────────────────────────── */
 
 export const STARTING_LABEL = "Getting started";
+
+/** The key of the desktop's one Getting started page. */
+export const GS_ITEM_KEY = "start:card";
+
+/**
+ * DASHBOARD FIRST VISIT v1 — the desktop task card's Getting started PAGE: one item, whose body the card draws
+ * as the checklist (fv1/GettingStarted). Its title is what the "Then:" line of the page before it says.
+ */
+export function gettingStartedItem(): ListItem {
+  return {
+    key: GS_ITEM_KEY, group: "start", tone: "house",
+    pre: "Finish getting started", who: "", post: "",
+    initials: "", fact: "", agency: "", status: null, when: "", foot: "",
+    actLabel: "Open", action: { kind: "route", tab: "dashboard" },
+    stages: null, note: null, date: null,
+  };
+}
+
+/** Before the first query the desktop's whole list is the one Getting started page. */
+export function gettingStartedPlan(): ListPlan {
+  const item = gettingStartedItem();
+  return { groups: [{ key: "start", label: STARTING_LABEL, items: [item] }], items: [item], thenLabel: "Then", all: { label: "All", tab: "todo" } };
+}
 
 /**
  * A book with no query yet has nothing on the list, so the column carries the getting-started

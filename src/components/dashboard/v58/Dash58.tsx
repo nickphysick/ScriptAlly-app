@@ -22,7 +22,7 @@ import { liveCount, undatedLiveCount } from "../../../lib/dashBreakdown";
 import { closedTile } from "../../../lib/dashClosed";
 import { assembleBoardColumns } from "../../../lib/todoColumns";
 import { todoRows } from "../../../lib/dashTodo";
-import { dashList, startingPlan, type ListAction } from "../../../lib/dashList";
+import { dashList, gettingStartedPlan, type ListAction } from "../../../lib/dashList";
 import { buildQcRows } from "../../../lib/qcSummary";
 import type { TaskCtx } from "../../../lib/dashTaskCard";
 import { gettingStartedRows } from "../../../lib/dashEmpty";
@@ -45,13 +45,15 @@ import { Dash71Right } from "../v71/Dash71Right";
 import { Dash71Task } from "../v71/Dash71Task";
 import { Dash58Feed, FeedTab } from "./Dash58Feed";
 import { Dash105Founding } from "../v105/Dash105Founding";
-import { agentCoverage, firstUseTiles, isPreQuery, type TileKey } from "../../../lib/dashFirstUse";
-import { QueriesDoor, AgentsDoor, AgentsSnap, ClosedHoop, AgentsHoop } from "../v60/Dash60Left";
-import { Dash60Lift } from "../v60/Dash60Lift";
-import { SpotProvider, WhereStart } from "../v60/WhereStart";
-import type { StartKey } from "../../../lib/dashFirstUse";
-import { switcherStanding } from "../../../lib/manuscriptStanding";
+import { agentCoverage, isPreQuery } from "../../../lib/dashFirstUse";
+import { ClosedHoop, AgentsHoop } from "../v60/Dash60Left";
 import { openNewAgentCard } from "../../../lib/agentCardStore";
+import { campaignEyebrow, seg, dashPrefsOf, gsHideWrite, gsOrder, nextTip, startPathOf, startPathWrite, stepTip, tipWrite, type GsLink, type StartPath } from "../../../lib/dashFirstVisit";
+import type { UserPaths } from "../../../lib/userPaths";
+import { DASH_TIPS } from "../../../lib/dashTips";
+import { SetUpCard } from "../fv1/SetUpCard";
+import { MentorTip } from "../fv1/MentorTip";
+import type { TaskGs } from "../v71/Dash71Task";
 import "../oneScreen.css";
 import "./dash58.css";
 import "../v59/dash59.css";
@@ -62,6 +64,8 @@ import "../v71/dash71.css";
 /* ⚠️ AND v77 AFTER IT */
 import "../v77/dash77.css";
 import "../v105/dash105.css";
+/* ⚠️ AND THE FIRST VISIT LAST OF ALL (Dashboard first visit v1): its pre-query layout wins ties */
+import "../fv1/fv1.css";
 
 export interface Dash58Props {
   loading: boolean;
@@ -81,6 +85,8 @@ export interface Dash58Props {
   smartImportUsage?: SmartImportUsage | null;
   /** v105: records the founding rank last celebrated (users.foundingSeenTier). Absent (the onboarding ghost) → no celebration, no write. */
   onFoundingSeen?: (tier: number) => void | Promise<void>;
+  /** First visit v1: writes the page's own prefs (`todoPrefs.dash`, one dotted leaf each). Absent (the onboarding ghost) → nothing is stored. */
+  onPrefs?: (paths: UserPaths) => void | Promise<void>;
 }
 
 const NO_AID: DashAid = { drop: [], noClosed: false, noAgents: false };
@@ -150,7 +156,7 @@ const ImportNoticeRow: React.FC<{ notice: ImportNotice; onDismiss: () => void; o
 export const Dash58: React.FC<Dash58Props> = ({
   loading: dataLoading, queries, agents: agentsIn, manuscripts, tasks, userTasks, activities, taskFlags, currentUser,
   activeManuscript, onNavigate, now: nowProp, versions = [], smartImportUsage = null,
-  onFoundingSeen,
+  onFoundingSeen, onPrefs,
 }) => {
   /* one clock per mount: a new Date on every render would rebuild every derivation below */
   const [mountedAt] = useState(() => new Date());
@@ -185,10 +191,8 @@ export const Dash58: React.FC<Dash58Props> = ({
 
   /* ── the list: the board's own cards, then the contact list's, then the clock's ── */
   const plan = useMemo(() => {
-    /* first run: no query on this book yet, so the list is the getting-started deeds */
-    if (empty && aid.drop.length === 0) {
-      return startingPlan(gettingStartedRows({ manuscripts, agentCount: agents.length, queryCount: queries.length, versions, activeManuscript }), scopeId);
-    }
+    /* first run: no query on this book yet, so the card is the one Getting started page (first visit v1) */
+    if (empty && aid.drop.length === 0) return gettingStartedPlan();
     const cols = assembleBoardColumns({
       tasks: scopedTasks, userTasks, queries, agents, manuscripts, taskFlags, activities: scopedActivities,
       now: now.getTime(), today: localYMD(now.getTime()), mutedTaskRules: currentUser?.mutedTaskRules,
@@ -298,9 +302,15 @@ export const Dash58: React.FC<Dash58Props> = ({
       if (win) {
         const pr = port.getBoundingClientRect();
         set("--d58-inset-b", Math.max(0, win.bottom - pr.bottom) + (parseFloat(cs.paddingBottom) || 0));
-        const btns = root.querySelector('[data-d58="buttons"]')?.getBoundingClientRect();
-        if (btns && btns.width > 0) setSheet((o) => {
-          const r = Math.round(win.right - btns.right);
+        /* the buttons' right edge; before the first query there are none (first visit v1), so the header's
+           own content edge — where they would end — stands in for it */
+        const btnEl = root.querySelector<HTMLElement>('[data-d58="buttons"]');
+        const head = root.querySelector<HTMLElement>('[data-d58="header"]');
+        const btns = btnEl?.getBoundingClientRect();
+        const edge = btns && btns.width > 0 ? btns.right
+          : head ? head.getBoundingClientRect().right - (parseFloat(getComputedStyle(head).paddingRight) || 0) : 0;
+        if (edge > 0) setSheet((o) => {
+          const r = Math.round(win.right - edge);
           return o && o.el === winEl && o.r === r ? o : { el: winEl!, r };
         });
       }
@@ -392,35 +402,59 @@ export const Dash58: React.FC<Dash58Props> = ({
      flashes; once loaded it is the one predicate's answer. */
   const pre = loading ? shape.pre : empty;
   const hasAgents = loading ? shape.agents : agents.length > 0;
-  /* v60.1 "Where do I start?": page state only — nothing stored, nothing routed */
-  const [startOpen, setStartOpen] = useState(false);
-  const [startAnswer, setStartAnswer] = useState<StartKey | null>(null);
-  const spotValue = useMemo(() => ({ answer: pre ? startAnswer : null, hasAgents }), [pre, startAnswer, hasAgents]);
-  useEffect(() => { if (!pre) { setStartOpen(false); setStartAnswer(null); } }, [pre]);
   const cov = useMemo(
     () => agentCoverage({ agents, queries, manuscript: activeManuscript, now, todayIso: localYMD(now.getTime()) }),
     [agents, queries, activeManuscript, now],
   );
-  const tiles = useMemo(
-    () => firstUseTiles({ plan: currentUser?.plan, usage: smartImportUsage, manuscript: activeManuscript, versions, now }),
-    [currentUser?.plan, smartImportUsage, activeManuscript, versions, now],
-  );
-  /* ⚠️ EACH TILE OPENS AN EXISTING PAGE. The add-material button (Submission packages), the comps add
-     drawer and the version dialog (Manuscripts) are each the page's own state with no door from
-     outside, so the tile lands on the page that holds the button — never a route invented here. */
-  const onTile = (k: TileKey) => {
-    if (k === "import") onNavigate("import");
-    else if (k === "mats") onNavigate("manuscripts", "Submission packages");
-    else if (k === "comps") onNavigate("manuscripts", "Comparable titles");
-    else onNavigate("manuscripts");
-  };
   const toContacts = () => onNavigate("agents");
-  /* "Log a query" on the queries door: with agents, the drawer's log journey; with none, the new-agent
-     panel first (the one every "Add an agent" opens, over this page), as the hint says */
-  const logFromDoor = () => {
-    if (agents.length === 0) openNewAgentCard({ from: "button", host: "panel" });
-    else openQueryDrawer({ mode: "log", ...(scopeId ? { manuscriptId: scopeId } : {}) });
+
+  /* ── first visit v1: the set-up answer, the tip, and Getting started ──
+     ⚠️ EVERY PREFERENCE IS A PREFERENCE, NEVER A SOURCE: the answer chooses a path and an order, the tip
+     index chooses which tip opens, and Hide hides a page. None of them is read by anything that counts. */
+  const prefs = useMemo(() => dashPrefsOf(currentUser), [currentUser]);
+  /* the answer is held locally as well, so a click shows at once and the ghost (no writer) still answers */
+  const [localPath, setLocalPath] = useState<Record<string, StartPath>>({});
+  const path: StartPath = (scopeId ? localPath[scopeId] : undefined) ?? startPathOf(prefs, scopeId);
+  const choosePath = (p: StartPath) => {
+    if (!scopeId) return;
+    setLocalPath((o) => ({ ...o, [scopeId]: p }));
+    void onPrefs?.(startPathWrite(scopeId, p));
   };
+  const logQuery = () => openQueryDrawer({ mode: "log", ...(scopeId ? { manuscriptId: scopeId } : {}) });
+  const addAgent = () => openNewAgentCard({ from: "button", host: "panel" });
+  const goGs = (go: GsLink) => {
+    if (go === "manuscript") onNavigate("manuscripts", "Add a manuscript");
+    else if (go === "agent") addAgent();
+    else if (go === "import") onNavigate("import");
+    else if (go === "log") logQuery();
+    else if (go === "materials") onNavigate("manuscripts", "Submission packages");
+    else onNavigate("manuscripts", "Comparable titles");
+  };
+  const gsRows = useMemo(() => {
+    const rows = gettingStartedRows({ manuscripts, agentCount: agents.length, queryCount: scopedQueries.length, versions, activeManuscript });
+    return gsOrder(path).map((k) => ({ key: k, done: rows.find((r) => r.key === k)?.done ?? false }));
+  }, [manuscripts, agents.length, scopedQueries.length, versions, activeManuscript, path]);
+  const gsHidden = !!scopeId && !!prefs.gsHidden[seg(scopeId)];
+  const gs: TaskGs = {
+    rows: gsRows, path, onGo: goGs,
+    /* "Hide" only once the first query exists: before it, Getting started is the card's whole job */
+    onHide: !empty && scopeId && onPrefs ? () => { void onPrefs(gsHideWrite(scopeId)); } : undefined,
+  };
+
+  /* the tip: each visit to the dashboard opens on the next one (stored), ‹ › loop round */
+  const [tip, setTip] = useState<number | null>(null);
+  const tipAdvanced = useRef(false);
+  const onDashNow = useLocation().pathname === "/dashboard";
+  useEffect(() => {
+    if (!onDashNow) { tipAdvanced.current = false; return; }
+    if (loading || tipAdvanced.current) return;
+    tipAdvanced.current = true;
+    const i = nextTip(prefs.tip, DASH_TIPS.length);
+    setTip(i);
+    if (currentUser) void onPrefs?.(tipWrite(i));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onDashNow, loading]);
+  const tipIndex = tip ?? nextTip(prefs.tip, DASH_TIPS.length);
 
   /* ── the skipped-rows line: read for this account, and read again whenever it changes ──
      This page stays mounted while the writer is on the Import page, so reading once showed the
@@ -453,8 +487,9 @@ export const Dash58: React.FC<Dash58Props> = ({
   }, [loading]);
 
   const author = (currentUser?.name ?? "").trim();
-  /* v60.1: the eyebrow reads the sidebar's own function */
-  const standing = activeManuscript ? switcherStanding(activeManuscript, scopedQueries) : null;
+  /* first visit v1: the eyebrow is the campaign's — GETTING READY, QUERYING or BETWEEN ROUNDS — read from this
+     manuscript's queries; the stored status stays the sidebar's */
+  const eyebrow = campaignEyebrow(scopedQueries);
   const title = (activeManuscript?.title ?? "").trim();
 
   return (
@@ -469,18 +504,20 @@ export const Dash58: React.FC<Dash58Props> = ({
             onLog={() => openQueryDrawer({ mode: "log", ...(scopeId ? { manuscriptId: scopeId } : {}) })}
             onRecord={() => onNavigate("queries", "Record a response")}
             onAddAgent={() => onNavigate("agents", "Add an agent")}
-            status={standing?.status ?? null}
-            start={pre ? <WhereStart hasAgents={hasAgents} open={startOpen} setOpen={setStartOpen} answer={startAnswer} setAnswer={setStartAnswer} disabled={loading} /> : undefined}
+            eyebrow={eyebrow}
+            /* first visit v1: no buttons before the first query; Record a response only once one exists */
+            buttons={pre ? "none" : "all"}
           />
-          <SpotProvider value={spotValue}>
           <div className="d58-body" data-d58="body">
             <div className="d58-left" data-d58="left" data-pre={pre ? "1" : "0"}>
               {pre ? (
                 <>
-                  <QueriesDoor loading={loading} agents={loading ? (hasAgents ? 1 : 0) : agents.length} onLog={logFromDoor} />
-                  {hasAgents
-                    ? <AgentsSnap loading={loading} cov={cov} onReady={toContacts} />
-                    : <AgentsDoor loading={loading} onAdd={() => openNewAgentCard({ from: "button", host: "panel" })} onImport={() => onNavigate("import")} />}
+                  <SetUpCard
+                    loading={loading} title={title} path={path} onPath={choosePath}
+                    agents={loading ? (hasAgents ? 1 : 0) : agents.length}
+                    onImport={() => onNavigate("import")} onLog={logQuery} onAddAgent={addAgent} onDiscover={() => onNavigate("agents", "Discover")}
+                  />
+                  <MentorTip loading={loading} index={tipIndex} onStep={(d) => setTip(stepTip(tipIndex, d, DASH_TIPS.length))} />
                 </>
               ) : (
                 <>
@@ -515,14 +552,12 @@ export const Dash58: React.FC<Dash58Props> = ({
               )}
             </div>
             <Dash71Right
-              task={<Dash71Task loading={loading} plan={plan} ctx={taskCtx} onView={viewTask} innerRef={focusRef} />}
-              lift={pre ? <Dash60Lift loading={loading} tiles={tiles} hasAgents={hasAgents} onTile={onTile} /> : undefined}
+              task={<Dash71Task loading={loading} plan={plan} ctx={taskCtx} onView={viewTask} innerRef={focusRef} gs={gsHidden ? undefined : gs} />}
               panel={
                 <Dash105Founding loading={loading} uid={fwUid} name={currentUser?.name ?? null} seenTier={currentUser?.foundingSeenTier ?? null} onSeen={onFoundingSeen} />
               }
             />
           </div>
-          </SpotProvider>
         </div>
 
       </DashPopupProvider>

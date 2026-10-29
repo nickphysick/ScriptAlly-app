@@ -8,7 +8,7 @@
 /* ── the right column while querying, ≤900px tall (moved from v93's sheet, unchanged): the founding card takes up to
    290px and the task card keeps at least 254px. At ≤760px tall the 128px row stays (it gives the Compact card). */
 @media (max-height: 900px) and (min-height: 761px) and (min-width: 1100px) {
-  .d58[data-mode="q"] .d71-right { grid-template-rows: minmax(254px, 1fr) minmax(194px, 290px); }
+  .d58:is([data-mode="q"], [data-mode="pre"]) .d71-right { grid-template-rows: minmax(254px, 1fr) minmax(194px, 290px); }
 }
 
 .d105-fw {

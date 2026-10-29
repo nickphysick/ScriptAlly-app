@@ -3,7 +3,7 @@ import { badgeText, unseenCount } from "./dashFeedSeen";
 import type { FeedEntry } from "./dashFeed";
 
 const at = (y: number, m: number, d: number, h = 10) => new Date(y, m, d, h).getTime();
-const e = (ms: number) => ({ at: ms } as FeedEntry);
+const e = (ms: number, dir: "in" | "out" = "in") => ({ at: ms, dir } as FeedEntry);
 
 describe("the feed tab's unseen badge", () => {
   const now = new Date(2026, 9, 16, 15);
@@ -15,6 +15,14 @@ describe("the feed tab's unseen badge", () => {
   });
   it("with no stored time, counts today's entries", () => {
     expect(unseenCount(entries, null, now)).toBe(2);
+  });
+  /* DFV-A (Dashboard first visit v1, A5): the writer's own acts are entries, never news — a new account opened
+     with a badge of 1 (its own "added a manuscript") and S5 read 9+ with nothing from any agent */
+  it("DFV-A: never counts the writer's own acts, with or without a stored time", () => {
+    const mine = [e(at(2026, 9, 16, 9), "out"), e(at(2026, 9, 16, 14), "out"), e(at(2026, 9, 16, 11), "in")];
+    expect(unseenCount(mine, null, now)).toBe(1);
+    expect(unseenCount(mine, at(2026, 9, 16, 8), now)).toBe(1);
+    expect(unseenCount([e(at(2026, 9, 16, 9), "out")], null, now)).toBe(0);
   });
   it("reads 9+ above nine", () => {
     expect(badgeText(3)).toBe("3");
