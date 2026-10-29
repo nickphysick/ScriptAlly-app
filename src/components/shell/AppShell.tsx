@@ -376,7 +376,11 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
   const setBandSlot = useCallback((path: string, node: React.ReactNode | null) => {
     setBandSlots((prev) => (prev[path] === node ? prev : { ...prev, [path]: node }));
   }, []);
-  const phoneBandValue = useMemo(() => ({ setBandSlot }), [setBandSlot]);
+  const [bandExtras, setBandExtras] = useState<Record<string, React.ReactNode | null>>({});
+  const setBandExtra = useCallback((path: string, node: React.ReactNode | null) => {
+    setBandExtras((prev) => (prev[path] === node ? prev : { ...prev, [path]: node }));
+  }, []);
+  const phoneBandValue = useMemo(() => ({ setBandSlot, setBandExtra }), [setBandSlot, setBandExtra]);
   const bandTitle = useMemo(() => {
     const tab = tabFor(pathname);
     if (tab === "home") return `${dayWord(salutation(new Date()))}, ${firstNameOf(currentUser?.name ?? "")}`.replace(/, $/, "");
@@ -606,6 +610,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
               if (idx > 0) navigate(-1); else goPath("/dashboard");
             }}
             slot={bandSlots[pathname] ?? null}
+            extra={bandExtras[pathname] ?? null}
           />
         ) : (
         <div className="ws-mobilebar">

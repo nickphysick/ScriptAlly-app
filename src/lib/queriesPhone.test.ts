@@ -10,7 +10,7 @@ import { QueryStatus, type Agent, type Query } from "../types";
 import { buildQcRows, whereItStands } from "./qcSummary";
 import {
   allSections, cheerFrom, cheerWords, chipCounts, comingUp, defaultChip, headerLine, pastDueRows, phoneScopeId, rowsFor,
-  stampFor, waitingGroups, yourMoveBadge, yourMoveGroups, COMING_DAYS, ordinal,
+  stampFor, waitingGroups, yourMoveBadge, yourMoveGroups, COMING_DAYS, ordinal, nextDateLine, stageIndex, PA2_CHIPS, PA2_GROUPS,
 } from "./queriesPhone";
 
 const DAY = 86_400_000;
@@ -130,5 +130,39 @@ describe("the celebration", () => {
     expect(w.line).toContain("Murphy’s Day Out");
     expect(w.stats).toHaveLength(3);
     expect(w.button).toBe("Send the full now");
+  });
+});
+
+describe("Phone app v2 — the next-date line and the stage track", () => {
+  const BAD = /overdue|late\b|score/i;
+  it("says a fact about the next date, never a verdict, for every row the fixture can produce", () => {
+    const lines = ROWS.map((r) => nextDateLine(r, NOW));
+    expect(lines.length).toBeGreaterThan(4);
+    for (const l of lines) expect(l.text).not.toMatch(BAD);
+    /* the four kinds are each entered */
+    const kinds = new Set(ROWS.map((r) => whereItStands(r, NOW)));
+    expect([...kinds].sort()).toEqual(["agent", "closed", "quiet", "you"]);
+  });
+  it("names the writer's move by what it is: a send, an answer", () => {
+    const req = ROWS.find((r) => r.id === "q2")!, offer = ROWS.find((r) => r.id === "q5")!;
+    expect(nextDateLine(req, NOW)).toMatchObject({ mine: true });
+    expect(nextDateLine(req, NOW).text).toMatch(/^Send by /);
+    expect(nextDateLine(offer, NOW).text).toMatch(/^Answer by /);
+  });
+  it("on a closed query states the outcome and its date", () => {
+    const c = ROWS.find((r) => r.id === "q7")!;
+    expect(nextDateLine(c, NOW)).toEqual({ text: expect.stringMatching(/^Passed \d+ [A-Z][a-z]{2}$/), mine: false });
+  });
+  it("the stage track: where a live query is, and the furthest a closed one got", () => {
+    expect(stageIndex(QueryStatus.QUERIED, [])).toBe(0);
+    expect(stageIndex(QueryStatus.PARTIAL_SENT, [])).toBe(1);
+    expect(stageIndex(QueryStatus.FULL_REQUESTED, [])).toBe(2);
+    expect(stageIndex(QueryStatus.OFFER, [])).toBe(3);
+    expect(stageIndex(QueryStatus.REJECTED, [QueryStatus.QUERIED, QueryStatus.FULL_SENT])).toBe(2);
+    expect(stageIndex(QueryStatus.NO_RESPONSE, [])).toBe(0);
+  });
+  it("five chips, All first; four groups, the chips less All", () => {
+    expect(PA2_CHIPS[0]).toBe("all");
+    expect([...PA2_GROUPS]).toEqual(PA2_CHIPS.slice(1));
   });
 });

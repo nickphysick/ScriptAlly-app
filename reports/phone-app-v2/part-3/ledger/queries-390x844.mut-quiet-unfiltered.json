@@ -1,0 +1,254 @@
+[
+ {
+  "lock": "pop",
+  "where": "390x844 five chips and rows",
+  "ok": true,
+  "detail": "{\"all\":52,\"you\":16,\"agent\":6,\"quiet\":17,\"closed\":13}"
+ },
+ {
+  "lock": "Q1",
+  "where": "390x844 the default is All, every query",
+  "ok": true,
+  "detail": "52 vs 52"
+ },
+ {
+  "lock": "Q1",
+  "where": "390x844 the four sets sum to All",
+  "ok": true,
+  "detail": "{\"all\":52,\"you\":16,\"agent\":6,\"quiet\":17,\"closed\":13}"
+ },
+ {
+  "lock": "Q3",
+  "where": "390x844 every row leads with its status glyph",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "Q1",
+  "where": "390x844 you: exactly its 16 rows",
+  "ok": true,
+  "detail": "16 vs 16; you"
+ },
+ {
+  "lock": "Q2",
+  "where": "390x844 you: the band line does not follow the chip",
+  "ok": true,
+  "detail": "52,39,16 vs 52,39,16"
+ },
+ {
+  "lock": "Q7",
+  "where": "390x844 you: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": "navy 26"
+ },
+ {
+  "lock": "Q7",
+  "where": "390x844 you: no image twice",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "Q1",
+  "where": "390x844 agent: exactly its 6 rows",
+  "ok": true,
+  "detail": "6 vs 6; agent"
+ },
+ {
+  "lock": "Q2",
+  "where": "390x844 agent: the band line does not follow the chip",
+  "ok": true,
+  "detail": "52,39,16 vs 52,39,16"
+ },
+ {
+  "lock": "Q7",
+  "where": "390x844 agent: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": "navy 16"
+ },
+ {
+  "lock": "Q7",
+  "where": "390x844 agent: no image twice",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "Q1",
+  "where": "390x844 quiet: exactly its 17 rows",
+  "ok": false,
+  "detail": "52 vs 17; closed,you,quiet,agent"
+ },
+ {
+  "lock": "Q2",
+  "where": "390x844 quiet: the band line does not follow the chip",
+  "ok": true,
+  "detail": "52,39,16 vs 52,39,16"
+ },
+ {
+  "lock": "Q7",
+  "where": "390x844 quiet: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": "navy 49"
+ },
+ {
+  "lock": "Q7",
+  "where": "390x844 quiet: no image twice",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "Q1",
+  "where": "390x844 closed: exactly its 13 rows",
+  "ok": true,
+  "detail": "13 vs 13; closed"
+ },
+ {
+  "lock": "Q2",
+  "where": "390x844 closed: the band line does not follow the chip",
+  "ok": true,
+  "detail": "52,39,16 vs 52,39,16"
+ },
+ {
+  "lock": "Q7",
+  "where": "390x844 closed: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": "navy 10"
+ },
+ {
+  "lock": "Q7",
+  "where": "390x844 closed: no image twice",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "Q4",
+  "where": "390x844 right on your move: the next step: the action is revealed",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "Q4",
+  "where": "390x844 right on your move: the next step: opens sent journey",
+  "ok": true,
+  "detail": "sent"
+ },
+ {
+  "lock": "Q4",
+  "where": "390x844 right on your move: the next step: nothing was written",
+  "ok": true,
+  "detail": "{\"all\":52,\"you\":16,\"agent\":6,\"quiet\":17,\"closed\":13}"
+ },
+ {
+  "lock": "Q4",
+  "where": "390x844 right on theirs: a nudge: the action is revealed",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "Q4",
+  "where": "390x844 right on theirs: a nudge: opens nudge journey",
+  "ok": true,
+  "detail": "nudge"
+ },
+ {
+  "lock": "Q4",
+  "where": "390x844 right on theirs: a nudge: nothing was written",
+  "ok": true,
+  "detail": "{\"all\":52,\"you\":16,\"agent\":6,\"quiet\":17,\"closed\":13}"
+ },
+ {
+  "lock": "Q4",
+  "where": "390x844 left: close: the action is revealed",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "Q4",
+  "where": "390x844 left: close: opens close journey",
+  "ok": true,
+  "detail": "close"
+ },
+ {
+  "lock": "Q4",
+  "where": "390x844 left: close: nothing was written",
+  "ok": true,
+  "detail": "{\"all\":52,\"you\":16,\"agent\":6,\"quiet\":17,\"closed\":13}"
+ },
+ {
+  "lock": "Q5",
+  "where": "390x844 the sheet opens at 64%",
+  "ok": true,
+  "detail": "540.15625 vs 540.16"
+ },
+ {
+  "lock": "Q5",
+  "where": "390x844 ?q= carries the query (back closes it)",
+  "ok": true,
+  "detail": "?q=seed-query-7"
+ },
+ {
+  "lock": "Q5",
+  "where": "390x844 band · agent row · stage track · the latest, in order",
+  "ok": true,
+  "detail": "[325.84375,357.390625,472.390625,563.171875]"
+ },
+ {
+  "lock": "Q5",
+  "where": "390x844 at 64% the next step is pinned at the sheet's foot",
+  "ok": true,
+  "detail": "{\"top\":674.84375,\"bottom\":844,\"h\":169.15625}"
+ },
+ {
+  "lock": "Q5",
+  "where": "390x844 scrolled, the next step has not moved",
+  "ok": true,
+  "detail": "[674.84375,674.84375]"
+ },
+ {
+  "lock": "Q5",
+  "where": "390x844 dragged up, the sheet is full (screen − 56)",
+  "ok": true,
+  "detail": "788 vs 788"
+ },
+ {
+  "lock": "Q5",
+  "where": "390x844 at full the next step is still pinned at the foot",
+  "ok": true,
+  "detail": "{\"top\":674.84375,\"bottom\":844,\"h\":169.15625}"
+ },
+ {
+  "lock": "Q7",
+  "where": "390x844 the sheet: no image twice",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "Q5",
+  "where": "390x844 ••• opens the more sheet",
+  "ok": true,
+  "detail": "more-sheet,more-resp,more-nudge,more-edit,more-close,more-pdf,more-delete"
+ },
+ {
+  "lock": "Q5",
+  "where": "390x844 Escape closes the more sheet and leaves the query sheet open",
+  "ok": true,
+  "detail": "http://127.0.0.1:4393/queries?q=seed-query-7"
+ },
+ {
+  "lock": "Q5",
+  "where": "390x844 back closes the sheet and stays on Queries",
+  "ok": true,
+  "detail": "http://127.0.0.1:4393/queries"
+ },
+ {
+  "lock": "Q6",
+  "where": "390x844 every open query, once",
+  "ok": true,
+  "detail": "39 vs 39"
+ },
+ {
+  "lock": "Q6",
+  "where": "390x844 no closed query",
+  "ok": true,
+  "detail": ""
+ }
+]

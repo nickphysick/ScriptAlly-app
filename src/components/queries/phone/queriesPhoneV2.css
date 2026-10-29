@@ -1,0 +1,158 @@
+/* ── PHONE APP v2, PART 3 — THE QUERIES TAB, THE QUERY SHEET AND THE BIRDS-EYE VIEW (ref design-refs/phone-app-v2/src/
+   app.css .bstats .chips .chip .rows .rowhd .sw .acts .row .av .when; qsheet.js .stg .qsec .nextstep). Below 768px. ── */
+@media (max-width: 767.98px) {
+  .qm1.pa-q { background: var(--pa-page); color: var(--pa-ink); font-family: var(--pa-sans); min-height: 100%; }
+  /* the ref's .sheetpg rises 24px into the band's rounded foot (margin-top: -24px; padding-top 18) */
+  .pa-qbody { position: relative; margin-top: -24px; padding: 18px 16px 120px; }
+  .pa-sub { font-size: 13px; color: var(--pa-muted); }
+  .pa-link { border: 0; background: none; padding: 0; cursor: pointer; min-height: 44px; font: 600 14px/1.2 var(--pa-sans) !important; color: var(--pa-navy); }
+
+  /* the band's counts (ref `.bstats`) */
+  .pa-bstats { display: flex; flex-wrap: wrap; align-items: baseline; gap: 18px; color: rgba(255, 255, 255, 0.75); font-size: 14px; }
+  .pa-bstats b { margin-right: 5px; font-family: var(--pa-type); font-weight: 400; font-size: 24px; color: #fff; font-variant-numeric: tabular-nums; }
+  .pa-bstats span { color: rgba(255, 255, 255, 0.75); }
+
+  /* the chips (ref `.chips`, `.chip`) */
+  .pa-chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: -2px -16px 6px; padding: 2px 16px 8px; }
+  .pa-chips::-webkit-scrollbar { display: none; }
+  .pa-chips .pa-chip { height: 44px; }
+  .pa-chip b { font-weight: 600; color: var(--pa-muted); font-variant-numeric: tabular-nums; }
+  .pa-chip[aria-pressed="true"] { background: var(--pa-navy); color: #fff; box-shadow: none; }
+  .pa-chip[aria-pressed="true"] b { color: rgba(255, 255, 255, 0.75); }
+
+  /* the rows (ref `.rows` `.rowhd` `.sw` `.acts` `.row`, QROW B) */
+  .pa-rows { margin: 0 -16px; }
+  .pa-rowhd { display: flex; align-items: center; gap: 8px; padding: 18px 16px 6px; font: 600 13px/1.3 var(--pa-sans) !important; color: var(--pa-muted); }
+  .pa-rowhd .pa-n { font-variant-numeric: tabular-nums; }
+  .pa-sw { position: relative; overflow: hidden; touch-action: pan-y; }
+  .pa-acts { position: absolute; inset: 0; display: flex; justify-content: space-between; }
+  .pa-acts button {
+    width: 96px; height: 100%; border: 0; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 4px; font: 600 13px/1.2 var(--pa-sans) !important;
+  }
+  .pa-acts svg { width: 20px; height: 20px; }
+  .pa-acts .l { background: var(--pa-blush); color: var(--pa-ink); }
+  .pa-acts .r { background: var(--pa-navy); color: #fff; margin-left: auto; }
+  .pa-row {
+    position: relative; display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 16px; border: 0; text-align: left;
+    background: var(--pa-page); color: var(--pa-ink); cursor: pointer; transition: transform 0.32s var(--pa-spring);
+  }
+  .pa-row.drag { transition: none; }
+  .pa-row::after { content: ""; position: absolute; left: 68px; right: 0; bottom: 0; height: 1px; background: var(--pa-rule); }
+  .pa-mid { flex: 1; min-width: 0; }
+  .pa-nm { display: block; font: 600 16px/1.2 var(--pa-sans) !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pa-ag { display: block; margin-top: 1px; font: 400 13.5px/1.3 var(--pa-sans) !important; color: var(--pa-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pa-rt { flex: none; max-width: 44%; text-align: right; }
+  .pa-st { display: block; font: 500 13px/1.3 var(--pa-sans) !important; color: var(--pa-ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pa-when { display: block; margin-top: 4px; font: 400 12.5px/1.3 var(--pa-sans) !important; color: var(--pa-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pa-when.mv { color: var(--pa-ink); font-weight: 600 !important; }
+  .pa-qnone { padding: 16px; }
+  .pa-qfilt { display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: var(--pa-ink-2); }
+
+  /* the Wall of no card (ref v2.js, under All and Closed) */
+  .pa-wallcard { display: flex; gap: 12px; align-items: center; width: 100%; margin-top: 18px; border: 0; text-align: left; cursor: pointer; color: var(--pa-ink); }
+  .pa-spotw { width: 48px; height: 48px; flex: none; border-radius: 50%; background: var(--pa-blush-wash); display: grid; place-items: center; overflow: hidden; }
+  .pa-spotw img { width: 42px; height: 42px; object-fit: contain; }
+  .pa-wtx { flex: 1; min-width: 0; }
+  .pa-wtx b { display: block; font: 600 15.5px/1.3 var(--pa-sans) !important; }
+  .pa-wallcard .pa-chev, .pa-wallcard .pa-chev svg { width: 18px; height: 18px; color: var(--pa-faint); }
+
+  /* ── the query sheet: the card fills the sheet; its body scrolls; the next step stays pinned at the foot ── */
+  .pa-qsheet .pa-sheet-body { padding: 0; overflow: hidden; display: flex; flex-direction: column; }
+  .pa-qsheet .pa-qwrap { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  .pa-qsheet .qc149c--sheet { flex: 1; min-height: 0; display: flex; flex-direction: column; background: #fff; }
+  .qc149c--sheet .qc149c-band { flex: none; border-radius: 0; }
+  .qc149c--sheet .qc149c-sheetbody { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0 16px 16px; display: flex; flex-direction: column; }
+  .qc149c--sheet .qc149c-sheethead { display: flex; align-items: center; gap: 8px; }
+  .qc149c--sheet .qc149c-sheethead > :first-child { flex: 1; min-width: 0; }
+  .qc149c-more3 { width: 44px; height: 44px; flex: none; border: 0; border-radius: 50%; background: var(--pa-page); color: var(--pa-ink); display: grid; place-items: center; cursor: pointer; }
+  /* the ref's order: where it's got to, what was sent, the agent */
+  .qc149c--sheet [data-pane="tracking"] { order: 1; }
+  .qc149c--sheet [data-pane="materials"] { order: 2; }
+  .qc149c--sheet [data-pane="agent"] { order: 3; }
+  .qc149c--sheet .qc149c-old { display: none; }
+  .qc149c--sheet .qc149c-st.next { display: none; }
+  .qc149c--sheet .qc149c-qsec { margin: 22px 0 2px; font-family: var(--pa-type) !important; font-weight: 400 !important; font-size: 18px; color: var(--pa-ink); }
+  .qc149c-whole { margin: 2px 0 4px 36px; min-height: 44px; border: 0; background: none; padding: 0; cursor: pointer; font: 600 14px/1.2 var(--pa-sans) !important; color: var(--pa-navy); }
+  .qc149c--sheet .qc149c-sheetfoot { flex: none; padding: 10px 16px calc(24px + env(safe-area-inset-bottom, 0px)); background: #fff; box-shadow: 0 -1px 0 var(--pa-rule); }
+  .qc149c--sheet .qc149c-sheetfoot .qc149c-nx { margin: 0; }
+
+  /* the stage track (ref `.stg`) */
+  .qc149c-stg { display: flex; align-items: flex-start; margin: 16px 0 4px; }
+  .qc149c-stgi { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 64px; flex: none; color: var(--pa-faint); font-size: 12px; text-align: center; line-height: 1.2; }
+  .qc149c-stgd { width: 34px; height: 34px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--pa-rule); display: grid; place-items: center; background: #fff; }
+  .qc149c-stgi.on { color: var(--pa-ink-2); }
+  .qc149c-stgi.on .qc149c-stgd { box-shadow: inset 0 0 0 1.5px var(--pa-navy); }
+  .qc149c-stgi.now { color: var(--pa-ink); font-weight: 600; }
+  .qc149c-stgi.now .qc149c-stgd { background: var(--pa-navy); box-shadow: none; color: #fff; }
+  .qc149c-stgl { flex: 1; height: 2px; background: var(--pa-rule); margin-top: 16px; min-width: 6px; }
+  .qc149c-stgl[data-on] { background: var(--pa-navy); }
+
+  /* the Birds-eye view (ref ovBirds) */
+  .pa-birdshead { float: right; width: 64px; height: 62px; object-fit: contain; margin: -4px 0 0 8px; }
+  .pa-brow { display: block; width: 100%; margin-bottom: 8px; padding: 12px 14px; border: 0; text-align: left; cursor: pointer; color: var(--pa-ink); }
+  .pa-brh { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .pa-brh b { flex: 1; font: 600 15px/1.3 var(--pa-sans) !important; }
+  .pa-brf { display: flex; justify-content: space-between; margin-top: 6px; }
+}
+
+/* ── the card's parts, as the sheet draws them (the sheet is portalled outside the page, so it states its own) ── */
+@media (max-width: 767.98px) {
+  /* the band (ref `.qband`): sentence case, the court's word, "Day n" in Special Elite */
+  .qc149c--sheet .qc149c-band { padding: 4px 18px 10px; text-transform: none; letter-spacing: 0; font: 600 13.5px/1.3 var(--pa-sans) !important; }
+  .qc149c--sheet .qc149c-band [data-qc149c="band-word"] { text-transform: none; letter-spacing: 0; font: 600 13.5px/1.3 var(--pa-sans) !important; }
+  .qc149c--sheet .qc149c-band .mk-lc-day, .qc149c--sheet .qc149c-band .mk-lc-day * { font-family: var(--pa-type) !important; font-size: 17px !important; text-transform: none; letter-spacing: 0; }
+  .qc149c--sheet .qc149c-band .mk-odo-dk { font-size: 17px !important; }
+  /* the agent row (ref `.qhead`): Special Elite name */
+  .qc149c--sheet .qc149c-agent { padding: 14px 0 12px; }
+  .qc149c--sheet .qc149c-agent .mk-lc-nm { font-family: var(--pa-type) !important; font-weight: 400 !important; font-size: 20px; line-height: 1.1; }
+  /* the pinned next step (ref `.nextstep`, QN A): white, a hairline, a 4px blush top (the rule when it is theirs) */
+  .qc149c--sheet .qc149c-nx { position: relative; overflow: hidden; margin: 0; padding: 12px 12px 12px 14px; border-radius: var(--pa-r-lg); background: #fff; box-shadow: inset 0 0 0 1px var(--pa-rule); }
+  .qc149c--sheet .qc149c-nx::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 4px; background: var(--pa-blush); }
+  .qc149c--sheet[data-where="agent"] .qc149c-nx::before, .qc149c--sheet[data-where="quiet"] .qc149c-nx::before, .qc149c--sheet .qc149c-nx--closed::before { background: var(--pa-fill); }
+  .qc149c--sheet .qc149c-nxart { display: none; }
+  .qc149c--sheet .qc149c-nx small { display: block; text-transform: none; letter-spacing: 0; font: 600 13px/1.3 var(--pa-sans) !important; color: var(--pa-ink-2); }
+  .qc149c--sheet .qc149c-nx b { display: block; margin-top: 2px; padding: 0; font: 600 15.5px/1.25 var(--pa-sans) !important; color: var(--pa-ink); }
+  .qc149c--sheet .qc149c-nx p { margin: 2px 0 0; font: 400 13px/1.3 var(--pa-sans) !important; font-style: normal !important; color: var(--pa-muted); }
+  .qc149c--sheet .qc149c-nxbtns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .qc149c--sheet .qc149c-nxb {
+    height: 44px; padding: 0 16px; border: 0; border-radius: 999px; cursor: pointer; white-space: nowrap;
+    background: #fff; color: var(--pa-ink); box-shadow: inset 0 0 0 1.5px var(--pa-rule); font: 600 14px/1 var(--pa-sans) !important;
+  }
+  .qc149c--sheet .qc149c-nxb.primary { background: var(--pa-navy); color: #fff; box-shadow: none; }
+}
+@media (max-width: 767.98px) {
+  /* ⚠️ THE DESKTOP CARD SIZES ITS PANES TO A FIXED FRAME; in the sheet each pane is as tall as its content and the
+     sheet's body is the one scroller (measured: the tracking pane was 50px tall holding 135px of story) */
+  .qc149c--sheet .qc149c-pane, .qc149c--sheet .qc149c-pane > .qc149c-pg, .qc149c--sheet .qc149c-mt {
+    display: block !important; height: auto !important; max-height: none !important; min-height: 0 !important; overflow: visible !important; flex: none !important;
+  }
+  /* no small uppercase mono labels on the phone: the card's kicker labels and agency read in sentence case */
+  .qc149c--sheet :is(.qc149c-k, .mk-lc-ag, .qc149c-mt h5, .qc149c-mc span, .qc149c-pk) {
+    text-transform: none !important; letter-spacing: 0 !important; font-family: var(--pa-sans) !important; font-size: 13px !important; font-weight: 600;
+  }
+  .qc149c--sheet .mk-lc-ag { font-weight: 400; color: var(--pa-muted); font-size: 14px !important; margin-top: 3px; }
+}
+@media (max-width: 767.98px) {
+  /* the latest first (ref `tlList`, reversed) */
+  .qc149c--sheet .qc149c-story { display: flex; flex-direction: column-reverse; }
+  .qc149c--sheet :is(.qc149c-d, .qc149c-small, .qc149c-gs span, .qc149c-ch, .qc149c-hs, .qc149c-act) {
+    text-transform: none !important; letter-spacing: 0 !important; font-family: var(--pa-sans) !important; font-size: 12.5px !important;
+  }
+}
+
+/* ── the query sheet is a pa-sheet layer (z 1000): a journey opened from it, and the celebration after it, sit over it.
+   The snackbar (1100) stays over both, so a wrong answer can be undone while the celebration shows. ── */
+@media (max-width: 767.98px) {
+  .qad-scrim { z-index: 1010; }
+  .qad-drawer { z-index: 1011; }
+  .qm1-layer { z-index: 1050; }
+}
+
+/* the sheet's head is the ref's (QH B): the agent and agency on one line each, the ••• right. The status is the stage
+   track's, a few lines down, so the pill beside the name (which wrapped the name at 390) is not drawn here. */
+@media (max-width: 767.98px) {
+  .pa-qsheet .qc149c-sheethead .qc149c-pill { display: none; }
+  .pa-qsheet .qc149c-sheethead [data-qc149c="name"] { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pa-qsheet .qc149c-sheethead .qc149c-who { min-width: 0; flex: 1 1 auto; }
+}

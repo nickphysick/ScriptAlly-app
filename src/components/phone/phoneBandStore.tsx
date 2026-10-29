@@ -11,8 +11,10 @@ import React, { createContext, useContext, useEffect } from "react";
 
 export interface PhoneBandValue {
   setBandSlot: (path: string, node: React.ReactNode | null) => void;
+  /** extra round buttons in the band's row, left of search (Queries' Birds-eye eye) */
+  setBandExtra: (path: string, node: React.ReactNode | null) => void;
 }
-export const PhoneBandContext = createContext<PhoneBandValue>({ setBandSlot: () => {} });
+export const PhoneBandContext = createContext<PhoneBandValue>({ setBandSlot: () => {}, setBandExtra: () => {} });
 
 /** Put `node` in the band while `path` is on screen. Pass null (or unmount) to clear it. */
 export function usePhoneBandSlot(path: string, node: React.ReactNode | null, deps: React.DependencyList): void {
@@ -22,4 +24,14 @@ export function usePhoneBandSlot(path: string, node: React.ReactNode | null, dep
     return () => setBandSlot(path, null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [path, setBandSlot, ...deps]);
+}
+
+/** Put extra round buttons in the band's row while `path` is on screen. */
+export function usePhoneBandExtra(path: string, node: React.ReactNode | null, deps: React.DependencyList): void {
+  const { setBandExtra } = useContext(PhoneBandContext);
+  useEffect(() => {
+    setBandExtra(path, node);
+    return () => setBandExtra(path, null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [path, setBandExtra, ...deps]);
 }

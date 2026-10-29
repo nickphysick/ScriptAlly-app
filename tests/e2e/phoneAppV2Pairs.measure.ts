@@ -29,6 +29,35 @@ const PARTS: Record<string, [string, string, Step][]> = {
     /* the ref's 03 shows Replies · All; the app has no replies series, so the nearest is Sent · All */
     ["03-home-hero-replies", "/dashboard", async (p) => { await p.locator('[data-pa="hero-series"][data-k="sent"]').click(); await p.locator('[data-pa="hero-range"][data-k="All"]').click(); await p.waitForTimeout(300); }],
   ],
+  "part-3": [
+    ["04-queries", "/queries", async (p) => { await p.locator('[data-qm1="chip"][data-key="all"]').click(); await p.waitForTimeout(300); }],
+    ["05-queries-filtered", "/queries", async (p) => { await p.locator('[data-qm1="chip"][data-key="you"]').click(); await p.waitForTimeout(300); }],
+    ["06-queries-swipe", "/queries", async (p) => {
+      await p.locator('[data-qm1="chip"][data-key="all"]').click(); await p.waitForTimeout(300);
+      const b = (await p.locator('[data-qm1="row"][data-where="you"] .pa-row').first().boundingBox())!;
+      await p.mouse.move(b.x + b.width / 2, b.y + b.height / 2); await p.mouse.down();
+      for (let i = 1; i <= 8; i++) await p.mouse.move(b.x + b.width / 2 + 15 * i, b.y + b.height / 2);
+      await p.mouse.up(); await p.waitForTimeout(500);
+    }],
+    ["07-query-sheet", "/queries", async (p) => { await openOwed(p); }],
+    ["08-query-sheet-full", "/queries", async (p) => {
+      await openOwed(p);
+      const g = (await p.locator('.pa-qsheet [data-pa="grab"]').boundingBox())!, H = p.viewportSize()!.height;
+      await p.mouse.move(g.x + g.width / 2, g.y + 10); await p.mouse.down();
+      for (let i = 1; i <= 10; i++) await p.mouse.move(g.x + g.width / 2, g.y + 10 - (H * 0.4 * i) / 10);
+      await p.mouse.up(); await p.waitForTimeout(700);
+    }],
+    ["09-query-waiting", "/queries", async (p) => { await p.locator('[data-qm1="chip"][data-key="agent"]').click(); await p.waitForTimeout(300); await p.locator('[data-qm1="row"] .pa-row').first().click(); await p.locator('.pa-qsheet [data-qc149c="card"]').waitFor(); await p.waitForTimeout(900); }],
+    ["10-query-more", "/queries", async (p) => { await openOwed(p); await p.locator('.pa-qsheet [data-qc149c="more-btn"]').click(); await p.waitForTimeout(800); }],
+    ["11-birds-eye", "/queries", async (p) => { await p.locator('[data-pa="birds-btn"]').click(); await p.waitForTimeout(900); }],
+  ],
+};
+
+/* a query the writer owes something on: a request, so the sheet's pinned foot is a next step */
+const openOwed = async (p: Page) => {
+  await p.locator('[data-qm1="chip"][data-key="all"]').click(); await p.waitForTimeout(300);
+  await p.locator('[data-qm1="row"][data-status$="Requested"] .pa-row').first().click();
+  await p.locator('.pa-qsheet [data-qc149c="card"]').waitFor(); await p.waitForTimeout(900);
 };
 
 const pair = async (page: Page, ref: string, app: Buffer, out: string) => {
@@ -55,7 +84,7 @@ for (const vp of PHONES) {
       const app = await page.screenshot();
       writeFileSync(`${DIR}/${PART}/pairs/${ref}-app-${tag(vp)}.png`, app);
       await pair(page, ref, app, `${DIR}/${PART}/pairs/${ref}-pair-${tag(vp)}.png`);
-      await page.keyboard.press("Escape"); await page.waitForTimeout(300);
+      await page.keyboard.press("Escape"); await page.waitForTimeout(300); await page.keyboard.press("Escape"); await page.waitForTimeout(300);
     }
   });
 }

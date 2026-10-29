@@ -93,7 +93,9 @@
 @media (max-width: 767.98px) {
   /* the old body's own gutter and flex gap stand down: the sheet's 16px is the only gutter, and each card states its
      own top margin as the ref does */
-  .pa-home .dm1-body { display: block; padding: 0; gap: 0; }
+  /* the ref's .sheetpg rises 24px into the band's rounded foot with 18px of padding: the body starts 6px above the
+     band's bottom edge. The root keeps the page ground below the foot so the foot's rounded corners stay visible. */
+  .pa-home .dm1-body { display: block; padding: 0; gap: 0; position: relative; margin-top: -24px; }
 }
 @media (max-width: 767.98px) {
   /* ⚠️ TAP TARGETS (DM1-F1): a text link is 44px tall to the finger without moving a line of the layout — the height is
