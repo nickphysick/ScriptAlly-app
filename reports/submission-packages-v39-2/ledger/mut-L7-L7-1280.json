@@ -1,0 +1,104 @@
+[
+ {
+  "lock": "L7-1280",
+  "where": "the tab and the package card were measured",
+  "ok": true,
+  "detail": "{\"tab\":{\"bg\":\"rgb(94, 47, 58)\",\"h\":40,\"top\":805.34375},\"card\":805.34375}"
+ },
+ {
+  "lock": "L7-1280",
+  "where": "the tab is #5e2f3a",
+  "ok": true,
+  "detail": "rgb(94, 47, 58)"
+ },
+ {
+  "lock": "L7-1280",
+  "where": "the tab is 40 tall (±1)",
+  "ok": true,
+  "detail": "40"
+ },
+ {
+  "lock": "L7-1280",
+  "where": "the tab's top is the package card's top (±1)",
+  "ok": true,
+  "detail": "805.34375 vs 805.34375"
+ },
+ {
+  "lock": "L7-1280",
+  "where": "the materials card starts 40 under the tab's top (±1)",
+  "ok": true,
+  "detail": "845.34375 vs 805.34375"
+ },
+ {
+  "lock": "L7-1280",
+  "where": "the rows were read (two letters at least)",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "L7-1280",
+  "where": "the 40-character name is on the page",
+  "ok": true,
+  "detail": "[\"Comps-forward, for agents who ask for it\",\"Hook-first\"]"
+ },
+ {
+  "lock": "L7-1280",
+  "where": "…in full: scrollWidth ≤ clientWidth",
+  "ok": false,
+  "detail": "{\"name\":\"Comps-forward, for agents who ask for it\",\"sw\":283,\"cw\":210,\"to\":\"ellipsis\",\"ws\":\"nowrap\",\"edge\":\"none\",\"add\":{\"vis\":true,\"op\":\"0\"},\"meta\":\"Sent 4\"}"
+ },
+ {
+  "lock": "L7-1280",
+  "where": "…and never ellipsised",
+  "ok": false,
+  "detail": "{\"name\":\"Comps-forward, for agents who ask for it\",\"sw\":283,\"cw\":210,\"to\":\"ellipsis\",\"ws\":\"nowrap\",\"edge\":\"none\",\"add\":{\"vis\":true,\"op\":\"0\"},\"meta\":\"Sent 4\"}"
+ },
+ {
+  "lock": "L7-1280",
+  "where": "exactly one row has the berry edge",
+  "ok": true,
+  "detail": "[[\"Comps-forward, for agents who ask for it\",\"none\"],[\"Hook-first\",\"rgb(155, 74, 87) 3px 0px 0px 0px inset\"]]"
+ },
+ {
+  "lock": "L7-1280",
+  "where": "…it is the row in this package, and says so first",
+  "ok": true,
+  "detail": "✓ In this package · Sent 7"
+ },
+ {
+  "lock": "L7-1280",
+  "where": "…and it has no Add",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "lock": "L7-1280",
+  "where": "every row has its meta line (Sent n / Not sent yet)",
+  "ok": true,
+  "detail": "[\"Sent 4\",\"✓ In this package · Sent 7\"]"
+ },
+ {
+  "lock": "L7-1280",
+  "where": "the other rows offer Add",
+  "ok": true,
+  "detail": "[{\"vis\":true,\"op\":\"0\"}]"
+ },
+ {
+  "lock": "L7-1280",
+  "where": "Add is hidden at rest",
+  "ok": true,
+  "detail": "[{\"vis\":true,\"op\":\"0\"}]"
+ },
+ {
+  "lock": "L7-1280",
+  "where": "Add shows on hover",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "L7-1280",
+  "where": "Add shows on focus",
+  "ok": true,
+  "detail": "1"
+ }
+]

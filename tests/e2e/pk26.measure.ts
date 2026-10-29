@@ -60,6 +60,8 @@ const MUTATIONS: Record<string, { css?: string; js?: string }> = {
      would come to report a letter, or an extra, that it never carried. */
   /* the header card takes the shell's shared gutter back */
   /* v39.1: the builder goes back to a fixed 48, off the header card's inset */
+  /* v39.2: names are cut to one line again */
+  "PK26-M": { css: `[data-pk26="page"] .p9-pb-grid.p9-v39 .p9-lib-list .p9-lr.p9-lr b { white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }` },
   "PK26-W": { css: `.p6.p6 > .p9-pb-build { margin-left: 48px !important; margin-right: 48px !important; }` },
   /* every row accepts every drop */
   "PK26-B": { js: `document.addEventListener('dragover', (e) => { if (e.target.closest && e.target.closest('.p9-slt')) e.preventDefault(); }, true); document.addEventListener('drop', (e) => { const s = e.target.closest && e.target.closest('.p9-slt'); if (!s) return; const [k] = (e.dataTransfer.getData('text/plain') || '').split(':'); if (k && k !== s.dataset.slot) { const t = document.querySelector('.p9-slt[data-slot="' + k + '"]'); if (t) { e.stopImmediatePropagation(); t.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer: e.dataTransfer })); } } }, true);` },
@@ -230,27 +232,27 @@ for (const size of SIZES) {
 
 /* PK26-T — RETIRED with v38 (27 Oct); see tests/e2e/RETIRED-submission-packages-v38.md */
 
-/* ── PK26-M · Your materials: one-line names, "In use" unbroken, never the type as a summary ── */
-test("PK26-M material rows: one-line names, no type for a summary", async ({ page }) => {
+/* ── PK26-M · Your materials: names in full, never the type as a summary ──
+   REWRITTEN by v39.2 (Part C): a name is never cut off any more — it wraps, with no ellipsis and no title tooltip
+   (it was one line with the full name as its title). The "no type for a summary" half is unchanged. */
+test("PK26-M material rows: names in full, no type for a summary", async ({ page }) => {
   test.setTimeout(180_000);
   const L = new Ledger("PK26-M");
   await open(page, SIZES[1]);
   const r = await page.evaluate(() => {
     const pg = [...document.querySelectorAll('[data-pk26="page"]')].find((e) => (e as HTMLElement).offsetParent) as HTMLElement;
     const rows = [...pg.querySelectorAll('[data-pk26="lib"] .p9-lr')].map((row) => {
-      /* v39: the ref's row has no name span — the b is the name, and carries the title */
-      const b = row.querySelector("b") as HTMLElement, nm = b;
-      const lh = parseFloat(getComputedStyle(b).fontSize) * 1.6;
-      return { name: nm?.textContent ?? b.textContent ?? "", title: nm?.getAttribute("title") ?? null, oneLine: b.getBoundingClientRect().height <= lh, small: row.querySelector("small")?.textContent ?? null };
+      const b = row.querySelector("b") as HTMLElement, cs = getComputedStyle(b);
+      return { name: b.textContent ?? "", whole: b.scrollWidth <= b.clientWidth, cut: cs.textOverflow === "ellipsis" || cs.whiteSpace === "nowrap", small: row.querySelector("small")?.textContent ?? null };
     });
     const smalls = [...pg.querySelectorAll('[data-pk26="lib"] small, [data-pk26="open"] .p9-mr-tx small')].map((e) => (e.textContent ?? "").trim());
     return { rows, smalls };
   });
   const long = r.rows.find((x) => x.name.startsWith("The longer comps-forward letter"));
   L.check("the long letter is listed", !!long, JSON.stringify(r.rows.map((x) => x.name)));
-  L.check("…its name is one line", !!long && long.oneLine, JSON.stringify(long));
-  L.check("…with the full name as its title", !!long && long.title === long.name, JSON.stringify(long));
-  L.check("every name is one line", r.rows.every((x) => x.oneLine), JSON.stringify(r.rows.filter((x) => !x.oneLine)));
+  L.check("…its name shows in full (scrollWidth ≤ clientWidth)", !!long && long.whole, JSON.stringify(long));
+  L.check("…and is never ellipsised", !!long && !long.cut, JSON.stringify(long));
+  L.check("every name shows in full", r.rows.every((x) => x.whole && !x.cut), JSON.stringify(r.rows.filter((x) => !x.whole || x.cut)));
   L.check("no summary is the type", !r.smalls.some((t) => t === "Query letter" || t === "Synopsis"), JSON.stringify(r.smalls));
   L.done(5);
 });
