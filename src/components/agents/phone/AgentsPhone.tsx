@@ -26,6 +26,9 @@ import { PhoneDisc } from "../../phone/PhoneDisc";
 import { PI } from "../../phone/phoneIcons";
 import { MobileSheet } from "../../shell/MobileSheet";
 import { useScout } from "../discover1/useScout";
+import { DISCOVER_LIVE } from "../../../lib/discoverShared";
+import { devAid, type DevAid } from "../../../lib/discoverReviewAid";
+import { notifyPrefs } from "../../../lib/accountPrefs";
 import { SubmissionMethod, type Agent, type CommunityAgent } from "../../../types";
 import { doorWords, howWords, replyWords } from "../../../lib/agentsPhone";
 import "./agentsPhone.css";
@@ -58,6 +61,15 @@ function useAgentFacts() {
   return { facts, scoped, now };
 }
 
+const NO_AID: DevAid = { face: null, fixture: null, memory: null, holdMs: 0 };
+/** Discover's own gate (`DISCOVER_LIVE`), with the desktop's dev review aid. ⚠️ THE MODE CHECK IS AT THE CALL SITE, as
+ *  in DiscoverPage, so a production build folds the aid away. While the gate is off the phone shows what the desktop
+ *  shows: that the Scout is coming — no queue, no "{n} new". */
+function useDiscoverFace(): { live: boolean; aid: DevAid } {
+  const [aid] = useState<DevAid>(() => (import.meta.env.MODE !== "production" ? devAid() : NO_AID));
+  return { live: (aid.face ?? (DISCOVER_LIVE ? "live" : "soon")) === "live", aid };
+}
+
 /* ══ Your list ══ */
 export const AgentsPhone: React.FC = () => {
   const navigate = useNavigate();
@@ -66,7 +78,8 @@ export const AgentsPhone: React.FC = () => {
   const qd = facts.filter((x) => x.stand !== "none");
   const [chip, setChip] = useState<AgentChip>("all");
   const [open, setOpen] = useState<AgentFacts | null>(null);
-  const scout = useScout({ fixture: null, memory: null });
+  const face = useDiscoverFace();
+  const scout = useScout(face.live ? face.aid : NO_AID);
 
   usePhoneBandSlot("/agents", (
     <div className="pa-bstats pa-agband" data-pa="agents-band">
@@ -86,7 +99,7 @@ export const AgentsPhone: React.FC = () => {
   return (
     <div className="pa-agents" data-pa="agents">
       <div className="pa-agbody">
-        <Seg list onDiscover={() => navigate("/agents/discover")} newN={scout.tally.toReview} />
+        <Seg list onDiscover={() => navigate("/agents/discover")} newN={face.live ? scout.tally.toReview : 0} />
         <div className="pa-chips" role="group" aria-label="Show">
           {(["all", "toq", "qd"] as AgentChip[]).map((k) => (
             <button type="button" key={k} className="pa-chip" aria-pressed={chip === k} data-pa="ag-chip" data-key={k} data-count={counts[k]} onClick={() => setChip(k)}>
@@ -207,7 +220,10 @@ const AgentProfileSheet: React.FC<{ x: AgentFacts | null; now: number; onClose: 
 /* ══ Discover (ref discList at ADC B: like the query card) ══ */
 export const DiscoverPhone: React.FC = () => {
   const navigate = useNavigate();
-  const s = useScout({ fixture: null, memory: null });
+  const face = useDiscoverFace();
+  const s = useScout(face.live ? face.aid : NO_AID);
+  const db = useScriptAllyDb();
+  const notified = notifyPrefs(db.currentUser?.notifyPrefs).discover;
   const [busy, setBusy] = useState<string | null>(null);
   const [peek, setPeek] = useState<CommunityAgent | null>(null);
   const { facts } = useAgentFacts();
@@ -243,12 +259,23 @@ export const DiscoverPhone: React.FC = () => {
   return (
     <div className="pa-agents" data-pa="discover">
       <div className="pa-agbody">
-        <Seg list={false} onList={() => navigate("/agents")} newN={s.tally.toReview} />
-        <div className="pa-dintro">
+        <Seg list={false} onList={() => navigate("/agents")} newN={face.live ? s.tally.toReview : 0} />
+        {!face.live ? (
+          <section className="pa-dsoon" data-pa="d-soon">
+            <span className="pa-dspot" aria-hidden="true">{PI.scope}</span>
+            <h2 className="pa-dname">The Scout is out looking</h2>
+            <p>As writers join, their agent lists build one shared catalogue. Every agent in it is checked by hand before the Scout brings you the ones who want a book like {s.manuscript?.title ?? "yours"}, with the reasons they fit. Nothing joins your contact list without you.</p>
+            {/* ⚠️ ONE LEAF, `notifyPrefs.discover` — the desktop's own write (the whole map would drop Settings' other keys) */}
+            <button type="button" className="pa-pri" data-pa="d-notify" aria-pressed={notified} onClick={() => { void db.updateUserPaths({ "notifyPrefs.discover": !notified }); }}>
+              {notified ? <>{PI.check}We’ll tell you</> : "Tell me when it’s ready"}
+            </button>
+          </section>
+        ) : null}
+        {face.live ? <div className="pa-dintro">
           <span className="pa-dspot" aria-hidden="true">{PI.scope}</span>
           <p>Verified agents who have told the Scout they’re looking for books like {s.manuscript?.title ?? "yours"}.</p>
-        </div>
-        {s.queue.map((p) => {
+        </div> : null}
+        {face.live ? s.queue.map((p) => {
           const ca = p.agent;
           const reply = replyWords(ca.responseTimeWeeks), how = howWords(ca.submissionMethod);
           return (
@@ -271,8 +298,8 @@ export const DiscoverPhone: React.FC = () => {
               </div>
             </article>
           );
-        })}
-        {!s.loading && !s.queue.length ? <p className="pa-tdnone" data-pa="d-none">No new agents for this book just now. The Scout keeps looking.</p> : null}
+        }) : null}
+        {face.live && !s.loading && !s.queue.length ? <p className="pa-tdnone" data-pa="d-none">No new agents for this book just now. The Scout keeps looking.</p> : null}
       </div>
       <MobileSheet open={!!peek} onClose={() => setPeek(null)} ariaLabel={peek?.name || "Agent"} pa={{ height: "auto", white: true, className: "pa-agmore" }}>
         {peek ? (

@@ -95,3 +95,9 @@
   .pa-dacts .pa-sec { height: 44px; padding: 0 16px; border-radius: 999px; border: 0; background: #fff; box-shadow: inset 0 0 0 1px var(--pa-rule); font: 600 14.5px var(--pa-sans); color: var(--pa-ink); }
   .pa-agents .pa-tdnone { margin: 30px 4px; color: var(--pa-muted); font-size: 15px; }
 }
+@media (max-width: 767.98px) {
+  /* Discover while DISCOVER_LIVE is off: the desktop's coming-soon words in one card */
+  .pa-dsoon { background: #fff; border-radius: 16px; box-shadow: var(--pa-sh); padding: 18px 16px 16px; display: flex; flex-direction: column; gap: 10px; }
+  .pa-dsoon p { margin: 0; font-size: 15px; line-height: 1.5; color: var(--pa-ink); }
+  .pa-dsoon .pa-pri { margin-top: 6px; }
+}

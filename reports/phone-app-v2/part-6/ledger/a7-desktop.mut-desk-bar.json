@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "pop",
+  "where": "1512 /agents: two or more base captures and a head capture",
+  "ok": true,
+  "detail": "base,base2,base3 / head"
+ },
+ {
+  "lock": "S9",
+  "where": "1512 /agents: pixels within the base's own variation",
+  "ok": false,
+  "detail": "head 317161 px vs base-to-base 0 px"
+ },
+ {
+  "lock": "S9",
+  "where": "1512 /agents: DOM-identical to the base",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "pop",
+  "where": "1512 /agents/discover: two or more base captures and a head capture",
+  "ok": true,
+  "detail": "base,base2 / head"
+ },
+ {
+  "lock": "S9",
+  "where": "1512 /agents/discover: pixels within the base's own variation",
+  "ok": false,
+  "detail": "head 382074 px vs base-to-base 0 px"
+ },
+ {
+  "lock": "S9",
+  "where": "1512 /agents/discover: DOM-identical to the base",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "pop",
+  "where": "1280 /agents: two or more base captures and a head capture",
+  "ok": true,
+  "detail": "base,base2,base3 / head"
+ },
+ {
+  "lock": "S9",
+  "where": "1280 /agents: pixels within the base's own variation",
+  "ok": false,
+  "detail": "head 436871 px vs base-to-base 0 px"
+ },
+ {
+  "lock": "S9",
+  "where": "1280 /agents: DOM-identical to the base",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "pop",
+  "where": "1280 /agents/discover: two or more base captures and a head capture",
+  "ok": true,
+  "detail": "base,base2 / head"
+ },
+ {
+  "lock": "S9",
+  "where": "1280 /agents/discover: pixels within the base's own variation",
+  "ok": false,
+  "detail": "head 361088 px vs base-to-base 0 px"
+ },
+ {
+  "lock": "S9",
+  "where": "1280 /agents/discover: DOM-identical to the base",
+  "ok": false,
+  "detail": ""
+ }
+]

@@ -272,7 +272,7 @@ const L1_NAME = process.env.PA2_L1_NAME ?? "head";
 const DESKS = [{ width: 1512, height: 900 }, { width: 1280, height: 800 }];
 /* Part 5 adds the Corkboard (the desktop noteboard page must not change either). PA2_L1_ROUTES narrows a capture to
    some routes — how the Corkboard's base was captured after the fact, from the base build */
-const DESK_ROUTES = process.env.PA2_L1_ROUTES ? process.env.PA2_L1_ROUTES.split(",") : ["/dashboard", "/queries", "/todo", "/agents", "/account", "/todo/corkboard"];
+const DESK_ROUTES = process.env.PA2_L1_ROUTES ? process.env.PA2_L1_ROUTES.split(",") : ["/dashboard", "/queries", "/todo", "/agents", "/account", "/todo/corkboard", "/agents/discover"];
 const l1Path = (name: string, vp: { width: number }, r: string, ext: string) => `${DIR}/${PART}/l1/${name}-${vp.width}${r.replace(/\//g, "_")}.${ext}`;
 
 test("PA2-1 · S9 desktop capture", async ({ page }) => {

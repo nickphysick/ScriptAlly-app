@@ -52,6 +52,13 @@ const PARTS: Record<string, [string, string, Step][]> = {
     ["11-birds-eye", "/queries", async (p) => { await p.locator('[data-pa="birds-btn"]').click(); await p.waitForTimeout(900); }],
   ],
 
+  /* 27 pairs the LIVE face, reached through the desktop's own dev review aid: on dev the gate (DISCOVER_LIVE) is off and
+     the page says the Scout is coming — that face is PA2-6's shot 27-discover-soon */
+  "part-6": [
+    ["26-agents", "/agents", async (p) => { await p.waitForTimeout(500); }],
+    ["27-agents-discover", "/agents/discover", async (p) => { await p.addInitScript(() => { (window as unknown as { __SA_DV_LIVE: number }).__SA_DV_LIVE = 1; }); await p.reload(); await p.locator('[data-pa="d-card"]').first().waitFor({ timeout: 20_000 }); await p.waitForTimeout(800); }],
+    ["28-agent-profile", "/agents", async (p) => { await p.locator('[data-pa="agents"] [data-pa="ag-row"][data-stand="none"]').first().click(); await p.waitForTimeout(900); }],
+  ],
   "part-5": [
     ["24-todo", "/todo", async (p) => { await p.waitForTimeout(500); }],
     ["25-corkboard", "/todo/corkboard", async (p) => { await p.waitForTimeout(500); }],
