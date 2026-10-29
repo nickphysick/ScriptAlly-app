@@ -486,7 +486,9 @@ export function whereItStands(q: Query | undefined, spans: readonly { status: st
 
 /* ── Coming up (all caught up) ────────────────────────────────────────────────────────────────── */
 
-export interface Upcoming { ms: number; ymd: string; name: string; line: string; anchorMs: number }
+/** v12 — what lands: a planned nudge, the check-back after a nudge, an agent's reply date, an own task, a snooze's return */
+export type UpcomingKind = "nudge" | "check" | "reply" | "own" | "back";
+export interface Upcoming { ms: number; ymd: string; name: string; line: string; anchorMs: number; kind: UpcomingKind; queryId?: string; agentId?: string }
 /**
  * The next three dates a task will land: an agent's reply date passing, a nudge check-back, and an
  * own task's date. Read from `expectedFor` (the Query Centre's own clock) and the stored dates.
@@ -500,12 +502,18 @@ export function comingUp(db: TrayDb, now: number, limit = 3): Upcoming[] {
     const nudgeAt = anyMs(q.nudgeDate);
     const nudged = anyMs(q.lastNudgeSentDate);
     if (Number.isFinite(nudgeAt) && Number.isFinite(nudged) && localYmd(nudgeAt) > today) {
-      out.push({ ms: nudgeAt, ymd: localYmd(nudgeAt), name, line: "The check-back after your nudge.", anchorMs: nudged });
+      out.push({ ms: nudgeAt, ymd: localYmd(nudgeAt), name, line: "The check-back after your nudge.", anchorMs: nudged, kind: "check", queryId: q.id, agentId: a?.id });
+      continue;
+    }
+    /* v12 — before any nudge, `nudgeDate` is the writer's planned nudge: the day `replyTask` raises the nudge task on
+       (taskDue's "chase" case reads it the same way) */
+    if (Number.isFinite(nudgeAt) && !Number.isFinite(nudged) && localYmd(nudgeAt) > today) {
+      out.push({ ms: nudgeAt, ymd: localYmd(nudgeAt), name, line: "The nudge you planned.", anchorMs: lastSendMs(q), kind: "nudge", queryId: q.id, agentId: a?.id });
       continue;
     }
     const e = expectedFor(q, a);
     if (e.kind === "reply" && e.ms != null && localYmd(e.ms) > today) {
-      out.push({ ms: e.ms, ymd: localYmd(e.ms), name, line: `${(q.status as string) === QueryStatus.QUERIED ? "Query" : String(q.status)} with the agent. The reply date passes.`, anchorMs: lastSendMs(q) });
+      out.push({ ms: e.ms, ymd: localYmd(e.ms), name, line: `${(q.status as string) === QueryStatus.QUERIED ? "Query" : String(q.status)} with the agent. The reply date passes.`, anchorMs: lastSendMs(q), kind: "reply", queryId: q.id, agentId: a?.id });
     }
   }
   /* v5.1 §I.6 — an own dated task lands on the day it SURFACES (its due day less its surface offset), not its due day */
@@ -515,7 +523,7 @@ export function comingUp(db: TrayDb, now: number, limit = 3): Upcoming[] {
     const d = new Date(ymdMs(t.dueDate)); d.setDate(d.getDate() - lead);
     const joins = localYmd(d.getTime());
     if (joins <= today) continue;
-    out.push({ ms: ymdMs(joins), ymd: joins, name: t.text || "Your task", line: lead ? "Your own task joins your tray." : "Your own task is due.", anchorMs: Date.parse(t.createdAt || "") });
+    out.push({ ms: ymdMs(joins), ymd: joins, name: t.text || "Your task", line: lead ? "Your own task joins your tray." : "Your own task is due.", anchorMs: Date.parse(t.createdAt || ""), kind: "own" });
   }
   /* v5.1 §G — a snooze coming back on its day */
   for (const f of db.taskFlags) {
@@ -525,7 +533,7 @@ export function comingUp(db: TrayDb, now: number, limit = 3): Upcoming[] {
     const q = f.queryId ? db.queries.find((x) => x.id === f.queryId) : undefined;
     const a = db.agents.find((x) => x.id === (q ? q.agentId : f.agentId));
     const own = f.taskType === "user_task" ? db.userTasks.find((t) => t.id === f.queryId) : undefined;
-    out.push({ ms, ymd: localYmd(ms), name: own ? own.text || "Your task" : a ? agentPrimary(a) : "A task", line: "A snooze comes back.", anchorMs: NaN });
+    out.push({ ms, ymd: localYmd(ms), name: own ? own.text || "Your task" : a ? agentPrimary(a) : "A task", line: "A snooze comes back.", anchorMs: NaN, kind: own ? "own" : "back", queryId: q?.id, agentId: a?.id });
   }
   return out.sort((a, b) => a.ms - b.ms).slice(0, limit);
 }
