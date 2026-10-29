@@ -1,0 +1,127 @@
+
+Running 47 tests using 1 worker
+
+  ✓   1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.4s)
+removed 0
+wrote pk26-ms: 3 letters, a synopsis, an empty package, a sent package with one credited query, a retired package with one, one extra
+
+[PK26-R] 4/4 green
+  ✓   2 [measure] › tests/e2e/pk26.measure.ts:92:1 › PK26-R the old address redirects with its query and opens that package (6.1s)
+[PK26-W-1512] 2/2 green
+  ✓   3 [measure] › tests/e2e/pk26.measure.ts:109:3 › PK26-W the three insets at 1512 (6.0s)
+[PK26-W-1280] 2/2 green
+  ✓   4 [measure] › tests/e2e/pk26.measure.ts:109:3 › PK26-W the three insets at 1280 (6.5s)
+[PK26-B] 6/6 green
+  ✓   5 [measure] › tests/e2e/pk26.measure.ts:133:1 › PK26-B only the matching row takes a drop; Add does the same by keyboard (17.4s)
+[PK26-D-1512] 6/6 green
+  ✓   6 [measure] › tests/e2e/pk26.measure.ts:176:3 › PK26-D the drawer's header stops at its inner border at 1512 (7.0s)
+[PK26-D-1280] 6/6 green
+  ✓   7 [measure] › tests/e2e/pk26.measure.ts:176:3 › PK26-D the drawer's header stops at its inner border at 1280 (7.5s)
+[PK26-N-1512] 6/6 green
+  ✓   8 [measure] › tests/e2e/pk26.measure.ts:209:3 › PK26-N the Submission packages row matches Versions at 1512 (5.9s)
+[PK26-N-1280] 6/6 green
+  ✓   9 [measure] › tests/e2e/pk26.measure.ts:209:3 › PK26-N the Submission packages row matches Versions at 1280 (6.0s)
+[PK26-M] 5/5 green
+  ✓  10 [measure] › tests/e2e/pk26.measure.ts:238:1 › PK26-M material rows: names in full, no type for a summary (6.2s)
+[PK26-H] 5/5 green
+removed 10
+
+  ✓  11 [measure] › tests/e2e/pk26.measure.ts:261:1 › PK26-H the package note is one line, or + Add a note (7.6s)
+wrote pk40-ms: 5 packages (out ×2, ready, draft, retired), 3 materials, 12 queries
+
+[L1] 8/8 green
+  ✓  12 [measure] › tests/e2e/pk38.measure.ts:103:1 › L1 no tab bar and no Letters/Synopses page; ?tab=syn opens Your materials on Synopses (11.3s)
+[L2] 17/17 green
+  ✓  13 [measure] › tests/e2e/pk38.measure.ts:122:1 › L2 a live label loads its package; a retired one opens the drawer; one label is selected (9.9s)
+[L3] 9/9 green
+  ✓  14 [measure] › tests/e2e/pk38.measure.ts:153:1 › L3 Figures opens the drawer for the open package at packageReplies' rate; Edit in the builder loads it (11.9s)
+[L4] 3/3 green
+  ✓  15 [measure] › tests/e2e/pk38.measure.ts:188:1 › L4 no package appears in more than one Packages showcase (6.3s)
+[L5] 14/14 green
+  ✓  16 [measure] › tests/e2e/pk38.measure.ts:201:1 › L5 every showcase's figure is packageReplies' for the fixture; nothing too early wins (6.4s)
+[L6-1512] 3/3 green
+  ✓  17 [measure] › tests/e2e/pk38.measure.ts:235:3 › L6 the results band spans the sheet's full width at 1512 (6.5s)
+[L6-1280] 3/3 green
+  ✓  18 [measure] › tests/e2e/pk38.measure.ts:235:3 › L6 the results band spans the sheet's full width at 1280 (6.3s)
+[L7] 4/4 green
+  ✓  19 [measure] › tests/e2e/pk38.measure.ts:253:1 › L7 no packaged queries: the empty line, the dashed message, no showcases (6.3s)
+[L8] 15/15 green
+  ✓  20 [measure] › tests/e2e/pk38.measure.ts:287:1 › L8 no visible element on the page or its layers is mono AND uppercase, but v39's and v39.1's named labels (17.8s)
+[L9] 15/15 green
+  ✓  21 [measure] › tests/e2e/pk38.measure.ts:325:1 › L9 a sent package opens in the builder locked; a Ready one does not (8.0s)
+[L10] 3/3 green
+  ✓  22 [measure] › tests/e2e/pk38.measure.ts:357:1 › L10 Make a copy opens New package with a copy of that package chosen (8.2s)
+[L11] 9/9 green
+removed 22
+
+  ✓  23 [measure] › tests/e2e/pk38.measure.ts:376:1 › L11 both manuscripts render with no console errors (11.3s)
+wrote pk40-ms: 5 packages (out ×2, ready, draft, retired), 3 materials, 12 queries
+
+[L1-1512] 13/13 green
+  ✓  24 [measure] › tests/e2e/pk39.measure.ts:104:3 › L1 the header card and title equal the Contact list's at 1512; one "Pro" (11.2s)
+[L1-1280] 13/13 green
+  ✓  25 [measure] › tests/e2e/pk39.measure.ts:104:3 › L1 the header card and title equal the Contact list's at 1280; one "Pro" (11.2s)
+[L2] 13/13 green
+  ✓  26 [measure] › tests/e2e/pk39.measure.ts:128:1 › L2 a colour picked reaches the label, both headers, the showcase card and the list tile; no field reads Harbour (10.8s)
+[L3-1512] 6/6 green
+  ✓  27 [measure] › tests/e2e/pk39.measure.ts:165:3 › L3 the labels row spans the content width; none under 200; none ringed at 1512 (6.4s)
+[L3-1280] 6/6 green
+  ✓  28 [measure] › tests/e2e/pk39.measure.ts:165:3 › L3 the labels row spans the content width; none under 200; none ringed at 1280 (6.3s)
+[L4-1512] 8/8 green
+  ✓  29 [measure] › tests/e2e/pk39.measure.ts:188:3 › L4 two cards, 24 apart, the materials tab level with the package card; one status pill and no stepper at 1512 (6.8s)
+[L4-1280] 8/8 green
+  ✓  30 [measure] › tests/e2e/pk39.measure.ts:188:3 › L4 two cards, 24 apart, the materials tab level with the package card; one status pill and no stepper at 1280 (6.3s)
+[L5] 16/16 green
+  ✓  31 [measure] › tests/e2e/pk39.measure.ts:210:1 › L5 rename writes once (draft and sent), Escape writes nothing, a sent package's one padlock is in the stage (23.3s)
+[L6] 26/26 green
+  ✓  32 [measure] › tests/e2e/pk39.measure.ts:247:1 › L6 every package once; one piece type at a time; switching keeps scrollTop; rates are packageReplies'; ranked first (8.4s)
+[L7] 18/18 green
+  ✓  33 [measure] › tests/e2e/pk39.measure.ts:286:1 › L7 How it works: both doors, five steps, Escape closes, focus back to the opener, the old dialog gone (13.7s)
+[L8-1512] 4/4 green
+  ✓  34 [measure] › tests/e2e/pk39.measure.ts:310:3 › L8 the pieces band is painted across the sheet's full width at 1512 (7.5s)
+[L8-1280] 4/4 green
+removed 22
+
+  ✓  35 [measure] › tests/e2e/pk39.measure.ts:310:3 › L8 the pieces band is painted across the sheet's full width at 1280 (6.7s)
+wrote pk40-ms: 5 packages (out ×2, ready, draft, retired), 3 materials, 12 queries
+
+[L1-1280] 19/19 green
+  ✓  36 [measure] › tests/e2e/pk391.measure.ts:90:3 › L1 every block shares the header card's edges, which are the Contact list's, at 1280 (13.4s)
+[L1-1512] 19/19 green
+  ✓  37 [measure] › tests/e2e/pk391.measure.ts:90:3 › L1 every block shares the header card's edges, which are the Contact list's, at 1512 (12.8s)
+[L1-1920] 19/19 green
+  ✓  38 [measure] › tests/e2e/pk391.measure.ts:90:3 › L1 every block shares the header card's edges, which are the Contact list's, at 1920 (13.5s)
+[L3] 26/26 green
+  ✓  39 [measure] › tests/e2e/pk391.measure.ts:119:1 › L3 one status pill with the right words; no stage dots; nothing overlaps at 1280; the selected label has the bar (8.0s)
+[L4] 6/6 green
+  ✓  40 [measure] › tests/e2e/pk391.measure.ts:166:1 › L4 explainer → labels 48, BUILD label → cards 24, builder → band 96, top three → list panel 96 (8.5s)
+[L5] 5/5 green
+  ✓  41 [measure] › tests/e2e/pk391.measure.ts:191:1 › L5 the explainer shows first; ✕ hides it and writes once; a reload keeps it hidden (10.7s)
+[L6] 10/10 green
+removed 23
+
+  ✓  42 [measure] › tests/e2e/pk391.measure.ts:213:1 › L6 New package and Package details open in the drawer; the header follows the colour; Create adds that label (11.8s)
+wrote pk40-ms: 5 packages (out ×2, ready, draft, retired), 3 materials, 12 queries
+
+[L1-1280] 12/12 green
+  ✓  43 [measure] › tests/e2e/pk392.measure.ts:77:3 › L1 the header card carries the packages pattern; nothing overflows; the title is unchanged, at 1280 (6.3s)
+[L1-1512] 12/12 green
+  ✓  44 [measure] › tests/e2e/pk392.measure.ts:77:3 › L1 the header card carries the packages pattern; nothing overflows; the title is unchanged, at 1512 (6.3s)
+[L2] 10/10 green
+  ✓  45 [measure] › tests/e2e/pk392.measure.ts:112:1 › L2 exactly three headings are set in the typewriter; the materials tab's label is the one exception (6.3s)
+wrote pk40-ms: 5 packages (out ×2, ready, draft, retired), 3 materials, 12 queries
+
+[L7-1280] 17/17 green
+wrote pk40-ms: 5 packages (out ×2, ready, draft, retired), 3 materials, 12 queries
+
+  ✓  46 [measure] › tests/e2e/pk392.measure.ts:150:3 › L7 the materials folder tab, and rows that never cut a name off, at 1280 (13.1s)
+wrote pk40-ms: 5 packages (out ×2, ready, draft, retired), 3 materials, 12 queries
+
+[L7-1512] 14/14 green
+wrote pk40-ms: 5 packages (out ×2, ready, draft, retired), 3 materials, 12 queries
+
+removed 22
+
+  ✓  47 [measure] › tests/e2e/pk392.measure.ts:150:3 › L7 the materials folder tab, and rows that never cut a name off, at 1512 (13.0s)
+
+  47 passed (7.7m)

@@ -8,7 +8,7 @@
  *
  *   L1 Width: the explainer, the labels row, the builder, the band's contents and the results share the header card's
  *      left and right edges (±1) at 1280, 1512 and 1920, and the header card's are the Contact list card's
- *   L2 Type: exactly two elements on the page set in the typewriter — the title's highlight and the open package's name
+ *   L2 — RETIRED by v39.2 (pk392.measure.ts L2)
  *   L3 Hero: one status pill reading the right words for sent, ready and draft (the padlock on sent only); no stage
  *      dots; nothing in the open package's header overlaps at 1280; the selected label has no ring and has the bar
  *   L4 Rhythm: explainer → labels 48, BUILD label → cards 24, builder → navy band 96, top three → list panel 96 (±1),
@@ -19,7 +19,7 @@
  *   L6 Drawer: + New package opens the drawer and no centred dialog is in the DOM; a colour changes the header's
  *      computed background before anything is saved; Create adds a label of that colour and closes; "Note, copy or
  *      delete…" opens the drawer's details form
- *   L7 Materials header: #fbf9f5 with a 4px #5e2f3a top edge, the same height as the package header
+ *   L7 — RETIRED by v39.2 (pk392.measure.ts L7)
  *
  * Breaks: `PK391_MUTATE=<lock>` applies that lock's named break in the page.
  */
@@ -52,8 +52,6 @@ class Ledger {
 const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   /* L1: the builder goes back to v39's fixed 48 */
   L1: { css: `.p6.p6 > .p9-pb-build { margin-left: 48px !important; margin-right: 48px !important; }` },
-  /* L2: the label names go back to the typewriter */
-  L2: { css: `[data-pk26="page"].p6.p6.p6 .p9-pkl .p9-pkl-b.p9-pkl-b b { font-family: var(--sp-type) !important; }` },
   /* L3: the selected label is ringed again */
   L3: { css: `.p9-pkl .p9-pkl-b.p9-on.p9-on.p9-on { box-shadow: 0 0 0 4px rgba(29,75,99,.35) !important; }` },
   /* L4: the explainer sits 20 above the labels */
@@ -62,8 +60,6 @@ const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   L5: { js: `try { localStorage.removeItem("${KEY}"); } catch (e) {}` },
   /* L6: the drawer's header stops following the chosen colour */
   L6: { css: `[data-pk391="pd-head"].p8-dh.p8-dpk { background: #1d4b63 !important; }` },
-  /* L7: the materials header goes back to white */
-  L7: { css: `[data-pk26="page"] .p9-pb-grid.p9-v39 .p9-pb-lib .p9-lib-top.p9-lib-top { background: #fff !important; }` },
 };
 
 async function open(page: Page, size: { width: number; height: number }, route = "/queries/packages") {
@@ -116,27 +112,8 @@ for (const size of SIZES) {
   });
 }
 
-/* ── L2 · two typewriter elements ── */
-test("L2 exactly two elements on the page are set in the typewriter", async ({ page }) => {
-  test.setTimeout(180_000);
-  const L = new Ledger("L2");
-  await open(page, SIZES[1]);
-  const tw = await page.evaluate((p) => {
-    const root = document.querySelector(p)!; const out: string[] = []; let texts = 0;
-    for (const e of root.querySelectorAll("*")) {
-      if (!(e as HTMLElement).offsetParent) continue;
-      if (![...e.childNodes].some((n) => n.nodeType === 3 && (n.textContent ?? "").trim())) continue;
-      texts++;
-      if (/special elite/i.test(getComputedStyle(e).fontFamily)) out.push(`${e.tagName}.${(e as HTMLElement).className}`);
-    }
-    return { out, texts };
-  }, pg);
-  L.check("the census read the page (over 60 text elements)", tw.texts > 60, String(tw.texts));
-  L.check("exactly two typewriter elements", tw.out.length === 2, JSON.stringify(tw.out));
-  L.check("…the title's", tw.out.some((x) => /\bhl\b/.test(x)), JSON.stringify(tw.out));
-  L.check("…and the open package's name", tw.out.some((x) => /p9-po-nm/.test(x)), JSON.stringify(tw.out));
-  L.done(4);
-});
+/* L2 — RETIRED by v39.2 (the typewriter is for three headings now); rewritten as pk392.measure.ts L2. See
+   tests/e2e/RETIRED-submission-packages-v39-2.md */
 
 /* ── L3 · the hero ── */
 test("L3 one status pill with the right words; no stage dots; nothing overlaps at 1280; the selected label has the bar", async ({ page }) => {
@@ -260,16 +237,5 @@ test("L6 New package and Package details open in the drawer; the header follows 
   L.done(10);
 });
 
-/* ── L7 · the materials header ── */
-for (const size of [SIZES[0], SIZES[1]]) {
-  test(`L7 the materials header is #fbf9f5 with a 4px #5e2f3a edge and the package header's height at ${size.width}`, async ({ page }) => {
-    test.setTimeout(180_000);
-    const L = new Ledger(`L7-${size.width}`);
-    await open(page, size);
-    const r = await page.evaluate((p) => { const e = document.querySelector(`${p} [data-pk39="lib-head"]`)!, ph = document.querySelector(`${p} [data-pk39="pkg-head"]`)!; const cs = getComputedStyle(e); return { bg: cs.backgroundColor, sh: cs.boxShadow, h: e.getBoundingClientRect().height, ph: ph.getBoundingClientRect().height }; }, pg);
-    L.check("the background is #fbf9f5", r.bg === hexRgb("#fbf9f5"), r.bg);
-    L.check("a 4px #5e2f3a top edge", r.sh.includes("rgb(94, 47, 58) 0px 4px 0px 0px inset"), r.sh);
-    L.check("its height equals the package header's (±0.5)", near(r.h, r.ph, 0.5), `${r.h} vs ${r.ph}`);
-    L.done(3);
-  });
-}
+/* L7 — RETIRED by v39.2 (Your materials is a folder tab now); rewritten as pk392.measure.ts L7. See
+   tests/e2e/RETIRED-submission-packages-v39-2.md */

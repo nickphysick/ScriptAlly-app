@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "L2",
+  "where": "the census read the page (over 60 text elements)",
+  "ok": true,
+  "detail": "231"
+ },
+ {
+  "lock": "L2",
+  "where": "exactly three typewriter headings, besides the tab",
+  "ok": true,
+  "detail": "[{\"tag\":\"SPAN\",\"cls\":\"hl\",\"head\":true,\"text\":\"Submission packages\"},{\"tag\":\"H2\",\"cls\":\"p9-pkl-h\",\"head\":true,\"text\":\"Your packages\"},{\"tag\":\"SPAN\",\"cls\":\"p9-po-nm\",\"head\":true,\"text\":\"Standard\"}]"
+ },
+ {
+  "lock": "L2",
+  "where": "…the title's",
+  "ok": true,
+  "detail": "[{\"tag\":\"SPAN\",\"cls\":\"hl\",\"head\":true,\"text\":\"Submission packages\"},{\"tag\":\"H2\",\"cls\":\"p9-pkl-h\",\"head\":true,\"text\":\"Your packages\"},{\"tag\":\"SPAN\",\"cls\":\"p9-po-nm\",\"head\":true,\"text\":\"Standard\"}]"
+ },
+ {
+  "lock": "L2",
+  "where": "…Your packages",
+  "ok": true,
+  "detail": "[{\"tag\":\"SPAN\",\"cls\":\"hl\",\"head\":true,\"text\":\"Submission packages\"},{\"tag\":\"H2\",\"cls\":\"p9-pkl-h\",\"head\":true,\"text\":\"Your packages\"},{\"tag\":\"SPAN\",\"cls\":\"p9-po-nm\",\"head\":true,\"text\":\"Standard\"}]"
+ },
+ {
+  "lock": "L2",
+  "where": "…and the open package's name",
+  "ok": true,
+  "detail": "[{\"tag\":\"SPAN\",\"cls\":\"hl\",\"head\":true,\"text\":\"Submission packages\"},{\"tag\":\"H2\",\"cls\":\"p9-pkl-h\",\"head\":true,\"text\":\"Your packages\"},{\"tag\":\"SPAN\",\"cls\":\"p9-po-nm\",\"head\":true,\"text\":\"Standard\"}]"
+ },
+ {
+  "lock": "L2",
+  "where": "the one exception is the materials tab's label",
+  "ok": true,
+  "detail": "[{\"tag\":\"H3\",\"cls\":\"p9-id-libT\",\"head\":true,\"text\":\"Your materials\"}]"
+ },
+ {
+  "lock": "L2",
+  "where": "Your packages: Special Elite 30px/1.1 ink, no capitals",
+  "ok": true,
+  "detail": "{\"tag\":\"H2\",\"ff\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"fs\":\"30px\",\"lh\":\"33px\",\"col\":\"rgb(28, 19, 15)\",\"tt\":\"none\",\"txt\":\"Your packages\"}"
+ },
+ {
+  "lock": "L2",
+  "where": "under it: 'Open one to change it below', serif italic 15px at ink 60%",
+  "ok": true,
+  "detail": "{\"ff\":\"\\\"Source Serif 4\\\", Georgia, serif\",\"fs\":\"15px\",\"st\":\"italic\",\"col\":\"rgba(28, 19, 15, 0.6)\",\"txt\":\"Open one to change it below\",\"gap\":4}"
+ },
+ {
+  "lock": "L2",
+  "where": "…4px down (±1)",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "L2",
+  "where": "the art sits to the left, centred on the pair (±1)",
+  "ok": true,
+  "detail": "{\"mid\":516.34375,\"pair\":516.34375,\"right\":328,\"left\":344}"
+ }
+]

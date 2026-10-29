@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "L1-1280",
+  "where": "the header card was measured",
+  "ok": true,
+  "detail": "[object Object]"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "it has a ::before",
+  "ok": false,
+  "detail": "none"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "its background is the packages tile",
+  "ok": true,
+  "detail": "url(\"http://127.0.0.1:4392/images/packages/packages-pattern.svg\")"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "the tile is 240 × 240",
+  "ok": true,
+  "detail": "240px 240px"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "at the Contact list's opacity, 0.085 (±0.001)",
+  "ok": true,
+  "detail": "0.085"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "faded in from the left (transparent at 0, full from 55%)",
+  "ok": true,
+  "detail": "linear-gradient(90deg, rgba(0, 0, 0, 0) 0px, rgb(0, 0, 0) 55%, rgb(0, 0, 0) 100%)"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "behind the content (absolute, z-index -1, in an isolated card)",
+  "ok": true,
+  "detail": "absolute -1 isolate"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "inside the card's clip",
+  "ok": true,
+  "detail": "hidden"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "the sheet's scroller has no horizontal overflow",
+  "ok": true,
+  "detail": "{\"sw\":1024,\"cw\":1024}"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "the window has no horizontal overflow",
+  "ok": true,
+  "detail": "{\"sw\":1024,\"cw\":1024}"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "the document has no horizontal overflow",
+  "ok": true,
+  "detail": "{\"sw\":1280,\"cw\":1280}"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "the title's colour is unchanged (#1c130f)",
+  "ok": true,
+  "detail": "rgb(28, 19, 15) / rgb(28, 19, 15)"
+ }
+]

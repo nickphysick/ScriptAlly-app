@@ -19,6 +19,8 @@
  *   node tests/e2e/seedPk40.mjs           # write (clean first)
  *   node tests/e2e/seedPk40.mjs --dump    # print the packages and the manuscript, as stored
  *   node tests/e2e/seedPk40.mjs --clean   # remove every pk40- document
+ *   node tests/e2e/seedPk40.mjs --long-name  # write, with the second letter named in 40 characters (v39.2 L7); a plain
+ *                                            # write puts the short name back
  *
  * ⚠️ SELF-CLEANING: every document carries the `pk40-` prefix or `manuscriptId: "pk40-ms"`; the locks clean in afterAll.
  */
@@ -86,7 +88,9 @@ const mat = (id, name, days, type) => b.set(ref("versions", id), {
   createdDate: iso(days), contentType: "text", contentDraft: `${name} — Dear agent, …`, wordCount: 4,
 });
 mat("pk40-let-a", "Hook-first", 80, "Query Letter");
-mat("pk40-let-b", "Comps-forward", 40, "Query Letter");
+/* v39.2 L7: a 40-character name, to prove the materials row never cuts a name off */
+const LONG_NAME = "Comps-forward, for agents who ask for it";
+mat("pk40-let-b", process.argv.includes("--long-name") ? LONG_NAME : "Comps-forward", 40, "Query Letter");
 mat("pk40-syn", "One-page", 80, "Synopsis");
 const pkg = (id, name, o) => b.set(ref("packages", id), {
   id, userId: uid, manuscriptId: MS, packageName: name, queryLetterVersionId: "", synopsisVersionId: "",
