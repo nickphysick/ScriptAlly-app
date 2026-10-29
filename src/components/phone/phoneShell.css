@@ -211,3 +211,8 @@
   @keyframes paSnackIn { from { transform: translate(-50%, 24px); opacity: 0; } }
   @media (prefers-reduced-motion: reduce) { .pa-snack { animation: none; } }
 }
+
+/* the phone's sheet is the warm off-white everywhere the band's rounded foot meets it (ref `.sheetpg` --page) */
+@media (max-width: 767.98px) {
+  .ws-main { background: var(--pa-page) !important; }
+}
