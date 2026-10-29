@@ -48,13 +48,21 @@ for (const vp of PHONES) {
     await prime(page);
     await openRoute(page, "/todo", { width: 1512, height: 900 });
     /* ⚠️ THE VISIBLE ONE: every page stays mounted, so `.first()` can pick a hidden copy and wait out the timeout */
-    await page.locator('[data-td7="headline"]:visible').first().waitFor({ timeout: 30_000 });
+    /* To-do v12 (on dev from 29 Oct) replaced the td7 headline with "Needs you now" and its summary line; read whichever
+       this build draws — both state the tray's overdue and due-today counts */
+    await page.locator('[data-td7="headline"]:visible, [data-td12="summary"]:visible, [data-td12="none"]:visible, [data-td12="ack"]:visible').first().waitFor({ timeout: 30_000 });
     await page.waitForTimeout(2500);
     const tray = await page.evaluate(() => {
       const vis = (e: Element) => e.getBoundingClientRect().height > 0;
       const head = [...document.querySelectorAll('[data-td7="headline"]')].find(vis) ?? null;
-      const n = (sel: string) => Number((head?.querySelector(sel)?.textContent ?? "0").match(/\d+/)?.[0] ?? 0);
-      return { overdue: n('[data-td52="title-od"]'), today: n('[data-td52="title-today"]'), head: head?.textContent ?? "" };
+      if (head) {
+        const n = (sel: string) => Number((head.querySelector(sel)?.textContent ?? "0").match(/\d+/)?.[0] ?? 0);
+        return { overdue: n('[data-td52="title-od"]'), today: n('[data-td52="title-today"]'), head: head.textContent ?? "" };
+      }
+      const sum = [...document.querySelectorAll('[data-td12="summary"], [data-td12="none"], [data-td12="ack"]')].find(vis) ?? null;
+      const t = sum?.textContent ?? "";
+      const od = t.match(/(\d+) overdue/), td = t.match(/(\d+) due today/);
+      return { overdue: od ? Number(od[1]) : 0, today: td ? Number(td[1]) : 0, head: t };
     });
     L.check("pop", `${tag(vp)} the tray's headline was read`, tray.head.trim().length > 0, JSON.stringify(tray));
 
