@@ -146,7 +146,8 @@ export function PhoneFlowShell({ view, mode, open, initialStep, initialSeen, onC
   const trail = view.steps.map((s, i) => ({ s, i })).filter(({ i }) => i < cur && answered(i));
 
   return (
-    <div className="pa-layer pa-flow" role="dialog" aria-modal="true" aria-label={view.title} data-qad-drawer={mode} data-pf={mode}>
+    <div className="pa-layer pa-flow" role="dialog" aria-modal="true" aria-label={view.title} data-qad-drawer={mode} data-pf={mode}
+      data-pf-steps={view.steps.map((s) => s.title).join("\u241f")}>
       <div className="pf-band">
         <div className="pf-top">
           {cur > 0

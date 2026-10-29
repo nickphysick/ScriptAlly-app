@@ -155,17 +155,18 @@ export const QueriesPhone: React.FC<QueriesPhoneProps> = (p) => {
     navigate({ pathname: "/queries", search: n.toString() ? `?${n}` : "" }, { replace: true });
   };
 
-  /* ── the celebration: a query that moves INTO a request or an offer while the page is on screen (Part 4 restyles) ── */
+  /* ── the celebration: a query that moves INTO a request or an offer (Part 4, CEV C). This page stays mounted on every
+     route, so the cheer shows wherever the response was saved on a phone — not only on /queries ── */
   const seen = useRef<Map<string, string> | null>(null);
   const [cheer, setCheer] = useState<{ id: string; kind: Cheer } | null>(null);
   useEffect(() => {
     if (p.loading) return;
     const prev = seen.current;
     seen.current = new Map(allRows.map((r) => [r.id, String(r.status)]));
-    if (!prev || !routeActive) return;
+    if (!prev) return;
     const c = cheerFrom(prev, allRows.map((r) => ({ id: r.id, status: String(r.status) })));
     if (c) setCheer(c);
-  }, [allRows, p.loading, routeActive]);
+  }, [allRows, p.loading]);
   const cheerRow = cheer ? allRows.find((r) => r.id === cheer.id) ?? null : null;
 
   /* ── the list ── */
@@ -283,11 +284,11 @@ export const QueriesPhone: React.FC<QueriesPhoneProps> = (p) => {
 
       {cheer && cheerRow ? createPortal(
         <div className="qm1-layer">
-          <Celebrate kind={cheer.kind} words={cheerWords(cheer.kind, cheerRow, rows.length ? rows : [cheerRow], ms?.title ?? null, Date.now())}
+          <Celebrate kind={cheer.kind} row={cheerRow} nowMs={nowMs} words={cheerWords(cheer.kind, cheerRow, rows.length ? rows : [cheerRow], ms?.title ?? null, Date.now())}
             onGo={() => {
-              const d = nextDoor(cheerRow, nowMs);
+              /* "See your next step" opens the query sheet, where the next step is pinned (§ Celebrations) */
               setCheer(null);
-              openQueryDrawer(d && d.mode !== "resp" ? { mode: d.mode, queryId: cheerRow.id } : { mode: "sent", queryId: cheerRow.id });
+              navigate({ pathname: "/queries", search: `?q=${encodeURIComponent(cheerRow.id)}` });
             }}
             onLater={() => setCheer(null)} />
         </div>, document.body) : null}
@@ -359,8 +360,11 @@ const Skeleton: React.FC = () => (
   <div className="qm1-grp qm1-sk" aria-hidden="true">{[0, 1, 2, 3].map((i) => <div key={i} className="qm1-skrow"><i /><span><b /><em /></span></div>)}</div>
 );
 
-const CONFETTI = [["#f3c8ba", 30, 70, 20], ["#2a3a52", 80, 150, -30], ["#e2b74f", 300, 60, 45], ["#8aa38c", 330, 170, -10], ["#e8a996", 250, 110, 70], ["#2a3a52", 60, 220, -50]] as const;
-const Celebrate: React.FC<{ kind: Cheer; words: ReturnType<typeof cheerWords>; onGo: () => void; onLater: () => void }> = ({ kind, words, onGo, onLater }) => {
+/* the ref's 34 pieces (restv.js ovCele, CEV C): blush, cream, sand and slate, their place, delay and fall time */
+const CONF_COLS = ["#e8c8bc", "#f4f0e9", "#f7efe3", "#d7e0e8"];
+const CONFETTI = Array.from({ length: 34 }, (_, i) => ({ left: (i * 37) % 100, bg: CONF_COLS[i % 4], delay: (i % 9) * 0.12, dur: 2.2 + (i % 5) * 0.3 }));
+export const STAMP_WORDS: Record<Cheer, string> = { partial: "Partial requested", full: "Full requested", offer: "Offer" };
+const Celebrate: React.FC<{ kind: Cheer; row: QcRow; nowMs: number; words: ReturnType<typeof cheerWords>; onGo: () => void; onLater: () => void }> = ({ kind, row, nowMs, words, onGo, onLater }) => {
   const go = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     requestAnimationFrame(() => go.current?.focus({ preventScroll: true }));
@@ -368,15 +372,25 @@ const Celebrate: React.FC<{ kind: Cheer; words: ReturnType<typeof cheerWords>; o
     document.addEventListener("keydown", key, true);
     return () => document.removeEventListener("keydown", key, true);
   }, [onLater]);
+  const day = row.sentMs != null ? Math.max(0, Math.floor((nowMs - row.sentMs) / 86_400_000)) : null;
+  const initials = row.agentName.trim().split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("");
   return (
-    <div className="qm1-cel" role="dialog" aria-modal="true" aria-labelledby="qm1-cel-h" data-qm1="celebrate" data-kind={kind}>
-      {CONFETTI.map(([c, l, t, r], i) => <span key={i} className="qm1-conf" aria-hidden="true" style={{ background: c, left: l, top: t, ["--r" as string]: `${r}deg` }} />)}
-      <Img art={QM1_ART.cheer} className="qm1-celart" slot="cheer" />
-      <div className="qm1-celh" id="qm1-cel-h">{words.headline}</div>
-      <p>{words.line}</p>
-      <div className="qm1-chips" data-qm1="cheer-stats">{words.stats.map((s) => <span key={s.label}><b>{s.n}</b>{s.label}</span>)}</div>
-      <button ref={go} type="button" className="qm1-cta full" data-qm1="cheer-go" onClick={onGo}>{words.button}</button>
-      <button type="button" className="qm1-later" data-qm1="cheer-later" onClick={onLater}>Later</button>
+    <div className="qm1-cel pa-cele" role="dialog" aria-modal="true" aria-labelledby="qm1-cel-h" data-qm1="celebrate" data-pa="cele" data-kind={kind}>
+      <div className="pa-conf" aria-hidden="true" data-pa="confetti">
+        {CONFETTI.map((c, i) => <i key={i} style={{ left: `${c.left}%`, background: c.bg, animationDelay: `${c.delay}s`, animationDuration: `${c.dur}s` }} />)}
+      </div>
+      <div className="pa-ccard" data-pa="cele-card">
+        <div className="pa-ccband"><span>With you</span><span>Day {day ?? 0}</span></div>
+        <div className="pa-ccag">
+          <span className="pa-ccav">{initials}</span>
+          <div><div className="pa-ccnm">{row.agentName}</div>{row.agency && row.agency !== "No agency" ? <div className="pa-ccsub">{row.agency}</div> : null}</div>
+        </div>
+        <span className="pa-stamp" data-pa="cele-stamp">{STAMP_WORDS[kind]}</span>
+      </div>
+      <h2 className="pa-celh" id="qm1-cel-h">{words.headline}</h2>
+      <p className="pa-celp">{words.line}</p>
+      <button ref={go} type="button" className="pa-celgo" data-qm1="cheer-go" data-pa="cele-next" onClick={onGo}>See your next step</button>
+      <button type="button" className="pa-celdone" data-qm1="cheer-later" data-pa="cele-done" onClick={onLater}>Done</button>
     </div>
   );
 };

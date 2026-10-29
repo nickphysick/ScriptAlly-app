@@ -156,3 +156,36 @@
   .pa-qsheet .qc149c-sheethead [data-qc149c="name"] { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .pa-qsheet .qc149c-sheethead .qc149c-who { min-width: 0; flex: 1 1 auto; }
 }
+
+/* ── the celebration (Part 4, ref restv.js ovCele at CEV C; app.css .cele, .ccard, .stamp, hop, stampin, fall) ──
+   A full-screen navy layer under the snackbar (QM1 L10: Undo is always on top). The stamp is the phone's one burgundy. */
+@media (max-width: 767.98px) {
+  .qm1-cel.pa-cele { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 60px 28px 40px; background: var(--pa-navy, #2a3a52); color: #fff; overflow: hidden; animation: paCeleFade .3s ease; }
+  @keyframes paCeleFade { from { opacity: 0; } }
+  .pa-conf { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+  .pa-conf i { position: absolute; top: -20px; width: 8px; height: 14px; border-radius: 2px; animation-name: paFall; animation-timing-function: linear; animation-fill-mode: forwards; }
+  @keyframes paFall { to { transform: translateY(110vh) rotate(540deg); } }
+  .pa-ccard { position: relative; width: 100%; max-width: 300px; background: #fff; border-radius: 16px; margin-bottom: 10px; box-shadow: 0 18px 40px rgba(0, 0, 0, .3);
+    animation: paHop .7s cubic-bezier(.2, .9, .3, 1.2) .1s both; color: #1f2633; }
+  @keyframes paHop { 0% { transform: translateY(40px) scale(.8); opacity: 0; } 100% { transform: none; opacity: 1; } }
+  .pa-ccband { display: flex; justify-content: space-between; padding: 8px 14px; border-radius: 16px 16px 0 0; background: #f3d2cc; color: #1f2633; font-size: 12.5px; font-weight: 600; }
+  .pa-ccband span:last-child { font-family: var(--pa-type); font-weight: 400; font-size: 14px; }
+  .pa-ccag { display: flex; gap: 12px; align-items: center; padding: 14px; text-align: left; }
+  .pa-ccav { width: 40px; height: 40px; flex: none; border-radius: 50%; display: grid; place-items: center; background: var(--pa-fill, #ece7de); color: #1f2633; font-size: 14px; font-weight: 600; }
+  .pa-ccnm { font-family: var(--pa-type); font-size: 18px; }
+  .pa-ccsub { font-size: 13px; color: var(--pa-muted, #6b6f78); }
+  .pa-stamp { position: absolute; right: -6px; bottom: -14px; font-family: var(--pa-type); font-size: 17px; color: #7c3a2a; border: 2.5px solid #7c3a2a; border-radius: 6px;
+    padding: 4px 10px; background: rgba(255, 255, 255, .92); transform: rotate(-8deg); animation: paStampIn .5s cubic-bezier(.55, 0, .75, .2) .7s both; }
+  @keyframes paStampIn { 0% { opacity: 0; transform: scale(1.6) rotate(-14deg); } 60% { opacity: 1; transform: scale(.95) rotate(-7deg); } 100% { opacity: 1; transform: scale(1) rotate(-8deg); } }
+  .qm1-cel.pa-cele h2.pa-celh { font-family: var(--pa-type) !important; font-weight: 400 !important; font-size: 30px !important; line-height: 1.1 !important; color: #fff !important; margin: 28px 0 10px; }
+  /* ⚠️ two classes and the element: `.qm1-cel p` (0-1-1, queriesPhone.css) sets a muted ink and a face !important */
+  .qm1-cel.pa-cele p.pa-celp { font: 400 16px/1.45 var(--pa-sans) !important; color: #fff; margin: 0 0 26px; max-width: 30ch; }
+  .pa-celgo { width: 100%; max-width: 320px; height: 54px; border-radius: 999px; border: 0; background: var(--pa-blush, #e8c8bc); color: #1f2633; font: 600 16.5px var(--pa-sans); position: relative; }
+  .pa-celdone { width: 100%; max-width: 320px; height: 50px; margin-top: 6px; border-radius: 999px; border: 0; background: transparent; color: #fff; font: 600 16px var(--pa-sans); position: relative; }
+}
+@media (max-width: 767.98px) and (prefers-reduced-motion: reduce) {
+  /* no confetti, no hop, no stamp animation: the stamp is shown in place */
+  .pa-conf { display: none; }
+  .qm1-cel.pa-cele, .pa-ccard, .pa-stamp { animation: none !important; }
+}
