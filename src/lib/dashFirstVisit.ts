@@ -162,5 +162,30 @@ export const winCopy = {
   }),
 };
 
+/**
+ * The triggers, stated once (Part B). A LOGGED query is a first win when this manuscript had none before it; an
+ * imported query never is (the import records one stamp for the file). An agent is a first win when the writer
+ * had none — an agent belongs to the writer, not to a manuscript, so a second manuscript never re-raises it.
+ */
+export const isFirstQueryWin = (before: readonly Pick<Query, "manuscriptId">[], msId: string | null | undefined, imported: boolean): boolean =>
+  !imported && !!msId && !before.some((q) => q.manuscriptId === msId);
+export const isFirstAgentWin = (agentsBefore: number): boolean => agentsBefore === 0;
+
+/**
+ * Which pending stamp to strike now: the oldest whose key is not already recorded (in the prefs, or struck on this
+ * mount). Everything before it that WAS already recorded is dropped, never repeated.
+ */
+export function pickStamp<W extends { kind: WinKind; msId: string | null }>(
+  pending: readonly W[], shown: Readonly<Record<string, true>>, struck: ReadonlySet<string>,
+): { strike: W | null; key: string | null; drop: W[] } {
+  const drop: W[] = [];
+  for (const w of pending) {
+    const key = winKey(w.kind, w.msId);
+    if (shown[key] || struck.has(key)) { drop.push(w); continue; }
+    return { strike: w, key, drop };
+  }
+  return { strike: null, key: null, drop };
+}
+
 /** How long the stamp holds before it fades (the ref's 2.2s). */
 export const STAMP_HOLD_MS = 2200;

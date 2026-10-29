@@ -53,6 +53,7 @@ import type { UserPaths } from "../../../lib/userPaths";
 import { DASH_TIPS } from "../../../lib/dashTips";
 import { SetUpCard } from "../fv1/SetUpCard";
 import { MentorTip } from "../fv1/MentorTip";
+import { FirstWinStamp } from "../fv1/FirstWinStamp";
 import type { TaskGs } from "../v71/Dash71Task";
 import "../oneScreen.css";
 import "./dash58.css";
@@ -551,6 +552,8 @@ export const Dash58: React.FC<Dash58Props> = ({
                 </>
               )}
             </div>
+            {/* Part B: the first-win stamp — struck over the body, once per kind, user and manuscript */}
+            <FirstWinStamp uid={currentUser?.id ?? null} active={onDash && !loading && !rootRef.current?.closest(".im-ghost")} shown={prefs.wins} onPrefs={onPrefs} />
             <Dash71Right
               task={<Dash71Task loading={loading} plan={plan} ctx={taskCtx} onView={viewTask} innerRef={focusRef} gs={gsHidden ? undefined : gs} />}
               panel={

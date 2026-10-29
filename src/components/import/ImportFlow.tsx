@@ -24,6 +24,8 @@ import { applyImportUpdate, PROGRESS_START, type LoaderProgress } from "../../li
 import { useSmartImportEntitlement } from "../../lib/useSmartImportEntitlement";
 import { agentAgencyLine } from "../../lib/agentDisplay";
 import { commitSmartImport, CommitOutcome } from "../../lib/smartImportCommit";
+import { clearWin, noteFirstWin } from "../../lib/firstWin";
+import { isFirstQueryWin, winCopy } from "../../lib/dashFirstVisit";
 import { SmartImportReview } from "../onboarding/SmartImportReview";
 import { ImportOverview } from "../onboarding/ImportOverview";
 import { ImportingLoader } from "../onboarding/ImportingLoader";
@@ -283,6 +285,13 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
       // Never route on a false success: if nothing actually landed, surface the outcome screen
       // instead of the loader's completion + dashboard route.
       if (committed.queriesImported === 0) { setScreen("done"); return; }
+      /* Dashboard first visit v1 (Part B): an import that brings a manuscript its first queries is the dashboard's
+         first-win stamp — one for the file. The agents it created are part of that import, not a first agent of
+         their own, so a "first agent" the commit raised is taken back. */
+      if (!lab && currentUser && isFirstQueryWin(queries, mId, false)) {
+        clearWin({ uid: currentUser.id, kind: "agent", msId: null });
+        noteFirstWin({ kind: "import", uid: currentUser.id, msId: mId, ...winCopy.import(committed.queriesImported) });
+      }
       // Genuine success → let the loader play its completion beat, then it calls onProceed to route.
       setImportComplete(true);
     } catch (e) {

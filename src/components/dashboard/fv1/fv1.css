@@ -123,45 +123,6 @@
   .d58 .fv1-tipt:not(.is-open) { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; }
 }
 
-/* ── the short window (≤859px tall, a 1280×800 laptop): the pre page still fits without scrolling ──
-   Measured at 1280×800 before this block: the set-up card 507px and the tip 172px against ~480px of column, so
-   the page scrolled by 168px. What gives, in order: the choices' second lines (the label says it), the set-up
-   card's paddings and type, the Mentor's size, and the tip's lines. The art slot goes where the card is narrow. */
-@media (max-height: 859px) {
-  .d58 .fv1-q { padding-top: 12px; }
-  .d58 .fv1-setup .fv1-qh, .d58 .fv1-setup .fv1-qh em { font-size: 18px !important; line-height: 1.25 !important; }
-  .d58 .fv1-ch { margin-top: 10px; gap: 10px; }
-  .d58 .fv1-choice { padding: 9px 14px; }
-  .d58 .fv1-choice b + span { display: none; }
-  .d58 .fv1-path { margin-top: 10px; padding: 12px 14px 12px 16px; }
-  .d58 .fv1-path .fv1-ph { font-size: 19px !important; }
-  .d58 .fv1-pp { margin-top: 4px; font-size: 14px !important; line-height: 1.45 !important; }
-  .d58 .fv1-row { margin-top: 10px; }
-  .d58 .fv1-btn { height: 38px; }
-  .d58 .fv1-setup > .os-frame { padding-bottom: 16px; }
-  .d58[data-mode="pre"] .d58-left { gap: 12px; }
-  .d58 .fv1-mentor { gap: 16px; }
-  .d58 .fv1-mentorart { flex-basis: 76px; width: 76px; }
-  .d58 .fv1-bub { padding: 12px 16px; }
-  .d58 .fv1-tipt { font-size: 14px !important; line-height: 1.45 !important; }
-  .d58 .fv1-tipt b { font-size: 14px !important; line-height: 1.45 !important; }
-  .d58 .fv1-gsr { padding: 3px 0; }
-  .d58 .fv1-gsr.is-current { padding: 6px 12px; margin: 2px -12px; }
-  .d58 .fv1-gsd, .d58 .fv1-gsc > b { font-size: 14px !important; }
-  .d58 .fv1-gsc > span { font-size: 13px !important; line-height: 1.35 !important; }
-  .d58 .d71-task .fv1-gstb { padding-top: 4px; }
-  /* the lit row keeps its link and lets its note go: the card is the row's height here, 254px */
-  .d58 .fv1-gsnote { display: none; }
-}
-@media (max-height: 819px) {
-  .d58 .fv1-tipt:not(.is-open) { -webkit-line-clamp: 3; }
-}
-/* the art slot leaves the path where the card is too narrow to keep the words beside it */
-.d58 .fv1-setup { container: fv1setup / inline-size; }
-@container fv1setup (max-width: 640px) {
-  .d58 .fv1-art { display: none; }
-}
-
 /* ── A4 · Getting started, as a page of the task card ──────────────────────────────────────────── */
 .d58 .d71-th .fv1-gsn { margin-left: auto; font: 400 14px/1 var(--d58-serif) !important; opacity: 0.85; white-space: nowrap; }
 .d58 .d71-th .fv1-hide {
@@ -209,4 +170,82 @@
    states the full card's floor instead — 303px, what it measures at 1512×900 in both states. */
 @media (min-height: 901px) and (min-width: 1100px) {
   .d58[data-mode="pre"] .d71-right { grid-template-rows: auto minmax(303px, 1fr); }
+}
+
+/* ── B · the first-win stamp ───────────────────────────────────────────────────────────────────────
+   Struck over the body where the ref strikes it (over the left column's middle), above every card. The colours and
+   the faces are stated here: it is the one burgundy fill-free mark on the page — a #6e3426 4px border, radius 12.
+   ⚠️ NO `var()` IN THE KEYFRAMES (the house rule — it fails silently): every frame states its own transform. */
+.d58 .d58-body { position: relative; }
+.d58 .fv1-stamp {
+  position: absolute; z-index: 30; left: 38%; top: 30%;
+  display: block; padding: 14px 24px; box-sizing: border-box; max-width: min(560px, 90%);
+  border: 4px solid #6e3426; border-radius: 12px;
+  background: rgba(255, 255, 255, 0.92); color: #6e3426;
+  box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.5);
+  pointer-events: none; text-align: left;
+  transform: translate(-50%, -50%) rotate(-8deg);
+  animation: fv1-stamp-in 380ms cubic-bezier(0.2, 1.6, 0.4, 1) both;
+}
+.d58 .fv1-stamp.is-out { animation: fv1-stamp-out 260ms ease forwards; }
+.d58 .fv1-stamp .fv1-stampt { display: block; font: 400 34px/1 var(--d58-type) !important; color: #6e3426; white-space: nowrap; }
+.d58 .fv1-stamp .fv1-stamps { display: block; margin-top: 6px; font: 600 14px/1.4 var(--d58-serif) !important; color: var(--d58-ink); }
+@keyframes fv1-stamp-in {
+  from { opacity: 0; transform: translate(-50%, -50%) rotate(-8deg) scale(1.6); }
+  to { opacity: 1; transform: translate(-50%, -50%) rotate(-8deg) scale(1); }
+}
+@keyframes fv1-stamp-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .d58 .fv1-stamp { animation: none; opacity: 1; }
+  .d58 .fv1-stamp.is-out { animation: none; opacity: 0; }
+}
+
+/* ══ SIZE-DEPENDENT RULES — LAST, so they win ties against every base rule above (they did not when they sat in
+   the A3 section: the A4 base rules came after them and the ≤900px checklist never applied). ══ */
+/* ── the short window (≤859px tall, a 1280×800 laptop): the pre page still fits without scrolling ──
+   Measured at 1280×800 before this block: the set-up card 507px and the tip 172px against ~480px of column, so
+   the page scrolled by 168px. What gives, in order: the choices' second lines (the label says it), the set-up
+   card's paddings and type, the Mentor's size, and the tip's lines. The art slot goes where the card is narrow. */
+@media (max-height: 859px) {
+  .d58 .fv1-q { padding-top: 12px; }
+  .d58 .fv1-setup .fv1-qh, .d58 .fv1-setup .fv1-qh em { font-size: 18px !important; line-height: 1.25 !important; }
+  .d58 .fv1-ch { margin-top: 10px; gap: 10px; }
+  .d58 .fv1-choice { padding: 9px 14px; }
+  .d58 .fv1-choice b + span { display: none; }
+  .d58 .fv1-path { margin-top: 10px; padding: 12px 14px 12px 16px; }
+  .d58 .fv1-path .fv1-ph { font-size: 19px !important; }
+  .d58 .fv1-pp { margin-top: 4px; font-size: 14px !important; line-height: 1.45 !important; }
+  .d58 .fv1-row { margin-top: 10px; }
+  .d58 .fv1-btn { height: 38px; }
+  .d58 .fv1-setup > .os-frame { padding-bottom: 16px; }
+  .d58[data-mode="pre"] .d58-left { gap: 12px; }
+  .d58 .fv1-mentor { gap: 16px; }
+  .d58 .fv1-mentorart { flex-basis: 76px; width: 76px; }
+  .d58 .fv1-bub { padding: 12px 16px; }
+  .d58 .fv1-tipt { font-size: 14px !important; line-height: 1.45 !important; }
+  .d58 .fv1-tipt b { font-size: 14px !important; line-height: 1.45 !important; }
+  .d58 .fv1-gsd, .d58 .fv1-gsc > b { font-size: 14px !important; }
+  /* the lit row keeps its link and lets its note go: the card is the row's height here, 254px */
+  .d58 .fv1-gsnote { display: none; }
+}
+@media (max-height: 819px) {
+  .d58 .fv1-tipt:not(.is-open) { -webkit-line-clamp: 3; }
+}
+/* the checklist in a 254px card (every window ≤900px tall, the right column's v105 row): tighter rows, so five
+   rows and the lit row's note fit with two rows done (measured at 1512×900: the last row was cut by 9px) */
+@media (max-height: 900px) {
+  .d58 .fv1-gsr { padding: 3px 0; }
+  .d58 .fv1-gsr > i { flex-basis: 17px; height: 17px; }
+  .d58 .fv1-gsr.is-current { padding: 5px 12px; margin: 1px -12px; }
+  .d58 .fv1-gsd, .d58 .fv1-gsc > b { font-size: 14px !important; line-height: 1.25 !important; }
+  .d58 .fv1-gsc > span { margin-top: 1px; font-size: 13px !important; line-height: 1.3 !important; }
+  .d58 .d71-task .fv1-gstb { padding-top: 2px; padding-bottom: 2px; }
+}
+/* the art slot leaves the path where the card is too narrow to keep the words beside it */
+.d58 .fv1-setup { container: fv1setup / inline-size; }
+@container fv1setup (max-width: 640px) {
+  .d58 .fv1-art { display: none; }
 }
