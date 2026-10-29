@@ -36,10 +36,9 @@ import { AccountMenu } from "./AccountMenu";
 import { usePalette } from "./usePalette";
 import { ShellScope, useShellNavCounts } from "./ShellSidebar";
 import { MobileChromeContext, MobileDetailSpec, useIsMobile } from "./mobileChrome";
-import { buildQcRows } from "../../lib/qcSummary";
-import { phoneScopeId, yourMoveBadge } from "../../lib/queriesPhone";
+import { todoDueBadge } from "../../lib/todoDueTally";
 import { MobileSheet } from "./MobileSheet";
-import { BottomTabBar } from "../BottomTabBar";
+import { BottomTabBar, isMenuPage, tabFor } from "../BottomTabBar";
 import { STAGE_SCROLL_ID } from "../../lib/stageScroll";
 import { useScriptAllyDb } from "../../lib/db";
 import { planLine } from "../../lib/shellSidebar";
@@ -48,6 +47,7 @@ import "./contentColumn.css";
 import "./mobileShell.css";
 import "../phone/phoneTokens.css";
 import "../phone/phone.css";
+import "../phone/phoneShell.css";
 
 /* ── Stage page slot ─────────────────────────────────────────────────────── */
 
@@ -212,7 +212,7 @@ export const WORKSPACE_ICONS: Record<string, React.ReactNode> = {
 export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, searchQuery, setSearchQuery, theme, children }) => {
   // The palette's corpus reads these — already in memory on every route (DbProvider), so the
   // palette never fetches. currentUser/logout feed the mobile you-menu (Mobile Pass 1).
-  const { agents, queries, manuscripts, activities, currentUser, logout } = useScriptAllyDb();
+  const { agents, queries, manuscripts, activities, currentUser, logout, tasks, userTasks, taskFlags } = useScriptAllyDb();
 
   /* ⚠️ ONE FIGURE IN THE NAV NOW (Amendment 1, H5). The Queries attention count went with the
      filter children: with the sidebar carrying destinations rather than views, there is nothing
@@ -338,17 +338,44 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
     },
     [navigate, setSearchQuery]
   );
-  /* Queries on a phone v1 — the tab bar's Queries badge: the Your-move count on the manuscript the phone page is scoped
-     to (lib/queriesPhone, the same derivation as the page's first chip). Phones only; the desktop never builds it. */
+  /* Phone app v2 (Part 1B) — the tab bar's To-do badge: tasks due today or earlier, the To-do tray's own tally
+     (lib/todoDueTally — the tray's chain, unchanged). Phones only; the desktop never builds it. The Queries Your-move
+     badge is retired from the bar (its derivation, `yourMoveBadge`, stays for its other readers). */
   const phoneNav = useIsMobile();
   const tabBadge = useMemo(() => {
     if (!phoneNav) return 0;
-    let stored: string | null = null;
-    try { stored = window.localStorage.getItem("scriptally_active_manuscript_id"); } catch { /* storage refused */ }
-    const now = Date.now();
-    return yourMoveBadge(buildQcRows(queries, agents, activities, now), phoneScopeId(manuscripts, stored), now);
+    return todoDueBadge({
+      tasks: tasks ?? [], userTasks: userTasks ?? [], queries, agents, manuscripts, taskFlags: taskFlags ?? [], activities,
+      mutedTaskRules: currentUser?.mutedTaskRules, nowMs: Date.now(),
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phoneNav, queries, agents, activities, manuscripts, pathname]);
+  }, [phoneNav, tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, currentUser?.mutedTaskRules, pathname]);
+
+  /* Phone app v2 (Part 1B) — THE BAR TUCKS AWAY AS YOU READ. One passive listener on the stage, in the CAPTURE phase so
+     a page that scrolls an inner box (the fill routes) is heard too: scroll does not bubble, but capture reaches every
+     descendant. The ref's thresholds (app.js `onScroll`): away after 6px down once past 90px; back after 6px up or
+     above 40px. Reset on every route. */
+  const [tabAway, setTabAway] = useState(false);
+  const [plusOpen, setPlusOpen] = useState(false);
+  useEffect(() => { setTabAway(false); setPlusOpen(false); }, [pathname]);
+  useEffect(() => {
+    if (!phoneNav) return undefined;
+    const stage = stageRef.current;
+    if (!stage) return undefined;
+    const last = new WeakMap<EventTarget, number>();
+    const onScrollAny = (e: Event) => {
+      const t = e.target as HTMLElement | Document | null;
+      const el = t && "scrollTop" in t ? (t as HTMLElement) : null;
+      if (!el) return;
+      const y = el.scrollTop;
+      const prev = last.get(el) ?? 0;
+      if (y > prev + 6 && y > 90) setTabAway(true);
+      else if (y < prev - 6 || y < 40) setTabAway(false);
+      last.set(el, y);
+    };
+    stage.addEventListener("scroll", onScrollAny, { passive: true, capture: true });
+    return () => stage.removeEventListener("scroll", onScrollAny, { capture: true } as EventListenerOptions);
+  }, [phoneNav, pathname]);
 
   return (
     /**
@@ -545,7 +572,19 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
 
       {/* The floating tab-bar capsule (<md). It stands down while the active route shows a
           pushed detail screen (baked decision 5) — the detail's own affordances take the foot. */}
-      <BottomTabBar pathname={pathname} onGo={goPath} onMore={() => setYouOpen(true)} badge={tabBadge} hidden={activeMobileDetail !== null} />
+      <BottomTabBar
+        pathname={pathname}
+        /* a tap on the tab you are on takes it back to the top (ref app.js `tab`) */
+        onGo={(path) => {
+          if (tabFor(path) === tabFor(pathname) && stageRef.current) { stageRef.current.scrollTo({ top: 0, behavior: "smooth" }); return; }
+          goPath(path);
+        }}
+        onPlus={() => setPlusOpen((o) => !o)}
+        plusOpen={plusOpen}
+        badge={tabBadge}
+        away={tabAway}
+        hidden={activeMobileDetail !== null || isMenuPage(pathname)}
+      />
 
       {/* THE YOU-MENU (Mobile Pass 1, concept frame 07) — the avatar's sheet: user block with
           the plan as PLAIN SLATE TEXT (no Pro card), then the demoted destinations. Rows route

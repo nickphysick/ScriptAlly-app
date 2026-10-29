@@ -2,84 +2,89 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Bottom tab bar — the phone's primary navigation (Queries on a phone v1; ref design-refs/queries-mobile-v1/, Nick's
- * ruling of 28 Oct: the five-tab bar on every phone page). Full width along the foot of the screen, five equal tabs:
- * Home · Queries · Agents · Analytics · More.
+ * THE PHONE'S TAB BAR (Phone app v2, Part 1B; ref design-refs/phone-app-v2/src/screens.js `tabbar()`, app.css `.tabbar`
+ * `.tb` `.plus`). A floating capsule with five slots: Home · Queries · [+] · To-do · Agents.
  *
- *  - The chosen tab is a NAVY pill (#2a3a52, 52 × 32, radius 12) with a white icon; its label is ink.
- *  - Queries carries a pink badge with a black number: the active manuscript's Your-move count, the same figure the
- *    Queries page's first chip shows. No badge at zero.
- *  - More opens the shell's own "you" sheet (To-do, packages, import, settings, help, sign out); it is never "on".
- *  - Analytics is `/queries/analytics`, so Queries is on for every other `/queries` path.
+ *  - The chosen tab is a NAVY pill behind a white icon; its label is navy.
+ *  - The + is a blush disc in the centre slot. While its sheet is open it is the close button (`aria-expanded`, the
+ *    plus turns 45°).
+ *  - To-do carries the badge: the To-do tray's own tally of tasks due today or earlier (`lib/todoDueTally`, the
+ *    tray's `dayBuckets` overdue + today). No badge at zero. The Queries Your-move badge is retired from the bar.
+ *  - It tucks away as the page scrolls down and comes back when it scrolls up (`away`, driven by the shell's one
+ *    scroll listener with the ref's thresholds), and it is not drawn on a page opened from the menu or on a pushed
+ *    detail screen (`hidden`).
  *
- * Hidden at ≥md and on pushed detail screens (`hidden`). Geometry and colour live in mobileShell.css (class + media
- * query, never inline — the shell CSS footgun law).
+ * SUPERSEDES the Queries on a phone v1 five-tab bar (Home · Queries · Agents · Analytics · More): Analytics moved to the
+ * menu, and More's "you" sheet is the menu behind your initials (PhoneMenu).
+ *
+ * Phone only: the bar is `display: none` at 768px and up (class + media query, never inline — the shell CSS law).
  */
 import React from "react";
+import { PI } from "./phone/phoneIcons";
 
-interface BottomTabBarProps {
-  /** the router's pathname; it decides the chosen tab */
-  pathname: string;
-  /** go to a path */
-  onGo: (path: string) => void;
-  /** open the "you" sheet */
-  onMore: () => void;
-  /** the Your-move count for the Queries badge (none at zero) */
-  badge?: number;
-  /** True while the active route shows a pushed detail screen — the bar stands down. */
-  hidden?: boolean;
-}
+type TabKey = "home" | "queries" | "todo" | "agents";
 
-const sv = (d: React.ReactNode) => <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">{d}</svg>;
-const ICON = {
-  home: sv(<path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z" />),
-  queries: sv(<><path d="M3 11l18-7-7 18-2.5-7.5z" /><path d="M11.5 14.5 21 4" /></>),
-  agents: sv(<><circle cx="9" cy="8" r="3.5" /><path d="M3 20c.8-3.5 3.2-5 6-5s5.2 1.5 6 5" /><circle cx="17" cy="9" r="2.5" /><path d="M16 14.5c2.4 0 4.3 1.3 5 4" /></>),
-  analytics: sv(<><path d="M4 20V4M4 20h16" /><path d="M8 16v-4M12 16V8M16 16v-6" /></>),
-  more: sv(<><circle cx="5" cy="12" r="1.3" /><circle cx="12" cy="12" r="1.3" /><circle cx="19" cy="12" r="1.3" /></>),
-};
-
-type TabKey = "home" | "queries" | "agents" | "analytics";
-/** which tab the path lights: Analytics is a Queries path of its own; anything else lights nothing */
+/** The four tab routes. Everything else on a phone is a page opened from the menu, with the page band and no bar. */
 export function tabFor(pathname: string): TabKey | null {
-  if (pathname.startsWith("/queries/analytics")) return "analytics";
-  if (pathname === "/queries" || pathname.startsWith("/queries/")) return "queries";
-  if (pathname.startsWith("/dashboard")) return "home";
-  if (pathname.startsWith("/agents")) return "agents";
+  const p = pathname.replace(/\/+$/, "") || "/";
+  if (p === "/dashboard") return "home";
+  if (p === "/queries") return "queries";
+  if (p === "/todo" || p.startsWith("/todo/")) return "todo";
+  if (p === "/agents" || p.startsWith("/agents/")) return "agents";
   return null;
 }
+/** a menu page: any workspace route that is not one of the four tabs */
+export const isMenuPage = (pathname: string): boolean => tabFor(pathname) === null;
 
 const TABS: { key: TabKey; label: string; path: string }[] = [
   { key: "home", label: "Home", path: "/dashboard" },
   { key: "queries", label: "Queries", path: "/queries" },
+  { key: "todo", label: "To-do", path: "/todo" },
   { key: "agents", label: "Agents", path: "/agents" },
-  { key: "analytics", label: "Analytics", path: "/queries/analytics" },
 ];
 
-export const BottomTabBar: React.FC<BottomTabBarProps> = ({ pathname, onGo, onMore, badge = 0, hidden = false }) => {
+interface BottomTabBarProps {
+  /** the router's pathname; it decides the chosen tab */
+  pathname: string;
+  /** go to a path (a tap on the tab you are on scrolls it back to the top instead) */
+  onGo: (path: string) => void;
+  /** the + : open its sheet, or close it while open */
+  onPlus: () => void;
+  plusOpen?: boolean;
+  /** the To-do badge: tasks due today or earlier (none at zero) */
+  badge?: number;
+  /** tucked away while scrolling down */
+  away?: boolean;
+  /** not drawn: a pushed detail screen or a page opened from the menu */
+  hidden?: boolean;
+}
+
+export const BottomTabBar: React.FC<BottomTabBarProps> = ({ pathname, onGo, onPlus, plusOpen = false, badge = 0, away = false, hidden = false }) => {
   if (hidden) return null;
   const on = tabFor(pathname);
-  return (
-    <nav className="sa-mtabbar" aria-label="Primary" data-qm1="tabbar">
-      {TABS.map((t) => {
-        const active = on === t.key;
-        return (
-          <button
-            key={t.key} type="button" className={`sa-mtab${active ? " on" : ""}`} data-tab={t.key}
-            onClick={() => onGo(t.path)}
-            aria-label={t.key === "queries" && badge > 0 ? `Queries, ${badge} your move` : t.label}
-            aria-current={active ? "page" : undefined}
-          >
-            <span className="sa-mtabic">{ICON[t.key]}</span>
-            <span className="sa-mtablb">{t.label}</span>
-            {t.key === "queries" && badge > 0 ? <em className="sa-mtabbd" data-qm1="tab-badge" aria-hidden="true">{badge}</em> : null}
-          </button>
-        );
-      })}
-      <button type="button" className="sa-mtab" data-tab="more" aria-label="More" aria-haspopup="dialog" onClick={onMore}>
-        <span className="sa-mtabic">{ICON.more}</span>
-        <span className="sa-mtablb">More</span>
+  const tab = (t: (typeof TABS)[number]) => {
+    const active = on === t.key;
+    return (
+      <button key={t.key} type="button" className="pa-tb" data-tab={t.key} data-pa="tab"
+        onClick={() => onGo(t.path)}
+        aria-label={t.key === "todo" && badge > 0 ? `To-do, ${badge} due` : t.label}
+        aria-current={active ? "page" : undefined}>
+        <span className="pa-tbi">{PI[t.key]}</span>
+        {t.label}
+        {t.key === "todo" && badge > 0 ? <span className="pa-tbbadge" data-pa="tab-badge" aria-hidden="true">{badge}</span> : null}
       </button>
+    );
+  };
+  return (
+    <nav className={`pa-tabbar${away ? " away" : ""}${plusOpen ? " plus-open" : ""}`} aria-label="Primary" data-pa="tabbar">
+      {tab(TABS[0])}
+      {tab(TABS[1])}
+      <button type="button" className="pa-plus" data-pa="plus" aria-label={plusOpen ? "Close" : "Log something"}
+        aria-haspopup="dialog" aria-expanded={plusOpen} onClick={onPlus}>
+        {PI.plus}
+      </button>
+      {tab(TABS[2])}
+      {tab(TABS[3])}
     </nav>
   );
 };

@@ -1,0 +1,45 @@
+/* ── PHONE APP v2 — THE SHELL (Part 1; ref design-refs/phone-app-v2/src/app.css). Below 768px only; at 768px and up
+   nothing here applies (the tab bar is `display: none` outside the media query). Every value is the ref's. ── */
+
+/* ── the tab bar (ref `.tabbar`, `.tb`, `.plus`, `.badge`) ── */
+.pa-tabbar { display: none; }
+@media (max-width: 767.98px) {
+  .pa-tabbar {
+    position: fixed; left: 14px; right: 14px; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); z-index: 40;
+    height: 66px; border-radius: 33px; box-sizing: border-box;
+    background: rgba(255, 255, 255, 0.92);
+    -webkit-backdrop-filter: blur(18px) saturate(1.4); backdrop-filter: blur(18px) saturate(1.4);
+    box-shadow: 0 10px 30px rgba(31, 38, 51, 0.16), inset 0 0 0 1px rgba(31, 38, 51, 0.05);
+    display: flex; align-items: center; justify-content: space-around; padding: 0 8px;
+    transition: transform 0.38s var(--pa-spring), opacity 0.25s;
+    font-family: var(--pa-sans);
+  }
+  .pa-tabbar.away { transform: translateY(130%); opacity: 0; pointer-events: none; }
+  /* while the + sheet is open the bar sits over its scrim, so the + is the close button (ref z-index 33 over 31) */
+  .pa-tabbar.plus-open { z-index: 1001; }
+  .pa-tb {
+    position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px; width: 58px;
+    padding: 0; border: 0; background: none; cursor: pointer;
+    font: 600 11px/1.2 var(--pa-sans) !important; color: var(--pa-muted);
+  }
+  .pa-tbi { width: 44px; height: 30px; border-radius: 15px; display: grid; place-items: center; transition: background 0.2s; }
+  .pa-tbi svg { width: 21px; height: 21px; }
+  .pa-tb[aria-current="page"] { color: var(--pa-navy); }
+  .pa-tb[aria-current="page"] .pa-tbi { background: var(--pa-navy); color: #fff; }
+  .pa-tbbadge {
+    position: absolute; top: -3px; right: 6px; min-width: 18px; height: 18px; border-radius: 9px; box-sizing: border-box;
+    background: var(--pa-blush); color: #111; font: 700 11px/18px var(--pa-sans) !important; text-align: center;
+    padding: 0 5px; box-shadow: 0 0 0 2px #fff;
+  }
+  .pa-plus {
+    width: 58px; height: 46px; border-radius: 23px; border: 0; padding: 0; cursor: pointer;
+    background: var(--pa-blush); color: #111; display: grid; place-items: center;
+    box-shadow: 0 4px 12px rgba(201, 120, 100, 0.32); transition: transform 0.2s var(--pa-spring);
+  }
+  .pa-plus svg { width: 24px; height: 24px; transition: transform 0.3s var(--pa-spring); }
+  .pa-plus[aria-expanded="true"] svg { transform: rotate(45deg); }
+  .pa-plus:active, .pa-tb:active .pa-tbi { transform: scale(0.96); }
+  @media (prefers-reduced-motion: reduce) {
+    .pa-tabbar, .pa-plus, .pa-plus svg, .pa-tbi { transition: none; }
+  }
+}
