@@ -12,7 +12,7 @@ import React from "react";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
-import { BottomTabBar, tabFor } from "../BottomTabBar";
+import { BottomTabBar, isMenuPage, tabFor } from "../BottomTabBar";
 
 const css = readFileSync(resolve(__dirname, "./mobileShell.css"), "utf8");
 const shellCss = readFileSync(resolve(__dirname, "./shellV2.css"), "utf8");
@@ -20,55 +20,74 @@ const appShell = readFileSync(resolve(__dirname, "./AppShell.tsx"), "utf8");
 const sheetSrc = readFileSync(resolve(__dirname, "./MobileSheet.tsx"), "utf8");
 const barSrc = readFileSync(resolve(__dirname, "../BottomTabBar.tsx"), "utf8");
 
-/* ⚠️ RETIRED 28 OCT (Queries on a phone v1, Nick's ruling): the four-tab floating capsule with a ground-fill pill is
-   replaced by the five-tab bar along the foot with a NAVY pill. The capsule's locks are rewritten here, not deleted. */
-describe("the tab bar — five tabs along the foot, a navy pill (Queries on a phone v1)", () => {
-  it("renders five tabs (Home · Queries · Agents · Analytics · More), path-driven active", () => {
-    const html = renderToStaticMarkup(<BottomTabBar pathname="/queries" onGo={() => {}} onMore={() => {}} />);
-    expect(html).toContain("sa-mtabbar");
-    for (const label of ["Home", "Queries", "Agents", "Analytics", "More"]) expect(html).toContain(`>${label}</span>`);
-    expect(html).not.toContain(">Scripts<");
+const phoneShellCss = readFileSync(resolve(__dirname, "../phone/phoneShell.css"), "utf8");
+const phoneTokens = readFileSync(resolve(__dirname, "../phone/phoneTokens.css"), "utf8");
+const noop = () => {};
+
+/* ⚠️ RE-POINTED 29 OCT (Phone app v2, Part 1B; ref design-refs/phone-app-v2/src/screens.js `tabbar()`). The Queries on
+   a phone v1 bar — five equal tabs along the foot (Home · Queries · Agents · Analytics · More) with a Queries Your-move
+   badge — is SUPERSEDED: a floating capsule, Home · Queries · [+] · To-do · Agents, the badge on To-do. Analytics moved
+   to the menu and More's "you" sheet became the menu behind your initials. The claims below are the new bar's; where an
+   old claim still holds (path-driven active, a navy pill with a white icon, no badge at zero, nothing inline) it is
+   kept and re-pointed rather than dropped. The rendered measurement is tests/e2e/phoneAppV2Shell.measure.ts S1–S2. */
+describe("the tab bar — a floating capsule, five slots, + in the middle (Phone app v2)", () => {
+  it("renders Home · Queries · + · To-do · Agents in that order, path-driven active", () => {
+    const html = renderToStaticMarkup(<BottomTabBar pathname="/queries" onGo={noop} onPlus={noop} />);
+    expect(html).toContain("pa-tabbar");
+    const order = [...html.matchAll(/data-tab="(\w+)"|data-pa="plus"/g)].map((m) => m[1] ?? "plus");
+    expect(order).toEqual(["home", "queries", "plus", "todo", "agents"]);
+    expect(html).not.toContain("Analytics");
+    expect(html).not.toContain(">More<");
     expect(html.match(/aria-current="page"/g)?.length).toBe(1);
     expect(html).toMatch(/data-tab="queries"[^>]*aria-current="page"/);
-    expect(html).not.toContain("To-do");
   });
 
-  it("Analytics is its own tab under /queries; More is never on; off-tab routes light nothing", () => {
-    expect(tabFor("/queries/analytics")).toBe("analytics");
-    expect(tabFor("/queries")).toBe("queries");
-    expect(tabFor("/queries/packages")).toBe("queries");
+  it("the four tab routes; everything else is a menu page with no bar", () => {
     expect(tabFor("/dashboard")).toBe("home");
+    expect(tabFor("/queries")).toBe("queries");
+    expect(tabFor("/todo")).toBe("todo");
+    expect(tabFor("/todo/corkboard")).toBe("todo");
     expect(tabFor("/agents/discover")).toBe("agents");
-    expect(tabFor("/todo")).toBeNull();
-    expect(renderToStaticMarkup(<BottomTabBar pathname="/queries" onGo={() => {}} onMore={() => {}} hidden />)).toBe("");
-    const offTab = renderToStaticMarkup(<BottomTabBar pathname="/todo" onGo={() => {}} onMore={() => {}} />);
-    expect(offTab).toContain("sa-mtabbar");
-    expect(offTab).not.toContain('aria-current="page"');
+    for (const p of ["/queries/analytics", "/queries/responses", "/queries/packages", "/manuscripts", "/account", "/help", "/import"]) {
+      expect(tabFor(p), p).toBeNull();
+      expect(isMenuPage(p), p).toBe(true);
+    }
+    expect(renderToStaticMarkup(<BottomTabBar pathname="/queries" onGo={noop} onPlus={noop} hidden />)).toBe("");
   });
 
-  it("the Queries badge shows the count, and nothing at zero", () => {
-    expect(renderToStaticMarkup(<BottomTabBar pathname="/dashboard" onGo={() => {}} onMore={() => {}} badge={4} />)).toMatch(/class="sa-mtabbd"[^>]*>4</);
-    expect(renderToStaticMarkup(<BottomTabBar pathname="/dashboard" onGo={() => {}} onMore={() => {}} badge={0} />)).not.toContain("sa-mtabbd");
+  it("the badge is on To-do, shows the count, and nothing at zero", () => {
+    expect(renderToStaticMarkup(<BottomTabBar pathname="/dashboard" onGo={noop} onPlus={noop} badge={4} />))
+      .toMatch(/data-tab="todo"[^]*class="pa-tbbadge"[^>]*>4</);
+    expect(renderToStaticMarkup(<BottomTabBar pathname="/dashboard" onGo={noop} onPlus={noop} badge={0} />)).not.toContain("pa-tbbadge");
   });
 
-  it("runs along the foot, full width, with the safe area under it", () => {
-    const bar = css.split("@media (max-width: 767.98px)")[1]?.match(/\.sa-mtabbar \{([^}]*)\}/s)?.[1] ?? "";
-    expect(bar, "the <md .sa-mtabbar rule must exist").not.toBe("");
-    expect(bar).toContain("left: 0");
-    expect(bar).toContain("right: 0");
-    expect(bar).toContain("bottom: 0");
-    expect(bar).toContain("grid-template-columns: repeat(5, 1fr)");
-    expect(bar).toContain("env(safe-area-inset-bottom)");
+  it("the + says whether its sheet is open, and the bar carries away / plus-open", () => {
+    const shut = renderToStaticMarkup(<BottomTabBar pathname="/dashboard" onGo={noop} onPlus={noop} />);
+    expect(shut).toMatch(/data-pa="plus"[^>]*aria-expanded="false"/);
+    const open = renderToStaticMarkup(<BottomTabBar pathname="/dashboard" onGo={noop} onPlus={noop} plusOpen away />);
+    expect(open).toMatch(/data-pa="plus"[^>]*aria-expanded="true"/);
+    expect(open).toMatch(/class="pa-tabbar away plus-open"/);
   });
 
-  it("THE COLOUR RULES — the chosen pill is navy with a white icon; the badge is pink with black text", () => {
-    const pill = css.match(/\.sa-mtab\.on \.sa-mtabic \{([^}]*)\}/s)?.[1] ?? "";
+  it("floats: inset 14px, 66 tall, a 33px capsule, over the safe area; hidden at 768 and up", () => {
+    const block = phoneShellCss.split("@media (max-width: 767.98px)")[1] ?? "";
+    const bar = block.match(/\.pa-tabbar \{([^}]*)\}/s)?.[1] ?? "";
+    expect(bar, "the <md .pa-tabbar rule must exist").not.toBe("");
+    for (const d of ["left: 14px", "right: 14px", "height: 66px", "border-radius: 33px", "env(safe-area-inset-bottom"]) expect(bar).toContain(d);
+    expect(phoneShellCss.split("@media (max-width: 767.98px)")[0]).toContain(".pa-tabbar { display: none; }");
+  });
+
+  it("THE COLOUR RULES — the chosen pill is navy with a white icon; the badge and the + are blush with ink text (#1f2633)", () => {
+    const pill = phoneShellCss.match(/\.pa-tb\[aria-current="page"\] \.pa-tbi \{([^}]*)\}/s)?.[1] ?? "";
     expect(pill, "the chosen pill's rule must exist").not.toBe("");
-    expect(pill).toContain("background: #2a3a52");
+    expect(pill).toContain("background: var(--pa-navy)");
     expect(pill).toContain("color: #fff");
-    const bd = css.match(/\.sa-mtabbd \{([^}]*)\}/s)?.[1] ?? "";
-    expect(bd).toContain("background: #f3c8ba");
-    expect(bd).toContain("color: #1c130f");
+    const bd = phoneShellCss.match(/\.pa-tbbadge \{([^}]*)\}/s)?.[1] ?? "";
+    expect(bd).toContain("background: var(--pa-blush)");
+    expect(bd).toContain("color: var(--pa-ink)");
+    expect(phoneTokens).toContain("--pa-ink: #1f2633");
+    expect(phoneTokens).toContain("--pa-blush: #e8c8bc");
+    expect(phoneTokens).toContain("--pa-navy: var(--sp-anthracite, #2a3a52)");
     expect(barSrc).not.toContain("style={{");
   });
 });
@@ -168,14 +187,19 @@ describe("the app-feel layer (Phase 6)", () => {
   it("the manifest is standalone with the token colours, and index.html links it", () => {
     const manifest = JSON.parse(readFileSync(resolve(__dirname, "../../../public/manifest.webmanifest"), "utf8"));
     expect(manifest.display).toBe("standalone");
-    expect(manifest.theme_color).toBe("#e7e0d5"); // --shell-ground
-    expect(manifest.background_color).toBe("#fdfbf8"); // --shell-canvas
+    /* ⚠️ RE-POINTED 29 OCT (Phone app v2, Part 1E): the installed app is the phone app, so its colours are the ink
+       navy (the launch screen's ground), and the icons are the hawk on navy in public/pwa/. */
+    expect(manifest.theme_color).toBe("#2a3a52");
+    expect(manifest.background_color).toBe("#2a3a52");
+    expect(manifest.icons.every((i: { src: string }) => i.src.startsWith("/pwa/"))).toBe(true);
     expect(manifest.icons.map((i: { sizes: string }) => i.sizes)).toEqual(
       expect.arrayContaining(["192x192", "512x512"]),
     );
     const html = readFileSync(resolve(__dirname, "../../../index.html"), "utf8");
     expect(html).toContain('rel="manifest" href="/manifest.webmanifest"');
-    expect(html).toContain('name="theme-color" content="#e7e0d5"');
+    expect(html).toContain('name="theme-color" content="#e7e0d5"'); // the browser colour at 768px and up, unchanged
+    expect(html).toContain('<meta name="theme-color" content="#2a3a52" media="(max-width: 767.98px)" />');
+    expect(html.match(/rel="apple-touch-startup-image"/g)?.length).toBeGreaterThanOrEqual(5);
     expect(html).toContain("viewport-fit=cover");
   });
 
@@ -191,14 +215,22 @@ describe("the app-feel layer (Phase 6)", () => {
   });
 });
 
-describe("the you-menu — demoted destinations behind the avatar", () => {
-  it("carries the six rows and the plain-slate plan line (no Pro card)", () => {
-    for (const row of ["To-do", "Submission packages", "Import your queries", "Account settings", "Help", "Sign out"]) {
-      expect(appShell).toContain(row);
-    }
-    expect(appShell).toContain("planLine(currentUser.plan).label");
-    expect(appShell).toContain("sa-ymenu-uplink");
-    // plain slate text — never a pill, never a fill
-    expect(css).toContain(".sa-ymenu-plan { font-size: 12px; font-weight: 600; color: var(--slate)");
+/* ⚠️ RE-POINTED 29 OCT (Phone app v2, Part 1D): the "you" sheet is REPLACED by the menu behind your initials
+   (components/phone/PhoneSheets.tsx `PhoneMenu`, ref menuv.js ovMenu MV B). The claim that survives is that nothing it
+   offered became unreachable: each of its six rows, and its Upgrade link, has a home. The rendered check is
+   tests/e2e/phoneAppV2Shell.measure.ts S6. */
+describe("the menu — everything the you-sheet offered is still reachable", () => {
+  const sheets = readFileSync(resolve(__dirname, "../phone/PhoneSheets.tsx"), "utf8");
+  it("To-do is a tab; packages, import, settings, help, sign out and upgrade are in the menu", () => {
+    expect(barSrc).toContain('{ key: "todo", label: "To-do", path: "/todo" }');
+    expect(appShell).toContain('goPath("/queries/packages")');
+    expect(appShell).toContain('onImport={() => goPath("/import")}');
+    expect(appShell).toContain('onSettings={() => goPath("/account")}');
+    expect(appShell).toContain('onHelp={() => goPath("/help")}');
+    expect(appShell).toContain('onPlan={() => goPath("/plans")}');
+    expect(appShell).toContain("onSignOut={logout}");
+    for (const w of ["Import queries", "Help centre", "Settings", "Plan &amp; billing", "Sign out"]) expect(sheets).toContain(w);
+    expect(appShell).toContain("planLine(currentUser?.plan).label");
+    expect(appShell).not.toContain("sa-ymenu-row");
   });
 });

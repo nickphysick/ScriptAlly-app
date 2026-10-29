@@ -2,19 +2,16 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * The phone dashboard's top bar (Dashboard on the phone v1, Part A; ref design-refs/dashboard-mobile-v1/ screens 01,
- * 05, 06, 07). Home only, below 768px: the mark, the manuscript (the shell's own phone switcher, `ShellScope`),
- * then Search, Feedback and the pink + menu. On the page colour, no band; a hairline arrives once the page scrolls.
+ * The phone search (PhoneSearch): it ranks the palette's own corpus (`searchPalette`) and runs a row exactly as the
+ * palette does. Nothing here writes.
  *
- * ⚠️ EVERY CONTROL OPENS SOMETHING THAT ALREADY EXISTS. Search ranks the palette's own corpus (`searchPalette`) and
- * runs a row exactly as the palette does; Feedback opens the shell's FeedbackDock (`openFeedback`); the + menu's
- * three items call the desktop header's own three handlers. Nothing here writes.
+ * The phone dashboard's top bar that lived here (the mark, the manuscript switcher, Search, Feedback and the pink +
+ * menu) is RETIRED by Phone app v2, Part 1C: the shell's navy band and the tab bar's + took its jobs.
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { MessageSquareText, Plus, Reply, Search, UserPlus } from "lucide-react";
+import { Search } from "lucide-react";
 import type { Agent, Query } from "../../../types";
 import { ShellScope } from "../../shell/ShellSidebar";
-import { QUERYHAWK_MARK } from "../v105/foundingArt";
 import { openFeedback } from "../../../lib/feedbackStore";
 import { buildCorpus, rankItems, type PaletteItem } from "../../../lib/searchPalette";
 import { agentPrimary, agentSecondary } from "../../../lib/agentDisplay";
@@ -26,67 +23,6 @@ export interface PhoneActions {
   onRecord: () => void;
   onAddAgent: () => void;
 }
-
-/* ── the + menu ─────────────────────────────────────────────────────────────────────────────── */
-
-const MENU: { key: keyof PhoneActions; label: string; Icon: typeof Plus }[] = [
-  { key: "onLog", label: "Log a query", Icon: Plus },
-  { key: "onRecord", label: "Record a response", Icon: Reply },
-  { key: "onAddAgent", label: "Add an agent", Icon: UserPlus },
-];
-
-const PlusMenu: React.FC<{ actions: PhoneActions }> = ({ actions }) => {
-  const [open, setOpen] = useState(false);
-  const btnRef = useRef<HTMLButtonElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const close = useCallback((focus: boolean) => {
-    setOpen(false);
-    if (focus) btnRef.current?.focus({ preventScroll: true });
-  }, []);
-  useEffect(() => {
-    if (!open) return undefined;
-    requestAnimationFrame(() => menuRef.current?.querySelector<HTMLElement>('[role="menuitem"]')?.focus({ preventScroll: true }));
-    const down = (e: PointerEvent) => {
-      const t = e.target as Node | null;
-      if (t && (menuRef.current?.contains(t) || btnRef.current?.contains(t))) return;
-      close(false);
-    };
-    const key = (e: KeyboardEvent) => {
-      if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); close(true); return; }
-      if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
-      const items = [...(menuRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? [])];
-      const i = items.indexOf(document.activeElement as HTMLElement);
-      const next = items[(i + (e.key === "ArrowDown" ? 1 : items.length - 1)) % items.length];
-      if (next) { e.preventDefault(); next.focus(); }
-    };
-    document.addEventListener("pointerdown", down, true);
-    document.addEventListener("keydown", key, true);
-    return () => { document.removeEventListener("pointerdown", down, true); document.removeEventListener("keydown", key, true); };
-  }, [open, close]);
-  return (
-    <span className="dm1-pluswrap">
-      <button
-        ref={btnRef} type="button" className={`dm1-ic dm1-plus${open ? " is-open" : ""}`} data-dm1="plus"
-        aria-label="Add" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((v) => !v)}
-      >
-        <span className="dm1-plusdisc" aria-hidden="true"><Plus /></span>
-      </button>
-      {open && (
-        <div ref={menuRef} className="dm1-menu" role="menu" aria-label="Add" data-dm1="menu">
-          {MENU.map(({ key, label, Icon }, i) => (
-            <button
-              key={key} type="button" role="menuitem" className={`dm1-mi${i === 0 ? " is-first" : ""}`} data-dm1="menuitem" data-k={key}
-              onClick={() => { close(true); actions[key](); }}
-            >
-              <span className="dm1-midisc" aria-hidden="true"><Icon /></span>
-              <span>{label}</span>
-            </button>
-          ))}
-        </div>
-      )}
-    </span>
-  );
-};
 
 /* ── search ─────────────────────────────────────────────────────────────────────────────────── */
 
@@ -210,28 +146,5 @@ export const PhoneSearch: React.FC<{
   );
 };
 
-/* ── the bar ────────────────────────────────────────────────────────────────────────────────── */
-
-export const PhoneTopBar: React.FC<{
-  onNavigate: (tab: string, subPageName?: string) => void;
-  onPickedManuscript: () => void;
-  onSearch: () => void;
-  actions: PhoneActions;
-  scrolled: boolean;
-}> = ({ onNavigate, onPickedManuscript, onSearch, actions, scrolled }) => (
-  <header className={`dm1-top${scrolled ? " is-scrolled" : ""}`} data-dm1="top">
-    <img className="dm1-mark" src={QUERYHAWK_MARK} alt="" aria-hidden="true" draggable={false} />
-    {/* the shell's own phone switcher; a pick re-opens the route so the page reads the new book */}
-    <div
-      className="dm1-ms" data-dm1="ms"
-      onClickCapture={(e) => { if ((e.target as HTMLElement).closest(".sv2-msrow")) window.setTimeout(onPickedManuscript, 0); }}
-    >
-      <ShellScope onNavigate={onNavigate} />
-    </div>
-    <div className="dm1-tools">
-      <button type="button" className="dm1-ic" aria-label="Search" data-dm1="search-btn" onClick={onSearch}><Search aria-hidden="true" /></button>
-      <button type="button" className="dm1-ic" aria-label="Feedback" data-dm1="feedback-btn" onClick={() => openFeedback()}><MessageSquareText aria-hidden="true" /></button>
-      <PlusMenu actions={actions} />
-    </div>
-  </header>
-);
+/* (The bar itself — PhoneTopBar and its + menu — is RETIRED by Phone app v2, Part 1C: the shell's navy band and the
+   tab bar's + took their jobs. This module keeps PhoneSearch, which two phone pages still open.) */

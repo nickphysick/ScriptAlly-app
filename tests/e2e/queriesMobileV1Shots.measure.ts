@@ -28,6 +28,9 @@ const pair = async (page: import("@playwright/test").Page, ref: string, app: Buf
 };
 
 test("QM1 shots · 390x844", async ({ page, context }) => {
+  /* ⚠️ RETIRED 29 OCT (Phone app v2): these were the v1 report's shots; its + and Coming up buttons are gone. The phone's
+     shots are taken by the PA2 locks (PA2_SHOTS=1). */
+  test.skip(true, "superseded by the Phone app v2 shots");
   mkdirSync(`${DIR}/shots`, { recursive: true });
   mkdirSync(`${DIR}/pairs`, { recursive: true });
   const shot = async (name: string) => { const b = await page.screenshot(); writeFileSync(`${DIR}/shots/${name}.png`, b); return b; };

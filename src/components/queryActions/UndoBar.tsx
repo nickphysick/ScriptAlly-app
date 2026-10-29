@@ -18,6 +18,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { hideUndoBar, subscribeUndoBar, type UndoToast } from "../../lib/queryActions/drawerStore";
 import "./queryDrawer.css";
+import { useIsMobile } from "../shell/mobileChrome";
+import { ArtPlaceholder, PhoneArt } from "../phone/PhoneArtSpot";
+import { PHONE_ART } from "../phone/phoneArt";
 
 export const UNDO_MS = 8000;
 const DONE_MS = 2200;
@@ -30,6 +33,7 @@ export function UndoBar() {
   const deadline = useRef(0);
   const timer = useRef<number | undefined>(undefined);
   const busy = useRef(false);
+  const phone = useIsMobile();
 
   useEffect(() => subscribeUndoBar((x) => { setT(x); setPaused(false); }), []);
 
@@ -78,6 +82,25 @@ export function UndoBar() {
 
   if (!t) return null;
   const dur = t.done ? DONE_MS : UNDO_MS;
+  /* Phone app v2 (Part 1E) — ON A PHONE, THE SAME BAR AS THE REF'S SNACKBAR (toastv.js TSV C): one navy pill above the
+     tab bar, a small round picture (the art table's `snack` slot), one line of white text, and the same Undo as a blush
+     pill. The message, the Undo, the timings and the ⌘Z key are this component's own, unchanged; only the drawing is
+     the phone's. At 768px and up `phone` is false and the bar below renders exactly as before. */
+  if (phone) {
+    return createPortal(
+      <div className="pa-layer pa-snackhost">
+        <div className={`pa-snack${t.failed ? " failed" : ""}`} role="status" aria-live="polite" data-pa="snack"
+          data-qad-toast={t.done ? "done" : t.failed ? "failed" : "on"} key={t.id}>
+          {PHONE_ART.snack ? <PhoneArt art={PHONE_ART.snack} size={30} className="pa-tph" /> : <ArtPlaceholder size={30} className="pa-tph" />}
+          <span className="pa-snacktx">{t.message}</span>
+          {t.failed ? <button type="button" onClick={() => { hideUndoBar(); t.failed!.retry(); }}>Try again</button> : null}
+          {!t.done && !t.failed && t.view ? <button type="button" onClick={() => { hideUndoBar(); t.view!(); }}>View</button> : null}
+          {!t.done && !t.failed && t.undo ? <button type="button" onClick={() => void doUndo()} data-qad-undo data-pa="snack-undo">Undo</button> : null}
+        </div>
+      </div>,
+      document.body,
+    );
+  }
   return createPortal(
     <div className={`qad-toast${paused ? " paused" : ""}${t.failed ? " failed" : ""}`} role="status" aria-live="polite" data-qad-toast={t.done ? "done" : t.failed ? "failed" : "on"}
       style={{ ["--qad-dur" as string]: `${dur}ms` }} key={t.id}

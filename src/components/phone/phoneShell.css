@@ -1,0 +1,213 @@
+/* ── PHONE APP v2 — THE SHELL (Part 1; ref design-refs/phone-app-v2/src/app.css). Below 768px only; at 768px and up
+   nothing here applies (the tab bar is `display: none` outside the media query). Every value is the ref's. ── */
+
+/* ── the tab bar (ref `.tabbar`, `.tb`, `.plus`, `.badge`) ── */
+.pa-tabbar { display: none; }
+@media (max-width: 767.98px) {
+  .pa-tabbar {
+    position: fixed; left: 14px; right: 14px; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); z-index: 40;
+    height: 66px; border-radius: 33px; box-sizing: border-box;
+    background: rgba(255, 255, 255, 0.92);
+    -webkit-backdrop-filter: blur(18px) saturate(1.4); backdrop-filter: blur(18px) saturate(1.4);
+    box-shadow: 0 10px 30px rgba(31, 38, 51, 0.16), inset 0 0 0 1px rgba(31, 38, 51, 0.05);
+    display: flex; align-items: center; justify-content: space-around; padding: 0 8px;
+    transition: transform 0.38s var(--pa-spring), opacity 0.25s;
+    font-family: var(--pa-sans);
+  }
+  .pa-tabbar.away { transform: translateY(130%); opacity: 0; pointer-events: none; }
+  /* while the + sheet is open the bar sits over its scrim, so the + is the close button (ref z-index 33 over 31) */
+  .pa-tabbar.plus-open { z-index: 1001; }
+  .pa-tb {
+    position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px; width: 58px;
+    padding: 0; border: 0; background: none; cursor: pointer;
+    font: 600 11px/1.2 var(--pa-sans) !important; color: var(--pa-muted);
+  }
+  .pa-tbi { width: 44px; height: 30px; border-radius: 15px; display: grid; place-items: center; transition: background 0.2s; }
+  .pa-tbi svg { width: 21px; height: 21px; }
+  .pa-tb[aria-current="page"] { color: var(--pa-navy); }
+  .pa-tb[aria-current="page"] .pa-tbi { background: var(--pa-navy); color: #fff; }
+  .pa-tbbadge {
+    position: absolute; top: -3px; right: 6px; min-width: 18px; height: 18px; border-radius: 9px; box-sizing: border-box;
+    background: var(--pa-blush); color: var(--pa-ink); font: 700 11px/18px var(--pa-sans) !important; text-align: center;
+    padding: 0 5px; box-shadow: 0 0 0 2px #fff;
+  }
+  .pa-plus {
+    width: 58px; height: 46px; border-radius: 23px; border: 0; padding: 0; cursor: pointer;
+    background: var(--pa-blush); color: var(--pa-ink); display: grid; place-items: center;
+    box-shadow: 0 4px 12px rgba(201, 120, 100, 0.32); transition: transform 0.2s var(--pa-spring);
+  }
+  .pa-plus svg { width: 24px; height: 24px; transition: transform 0.3s var(--pa-spring); }
+  .pa-plus[aria-expanded="true"] svg { transform: rotate(45deg); }
+  .pa-plus:active, .pa-tb:active .pa-tbi { transform: scale(0.96); }
+  @media (prefers-reduced-motion: reduce) {
+    .pa-tabbar, .pa-plus, .pa-plus svg, .pa-tbi { transition: none; }
+  }
+}
+
+/* ── the navy band (ref `.band` `.bandrow` `.bl` `.bt` `.ring` `.avring` `.bchip` `.pband`) ── */
+@media (max-width: 767.98px) {
+  .pa-band {
+    position: relative; flex: none; box-sizing: border-box;
+    background: var(--pa-navy); color: #fff; font-family: var(--pa-sans);
+    padding: calc(12px + env(safe-area-inset-top, 0px)) 16px 44px;
+  }
+  .pa-band--page { padding-bottom: 46px; }
+  /* the sheet's top: the page colour, rounded, laid over the band's foot (ref `.pband::after`) */
+  .pa-band::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 24px;
+    background: var(--pa-page); border-radius: 24px 24px 0 0;
+  }
+  .pa-bandrow { display: flex; align-items: center; gap: 6px; }
+  .pa-bl { flex: 1; min-width: 0; }
+  .pa-grow { flex: 1; }
+  /* ⚠️ TWO CLASSES AND !important: brand.tsx forces a family on every bare h1/h2/h3 at runtime, with !important */
+  .pa-band .pa-bt {
+    margin: 0; font-family: var(--pa-type) !important; font-weight: 400 !important; font-size: 25px; line-height: 1.1;
+    color: #fff; letter-spacing: 0; overflow-wrap: anywhere;
+  }
+  .pa-band .pa-bt--hello { font-size: 22px; }
+  .pa-band .pa-bt--page { margin-top: 14px; }
+  .pa-ring {
+    width: 40px; height: 40px; border-radius: 50%; flex: none; padding: 0; border: 0; cursor: pointer;
+    background: transparent; box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.28);
+    display: grid; place-items: center; color: #fff;
+  }
+  .pa-ring svg { width: 19px; height: 19px; }
+  .pa-avring {
+    width: 40px; height: 40px; border-radius: 50%; flex: none; padding: 0; border: 0; cursor: pointer;
+    background: #fff; color: var(--pa-navy); display: grid; place-items: center;
+    font: 700 14px/1 var(--pa-sans) !important;
+  }
+  .pa-bchipwrap { margin-top: 12px; }
+  .pa-bchip {
+    display: inline-flex; align-items: center; gap: 7px; height: 34px; max-width: 100%; box-sizing: border-box;
+    padding: 0 12px; border: 0; border-radius: 999px; cursor: pointer;
+    background: rgba(255, 255, 255, 0.12); color: #fff; font: 600 14px/1.2 var(--pa-sans) !important;
+  }
+  .pa-bchip svg { width: 15px; height: 15px; flex: none; }
+  .pa-mt { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pa-bandslot { margin-top: 16px; }
+}
+
+/* ── sheets (ref `.scrim` `.sheet` `.grab` `.sheet .body` `.sheet .foot` `.sheet .sh-t`) ── */
+@media (max-width: 767.98px) {
+  .pa-sheet-layer { position: fixed; inset: 0; z-index: 1000; font-family: var(--pa-sans); color: var(--pa-ink); }
+  .pa-scrim { position: absolute; inset: 0; background: rgba(21, 24, 30, 0.38); animation: paFade 0.25s ease; }
+  .pa-sheet {
+    position: absolute; left: 0; right: 0; bottom: 0; box-sizing: border-box; max-height: calc(100% - 40px);
+    background: var(--pa-page); border-radius: var(--pa-r-sheet) var(--pa-r-sheet) 0 0; box-shadow: var(--pa-sh-up);
+    display: flex; flex-direction: column; overflow: hidden;
+    transition: height 0.42s var(--pa-spring); animation: paRise 0.42s var(--pa-spring);
+  }
+  .pa-sheet.white { background: #fff; }
+  .pa-sheet.drag { transition: none; }
+  .pa-grab { flex: none; height: 22px; display: grid; place-items: center; cursor: grab; touch-action: none; }
+  .pa-grab::before { content: ""; width: 38px; height: 5px; border-radius: 3px; background: rgba(31, 38, 51, 0.18); }
+  .pa-grab.on-navy::before { background: rgba(255, 255, 255, 0.4); }
+  .pa-sheet-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0 16px 24px; scrollbar-width: none; }
+  .pa-sheet-body::-webkit-scrollbar { display: none; }
+  .pa-sheet-foot { flex: none; padding: 12px 16px calc(30px + env(safe-area-inset-bottom, 0px)); background: inherit; }
+  .pa-sheet .pa-sht {
+    margin: 4px 0 14px; font-family: var(--pa-type) !important; font-weight: 400 !important; font-size: 21px; line-height: 1.2; color: var(--pa-ink);
+  }
+  @keyframes paRise { from { transform: translateY(100%); } }
+  @keyframes paFade { from { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .pa-sheet, .pa-scrim { animation: none; transition: none; } }
+
+  /* grouped white lists (ref `.group` `.li` `.gl`) */
+  .pa-group { background: #fff; border-radius: var(--pa-r); box-shadow: var(--pa-sh); overflow: hidden; }
+  .pa-li {
+    position: relative; display: flex; align-items: center; gap: 12px; width: 100%; min-height: 54px; box-sizing: border-box;
+    padding: 0 14px; border: 0; background: none; text-align: left; cursor: pointer; color: var(--pa-ink);
+    font: 400 15.5px/1.3 var(--pa-sans) !important;
+  }
+  .pa-li + .pa-li::before { content: ""; position: absolute; left: 52px; right: 0; top: 0; height: 1px; background: var(--pa-rule); }
+  .pa-li .pa-ico { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; flex: none; color: var(--pa-ink-2); }
+  .pa-li .pa-ico svg { width: 20px; height: 20px; }
+  .pa-li .pa-lt { flex: 1; min-width: 0; }
+  .pa-li .pa-lsub { display: block; font-size: 13px; color: var(--pa-muted); }
+  .pa-li .pa-rt { color: var(--pa-muted); font-size: 14px; display: flex; align-items: center; gap: 4px; }
+  .pa-li .pa-rt > svg { width: 20px; height: 20px; flex: none; }
+  .pa-chev { width: 16px; height: 16px; color: var(--pa-faint); flex: none; display: inline-grid; }
+  .pa-chev svg { width: 16px; height: 16px; }
+  .pa-gl { font: 600 13px/1.3 var(--pa-sans) !important; color: var(--pa-muted); margin: 22px 4px 8px; }
+  .pa-lock {
+    display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 9px; border-radius: 999px;
+    background: var(--pa-blush-wash); color: var(--pa-ink-2); font: 600 12.5px/1 var(--pa-sans) !important;
+  }
+  .pa-sub { font-size: 13px; color: var(--pa-muted); }
+
+  /* the + sheet (ref ACT C: `.actrow`, `.chip`) */
+  .pa-actrows { display: flex; flex-direction: column; gap: 10px; }
+  .pa-actrow {
+    display: flex; align-items: center; gap: 14px; width: 100%; box-sizing: border-box; padding: 14px 16px; border: 0;
+    text-align: left; cursor: pointer; background: #fff; border-radius: var(--pa-r-lg); box-shadow: var(--pa-sh); color: var(--pa-ink);
+    font-family: var(--pa-sans);
+  }
+  .pa-actrow .pa-lt { flex: 1; min-width: 0; }
+  .pa-actrow b { display: block; font: 600 16.5px/1.25 var(--pa-sans) !important; }
+  .pa-actrow small { display: block; margin-top: 2px; font: 400 13.5px/1.3 var(--pa-sans) !important; color: var(--pa-muted); }
+  .pa-actrow .pa-chev, .pa-actrow .pa-chev svg { width: 18px; height: 18px; }
+  .pa-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .pa-chip {
+    flex: none; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px; border: 0; cursor: pointer;
+    border-radius: 999px; background: #fff; box-shadow: inset 0 0 0 1px var(--pa-rule); color: var(--pa-ink); white-space: nowrap;
+    font: 500 14px/1 var(--pa-sans) !important;
+  }
+  .pa-chip svg { width: 17px; height: 17px; }
+  .pa-pills .pa-chip { height: 42px; padding: 0 16px; }
+
+  /* the menu (ref MV B: `.mband` `.mtiles` `.mtile` `.msign`) */
+  .pa-menu .pa-sheet-head { background: var(--pa-navy); color: #fff; padding: 0 18px 36px; flex: none; }
+  .pa-menu .pa-sheet-body { margin-top: -20px; padding-top: 16px; background: var(--pa-page); border-radius: 22px 22px 0 0; position: relative; }
+  .pa-me { display: flex; align-items: center; gap: 14px; }
+  .pa-me .pa-avring { width: 52px; height: 52px; font-size: 17px !important; }
+  .pa-me-tx { flex: 1; min-width: 0; }
+  .pa-me-nm { font-family: var(--pa-type) !important; font-size: 22px; line-height: 1.15; color: #fff; overflow-wrap: anywhere; }
+  .pa-me-pl { margin-top: 2px; font: 400 13.5px/1.3 var(--pa-sans) !important; color: rgba(255, 255, 255, 0.75); }
+  .pa-menu .pa-bchip { margin-top: 14px; }
+  .pa-mtiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .pa-mtile {
+    display: flex; flex-direction: column; gap: 3px; min-height: 104px; box-sizing: border-box; padding: 14px; border: 0;
+    text-align: left; cursor: pointer; background: #fff; border-radius: var(--pa-r); box-shadow: var(--pa-sh); color: var(--pa-ink);
+  }
+  .pa-mtile[disabled] { cursor: default; opacity: 0.55; }
+  .pa-mtile .pa-mi { width: 34px; height: 34px; border-radius: 50%; background: var(--pa-page); display: grid; place-items: center; margin-bottom: 8px; color: var(--pa-ink-2); }
+  .pa-mtile .pa-mi svg { width: 18px; height: 18px; }
+  .pa-mtile b { font: 600 15px/1.2 var(--pa-sans) !important; }
+  .pa-mtile .pa-sub { font-family: var(--pa-sans) !important; }
+  .pa-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 48px; padding: 0 22px; border: 0;
+    border-radius: 999px; cursor: pointer; white-space: nowrap; font: 600 15.5px/1 var(--pa-sans) !important;
+  }
+  .pa-btn svg { width: 17px; height: 17px; }
+  .pa-btn.sec { background: #fff; color: var(--pa-ink); box-shadow: inset 0 0 0 1.5px var(--pa-rule); }
+  .pa-btn.pri { background: var(--pa-navy); color: #fff; }
+  .pa-btn.blk { display: flex; width: 100%; }
+  .pa-msign { display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 26px 0 10px; }
+  .pa-msign img { width: 44px; height: 44px; border-radius: 50%; background: #f4f0e9; }
+  .pa-msign img.wm { width: 120px; height: auto; border-radius: 0; background: none; }
+  .pa-msign span { font: 400 12.5px/1.3 var(--pa-sans) !important; color: var(--pa-muted); }
+}
+
+/* ── the snackbar (ref toastv.js TSV C; app.css `.snack`) — the phone's drawing of UndoBar and ToastProvider ── */
+.pa-snackhost { display: none; }
+@media (max-width: 767.98px) {
+  /* above every sheet and journey (the hub toast's stratum), so Undo is always on top and reachable */
+  .pa-snackhost { display: block; position: fixed; left: 0; right: 0; bottom: 0; z-index: 1100; pointer-events: none; }
+  .pa-snack {
+    position: absolute; left: 50%; bottom: calc(98px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
+    pointer-events: auto; box-sizing: border-box; max-width: calc(100vw - 28px);
+    display: flex; align-items: center; gap: 10px; padding: 6px 6px 6px 8px; border-radius: 999px; white-space: nowrap;
+    background: var(--pa-navy); color: #fff; box-shadow: 0 10px 24px rgba(31, 38, 51, 0.28);
+    font: 500 14.5px/1.2 var(--pa-sans) !important; animation: paSnackIn 0.45s var(--pa-spring);
+  }
+  .pa-snack .pa-snacktx { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: #fff; }
+  .pa-snack .pa-tph { width: 30px; height: 30px; flex: none; border-radius: 50%; }
+  .pa-snack button {
+    flex: none; height: 32px; padding: 0 14px; border: 0; border-radius: 999px; cursor: pointer;
+    background: var(--pa-blush); color: var(--pa-ink); font: 600 14px/1 var(--pa-sans) !important; text-transform: none; letter-spacing: 0;
+  }
+  @keyframes paSnackIn { from { transform: translate(-50%, 24px); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .pa-snack { animation: none; } }
+}

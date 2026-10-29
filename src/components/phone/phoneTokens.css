@@ -1,0 +1,50 @@
+/* ── PHONE APP v2 — THE ONE PHONE TOKEN SHEET (Part 1A; ref design-refs/phone-app-v2/src/app.css `:root`) ──────────
+   Below 768px only, on the shell root and on every portalled phone layer (`.pa-layer`), so a sheet under <body> reads
+   the same values as the page. Every value is the ref's own; nothing here is re-derived.
+
+   ⚠️ NEW TOKENS ONLY (`--pa-*`). No token a page already reads is re-valued, so the desktop and every phone page that
+      has not been rebuilt yet are unchanged by this file. The ink navy is the app's own `--sp-anthracite` (#2a3a52),
+      aliased rather than restated where it is defined.
+   ⚠️ LIGHT ONLY. No dark-mode rules on the phone (the ref sets `color-scheme: light`). */
+@media (max-width: 767.98px) {
+  .sa-shellframe,
+  .pa-layer {
+    --pa-page: #f8f6f2;
+    --pa-card: #ffffff;
+    --pa-navy: var(--sp-anthracite, #2a3a52);
+    --pa-navy-2: #364a66;
+    --pa-navy-deep: #1f2c40;
+    --pa-blush: #e8c8bc;
+    --pa-blush-wash: #f5e6df;
+    --pa-ink: #1f2633;
+    --pa-ink-2: #3a3f4a;
+    --pa-muted: #6b6f78;
+    --pa-faint: #9a9ca3;
+    --pa-rule: #e8e2d8;
+    --pa-fill: #ece7de;
+    /* the five status fills (ref `--st-*`) */
+    --pa-st-sand: #f7efe3;
+    --pa-st-sage: #e0e5dd;
+    --pa-st-pink: #f5e6df;
+    --pa-st-slate: #d7e0e8;
+    --pa-st-grey: #e4e1db;
+    /* type: Special Elite (the app's own face) for titles and numbers; the system stack for everything read or tapped */
+    /* ⚠️ THE FACE IS READ FROM `--sp-type`, NEVER NAMED HERE — a stylesheet naming the family is a new owner, which
+       marketingTokens.test refuses; `--sp-type` is declared at :root (primitives.css), so it resolves on a portal too */
+    --pa-type: var(--sp-type);
+    --pa-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    /* the ref's Newsreader is not loaded by the app; its fallback is what renders there too */
+    --pa-serif: Georgia, serif;
+    /* radii, shadow, the one spring */
+    --pa-r: 14px;
+    --pa-r-lg: 20px;
+    --pa-r-sheet: 24px;
+    --pa-sh: 0 1px 2px rgba(31, 38, 51, 0.05), 0 6px 18px rgba(31, 38, 51, 0.07);
+    --pa-sh-up: 0 -10px 30px rgba(31, 38, 51, 0.16);
+    --pa-spring: cubic-bezier(0.22, 1, 0.36, 1);
+    color-scheme: light;
+  }
+  /* ⚠️ SPECIAL ELITE HAS ONE WEIGHT, so it is never fake-bolded anywhere on the phone (ref `body{font-synthesis:none}`) */
+  .sa-shellframe,
+  .pa-layer { font-synthesis: none; }
+}
