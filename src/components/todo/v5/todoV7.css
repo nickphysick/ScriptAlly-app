@@ -52,8 +52,6 @@
   .td5-root .td7-sub { font: italic 400 17px/1.3 var(--sp-serif); color: rgba(28, 19, 15, 0.72); }
   .td5-root .td7-sub .td7-od { color: #a2452a; font-style: normal; font-weight: 600; }
   .td5-group > .td7-traysec + .td5-sheet { margin-top: 0; }
-  /* until S2 moves it into the navy row, the find and filter row sits under the heading (the old header's rule) */
-  .td7-traysec .td5-fr { display: flex; align-items: center; gap: 8px; min-width: 0; margin: 0 0 20px; }
 
   /* ═════ §2 · Today: one white card — the date, the three counts, the calendar button ═════ */
   .td7-tcard {
@@ -85,6 +83,35 @@
   .td5-root .td7-calbtn:hover { box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.45); }
   .td5-root .td7-calbtn svg { width: 16px; height: 16px; }
   .td5-root .td7-calbtn:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+
+  /* ═════ S2 · one navy bar: Find (translucent on the navy), a white "Filters" button, then the pin ═════ */
+  .td5-root .td5-nav .td7-find { display: flex; align-items: center; gap: 8px; flex: none; min-width: 0; }
+  .td5-root .td5-nav .td7-find .td5-find:not(.td52-pfind) {
+    display: flex; align-items: center; gap: 10px; box-sizing: border-box; flex: 0 0 280px; width: 280px; height: 42px; padding: 0 12px 0 14px; border-radius: 21px;
+    background: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.6); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  }
+  .td5-root .td5-nav .td7-find .td5-find:not(.td52-pfind):focus-within { box-shadow: inset 0 0 0 1.5px #e7a184; }
+  .td5-root .td5-nav .td7-find .td5-find:not(.td52-pfind) input { flex: 1 1 0; min-width: 0; border: 0; outline: 0; background: none; color: #fff; font: 400 15px/1.2 var(--sp-serif) !important; }
+  .td5-root .td5-nav .td7-find .td5-find:not(.td52-pfind) input::placeholder { color: rgba(255, 255, 255, 0.6); }
+  .td5-root .td5-nav .td7-find .td5-find:not(.td52-pfind) kbd {
+    flex: none; display: inline-grid; place-items: center; min-width: 18px; height: 18px; border-radius: 4px; color: rgba(255, 255, 255, 0.6);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25); font: 400 11px/1 var(--font-mono) !important;
+  }
+  .td5-root .td5-nav .td7-fbtn {
+    display: inline-flex; align-items: center; gap: 8px; flex: none; height: 42px; margin-right: 10px; padding: 0 16px; border: 0; border-radius: 21px;
+    background: #fff; color: #1c130f; font: 400 15px/1 var(--sp-serif) !important; white-space: nowrap; cursor: pointer;
+  }
+  .td5-root .td5-nav .td7-fbtn[aria-expanded="true"] { background: #f5e2da; }
+  .td5-root .td5-nav .td7-fbtn:disabled { opacity: 0.6; cursor: default; }
+  /* pinned: Filters shrinks to its icon (its accessible name stays "Filters") */
+  .td5-root[data-pinned] .td5-nav .td7-fbtn { gap: 0; padding: 0 12px; margin-right: 6px; }
+  .td5-root[data-pinned] .td5-nav .td7-fbtn .td7-fbl { display: none; }
+  /* the filter strip: under the navy row, on paper white, the pills at the strip's size */
+  .td7-strip { display: flex; align-items: center; gap: 8px; flex: none; padding: 12px 22px; background: #fbf9f5; border-bottom: 1px solid rgba(28, 19, 15, 0.08); }
+  .td7-strip .td5-fr { display: flex; align-items: center; gap: 8px; min-width: 0; margin: 0; padding: 0; border: 0; }
+  .td5-root .td7-strip .td5-fp { height: 38px; border-radius: 19px; padding: 0 14px; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16); }
+  .td5-root .td7-strip .td5-fpw.on .td5-fp { background: #2d3a50; color: #f4eee5; box-shadow: none; padding-right: 40px; }
+  .td5-root .td7-strip .td5-fpx { top: 7px; }
 
   /* pinned: the header card, Today and the "Your tray" heading leave with the old header (the ref's `.v6-pinhide`) */
   .td5-root[data-pinned] .td7-hd, .td5-root[data-pinned] .td7-sec { display: none; }

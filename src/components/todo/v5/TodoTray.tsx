@@ -1120,13 +1120,16 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
   ) : null;
   const trayHeading = (
     <TraySection title="Your tray" id="td7-tray-h" className="td7-traysec" data={{ "data-td7": "tray-head" }}
-      sub={<TrayHeadline urgent={state === "list" ? { overdue: calBuckets.overdue, today: calBuckets.today } : null} caught={state === "caught"} loading={loading} />}>
-      {state === "list" || state === "loading" ? (
-        <TrayFilterRow filters={filters} setFilters={setFilters} all={items} countFor={countFor} hasPin={hasPin} findRef={findRef} disabled={loading} findHere={!pinned}
-          calChip={calFilter ? { label: calFilterLabel(calFilter, shortDay), onClear: () => setCalFilter(null) } : null} />
-      ) : null}
-    </TraySection>
+      sub={<TrayHeadline urgent={state === "list" ? { overdue: calBuckets.overdue, today: calBuckets.today } : null} caught={state === "caught"} loading={loading} />} />
   );
+  /* ── v7 S2 · one navy bar: Find and a "Filters" button in the row; the pills open as a strip under it ── */
+  const [stripOpen, setStripOpen] = useState(false);
+  const filterStrip = (state === "list" || state === "loading") && stripOpen ? (
+    <div className="td7-strip" id="td7-strip" data-td7="strip">
+      <TrayFilterRow filters={filters} setFilters={setFilters} all={items} countFor={countFor} hasPin={hasPin} findRef={findRef} disabled={loading} findHere={false}
+        calChip={calFilter ? { label: calFilterLabel(calFilter, shortDay), onClear: () => setCalFilter(null) } : null} />
+    </div>
+  ) : null;
 
   /* the tray's rows, with the ghost held in place while it leaves */
   const renderRows = (g: { group: (typeof TRAY_GROUPS)[number]; items: TrayItem[] }) => {
@@ -1233,14 +1236,24 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
                   <span className="td5-sp" />
                   {state === "list" ? (
                     <>
-                      {working ? null : pinned ? null : <span className="td5-keys" aria-hidden="true"><kbd>J</kbd><kbd>K</kbd> move<span className="td5-gap" /><kbd>E</kbd> act</span>}
-                      {pinned ? <TrayFind filters={filters} setFilters={setFilters} findRef={findRef} placeholder="Find a task" pinned /> : null}
+                      {/* v7 S2 — the J / K / E hints leave the row (the keys still work, and the shortcuts sheet lists them) */}
+                      {working ? null : (
+                        <span className="td7-find" data-td7="nav-find">
+                          <TrayFind filters={filters} setFilters={setFilters} findRef={findRef} placeholder={pinned ? "Find a task" : "Find a task, agent or agency"} pinned={pinned} disabled={loading} />
+                          <button type="button" className="td7-fbtn" data-td7="filters" aria-label="Filters" aria-expanded={stripOpen} aria-controls="td7-strip"
+                            disabled={loading} onClick={() => setStripOpen((o) => !o)}>
+                            <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M2 4h12M4.5 8h7M7 12h2" /></svg>
+                            <span className="td7-fbl">Filters</span>
+                          </button>
+                        </span>
+                      )}
                       {pinned ? <span className="td52-pinned" data-td52="pinned-label">PINNED</span> : null}
                       {working ? <span className="td52-wesc" data-td52="esc-back" aria-hidden="true"><kbd>Esc</kbd> STEP BACK</span> : null}
                       <PinListButton pinned={pin.full} onToggle={pin.toggle} attrs={{ "data-td52": "pin" }} />
                     </>
                   ) : null}
                 </div>
+                {filterStrip}
                 {state === "caught" ? (
                   <TrayCaughtUp holding={holding} pastReply={pastReply} upcoming={nextLand} now={now} done={today} undoFor={undoFor} onQuery={() => navigate("/agents")} />
                 ) : (
@@ -1314,7 +1327,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
                             onClick={() => (filters.find.trim() ? setFilters((f) => ({ ...f, find: "" })) : clearAll())}>{filters.find.trim() ? "Clear the search" : "Clear the filter"}</button>
                         </div>
                       ) : <div className="td5-none">Nothing in your tray yet.</div>}
-                      {loading ? null : <button type="button" className="td5-addrow" data-td5="add-row" onClick={() => openCompose()}>+ Add a task<kbd>N</kbd></button>}
+                      {loading ? null : <button type="button" className="td5-addrow" data-td5="add-row" onClick={() => openCompose()}>+ Add a task</button>}
                       {bulk.size ? (
                         <div className="td52-bulk" data-td52="bulk" role="region" aria-label="Close several queries">
                           <span><b>{bulk.size}</b> selected</span><span className="td52-bsp" />
