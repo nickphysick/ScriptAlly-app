@@ -112,4 +112,11 @@ has four live packages, so at 1280 "+ New package" wraps (v39.1's premise 7), an
 
 ## 7 · Deploy
 
-(Filled in after the deploy.)
+- **Dev had moved again.** It served `index-BM6PjqtJ.js`: the "retire calendar" session had merged its work onto the
+  first v39.2's dev branch as `dev/pk391-qm1-pk392-calx` (d6726195). Confirmed by building d6726195 — an exact match.
+- This pack merged onto it as **`dev/pk391-qm1-pk392-calx-pk392b` (a9ed5341)**, pushed. The one conflict was
+  `design-refs/.refhashes.json`: both sides' entries kept, this branch's new hash for the v39.2 ref winning. Gates on the
+  merged tree: tsc 0, Vitest 685 files / 10,687 passed (3 skipped), build clean.
+- Hosting only, `--config firebase.dev.json --project scriptally-dev`, from that clean worktree. **Dev now serves
+  `index-hDdKXFfG.js`.** `pk392.measure.ts` (L1, L2, L7, L8, L9) passes against the live site. No rules or functions
+  changed. Prod is untouched.
