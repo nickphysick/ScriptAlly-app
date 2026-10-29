@@ -277,7 +277,6 @@
   position: sticky; top: var(--td5-striph); z-index: 10; display: flex; align-items: center; gap: 11px; box-sizing: border-box;
   width: 100%; height: var(--td5-bandh); margin: 0; padding: 0 14px 0 64px; border: 0; border-radius: 12px; cursor: pointer; user-select: none; text-align: left;
 }
-.td5-band img { position: absolute; pointer-events: none; height: auto; max-width: none; filter: drop-shadow(0 2px 1px rgba(28, 19, 15, 0.12)); }
 .td5-band .td5-bn { font: 400 17px/1 var(--sp-type) !important; color: var(--td5-ink); white-space: nowrap; }
 .ws-app.sheet-wide .td5-band .td5-bn { font-size: 19px !important; }
 .td5-band .td5-bc { font: 600 10px/1 var(--font-mono) !important; letter-spacing: 0.13em; padding: 4px 9px; border-radius: 10px; background: rgba(255, 255, 255, 0.75); }

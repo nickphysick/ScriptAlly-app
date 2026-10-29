@@ -122,6 +122,26 @@
   }
   .td5-root .td5-nav .td7-back:focus-visible { outline: 2px solid #e7a184; outline-offset: 3px; }
 
+  /* ═════ S4 · plain group headings: a paper band with hairlines above and below, the typewriter name at 19px, an
+     italic count, the chevron kept; Your move alone carries the rust "!" disc. No drawings, no colour fills. ═════ */
+  .td5-root .td5-band.td7-band {
+    box-sizing: border-box; width: calc(100% + 20px); height: auto; min-height: 0; margin: 6px -10px 0; padding: 12px 18px 10px;
+    border: 0; border-top: 1px solid rgba(28, 19, 15, 0.08); border-bottom: 1px solid rgba(28, 19, 15, 0.08); border-radius: 0;
+    background: #f6f2ec; color: #1c130f; box-shadow: none; gap: 10px;
+  }
+  .td5-root .td5-band.td7-band .td5-bn, .ws-app.sheet-wide .td5-root .td5-band.td7-band .td5-bn { font: 400 19px/1.2 var(--sp-type) !important; color: #1c130f; }
+  .td5-root .td5-band.td7-band .td5-bc { padding: 0; border-radius: 0; background: none; font: italic 400 15px/1.2 var(--sp-serif) !important; letter-spacing: 0; color: rgba(28, 19, 15, 0.55); }
+  .td5-root .td5-band.td7-band .td5-chv { color: #a2452a; }
+  .td5-root .td7-bang {
+    display: inline-grid; place-items: center; flex: none; width: 20px; height: 20px; border-radius: 50%; background: #a2452a; color: #fff;
+    font: 700 12px/1 var(--font-mono) !important;
+  }
+  .td5-root .td5-band--plain.td7-band .td5-bnote { font: italic 400 14px/1.2 var(--sp-serif) !important; letter-spacing: 0; text-transform: none; opacity: 1; color: rgba(28, 19, 15, 0.55); }
+  .td5-root .td5-band.td7-band .td52-selall {
+    margin-left: 10px; padding: 0; border-radius: 0; background: none; box-shadow: none; color: rgba(28, 19, 15, 0.7);
+    font: italic 400 14px/1.2 var(--sp-serif) !important; letter-spacing: 0; text-transform: none; text-decoration: underline; text-underline-offset: 2px;
+  }
+
   /* pinned: the header card, Today and the "Your tray" heading leave with the old header (the ref's `.v6-pinhide`) */
   .td5-root[data-pinned] .td7-hd, .td5-root[data-pinned] .td7-sec { display: none; }
 }

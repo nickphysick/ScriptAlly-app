@@ -1272,15 +1272,15 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
                         <div className="td5-aside" data-td5="aside-list">
                           <p className="td5-asidenote">Nothing here is lost. Snoozed tasks come back on their day. Dismissed ones come back if anything changes.</p>
                           {asideList.length ? ([
-                            { k: "snooze" as const, name: "Coming back", note: "By date", tint: "#e2e7ef", ink: "#2a3a52" },
-                            { k: "dismiss" as const, name: "Dismissed", note: "Back if anything changes", tint: "#ece8e3", ink: "rgba(28,19,15,.6)" },
-                            { k: "rule" as const, name: "Switched off", note: "Never raised", tint: "#f1efea", ink: "rgba(28,19,15,.6)" },
+                            { k: "snooze" as const, name: "Coming back", note: "By date" },
+                            { k: "dismiss" as const, name: "Dismissed", note: "Back if anything changes" },
+                            { k: "rule" as const, name: "Switched off", note: "Never raised" },
                           ].map((sec) => {
                             const rows = asideList.filter((a) => a.kind === sec.k);
                             if (!rows.length) return null;
                             return (
                               <div key={sec.k} className="td5-grp" data-td5="aside-group" data-g={sec.k}>
-                                <div className="td5-band td5-band--plain" style={{ background: sec.tint, color: sec.ink }}><span className="td5-bn">{sec.name}</span><span className="td5-bc">{rows.length}</span><span className="td5-bnote">{sec.note}</span></div>
+                                <div className="td5-band td5-band--plain td7-band"><span className="td5-bn">{sec.name}</span><span className="td5-bc">{rows.length}</span><span className="td5-bnote">{sec.note}</span></div>
                                 <div className="td5-rows">{rows.map((a) => {
                                   const c = asideCard(a);
                                   const on = asideDesk?.id === a.id;
@@ -1310,12 +1310,15 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
                         if (!g) return null;
                         return (
                           <div key={gd.id} className="td5-grp" data-td5="group-block" data-g={gd.id} data-shut={shut[gd.id] ? "" : undefined}>
-                            <button type="button" className="td5-band" data-td5="band" style={{ background: gd.tint, color: gd.ink }} aria-expanded={!shut[gd.id]} onClick={() => toggleShut(gd.id)}>
-                              <img src={gd.art.src} alt="" aria-hidden="true" data-td5="band-art" style={{ "--aw": `${gd.art.w}px` } as React.CSSProperties} />
+                            {/* v7 S4 — a plain heading: paper band, typewriter name, italic count; no drawing, no colour fill.
+                                Your move alone carries the rust "!" disc (the Contact list's Your move mark). Supersedes the 17 Oct
+                                "one drawing per tray group" ruling. */}
+                            <button type="button" className="td5-band td7-band" data-td5="band" aria-expanded={!shut[gd.id]} onClick={() => toggleShut(gd.id)}>
+                              {gd.id === "you" ? <span className="td7-bang" data-td7="your-move-mark" aria-hidden="true">!</span> : null}
                               <span className="td5-bn">{gd.name}</span><span className="td5-bc">{g.items.length}</span>
                               {gd.id === "quiet" && g.items.some(bulkable) ? (
                                 <span className="td52-selall" role="button" tabIndex={-1} data-td52="select-all"
-                                  onClick={(e) => { e.stopPropagation(); setBulk(new Set(g.items.filter(bulkable).map((x) => x.key))); }}>SELECT ALL</span>
+                                  onClick={(e) => { e.stopPropagation(); setBulk(new Set(g.items.filter(bulkable).map((x) => x.key))); }}>Select all</span>
                               ) : null}
                               <span className="td5-chv" aria-hidden="true">▾</span>
                             </button>

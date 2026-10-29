@@ -16,14 +16,9 @@
 /* ═════════ §A · THE CALENDAR CARD — RETIRED BY To-do list v7 S1 (29 Oct): the page's Today card (todoV7.css) took its
    place, and the month lives only in the slide-out calendar (§C). Its rules and its hover peek are deleted. ═════════ */
 
-/* ═════════ §D · ONE DRAWING PER GROUP ═════════
-   The tray's band carries the group's drawing; the desk card's head band does not repeat it. Each drawing stands 3px
-   above its band's floor, centred at x 31, at the width the group's table gives for a 56px band; a 44px band scales it
-   by 44/50 (the reference's bands are 50 tall: its tops put every drawing's foot 3px above a 50px floor). */
-.td5-root { --td5-artk: 0.88; }
-.ws-app.sheet-wide .td5-root { --td5-artk: 1; }
+/* ═════════ §D · ONE DRAWING PER GROUP — RETIRED by To-do list v7 S4: the tray's bands are plain headings (todoV7.css)
+   and carry no drawing. What is left here is the band's stacking and the desk head's inset. ═════════ */
 .td5-root .td5-band { z-index: 13; }
-.td5-root .td5-band img { top: auto; bottom: 3px; width: calc(var(--aw) * var(--td5-artk)); left: calc(31px - var(--aw) * var(--td5-artk) / 2); filter: drop-shadow(0 1.5px 1px rgba(28, 19, 15, 0.14)); }
 .td5-root .td5-chead { padding-left: 24px; }
 
 /* ═════════ §E · THE PIN (replaces "Just the desk") ═════════
