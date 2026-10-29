@@ -26,6 +26,11 @@ const MUTATE = process.env.PP1_MUTATE ?? "";
 const BEFORE = process.env.PP1_BASE_URL ?? "";
 const READINGS = process.env.PP1_READINGS ?? "";
 
+/* ⚠️ THE CONFIG'S RESOLVED `baseURL`, NEVER THE RAW ENV. `SA_E2E_BASE_URL=dev` is a keyword the config
+   expands; read raw it made "dev/contact", which the deployed site served as the sign-up screen, and
+   six locks read that screen as the page. */
+const origin = () => (test.info().project.use.baseURL as string).replace(/\/$/, "");
+
 const PAGES = ["/", "/pricing", "/about", "/contact", "/founders", "/terms", "/privacy", "/#/signup", "/#/login"];
 const EXEMPT = ".mk-hc-pile, .mk-hp-fly, .mk-aplatetag";
 
@@ -56,6 +61,10 @@ async function open(page: Page, url: string, w: number, h: number, breakIt = tru
     await page.addInitScript(() => window.addEventListener("hashchange", (e) => e.stopImmediatePropagation(), true));
   }
   await page.goto(url, { waitUntil: "load" });
+  /* ⚠️ WAIT FOR THE PAGE ITSELF, NOT A FIXED TIME. Against a local preview the route renders well inside
+     the settle below; against the deployed dev site it did not, and P4 read a null element while P7
+     clicked a menu that was not live yet and waited out the whole test timeout. */
+  await page.waitForSelector("#mk-main > *, .sf--account .sf-card", { timeout: 30_000 });
   await page.evaluate(() => document.fonts.ready);
   await page.addStyleTag({ content: "*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important;caret-color:transparent!important}" });
   if (BREAK[M]) await page.addStyleTag({ content: BREAK[M] });
@@ -98,7 +107,7 @@ async function walk(page: Page) {
 test.describe("PP1 public pages on phones", () => {
   test("P1 desktop unchanged at 1440 × 900 and 1280 × 800 on all nine pages", async ({ browser, page }) => {
     test.skip(!BEFORE, "PP1_BASE_URL (the build before this pack) is required for P1");
-    const base = process.env.SA_E2E_BASE_URL!;
+    const base = origin();
     const rows: { vp: string; path: string; dom: boolean; px: boolean; diff: unknown }[] = [];
     for (const [w, h] of [[1440, 900], [1280, 800]]) {
       for (const path of PAGES) {
@@ -145,7 +154,7 @@ test.describe("PP1 public pages on phones", () => {
     test(`${lock} ${lock === "P2" ? "no text under 12px" : "no small capitals under 14px"} at 360 and 390`, async ({ page }) => {
       const bad: string[] = []; let measured = 0;
       for (const w of [360, 390]) for (const path of PAGES) {
-        await open(page, process.env.SA_E2E_BASE_URL + path, w, 800);
+        await open(page, origin() + path, w, 800);
         await walk(page);
         const r = await page.evaluate(([ex, which]) => {
           const out: string[] = []; let n = 0;
@@ -174,7 +183,7 @@ test.describe("PP1 public pages on phones", () => {
   }
 
   test("P4 Contact and About match the after state", async ({ page }) => {
-    const base = process.env.SA_E2E_BASE_URL!;
+    const base = origin();
     await open(page, base + "/contact", 390, 844);
     if (MUTATE === "P4") {
       await page.evaluate(() => { const w = document.querySelector(".mk-pvm--contact"); if (w) w.replaceWith(...w.childNodes); });
@@ -234,7 +243,7 @@ test.describe("PP1 public pages on phones", () => {
   });
 
   test("P5 footer, menu and account frame: every hit box at least 44 × 44, none overlapping", async ({ page }) => {
-    const base = process.env.SA_E2E_BASE_URL!;
+    const base = origin();
     const groups: Record<string, { n: number; small: string[]; over: string[] }> = {};
     const check = (name: string, boxes: Awaited<ReturnType<typeof sampleHitBoxes>>) => {
       groups[name] = {
@@ -280,7 +289,7 @@ test.describe("PP1 public pages on phones", () => {
   test("P6 the account tab's name is whole at 320 and 360", async ({ page }) => {
     const rows: Record<string, unknown>[] = [];
     for (const w of [320, 360]) for (const h of ["/#/signup", "/#/login"]) {
-      await open(page, process.env.SA_E2E_BASE_URL + h, w, 760);
+      await open(page, origin() + h, w, 760);
       const r = await page.evaluate(() => {
         const nm = document.querySelector<HTMLElement>(".sf--account .ws-ftab .ws-ftnm")!;
         const tab = document.querySelector<HTMLElement>(".sf--account .ws-ftab")!.getBoundingClientRect();
@@ -307,14 +316,14 @@ test.describe("PP1 public pages on phones", () => {
   });
 
   test("P7 the phone menu: six items in order, then the founding button to the founders flow", async ({ page }) => {
-    await open(page, process.env.SA_E2E_BASE_URL + "/", 390, 844);
+    await open(page, origin() + "/", 390, 844);
     await page.click(".mk-burger");
     await page.waitForSelector(".mk-navpanel");
     if (MUTATE === "P7") await page.evaluate(() => [...document.querySelectorAll(".mk-navpanel > button")].find((b) => b.textContent === "Founding writers")?.remove());
     const items = await page.$$eval(".mk-navpanel > button", (bs) => bs.map((b) => b.textContent?.trim()));
     const join = await page.$eval(".mk-navpanel .mk-navjoin", (b) => ({ t: b.textContent?.trim(), w: b.getBoundingClientRect().width, pw: (b.closest(".mk-navpanel") as HTMLElement).clientWidth }));
     await page.click(".mk-navpanel .mk-navjoin");
-    await page.waitForURL(/\/founders$/);
+    await page.waitForURL(/\/founders$/, { timeout: 20_000 });
     const landed = await page.evaluate(() => ({ path: location.pathname, hasForm: !!document.querySelector(".mk-fw input[type=email], .mk-fw form") }));
     record("P7", { items, join, landed });
     expect(items).toEqual(["Features", "About", "Pricing", "Founding writers", "Contact", "Log in"]);
@@ -324,7 +333,7 @@ test.describe("PP1 public pages on phones", () => {
   });
 
   test("P8 sign in and sign up follow the address with no reload", async ({ page }) => {
-    await open(page, process.env.SA_E2E_BASE_URL + "/#/login", 390, 844);
+    await open(page, origin() + "/#/login", 390, 844);
     const read = () => page.evaluate(() => ({ auth: document.querySelector("[data-auth]")?.getAttribute("data-auth"), tab: document.querySelector(".ws-ftn")?.textContent }));
     const marks: unknown[] = [];
     await page.evaluate(() => { (window as unknown as { __pp: number }).__pp = 1; });
@@ -352,7 +361,7 @@ test.describe("PP1 public pages on phones", () => {
        the visually-hidden labels parked at −9999px on purpose. */
     const bad: string[] = []; let n = 0, els = 0;
     for (const w of [320, 360, 390, 430]) for (const path of PAGES) {
-      await open(page, process.env.SA_E2E_BASE_URL + path, w, 800);
+      await open(page, origin() + path, w, 800);
       await walk(page);
       const r = await page.evaluate(() => {
         const vw = document.documentElement.clientWidth, out: string[] = []; let m = 0;

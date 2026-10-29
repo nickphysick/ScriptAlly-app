@@ -130,6 +130,8 @@ The board's option CSS went the same way:
 
 - Before: `index-Br61DMeD.js` (`…-pa2-2-td12`, d5edca5a).
 - After: `index-DB-2-vh0.js`, from a clean build of the tip of `dev/pk391-qm1-pk392-calx-pk392b-td7-fv1-pk393-pa2-2-td12-ppp1` (this branch, which sits directly on what dev served).
+- Checked against the deployed site: PP1 P2–P9 with `SA_E2E_BASE_URL=dev`, **8 passed**. P1 needs both builds side by side, so it runs locally only.
+- ⚠️ The first run against dev failed six locks, and that was the harness, not the page. PP1 built URLs from the raw env value, so the keyword `dev` became the path `dev/contact`, which the deployed app served as the sign-up screen. PP1 now uses the config's resolved `baseURL` (follow-up commit), and a readiness wait replaces a fixed settle time.
 
 ## Open items for Nick
 
