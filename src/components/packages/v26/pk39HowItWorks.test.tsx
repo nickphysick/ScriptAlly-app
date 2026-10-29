@@ -17,6 +17,8 @@ describe("Part G · How it works", () => {
       "Pick a package, or make one", "Keep your materials in one place", "Drag them into the package", "Pick it when you log a query", "See what’s working",
     ]);
     expect(HOW_STEPS[0][1]).toBe("Your packages sit in a row at the top. Each has its own icon and colour, so you can spot it at a glance here, in the Query Centre and in your results. Click one to open it below, or press + New.");
+    /* v39.2 C: step 3 leads with the version */
+    expect(HOW_STEPS[2][1]).toBe("Start with the version of your book: it decides which pages go out. Then add a query letter and, if you want one, a synopsis. Anything else agents ask for goes under Also sends.");
     expect(HOW_STEPS[3][1]).toBe("Choose the package as you log a query and every slot fills itself. Once it’s out with agents it locks, so what each agent got stays true. Change it later and the queries already sent keep what they had.");
     expect(HOW_STEPS[4][1]).toContain("Each one ranks once enough agents have answered.");
   });

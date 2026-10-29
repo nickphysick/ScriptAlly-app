@@ -62,7 +62,8 @@ export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab:
   const [pkdId, setPkdId] = useState<string | null>(null);
   const [showRetired, setShowRetired] = useState(false);
   /** Your materials' list — the builder holds it, the page sets it from a deep link */
-  const [lib, setLib] = useState<LibTab>("let");
+  /* v39.2 C: Your materials opens on Versions (the version leads the package) */
+  const [lib, setLib] = useState<LibTab>("ver");
   const retired = useMemo(() => msPkgs.filter((p) => p.status === "Retired"), [msPkgs]);
   /* ⚠️ THE CURRENT PACKAGE IS ANY LIVE ONE (v38): the label chosen, else the active package, else the first */
   const current = useMemo(() => live.find((p) => p.id === curId) ?? (active && live.some((p) => p.id === active.id) ? active : null) ?? live[0] ?? null, [live, curId, active]);

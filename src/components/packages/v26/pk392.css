@@ -148,3 +148,17 @@
 @media (prefers-reduced-motion: reduce) {
   .p6 .p9-pb-grid.p9-v39 .p9-lib-list .p9-lr .p9-lr-add.p9-lr-add { transition: none; }
 }
+
+/* ══ C · THE VERSION LEADS THE PACKAGE (screens 03, 06) ════════════════════════════════════════════════════════════
+   Display order only: version → query letter → synopsis everywhere the three are listed; nothing stored moves. The
+   generated sheet keys each slot's top border by kind (it assumed the letter first), so the version row drops its border
+   and the letter row takes the 2px ink-10% rule under the version. The version row is padded 24, its name 20px, and its
+   label reads "Version" over "Sets the pages that go out" (italic, ink 55%). ⚠️ The ref's own 2px rule is overridden in
+   its cascade (it computes to the 1px row border); the pack bakes the 2px in, so it is built. */
+@media (min-width: 768px) {
+  .p6 .p9-pb-grid.p9-v39 .p9-mf .p9-mr.p9-slt.p9-t-ver { padding-top: 24px !important; padding-bottom: 24px !important; border-top: 0 !important; }
+  .p6 .p9-pb-grid.p9-v39 .p9-mf .p9-mr.p9-slt.p9-t-ver .p9-mr-l > span { color: #1c130f; }
+  .p6 .p9-pb-grid.p9-v39 .p9-mf .p9-mr.p9-slt.p9-t-ver .p9-mr-l > em.p9-vsub { display: block; max-width: 120px; font-style: italic; line-height: 1.3; color: rgba(28, 19, 15, 0.55) !important; }
+  .p6 .p9-pb-grid.p9-v39 .p9-mf .p9-mr.p9-slt.p9-t-ver .p9-mr-tx > b { font-size: 20px !important; }
+  .p6 .p9-pb-grid.p9-v39 .p9-mf .p9-mr.p9-slt.p9-t-ver + .p9-mr { border-top: 2px solid rgba(28, 19, 15, 0.1) !important; }
+}
