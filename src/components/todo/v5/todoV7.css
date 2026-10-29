@@ -113,6 +113,15 @@
   .td5-root .td7-strip .td5-fpw.on .td5-fp { background: #2d3a50; color: #f4eee5; box-shadow: none; padding-right: 40px; }
   .td5-root .td7-strip .td5-fpx { top: 7px; }
 
+  /* ═════ S3 · no tab strip: the bands stick to the top of the tray's scroller; the Set aside view's way back ═════ */
+  .td5-root { --td5-striph: 0px; }
+  .td5-root .td5-sheet .td5-say.td7-asidet { font: 400 22px/1.2 var(--sp-type) !important; color: #f4eee5; }
+  .td5-root .td5-nav .td7-back {
+    flex: none; height: 40px; margin-left: 18px; padding: 0 16px; border: 0; border-radius: 12px; background: #fff; color: #1c130f;
+    font: 400 15px/1 var(--sp-type) !important; white-space: nowrap; cursor: pointer;
+  }
+  .td5-root .td5-nav .td7-back:focus-visible { outline: 2px solid #e7a184; outline-offset: 3px; }
+
   /* pinned: the header card, Today and the "Your tray" heading leave with the old header (the ref's `.v6-pinhide`) */
   .td5-root[data-pinned] .td7-hd, .td5-root[data-pinned] .td7-sec { display: none; }
 }

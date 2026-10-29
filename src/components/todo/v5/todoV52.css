@@ -75,8 +75,6 @@
 /* F.4 — every text on /todo at 4.5:1 (TD52 F3 measures it): the labels v5.1 set fainter than that, raised */
 .td5-fr .td5-find kbd { color: var(--td5-ink62); }
 .td5-root .td5-nav .td5-keys { color: rgba(244, 238, 229, 0.62); }
-.td5-strip .td5-h { color: rgba(45, 58, 80, 0.75); }
-.td5-strip .td5-tab { color: rgba(45, 58, 80, 0.75); }
 .td5-dial[data-kind="late"] small { color: #a2452a; }
 
 /* ═════════ §G · DATES AND GROUPS ═════════ */

@@ -271,13 +271,7 @@
 .td5-tray { min-width: 0; padding: 0 16px 26px 18px; border-right: 1px solid rgba(28, 19, 15, 0.07); background: #fff; border-radius: 0 0 0 24px; }
 /* the tray is its own scroller: the strip and the bands stick inside IT, the strip at its top and the bands under the strip */
 .td5-sheet[data-one] .td5-tray { min-height: 0; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; }
-.td5-strip {
-  position: sticky; top: 0; z-index: 12; display: flex; align-items: center; gap: 10px; box-sizing: border-box; height: var(--td5-striph);
-  margin: 0 -16px 0 -18px; padding: 0 18px 0 20px; background: #e9edf3; border-bottom: 1px solid rgba(45, 58, 80, 0.2);
-}
-.td5-strip .td5-h { font: 600 10.5px/1 var(--font-mono) !important; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(45, 58, 80, 0.62); white-space: nowrap; }
-.td5-strip .td5-h b { font: inherit !important; color: var(--td5-navy); }
-.td5-strip .td5-sp { flex: 1 1 auto; }
+/* v7 S3 — the tab strip over the tray (`.td5-strip`, `.td5-tab`) is RETIRED: Set aside opens from the header's button */
 .td5-grp { margin-top: 14px; }
 .td5-band {
   position: sticky; top: var(--td5-striph); z-index: 10; display: flex; align-items: center; gap: 11px; box-sizing: border-box;
@@ -658,14 +652,6 @@ body.td5-parked-here [data-qad-park-chip]:not(.ask) { display: none; }
 
 /* ═════════ v5.1 §I · SET ASIDE ═════════ */
 /* the strip is two tabs: IN YOUR TRAY · SET ASIDE */
-.td5-strip .td5-tab { display: inline-flex; align-items: center; gap: 7px; padding: 5px 10px; border: 0; border-radius: 8px; background: none; cursor: pointer;
-  font: 600 10.5px/1 var(--font-mono) !important; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(45, 58, 80, 0.55); white-space: nowrap; }
-.td5-strip .td5-tab b { font: inherit !important; color: inherit; }
-.td5-strip .td5-tab[aria-selected="true"] { background: #fff; color: var(--td5-navy); box-shadow: 0 1px 3px rgba(28, 19, 15, 0.12); }
-.td5-strip .td5-tab:hover { color: var(--td5-navy); }
-.td5-strip .td5-tab:focus-visible { outline: 2px solid var(--td5-navy); outline-offset: 2px; }
-.td5-strip .td5-tab[data-bump] { animation: td-bump 0.5s cubic-bezier(0.2, 1.6, 0.4, 1); }
-@keyframes td-bump { 0% { transform: scale(1); } 40% { transform: scale(1.14); background: #f6e2d8; color: #a2452a; } 100% { transform: scale(1); } }
 .td5-root .td5-asidenote { margin: 14px 4px 10px; font: italic 400 14px/1.45 var(--sp-serif) !important; color: var(--td5-ink70); }
 .td5-band.td5-band--plain { padding-left: 16px; cursor: default; }
 .td5-band--plain .td5-bnote { margin-left: auto; font: 600 9px/1 var(--font-mono) !important; letter-spacing: 0.13em; text-transform: uppercase; opacity: 0.75; }

@@ -803,18 +803,19 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
     const at = walk.findIndex((x) => x.key === i.key);
     return (walk[at + 1] ?? walk[at - 1])?.key ?? null;
   };
-  /** the desk card flies into the Set aside tab (500ms); reduced motion: no flight, the same end state */
+  /** the desk card flies into the header's "Set aside" button (500ms; v7 S3: the tab it used to fly to is gone) —
+   *  only while that button is on screen; reduced motion: no flight, the same end state */
   const fly = async () => {
     const card = document.querySelector<HTMLElement>(".td5-root [data-todo-v5] .td5-dcard, .td5-root .td5-dcard");
-    const tab = document.querySelector<HTMLElement>('.td5-root [data-td5="tab-aside"]');
+    const tab = [...document.querySelectorAll<HTMLElement>('.td5-root [data-td5="aside"]')].find((e) => e.getBoundingClientRect().height > 0);
     if (!card || !tab || reduced() || typeof card.animate !== "function") return;
     const c = card.getBoundingClientRect(), t = tab.getBoundingClientRect();
+    if (t.bottom < 0 || t.top > window.innerHeight) return;
     const a = card.animate([{ transform: "none", opacity: 1 }, { transform: `translate(${t.left + t.width / 2 - (c.left + c.width / 2)}px,${t.top - (c.top + c.height / 2)}px) scale(.08)`, opacity: 0 }],
       { duration: 500, easing: "cubic-bezier(.5,0,.3,1)", fill: "forwards" });
     await a.finished.catch(() => undefined);
     requestAnimationFrame(() => a.cancel());
   };
-  const [bumpTab, setBumpTab] = useState(0);
   const toBack = (i: TrayItem) => () => { setTrayView("tray"); setSelKey(i.key); scrollRowIntoView(i.key); };
   const UNDO_MS = 7000;
 
@@ -845,7 +846,6 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
     const w = g ? snoozeGroupWrites({ upsertTaskFlag, dismissTask }, g, capped) : snoozeCardWrites({ upsertTaskFlag, dismissTask }, i.card, capped, `until ${dayLabel(until)}`, daysToDeadline);
     if (!w) return;
     if (!sel || sel.key === i.key) setSelKey(next);
-    setBumpTab((b) => b + 1);
     flash(o.say ?? `Snoozed until ${dayLabel(until)}`, { label: "Undo", fn: async () => { await putBack(cap); toBack(i)(); } }, UNDO_MS);
   };
   /* ── v5.2 §G.2 · move a date: two doors (the dial's menu, a drag onto a day), one rule — an own task's due date
@@ -950,7 +950,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
     await fly();
     const at = new Date().toISOString();
     await Promise.all(keys.map((k) => upsertTaskFlag(k, { skippedAt: at })));
-    setSelKey(next); setBumpTab((b) => b + 1);
+    setSelKey(next);
     const dated = !!i.query && !i.sweep && i.bucket !== "fix";
     flash(`Dismissed · back ${dated ? "if anything changes" : "when you bring it back"}`,
       { label: "Undo", fn: async () => { await putBack(cap); toBack(i)(); } }, UNDO_MS);
@@ -963,7 +963,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
     const next = nextAfter(i);
     await fly();
     await updateUserProfile({ mutedTaskRules: [...new Set([...before, rule])] });
-    setSelKey(next); setBumpTab((b) => b + 1);
+    setSelKey(next);
     flash(`${RULE_TITLE[rule]}: switched off for every agent`, { label: "Undo", fn: async () => { await updateUserProfile({ mutedTaskRules: before }); toBack(i)(); } }, UNDO_MS);
   };
   const doDelete = async (i: TrayItem) => {
@@ -1183,6 +1183,12 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
                     <p className="td5-say" data-td5="say">
                       Nothing in your tray.{nextLand[0] ? <> The next task lands on <b>{dayMonth(nextLand[0].ms)}</b>.</> : null}
                     </p>
+                  ) : trayView === "aside" && !working && !compose ? (
+                    /* v7 S3 — with no tab strip, the Set aside view names itself here and has its own way back */
+                    <>
+                      <p className="td5-say td7-asidet" data-td7="aside-say">Set aside: {asideN} {asideN === 1 ? "task" : "tasks"} waiting to come back</p>
+                      <button type="button" className="td7-back" data-td7="back-to-tray" onClick={() => showView("tray")}>Back to your tray</button>
+                    </>
                   ) : working || compose ? (
                     /* v5.2 §J.1 — while a task is open on the desk, the row says so: a pulsing dot, the label, and the
                        journey's own steps (none for the compose card) */
@@ -1237,7 +1243,9 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
                   {state === "list" ? (
                     <>
                       {/* v7 S2 — the J / K / E hints leave the row (the keys still work, and the shortcuts sheet lists them) */}
-                      {working ? null : (
+                      {/* in the Set aside view Find and Filters stand down: they narrow the tray, not that list, and beside
+                          the view's sentence and its way back they ran the row off its edge at 1280 (as the ref's own does) */}
+                      {working || (trayView === "aside" && !compose) ? null : (
                         <span className="td7-find" data-td7="nav-find">
                           <TrayFind filters={filters} setFilters={setFilters} findRef={findRef} placeholder={pinned ? "Find a task" : "Find a task, agent or agency"} pinned={pinned} disabled={loading} />
                           <button type="button" className="td7-fbtn" data-td7="filters" aria-label="Filters" aria-expanded={stripOpen} aria-controls="td7-strip"
@@ -1259,11 +1267,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
                 ) : (
                   <div className="td5-body">
                     <div className="td5-tray" data-td5="tray">
-                      <div className="td5-strip" data-td5="strip" role="tablist" aria-label="Your tray">
-                        <button type="button" role="tab" className="td5-tab" data-td5="tab-tray" aria-selected={trayView === "tray"} onClick={() => showView("tray")}>In your tray <b>{visible.length}</b></button>
-                        <button type="button" role="tab" className="td5-tab" data-td5="tab-aside" data-bump={bumpTab || undefined} key={`aside-${bumpTab}`} aria-selected={trayView === "aside"} onClick={() => showView("aside")}>Set aside <b>{asideN}</b></button>
-                        <span className="td5-sp" /><span className="td5-h">{trayView === "tray" ? "Due" : "Back"}</span>
-                      </div>
+                      {/* v7 S3 — the tab strip is gone: Set aside opens from the header's button, and the navy row leads back */}
                       {trayView === "aside" ? (
                         <div className="td5-aside" data-td5="aside-list">
                           <p className="td5-asidenote">Nothing here is lost. Snoozed tasks come back on their day. Dismissed ones come back if anything changes.</p>
