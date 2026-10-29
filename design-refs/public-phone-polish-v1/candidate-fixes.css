@@ -1,0 +1,15 @@
+/* phone polish candidates */
+.mk-s3n,.mk-ckicker,.mk-fweyebrow,.mk-doceyebrow{display:none!important}
+.mk-ccpill,.mk-pvtag,.mk-claimkicker,.sf-eyebrow,.mk-fwk,.mk-notekick,.mk-pvmorelbl,.mk-pvstepsh,.mk-drtag,.mk-docmeta,.mk-signrole,.ws-ftg,.mk-cmaillabel,.mk-field label,.sf-lab,.mk-pvjscount{
+  text-transform:none!important;letter-spacing:0!important;font-family:"Source Sans 3",system-ui,sans-serif!important;}
+.mk-ccpill,.mk-pvtag,.mk-claimkicker,.sf-eyebrow,.mk-fwk,.mk-notekick,.mk-pvmorelbl,.mk-pvstepsh{font-size:14px!important;font-weight:600!important}
+.mk-field label,.sf-lab,.mk-cmaillabel{font-size:14.5px!important;font-weight:600!important;color:var(--mk-nearblack,#1c130f)!important}
+.mk-drtag,.mk-docmeta,.mk-signrole,.ws-ftg,.mk-pvjscount{font-size:12.5px!important}
+.mk-pvtabsin small,.mk-rungline,.mk-rungline em{text-transform:none!important;letter-spacing:0!important;font-family:"Source Sans 3",system-ui,sans-serif!important;font-size:13px!important}
+.mk-footgrid{grid-template-columns:1fr 1fr!important;gap:8px 20px!important}
+.mk-footbrand{grid-column:1/-1!important;margin-bottom:12px}
+.mk-footcol ul{gap:0!important}
+.mk-footcol button{min-height:44px;display:flex;align-items:center}
+.mk-cbtn{background:#2a3a52!important}
+.mk-hp-bird{width:84px!important;height:auto!important;margin-top:18px!important}
+@media (max-width:400px){.ws-ftg{display:none!important}}

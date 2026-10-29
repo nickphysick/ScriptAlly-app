@@ -497,3 +497,30 @@
 .sf .sf-deadtx .sf-deadquiet { font-size: 15px; color: var(--sf-ink58); }
 .sf .sf-deaderrs { margin-top: 12px; }
 .sf .sf-deaderrs p { font-size: 14.5px; margin: 0 0 6px; color: rgba(28, 19, 15, .82); }
+
+/* ═══ Public pages on phones v1 (29 Oct; ref design-refs/public-phone-polish-v1/) ═══════════════
+   The ACCOUNT frame only (sign in, sign up, reset) below 768px — `.sf--account`, never `.sf`, because
+   the set-up screens share `.sf-lab` and they are the signed-in app. Same specificity as the rules
+   overridden (`.sf .x`), later in the file, so no `!important`.
+   ⚠️ `.sf .ws-ftg` IS THE PHONE TAB'S OWN RULE ABOVE (the shell's tab sheet is desktop only). */
+@media (max-width: 767.98px) {
+  .sf--account .sf-eyebrow {
+    font-family: "Source Sans 3", "Helvetica Neue", Arial, sans-serif; font-size: 14px; font-weight: 600;
+    letter-spacing: 0; text-transform: none;
+  }
+  .sf--account .sf-lab {
+    font-family: "Source Sans 3", "Helvetica Neue", Arial, sans-serif; font-size: 14.5px; font-weight: 600;
+    line-height: 1.35; letter-spacing: 0; text-transform: none; color: var(--ink-on-light);
+  }
+  .sf--account .ws-ftg {
+    font-family: "Source Sans 3", "Helvetica Neue", Arial, sans-serif; font-size: 12.5px;
+    letter-spacing: 0; text-transform: none;
+  }
+  /* Two the brief did not list, found by the census: "or with email" (9.5px capitals) and the BETA
+     chip (8px). The chip's word is written in capitals, so it keeps them and only grows to 12px. */
+  .sf--account .sf-or {
+    font-family: "Source Sans 3", "Helvetica Neue", Arial, sans-serif; font-size: 13px;
+    letter-spacing: 0; text-transform: none;
+  }
+  .sf--account .ws-beta { font-size: 12px; letter-spacing: .06em; padding: 1px 6px; }
+}
