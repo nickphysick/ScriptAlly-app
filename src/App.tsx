@@ -20,6 +20,7 @@ import { Queries } from "./components/Queries";
 import { TodoRoute } from "./components/todo/TodoRoute";
 import { Agents } from "./components/Agents";
 import { DiscoverPage } from "./components/agents/discover1/DiscoverPage";
+import { AgentsRoute, DiscoverRoute } from "./components/agents/phone/AgentsRoutes";
 import { SubmissionPackages } from "./components/SubmissionPackages";
 import { PACKAGES_PATH, packagesRedirectFor } from "./lib/packagesRoute";
 import { DiaryLab } from "./components/dashboard/DiaryLab";
@@ -741,10 +742,10 @@ function AppContent() {
             Contact list (no variant) 2400, Discover (`work`) 1600, Manuscripts (`read`)
             1200 — four width regimes across six pages that share two tokens. */}
         <StagePage active={routeKey === "agents" && agentsDiscover} layout="fillColumn">
-          <DiscoverPage onNavigate={handleNavigate} />
+          <DiscoverRoute onNavigate={handleNavigate} />
         </StagePage>
         <StagePage active={routeKey === "agents" && !agentsDiscover} layout="fill" clip>
-          <Agents searchQuery={searchQuery} onNavigate={handleNavigate} active={routeKey === "agents" && !agentsDiscover} />
+          <AgentsRoute searchQuery={searchQuery} onNavigate={handleNavigate} active={routeKey === "agents" && !agentsDiscover} />
         </StagePage>
 
         {/* ⚠️ NO `contentVariant` (header spec §1). The ultrawide caps — `work` 1600 and

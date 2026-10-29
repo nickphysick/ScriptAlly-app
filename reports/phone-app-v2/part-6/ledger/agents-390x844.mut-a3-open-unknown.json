@@ -1,0 +1,1100 @@
+[
+ {
+  "lock": "pop",
+  "where": "390x844 the desktop counts were read",
+  "ok": true,
+  "detail": "{\"total\":54,\"none\":30}"
+ },
+ {
+  "lock": "A1",
+  "where": "390x844 on your list · to query are the Contact list's (agents on file · not queried)",
+  "ok": true,
+  "detail": "{\"onlist\":54,\"toq\":30} vs {\"total\":54,\"none\":30}"
+ },
+ {
+  "lock": "pop",
+  "where": "390x844 rows",
+  "ok": true,
+  "detail": "54 vs 54"
+ },
+ {
+  "lock": "A1",
+  "where": "390x844 To query shows the not-queried rows and the band does not follow the chip",
+  "ok": true,
+  "detail": "30 rows, band 30"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 clv-fx-never: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "IVImogen ValeVale & Winter LiteraryBy email"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 clv-fx-never: not queried leads with the dotted ring",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 clv-fx-never: the reply time and the route are the record's",
+  "ok": true,
+  "detail": "[null,\"By email\"] vs [\"By email\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 clv-fx-reopen: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "TKTomas KellerKeller Rights8 weeksBy email"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 clv-fx-reopen: not queried leads with the dotted ring",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 clv-fx-reopen: the reply time and the route are the record's",
+  "ok": true,
+  "detail": "[\"8 weeks\",\"By email\"] vs [\"8 weeks\",\"By email\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 clv-fx-stale: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "IMIngrid MarshMarsh & Weir10 weeksBy email"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 clv-fx-stale: not queried leads with the dotted ring",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 clv-fx-stale: the reply time and the route are the record's",
+  "ok": true,
+  "detail": "[\"10 weeks\",\"By email\"] vs [\"10 weeks\",\"By email\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 clv-fx-stub0: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "EKEdda KronKron LiteraryBy email"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 clv-fx-stub0: not queried leads with the dotted ring",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 clv-fx-stub0: the reply time and the route are the record's",
+  "ok": true,
+  "detail": "[null,\"By email\"] vs [\"By email\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 clv181-bare: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "WTWren TallisTallis & MoorBy email"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 clv181-bare: not queried leads with the dotted ring",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 clv181-bare: the reply time and the route are the record's",
+  "ok": true,
+  "detail": "[null,\"By email\"] vs [\"By email\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-01: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "EWEleanor WhitfieldGreenfield LiteraryBy email"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-01: not queried leads with the dotted ring",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-01: the reply time and the route are the record's",
+  "ok": true,
+  "detail": "[null,\"By email\"] vs [\"By email\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-02: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "WTWilliam TanPenrose & LyleBy email"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-02: not queried leads with the dotted ring",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-02: the reply time and the route are the record's",
+  "ok": true,
+  "detail": "[null,\"By email\"] vs [\"By email\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-03: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "PRPriya RamanRaman & RoweBy email"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-03: not queried leads with the dotted ring",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-03: the reply time and the route are the record's",
+  "ok": true,
+  "detail": "[null,\"By email\"] vs [\"By email\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-04: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "DODaniel O’RourkeInkwell & StoneBy email"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-04: not queried leads with the dotted ring",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-04: the reply time and the route are the record's",
+  "ok": true,
+  "detail": "[null,\"By email\"] vs [\"By email\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-05: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "SDSophie DunnAshgrove LiteraryBy email"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-05: not queried leads with the dotted ring",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-05: the reply time and the route are the record's",
+  "ok": true,
+  "detail": "[null,\"By email\"] vs [\"By email\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-06: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "CBClara BeaumontHarbour LaneBy email"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-06: not queried leads with the dotted ring",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-06: the reply time and the route are the record's",
+  "ok": true,
+  "detail": "[null,\"By email\"] vs [\"By email\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-07: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "MRMarcus ReedBloomsbury QuillBy email"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-07: not queried leads with the dotted ring",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-07: the reply time and the route are the record's",
+  "ok": true,
+  "detail": "[null,\"By email\"] vs [\"By email\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-08: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "TETom ElleryEllery & FinchBy email"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-08: not queried leads with the dotted ring",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-08: the reply time and the route are the record's",
+  "ok": true,
+  "detail": "[null,\"By email\"] vs [\"By email\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-09: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "JMJonathan MarshThe Marsh AgencyBy email"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-09: not queried leads with the dotted ring",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-09: the reply time and the route are the record's",
+  "ok": true,
+  "detail": "[null,\"By email\"] vs [\"By email\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-10: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "AKAisha KapoorThe Lantern AgencyBy email"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-10: not queried leads with the dotted ring",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-10: the reply time and the route are the record's",
+  "ok": true,
+  "detail": "[null,\"By email\"] vs [\"By email\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-11: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "HQHester QuinnQuinn LiteraryBy email"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-11: not queried leads with the dotted ring",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-11: the reply time and the route are the record's",
+  "ok": true,
+  "detail": "[null,\"By email\"] vs [\"By email\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-12: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "GAGeorge AshworthAshworth LiteraryBy email"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-12: not queried leads with the dotted ring",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-12: the reply time and the route are the record's",
+  "ok": true,
+  "detail": "[null,\"By email\"] vs [\"By email\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-13: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "NHNadia HussainNorthgate LiteraryBy email"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-13: not queried leads with the dotted ring",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-13: the reply time and the route are the record's",
+  "ok": true,
+  "detail": "[null,\"By email\"] vs [\"By email\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-14: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "FSFenella StrandBrightwater BooksBy email"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-14: not queried leads with the dotted ring",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 cv25-agent-14: the reply time and the route are the record's",
+  "ok": true,
+  "detail": "[null,\"By email\"] vs [\"By email\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 msv12-agent-1: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "MKMira KovicOld Harbour Literary8 weeksBy email"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 msv12-agent-1: not queried leads with the dotted ring",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 msv12-agent-1: the reply time and the route are the record's",
+  "ok": true,
+  "detail": "[\"8 weeks\",\"By email\"] vs [\"8 weeks\",\"By email\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 msv12-agent-2: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "DRDouglas RennerRenner & Frost6 weeksBy email"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 msv12-agent-2: not queried leads with the dotted ring",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 msv12-agent-2: the reply time and the route are the record's",
+  "ok": true,
+  "detail": "[\"6 weeks\",\"By email\"] vs [\"6 weeks\",\"By email\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 msv12-agent-3: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "EVEdda VossVoss Literary6 weeksBy email"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 msv12-agent-3: not queried leads with the dotted ring",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 msv12-agent-3: the reply time and the route are the record's",
+  "ok": true,
+  "detail": "[\"6 weeks\",\"By email\"] vs [\"6 weeks\",\"By email\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 msv12-agent-4: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "TATheo AbaraAbara Grant AgencyBy email"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 msv12-agent-4: not queried leads with the dotted ring",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 msv12-agent-4: the reply time and the route are the record's",
+  "ok": true,
+  "detail": "[null,\"By email\"] vs [\"By email\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 msv12-agent-5: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "SPSun-hee ParkMeridian LineBy email"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 msv12-agent-5: not queried leads with the dotted ring",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 msv12-agent-5: the reply time and the route are the record's",
+  "ok": true,
+  "detail": "[null,\"By email\"] vs [\"By email\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 msv12-agent-6: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "RQRosa QuintanaQuintana BooksBy email"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 msv12-agent-6: not queried leads with the dotted ring",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 msv12-agent-6: the reply time and the route are the record's",
+  "ok": true,
+  "detail": "[null,\"By email\"] vs [\"By email\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 pa2-door-unstated: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "PUPat UnstatedUnstated & CoBy email"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 pa2-door-unstated: not queried leads with the dotted ring",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 pa2-door-unstated: the reply time and the route are the record's",
+  "ok": true,
+  "detail": "[null,\"By email\"] vs [\"By email\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 thin-ag-chase: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "TQTobias QuintQuint Literary4 weeksBy email"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 thin-ag-chase: not queried leads with the dotted ring",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 thin-ag-chase: the reply time and the route are the record's",
+  "ok": true,
+  "detail": "[\"4 weeks\",\"By email\"] vs [\"4 weeks\",\"By email\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 thin-ag-close: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "RVRosalind ValeVale & Marchetti6 weeksBy email"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 thin-ag-close: not queried leads with the dotted ring",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 thin-ag-close: the reply time and the route are the record's",
+  "ok": true,
+  "detail": "[\"6 weeks\",\"By email\"] vs [\"6 weeks\",\"By email\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 thin-ag-gap: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "DRDevendra RaoRao Agency10 weeksBy email"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 thin-ag-gap: not queried leads with the dotted ring",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 thin-ag-gap: the reply time and the route are the record's",
+  "ok": true,
+  "detail": "[\"10 weeks\",\"By email\"] vs [\"10 weeks\",\"By email\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 thin-ag-remind: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "IFImogen FarrFarr & Boyd8 weeksBy email"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 thin-ag-remind: not queried leads with the dotted ring",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 thin-ag-remind: the reply time and the route are the record's",
+  "ok": true,
+  "detail": "[\"8 weeks\",\"By email\"] vs [\"8 weeks\",\"By email\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 qc150l9-ag: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "Wren CallowayCalloway & HartFull sentDay 45"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 qc150l9-ag: a queried agent leads with its status glyph, not the ring",
+  "ok": true,
+  "detail": "Full Sent"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 qc150l9-ag: the status in words over \"Day n\"",
+  "ok": true,
+  "detail": "Full sent / Day 45"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 rej-agent-1: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "Imogen RackhamRackham & HalePassedDay 18"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 rej-agent-1: a queried agent leads with its status glyph, not the ring",
+  "ok": true,
+  "detail": "Rejected"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 rej-agent-1: the status in words over \"Day n\"",
+  "ok": true,
+  "detail": "Passed / Day 18"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 rj-agent-1: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "Imogen ValeVale & WickFull requestedDay 98"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 rj-agent-1: a queried agent leads with its status glyph, not the ring",
+  "ok": true,
+  "detail": "Full Requested"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 rj-agent-1: the status in words over \"Day n\"",
+  "ok": true,
+  "detail": "Full requested / Day 98"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 rj-agent-2: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "Tobias HarkHark LiteraryFull requestedDay 108"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 rj-agent-2: a queried agent leads with its status glyph, not the ring",
+  "ok": true,
+  "detail": "Full Requested"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 rj-agent-2: the status in words over \"Day n\"",
+  "ok": true,
+  "detail": "Full requested / Day 108"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 rj-agent-3: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "Tamsin ProbewellProbe & NightingaleQueriedDay 122"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 rj-agent-3: a queried agent leads with its status glyph, not the ring",
+  "ok": true,
+  "detail": "Queried"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 rj-agent-3: the status in words over \"Day n\"",
+  "ok": true,
+  "detail": "Queried / Day 122"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-1: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "Elinor HaleCavendish & RoePartial sentDay 83"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-1: a queried agent leads with its status glyph, not the ring",
+  "ok": true,
+  "detail": "Partial Sent"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-1: the status in words over \"Day n\"",
+  "ok": true,
+  "detail": "Partial sent / Day 83"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-10: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "Peter VanceVance AssociatesFull sentDay 264"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-10: a queried agent leads with its status glyph, not the ring",
+  "ok": true,
+  "detail": "Full Sent"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-10: the status in words over \"Day n\"",
+  "ok": true,
+  "detail": "Full sent / Day 264"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-11: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "Iris KwanKwan & HallRevise & resubmitDay 114"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-11: a queried agent leads with its status glyph, not the ring",
+  "ok": true,
+  "detail": "Revise & Resubmit"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-11: the status in words over \"Day n\"",
+  "ok": true,
+  "detail": "Revise & resubmit / Day 114"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-12: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "Noah BrightBright LiteraryOfferDay 142"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-12: a queried agent leads with its status glyph, not the ring",
+  "ok": true,
+  "detail": "Offer"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-12: the status in words over \"Day n\"",
+  "ok": true,
+  "detail": "Offer / Day 142"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-2: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "Tom ElleryCurtis VaneQueriedDay 95"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-2: a queried agent leads with its status glyph, not the ring",
+  "ok": true,
+  "detail": "Queried"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-2: the status in words over \"Day n\"",
+  "ok": true,
+  "detail": "Queried / Day 95"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-3: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "Marcus ReedReed & PartnersFull requestedDay 127"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-3: a queried agent leads with its status glyph, not the ring",
+  "ok": true,
+  "detail": "Full Requested"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-3: the status in words over \"Day n\"",
+  "ok": true,
+  "detail": "Full requested / Day 127"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-4: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "Priya NairNorthbank LiteraryPartial sentDay 122"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-4: a queried agent leads with its status glyph, not the ring",
+  "ok": true,
+  "detail": "Partial Sent"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-4: the status in words over \"Day n\"",
+  "ok": true,
+  "detail": "Partial sent / Day 122"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-5: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "Joan WhitfieldWhitfield AgencyQueriedDay 93"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-5: a queried agent leads with its status glyph, not the ring",
+  "ok": true,
+  "detail": "Queried"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-5: the status in words over \"Day n\"",
+  "ok": true,
+  "detail": "Queried / Day 93"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-6: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "Sam OkoroOkoro BellFull sentDay 118"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-6: a queried agent leads with its status glyph, not the ring",
+  "ok": true,
+  "detail": "Full Sent"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-6: the status in words over \"Day n\"",
+  "ok": true,
+  "detail": "Full sent / Day 118"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-7: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "Rachel LinLin LiteraryPartial requestedDay 86"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-7: a queried agent leads with its status glyph, not the ring",
+  "ok": true,
+  "detail": "Partial Requested"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-7: the status in words over \"Day n\"",
+  "ok": true,
+  "detail": "Partial requested / Day 86"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-8: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "David MarshMarsh & CoPartial sentDay 97"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-8: a queried agent leads with its status glyph, not the ring",
+  "ok": true,
+  "detail": "Partial Sent"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-8: the status in words over \"Day n\"",
+  "ok": true,
+  "detail": "Partial sent / Day 97"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-9: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "Ana DuarteDuarte WordsFull sentDay 103"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-9: a queried agent leads with its status glyph, not the ring",
+  "ok": true,
+  "detail": "Full Sent"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-9: the status in words over \"Day n\"",
+  "ok": true,
+  "detail": "Full sent / Day 103"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-nowin-1: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "Bea HalloranHalloran & FitchQueriedDay 72"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-nowin-1: a queried agent leads with its status glyph, not the ring",
+  "ok": true,
+  "detail": "Queried"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-nowin-1: the status in words over \"Day n\"",
+  "ok": true,
+  "detail": "Queried / Day 72"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-nowin-2: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "Rufus OyelaranOyelaran BooksPartial sentDay 100"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-nowin-2: a queried agent leads with its status glyph, not the ring",
+  "ok": true,
+  "detail": "Partial Sent"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-agent-nowin-2: the status in words over \"Day n\"",
+  "ok": true,
+  "detail": "Partial sent / Day 100"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-cal-bang: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "Alasdair CreweCrewe LiteraryQueriedDay 72"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-cal-bang: a queried agent leads with its status glyph, not the ring",
+  "ok": true,
+  "detail": "Queried"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-cal-bang: the status in words over \"Day n\"",
+  "ok": true,
+  "detail": "Queried / Day 72"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-cal-near: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "Wren AshcombeAshcombe LiteraryQueriedDay 82"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-cal-near: a queried agent leads with its status glyph, not the ring",
+  "ok": true,
+  "detail": "Queried"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-cal-near: the status in words over \"Day n\"",
+  "ok": true,
+  "detail": "Queried / Day 82"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-cal-passed20: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "Cormac BlighBligh & SonsQueriedDay 80"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-cal-passed20: a queried agent leads with its status glyph, not the ring",
+  "ok": true,
+  "detail": "Queried"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-cal-passed20: the status in words over \"Day n\"",
+  "ok": true,
+  "detail": "Queried / Day 80"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-cal-passed865: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "Ottoline FraynFrayn AgencyFull requestedDay 925"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-cal-passed865: a queried agent leads with its status glyph, not the ring",
+  "ok": true,
+  "detail": "Full Requested"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-cal-passed865: the status in words over \"Day n\"",
+  "ok": true,
+  "detail": "Full requested / Day 925"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-cal-soon: no dash and no \"Unknown\" anywhere on the row",
+  "ok": true,
+  "detail": "Hester BlaineBlaine & VoleQueriedDay 52"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-cal-soon: a queried agent leads with its status glyph, not the ring",
+  "ok": true,
+  "detail": "Queried"
+ },
+ {
+  "lock": "A2",
+  "where": "390x844 seed-cal-soon: the status in words over \"Day n\"",
+  "ok": true,
+  "detail": "Queried / Day 52"
+ },
+ {
+  "lock": "pop",
+  "where": "390x844 both kinds of row, and a not-queried agent with a fact missing",
+  "ok": true,
+  "detail": "30 not queried, 24 queried, 21 with a gap"
+ },
+ {
+  "lock": "pop",
+  "where": "390x844 an agent whose door nobody stated",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "A3",
+  "where": "390x844 pa2-door-unstated (Unknown): the door line",
+  "ok": false,
+  "detail": "\"Open to submissions\" vs \"Not known\""
+ },
+ {
+  "lock": "A3",
+  "where": "390x844 clv-fx-never (Open): the door line",
+  "ok": true,
+  "detail": "\"Open to submissions\" vs \"Open to submissions\""
+ },
+ {
+  "lock": "A5",
+  "where": "390x844 clv-fx-never: reply time is the record's",
+  "ok": true,
+  "detail": "Not stated vs null"
+ },
+ {
+  "lock": "A5",
+  "where": "390x844 clv-fx-never: submissions is the record's",
+  "ok": true,
+  "detail": "Email vs By email"
+ },
+ {
+  "lock": "A5",
+  "where": "390x844 clv-fx-never: your query is the row's status, or Not yet",
+  "ok": true,
+  "detail": "Not yet vs none"
+ },
+ {
+  "lock": "A5",
+  "where": "390x844 clv-fx-never: the foot names the agent and fits the standing",
+  "ok": true,
+  "detail": "log \"Log a query to Imogen\""
+ },
+ {
+  "lock": "A5",
+  "where": "390x844 clv-fx-never: the foot opens the log flow with Imogen Vale already chosen",
+  "ok": true,
+  "detail": "New queryDay 0IVImogen ValeVale & Winter LiteraryThe Smoke TestSendingWhat you s"
+ },
+ {
+  "lock": "A5",
+  "where": "390x844 opening the log flow wrote nothing",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A5",
+  "where": "390x844 qc150l9-ag: reply time is the record's",
+  "ok": true,
+  "detail": "8 wks vs 8 weeks"
+ },
+ {
+  "lock": "A5",
+  "where": "390x844 qc150l9-ag: submissions is the record's",
+  "ok": true,
+  "detail": "Email vs By email"
+ },
+ {
+  "lock": "A5",
+  "where": "390x844 qc150l9-ag: your query is the row's status, or Not yet",
+  "ok": true,
+  "detail": "Full sent vs Full Sent"
+ },
+ {
+  "lock": "A5",
+  "where": "390x844 qc150l9-ag: the foot names the agent and fits the standing",
+  "ok": true,
+  "detail": "open \"Open your query to Wren\""
+ },
+ {
+  "lock": "A6",
+  "where": "390x844 Agents: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": "navy 8"
+ },
+ {
+  "lock": "A6",
+  "where": "390x844 Agents: no image twice",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "A6",
+  "where": "390x844 the profile: white on the navy head",
+  "ok": true,
+  "detail": "navy 9"
+ }
+]

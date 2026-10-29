@@ -83,7 +83,15 @@ The account was unchanged afterwards, against the list taken before. Ledgers are
 
 ## Dev
 
-See PROGRESS.md and the integration commit.
+- **Before:** dev served `index-BkPjilRy.js`, the Part 4 integration `633aa338`.
+- **Integration branch:** `dev/pk391-qm1-pk392-calx-pk392b-td7-fv1-pk393-pa2-2-td12-ppp1-pa2-5`, at `cffcac5c` = `633aa338` + `phone-app-v2` at `ebf3be7f`. No conflicts; CLAUDE.md auto-merged.
+- **Gates there:** tsc 0 / 0 · build clean · Vitest `Test Files 694 passed (694)` · `Tests 10756 passed | 3 skipped (10759)`.
+- **Locks there:**
+  - PA2-4 `4 passed` (wrote and undid) · PA2-3 `3` · PA2-2 `3`;
+  - PA2-5's Corkboard cases passed;
+  - **PA2-5's To-do cases could not start:** To-do v12, another session's work on dev only, removed the desktop today card whose counts T1 reads (`[data-td7="count"]`). v12 states the tray's overdue and today only in its pinned header line and the later count nowhere. The phone's tallies are still `dayBuckets`, the same call v12's tray makes. Recorded for Nick beside Part 3's badge question; the test was not bent to the integration.
+  - The account was unchanged afterwards.
+- **After:** dev serves `index-D7d8tr1e.js`.
 
 ## Not done, and why — for Nick
 
@@ -91,6 +99,7 @@ See PROGRESS.md and the integration commit.
 2. **The note sheet has no tags and no "make it a task".** Those are the noteboard's other two actions; they need phone forms.
 3. **The pin is navy, not the ref's terracotta,** under the no-red-fill law. If the pin should be an exception like the celebration's stamp, it is one colour value.
 4. **`quickDone`'s Undo leaves an own task's `updatedAt` moved,** on desktop and phone alike. Fixing it means changing the shared tick writer, which this part may not touch.
+6. **On dev, To-do v12 no longer states the desktop tray's tallies where T1 reads them.** When v12 and this branch meet, T1 needs v12's own statement of the three counts, or v12 needs to keep one.
 5. **There is no unit smoke for `TodoPhone` and `CorkPhone`.** These are phone variants of existing routes, not new routes. `pageSmoke` renders in node, and both read the db; the e2e locks render both.
 
 ## Worktree

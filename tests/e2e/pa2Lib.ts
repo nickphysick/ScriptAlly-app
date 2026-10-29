@@ -54,6 +54,8 @@ export const CSS_MUTATIONS: Record<string, string> = {
   "burgundy-btn": ".pa-celgo { color: #7c3a2a !important; }",
   /* T8 — the Send verb turns rust */
   "rust-verb": ".pa-tverb.pri { background: #b4553f !important; }",
+  /* A6 — the profile's name in ink on the navy head */
+  "ink-head": ".pa-agsheet .pa-aname { color: #1f2633 !important; }",
   /* S9 — the phone's tab bar shown at every width */
   "desk-bar": ".pa-tabbar { display: flex !important; }",
 };
