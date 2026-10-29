@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Submission packages v39.2 — the screenshots beside the pack's 01–05 (design-refs/submission-packages-v39-2/screens/),
+ * Submission packages v39.2 — the screenshots beside the pack's 01–06 (design-refs/submission-packages-v39-2/screens/),
  * at 1512 × 982 and 1280 × 832, into reports/submission-packages-v39-2/app/. Not a lock: it runs only with
  * PK392_SHOTS=1, so a routine run writes nothing. FIXTURE: seedPk40.mjs (pk40-ms), cleaned after.
  */
@@ -45,15 +45,16 @@ for (const size of SIZES) {
     test.setTimeout(300_000);
     const W = size.width;
     await open(page, size);
-    await to(page, null); await shot(page, "01-header", W);
-    await to(page, ".p9-tip", 60); await shot(page, "02-packages-heading", W);
-    await to(page, ".p9-bk-k", 32); await page.mouse.move(2, 2); await shot(page, "03-materials-folder", W);
+    await to(page, null); await shot(page, "01-header-pattern", W);
+    await to(page, ".p9-tip", 60); await page.mouse.move(2, 2); await shot(page, "02-packages-panel", W);
+    await to(page, ".p9-bk-k", 32); await shot(page, "03-builder-version-first", W);
     /* a sent package is locked and offers no Add (v38); "Ready one" shows the hover the ref draws */
     await page.locator(`${pg} [data-pk39="labels"] [data-pkid="pk40-ready"]`).first().click(); await page.waitForTimeout(600);
     await to(page, ".p9-bk-k", 32);
     await page.locator(`${pg} [data-pk26="lib-list"] .p9-lr:not(.p9-inpk)`).first().hover(); await page.waitForTimeout(400);
     await shot(page, "04-materials-row-hover", W);
-    await page.locator(`${pg} .p9-lib-tabs .p9-t-syn`).first().click(); await page.mouse.move(2, 2); await page.waitForTimeout(500);
-    await shot(page, "05-materials-synopses", W);
+    await page.locator(`${pg} .p9-lib-tabs .p9-t-let`).first().click(); await page.mouse.move(2, 2); await page.waitForTimeout(500);
+    await shot(page, "05-materials-letters", W);
+    await to(page, '[data-pk38="row-pieces"]', 0); await shot(page, "06-pieces-version-first", W);
   });
 }

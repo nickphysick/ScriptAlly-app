@@ -62,7 +62,8 @@ const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   /* v39.1: the builder goes back to a fixed 48, off the header card's inset */
   /* v39.2: names are cut to one line again */
   "PK26-M": { css: `[data-pk26="page"] .p9-pb-grid.p9-v39 .p9-lib-list .p9-lr.p9-lr b { white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }` },
-  "PK26-W": { css: `.p6.p6 > .p9-pb-build { margin-left: 48px !important; margin-right: 48px !important; }` },
+  /* v39.2: the builder sits in the packages panel, which takes the width */
+  "PK26-W": { css: `.p6.p6 > .p9-pkc { margin-left: 48px !important; margin-right: 48px !important; }` },
   /* every row accepts every drop */
   "PK26-B": { js: `document.addEventListener('dragover', (e) => { if (e.target.closest && e.target.closest('.p9-slt')) e.preventDefault(); }, true); document.addEventListener('drop', (e) => { const s = e.target.closest && e.target.closest('.p9-slt'); if (!s) return; const [k] = (e.dataTransfer.getData('text/plain') || '').split(':'); if (k && k !== s.dataset.slot) { const t = document.querySelector('.p9-slt[data-slot="' + k + '"]'); if (t) { e.stopImmediatePropagation(); t.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer: e.dataTransfer })); } } }, true);` },
   /* the drawer's header fill runs to the rim, over the inner border */
@@ -116,9 +117,10 @@ for (const size of SIZES) {
       const ins = (sel: string) => { const b = (root.querySelector(sel) as HTMLElement).getBoundingClientRect(); return [b.left - sheet.left, sheet.right - b.right]; };
       /* v38: the tab bar and v26's Results are gone (the band's width is pk38's L6).
          v39.1 A REWRITE: the builder's inset is no longer a fixed 48 — it is the header card's (the Contact list's
-         card, max(24, (sheet − 1200)/2)); pk391 L1 owns that law across every block */
+         card, max(24, (sheet − 1200)/2)); pk391 L1 owns that law across every block.
+         v39.2 REWRITE: the builder sits inside the packages panel (pk392 L8), so the panel is what takes those insets */
       const hd = (root.querySelector(".pk39-card") as HTMLElement).getBoundingClientRect();
-      return { build: ins(".p9-pb-build"), want: [hd.left - sheet.left, sheet.right - hd.right] };
+      return { build: ins(".p9-pkc"), want: [hd.left - sheet.left, sheet.right - hd.right] };
     });
     for (const [k, want] of [["build", r.want[0]]] as const) {
       const [l, rt] = r[k];
@@ -136,6 +138,8 @@ test("PK26-B only the matching row takes a drop; Add does the same by keyboard",
   seed();
   await open(page, SIZES[0], "/queries/packages?pkg=pk26-pkg-open");
   L.check("the drag target is open", (await vis(page, '[data-pk26="open"]').getAttribute("data-pkg")) === "pk26-pkg-open", "open package");
+  /* v39.2: Your materials opens on Versions; the letters are on their own tab */
+  await vis(page, '.p9-lib-tabs [role="tab"].p9-t-let').click();
   const letterB = vis(page, '.p9-lr[data-drag="let:pk26-let-b"]');
   /* while dragging: the package dims, the Query letter row alone is marked */
   await letterB.evaluate((el) => el.dispatchEvent(new DragEvent("dragstart", { bubbles: true, dataTransfer: new DataTransfer() })));

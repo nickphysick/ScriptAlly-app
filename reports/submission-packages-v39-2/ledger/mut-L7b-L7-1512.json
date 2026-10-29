@@ -3,7 +3,7 @@
   "lock": "L7-1512",
   "where": "the tab and the package card were measured",
   "ok": true,
-  "detail": "{\"tab\":{\"bg\":\"rgb(94, 47, 58)\",\"h\":40,\"top\":723.34375},\"card\":723.34375}"
+  "detail": "{\"tab\":{\"bg\":\"rgb(94, 47, 58)\",\"h\":40,\"top\":751.34375},\"card\":751.34375}"
  },
  {
   "lock": "L7-1512",
@@ -21,13 +21,13 @@
   "lock": "L7-1512",
   "where": "the tab's top is the package card's top (±1)",
   "ok": true,
-  "detail": "723.34375 vs 723.34375"
+  "detail": "751.34375 vs 751.34375"
  },
  {
   "lock": "L7-1512",
   "where": "the materials card starts 40 under the tab's top (±1)",
   "ok": true,
-  "detail": "763.34375 vs 723.34375"
+  "detail": "791.34375 vs 751.34375"
  },
  {
   "lock": "L7-1512",

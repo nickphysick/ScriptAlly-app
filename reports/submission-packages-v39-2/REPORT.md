@@ -1,120 +1,115 @@
-# Submission packages v39.2 — report
+# Submission packages v39.2 — report (the replacement pack)
 
-Branch `submission-packages-v39-2`, cut from the tip of `submission-packages-v39-1`, **c4534e41**, in its own worktree.
-Level with base: `git rev-list --count HEAD..origin/submission-packages-v39-1` = 0, and the tree was clean. The ref and
-its ten screens were verified against `SHA256SUMS` (ref 02c2fe8d…, SHA256SUMS fb288567…) before anything else.
+Branch `submission-packages-v39-2`, in its own worktree. **The first v39.2 had landed** (a384dd4b → 3408fc69, pushed and
+on dev as `dev/pk391-qm1-pk392`, index-CRC8gyVq.js), so this pack is built on top of it, from tip **3408fc69**, and the
+work it got wrong is reworked (§2). Level with base: `git rev-list --count HEAD..origin/submission-packages-v39-2` = 0,
+clean tree. The new ref and its twelve screens were verified against `SHA256SUMS` (ref 8cf26f5c…, SHA256SUMS 42898c3c…);
+it replaces the first pack's ref at the same path, and the hash is re-recorded deliberately (`--update`).
 
 ## 1 · False premises and deviations
 
-1. **The Contact list does not draw a pattern behind its header card.** Its pattern is the page sheet's own background
-   (`contactV25.css` A1: `public/images/contact/doodle-tile.svg`, 340 × 360, repeating, `background-attachment: local`)
-   under an opaque white card. There is no pseudo-element, no mask and no element opacity: the SVG bakes
-   `stroke-opacity="0.085"` into its strokes. So "the same mechanism" could not be copied. The packages pattern is the
-   ref's mechanism (a `::before` inside the card's clip, `isolation: isolate`, `z-index: -1`).
-2. **Opacity: the Contact list's 0.085, not the ref's 0.07**, as the pack asks where they differ. **Mask: the ref's left
-   fade is kept**, although the Contact list has none. The Contact list's pattern never sits under text because its card
-   covers it; on this card the fade is what keeps the title and buttons clear, which the pack also asks for. To match
-   the Contact list literally (no mask), delete the two `mask-image` lines in `pk392.css`; L1 would then need its mask
-   check removed.
-3. **"Lock v39.1's L4 still holds: the tab's top equals the package card's top".** v39.1's L4 is the rhythm lock (48 / 24
-   / 96) and says nothing about the tab. The claim is asserted in the new L7, and pk39's L4 (which compared the two
-   headers' heights and tops) is rewritten to it.
-4. **The meta line's "· {k} file(s)" can never show.** A material in the app carries no files (`MaterialRow` has none,
-   and the drawer has no attachments). The meta line reads "Sent n" or "Not sent yet".
-5. **The ref's 04 shows Add on a sent package.** In the app a sent package is locked and offers no Add (v38's ruling,
-   unchanged). The screenshot 04 is taken on "Ready one", an unsent package, so the hover shows Add as the ref draws it.
-6. **The card stays sticky at 56px, not the ref's 16.** The ref's 16 tucks the 40px tab under the scroller's top edge
-   while the card is stuck; at 56 the tab stays 16 clear.
-7. **"The tabs start 18px under the strip".** The ref computes 18 from the card's top edge, and the 5px strip lies over
-   that edge (it is a pseudo-element), so the tabs are 13 under the strip. The ref's computed value was used.
-8. **The summary line drops "· sent n · in m packages".** The ref's row shows the material's own summary and moves
-   "Sent n" to the meta line; "in m packages" has no place in the ref's row and is dropped. A material with no summary
-   of its own shows no summary line (the fixture's letters have none).
-9. **Hover background.** The ref lifts the FIRST row with a shadow on hover and keeps the hairline on the others (an
-   accident of its cascade). Every row here takes the white background on hover and keeps its hairline; no lift.
+1. **"The page ground's pseudo-element carries the packages tile".** The Contact list's page pattern is not a
+   pseudo-element. It is the page scroller's own background (contactV25.css A1 — and the Query Centre's is the same,
+   qcv150.css A1): `background-color: #f2eee8`, a 340 × 360 tile repeating, `background-attachment: local`, with the
+   opacity baked into the SVG (`stroke-opacity="0.085"`, 1.5px stroke). The pack says to use the same mechanism, so the
+   packages page does exactly that, and L1 checks the scroller's background rather than a `::before`.
+2. **Opacity and size are the Contact list's, not the ref's.** The ref draws its tile at 240 × 240 on a `::before` at
+   opacity .055; this page uses 340 × 360 and `stroke-opacity` 0.085 baked into the tile, as the Contact list does. The
+   motifs are the ref's, at the ref's drawn scale and 1.4px stroke, spread over the larger tile (so they are as sparse as
+   the Contact list's). L1 reads the opacity from both SVGs, never from a literal.
+3. **The ref's 2px rule under the version row computes to the 1px row border** — its `.slt.t-ver+.slt` box-shadow is
+   overridden later in its own cascade. The pack bakes the 2px ink-10% rule in, so it is built.
+4. **"Phase 4: Part E, the folder tab and the rows" needs no edit.** It landed with the first v39.2 (024c78ea), and the
+   new ref's computed values for it match the first ref's exactly (diffed with `scripts/pk392/probe-ref.cjs`); only the
+   card's height differs, because the ref's Versions list is longer. The one Part E change — the tabs read Versions,
+   Letters, Synopses and open on Versions — is in Phase 3. So the pack's Phase 4 has no commit.
+5. **The panel exposed a real bug: the colour picker could open off screen.** It is portalled and fixed 10px under the
+   package's tile; with the panel's padding the tile sits on the fold at 1280 × 832, and the picker opened below the
+   screen where it could not be scrolled to (pk39 L2 timed out on "element is outside of the viewport",
+   `redfirst-older-suites-on-panel.txt`). The picker now flips above the tile when it would not fit below (1512df16).
+6. **The ref keeps "Pages from" in How it works' illustration and the empty page's animation, and "No pages" on the
+   showcase cards.** Only step 3's copy is in the pack; those stay as the ref draws them.
+7. **The explainer → panel gap.** The ref draws 48 at 1512 and 40 at 1280; v39.1 set 48 at both widths and this pack
+   does not list it, so it stays 48.
+8. **"· {k} file(s)" can never show** — materials in the app carry no files (as in the first v39.2).
+9. **The ref's screen 04 shows Add on a sent package**; a sent package is locked here and offers none (v38). Screen 04
+   is taken on an unsent package.
+10. **The design-ref folder was staged with a path-limited `git add -A -- design-refs/submission-packages-v39-2`** so
+    the first pack's renamed screens were deleted in the same commit; nothing outside that path was staged.
 
-## 2 · What changed
+## 2 · What the first v39.2 did, and what was reworked
+
+| First v39.2 | Now |
+|---|---|
+| A `::before` pattern inside the header card (a384dd4b), 240 × 240, opacity 0.085, faded from the left | **Removed.** The pattern is the page scroller's, by the Contact list's mechanism; the tile is re-laid at 340 × 360 with the opacity baked in (e249d1ee) |
+| "Your packages" as a 30px heading (8113ec12) | Kept: it matches this ref (Part D) |
+| Your materials as a folder tab, rows that never cut a name (024c78ea) | Kept (Part E); its tabs now lead with Versions (Phase 3) |
+| Locks L1 (header pattern), L2, L7 | L1 rewritten for the page ground; L2 kept; L7 opens Letters first (the list now opens on Versions) |
+
+## 3 · Commits (this pack)
 
 | Phase | Commit | Files |
 |---|---|---|
-| 1 · Part A, the header's pattern | a384dd4b | `public/images/packages/packages-pattern.svg` (new), `pk392.css` (new), `SubmissionPackages.tsx` (import) |
-| 2 · Part B, "Your packages" | 8113ec12 | `Pk39Labels.tsx`, `pk391.css` (mono rule removed), `pk392.css` |
-| 3 · Part C, the folder tab and rows | 024c78ea | `Pk26Builder.tsx`, `pk391.css` (F block and the serif title rule removed), `pk392.css` |
-| 4 · locks, report | this commit | `tests/e2e/pk392.measure.ts`, `pk392.shots.measure.ts`, `seedPk40.mjs` (`--long-name`), `pk26/pk39/pk391.measure.ts`, `RETIRED-submission-packages-v39-2.md`, `scripts/pk392/`, the ref, `.refhashes.json`, `CLAUDE.md`, this report |
+| 1 · A, the page pattern | e249d1ee | `packages-pattern.svg` (re-laid), `pk392.css`, the new ref + `.refhashes.json` |
+| 2 · B + D, the panel | 29ef6bc4 | `SubmissionPackages.tsx`, `pk391.css`, `pk39.css`, `pk392.css` |
+| 3 · C, the version first | 3eb25f07 | `SubmissionPackages.tsx`, `Pk26Builder.tsx`, `Pk38Drawer.tsx`, `Pk38Results.tsx`, `Pk39Tip.tsx`, `Pk39HowItWorks.tsx` (+ its test), `pk392.css` |
+| 4 · E | — | nothing to change (§1.4) |
+| the picker fix | 1512df16 | `Pk26Builder.tsx` |
+| 5 · locks, report | this commit | `tests/e2e/pk392.measure.ts`, `pk392.shots.measure.ts`, `pk26/pk38/pk39/pk391.measure.ts`, `RETIRED-submission-packages-v39-2.md`, `scripts/pk392/probe-ref2.cjs`, `CLAUDE.md`, this report |
 
-- **A** — the tile is the ref's inline SVG, written out unchanged (parcel, envelope, stamp, a parcel tied with string,
-  luggage tag, dashed routes, tick; 1.4px ink stroke). 240 × 240, repeating, from the card's top left.
-- **B** — "Your packages" is an h2 in Special Elite 30px/1.1, `#1c130f`, with "Open one to change it below" (Source
-  Serif italic 15px, ink 60%) 4 under it; the art is 16 to its left, centred on the pair.
-- **C** — the tab: 40 tall, `#5e2f3a`, radius 12 12 0 0, padding 0 18 0 14; the envelope glyph (the ref's two-gradient
-  drawing, `#f3d4d6`) and "Your materials" in Special Elite 16px `#fbf1ef`; a 12px concave fillet; a 5px strip. The card
-  is `#fbf9f5`, radius 0 16 16 16, no art. Rows: `30px minmax(0,1fr)`, padding 12 12 12 14, top-aligned; names wrap;
-  summaries clamp at two lines; the meta line in Source Serif 12px at ink 48%; the in-package row `#fbf3f3` with a 3px
-  `#9b4a57` inset edge and "✓ In this package ·" in italic berry, no Add; Add (top right, on a white wash) and Edit only
-  on hover or focus; Add always under `hover: none`; hairlines at ink 6%, none under the in-package row.
-- The `MATERIALS_ART` constant and the row's grip markup are deleted (nothing reads them).
+- **A** — `.pk39-wpg > .wpg-scroll`: #f2eee8, the tile repeating at 340 × 360, `local`. Every card, band and the header
+  keep their own fills; the pattern takes no room and no pointer events.
+- **B** — `.p9-pkc` wraps the labels and the builder: #fbf9f5, radius 20, v39.1's card shadow, padding 28/32/32
+  (22/22/24 at a sheet ≤1200), at the Contact list width; the band 96 below (80 compact). On the brand-new page it is
+  `display: contents`, so that page is as built.
+- **C** — version → query letter → synopsis in the packing list, the drawer, the showcase cards, the pieces row and both
+  tab rows (each opening on Versions); the explainer and How it works step 3 take the pack's copy. Display order only.
 
-## 3 · Gates (baseline → final)
+## 4 · Gates (baseline → final)
 
-| Gate | Baseline (c4534e41) | Final |
+| Gate | Baseline (3408fc69) | Final |
 |---|---|---|
 | tsc | 0 errors | 0 errors |
-| build (`build:dev`, grepped for error / [WARNING]) | clean | clean |
-| Vitest | 678 files, 10,624 passed, 3 skipped | 678 files, 10,624 passed, 3 skipped |
-| e2e (pk26, pk38, pk39, pk391, +pk392) | — | 47 passed, 0 failed (`e2e-final.txt`) |
+| build (`build:dev`, grepped) | clean | clean |
+| Vitest | 678 files, 10,624 passed, 3 skipped | 678 files, 10,624 passed, 3 skipped (the step 3 test gained an assertion) |
+| e2e (pk26, pk38, pk39, pk391, pk392) | 47 passed (the first v39.2) | 43 passed + PK26-B red (it dragged from the default list, now Versions); PK26-B rewritten to open Letters and re-run green: **all pass** |
 
-The first baseline Vitest run had three `functions/` files red; that was `functions/node_modules` missing from the fresh
-worktree (as in v39.1). With it linked, 678/678.
+## 5 · Locks
 
-## 4 · Locks
+`tests/e2e/pk392.measure.ts` (fixture `seedPk40.mjs`):
 
-New, in `tests/e2e/pk392.measure.ts` (fixture `seedPk40.mjs`; L7 re-seeds with `--long-name` and puts the short name
-back after):
+- **L1 Pattern** (rewritten): the page's scroller carries the packages tile at 340 × 360, repeating, `local`, on
+  #f2eee8; the tile's `stroke-opacity` equals the Contact list's (both SVGs read); the header card has no pattern and a
+  flat fill; no horizontal overflow (scroller, window, document) at 1280 and 1512.
+- **L2 Type**: exactly three typewriter headings; the materials tab's label the one exception.
+- **L7 Materials** (now opens Letters first): the tab, the 40-character name in full at 1280, the in-package row, Add on
+  hover or focus.
+- **L8 Panel** (new): the panel holds the labels, the builder's label and both cards; the explainer and the band are
+  outside it; its edges are the header card's (±1); #fbf9f5, radius 20; the band 96 below it (80 at 1280).
+- **L9 Version first** (new): the packing list's first slot is the version (by position on screen), then letter,
+  synopsis, Also sends; "Version" over "Sets the pages that go out"; both tab rows lead with Versions and open on it;
+  Best opening first; the drawer's "What's in it" starts with Version; the stored packages are equal by value before and
+  after (Firestore returns map keys in no fixed order, so the dumps are compared canonicalised, not as text).
 
-- **L1 Pattern** (1280, 1512): a `::before` on the header card; its background is `packages-pattern.svg`, 240 × 240; opacity
-  0.085 (±0.001); faded in from the left; absolute, `z-index: -1`, in an isolated card inside its clip; no horizontal
-  overflow in the scroller, the window or the document; the title's colour `#1c130f`.
-- **L2 Type** (rewrites v39.1 L2): exactly three typewriter headings (the title's highlight, "Your packages" as an H2, the
-  open package's name), and the one exception is the materials tab's label; "Your packages" 30px/33 ink, no capitals;
-  the italic line, 4 under (±1); the art left of the pair and centred on it (±1).
-- **L7 Materials** (rewrites v39.1 L7; 1280, 1512): the tab `#5e2f3a`, 40 (±1) tall, its top the package card's top
-  (±1), the card 40 under it; at 1280 the 40-character name "Comps-forward, for agents who ask for it" shows in full
-  (scrollWidth ≤ clientWidth) and is not ellipsised; exactly one row has the berry edge, its meta line starts
-  "✓ In this package · " and it has no Add; every row has its meta line; Add is hidden at rest and shows on hover and on
-  focus.
+**Red first, on the first v39.2's build** (`redfirst-v39-2a-base.txt`): L1 at both widths (no page tile, a header-card
+`::before`), L8 at both widths (no panel), L9 (letter first, Letters open, Best letter first, "Query letter" first in the
+drawer).
 
-**Red first, against the v39.1 build** (`redfirst-v39-1-base.txt`): every case red — L1 (no `::before`), L2 (two
-typewriter elements, mono heading, no italic line), L7 (tab `#fbf9f5` and 84 tall, the long name 283 wide in a 101 box,
-ellipsised, no berry edge, no meta line, Add not shown on focus).
+**Red under its own break, on the final build** (`mutation-proofs.txt`): L1 (page tile removed), L2 (label names in the
+typewriter), L7 (names ellipsised), L7b (Add shown at rest), L8 (the panel spans the sheet), L9 (the version row moved
+last), **L9data** (a stored name really changes between the two reads — the only way to prove the stored-fields check
+can fail, since nothing on the page writes), PK26-W (panel at 48), pk391 L1 (panel at 48), pk391 L4 (explainer 20 above
+the panel).
 
-**Red under its own break, on the v39.2 build** (`mutation-proofs.txt`): `PK392_MUTATE=L1` (pattern removed) → L1 red at
-both widths; `L2` (label names typewriter) → L2 red; `L7` (names ellipsised) → L7-1280 red (the name check runs at 1280
-only); `L7b` (Add shown at rest) → L7 red at both widths.
+Rewritten older locks are listed in `tests/e2e/RETIRED-submission-packages-v39-2.md`. Their natural reds on the panel
+build are in `redfirst-older-suites-on-panel.txt`; pk38 L8's change is a path fix (its claim is unchanged), and pk39
+L2's new "the picker is on screen" check is red there as a timeout.
 
-Rewritten older locks (`tests/e2e/RETIRED-submission-packages-v39-2.md`):
+## 6 · Screenshots and the final run
 
-| Lock | Red on v39.1 build | Red under break |
-|---|---|---|
-| pk391 L2, L7 | — | retired, replaced by pk392 L2 / L7 |
-| pk26 PK26-M (names in full, not one line) | yes: the long name ellipsised | `PK26_MUTATE=PK26-M` → red |
-| pk39 L4 (tab top = package card top; 340 / 300 wide) | yes: 320 / 280 wide | `PK39_MUTATE=L4tab` (tab back in its card) → red, 40 off |
+`app/` holds the six ref screens at 1512 × 982 and 1280 × 832; `side-by-side/` puts each beside the ref's. The fixture
+has four live packages, so at 1280 "+ New package" wraps (v39.1's premise 7), and its letters have no summaries.
 
-The tab-top half of pk39 L4 was already true on v39.1 (its two headers had equal tops then); its break is what proves it.
+## 7 · Deploy
 
-## 5 · Screenshots
-
-`app/` holds the five ref screens at 1512 × 982 and 1280 × 832; `side-by-side/` puts each beside the ref's. Two known
-differences: the harness account has four packages, so at 1280 "+ New package" wraps under the labels (v39.1's
-premise 7); and the fixture's letters have no summaries of their own.
-
-## 6 · Deploy
-
-- **Dev had moved since v39.1's deploy.** It served `index-DRG_02T1.js`, not v39.1's `index-BzLemNDD.js`: the phone
-  pack ("Queries on a phone v1") had merged itself onto the v39.1 dev branch as `dev/pk391-qm1` (07cec344) and deployed.
-  Confirmed by building 07cec344: the bundle differs from the live one only in the embedded build date (`__QH_BUILD_DATE__`,
-  28 vs 29 Oct) and the two chunk names that follow from it.
-- v39.2 merged onto it as **`dev/pk391-qm1-pk392` (fca44895)**, pushed. The one conflict was `design-refs/.refhashes.json`;
-  both sides' entries kept. Gates on the merged tree: tsc 0, Vitest 686 files / 10,704 passed (3 skipped), build clean.
-- Hosting only, `--config firebase.dev.json --project scriptally-dev`, from that clean worktree. **Dev now serves
-  `index-CRC8gyVq.js`**; `/images/packages/packages-pattern.svg` returns 200 `image/svg+xml`. `pk392.measure.ts` L1, L2
-  and L7 pass against the live site (`SA_E2E_BASE_URL=dev`). No rules or functions changed. Prod is untouched.
+(Filled in after the deploy.)

@@ -1,55 +1,43 @@
 [
  {
   "lock": "L1-1280",
-  "where": "the header card was measured",
+  "where": "the page's scroller and header card were measured",
   "ok": true,
   "detail": "[object Object]"
  },
  {
   "lock": "L1-1280",
-  "where": "it has a ::before",
-  "ok": true,
-  "detail": "\"\""
- },
- {
-  "lock": "L1-1280",
-  "where": "its background is the packages tile",
+  "where": "the page ground carries the packages tile",
   "ok": true,
   "detail": "url(\"http://127.0.0.1:4392/images/packages/packages-pattern.svg\")"
  },
  {
   "lock": "L1-1280",
-  "where": "the tile is 240 × 240",
+  "where": "at the Contact list's size, 340 × 360, repeating",
   "ok": true,
-  "detail": "240px 240px"
+  "detail": "340px 360px repeat"
  },
  {
   "lock": "L1-1280",
-  "where": "at the Contact list's opacity, 0.085 (±0.001)",
+  "where": "scrolling with the page (local), on the Contact list's ground #f2eee8",
   "ok": true,
-  "detail": "0.085"
+  "detail": "local rgb(242, 238, 232)"
  },
  {
   "lock": "L1-1280",
-  "where": "faded in from the left (transparent at 0, full from 55%)",
+  "where": "the tile's opacity is the Contact list's (read from both SVGs)",
   "ok": true,
-  "detail": "linear-gradient(90deg, rgba(0, 0, 0, 0) 0px, rgb(0, 0, 0) 55%, rgb(0, 0, 0) 100%)"
+  "detail": "0.085 vs 0.085"
  },
  {
   "lock": "L1-1280",
-  "where": "behind the content (absolute, z-index -1, in an isolated card)",
+  "where": "the header card has no pattern: no ::before image, a flat fill",
   "ok": true,
-  "detail": "absolute -1 isolate"
+  "detail": "{\"img\":\"none\",\"col\":\"rgb(251, 248, 244)\",\"before\":\"none\",\"beforeImg\":\"none\"}"
  },
  {
   "lock": "L1-1280",
-  "where": "inside the card's clip",
-  "ok": true,
-  "detail": "hidden"
- },
- {
-  "lock": "L1-1280",
-  "where": "the sheet's scroller has no horizontal overflow",
+  "where": "the scroller has no horizontal overflow",
   "ok": true,
   "detail": "{\"sw\":1024,\"cw\":1024}"
  },
@@ -64,11 +52,5 @@
   "where": "the document has no horizontal overflow",
   "ok": true,
   "detail": "{\"sw\":1280,\"cw\":1280}"
- },
- {
-  "lock": "L1-1280",
-  "where": "the title's colour is unchanged (#1c130f)",
-  "ok": true,
-  "detail": "rgb(28, 19, 15) / rgb(28, 19, 15)"
  }
 ]

@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "L8-1280",
+  "where": "the panel is on the page",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "L8-1280",
+  "where": "it holds the labels, the builder label and both builder cards",
+  "ok": true,
+  "detail": "{\"has\":true,\"labels\":true,\"lib\":true,\"open\":true,\"kicker\":true,\"tipIn\":false,\"bandIn\":false,\"tip\":true,\"band\":true,\"p\":{\"x\":248,\"right\":1272,\"top\":487.34375,\"bottom\":1410.25},\"card\":{\"x\":272,\"right\":1248,\"top\":129.75,\"bottom\":321.3125},\"b\":{\"x\":248,\"right\":1272,\"top\":1490.25,\"bottom\":1817.578125},\"bg\":\"rgb(251, 249, 245)\",\"rad\":\"20px\"}"
+ },
+ {
+  "lock": "L8-1280",
+  "where": "the explainer is on the page and outside it",
+  "ok": true,
+  "detail": "true false"
+ },
+ {
+  "lock": "L8-1280",
+  "where": "the results band is on the page and outside it",
+  "ok": true,
+  "detail": "true false"
+ },
+ {
+  "lock": "L8-1280",
+  "where": "its left edge is the header card's (±1)",
+  "ok": false,
+  "detail": "248 vs 272"
+ },
+ {
+  "lock": "L8-1280",
+  "where": "its right edge is the header card's (±1)",
+  "ok": false,
+  "detail": "1272 vs 1248"
+ },
+ {
+  "lock": "L8-1280",
+  "where": "#fbf9f5, radius 20",
+  "ok": true,
+  "detail": "rgb(251, 249, 245) 20px"
+ },
+ {
+  "lock": "L8-1280",
+  "where": "the band is 80 below it (±1)",
+  "ok": true,
+  "detail": "1490.25 − 1410.25"
+ }
+]

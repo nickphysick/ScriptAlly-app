@@ -137,6 +137,11 @@ test("L2 a colour picked reaches the label, both headers, the showcase card and 
   await page.locator(`${pg} [data-pk40="open"] [data-pk39="tile"]`).first().click();
   await page.waitForTimeout(300);
   L.check("the picker opened", (await page.locator('[data-pk39="picker"]').count()) === 1, "picker");
+  /* v39.2: the picker is portalled and fixed, so it must open ON screen — above the tile when there is no room below
+     (the panel put the tile on the fold at 1280 × 832, and the picker opened where it could not be reached) */
+  const pk = await page.locator('[data-pk39="picker"]').first().boundingBox();
+  const vh = page.viewportSize()?.height ?? 0;
+  L.check("…on screen (top ≥ 0, bottom ≤ the viewport)", !!pk && pk.y >= 0 && pk.y + pk.height <= vh, JSON.stringify({ pk, vh }));
   L.check("…with 12 icons and 8 colours", (await page.locator('[data-pk39="picker"] [data-ic]').count()) === 12 && (await page.locator('[data-pk39="picker"] [data-col]').count()) === 8, "counts");
   await page.locator('[data-pk39="picker"] [data-col="plum"]').click();
   await page.waitForTimeout(1500);
@@ -157,7 +162,7 @@ test("L2 a colour picked reaches the label, both headers, the showcase card and 
   const st = stored();
   L.check("stored as the key, never the hex", st["pk40-draft"]?.colour === "plum", JSON.stringify(st["pk40-draft"]));
   L.check("…and the others still have no colour field (they read as Harbour)", st["pk40-std"]?.colour === undefined, JSON.stringify(st["pk40-std"]?.colour));
-  L.done(13);
+  L.done(14);
 });
 
 /* ── L3 · labels ── */

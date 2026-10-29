@@ -6,12 +6,12 @@
  * document it writes, and the package L6 creates, is cleaned in afterAll by manuscript). Every population is asserted
  * non-zero before a claim about it is believed.
  *
- *   L1 Width: the explainer, the labels row, the builder, the band's contents and the results share the header card's
+ *   L1 Width (v39.2: the packages panel stands for the labels row and the builder): the explainer, the panel, the band's contents and the results share the header card's
  *      left and right edges (±1) at 1280, 1512 and 1920, and the header card's are the Contact list card's
  *   L2 — RETIRED by v39.2 (pk392.measure.ts L2)
  *   L3 Hero: one status pill reading the right words for sent, ready and draft (the padlock on sent only); no stage
  *      dots; nothing in the open package's header overlaps at 1280; the selected label has no ring and has the bar
- *   L4 Rhythm: explainer → labels 48, BUILD label → cards 24, builder → navy band 96, top three → list panel 96 (±1),
+ *   L4 Rhythm (v39.2: the panel in place of the labels row and the builder): explainer → panel 48, BUILD label → cards 24, panel → navy band 96, top three → list panel 96 (±1),
  *      in both results rows; and the status pill's 32 at 1512 (the ref's compact rule makes it 28 at 1280)
  *   L5 Explainer: shows first; ✕ hides it and writes the store once; a reload keeps it hidden. (Its absence on the
  *      brand-new page is materialsPageSmoke.test.tsx: the harness account has materials, so that page cannot be reached
@@ -51,7 +51,8 @@ class Ledger {
 
 const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   /* L1: the builder goes back to v39's fixed 48 */
-  L1: { css: `.p6.p6 > .p9-pb-build { margin-left: 48px !important; margin-right: 48px !important; }` },
+  /* L1 (v39.2: the labels and the builder sit in the packages panel, which takes the width) */
+  L1: { css: `.p6.p6 > .p9-pkc { margin-left: 48px !important; margin-right: 48px !important; }` },
   /* L3: the selected label is ringed again */
   L3: { css: `.p9-pkl .p9-pkl-b.p9-on.p9-on.p9-on { box-shadow: 0 0 0 4px rgba(29,75,99,.35) !important; }` },
   /* L4: the explainer sits 20 above the labels */
@@ -100,7 +101,7 @@ for (const size of SIZES) {
     L.check("both cards measured", !!cl && !!card && cl.w > 400, JSON.stringify({ cl, card }));
     L.check("the header card's left = the Contact list's (±1)", near(card?.x, cl?.x, 1), `${card?.x} vs ${cl?.x}`);
     L.check("the header card's right = the Contact list's (±1)", near(card?.right, cl?.right, 1), `${card?.right} vs ${cl?.right}`);
-    for (const [what, sel] of [["the explainer", ".p6 > .p9-tip"], ["the labels row", ".p6 > .p9-pkl"], ["the builder", ".p6 > .p9-pb-build"], ["the band's contents", ".p6 > .p8-bnr > .p8-bnr-in"], ["the results", ".p6 > .p9-agg3"]] as const) {
+    for (const [what, sel] of [["the explainer", ".p6 > .p9-tip"], ["the packages panel (v39.2: it holds the labels and the builder)", ".p6 > .p9-pkc"], ["the band's contents", ".p6 > .p8-bnr > .p8-bnr-in"], ["the results", ".p6 > .p9-agg3"]] as const) {
       const b = await box(page, `${pg}${sel.slice(3)}`);
       L.check(`${what}: measured`, !!b && b.w > 300, JSON.stringify(b));
       L.check(`${what}: left = the card's (±1)`, near(b?.x, card?.x, 1), `${b?.x} vs ${card?.x}`);
@@ -108,7 +109,7 @@ for (const size of SIZES) {
     }
     const band = await box(page, `${pg} > .p8-bnr`), sheet = await page.evaluate(() => { const r = (document.querySelector('[data-pk26="page"]')!.closest(".ws-window") as HTMLElement).getBoundingClientRect(); return { x: r.x, right: r.right }; });
     L.check("the navy band still runs the full sheet (±1)", near(band?.x, sheet.x, 1) && near(band?.right, sheet.right, 1), `${JSON.stringify(band)} vs ${JSON.stringify(sheet)}`);
-    L.done(19);
+    L.done(16); /* v39.2: one block (the panel) in place of two */
   });
 }
 
@@ -171,15 +172,17 @@ test("L4 explainer → labels 48, BUILD label → cards 24, builder → band 96,
   await page.reload(); await page.locator('[data-pk39="labels"]').first().waitFor({ state: "visible", timeout: 30_000 }); await page.waitForTimeout(1200);
   const g = await page.evaluate((p) => {
     const root = document.querySelector(p)!; const r = (s: string) => root.querySelector(s)?.getBoundingClientRect();
-    const tip = r(":scope > .p9-tip"), pkl = r(":scope > .p9-pkl"), k = r(".p9-pb-build .p9-bk-k"), grid = r('[data-pk39="grid"]'), build = r(":scope > .p9-pb-build"), band = r(":scope > .p8-bnr");
+    /* v39.2 REWRITE: the labels and the builder sit in the packages panel, so the explainer is 48 above the PANEL and the
+       band 96 below it (pk392 L8 holds 80 at 1280) */
+    const tip = r(":scope > .p9-tip"), pkl = r(":scope > .p9-pkc"), k = r(".p9-pb-build .p9-bk-k"), grid = r('[data-pk39="grid"]'), build = r(":scope > .p9-pkc"), band = r(":scope > .p8-bnr");
     /* the top three are each results row's showcase grid; the list panel is that row's .p9-rlw */
     const pairs = [...root.querySelectorAll(".p9-agg3 .p9-ag3-row")].map((row) => { const t = row.querySelector(":scope > .p9-ag3-g"), l = row.querySelector(":scope > .p9-rlw"); return t && l ? l.getBoundingClientRect().top - t.getBoundingClientRect().bottom : null; });
     const pill = root.querySelector('[data-pk40="open"] [data-pk39="status"]')?.getBoundingClientRect().height ?? null;
     return { tipPkl: tip && pkl ? pkl.top - tip.bottom : null, kGrid: k && grid ? grid.top - k.bottom : null, buildBand: build && band ? band.top - build.bottom : null, pairs, pill };
   }, pg);
-  L.check("explainer → labels 48 (±1)", near(g.tipPkl ?? undefined, 48, 1), String(g.tipPkl));
+  L.check("explainer → the packages panel 48 (±1)", near(g.tipPkl ?? undefined, 48, 1), String(g.tipPkl));
   L.check("BUILD label → cards 24 (±1)", near(g.kGrid ?? undefined, 24, 1), String(g.kGrid));
-  L.check("builder → navy band 96 (±1)", near(g.buildBand ?? undefined, 96, 1), String(g.buildBand));
+  L.check("the packages panel → navy band 96 (±1)", near(g.buildBand ?? undefined, 96, 1), String(g.buildBand));
   L.check("both results rows were read (packages and pieces)", g.pairs.length === 2 && g.pairs.every((x) => x != null), JSON.stringify(g.pairs));
   L.check("top three → list panel 96 (±1), in both rows", g.pairs.every((x) => near(x ?? undefined, 96, 1)), JSON.stringify(g.pairs));
   /* the pill's full size (the ref's @container ≤1200 rule makes it 28 at 1280; L3 reads that) */
