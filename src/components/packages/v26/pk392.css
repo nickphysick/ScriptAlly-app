@@ -26,6 +26,25 @@
   }
 }
 
+/* ══ B · THE PACKAGES SECTION IS ONE RAISED PANEL (screen 02) ═════════════════════════════════════════════════════════
+   Your packages, the labels, the builder's label and the two builder cards in one panel (`.p9-pkc`): #fbf9f5, radius 20,
+   v39.1's one card shadow (its 1px ink-6% ring included), padding 28 / 32 / 32 (22 / 22 / 24 when the sheet is 1200 or
+   narrower). It takes the Contact list width (v39.1 A, pk391.css) and its contents run full width inside it: 48 between
+   the labels and the builder (v39.1 E), none under the builder. The explainer stays above it and the results band 96
+   below it (80 compact). On the brand-new page the panel is `display: contents`, so that page is as built. */
+@media (min-width: 768px) {
+  .p6:not(.p6-new) > .p9-pkc {
+    display: block; box-sizing: border-box; margin-top: 0; margin-bottom: 96px;
+    padding: 28px 32px 32px; border-radius: 20px; background: #fbf9f5; box-shadow: var(--pk-card-sh);
+  }
+  .p6:not(.p6-new) > .p9-pkc > :is(.p9-pkl, .p9-pb-build) { margin-left: 0 !important; margin-right: 0 !important; }
+  .p6:not(.p6-new) > .p9-pkc > .p9-pb-build { margin-bottom: 0 !important; }
+  .p6.p6-new > .p9-pkc { display: contents; }
+}
+@container p9sheet (max-width: 1200px) {
+  .p6:not(.p6-new) > .p9-pkc { padding: 22px 22px 24px; margin-bottom: 80px; }
+}
+
 /* ══ B · "YOUR PACKAGES" IS A REAL HEADING AGAIN (screen 02) ═══════════════════════════════════════════════════════
    Special Elite 30px/1.1 in ink, no capitals, over "Open one to change it below" (Source Serif italic 15px at ink 60%,
    4 down). The art stays on its left, centred on the pair (16 between). This is the typewriter's third use: the page

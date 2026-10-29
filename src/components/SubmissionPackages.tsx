@@ -122,12 +122,15 @@ export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab:
           : <Pk39Header title={activeMs?.title ?? null} onNew={() => setDialog({ m: "new" })} onHow={() => setHow(true)} />}
         {/* v39.1 G: the one-line explainer, above Your packages; never on the brand-new page */}
         {empty || !collectionsReady ? null : <Pk39Tip onHow={() => setHow(true)} />}
+        {/* v39.2 B: Your packages and the builder are one raised panel (dressed only on the populated page) */}
+        <section className="p9-pkc" aria-label="Your packages and the builder" data-pk392="panel">
         <Pk39Labels model={model} currentId={current?.id ?? null} showRetired={showRetired} onShowRetired={setShowRetired}
           onPick={(p) => setCurId(p.id)} onOpenRetired={(p) => setPkdId(p.id)} onNew={() => setDialog({ m: "new" })} />
         <Pk26Builder model={model} retired={retired} current={current} onSelect={setCurId} onFigures={(p) => setPkdId(p.id)} lib={lib} onLib={setLib}
             onNewPackage={() => setDialog({ m: "new" })} onDuplicate={copy} onEditPackage={(p, focus) => setDialog({ m: "edit", id: p.id, ...(focus ? { focus } : {}) })}
             onOpenMaterial={(k, id) => setDrawer(k === "ext" ? { m: "ext", id } : { m: "mat", kind: k, id })}
             onNewMaterial={openNewMaterial} onOpenVersions={goVersions} onOpenComps={goComps} />
+        </section>
         <Pk38Results model={model} onOpenPkg={(p) => setPkdId(p.id)} onOpenMaterial={(k, id) => setDrawer({ m: "mat", kind: k, id })}
           onOpenVersions={goVersions} onSeeQueries={goQueries} onAnalytics={goAnalytics} />
       </div>

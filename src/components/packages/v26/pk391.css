@@ -18,7 +18,9 @@
    the page root, which spans the sheet. */
 @media (min-width: 768px) {
   .p6.p6 { --pk-in: max(24px, calc((100% - 1200px) / 2)); }
-  .p6 > :is(.p9-tip, .p9-pkl, .p9-pb-build, .p9-agg3) { margin-left: var(--pk-in) !important; margin-right: var(--pk-in) !important; }
+  /* v39.2: Your packages and the builder sit in one panel (pk392.css B), which takes the width; on the brand-new page the
+     panel is `display: contents`, so its two children take it there */
+  .p6 > :is(.p9-tip, .p9-pkc, .p9-agg3), .p6.p6-new > .p9-pkc > :is(.p9-pkl, .p9-pb-build) { margin-left: var(--pk-in) !important; margin-right: var(--pk-in) !important; }
   /* the navy band runs the sheet; only its contents follow the width */
   .p6 > .p8-bnr { padding-left: 0 !important; padding-right: 0 !important; }
   .p6 > .p8-bnr > .p8-bnr-in { box-sizing: border-box; margin-left: var(--pk-in) !important; margin-right: var(--pk-in) !important; max-width: none !important; }
@@ -28,13 +30,13 @@
 @media (min-width: 768px) {
   .p6 > .pk39-hd { margin-bottom: 48px !important; }
   .p6 > .p9-tip { margin-top: 0 !important; margin-bottom: 48px !important; }
-  .p6 > .p9-pkl { margin-top: 0 !important; margin-bottom: 48px !important; row-gap: 24px !important; }
-  .p6 > .p9-pkl .p9-pkl-k { margin-bottom: 0 !important; }
-  .p6 > .p9-pb-build { margin-top: 0 !important; margin-bottom: 96px !important; }
-  .p6 > .p9-pb-build .p9-bk-k { margin-bottom: 24px !important; }
+  .p9-pkc > .p9-pkl { margin-top: 0 !important; margin-bottom: 48px !important; row-gap: 24px !important; }
+  .p9-pkc > .p9-pkl .p9-pkl-k { margin-bottom: 0 !important; }
+  .p9-pkc > .p9-pb-build { margin-top: 0 !important; margin-bottom: 96px !important; }
+  .p9-pkc > .p9-pb-build .p9-bk-k { margin-bottom: 24px !important; }
   .p9-pb-grid.p9-v39.p9-v39 { gap: 24px !important; }
   /* v40's guidelines sit inside the builder section, 24 under the cards, so the builder still ends 96 above the band */
-  .p6 > .p9-pb-build > .p9-gl { margin: 24px 0 0 !important; }
+  .p9-pkc > .p9-pb-build > .p9-gl { margin: 24px 0 0 !important; }
   .p6 > .p8-bnr { margin-top: 0 !important; }
   .p6 > .p9-agg3 { margin-top: 96px !important; margin-bottom: 96px !important; }
   .p9-agg3 .p9-ag3-row .p9-sh2 { margin-bottom: 48px !important; }
