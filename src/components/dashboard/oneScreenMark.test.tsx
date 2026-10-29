@@ -102,7 +102,9 @@ describe("every dashboard container header carries one mark", () => {
     /* the page's files since Dashboard v58: the kept chart card and the four v58 parts */
     "Chart": "OneScreenChart.tsx",
     "Left": "v60/Dash60Left.tsx",
-    "Lift": "v60/Dash60Lift.tsx",
+    /* "Lift" (v60/Dash60Lift) is retired — first visit v1, Part E; the set-up card and the tip carry no mark either */
+    "SetUp": "fv1/SetUpCard.tsx",
+    "Tip": "fv1/MentorTip.tsx",
     "Right": "v71/Dash71Right.tsx",
     "Task": "v71/Dash71Task.tsx",
     "Feed": "v58/Dash58Feed.tsx",

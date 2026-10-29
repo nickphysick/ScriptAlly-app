@@ -141,6 +141,8 @@ import { agentPrimary } from "./agentDisplay";
 import { taskSurvivesMute } from "./todoHousekeeping";
 import { buildOfferDecisionWrites, hasOfferDecision, OfferDecision } from "./offerDecision";
 import { applyUserPaths, type UserPaths } from "./userPaths";
+import { noteFirstWin } from "./firstWin";
+import { isFirstAgentWin, isFirstQueryWin, winCopy } from "./dashFirstVisit";
 
 // Connection validation test on boot as requested by skill
 async function testConnection() {
@@ -2202,6 +2204,10 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         date: new Date().toISOString(),
         details: ""
       });
+      /* Dashboard first visit v1 (Part B): the writer's first agent is the dashboard's first-win stamp */
+      if (isFirstAgentWin(agents.length)) {
+        noteFirstWin({ kind: "agent", uid: currentUser.id, msId: null, ...winCopy.agent(newAg.name ?? "", newAg.agency ?? "") });
+      }
       return { success: true, id };
     }
     return { success: false, error: "Operation failed." };
@@ -2560,6 +2566,11 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
          at Queried is already at its derived status and has nothing to recompute towards */
       if (seeded.some(a => a.resultingStatus && a.resultingStatus !== QueryStatus.QUERIED)) {
         await recomputeQueryOnline(currentUser.id, id);
+      }
+      /* Dashboard first visit v1 (Part B): the first query LOGGED on a manuscript is the dashboard's first-win stamp.
+         An imported query never is — the import records its own stamp, once, for the whole file. */
+      if (isFirstQueryWin(queries, q.manuscriptId, !!opts?.imported)) {
+        noteFirstWin({ kind: "query", uid: currentUser.id, msId: q.manuscriptId, ...winCopy.query(agent ? agentPrimary(agent) : "", agent?.agency ?? "", newQ.dateSent) });
       }
       return { success: true, id };
     } catch (e) {

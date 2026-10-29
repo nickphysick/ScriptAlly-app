@@ -22,37 +22,10 @@
 /* ⚠️ THE TITLE GIVES WAY TO THE LINK, NEVER THE REVERSE. The row is the title's size container and
    the title's size is a function of the row's width, so it never wraps, clips or pushes the link
    out. (In the ref, "ALL 18 →" was pushed off the edge at 1512 before this rule.) */
-.d59-titlerow {
-  container-type: inline-size;
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  min-width: 0;
-}
-.d58 .d59-titlerow .d58-listtitle {
-  flex: 1 1 auto;
-  min-width: 0;
-  font-size: clamp(19px, calc((100cqw - 90px) / 15.2), 32px);
-  line-height: 1.3;
-  white-space: nowrap;
-}
 /* a short window (700px tall and less): the title row gives back a little air (before the first query,
    "Ready for lift off?" uses this row; v71 retired the focus card's half of this rule) */
-@media (max-height: 700px) {
-  .d58 .d58-listhead { margin-bottom: 10px; }
-}
 
 /* ── the hairline ──────────────────────────────────────────────────────────────────────────── */
-.d59-rule {
-  flex: none;
-  box-sizing: border-box;
-  width: 100%;
-  height: 1px;
-  margin: 24px 0 10px;
-  border: 0;
-  background: rgba(28, 19, 15, 0.18);
-}
-@media (max-height: 779px) { .d59-rule { margin: 16px 0 6px; } }
 
 /* ── the founding writer panel (`.d59-fw`) is RETIRED by Dashboard v71: the founding writer card
    (v71/Dash71Founding, since replaced by v77's and then v93's card) replaced it, without the history dots or "This week?". */

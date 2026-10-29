@@ -503,6 +503,7 @@ export const Dashboard: React.FC<{
     updateUserTask,
     deleteUserTask,
     updateUserProfile,
+    updateUserPaths,
     smartImportUsage,
   } = useScriptAllyDb();
 
@@ -1553,6 +1554,7 @@ export const Dashboard: React.FC<{
         smartImportUsage={smartImportUsage}
         onNavigate={onNavigate}
         onFoundingSeen={(tier) => updateUserProfile({ foundingSeenTier: tier })}
+        onPrefs={updateUserPaths}
       />
       )}
 

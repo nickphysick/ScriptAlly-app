@@ -22,7 +22,7 @@ import { useOverlay } from "../../shell/useOverlay";
 import { StatusDot } from "../../StatusDot";
 import { feedEntries, type FeedSeg } from "../../../lib/dashFeed";
 import {
-  FEED_FILTERS, SUMMARY_NOUN, defaultFrom, drawerDays, drawerEvents, drawerSummary, earlierWindow, rangeLabel,
+  FEED_FILTERS, SUMMARY_NOUN, SUMMARY_NONE, defaultFrom, drawerDays, drawerEvents, drawerSummary, earlierWindow, rangeLabel,
   windowEndLine, type DrawerEvent, type FeedFilter,
 } from "../../../lib/dashFeedDrawer";
 import { actModeFor, feedFamily } from "./feedFamily";
@@ -141,7 +141,9 @@ export const Dash58Feed: React.FC<{
   now: Date;
   onClose: () => void;
   onAct: (queryId: string, mode: DrawerMode) => void;
-}> = ({ title, activities, queries, scopedQueries, agents, manuscripts, now, onClose, onAct }) => {
+  /** first visit v1 (D4): sends dated by their sent date (`feedEntries`'s honestDates) — the desktop passes it */
+  honestDates?: boolean;
+}> = ({ title, activities, queries, scopedQueries, agents, manuscripts, now, onClose, onAct, honestDates = false }) => {
   const rootRef = useRef<HTMLDivElement>(null);
   const { trapTab, scrimClick } = useOverlay(rootRef, { onEscape: onClose, captureEscape: true, scrimClasses: ["d58-wash"], onScrimClick: onClose });
   const [filter, setFilter] = useState<FeedFilter>("all");
@@ -161,8 +163,8 @@ export const Dash58Feed: React.FC<{
   }, []);
 
   const entries = useMemo(
-    () => feedEntries({ activities, queries, agents, manuscripts, now, seenAt: null, from }),
-    [activities, queries, agents, manuscripts, now, from],
+    () => feedEntries({ activities, queries, agents, manuscripts, now, seenAt: null, from, honestDates }),
+    [activities, queries, agents, manuscripts, now, from, honestDates],
   );
   const qcRows = useMemo(() => buildQcRows(scopedQueries, agents, activities, now.getTime()), [scopedQueries, agents, activities, now]);
   const days = useMemo(() => drawerDays(drawerEvents(entries, qcRows, filter), now), [entries, qcRows, filter, now]);
@@ -185,7 +187,6 @@ export const Dash58Feed: React.FC<{
       >
         <header className="d58-dhead" data-d58="drawer-head">
           <div className="d58-drow">
-            <span className="d58-dart" aria-hidden="true" />
             <div style={{ minWidth: 0 }}>
               <h2 className="d58-dtitle">Activity feed</h2>
               <small className="d58-dsub" data-d58="drawer-sub">Everything that's happened on <i>{title || "your manuscript"}</i></small>
@@ -211,9 +212,10 @@ export const Dash58Feed: React.FC<{
           </div>
         </header>
         <div className="d58-sum">
-          <div data-d58="sum"><b>{sum.replies}</b><span>{SUMMARY_NOUN.replies(sum.replies)}</span></div>
-          <div data-d58="sum"><b>{sum.did}</b><span>{SUMMARY_NOUN.did(sum.did)}</span></div>
-          <div data-d58="sum" className="is-you"><b>{sum.need}</b><span>{SUMMARY_NOUN.need(sum.need)}</span></div>
+          {/* first visit v1 (D4): a zero is said in words, never as a 0 */}
+          <div data-d58="sum">{sum.replies ? <><b>{sum.replies}</b><span>{SUMMARY_NOUN.replies(sum.replies)}</span></> : <span className="d58-sumnone">{SUMMARY_NONE.replies}</span>}</div>
+          <div data-d58="sum">{sum.did ? <><b>{sum.did}</b><span>{SUMMARY_NOUN.did(sum.did)}</span></> : <span className="d58-sumnone">{SUMMARY_NONE.did}</span>}</div>
+          <div data-d58="sum" className="is-you">{sum.need ? <><b>{sum.need}</b><span>{SUMMARY_NOUN.need(sum.need)}</span></> : <span className="d58-sumnone">{SUMMARY_NONE.need}</span>}</div>
         </div>
         <div className="d58-dbody" data-d58="drawer-body">
           {days.length === 0 && <p className="d58-dempty">Nothing here in this window.</p>}

@@ -20,18 +20,18 @@
    the column, never under 194px. The two columns are one grid row, so their bottoms line up.
    ⚠️ KEEP THE QUERY IN STEP WITH `FIXED_SHAPE_QUERY` in v71/Dash71Task.tsx. Below 901px tall: v71 exactly. */
 @media (min-height: 901px) and (min-width: 1100px) {
-  .d58[data-mode="q"] { height: auto; }
-  .d58[data-mode="q"] .d58-page { flex: none; }
-  .d58[data-mode="q"] .d58-body { flex: none; align-items: stretch; }
+  .d58:is([data-mode="q"], [data-mode="pre"]) { height: auto; }
+  .d58:is([data-mode="q"], [data-mode="pre"]) .d58-page { flex: none; }
+  .d58:is([data-mode="q"], [data-mode="pre"]) .d58-body { flex: none; align-items: stretch; }
   .d58[data-mode="q"] .d58-left { grid-template-rows: clamp(300px, 31vw, 540px) auto; }
   .d58[data-mode="q"] .d60-hoops { min-height: 0; }
-  .d58[data-mode="q"] .d71-right { grid-template-rows: auto minmax(194px, 1fr); }
-  .d58[data-mode="q"] .d71-taskslot > .d71-task { flex: none; }
-  .d58[data-mode="q"] .d71-task .d71-tb { flex: none; padding: 18px 22px 16px; }
+  .d58:is([data-mode="q"], [data-mode="pre"]) .d71-right { grid-template-rows: auto minmax(194px, 1fr); }
+  .d58:is([data-mode="q"], [data-mode="pre"]) .d71-taskslot > .d71-task { flex: none; }
+  .d58:is([data-mode="q"], [data-mode="pre"]) .d71-task .d71-tb { flex: none; padding: 18px 22px 16px; }
   /* the stack: every item in one cell; the inactive ones are hidden, inert and aria-hidden (Dash71Task) */
-  .d58[data-mode="q"] .d71-tbstack { display: grid; }
+  .d58:is([data-mode="q"], [data-mode="pre"]) .d71-tbstack { display: grid; }
   /* each item from the top of the cell, as the ref's: a short item does not float in the tallest one's room */
-  .d58[data-mode="q"] .d71-tbstack > .d71-tb { grid-area: 1 / 1; justify-content: flex-start; }
+  .d58:is([data-mode="q"], [data-mode="pre"]) .d71-tbstack > .d71-tb { grid-area: 1 / 1; justify-content: flex-start; }
 }
 
 /* ── C · the founding writer card: RETIRED by Dashboard v93, whose card v105 replaced (v105/Dash105Founding.tsx, v105/dash105.css). ── */

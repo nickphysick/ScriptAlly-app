@@ -242,9 +242,10 @@ test("DB59 T1 — the folder tab on the sheet's edge, and its unseen badge", asy
   L.check("T1", "the desk's colour", !!t && t.bg === t.desk && t.bg !== "rgba(0, 0, 0, 0)", `${t?.bg} · desk ${t?.desk}`);
   await page.locator('[data-d58="tab"]').click();
   await page.waitForTimeout(700);
-  const rows = await page.locator('[data-d58="ev"]').count();
+  /* RE-POINTED (Dashboard first visit v1): the badge counts only what came IN — the writer's own acts are never unread (A5) */
+  const rows = await page.locator('[data-d58="ev"][data-dir="in"]').count();
   const expected = rows > 9 ? "9+" : rows === 0 ? null : String(rows);
-  L.check("T1", "the badge is the unseen count", rows > 0 && t?.badge === expected, `badge ${t?.badge} · ${rows} rows in the drawer → ${expected}`);
+  L.check("T1", "the badge is the unseen count", rows > 0 && t?.badge === expected, `badge ${t?.badge} · ${rows} incoming rows in the drawer → ${expected}`);
   await page.keyboard.press("Escape");
   await page.waitForTimeout(500);
   const afterOpen = await page.locator('[data-d58="tab-badge"]').count();

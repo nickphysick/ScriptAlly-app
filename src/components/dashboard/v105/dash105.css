@@ -8,7 +8,7 @@
 /* ── the right column while querying, ≤900px tall (moved from v93's sheet, unchanged): the founding card takes up to
    290px and the task card keeps at least 254px. At ≤760px tall the 128px row stays (it gives the Compact card). */
 @media (max-height: 900px) and (min-height: 761px) and (min-width: 1100px) {
-  .d58[data-mode="q"] .d71-right { grid-template-rows: minmax(254px, 1fr) minmax(194px, 290px); }
+  .d58:is([data-mode="q"], [data-mode="pre"]) .d71-right { grid-template-rows: minmax(254px, 1fr) minmax(194px, 290px); }
 }
 
 .d105-fw {
@@ -28,7 +28,6 @@
 /* the dashboard's cards lift on hover (v93's, kept) */
 .d58 .d105-fw { transition: transform 180ms cubic-bezier(0.22, 0.8, 0.3, 1), box-shadow 180ms ease; }
 .d58 .d105-fw:hover { z-index: 4; transform: translateY(-2px); box-shadow: 0 12px 26px rgba(28, 19, 15, 0.16), 0 2px 6px rgba(28, 19, 15, 0.08); }
-.d58[data-mode="pre"] .d58-right > .d105-fw { flex: 1 1 0; min-height: 112px; }
 .d105-fw *, .d105-fw *::before, .d105-fw *::after { box-sizing: border-box; }
 
 .d105-frame {

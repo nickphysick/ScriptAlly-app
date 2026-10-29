@@ -41,6 +41,10 @@ const NAMES: ArtSlotName[] = [
   "pane-unselected",
   // the submission-package group's mark — ONE for every package (refs 177/178)
   "package-mark",
+  // Dashboard first visit v1: the Mentor beside the top tip, and the set-up card's two paths — placeholders
+  "dash-mentor-standing",
+  "dash-courier-letter",
+  "dash-scout-binoculars",
 ];
 
 describe("⚠️ ONE component, TEN slots — the briefs are the contract", () => {

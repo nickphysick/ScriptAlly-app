@@ -307,7 +307,7 @@ type Card = { index: number; of: number; kind: string; key: string; query: strin
 const readCard = (page: Page) => page.evaluate(() => {
   const c = document.querySelector<HTMLElement>('[data-d71="task"][data-loading="0"]');
   if (!c) return null;
-  const pos = c.querySelector('[data-d71="pos-text"]')?.textContent ?? "1 OF 1";
+  const pos = c.querySelector('[data-d71="pos-text"]')?.textContent ?? "1 of 1";
   /* RE-POINTED (Dashboard v93): the head is the kind band; its title replaces the kicker pill, and the progress
      segments' accent is read off a past or current segment */
   const head = c.querySelector<HTMLElement>('[data-d71="band"]');
@@ -325,7 +325,8 @@ async function walk(page: Page): Promise<Card[]> {
   const out: Card[] = [];
   const first = await readCard(page);
   if (!first) return out;
-  const of = Number(first.pos.split(" OF ")[1] ?? 1);
+  /* RE-POINTED (Dashboard first visit v1): the pager reads "2 of 4", not "2 OF 4" */
+  const of = Number(first.pos.split(/ of /i)[1] ?? 1);
   for (let i = 0; i < of; i++) {
     const c = await readCard(page);
     if (c) out.push({ ...c, of } as unknown as Card);
@@ -442,7 +443,7 @@ test("DB71 C4 — 7s a task, held on hover, stepped by hand, still under reduced
   const i0 = await idx();
   await page.locator('[data-d71="next"]').click();
   const i1 = await idx();
-  L.check("C4", "› steps", i1 === (i0 + 1) % Math.max(1, Number((await page.locator('[data-d71="pos-text"]').textContent())?.split(" OF ")[1] ?? 1)), `${i0} → ${i1}`);
+  L.check("C4", "› steps", i1 === (i0 + 1) % Math.max(1, Number((await page.locator('[data-d71="pos-text"]').textContent())?.split(/ of /i)[1] ?? 1)), `${i0} → ${i1}`);
   await page.evaluate(() => {
     const w = window as unknown as { __d71: number | null };
     w.__d71 = null;

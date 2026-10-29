@@ -731,28 +731,10 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
 /* ⚠️ A MATCHING PAIR. The drawing, a title, one line; the active card adds the one thing to do about
    it and the closed card adds nothing, because there is nothing to do there. The band stays above
    both. The faded example chart that stood here is retired — it drew a card the app no longer has. */
-.os-hollow {
-  flex: 1 1 auto; min-height: 0;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  text-align: center; padding: 4px 0 8px;
-}
-.os-hollow-art { display: block; height: auto; margin-bottom: 20px; filter: drop-shadow(0 6px 8px rgba(28, 19, 15, 0.18)); }
-.os-hollow-art--courier { width: 210px; max-width: 70%; }
 /* the Archivist keeps his hover swap here: two stacked drawings in one 168px box */
 .os-hollow-art--archivist { position: relative; width: 168px; max-width: 70%; aspect-ratio: 922 / 821; }
 .os-hollow-art--archivist .os-arch { position: absolute; inset: 0; left: 0; top: 0; width: 100%; height: 100%; transform: none; }
-.os-hollow-ttl { margin: 0; font-family: var(--os-type); font-size: clamp(21px, 6cqw, 30px); line-height: 1.15; color: var(--dash-ink); }
-.os-hollow-line { margin: 10px 0 0; font-size: 16px; line-height: 1.55; color: var(--dash-ink-70); max-width: 300px; }
 /* the page's one ink pill — buttons stay ink */
-.os-inkpill {
-  margin-top: 22px; border: 0; cursor: pointer;
-  background: var(--dash-ink); color: var(--dash-page);
-  font-family: var(--font-serif), Georgia, serif; font-size: 15px; line-height: 1.2;
-  padding: 12px 24px; border-radius: 30px;
-  transition: transform 0.14s ease, background-color 0.14s ease;
-}
-.os-inkpill:hover { background: #2e221b; }
-.os-inkpill:active { transform: translateY(1px); }
 
 /* ══ §7 · THE STATE PILL ══════════════════════════════════════════════════════════════════════ */
 .os-spill {
@@ -1241,7 +1223,6 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
   .os-row2 > .os-card { height: 460px; }
 }
 
-
 /* ══ §12 · THE LOADING COVER ══════════════════════════════════════════════════════════════════ */
 
 /* ══ the per-card bars (carried over) ══
@@ -1346,7 +1327,6 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
   100% { background-position: 600px 0; }
 }
 
-
 /* ══ §13 · MICRO-INTERACTIONS ═════════════════════════════════════════════════════════════════ */
 
 /* ══ micro-interactions, carried over ═══════════════════════════════════════════════════════════════
@@ -1372,8 +1352,6 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
  */
 .os-card.os-lift { transition: box-shadow 0.16s ease; }
 
-
-
 /* buttons — ⚠️ THE PRESSED STATE IS THE ONE USUALLY MISSED, and it is the only feedback a click
    gives before its effect arrives. */
 .os-btn-mini, .os-see { transition: transform 0.14s ease, background-color 0.14s ease, border-color 0.14s ease; }
@@ -1382,7 +1360,6 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
 
 /* ⚠️ TASK ROWS KEEP THEIR PLAIN HOVER — background only. A hover-revealed action button was
    tried on these rows and rejected; the status pill stays put and the ⋯ is always there. */
-
 
 /* ══ §14 · THE MARK SLOT (read by pages beyond this one — see OneScreenMark) ══════════════════ */
 
@@ -1428,7 +1405,6 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
   font-family: "JetBrains Mono", monospace; font-style: normal;
   font-size: 6px; letter-spacing: 0.06em; text-transform: uppercase; color: #b09b8c;
 }
-
 
 /* ══ §15 · FIRST-RUN STATES ═══════════════════════════════════════════════════════════════════ */
 
@@ -1500,7 +1476,6 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
   font-family: "Caveat", cursive; font-size: 17px; line-height: 1.2; color: #8a7a6c;
 }
 
-
 /* ══ §16 · PARKED: components kept but not mounted on this page ═══════════════════════════════
    ⚠️ THE COMMUNITY TILE AND THE GOALS CARD ARE NOT ON THE v16 DASHBOARD (Nick: drop the tile from
    the page, keep the component). Their rules stay with them: a kept component that renders
@@ -1527,7 +1502,6 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
    and period select; the Form 11 sheet replaces them whole.
    The card's own rules now live in `queryingGoals.css`, beside the component that renders them.
    `.os-goal-t` went with the sentence it carried — the card states a count, not an instruction. */
-
 
 /* ══ COMMUNITY TILE (community-tile pack, P1) ═══════════════════════════════════════════════════
    Sage-band card at the author tile's width. Phase 1 renders the empty state and nothing else —
@@ -1620,7 +1594,6 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
    prevent. Rule and element removed together — a `margin-top: auto` left in this file would
    silently un-centre the hero the next time someone re-added the div. */
 
-
 /* ══ v26 · THE COMMUNITY TILE ══ */
 /* ref `.comtile` — 360px (the column's width), ~95px tall, a 56px mark, a serif title, one line,
    and the Beta pill in the corner rather than in the flow. */
@@ -1658,7 +1631,6 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
    `.os-search`, `.os-kbd`. The search is in the NAV's row now (`.ws-bigsearch`), which is where the
    ref puts it and where it shares a line with Feedback and New. The rules go with the element:
    leaving a stylesheet block for markup nothing renders is the fault this sheet already records. */
-
 
 /* ══ the Pro banner (v16 — supersedes the rail's mini) ══ */
 /* ⚠️ display:none BY DEFAULT and switched on only where the extra row genuinely fits. The gate is
@@ -1715,7 +1687,6 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
   position: absolute; left: 20px; top: 8px; bottom: 8px; width: 1.5px;
   background: linear-gradient(#e8dcd0, rgba(232, 220, 208, 0));
 }
-
 
 /* ⚠️ THE COMMUNITY STRIP'S OWN RULES, KEPT WITH THE COMPONENT (v16, 18 Sep). The tile left the
    dashboard and the component did not (Nick); its strip variant has been unreachable since the rail's

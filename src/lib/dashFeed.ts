@@ -124,7 +124,18 @@ export interface FeedInput {
   seenAt: number | null;
   /** where the window starts (ms). Absent, the last `FEED_DAYS` days. */
   from?: number;
+  /**
+   * First visit v1 (D4), the desktop only: a query's send is dated by its SENT date, not by when it was logged, and
+   * "after … without a reply" counts from that sent date. Without it a query logged today with an earlier sent date
+   * sat under "Today", and a June query closed in October read "after 3 minutes without a reply" (the minutes
+   * between logging and closing). The phone keeps the old reading until dashboard-mobile-v1 takes this up.
+   */
+  honestDates?: boolean;
 }
+
+/** The record of a query going out: the drawer's `query_sent`, or (before event keys) a rung to Queried. */
+const isSendEvent = (a: Activity): boolean =>
+  a.eventKey === "query_sent" || (!a.eventKey && a.resultingStatus === QueryStatus.QUERIED);
 
 /* ── the pills ─────────────────────────────────────────────────────────────────────────────────── */
 
@@ -409,9 +420,20 @@ export const feedEntries = (i: FeedInput): FeedEntry[] => {
      event from last week, and windowing the anchor loses the elapsed clause on every older query */
   const queriedAt = queriedTimes(i.activities);
   const out: FeedEntry[] = [];
+  /* honest dates (D4): a send is when it was sent; everything else is when it was recorded */
+  const sentOf = (q: Query | undefined): number | null => {
+    const v = q?.dateSent ? new Date(q.dateSent).getTime() : NaN;
+    return Number.isFinite(v) ? v : null;
+  };
+  const whenOf = (x: Activity): number => {
+    const logged = new Date(x.date).getTime();
+    if (!i.honestDates || !isSendEvent(x) || !x.queryId) return logged;
+    const sent = sentOf(i.queries.find((q) => q.id === x.queryId));
+    return sent !== null && sent < logged ? sent : logged;
+  };
 
   for (const { a, t } of i.activities
-    .map((x) => ({ a: x, t: new Date(x.date).getTime() }))
+    .map((x) => ({ a: x, t: whenOf(x) }))
     .filter((x) => Number.isFinite(x.t) && x.t >= from && x.t <= nowMs)
     .sort((x, y) => y.t - x.t)) {
     /* THE IMPORT'S EVENT (import review v1): about a manuscript, never a query, so it has no subject
@@ -463,7 +485,7 @@ export const feedEntries = (i: FeedInput): FeedEntry[] => {
       const agent = q ? i.agents.find((x) => x.id === q.agentId) : undefined;
       who = (agent?.name || agent?.agency || "").trim();
       const msTitle = i.manuscripts.find((m) => m.id === a.manuscriptId)?.title;
-      const anchorAt = querySentAt(a.queryId ?? "", queriedAt, q);
+      const anchorAt = i.honestDates ? (sentOf(q) ?? querySentAt(a.queryId ?? "", queriedAt, q)) : querySentAt(a.queryId ?? "", queriedAt, q);
       say = describeEvent(
         shape.status, who, (msTitle ?? "").trim(), trustedElapsed(anchorAt, t, nowMs),
         String(a.activityType),

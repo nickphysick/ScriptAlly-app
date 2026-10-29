@@ -26,7 +26,9 @@ export const QueryMini: React.FC<{ c: ClosedCard; manuscript: string }> = ({ c, 
       <div className="d116-nm"><b data-d116="name" title={c.name} aria-label={c.name}>{c.name}</b><small data-d116="agency">{c.agency}</small></div>
       <span className="d116-pill" data-d116="pill" aria-label={c.outcome === "quiet" ? "No reply" : "Passed"}><ClosedGlyph /><span className="d116-pillt">{c.outcome === "quiet" ? "No reply" : "Passed"}</span></span>
     </div>
-    <div className="d116-qmm"><small>QUERYING</small><b data-d116="ms">{manuscript}</b></div>
+    {/* ⚠️ NO "QUERYING" LABEL (first visit v1, D2): these are CLOSED queries — the label read as a status the query no
+        longer has. The manuscript alone names what was queried. */}
+    <div className="d116-qmm"><b data-d116="ms">{manuscript}</b></div>
     <div className="d116-qmf"><span data-d116="queried">Queried {c.queried}</span><span data-d116="end">{c.end}</span></div>
   </div>
 );

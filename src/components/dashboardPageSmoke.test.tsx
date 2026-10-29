@@ -52,10 +52,15 @@ describe("/dashboard renders", () => {
     /* ⚠️ RETARGETED A FIFTH TIME (Dashboard v60). Before the first query the right column is "Ready
        for lift off?" (it replaces the focus card, the getting-started plan included), and the left
        column is the two doors. */
-    expect(html).toContain("Ready for lift off?");
-    expect(html).toContain("No queries out yet.");
-    expect(html).toContain("No agents yet."); // v60.1 copy (was "Your list starts here.")
-    expect(html).toContain("Where do I start?"); // v60.1: the one header button before the first query
+    /* ⚠️ RETARGETED A SIXTH TIME (Dashboard first visit v1). Before the first query the left column is the
+       set-up card and the Mentor's tip, the task card is the one Getting started page, the eyebrow is the
+       campaign's, and the header carries no buttons at all ("Where do I start?" and the doors are retired). */
+    expect(html).toContain("Let&#x27;s get you set up");
+    expect(html).toContain("Top tip");
+    expect(html).toContain("Getting started");
+    expect(html).toContain("— GETTING READY —");
+    expect(html).not.toContain("Ready for lift off?");
+    expect(html).not.toContain("Where do I start?");
     /* RETARGETED (Dashboard v93): the founding card is "Your contributions"; its band names it while its stats load */
     /* RETARGETED (Dashboard v105): the founding card is a press ID; its strip says FOUNDING WRITER while its stats load */
     expect(html).toContain("FOUNDING WRITER");
