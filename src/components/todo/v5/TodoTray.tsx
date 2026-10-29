@@ -64,8 +64,8 @@ import { BLANK_DRAFT, ComposeCard, dayLabel, dueOf, surfaceDay, type ComposeDraf
 import { useTagWrites } from "../useTagWrites";
 import { taskSurfaced } from "../../../lib/todoBoard";
 import { snoozeCardWrites, snoozeGroupWrites } from "../snoozeWrites";
-import { TrayHeader } from "./TrayHeader";
-import { TrayCalendar, dayChip, plusDays as calPlus, shortDay, weekdayOf } from "./TrayCalendar";
+import { TrayHeader, TrayHeadline, TraySection } from "./TrayHeader";
+import { TrayToday, dayChip, plusDays as calPlus, shortDay, weekdayOf } from "./TrayCalendar";
 import { TrayCalDrawer } from "./TrayCalDrawer";
 import { TrayDialMenu, type DialOpt } from "./TrayDialMenu";
 import { lateTag, rowLines } from "../../../lib/trayRows";
@@ -87,6 +87,7 @@ import { QueryStatus, type TaskFlag, type UserTask } from "../../../types";
 import "../v2/todoV2.css";
 import "./todoV5.css";
 import "./todoV52.css";
+import "./todoV7.css";
 
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 const SORT_KEY = "sa.todoTray.sort";
@@ -216,10 +217,19 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
   const [selKey, setSelKey] = useState<string | null>(null);
   const sel = ordered.find((i) => i.key === selKey) ?? ordered[0] ?? null;
   const findRef = useRef<HTMLInputElement>(null);
+  /* ⚠️ v7 §1.5 — THE TRAY'S OWN SCROLLER, NEVER THE PAGE. `scrollIntoView` scrolls every scrolling ancestor, so on
+     load at 1280 a selected row pulled the whole page down past the header to the tray. The row is brought into view
+     inside `.td5-tray` alone ("nearest", clear of its sticky band), and the page stays where it is. */
   const scrollRowIntoView = (key: string) => {
     requestAnimationFrame(() => {
       const el = document.querySelector<HTMLElement>(`.td5-root [data-td5-row="${CSS.escape(key)}"]`);
-      el?.scrollIntoView({ block: "nearest", behavior: reduced() ? "auto" : "smooth" });
+      const sc = el?.closest<HTMLElement>(".td5-tray");
+      if (!el || !sc || sc.scrollHeight <= sc.clientHeight) return;
+      const band = el.closest(".td5-grp")?.querySelector<HTMLElement>(".td5-band")?.offsetHeight ?? 0;
+      const r = el.getBoundingClientRect(), c = sc.getBoundingClientRect();
+      const top = r.top - c.top - band, bottom = r.bottom - c.bottom;
+      const by = top < 0 ? top : bottom > 0 ? bottom : 0;
+      if (by) sc.scrollBy({ top: by, behavior: reduced() ? "auto" : "smooth" });
     });
   };
 
@@ -1098,27 +1108,24 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
     if (nx) { selectRow(nx.key); scrollRowIntoView(nx.key); }
   };
 
+  /* ── v7 §1 · the top of the page: the house header card, Today (populated only), and the "Your tray" heading ── */
   const header = (
-    <TrayHeader
-      loading={loading} n={loading ? null : n} caught={state === "caught"} msTitle={msTitle}
-      counts={counts} active={kindActive} onKind={(k) => setFilters((f) => ({ ...f, type: f.type === k ? null : k }))}
-      cleared={week.length} ringTitle={undated}
-      onRing={() => sheetRef.current?.scrollIntoView({ block: "start", behavior: reduced() ? "auto" : "smooth" })}
-      onAdd={() => openCompose()} asideN={asideN} asideRef={asideRef} onAside={() => showView("aside")}
-      calFiltered={!!calFilter}
-      urgent={state === "list" ? { overdue: calBuckets.overdue, today: calBuckets.today } : null}
-      calendar={state === "list" ? (
-        <TrayCalendar today={calToday} items={calItems} buckets={calBuckets} n={n} filter={calFilter} onFilter={setCalFilter}
-          onOpenDrawer={() => setCalDrawer(true)} onSetAside={() => showView("aside")} drawerOpen={calDrawer} sel={calSel} onSel={setCalSel}
-          litDay={rowLit} onHoverDay={setDayHover} dragging={!!dragKey}
-          onDropDay={(ymd) => { const it = items.find((x) => x.key === dragKey); setDragKey(null); if (it) guarded(() => moveTo(it, ymd)); }} />
-      ) : undefined}
-    >
+    <TrayHeader loading={loading} caught={state === "caught"} msTitle={msTitle}
+      onAdd={() => openCompose()} asideN={asideN} asideRef={asideRef} onAside={() => showView("aside")} />
+  );
+  const todaySection = state === "list" ? (
+    <TraySection title="Today" id="td7-today-h" rule className="td7-today" data={{ "data-td7": "today" }}>
+      <TrayToday today={calToday} items={calItems} buckets={calBuckets} filter={calFilter} onFilter={setCalFilter} onOpenDrawer={() => setCalDrawer(true)} />
+    </TraySection>
+  ) : null;
+  const trayHeading = (
+    <TraySection title="Your tray" id="td7-tray-h" className="td7-traysec" data={{ "data-td7": "tray-head" }}
+      sub={<TrayHeadline urgent={state === "list" ? { overdue: calBuckets.overdue, today: calBuckets.today } : null} caught={state === "caught"} loading={loading} />}>
       {state === "list" || state === "loading" ? (
         <TrayFilterRow filters={filters} setFilters={setFilters} all={items} countFor={countFor} hasPin={hasPin} findRef={findRef} disabled={loading} findHere={!pinned}
           calChip={calFilter ? { label: calFilterLabel(calFilter, shortDay), onClear: () => setCalFilter(null) } : null} />
       ) : null}
-    </TrayHeader>
+    </TraySection>
   );
 
   /* the tray's rows, with the ghost held in place while it leaves */
@@ -1164,6 +1171,8 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
           ) : (
             <>
               {header}
+              {todaySection}
+              {trayHeading}
               <div className="td5-sheet" ref={sheetRef} data-td5="sheet"
                 data-one={state === "list" || state === "loading" ? "" : undefined} data-working={busyDesk ? "" : undefined}>
                 <div className="td5-nav" data-td5="nav">

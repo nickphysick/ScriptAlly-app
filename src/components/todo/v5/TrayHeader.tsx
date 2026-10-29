@@ -2,193 +2,73 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * To-do list v5 §A — the header, built as Contact list v17.1's (eyebrow, the 50px title, the byline, two buttons,
- * the hawk shadow) with ONE card: three counts that filter, and "Cleared this week".
+ * To-do list v7 (design-refs/todo-list-v7/todo-list-v7.html) — the top of the page: the house header card, then the
+ * section headings. The header is the shared `PageHeaderCard`, mounted as Responses (`Rsp5TitleCard`) and the Contact
+ * list (`ContactHeader25`) mount it: the title on the blush highlighter, a body line naming the book, "+ Add a task" and
+ * "Set aside · n", and the Mentor with his clipboard.
  *
- * ⚠️ THE TITLE'S n IS THE SIDEBAR BADGE'S NUMBER (`boardFigures(cols).cards`), passed in by the page that derives
- *    both from the one `assembleBoardColumns`. The h1 keeps `data-page-title`.
- * ⚠️ THE ROWS ARE THE CONTROLS; the bar's segments take a press too but are `aria-hidden`. A press filters the
- *    tray (the Task type pill's state); it never scrolls.
- * ⚠️ THE RING: ink is cleared this week, rust is still in the tray, with cream ticks at both joins (v17.1's health
- *    ring, re-read for tasks). Its figures are `lib/todoCleared`'s and the board's.
+ * ⚠️ RETIRED BY v7, rule and element: v5's eyebrow, the hawk shadow, the "{n} tasks in your tray" title, the three-count
+ *    card and the "Cleared this week" ring. The urgent figures v5.2 put in the h1 moved to the "Your tray" line
+ *    (`TrayHeadline`), with the same words.
+ * ⚠️ THE h1 KEEPS `data-page-title`. The "Nothing yet" page is a different component (TrayEmpty) and is unchanged.
  */
 import React from "react";
-import "../../shell/pageHeroFrame.css";
-import type { TrayKind } from "../../../lib/todoTray";
-import { TRAY_KINDS } from "../../../lib/todoTray";
+import { PageHeaderCard } from "../../shared/PageHeaderCard";
+import { MENTOR_ART } from "./TrayEmpty";
 
-/** header rules v1.1 — the title wraps rather than stepping down (decision 5) */
-const HERO_RULES_WRAP = true;
-
-export const TODO_EYEBROW = "— TO-DO LIST —";
-export const TODO_SHADOW = "/images/hawk-shadow.png?v=1";
-export const titleWords = (n: number) => (n === 1 ? "task in your tray" : "tasks in your tray");
-
-const RING = { box: 95, r: 42, w: 9, join: 2.5 };
-const RING_C = 2 * Math.PI * RING.r;
-
-export const ClearedRing: React.FC<{ cleared: number; left: number; loading?: boolean }> = ({ cleared, left, loading }) => {
-  const c = RING.box / 2;
-  const total = cleared + left;
-  const share = total ? cleared / total : 1;
-  const ink = loading ? 0 : RING_C * share;
-  const rot = `rotate(-90 ${c} ${c})`;
-  const joins = !loading && cleared > 0 && left > 0;
-  return (
-    <span className="td5-rg" data-td5="ring" data-share={loading ? "" : share.toFixed(4)}>
-      <svg viewBox={`0 0 ${RING.box} ${RING.box}`} aria-hidden="true">
-        {left > 0 || loading ? <circle data-td5="ring-left" cx={c} cy={c} r={RING.r} fill="none" stroke="#a2452a" strokeOpacity={loading ? 0.12 : 0.85} strokeWidth={RING.w} /> : null}
-        {ink > 0 ? <circle data-td5="ring-ink" cx={c} cy={c} r={RING.r} fill="none" stroke="#2a3a52" strokeWidth={RING.w} strokeLinecap="butt"
-          strokeDasharray={`${ink.toFixed(2)} ${RING_C.toFixed(2)}`} transform={rot} style={{ transition: "stroke-dasharray .6s cubic-bezier(.22,.8,.3,1)" }} /> : null}
-        {joins ? (
-          <>
-            <circle data-td5="ring-join" cx={c} cy={c} r={RING.r} fill="none" stroke="#fff" strokeWidth={RING.w + 1}
-              strokeDasharray={`${RING.join} ${RING_C - RING.join}`} strokeDashoffset={RING.join / 2} transform={rot} />
-            <circle data-td5="ring-join" cx={c} cy={c} r={RING.r} fill="none" stroke="#fff" strokeWidth={RING.w + 1}
-              strokeDasharray={`${RING.join} ${RING_C - RING.join}`} strokeDashoffset={-(ink - RING.join / 2)} transform={rot} />
-          </>
-        ) : null}
-      </svg>
-      <span className="td5-pc" data-td5="ring-n">{loading ? "" : cleared}</span>
-    </span>
-  );
-};
-
-const SEG: Record<TrayKind, string> = { you: "you", chase: "chase", tidy: "tidy" };
+/** the body line, word for word (v7 §1) */
+export const trayHeaderBody = (caught: boolean, ms: React.ReactNode) => (caught
+  ? <>Nothing needs you right now on {ms}. When an agent’s window passes or a request comes in, it lands here.</>
+  : <>Everything waiting on you for {ms}: what to send, who to chase and what to tidy, most pressing first.</>);
 
 export const TrayHeader: React.FC<{
   loading: boolean;
-  /** null while loading */
-  n: number | null;
-  /** the empty-tray title */
+  /** the all caught up page's body line */
   caught?: boolean;
   msTitle: string | null;
-  counts: Record<TrayKind, number>;
-  active: TrayKind | null;
-  onKind: (k: TrayKind) => void;
-  cleared: number;
-  onRing: () => void;
-  ringTitle: string;
   onAdd: () => void;
   asideN: number;
   asideRef: React.Ref<HTMLButtonElement>;
   onAside: () => void;
-  /** v5.2 §A — on the populated page the card's contents are the calendar (TrayCalendar); caught up and empty keep v5.1's */
-  calendar?: React.ReactNode;
-  /** a calendar filter is on: the card's other rows fade */
-  calFiltered?: boolean;
-  /** v5.2 §F.1 — the populated title: "{o} overdue · {t} due today" (Part B's figures) */
-  urgent?: { overdue: number; today: number } | null;
-  children?: React.ReactNode;
-}> = ({ loading, n, caught, msTitle, counts, active, onKind, cleared, onRing, ringTitle, onAdd, asideN, asideRef, onAside, calendar, calFiltered, urgent, children }) => {
-  const left = n ?? 0;
-  /* v5.2 §F.1 — the title says what's urgent, from Part B; it ticks when the figure changes (never on arrival) */
-  const urgentKey = urgent ? `${urgent.overdue}-${urgent.today}` : "";
-  const seenKey = React.useRef<string | null>(null);
-  const tick = !!urgent && seenKey.current !== null && seenKey.current !== urgentKey;
-  React.useEffect(() => { if (urgent) seenKey.current = urgentKey; }, [urgentKey]); // eslint-disable-line react-hooks/exhaustive-deps
-  /* ⚠️ THE TITLE FITS ITS COLUMN, IT NEVER PUSHES THE CARD (found on the integration run: "33 overdue · 2 due today" is
-     533px at 44px, and at 1280 the column beside the card is 452). The header cannot grow (A1), so the title cannot wrap:
-     its font steps down until it fits, floor 26px, re-measured on resize and once the fonts are in. */
-  const rowRef = React.useRef<HTMLDivElement>(null);
-  const h1Ref = React.useRef<HTMLHeadingElement>(null);
-  React.useLayoutEffect(() => {
-    const row = rowRef.current, h1 = h1Ref.current;
-    if (!row || !h1) return undefined;
-    const fit = () => {
-      h1.removeAttribute("data-fit");
-      /* header rules v1.1 (decision 5): a title too long for its column wraps at its size and the stack grows; it is
-         never shrunk. The fit below is kept, unreached, for the record of what v5.2 did. */
-      if (HERO_RULES_WRAP) return;
-      const card = row.querySelector<HTMLElement>('[data-td5="card"]');
-      const gap = 40;
-      const avail = row.clientWidth - (card && getComputedStyle(card).gridColumnStart === "3" ? card.offsetWidth + gap : 0);
-      const w = h1.scrollWidth, base = parseFloat(getComputedStyle(h1).fontSize);
-      /* the line box keeps the unfitted size, so the header's height never moves with the figure (A1) */
-      if (!(avail > 0 && w > avail)) return;
-      h1.style.setProperty("--td52-fit-lh", getComputedStyle(h1).lineHeight);
-      /* width is not quite linear in size (the face's spacing), so step until it fits: a few passes at most */
-      let fs = base;
-      for (let i = 0; i < 4 && h1.scrollWidth > avail && fs > 26; i++) {
-        fs = Math.max(26, Math.floor((fs * avail) / h1.scrollWidth * 10) / 10 - (i ? 0.5 : 0));
-        h1.style.setProperty("--td52-fit", `${fs}px`);
-        h1.setAttribute("data-fit", "");
-      }
-    };
-    fit();
-    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(fit) : null;
-    ro?.observe(row);
-    /* and whenever the title's words change (the row's width need not) */
-    const mo = new MutationObserver(fit);
-    mo.observe(h1, { childList: true, characterData: true, subtree: true });
-    void document.fonts?.ready.then(fit);
-    return () => { ro?.disconnect(); mo.disconnect(); };
-  }, [urgentKey, caught, n]);
-  const urgentWords = urgent
-    ? (urgent.overdue || urgent.today ? [urgent.overdue ? `${urgent.overdue} overdue` : "", urgent.today ? `${urgent.today} due today` : ""].filter(Boolean).join(" · ") : "Nothing due today")
-    : "";
+}> = ({ loading, caught, msTitle, onAdd, asideN, asideRef, onAside }) => {
+  const ms = <b data-td7="ms">{msTitle || "your book"}</b>;
   return (
-    <header className="td5-hd phf" data-td5="header" data-own-header="" data-loading={loading ? "" : undefined} aria-busy={loading || undefined}>
-      <img className="td5-shadow" data-td5="shadow" alt="" aria-hidden="true" src={TODO_SHADOW} />
-      <div className="td5-tr" data-td5="header-row" ref={rowRef}>
-        <div className="td5-tb" data-td5="title-block">
-          <span className="td5-ey" data-td5="eyebrow">{TODO_EYEBROW}</span>
-          <h1 ref={h1Ref} className="td5-title" data-page-title="" data-td5="title" tabIndex={-1}
-            aria-label={caught ? "Your tray is empty" : urgent && n !== null ? urgentWords : n === null ? "Tasks in your tray" : `${n} ${titleWords(n)}`}>
-            <span aria-hidden="true">
-              {caught ? "Your tray is empty" : urgent && n !== null ? (
-                <span key={urgentKey} className={`td52-urg${tick ? " tick" : ""}`} data-td52="title-urgent">
-                  {urgent.overdue ? <span className="td52-od" data-td52="title-od">{urgent.overdue} overdue</span> : null}
-                  {urgent.overdue && urgent.today ? " · " : null}
-                  {urgent.today ? <span data-td52="title-today">{urgent.today} due today</span> : null}
-                  {!urgent.overdue && !urgent.today ? "Nothing due today" : null}
-                </span>
-              ) : (
-                <>{n === null ? <span className="td5-blank">00</span> : <span data-td5="title-n">{n}</span>}{" "}{titleWords(n ?? 0)}</>
-              )}
-            </span>
-          </h1>
-          <div className="td5-by" data-td5="byline">
-            {msTitle ? <span className="td5-byt">for <i className="td5-ms">{msTitle}</i></span> : <span className="td5-byt">for your book</span>}
-          </div>
-        </div>
-        <div className="td5-acts" data-td5="acts">
-          <button type="button" className="td5-b1" data-td5="add" disabled={loading} onClick={onAdd}>+ Add a task</button>
-          <button type="button" className="td5-b2" data-td5="aside" ref={asideRef} disabled={loading} onClick={onAside}>{asideN ? `Set aside · ${asideN}` : "Set aside"}</button>
-        </div>
-        {calendar ? (
-          <div className="td5-card td52-cal" data-td5="card" data-td52="cal" data-filtered={calFiltered ? "" : undefined}>{calendar}</div>
-        ) : (
-        <div className="td5-card" data-td5="card" data-on={active ?? undefined}>
-          <div className="td5-cnt" data-td5="counts" role="group" aria-label="What is in your tray">
-            <div className="td5-bar" data-td5="card-bar" aria-hidden="true">
-              {TRAY_KINDS.filter((k) => loading || counts[k.id] > 0).map((k) => (
-                <i key={k.id} className={`td5-sg td5-sg--${SEG[k.id]}`} data-td5="card-seg" data-k={k.id}
-                  data-on={active === k.id ? "" : undefined} style={{ flex: `${loading ? 1 : counts[k.id]} 1 0` }}
-                  onClick={loading ? undefined : () => onKind(k.id)} />
-              ))}
-            </div>
-            {TRAY_KINDS.map((k) => (
-              <button key={k.id} type="button" className="td5-row" data-td5="card-row" data-k={k.id}
-                aria-pressed={active === k.id} disabled={loading} onClick={() => onKind(k.id)}>
-                <i className={`td5-sw td5-sg--${SEG[k.id]}`} aria-hidden="true" />
-                <b className="td5-n" data-td5="card-n">{loading ? "" : counts[k.id]}</b>
-                <span className="td5-lb">{k.label}</span>
-              </button>
-            ))}
-          </div>
-          <button type="button" className="td5-hl" data-td5="cleared" data-none={left === 0 ? "" : undefined} disabled={loading} onClick={onRing}
-            aria-label={`Cleared this week: ${cleared}. ${left} still to do.`} title={ringTitle}>
-            <ClearedRing cleared={cleared} left={left} loading={loading} />
-            <span className="td5-ht">
-              <b>Cleared this week</b>
-              <em data-td5="still">{loading ? "" : left ? `${left} still to do` : "Nothing left to do"}</em>
-            </span>
-          </button>
-        </div>
-        )}
-      </div>
-      {children}
+    <header className="td7-hd" data-td7="header" data-td5="header" data-own-header="" data-loading={loading ? "" : undefined} aria-busy={loading || undefined}>
+      <PageHeaderCard className="td7-card" titleId="td7T" art={MENTOR_ART}
+        data={{ "data-td7": "hd-card" }} titleData={{ "data-page-title": "true", "data-td7": "title" }}
+        title={<span className="hl" data-td7="hl">To-do list</span>}
+        body={trayHeaderBody(!!caught, ms)}
+        primary={{ label: "+ Add a task", onClick: onAdd, disabled: loading, data: { "data-td5": "add" } }}
+        secondary={{ label: asideN ? `Set aside · ${asideN}` : "Set aside", onClick: onAside, disabled: loading, buttonRef: asideRef, data: { "data-td5": "aside" } }} />
     </header>
   );
 };
+
+/** v5.2 §F.1's urgent figures, as v7's "Your tray" line says them: "{o} overdue · {t} due today", a 0 part dropped */
+export const urgentWords = (u: { overdue: number; today: number }) =>
+  (u.overdue || u.today ? [u.overdue ? `${u.overdue} overdue` : "", u.today ? `${u.today} due today` : ""].filter(Boolean).join(" · ") : "Nothing due today");
+
+/** the overdue line under "Your tray": the overdue part rust and upright; "All caught up" on the empty tray */
+export const TrayHeadline: React.FC<{ urgent: { overdue: number; today: number } | null; caught?: boolean; loading?: boolean }> = ({ urgent, caught, loading }) => {
+  if (caught) return <span className="td7-sub" data-td7="headline">All caught up</span>;
+  if (loading || !urgent) return <span className="td7-sub" data-td7="headline" aria-hidden="true">&nbsp;</span>;
+  return (
+    <span className="td7-sub" data-td7="headline" aria-label={urgentWords(urgent)}>
+      {urgent.overdue ? <span className="td7-od" data-td52="title-od">{urgent.overdue} overdue</span> : null}
+      {urgent.overdue && urgent.today ? " · " : null}
+      {urgent.today ? <span data-td52="title-today">{urgent.today} due today</span> : null}
+      {!urgent.overdue && !urgent.today ? "Nothing due today" : null}
+    </span>
+  );
+};
+
+/** a v7 section heading: typewriter, a hairline running to the right edge (Today) or a line beneath (Your tray) */
+export const TraySection: React.FC<{ title: string; id: string; rule?: boolean; sub?: React.ReactNode; children?: React.ReactNode; data?: Record<`data-${string}`, string>; className?: string }> = ({ title, id, rule, sub, children, data, className }) => (
+  <section className={["td7-sec", className].filter(Boolean).join(" ")} aria-labelledby={id} {...data}>
+    <div className="td7-h2row">
+      <div className="td7-ttl"><h2 className="td7-h2" id={id}>{title}</h2>{sub != null ? <div className="td7-subrow">{sub}</div> : null}</div>
+      {rule ? <span className="td7-rule" aria-hidden="true" /> : null}
+    </div>
+    {children}
+  </section>
+);
