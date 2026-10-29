@@ -1,0 +1,68 @@
+[
+ {
+  "lock": "L9",
+  "where": "the probe task is in the tray",
+  "ok": true,
+  "detail": "zz-td12-pick-mvtrf2y5"
+ },
+ {
+  "lock": "L9",
+  "where": "dragging a row onto the drawer changes nothing",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L9",
+  "where": "no row is draggable",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L9",
+  "where": "the date opens the menu",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L9",
+  "where": "\"Pick a date\" is offered",
+  "ok": true,
+  "detail": "Pick a date▾"
+ },
+ {
+  "lock": "L9",
+  "where": "the month is in the popover",
+  "ok": true,
+  "detail": "30"
+ },
+ {
+  "lock": "L9",
+  "where": "today and the past are refused",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L9",
+  "where": "a pickable day",
+  "ok": true,
+  "detail": "2026-11-02"
+ },
+ {
+  "lock": "L9",
+  "where": "the pick moves dueDate to 2026-11-02",
+  "ok": true,
+  "detail": "2026-11-02"
+ },
+ {
+  "lock": "L9",
+  "where": "Undo",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L9",
+  "where": "Undo restores the document byte for byte",
+  "ok": true,
+  "detail": ""
+ }
+]

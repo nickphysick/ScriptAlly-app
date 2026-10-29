@@ -1,0 +1,308 @@
+[
+ {
+  "lock": "L1",
+  "where": "1280: the Contact list card was read",
+  "ok": true,
+  "detail": "{\"x\":272,\"w\":976,\"y\":129.75}"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 list: the shared card (.phc)",
+  "ok": true,
+  "detail": "phc td7-card"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 list: h1 \"To-do list\" with data-page-title",
+  "ok": true,
+  "detail": "To-do list · true"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 list: art is MENTOR_ART",
+  "ok": true,
+  "detail": "/images/dash/mentor-leaning.png"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 list: card x equals the Contact list's (±1)",
+  "ok": true,
+  "detail": "272.0 vs 272.0"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 list: card w equals the Contact list's (±1)",
+  "ok": true,
+  "detail": "976.0 vs 976.0"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 list: card y equals the Contact list's (±1)",
+  "ok": true,
+  "detail": "129.8 vs 129.8"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 caught: the shared card (.phc)",
+  "ok": true,
+  "detail": "phc td7-card"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 caught: h1 \"To-do list\" with data-page-title",
+  "ok": true,
+  "detail": "To-do list · true"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 caught: art is MENTOR_ART",
+  "ok": true,
+  "detail": "/images/dash/mentor-leaning.png"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 caught: card x equals the Contact list's (±1)",
+  "ok": true,
+  "detail": "272.0 vs 272.0"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 caught: card w equals the Contact list's (±1)",
+  "ok": true,
+  "detail": "976.0 vs 976.0"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 caught: card y equals the Contact list's (±1)",
+  "ok": true,
+  "detail": "129.8 vs 129.8"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 nothing: the shared card (.phc)",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "L1",
+  "where": "1280 nothing: h1 \"To-do list\" with data-page-title",
+  "ok": false,
+  "detail": "null · undefined"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 nothing: art is MENTOR_ART",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 nothing: the card's box",
+  "ok": false,
+  "detail": "no box"
+ },
+ {
+  "lock": "L1",
+  "where": "1512: the Contact list card was read",
+  "ok": true,
+  "detail": "{\"x\":276,\"w\":1200,\"y\":129.75}"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 list: the shared card (.phc)",
+  "ok": true,
+  "detail": "phc td7-card"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 list: h1 \"To-do list\" with data-page-title",
+  "ok": true,
+  "detail": "To-do list · true"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 list: art is MENTOR_ART",
+  "ok": true,
+  "detail": "/images/dash/mentor-leaning.png"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 list: card x equals the Contact list's (±1)",
+  "ok": true,
+  "detail": "276.0 vs 276.0"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 list: card w equals the Contact list's (±1)",
+  "ok": true,
+  "detail": "1200.0 vs 1200.0"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 list: card y equals the Contact list's (±1)",
+  "ok": true,
+  "detail": "129.8 vs 129.8"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 caught: the shared card (.phc)",
+  "ok": true,
+  "detail": "phc td7-card"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 caught: h1 \"To-do list\" with data-page-title",
+  "ok": true,
+  "detail": "To-do list · true"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 caught: art is MENTOR_ART",
+  "ok": true,
+  "detail": "/images/dash/mentor-leaning.png"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 caught: card x equals the Contact list's (±1)",
+  "ok": true,
+  "detail": "276.0 vs 276.0"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 caught: card w equals the Contact list's (±1)",
+  "ok": true,
+  "detail": "1200.0 vs 1200.0"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 caught: card y equals the Contact list's (±1)",
+  "ok": true,
+  "detail": "129.8 vs 129.8"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 nothing: the shared card (.phc)",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "L1",
+  "where": "1512 nothing: h1 \"To-do list\" with data-page-title",
+  "ok": false,
+  "detail": "null · undefined"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 nothing: art is MENTOR_ART",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 nothing: the card's box",
+  "ok": false,
+  "detail": "no box"
+ },
+ {
+  "lock": "L1",
+  "where": "1920: the Contact list card was read",
+  "ok": true,
+  "detail": "{\"x\":480,\"w\":1200,\"y\":129.75}"
+ },
+ {
+  "lock": "L1",
+  "where": "1920 list: the shared card (.phc)",
+  "ok": true,
+  "detail": "phc td7-card"
+ },
+ {
+  "lock": "L1",
+  "where": "1920 list: h1 \"To-do list\" with data-page-title",
+  "ok": true,
+  "detail": "To-do list · true"
+ },
+ {
+  "lock": "L1",
+  "where": "1920 list: art is MENTOR_ART",
+  "ok": true,
+  "detail": "/images/dash/mentor-leaning.png"
+ },
+ {
+  "lock": "L1",
+  "where": "1920 list: card x equals the Contact list's (±1)",
+  "ok": true,
+  "detail": "480.0 vs 480.0"
+ },
+ {
+  "lock": "L1",
+  "where": "1920 list: card w equals the Contact list's (±1)",
+  "ok": true,
+  "detail": "1200.0 vs 1200.0"
+ },
+ {
+  "lock": "L1",
+  "where": "1920 list: card y equals the Contact list's (±1)",
+  "ok": true,
+  "detail": "129.8 vs 129.8"
+ },
+ {
+  "lock": "L1",
+  "where": "1920 caught: the shared card (.phc)",
+  "ok": true,
+  "detail": "phc td7-card"
+ },
+ {
+  "lock": "L1",
+  "where": "1920 caught: h1 \"To-do list\" with data-page-title",
+  "ok": true,
+  "detail": "To-do list · true"
+ },
+ {
+  "lock": "L1",
+  "where": "1920 caught: art is MENTOR_ART",
+  "ok": true,
+  "detail": "/images/dash/mentor-leaning.png"
+ },
+ {
+  "lock": "L1",
+  "where": "1920 caught: card x equals the Contact list's (±1)",
+  "ok": true,
+  "detail": "480.0 vs 480.0"
+ },
+ {
+  "lock": "L1",
+  "where": "1920 caught: card w equals the Contact list's (±1)",
+  "ok": true,
+  "detail": "1200.0 vs 1200.0"
+ },
+ {
+  "lock": "L1",
+  "where": "1920 caught: card y equals the Contact list's (±1)",
+  "ok": true,
+  "detail": "129.8 vs 129.8"
+ },
+ {
+  "lock": "L1",
+  "where": "1920 nothing: the shared card (.phc)",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "L1",
+  "where": "1920 nothing: h1 \"To-do list\" with data-page-title",
+  "ok": false,
+  "detail": "null · undefined"
+ },
+ {
+  "lock": "L1",
+  "where": "1920 nothing: art is MENTOR_ART",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L1",
+  "where": "1920 nothing: the card's box",
+  "ok": false,
+  "detail": "no box"
+ }
+]

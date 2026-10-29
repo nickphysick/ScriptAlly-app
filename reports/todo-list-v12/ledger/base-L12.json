@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "L12",
+  "where": "1512: the tile at rest",
+  "ok": false,
+  "detail": "none"
+ },
+ {
+  "lock": "L12",
+  "where": "1512: 340 × 360, local, on #f2eee8",
+  "ok": false,
+  "detail": "{\"img\":\"none\",\"size\":\"auto\",\"att\":\"scroll\",\"col\":\"rgba(0, 0, 0, 0)\"}"
+ },
+ {
+  "lock": "L12",
+  "where": "1512: no tile while pinned",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "L12",
+  "where": "1280: the tile at rest",
+  "ok": false,
+  "detail": "none"
+ },
+ {
+  "lock": "L12",
+  "where": "1280: 340 × 360, local, on #f2eee8",
+  "ok": false,
+  "detail": "{\"img\":\"none\",\"size\":\"auto\",\"att\":\"scroll\",\"col\":\"rgba(0, 0, 0, 0)\"}"
+ },
+ {
+  "lock": "L12",
+  "where": "1280: no tile while pinned",
+  "ok": true,
+  "detail": "none"
+ }
+]
