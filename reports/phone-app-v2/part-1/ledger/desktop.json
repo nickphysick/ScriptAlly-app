@@ -99,7 +99,7 @@
   "lock": "S9",
   "where": "1280 /dashboard: pixels within the base's own variation",
   "ok": true,
-  "detail": "head 17 px vs base-to-base 171 px"
+  "detail": "head 0 px vs base-to-base 171 px"
  },
  {
   "lock": "S9",

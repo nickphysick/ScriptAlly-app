@@ -3,7 +3,7 @@
   "lock": "pop",
   "where": "390x844 the tray's headline was read",
   "ok": true,
-  "detail": "{\"overdue\":36,\"today\":0,\"head\":\"36 overdue\"}"
+  "detail": "{\"overdue\":37,\"today\":0,\"head\":\"37 overdue\"}"
  },
  {
   "lock": "pop",
@@ -33,7 +33,7 @@
   "lock": "S1",
   "where": "390x844 home: the badge is on To-do and equals the tray's overdue + today",
   "ok": true,
-  "detail": "todo 36 vs 36"
+  "detail": "todo 37 vs 37"
  },
  {
   "lock": "S3",
@@ -69,7 +69,7 @@
   "lock": "S8",
   "where": "390x844 home: navy grounds judged",
   "ok": true,
-  "detail": "{\"navy\":2,\"blush\":1}"
+  "detail": "{\"navy\":10,\"blush\":1}"
  },
  {
   "lock": "S8",
@@ -111,7 +111,7 @@
   "lock": "S1",
   "where": "390x844 queries: the badge is on To-do and equals the tray's overdue + today",
   "ok": true,
-  "detail": "todo 36 vs 36"
+  "detail": "todo 37 vs 37"
  },
  {
   "lock": "S3",
@@ -183,7 +183,7 @@
   "lock": "S1",
   "where": "390x844 todo: the badge is on To-do and equals the tray's overdue + today",
   "ok": true,
-  "detail": "todo 36 vs 36"
+  "detail": "todo 37 vs 37"
  },
  {
   "lock": "S3",
@@ -255,7 +255,7 @@
   "lock": "S1",
   "where": "390x844 agents: the badge is on To-do and equals the tray's overdue + today",
   "ok": true,
-  "detail": "todo 36 vs 36"
+  "detail": "todo 37 vs 37"
  },
  {
   "lock": "S3",

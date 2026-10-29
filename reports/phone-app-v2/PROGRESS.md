@@ -13,7 +13,9 @@ Baseline gates on the base: tsc root 0, tsc functions 0, build clean, Vitest 689
 | 1 | E the snackbar, the icon, the launch screen | `4e0f911c` | committed |
 | 1 | F locks, shots, report | `459b5d96` | committed |
 | 1 | dev deploy | integration `a8b44524` on `dev/…-fv1-pk393-pa2-1` | dev serves `index-Ox21np2m.js` |
-| 2 | — | — | next |
+| 2 | A–C Home (one commit) | `93d802c7` | committed |
+| 2 | D locks, shots, report | (the commit that carries this line) | committed; dev deploy follows |
+| 3 | — | — | next |
 
 ## Dev, as of the end of Part 1
 - dev serves `index-Ox21np2m.js` = `dev/pk391-qm1-pk392-calx-pk392b-td7-fv1-pk393-pa2-1` (`a8b44524`). The next part's

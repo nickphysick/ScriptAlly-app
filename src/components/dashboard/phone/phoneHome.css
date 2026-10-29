@@ -95,3 +95,9 @@
      own top margin as the ref does */
   .pa-home .dm1-body { display: block; padding: 0; gap: 0; }
 }
+@media (max-width: 767.98px) {
+  /* ⚠️ TAP TARGETS (DM1-F1): a text link is 44px tall to the finger without moving a line of the layout — the height is
+     taken back by equal negative margins; and the small primary is 44 tall (the ref's `.btn.sm` is 38). */
+  .pa-home .pa-link, .pa-band .pa-link { min-height: 44px; margin: -13px 0; }
+  .pa-home .pa-btn.sm { height: 44px; }
+}
