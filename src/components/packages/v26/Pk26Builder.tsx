@@ -46,7 +46,6 @@ const STAGE_CLASS: Record<PackageStage, string> = { draft: "draft", ready: "read
 const needOf = (p: SubmissionPackage) => [!p.queryLetterVersionId && "a query letter", !p.bookVersionId && "pages"].filter(Boolean).join(" and ");
 
 export const BUILDER_KICKER = "Build, view and edit";
-export const MATERIALS_ART = "a hawk sorting letters into pigeonholes";
 export const EMPTY_SLOT_TIP = "Drag one in from Your materials";
 export const STAGE_LOCK_TIP = "Locked: what each agent got stays as it was. You can still rename it; to change what goes out, make a copy.";
 export const PICKER_NOTE = "Shows on its label, in the Query Centre and in your results.";
@@ -139,9 +138,9 @@ export const Pk26Builder: React.FC<BuilderProps> = ({ model, retired, current, o
         <div className="p9-pb-grid p9-v39" data-pk39="grid">
           <aside className="p9-pb-lib" aria-labelledby="p9-libT" data-pk26="lib" data-pk39="lib">
             <div className="p9-lib-top" data-pk39="lib-head">
+              {/* v39.2 C: a folder tab on the card's top edge — the envelope glyph and the name, no art */}
               <span className="p9-hx-t">
-                <span className="p9-ill p9-ill-s" title={`Illustration: ${MATERIALS_ART}`} aria-hidden="true"><i>Art</i></span>
-                <span className="p9-mh-tt"><span className="p9-mh-k">Materials</span><h3 className="p9-id-libT" id="p9-libT">Your materials</h3></span>
+                <span className="p9-mh-tt"><span className="p9-mt-env" aria-hidden="true" /><h3 className="p9-id-libT" id="p9-libT">Your materials</h3></span>
               </span>
             </div>
             <div className="p9-lib-tabs" role="tablist">
@@ -155,23 +154,23 @@ export const Pk26Builder: React.FC<BuilderProps> = ({ model, retired, current, o
                 const used = inThis(lib, m.id);
                 const isVer = lib === "ver";
                 /* v26.1: own summary (· sent n), else "sent n · in m packages", never the type */
-                const own = isVer ? (m as VersionRow).summary : (m as MaterialRow).summary;
-                const sum = own ? `${own}${m.sent ? ` · sent ${m.sent}` : ""}` : materialSummary("", m.sent, m.inPackages.length);
+                /* v39.2 C: the summary is the material's own words, wrapping to two lines; the meta line under it carries
+                   whether it has been sent (the ref's "· {k} files" has no source: a material here carries no files) */
+                const own = (isVer ? (m as VersionRow).summary : (m as MaterialRow).summary).trim();
                 const canAdd = !!p && !locked;
                 return (
-                  <div key={m.id} className={`p9-lr${ghost === key ? " p9-ghost" : ""}`} draggable={canAdd} onDragStart={onDragStart(lib, m.id)} onDragEnd={onDragEnd} data-drag={key}>
-                    <span className="p9-lr-g" aria-hidden="true"><i /><i /><i /><i /><i /><i /></span>
+                  <div key={m.id} className={`p9-lr${used ? " p9-inpk" : ""}${ghost === key ? " p9-ghost" : ""}`} draggable={canAdd} onDragStart={onDragStart(lib, m.id)} onDragEnd={onDragEnd} data-drag={key}>
                     <span className={`p9-tic p9-t-${lib}`}>{isVer ? vnum(m as VersionRow) : <Mark k={lib} />}</span>
-                    <span><b title={m.name}>{m.name}</b>{sum ? <small>{sum}</small> : null}</span>
+                    <span className="p9-lr-tx"><b>{m.name}</b>{own ? <small>{own}</small> : null}
+                      <em className="p9-lr-m">{used ? <i className="p9-lr-in">✓ In this package</i> : null}{m.sent ? `Sent ${m.sent}` : "Not sent yet"}</em></span>
                     {!isVer ? <button type="button" className="p9-lr-ed" aria-label={`Edit ${m.name}`} onClick={() => onOpenMaterial(lib as "let" | "syn", m.id)}><Mark k="pen" /></button> : null}
-                    {used ? <button type="button" className="p9-lr-add" disabled aria-label="In package">✓ In package</button>
-                      : canAdd ? <button type="button" className="p9-lr-add" onClick={() => void put(lib, m.id)}>Add</button> : null}
+                    {/* in this package: no Add (the meta line says so); otherwise Add shows on hover or focus */}
+                    {!used && canAdd ? <button type="button" className="p9-lr-add" onClick={() => void put(lib, m.id)}>Add</button> : null}
                   </div>
                 );
               }) : <p className="p9-lib-empty">No {lib === "let" ? "query letters" : lib === "syn" ? "synopses" : "versions"} yet.</p>}
               {showAway ? away.map((m) => (
                 <div key={m.id} className="p9-lr p9-lr--away" data-away={`${lib}:${m.id}`}>
-                  <span className="p9-lr-g" aria-hidden="true" />
                   <span className={`p9-tic p9-t-${lib}`}><Mark k={lib as "let" | "syn"} /></span>
                   <span><b title={m.name}>{m.name}</b><small>Put away{materialSummary("", m.sent, m.inPackages.length) ? ` · ${materialSummary("", m.sent, m.inPackages.length)}` : ""}</small></span>
                   <button type="button" className="p9-lr-add p9-lr-open" onClick={() => onOpenMaterial(lib as "let" | "syn", m.id)}>Open</button>
