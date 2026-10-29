@@ -209,14 +209,22 @@ describe("the app-feel layer (Phase 6)", () => {
   });
 });
 
-describe("the you-menu — demoted destinations behind the avatar", () => {
-  it("carries the six rows and the plain-slate plan line (no Pro card)", () => {
-    for (const row of ["To-do", "Submission packages", "Import your queries", "Account settings", "Help", "Sign out"]) {
-      expect(appShell).toContain(row);
-    }
-    expect(appShell).toContain("planLine(currentUser.plan).label");
-    expect(appShell).toContain("sa-ymenu-uplink");
-    // plain slate text — never a pill, never a fill
-    expect(css).toContain(".sa-ymenu-plan { font-size: 12px; font-weight: 600; color: var(--slate)");
+/* ⚠️ RE-POINTED 29 OCT (Phone app v2, Part 1D): the "you" sheet is REPLACED by the menu behind your initials
+   (components/phone/PhoneSheets.tsx `PhoneMenu`, ref menuv.js ovMenu MV B). The claim that survives is that nothing it
+   offered became unreachable: each of its six rows, and its Upgrade link, has a home. The rendered check is
+   tests/e2e/phoneAppV2Shell.measure.ts S6. */
+describe("the menu — everything the you-sheet offered is still reachable", () => {
+  const sheets = readFileSync(resolve(__dirname, "../phone/PhoneSheets.tsx"), "utf8");
+  it("To-do is a tab; packages, import, settings, help, sign out and upgrade are in the menu", () => {
+    expect(barSrc).toContain('{ key: "todo", label: "To-do", path: "/todo" }');
+    expect(appShell).toContain('goPath("/queries/packages")');
+    expect(appShell).toContain('onImport={() => goPath("/import")}');
+    expect(appShell).toContain('onSettings={() => goPath("/account")}');
+    expect(appShell).toContain('onHelp={() => goPath("/help")}');
+    expect(appShell).toContain('onPlan={() => goPath("/plans")}');
+    expect(appShell).toContain("onSignOut={logout}");
+    for (const w of ["Import queries", "Help centre", "Settings", "Plan &amp; billing", "Sign out"]) expect(sheets).toContain(w);
+    expect(appShell).toContain("planLine(currentUser?.plan).label");
+    expect(appShell).not.toContain("sa-ymenu-row");
   });
 });

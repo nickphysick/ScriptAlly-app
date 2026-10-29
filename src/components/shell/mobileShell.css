@@ -67,62 +67,8 @@
   .sa-msheet-scrim { animation: none; }
 }
 
-/* ── THE YOU-MENU (concept frame 07) — user block + plain rows inside the sheet. The plan line
-   is PLAIN SLATE TEXT (no Pro card, no pill — the panel-foot law's mobile twin). ── */
-.sa-ymenu-user {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 2px 4px 15px;
-  border-bottom: 1px solid var(--shell-line-soft);
-  margin-bottom: 6px;
-}
-.sa-ymenu-av {
-  width: 42px;
-  height: 42px;
-  border-radius: 99px;
-  flex: none;
-  display: grid;
-  place-items: center;
-  background: var(--shell-card);
-  border: 1px solid rgba(124, 58, 42, 0.28);
-  font-family: "Playfair Display", Georgia, serif;
-  font-size: 14px;
-  color: var(--burg);
-}
-.sa-ymenu-nm { font-size: 15px; font-weight: 700; color: var(--shell-ink); line-height: 1.2; }
-.sa-ymenu-em { font-size: 12px; color: var(--shell-muted); margin-top: 1px; }
-.sa-ymenu-plan { font-size: 12px; font-weight: 600; color: var(--slate); margin-top: 2px; }
-.sa-ymenu-uplink {
-  border: 0;
-  background: transparent;
-  padding: 0;
-  font: inherit;
-  color: var(--slate);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  cursor: pointer;
-}
-.sa-ymenu-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  padding: 13px 4px;
-  border: 0;
-  border-bottom: 1px solid var(--shell-line-soft);
-  background: transparent;
-  font: inherit;
-  font-size: 14.5px;
-  font-weight: 600;
-  color: var(--shell-ink);
-  text-align: left;
-  cursor: pointer;
-}
-.sa-ymenu-row:last-child { border-bottom: none; }
-.sa-ymenu-row svg { width: 17px; height: 17px; color: var(--shell-ink-soft); flex: none; }
-.sa-ymenu-row.sa-ymenu-out,
-.sa-ymenu-row.sa-ymenu-out svg { color: var(--burg); }
+/* (THE YOU-MENU's rules are retired with it — Phone app v2, Part 1D: the menu behind your initials replaces it;
+   its styles live in components/phone/phoneShell.css.) */
 
 /* ── MOBILE-ONLY BAR CONTROLS — hidden at md+, shown below. ── */
 .sv2m-iconbtn,

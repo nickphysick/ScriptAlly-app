@@ -21,8 +21,8 @@ import { STAGE_REPLAY_EVENT } from "./BarSwitcher";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
-  ArrowLeftRight, Book, BookCopy, CalendarDays, Compass, HelpCircle, LayoutGrid, Library, LineChart, ListChecks,
-  LogOut, Package, Send, Settings, StickyNote, Sun, Upload, Users,
+  ArrowLeftRight, Book, BookCopy, CalendarDays, Compass, LayoutGrid, Library, LineChart, ListChecks,
+  Send, Settings, StickyNote, Sun, Users,
 } from "lucide-react";
 import { parchment } from "../../lib/designTokens";
 import { ShellTopBar } from "./ShellV2";
@@ -37,10 +37,17 @@ import { usePalette } from "./usePalette";
 import { ShellScope, useShellNavCounts } from "./ShellSidebar";
 import { MobileChromeContext, MobileDetailSpec, useIsMobile } from "./mobileChrome";
 import { todoDueBadge } from "../../lib/todoDueTally";
-import { MobileSheet } from "./MobileSheet";
 import { BottomTabBar, isMenuPage, tabFor } from "../BottomTabBar";
 import { PhoneBand, dayWord } from "../phone/PhoneBand";
 import { PhoneBandContext } from "../phone/phoneBandStore";
+import { PhoneBookSheet, PhoneMenu, PhonePlusSheet, type MenuTile } from "../phone/PhoneSheets";
+import { PI } from "../phone/phoneIcons";
+import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
+import { TODO_OPEN_COMPOSER } from "../../lib/todoRoutes";
+import { buildQcRows } from "../../lib/qcSummary";
+import { pageCounts, respItems } from "../../lib/responses";
+import { manuscriptComps } from "../../lib/comps";
+import { manuscriptViewPath } from "./manuscriptScope";
 import { salutation } from "../../lib/dashboardStats";
 import { shellCrumbForPath } from "./shellV2Nav";
 import { resolveScopedManuscript } from "../../lib/shellSidebar";
@@ -256,7 +263,6 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
   // The you-menu sheet (concept frame 07) and the per-route pushed-detail registry. Pages
   // register a MobileDetailSpec under their OWN route key (mounted-but-inactive StagePage slots
   // can therefore never hide another route's tab bar); the shell reads only the active route's.
-  const [youOpen, setYouOpen] = useState(false);
   // The SHARED account menu's open state — Phase 4's top-nav shell will drive the same component.
   const [accountOpen, setAccountOpen] = useState(false);
   /* ⚠️ THE MENU IS PORTALLED, SO IT NEEDS THE ELEMENT THAT OPENED IT. Two shells offer a trigger —
@@ -290,7 +296,8 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
 
      The concept returns — deliberately, visibly — as the workspace sidebar's icon rail
      (WorkspaceShell + useSidebarCollapsed), which is what now owns the freed ⌘\. */
-  const { pathname } = useLocation();
+  const location = useLocation();
+  const { pathname } = location;
 
   // ── THE FOOT FADE (canonical shell pack). It appears ONLY when content continues below the
   // fold: a permanent fade over a short page reads as a rendering fault rather than an
@@ -379,13 +386,50 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
     return shellCrumbForPath(pathname)?.page ?? "QueryHawk";
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname, currentUser?.name]);
-  const bandBook = useMemo(() => {
+  const bandMs = useMemo(() => {
     if (!phoneNav) return null;
     let stored: string | null = null;
     try { stored = window.localStorage.getItem("scriptally_active_manuscript_id"); } catch { /* storage refused */ }
-    return resolveScopedManuscript(manuscripts, stored)?.title?.trim() || null;
+    return resolveScopedManuscript(manuscripts, stored);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phoneNav, manuscripts, pathname, bookOpen]);
+  }, [phoneNav, manuscripts, pathname, location.search, bookOpen]);
+  const bandBook = bandMs?.title?.trim() || null;
+  const bandBookId = bandMs?.id ?? null;
+
+  /* the + sheet's doors — each opens what exists today (Part 4 restyles the journeys, not these doors) */
+  const plusDoors = useMemo(() => ({
+    onSent: () => openQueryDrawer({ mode: "log", ...(bandBookId ? { manuscriptId: bandBookId } : {}) }),
+    onReplied: () => onNavigate("queries", "Record a response"),
+    onAgent: () => onNavigate("agents", "Add an agent"),
+    onTask: () => {
+      /* the To-do page's own one-shot composer open (sa.todoCompose); on /todo already, its event */
+      if (pathname === "/todo") { window.dispatchEvent(new CustomEvent(TODO_OPEN_COMPOSER)); return; }
+      try { sessionStorage.setItem("sa.todoCompose", "task"); } catch { /* private mode */ }
+      goPath("/todo");
+    },
+    onImport: () => goPath("/import"),
+  }), [bandBookId, onNavigate, pathname, goPath]);
+
+  /* the menu's tiles — a line is an existing figure, or the tile shows its name alone */
+  const menuTiles = useMemo<MenuTile[]>(() => {
+    if (!phoneNav) return [];
+    const nowMs = Date.now();
+    const own = bandMs ? queries.filter((q) => q.manuscriptId === bandMs.id) : [];
+    const replies = pageCounts(respItems(buildQcRows(own, agents, activities, nowMs)), buildQcRows(own, agents, activities, nowMs)).replies;
+    const words = bandMs?.wordCount ? `${bandMs.wordCount.toLocaleString("en-GB")} words` : null;
+    const comps = bandMs ? manuscriptComps(bandMs).length : 0;
+    return [
+      { key: "responses", label: "Responses", icon: PI.inbox, line: `${replies} ${replies === 1 ? "reply" : "replies"}`, onOpen: () => goPath("/queries/responses") },
+      { key: "analytics", label: "Analytics", icon: PI.chart, line: null, onOpen: () => goPath("/queries/analytics") },
+      { key: "goals", label: "Streaks & goals", icon: PI.flame, line: null, onOpen: null, disabledLine: "Coming in Part 7" },
+      { key: "manuscript", label: "Manuscript", icon: PI.book, line: words, onOpen: () => goPath("/manuscripts") },
+      { key: "materials", label: "Materials", icon: PI.box, line: null, onOpen: () => goPath("/queries/packages") },
+      { key: "comps", label: "Comparable titles", icon: PI.pages, line: bandMs ? `${comps} ${comps === 1 ? "comp" : "comps"}` : null, onOpen: () => goPath("/manuscripts/comps") },
+      { key: "discover", label: "Discover agents", icon: PI.scope, line: null, onOpen: () => goPath("/agents/discover") },
+      { key: "feedback", label: "Feedback", icon: PI.chat, line: null, onOpen: () => setFeedbackOpen(true) },
+    ];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phoneNav, bandMs, queries, agents, activities, goPath]);
   const [tabAway, setTabAway] = useState(false);
   const [plusOpen, setPlusOpen] = useState(false);
   useEffect(() => { setTabAway(false); setPlusOpen(false); }, [pathname]);
@@ -576,7 +620,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
                itself belongs to the LOCKED mobile bar and is left for a mobile pass to remove. */
             onOpenAccount={toggleAccount}
             mobileDetail={activeMobileDetail}
-            onOpenYou={() => setYouOpen(true)}
+            onOpenYou={() => setMenuOpen(true)}
           />
         </div>
         )}
@@ -642,51 +686,31 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
         hidden={activeMobileDetail !== null || isMenuPage(pathname)}
       />
 
-      {/* THE YOU-MENU (Mobile Pass 1, concept frame 07) — the avatar's sheet: user block with
-          the plan as PLAIN SLATE TEXT (no Pro card), then the demoted destinations. Rows route
-          to existing pages; nothing here is a new surface. */}
-      <MobileSheet open={youOpen} onClose={() => setYouOpen(false)} ariaLabel="Your account and shortcuts">
-        {currentUser && (
-          <div className="sa-ymenu-user">
-            <span className="sa-ymenu-av" aria-hidden="true">
-              {currentUser.name.split(/\s+/).filter(Boolean).map((w) => w[0]).slice(0, 2).join("").toUpperCase()}
-            </span>
-            <div>
-              <div className="sa-ymenu-nm">{currentUser.name}</div>
-              <div className="sa-ymenu-em">{currentUser.email}</div>
-              <div className="sa-ymenu-plan">
-                {planLine(currentUser.plan).label}
-                {planLine(currentUser.plan).upgrade && (
-                  <>
-                    {" · "}
-                    <button type="button" className="sa-ymenu-uplink" onClick={() => { setYouOpen(false); goPath("/plans"); }}>
-                      Upgrade
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-        <button type="button" className="sa-ymenu-row" onClick={() => { setYouOpen(false); goPath("/todo"); }}>
-          <ListChecks aria-hidden="true" /> To-do
-        </button>
-        <button type="button" className="sa-ymenu-row" onClick={() => { setYouOpen(false); goPath("/queries/packages"); }}>
-          <Package aria-hidden="true" /> Submission packages
-        </button>
-        <button type="button" className="sa-ymenu-row" onClick={() => { setYouOpen(false); goPath("/import"); }}>
-          <Upload aria-hidden="true" /> Import your queries
-        </button>
-        <button type="button" className="sa-ymenu-row" onClick={() => { setYouOpen(false); goPath("/account"); }}>
-          <Settings aria-hidden="true" /> Account settings
-        </button>
-        <button type="button" className="sa-ymenu-row" onClick={() => { setYouOpen(false); goPath("/help"); }}>
-          <HelpCircle aria-hidden="true" /> Help
-        </button>
-        <button type="button" className="sa-ymenu-row sa-ymenu-out" onClick={() => { setYouOpen(false); logout(); }}>
-          <LogOut aria-hidden="true" /> Sign out
-        </button>
-      </MobileSheet>
+      {/* Phone app v2 (Part 1D) — THE PHONE'S SHEETS. The menu REPLACES the "you" sheet (Mobile Pass 1, concept
+          frame 07): every row it offered is still reachable — To-do is a tab, packages are the Materials tile, and
+          Import, Settings, Help, Sign out and Upgrade (Plan & billing) are in the menu. Phones only; at 768px and up
+          none of the three can open (their openers are phone chrome). */}
+      {phoneNav ? (
+        <>
+          <PhonePlusSheet open={plusOpen} onClose={() => setPlusOpen(false)} doors={plusDoors} />
+          <PhoneMenu
+            open={menuOpen} onClose={() => setMenuOpen(false)}
+            name={currentUser?.name ?? ""} initials={initialsOf(currentUser?.name ?? "")}
+            planLine={planLine(currentUser?.plan).label}
+            book={bandBook} onBook={() => setBookOpen(true)}
+            tiles={menuTiles}
+            onImport={() => goPath("/import")} onHelp={() => goPath("/help")} onFeedback={() => setFeedbackOpen(true)}
+            onSettings={() => goPath("/account")} onPlan={() => goPath("/plans")} planChip="Founding"
+            onSignOut={logout}
+          />
+          <PhoneBookSheet open={bookOpen} onClose={() => setBookOpen(false)} manuscripts={manuscripts} activeId={bandBookId}
+            onPick={(id) => {
+              try { localStorage.setItem("scriptally_active_manuscript_id", id); } catch { /* private mode */ }
+              /* the desktop picker's own rule: re-route, so a page that reads the key follows it */
+              goPath(manuscriptViewPath(pathname, id) ?? `${pathname}${location.search}`);
+            }} />
+        </>
+      ) : null}
 
       {/* DEV-only page-colour lab (local + scriptally-dev builds; statically false → tree-shaken
           from prod). Overrides ride an injected <style>; the root's data-sa-ground is its hook. */}
