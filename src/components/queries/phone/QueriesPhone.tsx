@@ -181,21 +181,16 @@ export const QueriesPhone: React.FC<QueriesPhoneProps> = (p) => {
   const agentOf = (r: QcRow): Agent | undefined => p.agents.find((a) => a.id === r.query.agentId);
   const firstOf = (r: QcRow) => r.agentName.trim().split(/\s+/)[0] || r.agentName;
 
-  /* ── the top nav ── */
-  const nav = (
+  /* ── the top nav ──
+     Phone app v2 (Part 1C): on the list the page's own bar is gone — the shell's navy band carries the title, the book
+     chip, search, feedback and the menu, and the + is the tab bar's. The query and Coming up screens keep their back
+     (and More) until Part 3 rebuilds them as sheets. */
+  const nav = screen === "list" ? null : (
     <div className="qm1-nav" data-qm1="nav">
-      {screen === "list" ? <span /> : (
-        <button type="button" className="qm1-bk" data-qm1="back" onClick={back}>{I.back}Queries</button>
-      )}
+      <button type="button" className="qm1-bk" data-qm1="back" onClick={back}>{I.back}Queries</button>
       <span className="qm1-acts">
         {screen === "query" ? (
           <button type="button" className="qm1-ib" data-qm1="more" aria-label="More actions" onClick={() => setMoreOpen(true)}>{I.dots}</button>
-        ) : screen === "list" ? (
-          <>
-            <button type="button" className="qm1-ib" data-qm1="search-btn" aria-label="Search" onClick={() => setSearchOpen(true)}>{I.search}</button>
-            <button type="button" className="qm1-ib" data-qm1="cal-btn" aria-label="Coming up" onClick={() => pushParams({ qm: "coming" })}>{I.cal}</button>
-            <button type="button" className="qm1-ib solid" data-qm1="plus" aria-label="Add" aria-haspopup="dialog" onClick={() => setPlusOpen(true)}>{I.plus}</button>
-          </>
         ) : null}
       </span>
     </div>
@@ -311,13 +306,7 @@ export const QueriesPhone: React.FC<QueriesPhoneProps> = (p) => {
     <>
       <div className="qm1-hdr" data-qm1="header">
         <div className="qm1-ht">
-          <div
-            className="qm1-ms" data-qm1="ms"
-            onClickCapture={(e) => { if ((e.target as HTMLElement).closest(".sv2-msrow")) window.setTimeout(() => navigate("/queries", { replace: true }), 0); }}
-          >
-            <ShellScope onNavigate={p.onNavigate} />
-          </div>
-          <div className="qm1-title" role="heading" aria-level={1}>Queries</div>
+          {/* Phone app v2 (Part 1C): the title and the book switcher moved up into the shell's band */}
           <p className="qm1-line" data-qm1="line"><b data-qm1="sent">{line.sent}</b> sent · <b data-qm1="active">{line.active}</b> active</p>
         </div>
         <Img art={QM1_ART.desk} className="qm1-hart" slot="desk" />

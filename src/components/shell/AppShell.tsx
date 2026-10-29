@@ -39,6 +39,13 @@ import { MobileChromeContext, MobileDetailSpec, useIsMobile } from "./mobileChro
 import { todoDueBadge } from "../../lib/todoDueTally";
 import { MobileSheet } from "./MobileSheet";
 import { BottomTabBar, isMenuPage, tabFor } from "../BottomTabBar";
+import { PhoneBand, dayWord } from "../phone/PhoneBand";
+import { PhoneBandContext } from "../phone/phoneBandStore";
+import { salutation } from "../../lib/dashboardStats";
+import { shellCrumbForPath } from "./shellV2Nav";
+import { resolveScopedManuscript } from "../../lib/shellSidebar";
+import { firstNameOf } from "../../lib/responses";
+import { initialsOf } from "../../lib/searchSuggestionsCore";
 import { STAGE_SCROLL_ID } from "../../lib/stageScroll";
 import { useScriptAllyDb } from "../../lib/db";
 import { planLine } from "../../lib/shellSidebar";
@@ -355,6 +362,30 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
      a page that scrolls an inner box (the fill routes) is heard too: scroll does not bubble, but capture reaches every
      descendant. The ref's thresholds (app.js `onScroll`): away after 6px down once past 90px; back after 6px up or
      above 40px. Reset on every route. */
+  /* Phone app v2 (Part 1C/1D) — the band, the menu, the book switcher */
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [bookOpen, setBookOpen] = useState(false);
+  const [bandSlots, setBandSlots] = useState<Record<string, React.ReactNode | null>>({});
+  const setBandSlot = useCallback((path: string, node: React.ReactNode | null) => {
+    setBandSlots((prev) => (prev[path] === node ? prev : { ...prev, [path]: node }));
+  }, []);
+  const phoneBandValue = useMemo(() => ({ setBandSlot }), [setBandSlot]);
+  const bandTitle = useMemo(() => {
+    const tab = tabFor(pathname);
+    if (tab === "home") return `${dayWord(salutation(new Date()))}, ${firstNameOf(currentUser?.name ?? "")}`.replace(/, $/, "");
+    if (tab === "queries") return "Queries";
+    if (tab === "todo") return "To-do";
+    if (tab === "agents") return "Agents";
+    return shellCrumbForPath(pathname)?.page ?? "QueryHawk";
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, currentUser?.name]);
+  const bandBook = useMemo(() => {
+    if (!phoneNav) return null;
+    let stored: string | null = null;
+    try { stored = window.localStorage.getItem("scriptally_active_manuscript_id"); } catch { /* storage refused */ }
+    return resolveScopedManuscript(manuscripts, stored)?.title?.trim() || null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phoneNav, manuscripts, pathname, bookOpen]);
   const [tabAway, setTabAway] = useState(false);
   const [plusOpen, setPlusOpen] = useState(false);
   useEffect(() => { setTabAway(false); setPlusOpen(false); }, [pathname]);
@@ -511,6 +542,28 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
             and both rebuild mockups are desktop-only — so the new chrome is a ≥768px
             replacement and this keeps rendering below it. Removing it would take the phone's
             only bar with it. */}
+        {/* ⚠️ PHONE APP v2 (Part 1C): ON A PHONE THE NAVY BAND TAKES THIS SLOT, for every route that is not showing a
+            pushed detail screen. The old mobile bar (ShellTopBar) stays for pushed detail screens only — their back,
+            Cancel and Done live in it (MobileDetailSpec) until each is rebuilt. At 768px and up `phoneNav` is false and
+            this renders exactly what it did before. */}
+        {phoneNav && activeMobileDetail === null ? (
+          <PhoneBand
+            variant={isMenuPage(pathname) ? "page" : "tab"}
+            title={bandTitle}
+            greeting={pathname === "/dashboard"}
+            book={bandBook}
+            initials={initialsOf(currentUser?.name ?? "")}
+            onSearch={openPalette}
+            onFeedback={() => setFeedbackOpen(true)}
+            onMenu={() => setMenuOpen(true)}
+            onBook={() => setBookOpen(true)}
+            onBack={() => {
+              const idx = (window.history.state as { idx?: number } | null)?.idx ?? 0;
+              if (idx > 0) navigate(-1); else goPath("/dashboard");
+            }}
+            slot={bandSlots[pathname] ?? null}
+          />
+        ) : (
         <div className="ws-mobilebar">
           <ShellTopBar
             onNavigate={onNavigate}
@@ -526,13 +579,16 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
             onOpenYou={() => setYouOpen(true)}
           />
         </div>
+        )}
 
         {/* ⚠️ THE STAGE MOVED INTO THE CARD (refinement §4). It is still the app's ONE scroll
             container and still carries STAGE_SCROLL_ID, the ref and the scroll memory — because
             stageScroll.ts and per-route restoration address it by id — but the element itself is
             now the card's `.ws-cscroll`, so the bar can be sticky above the scrolling content.
             Keeping a second scroller here would have double-scrolled every page. */}
-        <MobileChromeContext.Provider value={mobileChromeValue}>{children}</MobileChromeContext.Provider>
+        <MobileChromeContext.Provider value={mobileChromeValue}>
+          <PhoneBandContext.Provider value={phoneBandValue}>{children}</PhoneBandContext.Provider>
+        </MobileChromeContext.Provider>
       </WorkspaceShell>
 
       {palette}

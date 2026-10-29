@@ -13,7 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
 import type { Activity, Agent, Manuscript, ManuscriptVersion, Query, SmartImportUsage, Task, TaskFlag, User, UserTask } from "../../../types";
 import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
-import { PhoneSearch, PhoneTopBar, type PhoneActions } from "./PhoneTopBar";
+import { PhoneSearch, type PhoneActions } from "./PhoneTopBar";
 import { PhoneStats } from "./PhoneStats";
 import { PhoneUpNext } from "./PhoneUpNext";
 import { scopeActivities, scopeQueries, scopeTasks } from "../../../lib/manuscriptScope";
@@ -163,13 +163,8 @@ export const DashPhone: React.FC<DashPhoneProps> = (props) => {
 
   return (
     <div ref={rootRef} className="dm1" data-dm1="page" data-loading={loading ? "1" : "0"}>
-      <PhoneTopBar
-        onNavigate={onNavigate}
-        onPickedManuscript={() => navigate("/dashboard", { replace: true })}
-        onSearch={() => { searchBtn.current = document.activeElement as HTMLElement; setSearchOpen(true); }}
-        actions={actions}
-        scrolled={scrolled}
-      />
+      {/* Phone app v2 (Part 1C): the page's own top bar (PhoneTopBar) gives way to the shell's navy band, which carries
+          the greeting, the book chip, search, feedback and the menu; the + is the tab bar's. Part 2 rebuilds this body. */}
       <div className="dm1-body" data-dm1="body">
         {/* each card opens exactly its own queries (lib/dashPhone's `queriesForIds`). ⚠️ The Contact list takes no
             status from the URL, so Agents opens it whole (the report says so). */}
