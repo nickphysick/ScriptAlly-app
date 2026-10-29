@@ -229,6 +229,12 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   --mk-f-sans: "Source Sans 3", "Helvetica Neue", Arial, sans-serif;
   /* The handwriting: the phone drawer's strapline ("No more winging it."), the ref's Caveat 600. */
   --mk-f-hand: "Caveat", cursive;
+  /* Pricing on phones' two card surfaces, lifted to tokens because Contact and About wear them too
+     on a phone (public pages on phones v1). `--mk-pv-cardline` is the founding box's hairline and
+     `--mk-pv-cardlift` its shadow; `--mk-pv-perklift` is the perk card's ring-and-drop. */
+  --mk-pv-cardline: rgba(28, 19, 15, .08);
+  --mk-pv-cardlift: 0 1px 2px rgba(28, 19, 15, .05), 0 22px 44px -24px rgba(28, 19, 15, .35);
+  --mk-pv-perklift: 0 0 0 1px rgba(28, 19, 15, .08), 0 6px 14px -10px rgba(28, 19, 15, .2);
   /* Burgundy at low alpha — the illustration slot's placeholder chrome. Pre-computed, per the
      repo's no-colour-mix() rule. */
   --mk-illo-rim: rgba(162, 69, 42, 0.34);
@@ -1990,8 +1996,8 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 /* ── The founding box (ref .fbx) ── */
 .mk-pvm .mk-pvbox {
   position: relative; z-index: 2; margin-top: -116px;
-  border: 1px solid rgba(28, 19, 15, .08); border-radius: 20px;
-  box-shadow: 0 1px 2px rgba(28, 19, 15, .05), 0 22px 44px -24px rgba(28, 19, 15, .35);
+  border: 1px solid var(--mk-pv-cardline); border-radius: 20px;
+  box-shadow: var(--mk-pv-cardlift);
   /* ⚠️ COLOUR AND IMAGE SEPARATELY, NEVER THE SHORTHAND: a gradient that failed to parse would leave
      the box see-through over the ink. White to 52%, #fcf4f0 at 74%, blush at 100%, top to bottom. */
   background-color: #fff;
@@ -2071,7 +2077,7 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-pvm .mk-pvperks::-webkit-scrollbar { display: none; }
 .mk-pvm .mk-pvperk {
   flex: 0 0 82%; scroll-snap-align: start; background: #fff; border-radius: 16px; padding: 18px;
-  box-shadow: 0 0 0 1px rgba(28, 19, 15, .08), 0 6px 14px -10px rgba(28, 19, 15, .2);
+  box-shadow: var(--mk-pv-perklift);
 }
 .mk-pvm .mk-pvperki { width: 40px; height: 40px; border-radius: 50%; background: var(--mk-blush); display: grid; place-items: center; }
 .mk-pvm .mk-pvperki svg {
@@ -3091,4 +3097,30 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   .mk-cbtn { background: var(--mk-navy); color: #fff; }
   .mk-cbtn:hover { background: var(--mk-navy-hov); }
   .mk-cbtn:disabled:hover { background: var(--mk-navy); }
+}
+
+/* ── B2: Contact on phones (Nick's picks 7B, 8B, 9B) ──
+   The opener is Pricing's card (see `ContactPage.tsx`): it wears `.mk-pvm`/`.mk-pvbox`/`.mk-pvart`/
+   `.mk-pvh1`/`.mk-pvsub`, so every value up there is Pricing's own rule, not a copy. Only what differs
+   is stated: the email card's spacing inside it. (Pricing's 46px foot room under the card stays, as
+   the board draws it.) Below the card: "How can we help?" over the three ways as white cards, then
+   the form in Pricing's card dress — the box's radius, hairline and shadow, through the same tokens. */
+@media (max-width: 760px) {
+  .mk-pvm .mk-cmailcard { margin: 16px 0 18px; }
+  .mk-contact { padding-top: 6px; }
+  /* Two classes and `!important` on the family: brand.tsx forces every bare h2 with `!important`. */
+  .mk-contact .mk-waysh {
+    font-family: var(--mk-f-display) !important; font-weight: 400; font-size: 1.4rem; line-height: 1.25;
+    color: var(--mk-nearblack); margin: 6px 0 12px;
+  }
+  .mk-ways { gap: 12px; }
+  .mk-way { background: #fff; border-radius: 16px; padding: 18px; box-shadow: var(--mk-pv-perklift); }
+  .mk-way .mk-wayh { font-size: 1.08rem; }
+
+  .mk-formcard { border-radius: 20px; border: 1px solid var(--mk-pv-cardline); box-shadow: var(--mk-pv-cardlift); }
+  .mk-formcard .mk-formh2 { font-size: 1.6rem; }
+  .mk-field input, .mk-field select, .mk-field textarea {
+    border-radius: 14px; border: 1px solid rgba(28, 19, 15, .16); background: #fff; min-height: 50px;
+  }
+  .mk-cbtn { border-radius: 999px; min-height: 50px; }
 }

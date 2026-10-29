@@ -24,8 +24,9 @@ import { useEffect } from "react";
 import {
   CONTACT_DOCUMENT_TITLE, CONTACT_EYEBROW, CONTACT_H1, CONTACT_LEDE, CONTACT_MAIL_LABEL,
   CONTACT_WAYS, CONTACT_TOPICS, CONTACT_FORM_H2, CONTACT_FORM_SUB, CONTACT_FORM_SEND,
-  CONTACT_FINE_PRINT, CONTACT_FIELD_LABELS, CONTACT_PLACEHOLDERS, CONTACT_ART_ALT,
+  CONTACT_FINE_PRINT, CONTACT_FIELD_LABELS, CONTACT_PLACEHOLDERS, CONTACT_ART_ALT, CONTACT_WAYS_H2,
 } from "./contactCopy";
+import { usePhone } from "./usePhone";
 import { Runs } from "./CopyRuns";
 import { ContactTile } from "./marketingMarks";
 import { LEGAL_ENTITY_NAME, REGISTERED_ADDRESS, SUPPORT_EMAIL } from "../lib/companyInfo";
@@ -59,6 +60,13 @@ export const ContactPage: React.FC<{
   const [errors, setErrors] = useState<Partial<Record<ContactField, string>>>({});
   const [state, setState] = useState<SendState>("idle");
   const [notice, setNotice] = useState("");
+  /* ⚠️ ON A PHONE THE TOP OF THE PAGE IS PRICING'S (public pages on phones v1, Nick's pick 7B): a white
+     card over the navy holding the heading, the lede and the email, with the desk hawk perched on its
+     corner. It wears Pricing's own classes — `.mk-pvm`, `.mk-pvbox`, `.mk-pvart`, `.mk-pvin`,
+     `.mk-pvh1`, `.mk-pvsub` — so the two pages share one set of rules rather than a copy, and
+     `.mk-sheet:has(.mk-pvm)` starts the sheet below the navy exactly as it does there. The desktop
+     render (and every unit test, which renders without `matchMedia`) is unchanged. */
+  const phone = usePhone();
 
   useEffect(() => {
     const prev = document.title;
@@ -121,22 +129,43 @@ export const ContactPage: React.FC<{
     }
   };
 
+  const mailCard = (
+    <div className="mk-cmailcard">
+      <ContactTile kind="mail" />
+      <div>
+        <p className="mk-cmaillabel">{CONTACT_MAIL_LABEL}</p>
+        <a className="mk-cmail" href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>
+      </div>
+    </div>
+  );
+
   return (
     <div>
+      {phone && (
+        <div className="mk-pvm mk-pvm--contact">
+          <section className="mk-pvbox" aria-labelledby="mk-ch1">
+            <img className="mk-pvart" src={ARCHIVIST.src + "?v=" + ARCHIVIST.version} alt=""
+                 width={ARCHIVIST.width} height={ARCHIVIST.height} />
+            <div className="mk-pvin">
+              {/* Hidden on phones by the small-capitals rule; kept in the DOM, as on desktop. */}
+              <p className="mk-ckicker">{CONTACT_EYEBROW}</p>
+              <h1 id="mk-ch1" className="mk-pvh1">{CONTACT_H1}</h1>
+              <p className="mk-pvsub">{CONTACT_LEDE}</p>
+              {mailCard}
+            </div>
+          </section>
+        </div>
+      )}
       <main className="mk-contact">
         <div className="mk-contactsplit">
           <div className="mk-cleft">
-            <p className="mk-ckicker">{CONTACT_EYEBROW}</p>
-            <h1 className="mk-ch1">{CONTACT_H1}</h1>
-            <p className="mk-clede">{CONTACT_LEDE}</p>
-
-            <div className="mk-cmailcard">
-              <ContactTile kind="mail" />
-              <div>
-                <p className="mk-cmaillabel">{CONTACT_MAIL_LABEL}</p>
-                <a className="mk-cmail" href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>
-              </div>
-            </div>
+            {!phone && (<>
+              <p className="mk-ckicker">{CONTACT_EYEBROW}</p>
+              <h1 className="mk-ch1">{CONTACT_H1}</h1>
+              <p className="mk-clede">{CONTACT_LEDE}</p>
+              {mailCard}
+            </>)}
+            {phone && <h2 className="mk-waysh">{CONTACT_WAYS_H2}</h2>}
 
             {/* The three reasons are headings in their own right: a reader jumping by heading
                 lands on each, and on the form's, in the order the page reads. */}
@@ -152,14 +181,17 @@ export const ContactPage: React.FC<{
               ))}
             </div>
 
-            <img
-              className="mk-cart"
-              src={ARCHIVIST.src + "?v=" + ARCHIVIST.version}
-              alt={CONTACT_ART_ALT}
-              width={ARCHIVIST.width}
-              height={ARCHIVIST.height}
-              loading="lazy"
-            />
+            {/* On a phone the hawk perches on the opening card instead (above), so it is drawn once. */}
+            {!phone && (
+              <img
+                className="mk-cart"
+                src={ARCHIVIST.src + "?v=" + ARCHIVIST.version}
+                alt={CONTACT_ART_ALT}
+                width={ARCHIVIST.width}
+                height={ARCHIVIST.height}
+                loading="lazy"
+              />
+            )}
           </div>
 
           {/* ⚠️ A REAL <form> NOW (17 Sep), so Enter sends from any field and the region is named

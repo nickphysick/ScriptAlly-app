@@ -97,4 +97,7 @@ export const CONTACT_PLACEHOLDERS = {
 } as const;
 
 /** The Archivist at a writing desk — the page's one illustration, described rather than hidden. */
+/** Heads the three ways on a phone (public pages on phones v1, Nick's pick 8B). The desktop page
+ *  has no heading there: the kicker and h1 above the ways already say what the column is for. */
+export const CONTACT_WAYS_H2 = "How can we help?";
 export const CONTACT_ART_ALT = "An older hawk at a desk, writing a letter.";
