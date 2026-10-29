@@ -60,6 +60,26 @@ export const DueDial: React.FC<{ dial: Dial; size: number; tag?: string | null; 
   );
 };
 
+/**
+ * v7 S5 — DATES AS WORDS: a tray row's date reads "26 Jul" in serif (rust when overdue) with the age under it in rust
+ * italic ("3 mo overdue"), or "No date" in muted italic. It keeps the dial's `data-td5="dial"` and title, so the row's
+ * press target for moving a date (the date menu) is the date text now. The spoken label is the dial's.
+ */
+export const DueWords: React.FC<{ dial: Dial; age?: string | null; pressable?: boolean }> = ({ dial, age = null, pressable = false }) => {
+  const spoken = dial.kind === "late" && dial.ymd ? overdueLabel(dial.ymd, londonToday(Date.now())) : null;
+  return (
+    <span className={`td7-due${pressable ? " td52-press" : ""}`} data-td5="dial" data-td7="due" data-kind={dial.kind} title={dial.title}
+      role={spoken ? "img" : undefined} aria-label={spoken ?? undefined}>
+      {dial.kind === "none" ? <i className="td7-nd" data-td7="no-date">No date</i> : (
+        <>
+          <b className="td7-dt" data-td7="date-words">{dial.day} {dial.mon}</b>
+          {age ? <small className="td7-age" data-td52="age" data-td7="age">{age}</small> : null}
+        </>
+      )}
+    </span>
+  );
+};
+
 export const Disc: React.FC<{ item: TrayItem }> = ({ item }) =>
   item.initials ? <span className="td5-disc" aria-hidden="true">{item.initials}</span> : <span className="td5-disc" data-own="" aria-hidden="true">{QUILL}</span>;
 
@@ -171,7 +191,7 @@ export const DeskCard: React.FC<DeskCardProps> = ({ item, facts, lede, stops, pa
         <div className="td5-who">
           <Disc item={item} />
           <span className="td5-wn"><b>{item.who}</b>{item.whoSub ? <small>{item.whoSub}</small> : null}</span>
-          <DueDial dial={item.dial} size={60} />
+          {/* v7 S5 — the desk card's big dial is gone; the date reads in its facts and its rows */}
         </div>
         <h2 className="td5-deed" data-td5="deed">{item.deed}</h2>
         {lede ? <p className="td5-lede" data-td5="lede">{lede}</p> : null}

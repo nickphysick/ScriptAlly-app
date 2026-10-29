@@ -142,6 +142,21 @@
     font: italic 400 14px/1.2 var(--sp-serif) !important; letter-spacing: 0; text-transform: none; text-decoration: underline; text-underline-offset: 2px;
   }
 
+  /* ═════ S5 · dates as words: "26 Jul" in serif (rust when overdue), the age under it in rust italic, or "No date" ═════ */
+  .td5-root .td5-row2 { grid-template-columns: 40px minmax(0, 1fr) auto; }
+  .td5-root .td7-due { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; flex: none; white-space: nowrap; text-align: right; }
+  .td5-root .td7-due .td7-dt { font: 400 16px/1.2 var(--sp-serif) !important; color: #1c130f; }
+  .td5-root .td7-due[data-kind="late"] .td7-dt { color: #a2452a; }
+  .td5-root .td7-due .td7-age { font: italic 400 13.5px/1.2 var(--sp-serif) !important; color: #a2452a; }
+  .td5-root .td7-due .td7-nd { font: italic 400 15px/1.2 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.5); }
+  .td5-root .td7-due.td52-press { cursor: pointer; border-radius: 6px; }
+  .td5-root .td7-due.td52-press:hover .td7-dt { text-decoration: underline; text-underline-offset: 3px; }
+  /* a Set aside row's day, on one line */
+  .td5-root .td5-back.td7-bdate {
+    display: inline; width: auto; height: auto; border: 0; border-radius: 0; background: none; box-shadow: none; white-space: nowrap;
+    font: 400 16px/1.2 var(--sp-serif) !important; color: #1c130f;
+  }
+
   /* pinned: the header card, Today and the "Your tray" heading leave with the old header (the ref's `.v6-pinhide`) */
   .td5-root[data-pinned] .td7-hd, .td5-root[data-pinned] .td7-sec { display: none; }
 }
@@ -153,3 +168,16 @@
   .td5-root .td7-ct { padding: 2px 14px 0; }
   .td5-root .td7-ct .td7-ctl { font-size: 16px; }
 }
+
+/* ═════ the date menu's "Pick a date" (portalled to the body, so literals, never `--td5-*`): ComposeCard's month in the
+   popover — the popover widens to hold it; the month loses its own card frame there ═════ */
+.td52-dm.td7-picking { width: 296px; }
+.td52-dm .td5-cal { width: auto; margin: 6px 0 0; padding: 8px 4px 4px; border-radius: 0; box-shadow: none; border-top: 1px solid rgba(28, 19, 15, 0.08); background: none; }
+.td52-dm .td5-calm button { width: 26px; height: 26px; border: 0; border-radius: 50%; background: none; cursor: pointer; color: #2a3a52; font: 400 16px/1 var(--sp-serif) !important; }
+.td52-dm .td5-calm button:disabled { opacity: 0.3; cursor: default; }
+.td52-dm .td5-calg button { height: 32px; border: 0; border-radius: 8px; background: none; cursor: pointer; font: 400 14px/1 var(--sp-serif) !important; color: #1c130f; }
+.td52-dm .td5-calg button:hover:not(:disabled) { background: #f2eee8; }
+.td52-dm .td5-calg button:disabled { color: rgba(28, 19, 15, 0.25); cursor: default; }
+.td52-dm .td5-calg button[data-today] { box-shadow: inset 0 0 0 1px #2a3a52; }
+.td52-dm .td5-calg button[aria-pressed="true"] { background: #2a3a52; color: #f4eee5; }
+.td52-dm .td5-calg button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 1px; }

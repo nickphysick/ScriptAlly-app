@@ -68,7 +68,7 @@ import { TrayHeader, TrayHeadline, TraySection } from "./TrayHeader";
 import { TrayToday, dayChip, plusDays as calPlus, shortDay, weekdayOf } from "./TrayCalendar";
 import { TrayCalDrawer } from "./TrayCalDrawer";
 import { TrayDialMenu, type DialOpt } from "./TrayDialMenu";
-import { lateTag, rowLines } from "../../../lib/trayRows";
+import { lateWords, rowLines } from "../../../lib/trayRows";
 import { doingTitle } from "../../../lib/deskDoing";
 import { noreplyAnswers, saveClose } from "../../../lib/queryActions/closeSave";
 import { packagesHeldBy, packagesIn, restoreSnapshot, takeSnapshot } from "../../../lib/queryActions/snapshot";
@@ -79,7 +79,7 @@ import { calFilterLabel, calendarItems, dayBuckets, daysFrom, londonToday, passe
 import { TrayFilterRow, TrayFind } from "./TrayFilters";
 import { usePinList } from "../../shell/useFullScreenList";
 import { PinListButton } from "../../shell/PinListButton";
-import { DeskCard, Disc, DoneToday, DueDial } from "./TrayDesk";
+import { DeskCard, Disc, DoneToday, DueWords } from "./TrayDesk";
 import { TrayCaughtUp, TrayNothingYet } from "./TrayEmpty";
 import { dayMonth, MONTHS_SHORT } from "../../../lib/dates";
 import { trayReviewState } from "../../../lib/todoReviewAid";
@@ -848,12 +848,13 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
     if (!sel || sel.key === i.key) setSelKey(next);
     flash(o.say ?? `Snoozed until ${dayLabel(until)}`, { label: "Undo", fn: async () => { await putBack(cap); toBack(i)(); } }, UNDO_MS);
   };
-  /* ── v5.2 §G.2 · move a date: two doors (the dial's menu, a drag onto a day), one rule — an own task's due date
-     changes; anything else is SNOOZED to that day through v5.1's writer and guards, and leaves for Set aside ── */
+  /* ── v5.2 §G.2 · move a date: ONE door since v7 — the date's menu (its presets, or "Pick a date": a small month in
+     the same popover). Drag onto a day is RETIRED (Nick's ruling, 29 Oct): the in-page month it dropped on is gone and
+     the slide-out calendar stays read-only. One rule — an own task's due date changes; anything else is SNOOZED to that
+     day through v5.1's writer and guards (refusal()), and leaves for Set aside ── */
   const [dialMenu, setDialMenu] = useState<{ key: string; left: number; top: number; opener: HTMLElement } | null>(null);
-  const [dragKey, setDragKey] = useState<string | null>(null);
   /* a task with a date of its own: an own task's due date, or a dial that has one (the offer's answer-by included);
-     housekeeping and sweeps have none, so their dials open nothing and they cannot be dragged */
+     housekeeping and sweeps have none, so their dates open nothing */
   const movable = (i: TrayItem) => !i.sweep && i.bucket !== "fix" && (i.userTask ? !!i.userTask.dueDate : i.dial.kind !== "none");
   const nextMonday = (ymd: string) => { const wd = weekdayOf(ymd); return calPlus(ymd, wd === 1 ? 7 : (8 - wd) % 7 || 7); };
   const inMonth = (ymd: string) => { const [y, m, d] = ymd.split("-").map(Number); const last = new Date(Date.UTC(y, m + 1, 0)).getUTCDate(); const mm = m === 12 ? 1 : m + 1; const yy = m === 12 ? y + 1 : y;
@@ -1146,9 +1147,6 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
           data-task-type={i.card.taskType ?? (i.card.userTaskId ? "own" : undefined)} data-sweep={i.sweep ? String((i.card as BoardCard & { sweepOf?: number }).sweepOf ?? "") : undefined}
           data-query={i.query?.id} data-cal-ymd={calYmdOf.get(i.key)} data-out={leaving ? "" : undefined} aria-current={!ghost && sel?.key === i.key ? "true" : undefined}
           data-lit={dayHover && calYmdOf.get(i.key) === dayHover ? "" : undefined}
-          draggable={!pinned && movable(i) ? true : undefined}
-          onDragStart={(e) => { if (pinned || !movable(i)) { e.preventDefault(); return; } e.dataTransfer.setData("text/plain", i.key); e.dataTransfer.effectAllowed = "move"; setDragKey(i.key); }}
-          onDragEnd={() => setDragKey(null)}
           data-live={working && deskItem?.key === i.key ? "" : undefined} data-bulk={bulk.has(i.key) ? "" : undefined} aria-describedby={tip?.key === i.key ? "td52-tip" : undefined}
           onMouseEnter={(e) => { setRowLit(calYmdOf.get(i.key) ?? null); showTip(i.key, e.currentTarget); }} onMouseLeave={() => { setRowLit(null); setTip(null); }}
           onFocus={(e) => { setRowLit(calYmdOf.get(i.key) ?? null); showTip(i.key, e.currentTarget); }} onBlur={() => { setRowLit(null); setTip(null); }}
@@ -1158,8 +1156,8 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
               data-td52="bulk-check" onClick={(e) => { e.stopPropagation(); toggleBulk(i.key); }}><Disc item={i} /></span>
           ) : <Disc item={i} />}
           <span className="td5-tx" data-agent-led={lines(i).agentLed ? "" : undefined}><b data-td52="row-bold">{lines(i).bold}{working && deskItem?.key === i.key ? <span className="td52-live" data-td52="in-progress">IN PROGRESS</span> : startedKey === i.key ? <span className="td5-tag" data-td5="started">Started</span> : null}{(() => { const b = backOf(i); return b ? <span className="td5-tag" data-back="" data-td5="back-tag">{b.tag}</span> : null; })()}</b><small data-td52="row-italic">{lines(i).italic}</small></span>
-          <DueDial dial={i.dial} size={52} selected={!ghost && sel?.key === i.key} pressable={movable(i)}
-            tag={i.dial.kind === "late" && i.dial.ymd ? lateTag(daysFrom(i.dial.ymd, calToday)) : null} />
+          <DueWords dial={i.dial} pressable={movable(i)}
+            age={i.dial.kind === "late" && i.dial.ymd ? lateWords(daysFrom(i.dial.ymd, calToday)) : null} />
         </button>
       );
     });
@@ -1295,7 +1293,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
                                         <small>{a.kind === "snooze" ? `${a.who || c?.who || "Your task"} · back ${until ? dayLabel(localYMD(until.getTime())) : ""}${puts > 1 ? ` · put off ${puts} times` : ""}`
                                           : a.kind === "dismiss" ? `Dismissed${a.at && !a.legacy ? ` ${dayMonth(a.at)}` : ""} · ${a.who || c?.who || "Your task"}` : "For every agent"}</small>
                                       </span>
-                                      {until ? <span className="td5-back" aria-hidden="true"><b>{until.getDate()}</b><small>{MONTHS_SHORT[until.getMonth()]}</small></span> : <span />}
+                                      {until ? <span className="td5-back td7-bdate" data-td7="back-date" aria-hidden="true">{until.getDate()} {MONTHS_SHORT[until.getMonth()]}</span> : <span />}
                                     </button>
                                   );
                                 })}</div>
@@ -1488,9 +1486,12 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
           door: dl?.what === "send-by date" ? "Set a new send-by date →" : "Record where you are →",
           onDoor: () => { setDialMenu(null); doDoor(it, dl?.what === "send-by date" ? "sendby" : "offer"); },
         } : null;
+        /* "Pick a date": the month opens on tomorrow at the earliest and, with a ceiling, ends on it; moveTo's refusal()
+           is still the last word (today and the past, past the ceiling, a passed send-by) */
         return <TrayDialMenu left={dialMenu.left} top={dialMenu.top} opener={dialMenu.opener} head={it.userTask ? "MOVE TO" : "SET A NEW DATE"} opts={dialOpts(it)} cant={cant}
           onPick={(ymd) => guarded(() => moveTo(it, ymd))} onClose={() => setDialMenu(null)}
-          onPickCal={() => { setDialMenu(null); const sc = scroller(); if (sc) sc.scrollTo({ top: 0, behavior: reduced() ? "auto" : "smooth" }); flash("Drag the row onto a day in the calendar."); }} />;
+          todayYmd={calToday} min={calPlus(calToday, 1)} max={r && r.ceiling > 0 ? calPlus(calToday, r.ceiling) : null}
+          value={it.dial.ymd && it.dial.ymd > calToday ? it.dial.ymd : null} />;
       })() : null}
       <TrayCalDrawer open={calDrawer} today={calToday} items={calItems} n={n} sel={calSel} onSel={setCalSel}
         onClose={() => setCalDrawer(false)} onDesk={calToDesk} wordsOf={calWords} onAdd={() => { setCalDrawer(false); openCompose(); }} />

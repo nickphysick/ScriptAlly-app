@@ -34,6 +34,15 @@ export function lateTag(days: number): string | null {
   return `+${Math.round(days / 30.4)} mo`;
 }
 
+/** v7 S5 — the same lateness in words, for a row's date read as text: "2 days overdue" · "4 wk overdue" · "3 mo overdue"
+ *  (lateTag's thresholds, so the figure cannot drift from the tag it replaced) */
+export function lateWords(days: number): string | null {
+  const t = lateTag(days);
+  if (!t) return null;
+  const [n, u] = t.slice(1).split(" ");
+  return `${n} ${u === "d" ? (n === "1" ? "day" : "days") : u} overdue`;
+}
+
 const MONTH = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 /** the overdue dial's spoken label (F.5): "Overdue since 20 June" (the year when it is not this one) */
 export function overdueLabel(ymd: string, todayYmd: string): string {
