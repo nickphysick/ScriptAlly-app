@@ -4105,12 +4105,12 @@ body[data-ct=d] .db-sep span{color:rgba(42,58,82,.6)}
 </section>
 
 
-<div id="vPk">
+<div id="vPk" data-pc="d">
 <!-- 2 · the builder -->
 <section class="pk-tip" id="pkTip" data-tv="d" aria-label="About packages">
- <div class="tv tv-d"><span class="td-ic" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M3 7l7-3.5L17 7v8l-7 3.5L3 15z"/><path d="M3 7l7 3.5L17 7M10 10.5V18.5"/></svg></span><p><b>A package is everything one agent receives:</b> your query letter, pages and, if they want one, a synopsis. Pick it when you log a query and QueryHawk records exactly what went.</p><button type="button" class="td-l" data-hw>How it works →</button><button type="button" class="pk-tip-x" data-tipx aria-label="Dismiss">✕</button></div>
+ <div class="tv tv-d"><span class="td-ic" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M3 7l7-3.5L17 7v8l-7 3.5L3 15z"/><path d="M3 7l7 3.5L17 7M10 10.5V18.5"/></svg></span><p><b>A package is everything one agent receives:</b> the pages from a version of your book, your query letter and, if they want one, a synopsis. Pick it when you log a query and QueryHawk records exactly what went.</p><button type="button" class="td-l" data-hw>How it works →</button><button type="button" class="pk-tip-x" data-tipx aria-label="Dismiss">✕</button></div>
 </section>
-<nav class="pkl" id="pkl" aria-label="Your packages"></nav>
+<div class="pkc-wrap"><nav class="pkl" id="pkl" aria-label="Your packages"></nav>
 <section class="pb-build" aria-label="Put a package together">
  
  <p class="bk-k">Build, view and edit</p>
@@ -4125,7 +4125,7 @@ body[data-ct=d] .db-sep span{color:rgba(42,58,82,.6)}
    <div class="pk-open" id="pkOpen"></div>
   </div>
  </div>
-</section>
+</section></div>
 
 <!-- 3 · how they're doing -->
 <div class="bnr" id="bnr"><div class="bnr-in"><div class="bnr-art" aria-hidden="true"><span>Art<small>Hawk reading letters at a desk, a stack of replies beside it</small></span></div><div class="bnr-tx"><p class="bnr-k">Results</p><h2 id="agT">How your packages are doing</h2><p class="bnr-l" id="aggLine"></p></div><div class="bnr-n" id="bnrN"></div></div></div>
@@ -6450,7 +6450,7 @@ body.fx-space.hd-e .phd{margin-bottom:48px!important}
 
 /* ===== v39.2: patterned header, a proper Your packages heading, materials options ===== */
 .eh2{isolation:isolate;overflow:hidden}
-.eh2::before{content:"";position:absolute;inset:0;z-index:-1;background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22240%22%20height%3D%22240%22%20viewBox%3D%220%200%20240%20240%22%20fill%3D%22none%22%20stroke%3D%22%231c130f%22%20stroke-width%3D%221.4%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%0A%3Cg%20transform%3D%22translate%2822%2026%29%20rotate%28-8%29%22%3E%3Cpath%20d%3D%22M0%2010l22-10%2022%2010v26L22%2046%200%2036z%22/%3E%3Cpath%20d%3D%22M0%2010l22%2010%2022-10M22%2020v26%22/%3E%3Cpath%20d%3D%22M11%205l22%2010%22/%3E%3C/g%3E%0A%3Cg%20transform%3D%22translate%28150%2020%29%20rotate%286%29%22%3E%3Crect%20x%3D%220%22%20y%3D%220%22%20width%3D%2246%22%20height%3D%2232%22%20rx%3D%223%22/%3E%3Cpath%20d%3D%22M0%202l23%2017L46%202%22/%3E%3C/g%3E%0A%3Cg%20transform%3D%22translate%28118%20112%29%20rotate%28-4%29%22%3E%3Crect%20x%3D%220%22%20y%3D%220%22%20width%3D%2230%22%20height%3D%2236%22%20rx%3D%221%22/%3E%3Crect%20x%3D%224%22%20y%3D%224%22%20width%3D%2222%22%20height%3D%2228%22%20stroke-dasharray%3D%222%202.5%22/%3E%3Ccircle%20cx%3D%2215%22%20cy%3D%2216%22%20r%3D%225%22/%3E%3C/g%3E%0A%3Cg%20transform%3D%22translate%2826%20132%29%20rotate%2810%29%22%3E%3Crect%20x%3D%220%22%20y%3D%220%22%20width%3D%2254%22%20height%3D%2240%22%20rx%3D%223%22/%3E%3Cpath%20d%3D%22M27%200v40M0%2020h54%22/%3E%3Cpath%20d%3D%22M27%2020c-8-10-16-6-10%200M27%2020c8-10%2016-6%2010%200%22/%3E%3C/g%3E%0A%3Cg%20transform%3D%22translate%28176%20150%29%20rotate%28-12%29%22%3E%3Cpath%20d%3D%22M0%208h28l10%2010-10%2010H0z%22/%3E%3Ccircle%20cx%3D%228%22%20cy%3D%2218%22%20r%3D%222.5%22/%3E%3Cpath%20d%3D%22M8%2018c-8%208-6%2018%204%2020%22/%3E%3C/g%3E%0A%3Cpath%20d%3D%22M78%2082c20-14%2040%206%2060-6%22%20stroke-dasharray%3D%223%205%22/%3E%3Cpath%20d%3D%22M200%2096c10%2014-4%2024%206%2034%22%20stroke-dasharray%3D%223%205%22/%3E%0A%3Cg%20transform%3D%22translate%2892%20196%29%22%3E%3Cpath%20d%3D%22M0%206l8%208%2016-16%22/%3E%3C/g%3E%0A%3C/svg%3E") 0 0/240px 240px repeat;opacity:.07;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 55%,#000 100%);mask-image:linear-gradient(90deg,transparent 0,#000 55%,#000 100%)}
+.eh2::before{content:none}
 .eh2>*{position:relative}
 /* Your packages: back to a real heading */
 body.fx-type .pkl-h{font:400 30px/1.1 var(--machine)!important;letter-spacing:0!important;text-transform:none!important;color:#1c130f!important}
@@ -6545,6 +6545,28 @@ body.fx-type .pkl-k{gap:16px!important;align-items:center!important}
 .lr-in::after{content:"·";margin-left:6px;color:rgba(28,19,15,.35);font-style:normal}
 .v39 .lr .lr-add{background:#fff!important;box-shadow:0 0 0 1px rgba(28,19,15,.14),0 0 0 6px #fff,-14px 0 12px 4px #fff!important}
 .v39 .lr .lr-ed{background:#fff;border-radius:6px}
+
+/* the pattern belongs to the PAGE, as on the other pages */
+.ms25.pb{position:relative;isolation:isolate}
+.ms25.pb::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22240%22%20height%3D%22240%22%20viewBox%3D%220%200%20240%20240%22%20fill%3D%22none%22%20stroke%3D%22%231c130f%22%20stroke-width%3D%221.4%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%0A%3Cg%20transform%3D%22translate%2822%2026%29%20rotate%28-8%29%22%3E%3Cpath%20d%3D%22M0%2010l22-10%2022%2010v26L22%2046%200%2036z%22/%3E%3Cpath%20d%3D%22M0%2010l22%2010%2022-10M22%2020v26%22/%3E%3Cpath%20d%3D%22M11%205l22%2010%22/%3E%3C/g%3E%0A%3Cg%20transform%3D%22translate%28150%2020%29%20rotate%286%29%22%3E%3Crect%20x%3D%220%22%20y%3D%220%22%20width%3D%2246%22%20height%3D%2232%22%20rx%3D%223%22/%3E%3Cpath%20d%3D%22M0%202l23%2017L46%202%22/%3E%3C/g%3E%0A%3Cg%20transform%3D%22translate%28118%20112%29%20rotate%28-4%29%22%3E%3Crect%20x%3D%220%22%20y%3D%220%22%20width%3D%2230%22%20height%3D%2236%22%20rx%3D%221%22/%3E%3Crect%20x%3D%224%22%20y%3D%224%22%20width%3D%2222%22%20height%3D%2228%22%20stroke-dasharray%3D%222%202.5%22/%3E%3Ccircle%20cx%3D%2215%22%20cy%3D%2216%22%20r%3D%225%22/%3E%3C/g%3E%0A%3Cg%20transform%3D%22translate%2826%20132%29%20rotate%2810%29%22%3E%3Crect%20x%3D%220%22%20y%3D%220%22%20width%3D%2254%22%20height%3D%2240%22%20rx%3D%223%22/%3E%3Cpath%20d%3D%22M27%200v40M0%2020h54%22/%3E%3Cpath%20d%3D%22M27%2020c-8-10-16-6-10%200M27%2020c8-10%2016-6%2010%200%22/%3E%3C/g%3E%0A%3Cg%20transform%3D%22translate%28176%20150%29%20rotate%28-12%29%22%3E%3Cpath%20d%3D%22M0%208h28l10%2010-10%2010H0z%22/%3E%3Ccircle%20cx%3D%228%22%20cy%3D%2218%22%20r%3D%222.5%22/%3E%3Cpath%20d%3D%22M8%2018c-8%208-6%2018%204%2020%22/%3E%3C/g%3E%0A%3Cpath%20d%3D%22M78%2082c20-14%2040%206%2060-6%22%20stroke-dasharray%3D%223%205%22/%3E%3Cpath%20d%3D%22M200%2096c10%2014-4%2024%206%2034%22%20stroke-dasharray%3D%223%205%22/%3E%0A%3Cg%20transform%3D%22translate%2892%20196%29%22%3E%3Cpath%20d%3D%22M0%206l8%208%2016-16%22/%3E%3C/g%3E%0A%3C/svg%3E") 0 0/240px 240px repeat;opacity:.055}
+/* containing the packages feature: options */
+#vPk[data-pc=b] .pkc-wrap{border-radius:20px;box-shadow:inset 0 0 0 1px rgba(28,19,15,.12);padding:28px 32px 32px}
+#vPk[data-pc=c] .pkc-wrap{border-radius:20px;background:#ebe5dc;padding:28px 32px 32px}
+#vPk[data-pc=d] .pkc-wrap{border-radius:20px;background:#fbf9f5;box-shadow:0 0 0 1px rgba(28,19,15,.06),0 10px 24px -18px rgba(28,19,15,.35);padding:28px 32px 32px}
+#vPk:not([data-pc=a]) .pkc-wrap .pkl,#vPk:not([data-pc=a]) .pkc-wrap .pb-build{margin-left:0!important;margin-right:0!important}
+#vPk:not([data-pc=a]) .pkc-wrap .pb-build{margin-bottom:0!important}
+#vPk:not([data-pc=a]) .pkc-wrap{margin:0 max(64px,calc((100% - 1080px) / 2)) 96px}
+@container sheet (max-width:1200px){#vPk:not([data-pc=a]) .pkc-wrap{margin:0 max(40px,calc((100% - 900px) / 2)) 80px;padding:22px 22px 24px}}
+.pcsw{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:600;display:flex;gap:4px;align-items:center;padding:5px;border-radius:10px;background:#1c130f;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.pcsw span{font:500 9px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.5);padding:0 8px}
+.pcsw button{border:0;border-radius:7px;padding:7px 11px;background:none;color:rgba(255,255,255,.75);font:600 12.5px var(--serif);cursor:pointer}
+.pcsw button[aria-pressed=true]{background:#fff;color:#1c130f}
+/* the version leads the package */
+.v39 .mf .slt.t-ver{padding-top:24px!important;padding-bottom:24px!important}
+.v39 .mf .slt.t-ver .mr-l span{color:#1c130f}
+.v39 .mf .slt.t-ver .mr-l em{color:rgba(28,19,15,.55)!important;font-style:italic;max-width:120px;display:block;line-height:1.3}
+.v39 .mf .slt.t-ver .mr-tx b{font-size:20px}
+.v39 .mf .slt.t-ver+.slt{box-shadow:inset 0 2px 0 rgba(28,19,15,.1)}
 .bar .sib-1 .ic{display:none}@media (max-width:1360px){.bar .sib-1 .lt{display:none}.bar .sib-1 .ic{display:inline}}</style><script>(()=>{
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
@@ -6591,9 +6613,9 @@ const SEED=()=>({
 });
 const LIBC=['The Trees','Small Pleasures','Tin Man','Shuggie Bain','Small Things Like These'];
 let PG='pk',HD='e',PAL='harbour';
-let D=SEED(),CUR='k1',LIB='let',STATE='use';
+let D=SEED(),CUR='k1',LIB='ver',STATE='use';
 const find=(k,id)=>D[k].find(x=>x.id===id);
-const SLOT={let:{t:'Query letter',ic:I.let,req:1,empty:'Drag a query letter here'},syn:{t:'Synopsis',ic:I.syn,req:0,empty:'Drag a synopsis here, or leave it empty for agents who don’t ask for one'},ver:{t:'Pages from',ic:I.ver,req:1,empty:'Drag a version here — the pages come from it'}};
+const SLOT={let:{t:'Query letter',ic:I.let,req:1,empty:'Drag a query letter here'},syn:{t:'Synopsis',ic:I.syn,req:0,empty:'Drag a synopsis here, or leave it empty for agents who don’t ask for one'},ver:{t:'Version',ic:I.ver,req:1,empty:'Drag a version here — the pages come from it'}};
 let tt;const toast=h=>{const t=$('#toast');t.innerHTML=h;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),3000)};
 
 const renderTabs=()=>{$('#pkTabs').innerHTML='';return;$('#pkTabs').innerHTML=`<span class="pkc-l">Editing</span><span class="pkc"><select data-pksel aria-label="Package to edit">${D.pk.filter(p=>!p.retired).map(p=>`<option value="${p.id}"${p.id===CUR?' selected':''}>${esc(p.name)}${p.use?' (active)':''}</option>`).join('')}</select></span>`;return;$('#pkTabs').innerHTML=D.pk.map(p=>`<button class="pkb${p.id===CUR?' on':''}" aria-pressed="${p.id===CUR}" data-pk="${p.id}" title="${esc(p.name)}"><span class="pkb-ic">${pic(p)}</span><b>${esc(p.name)}</b>${p.use?'<em>Active</em>':''}</button>`).join('')+`<button class="pkb new" data-newpk>+ New package</button>`};
@@ -6605,14 +6627,14 @@ const renderOpen=()=>{const p=find('pk',CUR);if(!p){$('#pkOpen').innerHTML='';re
  const ready=p.let&&p.ver;
  const row=k=>{const m=p[k]&&find(k,p[k]);const S=SLOT[k];
   const body=m?`<div class="mr-it"><i class="tic t-${k}">${k==='ver'?(m.orig?'O':m.n):I[k]}</i><div class="mr-tx"><b>${esc(m.name)}</b><small>${esc(k==='let'?(m.sum||m.sub):k==='syn'?(m.sum?m.sum+' · '+m.sub:m.sub):m.sub)}</small>${m.files&&m.files.length?`<span class="mr-fl">${I.clip}${esc(m.files[0].n)}</span>`:''}</div><div class="mr-ac">${k!=='ver'?`<button class="mr-b" data-mat="${k}:${m.id}">Edit</button>`:`<button class="mr-b" data-mat="ver:${m.id}">View</button>`}<button class="mr-x" data-rm="${k}" aria-label="Take ${esc(m.name)} out">✕</button></div></div>`
-   :`<div class="mr-em" title="Drag one in from Your materials">${{let:'Query letter',syn:'Synopsis',ver:'Pages'}[k]||'Add one'}</div>`;
-  return `<div class="slt mr t-${k}" data-slot="${k}"><div class="mr-l"><span>${S.t}</span>${S.req?'<em>Needed</em>':'<em class="o">Optional</em>'}</div>${body}</div>`};
+   :`<div class="mr-em" title="Drag one in from Your materials">${{let:'Query letter',syn:'Synopsis',ver:'Version'}[k]||'Add one'}</div>`;
+  return `<div class="slt mr t-${k}" data-slot="${k}"><div class="mr-l"><span>${S.t}</span>${k==='ver'?'<em>Sets the pages that go out</em>':S.req?'<em>Needed</em>':'<em class="o">Optional</em>'}</div>${body}</div>`};
  $('#pkOpen').innerHTML=`<div class="po-h" style="--pc:${pc(p)}"><button class="po-ic" data-pkic="${p.id}" aria-label="Change icon and colour" title="Change icon and colour">${pic(p)}<span class="po-icx" aria-hidden="true">${I.pen}</span></button><div class="po-tt"><h3>${p.sent?`<span class="po-nm locked">${esc(p.name)}</span><span class="po-lk" title="Locked: it’s out with agents, so its name stays as they got it. Make a copy to change it." aria-label="Locked"><svg viewBox="0 0 20 20"><rect x="4.5" y="9" width="11" height="8" rx="1.5"/><path d="M7 9V6.5a3 3 0 0 1 6 0V9"/></svg></span>`:`<span class="po-nm" contenteditable="plaintext-only" spellcheck="false" data-pkname="${p.id}" role="textbox" aria-label="Package name" title="Click to rename">${esc(p.name)}</span>`}${p.use?'<em class="po-act">Active</em>':''}</h3><small>${esc(p.note||'Add a note: who is this for?')}</small></div><span class="sp"></span><div class="po-st"><span class="stg" aria-label="Stage">${[['Draft',!(p.let&&p.ver)&&!p.sent],['Ready',p.let&&p.ver&&!p.sent],['Out with agents',!!p.sent]].map(([l,on],n,a)=>`<span class="stg-s${on?' on':''}${a.slice(0,n).some(x=>x[1])||(!on&&a.slice(n+1).some(x=>x[1]))?'':''}">${l}</span>`).join('<i></i>')}</span><span class="stg-need"><i></i>${p.sent?`Out with agents · ${p.sent} sent`:(p.let&&p.ver)?'Ready to send':'Draft · needs '+[!p.let&&'a query letter',!p.ver&&'pages'].filter(Boolean).join(' and ')}</span>${p.use?'':`<button class="po-mk" data-use="${p.id}">Make active</button>`}<button class="po-fig" data-pkd="${p.id}" title="Figures" aria-label="Figures"><svg viewBox="0 0 20 20"><path d="M4 16V9M10 16V4M16 16v-5"/></svg></button></div></div>
- <div class="mf">${['let','syn','ver'].map(row).join('')}
+ <div class="mf">${['ver','let','syn'].map(row).join('')}
   <div class="mr mr-ex"><div class="mr-l"><span>Also sends</span><em class="o">If asked</em></div><div class="ex">${D.ext.map(e=>`<span class="exc${p.ext.includes(e.id)?' on':''}"><button aria-pressed="${p.ext.includes(e.id)}" data-ext="${e.id}">${p.ext.includes(e.id)?'✓ ':''}${esc(e.name)}${e.files&&e.files.length?I.clip:''}</button><button class="exc-ed" data-mat="ext:${e.id}" aria-label="Edit ${esc(e.name)}">${I.pen}</button></span>`).join('')}<span class="exa"><button class="exa-b" data-exadd aria-expanded="false">+ Add</button><span class="exa-pop" id="exPop" hidden></span></span></div></div>
  </div>
  <p class="po-foot"><span>${p.sent?(p.changed?`${p.sent-p.changed} sent as is, ${p.changed} with changes. `:'')+'Queries already sent keep exactly what went with them.':'Change it as much as you like. It locks when you log a query with it.'}</span><button class="po-del" data-pkedit="${p.id}">Note, copy or delete…</button></p>`};
-const renderLib=()=>{const tabs=[['let','Letters',I.let],['syn','Synopses',I.syn],['ver','Versions',I.ver]];
+const renderLib=()=>{const tabs=[['ver','Versions',I.ver],['let','Letters',I.let],['syn','Synopses',I.syn]];
  $('#libTabs').innerHTML=tabs.map(([k,l,ic])=>`<button role="tab" class="t-${k}" aria-selected="${LIB===k}" data-lib="${k}">${ic}${l}<em>${D[k].length}</em></button>`).join('');
  const p=find('pk',CUR),list=D[LIB];
  $('#libList').innerHTML=(list.length?list.map(m=>{const inPk=p&&p[LIB]===m.id;return `<div class="lr${inPk?' inpk':''}" draggable="true" data-drag="${LIB}:${m.id}"><span class="lr-g" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="tic t-${LIB}">${LIB==='ver'?(m.orig?'O':m.n):I[LIB]}</span><span><b>${esc(m.name)}</b><small>${esc(m.sum||m.sub)}</small><em class="lr-m">${inPk?'<i class="lr-in">✓ In this package</i>':''}${[m.sent?`Sent ${m.sent}`:'Not sent yet',m.files&&m.files.length?`${m.files.length} file${m.files.length>1?'s':''}`:''].filter(Boolean).join(' · ')}</em></span>${LIB!=='ver'?`<button class="lr-ed" data-mat="${LIB}:${m.id}" aria-label="Edit ${esc(m.name)}">${I.pen}</button>`:''}<button class="lr-add" ${inPk?'disabled':''} data-add="${LIB}:${m.id}">${inPk?'✓ In package':'Add'}</button></div>`}).join(''):`<p class="lib-empty">No ${({let:'query letters',syn:'synopses',ver:'versions'})[LIB]} yet.</p>`)+
@@ -6770,7 +6792,7 @@ const pkDrawer=id=>{const p=find('pk',id),s=stOf(id),L=p.let&&find('let',p.let),
  openD(`<div class="dh dpk" style="--pc:${pc(p)}"><span class="ddisc">${pic(p)}</span><div class="tx"><h3>${esc(p.name)}</h3><small>${esc(p.note||'')}${p.use?' · Active':''}${p.retired?' · Retired':''}</small></div><button class="cx-x" data-close aria-label="Close">✕</button></div>
  <div class="db">
   <p class="d-sum">${p.retired?'Retired. ':''}${p.sent?`Out with agents since its first query. Locked, so what each agent got stays true.`:(p.let&&p.ver)?'Ready to send. Pick it when you log a query.':'Draft. It needs a letter and pages.'}</p>
-  <h5>What’s in it</h5><div class="dpzs">${row('let','Query letter',L,'No letter yet')}${row('syn','Synopsis',Sy,'No synopsis')}${row('ver','Pages from',V,'No pages yet')}${p.ext.length?`<div class="dpz"><span class="dpz-l">Also sends</span><span>${p.ext.map(x=>esc(find('ext',x)?.name||'')).join(', ')}</span></div>`:''}</div>
+  <h5>What’s in it</h5><div class="dpzs">${row('ver','Version',V,'No version yet')}${row('let','Query letter',L,'No letter yet')}${row('syn','Synopsis',Sy,'No synopsis')}${p.ext.length?`<div class="dpz"><span class="dpz-l">Also sends</span><span>${p.ext.map(x=>esc(find('ext',x)?.name||'')).join(', ')}</span></div>`:''}</div>
   <h5>How it’s doing</h5>
   ${s.s?`<div class="dst"><div class="dst-r">${ringS(id,64)}<div><b>${s.r>=MINA?Math.round(s.q/s.s*100)+'%':'Too early'}</b><span>${s.q} of ${s.s} agents asked for more${s.r>=MINA&&avg!==null?` · you average ${avg}%`:''}</span></div></div><div class="ptx-fn">${fn}</div></div>
   ${s.r<MINA?`<p class="rs-warn">${s.r} answered so far. Give it ${MINA-s.r} more before reading much into this.</p>`:''}<div class="ptx-t"><div><b>${s.d||'–'}</b><span>days to a reply, on average</span></div><div><b>${s.f}</b><span>full manuscript requests</span></div></div>
@@ -6789,7 +6811,7 @@ const renderAgg=()=>{const el=$('#aggMain');if(!el)return;
  const ov=(title,list,cur,val,fmt)=>`<div class="ov"><p class="ov-k">${title}</p>${list.slice(0,3).map(m=>{const v=val(m);return `<div class="ov-b${m===cur?' on':''}${v===null?' early':''}"><span>${esc(m.name)}</span><i><u style="width:${v===null?100:Math.max(4,Math.min(100,v))}%"></u></i><b>${v===null?'–':fmt(m)}</b></div>`}).join('')}</div>`;
  const rateBar=m=>stOf(m.id).r<MINA?null:pct(m.id)*2;
  const pkCard=p=>{const l=p.let&&find('let',p.let),s=p.syn&&find('syn',p.syn),v=p.ver&&find('ver',p.ver);const li=(k,m,none)=>`<li class="${m?'':'none'}"><i class="tic t-${k}">${k==='ver'?(m?(m.orig?'O':m.n):'–'):I[k]}</i>${m?esc(m.name):none}</li>`;
-  return `<div class="ac-pk" style="--pc:${pc(p)}"><div class="ac-h"><span class="shc-ic">${pic(p)}</span><b>${esc(p.name)}</b>${p.retired?'<em>Retired</em>':p.use?'<em class="a">Active</em>':''}</div><ul>${li('let',l,'No letter')}${li('syn',s,'No synopsis')}${li('ver',v,'No pages')}</ul></div>`};
+  return `<div class="ac-pk" style="--pc:${pc(p)}"><div class="ac-h"><span class="shc-ic">${pic(p)}</span><b>${esc(p.name)}</b>${p.retired?'<em>Retired</em>':p.use?'<em class="a">Active</em>':''}</div><ul>${li('ver',v,'No pages')}${li('let',l,'No letter')}${li('syn',s,'No synopsis')}</ul></div>`};
  const mCard=(k,m,lab)=>`<div class="ac-m t-${k}"><div class="am-h">${k==='ver'?`<i class="mi v">${m.orig?'O':m.n}</i>`:`<i class="mi">${I[k]}</i>`}<span><small>${lab}</small><b>${esc(m.name)}</b></span></div><div class="am-b"><p>${esc(k==='ver'?m.sub:(m.sum||m.sub||''))}</p><span class="pc-lines"><u></u><u></u><u class="s"></u></span></div></div>`;
  const show=(o)=>`<article class="ag3"><button class="ag2-v" ${o.open}>${o.card}${o.ov}</button><p class="ag3-k">${o.k}</p><h3>${o.t}</h3><p class="ag3-d">${o.d}</p>${o.act?`<button class="ag3-a" ${o.actAttr}>${o.act} →</button>`:''}</article>`;
  /* every package / every piece, as a table under the showcases */
@@ -6797,7 +6819,7 @@ const renderAgg=()=>{const el=$('#aggMain');if(!el)return;
  const rlHead=first=>`<div class="rl-hd"><span>${first}</span><span>Sent</span><span>Answered</span><span>Asked for more</span><span>Rate</span></div>`;
  const order=list=>[...list].sort((a,b)=>{const A=stOf(a.id),B=stOf(b.id);return (!!B.s-!!A.s)||((B.r>=MINA)-(A.r>=MINA))||(pct(b.id)-pct(a.id))||(B.s-A.s)});
  const pkList=()=>`<div class="rlw"><div class="rl-side"><h4>Every package</h4><p>All ${D.pk.length}, best first. A package moves up once ${MINA} agents have answered it; until then it waits at the bottom as “Too early”.</p></div><div class="rl">${rlHead('Package')}${order(D.pk).map(p=>rowOf({id:p.id,name:p.name,open:`data-pkd="${p.id}"`,lead:`<span class="rl-ic" style="--pc:${pc(p)}">${pic(p)}</span>`,sub:[p.use?'Active':'',p.retired?'Retired':'',p.note||''].filter(Boolean).map(esc).join(' · ')})).join('')}</div></div>`;
- const pcList=()=>{const K=[['let','Query letters'],['syn','Synopses'],['ver','Versions']];return `<div class="rlw"><div class="rl-side"><h4>Every letter, synopsis and version</h4><p>Each counted across every package it went out in, by the edition the agent actually got.</p></div><div class="rl"><div class="rl-tabs" role="tablist" aria-label="Show">${K.map(([k,lab])=>`<button role="tab" data-rlk="${k}" aria-selected="${RLK===k}" class="t-${k}">${lab}<em>${D[k].length}</em></button>`).join('')}</div>${K.filter(([k])=>k===RLK).map(([k,lab])=>`${rlHead(k==='ver'?'Version':k==='let'?'Letter':'Synopsis')}${order(D[k]).map(m=>rowOf({id:m.id,name:m.name,open:`data-mat="${k}:${m.id}"`,lead:`<i class="tic t-${k}">${k==='ver'?(m.orig?'O':m.n):I[k]}</i>`,sub:esc(k==='ver'?m.sub:(m.sum||m.sub||''))})).join('')}`).join('')}</div></div>`};
+ const pcList=()=>{const K=[['ver','Versions'],['let','Query letters'],['syn','Synopses']];return `<div class="rlw"><div class="rl-side"><h4>Every letter, synopsis and version</h4><p>Each counted across every package it went out in, by the edition the agent actually got.</p></div><div class="rl"><div class="rl-tabs" role="tablist" aria-label="Show">${K.map(([k,lab])=>`<button role="tab" data-rlk="${k}" aria-selected="${RLK===k}" class="t-${k}">${lab}<em>${D[k].length}</em></button>`).join('')}</div>${K.filter(([k])=>k===RLK).map(([k,lab])=>`${rlHead(k==='ver'?'Version':k==='let'?'Letter':'Synopsis')}${order(D[k]).map(m=>rowOf({id:m.id,name:m.name,open:`data-mat="${k}:${m.id}"`,lead:`<i class="tic t-${k}">${k==='ver'?(m.orig?'O':m.n):I[k]}</i>`,sub:esc(k==='ver'?m.sub:(m.sum||m.sub||''))})).join('')}`).join('')}</div></div>`};
  /* packages: a winner, a workhorse and one still to prove — each package appears once */
  const pr=ranked(D.pk),used=new Set(),out=[];
  const best=pr.find(p=>stOf(p.id).r>=MINA);
@@ -6808,7 +6830,7 @@ const renderAgg=()=>{const el=$('#aggMain');if(!el)return;
  const watch=[...D.pk].filter(p=>!used.has(p.id)&&!p.retired).sort((a,b)=>stOf(b.id).s-stOf(a.id).s)[0];
  if(watch){const s=stOf(watch.id);out.push(show({open:`data-pkd="${watch.id}"`,card:pkCard(watch),ov:`<div class="ov"><p class="ov-k">Answers so far</p><div class="ov-dots">${Array.from({length:MINA},(_,i)=>`<i class="${i<s.r?'on':''}"></i>`).join('')}</div><p class="ov-n">${s.s?`<b>${s.r} of ${MINA}</b> answers needed to compare it`:'<b>Not sent yet</b>'}</p></div>`,k:'Still to prove',t:esc(watch.name),d:s.s?`Sent to ${s.s}, but only ${s.r} ${s.r===1?'has':'have'} answered. ${MINA-s.r} more and it’s ranked with the others.`:'Ready, but not sent yet. Pick it next time you log a query.',act:'Open its figures',actAttr:`data-pkd="${watch.id}"`}))}
  /* pieces */
- const pcs=[['let','Query letter','Best letter'],['syn','Synopsis','Best synopsis'],['ver','Pages from','Best opening']].map(([k,lab,kk])=>{const r=ranked(D[k]);const m=r.find(x=>stOf(x.id).r>=MINA);if(!m)return `<article class="ag3 none"><div class="ag2-v"><div class="ac-m ghost"></div></div><p class="ag3-k">${kk}</p><h3><i class="o">Too early</i></h3><p class="ag3-d">None has had ${MINA} answers yet.</p></article>`;const s=stOf(m.id);
+ const pcs=[['ver','Version','Best opening'],['let','Query letter','Best letter'],['syn','Synopsis','Best synopsis']].map(([k,lab,kk])=>{const r=ranked(D[k]);const m=r.find(x=>stOf(x.id).r>=MINA);if(!m)return `<article class="ag3 none"><div class="ag2-v"><div class="ac-m ghost"></div></div><p class="ag3-k">${kk}</p><h3><i class="o">Too early</i></h3><p class="ag3-d">None has had ${MINA} answers yet.</p></article>`;const s=stOf(m.id);
   return show({open:`data-mat="${k}:${m.id}"`,card:mCard(k,m,lab),ov:ov('Asked for more',r,m,rateBar,x=>pct(x.id)+'%'),k:kk,t:esc(m.name),d:`${pct(m.id)}% of the ${s.s} agents who got it asked for more${k==='let'&&m.comps.length?`. Names ${m.comps.map(esc).join(' and ')}`:''}.`,act:'',actAttr:''})}).join('');
  el.innerHTML=`<div class="ag3-row"><header class="sh2 sh2-pk">${ph('a row of parcels on a post-office counter','ill-m')}<div><h2>Packages</h2><p class="sh2-l">Each package as a whole, as it went to agents.</p></div></header><div class="ag3-g">${out.join('')}</div>${pkList()}</div>
  <div class="ag3-row"><header class="sh2 sh2-pc">${ph('a hawk laying out a letter, a synopsis and pages on a desk','ill-m')}<div><h2>Letters, synopses and openings</h2><p class="sh2-l">Each one on its own, whichever package it went out in.</p></div></header><div class="ag3-g">${pcs}</div>${pcList()}</div>
@@ -6830,10 +6852,10 @@ document.addEventListener('drop',e=>{const s=e.target.closest(".slt");if(!s)retu
 const HW=[
  ['Pick a package, or make one','Your packages sit in a row at the top. Each has its own icon and colour, so you can spot it at a glance here, in the Query Centre and in your results. Click one to open it below, or press + New.'],
  ['Keep your materials in one place','Your materials holds every query letter, synopsis and version of your book. Write or paste a new one, attach the file, and edit it whenever you like.'],
- ['Drag them into the package','Each package takes one query letter, the pages it sends (from a version of your book) and, if you want one, a synopsis. Add anything else agents ask for under Also sends.'],
+ ['Drag them into the package','Start with the version of your book: it decides which pages go out. Then add a query letter and, if you want one, a synopsis. Anything else agents ask for goes under Also sends.'],
  ['Pick it when you log a query','Choose the package as you log a query and every slot fills itself. Once it’s out with agents it locks, so what each agent got stays true. Change it later and the queries already sent keep what they had.'],
  ['See what’s working','Further down, How your packages are doing shows which package gets agents asking for more, then which letter, synopsis and opening inside them does best. Each one ranks once enough agents have answered.']];
-let HWS=0,RLK='let';
+let HWS=0,RLK='ver';
 const hwGo=()=>{const [t,p]=HW[HWS];$('#hw2N').textContent=`Step ${HWS+1} of ${HW.length}`;$('#hw2T').textContent=t;$('#hw2P').textContent=p;$('#hw2Pg').dataset.s=HWS+1;
  $('#hw2D').innerHTML=HW.map((_,i)=>`<button data-hw2d="${i}" aria-label="Step ${i+1}" aria-current="${i===HWS?'step':'false'}"></button>`).join('');
  $('[data-hw2b]').disabled=HWS===0;$('[data-hw2n]').textContent=HWS===HW.length-1?'Got it':'Next';
@@ -6923,6 +6945,7 @@ render();
 
 ;['edge','type','hero','surface','space','mat'].forEach(k=>document.body.classList.add('fx-'+k));
 document.addEventListener('click',e=>{const t=e.target.closest('[data-tipx]');if(!t)return;const b=document.getElementById('pkTip');b.classList.add('out');setTimeout(()=>{b.hidden=true},260)});
+
 
 
 

@@ -8,23 +8,21 @@
  * `data-mm` name ships. Desktop only (≥768), as v39's own rules.
  */
 
-/* ══ A · THE HEADER'S PATTERN (screen 01) ════════════════════════════════════════════════════════════════════════
-   One 240 × 240 tile (public/images/packages/packages-pattern.svg: a parcel, an envelope, a stamp, a parcel tied with
-   string, a luggage tag, dashed routes and a tick, in a 1.4px ink stroke), as a ::before behind the card's content and
-   inside its clip. The card is `overflow: hidden` already (pageHeaderCard.css); `isolation` gives the -1 z-index a
-   context of its own, so the pattern paints over the card's paper and under its text and art.
-   ⚠️ THE OPACITY IS THE CONTACT LIST'S, 0.085, NOT THE REF'S 0.07 (the pack's rule): the Contact list's doodle tile bakes
-   `stroke-opacity="0.085"` into its SVG (public/images/contact/doodle-tile.svg). It has no mask because it lies on the
-   page sheet, under an opaque card, so it is never under text; here the ref's left-hand fade does that job, keeping the
-   title and buttons clear while the pattern shows round the hawk. */
+/* ══ A · THE PAGE'S PATTERN (screen 01) ═══════════════════════════════════════════════════════════════════════════
+   ⚠️ REWORKED: the first v39.2 put the pattern INSIDE the header card; it belongs to the PAGE, as on the other pages.
+   The mechanism is the Contact list's and the Query Centre's own (contactV25.css A1, qcv150.css A1): the page's scroller
+   paints #f2eee8 and repeats a 340 × 360 tile, scrolling with the page (`local`). The tile's opacity is baked into its
+   SVG as theirs is (`stroke-opacity="0.085"`, not the ref's .055 on a pseudo-element), and only the motifs are this
+   page's own (public/images/packages/packages-pattern.svg: a parcel, an envelope, a stamp, a parcel tied with string, a
+   luggage tag, dashed routes and a tick, at the ref's drawn scale). It sits under every card, band and the header, which
+   paint their own fills; it takes no pointer events and no room, so it cannot overflow. The header card stays plain. */
 @media (min-width: 768px) {
-  .pk39-hd .pk39-card.phc.phc { position: relative; isolation: isolate; }
-  .pk39-hd .pk39-card.phc.phc::before {
-    content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
-    background: url("/images/packages/packages-pattern.svg") 0 0 / 240px 240px repeat;
-    opacity: 0.085;
-    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 55%, #000 100%);
-    mask-image: linear-gradient(90deg, transparent 0, #000 55%, #000 100%);
+  .pk39-wpg > .wpg-scroll {
+    background-color: #f2eee8;
+    background-image: url("/images/packages/packages-pattern.svg");
+    background-repeat: repeat;
+    background-size: 340px 360px;
+    background-attachment: local;
   }
 }
 
