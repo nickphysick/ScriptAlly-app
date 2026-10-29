@@ -32,6 +32,10 @@ import { DrawerContext, initialsOf } from "./controls";
 import { peekOffered, setDockPeek, useDockPeek } from "../../lib/queryActions/dockPeek";
 import { ESC_LEVEL, useEscapeLayer } from "../../lib/escapeStack";
 import { DrawerShell, type ShellState } from "./DrawerShell";
+import { PhoneFlowShell, type LiveFacts } from "./PhoneFlowShell";
+import { useIsMobile } from "../shell/mobileChrome";
+import { buildQcRows, whereItStands } from "../../lib/qcSummary";
+import { PA2_CHIP_LABEL } from "../../lib/queriesPhone";
 import { panelStepWords } from "../../lib/queryActions/entry";
 import { SIDE_SLOT } from "../shell/SidePanel";
 import { ParkedChip } from "./ParkedChip";
@@ -85,6 +89,7 @@ const agentIdOf = (r: OpenRequest, queries: { id: string; agentId: string }[], a
 
 export function QueryDrawer() {
   const db = useScriptAllyDb();
+  const phone = useIsMobile();
   const [req, setReq] = useState<OpenRequest | null>(currentDrawerRequest());
   const [parked, setParked] = useState<ParkedJourney | null>(currentParked());
   const [clash, setClash] = useState<OpenRequest | null>(currentClash());
@@ -316,6 +321,26 @@ export function QueryDrawer() {
   if (isPracticeId(active.queryId) && active.mode !== "resp") return chip;
   const J = JOURNEYS[active.mode];
   if (!J) return chip;
+  /* PHONE APP v2, PART 4 — on a phone the same journey walks in the flow layout (PhoneFlowShell), never in the panel */
+  const flowPhone = phone && !(!!active?.panel && !!slot && slot.isConnected);
+  const liveFor = (view: { live?: { name: string; agency: string; book: string | null } | null }): LiveFacts => {
+    const q = active.queryId ? db.queries.find((x) => x.id === active.queryId) : undefined;
+    if (!q) {
+      const lv = view.live ?? null;
+      return { court: { label: "New query", tone: "new" }, day: 0, name: lv?.name ?? null, agency: lv?.agency ?? "", book: lv?.book ?? null };
+    }
+    const a = db.agents.find((x) => x.id === q.agentId);
+    const m = db.manuscripts.find((x) => x.id === q.manuscriptId);
+    const now = Date.now();
+    const row = buildQcRows([q], db.agents, [], now)[0];
+    const where = row ? whereItStands(row, now) : "agent";
+    const sent = q.dateSent ? Date.parse(String(q.dateSent)) : NaN;
+    return {
+      court: { label: PA2_CHIP_LABEL[where], tone: where },
+      day: Number.isFinite(sent) ? Math.max(0, Math.floor((now - sent) / 86_400_000)) : null,
+      name: (a?.name || a?.agency || "").trim() || null, agency: a?.name ? (a?.agency ?? "") : "", book: m?.title ?? null,
+    };
+  };
 
   const inPanel = !!active?.panel && !!slot && slot.isConnected;
   const pq = inPanel && req?.queryId ? db.queries.find((x) => x.id === req.queryId) : undefined;
@@ -339,6 +364,12 @@ export function QueryDrawer() {
                 viewRef.current = view;
                 /* v139 §B — the practice query's act header says so: "Recording a response · practice" */
                 const shown = isPracticeId(active.queryId) ? { ...view, eyebrow: "Recording a response · practice" } : view;
+                if (flowPhone) return (
+                  <PhoneFlowShell view={shown} mode={active.mode} open={open && !hidden && !parkedAway} live={liveFor(shown)}
+                    initialStep={active.resume?.step ?? initialStep ?? active.preset?.step} initialSeen={active.resume?.seen}
+                    from={req?.dock?.name ?? null} stateRef={shellRef}
+                    onCancel={close} onPark={() => void park()} onSave={() => runSave(view)} />
+                );
                 return (
                   <DrawerShell view={shown} mode={active.mode} open={open && !hidden && !parkedAway}
                     initialStep={active.resume?.step ?? initialStep ?? active.preset?.step} initialSeen={active.resume?.seen}
