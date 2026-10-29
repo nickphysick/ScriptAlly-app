@@ -12,7 +12,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { useScriptAllyDb } from "../../lib/db";
 import { addDays, dayOf, ymd } from "../../lib/queryActions/dates";
-import { closePhoneCompose, subscribePhoneCompose, type ComposeKind } from "../../lib/phoneCompose";
+import { closePhoneCompose, subscribePhoneCompose, type ComposeKind, type ComposeSeed } from "../../lib/phoneCompose";
 import { showUndoBar } from "../../lib/queryActions/drawerStore";
 import { DateField, DrawerContext, Fl, TextBox, fmt } from "../queryActions/controls";
 import type { JourneyStep, JourneyView } from "../queryActions/journey";
@@ -20,19 +20,21 @@ import { PhoneFlowShell } from "../queryActions/PhoneFlowShell";
 
 export const PhoneComposeHost: React.FC = () => {
   const [kind, setKind] = useState<ComposeKind | null>(null);
+  const [seed, setSeed] = useState<ComposeSeed | null>(null);
   const [gen, setGen] = useState(0);
-  useEffect(() => subscribePhoneCompose((k) => { setKind(k); if (k) setGen((g) => g + 1); }), []);
+  useEffect(() => subscribePhoneCompose((k, s) => { setKind(k); setSeed(s); if (k) setGen((g) => g + 1); }), []);
   if (!kind) return null;
-  return <ComposeFlow key={gen} kind={kind} onDone={closePhoneCompose} />;
+  return <ComposeFlow key={gen} kind={kind} seed={seed} onDone={closePhoneCompose} />;
 };
 
-const ComposeFlow: React.FC<{ kind: ComposeKind; onDone: () => void }> = ({ kind, onDone }) => {
-  const { addUserTask, deleteUserTask } = useScriptAllyDb();
+const ymdToDay = (v: string | null | undefined): Date | null => { if (!v || !/^\d{4}-\d{2}-\d{2}/.test(v)) return null; const [y, m, d] = v.slice(0, 10).split("-").map(Number); return new Date(y, m - 1, d, 12); };
+const ComposeFlow: React.FC<{ kind: ComposeKind; seed: ComposeSeed | null; onDone: () => void }> = ({ kind, seed, onDone }) => {
+  const { addUserTask, deleteUserTask, updateUserTask, userTasks, restoreUserTask } = useScriptAllyDb();
   const today = useMemo(() => dayOf(new Date()), []);
   const [openCal, setOpenCal] = useState<string | null>(null);
-  const [text, setText] = useState("");
-  const [detail, setDetail] = useState("");
-  const [due, setDue] = useState<Date | null>(kind === "task" ? today : null);
+  const [text, setText] = useState(seed?.text ?? "");
+  const [detail, setDetail] = useState(seed?.detail ?? "");
+  const [due, setDue] = useState<Date | null>(kind === "task" ? (seed ? ymdToDay(seed.due) ?? today : today) : null);
   const task = kind === "task";
   const t = text.trim();
 
@@ -63,14 +65,14 @@ const ComposeFlow: React.FC<{ kind: ComposeKind; onDone: () => void }> = ({ kind
     });
   }
   const view: JourneyView = {
-    eyebrow: task ? "ADD A TASK" : "ADD A NOTE",
-    title: task ? "Add a task" : "Add a note",
-    verb: "add", verbDone: "added",
-    button: task ? "Add task" : "Pin it",
+    eyebrow: seed ? "EDIT" : task ? "ADD A TASK" : "ADD A NOTE",
+    title: seed ? (task ? "Edit a task" : "Edit a note") : task ? "Add a task" : "Add a note",
+    verb: seed ? "save" : "add", verbDone: seed ? "saved" : "added",
+    button: seed ? "Save" : task ? "Add task" : "Pin it",
     ok: true,
     steps,
     saves: [{ text: task ? "It goes on your to-do list" : "It goes on your corkboard" }],
-    dirty: !!t || !!detail.trim(),
+    dirty: seed ? t !== seed.text.trim() || detail.trim() !== (seed.detail ?? "").trim() : !!t || !!detail.trim(),
     touched: () => [],
     commit: async () => {
       const id = "task-" + Math.random().toString(36).slice(2, 11);
@@ -82,6 +84,17 @@ const ComposeFlow: React.FC<{ kind: ComposeKind; onDone: () => void }> = ({ kind
   };
 
   const save = async () => {
+    if (seed) {
+      /* the composer's own edit: the same update it writes (a task keeps its date; a cleared date is a note) */
+      const before = userTasks.find((x) => x.id === seed.id);
+      /* a note: the noteboard's own saveEdit writes the text alone (a dated note keeps its date); a task: the
+         composer's edit, its date and detail with it */
+      if (task) await updateUserTask(seed.id, { text: t, detail: detail.trim() || null, dueDate: due ? ymd(due) : null });
+      else await updateUserTask(seed.id, { text: t });
+      onDone();
+      showUndoBar({ message: "Saved.", sub: "", ...(before ? { undo: async () => { await restoreUserTask(before); } } : {}) });
+      return;
+    }
     const out = await view.commit();
     const id = out.touched[0];
     onDone();

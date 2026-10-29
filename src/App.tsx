@@ -57,7 +57,7 @@ import { accountRedirectFor, accountSectionForPath } from "./lib/accountRoutes";
 import "./components/todo/tasksLayout.css";
 import "./components/todo/taskChrome.css";
 import "./components/todo/todoCalendar.css";
-import { TodoNoteboardPage } from "./components/todo/TodoNoteboardPage";
+import { NoteboardRoute } from "./components/todo/NoteboardRoute";
 // ⚠️ PARKED, NOT DELETED (Amendment 1, G4) — held for the public marketing site.
 // import { TopNavHost } from "./components/shell/TopNavHost";
 import { QueryAnalytics } from "./components/QueryAnalytics";
@@ -729,7 +729,7 @@ function AppContent() {
 
         {/* tasks-pages P4: the Noteboard is REAL — the placeholder era ends for good. */}
         <StagePage active={routeKey === "todo" && todoPage === "noteboard"} layout="fillColumn" clip>
-          <TodoNoteboardPage onNavigate={handleNavigate} onNavigatePath={(p) => navigate(p)} />
+          <NoteboardRoute onNavigate={handleNavigate} onNavigatePath={(p) => navigate(p)} />
         </StagePage>
 
         {/* The agents slot is SPLIT (F12): Discover keeps the capped work column;

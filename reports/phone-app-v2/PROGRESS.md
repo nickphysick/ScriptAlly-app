@@ -21,8 +21,12 @@ Baseline gates on the base: tsc root 0, tsc functions 0, build clean, Vitest 689
 | 4 | A the flow layout and the live card | `5d3f7688` | committed |
 | 4 | B respond, mark sent, nudge, close, task, note | `3280fa0c` | committed |
 | 4 | C celebrations | `feba0f9c` | committed |
-| 4 | D locks, shots, report | see `git log` | committed |
-| 4 | dev deploy | — | next |
+| 4 | D locks, shots, report | `da0e8134` | committed |
+| 4 | dev deploy | integration `633aa338` on `dev/…-ppp1-pa2-4` | dev serves `index-BkPjilRy.js` |
+| 5 | A–B band, week, groups, rows, verbs, Later (one commit) | `ad46c604` | committed |
+| 5 | C the Corkboard | `cd55cabf` | committed |
+| 5 | D locks, shots, report (+ the two fixes the locks found) | see `git log` | committed |
+| 5 | dev deploy | — | next |
 
 ## Dev, as of the end of Part 1
 - (end of Part 2) dev serves `index-CRHIwewp.js` = `dev/pk391-qm1-pk392-calx-pk392b-td7-fv1-pk393-pa2-2` (`82adc7b9`). The next part's
@@ -36,6 +40,7 @@ Baseline gates on the base: tsc root 0, tsc functions 0, build clean, Vitest 689
 - e2e: `SA_E2E_BASE_URL=http://127.0.0.1:4391 npx playwright test tests/e2e/phoneAppV2Shell.measure.ts --workers=1`.
 
 ## Part 4 notes
+- (end of Part 4) dev serves `index-BkPjilRy.js` = `dev/…-td12-ppp1-pa2-4` (`633aa338`).
 - PA2-4 WRITES and undoes. Before any mutant or new writing run, list the account (scratchpad tools/added.mjs `before <file>`), and check after. Delete residue BY ID after showing it: a bulk "delete what was added" is refused by the session's safety check.
 - Part 5's "Add a note" tile should call `openPhoneCompose("note")`.
 
@@ -45,6 +50,7 @@ Baseline gates on the base: tsc root 0, tsc functions 0, build clean, Vitest 689
 - QM1's celebration WRITES and undoes. A timeout before its Undo leaves a change on `probe-dangling-pkg`, which happened once and was restored by hand (Part 3 report). Re-check the account after any red run of it.
 
 ## Open (for Nick — see each part's report)
+- Part 5: housekeeping sweeps open the first agent; no tags / make-a-task on the phone note; navy pin; quickDone's Undo moves updatedAt.
 - Part 4: Add an agent is not a flow (ruling); the card's edit mode on a phone is unstyled (Part 8); the task flow has no "No date"; Log asks when and how in one step.
 - Part 3: the To-do badge (37) disagrees with To-do v12's "Needs you now" (30) on dev; phones 761–767px get the desktop Queries page (`useQm1Phone` ≤760); the ••• is a sheet not a popover; the parked chip sits under an open sheet.
 - Part 1: the band's search (palette vs PhoneSearch); four menu tiles with no line; the one-manuscript footnote; the

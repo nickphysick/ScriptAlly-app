@@ -1,0 +1,158 @@
+[
+ {
+  "lock": "pop",
+  "where": "390x844 the desktop tray's tallies were read",
+  "ok": true,
+  "detail": "{\"overdue\":37,\"today\":0,\"later\":0}"
+ },
+ {
+  "lock": "T1",
+  "where": "390x844 the band's tallies are the tray's own (from earlier · today · coming up)",
+  "ok": false,
+  "detail": "{\"earlier\":37,\"today\":3,\"soon\":0} vs {\"overdue\":37,\"today\":0,\"later\":0}"
+ },
+ {
+  "lock": "pop",
+  "where": "390x844 rows",
+  "ok": true,
+  "detail": "55"
+ },
+ {
+  "lock": "T1",
+  "where": "390x844 each group holds exactly its tally",
+  "ok": false,
+  "detail": "{\"earlier\":37,\"moment\":18}"
+ },
+ {
+  "lock": "T7",
+  "where": "390x844 the To-do badge is From earlier + Today",
+  "ok": false,
+  "detail": "37 vs 37+3"
+ },
+ {
+  "lock": "pop",
+  "where": "390x844 seven days",
+  "ok": true,
+  "detail": "7"
+ },
+ {
+  "lock": "T2",
+  "where": "390x844 2026-10-26: the dots count the tasks due that day",
+  "ok": true,
+  "detail": "1/1 vs 1"
+ },
+ {
+  "lock": "T2",
+  "where": "390x844 2026-10-27: the dots count the tasks due that day",
+  "ok": true,
+  "detail": "0/0 vs 0"
+ },
+ {
+  "lock": "T2",
+  "where": "390x844 2026-10-28: the dots count the tasks due that day",
+  "ok": true,
+  "detail": "0/0 vs 0"
+ },
+ {
+  "lock": "T2",
+  "where": "390x844 2026-10-29: the dots count the tasks due that day",
+  "ok": true,
+  "detail": "0/0 vs 0"
+ },
+ {
+  "lock": "T2",
+  "where": "390x844 2026-10-30: the dots count the tasks due that day",
+  "ok": true,
+  "detail": "0/0 vs 0"
+ },
+ {
+  "lock": "T2",
+  "where": "390x844 2026-10-31: the dots count the tasks due that day",
+  "ok": true,
+  "detail": "0/0 vs 0"
+ },
+ {
+  "lock": "T2",
+  "where": "390x844 2026-11-01: the dots count the tasks due that day",
+  "ok": true,
+  "detail": "0/0 vs 0"
+ },
+ {
+  "lock": "T2",
+  "where": "390x844 housekeeping and offers carry no day (never dot)",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "T3",
+  "where": "390x844 tapping 2026-10-26 shows that day's tasks only",
+  "ok": true,
+  "detail": "1 vs 1"
+ },
+ {
+  "lock": "T3",
+  "where": "390x844 a second tap clears the filter",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "T8",
+  "where": "390x844 To-do: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": "navy 89"
+ },
+ {
+  "lock": "T8",
+  "where": "390x844 To-do: no image twice",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "T4",
+  "where": "390x844 Send opens its journey",
+  "ok": true,
+  "detail": "sent"
+ },
+ {
+  "lock": "T4",
+  "where": "390x844 Nudge opens its journey",
+  "ok": true,
+  "detail": "nudge"
+ },
+ {
+  "lock": "T4",
+  "where": "390x844 Decide opens its journey",
+  "ok": true,
+  "detail": "close"
+ },
+ {
+  "lock": "T4",
+  "where": "390x844 Done asks before it ticks anything off",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "T4",
+  "where": "390x844 nothing was written by any verb",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "T5",
+  "where": "390x844 a passed send-by: \"Can’t be snoozed\", in the existing words",
+  "ok": true,
+  "detail": "Can’t be snoozedYour send-by date passed on Sun 4 Oct. Snoozing would hide a dat"
+ },
+ {
+  "lock": "T5",
+  "where": "390x844 a snooze writes",
+  "ok": true,
+  "detail": "taskFlags/nudge_overdue__q_seed-cal-passed20-q__a___r_"
+ },
+ {
+  "lock": "T5",
+  "where": "390x844 Undo puts the account back",
+  "ok": true,
+  "detail": ""
+ }
+]

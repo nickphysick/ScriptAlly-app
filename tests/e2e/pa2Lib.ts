@@ -52,6 +52,8 @@ export const CSS_MUTATIONS: Record<string, string> = {
   "stamp-moves": "@media (prefers-reduced-motion: reduce) { .pa-stamp { animation: paStampIn .5s ease .7s both !important; } }",
   /* F8 — a second burgundy: the celebration's button */
   "burgundy-btn": ".pa-celgo { color: #7c3a2a !important; }",
+  /* T8 — the Send verb turns rust */
+  "rust-verb": ".pa-tverb.pri { background: #b4553f !important; }",
   /* S9 — the phone's tab bar shown at every width */
   "desk-bar": ".pa-tabbar { display: flex !important; }",
 };
