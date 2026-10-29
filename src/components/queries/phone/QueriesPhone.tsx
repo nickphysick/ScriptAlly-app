@@ -151,10 +151,9 @@ export const QueriesPhone: React.FC<QueriesPhoneProps> = (p) => {
   const openQuery = (id: string, order: readonly string[]) => { p.onOrder([...order]); pushParams({ q: id }); };
 
   /* ── the sheets ── */
-  const [plusOpen, setPlusOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
-  const layerOpen = plusOpen || searchOpen || moreOpen;
+  const layerOpen = searchOpen || moreOpen;
 
   /* ── the celebration: a query that moves INTO a request or an offer while the page is on screen ── */
   const seen = useRef<Map<string, string> | null>(null);
@@ -385,15 +384,6 @@ export const QueriesPhone: React.FC<QueriesPhoneProps> = (p) => {
           <div className="qm1-foot" />
         </div>
       </div>
-      {plusOpen ? createPortal(
-        <div className="qm1-layer">
-          <div className="qm1-dim" data-qm1="dim" onClick={() => setPlusOpen(false)} />
-          <PlusSheet
-            onClose={() => setPlusOpen(false)}
-            onReplied={() => { setPlusOpen(false); p.onNavigate("queries", "Record a response"); }}
-            onSent={() => { setPlusOpen(false); openQueryDrawer({ mode: "log", ...(scopeId ? { manuscriptId: scopeId } : {}) }); }}
-          />
-        </div>, document.body) : null}
       {searchOpen ? createPortal(
         <div className="dm1-layer">
           <PhoneSearch agents={p.agents} queries={p.queries} manuscripts={p.manuscripts}
@@ -532,33 +522,8 @@ const Skeleton: React.FC = () => (
   <div className="qm1-grp qm1-sk" aria-hidden="true">{[0, 1, 2, 3].map((i) => <div key={i} className="qm1-skrow"><i /><span><b /><em /></span></div>)}</div>
 );
 
-const PlusSheet: React.FC<{ onClose: () => void; onReplied: () => void; onSent: () => void }> = ({ onClose, onReplied, onSent }) => {
-  const first = useRef<HTMLButtonElement>(null);
-  useEffect(() => {
-    const opener = document.activeElement as HTMLElement | null;
-    requestAnimationFrame(() => first.current?.focus({ preventScroll: true }));
-    const key = (e: KeyboardEvent) => { if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); onClose(); } };
-    document.addEventListener("keydown", key, true);
-    return () => { document.removeEventListener("keydown", key, true); opener?.focus?.({ preventScroll: true }); };
-  }, [onClose]);
-  return (
-    <div className="qm1-sht" role="dialog" aria-modal="true" aria-labelledby="qm1-sht-t" data-qm1="plus-sheet">
-      <div className="qm1-grip" aria-hidden="true" />
-      <div className="qm1-shtt" id="qm1-sht-t">What happened?</div>
-      <div className="qm1-ops">
-        <button ref={first} type="button" className="qm1-op" data-qm1="tile-replied" onClick={onReplied}>
-          <Img art={QM1_ART.agentReplied} className="qm1-opart" slot="agentReplied" />
-          <b>An agent replied</b><span>A request, pass or offer</span>
-        </button>
-        <button type="button" className="qm1-op" data-qm1="tile-sent" onClick={onSent}>
-          <Img art={QM1_ART.flyTwo} className="qm1-opart" slot="flyTwo" />
-          <b>I sent a query</b><span>Log it in seconds</span>
-        </button>
-      </div>
-      <button type="button" className="qm1-cta navy full" data-qm1="plus-cancel" onClick={onClose}>Cancel</button>
-    </div>
-  );
-};
+/* (The page's own + sheet is RETIRED — Phone app v2, Part 1D: the tab bar's + opens the shell's "What happened?" sheet,
+   components/phone/PhoneSheets.tsx, with the same two doors.) */
 
 const ActionSheet: React.FC<{ label: string; items: { key: string; label: string; run: () => void }[]; onClose: () => void }> = ({ label, items, onClose }) => {
   useEffect(() => {

@@ -24,9 +24,11 @@ test.setTimeout(420_000);
 const colourSweep = (page: Page) => page.evaluate(() => {
   const rgb = (s: string) => (s.match(/[\d.]+/g) ?? []).map(Number);
   const isNavy = (bg: string, img: string) => /rgb\(42, 58, 82\)/.test(bg) || /rgb\(52, 72, 106\)|rgb\(42, 58, 82\)/.test(img);
-  const isPink = (bg: string, img: string) => /rgb\(243, 200, 186\)/.test(bg) || /rgb\(246, 211, 199\)|rgb\(240, 192, 176\)/.test(img);
+  /* Phone app v2 (Part 1): the shell's blush (#e8c8bc, the tab bar's + and badge) counts as the pink ground too */
+  const isPink = (bg: string, img: string) => /rgb\((243, 200, 186|232, 200, 188)\)/.test(bg) || /rgb\(246, 211, 199\)|rgb\(240, 192, 176\)/.test(img);
   const out = { navy: 0, pink: 0, bad: [] as string[] };
-  const roots = [...document.querySelectorAll<HTMLElement>(".qm1, .qm1-layer, .sa-mtabbar")];
+  /* Phone app v2 (Part 1B): the tab bar is `.pa-tabbar` now */
+  const roots = [...document.querySelectorAll<HTMLElement>(".qm1, .qm1-layer, .pa-tabbar")];
   const name = (e: Element) => `${e.tagName.toLowerCase()}.${String((e as HTMLElement).className).split(" ").slice(0, 2).join(".")}`;
   const textEls = (el: Element) => [el, ...el.querySelectorAll("*")].filter((x) => [...x.childNodes].some((n) => n.nodeType === 3 && (n.textContent ?? "").trim()));
   for (const root of roots) for (const el of [root, ...root.querySelectorAll<HTMLElement>("*")]) {
@@ -42,7 +44,8 @@ const colourSweep = (page: Page) => page.evaluate(() => {
       for (const t of textEls(el)) if (getComputedStyle(t).color !== "rgb(255, 255, 255)") out.bad.push(`text on navy is not white: ${name(t)} (${getComputedStyle(t).color})`);
     } else if (isPink(bg, img)) {
       out.pink++;
-      for (const t of textEls(el)) if (getComputedStyle(t).color !== "rgb(28, 19, 15)") out.bad.push(`text on pink is not #1c130f: ${name(t)} (${getComputedStyle(t).color})`);
+      /* ink: #1c130f, or the phone app's ink #1f2633 (Phone app v2 rule: text on blush is ink, either) */
+      for (const t of textEls(el)) if (!["rgb(28, 19, 15)", "rgb(31, 38, 51)"].includes(getComputedStyle(t).color)) out.bad.push(`text on pink is not ink: ${name(t)} (${getComputedStyle(t).color})`);
     }
   }
   return out;
@@ -87,10 +90,11 @@ for (const vp of PHONES) {
     L.check("L3", `${tag(vp)} sent equals All`, ln0.sent === c.all, `${ln0.sent} vs ${c.all}`);
     L.check("L3", `${tag(vp)} active equals All less Closed`, ln0.active === c.all - c.closed, `${ln0.active} vs ${c.all - c.closed}`);
     L.check("L3", `${tag(vp)} the four sets sum to All`, c.you + c.agent + c.quiet + c.closed === c.all, JSON.stringify(c));
-    /* L4 — the tab bar's chosen item is navy, on Queries */
-    const tab = await page.evaluate(() => { const on = document.querySelector<HTMLElement>(".sa-mtab.on"); return { key: on?.dataset.tab, bg: on ? getComputedStyle(on.querySelector(".sa-mtabic")!).backgroundColor : null, badge: document.querySelector('[data-qm1="tab-badge"]')?.textContent ?? null }; });
+    /* L4 — the tab bar's chosen item is navy, on Queries.
+       ⚠️ RE-POINTED 29 OCT (Phone app v2, Part 1B): the bar is the floating five-slot capsule and its badge moved to To-do
+       (the tray's tally). The Queries Your-move badge claim is RETIRED here; the badge's equality is PA2-1 S1. */
+    const tab = await page.evaluate(() => { const on = document.querySelector<HTMLElement>('.pa-tb[aria-current="page"]'); return { key: on?.dataset.tab, bg: on ? getComputedStyle(on.querySelector(".pa-tbi")!).backgroundColor : null }; });
     L.check("L4", `${tag(vp)} the tab bar's Queries item is chosen, navy`, tab.key === "queries" && tab.bg === "rgb(42, 58, 82)", JSON.stringify(tab));
-    L.check("L4", `${tag(vp)} the Queries badge is the Your-move count`, (c.you > 0 ? tab.badge === String(c.you) : tab.badge === null), `${tab.badge} vs ${c.you}`);
 
     const heroSeen: Record<string, number> = {};
     for (const k of ["you", "agent", "quiet", "closed", "all"]) {
@@ -279,6 +283,9 @@ test("QM1 · Coming up · 390x844", async ({ page, browser }) => {
 
 for (const vp of PHONES) {
   test(`QM1 · the + sheet · ${tag(vp)}`, async ({ page }) => {
+    /* ⚠️ RETIRED 29 OCT (Phone app v2, Part 1D): the page's own + sheet is deleted; the tab bar's + opens the shell's
+       "What happened?" sheet, whose doors and colours are PA2-1 S5 and S8. */
+    test.skip(true, "retired by Phone app v2 Part 1D — see PA2-1 S5/S8");
     const L = new Ledger(`plus-${tag(vp)}`);
     await openQ(page, vp);
     for (const [tile, mode] of [["tile-replied", "resp"], ["tile-sent", "log"]] as const) {

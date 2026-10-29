@@ -38,6 +38,8 @@ const closeEverything = async (page: Page) => {
 };
 
 test("DM1-A1 · the phone top bar", async ({ page }) => {
+  /* ⚠️ RETIRED 29 OCT (Phone app v2, Part 1C): the phone top bar is retired; the shell's navy band and the tab bar's + took its jobs — PA2-1 S3/S5. */
+  test.skip(true, "retired by Phone app v2 Part 1C");
   const L = new Ledger("A1");
   for (const vp of PHONES) {
     await openDash(page, vp);
@@ -199,8 +201,10 @@ test("DM1-B1 · stat cards first", async ({ page }) => {
     const f = await phoneFigs(page);
     L.check("B1", `${where} population: four cards`, !!f.boxes.active && !!f.boxes.with && !!f.boxes.closed && !!f.boxes.agents, JSON.stringify(f.boxes));
     if (!f.boxes.active || !f.boxes.with || !f.boxes.closed || !f.boxes.agents) continue;
-    const top = await rectOf(page, '[data-dm1="top"]');
-    L.check("B1", `${where} the page opens on the Active card, under the bar`, !!top && f.boxes.active.y >= top.b && f.boxes.active.y - top.b <= 16, `${top?.b} → ${f.boxes.active.y}`);
+    /* ⚠️ RE-POINTED 29 OCT (Phone app v2, Part 1C): the page's own top bar is retired; what sits above the first card
+       is the shell's navy band (its foot is the sheet's rounded top). Part 2 rebuilds this body. */
+    const top = await rectOf(page, '[data-pa="band"]');
+    L.check("B1", `${where} the page opens on the Active card, under the band`, !!top && f.boxes.active.y >= top.b && f.boxes.active.y - top.b <= 32, `${top?.b} → ${f.boxes.active.y}`);
     L.check("B1", `${where} order: Active above With agents / Closed / Agents`, f.boxes.active.y + f.boxes.active.h <= f.boxes.with.y && f.boxes.with.x < f.boxes.closed.x && f.boxes.closed.x < f.boxes.agents.x, JSON.stringify(f.boxes));
     L.check("B1", `${where} the three are equal thirds`, Math.abs(f.boxes.with.w - f.boxes.closed.w) < 1 && Math.abs(f.boxes.closed.w - f.boxes.agents.w) < 1, `${f.boxes.with.w} ${f.boxes.closed.w} ${f.boxes.agents.w}`);
     L.check("B1", `${where} gutters 16`, Math.abs(f.boxes.active.x - 16) < 1 && Math.abs(vp.width - (f.boxes.active.x + f.boxes.active.w) - 16) < 1, JSON.stringify(f.boxes.active));
@@ -501,6 +505,8 @@ test("DM1-F1 · no sideways scroll, and every tap target is at least 40px", asyn
 });
 
 test("DM1-A2 · the search sheet", async ({ page }) => {
+  /* ⚠️ RETIRED 29 OCT (Phone app v2, Part 1C): its opener (the retired top bar's search) is gone; the band's search opens the shell palette — PA2-1. */
+  test.skip(true, "retired by Phone app v2 Part 1C");
   const L = new Ledger("A2");
   for (const vp of PHONES) {
     await openDash(page, vp);

@@ -77,14 +77,15 @@ describe("the tab bar — a floating capsule, five slots, + in the middle (Phone
     expect(phoneShellCss.split("@media (max-width: 767.98px)")[0]).toContain(".pa-tabbar { display: none; }");
   });
 
-  it("THE COLOUR RULES — the chosen pill is navy with a white icon; the badge and the + are blush with black text", () => {
+  it("THE COLOUR RULES — the chosen pill is navy with a white icon; the badge and the + are blush with ink text (#1f2633)", () => {
     const pill = phoneShellCss.match(/\.pa-tb\[aria-current="page"\] \.pa-tbi \{([^}]*)\}/s)?.[1] ?? "";
     expect(pill, "the chosen pill's rule must exist").not.toBe("");
     expect(pill).toContain("background: var(--pa-navy)");
     expect(pill).toContain("color: #fff");
     const bd = phoneShellCss.match(/\.pa-tbbadge \{([^}]*)\}/s)?.[1] ?? "";
     expect(bd).toContain("background: var(--pa-blush)");
-    expect(bd).toContain("color: #111");
+    expect(bd).toContain("color: var(--pa-ink)");
+    expect(phoneTokens).toContain("--pa-ink: #1f2633");
     expect(phoneTokens).toContain("--pa-blush: #e8c8bc");
     expect(phoneTokens).toContain("--pa-navy: var(--sp-anthracite, #2a3a52)");
     expect(barSrc).not.toContain("style={{");
