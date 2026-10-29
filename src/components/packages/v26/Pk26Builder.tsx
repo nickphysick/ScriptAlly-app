@@ -30,6 +30,7 @@ import { canMakeActive, canRetire, isLocked, packageStage, type PackageStage } f
 import { colourOf, PACKAGE_COLOURS, pcStyle } from "../../../lib/packagesV39";
 import { Lock, Mark, Pic, PicBare } from "./icons";
 import type { MaterialRow, PieceKind, Pk26Model, VersionRow } from "./usePk26Model";
+import { Pk393Builder } from "./Pk393Builder";
 
 export const DRAFT_ID = "__draft";
 export type LibTab = "let" | "syn" | "ver";
@@ -136,6 +137,8 @@ export const Pk26Builder: React.FC<BuilderProps> = ({ model, retired, current, o
     <>
       <section className="p9-pb-build" aria-label="Put a package together" data-pk26="builder" data-pk39="builder">
         <p className="p9-bk-k" data-pk39="kicker">{BUILDER_KICKER}</p>
+        {/* v39.3: Steps + preview */}
+        {p ? <Pk393Builder model={model} p={p} isActive={active?.id === p.id || p.id === DRAFT_ID} onFigures={onFigures} onEdit={onEditPackage} onDuplicate={onDuplicate} /> : null}
         <div className="p9-pb-grid p9-v39" data-pk39="grid">
           <aside className="p9-pb-lib" aria-labelledby="p9-libT" data-pk26="lib" data-pk39="lib">
             <div className="p9-lib-top" data-pk39="lib-head">
@@ -224,7 +227,7 @@ const StartCard: React.FC<{ retired: SubmissionPackage[]; onNewPackage: () => vo
 );
 
 /** F — the name, edited in place (the app's "editable in place" grammar: a dashed underline on hover). */
-const NameInPlace: React.FC<{ model: Pk26Model; p: SubmissionPackage }> = ({ model, p }) => {
+export const NameInPlace: React.FC<{ model: Pk26Model; p: SubmissionPackage }> = ({ model, p }) => {
   const ref = useRef<HTMLSpanElement | null>(null);
   const restore = () => { if (ref.current) ref.current.textContent = p.packageName; };
   const commit = () => {
@@ -245,7 +248,7 @@ const NameInPlace: React.FC<{ model: Pk26Model; p: SubmissionPackage }> = ({ mod
 };
 
 /** E — the icon-and-colour picker: a popover under the header's icon tile. A pick saves at once. */
-const LookPicker: React.FC<{ model: Pk26Model; p: SubmissionPackage; anchor: HTMLElement; onClose: () => void }> = ({ model, p, anchor, onClose }) => {
+export const LookPicker: React.FC<{ model: Pk26Model; p: SubmissionPackage; anchor: HTMLElement; onClose: () => void }> = ({ model, p, anchor, onClose }) => {
   const box = useRef<HTMLDivElement | null>(null);
   useEscapeLayer(true, onClose, ESC_LEVEL.page);
   /* below the tile, 10 clear; v39.2: ABOVE it when there is no room below. It is portalled and fixed, so a picker that
@@ -420,7 +423,7 @@ const OpenPackage: React.FC<{
 };
 
 /** "+ Add" and its popover (ref `.exa` / `#exPop`): a name field and suggestions, filtered as you type. */
-const AddExtra: React.FC<{ model: Pk26Model; p: SubmissionPackage }> = ({ model, p }) => {
+export const AddExtra: React.FC<{ model: Pk26Model; p: SubmissionPackage }> = ({ model, p }) => {
   const [open, setOpen] = useState(false);
   const [v, setV] = useState("");
   const box = useRef<HTMLSpanElement | null>(null);
