@@ -20,8 +20,6 @@
  *   missing, else "Log a query with it" (the existing log-a-query journey with this package chosen). Illustrative only:
  *   it sends nothing and stores nothing.
  *
- * ⚠️ UNTIL PHASE 4 retires the old package card, this header carries only `data-pk393` markers (the old card still
- *    carries the `data-pk39` / `data-pk38` ones the existing locks read; two of each would break them).
  * ⚠️ A SENT PACKAGE IS LOCKED, AS v40 RULED, AND THE NOTE SAYS SO (Nick, 29 Oct, over the pack's copy): the pack's note
  *    promised "a new edition from your next query", which nothing does — `changeContents` refuses every change to a
  *    package that is out with agents, and nothing starts an edition. So the note reads "What went stays as it went. To
@@ -188,9 +186,9 @@ const Header: React.FC<Pk393Props & { locked: boolean; out: boolean; sent: numbe
   useEffect(() => { setPicker(false); }, [p.id]);
   const st = stepStatus(p, sent, out);
   return (
-    <div className="p93-bh" style={pcStyle(p)} data-pk393="head">
+    <div className="p93-bh" style={pcStyle(p)} data-pk39="pkg-head" data-pk393="head">
       <button ref={tile} type="button" className="p93-bh-ic" aria-label="Change icon and colour" title="Change icon and colour" aria-expanded={picker} aria-haspopup="dialog"
-        disabled={draft} data-pk393="tile" onClick={() => setPicker((v) => !v)}>
+        disabled={draft} data-pk39="tile" data-pk393="tile" onClick={() => setPicker((v) => !v)}>
         <Pic ic={iconOf(p)} cls="p9-pic" />
       </button>
       <div className="p93-bh-t">
@@ -201,9 +199,9 @@ const Header: React.FC<Pk393Props & { locked: boolean; out: boolean; sent: numbe
         {p.note ? <small title={p.note}>{p.note}</small>
           : draft ? <small>{p.note}</small> : <small><button type="button" className="p93-addnote" onClick={() => onEdit(p, "note")}>Add a note: who is this for?</button></small>}
       </div>
-      <span className={`p93-bh-s${st.green ? " p93-g" : ""}`} data-pk393="status"><i aria-hidden="true" />{st.text}</span>
+      <span className={`p93-bh-s${st.green ? " p93-g" : ""}`} data-pk39="status" data-pk393="status"><i aria-hidden="true" />{st.text}</span>
       {draft ? <span /> : (
-        <button type="button" className="p93-bh-f" title="Figures" aria-label="Figures" data-pk393="figures" onClick={() => onFigures(p)}>
+        <button type="button" className="p93-bh-f" title="Figures" aria-label="Figures" data-pk38="figures" data-pk393="figures" onClick={() => onFigures(p)}>
           <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 16V9M10 16V4M16 16v-5" /></svg>
         </button>
       )}
@@ -294,16 +292,16 @@ export const Pk393Builder: React.FC<Pk393Props> = (props) => {
   }), [model.versionRows, model.letters, model.synopses]);
   const awayLet = model.lettersAll.filter((m) => m.retired), awaySyn = model.synopsesAll.filter((m) => m.retired);
   return (
-    <div className="p93-b" data-pk393="builder" data-pkg={p.id}>
+    <div className="p93-b" data-pk393="builder" data-pk40="open" data-pk26="open" data-pkg={p.id}>
       <div className="p93-col" data-pk393="steps-col">
         <Header {...props} locked={locked} out={out} sent={sent} />
         {from ? <div className="p9-lc-from">Copied from <b>{from.packageName}</b>. Change one piece, and Results can tell you what that piece did.</div> : null}
         {locked ? (
-          <div className="p93-lock" data-pk393="sent-note">
+          <div className="p93-lock" data-pk393="sent-note" data-pk38="lock-line">
             <Lock />
             <span><b>{note.lead}</b>{note.rest}
               <span className="p93-lock-a">
-                <button type="button" className="p93-lnk" data-pk393="copy-link" onClick={() => onDuplicate(p)}>Make a copy</button>
+                <button type="button" className="p93-lnk" data-pk393="copy-link" data-pk38="lock-copy" onClick={() => onDuplicate(p)}>Make a copy</button>
                 {canRetire(p, model.active?.id) ? <button type="button" className="p93-lnk p93-q" onClick={() => void model.retire(p)}>Retire</button> : null}
               </span>
             </span>

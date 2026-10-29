@@ -54,7 +54,7 @@
    Everything else in the page's blocks reads in the serif; the mono labels (Your packages, the builder's label, the
    tabs' counts) stay mono. The header card's own buttons follow, on this page only. ══ */
 @media (min-width: 768px) {
-  .p6.p6 :is(.p9-tip, .p9-pkl, .p9-pb-build, .p8-bnr, .p9-agg3, .pk39-hd .phc-b) *:not(.p9-po-nm, .p9-pkl-h, [data-pk39="kicker"], .p9-lib-tabs em, .p9-rl-tabs em, [data-pk39="pro"]) {
+  .p6.p6 :is(.p9-tip, .p9-pkl, .p9-pb-build, .p8-bnr, .p9-agg3, .pk39-hd .phc-b) *:not(.p9-po-nm, .p9-pkl-h, [data-pk39="kicker"], .p9-lib-tabs em, .p9-rl-tabs em, [data-pk39="pro"], .p93-pv-k > span) {
     font-family: var(--sp-serif) !important;
   }
   .pk39-hd .pk39-card .phc-b button { font-weight: 600 !important; font-size: 15px !important; }
@@ -64,17 +64,9 @@
   .p9-agg3 .p9-rlw .p9-rl-side > h4.p9-h4, .p9-agg3 .p9-rlw.p9-rlw .p9-rl-side > h4 { font: 600 17px/1.3 var(--sp-serif) !important; }
   .p9-agg3 .p9-ag3-g .p9-ag3.p9-ag3 > h3 { font: 600 19px/1.3 var(--sp-serif) !important; }
   .p8-bnr .p8-bnr-tx h2.p8-id-agT { font-family: var(--sp-serif) !important; font-weight: 600 !important; }
-  /* the open package's name: the typewriter, 30px (24 compact) */
-  .p9-pb-grid.p9-v39 .p9-po-h .p9-po-tt > h3 { font-size: 30px !important; line-height: 1.2 !important; }
-  .p9-pb-grid.p9-v39 .p9-po-tt .p9-po-nm.p9-po-nm { font-family: var(--sp-type) !important; font-size: 30px !important; font-weight: 400 !important; }
   /* the small labels v40's ruling had moved to the typewriter now read in the serif */
-  .p9-pkl .p9-pkl-row .p9-pkl-b > em, .p9-pkl .p9-pkl-row .p9-on.p9-pkl-b[aria-pressed="true"] > em,
-  .p9-pb-grid.p9-v39 .p9-po-tt .p9-po-act { font-weight: 600 !important; font-size: 11px !important; }
-  .p9-pb-grid.p9-v39 .p9-mr .p9-mr-l > span { font-weight: 600 !important; font-size: 13.5px !important; }
+  .p9-pkl .p9-pkl-row .p9-pkl-b > em, .p9-pkl .p9-pkl-row .p9-on.p9-pkl-b[aria-pressed="true"] > em { font-weight: 600 !important; font-size: 11px !important; }
   .p9-pb-grid.p9-v39 .p9-ill > i, .p9-pkl .p9-pkl-k .p9-ill > i, .p9-agg3 .p9-ill > i { font-style: italic !important; font-size: 10px !important; }
-}
-@container p9sheet (max-width: 1200px) {
-  .p9-pb-grid.p9-v39 .p9-po-h .p9-po-tt > h3, .p9-pb-grid.p9-v39 .p9-po-tt .p9-po-nm.p9-po-nm { font-size: 24px !important; }
 }
 
 /* ══ D · ONE SURFACE SYSTEM: radius 16 for cards, 8 for controls, one card shadow (the ref's `fx-surface`) ══ */
@@ -83,11 +75,9 @@
     --pk-card-sh: 0 1px 2px rgba(28, 19, 15, 0.06), 0 10px 24px -18px rgba(28, 19, 15, 0.35), 0 0 0 1px rgba(28, 19, 15, 0.06);
   }
   .pk39-hd .pk39-card.phc.phc { border-radius: 16px !important; box-shadow: var(--pk-card-sh) !important; }
-  .p9-pb-grid.p9-v39 .p9-pb-lib, .p9-pb-grid.p9-v39 .p9-pb-left .p9-pk-open { border-radius: 16px !important; box-shadow: var(--pk-card-sh) !important; }
   .p9-agg3 .p9-rlw .p9-rl { border-radius: 16px !important; box-shadow: var(--pk-card-sh) !important; }
   .p9-agg3 .p9-ag3-row .p9-rlw, .p9-agg3 .p9-id-aggMain .p9-ag3-f { border-radius: 16px !important; }
   .p9-pkl .p9-pkl-row .p9-pkl-b, .p9-pkl .p9-pkl-row .p9-pkl-new,
-  .p9-pb-grid.p9-v39 .p9-mr.p9-slt .p9-mr-em, .p9-pb-grid.p9-v39 .p9-mr-ac .p9-mr-b, .p9-pb-grid.p9-v39 .p9-lr .p9-lr-add,
   .pk39-hd .pk39-card .phc-b button { border-radius: 8px !important; }
 }
 
@@ -102,17 +92,7 @@
   /* the others step back, and come forward on hover */
   .p9-pkl .p9-pkl-row .p9-pkl-b:not(.p9-on):not(.p9-ret) { filter: saturate(0.75); opacity: 0.8 !important; transition: opacity 0.15s, filter 0.15s; }
   .p9-pkl .p9-pkl-row .p9-pkl-b:not(.p9-on):not(.p9-ret):hover { filter: none; opacity: 1 !important; }
-  /* the status pill: 32 tall, radius 16, white 12% on the package's colour, serif 600 13.5 white, a dot */
-  .p9-pb-grid.p9-v39 .p9-po-st .p9-stp { display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 14px; border-radius: 16px;
-    background: rgba(255, 255, 255, 0.12); font: 600 13.5px/1 var(--sp-serif) !important; color: #fff; white-space: nowrap; flex: none; }
-  .p9-pb-grid.p9-v39 .p9-po-st .p9-stp > i { flex: none; width: 8px; height: 8px; border-radius: 50%; background: #7fc89a; }
-  .p9-pb-grid.p9-v39 .p9-po-st .p9-stp.p9-stp--draft > i { background: none; box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.55); }
-  .p9-pb-grid.p9-v39 .p9-po-st .p9-stp .p9-stg-lk { display: inline-grid; place-items: center; margin-left: -2px; color: rgba(255, 255, 255, 0.75); cursor: default; }
-  .p9-pb-grid.p9-v39 .p9-po-st .p9-stp .p9-stg-lk svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.5; }
-}
-@container p9sheet (max-width: 1200px) {
-  .p9-pb-grid.p9-v39 .p9-po-st .p9-stp { font-size: 12.5px !important; padding: 0 11px; height: 28px; }
-  .p9-pb-grid.p9-v39 .p9-po-h .p9-po-st { gap: 8px !important; }
+  /* the open package's status pill moved to the Steps column's header (v39.3, pk393.css) */
 }
 
 /* ══ G · THE EXPLAINER (the ref's `.pk-tip` with `.tv-d`): one quiet line on #eaf1f4 above Your packages ══ */

@@ -227,7 +227,7 @@ describe("/queries/packages renders", () => {
     expect(html).not.toContain('data-pk39="tip"');
   });
 
-  it("populated: the Contact list's header, the labels, the open package's packing list and Your materials", () => {
+  it("populated: the Contact list's header, the labels, and the builder's steps and preview (v39.3)", () => {
     setActiveManuscript();
     const html = renderPageSeededWith(<SubmissionPackages />, "/queries/packages", { versions: [LETTER], packages: [PACKAGE] });
     expect(html).toContain('data-pk26="header"');
@@ -238,11 +238,16 @@ describe("/queries/packages renders", () => {
     expect(html).not.toContain("Bundle it. Send it. Know what went.");
     expect(html).toContain('data-pk26="open"');
     expect(html).toContain(">Standard UK<");
-    /* v40: the stage chip and the stepper say what a draft needs (the v26 "Needs a version" pill is retired) */
-    expect(html).toContain('data-stage="draft"');
-    expect(html).toContain("Add pages to make it ready.");
-    expect(html).toContain('data-pk26="lib"');
+    /* v39.3: the steps say what is missing — the version step is open, the letter step is filled — and the preview's
+       primary names only what is missing. Your materials (its card, tabs and rows) and the packing list are retired. */
+    expect(html).toContain('data-pk393-step="ver"');
+    expect(html).toContain('data-pk393-step="let"');
     expect(html).toContain(">Hook-first<");
+    expect(html).toContain('data-pk393="preview"');
+    expect(html).toContain(">Add a version to send it<");
+    expect(html).not.toContain('data-pk26="lib"');
+    expect(html).not.toContain('data-slot=');
+    expect(html).not.toContain('draggable="true"');
     expect(html).not.toContain('data-pk26="hero"');
     /* v39 D–F: the label over two cards, the package's own header (picker tile, name in place, one status, Figures), the
        quiet foot with the details link, and no stepper row */
@@ -251,14 +256,13 @@ describe("/queries/packages renders", () => {
     expect(html).toContain("A package is everything one agent receives:");
     expect(html).toContain(">How it works →<");
     expect(html).toContain(">Build, view and edit<");
-    expect(html).toContain('data-pk39="lib-head"');
     expect(html).toContain('data-pk39="pkg-head"');
     expect(html).toContain('aria-label="Change icon and colour"');
     expect(html).toContain('aria-label="Package name"');
     /* v39.1 C: one status pill replaces v39's three-dot stage */
     expect((html.match(/data-pk39="status"/g) ?? []).length).toBe(1);
     expect(html).not.toContain('data-pk39="stage"');
-    expect(html).toContain("Draft · needs pages");
+    expect(html).toContain("1 of 2 needed");
     expect(html).toContain(">Note, copy or delete…<");
     expect(html).not.toContain("p6-lc-s");
     /* v38: the label for the package, and no tab bar or tab page */
