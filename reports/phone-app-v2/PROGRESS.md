@@ -37,6 +37,7 @@ Baseline gates on the base: tsc root 0, tsc functions 0, build clean, Vitest 689
 | 7 | E locks, shots, report | `77de94f4` | committed |
 | 7 | dev deploy | integration `dc20fc30` on `dev/…-ppp1-pa2-7` | dev serves `index-BZP8LJfl.js` |
 | 8 | A first run (Home, Queries) + two scoping regressions | `97367626` | committed |
+| 8 | B settings, help, import, plan | `91401e53` | committed |
 
 ## Dev, as of the end of Part 1
 - (end of Part 2) dev serves `index-CRHIwewp.js` = `dev/pk391-qm1-pk392-calx-pk392b-td7-fv1-pk393-pa2-2` (`82adc7b9`). The next part's
