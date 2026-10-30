@@ -31,6 +31,7 @@ import {
   Book, ChevronDown, ChevronsUpDown,
 } from "lucide-react";
 import { useScriptAllyDb } from "../../lib/db";
+import { activeManuscriptOf, eventPath, logEvent } from "../../lib/events";
 import { EdgeFadeScroll } from "../EdgeFadeScroll";
 import { planLine, resolveScopedManuscript } from "../../lib/shellSidebar";
 import {
@@ -169,6 +170,16 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   /* Help Centre v1 — the trail the Help Centre reads to ring the page the writer came from */
   useEffect(() => { noteRoute(pathname); }, [pathname]);
   const { manuscripts, queries, agents, currentUser, updateUserProfile } = useScriptAllyDb();
+  /* Dashboard first visit v2 (Part I): the first app load of each calendar day (Europe/London), per writer, per device */
+  useEffect(() => {
+    const uid = currentUser?.id;
+    if (!uid) return;
+    const day = new Date().toLocaleDateString("en-CA", { timeZone: "Europe/London" });
+    const key = `sa.openedApp.${uid}`;
+    try { if (window.localStorage.getItem(key) === day) return; window.localStorage.setItem(key, day); } catch { return; }
+    logEvent(uid, "opened_app", eventPath(currentUser, activeManuscriptOf(manuscripts)));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser?.id]);
 
   const hit = useMemo(() => shellHitFor(sections, pathname, search), [sections, pathname, search]);
 

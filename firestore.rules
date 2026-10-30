@@ -1335,6 +1335,42 @@ service cloud.firestore {
         && d.version == 1;
     }
 
+    // ROUTE: events — Dashboard first visit v2, Part I. The app records each first-visit step for the founder's desk.
+    // CREATE ONLY, by the signed-in writer, for their own uid, at the server's time; NOBODY READS IT FROM THE CLIENT
+    // (the desk reads through the Admin SDK). Exactly five fields; `props` holds only named keys, each an enum or a count
+    // — never free text a writer typed.
+    match /events/{eventId} {
+      allow read, update, delete: if false;
+      allow create: if isSignedIn() && isValidId(eventId) && isValidEvent(incoming());
+    }
+
+    function isValidEventPath(p) {
+      return p in ['querying', 'ready', 'writing', 'revising'];
+    }
+
+    function isValidEvent(e) {
+      return e.keys().hasOnly(['uid', 'name', 'at', 'path', 'props'])
+        && e.keys().hasAll(['uid', 'name', 'at', 'path', 'props'])
+        && e.uid == request.auth.uid
+        && e.name in ['signed_up', 'dashboard_first_seen', 'path_changed', 'tour_finished', 'tour_skipped',
+            'import_started', 'import_left', 'import_resumed', 'import_finished',
+            'first_agent', 'first_query', 'first_comp', 'first_letter',
+            'reminder_answered', 'getting_started_step', 'getting_started_done', 'getting_started_hidden',
+            'example_opened', 'opened_app']
+        && e.at == request.time
+        && isValidEventPath(e.path)
+        && e.props is map
+        && e.props.keys().hasOnly(['path', 'from', 'to', 'stop', 'step', 'agents', 'queries', 'answer'])
+        && (!('path' in e.props) || isValidEventPath(e.props.path))
+        && (!('from' in e.props) || isValidEventPath(e.props.from))
+        && (!('to' in e.props) || isValidEventPath(e.props.to))
+        && (!('stop' in e.props) || (e.props.stop is int && e.props.stop >= 1 && e.props.stop <= 3))
+        && (!('step' in e.props) || e.props.step in ['manuscript', 'agent', 'query', 'materials', 'comps', 'letter', 'ready', 'duplicates', 'agents', 'queries'])
+        && (!('agents' in e.props) || (e.props.agents is int && e.props.agents >= 0 && e.props.agents <= 100000))
+        && (!('queries' in e.props) || (e.props.queries is int && e.props.queries >= 0 && e.props.queries <= 100000))
+        && (!('answer' in e.props) || e.props.answer in ['yes', 'not_now']);
+    }
+
     match /foundingStats/{userId} { allow read: if isAdmin() || (isSignedIn() && request.auth.uid == userId); allow write: if false; }
 
     // ROUTE: Weekly pulse (Dashboard v59) — NO client writes. The founding writer panel's faces post

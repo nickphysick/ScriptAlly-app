@@ -60,6 +60,7 @@ import { ExampleDashboard } from "../fv2/ExampleDashboard";
 import { ResumeCard } from "../fv2/ResumeCard";
 import { ReminderAsk, ReminderDone } from "../fv2/ReminderAsk";
 import { FinishLine } from "../fv2/FinishLine";
+import { logEvent } from "../../../lib/events";
 import type { DraftMeta } from "../../../lib/importDraft";
 /* ⚠️ LOADED WHEN FIRST NEEDED: `lib/importDraft` brings Firebase, and this page is also the onboarding ghost, mounted by
    suites and the import loader with no Firebase to load */
@@ -239,6 +240,9 @@ export const Dash58: React.FC<Dash58Props> = ({
     const w = answerWrite(c, currentUser?.queryingStage, msStatus);
     setAnswerHeld((o) => ({ ...o, [scopeId]: { path: pathAfter(c, msStatus), status: w.status ?? (msStatus as ManuscriptStatus | null) } }));
     void onAnswer?.(scopeId, w);
+    /* Part I: the answer changed on the dashboard */
+    const to = pathAfter(c, msStatus);
+    if (!example && to !== (path ?? "ready")) logEvent(currentUser?.id, "path_changed", to, { from: path ?? "ready", to });
   };
   const logQuery = () => openQueryDrawer({ mode: "log", ...(scopeId ? { manuscriptId: scopeId } : {}) });
   const addAgent = () => openNewAgentCard({ from: "button", host: "panel" });
@@ -269,9 +273,25 @@ export const Dash58: React.FC<Dash58Props> = ({
   const gsAllDone = gsRows.length > 0 && gsRows.every((r) => r.done);
   const gsWhat = gsSlot({ pre: empty, hidden: gsHidden, closed: gsClosed, allDone: gsAllDone });
   const gsSheetOpen = gsWhat !== "goal";
-  const closeGs = scopeId && onPrefs && !example ? () => { setGsClosedNow(true); void onPrefs(gsCloseWrite(scopeId)); } : undefined;
+  const closeGs = scopeId && onPrefs && !example ? () => {
+    setGsClosedNow(true); void onPrefs(gsCloseWrite(scopeId));
+    logEvent(currentUser?.id, "getting_started_done", path ?? "ready");
+  } : undefined;
+  /* Part I: a Getting started row ticking while this page is mounted. The rows already done when it first loads are not
+     ticks; nor is anything in the ghost or the example. */
+  const gsSeen = useRef<Set<string> | null>(null);
+  useEffect(() => {
+    if (loading || example || !currentUser || rootRef.current?.closest(".im-ghost")) return;
+    const done = new Set(gsRows.filter((r) => r.done).map((r) => r.key));
+    if (gsSeen.current) for (const k of done) if (!gsSeen.current.has(k)) logEvent(currentUser.id, "getting_started_step", path ?? "ready", { step: k });
+    gsSeen.current = done;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, gsRows]);
   /* "Hide" only once the first query exists: before it, Getting started is the page's whole job */
-  const gsHide = !empty && scopeId && onPrefs ? () => { void onPrefs(gsHideWrite(scopeId)); } : undefined;
+  const gsHide = !empty && scopeId && onPrefs && !example ? () => {
+    void onPrefs(gsHideWrite(scopeId));
+    logEvent(currentUser?.id, "getting_started_hidden", path ?? "ready");
+  } : undefined;
 
   /* ── the list: the board's own cards, then the contact list's, then the clock's ── */
   const plan = useMemo(() => {
@@ -492,12 +512,14 @@ export const Dash58: React.FC<Dash58Props> = ({
 
   /* ── first visit v2 (Part E): the example dashboard, opened from the empty feed ── */
   const [exampleOpen, setExampleOpen] = useState(false);
-  const openExample = () => setExampleOpen(true);
+  const openExample = () => { setExampleOpen(true); logEvent(currentUser?.id, "example_opened", path ?? "ready"); };
   const closeExample = React.useCallback(() => setExampleOpen(false), []);
   useEffect(() => {
     if (loading || !onDash || !currentUser || tourDecided.current || isGhost()) return;
     tourDecided.current = true;
     const d = tourDecision(prefs.tour, fvState);
+    /* Part I: the account's first loaded dashboard is the one where the tour is still undecided */
+    if (d !== "none") logEvent(currentUser.id, "dashboard_first_seen", path ?? "ready");
     if (d === "never") void onPrefs?.(TOUR_DONE_PATH);
     /* after the page has settled: the first paint's sequence is over and the cards are where they rest */
     else if (d === "run") tourTimer.current = window.setTimeout(() => setTour(0), TOUR_SETTLE_MS);
@@ -506,8 +528,14 @@ export const Dash58: React.FC<Dash58Props> = ({
   useEffect(() => () => window.clearTimeout(tourTimer.current), []);
   /* the tour belongs to the pre-query page: if the page leaves that state (a query logged in another tab), it ends */
   useEffect(() => { if (tour !== null && !loading && !tourState(fvState)) setTour(null); }, [tour, loading, fvState]);
-  const endTour = () => { setTour(null); if (currentUser) void onPrefs?.(TOUR_DONE_PATH); };
-  const nextStop = () => { if (tour === null) return; if (tour + 1 >= TOUR_STOPS.length) endTour(); else setTour(tour + 1); };
+  const endTour = (how: "finished" | "skipped") => {
+    const stop = (tour ?? 0) + 1;
+    setTour(null);
+    if (!currentUser) return;
+    void onPrefs?.(TOUR_DONE_PATH);
+    logEvent(currentUser.id, how === "finished" ? "tour_finished" : "tour_skipped", path ?? "ready", { stop });
+  };
+  const nextStop = () => { if (tour === null) return; if (tour + 1 >= TOUR_STOPS.length) endTour("finished"); else setTour(tour + 1); };
   useEffect(() => {
     if (isGhost()) return undefined;
     if (!onDash || loading || !tourState(fvState)) { registerTourReplay(null); return undefined; }
@@ -564,8 +592,8 @@ export const Dash58: React.FC<Dash58Props> = ({
   const reminderNode = askReminder && firstQuery ? (
     <ReminderAsk
       agentFirst={firstNameOf(agents.find((a) => a.id === firstQuery.agentId)?.name)}
-      onYes={() => { setReminderSaid("yes"); void onPrefs?.(REMINDER_YES); }}
-      onNotNow={() => { setReminderSaid("not_now"); void onPrefs?.(REMINDER_NOT_NOW); }}
+      onYes={() => { setReminderSaid("yes"); void onPrefs?.(REMINDER_YES); logEvent(currentUser?.id, "reminder_answered", path ?? "ready", { answer: "yes" }); }}
+      onNotNow={() => { setReminderSaid("not_now"); void onPrefs?.(REMINDER_NOT_NOW); logEvent(currentUser?.id, "reminder_answered", path ?? "ready", { answer: "not_now" }); }}
     />
   ) : reminderSaid === "yes" ? <ReminderDone onSettings={() => navigate("/account")} /> : null;
 
@@ -671,7 +699,7 @@ export const Dash58: React.FC<Dash58Props> = ({
             </div>
             <FirstWinStamp uid={currentUser?.id ?? null} active={onDash && !loading && !example && !rootRef.current?.closest(".im-ghost")} shown={prefs.wins} onPrefs={onPrefs} />
           </div>
-          {tour !== null && onDash && <FirstVisitTour stop={tour} onNext={nextStop} onSkip={() => endTour()} />}
+          {tour !== null && onDash && <FirstVisitTour stop={tour} onNext={nextStop} onSkip={() => endTour("skipped")} />}
           </>)}
         </div>
       </DashPopupProvider>

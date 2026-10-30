@@ -20,7 +20,9 @@ import type { DraftMeta } from "../../lib/importDraft";
 /* ⚠️ LOADED WHEN FIRST NEEDED: `lib/importDraft` brings Firebase with it, and this flow is mounted by suites and labs that
    have no Firebase to load */
 const draftStore = () => import("../../lib/importDraft");
-import type { DraftPayload, ReviewSnapshot } from "../../lib/importDraftModel";
+import { draftCounts, type DraftPayload, type ReviewSnapshot } from "../../lib/importDraftModel";
+import { eventPath, logEvent } from "../../lib/events";
+import { useLocation } from "react-router-dom";
 
 /** First visit v2 (Part F): a draft is saved this long after the review's last change. */
 export const DRAFT_SAVE_MS = 800;
@@ -113,7 +115,7 @@ export interface ImportFlowProps {
 export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function ImportFlow({
   manuscriptTitle, manuscriptId, onEnsureManuscript, hostError, onAddByHand, onBackToStart, onUseTemplate, onImportComplete, onScreen, onHandoff, onCancel, lab,
 }, ref) {
-  const { currentUser, agents, queries, addAgent, addQuery } = useScriptAllyDb();
+  const { currentUser, agents, queries, addAgent, addQuery, manuscripts } = useScriptAllyDb();
   const entitlement = useSmartImportEntitlement();
 
   const [screen, setScreen] = useState<ImportFlowScreen>(lab ? "overview" : "idle");
@@ -161,9 +163,21 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
   const draftTimer = useRef(0);
   const draftLive = useRef(false);
   const uid = currentUser?.id ?? null;
+  /* Part I: the import's events — the path is the writer's, the counts the review's own (`draftCounts`) */
+  const lastSnap = useRef<ReviewSnapshot | null>(null);
+  const evPath = () => eventPath(currentUser, manuscripts.find((m) => m.id === manuscriptId) ?? null);
+  const evCounts = (snap: ReviewSnapshot | null) => {
+    if (!snap) return {};
+    const c = draftCounts(snap);
+    return { step: snap.screen, agents: c.agentsChecked, queries: c.queriesChecked };
+  };
   const keepDraft = useCallback((snap: ReviewSnapshot) => {
+    lastSnap.current = snap;
     if (lab || !uid || !validated) return;
-    if (!draftStarted.current) draftStarted.current = new Date().toISOString();
+    if (!draftStarted.current) {
+      draftStarted.current = new Date().toISOString();
+      logEvent(uid, "import_started", evPath(), evCounts(snap));
+    }
     draftLive.current = true;
     window.clearTimeout(draftTimer.current);
     const input = { uid, fileName, source: importSource, manuscriptId: manuscriptId ?? null, startedAt: draftStarted.current,
@@ -180,6 +194,25 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
     if (uid && !lab) void draftStore().then((m) => m.deleteDraft(uid)).catch(() => { /* nothing kept, or already gone */ });
   };
   useEffect(() => () => window.clearTimeout(draftTimer.current), []);
+  /* Part I: the page left while a review is open (another route, or the tab closed) — the moment a draft matters */
+  const where = useLocation().pathname;
+  const whereWas = useRef(where);
+  const leftLogged = useRef(false);
+  useEffect(() => {
+    const moved = whereWas.current !== where;
+    whereWas.current = where;
+    if (screen !== "review") { leftLogged.current = false; return; }
+    if (moved && !leftLogged.current && !lab) { leftLogged.current = true; logEvent(uid, "import_left", evPath(), evCounts(lastSnap.current)); }
+    if (!moved) leftLogged.current = false;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [where, screen]);
+  useEffect(() => {
+    if (screen !== "review" || lab) return undefined;
+    const hide = () => { if (!leftLogged.current) { leftLogged.current = true; logEvent(uid, "import_left", evPath(), evCounts(lastSnap.current)); } };
+    window.addEventListener("pagehide", hide);
+    return () => window.removeEventListener("pagehide", hide);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen, uid]);
 
   /**
    * Take the file as read, set aside what is already in the account, and show what is left.
@@ -316,6 +349,7 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
       setOutcome(committed);
       /* first visit v2 (Part F): the import is finished, so the kept review goes */
       dropDraft();
+      if (!lab) logEvent(uid, "import_finished", evPath(), { step: lastSnap.current?.screen, agents: committed.agentsCreated, queries: committed.queriesImported });
       /* ⚠️ THE SKIPPED ROWS ARE KEPT FOR THE DASHBOARD HERE, when the commit returns and before the
          loader completes. The validation is of the result the REVIEW handed back — the one that was
          committed — not of the first read. A commit that skipped nothing clears any older notice. */
@@ -359,6 +393,7 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
     },
     resume: ({ meta, payload }) => {
       draftStarted.current = meta.startedAt;
+      logEvent(uid, "import_resumed", evPath(), evCounts({ ...payload.review }));
       setFileName(meta.fileName);
       setImportSource(meta.source);
       setAlready(payload.already ?? []);
