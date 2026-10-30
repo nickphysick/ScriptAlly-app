@@ -1,0 +1,17 @@
+
+Running 13 tests using 1 worker
+
+[1/13] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/13] [measure] › tests/e2e/dashFeedV1.measure.ts:94:1 › DF1-A1 · three columns at 1512, 417 / 511 / 417, no header band
+[3/13] [measure] › tests/e2e/dashFeedV1.measure.ts:113:1 › DF1-A2 · the feed column is pinned; the cards scroll; the feed scrolls inside itself
+[4/13] [measure] › tests/e2e/dashFeedV1.measure.ts:141:1 › DF1-A3 · two columns at 1280 and 1512 expanded, the feed in column 2, the cards in order
+[5/13] [measure] › tests/e2e/dashFeedV1.measure.ts:161:1 › DF1-B1 · the goal sheet sits under the card; the ring is the goals code's; no goal still shows the tiles
+[6/13] [measure] › tests/e2e/dashFeedV1.measure.ts:197:1 › DF1-C1 · Active on load, a 224px body, the switch moves nothing, the grain spills toward the hawk
+[7/13] [measure] › tests/e2e/dashFeedV1.measure.ts:253:1 › DF1-C2 · the founding card is last in the left column, its line, nothing clipped
+[8/13] [measure] › tests/e2e/dashFeedV1.measure.ts:278:1 › DF1-D1 · the switch, a full request's big card, a query sent's mini row
+[9/13] [measure] › tests/e2e/dashFeedV1.measure.ts:326:1 › DF1-D2 · no floating feed tab and no feed drawer on the dashboard
+[10/13] [measure] › tests/e2e/dashFeedV1.measure.ts:337:1 › DF1-E1 · the tick box goes where Do this task goes, and completes nothing
+[11/13] [measure] › tests/e2e/dashFeedV1.measure.ts:373:1 › DF1-E2 · the tip: its art inside the card, one height, a 7s turn that holds on hover, › restarts, reduced motion still
+[12/13] [measure] › tests/e2e/dashFeedV1.measure.ts:435:1 › DF1-E3 · the Scout: a soft pink band, an example nothing can focus, a request that survives a reload
+[13/13] [measure] › tests/e2e/dashFeedV1.measure.ts:462:1 › DF1-F1 · every footer link renders its page, and Give feedback opens the dock
+  13 passed (4.6m)
