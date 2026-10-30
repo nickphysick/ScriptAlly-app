@@ -56,9 +56,14 @@ export interface F1BookProps {
   now: Date;
   /** writes the goal (the goals card's own write); absent → "Set a weekly goal" is shown and does nothing */
   onGoal?: (patch: Partial<User>) => void | Promise<void>;
+  /** Dashboard first visit v2 (Part A): false before the first query — the card is the book alone, no buttons */
+  buttons?: boolean;
+  /** Dashboard first visit v2 (Part A): what hangs under the card in the goal sheet's place (Getting started); absent →
+   *  the goal sheet */
+  belowCard?: React.ReactNode;
 }
 
-export const F1Book: React.FC<F1BookProps> = ({ loading, title, author, coverUrl, label, onLog, onRecord, onAddAgent, queries, agents, activities, currentUser, now, onGoal }) => {
+export const F1Book: React.FC<F1BookProps> = ({ loading, title, author, coverUrl, label, onLog, onRecord, onAddAgent, queries, agents, activities, currentUser, now, onGoal, buttons = true, belowCard }) => {
   const [sheet, setSheet] = useState(false);
   const entries = currentUser?.queryingGoals;
   const m = useMemo(() => {
@@ -88,18 +93,18 @@ export const F1Book: React.FC<F1BookProps> = ({ loading, title, author, coverUrl
             ? <img className="df1-cov df1-covimg" src={coverUrl} alt="" aria-hidden="true" data-df1="cover" />
             : <div className="df1-cov" aria-hidden="true" data-df1="cover"><span>{title}</span></div>}
           <div className="df1-bktxt">
-            <div className="df1-status" data-df1="status">{loading ? " " : label}</div>
+            <div className="df1-status fv2-label" data-df1="status">{loading ? " " : label}</div>
             <h1 className={`df1-title${loading ? " d58-sk" : ""}`} data-df1="title" data-page-title="">{loading ? " " : title || "Your manuscript"}</h1>
             {(loading || author) && <div className="df1-by" data-df1="byline">{loading ? " " : `by ${author}`}</div>}
           </div>
         </div>
-        <div className="df1-bkacts">
+        {buttons && <div className="df1-bkacts">
           <button type="button" className="df1-ba df1-ba--pri" data-df1="btn-log" aria-label={BOOK_BUTTONS.log} onClick={onLog}><Pen /><span>{BOOK_BUTTONS.log}</span></button>
           <button type="button" className="df1-ba" data-df1="btn-record" aria-label={BOOK_BUTTONS.record} onClick={onRecord}><Reply /><span>{BOOK_BUTTONS.record}</span></button>
           <button type="button" className="df1-ba" data-df1="btn-agent" aria-label={BOOK_BUTTONS.agent} onClick={onAddAgent}><PersonPlus /><span>{BOOK_BUTTONS.agent}</span></button>
-        </div>
+        </div>}
       </section>
-      <section className="df1-goal" data-df1="goal" aria-label="This week" data-loading={loading ? "1" : "0"}>
+      {belowCard ?? <section className="df1-goal" data-df1="goal" aria-label="This week" data-loading={loading ? "1" : "0"}>
         {g.target ? (
           <div className="df1-ring" data-df1="ring" data-count={g.count} data-target={g.target} role="img" aria-label={`${g.count} of ${g.target} queries`}>
             <svg viewBox="0 0 60 60" aria-hidden="true">
@@ -121,7 +126,7 @@ export const F1Book: React.FC<F1BookProps> = ({ loading, title, author, coverUrl
             {m.bar.map((met, i) => <i key={i} className={met ? undefined : "is-off"} data-df1="week" data-met={met ? "1" : "0"} />)}
           </span>
         </div>
-      </section>
+      </section>}
       {sheet && onGoal && (
         <GoalTargetSheet
           initialTarget={5}

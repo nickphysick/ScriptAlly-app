@@ -18,7 +18,7 @@
  * ⚠️ THE ANSWER ONLY CHOOSES A PATH. It changes no data, so a writer who picked "Not yet" and then imports a
  * tracker has lost nothing.
  */
-import { QueryStatus, type Agent, type Query, type User } from "../types";
+import { ManuscriptStatus, QueryStatus, type Agent, type Query, type User } from "../types";
 import { closedAt, sentAt } from "./oneScreen";
 import { agentPrimary } from "./agentDisplay";
 import type { UserPaths } from "./userPaths";
@@ -50,6 +50,44 @@ export const campaignLabel = (scopedQueries: readonly Pick<Query, "status">[]): 
   const w = CAMPAIGN_EYEBROW[campaignStage(scopedQueries)].toLowerCase();
   return w.charAt(0).toUpperCase() + w.slice(1);
 };
+
+/* ── Dashboard first visit v2 (Part A): the manuscript card's label and the page's state ─────────── */
+
+/** The manuscript card's five labels, italic sentence case. */
+export const BOOK_LABEL = {
+  ready: "Getting ready",
+  writing: "Still writing",
+  revising: "In revision",
+  querying: "Querying",
+  between: "Between rounds",
+} as const;
+
+/**
+ * The manuscript card's label. Once a query exists the campaign speaks (Querying / Between rounds); before it, the
+ * book's own readiness does: still being written, in revision, or getting ready to query.
+ * ⚠️ THE READINESS IS THE STORED `Manuscript.status`, the field sign-up's readiness question writes. Nothing here
+ * infers it.
+ */
+export function bookLabel(scopedQueries: readonly Pick<Query, "status">[], msStatus: ManuscriptStatus | string | null | undefined): string {
+  const stage = campaignStage(scopedQueries);
+  if (stage === "querying") return BOOK_LABEL.querying;
+  if (stage === "between") return BOOK_LABEL.between;
+  if (msStatus === ManuscriptStatus.DRAFTING) return BOOK_LABEL.writing;
+  if (msStatus === ManuscriptStatus.REVISING) return BOOK_LABEL.revising;
+  return BOOK_LABEL.ready;
+}
+
+/**
+ * Which first-visit state the page is in (Part A). `pre` and `resume` come before the first query on this manuscript
+ * (`resume` when a Smart Import draft is waiting); `querying` while any query is live; `between` once every query is
+ * closed. "All set up" is not a state of the page: it is the Getting started sheet's own finish line (Part H).
+ */
+export type DashState = "pre" | "resume" | "querying" | "between";
+export function dashState(scopedQueries: readonly Pick<Query, "status">[], hasDraft: boolean): DashState {
+  const stage = campaignStage(scopedQueries);
+  if (stage === "ready") return hasDraft ? "resume" : "pre";
+  return stage;
+}
 
 /* ── the stored preferences ─────────────────────────────────────────────────────────────────────── */
 

@@ -45,22 +45,27 @@ describe("DFV-A · the eyebrow is the campaign's", () => {
 
 describe("DFV-A · the pre-query page", () => {
   const html = render([]);
-  it("renders the set-up card, the Mentor's tip and Getting started as the task card", () => {
-    expect(html).toContain('data-fv1="setup"');
-    expect(html).toContain("Have you sent any queries for <em>The Lantern Keepers</em> yet?");
-    expect(html).toContain('data-fv1="tip"');
-    expect(html).toContain('data-group="start"');
-    expect(html).toContain('data-fv1="gs-count"');
+  /* ⚠️ RETARGETED (Dashboard first visit v2, Part A): the pre-query page is feed v1's three columns. Left: the manuscript
+     card with no buttons, Getting started under it, the founding card. Middle: the set-up card over the empty feed.
+     Right: Top tip, the Scout and the footer — no task card and no queries card. */
+  it("renders the set-up card in the middle column, Getting started under the book, and no task card", () => {
+    const at = (s: string) => html.indexOf(s);
+    expect(at('data-fv1="setup"')).toBeGreaterThan(at('data-df1="feed"'));
+    expect(at('data-fv2="empty-feed"')).toBeGreaterThan(at('data-fv1="setup"'));
+    expect(at('data-fv2="gs"')).toBeGreaterThan(at('data-df1="book"'));
+    expect(at('data-fv2="gs"')).toBeLessThan(at('data-df1="founding"'));
+    expect(html).toContain('data-df1="tip"');
+    expect(html).not.toContain('data-d71="task"');
+    expect(html).not.toContain('data-df1="queries"');
   });
-  it("draws the founding card in the querying column's own slot, so it is never squeezed to its band", () => {
-    expect(html).toContain('data-d71="fw-slot"');
+  it("draws the founding card in the left column, after Getting started", () => {
+    expect(html.indexOf('data-df1="founding"')).toBeLessThan(html.indexOf('data-df1="feed"'));
     expect(html).not.toContain('class="d59-rule"');
   });
-  it("carries no header buttons, and the eyebrow says GETTING READY", () => {
-    expect(html).toContain('data-set="none"');
-    expect(html).not.toContain('data-d58="btn-log"');
-    expect(html).not.toContain('data-d58="btn-record"');
-    expect(html).toContain("— GETTING READY —");
+  it("carries no buttons on the manuscript card, and its label says Getting ready", () => {
+    expect(html).not.toContain('data-df1="btn-log"');
+    expect(html).not.toContain('data-df1="btn-record"');
+    expect(html).toContain('data-df1="status">Getting ready<');
   });
   it("retires the doors, the lift tiles and Where do I start?", () => {
     for (const gone of ["d60-door", "Ready for lift off?", "Where do I start?", "No queries out yet."]) expect(html).not.toContain(gone);

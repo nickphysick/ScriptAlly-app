@@ -1,0 +1,61 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * DASHBOARD FIRST VISIT v2 (ref design-refs/dashboard-first-visit-v2/; desktop only, ≥768px).
+ * Loaded after df1.css, so equal-specificity rules here win ties. Every first-visit state now sits in feed v1's three
+ * columns (`data-mode="f1"`); `data-fv2` on the root names which state.
+ * ⚠️ EVERY TEXT ELEMENT NAMES ITS FAMILY: `lib/brand.tsx` forces a family on bare `span`s and on `h2`/`h3`, so the
+ * headings state theirs with two classes and `!important` (the house cure).
+ */
+
+/* ── Part A · the middle column before the first query: the set-up card over the empty feed, NOT pinned ──
+   The pinned, self-scrolling feed column is for a feed; before there is one the column is ordinary content. */
+.d58[data-mode="f1"] .df1-feed.fv2-mid { position: static; height: auto; gap: 22px; }
+
+/* ── Part A · the manuscript card's label: italic sentence case ── */
+.d58 .df1-status.fv2-label { font: italic 400 15.5px/20px var(--d58-serif) !important; letter-spacing: 0; text-transform: none; }
+
+/* ── Part A · Getting started, in the goal sheet's slot ── */
+.d58 .df1-goal.fv2-gs { display: block; padding: 18px 16px 10px; }
+.fv2-gsh { display: flex; align-items: baseline; gap: 12px; }
+.d58 .fv2-gsh .fv2-gst { margin: 0; flex: 1 1 auto; min-width: 0; font: 400 22px/1.3 var(--d58-type) !important; color: var(--d58-ink); letter-spacing: 0; }
+.d58 .fv2-gsn { flex: none; font: 400 14px/1.3 var(--d58-serif) !important; color: rgba(28, 19, 15, 0.6); white-space: nowrap; }
+.d58 .fv2-hide {
+  padding: 0; border: 0; background: none; cursor: pointer; color: var(--d58-ink);
+  font: 600 14px/1.3 var(--d58-serif) !important; text-decoration: underline; text-underline-offset: 3px;
+}
+.fv2-hide:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
+.fv2-gsbar { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; margin: 10px 0 8px; }
+.fv2-gsbar > i { height: 4px; border-radius: 2px; background: #ece7de; }
+.fv2-gsbar > i.is-on { background: var(--d58-navy); }
+/* the current row's tint is the reference's oat, not v1's powder */
+.d58 .fv2-gs .fv1-gsr.is-current { background: #f6f1ea; margin-inline: -8px; padding-inline: 8px; }
+
+/* ── Part A · the empty feed ── */
+.fv2-empty { min-width: 0; padding: 0 4px; }
+.d58 .fv2-empty .fv2-et { margin: 0; font: 400 21px/1.3 var(--d58-type) !important; color: var(--d58-ink); letter-spacing: 0; }
+.d58 .fv2-ep { margin: 4px 0 0; font: 400 15px/1.5 var(--d58-serif) !important; color: rgba(28, 19, 15, 0.62); }
+.d58 .fv2-elink {
+  display: inline; padding: 0; border: 0; background: none; cursor: pointer; color: var(--d58-ink);
+  font: 700 15px/1.5 var(--d58-serif) !important; text-decoration: underline; text-underline-offset: 3px; text-align: left;
+}
+.fv2-elink:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
+.fv2-ex {
+  position: relative; margin-top: 20px; padding: 12px 12px 10px; border-radius: 12px;
+  background: rgba(255, 255, 255, 0.55); box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.1); opacity: 0.85;
+}
+.d58 .fv2-extag {
+  position: absolute; top: -9px; right: 12px; padding: 1px 8px; border-radius: 999px; background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.14);
+  font: 600 11.5px/16px var(--d58-serif) !important; color: rgba(28, 19, 15, 0.55);
+}
+.fv2-exrow { display: flex; align-items: center; gap: 10px; }
+.d58 .fv2-exdisc { flex: none; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; background: #3d4553; color: #fff; font: 600 13px/1 var(--d58-serif) !important; }
+.fv2-exw { min-width: 0; }
+.d58 .fv2-exw b { display: block; font: 700 15px/1.3 var(--d58-serif) !important; color: var(--d58-ink); }
+.d58 .fv2-exw small { display: block; font: 400 13px/1.35 var(--d58-serif) !important; color: rgba(28, 19, 15, 0.55); }
+.fv2-extrk { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-top: 12px; }
+.fv2-extrk > i { height: 4px; border-radius: 2px; background: #e4ded4; }
+.fv2-extrk > i.is-on { background: #b8b2a8; }
+.fv2-extrk > i.is-now { background: #7f8794; }

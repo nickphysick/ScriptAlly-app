@@ -22,7 +22,7 @@ import { liveCount, undatedLiveCount } from "../../../lib/dashBreakdown";
 import { closedTile } from "../../../lib/dashClosed";
 import { assembleBoardColumns } from "../../../lib/todoColumns";
 import { todoRows } from "../../../lib/dashTodo";
-import { dashList, gettingStartedItem, gettingStartedPlan, type ListAction } from "../../../lib/dashList";
+import { dashList, type ListAction, type ListPlan } from "../../../lib/dashList";
 import { buildQcRows } from "../../../lib/qcSummary";
 import type { TaskCtx } from "../../../lib/dashTaskCard";
 import { gettingStartedRows } from "../../../lib/dashEmpty";
@@ -37,8 +37,6 @@ import { MONTHS_SHORT } from "../../../lib/dates";
 import { readImportNotice, clearImportNotice, onImportNoticeChange, noticeHeadline, noticeWhy, noticeToggle, NOTICE_DISMISS, type ImportNotice } from "../../../lib/importNotice";
 import { DashPopupProvider } from "../DashPopup";
 import { OneScreenChart, activeTitle } from "../OneScreenChart";
-import { Dash58Header } from "./Dash58Header";
-import { Dash71Right } from "../v71/Dash71Right";
 import { Dash71Task } from "../v71/Dash71Task";
 import { F1Feed } from "../f1/F1Feed";
 import { F1Book } from "../f1/F1Book";
@@ -51,13 +49,12 @@ import { Dash105Founding } from "../v105/Dash105Founding";
 import { agentCoverage, isPreQuery } from "../../../lib/dashFirstUse";
 import { ClosedHoop, AgentsHoop } from "../v60/Dash60Left";
 import { openNewAgentCard } from "../../../lib/agentCardStore";
-import { campaignEyebrow, campaignLabel, seg, dashPrefsOf, gsHideWrite, gsOrder, nextTip, startPathOf, startPathWrite, stepTip, tipWrite, type GsLink, type StartPath } from "../../../lib/dashFirstVisit";
+import { bookLabel, dashState, seg, dashPrefsOf, gsHideWrite, gsOrder, startPathOf, startPathWrite, type GsLink, type StartPath } from "../../../lib/dashFirstVisit";
 import type { UserPaths } from "../../../lib/userPaths";
-import { DASH_TIPS } from "../../../lib/dashTips";
 import { SetUpCard } from "../fv1/SetUpCard";
-import { MentorTip } from "../fv1/MentorTip";
+import { GsSheet } from "../fv2/GsSheet";
+import { EmptyFeed } from "../fv2/EmptyFeed";
 import { FirstWinStamp } from "../fv1/FirstWinStamp";
-import type { TaskGs } from "../v71/Dash71Task";
 import "../oneScreen.css";
 import "./dash58.css";
 import "../v59/dash59.css";
@@ -72,6 +69,8 @@ import "../v105/dash105.css";
 import "../fv1/fv1.css";
 /* ⚠️ AND DASHBOARD FEED v1 AFTER EVERYTHING: the three-column layout (`data-mode="f1"`) wins every tie */
 import "../f1/df1.css";
+/* ⚠️ AND FIRST VISIT v2 AFTER FEED v1: every first-visit state in the three columns */
+import "../fv2/fv2.css";
 
 export interface Dash58Props {
   loading: boolean;
@@ -97,11 +96,16 @@ export interface Dash58Props {
   onGoal?: (patch: Partial<User>) => void | Promise<void>;
 }
 
+/** Dashboard first visit v2 (Part A): the task card's last "Then:" while the Getting started sheet is open. */
+export const THEN_FINISH_GS = "finish getting started";
+
 /** Dashboard feed v1, Part C: the founding card's footer line on this page. */
 export const FOUNDING_RANKS_F1 = "Top contributors win a weekly prize.";
 
 const NO_AID: DashAid = { drop: [], noClosed: false, noAgents: false };
 const NO_AGENTS: Agent[] = [];
+/** Before the first query the page draws no task card, so its plan is empty. */
+const EMPTY_PLAN: ListPlan = { groups: [], items: [], thenLabel: "Then", all: { label: "All", tab: "todo" } };
 
 /** The hawk's shadow, cast across the sheet (v59). The same versioned file the other pages place. */
 export const DASH_SHADOW = { src: "/images/hawk-shadow.png", version: 1 };
@@ -200,8 +204,6 @@ export const Dash58: React.FC<Dash58Props> = ({
     return closedTile(aid.noClosed ? [] : scopedQueries, scopedActivities);
   }, [loading, scopedQueries, scopedActivities, aid.noClosed]);
 
-  /* ⚠️ ABOVE THE PLAN, WHICH READS `gsOpen` DURING RENDER: a `const` read from a memo below its declaration is a
-     TDZ that tsc cannot see (CLAUDE.md). */
   /* ── first visit v1: the set-up answer, the tip, and Getting started ──
      ⚠️ EVERY PREFERENCE IS A PREFERENCE, NEVER A SOURCE: the answer chooses a path and an order, the tip
      index chooses which tip opens, and Hide hides a page. None of them is read by anything that counts. */
@@ -229,18 +231,16 @@ export const Dash58: React.FC<Dash58Props> = ({
     return gsOrder(path).map((k) => ({ key: k, done: rows.find((r) => r.key === k)?.done ?? false }));
   }, [manuscripts, agents.length, scopedQueries.length, versions, activeManuscript, path]);
   const gsHidden = !!scopeId && !!prefs.gsHidden[seg(scopeId)];
-  /* Getting started is a page while any row is undone and the writer has not hidden it (Part C) */
-  const gsOpen = !gsHidden && gsRows.some((r) => !r.done);
-  const gs: TaskGs = {
-    rows: gsRows, path, onGo: goGs,
-    /* "Hide" only once the first query exists: before it, Getting started is the card's whole job */
-    onHide: !empty && scopeId && onPrefs ? () => { void onPrefs(gsHideWrite(scopeId)); } : undefined,
-  };
+  /* first visit v2 (Part A): Getting started is the sheet under the manuscript card — always before the first query,
+     and afterwards while any row is undone and the writer has not hidden it. Otherwise the goal sheet has the slot. */
+  const gsSheetOpen = empty || (!gsHidden && gsRows.some((r) => !r.done));
+  /* "Hide" only once the first query exists: before it, Getting started is the page's whole job */
+  const gsHide = !empty && scopeId && onPrefs ? () => { void onPrefs(gsHideWrite(scopeId)); } : undefined;
 
   /* ── the list: the board's own cards, then the contact list's, then the clock's ── */
   const plan = useMemo(() => {
-    /* first run: no query on this book yet, so the card is the one Getting started page (first visit v1) */
-    if (empty && aid.drop.length === 0) return gettingStartedPlan();
+    /* first run: no query on this book yet, so there is no task card at all (first visit v2, Part A) */
+    if (empty && aid.drop.length === 0) return EMPTY_PLAN;
     const cols = assembleBoardColumns({
       tasks: scopedTasks, userTasks, queries, agents, manuscripts, taskFlags, activities: scopedActivities,
       now: now.getTime(), today: localYMD(now.getTime()), mutedTaskRules: currentUser?.mutedTaskRules,
@@ -252,10 +252,11 @@ export const Dash58: React.FC<Dash58Props> = ({
       userTasks, manuscript: activeManuscript, user: currentUser, now, drop: aid.drop,
       /* first visit v1 (Part C): Getting started stays a page — after the real tasks, before housekeeping — until
          every row is done or the writer hides it */
-      start: gsOpen ? gettingStartedItem() : null,
+      /* first visit v2 (Part A): Getting started is a sheet under the manuscript card now, never a page of this card */
+      start: null,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [scopedTasks, userTasks, queries, scopedQueries, agents, manuscripts, taskFlags, scopedActivities, activities, activeManuscript, currentUser, now, aid.drop.join(","), empty, versions, scopeId, gsOpen]);
+  }, [scopedTasks, userTasks, queries, scopedQueries, agents, manuscripts, taskFlags, scopedActivities, activities, activeManuscript, currentUser, now, aid.drop.join(","), empty, versions, scopeId]);
 
   /* v71: the task card reads the Query Centre's own rows for the dates it draws */
   const taskCtx = useMemo<TaskCtx>(
@@ -426,26 +427,13 @@ export const Dash58: React.FC<Dash58Props> = ({
      flashes; once loaded it is the one predicate's answer. */
   const pre = loading ? shape.pre : empty;
   const hasAgents = loading ? shape.agents : agents.length > 0;
+  /* first visit v2 (Part A): which first-visit state the page is in; while loading, the shape memory's */
+  const fvState = loading ? (shape.pre ? "pre" : "querying") : dashState(scopedQueries, false);
   const cov = useMemo(
     () => agentCoverage({ agents, queries, manuscript: activeManuscript, now, todayIso: localYMD(now.getTime()) }),
     [agents, queries, activeManuscript, now],
   );
   const toContacts = () => onNavigate("agents");
-
-  /* the tip: each visit to the dashboard opens on the next one (stored), ‹ › loop round */
-  const [tip, setTip] = useState<number | null>(null);
-  const tipAdvanced = useRef(false);
-  const onDashNow = useLocation().pathname === "/dashboard";
-  useEffect(() => {
-    if (!onDashNow) { tipAdvanced.current = false; return; }
-    if (loading || tipAdvanced.current) return;
-    tipAdvanced.current = true;
-    const i = nextTip(prefs.tip, DASH_TIPS.length);
-    setTip(i);
-    if (currentUser) void onPrefs?.(tipWrite(i));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onDashNow, loading]);
-  const tipIndex = tip ?? nextTip(prefs.tip, DASH_TIPS.length);
 
   /* ── the skipped-rows line: read for this account, and read again whenever it changes ──
      This page stays mounted while the writer is on the Import page, so reading once showed the
@@ -478,9 +466,6 @@ export const Dash58: React.FC<Dash58Props> = ({
   }, [loading]);
 
   const author = (currentUser?.name ?? "").trim();
-  /* first visit v1: the eyebrow is the campaign's — GETTING READY, QUERYING or BETWEEN ROUNDS — read from this
-     manuscript's queries; the stored status stays the sidebar's */
-  const eyebrow = campaignEyebrow(scopedQueries);
   const title = (activeManuscript?.title ?? "").trim();
 
   /* ── the querying page's cards (Dashboard feed v1). Each is the app's own component; the layout below places them. ── */
@@ -513,56 +498,29 @@ export const Dash58: React.FC<Dash58Props> = ({
       agents={agents} queries={queries} msId={scopeId}
       onDiscover={() => onNavigate("agents", "Discover")} onImport={() => onNavigate("import")} />
   );
-  const taskCard = <Dash71Task loading={loading} plan={plan} ctx={taskCtx} onView={viewTask} innerRef={focusRef} gs={gsHidden ? undefined : gs} />;
-  const foundingCard = <Dash105Founding loading={loading} uid={fwUid} name={currentUser?.name ?? null} seenTier={currentUser?.foundingSeenTier ?? null} onSeen={onFoundingSeen} />;
   /* Dashboard feed v1 (Part C): the founding card at the foot of the left column, with its own footer line */
   const foundingF1 = <Dash105Founding loading={loading} uid={fwUid} name={currentUser?.name ?? null} seenTier={currentUser?.foundingSeenTier ?? null} onSeen={onFoundingSeen} ranksLine={FOUNDING_RANKS_F1} />;
 
   return (
-    <div ref={rootRef} className="os-root d58" data-mode={pre ? "pre" : "f1"} data-paint={paint ? "1" : undefined} style={noticeListH > 0 ? ({ ["--d58-notice-list-h" as string]: `${noticeListH}px` } as React.CSSProperties) : undefined}>
+    <div ref={rootRef} className="os-root d58" data-mode="f1" data-fv2={fvState} data-paint={paint ? "1" : undefined} style={noticeListH > 0 ? ({ ["--d58-notice-list-h" as string]: `${noticeListH}px` } as React.CSSProperties) : undefined}>
       <DashPopupProvider rootRef={rootRef}>
         <div className="d58-page" data-d58="page" data-loading={loading ? "1" : "0"}>
           {notice && <ImportNoticeRow notice={notice} onDismiss={dismissNotice} onListHeight={setNoticeListH} />}
-          {pre ? (
-            <>
-              {/* first visit v1, unchanged: the book's header, the set-up card and the Mentor */}
-              <Dash58Header
-                loading={loading}
-                title={title}
-                author={author}
-                onLog={logQuery}
-                onRecord={() => onNavigate("queries", "Record a response")}
-                onAddAgent={() => onNavigate("agents", "Add an agent")}
-                eyebrow={eyebrow}
-                buttons="none"
-              />
-              <div className="d58-body" data-d58="body">
-                <div className="d58-left" data-d58="left" data-pre="1">
-                  <SetUpCard
-                    loading={loading} title={title} path={path} onPath={choosePath}
-                    agents={loading ? (hasAgents ? 1 : 0) : agents.length}
-                    onImport={() => onNavigate("import")} onLog={logQuery} onAddAgent={addAgent} onDiscover={() => onNavigate("agents", "Discover")}
-                  />
-                  <MentorTip loading={loading} index={tipIndex} onStep={(d) => setTip(stepTip(tipIndex, d, DASH_TIPS.length))} />
-                </div>
-                {/* Part B: the first-win stamp — struck over the body, once per kind, user and manuscript */}
-                <FirstWinStamp uid={currentUser?.id ?? null} active={onDash && !loading && !rootRef.current?.closest(".im-ghost")} shown={prefs.wins} onPrefs={onPrefs} />
-                <Dash71Right task={taskCard} panel={foundingCard} />
+          {/* ⚠️ DASHBOARD FEED v1's THREE COLUMNS, IN EVERY STATE (first visit v2, Part A) — you and your book · the feed
+              (or, before the first query, the set-up card over the empty feed) · what to do. The page may scroll; only a
+              real feed is pinned. At a sheet of 1300px or less the cards share one column and the middle is the second. */}
+          <div className="df1-cols" data-df1="cols">
+            <div className="df1-left" data-df1="left">
+              <div className="df1-slot df1-s-book" data-df1="book-slot">
+                <F1Book
+                  loading={loading} title={title} author={author} coverUrl={activeManuscript?.coverUrl} label={bookLabel(scopedQueries, activeManuscript?.status)}
+                  onLog={logQuery} onRecord={() => onNavigate("queries", "Record a response")} onAddAgent={() => onNavigate("agents", "Add an agent")}
+                  queries={queries} agents={agents} activities={activities} currentUser={currentUser} now={now} onGoal={onGoal}
+                  buttons={!pre}
+                  belowCard={gsSheetOpen ? <GsSheet loading={loading} rows={gsRows} path={path} onGo={goGs} onHide={gsHide} /> : undefined}
+                />
               </div>
-            </>
-          ) : (
-            /* ⚠️ DASHBOARD FEED v1: THREE COLUMNS — you and your queries · the feed · what to do. The page may scroll;
-               only the feed column is pinned, and it scrolls inside itself. At a sheet of 1300px or less the left and
-               right columns' cards share one column (`display: contents`, placed by row) and the feed is the second. */
-            <div className="df1-cols" data-df1="cols">
-              <div className="df1-left" data-df1="left">
-                <div className="df1-slot df1-s-book" data-df1="book-slot">
-                  <F1Book
-                    loading={loading} title={title} author={author} coverUrl={activeManuscript?.coverUrl} label={campaignLabel(scopedQueries)}
-                    onLog={logQuery} onRecord={() => onNavigate("queries", "Record a response")} onAddAgent={() => onNavigate("agents", "Add an agent")}
-                    queries={queries} agents={agents} activities={activities} currentUser={currentUser} now={now} onGoal={onGoal}
-                  />
-                </div>
+              {!pre && (
                 <div className="df1-slot df1-s-queries" data-df1="queries">
                   <F1Queries
                     activeTitle={activeTitle(activeCount, loading ? 0 : undatedLiveCount(scopedQueries))}
@@ -570,25 +528,40 @@ export const Dash58: React.FC<Dash58Props> = ({
                     active={chartCard} closed={closedCard}
                   />
                 </div>
-                <div className="df1-slot df1-s-agents" data-df1="agents">{agentsCard}</div>
-                <div className="df1-slot df1-s-founding" data-df1="founding">{foundingF1}</div>
+              )}
+              {!pre && hasAgents && <div className="df1-slot df1-s-agents" data-df1="agents">{agentsCard}</div>}
+              <div className="df1-slot df1-s-founding" data-df1="founding">{foundingF1}</div>
+            </div>
+            {pre ? (
+              <div className="df1-feed fv2-mid" data-df1="feed" data-fv2="mid">
+                <SetUpCard
+                  loading={loading} title={title} path={path} onPath={choosePath}
+                  agents={loading ? (hasAgents ? 1 : 0) : agents.length}
+                  onImport={() => onNavigate("import")} onLog={logQuery} onAddAgent={addAgent} onDiscover={() => onNavigate("agents", "Discover")}
+                />
+                <EmptyFeed />
               </div>
+            ) : (
               <div className="df1-feed" data-df1="feed">
                 <F1Feed loading={loading} activities={scopedActivities} queries={queries} agents={agents} manuscripts={manuscripts} userName={author} now={now} />
               </div>
-              <div className="df1-right" data-df1="right">
+            )}
+            <div className="df1-right" data-df1="right">
+              {/* "Your next task" only once there is a task: never shown empty (Part A) */}
+              {!pre && (loading || plan.items.length > 0) && (
                 <div className="df1-slot df1-s-task" data-df1="task">
-                  <Dash71Task loading={loading} plan={plan} ctx={taskCtx} onView={viewTask} innerRef={focusRef} gs={gsHidden ? undefined : gs} look="next" />
+                  <Dash71Task loading={loading} plan={plan} ctx={taskCtx} onView={viewTask} innerRef={focusRef} look="next"
+                    thenLast={gsSheetOpen ? THEN_FINISH_GS : undefined} />
                 </div>
-                <div className="df1-slot df1-s-tip" data-df1="tip-slot"><F1Tip loading={loading} /></div>
-                <div className="df1-slot df1-s-scout" data-df1="scout-slot">
-                  <F1Scout asked={notifyPrefs(currentUser?.notifyPrefs).scout} onAsk={currentUser && onPrefs ? () => onPrefs({ "notifyPrefs.scout": true }) : undefined} />
-                </div>
-                <div className="df1-slot df1-s-footer" data-df1="footer-slot"><F1Footer /></div>
+              )}
+              <div className="df1-slot df1-s-tip" data-df1="tip-slot"><F1Tip loading={loading} /></div>
+              <div className="df1-slot df1-s-scout" data-df1="scout-slot">
+                <F1Scout asked={notifyPrefs(currentUser?.notifyPrefs).scout} onAsk={currentUser && onPrefs ? () => onPrefs({ "notifyPrefs.scout": true }) : undefined} />
               </div>
-              <FirstWinStamp uid={currentUser?.id ?? null} active={onDash && !loading && !rootRef.current?.closest(".im-ghost")} shown={prefs.wins} onPrefs={onPrefs} />
+              <div className="df1-slot df1-s-footer" data-df1="footer-slot"><F1Footer /></div>
             </div>
-          )}
+            <FirstWinStamp uid={currentUser?.id ?? null} active={onDash && !loading && !rootRef.current?.closest(".im-ghost")} shown={prefs.wins} onPrefs={onPrefs} />
+          </div>
         </div>
       </DashPopupProvider>
       {/* ⚠️ ONLY WHILE THE DASHBOARD IS THE PAGE ON SCREEN: every page stays mounted, and a layer
