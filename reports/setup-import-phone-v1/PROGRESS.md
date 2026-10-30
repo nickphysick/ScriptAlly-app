@@ -9,7 +9,8 @@ Baseline: tsc root 0, tsc functions 0, build clean (0 error/warning lines), Vite
 | 0 recon | — | done: refs 18/18 OK; today/ matches (fonts aside); base = dev |
 | A frame, labels, welcome, your list, your file, pinned foot, tick | `aa2b2a53` | committed |
 | B the reading screen | `341539e2` | committed |
-| C review header, ready rows, repeats | (this commit) | committed |
+| C review header, ready rows, repeats | `e177c380` | committed |
+| D questions, one per screen | (this commit) | committed |
 
 ## Resuming
 - Read `git log --oneline -10` and this file; resume at the first phase not committed.
@@ -28,3 +29,8 @@ Baseline: tsc root 0, tsc functions 0, build clean (0 error/warning lines), Vite
 - Ready rows: `PhoneRowShell` (reviewRows): tap → the row's own onToggleOpen (details portalled as a sheet into the foot host); left swipe → navy "Don't import" → the row's own onDelete. Row buttons kept, visually hidden (keyboard / screen reader).
 - Repeats: `duplicateUnits()` stays the one source; on phone a 2-member open set (no bars) becomes `PhoneDupePick` (held radio, applied by the pinned "Next set" through onRemove/onKeepBoth). Other set shapes (3-way, reconcile) keep their own card, one per screen; "Next set" waits for them to be decided.
 - The deck is unchanged in C (D replaces it on the phone).
+
+## Phase D notes
+- `PhoneDeck` (v9/ReviewDeck): compact navy card + "Answer this" → full-screen layer portalled to the frame root (`footHost.parentElement`), rendering the SAME `card.body`. "Save and next" clicks the question's own `.o9-ans > .sf-btn` (kept, visually hidden); pick-style questions answer on tap. "Skip" = `firstOpen(cards, at+1)`. Deck's same-render advance does the moving. Layer closes when nothing is left.
+- LOCAL layout (lift candidate): PhoneFlowShell takes a query JourneyView; the deck is not one.
+- The card's foot shows `card.sub` (DeckCard carries no sheet row number or query count; the mock's "row 14 · 2 queries" is not in the model).

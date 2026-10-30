@@ -16,7 +16,10 @@
  *
  * The arrows hide below 820px, where the dots (always pressable) are the way to move.
  */
-import React, { useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { useIsMobile } from "../../shell/mobileChrome";
+import { useSetupFootHost } from "../SetupFrame";
 import { Chip, Disc } from "../ImportParts";
 import "./onbV9.css";
 
@@ -47,6 +50,7 @@ export const ReviewDeck: React.FC<{
   faq: React.ReactNode;
 }> = ({ cards, faq }) => {
   const [at, setAt] = useState(() => firstOpen(cards));
+  const isMobile = useIsMobile();
   const [faqOpen, setFaqOpen] = useState(false);
   const i = Math.min(at, cards.length - 1);
   const card = cards[i];
@@ -67,6 +71,7 @@ export const ReviewDeck: React.FC<{
   }
 
   if (!card) return null;
+  if (isMobile) return <PhoneDeck cards={cards} at={i} setAt={setAt} />;
   return (
     <section className="o9-deck o9-pop" data-im="deck" aria-label={DECK_TITLE}>
       <div className="o9-deckhead" data-im="deck-head">
@@ -97,5 +102,82 @@ export const ReviewDeck: React.FC<{
         <button type="button" className="o9-deckarrow" disabled={i === cards.length - 1} aria-label="Next question" onClick={() => setAt(i + 1)} data-im="deck-next">›</button>
       </div>
     </section>
+  );
+};
+
+/* ═══ The deck on a phone (set-up on phones v1, board 2 2B + 3B; DOCS.headB, askB) ═══
+   On the step: a navy-headed card showing the first open row and "Answer this". Answering opens one
+   question per screen — the row as a card in a navy band, then the SAME `card.body` (the deck's own
+   `DeckQuestions` component, its field, its answers, its handlers) in the sheet below, with "Save and
+   next" and "Skip" pinned at the foot. "Save and next" presses the question's own save button;
+   "Skip" moves on and leaves it unanswered, as the deck's arrow does. The deck's same-render advance
+   (above) moves to the next open card the moment an answer lands, so nothing here moves it.
+   ⚠️ A LOCAL LAYOUT, AND A LIFT CANDIDATE: phone app v2's `PhoneFlowShell` is built round a query
+   journey's `JourneyView` (court, day, saves), and the deck is not one. */
+const PhoneDeck: React.FC<{ cards: DeckCard[]; at: number; setAt: (i: number) => void }> = ({ cards, at, setAt }) => {
+  const [open, setOpen] = useState(false);
+  const host = useSetupFootHost();
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const [hasSave, setHasSave] = useState(false);
+  const card = cards[at];
+  const left = cards.filter((c) => !c.answered).length;
+  useLayoutEffect(() => { setHasSave(!!bodyRef.current?.querySelector(".o9-ans > .sf-btn")); });
+  /* Everything answered: the question screen has done its job. */
+  useEffect(() => { if (open && left === 0) setOpen(false); }, [open, left]);
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") { e.stopPropagation(); setOpen(false); } };
+    document.addEventListener("keydown", onKey, true);
+    return () => document.removeEventListener("keydown", onKey, true);
+  }, [open]);
+  const first = cards.find((c) => !c.answered) ?? card;
+  const kind = (c: DeckCard) => (c.key.startsWith("q-") ? "Query" : "Agent");
+  const layer = open && card && (
+    <div className="o9-ql" role="dialog" aria-modal="true" aria-label={DECK_TITLE} data-im="q-layer">
+      <div className="o9-qlband">
+        <div className="o9-qlrow">
+          <button type="button" className="o9-qlback" onClick={() => setOpen(false)} data-im="q-back">‹ Review</button>
+          <span className="o9-qlpos" data-im="q-pos">{at + 1} of {cards.length}</span>
+        </div>
+        <div className="o9-qlcard" data-im="q-card" data-card={card.key}>
+          <div className="o9-qlcb"><span>{card.answered ? "Answered" : DECK_TITLE}</span><span>{kind(card)}</span></div>
+          <div className="o9-qlca">
+            <Disc initials={card.initials} tone={card.tone ?? "live"} />
+            <span><b>{card.name}</b><small className="o9-qlgap">{card.chip}</small></span>
+          </div>
+          <div className="o9-qlcf"><span>{card.sub}</span></div>
+        </div>
+      </div>
+      <div className="o9-qlsheet">
+        <div className="o9-qlchips" aria-hidden="true"><span className="is-on">{card.chip}</span></div>
+        <div className="o9-qlbody" ref={bodyRef} key={card.key} data-im="deck-card" data-card={card.key} data-answered={card.answered ? "1" : "0"}>
+          {card.body}
+        </div>
+      </div>
+      <div className="o9-qlpin">
+        <button type="button" className="sf-link" onClick={() => setAt(firstOpen(cards, at + 1))} data-im="q-skip">Skip</button>
+        {hasSave && !card.answered && (
+          <button type="button" className="sf-btn" data-im="q-save"
+            onClick={() => (bodyRef.current?.querySelector(".o9-ans > .sf-btn") as HTMLButtonElement | null)?.click()}>
+            Save and next
+          </button>
+        )}
+      </div>
+    </div>
+  );
+  return (
+    <>
+      <section className="o9-pdeck" data-im="deck" aria-label={DECK_TITLE}>
+        <div className="o9-pdeckh" data-im="deck-head"><b>{DECK_TITLE}</b><span data-im="deck-pos">{cards.indexOf(first) + 1} of {cards.length}</span></div>
+        <div className="o9-pdeckrow">
+          <Disc initials={first.initials} tone={first.tone ?? "live"} />
+          <span><b>{first.name}</b><small>{first.sub}</small></span>
+        </div>
+        <div className="o9-pdeckgo">
+          <button type="button" className="sf-btn" onClick={() => { setAt(cards.indexOf(first)); setOpen(true); }} data-im="deck-answer">Answer this</button>
+        </div>
+      </section>
+      {layer && (host?.parentElement ? createPortal(layer, host.parentElement) : layer)}
+    </>
   );
 };
