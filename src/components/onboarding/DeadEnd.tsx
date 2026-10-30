@@ -17,7 +17,7 @@
 
 import React from "react";
 import "./onboarding.css";
-import { BackLink } from "./setupParts";
+import { BackLink, StepFoot } from "./setupParts";
 
 export const CHIP_USED = "Smart Import already used";
 export const CHIP_UNREADABLE = "File couldn't be read";
@@ -50,10 +50,9 @@ export const DeadEndCard: React.FC<{
       <p className={`sf-chip${fail ? " sf-chip--fail" : ""}`} data-sf="chip">{chip}</p>
       <h1 className="sf-deadh">{title}</h1>
       <div className="sf-deadtx">{children}</div>
-      <div className={`sf-cfoot${left ? "" : " sf-cfoot--end"}`}>
-        {left}
-        <span className="sf-footr">{actions}</span>
-      </div>
+      {/* Phone last screens v1 (2B): `StepFoot` pins the actions to the bottom on a phone, through the
+          set-up frame's foot host; on the desktop it renders this same `.sf-cfoot` in place. */}
+      <StepFoot left={left}>{actions}</StepFoot>
     </section>
   </div>
 );

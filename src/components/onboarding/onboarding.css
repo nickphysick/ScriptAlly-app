@@ -611,3 +611,11 @@
   }
   .sf .sf-foothost .sf-link { flex: none; white-space: nowrap; }
 }
+
+/* ═══ Phone last screens v1 (30 Oct; ref design-refs/phone-last-screens-v1/, 1B) ═══════════════════
+   The ACCOUNT frame below 768px shows ONE folder tab — the current screen's. The sibling tab and the
+   small "Your account" label go; the in-card link ("New to QueryHawk? Create an account" and its
+   reverse) is the way between the two. Hidden, not unmounted: `FolderTab` still measures them. */
+@media (max-width: 767.98px) {
+  .sf--account .ws-ftg, .sf--account .ws-ftsibs { display: none; }
+}

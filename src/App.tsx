@@ -61,7 +61,7 @@ import { NoteboardRoute } from "./components/todo/NoteboardRoute";
 // import { TopNavHost } from "./components/shell/TopNavHost";
 import { TopNavPanelData } from "./components/shell/TopNavPanelData";
 import { Onboarding } from "./components/Onboarding";
-import { ErrorBoundary } from "./components/ErrorBoundary";
+import { ErrorBoundary, ThrowLab } from "./components/ErrorBoundary";
 import { StatusDotDemo } from "./components/StatusDotDemo";
 import { PlansPage } from "./components/PlansPage";
 import { QueryStatus, SubmissionMethod, UserPlan } from "./types";
@@ -899,6 +899,8 @@ function AppContent() {
 export default function App() {
   return (
     <ErrorBoundary>
+      {/* Dev builds only: `#/throw-lab` forces a render error so the fallback can be measured. */}
+      {import.meta.env.MODE !== "production" && <ThrowLab />}
       <DbProvider>
         <BrandProvider>
           {/* BrowserRouter carries the URL; the dev-lab hashes (#/shell-lab etc.) and the pre-auth
