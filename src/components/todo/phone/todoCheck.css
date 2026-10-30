@@ -16,7 +16,7 @@
 .pa-ckt .t { flex: 1; min-width: 0; }
 .pa-ckt b { display: block; font-size: 15.5px; font-weight: 600; line-height: 1.25; }
 .pa-ckt small { display: block; font-size: 13px; color: var(--pa-muted); margin-top: 2px; line-height: 1.3; }
-.pa-ckt small.late { color: #8a4a3a; font-weight: 600; }
+.pa-ckt small .late { color: #8a4a3a; font-weight: 600; }
 .pa-ckt .pa-chev { flex: none; color: var(--pa-faint); }
 .pa-ckt .pa-chev svg { width: 16px; height: 16px; }
 /* a done row (the To-do page's "Done today") */

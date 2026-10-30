@@ -148,7 +148,8 @@ test.describe("PF1 phone fixes", () => {
   test("F2 no fade floats detached from the bar: the edge fade is anchored to the screen's foot, no band above the bar", async ({ page }) => {
     const rows: Record<string, unknown>[] = [];
     await phone(page, "/dashboard");
-    for (const path of ["/dashboard", "/queries", "/todo", "/agents"]) {
+    /* Phone round two v1: To-do left the tab bar (it is a page now, with no bar), so the fourth tab route is Packages */
+    for (const path of ["/dashboard", "/queries", "/queries/packages", "/agents"]) {
       await go(page, path);
       if (BREAK[MUTATE]) await page.addStyleTag({ content: BREAK[MUTATE] });
       await page.waitForTimeout(500);
@@ -254,7 +255,12 @@ test.describe("PF1 phone fixes", () => {
     await phone(page, "/queries");
     await go(page, "/queries");
     if (BREAK[MUTATE]) await page.addStyleTag({ content: BREAK[MUTATE] });
-    const chips = await page.evaluate(() => Object.fromEntries([...document.querySelectorAll<HTMLElement>('[data-qm1="chip"]')].map((c) => [c.dataset.key, Number(c.dataset.count)])));
+    /* Phone round two v1 (1C): the pill row is retired; the band's tiles carry the same counts (chipCounts) */
+    await page.locator('[data-pa="band-tile"]').first().waitFor({ timeout: 30_000 });
+    /* WebKit draws the tiles before the query rows arrive, so wait for the counts themselves */
+    await page.waitForFunction(() => [...document.querySelectorAll<HTMLElement>('[data-pa="band-tile"]')].reduce((n, t) => n + Number(t.dataset.count ?? 0), 0) > 0, null, { timeout: 30_000 });
+    await page.waitForTimeout(800);
+    const chips = await page.evaluate(() => Object.fromEntries([...document.querySelectorAll<HTMLElement>('[data-pa="band-tile"]')].map((c) => [c.dataset.key, Number(c.dataset.count)])));
     await page.locator('[data-pa="birds-btn"]').first().tap();
     await page.locator('[data-pa="birds"]').waitFor({ timeout: 10_000 });
     await page.waitForTimeout(600);
@@ -430,20 +436,24 @@ test.describe("PF1 phone fixes", () => {
   });
 
   test("BADGE reading (report only, no assertion about which number is right)", async ({ page }) => {
-    await phone(page, "/todo");
+    /* Phone round two v1 (2B): the badge rides on Home now (To-do is a page with no bar), counting what it always counted */
+    await phone(page, "/dashboard");
+    await go(page, "/dashboard");
+    await page.waitForTimeout(1500);
+    const badgeNow = await page.evaluate(() => ({ badge: document.querySelector('[data-tab="home"] [data-pa="tab-badge"]')?.textContent?.trim() ?? null, label: document.querySelector('[data-tab="home"]')?.getAttribute("aria-label") ?? null }));
     await go(page, "/todo");
     await page.waitForTimeout(1500);
-    const r = await page.evaluate(() => {
+    const r = await page.evaluate((b) => {
       const n = (sel: string) => document.querySelector(sel)?.textContent?.trim() ?? null;
       return {
-        badge: n('[data-pa="tab-badge"]'),
-        badgeLabel: document.querySelector('[data-pa="tabbar"] [aria-label^="To-do"], .pa-tabbar [aria-label^="To-do"]')?.getAttribute("aria-label") ?? null,
+        badge: b.badge,
+        badgeLabel: b.label,
         earlier: n('[data-pa="tally-earlier"]'), today: n('[data-pa="tally-today"]'), soon: n('[data-pa="tally-soon"]'),
         groups: [...document.querySelectorAll(".pa-td .pa-rowhd")].map((h) => h.textContent?.trim()),
         segs: [...document.querySelectorAll(".pa-td .pa-seg button")].map((b) => b.textContent?.trim()),
         headline: [...document.querySelectorAll(".pa-td h1, .pa-td h2, [data-pa='band'] h1")].map((h) => h.textContent?.trim()),
       };
-    });
+    }, badgeNow);
     record("BADGE", r);
     expect(r.badge, "the badge is drawn").not.toBeNull();
   });

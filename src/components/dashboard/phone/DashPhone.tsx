@@ -139,7 +139,9 @@ export const DashPhone: React.FC<DashPhoneProps> = (props) => {
   /* ── Activity (Phone round two v1, 2A): the desktop feed's own entries, arranged by the desktop drawer's own model
      (PhoneActivity). `/dashboard?activity=1` is its page, so the back gesture closes it. ── */
   const feedList = useMemo(
-    () => (loading ? [] : feedEntries({ activities: scopedActivities, queries, agents, manuscripts, now, seenAt: null })),
+    /* honestDates, as the desktop passes it: a send is dated by its sent date. Without it the phone ordered the same
+       events differently from the desktop feed whenever a query was logged after it was sent. */
+    () => (loading ? [] : feedEntries({ activities: scopedActivities, queries, agents, manuscripts, now, seenAt: null, honestDates: true })),
     [loading, scopedActivities, queries, agents, manuscripts, now],
   );
   const location = useLocation();

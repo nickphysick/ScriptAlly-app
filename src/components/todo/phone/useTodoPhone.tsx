@@ -78,12 +78,21 @@ export function useTodoPhoneModel(now: number): TodoPhoneModel {
   return { items, live, calItems, buckets, today, dayOf, whenOf, hkGroups };
 }
 
-/** A checklist row's line under the title: when it fell due (if it is late), then who it is about. Facts only. */
-export function checkLine(i: TrayItem, day: string | null, today: string): { text: string; late: boolean } {
-  const late = !!day && day < today;
-  const who = i.agent ? [i.agent.name?.trim() || null, i.agent.agency?.trim() || null].filter(Boolean).join(" · ") : "";
-  const parts = [late && day ? overdueLabel(day, today) : null, who || i.sub || null].filter(Boolean) as string[];
-  return { text: parts.join(" · "), late };
+/** A checklist row's title: the task, with the agent named when the task's own words do not name them (ref boot2's
+ *  "Close your query to Tom Okafor?"). */
+export function checkTitle(i: TrayItem): string {
+  const name = (i.agent?.name || "").trim();
+  if (!name || i.userTask) return i.deed;
+  const first = name.split(/\s+/)[0]!;
+  return i.deed.includes(first) ? i.deed : `${i.deed} · ${name}`;
+}
+
+/** A checklist row's line under the title: when it fell due (if it is late, set apart in the rust ink), then the agency.
+ *  Facts only. */
+export function checkLine(i: TrayItem, day: string | null, today: string): { text: string; late: string | null } {
+  const late = day && day < today ? overdueLabel(day, today) : null;
+  const where = i.agent ? (i.agent.agency?.trim() || (checkTitle(i).includes((i.agent.name || "").trim()) ? "" : i.agent.name?.trim() || "")) : i.sub;
+  return { text: where || "", late };
 }
 
 const DAY = 86_400_000;
@@ -181,13 +190,15 @@ export function useTodoDoors(model: Pick<TodoPhoneModel, "hkGroups">, active: bo
 /** A checklist row (ref boot2 `.ck`): a 24px round tick, the title and its line, a chevron. The tick runs `onTick` (the
  *  old verb's door); the row runs `onOpen`. */
 export const CheckRow: React.FC<{
-  i: TrayItem; line: { text: string; late: boolean }; onTick: () => void; onOpen: () => void; style?: React.CSSProperties;
+  i: TrayItem; line: { text: string; late: string | null }; onTick: () => void; onOpen: () => void; style?: React.CSSProperties;
   dataPa?: string; chev: React.ReactNode;
 }> = ({ i, line, onTick, onOpen, style, dataPa = "check-row", chev }) => (
   <div className="pa-ck" data-pa={dataPa} data-key={i.key} data-bucket={i.bucket} data-type={i.card.taskType ?? ""} style={style}>
     <button type="button" className="pa-ckbx" data-pa="tick" aria-label={`Do it: ${i.deed}`} onClick={onTick} />
     <button type="button" className="pa-ckt" data-pa="check-open" onClick={onOpen}>
-      <span className="t"><b data-pa="check-title">{i.deed}</b>{line.text ? <small className={line.late ? "late" : undefined} data-pa="check-line">{line.text}</small> : null}</span>
+      <span className="t"><b data-pa="check-title">{checkTitle(i)}</b>{line.text || line.late ? (
+        <small data-pa="check-line">{line.late ? <span className="late" data-pa="check-late">{line.late}</span> : null}{line.late && line.text ? " · " : ""}{line.text}</small>
+      ) : null}</span>
       {chev}
     </button>
   </div>

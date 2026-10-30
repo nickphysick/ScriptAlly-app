@@ -125,9 +125,10 @@ export const PackagesPhone: React.FC<{ active: boolean }> = ({ active }) => {
   ), [pk?.id, pk?.packageName, pk?.colour, pk?.icon, model.figPk, model.letters, model.synopses, model.versionRows]);
 
   /* What's landing (4A): the desktop's own ranking; a card whose sample is under the desktop's minimum is left out */
-  const showcases = useMemo(() => landing(model), [model]);
-  const [howOpen, setHowOpen] = useState(false);
   const usage = useUsage(model);
+  const { versions } = useScriptAllyDb();
+  const showcases = useMemo(() => landing(model, usage, (id) => versions.find((v) => v.id === id)?.versionName ?? "a letter"), [model, usage, versions]);
+  const [howOpen, setHowOpen] = useState(false);
 
   /* the page in front: one of the detail pages, keyed by the address */
   const page = active ? pageFor(params) : null;
@@ -235,7 +236,7 @@ const PkRow: React.FC<{ model: Pk26Model; p: SubmissionPackage; onOpen: () => vo
 
 /* ── What's landing (land A): swipeable showcase cards ── */
 interface ShowCard { key: string; rank: string; name: string; colour: string; icon: React.ReactNode; metric: string; line: string; open: () => void }
-function landing(model: Pk26Model): { cards: Omit<ShowCard, "open">[] & { target?: [string, string] }[]; hidden: string[] } {
+function landing(model: Pk26Model, usage?: Usage, letterNames?: (id: string) => string): { cards: Omit<ShowCard, "open">[] & { target?: [string, string] }[]; hidden: string[] } {
   const cards: (Omit<ShowCard, "open"> & { target: [string, string] })[] = [];
   const hidden: string[] = [];
   const pks = model.figItems("pk").map((i) => ({ ...i, f: i.f }));
@@ -254,6 +255,19 @@ function landing(model: Pk26Model): { cards: Omit<ShowCard, "open">[] & { target
     const v = model.versionRows.find((x) => x.id === bv.item.id);
     cards.push({ key: "ver", rank: "Your best version", name: bv.item.name, colour: HB, icon: PI.book, metric: resultWords(bv.item.f), line: v?.summary ?? "", target: ["ver", bv.item.id] });
   } else hidden.push("version");
+  /* the desktop ranks a best synopsis too (Pk38Results' row of pieces), so the phone shows it */
+  const bs = bestPiece(model.figItems("syn").map((i) => ({ id: i.id, name: i.name, f: i.f, retired: i.retired })));
+  if (bs) {
+    const m = model.synopsesAll.find((x) => x.id === bs.item.id);
+    cards.push({ key: "syn", rank: "Your best synopsis", name: bs.item.name, colour: "#9b4a57", icon: PI.note, metric: resultWords(bs.item.f), line: m && m.inPackages.length ? `Used in ${m.inPackages.map((x) => x.packageName).join(" and ")}` : "", target: ["mat", bs.item.id] });
+  }
+  /* most named comp: the comp named in the most queries' letters (compUsage, the desktop's own count) */
+  if (usage) {
+    let top: { c: CompTitle; n: number; letters: string[] } | null = null;
+    usage.comps.forEach((c, i) => { const u = usage.byKey.get(compKey(c, i)); if (u && u.queries.length && (!top || u.queries.length > top.n)) top = { c, n: u.queries.length, letters: u.letters }; });
+    const t = top as { c: CompTitle; n: number; letters: string[] } | null;
+    if (t) cards.push({ key: "comp", rank: "Most named comp", name: t.c.title, colour: "#3a3f4a", icon: PI.pages, metric: `In ${plural(t.n, "query", "queries")}`, line: letterNames ? `Named in ${t.letters.map(letterNames).join(" and ")}` : "", target: ["comps", "1"] });
+  }
   return { cards, hidden };
 }
 const Landing: React.FC<{ cards: { key: string; rank: string; name: string; colour: string; icon: React.ReactNode; metric: string; line: string; target?: [string, string] }[]; hidden: string[] }> = ({ cards, hidden }) => {
@@ -267,7 +281,7 @@ const Landing: React.FC<{ cards: { key: string; rank: string; name: string; colo
         <>
           <div className="pa-land" ref={track} onScroll={onScroll} data-pa="pk-land" data-count={cards.length}>
             {cards.map((c) => (
-              <button key={c.key} type="button" className="pa-show" data-pa="pk-show" data-k={c.key} onClick={() => c.target && nav.open(c.target[0], c.target[1])}>
+              <button key={c.key} type="button" className="pa-show" data-pa="pk-show" data-k={c.key} data-id={c.target?.[1] ?? ""} onClick={() => c.target && nav.open(c.target[0], c.target[1])}>
                 <span className="top" style={{ background: c.colour }} data-pc={c.colour}><span className="ic" aria-hidden="true">{c.icon}</span><span className="nm">{c.name}</span></span>
                 <span className="rank">{c.rank}</span>
                 <span className="ov"><span className="m pa-type" data-pa="pk-show-metric">{c.metric}</span>{c.line ? <span className="c">{c.line}</span> : null}</span>
