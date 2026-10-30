@@ -209,10 +209,33 @@ export const stepTip = (i: number, d: number, n: number): number => (n <= 0 ? 0 
 /* ── Getting started, on the desktop task card ──────────────────────────────────────────────────── */
 
 /** The answer decides the order: an existing querier brings their queries in before building a contact list. */
-export const gsOrder = (path: StartPath | null): GettingStartedKey[] =>
-  path === "querying" ? ["manuscript", "query", "agent", "materials", "comps"] : ["manuscript", "agent", "query", "materials", "comps"];
+export const gsOrder = (path: StartPath | null): GsKey[] =>
+  path === "querying" ? ["manuscript", "query", "agent", "materials", "comps"]
+    : path === "writing" || path === "revising" ? ["manuscript", "comps", "agent", "letter", "ready"]
+      : ["manuscript", "agent", "query", "materials", "comps"];
 
-export type GsLink = "manuscript" | "agent" | "import" | "log" | "materials" | "comps";
+/**
+ * The desktop's row keys: the shared five (`lib/dashEmpty`, which the phone reads too and which this pack leaves alone)
+ * and the still-writing path's two of its own (first visit v2, Part C): start the query letter, and say it's ready.
+ */
+export type GsKey = GettingStartedKey | "letter" | "ready";
+
+export interface GsDoneInput {
+  /** the shared rows' done-states (`gettingStartedRows`) */
+  shared: readonly { key: GettingStartedKey; done: boolean }[];
+  /** a query-letter version is saved for this manuscript */
+  letter: boolean;
+}
+
+/**
+ * Each row's done-state, derived from records (Part C). The shared keys keep the shared rule — the comps row ticks at
+ * `COMPS_TARGET` titles on either path. "Start your query letter" ticks once a query-letter version is saved; "Tell us
+ * when it's ready" is never done on the writing path, because the moment it is true the path is the ready one.
+ */
+export const gsRowDone = (key: GsKey, i: GsDoneInput): boolean =>
+  key === "letter" ? i.letter : key === "ready" ? false : i.shared.find((r) => r.key === key)?.done ?? false;
+
+export type GsLink = "manuscript" | "agent" | "import" | "log" | "materials" | "comps" | "discover" | "letter" | "ready";
 
 export interface GsRowCopy { deed: string; note: string; link: string; go: GsLink }
 
@@ -221,15 +244,21 @@ export interface GsRowCopy { deed: string; note: string; link: string; go: GsLin
  * tick checks (`PACKAGE_MATERIALS`, two since D9) — the shared deed still names an opening sample the tick no
  * longer asks for, and is the phone's to change.
  */
-export const gsCopy = (key: GettingStartedKey, path: StartPath | null): GsRowCopy => {
+export const gsCopy = (key: GsKey, path: StartPath | null): GsRowCopy => {
+  const writing = path === "writing" || path === "revising";
   switch (key) {
     case "manuscript": return { deed: "Add your first manuscript", note: "Even a working title and a word count is enough to start.", link: "Add a manuscript", go: "manuscript" };
-    case "agent": return { deed: "Add an agent to your contact list", note: "Even one is enough to start. Discover has UK agents to browse.", link: "Add an agent", go: "agent" };
+    case "agent": if (writing) return { deed: "Shortlist your first agent", note: "Browse Discover for agents who take on books like yours.", link: "Browse Discover", go: "discover" };
+      return { deed: "Add an agent to your contact list", note: "Even one is enough to start. Discover has UK agents to browse.", link: "Add an agent", go: "agent" };
     case "query": return path === "querying"
       ? { deed: "Import or log your queries", note: "Bring your tracker across, or log each query as you send it.", link: "Import your tracker", go: "import" }
       : { deed: "Log your first query", note: "When you've sent it, log the date and what went with it.", link: "Log a query", go: "log" };
     case "materials": return { deed: "Add your query letter and synopsis", note: "So each query records exactly what was sent.", link: "Add materials", go: "materials" };
-    case "comps": return { deed: "Add three comparable titles", note: "Most agents ask for them; they go straight into your packages.", link: "Add comps", go: "comps" };
+    case "comps": return writing
+      ? { deed: "Add three comparable titles", note: "Books like yours, out in the last few years. Agents ask for them, and they shape your shortlist.", link: "Add comparable titles", go: "comps" }
+      : { deed: "Add three comparable titles", note: "Most agents ask for them; they go straight into your packages.", link: "Add comps", go: "comps" };
+    case "letter": return { deed: "Start your query letter", note: "A first draft is plenty. You can keep versions as it changes.", link: "Start a letter", go: "letter" };
+    case "ready": return { deed: "Tell us when it's ready to query", note: "Then the dashboard switches to sending and tracking queries.", link: "It's ready", go: "ready" };
     default: {
       const unhandled: never = key;
       return unhandled;

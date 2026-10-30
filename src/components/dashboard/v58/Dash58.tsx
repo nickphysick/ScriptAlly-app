@@ -15,6 +15,7 @@ import { openQueryPanel } from "../../../lib/queryPanelStore";
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
+import { ComponentType } from "../../../types";
 import type { Activity, Agent, Manuscript, ManuscriptStatus, ManuscriptVersion, Query, SmartImportUsage, Task, TaskFlag, User, UserTask } from "../../../types";
 import { scopeActivities, scopeQueries, scopeTasks } from "../../../lib/manuscriptScope";
 import { localYMD } from "../../../lib/shellSidebar";
@@ -49,7 +50,7 @@ import { Dash105Founding } from "../v105/Dash105Founding";
 import { agentCoverage, isPreQuery } from "../../../lib/dashFirstUse";
 import { ClosedHoop, AgentsHoop } from "../v60/Dash60Left";
 import { openNewAgentCard } from "../../../lib/agentCardStore";
-import { answerFor, answerWrite, bookLabel, dashState, seg, dashPrefsOf, gsHideWrite, gsOrder, legacyStartOf, pathAfter, type AnswerChoice, type AnswerWrite, type GsLink, type StartPath } from "../../../lib/dashFirstVisit";
+import { answerFor, answerWrite, bookLabel, gsRowDone, dashState, seg, dashPrefsOf, gsHideWrite, gsOrder, legacyStartOf, pathAfter, type AnswerChoice, type AnswerWrite, type GsLink, type StartPath } from "../../../lib/dashFirstVisit";
 import type { UserPaths } from "../../../lib/userPaths";
 import { SetUpCard } from "../fv1/SetUpCard";
 import { GsSheet } from "../fv2/GsSheet";
@@ -231,13 +232,19 @@ export const Dash58: React.FC<Dash58Props> = ({
     else if (go === "agent") addAgent();
     else if (go === "import") onNavigate("import");
     else if (go === "log") logQuery();
-    else if (go === "materials") onNavigate("manuscripts", "Submission packages");
+    /* the query letter is a material: it is written where the letter and synopsis are (Submission packages) */
+    else if (go === "materials" || go === "letter") onNavigate("manuscripts", "Submission packages");
+    else if (go === "discover") onNavigate("agents", "Discover");
+    /* first visit v2 (Part C): "It's ready →" is the ready answer — READY_TO_QUERY, and not querying yet */
+    else if (go === "ready") choose("ready");
     else onNavigate("manuscripts", "Comparable titles");
   };
   const gsRows = useMemo(() => {
-    const rows = gettingStartedRows({ manuscripts, agentCount: agents.length, queryCount: scopedQueries.length, versions, activeManuscript });
-    return gsOrder(path).map((k) => ({ key: k, done: rows.find((r) => r.key === k)?.done ?? false }));
-  }, [manuscripts, agents.length, scopedQueries.length, versions, activeManuscript, path]);
+    const shared = gettingStartedRows({ manuscripts, agentCount: agents.length, queryCount: scopedQueries.length, versions, activeManuscript });
+    /* Part C: a query-letter version saved for this book */
+    const letter = !!scopeId && versions.some((v) => v.manuscriptId === scopeId && v.componentType === ComponentType.QUERY_LETTER);
+    return gsOrder(path).map((k) => ({ key: k, done: gsRowDone(k, { shared, letter }) }));
+  }, [manuscripts, agents.length, scopedQueries.length, versions, activeManuscript, path, scopeId]);
   const gsHidden = !!scopeId && !!prefs.gsHidden[seg(scopeId)];
   /* first visit v2 (Part A): Getting started is the sheet under the manuscript card — always before the first query,
      and afterwards while any row is undone and the writer has not hidden it. Otherwise the goal sheet has the slot. */

@@ -22,7 +22,7 @@ export const gsDoneText = (done: number, total: number): string => `${done} of $
 export const GsSheet: React.FC<{
   loading: boolean;
   rows: readonly GsRow[];
-  path: StartPath;
+  path: StartPath | null;
   onGo: (go: GsLink) => void;
   /** " · Hide" — offered once the first query exists */
   onHide?: () => void;
