@@ -36,12 +36,13 @@ import { readShape, writeShape } from "../../../lib/dashShape";
 import { MONTHS_SHORT } from "../../../lib/dates";
 import { readImportNotice, clearImportNotice, onImportNoticeChange, noticeHeadline, noticeWhy, noticeToggle, NOTICE_DISMISS, type ImportNotice } from "../../../lib/importNotice";
 import { DashPopupProvider } from "../DashPopup";
-import { OneScreenChart } from "../OneScreenChart";
+import { OneScreenChart, activeTitle } from "../OneScreenChart";
 import { Dash58Header } from "./Dash58Header";
 import { Dash71Right } from "../v71/Dash71Right";
 import { Dash71Task } from "../v71/Dash71Task";
 import { F1Feed } from "../f1/F1Feed";
 import { F1Book } from "../f1/F1Book";
+import { F1Queries } from "../f1/F1Queries";
 import { Dash105Founding } from "../v105/Dash105Founding";
 import { agentCoverage, isPreQuery } from "../../../lib/dashFirstUse";
 import { ClosedHoop, AgentsHoop } from "../v60/Dash60Left";
@@ -91,6 +92,9 @@ export interface Dash58Props {
   /** Dashboard feed v1: writes the querying goal from the goal sheet (the goals card's own write). Absent → read only. */
   onGoal?: (patch: Partial<User>) => void | Promise<void>;
 }
+
+/** Dashboard feed v1, Part C: the founding card's footer line on this page. */
+export const FOUNDING_RANKS_F1 = "Top contributors win a weekly prize.";
 
 const NO_AID: DashAid = { drop: [], noClosed: false, noAgents: false };
 const NO_AGENTS: Agent[] = [];
@@ -507,6 +511,8 @@ export const Dash58: React.FC<Dash58Props> = ({
   );
   const taskCard = <Dash71Task loading={loading} plan={plan} ctx={taskCtx} onView={viewTask} innerRef={focusRef} gs={gsHidden ? undefined : gs} />;
   const foundingCard = <Dash105Founding loading={loading} uid={fwUid} name={currentUser?.name ?? null} seenTier={currentUser?.foundingSeenTier ?? null} onSeen={onFoundingSeen} />;
+  /* Dashboard feed v1 (Part C): the founding card at the foot of the left column, with its own footer line */
+  const foundingF1 = <Dash105Founding loading={loading} uid={fwUid} name={currentUser?.name ?? null} seenTier={currentUser?.foundingSeenTier ?? null} onSeen={onFoundingSeen} ranksLine={FOUNDING_RANKS_F1} />;
 
   return (
     <div ref={rootRef} className="os-root d58" data-mode={pre ? "pre" : "f1"} data-paint={paint ? "1" : undefined} style={noticeListH > 0 ? ({ ["--d58-notice-list-h" as string]: `${noticeListH}px` } as React.CSSProperties) : undefined}>
@@ -553,9 +559,15 @@ export const Dash58: React.FC<Dash58Props> = ({
                     queries={queries} agents={agents} activities={activities} currentUser={currentUser} now={now} onGoal={onGoal}
                   />
                 </div>
-                <div className="df1-slot df1-s-queries" data-df1="queries">{chartCard}{closedCard}</div>
+                <div className="df1-slot df1-s-queries" data-df1="queries">
+                  <F1Queries
+                    activeTitle={activeTitle(activeCount, loading ? 0 : undatedLiveCount(scopedQueries))}
+                    closedTitle={!closed || closed.total === 0 ? "Closed" : `${closed.total} closed`}
+                    active={chartCard} closed={closedCard}
+                  />
+                </div>
                 <div className="df1-slot df1-s-agents" data-df1="agents">{agentsCard}</div>
-                <div className="df1-slot df1-s-founding" data-df1="founding">{foundingCard}</div>
+                <div className="df1-slot df1-s-founding" data-df1="founding">{foundingF1}</div>
               </div>
               <div className="df1-feed" data-df1="feed">
                 <F1Feed loading={loading} activities={scopedActivities} queries={queries} agents={agents} manuscripts={manuscripts} now={now} />
