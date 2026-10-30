@@ -62,6 +62,7 @@ import { NoteboardRoute } from "./components/todo/NoteboardRoute";
 import { TopNavPanelData } from "./components/shell/TopNavPanelData";
 import { Onboarding } from "./components/Onboarding";
 import { ErrorBoundary, ThrowLab } from "./components/ErrorBoundary";
+import { PhoneSectionLanding, phoneSectionFor } from "./components/phone/PhoneSectionLanding";
 import { StatusDotDemo } from "./components/StatusDotDemo";
 import { PlansPage } from "./components/PlansPage";
 import { QueryStatus, SubmissionMethod, UserPlan } from "./types";
@@ -577,6 +578,13 @@ function AppContent() {
   /* Submission packages v26: /manuscripts/packages moved to /queries/packages — above the guard, same reason */
   const packagesRedirect = packagesRedirectFor(path, location.search, location.hash);
   if (packagesRedirect) return <Navigate to={packagesRedirect} replace />;
+  /* Phone last screens v1, 4B: below 768px the desktop-only Packages, Comps and Versions addresses land
+     on the phone Manuscript page at their section (PhoneSectionLanding scrolls there and opens a
+     `?pkg=`/`?version=` item). Read like Part 8B's account index above, without a hook, because this
+     sits among early returns. `replace`, so the back gesture returns to wherever the link was opened. */
+  const isPhoneNow = typeof window !== "undefined" && !!window.matchMedia?.("(max-width: 767.98px)").matches;
+  const phoneSection = isPhoneNow ? phoneSectionFor(path) : null;
+  if (phoneSection) return <Navigate to={`/manuscripts${location.search}#${phoneSection}`} replace />;
 
   // Any unknown path lands on the dashboard. All the early returns above (dev labs, marketing,
   // auth, onboarding, focus) run first, so a logged-out deep link keeps its URL until sign-in.
@@ -638,6 +646,7 @@ function AppContent() {
 
   return (
     <div className="text-[#3a1c14] selection:bg-[#7c3a2a]/20 selection:text-[#3a1c14] selection:font-bold">
+      <PhoneSectionLanding active={isPhoneNow} />
       {/* Global AppShell: persistent left rail + the stage (the app's scroll container); pages
           render inside as persistent StagePage slots. EditQueryHost mounts the single Edit Query
           drawer as an app-level overlay (useOpenEditQuery — no route change, scroll preserved);

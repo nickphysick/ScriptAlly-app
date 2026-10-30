@@ -7,8 +7,8 @@ Ref: MANIFEST hash 4a819d11…cf6e2, 13/13 OK.
 
 | Phase | Commit | State |
 |---|---|---|
-| A account screens, dead ends, the error page | (this commit) | committed |
-| B addresses and column matching | — | next |
+| A account screens, dead ends, the error page | `711c1207` | committed |
+| B addresses and column matching | (this commit) | committed; PLS1 L1–L5 written and green (L1–L3 lab, L4–L5 signed in) |
 | C email drop on a phone | — | |
 | D editing a query | — | |
 | E writing materials and building packages | — | |
@@ -28,3 +28,9 @@ Ref: MANIFEST hash 4a819d11…cf6e2, 13/13 OK.
 - 1B: `.sf--account .ws-ftg, .ws-ftsibs { display: none }` below 768px. Sentence case was already done by public pages on phones v1.
 - 2B: `DeadEndCard`'s foot is `StepFoot` (PhonePin), so on a phone in set-up the actions are pinned; the band was already drawn by Stage 3's frame. On `/import` (no SetupFrame) the foot renders in place.
 - 3B: the error page is full-screen shell ink at every width (the one desktop change). Feedback cannot open from outside the shell, so "Tell us what happened" links to `/contact`. `#/throw-lab` (dev builds only) forces the fallback for L3.
+
+## Phase B notes
+- 4B: App.tsx (hook-free `matchMedia`, among the early returns like Part 8B's account index) redirects `/queries/packages`, `/manuscripts/comps`, `/manuscripts/versions` with `replace` to `/manuscripts{?query}#packages|comps|versions`. `PhoneSectionLanding` scrolls the Packages/Versions heading in (found by the lists it heads, because `ManuscriptPhone.tsx` is a `Manuscript*` file and is not edited) and opens `?pkg=`/`?version=` by pressing the page's own row.
+- 5B: already true on this base: `/todo/calendar` redirects to `/todo` (`todoRedirectFor`), and the phone To-do shows the week band. L4 asserts it.
+- 6B: `ImportDoorsPhone` opens a sheet from "Match your own columns": its two doors call the page's own `onSmart` / `onUpload`. Copy from the board's `matchB`.
+- Harness: `tests/e2e/phoneLastScreens.measure.ts` (PLS1) reuses pa2Lib's `openPhone`, `colourSweep`, `imageSweep`.
