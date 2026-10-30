@@ -31,6 +31,7 @@ import {
 import { StatusDot } from "../StatusDot";
 import { Chip, Disc, Stepper } from "./ImportParts";
 import { GoMark } from "./v9/GoMark";
+import { PhonePin } from "./setupParts";
 import { openAgentQuestions, openQueryQuestions, agentsAnswerLine, queriesAnswerLine, summaryLead, readLine } from "../../lib/reviewGate";
 import { unresolvedDuplicateAgentIds } from "../../lib/smartImportReviewModel";
 
@@ -182,12 +183,14 @@ export const ImportOverview: React.FC<Props> = ({ result, manuscriptTitle, fileN
 
       <div className="im-nextbar" data-im="nextbar">
         <Stepper steps={steps} current={null} captions={captions} label="What happens next" />
+        <PhonePin>
         <div className="im-nextgo">
           {onCancel && <button type="button" className="sf-link sf-link--quiet" onClick={onCancel} data-im="cancel">Cancel</button>}
           <button type="button" className="sf-btn" onClick={onContinue} data-im="primary">
             {allClear ? SUMMARY_PRIMARY.clear : SUMMARY_PRIMARY.work}
           </button>
         </div>
+        </PhonePin>
       </div>
     </div>
   );

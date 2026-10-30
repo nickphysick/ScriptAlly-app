@@ -44,6 +44,7 @@ import { Chip, Stepper } from "./ImportParts";
 import { AgentRow, QueryRow, DupeOpen, DupeKept, DupeMerged } from "./reviewRows";
 import { Disc, initialsOf } from "./ImportParts";
 import { GoMark } from "./v9/GoMark";
+import { PhonePin } from "./setupParts";
 import { ReviewDeck, DeckCard } from "./v9/ReviewDeck";
 import { AgencyQuestion, NamelessQuestion, MappingQuestion, QueryQuestion, Answered, DECK_WORDS } from "./v9/DeckQuestions";
 import {
@@ -710,6 +711,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
         )}
         <div className="o9-bar" data-im="foot">
           <p className="o9-barhint" data-im="hint">{hint}</p>
+          <PhonePin>
           <div className="o9-bargo">
             <button type="button" className="sf-link" onClick={() => back?.()} data-im="back">‹ Back</button>
             {onCancel && <button type="button" className="sf-link sf-link--quiet" onClick={onCancel} data-im="cancel">Cancel</button>}
@@ -726,6 +728,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
               <button type="button" className="sf-btn" onClick={onImportClick} disabled={!canImport} data-im="primary">{gatePrimary("queries", qNeed)}</button>
             )}
           </div>
+          </PhonePin>
         </div>
       </div>
       {toast && <UndoToast msg={toast.msg} onUndo={toast.undo} onClose={dismissToast} />}

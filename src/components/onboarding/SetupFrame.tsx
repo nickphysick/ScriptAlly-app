@@ -24,7 +24,8 @@
  * (`FolderTab`'s own 90ms swap). Only the sheet's contents fade.
  */
 
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React, { createContext, useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useIsMobile } from "../shell/mobileChrome";
 import "../shell/primitives.css";
 import "../shell/workspaceShell.css";
 import "../shell/inkShell.css";
@@ -74,6 +75,39 @@ export interface SetupFrameProps {
   children: React.ReactNode;
 }
 
+/* ═══ Set-up on phones v1 (30 Oct; ref design-refs/setup-import-phone-v1/, Nick's 1B and 6B) ═══
+   Below 768px a set-up frame swaps its folder tabs for a navy progress band, and pins each step's
+   foot to the bottom of the screen. Both live here, behind `useIsMobile`, so at 768px and up the
+   frame's DOM is byte-identical to before (SIP1 S11).
+   ⚠️ THE FOOT IS PORTALLED TO A HOST AT THE FRAME'S ROOT, NOT `position: fixed` WHERE IT STANDS. The
+   steps animate `transform` with `fill: both`, which makes each one the containing block for a fixed
+   descendant, so a fixed foot inside them would pin to the step and not the screen. The host sits
+   on `.sf` itself, which never animates, so the steps' `.sf .x` rules still reach the buttons. */
+
+/** A band override, for a step that runs its own sub-steps (the review: duplicates, agents, queries,
+ *  import). The review supplies its name and its own step list; nothing is counted twice. */
+export interface SetupBandOverride { name: string; steps: { id: string; label: string }[]; index: number }
+
+interface SetupPhoneCtx { footHost: HTMLElement | null; setBand: (b: SetupBandOverride | null) => void }
+const PhoneCtx = createContext<SetupPhoneCtx | null>(null);
+
+/** A step sets the band for as long as it is mounted. A no-op on the desktop and outside a frame. */
+export function useSetupBand(band: SetupBandOverride | null): void {
+  const ctx = useContext(PhoneCtx);
+  const key = band ? `${band.name}|${band.index}|${band.steps.map((s) => s.id).join(",")}` : "";
+  useEffect(() => {
+    if (!ctx) return;
+    ctx.setBand(band);
+    return () => ctx.setBand(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ctx, key]);
+}
+
+/** On a phone, the frame's foot host; null on the desktop, outside a set-up frame, or before mount. */
+export function useSetupFootHost(): HTMLElement | null {
+  return useContext(PhoneCtx)?.footHost ?? null;
+}
+
 const Brand: React.FC = () => (
   <div className="ws-logo sf-logo" data-shell="logo">
     <span className="ws-brand sf-brand">
@@ -111,6 +145,26 @@ export const SetupFrame: React.FC<SetupFrameProps> = ({
     return () => ro.disconnect();
   }, [!!handoff]);
   const noLimit = useRef<HTMLElement>(null);
+  const isMobile = useIsMobile();
+  const phoneSetup = isMobile && form === "setup";
+  const [footHost, setFootHost] = useState<HTMLElement | null>(null);
+  const [bandOverride, setBand] = useState<SetupBandOverride | null>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  /* The foot's height, published on the frame so a step's spacer reserves exactly that much. */
+  useLayoutEffect(() => {
+    if (!footHost || !rootRef.current) return;
+    const root = rootRef.current;
+    const fit = () => root.style.setProperty("--sf-foot-h", `${footHost.offsetHeight}px`);
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(footHost);
+    return () => { ro.disconnect(); root.style.removeProperty("--sf-foot-h"); };
+  }, [footHost]);
+  const ctxValue = React.useMemo<SetupPhoneCtx | null>(
+    () => (phoneSetup ? { footHost, setBand } : null), [phoneSetup, footHost]);
+  const bandSteps = bandOverride ? bandOverride.steps : (steps ?? []);
+  const bandIndex = bandOverride ? bandOverride.index : activeIndex;
+  const bandName = bandOverride ? bandOverride.name : (steps?.[activeIndex]?.label ?? name);
   const siblings: TabSibling[] = otherTab
     ? [{ id: otherTab.id, label: otherTab.label, path: otherTab.id, icon: null }]
     : [];
@@ -119,7 +173,8 @@ export const SetupFrame: React.FC<SetupFrameProps> = ({
   const userName = (user?.name ?? "").trim();
 
   return (
-    <div className={`ws-app sf sf--${form}${appMode ? " dash-mode" : ""}${handoff?.on ? " is-handoff" : ""}`} data-setup-frame={form}
+    <PhoneCtx.Provider value={ctxValue}>
+    <div ref={rootRef} className={`ws-app sf sf--${form}${appMode ? " dash-mode" : ""}${handoff?.on ? " is-handoff" : ""}`} data-setup-frame={form}
          style={handoff ? ({ ["--sf-strip-h" as string]: `${stripH}px` } as React.CSSProperties) : undefined}>
       {form === "setup" && (
         <div className="ws-panel sf-panel" data-sf="panel">
@@ -197,6 +252,15 @@ export const SetupFrame: React.FC<SetupFrameProps> = ({
             {exitLabel}
           </button>
         </header>
+        {phoneSetup && bandSteps.length > 0 && (
+          <div className="sf-pband" data-sf="pband">
+            <small className="sf-pbstep" data-sf="pband-step">Step {bandIndex + 1} of {bandSteps.length}</small>
+            <b className="sf-pbname" data-sf="pband-name">{bandName}</b>
+            <div className="sf-pbsegs" aria-hidden="true">
+              {bandSteps.map((st, i) => <i key={st.id} className={i <= bandIndex ? "on" : undefined} />)}
+            </div>
+          </div>
+        )}
         <div className="ws-winwrap">
           <div className="ws-window sf-sheet" data-sf="sheet">
             <div className="sf-scroll" data-sf="scroll">{children}</div>
@@ -205,11 +269,13 @@ export const SetupFrame: React.FC<SetupFrameProps> = ({
       </div>
       {/* Last, so that adding it re-keys nothing above it. For show: the app's own strip arrives
           with the app. */}
+      {phoneSetup && <div className="sf-foothost" ref={setFootHost} data-sf="foothost" />}
       {handoff && (
         <div className="sf-strip" ref={stripRef} aria-hidden="true" data-sf="strip" {...{ inert: true }}>
           <BetaStrip onReport={() => {}} />
         </div>
       )}
     </div>
+    </PhoneCtx.Provider>
   );
 };

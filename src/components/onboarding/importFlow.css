@@ -626,3 +626,14 @@ button.im-pick { cursor: pointer; }
   .sf .im-panelfoot { flex-wrap: wrap; }
 }
 @media (prefers-reduced-motion: reduce) { .sf .im-edit.im-panel { animation: none; } .sf .o9-ready .im-rw { transition: none; } }
+
+/* ═══ Set-up on phones v1 (30 Oct; ref design-refs/setup-import-phone-v1/) ═══════════════════════
+   Below 768px only, last in the file, at each overridden rule's own specificity. 2B: the import's
+   small mono capitals (the reading screen's labels, chips, the stepper, review meta lines and agency
+   names, the outcome words) become sentence case in the body face, weight 600, at least 13px. */
+@media (max-width: 767.98px) {
+  .sf .im-sc-sub, .sf .im-sc-formbox small, .sf .im-chip, .sf .im-st, .sf .im-guide .im-eyebrow, .sf .im-traysub,
+  .sf .im-rwsub, .sf .im-pick .im-when, .sf .im-result small, .sf .im-outcount, .sf .im-outword, .sf .im-added {
+    font-family: var(--font-sans); font-size: 13px; font-weight: 600; letter-spacing: 0; text-transform: none;
+  }
+}

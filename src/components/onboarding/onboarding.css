@@ -551,3 +551,61 @@
   .sf--account .ws-ftsib { z-index: 1; }
   .sf--account .ws-ftsib::after { left: -16px; }
 }
+
+/* ═══ Set-up on phones v1 (30 Oct; ref design-refs/setup-import-phone-v1/, board 1) ═══════════════
+   Below 768px only. Last in the file and at the overridden rules' own specificity (`.sf .x` or
+   `.sf--setup .x`), so no `!important`.
+   1B — on set-up screens the folder tabs give way to a navy progress band (drawn by `SetupFrame`):
+   "Step n of N", the step's name in the typewriter face, one 5px segment per step. The steps are the
+   frame's own `spineFor`/`spineIndex`, or a review's own steps (`useSetupBand`).
+   6B — each step's foot is pinned to the bottom of the screen (`StepFoot` portals it into the frame's
+   foot host; a spacer of its measured height keeps the last content clear of it).
+   2B — every small-capital label is sentence case in Source Sans 3, weight 600, at least 13px. The
+   BETA chip keeps its capitals. */
+@media (max-width: 767.98px) {
+  .sf--setup .sf-tabs { display: none; }
+  .sf--setup .sf-bar { flex-wrap: nowrap; align-items: center; justify-content: space-between; padding: 0 12px 0 8px; }
+  .sf--setup .sf-barbrand { flex: 1 1 auto; width: auto; min-width: 0; }
+  .sf--setup .sf-exit { flex: none; min-height: 44px; margin: 0 0 0 12px; color: #fff; }
+  .sf .sf-pband { padding: 2px 18px 16px; color: #fff; }
+  .sf .sf-pband .sf-pbstep { display: block; font: 600 13px/1.2 var(--font-sans); color: rgba(255, 255, 255, .72); }
+  .sf .sf-pband .sf-pbname {
+    display: block; margin: 2px 0 10px; font-family: var(--sp-type); font-weight: 400; font-size: 22px; line-height: 1.3; color: #fff;
+  }
+  .sf .sf-pbsegs { display: flex; gap: 6px; }
+  .sf .sf-pbsegs i { flex: 1; height: 5px; border-radius: 3px; background: rgba(255, 255, 255, .18); }
+  .sf .sf-pbsegs i.on { background: #e8c8bc; }
+  .sf--setup .sf-sheet { border-top-left-radius: 20px; border-top-right-radius: 20px; }
+
+  .sf .sf-foothost {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; box-sizing: border-box; background: #fff;
+    padding: 12px 18px calc(12px + env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 -10px 20px -16px rgba(0, 0, 0, .35);
+  }
+  .sf .sf-foothost:empty { display: none; }
+  .sf .sf-foothost .sf-cfoot { margin: 0; flex-wrap: nowrap; gap: 14px; }
+  .sf .sf-foothost .sf-footr { flex: 1 1 auto; display: flex; justify-content: flex-end; align-items: center; gap: 10px; min-width: 0; }
+  .sf .sf-foothost .sf-btn { flex: 1 1 auto; height: 50px; border-radius: 25px; white-space: normal; text-align: center; }
+  .sf .sf-cfootspace { height: calc(var(--sf-foot-h, 0px) + 12px); }
+
+  .sf .sf-lab {
+    font-family: var(--font-sans); font-size: 14.5px; font-weight: 600;
+    line-height: 1.35; letter-spacing: 0; text-transform: none; color: var(--ink-on-light);
+  }
+  .sf .sf-eyebrow, .sf .sf-qlab {
+    font-family: var(--font-sans); font-size: 14px; font-weight: 600;
+    letter-spacing: 0; text-transform: none;
+  }
+  .sf .sf-or, .sf .sf-fact, .sf .sf-droptypes, .sf .sf-chip {
+    font-family: var(--font-sans); font-size: 13px; font-weight: 600;
+    letter-spacing: 0; text-transform: none;
+  }
+}
+/* The overview's and the review's buttons, pinned the same way (`PhonePin`): Back or Cancel on the
+   left as text links, the primary filling the rest. */
+@media (max-width: 767.98px) {
+  .sf .sf-foothost .im-nextgo, .sf .sf-foothost .o9-bargo {
+    display: flex; flex-wrap: nowrap; align-items: center; justify-content: flex-start; gap: 14px; width: auto; margin: 0;
+  }
+  .sf .sf-foothost .sf-link { flex: none; white-space: nowrap; }
+}

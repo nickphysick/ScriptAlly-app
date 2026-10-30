@@ -359,3 +359,35 @@
   .sf .o9-ready [data-im="rows"] > .im-rw, .sf .o9-bar { animation: none; }
   .sf [class*="o9-"], .sf [class*="o9-"]::before, .sf [class*="o9-"]::after { animation: none !important; }
 }
+
+/* ═══ Set-up on phones v1 (30 Oct; ref design-refs/setup-import-phone-v1/, board 1) ═══════════════
+   Below 768px only, last in the file, at each overridden rule's own specificity.
+   3B — the welcome panel loses its picture slot, so the four options start on the first screen.
+   4B — "Your list": each way is a short card, no picture, its first line only, then its button and fact.
+   5B — "What happens next" keeps its numbers (the steps are a sequence) and loses its picture slots.
+   7B — the "We've read your file" mark is navy with a white tick. Sage stays on the desktop; S1's
+   sage sweep exempts the phone by name.
+   2B — the v9 small capitals become sentence case in the body face, weight 600, at least 13px. */
+@media (max-width: 767.98px) {
+  .sf .o9-panel .o9-slot { display: none; }
+  .sf .o9-panel { padding-bottom: 22px; }
+
+  .sf .o9-wayslot { display: none; }
+  .sf .o9-waylist { margin: 4px 0 12px; }
+  .sf .o9-waylist li:not(:first-child) { display: none; }
+  .sf .sf-tile { min-height: 0; }
+  .sf .o9-waybody .sf-tileh { font-size: 1.3rem; }
+
+  .sf .o9-howslot { display: none; }
+
+  .sf .o9-gomark { background: var(--sp-anthracite); }
+  .sf .o9-gomark::before { border-color: var(--sp-anthracite); }
+  .sf .o9-gomark path { stroke: #fff; }
+
+  .sf .o9-eyebrow, .sf .o9-bookeye, .sf .o9-desceye, .sf .o9-howeye {
+    font-family: var(--font-sans); font-size: 14px; font-weight: 600; line-height: 1.3; letter-spacing: 0; text-transform: none;
+  }
+  .sf .o9-acklbl small, .sf .o9-pilltag, .sf .o9-qwho small {
+    font-family: var(--font-sans); font-size: 13px; font-weight: 600; letter-spacing: 0; text-transform: none;
+  }
+}
