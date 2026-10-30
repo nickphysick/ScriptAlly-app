@@ -25,7 +25,8 @@
   .pf-band { flex: none; background: var(--pa-navy); color: #fff; padding: calc(8px + env(safe-area-inset-top, 0px)) 20px 36px; }
   .pf-top { display: flex; align-items: center; gap: 12px; padding: 6px 0 10px; }
   .pf-grow { flex: 1; }
-  .pf-ib, .pf-ib-sp { width: 40px; height: 40px; flex: none; }
+  /* Phone fixes v1, G4: 44 x 44, the tap-target floor — the journeys measured the flow's close and back at 40 x 40 on every step */
+  .pf-ib, .pf-ib-sp { width: 44px; height: 44px; flex: none; }
   .pf-ib { display: grid; place-items: center; border-radius: 50%; color: #fff; background: transparent; border: 0; padding: 0; }
   .pf-ib svg { width: 22px; height: 22px; }
 
