@@ -40,20 +40,8 @@
   .pa-td .pa-acts button { width: 96px; border: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font: 600 13px var(--pa-sans); }
   .pa-td .pa-acts svg { width: 20px; height: 20px; }
   .pa-td .pa-acts .r { background: var(--pa-navy); color: #fff; margin-left: auto; }
-  .pa-task { position: relative; display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 16px; background: var(--pa-page); text-align: left;
-    transition: transform .32s var(--pa-spring); min-height: 64px; }
-  .pa-task::after { content: ""; position: absolute; left: 68px; right: 0; bottom: 0; height: 1px; background: var(--pa-rule); }
-  .pa-task .lt { flex: 1; min-width: 0; }
-  /* ⚠️ ONE LINE BY CLAMP, NEVER `nowrap`: a nowrap title's whole text is the row's MIN-CONTENT width, and a flex item's
-     min-content contribution ignores `min-width: 0` — so one long title widened the whole stage to 589px (measured).
-     A clamp wraps by word for sizing and shows one line. */
-  .pa-task .lt b, .pa-task .lt small { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
-  .pa-task .lt b { font-weight: 600; font-size: 15.5px; line-height: 1.25; }
-  .pa-task .lt small { color: var(--pa-muted); font-size: 13px; margin-top: 2px; }
   .pa-ico2 { width: 40px; height: 40px; flex: none; border-radius: 50%; display: grid; place-items: center; background: #fff; box-shadow: inset 0 0 0 1px var(--pa-rule); color: var(--pa-ink-2); }
   .pa-ico2 svg { width: 19px; height: 19px; }
-  .pa-tverb { flex: none; height: 44px; padding: 0 14px; border-radius: 999px; border: 0; font: 600 14px var(--pa-sans); background: #fff; color: var(--pa-ink); box-shadow: inset 0 0 0 1px var(--pa-rule); }
-  .pa-tverb.pri { background: var(--pa-navy); color: #fff; box-shadow: none; }
 
   /* ── Later and the tick ── */
   .pa-later [data-pa="later-sheet"] { padding: 6px 4px 24px; }

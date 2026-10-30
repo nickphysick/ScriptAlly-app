@@ -5,7 +5,7 @@
  * THE TO-DO TAB ON A PHONE (Phone app v2, Part 5; ref design-refs/phone-app-v2/src/todov.js `screenTodo2` at TDB B ·
  * TDG A · TDR B, `taskRowV`, `KIND`). SUPERSEDES the v2 page on a phone (TodoRoute chooses).
  *
- * ⚠️ IT DERIVES NOTHING. The board is the tray's own `assembleBoardColumns` → `[...cols.todo, ...cols.today]`, its rows
+ * ⚠️ IT DERIVES NOTHING (the model is useTodoPhone's, shared with Home since round two). The board is the tray's own `assembleBoardColumns` → `[...cols.todo, ...cols.today]`, its rows
  * `trayItem`, its days `calendarItems` (send, nudge, consider-closing and own dated tasks only) and its tallies
  * `dayBuckets` — the same four calls, in the same order, as the desktop tray and the To-do badge (lib/todoDueTally),
  * so the band's "from earlier · today" IS the badge.
@@ -18,20 +18,12 @@
  *    journey — nothing writes on a tap. Swipe left: Later, the existing snooze with its rules and Undo.
  */
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useScriptAllyDb } from "../../../lib/db";
 import { formatDate } from "../../../lib/dates";
-import { assembleBoardColumns } from "../../../lib/todoColumns";
-import { localYMD } from "../../../lib/shellSidebar";
-import { calendarItems, counted, dayBuckets, londonToday, type CalItem } from "../../../lib/trayCalendar";
-import { trayItem, type TrayDb, type TrayItem } from "../../../lib/todoTray";
-import { rowLines } from "../../../lib/trayRows";
-import { drawerDoorForTask } from "../../../lib/queryActions/entry";
+import { counted } from "../../../lib/trayCalendar";
+import type { TrayItem } from "../../../lib/todoTray";
 import { openQueryDrawer, showUndoBar } from "../../../lib/queryActions/drawerStore";
-import { dataNeedTarget, openAgentCard } from "../../../lib/agentCardStore";
-import { agentDataQualityNeeds } from "../../../lib/agentDataQuality";
-import { SWEEP_NEED } from "../../../lib/todoTray";
 import { setAsideRules, daysBetween } from "../../../lib/todoSetAside";
 import { flagForCard } from "../../../lib/todoColumns";
 import { flagKeyForTask, taskFlagId } from "../../../lib/taskFlags";
@@ -42,25 +34,15 @@ import { MobileSheet } from "../../shell/MobileSheet";
 import { SetAsidePop } from "../v5/SetAsidePop";
 import { snoozeCardWrites } from "../snoozeWrites";
 import { openPhoneCompose } from "../../../lib/phoneCompose";
-import { useTodoDoors, useTodoPhoneModel, type WhenGroup } from "./useTodoPhone";
-import type { BoardCard } from "../../../lib/todoBoard";
+import { CheckRow, checkLine, upNextVerb, useTodoDoors, useTodoPhoneModel, whyLine, type WhenGroup } from "./useTodoPhone";
+import { clearedToday } from "../../../lib/todoCleared";
 import "./todoPhone.css";
+import "./todoPhoneR2.css";
 
 export type { WhenGroup };
-export const WHEN_LABEL: Record<WhenGroup, string> = { earlier: "From earlier", today: "Today", soon: "Coming up", moment: "When you have a moment" };
-const WHEN_ORDER: WhenGroup[] = ["earlier", "today", "soon", "moment"];
-
-/** the verb (ref KIND): Send · Nudge · Decide · Add · Done, by the tray's bucket */
-export function verbFor(i: Pick<TrayItem, "bucket" | "card">): { word: string; primary: boolean } {
-  switch (i.bucket) {
-    case "send": return { word: "Send", primary: true };
-    case "decide": return i.card.taskType === "revise_resubmit" ? { word: "Send", primary: true } : { word: "Decide", primary: false };
-    case "chase": return { word: "Nudge", primary: false };
-    case "close": return { word: "Decide", primary: false };
-    case "fix": return { word: "Add", primary: false };
-    default: return { word: "Done", primary: false };
-  }
-}
+/* Phone round two v1 (4A, ref boot2 `t1`): Overdue · Today · This week · Later · When you have a moment */
+export const WHEN_LABEL: Record<WhenGroup, string> = { earlier: "Overdue", today: "Today", soon: "This week", later: "Later", moment: "When you have a moment" };
+const WHEN_ORDER: WhenGroup[] = ["earlier", "today", "soon", "later", "moment"];
 
 const DAY_SHORT = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const plusYmd = (ymd: string, n: number) => { const [y, m, d] = ymd.split("-").map(Number); const x = new Date(y, m - 1, d + n, 12); return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, "0")}-${String(x.getDate()).padStart(2, "0")}`; };
@@ -120,7 +102,18 @@ export const TodoPhone: React.FC = () => {
 
   /* ── the list ── */
   const shown = useMemo(() => (day ? items.filter((i) => dayOf.get(i.key) === day) : items), [items, day, dayOf]);
-  const groups = WHEN_ORDER.map((g) => ({ g, rows: shown.filter((i) => whenOf(i) === g).sort((a, b) => (dayOf.get(a.key) ?? "9") < (dayOf.get(b.key) ?? "9") ? -1 : 1) })).filter((x) => x.rows.length);
+  const byDay = (a: TrayItem, b: TrayItem) => ((dayOf.get(a.key) ?? "9") < (dayOf.get(b.key) ?? "9") ? -1 : 1);
+  /* Up next (ref `t1`): the first of the overdue, then today's, by the list's own order — the writer's own tasks aside,
+     as the ref's `urgent` sets them aside. It leaves the checklist below while it is up next. */
+  const upNext = useMemo(() => {
+    if (day) return null;
+    const urgent = items.filter((i) => !i.userTask && (whenOf(i) === "earlier" || whenOf(i) === "today"));
+    return { first: [...urgent].sort((a, b) => (whenOf(a) === whenOf(b) ? byDay(a, b) : whenOf(a) === "earlier" ? -1 : 1))[0] ?? null, n: urgent.length };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items, day, dayOf, today]);
+  const groups = WHEN_ORDER.map((g) => ({ g, rows: shown.filter((i) => whenOf(i) === g && i !== upNext?.first).sort(byDay) })).filter((x) => x.rows.length);
+  /* Done today: the tray's own cleared acts (lib/todoCleared) — what came off the list today, never guessed */
+  const doneToday = useMemo(() => clearedToday({ activities, taskFlags, userTasks, queries, agents }, now), [activities, taskFlags, userTasks, queries, agents, now]);
 
   /* ── the doors: each verb OPENS its journey; nothing writes on a tap (useTodoDoors, shared with Home) ── */
   const { act, openRow, askNode } = useTodoDoors(model, routeActive);
@@ -161,12 +154,27 @@ export const TodoPhone: React.FC = () => {
           <button type="button" role="tab" aria-pressed="false" aria-selected="false" data-pa="seg-cork" onClick={() => navigate("/todo/corkboard")}>Corkboard</button>
         </div>
         {day ? <p className="pa-tdfilter" data-pa="day-filter">{dayLabel(day)} · <button type="button" onClick={() => setDay(null)}>Show every day</button></p> : null}
+        {upNext?.first ? (
+          <UpNextTask i={upNext.first} n={upNext.n} why={whyLine(upNext.first, dayOf.get(upNext.first.key) ?? null, today, now)}
+            onGo={() => act(upNext.first!)} onLater={() => setLater(upNext.first)} onOpen={() => openRow(upNext.first!)} />
+        ) : null}
         {groups.length ? groups.map(({ g, rows }) => (
-          <section key={g} data-pa="when-group" data-when={g}>
+          <section key={g} className="pa-cklist" data-pa="when-group" data-when={g}>
             <div className="pa-rowhd">{WHEN_LABEL[g]} <span className="n">· {rows.length}</span></div>
-            {rows.map((i) => <TaskRow key={i.key} i={i} day={dayOf.get(i.key) ?? null} onAct={() => act(i)} onOpen={() => openRow(i)} onLater={() => setLater(i)} />)}
+            {rows.map((i) => <TaskRow key={i.key} i={i} day={dayOf.get(i.key) ?? null} today={today} onAct={() => act(i)} onOpen={() => openRow(i)} onLater={() => setLater(i)} />)}
           </section>
-        )) : <p className="pa-tdnone" data-pa="todo-none">{day ? "Nothing falls due that day." : "Nothing to do. Every query is waiting on someone else."}</p>}
+        )) : !upNext?.first ? <p className="pa-tdnone" data-pa="todo-none">{day ? "Nothing falls due that day." : "Nothing to do. Every query is waiting on someone else."}</p> : null}
+        {!day && doneToday.length ? (
+          <section className="pa-cklist" data-pa="done-today" data-count={doneToday.length}>
+            <div className="pa-rowhd">Done today <span className="n">· {doneToday.length}</span></div>
+            {doneToday.map((a) => (
+              <div key={a.id} className="pa-ck isdone" data-pa="done-row">
+                <span className="pa-ckbx" aria-hidden="true">{PI.check}</span>
+                <span className="pa-ckt"><span className="t"><b>{a.label}</b>{a.consequence ? <small>{a.consequence}</small> : null}</span></span>
+              </div>
+            ))}
+          </section>
+        ) : null}
       </div>
 
       <MobileSheet open={!!later} onClose={() => setLater(null)} ariaLabel="Later" pa={{ height: "auto", white: true, className: "pa-later" }}>
@@ -185,11 +193,34 @@ export const TodoPhone: React.FC = () => {
   );
 };
 
-/* ── a row (ref taskRowV at TDR B): the swipe reveals Later; the verb opens the journey ── */
+/* ── Up next (Phone round two v1, ref boot2 `t1` `.focus`): the most urgent task as a card — a blush head ("Up next",
+   "1 of n"), the agent, the task, why (the facts only), one primary that opens the task's own door, and "Not now", which
+   is the existing snooze ── */
+const UpNextTask: React.FC<{ i: TrayItem; n: number; why: string; onGo: () => void; onLater: () => void; onOpen: () => void }> = ({ i, n, why, onGo, onLater, onOpen }) => {
+  const name = (i.agent?.name || i.agent?.agency || "").trim();
+  return (
+    <section className="pa-focus" data-pa="todo-upnext" data-key={i.key} data-bucket={i.bucket}>
+      <div className="pa-focush"><span>Up next</span><span data-pa="upnext-count">1 of {n}</span></div>
+      <div className="pa-focusb">
+        <button type="button" className="pa-focuswho" onClick={onOpen}>
+          {i.query ? <PhoneDisc status={i.query.status} size={40} /> : <span className="pa-ico2" aria-hidden="true">{PI.todo}</span>}
+          <span className="pa-mid"><b>{name || i.who}</b>{i.agent?.name && i.agent.agency ? <span className="pa-sub">{i.agent.agency}</span> : null}</span>
+        </button>
+        <div className="pa-focust" data-pa="upnext-task">{i.deed}</div>
+        {why ? <div className="pa-focuswhy" data-pa="upnext-why">{why}</div> : null}
+        <div className="pa-focusacts">
+          <button type="button" className="pa-btn pri sm" data-pa="upnext-go" onClick={onGo}>{upNextVerb(i)}</button>
+          <button type="button" className="pa-link" data-pa="upnext-later" onClick={onLater}>Not now</button>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+/* ── a checklist row (ref boot2 `t1` `.ck`): the round tick runs the task's own door (a flow opens; only the writer's
+   own task is ticked, after asking); the row opens the task; the swipe reveals Later, the existing snooze ── */
 const ACT_W = 96;
-const TaskRow: React.FC<{ i: TrayItem; day: string | null; onAct: () => void; onOpen: () => void; onLater: () => void }> = ({ i, day, onAct, onOpen, onLater }) => {
-  const l = rowLines(i);
-  const v = verbFor(i);
+const TaskRow: React.FC<{ i: TrayItem; day: string | null; today: string; onAct: () => void; onOpen: () => void; onLater: () => void }> = ({ i, day, today, onAct, onOpen, onLater }) => {
   const [x, setX] = useState(0);
   const g = useRef<{ x0: number; y0: number; base: number; axis: "x" | "y" | null; moved: boolean } | null>(null);
   const dragged = useRef(false);
@@ -203,17 +234,14 @@ const TaskRow: React.FC<{ i: TrayItem; day: string | null; onAct: () => void; on
     setX(Math.max(-ACT_W, Math.min(0, s.base + dx)));
   };
   const onUp = () => { const s = g.current; g.current = null; if (s?.moved) { dragged.current = true; setX((v0) => (v0 < -ACT_W / 2 ? -ACT_W : 0)); } };
-  const lead = i.query ? <PhoneDisc status={i.query.status} size={40} /> : <span className="pa-ico2" aria-hidden="true">{i.userTask ? PI.todo : i.bucket === "fix" ? PI.edit : PI.todo}</span>;
+  const guard = (f: () => void) => () => { if (dragged.current) { dragged.current = false; return; } if (x !== 0) { setX(0); return; } f(); };
   return (
     <div className="pa-sw" data-pa="task-row" data-key={i.key} data-bucket={i.bucket} data-type={i.card.taskType ?? ""} data-day={day ?? ""} data-swipe={x < 0 ? "left" : undefined}>
       <div className="pa-acts"><span /><button type="button" className="r" data-pa="later" tabIndex={x < 0 ? 0 : -1} onClick={() => { setX(0); onLater(); }}>{PI.later}Later</button></div>
-      <div className="pa-task" role="button" tabIndex={0} style={{ transform: x ? `translateX(${x}px)` : undefined }}
-        onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}
-        onClick={(e) => { if ((e.target as HTMLElement).closest("[data-pa='verb']")) return; if (dragged.current) { dragged.current = false; return; } if (x !== 0) { setX(0); return; } onOpen(); }}
-        onKeyDown={(e) => { if (e.key === "Enter") onOpen(); }}>
-        {lead}
-        <span className="lt"><b data-pa="task-title">{l.bold}</b><small>{l.italic}</small></span>
-        <button type="button" className={`pa-tverb${v.primary ? " pri" : ""}`} data-pa="verb" data-verb={v.word} onClick={(e) => { e.stopPropagation(); onAct(); }}>{v.word}</button>
+      <div className="pa-cksw" style={{ transform: x ? `translateX(${x}px)` : undefined }}
+        onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}>
+        <CheckRow i={i} line={checkLine(i, day, today)} chev={<span className="pa-chev">{PI.chev}</span>}
+          onTick={guard(onAct)} onOpen={guard(onOpen)} />
       </div>
     </div>
   );
