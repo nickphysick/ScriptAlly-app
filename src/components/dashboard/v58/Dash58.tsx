@@ -50,11 +50,13 @@ import { Dash105Founding } from "../v105/Dash105Founding";
 import { agentCoverage, isPreQuery } from "../../../lib/dashFirstUse";
 import { ClosedHoop, AgentsHoop } from "../v60/Dash60Left";
 import { openNewAgentCard } from "../../../lib/agentCardStore";
-import { answerFor, answerWrite, bookLabel, gsRowDone, dashState, seg, dashPrefsOf, gsHideWrite, gsOrder, legacyStartOf, pathAfter, type AnswerChoice, type AnswerWrite, type GsLink, type StartPath } from "../../../lib/dashFirstVisit";
+import { answerFor, answerWrite, bookLabel, gsRowDone, dashState, seg, dashPrefsOf, gsHideWrite, gsOrder, legacyStartOf, pathAfter, type AnswerChoice, type AnswerWrite, type DashState, type GsLink, type StartPath } from "../../../lib/dashFirstVisit";
 import type { UserPaths } from "../../../lib/userPaths";
 import { SetUpCard } from "../fv1/SetUpCard";
 import { GsSheet } from "../fv2/GsSheet";
 import { EmptyFeed } from "../fv2/EmptyFeed";
+import { FirstVisitTour } from "../fv2/FirstVisitTour";
+import { TOUR_DONE_PATH, TOUR_STOPS, registerTourReplay, tourDecision, tourState } from "../../../lib/dashTour";
 import { FirstWinStamp } from "../fv1/FirstWinStamp";
 import "../oneScreen.css";
 import "./dash58.css";
@@ -102,6 +104,9 @@ export interface Dash58Props {
 
 /** Dashboard first visit v2 (Part A): the task card's last "Then:" while the Getting started sheet is open. */
 export const THEN_FINISH_GS = "finish getting started";
+/** First visit v2 (Part D): how long after the first loaded paint the tour opens — after the first paint's sequence
+ *  (`PAINT_MS`), so the spotlight opens on cards where they rest. */
+export const TOUR_SETTLE_MS = 1600;
 
 /** Dashboard feed v1, Part C: the founding card's footer line on this page. */
 export const FOUNDING_RANKS_F1 = "Top contributors win a weekly prize.";
@@ -443,7 +448,36 @@ export const Dash58: React.FC<Dash58Props> = ({
   const pre = loading ? shape.pre : empty;
   const hasAgents = loading ? shape.agents : agents.length > 0;
   /* first visit v2 (Part A): which first-visit state the page is in; while loading, the shape memory's */
-  const fvState = loading ? (shape.pre ? "pre" : "querying") : dashState(scopedQueries, false);
+  const fvState: DashState = loading ? (shape.pre ? "pre" : "querying") : dashState(scopedQueries, false);
+
+  /* ── first visit v2 (Part D): the three-stop tour ──
+     Decided ONCE, on the first loaded dashboard of an account (the stored flag): run it before the first query, or record
+     that it never runs (the first load already has queries). Finishing or skipping stores the flag; it never runs again
+     by itself. "Show me round again" in the "?" menu replays it in the pre-query and resume states. Never in the ghost. */
+  const [tour, setTour] = useState<number | null>(null);
+  const tourDecided = useRef(false);
+  const tourTimer = useRef(0);
+  const isGhost = () => !!rootRef.current?.closest(".im-ghost");
+  useEffect(() => {
+    if (loading || !onDash || !currentUser || tourDecided.current || isGhost()) return;
+    tourDecided.current = true;
+    const d = tourDecision(prefs.tour, fvState);
+    if (d === "never") void onPrefs?.(TOUR_DONE_PATH);
+    /* after the page has settled: the first paint's sequence is over and the cards are where they rest */
+    else if (d === "run") tourTimer.current = window.setTimeout(() => setTour(0), TOUR_SETTLE_MS);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, onDash, currentUser, fvState, prefs.tour]);
+  useEffect(() => () => window.clearTimeout(tourTimer.current), []);
+  /* the tour belongs to the pre-query page: if the page leaves that state (a query logged in another tab), it ends */
+  useEffect(() => { if (tour !== null && !loading && !tourState(fvState)) setTour(null); }, [tour, loading, fvState]);
+  const endTour = () => { setTour(null); if (currentUser) void onPrefs?.(TOUR_DONE_PATH); };
+  const nextStop = () => { if (tour === null) return; if (tour + 1 >= TOUR_STOPS.length) endTour(); else setTour(tour + 1); };
+  useEffect(() => {
+    if (isGhost()) return undefined;
+    if (!onDash || loading || !tourState(fvState)) { registerTourReplay(null); return undefined; }
+    registerTourReplay(() => setTour(0));
+    return () => registerTourReplay(null);
+  }, [onDash, loading, fvState]);
   const cov = useMemo(
     () => agentCoverage({ agents, queries, manuscript: activeManuscript, now, todayIso: localYMD(now.getTime()) }),
     [agents, queries, activeManuscript, now],
@@ -578,6 +612,7 @@ export const Dash58: React.FC<Dash58Props> = ({
             </div>
             <FirstWinStamp uid={currentUser?.id ?? null} active={onDash && !loading && !rootRef.current?.closest(".im-ghost")} shown={prefs.wins} onPrefs={onPrefs} />
           </div>
+          {tour !== null && onDash && <FirstVisitTour stop={tour} onNext={nextStop} onSkip={() => endTour()} />}
         </div>
       </DashPopupProvider>
       {/* ⚠️ ONLY WHILE THE DASHBOARD IS THE PAGE ON SCREEN: every page stays mounted, and a layer

@@ -80,7 +80,7 @@ export const SetUpCard: React.FC<SetUpCardProps> = ({ loading, title, path, onCh
   };
   const book = title ? <em>{title}</em> : "your manuscript";
   return (
-    <section className={`os-card fv1-setup${loading ? " d58-skcard" : ""}`} data-fv1="setup" data-path={path ?? "none"} data-asking={asking ? "1" : "0"}
+    <section className={`os-card fv1-setup${loading ? " d58-skcard" : ""}`} data-fv1="setup" data-fv2="start-card" data-path={path ?? "none"} data-asking={asking ? "1" : "0"}
       data-loading={loading ? "1" : "0"} data-sk={loading ? "card" : undefined} aria-label={SETUP_TITLE}>
       <div className="os-frame">
         <div className="os-band">

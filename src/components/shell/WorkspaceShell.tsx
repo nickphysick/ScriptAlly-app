@@ -63,6 +63,7 @@ import "./inkShell.css";
 import { SheetLip } from "./SheetLip";
 import { INK_THEME_COLOR } from "./inkTokens";
 import { registeredPageGuide, requestPageGuide, subscribePageGuide } from "../../lib/pageGuide";
+import { subscribeTourReplay, tourReplay as readTourReplay } from "../../lib/dashTour";
 import { setBarSlot } from "../../lib/barSlot";
 import { claimTopbar, onTopbarClaim, releaseTopbar } from "../../lib/popoverLayer";
 import { AnchoredPortal, useAnchoredPopover } from "./useAnchoredPopover";
@@ -294,6 +295,13 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
    */
   const [helpOpen, setHelpOpen] = useState(false);
   const [guidePage, setGuidePage] = useState<string | null>(registeredPageGuide());
+  /* Dashboard first visit v2 (Part D): the dashboard's tour replay, while it registers one. Read on subscribe as well
+     as on notification — a child's effect registers before this one subscribes. */
+  const [tourReplay, setTourReplay] = useState<(() => void) | null>(() => readTourReplay());
+  useEffect(() => {
+    setTourReplay(() => readTourReplay());
+    return subscribeTourReplay(() => setTourReplay(() => readTourReplay()));
+  }, []);
   const helpWrapRef = useRef<HTMLSpanElement>(null);
   const helpBtnRef = useRef<HTMLButtonElement>(null);
   const helpMenuRef = useRef<HTMLDivElement>(null);
@@ -1073,6 +1081,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                       pageName={pageName?.name ?? null}
                       legacyGuide={!!guidePage}
                       onLegacyGuide={requestPageGuide}
+                      onTour={tourReplay ?? undefined}
                       onClose={(focusHelp) => { setHelpOpen(false); if (focusHelp) helpBtnRef.current?.focus(); }}
                       onGo={go}
                       onFeedback={onOpenFeedback}

@@ -36,6 +36,7 @@ import {
 } from "../../../lib/pageChecklist";
 import "./pageChecklist.css";
 import { GuideRing } from "./GuideRing";
+import { SpotCard } from "./SpotCard";
 import {
   autoOpenedThisSession, clearGuide, markAutoOpened, publishGuide, readSkipped, stampLearned, stampVisit, takeGuideRequest, takeRestart,
   useGuideRequest, useGuidesOff, writeSkipped,
@@ -427,59 +428,9 @@ export function PageChecklist<K extends string>(p: PageChecklistProps<K>): React
   /* the card's own size is known after its first paint: place it once more then */
   useLayoutEffect(() => { if (spot && geo && !cardAt) draw(); }, [spot, geo, cardAt, draw]);
 
-  /* ── the page's own card (Query Centre v139) ──
-     ⚠️ PLACED ONLY ONCE ITS TARGET HAS STOPPED MOVING. A panel slides in over ~300ms; a card placed on the first frame
-     lands on top of the moving panel (the mock's own fix). The target's box is read every frame, and the card waits
-     until two frames agree; after that it follows the target (scroll, resize, a panel growing). */
+  /* ── the page's own card (Query Centre v139) ── drawn by `SpotCard`, the spotlight's page-driven card (lifted out of
+     this file by Dashboard first visit v2, Part D, so the dashboard's tour is the same spotlight). */
   const { flow } = p;
-  const flowRef = useRef<HTMLDivElement | null>(null);
-  const [fgeo, setFgeo] = useState<{ path: string; hole: { left: number; top: number; width: number; height: number; r: number } } | null>(null);
-  const [fcard, setFcard] = useState<{ left: number; top: number; up: boolean; side: boolean } | null>(null);
-  useLayoutEffect(() => {
-    setFgeo(null); setFcard(null);
-    if (!flow) return undefined;
-    let raf = 0; let last = ""; let still = 0; let shownOnce = false;
-    const tick = () => {
-      raf = requestAnimationFrame(tick);
-      const el = flow.target();
-      const b = el ? boxOf(el) : null;
-      if (!b || b.width === 0) { last = ""; still = 0; return; }
-      const sig = `${Math.round(b.left)},${Math.round(b.top)},${Math.round(b.width)},${Math.round(b.height)},${window.innerWidth},${window.innerHeight}`;
-      if (sig === last) still += 1; else { still = 0; last = sig; if (shownOnce && !flow.follow) return; }
-      if (!shownOnce && still < 2) return;
-      if (shownOnce && still !== 0) return;
-      shownOnce = true;
-      const hole = holeFor(b);
-      setFgeo({ path: dimPath(window.innerWidth, window.innerHeight, hole), hole });
-      const c = flowRef.current;
-      const cw = c?.offsetWidth ?? 320; const ch = c?.offsetHeight ?? 160;
-      if (flow.place === "left") {
-        const left = Math.max(12, hole.left - 14 - cw);
-        const top = Math.max(12, Math.min(hole.top + 40, window.innerHeight - 12 - ch));
-        setFcard({ left, top, up: false, side: true });
-      } else {
-        setFcard({ ...cardPlace(hole, { width: cw, height: ch }, window.innerWidth, window.innerHeight), side: false });
-      }
-    };
-    raf = requestAnimationFrame(tick);
-    /* Escape is the page's; a press outside the card and the hole is swallowed unless the card passes it through */
-    const key = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      e.stopImmediatePropagation(); e.preventDefault(); flow.onEscape();
-    };
-    window.addEventListener("keydown", key, true);
-    return () => { cancelAnimationFrame(raf); window.removeEventListener("keydown", key, true); };
-  }, [flow]);
-  /* the card's size is known after its first paint: placed once more then */
-  const flowId = flow?.id;
-  useLayoutEffect(() => {
-    if (!flow || !fgeo || !flowRef.current) return;
-    const c = flowRef.current, hole = fgeo.hole;
-    if (flow.place === "left") {
-      setFcard({ left: Math.max(12, hole.left - 14 - c.offsetWidth), top: Math.max(12, Math.min(hole.top + 40, window.innerHeight - 12 - c.offsetHeight)), up: false, side: true });
-    } else setFcard({ ...cardPlace(hole, { width: c.offsetWidth, height: c.offsetHeight }, window.innerWidth, window.innerHeight), side: false });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [flowId, fgeo?.path]);
 
 
   /* ── Part B: what the Help menu knows about this guide, and what it can ask of it ── */
@@ -652,26 +603,22 @@ export function PageChecklist<K extends string>(p: PageChecklistProps<K>): React
 
   /* the page's own card: the same dim and hole, its own words, dots and buttons */
   const flowEl = flow ? (
-    <div className={`pck-spot${flow.passThrough ? " pck-thru" : ""}`} data-pck="flow" data-flow={flow.id}>
-      <div className="pck-dim" data-pck="dim" style={fgeo ? { clipPath: `path(evenodd, "${fgeo.path}")` } : { opacity: 0 }}
-        data-hole={fgeo ? JSON.stringify(fgeo.hole) : undefined} />
-      <div ref={flowRef} className={`pck-card${fcard?.up ? " up" : ""}${fcard?.side ? " side" : ""}`} role="status" data-pck="card" data-flow-card={flow.id}
-        style={fcard ? { left: fcard.left, top: fcard.top } : { visibility: "hidden", left: 0, top: 0 }}>
-        <span className="pck-ck">{flow.kicker}</span>
-        <b>{flow.title}</b>
-        <span className="pck-ci">{flow.body}</span>
-        <span className="pck-cf">
-          {flow.action
-            ? <button type="button" className="pck-cta" data-pck="flow-action" {...(flow.action.attrs ?? {})} onClick={flow.action.onClick}>{flow.action.label}</button>
-            : <button type="button" className="pck-back" data-pck="back" onClick={flow.onBack}>← Back to checklist</button>}
-          {flow.dots ? (
-            <span className="pck-dots" aria-label={`${flow.dots.k} of ${flow.dots.n}`}>
-              {Array.from({ length: flow.dots.n }, (_, i) => <i key={i} className={i < flow.dots!.k ? "on" : undefined} />)}
-            </span>
-          ) : null}
-        </span>
-      </div>
-    </div>
+    <SpotCard
+      spec={flow}
+      kicker={flow.kicker}
+      title={flow.title}
+      body={flow.body}
+      foot={<>
+        {flow.action
+          ? <button type="button" className="pck-cta" data-pck="flow-action" {...(flow.action.attrs ?? {})} onClick={flow.action.onClick}>{flow.action.label}</button>
+          : <button type="button" className="pck-back" data-pck="back" onClick={flow.onBack}>← Back to checklist</button>}
+        {flow.dots ? (
+          <span className="pck-dots" aria-label={`${flow.dots.k} of ${flow.dots.n}`}>
+            {Array.from({ length: flow.dots.n }, (_, i) => <i key={i} className={i < flow.dots!.k ? "on" : undefined} />)}
+          </span>
+        ) : null}
+      </>}
+    />
   ) : null;
 
   const noteItem = note ? items.find((i) => i.key === note.key) : null;

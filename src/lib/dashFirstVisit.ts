@@ -110,6 +110,8 @@ export interface DashPrefs {
   wins: Record<string, true>;
   /** Getting started hidden per manuscript (the band's "Hide") */
   gsHidden: Record<string, true>;
+  /** first visit v2 (Part D): the first-visit tour has been decided — finished, skipped, or never to run */
+  tour: boolean;
 }
 
 const ROOT = "todoPrefs.dash";
@@ -120,7 +122,7 @@ export const seg = (id: string): string => id.replace(/[^A-Za-z0-9_-]/g, "_");
 /** Total reader: whatever is stored (or nothing), a well-formed value comes back. */
 export function dashPrefsOf(user: Pick<User, "todoPrefs"> | null | undefined): DashPrefs {
   const raw = ((user?.todoPrefs as { dash?: Record<string, unknown> } | undefined)?.dash ?? {}) as {
-    start?: Record<string, unknown>; tip?: unknown; wins?: Record<string, unknown>; gsHidden?: Record<string, unknown>;
+    start?: Record<string, unknown>; tip?: unknown; wins?: Record<string, unknown>; gsHidden?: Record<string, unknown>; tour?: unknown;
   };
   const start: Record<string, LegacyStart> = {};
   for (const [k, v] of Object.entries(raw.start ?? {})) if (v === "yes" || v === "notyet") start[k] = v;
@@ -134,6 +136,7 @@ export function dashPrefsOf(user: Pick<User, "todoPrefs"> | null | undefined): D
     tip: typeof raw.tip === "number" && Number.isInteger(raw.tip) && raw.tip >= 0 ? raw.tip : null,
     wins: flags(raw.wins),
     gsHidden: flags(raw.gsHidden),
+    tour: raw.tour === "done",
   };
 }
 
