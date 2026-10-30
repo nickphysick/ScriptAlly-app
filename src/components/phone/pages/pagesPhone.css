@@ -71,5 +71,43 @@
   .pa-nod { font-size: 13px; color: var(--pa-muted); }
   .pa-wallf { color: #fff; margin-top: 14px; font-size: 14px; display: flex; align-items: baseline; gap: 6px; justify-content: flex-end; font-family: var(--pa-type); }
   .pa-wallf .pa-num { font-size: 26px; color: #fff; }
+
+  /* ── Manuscript: the paperback in the band (ref .cov-b at COV B) ── */
+  .pa-msband { display: flex; gap: 16px; align-items: center; }
+  .pa-cov { width: 76px; height: 112px; flex: none; border-radius: 2px 6px 6px 2px; position: relative; padding: 12px 9px 10px 14px; display: flex; flex-direction: column; box-sizing: border-box; background: linear-gradient(135deg, #efd5cb, #e3bfb2); box-shadow: 0 10px 22px rgba(0, 0, 0, 0.32), inset 0 0 0 1px rgba(255, 255, 255, 0.25); overflow: hidden; }
+  .pa-covimg { padding: 0; object-fit: cover; }
+  .pa-covsp { position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: linear-gradient(90deg, rgba(0, 0, 0, 0.18), rgba(255, 255, 255, 0.18) 60%, transparent); }
+  .pa-covt { font-family: var(--pa-type); font-size: 12px; line-height: 1.15; color: #1f2633; overflow-wrap: anywhere; }
+  .pa-covrl { display: block; width: 22px; height: 1.5px; background: #1f2633; opacity: 0.45; margin: 7px 0 auto; }
+  .pa-cova { font-size: 8.5px; letter-spacing: 0.06em; text-transform: uppercase; color: #1f2633; opacity: 0.8; overflow-wrap: anywhere; }
+  .pa-msinfo { min-width: 0; }
+  .pa-mst { font-family: var(--pa-type); font-size: 25px; line-height: 1.1; color: #fff; overflow-wrap: anywhere; }
+  .pa-msfacts { font-size: 14px; color: rgba(255, 255, 255, 0.78); margin-top: 6px; line-height: 1.45; }
+  .pa-mssince { font-size: 13px; color: rgba(255, 255, 255, 0.7); margin-top: 6px; }
+  .pa-grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 16px; }
+  .pa-mini { background: #fff; border-radius: var(--pa-r); box-shadow: var(--pa-sh); padding: 12px 12px 11px; min-width: 0; }
+  .pa-mini .pa-num { font-size: 26px; display: block; line-height: 1; color: var(--pa-ink); }
+  .pa-mini .pa-sub { display: block; margin-top: 6px; line-height: 1.2; }
+  .pa-pg .pa-mspitch { margin-top: 14px; }
+  .pa-msk { font-weight: 600; color: var(--pa-ink-2); }
+  .pa-mspitch p { font-size: 15.5px; line-height: 1.5; margin: 6px 0 0; }
+  /* a package: the package as a back card, its results laid over it (ref MSP A) */
+  .pa-pkw { width: 230px; position: relative; padding: 50px 0 0; border: 0; background: none; text-align: left; font-family: var(--pa-sans); color: var(--pa-ink); }
+  .pa-pg .pa-pkback { position: absolute; inset: 0 0 auto 0; height: 100px; padding: 14px 16px; display: flex; gap: 8px; align-items: flex-start; box-sizing: border-box; }
+  .pa-pkback svg { width: 20px; height: 20px; flex: none; }
+  .pa-pkback b { font-weight: 600; font-size: 15px; }
+  .pa-pkw.is-lead .pa-pkback { background: var(--pa-navy); color: #fff; }
+  .pa-pg .pa-pkres { position: relative; margin: 0 10px; box-shadow: 0 10px 24px rgba(31, 38, 51, 0.14); display: block; }
+  .pa-pkh { display: block; font-size: 19px; color: var(--pa-ink); line-height: 1.2; }
+  .pa-pkc, .pa-pkst { display: block; margin-top: 4px; }
+  .pa-prostrip { display: flex; gap: 10px; align-items: center; background: var(--pa-blush-wash); color: var(--pa-ink); border-radius: var(--pa-r); padding: 10px 14px; font-size: 13.5px; }
+  .pa-lock { display: inline-flex; align-items: center; height: 24px; padding: 0 9px; border-radius: 999px; background: #fff; font-size: 12.5px; font-weight: 600; color: var(--pa-ink); flex: none; }
+  .pa-mt10 { margin-top: 10px; }
+  .pa-kv .pa-k { color: var(--pa-muted); font-size: 15px; }
+  .pa-kv .pa-v { color: var(--pa-ink); }
+  .pa-read { padding: 8px 4px 24px; color: var(--pa-ink); font-family: var(--pa-sans); }
+  .pa-read .pa-sub { margin: 6px 0 0; }
+  .pa-readbody { margin-top: 14px; font-size: 15px; line-height: 1.55; white-space: pre-wrap; max-height: 55vh; overflow: auto; }
+  .pa-readfoot { margin-top: 16px !important; }
   @media (prefers-reduced-motion: reduce) { .pa-pg .pa-card, .pa-nocard { transition: none; } }
 }

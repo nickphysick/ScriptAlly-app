@@ -21,11 +21,10 @@ import { TodoRoute } from "./components/todo/TodoRoute";
 import { Agents } from "./components/Agents";
 import { DiscoverPage } from "./components/agents/discover1/DiscoverPage";
 import { AgentsRoute, DiscoverRoute } from "./components/agents/phone/AgentsRoutes";
-import { ResponsesRoute } from "./components/phone/pages/PageRoutes";
+import { ManuscriptRoute, ResponsesRoute } from "./components/phone/pages/PageRoutes";
 import { SubmissionPackages } from "./components/SubmissionPackages";
 import { PACKAGES_PATH, packagesRedirectFor } from "./lib/packagesRoute";
 import { DiaryLab } from "./components/dashboard/DiaryLab";
-import { ManuscriptPage } from "./components/manuscripts/v12/ManuscriptPage";
 import { ComparableTitlesPage } from "./components/manuscripts/ComparableTitlesPage";
 import { VersionsV2Page } from "./components/versions/VersionsV2Page";
 import { ImportPage } from "./components/import/ImportPage";
@@ -766,7 +765,7 @@ function AppContent() {
                its versions, letters, synopses, packages and comps, built to
                design-refs/manuscripts/manuscripts-v12.html. `AllManuscripts` is a locked file and
                stays in the tree, unrouted. */
-            <ManuscriptPage
+            <ManuscriptRoute
               onNavigate={handleNavigate}
               openId={manuscriptView}
               active={routeKey === "manuscripts" && !manuscriptsComps && !manuscriptsVersions}

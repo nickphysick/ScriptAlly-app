@@ -431,8 +431,8 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
       { key: "analytics", label: "Analytics", icon: PI.chart, line: null, onOpen: () => goPath("/queries/analytics") },
       { key: "goals", label: "Streaks & goals", icon: PI.flame, line: null, onOpen: null, disabledLine: "Coming in Part 7" },
       { key: "manuscript", label: "Manuscript", icon: PI.book, line: words, onOpen: () => goPath("/manuscripts") },
-      { key: "materials", label: "Materials", icon: PI.box, line: null, onOpen: () => goPath("/queries/packages") },
-      { key: "comps", label: "Comparable titles", icon: PI.pages, line: bandMs ? `${comps} ${comps === 1 ? "comp" : "comps"}` : null, onOpen: () => goPath("/manuscripts/comps") },
+      { key: "materials", label: "Materials", icon: PI.box, line: null, onOpen: () => goPath("/manuscripts#materials") },
+      { key: "comps", label: "Comparable titles", icon: PI.pages, line: bandMs ? `${comps} ${comps === 1 ? "comp" : "comps"}` : null, onOpen: () => goPath("/manuscripts#comps") },
       { key: "discover", label: "Discover agents", icon: PI.scope, line: null, onOpen: () => goPath("/agents/discover") },
       { key: "feedback", label: "Feedback", icon: PI.chat, line: null, onOpen: () => setFeedbackOpen(true) },
     ];
