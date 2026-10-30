@@ -20,6 +20,8 @@ import { PlansPage } from "../../PlansPage";
 import { HelpCentre } from "../../HelpCentre";
 import { HelpPhone, PlanPhone, SettingsPhone } from "./AccountPhone";
 import type { AccountSectionId } from "../../../lib/accountRoutes";
+import { SubmissionPackages } from "../../SubmissionPackages";
+import { PackagesPhone } from "../../packages/phone/PackagesPhone";
 import "./settingsPhone.css";
 
 export const ResponsesRoute: React.FC<React.ComponentProps<typeof ResponsesPage>> = (props) =>
@@ -47,3 +49,7 @@ export const PlansRoute: React.FC = () => (useIsMobile() ? <PlanPhone /> : <div 
 
 /** Help: the phone's own home at `/help`; an article (`/help/{slug}`) is the Help Centre's own page */
 export const HelpRoute: React.FC<{ path: string }> = ({ path }) => (useIsMobile() && path.replace(/\/+$/, "") === "/help" ? <HelpPhone /> : <HelpCentre />);
+
+/** Phone round two v1 (2B): Packages is a tab on a phone — its own page below 768px, the desktop page from 768px up */
+export const PackagesRoute: React.FC<React.ComponentProps<typeof SubmissionPackages>> = (props) =>
+  useIsMobile() ? <PackagesPhone active={!!props.active} /> : <SubmissionPackages {...props} />;

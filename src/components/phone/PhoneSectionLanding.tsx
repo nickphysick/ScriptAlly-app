@@ -17,8 +17,8 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
 /** The phone landing for a desktop-only address, or null. */
+/* Phone round two v1 (2B): `/queries/packages` is the Packages tab on a phone now, so it no longer lands here. */
 export function phoneSectionFor(path: string): "packages" | "comps" | "versions" | null {
-  if (path === "/queries/packages") return "packages";
   if (path === "/manuscripts/comps") return "comps";
   if (path === "/manuscripts/versions") return "versions";
   return null;

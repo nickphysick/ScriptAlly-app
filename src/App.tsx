@@ -21,8 +21,7 @@ import { TodoRoute } from "./components/todo/TodoRoute";
 import { Agents } from "./components/Agents";
 import { DiscoverPage } from "./components/agents/discover1/DiscoverPage";
 import { AgentsRoute, DiscoverRoute } from "./components/agents/phone/AgentsRoutes";
-import { AnalyticsRoute, GoalsRoute, HelpRoute, ManuscriptRoute, PlansRoute, ResponsesRoute, SettingsRoute } from "./components/phone/pages/PageRoutes";
-import { SubmissionPackages } from "./components/SubmissionPackages";
+import { AnalyticsRoute, GoalsRoute, HelpRoute, ManuscriptRoute, PackagesRoute, PlansRoute, ResponsesRoute, SettingsRoute } from "./components/phone/pages/PageRoutes";
 import { PACKAGES_PATH, packagesRedirectFor } from "./lib/packagesRoute";
 import { DiaryLab } from "./components/dashboard/DiaryLab";
 import { ComparableTitlesPage } from "./components/manuscripts/ComparableTitlesPage";
@@ -716,7 +715,7 @@ function AppContent() {
 
         {/* Responses v2 (15 Oct) — every agent answer for the book in scope. A flowing page in the shared grid. */}
         <StagePage active={queriesPackages} layout="fill" clip>
-          <SubmissionPackages active={queriesPackages} onNavigate={handleNavigate} />
+          <PackagesRoute active={queriesPackages} onNavigate={handleNavigate} />
         </StagePage>
         <StagePage active={queriesResponses} layout="fill" clip>
           <ResponsesRoute onNavigate={handleNavigate} routeActive={queriesResponses} />
