@@ -12,7 +12,7 @@
  *
  * Missing facts are left out — never a dash, never "Unknown".
  */
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useScriptAllyDb } from "../../../lib/db";
 import { buildQcRows, STAGE_NAME, type QcRow } from "../../../lib/qcSummary";
@@ -78,6 +78,11 @@ export const AgentsPhone: React.FC = () => {
   const qd = facts.filter((x) => x.stand !== "none");
   const [chip, setChip] = useState<AgentChip>("all");
   const [open, setOpen] = useState<AgentFacts | null>(null);
+  /* Phone fixes v1, G2: A SHEET DOES NOT OUTLIVE ITS PAGE. Every page stays mounted, so this sheet stayed open when the
+     writer left Agents — the phone's back button, a tab, the menu — and was drawn over the next page, locking its scroll
+     (measured in J4: opened on Agents, it covered Corkboard, Analytics, Responses and Manuscripts). */
+  const { pathname } = useLocation();
+  useEffect(() => { if (pathname !== "/agents") setOpen(null); }, [pathname]);
   const face = useDiscoverFace();
   const scout = useScout(face.live ? face.aid : NO_AID);
 
