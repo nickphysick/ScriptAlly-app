@@ -41,10 +41,12 @@ import {
 import { importSteps } from "../../lib/importSummary";
 import { ReconcileCard, ReconcileCardRow } from "./ReconcileCard";
 import { Chip, Stepper } from "./ImportParts";
-import { AgentRow, QueryRow, DupeOpen, DupeKept, DupeMerged } from "./reviewRows";
+import { AgentRow, QueryRow, DupeOpen, DupeKept, DupeMerged, PhoneDupePick } from "./reviewRows";
 import { Disc, initialsOf } from "./ImportParts";
 import { GoMark } from "./v9/GoMark";
 import { PhonePin } from "./setupParts";
+import { useSetupBand } from "./SetupFrame";
+import { useIsMobile } from "../shell/mobileChrome";
 import { ReviewDeck, DeckCard } from "./v9/ReviewDeck";
 import { AgencyQuestion, NamelessQuestion, MappingQuestion, QueryQuestion, Answered, DECK_WORDS } from "./v9/DeckQuestions";
 import {
@@ -162,6 +164,10 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
   // after every cluster is resolved (so a mistaken merge can be undone).
   const hadDuplicates = useMemo(() => initial.agents.some((a) => a.mergeWith.length > 0 && !a.mergeResolved), [initial]);
   const [screen, setScreen] = useState<Step>(hadDuplicates ? "duplicates" : "agents");
+  /* Repeats on a phone: which set is on screen, and each set's held choice (set-up on phones v1). */
+  const [dupAt, setDupAt] = useState(0);
+  const [, setDupTick] = useState(0);
+  const dupApply = useRef<Record<string, (() => void) | null>>({});
   // Per-cluster pre-resolution snapshot (keyed by leader id) — restored verbatim on Undo, so a merge or
   // keep-both can be cleanly reversed (un-delete the removed agent, revert repointed queries).
   const snapRef = useRef<Record<string, { agents: ReviewAgent[]; queries: { id: string; agentRef: string }[] }>>({});
@@ -469,6 +475,15 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
           c.members.forEach((m) => placed.add(m.id));
         } else {
           const bars = byKeeper.get(c.leaderId) ?? [];
+          /* A phone shows a two-agent set as three choices (5B), through the same two handlers. */
+          if (isMobile && c.openMembers.length === 2 && bars.length === 0) {
+            units.push({ sort: at(c.leaderId), node: (
+              <PhoneDupePick key={`open-${c.leaderId}`} a={c.openMembers[0]} b={c.openMembers[1]} queryCount={queryCount}
+                onRemove={removeDuplicate} onKeepBoth={() => keepBoth(c.leaderId)}
+                register={(fn) => { dupApply.current[c.leaderId] = fn; setDupTick((t) => t + 1); }} />) });
+            placed.add(c.leaderId);
+            continue;
+          }
           units.push({ sort: at(c.leaderId, ...bars.map((b) => b.id)),
             node: <DupeOpen key={`open-${c.leaderId}`} leader={c.members[0]} members={c.openMembers} bars={bars} queryCount={queryCount} movedCount={movedCount}
                     onRemove={removeDuplicate} onKeepBoth={() => keepBoth(c.leaderId)} /> });
@@ -586,6 +601,15 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
 
   // ── The frame of a step ───────────────────────────────────────────────────────────────────────
   const steps = importSteps(hadDuplicates);
+  /* On a phone (set-up on phones v1, 2B) the band carries the review's progress: "Review: agents",
+     with the review's own steps as its segments. The four-dot stepper is hidden there. */
+  const isMobile = useIsMobile();
+  const BAND_NAME: Record<string, string> = { duplicates: "repeats", agents: "agents", queries: "queries" };
+  useSetupBand(isMobile ? {
+    name: `Review: ${BAND_NAME[screen] ?? screen}`,
+    steps: steps.map((id) => ({ id, label: id })),
+    index: Math.max(0, steps.indexOf(screen)),
+  } : null);
   const title = (manuscriptTitle ?? "").trim();
   /* v9: when the last answer lands on the queries step, the sage band says so and accounts for
      every answer given. Only a step that asked something can be "all answered". */
@@ -600,12 +624,26 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
         <p>{DUPLICATES_SUB}</p>
       </header>
     ) : screen === "agents" ? (
+      isMobile ? (
+      /* One line in the typewriter face and one sentence beneath (2B; DOCS.headB), from the review's
+         own numbers and words. */
+      <header className="im-ohead im-ohead--sm im-phead">
+        <h1 className="im-h1" data-im="title"><span data-im="title-n">{active.length}</span> agents for your contact list.</h1>
+        <p data-im="title-sub">{reviewSubline(agentOpen, readyAgents.length, "agents")}</p>
+      </header>
+    ) : (
       <header className="im-ohead im-ohead--sm">
         <h1 className="im-stack" data-im="title">
           <span className="im-num" data-im="title-n">{active.length}</span>
           <span className="im-words">agents for your contact list</span>
           <span className="im-sub" data-im="title-sub">{reviewSubline(agentOpen, readyAgents.length, "agents")}</span>
         </h1>
+      </header>
+    )
+    ) : isMobile ? (
+      <header className="im-ohead im-ohead--sm im-phead">
+        <h1 className="im-h1" data-im="title"><span data-im="title-n">{qActive.length}</span> {title ? <>queries for <i>{title}</i>.</> : "queries for your Query Centre."}</h1>
+        {(qNeed > 0 || queriesDone) && <p data-im="title-sub">{reviewSubline(qNeed, readyQueries.length, "queries")}</p>}
       </header>
     ) : (
       <header className="im-ohead im-ohead--sm">
@@ -621,7 +659,19 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
   const listTitle = isDup ? "Possible repeats" : READY_LIST.head;
   const [showAll, setShowAll] = useState(false);
   const allRows = isDup ? duplicateUnits() : screen === "agents" ? agentRows() : queryRows();
-  const rows = isDup || showAll ? allRows : allRows.slice(0, READY_FIRST);
+  /* Repeats on a phone (5B): one set per screen, paged by the pinned "Next set". */
+  const dupPaged = isMobile && isDup;
+  const dupI = Math.min(dupAt, Math.max(0, allRows.length - 1));
+  const dupKey = String((allRows[dupI] as React.ReactElement | undefined)?.key ?? "");
+  const dupLeader = dupKey.replace(/^[a-z]+-/, "");
+  const dupOpenNow = dupKey.startsWith("open-") || (dupKey.startsWith("recon-") && !reconciled[dupLeader]);
+  const dupApplyNow = dupApply.current[dupLeader] ?? null;
+  const dupNext = () => {
+    if (dupApplyNow) dupApplyNow();
+    if (dupI < allRows.length - 1) setDupAt(dupI + 1);
+  };
+  const showDupNext = dupPaged && (dupOpenNow || dupI < allRows.length - 1);
+  const rows = dupPaged ? allRows.slice(dupI, dupI + 1) : isDup || showAll ? allRows : allRows.slice(0, READY_FIRST);
   const outCount = screen === "agents" ? listAgents.length - readyAgents.length : screen === "queries" ? listQueries.length - readyQueries.length : 0;
   const liveCount = screen === "agents" ? readyAgents.length : readyQueries.length;
   const chips = isDup
@@ -688,6 +738,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
           </section>
         ) : (
           <section className={`im-list${isDup ? "" : " o9-ready o9-rise"}`} data-im={isDup ? "list" : "ready"} aria-label={listTitle}>
+            {dupPaged && allRows.length > 0 && <span className="im-setchip" data-im="dup-chip">Set {dupI + 1} of {allRows.length}</span>}
             <div className={`im-listhead${isDup ? "" : " im-listhead--ready"}`} data-im="list-head">
               {!isDup && (
                 <span className="im-readymark" aria-hidden="true">
@@ -715,7 +766,10 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
           <div className="o9-bargo">
             <button type="button" className="sf-link" onClick={() => back?.()} data-im="back">‹ Back</button>
             {onCancel && <button type="button" className="sf-link sf-link--quiet" onClick={onCancel} data-im="cancel">Cancel</button>}
-            {isDup && (
+            {showDupNext && (
+              <button type="button" className="sf-btn" onClick={dupNext} disabled={dupOpenNow && !dupApplyNow} data-im="dup-next">Next set</button>
+            )}
+            {isDup && !showDupNext && (
               /* v9: lit only once every set is decided. It was always available, and an undecided
                  set carried through to the agents step. */
               <button type="button" className="sf-btn" onClick={() => switchScreen("agents")} disabled={openSets > 0} data-im="primary">{REVIEW_PRIMARY.duplicates}</button>

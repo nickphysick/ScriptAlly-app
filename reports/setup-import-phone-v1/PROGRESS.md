@@ -8,7 +8,8 @@ Baseline: tsc root 0, tsc functions 0, build clean (0 error/warning lines), Vite
 |---|---|---|
 | 0 recon | — | done: refs 18/18 OK; today/ matches (fonts aside); base = dev |
 | A frame, labels, welcome, your list, your file, pinned foot, tick | `aa2b2a53` | committed |
-| B the reading screen | (this commit) | committed |
+| B the reading screen | `341539e2` | committed |
+| C review header, ready rows, repeats | (this commit) | committed |
 
 ## Resuming
 - Read `git log --oneline -10` and this file; resume at the first phase not committed.
@@ -21,3 +22,9 @@ Baseline: tsc root 0, tsc functions 0, build clean (0 error/warning lines), Vite
 ## Phase B notes
 - Phone branch inside `ScatterSettleLoader` (same hooks/timers/settle). Slips follow `prefersReduced()` only (the loader's `reduced` is the <900px static path). Piles: 0 until the result, then count with `resolved/n` to `piles` = the overview's `summaryModel`→`reviewTallies` totals (ImportFlow `readPiles`; lab `labPiles`).
 - FALSE PREMISE: the tip card's art is a real drawing (`/images/import/tip-hawk.png`), not a placeholder; kept, shown in a 56px round spot.
+
+## Phase C notes
+- Band: "Review: agents|queries|repeats", segments = `importSteps(hadDuplicates)`. Stepper hidden on phone.
+- Ready rows: `PhoneRowShell` (reviewRows): tap → the row's own onToggleOpen (details portalled as a sheet into the foot host); left swipe → navy "Don't import" → the row's own onDelete. Row buttons kept, visually hidden (keyboard / screen reader).
+- Repeats: `duplicateUnits()` stays the one source; on phone a 2-member open set (no bars) becomes `PhoneDupePick` (held radio, applied by the pinned "Next set" through onRemove/onKeepBoth). Other set shapes (3-way, reconcile) keep their own card, one per screen; "Next set" waits for them to be decided.
+- The deck is unchanged in C (D replaces it on the phone).

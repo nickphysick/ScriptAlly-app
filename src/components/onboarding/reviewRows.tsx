@@ -21,7 +21,10 @@
  * and "you've sorted this query", each with its change action — so they are mounted there, wired
  * to the handlers the walk called.
  */
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { useIsMobile } from "../shell/mobileChrome";
+import { useSetupFootHost } from "./SetupFrame";
 import "./importFlow.css";
 import { ReviewReasonCode } from "../../types/smartImport";
 import { QueryStatus } from "../../types";
@@ -105,16 +108,63 @@ const OutEnd: React.FC<{ onUndo: () => void }> = ({ onUndo }) => (
   </div>
 );
 
-/** The details panel's shell: inset under the row, paper ground, a foot with its sentence and Done. */
-const DetailsPanel: React.FC<{ foot: string; onDone: () => void; children: React.ReactNode }> = ({ foot, onDone, children }) => (
-  <div className="im-edit im-panel" data-im="row-edit">
-    {children}
-    <div className="im-panelfoot">
-      <span>{foot}</span>
-      <button type="button" className="im-done" onClick={onDone} data-im="row-done">{ROW_WORDS.done}</button>
+/** The details panel's shell: inset under the row, paper ground, a foot with its sentence and Done.
+ *  On a phone in the set-up frame (set-up on phones v1, 4B) the same panel rises as a sheet from the
+ *  frame's foot host, over the pinned buttons; its fields and Done are unchanged. */
+const DetailsPanel: React.FC<{ foot: string; onDone: () => void; children: React.ReactNode }> = ({ foot, onDone, children }) => {
+  const host = useSetupFootHost();
+  const panel = (
+    <div className={`im-edit im-panel${host ? " im-panel--sheet" : ""}`} data-im="row-edit">
+      {children}
+      <div className="im-panelfoot">
+        <span>{foot}</span>
+        <button type="button" className="im-done" onClick={onDone} data-im="row-done">{ROW_WORDS.done}</button>
+      </div>
     </div>
-  </div>
-);
+  );
+  return host ? createPortal(panel, host) : panel;
+};
+
+/* ═══ The ready rows on a phone (set-up on phones v1, board 2 4B; DOCS.rowsB) ═══
+   A tap opens the row's details (its own `onToggleOpen`); a left swipe reveals "Don't import" in
+   navy, which calls the row's own `onDelete` — the same handler the button calls, so the Undo row
+   and every count are today's. The row's buttons stay in the DOM, visually hidden on a phone, so a
+   keyboard or a screen reader still reaches both. */
+const SWIPE_W = 118;
+const PhoneRowShell: React.FC<{ out: boolean; onTap: () => void; onDelete: () => void; children: React.ReactNode }> = ({ out, onTap, onDelete, children }) => {
+  const [dx, setDx] = useState(0);
+  const start = useRef<{ x: number; y: number; base: number } | null>(null);
+  const moved = useRef(false);
+  const dxRef = useRef(0); dxRef.current = dx;
+  return (
+    <div className="im-swrap" data-im="swipe" data-open={dx !== 0 ? "1" : "0"}>
+      {!out && (
+        <button type="button" className="im-swact" onClick={() => { setDx(0); onDelete(); }} data-im="swipe-remove"
+                tabIndex={dx !== 0 ? 0 : -1} aria-hidden={dx !== 0 ? undefined : true}>
+          {ROW_WORDS.dontImport}
+        </button>
+      )}
+      <div className="im-swface" data-im="row-face" style={{ transform: dx ? `translateX(${dx}px)` : undefined }}
+        onPointerDown={(e) => { if (out) return; start.current = { x: e.clientX, y: e.clientY, base: dxRef.current }; moved.current = false; }}
+        onPointerMove={(e) => {
+          const st = start.current; if (!st) return;
+          const d = e.clientX - st.x;
+          if (!moved.current && Math.abs(d) > 8 && Math.abs(d) > Math.abs(e.clientY - st.y)) moved.current = true;
+          if (moved.current) setDx(Math.max(-SWIPE_W, Math.min(0, st.base + d)));
+        }}
+        onPointerUp={() => { if (!start.current) return; start.current = null; if (moved.current) setDx(dxRef.current < -SWIPE_W / 2 ? -SWIPE_W : 0); }}
+        onPointerCancel={() => { start.current = null; if (moved.current) setDx(0); }}
+        onClick={(e) => {
+          if (moved.current) { moved.current = false; return; }
+          if ((e.target as HTMLElement).closest("button")) return;
+          if (dxRef.current !== 0) { setDx(0); return; }
+          if (!out) onTap();
+        }}>
+        {children}
+      </div>
+    </div>
+  );
+};
 
 /** A line stating what was answered, with the way to change it. */
 const Said: React.FC<{ children: React.ReactNode; onChange: () => void }> = ({ children, onChange }) => (
@@ -150,9 +200,13 @@ export const AgentRow: React.FC<AgentRowProps> = ({ agent, merged, open, onToggl
   const who = disp || "This agent";
   const resolvedMapping = agent.reasons.some((r) => r.kind === "mapping" && r.resolved);
   const live = !out;
+  const isMobile = useIsMobile();
+  const wrap = (face: React.ReactNode) => isMobile
+    ? <PhoneRowShell out={!!out} onTap={onToggleOpen} onDelete={onDelete}>{face}</PhoneRowShell> : face;
 
   return (
     <div className={`im-rw${out ? " is-out" : ""}`} data-row-id={agent.id} data-row="agent" data-asks="0" data-out={out ? "1" : "0"}>
+      {wrap(<>
       <Disc initials={agent.name ? initialsOf(agent.name) : (agent.agency.match(/\b\w/g)?.slice(0, 2).join("").toUpperCase() ?? "–")} tone={out ? "none" : agent.name ? "live" : "agency"} />
       <div className="im-rwtext">
         <b className="im-rwname">{disp}</b>
@@ -163,6 +217,7 @@ export const AgentRow: React.FC<AgentRowProps> = ({ agent, merged, open, onToggl
       {live
         ? <LiveEnd open={open} added={!!added} onToggleOpen={onToggleOpen} onDelete={onDelete} />
         : <OutEnd onUndo={() => onUndo?.()} />}
+      </>)}
 
       {/* a settled row's details: add what the file did not give, or change an answer */}
       {live && open && (
@@ -424,9 +479,27 @@ export interface QueryRowProps {
 export const QueryRow: React.FC<QueryRowProps> = ({ query, agentName, origin, open, onToggleOpen, onPatch, onDelete, onReopen, out, onUndo, added }) => {
   const dateStr = currentDate(query);
   const settledReasons = query.reasons.length > 0;
+  const isMobile = useIsMobile();
 
   return (
     <div className={`im-rw${out ? " is-out" : ""}`} data-row-id={query.id} data-row="query" data-asks="0" data-out={out ? "1" : "0"}>
+      {isMobile ? (
+        /* The phone's row (4B): the status disc, the name over where it came from, and the status in
+           words with its date beneath on the right. Same handlers. */
+        <PhoneRowShell out={!!out} onTap={onToggleOpen} onDelete={onDelete}>
+          <span className="im-rwpdisc" aria-hidden="true"><StatusDot status={query.status} overrideSize={22} /></span>
+          <div className="im-rwtext">
+            <b className="im-rwname">{agentName}</b>
+            <small className="im-rwsub">{origin}</small>
+          </div>
+          {out
+            ? <OutEnd onUndo={() => onUndo?.()} />
+            : <>
+                <span className="im-rwpst" data-im="row-status"><b>{STAGE_NAME[query.status]}</b><small>{dateStr ? fmtDate(dateStr) : "Undated"}</small></span>
+                <LiveEnd open={open} added={!!added} onToggleOpen={onToggleOpen} onDelete={onDelete} />
+              </>}
+        </PhoneRowShell>
+      ) : (<>
       <Disc initials={initialsOf(agentName)} tone={out ? "none" : "live"} />
       <div className="im-rwtext">
         <b className="im-rwname">{agentName}</b>
@@ -437,6 +510,7 @@ export const QueryRow: React.FC<QueryRowProps> = ({ query, agentName, origin, op
         ? <OutEnd onUndo={() => onUndo?.()} />
         : <LiveEnd open={open} added={!!added} onToggleOpen={onToggleOpen} onDelete={onDelete}
             lead={<span className="im-stat" data-im="row-status"><StatusDot status={query.status} overrideSize={18} />{STAGE_NAME[query.status]}</span>} />}
+      </>)}
 
       {!out && open && (
         <DetailsPanel foot="Add what you remember and your timeline stays accurate." onDone={onToggleOpen}>
@@ -544,3 +618,43 @@ export const DupeMerged: React.FC<{ keeper: ReviewAgent; bars: ReviewAgent[]; qu
     <div className="im-dupeact"><button type="button" className="sf-link sf-link--quiet" onClick={onUndo} data-im="dupe-undo">Undo</button></div>
   </div>
 );
+
+/* ═══ Repeats on a phone (set-up on phones v1, board 2 5B; DOCS.dupB) ═══
+   One two-agent set, as three choices. Nothing is applied on a tap: the choice is held here and
+   applied by the pinned "Next set" through `register`, with the set's OWN handlers — keep A removes
+   B, keep B removes A, "different people" keeps both — so the result and the gate's counts are
+   exactly what the desktop's buttons produce. */
+export const PhoneDupePick: React.FC<{
+  a: ReviewAgent;
+  b: ReviewAgent;
+  queryCount: (id: string) => number;
+  onRemove: (id: string) => void;
+  onKeepBoth: () => void;
+  register: (apply: (() => void) | null) => void;
+}> = ({ a, b, queryCount, onRemove, onKeepBoth, register }) => {
+  const [pick, setPick] = useState<"a" | "b" | "both" | null>(null);
+  React.useEffect(() => {
+    register(pick === null ? null : () => (pick === "a" ? onRemove(b.id) : pick === "b" ? onRemove(a.id) : onKeepBoth()));
+    return () => register(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pick, a.id, b.id]);
+  const nameOf = (m: ReviewAgent) => m.name || m.agency || "This agent";
+  const opt = (id: "a" | "b" | "both", title: string, sub: string) => (
+    <label className={`im-dpop${pick === id ? " is-on" : ""}`} data-im={`dup-opt-${id}`}>
+      <input type="radio" name={`dup-${a.id}`} checked={pick === id} onChange={() => setPick(id)} />
+      <span className="im-dprad" aria-hidden="true" />
+      <span><b>{title}</b><small>{sub}</small></span>
+    </label>
+  );
+  return (
+    <div className="im-dpick" data-dup-set={a.id} data-dup-state="open" data-dup-kind="agents" data-im="dup-pick">
+      <h2 className="im-dpickh">Is this the same agent?</h2>
+      <p className="im-dpickp">Two rows look like {nameOf(a)}. Keep one and its queries move across. Nothing is lost.</p>
+      <div className="im-dpops" role="radiogroup">
+        {opt("a", `Keep "${nameOf(a)}"`, `${a.agency || "No agency"} · ${quer(queryCount(a.id))}`)}
+        {opt("b", `Keep "${nameOf(b)}"`, `${b.agency || "No agency"} · ${quer(queryCount(b.id))}`)}
+        {opt("both", "They're different people", "Keep both")}
+      </div>
+    </div>
+  );
+};
