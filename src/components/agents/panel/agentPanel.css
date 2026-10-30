@@ -263,6 +263,13 @@
    the drawer does rather than starting under the shell's bar. The parked chip (69) and the toasts (90) are unchanged. ── */
 .spanel.apn--over { z-index: 74; }
 .spanel-scrim:has(+ .spanel.apn--over) { z-index: 73; }
+/* Phone fixes v1, G1: on a phone, Log a query is a full-screen layer at z 1011 (phoneFlow.css), so a panel opened OVER
+   it at 74 opened BEHIND it — "Someone not on my list" did nothing a writer could see (J1 measured: the panel was
+   mounted, 393 × 727, under the flow). Above the flow, under the snackbar (1100). */
+@media (max-width: 767.98px) {
+  .spanel.apn--over { z-index: 1013; }
+  .spanel-scrim:has(+ .spanel.apn--over) { z-index: 1012; }
+}
 @media (min-width: 900px) { .spanel.qsp.apn--over { top: 8px; } }
 
 /* Contact list v25.2 C — the agent edit mode (AgentEditMode) fills the panel's act slot, its foot pinned */
