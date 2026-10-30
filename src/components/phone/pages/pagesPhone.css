@@ -170,5 +170,35 @@
   .pa-rankw { font-size: 11.5px; color: var(--pa-muted); overflow-wrap: anywhere; }
   .pa-rank.on .pa-rankw { color: var(--pa-ink); font-weight: 600; }
   .pa-rankline { font-size: 14px !important; line-height: 1.45; margin: 14px 0 0; }
+
+  /* ── Settings index, Plan, Help (ref PAGES.settings / plan / help) ── */
+  .pa-pg .pa-setgroup + .pa-setgroup { margin-top: 14px; }
+  .pa-pg .pa-gl { font-size: 13px; font-weight: 600; color: var(--pa-muted); margin: 22px 4px 8px; }
+  .pa-pg .pa-li .pa-lt .pa-sub { display: block; }
+  .pa-pg .pa-plancard { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 20px; }
+  .pa-pg .pa-planimg { width: 64px; height: 64px; border-radius: 50%; background: var(--pa-blush-wash); padding: 7px; box-sizing: border-box; object-fit: contain; }
+  .pa-pg .pa-plant { font-family: var(--pa-type); font-size: 22px; color: var(--pa-ink); }
+  .pa-pg .pa-plansub { margin: 0; font-size: 14.5px; }
+  .pa-pg .pa-planico { color: var(--pa-navy); }
+  .pa-pg .pa-hsearch { display: flex; align-items: center; gap: 10px; height: 44px; border-radius: 999px; background: #fff; box-shadow: var(--pa-sh); padding: 0 16px; margin: 16px 0 14px; color: var(--pa-muted); }
+  .pa-pg .pa-hsearch svg { width: 17px; height: 17px; flex: none; }
+  .pa-pg .pa-hsearch input { flex: 1; min-width: 0; height: 40px; border: 0; background: transparent; font: 400 16px var(--pa-sans); color: var(--pa-ink); outline: none; }
+  .pa-pg .pa-gscard { display: flex; flex-direction: column; gap: 8px; width: 100%; margin-top: 14px; }
+  .pa-pg .pa-gscard b { font-size: 16px; font-weight: 600; }
+  .pa-pg .pa-barh { display: block; height: 10px; border-radius: 5px; background: var(--pa-fill); overflow: hidden; }
+  .pa-pg .pa-barh i { display: block; height: 100%; border-radius: 5px; background: var(--pa-navy); }
   @media (prefers-reduced-motion: reduce) { .pa-pg .pa-card, .pa-nocard { transition: none; } }
+}
+@media (max-width: 767.98px) {
+  .pa-pg .pa-implede { font-size: 15px; color: var(--pa-ink-2); line-height: 1.45; margin: 16px 0 14px; }
+  .pa-pg .pa-impsmart { display: flex; flex-direction: column; gap: 8px; }
+  .pa-pg .pa-impsmart b { font-size: 17px; font-weight: 600; }
+  .pa-pg .pa-impsmart .pa-sub { margin: 0; font-size: 14px; }
+  .pa-pg .pa-impfact { font-size: 13px !important; }
+  .pa-pg .pa-impfoot { margin: 18px 4px 0; }
+}
+@media (max-width: 767.98px) {
+  /* the import page's grid gives its child a gutter; the phone page draws its own */
+  .impg-wpg .wpg-scroll > .pa-impg { padding-inline: 0 !important; max-width: none !important; }
+  .pa-pg .pa-plant .pa-lock { display: inline-flex; align-items: center; height: 24px; padding: 0 9px; border-radius: 999px; background: var(--pa-blush-wash); font: 600 12.5px var(--pa-sans); color: var(--pa-ink); vertical-align: middle; margin-left: 6px; }
 }

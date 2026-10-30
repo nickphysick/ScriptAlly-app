@@ -21,7 +21,7 @@ import { TodoRoute } from "./components/todo/TodoRoute";
 import { Agents } from "./components/Agents";
 import { DiscoverPage } from "./components/agents/discover1/DiscoverPage";
 import { AgentsRoute, DiscoverRoute } from "./components/agents/phone/AgentsRoutes";
-import { AnalyticsRoute, GoalsRoute, ManuscriptRoute, ResponsesRoute } from "./components/phone/pages/PageRoutes";
+import { AnalyticsRoute, GoalsRoute, HelpRoute, ManuscriptRoute, PlansRoute, ResponsesRoute, SettingsRoute } from "./components/phone/pages/PageRoutes";
 import { SubmissionPackages } from "./components/SubmissionPackages";
 import { PACKAGES_PATH, packagesRedirectFor } from "./lib/packagesRoute";
 import { DiaryLab } from "./components/dashboard/DiaryLab";
@@ -30,8 +30,6 @@ import { VersionsV2Page } from "./components/versions/VersionsV2Page";
 import { ImportPage } from "./components/import/ImportPage";
 import { BrandStudio } from "./components/BrandStudio";
 import { AddManuscriptFocusForm } from "./components/AddManuscriptFocusForm";
-import { HelpCentre } from "./components/HelpCentre";
-import { AccountSettings } from "./components/AccountSettings";
 // Rail "+ Record a response" host (the dashboard keeps its own independent instance).
 import { PasteEmailFlow } from "./components/emailImport/PasteEmailFlow";
 import { PASTE_RESPONSE_EVENT, openQueryDrawer } from "./lib/queryActions/drawerStore";
@@ -566,7 +564,9 @@ function AppContent() {
      to the dashboard — landing a mistyped settings link on the wrong page entirely instead of on
      the section list. `replace`, so Back leaves settings rather than bouncing off the redirect. */
   const accountRedirect = accountRedirectFor(path);
-  if (accountRedirect) return <Navigate to={accountRedirect} replace />;
+  /* Phone app v2 Part 8B: on a phone the bare `/account` is the Settings index (SettingsRoute), not a redirect */
+  const phoneAccountIndex = path === "/account" && typeof window !== "undefined" && !!window.matchMedia?.("(max-width: 767.98px)").matches;
+  if (accountRedirect && !phoneAccountIndex) return <Navigate to={accountRedirect} replace />;
 
   /* Corkboard v1: `/todo/noteboard` is the Corkboard's OLD address (and, since 29 Oct, `/todo/calendar` the retired
      Calendar page's, which lands on the To-do list). It sits above the unknown-path guard for
@@ -782,7 +782,7 @@ function AppContent() {
             and `.acct-page` continues the chain. /plans and /help keep the wrapper unchanged. */}
         {routeKey === "account" && (
           <StagePage active layout="fill">
-            <AccountSettings section={accountSectionForPath(path) ?? "profile"} onNavigate={handleNavigate} />
+            <SettingsRoute path={path} section={accountSectionForPath(path) ?? "profile"} onNavigate={handleNavigate} />
           </StagePage>
         )}
         {/* Phone app v2 Part 7D — Streaks & goals: a phone page; a computer is sent to the dashboard (GoalsRoute) */}
@@ -793,13 +793,13 @@ function AppContent() {
         )}
         {routeKey === "plans" && (
           <StagePage active>
-            <div className="sv2-focuscol"><PlansPage /></div>
+            <PlansRoute />
           </StagePage>
         )}
         {routeKey === "help" && (
           <StagePage active>
             {/* Help Centre v1 — its own column (1120, 40px either side), not the 860px focus column */}
-            <HelpCentre />
+            <HelpRoute path={path} />
           </StagePage>
         )}
         {routeKey === "import" && (
