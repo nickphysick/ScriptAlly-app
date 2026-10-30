@@ -24,7 +24,9 @@
     --pa-fill: #ece7de;
     /* the five status fills (ref `--st-*`) */
     --pa-st-sand: #f7efe3;
-    --pa-st-sage: #e0e5dd;
+    /* Phone round two v1: THE HOUSE RULE, NO GREEN ON A PHONE. The sent stages' sage fill reads as sand here (ref boot2,
+       `--st-sage: var(--st-sand)`). Phone layer only — the desktop's sage uses are listed for Nick in the report. */
+    --pa-st-sage: var(--pa-st-sand);
     --pa-st-pink: #f5e6df;
     --pa-st-slate: #d7e0e8;
     --pa-st-grey: #e4e1db;

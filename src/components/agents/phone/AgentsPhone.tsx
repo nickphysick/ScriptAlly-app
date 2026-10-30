@@ -32,6 +32,7 @@ import { notifyPrefs } from "../../../lib/accountPrefs";
 import { SubmissionMethod, type Agent, type CommunityAgent } from "../../../types";
 import { doorWords, howWords, replyWords } from "../../../lib/agentsPhone";
 import "./agentsPhone.css";
+import "./agentsPhoneR2.css";
 
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 export type AgentChip = "all" | "toq" | "qd";
@@ -86,18 +87,28 @@ export const AgentsPhone: React.FC = () => {
   const face = useDiscoverFace();
   const scout = useScout(face.live ? face.aid : NO_AID);
 
+  /* Phone round two v1 (1D, ref boot2 `c4`): the band's hero is a ring — queried against your list, a blush arc on
+     navy — with "{q} of {n} queried" and "{n} on your list still to query". The Contact list's own counts (agentFacts). */
+  const ringPct = facts.length ? qd.length / facts.length : 0;
   usePhoneBandSlot("/agents", (
-    <div className="pa-bstats pa-agband" data-pa="agents-band">
-      <span><b className="pa-num" data-pa="ag-onlist">{facts.length}</b> on your list</span>
-      <span><b className="pa-num" data-pa="ag-toq">{toq.length}</b> to query</span>
+    <div className="pa-agringb" data-pa="agents-band" data-queried={qd.length} data-onlist={facts.length}>
+      <svg width="72" height="72" viewBox="0 0 72 72" aria-hidden="true" data-pa="ag-ring-svg">
+        <circle cx="36" cy="36" r="29" fill="none" stroke="rgba(255,255,255,.15)" strokeWidth="9" />
+        {qd.length > 0 ? <circle cx="36" cy="36" r="29" fill="none" stroke="#e8c8bc" strokeWidth="9" strokeLinecap="round" data-pa="ag-ring-arc"
+          data-pct={ringPct.toFixed(4)} strokeDasharray={`${(ringPct * 2 * Math.PI * 29).toFixed(1)} ${(2 * Math.PI * 29 + 1).toFixed(1)}`} transform="rotate(-90 36 36)" /> : null}
+      </svg>
+      <div>
+        <div className="pa-agringt" data-pa="ag-onlist"><span data-pa="ag-qd">{qd.length}</span> of {facts.length} queried</div>
+        <div className="pa-agrings" data-pa="ag-toq">{toq.length === 0 ? "Everyone on your list has been queried" : `${toq.length} on your list still to query`}</div>
+      </div>
     </div>
-  ), [facts.length, toq.length]);
+  ), [facts.length, toq.length, qd.length]);
 
   const counts: Record<AgentChip, number> = { all: facts.length, toq: toq.length, qd: qd.length };
   const group = (title: string, list: AgentFacts[], key: string) => (list.length ? (
     <section data-pa="ag-group" data-group={key} key={key}>
       <div className="pa-rowhd">{title} <span className="n">· {list.length}</span></div>
-      {list.map((x) => <AgentRow key={x.agent.id} x={x} now={now} onOpen={() => setOpen(x)} />)}
+      <div className="pa-agtiles" data-pa="ag-tiles">{list.map((x) => <AgentTile key={x.agent.id} x={x} onOpen={() => setOpen(x)} />)}</div>
     </section>
   ) : null);
 
@@ -129,22 +140,21 @@ const Seg: React.FC<{ list: boolean; onDiscover?: () => void; onList?: () => voi
   </div>
 );
 
-/* ── a row (ref agRow at AGR B) ── */
-const AgentRow: React.FC<{ x: AgentFacts; now: number; onOpen: () => void }> = ({ x, now, onOpen }) => {
+/* ── a tile (Phone round two v1, ref boot2 `agCard` at `c4`): the status disc, or initials on blush when not queried;
+   the name and agency; then one fact — "{status} · Day n" for a queried agent, the reply time for the rest ── */
+const AgentTile: React.FC<{ x: AgentFacts; onOpen: () => void }> = ({ x, onOpen }) => {
   const a = x.agent;
   const name = (a.name || a.agency || "").trim();
   const queried = x.stand !== "none" && !!x.q;
-  const facts = queried
-    ? [STAGE_NAME[x.q!.status] ?? String(x.q!.status), x.q!.dayN != null ? `Day ${x.q!.dayN}` : null]
-    : [replyWords(a.responseTimeWeeks), howWords(a.submissionMethod)];
+  const fact = queried
+    ? [STAGE_NAME[x.q!.status] ?? String(x.q!.status), x.q!.dayN != null ? `Day ${x.q!.dayN}` : null].filter(Boolean).join(" · ")
+    : (replyWords(a.responseTimeWeeks) ? `Replies in ${replyWords(a.responseTimeWeeks)}` : howWords(a.submissionMethod));
   return (
-    <button type="button" className="pa-agrow" data-pa="ag-row" data-id={a.id} data-stand={x.stand} data-status={queried ? x.q!.status : ""} onClick={onOpen}>
-      {queried ? <PhoneDisc status={x.q!.status} size={40} /> : <span className="pa-agring" data-pa="ag-ring" aria-hidden="true">{initialsOf(name)}</span>}
-      <span className="pa-mid"><span className="pa-nm">{name}</span>{a.name && a.agency ? <span className="pa-ag">{a.agency}</span> : null}</span>
-      <span className="pa-rt" data-pa="ag-facts">
-        {facts[0] ? <span className="pa-st" data-pa="ag-f1">{facts[0]}</span> : null}
-        {facts[1] ? <span className="pa-when" data-pa="ag-f2">{facts[1]}</span> : null}
-      </span>
+    <button type="button" className="pa-agtile" data-pa="ag-row" data-id={a.id} data-stand={x.stand} data-status={queried ? x.q!.status : ""} onClick={onOpen}>
+      {queried ? <PhoneDisc status={x.q!.status} size={42} /> : <span className="pa-agtav" data-pa="ag-ring" aria-hidden="true">{initialsOf(name)}</span>}
+      <b className="pa-agtn">{name}</b>
+      {a.name && a.agency ? <span className="pa-agta">{a.agency}</span> : null}
+      {fact ? <span className="pa-agtf" data-pa="ag-f1">{fact}</span> : null}
     </button>
   );
 };

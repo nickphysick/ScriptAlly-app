@@ -43,9 +43,32 @@ import { exampleRows } from "../../../lib/phonePages";
 import { StatusDot } from "../../StatusDot";
 import "./queriesPhone.css";
 import "./queriesPhoneV2.css";
+import "./queriesPhoneR2.css";
 
 /** The body class the page sets while it is on screen. */
 export const QM1_BODY_CLASS = "qm1-on";
+/** the band's four tiles, in the ref's order (1C) */
+export const TILE_KEYS = ["you", "agent", "quiet", "closed"] as const;
+
+/* ── Phone round two v1 (3, ref boot2 `qCard`): a query is a card. The strip is its court (`whereItStands`, the same
+   sets the tiles count) with "Day n"; the track is how far it has come — queried, partial, full, offer — filled pink
+   when it is with you and navy otherwise; a closed query has no track. ── */
+export const COURT_STRIP: Record<"you" | "agent" | "quiet" | "closed", { bg: string; fg: string }> = {
+  you: { bg: "var(--pa-st-pink)", fg: "#5a3027" },
+  agent: { bg: "var(--pa-st-sand)", fg: "#5d4b2f" },
+  quiet: { bg: "var(--pa-st-grey)", fg: "#4f4943" },
+  closed: { bg: "var(--pa-st-grey)", fg: "#4f4943" },
+};
+/** the track's step (0 queried · 1 partial · 2 full · 3 offer), by status. R&R sits with the partials, as the ref has it;
+ *  a resubmission has gone back, so it reads with the fulls. */
+export function trackStep(status: string): number {
+  switch (status) {
+    case "Partial Requested": case "Partial Sent": case "Revise & Resubmit": return 1;
+    case "Full Requested": case "Full Sent": case "Resubmitted": return 2;
+    case "Offer": case "Signed": return 3;
+    default: return 0;
+  }
+}
 export const QM1_MEDIA = "(max-width: 760px)";
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 
@@ -138,13 +161,26 @@ export const QueriesPhone: React.FC<QueriesPhoneProps> = (p) => {
   const [birdsOpen, setBirdsOpen] = useState(false);
   /* Part 8A: before the first query on this book, the first-query card and three inert example rows (FRQ A) */
   const firstRun = !p.loading && !idRows && rows.length === 0;
+  /* Phone round two v1 (1C, ref boot2 `p3`): THE BAND'S NUMBERS ARE THE FILTERS. Four tiles — the chip counts
+     (`chipCounts`, `whereItStands`' sets) — replace the pill row (and with it the pills clipped at the sheet's top). A tap
+     filters the list and turns its tile white; a second tap, or "Show all", returns to all. */
+  const toggleTile = (k: Exclude<PhoneChip, "all">) => setChip(chip === k ? "all" : k);
   usePhoneBandSlot("/queries", firstRun ? <div className="pa-bandtx" data-pa="band-empty">Nothing logged yet.</div> : (
-    <div className="pa-bstats" data-pa="band-stats">
-      <span><b className="pa-num" data-pa="stat-sent">{line.sent}</b> sent</span>
-      <span><b className="pa-num" data-pa="stat-active">{line.active}</b> active</span>
-      <span><b className="pa-num" data-pa="stat-you">{counts.you}</b> with you</span>
+    <div data-pa="band-tiles-wrap">
+      <div className="pa-btiles" role="group" aria-label="Show" data-pa="band-tiles">
+        {TILE_KEYS.map((k) => (
+          <button key={k} type="button" className="pa-btile" aria-pressed={chip === k} data-pa="band-tile" data-key={k} data-count={counts[k]}
+            onClick={() => toggleTile(k)}>
+            <b className="pa-num">{counts[k]}</b><span>{PA2_CHIP_LABEL[k]}</span>
+          </button>
+        ))}
+      </div>
+      <div className="pa-bsum" data-pa="band-stats">
+        <span><b data-pa="stat-sent">{line.sent}</b> sent</span> · <span><b data-pa="stat-active">{line.active}</b> active</span>
+        {chip !== "all" ? <> · <button type="button" className="pa-bsumall" data-pa="band-show-all" onClick={() => setChip("all")}>Show all</button></> : null}
+      </div>
     </div>
-  ), [line.sent, line.active, counts.you, firstRun]);
+  ), [line.sent, line.active, counts.you, counts.agent, counts.quiet, counts.closed, chip, firstRun]);
   usePhoneBandExtra("/queries", (
     <button type="button" className="pa-ring" aria-label="Birds-eye view" aria-haspopup="dialog" data-pa="birds-btn" onClick={() => setBirdsOpen(true)}>{PI.eye}</button>
   ), []);
@@ -177,7 +213,7 @@ export const QueriesPhone: React.FC<QueriesPhoneProps> = (p) => {
 
   /* ── the list ── */
   const order = (list: readonly QcRow[]) => list.map((r) => r.id);
-  const rowEl = (r: QcRow, list: readonly QcRow[]) => <PhoneRow key={r.id} r={r} nowMs={nowMs} onOpen={() => openQuery(r.id, order(list))} />;
+  const rowEl = (r: QcRow, list: readonly QcRow[]) => <PhoneRow key={r.id} r={r} nowMs={nowMs} card onOpen={() => openQuery(r.id, order(list))} />;
   const groups = idRows ? null : chip === "all"
     ? PA2_GROUPS.map((g) => ({ key: g, rows: rowsFor(rows, g, nowMs) })).filter((g) => g.rows.length)
     : [{ key: chip as Exclude<PhoneChip, "all">, rows: rowsFor(rows, chip, nowMs) }];
@@ -198,12 +234,6 @@ export const QueriesPhone: React.FC<QueriesPhoneProps> = (p) => {
           </>
         ) : (
           <>
-            <div className="pa-chips" role="group" aria-label="Show" data-qm1="chips">
-              {PA2_CHIPS.map((c) => (
-                <button key={c} type="button" className="pa-chip" aria-pressed={chip === c} data-qm1="chip" data-key={c} data-count={counts[c]}
-                  onClick={() => setChip(c)}>{PA2_CHIP_LABEL[c]} <b>{counts[c]}</b></button>
-              ))}
-            </div>
             <div className="pa-rows" data-qm1="list" data-chip={chip}>
               {p.loading ? <Skeleton /> : groups!.map((g) => (
                 <React.Fragment key={g.key}>
@@ -311,7 +341,7 @@ export const QueriesPhone: React.FC<QueriesPhoneProps> = (p) => {
 
 /* ── a row and its swipe (ref `qRow`, `.sw .acts`): right shows the next step or a nudge, left shows Close ───────── */
 const ACT_W = 96;
-const PhoneRow: React.FC<{ r: QcRow; nowMs: number; onOpen: () => void }> = ({ r, nowMs, onOpen }) => {
+const PhoneRow: React.FC<{ r: QcRow; nowMs: number; onOpen: () => void; card?: boolean }> = ({ r, nowMs, onOpen, card = false }) => {
   const where = whereItStands(r, nowMs);
   const live = where !== "closed";
   const mine = where === "you";
@@ -358,12 +388,33 @@ const PhoneRow: React.FC<{ r: QcRow; nowMs: number; onOpen: () => void }> = ({ r
           <button type="button" className="r" data-pa="swipe-close" tabIndex={x < 0 ? 0 : -1} onClick={close}>{PI.closeq}Close</button>
         </div>
       ) : null}
-      <button type="button" className={`pa-row${dragging ? " drag" : ""}`} style={{ transform: x ? `translateX(${x}px)` : undefined }}
+      <button type="button" className={`${card ? "pa-qc" : "pa-row"}${dragging ? " drag" : ""}`} style={{ transform: x ? `translateX(${x}px)` : undefined }}
+        data-pa={card ? "qcard" : undefined} data-court={where}
         onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}
         onClick={() => { if (dragged.current) { dragged.current = false; return; } if (x !== 0) { setX(0); return; } onOpen(); }}>
-        <PhoneDisc status={r.status} size={40} />
-        <span className="pa-mid"><span className="pa-nm" data-qm1="row-name">{r.agentName}</span><span className="pa-ag">{r.agency && r.agency !== "No agency" ? r.agency : ""}</span></span>
-        <span className="pa-rt"><span className="pa-st" data-qm1="row-status">{STAGE_NAME[r.status] ?? r.status}</span><span className={`pa-when${nd.mine ? " mv" : ""}`} data-qm1="row-when">{nd.text}</span></span>
+        {card ? (
+          <>
+            <span className="pa-qcb" data-pa="qcard-strip" style={{ background: COURT_STRIP[where].bg, color: COURT_STRIP[where].fg }}>
+              <span>{PA2_CHIP_LABEL[where]}</span>{r.dayN != null ? <span className="pa-qcday">Day {r.dayN}</span> : null}
+            </span>
+            <span className="pa-qcm">
+              <PhoneDisc status={r.status} size={40} />
+              <span className="pa-mid"><span className="pa-nm" data-qm1="row-name">{r.agentName}</span><span className="pa-ag">{r.agency && r.agency !== "No agency" ? r.agency : ""}</span></span>
+            </span>
+            {where !== "closed" ? (
+              <span className="pa-qct" data-pa="qcard-track" data-step={trackStep(String(r.status))} aria-hidden="true">
+                {[0, 1, 2, 3].map((k) => <i key={k} className={k <= trackStep(String(r.status)) ? (mine ? "on you" : "on") : undefined} />)}
+              </span>
+            ) : null}
+            <span className="pa-qcn"><span className="pa-st" data-qm1="row-status">{STAGE_NAME[r.status] ?? r.status}</span><span className={`pa-when${nd.mine ? " mv" : ""}`} data-qm1="row-when">{nd.text}</span></span>
+          </>
+        ) : (
+          <>
+            <PhoneDisc status={r.status} size={40} />
+            <span className="pa-mid"><span className="pa-nm" data-qm1="row-name">{r.agentName}</span><span className="pa-ag">{r.agency && r.agency !== "No agency" ? r.agency : ""}</span></span>
+            <span className="pa-rt"><span className="pa-st" data-qm1="row-status">{STAGE_NAME[r.status] ?? r.status}</span><span className={`pa-when${nd.mine ? " mv" : ""}`} data-qm1="row-when">{nd.text}</span></span>
+          </>
+        )}
       </button>
     </div>
   );

@@ -1,0 +1,44 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * PHONE ROUND TWO v1 — THE QUERIES TAB'S BAND TILES AND QUERY CARDS (ref design-refs/phone-round-two-v1/src/boot2.js
+ * `.btiles` `.btile` `.bsum` `.qc` `.qb` `.qm` `.qt` `.qn`, picked `p3`). Below 768px; nothing here reaches the desktop.
+ */
+@media (max-width: 767.98px) {
+  /* the band's numbers are the filters */
+  .pa-btiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 18px; }
+  .pa-btile {
+    border: 0; cursor: pointer; border-radius: 14px; background: rgba(255, 255, 255, 0.1); padding: 10px 8px 9px; text-align: left;
+    color: #fff; min-height: 70px; display: flex; flex-direction: column; justify-content: space-between; gap: 4px; min-width: 0;
+  }
+  .pa-btile b { font-family: var(--pa-type) !important; font-weight: 400 !important; font-size: 26px; line-height: 1; color: inherit; font-variant-numeric: tabular-nums; }
+  .pa-btile span { font: 400 12.5px/1.15 var(--pa-sans) !important; color: rgba(255, 255, 255, 0.82); }
+  .pa-btile[aria-pressed="true"] { background: #fff; color: var(--pa-ink); }
+  .pa-btile[aria-pressed="true"] span { color: var(--pa-ink-2, #3b4150); }
+  .pa-bsum { font-size: 14px; color: rgba(255, 255, 255, 0.75); margin-top: 12px; }
+  .pa-bsum b { color: #fff; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .pa-bsumall { border: 0; background: none; padding: 0; color: #fff; text-decoration: underline; font: 600 14px var(--pa-sans) !important; cursor: pointer; min-height: 32px; }
+
+  /* the list of cards: the groups keep the page's gutter; the head reads "With you · 2" */
+  .pa-q .pa-rows[data-qm1="list"] { margin: 0; }
+  .pa-q .pa-rows[data-qm1="list"] .pa-rowhd { padding: 18px 2px 8px; }
+  .pa-q [data-qm1="list"] .pa-sw { border-radius: 16px; margin-bottom: 10px; box-shadow: var(--pa-sh); background: var(--pa-card); }
+  .pa-q [data-qm1="list"] .pa-acts button { height: 100%; }
+  .pa-qc {
+    position: relative; display: block; width: 100%; padding: 0; border: 0; text-align: left; background: var(--pa-card); color: var(--pa-ink);
+    cursor: pointer; border-radius: 16px; overflow: hidden; transition: transform 0.32s var(--pa-spring);
+  }
+  .pa-qc.drag { transition: none; }
+  .pa-qcb { display: flex; justify-content: space-between; align-items: baseline; padding: 7px 14px; font: 600 12.5px/1.3 var(--pa-sans) !important; }
+  .pa-qcday { font-family: var(--pa-type) !important; font-weight: 400 !important; font-size: 13.5px; }
+  .pa-qcm { display: flex; gap: 12px; align-items: center; padding: 12px 14px 4px; }
+  .pa-qcm .pa-nm { font-size: 16px; }
+  .pa-qct { display: flex; gap: 4px; padding: 8px 14px 0; }
+  .pa-qct i { flex: 1; height: 5px; border-radius: 3px; background: var(--pa-fill); }
+  .pa-qct i.on { background: var(--pa-navy); }
+  .pa-qct i.on.you { background: var(--pa-blush); }
+  .pa-qcn { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 8px 14px 12px; }
+  .pa-qcn .pa-st { font: 600 14px/1.3 var(--pa-sans) !important; color: var(--pa-ink); flex: none; }
+  .pa-qcn .pa-when { margin: 0; font-size: 13.5px !important; text-align: right; min-width: 0; }
+}
