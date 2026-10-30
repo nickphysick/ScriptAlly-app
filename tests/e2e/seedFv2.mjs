@@ -8,6 +8,10 @@
  *   node tests/e2e/seedFv2.mjs dump [ms]         print the stage, the tour flag, the reminder flags and <ms>'s status
  *   node tests/e2e/seedFv2.mjs g1-prep           back up notifyPrefs and the ask's answer, then clear notifyPrefs.nudges
  *                                                and the answer (an account that has never chosen); g1-restore puts both back
+ *   node tests/e2e/seedFv2.mjs h1-dump|h1-prep|h1-finish|h1-restore <ms>
+ *                                                H1's Getting started on <ms>: what is done; prep backs up and clears its
+ *                                                Hide/Close flags and leaves exactly one row (comps) undone; finish ticks it
+ *                                                (three comps); restore puts the comps and the flags back exactly
  *   node tests/e2e/seedFv2.mjs draft-clear       delete the kept import review (importDrafts/{uid} and its parts)
  *   node tests/e2e/seedFv2.mjs imports-clean     delete what an F1 import brought in: agents named "Fv2 Sample …",
  *                                                their queries, those queries' logs and their feed rows
@@ -47,6 +51,34 @@ else if (cmd === "g1-prep" || cmd === "g1-restore") {
   } else {
     const b = JSON.parse(readFileSync(file, "utf8"));
     await updateDoc(uref, { notifyPrefs: b.notifyPrefs ?? deleteField(), "todoPrefs.dash.reminder": b.reminder ?? deleteField() });
+    unlinkSync(file);
+  }
+} else if (cmd.startsWith("h1-")) {
+  const mref = doc(db, "users", user.uid, "manuscripts", a);
+  const segId = a.replace(/[^A-Za-z0-9_-]/g, "_");
+  const file = `tests/e2e/.auth/fv2-h1-${segId}.json`;
+  mkdirSync("tests/e2e/.auth", { recursive: true });
+  const m = (await getDoc(mref)).data() ?? {};
+  const u0 = (await getDoc(uref)).data() ?? {};
+  if (cmd === "h1-dump") {
+    const vs = await getDocs(query(collection(db, "users", user.uid, "versions"), where("manuscriptId", "==", a)));
+    console.log(JSON.stringify({ comps: (m.comps ?? []).length, versions: [...new Set(vs.docs.map((d) => d.data().componentType))], hidden: u0.todoPrefs?.dash?.gsHidden?.[segId] ?? null, closed: u0.todoPrefs?.dash?.gsClosed?.[segId] ?? null }));
+    process.exit(0);
+  }
+  if (cmd === "h1-prep") {
+    if (!existsSync(file)) writeFileSync(file, JSON.stringify({ comps: m.comps ?? null, hidden: u0.todoPrefs?.dash?.gsHidden?.[segId] ?? null, closed: u0.todoPrefs?.dash?.gsClosed?.[segId] ?? null }));
+    await updateDoc(uref, { [`todoPrefs.dash.gsHidden.${segId}`]: deleteField(), [`todoPrefs.dash.gsClosed.${segId}`]: deleteField() });
+    await updateDoc(mref, { comps: [] });
+  } else if (cmd === "h1-finish") {
+    await updateDoc(mref, { comps: [
+      { title: "The Night Circus", author: "Erin Morgenstern", year: 2011, source: "user" },
+      { title: "Piranesi", author: "Susanna Clarke", year: 2020, source: "user" },
+      { title: "The Starless Sea", author: "Erin Morgenstern", year: 2019, source: "user" },
+    ] });
+  } else if (cmd === "h1-restore") {
+    const b = JSON.parse(readFileSync(file, "utf8"));
+    await updateDoc(mref, { comps: b.comps ?? deleteField() });
+    await updateDoc(uref, { [`todoPrefs.dash.gsHidden.${segId}`]: b.hidden ?? deleteField(), [`todoPrefs.dash.gsClosed.${segId}`]: b.closed ?? deleteField() });
     unlinkSync(file);
   }
 } else if (cmd === "draft-clear") {

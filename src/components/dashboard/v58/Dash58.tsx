@@ -50,7 +50,7 @@ import { Dash105Founding } from "../v105/Dash105Founding";
 import { agentCoverage, isPreQuery } from "../../../lib/dashFirstUse";
 import { ClosedHoop, AgentsHoop } from "../v60/Dash60Left";
 import { openNewAgentCard } from "../../../lib/agentCardStore";
-import { REMINDER_NOT_NOW, REMINDER_YES, firstNameOf, shouldAskReminder, answerFor, answerWrite, bookLabel, gsRowDone, dashState, seg, dashPrefsOf, gsHideWrite, gsOrder, legacyStartOf, pathAfter, type AnswerChoice, type AnswerWrite, type DashState, type GsLink, type StartPath } from "../../../lib/dashFirstVisit";
+import { gsCloseWrite, gsSlot, REMINDER_NOT_NOW, REMINDER_YES, firstNameOf, shouldAskReminder, answerFor, answerWrite, bookLabel, gsRowDone, dashState, seg, dashPrefsOf, gsHideWrite, gsOrder, legacyStartOf, pathAfter, type AnswerChoice, type AnswerWrite, type DashState, type GsLink, type StartPath } from "../../../lib/dashFirstVisit";
 import type { UserPaths } from "../../../lib/userPaths";
 import { SetUpCard } from "../fv1/SetUpCard";
 import { GsSheet } from "../fv2/GsSheet";
@@ -59,6 +59,7 @@ import { FirstVisitTour } from "../fv2/FirstVisitTour";
 import { ExampleDashboard } from "../fv2/ExampleDashboard";
 import { ResumeCard } from "../fv2/ResumeCard";
 import { ReminderAsk, ReminderDone } from "../fv2/ReminderAsk";
+import { FinishLine } from "../fv2/FinishLine";
 import type { DraftMeta } from "../../../lib/importDraft";
 /* ⚠️ LOADED WHEN FIRST NEEDED: `lib/importDraft` brings Firebase, and this page is also the onboarding ghost, mounted by
    suites and the import loader with no Firebase to load */
@@ -262,7 +263,13 @@ export const Dash58: React.FC<Dash58Props> = ({
   const gsHidden = !!scopeId && !!prefs.gsHidden[seg(scopeId)];
   /* first visit v2 (Part A): Getting started is the sheet under the manuscript card — always before the first query,
      and afterwards while any row is undone and the writer has not hidden it. Otherwise the goal sheet has the slot. */
-  const gsSheetOpen = empty || (!gsHidden && gsRows.some((r) => !r.done));
+  /* first visit v2 (Part H): every row done → the finish line, until it is closed; closed or hidden → the goal sheet */
+  const [gsClosedNow, setGsClosedNow] = useState(false);
+  const gsClosed = gsClosedNow || (!!scopeId && !!prefs.gsClosed[seg(scopeId)]);
+  const gsAllDone = gsRows.length > 0 && gsRows.every((r) => r.done);
+  const gsWhat = gsSlot({ pre: empty, hidden: gsHidden, closed: gsClosed, allDone: gsAllDone });
+  const gsSheetOpen = gsWhat !== "goal";
+  const closeGs = scopeId && onPrefs && !example ? () => { setGsClosedNow(true); void onPrefs(gsCloseWrite(scopeId)); } : undefined;
   /* "Hide" only once the first query exists: before it, Getting started is the page's whole job */
   const gsHide = !empty && scopeId && onPrefs ? () => { void onPrefs(gsHideWrite(scopeId)); } : undefined;
 
@@ -612,7 +619,8 @@ export const Dash58: React.FC<Dash58Props> = ({
                   onLog={logQuery} onRecord={() => onNavigate("queries", "Record a response")} onAddAgent={() => onNavigate("agents", "Add an agent")}
                   queries={queries} agents={agents} activities={activities} currentUser={currentUser} now={now} onGoal={onGoal}
                   buttons={!pre}
-                  belowCard={gsSheetOpen ? <GsSheet loading={loading} rows={gsRows} path={path} onGo={goGs} onHide={gsHide} /> : undefined}
+                  belowCard={gsSheetOpen ? <GsSheet loading={loading} rows={gsRows} path={path} onGo={goGs} onHide={gsHide}
+                    finish={gsWhat === "finish" ? <FinishLine path={path} onClose={closeGs} /> : undefined} /> : undefined}
                 />
               </div>
               {!pre && (
@@ -652,7 +660,7 @@ export const Dash58: React.FC<Dash58Props> = ({
               {!pre && (loading || plan.items.length > 0) && (
                 <div className="df1-slot df1-s-task" data-df1="task">
                   <Dash71Task loading={loading} plan={plan} ctx={taskCtx} onView={viewTask} innerRef={focusRef} look="next"
-                    thenLast={gsSheetOpen ? THEN_FINISH_GS : undefined} />
+                    thenLast={gsWhat === "list" ? THEN_FINISH_GS : undefined} />
                 </div>
               )}
               <div className="df1-slot df1-s-tip" data-df1="tip-slot"><F1Tip loading={loading} /></div>

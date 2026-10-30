@@ -114,6 +114,8 @@ export interface DashPrefs {
   tour: boolean;
   /** first visit v2 (Part G): the nudge-email ask's answer, once given */
   reminder: "yes" | "not_now" | null;
+  /** first visit v2 (Part H): Getting started closed from its finish line, per manuscript */
+  gsClosed: Record<string, true>;
 }
 
 const ROOT = "todoPrefs.dash";
@@ -124,7 +126,7 @@ export const seg = (id: string): string => id.replace(/[^A-Za-z0-9_-]/g, "_");
 /** Total reader: whatever is stored (or nothing), a well-formed value comes back. */
 export function dashPrefsOf(user: Pick<User, "todoPrefs"> | null | undefined): DashPrefs {
   const raw = ((user?.todoPrefs as { dash?: Record<string, unknown> } | undefined)?.dash ?? {}) as {
-    start?: Record<string, unknown>; tip?: unknown; wins?: Record<string, unknown>; gsHidden?: Record<string, unknown>; tour?: unknown; reminder?: unknown;
+    start?: Record<string, unknown>; tip?: unknown; wins?: Record<string, unknown>; gsHidden?: Record<string, unknown>; tour?: unknown; reminder?: unknown; gsClosed?: Record<string, unknown>;
   };
   const start: Record<string, LegacyStart> = {};
   for (const [k, v] of Object.entries(raw.start ?? {})) if (v === "yes" || v === "notyet") start[k] = v;
@@ -140,6 +142,7 @@ export function dashPrefsOf(user: Pick<User, "todoPrefs"> | null | undefined): D
     gsHidden: flags(raw.gsHidden),
     tour: raw.tour === "done",
     reminder: raw.reminder === "yes" || raw.reminder === "not_now" ? raw.reminder : null,
+    gsClosed: flags(raw.gsClosed),
   };
 }
 
@@ -200,6 +203,29 @@ export const pathAfter = (choice: AnswerChoice, status: ManuscriptStatus | strin
 
 export const tipWrite = (i: number): UserPaths => ({ [`${ROOT}.tip`]: i });
 export const gsHideWrite = (msId: string): UserPaths => ({ [`${ROOT}.gsHidden.${seg(msId)}`]: true });
+/** first visit v2 (Part H): "Close this list" on the finish line — the goal sheet takes the slot, and it never comes back */
+export const gsCloseWrite = (msId: string): UserPaths => ({ [`${ROOT}.gsClosed.${seg(msId)}`]: true });
+
+/* ── first visit v2, Part H: the finish line ── */
+export const FINISH = {
+  title: "That's you set up",
+  text: (path: StartPath | null) => (path === "writing" || path === "revising"
+    ? "Manuscript, comparable titles, a shortlist and your letter: all in. From here on, the dashboard shows what needs doing next."
+    : "Manuscript, agents, queries, materials and comparable titles: all in. From here on, the dashboard shows what needs doing next."),
+  close: "Close this list",
+  note: "Your weekly goal and streak go here instead.",
+} as const;
+
+/**
+ * What the Getting started slot holds (Parts A and H): the list while a row is undone; the finish line once every row
+ * is done and it has not been closed; and nothing — the goal sheet — once it is hidden or closed. Before the first
+ * query it is always the list (nothing can be hidden or closed then).
+ */
+export function gsSlot(i: { pre: boolean; hidden: boolean; closed: boolean; allDone: boolean }): "list" | "finish" | "goal" {
+  if (i.pre) return i.allDone ? "finish" : "list";
+  if (i.hidden || i.closed) return "goal";
+  return i.allDone ? "finish" : "list";
+}
 
 /** The key a stamp is remembered by: per kind and manuscript (an agent is the writer's, so it has none). */
 export const winKey = (kind: WinKind, msId: string | null): string => (kind === "agent" ? "agent" : `${kind}_${seg(msId ?? "none")}`);

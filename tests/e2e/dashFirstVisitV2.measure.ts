@@ -165,3 +165,44 @@ test("G1 · the ask shows after the first query; Yes writes one leaf and it neve
   }
   L.done(9);
 });
+
+/* ── H1 · the finish line ─────────────────────────────────────────────────────────────────────────── */
+test("H1 · ticking the fifth step shows the finish line; Close this list brings the goal sheet back for good", async ({ page }) => {
+  test.setTimeout(240_000);
+  const L = new Ledger("H1");
+  seed(`h1-prep ${Q}`);
+  try {
+    await openDash(page, SIZES[0], Q);
+    const count = (await vis(page, '[data-fv2="gs-count"]').textContent())?.trim() ?? "";
+    L.check("H1", "before", /^4 of 5 done/.test(count), `the list: ${count}`);
+    /* every page of the task card is drawn in one cell (the ghosts carry their "Then:" too); the LAST names Getting started */
+    const thens = () => vis(page, '[data-d71="task"]').locator(".df1-then").allTextContents();
+    const thenBefore = (await thens()).pop() ?? "";
+    L.check("H1", "before", /finish getting started/.test(thenBefore), `Then: ${thenBefore}`);
+    /* the fifth step, ticked by its record (three comparable titles) — the page follows its own data */
+    seed(`h1-finish ${Q}`);
+    const fin = vis(page, '[data-fv2="finish"]');
+    await fin.waitFor({ timeout: 20_000 });
+    L.check("H1", "finish", (await vis(page, '[data-fv2="finish-title"]').textContent())?.trim() === "That's you set up", "That's you set up");
+    L.check("H1", "finish", (await fin.textContent())?.includes("Your weekly goal and streak go here instead.") ?? false, "the note");
+    const sheet = await vis(page, '[data-fv2="gs"]').boundingBox();
+    const book = await vis(page, '[data-df1="book"]').boundingBox();
+    L.check("H1", "finish", !!sheet && !!book && Math.abs(sheet.y - (book.y + book.height)) <= 1, `in the goal slot, on the card's bottom (${sheet?.y} vs ${book ? book.y + book.height : "?"})`);
+    const thenFin = (await thens()).join(" | ");
+    L.check("H1", "then", !/getting started/i.test(thenFin), `Then: no longer names it (${thenFin || "none"})`);
+    await vis(page, '[data-fv2="finish-close"]').click();
+    await vis(page, '[data-df1="goal"]').waitFor({ timeout: 10_000 });
+    L.check("H1", "closed", (await page.locator('[data-fv2="gs"]').filter({ visible: true }).count()) === 0, "the goal sheet has the slot");
+    await page.waitForTimeout(1500);
+    await page.reload();
+    await page.locator('[data-d58="page"][data-loading="0"]').first().waitFor({ timeout: 25_000 });
+    await page.waitForTimeout(800);
+    L.check("H1", "closed", (await page.locator('[data-df1="goal"]').filter({ visible: true }).count()) === 1 && (await page.locator('[data-fv2="gs"]').filter({ visible: true }).count()) === 0, "still the goal sheet after a reload");
+    L.check("H1", "closed", JSON.parse(seed(`h1-dump ${Q}`)).closed === true, "the flag is stored");
+  } finally {
+    seed(`h1-restore ${Q}`);
+    const back = JSON.parse(seed(`h1-dump ${Q}`));
+    L.check("H1", "restore", back.comps === 0 && back.closed === null && back.hidden === null, `restored ${JSON.stringify(back)}`);
+  }
+  L.done(10);
+});
