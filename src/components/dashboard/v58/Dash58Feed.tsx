@@ -2,7 +2,8 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * DASHBOARD v58 — the activity feed: a floating ink tab, and a half-screen drawer from the right.
+ * DASHBOARD v58 — the activity feed: a half-screen drawer from the right (the phone dashboard's; the desktop
+ * dashboard's floating tab was retired by Dashboard feed v1, which puts the feed on the page).
  *
  * ⚠️ PORTALLED TO `document.body`, AND MOUNTED ONLY WHILE OPEN. `useOverlay` makes `#root` inert
  * and returns focus to whatever opened it; a drawer rendered inside the page would be inert itself.
@@ -26,30 +27,9 @@ import {
   windowEndLine, type DrawerEvent, type FeedFilter,
 } from "../../../lib/dashFeedDrawer";
 import { actModeFor, feedFamily } from "./feedFamily";
-import { badgeText } from "../../../lib/dashFeedSeen";
 import { buildQcRows } from "../../../lib/qcSummary";
 import type { DrawerMode } from "../../../lib/queryActions/drawerStore";
 
-const ListGlyph = () => (
-  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
-    <circle cx="4" cy="4" r="1.6" /><circle cx="4" cy="9" r="1.6" /><circle cx="4" cy="14" r="1.6" /><path d="M8 4h7M8 9h7M8 14h5" />
-  </svg>
-);
-
-/**
- * THE FOLDER TAB (v59): it rises from the page sheet's bottom edge in the desk's colour, with an
- * unseen badge. "LAST 30 DAYS" and the "{n} today" pill are retired. `unseen` is the count; the
- * badge is hidden at 0, and −1 holds its place while the page loads. `bump` replays the 250ms rise when the count goes up while the page is open.
- */
-export const FeedTab: React.FC<{ open: boolean; unseen: number; bump: boolean; onOpen: () => void }> = ({ open, unseen, bump, onOpen }) => (
-  <button type="button" className={`d59-ftab${bump ? " is-bump" : ""}`} data-d58="tab" aria-haspopup="dialog" aria-expanded={open} onClick={onOpen}
-    aria-label={unseen > 0 ? `Activity feed, ${unseen} new` : "Activity feed"}>
-    <span className="d59-ftabic" aria-hidden="true"><ListGlyph /></span>
-    <b>Activity feed</b>
-    {unseen !== 0 && <span className={`d59-badge${unseen < 0 ? " d58-sk" : ""}`} data-d58="tab-badge" aria-hidden="true">{unseen < 0 ? "0" : badgeText(unseen)}</span>}
-    <span className="d59-ftabup" aria-hidden="true">▲</span>
-  </button>
-);
 
 const Segs: React.FC<{ say: readonly FeedSeg[] }> = ({ say }) => (
   <>{say.map((s, i) => (s.who ? <b key={i}>{s.t}</b> : s.em ? <i key={i}>{s.t}</i> : <React.Fragment key={i}>{s.t}</React.Fragment>))}</>

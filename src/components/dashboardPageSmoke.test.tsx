@@ -87,7 +87,10 @@ describe("/dashboard renders", () => {
     expect(html).toContain('data-d60="closed-hoop"');
     /* ⚠️ RETARGETED (Dashboard v58): the header no longer states a figure — it is the book. The
        populated landmarks are the title-page eyebrow and the list column's own title. */
-    expect(html).toContain("— QUERYING —"); // v60.1: the eyebrow is the sidebar's status (fixture: Querying), no longer a constant
+    /* ⚠️ RETARGETED (Dashboard feed v1, Part A): the navy header band is retired from the querying page, so its eyebrow
+       is no landmark; the page is the three columns. */
+    expect(html).not.toContain("— QUERYING —");
+    expect(html).toContain('data-df1="cols"');
     /* ⚠️ RETARGETED (Dashboard v71): "What's on the list today?" is retired with the list's title row.
        The right column's landmark is the task card's region, labelled "Your tasks". */
     expect(html).not.toContain("What&#x27;s on the list today?");

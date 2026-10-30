@@ -11,7 +11,7 @@
  * ⚠️ NOTHING HERE WRITES A STATUS. Every action opens the flow that does: the query drawer
  * (`openQueryDrawer`), the agent card, or a route.
  */
-import { claimRightPanel, openQueryPanel, releaseRightPanel, subscribeRightPanel } from "../../../lib/queryPanelStore";
+import { openQueryPanel } from "../../../lib/queryPanelStore";
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
@@ -26,9 +26,6 @@ import { dashList, gettingStartedItem, gettingStartedPlan, type ListAction } fro
 import { buildQcRows } from "../../../lib/qcSummary";
 import type { TaskCtx } from "../../../lib/dashTaskCard";
 import { gettingStartedRows } from "../../../lib/dashEmpty";
-import { feedEntries } from "../../../lib/dashFeed";
-import { todayCount } from "../../../lib/dashFeedDrawer";
-import { readFeedSeen, unseenCount, writeFeedSeen } from "../../../lib/dashFeedSeen";
 import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
 import { openAgentCard } from "../../../lib/agentCardStore";
 import { queriesForIds, queriesPathFor } from "../../../lib/queriesFilterParam";
@@ -43,7 +40,7 @@ import { OneScreenChart } from "../OneScreenChart";
 import { Dash58Header } from "./Dash58Header";
 import { Dash71Right } from "../v71/Dash71Right";
 import { Dash71Task } from "../v71/Dash71Task";
-import { Dash58Feed, FeedTab } from "./Dash58Feed";
+import { F1Feed } from "../f1/F1Feed";
 import { Dash105Founding } from "../v105/Dash105Founding";
 import { agentCoverage, isPreQuery } from "../../../lib/dashFirstUse";
 import { ClosedHoop, AgentsHoop } from "../v60/Dash60Left";
@@ -67,6 +64,8 @@ import "../v77/dash77.css";
 import "../v105/dash105.css";
 /* ⚠️ AND THE FIRST VISIT LAST OF ALL (Dashboard first visit v1): its pre-query layout wins ties */
 import "../fv1/fv1.css";
+/* ⚠️ AND DASHBOARD FEED v1 AFTER EVERYTHING: the three-column layout (`data-mode="f1"`) wins every tie */
+import "../f1/df1.css";
 
 export interface Dash58Props {
   loading: boolean;
@@ -253,43 +252,6 @@ export const Dash58: React.FC<Dash58Props> = ({
     [queries, agents, scopedQueries, scopedActivities, now],
   );
 
-  /* ── the feed ── */
-  const feed30 = useMemo(
-    () => (loading ? [] : feedEntries({ activities: scopedActivities, queries, agents, manuscripts, now, seenAt: null, honestDates: true })),
-    [loading, scopedActivities, queries, agents, manuscripts, now],
-  );
-  const today = todayCount(feed30, now);
-  const [feedOpen, setFeedOpen] = useState(false);
-  /* v59: the tab's unseen badge — entries newer than this account last opened the drawer */
-  const feedUid = currentUser?.id ?? "";
-  const [feedSeenAt, setFeedSeenAt] = useState<number | null>(() => readFeedSeen(feedUid));
-  useEffect(() => { setFeedSeenAt(readFeedSeen(feedUid)); }, [feedUid]);
-  const unseen = loading ? 0 : unseenCount(feed30, feedSeenAt, now);
-  const lastUnseen = useRef<number | null>(null);
-  const [bump, setBump] = useState(false);
-  useEffect(() => {
-    if (loading) return undefined;
-    const prev = lastUnseen.current;
-    lastUnseen.current = unseen;
-    if (prev === null || unseen <= prev) return undefined;
-    setBump(true);
-    const t = window.setTimeout(() => setBump(false), 260);
-    return () => window.clearTimeout(t);
-  }, [unseen, loading]);
-  const openFeed = () => {
-    const at = Date.now();
-    writeFeedSeen(feedUid, at);
-    setFeedSeenAt(at);
-    setFeedOpen(true);
-  };
-  /* Query panel v1 — one right-hand panel at a time: the feed says when it opens, and closes when a query does */
-  useEffect(() => {
-    if (!feedOpen) return undefined;
-    claimRightPanel("feed");
-    const off = subscribeRightPanel((o) => { if (o && o !== "feed") setFeedOpen(false); });
-    return () => { off(); releaseRightPanel("feed"); };
-  }, [feedOpen]);
-
   const run = (a: ListAction) => {
     if (a.kind === "drawer") openQueryDrawer({ ...a.request });
     else if (a.kind === "agent") openAgentCard(a.agentId, { tab: a.tab, focus: a.focus, from: "hk", sequence: a.sequence });
@@ -345,8 +307,17 @@ export const Dash58: React.FC<Dash58Props> = ({
         set("--d58-inset-b", Math.max(0, win.bottom - pr.bottom) + (parseFloat(cs.paddingBottom) || 0));
         /* the buttons' right edge; before the first query there are none (first visit v1), so the header's
            own content edge — where they would end — stands in for it */
+        /* Dashboard feed v1: the pinned feed column — its top is where it rests (the first left card's top, measured
+           at the page's own scroll offset, so it reads the same scrolled or not), and its foot is 14px above the
+           sheet's bottom. ⚠️ MEASURED, NEVER `100vh`. */
+        const cols = root.querySelector<HTMLElement>('[data-df1="cols"]');
+        if (cols) {
+          const stick = cols.getBoundingClientRect().top - pr.top + port.scrollTop - (parseFloat(cs.paddingTop) || 0);
+          set("--df1-stick", Math.max(0, stick));
+          set("--df1-feed-h", Math.max(320, win.bottom - 14 - (pr.top + (parseFloat(cs.paddingTop) || 0) + Math.max(0, stick))));
+        }
         const btnEl = root.querySelector<HTMLElement>('[data-d58="buttons"]');
-        const head = root.querySelector<HTMLElement>('[data-d58="header"]');
+        const head = root.querySelector<HTMLElement>('[data-d58="header"]') ?? cols;
         const btns = btnEl?.getBoundingClientRect();
         const edge = btns && btns.width > 0 ? btns.right
           : head ? head.getBoundingClientRect().right - (parseFloat(getComputedStyle(head).paddingRight) || 0) : 0;
@@ -360,6 +331,7 @@ export const Dash58: React.FC<Dash58Props> = ({
     measure();
     const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(schedule) : null;
     ro?.observe(port);
+    ro?.observe(root);
     window.addEventListener("resize", schedule);
     return () => { ro?.disconnect(); window.removeEventListener("resize", schedule); if (frame) window.cancelAnimationFrame(frame); };
   }, []);
@@ -435,8 +407,8 @@ export const Dash58: React.FC<Dash58Props> = ({
   useEffect(() => {
     if (loading) return;
     const h = focusRef.current?.getBoundingClientRect().height ?? 0;
-    writeShape({ focusH: h > 0 ? Math.round(h) : shape.focusH, closed: closed && closed.total === 0 ? "none" : "some", today: unseen > 0, pre: empty, agents: agents.length > 0, hoopNeed: hoopNeedRef.current || shape.hoopNeed });
-  }, [loading, plan, closed, unseen, shape.focusH, empty, agents.length]);
+    writeShape({ focusH: h > 0 ? Math.round(h) : shape.focusH, closed: closed && closed.total === 0 ? "none" : "some", today: false, pre: empty, agents: agents.length > 0, hoopNeed: hoopNeedRef.current || shape.hoopNeed });
+  }, [loading, plan, closed, shape.focusH, empty, agents.length]);
 
   /* ── v60: first use, and the two hoops ──
      While loading, the page draws whichever state the shape memory last saw, so the swap never
@@ -500,102 +472,100 @@ export const Dash58: React.FC<Dash58Props> = ({
   const eyebrow = campaignEyebrow(scopedQueries);
   const title = (activeManuscript?.title ?? "").trim();
 
+  /* ── the querying page's cards (Dashboard feed v1). Each is the app's own component; the layout below places them. ── */
+  const chartCard = (
+    <div className="d58-active" data-d58="active">
+      <OneScreenChart
+        loading={loading}
+        queries={scopedQueries}
+        activities={scopedActivities}
+        agents={agents}
+        manuscripts={manuscripts}
+        /* Query panel v1: the query opens in the side panel, over this page */
+        onOpenQuery={(id) => openQueryPanel(id, "dashboard")}
+        activeCount={activeCount}
+        undatedCount={loading ? 0 : undatedLiveCount(scopedQueries)}
+        now={now}
+      />
+    </div>
+  );
+  const closedCard = (
+    <ClosedHoop loading={loading} tile={closed} play={paint} onSeeAll={() => navigate(queriesPathFor("closed"))}
+      /* v118 Part B — a slice or row opens the Query Centre on exactly its queries, this manuscript's only */
+      onOpen={(k) => closed && navigate(queriesForIds(closed.members[k] ?? [], CLOSED_BUCKETS.find((b) => b.key === k)?.label))}
+      queries={scopedQueries} agents={agents} manuscript={activeManuscript?.title ?? ""} noneWhileLoading={shape.closed === "none"} />
+  );
+  const agentsCard = (
+    <AgentsHoop loading={loading} cov={cov} play={paint} onReady={toContacts}
+      /* v118 Part B — a slice or row opens the Contact list filtered to that status */
+      onOpen={(k) => navigate(contactListForStatus(k))}
+      agents={agents} queries={queries} msId={scopeId}
+      onDiscover={() => onNavigate("agents", "Discover")} onImport={() => onNavigate("import")} />
+  );
+  const taskCard = <Dash71Task loading={loading} plan={plan} ctx={taskCtx} onView={viewTask} innerRef={focusRef} gs={gsHidden ? undefined : gs} />;
+  const foundingCard = <Dash105Founding loading={loading} uid={fwUid} name={currentUser?.name ?? null} seenTier={currentUser?.foundingSeenTier ?? null} onSeen={onFoundingSeen} />;
+
   return (
-    <div ref={rootRef} className="os-root d58" data-mode={pre ? "pre" : "q"} data-paint={paint ? "1" : undefined} style={noticeListH > 0 ? ({ ["--d58-notice-list-h" as string]: `${noticeListH}px` } as React.CSSProperties) : undefined}>
+    <div ref={rootRef} className="os-root d58" data-mode={pre ? "pre" : "f1"} data-paint={paint ? "1" : undefined} style={noticeListH > 0 ? ({ ["--d58-notice-list-h" as string]: `${noticeListH}px` } as React.CSSProperties) : undefined}>
       <DashPopupProvider rootRef={rootRef}>
         <div className="d58-page" data-d58="page" data-loading={loading ? "1" : "0"}>
           {notice && <ImportNoticeRow notice={notice} onDismiss={dismissNotice} onListHeight={setNoticeListH} />}
-          <Dash58Header
-            loading={loading}
-            title={title}
-            author={author}
-            onLog={() => openQueryDrawer({ mode: "log", ...(scopeId ? { manuscriptId: scopeId } : {}) })}
-            onRecord={() => onNavigate("queries", "Record a response")}
-            onAddAgent={() => onNavigate("agents", "Add an agent")}
-            eyebrow={eyebrow}
-            /* first visit v1: no buttons before the first query; Record a response only once one exists */
-            buttons={pre ? "none" : "all"}
-          />
-          <div className="d58-body" data-d58="body">
-            <div className="d58-left" data-d58="left" data-pre={pre ? "1" : "0"}>
-              {pre ? (
-                <>
+          {pre ? (
+            <>
+              {/* first visit v1, unchanged: the book's header, the set-up card and the Mentor */}
+              <Dash58Header
+                loading={loading}
+                title={title}
+                author={author}
+                onLog={logQuery}
+                onRecord={() => onNavigate("queries", "Record a response")}
+                onAddAgent={() => onNavigate("agents", "Add an agent")}
+                eyebrow={eyebrow}
+                buttons="none"
+              />
+              <div className="d58-body" data-d58="body">
+                <div className="d58-left" data-d58="left" data-pre="1">
                   <SetUpCard
                     loading={loading} title={title} path={path} onPath={choosePath}
                     agents={loading ? (hasAgents ? 1 : 0) : agents.length}
                     onImport={() => onNavigate("import")} onLog={logQuery} onAddAgent={addAgent} onDiscover={() => onNavigate("agents", "Discover")}
                   />
                   <MentorTip loading={loading} index={tipIndex} onStep={(d) => setTip(stepTip(tipIndex, d, DASH_TIPS.length))} />
-                </>
-              ) : (
-                <>
-                  <div className="d58-active" data-d58="active">
-                    <OneScreenChart
-                      loading={loading}
-                      queries={scopedQueries}
-                      activities={scopedActivities}
-                      agents={agents}
-                      manuscripts={manuscripts}
-                      /* Query panel v1: the query opens in the side panel, over this page */
-                      onOpenQuery={(id) => openQueryPanel(id, "dashboard")}
-                      activeCount={activeCount}
-                      undatedCount={loading ? 0 : undatedLiveCount(scopedQueries)}
-                      now={now}
-                    />
-                  </div>
-                  {/* v60: Closed folds into a pair of hoops beneath the full-width chart, beside Agents on file */}
-                  <div className="d60-hoops" data-d60="hoops">
-                    <ClosedHoop loading={loading} tile={closed} play={paint} onSeeAll={() => navigate(queriesPathFor("closed"))}
-                      /* v118 Part B — a slice or row opens the Query Centre on exactly its queries, this manuscript's only */
-                      onOpen={(k) => closed && navigate(queriesForIds(closed.members[k] ?? [], CLOSED_BUCKETS.find((b) => b.key === k)?.label))}
-                      queries={scopedQueries} agents={agents} manuscript={activeManuscript?.title ?? ""} noneWhileLoading={shape.closed === "none"} />
-                    <AgentsHoop loading={loading} cov={cov} play={paint} onReady={toContacts}
-                      /* v118 Part B — a slice or row opens the Contact list filtered to that status */
-                      onOpen={(k) => navigate(contactListForStatus(k))}
-                      agents={agents} queries={queries} msId={scopeId}
-                      onDiscover={() => onNavigate("agents", "Discover")} onImport={() => onNavigate("import")} />
-                  </div>
-                </>
-              )}
+                </div>
+                {/* Part B: the first-win stamp — struck over the body, once per kind, user and manuscript */}
+                <FirstWinStamp uid={currentUser?.id ?? null} active={onDash && !loading && !rootRef.current?.closest(".im-ghost")} shown={prefs.wins} onPrefs={onPrefs} />
+                <Dash71Right task={taskCard} panel={foundingCard} />
+              </div>
+            </>
+          ) : (
+            /* ⚠️ DASHBOARD FEED v1: THREE COLUMNS — you and your queries · the feed · what to do. The page may scroll;
+               only the feed column is pinned, and it scrolls inside itself. At a sheet of 1300px or less the left and
+               right columns' cards share one column (`display: contents`, placed by row) and the feed is the second. */
+            <div className="df1-cols" data-df1="cols">
+              <div className="df1-left" data-df1="left">
+                <div className="df1-slot df1-s-queries" data-df1="queries">{chartCard}{closedCard}</div>
+                <div className="df1-slot df1-s-agents" data-df1="agents">{agentsCard}</div>
+                <div className="df1-slot df1-s-founding" data-df1="founding">{foundingCard}</div>
+              </div>
+              <div className="df1-feed" data-df1="feed">
+                <F1Feed loading={loading} activities={scopedActivities} queries={queries} agents={agents} manuscripts={manuscripts} now={now} />
+              </div>
+              <div className="df1-right" data-df1="right">
+                <div className="df1-slot df1-s-task" data-df1="task">{taskCard}</div>
+              </div>
+              <FirstWinStamp uid={currentUser?.id ?? null} active={onDash && !loading && !rootRef.current?.closest(".im-ghost")} shown={prefs.wins} onPrefs={onPrefs} />
             </div>
-            {/* Part B: the first-win stamp — struck over the body, once per kind, user and manuscript */}
-            <FirstWinStamp uid={currentUser?.id ?? null} active={onDash && !loading && !rootRef.current?.closest(".im-ghost")} shown={prefs.wins} onPrefs={onPrefs} />
-            <Dash71Right
-              task={<Dash71Task loading={loading} plan={plan} ctx={taskCtx} onView={viewTask} innerRef={focusRef} gs={gsHidden ? undefined : gs} />}
-              panel={
-                <Dash105Founding loading={loading} uid={fwUid} name={currentUser?.name ?? null} seenTier={currentUser?.foundingSeenTier ?? null} onSeen={onFoundingSeen} />
-              }
-            />
-          </div>
+          )}
         </div>
-
       </DashPopupProvider>
       {/* ⚠️ ONLY WHILE THE DASHBOARD IS THE PAGE ON SCREEN: every page stays mounted, and a layer
-          portalled into the shell's sheet outlives its page otherwise. Never in the onboarding ghost. */}
+          portalled into the shell's sheet outlives its page otherwise. Never in the onboarding ghost.
+          Dashboard feed v1: the floating feed tab is retired; the hawk's shadow stays. */}
       {sheet && onDash && !rootRef.current?.closest(".im-ghost") && createPortal(
         <div className="d58-layer d59-sheet" data-d58="sheet-layer" style={{ ["--d59-tab-r" as string]: `${sheet.r}px` } as React.CSSProperties}>
           <img className="d59-hawkshadow" data-d58="shadow" alt="" aria-hidden="true" draggable={false} src={`${DASH_SHADOW.src}?v=${DASH_SHADOW.version}`} />
-          <FeedTab open={feedOpen} unseen={loading ? (shape.today ? -1 : 0) : unseen} bump={bump} onOpen={openFeed} />
         </div>,
         sheet.el,
-      )}
-      {feedOpen && (
-        <Dash58Feed
-          title={title}
-          activities={scopedActivities}
-          queries={queries}
-          scopedQueries={scopedQueries}
-          agents={agents}
-          manuscripts={manuscripts}
-          now={now}
-          honestDates
-          onClose={() => setFeedOpen(false)}
-          onAct={(queryId, mode) => {
-            /* the drawer closes first: one asking surface at a time, and the flow is not behind it */
-            setFeedOpen(false);
-            openQueryDrawer(mode === "offer" ? { mode, queryId, preset: { step: 1 } } : { mode, queryId });
-          }}
-        />
       )}
     </div>
   );

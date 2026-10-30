@@ -1,0 +1,95 @@
+/* ══ DASHBOARD FEED v1 — three columns, the activity feed in the middle ═══════════════════════════════════════════
+   Ref: design-refs/dashboard-feed-v1/ (dashboard-feed-v1.html + screens/*), read rendered at 1512×982 and 1280×800.
+
+   Left: you and your queries. Middle: the activity feed, sticky, scrolling inside itself. Right: what to do.
+   ⚠️ THE PAGE MAY SCROLL. The one-screen rule (`.d58`'s height from the scrollport) is for the first-visit layout
+   only; here `.d58` is as tall as its content and the shell's `.ws-wbody` scrolls it. Only the feed is pinned.
+   ⚠️ EVERYTHING HERE IS SCOPED TO `.d58[data-mode="f1"]`, which the querying page alone carries. The first-visit page
+   (`data-mode="pre"`) keeps every older sheet's layout, untouched.
+   ⚠️ TWO COLUMNS BY A CONTAINER QUERY ON THE SHEET (`.d58-page`), NEVER THE VIEWPORT: an expanded sidebar narrows
+   the sheet without the window changing. */
+
+.d58[data-mode="f1"] {
+  /* the sheet's side padding, halved from v58's 50 (34 under 1366): the ref's 20 — see the report */
+  --d58-gutter: 20px;
+  height: auto;
+}
+.d58[data-mode="f1"] .d58-page {
+  flex: none;
+  container: df1 / inline-size;
+  padding-top: 14px;
+  /* ⚠️ 14, THE FEED'S OWN FOOT, NOT MORE: a sticky grid item is held inside its grid area, so with more room below the
+     grid than the feed keeps below itself, a page scrolled to its end pushes the pinned feed up by the difference
+     (40 here pushed it 26px under the sheet's top edge — measured) */
+  padding-bottom: 14px;
+}
+
+.df1-cols {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 31fr) minmax(0, 38fr) minmax(0, 31fr);
+  column-gap: 30px;
+  align-items: start;
+}
+.df1-left, .df1-right { min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+.df1-slot { min-width: 0; }
+
+/* ── the feed column: pinned at the first left card's top, its foot 14px above the sheet's bottom ──
+   ⚠️ BOTH NUMBERS ARE PUBLISHED BY THE PAGE (`--df1-stick`, `--df1-feed-h`, measured in Dash58), never `100vh`:
+   the page starts under the top bar and the sheet stops short of the window. */
+.df1-feed {
+  position: sticky;
+  top: var(--df1-stick, 0px);
+  height: var(--df1-feed-h, 640px);
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── two columns: the cards in one column by row, the feed beside them spanning every row ── */
+@container df1 (max-width: 1300px) {
+  .df1-cols { grid-template-columns: minmax(0, 1fr) minmax(0, 1.12fr); column-gap: 26px; row-gap: 14px; }
+  .df1-left, .df1-right { display: contents; }
+  .df1-slot { grid-column: 1; }
+  .df1-s-book { grid-row: 1; }
+  .df1-s-task { grid-row: 2; }
+  .df1-s-tip { grid-row: 3; }
+  .df1-s-scout { grid-row: 4; }
+  .df1-s-queries { grid-row: 5; }
+  .df1-s-agents { grid-row: 6; }
+  .df1-s-founding { grid-row: 7; }
+  .df1-s-footer { grid-row: 8; }
+  .df1-feed { grid-column: 2; grid-row: 1 / span 8; }
+}
+
+/* ── the cards in their slots (refined by Parts B–C) ── */
+.d58[data-mode="f1"] .df1-s-queries .d58-active { height: 330px; display: flex; flex-direction: column; }
+.d58[data-mode="f1"] .df1-s-queries .d58-active > .os-card { flex: 1 1 0; min-height: 0; }
+.d58[data-mode="f1"] .df1-s-founding { height: 300px; display: flex; }
+.d58[data-mode="f1"] .df1-s-founding > .d105-fw { flex: 1 1 0; }
+
+.d58[data-mode="f1"] .df1-s-task .d71-task { flex: none; }
+/* every item of the task card's cycle in one cell, so the card is the tallest item's height (v77's rule, which names
+   only the older modes) */
+.d58[data-mode="f1"] .d71-tbstack { display: grid; }
+.d58[data-mode="f1"] .d71-tbstack > .d71-tb { grid-area: 1 / 1; justify-content: flex-start; }
+
+/* ── the feed (Part A: the switch and the scroller) ── */
+.df1-feedcol { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; }
+.df1-sw { flex: none; display: flex; margin-bottom: 10px; padding: 3px; border-radius: 999px; background: #ece7de; }
+.d58 .df1-sw button {
+  flex: 1 1 0; height: 32px; border: 0; border-radius: 999px; background: none; cursor: pointer;
+  font-family: var(--d58-serif) !important; font-size: 14px; font-weight: 600; color: #3b322c;
+}
+.d58 .df1-sw button[aria-pressed="true"] { background: #fff; color: var(--d58-ink); box-shadow: 0 1px 3px rgba(28, 19, 15, 0.12); }
+.df1-sw button:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
+.df1-fscroll {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  margin: 0 -6px;
+  padding: 0 6px 8px;
+  -webkit-mask-image: linear-gradient(#000 calc(100% - 28px), transparent);
+  mask-image: linear-gradient(#000 calc(100% - 28px), transparent);
+}
