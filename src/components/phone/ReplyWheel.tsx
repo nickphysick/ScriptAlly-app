@@ -34,8 +34,11 @@ export const ReplyWheel: React.FC<{ sentMs: number; days: number; onDays: (d: nu
       </div>
       <div className="rw-whl" data-rw="wheel">
         <div className="rw-band" aria-hidden="true" />
-        <Wheel n={53} value={wk} onChange={(v) => onDays(v * 7 + cur.current.dy)} label="Weeks" data="weeks" /><span className="rw-u">weeks</span>
-        <Wheel n={7} value={dy} onChange={(v) => onDays(cur.current.wk * 7 + v)} label="Days" data="days" /><span className="rw-u">days</span>
+        {/* each column writes its own value into the ref BEFORE reporting the total: when both columns settle inside one
+            90ms window there is no render between the two callbacks, so the second must see the first's answer, not
+            the last render's (measured: weeks 11 then days 3 saved 8w3d, the weeks lost) */}
+        <Wheel n={53} value={wk} onChange={(v) => { cur.current.wk = v; onDays(v * 7 + cur.current.dy); }} label="Weeks" data="weeks" /><span className="rw-u">weeks</span>
+        <Wheel n={7} value={dy} onChange={(v) => { cur.current.dy = v; onDays(cur.current.wk * 7 + v); }} label="Days" data="days" /><span className="rw-u">days</span>
       </div>
       <p className="rw-dl" data-rw="dateline">Expected by {wdm(due)}{dy === 0 ? ` (${wk} ${wk === 1 ? "week" : "weeks"} after you sent it)` : ` (${days} days after you sent it)`}</p>
     </div>
