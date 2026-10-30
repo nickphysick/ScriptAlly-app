@@ -1300,6 +1300,41 @@ service cloud.firestore {
     // ROUTE: Founding writer stats (Dashboard v93) — NO client writes. The foundingStats functions recompute every
     // writer's contributions, tier and standing from betaFeedback (Admin SDK) on any feedback write and nightly. A
     // writer reads their OWN doc; an admin reads all.
+    // ROUTE: importDrafts — Dashboard first visit v2, Part F. A Smart Import review in progress, kept so a writer who
+    // leaves halfway can pick up where they left off. ONE live draft per writer, at their own uid; its JSON payload is
+    // split into ordered parts (`parts/{n}`) so a long file never meets the 1MB document limit. ONLY THE OWNER reads or
+    // writes it. `updatedAt` must be the server's time, so "kept for 7 days from the last change" (the daily clean-up,
+    // functions/src/importDrafts.ts) is measured by a clock the client cannot set. Never the original file.
+    match /importDrafts/{userId} {
+      allow read, delete: if isOwner(userId);
+      allow create, update: if isOwner(userId) && isValidImportDraft(incoming());
+      match /parts/{part} {
+        allow read, delete: if isOwner(userId);
+        allow create, update: if isOwner(userId)
+          && part.matches('^[0-9]{1,3}$')
+          && incoming().keys().hasOnly(['i', 'data'])
+          && incoming().i is int && incoming().i >= 0 && incoming().i < 1000
+          && incoming().data is string && incoming().data.size() <= 900000;
+      }
+    }
+
+    function isValidImportDraft(d) {
+      return d.keys().hasOnly(['uid', 'fileName', 'source', 'manuscriptId', 'step', 'agentsChecked', 'agentsTotal',
+          'queriesChecked', 'queriesTotal', 'queriesStarted', 'parts', 'startedAt', 'updatedAt', 'version'])
+        && d.uid == request.auth.uid
+        && d.fileName is string && d.fileName.size() <= 300
+        && d.source in ['smart', 'template']
+        && (d.manuscriptId == null || (d.manuscriptId is string && d.manuscriptId.size() <= 128))
+        && d.step in ['duplicates', 'agents', 'queries']
+        && d.agentsChecked is int && d.agentsTotal is int && d.queriesChecked is int && d.queriesTotal is int
+        && d.agentsChecked >= 0 && d.agentsTotal >= d.agentsChecked && d.queriesChecked >= 0 && d.queriesTotal >= d.queriesChecked
+        && d.queriesStarted is bool
+        && d.parts is int && d.parts >= 1 && d.parts <= 1000
+        && d.startedAt is string && d.startedAt.size() <= 40
+        && d.updatedAt == request.time
+        && d.version == 1;
+    }
+
     match /foundingStats/{userId} { allow read: if isAdmin() || (isSignedIn() && request.auth.uid == userId); allow write: if false; }
 
     // ROUTE: Weekly pulse (Dashboard v59) — NO client writes. The founding writer panel's faces post

@@ -84,3 +84,22 @@
 .fv2-exback:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
 /* the example's own page sits inside this page's: it pays no second top padding */
 .d58 .fv2-exbody > .d58 > .d58-page { padding: 0; }
+
+/* ── Part F · Pick up where you left off ── */
+.d58 .fv2-resume > .os-frame { padding: 0 0 22px; }
+.fv2-rbody { padding: 16px 20px 0; }
+.fv2-rfile { display: flex; align-items: center; gap: 12px; }
+.fv2-rdoc { flex: none; width: 42px; height: 42px; display: grid; place-items: center; border-radius: 10px; background: #f3efe9; }
+.fv2-rdoc svg { width: 20px; height: 20px; fill: none; stroke: var(--d58-ink); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.fv2-rfw { min-width: 0; }
+.d58 .fv2-rfw b { display: block; font: 700 15.5px/1.3 var(--d58-serif) !important; color: var(--d58-ink); overflow-wrap: anywhere; }
+.d58 .fv2-rfw small { display: block; font: 400 13.5px/1.35 var(--d58-serif) !important; color: rgba(28, 19, 15, 0.6); }
+.fv2-rtiles { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; margin-top: 14px; }
+.fv2-rtile { min-width: 0; padding: 10px 12px 12px; border-radius: 10px; background: #f3efe9; }
+.d58 .fv2-rtile b { display: block; font: 700 14.5px/1.3 var(--d58-serif) !important; color: var(--d58-ink); }
+.d58 .fv2-rtile span { display: block; font: 400 13.5px/1.35 var(--d58-serif) !important; color: rgba(28, 19, 15, 0.62); }
+.fv2-rbar { display: block; height: 4px; margin-top: 10px; border-radius: 2px; background: #ddd5ca; overflow: hidden; }
+.fv2-rbar > i { display: block; height: 100%; border-radius: 2px; background: var(--d58-navy); }
+.d58 .fv2-rtext { margin: 14px 0 0; font: 400 15px/1.5 var(--d58-serif) !important; color: var(--d58-ink); }
+.d58 .fv2-rask p { margin: 12px 0 0; font: 600 15px/1.45 var(--d58-serif) !important; color: var(--d58-ink); }
+.d58 .fv2-resume .fv1-lnk { color: var(--d58-ink); }

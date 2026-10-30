@@ -57,6 +57,11 @@ import { GsSheet } from "../fv2/GsSheet";
 import { EmptyFeed } from "../fv2/EmptyFeed";
 import { FirstVisitTour } from "../fv2/FirstVisitTour";
 import { ExampleDashboard } from "../fv2/ExampleDashboard";
+import { ResumeCard } from "../fv2/ResumeCard";
+import type { DraftMeta } from "../../../lib/importDraft";
+/* ⚠️ LOADED WHEN FIRST NEEDED: `lib/importDraft` brings Firebase, and this page is also the onboarding ghost, mounted by
+   suites and the import loader with no Firebase to load */
+const draftStore = () => import("../../../lib/importDraft");
 import { TOUR_DONE_PATH, TOUR_STOPS, registerTourReplay, tourDecision, tourState } from "../../../lib/dashTour";
 import { FirstWinStamp } from "../fv1/FirstWinStamp";
 import "../oneScreen.css";
@@ -454,7 +459,18 @@ export const Dash58: React.FC<Dash58Props> = ({
   const pre = loading ? shape.pre : empty;
   const hasAgents = loading ? shape.agents : agents.length > 0;
   /* first visit v2 (Part A): which first-visit state the page is in; while loading, the shape memory's */
-  const fvState: DashState = loading ? (shape.pre ? "pre" : "querying") : dashState(scopedQueries, false);
+  /* ── first visit v2 (Part F): a Smart Import review left halfway, for this book (or for a book set-up has not made yet) ── */
+  const [draftMeta, setDraftMeta] = useState<DraftMeta | null>(null);
+  const draftUid = example ? null : currentUser?.id ?? null;
+  useEffect(() => {
+    if (!draftUid) { setDraftMeta(null); return undefined; }
+    let off: (() => void) | null = null;
+    let live = true;
+    void draftStore().then((m) => { if (live) off = m.subscribeDraftMeta(draftUid, setDraftMeta); });
+    return () => { live = false; off?.(); };
+  }, [draftUid]);
+  const resumeDraft = draftMeta && (draftMeta.manuscriptId === null || draftMeta.manuscriptId === scopeId) ? draftMeta : null;
+  const fvState: DashState = loading ? (shape.pre ? "pre" : "querying") : dashState(scopedQueries, !!resumeDraft);
 
   /* ── first visit v2 (Part D): the three-stop tour ──
      Decided ONCE, on the first loaded dashboard of an account (the stored flag): run it before the first query, or record
@@ -596,12 +612,16 @@ export const Dash58: React.FC<Dash58Props> = ({
             </div>
             {pre ? (
               <div className="df1-feed fv2-mid" data-df1="feed" data-fv2="mid">
-                <SetUpCard
+                {fvState === "resume" && resumeDraft ? (
+                  <ResumeCard meta={resumeDraft} now={now}
+                    onCarryOn={() => navigate("/import?resume=1")}
+                    onStartAgain={() => { if (draftUid) void draftStore().then((m) => m.deleteDraft(draftUid)).finally(() => navigate("/import?start=smart")); }} />
+                ) : <SetUpCard
                   loading={loading} title={title} path={path} onChoose={choose}
                   agents={loading ? (hasAgents ? 1 : 0) : agents.length}
                   onImport={() => onNavigate("import")} onLog={logQuery} onAddAgent={addAgent} onDiscover={() => onNavigate("agents", "Discover")}
                   onComps={() => goGs("comps")}
-                />
+                />}
                 <EmptyFeed onExample={example ? undefined : openExample} />
               </div>
             ) : (

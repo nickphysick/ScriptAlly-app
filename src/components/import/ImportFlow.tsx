@@ -15,7 +15,15 @@
  * fork, the Import page's tiles); while the flow is `idle` it renders only its two file pickers,
  * which the host opens through the ref.
  */
-import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
+import type { DraftMeta } from "../../lib/importDraft";
+/* ⚠️ LOADED WHEN FIRST NEEDED: `lib/importDraft` brings Firebase with it, and this flow is mounted by suites and labs that
+   have no Firebase to load */
+const draftStore = () => import("../../lib/importDraft");
+import type { DraftPayload, ReviewSnapshot } from "../../lib/importDraftModel";
+
+/** First visit v2 (Part F): a draft is saved this long after the review's last change. */
+export const DRAFT_SAVE_MS = 800;
 import { useScriptAllyDb } from "../../lib/db";
 import { QueryStatus } from "../../types";
 import { SmartImportResult } from "../../types/smartImport";
@@ -61,8 +69,11 @@ export interface ImportFlowHandle {
   /** A file dropped on the host's drop zone: the Smart Import path. */
   dropFile: (file: File) => void;
   /** Drop the file that was read and everything answered about it, and go back to idle. Nothing has
-   *  been written at any point before the import, so there is nothing to undo. */
+   *  been written at any point before the import, so there is nothing to undo — except the kept draft
+   *  (Dashboard first visit v2, Part F), which a discard deletes. */
   reset: () => void;
+  /** Dashboard first visit v2 (Part F): reopen a kept review at the step and row it was left on. */
+  resume: (d: { meta: DraftMeta; payload: DraftPayload }) => void;
 }
 
 export interface ImportFlowProps {
@@ -140,6 +151,35 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
   /** Rows of the file the account already holds (same agent, manuscript and sent day). They are
    *  taken out before the summary, so the summary and the review count only what will be written. */
   const [already, setAlready] = useState<AlreadyRow[]>([]);
+
+  /* ── Dashboard first visit v2 (Part F): the review, kept as a draft while it is open ──
+     Every change the review reports is saved (debounced) to `importDrafts/{uid}`: the file's name, the read, every
+     decision so far, the step and counts — never the file. Finishing the import, or discarding it, deletes it. A save
+     that fails is logged and the review carries on. Never in the lab, and never without a writer. */
+  const [resumeSnap, setResumeSnap] = useState<ReviewSnapshot | undefined>(undefined);
+  const draftStarted = useRef<string | null>(null);
+  const draftTimer = useRef(0);
+  const draftLive = useRef(false);
+  const uid = currentUser?.id ?? null;
+  const keepDraft = useCallback((snap: ReviewSnapshot) => {
+    if (lab || !uid || !validated) return;
+    if (!draftStarted.current) draftStarted.current = new Date().toISOString();
+    draftLive.current = true;
+    window.clearTimeout(draftTimer.current);
+    const input = { uid, fileName, source: importSource, manuscriptId: manuscriptId ?? null, startedAt: draftStarted.current,
+      payload: { result: validated.result, review: snap, already } };
+    draftTimer.current = window.setTimeout(() => {
+      if (!draftLive.current) return;
+      void draftStore().then((m) => m.saveDraft(input)).catch((e) => console.error("Import draft not kept:", e));
+    }, DRAFT_SAVE_MS);
+  }, [lab, uid, validated, fileName, importSource, manuscriptId, already]);
+  const dropDraft = () => {
+    window.clearTimeout(draftTimer.current);
+    draftLive.current = false;
+    draftStarted.current = null;
+    if (uid && !lab) void draftStore().then((m) => m.deleteDraft(uid)).catch(() => { /* nothing kept, or already gone */ });
+  };
+  useEffect(() => () => window.clearTimeout(draftTimer.current), []);
 
   /**
    * Take the file as read, set aside what is already in the account, and show what is left.
@@ -274,6 +314,8 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
         delay(lab?.floorMs ?? 5000),
       ]);
       setOutcome(committed);
+      /* first visit v2 (Part F): the import is finished, so the kept review goes */
+      dropDraft();
       /* ⚠️ THE SKIPPED ROWS ARE KEPT FOR THE DASHBOARD HERE, when the commit returns and before the
          loader completes. The validation is of the result the REVIEW handed back — the one that was
          committed — not of the first read. A commit that skipped nothing clears any older notice. */
@@ -308,10 +350,21 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
     chooseTemplate: () => templateInputRef.current?.click(),
     dropFile: pickFile,
     reset: () => {
+      dropDraft();
+      setResumeSnap(undefined);
       setPendingFile(null); setValidated(null); setRawSample([]); setExtractComplete(false); setOutcome(null);
       setCommitError(null); setManuscriptFailed(false); setImportComplete(false); setBlocked(null); setRowsRead(null); setFileName("");
       setAlready([]); setNothingNew(false);
       setScreen("idle");
+    },
+    resume: ({ meta, payload }) => {
+      draftStarted.current = meta.startedAt;
+      setFileName(meta.fileName);
+      setImportSource(meta.source);
+      setAlready(payload.already ?? []);
+      setValidated(validateSmartImport(payload.result));
+      setResumeSnap(payload.review);
+      setScreen("review");
     },
   }));
 
@@ -446,6 +499,8 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
         error={manuscriptFailed ? manuscriptErrorLine(hostError) : commitError}
         onImport={handleImport}
         onCancel={onCancel}
+        resume={resumeSnap}
+        onChange={keepDraft}
       />
     );
   }

@@ -118,6 +118,9 @@ describe("the Firestore handle has exactly one home", () => {
       /* the eleventh (Dashboard v93): it reads every betaFeedback doc and writes every foundingStats doc, and its
          trigger names the same DATABASE_ID — so on prod it listens to the named database, not a (default) */
       "foundingStats.ts",
+      /* the twelfth (Dashboard first visit v2, Part F): the daily clean-up deletes kept import reviews — every draft and
+         its parts — so it must be on the one handle, which on prod is the named database */
+      "importDrafts.ts",
     ];
     /* ⚠️ RECONCILED AGAINST index.ts RATHER THAN TRUSTED AS A HAND-WRITTEN LIST — a literal here
      * goes stale the day a ninth function is exported, and goes stale silently. */
