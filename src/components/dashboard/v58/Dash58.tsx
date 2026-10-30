@@ -570,7 +570,7 @@ export const Dash58: React.FC<Dash58Props> = ({
                 <div className="df1-slot df1-s-founding" data-df1="founding">{foundingF1}</div>
               </div>
               <div className="df1-feed" data-df1="feed">
-                <F1Feed loading={loading} activities={scopedActivities} queries={queries} agents={agents} manuscripts={manuscripts} now={now} />
+                <F1Feed loading={loading} activities={scopedActivities} queries={queries} agents={agents} manuscripts={manuscripts} userName={author} now={now} />
               </div>
               <div className="df1-right" data-df1="right">
                 <div className="df1-slot df1-s-task" data-df1="task">{taskCard}</div>
