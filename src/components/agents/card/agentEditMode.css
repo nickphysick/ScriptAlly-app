@@ -59,3 +59,12 @@
 .cl252-em .cl252-emfoot .qad-conf span:not([class]) { font: 400 13px/1.35 var(--sp-serif) !important; }
 
 @media (prefers-reduced-motion: reduce) { .cl252-em .qad-conf { animation: none; } }
+
+/* Phone fixes v1, G3: on a phone the summary shares one row with Cancel and "Add to your list", whose nowrap labels take
+   the width, so "A name or an agency is needed" was squeezed to one word per line (J1, 393px). Below 768 the summary
+   takes a row of its own above the two buttons, which share the next row. */
+@media (max-width: 767.98px) {
+  .cl252-em .cl252-emfoot { flex-wrap: wrap; padding: 12px 16px 14px; }
+  .cl252-em .cl252-sum { flex: 1 0 100%; }
+  .cl252-em .cl252-emfoot :is(.cl252-b1, .cl252-b2) { flex: 1 1 0; min-width: 0; text-align: center; padding: 2px 12px 0; }
+}
