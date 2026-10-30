@@ -399,6 +399,7 @@ import {
 } from "lucide-react";
 import { csvCell } from "../lib/csvCell";
 import { formatDate } from "../lib/dates";
+import { EditQueryPhone } from "./queries/phone/EditQueryPhone";
 import { QueriesPhone, useQm1Phone } from "./queries/phone/QueriesPhone";
 import { QM1_ART } from "./queries/phone/qm1Art";
 
@@ -594,6 +595,8 @@ export const Queries: React.FC<{
   const qmPhone = useQm1Phone();
   /* Phone app v2, Part 3 — the query sheet's ••• opens the phone's more sheet; the card is built here, so the state is too */
   const [qmMore, setQmMore] = useState(false);
+  /* Phone last screens v1, 9B — the query open in "Edit this query" on a phone */
+  const [phoneEditId, setPhoneEditId] = useState<string | null>(null);
   const { setMobileDetail } = useMobileChrome();
   const [mobileView, setMobileView] = useState<"list" | "detail">("list");
   const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
@@ -6454,6 +6457,7 @@ export const Queries: React.FC<{
 
   /* Queries on a phone v1 — every hook above has run; at 760px and narrower the page is the phone page, and above it
      nothing here changes. The open query's card is the one built above, laid out for a phone. */
+  const phoneEditQuery = phoneEditId ? (queries as Query[]).find((q) => q.id === phoneEditId) ?? null : null;
   if (qmPhone) {
     return (
       <>
@@ -6469,7 +6473,7 @@ export const Queries: React.FC<{
         card={qcCardNode}
         onNavigate={(t, sub) => onNavigate?.(t, sub)}
         onOrder={(ids) => { qmOrderRef.current = ids; }}
-        onEditQuery={() => setQcCardMode("edit")}
+        onEditQuery={() => setPhoneEditId(selectedQueryId ?? null)}
         moreOpen={qmMore}
         onMoreClose={() => setQmMore(false)}
         onDelete={(id) => { void deleteQueryWithUndo(id); }}
@@ -6479,6 +6483,10 @@ export const Queries: React.FC<{
           the agent panel, search) is drawn by this page's ONE host whichever route is on screen. Found by the dashboard's
           C1 lock, after the phone return first left the host out. */}
       {queryPanelHost}
+      {/* Phone last screens v1, 9B: the ••• menu's Edit opens "Edit this query", whose every save is the
+          edit drawer's own (commitQueryEdits) */}
+      {phoneEditQuery && <EditQueryPhone query={phoneEditQuery} onClose={() => setPhoneEditId(null)}
+        onDelete={(id) => { void deleteQueryWithUndo(id); }} />}
       </>
     );
   }

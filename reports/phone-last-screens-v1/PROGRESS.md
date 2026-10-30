@@ -9,8 +9,8 @@ Ref: MANIFEST hash 4a819d11…cf6e2, 13/13 OK.
 |---|---|---|
 | A account screens, dead ends, the error page | `711c1207` | committed |
 | B addresses and column matching | `69abc04c` | committed; PLS1 L1–L5 written and green (L1–L3 lab, L4–L5 signed in) |
-| C email drop on a phone | (this commit) | committed; behind `emailDropPhoneLive()`, OFF; PLS1 L6 green on the lab |
-| D editing a query | — | |
+| C email drop on a phone | `af75ae97` | committed; behind `emailDropPhoneLive()`, OFF; PLS1 L6 green on the lab |
+| D editing a query | (this commit) | committed; PLS1 L7 green (writes and undoes on the harness account) |
 | E writing materials and building packages | — | |
 | F locks, shots and the report | — | |
 
@@ -42,3 +42,12 @@ Ref: MANIFEST hash 4a819d11…cf6e2, 13/13 OK.
 - No allowance exists in the entitlement model, so the line reads "Included with Pro." (the mock's "30 emails a month" has no source).
 - `#/email-drop-lab` (dev only) holds the two screens over a fixture for L6. The account-writing half of L6 (save and Undo on the harness account) cannot run: the harness account is free and the flow is Pro only.
 - Walk on dev (Stage 3): "Just getting started" times out waiting for the Contact list on the BASE build too (pre-existing).
+
+## Phase D notes
+- `EditQueryPhone` (queries/phone): the page and six one-question screens. The ••• menu's Edit opens it (Queries.tsx phone branch, `phoneEditId`); it portals to <body> at z 1050, above the phone sheets (the query sheet stays open beneath and holds #root inert) and under the snackbar (1100). L7 found the first version unclickable under the sheet's scrim.
+- Every save builds the drawer's `QueryEditOps` and calls `commitQueryEdits`; the drawer's option lists (`METHOD_OPTIONS`, `IF_NO_RESPONSE_OPTIONS`, `REJECTION_TYPE_OPTIONS`) are now exported from EditQueryDrawer and read, never copied.
+- Field → section: agentId → Agent; manuscriptId, packageId (+ stamp when unlocked), materialsWanted (via `editMaterialsUpdate`), personalisationNotes → What you sent; dateSent, sendMethod → How and when; writerExpectedDate, ifNoResponse → Reply window; timeline appends/edits/deletes (checked by `validateTimeline`), rejectionType (rejected/withdrawn only, as the drawer), agentComments → Their responses; journal (`addJournalEntry`) → Notes.
+- "No reply means no" maps to the drawer's `ifNoResponse`: on = "Mark as no response automatically"; off = back to "Remind me to nudge" (or the stored "Do nothing", kept).
+- The reply window is the drawer's `writerExpectedDate` (a date at noon), so days from the wheel are stored exactly: no rounding, and Nick's question answers itself.
+- Undo: a query snapshot before each save; a note (its own `journalEntries` document, outside the snapshot) is undone by deleting the entry it added.
+- NOT DONE: the same wheel replacing the presets in the phone log-a-query flow's reply question (Part 4 is on this base). Lift note: `ReplyStep`'s chips + `Wheel` are the parts to share.

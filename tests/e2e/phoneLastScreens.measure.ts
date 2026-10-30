@@ -16,6 +16,8 @@ import { test, expect, type Page } from "@playwright/test";
 import { appendFileSync } from "node:fs";
 import { PHONES, colourSweep, imageSweep, openPhone } from "./pa2Lib";
 import { openRoute } from "./measure";
+import { devDb } from "./devWrite";
+import { doc, getDoc } from "firebase/firestore";
 
 const MUTATE = process.env.PLS1_MUTATE ?? "";
 const BEFORE = process.env.PLS1_BASE_URL ?? "";
@@ -246,6 +248,58 @@ test.describe("PLS1 the last screens on phones", () => {
       expect(r.label).toBe("Save 1 update");
       expect(r.saved, `@${r.vp}: only the ticked proposal is saved`).toEqual(["Full Requested"]);
     }
+  });
+
+  test("L7 editing: every drawer field is reachable; the wheel saves the drawer's own value and Undo restores it", async ({ page }) => {
+    /* WRITES AND UNDOES on the harness account: one reply-window change, through the phone screens. */
+    test.setTimeout(400_000);
+    const vp = PHONES[0];
+    await openPhone(page, "/queries", vp);
+    const id = await page.locator('[data-qm1="row"]').first().getAttribute("data-id");
+    expect(id, "a query to edit").toBeTruthy();
+    await page.locator(`[data-qm1="row"][data-id="${id}"] .pa-row`).click();
+    await page.locator('.pa-qsheet [data-qc149c="more-btn"]').click(); await page.waitForTimeout(400);
+    await page.locator('[data-pa="more-edit"]').click();
+    await page.locator('[data-eqp="page"]').waitFor({ timeout: 10_000 });
+    const sections = await page.locator('[data-eqp="section"]').evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.section));
+    /* every drawer field, by the section that holds it (the report's map); each section must open a step */
+    const FIELD_SECTION: Record<string, string> = {
+      agentId: "agent", manuscriptId: "sent", packageId: "sent", materialsWanted: "sent", personalisationNotes: "sent",
+      dateSent: "howwhen", sendMethod: "howwhen", writerExpectedDate: "reply", ifNoResponse: "reply",
+      timelineAppends: "responses", timelineEdits: "responses", timelineDeletes: "responses", rejectionType: "responses", agentComments: "responses", journal: "notes",
+    };
+    const opened: Record<string, string> = {};
+    for (const sec of sections) {
+      await page.locator(`[data-eqp="section"][data-section="${sec}"]`).click();
+      opened[sec!] = (await page.locator('[data-eqp="step"]').getAttribute("data-section")) ?? "";
+      await page.locator('[data-eqp="cancel"]').click(); await page.waitForTimeout(200);
+    }
+    const { db, uid } = await devDb();
+    const before = (await getDoc(doc(db, "users", uid, "queries", id!))).data()!;
+    await page.locator('[data-eqp="section"][data-section="reply"]').click();
+    if (MUTATE === "L7") await page.evaluate(() => { const d = document.querySelector('[data-eqp="due"]'); d?.replaceWith(d.cloneNode(true)); });
+    const due0 = await page.locator('[data-eqp="due"]').innerText();
+    const wk0 = Number(await page.locator('[data-eqp="col-weeks"] .eqp-it.on').innerText());
+    const wk = wk0 === 11 ? 13 : 11, dy = 3;
+    await page.locator('[data-eqp="col-weeks"]').evaluate((e, w) => { e.scrollTop = w * 40; }, wk);
+    await page.locator('[data-eqp="col-days"]').evaluate((e, d) => { e.scrollTop = d * 40; }, dy);
+    await page.waitForTimeout(500);
+    const due1 = await page.locator('[data-eqp="due"]').innerText();
+    const sentMs = new Date(before.dateSent).getTime();
+    const s = new Date(sentMs + (wk * 7 + dy) * 86_400_000);
+    const want = new Date(s.getFullYear(), s.getMonth(), s.getDate(), 12).toISOString(); /* the drawer's own: the date input at noon */
+    await page.locator('[data-eqp="save"]').click();
+    await page.locator('[data-pa="snack"]').waitFor({ timeout: 15_000 });
+    const saved = (await getDoc(doc(db, "users", uid, "queries", id!))).data()!;
+    await page.locator('[data-pa="snack-undo"]').click();
+    await page.waitForTimeout(2500);
+    const after = (await getDoc(doc(db, "users", uid, "queries", id!))).data()!;
+    record("L7", { id, sections, opened, due0, due1, wk, dy, want, saved: saved.writerExpectedDate, restored: after.writerExpectedDate ?? null, was: before.writerExpectedDate ?? null });
+    expect(sections).toEqual(["agent", "sent", "howwhen", "reply", "responses", "notes"]);
+    for (const sec of new Set(Object.values(FIELD_SECTION))) expect(opened[sec], `section ${sec} opens its step`).toBe(sec);
+    expect(due1, "the band's date updates before saving").not.toBe(due0);
+    expect(saved.writerExpectedDate, "the wheel saves the drawer's value for that input, days kept").toBe(want);
+    expect(after.writerExpectedDate ?? null, "Undo puts the query back").toBe(before.writerExpectedDate ?? null);
   });
 
   test("L10 colour laws and no image twice on this pack's phone screens", async ({ page }) => {

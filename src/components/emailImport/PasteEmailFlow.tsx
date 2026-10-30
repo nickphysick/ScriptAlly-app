@@ -11,6 +11,7 @@
  * accept/skip; committing records is the next prompt.
  */
 import React, { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import "../forms/forms.css";
 import { useScriptAllyDb } from "../../lib/db";
 import { pickableManuscripts } from "../../lib/lifecycle";
@@ -187,11 +188,12 @@ export const PasteEmailFlow: React.FC<PasteEmailFlowProps> = ({ isOpen, onClose,
   if (phone && step !== "upsell") {
     const sentIso = proposal?.subject.queryId ? queries.find((q) => q.id === proposal.subject.queryId)?.dateSent : undefined;
     const dayN = sentIso ? Math.max(0, Math.floor((Date.now() - new Date(sentIso).getTime()) / 86_400_000)) : null;
-    return step === "review" && proposal
+    /* portalled above the phone sheets (a sheet may hold #root inert) */
+    return createPortal(step === "review" && proposal
       ? <EmailUpdatesPhone proposal={proposal} dayN={dayN} busy={committing} error={commitError}
           onSave={handlePhoneSave} onSkipAll={onClose} onBack={() => setStep("paste")} />
       : <EmailPastePhone emailText={emailText} onEmailText={(t) => { setEmailText(t); if (error) setError(null); }}
-          busy={busy} error={error} onRead={submit} onBack={onClose} />;
+          busy={busy} error={error} onRead={submit} onBack={onClose} />, document.body);
   }
 
   return (
