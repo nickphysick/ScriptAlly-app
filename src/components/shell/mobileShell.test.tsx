@@ -31,11 +31,13 @@ const noop = () => {};
    old claim still holds (path-driven active, a navy pill with a white icon, no badge at zero, nothing inline) it is
    kept and re-pointed rather than dropped. The rendered measurement is tests/e2e/phoneAppV2Shell.measure.ts S1–S2. */
 describe("the tab bar — a floating capsule, five slots, + in the middle (Phone app v2)", () => {
-  it("renders Home · Queries · + · To-do · Agents in that order, path-driven active", () => {
+  /* Phone round two v1 (2B): Packages took To-do's slot; To-do is a page now and its badge rides on Home. */
+  it("renders Home · Queries · + · Packages · Agents in that order, path-driven active", () => {
     const html = renderToStaticMarkup(<BottomTabBar pathname="/queries" onGo={noop} onPlus={noop} />);
     expect(html).toContain("pa-tabbar");
     const order = [...html.matchAll(/data-tab="(\w+)"|data-pa="plus"/g)].map((m) => m[1] ?? "plus");
-    expect(order).toEqual(["home", "queries", "plus", "todo", "agents"]);
+    expect(order).toEqual(["home", "queries", "plus", "packages", "agents"]);
+    expect(html).not.toContain('data-tab="todo"');
     expect(html).not.toContain("Analytics");
     expect(html).not.toContain(">More<");
     expect(html.match(/aria-current="page"/g)?.length).toBe(1);
@@ -45,19 +47,18 @@ describe("the tab bar — a floating capsule, five slots, + in the middle (Phone
   it("the four tab routes; everything else is a menu page with no bar", () => {
     expect(tabFor("/dashboard")).toBe("home");
     expect(tabFor("/queries")).toBe("queries");
-    expect(tabFor("/todo")).toBe("todo");
-    expect(tabFor("/todo/corkboard")).toBe("todo");
+    expect(tabFor("/queries/packages")).toBe("packages");
     expect(tabFor("/agents/discover")).toBe("agents");
-    for (const p of ["/queries/analytics", "/queries/responses", "/queries/packages", "/manuscripts", "/account", "/help", "/import"]) {
+    for (const p of ["/todo", "/todo/corkboard", "/queries/analytics", "/queries/responses", "/manuscripts", "/account", "/help", "/import"]) {
       expect(tabFor(p), p).toBeNull();
       expect(isMenuPage(p), p).toBe(true);
     }
     expect(renderToStaticMarkup(<BottomTabBar pathname="/queries" onGo={noop} onPlus={noop} hidden />)).toBe("");
   });
 
-  it("the badge is on To-do, shows the count, and nothing at zero", () => {
-    expect(renderToStaticMarkup(<BottomTabBar pathname="/dashboard" onGo={noop} onPlus={noop} badge={4} />))
-      .toMatch(/data-tab="todo"[^]*class="pa-tbbadge"[^>]*>4</);
+  it("the To-do badge rides on Home, shows the count, and nothing at zero", () => {
+    expect(renderToStaticMarkup(<BottomTabBar pathname="/queries" onGo={noop} onPlus={noop} badge={4} />))
+      .toMatch(/data-tab="home"[^>]*>[^]*?class="pa-tbbadge"[^>]*>4<[^]*?data-tab="queries"/);
     expect(renderToStaticMarkup(<BottomTabBar pathname="/dashboard" onGo={noop} onPlus={noop} badge={0} />)).not.toContain("pa-tbbadge");
   });
 
@@ -221,8 +222,10 @@ describe("the app-feel layer (Phase 6)", () => {
    tests/e2e/phoneAppV2Shell.measure.ts S6. */
 describe("the menu — everything the you-sheet offered is still reachable", () => {
   const sheets = readFileSync(resolve(__dirname, "../phone/PhoneSheets.tsx"), "utf8");
-  it("To-do is a tab; packages, import, settings, help, sign out and upgrade are in the menu", () => {
-    expect(barSrc).toContain('{ key: "todo", label: "To-do", path: "/todo" }');
+  it("To-do, packages, import, settings, help, sign out and upgrade are in the menu (To-do left the bar in round two)", () => {
+    expect(barSrc).not.toContain('{ key: "todo"');
+    expect(appShell).toContain('{ key: "todo", label: "To-do", icon: PI.todo');
+    expect(appShell).toContain('onTodo: () => goPath("/todo")');
     /* Phone app v2 Part 7: the Materials tile opens the phone Manuscript page at its materials, which shows the packages
        (read only — building one stays on a computer). The packages are still one tap from the menu. */
     expect(appShell).toContain('goPath("/manuscripts#materials")');

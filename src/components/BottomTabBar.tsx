@@ -3,12 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * THE PHONE'S TAB BAR (Phone app v2, Part 1B; ref design-refs/phone-app-v2/src/screens.js `tabbar()`, app.css `.tabbar`
- * `.tb` `.plus`). A floating capsule with five slots: Home · Queries · [+] · To-do · Agents.
+ * `.tb` `.plus`). A floating capsule with five slots: Home · Queries · [+] · Packages · Agents.
+ *
+ * Phone round two v1 (2B, ref design-refs/phone-round-two-v1 `n2`): Packages takes To-do's slot. To-do is a page now,
+ * opened from Home's "See all", the menu, the + sheet and every old address; its badge moves onto Home and counts the
+ * same number it always counted (`lib/todoDueTally`).
  *
  *  - The chosen tab is a NAVY pill behind a white icon; its label is navy.
  *  - The + is a blush disc in the centre slot. While its sheet is open it is the close button (`aria-expanded`, the
  *    plus turns 45°).
- *  - To-do carries the badge: the To-do tray's own tally of tasks due today or earlier (`lib/todoDueTally`, the
+ *  - Home carries the badge (it was To-do's until round two): the To-do tray's own tally of tasks due today or earlier (`lib/todoDueTally`, the
  *    tray's `dayBuckets` overdue + today). No badge at zero. The Queries Your-move badge is retired from the bar.
  *  - It tucks away as the page scrolls down and comes back when it scrolls up (`away`, driven by the shell's one
  *    scroll listener with the ref's thresholds), and it is not drawn on a page opened from the menu or on a pushed
@@ -22,14 +26,18 @@
 import React from "react";
 import { PI } from "./phone/phoneIcons";
 
-type TabKey = "home" | "queries" | "todo" | "agents";
+type TabKey = "home" | "queries" | "packages" | "agents";
 
-/** The four tab routes. Everything else on a phone is a page opened from the menu, with the page band and no bar. */
+/** The packages page's address (Submission packages v26 moved it under Queries). */
+export const PACKAGES_TAB_PATH = "/queries/packages";
+
+/** The four tab routes. Everything else on a phone is a page opened from the menu, with the page band and no bar —
+ *  To-do included since round two. */
 export function tabFor(pathname: string): TabKey | null {
   const p = pathname.replace(/\/+$/, "") || "/";
   if (p === "/dashboard") return "home";
   if (p === "/queries") return "queries";
-  if (p === "/todo" || p.startsWith("/todo/")) return "todo";
+  if (p === PACKAGES_TAB_PATH) return "packages";
   if (p === "/agents" || p.startsWith("/agents/")) return "agents";
   return null;
 }
@@ -39,7 +47,7 @@ export const isMenuPage = (pathname: string): boolean => tabFor(pathname) === nu
 const TABS: { key: TabKey; label: string; path: string }[] = [
   { key: "home", label: "Home", path: "/dashboard" },
   { key: "queries", label: "Queries", path: "/queries" },
-  { key: "todo", label: "To-do", path: "/todo" },
+  { key: "packages", label: "Packages", path: PACKAGES_TAB_PATH },
   { key: "agents", label: "Agents", path: "/agents" },
 ];
 
@@ -51,7 +59,7 @@ interface BottomTabBarProps {
   /** the + : open its sheet, or close it while open */
   onPlus: () => void;
   plusOpen?: boolean;
-  /** the To-do badge: tasks due today or earlier (none at zero) */
+  /** the To-do badge, on Home since round two: tasks due today or earlier (none at zero) */
   badge?: number;
   /** tucked away while scrolling down */
   away?: boolean;
@@ -69,11 +77,11 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({ pathname, onGo, onPl
     return (
       <button key={t.key} type="button" className="pa-tb" data-tab={t.key} data-pa="tab"
         onClick={() => onGo(t.path)}
-        aria-label={t.key === "todo" && badge > 0 ? `To-do, ${badge} due` : t.label}
+        aria-label={t.key === "home" && badge > 0 ? `Home, ${badge} to-do due` : t.label}
         aria-current={active ? "page" : undefined}>
-        <span className="pa-tbi">{PI[t.key]}</span>
+        <span className="pa-tbi">{t.key === "packages" ? PI.box : PI[t.key]}</span>
         {t.label}
-        {t.key === "todo" && badge > 0 ? <span className="pa-tbbadge" data-pa="tab-badge" aria-hidden="true">{badge}</span> : null}
+        {t.key === "home" && badge > 0 ? <span className="pa-tbbadge" data-pa="tab-badge" aria-hidden="true">{badge}</span> : null}
       </button>
     );
   };

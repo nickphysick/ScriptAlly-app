@@ -393,8 +393,10 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
     const tab = tabFor(pathname);
     if (tab === "home") return `${dayWord(salutation(new Date()))}, ${firstNameOf(currentUser?.name ?? "")}`.replace(/, $/, "");
     if (tab === "queries") return "Queries";
-    if (tab === "todo") return "To-do";
+    if (tab === "packages") return "Packages";
     if (tab === "agents") return "Agents";
+    /* Phone round two v1 (2B): To-do is a page now, opened from Home, the menu and the + sheet */
+    if (pathname === "/todo" || pathname.startsWith("/todo/")) return "To-do";
     /* Phone app v2 Part 8B: a settings section names itself in the band (the index is "Settings") */
     const section = ACCOUNT_ROUTES.find((r) => r.path === pathname);
     if (section) return section.label;
@@ -426,6 +428,8 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
       goPath("/todo");
     },
     onImport: () => goPath("/import"),
+    /* Phone round two v1 (2B): To-do left the tab bar; the + sheet keeps a door to it */
+    onTodo: () => goPath("/todo"),
   }), [bandBookId, onNavigate, pathname, goPath, phoneNav]);
 
   /* the menu's tiles — a line is an existing figure, or the tile shows its name alone */
@@ -437,6 +441,8 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
     const words = bandMs?.wordCount ? `${bandMs.wordCount.toLocaleString("en-GB")} words` : null;
     const comps = bandMs ? manuscriptComps(bandMs).length : 0;
     return [
+      /* Phone round two v1 (2B): To-do left the tab bar, so the menu leads with it; its line is the badge's own count */
+      { key: "todo", label: "To-do", icon: PI.todo, line: tabBadge > 0 ? `${tabBadge} due` : null, onOpen: () => goPath("/todo") },
       { key: "responses", label: "Responses", icon: PI.inbox, line: `${replies} ${replies === 1 ? "reply" : "replies"}`, onOpen: () => goPath("/queries/responses") },
       { key: "analytics", label: "Analytics", icon: PI.chart, line: null, onOpen: () => goPath("/queries/analytics") },
       { key: "goals", label: "Streaks & goals", icon: PI.flame, line: null, onOpen: () => goPath("/goals") },
@@ -447,7 +453,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
       { key: "feedback", label: "Feedback", icon: PI.chat, line: null, onOpen: () => setFeedbackOpen(true) },
     ];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phoneNav, bandMs, queries, agents, activities, goPath]);
+  }, [phoneNav, bandMs, queries, agents, activities, goPath, tabBadge]);
   const [tabAway, setTabAway] = useState(false);
   const [plusOpen, setPlusOpen] = useState(false);
   useEffect(() => { setTabAway(false); setPlusOpen(false); }, [pathname]);

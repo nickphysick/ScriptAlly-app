@@ -37,6 +37,8 @@ export interface PlusDoors {
   onAgent: () => void;
   onTask: () => void;
   onImport: () => void;
+  /** Phone round two v1 (2B): To-do left the tab bar; the sheet keeps a door to the page */
+  onTodo?: () => void;
 }
 
 export const PhonePlusSheet: React.FC<{ open: boolean; onClose: () => void; doors: PlusDoors }> = ({ open, onClose, doors }) => {
@@ -59,6 +61,7 @@ export const PhonePlusSheet: React.FC<{ open: boolean; onClose: () => void; door
         <button type="button" className="pa-chip" data-pa="plus-agent" onClick={go(doors.onAgent)}>{PI.agents}Add an agent</button>
         <button type="button" className="pa-chip" data-pa="plus-task" onClick={go(doors.onTask)}>{PI.todo}Task or note</button>
         <button type="button" className="pa-chip" data-pa="plus-import" onClick={go(doors.onImport)}>{PI.upload}Import</button>
+        {doors.onTodo ? <button type="button" className="pa-chip" data-pa="plus-todo" onClick={go(doors.onTodo)}>{PI.todo}Your to-do list</button> : null}
       </div>
     </MobileSheet>
   );

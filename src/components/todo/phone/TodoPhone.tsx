@@ -42,11 +42,11 @@ import { MobileSheet } from "../../shell/MobileSheet";
 import { SetAsidePop } from "../v5/SetAsidePop";
 import { snoozeCardWrites } from "../snoozeWrites";
 import { openPhoneCompose } from "../../../lib/phoneCompose";
-import { useTaskCommit } from "../useTaskCommit";
+import { useTodoDoors, useTodoPhoneModel, type WhenGroup } from "./useTodoPhone";
 import type { BoardCard } from "../../../lib/todoBoard";
 import "./todoPhone.css";
 
-export type WhenGroup = "earlier" | "today" | "soon" | "moment";
+export type { WhenGroup };
 export const WHEN_LABEL: Record<WhenGroup, string> = { earlier: "From earlier", today: "Today", soon: "Coming up", moment: "When you have a moment" };
 const WHEN_ORDER: WhenGroup[] = ["earlier", "today", "soon", "moment"];
 
@@ -88,25 +88,9 @@ export const TodoPhone: React.FC = () => {
     openPhoneCompose(want);
   }, [routeActive, location.key]);
 
-  /* ── the tray's own board, rows, days and tallies (see the header) ── */
-  const { cols, hkGroups } = useMemo(() => assembleBoardColumns({
-    tasks, userTasks, queries, agents, manuscripts, taskFlags, activities,
-    now, today: localYMD(now), mutedTaskRules: currentUser?.mutedTaskRules,
-  }), [tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, now, currentUser?.mutedTaskRules]);
-  const live: BoardCard[] = useMemo(() => [...cols.todo, ...cols.today], [cols]);
-  const trayDb: TrayDb = useMemo(() => ({ queries, agents, manuscripts, userTasks, activities, packages, taskFlags, hkGroups }),
-    [queries, agents, manuscripts, userTasks, activities, packages, taskFlags, hkGroups]);
-  const items = useMemo(() => live.map((c) => trayItem(c, trayDb, now)), [live, trayDb, now]);
-  const today = londonToday(now);
-  const calItems: CalItem[] = useMemo(() => {
-    const byKey = new Map(items.map((i) => [i.key, i]));
-    return calendarItems({ cards: live, db: trayDb, flags: taskFlags, nowMs: now,
-      words: (c) => { const i = byKey.get(c.key); return { deed: i?.deed ?? c.title, who: i?.who ?? c.who }; } });
-  }, [live, items, trayDb, taskFlags, now]);
-  const buckets = useMemo(() => dayBuckets(calItems, live, today), [calItems, live, today]);
-  /** a card's day: counted (surfaced, not snoozed) items only — dayBuckets' own rule */
-  const dayOf = useMemo(() => new Map(calItems.filter(counted).map((i) => [i.key, i.ymd])), [calItems]);
-  const whenOf = (i: TrayItem): WhenGroup => { const d = dayOf.get(i.key); return !d ? "moment" : d < today ? "earlier" : d === today ? "today" : "soon"; };
+  /* ── the tray's own board, rows, days and tallies (see the header; shared with Home since round two) ── */
+  const model = useTodoPhoneModel(now);
+  const { items, live, calItems, buckets, today, dayOf, whenOf, hkGroups } = model;
 
   /* ── the week strip: the dots are the counted items on each day ── */
   const week = useMemo(() => weekOf(today), [today]);
@@ -138,32 +122,8 @@ export const TodoPhone: React.FC = () => {
   const shown = useMemo(() => (day ? items.filter((i) => dayOf.get(i.key) === day) : items), [items, day, dayOf]);
   const groups = WHEN_ORDER.map((g) => ({ g, rows: shown.filter((i) => whenOf(i) === g).sort((a, b) => (dayOf.get(a.key) ?? "9") < (dayOf.get(b.key) ?? "9") ? -1 : 1) })).filter((x) => x.rows.length);
 
-  /* ── the doors: each verb OPENS its journey; nothing writes on a tap ── */
-  const { quickDone } = useTaskCommit({
-    flash: (message, action) => showUndoBar({ message, sub: "", ...(action ? { undo: async () => { await action.fn(); } } : {}) }),
-    rememberUndo: () => {},
-    confirmAsk: async (msg) => window.confirm(msg),
-    openFlow: () => {},
-  });
-  const [doneAsk, setDoneAsk] = useState<TrayItem | null>(null);
-  const act = (i: TrayItem) => {
-    const c = i.card;
-    if (i.sweep) {
-      const group = hkGroups.find((g) => g.rule === (c as BoardCard & { sweepRule?: string }).sweepRule);
-      const need = group ? SWEEP_NEED[group.rule] : undefined;
-      const first = group?.members[0]?.agentId;
-      if (first) openAgentCard(first, { ...(need ? dataNeedTarget([need]) ?? {} : {}), from: "task" });
-      return;
-    }
-    if (c.userTaskId) { setDoneAsk(i); return; }
-    if (c.taskType === "data_quality_poor" && i.agent) { openAgentCard(i.agent.id, { ...(dataNeedTarget(agentDataQualityNeeds(i.agent)) ?? {}), from: "task" }); return; }
-    const door = drawerDoorForTask(c.taskType, c.relatedRecordId, (id) => queries.find((x) => x.id === id)?.offerRefQueryId);
-    if (door) openQueryDrawer(door);
-  };
-  const openRow = (i: TrayItem) => {
-    if (i.query) { navigate({ pathname: "/queries", search: `?q=${encodeURIComponent(i.query.id)}` }); return; }
-    if (i.userTask) openPhoneCompose("task", { id: i.userTask.id, text: i.userTask.text ?? "", detail: i.userTask.detail ?? "", due: i.userTask.dueDate ?? null });
-  };
+  /* ── the doors: each verb OPENS its journey; nothing writes on a tap (useTodoDoors, shared with Home) ── */
+  const { act, openRow, askNode } = useTodoDoors(model, routeActive);
 
   /* ── Later: the existing snooze, its rules and its writer, with Undo ── */
   const [later, setLater] = useState<TrayItem | null>(null);
@@ -220,17 +180,7 @@ export const TodoPhone: React.FC = () => {
         ) : null}
       </MobileSheet>
 
-      {doneAsk && routeActive ? createPortal(
-        <div className="pa-layer pa-doneask" role="dialog" aria-modal="true" aria-label="Tick it off" data-pa="done-ask">
-          <div className="pa-doneask-card">
-            <b>Tick off “{doneAsk.deed}”?</b>
-            <span>It leaves your list. You can undo it straight after.</span>
-            <div>
-              <button type="button" className="keep" onClick={() => setDoneAsk(null)}>Not yet</button>
-              <button type="button" className="go" data-pa="done-go" onClick={() => { const c = doneAsk.card; setDoneAsk(null); void quickDone(c); }}>Tick it off</button>
-            </div>
-          </div>
-        </div>, document.body) : null}
+      {askNode}
     </div>
   );
 };

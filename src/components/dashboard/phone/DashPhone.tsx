@@ -44,6 +44,8 @@ import { closedTile } from "../../../lib/dashClosed";
 import { agentCoverage } from "../../../lib/dashFirstUse";
 import { localYMD } from "../../../lib/shellSidebar";
 import "./dashPhone.css";
+import { CheckRow, checkLine, useTodoDoors, useTodoPhoneModel } from "../../todo/phone/useTodoPhone";
+import { PI } from "../../phone/phoneIcons";
 
 export interface DashPhoneProps {
   loading: boolean;
@@ -222,6 +224,7 @@ export const DashPhone: React.FC<DashPhoneProps> = (props) => {
           title={upHero ? <>{upHero.m.pre}{upHero.m.who}{upHero.m.post}</> : null}
           line={upHero?.m.line ?? null} caughtUp={CAUGHT_UP}
           onView={() => upHero && viewTask(upHero.it.action)} onSeeAll={() => onNavigate("todo")} />
+        <HomeTodo onSeeAll={() => navigate("/todo")} />
         <Latest events={feedEvents} nowMs={now.getTime()} onResponses={() => navigate("/queries/responses")} />
         </>}
         <FoundingCard name={currentUser?.name ?? ""} rank={fRow.rank} progress={fProgress} pct={fPct} loading={fLoading}
@@ -264,5 +267,32 @@ export const DashPhone: React.FC<DashPhoneProps> = (props) => {
         onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }))}
       />
     </div>
+  );
+};
+
+/* ── Phone round two v1 (2B, ref boot3 `n2`): To-do left the tab bar, so Home lists what is due — up to four of the
+   tasks from earlier and today, as checklist rows, with "See all {n}" opening the To-do page. The model and the doors are
+   the To-do page's own (useTodoPhone), so the two cannot disagree. ── */
+export const HOME_TODO_MAX = 4;
+const HomeTodo: React.FC<{ onSeeAll: () => void }> = ({ onSeeAll }) => {
+  const [now] = useState(() => Date.now());
+  const model = useTodoPhoneModel(now);
+  const { act, openRow, askNode } = useTodoDoors(model, true);
+  const due = model.items.filter((i) => { const w = model.whenOf(i); return w === "earlier" || w === "today"; })
+    .sort((a, b) => ((model.dayOf.get(a.key) ?? "9") < (model.dayOf.get(b.key) ?? "9") ? -1 : 1));
+  return (
+    <>
+      <div className="pa-shd" data-pa="home-todo-head"><h2 className="pa-h2">To-do</h2>
+        <button type="button" className="pa-link" data-pa="home-todo-all" onClick={onSeeAll}>See all {model.items.length}</button></div>
+      {due.length ? (
+        <div className="pa-card pa-todocard" data-pa="home-todo" data-count={due.length}>
+          {due.slice(0, HOME_TODO_MAX).map((i) => (
+            <CheckRow key={i.key} i={i} line={checkLine(i, model.dayOf.get(i.key) ?? null, model.today)} chev={<span className="pa-chev">{PI.chev}</span>}
+              onTick={() => act(i)} onOpen={() => openRow(i)} />
+          ))}
+        </div>
+      ) : <p className="pa-sub" data-pa="home-todo-none" style={{ margin: "0 2px" }}>Nothing due today.</p>}
+      {askNode}
+    </>
   );
 };
