@@ -9,7 +9,7 @@
  * Order: the top bar → the stat cards → Up next → the founding writer row → Recent.
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
 import type { Activity, Agent, Manuscript, ManuscriptVersion, Query, SmartImportUsage, Task, TaskFlag, User, UserTask } from "../../../types";
 import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
@@ -25,7 +25,8 @@ import { isPreQuery } from "../../../lib/dashFirstUse";
 import { openQueryPanel } from "../../../lib/queryPanelStore";
 import { openAgentCard } from "../../../lib/agentCardStore";
 import { dashAid } from "../../../lib/dashReviewAid";
-import { FoundingCard, HomeHero, Latest, UpNextCard, WhereTheyStand, type StandKey } from "./PhoneHome";
+import { FoundingCard, HomeHero, UpNextCard, WhereTheyStand, type StandKey } from "./PhoneHome";
+import { ActivityPage, HomeActivity } from "./PhoneActivity";
 import { closedSplit, heroFor, readHero, writeHero, type HeroRange, type HeroSeries } from "../../../lib/phoneHome";
 import { chipCounts, phoneScopeId, rowsFor } from "../../../lib/queriesPhone";
 import { usePhoneBandSlot } from "../../phone/phoneBandStore";
@@ -36,9 +37,7 @@ import { useFoundingStats, TIERS } from "../../../lib/foundingStats";
 import { foundingRow } from "../../../lib/dashPhone";
 import { Dash105How } from "../v105/Dash105How";
 import "./phoneHome.css";
-import { Dash58Feed } from "../v58/Dash58Feed";
 import { feedEntries } from "../../../lib/dashFeed";
-import { drawerEvents } from "../../../lib/dashFeedDrawer";
 import { openFeedback } from "../../../lib/feedbackStore";
 import { closedTile } from "../../../lib/dashClosed";
 import { agentCoverage } from "../../../lib/dashFirstUse";
@@ -137,17 +136,21 @@ export const DashPhone: React.FC<DashPhoneProps> = (props) => {
     () => ({ queries, agents, qcRows: buildQcRows(scopedQueries, agents, scopedActivities, now.getTime()), nowMs: now.getTime() }),
     [queries, agents, scopedQueries, scopedActivities, now],
   );
-  /* ── Recent: the feed's own entries, in the drawer's own words; the feed itself opens as this page's bottom sheet ── */
-  const feedEvents = useMemo(
-    () => (loading ? [] : drawerEvents(feedEntries({ activities: scopedActivities, queries, agents, manuscripts, now, seenAt: null }), taskCtx.qcRows)),
-    [loading, scopedActivities, queries, agents, manuscripts, now, taskCtx.qcRows],
+  /* ── Activity (Phone round two v1, 2A): the desktop feed's own entries, arranged by the desktop drawer's own model
+     (PhoneActivity). `/dashboard?activity=1` is its page, so the back gesture closes it. ── */
+  const feedList = useMemo(
+    () => (loading ? [] : feedEntries({ activities: scopedActivities, queries, agents, manuscripts, now, seenAt: null })),
+    [loading, scopedActivities, queries, agents, manuscripts, now],
   );
-  const [feedOpen, setFeedOpen] = useState(false);
-  useEffect(() => {
-    if (!feedOpen) return undefined;
-    document.body.classList.add("dm1-feedsheet");
-    return () => document.body.classList.remove("dm1-feedsheet");
-  }, [feedOpen]);
+  const location = useLocation();
+  const activityOpen = new URLSearchParams(location.search).get("activity") === "1";
+  const openActivity = () => navigate({ pathname: "/dashboard", search: "?activity=1" }, { state: { pr2Act: true } });
+  const closeActivity = () => {
+    if ((location.state as { pr2Act?: boolean } | null)?.pr2Act) { navigate(-1); return; }
+    navigate({ pathname: "/dashboard", search: "" }, { replace: true });
+  };
+  const actOnFeed = (queryId: string, mode: "offer" | "sent") =>
+    openQueryDrawer(mode === "offer" ? { mode, queryId, preset: { step: 1 } } : { mode, queryId });
 
   /* ⚠️ "View task" NEVER COMPLETES A TASK — Dash58's own viewTask: a query's task opens that query in the query panel,
      where its next step is offered; anything else opens its own flow or page. */
@@ -225,28 +228,14 @@ export const DashPhone: React.FC<DashPhoneProps> = (props) => {
           line={upHero?.m.line ?? null} caughtUp={CAUGHT_UP}
           onView={() => upHero && viewTask(upHero.it.action)} onSeeAll={() => onNavigate("todo")} />
         <HomeTodo onSeeAll={() => navigate("/todo")} />
-        <Latest events={feedEvents} nowMs={now.getTime()} onResponses={() => navigate("/queries/responses")} />
+        <HomeActivity entries={feedList} qcRows={taskCtx.qcRows} nowMs={now.getTime()} onAct={actOnFeed} onSeeAll={openActivity} />
         </>}
         <FoundingCard name={currentUser?.name ?? ""} rank={fRow.rank} progress={fProgress} pct={fPct} loading={fLoading}
           onFeedback={() => openFeedback()} onHow={() => setHowOpen(true)} />
       </div>
       <Dash105How open={howOpen} onClose={() => setHowOpen(false)} />
-      {feedOpen && (
-        <Dash58Feed
-          title={(activeManuscript?.title ?? "").trim()}
-          activities={scopedActivities}
-          queries={queries}
-          scopedQueries={scopedQueries}
-          agents={agents}
-          manuscripts={manuscripts}
-          now={now}
-          onClose={() => setFeedOpen(false)}
-          onAct={(queryId, mode) => {
-            setFeedOpen(false);
-            openQueryDrawer(mode === "offer" ? { mode, queryId, preset: { step: 1 } } : { mode, queryId });
-          }}
-        />
-      )}
+      <ActivityPage open={activityOpen} book={(activeManuscript?.title ?? "").trim()} entries={feedList} qcRows={taskCtx.qcRows} nowMs={now.getTime()}
+        onAct={(q, m) => { actOnFeed(q, m); }} onBack={closeActivity} />
       {/* ⚠️ PORTALLED: a fixed child cannot rise out of the shell's stacking context, and the window's edge shading painted
           over the sheet's right edge. Under <body>, in the token-carrying `.dm1-layer` host, it covers the whole screen. */}
       {searchOpen && createPortal(

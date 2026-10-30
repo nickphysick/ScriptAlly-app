@@ -6,16 +6,14 @@
  * next B; `foundingCard`; app.css `.card` `.closedline` `.nextc` `.shd` `.feed`).
  *
  * The band carries the hero (`HomeHero`, put there through the band slot); the sheet carries Where they stand, Up next,
- * Latest and the founding writer card, in that order. Every figure comes from a derivation the app already runs — see
+ * Activity (Phone round two v1, PhoneActivity — it replaced Latest) and the founding writer card, in that order. Every figure comes from a derivation the app already runs — see
  * `lib/phoneHome.ts` and DashPhone, which hands these the numbers.
  */
 import React from "react";
 import { PI } from "../../phone/phoneIcons";
-import { PhoneDisc } from "../../phone/PhoneDisc";
 import { PhoneArt } from "../../phone/PhoneArtSpot";
 import { PHONE_ART } from "../../phone/phoneArt";
 import { HERO_RANGES, HERO_SERIES, SERIES_LABEL, SERIES_NOUN, sparkPath, type Hero, type HeroRange, type HeroSeries } from "../../../lib/phoneHome";
-import type { DrawerEvent } from "../../../lib/dashFeedDrawer";
 import { StatusDot } from "../../StatusDot";
 import { QueryStatus } from "../../../types";
 
@@ -118,28 +116,6 @@ export const UpNextCard: React.FC<{
       <PhoneArt art={PHONE_ART.upNext} size={64} className="pa-spot" />
     </div>
   </section>
-);
-
-/* ── Latest ─────────────────────────────────────────────────────────────────────────────────────────────────────── */
-
-const ago = (at: number, nowMs: number): string => {
-  const day = (ms: number) => { const d = new Date(ms); d.setHours(0, 0, 0, 0); return d.getTime(); };
-  const n = Math.round((day(nowMs) - day(at)) / 86_400_000);
-  return n <= 0 ? "Today" : n === 1 ? "Yesterday" : `${n} days ago`;
-};
-
-export const Latest: React.FC<{ events: readonly DrawerEvent[]; nowMs: number; onResponses: () => void }> = ({ events, nowMs, onResponses }) => (
-  <>
-    <div className="pa-shd"><h2 className="pa-h2">Latest</h2><button type="button" className="pa-link" data-pa="responses-link" onClick={onResponses}>Responses</button></div>
-    <div className="pa-card pa-feed" data-pa="latest">
-      {events.length === 0 ? <p className="pa-sub" style={{ margin: "12px 0" }}>Nothing in the last thirty days.</p> : events.slice(0, 3).map(({ entry: e, say }) => (
-        <div key={e.id} className="pa-it" data-pa="latest-row" data-id={e.id}>
-          {e.status ? <PhoneDisc status={e.status} size={32} /> : <span className="pa-disc pa-fill-sand pa-icodisc" style={{ width: 32, height: 32 }}>{PI.bell}</span>}
-          <div className="pa-ittx">{say.map((s, i) => (s.who ? <b key={i}>{s.t}</b> : s.em ? <em key={i}>{s.t}</em> : <React.Fragment key={i}>{s.t}</React.Fragment>))}<small>{ago(e.at, nowMs)}</small></div>
-        </div>
-      ))}
-    </div>
-  </>
 );
 
 /* ── the founding writer card (ref `foundingCard`) ──────────────────────────────────────────────────────────────── */

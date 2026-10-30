@@ -1,0 +1,37 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * PHONE ROUND TWO v1 — ACTIVITY (ref design-refs/phone-round-two-v1/src/boot2.js `.fdh` `.fit` `.fsum`, picked `f1`).
+ * Below 768px only.
+ */
+@media (max-width: 767.98px) {
+  .pa-actchips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 2px 16px 4px; }
+  .pa-actchips::-webkit-scrollbar { display: none; }
+  .pa-actchips .pa-chip { height: 40px; flex: none; }
+  .pa-actchips .pa-chip[aria-pressed="true"] { background: var(--pa-navy); color: #fff; box-shadow: none; }
+  .pa-fdh { display: flex; align-items: baseline; gap: 8px; margin: 18px 2px 8px; font-family: var(--pa-type) !important; font-size: 16px; color: var(--pa-ink); }
+  .pa-fdh small { font: 400 13px var(--pa-sans) !important; color: var(--pa-muted); }
+  .pa-fit { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; background: var(--pa-card); border-radius: 14px; box-shadow: var(--pa-sh); margin-bottom: 8px; color: var(--pa-ink); }
+  .pa-fit .tx { flex: 1; min-width: 0; font: 400 15px/1.35 var(--pa-sans) !important; }
+  .pa-fit .tx b { font-weight: 600; }
+  .pa-fit .meta { display: block; font: 400 13px/1.3 var(--pa-sans) !important; color: var(--pa-muted); margin-top: 3px; }
+  .pa-fit.req { background: var(--pa-blush-wash); box-shadow: none; }
+  .pa-fit.mine { background: transparent; box-shadow: none; padding: 8px 14px; }
+  .pa-fit.mine .tx { font-size: 14.5px !important; color: var(--pa-ink-2); }
+  .pa-fitico { width: 30px; height: 30px; border-radius: 50%; background: var(--pa-fill); display: grid; place-items: center; flex: none; color: var(--pa-ink); }
+  .pa-fitico svg { width: 15px; height: 15px; }
+  .pa-fit .pa-fitact { margin-top: 10px; }
+  .pa-actnone { margin: 14px 2px; }
+  .pa-actall { margin: 6px 0 4px; }
+  /* the page */
+  .pa-actpage { position: fixed; inset: 0; z-index: 1005; background: var(--pa-page); overflow-y: auto; overscroll-behavior: contain; color: var(--pa-ink); font-family: var(--pa-sans); }
+  .pa-actpage .pa-band { padding-bottom: 46px; }
+  .pa-actsub { font: 400 14px/1.35 var(--pa-sans) !important; color: rgba(255, 255, 255, 0.75); margin-top: 6px; }
+  .pa-actbody { padding: 0 16px 48px; position: relative; }
+  .pa-fsum { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 0 0 14px; }
+  .pa-fsum div { background: var(--pa-card); border-radius: 14px; box-shadow: var(--pa-sh); padding: 10px 12px; }
+  .pa-fsum b { display: block; font-family: var(--pa-type) !important; font-weight: 400 !important; font-size: 24px; line-height: 1; }
+  .pa-fsum span { display: block; font: 400 12.5px/1.2 var(--pa-sans) !important; color: var(--pa-muted); margin-top: 4px; }
+  .pa-fsum span.none { margin-top: 0; color: var(--pa-ink-2); }
+}
