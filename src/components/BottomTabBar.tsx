@@ -57,9 +57,11 @@ interface BottomTabBarProps {
   away?: boolean;
   /** not drawn: a pushed detail screen or a page opened from the menu */
   hidden?: boolean;
+  /** Phone fixes v1 (1B): there is more of the page below, so the edge fade shows */
+  more?: boolean;
 }
 
-export const BottomTabBar: React.FC<BottomTabBarProps> = ({ pathname, onGo, onPlus, plusOpen = false, badge = 0, away = false, hidden = false }) => {
+export const BottomTabBar: React.FC<BottomTabBarProps> = ({ pathname, onGo, onPlus, plusOpen = false, badge = 0, away = false, hidden = false, more = false }) => {
   if (hidden) return null;
   const on = tabFor(pathname);
   const tab = (t: (typeof TABS)[number]) => {
@@ -75,7 +77,11 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({ pathname, onGo, onPl
       </button>
     );
   };
-  return (
+  return (<>
+    {/* Phone fixes v1 (1B; boot.js `.fx-b2 .app::after`): the edge fade is anchored to the screen's foot and runs
+        up behind the frosted bar, so content scrolls clearly behind it. It goes when the bar tucks away and at
+        the end of the page. */}
+    <div className={`pa-edgefade${away || !more ? " off" : ""}`} aria-hidden="true" data-pa="edgefade" />
     <nav className={`pa-tabbar${away ? " away" : ""}${plusOpen ? " plus-open" : ""}`} aria-label="Primary" data-pa="tabbar">
       {tab(TABS[0])}
       {tab(TABS[1])}
@@ -86,5 +92,5 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({ pathname, onGo, onPl
       {tab(TABS[2])}
       {tab(TABS[3])}
     </nav>
-  );
+  </>);
 };

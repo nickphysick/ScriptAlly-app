@@ -7,8 +7,9 @@
   .pa-tabbar {
     position: fixed; left: 14px; right: 14px; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); z-index: 40;
     height: 66px; border-radius: 33px; box-sizing: border-box;
-    background: rgba(255, 255, 255, 0.92);
-    -webkit-backdrop-filter: blur(18px) saturate(1.4); backdrop-filter: blur(18px) saturate(1.4);
+    /* Phone fixes v1 (1B; boot.js `.fx-b2 .tabbar`): frosted, so content shows through as it scrolls behind */
+    background: rgba(255, 255, 255, 0.6);
+    -webkit-backdrop-filter: blur(20px) saturate(1.5); backdrop-filter: blur(20px) saturate(1.5);
     box-shadow: 0 10px 30px rgba(31, 38, 51, 0.16), inset 0 0 0 1px rgba(31, 38, 51, 0.05);
     display: flex; align-items: center; justify-content: space-around; padding: 0 8px;
     transition: transform 0.38s var(--pa-spring), opacity 0.25s;
@@ -234,3 +235,24 @@
   .ws-work .wpg { height: auto; overflow: visible; }
   .ws-work .wpg-scroll { height: auto; max-height: none; overflow: visible; }
 }
+
+/* ═══ Phone fixes v1, B — THE FROSTED BAR AND THE EDGE FADE (1B; boot.js `b2`) ══════════════════════
+   The old foot fade (`.sv2-fade`) was sticky at the stage's foot, which ends 20px above the bar's top, so
+   it floated over the bar with a gap of page under it. It is not drawn on a phone. The edge fade replaces
+   it: anchored to the screen's bottom (safe area included), running up behind the bar to 32px above its
+   top (bar 66 + offset 14 + 32 = the ref's 112), the page colour to transparent, under the bar (z 39 < 40). */
+@media (max-width: 767.98px) {
+  .sv2-fade { display: none; }
+  .pa-edgefade {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 39; pointer-events: none;
+    height: calc(66px + 14px + 32px + env(safe-area-inset-bottom, 0px));
+    background: linear-gradient(rgba(248, 246, 242, 0), rgba(248, 246, 242, 0.9) 55%, var(--pa-page));
+    transition: opacity 0.3s;
+  }
+  .pa-edgefade.off { opacity: 0; }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .pa-tabbar { background: #fff; }
+  }
+}
+@media (min-width: 768px) { .pa-edgefade { display: none; } }
+@media (prefers-reduced-motion: reduce) { .pa-edgefade { transition: none; } }

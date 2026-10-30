@@ -7,7 +7,8 @@ Phone projects added to playwright.config.ts: `iphone` (iPhone 13, WebKit) and `
 
 | Phase | Commit | State |
 |---|---|---|
-| A one scroller per page | (this commit) | committed; PF1 F1 green on both phones (24 pages) |
+| A one scroller per page | `8fd56b3b` | committed; PF1 F1 green on both phones (24 pages) |
+| B frosted bar and edge fade | (this commit) | committed; PF1 F2, F3 green on both phones |
 
 ## Causes (recon, base build, Pixel and iPhone)
 - 2 (no scroll): on a phone every page sits in the desktop's viewport-locked stage slot — `StagePage` (AppShell.tsx:141–153) gives `layout="fill" clip` slots `flex:1; min-height:0; overflow:hidden` inline, and `.ws-work--fit` (workspaceShell.css:464) is `flex:1 1 0; min-height:0`. Queries got a 358px box over a 3,786px page; nothing scrolled. Home's slot is `flow`, which is why it alone scrolled. Import also had a second scroller (`.wpg-scroll`).
@@ -19,3 +20,9 @@ Phone projects added to playwright.config.ts: `iphone` (iPhone 13, WebKit) and `
 ## Harness notes
 - `tests/e2e/touch.ts`: native touch drag on Chromium (CDP); on WebKit Playwright has no native touch drag, so the touch events are dispatched (catching a cancelling listener) and the scroll is applied to the element the browser would pick.
 - Navigate inside the app (`go()`: pushState + popstate) and wait for the stage height to settle; full reloads made WebKit measure half-rendered pages.
+
+## Phase B notes
+- The bar is `rgba(255,255,255,.6)` with `blur(20px) saturate(1.5)` (both prefixes), solid white where backdrop-filter is unsupported.
+- `.sv2-fade` is not drawn below 768px. `.pa-edgefade` is drawn beside the bar by `BottomTabBar` (fixed, bottom 0, height 66 + 14 + 32 + safe area, z 39 under the bar's 40), off while the bar is tucked away or there is nothing more below (`fadeOn`, the stage's own "more below" state).
+- The stage's phone bottom padding was already `100px + safe area` (bar 66 + offset 14 + 16 = 96), so nothing changed there; F1 holds the last item above the bar.
+- Harness repair: `ensureSignedIn` (tests/e2e/measure.ts) raced the shell against the form only once; after `goto("/#/signin")` it read `isVisible()` before WebKit had drawn the shell and then waited the whole test for a form that never came. It races again there now (30s each side).

@@ -698,6 +698,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
         plusOpen={plusOpen}
         badge={tabBadge}
         away={tabAway}
+        more={fadeOn}
         hidden={activeMobileDetail !== null || isMenuPage(pathname)}
       />
 
