@@ -50,7 +50,7 @@ import { Dash105Founding } from "../v105/Dash105Founding";
 import { agentCoverage, isPreQuery } from "../../../lib/dashFirstUse";
 import { ClosedHoop, AgentsHoop } from "../v60/Dash60Left";
 import { openNewAgentCard } from "../../../lib/agentCardStore";
-import { answerFor, answerWrite, bookLabel, gsRowDone, dashState, seg, dashPrefsOf, gsHideWrite, gsOrder, legacyStartOf, pathAfter, type AnswerChoice, type AnswerWrite, type DashState, type GsLink, type StartPath } from "../../../lib/dashFirstVisit";
+import { REMINDER_NOT_NOW, REMINDER_YES, firstNameOf, shouldAskReminder, answerFor, answerWrite, bookLabel, gsRowDone, dashState, seg, dashPrefsOf, gsHideWrite, gsOrder, legacyStartOf, pathAfter, type AnswerChoice, type AnswerWrite, type DashState, type GsLink, type StartPath } from "../../../lib/dashFirstVisit";
 import type { UserPaths } from "../../../lib/userPaths";
 import { SetUpCard } from "../fv1/SetUpCard";
 import { GsSheet } from "../fv2/GsSheet";
@@ -58,6 +58,7 @@ import { EmptyFeed } from "../fv2/EmptyFeed";
 import { FirstVisitTour } from "../fv2/FirstVisitTour";
 import { ExampleDashboard } from "../fv2/ExampleDashboard";
 import { ResumeCard } from "../fv2/ResumeCard";
+import { ReminderAsk, ReminderDone } from "../fv2/ReminderAsk";
 import type { DraftMeta } from "../../../lib/importDraft";
 /* ⚠️ LOADED WHEN FIRST NEEDED: `lib/importDraft` brings Firebase, and this page is also the onboarding ghost, mounted by
    suites and the import loader with no Firebase to load */
@@ -545,6 +546,22 @@ export const Dash58: React.FC<Dash58Props> = ({
   const author = (currentUser?.name ?? "").trim();
   const title = (activeManuscript?.title ?? "").trim();
 
+  /* ── first visit v2 (Part G): the nudge-email ask — once per account, after its first query, under that query's row ── */
+  const [reminderSaid, setReminderSaid] = useState<"yes" | "not_now" | null>(null);
+  const firstQuery = useMemo(() => {
+    const dated = queries.filter((q) => q.dateSent).sort((a, b) => Date.parse(a.dateSent!) - Date.parse(b.dateSent!));
+    return dated[0] ?? queries[0] ?? null;
+  }, [queries]);
+  const askReminder = !loading && !example && !!currentUser && !!onPrefs && !!firstQuery && reminderSaid === null
+    && shouldAskReminder({ queries: queries.length, answered: prefs.reminder, storedNudges: (currentUser?.notifyPrefs as { nudges?: unknown } | undefined)?.nudges });
+  const reminderNode = askReminder && firstQuery ? (
+    <ReminderAsk
+      agentFirst={firstNameOf(agents.find((a) => a.id === firstQuery.agentId)?.name)}
+      onYes={() => { setReminderSaid("yes"); void onPrefs?.(REMINDER_YES); }}
+      onNotNow={() => { setReminderSaid("not_now"); void onPrefs?.(REMINDER_NOT_NOW); }}
+    />
+  ) : reminderSaid === "yes" ? <ReminderDone onSettings={() => navigate("/account")} /> : null;
+
   /* ── the querying page's cards (Dashboard feed v1). Each is the app's own component; the layout below places them. ── */
   const chartCard = (
     <div className="d58-active" data-d58="active">
@@ -626,7 +643,8 @@ export const Dash58: React.FC<Dash58Props> = ({
               </div>
             ) : (
               <div className="df1-feed" data-df1="feed">
-                <F1Feed loading={loading} activities={scopedActivities} queries={queries} agents={agents} manuscripts={manuscripts} userName={author} now={now} />
+                <F1Feed loading={loading} activities={scopedActivities} queries={queries} agents={agents} manuscripts={manuscripts} userName={author} now={now}
+                  under={reminderNode && firstQuery ? { queryId: firstQuery.id, node: reminderNode } : null} />
               </div>
             )}
             <div className="df1-right" data-df1="right">

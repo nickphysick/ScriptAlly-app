@@ -112,6 +112,8 @@ export interface DashPrefs {
   gsHidden: Record<string, true>;
   /** first visit v2 (Part D): the first-visit tour has been decided — finished, skipped, or never to run */
   tour: boolean;
+  /** first visit v2 (Part G): the nudge-email ask's answer, once given */
+  reminder: "yes" | "not_now" | null;
 }
 
 const ROOT = "todoPrefs.dash";
@@ -122,7 +124,7 @@ export const seg = (id: string): string => id.replace(/[^A-Za-z0-9_-]/g, "_");
 /** Total reader: whatever is stored (or nothing), a well-formed value comes back. */
 export function dashPrefsOf(user: Pick<User, "todoPrefs"> | null | undefined): DashPrefs {
   const raw = ((user?.todoPrefs as { dash?: Record<string, unknown> } | undefined)?.dash ?? {}) as {
-    start?: Record<string, unknown>; tip?: unknown; wins?: Record<string, unknown>; gsHidden?: Record<string, unknown>; tour?: unknown;
+    start?: Record<string, unknown>; tip?: unknown; wins?: Record<string, unknown>; gsHidden?: Record<string, unknown>; tour?: unknown; reminder?: unknown;
   };
   const start: Record<string, LegacyStart> = {};
   for (const [k, v] of Object.entries(raw.start ?? {})) if (v === "yes" || v === "notyet") start[k] = v;
@@ -137,6 +139,7 @@ export function dashPrefsOf(user: Pick<User, "todoPrefs"> | null | undefined): D
     wins: flags(raw.wins),
     gsHidden: flags(raw.gsHidden),
     tour: raw.tour === "done",
+    reminder: raw.reminder === "yes" || raw.reminder === "not_now" ? raw.reminder : null,
   };
 }
 
@@ -201,6 +204,32 @@ export const gsHideWrite = (msId: string): UserPaths => ({ [`${ROOT}.gsHidden.${
 /** The key a stamp is remembered by: per kind and manuscript (an agent is the writer's, so it has none). */
 export const winKey = (kind: WinKind, msId: string | null): string => (kind === "agent" ? "agent" : `${kind}_${seg(msId ?? "none")}`);
 export const winWrite = (key: string): UserPaths => ({ [`${ROOT}.wins.${key}`]: true });
+
+/* ── first visit v2, Part G: the nudge-email ask ── */
+
+export const REMINDER = {
+  title: "Want an email when a nudge is due?",
+  text: (first: string) => `If ${first} hasn't replied in time, we'll email you so you can follow up. Only when there's something to do, never more than once a day.`,
+  yes: "Yes, email me",
+  notNow: "Not now",
+  done: "We'll email you when a nudge is due.",
+  settings: "Change in Settings",
+} as const;
+
+/**
+ * Whether to ask (once per account): after the first query, while the account has not answered it, and never when the
+ * writer has already turned nudge emails on. ⚠️ THE STORED LEAF, NOT THE SETTINGS READER: `NOTIFY_DEFAULT.nudges` is
+ * true, so the reader says "on" for an account that never chose anything; only a stored `true` was the writer's choice.
+ */
+export const shouldAskReminder = (i: { queries: number; answered: DashPrefs["reminder"]; storedNudges: unknown }): boolean =>
+  i.queries > 0 && i.answered === null && i.storedNudges !== true;
+
+/** Yes: `notifyPrefs.nudges` as ONE leaf (Settings saves the whole map from its reader; every other key is kept). */
+export const REMINDER_YES: UserPaths = { "notifyPrefs.nudges": true, [`${ROOT}.reminder`]: "yes" };
+export const REMINDER_NOT_NOW: UserPaths = { [`${ROOT}.reminder`]: "not_now" };
+
+/** "Tessa" — the first word of the agent's name, or "the agent" when the record has none. */
+export const firstNameOf = (name: string | null | undefined): string => (name ?? "").trim().split(/\s+/)[0] || "the agent";
 
 /* ── the tips ───────────────────────────────────────────────────────────────────────────────────── */
 

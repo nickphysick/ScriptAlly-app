@@ -109,7 +109,9 @@ export const F1Feed: React.FC<{
   manuscripts: Manuscript[];
   userName: string;
   now: Date;
-}> = ({ loading, activities, queries, agents, manuscripts, userName, now }) => {
+  /** First visit v2 (Part G): drawn under the newest row about `queryId`, or at the top when no such row is showing */
+  under?: { queryId: string; node: React.ReactNode } | null;
+}> = ({ loading, activities, queries, agents, manuscripts, userName, now, under }) => {
   const navigate = useNavigate();
   const [filter, setFilter] = useState<FeedFilter>("all");
   /* how many seven-day windows are showing: 1, then 2 after one "Show earlier", … */
@@ -127,6 +129,12 @@ export const F1Feed: React.FC<{
   );
   const hasEarlier = useMemo(() => activities.some((a) => { const t = new Date(a.date).getTime(); return Number.isFinite(t) && t < from; }), [activities, from]);
   const open = (id: string) => navigate(`/queries?q=${encodeURIComponent(id)}`);
+  /* the newest row about the query the ask belongs under (Part G); the days run newest first */
+  const underAt = useMemo(() => {
+    if (!under) return null;
+    for (const d of days) for (const it of d.items) if (it.queryId === under.queryId) return it.id;
+    return null;
+  }, [days, under]);
 
   return (
     <section className="df1-feedcol" aria-label="Activity feed" data-df1="feedcol" data-filter={filter}>
@@ -136,10 +144,16 @@ export const F1Feed: React.FC<{
         ))}
       </div>
       <div className="df1-fscroll" data-df1="fscroll" data-loading={loading ? "1" : "0"}>
+        {!loading && under && !underAt && under.node}
         {!loading && days.map((d) => (
           <React.Fragment key={d.key}>
             <div className="df1-day" data-df1="day"><b>{d.first}</b><span>{d.rest}</span></div>
-            {d.items.map((it) => (it.type === "big" ? <Big key={it.id} c={it} onOpen={open} /> : <Mini key={it.id} m={it} />))}
+            {d.items.map((it) => (
+              <React.Fragment key={it.id}>
+                {it.type === "big" ? <Big c={it} onOpen={open} /> : <Mini m={it} />}
+                {under && it.id === underAt && under.node}
+              </React.Fragment>
+            ))}
           </React.Fragment>
         ))}
         {!loading && (

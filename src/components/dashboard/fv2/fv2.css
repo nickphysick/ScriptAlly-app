@@ -103,3 +103,18 @@
 .d58 .fv2-rtext { margin: 14px 0 0; font: 400 15px/1.5 var(--d58-serif) !important; color: var(--d58-ink); }
 .d58 .fv2-rask p { margin: 12px 0 0; font: 600 15px/1.45 var(--d58-serif) !important; color: var(--d58-ink); }
 .d58 .fv2-resume .fv1-lnk { color: var(--d58-ink); }
+
+/* ── Part G · the nudge-email ask, in the feed ── */
+.fv2-ask { display: flex; gap: 10px; margin: 0 0 10px; padding: 14px 16px; border-radius: 12px; background: #fbf4ee; box-shadow: inset 0 0 0 1px #efe0d4; }
+.fv2-askbell { flex: none; width: 20px; height: 20px; margin-top: 1px; }
+.fv2-askbell svg { width: 16px; height: 16px; fill: none; stroke: #8a4a3c; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.fv2-askw { min-width: 0; }
+.d58 .fv2-askw b { display: block; font: 700 15.5px/1.35 var(--d58-serif) !important; color: var(--d58-ink); }
+.d58 .fv2-askw p { margin: 2px 0 0; font: 400 14.5px/1.5 var(--d58-serif) !important; color: var(--d58-ink); }
+.fv2-askrow { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.d58 .fv2-askyes { height: 36px; padding: 0 14px; border: 0; border-radius: 9px; cursor: pointer; background: var(--d58-navy); color: #fff; font: 700 15px/1 var(--d58-serif) !important; }
+.d58 .fv2-askno { height: 36px; padding: 0 14px; border: 0; border-radius: 9px; cursor: pointer; background: #fff; color: var(--d58-ink); box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.18); font: 600 15px/1 var(--d58-serif) !important; }
+.fv2-askyes:focus-visible, .fv2-askno:focus-visible, .fv2-askset:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
+.fv2-askdone { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; padding: 10px 14px; border-radius: 12px; background: #fbf4ee; }
+.d58 .fv2-askdt { flex: 1 1 auto; min-width: 0; font: 400 14.5px/1.4 var(--d58-serif) !important; color: var(--d58-ink); }
+.d58 .fv2-askset { flex: none; padding: 0; border: 0; background: none; cursor: pointer; color: var(--d58-ink); font: 700 14.5px/1.4 var(--d58-serif) !important; text-decoration: underline; text-underline-offset: 3px; }

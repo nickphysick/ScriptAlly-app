@@ -6,13 +6,15 @@
  *   node tests/e2e/seedFv2.mjs stage <s>         User.queryingStage = s ("starting" | "early" | …)
  *   node tests/e2e/seedFv2.mjs status <ms> <st>  Manuscript.status for <ms>
  *   node tests/e2e/seedFv2.mjs dump [ms]         print the stage, the tour flag, the reminder flags and <ms>'s status
+ *   node tests/e2e/seedFv2.mjs g1-prep           back up notifyPrefs and the ask's answer, then clear notifyPrefs.nudges
+ *                                                and the answer (an account that has never chosen); g1-restore puts both back
  *   node tests/e2e/seedFv2.mjs draft-clear       delete the kept import review (importDrafts/{uid} and its parts)
  *   node tests/e2e/seedFv2.mjs imports-clean     delete what an F1 import brought in: agents named "Fv2 Sample …",
  *                                                their queries, those queries' logs and their feed rows
  *
  * Every write is one leaf; nothing else on the account is touched. Each lock that uses this puts back what it changed.
  */
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync, existsSync, writeFileSync, mkdirSync, unlinkSync } from "node:fs";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { getFirestore, doc, getDoc, getDocs, updateDoc, deleteField, deleteDoc, collection, query, where, writeBatch } from "firebase/firestore";
@@ -34,7 +36,20 @@ if (cmd === "tour-reset") await updateDoc(uref, { "todoPrefs.dash.tour": deleteF
 else if (cmd === "tour-done") await updateDoc(uref, { "todoPrefs.dash.tour": "done" });
 else if (cmd === "stage") await updateDoc(uref, a === "none" ? { queryingStage: deleteField() } : { queryingStage: a });
 else if (cmd === "status") await updateDoc(doc(db, "users", user.uid, "manuscripts", a), { status: b });
-else if (cmd === "draft-clear") {
+else if (cmd === "g1-prep" || cmd === "g1-restore") {
+  /* ⚠️ RESTORE IS EXACT: a field that was absent is deleted, never written as empty */
+  mkdirSync("tests/e2e/.auth", { recursive: true });
+  const file = "tests/e2e/.auth/fv2-g1.json";
+  if (cmd === "g1-prep") {
+    const d = (await getDoc(uref)).data() ?? {};
+    if (!existsSync(file)) writeFileSync(file, JSON.stringify({ notifyPrefs: d.notifyPrefs ?? null, reminder: d.todoPrefs?.dash?.reminder ?? null }));
+    await updateDoc(uref, { "notifyPrefs.nudges": deleteField(), "todoPrefs.dash.reminder": deleteField() });
+  } else {
+    const b = JSON.parse(readFileSync(file, "utf8"));
+    await updateDoc(uref, { notifyPrefs: b.notifyPrefs ?? deleteField(), "todoPrefs.dash.reminder": b.reminder ?? deleteField() });
+    unlinkSync(file);
+  }
+} else if (cmd === "draft-clear") {
   const parts = await getDocs(collection(db, "importDrafts", user.uid, "parts"));
   for (const p of parts.docs) await deleteDoc(p.ref);
   await deleteDoc(doc(db, "importDrafts", user.uid));
@@ -56,7 +71,7 @@ const u = (await getDoc(uref)).data() ?? {};
 const ms = a && cmd !== "stage" ? (await getDoc(doc(db, "users", user.uid, "manuscripts", a))).data() : null;
 console.log(JSON.stringify({
   uid: user.uid, stage: u.queryingStage ?? null, tour: u.todoPrefs?.dash?.tour ?? null,
-  nudges: u.notifyPrefs?.nudges ?? null, asked: u.todoPrefs?.dash?.reminderAsked ?? null, gsClosed: u.todoPrefs?.dash?.gsClosed ?? null,
+  nudges: u.notifyPrefs?.nudges ?? null, notify: u.notifyPrefs ?? null, reminder: u.todoPrefs?.dash?.reminder ?? null, gsClosed: u.todoPrefs?.dash?.gsClosed ?? null,
   ...(ms ? { msStatus: ms.status ?? null } : {}),
   draft: await (async () => { const d = (await getDoc(doc(db, "importDrafts", user.uid))).data(); return d ? { file: d.fileName, a: `${d.agentsChecked}/${d.agentsTotal}`, step: d.step, parts: d.parts } : null; })(),
 }));

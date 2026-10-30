@@ -128,3 +128,40 @@ test("F1 · a review left at agent 23 of 31 is kept, resumed at row 24, and goes
   }
   L.done(13);
 });
+
+/* ── G1 · the nudge-email ask ─────────────────────────────────────────────────────────────────────── */
+const Q = "seed-ms-1";
+test("G1 · the ask shows after the first query; Yes writes one leaf and it never shows again", async ({ page }) => {
+  test.setTimeout(240_000);
+  const L = new Ledger("G1");
+  const before = dump(Q);
+  seed("g1-prep");
+  try {
+    const prepped = dump(Q);
+    L.check("G1", "setup", prepped.notify?.nudges === undefined && prepped.reminder === null, `an account that never chose: ${JSON.stringify(prepped.notify)}`);
+    await openDash(page, SIZES[0], Q);
+    const ask = vis(page, '[data-fv2="reminder-ask"]');
+    await ask.waitFor({ timeout: 15_000 });
+    const t = (await ask.textContent()) ?? "";
+    L.check("G1", "ask", /Want an email when a nudge is due\?/.test(t) && /If \S+ hasn't replied in time/.test(t), t.slice(0, 120));
+    L.check("G1", "ask", (await ask.locator("xpath=ancestor::*[@data-df1='feedcol']").count()) === 1, "in the feed");
+    await vis(page, '[data-fv2="reminder-yes"]').click();
+    await vis(page, '[data-fv2="reminder-done"]').waitFor({ timeout: 10_000 });
+    L.check("G1", "answered", /We'll email you when a nudge is due\./.test((await vis(page, '[data-fv2="reminder-done"]').textContent()) ?? ""), "one line");
+    await page.waitForTimeout(2000);
+    const after = dump(Q);
+    L.check("G1", "write", after.notify?.nudges === true, `nudges ${after.notify?.nudges}`);
+    L.check("G1", "write", after.notify?.weeklyDigest === prepped.notify?.weeklyDigest, `weeklyDigest kept (${after.notify?.weeklyDigest})`);
+    L.check("G1", "write", after.notify?.discover === prepped.notify?.discover, `discover kept (${after.notify?.discover})`);
+    L.check("G1", "write", JSON.stringify(Object.keys(after.notify ?? {}).sort()) === JSON.stringify([...Object.keys(prepped.notify ?? {}), "nudges"].sort()), `no other key: ${JSON.stringify(after.notify)}`);
+    await page.reload();
+    await page.locator('[data-d58="page"][data-loading="0"]').first().waitFor({ timeout: 25_000 });
+    await page.waitForTimeout(1500);
+    L.check("G1", "once", (await page.locator('[data-fv2="reminder-ask"], [data-fv2="reminder-done"]').filter({ visible: true }).count()) === 0, "never shown again");
+  } finally {
+    seed("g1-restore");
+    const back = dump(Q);
+    L.check("G1", "restore", JSON.stringify(back.notify) === JSON.stringify(before.notify) && back.reminder === before.reminder, `restored ${JSON.stringify(back.notify)}`);
+  }
+  L.done(9);
+});
