@@ -8,8 +8,8 @@ Ref: MANIFEST hash 4a819d11…cf6e2, 13/13 OK.
 | Phase | Commit | State |
 |---|---|---|
 | A account screens, dead ends, the error page | `711c1207` | committed |
-| B addresses and column matching | (this commit) | committed; PLS1 L1–L5 written and green (L1–L3 lab, L4–L5 signed in) |
-| C email drop on a phone | — | |
+| B addresses and column matching | `69abc04c` | committed; PLS1 L1–L5 written and green (L1–L3 lab, L4–L5 signed in) |
+| C email drop on a phone | (this commit) | committed; behind `emailDropPhoneLive()`, OFF; PLS1 L6 green on the lab |
 | D editing a query | — | |
 | E writing materials and building packages | — | |
 | F locks, shots and the report | — | |
@@ -34,3 +34,11 @@ Ref: MANIFEST hash 4a819d11…cf6e2, 13/13 OK.
 - 5B: already true on this base: `/todo/calendar` redirects to `/todo` (`todoRedirectFor`), and the phone To-do shows the week band. L4 asserts it.
 - 6B: `ImportDoorsPhone` opens a sheet from "Match your own columns": its two doors call the page's own `onSmart` / `onUpload`. Copy from the board's `matchB`.
 - Harness: `tests/e2e/phoneLastScreens.measure.ts` (PLS1) reuses pa2Lib's `openPhone`, `colourSweep`, `imageSweep`.
+
+## Phase C notes
+- FALSE PREMISE: Smart email drop is already mounted and reachable for Pro: `PasteEmailFlow` (App.tsx, Pro only), opened by QueryPicker's "Paste the email instead". So no new door was added.
+- The phone screens (`EmailDropPhone.tsx`: `EmailPastePhone`, `EmailUpdatesPhone`) render from `PasteEmailFlow` below 768px when `emailDropPhoneLive()` is true. It is OFF: production never reads the switch, and on a dev build it is per device (localStorage `sa.lab.emailDropPhone` = "1"). Nick decides.
+- The phone save calls `commitEmailImport` with only the ticked records, then `showUndoBar`. Undo restores a snapshot (matched query) or deletes the created agent, which cascades its query (new agent). The celebration is the existing phone Queries watcher.
+- No allowance exists in the entitlement model, so the line reads "Included with Pro." (the mock's "30 emails a month" has no source).
+- `#/email-drop-lab` (dev only) holds the two screens over a fixture for L6. The account-writing half of L6 (save and Undo on the harness account) cannot run: the harness account is free and the flow is Pro only.
+- Walk on dev (Stage 3): "Just getting started" times out waiting for the Contact list on the BASE build too (pre-existing).

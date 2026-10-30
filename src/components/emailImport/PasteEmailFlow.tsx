@@ -20,6 +20,12 @@ import { commitEmailImport } from "../../lib/emailImportCommit";
 import { PasteScreen } from "./PasteScreen";
 import { EmailImportReview } from "./EmailImportReview";
 import { UpsellExplainer } from "./parts";
+import { EmailPastePhone, EmailUpdatesPhone, emailDropPhoneLive } from "./EmailDropPhone";
+import { useIsMobile } from "../shell/mobileChrome";
+import { takeSnapshot, restoreSnapshot } from "../../lib/queryActions/snapshot";
+import { showUndoBar } from "../../lib/queryActions/drawerStore";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../../lib/firebase";
 
 /** The dimmed focused overlay (reused chrome), closing on Escape or a backdrop click. */
 export const EmailOverlay: React.FC<{ onClose: () => void; maxWidth?: number; children: React.ReactNode }> = ({
@@ -56,7 +62,10 @@ interface PasteEmailFlowProps {
 }
 
 export const PasteEmailFlow: React.FC<PasteEmailFlowProps> = ({ isOpen, onClose, initialManuscriptId, onNavigate, onSuccessToast }) => {
-  const { manuscripts, currentUser, addAgent, addQuery } = useScriptAllyDb();
+  const { manuscripts, currentUser, addAgent, addQuery, queries, deleteAgent } = useScriptAllyDb();
+  /* Phone last screens v1 (7B/8B): below 768px, and only while the phone flow is switched on
+     (`emailDropPhoneLive`, off until Nick says), the same state and calls render full screen. */
+  const phone = useIsMobile() && emailDropPhoneLive();
   const pickable = useMemo(() => pickableManuscripts(manuscripts), [manuscripts]);
   const msOptions = useMemo(() => pickable.map((m) => ({ id: m.id, title: m.title })), [pickable]);
 
@@ -85,6 +94,7 @@ export const PasteEmailFlow: React.FC<PasteEmailFlowProps> = ({ isOpen, onClose,
   }, [isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!isOpen) return null;
+
 
   const submit = async () => {
     if (!emailText.trim()) {
@@ -140,6 +150,49 @@ export const PasteEmailFlow: React.FC<PasteEmailFlowProps> = ({ isOpen, onClose,
       setCommitting(false);
     }
   };
+
+  /* The phone's save: the same commit with only the ticked records, then the snackbar with Undo.
+     Undo puts a matched query back from a snapshot taken before the write; for a new agent it deletes
+     the agent the commit created, which takes its query and records with it. The celebration is the
+     existing one (the phone Queries page's watcher fires when a status moves into a request or offer). */
+  const handlePhoneSave = async (accepted: ProposalRecord[]) => {
+    if (!currentUser || !proposal) return;
+    setCommitting(true);
+    setCommitError(null);
+    try {
+      const matchedId = proposal.subject.kind === "matched" ? proposal.subject.queryId : null;
+      const snap = matchedId ? await takeSnapshot(currentUser.id, [matchedId]) : null;
+      const res = await commitEmailImport(
+        { userId: currentUser.id, addAgent, addQuery, manuscriptTitle: manuscriptTitle || "" },
+        proposal.subject, manuscriptId, accepted,
+      );
+      let undo: (() => Promise<void>) | undefined;
+      if (snap) undo = () => restoreSnapshot(snap);
+      else if (res.created) undo = async () => {
+        const q = await getDoc(doc(db, "users", currentUser.id, "queries", res.queryId));
+        const agentId = q.exists() ? (q.data().agentId as string | undefined) : undefined;
+        if (agentId) await deleteAgent(agentId);
+      };
+      const n = res.recordCount;
+      onClose();
+      onNavigate?.("queries", "Queries database");
+      showUndoBar({ message: `Saved ${n} ${n === 1 ? "update" : "updates"}`, sub: res.agentName, undo });
+    } catch (e: any) {
+      setCommitError(e?.message || "Couldn't save those records — please try again.");
+    } finally {
+      setCommitting(false);
+    }
+  };
+
+  if (phone && step !== "upsell") {
+    const sentIso = proposal?.subject.queryId ? queries.find((q) => q.id === proposal.subject.queryId)?.dateSent : undefined;
+    const dayN = sentIso ? Math.max(0, Math.floor((Date.now() - new Date(sentIso).getTime()) / 86_400_000)) : null;
+    return step === "review" && proposal
+      ? <EmailUpdatesPhone proposal={proposal} dayN={dayN} busy={committing} error={commitError}
+          onSave={handlePhoneSave} onSkipAll={onClose} onBack={() => setStep("paste")} />
+      : <EmailPastePhone emailText={emailText} onEmailText={(t) => { setEmailText(t); if (error) setError(null); }}
+          busy={busy} error={error} onRead={submit} onBack={onClose} />;
+  }
 
   return (
     <EmailOverlay onClose={onClose} maxWidth={step === "review" ? 580 : 540}>

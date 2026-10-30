@@ -1,0 +1,50 @@
+/* Smart email drop on a phone (phone last screens v1, 7B/8B; mocks `mailB1`, `mailB2`). Full screen
+   in the phone app's page layout: shell ink above, the sheet below, the action pinned at the foot. */
+.edp {
+  position: fixed; inset: 0; z-index: 1200; display: flex; flex-direction: column;
+  background: #1b2433; font-family: var(--font-sans); color: #1c130f; -webkit-font-smoothing: antialiased;
+}
+.edp-top { color: #fff; padding: 0 18px; }
+.edp-back { display: block; height: 60px; background: none; border: 0; color: #fff; font: 600 15px var(--font-sans); padding: 0; }
+.edp .edp-h { font-family: var(--sp-type) !important; font-weight: 400; font-size: 26px; line-height: 1.3; color: #fff; margin: 4px 0 18px; }
+.edp-sheet {
+  flex: 1; overflow: auto; background: #fbf9f5; border-radius: 20px 20px 0 0; padding: 22px 18px 110px; box-sizing: border-box;
+}
+.edp-sub { font: 16px/1.45 var(--sp-serif); color: #6b625b; margin: 0 0 16px; }
+.edp-small { font-size: 14px; margin-top: 16px; }
+.edp-paste {
+  display: block; width: 100%; height: 280px; box-sizing: border-box; resize: none; border-radius: 16px;
+  border: 1.5px dashed #cdbfb3; background: #fff; padding: 16px; font: 16px/1.45 var(--font-sans); color: #1c130f;
+}
+.edp-paste::placeholder { color: #9a918a; }
+.edp-chips { display: flex; gap: 8px; margin-top: 12px; }
+.edp-chip { font: 600 14px var(--font-sans); padding: 9px 14px; border-radius: 999px; border: 0; background: #ece7de; color: #1c130f; }
+.edp-chip.on { background: #2a3a52; color: #fff; }
+.edp-err { font: 600 14px var(--font-sans); color: #1c130f; background: #f5e6df; border-radius: 10px; padding: 10px 12px; margin: 12px 0 0; }
+.edp-pin {
+  position: fixed; left: 0; right: 0; bottom: 0; background: #fff; display: flex; gap: 12px; align-items: center;
+  padding: 12px 18px calc(22px + env(safe-area-inset-bottom, 0px)); box-shadow: 0 -10px 22px -16px rgba(0, 0, 0, .35);
+}
+.edp-btn {
+  flex: 1; height: 50px; border-radius: 999px; border: 0; background: #2a3a52; color: #fff; font: 700 16px var(--font-sans);
+}
+.edp-btn:disabled { background: #c9cfd8; }
+.edp-skip { background: none; border: 0; font: 600 15px var(--font-sans); color: #1c130f; padding: 12px 4px; white-space: nowrap; }
+.edp-card {
+  background: #fff; border-radius: 16px; overflow: hidden; margin-top: 12px;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, .07), 0 8px 18px -12px rgba(28, 19, 15, .25);
+}
+.edp-band { display: flex; justify-content: space-between; gap: 10px; padding: 8px 14px; font: 600 13px var(--font-sans); background: #e4e1db; color: #1c130f; }
+.edp-card.court-you .edp-band { background: #f5e6df; color: #5a3027; }
+.edp-card.court-agent .edp-band { background: #d7e0e8; color: #2a3a52; }
+.edp-row { display: flex; gap: 12px; align-items: center; padding: 14px; }
+.edp-what { flex: 1; min-width: 0; }
+.edp-what b { display: block; font: 600 16px var(--font-sans); }
+.edp-what small { display: block; font: 14px/1.4 var(--sp-serif); color: #6b625b; }
+.edp-tk {
+  appearance: none; flex: none; width: 28px; height: 28px; margin: 0; border-radius: 8px; border: 2px solid #b9b0a7; display: grid; place-items: center;
+}
+.edp-tk:checked { background: #2a3a52; border-color: #2a3a52; }
+.edp-tk:checked::after { content: "✓"; color: #fff; font: 700 16px var(--font-sans); }
+.edp-back:focus-visible, .edp-btn:focus-visible, .edp-chip:focus-visible, .edp-skip:focus-visible, .edp-tk:focus-visible { outline: 2px solid #2a3a52; outline-offset: 3px; }
+.edp-back:focus-visible { outline-color: #fff; }

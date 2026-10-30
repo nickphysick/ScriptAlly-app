@@ -188,7 +188,7 @@ test.describe("PLS1 the last screens on phones", () => {
     for (const vp of PHONES) {
       await openPhone(page, "/import", vp);
       if (MUTATE === "L5") await page.evaluate(() => { const b = document.querySelector<HTMLElement>('[data-pa="imp-match"]'); b?.replaceWith(Object.assign(document.createElement("a"), { textContent: "x" })); });
-      await page.locator('[data-pa="imp-match"]').click();
+      await page.locator('[data-pa="imp-match"]').click({ timeout: 10_000 });
       await page.waitForTimeout(500);
       const sheet = await page.locator('[data-pa="imp-match-sheet"]').isVisible();
       const words = sheet ? await page.locator('[data-pa="imp-match-sheet"]').innerText() : "";
@@ -207,6 +207,45 @@ test.describe("PLS1 the last screens on phones", () => {
       expect(r.matcher, `@${r.vp}: the matcher stays shut on a phone`).toBe(0);
     }
     expect(desk, "the desktop tile still opens the matcher").toBe(1);
+  });
+
+  test("L6 email drop: paste, two proposals, untick one, only the other is saved", async ({ page }) => {
+    /* On `#/email-drop-lab` (dev only): the phone screens over a fixture, the save recorded rather than
+       written. ⚠️ The brief's account-writing half (save on the harness account, then Undo) cannot run:
+       the flow is Pro only and the harness account is free (the rules refuse a client plan change). */
+    const rows: Record<string, unknown>[] = [];
+    for (const vp of PHONES) {
+      await lab(page, "#/email-drop-lab", vp);
+      const paste = await page.evaluate(() => ({
+        allowance: document.querySelector('[data-edp="allowance"]')?.textContent, clip: !!document.querySelector('[data-edp="clipboard"]'),
+        readOff: (document.querySelector('[data-edp="read"]') as HTMLButtonElement | null)?.disabled,
+        area: Math.round(document.querySelector('[data-edp="text"]')!.getBoundingClientRect().height),
+        pinBottom: Math.round(document.querySelector(".edp-pin")!.getBoundingClientRect().bottom), vh: innerHeight,
+      }));
+      await page.fill('[data-edp="text"]', "Dear Writer, I'd love to read the full manuscript. Best, Marcus");
+      await page.click('[data-edp="read"]');
+      await page.locator('[data-edp="updates"]').waitFor();
+      const count = await page.locator('[data-edp="count"]').innerText();
+      const n = await page.locator('[data-edp="proposal"]').count();
+      const tickedAtFirst = await page.locator('[data-edp="tick"]:checked').count();
+      await page.locator('[data-edp="tick"]').nth(1).click();
+      if (MUTATE === "L6") await page.locator('[data-edp="tick"]').nth(1).click(); // the break: save all
+      const label = await page.locator('[data-edp="save"]').innerText();
+      await page.click('[data-edp="save"]');
+      const saved = await page.evaluate(() => (window as unknown as { __edLab?: { saved: { resultingStatus: string }[] | null } }).__edLab?.saved?.map((r) => r.resultingStatus) ?? null);
+      rows.push({ vp: vp.width, ...paste, count, n, tickedAtFirst, label, saved });
+    }
+    record("L6", rows);
+    for (const r of rows as Array<Record<string, unknown>>) {
+      expect(r.n, `@${r.vp}: proposals`).toBe(2);
+      expect(r.count).toBe("2 updates found");
+      expect(r.tickedAtFirst, "ticked by default").toBe(2);
+      expect(r.readOff, "Read waits for an email").toBe(true);
+      expect(r.area).toBe(280);
+      expect(r.pinBottom).toBe(r.vh);
+      expect(r.label).toBe("Save 1 update");
+      expect(r.saved, `@${r.vp}: only the ticked proposal is saved`).toEqual(["Full Requested"]);
+    }
   });
 
   test("L10 colour laws and no image twice on this pack's phone screens", async ({ page }) => {

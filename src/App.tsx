@@ -77,6 +77,7 @@ import { NotesLab } from "./components/notes/NotesLab";
 // state is unreachable on any account that has agents, which is every real one.
 import { ContactListLab } from "./components/agents/ContactListLab";
 import { OnbLab } from "./components/onboarding/OnbLab";
+import { EmailDropLab } from "./components/emailImport/EmailDropLab";
 import { QueryDrawer } from "./components/queryActions/QueryDrawer";
 import { PracticeOverlay } from "./components/queries/practice/PracticeOverlay";
 import { AgentCardHost } from "./components/agents/card/AgentCardHost";
@@ -442,6 +443,10 @@ function AppContent() {
      state over fixtures inside the real SetupFrame. Gated on MODE exactly as the contact lab is:
      served by `build:dev`, absent from production. It carries a query (`?s=fork&…`), so it is
      matched by prefix. */
+  /* #/email-drop-lab — the phone email drop over a fixture (phone last screens v1, PLS1 L6). Dev only. */
+  if (hash.startsWith("#/email-drop-lab") && import.meta.env.MODE !== "production") {
+    return <EmailDropLab />;
+  }
   if (hash.startsWith("#/onb-lab") && import.meta.env.MODE !== "production") {
     return <OnbLab />;
   }
