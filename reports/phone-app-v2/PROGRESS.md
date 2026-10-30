@@ -39,6 +39,7 @@ Baseline gates on the base: tsc root 0, tsc functions 0, build clean, Vitest 689
 | 8 | A first run (Home, Queries) + two scoping regressions | `97367626` | committed |
 | 8 | B settings, help, import, plan | `91401e53` | committed |
 | 8 | C the sweep fixes | `9b7d2b0b` | committed |
+| 8 | D the sweep lock, pairs, report, CLAUDE.md | `be08d69c` | committed |
 
 ## Dev, as of the end of Part 1
 - (end of Part 2) dev serves `index-CRHIwewp.js` = `dev/pk391-qm1-pk392-calx-pk392b-td7-fv1-pk393-pa2-2` (`82adc7b9`). The next part's
