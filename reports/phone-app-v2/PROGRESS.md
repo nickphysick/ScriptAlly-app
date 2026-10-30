@@ -33,6 +33,7 @@ Baseline gates on the base: tsc root 0, tsc functions 0, build clean, Vitest 689
 | 7 | A Responses and the Wall of no | `4a17e4eb` | committed |
 | 7 | B the Manuscript page | `0d3ba86a` | committed |
 | 7 | C Analytics | `16418e8e` | committed |
+| 7 | D Streaks & goals | `c08bc3e1` | committed |
 
 ## Dev, as of the end of Part 1
 - (end of Part 2) dev serves `index-CRHIwewp.js` = `dev/pk391-qm1-pk392-calx-pk392b-td7-fv1-pk393-pa2-2` (`82adc7b9`). The next part's
