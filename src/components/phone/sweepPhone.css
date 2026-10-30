@@ -45,6 +45,13 @@
   .pk39-wpg.pk39-wpg.pk39-wpg :is(#pa-phone, *) .p9-po-addnote { display: inline-flex !important; align-items: center; min-height: 44px; }
   .af-link { display: inline-flex !important; align-items: center; min-height: 44px; min-width: 44px; }
 
+  /* Submission packages v39.3's builder (`.p93-*`, another stream's page, on dev but not on this branch, where these
+     rules match nothing): its done steps and its "good" dot are green, and the ink rule above reached its navy
+     pieces. On the phone a done step is navy, the dot white on its navy band, and text on navy white (W2). */
+  .pk39-wpg.pk39-wpg.pk39-wpg :is(#pa-phone, *) .p93-done .p93-sn { background: var(--pa-navy) !important; color: #fff !important; }
+  .pk39-wpg.pk39-wpg.pk39-wpg :is(#pa-phone, *) .p93-bh-s.p93-g > i { background: #fff !important; }
+  .pk39-wpg.pk39-wpg.pk39-wpg :is(#pa-phone, *) .p93-tic.p93-t-v, .pk39-wpg.pk39-wpg.pk39-wpg :is(#pa-phone, *) .p93-b1:not([disabled]) { color: #fff !important; }
+
   /* the blush strip of a card takes ink, its count included (W2) */
   .pa-nh .pa-sub { color: var(--pa-ink) !important; }
   /* the week strip at 360: seven days of at least 44px (W6) */
