@@ -36,6 +36,9 @@ import { MobileSheet } from "../../shell/MobileSheet";
 import { PhoneDisc } from "../../phone/PhoneDisc";
 import { PI } from "../../phone/phoneIcons";
 import { usePhoneBandExtra, usePhoneBandSlot } from "../../phone/phoneBandStore";
+import { ArtPlaceholder } from "../../phone/PhoneArtSpot";
+import { QC_SAMPLE_NOW, QC_SAMPLE_ROWS } from "../centre/QcExhibit";
+import { exampleRows } from "../../../lib/phonePages";
 import { StatusDot } from "../../StatusDot";
 import "./queriesPhone.css";
 import "./queriesPhoneV2.css";
@@ -132,13 +135,15 @@ export const QueriesPhone: React.FC<QueriesPhoneProps> = (p) => {
 
   /* ── the band: the counts (fixed whatever the chip) and the Birds-eye eye ── */
   const [birdsOpen, setBirdsOpen] = useState(false);
-  usePhoneBandSlot("/queries", (
+  /* Part 8A: before the first query on this book, the first-query card and three inert example rows (FRQ A) */
+  const firstRun = !p.loading && !idRows && rows.length === 0;
+  usePhoneBandSlot("/queries", firstRun ? <div className="pa-bandtx" data-pa="band-empty">Nothing logged yet.</div> : (
     <div className="pa-bstats" data-pa="band-stats">
       <span><b className="pa-num" data-pa="stat-sent">{line.sent}</b> sent</span>
       <span><b className="pa-num" data-pa="stat-active">{line.active}</b> active</span>
       <span><b className="pa-num" data-pa="stat-you">{counts.you}</b> with you</span>
     </div>
-  ), [line.sent, line.active, counts.you]);
+  ), [line.sent, line.active, counts.you, firstRun]);
   usePhoneBandExtra("/queries", (
     <button type="button" className="pa-ring" aria-label="Birds-eye view" aria-haspopup="dialog" data-pa="birds-btn" onClick={() => setBirdsOpen(true)}>{PI.eye}</button>
   ), []);
@@ -180,7 +185,9 @@ export const QueriesPhone: React.FC<QueriesPhoneProps> = (p) => {
   return (
     <div className="qm1 pa-q" data-qm1="page" data-pa="queries" data-screen="list">
       <div className="pa-qbody" data-qm1="body">
-        {idRows ? (
+        {firstRun ? (
+          <QueriesFirstRun onLog={() => openQueryDrawer({ mode: "log", ...(scopeId ? { manuscriptId: scopeId } : {}) })} onImport={() => navigate("/import")} />
+        ) : idRows ? (
           <>
             <div className="pa-qfilt" data-qm1="ids-banner">
               <span>Showing {idRows.length} {idRows.length === 1 ? "query" : "queries"}</span>
@@ -397,3 +404,20 @@ const Celebrate: React.FC<{ kind: Cheer; row: QcRow; nowMs: number; words: Retur
 };
 
 export default QueriesPhone;
+
+/* ── Queries before the first query (Phone app v2, Part 8A; ref v2.js `screenQueries2`'s empty branch at FRQ A) ── */
+const QueriesFirstRun: React.FC<{ onLog: () => void; onImport: () => void }> = ({ onLog, onImport }) => (
+  <div className="pa-qfirst" data-pa="queries-first-run">
+    <section className="pa-qfcard" data-pa="first-card">
+      <div className="pa-qfhead"><ArtPlaceholder size={64} /><h2 className="pa-qfh">Let’s log your first query</h2></div>
+      <p className="pa-qflede">Every query you log gets its own card: what you sent, when to nudge and what happens next.</p>
+      <button type="button" className="pa-btn pri blk" data-pa="first-log" onClick={onLog}>{PI.plus}Log a query</button>
+      <button type="button" className="pa-btn sec blk pa-mt10" data-pa="first-import" onClick={onImport}>{PI.upload}Import a spreadsheet</button>
+    </section>
+    <div className="pa-qfshd"><h2 className="pa-qfh2">What you’ll see here</h2><span className="pa-sub">Examples</span></div>
+    {/* the app's own sample rows (the desktop exhibition's), faded and inert — never the writer's */}
+    <div className="pa-rows pa-qfex" data-pa="examples" aria-hidden="true" inert>
+      {exampleRows(QC_SAMPLE_ROWS).map((r) => <PhoneRow key={r.id} r={r} nowMs={QC_SAMPLE_NOW} onOpen={() => {}} />)}
+    </div>
+  </div>
+);

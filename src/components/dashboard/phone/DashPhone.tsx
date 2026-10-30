@@ -29,6 +29,7 @@ import { FoundingCard, HomeHero, Latest, UpNextCard, WhereTheyStand, type StandK
 import { closedSplit, heroFor, readHero, writeHero, type HeroRange, type HeroSeries } from "../../../lib/phoneHome";
 import { chipCounts, phoneScopeId, rowsFor } from "../../../lib/queriesPhone";
 import { usePhoneBandSlot } from "../../phone/phoneBandStore";
+import { GettingStartedCard, HeroFirstRun, StandExample } from "./HomeFirstRun";
 import { taskCardModel } from "../../../lib/dashTaskCard";
 import { CAUGHT_UP } from "../v71/Dash71Task";
 import { useFoundingStats, TIERS } from "../../../lib/foundingStats";
@@ -79,11 +80,16 @@ export const DashPhone: React.FC<DashPhoneProps> = (props) => {
   const [heroPick, setHeroPick] = useState(() => readHero());
   const pickHero = (v: { series: HeroSeries; range: HeroRange }) => { setHeroPick(v); writeHero(v); };
   const hero = useMemo(() => heroFor(scopedQueries, now, heroPick.series, heroPick.range), [scopedQueries, now, heroPick]);
-  usePhoneBandSlot("/dashboard", (
+  /* Part 8A: before the first query the hero is drawn faded behind the first-query call (FRH C) */
+  const firstRun = isPreQuery(scopedQueries) && !loading;
+  const heroNode = (
     <HomeHero hero={hero} series={heroPick.series} range={heroPick.range}
       onSeries={(series) => pickHero({ ...heroPick, series })} onRange={(range) => pickHero({ ...heroPick, range })}
       onOpen={() => navigate("/queries")} />
-  ), [hero, heroPick]);
+  );
+  usePhoneBandSlot("/dashboard", firstRun
+    ? <HeroFirstRun hero={heroNode} onLog={() => openQueryDrawer({ mode: "log", ...(scopeId ? { manuscriptId: scopeId } : {}) })} onImport={() => navigate("/import")} />
+    : heroNode, [hero, heroPick, firstRun, scopeId]);
 
   /* ── Where they stand: the Queries tab's own chip counts (whereItStands), on the book the Queries tab is scoped to ── */
   const standScope = useMemo(() => {
@@ -107,9 +113,11 @@ export const DashPhone: React.FC<DashPhoneProps> = (props) => {
   /* the desktop's dev-only review aid (`__SA_DASH_DROP`), read behind the same call-site MODE gate Dash58 uses, so a
      production build carries none of it; the locks use it to put each task kind first */
   const drop = import.meta.env.MODE !== "production" ? dashAid().drop : [];
+  const gsRows = useMemo(() => gettingStartedRows({ manuscripts, agentCount: agents.length, queryCount: queries.length, versions, activeManuscript }),
+    [manuscripts, agents.length, queries.length, versions, activeManuscript]);
   const plan = useMemo(() => {
     if (empty && drop.length === 0) {
-      return startingPlan(gettingStartedRows({ manuscripts, agentCount: agents.length, queryCount: queries.length, versions, activeManuscript }), scopeId);
+      return startingPlan(gsRows, scopeId);
     }
     const cols = assembleBoardColumns({
       tasks: scopedTasks, userTasks, queries, agents, manuscripts, taskFlags, activities: scopedActivities,
@@ -202,6 +210,12 @@ export const DashPhone: React.FC<DashPhoneProps> = (props) => {
       {/* Phone app v2 (Part 1C): the page's own top bar (PhoneTopBar) gives way to the shell's navy band, which carries
           the greeting, the book chip, search, feedback and the menu; the + is the tab bar's. Part 2 rebuilds this body. */}
       <div className="dm1-body" data-dm1="body">
+        {firstRun ? (
+          <>
+            <StandExample />
+            <GettingStartedCard rows={gsRows} items={plan.items} onAct={viewTask} />
+          </>
+        ) : <>
         <WhereTheyStand counts={stand} passed={split.passed} noReply={split.noReply} onChip={goChip} />
         <UpNextCard
           loading={loading} total={plan.items.length} dataKey={upHero?.it.key}
@@ -209,6 +223,7 @@ export const DashPhone: React.FC<DashPhoneProps> = (props) => {
           line={upHero?.m.line ?? null} caughtUp={CAUGHT_UP}
           onView={() => upHero && viewTask(upHero.it.action)} onSeeAll={() => onNavigate("todo")} />
         <Latest events={feedEvents} nowMs={now.getTime()} onResponses={() => navigate("/queries/responses")} />
+        </>}
         <FoundingCard name={currentUser?.name ?? ""} rank={fRow.rank} progress={fProgress} pct={fPct} loading={fLoading}
           onFeedback={() => openFeedback()} onHow={() => setHowOpen(true)} />
       </div>

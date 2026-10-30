@@ -82,3 +82,14 @@ describe("the phone pages' small rules", () => {
     expect(inWindow(null, "all", now)).toBe(true);
   });
 });
+
+import { exampleRows } from "./phonePages";
+import { QC_SAMPLE_ROWS } from "../components/queries/centre/QcExhibit";
+describe("Queries' first-run examples", () => {
+  it("are three of the app's own sample rows — a full request, a sent partial, a query out — from three agents", () => {
+    const ex = exampleRows(QC_SAMPLE_ROWS);
+    expect(ex.map((r) => r.status)).toEqual(["Full Requested", "Partial Sent", "Queried"]);
+    expect(new Set(ex.map((r) => r.agentName)).size).toBe(3);
+    expect(ex.every((r) => r.query.manuscriptId === "sample-ms")).toBe(true);
+  });
+});

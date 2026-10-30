@@ -97,12 +97,12 @@ export const AnalyticsPhone: React.FC = () => {
       <div className="pa-pgbody">
         <div className="pa-card pa-ancard" data-pa="an-track">
           <h2 className="pa-h2 pa-h17">Where your queries got to</h2>
-          <div className="pa-ftrack">
+          <div className="pa-antrack">
             {STAGES.map((s, i) => (
               <React.Fragment key={s.k}>
-                {i ? <i className="pa-fl" aria-hidden="true" /> : null}
-                <div className="pa-fst" data-pa="an-stage" data-k={s.k} data-n={s.n}>
-                  <span className={`pa-fd${s.n ? " on" : ""}`}><StatusDot status={s.status} overrideSize={20} /></span>
+                {i ? <i className="pa-anlink" aria-hidden="true" /> : null}
+                <div className="pa-anst" data-pa="an-stage" data-k={s.k} data-n={s.n}>
+                  <span className={`pa-andisc${s.n ? " on" : ""}`}><StatusDot status={s.status} overrideSize={20} /></span>
                   <b className="pa-num">{s.n || "–"}</b><span>{s.w}</span>
                 </div>
               </React.Fragment>
