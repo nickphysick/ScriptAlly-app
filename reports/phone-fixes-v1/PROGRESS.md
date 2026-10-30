@@ -8,7 +8,8 @@ Phone projects added to playwright.config.ts: `iphone` (iPhone 13, WebKit) and `
 | Phase | Commit | State |
 |---|---|---|
 | A one scroller per page | `8fd56b3b` | committed; PF1 F1 green on both phones (24 pages) |
-| B frosted bar and edge fade | (this commit) | committed; PF1 F2, F3 green on both phones |
+| B frosted bar and edge fade | `3b2b2136` | committed; PF1 F2, F3 green on both phones |
+| C search on phones | (this commit) | committed; PF1 F4 green on both phones |
 
 ## Causes (recon, base build, Pixel and iPhone)
 - 2 (no scroll): on a phone every page sits in the desktop's viewport-locked stage slot — `StagePage` (AppShell.tsx:141–153) gives `layout="fill" clip` slots `flex:1; min-height:0; overflow:hidden` inline, and `.ws-work--fit` (workspaceShell.css:464) is `flex:1 1 0; min-height:0`. Queries got a 358px box over a 3,786px page; nothing scrolled. Home's slot is `flow`, which is why it alone scrolled. Import also had a second scroller (`.wpg-scroll`).
@@ -26,3 +27,8 @@ Phone projects added to playwright.config.ts: `iphone` (iPhone 13, WebKit) and `
 - `.sv2-fade` is not drawn below 768px. `.pa-edgefade` is drawn beside the bar by `BottomTabBar` (fixed, bottom 0, height 66 + 14 + 32 + safe area, z 39 under the bar's 40), off while the bar is tucked away or there is nothing more below (`fadeOn`, the stage's own "more below" state).
 - The stage's phone bottom padding was already `100px + safe area` (bar 66 + offset 14 + 16 = 96), so nothing changed there; F1 holds the last item above the bar.
 - Harness repair: `ensureSignedIn` (tests/e2e/measure.ts) raced the shell against the form only once; after `goto("/#/signin")` it read `isVisible()` before WebKit had drawn the shell and then waited the whole test for a form that never came. It races again there now (30s each side).
+
+## Phase C notes
+- `PhoneSearchPage` (phone/): full screen (portal, z 1050), the field focused with `preventScroll`, Cancel beside it. Empty: "Try" (an agency, an agent's first name and a status from the writer's own data, never sample names) and "Jump to" (Responses, Analytics, Manuscript). Typing: Queries and Agents to query from the palette's own `buildCorpus` + `rankItems`; Notes (Corkboard notes, `isNoteTask`) scored by its `scoreItem`.
+- AppShell: on a phone the band's search opens it; the desktop keeps `openPalette`. The old `PhoneSearch` in the retired PhoneTopBar is left alone (still mounted nowhere).
+- A query opens through `/queries?q=<id>` with `{ qm1: true }` (the query sheet); an agent through `openAgentCard`; a note goes to the Corkboard.

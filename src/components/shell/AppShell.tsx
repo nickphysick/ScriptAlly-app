@@ -33,6 +33,7 @@ import { notifyFeedbackSent, subscribeFeedback } from "../../lib/feedbackStore";
 import { WorkspaceShell } from "./WorkspaceShell";
 import { workspaceSections } from "../../lib/workspaceNav";
 import { AccountMenu } from "./AccountMenu";
+import { PhoneSearchPage } from "../phone/PhoneSearchPage";
 import { usePalette } from "./usePalette";
 import { ShellScope, useShellNavCounts } from "./ShellSidebar";
 import { MobileChromeContext, MobileDetailSpec, useIsMobile } from "./mobileChrome";
@@ -375,6 +376,9 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
      above 40px. Reset on every route. */
   /* Phone app v2 (Part 1C/1D) — the band, the menu, the book switcher */
   const [menuOpen, setMenuOpen] = useState(false);
+  /* Phone fixes v1 (3A): the band's search opens the phone's full-screen search; the desktop palette drew nothing here */
+  const [phoneSearch, setPhoneSearch] = useState(false);
+  useEffect(() => { setPhoneSearch(false); }, [pathname]);
   const [bookOpen, setBookOpen] = useState(false);
   const [bandSlots, setBandSlots] = useState<Record<string, React.ReactNode | null>>({});
   const setBandSlot = useCallback((path: string, node: React.ReactNode | null) => {
@@ -611,7 +615,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
             greeting={pathname === "/dashboard"}
             book={bandBook}
             initials={initialsOf(currentUser?.name ?? "")}
-            onSearch={openPalette}
+            onSearch={phoneNav ? () => setPhoneSearch(true) : openPalette}
             onFeedback={() => setFeedbackOpen(true)}
             onMenu={() => setMenuOpen(true)}
             onBook={() => setBookOpen(true)}
@@ -702,6 +706,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
         hidden={activeMobileDetail !== null || isMenuPage(pathname)}
       />
 
+      {phoneNav && phoneSearch ? <PhoneSearchPage onClose={() => setPhoneSearch(false)} /> : null}
       {/* Phone app v2 (Part 1D) — THE PHONE'S SHEETS. The menu REPLACES the "you" sheet (Mobile Pass 1, concept
           frame 07): every row it offered is still reachable — To-do is a tab, packages are the Materials tile, and
           Import, Settings, Help, Sign out and Upgrade (Plan & billing) are in the menu. Phones only; at 768px and up

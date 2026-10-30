@@ -40,6 +40,7 @@ export const PAGES = [
 
 /** Named breaks that put back what each fix removed. */
 export const BREAK: Record<string, string> = {
+  F4: '[data-pa="search-btn"] { pointer-events: none !important; }',
   F2: "@media (max-width: 767.98px) { .sv2-fade { display: block !important; opacity: 1 !important; } .pa-edgefade { display: none !important; } }",
   F3: "@media (max-width: 767.98px) { .pa-tabbar { background: #fff !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; } }",
   F1: "@media (max-width: 767.98px) { .ws-work > div { overflow: hidden !important; flex: 1 1 0 !important; min-height: 0 !important; } .ws-work--fit { flex: 1 1 0 !important; min-height: 0 !important; } }",
@@ -194,5 +195,36 @@ test.describe("PF1 phone fixes", () => {
     record("F3", { filt, changed: !a.equals(b) });
     expect(filt, "backdrop-filter includes blur").toMatch(/blur/);
     expect(a.equals(b), "pixels under the bar change as content scrolls behind it").toBe(false);
+  });
+
+  test("F4 the search button opens full-screen search, focused; typing an agent's name lists them, and tapping opens them", async ({ page }) => {
+    await phone(page, "/queries");
+    await go(page, "/queries");
+    if (BREAK[MUTATE]) await page.addStyleTag({ content: BREAK[MUTATE] });
+    const name = (await page.locator('[data-qm1="row"] .pa-mid b, [data-qm1="row"] .pa-nm').first().textContent())?.trim()
+      ?? await page.evaluate(() => document.querySelector('[data-qm1="row"]')?.textContent?.trim().split("\n")[0] ?? "");
+    expect(name, "a known agent on the page").toBeTruthy();
+    await page.locator('[data-pa="band"] [data-pa="search-btn"]').first().tap({ timeout: 10_000 }).catch(() => {});
+    await page.waitForTimeout(500);
+    const open = await page.evaluate(() => {
+      const s = document.querySelector<HTMLElement>('[data-pa="search"]');
+      const r = s?.getBoundingClientRect();
+      return { shown: !!r && r.width === innerWidth && r.height === innerHeight, focused: (document.activeElement as HTMLElement | null)?.dataset.pa === "search-input",
+        empty: [...document.querySelectorAll('[data-pa="search-jump"]')].length };
+    });
+    let hits = 0, url = "";
+    if (open.shown) {
+      await page.locator('[data-pa="search-input"]').fill(name!.split(" ")[0]);
+      await page.waitForTimeout(300);
+      hits = await page.locator('[data-pa="search-query"], [data-pa="search-agent"]').filter({ hasText: name! }).count();
+      if (hits) { await page.locator('[data-pa="search-query"], [data-pa="search-agent"]').filter({ hasText: name! }).first().tap(); await page.waitForTimeout(800); url = await page.evaluate(() => location.pathname + location.search); }
+    }
+    const opened = await page.evaluate(() => !!document.querySelector('.pa-qsheet [data-qc149c="card"], [data-agent-card], .ac-card'));
+    record("F4", { name, open, hits, url, opened });
+    expect(open.shown, "full-screen search opens").toBe(true);
+    expect(open.focused, "the field is focused").toBe(true);
+    expect(open.empty, "the empty state offers Jump to").toBe(3);
+    expect(hits, `typing "${name}" lists them`).toBeGreaterThan(0);
+    expect(opened || /[?&]q=/.test(url), "tapping opens them").toBe(true);
   });
 });
