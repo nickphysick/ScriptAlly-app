@@ -11,8 +11,8 @@ Ref: MANIFEST hash 4a819d11…cf6e2, 13/13 OK.
 | B addresses and column matching | `69abc04c` | committed; PLS1 L1–L5 written and green (L1–L3 lab, L4–L5 signed in) |
 | C email drop on a phone | `af75ae97` | committed; behind `emailDropPhoneLive()`, OFF; PLS1 L6 green on the lab |
 | D editing a query | `e934f845` | committed; PLS1 L7 green (writes and undoes on the harness account) |
-| E writing materials and building packages | (this commit) | committed; PLS1 L8, L9 green (write and delete their probes) |
-| F locks, shots and the report | — | |
+| E writing materials and building packages | `1b18746b` | committed; PLS1 L8, L9 green (write and delete their probes) |
+| F locks, shots and the report | (this commit) | committed; PLS1 11/11, every lock proved red; REPORT.md |
 
 ## Resuming
 - Read `git log --oneline -10` and this file; resume at the first phase not committed.

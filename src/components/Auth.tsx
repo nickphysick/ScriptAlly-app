@@ -7,6 +7,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useScriptAllyDb } from "../lib/db";
 import { SetupFrame, ACCOUNT_GROUP } from "./onboarding/SetupFrame";
+import { useIsMobile } from "./shell/mobileChrome";
 import { BETA_MODE, INVITE_GATE_ENABLED } from "../lib/beta";
 import {
   INVITE_LABEL, INVITE_PLACEHOLDER, INVITE_MISSING, INVITE_REJECTED,
@@ -34,6 +35,9 @@ export interface AuthLabState {
 }
 
 export const Auth: React.FC<{ initialMode?: "login" | "signup"; lab?: AuthLabState }> = ({ initialMode, lab }) => {
+  /* Phone last screens v1 (1B): below 768px the sibling tab is hidden, so the sign-up card carries the way
+     back to sign in (the sign-in card already carries "New to QueryHawk? Create an account"). */
+  const isPhone = useIsMobile();
   const { login, signup } = useScriptAllyDb();
   /* ⚠️ IN-APP NAVIGATION, NOT href. This screen used to link out to https://scriptally.ink for
      "Back to site" and to /terms and /privacy on that host — pages which could not exist, because
@@ -334,13 +338,18 @@ export const Auth: React.FC<{ initialMode?: "login" | "signup"; lab?: AuthLabSta
                 <p className="sf-under">
                   New to QueryHawk? <button type="button" className="sf-link sf-link--in" onClick={() => switchMode("signup")}>Create an account</button>
                 </p>
-              ) : (
+              ) : (<>
+                {isPhone && (
+                  <p className="sf-under" data-sf="to-signin-line">
+                    Already have an account? <button type="button" className="sf-link sf-link--in" onClick={() => switchMode("signin")} data-sf="to-signin">Sign in</button>
+                  </p>
+                )}
                 <p className="sf-under">
                   By continuing you agree to our{" "}
                   <button type="button" className="sf-link sf-link--in" onClick={() => goPublic("/terms")}>Terms</button> &amp;{" "}
                   <button type="button" className="sf-link sf-link--in" onClick={() => goPublic("/privacy")}>Privacy Policy</button>.
                 </p>
-              )}
+              </>)}
             </>
           ) : !resetSent ? (
             <form onSubmit={handleReset} noValidate>

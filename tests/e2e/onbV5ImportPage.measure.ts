@@ -79,7 +79,11 @@ for (const vp of P1_VIEWPORTS) {
       const before: Record<string, { html: string; boxes: unknown[] }> = !CAPTURE && existsSync(P1_FILE) ? JSON.parse(readFileSync(P1_FILE, "utf8")) : {};
       const now: Record<string, { html: string; boxes: unknown[] }> = {};
       const diffs: string[] = [];
+      /* Phone last screens v1 (2B): below 768px the dead ends' actions moved into the set-up frame's pinned
+         foot by design, so their markup differs from this capture there (PLS1 L2 holds the new shape). */
+      const PHONE_MOVED = new Set(["used-free", "used-pro", "unreadable", "nothing", "unloaded", "flow-nothing"]);
       for (const s of P1_SCREENS) {
+        if (vp.width < 768 && PHONE_MOVED.has(s.id)) continue;
         await reach(page, s);
         const c = await capture(page, '[data-sf="sheet"]', s.mode);
         expect(c, `${s.id}: the sheet is on screen`).toBeTruthy();
@@ -105,7 +109,7 @@ for (const vp of P1_VIEWPORTS) {
         return;
       }
       record("P1", vpName(vp), "screens", { compared: Object.keys(now).length, diffs, clock: P1_CLOCK, gutterLeftOn: !!process.env.IP1_P1_GUTTER });
-      expect(Object.keys(now).length, "every screen was compared").toBe(P1_SCREENS.length);
+      expect(Object.keys(now).length, "every screen was compared").toBe(P1_SCREENS.filter((x) => !(vp.width < 768 && PHONE_MOVED.has(x.id))).length);
       expect(diffs).toEqual([]);
     });
   });

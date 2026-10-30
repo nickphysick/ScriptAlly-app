@@ -311,7 +311,9 @@ test.describe("OB1", () => {
       /* The offer panel reads the landing hero's headline (`HERO_H1`), which landing hero v3 changed. */
       expect(up.title).toBe("No more winging it.");
       expect(up.old, "the preview and the segmented control are gone").toBe(0);
-      await page.click(".sf .ws-ftsibs:not(.ws-ftmeasure) .ws-ftsib");
+      /* Phone last screens v1 (1B): below 768px the sibling tab is hidden and the in-card link is the way
+         between the two (PLS1 L1 holds the one tab). */
+      await page.click(vp.width < 768 ? '.sf [data-sf="to-signin"]' : ".sf .ws-ftsibs:not(.ws-ftmeasure) .ws-ftsib");
       await page.waitForFunction(() => document.querySelector(".sf .ws-ftn")?.textContent === "Sign in");
       const inn = await read();
       expect(inn.other).toEqual(["Create account"]);
@@ -539,11 +541,11 @@ test.describe("OB1", () => {
   test("E1 the dead ends: chip, title and actions per state, each press to its own handler", async ({ page }) => {
     const want: Record<string, { chip: string; fail: boolean; title: string; presses: Array<[string, string]> }> = {
       "used-free": { chip: "Smart Import already used", fail: false, title: "You've used your Smart Import.",
-        presses: [[".sf-dead .sf-link:not([data-act])", "back"], ['[data-act="byhand"]', "byhand"], ['[data-act="template"]', "useTemplate"]] },
+        presses: [[":is(.sf-dead, .sf-foothost) .sf-link:not([data-act])", "back"], ['[data-act="byhand"]', "byhand"], ['[data-act="template"]', "useTemplate"]] },
       "used-pro": { chip: "Smart Import already used", fail: false, title: "Next Smart Import next month",
-        presses: [[".sf-dead .sf-link:not([data-act])", "back"], ['[data-act="byhand"]', "byhand"]] },
+        presses: [[":is(.sf-dead, .sf-foothost) .sf-link:not([data-act])", "back"], ['[data-act="byhand"]', "byhand"]] },
       unreadable: { chip: "File couldn't be read", fail: true, title: "We couldn't read that one.",
-        presses: [[".sf-dead .sf-link:not([data-act])", "back"], ['[data-act="byhand"]', "byhand"], ['[data-act="download"]', "download"]] },
+        presses: [[":is(.sf-dead, .sf-foothost) .sf-link:not([data-act])", "back"], ['[data-act="byhand"]', "byhand"], ['[data-act="download"]', "download"]] },
       nothing: { chip: "Nothing imported", fail: true, title: "That didn't work.", presses: [['[data-act="review"]', "review"]] },
       unloaded: { chip: "Step didn't load", fail: false, title: "That step didn't load.",
         presses: [['[data-act="byhand"]', "byhand"], ['[data-act="restart"]', "restart"]] },
@@ -560,7 +562,8 @@ test.describe("OB1", () => {
           chip: chip.textContent, chipBg: getComputedStyle(chip).backgroundColor, chipCase: getComputedStyle(chip).textTransform,
           title: h.textContent, family: getComputedStyle(h).fontFamily, size: parseFloat(getComputedStyle(h).fontSize),
           width: card.getBoundingClientRect().width, text: card.innerText,
-          controls: Array.from(card.querySelectorAll("button")).map((b) => b.textContent ?? ""),
+          /* Phone last screens v1 (2B): below 768px the actions are pinned in `.sf-foothost` (PLS1 L2). */
+          controls: [...card.querySelectorAll("button"), ...document.querySelectorAll(".sf-foothost button")].map((b) => b.textContent ?? ""),
         };
       });
       expect(d.cards, `${id}: one card`).toBe(1);

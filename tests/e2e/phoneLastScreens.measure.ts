@@ -13,7 +13,7 @@
  * ⚠️ EVERY LOCK ASSERTS ITS POPULATION FIRST. A census over nothing passes.
  */
 import { test, expect, type Page } from "@playwright/test";
-import { appendFileSync } from "node:fs";
+import { appendFileSync, mkdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
 import { PHONES, colourSweep, imageSweep, openPhone } from "./pa2Lib";
 import { openRoute } from "./measure";
 import { devDb } from "./devWrite";
@@ -29,6 +29,7 @@ const record = (lock: string, data: unknown) => { if (READINGS) appendFileSync(R
 
 const BREAK: Record<string, string> = {
   L1: "@media (max-width: 767.98px) { .sf--account .ws-ftsibs { display: flex !important; } }",
+  L10: ".sf .sf-eyebrow, .sf .sf-chip { color: rgb(60, 140, 80) !important; }",
 };
 
 async function lab(page: Page, hash: string, vp: { width: number; height: number }, base = origin()) {
@@ -59,7 +60,10 @@ test.describe("PLS1 the last screens on phones", () => {
           if (cs.textTransform === "uppercase" && parseFloat(cs.fontSize) < 14) caps.push(t.textContent.trim().slice(0, 20));
           if ((cs.overflow === "hidden" || cs.textOverflow === "ellipsis") && el.scrollWidth > el.clientWidth + 1) clipped.push(t.textContent.trim().slice(0, 20));
         }
-        return { tabs, label, caps, clipped, n, overflow: document.documentElement.scrollWidth - innerWidth, frame: !!document.querySelector(".sf--account") };
+        /* with one tab, each card must carry the way to the other mode */
+        const sw = document.querySelector<HTMLElement>('[data-sf="to-signin"], .sf-under .sf-link--in');
+        return { tabs, label, caps, clipped, n, overflow: document.documentElement.scrollWidth - innerWidth, frame: !!document.querySelector(".sf--account"),
+          switchLink: !!sw && sw.getBoundingClientRect().width > 0, isSignup: !!document.querySelector('[data-sf="to-signin"]') || document.querySelector(".ws-ftn")?.textContent === "Create account" };
       })) });
     }
     record("L1", rows);
@@ -72,6 +76,7 @@ test.describe("PLS1 the last screens on phones", () => {
       expect(r.caps, `${r.s} @${r.vp}: small capitals`).toEqual([]);
       expect(r.clipped, `${r.s} @${r.vp}: clipped text`).toEqual([]);
       expect(r.overflow as number, `${r.s} @${r.vp}: sideways scroll`).toBeLessThanOrEqual(0);
+      if (r.s === "signup") expect(r.switchLink, `signup @${r.vp}: a link to sign in`).toBe(true);
     }
   });
 
@@ -104,7 +109,9 @@ test.describe("PLS1 the last screens on phones", () => {
     for (const r of rows as Array<{ vp: number; s: string; band: string | null; pinned: boolean; fired: Record<string, string[]> }>) {
       expect(r.band, `${r.s}: the band`).toMatch(/^Step \d of \d$/);
       expect(r.pinned, `${r.s} @${r.vp}: actions pinned`).toBe(true);
-      for (const [a, calls] of Object.entries(r.fired)) expect(calls.length, `${r.s} ${a}: one handler fired`).toBe(1);
+      /* each action reaches ITS OWN handler (the lab names them): a set of distinct names alone passes a swap */
+      const HANDLER: Record<string, string> = { back: "back", byhand: "byhand", template: "useTemplate", download: "download", restart: "restart" };
+      for (const [a, calls] of Object.entries(r.fired)) expect(calls, `${r.s} ${a}: its own handler, once`).toEqual([HANDLER[a]]);
       const names = Object.values(r.fired).map((c) => c[0]);
       expect(new Set(names).size, `${r.s}: each action its own handler`).toBe(names.length);
     }
@@ -430,9 +437,10 @@ test.describe("PLS1 the last screens on phones", () => {
   test("L10 colour laws and no image twice on this pack's phone screens", async ({ page }) => {
     const bad: string[] = []; let judged = 0;
     for (const vp of PHONES) {
-      for (const s of ["signin", "signup", "reset", "used-free", "unreadable", "unloaded"]) {
-        await lab(page, `#/onb-lab?s=${s}`, vp);
-        const c = await colourSweep(page); judged += c.navy + c.blush; c.bad.forEach((b: string) => bad.push(`${s} ${b}`));
+      /* the lab screens are not in the app shell, so the sweep is pointed at their own roots */
+      for (const s of ["#/onb-lab?s=signin", "#/onb-lab?s=signup", "#/onb-lab?s=reset", "#/onb-lab?s=used-free", "#/onb-lab?s=unreadable", "#/onb-lab?s=unloaded", "#/throw-lab", "#/email-drop-lab", "#/email-drop-lab?s=review"]) {
+        await lab(page, s, vp);
+        const c = await colourSweep(page, { roots: ".sf, .eb-page, .edp" }); judged += c.navy + c.blush; c.bad.forEach((b: string) => bad.push(`${s} ${b}`));
         for (const set of await imageSweep(page)) set.filter((x, i) => set.indexOf(x) !== i).forEach((x) => bad.push(`${s} image twice ${x}`));
       }
       await openPhone(page, "/import", vp);
@@ -440,7 +448,7 @@ test.describe("PLS1 the last screens on phones", () => {
       const c = await colourSweep(page); judged += c.navy + c.blush; c.bad.forEach((b: string) => bad.push(`match ${b}`));
     }
     record("L10", { judged, bad });
-    expect(judged).toBeGreaterThan(0);
+    expect(judged, "navy and blush grounds judged").toBeGreaterThan(20);
     expect([...new Set(bad)]).toEqual([]);
   });
 
@@ -469,5 +477,61 @@ test.describe("PLS1 the last screens on phones", () => {
     record("L11", rows);
     expect(rows.length).toBe(screens.length * 2);
     expect(rows.filter((r) => !r.dom || !r.px), "screens that changed at a desktop width").toEqual([]);
+  });
+
+  test("shots: every screen of this pack at 390, paired with the board (PLS1_SHOTS=1)", async ({ page, browser }) => {
+    test.skip(!process.env.PLS1_SHOTS, "PLS1_SHOTS=1 writes the report's shots");
+    test.setTimeout(600_000);
+    const OUT = "reports/phone-last-screens-v1";
+    mkdirSync(`${OUT}/after`, { recursive: true }); mkdirSync(`${OUT}/pairs`, { recursive: true });
+    const vp = PHONES[0];
+    const snap = async (name: string) => { await page.waitForTimeout(500); await page.screenshot({ path: `${OUT}/after/${name}.png` }); };
+    for (const s of ["signin", "signup", "reset", "reset-sent", "used-free", "used-pro", "unreadable", "nothing", "unloaded"]) { await lab(page, `#/onb-lab?s=${s}`, vp); await snap(s); }
+    await lab(page, "#/throw-lab", vp); await snap("error");
+    await lab(page, "#/email-drop-lab", vp); await snap("email-paste");
+    await lab(page, "#/email-drop-lab?s=review", vp); await snap("email-updates");
+    await openPhone(page, "/import", vp); await page.locator('[data-pa="imp-match"]').click(); await snap("match-sheet");
+    await openPhone(page, "/queries", vp);
+    const id = await page.locator('[data-qm1="row"]').first().getAttribute("data-id");
+    await page.locator(`[data-qm1="row"][data-id="${id}"] .pa-row`).click();
+    await page.locator('.pa-qsheet [data-qc149c="more-btn"]').click(); await page.waitForTimeout(400);
+    await page.locator('[data-pa="more-edit"]').click(); await page.locator('[data-eqp="page"]').waitFor(); await snap("edit-page");
+    for (const sec of ["agent", "sent", "howwhen", "reply", "responses", "notes"]) {
+      await page.locator(`[data-eqp="section"][data-section="${sec}"]`).click(); await snap(`edit-${sec}`);
+      await page.locator('[data-eqp="cancel"]').click(); await page.waitForTimeout(200);
+    }
+    await page.evaluate((ms) => localStorage.setItem("scriptally_active_manuscript_id", ms), MS);
+    const { db, uid } = await devDb();
+    const vs = (await getDocs(collection(db, "users", uid, "versions"))).docs.map((d) => ({ id: d.id, ...d.data() })) as { id: string; manuscriptId: string; componentType: string }[];
+    const letter = vs.find((v) => v.manuscriptId === MS && v.componentType === "Query Letter");
+    if (letter) { await page.goto(`${origin()}/manuscripts?edit=${letter.id}`); await page.locator('[data-pmx="editor"]').waitFor(); await snap("letter-editor"); }
+    await page.goto(`${origin()}/manuscripts?newpackage=1`); await page.locator('[data-pmx="pkgflow"]').waitFor();
+    await page.locator('[data-pmx="name"]').fill("Standard UK"); await snap("package-name");
+    await page.locator('[data-pmx="next"]').click(); await snap("package-letter");
+    await page.locator('[data-pmx="pick-letter"] [data-pmx="op"]').first().click(); await snap("package-synopsis");
+    /* board mock-ups on the left, the app on the right */
+    const DOCS = JSON.parse((() => { const h = readFileSync("design-refs/phone-last-screens-v1/last-screens-options.html", "utf8"); const i = h.indexOf("{", h.indexOf("const DOCS")); let depth = 0, j = i; for (; j < h.length; j++) { if (h[j] === "{") depth++; else if (h[j] === "}" && --depth === 0) break; } return h.slice(i, j + 1); })());
+    const PAIRS: [string, string, string][] = [
+      ["error", "doc:errB", "error"], ["match", "doc:matchB", "match-sheet"], ["email-paste", "doc:mailB1", "email-paste"], ["email-updates", "doc:mailB2", "email-updates"],
+      ["edit-page", "doc:editB1", "edit-page"], ["edit-step", "doc:editB2", "edit-sent"], ["reply-window", "doc:rwB", "edit-reply"], ["letter", "doc:letB", "letter-editor"], ["package", "doc:pkA", "package-synopsis"],
+      ["signin", "png:reset-after", "reset"], ["reset-sent", "png:resetsent-after", "reset-sent"], ["used-pro", "png:usedpro-after", "used-pro"], ["unreadable", "png:unreadable-after", "unreadable"], ["nothing", "png:nothing-after", "nothing"], ["unloaded", "png:unloaded-after", "unloaded"],
+    ];
+    for (const [name, left, right] of PAIRS) {
+      let leftSrc = "";
+      if (left.startsWith("doc:")) {
+        const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } }); const p = await ctx.newPage();
+        await p.setContent(DOCS[left.slice(4)], { waitUntil: "load" }); await p.waitForTimeout(800);
+        const f = `${OUT}/pairs/.board-${name}.png`; await p.screenshot({ path: f }); await ctx.close(); leftSrc = f;
+      } else leftSrc = `design-refs/phone-last-screens-v1/today/${left.slice(4)}.png`;
+      const rightSrc = `${OUT}/after/${right}.png`;
+      if (!existsSync(leftSrc) || !existsSync(rightSrc)) continue;
+      const img = (f: string) => `data:image/png;base64,${readFileSync(f).toString("base64")}`;
+      const ctx = await browser.newContext({ viewport: { width: 860, height: 900 } }); const p = await ctx.newPage();
+      await p.setContent(`<body style="margin:0;background:#e9e6e0;font:14px system-ui;display:inline-flex;gap:20px;padding:20px"><div><p style="margin:0 0 8px">Board</p><img src="${img(leftSrc)}" style="width:390px"></div><div><p style="margin:0 0 8px">App</p><img src="${img(rightSrc)}" style="width:390px"></div></body>`);
+      await p.waitForTimeout(300);
+      const box = await p.evaluate(() => { const r = document.body.getBoundingClientRect(); return { x: 0, y: 0, width: Math.ceil(r.width), height: Math.ceil(r.height) }; });
+      await p.screenshot({ path: `${OUT}/pairs/${name}.png`, clip: box }); await ctx.close();
+    }
+    writeFileSync(`${OUT}/pairs/.done`, "");
   });
 });

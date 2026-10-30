@@ -619,3 +619,8 @@
 @media (max-width: 767.98px) {
   .sf--account .ws-ftg, .sf--account .ws-ftsibs { display: none; }
 }
+/* Phone last screens v1 — the colour law (white on navy): below 768px the frame's navy buttons carry white,
+   not the desktop's cream (PLS1 L10 found cream on the account screens and the dead ends). */
+@media (max-width: 767.98px) {
+  .sf .sf-btn:not(.sf-btn--line) { color: #fff; }
+}
