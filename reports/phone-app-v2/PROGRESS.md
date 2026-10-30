@@ -34,6 +34,7 @@ Baseline gates on the base: tsc root 0, tsc functions 0, build clean, Vitest 689
 | 7 | B the Manuscript page | `0d3ba86a` | committed |
 | 7 | C Analytics | `16418e8e` | committed |
 | 7 | D Streaks & goals | `c08bc3e1` | committed |
+| 7 | E locks, shots, report | (see `git log`) | committed |
 
 ## Dev, as of the end of Part 1
 - (end of Part 2) dev serves `index-CRHIwewp.js` = `dev/pk391-qm1-pk392-calx-pk392b-td7-fv1-pk393-pa2-2` (`82adc7b9`). The next part's
@@ -45,6 +46,10 @@ Baseline gates on the base: tsc root 0, tsc functions 0, build clean, Vitest 689
 - Local previews: this build on :4391 (`npx vite preview --port 4391 --host 127.0.0.1`); the base build (a copy of the
   base's dist in the session scratchpad) on :4392 for S9-style desktop captures.
 - e2e: `SA_E2E_BASE_URL=http://127.0.0.1:4391 npx playwright test tests/e2e/phoneAppV2Shell.measure.ts --workers=1`.
+
+## Part 7 notes
+- 7A–D `4a17e4eb` · `0d3ba86a` · `16418e8e` · `c08bc3e1`; 7E the locks. P6's base is `5572ebce` (the commit before 7A).
+- New route `/goals` (phone page; a computer goes to the dashboard). PA2-7 writes nothing.
 
 ## Part 6 notes
 - (end of Part 6) dev serves `index-ir44D8o3.js` = `dev/…-td12-ppp1-pa2-6` (`6f1bb838`).

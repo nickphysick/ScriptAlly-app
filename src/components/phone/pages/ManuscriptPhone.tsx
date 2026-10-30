@@ -21,7 +21,8 @@ import { bookVersionsOf } from "../../../lib/bookVersions";
 import { isOlderComp, manuscriptComps } from "../../../lib/comps";
 import { buildRows } from "../../../lib/analytics";
 import { creditedTo, materialSplit, packageSplit } from "../../../lib/packageReplies";
-import { figOf, labelStatus, rankByMore, type Fig } from "../../../lib/packagesV38";
+import { figOf, labelStatus, rankByMore } from "../../../lib/packagesV38";
+import { packageHeading } from "../../../lib/phonePages";
 import { ComponentType, type ManuscriptVersion } from "../../../types";
 import { usePhoneBandSlot } from "../phoneBandStore";
 import { PI } from "../phoneIcons";
@@ -30,12 +31,6 @@ import "./pagesPhone.css";
 
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 const usedIn = (n: number) => (n ? `Used in ${n} ${n === 1 ? "query" : "queries"}` : "Not used yet");
-/** a package card's heading: the first answers it drew, in the ref's words; never a figure the record does not hold */
-export function packageHeading(f: Pick<Fig, "sent" | "more" | "replies">): string {
-  if (!f.sent) return "Not sent yet";
-  if (f.more) return `${f.more} ${f.more === 1 ? "request" : "requests"} from ${f.sent}`;
-  return f.replies ? `No requests from ${f.sent}` : "No replies yet";
-}
 
 interface ReadView { title: string; sub?: string | null; body?: string | null }
 

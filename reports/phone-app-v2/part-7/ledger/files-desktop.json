@@ -1,0 +1,20 @@
+[
+ {
+  "lock": "pop",
+  "where": "the part changed existing files",
+  "ok": true,
+  "detail": "8"
+ },
+ {
+  "lock": "P6",
+  "where": "no Manuscripts file changed since the part began",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "P8",
+  "where": "on a computer /goals goes to the dashboard",
+  "ok": true,
+  "detail": "http://127.0.0.1:4391/dashboard"
+ }
+]

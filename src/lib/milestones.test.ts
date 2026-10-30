@@ -64,3 +64,21 @@ describe("weekStreak: Monday weeks against the goal in force", () => {
     expect(s.current).toBe(1);
   });
 });
+
+import { inWindow, packageHeading } from "./phonePages";
+describe("the phone pages' small rules", () => {
+  it("a package heading states only what it drew", () => {
+    expect(packageHeading({ sent: 0, more: 0, replies: 0 })).toBe("Not sent yet");
+    expect(packageHeading({ sent: 11, more: 2, replies: 5 })).toBe("2 requests from 11");
+    expect(packageHeading({ sent: 4, more: 1, replies: 1 })).toBe("1 request from 4");
+    expect(packageHeading({ sent: 4, more: 0, replies: 2 })).toBe("No requests from 4");
+    expect(packageHeading({ sent: 4, more: 0, replies: 0 })).toBe("No replies yet");
+  });
+  it("the last 90 days is (now − 90 days, now], by send date", () => {
+    const now = Date.parse("2026-10-29T12:00:00Z"), d = 86_400_000;
+    expect(inWindow(now - 90 * d, "d90", now)).toBe(false);
+    expect(inWindow(now - 90 * d + 1, "d90", now)).toBe(true);
+    expect(inWindow(null, "d90", now)).toBe(false);
+    expect(inWindow(null, "all", now)).toBe(true);
+  });
+});

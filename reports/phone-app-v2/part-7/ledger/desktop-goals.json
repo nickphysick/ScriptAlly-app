@@ -1,0 +1,8 @@
+[
+ {
+  "lock": "P8",
+  "where": "on a computer /goals goes to the dashboard",
+  "ok": true,
+  "detail": "http://127.0.0.1:4391/dashboard"
+ }
+]

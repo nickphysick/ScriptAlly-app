@@ -25,6 +25,7 @@ import { sentWeeks } from "../../../lib/qcSentWeeks";
 import { analyticsModel } from "../../../lib/analyticsModel";
 import { anyToMs } from "../../../lib/qcStages";
 import { dayMonth } from "../../../lib/dates";
+import { inWindow, type PhoneRange } from "../../../lib/phonePages";
 import { QueryStatus } from "../../../types";
 import { StatusDot } from "../../StatusDot";
 import { usePhoneBandSlot } from "../phoneBandStore";
@@ -32,16 +33,10 @@ import "./pagesPhone.css";
 
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 export const ANALYTICS_RANGE_KEY = "sa.phoneAnalytics";
-export type PhoneRange = "all" | "d90";
-const DAY = 86_400_000;
-export const D90_MS = 90 * DAY;
 export function readRange(): PhoneRange {
   try { return localStorage.getItem(ANALYTICS_RANGE_KEY) === "d90" ? "d90" : "all"; } catch { return "all"; }
 }
 function writeRange(r: PhoneRange): void { try { localStorage.setItem(ANALYTICS_RANGE_KEY, r); } catch { /* private mode */ } }
-/** the window the switch names: everything, or the queries sent in (now − 90 days, now] */
-export const inWindow = (sentMs: number | null, range: PhoneRange, nowMs: number): boolean =>
-  range === "all" || (sentMs != null && sentMs > nowMs - D90_MS && sentMs <= nowMs);
 
 const RECORD_KEYS = ["first-request", "quickest", "first-offer", "busiest", "run", "full-read"] as const;
 
