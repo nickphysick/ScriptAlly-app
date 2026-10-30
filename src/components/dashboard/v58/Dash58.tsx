@@ -41,11 +41,12 @@ import { Dash58Header } from "./Dash58Header";
 import { Dash71Right } from "../v71/Dash71Right";
 import { Dash71Task } from "../v71/Dash71Task";
 import { F1Feed } from "../f1/F1Feed";
+import { F1Book } from "../f1/F1Book";
 import { Dash105Founding } from "../v105/Dash105Founding";
 import { agentCoverage, isPreQuery } from "../../../lib/dashFirstUse";
 import { ClosedHoop, AgentsHoop } from "../v60/Dash60Left";
 import { openNewAgentCard } from "../../../lib/agentCardStore";
-import { campaignEyebrow, seg, dashPrefsOf, gsHideWrite, gsOrder, nextTip, startPathOf, startPathWrite, stepTip, tipWrite, type GsLink, type StartPath } from "../../../lib/dashFirstVisit";
+import { campaignEyebrow, campaignLabel, seg, dashPrefsOf, gsHideWrite, gsOrder, nextTip, startPathOf, startPathWrite, stepTip, tipWrite, type GsLink, type StartPath } from "../../../lib/dashFirstVisit";
 import type { UserPaths } from "../../../lib/userPaths";
 import { DASH_TIPS } from "../../../lib/dashTips";
 import { SetUpCard } from "../fv1/SetUpCard";
@@ -87,6 +88,8 @@ export interface Dash58Props {
   onFoundingSeen?: (tier: number) => void | Promise<void>;
   /** First visit v1: writes the page's own prefs (`todoPrefs.dash`, one dotted leaf each). Absent (the onboarding ghost) → nothing is stored. */
   onPrefs?: (paths: UserPaths) => void | Promise<void>;
+  /** Dashboard feed v1: writes the querying goal from the goal sheet (the goals card's own write). Absent → read only. */
+  onGoal?: (patch: Partial<User>) => void | Promise<void>;
 }
 
 const NO_AID: DashAid = { drop: [], noClosed: false, noAgents: false };
@@ -156,7 +159,7 @@ const ImportNoticeRow: React.FC<{ notice: ImportNotice; onDismiss: () => void; o
 export const Dash58: React.FC<Dash58Props> = ({
   loading: dataLoading, queries, agents: agentsIn, manuscripts, tasks, userTasks, activities, taskFlags, currentUser,
   activeManuscript, onNavigate, now: nowProp, versions = [], smartImportUsage = null,
-  onFoundingSeen, onPrefs,
+  onFoundingSeen, onPrefs, onGoal,
 }) => {
   /* one clock per mount: a new Date on every render would rebuild every derivation below */
   const [mountedAt] = useState(() => new Date());
@@ -543,6 +546,13 @@ export const Dash58: React.FC<Dash58Props> = ({
                right columns' cards share one column (`display: contents`, placed by row) and the feed is the second. */
             <div className="df1-cols" data-df1="cols">
               <div className="df1-left" data-df1="left">
+                <div className="df1-slot df1-s-book" data-df1="book-slot">
+                  <F1Book
+                    loading={loading} title={title} author={author} coverUrl={activeManuscript?.coverUrl} label={campaignLabel(scopedQueries)}
+                    onLog={logQuery} onRecord={() => onNavigate("queries", "Record a response")} onAddAgent={() => onNavigate("agents", "Add an agent")}
+                    queries={queries} agents={agents} activities={activities} currentUser={currentUser} now={now} onGoal={onGoal}
+                  />
+                </div>
                 <div className="df1-slot df1-s-queries" data-df1="queries">{chartCard}{closedCard}</div>
                 <div className="df1-slot df1-s-agents" data-df1="agents">{agentsCard}</div>
                 <div className="df1-slot df1-s-founding" data-df1="founding">{foundingCard}</div>

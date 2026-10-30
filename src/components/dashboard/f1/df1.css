@@ -93,3 +93,130 @@
   -webkit-mask-image: linear-gradient(#000 calc(100% - 28px), transparent);
   mask-image: linear-gradient(#000 calc(100% - 28px), transparent);
 }
+
+/* ── Part B: the manuscript card (navy) and the goal sheet tucked under it ─────────────────────────────────────── */
+.df1-bookset { display: flex; flex-direction: column; }
+.df1-book {
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  padding: 14px 14px 12px;
+  border-radius: 16px;
+  background: #2d3a50;
+  color: #fffaf3;
+  box-shadow: 0 8px 20px rgba(27, 36, 51, 0.18);
+}
+.df1-bktop { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.df1-cov {
+  position: relative;
+  flex: none;
+  box-sizing: border-box;
+  width: 46px;
+  height: 66px;
+  padding: 7px 5px 0 8px;
+  overflow: hidden;
+  border-radius: 2px 5px 5px 2px;
+  background: linear-gradient(135deg, #efd5cb, #e3bfb2);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
+}
+.df1-cov::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: linear-gradient(90deg, rgba(0, 0, 0, 0.2), transparent); }
+.d58 .df1-cov span { display: block; font-family: var(--d58-type) !important; font-size: 8.5px; line-height: 1.15; color: #2a2320; overflow-wrap: anywhere; }
+img.df1-covimg { padding: 0; object-fit: cover; background: none; }
+.df1-bktxt { min-width: 0; }
+/* the old header's campaign word, in sentence case on the navy */
+.d58 .df1-status { font-family: var(--d58-mono) !important; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; line-height: 14px; color: #e3a58b; white-space: nowrap; }
+/* ⚠️ TWO CLASSES AND `!important`: brand.tsx forces a face on every h1 at runtime. 1.15 because a title can be any
+   string, and a descender must not be cut (nothing here clips — the title wraps). */
+.d58 .df1-title {
+  margin: 2px 0 0;
+  font-family: var(--d58-type) !important;
+  font-weight: 400;
+  font-size: 28px;
+  line-height: 1.15;
+  color: #fffaf3;
+  overflow-wrap: anywhere;
+}
+.d58 .df1-by { margin-top: 3px; font-family: var(--d58-serif) !important; font-style: italic; font-size: 15px; line-height: 20px; color: rgba(244, 238, 229, 0.75); }
+/* ⚠️ SIZED BY THEIR OWN WORDS, NOT THE REF'S 1 : 1.25 : 1. The app's serif is wider than the ref's, and at a 414px card the
+   ratios cut "Record a response" to "Record a respo…" (measured); each button grows from its own label instead. */
+.df1-bkacts {
+  display: flex;
+  gap: 6px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+.d58 .df1-ba {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 36px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 9px;
+  background: none;
+  box-shadow: inset 0 0 0 1px rgba(244, 238, 229, 0.25);
+  color: #fffaf3;
+  font-family: var(--d58-serif) !important;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.d58 .df1-ba > span { font-family: inherit !important; overflow: hidden; text-overflow: ellipsis; }
+.d58 .df1-ba svg { flex: none; width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.d58 .df1-ba:hover { background: rgba(255, 255, 255, 0.08); }
+.d58 .df1-ba--pri { background: #fffaf3; color: var(--d58-ink); box-shadow: none; }
+.d58 .df1-ba--pri:hover { background: #fff; }
+.df1-ba:focus-visible { outline: 2px solid #fffaf3; outline-offset: 2px; }
+
+/* the goal sheet: white, square at the top so it reads as tucked under the card's bottom edge, with no gap */
+.df1-goal {
+  position: relative;
+  z-index: 0;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+  padding: 18px 16px 14px;
+  border-radius: 0 0 16px 16px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(28, 19, 15, 0.06);
+  margin-inline: 6px;
+}
+.df1-ring { position: relative; width: 96px; height: 96px; }
+.df1-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.df1-ring > div { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.d58 .df1-ring b { font-family: var(--d58-type) !important; font-weight: 400; font-size: 26px; line-height: 1; color: var(--d58-ink); }
+.d58 .df1-ring small { margin-top: 3px; font-family: var(--d58-serif) !important; font-size: 11.5px; color: #7d7067; }
+.d58 .df1-setgoal {
+  width: 96px; height: 96px; padding: 10px; border: 0; border-radius: 50%; cursor: pointer;
+  background: none; box-shadow: inset 0 0 0 2px #ece7de;
+  font-family: var(--d58-serif) !important; font-size: 13px; font-weight: 600; line-height: 1.25; color: var(--d58-ink);
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.df1-setgoal:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
+.df1-tiles { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; min-width: 0; }
+.df1-tiles > div { min-width: 0; padding: 8px 10px; border-radius: 10px; background: #f5f1eb; }
+.d58 .df1-tiles b { display: block; font-family: var(--d58-type) !important; font-weight: 400; font-size: 22px; line-height: 1; color: var(--d58-ink); }
+.d58 .df1-tiles span { font-family: var(--d58-serif) !important; font-size: 12.5px; color: #3b322c; }
+.d58 .df1-tiles em { display: block; margin-top: 2px; font-family: var(--d58-serif) !important; font-style: normal; font-size: 11.5px; line-height: 1.3; color: #7d7067; }
+.d58 .df1-streak {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid #efe8de;
+  font-family: var(--d58-serif) !important;
+  font-size: 13.5px;
+  color: var(--d58-ink);
+}
+.d58 .df1-streak > b { font-family: var(--d58-type) !important; font-weight: 400; font-size: 18px; }
+.df1-weeks { margin-left: auto; display: flex; gap: 3px; }
+.df1-weeks i { width: 20px; height: 6px; border-radius: 3px; background: #2d3a50; }
+.df1-weeks i.is-off { background: #ece7de; }

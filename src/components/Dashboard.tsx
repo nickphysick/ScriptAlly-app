@@ -1555,6 +1555,7 @@ export const Dashboard: React.FC<{
         onNavigate={onNavigate}
         onFoundingSeen={(tier) => updateUserProfile({ foundingSeenTier: tier })}
         onPrefs={updateUserPaths}
+        onGoal={(patch) => updateUserProfile(patch)}
       />
       )}
 
