@@ -142,5 +142,33 @@
   .pa-pg .pa-annote { background: var(--pa-page); box-shadow: none; padding: 16px 2px; }
   .pa-annote b { font-size: 15px; }
   .pa-annote p { font-size: 14px; line-height: 1.45; margin: 6px 0 0; }
+
+  /* ── Streaks & goals (ref GLV B) ── */
+  .pa-pg .pa-goal { display: flex; gap: 16px; align-items: center; width: 100%; margin-top: 16px; }
+  .pa-goaltxt { font-family: var(--pa-type); font-size: 22px; fill: var(--pa-ink); }
+  .pa-goalw { display: flex; flex-direction: column; min-width: 0; }
+  .pa-goalbig { font-family: var(--pa-type); font-size: 21px; margin: 2px 0 4px; color: var(--pa-ink); }
+  .pa-strhead { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .pa-strhead b { font-size: 16px; display: flex; gap: 6px; align-items: center; font-weight: 600; }
+  .pa-strhead b svg { width: 18px; height: 18px; }
+  .pa-wdots { display: flex; gap: 6px; margin-top: 14px; }
+  .pa-wdcol { flex: 1; text-align: center; min-width: 0; }
+  .pa-wdot { width: 30px; height: 30px; border-radius: 50%; margin: 0 auto; display: grid; place-items: center; background: var(--pa-fill); color: #fff; }
+  .pa-wdot.on { background: var(--pa-navy); }
+  .pa-wdot.now { box-shadow: 0 0 0 3px var(--pa-blush); }
+  .pa-wdot svg { width: 14px; height: 14px; }
+  .pa-wdl { font-size: 11px !important; margin-top: 4px; white-space: nowrap; }
+  .pa-bgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .pa-badge { background: #fff; border-radius: var(--pa-r); box-shadow: var(--pa-sh); padding: 14px 8px 12px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; min-width: 0; }
+  .pa-badge b { font-size: 13.5px; font-weight: 600; margin-top: 4px; color: var(--pa-ink); }
+  .pa-badge.off { background: transparent; box-shadow: inset 0 0 0 1.5px var(--pa-rule); }
+  .pa-badge.off > .pa-disc { opacity: 0.35; }
+  .pa-ranks { display: flex; justify-content: space-between; gap: 4px; }
+  .pa-rank { flex: 1; text-align: center; display: flex; flex-direction: column; align-items: center; min-width: 0; }
+  .pa-rankn { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--pa-fill); color: var(--pa-ink); margin-bottom: 6px; font-size: 15px; }
+  .pa-rank.on .pa-rankn { background: var(--pa-navy); color: #fff; }
+  .pa-rankw { font-size: 11.5px; color: var(--pa-muted); overflow-wrap: anywhere; }
+  .pa-rank.on .pa-rankw { color: var(--pa-ink); font-weight: 600; }
+  .pa-rankline { font-size: 14px !important; line-height: 1.45; margin: 14px 0 0; }
   @media (prefers-reduced-motion: reduce) { .pa-pg .pa-card, .pa-nocard { transition: none; } }
 }

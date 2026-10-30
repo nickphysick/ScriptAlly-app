@@ -34,6 +34,8 @@ export const WORKSPACE_PATHS = new Set([
   "/agents", "/agents/discover",
   "/manuscripts", "/manuscripts/comps", "/queries/packages", "/manuscripts/versions", "/import",
   "/account", "/plans", "/help",
+  // Phone app v2 Part 7D: Streaks & goals, a phone page (a computer is sent to the dashboard).
+  "/goals",
   /* The settings SECTIONS are real routes (`/account/profile`, …) — spread from the one table so
      a new section cannot be added without being registered here. `/account` itself stays listed
      above: it must survive this check for App.tsx's redirect to it run at all. */

@@ -6,6 +6,7 @@
  * own pages (Phone app v2, Part 7) below it. One is mounted at a time.
  */
 import React from "react";
+import { Navigate } from "react-router-dom";
 import { useIsMobile } from "../../shell/mobileChrome";
 import { ResponsesPage } from "../../responses/ResponsesPage";
 import { ResponsesPhone } from "./ResponsesPhone";
@@ -13,6 +14,7 @@ import { ManuscriptPage } from "../../manuscripts/v12/ManuscriptPage";
 import { ManuscriptPhone } from "./ManuscriptPhone";
 import { QueryAnalytics } from "../../QueryAnalytics";
 import { AnalyticsPhone } from "./AnalyticsPhone";
+import { GoalsPhone } from "./GoalsPhone";
 
 export const ResponsesRoute: React.FC<React.ComponentProps<typeof ResponsesPage>> = (props) =>
   useIsMobile() ? <ResponsesPhone /> : <ResponsesPage {...props} />;
@@ -23,3 +25,6 @@ export const ManuscriptRoute: React.FC<React.ComponentProps<typeof ManuscriptPag
 
 export const AnalyticsRoute: React.FC<React.ComponentProps<typeof QueryAnalytics>> = (props) =>
   useIsMobile() ? <AnalyticsPhone /> : <QueryAnalytics {...props} />;
+
+/** Streaks & goals has no desktop page yet: a computer goes to the dashboard (listed for Nick) */
+export const GoalsRoute: React.FC = () => (useIsMobile() ? <GoalsPhone /> : <Navigate to="/dashboard" replace />);

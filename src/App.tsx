@@ -21,7 +21,7 @@ import { TodoRoute } from "./components/todo/TodoRoute";
 import { Agents } from "./components/Agents";
 import { DiscoverPage } from "./components/agents/discover1/DiscoverPage";
 import { AgentsRoute, DiscoverRoute } from "./components/agents/phone/AgentsRoutes";
-import { AnalyticsRoute, ManuscriptRoute, ResponsesRoute } from "./components/phone/pages/PageRoutes";
+import { AnalyticsRoute, GoalsRoute, ManuscriptRoute, ResponsesRoute } from "./components/phone/pages/PageRoutes";
 import { SubmissionPackages } from "./components/SubmissionPackages";
 import { PACKAGES_PATH, packagesRedirectFor } from "./lib/packagesRoute";
 import { DiaryLab } from "./components/dashboard/DiaryLab";
@@ -783,6 +783,12 @@ function AppContent() {
         {routeKey === "account" && (
           <StagePage active layout="fill">
             <AccountSettings section={accountSectionForPath(path) ?? "profile"} onNavigate={handleNavigate} />
+          </StagePage>
+        )}
+        {/* Phone app v2 Part 7D — Streaks & goals: a phone page; a computer is sent to the dashboard (GoalsRoute) */}
+        {routeKey === "goals" && (
+          <StagePage active layout="fill">
+            <GoalsRoute />
           </StagePage>
         )}
         {routeKey === "plans" && (
