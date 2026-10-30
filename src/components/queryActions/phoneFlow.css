@@ -168,3 +168,18 @@
   .pa-flow .pf-nqc b { font-family: var(--pa-type) !important; font-weight: 400; font-size: 26px; line-height: 1.3; color: var(--pa-ink); }
   .pa-flow .pf-nqc span { font-family: var(--pa-type); font-size: 14px; color: var(--pa-muted); }
 }
+
+/* ── Phone round two v1 (ref boot3 `sent`): "What did you send?" as one white list — the package you're using now first,
+   the other ready or sent packages, then "Something different". Each row is at least 56px, so no option can collapse to
+   a sliver (the ref's own `.group.fl` collision did exactly that to its options). ── */
+@media (max-width: 767.98px) {
+  .pa-flow .pa-logsent { background: #fff; border-radius: 16px; box-shadow: var(--pa-sh); overflow: hidden; margin: 0 0 16px; }
+  .pa-flow .pa-logopt { display: flex; gap: 12px; align-items: center; width: 100%; min-height: 56px; padding: 12px 16px; border: 0; border-bottom: 1px solid var(--pa-rule);
+    background: none; text-align: left; color: var(--pa-ink); cursor: pointer; font-family: var(--pa-sans); }
+  .pa-flow .pa-logopt:last-child { border-bottom: 0; }
+  .pa-flow .pa-logopt i { width: 22px; height: 22px; flex: none; border-radius: 50%; box-shadow: inset 0 0 0 1.8px #b9b1a5; }
+  .pa-flow .pa-logopt.on i { box-shadow: inset 0 0 0 7px var(--pa-navy); }
+  .pa-flow .pa-logopt span { flex: 1; min-width: 0; }
+  .pa-flow .pa-logopt b { display: block; font: 600 15.5px/1.25 var(--pa-sans) !important; }
+  .pa-flow .pa-logopt small { display: block; font: 400 13px/1.3 var(--pa-sans) !important; color: var(--pa-muted); margin-top: 2px; }
+}

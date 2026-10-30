@@ -32,6 +32,7 @@ import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
 import { openNewAgentCard } from "../../../lib/agentCardStore";
 import { ReplyWheel } from "../../phone/ReplyWheel";
 import { useIsMobile } from "../../shell/mobileChrome";
+import { packageStage } from "../../../lib/packagesV40";
 import { SentChip } from "../SentHow";
 import {
   Chip, Chips, DateField, Fl, Note, NoteLink, SampleControl, SampleLine, Seg, Toggle, Who, initialsOf,
@@ -330,6 +331,32 @@ export function LogJourney({ req, today, children }: JourneyProps) {
     const askLine = ask.stated ? `${first.toUpperCase()} ASKS FOR: ${materialsName({ ql: ask.ql, syn: ask.syn, s: ask.sample }).toUpperCase()}` : undefined;
     const match = agent && ask.stated ? pkgs.find((p) => packageMatches(p, ask)) ?? null : null;
     const bookTitle = ms?.title ?? "this book";
+    /* Phone round two v1 (ref boot3 `sent`): ON A PHONE THE STEP IS ONE LIST. The package new queries go out with comes
+       first, marked "The package you're using now"; then the other packages that are ready or out with agents (a draft
+       is not something anyone was sent); then "Something different", which is the individual choice. The help line is
+       the agency's own requirements, when they are recorded. The desktop drawer is unchanged. */
+    const nowId = activePackageId(ms, packages);
+    const phoneOptions = onPhone ? [...pkgs]
+      .filter((p) => { const sp = packages.find((x) => x.id === p.id); return p.id === nowId || (sp ? packageStage(sp) !== "draft" : true); })
+      .sort((a, b) => Number(b.id === nowId) - Number(a.id === nowId)) : [];
+    const phoneSent = onPhone ? (
+      <>
+        {agent && ask.stated ? <p className="pf-help" data-pa="log-asks">{(agent.agency || first).trim()} asks for {materialsName({ ql: ask.ql, syn: ask.syn, s: ask.sample }).replace(/^Q/, "a q").replace(/^S/, "a s")}.</p> : null}
+        <div className="pa-logsent" role="radiogroup" aria-label="What you sent" data-pa="log-sent">
+          {phoneOptions.map((p) => (
+            <button type="button" role="radio" key={p.id} aria-checked={how === "package" && pkg === p.id} className={`pa-logopt${how === "package" && pkg === p.id ? " on" : ""}`}
+              data-pa="log-pkg" data-id={p.id} data-now={p.id === nowId ? "1" : "0"} onClick={() => attach(p.id)}>
+              <i aria-hidden="true" />
+              <span><b>{p.name}</b><small>{p.id === nowId ? `The package you’re using now${agent && packageMatches(p, ask) ? " · matches what they ask for" : ""}` : `${p.summary}${p.bookVersion ? ` · ${p.bookVersion}` : ""}`}</small></span>
+            </button>
+          ))}
+          <button type="button" role="radio" aria-checked={how === "individual"} className={`pa-logopt${how === "individual" ? " on" : ""}`} data-pa="log-something" onClick={() => chooseHow("individual")}>
+            <i aria-hidden="true" />
+            <span><b>Something different</b><small>Choose the letter, synopsis and pages</small></span>
+          </button>
+        </div>
+      </>
+    ) : null;
     steps.push({
       title: "What you sent",
       /* ⚠️ THE REVIEW WEARS THE SAME PAIR AS THE CARD AND TRACKING (§A3): the chip is SentChip
@@ -346,6 +373,7 @@ export function LogJourney({ req, today, children }: JourneyProps) {
       ownWarn: true,
       body: (
         <>
+          {phoneSent ?? (<>
           <div className="qad-hows" role="radiogroup" aria-label="How you record what you sent">
             <button type="button" role="radio" aria-checked={how === "package"} className={`qad-how${how === "package" ? " on" : ""}${pkgs.length ? "" : " dis"}`}
               disabled={!pkgs.length} data-qad-how="package" onClick={() => chooseHow("package")}>
@@ -359,8 +387,10 @@ export function LogJourney({ req, today, children }: JourneyProps) {
           {!pkgs.length ? (
             <div className="qad-nopkg" data-qad-nopkg>No packages yet. <a role="button" tabIndex={0} onClick={() => setLeaving(true)} onKeyDown={(e) => { if (e.key === "Enter") setLeaving(true); }}>Make one in Submission packages ›</a></div>
           ) : null}
+          </>)}
           {how === "package" && pkCard ? (
             <>
+              {phoneSent ? null : <>
               <Fl right={askLine}>WHICH PACKAGE</Fl>
               <div className="qad-plist" role="radiogroup" aria-label="Which package">
                 {pkgs.map((p) => (
@@ -374,6 +404,7 @@ export function LogJourney({ req, today, children }: JourneyProps) {
                   </button>
                 ))}
               </div>
+              </>}
               <div className="qad-inpk" data-qad-inpk>
                 <h5>IN THIS PACKAGE</h5>
                 {sentPieces({ ...mat, ql: pkCard.ql, syn: pkCard.syn, s: noSample() }, pieceV).map((x) => (
