@@ -86,6 +86,10 @@ for (const vp of PHONES) {
     await page.locator('[data-pa="plus-sent"]').click(); await page.locator(".pa-flow").waitFor(); await page.waitForTimeout(800);
     const s0 = await flowState(page);
     L.check("F1", `${tag(vp)} log opens on its first step`, s0.at === s0.steps[0] && s0.question === "Who did you query?", JSON.stringify(s0));
+    /* ⚠️ ADDED (phone fixes v1): opening on the right STEP said nothing about where the screen was. The agent field's
+       autofocus scrolled the flow down to it, past the card. Red on the base build (ba0513b6): the sheet opens scrolled. */
+    const at0 = await page.evaluate(() => { const sh = document.querySelector<HTMLElement>('.pa-flow [data-pf="sheet"]'); const c = document.querySelector('.pa-flow [data-pf="live"]')?.getBoundingClientRect(); return { sheet: sh?.scrollTop ?? -1, cardTop: c ? Math.round(c.top) : -1, focus: document.activeElement?.tagName ?? null }; });
+    L.check("F1", `${tag(vp)} log opens at the top, the card in view, nothing focused`, at0.sheet === 0 && at0.cardTop >= 0 && at0.focus !== "INPUT", JSON.stringify(at0));
     await page.locator('[data-qad-agent]').nth(1).dispatchEvent("mousedown"); await page.waitForTimeout(600);
     const all = (await flowState(page)).steps;
     L.check("pop", `${tag(vp)} log has its five steps once an agent is chosen`, all.length >= 4, all.join(" | "));
@@ -140,7 +144,7 @@ for (const vp of PHONES) {
     }
 
     /* the no-undo mutant stops here: past this point its writes could not be put back by deleting what was added */
-    if (process.env.PA2_ONLY === "F4") { L.done(1); return; }
+    if (process.env.PA2_ONLY === "F4") { L.done(2); return; }
     /* ── F5, F6, F8: a partial request cheers with the right stamp and Undo on top; a pass never cheers ── */
     for (const [k, stamp, cheers] of [["partial", "Partial requested", true], ["full", "Full requested", true], ["pass", null, false]] as const) {
       if (vp.width !== 390 && k !== "partial") continue;
@@ -174,7 +178,7 @@ for (const vp of PHONES) {
       for (let t = 0; t < 8; t++) { left = diff(b5, await snapshot(qid)); if (!left.length) break; await page.waitForTimeout(1000); }
       L.check("F4", `${tag(vp)} ${k}: after Undo the account is as it was`, left.length === 0, left.slice(0, 6).join(", "));
     }
-    L.done(vp.width === 390 ? 24 : 12);
+    L.done(vp.width === 390 ? 25 : 13);
   });
 }
 

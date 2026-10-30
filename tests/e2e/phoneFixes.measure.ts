@@ -17,10 +17,11 @@
  * ⚠️ EVERY LOCK ASSERTS ITS POPULATION FIRST.
  */
 import { test, expect, type Page } from "@playwright/test";
-import { appendFileSync, existsSync } from "node:fs";
+import { appendFileSync, existsSync, mkdirSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { createRequire } from "node:module";
 import { MS, openPhone } from "./pa2Lib";
+import { openRoute } from "./measure";
 import { engine, touchDrag } from "./touch";
 import { devDb } from "./devWrite";
 import { collection, deleteDoc, doc, getDocs, query as fsq, where } from "firebase/firestore";
@@ -36,16 +37,12 @@ const proj = () => test.info().project.name;
 const record = (lock: string, data: unknown) => { if (READINGS) appendFileSync(READINGS, JSON.stringify({ lock, proj: proj(), mutate: MUTATE || null, data }) + "\n"); };
 
 /** Decision 2's pages, each with what must be reachable by touch. */
-export const PAGES = [
-  "/dashboard", "/queries", "/todo", "/agents", "/todo/corkboard",
-  "/queries/analytics", "/queries/responses", "/manuscripts", "/queries/packages", "/manuscripts/comps", "/manuscripts/versions",
-  "/goals", "/agents/discover", "/help",
-  "/account", "/account/profile", "/account/preferences", "/account/notifications", "/account/tasks", "/account/security", "/account/data", "/account/plan",
-  "/plans", "/import",
-];
+export { PAGES } from "./phonePages";
+import { PAGES } from "./phonePages";
 
 /** Named breaks that put back what each fix removed. */
 export const BREAK: Record<string, string> = {
+  F9: ".ws-work > div { flex: 0 0 auto !important; min-height: auto !important; overflow: visible !important; } .ws-work .wpg-scroll { height: auto !important; max-height: none !important; overflow: visible !important; }",
   F7: ".pa-flow .pf-nqc { display: none !important; } .pa-flow .pf-lcard::before { content: 'New query'; display: block; padding: 7px 14px; font-size: 12.5px; background: #f7efe3; }",
   F5: ".pa-birds .pa-barh { display: inline !important; }",
   F4: '[data-pa="search-btn"] { pointer-events: none !important; }',
@@ -449,5 +446,128 @@ test.describe("PF1 phone fixes", () => {
     });
     record("BADGE", r);
     expect(r.badge, "the badge is drawn").not.toBeNull();
+  });
+
+  test("F9 the desktop is unchanged at 1440 × 900 on Home, Queries, To-do, Agents, Analytics and Settings", async ({ browser, browserName }) => {
+    test.skip(browserName !== "chromium", "the desktop comparison runs once, in Chromium");
+    test.setTimeout(900_000);
+    const BASE = process.env.PF1_BASE_URL ?? "http://127.0.0.1:4730";
+    const OURS = process.env.SA_E2E_BASE_URL!;
+    const ROUTES: [string, string][] = [["Home", "/dashboard"], ["Queries", "/queries"], ["To-do", "/todo"], ["Agents", "/agents"], ["Analytics", "/queries/analytics"], ["Settings", "/account"]];
+    const open = async (url: string) => {
+      const f = resolve(process.cwd(), `tests/e2e/.auth/pf1-desk-${new URL(url).port}.json`);
+      const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, baseURL: url, ...(existsSync(f) ? { storageState: f } : {}) });
+      /* BOTH SIDES ON ONE MANUSCRIPT. The active book is remembered per context in localStorage, so two contexts can
+         disagree about it — measured: the base said "Murphy's Day Out" and this build "The Smoke Test", and every page
+         differed for a reason that has nothing to do with the build. */
+      await ctx.addInitScript((ms) => { try { localStorage.setItem("scriptally_active_manuscript_id", ms); } catch { /* */ } }, MS);
+      const page = await ctx.newPage();
+      await openRoute(page, "/dashboard");
+      if (!existsSync(f)) await ctx.storageState({ path: f, indexedDB: true });
+      return { ctx, page };
+    };
+    const sig = (page: Page) => page.evaluate(() => {
+      const P = ["display", "position", "color", "background-color", "font-size", "font-family", "padding", "margin", "overflow-y", "height", "width", "opacity", "transform"];
+      const out: string[] = [];
+      for (const el of document.querySelectorAll("body *")) {
+        const r = el.getBoundingClientRect(); const cs = getComputedStyle(el);
+        if (r.width <= 0 || r.height <= 0 || cs.visibility === "hidden") continue;
+        out.push(`${(el.children.length ? "" : (el.textContent ?? "").trim().slice(0, 40) + " ")}${el.tagName}.${String((el.className as unknown as { baseVal?: string })?.baseVal ?? el.className).trim()} ${r.x.toFixed(2)},${r.y.toFixed(2)},${r.width.toFixed(2)},${r.height.toFixed(2)} ${P.map((p) => cs.getPropertyValue(p)).join("|")}`);
+      }
+      return out;
+    });
+    const png = async (page: Page) => (PNG as { sync: { read: (b: Buffer) => { data: Buffer; width: number; height: number } } }).sync.read(await page.screenshot());
+    /* THE BASE IS OPENED TWICE AND ITS OWN DISAGREEMENT IS THE NOISE MASK. Home carries a live cycling card and the
+       sidebar's text widths move a hair between loads of one build; a change counts only where the two base loads
+       agree with each other and this build does not. */
+    const base = await open(BASE), base2 = await open(BASE), ours = await open(OURS);
+    if (BREAK[MUTATE]) await ours.page.addStyleTag({ content: BREAK[MUTATE] });
+    const rows: unknown[] = [];
+    try {
+      for (const [name, path] of ROUTES) {
+        /* SETTLE BOTH BEFORE COMPARING: fonts loaded, and the whole document's size unchanged across four reads
+           half a second apart. Measured unsettled: one string 351px against 307 (a web font against its fallback)
+           and Analytics 6,372px tall against 10,951 (one still loading) — differences of timing, not of the build. */
+        for (const x of [base, base2, ours]) await go(x.page, path);
+        /* Home's task card cycles through the tasks on a timer (Dash71Task, DWELL_MS), so its contents depend on WHEN
+           each page was read: measured, the base disagreed with itself on 45,279 pixels. It is hidden in all three
+           (visibility keeps its box, so everything around it is still compared). */
+        for (const x of [base, base2, ours]) await x.page.addStyleTag({ content: '[data-d71="task"] { visibility: hidden !important; }' });
+        for (const x of [base, base2, ours]) {
+          await x.page.evaluate(() => document.fonts.ready);
+          let last = "", same = 0;
+          for (let i = 0; i < 60 && same < 4; i++) {
+            await x.page.waitForTimeout(500);
+            const now = await x.page.evaluate(() => { const st = document.getElementById("app-stage-scroll"); return `${document.body.scrollHeight}|${st?.scrollHeight}|${document.querySelectorAll("body *").length}|${document.fonts.status}`; });
+            same = now === last ? same + 1 : 0; last = now;
+          }
+        }
+        if (BREAK[MUTATE]) await ours.page.addStyleTag({ content: BREAK[MUTATE] });
+        const [sa, s2, so] = [await sig(base.page), await sig(base2.page), await sig(ours.page)];
+        const [pa, p2, po] = [await png(base.page), await png(base2.page), await png(ours.page)];
+        const far = (d: Buffer, e: Buffer, i: number) => Math.max(Math.abs(d[i] - e[i]), Math.abs(d[i + 1] - e[i + 1]), Math.abs(d[i + 2] - e[i + 2])) > 48;
+        /* SUB-PIXEL NOISE IS NOT A CHANGE. Text widths move by ~0.015px between two loads of the SAME build (measured:
+           the base build read 100.609 and 100.594 for one label on two loads), so a number compares within 0.25px and
+           a pixel counts only when a channel moves by more than 48 — anti-aliasing shifts, a moved or recoloured box
+           does not hide under that. */
+        let px = 0, noisePx = 0;
+        for (let i = 0; i < pa.data.length; i += 4) { if (far(pa.data, p2.data, i)) { noisePx++; continue; } if (far(pa.data, po.data, i)) px++; }
+        const same = (x: string, y: string) => { if (x === y) return true; const xs = x.split(/[ |,]/), ys = y.split(/[ |,]/); return xs.length === ys.length && xs.every((t, k) => t === ys[k] || (/^-?[\d.]+(px)?$/.test(t) && /^-?[\d.]+(px)?$/.test(ys[k]) && Math.abs(parseFloat(t) - parseFloat(ys[k])) <= 0.25)); };
+        const stable = (i: number) => sa.length === s2.length && same(sa[i], s2[i]);
+        const noiseDom = sa.length === s2.length ? sa.filter((v, i) => !same(v, s2[i])).length : -1;
+        const dom = sa.length === so.length ? sa.filter((v, i) => stable(i) && !same(v, so[i])).length : Math.abs(sa.length - so.length) + 1000;
+        const firstDiff = sa.findIndex((v, i) => v !== so[i]);
+        const parts = (v?: string) => (v ?? "").split(/[ |]/);
+        const delta = (i: number) => { const a = parts(sa[i]), o = parts(so[i]); return a.map((x, k) => (x !== o[k] ? `${x} → ${o[k]}` : null)).filter(Boolean).join("; "); };
+        const diffs = sa.map((_, i) => i).filter((i) => stable(i) && !same(sa[i], so[i]));
+        rows.push({ name, elements: sa.length, base: sa.length, ours: so.length, dom, px, noiseDom, noisePx, first: diffs.slice(0, 4).map((i) => `${sa[i]?.split(" ")[0]} :: ${delta(i)}`) });
+      }
+    } finally { await base.ctx.close(); await base2.ctx.close(); await ours.ctx.close(); }
+    record("F9", rows);
+    expect(rows.length, "six routes compared").toBe(6);
+    for (const r of rows as { name: string; elements: number; dom: number; px: number; noiseDom: number; noisePx: number }[]) {
+      expect(r.noiseDom, `${r.name}: the two base loads are comparable`).toBeGreaterThanOrEqual(0);
+      expect(r.noisePx, `${r.name}: the base's own noise is under 2% of the screen`).toBeLessThan(1440 * 900 * 0.02);
+      expect(r.elements, `${r.name}: elements were read`).toBeGreaterThan(50);
+      expect(r.dom, `${r.name}: no visible element moved or restyled`).toBe(0);
+      expect(r.px, `${r.name}: no pixel changed outside the base's own noise`).toBe(0);
+    }
+  });
+
+  test("SHOTS board against app (1B · 3A · 4A · 5C) at 390 and 360, and before → after", async ({ page }) => {
+    test.skip(!process.env.PF1_SHOTS, "PF1_SHOTS=1 takes the report's pictures");
+    test.setTimeout(900_000);
+    const out = "reports/phone-fixes-v1/pairs";
+    mkdirSync(out, { recursive: true });
+    const pair = async (name: string, left: string, right: Buffer, labels: [string, string]) => {
+      const html = `<body style="margin:0;display:flex;gap:16px;padding:16px;background:#ece7df;font:13px system-ui">` +
+        [[left, labels[0]], [`data:image/png;base64,${right.toString("base64")}`, labels[1]]].map(([src, l]) => `<figure style="margin:0"><figcaption style="padding:0 0 6px">${l}</figcaption><img src="${src}" style="width:390px;border:1px solid #c9c0b3"></figure>`).join("") + "</body>";
+      const p2 = await page.context().newPage(); await p2.setViewportSize({ width: 844, height: 940 }); await p2.setContent(html); await p2.waitForTimeout(300);
+      await p2.screenshot({ path: `${out}/${name}.png`, fullPage: true }); await p2.close();
+    };
+    const b64 = (f: string) => `data:image/png;base64,${readFileSync(f).toString("base64")}`;
+    for (const vp of [{ width: 390, height: 844 }, { width: 360, height: 780 }]) {
+      await page.setViewportSize(vp);
+      await openPhone(page, "/queries", vp); await go(page, "/queries"); await page.waitForTimeout(1500);
+      for (let i = 0; i < 3; i++) await touchDrag(page, Math.round(vp.width / 2), Math.round(vp.height * 0.7), -120);
+      await touchDrag(page, Math.round(vp.width / 2), Math.round(vp.height * 0.4), 30, 4); await page.waitForTimeout(600);
+      await pair(`1B-${vp.width}`, b64("design-refs/phone-fixes-v1/shots/1B-bar-fade.png"), await page.screenshot(), ["board 1B (390)", `app ${vp.width}`]);
+      await page.locator('[data-pa="search-btn"]').first().tap(); await page.locator('[data-pa="search"]').waitFor(); await page.waitForTimeout(600);
+      await pair(`3A-${vp.width}`, b64("design-refs/phone-fixes-v1/shots/3A-search.png"), await page.screenshot(), ["board 3A (390)", `app ${vp.width}`]);
+      await page.locator('[data-pa="search-cancel"]').tap(); await page.waitForTimeout(400);
+      await page.locator('[data-pa="birds-btn"]').first().tap(); await page.locator('[data-pa="birds"]').waitFor(); await page.waitForTimeout(800);
+      await pair(`4A-${vp.width}`, b64("design-refs/phone-fixes-v1/shots/4A-birds-eye.png"), await page.screenshot(), ["board 4A (390)", `app ${vp.width}`]);
+      await page.keyboard.press("Escape"); await go(page, "/queries"); await page.waitForTimeout(800);
+      await page.locator('[data-pa="plus"]').tap(); await page.locator('[data-pa="plus-sent"]').tap(); await page.locator(".pa-flow").waitFor(); await page.waitForTimeout(900);
+      await pair(`5C-${vp.width}`, b64("design-refs/phone-fixes-v1/shots/5C-log-a-query.png"), await page.screenshot(), ["board 5C (390)", `app ${vp.width}`]);
+      await page.locator('.pa-flow [data-pf="close"]').tap(); await page.waitForTimeout(400);
+      const discard = page.getByRole("button", { name: /^Discard/ }); if (await discard.count()) await discard.first().tap();
+    }
+    /* before → after: the same views the recon photographed on the base build */
+    await page.setViewportSize({ width: 393, height: 727 });
+    for (const [file, path] of [["pixel-_dashboard", "/dashboard"], ["pixel-_queries", "/queries"], ["pixel-_todo", "/todo"], ["pixel-_agents", "/agents"], ["pixel-_queries_analytics", "/queries/analytics"], ["pixel-_account", "/account"]] as const) {
+      await go(page, path); await page.waitForTimeout(1500);
+      await pair(`before-after-${file.slice(7) || "home"}`, b64(`reports/phone-fixes-v1/before/${file}.png`), await page.screenshot(), ["before (base build)", "after"]);
+    }
   });
 });

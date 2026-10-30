@@ -79,3 +79,20 @@ export async function swipeToEnd(page: Page, x: number, y: number, read: () => P
   }
   return max;
 }
+
+/** A sideways finger swipe across an element (a row's swipe actions). Chromium: a real touch through CDP. WebKit has no
+ *  touch input in Playwright, so there the swipe is a pointer drag — which is what the row listens to (pointer events
+ *  cover touch and mouse alike); the report says which. */
+export async function touchSwipeX(page: Page, x: number, y: number, dx: number, steps = 10): Promise<void> {
+  if (engine(page) === "chromium") {
+    const s = await cdp(page);
+    await s.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
+    for (let i = 1; i <= steps; i++) { await s.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x: x + (dx * i) / steps, y }] }); await page.waitForTimeout(16); }
+    await s.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+  } else {
+    await page.mouse.move(x, y); await page.mouse.down();
+    for (let i = 1; i <= steps; i++) await page.mouse.move(x + (dx * i) / steps, y);
+    await page.mouse.up();
+  }
+  await page.waitForTimeout(400);
+}

@@ -24,6 +24,10 @@ import { sampleHitBoxes, overlaps } from "./hitBoxes";
 
 const MUTATE = process.env.PP1_MUTATE ?? "";
 const BEFORE = process.env.PP1_BASE_URL ?? "";
+/* Phone fixes v1: the phone projects now start from a cached SIGNED-IN session (playwright.config `phoneSession`);
+   these are the logged-out public pages, so this file starts signed out. Signed in, the menu, the account tab and the
+   sign-in route all draw the signed-in variants and P5–P9 measured the wrong page. */
+test.use({ storageState: { cookies: [], origins: [] } });
 const READINGS = process.env.PP1_READINGS ?? "";
 
 const PAGES = ["/", "/pricing", "/about", "/contact", "/founders", "/terms", "/privacy", "/#/signup", "/#/login"];

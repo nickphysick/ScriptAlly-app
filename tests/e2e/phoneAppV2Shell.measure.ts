@@ -17,6 +17,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { openRoute } from "./measure";
 import { DIR, Ledger, PHONES, colourSweep, imageSweep, openPhone, prime, shot, tag } from "./pa2Lib";
+import { touchDrag } from "./touch";
 
 test.setTimeout(420_000);
 const PART = "part-1";
@@ -109,18 +110,32 @@ for (const vp of PHONES) {
 for (const vp of PHONES) {
   test(`PA2-1 · tuck-away · ${tag(vp)}`, async ({ page }) => {
     const L = new Ledger(PART, `tuck-${tag(vp)}`);
-    await openPhone(page, "/dashboard", vp);
-    const stage = '#app-stage-scroll';
-    const can = await page.evaluate((s) => { const e = document.querySelector<HTMLElement>(s)!; return e.scrollHeight - e.clientHeight; }, stage);
-    L.check("pop", `${tag(vp)} Home scrolls (precondition)`, can > 260, String(can));
-    const scrollTo = async (y: number) => { await page.evaluate(([s, v]) => { document.querySelector<HTMLElement>(s as string)!.scrollTop = v as number; }, [stage, y] as const); await page.waitForTimeout(250); };
-    await scrollTo(0);
-    L.check("S2", `${tag(vp)} at rest the bar is in`, (await bar(page))?.away === false, "");
-    for (const y of [50, 100, 150, 200]) await scrollTo(y);
-    L.check("S2", `${tag(vp)} after 200 down the bar is away`, (await bar(page))?.away === true, "");
-    await scrollTo(180);
-    L.check("S2", `${tag(vp)} after 20 up the bar is back`, (await bar(page))?.away === false, "");
-    L.done(4);
+    /* ⚠️ REPAIRED (phone fixes v1). This lock used to run on Home alone and move the stage by writing `scrollTop` — and
+       Home was the ONE page whose slot was `flow`, so it was the one page that scrolled. Every other page sat in a
+       clipped `fill` slot no finger could move, and script can scroll a clip, so nothing here could see it. It now
+       drags by touch, on Home and on Queries. Red on the base build (ba0513b6): Queries "scrolls by touch" fails. */
+    const stage = "#app-stage-scroll";
+    for (const route of ["/dashboard", "/queries"]) {
+      await openPhone(page, route, vp);
+      await page.waitForFunction((s) => { const e = document.querySelector<HTMLElement>(s)!; return e.scrollHeight - e.clientHeight > 260; }, stage, { timeout: 20_000 }).catch(() => {});
+      const top = () => page.evaluate((s) => document.querySelector<HTMLElement>(s)!.scrollTop, stage);
+      L.check("S2", `${tag(vp)} ${route}: at rest the bar is in`, (await bar(page))?.away === false, "");
+      for (let i = 0; i < 3; i++) await touchDrag(page, Math.round(vp.width / 2), Math.round(vp.height * 0.7), -140);
+      const down = await top();
+      L.check("S2", `${tag(vp)} ${route}: the page scrolls by touch`, down > 260, String(down));
+      L.check("S2", `${tag(vp)} ${route}: after scrolling down the bar is away`, (await bar(page))?.away === true, "");
+      await touchDrag(page, Math.round(vp.width / 2), Math.round(vp.height * 0.4), 60, 6);
+      L.check("S2", `${tag(vp)} ${route}: after a drag up the bar is back`, (await bar(page))?.away === false, "");
+    }
+    /* ⚠️ ADDED (phone fixes v1): the two faults of the bar's neighbourhood that nothing here looked at. The old floating
+       fade (`.sv2-fade`) is not drawn on a phone — red on the base build, where it floats 20px above the bar — and the
+       band's search opens something a phone can see — red on the base build, where it opened the desktop palette. */
+    const fade = await page.evaluate(() => { const f = document.querySelector<HTMLElement>(".sv2-fade"); return f ? getComputedStyle(f).display : "absent"; });
+    L.check("S2", `${tag(vp)} the old floating fade is not drawn on a phone`, fade === "none" || fade === "absent", fade);
+    await page.locator('[data-pa="search-btn"]').first().tap();
+    const sr = await page.locator('[data-pa="search"]').first().waitFor({ timeout: 5000 }).then(() => page.locator('[data-pa="search"]').first().boundingBox(), () => null);
+    L.check("S2", `${tag(vp)} the band's search opens full screen`, !!sr && sr.width >= vp.width - 1 && sr.height >= vp.height * 0.9, JSON.stringify(sr));
+    L.done(10);
   });
 }
 

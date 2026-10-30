@@ -143,7 +143,12 @@ for (const vp of PHONES) {
     const birds = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-pa="birds-row"]')].map((b) => ({ id: b.dataset.id, where: b.dataset.where })));
     L.check("Q6", `${tag(vp)} every open query, once`, birds.length === c0.counts.you + c0.counts.agent + c0.counts.quiet && new Set(birds.map((b) => b.id)).size === birds.length, `${birds.length} vs ${c0.counts.you + c0.counts.agent + c0.counts.quiet}`);
     L.check("Q6", `${tag(vp)} no closed query`, birds.every((b) => b.where !== "closed"), "");
+    /* ⚠️ ADDED (phone fixes v1): every row was present and the sheet still read as a plain list — the bar's track was a
+       span with no display rule under the sheet, so each bar drew 0px tall. Counting rows could not see it; this reads
+       the drawn track. Red on the base build (ba0513b6): every track is 0px. */
+    const tracks = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-pa="birds-row"] .pa-barh')].map((e) => e.getBoundingClientRect().height));
+    L.check("Q6", `${tag(vp)} every row draws its progress track`, tracks.length === birds.length && tracks.every((h) => h >= 6), JSON.stringify(tracks.slice(0, 6)));
     await shot(page, PART, `11-birds-eye-${tag(vp)}`);
-    L.done(30);
+    L.done(31);
   });
 }
