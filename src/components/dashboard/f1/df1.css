@@ -443,3 +443,14 @@ img.df1-covimg { padding: 0; object-fit: cover; background: none; }
 .d58 .df1-notify { width: 100%; height: 40px; margin-top: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: 10px; background: #b9786a; color: #fff; font-size: 14.5px; font-weight: 600; cursor: pointer; }
 .d58 .df1-notify:disabled { cursor: default; opacity: 0.85; }
 .df1-notify svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ── Part F: the footer, on the sheet's own colour after a hairline ─────────────────────────────────────────────── */
+.df1-foot { margin-top: 6px; padding: 18px 4px 10px; border-top: 1px solid #ddd5ca; font-family: var(--d58-serif) !important; }
+.df1-foot nav { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.d58 .df1-foot a { font-family: inherit; font-size: 14.5px; color: #3b322c; text-decoration: none; }
+.d58 .df1-foot a:hover { color: var(--d58-ink); text-decoration: underline; text-underline-offset: 3px; }
+.df1-fsel { display: flex; gap: 8px; margin: 16px 0 12px; }
+.d58 .df1-fsel button { height: 38px; padding: 0 14px; border: 0; border-radius: 999px; background: #fff; box-shadow: inset 0 0 0 1px #d9cfc1; font-family: inherit; font-size: 14.5px; color: var(--d58-ink); cursor: pointer; }
+.d58 .df1-fsel button:hover { background: #fbf9f5; }
+.df1-foot a:focus-visible, .df1-fsel button:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
+.d58 .df1-foot small { font-family: inherit; font-size: 13.5px; color: #7d7067; }

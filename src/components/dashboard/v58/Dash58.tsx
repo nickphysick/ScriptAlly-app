@@ -45,6 +45,7 @@ import { F1Book } from "../f1/F1Book";
 import { F1Queries } from "../f1/F1Queries";
 import { F1Tip } from "../f1/F1Tip";
 import { F1Scout } from "../f1/F1Scout";
+import { F1Footer } from "../f1/F1Footer";
 import { notifyPrefs } from "../../../lib/accountPrefs";
 import { Dash105Founding } from "../v105/Dash105Founding";
 import { agentCoverage, isPreQuery } from "../../../lib/dashFirstUse";
@@ -583,6 +584,7 @@ export const Dash58: React.FC<Dash58Props> = ({
                 <div className="df1-slot df1-s-scout" data-df1="scout-slot">
                   <F1Scout asked={notifyPrefs(currentUser?.notifyPrefs).scout} onAsk={currentUser && onPrefs ? () => onPrefs({ "notifyPrefs.scout": true }) : undefined} />
                 </div>
+                <div className="df1-slot df1-s-footer" data-df1="footer-slot"><F1Footer /></div>
               </div>
               <FirstWinStamp uid={currentUser?.id ?? null} active={onDash && !loading && !rootRef.current?.closest(".im-ghost")} shown={prefs.wins} onPrefs={onPrefs} />
             </div>
