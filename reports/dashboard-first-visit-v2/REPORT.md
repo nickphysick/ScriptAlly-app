@@ -197,7 +197,21 @@ striking it on a page needs a writer's first query, which the shared account can
 
 ## Integration and dev
 
-{{DEPLOY}}
+**Dev serves `index-BMYft5lI.js`**, built from a clean checkout of the integration branch
+`dev/pk391-qm1-pk392-calx-pk392b-td7-fv1-pk393-pa2-2-td12-ppp1-pa2-8-sip1-pls1-pfx1-df1-g4-pr2-fv2` at `63d3d889`: this
+branch merged onto what dev served when the pack finished — `…-df1-g4-pr2` (`index-DH1ftLEE.js`, confirmed by building
+it), which is the base plus feed v1's report, phone fixes v1's G4 and phone round two. No file in common; a clean merge.
+On the merged tree: tsc and functions tsc clean, Vitest 710 files and 10,858 passed, rules 243 passed, both builds clean,
+and **FV2's nine locks green against a preview of the integrated build** (10 passed).
+
+- **Hosting:** deployed to dev, the served bundle checked after.
+- **Rules:** deployed to dev with Parts F and I (releases 15:45:04 and 16:22:22); the integration's file is the same.
+- **⚠️ The clean-up function is NOT deployed.** `firebase deploy --only functions:importDraftsCleanup --project
+  scriptally-dev` was refused: *"Runtime Node.js 20 was decommissioned on 2026-10-30. To deploy you must first upgrade your
+  runtime version."* Upgrading the runtime is a change to every function (`functions/package.json`), outside what this
+  pack may touch. Until it is deployed, a draft is deleted when its import finishes or is discarded, but not after 7 days.
+  **Your call: upgrade the functions runtime (its own small pack), then deploy `importDraftsCleanup` to dev.**
+- **Not merged; prod untouched.** Don't deploy to prod before emails v1 lands (Part G says "we'll email you").
 
 ## Out of scope, reported
 
@@ -205,4 +219,4 @@ striking it on a page needs a writer's first query, which the shared account can
 - The ready path with agents offers no "Change it" (false premise 6).
 - `dashList`'s `start` group is now unreachable from the desktop (kept, tested).
 - Don't deploy this to prod before emails v1 lands: Part G tells writers "we'll email you".
-- `functions` deploy to dev: `importDraftsCleanup` (see the deploy section).
+- The functions runtime: Node.js 20 is decommissioned, so no function can be deployed until it is upgraded.
