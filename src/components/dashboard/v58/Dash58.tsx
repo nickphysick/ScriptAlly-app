@@ -43,6 +43,9 @@ import { Dash71Task } from "../v71/Dash71Task";
 import { F1Feed } from "../f1/F1Feed";
 import { F1Book } from "../f1/F1Book";
 import { F1Queries } from "../f1/F1Queries";
+import { F1Tip } from "../f1/F1Tip";
+import { F1Scout } from "../f1/F1Scout";
+import { notifyPrefs } from "../../../lib/accountPrefs";
 import { Dash105Founding } from "../v105/Dash105Founding";
 import { agentCoverage, isPreQuery } from "../../../lib/dashFirstUse";
 import { ClosedHoop, AgentsHoop } from "../v60/Dash60Left";
@@ -573,7 +576,13 @@ export const Dash58: React.FC<Dash58Props> = ({
                 <F1Feed loading={loading} activities={scopedActivities} queries={queries} agents={agents} manuscripts={manuscripts} userName={author} now={now} />
               </div>
               <div className="df1-right" data-df1="right">
-                <div className="df1-slot df1-s-task" data-df1="task">{taskCard}</div>
+                <div className="df1-slot df1-s-task" data-df1="task">
+                  <Dash71Task loading={loading} plan={plan} ctx={taskCtx} onView={viewTask} innerRef={focusRef} gs={gsHidden ? undefined : gs} look="next" />
+                </div>
+                <div className="df1-slot df1-s-tip" data-df1="tip-slot"><F1Tip loading={loading} /></div>
+                <div className="df1-slot df1-s-scout" data-df1="scout-slot">
+                  <F1Scout asked={notifyPrefs(currentUser?.notifyPrefs).scout} onAsk={currentUser && onPrefs ? () => onPrefs({ "notifyPrefs.scout": true }) : undefined} />
+                </div>
               </div>
               <FirstWinStamp uid={currentUser?.id ?? null} active={onDash && !loading && !rootRef.current?.closest(".im-ghost")} shown={prefs.wins} onPrefs={onPrefs} />
             </div>

@@ -39,7 +39,8 @@ export type ArtSlotName =
   | "package-mark"      // the submission-package group's mark — ONE mark for every package
   | "dash-mentor-standing"   // Dashboard first visit v1: the Mentor beside the top tip
   | "dash-courier-letter"    // Dashboard first visit v1: the set-up card's "Yes" path
-  | "dash-scout-binoculars"; // Dashboard first visit v1: the set-up card's "Not yet" path
+  | "dash-scout-binoculars"  // Dashboard first visit v1: the set-up card's "Not yet" path
+  | "dash-mentor-pointing";  // Dashboard feed v1: the Mentor and the chick, pointing, in the Top tip's header
 
 interface SlotBrief {
   /** The illustrator's brief, one line — rendered as the placeholder's own caption. */
@@ -157,6 +158,15 @@ export const ART_SLOTS: Record<ArtSlotName, SlotBrief> = {
     caption: "The courier hawk carrying a letter.",
     w: 140, h: 118,
     alt: "The courier hawk carrying a letter",
+  },
+  /* Dashboard feed v1 · the Top tip card's yellow header: the Mentor pointing, the chick beside him, standing on the
+     header's bottom edge. Supplied with the pack (design-refs/dashboard-feed-v1/art/mentor-pointing.png, already
+     flipped), resized to 317×260 — 2.5× the 104px it is drawn at. */
+  "dash-mentor-pointing": {
+    caption: "The Mentor pointing, with the chick beside him, in the Top tip's header.",
+    w: 317, h: 260,
+    src: "/images/dash/mentor-pointing.png?v=1",
+    alt: "The Mentor hawk pointing, with a chick beside him",
   },
   "dash-scout-binoculars": {
     caption: "The scout hawk with binoculars.",

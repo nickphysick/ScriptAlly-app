@@ -157,7 +157,10 @@ export const Dash71Task: React.FC<{
   onView: (a: ListAction) => void;
   innerRef?: React.Ref<HTMLElement>;
   gs?: TaskGs;
-}> = ({ loading, plan, ctx, onView, innerRef, gs }) => {
+  /** Dashboard feed v1 (Part E): "next" is the right column's "Your next task" card; absent → the kind band (every
+   *  other mount, the first-visit page included). The plan, the models and `onView` are the same in both. */
+  look?: "band" | "next";
+}> = ({ loading, plan, ctx, onView, innerRef, gs, look = "band" }) => {
   const items: ListItem[] = plan.items;
   const labelOf = useMemo(() => {
     const map = new Map<string, string>();
@@ -179,7 +182,8 @@ export const Dash71Task: React.FC<{
   const [run, setRun] = useState(0);
   const cardRef = useRef<HTMLElement | null>(null);
 
-  const auto = n > 1 && !held && !reduced();
+  /* the "next" look steps by its pager only: it has no progress segments to say a page is about to turn */
+  const auto = look === "band" && n > 1 && !held && !reduced();
   useEffect(() => {
     if (!auto || loading) return undefined;
     const t = window.setTimeout(() => { setIndex((i) => (i + 1) % n); setRun((r) => r + 1); }, DWELL_MS);
@@ -199,6 +203,8 @@ export const Dash71Task: React.FC<{
     if (typeof innerRef === "function") innerRef(el);
     else if (innerRef) (innerRef as React.MutableRefObject<HTMLElement | null>).current = el;
   };
+
+  if (look === "next") return <NextTask loading={loading} models={models} items={items} at={at} step={step} onView={onView} setRefs={setRefs} gs={gs} counts={counts} />;
 
   if (loading) {
     return (
@@ -297,6 +303,100 @@ export const Dash71Task: React.FC<{
         <button type="button" className="d71-view" data-d71="view" onClick={() => onView(items[at].action)}>{VIEW_TASK} →</button>
         {next && <span className="d71-then" data-d71="then">Then: {next.plain}</span>}
       </div>}
+    </section>
+  );
+};
+
+/** "To do · Consider closing" — the task's kind, the band's own title */
+export const todoChip = (m: TaskCardModel): string => `To do · ${m.bandTitle}`;
+/** The task in words: the model's title, without the question mark the kind band asked it with */
+const taskLine = (m: TaskCardModel) => ({ pre: m.pre, who: m.who, post: m.post.replace(/\?$/, "") });
+export const DO_THIS_TASK = "Do this task";
+
+/**
+ * DASHBOARD FEED v1 — "YOUR NEXT TASK" (Part E; ref design-refs/dashboard-feed-v1/ screen 01, top right).
+ *
+ * A grey header with the pager; a tick box, the "To do · {kind}" chip, the task, a muted reason, a full-width navy
+ * "Do this task →", and "Then: …" under it. Every page of the plan is drawn in one cell, so the card is the tallest
+ * page's height and paging moves nothing below it.
+ * ⚠️ NOT `.d71-task`: that class carries the kind band's rim, inner frame and paddings (dash71/dash116Frame), and this
+ * card has none of them. `data-d71="task"` stays, so the locks that find the card still do.
+ * ⚠️ THE TICK BOX COMPLETES NOTHING. It does exactly what "Do this task" does — opens the place the task is done — and
+ * says so in its accessible name. The dashboard never completes a task.
+ */
+const NextTask: React.FC<{
+  loading: boolean;
+  models: TaskCardModel[];
+  items: ListItem[];
+  at: number;
+  step: (d: number) => void;
+  onView: (a: ListAction) => void;
+  setRefs: (el: HTMLElement | null) => void;
+  gs?: TaskGs;
+  counts: string;
+}> = ({ loading, models, items, at, step, onView, setRefs, gs, counts }) => {
+  const n = models.length;
+  if (loading) {
+    return (
+      <section className="df1-task is-loading d58-skcard" data-sk="card" data-d71="task" data-loading="1" aria-hidden="true">
+        <div className="df1-tkh"><span className="df1-tkttl">Your next task</span></div>
+        <div className="df1-tkb" />
+      </section>
+    );
+  }
+  if (n === 0) {
+    return (
+      <section ref={setRefs} className="df1-task" data-d71="task" data-loading="0" data-kind="none" data-counts={counts} role="region" aria-label="Your tasks">
+        <div className="df1-tkh"><span className="df1-tkttl">Your next task</span></div>
+        <div className="df1-tkb"><p className="d58-quietline" data-d58="focus-none">{CAUGHT_UP}</p></div>
+      </section>
+    );
+  }
+  const isGsAt = (i: number) => !!gs && items[i]?.group === "start";
+  const m = models[at];
+  return (
+    <section ref={setRefs} className="df1-task" data-d71="task" data-loading="0" data-kind={m.kind} data-key={m.key} data-group={items[at].group}
+      data-counts={counts} data-query={m.queryId ?? undefined} data-index={at} role="region" aria-label="Your tasks">
+      <div className="df1-tkh" data-d71="band">
+        <span className="df1-tkttl">Your next task</span>
+        {isGsAt(at) && gs!.onHide && <button type="button" className="fv1-hide" data-fv1="gs-hide" onClick={gs!.onHide}>Hide</button>}
+        {n > 1 && (
+          <span className="df1-pg" data-d71="pos">
+            <button type="button" aria-label="Previous task" data-d71="prev" onClick={() => step(-1)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg></button>
+            <span data-d71="pos-text">{posText(at, n)}</span>
+            <button type="button" aria-label="Next task" data-d71="next" onClick={() => step(1)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg></button>
+          </span>
+        )}
+      </div>
+      <div className="df1-tkstack" data-d71="stack">
+        {models.map((x, i) => {
+          const on = i === at;
+          const next = thenIndex(n, i) !== null ? models[thenIndex(n, i)!] : null;
+          const line = taskLine(x);
+          const words = `${line.pre}${line.who}${line.post}`;
+          return (
+            <div key={x.key} className={`df1-tkb${on ? "" : " is-ghost"}`} data-d71={on ? "body" : undefined} data-kind={isGsAt(i) ? "start" : x.kind}
+              aria-hidden={on ? undefined : true} inert={on ? undefined : true}>
+              {isGsAt(i) ? (
+                <GettingStartedList rows={gs!.rows} path={gs!.path} onGo={on ? gs!.onGo : () => {}} />
+              ) : (
+                <>
+                  <div className="df1-tkrow">
+                    <button type="button" className="df1-box" data-df1={on ? "task-box" : undefined} aria-label={`${DO_THIS_TASK}: ${words}`} onClick={() => onView(items[i].action)} />
+                    <div className="df1-tkw">
+                      <span className="df1-todo" data-df1={on ? "task-chip" : undefined}>{todoChip(x)}</span>
+                      <h3 className="df1-tkline" data-d71={on ? "title" : undefined}>{line.pre}{line.who && <b>{line.who}</b>}{line.post}</h3>
+                      {x.line && <p className="df1-tkwhy" data-d71={on ? "line" : undefined}>{x.line}</p>}
+                    </div>
+                  </div>
+                  <button type="button" className="df1-go" data-d71={on ? "view" : undefined} onClick={() => onView(items[i].action)}>{DO_THIS_TASK} →</button>
+                  {next && <p className="df1-then" data-d71={on ? "then" : undefined}>Then: {next.plain}</p>}
+                </>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </section>
   );
 };

@@ -131,11 +131,7 @@
 .d58[data-mode="f1"] .df1-s-founding { height: 290px; display: flex; padding: 4px 6px 0; }
 .d58[data-mode="f1"] .df1-s-founding > .d105-fw { flex: 1 1 0; }
 
-.d58[data-mode="f1"] .df1-s-task .d71-task { flex: none; }
-/* every item of the task card's cycle in one cell, so the card is the tallest item's height (v77's rule, which names
-   only the older modes) */
-.d58[data-mode="f1"] .d71-tbstack { display: grid; }
-.d58[data-mode="f1"] .d71-tbstack > .d71-tb { grid-area: 1 / 1; justify-content: flex-start; }
+
 
 /* ── Part B: the manuscript card (navy) and the goal sheet tucked under it ─────────────────────────────────────── */
 .df1-bookset { display: flex; flex-direction: column; }
@@ -350,3 +346,100 @@ img.df1-covimg { padding: 0; object-fit: cover; background: none; }
 .d58 .df1-mini time { flex: none; font-family: var(--d58-mono) !important; font-size: 11.5px; color: #a39a91; white-space: nowrap; }
 .df1-fend { padding: 10px 0 14px; text-align: center; font-size: 14px; color: #7d7067; }
 .d58 .df1-earlier { padding: 0; border: 0; background: none; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--d58-ink); }
+
+/* ── Part E: "Your next task" (Dash71Task, look="next") ────────────────────────────────────────────────────────── */
+.d58 .df1-task { flex: none; display: block; overflow: hidden; border-radius: 16px; background: #fff; box-shadow: 0 2px 8px rgba(28, 19, 15, 0.06); }
+.df1-tkh { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #e4e1db; color: var(--d58-ink); }
+.d58 .df1-tkttl { font-family: var(--d58-type) !important; font-size: 21px; line-height: 1.3; }
+.d58 .df1-pg { margin-left: auto; display: flex; align-items: center; gap: 6px; font-size: 14px; }
+.d58 .df1-pg button { width: 26px; height: 26px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: #fff; box-shadow: inset 0 0 0 1px #e7ddd2; cursor: pointer; color: var(--d58-ink); }
+.df1-pg svg, .df1-tipx svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.df1-pg button:focus-visible, .df1-box:focus-visible, .df1-go:focus-visible, .df1-tipx:focus-visible, .df1-tipdots button:focus-visible, .df1-notify:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
+/* ⚠️ EVERY PAGE IN ONE CELL: the card is the tallest page's height, so paging moves nothing below it */
+.df1-tkstack { display: grid; }
+.df1-tkstack > .df1-tkb { grid-area: 1 / 1; }
+.df1-tkb.is-ghost { visibility: hidden; }
+.df1-tkb { min-width: 0; padding: 14px; }
+.df1-tkrow { display: flex; align-items: flex-start; gap: 12px; }
+.d58 .df1-box { flex: none; width: 26px; height: 26px; margin-top: 3px; padding: 0; border: 0; border-radius: 7px; background: #fff; box-shadow: inset 0 0 0 2px var(--d58-ink); cursor: pointer; }
+.d58 .df1-box:hover { background: #f5f1eb; }
+.df1-tkw { min-width: 0; }
+.d58 .df1-todo { display: inline-flex; align-items: center; height: 24px; padding: 0 9px; border-radius: 999px; background: #ece7de; font-size: 12px; font-weight: 600; color: var(--d58-ink); }
+/* ⚠️ TWO CLASSES AND `!important`: brand.tsx forces a face on every h3 */
+.d58 .df1-tkline { margin: 6px 0 0; font-family: var(--d58-serif) !important; font-size: 19px; font-weight: 400; line-height: 1.3; color: var(--d58-ink); overflow-wrap: anywhere; }
+.d58 .df1-tkline b { font-weight: 700; }
+.d58 .df1-tkwhy { margin: 3px 0 0; font-size: 13.5px; line-height: 1.4; color: #7d7067; }
+.d58 .df1-go { width: 100%; height: 42px; margin-top: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: 10px; background: #2a3a52; color: #fff; font-size: 15.5px; font-weight: 600; cursor: pointer; }
+.d58 .df1-go:hover { background: #22304a; }
+.d58 .df1-then { margin: 8px 0 0; text-align: center; font-size: 13px; color: #7d7067; }
+.d58 .df1-task :is(p, span, div, button, small, b) { font-family: inherit; }
+.df1-task { font-family: var(--d58-serif) !important; }
+
+/* ── Part E: Top tip ────────────────────────────────────────────────────────────────────────────────────────────── */
+.df1-tip { overflow: hidden; border-radius: 16px; background: #fff; box-shadow: 0 2px 8px rgba(28, 19, 15, 0.06); font-family: var(--d58-serif) !important; color: var(--d58-ink); }
+.d58 .df1-tip :is(p, span, div, button, small, b) { font-family: inherit; }
+.df1-tiph {
+  position: relative;
+  box-sizing: border-box;
+  height: 112px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0 10px 0 20px;
+  background-color: #f8e9a8;
+  background-image: radial-gradient(circle at 85% 120%, #fbf1c9 0 38%, transparent 39%);
+}
+.df1-tipl { align-self: center; display: grid; gap: 4px; min-width: 0; }
+.d58 .df1-tipttl { font-family: var(--d58-type) !important; font-size: 25px; line-height: 1.1; }
+.d58 .df1-tipl small { font-size: 13.5px; color: #6f5d33; }
+/* the Mentor stands on the header's bottom edge: 104px tall, wholly inside the card */
+/* ⚠️ POSITIONED: ArtSlot's image is `position: absolute; inset: 0`, so an unpositioned slot let it fill the header */
+.d58 .df1-tipart { position: relative; flex: none; width: 127px; height: 104px; margin-bottom: -1px; }
+.df1-tipb { padding: 16px 20px 14px; }
+.df1-tipswap { display: grid; }
+.df1-tipit { grid-area: 1 / 1; min-width: 0; opacity: 0; visibility: hidden; transform: translateX(var(--dx, 14px)); transition: opacity 0.35s ease, transform 0.35s ease, visibility 0s linear 0.35s; }
+.df1-tipit.is-on { opacity: 1; visibility: visible; transform: none; transition: opacity 0.35s ease 0.12s, transform 0.35s ease 0.12s, visibility 0s; }
+.df1-tipit.is-leave { transform: translateX(calc(var(--dx, 14px) * -1)); }
+.df1-tip.is-still .df1-tipit, .df1-tip.is-still .df1-tipit.is-on { transition: none; transform: none; }
+.d58 .df1-tiph4 { margin: 0 0 8px; font-family: var(--d58-type) !important; font-size: 21px; font-weight: 400; line-height: 1.25; }
+.d58 .df1-tipit p { margin: 0; font-size: 16px; line-height: 1.55; color: #3b322c; }
+.df1-tipf { display: flex; align-items: center; gap: 6px; margin-top: 14px; padding-top: 12px; border-top: 1px solid #efe8de; }
+.df1-tipdots { margin-right: auto; display: flex; align-items: center; gap: 5px; }
+.d58 .df1-tipdots button { position: relative; width: 7px; height: 7px; padding: 0; border: 0; border-radius: 50%; overflow: hidden; background: #ece7de; cursor: pointer; transition: width 0.25s ease, background 0.25s ease; }
+.d58 .df1-tipdots button.is-on { width: 26px; border-radius: 4px; background: #eadfb8; }
+.df1-tipdots b { position: absolute; inset: 0; background: #c9a93f; transform-origin: left; }
+.df1-tipdots b.is-run { animation: df1TipFill linear forwards; }
+.df1-tip.is-paused .df1-tipdots b.is-run { animation-play-state: paused; }
+@keyframes df1TipFill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.d58 .df1-tipx { width: 32px; height: 32px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: #fff; box-shadow: inset 0 0 0 1px #e7ddd2; cursor: pointer; color: var(--d58-ink); }
+.d58 .df1-tipx:hover { background: #f5f1eb; }
+@media (prefers-reduced-motion: reduce) {
+  .df1-tipit, .df1-tipit.is-on { transition: none; }
+  .df1-tipdots b.is-run { animation: none; }
+}
+
+/* ── Part E: the Scout, coming soon ─────────────────────────────────────────────────────────────────────────────── */
+.df1-scout { overflow: hidden; border-radius: 16px; background: #fff; box-shadow: 0 2px 8px rgba(28, 19, 15, 0.06); font-family: var(--d58-serif) !important; color: var(--d58-ink); }
+.d58 .df1-scout :is(p, span, div, button, small, b) { font-family: inherit; }
+.df1-sch { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 16px; background: #ecd3ca; color: #3a2a24; }
+.d58 .df1-scttl { font-family: var(--d58-type) !important; font-size: 21px; line-height: 1.3; }
+.d58 .df1-soon { padding: 3px 9px; border-radius: 999px; background: #fff; color: #8a5a4c; font-size: 11.5px; font-weight: 600; white-space: nowrap; }
+/* the bird straddles the band's bottom edge: the band's colour runs halfway down its box */
+.df1-scart { display: flex; justify-content: center; padding-bottom: 4px; background: linear-gradient(#ecd3ca 0 50%, #fff 50%); }
+.df1-scart img { width: 150px; height: 150px; object-fit: contain; border-radius: 50%; background: #f8ece7; box-shadow: 0 0 0 6px #fff; }
+.df1-scb { padding: 10px 18px 18px; }
+.d58 .df1-sch3 { margin: 0 0 6px; text-align: center; font-family: var(--d58-type) !important; font-size: 21px; font-weight: 400; line-height: 1.2; color: var(--d58-ink); }
+.d58 .df1-scb > p { margin: 0 0 14px; text-align: center; font-size: 14.5px; line-height: 1.5; color: #3b322c; }
+.df1-ghost { position: relative; padding: 12px; border-radius: 12px; background: #fbfaf8; box-shadow: inset 0 0 0 1.5px #efdcd5; opacity: 0.9; pointer-events: none; user-select: none; }
+.d58 .df1-ex { position: absolute; top: -9px; right: 12px; padding: 1px 9px; border-radius: 999px; background: #fff; box-shadow: inset 0 0 0 1px #efdcd5; font-size: 11.5px; font-weight: 600; color: #a0675a; }
+.df1-gw { display: flex; align-items: center; gap: 10px; }
+.d58 .df1-gi { flex: none; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; background: #467a76; color: #fff; font-size: 12.5px; font-weight: 600; filter: saturate(0.6); }
+.d58 .df1-gw b { display: block; font-size: 14.5px; font-weight: 600; }
+.d58 .df1-gw small { font-size: 12.5px; color: #7d7067; }
+.d58 .df1-gwhy { margin: 9px 0; padding: 7px 10px; border-radius: 9px; background: #f8ece7; font-size: 13px; }
+.df1-gacts { display: flex; gap: 6px; }
+.d58 .df1-gacts span { flex: 1 1 0; height: 30px; display: grid; place-items: center; border-radius: 8px; box-shadow: inset 0 0 0 1px #efdcd5; font-size: 12.5px; font-weight: 600; color: #7d7067; }
+.d58 .df1-gacts span.is-p { background: #dcbcb1; color: #fff; box-shadow: none; }
+.d58 .df1-notify { width: 100%; height: 40px; margin-top: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: 10px; background: #b9786a; color: #fff; font-size: 14.5px; font-weight: 600; cursor: pointer; }
+.d58 .df1-notify:disabled { cursor: default; opacity: 0.85; }
+.df1-notify svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
