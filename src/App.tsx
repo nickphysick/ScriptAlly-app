@@ -21,6 +21,7 @@ import { TodoRoute } from "./components/todo/TodoRoute";
 import { Agents } from "./components/Agents";
 import { DiscoverPage } from "./components/agents/discover1/DiscoverPage";
 import { AgentsRoute, DiscoverRoute } from "./components/agents/phone/AgentsRoutes";
+import { ResponsesRoute } from "./components/phone/pages/PageRoutes";
 import { SubmissionPackages } from "./components/SubmissionPackages";
 import { PACKAGES_PATH, packagesRedirectFor } from "./lib/packagesRoute";
 import { DiaryLab } from "./components/dashboard/DiaryLab";
@@ -62,7 +63,6 @@ import { NoteboardRoute } from "./components/todo/NoteboardRoute";
 // ⚠️ PARKED, NOT DELETED (Amendment 1, G4) — held for the public marketing site.
 // import { TopNavHost } from "./components/shell/TopNavHost";
 import { QueryAnalytics } from "./components/QueryAnalytics";
-import { ResponsesPage } from "./components/responses/ResponsesPage";
 import { TopNavPanelData } from "./components/shell/TopNavPanelData";
 import { Onboarding } from "./components/Onboarding";
 import { ErrorBoundary } from "./components/ErrorBoundary";
@@ -705,7 +705,7 @@ function AppContent() {
           <SubmissionPackages active={queriesPackages} onNavigate={handleNavigate} />
         </StagePage>
         <StagePage active={queriesResponses} layout="fill" clip>
-          <ResponsesPage onNavigate={handleNavigate} routeActive={queriesResponses} />
+          <ResponsesRoute onNavigate={handleNavigate} routeActive={queriesResponses} />
         </StagePage>
 
         {/* THE TO-DO WORKSPACE — four routes under one routeKey (To-do workspace pack, Phase 1).
