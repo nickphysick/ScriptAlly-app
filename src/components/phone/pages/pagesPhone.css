@@ -202,3 +202,4 @@
   .impg-wpg .wpg-scroll > .pa-impg { padding-inline: 0 !important; max-width: none !important; }
   .pa-pg .pa-plant .pa-lock { display: inline-flex; align-items: center; height: 24px; padding: 0 9px; border-radius: 999px; background: var(--pa-blush-wash); font: 600 12.5px var(--pa-sans); color: var(--pa-ink); vertical-align: middle; margin-left: 6px; }
 }
+@media (max-width: 767.98px) { .pa-pg .pa-msnone { margin-top: 16px; display: flex; flex-direction: column; gap: 12px; } .pa-pg .pa-msnone .pa-pgnone { margin: 0; } }

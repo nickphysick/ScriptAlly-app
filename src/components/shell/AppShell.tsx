@@ -65,6 +65,7 @@ import "./mobileShell.css";
 import "../phone/phoneTokens.css";
 import "../phone/phone.css";
 import "../phone/phoneShell.css";
+import "../phone/sweepPhone.css";
 
 /* ── Stage page slot ─────────────────────────────────────────────────────── */
 

@@ -27,7 +27,7 @@ export const ResponsesRoute: React.FC<React.ComponentProps<typeof ResponsesPage>
 
 /** ⚠️ READS the manuscripts page's component to choose it; no Manuscripts file is edited (Part 7's rule) */
 export const ManuscriptRoute: React.FC<React.ComponentProps<typeof ManuscriptPage>> = (props) =>
-  useIsMobile() ? <ManuscriptPhone /> : <ManuscriptPage {...props} />;
+  useIsMobile() ? <ManuscriptPhone onNavigate={props.onNavigate} /> : <ManuscriptPage {...props} />;
 
 export const AnalyticsRoute: React.FC<React.ComponentProps<typeof QueryAnalytics>> = (props) =>
   useIsMobile() ? <AnalyticsPhone /> : <QueryAnalytics {...props} />;
