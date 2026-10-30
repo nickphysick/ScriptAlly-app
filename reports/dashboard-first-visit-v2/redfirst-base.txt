@@ -1,0 +1,202 @@
+
+Running 10 tests using 1 worker
+
+  ✓   1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (20.7s)
+removed 0 agent(s), 0 quer(ies), 0 log row(s)
+{"uid":"LS4ymFFCEvhN82advZQJ5zkr7sv2","stage":"starting","tour":"done","nudges":true,"notify":{"weeklyDigest":true,"nudges":true},"reminder":null,"gsClosed":null,"draft":null}
+  ✘   2 [measure] › tests/e2e/dashFirstVisitV2.measure.ts:52:1 › F1 · a review left at agent 23 of 31 is kept, resumed at row 24, and goes when discarded or finished (58.2s)
+  ✘   3 [measure] › tests/e2e/dashFirstVisitV2.measure.ts:137:1 › G1 · the ask shows after the first query; Yes writes one leaf and it never shows again (27.4s)
+  ✘   4 [measure] › tests/e2e/dashFirstVisitV2.measure.ts:175:1 › H1 · ticking the fifth step shows the finish line; Close this list brings the goal sheet back for good (4.0m)
+  ✘   5 [measure] › tests/e2e/dashFirstVisitV2.measure.ts:219:1 › A1 · pre-query: the set-up card leads the middle column, Getting started hangs on the book; first query: the queries card (4.0m)
+  ✘   6 [measure] › tests/e2e/dashFirstVisitV2.measure.ts:248:1 › A2 · the label is each of the five strings (5.1m)
+  ✘   7 [measure] › tests/e2e/dashFirstVisitV2.measure.ts:276:1 › B1 · the ready sentence; Change it → still writing sets DRAFTING and reorders Getting started (43.5s)
+  ✘   8 [measure] › tests/e2e/dashFirstVisitV2.measure.ts:305:1 › C1 · on the still-writing path, It's ready → READY_TO_QUERY and the ready path, done steps still ticked (4.1m)
+  ✘   9 [measure] › tests/e2e/dashFirstVisitV2.measure.ts:338:1 › D1 · the first load runs the tour once; the ? menu replays it; a first load with queries never shows it (24.3s)
+  ✘  10 [measure] › tests/e2e/dashFirstVisitV2.measure.ts:386:1 › E1 · the example opens with its bar, writes nothing, and goes back by the button or Escape (4.0m)
+
+
+  1) [measure] › tests/e2e/dashFirstVisitV2.measure.ts:52:1 › F1 · a review left at agent 23 of 31 is kept, resumed at row 24, and goes when discarded or finished 
+
+    TimeoutError: locator.waitFor: Timeout 15000ms exceeded.
+    Call log:
+      - waiting for locator('[data-fv2-card="resume"]').filter({ visible: true }).first() to be visible
+
+
+      84 |     await page.locator('[data-d58="page"][data-loading="0"]').first().waitFor({ timeout: 25_000 });
+      85 |     const card = vis(page, '[data-fv2-card="resume"]');
+    > 86 |     await card.waitFor({ timeout: 15_000 });
+         |                ^
+      87 |     const tile = (await vis(page, '[data-fv2="resume-agents"]').textContent()) ?? "";
+      88 |     const qtile = (await vis(page, '[data-fv2="resume-queries"]').textContent()) ?? "";
+      89 |     L.check("F1", "card", /23 of 31 checked/.test(tile), `agents tile: ${tile}`);
+        at /Users/nickphysick/ScriptAlly-fv2/tests/e2e/dashFirstVisitV2.measure.ts:86:16
+
+    Error Context: test-results/dashFirstVisitV2.measure.t-cee18--when-discarded-or-finished-measure/error-context.md
+
+  2) [measure] › tests/e2e/dashFirstVisitV2.measure.ts:137:1 › G1 · the ask shows after the first query; Yes writes one leaf and it never shows again 
+
+    TimeoutError: locator.waitFor: Timeout 15000ms exceeded.
+    Call log:
+      - waiting for locator('[data-fv2="reminder-ask"]').filter({ visible: true }).first() to be visible
+
+
+      145 |     await openDash(page, SIZES[0], Q);
+      146 |     const ask = vis(page, '[data-fv2="reminder-ask"]');
+    > 147 |     await ask.waitFor({ timeout: 15_000 });
+          |               ^
+      148 |     const t = (await ask.textContent()) ?? "";
+      149 |     L.check("G1", "ask", /Want an email when a nudge is due\?/.test(t) && /If \S+ hasn't replied in time/.test(t), t.slice(0, 120));
+      150 |     L.check("G1", "ask", (await ask.locator("xpath=ancestor::*[@data-df1='feedcol']").count()) === 1, "in the feed");
+        at /Users/nickphysick/ScriptAlly-fv2/tests/e2e/dashFirstVisitV2.measure.ts:147:15
+
+    Error Context: test-results/dashFirstVisitV2.measure.t-6795f-af-and-it-never-shows-again-measure/error-context.md
+
+  3) [measure] › tests/e2e/dashFirstVisitV2.measure.ts:175:1 › H1 · ticking the fifth step shows the finish line; Close this list brings the goal sheet back for good 
+
+    Test timeout of 240000ms exceeded.
+
+    Error: locator.textContent: Test timeout of 240000ms exceeded.
+    Call log:
+      - waiting for locator('[data-fv2="gs-count"]').filter({ visible: true }).first()
+
+
+      179 |   try {
+      180 |     await openDash(page, SIZES[0], Q);
+    > 181 |     const count = (await vis(page, '[data-fv2="gs-count"]').textContent())?.trim() ?? "";
+          |                                                             ^
+      182 |     L.check("H1", "before", /^4 of 5 done/.test(count), `the list: ${count}`);
+      183 |     /* every page of the task card is drawn in one cell (the ghosts carry their "Then:" too); the LAST names Getting started */
+      184 |     const thens = () => vis(page, '[data-d71="task"]').locator(".df1-then").allTextContents();
+        at /Users/nickphysick/ScriptAlly-fv2/tests/e2e/dashFirstVisitV2.measure.ts:181:61
+
+    Error Context: test-results/dashFirstVisitV2.measure.t-f9516-he-goal-sheet-back-for-good-measure/error-context.md
+
+  4) [measure] › tests/e2e/dashFirstVisitV2.measure.ts:219:1 › A1 · pre-query: the set-up card leads the middle column, Getting started hangs on the book; first query: the queries card 
+
+    Test timeout of 240000ms exceeded.
+
+    Error: locator.boundingBox: Test timeout of 240000ms exceeded.
+    Call log:
+      - waiting for locator('[data-fv2="start-card"]').filter({ visible: true }).first()
+
+
+      214 | });
+      215 |
+    > 216 | const box = (page: Page, sel: string) => vis(page, sel).boundingBox();
+          |                                                         ^
+      217 |
+      218 | /* ── A1 · placement ───────────────────────────────────────────────────────────────────────────────── */
+      219 | test("A1 · pre-query: the set-up card leads the middle column, Getting started hangs on the book; first query: the queries card", async ({ page }) => {
+        at box (/Users/nickphysick/ScriptAlly-fv2/tests/e2e/dashFirstVisitV2.measure.ts:216:57)
+        at /Users/nickphysick/ScriptAlly-fv2/tests/e2e/dashFirstVisitV2.measure.ts:226:24
+
+    Error Context: test-results/dashFirstVisitV2.measure.t-822d7-irst-query-the-queries-card-measure/error-context.md
+
+  5) [measure] › tests/e2e/dashFirstVisitV2.measure.ts:248:1 › A2 · the label is each of the five strings 
+
+    Test timeout of 300000ms exceeded.
+
+    Error: locator.textContent: Test timeout of 300000ms exceeded.
+    Call log:
+      - waiting for locator('[data-df1="status"]').filter({ visible: true }).first()
+
+
+      252 |   const label = async () => {
+      253 |     if (MUT === "A2") await page.evaluate(() => { const s = [...document.querySelectorAll<HTMLElement>('[data-df1="status"]')].find((e) => e.offsetHeight > 0); if (s) s.textContent = (s.textContent ?? "").toUpperCase(); });
+    > 254 |     return (await vis(page, '[data-df1="status"]').textContent())?.trim();
+          |                                                    ^
+      255 |   };
+      256 |   seed("between-make");
+      257 |   try {
+        at label (/Users/nickphysick/ScriptAlly-fv2/tests/e2e/dashFirstVisitV2.measure.ts:254:52)
+        at /Users/nickphysick/ScriptAlly-fv2/tests/e2e/dashFirstVisitV2.measure.ts:261:25
+
+    Error Context: test-results/dashFirstVisitV2.measure.t-b1d57-is-each-of-the-five-strings-measure/error-context.md
+
+  6) [measure] › tests/e2e/dashFirstVisitV2.measure.ts:276:1 › B1 · the ready sentence; Change it → still writing sets DRAFTING and reorders Getting started 
+
+    TimeoutError: locator.click: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-fv1="choice-writing"]').filter({ visible: true }).first()
+
+
+      287 |     L.check("B1", "said", /You said DB60 Pre-query is ready, and you haven't sent any queries yet\./.test(said) && /Not right\? Change it/.test(said), said);
+      288 |     await vis(page, '[data-fv1="change"]').click({ timeout: 10_000 }).catch(() => {});
+    > 289 |     await vis(page, '[data-fv1="choice-writing"]').click({ timeout: 10_000 });
+          |                                                    ^
+      290 |     await page.waitForTimeout(2500);
+      291 |     L.check("B1", "write", dump(PRE).msStatus === "Drafting", `Manuscript.status re-read: ${dump(PRE).msStatus}`);
+      292 |     L.check("B1", "path", (await vis(page, '[data-fv1="path-head"]').textContent())?.trim() === "Get ahead while you write", "the path heading");
+        at /Users/nickphysick/ScriptAlly-fv2/tests/e2e/dashFirstVisitV2.measure.ts:289:52
+
+    Error Context: test-results/dashFirstVisitV2.measure.t-e9339-nd-reorders-Getting-started-measure/error-context.md
+
+  7) [measure] › tests/e2e/dashFirstVisitV2.measure.ts:305:1 › C1 · on the still-writing path, It's ready → READY_TO_QUERY and the ready path, done steps still ticked 
+
+    Test timeout of 240000ms exceeded.
+
+    Error: locator.click: Test timeout of 240000ms exceeded.
+    Call log:
+      - waiting for locator('[data-fv2="gs"] [data-fv1="gs-link"][data-go="ready"]').filter({ visible: true }).first()
+
+
+      318 |     const before = await rows();
+      319 |     L.check("C1", "before", JSON.stringify(before) === JSON.stringify(["manuscript:done", "comps:done", "agent:done", "letter:done", "ready:current"]), JSON.stringify(before));
+    > 320 |     await vis(page, '[data-fv2="gs"] [data-fv1="gs-link"][data-go="ready"]').click();
+          |                                                                              ^
+      321 |     await page.waitForTimeout(2500);
+      322 |     if (MUT === "C1") seed(`status ${PRE} "Drafting"`);
+      323 |     await page.waitForTimeout(1500);
+        at /Users/nickphysick/ScriptAlly-fv2/tests/e2e/dashFirstVisitV2.measure.ts:320:78
+
+    Error Context: test-results/dashFirstVisitV2.measure.t-e5173-ath-done-steps-still-ticked-measure/error-context.md
+
+  8) [measure] › tests/e2e/dashFirstVisitV2.measure.ts:338:1 › D1 · the first load runs the tour once; the ? menu replays it; a first load with queries never shows it 
+
+    TimeoutError: locator.waitFor: Timeout 15000ms exceeded.
+    Call log:
+      - waiting for locator('[data-fv2="tour"][data-stop="1"] [data-pck="card"]:not([style*="hidden"])').filter({ visible: true }).first() to be visible
+
+
+      343 |   try {
+      344 |     await openDash(page, SIZES[0], PRE);
+    > 345 |     await vis(page, '[data-fv2="tour"][data-stop="1"] [data-pck="card"]:not([style*="hidden"])').waitFor({ timeout: 15_000 });
+          |                                                                                                  ^
+      346 |     const hole = JSON.parse((await vis(page, '[data-fv2="tour"] [data-pck="dim"]').getAttribute("data-hole")) ?? "null");
+      347 |     const card = await box(page, '[data-fv2="start-card"]');
+      348 |     L.check("D1", "stop 1", !!hole && !!card && hole.left <= card.x && hole.top <= card.y && hole.left + hole.width >= card.x + card.width - 1, `the hole ${JSON.stringify(hole)} round the set-up card`);
+        at /Users/nickphysick/ScriptAlly-fv2/tests/e2e/dashFirstVisitV2.measure.ts:345:98
+
+    Error Context: test-results/dashFirstVisitV2.measure.t-e677b-with-queries-never-shows-it-measure/error-context.md
+
+  9) [measure] › tests/e2e/dashFirstVisitV2.measure.ts:386:1 › E1 · the example opens with its bar, writes nothing, and goes back by the button or Escape 
+
+    Test timeout of 240000ms exceeded.
+
+    Error: locator.click: Test timeout of 240000ms exceeded.
+    Call log:
+      - waiting for locator('[data-fv2="example-link"]').filter({ visible: true }).first()
+
+
+      397 |     if (/Write/.test(r.url()) && /update|delete/.test(decodeURIComponent(body))) writes.push(decodeURIComponent(body).slice(0, 300));
+      398 |   });
+    > 399 |   await vis(page, '[data-fv2="example-link"]').click();
+          |                                                ^
+      400 |   await vis(page, '[data-fv2="example-bar"]').waitFor({ timeout: 10_000 });
+      401 |   L.check("E1", "open", /This is an example dashboard with made-up queries, so you can see where things go\./.test((await vis(page, '[data-fv2="example-bar"]').textContent()) ?? ""), "the bar");
+      402 |   L.check("E1", "open", (await page.locator('[data-fv2="example"] [data-fv2="querying"]').count()) === 1, "the querying page over sample data");
+        at /Users/nickphysick/ScriptAlly-fv2/tests/e2e/dashFirstVisitV2.measure.ts:399:48
+
+    Error Context: test-results/dashFirstVisitV2.measure.t-dc16d-ack-by-the-button-or-Escape-measure/error-context.md
+
+  9 failed
+    [measure] › tests/e2e/dashFirstVisitV2.measure.ts:52:1 › F1 · a review left at agent 23 of 31 is kept, resumed at row 24, and goes when discarded or finished 
+    [measure] › tests/e2e/dashFirstVisitV2.measure.ts:137:1 › G1 · the ask shows after the first query; Yes writes one leaf and it never shows again 
+    [measure] › tests/e2e/dashFirstVisitV2.measure.ts:175:1 › H1 · ticking the fifth step shows the finish line; Close this list brings the goal sheet back for good 
+    [measure] › tests/e2e/dashFirstVisitV2.measure.ts:219:1 › A1 · pre-query: the set-up card leads the middle column, Getting started hangs on the book; first query: the queries card 
+    [measure] › tests/e2e/dashFirstVisitV2.measure.ts:248:1 › A2 · the label is each of the five strings 
+    [measure] › tests/e2e/dashFirstVisitV2.measure.ts:276:1 › B1 · the ready sentence; Change it → still writing sets DRAFTING and reorders Getting started 
+    [measure] › tests/e2e/dashFirstVisitV2.measure.ts:305:1 › C1 · on the still-writing path, It's ready → READY_TO_QUERY and the ready path, done steps still ticked 
+    [measure] › tests/e2e/dashFirstVisitV2.measure.ts:338:1 › D1 · the first load runs the tour once; the ? menu replays it; a first load with queries never shows it 
+    [measure] › tests/e2e/dashFirstVisitV2.measure.ts:386:1 › E1 · the example opens with its bar, writes nothing, and goes back by the button or Escape 
+  1 passed (24.2m)

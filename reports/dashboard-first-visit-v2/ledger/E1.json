@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "E1",
+  "where": "open",
+  "ok": true,
+  "detail": "the bar"
+ },
+ {
+  "lock": "E1",
+  "where": "open",
+  "ok": true,
+  "detail": "the querying page over sample data"
+ },
+ {
+  "lock": "E1",
+  "where": "writes",
+  "ok": false,
+  "detail": "writes to the writer's data while open: 1 [\"count=1&ofs=2&req0___data__={\\\"streamToken\\\":\\\"EAEZEGhCAoH0tbU=\\\",\\\"writes\\\":[{\\\"update\\\":{\\\"name\\\":\\\"projects/scriptally-dev/databases/(default)/documents/users/LS4ymFFCEvhN82advZQJ5zkr7sv2\\\",\\\"fields\\\":{\\\"notifyPrefs\\\":{\\\"mapValue\\\":{\\\"fields\\\":{\\\"scout\\\":{\\\"booleanValue\\\":true}}}}}},\\\"updateMas"
+ },
+ {
+  "lock": "E1",
+  "where": "writes",
+  "ok": true,
+  "detail": "events: 1 (example_opened)"
+ },
+ {
+  "lock": "E1",
+  "where": "back",
+  "ok": true,
+  "detail": "Back to yours"
+ },
+ {
+  "lock": "E1",
+  "where": "back",
+  "ok": true,
+  "detail": "Escape"
+ }
+]

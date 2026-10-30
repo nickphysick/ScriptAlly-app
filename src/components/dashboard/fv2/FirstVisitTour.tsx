@@ -11,6 +11,7 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import { SpotCard } from "../../shell/guide/SpotCard";
+import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import { TOUR_LAST, TOUR_NEXT, TOUR_SKIP, TOUR_STOPS, tourKicker } from "../../../lib/dashTour";
 import "../../shell/guide/pageChecklist.css";
 
@@ -21,6 +22,10 @@ export const FirstVisitTour: React.FC<{
   onSkip: (stop: number) => void;
 }> = ({ stop, onNext, onSkip }) => {
   const s = TOUR_STOPS[stop];
+  /* ⚠️ ESCAPE THROUGH THE APP'S ONE STACK, AT THE TOP: the stack is installed on the window first and stops the key for
+     its top layer, so the spotlight's own listener never hears Escape while any layer is live — and a page's popover
+     layer can be live on a page that is mounted but not on screen (measured). */
+  useEscapeLayer(!!s, () => onSkip(stop), ESC_LEVEL.tour);
   if (!s || typeof document === "undefined") return null;
   const last = stop === TOUR_STOPS.length - 1;
   return createPortal(

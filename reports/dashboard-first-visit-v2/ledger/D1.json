@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "D1",
+  "where": "stop 1",
+  "ok": true,
+  "detail": "the hole {\"left\":847.3125,\"top\":111.75,\"width\":644.6875,\"height\":339.9375,\"r\":14} round the set-up card"
+ },
+ {
+  "lock": "D1",
+  "where": "stop 1",
+  "ok": true,
+  "detail": "focus on Next"
+ },
+ {
+  "lock": "D1",
+  "where": "stop 3",
+  "ok": true,
+  "detail": "Got it on the last"
+ },
+ {
+  "lock": "D1",
+  "where": "end",
+  "ok": true,
+  "detail": "Got it ends it"
+ },
+ {
+  "lock": "D1",
+  "where": "events",
+  "ok": true,
+  "detail": "[\"dashboard_first_seen\",\"tour_finished:3\"]"
+ },
+ {
+  "lock": "D1",
+  "where": "once",
+  "ok": true,
+  "detail": "a reload shows no tour"
+ },
+ {
+  "lock": "D1",
+  "where": "replay",
+  "ok": true,
+  "detail": "Show me round again shows it"
+ },
+ {
+  "lock": "D1",
+  "where": "replay",
+  "ok": true,
+  "detail": "Escape skips"
+ },
+ {
+  "lock": "D1",
+  "where": "with queries",
+  "ok": true,
+  "detail": "no tour"
+ },
+ {
+  "lock": "D1",
+  "where": "with queries",
+  "ok": true,
+  "detail": "and it is recorded as never to run"
+ }
+]

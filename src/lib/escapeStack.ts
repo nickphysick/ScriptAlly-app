@@ -52,6 +52,9 @@ export const ESC_LEVEL = {
   trayBulk: 46,
   /** To-do v5.2 — a dial's reschedule menu, the topmost layer on the page */
   dialMenu: 47,
+  /** the dashboard's first-visit tour (Dashboard first visit v2, Part D): its dim covers everything on screen, so Escape
+   *  is the tour's before anything under it */
+  tour: 60,
 } as const;
 
 interface Layer { level: number; order: number; handle: () => void }

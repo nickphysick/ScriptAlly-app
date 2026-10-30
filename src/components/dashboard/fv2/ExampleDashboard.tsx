@@ -5,7 +5,7 @@
  * DASHBOARD FIRST VISIT v2, Part E — THE EXAMPLE DASHBOARD (ref design-refs/dashboard-first-visit-v2/, screen 16).
  *
  * The real querying dashboard (`Dash58`) over sample data (`lib/dashExample`), under a yellow bar that says it is an
- * example, with "Back to yours". Escape goes back too.
+ * example, with "Back to yours". Escape goes back too (a layer on the app's escape stack).
  *
  * ⚠️ IT READS AND WRITES NOTHING OF THE WRITER'S. The data is the sample's; `Dash58`'s `example` flag turns off every
  * side effect it has (the tour, the stamp, the shape memory, the founding card's read), the host's writers are not
@@ -14,6 +14,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Dash58 } from "../v58/Dash58";
 import { EXAMPLE_BACK, EXAMPLE_BAR, exampleData } from "../../../lib/dashExample";
+import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 
 const NONE: never[] = [];
 const noop = () => {};
@@ -26,12 +27,11 @@ export const ExampleDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) =
   const [now] = useState(() => new Date());
   const data = useMemo(() => exampleData(now), [now]);
   const backRef = useRef<HTMLButtonElement>(null);
-  useEffect(() => {
-    backRef.current?.focus({ preventScroll: true });
-    const key = (e: KeyboardEvent) => { if (e.key === "Escape" && !e.defaultPrevented) { e.preventDefault(); onBack(); } };
-    window.addEventListener("keydown", key);
-    return () => window.removeEventListener("keydown", key);
-  }, [onBack]);
+  useEffect(() => { backRef.current?.focus({ preventScroll: true }); }, []);
+  /* Escape goes back: a layer on the app's one escape stack. ⚠️ AT pageModal, NOT pageMode: a page's own popover layer
+     (ESC_LEVEL.page) can be live on a page that is mounted but not on screen — every workspace page stays mounted — and
+     it would take Escape from anything under it (measured: the example never heard the key at pageMode). */
+  useEscapeLayer(true, onBack, ESC_LEVEL.pageModal);
   return (
     <div className="fv2-exdash" data-fv2="example">
       <div className="fv2-exbar" role="status" data-fv2="example-bar">

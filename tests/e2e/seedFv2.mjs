@@ -12,6 +12,9 @@
  *                                                H1's Getting started on <ms>: what is done; prep backs up and clears its
  *                                                Hide/Close flags and leaves exactly one row (comps) undone; finish ticks it
  *                                                (three comps); restore puts the comps and the flags back exactly
+ *   node tests/e2e/seedFv2.mjs between-make|between-clean
+ *                                                a book of its own (`fv2-between`) whose one query is closed: a copy of
+ *                                                one of the account's own Rejected queries, under a new id
  *   node tests/e2e/seedFv2.mjs draft-clear       delete the kept import review (importDrafts/{uid} and its parts)
  *   node tests/e2e/seedFv2.mjs imports-clean     delete what an F1 import brought in: agents named "Fv2 Sample …",
  *                                                their queries, those queries' logs and their feed rows
@@ -21,7 +24,7 @@
 import { readFileSync, existsSync, writeFileSync, mkdirSync, unlinkSync } from "node:fs";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { getFirestore, doc, getDoc, getDocs, updateDoc, deleteField, deleteDoc, collection, query, where, writeBatch } from "firebase/firestore";
+import { getFirestore, doc, getDoc, getDocs, setDoc, updateDoc, deleteField, deleteDoc, collection, query, where, writeBatch } from "firebase/firestore";
 
 const env = (file) => Object.fromEntries(readFileSync(file, "utf8").split("\n").map((l) => /^\s*([A-Z0-9_]+)\s*=\s*(.*)$/.exec(l)).filter(Boolean).map((m) => [m[1], m[2].replace(/^["']|["']$/g, "")]));
 const dev = env(".env.development");
@@ -75,12 +78,49 @@ else if (cmd === "g1-prep" || cmd === "g1-restore") {
       { title: "Piranesi", author: "Susanna Clarke", year: 2020, source: "user" },
       { title: "The Starless Sea", author: "Erin Morgenstern", year: 2019, source: "user" },
     ] });
+  } else if (cmd === "h1-unclose") {
+    /* FV2 H1's named break: the list kept (the close not stored) */
+    await updateDoc(uref, { [`todoPrefs.dash.gsClosed.${segId}`]: deleteField() });
   } else if (cmd === "h1-restore") {
     const b = JSON.parse(readFileSync(file, "utf8"));
     await updateDoc(mref, { comps: b.comps ?? deleteField() });
     await updateDoc(uref, { [`todoPrefs.dash.gsHidden.${segId}`]: b.hidden ?? deleteField(), [`todoPrefs.dash.gsClosed.${segId}`]: b.closed ?? deleteField() });
+    /* a map left empty by the restore was not there before this pack: it goes too */
+    const d1 = (await getDoc(uref)).data()?.todoPrefs?.dash ?? {};
+    const gone = {};
+    for (const k of ["gsClosed", "gsHidden"]) if (d1[k] && Object.keys(d1[k]).length === 0) gone[`todoPrefs.dash.${k}`] = deleteField();
+    if (Object.keys(gone).length) await updateDoc(uref, gone);
     unlinkSync(file);
   }
+} else if (cmd === "between-make") {
+  const src = (await getDoc(doc(db, "users", user.uid, "manuscripts", "db60-pre"))).data();
+  if (!src) throw new Error("seed db60-pre first (seedDash60.mjs)");
+  await setDoc(doc(db, "users", user.uid, "manuscripts", "fv2-between"), { ...src, id: "fv2-between", title: "FV2 Between rounds", status: "Querying" });
+  const closed = (await getDocs(query(collection(db, "users", user.uid, "queries"), where("status", "==", "Rejected")))).docs[0];
+  if (!closed) throw new Error("the account has no Rejected query to copy");
+  await setDoc(doc(db, "users", user.uid, "queries", "fv2-between-q"), { ...closed.data(), id: "fv2-between-q", manuscriptId: "fv2-between" });
+} else if (cmd === "between-clean") {
+  await deleteDoc(doc(db, "users", user.uid, "queries", "fv2-between-q"));
+  await deleteDoc(doc(db, "users", user.uid, "manuscripts", "fv2-between"));
+} else if (cmd === "gs-hide" || cmd === "gs-hide-restore") {
+  /* DF1-B1's re-point (first visit v2): the goal sheet has the slot only once Getting started is hidden or closed */
+  const segId = a.replace(/[^A-Za-z0-9_-]/g, "_");
+  const file = `tests/e2e/.auth/fv2-gshide-${segId}.json`;
+  mkdirSync("tests/e2e/.auth", { recursive: true });
+  if (cmd === "gs-hide") {
+    const d = (await getDoc(uref)).data()?.todoPrefs?.dash ?? {};
+    if (!existsSync(file)) writeFileSync(file, JSON.stringify({ hidden: d.gsHidden?.[segId] ?? null }));
+    await updateDoc(uref, { [`todoPrefs.dash.gsHidden.${segId}`]: true });
+  } else {
+    const b = JSON.parse(readFileSync(file, "utf8"));
+    await updateDoc(uref, { [`todoPrefs.dash.gsHidden.${segId}`]: b.hidden ?? deleteField() });
+    const d1 = (await getDoc(uref)).data()?.todoPrefs?.dash ?? {};
+    if (d1.gsHidden && Object.keys(d1.gsHidden).length === 0) await updateDoc(uref, { "todoPrefs.dash.gsHidden": deleteField() });
+    unlinkSync(file);
+  }
+} else if (cmd === "notify-whole") {
+  /* FV2 G1's named break: the whole notifyPrefs map written, as a Settings-style save would */
+  await updateDoc(uref, { notifyPrefs: { nudges: true } });
 } else if (cmd === "draft-clear") {
   const parts = await getDocs(collection(db, "importDrafts", user.uid, "parts"));
   for (const p of parts.docs) await deleteDoc(p.ref);

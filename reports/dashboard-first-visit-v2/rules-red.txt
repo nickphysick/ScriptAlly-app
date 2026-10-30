@@ -1,0 +1,8 @@
+== read-open
+   × FV2 F · importDrafts > another writer may neither read nor write it 44ms
+      Tests  1 failed | 5 passed (6)
+== any-time
+   × FV2 F · importDrafts > an extra key, a client-set updatedAt, or a count above its total is denied 34ms
+      Tests  1 failed | 5 passed (6)
+   × FV2 I1 · events > a client read is denied, even the writer's own 33ms
+      Tests  1 failed | 4 passed (5)
