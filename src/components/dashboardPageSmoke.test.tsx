@@ -58,7 +58,10 @@ describe("/dashboard renders", () => {
     expect(html).toContain("Let&#x27;s get you set up");
     expect(html).toContain("Top tip");
     expect(html).toContain("Getting started");
-    expect(html).toContain("— GETTING READY —");
+    /* ⚠️ RETARGETED A SEVENTH TIME (Dashboard first visit v2, Part A): the pre-query page is feed v1's three columns —
+       the manuscript card's label says "Getting ready" (italic sentence case) and Getting started is the sheet under it */
+    expect(html).toContain(">Getting ready<");
+    expect(html).toContain('data-fv2="gs"');
     expect(html).not.toContain("Ready for lift off?");
     expect(html).not.toContain("Where do I start?");
     /* RETARGETED (Dashboard v93): the founding card is "Your contributions"; its band names it while its stats load */

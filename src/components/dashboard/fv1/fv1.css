@@ -12,16 +12,6 @@
  * headings here state theirs with two classes and `!important` (the house cure), and every span has a class.
  */
 
-/* ── the pre-query page: the querying grid (shared selectors in v71/v77/v105), with its own left column ── */
-.d58[data-mode="pre"] .d58-left {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  min-width: 0;
-  min-height: 0;
-}
-.d58[data-mode="pre"] .d58-left > * { flex: none; }
-
 /* ── A2 · the set-up card ──────────────────────────────────────────────────────────────────────── */
 .d58 .fv1-setup { display: flex; flex-direction: column; }
 /* the frame pays no padding of its own (the hoop cards' and the chart's rule, dash58.css): the band runs to its
@@ -78,7 +68,7 @@
   font: 600 15.5px/1.3 var(--d58-serif) !important;
   text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px;
 }
-.d58 .fv1-btn:focus-visible, .d58 .fv1-lnk:focus-visible, .d58 .fv1-gsl:focus-visible, .d58 .fv1-tipb:focus-visible, .d58 .fv1-more:focus-visible, .d58 .fv1-hide:focus-visible {
+.d58 .fv1-btn:focus-visible, .d58 .fv1-lnk:focus-visible, .d58 .fv1-gsl:focus-visible {
   outline: 2px solid var(--d58-navy); outline-offset: 2px;
 }
 .d58 .fv1-btn:disabled, .d58 .fv1-lnk:disabled, .d58 .fv1-choice:disabled { cursor: default; }
@@ -86,53 +76,7 @@
 /* the set-up card in its loading beat: the page's own boxes, painted over */
 .d58 .fv1-setup.d58-skcard .fv1-qh, .d58 .fv1-setup.d58-skcard .fv1-choice, .d58 .fv1-setup.d58-skcard .fv1-path { visibility: hidden; }
 
-/* ── A3 · the Mentor speaking ──────────────────────────────────────────────────────────────────── */
-.d58 .fv1-mentor { display: flex; align-items: flex-end; gap: 22px; min-width: 0; }
-.d58 .fv1-mentorart { flex: 0 0 110px; width: 110px; }
-.d58 .fv1-bub {
-  position: relative; flex: 1 1 auto; min-width: 0;
-  display: flex; gap: 16px; align-items: flex-start;
-  padding: 16px 20px; border-radius: 18px; background: #fff;
-  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.08), 0 12px 26px -18px rgba(28, 19, 15, 0.45);
-}
-/* the tail: it points at the Mentor */
-.d58 .fv1-bub::before {
-  content: ""; position: absolute; left: -12px; top: 44px;
-  border: 12px solid transparent; border-right-color: #fff; border-left: 0;
-  filter: drop-shadow(-1px 0 0 rgba(28, 19, 15, 0.08));
-}
-.d58 .fv1-bubt { flex: 1 1 auto; min-width: 0; }
-.d58 .fv1-th { margin: 0; display: flex; align-items: baseline; gap: 10px; }
-.d58 .fv1-thl { font: 400 19px/1.2 var(--d58-type) !important; color: var(--d58-ink); }
-.d58 .fv1-tipn { font: 400 13px/1 var(--d58-serif) !important; color: rgba(28, 19, 15, 0.5); }
-.d58 .fv1-tipt { margin: 5px 0 0; font: 400 14.5px/1.5 var(--d58-serif) !important; color: rgba(28, 19, 15, 0.74); }
-.d58 .fv1-tipt b { font: 700 14.5px/1.5 var(--d58-serif) !important; color: var(--d58-ink); }
-.d58 .fv1-more { margin-top: 4px; padding: 0; border: 0; background: none; cursor: pointer; color: var(--d58-navy); font: 600 14px/1.3 var(--d58-serif) !important; text-decoration: underline; text-underline-offset: 3px; }
-.d58 .fv1-arw { display: flex; gap: 6px; flex: none; }
-.d58 .fv1-tipb {
-  width: 30px; height: 30px; border: 0; border-radius: 50%; cursor: pointer; background: #fff;
-  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.18);
-  font: 400 18px/1 var(--d58-serif) !important; color: var(--d58-ink);
-}
-.d58 .fv1-tipb:hover { background: #f4f0eb; }
-.d58 .fv1-mentor.is-loading .fv1-bubt, .d58 .fv1-mentor.is-loading .fv1-arw { visibility: hidden; }
-/* ⚠️ THE CLAMP, ONLY WHERE THE COLUMN IS SHORT: the page never scrolls, so below 860px of window height the tip is
-   cut at four lines and "More" (MentorTip) opens it in place — three below 820px. Everywhere else it is whole and
-   there is no "More". */
-@media (max-height: 859px) {
-  .d58 .fv1-tipt:not(.is-open) { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; }
-}
-
-/* ── A4 · Getting started, as a page of the task card ──────────────────────────────────────────── */
-.d58 .d71-th .fv1-gsn { margin-left: auto; font: 400 14px/1 var(--d58-serif) !important; opacity: 0.85; white-space: nowrap; }
-.d58 .d71-th .fv1-hide {
-  margin-left: auto; padding: 2px 4px; border: 0; background: none; cursor: pointer;
-  color: inherit; font: 400 14px/1 var(--d58-serif) !important;
-  text-decoration: underline; text-underline-offset: 3px; opacity: 0.85;
-}
-.d58 .d71-th .fv1-hide + .fv1-gsn { margin-left: 12px; }
-.d58 .d71-th .fv1-hide + .d71-pos { margin-left: 10px; }
-.d58 .d71-task .fv1-gstb { padding-top: 6px; justify-content: flex-start; overflow: hidden; }
+/* ── A4 · Getting started rows (the sheet under the manuscript card since first visit v2) ──────────────────────────────────────────── */
 .d58 .fv1-gs { margin: 0; padding: 0; list-style: none; }
 .d58 .fv1-gsr {
   display: flex; align-items: flex-start; gap: 11px;
@@ -161,15 +105,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .d58 .fv1-choice { transition: none; }
-}
-
-/* ── A4 · the founding card shows in full before the first query, the same as after ──
-   In the Fixed shape (≥901px tall) the querying left column (the chart's clamp over the hoops) is what gives the
-   founding card its height; before the first query the left column is the set-up card and the tip, ~200px
-   shorter, and the card fell to its compact form (245px at 1920×1080: no egg, no line). The pre right column
-   states the full card's floor instead — 303px, what it measures at 1512×900 in both states. */
-@media (min-height: 901px) and (min-width: 1100px) {
-  .d58[data-mode="pre"] .d71-right { grid-template-rows: auto minmax(303px, 1fr); }
 }
 
 /* ── B · the first-win stamp ───────────────────────────────────────────────────────────────────────
@@ -234,56 +169,8 @@
 /* ── D4 · the Coming up date tile names its month (it read "WED 9" for 9 December) ── */
 .d58 .d71-cal .d71-calmon { display: block; padding: 0 0 4px; margin-top: -3px; font: 400 11px/1.1 var(--d58-serif) !important; color: rgba(28, 19, 15, 0.62); }
 
-/* ══ SIZE-DEPENDENT RULES — LAST, so they win ties against every base rule above (they did not when they sat in
-   the A3 section: the A4 base rules came after them and the ≤900px checklist never applied). ══ */
-/* ── the short window (≤859px tall, a 1280×800 laptop): the pre page still fits without scrolling ──
-   Measured at 1280×800 before this block: the set-up card 507px and the tip 172px against ~480px of column, so
-   the page scrolled by 168px. What gives, in order: the choices' second lines (the label says it), the set-up
-   card's paddings and type, the Mentor's size, and the tip's lines. The art slot goes where the card is narrow. */
-@media (max-height: 859px) {
-  .d58 .fv1-q { padding-top: 12px; }
-  .d58 .fv1-setup .fv1-qh, .d58 .fv1-setup .fv1-qh em { font-size: 18px !important; line-height: 1.25 !important; }
-  .d58 .fv1-ch { margin-top: 10px; gap: 10px; }
-  .d58 .fv1-choice { padding: 9px 14px; }
-  .d58 .fv1-choice b + span { display: none; }
-  .d58 .fv1-path { margin-top: 10px; padding: 12px 14px 12px 16px; }
-  .d58 .fv1-path .fv1-ph { font-size: 19px !important; }
-  .d58 .fv1-pp { margin-top: 4px; font-size: 14px !important; line-height: 1.45 !important; }
-  .d58 .fv1-row { margin-top: 10px; }
-  .d58 .fv1-btn { height: 38px; }
-  .d58 .fv1-setup > .os-frame { padding-bottom: 16px; }
-  .d58[data-mode="pre"] .d58-left { gap: 12px; }
-  .d58 .fv1-mentor { gap: 16px; }
-  .d58 .fv1-mentorart { flex-basis: 76px; width: 76px; }
-  .d58 .fv1-bub { padding: 12px 16px; }
-  .d58 .fv1-tipt { font-size: 14px !important; line-height: 1.45 !important; }
-  .d58 .fv1-tipt b { font-size: 14px !important; line-height: 1.45 !important; }
-  .d58 .fv1-gsd, .d58 .fv1-gsc > b { font-size: 14px !important; }
-  /* the lit row keeps its link and lets its note go: the card is the row's height here, 254px */
-  .d58 .fv1-gsnote { display: none; }
-}
-@media (max-height: 819px) {
-  .d58 .fv1-tipt:not(.is-open) { -webkit-line-clamp: 3; }
-}
-/* the checklist in a 254px card (every window ≤900px tall, the right column's v105 row): tighter rows, so five
-   rows and the lit row's note fit with two rows done (measured at 1512×900: the last row was cut by 9px) */
-@media (max-height: 900px) {
-  .d58 .fv1-gsr { padding: 3px 0; }
-  .d58 .fv1-gsr > i { flex-basis: 17px; height: 17px; }
-  .d58 .fv1-gsr.is-current { padding: 5px 12px; margin: 1px -12px; }
-  .d58 .fv1-gsd, .d58 .fv1-gsc > b { font-size: 14px !important; line-height: 1.25 !important; }
-  .d58 .fv1-gsc > span { margin-top: 1px; font-size: 13px !important; line-height: 1.3 !important; }
-  .d58 .d71-task .fv1-gstb { padding-top: 2px; padding-bottom: 2px; }
-}
 /* the art slot leaves the path where the card is too narrow to keep the words beside it */
 .d58 .fv1-setup { container: fv1setup / inline-size; }
 @container fv1setup (max-width: 640px) {
   .d58 .fv1-art { display: none; }
-}
-/* the Getting started page as one of several (Part C): its band holds the title, Hide and the pager. In a card under
-   360px (a 1280 window) that cut the title to "Getting s…" — the title and Hide step down so all three fit. */
-@container d71task (max-width: 359px) {
-  .d58 .d71-task[data-group="start"] .d71-bandttl { font-size: 18px !important; }
-  .d58 .d71-th .fv1-hide { font-size: 13px !important; padding: 2px; }
-  .d58 .d71-th .fv1-hide + .d71-pos { margin-left: 6px; }
 }

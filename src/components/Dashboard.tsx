@@ -504,6 +504,7 @@ export const Dashboard: React.FC<{
     deleteUserTask,
     updateUserProfile,
     updateUserPaths,
+    updateManuscriptQuiet,
     smartImportUsage,
   } = useScriptAllyDb();
 
@@ -1556,6 +1557,14 @@ export const Dashboard: React.FC<{
         onFoundingSeen={(tier) => updateUserProfile({ foundingSeenTier: tier })}
         onPrefs={updateUserPaths}
         onGoal={(patch) => updateUserProfile(patch)}
+        /* first visit v2 (Part B): the dashboard's answer writes the fields sign-up wrote; the status write makes no
+           feed entry (`updateManuscriptQuiet`) — changing an answer is not a querying event */
+        onAnswer={async (msId, w) => {
+          await Promise.all([
+            updateUserProfile({ queryingStage: w.queryingStage }),
+            w.status ? updateManuscriptQuiet(msId, { status: w.status }) : Promise.resolve(),
+          ]);
+        }}
       />
       )}
 

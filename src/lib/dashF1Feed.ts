@@ -87,6 +87,8 @@ export interface F1Mini {
   say: readonly FeedSeg[];
   time: string;
   at: number;
+  /** the query the row is about (the activity's own), or null — first visit v2 hangs the nudge-email ask under one */
+  queryId: string | null;
 }
 
 export type F1Item = F1Big | F1Mini;
@@ -245,7 +247,7 @@ export function bigCard(ev: DrawerEvent, kind: F1Kind, ctx: F1Ctx): F1Big | null
 const miniOf = (ev: DrawerEvent): F1Mini => {
   const e = ev.entry;
   const glyph: F1Mini["glyph"] = e.imported ? "import" : e.app ? "house" : !e.status || e.activityType === ActivityType.NUDGE_SENT ? "bell" : "status";
-  return { type: "mini", id: e.id, dir: e.dir, status: e.status, glyph, say: ev.say, time: e.time, at: e.at };
+  return { type: "mini", id: e.id, dir: e.dir, status: e.status, glyph, say: ev.say, time: e.time, at: e.at, queryId: e.queryId };
 };
 
 /** The writer's queries sent on one day, as one row: "You queried A, B and C." (one: "You queried A with Title.") */

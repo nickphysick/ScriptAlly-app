@@ -1,0 +1,134 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * DASHBOARD FIRST VISIT v2 (ref design-refs/dashboard-first-visit-v2/; desktop only, ≥768px).
+ * Loaded after df1.css, so equal-specificity rules here win ties. Every first-visit state now sits in feed v1's three
+ * columns (`data-mode="f1"`); `data-fv2` on the root names which state.
+ * ⚠️ EVERY TEXT ELEMENT NAMES ITS FAMILY: `lib/brand.tsx` forces a family on bare `span`s and on `h2`/`h3`, so the
+ * headings state theirs with two classes and `!important` (the house cure).
+ */
+
+/* ── Part A · the middle column before the first query: the set-up card over the empty feed, NOT pinned ──
+   The pinned, self-scrolling feed column is for a feed; before there is one the column is ordinary content. */
+.d58[data-mode="f1"] .df1-feed.fv2-mid { position: static; height: auto; gap: 22px; }
+
+/* ── Part A · the manuscript card's label: italic sentence case ── */
+.d58 .df1-status.fv2-label { font: italic 400 15.5px/20px var(--d58-serif) !important; letter-spacing: 0; text-transform: none; }
+
+/* ── Part A · Getting started, in the goal sheet's slot ── */
+.d58 .df1-goal.fv2-gs { display: block; padding: 18px 16px 10px; }
+.fv2-gsh { display: flex; align-items: baseline; gap: 12px; }
+.d58 .fv2-gsh .fv2-gst { margin: 0; flex: 1 1 auto; min-width: 0; font: 400 22px/1.3 var(--d58-type) !important; color: var(--d58-ink); letter-spacing: 0; }
+.d58 .fv2-gsn { flex: none; font: 400 14px/1.3 var(--d58-serif) !important; color: rgba(28, 19, 15, 0.6); white-space: nowrap; }
+.d58 .fv2-hide {
+  padding: 0; border: 0; background: none; cursor: pointer; color: var(--d58-ink);
+  font: 600 14px/1.3 var(--d58-serif) !important; text-decoration: underline; text-underline-offset: 3px;
+}
+.fv2-hide:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
+.fv2-gsbar { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; margin: 10px 0 8px; }
+.fv2-gsbar > i { height: 4px; border-radius: 2px; background: #ece7de; }
+.fv2-gsbar > i.is-on { background: var(--d58-navy); }
+/* the current row's tint is the reference's oat, not v1's powder */
+.d58 .fv2-gs .fv1-gsr.is-current { background: #f6f1ea; margin-inline: -8px; padding-inline: 8px; }
+
+/* ── Part A · the empty feed ── */
+.fv2-empty { min-width: 0; padding: 0 4px; }
+.d58 .fv2-empty .fv2-et { margin: 0; font: 400 21px/1.3 var(--d58-type) !important; color: var(--d58-ink); letter-spacing: 0; }
+.d58 .fv2-ep { margin: 4px 0 0; font: 400 15px/1.5 var(--d58-serif) !important; color: rgba(28, 19, 15, 0.62); }
+.d58 .fv2-elink {
+  display: inline; padding: 0; border: 0; background: none; cursor: pointer; color: var(--d58-ink);
+  font: 700 15px/1.5 var(--d58-serif) !important; text-decoration: underline; text-underline-offset: 3px; text-align: left;
+}
+.fv2-elink:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
+.fv2-ex {
+  position: relative; margin-top: 20px; padding: 12px 12px 10px; border-radius: 12px;
+  background: rgba(255, 255, 255, 0.55); box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.1); opacity: 0.85;
+}
+.d58 .fv2-extag {
+  position: absolute; top: -9px; right: 12px; padding: 1px 8px; border-radius: 999px; background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.14);
+  font: 600 11.5px/16px var(--d58-serif) !important; color: rgba(28, 19, 15, 0.55);
+}
+.fv2-exrow { display: flex; align-items: center; gap: 10px; }
+.d58 .fv2-exdisc { flex: none; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; background: #3d4553; color: #fff; font: 600 13px/1 var(--d58-serif) !important; }
+.fv2-exw { min-width: 0; }
+.d58 .fv2-exw b { display: block; font: 700 15px/1.3 var(--d58-serif) !important; color: var(--d58-ink); }
+.d58 .fv2-exw small { display: block; font: 400 13px/1.35 var(--d58-serif) !important; color: rgba(28, 19, 15, 0.55); }
+.fv2-extrk { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-top: 12px; }
+.fv2-extrk > i { height: 4px; border-radius: 2px; background: #e4ded4; }
+.fv2-extrk > i.is-on { background: #b8b2a8; }
+.fv2-extrk > i.is-now { background: #7f8794; }
+
+/* ── Part B · the set-up card says what the writer told us, and offers to change it ── */
+.d58 .fv2-said { margin: 0; padding: 18px 28px 0; font: 400 15.5px/1.5 var(--d58-serif) !important; color: var(--d58-ink); }
+.d58 .fv2-said em { font: italic 400 15.5px/1.5 var(--d58-serif) !important; }
+.d58 .fv1-lnk.fv2-change { margin-left: 6px; font-size: 15.5px !important; color: var(--d58-ink); }
+/* the three answers, stacked: each a full-width card */
+.d58 .fv1-ch.fv2-ch { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+.d58 .fv2-done { display: flex; justify-content: flex-end; margin-top: 10px; }
+.d58 .fv2-done .fv1-lnk { color: var(--d58-ink); font-size: 15px !important; }
+
+/* ── Part E · the example dashboard: a yellow bar over the columns, the real page below it, inert ── */
+.fv2-exdash { min-width: 0; }
+.fv2-exbar {
+  display: flex; align-items: center; gap: 10px; margin: 0 0 14px; padding: 10px 14px;
+  border-radius: 12px; background: #fbf1c9; box-shadow: inset 0 0 0 1px #ecd47a;
+}
+.fv2-exbar > svg { flex: none; width: 18px; height: 18px; fill: none; stroke: var(--d58-ink); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.d58 .fv2-exbart { flex: 1 1 auto; min-width: 0; font: 400 15px/1.4 var(--d58-serif) !important; color: var(--d58-ink); }
+.d58 .fv2-exback {
+  flex: none; padding: 0; border: 0; background: none; cursor: pointer; color: var(--d58-ink);
+  font: 700 15px/1.4 var(--d58-serif) !important; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap;
+}
+.fv2-exback:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
+/* the example's own page sits inside this page's: it pays no second top padding */
+.d58 .fv2-exbody > .d58 > .d58-page { padding: 0; }
+
+/* ── Part F · Pick up where you left off ── */
+.d58 .fv2-resume > .os-frame { padding: 0 0 22px; }
+.fv2-rbody { padding: 16px 20px 0; }
+.fv2-rfile { display: flex; align-items: center; gap: 12px; }
+.fv2-rdoc { flex: none; width: 42px; height: 42px; display: grid; place-items: center; border-radius: 10px; background: #f3efe9; }
+.fv2-rdoc svg { width: 20px; height: 20px; fill: none; stroke: var(--d58-ink); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.fv2-rfw { min-width: 0; }
+.d58 .fv2-rfw b { display: block; font: 700 15.5px/1.3 var(--d58-serif) !important; color: var(--d58-ink); overflow-wrap: anywhere; }
+.d58 .fv2-rfw small { display: block; font: 400 13.5px/1.35 var(--d58-serif) !important; color: rgba(28, 19, 15, 0.6); }
+.fv2-rtiles { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; margin-top: 14px; }
+.fv2-rtile { min-width: 0; padding: 10px 12px 12px; border-radius: 10px; background: #f3efe9; }
+.d58 .fv2-rtile b { display: block; font: 700 14.5px/1.3 var(--d58-serif) !important; color: var(--d58-ink); }
+.d58 .fv2-rtile span { display: block; font: 400 13.5px/1.35 var(--d58-serif) !important; color: rgba(28, 19, 15, 0.62); }
+.fv2-rbar { display: block; height: 4px; margin-top: 10px; border-radius: 2px; background: #ddd5ca; overflow: hidden; }
+.fv2-rbar > i { display: block; height: 100%; border-radius: 2px; background: var(--d58-navy); }
+.d58 .fv2-rtext { margin: 14px 0 0; font: 400 15px/1.5 var(--d58-serif) !important; color: var(--d58-ink); }
+.d58 .fv2-rask p { margin: 12px 0 0; font: 600 15px/1.45 var(--d58-serif) !important; color: var(--d58-ink); }
+.d58 .fv2-resume .fv1-lnk { color: var(--d58-ink); }
+
+/* ── Part G · the nudge-email ask, in the feed ── */
+.fv2-ask { display: flex; gap: 10px; margin: 0 0 10px; padding: 14px 16px; border-radius: 12px; background: #fbf4ee; box-shadow: inset 0 0 0 1px #efe0d4; }
+.fv2-askbell { flex: none; width: 20px; height: 20px; margin-top: 1px; }
+.fv2-askbell svg { width: 16px; height: 16px; fill: none; stroke: #8a4a3c; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.fv2-askw { min-width: 0; }
+.d58 .fv2-askw b { display: block; font: 700 15.5px/1.35 var(--d58-serif) !important; color: var(--d58-ink); }
+.d58 .fv2-askw p { margin: 2px 0 0; font: 400 14.5px/1.5 var(--d58-serif) !important; color: var(--d58-ink); }
+.fv2-askrow { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.d58 .fv2-askyes { height: 36px; padding: 0 14px; border: 0; border-radius: 9px; cursor: pointer; background: var(--d58-navy); color: #fff; font: 700 15px/1 var(--d58-serif) !important; }
+.d58 .fv2-askno { height: 36px; padding: 0 14px; border: 0; border-radius: 9px; cursor: pointer; background: #fff; color: var(--d58-ink); box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.18); font: 600 15px/1 var(--d58-serif) !important; }
+.fv2-askyes:focus-visible, .fv2-askno:focus-visible, .fv2-askset:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
+.fv2-askdone { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; padding: 10px 14px; border-radius: 12px; background: #fbf4ee; }
+.d58 .fv2-askdt { flex: 1 1 auto; min-width: 0; font: 400 14.5px/1.4 var(--d58-serif) !important; color: var(--d58-ink); }
+.d58 .fv2-askset { flex: none; padding: 0; border: 0; background: none; cursor: pointer; color: var(--d58-ink); font: 700 14.5px/1.4 var(--d58-serif) !important; text-decoration: underline; text-underline-offset: 3px; }
+
+/* ── Part H · the finish line ── */
+.fv2-fin { display: flex; gap: 14px; padding: 4px 0 8px; }
+.fv2-fintick { flex: none; width: 46px; height: 46px; display: grid; place-items: center; border-radius: 50%; background: var(--d58-navy); animation: fv2-pop 500ms cubic-bezier(0.2, 1.4, 0.4, 1) both; }
+.fv2-fintick svg { width: 24px; height: 24px; fill: none; stroke: #fff; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+@keyframes fv2-pop { from { transform: scale(0.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .fv2-fintick { animation: none; } }
+.fv2-finw { min-width: 0; }
+.d58 .fv2-finw .fv2-fint { margin: 0; font: 400 22px/1.3 var(--d58-type) !important; color: var(--d58-ink); letter-spacing: 0; }
+.d58 .fv2-finp { margin: 6px 0 0; font: 400 15px/1.5 var(--d58-serif) !important; color: var(--d58-ink); }
+.fv2-finrow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 12px; }
+.d58 .fv2-finclose { height: 38px; padding: 0 14px; border: 0; border-radius: 10px; cursor: pointer; background: var(--d58-navy); color: #fff; font: 700 15px/1 var(--d58-serif) !important; }
+.fv2-finclose:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
+.d58 .fv2-finrow small { font: 400 13.5px/1.35 var(--d58-serif) !important; color: rgba(28, 19, 15, 0.55); }

@@ -142,6 +142,8 @@ import { taskSurvivesMute } from "./todoHousekeeping";
 import { buildOfferDecisionWrites, hasOfferDecision, OfferDecision } from "./offerDecision";
 import { applyUserPaths, type UserPaths } from "./userPaths";
 import { noteFirstWin } from "./firstWin";
+import { activeManuscriptOf, eventPath, logEvent } from "./events";
+import { manuscriptComps } from "./comps";
 import { isFirstAgentWin, isFirstQueryWin, winCopy } from "./dashFirstVisit";
 
 // Connection validation test on boot as requested by skill
@@ -1568,6 +1570,10 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/manuscripts/${id}`);
     }
 
+    /* first visit v2 (Part I): the writer's first comparable title, on any manuscript */
+    if (writeSuccess && Array.isArray(fields.comps) && fields.comps.length > 0 && manuscripts.every((m) => manuscriptComps(m).length === 0)) {
+      logEvent(currentUser.id, "first_comp", eventPath(currentUser, existingMs));
+    }
     /* a comps-only write is list maintenance and narrates nothing — lib/manuscriptFeed.ts */
     if (writeSuccess && narratesManuscriptWrite(fields)) {
       const dateStr = new Date().toISOString();
@@ -1818,6 +1824,10 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     };
     try {
       await setDoc(doc(db, "users", currentUser.id, "versions", id), newVer);
+      /* first visit v2 (Part I): the writer's first query letter */
+      if (v.componentType === ComponentType.QUERY_LETTER && !versions.some((x) => x.componentType === ComponentType.QUERY_LETTER)) {
+        logEvent(currentUser.id, "first_letter", eventPath(currentUser, manuscripts.find((m) => m.id === v.manuscriptId)));
+      }
       return id; // returned so a build-slot "+ New …" can auto-select the freshly created version
     } catch (e) {
       handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/versions/${id}`);
@@ -2207,6 +2217,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       /* Dashboard first visit v1 (Part B): the writer's first agent is the dashboard's first-win stamp */
       if (isFirstAgentWin(agents.length)) {
         noteFirstWin({ kind: "agent", uid: currentUser.id, msId: null, ...winCopy.agent(newAg.name ?? "", newAg.agency ?? "") });
+        /* first visit v2 (Part I) */
+        logEvent(currentUser.id, "first_agent", eventPath(currentUser, activeManuscriptOf(manuscripts)));
       }
       return { success: true, id };
     }
@@ -2569,6 +2581,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       }
       /* Dashboard first visit v1 (Part B): the first query LOGGED on a manuscript is the dashboard's first-win stamp.
          An imported query never is — the import records its own stamp, once, for the whole file. */
+      /* first visit v2 (Part I): the writer's first logged query on any manuscript (an import records import_finished) */
+      if (!opts?.imported && queries.length === 0) logEvent(currentUser.id, "first_query", eventPath(currentUser, manuscripts.find((m) => m.id === q.manuscriptId)));
       if (isFirstQueryWin(queries, q.manuscriptId, !!opts?.imported)) {
         noteFirstWin({ kind: "query", uid: currentUser.id, msId: q.manuscriptId, ...winCopy.query(agent ? agentPrimary(agent) : "", agent?.agency ?? "", newQ.dateSent) });
       }

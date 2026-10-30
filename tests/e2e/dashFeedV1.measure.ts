@@ -14,7 +14,7 @@
  */
 import { test, expect, type Page } from "@playwright/test";
 import { mkdirSync, writeFileSync } from "node:fs";
-import { execFileSync } from "node:child_process";
+import { execFileSync, execSync } from "node:child_process";
 import { createRequire } from "node:module";
 import { openRoute } from "./measure";
 
@@ -171,6 +171,11 @@ test("DF1-B1 · the goal sheet sits under the card; the ring is the goals code's
   const goals = await phone.evaluate(() => { const g = document.querySelector<HTMLElement>('[data-pa="goal-ring"]'); return g ? { count: g.dataset.count, target: g.dataset.target } : null; });
   await phone.close();
   L.check("B1", "population: the goals page read", !!goals, JSON.stringify(goals));
+  /* ⚠️ RE-POINTED (Dashboard first visit v2, Part A): the slot under the book holds Getting started until it is hidden,
+     closed or finished, and the harness book's list is open (4 of 5). The goal sheet's law is unchanged; it is measured
+     with Getting started hidden, and the flag is put back in this run. */
+  execSync("node tests/e2e/seedFv2.mjs gs-hide seed-ms-1", { stdio: "ignore" });
+  try {
   for (const vp of [W1512, W1280]) {
     await openDash(page, vp);
     const r = await page.evaluate(() => {
@@ -191,6 +196,7 @@ test("DF1-B1 · the goal sheet sits under the card; the ring is the goals code's
     L.check("B1", "no goal: Set a weekly goal shows", r.set === "Set a weekly goal", String(r.set));
     L.check("B1", "no goal: the tiles and the streak still render", r.sent && r.added && r.streak, JSON.stringify(r));
   } finally { seed("nogoal", "--restore"); }
+  } finally { execSync("node tests/e2e/seedFv2.mjs gs-hide-restore seed-ms-1", { stdio: "ignore" }); }
   L.done(8);
 });
 

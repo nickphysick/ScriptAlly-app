@@ -1,0 +1,17 @@
+
+Running 10 tests using 1 worker
+
+  ✓   1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.6s)
+removed 1 agent(s), 1 quer(ies), 1 log row(s)
+{"uid":"LS4ymFFCEvhN82advZQJ5zkr7sv2","stage":"starting","tour":"done","nudges":true,"notify":{"weeklyDigest":true,"nudges":true},"reminder":null,"gsClosed":null,"draft":null}
+  ✓   2 [measure] › tests/e2e/dashFirstVisitV2.measure.ts:50:1 › F1 · a review left at agent 23 of 31 is kept, resumed at row 24, and goes when discarded or finished (1.0m)
+  ✓   3 [measure] › tests/e2e/dashFirstVisitV2.measure.ts:134:1 › G1 · the ask shows after the first query; Yes writes one leaf and it never shows again (17.1s)
+  ✓   4 [measure] › tests/e2e/dashFirstVisitV2.measure.ts:171:1 › H1 · ticking the fifth step shows the finish line; Close this list brings the goal sheet back for good (18.6s)
+  ✓   5 [measure] › tests/e2e/dashFirstVisitV2.measure.ts:215:1 › A1 · pre-query: the set-up card leads the middle column, Getting started hangs on the book; first query: the queries card (21.0s)
+  ✓   6 [measure] › tests/e2e/dashFirstVisitV2.measure.ts:244:1 › A2 · the label is each of the five strings (35.2s)
+  ✓   7 [measure] › tests/e2e/dashFirstVisitV2.measure.ts:272:1 › B1 · the ready sentence; Change it → still writing sets DRAFTING and reorders Getting started (19.0s)
+  ✓   8 [measure] › tests/e2e/dashFirstVisitV2.measure.ts:301:1 › C1 · on the still-writing path, It's ready → READY_TO_QUERY and the ready path, done steps still ticked (20.2s)
+  ✓   9 [measure] › tests/e2e/dashFirstVisitV2.measure.ts:334:1 › D1 · the first load runs the tour once; the ? menu replays it; a first load with queries never shows it (25.5s)
+  ✓  10 [measure] › tests/e2e/dashFirstVisitV2.measure.ts:382:1 › E1 · the example opens with its bar, writes nothing, and goes back by the button or Escape (18.4s)
+
+  10 passed (4.3m)

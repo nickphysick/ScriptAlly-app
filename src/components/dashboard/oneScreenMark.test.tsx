@@ -104,8 +104,10 @@ describe("every dashboard container header carries one mark", () => {
     "Left": "v60/Dash60Left.tsx",
     /* "Lift" (v60/Dash60Lift) is retired — first visit v1, Part E; the set-up card and the tip carry no mark either */
     "SetUp": "fv1/SetUpCard.tsx",
-    "Tip": "fv1/MentorTip.tsx",
-    "Right": "v71/Dash71Right.tsx",
+    /* "Tip" (fv1/MentorTip) and "Right" (v71/Dash71Right) are retired — first visit v2, Part A: the pre-query page is
+       feed v1's three columns; Getting started is a sheet and the empty feed carries no mark either */
+    "GsSheet": "fv2/GsSheet.tsx",
+    "EmptyFeed": "fv2/EmptyFeed.tsx",
     "Task": "v71/Dash71Task.tsx",
     "Feed": "v58/Dash58Feed.tsx",
     "Header": "v58/Dash58Header.tsx",

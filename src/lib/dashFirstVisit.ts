@@ -18,10 +18,11 @@
  * ⚠️ THE ANSWER ONLY CHOOSES A PATH. It changes no data, so a writer who picked "Not yet" and then imports a
  * tracker has lost nothing.
  */
-import { QueryStatus, type Agent, type Query, type User } from "../types";
+import { ManuscriptStatus, QueryStatus, type Agent, type Query, type User } from "../types";
 import { closedAt, sentAt } from "./oneScreen";
 import { agentPrimary } from "./agentDisplay";
 import type { UserPaths } from "./userPaths";
+import type { QueryingStage } from "./onboardingStage";
 import type { GettingStartedKey } from "./dashEmpty";
 import { MONTHS_SHORT } from "./dates";
 
@@ -51,20 +52,70 @@ export const campaignLabel = (scopedQueries: readonly Pick<Query, "status">[]): 
   return w.charAt(0).toUpperCase() + w.slice(1);
 };
 
+/* ── Dashboard first visit v2 (Part A): the manuscript card's label and the page's state ─────────── */
+
+/** The manuscript card's five labels, italic sentence case. */
+export const BOOK_LABEL = {
+  ready: "Getting ready",
+  writing: "Still writing",
+  revising: "In revision",
+  querying: "Querying",
+  between: "Between rounds",
+} as const;
+
+/**
+ * The manuscript card's label. Once a query exists the campaign speaks (Querying / Between rounds); before it, the
+ * book's own readiness does: still being written, in revision, or getting ready to query.
+ * ⚠️ THE READINESS IS THE STORED `Manuscript.status`, the field sign-up's readiness question writes. Nothing here
+ * infers it.
+ */
+export function bookLabel(scopedQueries: readonly Pick<Query, "status">[], msStatus: ManuscriptStatus | string | null | undefined): string {
+  const stage = campaignStage(scopedQueries);
+  if (stage === "querying") return BOOK_LABEL.querying;
+  if (stage === "between") return BOOK_LABEL.between;
+  if (msStatus === ManuscriptStatus.DRAFTING) return BOOK_LABEL.writing;
+  if (msStatus === ManuscriptStatus.REVISING) return BOOK_LABEL.revising;
+  return BOOK_LABEL.ready;
+}
+
+/**
+ * Which first-visit state the page is in (Part A). `pre` and `resume` come before the first query on this manuscript
+ * (`resume` when a Smart Import draft is waiting); `querying` while any query is live; `between` once every query is
+ * closed. "All set up" is not a state of the page: it is the Getting started sheet's own finish line (Part H).
+ */
+export type DashState = "pre" | "resume" | "querying" | "between";
+export function dashState(scopedQueries: readonly Pick<Query, "status">[], hasDraft: boolean): DashState {
+  const stage = campaignStage(scopedQueries);
+  if (stage === "ready") return hasDraft ? "resume" : "pre";
+  return stage;
+}
+
 /* ── the stored preferences ─────────────────────────────────────────────────────────────────────── */
 
-export type StartPath = "yes" | "notyet";
+/**
+ * The set-up path (first visit v2, Part B): already querying · ready but not querying · still writing · in revision.
+ * It is READ FROM THE SIGN-UP ANSWERS (`answerFor`), never asked again on the dashboard.
+ */
+export type StartPath = "querying" | "ready" | "writing" | "revising";
+/** First visit v1's stored dashboard answer, read only for an account that never answered the sign-up stage question. */
+export type LegacyStart = "yes" | "notyet";
 export type WinKind = "query" | "agent" | "import";
 
 export interface DashPrefs {
-  /** the set-up answer per manuscript; absent → "yes" */
-  start: Record<string, StartPath>;
+  /** first visit v1's set-up answer per manuscript (legacy; see `answerFor`) */
+  start: Record<string, LegacyStart>;
   /** the index of the tip shown on the last visit; null before the first */
   tip: number | null;
   /** stamps already shown, keyed by `winKey` */
   wins: Record<string, true>;
   /** Getting started hidden per manuscript (the band's "Hide") */
   gsHidden: Record<string, true>;
+  /** first visit v2 (Part D): the first-visit tour has been decided — finished, skipped, or never to run */
+  tour: boolean;
+  /** first visit v2 (Part G): the nudge-email ask's answer, once given */
+  reminder: "yes" | "not_now" | null;
+  /** first visit v2 (Part H): Getting started closed from its finish line, per manuscript */
+  gsClosed: Record<string, true>;
 }
 
 const ROOT = "todoPrefs.dash";
@@ -75,9 +126,9 @@ export const seg = (id: string): string => id.replace(/[^A-Za-z0-9_-]/g, "_");
 /** Total reader: whatever is stored (or nothing), a well-formed value comes back. */
 export function dashPrefsOf(user: Pick<User, "todoPrefs"> | null | undefined): DashPrefs {
   const raw = ((user?.todoPrefs as { dash?: Record<string, unknown> } | undefined)?.dash ?? {}) as {
-    start?: Record<string, unknown>; tip?: unknown; wins?: Record<string, unknown>; gsHidden?: Record<string, unknown>;
+    start?: Record<string, unknown>; tip?: unknown; wins?: Record<string, unknown>; gsHidden?: Record<string, unknown>; tour?: unknown; reminder?: unknown; gsClosed?: Record<string, unknown>;
   };
-  const start: Record<string, StartPath> = {};
+  const start: Record<string, LegacyStart> = {};
   for (const [k, v] of Object.entries(raw.start ?? {})) if (v === "yes" || v === "notyet") start[k] = v;
   const flags = (m: Record<string, unknown> | undefined) => {
     const out: Record<string, true> = {};
@@ -89,20 +140,122 @@ export function dashPrefsOf(user: Pick<User, "todoPrefs"> | null | undefined): D
     tip: typeof raw.tip === "number" && Number.isInteger(raw.tip) && raw.tip >= 0 ? raw.tip : null,
     wins: flags(raw.wins),
     gsHidden: flags(raw.gsHidden),
+    tour: raw.tour === "done",
+    reminder: raw.reminder === "yes" || raw.reminder === "not_now" ? raw.reminder : null,
+    gsClosed: flags(raw.gsClosed),
   };
 }
 
-/** The answer for a manuscript — "yes" when nothing is stored (the pack's default). */
-export const startPathOf = (prefs: DashPrefs, msId: string | null): StartPath =>
-  (msId ? prefs.start[seg(msId)] : undefined) ?? "yes";
+/** First visit v1's stored answer for a manuscript, if any. */
+export const legacyStartOf = (prefs: DashPrefs, msId: string | null): LegacyStart | null =>
+  (msId ? prefs.start[seg(msId)] : undefined) ?? null;
 
-export const startPathWrite = (msId: string, v: StartPath): UserPaths => ({ [`${ROOT}.start.${seg(msId)}`]: v });
+/** The sign-up stages that mean "I've sent queries". */
+const QUERYING_STAGES = new Set<QueryingStage>(["early", "deep", "interest"]);
+
+/**
+ * THE SET-UP PATH, READ FROM WHAT THE WRITER SAID AT SIGN-UP (first visit v2, Part B). In order:
+ *  1. the querying stage (`User.queryingStage`): early / deep / interest → already querying;
+ *  2. the book's readiness (`Manuscript.status`, the readiness question): Drafting → still writing, Revising → in revision;
+ *  3. the stage "starting" → ready, not querying yet;
+ *  4. an account that never answered the stage question: first visit v1's dashboard answer, if it gave one.
+ * ⚠️ NULL WHEN NOTHING WAS SAID. The card then opens on the question rather than telling the writer something they
+ * never said ("You said…" is a claim about their own words).
+ */
+export function answerFor(input: { stage: QueryingStage | null | undefined; status: ManuscriptStatus | string | null | undefined; legacy: LegacyStart | null }): StartPath | null {
+  const { stage, status, legacy } = input;
+  if (stage && QUERYING_STAGES.has(stage)) return "querying";
+  if (status === ManuscriptStatus.DRAFTING) return "writing";
+  if (status === ManuscriptStatus.REVISING) return "revising";
+  if (stage === "starting") return "ready";
+  if (legacy === "yes") return "querying";
+  if (legacy === "notyet") return "ready";
+  return null;
+}
+
+/** The three answers the card offers ("still writing or revising" is one answer, two paths). */
+export type AnswerChoice = "querying" | "ready" | "writing";
+export const choiceOf = (p: StartPath | null): AnswerChoice | null => (p === "revising" ? "writing" : p);
+
+export interface AnswerWrite {
+  /** `User.queryingStage` — the same field sign-up's stage question writes */
+  queryingStage: QueryingStage;
+  /** `Manuscript.status` — the same field sign-up's readiness question writes; null when it stays as it is */
+  status: ManuscriptStatus | null;
+}
+
+/**
+ * What changing the answer on the dashboard writes (Part B): THE SAME FIELDS SIGN-UP WROTE.
+ *  · already querying → the stage becomes "early" (an existing early / deep / interest is kept); the book READY_TO_QUERY
+ *  · ready, not querying → the stage "starting"; the book READY_TO_QUERY
+ *  · still writing or revising → the stage "starting"; the book DRAFTING, unless it was already REVISING
+ */
+export function answerWrite(choice: AnswerChoice, stage: QueryingStage | null | undefined, status: ManuscriptStatus | string | null | undefined): AnswerWrite {
+  const set = (s: ManuscriptStatus): ManuscriptStatus | null => (status === s ? null : s);
+  if (choice === "querying") return { queryingStage: stage && QUERYING_STAGES.has(stage) ? stage : "early", status: set(ManuscriptStatus.READY_TO_QUERY) };
+  if (choice === "ready") return { queryingStage: "starting", status: set(ManuscriptStatus.READY_TO_QUERY) };
+  return { queryingStage: "starting", status: status === ManuscriptStatus.REVISING ? null : set(ManuscriptStatus.DRAFTING) };
+}
+
+/** The path a write leaves the book on (what the card shows straight after the click). */
+export const pathAfter = (choice: AnswerChoice, status: ManuscriptStatus | string | null | undefined): StartPath =>
+  choice === "writing" ? (status === ManuscriptStatus.REVISING ? "revising" : "writing") : choice;
+
 export const tipWrite = (i: number): UserPaths => ({ [`${ROOT}.tip`]: i });
 export const gsHideWrite = (msId: string): UserPaths => ({ [`${ROOT}.gsHidden.${seg(msId)}`]: true });
+/** first visit v2 (Part H): "Close this list" on the finish line — the goal sheet takes the slot, and it never comes back */
+export const gsCloseWrite = (msId: string): UserPaths => ({ [`${ROOT}.gsClosed.${seg(msId)}`]: true });
+
+/* ── first visit v2, Part H: the finish line ── */
+export const FINISH = {
+  title: "That's you set up",
+  text: (path: StartPath | null) => (path === "writing" || path === "revising"
+    ? "Manuscript, comparable titles, a shortlist and your letter: all in. From here on, the dashboard shows what needs doing next."
+    : "Manuscript, agents, queries, materials and comparable titles: all in. From here on, the dashboard shows what needs doing next."),
+  close: "Close this list",
+  note: "Your weekly goal and streak go here instead.",
+} as const;
+
+/**
+ * What the Getting started slot holds (Parts A and H): the list while a row is undone; the finish line once every row
+ * is done and it has not been closed; and nothing — the goal sheet — once it is hidden or closed. Before the first
+ * query it is always the list (nothing can be hidden or closed then).
+ */
+export function gsSlot(i: { pre: boolean; hidden: boolean; closed: boolean; allDone: boolean }): "list" | "finish" | "goal" {
+  if (i.pre) return i.allDone ? "finish" : "list";
+  if (i.hidden || i.closed) return "goal";
+  return i.allDone ? "finish" : "list";
+}
 
 /** The key a stamp is remembered by: per kind and manuscript (an agent is the writer's, so it has none). */
 export const winKey = (kind: WinKind, msId: string | null): string => (kind === "agent" ? "agent" : `${kind}_${seg(msId ?? "none")}`);
 export const winWrite = (key: string): UserPaths => ({ [`${ROOT}.wins.${key}`]: true });
+
+/* ── first visit v2, Part G: the nudge-email ask ── */
+
+export const REMINDER = {
+  title: "Want an email when a nudge is due?",
+  text: (first: string) => `If ${first} hasn't replied in time, we'll email you so you can follow up. Only when there's something to do, never more than once a day.`,
+  yes: "Yes, email me",
+  notNow: "Not now",
+  done: "We'll email you when a nudge is due.",
+  settings: "Change in Settings",
+} as const;
+
+/**
+ * Whether to ask (once per account): after the first query, while the account has not answered it, and never when the
+ * writer has already turned nudge emails on. ⚠️ THE STORED LEAF, NOT THE SETTINGS READER: `NOTIFY_DEFAULT.nudges` is
+ * true, so the reader says "on" for an account that never chose anything; only a stored `true` was the writer's choice.
+ */
+export const shouldAskReminder = (i: { queries: number; answered: DashPrefs["reminder"]; storedNudges: unknown }): boolean =>
+  i.queries > 0 && i.answered === null && i.storedNudges !== true;
+
+/** Yes: `notifyPrefs.nudges` as ONE leaf (Settings saves the whole map from its reader; every other key is kept). */
+export const REMINDER_YES: UserPaths = { "notifyPrefs.nudges": true, [`${ROOT}.reminder`]: "yes" };
+export const REMINDER_NOT_NOW: UserPaths = { [`${ROOT}.reminder`]: "not_now" };
+
+/** "Tessa" — the first word of the agent's name, or "the agent" when the record has none. */
+export const firstNameOf = (name: string | null | undefined): string => (name ?? "").trim().split(/\s+/)[0] || "the agent";
 
 /* ── the tips ───────────────────────────────────────────────────────────────────────────────────── */
 
@@ -114,10 +267,33 @@ export const stepTip = (i: number, d: number, n: number): number => (n <= 0 ? 0 
 /* ── Getting started, on the desktop task card ──────────────────────────────────────────────────── */
 
 /** The answer decides the order: an existing querier brings their queries in before building a contact list. */
-export const gsOrder = (path: StartPath): GettingStartedKey[] =>
-  path === "yes" ? ["manuscript", "query", "agent", "materials", "comps"] : ["manuscript", "agent", "query", "materials", "comps"];
+export const gsOrder = (path: StartPath | null): GsKey[] =>
+  path === "querying" ? ["manuscript", "query", "agent", "materials", "comps"]
+    : path === "writing" || path === "revising" ? ["manuscript", "comps", "agent", "letter", "ready"]
+      : ["manuscript", "agent", "query", "materials", "comps"];
 
-export type GsLink = "manuscript" | "agent" | "import" | "log" | "materials" | "comps";
+/**
+ * The desktop's row keys: the shared five (`lib/dashEmpty`, which the phone reads too and which this pack leaves alone)
+ * and the still-writing path's two of its own (first visit v2, Part C): start the query letter, and say it's ready.
+ */
+export type GsKey = GettingStartedKey | "letter" | "ready";
+
+export interface GsDoneInput {
+  /** the shared rows' done-states (`gettingStartedRows`) */
+  shared: readonly { key: GettingStartedKey; done: boolean }[];
+  /** a query-letter version is saved for this manuscript */
+  letter: boolean;
+}
+
+/**
+ * Each row's done-state, derived from records (Part C). The shared keys keep the shared rule — the comps row ticks at
+ * `COMPS_TARGET` titles on either path. "Start your query letter" ticks once a query-letter version is saved; "Tell us
+ * when it's ready" is never done on the writing path, because the moment it is true the path is the ready one.
+ */
+export const gsRowDone = (key: GsKey, i: GsDoneInput): boolean =>
+  key === "letter" ? i.letter : key === "ready" ? false : i.shared.find((r) => r.key === key)?.done ?? false;
+
+export type GsLink = "manuscript" | "agent" | "import" | "log" | "materials" | "comps" | "discover" | "letter" | "ready";
 
 export interface GsRowCopy { deed: string; note: string; link: string; go: GsLink }
 
@@ -126,15 +302,21 @@ export interface GsRowCopy { deed: string; note: string; link: string; go: GsLin
  * tick checks (`PACKAGE_MATERIALS`, two since D9) — the shared deed still names an opening sample the tick no
  * longer asks for, and is the phone's to change.
  */
-export const gsCopy = (key: GettingStartedKey, path: StartPath): GsRowCopy => {
+export const gsCopy = (key: GsKey, path: StartPath | null): GsRowCopy => {
+  const writing = path === "writing" || path === "revising";
   switch (key) {
     case "manuscript": return { deed: "Add your first manuscript", note: "Even a working title and a word count is enough to start.", link: "Add a manuscript", go: "manuscript" };
-    case "agent": return { deed: "Add an agent to your contact list", note: "Even one is enough to start. Discover has UK agents to browse.", link: "Add an agent", go: "agent" };
-    case "query": return path === "yes"
+    case "agent": if (writing) return { deed: "Shortlist your first agent", note: "Browse Discover for agents who take on books like yours.", link: "Browse Discover", go: "discover" };
+      return { deed: "Add an agent to your contact list", note: "Even one is enough to start. Discover has UK agents to browse.", link: "Add an agent", go: "agent" };
+    case "query": return path === "querying"
       ? { deed: "Import or log your queries", note: "Bring your tracker across, or log each query as you send it.", link: "Import your tracker", go: "import" }
       : { deed: "Log your first query", note: "When you've sent it, log the date and what went with it.", link: "Log a query", go: "log" };
     case "materials": return { deed: "Add your query letter and synopsis", note: "So each query records exactly what was sent.", link: "Add materials", go: "materials" };
-    case "comps": return { deed: "Add three comparable titles", note: "Most agents ask for them; they go straight into your packages.", link: "Add comps", go: "comps" };
+    case "comps": return writing
+      ? { deed: "Add three comparable titles", note: "Books like yours, out in the last few years. Agents ask for them, and they shape your shortlist.", link: "Add comparable titles", go: "comps" }
+      : { deed: "Add three comparable titles", note: "Most agents ask for them; they go straight into your packages.", link: "Add comps", go: "comps" };
+    case "letter": return { deed: "Start your query letter", note: "A first draft is plenty. You can keep versions as it changes.", link: "Start a letter", go: "letter" };
+    case "ready": return { deed: "Tell us when it's ready to query", note: "Then the dashboard switches to sending and tracking queries.", link: "It's ready", go: "ready" };
     default: {
       const unhandled: never = key;
       return unhandled;

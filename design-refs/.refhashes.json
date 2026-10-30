@@ -981,7 +981,8 @@
     "design-refs/dashboard-feed-v1/screens/03-feed-agents-1512@2x.png": "521a5c8c7afc47faaf577b1c386357dab64d73a0ec22c76dad86b11a2cd51be5",
     "design-refs/dashboard-feed-v1/screens/04-queries-closed-1280@2x.png": "409c01aaf86fe6c18a8c5fcee2dc3ed6afa1dbca962d75d517cbaf24497446fb",
     "design-refs/dashboard-feed-v1/screens/04-queries-closed-1512@2x.png": "af261488655f53d687c1749cb161bb3b08be55c4991e9bdc01926f43006e27b1",
-    "design-refs/dashboard-feed-v1/screens/05-sidebar-expanded-1512@2x.png": "02407636bfb3bfebb9c83a8954f34c63d295c6ae20e1b065c181a68d626f153f"
+    "design-refs/dashboard-feed-v1/screens/05-sidebar-expanded-1512@2x.png": "02407636bfb3bfebb9c83a8954f34c63d295c6ae20e1b065c181a68d626f153f",
+    "design-refs/dashboard-first-visit-v2/dashboard-first-visit-v2.html": "2533c753b628983794092d1b9b73c75cc69cd48363b1ae44bb8ab2ed609a31a8"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",

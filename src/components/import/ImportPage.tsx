@@ -15,7 +15,8 @@ import { importAgeCategory } from "../../lib/ageCategories";
 import { useIsMobile } from "../shell/mobileChrome";
 import { ImportDoorsPhone } from "../phone/pages/ImportDoorsPhone";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { BookStep } from "../onboarding/BookStep";
 import { ManuscriptFieldsState, emptyManuscriptFields } from "../onboarding/ManuscriptFields";
 import { ImportCancelConfirm } from "./ImportCancelConfirm";
@@ -115,6 +116,38 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
       return res.id;
     });
   };
+
+  /* ── Dashboard first visit v2 (Part F): "Carry on checking" opens /import?resume=1 ──
+     The kept review is read once, the flow reopens it at the step and row it was left on (its manuscript made the
+     active one first, so the import attaches where it was going), and the parameter comes off the URL. This page
+     stays mounted, so it answers the parameter whenever it arrives, not only on mount. */
+  const loc = useLocation();
+  const navigate = useNavigate();
+  const resumeAsked = !lab && new URLSearchParams(loc.search).get("resume") === "1";
+  /* "Start again with a different file" (the dashboard's resume card) deletes the draft and arrives here asking for
+     Smart Import's upload: the picker opens, inside the press's activation window */
+  const startAsked = !lab && new URLSearchParams(loc.search).get("start") === "smart";
+  useEffect(() => {
+    if (!startAsked) return;
+    navigate("/import", { replace: true });
+    setView("tiles");
+    start("smart");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startAsked]);
+  useEffect(() => {
+    if (!resumeAsked || !currentUser) return;
+    let live = true;
+    /* loaded when first needed: it brings Firebase, and this page mounts in labs that have none */
+    void import("../../lib/importDraft").then((m) => m.loadDraft(currentUser.id)).then((d) => {
+      if (!live) return;
+      navigate("/import", { replace: true });
+      if (!d) return;
+      if (d.meta.manuscriptId) { try { window.localStorage.setItem(ACTIVE_MS_KEY, d.meta.manuscriptId); } catch { /* private mode */ } }
+      setView("tiles"); setBook(null);
+      flowRef.current?.resume(d);
+    }).catch(() => { if (live) navigate("/import", { replace: true }); });
+    return () => { live = false; };
+  }, [resumeAsked, currentUser, navigate]);
 
   /* ── Leaving part-way ── "Cancel" asks with the drawer's own words; Discard drops the read file. */
   const [asking, setAsking] = useState(false);

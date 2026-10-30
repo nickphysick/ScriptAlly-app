@@ -12,14 +12,13 @@
  * ⚠️ EVERY LINK OPENS THE FLOW THAT DOES THE THING; nothing here writes.
  */
 import React from "react";
-import type { GettingStartedKey } from "../../../lib/dashEmpty";
-import { gsCopy, type GsLink, type StartPath } from "../../../lib/dashFirstVisit";
+import { gsCopy, type GsKey, type GsLink, type StartPath } from "../../../lib/dashFirstVisit";
 
-export interface GsRow { key: GettingStartedKey; done: boolean }
+export interface GsRow { key: GsKey; done: boolean }
 
 export const gsDone = (rows: readonly GsRow[]): number => rows.filter((r) => r.done).length;
 
-export const GettingStartedList: React.FC<{ rows: readonly GsRow[]; path: StartPath; onGo: (go: GsLink) => void }> = ({ rows, path, onGo }) => {
+export const GettingStartedList: React.FC<{ rows: readonly GsRow[]; path: StartPath | null; onGo: (go: GsLink) => void }> = ({ rows, path, onGo }) => {
   const cur = rows.findIndex((r) => !r.done);
   return (
     <ul className="fv1-gs" data-fv1="gs" data-path={path}>

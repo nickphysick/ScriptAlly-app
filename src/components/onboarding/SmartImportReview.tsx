@@ -25,7 +25,8 @@
  * now it must be named or removed. A removed one is listed in the skipped-rows notice exactly as
  * the set-aside one was.
  */
-import React, { useState, useRef, useMemo, useCallback } from "react";
+import React, { useState, useRef, useMemo, useCallback, useEffect } from "react";
+import type { ReviewSnapshot } from "../../lib/importDraftModel";
 import { queryOriginLine } from "../../lib/importLabels";
 import "./importFlow.css";
 import { SmartImportResult, ReviewReasonCode } from "../../types/smartImport";
@@ -148,22 +149,27 @@ export interface SmartImportReviewProps {
   onImport?: (result: SmartImportResult, left?: { setAside: { status: string; sentDate: string | null }[] }) => void | Promise<void>;
   /** A host with a way out of its own (the Import page) passes this; set-up passes none and no link is drawn. */
   onCancel?: () => void;
+  /** Dashboard first visit v2 (Part F): start from a kept draft's working model and step, not a fresh read. The
+   *  answer deck then opens on the first row still asking something — where the writer left off. */
+  resume?: ReviewSnapshot;
+  /** Dashboard first visit v2 (Part F): the working model after every change, for the host to keep as a draft */
+  onChange?: (snap: ReviewSnapshot) => void;
 }
 
 type Step = "duplicates" | "agents" | "queries";
 
-export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, manuscriptTitle, onBack, error, onImport, onCancel }) => {
+export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, manuscriptTitle, onBack, error, onImport, onCancel, resume, onChange }) => {
   const initial = useMemo(() => parseModel(result), [result]);
   // v9: nothing is set aside before the review begins. A row with no agent and no agency is
   // asked about on the agents step.
   const seeded = initial;
-  const [agents, setAgents] = useState<ReviewAgent[]>(seeded.agents);
-  const [queries, setQueries] = useState<ReviewQuery[]>(seeded.queries);
+  const [agents, setAgents] = useState<ReviewAgent[]>(resume?.agents ?? seeded.agents);
+  const [queries, setQueries] = useState<ReviewQuery[]>(resume?.queries ?? seeded.queries);
   // Open on the duplicates step only when the import actually has clusters (never empty).
   // `hadDuplicates` is fixed for the session: it keeps the step reachable again via Agents' Back even
   // after every cluster is resolved (so a mistaken merge can be undone).
   const hadDuplicates = useMemo(() => initial.agents.some((a) => a.mergeWith.length > 0 && !a.mergeResolved), [initial]);
-  const [screen, setScreen] = useState<Step>(hadDuplicates ? "duplicates" : "agents");
+  const [screen, setScreen] = useState<Step>(resume?.screen ?? (hadDuplicates ? "duplicates" : "agents"));
   /* Repeats on a phone: which set is on screen, and each set's held choice (set-up on phones v1). */
   const [dupAt, setDupAt] = useState(0);
   const [, setDupTick] = useState(0);
@@ -175,10 +181,12 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
   // "Change this" / reset can revert a collapse. `reconciled` drives the card's working↔sorted state,
   // keyed by the cluster leader id.
   const reconcileSnapRef = useRef<Record<string, { agents: ReviewAgent[]; queries: ReviewQuery[] }>>({});
-  const [reconciled, setReconciled] = useState<Record<string, { keptId: string; kind: "collapsed" | "split" }>>({});
+  const [reconciled, setReconciled] = useState<Record<string, { keptId: string; kind: "collapsed" | "split" }>>(resume?.reconciled ?? {});
   const [openId, setOpenId] = useState<string | null>(null);
   /* Rows whose details the writer changed in the panel: "✓ Details added" and "Edit details". */
-  const [touched, setTouched] = useState<Set<string>>(new Set());
+  const [touched, setTouched] = useState<Set<string>>(() => new Set(resume?.touched ?? []));
+  /* Dashboard first visit v2 (Part F): every change is handed to the host, which keeps it as the draft */
+  useEffect(() => { onChange?.({ agents, queries, reconciled, touched: [...touched], screen }); }, [agents, queries, reconciled, touched, screen, onChange]);
   const touch = (id: string) => setTouched((t) => (t.has(id) ? t : new Set(t).add(id)));
   const [openFaqs, setOpenFaqs] = useState<Set<number>>(new Set());
   const toggleFaq = (i: number) => setOpenFaqs((prev) => { const next = new Set(prev); if (next.has(i)) next.delete(i); else next.add(i); return next; });

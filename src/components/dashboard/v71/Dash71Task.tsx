@@ -18,8 +18,6 @@
  */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { ListAction, ListItem, ListPlan } from "../../../lib/dashList";
-import type { GsLink, StartPath } from "../../../lib/dashFirstVisit";
-import { GettingStartedList, gsDone, type GsRow } from "../fv1/GettingStarted";
 import { DWELL_MS, segmentWindow, taskCardModel, type TaskCardModel, type TaskCtx } from "../../../lib/dashTaskCard";
 import "../v116/dash116Frame.css";
 
@@ -140,14 +138,6 @@ const Body: React.FC<{ m: TaskCardModel; probe?: boolean }> = ({ m, probe = true
   </>
 );
 
-/** DASHBOARD FIRST VISIT v1 — what the Getting started page draws (the desktop's checklist), when the plan holds it. */
-export interface TaskGs {
-  rows: readonly GsRow[];
-  path: StartPath;
-  onGo: (go: GsLink) => void;
-  /** "Hide" in the band — offered once the first query exists; absent before it */
-  onHide?: () => void;
-}
 
 export const Dash71Task: React.FC<{
   loading: boolean;
@@ -156,11 +146,13 @@ export const Dash71Task: React.FC<{
   /** opens where the task is completed, never writes */
   onView: (a: ListAction) => void;
   innerRef?: React.Ref<HTMLElement>;
-  gs?: TaskGs;
   /** Dashboard feed v1 (Part E): "next" is the right column's "Your next task" card; absent → the kind band (every
    *  other mount, the first-visit page included). The plan, the models and `onView` are the same in both. */
   look?: "band" | "next";
-}> = ({ loading, plan, ctx, onView, innerRef, gs, look = "band" }) => {
+  /** Dashboard first visit v2 (Part A): the "next" look's last page names this as what comes after it ("finish getting
+   *  started") while the Getting started sheet is open. Absent → the last page has no "Then:". */
+  thenLast?: string;
+}> = ({ loading, plan, ctx, onView, innerRef, look = "band", thenLast }) => {
   const items: ListItem[] = plan.items;
   const labelOf = useMemo(() => {
     const map = new Map<string, string>();
@@ -204,7 +196,7 @@ export const Dash71Task: React.FC<{
     else if (innerRef) (innerRef as React.MutableRefObject<HTMLElement | null>).current = el;
   };
 
-  if (look === "next") return <NextTask loading={loading} models={models} items={items} at={at} step={step} onView={onView} setRefs={setRefs} gs={gs} counts={counts} />;
+  if (look === "next") return <NextTask loading={loading} models={models} items={items} at={at} step={step} onView={onView} setRefs={setRefs} counts={counts} thenLast={thenLast} />;
 
   if (loading) {
     return (
@@ -229,9 +221,6 @@ export const Dash71Task: React.FC<{
      what came next, so the last of four housekeeping pages read "Then: add typical reply times…" — the page the
      writer had started on. */
   const next = thenIndex(n, at) !== null ? models[thenIndex(n, at)!] : null;
-  /* the Getting started page draws its checklist, its done count and its Hide (fv1) */
-  const isGsAt = (i: number) => !!gs && items[i]?.group === "start";
-  const isGs = isGsAt(at);
   const win = segmentWindow(n, at);
   return (
     <section
@@ -259,8 +248,6 @@ export const Dash71Task: React.FC<{
       {/* v93: the head is the kind band — its title, and the pager at the right */}
       <div className="d71-th" data-d71="band" data-ink={m.bandInk === "#ffffff" ? "light" : "dark"}>
         <span className="d71-bandttl" data-d71="band-title">{m.bandTitle}</span>
-        {isGs && gs!.onHide && <button type="button" className="fv1-hide" data-fv1="gs-hide" onClick={gs!.onHide}>Hide</button>}
-        {isGs && n === 1 && <span className="fv1-gsn" data-fv1="gs-count">{gsDone(gs!.rows)} of {gs!.rows.length}</span>}
         {n > 1 && (
           <span className="d71-pos" data-d71="pos">
             <button type="button" aria-label="Previous task" data-d71="prev" onClick={() => step(-1)}>‹</button>
@@ -285,24 +272,24 @@ export const Dash71Task: React.FC<{
         /* every item in one cell: the card is the tallest item's height and never jumps (v77) */
         <div className="d71-tbstack" data-d71="stack">
           {models.map((x, i) => i === at ? (
-            <div className={`d71-tb${isGsAt(i) ? " fv1-gstb" : ""}`} key={`${x.key}-${at}`} data-d71="body" data-kind={isGsAt(i) ? "start" : x.kind}>
-              {isGsAt(i) ? <GettingStartedList rows={gs!.rows} path={gs!.path} onGo={gs!.onGo} /> : <Body m={x} />}
+            <div className="d71-tb" key={`${x.key}-${at}`} data-d71="body" data-kind={x.kind}>
+              <Body m={x} />
             </div>
           ) : (
-            <div className={`d71-tb is-ghost${isGsAt(i) ? " fv1-gstb" : ""}`} key={`ghost-${x.key}`} data-kind={isGsAt(i) ? "start" : x.kind} aria-hidden="true" inert={true} style={{ visibility: "hidden" }}>
-              {isGsAt(i) ? <GettingStartedList rows={gs!.rows} path={gs!.path} onGo={() => {}} /> : <Body m={x} probe={false} />}
+            <div className="d71-tb is-ghost" key={`ghost-${x.key}`} data-kind={x.kind} aria-hidden="true" inert={true} style={{ visibility: "hidden" }}>
+              <Body m={x} probe={false} />
             </div>
           ))}
         </div>
       ) : (
-        <div className={`d71-tb${isGs ? " fv1-gstb" : ""}`} key={`${m.key}-${at}`} data-d71="body" data-kind={isGs ? "start" : m.kind}>
-          {isGs ? <GettingStartedList rows={gs!.rows} path={gs!.path} onGo={gs!.onGo} /> : <Body m={m} />}
+        <div className="d71-tb" key={`${m.key}-${at}`} data-d71="body" data-kind={m.kind}>
+          <Body m={m} />
         </div>
       )}
-      {!isGs && <div className="d71-tf" data-d71="foot">
+      <div className="d71-tf" data-d71="foot">
         <button type="button" className="d71-view" data-d71="view" onClick={() => onView(items[at].action)}>{VIEW_TASK} →</button>
         {next && <span className="d71-then" data-d71="then">Then: {next.plain}</span>}
-      </div>}
+      </div>
     </section>
   );
 };
@@ -332,9 +319,9 @@ const NextTask: React.FC<{
   step: (d: number) => void;
   onView: (a: ListAction) => void;
   setRefs: (el: HTMLElement | null) => void;
-  gs?: TaskGs;
   counts: string;
-}> = ({ loading, models, items, at, step, onView, setRefs, gs, counts }) => {
+  thenLast?: string;
+}> = ({ loading, models, items, at, step, onView, setRefs, counts, thenLast }) => {
   const n = models.length;
   if (loading) {
     return (
@@ -352,14 +339,12 @@ const NextTask: React.FC<{
       </section>
     );
   }
-  const isGsAt = (i: number) => !!gs && items[i]?.group === "start";
   const m = models[at];
   return (
     <section ref={setRefs} className="df1-task" data-d71="task" data-loading="0" data-kind={m.kind} data-key={m.key} data-group={items[at].group}
       data-counts={counts} data-query={m.queryId ?? undefined} data-index={at} role="region" aria-label="Your tasks">
       <div className="df1-tkh" data-d71="band">
         <span className="df1-tkttl">Your next task</span>
-        {isGsAt(at) && gs!.onHide && <button type="button" className="fv1-hide" data-fv1="gs-hide" onClick={gs!.onHide}>Hide</button>}
         {n > 1 && (
           <span className="df1-pg" data-d71="pos">
             <button type="button" aria-label="Previous task" data-d71="prev" onClick={() => step(-1)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg></button>
@@ -375,12 +360,9 @@ const NextTask: React.FC<{
           const line = taskLine(x);
           const words = `${line.pre}${line.who}${line.post}`;
           return (
-            <div key={x.key} className={`df1-tkb${on ? "" : " is-ghost"}`} data-d71={on ? "body" : undefined} data-kind={isGsAt(i) ? "start" : x.kind}
+            <div key={x.key} className={`df1-tkb${on ? "" : " is-ghost"}`} data-d71={on ? "body" : undefined} data-kind={x.kind}
               aria-hidden={on ? undefined : true} inert={on ? undefined : true}>
-              {isGsAt(i) ? (
-                <GettingStartedList rows={gs!.rows} path={gs!.path} onGo={on ? gs!.onGo : () => {}} />
-              ) : (
-                <>
+              <>
                   <div className="df1-tkrow">
                     <button type="button" className="df1-box" data-df1={on ? "task-box" : undefined} aria-label={`${DO_THIS_TASK}: ${words}`} onClick={() => onView(items[i].action)} />
                     <div className="df1-tkw">
@@ -390,9 +372,9 @@ const NextTask: React.FC<{
                     </div>
                   </div>
                   <button type="button" className="df1-go" data-d71={on ? "view" : undefined} onClick={() => onView(items[i].action)}>{DO_THIS_TASK} →</button>
-                  {next && <p className="df1-then" data-d71={on ? "then" : undefined}>Then: {next.plain}</p>}
-                </>
-              )}
+                  {next ? <p className="df1-then" data-d71={on ? "then" : undefined}>Then: {next.plain}</p>
+                    : thenLast ? <p className="df1-then" data-d71={on ? "then" : undefined}>Then: {thenLast}</p> : null}
+              </>
             </div>
           );
         })}

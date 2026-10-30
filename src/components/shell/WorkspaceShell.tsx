@@ -31,6 +31,7 @@ import {
   Book, ChevronDown, ChevronsUpDown,
 } from "lucide-react";
 import { useScriptAllyDb } from "../../lib/db";
+import { activeManuscriptOf, eventPath, logEvent } from "../../lib/events";
 import { EdgeFadeScroll } from "../EdgeFadeScroll";
 import { planLine, resolveScopedManuscript } from "../../lib/shellSidebar";
 import {
@@ -63,6 +64,7 @@ import "./inkShell.css";
 import { SheetLip } from "./SheetLip";
 import { INK_THEME_COLOR } from "./inkTokens";
 import { registeredPageGuide, requestPageGuide, subscribePageGuide } from "../../lib/pageGuide";
+import { subscribeTourReplay, tourReplay as readTourReplay } from "../../lib/dashTour";
 import { setBarSlot } from "../../lib/barSlot";
 import { claimTopbar, onTopbarClaim, releaseTopbar } from "../../lib/popoverLayer";
 import { AnchoredPortal, useAnchoredPopover } from "./useAnchoredPopover";
@@ -168,6 +170,16 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   /* Help Centre v1 — the trail the Help Centre reads to ring the page the writer came from */
   useEffect(() => { noteRoute(pathname); }, [pathname]);
   const { manuscripts, queries, agents, currentUser, updateUserProfile } = useScriptAllyDb();
+  /* Dashboard first visit v2 (Part I): the first app load of each calendar day (Europe/London), per writer, per device */
+  useEffect(() => {
+    const uid = currentUser?.id;
+    if (!uid) return;
+    const day = new Date().toLocaleDateString("en-CA", { timeZone: "Europe/London" });
+    const key = `sa.openedApp.${uid}`;
+    try { if (window.localStorage.getItem(key) === day) return; window.localStorage.setItem(key, day); } catch { return; }
+    logEvent(uid, "opened_app", eventPath(currentUser, activeManuscriptOf(manuscripts)));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser?.id]);
 
   const hit = useMemo(() => shellHitFor(sections, pathname, search), [sections, pathname, search]);
 
@@ -294,6 +306,13 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
    */
   const [helpOpen, setHelpOpen] = useState(false);
   const [guidePage, setGuidePage] = useState<string | null>(registeredPageGuide());
+  /* Dashboard first visit v2 (Part D): the dashboard's tour replay, while it registers one. Read on subscribe as well
+     as on notification — a child's effect registers before this one subscribes. */
+  const [tourReplay, setTourReplay] = useState<(() => void) | null>(() => readTourReplay());
+  useEffect(() => {
+    setTourReplay(() => readTourReplay());
+    return subscribeTourReplay(() => setTourReplay(() => readTourReplay()));
+  }, []);
   const helpWrapRef = useRef<HTMLSpanElement>(null);
   const helpBtnRef = useRef<HTMLButtonElement>(null);
   const helpMenuRef = useRef<HTMLDivElement>(null);
@@ -1073,6 +1092,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                       pageName={pageName?.name ?? null}
                       legacyGuide={!!guidePage}
                       onLegacyGuide={requestPageGuide}
+                      onTour={tourReplay ?? undefined}
                       onClose={(focusHelp) => { setHelpOpen(false); if (focusHelp) helpBtnRef.current?.focus(); }}
                       onGo={go}
                       onFeedback={onOpenFeedback}

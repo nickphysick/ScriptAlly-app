@@ -1300,6 +1300,77 @@ service cloud.firestore {
     // ROUTE: Founding writer stats (Dashboard v93) — NO client writes. The foundingStats functions recompute every
     // writer's contributions, tier and standing from betaFeedback (Admin SDK) on any feedback write and nightly. A
     // writer reads their OWN doc; an admin reads all.
+    // ROUTE: importDrafts — Dashboard first visit v2, Part F. A Smart Import review in progress, kept so a writer who
+    // leaves halfway can pick up where they left off. ONE live draft per writer, at their own uid; its JSON payload is
+    // split into ordered parts (`parts/{n}`) so a long file never meets the 1MB document limit. ONLY THE OWNER reads or
+    // writes it. `updatedAt` must be the server's time, so "kept for 7 days from the last change" (the daily clean-up,
+    // functions/src/importDrafts.ts) is measured by a clock the client cannot set. Never the original file.
+    match /importDrafts/{userId} {
+      allow read, delete: if isOwner(userId);
+      allow create, update: if isOwner(userId) && isValidImportDraft(incoming());
+      match /parts/{part} {
+        allow read, delete: if isOwner(userId);
+        allow create, update: if isOwner(userId)
+          && part.matches('^[0-9]{1,3}$')
+          && incoming().keys().hasOnly(['i', 'data'])
+          && incoming().i is int && incoming().i >= 0 && incoming().i < 1000
+          && incoming().data is string && incoming().data.size() <= 900000;
+      }
+    }
+
+    function isValidImportDraft(d) {
+      return d.keys().hasOnly(['uid', 'fileName', 'source', 'manuscriptId', 'step', 'agentsChecked', 'agentsTotal',
+          'queriesChecked', 'queriesTotal', 'queriesStarted', 'parts', 'startedAt', 'updatedAt', 'version'])
+        && d.uid == request.auth.uid
+        && d.fileName is string && d.fileName.size() <= 300
+        && d.source in ['smart', 'template']
+        && (d.manuscriptId == null || (d.manuscriptId is string && d.manuscriptId.size() <= 128))
+        && d.step in ['duplicates', 'agents', 'queries']
+        && d.agentsChecked is int && d.agentsTotal is int && d.queriesChecked is int && d.queriesTotal is int
+        && d.agentsChecked >= 0 && d.agentsTotal >= d.agentsChecked && d.queriesChecked >= 0 && d.queriesTotal >= d.queriesChecked
+        && d.queriesStarted is bool
+        && d.parts is int && d.parts >= 1 && d.parts <= 1000
+        && d.startedAt is string && d.startedAt.size() <= 40
+        && d.updatedAt == request.time
+        && d.version == 1;
+    }
+
+    // ROUTE: events — Dashboard first visit v2, Part I. The app records each first-visit step for the founder's desk.
+    // CREATE ONLY, by the signed-in writer, for their own uid, at the server's time; NOBODY READS IT FROM THE CLIENT
+    // (the desk reads through the Admin SDK). Exactly five fields; `props` holds only named keys, each an enum or a count
+    // — never free text a writer typed.
+    match /events/{eventId} {
+      allow read, update, delete: if false;
+      allow create: if isSignedIn() && isValidId(eventId) && isValidEvent(incoming());
+    }
+
+    function isValidEventPath(p) {
+      return p in ['querying', 'ready', 'writing', 'revising'];
+    }
+
+    function isValidEvent(e) {
+      return e.keys().hasOnly(['uid', 'name', 'at', 'path', 'props'])
+        && e.keys().hasAll(['uid', 'name', 'at', 'path', 'props'])
+        && e.uid == request.auth.uid
+        && e.name in ['signed_up', 'dashboard_first_seen', 'path_changed', 'tour_finished', 'tour_skipped',
+            'import_started', 'import_left', 'import_resumed', 'import_finished',
+            'first_agent', 'first_query', 'first_comp', 'first_letter',
+            'reminder_answered', 'getting_started_step', 'getting_started_done', 'getting_started_hidden',
+            'example_opened', 'opened_app']
+        && e.at == request.time
+        && isValidEventPath(e.path)
+        && e.props is map
+        && e.props.keys().hasOnly(['path', 'from', 'to', 'stop', 'step', 'agents', 'queries', 'answer'])
+        && (!('path' in e.props) || isValidEventPath(e.props.path))
+        && (!('from' in e.props) || isValidEventPath(e.props.from))
+        && (!('to' in e.props) || isValidEventPath(e.props.to))
+        && (!('stop' in e.props) || (e.props.stop is int && e.props.stop >= 1 && e.props.stop <= 3))
+        && (!('step' in e.props) || e.props.step in ['manuscript', 'agent', 'query', 'materials', 'comps', 'letter', 'ready', 'duplicates', 'agents', 'queries'])
+        && (!('agents' in e.props) || (e.props.agents is int && e.props.agents >= 0 && e.props.agents <= 100000))
+        && (!('queries' in e.props) || (e.props.queries is int && e.props.queries >= 0 && e.props.queries <= 100000))
+        && (!('answer' in e.props) || e.props.answer in ['yes', 'not_now']);
+    }
+
     match /foundingStats/{userId} { allow read: if isAdmin() || (isSignedIn() && request.auth.uid == userId); allow write: if false; }
 
     // ROUTE: Weekly pulse (Dashboard v59) — NO client writes. The founding writer panel's faces post

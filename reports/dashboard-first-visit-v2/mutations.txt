@@ -1,0 +1,41 @@
+== A1
+  ✗ A1 · pre 1512 — the middle column's first card: empty-feed
+  ✗ A1 · pre 1512 — card 268,520.15625 · column 855.3125,119.75
+  ✗ A1 · pre 1280 — the middle column's first card: empty-feed
+  ✗ A1 · pre 1280 — card 268,520.15625 · column 745.875,119.75
+== A2
+  ✗ A2 · Ready to Query — GETTING READY
+  ✗ A2 · Drafting — STILL WRITING
+  ✗ A2 · Revising — IN REVISION
+  ✗ A2 · querying — QUERYING
+== B1
+  ✗ B1 · said — You said you've already sent some queries for DB60 Pre-query. Not right? Change it
+      36 |     for (const r of this.rows.filter((x) => !x.ok)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+  1 failed
+  1 passed (33.9s)
+== C1
+  ✗ C1 · write — status Drafting, stage starting
+      36 |     for (const r of this.rows.filter((x) => !x.ok)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+  1 failed
+  1 passed (38.8s)
+== D1
+  1 failed
+  1 passed (5.3m)
+== F1
+  1 failed
+  1 passed (1.3m)
+== G1
+  ✗ G1 · write — weeklyDigest kept (undefined)
+  ✗ G1 · write — no other key: {"nudges":true}
+      36 |     for (const r of this.rows.filter((x) => !x.ok)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+  1 failed
+== H1
+  ✗ H1 · closed — still the goal sheet after a reload
+  ✗ H1 · closed — the flag is stored
+      36 |     for (const r of this.rows.filter((x) => !x.ok)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+  1 failed
+== E1 (source: the example given the writer's own user and writer, inert and the Scout guard removed)
+  ✗ E1 · writes — writes to the writer's data while open: 1 ["count=1&ofs=2&req0___data__={\"streamToken\":\"EAEZEGhCAoH0tbU=\",\"writes\":[{\"update\":{\"name\":\"projects/scriptally-dev/databases/(default)/documents/users/LS4ymFFCEvhN82advZQJ5zkr7sv2\",\"fields\":{\"notifyPrefs\":{\"mapValue\":{\"fields\":{\"scout\":{\"booleanValue\":true}}}}}},\"updateMas
+      36 |     for (const r of this.rows.filter((x) => !x.ok)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+  1 failed
+  1 passed (34.7s)

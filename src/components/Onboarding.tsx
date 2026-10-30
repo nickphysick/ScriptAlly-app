@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { answerFor } from "../lib/dashFirstVisit";
+import { logEvent } from "../lib/events";
 import React, { useState, useRef } from "react";
 import { motion } from "motion/react";
 import { useScriptAllyDb } from "../lib/db";
@@ -321,6 +323,9 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   const finishOnboarding = async () => {
     localStorage.removeItem(STORAGE_KEY);
     persistProfile({ onboardingComplete: true });
+    /* Dashboard first visit v2 (Part I): the account's sign-up, with the path its answers chose */
+    const path = answerFor({ stage: queryingStage ?? currentUser?.queryingStage, status: aStart?.status, legacy: null }) ?? "ready";
+    logEvent(currentUser?.id, "signed_up", path, { path });
     onComplete();
   };
 
