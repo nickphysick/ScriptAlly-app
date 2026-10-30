@@ -28,6 +28,8 @@ import { validateSmartImport } from "../../lib/smartImport";
 import { applyImportUpdate, PROGRESS_START, type LoaderProgress } from "../../lib/importEstimate";
 import { CommitOutcome } from "../../lib/smartImportCommit";
 import { ScatterSettleLoader, LoaderCard } from "./ScatterSettleLoader";
+import { summaryModel } from "../../lib/importSummary";
+import { reviewTallies } from "../../lib/smartImportReviewModel";
 import { ImportingLoader } from "./ImportingLoader";
 import { ImportOverview } from "./ImportOverview";
 import { SmartImportReview } from "./SmartImportReview";
@@ -42,6 +44,13 @@ const spy = (name: string) => (arg?: unknown) => {
 };
 
 export const LAB_FILE = "my agents FINAL v3.csv";
+/** The phone's reading piles, for the lab's reading mocks: the default fixture's own overview totals
+ *  (the real flow, `s=flow`, reads them from its own result through `ImportFlow`). */
+const labPiles = (complete: boolean) => {
+  if (!complete) return null;
+  const m = summaryModel(REVIEW_FIXTURE); const t = reviewTallies(m.agents, m.queries);
+  return { agents: t.agents.total, queries: t.queries.total };
+};
 export const labFixture = (fx: string | null): SmartImportResult =>
   fx === "dupes" ? REVIEW_FIXTURE_DUPES : fx === "clear" ? REVIEW_FIXTURE_CLEAR : fx === "gate" ? REVIEW_FIXTURE_GATE : fx === "nameless" ? REVIEW_FIXTURE_NAMELESS : REVIEW_FIXTURE;
 
@@ -82,7 +91,7 @@ const LabReadingStream: React.FC<{ rows: number; speed: number; hold: string | n
     return () => timers.forEach(clearTimeout);
   }, [rows, speed, hold, silent]);
   const cards: LoaderCard[] = SAMPLE.map((s) => (complete ? { ...s } : { messy: s.messy }));
-  return <ScatterSettleLoader cards={cards} complete={complete} total={rows} onProceed={spy("proceed")} onTimeout={spy("timeout")} progress={progress} />;
+  return <ScatterSettleLoader cards={cards} complete={complete} total={rows} onProceed={spy("proceed")} onTimeout={spy("timeout")} progress={progress} fileName={LAB_FILE} piles={labPiles(complete)} />;
 };
 
 const LabReadingLoop: React.FC<{ hold: string | null }> = ({ hold }) => {
@@ -97,7 +106,7 @@ const LabReadingLoop: React.FC<{ hold: string | null }> = ({ hold }) => {
     return () => { clearInterval(id); clearTimeout(inner); };
   }, [hold]);
   const cards: LoaderCard[] = SAMPLE.map((s) => (complete ? { ...s } : { messy: s.messy }));
-  return <ScatterSettleLoader cards={cards} complete={complete} total={28} onProceed={spy("proceed")} onTimeout={spy("timeout")} />;
+  return <ScatterSettleLoader cards={cards} complete={complete} total={28} onProceed={spy("proceed")} onTimeout={spy("timeout")} fileName={LAB_FILE} piles={labPiles(complete)} />;
 };
 
 /** A stand-in commit for the lab's whole run: it writes nothing and reports an outcome shaped by the

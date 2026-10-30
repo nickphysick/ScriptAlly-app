@@ -30,7 +30,8 @@ import { SmartImportReview } from "../onboarding/SmartImportReview";
 import { ImportOverview } from "../onboarding/ImportOverview";
 import { ImportingLoader } from "../onboarding/ImportingLoader";
 import { ScatterSettleLoader, LoaderCard } from "../onboarding/ScatterSettleLoader";
-import { fmtDate } from "../../lib/smartImportReviewModel";
+import { fmtDate, reviewTallies } from "../../lib/smartImportReviewModel";
+import { summaryModel } from "../../lib/importSummary";
 import { readTemplateFile, TemplateFlag } from "../../lib/templateImport";
 import { TEMPLATE_FILENAME, downloadTemplate } from "../../lib/templateFile";
 import { buildImportNotice, saveImportNotice } from "../../lib/importNotice";
@@ -374,6 +375,11 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
   }
 
   if (screen === "reading") {
+    /* The phone's two piles end on the overview's own totals (set-up on phones v1): the same
+       `summaryModel` → `reviewTallies` the overview reads, once the result is in. Read only. */
+    const readPiles = validated
+      ? (() => { const m = summaryModel(validated.result); const t = reviewTallies(m.agents, m.queries); return { agents: t.agents.total, queries: t.queries.total }; })()
+      : null;
     const resultQueries = validated?.result.queries ?? [];
     const resultAgents = validated?.result.agents ?? [];
     const cards: LoaderCard[] = rawSample.map((r, i) => {
@@ -393,6 +399,8 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
         onProceed={() => setScreen("overview")}
         onTimeout={() => setScreen("fallback")}
         progress={readProgress}
+        fileName={fileName}
+        piles={readPiles}
       />
     );
   }

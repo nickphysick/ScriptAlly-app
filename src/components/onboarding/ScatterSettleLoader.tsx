@@ -25,6 +25,8 @@ import { QueryStatus } from "../../types";
 import { footBar, type FirstRow, type LoaderProgress, type TimeHold } from "../../lib/importEstimate";
 import { TIP_SHOW_AFTER_MS } from "../../lib/importTips";
 import { ImportTipsCard } from "./ImportTipsCard";
+import { useIsMobile } from "../shell/mobileChrome";
+import { STAGE_NAME } from "../../lib/qcSummary";
 
 
 export interface LoaderCard {
@@ -51,7 +53,16 @@ export interface ScatterSettleLoaderProps {
   /** The read's progress for the foot bar: row total, rows read, phase, and whether the server's
    *  count is arriving. Absent (a host that predates it) reads as a read with no stream. */
   progress?: LoaderProgress;
+  /** Phone only (set-up on phones v1, board 2 1B): the file's name for the line under the heading,
+   *  and the two piles' final counts — the overview's own agents and queries totals, read by the host
+   *  from `summaryModel` → `reviewTallies` once the result is in (null until then). */
+  fileName?: string;
+  piles?: { agents: number; queries: number } | null;
 }
+
+/** One cycle of the phone's falling slips: the ref's 7.7s for its seven rows, shared by however many
+ *  sample rows the file gives, so each slip still has 1/7 of the loop to itself at seven. */
+const SLIP_CYCLE_S = 7.7;
 
 // Scatter slots — offsets (px) from the centre of the stage + a slight rotation + per-card drift
 // (bob amplitude/rotation + a varied duration & delay so each breathes independently). Deterministic.
@@ -143,7 +154,8 @@ export const SCATTER_TIMINGS = { INTRO_MS, FLOOR_MS, TIMEOUT_MS } as const;
  *  slot offset plus half a messy card. The stage scales the spread to its own box below this. */
 const FULL_SPREAD = 332 + CARD_W / 2;
 
-export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards, complete, total, onProceed, onTimeout, progress }) => {
+export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards, complete, total, onProceed, onTimeout, progress, fileName, piles }) => {
+  const isMobile = useIsMobile();
   const reduced = prefersStatic();
   /* ⚠️ POSITIONS ARE MEASURED FROM THE STAGE, NOT THE WINDOW. The loader fills the frame's sheet
      now, which is narrower than the window by the sidebar, so the scatter is scaled to the stage's
@@ -313,6 +325,55 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
   if (underWay && underWayAt.current === null) underWayAt.current = nowMs;
   if (!underWay) underWayAt.current = null;
   const showTips = underWay && underWayAt.current !== null && nowMs - underWayAt.current >= TIP_SHOW_AFTER_MS;
+
+  /* ═══ The phone (set-up on phones v1, board 2 1B; DOCS.readB) ═══
+     The same loader — every timer, the floor, the settle, the tick and `onProceed` above are untouched
+     — drawn as the file's rows falling into two piles. The slips are the file's own sample rows (raw
+     cells until the read returns, then the clean record); the piles count up with the loader's own
+     settle (`resolved` of `n`) to the overview's own totals, so they end where the overview begins. */
+  if (isMobile) {
+    const frac = allShownResolved ? 1 : settling && n > 0 ? resolved / n : 0;
+    const pileOf = (v: number) => Math.round(v * frac);
+    const rowsKnown = p.rowsTotal > 0;
+    const slips = cards.slice(0, 7);
+    const status = bar.right ? `${bar.left} · ${bar.right}` : bar.left;
+    return (
+      <div className="im-bare im-ssl im-sslp" data-im="reading" data-im-state={tick ? "done" : settling ? "settling" : "work"}>
+        <h1 className="im-rdh" data-im="rd-title">Reading your file.</h1>
+        {fileName && <p className="im-rdsub" data-im="rd-file">{fileName}{rowsKnown ? ` · ${p.rowsTotal} rows` : ""}</p>}
+        <div className="im-lane" aria-hidden data-im="lane">
+          {/* ⚠️ THE READER'S MOTION PREFERENCE, NOT `reduced`: that is the desktop's static path, true at
+              every width under 900px, and would have drawn no slips on any phone. */}
+          {!prefersReduced() && slips.map((c, i) => (
+            <div key={i} className="im-slip" data-im="slip" style={{ animationDelay: `${((SLIP_CYCLE_S / slips.length) * i).toFixed(2)}s` }}>
+              <span className="im-slipdisc">{c.status ? <StatusDot status={c.status} overrideSize={18} /> : null}</span>
+              <span className="im-sliptx">
+                <b>{c.name || c.messy}</b>
+                {c.name && <small>{[c.agency, c.status ? (STAGE_NAME as Record<string, string>)[c.status] ?? String(c.status) : null, c.date].filter(Boolean).join(" · ")}</small>}
+              </span>
+            </div>
+          ))}
+        </div>
+        {/* Zero until the read returns: until then nothing is known to be an agent or a query. */}
+        <div className="im-piles" data-im="piles">
+          <div className="im-pile"><b data-im="pile-agents">{piles ? pileOf(piles.agents) : 0}</b><span>agents</span></div>
+          <div className="im-pile"><b data-im="pile-queries">{piles ? pileOf(piles.queries) : 0}</b><span>queries</span></div>
+        </div>
+        <div className="im-rdprog" data-im="strip">
+          <span className="im-rdbar" data-im="track" aria-hidden>
+            {bar.fill === null
+              ? <i key="shim" className="im-ssl-shim" data-im="shimmer" />
+              : <i key="fill" data-im="fill" style={{ width: `${bar.fill}%` }} />}
+          </span>
+          <span className="im-rdtxt" data-im="status" aria-hidden>{status}</span>
+          <span className="sr-only" role="status">
+            {allShownResolved ? READY_TXT : phase === "tidying" ? "Tidying records" : phase === "opening" ? "Opening your file" : "Reading your file"}
+          </span>
+        </div>
+        {showTips && <ImportTipsCard reduced={prefersReduced()} />}
+      </div>
+    );
+  }
 
   return (
     <div className="im-bare im-ssl" data-im="reading" data-im-state={tick ? "done" : settling ? "settling" : "work"}>
