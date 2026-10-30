@@ -10,8 +10,8 @@ Ref: MANIFEST hash 4a819d11…cf6e2, 13/13 OK.
 | A account screens, dead ends, the error page | `711c1207` | committed |
 | B addresses and column matching | `69abc04c` | committed; PLS1 L1–L5 written and green (L1–L3 lab, L4–L5 signed in) |
 | C email drop on a phone | `af75ae97` | committed; behind `emailDropPhoneLive()`, OFF; PLS1 L6 green on the lab |
-| D editing a query | (this commit) | committed; PLS1 L7 green (writes and undoes on the harness account) |
-| E writing materials and building packages | — | |
+| D editing a query | `e934f845` | committed; PLS1 L7 green (writes and undoes on the harness account) |
+| E writing materials and building packages | (this commit) | committed; PLS1 L8, L9 green (write and delete their probes) |
 | F locks, shots and the report | — | |
 
 ## Resuming
@@ -51,3 +51,10 @@ Ref: MANIFEST hash 4a819d11…cf6e2, 13/13 OK.
 - The reply window is the drawer's `writerExpectedDate` (a date at noon), so days from the wheel are stored exactly: no rounding, and Nick's question answers itself.
 - Undo: a query snapshot before each save; a note (its own `journalEntries` document, outside the snapshot) is undone by deleting the entry it added.
 - NOT DONE: the same wheel replacing the presets in the phone log-a-query flow's reply question (Part 4 is on this base). Lift note: `ReplyStep`'s chips + `Wheel` are the parts to share.
+
+## Phase E notes
+- `phone/materials/`: `PhoneLetterEditor` (11A), `PhonePackageFlow` (12A), `PhoneMaterialsHost` (App.tsx, phones only). Both call the package model's own writers (`usePackagesModel`: `saveMaterial`, `newVersionDraft`, `savePackage`, `dupDraft`), so their toasts and Undos are the page's own.
+- STOP (doors only): the phone's material rows and package cards are on `ManuscriptPhone.tsx`, a `Manuscript*` file. The editor and flow open from deep links instead: `/manuscripts?edit=<materialId>`, `/manuscripts?newpackage=1`, `/manuscripts?copy=<packageId>`. What would change in ManuscriptPhone.tsx: an "Edit" button in the read sheet of a letter or synopsis linking to `?edit=<v.id>`; a "New package" button under the Packages heading linking to `?newpackage=1`; a "Make a copy" button in a locked package's read sheet linking to `?copy=<p.id>`.
+- The store is plain text (`ManuscriptVersion.contentDraft`), so the formatting bar shows the word count only; bold/italic/list/quote would print as literal characters elsewhere.
+- Slots map: Letter → `letter`, Synopsis → `synopsis`, Sample pages → `version` (book version), Extras → `other`.
+- The draft autosaves to localStorage (`sa.matDraft.<id>`, try/catch) until Save; Discard asks first when there are changes.

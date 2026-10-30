@@ -17,7 +17,9 @@ import { appendFileSync } from "node:fs";
 import { PHONES, colourSweep, imageSweep, openPhone } from "./pa2Lib";
 import { openRoute } from "./measure";
 import { devDb } from "./devWrite";
-import { doc, getDoc } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, getDocs, updateDoc, deleteField } from "firebase/firestore";
+import { isVersionSent } from "../../src/lib/versionLock";
+import { MS } from "./pa2Lib";
 
 const MUTATE = process.env.PLS1_MUTATE ?? "";
 const BEFORE = process.env.PLS1_BASE_URL ?? "";
@@ -300,6 +302,129 @@ test.describe("PLS1 the last screens on phones", () => {
     expect(due1, "the band's date updates before saving").not.toBe(due0);
     expect(saved.writerExpectedDate, "the wheel saves the drawer's value for that input, days kept").toBe(want);
     expect(after.writerExpectedDate ?? null, "Undo puts the query back").toBe(before.writerExpectedDate ?? null);
+  });
+
+  /** open a phone deep link on the harness manuscript (the model's active manuscript is read from storage) */
+  async function phoneAt(page: Page, path: string) {
+    await openPhone(page, "/manuscripts", PHONES[0]);
+    await page.evaluate((ms) => localStorage.setItem("scriptally_active_manuscript_id", ms), MS);
+    await page.goto(`${origin()}${path}`);
+    await page.locator('[data-pmx]').first().waitFor({ timeout: 20_000 });
+    await page.waitForTimeout(500);
+  }
+  async function snapshotUser() {
+    const { db, uid } = await devDb();
+    const read = async (c: string) => new Map((await getDocs(collection(db, "users", uid, c))).docs.map((d) => [d.id, JSON.stringify(d.data())]));
+    return { db, uid, versions: await read("versions"), packages: await read("packages"), queries: (await getDocs(collection(db, "users", uid, "queries"))).docs.map((d) => d.data()) };
+  }
+
+  test("L8 materials: a sent letter's edit makes the next version and leaves it byte-identical; an unsent one saves in place", async ({ page }) => {
+    /* WRITES AND DELETES its probes on the harness account. */
+    test.setTimeout(400_000);
+    const s0 = await snapshotUser();
+    const pkgs = [...s0.packages.entries()].map(([id, j]) => ({ id, ...JSON.parse(j) }));
+    const letters = [...s0.versions.entries()].map(([id, j]) => ({ id, ...JSON.parse(j) })).filter((v) => v.manuscriptId === MS && v.componentType === "Query Letter" && v.status !== "Retired");
+    const sent = letters.find((v) => isVersionSent(v.id, s0.queries as never, pkgs as never));
+    expect(sent, "a letter that has gone out on the harness manuscript").toBeTruthy();
+    const made: string[] = [];
+    try {
+      /* the sent one */
+      await phoneAt(page, `/manuscripts?edit=${sent!.id}`);
+      const gone = await page.locator('[data-pmx="gone"]').innerText();
+      await page.locator('[data-pmx="text"]').press("End");
+      await page.locator('[data-pmx="text"]').type(" PLS1 probe.");
+      const label = await page.locator('[data-pmx="save"]').innerText();
+      /* L8's red-before is natural: against the build before this pack the editor does not exist (PLS1_BASE run). */
+      await page.locator('[data-pmx="save"]').click();
+      await page.waitForTimeout(2500);
+      const s1 = await snapshotUser();
+      const added = [...s1.versions.keys()].filter((k) => !s0.versions.has(k));
+      made.push(...added);
+      const sentAfter = s1.versions.get(sent!.id);
+      /* the unsent one: a probe written here first (through the flow's "Write a new letter"), then edited */
+      await phoneAt(page, "/manuscripts?newpackage=1");
+      await page.locator('[data-pmx="next"]').click();
+      await page.locator('[data-pmx="write-new"]').click();
+      await page.locator('[data-pmx="name-in"]').fill("PLS1 probe letter");
+      await page.locator('[data-pmx="text"]').fill("A first draft.");
+      await page.locator('[data-pmx="save"]').click();
+      await page.waitForTimeout(2500);
+      const s2 = await snapshotUser();
+      const probe = [...s2.versions.keys()].find((k) => !s1.versions.has(k));
+      if (probe) made.push(probe);
+      await phoneAt(page, `/manuscripts?edit=${probe}`);
+      const goneShown = await page.locator('[data-pmx="gone"]').count();
+      await page.locator('[data-pmx="text"]').fill("A second draft.");
+      await page.locator('[data-pmx="save"]').click();
+      await page.waitForTimeout(2500);
+      const s3 = await snapshotUser();
+      const newAfterInPlace = [...s3.versions.keys()].filter((k) => !s2.versions.has(k));
+      made.push(...newAfterInPlace);
+      const probeDoc = JSON.parse(s3.versions.get(probe!) ?? "{}");
+      record("L8", { sent: sent!.id, gone, label, added, identical: sentAfter === s0.versions.get(sent!.id), probe, goneShown, newAfterInPlace, probeText: probeDoc.contentDraft });
+      expect(gone).toMatch(/has gone out, so your changes save as/);
+      expect(label).toMatch(/^Save as /);
+      expect(added.length, "the sent letter's edit created exactly one new version").toBe(1);
+      expect(sentAfter, "the sent letter is byte-identical").toBe(s0.versions.get(sent!.id));
+      expect(probe, "the probe letter was written").toBeTruthy();
+      expect(goneShown, "an unsent letter says nothing about going out").toBe(0);
+      expect(newAfterInPlace, "an unsent letter saves in place").toEqual([]);
+      expect(probeDoc.contentDraft).toBe("A second draft.");
+    } finally {
+      const { db, uid } = await devDb();
+      for (const id of made) await deleteDoc(doc(db, "users", uid, "versions", id)).catch(() => {});
+    }
+  });
+
+  test("L9 package flow: a phone-built package is the model's own document; a locked package's copy leaves it locked", async ({ page }) => {
+    /* WRITES AND DELETES its probes on the harness account, and puts the manuscript's active package back. */
+    test.setTimeout(400_000);
+    const s0 = await snapshotUser();
+    const msBefore = (await getDoc(doc(s0.db, "users", s0.uid, "manuscripts", MS))).data()!;
+    const pkgs = [...s0.packages.entries()].map(([id, j]) => ({ id, ...JSON.parse(j) })).filter((p) => p.manuscriptId === MS);
+    const locked = pkgs.find((p) => !!p.firstSentAt && p.status !== "Retired");
+    expect(locked, "a locked package on the harness manuscript").toBeTruthy();
+    const made: string[] = [];
+    try {
+      await phoneAt(page, "/manuscripts?newpackage=1");
+      await page.locator('[data-pmx="name"]').fill("PLS1 probe package");
+      await page.locator('[data-pmx="next"]').click();
+      const letterId = await page.locator('[data-pmx="pick-letter"] [data-pmx="op"]').first().getAttribute("data-id");
+      await page.locator('[data-pmx="pick-letter"] [data-pmx="op"]').first().click();
+      await page.locator('[data-pmx="pick-synopsis"] [data-pmx="op"][data-id=""]').click();
+      if (MUTATE !== "L9") await page.locator('[data-pmx="pick-version"] [data-pmx="op"][data-id=""]').click();
+      else await page.locator('[data-pmx="next"]').click();
+      await page.locator('[data-pmx="other"]').fill("Author bio");
+      if (MUTATE === "L9") await page.locator('[data-pmx="other"]').fill("");
+      await page.locator('[data-pmx="next"]').click();
+      await page.locator('[data-pmx="save"]').click();
+      await page.waitForTimeout(2500);
+      const s1 = await snapshotUser();
+      const built = [...s1.packages.keys()].filter((k) => !s0.packages.has(k));
+      made.push(...built);
+      const doc1 = built[0] ? JSON.parse(s1.packages.get(built[0])!) : null;
+      /* the same picks through the model's savePackage on the desktop path give exactly these fields */
+      const want = { manuscriptId: MS, packageName: "PLS1 probe package", queryLetterVersionId: letterId, synopsisVersionId: "", samplePagesVersionId: "", otherMaterials: "Author bio" };
+      await phoneAt(page, `/manuscripts?copy=${locked!.id}`);
+      for (let k = 0; k < 5; k++) await page.locator('[data-pmx="next"]').click();
+      await page.locator('[data-pmx="save"]').click();
+      await page.waitForTimeout(2500);
+      const s2 = await snapshotUser();
+      const copies = [...s2.packages.keys()].filter((k) => !s1.packages.has(k));
+      made.push(...copies);
+      const copyDoc = copies[0] ? JSON.parse(s2.packages.get(copies[0])!) : null;
+      record("L9", { built, doc1, want, copies, copyName: copyDoc?.packageName, lockedSame: s2.packages.get(locked!.id) === s0.packages.get(locked!.id) });
+      expect(built.length, "one package built").toBe(1);
+      for (const [k, v] of Object.entries(want)) expect(doc1[k], `the built package's ${k}`).toBe(v);
+      expect(copies.length, "one copy made").toBe(1);
+      expect(copyDoc.queryLetterVersionId).toBe(locked!.queryLetterVersionId);
+      expect(copyDoc.firstSentAt ?? null, "the copy is a new, unsent package").toBeNull();
+      expect(s2.packages.get(locked!.id), "the locked original is byte-identical").toBe(s0.packages.get(locked!.id));
+    } finally {
+      const { db, uid } = await devDb();
+      for (const id of made) await deleteDoc(doc(db, "users", uid, "packages", id)).catch(() => {});
+      await updateDoc(doc(db, "users", uid, "manuscripts", MS), { activePackageId: msBefore.activePackageId ?? deleteField() }).catch(() => {});
+    }
   });
 
   test("L10 colour laws and no image twice on this pack's phone screens", async ({ page }) => {

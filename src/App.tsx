@@ -63,6 +63,7 @@ import { TopNavPanelData } from "./components/shell/TopNavPanelData";
 import { Onboarding } from "./components/Onboarding";
 import { ErrorBoundary, ThrowLab } from "./components/ErrorBoundary";
 import { PhoneSectionLanding, phoneSectionFor } from "./components/phone/PhoneSectionLanding";
+import { PhoneMaterialsHost } from "./components/phone/materials/PhoneMaterialsHost";
 import { StatusDotDemo } from "./components/StatusDotDemo";
 import { PlansPage } from "./components/PlansPage";
 import { QueryStatus, SubmissionMethod, UserPlan } from "./types";
@@ -652,6 +653,7 @@ function AppContent() {
   return (
     <div className="text-[#3a1c14] selection:bg-[#7c3a2a]/20 selection:text-[#3a1c14] selection:font-bold">
       <PhoneSectionLanding active={isPhoneNow} />
+      <PhoneMaterialsHost active={isPhoneNow} />
       {/* Global AppShell: persistent left rail + the stage (the app's scroll container); pages
           render inside as persistent StagePage slots. EditQueryHost mounts the single Edit Query
           drawer as an app-level overlay (useOpenEditQuery — no route change, scroll preserved);
