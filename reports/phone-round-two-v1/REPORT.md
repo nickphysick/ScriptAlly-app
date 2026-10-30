@@ -144,7 +144,9 @@ F9 (phone fixes' desktop check) reports one element on Home differing. It's the 
 ## Dev
 
 - Before: `index-DY34491Q.js`.
-- After: in the H section of the final message.
+- After: `index-DH1ftLEE.js`, deployed 30 Oct (hosting only, `firebase.dev.json`, `--project scriptally-dev`).
+  - Built from a clean detached checkout of `de1f6df6`; the integration branch is `dev/…-pfx1-df1-g4-pr2`.
+  - Dev still served the base when the deploy started.
 
 ## For Nick
 
@@ -185,4 +187,4 @@ F9 (phone fixes' desktop check) reports one element on Home differing. It's the 
 
 ## Worktree
 
-`../ScriptAlly-pr2` is removed at the end (see the final message).
+`../ScriptAlly-pr2` and the scratch deploy checkout are removed once this commit is pushed.
