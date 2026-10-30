@@ -33,6 +33,11 @@ test("DB118-A1 · every stack opens at the pointer", async ({ page }) => {
     await openDash(page, vp);
     const where = tag(vp);
     for (const card of ["closed-hoop", "agents-hoop"] as const) {
+      /* RE-POINTED (Dashboard feed v1): Closed shares one card with Active behind a switch, and the page scrolls — so
+         show the card's view and bring it on screen before probing its stacks */
+      if (card === "closed-hoop") await page.locator('[data-df1-q="closed"]').click().catch(() => {});
+      await page.evaluate((c) => document.querySelector(`[data-d60="${c}"]`)?.scrollIntoView({ block: "center" }), card);
+      await page.waitForTimeout(300);
       const segs = await segsOf(page, card);
       L.check("A1", `${where} ${card}: population, slices`, segs.length > 0, JSON.stringify(segs));
       if (!segs.length) continue;

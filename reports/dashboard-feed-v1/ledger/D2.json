@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "D2",
+  "where": "1512x982c population: the dashboard drew",
+  "ok": true,
+  "detail": "{\"cols\":true,\"tab\":0,\"drawer\":0}"
+ },
+ {
+  "lock": "D2",
+  "where": "1512x982c no tab and no drawer",
+  "ok": true,
+  "detail": "{\"cols\":true,\"tab\":0,\"drawer\":0}"
+ },
+ {
+  "lock": "D2",
+  "where": "1280x800 population: the dashboard drew",
+  "ok": true,
+  "detail": "{\"cols\":true,\"tab\":0,\"drawer\":0}"
+ },
+ {
+  "lock": "D2",
+  "where": "1280x800 no tab and no drawer",
+  "ok": true,
+  "detail": "{\"cols\":true,\"tab\":0,\"drawer\":0}"
+ }
+]

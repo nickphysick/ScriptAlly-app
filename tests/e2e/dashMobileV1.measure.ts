@@ -459,7 +459,8 @@ test("DM1-E1 · the desktop furniture is gone on phones, and stays on the deskto
   const L = new Ledger("E1");
   const FURNITURE: [string, string][] = [
     ["the desktop page", '[data-d58="page"]'],
-    ["the header's Log a query / Record a response", '[data-d58="buttons"]'],
+    /* RE-POINTED (Dashboard feed v1): on the desktop the buttons are the manuscript card's now (the header is the first visit's) */
+    ["the header's Log a query / Record a response", '[data-d58="buttons"], [data-df1="btn-record"]'],
     ["the Closed ring card", '[data-d60="closed-hoop"]'],
     ["the Agents ring card", '[data-d60="agents-hoop"]'],
     ["the task pager card", '[data-d71="task"]'],

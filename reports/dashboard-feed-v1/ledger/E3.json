@@ -1,0 +1,56 @@
+[
+ {
+  "lock": "E3",
+  "where": "1512x982c population: the example and the button",
+  "ok": true,
+  "detail": "{\"band\":\"rgb(236, 211, 202)\",\"ex\":true,\"inside\":11,\"focusable\":0,\"text\":\"Tell me when it's ready\"}"
+ },
+ {
+  "lock": "E3",
+  "where": "1512x982c the band is rgb(236,211,202)",
+  "ok": true,
+  "detail": "rgb(236, 211, 202)"
+ },
+ {
+  "lock": "E3",
+  "where": "1512x982c nothing in the example is focusable",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "E3",
+  "where": "1280x800 population: the example and the button",
+  "ok": true,
+  "detail": "{\"band\":\"rgb(236, 211, 202)\",\"ex\":true,\"inside\":11,\"focusable\":0,\"text\":\"Tell me when it's ready\"}"
+ },
+ {
+  "lock": "E3",
+  "where": "1280x800 the band is rgb(236,211,202)",
+  "ok": true,
+  "detail": "rgb(236, 211, 202)"
+ },
+ {
+  "lock": "E3",
+  "where": "1280x800 nothing in the example is focusable",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "E3",
+  "where": "before: Tell me when it's ready",
+  "ok": true,
+  "detail": "Tell me when it's ready"
+ },
+ {
+  "lock": "E3",
+  "where": "pressed: We'll let you know",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "E3",
+  "where": "after a reload: still We'll let you know",
+  "ok": true,
+  "detail": "We'll let you know"
+ }
+]

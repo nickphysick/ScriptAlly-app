@@ -1,0 +1,12 @@
+A1-fifty-fifty → DF1-A1: exit 1 (RED) · ✗ A1 · left 417 ±4 — 683.0
+A2-static → DF1-A2: exit 1 (RED) · ✗ A2 · 1512x982c the feed's top is unchanged ±1 — 119.8 → -480.3 (scrolled 600)
+A3-three-columns → DF1-A3: exit 1 (RED) · ✗ A3 · 1280x800 every card in one column — 268,963
+B1-hardcoded → DF1-B1: exit 1 (RED) · ✗ B1 · 1512x982c the ring says the goals code's count of its target — ["3","of 5"] vs 0/8
+C1-cut-fill → DF1-C1: exit 1 (RED) · ✗ C1 · 1512x982c the grain: a column past the last point with ≥20% fill and ≥20% card — 404:1 407:1 410:1 413:1 416:1 419:1 422:1 425:1 428:1 431:1 434:1 437:1 440:1 443:1 446:1 449:1 452:1 455:1 458:1 461:1 464:1 467:1 470:1
+C2-right-column → DF1-C2: exit 1 (RED) · ✗ C2 · 1512x982c the left column's last card — {"inLeft":false,"last":false}
+D2-keep-tab → DF1-D2: exit 1 (RED) · ✗ D2 · 1512x982c no tab and no drawer — {"cols":true,"tab":1,"drawer":0}
+E2-js-height → DF1-E2: exit 1 (RED) · ✗ E2 · 1512x982c the card's height is equal across all tips ±1 — 359.2,359.2,334.4,359.2
+E3-slate → DF1-E3: exit 1 (RED) · ✗ E3 · 1512x982c the band is rgb(236,211,202) — rgb(106, 137, 167)
+F1-dead-cookies → DF1-F1: exit 1 (RED) · ✗ F1 · /cookies renders its own route (no 404, no redirect) — /dashboard · 2711 chars
+D1-all-big → exit 1 ·   ✗ D1 · 1512x982c a query sent renders a mini row, never a big card — {"fullReq":[{"q":"qc150l9-q","journey":3},{"q":"rj-send","journey":3},{"q":"cor-closed","journey":2}],"sentMini":1,"sentBig":8}
+E1-box-elsewhere → exit 1 ·   ✗ E1 · 1512x982c the box goes exactly where Do this task goes — {"path":"/dashboard","panel":["d105-how"]} vs {"path":"/dashboard","panel":["d105-how","query:seed-query-12"]}
