@@ -216,3 +216,21 @@
 @media (max-width: 767.98px) {
   .ws-main { background: var(--pa-page) !important; }
 }
+
+/* ═══ Phone fixes v1, A — ONE SCROLLER PER PAGE (30 Oct) ═══════════════════════════════════════════
+   On a phone the stage (`#app-stage-scroll`, `.ws-wbody`) is every page's one vertical scroller: the
+   tuck-away bar already listens there, and Home already scrolled there. The desktop's viewport-locked
+   slots did not let the others reach it: a `StagePage layout="fill" clip` slot is `flex: 1; min-height: 0;
+   overflow: hidden` (INLINE, from AppShell — hence `!important`, the only thing that beats an inline
+   style), and the fixed-viewport work area `.ws-work--fit` is `flex: 1 1 0; min-height: 0`. Together they
+   gave each phone page a box a few hundred pixels tall and clipped the rest (Queries: 358px of a 3,786px
+   page), so nothing could scroll. Below 768px both grow with their content instead. */
+@media (max-width: 767.98px) {
+  .ws-work--fit { flex: 0 0 auto; min-height: auto; }
+  .ws-work > div { flex: 0 0 auto !important; min-height: auto !important; overflow: visible !important; }
+  .ws-work .sa-content-col--fill { height: auto; }
+  /* a page still wrapped in the desktop's WorkspacePageGrid (Import) had its own second scroller,
+     `.wpg-scroll`, inside the stage: on a phone it grows too, so the stage stays the only one */
+  .ws-work .wpg { height: auto; overflow: visible; }
+  .ws-work .wpg-scroll { height: auto; max-height: none; overflow: visible; }
+}

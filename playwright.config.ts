@@ -111,5 +111,17 @@ export default defineConfig({
       dependencies: ["setup"],
       use: { storageState: STORAGE_STATE },
     },
+    /* Phone fixes v1: the phone suites run as a real phone does — touch, a mobile viewport, and Safari's
+       engine (WebKit) as well as Chromium. Desktop launch flags stay off these (WebKit rejects Chromium args). */
+    {
+      name: "iphone",
+      testMatch: /phone[A-Za-z0-9]*\.(measure|e2e)\.ts|(pfxRecon|pfxProbe)\.measure\.ts/,
+      use: { ...devices["iPhone 13"], hasTouch: true, isMobile: true, launchOptions: {} },
+    },
+    {
+      name: "pixel",
+      testMatch: /phone[A-Za-z0-9]*\.(measure|e2e)\.ts|(pfxRecon|pfxProbe)\.measure\.ts/,
+      use: { ...devices["Pixel 5"], hasTouch: true, isMobile: true, launchOptions: {} },
+    },
   ],
 });
