@@ -56,6 +56,8 @@ export const CSS_MUTATIONS: Record<string, string> = {
   "rust-verb": ".pa-tverb.pri { background: #b4553f !important; }",
   /* A6 — the profile's name in ink on the navy head */
   "ink-head": ".pa-agsheet .pa-aname { color: #1f2633 !important; }",
+  /* P7 — the band's figure in ink on the navy */
+  "ink-figure": ".pa-pgfig .pa-pgnum b { color: #1f2633 !important; }",
   /* S9 — the phone's tab bar shown at every width */
   "desk-bar": ".pa-tabbar { display: flex !important; }",
 };

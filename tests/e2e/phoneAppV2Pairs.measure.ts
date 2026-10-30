@@ -54,6 +54,15 @@ const PARTS: Record<string, [string, string, Step][]> = {
 
   /* 27 pairs the LIVE face, reached through the desktop's own dev review aid: on dev the gate (DISCOVER_LIVE) is off and
      the page says the Scout is coming — that face is PA2-6's shot 27-discover-soon */
+  "part-7": [
+    ["32-responses", "/queries/responses", async (p) => { await p.waitForTimeout(600); }],
+    ["33-wall-of-no", "/queries/responses", async (p) => { await p.locator('[data-pa="resp-wall"]').evaluate((e) => e.scrollIntoView({ block: "center" })); await p.waitForTimeout(500); }],
+    ["34-analytics", "/queries/analytics", async (p) => { await p.waitForTimeout(600); }],
+    ["35-analytics-charts", "/queries/analytics", async (p) => { await p.locator('[data-pa="an-weeks"]').evaluate((e) => e.scrollIntoView({ block: "start" })); await p.waitForTimeout(500); }],
+    ["36-goals", "/goals", async (p) => { await p.waitForTimeout(600); }],
+    ["37-manuscript", "/manuscripts", async (p) => { await p.waitForTimeout(600); }],
+    ["38-manuscript-packages", "/manuscripts", async (p) => { await p.locator('[data-pa="ms-pkgs"]').evaluate((e) => e.scrollIntoView({ block: "center" })); await p.waitForTimeout(500); }],
+  ],
   "part-6": [
     ["26-agents", "/agents", async (p) => { await p.waitForTimeout(500); }],
     ["27-agents-discover", "/agents/discover", async (p) => { await p.addInitScript(() => { (window as unknown as { __SA_DV_LIVE: number }).__SA_DV_LIVE = 1; }); await p.reload(); await p.locator('[data-pa="d-card"]').first().waitFor({ timeout: 20_000 }); await p.waitForTimeout(800); }],

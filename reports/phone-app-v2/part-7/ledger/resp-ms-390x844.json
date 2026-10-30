@@ -1,0 +1,134 @@
+[
+ {
+  "lock": "P1",
+  "where": "390x844 \"Heard back from {replies} of {sent}\" is pageCounts'",
+  "ok": true,
+  "detail": "31 of 51 vs 31 of 51"
+ },
+ {
+  "lock": "P1",
+  "where": "390x844 the Requests count is the asked-for-more set",
+  "ok": true,
+  "detail": "20 vs 20"
+ },
+ {
+  "lock": "pop",
+  "where": "390x844 the wall has cards",
+  "ok": true,
+  "detail": "12"
+ },
+ {
+  "lock": "P1",
+  "where": "390x844 the wall holds exactly the passes and the no replies, newest first",
+  "ok": true,
+  "detail": "12 vs 12"
+ },
+ {
+  "lock": "P1",
+  "where": "390x844 no card on the wall is anything but a pass or a no reply",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "P1",
+  "where": "390x844 \"{n} on the wall\" counts the cards",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "P1",
+  "where": "390x844 each card's tilt is the same on every render",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "P7",
+  "where": "390x844 Responses: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": "navy 6"
+ },
+ {
+  "lock": "P7",
+  "where": "390x844 Responses: no image twice",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "pop",
+  "where": "390x844 the packages are all drawn",
+  "ok": true,
+  "detail": "3 vs 3"
+ },
+ {
+  "lock": "P2",
+  "where": "390x844 Prologue-led: the heading is the first answers it drew",
+  "ok": true,
+  "detail": "\"2 requests from 2\" vs \"2 requests from 2\""
+ },
+ {
+  "lock": "P2",
+  "where": "390x844 Prologue-led: ranked only once 4 have answered (labelStatus)",
+  "ok": true,
+  "detail": "\"Too early\" vs \"Too early\""
+ },
+ {
+  "lock": "P2",
+  "where": "390x844 Unattributed set: the heading is the first answers it drew",
+  "ok": true,
+  "detail": "\"1 request from 1\" vs \"1 request from 1\""
+ },
+ {
+  "lock": "P2",
+  "where": "390x844 Unattributed set: ranked only once 4 have answered (labelStatus)",
+  "ok": true,
+  "detail": "\"Too early\" vs \"Too early\""
+ },
+ {
+  "lock": "P2",
+  "where": "390x844 The Complete Autumn Submission Bundle for Literary Agents: the heading is the first answers it drew",
+  "ok": true,
+  "detail": "\"1 request from 4\" vs \"1 request from 4\""
+ },
+ {
+  "lock": "P2",
+  "where": "390x844 The Complete Autumn Submission Bundle for Literary Agents: ranked only once 4 have answered (labelStatus)",
+  "ok": true,
+  "detail": "\"Too early\" vs \"Too early\""
+ },
+ {
+  "lock": "pop",
+  "where": "390x844 a package still too early to rank",
+  "ok": true,
+  "detail": "3 early, 0 ranked"
+ },
+ {
+  "lock": "P2",
+  "where": "390x844 the packages figure is the live packages",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "P7",
+  "where": "390x844 Manuscript: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": "navy 5"
+ },
+ {
+  "lock": "P7",
+  "where": "390x844 Manuscript: no image twice",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "P5",
+  "where": "390x844 the materials tile opens the Manuscript page at #materials",
+  "ok": true,
+  "detail": "{\"url\":\"/manuscripts#materials\",\"top\":0,\"h\":844,\"atEnd\":false,\"visible\":true}"
+ },
+ {
+  "lock": "P5",
+  "where": "390x844 the comps tile opens the Manuscript page at #comps",
+  "ok": true,
+  "detail": "{\"url\":\"/manuscripts#comps\",\"top\":325,\"h\":844,\"atEnd\":true,\"visible\":true}"
+ }
+]

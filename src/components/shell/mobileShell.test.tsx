@@ -223,7 +223,9 @@ describe("the menu — everything the you-sheet offered is still reachable", () 
   const sheets = readFileSync(resolve(__dirname, "../phone/PhoneSheets.tsx"), "utf8");
   it("To-do is a tab; packages, import, settings, help, sign out and upgrade are in the menu", () => {
     expect(barSrc).toContain('{ key: "todo", label: "To-do", path: "/todo" }');
-    expect(appShell).toContain('goPath("/queries/packages")');
+    /* Phone app v2 Part 7: the Materials tile opens the phone Manuscript page at its materials, which shows the packages
+       (read only — building one stays on a computer). The packages are still one tap from the menu. */
+    expect(appShell).toContain('goPath("/manuscripts#materials")');
     expect(appShell).toContain('onImport={() => goPath("/import")}');
     expect(appShell).toContain('onSettings={() => goPath("/account")}');
     expect(appShell).toContain('onHelp={() => goPath("/help")}');

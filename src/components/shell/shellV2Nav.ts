@@ -124,6 +124,8 @@ const CRUMB_EXTRAS: Record<string, { section: string; page: string; rail: "dashb
    */
   "/queries/analytics": { section: "Querying", page: "Analytics", rail: "querying" },
   "/queries/responses": { section: "Querying", page: "Responses", rail: "querying" },
+  /* Phone app v2 Part 7D — a phone page; on a computer `/goals` goes to the dashboard */
+  "/goals": { section: "Querying", page: "Streaks & goals", rail: "querying" },
   "/import": { section: "Shelf", page: "Import", rail: "shelf" },
   /* ⚠️ THE PAGE IS "Settings", NOT "Account" (settings-mode pack, Phase 1). The word had to agree
      with the rail heading the mode now puts in the panel; two names for one place, three inches

@@ -72,7 +72,11 @@ Branch `phone-app-v2` (worktree `/Users/nickphysick/ScriptAlly-pa2`). Ref: `desi
 
 ## Dev
 
-(filled in after the deploy)
+- **Before:** dev served `index-D7d8tr1e.js`, the Part 5 integration `cffcac5c`.
+- **Integration branch:** `dev/pk391-qm1-pk392-calx-pk392b-td7-fv1-pk393-pa2-2-td12-ppp1-pa2-6`, at `6f1bb838` = `cffcac5c` + `phone-app-v2` at `f99ea89d`. No conflicts; CLAUDE.md auto-merged.
+- **Gates there:** tsc 0 / 0 · build clean · Vitest `Test Files 695 passed (695)` · `Tests 10759 passed | 3 skipped (10762)`.
+- **Locks there:** PA2-6 `5 passed` (wrote and undid) · PA2-4 `4` · PA2-3 `3` · PA2-2 `3`. The account matched its list afterwards.
+- **After:** built from a clean checkout of that branch; dev serves `index-ir44D8o3.js`.
 
 ## Not done, and why — for Nick
 

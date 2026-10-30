@@ -28,7 +28,13 @@ Baseline gates on the base: tsc root 0, tsc functions 0, build clean, Vitest 689
 | 5 | D locks, shots, report (+ the two fixes the locks found) | `ebf3be7f` | committed |
 | 5 | dev deploy | integration `cffcac5c` on `dev/…-ppp1-pa2-5` | dev serves `index-D7d8tr1e.js` |
 | 6 | A–C the tab, Discover, the profile (one commit) | `91499a7c` | committed |
-| 6 | D the Discover gate, locks, shots, report | (see `git log`) | committed |
+| 6 | D the Discover gate, locks, shots, report | `c0be58ea` (+ regress ledgers `f99ea89d`) | committed |
+| 6 | dev deploy | integration `6f1bb838` on `dev/…-ppp1-pa2-6` | dev serves `index-ir44D8o3.js` |
+| 7 | A Responses and the Wall of no | `4a17e4eb` | committed |
+| 7 | B the Manuscript page | `0d3ba86a` | committed |
+| 7 | C Analytics | `16418e8e` | committed |
+| 7 | D Streaks & goals | `c08bc3e1` | committed |
+| 7 | E locks, shots, report | (see `git log`) | committed |
 
 ## Dev, as of the end of Part 1
 - (end of Part 2) dev serves `index-CRHIwewp.js` = `dev/pk391-qm1-pk392-calx-pk392b-td7-fv1-pk393-pa2-2` (`82adc7b9`). The next part's
@@ -41,7 +47,12 @@ Baseline gates on the base: tsc root 0, tsc functions 0, build clean, Vitest 689
   base's dist in the session scratchpad) on :4392 for S9-style desktop captures.
 - e2e: `SA_E2E_BASE_URL=http://127.0.0.1:4391 npx playwright test tests/e2e/phoneAppV2Shell.measure.ts --workers=1`.
 
+## Part 7 notes
+- 7A–D `4a17e4eb` · `0d3ba86a` · `16418e8e` · `c08bc3e1`; 7E the locks. P6's base is `5572ebce` (the commit before 7A).
+- New route `/goals` (phone page; a computer goes to the dashboard). PA2-7 writes nothing.
+
 ## Part 6 notes
+- (end of Part 6) dev serves `index-ir44D8o3.js` = `dev/…-td12-ppp1-pa2-6` (`6f1bb838`).
 - 6A–C `91499a7c`, 6D (this commit). Discover follows `DISCOVER_LIVE` (off): coming soon on phones; the live cards via `window.__SA_DV_LIVE = 1`.
 - PA2-6 A3 seeds `agents/pa2-door-unstated` and deletes it in the same run; after a red run of it, check that id is gone.
 
