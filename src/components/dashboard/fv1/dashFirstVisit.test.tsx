@@ -65,11 +65,13 @@ describe("DFV-A · the pre-query page", () => {
   it("retires the doors, the lift tiles and Where do I start?", () => {
     for (const gone of ["d60-door", "Ready for lift off?", "Where do I start?", "No queries out yet."]) expect(html).not.toContain(gone);
   });
-  it("Record a response appears only once a query exists", () => {
+  /* ⚠️ RETARGETED (Dashboard feed v1, Part A): once a query exists the page is the three columns and the navy header,
+     with its buttons, is gone — the first-visit header is the pre-query page's alone. */
+  it("the header's buttons and eyebrow belong to the pre-query page only", () => {
     const after = render([q("a", QueryStatus.QUERIED)]);
-    expect(after).toContain('data-d58="btn-record"');
-    expect(after).toContain('data-set="all"');
-    expect(after).toContain("— QUERYING —");
+    expect(after).toContain('data-df1="cols"');
+    expect(after).not.toContain('data-d58="header"');
+    expect(after).not.toContain("— QUERYING —");
   });
 });
 

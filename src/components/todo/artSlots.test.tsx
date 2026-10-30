@@ -45,6 +45,8 @@ const NAMES: ArtSlotName[] = [
   "dash-mentor-standing",
   "dash-courier-letter",
   "dash-scout-binoculars",
+  // Dashboard feed v1: the Top tip's header — a real asset
+  "dash-mentor-pointing",
 ];
 
 describe("⚠️ ONE component, TEN slots — the briefs are the contract", () => {
@@ -107,8 +109,8 @@ describe("⚠️ ONE component, TEN slots — the briefs are the contract", () =
         expect(html, n).toContain(`ART · ${n.toUpperCase()}`);
       }
     }
-    // exactly ONE slot carries an asset today — the plan card's mark
-    expect(NAMES.filter((n) => !!ART_SLOTS[n].src)).toEqual(["seize-the-day"]);
+    // exactly TWO slots carry an asset today — the plan card's mark, and (Dashboard feed v1) the Top tip's Mentor
+    expect(NAMES.filter((n) => !!ART_SLOTS[n].src)).toEqual(["seize-the-day", "dash-mentor-pointing"]);
     expect(ART_SLOTS["seize-the-day"].src).toBe("/todo-seize-the-day.png");
     // and when one DOES land, an onError flips it back to the caption rather than the glyph
     const src = readFileSync(join(here, "ArtSlot.tsx"), "utf8");

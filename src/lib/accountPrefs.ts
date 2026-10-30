@@ -29,6 +29,9 @@ export interface NotifyPrefs {
    *  told when Discover opens. Written by that panel as ONE leaf (`notifyPrefs.discover`); it is here so that Settings,
    *  which saves the WHOLE map from this reader, carries it through instead of dropping it. Off until asked for. */
   discover: boolean;
+  /** "Tell me when it's ready" on the dashboard's Scout card (Dashboard feed v1), one leaf (`notifyPrefs.scout`); here
+   *  for the same reason as `discover`. Off until asked for. */
+  scout: boolean;
 }
 
 /**
@@ -40,7 +43,7 @@ export interface NotifyPrefs {
  * shipping a new setting at the behaviour it already had — and the behaviour it has is that a
  * writer who never opens this page would expect their reminders to work.
  */
-export const NOTIFY_DEFAULT: NotifyPrefs = { nudges: true, weeklyDigest: true, discover: false };
+export const NOTIFY_DEFAULT: NotifyPrefs = { nudges: true, weeklyDigest: true, discover: false, scout: false };
 
 export function notifyPrefs(stored: Partial<NotifyPrefs> | undefined | null): NotifyPrefs {
   const s = stored ?? {};
@@ -48,6 +51,8 @@ export function notifyPrefs(stored: Partial<NotifyPrefs> | undefined | null): No
     nudges: typeof s.nudges === "boolean" ? s.nudges : NOTIFY_DEFAULT.nudges,
     weeklyDigest: typeof s.weeklyDigest === "boolean" ? s.weeklyDigest : NOTIFY_DEFAULT.weeklyDigest,
     discover: typeof s.discover === "boolean" ? s.discover : NOTIFY_DEFAULT.discover,
+    /* ⚠️ CARRIED THROUGH, because Settings saves the whole map from this reader: a key it did not know was dropped */
+    scout: typeof s.scout === "boolean" ? s.scout : NOTIFY_DEFAULT.scout,
   };
 }
 

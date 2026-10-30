@@ -45,6 +45,12 @@ export const campaignStage = (scopedQueries: readonly Pick<Query, "status">[]): 
 export const campaignEyebrow = (scopedQueries: readonly Pick<Query, "status">[]): string =>
   `— ${CAMPAIGN_EYEBROW[campaignStage(scopedQueries)]} —`;
 
+/** Dashboard feed v1 — the same campaign word in sentence case ("Querying", "Between rounds"), for the manuscript card. */
+export const campaignLabel = (scopedQueries: readonly Pick<Query, "status">[]): string => {
+  const w = CAMPAIGN_EYEBROW[campaignStage(scopedQueries)].toLowerCase();
+  return w.charAt(0).toUpperCase() + w.slice(1);
+};
+
 /* ── the stored preferences ─────────────────────────────────────────────────────────────────────── */
 
 export type StartPath = "yes" | "notyet";

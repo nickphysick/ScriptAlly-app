@@ -31,7 +31,9 @@ describe("notifyPrefs is total — absent, partial and nonsense all resolve", ()
     expect(notifyPrefs(undefined).discover).toBe(false);
     expect(notifyPrefs({ nudges: false }).discover).toBe(false);
     /* Settings saves the WHOLE map from this reader: a leaf it dropped would be wiped by the next toggle there */
-    expect({ ...notifyPrefs({ discover: true }), nudges: false }).toEqual({ nudges: false, weeklyDigest: true, discover: true });
+    /* RE-POINTED (Dashboard feed v1): the map now carries `scout` as well — the Scout card's request, off until asked */
+    expect({ ...notifyPrefs({ discover: true }), nudges: false }).toEqual({ nudges: false, weeklyDigest: true, discover: true, scout: false });
+    expect(notifyPrefs({ scout: true }).scout).toBe(true);
     expect(notifyPrefs({ discover: "yes" as unknown as boolean }).discover).toBe(false);
   });
 

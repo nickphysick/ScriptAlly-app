@@ -42,6 +42,8 @@ export interface Dash105FoundingProps {
   seenTier?: number | null;
   /** records a celebrated rank. Absent (the onboarding ghost) → the card never celebrates and never writes. */
   onSeen?: (tier: number) => void | Promise<void>;
+  /** Dashboard feed v1: the ranks strip's line in this card's place; absent → `IDLE.ranks` (every other mount) */
+  ranksLine?: string;
 }
 
 type Mode = "idle" | "write" | "sent";
@@ -86,7 +88,7 @@ const Ranks: React.FC<{ tier: number }> = ({ tier }) => (
   </ol>
 );
 
-export const Dash105Founding: React.FC<Dash105FoundingProps> = ({ loading, uid, name, seenTier, onSeen }) => {
+export const Dash105Founding: React.FC<Dash105FoundingProps> = ({ loading, uid, name, seenTier, onSeen, ranksLine }) => {
   const { loading: statsLoading, error, stats, aided } = useFoundingStats(uid);
   const [mode, setMode] = useState<Mode>("idle");
   const [kind, setKind] = useState<ComposeKey>("like");
@@ -215,7 +217,7 @@ export const Dash105Founding: React.FC<Dash105FoundingProps> = ({ loading, uid, 
             </div>
             <div className="d105-ranks" data-d105="ranks">
               <Ranks tier={tier} />
-              <p className="d105-note" data-d105="note">{IDLE.ranks}</p>
+              <p className="d105-note" data-d105="note">{ranksLine ?? IDLE.ranks}</p>
             </div>
           </div>
         )}

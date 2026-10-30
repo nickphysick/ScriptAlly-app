@@ -147,7 +147,8 @@ export interface User {
   /* Settings → Notifications. ONE MAP (the todoPrefs precedent): one allowlist entry, one write
      path. Readers go through `notifyPrefs()`, which is total. Nothing sends email yet — see
      lib/accountPrefs. */
-  notifyPrefs?: { nudges?: boolean; weeklyDigest?: boolean; discover?: boolean };
+  /* Dashboard feed v1: `scout` — "Tell me when it's ready" on the dashboard's Scout card, one leaf (no rules change) */
+  notifyPrefs?: { nudges?: boolean; weeklyDigest?: boolean; discover?: boolean; scout?: boolean };
   /* Discover v1: the Scout's tuning — a lens and three switches, written leaf by leaf. Read through
      `discoverPrefs()` (lib/scout), which is total. */
   discoverPrefs?: { lens?: string; openOnly?: boolean; notOnList?: boolean; ukIreland?: boolean };

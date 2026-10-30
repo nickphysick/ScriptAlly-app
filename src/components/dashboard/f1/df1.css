@@ -1,0 +1,456 @@
+/* ══ DASHBOARD FEED v1 — three columns, the activity feed in the middle ═══════════════════════════════════════════
+   Ref: design-refs/dashboard-feed-v1/ (dashboard-feed-v1.html + screens/*), read rendered at 1512×982 and 1280×800.
+
+   Left: you and your queries. Middle: the activity feed, sticky, scrolling inside itself. Right: what to do.
+   ⚠️ THE PAGE MAY SCROLL. The one-screen rule (`.d58`'s height from the scrollport) is for the first-visit layout
+   only; here `.d58` is as tall as its content and the shell's `.ws-wbody` scrolls it. Only the feed is pinned.
+   ⚠️ EVERYTHING HERE IS SCOPED TO `.d58[data-mode="f1"]`, which the querying page alone carries. The first-visit page
+   (`data-mode="pre"`) keeps every older sheet's layout, untouched.
+   ⚠️ TWO COLUMNS BY A CONTAINER QUERY ON THE SHEET (`.d58-page`), NEVER THE VIEWPORT: an expanded sidebar narrows
+   the sheet without the window changing. */
+
+.d58[data-mode="f1"] {
+  /* the sheet's side padding, halved from v58's 50 (34 under 1366): the ref's 20 — see the report */
+  --d58-gutter: 20px;
+  height: auto;
+}
+.d58[data-mode="f1"] .d58-page {
+  flex: none;
+  container: df1 / inline-size;
+  padding-top: 14px;
+  /* ⚠️ 14, THE FEED'S OWN FOOT, NOT MORE: a sticky grid item is held inside its grid area, so with more room below the
+     grid than the feed keeps below itself, a page scrolled to its end pushes the pinned feed up by the difference
+     (40 here pushed it 26px under the sheet's top edge — measured) */
+  padding-bottom: 14px;
+}
+
+.df1-cols {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 31fr) minmax(0, 38fr) minmax(0, 31fr);
+  column-gap: 30px;
+  align-items: start;
+}
+.df1-left, .df1-right { min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+.df1-slot { min-width: 0; }
+
+/* ── the feed column: pinned at the first left card's top, its foot 14px above the sheet's bottom ──
+   ⚠️ BOTH NUMBERS ARE PUBLISHED BY THE PAGE (`--df1-stick`, `--df1-feed-h`, measured in Dash58), never `100vh`:
+   the page starts under the top bar and the sheet stops short of the window. */
+.df1-feed {
+  position: sticky;
+  top: var(--df1-stick, 0px);
+  height: var(--df1-feed-h, 640px);
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── two columns: the cards in one column by row, the feed beside them spanning every row ── */
+@container df1 (max-width: 1300px) {
+  .df1-cols { grid-template-columns: minmax(0, 1fr) minmax(0, 1.12fr); column-gap: 26px; row-gap: 14px; }
+  .df1-left, .df1-right { display: contents; }
+  .df1-slot { grid-column: 1; }
+  .df1-s-book { grid-row: 1; }
+  .df1-s-task { grid-row: 2; }
+  .df1-s-tip { grid-row: 3; }
+  .df1-s-scout { grid-row: 4; }
+  .df1-s-queries { grid-row: 5; }
+  .df1-s-agents { grid-row: 6; }
+  .df1-s-founding { grid-row: 7; }
+  .df1-s-footer { grid-row: 8; }
+  .df1-feed { grid-column: 2; grid-row: 1 / span 8; }
+}
+
+/* ── Part C: Active and Closed, one card ───────────────────────────────────────────────────────────────────────
+   The dashboard's card grammar (the white rim, the burgundy frame inside it — `--dash-*`), with a navy header carrying
+   the title and the Active | Closed switch. The two views are the app's own cards with their own bands hidden. */
+.df1-q {
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  padding: var(--dash-rim, 6px);
+  border-radius: var(--dash-radius, 16px);
+  background: var(--dash-card, #fff);
+  box-shadow: var(--dash-shadow, 0 2px 8px rgba(28, 19, 15, 0.06));
+}
+.df1-qfr { overflow: hidden; border: 1px solid var(--dash-frame, rgba(124, 58, 42, 0.42)); border-radius: var(--dash-frame-radius, 11px); background: var(--dash-card, #fff); }
+.df1-qbd {
+  box-sizing: border-box;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 14px;
+  background: #2d3a50;
+  color: #fffaf3;
+}
+/* ⚠️ TWO CLASSES AND `!important`: brand.tsx forces a face on every h2 at runtime */
+.d58 .df1-qttl {
+  min-width: 0;
+  margin: 0;
+  font-family: var(--d58-type) !important;
+  font-weight: 400;
+  font-size: 23px;
+  line-height: 1.3;
+  color: #fffaf3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.df1-qtg { flex: none; display: flex; padding: 3px; border-radius: 999px; background: rgba(255, 255, 255, 0.1); }
+.d58 .df1-qtg button {
+  height: 30px; padding: 0 12px; border: 0; border-radius: 999px; background: none; cursor: pointer;
+  font-family: var(--d58-serif) !important; font-size: 13.5px; font-weight: 600; color: rgba(255, 250, 243, 0.8);
+}
+.d58 .df1-qtg button[aria-pressed="true"] { background: #fffaf3; color: #2a3a52; }
+.df1-qtg button:focus-visible { outline: 2px solid #fffaf3; outline-offset: 2px; }
+/* ⚠️ 224, WHICHEVER VIEW SHOWS: both views share one cell, so the switch cannot move anything below the card */
+.df1-qv { position: relative; display: grid; height: 224px; }
+.df1-qpane { grid-area: 1 / 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+.df1-qpane[aria-hidden="true"] { visibility: hidden; }
+.df1-qpane > * { flex: 1 1 0; min-height: 0; }
+/* the two cards inside: their rim, frame and band are this card's now */
+.d58 .df1-q .df1-qpane > .d58-active { display: flex; flex-direction: column; }
+.d58 .df1-q :is(.d58-active > .os-card, .d60-card) { flex: 1 1 0; padding: 0; border-radius: 0; background: none; box-shadow: none; transform: none; }
+.d58 .df1-q :is(.d58-active > .os-card, .d60-card):hover { transform: none; box-shadow: none; }
+.d58 .df1-q :is(.d58-active > .os-card, .d60-card) > .os-frame { border: 0; border-radius: 0; }
+.d58 .df1-q .os-band { display: none; }
+/* the note under the axis is removed here; the hawk is at most 138px */
+.d58 .df1-q .os-acmore { display: none; }
+.d58 .df1-q .os-mentor { height: min(138px, 78%); }
+.d58 .df1-q .os-lead .os-acplot { margin-top: 14px; }
+/* Closed: the built ring and legend, centred in the card */
+.d58 .df1-q .d60-closed .d60-hb { flex: 1 1 0; justify-content: center; }
+
+/* ── Part C: the founding card at the foot of the left column, at its full size ──
+   ⚠️ IT IS A SIZE CONTAINER (dash105.css), so its height comes from its slot, never its content: the slot states it.
+   290 is the height at which nothing in it is cut at 414–561px of column (C2 holds every descendant). */
+.d58[data-mode="f1"] .df1-s-founding { height: 290px; display: flex; padding: 4px 6px 0; }
+.d58[data-mode="f1"] .df1-s-founding > .d105-fw { flex: 1 1 0; }
+
+
+
+/* ── Part B: the manuscript card (navy) and the goal sheet tucked under it ─────────────────────────────────────── */
+.df1-bookset { display: flex; flex-direction: column; }
+.df1-book {
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  padding: 14px 14px 12px;
+  border-radius: 16px;
+  background: #2d3a50;
+  color: #fffaf3;
+  box-shadow: 0 8px 20px rgba(27, 36, 51, 0.18);
+}
+.df1-bktop { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.df1-cov {
+  position: relative;
+  flex: none;
+  box-sizing: border-box;
+  width: 46px;
+  height: 66px;
+  padding: 7px 5px 0 8px;
+  overflow: hidden;
+  border-radius: 2px 5px 5px 2px;
+  background: linear-gradient(135deg, #efd5cb, #e3bfb2);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
+}
+.df1-cov::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: linear-gradient(90deg, rgba(0, 0, 0, 0.2), transparent); }
+.d58 .df1-cov span { display: block; font-family: var(--d58-type) !important; font-size: 8.5px; line-height: 1.15; color: #2a2320; overflow-wrap: anywhere; }
+img.df1-covimg { padding: 0; object-fit: cover; background: none; }
+.df1-bktxt { min-width: 0; }
+/* the old header's campaign word, in sentence case on the navy */
+.d58 .df1-status { font-family: var(--d58-mono) !important; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; line-height: 14px; color: #e3a58b; white-space: nowrap; }
+/* ⚠️ TWO CLASSES AND `!important`: brand.tsx forces a face on every h1 at runtime. 1.15 because a title can be any
+   string, and a descender must not be cut (nothing here clips — the title wraps). */
+.d58 .df1-title {
+  margin: 2px 0 0;
+  font-family: var(--d58-type) !important;
+  font-weight: 400;
+  font-size: 28px;
+  line-height: 1.15;
+  color: #fffaf3;
+  overflow-wrap: anywhere;
+}
+.d58 .df1-by { margin-top: 3px; font-family: var(--d58-serif) !important; font-style: italic; font-size: 15px; line-height: 20px; color: rgba(244, 238, 229, 0.75); }
+/* ⚠️ SIZED BY THEIR OWN WORDS, NOT THE REF'S 1 : 1.25 : 1. The app's serif is wider than the ref's, and at a 414px card the
+   ratios cut "Record a response" to "Record a respo…" (measured); each button grows from its own label instead. */
+.df1-bkacts {
+  display: flex;
+  gap: 6px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+.d58 .df1-ba {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 36px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 9px;
+  background: none;
+  box-shadow: inset 0 0 0 1px rgba(244, 238, 229, 0.25);
+  color: #fffaf3;
+  font-family: var(--d58-serif) !important;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.d58 .df1-ba > span { font-family: inherit !important; overflow: hidden; text-overflow: ellipsis; }
+.d58 .df1-ba svg { flex: none; width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.d58 .df1-ba:hover { background: rgba(255, 255, 255, 0.08); }
+.d58 .df1-ba--pri { background: #fffaf3; color: var(--d58-ink); box-shadow: none; }
+.d58 .df1-ba--pri:hover { background: #fff; }
+.df1-ba:focus-visible { outline: 2px solid #fffaf3; outline-offset: 2px; }
+
+/* the goal sheet: white, square at the top so it reads as tucked under the card's bottom edge, with no gap */
+.df1-goal {
+  position: relative;
+  z-index: 0;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+  padding: 18px 16px 14px;
+  border-radius: 0 0 16px 16px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(28, 19, 15, 0.06);
+  margin-inline: 6px;
+}
+.df1-ring { position: relative; width: 96px; height: 96px; }
+.df1-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.df1-ring > div { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.d58 .df1-ring b { font-family: var(--d58-type) !important; font-weight: 400; font-size: 26px; line-height: 1; color: var(--d58-ink); }
+.d58 .df1-ring small { margin-top: 3px; font-family: var(--d58-serif) !important; font-size: 11.5px; color: #7d7067; }
+.d58 .df1-setgoal {
+  width: 96px; height: 96px; padding: 10px; border: 0; border-radius: 50%; cursor: pointer;
+  background: none; box-shadow: inset 0 0 0 2px #ece7de;
+  font-family: var(--d58-serif) !important; font-size: 13px; font-weight: 600; line-height: 1.25; color: var(--d58-ink);
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.df1-setgoal:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
+.df1-tiles { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; min-width: 0; }
+.df1-tiles > div { min-width: 0; padding: 8px 10px; border-radius: 10px; background: #f5f1eb; }
+.d58 .df1-tiles b { display: block; font-family: var(--d58-type) !important; font-weight: 400; font-size: 22px; line-height: 1; color: var(--d58-ink); }
+.d58 .df1-tiles span { font-family: var(--d58-serif) !important; font-size: 12.5px; color: #3b322c; }
+.d58 .df1-tiles em { display: block; margin-top: 2px; font-family: var(--d58-serif) !important; font-style: normal; font-size: 11.5px; line-height: 1.3; color: #7d7067; }
+.d58 .df1-streak {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid #efe8de;
+  font-family: var(--d58-serif) !important;
+  font-size: 13.5px;
+  color: var(--d58-ink);
+}
+.d58 .df1-streak > b { font-family: var(--d58-type) !important; font-weight: 400; font-size: 18px; }
+.df1-weeks { margin-left: auto; display: flex; gap: 3px; }
+.df1-weeks i { width: 20px; height: 6px; border-radius: 3px; background: #2d3a50; }
+.df1-weeks i.is-off { background: #ece7de; }
+
+/* ── Part D: the feed ─────────────────────────────────────────────────────────────────────────────────────────────
+   The switch, then a list that scrolls inside the column with a 28px fade at its foot. The app's request and offer
+   tints for the journeys (dash58.css's families); every face `!important` because brand.tsx names one on bare tags. */
+.df1-feedcol { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; }
+.df1-sw { flex: none; display: flex; margin-bottom: 10px; padding: 3px; border-radius: 999px; background: #ece7de; }
+.d58 .df1-sw button {
+  flex: 1 1 0; height: 32px; border: 0; border-radius: 999px; background: none; cursor: pointer;
+  font-family: var(--d58-serif) !important; font-size: 14px; font-weight: 600; color: #3b322c;
+}
+.d58 .df1-sw button[aria-pressed="true"] { background: #fff; color: var(--d58-ink); box-shadow: 0 1px 3px rgba(28, 19, 15, 0.12); }
+.df1-sw button:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
+.df1-fscroll {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  margin: 0 -6px;
+  padding: 0 6px 8px;
+  -webkit-mask-image: linear-gradient(#000 calc(100% - 28px), transparent);
+  mask-image: linear-gradient(#000 calc(100% - 28px), transparent);
+}
+.d58 .df1-feedcol :is(p, span, div, button, label, small, b, time) { font-family: inherit; }
+.df1-feedcol { font-family: var(--d58-serif) !important; color: var(--d58-ink); }
+
+.df1-day { display: flex; align-items: baseline; gap: 8px; margin: 12px 2px 8px; font-size: 14px; line-height: 1.4; }
+.df1-day:first-child { margin-top: 2px; }
+.df1-day > b { font-weight: 700; }
+.df1-day > span { color: #7d7067; }
+.df1-day::after { content: ""; flex: 1 1 0; height: 1px; background: #ddd5ca; transform: translateY(-4px); }
+
+.df1-entry { margin-bottom: 10px; padding: 16px 16px 14px; border-radius: 12px; background: #fff; box-shadow: 0 1px 3px rgba(28, 19, 15, 0.07); }
+.df1-eh { display: flex; align-items: center; gap: 11px; min-width: 0; }
+.d58 .df1-disc { flex: none; width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; background: #2a3a52; color: #fff; font-size: 13px; font-weight: 600; }
+.d58 .df1-disc.is-me { background: #8a4a3c; }
+.df1-ehw { min-width: 0; }
+.d58 .df1-ehw b { display: block; font-size: 15.5px; font-weight: 600; line-height: 1.3; }
+.d58 .df1-ehw small { display: block; font-size: 13px; line-height: 1.35; color: #7d7067; }
+.df1-et { display: flex; align-items: center; gap: 10px; margin: 12px 0 10px; }
+.df1-eico { flex: none; width: 24px; display: grid; place-items: center; }
+/* ⚠️ TWO CLASSES AND `!important`: brand.tsx forces a face on every h3 */
+.d58 .df1-eh3 { margin: 0; font-family: var(--d58-type) !important; font-weight: 400; font-size: 21px; line-height: 1.25; color: var(--d58-ink); }
+.df1-figs { display: flex; margin-left: 34px; }
+.df1-figs > div { padding-right: 14px; margin-right: 14px; border-right: 1px solid #efe8de; }
+.df1-figs > div:last-child { border: 0; margin-right: 0; }
+.d58 .df1-figs small { display: block; font-size: 12.5px; color: #7d7067; }
+.d58 .df1-figs b { display: block; margin-top: 1px; font-family: var(--d58-type) !important; font-weight: 400; font-size: 19px; line-height: 1.2; }
+
+.df1-entry { --t: #fdfaf5; }
+.df1-entry[data-kind="request"] { --t: #e2e7ef; }
+.df1-entry[data-kind="offer"] { --t: #f6ecd6; }
+.df1-journey { margin-top: 12px; padding: 14px 14px 10px; border-radius: 10px; background: var(--t); }
+.df1-trk { display: flex; margin: 0; padding: 0; list-style: none; }
+.df1-trk > li { position: relative; flex: 1 1 0; min-width: 0; }
+.df1-trk > li.is-last { flex: none; width: 88px; }
+.df1-trk > li.is-next { opacity: 0.5; }
+.df1-sd { position: relative; z-index: 1; display: block; width: 18px; height: 18px; border-radius: 50%; background: var(--t); }
+.df1-sd > * { display: block; }
+.df1-ln { position: absolute; top: 8px; left: 21px; right: 3px; height: 2px; background: var(--d58-ink); }
+/* ⚠️ DASHED = NOT HAPPENED YET (the house grammar): the line into a step still to come */
+.df1-trk > li.is-to .df1-ln { height: 0; background: none; border-top: 2px dashed rgba(28, 19, 15, 0.3); }
+.d58 .df1-trk b { display: block; margin-top: 6px; padding-right: 4px; font-family: var(--d58-type) !important; font-weight: 400; font-size: 11.5px; line-height: 1.2; }
+.d58 .df1-trk small { display: block; margin-top: 1px; font-size: 11px; color: #7d7067; }
+.df1-jf { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 10px; padding-top: 9px; border-top: 1px solid rgba(28, 19, 15, 0.08); font-size: 13px; color: #7d7067; }
+.df1-trk:empty + .df1-jf, .df1-journey > .df1-jf:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+.d58 .df1-chip { display: inline-flex; align-items: center; height: 24px; padding: 0 9px; border-radius: 999px; background: #ece8f3; box-shadow: inset 0 0 0 1px #ddd6ea; font-size: 12px; font-weight: 600; color: var(--d58-ink); }
+.d58 .df1-btn { display: inline-flex; align-items: center; height: 30px; padding: 0 12px; border: 0; border-radius: 9px; background: #fff; box-shadow: inset 0 0 0 1px #d9cfc1; font-size: 13px; font-weight: 600; color: var(--d58-ink); white-space: nowrap; cursor: pointer; }
+.df1-btn:focus-visible, .df1-earlier:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
+.df1-mats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 8px; }
+.df1-mat { min-height: 78px; display: flex; flex-direction: column; justify-content: space-between; padding: 10px 10px 9px; border-radius: 8px; background: #fbf6ee; box-shadow: inset 0 0 0 1px #efe8de; }
+.df1-matl { display: grid; gap: 4px; }
+.df1-matl i { display: block; height: 3px; border-radius: 2px; background: #e3d9cb; }
+.df1-matl i:nth-child(2) { width: 86%; }
+.df1-matl i:nth-child(3) { width: 62%; }
+.d58 .df1-mat b { font-size: 12.5px; font-weight: 600; }
+.d58 .df1-mat small { display: block; font-size: 11px; color: #7d7067; }
+
+.df1-mini { display: flex; align-items: center; gap: 11px; margin-bottom: 8px; padding: 12px 14px; border-radius: 12px; background: #fff; box-shadow: 0 1px 3px rgba(28, 19, 15, 0.07); font-size: 14.5px; line-height: 1.35; }
+.df1-mg { flex: none; display: grid; width: 20px; height: 20px; }
+.df1-mg > svg { width: 20px; height: 20px; }
+.df1-mg--bell { color: #a2452a; }
+.df1-mg--house { color: #a39c94; }
+.df1-mtx { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+.d58 .df1-mtx b { font-weight: 700; }
+.d58 .df1-mtx i { font-style: italic; }
+.d58 .df1-mini time { flex: none; font-family: var(--d58-mono) !important; font-size: 11.5px; color: #a39a91; white-space: nowrap; }
+.df1-fend { padding: 10px 0 14px; text-align: center; font-size: 14px; color: #7d7067; }
+.d58 .df1-earlier { padding: 0; border: 0; background: none; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--d58-ink); }
+
+/* ── Part E: "Your next task" (Dash71Task, look="next") ────────────────────────────────────────────────────────── */
+.d58 .df1-task { flex: none; display: block; overflow: hidden; border-radius: 16px; background: #fff; box-shadow: 0 2px 8px rgba(28, 19, 15, 0.06); }
+.df1-tkh { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #e4e1db; color: var(--d58-ink); }
+.d58 .df1-tkttl { font-family: var(--d58-type) !important; font-size: 21px; line-height: 1.3; }
+.d58 .df1-pg { margin-left: auto; display: flex; align-items: center; gap: 6px; font-size: 14px; }
+.d58 .df1-pg button { width: 26px; height: 26px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: #fff; box-shadow: inset 0 0 0 1px #e7ddd2; cursor: pointer; color: var(--d58-ink); }
+.df1-pg svg, .df1-tipx svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.df1-pg button:focus-visible, .df1-box:focus-visible, .df1-go:focus-visible, .df1-tipx:focus-visible, .df1-tipdots button:focus-visible, .df1-notify:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
+/* ⚠️ EVERY PAGE IN ONE CELL: the card is the tallest page's height, so paging moves nothing below it */
+.df1-tkstack { display: grid; }
+.df1-tkstack > .df1-tkb { grid-area: 1 / 1; }
+.df1-tkb.is-ghost { visibility: hidden; }
+.df1-tkb { min-width: 0; padding: 14px; }
+.df1-tkrow { display: flex; align-items: flex-start; gap: 12px; }
+.d58 .df1-box { flex: none; width: 26px; height: 26px; margin-top: 3px; padding: 0; border: 0; border-radius: 7px; background: #fff; box-shadow: inset 0 0 0 2px var(--d58-ink); cursor: pointer; }
+.d58 .df1-box:hover { background: #f5f1eb; }
+.df1-tkw { min-width: 0; }
+.d58 .df1-todo { display: inline-flex; align-items: center; height: 24px; padding: 0 9px; border-radius: 999px; background: #ece7de; font-size: 12px; font-weight: 600; color: var(--d58-ink); }
+/* ⚠️ TWO CLASSES AND `!important`: brand.tsx forces a face on every h3 */
+.d58 .df1-tkline { margin: 6px 0 0; font-family: var(--d58-serif) !important; font-size: 19px; font-weight: 400; line-height: 1.3; color: var(--d58-ink); overflow-wrap: anywhere; }
+.d58 .df1-tkline b { font-weight: 700; }
+.d58 .df1-tkwhy { margin: 3px 0 0; font-size: 13.5px; line-height: 1.4; color: #7d7067; }
+.d58 .df1-go { width: 100%; height: 42px; margin-top: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: 10px; background: #2a3a52; color: #fff; font-size: 15.5px; font-weight: 600; cursor: pointer; }
+.d58 .df1-go:hover { background: #22304a; }
+.d58 .df1-then { margin: 8px 0 0; text-align: center; font-size: 13px; color: #7d7067; }
+.d58 .df1-task :is(p, span, div, button, small, b) { font-family: inherit; }
+.df1-task { font-family: var(--d58-serif) !important; }
+
+/* ── Part E: Top tip ────────────────────────────────────────────────────────────────────────────────────────────── */
+.df1-tip { overflow: hidden; border-radius: 16px; background: #fff; box-shadow: 0 2px 8px rgba(28, 19, 15, 0.06); font-family: var(--d58-serif) !important; color: var(--d58-ink); }
+.d58 .df1-tip :is(p, span, div, button, small, b) { font-family: inherit; }
+.df1-tiph {
+  position: relative;
+  box-sizing: border-box;
+  height: 112px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0 10px 0 20px;
+  background-color: #f8e9a8;
+  background-image: radial-gradient(circle at 85% 120%, #fbf1c9 0 38%, transparent 39%);
+}
+.df1-tipl { align-self: center; display: grid; gap: 4px; min-width: 0; }
+.d58 .df1-tipttl { font-family: var(--d58-type) !important; font-size: 25px; line-height: 1.1; }
+.d58 .df1-tipl small { font-size: 13.5px; color: #6f5d33; }
+/* the Mentor stands on the header's bottom edge: 104px tall, wholly inside the card */
+/* ⚠️ POSITIONED: ArtSlot's image is `position: absolute; inset: 0`, so an unpositioned slot let it fill the header */
+.d58 .df1-tipart { position: relative; flex: none; width: 127px; height: 104px; margin-bottom: -1px; }
+.df1-tipb { padding: 16px 20px 14px; }
+.df1-tipswap { display: grid; }
+.df1-tipit { grid-area: 1 / 1; min-width: 0; opacity: 0; visibility: hidden; transform: translateX(var(--dx, 14px)); transition: opacity 0.35s ease, transform 0.35s ease, visibility 0s linear 0.35s; }
+.df1-tipit.is-on { opacity: 1; visibility: visible; transform: none; transition: opacity 0.35s ease 0.12s, transform 0.35s ease 0.12s, visibility 0s; }
+.df1-tipit.is-leave { transform: translateX(calc(var(--dx, 14px) * -1)); }
+.df1-tip.is-still .df1-tipit, .df1-tip.is-still .df1-tipit.is-on { transition: none; transform: none; }
+.d58 .df1-tiph4 { margin: 0 0 8px; font-family: var(--d58-type) !important; font-size: 21px; font-weight: 400; line-height: 1.25; }
+.d58 .df1-tipit p { margin: 0; font-size: 16px; line-height: 1.55; color: #3b322c; }
+.df1-tipf { display: flex; align-items: center; gap: 6px; margin-top: 14px; padding-top: 12px; border-top: 1px solid #efe8de; }
+.df1-tipdots { margin-right: auto; display: flex; align-items: center; gap: 5px; }
+.d58 .df1-tipdots button { position: relative; width: 7px; height: 7px; padding: 0; border: 0; border-radius: 50%; overflow: hidden; background: #ece7de; cursor: pointer; transition: width 0.25s ease, background 0.25s ease; }
+.d58 .df1-tipdots button.is-on { width: 26px; border-radius: 4px; background: #eadfb8; }
+.df1-tipdots b { position: absolute; inset: 0; background: #c9a93f; transform-origin: left; }
+.df1-tipdots b.is-run { animation: df1TipFill linear forwards; }
+.df1-tip.is-paused .df1-tipdots b.is-run { animation-play-state: paused; }
+@keyframes df1TipFill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.d58 .df1-tipx { width: 32px; height: 32px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: #fff; box-shadow: inset 0 0 0 1px #e7ddd2; cursor: pointer; color: var(--d58-ink); }
+.d58 .df1-tipx:hover { background: #f5f1eb; }
+@media (prefers-reduced-motion: reduce) {
+  .df1-tipit, .df1-tipit.is-on { transition: none; }
+  .df1-tipdots b.is-run { animation: none; }
+}
+
+/* ── Part E: the Scout, coming soon ─────────────────────────────────────────────────────────────────────────────── */
+.df1-scout { overflow: hidden; border-radius: 16px; background: #fff; box-shadow: 0 2px 8px rgba(28, 19, 15, 0.06); font-family: var(--d58-serif) !important; color: var(--d58-ink); }
+.d58 .df1-scout :is(p, span, div, button, small, b) { font-family: inherit; }
+.df1-sch { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 16px; background: #ecd3ca; color: #3a2a24; }
+.d58 .df1-scttl { font-family: var(--d58-type) !important; font-size: 21px; line-height: 1.3; }
+.d58 .df1-soon { padding: 3px 9px; border-radius: 999px; background: #fff; color: #8a5a4c; font-size: 11.5px; font-weight: 600; white-space: nowrap; }
+/* the bird straddles the band's bottom edge: the band's colour runs halfway down its box */
+.df1-scart { display: flex; justify-content: center; padding-bottom: 4px; background: linear-gradient(#ecd3ca 0 50%, #fff 50%); }
+.df1-scart img { width: 150px; height: 150px; object-fit: contain; border-radius: 50%; background: #f8ece7; box-shadow: 0 0 0 6px #fff; }
+.df1-scb { padding: 10px 18px 18px; }
+.d58 .df1-sch3 { margin: 0 0 6px; text-align: center; font-family: var(--d58-type) !important; font-size: 21px; font-weight: 400; line-height: 1.2; color: var(--d58-ink); }
+.d58 .df1-scb > p { margin: 0 0 14px; text-align: center; font-size: 14.5px; line-height: 1.5; color: #3b322c; }
+.df1-ghost { position: relative; padding: 12px; border-radius: 12px; background: #fbfaf8; box-shadow: inset 0 0 0 1.5px #efdcd5; opacity: 0.9; pointer-events: none; user-select: none; }
+.d58 .df1-ex { position: absolute; top: -9px; right: 12px; padding: 1px 9px; border-radius: 999px; background: #fff; box-shadow: inset 0 0 0 1px #efdcd5; font-size: 11.5px; font-weight: 600; color: #a0675a; }
+.df1-gw { display: flex; align-items: center; gap: 10px; }
+.d58 .df1-gi { flex: none; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; background: #467a76; color: #fff; font-size: 12.5px; font-weight: 600; filter: saturate(0.6); }
+.d58 .df1-gw b { display: block; font-size: 14.5px; font-weight: 600; }
+.d58 .df1-gw small { font-size: 12.5px; color: #7d7067; }
+.d58 .df1-gwhy { margin: 9px 0; padding: 7px 10px; border-radius: 9px; background: #f8ece7; font-size: 13px; }
+.df1-gacts { display: flex; gap: 6px; }
+.d58 .df1-gacts span { flex: 1 1 0; height: 30px; display: grid; place-items: center; border-radius: 8px; box-shadow: inset 0 0 0 1px #efdcd5; font-size: 12.5px; font-weight: 600; color: #7d7067; }
+.d58 .df1-gacts span.is-p { background: #dcbcb1; color: #fff; box-shadow: none; }
+.d58 .df1-notify { width: 100%; height: 40px; margin-top: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: 10px; background: #b9786a; color: #fff; font-size: 14.5px; font-weight: 600; cursor: pointer; }
+.d58 .df1-notify:disabled { cursor: default; opacity: 0.85; }
+.df1-notify svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ── Part F: the footer, on the sheet's own colour after a hairline ─────────────────────────────────────────────── */
+.df1-foot { margin-top: 6px; padding: 18px 4px 10px; border-top: 1px solid #ddd5ca; font-family: var(--d58-serif) !important; }
+.df1-foot nav { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.d58 .df1-foot a { font-family: inherit; font-size: 14.5px; color: #3b322c; text-decoration: none; }
+.d58 .df1-foot a:hover { color: var(--d58-ink); text-decoration: underline; text-underline-offset: 3px; }
+.df1-fsel { display: flex; gap: 8px; margin: 16px 0 12px; }
+.d58 .df1-fsel button { height: 38px; padding: 0 14px; border: 0; border-radius: 999px; background: #fff; box-shadow: inset 0 0 0 1px #d9cfc1; font-family: inherit; font-size: 14.5px; color: var(--d58-ink); cursor: pointer; }
+.d58 .df1-fsel button:hover { background: #fbf9f5; }
+.df1-foot a:focus-visible, .df1-fsel button:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
+.d58 .df1-foot small { font-family: inherit; font-size: 13.5px; color: #7d7067; }
