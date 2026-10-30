@@ -45,7 +45,7 @@ import { AgentRow, QueryRow, DupeOpen, DupeKept, DupeMerged, PhoneDupePick } fro
 import { Disc, initialsOf } from "./ImportParts";
 import { GoMark } from "./v9/GoMark";
 import { PhonePin } from "./setupParts";
-import { useSetupBand } from "./SetupFrame";
+import { useSetupBand, useSetupFootHost } from "./SetupFrame";
 import { useIsMobile } from "../shell/mobileChrome";
 import { ReviewDeck, DeckCard } from "./v9/ReviewDeck";
 import { AgencyQuestion, NamelessQuestion, MappingQuestion, QueryQuestion, Answered, DECK_WORDS } from "./v9/DeckQuestions";
@@ -604,6 +604,8 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
   /* On a phone (set-up on phones v1, 2B) the band carries the review's progress: "Review: agents",
      with the review's own steps as its segments. The four-dot stepper is hidden there. */
   const isMobile = useIsMobile();
+  const footHost = useSetupFootHost();
+  const appSegs = isMobile && !footHost;
   const BAND_NAME: Record<string, string> = { duplicates: "repeats", agents: "agents", queries: "queries" };
   useSetupBand(isMobile ? {
     name: `Review: ${BAND_NAME[screen] ?? screen}`,
@@ -696,6 +698,14 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
 
   return (
     <div className="im-page" data-im="review" data-screen={`review-${screen}`} data-step={screen} key={screen}>
+      {appSegs && (
+        /* In the app's /import on a phone there is no set-up band: the review's own steps sit at the
+           top of the sheet instead (set-up on phones v1). */
+        <div className="im-appsegs" data-im="app-segs">
+          <small>Review: {BAND_NAME[screen] ?? screen} · step {Math.max(0, steps.indexOf(screen)) + 1} of {steps.length}</small>
+          <div aria-hidden="true">{steps.map((id, k) => <i key={id} className={k <= steps.indexOf(screen) ? "on" : undefined} />)}</div>
+        </div>
+      )}
       {head}
       <Stepper steps={steps} current={screen} label="Review progress" />
       {dupesDone && (

@@ -10,7 +10,8 @@ Baseline: tsc root 0, tsc functions 0, build clean (0 error/warning lines), Vite
 | A frame, labels, welcome, your list, your file, pinned foot, tick | `aa2b2a53` | committed |
 | B the reading screen | `341539e2` | committed |
 | C review header, ready rows, repeats | `e177c380` | committed |
-| D questions, one per screen | (this commit) | committed |
+| D questions, one per screen | `73e5c61c` | committed |
+| E importing loader and /import | (this commit) | committed |
 
 ## Resuming
 - Read `git log --oneline -10` and this file; resume at the first phase not committed.
@@ -34,3 +35,7 @@ Baseline: tsc root 0, tsc functions 0, build clean (0 error/warning lines), Vite
 - `PhoneDeck` (v9/ReviewDeck): compact navy card + "Answer this" → full-screen layer portalled to the frame root (`footHost.parentElement`), rendering the SAME `card.body`. "Save and next" clicks the question's own `.o9-ans > .sf-btn` (kept, visually hidden); pick-style questions answer on tap. "Skip" = `firstOpen(cards, at+1)`. Deck's same-render advance does the moving. Layer closes when nothing is left.
 - LOCAL layout (lift candidate): PhoneFlowShell takes a query JourneyView; the deck is not one.
 - The card's foot shows `card.sub` (DeckCard carries no sheet row number or query count; the mock's "row 14 · 2 queries" is not in the model).
+
+## Phase E notes
+- ImportingLoader phone layer (`.im-pldr`, portalled to the frame root): checklist = IMPORTING_MESSAGES[0..4] (ellipsis dropped), ticks on a non-wrapping `beats` counter bumped by the SAME 950ms interval; lifts at LIFT_AT_MS via the existing `revealing`. Timings untouched.
+- /import in the app: no SetupFrame, so no band/pinned foot; the review draws `.im-appsegs` (its own steps) at the top of the sheet. Phone deck, rows, repeats and the question layer all apply there too (the layer renders in place, fixed). OPEN: the in-app review's buttons are in flow, not pinned.

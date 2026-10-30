@@ -775,3 +775,33 @@ button.im-pick { cursor: pointer; }
     font-family: var(--font-sans); font-weight: 600; font-size: 13px; letter-spacing: 0; text-transform: none;
   }
 }
+
+/* ── E: "Setting up your dashboard" on a phone (board 2 6B; DOCS.loadB) ──
+   Full-screen navy over the ghost: a picture spot (placeholder), the heading in white, the loader's
+   own words as a checklist ticking blush on its existing beat, and a slim blush bar. It lifts on the
+   same beat the card does (IMPORTING_TIMINGS unchanged). */
+@media (max-width: 767.98px) {
+  .sf .im-pldr {
+    position: fixed; inset: 0; z-index: 70; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 0 28px; background: var(--ink-shell, #1b2433); color: #fff; text-align: center; transition: opacity .5s ease;
+  }
+  .sf .im-pldr.is-lifting { opacity: 0; pointer-events: none; }
+  .sf .im-pldrspot { width: 96px; height: 96px; border-radius: 50%; border: 2px dashed rgba(255, 255, 255, .3); background: rgba(255, 255, 255, .08); }
+  .sf .im-pldr .im-pldrh { margin: 22px 0; font-family: var(--sp-type) !important; font-weight: 400; font-size: 28px; line-height: 1.15; color: #fff; }
+  .sf .im-pldrst { list-style: none; margin: 0 auto; padding: 0; display: grid; gap: 12px; width: 250px; text-align: left; }
+  .sf .im-pldrst li { display: flex; gap: 12px; align-items: center; font-family: var(--font-sans); font-weight: 600; font-size: 16px; color: rgba(255, 255, 255, .45); transition: color .3s; }
+  .sf .im-pldrst li.is-on { color: #fff; }
+  .sf .im-pldrck { width: 22px; height: 22px; flex: none; box-sizing: border-box; border-radius: 50%; border: 2px solid rgba(255, 255, 255, .35); transition: background .3s, border-color .3s; }
+  .sf .im-pldrst li.is-on .im-pldrck { background: #e8c8bc; border-color: #e8c8bc; }
+  .sf .im-pldrbar { width: 250px; height: 5px; margin: 26px auto 0; border-radius: 3px; background: rgba(255, 255, 255, .15); overflow: hidden; }
+  .sf .im-pldrbar i { display: block; height: 100%; background: #e8c8bc; transition: width .9s linear; }
+  /* In the app's /import, where there is no set-up band, the review's steps sit at the top of the sheet. */
+  .sf .im-appsegs { margin: 0 0 16px; }
+  .sf .im-appsegs small { display: block; margin: 0 0 8px; font-family: var(--font-sans); font-weight: 600; font-size: 13px; color: var(--sf-ink58); }
+  .sf .im-appsegs div { display: flex; gap: 6px; }
+  .sf .im-appsegs i { flex: 1; height: 5px; border-radius: 3px; background: var(--im-stone, #e6dfd6); }
+  .sf .im-appsegs i.on { background: var(--sp-anthracite); }
+}
+@media (max-width: 767.98px) and (prefers-reduced-motion: reduce) {
+  .sf .im-pldr, .sf .im-pldrst li, .sf .im-pldrck, .sf .im-pldrbar i { transition: none; }
+}
