@@ -1,0 +1,14 @@
+[
+ {
+  "lock": "pop",
+  "where": "the part changed existing files",
+  "ok": true,
+  "detail": "26"
+ },
+ {
+  "lock": "P6",
+  "where": "no Manuscripts file changed since the part began",
+  "ok": true,
+  "detail": ""
+ }
+]

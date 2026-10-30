@@ -34,7 +34,12 @@ Baseline gates on the base: tsc root 0, tsc functions 0, build clean, Vitest 689
 | 7 | B the Manuscript page | `0d3ba86a` | committed |
 | 7 | C Analytics | `16418e8e` | committed |
 | 7 | D Streaks & goals | `c08bc3e1` | committed |
-| 7 | E locks, shots, report | (see `git log`) | committed |
+| 7 | E locks, shots, report | `77de94f4` | committed |
+| 7 | dev deploy | integration `dc20fc30` on `dev/…-ppp1-pa2-7` | dev serves `index-BZP8LJfl.js` |
+| 8 | A first run (Home, Queries) + two scoping regressions | `97367626` | committed |
+| 8 | B settings, help, import, plan | `91401e53` | committed |
+| 8 | C the sweep fixes | `9b7d2b0b` | committed |
+| 8 | D the sweep lock, pairs, report, CLAUDE.md | `be08d69c` | committed |
 
 ## Dev, as of the end of Part 1
 - (end of Part 2) dev serves `index-CRHIwewp.js` = `dev/pk391-qm1-pk392-calx-pk392b-td7-fv1-pk393-pa2-2` (`82adc7b9`). The next part's
@@ -48,6 +53,7 @@ Baseline gates on the base: tsc root 0, tsc functions 0, build clean, Vitest 689
 - e2e: `SA_E2E_BASE_URL=http://127.0.0.1:4391 npx playwright test tests/e2e/phoneAppV2Shell.measure.ts --workers=1`.
 
 ## Part 7 notes
+- (end of Part 7) dev serves `index-BZP8LJfl.js` = `dev/…-td12-ppp1-pa2-7` (`dc20fc30`).
 - 7A–D `4a17e4eb` · `0d3ba86a` · `16418e8e` · `c08bc3e1`; 7E the locks. P6's base is `5572ebce` (the commit before 7A).
 - New route `/goals` (phone page; a computer goes to the dashboard). PA2-7 writes nothing.
 

@@ -1,0 +1,49 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * PHONE APP v2, PART 8B — a Settings section on a phone. The page is the desktop's own `AccountSettings` (every setting,
+ * its writer and its receipt unchanged), inside `.pa-set`, dressed as the ref's grouped lists (overlays.js
+ * `PAGES.notifications`: `.group`, `.li`, `.gl`, `.toggle-sw`). Phone only; the band names the section, so the section's
+ * own title is not drawn twice.
+ */
+@media (max-width: 767.98px) {
+  .pa-set { position: relative; margin-top: -24px; padding: 8px 0 120px; background: var(--pa-page); border-radius: 24px 24px 0 0; min-height: 100%; font-family: var(--pa-sans); }
+  .pa-set .acct-page { height: auto; background: transparent !important; color: var(--pa-ink) !important; }
+  .pa-set .acct-page .acct-plane { padding: 8px 16px 0 !important; }
+  .pa-set .acct-page .acct-grid, .pa-set .acct-page .acct-work { max-width: none; margin: 0; display: block; }
+  .pa-set .sc-ttl { display: none; }
+
+  /* a card is a group: white, 14px corners, the soft shadow, no frame */
+  .pa-set .sc-card { background: #fff !important; border: 0 !important; border-radius: var(--pa-r) !important; box-shadow: var(--pa-sh) !important; padding: 0 !important; margin: 0 0 14px !important; overflow: hidden; }
+  .pa-set .sc-card--danger { box-shadow: var(--pa-sh) !important; }
+  .pa-set .sc-ch { padding: 14px 14px 4px !important; border: 0 !important; background: transparent !important; display: block !important; }
+  /* the group's heading, in sentence case (ref .gl); brand.tsx forces every h2, hence !important */
+  .pa-set .sc-ch .sc-ch-h { font-family: var(--pa-sans) !important; font-weight: 600 !important; font-size: 13px !important; line-height: 1.3 !important; color: var(--pa-muted) !important; text-transform: none !important; letter-spacing: 0 !important; margin: 0 !important; }
+  .pa-set .sc-ch-p { font-size: 13px !important; color: var(--pa-muted) !important; margin: 4px 0 0 !important; }
+  .pa-set .sc-cb { padding: 0 !important; }
+
+  /* a row is an .li: label over its line, the control on the right, a hairline between rows */
+  .pa-set .sc-row { position: relative; display: flex !important; align-items: center !important; gap: 12px; min-height: 54px; padding: 10px 14px !important; margin: 0 !important; border: 0 !important; flex-wrap: wrap; }
+  .pa-set .sc-row + .sc-row::before { content: ""; position: absolute; left: 14px; right: 0; top: 0; height: 1px; background: var(--pa-rule); }
+  .pa-set .sc-row-l { flex: 1; min-width: 0; }
+  .pa-set .sc-lbl { font-size: 15.5px !important; font-weight: 500 !important; color: var(--pa-ink) !important; text-transform: none !important; letter-spacing: 0 !important; }
+  .pa-set .sc-dsc, .pa-set .sc-note { font-size: 13px !important; color: var(--pa-muted) !important; margin-top: 2px; }
+  .pa-set .sc-ctl { flex: none; max-width: 100%; }
+  .pa-set .sc-row--full .sc-row-l, .pa-set .sc-row--full > * { flex: 1 1 100%; }
+  .pa-set .sc-cf { padding: 10px 14px 12px !important; border: 0 !important; background: var(--pa-page) !important; }
+  .pa-set .sc-cf-note { font-size: 13px !important; color: var(--pa-muted) !important; }
+
+  /* the switch (ref .toggle-sw) — the desktop's own control and its handler, only its dress */
+  .pa-set .acct-toggle { width: 51px !important; height: 31px !important; border-radius: 16px !important; background: var(--pa-fill) !important; }
+  .pa-set .acct-toggle[aria-checked="true"] { background: var(--pa-navy) !important; }
+  .pa-set .acct-toggle .acct-toggle-k { top: 2px !important; left: 2px !important; width: 27px !important; height: 27px !important; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.18) !important; transition: transform 0.25s var(--pa-spring) !important; }
+  .pa-set .acct-toggle[aria-checked="true"] .acct-toggle-k { transform: translateX(20px); }
+
+  /* every control a finger reaches is at least 44px; every input at least 16px (the mobileShell law) */
+  .pa-set button:not(.acct-toggle), .pa-set [role="radio"], .pa-set select { min-height: 44px; }
+  .pa-set input, .pa-set select, .pa-set textarea { font-size: 16px !important; }
+  /* the phone allows no red text: the desktop's burgundy buttons are ink here */
+  .pa-set button:not(.acct-toggle) { font-family: var(--pa-sans) !important; color: var(--pa-ink) !important; border-color: var(--pa-rule) !important; }
+  @media (prefers-reduced-motion: reduce) { .pa-set .acct-toggle .acct-toggle-k { transition: none !important; } }
+}

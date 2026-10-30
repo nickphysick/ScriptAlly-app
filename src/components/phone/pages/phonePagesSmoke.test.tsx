@@ -18,6 +18,7 @@ import { ResponsesPhone } from "./ResponsesPhone";
 import { ManuscriptPhone } from "./ManuscriptPhone";
 import { AnalyticsPhone } from "./AnalyticsPhone";
 import { GoalsPhone } from "./GoalsPhone";
+import { HelpPhone, PlanPhone, SettingsPhone } from "./AccountPhone";
 
 const base = { userId: "smoke-user", manuscriptId: "m1", agentId: "a1", packageId: "", personalisationNotes: "", sendMethod: "Email", materialsWanted: ["Query Letter"] };
 const QUERIES = [
@@ -50,5 +51,13 @@ describe("the phone's menu pages render", () => {
     const html = renderPageSeededWith(<GoalsPhone />, "/goals", { queries: QUERIES });
     expect(html).toContain("First request");
     expect(html).toContain("Founding writer ranks");
+  });
+  it("Settings, Plan & billing and Help (Part 8B)", () => {
+    const set = renderPage(<SettingsPhone />, "/account");
+    for (const w of ["Profile", "Sign-in &amp; security", "Plan &amp; billing", "Notifications", "Preferences", "Tasks", "Your data"]) expect(set).toContain(w);
+    expect(renderPage(<PlanPhone />, "/plans")).toContain("Founding writer");
+    const help = renderPageSeededWith(<HelpPhone />, "/help", { queries: QUERIES });
+    expect(help).toContain("Getting started");
+    expect(help).toContain("Ask us");
   });
 });

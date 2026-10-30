@@ -38,6 +38,7 @@ import { ShellScope, useShellNavCounts } from "./ShellSidebar";
 import { MobileChromeContext, MobileDetailSpec, useIsMobile } from "./mobileChrome";
 import { todoDueBadge } from "../../lib/todoDueTally";
 import { BottomTabBar, isMenuPage, tabFor } from "../BottomTabBar";
+import { ACCOUNT_ROUTES } from "../../lib/accountRoutes";
 import { PhoneBand, dayWord } from "../phone/PhoneBand";
 import { PhoneBandContext } from "../phone/phoneBandStore";
 import { PhoneBookSheet, PhoneMenu, PhonePlusSheet, type MenuTile } from "../phone/PhoneSheets";
@@ -64,6 +65,7 @@ import "./mobileShell.css";
 import "../phone/phoneTokens.css";
 import "../phone/phone.css";
 import "../phone/phoneShell.css";
+import "../phone/sweepPhone.css";
 
 /* ── Stage page slot ─────────────────────────────────────────────────────── */
 
@@ -389,6 +391,10 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
     if (tab === "queries") return "Queries";
     if (tab === "todo") return "To-do";
     if (tab === "agents") return "Agents";
+    /* Phone app v2 Part 8B: a settings section names itself in the band (the index is "Settings") */
+    const section = ACCOUNT_ROUTES.find((r) => r.path === pathname);
+    if (section) return section.label;
+    if (pathname === "/plans") return "Plan & billing";
     return shellCrumbForPath(pathname)?.page ?? "QueryHawk";
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname, currentUser?.name]);

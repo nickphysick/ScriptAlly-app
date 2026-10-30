@@ -19,3 +19,18 @@ export type PhoneRange = "all" | "d90";
 export const D90_MS = 90 * 86_400_000;
 export const inWindow = (sentMs: number | null, range: PhoneRange, nowMs: number): boolean =>
   range === "all" || (sentMs != null && sentMs > nowMs - D90_MS && sentMs <= nowMs);
+
+/**
+ * Queries before the first query (Part 8A, ref FRQ A): three example rows — a request with you, a sent partial and a
+ * query out — taken from the app's own sample rows (the desktop exhibition's `QC_SAMPLE_ROWS`), never the writer's.
+ */
+export const EXAMPLE_STATUSES = ["Full Requested", "Partial Sent", "Queried"] as const;
+export function exampleRows<R extends { status: string; agentName?: string }>(sample: readonly R[]): R[] {
+  const out: R[] = [];
+  for (const s of EXAMPLE_STATUSES) {
+    /* three different agents where the sample allows it */
+    const r = sample.find((x) => x.status === s && !out.some((o) => o.agentName === x.agentName)) ?? sample.find((x) => x.status === s);
+    if (r) out.push(r);
+  }
+  return out;
+}

@@ -107,7 +107,11 @@ Every expected figure is computed in the test by the SAME library calls over the
 
 ## Dev
 
-(filled in after the deploy)
+- **Before:** dev served `index-ir44D8o3.js`, the Part 6 integration `6f1bb838`.
+- **Integration branch:** `dev/pk391-qm1-pk392-calx-pk392b-td7-fv1-pk393-pa2-2-td12-ppp1-pa2-7`, at `dc20fc30` = `6f1bb838` + `phone-app-v2` at `77de94f4`. No conflicts; CLAUDE.md auto-merged.
+- **Gates there:** tsc 0 / 0 · build clean · Vitest `Test Files 697 passed (697)` · `Tests 10772 passed | 3 skipped (10775)`.
+- **Locks there:** PA2-7 `7 passed` · PA2-6 `5` · PA2-4 `4` (wrote and undid) · PA2-3 `3` · PA2-2 `3`. The account matched its list afterwards.
+- **After:** built from a clean checkout of that branch; dev serves `index-BZP8LJfl.js`.
 
 ## Not done, and why — for Nick
 

@@ -190,3 +190,17 @@
   .pa-conf { display: none; }
   .qm1-cel.pa-cele, .pa-ccard, .pa-stamp { animation: none !important; }
 }
+
+/* Phone app v2, Part 8A — Queries before the first query (ref FRQ A) */
+@media (max-width: 767.98px) {
+  .pa-bandtx { margin-top: 4px; font-size: 15px; color: rgba(255, 255, 255, 0.8); }
+  .pa-qfirst { padding-top: 4px; }
+  .pa-qfcard { background: #fff; border-radius: var(--pa-r); box-shadow: var(--pa-sh); padding: 16px; }
+  .pa-qfhead { display: flex; gap: 14px; align-items: center; }
+  .qm1-layer .pa-qfh, .pa-q .pa-qfh, .pa-q .pa-qfh2 { margin: 0; flex: 1; font-family: var(--pa-type) !important; font-weight: 400 !important; font-size: 21px; line-height: 1.2; color: var(--pa-ink); }
+  .pa-q .pa-qfh2 { font-size: 19px; flex: none; }
+  .pa-qflede { margin: 12px 0 14px; font-size: 15px; line-height: 1.45; color: var(--pa-ink-2); }
+  .pa-q .pa-mt10 { margin-top: 10px; }
+  .pa-qfshd { display: flex; align-items: baseline; justify-content: space-between; margin: 24px 2px 10px; }
+  .pa-qfex { opacity: 0.55; pointer-events: none; }
+}

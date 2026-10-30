@@ -1,0 +1,53 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * PHONE APP v2, PART 8C — what the whole-app sweep (PA2-8) found, fixed in the phone layer. Phone only.
+ *
+ * TAP TARGETS (W6, the rulebook's 44px): where the drawn size should stay, a TRANSPARENT border grows the hit area and a
+ * matching negative margin keeps the layout, so nothing on screen moves. The band's rings are 44 outright: the ref draws
+ * 40, and the rulebook's law wins over the drawing.
+ */
+@media (max-width: 767.98px) {
+  .pa-band .pa-ring, .pa-band .pa-avring { width: 44px !important; height: 44px !important; }
+  .pa-bchip, .pa-herochip, .pa-herorange, .pa-anr {
+    border-top: 6px solid transparent !important; border-bottom: 6px solid transparent !important;
+    margin-top: -6px; margin-bottom: -6px; background-clip: padding-box !important; box-sizing: content-box !important;
+  }
+  .pa-bchip { border-top-width: 5px !important; border-bottom-width: 5px !important; margin-top: -5px; margin-bottom: -5px; }
+  .pa-agents .pa-seg button, .pa-td .pa-seg button, .pa-cork .pa-seg button { height: 44px !important; }
+  .pa-set .acct-toggle {
+    border-top: 7px solid transparent !important; border-bottom: 7px solid transparent !important;
+    margin: -7px 0; background-clip: padding-box !important; box-sizing: content-box !important;
+  }
+  .pa-pg .pa-hsearch input { height: 44px !important; }
+
+  /* SETTINGS (W2, W4): the desktop's burgundy initials and its uppercase chips, in the phone's law */
+  .pa-set .sc-id-av { color: var(--pa-ink) !important; }
+  .pa-set * { text-transform: none !important; letter-spacing: normal !important; }
+
+  /* THE THREE DESKTOP-ONLY PAGES A PHONE REACHES BY ADDRESS — Submission packages (.pk39-wpg), Comparable titles
+     (.cv-page) and Versions (.vv2-wpg). The ref draws none of them for a phone (the Manuscript page shows their facts
+     read only); their own files are not touched, and what the phone layer can put right, it does. */
+  /* ⚠️ `:is(#pa-phone, *)` matches any element at an ID's weight: the pages' own rules carry !important with an ID in
+     their selectors (`.vv2 #secH2hB p.oh-k`), which no number of classes outranks */
+  .pk39-wpg.pk39-wpg.pk39-wpg :is(#pa-phone, *) *, .cv-page.cv-page.cv-page :is(#pa-phone, *) *, .vv2-wpg.vv2-wpg.vv2-wpg :is(#pa-phone, *) * { text-transform: none !important; letter-spacing: normal !important; }
+  /* no red or burgundy text (W2) */
+  .pk39-wpg.pk39-wpg.pk39-wpg :is(#pa-phone, *) :is(b, span, em, small, i, p, button), .cv-page.cv-page.cv-page :is(#pa-phone, *) :is(b, span, em, small, p), .vv2-wpg.vv2-wpg.vv2-wpg :is(#pa-phone, *) :is(b, span, em, small, p, u) { color: var(--pa-ink-2) !important; }
+  /* text on a navy ground is white (W2): these win over the line above by being more specific */
+  .pk39-wpg.pk39-wpg.pk39-wpg :is(#pa-phone, *) .pk39-pro, .pk39-wpg.pk39-wpg.pk39-wpg :is(#pa-phone, *) .phc-p, .pk39-wpg.pk39-wpg.pk39-wpg :is(#pa-phone, *) .p9-tic,
+  .vv2-wpg.vv2-wpg.vv2-wpg :is(#pa-phone, *) .phc-p, .vv2-wpg.vv2-wpg.vv2-wpg :is(#pa-phone, *) .pab-b, .vv2-wpg.vv2-wpg.vv2-wpg :is(#pa-phone, *) .db-r.use, .vv2-wpg.vv2-wpg.vv2-wpg :is(#pa-phone, *) .db-r.use *, .vv2-wpg.vv2-wpg.vv2-wpg :is(#pa-phone, *) .vl-n.on, .vv2-wpg.vv2-wpg.vv2-wpg :is(#pa-phone, *) .tr-use, .vv2-wpg.vv2-wpg.vv2-wpg :is(#pa-phone, *) .on, .vv2-wpg.vv2-wpg.vv2-wpg :is(#pa-phone, *) .on * { color: #fff !important; }
+  .vv2-wpg.vv2-wpg.vv2-wpg :is(#pa-phone, *) .db-r.use .db-w small { color: #fff !important; }
+  .vv2-wpg.vv2-wpg.vv2-wpg :is(#pa-phone, *) .bcn { background: #fff !important; }
+  /* every tap target at least 44px (W6) */
+  .pk39-wpg.pk39-wpg.pk39-wpg :is(#pa-phone, *) button, .vv2-wpg.vv2-wpg.vv2-wpg :is(#pa-phone, *) button, .cv-page.cv-page.cv-page :is(#pa-phone, *) button { min-height: 44px; min-width: 44px; }
+  .vv2-wpg.vv2-wpg.vv2-wpg :is(#pa-phone, *) input, .pk39-wpg.pk39-wpg.pk39-wpg :is(#pa-phone, *) input, .cv-page.cv-page.cv-page :is(#pa-phone, *) input { min-height: 44px; font-size: 16px !important; }
+  .pk39-wpg.pk39-wpg.pk39-wpg :is(#pa-phone, *) .p9-po-addnote { display: inline-flex !important; align-items: center; min-height: 44px; }
+  .af-link { display: inline-flex !important; align-items: center; min-height: 44px; min-width: 44px; }
+
+  /* the blush strip of a card takes ink, its count included (W2) */
+  .pa-nh .pa-sub { color: var(--pa-ink) !important; }
+  /* the week strip at 360: seven days of at least 44px (W6) */
+  .pa-band .pa-wk { gap: 2px; margin-left: -6px; margin-right: -6px; }
+  .pa-band .pa-wkd { min-width: 44px; }
+}

@@ -12,6 +12,9 @@
  * fact line says why; there is no dead-end screen and no upgrade prompt here.
  */
 import { importAgeCategory } from "../../lib/ageCategories";
+import { useIsMobile } from "../shell/mobileChrome";
+import { ImportDoorsPhone } from "../phone/pages/ImportDoorsPhone";
+import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
 import React, { useRef, useState } from "react";
 import { BookStep } from "../onboarding/BookStep";
 import { ManuscriptFieldsState, emptyManuscriptFields } from "../onboarding/ManuscriptFields";
@@ -68,6 +71,9 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
   const { manuscripts, currentUser, addManuscript } = useScriptAllyDb();
   const liveEntitlement = useSmartImportEntitlement();
   const entitlement = lab?.entitlement ?? liveEntitlement;
+  /* Phone app v2 Part 8B: below 768px only the doors are the phone's (ImportDoorsPhone); every press below is this
+     page's own handler, and the flow, the book step and the matcher are untouched */
+  const phone = useIsMobile();
 
   const [view, setView] = useState<"tiles" | "matcher">("tiles");
   const [flowScreen, setFlowScreen] = useState<ImportFlowScreen>(lab?.flow ? "overview" : "idle");
@@ -136,7 +142,7 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
   return (
     <WorkspacePageGrid
       className="impg impg-wpg" scrollLabel="Import"
-      masthead={!showTiles ? null : (
+      masthead={!showTiles || phone ? null : (
         <PanelHeader
           kind="title" slim className="ph ph--compact ph--panel"
           attrs={{ "data-probe": "page-header", "data-size": "compact", "data-impg": "header" }}
@@ -144,7 +150,13 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
         />
       )}
     >
-      {showTiles && (
+      {showTiles && phone ? (
+        <ImportDoorsPhone lede={IMPORT_SUB} smartAllowed={entitlement.allowed} smartFact={smartFactLine(entitlement, dayMonth)}
+          onSmart={chooseSmart} onDownload={download} onUpload={chooseTemplate} onMatch={openMatcher}
+          onByHand={() => openQueryDrawer({ mode: "log", ...(manuscript ? { manuscriptId: manuscript.id } : {}) })}
+          footnote={`${IMPORT_FOOTNOTE} ${IMPORT_FOOTNOTE_SECOND}`} />
+      ) : null}
+      {showTiles && !phone && (
         <div className="impg-tilesview" data-impg="tiles-view">
           <div className="impg-tiles" data-impg="tiles">
             <section className="impg-tile" data-impg="tile" data-tile="smart" aria-labelledby="impg-t-smart">

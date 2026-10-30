@@ -11,9 +11,11 @@
  *  - The two in-page sweeps every part re-uses: the colour laws (by the NEAREST painted ground, so a white disc inside
  *    the navy band is judged on white) and the image census (no source twice on one screen).
  */
-import { expect, type Page } from "@playwright/test";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { expect, type Browser, type BrowserContext, type Page } from "@playwright/test";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { openRoute } from "./measure";
+import { assertLocalBundleIsDev } from "./bundleGuard";
 
 export const DIR = "reports/phone-app-v2";
 export type VP = { width: number; height: number };
@@ -58,6 +60,14 @@ export const CSS_MUTATIONS: Record<string, string> = {
   "ink-head": ".pa-agsheet .pa-aname { color: #1f2633 !important; }",
   /* P7 — the band's figure in ink on the navy */
   "ink-figure": ".pa-pgfig .pa-pgnum b { color: #1f2633 !important; }",
+  /* PA2-8 W1–W7 — one break per sweep check */
+  "w1-no-band": ".pa-band { display: none !important; }",
+  "w2-red-fill": ".pa-tabbar { background: #b4553f !important; }",
+  "w4-upper-label": ".pa-sub { text-transform: uppercase !important; }",
+  "w5-past-edge": ".pa-pgbody { width: 480px !important; }",
+  "w6-40px-button": ".pa-band .pa-ring { width: 40px !important; height: 40px !important; }",
+  /* the mobileShell floor is (0,4,1) !important, so the break must outrank it */
+  "w7-14px-input": ".pa-hsearch.pa-hsearch.pa-hsearch.pa-hsearch.pa-hsearch input { font-size: 14px !important; }",
   /* S9 — the phone's tab bar shown at every width */
   "desk-bar": ".pa-tabbar { display: flex !important; }",
 };
@@ -147,4 +157,42 @@ export async function shot(page: Page, part: string, name: string) {
   if (!process.env.PA2_SHOTS) return;
   mkdirSync(`${DIR}/${part}/shots`, { recursive: true });
   writeFileSync(`${DIR}/${part}/shots/${name}.png`, await page.screenshot());
+}
+
+/**
+ * THE EMPTY FIXTURE ACCOUNT (`ms21-empty@scriptally.test`, tests/e2e/ms21Fixture.mjs: no manuscript, no agent, no query;
+ * the harness password). Signs in once through the app's own sign-in page and caches the session, as
+ * manuscriptsV21's `accountContext` does, then opens `path` at a phone size with the lock's CSS mutation applied.
+ */
+export const EMPTY_EMAIL = "ms21-empty@scriptally.test";
+const pw = (): string => {
+  if (process.env.SA_E2E_PASSWORD) return process.env.SA_E2E_PASSWORD;
+  const m = /^\s*SA_E2E_PASSWORD\s*=\s*(.*)$/m.exec(readFileSync(".env.local", "utf8"));
+  return (m?.[1] ?? "").replace(/^["']|["']$/g, "");
+};
+export async function emptyPhone(browser: Browser, baseURL: string, path: string, vp: VP, opts: { motion?: boolean } = {}): Promise<{ ctx: BrowserContext; page: Page }> {
+  await assertLocalBundleIsDev();
+  const port = new URL(baseURL).port || "443";
+  const file = resolve(process.cwd(), `tests/e2e/.auth/${EMPTY_EMAIL.split("@")[0]}-pa2-${port}.json`);
+  let ctx = existsSync(file) ? await browser.newContext({ storageState: file, viewport: { width: 1440, height: 900 }, baseURL }) : null;
+  let page = ctx ? await ctx.newPage() : null;
+  const signedIn = page ? await page.goto("/dashboard").then(() => page!.locator(".ws-work").first().waitFor({ timeout: 20_000 })).then(() => true).catch(() => false) : false;
+  if (!signedIn) {
+    await ctx?.close();
+    ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, baseURL });
+    page = await ctx.newPage();
+    await page.goto("/#/signin");
+    await page.locator("#au-email").fill(EMPTY_EMAIL);
+    await page.locator("#au-pw").fill(pw());
+    await page.getByRole("button", { name: /^Sign in$/ }).last().click();
+    await expect(page.locator(".ws-work").first()).toBeVisible({ timeout: 30_000 });
+    await ctx.storageState({ path: file, indexedDB: true });
+  }
+  await prime(page!, opts);
+  await page!.setViewportSize(vp);
+  await page!.goto(path);
+  await page!.locator('[data-pa="band"]').first().waitFor({ timeout: 30_000 });
+  await page!.evaluate(() => document.fonts.ready);
+  await page!.waitForTimeout(1500);
+  return { ctx: ctx!, page: page! };
 }

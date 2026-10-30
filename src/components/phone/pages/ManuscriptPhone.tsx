@@ -34,7 +34,7 @@ const usedIn = (n: number) => (n ? `Used in ${n} ${n === 1 ? "query" : "queries"
 
 interface ReadView { title: string; sub?: string | null; body?: string | null }
 
-export const ManuscriptPhone: React.FC = () => {
+export const ManuscriptPhone: React.FC<{ onNavigate?: (tab: string, sub?: string) => void }> = ({ onNavigate }) => {
   const { manuscripts, queries, activities, agents, packages, versions, currentUser } = useScriptAllyDb();
   const location = useLocation();
   const [read, setRead] = useState<ReadView | null>(null);
@@ -95,7 +95,17 @@ export const ManuscriptPhone: React.FC = () => {
     </div>
   ) : null, [ms?.id, ms?.title, ms?.coverUrl, author, m?.since, m?.book?.name, ms?.wordCount, ms?.genre, ms?.ageCategory]);
 
-  if (!m || !ms) return <div className="pa-pg" data-pa="manuscript"><div className="pa-pgbody"><p className="pa-pgnone">No manuscript yet.</p></div></div>;
+  /* no book yet: the app's own way to add one (the getting-started step's door, startingPlan's route) */
+  if (!m || !ms) return (
+    <div className="pa-pg" data-pa="manuscript">
+      <div className="pa-pgbody">
+        <div className="pa-card pa-msnone" data-pa="ms-none">
+          <p className="pa-pgnone">No manuscript yet.</p>
+          <button type="button" className="pa-btn pri blk" data-pa="ms-add" onClick={() => onNavigate?.("manuscripts", "Add a manuscript")}>{PI.plus}Add a manuscript</button>
+        </div>
+      </div>
+    </div>
+  );
   const pitch = (ms.elevatorPitch ?? ms.logline ?? "").trim();
   const open = (v: ReadView) => setRead(v);
 

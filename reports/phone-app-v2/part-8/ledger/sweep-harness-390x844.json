@@ -1,0 +1,1154 @@
+[
+ {
+  "lock": "W1",
+  "where": "harness 390x844 /dashboard: the band is present",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W2",
+  "where": "harness 390x844 /dashboard: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W3",
+  "where": "harness 390x844 /dashboard: no image twice",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "pop",
+  "where": "harness 390x844 /dashboard: text and targets were read",
+  "ok": true,
+  "detail": "{\"text\":51,\"taps\":26}"
+ },
+ {
+  "lock": "W4",
+  "where": "harness 390x844 /dashboard: no uppercase labels",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W5",
+  "where": "harness 390x844 /dashboard: nothing past the screen's edge",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W6",
+  "where": "harness 390x844 /dashboard: every tap target at least 44px",
+  "ok": true,
+  "detail": "0: "
+ },
+ {
+  "lock": "W7",
+  "where": "harness 390x844 /dashboard: every input at least 16px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W1",
+  "where": "harness 390x844 /queries: the band is present",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W2",
+  "where": "harness 390x844 /queries: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W3",
+  "where": "harness 390x844 /queries: no image twice",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "pop",
+  "where": "harness 390x844 /queries: text and targets were read",
+  "ok": true,
+  "detail": "{\"text\":318,\"taps\":146}"
+ },
+ {
+  "lock": "W4",
+  "where": "harness 390x844 /queries: no uppercase labels",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W5",
+  "where": "harness 390x844 /queries: nothing past the screen's edge",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W6",
+  "where": "harness 390x844 /queries: every tap target at least 44px",
+  "ok": true,
+  "detail": "0: "
+ },
+ {
+  "lock": "W7",
+  "where": "harness 390x844 /queries: every input at least 16px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W1",
+  "where": "harness 390x844 /queries/analytics: the band is present",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W2",
+  "where": "harness 390x844 /queries/analytics: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W3",
+  "where": "harness 390x844 /queries/analytics: no image twice",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "pop",
+  "where": "harness 390x844 /queries/analytics: text and targets were read",
+  "ok": true,
+  "detail": "{\"text\":42,\"taps\":5}"
+ },
+ {
+  "lock": "W4",
+  "where": "harness 390x844 /queries/analytics: no uppercase labels",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W5",
+  "where": "harness 390x844 /queries/analytics: nothing past the screen's edge",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W6",
+  "where": "harness 390x844 /queries/analytics: every tap target at least 44px",
+  "ok": true,
+  "detail": "0: "
+ },
+ {
+  "lock": "W7",
+  "where": "harness 390x844 /queries/analytics: every input at least 16px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W1",
+  "where": "harness 390x844 /queries/responses: the band is present",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W2",
+  "where": "harness 390x844 /queries/responses: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W3",
+  "where": "harness 390x844 /queries/responses: no image twice",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "pop",
+  "where": "harness 390x844 /queries/responses: text and targets were read",
+  "ok": true,
+  "detail": "{\"text\":188,\"taps\":36}"
+ },
+ {
+  "lock": "W4",
+  "where": "harness 390x844 /queries/responses: no uppercase labels",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W5",
+  "where": "harness 390x844 /queries/responses: nothing past the screen's edge",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W6",
+  "where": "harness 390x844 /queries/responses: every tap target at least 44px",
+  "ok": true,
+  "detail": "0: "
+ },
+ {
+  "lock": "W7",
+  "where": "harness 390x844 /queries/responses: every input at least 16px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W1",
+  "where": "harness 390x844 /queries/packages: the band is present",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W2",
+  "where": "harness 390x844 /queries/packages: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W3",
+  "where": "harness 390x844 /queries/packages: no image twice",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "pop",
+  "where": "harness 390x844 /queries/packages: text and targets were read",
+  "ok": true,
+  "detail": "{\"text\":172,\"taps\":45}"
+ },
+ {
+  "lock": "W4",
+  "where": "harness 390x844 /queries/packages: no uppercase labels",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W5",
+  "where": "harness 390x844 /queries/packages: nothing past the screen's edge",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W6",
+  "where": "harness 390x844 /queries/packages: every tap target at least 44px",
+  "ok": true,
+  "detail": "0: "
+ },
+ {
+  "lock": "W7",
+  "where": "harness 390x844 /queries/packages: every input at least 16px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W1",
+  "where": "harness 390x844 /todo: the band is present",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W2",
+  "where": "harness 390x844 /todo: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W3",
+  "where": "harness 390x844 /todo: no image twice",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "pop",
+  "where": "harness 390x844 /todo: text and targets were read",
+  "ok": true,
+  "detail": "{\"text\":253,\"taps\":183}"
+ },
+ {
+  "lock": "W4",
+  "where": "harness 390x844 /todo: no uppercase labels",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W5",
+  "where": "harness 390x844 /todo: nothing past the screen's edge",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W6",
+  "where": "harness 390x844 /todo: every tap target at least 44px",
+  "ok": true,
+  "detail": "0: "
+ },
+ {
+  "lock": "W7",
+  "where": "harness 390x844 /todo: every input at least 16px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W1",
+  "where": "harness 390x844 /todo/corkboard: the band is present",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W2",
+  "where": "harness 390x844 /todo/corkboard: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W3",
+  "where": "harness 390x844 /todo/corkboard: no image twice",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "pop",
+  "where": "harness 390x844 /todo/corkboard: text and targets were read",
+  "ok": true,
+  "detail": "{\"text\":29,\"taps\":20}"
+ },
+ {
+  "lock": "W4",
+  "where": "harness 390x844 /todo/corkboard: no uppercase labels",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W5",
+  "where": "harness 390x844 /todo/corkboard: nothing past the screen's edge",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W6",
+  "where": "harness 390x844 /todo/corkboard: every tap target at least 44px",
+  "ok": true,
+  "detail": "0: "
+ },
+ {
+  "lock": "W7",
+  "where": "harness 390x844 /todo/corkboard: every input at least 16px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W1",
+  "where": "harness 390x844 /agents: the band is present",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W2",
+  "where": "harness 390x844 /agents: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W3",
+  "where": "harness 390x844 /agents: no image twice",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "pop",
+  "where": "harness 390x844 /agents: text and targets were read",
+  "ok": true,
+  "detail": "{\"text\":215,\"taps\":67}"
+ },
+ {
+  "lock": "W4",
+  "where": "harness 390x844 /agents: no uppercase labels",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W5",
+  "where": "harness 390x844 /agents: nothing past the screen's edge",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W6",
+  "where": "harness 390x844 /agents: every tap target at least 44px",
+  "ok": true,
+  "detail": "0: "
+ },
+ {
+  "lock": "W7",
+  "where": "harness 390x844 /agents: every input at least 16px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W1",
+  "where": "harness 390x844 /agents/discover: the band is present",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W2",
+  "where": "harness 390x844 /agents/discover: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W3",
+  "where": "harness 390x844 /agents/discover: no image twice",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "pop",
+  "where": "harness 390x844 /agents/discover: text and targets were read",
+  "ok": true,
+  "detail": "{\"text\":16,\"taps\":12}"
+ },
+ {
+  "lock": "W4",
+  "where": "harness 390x844 /agents/discover: no uppercase labels",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W5",
+  "where": "harness 390x844 /agents/discover: nothing past the screen's edge",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W6",
+  "where": "harness 390x844 /agents/discover: every tap target at least 44px",
+  "ok": true,
+  "detail": "0: "
+ },
+ {
+  "lock": "W7",
+  "where": "harness 390x844 /agents/discover: every input at least 16px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W1",
+  "where": "harness 390x844 /manuscripts: the band is present",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W2",
+  "where": "harness 390x844 /manuscripts: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W3",
+  "where": "harness 390x844 /manuscripts: no image twice",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "pop",
+  "where": "harness 390x844 /manuscripts: text and targets were read",
+  "ok": true,
+  "detail": "{\"text\":59,\"taps\":13}"
+ },
+ {
+  "lock": "W4",
+  "where": "harness 390x844 /manuscripts: no uppercase labels",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W5",
+  "where": "harness 390x844 /manuscripts: nothing past the screen's edge",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W6",
+  "where": "harness 390x844 /manuscripts: every tap target at least 44px",
+  "ok": true,
+  "detail": "0: "
+ },
+ {
+  "lock": "W7",
+  "where": "harness 390x844 /manuscripts: every input at least 16px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W1",
+  "where": "harness 390x844 /manuscripts/comps: the band is present",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W2",
+  "where": "harness 390x844 /manuscripts/comps: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W3",
+  "where": "harness 390x844 /manuscripts/comps: no image twice",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "pop",
+  "where": "harness 390x844 /manuscripts/comps: text and targets were read",
+  "ok": true,
+  "detail": "{\"text\":34,\"taps\":14}"
+ },
+ {
+  "lock": "W4",
+  "where": "harness 390x844 /manuscripts/comps: no uppercase labels",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W5",
+  "where": "harness 390x844 /manuscripts/comps: nothing past the screen's edge",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W6",
+  "where": "harness 390x844 /manuscripts/comps: every tap target at least 44px",
+  "ok": true,
+  "detail": "0: "
+ },
+ {
+  "lock": "W7",
+  "where": "harness 390x844 /manuscripts/comps: every input at least 16px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W1",
+  "where": "harness 390x844 /manuscripts/versions: the band is present",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W2",
+  "where": "harness 390x844 /manuscripts/versions: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W3",
+  "where": "harness 390x844 /manuscripts/versions: no image twice",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "pop",
+  "where": "harness 390x844 /manuscripts/versions: text and targets were read",
+  "ok": true,
+  "detail": "{\"text\":102,\"taps\":21}"
+ },
+ {
+  "lock": "W4",
+  "where": "harness 390x844 /manuscripts/versions: no uppercase labels",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W5",
+  "where": "harness 390x844 /manuscripts/versions: nothing past the screen's edge",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W6",
+  "where": "harness 390x844 /manuscripts/versions: every tap target at least 44px",
+  "ok": true,
+  "detail": "0: "
+ },
+ {
+  "lock": "W7",
+  "where": "harness 390x844 /manuscripts/versions: every input at least 16px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W1",
+  "where": "harness 390x844 /goals: the band is present",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W2",
+  "where": "harness 390x844 /goals: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W3",
+  "where": "harness 390x844 /goals: no image twice",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "pop",
+  "where": "harness 390x844 /goals: text and targets were read",
+  "ok": true,
+  "detail": "{\"text\":40,\"taps\":4}"
+ },
+ {
+  "lock": "W4",
+  "where": "harness 390x844 /goals: no uppercase labels",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W5",
+  "where": "harness 390x844 /goals: nothing past the screen's edge",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W6",
+  "where": "harness 390x844 /goals: every tap target at least 44px",
+  "ok": true,
+  "detail": "0: "
+ },
+ {
+  "lock": "W7",
+  "where": "harness 390x844 /goals: every input at least 16px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W1",
+  "where": "harness 390x844 /import: the band is present",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W2",
+  "where": "harness 390x844 /import: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W3",
+  "where": "harness 390x844 /import: no image twice",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "pop",
+  "where": "harness 390x844 /import: text and targets were read",
+  "ok": true,
+  "detail": "{\"text\":15,\"taps\":8}"
+ },
+ {
+  "lock": "W4",
+  "where": "harness 390x844 /import: no uppercase labels",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W5",
+  "where": "harness 390x844 /import: nothing past the screen's edge",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W6",
+  "where": "harness 390x844 /import: every tap target at least 44px",
+  "ok": true,
+  "detail": "0: "
+ },
+ {
+  "lock": "W7",
+  "where": "harness 390x844 /import: every input at least 16px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W1",
+  "where": "harness 390x844 /help: the band is present",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W2",
+  "where": "harness 390x844 /help: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W3",
+  "where": "harness 390x844 /help: no image twice",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "pop",
+  "where": "harness 390x844 /help: text and targets were read",
+  "ok": true,
+  "detail": "{\"text\":44,\"taps\":35}"
+ },
+ {
+  "lock": "W4",
+  "where": "harness 390x844 /help: no uppercase labels",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W5",
+  "where": "harness 390x844 /help: nothing past the screen's edge",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W6",
+  "where": "harness 390x844 /help: every tap target at least 44px",
+  "ok": true,
+  "detail": "0: "
+ },
+ {
+  "lock": "W7",
+  "where": "harness 390x844 /help: every input at least 16px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W1",
+  "where": "harness 390x844 /plans: the band is present",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W2",
+  "where": "harness 390x844 /plans: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W3",
+  "where": "harness 390x844 /plans: no image twice",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "pop",
+  "where": "harness 390x844 /plans: text and targets were read",
+  "ok": true,
+  "detail": "{\"text\":28,\"taps\":4}"
+ },
+ {
+  "lock": "W4",
+  "where": "harness 390x844 /plans: no uppercase labels",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W5",
+  "where": "harness 390x844 /plans: nothing past the screen's edge",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W6",
+  "where": "harness 390x844 /plans: every tap target at least 44px",
+  "ok": true,
+  "detail": "0: "
+ },
+ {
+  "lock": "W7",
+  "where": "harness 390x844 /plans: every input at least 16px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W1",
+  "where": "harness 390x844 /account: the band is present",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W2",
+  "where": "harness 390x844 /account: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W3",
+  "where": "harness 390x844 /account: no image twice",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "pop",
+  "where": "harness 390x844 /account: text and targets were read",
+  "ok": true,
+  "detail": "{\"text\":16,\"taps\":10}"
+ },
+ {
+  "lock": "W4",
+  "where": "harness 390x844 /account: no uppercase labels",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W5",
+  "where": "harness 390x844 /account: nothing past the screen's edge",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W6",
+  "where": "harness 390x844 /account: every tap target at least 44px",
+  "ok": true,
+  "detail": "0: "
+ },
+ {
+  "lock": "W7",
+  "where": "harness 390x844 /account: every input at least 16px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W1",
+  "where": "harness 390x844 /account/profile: the band is present",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W2",
+  "where": "harness 390x844 /account/profile: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W3",
+  "where": "harness 390x844 /account/profile: no image twice",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "pop",
+  "where": "harness 390x844 /account/profile: text and targets were read",
+  "ok": true,
+  "detail": "{\"text\":12,\"taps\":5}"
+ },
+ {
+  "lock": "W4",
+  "where": "harness 390x844 /account/profile: no uppercase labels",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W5",
+  "where": "harness 390x844 /account/profile: nothing past the screen's edge",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W6",
+  "where": "harness 390x844 /account/profile: every tap target at least 44px",
+  "ok": true,
+  "detail": "0: "
+ },
+ {
+  "lock": "W7",
+  "where": "harness 390x844 /account/profile: every input at least 16px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W1",
+  "where": "harness 390x844 /account/security: the band is present",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W2",
+  "where": "harness 390x844 /account/security: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W3",
+  "where": "harness 390x844 /account/security: no image twice",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "pop",
+  "where": "harness 390x844 /account/security: text and targets were read",
+  "ok": true,
+  "detail": "{\"text\":17,\"taps\":6}"
+ },
+ {
+  "lock": "W4",
+  "where": "harness 390x844 /account/security: no uppercase labels",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W5",
+  "where": "harness 390x844 /account/security: nothing past the screen's edge",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W6",
+  "where": "harness 390x844 /account/security: every tap target at least 44px",
+  "ok": true,
+  "detail": "0: "
+ },
+ {
+  "lock": "W7",
+  "where": "harness 390x844 /account/security: every input at least 16px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W1",
+  "where": "harness 390x844 /account/plan: the band is present",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W2",
+  "where": "harness 390x844 /account/plan: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W3",
+  "where": "harness 390x844 /account/plan: no image twice",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "pop",
+  "where": "harness 390x844 /account/plan: text and targets were read",
+  "ok": true,
+  "detail": "{\"text\":54,\"taps\":5}"
+ },
+ {
+  "lock": "W4",
+  "where": "harness 390x844 /account/plan: no uppercase labels",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W5",
+  "where": "harness 390x844 /account/plan: nothing past the screen's edge",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W6",
+  "where": "harness 390x844 /account/plan: every tap target at least 44px",
+  "ok": true,
+  "detail": "0: "
+ },
+ {
+  "lock": "W7",
+  "where": "harness 390x844 /account/plan: every input at least 16px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W1",
+  "where": "harness 390x844 /account/notifications: the band is present",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W2",
+  "where": "harness 390x844 /account/notifications: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W3",
+  "where": "harness 390x844 /account/notifications: no image twice",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "pop",
+  "where": "harness 390x844 /account/notifications: text and targets were read",
+  "ok": true,
+  "detail": "{\"text\":13,\"taps\":6}"
+ },
+ {
+  "lock": "W4",
+  "where": "harness 390x844 /account/notifications: no uppercase labels",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W5",
+  "where": "harness 390x844 /account/notifications: nothing past the screen's edge",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W6",
+  "where": "harness 390x844 /account/notifications: every tap target at least 44px",
+  "ok": true,
+  "detail": "0: "
+ },
+ {
+  "lock": "W7",
+  "where": "harness 390x844 /account/notifications: every input at least 16px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W1",
+  "where": "harness 390x844 /account/preferences: the band is present",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W2",
+  "where": "harness 390x844 /account/preferences: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W3",
+  "where": "harness 390x844 /account/preferences: no image twice",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "pop",
+  "where": "harness 390x844 /account/preferences: text and targets were read",
+  "ok": true,
+  "detail": "{\"text\":10,\"taps\":7}"
+ },
+ {
+  "lock": "W4",
+  "where": "harness 390x844 /account/preferences: no uppercase labels",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W5",
+  "where": "harness 390x844 /account/preferences: nothing past the screen's edge",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W6",
+  "where": "harness 390x844 /account/preferences: every tap target at least 44px",
+  "ok": true,
+  "detail": "0: "
+ },
+ {
+  "lock": "W7",
+  "where": "harness 390x844 /account/preferences: every input at least 16px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W1",
+  "where": "harness 390x844 /account/tasks: the band is present",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W2",
+  "where": "harness 390x844 /account/tasks: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W3",
+  "where": "harness 390x844 /account/tasks: no image twice",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "pop",
+  "where": "harness 390x844 /account/tasks: text and targets were read",
+  "ok": true,
+  "detail": "{\"text\":17,\"taps\":9}"
+ },
+ {
+  "lock": "W4",
+  "where": "harness 390x844 /account/tasks: no uppercase labels",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W5",
+  "where": "harness 390x844 /account/tasks: nothing past the screen's edge",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W6",
+  "where": "harness 390x844 /account/tasks: every tap target at least 44px",
+  "ok": true,
+  "detail": "0: "
+ },
+ {
+  "lock": "W7",
+  "where": "harness 390x844 /account/tasks: every input at least 16px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W1",
+  "where": "harness 390x844 /account/data: the band is present",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W2",
+  "where": "harness 390x844 /account/data: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W3",
+  "where": "harness 390x844 /account/data: no image twice",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "pop",
+  "where": "harness 390x844 /account/data: text and targets were read",
+  "ok": true,
+  "detail": "{\"text\":23,\"taps\":8}"
+ },
+ {
+  "lock": "W4",
+  "where": "harness 390x844 /account/data: no uppercase labels",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W5",
+  "where": "harness 390x844 /account/data: nothing past the screen's edge",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "W6",
+  "where": "harness 390x844 /account/data: every tap target at least 44px",
+  "ok": true,
+  "detail": "0: "
+ },
+ {
+  "lock": "W7",
+  "where": "harness 390x844 /account/data: every input at least 16px",
+  "ok": true,
+  "detail": ""
+ }
+]

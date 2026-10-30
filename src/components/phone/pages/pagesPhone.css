@@ -23,11 +23,11 @@
   .pa-pgsub { font-size: 14px; color: rgba(255, 255, 255, 0.75); margin-top: 6px; line-height: 1.4; }
 
   /* section heads (ref .shd .h2) */
-  .pa-shd { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 24px 2px 10px; }
-  .pa-shd:first-child { margin-top: 16px; }
+  .pa-pg .pa-shd { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 24px 2px 10px; }
+  .pa-pg .pa-shd:first-child { margin-top: 16px; }
   /* ⚠️ `!important` on the face and weight: brand.tsx forces every h2 at runtime (the Home headings carry it too) */
   .qm1-layer .pa-h2, .pa-pg .pa-h2 { font-family: var(--pa-type) !important; font-weight: 400 !important; font-size: 19px; margin: 0; color: var(--pa-ink); letter-spacing: -0.005em; line-height: 1.2; }
-  .pa-shn { font-size: 13px; color: var(--pa-muted); }
+  .pa-pg .pa-shn { font-size: 13px; color: var(--pa-muted); }
   .pa-pg .pa-link { display: inline-flex; align-items: center; gap: 5px; min-height: 44px; border: 0; background: none; font: 600 14px var(--pa-sans); color: var(--pa-navy); padding: 0; }
   .pa-pg .pa-link svg { width: 15px; height: 15px; }
 
@@ -35,33 +35,33 @@
   .pa-pg .pa-card { display: block; background: var(--pa-card); border-radius: var(--pa-r); box-shadow: var(--pa-sh); padding: 16px; border: 0; text-align: left; color: var(--pa-ink); font-family: var(--pa-sans); }
   /* ⚠️ `contain: inline-size`: without it the cards' total width is the scroller's min-content, and the shell's flex
      ancestors (min-width: auto) grew to it — the page measured 4,660px wide at 390 */
-  .pa-hscroll { contain: inline-size; display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: 16px; margin: 0 -16px; padding: 2px 16px 12px; scrollbar-width: none; }
-  .pa-hscroll > * { scroll-snap-align: start; flex: none; }
-  .pa-group { background: #fff; border-radius: var(--pa-r); box-shadow: var(--pa-sh); overflow: hidden; }
-  .pa-li { display: flex; align-items: center; gap: 12px; padding: 8px 14px; min-height: 54px; width: 100%; text-align: left; font-size: 15.5px; position: relative; border: 0; background: none; color: var(--pa-ink); font-family: var(--pa-sans); box-sizing: border-box; }
-  .pa-li + .pa-li::before { content: ""; position: absolute; left: 52px; right: 0; top: 0; height: 1px; background: var(--pa-rule); }
-  .pa-li .pa-ico { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; flex: none; color: var(--pa-ink-2); }
-  .pa-li .pa-ico svg { width: 20px; height: 20px; }
-  .pa-li .pa-lt { flex: 1; min-width: 0; }
-  .pa-li .pa-lt .pa-sub { display: block; margin-top: 1px; }
-  .pa-li .pa-rt { color: var(--pa-muted); font-size: 14px; display: flex; align-items: center; gap: 4px; text-align: right; }
-  .pa-li .pa-chev { color: var(--pa-faint); display: grid; }
-  .pa-li .pa-chev svg { width: 16px; height: 16px; }
+  .pa-pg .pa-hscroll { contain: inline-size; display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: 16px; margin: 0 -16px; padding: 2px 16px 12px; scrollbar-width: none; }
+  .pa-pg .pa-hscroll > * { scroll-snap-align: start; flex: none; }
+  .pa-pg .pa-group { background: #fff; border-radius: var(--pa-r); box-shadow: var(--pa-sh); overflow: hidden; }
+  .pa-pg .pa-li { display: flex; align-items: center; gap: 12px; padding: 8px 14px; min-height: 54px; width: 100%; text-align: left; font-size: 15.5px; position: relative; border: 0; background: none; color: var(--pa-ink); font-family: var(--pa-sans); box-sizing: border-box; }
+  .pa-pg .pa-li + .pa-li::before { content: ""; position: absolute; left: 52px; right: 0; top: 0; height: 1px; background: var(--pa-rule); }
+  .pa-pg .pa-li .pa-ico { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; flex: none; color: var(--pa-ink-2); }
+  .pa-pg .pa-li .pa-ico svg { width: 20px; height: 20px; }
+  .pa-pg .pa-li .pa-lt { flex: 1; min-width: 0; }
+  .pa-pg .pa-li .pa-lt .pa-sub { display: block; margin-top: 1px; }
+  .pa-pg .pa-li .pa-rt { color: var(--pa-muted); font-size: 14px; display: flex; align-items: center; gap: 4px; text-align: right; }
+  .pa-pg .pa-li .pa-chev { color: var(--pa-faint); display: grid; }
+  .pa-pg .pa-li .pa-chev svg { width: 16px; height: 16px; }
 
   /* ── Responses: the mini request cards (ref .rqc + .qband) ── */
   .pa-pg .pa-rqc { width: 220px; padding: 0; overflow: hidden; }
-  .pa-qband { display: flex; justify-content: space-between; align-items: center; padding: 7px 14px; font-weight: 600; font-size: 13.5px; color: var(--pa-ink); }
+  .pa-pg .pa-qband { display: flex; justify-content: space-between; align-items: center; padding: 7px 14px; font-weight: 600; font-size: 13.5px; color: var(--pa-ink); }
   .pa-rqb { display: block; padding: 12px 14px 14px; }
   .pa-rqrow { display: flex; gap: 10px; align-items: center; }
   .pa-pg .pa-av { width: 40px; height: 40px; border-radius: 50%; background: #fff; box-shadow: inset 0 0 0 1px var(--pa-rule); display: grid; place-items: center; flex: none; font-size: 13.5px; font-weight: 600; color: var(--pa-ink-2); letter-spacing: 0.02em; }
   .pa-rqwho { display: flex; flex-direction: column; min-width: 0; }
   .pa-rqname { font-family: var(--pa-type); font-size: 17px; line-height: 1.1; color: var(--pa-ink); }
-  .pa-stp { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; height: 28px; padding: 0 10px 0 6px; border-radius: 999px; white-space: nowrap; margin-top: 12px; color: var(--pa-ink); }
+  .pa-pg .pa-stp { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; height: 28px; padding: 0 10px 0 6px; border-radius: 999px; white-space: nowrap; margin-top: 12px; color: var(--pa-ink); }
   .pa-rqnow { display: block; margin-top: 8px; }
 
   /* the banner (blush: ink on blush) */
-  .pa-banner { background: var(--pa-blush-wash); color: var(--pa-ink); border-radius: var(--pa-r); padding: 12px 14px; font-size: 14px; line-height: 1.45; margin: 0 0 12px; }
-  .pa-banner small { display: block; font-size: 13px; margin-top: 4px; color: var(--pa-ink); }
+  .pa-pg .pa-banner { background: var(--pa-blush-wash); color: var(--pa-ink); border-radius: var(--pa-r); padding: 12px 14px; font-size: 14px; line-height: 1.45; margin: 0 0 12px; }
+  .pa-pg .pa-banner small { display: block; font-size: 13px; margin-top: 4px; color: var(--pa-ink); }
 
   /* ── the wall (ref .wallb .nocard .wallf): paper cards on a brick ground ── */
   .pa-wall { border-radius: var(--pa-r-lg); padding: 16px 12px 12px; box-shadow: var(--pa-sh); overflow: hidden; background: #141925 url("/images/responses/responses-wall-tile.webp") center / 300px; }
@@ -85,10 +85,10 @@
   .pa-mst { font-family: var(--pa-type); font-size: 25px; line-height: 1.1; color: #fff; overflow-wrap: anywhere; }
   .pa-msfacts { font-size: 14px; color: rgba(255, 255, 255, 0.78); margin-top: 6px; line-height: 1.45; }
   .pa-mssince { font-size: 13px; color: rgba(255, 255, 255, 0.7); margin-top: 6px; }
-  .pa-grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 16px; }
-  .pa-mini { background: #fff; border-radius: var(--pa-r); box-shadow: var(--pa-sh); padding: 12px 12px 11px; min-width: 0; }
-  .pa-mini .pa-num { font-size: 26px; display: block; line-height: 1; color: var(--pa-ink); }
-  .pa-mini .pa-sub { display: block; margin-top: 6px; line-height: 1.2; }
+  .pa-pg .pa-grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 16px; }
+  .pa-pg .pa-mini { background: #fff; border-radius: var(--pa-r); box-shadow: var(--pa-sh); padding: 12px 12px 11px; min-width: 0; }
+  .pa-pg .pa-mini .pa-num { font-size: 26px; display: block; line-height: 1; color: var(--pa-ink); }
+  .pa-pg .pa-mini .pa-sub { display: block; margin-top: 6px; line-height: 1.2; }
   .pa-pg .pa-mspitch { margin-top: 14px; }
   .pa-msk { font-weight: 600; color: var(--pa-ink-2); }
   .pa-mspitch p { font-size: 15.5px; line-height: 1.5; margin: 6px 0 0; }
@@ -101,8 +101,8 @@
   .pa-pg .pa-pkres { position: relative; margin: 0 10px; box-shadow: 0 10px 24px rgba(31, 38, 51, 0.14); display: block; }
   .pa-pkh { display: block; font-size: 19px; color: var(--pa-ink); line-height: 1.2; }
   .pa-pkc, .pa-pkst { display: block; margin-top: 4px; }
-  .pa-prostrip { display: flex; gap: 10px; align-items: center; background: var(--pa-blush-wash); color: var(--pa-ink); border-radius: var(--pa-r); padding: 10px 14px; font-size: 13.5px; }
-  .pa-lock { display: inline-flex; align-items: center; height: 24px; padding: 0 9px; border-radius: 999px; background: #fff; font-size: 12.5px; font-weight: 600; color: var(--pa-ink); flex: none; }
+  .pa-pg .pa-prostrip { display: flex; gap: 10px; align-items: center; background: var(--pa-blush-wash); color: var(--pa-ink); border-radius: var(--pa-r); padding: 10px 14px; font-size: 13.5px; }
+  .pa-pg .pa-lock { display: inline-flex; align-items: center; height: 24px; padding: 0 9px; border-radius: 999px; background: #fff; font-size: 12.5px; font-weight: 600; color: var(--pa-ink); flex: none; }
   .pa-mt10 { margin-top: 10px; }
   .pa-kv .pa-k { color: var(--pa-muted); font-size: 15px; }
   .pa-kv .pa-v { color: var(--pa-ink); }
@@ -121,14 +121,14 @@
   .pa-pg .pa-ancard { margin-top: 16px; }
   .pa-pg .pa-mt12 { margin-top: 12px; }
   .qm1-layer .pa-h17, .pa-pg .pa-h17 { font-size: 17px; }
-  .pa-ftrack { display: flex; align-items: flex-start; margin-top: 16px; }
-  .pa-fst { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 60px; flex: none; font-size: 12.5px; color: var(--pa-muted); text-align: center; }
-  .pa-fd { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; box-shadow: inset 0 0 0 1.5px var(--pa-rule); color: var(--pa-faint); background: #fff; }
-  .pa-fd.on { background: var(--pa-navy); box-shadow: none; color: #fff; }
-  .pa-fd.on svg * { stroke: #fff; }
-  .pa-fd.on svg [fill]:not([fill="none"]) { fill: #fff; }
-  .pa-fst b { font-size: 20px; color: var(--pa-ink); margin-top: 4px; }
-  .pa-fl { flex: 1; height: 2px; background: var(--pa-rule); margin-top: 18px; }
+  .pa-antrack { display: flex; align-items: flex-start; margin-top: 16px; }
+  .pa-anst { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 60px; flex: none; font-size: 12.5px; color: var(--pa-muted); text-align: center; }
+  .pa-andisc { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; box-shadow: inset 0 0 0 1.5px var(--pa-rule); color: var(--pa-faint); background: #fff; }
+  .pa-andisc.on { background: var(--pa-navy); box-shadow: none; color: #fff; }
+  .pa-andisc.on svg * { stroke: #fff; }
+  .pa-andisc.on svg [fill]:not([fill="none"]) { fill: #fff; }
+  .pa-anst b { font-size: 20px; color: var(--pa-ink); margin-top: 4px; }
+  .pa-anlink { flex: 1; height: 2px; background: var(--pa-rule); margin-top: 18px; }
   .pa-anline { margin: 12px 0 0; }
   .pa-anweeksub { margin: 4px 0 12px; }
   .pa-anbars { display: flex; align-items: flex-end; gap: 5px; height: 90px; }
@@ -170,5 +170,42 @@
   .pa-rankw { font-size: 11.5px; color: var(--pa-muted); overflow-wrap: anywhere; }
   .pa-rank.on .pa-rankw { color: var(--pa-ink); font-weight: 600; }
   .pa-rankline { font-size: 14px !important; line-height: 1.45; margin: 14px 0 0; }
+
+  /* ── Settings index, Plan, Help (ref PAGES.settings / plan / help) ── */
+  .pa-pg .pa-setgroup + .pa-setgroup { margin-top: 14px; }
+  .pa-pg .pa-gl { font-size: 13px; font-weight: 600; color: var(--pa-muted); margin: 22px 4px 8px; }
+  .pa-pg .pa-li .pa-lt .pa-sub { display: block; }
+  .pa-pg .pa-plancard { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 20px; }
+  .pa-pg .pa-planimg { width: 64px; height: 64px; border-radius: 50%; background: var(--pa-blush-wash); padding: 7px; box-sizing: border-box; object-fit: contain; }
+  .pa-pg .pa-plant { font-family: var(--pa-type); font-size: 22px; color: var(--pa-ink); }
+  .pa-pg .pa-plansub { margin: 0; font-size: 14.5px; }
+  .pa-pg .pa-planico { color: var(--pa-navy); }
+  .pa-pg .pa-hsearch { display: flex; align-items: center; gap: 10px; height: 44px; border-radius: 999px; background: #fff; box-shadow: var(--pa-sh); padding: 0 16px; margin: 16px 0 14px; color: var(--pa-muted); }
+  .pa-pg .pa-hsearch svg { width: 17px; height: 17px; flex: none; }
+  .pa-pg .pa-hsearch input { flex: 1; min-width: 0; height: 40px; border: 0; background: transparent; font: 400 16px var(--pa-sans); color: var(--pa-ink); outline: none; }
+  .pa-pg .pa-gscard { display: flex; align-items: center; gap: 16px; width: 100%; margin-top: 14px; text-align: left; }
+  .pa-pg .pa-gsart { width: 68px !important; height: 68px !important; min-width: 68px; }
+  .pa-pg .pa-gscol { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 0; }
+  /* the picture sits in the blush disc, as the ref draws its tip art (Part 8 pairs) */
+  .pa-pg .pa-gsart, .pa-pg .pa-impsmart .pa-impart { flex: none; border-radius: 50%; background: var(--pa-blush-wash); padding: 8px; box-sizing: border-box; }
+  .pa-pg .pa-gscard b { font-size: 16px; font-weight: 600; }
+  .pa-pg .pa-barh { display: block; height: 10px; border-radius: 5px; background: var(--pa-fill); overflow: hidden; }
+  .pa-pg .pa-barh i { display: block; height: 100%; border-radius: 5px; background: var(--pa-navy); }
   @media (prefers-reduced-motion: reduce) { .pa-pg .pa-card, .pa-nocard { transition: none; } }
 }
+@media (max-width: 767.98px) {
+  .pa-pg .pa-implede { font-size: 15px; color: var(--pa-ink-2); line-height: 1.45; margin: 16px 0 14px; }
+  .pa-pg .pa-impsmart { display: flex; flex-direction: column; gap: 8px; }
+  .pa-pg .pa-impsmart b { font-size: 17px; font-weight: 600; }
+  .pa-pg .pa-impsmart .pa-impart { display: block; margin: 0 auto 6px; padding: 14px; }
+  .pa-pg .pa-impsmart { text-align: center; }
+  .pa-pg .pa-impsmart .pa-sub { margin: 0; font-size: 14px; }
+  .pa-pg .pa-impfact { font-size: 13px !important; }
+  .pa-pg .pa-impfoot { margin: 18px 4px 0; }
+}
+@media (max-width: 767.98px) {
+  /* the import page's grid gives its child a gutter; the phone page draws its own */
+  .impg-wpg .wpg-scroll > .pa-impg { padding-inline: 0 !important; max-width: none !important; }
+  .pa-pg .pa-plant .pa-lock { display: inline-flex; align-items: center; height: 24px; padding: 0 9px; border-radius: 999px; background: var(--pa-blush-wash); font: 600 12.5px var(--pa-sans); color: var(--pa-ink); vertical-align: middle; margin-left: 6px; }
+}
+@media (max-width: 767.98px) { .pa-pg .pa-msnone { margin-top: 16px; display: flex; flex-direction: column; gap: 12px; } .pa-pg .pa-msnone .pa-pgnone { margin: 0; } }
