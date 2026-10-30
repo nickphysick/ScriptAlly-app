@@ -47,6 +47,11 @@ for (const name of PICK) {
         await page.waitForTimeout(3000);
         return;
       }
+      if (name === "example") {
+        await page.locator('[data-fv2="example-link"]').click();
+        await page.locator('[data-fv2="example"] [data-d58="page"][data-loading="0"]').first().waitFor({ timeout: 15_000 });
+        await page.waitForTimeout(1600);
+      }
       await page.screenshot({ path: `${DIR}/${name}-${vp.width}.png` });
     });
   }

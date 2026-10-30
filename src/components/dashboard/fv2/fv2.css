@@ -68,3 +68,19 @@
 .d58 .fv1-ch.fv2-ch { grid-template-columns: minmax(0, 1fr); gap: 10px; }
 .d58 .fv2-done { display: flex; justify-content: flex-end; margin-top: 10px; }
 .d58 .fv2-done .fv1-lnk { color: var(--d58-ink); font-size: 15px !important; }
+
+/* ── Part E · the example dashboard: a yellow bar over the columns, the real page below it, inert ── */
+.fv2-exdash { min-width: 0; }
+.fv2-exbar {
+  display: flex; align-items: center; gap: 10px; margin: 0 0 14px; padding: 10px 14px;
+  border-radius: 12px; background: #fbf1c9; box-shadow: inset 0 0 0 1px #ecd47a;
+}
+.fv2-exbar > svg { flex: none; width: 18px; height: 18px; fill: none; stroke: var(--d58-ink); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.d58 .fv2-exbart { flex: 1 1 auto; min-width: 0; font: 400 15px/1.4 var(--d58-serif) !important; color: var(--d58-ink); }
+.d58 .fv2-exback {
+  flex: none; padding: 0; border: 0; background: none; cursor: pointer; color: var(--d58-ink);
+  font: 700 15px/1.4 var(--d58-serif) !important; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap;
+}
+.fv2-exback:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
+/* the example's own page sits inside this page's: it pays no second top padding */
+.d58 .fv2-exbody > .d58 > .d58-page { padding: 0; }

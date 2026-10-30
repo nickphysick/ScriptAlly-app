@@ -56,6 +56,7 @@ import { SetUpCard } from "../fv1/SetUpCard";
 import { GsSheet } from "../fv2/GsSheet";
 import { EmptyFeed } from "../fv2/EmptyFeed";
 import { FirstVisitTour } from "../fv2/FirstVisitTour";
+import { ExampleDashboard } from "../fv2/ExampleDashboard";
 import { TOUR_DONE_PATH, TOUR_STOPS, registerTourReplay, tourDecision, tourState } from "../../../lib/dashTour";
 import { FirstWinStamp } from "../fv1/FirstWinStamp";
 import "../oneScreen.css";
@@ -100,6 +101,8 @@ export interface Dash58Props {
   /** First visit v2 (Part B): the set-up answer changed on the dashboard — write the SAME fields sign-up wrote
    *  (`User.queryingStage`, `Manuscript.status`). Absent (the onboarding ghost) → shown, never stored. */
   onAnswer?: (msId: string, w: AnswerWrite) => void | Promise<void>;
+  /** First visit v2 (Part E): this mount is the example dashboard — sample data, no side effects of any kind */
+  example?: boolean;
 }
 
 /** Dashboard first visit v2 (Part A): the task card's last "Then:" while the Getting started sheet is open. */
@@ -180,7 +183,7 @@ const ImportNoticeRow: React.FC<{ notice: ImportNotice; onDismiss: () => void; o
 export const Dash58: React.FC<Dash58Props> = ({
   loading: dataLoading, queries, agents: agentsIn, manuscripts, tasks, userTasks, activities, taskFlags, currentUser,
   activeManuscript, onNavigate, now: nowProp, versions = [], smartImportUsage = null,
-  onFoundingSeen, onPrefs, onGoal, onAnswer,
+  onFoundingSeen, onPrefs, onGoal, onAnswer, example = false,
 }) => {
   /* one clock per mount: a new Date on every render would rebuild every derivation below */
   const [mountedAt] = useState(() => new Date());
@@ -301,7 +304,8 @@ export const Dash58: React.FC<Dash58Props> = ({
 
   /* ── the founding writer card (v105): a press ID — the writer's name and founding number, feedback composed in the
      card, the rank read live from their own `foundingStats` doc. The sidebar's Give feedback (FeedbackDock) is unchanged. */
-  const fwUid = currentUser?.id ?? null;
+  /* the example (first visit v2, Part E) reads no founding stats: its writer is a sample */
+  const fwUid = example ? null : currentUser?.id ?? null;
 
   /* ── the page's own scrollport: the height the one screen fills ──
      ⚠️ MEASURED, NEVER `100vh`: the page starts under the top bar. `--d58-chrome` is the rest of
@@ -420,7 +424,7 @@ export const Dash58: React.FC<Dash58Props> = ({
       const n = need > 0 ? Math.ceil(need) : 0;
       /* remembered for the next loading page the moment it changes — the shape effect below runs before
          the webfonts land, and a floor written then is the narrower one */
-      if (n > 0 && n !== hoopNeedRef.current) writeShape({ ...readShape(), hoopNeed: n });
+      if (n > 0 && n !== hoopNeedRef.current && !example) writeShape({ ...readShape(), hoopNeed: n });
       hoopNeedRef.current = n;
       const v = need > 0 ? `${Math.ceil(need)}px` : "";
       if (root.style.getPropertyValue("--d60-hoop-need") !== v) {
@@ -439,6 +443,8 @@ export const Dash58: React.FC<Dash58Props> = ({
   useEffect(() => {
     if (loading) return;
     const h = focusRef.current?.getBoundingClientRect().height ?? 0;
+    /* the example's shape is not the writer's: it is never remembered as the loading page's */
+    if (example) return;
     writeShape({ focusH: h > 0 ? Math.round(h) : shape.focusH, closed: closed && closed.total === 0 ? "none" : "some", today: false, pre: empty, agents: agents.length > 0, hoopNeed: hoopNeedRef.current || shape.hoopNeed });
   }, [loading, plan, closed, shape.focusH, empty, agents.length]);
 
@@ -457,7 +463,13 @@ export const Dash58: React.FC<Dash58Props> = ({
   const [tour, setTour] = useState<number | null>(null);
   const tourDecided = useRef(false);
   const tourTimer = useRef(0);
-  const isGhost = () => !!rootRef.current?.closest(".im-ghost");
+  /* the onboarding ghost and the example (Part E) are for show: neither decides, registers or writes the tour */
+  const isGhost = () => example || !!rootRef.current?.closest(".im-ghost");
+
+  /* ── first visit v2 (Part E): the example dashboard, opened from the empty feed ── */
+  const [exampleOpen, setExampleOpen] = useState(false);
+  const openExample = () => setExampleOpen(true);
+  const closeExample = React.useCallback(() => setExampleOpen(false), []);
   useEffect(() => {
     if (loading || !onDash || !currentUser || tourDecided.current || isGhost()) return;
     tourDecided.current = true;
@@ -554,6 +566,7 @@ export const Dash58: React.FC<Dash58Props> = ({
     <div ref={rootRef} className="os-root d58" data-mode="f1" data-fv2={fvState} data-paint={paint ? "1" : undefined} style={noticeListH > 0 ? ({ ["--d58-notice-list-h" as string]: `${noticeListH}px` } as React.CSSProperties) : undefined}>
       <DashPopupProvider rootRef={rootRef}>
         <div className="d58-page" data-d58="page" data-loading={loading ? "1" : "0"}>
+          {exampleOpen ? <ExampleDashboard onBack={closeExample} /> : (<>
           {notice && <ImportNoticeRow notice={notice} onDismiss={dismissNotice} onListHeight={setNoticeListH} />}
           {/* ⚠️ DASHBOARD FEED v1's THREE COLUMNS, IN EVERY STATE (first visit v2, Part A) — you and your book · the feed
               (or, before the first query, the set-up card over the empty feed) · what to do. The page may scroll; only a
@@ -589,7 +602,7 @@ export const Dash58: React.FC<Dash58Props> = ({
                   onImport={() => onNavigate("import")} onLog={logQuery} onAddAgent={addAgent} onDiscover={() => onNavigate("agents", "Discover")}
                   onComps={() => goGs("comps")}
                 />
-                <EmptyFeed />
+                <EmptyFeed onExample={example ? undefined : openExample} />
               </div>
             ) : (
               <div className="df1-feed" data-df1="feed">
@@ -606,19 +619,20 @@ export const Dash58: React.FC<Dash58Props> = ({
               )}
               <div className="df1-slot df1-s-tip" data-df1="tip-slot"><F1Tip loading={loading} /></div>
               <div className="df1-slot df1-s-scout" data-df1="scout-slot">
-                <F1Scout asked={notifyPrefs(currentUser?.notifyPrefs).scout} onAsk={currentUser && onPrefs ? () => onPrefs({ "notifyPrefs.scout": true }) : undefined} />
+                <F1Scout asked={notifyPrefs(currentUser?.notifyPrefs).scout} onAsk={currentUser && onPrefs && !example ? () => onPrefs({ "notifyPrefs.scout": true }) : undefined} />
               </div>
               <div className="df1-slot df1-s-footer" data-df1="footer-slot"><F1Footer /></div>
             </div>
-            <FirstWinStamp uid={currentUser?.id ?? null} active={onDash && !loading && !rootRef.current?.closest(".im-ghost")} shown={prefs.wins} onPrefs={onPrefs} />
+            <FirstWinStamp uid={currentUser?.id ?? null} active={onDash && !loading && !example && !rootRef.current?.closest(".im-ghost")} shown={prefs.wins} onPrefs={onPrefs} />
           </div>
           {tour !== null && onDash && <FirstVisitTour stop={tour} onNext={nextStop} onSkip={() => endTour()} />}
+          </>)}
         </div>
       </DashPopupProvider>
       {/* ⚠️ ONLY WHILE THE DASHBOARD IS THE PAGE ON SCREEN: every page stays mounted, and a layer
           portalled into the shell's sheet outlives its page otherwise. Never in the onboarding ghost.
           Dashboard feed v1: the floating feed tab is retired; the hawk's shadow stays. */}
-      {sheet && onDash && !rootRef.current?.closest(".im-ghost") && createPortal(
+      {sheet && onDash && !example && !rootRef.current?.closest(".im-ghost") && createPortal(
         <div className="d58-layer d59-sheet" data-d58="sheet-layer" style={{ ["--d59-tab-r" as string]: `${sheet.r}px` } as React.CSSProperties}>
           <img className="d59-hawkshadow" data-d58="shadow" alt="" aria-hidden="true" draggable={false} src={`${DASH_SHADOW.src}?v=${DASH_SHADOW.version}`} />
         </div>,
