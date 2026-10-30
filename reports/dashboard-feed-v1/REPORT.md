@@ -175,5 +175,15 @@ v1 (all but DM1-E1, re-pointed), help system v1 (all but the 12 above).
 `02-desk-full-1280`, `03-feed-agents-1512`, `03-feed-agents-1280`, `04-queries-closed-1512`, `04-queries-closed-1280`,
 `05-sidebar-expanded-1512`.
 
-{{DEPLOY}}
+## Integration and deploy
+
+- **Dev moved mid-pack.** It served the base (`index-4L_rFD9m.js`) at the start, and phone fixes v1
+  (`dev/…-sip1-pls1-pfx1`, 3c858ca9, `index-BdI7VYoR.js`) by the time of the deploy. Re-checked before deploying.
+- **Integration branch:** `dev/pk391-qm1-pk392-calx-pk392b-td7-fv1-pk393-pa2-2-td12-ppp1-pa2-8-sip1-pls1-pfx1-df1`, cut
+  from phone fixes v1's tip with `dashboard-feed-v1` merged in. Clean merge, no conflicts. Merge commit b9684661.
+- **Gates there:** tsc clean, both builds clean, Vitest 701 files / 10,803 passed. **Locks there:** all 12 DF1 locks and
+  the three re-pointed suites, green (16 passed).
+- **Deployed to dev only** (hosting), from the clean integration worktree: **`index-BQ2ftw2C.js`**, confirmed served.
+  A1, C1 and D2 re-run against the deployed site: green.
+- **Not merged to main.** Prod untouched.
 
