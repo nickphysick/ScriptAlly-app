@@ -19,6 +19,7 @@
  * otherwise sit under the drawer) — the flow itself is untouched. Free users see no link: the drawer
  * does not sell.
  */
+import { useIsMobile } from "../../shell/mobileChrome";
 import React, { useMemo, useState } from "react";
 import { useScriptAllyDb } from "../../../lib/db";
 import { PASTE_RESPONSE_EVENT, closeQueryDrawer } from "../../../lib/queryActions/drawerStore";
@@ -29,6 +30,8 @@ import type { JourneyView } from "../journey";
 import { isLive, seedOf, statusWords } from "./common";
 
 export function QueryPicker({ onPick, seed, hadOpen, children }: { onPick: (queryId: string) => void; seed?: unknown; /** Query panel v2 §E — the query that was open in the panel: listed first, under its own heading */ hadOpen?: string; children: (view: JourneyView) => React.ReactElement }) {
+  /* Phone fixes v1 (5C): no autofocus on a phone (it scrolls the flow to the field) */
+  const onPhone = useIsMobile();
   const db = useScriptAllyDb();
   const isPro = db.currentUser?.plan === UserPlan.PRO;
   /* parking (§6.4): what was typed is the picker's one answer */
@@ -72,7 +75,7 @@ export function QueryPicker({ onPick, seed, hadOpen, children }: { onPick: (quer
   };
   const body = (
     <div className="qad-apick" data-qad-qpick>
-      <input className="qad-fin" autoFocus placeholder="Start typing an agent's name…" value={typed} data-qad-query-input
+      <input className="qad-fin" autoFocus={!onPhone} placeholder="Start typing an agent's name…" value={typed} data-qad-query-input
         onChange={(e) => setTyped(e.target.value)} autoComplete="off"
         onKeyDown={(e) => { const first = open ?? rest[0]; if (e.key === "Enter" && first) { e.preventDefault(); onPick(first.q.id); } }} />
       <div className="qad-sugg" data-qad-sugg>

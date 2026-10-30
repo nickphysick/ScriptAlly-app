@@ -40,6 +40,7 @@ import { showUndoBar, openQueryDrawer } from "../../../lib/queryActions/drawerSt
 import { STAGE_NAME } from "../../../lib/qcSummary";
 import { formatDate } from "../../../lib/dates";
 import { METHOD_OPTIONS, IF_NO_RESPONSE_OPTIONS, REJECTION_TYPE_OPTIONS } from "../../EditQueryDrawer";
+import { ReplyWheel } from "../../phone/ReplyWheel";
 import "./editQueryPhone.css";
 
 type Section = "agent" | "sent" | "howwhen" | "reply" | "responses" | "notes";
@@ -53,7 +54,6 @@ const wdm = (ms: number) => formatDate(new Date(ms), { weekday: "short", day: "n
 const AUTO_NO = IF_NO_RESPONSE_OPTIONS[1];
 const NUDGE = IF_NO_RESPONSE_OPTIONS[0];
 const CLOSED_REVIEW = new Set<QueryStatus>([QueryStatus.REJECTED, QueryStatus.WITHDRAWN]);
-const CHIP_WEEKS = [6, 8, 12, 16];
 
 export const EditQueryPhone: React.FC<{ query: Query; onClose: () => void; onDelete: (id: string) => void }> = ({ query, onClose, onDelete }) => {
   const { agents, manuscripts, packages, currentUser, addJournalEntry, journalEntries, deleteJournalEntry } = useScriptAllyDb();
@@ -295,19 +295,7 @@ const ReplyStep: React.FC<StepProps> = (p) => {
         ...(dueInput !== was ? { writerExpectedDate: new Date(fromInput(dueInput, 12)).toISOString() } : {}),
         ...(nextIf !== curIf ? { ifNoResponse: nextIf } : {}),
       } }, "Reply window")}>
-      <div className="eqp-chips" data-eqp="chips">
-        {CHIP_WEEKS.map((w) => (
-          <button key={w} type="button" className={`eqp-chip${wk === w && dy === 0 ? " on" : ""}`} onClick={() => { setWk(w); setDy(0); }} data-eqp="chip" data-w={w}>
-            {w} weeks{usual === w ? <small>Usual</small> : null}
-          </button>
-        ))}
-      </div>
-      <div className="eqp-whl" data-eqp="wheel">
-        <div className="eqp-whlband" aria-hidden="true" />
-        <Wheel n={53} value={wk} onChange={setWk} label="Weeks" data="weeks" /><span className="eqp-u">weeks</span>
-        <Wheel n={7} value={dy} onChange={setDy} label="Days" data="days" /><span className="eqp-u">days</span>
-      </div>
-      <p className="eqp-dl" data-eqp="dateline">Expected by {wdm(due)}{dy === 0 ? ` (${wk} ${wk === 1 ? "week" : "weeks"} after you sent it)` : ` (${days} days after you sent it)`}</p>
+      <ReplyWheel sentMs={p.sentMs} days={days} usual={usual} onDays={(d) => { setWk(Math.min(52, Math.floor(d / 7))); setDy(d % 7); }} />
       <label className="eqp-sw" data-eqp="nrmn">No reply means no
         <input type="checkbox" role="switch" checked={no} onChange={() => setNo(!no)} aria-label="No reply means no" /><span className="eqp-tg" aria-hidden="true"><i /></span>
       </label>
@@ -315,23 +303,6 @@ const ReplyStep: React.FC<StepProps> = (p) => {
   );
 };
 
-/** A scroll-snap column; the value is read from where it settles, and set by scrolling to it. */
-const Wheel: React.FC<{ n: number; value: number; onChange: (v: number) => void; label: string; data: string }> = ({ n, value, onChange, label, data }) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const H = 40;
-  const settle = useRef<number | undefined>(undefined);
-  useEffect(() => {
-    const el = ref.current; if (!el) return;
-    if (Math.round(el.scrollTop / H) !== value) el.scrollTop = value * H;
-  }, [value]);
-  return (
-    <div ref={ref} className="eqp-col" role="listbox" aria-label={label} tabIndex={0} data-eqp={`col-${data}`}
-      onScroll={(e) => { const el = e.currentTarget; window.clearTimeout(settle.current); settle.current = window.setTimeout(() => { const v = Math.max(0, Math.min(n - 1, Math.round(el.scrollTop / H))); if (v !== value) onChange(v); }, 90); }}
-      onKeyDown={(e) => { if (e.key === "ArrowDown") { e.preventDefault(); onChange(Math.min(n - 1, value + 1)); } if (e.key === "ArrowUp") { e.preventDefault(); onChange(Math.max(0, value - 1)); } }}>
-      {Array.from({ length: n }, (_, i) => <div key={i} className={`eqp-it${i === value ? " on" : ""}`} role="option" aria-selected={i === value} data-v={i} onClick={() => onChange(i)}>{i}</div>)}
-    </div>
-  );
-};
 
 const ResponsesStep: React.FC<StepProps> = (p) => {
   const [edits, setEdits] = useState<Record<string, number>>({});

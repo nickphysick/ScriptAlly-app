@@ -17,12 +17,13 @@
  * ⚠️ EVERY LOCK ASSERTS ITS POPULATION FIRST.
  */
 import { test, expect, type Page } from "@playwright/test";
-import { appendFileSync } from "node:fs";
+import { appendFileSync, existsSync } from "node:fs";
+import { resolve } from "node:path";
 import { createRequire } from "node:module";
-import { openPhone } from "./pa2Lib";
-import { touchDrag } from "./touch";
+import { MS, openPhone } from "./pa2Lib";
+import { engine, touchDrag } from "./touch";
 import { devDb } from "./devWrite";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDocs, query as fsq, where } from "firebase/firestore";
 import { buildQcRows } from "../../src/lib/qcSummary";
 import { eyeProgress } from "../../src/lib/qcBirdsEye";
 import type { Activity, Agent, Query } from "../../src/types";
@@ -45,6 +46,7 @@ export const PAGES = [
 
 /** Named breaks that put back what each fix removed. */
 export const BREAK: Record<string, string> = {
+  F7: ".pa-flow .pf-nqc { display: none !important; } .pa-flow .pf-lcard::before { content: 'New query'; display: block; padding: 7px 14px; font-size: 12.5px; background: #f7efe3; }",
   F5: ".pa-birds .pa-barh { display: inline !important; }",
   F4: '[data-pa="search-btn"] { pointer-events: none !important; }',
   F2: "@media (max-width: 767.98px) { .sv2-fade { display: block !important; opacity: 1 !important; } .pa-edgefade { display: none !important; } }",
@@ -69,9 +71,26 @@ export async function go(page: Page, path: string) {
   await page.waitForTimeout(300);
 }
 
+/* ONE SIGN-IN PER PROJECT, NOT PER TEST. Firebase keeps its session in IndexedDB, which `storageState` carries only
+   when asked (`indexedDB: true`); without it every lock password-signs-in and a run trips Firebase's throttle, which
+   reads as "the page never rendered" (it did, on the iPhone, twice in one session). */
+const authFile = (engineName: string) => resolve(process.cwd(), `tests/e2e/.auth/pf1-${engineName}-${new URL(process.env.SA_E2E_BASE_URL ?? "http://x").port || "443"}.json`);
+test.use({ storageState: async ({ browserName }, use) => { const f = authFile(browserName); await use(existsSync(f) ? f : undefined); } });
 export async function phone(page: Page, path: string) {
   const vp = page.viewportSize()!;
-  await openPhone(page, path, vp);
+  /* ONE RETRY, AND ONLY FOR THE SPLASH STALL. Playwright's WebKit here intermittently fails Google's fetches ("Fetch API
+     cannot load …googleapis…"), so Firebase never finishes starting and the page holds its splash — the same fault that
+     stops its Firestore Write channel. It is the harness's network, not the app: the same build loads on the next try.
+     A second failure stands. Every retry is recorded, so a run that leans on it shows it. */
+  try { await openPhone(page, path, vp); }
+  catch (e) {
+    const splash = await page.evaluate(() => !document.querySelector(".ws-work, .ws-panel, #au-email") && /QueryHawk/.test(document.body.innerText)).catch(() => false);
+    if (!splash) throw e;
+    record("RETRY", { why: "splash stall", path, engine: engine(page) });
+    await page.reload(); await openPhone(page, path, vp);
+  }
+  const f = authFile(engine(page));
+  if (!existsSync(f)) await page.context().storageState({ path: f, indexedDB: true });
   if (BREAK[MUTATE]) await page.addStyleTag({ content: BREAK[MUTATE] });
   await page.waitForTimeout(400);
 }
@@ -264,5 +283,171 @@ test.describe("PF1 phone fixes", () => {
     expect(cards.every((c) => c.where !== "closed"), "no closed group").toBe(true);
     expect(cards.every((c) => c.trackH >= 9 && c.trackW > 100), "every bar has its 10px track").toBe(true);
     expect(mism, "each bar's fill is the desktop eyeProgress value, closed queries left out").toEqual([]);
+  });
+
+  /** Open Log a query from the tab bar's + (the "I sent a query" door). */
+  async function openLog(page: Page) {
+    await page.locator('[data-pa="plus"]').first().tap();
+    await page.locator('[data-pa="plus-sent"]').first().tap();
+    await page.locator('.pa-flow[data-pf="log"]').waitFor({ timeout: 15_000 });
+    if (MUTATE === "F6") await page.evaluate(() => { const i = document.querySelector<HTMLInputElement>("[data-qad-agent-input]"); i?.focus(); i?.scrollIntoView({ block: "end" }); });
+    await page.waitForTimeout(900);
+  }
+  const flowTop = (page: Page) => page.evaluate(() => {
+    const sh = document.querySelector<HTMLElement>('.pa-flow [data-pf="sheet"]'), layer = document.querySelector<HTMLElement>(".pa-flow");
+    const card = document.querySelector<HTMLElement>('.pa-flow [data-pf="live"]')!.getBoundingClientRect();
+    return { sheet: sh?.scrollTop ?? -1, layer: layer?.scrollTop ?? -1, win: scrollY, cardTop: Math.round(card.top), cardBottom: Math.round(card.bottom), vh: innerHeight,
+      focus: (document.activeElement as HTMLElement | null)?.tagName ?? null };
+  });
+
+  test("F6 Log a query opens at the top with the card fully in view, from + and after Queries was scrolled halfway", async ({ page }) => {
+    const vp = page.viewportSize()!;
+    await phone(page, "/queries");
+    await go(page, "/queries");
+    await openLog(page);
+    const fresh = await flowTop(page);
+    await page.locator('.pa-flow [data-pf="close"]').tap(); await page.waitForTimeout(600);
+    const discard = page.getByRole("button", { name: /^Discard/ });
+    if (await discard.count()) await discard.first().tap();
+    const stageTop = () => page.evaluate(() => document.getElementById("app-stage-scroll")!.scrollTop);
+    /* the list arrives late on WebKit (its Firestore channel is slow in this harness): at 1.5s the page could scroll
+       219px, at 7s 3,400 — wait for the list, or "scrolled halfway" is a claim about a page that had not loaded */
+    await page.waitForFunction(() => { const st = document.getElementById("app-stage-scroll")!; return st.scrollHeight - st.clientHeight > 1500; }, null, { timeout: 30_000 });
+    for (let i = 0; i < 16 && (await stageTop()) < 600; i++) await touchDrag(page, Math.round(vp.width / 2), Math.round(vp.height * 0.7), -Math.round(vp.height * 0.4));
+    const half = await stageTop();
+    /* the bar tucked away on the way down; a phone brings it back with a small drag up (app.js onScroll: 6px up) */
+    await touchDrag(page, Math.round(vp.width / 2), Math.round(vp.height * 0.4), 60, 6);
+    const halfNow = await stageTop();
+    await page.waitForTimeout(500);
+    await openLog(page);
+    const after = await flowTop(page);
+    record("F6", { fresh, half, halfNow, after });
+    expect(half, "Queries was scrolled down first").toBeGreaterThan(300);
+    for (const [k, r] of [["from +", fresh], ["after scrolling", after]] as const) {
+      expect(r.sheet, `${k}: the flow's scroll is 0`).toBe(0);
+      expect(r.layer, `${k}: the layer is not scrolled`).toBe(0);
+      expect(r.cardTop, `${k}: the card's top is in view`).toBeGreaterThanOrEqual(0);
+      expect(r.cardBottom, `${k}: the card's bottom is in view`).toBeLessThanOrEqual(r.vh);
+      expect(r.focus, `${k}: no field focused on open`).not.toBe("INPUT");
+    }
+  });
+
+  test("F7 the 'New query' heading is at least 26px, inside the white card, and there is no strip", async ({ page }) => {
+    await phone(page, "/queries");
+    await go(page, "/queries");
+    if (BREAK[MUTATE]) await page.addStyleTag({ content: BREAK[MUTATE] });
+    await openLog(page);
+    const h = await page.evaluate(() => {
+      const card = document.querySelector<HTMLElement>('.pa-flow [data-pf="live"]')!;
+      const head = card.querySelector<HTMLElement>('[data-pf="heading"]');
+      const hb = head?.querySelector("b");
+      const vis = (e: Element | null) => !!e && getComputedStyle(e).display !== "none" && (e as HTMLElement).getBoundingClientRect().height > 0;
+      return { text: hb?.textContent ?? null, size: hb ? parseFloat(getComputedStyle(hb).fontSize) : 0, face: hb ? getComputedStyle(hb).fontFamily : "",
+        inCard: !!head && vis(head) && card.contains(head), strip: vis(card.querySelector(".pf-lcband")) || getComputedStyle(card, "::before").content !== "none" && getComputedStyle(card, "::before").content !== "normal",
+        day: head?.querySelector("span")?.textContent ?? null };
+    });
+    record("F7", h);
+    if (!MUTATE) await page.screenshot({ path: `reports/phone-fixes-v1/after/5C-log-${engine(page)}.png` });
+    expect(h.text).toBe("New query");
+    expect(h.size, "at least 26px").toBeGreaterThanOrEqual(26);
+    expect(h.face).toMatch(/Special Elite/);
+    expect(h.inCard, "inside the white card").toBe(true);
+    expect(h.strip, "no strip").toBe(false);
+    expect(h.day).toBe("Day 0");
+  });
+
+  test("F8 the reply wheel in Log a query saves 3 weeks 4 days as an expected date 25 days after sending", async ({ page }) => {
+    /* WRITES one query on the harness account, reads it back and deletes everything it wrote. */
+    test.setTimeout(400_000);
+    const { db, uid } = await devDb();
+    const qsBefore = new Set((await getDocs(collection(db, "users", uid, "queries"))).docs.map((d) => d.id));
+    const queried = new Set((await getDocs(collection(db, "users", uid, "queries"))).docs.map((d) => d.data()).filter((q) => q.manuscriptId === MS).map((q) => q.agentId));
+    const agent = (await getDocs(collection(db, "users", uid, "agents"))).docs.map((d) => ({ id: d.id, ...d.data() }) as { id: string; name?: string; agency?: string }).filter((a) => !queried.has(a.id) && (a.name ?? "").trim().length > 2)[engine(page) === "webkit" ? 1 : 0];
+    expect(agent, "an agent with no query on the harness manuscript").toBeTruthy();
+    const made: string[] = [];
+    const errs: string[] = [];
+    page.on("console", (m) => { if (m.type() === "error") errs.push("console: " + m.text().slice(0, 200)); });
+    page.on("pageerror", (e) => errs.push("pageerror: " + String(e).slice(0, 200)));
+    try {
+      await phone(page, "/queries");
+      await go(page, "/queries");
+      await openLog(page);
+      await page.locator("[data-qad-agent-input]").fill(agent!.name!);
+      await page.waitForTimeout(400);
+      await page.locator("[data-qad-sugg] button").filter({ hasText: agent!.name! }).first().tap();
+      let wheel = false, saved = false; const trace: string[] = []; const shown: { dateline?: string; slots?: string[] } = {};
+      for (let i = 0; i < 14 && !saved; i++) {
+        await page.waitForTimeout(450);
+        const step = await page.evaluate(() => document.querySelector("[data-pf-step]")?.getAttribute("data-pf-step") ?? "check");
+        if (!(await page.locator('[data-pf="primary"]').count())) trace.push(`${step}→(no primary)`);
+        if (step === "Response expectations" && !wheel) {
+          await page.locator('[data-rw="col-weeks"]').evaluate((e) => { e.scrollTop = 3 * 40; });
+          await page.locator('[data-rw="col-days"]').evaluate((e) => { e.scrollTop = (4 * 40); });
+          await page.waitForTimeout(500);
+          if (MUTATE === "F8") { await page.locator('[data-rw="col-days"]').evaluate((e) => { e.scrollTop = 0; }); await page.waitForTimeout(500); }
+          wheel = true;
+          shown.dateline = (await page.locator('[data-rw="dateline"]').textContent())?.trim() ?? "";
+        }
+        if (wheel && !shown.slots && step !== "Response expectations") shown.slots = await page.locator('.pa-flow [data-pf="slot"]').allTextContents();
+        const pri = page.locator('[data-pf="primary"]');
+        if (await pri.count() && await pri.isEnabled()) {
+          const label = (await pri.textContent()) ?? "";
+          trace.push(`${step}→${label.trim()}`);
+          await pri.tap();
+          if (/^Log/.test(label) && !/^Logging/.test(label)) { saved = true; break; }
+        } else {
+          const opt = page.locator("[data-pf-step] button").first();
+          if (await opt.count()) await opt.tap(); else break;
+        }
+      }
+      let fresh: Awaited<ReturnType<typeof getDocs>>["docs"] = [];
+      for (let t = 0; t < (engine(page) === "chromium" ? 20 : 8) && !fresh.length; t++) {
+        await page.waitForTimeout(1000);
+        fresh = (await getDocs(collection(db, "users", uid, "queries"))).docs.filter((d) => !qsBefore.has(d.id) && (d.data() as { agentId?: string }).agentId === agent!.id);
+      }
+      if (!fresh.length) { trace.push(...errs.slice(0, 2)); await page.screenshot({ path: `test-results/f8-${engine(page)}-after.png` }); }
+      made.push(...fresh.map((d) => d.id));
+      const q = fresh[0]?.data() as unknown as { dateSent?: string; writerExpectedDate?: string; agentId?: string } | undefined;
+      const day0 = (iso: string) => Date.parse(iso.slice(0, 10) + "T00:00:00Z");
+      const days = q?.dateSent && q?.writerExpectedDate ? Math.round((day0(q.writerExpectedDate) - day0(String(q.dateSent))) / 86_400_000) : null;
+      const dm = /Expected by \w+ (\d+ \w+)/.exec(shown.dateline ?? "")?.[1] ?? null;
+      record("F8", { shown, dm, trace, wheel, saved, n: fresh.length, agentOk: q?.agentId === agent!.id, dateSent: q?.dateSent, writerExpectedDate: q?.writerExpectedDate, days });
+      expect(wheel, "the reply step offered the wheel").toBe(true);
+      expect(shown.dateline, "the wheel states 25 days").toMatch(/\(25 days after you sent it\)/);
+      expect(dm, "the date line names a day").not.toBeNull();
+      expect((shown.slots ?? []).some((t) => t.includes(dm!)), "the card's Reply window slot carries the same date").toBe(true);
+      /* ⚠️ THE STORED READ-BACK RUNS WHERE THE SERVER IS REACHABLE. Playwright's WebKit cannot open Firestore's Write
+         channel here ("Fetch API cannot load …/Firestore/Write/channel", every run), so on the iPhone the write never
+         leaves the page. Its on-screen answer above is the same derivation; Chromium proves the stored half. */
+      if (engine(page) === "chromium") {
+        expect(fresh.length, "one query logged").toBe(1);
+        expect(days, "the expected date is 25 days after the sent date").toBe(25);
+      } else expect(fresh.length, "WebKit: nothing reached the server, so nothing to clean").toBeLessThanOrEqual(1);
+    } finally {
+      for (const id of made) {
+        for (const a of (await getDocs(collection(db, "users", uid, "queries", id, "activity"))).docs) await deleteDoc(a.ref).catch(() => {});
+        for (const c of ["activities", "taskFlags", "tasks"]) for (const r of (await getDocs(fsq(collection(db, "users", uid, c), where("queryId", "==", id)))).docs) await deleteDoc(r.ref).catch(() => {});
+        await deleteDoc(doc(db, "users", uid, "queries", id)).catch(() => {});
+      }
+    }
+  });
+
+  test("BADGE reading (report only, no assertion about which number is right)", async ({ page }) => {
+    await phone(page, "/todo");
+    await go(page, "/todo");
+    await page.waitForTimeout(1500);
+    const r = await page.evaluate(() => {
+      const n = (sel: string) => document.querySelector(sel)?.textContent?.trim() ?? null;
+      return {
+        badge: n('[data-pa="tab-badge"]'),
+        badgeLabel: document.querySelector('[data-pa="tabbar"] [aria-label^="To-do"], .pa-tabbar [aria-label^="To-do"]')?.getAttribute("aria-label") ?? null,
+        earlier: n('[data-pa="tally-earlier"]'), today: n('[data-pa="tally-today"]'), soon: n('[data-pa="tally-soon"]'),
+        groups: [...document.querySelectorAll(".pa-td .pa-rowhd")].map((h) => h.textContent?.trim()),
+        segs: [...document.querySelectorAll(".pa-td .pa-seg button")].map((b) => b.textContent?.trim()),
+        headline: [...document.querySelectorAll(".pa-td h1, .pa-td h2, [data-pa='band'] h1")].map((h) => h.textContent?.trim()),
+      };
+    });
+    record("BADGE", r);
+    expect(r.badge, "the badge is drawn").not.toBeNull();
   });
 });

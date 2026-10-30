@@ -288,10 +288,11 @@ test.describe("PLS1 the last screens on phones", () => {
     await page.locator('[data-eqp="section"][data-section="reply"]').click();
     if (MUTATE === "L7") await page.evaluate(() => { const d = document.querySelector('[data-eqp="due"]'); d?.replaceWith(d.cloneNode(true)); });
     const due0 = await page.locator('[data-eqp="due"]').innerText();
-    const wk0 = Number(await page.locator('[data-eqp="col-weeks"] .eqp-it.on').innerText());
+    /* Phone fixes v1: the wheel is the shared ReplyWheel now (Log a query uses it too), so its markers are data-rw */
+    const wk0 = Number(await page.locator('[data-rw="col-weeks"] .rw-it.on').innerText());
     const wk = wk0 === 11 ? 13 : 11, dy = 3;
-    await page.locator('[data-eqp="col-weeks"]').evaluate((e, w) => { e.scrollTop = w * 40; }, wk);
-    await page.locator('[data-eqp="col-days"]').evaluate((e, d) => { e.scrollTop = d * 40; }, dy);
+    await page.locator('[data-rw="col-weeks"]').evaluate((e, w) => { e.scrollTop = w * 40; }, wk);
+    await page.locator('[data-rw="col-days"]').evaluate((e, d) => { e.scrollTop = d * 40; }, dy);
     await page.waitForTimeout(500);
     const due1 = await page.locator('[data-eqp="due"]').innerText();
     const sentMs = new Date(before.dateSent).getTime();

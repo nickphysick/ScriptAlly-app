@@ -50,7 +50,15 @@ export function PhoneFlowShell({ view, mode, open, initialStep, initialSeen, onC
   const [busy, setBusy] = useState(false);
   const [dir, setDir] = useState<"in" | "back" | "">("");
   const bodyRef = useRef<HTMLDivElement>(null);
+  const layerRef = useRef<HTMLDivElement>(null);
   const cur = Math.min(step, last);
+  /* Phone fixes v1 (5C): the flow always OPENS AT THE TOP — scroll position 0 for the sheet, the layer and the page
+     behind it, with the whole card in view in the band. Any restored position is cleared here, after layout. */
+  useLayoutEffect(() => {
+    bodyRef.current?.scrollTo({ top: 0 });
+    if (layerRef.current) layerRef.current.scrollTop = 0;
+    window.scrollTo(0, 0);
+  }, []);
   useEffect(() => { if (step > last) setStep(last); }, [step, last]);
   const pendingStep = useRef<number | null>(n === 0 && (initialStep ?? 0) > 0 ? initialStep! : null);
   useEffect(() => {
@@ -146,7 +154,7 @@ export function PhoneFlowShell({ view, mode, open, initialStep, initialSeen, onC
   const trail = view.steps.map((s, i) => ({ s, i })).filter(({ i }) => i < cur && answered(i));
 
   return (
-    <div className="pa-layer pa-flow" role="dialog" aria-modal="true" aria-label={view.title} data-qad-drawer={mode} data-pf={mode}
+    <div ref={layerRef} className="pa-layer pa-flow" role="dialog" aria-modal="true" aria-label={view.title} data-qad-drawer={mode} data-pf={mode}
       data-pf-steps={view.steps.map((s) => s.title).join("\u241f")}>
       <div className="pf-band">
         <div className="pf-top">
@@ -158,7 +166,11 @@ export function PhoneFlowShell({ view, mode, open, initialStep, initialSeen, onC
         </div>
         {/* the query card, building itself as you answer (ref liveCard) */}
         {live ? <div className="pf-lcard" data-pf="live">
-          <div className={`pf-lcband t-${live.court.tone}`}><span>{live.court.label}</span><span className="pf-day">Day {live.day ?? 0}</span></div>
+          {mode === "log"
+            /* Phone fixes v1 (5C; boot.js `.fx-nqc`): Log a query's heading sits inside the white card — "New query", then
+               "With the agent" once an agent is chosen, as the strip said — in place of the small strip */
+            ? <div className="pf-nqc" data-pf="heading"><b>{live.court.label}</b><span>Day {live.day ?? 0}</span></div>
+            : <div className={`pf-lcband t-${live.court.tone}`}><span>{live.court.label}</span><span className="pf-day">Day {live.day ?? 0}</span></div>}
           <div className="pf-lcag">
             {live.name
               ? <span className="pf-av" data-pf="live-disc">{initialsOf(live.name)}</span>

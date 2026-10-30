@@ -160,3 +160,10 @@
   .pa-flow .qad-sentsum .sh-chip { display: none; }
   .pa-flow .pf-step .sh-chip { font-family: var(--pa-sans); letter-spacing: 0; text-transform: lowercase; }
 }
+
+/* Phone fixes v1 (5C; boot.js `.fx-nqc`): Log a query's heading inside the white card, in place of the strip */
+@media (max-width: 767.98px) {
+  .pa-flow .pf-nqc { display: flex; justify-content: space-between; align-items: baseline; padding: 14px 16px 2px; }
+  .pa-flow .pf-nqc b { font-family: var(--pa-type) !important; font-weight: 400; font-size: 26px; line-height: 1.3; color: var(--pa-ink); }
+  .pa-flow .pf-nqc span { font-family: var(--pa-type); font-size: 14px; color: var(--pa-muted); }
+}

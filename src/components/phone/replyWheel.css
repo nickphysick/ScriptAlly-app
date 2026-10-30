@@ -1,0 +1,24 @@
+/* The reply window's chips + wheel + date line (last-screens 10B; shared by Edit this query and Log a query, phone fixes v1). */
+.rw-chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 16px; }
+.rw-chip {
+  display: flex; gap: 6px; align-items: center; padding: 8px 14px; border-radius: 999px; border: 1.5px solid #e6dfd6; background: #fff;
+  font: 600 14px var(--font-sans); color: #1c130f;
+}
+.rw-chip small { font-size: 11.5px; opacity: .75; }
+.rw-chip.on { background: #2a3a52; border-color: #2a3a52; color: #fff; }
+.rw-whl {
+  position: relative; display: flex; align-items: center; justify-content: center; gap: 6px; height: 200px; overflow: hidden; padding: 0 20px;
+  background: #fff; border-radius: 16px; box-shadow: 0 0 0 1px rgba(28, 19, 15, .07), 0 8px 18px -12px rgba(28, 19, 15, .25);
+}
+.rw-band { position: absolute; left: 14px; right: 14px; top: 80px; height: 40px; border-radius: 10px; background: #f5e6df; }
+.rw-col {
+  position: relative; height: 200px; width: 70px; overflow-y: scroll; scroll-snap-type: y mandatory; scrollbar-width: none; padding: 80px 0; box-sizing: border-box;
+  -webkit-mask-image: linear-gradient(transparent, #000 35%, #000 65%, transparent); mask-image: linear-gradient(transparent, #000 35%, #000 65%, transparent);
+}
+.rw-col::-webkit-scrollbar { display: none; }
+.rw-col:focus-visible { outline: 2px solid #2a3a52; outline-offset: -2px; }
+.rw-it { height: 40px; line-height: 40px; text-align: center; font: 400 24px var(--sp-type); scroll-snap-align: center; }
+.rw-u { position: relative; font: 600 15px var(--font-sans); color: #6b625b; width: 46px; }
+.rw-dl { font: 15px var(--sp-serif); color: #6b625b; margin: 14px 2px 0; }
+.rw-chip { min-height: 44px; box-sizing: border-box; }
+.rw-chip:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }

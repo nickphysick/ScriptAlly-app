@@ -30,6 +30,7 @@ import {
 } from "../../../lib/queryActions/packages";
 import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
 import { openNewAgentCard } from "../../../lib/agentCardStore";
+import { ReplyWheel } from "../../phone/ReplyWheel";
 import { useIsMobile } from "../../shell/mobileChrome";
 import { SentChip } from "../SentHow";
 import {
@@ -59,6 +60,8 @@ interface LogAnswers {
 }
 
 export function LogJourney({ req, today, children }: JourneyProps) {
+  /* Phone fixes v1 (decision 6): on a phone the reply question is the shared weeks-and-days wheel */
+  const onPhone = useIsMobile();
   const db = useScriptAllyDb();
   const { agents, queries, manuscripts, packages, versions } = db;
   const liveMss = manuscripts.filter((m) => !m.shelved);
@@ -429,9 +432,16 @@ export function LogJourney({ req, today, children }: JourneyProps) {
       body: (
         <>
           <p className="qad-secs">What {first} says about replies — change either if you know better.</p>
+          {onPhone ? (
+            /* the same control as "Edit this query" (10B): the answer is the expected DATE, sent + n days, so the
+               days are kept; the usual window keeps its own mode so the agency's stated weeks still read as usual */
+            <ReplyWheel sentMs={sent.getTime()} days={Math.max(0, Math.round((expect.getTime() - sent.getTime()) / 86_400_000))} usual={wks}
+              onDays={(d) => { const at = addDays(sent, d); if (wks && d === wks * 7) setExpectMode("usual"); else { setExpectMode("custom"); setExpectCustom(at); } setTouched(true); }} />
+          ) : (
           <DateField id="logExpect" label="REPLY EXPECTED BY" value={expect} anchors={exA} dir="future"
             forceKey={expectMode === "custom" ? null : expectMode}
             onPick={(d, k) => { if (!d) return; if (k === "custom") { setExpectMode("custom"); setExpectCustom(d); } else setExpectMode(k); setTouched(true); }} />
+          )}
           <Fl right={agent.noResponseMeansNo ? `${first.toUpperCase()}'S GUIDELINES SAY YES` : `${first.toUpperCase()}'S GUIDELINES DON'T SAY SO`}>DOES NO REPLY MEAN NO?</Fl>
           <Chips name="nrmn" options={[["yes", "Yes — silence is a pass"], ["no", "No — they reply to everyone"]]} value={nrmnNow ? "yes" : "no"}
             onPick={(k) => { const v = k === "yes"; setNrmn(v); if (!ifNoSet) setIfNo(v ? "close" : "nudge"); setTouched(true); }} />
@@ -592,7 +602,8 @@ function AgentPicker({ typed, setTyped, agents, queried, onPick }: {
   });
   return (
     <div className="qad-apick">
-      <input className="qad-fin" autoFocus placeholder="Start typing an agent's name…" value={typed} data-qad-agent-input
+      {/* Phone fixes v1 (5C): no autofocus on a phone — focusing the field scrolled the flow down to it on open */}
+      <input className="qad-fin" autoFocus={!phone} placeholder="Start typing an agent's name…" value={typed} data-qad-agent-input
         onChange={(e) => setTyped(e.target.value)} onFocus={() => setFocus(true)} onBlur={() => window.setTimeout(() => setFocus(false), 150)}
         onKeyDown={(e) => { if (e.key === "Enter" && list[0]) { e.preventDefault(); onPick(list[0]); } }} autoComplete="off" />
       {phone || focus || t ? (
