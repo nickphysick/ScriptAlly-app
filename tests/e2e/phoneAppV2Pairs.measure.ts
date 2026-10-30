@@ -54,6 +54,18 @@ const PARTS: Record<string, [string, string, Step][]> = {
 
   /* 27 pairs the LIVE face, reached through the desktop's own dev review aid: on dev the gate (DISCOVER_LIVE) is off and
      the page says the Scout is coming — that face is PA2-6's shot 27-discover-soon */
+  /* 45 and 46 are the empty account's first run; the harness account has queries, so they pair the shots PA2-8 takes
+     on the empty fixture account (PA2_SHOTS=1) — see FROM_SHOTS */
+  "part-8": [
+    ["39-discover", "/agents/discover", async (p) => { await p.addInitScript(() => { (window as unknown as { __SA_DV_LIVE: number }).__SA_DV_LIVE = 1; }); await p.reload(); await p.locator('[data-pa="d-card"]').first().waitFor({ timeout: 20_000 }); await p.waitForTimeout(800); }],
+    ["40-import", "/import", async (p) => { await p.waitForTimeout(600); }],
+    ["41-settings", "/account", async (p) => { await p.waitForTimeout(600); }],
+    ["42-notifications", "/account/notifications", async (p) => { await p.waitForTimeout(600); }],
+    ["43-plan", "/plans", async (p) => { await p.waitForTimeout(600); }],
+    ["44-help", "/help", async (p) => { await p.waitForTimeout(600); }],
+    ["45-home-first-run", "/dashboard", async () => {}],
+    ["46-queries-first-run", "/queries", async () => {}],
+  ],
   "part-7": [
     ["32-responses", "/queries/responses", async (p) => { await p.waitForTimeout(600); }],
     ["33-wall-of-no", "/queries/responses", async (p) => { await p.locator('[data-pa="resp-wall"]').evaluate((e) => e.scrollIntoView({ block: "center" })); await p.waitForTimeout(500); }],
@@ -88,7 +100,7 @@ const PARTS: Record<string, [string, string, Step][]> = {
     ["23-nudge", "/queries", async (p) => { await sheetOf(p, '[data-qm1="row"][data-where="agent"]'); await p.locator('.pa-qsheet [data-qc149c="more-btn"]').click(); await p.waitForTimeout(400); await p.locator('[data-pa="more-nudge"]').click(); await p.waitForTimeout(900); }],
   ],
 };
-const FROM_SHOTS = new Set(["18-snackbar", "20-celebration"]);
+const FROM_SHOTS = new Set(["18-snackbar", "20-celebration", "45-home-first-run", "46-queries-first-run"]);
 const logFlow = async (p: Page) => { await p.locator('[data-pa="plus"]').click(); await p.waitForTimeout(600); await p.locator('[data-pa="plus-sent"]').click(); await p.waitForTimeout(1000); };
 /* ⚠️ THE PAIRS ONLY READ: Continue stops at the check card, where the primary is the SAVE. An earlier count of
    presses ran one past it and logged a query on the harness account (removed by id; Part 4 report). */

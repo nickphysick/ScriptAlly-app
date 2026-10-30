@@ -13,7 +13,7 @@
  *
  * The Queries on a phone v1 slots moved here unchanged; `queries/phone/qm1Art.ts` re-exports them as `QM1_ART`.
  */
-import { COURIER_CUTOUT, QC_INKWELL, QC_LIST_FLIGHT, QC_PLATE_FIGURE } from "../queries/centre/qcArt";
+import { COURIER_CUTOUT, QC_COURIER_DISC, QC_INKWELL, QC_LIST_FLIGHT, QC_PLATE_FIGURE } from "../queries/centre/qcArt";
 import { QC_DESK_HAWK } from "../queries/centre/QcHeader138";
 
 export interface PhoneArtSrc { src: string; w: number; h: number }
@@ -52,6 +52,8 @@ export const PHONE_ART = {
   snack: null as PhoneArtSrc | null,
   /** Home's Up next card (Part 2) */
   upNext: null as PhoneArtSrc | null,
+  /** Import's Smart import card (Part 8; ref `tipHawk` = the courier disc, README "Illustrations") */
+  importSmart: art(QC_COURIER_DISC.src, QC_COURIER_DISC.version, QC_COURIER_DISC.width, QC_COURIER_DISC.height),
 } as const;
 
 export type PhoneArtKey = keyof typeof PHONE_ART;

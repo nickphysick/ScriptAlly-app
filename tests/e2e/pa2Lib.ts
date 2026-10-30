@@ -60,6 +60,14 @@ export const CSS_MUTATIONS: Record<string, string> = {
   "ink-head": ".pa-agsheet .pa-aname { color: #1f2633 !important; }",
   /* P7 — the band's figure in ink on the navy */
   "ink-figure": ".pa-pgfig .pa-pgnum b { color: #1f2633 !important; }",
+  /* PA2-8 W1–W7 — one break per sweep check */
+  "w1-no-band": ".pa-band { display: none !important; }",
+  "w2-red-fill": ".pa-tabbar { background: #b4553f !important; }",
+  "w4-upper-label": ".pa-sub { text-transform: uppercase !important; }",
+  "w5-past-edge": ".pa-pgbody { width: 480px !important; }",
+  "w6-40px-button": ".pa-band .pa-ring { width: 40px !important; height: 40px !important; }",
+  /* the mobileShell floor is (0,4,1) !important, so the break must outrank it */
+  "w7-14px-input": ".pa-hsearch.pa-hsearch.pa-hsearch.pa-hsearch.pa-hsearch input { font-size: 14px !important; }",
   /* S9 — the phone's tab bar shown at every width */
   "desk-bar": ".pa-tabbar { display: flex !important; }",
 };

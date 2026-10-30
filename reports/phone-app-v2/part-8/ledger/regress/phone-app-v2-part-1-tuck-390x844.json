@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "pop",
+  "where": "390x844 Home scrolls (precondition)",
+  "ok": true,
+  "detail": "905"
+ },
+ {
+  "lock": "S2",
+  "where": "390x844 at rest the bar is in",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S2",
+  "where": "390x844 after 200 down the bar is away",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S2",
+  "where": "390x844 after 20 up the bar is back",
+  "ok": true,
+  "detail": ""
+ }
+]

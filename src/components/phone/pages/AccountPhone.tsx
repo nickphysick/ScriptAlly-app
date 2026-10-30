@@ -32,6 +32,8 @@ import { HELP_AREAS } from "../../../content/help/model";
 import { searchHelp } from "../../../content/help/search";
 import { openFeedback } from "../../../lib/feedbackStore";
 import { UserPlan } from "../../../types";
+import { QM1_SLOTS } from "../phoneArt";
+import { PhoneArt } from "../PhoneArtSpot";
 import { PI } from "../phoneIcons";
 import "./pagesPhone.css";
 
@@ -133,9 +135,12 @@ export const HelpPhone: React.FC = () => {
           </div>
         ) : null}
         <button type="button" className="pa-card pa-gscard" data-pa="help-gs" data-done={gsDone} data-total={gs.length} onClick={() => navigate("/dashboard")}>
-          <b>Getting started</b>
-          <span className="pa-barh" aria-hidden="true"><i style={{ width: `${Math.round((gsDone / Math.max(1, gs.length)) * 100)}%` }} /></span>
-          <span className="pa-sub">{gsDone} of {gs.length} steps done</span>
+          <PhoneArt art={QM1_SLOTS.quill} size={68} className="pa-gsart" />
+          <span className="pa-gscol">
+            <b>Getting started</b>
+            <span className="pa-barh" aria-hidden="true"><i style={{ width: `${Math.round((gsDone / Math.max(1, gs.length)) * 100)}%` }} /></span>
+            <span className="pa-sub">{gsDone} of {gs.length} steps done</span>
+          </span>
         </button>
         <div className="pa-gl">Page guides</div>
         <div className="pa-group" data-pa="help-guides">

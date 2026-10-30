@@ -183,7 +183,11 @@
   .pa-pg .pa-hsearch { display: flex; align-items: center; gap: 10px; height: 44px; border-radius: 999px; background: #fff; box-shadow: var(--pa-sh); padding: 0 16px; margin: 16px 0 14px; color: var(--pa-muted); }
   .pa-pg .pa-hsearch svg { width: 17px; height: 17px; flex: none; }
   .pa-pg .pa-hsearch input { flex: 1; min-width: 0; height: 40px; border: 0; background: transparent; font: 400 16px var(--pa-sans); color: var(--pa-ink); outline: none; }
-  .pa-pg .pa-gscard { display: flex; flex-direction: column; gap: 8px; width: 100%; margin-top: 14px; }
+  .pa-pg .pa-gscard { display: flex; align-items: center; gap: 16px; width: 100%; margin-top: 14px; text-align: left; }
+  .pa-pg .pa-gsart { width: 68px !important; height: 68px !important; min-width: 68px; }
+  .pa-pg .pa-gscol { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 0; }
+  /* the picture sits in the blush disc, as the ref draws its tip art (Part 8 pairs) */
+  .pa-pg .pa-gsart, .pa-pg .pa-impsmart .pa-impart { flex: none; border-radius: 50%; background: var(--pa-blush-wash); padding: 8px; box-sizing: border-box; }
   .pa-pg .pa-gscard b { font-size: 16px; font-weight: 600; }
   .pa-pg .pa-barh { display: block; height: 10px; border-radius: 5px; background: var(--pa-fill); overflow: hidden; }
   .pa-pg .pa-barh i { display: block; height: 100%; border-radius: 5px; background: var(--pa-navy); }
@@ -193,6 +197,8 @@
   .pa-pg .pa-implede { font-size: 15px; color: var(--pa-ink-2); line-height: 1.45; margin: 16px 0 14px; }
   .pa-pg .pa-impsmart { display: flex; flex-direction: column; gap: 8px; }
   .pa-pg .pa-impsmart b { font-size: 17px; font-weight: 600; }
+  .pa-pg .pa-impsmart .pa-impart { display: block; margin: 0 auto 6px; padding: 14px; }
+  .pa-pg .pa-impsmart { text-align: center; }
   .pa-pg .pa-impsmart .pa-sub { margin: 0; font-size: 14px; }
   .pa-pg .pa-impfact { font-size: 13px !important; }
   .pa-pg .pa-impfoot { margin: 18px 4px 0; }

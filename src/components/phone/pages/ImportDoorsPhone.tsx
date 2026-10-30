@@ -9,6 +9,8 @@
 import React from "react";
 import { TILE_MATCH, TILE_SMART, TILE_TEMPLATE } from "../../../lib/importPage";
 import { PI } from "../phoneIcons";
+import { PHONE_ART } from "../phoneArt";
+import { PhoneArt } from "../PhoneArtSpot";
 import "./pagesPhone.css";
 
 const Chev = () => <span className="pa-chev" aria-hidden="true">{PI.chev}</span>;
@@ -21,6 +23,7 @@ export const ImportDoorsPhone: React.FC<{
     <div className="pa-pgbody">
       <p className="pa-implede" data-pa="imp-lede">{p.lede}</p>
       <div className="pa-card pa-impsmart" data-pa="imp-smart">
+        <PhoneArt art={PHONE_ART.importSmart} size={120} className="pa-impart" />
         <b>{TILE_SMART.title.replace(/\.$/, "")}</b>
         <p className="pa-sub">{TILE_SMART.text}</p>
         <button type="button" className="pa-btn pri blk" data-pa="imp-smart-go" disabled={!p.smartAllowed} onClick={p.onSmart}>{PI.upload}{TILE_SMART.action}</button>
