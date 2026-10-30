@@ -11,7 +11,8 @@ Baseline: tsc root 0, tsc functions 0, build clean (0 error/warning lines), Vite
 | B the reading screen | `341539e2` | committed |
 | C review header, ready rows, repeats | `e177c380` | committed |
 | D questions, one per screen | `73e5c61c` | committed |
-| E importing loader and /import | (this commit) | committed |
+| E importing loader and /import | `18844244` | committed |
+| F locks, shots and the report | (this commit) | committed; SIP1 11/11, every lock proved red; older suites re-pointed (REPORT.md) |
 
 ## Resuming
 - Read `git log --oneline -10` and this file; resume at the first phase not committed.

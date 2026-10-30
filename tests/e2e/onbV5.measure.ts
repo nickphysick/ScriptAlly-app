@@ -255,13 +255,15 @@ test.describe("OB1", () => {
       await lab(page, sc.q + "&rows=40", VPS[2]);
       const f = await page.evaluate(() => {
         const vis = (sel: string) => Array.from(document.querySelectorAll(sel)).filter((e) => (e as HTMLElement).getBoundingClientRect().width > 0);
-        const tab = document.querySelector(".sf .ws-ftab")!.getBoundingClientRect();
+        /* Set-up on phones v1 (30 Oct): below 768px a set-up screen's folder tab is replaced by the navy
+           progress band (`.sf-pband`, SIP1 S1); other frames keep the tab. */
+        const tab = (document.querySelector(".sf .sf-pband") ?? document.querySelector(".sf .ws-ftab"))!.getBoundingClientRect();
         const exit = document.querySelector(".sf .sf-exit")!.getBoundingClientRect();
         const brand = vis(".sf .ws-bwm")[0]?.getBoundingClientRect();
         const last = Array.from(document.querySelectorAll(".sf-scroll *")).pop()!.getBoundingClientRect();
         const d = document.documentElement;
         return {
-          panels: vis(".sf .ws-panel").length, brandTop: brand?.top ?? null, brandBottom: brand?.bottom ?? null,
+          bandShown: !!document.querySelector(".sf .sf-pband"), panels: vis(".sf .ws-panel").length, brandTop: brand?.top ?? null, brandBottom: brand?.bottom ?? null,
           tabTop: tab.top, tabBottom: tab.bottom, exitTop: exit.top, exitBottom: exit.bottom,
           lastBottom: last.bottom + window.scrollY, scrollH: d.scrollHeight, viewH: window.innerHeight,
           overflow: d.scrollWidth - d.clientWidth,
@@ -270,7 +272,9 @@ test.describe("OB1", () => {
       expect(f.panels, "no sidebar").toBe(0);
       expect(f.brandTop, "the brand row is visible").not.toBeNull();
       expect(f.brandBottom!, "the brand row sits above the tab").toBeLessThanOrEqual(f.tabTop + 1);
-      expect(f.exitTop < f.tabBottom && f.exitBottom > f.tabTop, "the tab and the exit share a row").toBe(true);
+      /* With the band, the exit moved up into the brand row (board 1, 1B). */
+      if (f.bandShown) expect(f.exitTop < f.brandBottom! && f.exitBottom > f.brandTop!, "the exit sits in the brand row").toBe(true);
+      else expect(f.exitTop < f.tabBottom && f.exitBottom > f.tabTop, "the tab and the exit share a row").toBe(true);
       /* The two filler screens are padded past the fold so the scrolling half is really exercised;
          a real screen may fit, and is then reachable without scrolling. */
       if (sc.id.startsWith("frame-")) expect(f.lastBottom, "the content is taller than the screen (the case is real)").toBeGreaterThan(f.viewH);
@@ -417,7 +421,8 @@ test.describe("OB1", () => {
           rows: rows.length, checked: rows.filter((r) => r.getAttribute("aria-checked") === "true").length,
           pressed: document.querySelectorAll(".sf-opts [aria-pressed]").length,
           ring: rows.filter((r) => r.getAttribute("aria-checked") === "true").map((r) => getComputedStyle(r).boxShadow),
-          disabled: (Array.from(document.querySelectorAll(".sf-stepcard .sf-btn")).pop() as HTMLButtonElement).disabled,
+          /* Set-up on phones v1: below 768px Continue is pinned in `.sf-foothost` (SIP1 S4). */
+          disabled: (Array.from(document.querySelectorAll(".sf-stepcard .sf-btn, .sf-foothost .sf-btn")).pop() as HTMLButtonElement).disabled,
         };
       });
       const before = await read();
@@ -562,7 +567,8 @@ test.describe("OB1", () => {
       expect(d.open, `${id}: no open title above it`).toBe(0);
       expect(d.chip).toBe(w.chip);
       expect(d.chipBg, `${id}: chip tone`).toBe(w.fail ? "rgb(243, 221, 210)" : "rgb(244, 239, 233)");
-      expect(d.chipCase).toBe("uppercase");
+      /* Set-up on phones v1: sentence case below 768px (board 1, 2B; SIP1 S2). */
+      expect(d.chipCase).toBe(vp.width < 768 ? "none" : "uppercase");
       expect(d.title).toBe(w.title);
       expect(d.family).toMatch(/Special Elite/);
       expect(Math.abs(d.size - 23)).toBeLessThanOrEqual(0.5);

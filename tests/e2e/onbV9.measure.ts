@@ -900,8 +900,9 @@ test.describe("G", () => {
     await lab(page, "s=review&fx=gate", PHONE, { motion: "reduce" });
     await noOverflow(page, "agents 400");
     expect(await page.locator('[data-im="deck-prev"]').isVisible(), "arrows hide below 820").toBe(false);
-    await page.locator('[data-im="deck-dots"] .o9-dot').nth(1).click();
-    expect((await state(page)).name, "the dots move the deck").toBe("Tom Rafferty");
+    /* Set-up on phones v1 (30 Oct): below 768px the deck is a compact card with "Answer this", one
+       question per screen (board 2, 3B) — there are no dots to move. SIP1 S6 holds it. */
+    expect(await page.locator('[data-im="deck-answer"]').isVisible(), "the phone deck offers Answer this").toBe(true);
     await answerAgents(page);
     await primary(page).click();
     await page.locator('[data-im="review"][data-step="queries"]').waitFor();

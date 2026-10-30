@@ -371,6 +371,14 @@
 @media (max-width: 767.98px) {
   .sf .o9-panel .o9-slot { display: none; }
   .sf .o9-panel { padding-bottom: 22px; }
+  /* 3B — Welcome's four options start above the pinned foot at 390 × 844 (S3). The panel and the
+     option cards give up about 70px between them; measured 830 → under 770. */
+  .sf .o9-welv { row-gap: 14px; }
+  .sf .o9-welv .o9-panel { padding: 20px 18px 18px; }
+  .sf .o9-welv .o9-panel .o9-panelh { font-size: 26px; }
+  .sf .o9-welv .sf-stepcard { padding-top: 16px; }
+  .sf .o9-welv .sf-opts { gap: 8px; }
+  .sf .o9-welv .sf-opt { padding: 10px 14px 9px; }
 
   .sf .o9-wayslot { display: none; }
   .sf .o9-waylist { margin: 4px 0 12px; }

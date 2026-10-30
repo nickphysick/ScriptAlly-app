@@ -562,6 +562,8 @@
    foot host; a spacer of its measured height keeps the last content clear of it).
    2B — every small-capital label is sentence case in Source Sans 3, weight 600, at least 13px. The
    BETA chip keeps its capitals. */
+/* Set-up on phones v1: the pinned foot's height, published by SetupFrame while the foot shows. */
+.sf { --sf-foot-h: 0px; }
 @media (max-width: 767.98px) {
   .sf--setup .sf-tabs { display: none; }
   .sf--setup .sf-bar { flex-wrap: nowrap; align-items: center; justify-content: space-between; padding: 0 12px 0 8px; }

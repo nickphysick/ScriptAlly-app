@@ -189,6 +189,9 @@ const fixedOverFrame = (page: Page) => page.evaluate(() => {
   const out: string[] = [];
   document.querySelectorAll<HTMLElement>("body *").forEach((e) => {
     if (e === frame) return;
+    /* Set-up on phones v1 (30 Oct): below 768px the frame's own Back/Continue are pinned to the
+       bottom in `.sf-foothost`, by design (board 1, 6B). SIP1 S4 holds that foot. */
+    if (e.closest(".sf-foothost")) return;
     const cs = getComputedStyle(e);
     if (cs.position !== "fixed" || cs.display === "none" || cs.visibility === "hidden") return;
     const r = e.getBoundingClientRect();
@@ -225,6 +228,7 @@ test.describe("OB2", () => {
 
       /* ── R2 · the reading loader is inside the frame ─────────────────────────────────────── */
       test("R2 reading loader sits in the frame's sheet", async ({ page }) => {
+        test.skip(vp.width < 768, "Set-up on phones v1 (30 Oct) replaced this at a phone width: the folder tab is gone and the reading screen is its own document (SIP1 S1, S5)");
         await lab(page, "s=reading&hold=work");
         await page.waitForSelector('[data-im="reading"]');
         const sheet = await box(page, '[data-sf="sheet"]');
@@ -272,7 +276,8 @@ test.describe("OB2", () => {
         await page.waitForTimeout(250);
         const status = await page.locator('[data-im="status"]').innerText();
         record(page, "R3", "finalStatus", status);
-        expect(status).toBe("Ready");
+        /* Set-up on phones v1: the phone's status reads "Ready · N of N rows read" (board 2, 1B). */
+        if (vp.width < 768) expect(status).toMatch(/^Ready · (\d+) of \1 rows read$/); else expect(status).toBe("Ready");
         const body = (await page.locator("body").innerText()).toLowerCase();
         expect(body).not.toContain("what we found");
         if (SHOTS) await page.screenshot({ path: resolve(OUT, "shots", `reading-done-${vp.width}.png`) });
@@ -280,6 +285,7 @@ test.describe("OB2", () => {
 
       /* ── R4 · no sage (the reading loader's half; the importing loader's is below) ───────── */
       test("R4 reading loader's finished mark is navy, and nothing is sage", async ({ page }) => {
+        test.skip(vp.width < 768, "Set-up on phones v1 (30 Oct) replaced this at a phone width: the reading screen ends on its piles, with no tick mark (SIP1 S5; no sage is SIP1 S10)");
         await lab(page, "s=reading&hold=done", { reduced: vp.width < 900 });
         await page.waitForSelector('[data-im="tick"]', { timeout: 15_000 });
         await page.waitForTimeout(900);
@@ -348,7 +354,8 @@ test.describe("OB2", () => {
               cards: document.querySelectorAll('[data-im="summary"] .im-pop').length,
               firstTag: first?.tagName, firstFont: first ? getComputedStyle(first).fontFamily : "", firstText: first?.textContent,
               text: sheet.innerText,
-              controls: [...sheet.querySelectorAll("button, a")].map((b) => (b as HTMLElement).innerText.trim()),
+              /* Set-up on phones v1: below 768px the sheet's Back/Continue are pinned in `.sf-foothost`. */
+              controls: [...sheet.querySelectorAll("button, a"), ...document.querySelectorAll(".sf-foothost button, .sf-foothost a")].map((b) => (b as HTMLElement).innerText.trim()),
               primary: (document.querySelector('[data-im="primary"]') as HTMLElement).innerText.trim(),
               /* v9: the "sharp" tier is "ask" (Need an answer) */
               open: tier("agents", "fix") + tier("agents", "ask") + tier("queries", "ask"),
@@ -393,6 +400,7 @@ test.describe("OB2", () => {
       /* ── V1 · the review's frame ─────────────────────────────────────────────────────────── */
       for (const t of STEPS) {
         test(`V1 review frame (${t.step})`, async ({ page }) => {
+          test.skip(vp.width < 768, "Set-up on phones v1 (30 Oct) replaced this at a phone width: the band replaces the folder tab and the deck is a compact card (SIP1 S1, S6)");
           await toStep(page, t);
           const r = await page.evaluate(() => {
             const frame = document.querySelector("[data-setup-frame]") as HTMLElement;
@@ -439,7 +447,9 @@ test.describe("OB2", () => {
           const r = await page.evaluate(() => {
             const dialogs = document.querySelectorAll('[role="dialog"]').length;
             const rows = document.querySelector('[data-im="rows"]') as HTMLElement;
-            const target = rows.querySelector("button") as HTMLElement | null;
+            /* Set-up on phones v1 (30 Oct): below 768px a row's buttons are visually hidden and the row's
+               face takes the tap and the swipe (board 2, 4B; SIP1 S7) — so the face is what must be reachable. */
+            const target = ((innerWidth < 768 ? rows.querySelector('[data-im="row-face"], [data-im="dup-pick"] label') : null) ?? rows.querySelector("button")) as HTMLElement | null;
             let reachable = false;
             if (target) {
               target.scrollIntoView({ block: "center" });
@@ -513,18 +523,21 @@ test.describe("OB2", () => {
            "Won't be imported" and carries its own Undo. The toast and the tray are retired. */
         const out = (id: string) => page.evaluate((x) => document.querySelector(`[data-row-id="${x}"]`)?.getAttribute("data-out"), id);
         /* Don't import, Undo: back in its place, never gone from it */
-        await page.locator('[data-row-id="a3"] [data-im="row-remove"]').click();
+        /* Set-up on phones v1: below 768px a row's buttons are visually hidden (the swipe and the tap
+           are the touch way in; SIP1 S7) — pressed on the element itself, the same handler. */
+        const press = async (sel: string) => { const l = page.locator(sel); if (vp.width < 768) await l.evaluate((e) => (e as HTMLElement).click()); else await l.click(); };
+        await press('[data-row-id="a3"] [data-im="row-remove"]');
         expect(await ids(), "the row stays in its place").toEqual(first);
         expect(await out("a3")).toBe("1");
         expect(await ready(), "the ready count fell by one").not.toBe(ready0);
         expect(await page.locator('[data-im="toast"]').count(), "no toast").toBe(0);
-        await page.locator('[data-row-id="a3"] [data-im="row-undo"]').click();
+        await press('[data-row-id="a3"] [data-im="row-undo"]');
         expect(await out("a3"), "Undo brings it back").toBe("0");
         /* a second one: the header counts it, and Undo puts it back */
-        await page.locator('[data-row-id="a4"] [data-im="row-remove"]').click();
+        await press('[data-row-id="a4"] [data-im="row-remove"]');
         expect(await page.locator('[data-im="out-count"]').textContent()).toBe("1 not importing");
         expect(await page.locator('[data-im="tray"]').count(), "no tray").toBe(0);
-        await page.locator('[data-row-id="a4"] [data-im="row-undo"]').click();
+        await press('[data-row-id="a4"] [data-im="row-undo"]');
         record(page, "V5", "afterRestore", { ids: await ids(), ready: await ready(), ready0 });
         expect(await ids(), "every row in its place").toEqual(first);
         expect(await ready()).toBe(ready0);
@@ -604,6 +617,7 @@ test.describe("OB2", () => {
 
       /* ── R2 + R4 · the importing loader ──────────────────────────────────────────────────── */
       test("R2 importing loader sits in the frame's sheet", async ({ page }) => {
+        test.skip(vp.width < 768, "Set-up on phones v1 (30 Oct) replaced this at a phone width: the importing loader is full-screen navy over the frame (board 2, 6B; SIP1 S9)");
         await lab(page, "s=importing");
         await page.waitForSelector('[data-im="loader-card"]');
         const sheet = await box(page, '[data-sf="sheet"]');
