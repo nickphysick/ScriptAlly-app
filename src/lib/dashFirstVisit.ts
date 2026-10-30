@@ -22,6 +22,7 @@ import { ManuscriptStatus, QueryStatus, type Agent, type Query, type User } from
 import { closedAt, sentAt } from "./oneScreen";
 import { agentPrimary } from "./agentDisplay";
 import type { UserPaths } from "./userPaths";
+import type { QueryingStage } from "./onboardingStage";
 import type { GettingStartedKey } from "./dashEmpty";
 import { MONTHS_SHORT } from "./dates";
 
@@ -91,12 +92,18 @@ export function dashState(scopedQueries: readonly Pick<Query, "status">[], hasDr
 
 /* ── the stored preferences ─────────────────────────────────────────────────────────────────────── */
 
-export type StartPath = "yes" | "notyet";
+/**
+ * The set-up path (first visit v2, Part B): already querying · ready but not querying · still writing · in revision.
+ * It is READ FROM THE SIGN-UP ANSWERS (`answerFor`), never asked again on the dashboard.
+ */
+export type StartPath = "querying" | "ready" | "writing" | "revising";
+/** First visit v1's stored dashboard answer, read only for an account that never answered the sign-up stage question. */
+export type LegacyStart = "yes" | "notyet";
 export type WinKind = "query" | "agent" | "import";
 
 export interface DashPrefs {
-  /** the set-up answer per manuscript; absent → "yes" */
-  start: Record<string, StartPath>;
+  /** first visit v1's set-up answer per manuscript (legacy; see `answerFor`) */
+  start: Record<string, LegacyStart>;
   /** the index of the tip shown on the last visit; null before the first */
   tip: number | null;
   /** stamps already shown, keyed by `winKey` */
@@ -115,7 +122,7 @@ export function dashPrefsOf(user: Pick<User, "todoPrefs"> | null | undefined): D
   const raw = ((user?.todoPrefs as { dash?: Record<string, unknown> } | undefined)?.dash ?? {}) as {
     start?: Record<string, unknown>; tip?: unknown; wins?: Record<string, unknown>; gsHidden?: Record<string, unknown>;
   };
-  const start: Record<string, StartPath> = {};
+  const start: Record<string, LegacyStart> = {};
   for (const [k, v] of Object.entries(raw.start ?? {})) if (v === "yes" || v === "notyet") start[k] = v;
   const flags = (m: Record<string, unknown> | undefined) => {
     const out: Record<string, true> = {};
@@ -130,11 +137,61 @@ export function dashPrefsOf(user: Pick<User, "todoPrefs"> | null | undefined): D
   };
 }
 
-/** The answer for a manuscript — "yes" when nothing is stored (the pack's default). */
-export const startPathOf = (prefs: DashPrefs, msId: string | null): StartPath =>
-  (msId ? prefs.start[seg(msId)] : undefined) ?? "yes";
+/** First visit v1's stored answer for a manuscript, if any. */
+export const legacyStartOf = (prefs: DashPrefs, msId: string | null): LegacyStart | null =>
+  (msId ? prefs.start[seg(msId)] : undefined) ?? null;
 
-export const startPathWrite = (msId: string, v: StartPath): UserPaths => ({ [`${ROOT}.start.${seg(msId)}`]: v });
+/** The sign-up stages that mean "I've sent queries". */
+const QUERYING_STAGES = new Set<QueryingStage>(["early", "deep", "interest"]);
+
+/**
+ * THE SET-UP PATH, READ FROM WHAT THE WRITER SAID AT SIGN-UP (first visit v2, Part B). In order:
+ *  1. the querying stage (`User.queryingStage`): early / deep / interest → already querying;
+ *  2. the book's readiness (`Manuscript.status`, the readiness question): Drafting → still writing, Revising → in revision;
+ *  3. the stage "starting" → ready, not querying yet;
+ *  4. an account that never answered the stage question: first visit v1's dashboard answer, if it gave one.
+ * ⚠️ NULL WHEN NOTHING WAS SAID. The card then opens on the question rather than telling the writer something they
+ * never said ("You said…" is a claim about their own words).
+ */
+export function answerFor(input: { stage: QueryingStage | null | undefined; status: ManuscriptStatus | string | null | undefined; legacy: LegacyStart | null }): StartPath | null {
+  const { stage, status, legacy } = input;
+  if (stage && QUERYING_STAGES.has(stage)) return "querying";
+  if (status === ManuscriptStatus.DRAFTING) return "writing";
+  if (status === ManuscriptStatus.REVISING) return "revising";
+  if (stage === "starting") return "ready";
+  if (legacy === "yes") return "querying";
+  if (legacy === "notyet") return "ready";
+  return null;
+}
+
+/** The three answers the card offers ("still writing or revising" is one answer, two paths). */
+export type AnswerChoice = "querying" | "ready" | "writing";
+export const choiceOf = (p: StartPath | null): AnswerChoice | null => (p === "revising" ? "writing" : p);
+
+export interface AnswerWrite {
+  /** `User.queryingStage` — the same field sign-up's stage question writes */
+  queryingStage: QueryingStage;
+  /** `Manuscript.status` — the same field sign-up's readiness question writes; null when it stays as it is */
+  status: ManuscriptStatus | null;
+}
+
+/**
+ * What changing the answer on the dashboard writes (Part B): THE SAME FIELDS SIGN-UP WROTE.
+ *  · already querying → the stage becomes "early" (an existing early / deep / interest is kept); the book READY_TO_QUERY
+ *  · ready, not querying → the stage "starting"; the book READY_TO_QUERY
+ *  · still writing or revising → the stage "starting"; the book DRAFTING, unless it was already REVISING
+ */
+export function answerWrite(choice: AnswerChoice, stage: QueryingStage | null | undefined, status: ManuscriptStatus | string | null | undefined): AnswerWrite {
+  const set = (s: ManuscriptStatus): ManuscriptStatus | null => (status === s ? null : s);
+  if (choice === "querying") return { queryingStage: stage && QUERYING_STAGES.has(stage) ? stage : "early", status: set(ManuscriptStatus.READY_TO_QUERY) };
+  if (choice === "ready") return { queryingStage: "starting", status: set(ManuscriptStatus.READY_TO_QUERY) };
+  return { queryingStage: "starting", status: status === ManuscriptStatus.REVISING ? null : set(ManuscriptStatus.DRAFTING) };
+}
+
+/** The path a write leaves the book on (what the card shows straight after the click). */
+export const pathAfter = (choice: AnswerChoice, status: ManuscriptStatus | string | null | undefined): StartPath =>
+  choice === "writing" ? (status === ManuscriptStatus.REVISING ? "revising" : "writing") : choice;
+
 export const tipWrite = (i: number): UserPaths => ({ [`${ROOT}.tip`]: i });
 export const gsHideWrite = (msId: string): UserPaths => ({ [`${ROOT}.gsHidden.${seg(msId)}`]: true });
 
@@ -152,8 +209,8 @@ export const stepTip = (i: number, d: number, n: number): number => (n <= 0 ? 0 
 /* ── Getting started, on the desktop task card ──────────────────────────────────────────────────── */
 
 /** The answer decides the order: an existing querier brings their queries in before building a contact list. */
-export const gsOrder = (path: StartPath): GettingStartedKey[] =>
-  path === "yes" ? ["manuscript", "query", "agent", "materials", "comps"] : ["manuscript", "agent", "query", "materials", "comps"];
+export const gsOrder = (path: StartPath | null): GettingStartedKey[] =>
+  path === "querying" ? ["manuscript", "query", "agent", "materials", "comps"] : ["manuscript", "agent", "query", "materials", "comps"];
 
 export type GsLink = "manuscript" | "agent" | "import" | "log" | "materials" | "comps";
 
@@ -164,11 +221,11 @@ export interface GsRowCopy { deed: string; note: string; link: string; go: GsLin
  * tick checks (`PACKAGE_MATERIALS`, two since D9) — the shared deed still names an opening sample the tick no
  * longer asks for, and is the phone's to change.
  */
-export const gsCopy = (key: GettingStartedKey, path: StartPath): GsRowCopy => {
+export const gsCopy = (key: GettingStartedKey, path: StartPath | null): GsRowCopy => {
   switch (key) {
     case "manuscript": return { deed: "Add your first manuscript", note: "Even a working title and a word count is enough to start.", link: "Add a manuscript", go: "manuscript" };
     case "agent": return { deed: "Add an agent to your contact list", note: "Even one is enough to start. Discover has UK agents to browse.", link: "Add an agent", go: "agent" };
-    case "query": return path === "yes"
+    case "query": return path === "querying"
       ? { deed: "Import or log your queries", note: "Bring your tracker across, or log each query as you send it.", link: "Import your tracker", go: "import" }
       : { deed: "Log your first query", note: "When you've sent it, log the date and what went with it.", link: "Log a query", go: "log" };
     case "materials": return { deed: "Add your query letter and synopsis", note: "So each query records exactly what was sent.", link: "Add materials", go: "materials" };

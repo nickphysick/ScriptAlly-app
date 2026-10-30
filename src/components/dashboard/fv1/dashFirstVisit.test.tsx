@@ -18,7 +18,7 @@ vi.mock("../../../lib/firebase", async () => (await import("../../../test/pageSm
 
 import { Dash58 } from "../v58/Dash58";
 import { QueryStatus, type Manuscript, type Query, type User } from "../../../types";
-import { campaignEyebrow, campaignStage, dashPrefsOf, gsOrder, nextTip, startPathOf, stepTip } from "../../../lib/dashFirstVisit";
+import { campaignEyebrow, campaignStage, dashPrefsOf, gsOrder, legacyStartOf, nextTip, stepTip } from "../../../lib/dashFirstVisit";
 import { DEFAULT_SHAPE } from "../../../lib/dashShape";
 import { DASH_TIPS } from "../../../lib/dashTips";
 
@@ -80,21 +80,24 @@ describe("DFV-A · the pre-query page", () => {
   });
 });
 
-describe("DFV-A · the answer is remembered and chooses the path", () => {
-  it("defaults to Yes when nothing is stored", () => {
-    expect(startPathOf(dashPrefsOf(user()), "ms-1")).toBe("yes");
-    expect(render([])).toContain('data-fv1="path-yes"');
+/* ⚠️ RETARGETED (Dashboard first visit v2, Part B): the answer is the SIGN-UP answer now. First visit v1's stored
+   dashboard answer is read only for an account that never answered the stage question; with nothing said at all the
+   card opens on the question (FV2-B in fv2/fv2PartB.test.tsx holds the rest). */
+describe("DFV-A · the stored v1 answer still chooses the path where sign-up said nothing", () => {
+  it("opens on the question when nothing is stored", () => {
+    expect(legacyStartOf(dashPrefsOf(user()), "ms-1")).toBe(null);
+    expect(render([])).toContain('data-asking="1"');
   });
-  it("reads the stored answer per manuscript", () => {
+  it("reads the stored v1 answer per manuscript", () => {
     const u = user({ dash: { start: { "ms-1": "notyet", "ms-2": "yes" } } });
-    expect(startPathOf(dashPrefsOf(u), "ms-1")).toBe("notyet");
+    expect(legacyStartOf(dashPrefsOf(u), "ms-1")).toBe("notyet");
     const html = render([], u);
-    expect(html).toContain('data-fv1="path-notyet"');
+    expect(html).toContain('data-fv1="path-ready"');
     expect(html).toContain("Start your contact list");
   });
   it("orders Getting started by the answer", () => {
-    expect(gsOrder("yes")).toEqual(["manuscript", "query", "agent", "materials", "comps"]);
-    expect(gsOrder("notyet")).toEqual(["manuscript", "agent", "query", "materials", "comps"]);
+    expect(gsOrder("querying")).toEqual(["manuscript", "query", "agent", "materials", "comps"]);
+    expect(gsOrder("ready")).toEqual(["manuscript", "agent", "query", "materials", "comps"]);
   });
 });
 

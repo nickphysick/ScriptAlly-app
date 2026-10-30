@@ -59,3 +59,12 @@
 .fv2-extrk > i { height: 4px; border-radius: 2px; background: #e4ded4; }
 .fv2-extrk > i.is-on { background: #b8b2a8; }
 .fv2-extrk > i.is-now { background: #7f8794; }
+
+/* ── Part B · the set-up card says what the writer told us, and offers to change it ── */
+.d58 .fv2-said { margin: 0; padding: 18px 28px 0; font: 400 15.5px/1.5 var(--d58-serif) !important; color: var(--d58-ink); }
+.d58 .fv2-said em { font: italic 400 15.5px/1.5 var(--d58-serif) !important; }
+.d58 .fv1-lnk.fv2-change { margin-left: 6px; font-size: 15.5px !important; color: var(--d58-ink); }
+/* the three answers, stacked: each a full-width card */
+.d58 .fv1-ch.fv2-ch { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+.d58 .fv2-done { display: flex; justify-content: flex-end; margin-top: 10px; }
+.d58 .fv2-done .fv1-lnk { color: var(--d58-ink); font-size: 15px !important; }

@@ -15,7 +15,7 @@ import { openQueryPanel } from "../../../lib/queryPanelStore";
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
-import type { Activity, Agent, Manuscript, ManuscriptVersion, Query, SmartImportUsage, Task, TaskFlag, User, UserTask } from "../../../types";
+import type { Activity, Agent, Manuscript, ManuscriptStatus, ManuscriptVersion, Query, SmartImportUsage, Task, TaskFlag, User, UserTask } from "../../../types";
 import { scopeActivities, scopeQueries, scopeTasks } from "../../../lib/manuscriptScope";
 import { localYMD } from "../../../lib/shellSidebar";
 import { liveCount, undatedLiveCount } from "../../../lib/dashBreakdown";
@@ -49,7 +49,7 @@ import { Dash105Founding } from "../v105/Dash105Founding";
 import { agentCoverage, isPreQuery } from "../../../lib/dashFirstUse";
 import { ClosedHoop, AgentsHoop } from "../v60/Dash60Left";
 import { openNewAgentCard } from "../../../lib/agentCardStore";
-import { bookLabel, dashState, seg, dashPrefsOf, gsHideWrite, gsOrder, startPathOf, startPathWrite, type GsLink, type StartPath } from "../../../lib/dashFirstVisit";
+import { answerFor, answerWrite, bookLabel, dashState, seg, dashPrefsOf, gsHideWrite, gsOrder, legacyStartOf, pathAfter, type AnswerChoice, type AnswerWrite, type GsLink, type StartPath } from "../../../lib/dashFirstVisit";
 import type { UserPaths } from "../../../lib/userPaths";
 import { SetUpCard } from "../fv1/SetUpCard";
 import { GsSheet } from "../fv2/GsSheet";
@@ -94,6 +94,9 @@ export interface Dash58Props {
   onPrefs?: (paths: UserPaths) => void | Promise<void>;
   /** Dashboard feed v1: writes the querying goal from the goal sheet (the goals card's own write). Absent → read only. */
   onGoal?: (patch: Partial<User>) => void | Promise<void>;
+  /** First visit v2 (Part B): the set-up answer changed on the dashboard — write the SAME fields sign-up wrote
+   *  (`User.queryingStage`, `Manuscript.status`). Absent (the onboarding ghost) → shown, never stored. */
+  onAnswer?: (msId: string, w: AnswerWrite) => void | Promise<void>;
 }
 
 /** Dashboard first visit v2 (Part A): the task card's last "Then:" while the Getting started sheet is open. */
@@ -171,7 +174,7 @@ const ImportNoticeRow: React.FC<{ notice: ImportNotice; onDismiss: () => void; o
 export const Dash58: React.FC<Dash58Props> = ({
   loading: dataLoading, queries, agents: agentsIn, manuscripts, tasks, userTasks, activities, taskFlags, currentUser,
   activeManuscript, onNavigate, now: nowProp, versions = [], smartImportUsage = null,
-  onFoundingSeen, onPrefs, onGoal,
+  onFoundingSeen, onPrefs, onGoal, onAnswer,
 }) => {
   /* one clock per mount: a new Date on every render would rebuild every derivation below */
   const [mountedAt] = useState(() => new Date());
@@ -208,13 +211,18 @@ export const Dash58: React.FC<Dash58Props> = ({
      ⚠️ EVERY PREFERENCE IS A PREFERENCE, NEVER A SOURCE: the answer chooses a path and an order, the tip
      index chooses which tip opens, and Hide hides a page. None of them is read by anything that counts. */
   const prefs = useMemo(() => dashPrefsOf(currentUser), [currentUser]);
-  /* the answer is held locally as well, so a click shows at once and the ghost (no writer) still answers */
-  const [localPath, setLocalPath] = useState<Record<string, StartPath>>({});
-  const path: StartPath = (scopeId ? localPath[scopeId] : undefined) ?? startPathOf(prefs, scopeId);
-  const choosePath = (p: StartPath) => {
+  /* first visit v2 (Part B): the answer is the SIGN-UP answer. A change on the dashboard is held locally as well, so a
+     click shows at once (and the ghost, which has no writer, still answers); the held status is what the label reads
+     until the manuscript document comes back with it. */
+  const [answerHeld, setAnswerHeld] = useState<Record<string, { path: StartPath; status: ManuscriptStatus | null }>>({});
+  const heldNow = scopeId ? answerHeld[scopeId] : undefined;
+  const msStatus = heldNow?.status ?? activeManuscript?.status ?? null;
+  const path: StartPath | null = heldNow?.path ?? answerFor({ stage: currentUser?.queryingStage, status: activeManuscript?.status, legacy: legacyStartOf(prefs, scopeId) });
+  const choose = (c: AnswerChoice) => {
     if (!scopeId) return;
-    setLocalPath((o) => ({ ...o, [scopeId]: p }));
-    void onPrefs?.(startPathWrite(scopeId, p));
+    const w = answerWrite(c, currentUser?.queryingStage, msStatus);
+    setAnswerHeld((o) => ({ ...o, [scopeId]: { path: pathAfter(c, msStatus), status: w.status ?? (msStatus as ManuscriptStatus | null) } }));
+    void onAnswer?.(scopeId, w);
   };
   const logQuery = () => openQueryDrawer({ mode: "log", ...(scopeId ? { manuscriptId: scopeId } : {}) });
   const addAgent = () => openNewAgentCard({ from: "button", host: "panel" });
@@ -513,7 +521,7 @@ export const Dash58: React.FC<Dash58Props> = ({
             <div className="df1-left" data-df1="left">
               <div className="df1-slot df1-s-book" data-df1="book-slot">
                 <F1Book
-                  loading={loading} title={title} author={author} coverUrl={activeManuscript?.coverUrl} label={bookLabel(scopedQueries, activeManuscript?.status)}
+                  loading={loading} title={title} author={author} coverUrl={activeManuscript?.coverUrl} label={bookLabel(scopedQueries, msStatus)}
                   onLog={logQuery} onRecord={() => onNavigate("queries", "Record a response")} onAddAgent={() => onNavigate("agents", "Add an agent")}
                   queries={queries} agents={agents} activities={activities} currentUser={currentUser} now={now} onGoal={onGoal}
                   buttons={!pre}
@@ -535,9 +543,10 @@ export const Dash58: React.FC<Dash58Props> = ({
             {pre ? (
               <div className="df1-feed fv2-mid" data-df1="feed" data-fv2="mid">
                 <SetUpCard
-                  loading={loading} title={title} path={path} onPath={choosePath}
+                  loading={loading} title={title} path={path} onChoose={choose}
                   agents={loading ? (hasAgents ? 1 : 0) : agents.length}
                   onImport={() => onNavigate("import")} onLog={logQuery} onAddAgent={addAgent} onDiscover={() => onNavigate("agents", "Discover")}
+                  onComps={() => goGs("comps")}
                 />
                 <EmptyFeed />
               </div>
