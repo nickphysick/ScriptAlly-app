@@ -62,7 +62,7 @@ Not merged, and not on prod.
 | `97367626` | 8A first run (Home, Queries) and the two scoping regressions | `DashPhone.tsx`, `HomeFirstRun.tsx` (new), `phoneHome.css`, `QueriesPhone.tsx`, `queriesPhoneV2.css`, `AnalyticsPhone.tsx`, `pagesPhone.css`, `agentsPhone.css`, `lib/phonePages.ts`, `lib/milestones.test.ts`, `tests/e2e/pa2Lib.ts` |
 | `91401e53` | 8B Settings, Help, Import, Plan | `App.tsx`, `ImportPage.tsx`, `AccountPhone.tsx` (new), `ImportDoorsPhone.tsx` (new), `settingsPhone.css` (new), `PageRoutes.tsx`, `AppShell.tsx` (band titles), `pagesPhone.css`, `phonePagesSmoke.test.tsx` |
 | `9b7d2b0b` | 8C the sweep fixes | `components/phone/sweepPhone.css` (new), `AppShell.tsx` (import), `ManuscriptPhone.tsx` (the empty page's "Add a manuscript") |
-| (this commit) | 8D the sweep lock, the art from the pairs, the pairs, this report, CLAUDE.md | `tests/e2e/phoneAppV2Sweep.measure.ts` (new), `pa2Lib.ts`, `phoneAppV2Pairs.measure.ts`, `phoneArt.ts`, `ImportDoorsPhone.tsx`, `AccountPhone.tsx`, `pagesPhone.css`, `CLAUDE.md`, `reports/phone-app-v2/` |
+| `be08d69c` | 8D the sweep lock, the art from the pairs, the pairs, this report, CLAUDE.md | `tests/e2e/phoneAppV2Sweep.measure.ts` (new), `pa2Lib.ts`, `phoneAppV2Pairs.measure.ts`, `phoneArt.ts`, `ImportDoorsPhone.tsx`, `AccountPhone.tsx`, `pagesPhone.css`, `CLAUDE.md`, `reports/phone-app-v2/` |
 
 **What the sweep found and 8C fixed, all in the phone layer:**
 - **Tap targets under 44px.**
@@ -85,6 +85,8 @@ Not merged, and not on prod.
   - their inputs, now 16px;
   - their footer links.
 - **The empty Manuscript page** now offers the app's own "Add a manuscript".
+
+**On the dev integration, the sweep found one more page, fixed in `cf4229cd`:** Submission packages v39.3's builder (see Dev).
 
 **What the pairs found and 8D fixed:**
 - Import's Smart import card had no picture. The ref's `tipHawk` is the courier disc (README "Illustrations"). It is a new art-table slot, `PHONE_ART.importSmart`, drawn in a blush disc.
@@ -144,7 +146,18 @@ The sweep visits 24 workspace routes at 390 × 844 and 360 × 780, on the harnes
 
 ## Dev
 
-DEV_SECTION
+- **Before:** dev served `index-BZP8LJfl.js`, the Part 7 integration `dc20fc30` (checked before branching and again before deploying).
+- **Integration branch:** `dev/pk391-qm1-pk392-calx-pk392b-td7-fv1-pk393-pa2-2-td12-ppp1-pa2-8`, at `3c1e5b90` = `dc20fc30` + `phone-app-v2` at `cf4229cd`. No conflicts; CLAUDE.md auto-merged.
+- **Gates there:** tsc 0 / 0 · build clean · Vitest `Test Files 697 passed (697)` · `Tests 10774 passed | 3 skipped (10777)`.
+- **Locks there:** PA2-8, PA2-4, PA2-7 and PA2-1 together gave `19 passed, 2 skipped`, with two reds:
+  - **S1 at both sizes: the badge reads 37 against 30.** This is the Part 3 question unchanged: To-do v12, on dev but not on this branch, states a different figure. Item 17 of the summary.
+  - **W2 on `/queries/packages` at both sizes: a new finding, because the sweep is new.**
+    - Submission packages v39.3's builder (`.p93-*`, on dev, not on this branch) draws green done steps and a green dot.
+    - 8C's ink rule had reached its navy pieces.
+    - Fixed in the phone layer on `phone-app-v2` (`cf4229cd`; the rules match nothing on the branch itself).
+    - Re-merged, rebuilt and re-swept there: `/queries/packages`, `/manuscripts/comps` and `/manuscripts/versions` passed at both sizes.
+- **PA2-4 wrote and undid;** the account matched its list afterwards (`queries/seed-pkgq-1` key order only).
+- **After:** built from a clean checkout of that branch and deployed (hosting only); **dev serves `index-DyXfq4ti.js`**. The integration branch is pushed.
 
 ## Not done, and why: for Nick
 
@@ -180,4 +193,4 @@ The two older sections' headings now point at it.
 
 ## Worktree
 
-WORKTREE_LINE
+Both of this pack's worktrees (`ScriptAlly-pa2`, `ScriptAlly-pa2-int`) were removed at the end of the run; the branches are pushed.
