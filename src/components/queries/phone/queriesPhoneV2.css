@@ -94,6 +94,10 @@
   .pa-brh { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
   .pa-brh b { flex: 1; font: 600 15px/1.3 var(--pa-sans) !important; }
   .pa-brf { display: flex; justify-content: space-between; margin-top: 6px; }
+  /* Phone fixes v1 (4A): the bar's track. `.pa-barh` is a span and its block rule lived only under .pa-pg, so in this
+     sheet every bar collapsed to nothing and Birds-eye read as a plain list. */
+  .pa-birds .pa-barh { display: block; height: 10px; border-radius: 5px; background: var(--pa-fill); overflow: hidden; }
+  .pa-birds .pa-barh i { display: block; height: 100%; border-radius: 5px; }
 }
 
 /* ── the card's parts, as the sheet draws them (the sheet is portalled outside the page, so it states its own) ── */

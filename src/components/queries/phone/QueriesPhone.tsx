@@ -17,6 +17,7 @@
  *
  * Phones (≤760px, `useQm1Phone`) only; Queries.tsx renders the desktop page otherwise.
  */
+import { dayMonth } from "../../../lib/dates";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -273,13 +274,17 @@ export const QueriesPhone: React.FC<QueriesPhoneProps> = (p) => {
                 {list.map((r) => {
                   const e = eyeProgress(r, nowMs);
                   const due = dueCell(r, nowMs);
-                  const pct = e.dated ? Math.min(1, e.f ?? 0) : null;
+                  /* Phone fixes v1 (4A): the bar is the desktop rail's own value (`eyeProgress().fill`, the allowance included),
+                     never an illustrative percentage; beneath it, the last step's date and the next step */
+                  const pct = e.dated ? e.fill : null;
+                  const lastMs = r.stageStartMs ?? r.sentMs;
+                  const next = g === "you" ? "Your move" : g === "quiet" ? "Window ended" : due.date !== "—" ? due.date : "No reply date";
                   return (
-                    <button key={r.id} type="button" className="pa-card pa-brow" data-pa="birds-row" data-id={r.id} data-where={g} data-f={e.f ?? ""}
+                    <button key={r.id} type="button" className="pa-card pa-brow" data-pa="birds-row" data-id={r.id} data-where={g} data-f={e.f ?? ""} data-fill={pct ?? ""}
                       onClick={() => { setBirdsOpen(false); openQuery(r.id, order(list)); }}>
                       <span className="pa-brh"><StatusDot status={r.status} overrideSize={20} decorative /><b>{r.agentName}</b>{r.dayN != null ? <span className="pa-sub">Day {r.dayN}</span> : null}</span>
-                      <span className="pa-barh"><i style={{ width: pct == null ? 0 : `${Math.round(Math.max(0.03, pct) * 100)}%`, background: g === "you" ? "var(--pa-blush)" : "var(--pa-navy)" }} /></span>
-                      <span className="pa-brf pa-sub"><span>{STAGE_NAME[r.status] ?? r.status}</span><span>{g === "you" ? "Your move" : due.date || "No reply date"}</span></span>
+                      <span className="pa-barh" data-pa="birds-bar"><i style={{ width: pct == null ? 0 : `${pct * 100}%`, background: g === "you" ? "var(--pa-blush)" : "var(--pa-navy)" }} /></span>
+                      <span className="pa-brf pa-sub"><span>{lastMs != null ? dayMonth(lastMs) : STAGE_NAME[r.status] ?? r.status}</span><span>{next}</span></span>
                     </button>
                   );
                 })}

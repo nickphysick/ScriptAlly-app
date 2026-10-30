@@ -21,6 +21,11 @@ import { appendFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { openPhone } from "./pa2Lib";
 import { touchDrag } from "./touch";
+import { devDb } from "./devWrite";
+import { collection, getDocs } from "firebase/firestore";
+import { buildQcRows } from "../../src/lib/qcSummary";
+import { eyeProgress } from "../../src/lib/qcBirdsEye";
+import type { Activity, Agent, Query } from "../../src/types";
 
 const { PNG } = createRequire(import.meta.url)("playwright-core/lib/utilsBundle") as { PNG: { sync: { read(b: Buffer): { width: number; height: number; data: Buffer } } } };
 
@@ -40,6 +45,7 @@ export const PAGES = [
 
 /** Named breaks that put back what each fix removed. */
 export const BREAK: Record<string, string> = {
+  F5: ".pa-birds .pa-barh { display: inline !important; }",
   F4: '[data-pa="search-btn"] { pointer-events: none !important; }',
   F2: "@media (max-width: 767.98px) { .sv2-fade { display: block !important; opacity: 1 !important; } .pa-edgefade { display: none !important; } }",
   F3: "@media (max-width: 767.98px) { .pa-tabbar { background: #fff !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; } }",
@@ -226,5 +232,37 @@ test.describe("PF1 phone fixes", () => {
     expect(open.empty, "the empty state offers Jump to").toBe(3);
     expect(hits, `typing "${name}" lists them`).toBeGreaterThan(0);
     expect(opened || /[?&]q=/.test(url), "tapping opens them").toBe(true);
+  });
+
+  test("F5 Birds-eye: one card per open query, none closed, each bar the desktop's own fill", async ({ page }) => {
+    await phone(page, "/queries");
+    await go(page, "/queries");
+    if (BREAK[MUTATE]) await page.addStyleTag({ content: BREAK[MUTATE] });
+    const chips = await page.evaluate(() => Object.fromEntries([...document.querySelectorAll<HTMLElement>('[data-qm1="chip"]')].map((c) => [c.dataset.key, Number(c.dataset.count)])));
+    await page.locator('[data-pa="birds-btn"]').first().tap();
+    await page.locator('[data-pa="birds"]').waitFor({ timeout: 10_000 });
+    await page.waitForTimeout(600);
+    const nowMs = Date.now();
+    const cards = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-pa="birds-row"]')].map((c) => {
+      const trk = c.querySelector<HTMLElement>('[data-pa="birds-bar"]')!; const fill = trk.querySelector<HTMLElement>("i")!;
+      const tr = trk.getBoundingClientRect(), fr = fill.getBoundingClientRect();
+      return { id: c.dataset.id!, where: c.dataset.where!, fill: c.dataset.fill === "" ? null : Number(c.dataset.fill), trackW: tr.width, trackH: tr.height, drawn: tr.width ? fr.width / tr.width : 0,
+        foot: [...c.querySelectorAll(".pa-brf > span")].map((x) => x.textContent) };
+    }));
+    const { db, uid } = await devDb();
+    const read = async <T,>(c: string) => (await getDocs(collection(db, "users", uid, c))).docs.map((d) => ({ id: d.id, ...d.data() }) as T);
+    const rows = buildQcRows(await read<Query>("queries"), await read<Agent>("agents"), await read<Activity>("activities"), nowMs);
+    const byId = new Map(rows.map((r) => [r.id, r]));
+    const CLOSED = new Set(["Rejected", "No Response", "Withdrawn", "Signed"]);
+    const mism = cards.map((c) => {
+      const r = byId.get(c.id); const e = r ? eyeProgress(r, nowMs) : null; const want = e?.dated ? e.fill : null;
+      return { id: c.id, got: c.fill, want, drawn: c.drawn, closed: r ? CLOSED.has(String(r.status)) : null };
+    }).filter((m) => m.closed || (m.want == null) !== (m.got == null) || (m.want != null && Math.abs(m.want - (m.got ?? 0)) > 0.01) || (m.want != null && Math.abs(m.want - m.drawn) > 0.03));
+    record("F5", { chips, n: cards.length, sample: cards.slice(0, 3), mism: mism.slice(0, 5) });
+    expect(cards.length, "Birds-eye has cards").toBeGreaterThan(0);
+    expect(cards.length, "one card per open query (the page's own With you + With the agent + Gone quiet)").toBe((chips.you ?? 0) + (chips.agent ?? 0) + (chips.quiet ?? 0));
+    expect(cards.every((c) => c.where !== "closed"), "no closed group").toBe(true);
+    expect(cards.every((c) => c.trackH >= 9 && c.trackW > 100), "every bar has its 10px track").toBe(true);
+    expect(mism, "each bar's fill is the desktop eyeProgress value, closed queries left out").toEqual([]);
   });
 });

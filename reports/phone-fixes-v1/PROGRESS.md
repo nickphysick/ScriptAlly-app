@@ -9,7 +9,8 @@ Phone projects added to playwright.config.ts: `iphone` (iPhone 13, WebKit) and `
 |---|---|---|
 | A one scroller per page | `8fd56b3b` | committed; PF1 F1 green on both phones (24 pages) |
 | B frosted bar and edge fade | `3b2b2136` | committed; PF1 F2, F3 green on both phones |
-| C search on phones | (this commit) | committed; PF1 F4 green on both phones |
+| C search on phones | `453d2267` | committed; PF1 F4 green on both phones |
+| D Birds-eye shows progress | (this commit) | committed; PF1 F5 green on both phones (39 cards) |
 
 ## Causes (recon, base build, Pixel and iPhone)
 - 2 (no scroll): on a phone every page sits in the desktop's viewport-locked stage slot — `StagePage` (AppShell.tsx:141–153) gives `layout="fill" clip` slots `flex:1; min-height:0; overflow:hidden` inline, and `.ws-work--fit` (workspaceShell.css:464) is `flex:1 1 0; min-height:0`. Queries got a 358px box over a 3,786px page; nothing scrolled. Home's slot is `flow`, which is why it alone scrolled. Import also had a second scroller (`.wpg-scroll`).
@@ -32,3 +33,8 @@ Phone projects added to playwright.config.ts: `iphone` (iPhone 13, WebKit) and `
 - `PhoneSearchPage` (phone/): full screen (portal, z 1050), the field focused with `preventScroll`, Cancel beside it. Empty: "Try" (an agency, an agent's first name and a status from the writer's own data, never sample names) and "Jump to" (Responses, Analytics, Manuscript). Typing: Queries and Agents to query from the palette's own `buildCorpus` + `rankItems`; Notes (Corkboard notes, `isNoteTask`) scored by its `scoreItem`.
 - AppShell: on a phone the band's search opens it; the desktop keeps `openPalette`. The old `PhoneSearch` in the retired PhoneTopBar is left alone (still mounted nowhere).
 - A query opens through `/queries?q=<id>` with `{ qm1: true }` (the query sheet); an agent through `openAgentCard`; a note goes to the Corkboard.
+
+## Phase D notes
+- The bar's track rule now lives on the sheet (`.pa-birds .pa-barh`, queriesPhoneV2.css); before, the span had no height there.
+- The fill is `eyeProgress(row).fill` — the desktop rail's own value with its allowance — not `min(1, f)`. F5 recomputes it in Node with `buildQcRows` + `eyeProgress` from the account's data and compares it with the card's value and its drawn width.
+- Beneath the bar: the last step's date (the stage's start, else the send date) on the left; "Your move", the expected date, or "Window ended" on the right, as `ovBirds`.
