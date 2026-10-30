@@ -11,6 +11,8 @@ import { ResponsesPage } from "../../responses/ResponsesPage";
 import { ResponsesPhone } from "./ResponsesPhone";
 import { ManuscriptPage } from "../../manuscripts/v12/ManuscriptPage";
 import { ManuscriptPhone } from "./ManuscriptPhone";
+import { QueryAnalytics } from "../../QueryAnalytics";
+import { AnalyticsPhone } from "./AnalyticsPhone";
 
 export const ResponsesRoute: React.FC<React.ComponentProps<typeof ResponsesPage>> = (props) =>
   useIsMobile() ? <ResponsesPhone /> : <ResponsesPage {...props} />;
@@ -18,3 +20,6 @@ export const ResponsesRoute: React.FC<React.ComponentProps<typeof ResponsesPage>
 /** ⚠️ READS the manuscripts page's component to choose it; no Manuscripts file is edited (Part 7's rule) */
 export const ManuscriptRoute: React.FC<React.ComponentProps<typeof ManuscriptPage>> = (props) =>
   useIsMobile() ? <ManuscriptPhone /> : <ManuscriptPage {...props} />;
+
+export const AnalyticsRoute: React.FC<React.ComponentProps<typeof QueryAnalytics>> = (props) =>
+  useIsMobile() ? <AnalyticsPhone /> : <QueryAnalytics {...props} />;

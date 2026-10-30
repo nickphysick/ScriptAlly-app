@@ -25,7 +25,8 @@
   /* section heads (ref .shd .h2) */
   .pa-shd { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 24px 2px 10px; }
   .pa-shd:first-child { margin-top: 16px; }
-  .qm1-layer .pa-h2, .pa-pg .pa-h2 { font-family: var(--pa-type); font-weight: 400; font-size: 19px; margin: 0; color: var(--pa-ink); letter-spacing: -0.005em; line-height: 1.2; }
+  /* ⚠️ `!important` on the face and weight: brand.tsx forces every h2 at runtime (the Home headings carry it too) */
+  .qm1-layer .pa-h2, .pa-pg .pa-h2 { font-family: var(--pa-type) !important; font-weight: 400 !important; font-size: 19px; margin: 0; color: var(--pa-ink); letter-spacing: -0.005em; line-height: 1.2; }
   .pa-shn { font-size: 13px; color: var(--pa-muted); }
   .pa-pg .pa-link { display: inline-flex; align-items: center; gap: 5px; min-height: 44px; border: 0; background: none; font: 600 14px var(--pa-sans); color: var(--pa-navy); padding: 0; }
   .pa-pg .pa-link svg { width: 15px; height: 15px; }
@@ -109,5 +110,37 @@
   .pa-read .pa-sub { margin: 6px 0 0; }
   .pa-readbody { margin-top: 14px; font-size: 15px; line-height: 1.55; white-space: pre-wrap; max-height: 55vh; overflow: auto; }
   .pa-readfoot { margin-top: 16px !important; }
+
+  /* ── Analytics (ref ANT B · ANC B) ── */
+  .pa-anrange { display: flex; gap: 6px; }
+  .pa-anr { height: 32px; padding: 0 13px; border: 0; border-radius: 999px; font: 600 13.5px/1 var(--pa-sans); background: transparent; color: rgba(255, 255, 255, 0.75); }
+  .pa-anr[aria-pressed="true"] { background: rgba(255, 255, 255, 0.16); color: #fff; }
+  .pa-anhead { display: flex; align-items: baseline; gap: 10px; margin-top: 16px; color: #fff; }
+  .pa-anhead b { font-size: 54px; line-height: 0.9; color: #fff; }
+  .pa-anhead span { font-size: 16px; color: rgba(255, 255, 255, 0.75); }
+  .pa-pg .pa-ancard { margin-top: 16px; }
+  .pa-pg .pa-mt12 { margin-top: 12px; }
+  .qm1-layer .pa-h17, .pa-pg .pa-h17 { font-size: 17px; }
+  .pa-ftrack { display: flex; align-items: flex-start; margin-top: 16px; }
+  .pa-fst { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 60px; flex: none; font-size: 12.5px; color: var(--pa-muted); text-align: center; }
+  .pa-fd { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; box-shadow: inset 0 0 0 1.5px var(--pa-rule); color: var(--pa-faint); background: #fff; }
+  .pa-fd.on { background: var(--pa-navy); box-shadow: none; color: #fff; }
+  .pa-fd.on svg * { stroke: #fff; }
+  .pa-fd.on svg [fill]:not([fill="none"]) { fill: #fff; }
+  .pa-fst b { font-size: 20px; color: var(--pa-ink); margin-top: 4px; }
+  .pa-fl { flex: 1; height: 2px; background: var(--pa-rule); margin-top: 18px; }
+  .pa-anline { margin: 12px 0 0; }
+  .pa-anweeksub { margin: 4px 0 12px; }
+  .pa-anbars { display: flex; align-items: flex-end; gap: 5px; height: 90px; }
+  .pa-anbar { flex: 1; border-radius: 5px; background: var(--pa-fill); }
+  .pa-anbar.on { background: var(--pa-navy); }
+  .pa-anbar.now { background: var(--pa-blush); }
+  .pa-anaxis { display: flex; justify-content: space-between; margin-top: 8px; }
+  .pa-pg .pa-rec { width: 150px; box-sizing: border-box; }
+  .pa-recv { font-size: 22px; margin-top: 6px; color: var(--pa-ink); line-height: 1.15; }
+  .pa-recw { margin-top: 4px; }
+  .pa-pg .pa-annote { background: var(--pa-page); box-shadow: none; padding: 16px 2px; }
+  .pa-annote b { font-size: 15px; }
+  .pa-annote p { font-size: 14px; line-height: 1.45; margin: 6px 0 0; }
   @media (prefers-reduced-motion: reduce) { .pa-pg .pa-card, .pa-nocard { transition: none; } }
 }
