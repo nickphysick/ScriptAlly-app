@@ -75,11 +75,15 @@ const BACKS = [
 
 /** What the story tells its host about its own progress. */
 interface StoryHooks {
-  /** On a phone, after the FIRST run of the loop only: the drawer may rise to offer the founding sign-up. */
-  onGrow?: () => void;
   /** The phone layout: the same short loop, with the phone's stamp step and its popover sequence. */
   phone?: boolean;
+  /** Feature mode (waitlist landing, 31 Oct): play the story ONCE, rest on its final state, and say so. */
+  once?: boolean;
+  onDone?: () => void;
 }
+
+/** What a feature-mode host can ask of the card: play the story again from the start. */
+export interface HeroCardControl { replay: () => void }
 
 /**
  * On a phone the four sit tucked behind the front card, all at its place (688, 14), peeking over its
@@ -138,11 +142,19 @@ function makeStory(root: HTMLElement, hooks: StoryHooks = {}) {
   const waits = parts.map((p, i) => { if (!i) return null; const w = mkWait(); p.st.appendChild(w); return w; });
   const slotWait = mkWait(); slot.appendChild(slotWait);
 
-  let anims: Animation[] = [], timers: number[] = [];
+  /* ⚠️ TIMERS ARE OBJECTS, NOT IDS, SO THE STORY CAN PAUSE (feature mode). A paused timer remembers how
+     long it had left and is re-armed with exactly that on resume; the animations pause with the
+     Web Animations API and the clock shifts its own origin by the time spent paused. */
+  type Timer = { id: number; fn: () => void; due: number; left: number };
+  let anims: Animation[] = [], timers: Timer[] = [], paused = false, pausedAt = 0, clockOn = false;
+  const arm = (tm: Timer, ms: number) => {
+    tm.due = performance.now() + ms;
+    tm.id = window.setTimeout(() => { timers = timers.filter((x) => x !== tm); tm.fn(); }, ms);
+  };
   const A = (el: Element, kf: Keyframe[], o: KeyframeAnimationOptions) => {
     const a = el.animate(kf, Object.assign({ fill: "both", easing: "cubic-bezier(.2,.7,.2,1)" }, o)); anims.push(a); return a;
   };
-  const later = (fn: () => void, ms: number) => { timers.push(window.setTimeout(fn, ms)); };
+  const later = (fn: () => void, ms: number) => { const tm: Timer = { id: 0, fn, due: 0, left: ms }; timers.push(tm); if (paused) tm.left = ms; else arm(tm, ms); };
   const BOUNCE = "cubic-bezier(.34,1.56,.64,1)";
   const KEY = 30;
   const type = (chars: HTMLElement[], t: number, key = KEY) => {
@@ -201,7 +213,7 @@ function makeStory(root: HTMLElement, hooks: StoryHooks = {}) {
   function runClock() {
     const el = performance.now() - t0, last = knots[knots.length - 1][0];
     show(Math.min(clockAt(el), knots[knots.length - 1][1]));
-    if (el < last) raf = requestAnimationFrame(runClock); else show(knots[knots.length - 1][1]);
+    if (el < last) raf = requestAnimationFrame(runClock); else { clockOn = false; show(knots[knots.length - 1][1]); }
   }
 
   // the card's state: whose move it is, the status pill, the footer
@@ -252,7 +264,21 @@ function makeStory(root: HTMLElement, hooks: StoryHooks = {}) {
     build(); show(99); psd.classList.remove("mk-late");
     ftT.textContent = "Send the full by 5 July"; ftA.textContent = "Mark full sent"; ftL.classList.add("mk-late");
   }
-  function cancelAll() { anims.forEach((a) => a.cancel()); anims = []; timers.forEach(clearTimeout); timers = []; cancelAnimationFrame(raf); }
+  function cancelAll() { anims.forEach((a) => a.cancel()); anims = []; timers.forEach((tm) => clearTimeout(tm.id)); timers = []; cancelAnimationFrame(raf); clockOn = false; paused = false; }
+  /** Feature mode: hold the story exactly where it is (scrolled away), and carry on from there. */
+  function pause() {
+    if (paused) return; paused = true; pausedAt = performance.now();
+    anims.forEach((a) => { if (a.playState === "running") a.pause(); });
+    timers.forEach((tm) => { clearTimeout(tm.id); tm.left = Math.max(0, tm.due - pausedAt); });
+    cancelAnimationFrame(raf);
+  }
+  function resume() {
+    if (!paused) return; paused = false;
+    const now = performance.now(); t0 += now - pausedAt;
+    anims.forEach((a) => { if (a.playState === "paused") a.play(); });
+    timers.forEach((tm) => arm(tm, tm.left));
+    if (clockOn) raf = requestAnimationFrame(runClock);
+  }
   function stop() { cancelAll(); setStatic(); }
 
   let LEAD = 0;
@@ -380,10 +406,9 @@ function makeStory(root: HTMLElement, hooks: StoryHooks = {}) {
 
   /**
    * One query, Query sent to Full requested in about 24 seconds, then the card is dealt away to the
-   * left, a fresh one comes in from the right, and the story plays again, for ever. On a phone, after
-   * the FIRST run only, the drawer is offered its grow (the desk has no `onGrow`).
+   * left, a fresh one comes in from the right, and the story plays again, for ever — unless `once`, when it
+   * rests on its final state and calls `onDone` (feature mode).
    */
-  let looped = false;
   function playShort(again: boolean) {
     const F = PHONE_STORY.foot;
     tilt = 0; scrolled = 0; ol.style.transform = "none"; tlv.classList.remove("mk-lc-tlv--scroll"); tlv.scrollTop = 0;
@@ -452,19 +477,20 @@ function makeStory(root: HTMLElement, hooks: StoryHooks = {}) {
     A(pfIcon, [{ opacity: 0, transform: "scale(0) rotate(-90deg)" }, { opacity: 1, transform: "scale(1.3) rotate(10deg)", offset: .7 }, { opacity: 1, transform: "none" }], { duration: 520, delay: e, easing: BOUNCE });
     e = type(pfText, e + 60, 9); stamp(pfBtn, e + 100, 1.5);
     t = e + 1400;
-    prepClock(); raf = requestAnimationFrame(runClock);
-    if (!looped) later(() => hooks.onGrow?.(), t + 1200);
+    prepClock(); clockOn = true; raf = requestAnimationFrame(runClock);
+    /* Feature mode: no deal-away and no second run — the card rests on its final state. */
+    if (hooks.once) { later(() => hooks.onDone?.(), t + 1200); return; }
     // hold, then this card is dealt away and the story starts again
     const out = t + 2600;
     A(front, [{ translate: "0 0", rotate: "0deg", opacity: 1 }, { translate: "-130% -20px", rotate: "-10deg", opacity: 0 }], { duration: 520, delay: out, fill: "forwards", easing: "cubic-bezier(.5,0,.75,0)" });
-    later(() => { looped = true; LEAD = 0; cancelAll(); playShort(true); }, out + 540);
+    later(() => { LEAD = 0; cancelAll(); playShort(true); }, out + 540);
   }
-  function start(lead: number) { LEAD = lead || 0; stop(); if (reduceMotion()) return; looped = false; playShort(false); }
+  function start(lead: number) { LEAD = lead || 0; stop(); if (reduceMotion()) return; playShort(false); }
   /* Unmount: cancel everything and take back the dots this run added, so a second run (StrictMode,
      a remount) starts from the markup rather than from the leftovers of the first. */
   function dispose() { cancelAll(); waits.forEach((w) => w?.remove()); slotWait.remove(); root.querySelectorAll(".mk-taskchip, .mk-pillpop, .mk-cgx").forEach((g) => g.remove()); }
   setStatic();
-  return { start, stop, dispose };
+  return { start, stop, dispose, pause, resume };
 }
 
 /* ═════════════ the first impression on the desk (the v4 ref's ENTER: ENTRIES['4'] + hk 'b') ═════════════ */
@@ -552,27 +578,6 @@ const Ms: React.FC<{ chips: readonly string[]; front?: boolean }> = ({ chips, fr
   </div>
 );
 
-/* ═════════════ the first impression on a phone (the mobile ref's ENTER and fly-past) ═════════════ */
-function enterPhone(scope: HTMLElement) {
-  const front = scope.querySelector<HTMLElement>('[data-hc="front"]')!;
-  const backs = [...scope.querySelectorAll<HTMLElement>(".mk-lc--back")];
-  const fly = scope.querySelector<HTMLElement>(".mk-hp-fly");
-  const anims: Animation[] = [];
-  const E = (el: Element, kf: Keyframe[], o: KeyframeAnimationOptions) => {
-    const a = el.animate(kf, Object.assign({ fill: "backwards", easing: "cubic-bezier(.16,1,.3,1)" }, o)); anims.push(a); return a;
-  };
-  // dealt from the side: each back card slides in from the right, spinning down onto the pile; the front lands last
-  backs.forEach((b, k) => E(b, [{ opacity: 0, translate: "720px -40px", rotate: "18deg" }, { opacity: 1, offset: .25 }, { opacity: 1, translate: "0 0", rotate: "0deg" }], { duration: 700, delay: 350 + k * 150 }));
-  E(front, [{ opacity: 0, translate: "760px -60px", rotate: "16deg" }, { opacity: 1, offset: .25 }, { opacity: 1, translate: "0 0", rotate: "0deg" }], { duration: 800, delay: 350 + 4 * 150 + 60 });
-  // the hawk's shadow: one pass, low left to top right along one curve, at a constant speed — at 650ms
-  // (v2 P2), while the cards are still being dealt
-  if (fly) {
-    anims.push(fly.animate([{ opacity: 1, offsetDistance: "0%", scale: .94 }, { opacity: 1, offsetDistance: "100%", scale: 1.06 }], { duration: 1000, delay: 650, easing: "linear", fill: "none" }));
-    const img = fly.querySelector("img");
-    if (img) anims.push(img.animate([{ filter: "blur(7px)" }, { filter: "blur(10px)" }], { duration: 1000, delay: 650, fill: "none" }));
-  }
-  return () => { anims.forEach((a) => a.cancel()); };
-}
 
 const BackCard: React.FC<{ c: typeof BACKS[number]; phone: boolean; t?: string }> = ({ c, phone, t }) => (
   <div className={"mk-lc mk-lc--back " + c.cls} style={phone ? { left: 688, top: 14, transform: t } : { left: c.left, top: c.top, transform: c.t }}>
@@ -645,40 +650,81 @@ const FrontCard: React.FC<{ phone: boolean }> = ({ phone }) => (
 
 /**
  * The pile. `host` is the hero element the pointer is measured against; the hero itself places and
- * scales the pile (see `Hero.tsx`'s `size()`, or `HeroPhone.tsx` on a phone), which reads
- * `[data-hc="front"]` for the card's box.
+ * scales the pile, reading `[data-hc="front"]` for the card's box.
  *
- * ⚠️ ONE STORY, TWO LAYOUTS, FIXED PER MOUNT. Both play the short loop (`playShort`) — Query sent to
- * Full requested, dealt away, dealt in, again, for ever. `variant="phone"` (≤760px) draws the pile
- * under the header with the ref's phone transforms, no blur and no cast shadow, and calls `onGrow`
- * after its first run only. Neither offers Watch again: the story loops by itself (desktop v4).
- * A change of breakpoint remounts the hero rather than re-rendering this.
+ * ⚠️ ONE STORY, TWO LAYOUTS, FIXED PER MOUNT. `variant="phone"` draws the phone's front card (its
+ * transforms, no blur, the phone's popover and flips); since waitlist v1 (31 Oct) it exists ONLY in
+ * feature mode — the phone hero's pile, its dealt-in entrance and its fly-past were retired with
+ * `HeroPhone`. A change of breakpoint remounts the card rather than re-rendering it.
  */
+/**
+ * ⚠️ FEATURE MODE (waitlist landing v1, 31 Oct): the same card and the same story, shown as a feature
+ * illustration rather than as the hero. No entrance and no fly-past; no cast shadow; the back cards
+ * only where `backs` says; the story starts when the card is 60% visible, pauses when it is scrolled
+ * away, plays ONCE and rests on its final state, then calls `onDone`. `control` is filled with a
+ * `replay`. Both props are read through refs, so passing them never re-renders the card.
+ * Under reduced motion the card shows its final state and nothing moves.
+ */
+export interface HeroCardFeature {
+  backs: boolean;
+  control: React.MutableRefObject<HeroCardControl | null>;
+  onDone?: () => void;
+}
+
+/** The share of the card that must be on screen before the feature story starts (waitlist rule 4). */
+export const FEATURE_VISIBLE = 0.6;
+
 export const HeroCard: React.FC<{
   host: React.RefObject<HTMLElement | null>;
   variant?: "desk" | "phone";
-  onGrow?: () => void;
-}> = React.memo(({ host, variant = "desk", onGrow }) => {
+  feature?: HeroCardFeature;
+}> = React.memo(({ host, variant = "desk", feature }) => {
   const phone = variant === "phone";
+  const feat = useRef(feature);
+  feat.current = feature;
+  const isFeature = !!feature;
   const root = useRef<HTMLDivElement>(null);
   const scope = useRef<HTMLDivElement>(null);
-  /* The latest `onGrow`, read when the story ends — never a dependency, so it cannot restart it. */
-  const grow = useRef(onGrow);
-  grow.current = onGrow;
 
   /* ⚠️ A LAYOUT EFFECT, SO THE ENTRANCE IS APPLIED BEFORE THE FIRST PAINT. With `fill: backwards` the
      cards and the shadow hold their first keyframe through their delays — invisible at 0.1s — and a
      plain effect would paint the resting pile for one frame before taking it away. */
   useLayoutEffect(() => {
-    if (reduceMotion()) return;
-    if (phone) { const el = scope.current; return el ? enterPhone(el) : undefined; }
+    if (reduceMotion() || isFeature || phone) return;
     const el = root.current; if (!el) return;
     return enter(el, host);
-  }, [host, phone]);
+  }, [host, phone, isFeature]);
 
   useEffect(() => {
+    if (!isFeature) return;
     const el = phone ? scope.current : root.current; if (!el) return;
-    const story = makeStory(el, { phone, onGrow: () => grow.current?.() });
+    const story = makeStory(el, { phone, once: true, onDone: () => feat.current?.onDone?.() });
+    if (reduceMotion()) return () => story.dispose();
+    let live = true, ready = false, seen = false;
+    const io = typeof IntersectionObserver !== "undefined" ? new IntersectionObserver((es) => {
+      es.forEach((e) => { seen = e.intersectionRatio >= FEATURE_VISIBLE; if (ready) (seen ? story.resume : story.pause)(); });
+    }, { threshold: [0, FEATURE_VISIBLE] }) : null;
+    /* The story's first act measures the timeline, so it is laid out (and paused) once the fonts are in:
+       the card then holds the story's first frame until it is seen, rather than its last. */
+    const arm = () => {
+      if (!live) return;
+      story.start(300); ready = true;
+      if (!seen && io) story.pause();
+    };
+    const fonts = (document as Document & { fonts?: FontFaceSet }).fonts;
+    if (fonts?.ready) fonts.ready.then(arm, arm); else arm();
+    io?.observe(el);
+    const control = feat.current?.control;
+    if (control) control.current = { replay: () => { if (!live) return; story.start(0); if (!seen && io) story.pause(); } };
+    return () => { live = false; io?.disconnect(); if (control) control.current = null; story.dispose(); };
+  }, [phone, isFeature]);
+
+  useEffect(() => {
+    if (isFeature) return;
+    /* The hero (desk only since waitlist v1: the phone layout is always a feature). */
+    if (phone) return;
+    const el = root.current; if (!el) return;
+    const story = makeStory(el, {});
     if (reduceMotion()) return () => story.dispose();
     /* The story starts at the ref's lead — but its first act measures
        the timeline's lines, so it waits for the fonts. If they are slower than that, it starts the
@@ -686,26 +732,26 @@ export const HeroCard: React.FC<{
     const born = performance.now();
     let live = true;
     /* The refs' leads: `V4.start(1500)` on the desk after the pop (v4 E2), `V4.start(1300)` on a phone. */
-    const lead = phone ? 1300 : 1500;
+    const lead = 1500;
     const go = () => { if (live) story.start(Math.max(0, lead - (performance.now() - born))); };
     const fonts = (document as Document & { fonts?: FontFaceSet }).fonts;
     if (fonts?.ready) fonts.ready.then(go, go); else go();
     return () => { live = false; story.dispose(); };
-  }, [phone]);
+  }, [phone, isFeature]);
 
-  if (phone) return (
-    <div className="mk-hp-scope" ref={scope}>
-      <div className="mk-hp-hero">
-        <div className="mk-hc-pile mk-hc-pile--phone" ref={root} aria-hidden="true">
-          {BACKS.map((c, k) => <BackCard key={c.ini} c={c} phone t={phoneBackTransform(PHONE_BACKS[k])} />)}
-          <FrontCard phone />
-        </div>
+  /* Feature mode: the card on its own (or the desk pile), with nothing of the hero around it. */
+  if (feature && phone) return (
+    <div className="mk-hp-scope mk-hc-feat" ref={scope}>
+      <div className="mk-hc-pile mk-hc-pile--phone" ref={root} aria-hidden="true">
+        {feature.backs && BACKS.map((c, k) => <BackCard key={c.ini} c={c} phone t={phoneBackTransform(PHONE_BACKS[k])} />)}
+        <FrontCard phone />
       </div>
-      {/* The hawk's shadow, once: above the pile, below the drawer (the stage is its own stacking
-          context, under the sheet), so it never darkens the drawer. */}
-      <div className="mk-hp-fly" aria-hidden="true">
-        <img src={HERO_FLY.src + "?v=" + HERO_FLY.version} alt="" width={HERO_FLY.width} height={HERO_FLY.height} />
-      </div>
+    </div>
+  );
+  if (feature) return (
+    <div className="mk-hc-pile mk-hc-pile--feature" ref={root} aria-hidden="true">
+      {feature.backs && BACKS.map((c) => <BackCard key={c.ini} c={c} phone={false} />)}
+      <FrontCard phone={false} />
     </div>
   );
 

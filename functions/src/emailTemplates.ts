@@ -124,7 +124,7 @@ export const prepareWelcome = (
   const unsubUrl = unsubscribeLink(cfg, unsubToken);
   if (!unsubUrl) return { ok: false, missing: ["unsubscribeUrl"] };
 
-  const lead = welcomeLead(position, cap);
+  const lead = welcomeLead(position);
   const perks = WELCOME_PERKS;
   return {
     ok: true,

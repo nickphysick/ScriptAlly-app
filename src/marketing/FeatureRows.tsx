@@ -15,7 +15,8 @@
  */
 
 import React from "react";
-import { FEATURE_ROWS } from "./landingCopy";
+import { FEATURE_ROWS, BE_HEADING, BE_LINE_DESK } from "./landingCopy";
+import { BirdsEyeFocus, TrackFeature } from "./WaitlistParts";
 
 /* Each illustration's own facts, keyed by file.
    The SIZE is the file's pixel size. CSS sizes the image to its column, so it states only the ratio —
@@ -54,12 +55,34 @@ const lastTwoWords = (heading: string): [string, string] => {
   return cut >= 0 ? [heading.slice(0, cut + 1), heading.slice(cut + 1)] : ["", heading];
 };
 
+/**
+ * ⚠️ WAITLIST v1 (31 Oct, ref design-refs/landing-desktop-v5.html): row 1 is NEW — the Birds-eye focus
+ * window (`BirdsEyeFocus`) beside the bird's-eye copy, which was the retired status band's heading.
+ * Row 2 keeps "Every query tracked"'s words, and its picture is now the REAL card pile (`TrackFeature`),
+ * played once when seen. Every other row is unchanged, copy included.
+ */
 export const FeatureRows: React.FC = () => (
   <section className="mk-featband" id="mk-features">
     <div className="mk-rows">
+      <div className="mk-frow mk-frow--be">
+        <div className="mk-befcell"><BirdsEyeFocus /></div>
+        <div className="mk-fcopy">
+          <h3>{BE_HEADING}</h3>
+          <p>{BE_LINE_DESK}</p>
+        </div>
+      </div>
       {FEATURE_ROWS.map((row) => {
         const art = ILLUSTRATIONS[row.image];
         const [lead, held] = lastTwoWords(row.heading);
+        if (row.key === "track") return (
+          <div className="mk-frow" key={row.key}>
+            <TrackFeature layout="desk" />
+            <div className="mk-fcopy">
+              <h3>{lead}<span className="mk-fkeep">{held}</span></h3>
+              <p>{row.body}</p>
+            </div>
+          </div>
+        );
         return (
           <div className="mk-frow" key={row.key}>
             <img

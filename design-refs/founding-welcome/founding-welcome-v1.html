@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Founding Welcome — v1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Special+Elite&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1c130f; --ink70:rgba(28,19,15,.72); --ink55:rgba(28,19,15,.56); --ink40:rgba(28,19,15,.42); --ink15:rgba(28,19,15,.14); --ink08:rgba(28,19,15,.07);
+  --shell:#1b2433; --navy:#2a3a52; --navy2:#34486a;
+  --paper:#fbf9f5; --oat:#f2eee8; --white:#ffffff; --stone:#e9e6e0;
+  --rust:#a2452a; --terra:#d9967a; --stamp:#e0a188; --blush:#f5e2da; --blush2:#f9ece6;
+  --sage:#4e7d60; --sage-soft:#e3ece5;
+  --cream:#f4ead9;
+  --serif:'Playfair Display',Georgia,serif; --type:'Special Elite',ui-monospace,monospace;
+  --sans:'Source Sans 3',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace; --hand:'Caveat',cursive;
+}
+*{box-sizing:border-box;margin:0}
+body{background:#d9d4cc;font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased}
+button{font:inherit;cursor:pointer}
+
+/* review bar */
+.rv{position:sticky;top:0;z-index:50;background:#111827;color:#e5e7eb;display:flex;flex-wrap:wrap;gap:14px 22px;align-items:center;padding:10px 18px;font:500 12px/1.2 var(--mono)}
+.rv b{color:#fff;font-weight:600;letter-spacing:.04em}
+.rv .grp{display:flex;gap:6px;align-items:center}
+.rv .grp span{opacity:.6;margin-right:4px;text-transform:uppercase;letter-spacing:.08em;font-size:10.5px}
+.rv button{background:#1f2937;color:#d1d5db;border:1px solid #374151;border-radius:999px;padding:6px 11px;font:500 11.5px var(--mono)}
+.rv button[aria-pressed=true]{background:#f4ead9;color:#111827;border-color:#f4ead9}
+.rv .sp{flex:1}
+
+/* frame */
+.stage{display:flex;justify-content:center;padding:28px 18px 60px}
+.site{width:100%;max-width:1360px;background:var(--shell);border-radius:18px;overflow:hidden;box-shadow:0 30px 70px rgba(0,0,0,.25);transition:max-width .35s}
+.stage.phone .site{max-width:400px;border-radius:30px}
+.nav{display:flex;align-items:center;gap:12px;padding:20px 34px;color:var(--cream)}
+.nav .mk{width:34px;height:34px;border-radius:50%;background:var(--cream);display:grid;place-items:center;color:var(--shell);font:700 17px var(--serif)}
+.nav .wm{font:600 24px var(--serif);letter-spacing:.005em}
+.nav .sp{flex:1}
+.nav .back{font:500 13px var(--sans);color:rgba(244,234,217,.7);border:1px solid rgba(244,234,217,.25);border-radius:999px;padding:8px 14px}
+.stage.phone .nav{padding:16px 18px}
+.stage.phone .nav .wm{font-size:20px}
+.stage.phone .nav .back{display:none}
+
+.sheet{background:var(--oat);border-radius:18px 18px 0 0;margin:0 10px;min-height:900px;position:relative;overflow:clip;isolation:isolate}
+.sheet::before{content:"";position:absolute;inset:0 0 auto 0;height:620px;background:linear-gradient(180deg,var(--paper) 0%,var(--paper) 62%,var(--oat) 100%);z-index:-1}
+.foot{color:rgba(244,234,217,.55);font:400 12.5px var(--sans);text-align:center;padding:22px 20px 26px}
+.foot a{color:rgba(244,234,217,.8);text-decoration:none;border-bottom:1px solid rgba(244,234,217,.3)}
+
+.wrap{max-width:1080px;margin:0 auto;padding:0 48px}
+.stage.phone .wrap{padding:0 18px}
+
+/* shared atoms */
+.eyebrow{font:600 11px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--rust)}
+.chip{display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:6px 12px;font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase}
+.chip.go{background:var(--sage-soft);color:var(--sage)}
+.chip.blush{background:var(--blush);color:var(--rust)}
+.chip.stone{background:var(--stone);color:var(--ink70)}
+.btn{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:12px 20px;font:600 14.5px var(--sans);border:0}
+.btn.navy{background:var(--navy);color:#fff}
+.btn.cream{background:var(--cream);color:var(--shell)}
+.btn.ghost{background:transparent;border:1px solid var(--ink15);color:var(--ink)}
+h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.3;letter-spacing:-.005em}
+
+/* reveal motion */
+@media (prefers-reduced-motion:no-preference){
+  .rise{animation:rise .7s cubic-bezier(.22,.8,.3,1) both}
+  .d1{animation-delay:.08s}.d2{animation-delay:.18s}.d3{animation-delay:.3s}.d4{animation-delay:.42s}.d5{animation-delay:.54s}
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  .cardin{animation:cardin .9s cubic-bezier(.2,.9,.25,1.05) both .15s}
+  @keyframes cardin{from{opacity:0;transform:translateY(26px) rotate(-4deg) scale(.96)}to{opacity:1;transform:rotate(-1.6deg)}}
+  .stampin{animation:stampin .55s cubic-bezier(.3,1.4,.5,1) both .95s}
+  @keyframes stampin{0%{opacity:0;transform:rotate(-14deg) scale(1.6)}100%{opacity:1;transform:rotate(-14deg) scale(1)}}
+}
+
+/* ========== DIRECTION A — THE CARD ========== */
+.A .hero{display:grid;grid-template-columns:1.05fr 1fr;gap:64px;align-items:center;padding:72px 0 56px}
+.stage.phone .A .hero{grid-template-columns:1fr;gap:34px;padding:34px 0 30px}
+.A .hero h1{font-size:64px;line-height:1.08;margin:18px 0 18px}
+.stage.phone .A .hero h1{font-size:40px}
+.A .hero .lede{font:400 19px/1.55 var(--sans);color:var(--ink70);max-width:30em}
+.stage.phone .A .hero .lede{font-size:16.5px}
+.A .hero .sub{margin-top:22px;font:500 13px var(--mono);color:var(--ink55);letter-spacing:.02em}
+
+.fcard{position:relative;aspect-ratio:1.586/1;width:100%;max-width:470px;justify-self:center;border-radius:20px;background:
+   radial-gradient(120% 90% at 100% 0%, rgba(217,150,122,.28), transparent 55%),
+   linear-gradient(155deg,var(--navy2) 0%, var(--navy) 45%, #1f2c40 100%);
+   color:var(--cream);padding:26px 28px;box-shadow:0 30px 60px -18px rgba(27,36,51,.55), 0 2px 0 rgba(255,255,255,.08) inset;transform:rotate(-1.6deg);overflow:hidden}
+.fcard::after{content:"";position:absolute;inset:10px;border:1px solid rgba(244,234,217,.22);border-radius:13px;pointer-events:none}
+.fcard .top{display:flex;justify-content:space-between;align-items:flex-start}
+.fcard .brand{display:flex;align-items:center;gap:9px;font:600 18px var(--serif)}
+.fcard .brand i{width:24px;height:24px;border-radius:50%;background:var(--cream);color:var(--navy);display:grid;place-items:center;font:700 12px var(--serif);font-style:normal}
+.fcard .kind{font:600 10px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--stamp);text-align:right;line-height:1.6}
+.fcard .no{position:absolute;left:28px;bottom:60px;font:400 15px var(--type);color:rgba(244,234,217,.7)}
+.fcard .no b{display:block;font:400 76px/1 var(--type);color:var(--cream);margin-top:4px;letter-spacing:-.02em}
+.stage.phone .fcard .no b{font-size:58px}
+.fcard .name{position:absolute;left:28px;right:28px;bottom:24px;display:flex;justify-content:space-between;font:500 11.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:rgba(244,234,217,.72)}
+.fcard .seal{position:absolute;right:26px;bottom:52px;width:92px;height:92px;border-radius:50%;border:2px solid var(--stamp);color:var(--stamp);display:grid;place-items:center;text-align:center;font:600 9.5px/1.35 var(--mono);letter-spacing:.14em;text-transform:uppercase;transform:rotate(-14deg)}
+.fcard .seal::before{content:"";position:absolute;inset:5px;border:1px dashed rgba(224,161,136,.7);border-radius:50%}
+.fcard.reserve{background:linear-gradient(155deg,#5b5047 0%,#3d342e 100%)}
+.fcard.reserve .seal{border-color:var(--cream);color:var(--cream)}
+.fcard.reserve .seal::before{border-color:rgba(244,234,217,.5)}
+.fcard.ghost{background:repeating-linear-gradient(135deg,var(--paper) 0 14px,#f6f2ec 14px 28px);color:var(--ink55);box-shadow:none;border:1.5px dashed var(--ink15)}
+.fcard.ghost::after{border-color:transparent}
+.fcard.ghost .brand i{background:var(--ink15);color:var(--paper)}
+.fcard.ghost .no,.fcard.ghost .no b,.fcard.ghost .name{color:var(--ink40)}
+.fcard.ghost .kind{color:var(--ink40)}
+.cardcap{margin-top:16px;text-align:center;font:500 12.5px var(--mono);color:var(--ink55)}
+.cardcap a{color:var(--navy);font-weight:600;text-decoration:none;border-bottom:1px solid rgba(42,58,82,.3)}
+
+/* note from Nick */
+.note{background:var(--white);border-radius:18px;box-shadow:0 1px 0 var(--ink08),0 18px 40px -26px rgba(28,19,15,.35);display:grid;grid-template-columns:120px 1fr;gap:30px;padding:36px 40px;margin:8px 0 22px}
+.stage.phone .note{grid-template-columns:1fr;gap:16px;padding:24px 22px}
+.photo{width:104px;height:104px;border-radius:50%;background:linear-gradient(140deg,#d8cfc2,#bfb3a3);display:grid;place-items:center;font:600 34px var(--serif);color:#fff;position:relative}
+.photo small{position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);white-space:nowrap;font:500 10px var(--mono);color:var(--ink40);letter-spacing:.06em;text-transform:uppercase}
+.stage.phone .photo{width:72px;height:72px;font-size:24px}
+.note .body p{font:400 18px/1.62 var(--sans);color:var(--ink);margin:0 0 12px;max-width:40em}
+.stage.phone .note .body p{font-size:16px}
+.note .sig{font:600 34px/1 var(--hand);color:var(--rust);margin-top:4px}
+.note .role{font:500 12px var(--mono);color:var(--ink55);letter-spacing:.04em;margin-top:6px}
+
+/* next steps */
+.sec{padding:44px 0 6px}
+.sec h2{font-size:34px;margin:8px 0 22px}
+.stage.phone .sec h2{font-size:27px}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.stage.phone .steps{grid-template-columns:1fr}
+.step{background:var(--white);border-radius:16px;padding:22px 22px 24px;box-shadow:0 1px 0 var(--ink08);position:relative}
+.step .n{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font:600 14px var(--mono);background:var(--stone);color:var(--ink70);margin-bottom:14px}
+.step.done .n{background:var(--sage);color:#fff}
+.step h3{font-size:20px;margin-bottom:6px}
+.step p{font:400 15.5px/1.55 var(--sans);color:var(--ink70)}
+.step .when{margin-top:12px;font:600 10.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink40)}
+.step.done .when{color:var(--sage)}
+.perks{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.perk{display:flex;align-items:center;gap:9px;background:var(--blush2);border:1px solid #efd7cc;border-radius:999px;padding:9px 15px;font:600 14px var(--sans);color:var(--ink)}
+.perk i{width:20px;height:20px;border-radius:50%;background:var(--rust);color:#fff;display:grid;place-items:center;font:700 11px var(--sans);font-style:normal}
+
+/* peek */
+.peek{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:16px}
+.stage.phone .peek{grid-template-columns:1fr}
+.shot{background:var(--white);border-radius:16px;overflow:hidden;box-shadow:0 1px 0 var(--ink08),0 14px 30px -24px rgba(28,19,15,.4);display:flex;flex-direction:column}
+.shot .scr{flex:1;min-height:200px;padding:14px;background:var(--oat);position:relative}
+.shot .cap{padding:14px 16px 16px}
+.shot .cap b{display:block;font:600 16px var(--serif)}
+.shot .cap span{font:400 14px/1.45 var(--sans);color:var(--ink55)}
+/* mini UI */
+.mui-bar{height:26px;border-radius:7px;background:var(--navy);display:flex;align-items:center;padding:0 9px;gap:6px;margin-bottom:9px}
+.mui-bar i{width:34px;height:6px;border-radius:3px;background:rgba(244,234,217,.5)}
+.mui-bar i:first-child{width:52px;background:var(--cream)}
+.mui-row{display:grid;grid-template-columns:22px 1fr 54px 34px;gap:8px;align-items:center;background:#fff;border-radius:7px;padding:7px 8px;margin-bottom:6px}
+.mui-row .d{width:20px;height:20px;border-radius:50%;background:var(--navy)}
+.mui-row .d.c{background:#b5aca4}.mui-row .d.q{background:#fff;border:1.5px solid var(--navy)}
+.mui-row .l{height:7px;border-radius:4px;background:var(--ink15)}
+.mui-row .l2{height:5px;width:60%;border-radius:3px;background:var(--ink08);margin-top:4px}
+.mui-row .t{height:6px;border-radius:3px;background:var(--blush)}
+.mui-row .r{width:26px;height:26px;border-radius:50%;border:3px solid var(--navy);border-right-color:var(--ink08)}
+.mui-row .r.late{border-color:var(--rust)}
+.mui-card{background:#fff;border-radius:9px;padding:10px;margin-bottom:8px;display:flex;gap:9px;align-items:center}
+.mui-card .av{width:28px;height:28px;border-radius:50%;background:var(--navy);flex:none}
+.mui-card .ln{flex:1}.mui-card .ln i{display:block;height:6px;border-radius:3px;background:var(--ink15);margin:3px 0}.mui-card .ln i+i{width:55%;background:var(--ink08)}
+.mui-card .tr{display:flex;gap:3px}.mui-card .tr b{width:12px;height:5px;border-radius:2px;background:var(--navy)}.mui-card .tr b.o{background:var(--ink15)}
+.mui-file{background:#fff;border:1.5px dashed var(--ink15);border-radius:10px;padding:14px;text-align:center;font:600 11px var(--mono);color:var(--ink55);letter-spacing:.05em}
+.mui-file .sheetico{width:34px;height:40px;margin:0 auto 8px;border-radius:4px;background:linear-gradient(#fff,#fff) padding-box,linear-gradient(var(--sage),var(--sage)) border-box;border:2px solid transparent;position:relative}
+.mui-file .sheetico::after{content:"";position:absolute;inset:7px 5px;background:repeating-linear-gradient(180deg,var(--sage-soft) 0 4px,transparent 4px 7px)}
+.mui-arrow{text-align:center;font:600 16px var(--sans);color:var(--ink40);margin:6px 0}
+.mui-done{display:flex;align-items:center;gap:8px;background:var(--sage-soft);color:var(--sage);border-radius:9px;padding:9px 10px;font:600 11.5px var(--sans)}
+
+/* shape it */
+.shape{background:var(--white);border-radius:18px;padding:30px 34px;box-shadow:0 1px 0 var(--ink08)}
+.stage.phone .shape{padding:22px 18px}
+.shape .q{padding:16px 0;border-top:1px solid var(--ink08)}
+.shape .q:first-of-type{border-top:0;padding-top:4px}
+.shape .q label{display:block;font:600 16.5px var(--sans);margin-bottom:11px}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{border:1px solid var(--ink15);background:var(--paper);border-radius:999px;padding:9px 15px;font:500 14.5px var(--sans);color:var(--ink);transition:background .15s,border-color .15s,color .15s}
+.opt:hover{border-color:var(--ink40)}
+.opt[aria-pressed=true]{background:var(--navy);border-color:var(--navy);color:#fff}
+.shape .meta{display:flex;align-items:center;gap:14px;margin-top:18px;flex-wrap:wrap}
+.shape .meta small{font:400 13.5px var(--sans);color:var(--ink55)}
+.thanks{display:none;align-items:center;gap:14px;background:var(--sage-soft);border-radius:14px;padding:16px 18px;color:var(--ink)}
+.thanks i{width:30px;height:30px;border-radius:50%;background:var(--sage);color:#fff;display:grid;place-items:center;font-style:normal;font-weight:700;flex:none}
+.shape.sent .qs{display:none}.shape.sent .thanks{display:flex}
+
+.two{display:grid;grid-template-columns:1.25fr 1fr;gap:18px;align-items:start}
+.stage.phone .two{grid-template-columns:1fr}
+.ready{background:var(--navy);color:var(--cream);border-radius:18px;padding:30px 30px 32px;position:relative;overflow:hidden}
+.ready h3{font-size:24px;color:#fff;margin:8px 0 10px}
+.ready p{font:400 15.5px/1.6 var(--sans);color:rgba(244,234,217,.8)}
+.ready ul{list-style:none;padding:0;margin:16px 0 0}
+.ready li{display:flex;gap:10px;font:500 15px/1.45 var(--sans);padding:8px 0;border-top:1px solid rgba(244,234,217,.14)}
+.ready li i{color:var(--stamp);font-style:normal}
+.ready .eyebrow{color:var(--stamp)}
+
+.close{text-align:center;padding:58px 0 70px}
+.close p{font:400 italic 22px/1.5 var(--serif);color:var(--ink70);max-width:32em;margin:0 auto}
+.stage.phone .close p{font-size:18px}
+.close .hand{font:600 32px var(--hand);color:var(--rust);margin-top:10px}
+
+/* ========== DIRECTION B — THE LETTER ========== */
+.B .letterwrap{display:grid;grid-template-columns:1fr 340px;gap:40px;padding:60px 0 30px;align-items:start}
+.stage.phone .B .letterwrap{grid-template-columns:1fr;padding:26px 0 10px;gap:24px}
+.letter{background:var(--white);border-radius:6px;padding:56px 64px 54px;position:relative;box-shadow:0 1px 0 var(--ink08),0 34px 60px -34px rgba(28,19,15,.45);background-image:linear-gradient(90deg,transparent 46px,rgba(162,69,42,.22) 46px,rgba(162,69,42,.22) 47px,transparent 47px)}
+.stage.phone .letter{padding:30px 22px 30px 34px;background-image:linear-gradient(90deg,transparent 20px,rgba(162,69,42,.22) 20px,rgba(162,69,42,.22) 21px,transparent 21px)}
+.letter .dateline{font:400 14px var(--type);color:var(--ink55);display:flex;justify-content:space-between}
+.letter h1{font:400 50px/1.15 var(--type);letter-spacing:-.01em;margin:30px 0 22px;color:var(--ink)}
+.stage.phone .letter h1{font-size:34px;margin-top:20px}
+.letter p{font:400 18.5px/1.7 var(--sans);color:var(--ink);margin:0 0 14px;max-width:34em}
+.stage.phone .letter p{font-size:16px}
+.letter .sigrow{display:flex;align-items:center;gap:16px;margin-top:22px}
+.letter .sigrow .photo{width:64px;height:64px;font-size:22px}
+.letter .sigrow .photo small{display:none}
+.letter .sig{font:600 38px/1 var(--hand);color:var(--rust)}
+.letter .role{font:500 12px var(--mono);color:var(--ink55);margin-top:4px}
+.waxno{position:absolute;top:-26px;right:34px;width:132px;height:132px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#b65a3c,var(--rust) 55%,#7e3320);color:#fbe7dd;display:grid;place-items:center;text-align:center;box-shadow:0 10px 22px -8px rgba(126,51,32,.7), inset 0 -4px 10px rgba(0,0,0,.18);transform:rotate(-14deg)}
+.waxno::before{content:"";position:absolute;inset:9px;border-radius:50%;border:1.5px dashed rgba(251,231,221,.55)}
+.waxno span{font:600 9px var(--mono);letter-spacing:.2em;text-transform:uppercase;display:block}
+.waxno b{display:block;font:400 42px/1 var(--type);margin:3px 0 2px}
+.stage.phone .waxno{width:92px;height:92px;right:14px;top:-34px}
+.stage.phone .waxno b{font-size:28px}
+.waxno.reserve{background:radial-gradient(circle at 35% 30%,#6f6359,#4a403a 60%,#332b26)}
+.waxno.ghost{background:none;border:2px dashed var(--ink15);box-shadow:none;color:var(--ink40)}
+.waxno.ghost::before{border-color:transparent}
+
+.side{display:flex;flex-direction:column;gap:16px;position:sticky;top:70px}
+.stage.phone .side{position:static}
+.tile{background:var(--white);border-radius:16px;padding:22px;box-shadow:0 1px 0 var(--ink08)}
+.tile h3{font-size:19px;margin:6px 0 12px}
+.tl{list-style:none;padding:0;margin:0;position:relative}
+.tl li{display:grid;grid-template-columns:24px 1fr;gap:12px;padding:0 0 16px;position:relative}
+.tl li::before{content:"";position:absolute;left:11px;top:24px;bottom:0;width:2px;background:var(--ink08)}
+.tl li:last-child::before{display:none}
+.tl .dot{width:24px;height:24px;border-radius:50%;border:2px solid var(--ink15);background:#fff;display:grid;place-items:center;font:700 11px var(--sans);color:#fff}
+.tl li.done .dot{background:var(--sage);border-color:var(--sage)}
+.tl li.now .dot{border-color:var(--navy);box-shadow:0 0 0 4px rgba(42,58,82,.12)}
+.tl b{display:block;font:600 15px var(--sans)}
+.tl span{font:400 14px/1.45 var(--sans);color:var(--ink55)}
+.plist{list-style:none;padding:0;margin:0}
+.plist li{display:flex;gap:10px;padding:9px 0;border-top:1px solid var(--ink08);font:500 15px/1.45 var(--sans)}
+.plist li:first-child{border-top:0;padding-top:0}
+.plist i{color:var(--rust);font-style:normal;font-weight:700}
+
+.B .sec2{padding:34px 0 0}
+.B .sec2 h2{font-size:32px;margin:8px 0 20px}
+.stage.phone .B .sec2 h2{font-size:26px}
+
+/* state-only bits */
+.sheet [data-only]{display:none}
+.sheet.st-verified [data-only~=verified],.sheet.st-already [data-only~=already],.sheet.st-waiting [data-only~=waiting],.sheet.st-expired [data-only~=expired],.sheet.st-unknown [data-only~=unknown]{display:revert}
+.sheet.st-expired form[data-only~=expired],.sheet.st-unknown form[data-only~=unknown]{display:flex}
+.sheet.st-verified .tl b[data-hide],.sheet.st-already .tl b[data-hide]{display:block}
+.st-expired [data-hide~=bad],.st-unknown [data-hide~=bad]{display:none!important}
+.st-waiting [data-hide~=wait]{display:none!important}
+
+.form{display:flex;gap:10px;max-width:460px;margin-top:22px}
+.stage.phone .form{flex-direction:column}
+.form input{flex:1;border:1px solid var(--ink15);background:#fff;border-radius:999px;padding:13px 18px;font:400 16px var(--sans)}
+
+.annot{max-width:1080px;margin:0 auto 26px;padding:0 48px;color:#3b3631;font:400 14px/1.55 var(--sans)}
+.annot h4{font:600 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:#6b6259;margin-bottom:8px}
+.annot ul{padding-left:18px}.annot li{margin:3px 0}
+.stage.phone + .annot{max-width:460px;padding:0 18px}
+</style>
+</head>
+<body>
+
+<div class="rv" role="toolbar" aria-label="Review controls">
+  <b>FOUNDING WELCOME · v1</b>
+  <div class="grp"><span>Direction</span>
+    <button data-dir="A" aria-pressed="true">A · The card</button>
+    <button data-dir="B" aria-pressed="false">B · The letter</button>
+  </div>
+  <div class="grp"><span>Outcome</span>
+    <button data-st="verified" aria-pressed="true">confirmed</button>
+    <button data-st="already" aria-pressed="false">already</button>
+    <button data-st="waiting" aria-pressed="false">waiting list</button>
+    <button data-st="expired" aria-pressed="false">expired</button>
+    <button data-st="unknown" aria-pressed="false">unknown</button>
+  </div>
+  <div class="sp"></div>
+  <div class="grp"><span>View</span>
+    <button data-vw="desk" aria-pressed="true">1440</button>
+    <button data-vw="phone" aria-pressed="false">390</button>
+  </div>
+</div>
+
+<div class="stage" id="stage">
+<div class="site">
+  <div class="nav"><div class="mk">Q</div><div class="wm">QueryHawk</div><div class="sp"></div><span class="back">← Back to queryhawk.net</span></div>
+  <div class="sheet st-verified" id="sheet">
+
+    <!-- ================= A ================= -->
+    <div class="A" id="dirA">
+      <div class="wrap">
+        <div class="hero">
+          <div>
+            <span class="chip go rise" data-only="verified">✓ Place confirmed</span>
+            <span class="chip go rise" data-only="already">✓ Already confirmed</span>
+            <span class="chip blush rise" data-only="waiting">First reserve</span>
+            <span class="chip stone rise" data-only="expired">Link expired</span>
+            <span class="chip stone rise" data-only="unknown">Link not recognised</span>
+
+            <h1 class="rise d1" data-only="verified">Welcome, Founding Writer.</h1>
+            <h1 class="rise d1" data-only="already">You're already in.</h1>
+            <h1 class="rise d1" data-only="waiting">So close. You're first reserve.</h1>
+            <h1 class="rise d1" data-only="expired">That link's 48 hours are up.</h1>
+            <h1 class="rise d1" data-only="unknown">We don't recognise that link.</h1>
+
+            <p class="lede rise d2" data-only="verified">You're one of the hundred writers shaping QueryHawk before anyone else sees it. Your place is held, your perks are locked in, and the next thing you'll get from us is your invitation.</p>
+            <p class="lede rise d2" data-only="already">That link had already done its job, usually because your email's security scanner opened it before you did. Nothing's wrong and nothing's changed: your founding place stands.</p>
+            <p class="lede rise d2" data-only="waiting">The last founding place went while your email sat in your inbox. You're confirmed and on the waiting list in the order people confirmed. If a founding place frees up, it's offered to the next writer in line, and we'll tell you by email.</p>
+            <p class="lede rise d2" data-only="expired">Your place wasn't held, but nothing's lost. Put your email in again and a fresh confirmation will be with you in a minute.</p>
+            <p class="lede rise d2" data-only="unknown">It may have been cut short by your email app. Put your email in again and you'll get a fresh confirmation.</p>
+
+            <form class="form rise d3" data-only="expired unknown" onsubmit="return false"><input type="email" placeholder="you@example.com" aria-label="Email address"><button class="btn navy">Send a fresh link</button></form>
+            <div class="sub rise d3" data-only="verified already">Confirmed with lucy@example.com · we've sent your welcome email</div>
+          </div>
+
+          <div>
+            <div class="fcard cardin" id="cardA">
+              <div class="top"><div class="brand"><i>Q</i>QueryHawk</div><div class="kind" id="kindA">Founding<br>Writer</div></div>
+              <div class="no"><span id="noLblA">No.</span><b id="noA">023</b></div>
+              <div class="seal stampin" id="sealA">Confirmed<br>18 Oct<br>2026</div>
+              <div class="name"><span id="nameA">Lucy Hartwell</span><span>of 100</span></div>
+            </div>
+            <div class="cardcap" data-only="verified already">Your founding card · <a href="#">Save as image</a></div>
+            <div class="cardcap" data-only="waiting">Reserve card · first offered any place that frees up</div>
+            <div class="cardcap" data-only="expired unknown">No place held yet: one click away</div>
+          </div>
+        </div>
+
+        <div class="note rise d4" data-hide="bad">
+          <div class="photo">N<small>your photo</small></div>
+          <div class="body">
+            <p data-only="verified already">Thank you. Really. QueryHawk started because I was tracking my own queries in a spreadsheet that got harder to trust with every agent I added. You've just said you'll help me make it something every querying writer would want.</p>
+            <p data-only="waiting">I'm sorry we couldn't hold a place this time. You're near the top of the list, and I'd still love to hear from you while you wait.</p>
+            <p>If you've got a question, an idea, or a story about the querying trenches, reply to your welcome email. It comes straight to me, and I read every one.</p>
+            <div class="sig">Nick</div>
+            <div class="role">Founder, QueryHawk</div>
+          </div>
+        </div>
+
+        <div class="sec" data-hide="bad">
+          <div class="eyebrow">What happens next</div>
+          <h2>Three steps, and you've done the first.</h2>
+          <div class="steps">
+            <div class="step done"><div class="n">✓</div><h3 data-hide="wait">Your place is confirmed</h3><h3 data-only="waiting">You're on the list</h3><p data-hide="wait">Founding Writer No. 23 is yours, and so are the perks below.</p><p data-only="waiting">First reserve, in the order writers confirmed.</p><div class="when">Done · today</div></div>
+            <div class="step"><div class="n">2</div><h3>Your invitation arrives</h3><p>We're letting founding writers in a few at a time, so every one gets a proper welcome. Yours comes by email: one button, no codes.</p><div class="when">By email · in waves</div></div>
+            <div class="step"><div class="n">3</div><h3>Set up in five minutes</h3><p>Your name, your manuscript and the agents you've queried. Bring your tracking spreadsheet and Smart Import will read it for you.</p><div class="when">On the day</div></div>
+          </div>
+          <div class="perks" data-hide="wait">
+            <div class="perk"><i>✓</i>Six months of Pro, free</div>
+            <div class="perk"><i>✓</i>The founding rate for as long as you're querying</div>
+            <div class="perk"><i>✓</i>A direct line to the founder</div>
+          </div>
+        </div>
+
+        <div class="sec" data-hide="bad">
+          <div class="eyebrow">A first look</div>
+          <h2>Here's what's waiting for you.</h2>
+          <div class="peek">
+            <div class="shot"><div class="scr">
+              <div class="mui-bar"><i></i><i></i><i></i></div>
+              <div class="mui-row"><div class="d"></div><div><div class="l"></div><div class="l2"></div></div><div class="t"></div><div class="r"></div></div>
+              <div class="mui-row"><div class="d"></div><div><div class="l"></div><div class="l2"></div></div><div class="t"></div><div class="r late"></div></div>
+              <div class="mui-row"><div class="d q"></div><div><div class="l"></div><div class="l2"></div></div><div class="t" style="background:var(--sage-soft)"></div><div class="r"></div></div>
+              <div class="mui-row"><div class="d c"></div><div><div class="l"></div><div class="l2"></div></div><div class="t" style="background:var(--stone)"></div><div class="r" style="border-color:var(--ink15)"></div></div>
+            </div><div class="cap"><b>Query Centre</b><span>Every query, where it stands, and what's due next, on one page.</span></div></div>
+            <div class="shot"><div class="scr">
+              <div class="mui-card"><div class="av"></div><div class="ln"><i></i><i></i></div><div class="tr"><b></b><b></b><b class="o"></b><b class="o"></b></div></div>
+              <div class="mui-card"><div class="av" style="background:#fff;border:1.5px solid var(--navy)"></div><div class="ln"><i></i><i></i></div><div class="tr"><b class="o"></b><b class="o"></b><b class="o"></b><b class="o"></b></div></div>
+              <div class="mui-card"><div class="av"></div><div class="ln"><i></i><i></i></div><div class="tr"><b></b><b></b><b></b><b class="o"></b></div></div>
+            </div><div class="cap"><b>Contact list</b><span>The agents you're after, who's open, and who has your pages.</span></div></div>
+            <div class="shot"><div class="scr">
+              <div class="mui-file"><div class="sheetico"></div>my-queries.xlsx</div>
+              <div class="mui-arrow">↓</div>
+              <div class="mui-done"><span>✓</span>24 queries · 19 agents read</div>
+            </div><div class="cap"><b>Smart Import</b><span>Bring your spreadsheet. We'll do the typing.</span></div></div>
+          </div>
+        </div>
+
+        <div class="sec" data-hide="bad">
+          <div class="two">
+            <div class="shape" id="shapeA">
+              <div class="eyebrow">Help shape QueryHawk · optional</div>
+              <h2 style="font-size:28px;margin:8px 0 18px">Three quick taps.</h2>
+              <div class="qs">
+                <div class="q"><label>Where are you with querying?</label><div class="opts" data-q="stage"><button class="opt" aria-pressed="false">Getting ready</button><button class="opt" aria-pressed="false">Just started</button><button class="opt" aria-pressed="false">In the thick of it</button><button class="opt" aria-pressed="false">Revising and going again</button></div></div>
+                <div class="q"><label>How many agents have you queried so far?</label><div class="opts" data-q="count"><button class="opt" aria-pressed="false">None yet</button><button class="opt" aria-pressed="false">1–10</button><button class="opt" aria-pressed="false">11–50</button><button class="opt" aria-pressed="false">50+</button></div></div>
+                <div class="q"><label>What do you track them in now?</label><div class="opts" data-q="tool"><button class="opt" aria-pressed="false">Spreadsheet</button><button class="opt" aria-pressed="false">QueryTracker</button><button class="opt" aria-pressed="false">Notebook</button><button class="opt" aria-pressed="false">My inbox</button><button class="opt" aria-pressed="false">Something else</button></div></div>
+                <div class="meta"><button class="btn navy send" disabled style="opacity:.45">Send to Nick</button><small>Takes ten seconds. It helps us decide who to invite first.</small></div>
+              </div>
+              <div class="thanks"><i>✓</i><div><b>Thank you, that's really useful.</b><br><span style="color:var(--ink55);font-size:14.5px">You can close this page whenever you like.</span></div></div>
+            </div>
+            <div class="ready">
+              <div class="eyebrow">Get ready for day one</div>
+              <h3>Have these to hand.</h3>
+              <p>Set-up is quickest when you've got your querying history nearby.</p>
+              <ul>
+                <li><i>→</i>Your tracking spreadsheet, if you keep one</li>
+                <li><i>→</i>The agents you've queried, and when</li>
+                <li><i>→</i>Any requests or replies you're waiting on</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="close" data-hide="bad">
+          <p data-hide="wait">That's everything for now. Keep an eye on your inbox. We'll be in touch.</p>
+          <p data-only="waiting">We'll email you the moment anything changes.</p>
+          <div class="hand">See you soon</div>
+        </div>
+        <div style="height:60px" data-only="expired unknown"></div>
+      </div>
+    </div>
+
+    <!-- ================= B ================= -->
+    <div class="B" id="dirB" hidden>
+      <div class="wrap">
+        <div class="letterwrap">
+          <div class="letter rise">
+            <div class="waxno stampin" id="waxB"><div><span id="waxLbl">Founding</span><b id="waxNo">23</b><span id="waxSub">of 100</span></div></div>
+            <div class="dateline"><span>18 October 2026</span></div>
+
+            <h1 data-only="verified">Dear Lucy,<br>you're in.</h1>
+            <h1 data-only="already">Dear Lucy,<br>you're already in.</h1>
+            <h1 data-only="waiting">Dear Lucy,<br>so nearly.</h1>
+            <h1 data-only="expired">That link has<br>run out.</h1>
+            <h1 data-only="unknown">We don't recognise<br>that link.</h1>
+
+            <div data-only="verified">
+              <p>Your founding place is confirmed: you're Founding Writer No. 23 of 100. Thank you for saying yes before there was much to say yes to.</p>
+              <p>QueryHawk started because I was tracking my own queries in a spreadsheet that got harder to trust with every agent I added. The hundred of you are going to help me make it something every querying writer would want.</p>
+              <p>Your invitation will come by email when your wave opens. Until then, if you've a question, an idea or a story from the querying trenches, reply to your welcome email. It comes straight to me, and I read every one.</p>
+            </div>
+            <div data-only="already">
+              <p>That link had already done its job, usually because your email's security scanner opened it before you did. Nothing's wrong and nothing's changed: you're still Founding Writer No. 23.</p>
+              <p>Your invitation will come by email when your wave opens. Reply to your welcome email any time; it comes straight to me.</p>
+            </div>
+            <div data-only="waiting">
+              <p>The last founding place went while your email sat in your inbox. You're confirmed and you're first reserve: if a founding place frees up, it's offered to the next writer in line, and we'll tell you by email.</p>
+              <p>I'm sorry we couldn't hold one this time. I'd still love to hear from you. Reply to the email we've sent; it comes straight to me.</p>
+            </div>
+            <div data-only="expired">
+              <p>Confirmation links last 48 hours, and that one's had its time. Your place wasn't held, but nothing's lost: put your email in again and a fresh link will be with you in a minute.</p>
+              <form class="form" onsubmit="return false"><input type="email" placeholder="you@example.com" aria-label="Email address"><button class="btn navy">Send a fresh link</button></form>
+            </div>
+            <div data-only="unknown">
+              <p>It may have been cut short by your email app. Put your email in again and you'll get a fresh confirmation.</p>
+              <form class="form" onsubmit="return false"><input type="email" placeholder="you@example.com" aria-label="Email address"><button class="btn navy">Send a fresh link</button></form>
+            </div>
+
+            <div class="sigrow" data-hide="bad"><div class="photo">N<small>your photo</small></div><div><div class="sig">Nick</div><div class="role">Founder, QueryHawk</div></div></div>
+          </div>
+
+          <div class="side" data-hide="bad">
+            <div class="tile rise d2">
+              <div class="eyebrow">What happens next</div>
+              <h3>Your path in</h3>
+              <ul class="tl">
+                <li class="done"><div class="dot">✓</div><div><b data-hide="wait">Place confirmed</b><b data-only="waiting">On the list</b><span>Today</span></div></li>
+                <li class="now"><div class="dot"></div><div><b>Invitation by email</b><span>One button, no codes. Sent in waves.</span></div></li>
+                <li><div class="dot"></div><div><b>Five-minute set-up</b><span>Bring your spreadsheet; Smart Import reads it.</span></div></li>
+              </ul>
+            </div>
+            <div class="tile rise d3" data-hide="wait">
+              <div class="eyebrow">Yours as a founder</div>
+              <ul class="plist" style="margin-top:12px">
+                <li><i>✓</i>Six months of Pro, free</li>
+                <li><i>✓</i>The founding rate for as long as you're querying</li>
+                <li><i>✓</i>A direct line to the founder</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="sec2" data-hide="bad">
+          <div class="eyebrow">A first look</div>
+          <h2>Here's what's waiting for you.</h2>
+          <div class="peek" id="peekB"></div>
+        </div>
+
+        <div class="sec2" data-hide="bad">
+          <div class="two">
+            <div class="shape" id="shapeB"></div>
+            <div class="ready" id="readyB"></div>
+          </div>
+        </div>
+
+        <div class="close" data-hide="bad">
+          <div class="hand">Until then, happy writing.</div>
+        </div>
+        <div style="height:60px" data-only="expired unknown"></div>
+      </div>
+    </div>
+
+  </div>
+  <div class="foot">© 2026 QueryHawk · <a href="#">Privacy</a> · <a href="#">Terms</a> · Questions? <a href="#">hello@queryhawk.net</a></div>
+</div>
+</div>
+
+<div class="annot" id="annot"></div>
+
+<script>
+const stage=document.getElementById('stage'), sheet=document.getElementById('sheet');
+const A=document.getElementById('dirA'), B=document.getElementById('dirB');
+// B reuses A's peek, shape and ready blocks
+document.getElementById('peekB').innerHTML=A.querySelector('.peek').innerHTML;
+document.getElementById('shapeB').innerHTML=document.getElementById('shapeA').innerHTML;
+document.getElementById('readyB').innerHTML=A.querySelector('.ready').innerHTML;
+
+const notes={
+ A:["<b>The card is the moment.</b> A founding card with their number, name and a stamp that lands a beat after the card. 'Save as image' gives them something to share.",
+    "The number needs one server change: the confirm link must hand the page a short-lived reference so the page can look up their number. It never goes in the URL as plain text, or anyone could fake 'No. 1'.",
+    "Your note sits straight under the card, then next steps, a first look at the app, the three optional questions, and day-one prep.",
+    "Nothing on the page sells, and there's no sign-in: they've already said yes."],
+ B:["<b>A letter from you.</b> Typewritten on ruled paper, with their number pressed in as a wax seal. It's more personal and quieter than A.",
+    "Next steps and perks sit in a sticky side column, so the letter stays the focus.",
+    "Same first look, questions and prep below as A.",
+    "B leans on your voice more, so the copy has to sound like you. Edit freely."]
+};
+const cardStates={
+ verified:{kind:'Founding<br>Writer',lbl:'No.',no:'023',seal:'Confirmed<br>18 Oct<br>2026',name:'Lucy Hartwell',cls:''},
+ already:{kind:'Founding<br>Writer',lbl:'No.',no:'023',seal:'Confirmed<br>18 Oct<br>2026',name:'Lucy Hartwell',cls:''},
+ waiting:{kind:'Waiting<br>list',lbl:'Reserve',no:'1st',seal:'First<br>reserve',name:'Lucy Hartwell',cls:'reserve'},
+ expired:{kind:'Founding<br>Writer',lbl:'No.',no:'—',seal:'Not yet<br>held',name:'Your name here',cls:'ghost'},
+ unknown:{kind:'Founding<br>Writer',lbl:'No.',no:'—',seal:'Not yet<br>held',name:'Your name here',cls:'ghost'}
+};
+let dir='A', st='verified';
+function render(){
+  A.hidden=dir!=='A'; B.hidden=dir!=='B';
+  sheet.className='sheet st-'+st;
+  const c=cardStates[st], card=document.getElementById('cardA');
+  card.className='fcard cardin '+c.cls;
+  document.getElementById('kindA').innerHTML=c.kind; document.getElementById('noLblA').textContent=c.lbl;
+  document.getElementById('noA').textContent=c.no; document.getElementById('sealA').innerHTML=c.seal; document.getElementById('nameA').textContent=c.name;
+  const wax=document.getElementById('waxB');
+  wax.className='waxno stampin '+(st==='waiting'?'reserve':(st==='expired'||st==='unknown')?'ghost':'');
+  document.getElementById('waxLbl').textContent=st==='waiting'?'Reserve':'Founding';
+  document.getElementById('waxNo').textContent=st==='waiting'?'1st':(st==='expired'||st==='unknown')?'—':'23';
+  document.getElementById('waxSub').textContent=st==='waiting'?'in line':'of 100';
+  // replay motion
+  document.querySelectorAll('.rise,.cardin,.stampin').forEach(e=>{e.style.animation='none';void e.offsetWidth;e.style.animation=''});
+  document.getElementById('annot').innerHTML='<h4>Direction '+dir+' notes</h4><ul>'+notes[dir].map(n=>'<li>'+n+'</li>').join('')+
+   '<li><b>What it never states:</b> dates, an invented count, or promises beyond the perks already on /founders. The number shown is the writer\'s own stored place, not an estimate.</li></ul>';
+}
+function wireGroup(attr,set){document.querySelectorAll('['+attr+']').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('['+attr+']').forEach(x=>x.setAttribute('aria-pressed',x===b));set(b.getAttribute(attr));render();}))}
+wireGroup('data-dir',v=>dir=v); wireGroup('data-st',v=>st=v);
+document.querySelectorAll('[data-vw]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-vw]').forEach(x=>x.setAttribute('aria-pressed',x===b));stage.classList.toggle('phone',b.dataset.vw==='phone');}));
+// questions: one choice per row; send enables when all three answered
+document.addEventListener('click',e=>{
+  const o=e.target.closest('.opt'); if(o){const row=o.parentElement; row.querySelectorAll('.opt').forEach(x=>x.setAttribute('aria-pressed',x===o));
+    const sh=o.closest('.shape'), done=[...sh.querySelectorAll('.opts')].every(r=>r.querySelector('[aria-pressed=true]'));
+    const s=sh.querySelector('.send'); s.disabled=!done; s.style.opacity=done?1:.45; return;}
+  const s=e.target.closest('.send'); if(s&&!s.disabled){s.closest('.shape').classList.add('sent');}
+});
+render();
+</script>
+</body>
+</html>

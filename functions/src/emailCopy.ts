@@ -29,20 +29,20 @@ export const CONFIRM_CTA = "Confirm my place";
 export const CONFIRM_EXPIRY = "This link works for 48 hours.";
 
 /**
- * ⚠️ THE HARDEST SENTENCE IN EITHER EMAIL, AND IT HAS TO BE HERE. With a hard cap of a hundred,
+ * ⚠️ THE HARDEST SENTENCE IN EITHER EMAIL, AND IT HAS TO BE HERE. With a hard cap of fifty,
  * somebody can confirm after the last place goes — their mail sat in an inbox while the list
  * filled. That race is unavoidable with double opt-in, and the honest fix is to warn about it now
  * rather than apologise afterwards. It is deliberately not softened: a reader who is told this
  * plainly and still gets a place has lost nothing, and one who is not told has been misled.
  */
 export const CONFIRM_NOT_HELD =
-  "Your place isn't held until you click. There are a hundred founding places and they go in the " +
+  "Your place isn't held until you click. There are fifty founding places and they go in the " +
   "order people confirm — so if the last one is taken while this is sitting in your inbox, you'll " +
   "go on the waiting list instead, and we'll say so plainly.";
 
 export const CONFIRM_NEXT =
-  "Once you've confirmed, we'll email your invite when your wave opens. Six months of Pro, free, " +
-  "and a founding rate afterwards.";
+  "Once you've confirmed, we'll email your invite when your wave opens. QueryHawk Pro is free for " +
+  "your whole querying campaign.";
 
 /** ⚠️ NO ACTION REQUIRED TO OPT OUT. Someone who did not ask for this must not have to do anything. */
 export const CONFIRM_NOT_YOU =
@@ -55,9 +55,9 @@ export const WELCOME_SUBJECT = "You're in — you're a Founding Writer";
 
 export const WELCOME_HEADING = "That's your place confirmed.";
 
-/** `position` and `cap` are the real, stored figures — never rounded and never estimated. */
-export const welcomeLead = (position: number, cap: number): string =>
-  `You're founding writer number ${position} of ${cap}.`;
+/** The writer's stored founding number — never rounded and never estimated. Unpadded here. */
+export const welcomeLead = (foundingNumber: number): string =>
+  `You're Founding Writer No. ${foundingNumber}.`;
 
 /**
  * ⚠️ WAVES, AND NO DATE. Saying "in waves" is a true description of how this will work; naming a
@@ -73,17 +73,18 @@ export const WELCOME_NO_DATE =
   "We can't give you a date, and we'd rather say that than guess. When it's ready, you'll hear.";
 
 export const WELCOME_PERKS: readonly string[] = [
-  "Six months' free Pro access",
-  "Half price for life",
+  "QueryHawk Pro, free for your whole querying campaign",
+  "Smart Import to bring your list across",
   "A direct line to the founder",
+  "An Early Bird discount for the writers you invite when we launch",
 ];
 
 /* ══════════════ Shared ══════════════ */
 
 /**
- * ⚠️ A VISIBLE ADDRESS, NOT JUST A `Reply-To` HEADER. A reader cannot see a header — and replies
- * to the from-address are currently diverted, so trusting reply alone would break the "direct line
- * to the founder" promise silently. Someone who wants a person needs something they can read.
+ * ⚠️ A VISIBLE ADDRESS, NOT JUST A `Reply-To` HEADER. A reader cannot see a header, so trusting
+ * reply alone would leave the "direct line to the founder" promise resting on something invisible.
+ * Someone who wants a person needs something they can read.
  */
 export const contactLine = (supportEmail: string): string =>
   `Questions, or something to tell us? Write to ${supportEmail} — a person reads it.`;

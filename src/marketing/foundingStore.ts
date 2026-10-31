@@ -24,6 +24,7 @@
 import { useSyncExternalStore } from "react";
 import { joinWaitlist, fetchWaitlistCount, JoinFields, WaitlistCount } from "./waitlist";
 import { FOUNDING_CAP } from "./foundingCap";
+import { trackSignUp } from "./analytics";
 
 /**
  * ⚠️ `full` IS REACHABLE NOW, AND IT ARRIVES FROM THE SERVER RATHER THAN FROM ARITHMETIC.
@@ -95,6 +96,10 @@ export const ensureCount = (): void => {
 export const submitFounding = async (fields: JoinFields): Promise<void> => {
   set({ ...snapshot, state: "sending" });
   const outcome = await joinWaitlist(fields);
+  /* Counted only when the server took it; a no-op unless the visitor accepted analytics. */
+  if (outcome.state === "sent" || outcome.state === "dupe" || outcome.state === "full") {
+    trackSignUp(outcome.state, fields.source);
+  }
   set({
     state: outcome.state,
     count: "count" in outcome && outcome.count ? withCap(outcome.count) : snapshot.count,

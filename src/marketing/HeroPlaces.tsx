@@ -1,29 +1,30 @@
 /**
- * HeroPlaces — the places counter under the desktop hero's actions (landing hero v4.1, ref
- * design-refs/landing-hero-v4-1.html `.places`): a 4px track with a rust fill for the share of
- * founding places taken, and "N PLACES LEFT" beneath it.
+ * HeroPlaces — the founding places counter under each sign-up on the waiting-list page (waitlist v1,
+ * 31 Oct; refs design-refs/landing-mobile-v7.html `.places` and landing-desktop-v5.html `.qh-places`):
+ * a short track with a rust fill for the share of founding places taken, and "N of M founding places
+ * left" beside it. The desktop hero's stacked shape ("bar over N PLACES LEFT", landing hero v4.1) is
+ * RETIRED with that hero; `variant` survives as the one value the callers name.
  *
- * ⚠️ ONE SOURCE. It reads the same `foundingStore` reading as the nav's pill and the Pricing page's
- * panel, so the three can never state different numbers. The ref's 47 is a placeholder.
+ * ⚠️ ONE SOURCE. It reads the same `foundingStore` reading as every other founding counter, so they can
+ * never state different numbers.
  *
  * ⚠️ LIVE OR ABSENT, like every founding counter: with no count from the endpoint nothing is SHOWN —
- * never a zero, never an empty bar (its box is held, invisible, so the copy does not move).
+ * never a zero, never an empty bar (its box is held, invisible, so the form above does not move).
  *
- * On load the number counts DOWN from the cap to the places left and the fill grows to match: 1100ms,
- * ease-out, from 700ms after mount (or from when the count arrives, if that is later) — the ref's
- * count-down script. Under reduced motion the final figures, at once. The number a reader hears is
- * the final one; the count-down is for the eye.
+ * The number counts DOWN from the cap to the places left and the fill grows to match: 1100ms, ease-out,
+ * from 700ms after mount (or from when the count arrives, if that is later). Under reduced motion the
+ * final figures, at once. The number a reader hears is the final one; the count-down is for the eye.
  */
 import React, { useEffect, useRef, useState } from "react";
 import { useFounding, ensureCount } from "./foundingStore";
-import { HERO_PLACES_REST, heroPlacesLabel } from "./landingCopy";
+import { heroPlacesLabel } from "./landingCopy";
 
 const DELAY = 700, DUR = 1100;
 
 const reduce = () =>
   typeof window !== "undefined" && !!window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-export const HeroPlaces: React.FC = () => {
+export const HeroPlaces: React.FC<{ variant: "line" }> = () => {
   const { count } = useFounding();
   useEffect(ensureCount, []);
   const born = useRef(typeof performance !== "undefined" ? performance.now() : 0);
@@ -43,22 +44,21 @@ export const HeroPlaces: React.FC = () => {
     return () => cancelAnimationFrame(raf);
   }, [live]);
 
-  /* ⚠️ THE BOX IS RESERVED BEFORE THE COUNT ARRIVES. `size()` centres the copy block in the card from
-     its measured height, and the count comes from the endpoint after first paint; a counter that
-     mounted late would move the copy. So the same markup holds its place, invisible and silent —
-     no number and no bar are shown (live or absent still holds for the reader). */
+  /* ⚠️ THE BOX IS RESERVED BEFORE THE COUNT ARRIVES: the count comes from the endpoint after first
+     paint, and a counter that mounted late would move what is below it. Held, invisible and silent. */
   if (!count) return (
-    <div className="mk-places mk-places--wait" aria-hidden="true">
-      <div className="mk-places-bar" /><span><b>00</b>{HERO_PLACES_REST}</span>
+    <div className="mk-places mk-places--line mk-places--wait" aria-hidden="true">
+      {/* No digits, not even invisible ones: the live-or-absent law is about the markup, not the paint. */}
+      <span className="mk-places-bar" /><span>{heroPlacesLabel(0, 0).replace(/\d+/g, "··")}</span>
     </div>
   );
   const { cap, claimed } = count;
   const left = Math.max(0, cap - claimed);
   const pct = Math.min(100, (Math.min(claimed, cap) / cap) * 100);
   return (
-    <div className="mk-places" role="img" aria-label={heroPlacesLabel(left, cap)} data-left={left} data-cap={cap}>
-      <div className="mk-places-bar" aria-hidden="true"><i style={{ width: pct * e + "%" }} /></div>
-      <span aria-hidden="true"><b>{Math.round(cap + (left - cap) * e)}</b>{HERO_PLACES_REST}</span>
+    <div className="mk-places mk-places--line" role="img" aria-label={heroPlacesLabel(left, cap)} data-left={left} data-cap={cap}>
+      <span className="mk-places-bar" aria-hidden="true"><i style={{ width: pct * e + "%" }} /></span>
+      <span aria-hidden="true">{heroPlacesLabel(Math.round(cap + (left - cap) * e), cap)}</span>
     </div>
   );
 };

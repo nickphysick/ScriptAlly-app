@@ -97,8 +97,9 @@ export const sendEmail = async (
   const toHash = recipientHash(to);
   const started = Date.now();
 
-  /* ⚠️ LOGGED, NOT THROWN — see `replyToWarning`. In this state a reader's reply goes to an
-     address that is not currently delivering, and nothing else in the system would say so. */
+  /* LOGGED, NOT THROWN — see `replyToWarning`. A reply then goes to the from-address, which is a
+     real mailbox; the line only makes the missing key visible. An explicit override (feedback mail)
+     is the caller's own decision and is not warned about. */
   const warning = overrides.replyTo === undefined ? replyToWarning(env) : null;
   if (warning) console.warn(JSON.stringify({ event: "email.config", warning }));
 

@@ -32,9 +32,10 @@ import { LegalPage } from "./LegalPage";
 import { AboutPage } from "./AboutPage";
 import { ContactPage } from "./ContactPage";
 import { FoundersPage } from "./FoundersPage";
+import { WelcomePage } from "./WelcomePage";
 import { LEGAL_COPY_REVIEWED } from "./legalCopy";
-import { HERO_H1, HERO_SUB_LINES, HERO_SUB_BRAND, HERO_CTA, HERO_LINK, FEATURE_ROWS,
-  VISION_HEADING, VISION_POINTS, VISION_LINK, BAND_HEADING } from "./landingCopy";
+import { HERO_H1, HERO_CTA, FEATURE_ROWS, WAIT_HERO_Q, WAIT_HERO_SUB, BE_HEADING, BE_LINE_DESK,
+  VISION_HEADING, VISION_POINTS } from "./landingCopy";
 import { SUPPORT_EMAIL } from "../lib/companyInfo";
 import { sliceBetween } from "../test/sliceBetween";
 
@@ -51,7 +52,8 @@ const PUBLIC_ROUTES: [path: string, node: () => React.ReactElement, mustContain:
   /* ⚠️ RETARGET, SAME LAW (landing hero v3): the h1 is two block spans now, so the sentence is not one
      uninterrupted run in the markup; the sub's first sentence is, and it is hero copy that only this
      route renders. The h1's own text is asserted whole by the hero describe below. */
-  ["/", () => <Landing onNavigate={noNavigate} />, "Hunting for literary agent representation?"],
+  /* Retarget, same law (waitlist v1, 31 Oct): the hero's question. */
+  ["/", () => <Landing onNavigate={noNavigate} />, "literary agent?"],
   /* Retarget, same law (pricing v3, 21 Oct): the page opens on the founding band and its h1 changed. */
   ["/pricing", () => <PricingPage onNavigate={noNavigate} />, "A free QueryHawk campaign for our first 50 writers."],
   /* Retarget, same law (21 Oct): the h1 is three block spans now, so the sentence is not one
@@ -60,6 +62,13 @@ const PUBLIC_ROUTES: [path: string, node: () => React.ReactElement, mustContain:
   ["/contact", () => <ContactPage onNavigate={noNavigate} />, "Get in touch"],
   /* Retarget, same law: the founders headline changed with the hero rebuild (16 Sep). */
   ["/founders", () => <FoundersPage onNavigate={noNavigate} />, "Help get things off the ground."],
+  /* The founding welcome a verify link lands on, one entry per state (founding-welcome, Part C).
+     There is no reference in a static render, so each renders its state without a number. */
+  ["/welcome?v=verified", () => <WelcomePage onNavigate={noNavigate} />, "Welcome, Founding Writer."],
+  ["/welcome?v=already", () => <WelcomePage onNavigate={noNavigate} />, "You&#x27;re already in."],
+  ["/welcome?v=waiting", () => <WelcomePage onNavigate={noNavigate} />, "So close. You&#x27;re on the reserve list."],
+  ["/welcome?v=expired", () => <WelcomePage onNavigate={noNavigate} />, "That link&#x27;s 48 hours are up."],
+  ["/welcome?v=unknown", () => <WelcomePage onNavigate={noNavigate} />, "We don&#x27;t recognise that link."],
   ["/terms", () => <LegalPage doc="terms" onNavigate={noNavigate} />, "Terms of Service"],
   ["/privacy", () => <LegalPage doc="privacy" onNavigate={noNavigate} />, "Privacy Policy"],
 ];
@@ -225,14 +234,18 @@ describe("the legal pages are honest about being drafts", () => {
   });
 
   /**
-   * ⚠️ THE POLICY SAYS THERE IS NO COOKIE BANNER. That sentence is only true while the app sets
-   * nothing but auth tokens and interface preferences — so if a banner or an analytics tag ever
-   * arrives, this assertion is the thing that should stop it arriving silently.
+   * ⚠️ REWRITTEN 31 Oct: the public site now offers Google Analytics behind a consent bar. The
+   * policy must say so, and must say it only runs after Accept — the sentence that used to be
+   * locked here ("no cookie banner") stopped being true the day the tag arrived, which is what
+   * this assertion was for.
    */
-  it("the privacy policy covers cookies and local storage, and claims no banner", () => {
+  it("the privacy policy covers cookies, names Google Analytics, and says it waits for Accept", () => {
     const html = renderPage(<LegalPage doc="privacy" onNavigate={noNavigate} />, "/privacy");
     expect(html).toContain("Cookies and local storage");
-    expect(html).toContain("cookie banner");
+    expect(html).toContain("Google Analytics");
+    expect(html).toContain("only runs if you choose Accept");
+    expect(html).toContain("Cookie choices");
+    expect(html).not.toContain("no third-party analytics");
   });
 
   /** The rights section is the one a data subject arrives looking for; it must name a route out. */
@@ -245,11 +258,22 @@ describe("the legal pages are honest about being drafts", () => {
 });
 
 describe("the marketing chrome renders in both of its states", () => {
-  const shell = (user: unknown) => (
-    <MarketingShell user={user as never} onNavigate={noNavigate} path="/">
+  /* RE-POINTED (waitlist v1, 31 Oct): both states are asserted on "/about". "/" is the waiting-list
+     page and offers neither pair — the case below holds that. */
+  const shell = (user: unknown, path = "/about") => (
+    <MarketingShell user={user as never} onNavigate={noNavigate} path={path}>
       <div>child</div>
     </MarketingShell>
   );
+
+  it("on \"/\" (the waiting-list page) it offers neither pair, signed in or out", () => {
+    for (const u of [null, SMOKE_USER]) {
+      const html = renderPage(shell(u, "/"), "/");
+      expect(html).not.toContain("Log in");
+      expect(html).not.toContain("Open dashboard");
+      expect(html).toContain("Become a Founding Writer");
+    }
+  });
 
   /**
    * ⚠️ TWO STATES, and the signed-in one is the easy one to forget: a signed-in user is NEVER
@@ -404,76 +428,64 @@ describe("the nav's condense is triggered by sentinels ahead of the nav", () => 
  * can see, because the constant is still right. So these read the RENDERED markup, strip it, and
  * require the copy back.
  */
+/* RE-POINTED (waitlist v1, 31 Oct, ref design-refs/landing-desktop-v5.html): the hero is the white card
+   over the navy — the question, the handwritten line, the sub, the inline sign-up and the binocular hawk.
+   The two-line headline, the sub's two lines, "See how it works", the card pile and the cast shadow left it. */
 describe("the hero", () => {
   const html = () => renderPage(<Landing onNavigate={noNavigate} />, "/");
-  const heading = () => {
-    const m = html().match(/<h1[^>]*class="[^"]*mk-herotitle[^"]*"[^>]*>([\s\S]*?)<\/h1>/);
-    expect(m, "the hero renders an h1.mk-herotitle").toBeTruthy();
-    return m![1];
-  };
+  const hero = () => sliceBetween(html(), 'class="mk-dh"', 'id="mk-features"', "the hero");
   const unesc = (s: string) => s.replace(/&quot;/g, '"').replace(/&#x27;/g, "'").replace(/&amp;/g, "&");
 
-  it("reads as the whole sentence, on its two lines", () => {
-    const h = heading();
-    expect(unesc(h.replace(/<[^>]+>/g, "")), "word for word").toBe(HERO_H1);
-    expect(h.match(/class="mk-hl"/g) ?? [], "two block lines").toHaveLength(2);
+  it("asks the question as the page's only h1, word for word", () => {
+    const m = hero().match(/<h1[^>]*class="mk-dh-q"[^>]*>([\s\S]*?)<\/h1>/);
+    expect(m, "the hero renders h1.mk-dh-q").toBeTruthy();
+    expect(unesc(m![1].replace(/<[^>]+>/g, ""))).toBe(WAIT_HERO_Q.join(" "));
+    expect(m![1], "the second line carries the highlighter").toContain("<mark>" + WAIT_HERO_Q[1] + "</mark>");
     expect(html().match(/<h1\b/g) ?? [], "the page's only h1").toHaveLength(1);
   });
 
-  it("the sub is two lines, broken after the question, with the brand highlighted once", () => {
-    const m = html().match(/<p class="mk-herosub">([\s\S]*?)<\/p>/);
-    expect(m, "the hero renders p.mk-herosub").toBeTruthy();
-    const lines = m![1].split(/<br\s*\/?>/);
-    expect(lines, "one line break, not two paragraphs").toHaveLength(2);
-    expect(unesc(lines[0].replace(/<[^>]+>/g, ""))).toBe(HERO_SUB_LINES[0]);
-    expect(unesc(lines[1].replace(/<[^>]+>/g, ""))).toBe(HERO_SUB_LINES[1]);
-    expect(lines[1].match(/<b>([^<]*)<\/b>/g), "the brand, and only the brand, is the highlight").toEqual(["<b>" + HERO_SUB_BRAND + "</b>"]);
+  it("says \"No more winging it.\" once, by hand, then the sub", () => {
+    const h = hero();
+    expect(h).toContain('<p class="mk-dh-strap">' + HERO_H1 + "</p>");
+    expect(unesc(h)).toContain(WAIT_HERO_SUB);
   });
 
-  it("carries both actions, and the pile and its shadow are decorative", () => {
-    const h = html();
+  it("asks for an address, and carries nothing that leaves the page", () => {
+    const h = hero();
+    expect(h).toContain('id="mk-hero-email"');
     expect(h).toContain(HERO_CTA);
-    expect(h).toContain(HERO_LINK);
-    expect(h, "the link is an in-page jump to the section break").toContain('href="#pulse"');
-    expect(h, "the whole pile is hidden from assistive tech").toMatch(/<div class="mk-hc-pile" aria-hidden="true">/);
-    expect(h, "an empty alt, because the shadow says nothing the copy does not").toMatch(/<img[^>]*class="mk-lc-cast"[^>]*src="\/images\/hawk-shadow\.png\?v=[0-9a-f]{8}"[^>]*alt=""/);
+    expect(h, "the old in-page jump is retired").not.toContain('href="#pulse"');
+    expect(h, "no card pile in the hero").not.toMatch(/["\s`]mk-hc-pile["\s`]/);
+    expect(h, "no cast shadow").not.toContain("hawk-shadow.png");
+    expect(h.match(/<a\b/g) ?? [], "no links").toHaveLength(0);
+  });
+
+  it("versions the binocular hawk's URL by the file's own content", () => {
+    const here = dirname(fileURLToPath(import.meta.url));
+    const png = readFileSync(resolve(here, "../../public/images/contact/discover-binoculars-bird.png"));
+    const version = createHash("md5").update(png).digest("hex").slice(0, 8);
+    expect(hero()).toContain('src="/images/contact/discover-binoculars-bird.png?v=' + version + '"');
   });
 
   /**
-   * ⚠️ WHAT RENDERS WITHOUT SCRIPT — before hydration, to a crawler, under reduced motion — IS THE
-   * STORY'S END STATE: Day 99, "With you", "Full requested", all five lines, the final panel and its
-   * footer. The animation starts from an earlier state; the markup is where it ends.
+   * ⚠️ WHAT RENDERS WITHOUT SCRIPT IS STILL THE STORY'S END STATE — now in feature row 2, where the pile
+   * lives: Day 99, "With you", "Full requested", all five lines, the final panel and its footer.
    */
-  it("renders the card's end state before any script runs", () => {
+  it("renders the card's end state before any script runs (feature row 2)", () => {
     const h = unesc(html());
     for (const s of ["With you", "Day 99", "Full requested", "Eleanor wants the full! Send it by 5 July.", "Send the full by 5 July", "Mark full sent",
                      "Query sent", "Partial requested", "Partial sent", "You nudged Eleanor", "Full manuscript"]) {
       expect(h, s).toContain(s);
     }
-    expect(h, "the feed is the writer's to scroll").toMatch(/class="mk-lc-tlv mk-lc-tlv--scroll"/);
-    expect(h, "the final panel is the one showing").toMatch(/class="mk-lc-panel mk-lc-panel--final"/);
     expect(h.match(/class="mk-lc mk-lc--back/g) ?? [], "four cards behind").toHaveLength(4);
-    for (const name of ["Greg Panetta", "Tessa Rowe", "Amira Khan", "Tom Ellery", "Eleanor Whitfield"]) expect(h).toContain(name);
   });
 
-  /**
-   * ⚠️ AN IMAGE REPLACED UNDER THE SAME FILENAME MUST NOT BE SERVED FROM A CACHE — the same rule the
-   * feature illustrations carry. Nothing under public/ is fingerprinted and prod hosting lets a
-   * browser keep a file for an hour, so the URL carries the first eight hex digits of the file's md5.
-   */
-  it("versions the shadow's URL by the file's own content", () => {
-    const here = dirname(fileURLToPath(import.meta.url));
-    const png = readFileSync(resolve(here, "../../public/images/hawk-shadow.png"));
-    const version = createHash("md5").update(png).digest("hex").slice(0, 8);
-    expect(png.toString("latin1", 12, 16), "the header was read").toBe("IHDR");
-    expect(html()).toContain('src="/images/hawk-shadow.png?v=' + version + '"');
-  });
-
-  /** ⚠️ Asserting the ABSENCE is what stops the statement hero, and the shadow column after it, returning from a diff. */
+  /** ⚠️ Asserting the ABSENCE is what stops the heroes this one replaced returning from a diff. */
   it("carries none of the heroes it replaced", () => {
     const h = html();
     expect(h, "the shadow-column hero's headline").not.toContain("The hunt begins.");
-    for (const gone of ["mk-statement", "mk-heroburst", "mk-slip", "mk-lede", "mk-turn", "mk-found", "mk-illoart", "mk-heroart"]) {
+    for (const gone of ["mk-statement", "mk-heroburst", "mk-slip", "mk-lede", "mk-turn", "mk-found", "mk-illoart", "mk-heroart",
+                        "mk-herowrap", "mk-herotitle", "mk-herosub", "mk-heropill", "mk-herolink", "mk-lc-cast"]) {
       expect(h, `${gone} is retired`).not.toMatch(new RegExp('["\\s`]' + gone + '["\\s`]'));
     }
     expect(h).not.toContain("You&#x27;ve written a book.");
@@ -488,36 +500,15 @@ describe("the hero", () => {
  * diff. The glyph MARKS are not forbidden — the footer draws all six — so this is scoped to the
  * band rather than to the page.
  */
-describe("the status band: one line, and nothing that moves", () => {
-  const html = () => renderPage(<Landing onNavigate={noNavigate} />, "/");
-  const band = () => sliceBetween(html(), 'class="mk-statband"', 'id="mk-features"', "the status band");
-
-  /* RETARGET (landing hero v3): the eyebrow is retired — "No more winging it." is the hero's
-     headline — so the band is its heading alone, and the absence is asserted. */
-  it("renders the heading, word for word, and no eyebrow", () => {
-    const b = band();
-    const esc = (t: string) => t.replace(/&/g, "&amp;").replace(/'/g, "&#x27;");
-    expect(b).toContain(esc(BAND_HEADING));
-    expect(b, "the eyebrow moved up to be the hero's headline").not.toContain("No more winging it.");
-    expect(b, "no eyebrow element").not.toMatch(/["\s`]mk-stateyebrow["\s`]/);
-    expect(b, "the anchor the hero's link jumps to").toBeTruthy();
-    expect(html(), "…and the id itself, which the hero depends on").toContain('id="pulse"');
+/* "the status band" is RETIRED (waitlist v1, 31 Oct): its heading is feature row 1's now, beside the
+   Birds-eye window. The absence is asserted, and the glyph marks still draw in the footer. */
+describe("the status band is gone, and its glyphs survive in the footer", () => {
+  it("renders no status band and no #pulse anchor", () => {
+    const h = renderPage(<Landing onNavigate={noNavigate} />, "/");
+    expect(h).not.toMatch(/["\s`]mk-statband["\s`]/);
+    expect(h).not.toContain('id="pulse"');
   });
-
-  it("carries no carousel: no controls, no live region, no dashes", () => {
-    const b = band();
-    expect(b.match(/<button\b/g) ?? [], "nothing in the band is operable").toHaveLength(0);
-    expect(b, "no rotating description").not.toContain("aria-live");
-    expect(b, "and no tablist").not.toContain('role="tab');
-    for (const gone of ["mk-carousel", "mk-carglyphs", "mk-carglyph", "mk-carcopy", "mk-carcopyin",
-                        "mk-cartitle", "mk-carbody", "mk-cardashes", "mk-cardash"]) {
-      expect(b, `${gone} is retired`).not.toMatch(new RegExp('["\\s`]' + gone + '["\\s`]'));
-    }
-  });
-
-  /** ⚠️ THE MARKS SURVIVE ELSEWHERE, and asserting that is what stops the deletion over-reaching. */
   it("and the glyphs themselves still draw, in the footer", () => {
-    /* The footer is the shell's (landing colours v2), so it is read where it is rendered. */
     expect(renderPage(
       <MarketingShell user={null as never} onNavigate={noNavigate} path="/"><div /></MarketingShell>, "/"),
       "the footer's signature row").toContain('class="mk-footglyphs"');
@@ -530,12 +521,16 @@ describe("the status band: one line, and nothing that moves", () => {
  * `/founders` — so the landing carries exactly one, and the hero's solid button is the way to the
  * other. Counting the mounts is the claim: two would put two different asks on one page again.
  */
-describe("the founding sign-up — one on the landing, in the band", () => {
+/* RE-POINTED (waitlist v1, 31 Oct): the landing asks in TWO places now, by design — the hero's inline
+   form and the band's — both the one shared component, the hero's with source "landing-panel". */
+describe("the founding sign-up — the hero's and the band's", () => {
   const html = () => renderPage(<Landing onNavigate={noNavigate} />, "/");
 
-  it("one form, and it is the band's", () => {
+  it("two forms, the hero's and the band's", () => {
     const h = html();
-    expect(h.match(/mk-trap/g) ?? [], "one honeypot, so one form").toHaveLength(1);
+    expect(h.match(/class="mk-trap"/g) ?? [], "two honeypots, so two forms").toHaveLength(2);
+    expect(h).toContain('id="mk-hero-email"');
+    expect(h).toContain('id="mk-band-email"');
     expect(h).toContain("Claim your place");
     expect(h, "the panel's own ask went with it").not.toContain("Claim your spot");
     expect(h).toContain("Founding writers");
@@ -585,7 +580,7 @@ describe("the founding sign-up — one on the landing, in the band", () => {
     expect(html()).not.toContain("founding-seal-mark");
   });
 
-  it("the hero points at the offer rather than asking for an address", () => {
+  it("the hero asks with its own form, and none of the retired panel's pieces", () => {
     const h = html();
     expect(h).toContain(HERO_CTA);
     for (const gone of ["mk-fmperks", "mk-fmrow", "mk-fmlearn", "mk-found-panel"]) {
@@ -637,8 +632,8 @@ describe("the sign-up the landing does carry", () => {
   it("every sign-up on the page has its own ids and its own label", () => {
     const h = html();
     const ids = [...h.matchAll(/<input[^>]*id="([^"]+)"[^>]*type="email"/g)].map((m) => m[1]);
-    expect(ids.length, "the landing carries one sign-up — the band's").toBe(1);
-    expect(new Set(ids).size, `ids collide: ${ids.join(", ")}`).toBe(1);
+    expect(ids.length, "the landing carries two sign-ups — the hero's and the band's").toBe(2);
+    expect(new Set(ids).size, `ids collide: ${ids.join(", ")}`).toBe(2);
     for (const id of ids) {
       const label = h.match(new RegExp(`<label[^>]*for="${id}"[^>]*>([^<]*)<`));
       expect(label, `${id} has its own label`).toBeTruthy();
@@ -649,7 +644,7 @@ describe("the sign-up the landing does carry", () => {
 
   it("…and one live region each, mounted empty before there is anything to announce", () => {
     const regions = [...html().matchAll(/<div class="mk-betamsgwrap"([^>]*)>([\s\S]*?)<\/div>/g)];
-    expect(regions.length, "one mount, one region").toBe(1);
+    expect(regions.length, "one region per mount").toBe(2);
     for (const [, attrs, body] of regions) {
       expect(attrs).toContain('aria-live="polite"');
       expect(attrs).toContain('role="status"');
@@ -935,7 +930,7 @@ describe("the italic run is additive — the pages that do not use it are unchan
  * a point picking up markup the copy never asked for — a second image, a link, a badge — and
  * because a copy constant nothing renders passes a copy test perfectly.
  */
-describe("the vision band: three points and one way out", () => {
+describe("the vision band: three points and no way out", () => {
   const html = () => renderPage(<Landing onNavigate={noNavigate} />, "/");
   const band = () => sliceBetween(html(), 'class="mk-vision"', 'class="mk-claimband"', "the vision band");
   const esc = (t: string) => t.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/'/g, "&#x27;");
@@ -961,10 +956,11 @@ describe("the vision band: three points and one way out", () => {
     });
   });
 
-  it("carries one action and it is the way to /about", () => {
+  /* RE-POINTED (waitlist v1): "Read our story" is retired — the landing links nowhere but Privacy. */
+  it("carries no action at all", () => {
     const b = band();
-    expect(b.match(/<button\b/g) ?? [], "exactly one control in the band").toHaveLength(1);
-    expect(b).toContain(VISION_LINK);
+    expect(b.match(/<button\b/g) ?? [], "no control in the band").toHaveLength(0);
+    expect(b).not.toContain("Read our story");
     /* ⚠️ A BUTTON, NOT AN ANCHOR. Marketing routes go through `onNavigate`; an `<a href>` would
        reload the app to reach a page it can already render. The ref draws an anchor because it is a
        standalone document with nowhere to navigate to. */
@@ -1005,27 +1001,34 @@ describe("the vision band: three points and one way out", () => {
  * markup the copy never asked for: a button, a link, a bold run, a badge, or the aria-hidden wrapper
  * the retired mockups sat in — which would silence the alt text.
  */
-describe("the feature rows: six images, six headings, six paragraphs", () => {
+/* RE-POINTED (waitlist v1, 31 Oct, ref design-refs/landing-desktop-v5.html): seven rows now. Row 1 is the
+   Birds-eye focus window and row 2's picture is the real card pile — both live components, not PNGs — so
+   the image-row laws (one image, its alt, its pixel size, its version) hold over the five image rows, and
+   rows 1 and 2 have laws of their own. Every row's heading and paragraph are still word for word. */
+describe("the feature rows: the Birds-eye window, the card pile, then five illustrations", () => {
   const html = () => renderPage(<Landing onNavigate={noNavigate} />, "/");
-  /* Retarget, same law: the band the rows end at is the WHITE VISION BAND now (18 Sep), which
-     landed between the rows and the founding-writers banner. The slice's END anchor is what stops
-     it running to the foot of the document — which is exactly what `sliceBetween` refused to let
-     happen silently here.
-     ⚠️ AND THIS ONE WOULD NOT HAVE FAILED LOUDLY. Both anchors still exist, so `sliceBetween` had
-     nothing to refuse; the slice simply grew to swallow the new section, and the SIXTH row's
-     markup would then have carried three more images and a button. The assertions below say "one
-     image, one paragraph, no button" per row — so it fails, but it fails as though the rows were
-     wrong. Whenever a section is inserted on this page, check what slices across it. */
+  /* The slice's END anchor stops it running into the vision band — see the note that used to stand here:
+     whenever a section is inserted on this page, check what slices across it. */
   const band = () => sliceBetween(html(), 'id="mk-features"', 'class="mk-vision"', "the features band");
-  const rowsOf = (markup: string) => markup.split('<div class="mk-frow">').slice(1);
+  const rowsOf = (markup: string) => markup.split(/<div class="mk-frow(?: [^"]*)?">/).slice(1);
   const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/'/g, "&#x27;");
   const unesc = (s: string) => s.replace(/&quot;/g, '"').replace(/&#x27;/g, "'").replace(/&amp;/g, "&");
+  const IMAGE_ROWS = FEATURE_ROWS.filter((r) => r.key !== "track");
+  const imageRows = () => rowsOf(band()).slice(2);
 
-  it("renders the six rows in order, each an image, then its heading, then its paragraph", () => {
+  it("renders seven rows: the Birds-eye window, the card pile, then the five image rows in order", () => {
     const rows = rowsOf(band());
-    expect(rows).toHaveLength(6);
-    rows.forEach((markup, i) => {
-      const row = FEATURE_ROWS[i];
+    expect(rows).toHaveLength(2 + IMAGE_ROWS.length);
+    expect(rows[0], "row 1 is the focus window").toContain('data-be="desk"');
+    expect(unesc(rows[0]), "row 1's heading").toContain("<h3>" + BE_HEADING + "</h3>");
+    expect(unesc(rows[0]), "row 1's paragraph").toContain("<p>" + BE_LINE_DESK + "</p>");
+    const track = FEATURE_ROWS.find((r) => r.key === "track")!;
+    expect(rows[1], "row 2 is the real pile").toContain('data-trk="desk"');
+    expect(unesc(rows[1].match(/<h3>([\s\S]*?)<\/h3>/)![1].replace(/<[^>]+>/g, "")), "row 2's heading").toBe(track.heading);
+    expect(rows[1]).toContain("<p>" + esc(track.body) + "</p>");
+    expect(rows[1], "the old illustration is gone from row 2").not.toContain(track.image);
+    imageRows().forEach((markup, i) => {
+      const row = IMAGE_ROWS[i];
       const img = markup.indexOf('src="' + row.image + "?v=");
       const h3 = markup.indexOf("<h3>");
       const heading = /<h3>([\s\S]*?)<\/h3>/.exec(markup);
@@ -1041,18 +1044,23 @@ describe("the feature rows: six images, six headings, six paragraphs", () => {
     });
   });
 
-  it("carries no action, no link, no emphasis, no badge and no hidden wrapper", () => {
-    const markup = band();
-    for (const forbidden of ["<button", "<a ", "<b>", "<strong", "aria-hidden", "mk-protag", "mk-btn", "mk-tlink"]) {
-      expect(markup, "the band renders " + forbidden).not.toContain(forbidden);
+  /* The copy columns carry nothing but words; the only control in the band is the pile's "Play again". */
+  it("the copy carries no action, no link, no emphasis and no badge", () => {
+    const copies = [...band().matchAll(/<div class="mk-fcopy">([\s\S]*?)<\/div>/g)].map((m) => m[1]);
+    expect(copies, "seven copy columns").toHaveLength(2 + IMAGE_ROWS.length);
+    for (const markup of copies) for (const forbidden of ["<button", "<a ", "<b>", "<strong", "aria-hidden", "mk-protag", "mk-btn", "mk-tlink"]) {
+      expect(markup, "a copy column renders " + forbidden).not.toContain(forbidden);
     }
+    const buttons = [...band().matchAll(/<button[^>]*>([\s\S]*?)<\/button>/g)].map((m) => m[1]);
+    expect(buttons, "the band's one control is the card's replay").toEqual(["↻ Play again"]);
+    expect(band(), "and nothing links").not.toContain("<a ");
   });
 
   /** A hand-typed ratio that disagreed with a file would reserve the wrong box until it loaded. */
   it("states each image's own pixel size, read from its PNG header", () => {
     const here = dirname(fileURLToPath(import.meta.url));
-    const rows = rowsOf(band());
-    FEATURE_ROWS.forEach((row, i) => {
+    const rows = imageRows();
+    IMAGE_ROWS.forEach((row, i) => {
       const png = readFileSync(resolve(here, "../../public", "." + row.image));
       expect(png.toString("latin1", 12, 16), row.image + ": the header was read").toBe("IHDR");
       expect(rows[i], row.image).toContain('width="' + png.readUInt32BE(16) + '" height="' + png.readUInt32BE(20) + '"');
@@ -1060,32 +1068,26 @@ describe("the feature rows: six images, six headings, six paragraphs", () => {
   });
 
   /**
-   * ⚠️ EVERY HEADING HOLDS ITS LAST TWO WORDS TOGETHER ON ONE LINE. The 13ch measure that made this
-   * necessary is gone (17 Sep) and the headings wrap with `text-wrap: balance`, which avoids a lone last
-   * word by itself — but an engine without `balance` does not, and there the held pair still does. That
-   * is typesetting, not copy: the heading, markup stripped, is still the sentence word for word
-   * (asserted above), and the held run is exactly its last two words.
+   * ⚠️ EVERY ROW HEADING FROM `FEATURE_ROWS` HOLDS ITS LAST TWO WORDS TOGETHER ON ONE LINE — row 2 included,
+   * whose picture changed and whose words did not. (Row 1's heading is the bird's-eye line, set as the ref sets it.)
    */
   it("holds each heading's last two words together on one line", () => {
-    const rows = rowsOf(band());
-    rows.forEach((markup, i) => {
-      const held = FEATURE_ROWS[i].heading.split(" ").slice(-2).join(" ");
-      expect(markup, FEATURE_ROWS[i].key + ": its last two words, held").toContain('<span class="mk-fkeep">' + esc(held) + "</span></h3>");
+    const rows = rowsOf(band()).slice(1);
+    FEATURE_ROWS.forEach((row, i) => {
+      const held = row.heading.split(" ").slice(-2).join(" ");
+      expect(rows[i], row.key + ": its last two words, held").toContain('<span class="mk-fkeep">' + esc(held) + "</span></h3>");
     });
   });
 
   /**
-   * ⚠️ AN IMAGE REPLACED UNDER THE SAME FILENAME MUST NOT BE SERVED FROM A CACHE. Nothing under public/ is
-   * fingerprinted by the build and prod hosting lets a browser keep a file for an hour, so each URL carries
-   * the first eight hex digits of its file's own md5. A file re-exported without its version following
-   * fails here.
+   * ⚠️ AN IMAGE REPLACED UNDER THE SAME FILENAME MUST NOT BE SERVED FROM A CACHE. Each URL carries the first
+   * eight hex digits of its file's own md5 — the image rows' illustrations, and the two hawks rows 1 and 2 draw.
    */
   it("versions each image's URL by the file's own content", () => {
     const here = dirname(fileURLToPath(import.meta.url));
-    const rows = rowsOf(band());
-    FEATURE_ROWS.forEach((row, i) => {
-      const version = createHash("md5").update(readFileSync(resolve(here, "../../public", "." + row.image))).digest("hex").slice(0, 8);
-      expect(rows[i], row.image).toContain('src="' + row.image + "?v=" + version + '"');
-    });
+    const v = (f: string) => createHash("md5").update(readFileSync(resolve(here, "../../public", "." + f))).digest("hex").slice(0, 8);
+    const rows = imageRows();
+    IMAGE_ROWS.forEach((row, i) => expect(rows[i], row.image).toContain('src="' + row.image + "?v=" + v(row.image) + '"'));
+    for (const f of ["/images/qc/be-hawk-head.png", "/images/pointing-hawk.png"]) expect(band(), f).toContain('src="' + f + "?v=" + v(f) + '"');
   });
 });

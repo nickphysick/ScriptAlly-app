@@ -12,6 +12,10 @@ interface ImportMetaEnv {
   readonly VITE_APP_CHECK_SITE_KEY?: string;
   /** Firestore database id. Empty or "(default)" → the project's default database. */
   readonly VITE_FIREBASE_DATABASE_ID: string;
+  /** "true" makes the build landing-only (see src/lib/siteMode.ts). Set in .env.production only. */
+  readonly VITE_LANDING_ONLY?: string;
+  /** GA4 measurement id for the public site. Set in .env.production only; empty = no analytics, no bar. */
+  readonly VITE_GA_MEASUREMENT_ID?: string;
 }
 
 interface ImportMeta {

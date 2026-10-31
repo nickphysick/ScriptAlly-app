@@ -112,10 +112,8 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   /* A card on a tinted band: the app's `--fc-card`. True white, which `--mk-card` (#fffefb) is not. */
   --mk-white: #ffffff;
   --mk-hero-ground: #fbf9f5;
-  /* The hero's foot and the band's top: the ref's `.hero` gradient ends on #eeebe5 and its `.peek`
-     band begins on #efece6 — a unit apart, so the join between them reads as no join at all. */
-  --mk-hero-foot: #eeebe5;
-  --mk-band-top: #efece6;
+  /* `--mk-hero-foot` and `--mk-band-top` are RETIRED with the old hero's gradient and the status band
+     (waitlist v1, 31 Oct). */
   /* Named for where it sits, not what colour it is — the value is a decision, the mechanism is
      not. Changing the surface below the break is this one line. */
   --mk-lower: #f2eee8;
@@ -186,9 +184,9 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
      ARE GONE. On an oat sheet white reads as a card rather than as a band, and the three points
      are cards — so the band is the darker step and the cards are the white. The colour change
      marks both edges; `--mk-vision-edge` is deleted with the rules that read it.
-     The rule is the "more about us" underline: the ink at 40%. Pre-computed alphas, no `color-mix()`. */
+     Pre-computed alphas, no `color-mix()`. */
   --mk-stone: #e9e6e0;
-  --mk-vision-rule: rgba(28, 19, 15, .4);
+  /* `--mk-vision-rule` ("Read our story"'s underline) is RETIRED with the link (waitlist v1). */
   --mk-vision-body: rgba(28, 19, 15, .72);
   --mk-navy: #2a3a52;
   /* Navy's hover, pre-computed per the no-`color-mix()` rule — the same darkening step
@@ -587,7 +585,7 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   .mk-navwrap { box-shadow: 0 1px 0 rgba(244, 241, 234, .06); }
   /* ⚠️ THE LANDING'S STAGE MEETS THE BAR SQUARE: the sheet's 18px top corners would show as two
      lighter notches under the header against the navy stage. Its bottom corners are unchanged. */
-  .mk-sheet:has(.mk-hp) { border-top-left-radius: 0; border-top-right-radius: 0; }
+  .mk-sheet:has(.mk-wl) { border-top-left-radius: 0; border-top-right-radius: 0; }
 }
 
 /* "Log in" on phones (landing on phones v4, 26 Oct; ref design-refs/landing-mobile-v4.html `.lg`): a
@@ -669,107 +667,9 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 
 /* ═══════════════ Landing page (design-refs/landing-v13.html, values verbatim) ═══════════════ */
 
-/* ── Hero v3 (20 Oct, ref design-refs/landing-hero-v3.html): the copy, the card pile, the cast shadow ──
-   ⚠️ IT IS A 1280px FRAME SCALED TO THE WINDOW. `.mk-hero` is the frame: 1280 wide, `--mk-hero-h` tall
-   (frame units), scaled by `--mk-hero-k`; `.mk-herowrap` is the full-width box whose height is the
-   SCALED hero. `Hero.tsx`'s `size()` — the ref's — writes both, and the copy's top and scale and the
-   pile's transform, on load, on resize and once the fonts arrive. The defaults below are the 1280
-   frame at its tallest, which is what renders before that runs.
-   ⚠️ IT IS ABOVE THE BAND (`z-index: 2`) AND NOTHING CLIPS IT, so the pile's soft shadows and the tip
-   of the hawk's shadow fall onto the band below rather than being cut at the hero's foot. The page
-   cannot scroll sideways because `html`/`body` clip the x axis one level up.
-   ⚠️ THE CLEARANCE RULE IS RETIRED, NOT MOVED: `--mk-hero-ink`, `--mk-hero-clear`, `--mk-hero-edge`,
-   `--mk-hero-shadow-x`, `--mk-hero-cap`, `--mk-hero-pad` and the `cqw` container all went with the
-   shadow's own column. The shadow is cast over the words now, by design.
-   ⚠️ COLOUR AND IMAGE SEPARATELY, NEVER THE `background` SHORTHAND: the shorthand resets the colour,
-   so a gradient that failed to parse would leave the hero showing whatever is behind it. */
-.mk-herowrap {
-  /* The frame at its tallest, at 1:1 — what renders before `size()` writes the window's values. */
-  --mk-hero-h: 672px; --mk-hero-k: 1;
-  position: relative; z-index: 2;
-  height: calc(var(--mk-hero-h) * var(--mk-hero-k));
-  background-color: var(--mk-hero-ground);
-  background-image: linear-gradient(180deg, var(--mk-hero-ground) 0%, var(--mk-hero-foot) 100%);
-}
-.mk-hero {
-  position: absolute; left: 0; top: 0; width: 1280px; height: var(--mk-hero-h);
-  transform-origin: 0 0; transform: scale(var(--mk-hero-k));
-}
-/* The copy: 175 in from the frame's left, 560 wide, scaled about its own top-left by `size()`. */
-.mk-herocopy {
-  position: absolute; left: 175px; top: 150px; width: 560px;
-  display: flex; flex-direction: column; transform-origin: 0 0;
-}
-/* ── v4.1 (25 Oct, ref design-refs/landing-hero-v4-1.html): the hero in a card over the navy ──
-   Desktop only (`--carded` is set by `size()` above 900px; the stacked layout never gets it).
-   ⚠️ THE NAVY IS THE WRAPPER'S, IN SCREEN PIXELS: the nav's ink carries on to `--mk-navy-to` (36% of
-   the way down the card, written by `size()`), then the light ground runs from the lower surface to
-   the band's top colour — so the hero meets the status band (`--mk-band-top` → `--mk-lower`, the
-   ref's `.peek`) with no seam. The 3px ink shadow upward is the ref's seam fix: it covers any
-   hairline between the nav and the band. Colour and image separately, never the shorthand. */
-.mk-herowrap.mk-herowrap--carded {
-  --mk-navy-to: 190px; /* the ref's default; `size()` writes the measured one inline */
-  background-color: var(--mk-band-top);
-  background-image: linear-gradient(180deg, var(--mk-ink-shell) 0, var(--mk-ink-shell) var(--mk-navy-to), var(--mk-lower) var(--mk-navy-to), var(--mk-band-top) 100%);
-  box-shadow: 0 -3px 0 var(--mk-ink-shell);
-}
-/* The card (the ref's `.hcard`): 64px in from each side of the frame, radius 22, white fading to blush
-   at its right edge, the layered shadow and 1px hairline. Its top and bottom are `size()`'s. Below
-   the copy and the pile (first in the frame), decorative, and it takes no clicks. */
-.mk-hcard { display: none; }
-.mk-herowrap--carded .mk-hcard {
-  display: block; position: absolute; left: 64px; right: 64px; top: 6px; bottom: 26px; border-radius: 22px;
-  background-color: #fff; background-image: linear-gradient(100deg, #fff 0%, #fff 46%, #f7ece7 100%);
-  box-shadow: 0 1px 2px rgba(28,19,15,.06), 0 24px 50px -26px rgba(28,19,15,.35), 0 0 0 1px rgba(28,19,15,.05);
-  pointer-events: none;
-}
-/* The places counter under the actions (the ref's `.places`). Hidden in the stacked layout, which this
-   pass does not change. */
-.mk-places { margin-top: 26px; width: 318px; }
-.mk-places--wait { visibility: hidden; }
-.mk-places-bar { height: 4px; border-radius: 2px; background: #e9e4dd; overflow: hidden; }
-.mk-places-bar i { display: block; height: 100%; width: 0; border-radius: 2px; background: #a2452a; }
-.mk-places span { display: block; margin-top: 11px; font: 500 11.5px/1 var(--mk-f-mono); letter-spacing: .16em; text-transform: uppercase; color: #1c130f; }
-.mk-places b { font-weight: 600; }
-.mk-herowrap--narrow .mk-places { display: none; }
-
-/* The pile's box IS the frame above 900px, so the pile's coordinates are the ref's. */
-.mk-herobox { position: absolute; inset: 0; pointer-events: none; }
-
-/* ⚠️ THE FAMILY IS !important, AND IT HAS TO BE. src/lib/brand.tsx injects, on every route, a rule
-   giving every bare h1 (as `h1:not(.wsh-title)`, 0-1-1) the brand heading font with !important —
-   two classes outrank it. Its other rule gives every bare SPAN the body font, so the two line spans
-   inherit explicitly or they would draw in the app's sans inside a typewriter heading. */
-.mk-hero .mk-herotitle {
-  font-family: var(--mk-f-display) !important; font-weight: 400;
-  font-size: 78px; line-height: 1.04; letter-spacing: -.02em; color: var(--mk-nearblack);
-  margin: 0;
-}
-.mk-hero .mk-herotitle .mk-hl { display: block; font-family: inherit; }
-/* ⚠️ THE SUB IS THE HEADLINE'S FACE, QUIETER — the ref's `data-sub="c"`, and the other four variants it
-   carries are retired. Two sentences, a line break between them; "QueryHawk" in full ink, 400 (the
-   face has one weight), on a faint rust highlighter. */
-.mk-herosub {
-  margin: 28px 0 0; font-family: var(--mk-f-display); font-weight: 400; font-size: 21px; line-height: 1.6;
-  letter-spacing: -.005em; color: rgba(28, 19, 15, .78); text-wrap: pretty;
-}
-.mk-herosub b { font-weight: 400; color: var(--mk-nearblack); box-shadow: inset 0 -.38em 0 rgba(162, 69, 42, .16); }
-.mk-heroctas { display: flex; align-items: center; gap: 30px; margin-top: 38px; }
-/* ⚠️ BOTH DECLARE THEIR OWN FAMILY. The button is caught by the injection's plain `button` rule and
-   the link inherits from a `div` it also sets, so neither would be the serif by inheritance. */
-.mk-heropill {
-  font: 600 18px/1 var(--mk-f-serif); white-space: nowrap;
-  background: var(--mk-navy); color: #f4f1ea; border: 0; border-radius: 999px;
-  padding: 19px 30px; cursor: pointer;
-  transition: background .18s ease;
-}
-.mk-heropill:hover { background: var(--mk-navy-hov); }
-@media (prefers-reduced-motion: reduce) { .mk-heropill { transition: none; } }
-/* Rust, not ink: beside a navy pill it reads as a way to keep reading rather than a second button. */
-.mk-herolink {
-  font: 400 17px/1 var(--mk-f-serif); color: var(--mk-rust); white-space: nowrap;
-  text-decoration: none; border-bottom: 1.5px solid var(--mk-rust); padding-bottom: 3px;
-}
+/* ── The desktop hero ── RETIRED here (waitlist v1, 31 Oct): the 1280px frame, the card, the pile's
+   box, the headline pair, the CTA pair and the stacked places counter. The new hero (ref
+   design-refs/landing-desktop-v5.html) is one block in `waitlist.css`. */
 
 /* `.mk-eyebrow` is DELETED (21 Oct): the old pricing header was its last renderer — checked across
    `src/` after the removal, not from the diff. */
@@ -793,20 +693,6 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 }
 
 
-/* ⚠️ BELOW 900px THE HERO STACKS — a default Nick has not ruled on (landing hero v3). The frame stops
-   being scaled: the copy flows at its own sizes, and the pile sits in a box below it, centred and
-   scaled to the width by `size()`, which also sets the box's height. The two OUTERMOST back cards
-   (`.mk-lc--o`, the −9° and the +11°) are dropped, and the animation still plays. */
-@media (max-width: 899.98px) {
-  .mk-herowrap { height: auto; }
-  .mk-hero { position: relative; width: auto; height: auto; transform: none; padding: 48px 0 8px; }
-  .mk-herocopy { position: static; width: auto; transform: none; padding: 0 24px; }
-  .mk-hero .mk-herotitle { font-size: clamp(40px, 10vw, 64px); }
-  .mk-herosub { font-size: 18px; margin-top: 22px; }
-  .mk-heroctas { flex-wrap: wrap; gap: 18px 26px; margin-top: 30px; }
-  .mk-herobox { position: relative; inset: auto; height: 560px; margin-top: 16px; }
-  .mk-herobox .mk-lc--o { display: none; }
-}
 
 /* ── Features: one parchment band, centred header, seven alternating hairline rows ── */
 /* ⚠️ THE TOP PADDING HOLDS THE ECG INSIDE THE BAND. The trace is 150px tall and centred on the
@@ -821,54 +707,8 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
    (100cqw is the band's own width, so a classic scrollbar is never counted as room). */
 .mk-featband { padding: 0 0 26px; margin-top: 0; container-type: inline-size; }
 
-/* ── The full-width section break: eyebrow, heading, and a trace behind them ── */
-/* ⚠️ `scroll-margin-top` IS THE NAV'S HEIGHT, OR THE HEADING LANDS UNDERNEATH IT. The marketing
-   nav is `position: sticky; top: 0`, so an anchor that scrolls this section to y=0 puts its first
-   76.5px behind the bar. The mobile value differs because the nav re-wraps to 92px, and the
-   override is tied to the SAME breakpoint at which `.mk-links` hides — so the two cannot drift
-   apart without someone seeing both. */
-/* ── The status band: the break between the hero and the feature rows ──
-   ⚠️ IT REPLACED THE ECG BAND, WHICH IS DELETED ENTIRELY: `.mk-sect`, `.mk-sectinner`,
-   `.mk-seyebrow`, `.mk-sect h2`, the whole `.mk-ecg` trace with its radial mask, the `mkSweep`
-   sweep, the reduced-motion still and the 900px block that hid it. Nothing rendered any of them
-   once `BandHeader.tsx` went — checked by grep before the deletion rather than inferred from the
-   diff, because `.mk-sectitle` is LEGALPAGE'S heading and shares the prefix.
-   ⚠️ `scroll-margin-top` IS LIVE AGAIN, AND THE NOTE IT REPLACES SAID IT WAS DORMANT. The hero's
-   "See how it works" is an in-page jump to `#pulse`, which this section now carries, so the offset
-   has something to serve for the first time since the statement hero went. `--mk-nav-h` is derived
-   from the FULL nav height, not the condensed one — the browser computes the target before the
-   condense runs, so the intuition is inverted; the measurement is at the token. */
-/* ⚠️ NO `border-top`. It drew a hairline at the exact boundary `.mk-lower` now fades across, and
-   a fade behind a rule is a fade nobody can see. It also cut the hero's shadow in half at the one
-   place the shadow is meant to cross. Deleted rather than made transparent — a border set to
-   `none` is a declaration describing a decision twice. */
-/* ⚠️ THE BAND PAINTS ITS OWN GROUND, AND IT IS THE ONE STATED EXCEPTION INSIDE `.mk-lower`
-   (landing hero v3). It continues the hero's lower ground — the ref's `.peek`: the band's top colour
-   fading into the lower surface over 220px — so hero and band meet with no seam and no hairline.
-   It is FULL WIDTH so the ground is a surface rather than a column; the heading is centred in it.
-   ⚠️ COLOUR AND IMAGE SEPARATELY, NEVER THE SHORTHAND, for the reason this file gives everywhere.
-   ⚠️ `scroll-margin-top` IS THE NAV'S FULL HEIGHT — "See how it works" jumps here. */
-.mk-statband {
-  padding: clamp(40px, 5.47vw, 105px) 16px 56px;
-  text-align: center;
-  background-color: var(--mk-lower);
-  background-image: linear-gradient(180deg, var(--mk-band-top), var(--mk-lower) 220px);
-  background-repeat: no-repeat;
-  scroll-margin-top: var(--mk-nav-h);
-}
-/* ⚠️ ONE LINE ABOVE 900px, AND THE CLAMP IS THE REF'S. `clamp(20px, 2.3vw, 40px)` reaches its 40px
-   ceiling at 1739px; the band has no container cap (it is the page's width), so nothing past that
-   width is type growing against a frozen measure. The family is !important for brand.tsx's h2 rule. */
-.mk-stattitle {
-  font-family: var(--mk-f-display) !important; font-weight: 400;
-  font-size: clamp(20px, 2.3vw, 40px); line-height: 1.2;
-  color: var(--mk-nearblack); margin: 0 auto; white-space: nowrap;
-}
-@media (max-width: 900px) {
-  /* `text-wrap` only here, after `white-space`: both set the wrap mode, so in the base rule it would
-     quietly undo the desktop `nowrap`. */
-  .mk-stattitle { white-space: normal; text-wrap: balance; }
-}
+/* ── The status band ── RETIRED (waitlist v1, 31 Oct): its heading is feature row 1's now, beside the
+   Birds-eye window. */
 /* ⚠️ UNCHANGED WHEN `.mk-feathead` WAS DELETED, AND THAT IS A MEASURED DECISION RATHER THAN AN
    OVERSIGHT. The brief said to add back whatever the removed header was contributing IF the first
    row ended up against the band edge. It does not: `.mk-frow` carries its own 60px of top padding
@@ -1032,39 +872,20 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-vfig img {
   height: 100%; width: auto; max-width: 100%; object-fit: contain; display: block;
 }
-/* ⚠️ HELD ON ONE LINE, AND THE RELEASE IS MEASURED — see the boundary below. The headings are short
-   enough to hold in a 318.7px column; a longer one is a wrap, not a copy edit. */
+/* ⚠️ THE HEADINGS MAY WRAP (waitlist v1, 31 Oct, ref design-refs/landing-desktop-v5.html): held on one
+   line, "Make querying straightforward." overflowed its card. Balanced, so a wrap is never one word. */
 .mk-vh3 {
   font-family: "Special Elite", cursive !important; font-weight: 400;
   font-size: 27px; line-height: 1.2; letter-spacing: -0.01em;
-  color: var(--mk-nearblack); margin: 0; white-space: nowrap;
+  color: var(--mk-nearblack); margin: 0; white-space: normal; text-wrap: balance;
 }
 .mk-vbody {
   font-family: "Source Serif 4", Georgia, serif; font-weight: 400;
   font-size: 17px; line-height: 1.7; color: var(--mk-vision-body);
   max-width: 330px; margin: 14px auto 0; text-wrap: balance;
 }
-/* ⚠️ A BUTTON WEARING A LINK, so it declares everything a button would otherwise bring: no fill, no
-   border, no padding, and its own family — brand.tsx names bare `button` too, so it would not be
-   Source Serif by inheritance. The underline is the band's rule colour, which is deliberately a
-   step stronger than the band's own edges: an edge should be felt and a link should be seen. */
-.mk-visionmore {
-  display: inline-block; margin-top: 60px;
-  font-family: "Source Serif 4", Georgia, serif; font-size: 17px; line-height: 1.4;
-  color: var(--mk-nearblack); background: none; border: 0; padding: 0; cursor: pointer;
-  text-decoration: underline; text-underline-offset: 5px;
-  text-decoration-color: var(--mk-vision-rule);
-}
-.mk-visionmore:hover { text-decoration-color: var(--mk-nearblack); }
+/* `.mk-visionmore` ("Read our story") is RETIRED with the link (waitlist v1). */
 
-/* ⚠️ THE HEADINGS RELEASE ABOVE THE STACK, NOT AT IT, AND THE GAP IS REAL. The columns stack at
-   1080 with the feature rows; the longest heading needs 304.6px of ink and the column is a third of
-   the viewport less 112px of gutters, so it stops fitting at ~1138 — leaving ~58px of viewport
-   where three columns still stand and a held heading would spill into the gap between them.
-   Measured on the rendered page; `.98` because `max-width` is inclusive. */
-@media (max-width: 1159.98px) {
-  .mk-vh3 { white-space: normal; text-wrap: balance; }
-}
 /* One column, on the same breakpoint the feature rows stack at — the two bands are read as one
    region and a page that reflowed them at different widths would look like a mistake. */
 @media (max-width: 1080px) {
@@ -1078,7 +899,6 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 }
 @media (max-width: 560px) {
   .mk-visionh2 { font-size: 36px; }
-  .mk-visionmore { margin-top: 44px; }
 }
 @media (max-width: 360px) {
   .mk-visionh2 { font-size: 31px; }
@@ -2871,166 +2691,10 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   .mk-cart { max-width: 220px; margin-left: auto; margin-right: auto; }
 }
 
-/* ══════════════ The landing page on phones, below the hero (landing on phones v1, 26 Oct) ══════════════
-   ref design-refs/landing-mobile-v1.html for `.close`/`.ccard`, and landing-mobile-v2.html for the
-   feature story and the navy vision (below). Every value is the ref's. Only phones render these classes (`usePhone`), so none
-   of them can reach the desktop layout.
-   ⚠️ HEADINGS READ THE FACE TOKENS WITH `!important` AND TWO CLASSES: `brand.tsx` forces every bare
-   h2/h3 to the brand family at runtime, and a single-class rule loses between two important
-   declarations. Spans and paragraphs declare their family too, for the same file's sake. */
-
-/* ── v2 (26 Oct, ref design-refs/landing-mobile-v2.html), superseding v1's swipe strip and vision rows ──
-   Values are the ref's LAST declaration of each rule (it restates `.sp.big` for the real page). */
-
-/* The six features: a story you scroll down. The picture panel sticks under the 60px bar
-   (`--mk-nav-h` at this width) and takes half the screen below it, never more than 420px; it is sticky
-   inside this section only, so after the last caption it scrolls away and the vision rises beneath. */
-/* v3 (ref landing-mobile-v3.html `.p3`, `.s3`, `.tl`): one feature per flick. `--mk-ph` is the panel's
-   height, read by the panel, its picture and each caption's height and snap margin, so the four can
-   never disagree. The story has no bottom padding in v3: the closing beat follows the sixth caption. */
-.mk-story { --mk-ph: min(calc((100svh - var(--mk-nav-h)) / 2), 420px); position: relative; scroll-margin-top: var(--mk-nav-h); }
-.mk-spimg {
-  position: sticky; top: var(--mk-nav-h); z-index: 2; box-sizing: border-box;
-  height: var(--mk-ph); padding: 6px 14px 0;
-  background: var(--mk-lower);
-}
-.mk-spimg img {
-  position: absolute; left: 14px; right: 14px; top: 6px; width: calc(100% - 28px); height: calc(var(--mk-ph) - 48px);
-  max-width: none; object-fit: contain; background: #f5e6df; border-radius: 18px;
-  opacity: 0; transition: opacity .45s;
-}
-.mk-spimg img.mk-on { opacity: 1; }
-.mk-spbar { position: absolute; left: 14px; right: 14px; bottom: 16px; display: flex; gap: 5px; }
-.mk-spbar i { flex: 1; height: 4px; border-radius: 2px; background: rgba(28, 19, 15, .12); transition: background .3s; }
-.mk-spbar i.mk-on { background: var(--mk-navy); }
-/* Each caption is exactly the room beneath the panel, and a snap point whose margin is the bar plus
-   the panel — so a snapped caption sits directly under the picture. */
-.mk-s3 {
-  height: calc(100svh - var(--mk-nav-h) - var(--mk-ph)); box-sizing: border-box; padding: 14px 24px 0;
-  scroll-snap-align: start; scroll-snap-stop: always; scroll-margin-top: calc(var(--mk-nav-h) + var(--mk-ph));
-  opacity: .25; transition: opacity .3s;
-}
-.mk-s3.mk-on { opacity: 1; }
-/* ⚠️ A 14px BLOCK, NOT AN INLINE SPAN ON THE CAPTION'S LINE: inline, its line box takes the caption's
-   inherited 24px strut and the heading lands 10px lower than the ref's (whose strut is 14px). */
-.mk-s3n { display: block; height: 14px; font: 500 11px/14px var(--mk-f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--mk-rust); }
-.mk-s3 .mk-s3h3 { margin: 8px 0 6px; font: 400 24px/1.16 var(--mk-f-display) !important; color: #1c130f; }
-.mk-s3 p { margin: 0; font: 400 16px/1.5 var(--mk-f-serif); color: rgba(28, 19, 15, .78); }
-.mk-s3 ul { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; }
-.mk-s3 li { display: grid; grid-template-columns: 20px 1fr; gap: 8px; font: 400 15px/1.35 var(--mk-f-serif); color: #1c130f; }
-.mk-s3 li span { font: inherit; }
-
-/* S5 (landing on phones v3): on a screen as short as 360 × 640 the three points and the join bar do
-   not fit, so the third point is dropped at that height only. 375 × 667 keeps all three (see the v3
-   report: two of its captions still meet the bar). */
-@media (max-width: 760px) and (max-height: 660px) { .mk-s3 li:nth-child(3) { display: none; } }
-
-/* The page snaps only while the story is on it (phones, the landing page), and only to the six
-   captions (v4 folded v3's closing beat into the vision). `proximity`: a scroll that ends far from them is left where it is. */
-@media (max-width: 760px) { html:has(.mk-story) { scroll-snap-type: y proximity; } }
-
-/* The vision on navy (v4, ref landing-mobile-v4.html `.nv`, `.nk`, `.nl`, `.vbf`, `.vbr`/`.vbt`):
-   rounded top corners, 6px up into the story's foot, the heading and the lead, ONE cream frame whose
-   pictures cross-fade, and the line carousel beneath it. Text on navy is white; the active dot pink. */
-.mk-vision.mk-vision--navy { background: #1b2433; color: #fff; margin-top: -6px; padding: 40px 0 30px; border-radius: 26px 26px 0 0; }
-.mk-vision--navy .mk-nk { margin: 0 24px 10px; font: 400 32px/1.1 var(--mk-f-display) !important; color: #fff; }
-.mk-vision--navy .mk-nl { margin: 0 24px 26px; max-width: 320px; font: 400 17px/1.5 var(--mk-f-serif); color: rgba(255, 255, 255, .78); }
-.mk-vbf { position: relative; height: 300px; margin: 0 24px; background: #f4f1ea; border-radius: 20px; overflow: hidden; }
-.mk-vbf img {
-  position: absolute; inset: 20px; width: calc(100% - 40px); height: calc(100% - 40px); max-width: none;
-  object-fit: contain; opacity: 0; transition: opacity .45s;
-}
-.mk-vbf img.mk-on { opacity: 1; }
-.mk-vrail {
-  display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory;
-  padding: 0 24px 6px; margin: 18px 0 0; scrollbar-width: none; overscroll-behavior-x: contain;
-}
-.mk-vrail::-webkit-scrollbar { display: none; }
-.mk-vrail:focus-visible { outline: 2px solid #e8b4a3; outline-offset: 2px; }
-.mk-vbt { flex: 0 0 330px; scroll-snap-align: center; }
-.mk-vbt .mk-vbth3 { margin: 0 0 8px; font: 400 28px/1.12 var(--mk-f-display) !important; color: #fff; }
-.mk-vbt p { margin: 0; font: 400 16px/1.5 var(--mk-f-serif); color: rgba(255, 255, 255, .75); }
-.mk-vdots { display: flex; justify-content: center; gap: 6px; margin: 14px 0 6px; }
-.mk-vdots i { width: 6px; height: 6px; border-radius: 3px; background: rgba(255, 255, 255, .22); transition: width .2s, background .2s; }
-.mk-vdots i.mk-on { width: 18px; background: #e8b4a3; }
-.mk-vlink {
-  display: inline-block; margin: 14px 24px 0; font: 500 15px/1 var(--mk-f-serif); color: #fff;
-  text-decoration: underline; text-decoration-color: #e8b4a3; text-underline-offset: 6px; text-decoration-thickness: 1.5px;
-}
-
-/* The closing founding card, on the light ground: white fading to blush, the hawks on its top-right
-   corner, breaking its top edge (absolutely placed, so they take no room in the card). */
-.mk-close { padding: 64px 16px 44px; }
-.mk-ccard {
-  position: relative; border-radius: 20px; padding: 22px 20px;
-  background: linear-gradient(160deg, #fff 0%, #fff 55%, #f7ece7 100%);
-  box-shadow: 0 0 0 1px rgba(28, 19, 15, .06), 0 20px 40px -28px rgba(28, 19, 15, .45);
-}
-.mk-ccart { position: absolute; right: -4px; top: -58px; width: 138px; height: auto; max-width: none; }
-.mk-ccpill {
-  display: inline-block; font: 600 10.5px/1 var(--mk-f-mono); letter-spacing: .16em; text-transform: uppercase;
-  /* ⚠️ RUST, NOT THE REF'S BURGUNDY (#7c3a2a): burgundy is retired from this sheet (landing colours
-     v2) and rust is the one red on light, so the pill reads the token. */
-  color: var(--mk-rust); background: #f5e6df; border-radius: 999px; padding: 7px 10px;
-}
-.mk-ccard .mk-cch2 { font: 400 28px/1.12 var(--mk-f-display) !important; margin: 14px 0 10px; max-width: 220px; color: #1c130f; }
-.mk-cclead { font: 400 15.5px/1.5 var(--mk-f-serif); color: rgba(28, 19, 15, .78); margin: 0 0 14px; }
-.mk-cclist { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 10px; }
-.mk-cclist li { display: grid; grid-template-columns: 22px 1fr; gap: 8px; font: 400 15.5px/1.4 var(--mk-f-serif); color: #1c130f; }
-.mk-cclist li svg { margin-top: 1px; }
-.mk-cclist li span { font: inherit; }
-.mk-ccform { display: grid; gap: 8px; }
-.mk-ccform input[type="email"] {
-  height: 48px; box-sizing: border-box; border-radius: 12px; border: 1px solid rgba(28, 19, 15, .2); background: #fff;
-  padding: 0 14px; font: 400 16px/1 var(--mk-f-serif); color: #1c130f; width: 100%;
-}
-.mk-ccform input[type="email"]::placeholder { color: rgba(28, 19, 15, .4); }
-.mk-ccform input[type="email"]:focus { outline: none; border-color: var(--mk-navy); box-shadow: 0 0 0 3px rgba(42, 58, 82, .15); }
-.mk-ccform .mk-btn {
-  height: 48px; border-radius: 12px; background: var(--mk-navy); color: #fff; border: 0; width: 100%;
-  font: 600 16px/1 var(--mk-f-serif); justify-content: center;
-}
-.mk-ccform .mk-btn:hover { background: var(--mk-navy); }
-.mk-ccard .mk-betanote { margin: 8px 0 0; font-size: 12px; line-height: 1.4; }
-.mk-ccard .mk-places { margin-top: 16px; width: auto; }
-.mk-ccard .mk-places-bar { height: 4px; border-radius: 2px; background: #e9e4dd; overflow: hidden; }
-.mk-ccard .mk-places span { margin-top: 9px; font: 500 11px/1 var(--mk-f-mono); letter-spacing: .16em; text-transform: uppercase; color: #1c130f; }
-.mk-ccnote { font: 400 13px/1.45 var(--mk-f-serif); color: rgba(28, 19, 15, .6); margin: 12px 0 0; }
-.mk-ccmore {
-  display: inline-flex; gap: 6px; align-items: center; margin-top: 18px;
-  font: 500 15px/1 var(--mk-f-serif); color: var(--mk-navy);
-  text-decoration: underline; text-decoration-color: var(--mk-rust); text-underline-offset: 6px; text-decoration-thickness: 1.5px;
-}
-/* The join bar (landing on phones v2; ref `.bbar`): navy, floating 12px above the bottom plus the
-   safe-area inset and 10px from each side, hidden below the fold until `JoinBar` shows it. Text on navy
-   is white and its count is pink; text on the pink Join is black. Each part declares its family —
-   `brand.tsx` gives bare `b` and `span` the app's body face. */
-.mk-jbar {
-  position: fixed; left: 10px; right: 10px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); z-index: 70;
-  display: flex; align-items: center; gap: 12px; padding: 10px 10px 10px 16px; border-radius: 16px;
-  background: #1b2433; color: #fff; box-shadow: 0 14px 30px -12px rgba(0, 0, 0, .5); text-decoration: none;
-  transform: translateY(130%); opacity: 0; pointer-events: none;
-  transition: transform .35s cubic-bezier(.2, .8, .2, 1), opacity .25s;
-}
-.mk-jbar.mk-on { transform: none; opacity: 1; pointer-events: auto; }
-.mk-jbt { flex: 1; display: grid; gap: 6px; }
-.mk-jbt b { font: 600 15px/1.1 var(--mk-f-serif); color: #fff; }
-.mk-jbc { display: flex; align-items: center; gap: 8px; font: 500 11px/1 var(--mk-f-mono); letter-spacing: .06em; color: #e8b4a3; }
-.mk-jbc i { width: 64px; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, .16); overflow: hidden; }
-.mk-jbc em { display: block; min-width: 4px; height: 100%; background: #e8b4a3; }
-.mk-jbj {
-  height: 40px; padding: 0 18px; border-radius: 12px; background: var(--mk-join); color: #1c130f;
-  display: grid; place-items: center; font: 600 15px/1 var(--mk-f-serif);
-}
-.mk-jbar:focus-visible { outline: 2px solid #e8b4a3; outline-offset: 2px; }
-@media (min-width: 761px) { .mk-jbar { display: none; } }
-
-/* ⚠️ AFTER THE RULES IT OVERRIDES: a media query confers no specificity, so an earlier reduced-motion
-   block would lose to the story's, the carousel's and the join bar's rules on source order. */
-@media (prefers-reduced-motion: reduce) {
-  .mk-spimg img, .mk-s3, .mk-spbar i, .mk-vdots i, .mk-vbf img, .mk-jbar { transition: none; }
-  html:has(.mk-story) { scroll-snap-type: none; }
-}
+/* ══════════════ The landing page on phones (waitlist v1, 31 Oct) ══════════════
+   The phone page, its founding card and its join bar are styled in `waitlist.css`, one block per
+   selector. The v1–v4 feature story, the navy vision carousel, the founding card's pill and link, and
+   the page's scroll-snapping were RETIRED with this build (ref design-refs/landing-mobile-v7.html). */
 
 /* ══════════════ Public pages on phones v1 (29 Oct; ref design-refs/public-phone-polish-v1/) ══════════════
    The logged-out site at ≤760px. Nothing here can reach a wider screen: every rule is inside this

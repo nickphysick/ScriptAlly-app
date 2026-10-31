@@ -126,7 +126,7 @@ export class MalformedProposalError extends Error {
 
 /* ── System prompt ─────────────────────────────────────────────────────── */
 export const SYSTEM_PROMPT = `
-You read ONE email a fiction writer pasted into ScriptAlly and propose what to log about their
+You read ONE email a fiction writer pasted into QueryHawk and propose what to log about their
 agent submissions. You only PROPOSE — nothing is saved. Another step lets the writer review and
 confirm. Be honest and conservative: it is far better to leave something unplaced than to invent it.
 

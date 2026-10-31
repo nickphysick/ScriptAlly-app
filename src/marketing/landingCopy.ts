@@ -24,37 +24,21 @@ import { FOUNDING_CAP, FOUNDING_CAP_WORD } from "./foundingCap";
    ⚠️ "No more winging it." MOVED UP FROM THE BAND'S EYEBROW, AND IT IS STILL SAID EXACTLY ONCE.
    `BAND_EYEBROW` is retired in the same edit; a lock asserts one owner across every string the page
    renders, so restoring the eyebrow beside this headline fails. */
+/* ⚠️ WAITLIST v1 (31 Oct): `HERO_H1` is the hero's HANDWRITTEN line on both layouts now (`WAIT_HERO_STRAP`
+   is this constant), under the question "Hunting for a / literary agent?". The two-line headline split
+   (`HERO_H1_LINES`), the two-line sub (`HERO_SUB_LINES`, `HERO_SUB_BRAND`, `HERO_SUB`) and "See how it
+   works" (`HERO_LINK`) are RETIRED with the hero that drew them. */
 export const HERO_H1 = "No more winging it.";
-/** The two lines the headline sets on at desktop. `Hero.tsx` renders each as its own block so the
- *  break is the design's rather than the column's; joined with a space they ARE `HERO_H1`. */
-export const HERO_H1_LINES = ["No more", "winging it."] as const;
 
-/* ⚠️ THE SUB IS TWO SENTENCES ON TWO LINES — a line break, not two paragraphs — and the brand name
-   in the second is DATA, not markup in a string: `HERO_SUB_BRAND` is what `Hero.tsx` wraps in the
-   rust highlighter, and a lock requires it exactly once, in the second line. */
-export const HERO_SUB_LINES = [
-  "Hunting for literary agent representation?",
-  "Smarten your search with QueryHawk.",
-] as const;
-export const HERO_SUB_BRAND = "QueryHawk";
-/** The whole sub as a reader (or a screen reader) is told it. */
-export const HERO_SUB = HERO_SUB_LINES.join(" ");
-
-/** The solid pill. It goes to `/founders`, which is where the sign-up it asks for lives. */
+/** The sign-up's button in the hero, on both layouts, and the join bar's words. */
 export const HERO_CTA = "Become a founding writer";
-
-/** The plain link beside it: an in-page jump to the section break above the feature rows. */
-export const HERO_LINK = "See how it works";
 
 /* ── The hero on phones (≤760px; ref design-refs/landing-hero-mobile-v1.html) ──
    ⚠️ THE STRAPLINE IS `HERO_H1` ITSELF, NOT A SECOND STRING. On phones the desktop headline is not
    rendered and "No more winging it." is the drawer's handwritten strapline — so the phrase keeps
-   exactly one owner here, and the "exactly once" lock stays true by construction.
-   "See how it works" is `HERO_LINK`, for the same reason. */
+   exactly one owner here, and the "exactly once" lock stays true by construction. */
 /** The drawer's question, in two blocks: the second carries the rust highlighter. */
 export const HERO_PHONE_Q = ["Hunting for a", "literary agent?"] as const;
-/** The founding sign-up that opens inside the drawer once the story ends. */
-export const HERO_PHONE_SIGNUP = "Enter your email for full, free access to QueryHawk as a founding writer.";
 export const HERO_PHONE_JOIN = "Join";
 /** The phone cards' manuscript (v3): the same invented title on every phone card, front and back. */
 export const HERO_PHONE_MS = "Lord of the Wings";
@@ -129,16 +113,9 @@ export const PHONE_STORY = {
    action label — so a lock asserting the WORDING has left the site would be wrong. The claim is
    about the constants and the hero. */
 
-/* ══════════════ The status band, between the hero and the rows ══════════════ */
-
-/**
- * ⚠️ THE BAND HAS NO EYEBROW (landing hero v3, 20 Oct). `BAND_EYEBROW` ("No more winging it.") is
- * DELETED: the phrase moved up to be the hero's headline, which is what keeps it said once.
- * ⚠️ AND THE HEADING IS A STATEMENT WITH A FULL STOP, NOT THE OLD QUESTION — with the typographic
- * apostrophe the ref sets. One line at desktop; it may wrap below 900px.
- */
-export const BAND_HEADING =
-  "A bird\u2019s-eye view of your entire querying campaign.";
+/* ══════════════ The status band — RETIRED (waitlist v1, 31 Oct) ══════════════
+   Its heading is feature row 1's now (`BE_HEADING`, beside the Birds-eye window, without the full stop,
+   as the ref sets it). `BAND_HEADING` and `BAND_EYEBROW` are both gone. */
 
 /* ⚠️ `STATUS_STEPS` AND `StatusStep` ARE RETIRED WITH THE CAROUSEL THEY WERE WRITTEN FOR (18 Sep).
    Six titles and six descriptions of the pipeline states, rotated one at a time under the band's
@@ -223,10 +200,13 @@ export const FOUNDING_IN_RETURN =
    /founders — and two of them promised "for life", which is a stronger commitment than the product
    needs to make. Standardised on "for as long as you need it": warmer, and it does not promise
    anything we might regret. If the terms change, all four change together. */
+/* ⚠️ REWRITTEN 31 Oct: the offer is no longer "six months free, then half price". These are
+   `FOUNDING_GETS`' four terms in the tier card's shorter register. */
 export const FOUNDING_PERKS = [
-  "Six months' free Pro access",
-  "Half price for as long as you need it",
+  "Pro free for your whole querying campaign",
+  "Smart Import to bring your list across",
   "A direct line to the founder",
+  "An Early Bird discount for writers you invite",
 ] as const;
 
 
@@ -309,8 +289,7 @@ export const navPlacesLeft = (left: number) => `${left} places left`;
 /** "63 places left" from the two figures the endpoint answered with: /pricing's counter line.
  *  A builder for the reason the two above are — no subtraction at a render site, and never below 0. */
 export const foundingPlacesLeftLabel = (claimed: number, cap: number) => navPlacesLeft(Math.max(0, cap - claimed));
-/** The desktop hero's places counter (v4.1): the number in bold, then this; and its spoken label. */
-export const HERO_PLACES_REST = " places left";
+/** The places line under each sign-up (waitlist v1): what it says, and what it is read as. */
 export const heroPlacesLabel = (left: number, cap: number) => `${left} of ${cap} founding places left`;
 
 export const FOUNDING_NOTE: CopyRun[] = [
@@ -442,8 +421,7 @@ export const VISION_POINTS: VisionPoint[] = [
   },
 ];
 
-/** The band's one way out, to /about. A button, because marketing routes go through `onNavigate`. */
-export const VISION_LINK = "Read our story";
+/* `VISION_LINK` ("Read our story") is RETIRED (waitlist v1): the landing page links nowhere but Privacy. */
 
 /* ══════════════ The landing page on phones (≤760px; landing on phones v3, 26 Oct) ══════════════
    ref design-refs/landing-mobile-v3.html (the story and its closing beat; v2's ref for the rest).
@@ -455,8 +433,6 @@ export const VISION_LINK = "Read our story";
    `FEATURE_ROWS` and the desktop rows' table. */
 export interface FeatureCard { key: FeatureRow["key"]; heading: string; line: string; points: [string, string, string] }
 
-/** "3 of 6" — the caption's place in the story. */
-export const featureStoryLabel = (n: number, of: number) => `${n} of ${of}`;
 
 export const FEATURE_STORY: FeatureCard[] = [
   { key: "track", heading: "Every query tracked, from start to finish", line: "A full history for everything you've sent, so nothing slips through the cracks.",
@@ -477,15 +453,13 @@ export const FEATURE_STORY: FeatureCard[] = [
    into its top — the heading and the lead — then one frame and the three lines you swipe, each a
    point's short line keyed to `VISION_POINTS` (whose headings are shared — "Make querying
    straightforward." included), and the way out to /about. */
-export const VISION_NAVY_HEADING = "And so much more.";
-export const VISION_NAVY_LEAD = "That's QueryHawk, your smart querying companion. And here are the principles we built it on:";
-export const VISION_NAVY_ARIA = "Our principles, swipe across";
+/* ⚠️ WAITLIST v1 (31 Oct): the carousel's heading, lead, aria label and "Read our story →" are RETIRED
+   with `VisionNavy`. These short lines live on as the phone mission's two lines (`LandingPhone`). */
 export const VISION_NAVY: Record<string, string> = {
   stories: "A captivating story should never be lost to a sub-par querying campaign.",
   simple: "Everything you need to make the right call at the right time.",
   write: "Less time in spreadsheets, more time doing what you love.",
 };
-export const VISION_NAVY_LINK = "Read our story →";
 
 /* The join bar that follows a reader down the landing page on phones. Its count's words are
    `navPlacesLeft`, the same phrase the other places-left lines use. */
@@ -496,7 +470,7 @@ export const JOIN_BAR_CTA = "Join";
 export const CLOSE_HEADING = "Help get things off the ground.";
 export const CLOSE_LEAD = `We're looking for ${FOUNDING_CAP} writers to put QueryHawk through its paces. You get:`;
 export const CLOSE_NOTE = "All we ask is occasional feedback to help shape QueryHawk.";
-export const CLOSE_LINK = "How being a founding writer works →";
+/* `CLOSE_LINK` ("How being a founding writer works →") is RETIRED (waitlist v1): the page links nowhere but Privacy. */
 
 /* ══════════════ Pricing (public, marketing tier) ══════════════
    ⚠️ THREE FIGURES ARE UNSET AND NOTHING HERE MAY INVENT THEM. The design this page was rebuilt
@@ -616,7 +590,7 @@ export const PRICING_TIERS: PricingTier[] = [
     illoAlt: "A hawk wearing a scarf, holding a rolled manuscript under one wing.",
     tag: `Available now · ${FOUNDING_CAP} places`,
     price: "Free",
-    priceUnit: "for six months",
+    priceUnit: "for your whole querying campaign",
     summary: `For the ${FOUNDING_CAP_WORD} writers who put QueryHawk through its paces.`,
     /* ⚠️ NO FIGURE AND NO STRUCK-THROUGH PRICE. The ref draws "£0 for six months" against a
        struck "£7/mo" and then "half price for life"; both halves of that are arithmetic on a
@@ -663,4 +637,125 @@ export const PRICING_TIERS: PricingTier[] = [
     action: "Available at launch",
     cta: "later",
   },
+];
+
+/* ══════════════ The waiting-list landing page (waitlist v1, 31 Oct) ══════════════
+   refs design-refs/landing-mobile-v7.html (phones), design-refs/landing-desktop-v5.html (desktop) and
+   design-refs/birdseye-focus-v1.html option 2 (the desktop Birds-eye window). Every string is the
+   refs', verbatim.
+
+   ⚠️ THE PAGE ASKS FOR ONE THING AND LINKS NOWHERE BUT PRIVACY. Every CTA scrolls to an on-page
+   sign-up; the routes behind the old links are untouched.
+
+   ⚠️ THE BIRDS-EYE DATA IS ILLUSTRATION. Names, agencies, dates and chip words are static, typed
+   here; nothing reads the store or today's date. October/November are a drawn window, not a clock. */
+
+/** The hero's question, both layouts: "Hunting for a" / "literary agent?" (highlighter on the second). */
+export const WAIT_HERO_Q = HERO_PHONE_Q;
+/** The handwritten line under it. It is `HERO_H1` — the phrase keeps one owner. */
+export const WAIT_HERO_STRAP = HERO_H1;
+export const WAIT_HERO_SUB = "Smarten your hunt for literary agent representation with QueryHawk.";
+
+/* ── Feature 1: the Birds-eye view ── */
+export const BE_HEADING = "A bird’s-eye view of your entire querying campaign";
+/** Phones say it shorter. */
+export const BE_LINE_PHONE = "Every query on one timeline, so you can see at a glance what needs you and when.";
+export const BE_LINE_DESK = "Every query on one timeline, so you can see at a glance what needs you, what’s coming up and what can wait.";
+export const BE_TICKS = [
+  "What's overdue, what's coming up and what can wait",
+  "Every reply date worked out for you",
+  "Your next move flagged as it falls due",
+] as const;
+/** The phone window's ink header. */
+export const BE_TITLE = "Birds-eye view";
+
+/** The drawn date row both windows share: month bands, Monday ticks, and where TODAY sits (% across). */
+export const BE_DATES = {
+  months: [{ name: "October", from: 0, to: 66.3 }, { name: "November", from: 66.3, to: 100 }],
+  ticks: [{ at: 4.6, label: "5" }, { at: 20.6, label: "12" }, { at: 36.6, label: "19" }, { at: 52.6, label: "26" }, { at: 84.6, label: "9" }],
+  today: 64,
+  todayLabel: "TODAY",
+} as const;
+
+/** Stages the windows colour by, and the name a bar falls back to when its sentence will not fit. */
+export type BeStage = "q" | "pr" | "ps" | "fr" | "fs" | "o";
+export const BE_STAGE_NAME: Record<BeStage, string> = {
+  q: "Queried", pr: "Partial requested", ps: "Partial sent", fr: "Full requested", fs: "Full sent", o: "Offer",
+};
+export const BE_STAGE_RGB: Record<BeStage, readonly [number, number, number]> = {
+  q: [236, 226, 209], pr: [226, 160, 139], fr: [226, 160, 139], ps: [178, 194, 172], fs: [178, 194, 172], o: [156, 180, 204],
+};
+
+/** Phones: eight bars at rest — [left %, width %, stage, sentence, overdue]. */
+export const BE_PHONE_START: ReadonlyArray<readonly [number, number, BeStage, string, boolean]> = [
+  [30, 34, "fr", "Full requested · send by 12 Nov", false],
+  [0, 64, "q", "Reply 5 weeks overdue", true],
+  [12, 66, "ps", "Partial sent · reply by 30 Nov", false],
+  [42, 34, "o", "Offer · reply by 6 Nov", false],
+  [4, 78, "q", "Queried · reply by 23 Nov", false],
+  [48, 40, "fs", "Full sent · reply by 2 Dec", false],
+  [10, 54, "q", "Reply 2 weeks overdue", true],
+  [36, 56, "q", "Queried · reply by 26 Nov", false],
+];
+/** Phones: the story, one change at a time — [bar, left, width, stage, sentence, chip, blush chip, overdue]. */
+export const BE_PHONE_EVENTS: ReadonlyArray<readonly [number, number, number, BeStage, string, string | null, boolean?, boolean?]> = [
+  [1, 0, 64, "q", "Reply 5 weeks overdue", "Worth a nudge", true, true],
+  [0, 30, 34, "fr", "Full requested · send by 12 Nov", "Send the full", true, false],
+  [4, 60, 6, "pr", "Partial requested · send by 6 Nov", "Partial requested!", false, false],
+  [4, 60, 22, "pr", "Partial requested · send by 6 Nov", null],
+  [2, 12, 54, "ps", "Partial sent · reply by 3 Nov", "Reply due in 3 days", false, false],
+  [6, 10, 54, "q", "Reply 2 weeks overdue", "Worth a nudge", true, true],
+  [3, 42, 22, "o", "Offer · reply by 6 Nov", "Offer! Reply by Friday", true, false],
+  [5, 48, 16, "fs", "Reply 3 days overdue", "Worth a nudge", true, true],
+  [7, 58, 8, "fr", "Full requested · send by 30 Nov", "Full requested!", false, false],
+  [7, 58, 34, "fr", "Full requested · send by 30 Nov", null],
+  [0, 30, 34, "fr", "Full requested · send by 12 Nov", null],
+  [4, 4, 78, "q", "Queried · reply by 23 Nov", null],
+  [2, 12, 66, "ps", "Partial sent · reply by 30 Nov", null],
+  [3, 42, 34, "o", "Offer · reply by 6 Nov", null],
+  [5, 48, 40, "fs", "Full sent · reply by 2 Dec", null, false, false],
+  [7, 36, 56, "q", "Queried · reply by 26 Nov", null],
+];
+
+/** Desktop: the focus window's names-column header. */
+export const BE_DESK_HEAD = "8 active queries";
+/** Desktop: the eight rows — [left %, width %, stage, sentence, ghost line widths %] — and the one in focus. */
+export const BE_DESK_ROWS: ReadonlyArray<readonly [number, number, BeStage, string, readonly [number, number] | null]> = [
+  [0, 64, "q", "Reply 5 weeks overdue", [78, 52]],
+  [8, 56, "ps", "Reply 12 days overdue", [64, 46]],
+  [30, 42, "fr", "Send the full by 6 Nov", null],
+  [42, 34, "o", "Reply to the offer by 9 Nov", [58, 40]],
+  [48, 32, "pr", "Send the partial by 12 Nov", [72, 50]],
+  [4, 88, "q", "Reply due 23 Nov", [66, 58]],
+  [20, 80, "fs", "Reply due 2 Dec", [80, 44]],
+  [36, 62, "q", "Reply due 28 Nov", [60, 48]],
+];
+export const BE_FOCUS = {
+  name: "Eleanor Whitfield",
+  agency: "Greenfield Literary",
+  /** The detail card's sentence: [before, in bold, after]. */
+  line: ["Full requested on 21 October. ", "Send it by 6 November", ", in 6 days."],
+  action: "Mark full sent",
+} as const;
+
+/* ── Feature 2 onwards (phones): each a picture, a heading, a line and three ticks ──
+   The desktop rows keep `FEATURE_ROWS`' own words ("Your agents on file" stays there). */
+export const WAIT_AGENTS: FeatureCard = {
+  key: "agents", heading: "A home for your agents",
+  line: "Know your quarry. QueryHawk tracks the health of your agent list, making sure everything you need to query them smartly is up to date.",
+  points: ["Agent wish list and desired genres", "Reply policies and response times", "Contact details & correspondence notes"],
+};
+/** The card's "play again" pill, both layouts. */
+export const REPLAY_LABEL = "↻ Play again";
+
+/* ── The mission (phones, navy) ── */
+export const MISSION_EYEBROW = "Our mission? Simple.";
+
+/* ── Questions (phones) ── */
+export const FAQ_HEADING = "Questions";
+export const FAQ: ReadonlyArray<readonly [string, string]> = [
+  ["What does it cost?", "Nothing for founding writers: you get QueryHawk Pro free for your entire querying campaign."],
+  ["Do I need a finished manuscript?", "No. If you're still writing or revising, there's a set-up for that too, ready for when you start querying."],
+  ["I already track my queries in a spreadsheet.", "Bring it with you. Smart Import reads your spreadsheet and sets everything up, or you can start fresh in minutes."],
+  ["What do you ask of founding writers?", "Occasional feedback to help shape QueryHawk. That's it."],
 ];

@@ -13,10 +13,15 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./marketing.css";
 import { marketingNavState, MarketingNavUser } from "./marketingNav";
+import { LANDING_ONLY } from "../lib/siteMode";
 import { BRAND_MARK, artUrl } from "./brandArt";
 import { MarketingFooter } from "./MarketingFooter";
 import { usePhone } from "./usePhone";
-import { HERO_CTA } from "./landingCopy";
+import { ConsentBar } from "./ConsentBar";
+import { CONSENT_EVENT, initAnalytics, trackPageView } from "./analytics";
+import { captureAttribution } from "./attribution";
+import { HERO_CTA, HERO_PHONE_JOIN } from "./landingCopy";
+import { BAND_FORM, joinTarget, scrollToForm } from "./WaitlistParts";
 
 /* ── The brand artwork: the hawk and the drawn wordmark ──
    Both sit in public/ rather than src/assets/ so they are served at stable paths — and public/ is
@@ -46,6 +51,15 @@ export const MarketingShell: React.FC<{
   path: string;
   children: React.ReactNode;
 }> = ({ user, onNavigate, path, children }) => {
+  /* Analytics: loads only if the visitor has already said yes (see analytics.ts), then one page
+     view per public route. A yes given on this page sends this page's view at that moment. */
+  useEffect(() => { captureAttribution(); initAnalytics(); }, []);
+  useEffect(() => { trackPageView(path); }, [path]);
+  useEffect(() => {
+    const onConsent = () => trackPageView(path);
+    window.addEventListener(CONSENT_EVENT, onConsent);
+    return () => window.removeEventListener(CONSENT_EVENT, onConsent);
+  }, [path]);
   /* ⚠️ A CLASS TOGGLED BY A PASSIVE LISTENER, NOT A SCROLL-LINKED ANIMATION. The condense is a
      state change with a transition, so it runs on the compositor once and stops; a scroll-driven
      animation would recompute on every frame of every scroll for a two-state effect. */
@@ -146,6 +160,12 @@ export const MarketingShell: React.FC<{
   /* At and below 760px the bar is the logo, one tinted pill ("Log in", or "Open dashboard" signed in)
      and the menu (landing on phones v4, 26 Oct; v1's founding strip above the bar is gone). */
   const phone = usePhone();
+  /* ⚠️ THE WAITING-LIST PAGE LINKS NOWHERE (waitlist v1, 31 Oct). On `/` the bar is the logo and ONE
+     call to action that scrolls to an on-page sign-up — Join on phones (the hero's form, or the founding
+     card's once the hero is passed), "Become a Founding Writer" on the desktop (the founding band's).
+     No links, no Log in, no menu; the logo scrolls to the top. Every other public page keeps its chrome. */
+  const waitlist = path === "/";
+  const toTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
   const toFeatures = () => {
     if (path === "/") {
@@ -182,7 +202,7 @@ export const MarketingShell: React.FC<{
       <div className="mk-navsentinel mk-navsentinel--release" ref={releaseRef} aria-hidden="true" />
       <div className={"mk-navwrap" + (scrolled ? " mk-scrolled" : "")}>
         <nav className="mk-nav" aria-label="Marketing">
-          <button type="button" className="mk-brand mk-brand-link" onClick={() => onNavigate("landing")} aria-label="QueryHawk home">
+          <button type="button" className="mk-brand mk-brand-link" onClick={waitlist ? toTop : () => onNavigate("landing")} aria-label="QueryHawk home">
             {/* ⚠️ SHIPPED AS SUPPLIED — NO FILTER, NO RECOLOUR. The mark is artwork, not an icon that
                 takes the tier's ink, and its transparency is part of the drawing.
                 `alt=""` because the wordmark beside it already names the site — a second
@@ -199,6 +219,15 @@ export const MarketingShell: React.FC<{
               Contact are real public routes; leaving them footer-only would put the two company
               pages one scroll below the fold on every page that has one. Features stays because it
               is a live in-page anchor on the landing, and the refs' nav simply predates it. */}
+          {waitlist ? (
+            <div className="mk-navright">
+              {phone ? (
+                <button type="button" className="mk-wljoin" onClick={() => scrollToForm(joinTarget())}>{HERO_PHONE_JOIN}</button>
+              ) : (
+                <button type="button" className="mk-btn mk-btn--cream" onClick={() => scrollToForm(BAND_FORM)}>{marketingNavState(null).primaryLabel}</button>
+              )}
+            </div>
+          ) : (<>
           <div className="mk-links">
             {LINKS.map((l) => (
               <button key={l.label} type="button" onClick={l.go}
@@ -210,20 +239,24 @@ export const MarketingShell: React.FC<{
           <div className="mk-navright">
             {/* Phones (landing on phones v4, 26 Oct): one tinted pill — "Log in" to the sign-in route the
                 desktop's Log in uses, or, signed in, the desktop's "Open dashboard". The founding offer
-                is the drawer's sign-up, the join bar and the closing card; the strip is gone. */}
+                is the drawer's sign-up, the join bar and the closing card; the strip is gone.
+                Landing-only (live) draws NO pill: there is no way in, and the constant folds the
+                branch away so the bundle carries neither label. */}
             {phone ? (
-              nav.mode === "anon" ? (
+              LANDING_ONLY ? null : nav.mode === "anon" ? (
                 <button type="button" className="mk-lg" onClick={() => { window.location.hash = "#/login"; }}>Log in</button>
               ) : (
                 <button type="button" className="mk-lg" onClick={() => onNavigate("dashboard")}>{nav.primaryLabel}</button>
               )
             ) : (<>
-            {nav.showLogIn && (
+            {!LANDING_ONLY && nav.showLogIn && (
               <button type="button" className="mk-login" onClick={() => { window.location.hash = "#/login"; }}>
                 Log in
               </button>
             )}
-            {nav.mode === "anon" ? (
+            {/* Landing-only folds this to the anon branch at build time, so the bundle carries no
+                "Open dashboard" (and no Log in above) for verify to find. */}
+            {LANDING_ONLY || nav.mode === "anon" ? (
               <button type="button" className="mk-btn mk-btn--cream" onClick={() => onNavigate("founders")}>
                 {nav.primaryLabel}
               </button>
@@ -248,11 +281,12 @@ export const MarketingShell: React.FC<{
           >
             <span /><span /><span />
           </button>
+          </>)}
         </nav>
 
         {/* The panel is inside the sticky wrapper so it travels with the nav and inherits its
             ground; it is only reachable below the breakpoint, where the links are hidden. */}
-        {menuOpen && (
+        {menuOpen && !waitlist && (
           <div className="mk-navpanel" id="mk-navpanel" ref={panelRef}>
             {MENU_LINKS.map((l) => (
               <button key={l.label} type="button" onClick={pick(l.go)}
@@ -260,7 +294,7 @@ export const MarketingShell: React.FC<{
                 {l.label}
               </button>
             ))}
-            {nav.showLogIn && (
+            {!LANDING_ONLY && nav.showLogIn && (
               <button type="button" onClick={pick(() => { window.location.hash = "#/login"; })}>
                 Log in
               </button>
@@ -286,7 +320,8 @@ export const MarketingShell: React.FC<{
           last child — which put it INSIDE whatever the page's last surface was, so nothing could
           round that surface's bottom corners against it. Chrome on both sides of the sheet now
           belongs to the same component. */}
-      <MarketingFooter onNavigate={onNavigate} />
+      <MarketingFooter onNavigate={onNavigate} waitlist={waitlist} />
+      <ConsentBar onPrivacy={() => onNavigate("privacy")} />
     </div>
   );
 };

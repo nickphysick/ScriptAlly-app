@@ -25,9 +25,9 @@ export const CONTACT_ENV = "WAITLIST_CONTACT_EMAIL";
 export const DEFAULT_FROM = "Nick at QueryHawk <nick@queryhawk.net>";
 
 /**
- * ⚠️ A VISIBLE CONTACT ROUTE IN THE BODY, NOT JUST A HEADER. Replies to the from-address are
- * currently diverted (see `replyTo` below) and a reader cannot see a `Reply-To` header. Someone who
- * wants a human needs an address they can read.
+ * ⚠️ A VISIBLE CONTACT ROUTE IN THE BODY, NOT JUST A HEADER. A reader cannot see a `Reply-To`
+ * header, so someone who wants a human needs an address they can read. (This mattered most when
+ * the old domain's mail was forwarded and replies were lost; nick@queryhawk.net is a real mailbox.)
  *
  * ⚠️ THE SAME STRING AS `SUPPORT_EMAIL` IN `src/lib/companyInfo.ts`, DELIBERATELY DUPLICATED.
  * `functions/` cannot import from `src/` (they are separate TypeScript projects with their own
@@ -71,8 +71,8 @@ export interface MailConfig {
    *
    * ⚠️ A PRINTED ADDRESS THAT BOUNCES IS WORSE THAN A DEAD `Reply-To`. A reply-to that fails is
    * invisible; an address in the body is a promise made in the text of the email, and the founding
-   * offer is built on "a direct line to the founder". Until forwarding delivers, this points
-   * somewhere that answers.
+   * offer is built on "a direct line to the founder". So it must always point somewhere that
+   * answers; each environment states it explicitly.
    */
   contactEmail: string;
 }
@@ -88,8 +88,8 @@ export const resolveMailConfig = (env: Env): MailConfig => {
   return {
     from,
     /* ⚠️ FALL BACK, NEVER THROW. A missing reply-to must not stop a confirmation going out — the
-       signup is worth more than the reply route. But see `replyToWarning`: in that state a
-       writer's reply lands somewhere that currently bounces, and nothing else would say so. */
+       signup is worth more than the reply route. The from-address is a real mailbox, so the
+       fallback is fine; `replyToWarning` only makes the missing key visible in the logs. */
     replyTo: replyTo || from,
     publicUrl: publicUrl || null,
     contactEmail: clean(env[CONTACT_ENV]) || SUPPORT_EMAIL,
@@ -97,17 +97,14 @@ export const resolveMailConfig = (env: Env): MailConfig => {
 };
 
 /**
- * ⚠️ THE WARNING IS THE WHOLE POINT OF THE FALLBACK BEING SILENT-BUT-LOGGED. Namecheap forwarding
- * for the from-address is configured and not delivering, so replies to it are lost — and because
- * the MX record was replaced by that forwarding, bounce feedback does not reach Resend either.
- * Nobody would find out. When forwarding works, `WAITLIST_REPLY_TO` is deleted and the
- * from-address becomes the reply route again.
+ * LOGGED, NEVER THROWN. An unset `WAITLIST_REPLY_TO` falls back to the from-address, which is fine:
+ * nick@queryhawk.net is a real mailbox. The warning exists only so a missing key is visible in the
+ * logs rather than silent. (It mattered more when the old domain's mail was forwarded and lost.)
  */
 export const replyToWarning = (env: Env): string | null =>
   clean(env[REPLY_TO_ENV])
     ? null
-    : `${REPLY_TO_ENV} is unset — replies will go to the from-address, which is not currently ` +
-      "delivering. Set it in functions/.env so a writer's reply reaches a person.";
+    : `${REPLY_TO_ENV} is unset — replies will go to the from-address.`;
 
 /* ══════════════ Links ══════════════ */
 

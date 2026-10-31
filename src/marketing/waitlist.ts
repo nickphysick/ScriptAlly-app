@@ -48,6 +48,7 @@
  */
 
 import { appCheckToken } from "./appCheck";
+import { storedAttribution } from "./attribution";
 
 export const WAITLIST_ENDPOINT = "/api/waitlist";
 
@@ -185,6 +186,7 @@ export const joinWaitlist = async (fields: JoinFields): Promise<JoinOutcome> => 
      as unverified. Neither decides anything. A signup must not depend on a bot defence that is
      being trialled, so every failure path yields `null` and the request goes without the header. */
   const token = await appCheckToken();
+  const attribution = storedAttribution();
   return classifyJoin(await request({
     method: "POST",
     headers: {
@@ -197,6 +199,9 @@ export const joinWaitlist = async (fields: JoinFields): Promise<JoinOutcome> => 
       [WAITLIST_HONEYPOT_FIELD]: fields.trap,
       elapsedMs: fields.elapsedMs,
       source: fields.source,
+      /* Which link brought them (see attribution.ts). Omitted when there is none; an older
+         server ignores it. */
+      ...(attribution ? { attribution } : {}),
     }),
   }));
 };
