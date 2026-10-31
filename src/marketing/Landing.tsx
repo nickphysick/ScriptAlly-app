@@ -19,7 +19,6 @@
 import React, { useEffect } from "react";
 import { Hero } from "./Hero";
 import { usePhone } from "./usePhone";
-import { StatusBand } from "./StatusBand";
 import { FeatureRows } from "./FeatureRows";
 import { Vision } from "./Vision";
 import { FoundingBand } from "./FoundingBand";
@@ -47,7 +46,6 @@ export const Landing: React.FC<{ onNavigate: (tab: string, subPageName?: string)
     <div>
       <Hero onNavigate={onNavigate} />
       <div className="mk-lower">
-        <StatusBand />
         <FeatureRows />
         {/* ⚠️ THE WHITE BAND SITS BETWEEN THE ROWS AND THE OFFER, AND THE ORDER IS THE ARGUMENT.
             The rows say what the product does; this says why it exists; the founding band asks for

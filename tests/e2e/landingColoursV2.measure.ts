@@ -46,7 +46,6 @@ const INK = [27, 36, 51];
 const MUTATIONS: Record<string, string> = {
   N1: ".mk-navwrap.mk-scrolled{background:rgba(247,244,238,.92)!important;backdrop-filter:blur(8px)!important}",
   N3: ".mk-navword{font-size:40px!important}",
-  H1: ".mk-herowrap{background:#1b2433!important}",
   S1: ".mk-sheet{border-bottom-left-radius:0!important;border-bottom-right-radius:0!important}",
   V1: ".mk-vision{background-color:#ffffff!important}",
   F1: ".mk-claimcard .mk-betamsg{color:#3a1c14!important;background:none!important}",
@@ -57,11 +56,7 @@ const MUTATIONS: Record<string, string> = {
   /* RETARGETED (landing on phones v1, 26 Oct): the pill is gone; the phone's founding offer is the strip. */
   /* RETARGETED (landing on phones v4): the strip is gone; the phone's bar holds the "Log in" pill. */
   N2p: ".mk-lg{background:#e8b4a3!important}",
-  V1p: ".mk-vbf img{opacity:1!important}",
-  /* v3: page snapping switched off, so the phone's jump lands on the band rather than on caption 1. */
-  N3s: "html:has(.mk-story){scroll-snap-type:none!important}",
   N3p: "@media (max-width:760px){.mk-scope .mk-nav{height:72px!important}}",
-  H1p: ".mk-hp-stage{background:#ffffff!important}",
   S1p: ".mk-sheet{border-top-left-radius:18px!important;border-top-right-radius:18px!important}",
 };
 
@@ -198,12 +193,10 @@ async function navHeights(page: Page) {
 /** The landing's own sections, by class. No element on these pages carries a `data-probe`. */
 const BOXES = [
   ".mk-navwrap", ".mk-nav", ".mk-logo", ".mk-links button", ".mk-login", ".mk-navright .mk-btn", ".mk-burger",
-  ".mk-herowrap", ".mk-hero", ".mk-herocopy", ".mk-herotitle", ".mk-herosub", ".mk-heroctas", ".mk-heropill",
-  ".mk-herolink",
-  ".mk-statband", ".mk-stattitle",
+  /* The old hero's and the status band's selectors left with them (waitlist v1, 31 Oct). */
   ".mk-featband", ".mk-rows", ".mk-frow", ".mk-frow h3", ".mk-fcopy", ".mk-fcopy p", ".mk-rowillo",
   ".mk-vision", ".mk-visionin", ".mk-visionh2", ".mk-visionpoints", ".mk-vfig", ".mk-vfig img", ".mk-vh3",
-  ".mk-vbody", ".mk-visionmore",
+  ".mk-vbody",
   ".mk-claimband", ".mk-claimgrid", ".mk-claimart", ".mk-claimcard", ".mk-claimkicker", ".mk-claimh2",
   ".mk-claimlead", ".mk-claimlist li", ".mk-claimask", ".mk-claimform", ".mk-claimform input[type=email]",
   ".mk-claimform button", ".mk-betanote",
@@ -232,17 +225,7 @@ async function boxes(page: Page) {
   }, BOXES);
 }
 
-/** `See how it works` → #pulse: the gap between the nav's bottom edge and the section's top. */
-async function anchorGap(page: Page) {
-  await page.evaluate(() => window.scrollTo(0, 0));
-  /* RETARGET (phone hero, 23 Oct): on a phone the jump is the drawer's "See how it works". Same law —
-     the band lands at the nav's foot — through whichever of the two links the page renders. */
-  await page.click((page.viewportSize()?.width ?? 1440) <= PHONE ? ".mk-hp-how" : ".mk-herolink");
-  await page.waitForTimeout(400);
-  return page.evaluate(() =>
-    document.querySelector("#pulse")!.getBoundingClientRect().top -
-    document.querySelector(".mk-navwrap")!.getBoundingClientRect().bottom);
-}
+/* `anchorGap` ("See how it works" → #pulse) is RETIRED with both (waitlist v1, 31 Oct). */
 
 const key = (vp: { width: number }) => String(vp.width);
 const baseline = () => {
@@ -258,7 +241,7 @@ const shot = async (page: Page, name: string, fullPage = false) => {
 test.describe("LC2", () => {
   test("capture: the pre-pack geometry", async ({ page }) => {
     test.skip(!CAPTURE, "capture runs once, on request");
-    const g: Record<string, unknown> = { nav: {}, boxes: {}, anchor: {} };
+    const g: Record<string, unknown> = { nav: {}, boxes: {} };
     for (const route of ROUTES) for (const vp of NAV_VPS) {
       await open(page, route, vp);
       (g.nav as Record<string, unknown>)[route + "@" + key(vp)] = await navHeights(page);
@@ -266,7 +249,6 @@ test.describe("LC2", () => {
     for (const vp of VPS) {
       await open(page, "/", vp);
       (g.boxes as Record<string, unknown>)[key(vp)] = await boxes(page);
-      (g.anchor as Record<string, unknown>)[key(vp)] = await anchorGap(page);
     }
     mkdirSync(resolve(OUT, "baseline"), { recursive: true });
     writeFileSync(GEOMETRY, JSON.stringify(g, null, 1));
@@ -345,7 +327,9 @@ test.describe("LC2", () => {
     }
   });
 
-  test("N3 the nav's heights and the anchor landing are the pre-pack ones", async ({ page }) => {
+  /* RE-POINTED (waitlist v1, 31 Oct): the anchor-landing half is retired — "See how it works", the
+     drawer's link and the #pulse band they jumped to are all gone. The heights half stands. */
+  test("N3 the nav's heights are the pre-pack ones", async ({ page }) => {
     test.skip(CAPTURE);
     const base = baseline();
     let read = 0;
@@ -367,82 +351,10 @@ test.describe("LC2", () => {
       read++;
     }
     expect(read).toBe(ROUTES.length * NAV_VPS.length);
-    for (const vp of VPS) {
-      await open(page, "/", vp);
-      if (vp.width <= PHONE) {
-        /* RETARGET (landing on phones v3, 26 Oct): the page snaps to the feature captions on a phone, and
-           the band sits just above the first of them, so the jump is pulled on to caption 1's snap: it
-           lands directly under the picture (the band line scrolls under the bar). Measured stable. */
-        await page.evaluate(() => window.scrollTo(0, 0));
-        await page.click(".mk-hp-how"); await page.waitForTimeout(1200);
-        /* ⚠️ Caption 1 always follows the panel in flow, so "under the picture" alone holds snapped or not;
-           what the snap decides is that the panel is STUCK under the bar, which is asserted too. */
-        const land = await page.evaluate(() => ({
-          gap: document.querySelector(".mk-s3")!.getBoundingClientRect().top - document.querySelector(".mk-spimg")!.getBoundingClientRect().bottom,
-          panel: document.querySelector(".mk-spimg")!.getBoundingClientRect().top - document.querySelector(".mk-navwrap")!.getBoundingClientRect().bottom,
-        }));
-        console.log(`LC2 N3 anchor @${vp.width}: caption 1 ${land.gap.toFixed(2)} from the picture, the picture ${land.panel.toFixed(2)} from the bar`);
-        expect(Math.abs(land.panel), `anchor landing @${vp.width}: the picture is stuck under the bar`).toBeLessThanOrEqual(1);
-        expect(Math.abs(land.gap), `anchor landing @${vp.width}: caption 1 snapped under the picture`).toBeLessThanOrEqual(2);
-        continue;
-      }
-      const gap = await anchorGap(page);
-      console.log(`LC2 N3 anchor @${vp.width}: ${gap.toFixed(2)} (was ${Number(base.anchor[key(vp)]).toFixed(2)})`);
-      /* RETARGET (phone hero, 23 Oct): at ≤760px the jump is the drawer's link and the band lands AT the
-         nav's foot (the pre-pack wrapped bar left 8.5px); the law is the landing, so it is held to 0. */
-      expect(Math.abs(gap - (vp.width <= PHONE ? 0 : base.anchor[key(vp)])), `anchor landing @${vp.width}`).toBeLessThanOrEqual(1);
-    }
   });
 
-  /* RE-POINTED (landing hero v3): the hero's ground is the ref's `.hero` gradient now — paper white
-     at the top to `--mk-hero-foot` (#eeebe5) at its foot — rather than white to 62% and the oat. */
-  test("H1 the hero is paper white fading to its foot, with ink type", async ({ page }) => {
-    test.skip(CAPTURE);
-    for (const vp of VPS) {
-      await open(page, "/", vp);
-      /* RETARGET (phone hero, 23 Oct): on a phone the hero is the navy stage under the bar with the
-         cream drawer over its foot, and the type that opens the page is the drawer's question. */
-      if (vp.width <= PHONE) {
-        const r = await page.evaluate(() => {
-          const st = document.querySelector(".mk-hp-stage")!.getBoundingClientRect();
-          const sh = document.querySelector(".mk-hp-sheet")!.getBoundingClientRect();
-          return { stageTop: st.top, sheetTop: sh.top, color: getComputedStyle(document.querySelector(".mk-hp-q2")!).color };
-        });
-        await page.addStyleTag({ content: ".mk-hp-scope{visibility:hidden!important}" });
-        const [stage, drawer] = await pixels(page, [[8, r.stageTop + 8], [8, r.sheetTop + 40]]);
-        console.log(`LC2 H1 @${vp.width} phone`, JSON.stringify({ stage, drawer, title: r.color }));
-        expect(near(stage, [30, 40, 57], 6), `stage ${stage}`).toBe(true);
-        expect(near(drawer, [251, 249, 245], 2), `drawer ${drawer}`).toBe(true);
-        expect(r.color).toBe("rgb(28, 19, 15)");
-        continue;
-      }
-      /* The pile and its shadow are hidden for this one reading: the claim is the ground. */
-      await page.addStyleTag({ content: ".mk-herobox{visibility:hidden!important}" });
-      const hero = await page.evaluate(() => {
-        const r = document.querySelector(".mk-herowrap")!.getBoundingClientRect();
-        return { top: r.top, h: r.height, color: getComputedStyle(document.querySelector(".mk-herotitle")!).color };
-      });
-      const [top] = await pixels(page, [[24, hero.top + 24]]);
-      /* Stacked, the hero is taller than a phone's screen by design (the copy, then the pile), so its
-         foot is brought on screen before it is read rather than assumed to be there. */
-      const footY = await page.evaluate(() => {
-        const r = document.querySelector(".mk-herowrap")!.getBoundingClientRect();
-        if (r.bottom > innerHeight) window.scrollTo(0, scrollY + r.bottom - innerHeight + 40);
-        return new Promise<number>((done) => requestAnimationFrame(() =>
-          done(document.querySelector(".mk-herowrap")!.getBoundingClientRect().bottom - 1)));
-      });
-      expect(footY, "the hero's foot is on screen").toBeLessThanOrEqual(vp.height);
-      const [foot] = await pixels(page, [[24, footY]]);
-      console.log(`LC2 H1 @${vp.width}`, JSON.stringify({ top, foot, title: hero.color }));
-      /* RETARGET (desktop hero v4.1, 25 Oct): at 900px and up the hero sits in a white card over the
-         navy, and the nav's ink carries on into its top; its ground below the card runs from the oat
-         to the band's top colour (#efece6). The 761–899px stacked hero keeps the paper white. */
-      const carded = vp.width >= 900;
-      expect(near(top, carded ? INK : [251, 249, 245], 2), `top ${top}`).toBe(true);
-      expect(near(foot, carded ? [239, 236, 230] : [238, 235, 229], 2), `foot ${foot}`).toBe(true);
-      expect(hero.color).toBe("rgb(28, 19, 15)");
-    }
-  });
+  /* "H1 the hero is paper white fading to its foot" is RETIRED with that hero (waitlist v1, 31 Oct). The new
+     hero's ground (the nav's ink to 58%, then the oat) is held by marketingTokens.test.ts. */
 
   test("S1 one light sheet with four 18px corners between the ink nav and the ink footer", async ({ page }) => {
     test.skip(CAPTURE);

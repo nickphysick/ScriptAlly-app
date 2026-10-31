@@ -24,33 +24,19 @@ import { FOUNDING_CAP, FOUNDING_CAP_WORD } from "./foundingCap";
    ⚠️ "No more winging it." MOVED UP FROM THE BAND'S EYEBROW, AND IT IS STILL SAID EXACTLY ONCE.
    `BAND_EYEBROW` is retired in the same edit; a lock asserts one owner across every string the page
    renders, so restoring the eyebrow beside this headline fails. */
+/* ⚠️ WAITLIST v1 (31 Oct): `HERO_H1` is the hero's HANDWRITTEN line on both layouts now (`WAIT_HERO_STRAP`
+   is this constant), under the question "Hunting for a / literary agent?". The two-line headline split
+   (`HERO_H1_LINES`), the two-line sub (`HERO_SUB_LINES`, `HERO_SUB_BRAND`, `HERO_SUB`) and "See how it
+   works" (`HERO_LINK`) are RETIRED with the hero that drew them. */
 export const HERO_H1 = "No more winging it.";
-/** The two lines the headline sets on at desktop. `Hero.tsx` renders each as its own block so the
- *  break is the design's rather than the column's; joined with a space they ARE `HERO_H1`. */
-export const HERO_H1_LINES = ["No more", "winging it."] as const;
 
-/* ⚠️ THE SUB IS TWO SENTENCES ON TWO LINES — a line break, not two paragraphs — and the brand name
-   in the second is DATA, not markup in a string: `HERO_SUB_BRAND` is what `Hero.tsx` wraps in the
-   rust highlighter, and a lock requires it exactly once, in the second line. */
-export const HERO_SUB_LINES = [
-  "Hunting for literary agent representation?",
-  "Smarten your search with QueryHawk.",
-] as const;
-export const HERO_SUB_BRAND = "QueryHawk";
-/** The whole sub as a reader (or a screen reader) is told it. */
-export const HERO_SUB = HERO_SUB_LINES.join(" ");
-
-/** The solid pill. It goes to `/founders`, which is where the sign-up it asks for lives. */
+/** The sign-up's button in the hero, on both layouts, and the join bar's words. */
 export const HERO_CTA = "Become a founding writer";
-
-/** The plain link beside it: an in-page jump to the section break above the feature rows. */
-export const HERO_LINK = "See how it works";
 
 /* ── The hero on phones (≤760px; ref design-refs/landing-hero-mobile-v1.html) ──
    ⚠️ THE STRAPLINE IS `HERO_H1` ITSELF, NOT A SECOND STRING. On phones the desktop headline is not
    rendered and "No more winging it." is the drawer's handwritten strapline — so the phrase keeps
-   exactly one owner here, and the "exactly once" lock stays true by construction.
-   "See how it works" is `HERO_LINK`, for the same reason. */
+   exactly one owner here, and the "exactly once" lock stays true by construction. */
 /** The drawer's question, in two blocks: the second carries the rust highlighter. */
 export const HERO_PHONE_Q = ["Hunting for a", "literary agent?"] as const;
 export const HERO_PHONE_JOIN = "Join";
@@ -127,16 +113,9 @@ export const PHONE_STORY = {
    action label — so a lock asserting the WORDING has left the site would be wrong. The claim is
    about the constants and the hero. */
 
-/* ══════════════ The status band, between the hero and the rows ══════════════ */
-
-/**
- * ⚠️ THE BAND HAS NO EYEBROW (landing hero v3, 20 Oct). `BAND_EYEBROW` ("No more winging it.") is
- * DELETED: the phrase moved up to be the hero's headline, which is what keeps it said once.
- * ⚠️ AND THE HEADING IS A STATEMENT WITH A FULL STOP, NOT THE OLD QUESTION — with the typographic
- * apostrophe the ref sets. One line at desktop; it may wrap below 900px.
- */
-export const BAND_HEADING =
-  "A bird\u2019s-eye view of your entire querying campaign.";
+/* ══════════════ The status band — RETIRED (waitlist v1, 31 Oct) ══════════════
+   Its heading is feature row 1's now (`BE_HEADING`, beside the Birds-eye window, without the full stop,
+   as the ref sets it). `BAND_HEADING` and `BAND_EYEBROW` are both gone. */
 
 /* ⚠️ `STATUS_STEPS` AND `StatusStep` ARE RETIRED WITH THE CAROUSEL THEY WERE WRITTEN FOR (18 Sep).
    Six titles and six descriptions of the pipeline states, rotated one at a time under the band's
@@ -307,8 +286,7 @@ export const foundingRemainingLabel = (claimed: number, cap: number) =>
 
 /** The phone nav's founding pill, beneath its ten segments: a BUILDER, never a number in a string. */
 export const navPlacesLeft = (left: number) => `${left} places left`;
-/** The desktop hero's places counter (v4.1): the number in bold, then this; and its spoken label. */
-export const HERO_PLACES_REST = " places left";
+/** The places line under each sign-up (waitlist v1): what it says, and what it is read as. */
 export const heroPlacesLabel = (left: number, cap: number) => `${left} of ${cap} founding places left`;
 
 export const FOUNDING_NOTE: CopyRun[] = [
@@ -440,8 +418,7 @@ export const VISION_POINTS: VisionPoint[] = [
   },
 ];
 
-/** The band's one way out, to /about. A button, because marketing routes go through `onNavigate`. */
-export const VISION_LINK = "Read our story";
+/* `VISION_LINK` ("Read our story") is RETIRED (waitlist v1): the landing page links nowhere but Privacy. */
 
 /* ══════════════ The landing page on phones (≤760px; landing on phones v3, 26 Oct) ══════════════
    ref design-refs/landing-mobile-v3.html (the story and its closing beat; v2's ref for the rest).

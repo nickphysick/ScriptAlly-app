@@ -1,7 +1,7 @@
 /**
  * Vision — "Our vision is simple.": a white band between the feature rows and the founding-writers
- * band (ref design-refs/landing-v6.html). A heading, three illustrated points, and one way out to
- * /about. Pure presentation over `VISION_POINTS` in landingCopy.ts.
+ * band (ref design-refs/landing-v6.html). A heading and three illustrated points. Pure presentation
+ * over `VISION_POINTS` in landingCopy.ts.
  *
  * ⚠️ IT IS THE THIRD BAND INSIDE `.mk-lower` THAT PAINTS ITS OWN GROUND, and that is a decision
  * rather than a drift. The two-surface rule exists because a retired parchment band repainted by
@@ -16,13 +16,14 @@
  * their widths. Replace one with a differently-proportioned export and the row still holds; replace
  * one with a padded export and it floats, silently.
  *
- * ⚠️ "Read our story" IS A BUTTON, NOT AN ANCHOR. Marketing routes are driven by `onNavigate`; an
- * `<a href>` would reload the app to reach a page it can already render. The ref draws an anchor
- * because it is a standalone document with nowhere to navigate to.
+ * ⚠️ "Read our story" IS RETIRED (waitlist v1, 31 Oct, ref design-refs/landing-desktop-v5.html): the
+ * landing page links nowhere but Privacy. The headings may wrap now (`.mk-vh3`), which fixes
+ * "straightforward" overflowing its card. `onNavigate` stays in the props so the page's callers
+ * do not change.
  */
 
 import React from "react";
-import { VISION_HEADING, VISION_POINTS, VISION_LINK } from "./landingCopy";
+import { VISION_HEADING, VISION_POINTS } from "./landingCopy";
 
 /* Each plate's own facts, keyed by file. The SIZE is the file's pixel size, so a point reserves its
    box before the picture arrives rather than jumping when it does; CSS sizes it to the figure.
@@ -52,7 +53,7 @@ const PLATES: Record<string, { width: number; height: number; version: string }>
 /* ⚠️ `VisionNavy` — the phones' sideways carousel of the three principles — is RETIRED (waitlist v1,
    31 Oct). Phones draw the mission on navy in `LandingPhone` and the page never scrolls sideways. */
 
-export const Vision: React.FC<{ onNavigate: (tab: string, subPageName?: string) => void }> = ({ onNavigate }) => {
+export const Vision: React.FC<{ onNavigate: (tab: string, subPageName?: string) => void }> = () => {
   return (
   <section className="mk-vision" aria-labelledby="mk-vision-h">
     <div className="mk-visionin">
@@ -79,9 +80,6 @@ export const Vision: React.FC<{ onNavigate: (tab: string, subPageName?: string) 
           );
         })}
       </div>
-      <button type="button" className="mk-visionmore" onClick={() => onNavigate("about")}>
-        {VISION_LINK}
-      </button>
     </div>
   </section>
   );

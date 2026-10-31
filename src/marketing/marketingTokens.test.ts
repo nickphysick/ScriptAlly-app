@@ -18,6 +18,8 @@ const css = (f: string) => readFileSync(resolve(here, f), "utf8");
 const decls = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 
 const marketing = decls(css("marketing.css"));
+/* The waiting-list page's own sheet (waitlist v1, 31 Oct). */
+const waitlistCss = decls(css("waitlist.css"));
 
 /**
  * Every marketing component's source, as `[filename, text]`. Comments are NOT stripped: the check
@@ -242,10 +244,9 @@ const LOWER_READERS = [
      ground to fade into and paints its own flat ground (`.mk-ahero::before`). */
   /* Pricing left this group on 21 Oct (pricing v3): it opens on a navy band, like About. */
   ".mk-fwhero::before, .mk-contact::before, .mk-docplane::before",
-  /* the status band continues the hero's lower ground into the oat (landing hero v3) */
-  ".mk-lower", ".mk-statband",
-  /* the carded desktop hero (v4.1): below the navy its ground runs from the oat to the band's top colour */
-  ".mk-herowrap.mk-herowrap--carded",
+  /* the lower surface itself. (The status band and the carded desktop hero were readers until both were
+     retired by waitlist v1, 31 Oct; the new hero's band is in waitlist.css and reads the token there.) */
+  ".mk-lower",
   /* the sheet itself: every page continues on the oat */
   ".mk-sheet",
   /* the phone feature story's sticky picture panel (landing on phones v2, 26 Oct): it is the lower
@@ -294,31 +295,19 @@ describe("two surfaces, and the step between them is real", () => {
     expect(own).toMatch(/background-color:\s*var\(--mk-lower\)/);
     expect(own, "flat: the fade moved to the hero").not.toMatch(/gradient|background-image/);
     expect(own).not.toMatch(/background:\s/);
-    const hero = ruleFor(".mk-herowrap");
-    expect(hero).toMatch(/background-color:\s*var\(--mk-hero-ground\)/);
-    expect(hero, "the ref's hero gradient, paper to its foot")
-      .toMatch(/background-image:\s*linear-gradient\(180deg,\s*var\(--mk-hero-ground\) 0%,\s*var\(--mk-hero-foot\) 100%\)/);
-    expect(hero, "separate longhands, never the shorthand").not.toMatch(/background:\s/);
-    const band = ruleFor(".mk-statband");
-    expect(band, "the ref's .peek: the band's top colour into the oat over 220px")
-      .toMatch(/background-image:\s*linear-gradient\(180deg,\s*var\(--mk-band-top\),\s*var\(--mk-lower\) 220px\)/);
-    expect(band).toMatch(/background-color:\s*var\(--mk-lower\)/);
-    expect(band, "separate longhands, never the shorthand").not.toMatch(/background:\s/);
+    /* RE-POINTED (waitlist v1, 31 Oct): the hero's ground is the new band — the nav's ink to 58%, then
+       the oat — declared in waitlist.css, colour and image as separate longhands as everywhere here.
+       The status band, whose fade this asserted, is retired. */
+    const dh = /(?:^|\n)\.mk-dh\s*\{([^}]*)\}/.exec(waitlistCss)?.[1] ?? "";
+    expect(dh, "the hero band is declared").toMatch(/background-color:\s*var\(--mk-lower\)/);
+    expect(dh).toMatch(/background-image:\s*linear-gradient\(var\(--mk-ink-shell\) 0, var\(--mk-ink-shell\) 58%, var\(--mk-lower\) 58%\)/);
+    expect(dh, "separate longhands, never the shorthand").not.toMatch(/background:\s/);
     const readers = [...baseCss.matchAll(/(?:^|\n)([^@{}][^{}]*?)\{([^{}]*)\}/g)]
       .filter((m) => /var\(--mk-lower\)/.test(m[2])).map((m) => m[1].trim()).sort();
     expect(readers).toEqual(LOWER_READERS);
   });
 
-  /**
-   * ⚠️ AND THE HAIRLINE AT THE JOIN IS GONE, WHICH IS HALF OF WHAT MAKES THE FADE VISIBLE. The
-   * status band carried `border-top: 1px solid var(--mk-hair)` at exactly the boundary the fade
-   * now crosses. Two separators at one edge is one too many — the rule wins and the fade is
-   * wasted — and the line also cut the hero's shadow in half at the one place it is meant to pass
-   * through. Asserting its absence is what stops it returning from a diff.
-   */
-  it("the status band declares no top rule, so the fade has the boundary to itself", () => {
-    expect(ruleFor(".mk-statband")).not.toMatch(/border-top/);
-  });
+  /* "the status band declares no top rule" is RETIRED with the band (waitlist v1, 31 Oct). */
 
   /**
    * ⚠️ THE RETIRED PARCHMENT BAND MUST NOT COME BACK. It was a third surface inside the second,
@@ -405,7 +394,10 @@ describe("the vision band's own type and geometry", () => {
     expect(pts).toMatch(/margin-top:\s*64px/);
     const h3 = ruleFor(".mk-vh3");
     expect(h3).toMatch(/font-size:\s*27px/);
-    expect(h3, "held on one line at desktop").toMatch(/white-space:\s*nowrap/);
+    /* RE-POINTED (waitlist v1): the headings wrap now, balanced — "straightforward" overflowed its
+       card while they were held on one line. */
+    expect(h3, "wraps, balanced").toMatch(/white-space:\s*normal/);
+    expect(h3).toMatch(/text-wrap:\s*balance/);
     const body = ruleFor(".mk-vbody");
     expect(body).toMatch(/font-size:\s*17px/);
     expect(body).toMatch(/line-height:\s*1\.7/);
@@ -446,41 +438,15 @@ describe("the vision band's own type and geometry", () => {
    * inheritance. The underline is the band's rule colour, a step stronger than the band's own edges:
    * an edge should be felt and a link should be seen.
    */
-  it("the way out is a link's treatment on a real button", () => {
-    const more = ruleFor(".mk-visionmore");
-    expect(more).toMatch(/font-family:\s*"Source Serif 4"/);
-    expect(more).toMatch(/background:\s*none/);
-    expect(more).toMatch(/border:\s*0/);
-    expect(more).toMatch(/text-decoration:\s*underline/);
-    expect(more).toMatch(/text-underline-offset:\s*5px/);
-    expect(more).toMatch(/text-decoration-color:\s*var\(--mk-vision-rule\)/);
-    expect(more).toMatch(/margin-top:\s*60px/);
-    /* The rule is stronger than the edge — asserted as an ORDER, so both survive a retune. */
-    /* RE-POINTED (landing colours v2): the band has no edge rules left to be stronger than. The
-       underline is the ink at 40%, which is the claim the value can carry on its own. */
-    expect(value(marketing, "--mk-vision-rule"), "the ink at 40%").toBe("rgba(28, 19, 15, .4)");
+  /* "the way out is a link's treatment on a real button" is RETIRED with "Read our story" (waitlist v1):
+     the landing page links nowhere but Privacy. Its underline token, `--mk-vision-rule`, went with it. */
+  it("the band carries no way out", () => {
+    expect(marketing).not.toMatch(/(?:^|\n)\s*\.mk-visionmore\s*\{/);
+    expect(marketing).not.toMatch(/--mk-vision-rule\s*:/);
   });
 
-  /**
-   * ⚠️ THE HEADINGS RELEASE ABOVE THE BREAKPOINT THE COLUMNS STACK AT, AND THE GAP IS DELIBERATE.
-   * Three columns still stand between 1080 and ~1138 while the longest heading no longer fits one —
-   * and a `nowrap` fails by SPILLING into the gap between columns, not by wrapping, so no scrollbar
-   * ever reports it. Asserted as the RELATION, so both boundaries can move as long as the release
-   * stays above the stack.
-   */
-  it("the headings release before the columns stack, not with them", () => {
-    const at = (px: string, sel: string) => {
-      const m = new RegExp("@media \\(max-width: " + px + "\\) \\{([\\s\\S]*?)\\n\\}", "g");
-      return [...marketing.matchAll(m)].some((b) => new RegExp("\\" + sel + "\\s*\\{").test(b[1]));
-    };
-    const release = /@media \(max-width: ([\d.]+)px\) \{[^}]*\.mk-vh3\s*\{[^}]*white-space:\s*normal/.exec(marketing);
-    expect(release, "the headings release somewhere").toBeTruthy();
-    const stack = /@media \(max-width: ([\d.]+)px\) \{[^{]*\{[\s\S]*?\.mk-visionpoints\s*\{[^}]*grid-template-columns:\s*1fr/.exec(marketing);
-    expect(stack, "the columns stack somewhere").toBeTruthy();
-    expect(Number(release![1]), "the release is wider than the stack, or a held heading spills between columns")
-      .toBeGreaterThan(Number(stack![1]));
-    expect(at("1080px", ".mk-visionpoints"), "and the stack is the feature rows' own breakpoint").toBe(true);
-  });
+  /* "the headings release before the columns stack" is RETIRED (waitlist v1): nothing is held on one
+     line any more, so there is no release to order against the stack. */
 });
 
 describe("the lower surface's one repaint is the vision band (was: the banner, the vision band and the footer)", () => {
@@ -572,12 +538,13 @@ describe("the lower surface's one repaint is the vision band (was: the banner, t
 
   it("and nothing else under the wrapper repaints the ground", () => {
     /* Sections that sit inside `.mk-lower`, by the classes `Landing` renders there. */
-    const INSIDE = [".mk-statband", ".mk-featband", ".mk-vision", ".mk-claimband"];
+    const INSIDE = [".mk-featband", ".mk-vision", ".mk-claimband"];
     const painted = INSIDE.filter((sel) => /background(?:-color)?\s*:/.test(ruleFor(sel)));
     /* ⚠️ THE STATUS BAND IS THE SECOND, AND IT IS ARGUED FOR (landing hero v3): it continues the
        hero's lower ground — the ref's `.peek` — so hero and band meet with no seam, and its fade ends
        on the oat itself, so the band's foot IS the lower surface. */
-    expect(painted).toEqual([".mk-statband", ".mk-vision"]);
+    /* RE-POINTED (waitlist v1): the status band, the argued-for second, is retired. */
+    expect(painted).toEqual([".mk-vision"]);
   });
 
   /**
@@ -622,105 +589,29 @@ const heroCard = decls(css("heroCard.css"));
  * stylesheet can carry; where the copy and the card actually LAND — centred on each other, the band
  * peeking in, the bird uncropped — is measured on a rendered page in `landingHeroV3.measure.ts`.
  */
-describe("the hero is a 1280px frame scaled to the window, with the pile cast over it", () => {
-  it("the frame is 1280 wide and scaled about its corner; the wrapper is the scaled height", () => {
-    const wrap = ruleFor(".mk-herowrap");
-    expect(wrap).toMatch(/--mk-hero-h:\s*672px/);
-    expect(wrap).toMatch(/--mk-hero-k:\s*1;/);
-    expect(wrap).toMatch(/height:\s*calc\(var\(--mk-hero-h\) \* var\(--mk-hero-k\)\)/);
-    /* ⚠️ ABOVE THE BAND AND UNCLIPPED, so the pile's shadows and the bird's tip fall onto the band. */
-    expect(wrap).toMatch(/z-index:\s*2/);
-    expect(wrap, "nothing clips the hero").not.toMatch(/overflow/);
-    expect(wrap).toMatch(/background-color:\s*var\(--mk-hero-ground\)/);
-    expect(wrap, "separate longhands, never the shorthand").not.toMatch(/background:\s/);
-    const hero = ruleFor(".mk-hero");
-    expect(hero).toMatch(/width:\s*1280px/);
-    expect(hero).toMatch(/transform-origin:\s*0 0/);
-    expect(hero).toMatch(/transform:\s*scale\(var\(--mk-hero-k\)\)/);
-    const clip = /html:has\(\.mk-scope\), body:has\(\.mk-scope\)\s*\{([^}]*)\}/.exec(marketing);
-    expect(clip, "html and body clip the x axis while a marketing page is mounted").toBeTruthy();
-    expect(clip![1]).toMatch(/overflow-x:\s*clip/);
+/* "the hero is a 1280px frame scaled to the window, with the pile cast over it" is RETIRED with that hero
+   (waitlist v1, 31 Oct): the frame, its `size()`, the copy's placement, the headline pair, the CTA pair,
+   the cast shadow and the stacked layout. The pile and the shadow file live on — the pile as feature row 2,
+   the shadow in `heroCard.css`, where `.mk-lc-cast` is still declared for the card's own stack. */
+describe("the waiting-list hero is a white card over the navy (ref design-refs/landing-desktop-v5.html)", () => {
+  const rule = (sel: string) => {
+    const esc = sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return new RegExp("(?:^|\\n)" + esc + "\\s*\\{([^}]*)\\}").exec(waitlistCss)?.[1] ?? "";
+  };
+  it("the card is the ref's grid, radius and shadow", () => {
+    const card = rule(".mk-dh-card");
+    expect(card, "declared").not.toBe("");
+    expect(card).toMatch(/grid-template-columns:\s*1\.15fr \.85fr/);
+    expect(card).toMatch(/border-radius:\s*28px/);
   });
-
-  it("the copy starts 175 in from the frame and is 560 wide", () => {
-    const copy = ruleFor(".mk-herocopy");
-    expect(copy).toMatch(/left:\s*175px/);
-    expect(copy).toMatch(/width:\s*560px/);
-    expect(copy).toMatch(/transform-origin:\s*0 0/);
+  it("the question reads the typewriter token with !important and two classes (brand.tsx forces h1)", () => {
+    const q = rule(".mk-dh .mk-dh-q");
+    expect(q).toMatch(/font-family:\s*var\(--mk-f-display\) !important/);
+    expect(rule(".mk-dh-q .mk-dh-q2")).toMatch(/font-size:\s*66px/);
   });
-
-  it("the headline: the typewriter face, important, 78px/1.04, two block lines", () => {
-    const h1 = ruleFor(".mk-hero .mk-herotitle");
-    expect(h1).toMatch(/font-family:\s*var\(--mk-f-display\) !important/);
-    expect(value(marketing, "--mk-f-display")).toMatch(/^"Special Elite"/);
-    expect(h1).toMatch(/font-weight:\s*400/);
-    expect(h1).toMatch(/font-size:\s*78px/);
-    expect(h1).toMatch(/line-height:\s*1\.04/);
-    expect(h1).toMatch(/letter-spacing:\s*-\.02em/);
-    /* ⚠️ THE LINE SPANS INHERIT, OR brand.tsx's bare-span rule draws them in the app's sans. */
-    const hl = ruleFor(".mk-hero .mk-herotitle .mk-hl");
-    expect(hl).toMatch(/display:\s*block/);
-    expect(hl).toMatch(/font-family:\s*inherit/);
-  });
-
-  it("the sub is the headline's face, quieter, with the brand on a rust highlighter", () => {
-    const sub = ruleFor(".mk-herosub");
-    expect(sub).toMatch(/font-family:\s*var\(--mk-f-display\)/);
-    expect(sub).toMatch(/font-size:\s*21px/);
-    expect(sub).toMatch(/line-height:\s*1\.6/);
-    expect(sub).toMatch(/letter-spacing:\s*-\.005em/);
-    expect(sub).toMatch(/color:\s*rgba\(28, 19, 15, \.78\)/);
-    const b = ruleFor(".mk-herosub b");
-    expect(b, "the face has one weight").toMatch(/font-weight:\s*400/);
-    expect(b).toMatch(/color:\s*var\(--mk-nearblack\)/);
-    expect(b).toMatch(/box-shadow:\s*inset 0 -\.38em 0 rgba\(162, 69, 42, \.16\)/);
-  });
-
-  it("the two actions are the ref's, and the pill still outranks the chrome's navy", () => {
-    const pill = ruleFor(".mk-heropill");
-    expect(pill).toMatch(/font:\s*600 18px\/1 var\(--mk-f-serif\)/);
-    expect(value(marketing, "--mk-f-serif")).toMatch(/^"Source Serif 4"/);
-    expect(pill).toMatch(/background:\s*var\(--mk-navy\)/);
-    expect(pill).toMatch(/padding:\s*19px 30px/);
-    expect(pill).toMatch(/border-radius:\s*999px/);
-    const navy = ruleFor(".mk-btn--navy");
-    expect(navy, "the chrome's navy is the same fill").toMatch(/background:\s*var\(--mk-navy\)/);
-    expect(navy, "…and deliberately lighter than the hero's").toMatch(/font-size:\s*1rem/);
-    const link = ruleFor(".mk-herolink");
-    expect(link).toMatch(/font:\s*400 17px\/1 var\(--mk-f-serif\)/);
-    expect(link).toMatch(/color:\s*var\(--mk-rust\)/);
-    expect(link).toMatch(/border-bottom:\s*1\.5px solid var\(--mk-rust\)/);
-    const ctas = ruleFor(".mk-heroctas");
-    expect(ctas).toMatch(/gap:\s*30px/);
-    expect(ctas).toMatch(/margin-top:\s*38px/);
-  });
-
-  it("the shadow is cast over the pile: multiplied, .2, blurred, turned, and it takes no clicks", () => {
-    const cast = /(?:^|\n)\.mk-lc-cast\s*\{([^}]*)\}/.exec(heroCard);
-    expect(cast, "the cast has its rule in the pile's sheet").toBeTruthy();
-    expect(cast![1]).toMatch(/mix-blend-mode:\s*multiply/);
-    expect(cast![1]).toMatch(/opacity:\s*\.2/);
-    expect(cast![1]).toMatch(/filter:\s*blur\(7px\)/);
-    expect(cast![1]).toMatch(/transform:\s*rotate\(-4deg\)/);
-    expect(cast![1]).toMatch(/width:\s*860px/);
-    expect(cast![1]).toMatch(/pointer-events:\s*none/);
-    expect(cast![1], "the global image reset would cap it in silence").toMatch(/max-width:\s*none/);
-  });
-
-  it("the shadow column and its clearance rule are retired, not left inert", () => {
-    for (const gone of ["mk-heroart", "--mk-hero-ink", "--mk-hero-clear", "--mk-hero-edge", "--mk-hero-shadow-x", "--mk-hero-cap", "--mk-hero-pad"]) {
-      expect(marketing, gone).not.toContain(gone);
-    }
-    expect(ruleFor(".mk-herowrap"), "the cqw container went with the column").not.toMatch(/container-type/);
-  });
-
-  it("below 900px it stacks, and the two outermost back cards are dropped", () => {
-    const block = [...marketing.matchAll(/@media \(max-width: 899\.98px\) \{([\s\S]*?)\n\}/g)]
-      .find((m) => /\.mk-hero\s*\{/.test(m[1]));
-    expect(block, "a sub-900px block stacks the hero").toBeTruthy();
-    expect(block![1]).toMatch(/\.mk-hero\s*\{[^}]*transform:\s*none/);
-    expect(block![1]).toMatch(/\.mk-herocopy\s*\{[^}]*position:\s*static/);
-    expect(block![1]).toMatch(/\.mk-herobox \.mk-lc--o\s*\{\s*display:\s*none/);
+  it("the strap is the hand face, in rust", () => {
+    expect(rule(".mk-dh-strap")).toMatch(/var\(--mk-f-hand\)/);
+    expect(rule(".mk-dh-strap")).toMatch(/#a2452a/);
   });
 });
 
@@ -762,7 +653,9 @@ describe("the hero grid aligns per item, and overlaps by construction", () => {
   it("no invisibility-making class is rendered by two different components", () => {
     const RISKY = /pointer-events:\s*none|z-index:\s*-/;
     const owners: Record<string, string[]> = {};
-    for (const m of marketing.matchAll(/(?:^|\n)([^@{}][^{}]*?)\{([^{}]*)\}/g)) {
+    /* waitlist.css joins the sweep (waitlist v1): the old hero's own hiding rules left with it, and the
+       new page's live there. */
+    for (const m of (marketing + "\n" + waitlistCss).matchAll(/(?:^|\n)([^@{}][^{}]*?)\{([^{}]*)\}/g)) {
       if (!RISKY.test(m[2])) continue;
       for (const raw of m[1].split(",")) {
         const sel = raw.trim();
@@ -1156,7 +1049,7 @@ describe("the feature rows set their own type, and nothing else uses its familie
     expect(ruleOwners("Source Serif 4").sort())
       /* About's body copy joined on 21 Oct, for the same reason as the headings above. */
       .toEqual([".mk-aclosep", ".mk-agapbody", ".mk-bandcopy p", ".mk-fcopy p", ".mk-notep",
-        ".mk-scope", ".mk-vbody", ".mk-visionmore"]);
+        ".mk-scope", ".mk-vbody"]);
     const src = resolve(here, "..");
     const walk = (dir: string): string[] => readdirSync(dir, { withFileTypes: true }).flatMap((d) =>
       d.isDirectory() ? walk(resolve(dir, d.name))

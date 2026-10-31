@@ -19,3 +19,19 @@ Swept by the SELECTORS and copy the retired pieces were reached through (`mk-hp-
 | `landingMobileV4.measure.ts` | the navy vision carousel and "Read our story →" (ref landing-mobile-v4) | `VisionNavy` is deleted; the page links nowhere but Privacy |
 
 The new page's laws are held by `tests/e2e/landingWaitlist.measure.ts` (LW-1 … LW-6).
+
+## Phase 2 — the desktop page
+
+| File | Measured | Why retired |
+|---|---|---|
+| `landingHeroV3.measure.ts` (LH1–LH20) | the 1280-frame hero: its sub, the pile's loop and entrance, the fly-past and cast shadow, the carded layout, the counter under the actions | the hero is now the ref's white card with a form and the binocular hawk; the pile is feature row 2, played once |
+| `heroWording.ts` | the init script `landingHeroV3` used to collect the pile's words | its only importer is retired |
+
+Two of `landingHeroV3`'s claims are wider than the hero and are still held elsewhere: LH17's "no page
+says 100 places" by `src/marketing/offerCopySweep.test.ts` (on every copy file), and LH20's "an agent
+is named, never she or he" by `agentRef` and its locks in `landingCopy.test.ts`.
+
+`landingColoursV2.measure.ts` is **kept**, cut to the laws that still have subjects (N1, N2, the
+heights half of N3, S1, V1, F1, F2, T1). Retired from it: H1 (the old hero's ground), the anchor
+half of N3 ("See how it works" → `#pulse`), their mutations (H1, H1p, N3s, V1p) and the retired
+selectors in its capture list.

@@ -12,10 +12,11 @@
 
 import { describe, it, expect } from "vitest";
 import {
-  HERO_H1, HERO_H1_LINES, HERO_SUB, HERO_SUB_LINES, HERO_SUB_BRAND, HERO_CTA, HERO_LINK, FOUNDING_PERKS,
+  HERO_H1, HERO_CTA, FOUNDING_PERKS, WAIT_HERO_Q, WAIT_HERO_STRAP, WAIT_HERO_SUB, BE_HEADING, BE_LINE_PHONE,
+  BE_LINE_DESK, BE_TICKS, FAQ, WAIT_AGENTS, MISSION_EYEBROW,
   HERO_PHONE_Q, HERO_PHONE_JOIN, HERO_PHONE_MS, HERO_PHONE_MS_FRONT, HERO_PHONE_TAGS, PHONE_STORY,
-  DOCUMENT_TITLE, FEATURE_ROWS, BAND_HEADING,
-  VISION_HEADING, VISION_POINTS, VISION_LINK,
+  DOCUMENT_TITLE, FEATURE_ROWS,
+  VISION_HEADING, VISION_POINTS,
   FOUNDING_EYEBROW, FOUNDING_HEADING, FOUNDING_GET_LEAD, FOUNDING_GETS, FOUNDING_IN_RETURN, FOUNDING_CTA,
   FOUNDING_SENT, FOUNDING_DUPE, FOUNDING_FULL, FOUNDING_ERROR, FOUNDING_DOWN,
   FOUNDING_NOTE, FOUNDING_INVALID, foundingCounterLabel, foundingCounterRest, foundingRemainingLabel,
@@ -34,17 +35,21 @@ describe("landing copy — verbatim locks", () => {
      brand as data. Retired with this edit: "The hunt begins.", the "expert querying companion" sub,
      the band's question and `BAND_EYEBROW` itself — whose absence is asserted, so a diff cannot
      restore it beside the headline. */
-  it("the headline", () => {
+  /* REWRITTEN (waitlist v1, 31 Oct, refs landing-desktop-v5 and landing-mobile-v7): the hero asks
+     "Hunting for a / literary agent?", and "No more winging it." is its handwritten line — still
+     `HERO_H1`, so the phrase keeps one owner. The two-line headline split is retired with that hero. */
+  it("the headline", async () => {
     expect(HERO_H1).toBe("No more winging it.");
-    /* The two block lines it sets on ARE the sentence, so the heading's text is the copy. */
-    expect(HERO_H1_LINES).toEqual(["No more", "winging it."]);
-    expect(HERO_H1_LINES.join(" ")).toBe(HERO_H1);
+    expect(WAIT_HERO_Q).toEqual(["Hunting for a", "literary agent?"]);
+    expect(WAIT_HERO_STRAP, "the handwritten line IS the phrase's one owner").toBe(HERO_H1);
+    const copy = await import("./landingCopy");
+    expect("HERO_H1_LINES" in copy, "HERO_H1_LINES is retired").toBe(false);
   });
 
-  it("the band's heading is a statement, and its eyebrow is retired", async () => {
-    expect(BAND_HEADING).toBe("A bird\u2019s-eye view of your entire querying campaign.");
-    expect(HERO_H1).not.toBe(BAND_HEADING);
+  it("the status band is retired, and its words are feature row 1's — without the full stop, as the ref sets it", async () => {
+    expect(BE_HEADING).toBe("A bird\u2019s-eye view of your entire querying campaign");
     const copy = await import("./landingCopy");
+    expect("BAND_HEADING" in copy, "BAND_HEADING is retired").toBe(false);
     expect("BAND_EYEBROW" in copy, "the eyebrow moved up to be the headline").toBe(false);
   });
 
@@ -70,26 +75,22 @@ describe("landing copy — verbatim locks", () => {
   it("says `No more winging it.` exactly once on the page", () => {
     const PHRASE = "No more winging it.";
     const said = [
-      BAND_HEADING,
-      HERO_H1, HERO_SUB, HERO_CTA, HERO_LINK,
+      BE_HEADING, BE_LINE_PHONE, BE_LINE_DESK, ...BE_TICKS, WAIT_HERO_SUB, ...WAIT_HERO_Q, MISSION_EYEBROW,
+      WAIT_AGENTS.heading, WAIT_AGENTS.line, ...WAIT_AGENTS.points, ...FAQ.flat(),
+      HERO_H1, HERO_CTA,
       /* The phone hero's own strings (23 Oct): its strapline IS `HERO_H1`, so none of these may say it. */
       ...HERO_PHONE_Q, HERO_PHONE_JOIN, HERO_PHONE_MS, HERO_PHONE_MS_FRONT, ...HERO_PHONE_TAGS, PHONE_STORY.asked.label, ...Object.values(PHONE_STORY.chips).map((c) => c[0]),
-      VISION_HEADING, VISION_LINK,
+      VISION_HEADING,
       ...VISION_POINTS.flatMap((p) => [p.heading, p.body]),
       ...FEATURE_ROWS.flatMap((r) => [r.heading, r.body, r.alt]),
     ].filter((t) => t.includes(PHRASE));
     expect(said, `owners of the phrase: ${said.join(" | ")}`).toEqual([HERO_H1]);
   });
 
-  it("the sub, word for word: two sentences, the brand once, in the second", () => {
-    expect(HERO_SUB_LINES).toEqual([
-      "Hunting for literary agent representation?",
-      "Smarten your search with QueryHawk.",
-    ]);
-    expect(HERO_SUB).toBe(HERO_SUB_LINES.join(" "));
-    expect(HERO_SUB_BRAND).toBe("QueryHawk");
-    expect(HERO_SUB_LINES[0]).not.toContain(HERO_SUB_BRAND);
-    expect(HERO_SUB_LINES[1].split(HERO_SUB_BRAND)).toHaveLength(2);
+  it("the sub, word for word, and the old two-line sub retired", async () => {
+    expect(WAIT_HERO_SUB).toBe("Smarten your hunt for literary agent representation with QueryHawk.");
+    const copy = await import("./landingCopy");
+    for (const gone of ["HERO_SUB", "HERO_SUB_LINES", "HERO_SUB_BRAND", "HERO_PLACES_REST"]) expect(gone in copy, `${gone} is retired`).toBe(false);
   });
 
   /**
@@ -102,9 +103,10 @@ describe("landing copy — verbatim locks", () => {
    * at which the whole row releases moves with it. A copy edit here is a layout change; the rendered
    * width is measured in `visionBand.measure.ts`.
    */
-  it("the vision band, word for word", () => {
+  it("the vision band, word for word", async () => {
     expect(VISION_HEADING).toBe("Our vision is simple.");
-    expect(VISION_LINK).toBe("Read our story");
+    /* "Read our story" is RETIRED (waitlist v1): the landing page links nowhere but Privacy. */
+    expect("VISION_LINK" in (await import("./landingCopy"))).toBe(false);
     expect(VISION_POINTS.map((p) => p.heading)).toEqual([
       "Get good stories told.",
       "Make querying straightforward.", // C2, 26 Oct (was "Make querying simple.")
@@ -142,10 +144,10 @@ describe("landing copy — verbatim locks", () => {
     expect(VISION_POINTS.map((p) => p.image)).not.toContain("/images/about-story.png");
   });
 
-  /** Two actions, and they ask for different things: one claims a place, one explains the product. */
-  it("the two actions", () => {
+  /** One action (waitlist v1): the founding sign-up. "See how it works" is retired with the band it jumped to. */
+  it("the hero's one action", async () => {
     expect(HERO_CTA).toBe("Become a founding writer");
-    expect(HERO_LINK).toBe("See how it works");
+    expect("HERO_LINK" in (await import("./landingCopy"))).toBe(false);
   });
 
   /**
@@ -229,13 +231,13 @@ describe("landing copy — verbatim locks", () => {
    */
   it("says `a finger on the pulse` nowhere at all", () => {
     const said = [
-      BAND_HEADING,
+      BE_HEADING,
       ...FEATURE_ROWS.map((r) => r.heading),
       /* Retarget, same law: a row's body is one string now, and its alt text is rendered too. */
       ...FEATURE_ROWS.flatMap((r) => [r.body, r.alt]),
-      HERO_H1, HERO_SUB, HERO_CTA, HERO_LINK,
+      HERO_H1, WAIT_HERO_SUB, HERO_CTA,
       /* Retarget, same law: the white band is three more headings and three more paragraphs. */
-      VISION_HEADING, VISION_LINK, ...VISION_POINTS.flatMap((p) => [p.heading, p.body]),
+      VISION_HEADING, ...VISION_POINTS.flatMap((p) => [p.heading, p.body]),
       /* Retarget, same law: the band's blurb is four list items and an ask now. */
       FOUNDING_HEADING, ...FOUNDING_GETS, FOUNDING_IN_RETURN,
       FOUNDING_SENT, FOUNDING_DUPE, FOUNDING_FULL,
@@ -250,8 +252,8 @@ describe("landing copy — verbatim locks", () => {
    * shape and the subtitle are GONE is what stops either being reinstated — a marked word would
    * invite the halo back, and a subtitle under a band header competes with the first row.
    */
-  it("the band header is one plain string, and the ECG band's copy is retired", async () => {
-    expect(BAND_HEADING).toBe("A bird\u2019s-eye view of your entire querying campaign.");
+  it("the bird's-eye heading is one plain string, and the ECG band's copy is retired", async () => {
+    expect(BE_HEADING).toBe("A bird\u2019s-eye view of your entire querying campaign");
     const copy = await import("./landingCopy");
     /* The trace's heading and its mono eyebrow went with the section that carried them. */
     expect("PULSE_HEADING" in copy, "PULSE_HEADING is retired").toBe(false);
