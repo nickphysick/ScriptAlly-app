@@ -714,8 +714,6 @@ export const BE_PHONE_EVENTS: ReadonlyArray<readonly [number, number, number, Be
   [7, 36, 56, "q", "Queried · reply by 26 Nov", null],
 ];
 
-/** Desktop: the focus window's names-column header. */
-export const BE_DESK_HEAD = "8 active queries";
 /** Desktop: the eight rows — [left %, width %, stage, sentence, ghost line widths %] — and the one in focus. */
 export const BE_DESK_ROWS: ReadonlyArray<readonly [number, number, BeStage, string, readonly [number, number] | null]> = [
   [0, 64, "q", "Reply 5 weeks overdue", [78, 52]],
