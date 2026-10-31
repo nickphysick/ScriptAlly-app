@@ -75,6 +75,14 @@ describe("the shared footer offers all five, on every public page", () => {
       expect(renderPage(node(), name), "the page itself mounts no footer").not.toMatch(/class="mk-foot"/);
       const html = renderPage(
         <MarketingShell user={null} onNavigate={noNavigate} path={name}>{node()}</MarketingShell>, name);
+      /* RE-POINTED (waitlist v1, 31 Oct): "/" is the waiting-list page, which links nowhere but
+         Privacy — its footer is the waitlist variant and carries no other destination. */
+      if (name === "/") {
+        expect(html.match(/class="mk-foot mk-foot--wl"/g) ?? [], "exactly one footer").toHaveLength(1);
+        expect(html).toContain(">Privacy</button>");
+        for (const [label] of PUBLIC_DESTINATIONS) if (label !== "Privacy") expect(html).not.toContain(`>${label}</button>`);
+        return;
+      }
       expect(html.match(/class="mk-foot"/g) ?? [], "exactly one footer").toHaveLength(1);
       /* The whole class attribute, never a prefix: "mk-foot" is a prefix of "mk-footgrid",
          "mk-footcol" and three more, so a substring check here would pass on any of them. */
@@ -87,9 +95,11 @@ describe("the shared footer offers all five, on every public page", () => {
 });
 
 describe("the nav and the footer agree about what the site contains", () => {
+  /* RE-POINTED (waitlist v1): the full nav lives on every public page but "/", whose bar is the logo
+     and one call to action that scrolls. The law is about the site's other pages. */
   const nav = () => renderPage(
-    <MarketingShell user={null} onNavigate={noNavigate} path="/"><div /></MarketingShell>,
-    "/",
+    <MarketingShell user={null} onNavigate={noNavigate} path="/about"><div /></MarketingShell>,
+    "/about",
   );
 
   it("the top nav reaches both company pages", () => {

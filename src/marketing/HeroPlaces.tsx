@@ -23,7 +23,12 @@ const DELAY = 700, DUR = 1100;
 const reduce = () =>
   typeof window !== "undefined" && !!window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-export const HeroPlaces: React.FC = () => {
+/**
+ * `line` (waitlist landing v1, 31 Oct): the refs' one-line counter — a short track, then
+ * "N of M founding places left" beside it — under each sign-up on the waiting-list page. Same store,
+ * same count-down, same live-or-absent rule; only the shape differs.
+ */
+export const HeroPlaces: React.FC<{ variant?: "stack" | "line" }> = ({ variant = "stack" }) => {
   const { count } = useFounding();
   useEffect(ensureCount, []);
   const born = useRef(typeof performance !== "undefined" ? performance.now() : 0);
@@ -47,7 +52,12 @@ export const HeroPlaces: React.FC = () => {
      its measured height, and the count comes from the endpoint after first paint; a counter that
      mounted late would move the copy. So the same markup holds its place, invisible and silent —
      no number and no bar are shown (live or absent still holds for the reader). */
-  if (!count) return (
+  const line = variant === "line";
+  if (!count) return line ? (
+    <div className="mk-places mk-places--line mk-places--wait" aria-hidden="true">
+      <span className="mk-places-bar" /><span>{heroPlacesLabel(0, 0)}</span>
+    </div>
+  ) : (
     <div className="mk-places mk-places--wait" aria-hidden="true">
       <div className="mk-places-bar" /><span><b>00</b>{HERO_PLACES_REST}</span>
     </div>
@@ -55,6 +65,12 @@ export const HeroPlaces: React.FC = () => {
   const { cap, claimed } = count;
   const left = Math.max(0, cap - claimed);
   const pct = Math.min(100, (Math.min(claimed, cap) / cap) * 100);
+  if (line) return (
+    <div className="mk-places mk-places--line" role="img" aria-label={heroPlacesLabel(left, cap)} data-left={left} data-cap={cap}>
+      <span className="mk-places-bar" aria-hidden="true"><i style={{ width: pct * e + "%" }} /></span>
+      <span aria-hidden="true">{heroPlacesLabel(Math.round(cap + (left - cap) * e), cap)}</span>
+    </div>
+  );
   return (
     <div className="mk-places" role="img" aria-label={heroPlacesLabel(left, cap)} data-left={left} data-cap={cap}>
       <div className="mk-places-bar" aria-hidden="true"><i style={{ width: pct * e + "%" }} /></div>

@@ -21,7 +21,14 @@ import { analyticsAvailable, reopenConsent } from "./analytics";
 
 export const MarketingFooter: React.FC<{
   onNavigate: (tab: string, subPageName?: string) => void;
-}> = ({ onNavigate }) => {
+  /**
+   * The waiting-list landing page's footer (waitlist v1, 31 Oct; refs landing-desktop-v5 and
+   * landing-mobile-v7): the brand, the tagline, the glyph row, © and "Made in the UK", and Privacy —
+   * the three link columns and the support address go, because that page links nowhere else. Cookie
+   * choices stays beside Privacy (it opens the consent bar; it goes nowhere).
+   */
+  waitlist?: boolean;
+}> = ({ onNavigate, waitlist = false }) => {
   /* ⚠️ `#/login`, NOT `#/signup`. The nav stopped pointing at account creation because there is no
      self-serve product behind it yet (see `marketingNav.ts`); this link was the one place in the
      chrome still opening it. App.tsx turns `#/login` into sign-in for a visitor and into the
@@ -39,7 +46,7 @@ export const MarketingFooter: React.FC<{
   };
 
   return (
-    <footer className="mk-foot">
+    <footer className={"mk-foot" + (waitlist ? " mk-foot--wl" : "")}>
       <div className="mk-footinner">
         <div className="mk-footgrid">
           <div className="mk-footbrand">
@@ -65,6 +72,7 @@ export const MarketingFooter: React.FC<{
             </div>
           </div>
 
+          {!waitlist && (<>
           <div className="mk-footcol">
             <h4>Product</h4>
             <ul>
@@ -94,6 +102,7 @@ export const MarketingFooter: React.FC<{
               )}
             </ul>
           </div>
+          </>)}
         </div>
 
         <div className="mk-footbase">
@@ -104,7 +113,14 @@ export const MarketingFooter: React.FC<{
           {/* ⚠️ `SUPPORT_EMAIL`, AND NO OTHER ADDRESS. The privacy policy names it as the route for a
               UK GDPR request, so a second address here would publish a route nothing else honours.
               It is hello@queryhawk.net since 17 Oct; changing the constant moves every surface. */}
-          <a className="mk-footmail" href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>
+          {waitlist ? (
+            <p className="mk-footlegal">
+              <button type="button" className="mk-footmail" onClick={() => onNavigate("privacy")}>Privacy</button>
+              {analyticsAvailable() && <button type="button" className="mk-footmail" onClick={reopenConsent}>Cookie choices</button>}
+            </p>
+          ) : (
+            <a className="mk-footmail" href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>
+          )}
         </div>
       </div>
     </footer>

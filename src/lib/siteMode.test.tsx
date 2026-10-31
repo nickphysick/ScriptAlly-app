@@ -99,7 +99,10 @@ describe("L3 · with the flag off, the whole app is exactly as before (dev)", ()
   it("the nav offers Log in and the footer Open QueryHawk again", async () => {
     const { shell, nav } = await withFlag(false);
     expect(nav.marketingNavState(null).showLogIn).toBe(true);
-    const html = renderPage(<shell.MarketingShell user={null} onNavigate={noop} path="/"><p>page</p></shell.MarketingShell>, "/");
+    /* RE-POINTED (waitlist v1, 31 Oct): "/" is the waiting-list page in every build and links nowhere
+       but Privacy, so the whole-app chrome is asserted on a public page that keeps it. On dev the
+       sign-in screen is still one click away there, and at #/login. */
+    const html = renderPage(<shell.MarketingShell user={null} onNavigate={noop} path="/about"><p>page</p></shell.MarketingShell>, "/about");
     expect(html).toContain("Log in");
     expect(html).toContain("Open QueryHawk");
   });

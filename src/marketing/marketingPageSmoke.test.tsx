@@ -254,11 +254,22 @@ describe("the legal pages are honest about being drafts", () => {
 });
 
 describe("the marketing chrome renders in both of its states", () => {
-  const shell = (user: unknown) => (
-    <MarketingShell user={user as never} onNavigate={noNavigate} path="/">
+  /* RE-POINTED (waitlist v1, 31 Oct): both states are asserted on "/about". "/" is the waiting-list
+     page and offers neither pair — the case below holds that. */
+  const shell = (user: unknown, path = "/about") => (
+    <MarketingShell user={user as never} onNavigate={noNavigate} path={path}>
       <div>child</div>
     </MarketingShell>
   );
+
+  it("on \"/\" (the waiting-list page) it offers neither pair, signed in or out", () => {
+    for (const u of [null, SMOKE_USER]) {
+      const html = renderPage(shell(u, "/"), "/");
+      expect(html).not.toContain("Log in");
+      expect(html).not.toContain("Open dashboard");
+      expect(html).toContain("Become a Founding Writer");
+    }
+  });
 
   /**
    * ⚠️ TWO STATES, and the signed-in one is the easy one to forget: a signed-in user is NEVER

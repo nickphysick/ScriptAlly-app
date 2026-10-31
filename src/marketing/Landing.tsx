@@ -18,16 +18,15 @@
 
 import React, { useEffect } from "react";
 import { Hero } from "./Hero";
-import { HeroPhone } from "./HeroPhone";
 import { usePhone } from "./usePhone";
 import { StatusBand } from "./StatusBand";
 import { FeatureRows } from "./FeatureRows";
 import { Vision } from "./Vision";
 import { FoundingBand } from "./FoundingBand";
-import { FeatureStory } from "./FeatureStory";
 import { JoinBar } from "./JoinBar";
-import { FoundingClose } from "./FoundingClose";
+import { LandingPhone } from "./LandingPhone";
 import { DOCUMENT_TITLE } from "./landingCopy";
+import "./waitlist.css";
 
 export const Landing: React.FC<{ onNavigate: (tab: string, subPageName?: string) => void }> = ({ onNavigate }) => {
   useEffect(() => {
@@ -36,38 +35,26 @@ export const Landing: React.FC<{ onNavigate: (tab: string, subPageName?: string)
     return () => { document.title = prev; };
   }, []);
 
-  /* ⚠️ ON A PHONE (≤760px) THE REST OF THE PAGE IS THE HERO'S DRAWER — `HeroPhone` renders it inside
-     the pull-up sheet, so swiping up is ordinary scrolling. The content is the same element either
-     way; only its wrapper differs. 761px and up is the v3 hero unchanged. */
+  /* ⚠️ ON A PHONE (≤760px) THE PAGE IS `LandingPhone` (waitlist v1, 31 Oct): an ordinary page that scrolls,
+     with the founding ask following it down in `JoinBar`. 761px and up is the desktop page. */
   const phone = usePhone();
+  if (phone) return <div><LandingPhone onNavigate={onNavigate} /><JoinBar /></div>;
+
   /* ⚠️ THE SECOND SURFACE STARTS HERE AND RUNS TO THE FOOT OF THE PAGE. The hero is on the app's
      content ground above it and the boundary is marked by the colour change alone — there is
      deliberately no rule at the join. */
-  const lower = (
-      <div className="mk-lower">
-        <StatusBand />
-        {/* Phones (landing on phones v2, 26 Oct): the six features are a story you scroll down under a
-            half-screen picture, the vision is a navy carousel, and the page closes on a short founding
-            card that hands on to /founders. The desktop is unchanged. */}
-        {phone ? <FeatureStory /> : <FeatureRows />}
-        {/* ⚠️ THE WHITE BAND SITS BETWEEN THE ROWS AND THE OFFER, AND THE ORDER IS THE ARGUMENT.
-            The rows say what the product does; this says why it exists; the founding band asks for
-            something. Moved above the rows it would ask a reader to care before they know what
-            they are looking at, and below the offer nobody would reach it. */}
-        <Vision onNavigate={onNavigate} />
-        {phone ? <FoundingClose onNavigate={onNavigate} /> : <FoundingBand onNavigate={onNavigate} />}
-      {/* ⚠️ LINKS, NOT SPANS. These were inert text for as long as the pages did not exist — which
-          is a worse answer than an unfinished page, because a reader cannot tell the difference
-          between "no policy yet" and "the link is broken". The footer is now shared, so a page
-          added to the site is reachable from every other page by construction. */}
-      </div>
-  );
-
   return (
     <div>
-      {phone ? <HeroPhone onNavigate={onNavigate}>{lower}</HeroPhone> : <><Hero onNavigate={onNavigate} />{lower}</>}
-      {/* Phones only, this page only (landing on phones v2): the founding ask that follows you down. */}
-      {phone && <JoinBar />}
+      <Hero onNavigate={onNavigate} />
+      <div className="mk-lower">
+        <StatusBand />
+        <FeatureRows />
+        {/* ⚠️ THE WHITE BAND SITS BETWEEN THE ROWS AND THE OFFER, AND THE ORDER IS THE ARGUMENT.
+            The rows say what the product does; this says why it exists; the founding band asks for
+            something. */}
+        <Vision onNavigate={onNavigate} />
+        <FoundingBand onNavigate={onNavigate} />
+      </div>
     </div>
   );
 };

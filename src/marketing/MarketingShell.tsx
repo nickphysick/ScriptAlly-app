@@ -20,6 +20,8 @@ import { usePhone } from "./usePhone";
 import { ConsentBar } from "./ConsentBar";
 import { CONSENT_EVENT, initAnalytics, trackPageView } from "./analytics";
 import { captureAttribution } from "./attribution";
+import { HERO_PHONE_JOIN } from "./landingCopy";
+import { BAND_FORM, joinTarget, scrollToForm } from "./WaitlistParts";
 
 /* ── The brand artwork: the hawk and the drawn wordmark ──
    Both sit in public/ rather than src/assets/ so they are served at stable paths — and public/ is
@@ -158,6 +160,12 @@ export const MarketingShell: React.FC<{
   /* At and below 760px the bar is the logo, one tinted pill ("Log in", or "Open dashboard" signed in)
      and the menu (landing on phones v4, 26 Oct; v1's founding strip above the bar is gone). */
   const phone = usePhone();
+  /* ⚠️ THE WAITING-LIST PAGE LINKS NOWHERE (waitlist v1, 31 Oct). On `/` the bar is the logo and ONE
+     call to action that scrolls to an on-page sign-up — Join on phones (the hero's form, or the founding
+     card's once the hero is passed), "Become a Founding Writer" on the desktop (the founding band's).
+     No links, no Log in, no menu; the logo scrolls to the top. Every other public page keeps its chrome. */
+  const waitlist = path === "/";
+  const toTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
   const toFeatures = () => {
     if (path === "/") {
@@ -188,7 +196,7 @@ export const MarketingShell: React.FC<{
       <div className="mk-navsentinel mk-navsentinel--release" ref={releaseRef} aria-hidden="true" />
       <div className={"mk-navwrap" + (scrolled ? " mk-scrolled" : "")}>
         <nav className="mk-nav" aria-label="Marketing">
-          <button type="button" className="mk-brand mk-brand-link" onClick={() => onNavigate("landing")} aria-label="QueryHawk home">
+          <button type="button" className="mk-brand mk-brand-link" onClick={waitlist ? toTop : () => onNavigate("landing")} aria-label="QueryHawk home">
             {/* ⚠️ SHIPPED AS SUPPLIED — NO FILTER, NO RECOLOUR. The mark is artwork, not an icon that
                 takes the tier's ink, and its transparency is part of the drawing.
                 `alt=""` because the wordmark beside it already names the site — a second
@@ -205,6 +213,15 @@ export const MarketingShell: React.FC<{
               Contact are real public routes; leaving them footer-only would put the two company
               pages one scroll below the fold on every page that has one. Features stays because it
               is a live in-page anchor on the landing, and the refs' nav simply predates it. */}
+          {waitlist ? (
+            <div className="mk-navright">
+              {phone ? (
+                <button type="button" className="mk-wljoin" onClick={() => scrollToForm(joinTarget())}>{HERO_PHONE_JOIN}</button>
+              ) : (
+                <button type="button" className="mk-btn mk-btn--cream" onClick={() => scrollToForm(BAND_FORM)}>{marketingNavState(null).primaryLabel}</button>
+              )}
+            </div>
+          ) : (<>
           <div className="mk-links">
             {LINKS.map((l) => (
               <button key={l.label} type="button" onClick={l.go}
@@ -258,11 +275,12 @@ export const MarketingShell: React.FC<{
           >
             <span /><span /><span />
           </button>
+          </>)}
         </nav>
 
         {/* The panel is inside the sticky wrapper so it travels with the nav and inherits its
             ground; it is only reachable below the breakpoint, where the links are hidden. */}
-        {menuOpen && (
+        {menuOpen && !waitlist && (
           <div className="mk-navpanel" id="mk-navpanel" ref={panelRef}>
             {LINKS.map((l) => (
               <button key={l.label} type="button" onClick={pick(l.go)}
@@ -287,7 +305,7 @@ export const MarketingShell: React.FC<{
           last child — which put it INSIDE whatever the page's last surface was, so nothing could
           round that surface's bottom corners against it. Chrome on both sides of the sheet now
           belongs to the same component. */}
-      <MarketingFooter onNavigate={onNavigate} />
+      <MarketingFooter onNavigate={onNavigate} waitlist={waitlist} />
       <ConsentBar onPrivacy={() => onNavigate("privacy")} />
     </div>
   );

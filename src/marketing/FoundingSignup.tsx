@@ -67,7 +67,13 @@ export const FoundingSignup: React.FC<{
    */
   source: WaitlistSource;
   onNavigate: (tab: string, subPageName?: string) => void;
-}> = ({ idPrefix, ctaLabel = FOUNDING_CTA, formClass, messages, source, onNavigate }) => {
+  /**
+   * Rendered between the form and the privacy note, whatever the state (waitlist landing v1: the
+   * places counter sits under the button and stays once the form has gone, showing the new count).
+   * Layout only — the state machine and the outcome copy are untouched.
+   */
+  afterForm?: React.ReactNode;
+}> = ({ idPrefix, ctaLabel = FOUNDING_CTA, formClass, messages, source, onNavigate, afterForm }) => {
   const { state } = useFounding();
   const [email, setEmail] = useState("");
   const [invalid, setInvalid] = useState(false);
@@ -147,6 +153,11 @@ export const FoundingSignup: React.FC<{
             {ctaLabel}
           </button>
         </form>
+        </>
+      )}
+      {afterForm}
+      {!HIDES_FORM.has(state) && (
+        <>
         {/* ⚠️ RENDERED HERE, SO ALL THREE CAPTURE POINTS CARRY IT BY CONSTRUCTION. It used to live
             in `FoundingBand` alone — so the landing hero's panel and the `/founders` hero each took
             an address with no privacy link at all, which is a consent problem on two of the three

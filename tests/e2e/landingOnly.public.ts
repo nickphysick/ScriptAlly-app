@@ -100,7 +100,9 @@ test.describe("C3 · no way into the app in the public chrome", () => {
         if (await burger.isVisible()) await burger.click();
         const text = await page.evaluate(() => document.body.textContent ?? "");
         found[path] = ["Log in", "Open dashboard", "Open QueryHawk"].filter((d) => text.includes(d));
-        expect(text, `${path} has the founding CTA`).toContain("Become a Founding Writer");
+        /* Case-insensitive since waitlist v1 (31 Oct): on a phone "/" says "Become a founding writer"
+           (the hero's button and the join bar) and its bar's pill says Join. */
+        expect(text, `${path} has the founding CTA`).toMatch(/become a founding writer/i);
       }
       readings[`chrome ${width}`] = found;
       for (const [path, doors] of Object.entries(found)) expect(doors, path).toEqual([]);

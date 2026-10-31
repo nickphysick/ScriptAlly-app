@@ -151,27 +151,15 @@
 
 /* ═════════════ The hero on phones (≤760px; ref design-refs/landing-hero-mobile-v1.html) ═════════════
    ⚠️ EVERY VALUE IS THE MOBILE REF'S, read from its last declaration of each rule (the ref is
-   cumulative and restates `.sheet`, `.bird`, `.m-row` and `.q2` more than once). Only `HeroPhone`
-   renders these classes, so none of them can reach the desktop hero — EXCEPT the rules written as
+   cumulative and restates `.sheet`, `.bird`, `.m-row` and `.q2` more than once). Since waitlist v1
+   (31 Oct) only the phone FEATURE card renders these — `HeroPhone`'s stage, sheet, drawer and fly-past
+   are retired, rules and all — so none of them can reach the desktop hero — EXCEPT the rules written as
    `.mk-hc-pile …` (the manuscript block, the discs and the line's wash), which both piles share
    since desktop v4 because the desktop ref's values are the same. */
 
-/* The stage: sticky under the header, the window less the header tall (`HeroPhone` measures it and
-   writes the height; the `calc` is the first paint's), navy with the ref's soft light.
-   ⚠️ `overflow-x: clip` AND NOTHING ELSE: the pile is a 1280-wide frame and the fly-past starts off
-   the left edge, but the shadow must be free to rise under the header rather than be cut at it. */
-.mk-hp { position: relative; }
-.mk-hp-stage {
-  position: sticky; top: var(--mk-nav-h); z-index: 1;
-  height: calc(100svh - var(--mk-nav-h));
-  overflow-x: clip;
-  /* L1 (v3): plain navy with the ref's soft light — its last stage rule; no clouds, no stars. */
-  background: radial-gradient(circle at 50% 34%, #2b3a55 0, #1b2433 66%);
-}
 .mk-hp-scope { position: absolute; inset: 0; }
-.mk-hp-hero { position: absolute; left: 0; right: 0; top: 0; height: 100%; transform-origin: 50% 0; }
 
-/* The pile: the 1280 frame at its natural size, placed and scaled by `HeroPhone`. No blur. */
+/* The pile: the 1280 frame at its natural size, placed and scaled by its host. No blur. */
 .mk-hc-pile.mk-hc-pile--phone { inset: auto; left: 0; top: 0; width: 1280px; height: 760px; }
 .mk-hc-pile--phone .mk-lc.mk-lc--back { filter: none; }
 /* ⚠️ THE FRONT CARD TAKES NO POINTER ON A PHONE (a deliberate departure from the desk): its finished
@@ -189,104 +177,6 @@
 .mk-hc-pile .mk-lc-ms b { grid-column: 2; margin: 5px 0 9px; font-size: 27px; }
 .mk-hc-pile .mk-lc-ms .mk-lc-chips { grid-column: 2; gap: 6px; }
 .mk-hc-pile .mk-lc-ms .mk-lc-chips span { padding: 4px 7px 3px; font-size: 9.5px; text-transform: uppercase; }
-
-/* The hawk's shadow, once: one curve from low left to top right, the body following it. Hidden
-   (opacity 0) except while its animation runs. Above the pile, below the drawer. */
-.mk-hp-fly {
-  position: absolute; left: 0; top: 0; width: 920px; z-index: 15; pointer-events: none; opacity: 0;
-  will-change: offset-distance;
-  offset-path: path("M -170 600 C 30 470, 200 290, 610 -170"); offset-rotate: auto 90deg;
-}
-.mk-hp-fly img { display: block; width: 100%; height: auto; max-width: none; opacity: .19; filter: blur(8px); }
-
-/* The drawer: a cream sheet at rest (`--mk-hp-rest`, set by `HeroPhone`: at least 250px, more on a
-   tall phone so the card can sit higher), 26px top corners (`HeroPhone` squares them off across
-   the travel), over the foot of the stage. Its head holds the drawer's own contents and is the
-   drawer's resting height, so the page that follows starts below the fold. */
-.mk-hp-sheet {
-  --mk-hp-rest: 250px; /* the ref's; HeroPhone sets the measured value inline, which wins */
-  position: relative; z-index: 20; margin-top: calc(-1 * var(--mk-hp-rest));
-  background: #fbf9f5; border-radius: 26px 26px 0 0;
-  box-shadow: 0 -18px 36px -14px rgba(0, 0, 0, .45);
-  transition: margin-top .8s cubic-bezier(.2, .8, .2, 1);
-}
-.mk-hp-sheet.mk-hp-sheet--grown { margin-top: calc(-1 * (var(--mk-hp-rest) + 128px)); }
-.mk-hp-head {
-  box-sizing: border-box; min-height: 250px; padding: 10px 24px max(22px, env(safe-area-inset-bottom));
-  transition: min-height .8s cubic-bezier(.2, .8, .2, 1);
-}
-.mk-hp-sheet--grown .mk-hp-head { min-height: 378px; }
-.mk-hp-grab {
-  position: relative; display: block; width: 40px; height: 5px; margin: 0 auto 12px; border-radius: 3px;
-  background: rgba(28, 19, 15, .16); cursor: pointer; transition: opacity .2s;
-}
-.mk-hp-grab::after { content: ""; position: absolute; inset: -12px -24px; }
-
-/* ⚠️ THE FAMILY IS !important AND THE SELECTOR TWO CLASSES: `brand.tsx` forces every bare h1 to the
-   app's heading face with !important, and gives every span the body face — so the spans inherit. */
-.mk-hp .mk-hp-q { margin: 0; color: #1c130f; font-family: var(--mk-f-display) !important; font-weight: 400; }
-.mk-hp-q span, .mk-hp-q mark { font-family: inherit; }
-.mk-hp-q1 { display: block; font-size: 25px; line-height: 1.15; color: rgba(28, 19, 15, .78); }
-.mk-hp-q2 { display: block; margin-top: 4px; font-size: 35px; line-height: 1.1; letter-spacing: -.02em; }
-.mk-hp-q2 mark { background: none; color: inherit; box-shadow: inset 0 -.36em 0 rgba(162, 69, 42, .2); padding: 0 2px; }
-.mk-hp-strap {
-  margin: 8px 0 0; font: 600 27px/1.1 var(--mk-f-hand); color: #a2452a;
-  transform: rotate(-1.5deg); transform-origin: 0 50%;
-}
-
-/* The row: the "See how it works" link with its chevron, and the binocular hawk to its right. */
-.mk-hp-row { display: grid; grid-template-columns: 1fr 112px; align-items: center; gap: 4px; margin-top: 6px; }
-/* v3.1 (C4): a text link, not a button — navy, no fill, left-aligned, rust underline 1.5px at 6px
-   (the ref's `.m-btn.m-how` as overridden in v3.1). */
-.mk-hp-how {
-  display: flex; width: auto; box-sizing: border-box; height: 40px; padding: 0; border-radius: 26px; align-items: center; justify-content: flex-start; gap: 8px;
-  background: transparent; color: #2a3a52; font: 600 15px/1 var(--mk-f-serif);
-  text-decoration: underline; text-decoration-color: #a2452a; text-underline-offset: 6px; text-decoration-thickness: 1.5px;
-}
-.mk-hp-how svg { animation: mkHpSink 2.4s ease-in-out 4s infinite; }
-@keyframes mkHpSink { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(3px); } }
-.mk-hp-bird {
-  display: block; width: 112px; height: auto; max-width: none; margin: -26px -20px -14px 0; pointer-events: none;
-  transform-origin: 60% 90%; transition: margin .8s cubic-bezier(.2, .8, .2, 1);
-}
-.mk-hp-sheet--grown .mk-hp-bird { margin-top: 2px; }
-
-/* The founding sign-up, folded away until the drawer grows. `visibility` rides the fold so the
-   field is out of the tab order while it is hidden, not merely transparent. */
-.mk-hp-su {
-  max-height: 0; overflow: hidden; opacity: 0; margin: 0; visibility: hidden;
-  transition: max-height .8s cubic-bezier(.2, .8, .2, 1), opacity .5s .3s, margin .8s cubic-bezier(.2, .8, .2, 1), visibility 0s linear .8s;
-}
-.mk-hp-sheet--grown .mk-hp-su {
-  max-height: 128px; opacity: 1; margin: 14px 0 4px; visibility: visible;
-  transition: max-height .8s cubic-bezier(.2, .8, .2, 1), opacity .5s .3s, margin .8s cubic-bezier(.2, .8, .2, 1), visibility 0s;
-}
-.mk-hp-suline { margin: 0 0 8px; font: 400 14.5px/1.4 var(--mk-f-serif); color: rgba(28, 19, 15, .78); }
-.mk-hp-suform { display: flex; gap: 8px; }
-.mk-hp-suform input[type="email"] {
-  flex: 1; min-width: 0; height: 46px; box-sizing: border-box; padding: 0 14px;
-  border: 1px solid rgba(28, 19, 15, .2); border-radius: 12px; background: #fff;
-  font: 400 16px/1 var(--mk-f-serif); color: #1c130f;
-}
-.mk-hp-suform input[type="email"]::placeholder { color: rgba(28, 19, 15, .38); }
-.mk-hp-suform input[type="email"]:focus { outline: none; border-color: #2a3a52; box-shadow: 0 0 0 3px rgba(42, 58, 82, .15); }
-.mk-hp-suform .mk-btn {
-  height: 46px; padding: 0 18px; border: 0; border-radius: 12px; background: #2a3a52; color: #fff; /* v3.1 (C4): ink navy */
-  font: 600 15px/1 var(--mk-f-serif); box-shadow: none; transform: none;
-}
-.mk-hp-suform .mk-btn:hover { background: #2a3a52; } /* the ref states no hover; it must not flash rust */
-/* ⚠️ THE PRIVACY NOTE IS NOT IN THE REF AND IS KEPT: `FoundingSignup` renders it on every surface
-   that takes an address, by construction. It is set small and tight so the drawer's baked 128px rise
-   still holds the line, the field and the note. */
-.mk-hp-su .mk-betanote { margin: 4px 0 0; font-size: 10.5px; line-height: 1.25; }
-.mk-hp-su .mk-betainvalid { margin: 4px 0 0; font-size: 12px; }
-.mk-hp-su .mk-betamsg { margin: 0; padding: 10px 14px; font-size: 14px; line-height: 1.4; }
-
-@media (prefers-reduced-motion: reduce) {
-  .mk-hp-sheet, .mk-hp-head, .mk-hp-su, .mk-hp-bird { transition: none; }
-  .mk-hp-how svg { animation: none; }
-  .mk-hp-fly { display: none; }
-}
 
 /* ═════════════ The phone card's story, v3 (ref design-refs/landing-hero-mobile-v3.html) ═════════════
    ⚠️ ONLY WHAT `playShort()` REACHES. v2's dashboard, agent list, query form, sample control,

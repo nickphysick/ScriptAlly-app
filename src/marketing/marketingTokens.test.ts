@@ -251,7 +251,6 @@ const LOWER_READERS = [
   /* the phone feature story's sticky picture panel (landing on phones v2, 26 Oct): it is the lower
      ground itself, painted opaque so the captions vanish as they scroll up under it — the token, not a
      copy of its value, so the colour still has one home */
-  ".mk-spimg",
 ].sort();
 
 describe("two surfaces, and the step between them is real", () => {
@@ -343,7 +342,9 @@ describe("two surfaces, and the step between them is real", () => {
 describe("no marketing rule reads a token that does not exist", () => {
   /* ⚠️ THE CARD PILE'S SHEET IS PART OF THE SWEEP (landing hero v3): it READS the tier's faces and
      declares none, so leaving it out would call `--mk-f-mono` unread and miss a bad read in it. */
-  const both = marketing + "\n" + decls(css("heroCard.css"));
+  /* ⚠️ AND THE WAITING-LIST PAGE'S SHEET (waitlist v1, 31 Oct) for the same reason: it reads the
+     tier's faces (it is the one reader of `--mk-f-hand`, the hero's handwritten line) and declares none. */
+  const both = marketing + "\n" + decls(css("heroCard.css")) + "\n" + decls(css("waitlist.css"));
   const declared = new Set(
     [...both.matchAll(/(--mk-[a-z0-9-]+)\s*:/g)].map((m) => m[1]),
   );
@@ -822,7 +823,6 @@ describe("the hero grid aligns per item, and overlaps by construction", () => {
       ".mk-vpoint",
       /* the phone vision's navy rising 6px into the feature story's foot, so its rounded top corners
          meet the last caption with no seam (landing on phones v4, ref `.nv{margin-top:-6px}`) */
-      ".mk-vision.mk-vision--navy",
     ].sort());
   });
 
