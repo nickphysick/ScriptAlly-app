@@ -13,7 +13,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
   BE_DATES, BE_TITLE, BE_STAGE_NAME, BE_STAGE_RGB, BE_PHONE_START, BE_PHONE_EVENTS,
-  BE_DESK_HEAD, BE_DESK_ROWS, BE_FOCUS, REPLAY_LABEL, BeStage,
+  BE_DESK_ROWS, BE_FOCUS, REPLAY_LABEL, BeStage,
 } from "./landingCopy";
 import { HeroCard, HeroCardControl, HeroCardFeature, FEATURE_VISIBLE } from "./HeroCard";
 import { StatusGlyph } from "./marketingMarks";
@@ -172,8 +172,8 @@ export const BirdsEyeShowcase: React.FC = () => {
  * The date row IS the navy header. One row in focus — Eleanor Whitfield, blush, a 3px rust edge, her bar
  * in colour; every other row a grey placeholder with its bar faded but still labelled. The bars draw in
  * once when the window is 60% visible, then the detail card fades in beside Eleanor's row, in front of
- * the today line and over the window's right edge. The hawk's head peeks over the top-left edge from
- * BEHIND the window. Under reduced motion it is drawn finished, with nothing moving.
+ * the today line and over the window's right edge. The hawk's head peeks up from the bottom edge of the
+ * navy header, over the names column. Under reduced motion it is drawn finished, with nothing moving.
  */
 export const BirdsEyeFocus: React.FC = () => {
   const root = useRef<HTMLDivElement>(null);
@@ -184,10 +184,12 @@ export const BirdsEyeFocus: React.FC = () => {
   useSeen(root, (seen) => { if (seen && !done.current) { done.current = true; root.current?.classList.add("mk-go"); } });
   return (
     <div className="mk-bef" ref={root} data-be="desk" aria-hidden="true">
+      {/* The hawk stands on the navy header's bottom edge, in front of it, his head rising above the
+          window (Nick, 31 Oct). Outside the window, which clips. */}
       <img className="mk-bef-hk" src={v(BE_HAWK)} alt="" width={BE_HAWK.width} height={BE_HAWK.height} />
       <div className="mk-bef-win">
         <div className="mk-bef-grid">
-          <div className="mk-bef-whohead">{BE_DESK_HEAD}</div>
+          <div className="mk-bef-whohead" />
           <div className="mk-bef-lanehead"><Dates /></div>
         </div>
         <div className="mk-bef-body">

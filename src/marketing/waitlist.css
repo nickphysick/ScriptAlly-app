@@ -260,18 +260,23 @@
   --mk-bef-names: 196px; --mk-bef-head: 46px; --mk-bef-row: 44px;
   position: relative; color: #1c130f;
 }
-.mk-bef-hk {
-  position: absolute; left: 40px; top: -84px; width: 120px; height: auto; max-width: none; z-index: 0; pointer-events: none;
-  -webkit-mask: linear-gradient(90deg, transparent 0, #000 18%, #000 82%, transparent 100%);
-  mask: linear-gradient(90deg, transparent 0, #000 18%, #000 82%, transparent 100%);
-}
 .mk-bef-win {
   position: relative; z-index: 1; background: #fff; border-radius: 16px; overflow: hidden;
   box-shadow: 0 30px 60px -20px rgba(27, 36, 51, .28), 0 0 0 1px rgba(28, 19, 15, .07);
 }
 .mk-bef-grid, .mk-bef-rw { display: grid; grid-template-columns: var(--mk-bef-names) 1fr; }
 .mk-bef-grid { background: #2a3a52; }
-.mk-bef-whohead { padding: 16px 16px 0; font: 600 13px/1.2 var(--mk-f-sans); color: rgba(255, 255, 255, .7); border-right: 1px solid rgba(255, 255, 255, .12); }
+.mk-bef-whohead { border-right: 1px solid rgba(255, 255, 255, .12); }
+/* The hawk stands on the navy header's bottom edge: the foot of the drawing (a straight cut through his
+   chest) sits exactly on it, and he rises above the window's top. Centred on the names column; in front
+   of the window. His height is width × 287/300, so his top is the header's height minus that. */
+.mk-bef-hk {
+  position: absolute; z-index: 2; pointer-events: none;
+  width: 120px; height: auto; max-width: none;
+  left: calc(var(--mk-bef-names) / 2 - 60px);
+  top: calc(var(--mk-bef-head) - 120px * 287 / 300);
+  /* Fully opaque, no fade (Nick, 31 Oct). */
+}
 .mk-bef .mk-be-dates { height: var(--mk-bef-head); border-bottom: 0; background: #2a3a52; }
 .mk-bef .mk-be-mo, .mk-bef .mk-be-mo:nth-child(2) { background: transparent; }
 .mk-bef .mk-be-mo:nth-child(1) { background: #33455f; }
