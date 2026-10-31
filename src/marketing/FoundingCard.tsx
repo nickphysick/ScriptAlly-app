@@ -11,6 +11,7 @@
  * number is on its way every slot keeps its line, so the card does not move when the data lands.
  */
 import React from "react";
+import { FOUNDING_CAP } from "./foundingCap";
 import type { WelcomeKind, WelcomeData } from "./welcomeCopy";
 import { ordinal, padNumber, splitDate } from "./welcomeCopy";
 
@@ -25,7 +26,7 @@ export const FoundingCard: React.FC<{ kind: WelcomeKind; data: WelcomeData | nul
     : n ? (variant === "reserve" ? ordinal(n) : padNumber(n)) : "—";
   const seal = variant === "ghost" ? ["Not yet", "held"]
     : [variant === "reserve" ? "Reserve" : "Confirmed", ...(date ? [`${date.day} ${date.mon}`, date.year] : [])];
-  const right = variant === "reserve" ? (n ? "in line" : "On the reserve list") : "of 100";
+  const right = variant === "reserve" ? (n ? "in line" : "On the reserve list") : `of ${FOUNDING_CAP}`;
 
   return (
     <div
@@ -35,7 +36,7 @@ export const FoundingCard: React.FC<{ kind: WelcomeKind; data: WelcomeData | nul
       aria-label={
         variant === "ghost" ? "Founding card: no place held yet"
         : variant === "reserve" ? `Reserve card${n ? `: ${ordinal(n)} in line` : ""}`
-        : `Founding card${n ? `: Founding Writer number ${n} of 100` : ""}`
+        : `Founding card${n ? `: Founding Writer number ${n} of ${FOUNDING_CAP}` : ""}`
       }
     >
       <div className="mk-wel-cardtop" aria-hidden="true">

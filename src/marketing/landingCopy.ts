@@ -223,10 +223,13 @@ export const FOUNDING_IN_RETURN =
    /founders — and two of them promised "for life", which is a stronger commitment than the product
    needs to make. Standardised on "for as long as you need it": warmer, and it does not promise
    anything we might regret. If the terms change, all four change together. */
+/* ⚠️ REWRITTEN 31 Oct: the offer is no longer "six months free, then half price". These are
+   `FOUNDING_GETS`' four terms in the tier card's shorter register. */
 export const FOUNDING_PERKS = [
-  "Six months' free Pro access",
-  "Half price for as long as you need it",
+  "Pro free for your whole querying campaign",
+  "Smart Import to bring your list across",
   "A direct line to the founder",
+  "An Early Bird discount for writers you invite",
 ] as const;
 
 
@@ -613,7 +616,7 @@ export const PRICING_TIERS: PricingTier[] = [
     illoAlt: "A hawk wearing a scarf, holding a rolled manuscript under one wing.",
     tag: `Available now · ${FOUNDING_CAP} places`,
     price: "Free",
-    priceUnit: "for six months",
+    priceUnit: "for your whole querying campaign",
     summary: `For the ${FOUNDING_CAP_WORD} writers who put QueryHawk through its paces.`,
     /* ⚠️ NO FIGURE AND NO STRUCK-THROUGH PRICE. The ref draws "£0 for six months" against a
        struck "£7/mo" and then "half price for life"; both halves of that are arithmetic on a

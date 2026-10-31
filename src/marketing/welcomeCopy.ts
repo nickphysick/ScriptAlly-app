@@ -69,7 +69,7 @@ export const stateCopy = (kind: WelcomeKind, data: WelcomeData): StateCopy => {
       return {
         chip: "✓ Place confirmed", chipTone: "go",
         headline: "Welcome, Founding Writer.",
-        lede: "You're one of the hundred writers shaping QueryHawk before anyone else sees it. Your place is held, your perks are locked in, and the next thing you'll get from us is your invitation.",
+        lede: "You're one of the fifty writers shaping QueryHawk before anyone else sees it. Your place is held, your perks are locked in, and the next thing you'll get from us is your invitation.",
         sub: "We've sent your welcome email",
         cardCaption: "Your founding card",
       };
@@ -149,9 +149,10 @@ export const STEP_THREE = {
   when: "On the day",
 };
 export const PERKS = [
-  "Six months of Pro, free",
-  "The founding rate for as long as you're querying",
+  "QueryHawk Pro, free for your whole querying campaign",
+  "Smart Import to bring your list across",
   "A direct line to the founder",
+  "An Early Bird discount for the writers you invite",
 ];
 
 /* ── A first look ── */

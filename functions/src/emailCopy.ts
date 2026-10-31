@@ -29,20 +29,20 @@ export const CONFIRM_CTA = "Confirm my place";
 export const CONFIRM_EXPIRY = "This link works for 48 hours.";
 
 /**
- * ⚠️ THE HARDEST SENTENCE IN EITHER EMAIL, AND IT HAS TO BE HERE. With a hard cap of a hundred,
+ * ⚠️ THE HARDEST SENTENCE IN EITHER EMAIL, AND IT HAS TO BE HERE. With a hard cap of fifty,
  * somebody can confirm after the last place goes — their mail sat in an inbox while the list
  * filled. That race is unavoidable with double opt-in, and the honest fix is to warn about it now
  * rather than apologise afterwards. It is deliberately not softened: a reader who is told this
  * plainly and still gets a place has lost nothing, and one who is not told has been misled.
  */
 export const CONFIRM_NOT_HELD =
-  "Your place isn't held until you click. There are a hundred founding places and they go in the " +
+  "Your place isn't held until you click. There are fifty founding places and they go in the " +
   "order people confirm — so if the last one is taken while this is sitting in your inbox, you'll " +
   "go on the waiting list instead, and we'll say so plainly.";
 
 export const CONFIRM_NEXT =
-  "Once you've confirmed, we'll email your invite when your wave opens. Six months of Pro, free, " +
-  "and a founding rate afterwards.";
+  "Once you've confirmed, we'll email your invite when your wave opens. QueryHawk Pro is free for " +
+  "your whole querying campaign.";
 
 /** ⚠️ NO ACTION REQUIRED TO OPT OUT. Someone who did not ask for this must not have to do anything. */
 export const CONFIRM_NOT_YOU =
@@ -73,9 +73,10 @@ export const WELCOME_NO_DATE =
   "We can't give you a date, and we'd rather say that than guess. When it's ready, you'll hear.";
 
 export const WELCOME_PERKS: readonly string[] = [
-  "Six months' free Pro access",
-  "Half price for life",
+  "QueryHawk Pro, free for your whole querying campaign",
+  "Smart Import to bring your list across",
   "A direct line to the founder",
+  "An Early Bird discount for the writers you invite when we launch",
 ];
 
 /* ══════════════ Shared ══════════════ */

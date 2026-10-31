@@ -8,6 +8,7 @@
  * number without a server. That the address is cleaned and the card holds still while the number
  * arrives are measured on a real page (tests/e2e/foundingWelcome.measure.ts).
  */
+import { FOUNDING_CAP } from "./foundingCap";
 import { describe, expect, it, vi } from "vitest";
 import React from "react";
 import { readFileSync } from "fs";
@@ -74,10 +75,11 @@ describe("W1 · each state draws its own headline", () => {
 });
 
 describe("W2 · the card states the stored number and nothing about the person", () => {
-  it("verified: 023 on the card, of 100, the confirmed date, and no address", () => {
+  it("verified: 023 on the card, of the cap, the confirmed date, and no address", () => {
     const html = view("verified");
     expect(html).toContain('data-probe="card-number">023<');
-    expect(text(html)).toContain("of 100");
+    expect(text(html)).toContain(`of ${FOUNDING_CAP}`);
+    expect(text(html)).not.toContain("of 100");
     expect(text(html)).toContain("18 October 2026");
     expect(html, "no email address anywhere on the page").not.toMatch(/@[a-z0-9-]+\./i);
     expect(text(html)).toContain("Founding Writer No. 23");

@@ -179,11 +179,14 @@ describe("landing copy — verbatim locks", () => {
        the landing banner and /founders each worded the same offer differently and two of them
        promised "for life" — a stronger commitment than the product needs to make. The wording is
        standardised; if the terms change, all four change together. */
+    /* REWRITTEN 31 Oct: the current offer, and nothing from the old one survives in it. */
     expect(FOUNDING_PERKS).toEqual([
-      "Six months' free Pro access",
-      "Half price for as long as you need it",
+      "Pro free for your whole querying campaign",
+      "Smart Import to bring your list across",
       "A direct line to the founder",
+      "An Early Bird discount for writers you invite",
     ]);
+    expect(FOUNDING_PERKS.join(" ")).not.toMatch(/six months|half price|for life/i);
   });
 
   /**
