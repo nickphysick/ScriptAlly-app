@@ -184,13 +184,12 @@ export const BirdsEyeFocus: React.FC = () => {
   useSeen(root, (seen) => { if (seen && !done.current) { done.current = true; root.current?.classList.add("mk-go"); } });
   return (
     <div className="mk-bef" ref={root} data-be="desk" aria-hidden="true">
+      {/* The hawk stands on the navy header's bottom edge, in front of it, his head rising above the
+          window (Nick, 31 Oct). Outside the window, which clips. */}
+      <img className="mk-bef-hk" src={v(BE_HAWK)} alt="" width={BE_HAWK.width} height={BE_HAWK.height} />
       <div className="mk-bef-win">
         <div className="mk-bef-grid">
-          {/* The hawk peeks up from the header's bottom edge, over the names column (Nick, 31 Oct:
-              he replaces the "8 active queries" label). The cell clips him at its foot. */}
-          <div className="mk-bef-whohead">
-            <img className="mk-bef-hk" src={v(BE_HAWK)} alt="" width={BE_HAWK.width} height={BE_HAWK.height} />
-          </div>
+          <div className="mk-bef-whohead" />
           <div className="mk-bef-lanehead"><Dates /></div>
         </div>
         <div className="mk-bef-body">

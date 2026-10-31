@@ -266,12 +266,18 @@
 }
 .mk-bef-grid, .mk-bef-rw { display: grid; grid-template-columns: var(--mk-bef-names) 1fr; }
 .mk-bef-grid { background: #2a3a52; }
-.mk-bef-whohead { position: relative; overflow: hidden; border-right: 1px solid rgba(255, 255, 255, .12); }
-/* The hawk peeks up from the header's bottom edge: crown, eyes and the top of his glasses show, the rest
-   is below the cell's foot and clipped by it. Centred on the names column. */
+.mk-bef-whohead { border-right: 1px solid rgba(255, 255, 255, .12); }
+/* The hawk stands on the navy header's bottom edge: the foot of the drawing (a straight cut through his
+   chest) sits exactly on it, and he rises above the window's top. Centred on the names column; in front
+   of the window. His height is width × 287/300, so his top is the header's height minus that. */
 .mk-bef-hk {
-  position: absolute; left: 50%; top: 5px; width: 80px; height: auto; max-width: none;
-  transform: translateX(-50%); pointer-events: none;
+  position: absolute; z-index: 2; pointer-events: none;
+  width: 120px; height: auto; max-width: none;
+  left: calc(var(--mk-bef-names) / 2 - 60px);
+  top: calc(var(--mk-bef-head) - 120px * 287 / 300);
+  /* The drawing's sides are straight cuts; they fade out rather than stand as edges on the navy. */
+  -webkit-mask: linear-gradient(90deg, transparent 0, #000 18%, #000 82%, transparent 100%);
+  mask: linear-gradient(90deg, transparent 0, #000 18%, #000 82%, transparent 100%);
 }
 .mk-bef .mk-be-dates { height: var(--mk-bef-head); border-bottom: 0; background: #2a3a52; }
 .mk-bef .mk-be-mo, .mk-bef .mk-be-mo:nth-child(2) { background: transparent; }
