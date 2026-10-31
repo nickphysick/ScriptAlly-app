@@ -231,18 +231,22 @@ describe("the legal pages are honest about being drafts", () => {
   });
 
   /**
-   * ⚠️ REWRITTEN 31 Oct: the public site now offers Google Analytics behind a consent bar. The
-   * policy must say so, and must say it only runs after Accept — the sentence that used to be
-   * locked here ("no cookie banner") stopped being true the day the tag arrived, which is what
-   * this assertion was for.
+   * ⚠️ THE POLICY SAYS THERE IS NO COOKIE BANNER AND NO THIRD-PARTY ANALYTICS (restored 31 Oct,
+   * when GA was taken off the public site). True only while `.env.production` sets no
+   * `VITE_GA_MEASUREMENT_ID` — `analytics.ts` and the consent bar are dormant without it. The second
+   * test below holds the two together: set an id and this fails until the policy says so.
    */
-  it("the privacy policy covers cookies, names Google Analytics, and says it waits for Accept", () => {
+  it("the privacy policy covers cookies and local storage, and claims no banner", () => {
     const html = renderPage(<LegalPage doc="privacy" onNavigate={noNavigate} />, "/privacy");
     expect(html).toContain("Cookies and local storage");
-    expect(html).toContain("Google Analytics");
-    expect(html).toContain("only runs if you choose Accept");
-    expect(html).toContain("Cookie choices");
-    expect(html).not.toContain("no third-party analytics");
+    expect(html).toContain("cookie banner");
+    expect(html).toContain("no third-party analytics");
+    expect(html).toContain("which link brought you");
+  });
+
+  it("the live build carries no analytics id while the policy promises none", () => {
+    const env = readFileSync(resolve(process.cwd(), ".env.production"), "utf8");
+    expect(env).not.toMatch(/^VITE_GA_MEASUREMENT_ID=\S/m);
   });
 
   /** The rights section is the one a data subject arrives looking for; it must name a route out. */
