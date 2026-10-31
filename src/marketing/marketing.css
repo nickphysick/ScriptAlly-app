@@ -159,8 +159,9 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   --mk-blush-label: rgba(28, 19, 15, .62);
   --mk-blush-note: rgba(28, 19, 15, .62);
   --mk-blush-ph: rgba(28, 19, 15, .48);
-  --mk-msg-ok-bg: rgba(233, 237, 230, .8);
-  --mk-msg-ok-bd: rgba(138, 158, 136, .5);
+  /* Blush, not sage (31 Oct): no green in the UI. */
+  --mk-msg-ok-bg: #f5e2da;
+  --mk-msg-ok-bd: #e8c8bc;
   /* ── The two primaries (18 Sep) ──
      ⚠️ NAVY IS THE MARKETING TIER'S PRIMARY ACTION COLOUR AND RUST IS ITS SECONDARY VOICE. Both
      arrived named in a brief rather than derived from anything here, so both get a token of their

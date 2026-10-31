@@ -238,13 +238,20 @@ export const FOUNDING_INVALID = "That doesn't look like an email address.";
  * keeps the form, because trying again can. Collapsing them tells one of the two readers to do
  * something useless.
  */
+/* ⚠️ REWRITTEN 31 Oct: sign-up is double opt-in, so a writer is NOT on the list until they click
+   the emailed link. The old line ("You're on the list … no other mail, ever") told them the
+   opposite, and a writer who believes it never confirms. Each line says what actually happened
+   and what to do next. */
 export const FOUNDING_SENT =
-  "You're on the list. We'll email your invite code when your place opens — no other mail, ever.";
+  "Nearly there. We've emailed you a link: click it to confirm your place. " +
+  "If it isn't in your inbox in a few minutes, check your spam folder.";
 export const FOUNDING_DUPE =
-  "You're already on the list — no need to sign up twice. Your invite is still coming.";
+  "That address is already signed up. If you haven't confirmed yet, look for our email " +
+  "and click the link in it (check spam too).";
+/* The server has already put them on the waiting list when it answers `full`. */
 export const FOUNDING_FULL =
-  `All ${FOUNDING_CAP_WORD} founding places are claimed. Join the waiting list and we'll be in touch as the ` +
-  "next stage opens.";
+  `All ${FOUNDING_CAP_WORD} founding places have gone, so you're on the waiting list. ` +
+  "We'll email you if a place opens up.";
 export const FOUNDING_ERROR: CopyRun[] = [
   "That didn't send. Check the address and try again, or ",
   { link: "email us", mailto: supportMailto("QueryHawk founding members") },

@@ -339,12 +339,13 @@ describe("landing copy — verbatim locks", () => {
       "for when it opens to the wider writing community.",
     );
     expect(FOUNDING_CTA).toBe("Claim your place");
-    expect(FOUNDING_SENT).toBe(
-      "You're on the list. We'll email your invite code when your place opens — no other mail, ever.",
-    );
-    expect(FOUNDING_DUPE).toBe(
-      "You're already on the list — no need to sign up twice. Your invite is still coming.",
-    );
+    /* REWRITTEN 31 Oct: double opt-in. The message must send them to their inbox, and must not
+       claim a place is held or that no other mail will come. */
+    expect(FOUNDING_SENT).toContain("click it to confirm your place");
+    expect(FOUNDING_SENT).not.toMatch(/you're on the list|no other mail/i);
+    expect(FOUNDING_DUPE).toContain("click the link");
+    expect(FOUNDING_FULL).toContain("you're on the waiting list");
+    expect(FOUNDING_FULL).not.toMatch(/join the waiting list/i);
   });
 
   /**
