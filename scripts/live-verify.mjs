@@ -81,12 +81,25 @@ const hosting = async () => {
 const functions = async () => {
   let out = "";
   try {
-    out = execFileSync("firebase", ["functions:list", "--project", "prod"], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+    out = execFileSync("firebase", ["functions:list", "--project", "prod", "--json"], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
   } catch (e) {
     line(false, "functions · list", String(e.stderr ?? e.message).split("\n")[0]);
     return;
   }
-  const deployed = new Set([...out.matchAll(/│\s*([A-Za-z]\w*)\s*│\s*v[12]/g)].map((m) => m[1]));
+  /* ⚠️ --json, NOT THE TABLE. firebase-tools 15 changed the printed table, the old regex matched
+     nothing, and a live, working waitlist was reported "not deployed" (31 Oct). The JSON is
+     { status, result: [{ id | entryPoint | name, ... }] }; every id-like field is collected. */
+  const deployed = new Set();
+  try {
+    const parsed = JSON.parse(out);
+    for (const fn of parsed.result ?? []) {
+      for (const k of ["id", "entryPoint"]) if (typeof fn[k] === "string") deployed.add(fn[k]);
+      if (typeof fn.name === "string") deployed.add(fn.name.split("/").pop());
+    }
+  } catch (e) {
+    line(false, "functions · list", `unreadable --json output: ${String(e.message)}`);
+    return;
+  }
   for (const f of REQUIRED_FUNCTIONS) line(deployed.has(f), `functions · ${f} deployed`);
   info("functions · optional", OPTIONAL_FUNCTIONS.map((f) => `${f} ${deployed.has(f) ? "deployed" : "absent"}`).join(", "));
 };
