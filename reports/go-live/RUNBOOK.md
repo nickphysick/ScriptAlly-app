@@ -11,6 +11,9 @@ it will run the matching check and report.
 `release/live-1` (`landing-live` was fast-forwarded into it on 18 Oct). The preflight's check `4b`
 refuses any other branch.
 
+> **The Instagram launch (31 Oct) is section 11.** It fast-forwards `release/live-1` to main
+> first; sections 0–10 are the history of release 1.
+
 **Every command names `--project prod`.** A bare `firebase deploy` would resolve `.firebaserc`'s
 default, which is also prod. Naming it keeps every line readable for what it does.
 
@@ -363,6 +366,158 @@ then run the same line with `--apply`. **A second run must say there is nothing 
 **Rollback:** hosting from Release history (section 8). The function by redeploying `waitlist`
 from `release/live-1` as it was before the merge. The backfill's numbers can stay: the old
 function never reads them.
+
+---
+
+## 11 · The Instagram launch release (31 Oct) — from `main`
+
+What this release adds to live, on top of release 1:
+
+- **the new landing page** (dev's design, plus whatever the landing session finishes);
+- **the current founding offer** in the confirmation and welcome emails, the /welcome page and
+  pricing: fifty places, Pro free for a whole querying campaign, Smart Import, a direct line to
+  the founder, an Early Bird discount;
+- **sign-ups record the link that brought them** (`?utm_source=instagram`), stored on the
+  waitlist entry;
+- **Google Analytics** (G-5XTF9DC7NF) behind a consent bar, plus a privacy page that says so;
+- **the sharing preview** (title, description, image);
+- **functions on Node.js 22**. Node 20 was switched off on 30 Oct, so a functions deploy from the
+  old `release/live-1` would be refused.
+
+There are **no rules or index changes for live in this release.** The waitlist's rules are
+unchanged; main's other rule changes are for the app, which stays closed.
+
+### 11.0 · Bring the release branch up to main
+
+Main already contains everything on `release/live-1` (it was merged in on 31 Oct), so this is a
+fast-forward: nothing on live's branch is lost, and the preflight's `4b` still sees `release/live-1`.
+
+```bash
+cd /Users/nickphysick/ScriptAlly-live
+git fetch origin
+git checkout release/live-1
+git merge --ff-only origin/main
+npm ci && (cd functions && npm ci)
+```
+
+**Good:** the merge says `Fast-forward`. If it refuses, stop and tell Claude Code: something was
+committed to `release/live-1` that isn't on main.
+
+Do this **after** the landing page from the other session is merged to main, so hosting carries
+the finished design.
+
+### 11.1 · Check the counter, then set its cap to 50
+
+The cap the server enforces is the `cap` field on the counter document, not the code.
+
+```bash
+curl -s https://queryhawk.net/api/waitlist
+```
+
+- If the count is already **more than 50**, stop and decide what to do before going further.
+- Otherwise: Firebase console → Firestore Database → database `ai-studio-ae82196c-…` →
+  `counters` → `waitlist` → field **`cap`** → set it to the **number** `50` (not the string).
+  - If there is no `counters/waitlist` document yet, skip this: the first sign-up creates it with
+    50 from the code.
+
+**Verify:** `curl -s https://queryhawk.net/api/waitlist` shows `"cap":50`.
+
+### 11.2 · Functions
+
+```bash
+npm run build && node scripts/live-preflight.mjs
+firebase deploy --only functions:waitlist --project prod
+```
+
+**Good:** `PREFLIGHT PASSED.` before the deploy, then the deploy finishes without errors.
+
+- The deploy is on Node 22 now. If it asks to upgrade anything, say yes.
+- **If section 10 was never run:** this deploy is 10.2. Do the 10.3 backfill straight after.
+
+**Verify:** `node scripts/live-verify.mjs all`: every line `PASS`.
+
+### 11.3 · Hosting
+
+```bash
+npm run build && node scripts/live-preflight.mjs
+firebase deploy --only hosting --project prod
+node scripts/live-verify.mjs hosting
+```
+
+**Good:** `PREFLIGHT PASSED.`, then every verify line `PASS`, which includes "no Log in" and
+"`/dashboard` serves the landing".
+
+Then on your phone (390–430 px) and laptop:
+
+- the landing matches the agreed design at 390, 430, 1280 and 1440 px;
+- the consent bar appears once; "No thanks" makes it go away and it stays away on reload;
+- the footer has **Privacy**, **Terms** and **Cookie choices**; the privacy page's cookie section
+  mentions Google Analytics.
+
+### 11.4 · One real test, with the Instagram tag
+
+1. Open **https://queryhawk.net/?utm_source=runbooktest** in a private window and press
+   **Accept** on the cookie bar.
+2. Join with `nick+launch@queryhawk.net`.
+3. The confirmation email arrives **from `Nick at QueryHawk <nick@queryhawk.net>`** and says
+   **fifty** founding places, with no mention of six months or half price.
+4. Click its link: **queryhawk.net/welcome** shows "Welcome, Founding Writer." and the card reads
+   **of 50**. The welcome email's perks are the current four.
+5. Click the link again: "You're already in."
+6. Firebase console → Firestore → `waitlist` → your test document has
+   **`attribution: { source: "runbooktest" }`** and `status: "verified"`.
+7. Google Analytics → Reports → Realtime shows your visit, with `runbooktest` as the session
+   source, and a **sign_up** event.
+8. Remove the test entry and give the place back exactly as in section 7, then check
+   `curl -s https://queryhawk.net/api/waitlist` shows the count from before.
+
+### 11.5 · Google Analytics, once
+
+- Admin → Data collection and modification → Data collection: **Google signals off**.
+- Admin → Data retention: **2 months**.
+- Admin → Events: after the 11.4 test, mark **`sign_up`** as a **key event**.
+- Admin → Data streams → the web stream: press **Test installation** now that the tag is live.
+
+### 11.6 · The sharing preview
+
+Paste `https://queryhawk.net/` into https://developers.facebook.com/tools/debug/ and press
+**Scrape again**. It should show "QueryHawk: No more winging it", the description and the image.
+Instagram link previews read the same tags. To change the image later, replace
+`public/og-image.jpg` (1200 × 630) and redeploy hosting.
+
+### 11.7 · Console hardening (do once, today)
+
+- **Budget alert.** Google Cloud console → Billing → Budgets & alerts → Create budget for
+  `gen-lang-client-0801391782`, about £20 a month, with email alerts at 50%, 90% and 100%.
+- **API key restriction.** The section 9 bullet: limit the browser key to `queryhawk.net`,
+  `www.queryhawk.net`, `scriptally-app.web.app` and `gen-lang-client-0801391782.firebaseapp.com`.
+  Then reload queryhawk.net and join the waitlist once more (and remove it) to confirm nothing broke.
+- **Anthropic key.** If it hasn't been replaced since it was pasted into a chat, revoke it in the
+  Anthropic console, create a new one, and set it on both projects:
+  `firebase functions:secrets:set ANTHROPIC_API_KEY --project prod`, and the same with
+  `--project dev`. Redeploy the functions that use it when the app opens; nothing on live calls
+  them now.
+- **Two-step verification** on the Google account that owns Firebase, Analytics and the domain,
+  and on Resend.
+- **Sign-up is still off:** `node scripts/live-verify.mjs signup` → `PASS`.
+
+### 11.8 · The Instagram link
+
+Use this as the link in bio:
+
+```
+https://queryhawk.net/?utm_source=instagram&utm_medium=social
+```
+
+Sign-ups from it are stored with `attribution.source = "instagram"`. To count them: Firestore →
+`waitlist` → filter `attribution.source == instagram`. GA shows the same for visitors who
+accepted.
+
+### 11.9 · Rollback
+
+As section 8. To return hosting and the function to release 1 exactly, redeploy from
+`git checkout cb6969e2` (the old `release/live-1` tip). Its function would need Node 22 in
+`functions/package.json` first: Firebase refuses Node 20 deploys.
 
 ---
 
