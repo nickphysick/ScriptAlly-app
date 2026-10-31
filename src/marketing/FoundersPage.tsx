@@ -30,6 +30,8 @@
  */
 
 import React, { useEffect } from "react";
+import { Navigate, useSearchParams } from "react-router-dom";
+import { parseWelcomeKind } from "./welcomeCopy";
 import { Runs } from "./CopyRuns";
 import { FoundingSignup, FoundingCounter } from "./FoundingSignup";
 import { FoundingBand } from "./FoundingBand";
@@ -49,11 +51,20 @@ const ART = { src: "/images/off-the-ground.png", version: "430029d2", width: 120
 export const FoundersPage: React.FC<{
   onNavigate: (tab: string, subPageName?: string) => void;
 }> = ({ onNavigate }) => {
+  /* ⚠️ THE CONFIRMATION STATES LIVE ON /welcome NOW. A link that still arrives here with
+     `?verified=<kind>` (an old redirect, a bookmark) is sent on with the same kind; the page itself
+     no longer draws any of them. There is no reference on such a link, so /welcome shows the state
+     without a number. */
+  const [params] = useSearchParams();
+  const verified = params.get("verified");
+
   useEffect(() => {
     const prev = document.title;
     document.title = FOUNDERS_DOCUMENT_TITLE;
     return () => { document.title = prev; };
   }, []);
+
+  if (verified !== null) return <Navigate to={`/welcome?v=${parseWelcomeKind(verified)}`} replace />;
 
   return (
     <div className="mk-fw">

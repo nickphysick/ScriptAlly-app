@@ -12,7 +12,7 @@
  * compact JSON, because output tokens are both the slow and the costly part of the call.
  */
 export const SYSTEM_PROMPT = `
-You convert a fiction writer's existing query-tracking spreadsheet into ScriptAlly's structure.
+You convert a fiction writer's existing query-tracking spreadsheet into QueryHawk's structure.
 You receive CSV text exported from a spreadsheet. The layout is unknown and often MESSY:
 - The real header row may sit BELOW preamble rows (a title, a note-to-self, blank rows). Find the
   genuine header — do NOT assume row 1 is the header.

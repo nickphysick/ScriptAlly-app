@@ -24,7 +24,9 @@ import {
 } from "./waitlistModel";
 import {
   consumeRateLimit, joinWaitlist, readCounterState, unsubscribeById, verifyWaitlist,
+  mintWelcomeRef, readWelcome, saveWelcomeAnswers,
 } from "./waitlistStore";
+import { WELCOME_REF_TTL_MS } from "./waitlistModel";
 import { runRetention } from "./waitlistRetention";
 import { RETENTION_MS, UNSUBSCRIBED_GRACE_MS, CONFIRM_RESEND_MS } from "./waitlistModel";
 
@@ -140,6 +142,140 @@ describe("the cap holds under a race", () => {
     const doc = await db.doc(`waitlist/${emailHash("late@example.com")}`).get();
     expect(doc.exists).toBe(true);
     expect(doc.get("status")).toBe("waiting");
+  });
+});
+
+/* ══════════════ Founding and reserve numbers ══════════════ */
+
+describe("founding numbers are assigned once, atomically, and never held twice", () => {
+  const numberOf = async (email: string) => (await db.doc(`waitlist/${emailHash(email)}`).get()).data() ?? {};
+
+  it("two simultaneous confirmations at 99: exactly one is No. 100, the other is reserve No. 1", async () => {
+    await setCounter(DEFAULT_CAP - 1);
+    const [ta, tb] = await Promise.all([seedPending("a99@example.com"), seedPending("b99@example.com")]);
+    const now = Date.now();
+    const out = await Promise.all([verifyWaitlist(db, ta, now), verifyWaitlist(db, tb, now)]);
+    expect(out.map((o) => o.kind).sort()).toEqual(["verified", "waiting"]);
+    const docs = await Promise.all(["a99@example.com", "b99@example.com"].map(numberOf));
+    expect(docs.map((d) => d.foundingNumber ?? null).filter((n) => n !== null)).toEqual([DEFAULT_CAP]);
+    expect(docs.map((d) => d.reserveNumber ?? null).filter((n) => n !== null)).toEqual([1]);
+  });
+
+  /* ⚠️ THE CASE THAT CATCHES A NUMBER ASSIGNED OUTSIDE THE TRANSACTION. At 98 both racers find
+     room, so the cap check cannot hide a shared read: if the number came from outside the
+     transaction, both would be No. 99. */
+  it("two simultaneous confirmations at 98: Nos. 99 and 100, never the same number twice", async () => {
+    await setCounter(DEFAULT_CAP - 2);
+    const [ta, tb] = await Promise.all([seedPending("a98@example.com"), seedPending("b98@example.com")]);
+    const now = Date.now();
+    await Promise.all([verifyWaitlist(db, ta, now), verifyWaitlist(db, tb, now)]);
+    const nums = (await Promise.all(["a98@example.com", "b98@example.com"].map(numberOf)))
+      .map((d) => d.foundingNumber as number).sort((a, b) => a - b);
+    expect(nums).toEqual([DEFAULT_CAP - 1, DEFAULT_CAP]);
+    expect((await counterOf()).verifiedCount).toBe(DEFAULT_CAP);
+  });
+
+  it("everyone who misses the cap gets a distinct reserve number, in a single queue", async () => {
+    await setCounter(DEFAULT_CAP - 1);
+    const emails = Array.from({ length: 6 }, (_, i) => `rq${i}@example.com`);
+    const tokens = await Promise.all(emails.map((e) => seedPending(e)));
+    const now = Date.now();
+    await Promise.all(tokens.map((t) => verifyWaitlist(db, t, now)));
+    const reserves = (await Promise.all(emails.map(numberOf)))
+      .map((d) => d.reserveNumber).filter((n) => typeof n === "number").sort((a, b) => a - b);
+    expect(reserves).toEqual([1, 2, 3, 4, 5]);
+  });
+
+  it("a released number goes to the next writer to confirm (a number is a place, not a person)", async () => {
+    await setCounter(0);
+    const [ta, tb] = [await seedPending("fa@example.com"), await seedPending("fb@example.com")];
+    await verifyWaitlist(db, ta, Date.now());
+    await verifyWaitlist(db, tb, Date.now());
+    expect((await numberOf("fa@example.com")).foundingNumber).toBe(1);
+    expect((await numberOf("fb@example.com")).foundingNumber).toBe(2);
+
+    await unsubscribeById(db, emailHash("fa@example.com"), Date.now());
+    expect((await numberOf("fa@example.com")).foundingNumber ?? null, "the leaver holds no number").toBeNull();
+
+    const tc = await seedPending("fc@example.com");
+    await verifyWaitlist(db, tc, Date.now());
+    expect((await numberOf("fc@example.com")).foundingNumber, "the freed number is reissued").toBe(1);
+    const td = await seedPending("fd@example.com");
+    await verifyWaitlist(db, td, Date.now());
+    expect((await numberOf("fd@example.com")).foundingNumber, "then the next unissued one").toBe(3);
+
+    const counter = (await db.doc(COUNTER_PATH).get()).data()!;
+    expect(counter.verifiedCount).toBe(3);
+    expect(counter.freedNumbers ?? []).toEqual([]);
+  });
+
+  it("a second click returns the number already stored, and assigns nothing", async () => {
+    await setCounter(10);
+    const t = await seedPending("again@example.com");
+    const first = await verifyWaitlist(db, t, Date.now());
+    const again = await verifyWaitlist(db, t, Date.now());
+    expect(first.kind).toBe("verified");
+    expect(again).toMatchObject({ kind: "already", position: 11 });
+    expect((await counterOf()).verifiedCount).toBe(11);
+  });
+});
+
+/* ══════════════ The founding welcome ══════════════ */
+
+describe("the welcome reference trades for the writer's number, and nothing else", () => {
+  const confirmed = async (email: string, count = 22) => {
+    await setCounter(count);
+    const t = await seedPending(email);
+    const out = await verifyWaitlist(db, t, Date.now());
+    if (out.kind !== "verified") throw new Error("expected verified");
+    return out.docId;
+  };
+
+  it("a live reference returns the kind, the number and the date — and reads again on refresh", async () => {
+    const docId = await confirmed("w1@example.com");
+    const ref = await mintWelcomeRef(db, docId, "verified", Date.now());
+    const once = await readWelcome(db, ref, Date.now());
+    expect(once).toMatchObject({ kind: "verified", foundingNumber: 23 });
+    expect(once!.confirmedOn).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(JSON.stringify(once)).not.toContain("@");
+    expect(await readWelcome(db, ref, Date.now() + 60_000), "a refresh still works").toEqual(once);
+    /* Only the hash is stored. */
+    const stored = (await db.doc(`waitlist/${docId}`).get()).data()!;
+    expect(JSON.stringify(stored)).not.toContain(ref);
+  });
+
+  it("an expired reference is refused", async () => {
+    const docId = await confirmed("w2@example.com");
+    const t0 = Date.now();
+    const ref = await mintWelcomeRef(db, docId, "verified", t0);
+    expect(await readWelcome(db, ref, t0 + WELCOME_REF_TTL_MS + 1)).toBeNull();
+  });
+
+  it("an unknown reference is refused, and so is anyone who has since unsubscribed", async () => {
+    expect(await readWelcome(db, "x".repeat(32), Date.now())).toBeNull();
+    const docId = await confirmed("w3@example.com");
+    const ref = await mintWelcomeRef(db, docId, "verified", Date.now());
+    await unsubscribeById(db, docId, Date.now());
+    expect(await readWelcome(db, ref, Date.now())).toBeNull();
+  });
+
+  it("the three answers are stored as flat fields, and a second send overwrites", async () => {
+    const docId = await confirmed("w4@example.com");
+    const ref = await mintWelcomeRef(db, docId, "verified", Date.now());
+    expect(await saveWelcomeAnswers(db, ref, { answerStage: "just-started", answerQueried: "none", answerTracker: "inbox" }, Date.now())).toBe(true);
+    expect(await saveWelcomeAnswers(db, ref, { answerStage: "revising", answerQueried: "50-plus", answerTracker: "spreadsheet" }, Date.now())).toBe(true);
+    const d = (await db.doc(`waitlist/${docId}`).get()).data()!;
+    expect(d).toMatchObject({ answerStage: "revising", answerQueried: "50-plus", answerTracker: "spreadsheet" });
+    expect(d.answeredAt).toBeTruthy();
+    expect(d.answers, "flat fields, not a map").toBeUndefined();
+  });
+
+  it("answers against an expired reference are refused and change nothing", async () => {
+    const docId = await confirmed("w5@example.com");
+    const t0 = Date.now();
+    const ref = await mintWelcomeRef(db, docId, "verified", t0);
+    expect(await saveWelcomeAnswers(db, ref, { answerStage: "revising", answerQueried: "none", answerTracker: "inbox" }, t0 + WELCOME_REF_TTL_MS + 1)).toBe(false);
+    expect((await db.doc(`waitlist/${docId}`).get()).get("answerStage")).toBeUndefined();
   });
 });
 

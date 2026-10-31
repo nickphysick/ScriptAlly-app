@@ -37,12 +37,8 @@ import { closeQueryPanel, openResponsePicker, responsePickerHosted } from "./lib
 // Route tiers: marketing chrome for "/" + /pricing; EVERYTHING signed-in is workspace, in the
 // one capsule shell (the focus tier is retired — capsule fixes P5).
 import { MarketingShell } from "./marketing/MarketingShell";
-import { Landing } from "./marketing/Landing";
-import { PricingPage } from "./marketing/PricingPage";
-import { AboutPage } from "./marketing/AboutPage";
-import { ContactPage } from "./marketing/ContactPage";
-import { FoundersPage } from "./marketing/FoundersPage";
-import { LegalPage } from "./marketing/LegalPage";
+import { LandingOnlySite, MarketingPage } from "./marketing/LandingOnlySite";
+import { LANDING_ONLY, AUTH_HASH } from "./lib/siteMode";
 import { tierForPath, WORKSPACE_PATHS } from "./marketing/routeTiers";
 import { shellForRoute } from "./lib/shellForRoute";
 import { routeBase } from "./lib/helpPath";
@@ -237,16 +233,21 @@ const ShellLab: React.FC = () => {
   );
 };
 
-/** Dev review surface for the canonical StatusDot (no router — reached via #/status-dots). */
-const useStatusDotDemoRoute = () => {
-  const [isDemo, setIsDemo] = useState(() => window.location.hash === "#/status-dots");
-  useEffect(() => {
-    const onHashChange = () => setIsDemo(window.location.hash === "#/status-dots");
-    window.addEventListener("hashchange", onHashChange);
-    return () => window.removeEventListener("hashchange", onHashChange);
-  }, []);
-  return isDemo;
-};
+/** Dev review surface for the canonical StatusDot (no router — reached via #/status-dots).
+ *  ⚠️ DEFINED ONLY IN DEV. A hook runs in every build, so the hash it compares against shipped to
+ *  production although nothing could render there (`prodBuild.test.ts` P1). In a production build
+ *  this is a constant `false`, and the string is gone with the body. */
+const useStatusDotDemoRoute: () => boolean = import.meta.env.DEV
+  ? () => {
+      const [isDemo, setIsDemo] = useState(() => window.location.hash === "#/status-dots");
+      useEffect(() => {
+        const onHashChange = () => setIsDemo(window.location.hash === "#/status-dots");
+        window.addEventListener("hashchange", onHashChange);
+        return () => window.removeEventListener("hashchange", onHashChange);
+      }, []);
+      return isDemo;
+    }
+  : () => false;
 
 /** Current location hash, re-rendering on change (no router — same pattern as above).
  *  Used only to choose the logged-out front door (landing vs. the auth deep-links). */
@@ -402,6 +403,14 @@ function AppContent() {
 
   const isStatusDotDemo = useStatusDotDemoRoute();
   const hash = useHash();
+  /* LANDING-ONLY: a sign-in hash is cleared from the address bar. replaceState fires no
+     hashchange, so one is dispatched to bring useHash's state in line; without it, `/` would keep
+     re-reading a hash that is no longer in the URL. */
+  useEffect(() => {
+    if (!LANDING_ONLY || !AUTH_HASH.test(hash)) return;
+    window.history.replaceState(window.history.state, "", window.location.pathname + window.location.search);
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
+  }, [hash]);
   // Dev-only review surface — never reachable in the production build (import.meta.env.DEV is
   // false there). In prod the #/status-dots hash simply falls through to the normal app/landing.
   if (isStatusDotDemo && import.meta.env.DEV) {
@@ -436,8 +445,9 @@ function AppContent() {
   /* #/onb-lab — the screens before the app (sign-up, sign-in, the set-up steps), each held in one
      state over fixtures inside the real SetupFrame. Gated on MODE exactly as the contact lab is:
      served by `build:dev`, absent from production. It carries a query (`?s=fork&…`), so it is
-     matched by prefix. */
-  if (hash.startsWith("#/onb-lab") && import.meta.env.MODE !== "production") {
+     matched by prefix. ⚠️ `MODE` FIRST: with the hash first, the minifier kept the `startsWith`
+     call, and the lab's name with it, in the production bundle (`prodBuild.test.ts` P1). */
+  if (import.meta.env.MODE !== "production" && hash.startsWith("#/onb-lab")) {
     return <OnbLab />;
   }
   // Dev-only notes review surface (PostIt / quick-add / editor) — local state, no persistence.
@@ -463,6 +473,12 @@ function AppContent() {
   }
   // Boot: while Firebase Auth is still resolving the session, show a neutral splash — never a
   // landing/auth view. Stops the old "calmer place to query" landing flashing on a hard refresh.
+  // ── LANDING-ONLY (production, queryhawk.net): the public site and nothing else. Ahead of the
+  // boot splash and the auth check, so no visitor ever sees a sign-in screen, not even for a frame.
+  if (LANDING_ONLY) {
+    return <LandingOnlySite path={path} hash={hash} onNavigate={handleNavigate} />;
+  }
+
   if (!authReady) {
     return (
       <div
@@ -508,13 +524,7 @@ function AppContent() {
     }
     return (
       <MarketingShell user={currentUser} onNavigate={handleNavigate} path={path}>
-        {path === "/pricing" ? <PricingPage onNavigate={handleNavigate} />
-          : path === "/about" ? <AboutPage onNavigate={handleNavigate} />
-          : path === "/contact" ? <ContactPage onNavigate={handleNavigate} />
-          : path === "/founders" ? <FoundersPage onNavigate={handleNavigate} />
-          : path === "/terms" ? <LegalPage doc="terms" onNavigate={handleNavigate} />
-          : path === "/privacy" ? <LegalPage doc="privacy" onNavigate={handleNavigate} />
-          : <Landing onNavigate={handleNavigate} />}
+        <MarketingPage path={path} onNavigate={handleNavigate} />
       </MarketingShell>
     );
   }

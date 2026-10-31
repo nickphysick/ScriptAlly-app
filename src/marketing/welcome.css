@@ -1,0 +1,310 @@
+/*
+ * The founding welcome (/welcome) — Direction A ("The card") of
+ * design-refs/founding-welcome/founding-welcome-v1.html, in the marketing tier's own tokens.
+ *
+ * ⚠️ NO NEW COLOURS OR FONTS. Every colour is a `--mk-*` token from marketing.css (declared on
+ * `.mk-scope`, which MarketingShell draws around this page). Where the mock had a value with no
+ * token, the nearest token was chosen (see the founding-welcome report): the card's lighter navy is
+ * --mk-panel, the reserve card's brown is --mk-ink-hov under a cream wash, sage text is --mk-sage-t,
+ * the faintest hairline is --mk-hair.
+ *
+ * ⚠️ `brand.tsx` FORCES THE BODY FONT ONTO BARE `span`, `div`, `p`, `button`, `label`. So every
+ * mono or typewriter element below states its own family, including the spans inside the card,
+ * rather than inheriting one.
+ *
+ * ⚠️ THE TYPEWRITER FACE IS NAMED ONCE, on `.mk-wel-card .mk-wel-cardno`, for the card's number as
+ * the mock draws it. That makes this sheet an owner of the family that marketingTokens.test.ts
+ * counts by name; the number inside inherits it rather than naming it a second time.
+ *
+ * ⚠️ NO `var()` INSIDE `@keyframes` (it fails silently here); keyframes animate opacity and
+ * transform only, with literal values.
+ */
+
+.mk-wel {
+  position: relative; isolation: isolate;
+  background: var(--mk-lower);
+  color: var(--mk-nearblack);
+}
+.mk-wel::before {
+  content: ""; position: absolute; inset: 0 0 auto 0; height: 620px; z-index: -1;
+  background: linear-gradient(180deg, var(--mk-hero-ground) 0%, var(--mk-hero-ground) 62%, var(--mk-lower) 100%);
+}
+.mk-wel-wrap { max-width: 1080px; margin: 0 auto; padding: 0 48px 1px; box-sizing: border-box; }
+
+/* ── shared atoms ── */
+.mk-wel-eyebrow {
+  font: 600 11px "JetBrains Mono", monospace; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--mk-rust);
+}
+.mk-wel-chip {
+  display: inline-flex; align-items: center; gap: 7px; border-radius: 999px; padding: 6px 12px;
+  font: 600 11px "JetBrains Mono", monospace; letter-spacing: .08em; text-transform: uppercase;
+  align-self: flex-start;
+}
+.mk-wel-chip--go { background: var(--mk-sage); color: var(--mk-sage-t); }
+.mk-wel-chip--blush { background: var(--mk-cta); color: var(--mk-rust); }
+.mk-wel-chip--stone { background: var(--mk-stone); color: var(--mk-body); }
+.mk-wel-btn {
+  display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; padding: 12px 20px;
+  font: 600 14.5px "Source Sans Pro", system-ui, sans-serif; border: 0; cursor: pointer;
+}
+.mk-wel-btn--navy { background: var(--mk-navy); color: var(--mk-white); }
+.mk-wel-btn:disabled { opacity: .45; cursor: default; }
+/* Headings: brand.tsx gives every h1/h2/h3 the heading font with `!important`; the size and
+   weight below are ours, at two classes so they win the tie on specificity. */
+.mk-wel .mk-wel-h1, .mk-wel .mk-wel-h2, .mk-wel .mk-wel-h3 {
+  font-weight: 600; line-height: 1.3; letter-spacing: -.005em; color: var(--mk-nearblack);
+}
+
+/* ── motion: plays once; off under reduced motion ── */
+@media (prefers-reduced-motion: no-preference) {
+  .mk-wel-rise { animation: mkWelRise .7s cubic-bezier(.22, .8, .3, 1) both; }
+  .mk-wel-d1 { animation-delay: .08s; } .mk-wel-d2 { animation-delay: .18s; }
+  .mk-wel-d3 { animation-delay: .3s; } .mk-wel-d4 { animation-delay: .42s; }
+  .mk-wel-cardin { animation: mkWelCardIn .9s cubic-bezier(.2, .9, .25, 1.05) .15s both; }
+  /* Lands by 1.45s (0.9s + 0.55s), so it has finished well inside the first second and a half. */
+  .mk-wel-stampin { animation: mkWelStampIn .55s cubic-bezier(.3, 1.4, .5, 1) .9s both; }
+}
+@keyframes mkWelRise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes mkWelCardIn {
+  from { opacity: 0; transform: translateY(26px) rotate(-4deg) scale(.96); }
+  to { opacity: 1; transform: rotate(-1.6deg); }
+}
+@keyframes mkWelStampIn {
+  0% { opacity: 0; transform: rotate(-14deg) scale(1.6); }
+  100% { opacity: 1; transform: rotate(-14deg) scale(1); }
+}
+
+/* ── the hero ── */
+.mk-wel-hero {
+  display: grid; grid-template-columns: 1.05fr 1fr; gap: 64px; align-items: center;
+  padding: 72px 0 56px;
+}
+.mk-wel-herotext { display: flex; flex-direction: column; min-width: 0; outline: none; }
+.mk-wel .mk-wel-h1 { font-size: 64px; line-height: 1.08; margin: 18px 0 18px; }
+/* Focus is moved here on arrival so a screen reader starts on the news. It is `tabIndex={-1}`, never
+   a tab stop, and Chromium counts that programmatic focus as :focus-visible, so a ring here would
+   box the headline for every visitor. No ring. */
+.mk-wel .mk-wel-h1:focus, .mk-wel .mk-wel-h1:focus-visible { outline: none; }
+.mk-wel-lede { font: 400 19px/1.55 "Source Sans Pro", system-ui, sans-serif; color: var(--mk-body); max-width: 30em; margin: 0; }
+.mk-wel-sub { margin-top: 22px; font: 500 13px "JetBrains Mono", monospace; color: var(--mk-muted); letter-spacing: .02em; }
+.mk-wel-form { margin-top: 22px; max-width: 460px; }
+.mk-wel-cardcol { min-width: 0; }
+.mk-wel-cardcap { margin-top: 16px; text-align: center; font: 500 12.5px "JetBrains Mono", monospace; color: var(--mk-muted); }
+
+/* ── the card ── */
+.mk-wel-card {
+  position: relative; box-sizing: border-box; aspect-ratio: 1.586 / 1; width: 100%; max-width: 470px;
+  margin: 0 auto; border-radius: 20px; padding: 26px 28px; overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgba(217, 150, 122, .28), transparent 55%),
+    linear-gradient(155deg, var(--mk-panel) 0%, var(--mk-navy) 45%, var(--mk-navy-hov) 100%);
+  color: var(--mk-cream);
+  box-shadow: 0 30px 60px -18px rgba(27, 36, 51, .55), 0 2px 0 rgba(255, 255, 255, .08) inset;
+  transform: rotate(-1.6deg);
+}
+.mk-wel-card::after {
+  content: ""; position: absolute; inset: 10px; border: 1px solid rgba(var(--mk-cream-rgb), .22);
+  border-radius: 13px; pointer-events: none;
+}
+.mk-wel-card span, .mk-wel-card b, .mk-wel-card div { font: inherit; }
+.mk-wel-cardtop { display: flex; justify-content: space-between; align-items: flex-start; }
+.mk-wel-card .mk-wel-cardbrand { display: flex; align-items: center; gap: 9px; font: 600 18px "Playfair Display", Georgia, serif; }
+.mk-wel-cardbrand i {
+  width: 24px; height: 24px; border-radius: 50%; background: var(--mk-cream); color: var(--mk-navy);
+  display: grid; place-items: center; font: 700 12px "Playfair Display", Georgia, serif; font-style: normal;
+}
+.mk-wel-card .mk-wel-cardkind {
+  font: 600 10px "JetBrains Mono", monospace; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--mk-stamp); text-align: right; line-height: 1.6;
+}
+.mk-wel-card .mk-wel-cardno {
+  position: absolute; left: 28px; bottom: 60px;
+  font: 400 15px "Special Elite", monospace; color: rgba(var(--mk-cream-rgb), .7);
+}
+.mk-wel-card .mk-wel-cardno b {
+  display: block; font-family: inherit; font-weight: 400; font-size: 76px; line-height: 1; color: var(--mk-cream);
+  margin-top: 4px; letter-spacing: -.02em; min-height: 1em;
+}
+.mk-wel-card .mk-wel-cardline {
+  position: absolute; left: 28px; right: 28px; bottom: 24px; display: flex; justify-content: space-between;
+  font: 500 11.5px "JetBrains Mono", monospace; letter-spacing: .08em; text-transform: uppercase;
+  color: rgba(var(--mk-cream-rgb), .72);
+}
+.mk-wel-card .mk-wel-seal {
+  position: absolute; right: 26px; bottom: 52px; width: 92px; height: 92px; border-radius: 50%;
+  border: 2px solid var(--mk-stamp); color: var(--mk-stamp); display: grid; place-items: center; text-align: center;
+  font: 600 9.5px/1.35 "JetBrains Mono", monospace; letter-spacing: .14em; text-transform: uppercase;
+  transform: rotate(-14deg);
+}
+.mk-wel-seal::before {
+  content: ""; position: absolute; inset: 5px; border: 1px dashed rgba(224, 161, 136, .7); border-radius: 50%;
+}
+.mk-wel-card.is-loading .mk-wel-seal, .mk-wel-card.is-loading .mk-wel-cardline { opacity: .35; }
+/* The reserve card: --mk-ink-hov under a cream wash stands in for the mock's brown. */
+.mk-wel-card--reserve {
+  background: linear-gradient(155deg, rgba(var(--mk-cream-rgb), .22) 0%, rgba(var(--mk-cream-rgb), .06) 100%), var(--mk-ink-hov);
+}
+.mk-wel-card--reserve .mk-wel-seal { border-color: var(--mk-cream); color: var(--mk-cream); }
+.mk-wel-card--reserve .mk-wel-seal::before { border-color: rgba(var(--mk-cream-rgb), .5); }
+.mk-wel-card--ghost {
+  background: repeating-linear-gradient(135deg, var(--mk-hero-ground) 0 14px, var(--mk-parch) 14px 28px);
+  color: var(--mk-muted); box-shadow: none; border: 1.5px dashed var(--mk-hair);
+}
+.mk-wel-card--ghost::after { border-color: transparent; }
+.mk-wel-card--ghost .mk-wel-cardbrand i { background: var(--mk-hair); color: var(--mk-hero-ground); }
+.mk-wel-card--ghost .mk-wel-cardno, .mk-wel-card--ghost .mk-wel-cardno b,
+.mk-wel-card--ghost .mk-wel-cardline, .mk-wel-card--ghost .mk-wel-cardkind { color: var(--mk-label); }
+.mk-wel-card--ghost .mk-wel-seal { border-color: var(--mk-label); color: var(--mk-label); }
+.mk-wel-card--ghost .mk-wel-seal::before { border-color: var(--mk-hair); }
+
+/* ── Nick's note ── */
+.mk-wel-note {
+  background: var(--mk-white); border-radius: 18px; display: grid; grid-template-columns: 120px 1fr; gap: 30px;
+  padding: 36px 40px; margin: 8px 0 22px;
+  box-shadow: 0 1px 0 var(--mk-hair), 0 18px 40px -26px rgba(28, 19, 15, .35);
+}
+.mk-wel-photo {
+  width: 104px; height: 104px; border-radius: 50%; overflow: hidden; background: var(--mk-bd);
+  display: grid; place-items: center;
+}
+.mk-wel-photo span { font: 600 34px "Playfair Display", Georgia, serif; color: var(--mk-white); }
+.mk-wel-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mk-wel-notebody p { font: 400 18px/1.62 "Source Sans Pro", system-ui, sans-serif; color: var(--mk-nearblack); margin: 0 0 12px; max-width: 40em; }
+.mk-wel-sig { font: 600 34px/1 "Caveat", cursive; color: var(--mk-rust); margin-top: 4px; }
+.mk-wel-role { font: 500 12px "JetBrains Mono", monospace; color: var(--mk-muted); letter-spacing: .04em; margin-top: 6px; }
+
+/* ── sections ── */
+.mk-wel-sec { padding: 44px 0 6px; }
+.mk-wel .mk-wel-h2 { font-size: 34px; margin: 8px 0 22px; }
+.mk-wel .mk-wel-h2--sm { font-size: 28px; margin: 8px 0 18px; }
+.mk-wel-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.mk-wel-step { background: var(--mk-white); border-radius: 16px; padding: 22px 22px 24px; box-shadow: 0 1px 0 var(--mk-hair); }
+.mk-wel-n {
+  width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+  font: 600 14px "JetBrains Mono", monospace; background: var(--mk-stone); color: var(--mk-body); margin-bottom: 14px;
+}
+.mk-wel-step.is-done .mk-wel-n { background: var(--mk-sage-t); color: var(--mk-white); }
+.mk-wel .mk-wel-step .mk-wel-h3 { font-size: 20px; margin: 0 0 6px; }
+.mk-wel-step p { font: 400 15.5px/1.55 "Source Sans Pro", system-ui, sans-serif; color: var(--mk-body); margin: 0; }
+.mk-wel-when { margin-top: 12px; font: 600 10.5px "JetBrains Mono", monospace; letter-spacing: .1em; text-transform: uppercase; color: var(--mk-label); }
+.mk-wel-step.is-done .mk-wel-when { color: var(--mk-sage-t); }
+.mk-wel-perks { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0 0; padding: 0; list-style: none; }
+.mk-wel-perk {
+  display: flex; align-items: center; gap: 9px; background: var(--mk-blush); border: 1px solid var(--mk-cta-bd);
+  border-radius: 999px; padding: 9px 15px; font: 600 14px "Source Sans Pro", system-ui, sans-serif; color: var(--mk-nearblack);
+}
+.mk-wel-perk i {
+  width: 20px; height: 20px; border-radius: 50%; background: var(--mk-rust); color: var(--mk-white);
+  display: grid; place-items: center; font: 700 11px "Source Sans Pro", system-ui, sans-serif; font-style: normal;
+}
+
+/* ── a first look: drawn in CSS, no real data ── */
+.mk-wel-peek { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 16px; }
+.mk-wel-shot {
+  background: var(--mk-white); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column;
+  box-shadow: 0 1px 0 var(--mk-hair), 0 14px 30px -24px rgba(28, 19, 15, .4);
+}
+.mk-wel-scr { flex: 1; min-height: 200px; padding: 14px; background: var(--mk-lower); }
+.mk-wel-cap { padding: 14px 16px 16px; }
+.mk-wel-cap b { display: block; font: 600 16px "Playfair Display", Georgia, serif; }
+.mk-wel-cap span { font: 400 14px/1.45 "Source Sans Pro", system-ui, sans-serif; color: var(--mk-muted); }
+.mk-wel-scr .mui-bar { height: 26px; border-radius: 7px; background: var(--mk-navy); display: flex; align-items: center; padding: 0 9px; gap: 6px; margin-bottom: 9px; }
+.mk-wel-scr .mui-bar i { width: 34px; height: 6px; border-radius: 3px; background: rgba(var(--mk-cream-rgb), .5); }
+.mk-wel-scr .mui-bar i:first-child { width: 52px; background: var(--mk-cream); }
+.mk-wel-scr .mui-row { display: grid; grid-template-columns: 22px 1fr 54px 34px; gap: 8px; align-items: center; background: var(--mk-white); border-radius: 7px; padding: 7px 8px; margin-bottom: 6px; }
+.mk-wel-scr .mui-row .d { width: 20px; height: 20px; border-radius: 50%; background: var(--mk-navy); }
+.mk-wel-scr .mui-row .d.c { background: var(--mk-label); }
+.mk-wel-scr .mui-row .d.q { background: var(--mk-white); border: 1.5px solid var(--mk-navy); box-sizing: border-box; }
+.mk-wel-scr .mui-row .l { height: 7px; border-radius: 4px; background: var(--mk-hair); }
+.mk-wel-scr .mui-row .l2 { height: 5px; width: 60%; border-radius: 3px; background: var(--mk-stone); margin-top: 4px; }
+.mk-wel-scr .mui-row .t { height: 6px; border-radius: 3px; background: var(--mk-cta); }
+.mk-wel-scr .mui-row .t--sage { background: var(--mk-sage); }
+.mk-wel-scr .mui-row .t--stone { background: var(--mk-stone); }
+.mk-wel-scr .mui-row .r { width: 26px; height: 26px; box-sizing: border-box; border-radius: 50%; border: 3px solid var(--mk-navy); border-right-color: var(--mk-stone); }
+.mk-wel-scr .mui-row .r.late { border-color: var(--mk-rust); border-right-color: var(--mk-stone); }
+.mk-wel-scr .mui-row .r.r--off { border-color: var(--mk-hair); }
+.mk-wel-scr .mui-card { background: var(--mk-white); border-radius: 9px; padding: 10px; margin-bottom: 8px; display: flex; gap: 9px; align-items: center; }
+.mk-wel-scr .mui-card .av { width: 28px; height: 28px; border-radius: 50%; background: var(--mk-navy); flex: none; box-sizing: border-box; }
+.mk-wel-scr .mui-card .av--q { background: var(--mk-white); border: 1.5px solid var(--mk-navy); }
+.mk-wel-scr .mui-card .ln { flex: 1; }
+.mk-wel-scr .mui-card .ln i { display: block; height: 6px; border-radius: 3px; background: var(--mk-hair); margin: 3px 0; }
+.mk-wel-scr .mui-card .ln i + i { width: 55%; background: var(--mk-stone); }
+.mk-wel-scr .mui-card .tr { display: flex; gap: 3px; }
+.mk-wel-scr .mui-card .tr b { width: 12px; height: 5px; border-radius: 2px; background: var(--mk-navy); }
+.mk-wel-scr .mui-card .tr b.o { background: var(--mk-hair); }
+.mk-wel-scr .mui-file {
+  background: var(--mk-white); border: 1.5px dashed var(--mk-hair); border-radius: 10px; padding: 14px; text-align: center;
+  font: 600 11px "JetBrains Mono", monospace; color: var(--mk-muted); letter-spacing: .05em;
+}
+.mk-wel-scr .mui-file .sheetico {
+  width: 34px; height: 40px; margin: 0 auto 8px; border-radius: 4px; position: relative; box-sizing: border-box;
+  background: var(--mk-white); border: 2px solid var(--mk-sage-t);
+}
+.mk-wel-scr .mui-file .sheetico::after {
+  content: ""; position: absolute; inset: 7px 5px;
+  background: repeating-linear-gradient(180deg, var(--mk-sage) 0 4px, transparent 4px 7px);
+}
+.mk-wel-scr .mui-arrow { text-align: center; font: 600 16px "Source Sans Pro", system-ui, sans-serif; color: var(--mk-label); margin: 6px 0; }
+.mk-wel-scr .mui-done {
+  display: flex; align-items: center; gap: 8px; background: var(--mk-sage); color: var(--mk-sage-t);
+  border-radius: 9px; padding: 9px 10px; font: 600 11.5px "Source Sans Pro", system-ui, sans-serif;
+}
+.mk-wel-scr .mui-done span { font: inherit; }
+
+/* ── three quick taps · have these to hand ── */
+.mk-wel-two { display: grid; grid-template-columns: 1.25fr 1fr; gap: 18px; align-items: start; }
+.mk-wel-shape { background: var(--mk-white); border-radius: 18px; padding: 30px 34px; box-shadow: 0 1px 0 var(--mk-hair); }
+.mk-wel-q { padding: 16px 0; border-top: 1px solid var(--mk-hair); }
+.mk-wel-q:first-child { border-top: 0; padding-top: 4px; }
+.mk-wel-qlabel { display: block; font: 600 16.5px "Source Sans Pro", system-ui, sans-serif; margin: 0 0 11px; color: var(--mk-nearblack); }
+.mk-wel-opts { display: flex; flex-wrap: wrap; gap: 8px; }
+.mk-wel-opt {
+  border: 1px solid var(--mk-hair); background: var(--mk-hero-ground); border-radius: 999px; padding: 9px 15px;
+  font: 500 14.5px "Source Sans Pro", system-ui, sans-serif; color: var(--mk-nearblack); cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.mk-wel-opt:hover { border-color: var(--mk-label); }
+.mk-wel-opt[aria-pressed="true"] { background: var(--mk-navy); border-color: var(--mk-navy); color: var(--mk-white); }
+.mk-wel-meta { display: flex; align-items: center; gap: 14px; margin-top: 18px; flex-wrap: wrap; }
+.mk-wel-meta small { font: 400 13.5px "Source Sans Pro", system-ui, sans-serif; color: var(--mk-muted); }
+.mk-wel-meta small span { font: inherit; }
+.mk-wel-failed { color: var(--mk-rust); font-weight: 600; }
+.mk-wel-thanks { display: flex; align-items: center; gap: 14px; background: var(--mk-sage); border-radius: 14px; padding: 16px 18px; color: var(--mk-nearblack); }
+.mk-wel-thanks i {
+  width: 30px; height: 30px; border-radius: 50%; background: var(--mk-sage-t); color: var(--mk-white);
+  display: grid; place-items: center; font-style: normal; font-weight: 700; flex: none;
+}
+.mk-wel-thanks span { color: var(--mk-muted); font-size: 14.5px; }
+.mk-wel-ready { background: var(--mk-navy); color: var(--mk-cream); border-radius: 18px; padding: 30px 30px 32px; }
+.mk-wel .mk-wel-ready .mk-wel-h3 { font-size: 24px; color: var(--mk-white); margin: 8px 0 10px; }
+.mk-wel-ready p { font: 400 15.5px/1.6 "Source Sans Pro", system-ui, sans-serif; color: rgba(var(--mk-cream-rgb), .8); margin: 0; }
+.mk-wel-ready ul { list-style: none; padding: 0; margin: 16px 0 0; }
+.mk-wel-ready li { display: flex; gap: 10px; font: 500 15px/1.45 "Source Sans Pro", system-ui, sans-serif; padding: 8px 0; border-top: 1px solid rgba(var(--mk-cream-rgb), .14); }
+.mk-wel-ready li i { color: var(--mk-stamp); font-style: normal; }
+.mk-wel-ready .mk-wel-eyebrow { color: var(--mk-stamp); }
+
+/* ── closing ── */
+.mk-wel-close { text-align: center; padding: 58px 0 70px; }
+.mk-wel-close p { font: italic 400 22px/1.5 "Playfair Display", Georgia, serif; color: var(--mk-body); max-width: 32em; margin: 0 auto; }
+.mk-wel-hand { font: 600 32px "Caveat", cursive; color: var(--mk-rust); margin-top: 10px; }
+
+/* ── expired / unknown: hero only, with room below ── */
+.mk-wel[data-welcome="expired"] .mk-wel-wrap, .mk-wel[data-welcome="unknown"] .mk-wel-wrap { padding-bottom: 60px; }
+
+/* ── the phone (the mock's 390 view) ── */
+@media (max-width: 760px) {
+  .mk-wel-wrap { padding: 0 18px 1px; }
+  .mk-wel-hero { grid-template-columns: 1fr; gap: 34px; padding: 34px 0 30px; }
+  .mk-wel .mk-wel-h1 { font-size: 40px; }
+  .mk-wel-lede { font-size: 16.5px; }
+  .mk-wel-card .mk-wel-cardno b { font-size: 58px; }
+  .mk-wel-note { grid-template-columns: 1fr; gap: 16px; padding: 24px 22px; }
+  .mk-wel-photo { width: 72px; height: 72px; }
+  .mk-wel-photo span { font-size: 24px; }
+  .mk-wel-notebody p { font-size: 16px; }
+  .mk-wel .mk-wel-h2 { font-size: 27px; }
+  .mk-wel-steps, .mk-wel-peek, .mk-wel-two { grid-template-columns: 1fr; }
+  .mk-wel-shape { padding: 22px 18px; }
+  .mk-wel-close p { font-size: 18px; }
+}

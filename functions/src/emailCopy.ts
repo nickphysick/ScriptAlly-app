@@ -55,9 +55,9 @@ export const WELCOME_SUBJECT = "You're in — you're a Founding Writer";
 
 export const WELCOME_HEADING = "That's your place confirmed.";
 
-/** `position` and `cap` are the real, stored figures — never rounded and never estimated. */
-export const welcomeLead = (position: number, cap: number): string =>
-  `You're founding writer number ${position} of ${cap}.`;
+/** The writer's stored founding number — never rounded and never estimated. Unpadded here. */
+export const welcomeLead = (foundingNumber: number): string =>
+  `You're Founding Writer No. ${foundingNumber}.`;
 
 /**
  * ⚠️ WAVES, AND NO DATE. Saying "in waves" is a true description of how this will work; naming a
@@ -81,9 +81,9 @@ export const WELCOME_PERKS: readonly string[] = [
 /* ══════════════ Shared ══════════════ */
 
 /**
- * ⚠️ A VISIBLE ADDRESS, NOT JUST A `Reply-To` HEADER. A reader cannot see a header — and replies
- * to the from-address are currently diverted, so trusting reply alone would break the "direct line
- * to the founder" promise silently. Someone who wants a person needs something they can read.
+ * ⚠️ A VISIBLE ADDRESS, NOT JUST A `Reply-To` HEADER. A reader cannot see a header, so trusting
+ * reply alone would leave the "direct line to the founder" promise resting on something invisible.
+ * Someone who wants a person needs something they can read.
  */
 export const contactLine = (supportEmail: string): string =>
   `Questions, or something to tell us? Write to ${supportEmail} — a person reads it.`;

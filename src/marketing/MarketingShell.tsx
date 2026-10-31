@@ -13,6 +13,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./marketing.css";
 import { marketingNavState, MarketingNavUser } from "./marketingNav";
+import { LANDING_ONLY } from "../lib/siteMode";
 import { BRAND_MARK, artUrl } from "./brandArt";
 import { MarketingFooter } from "./MarketingFooter";
 import { usePhone } from "./usePhone";
@@ -203,20 +204,24 @@ export const MarketingShell: React.FC<{
           <div className="mk-navright">
             {/* Phones (landing on phones v4, 26 Oct): one tinted pill — "Log in" to the sign-in route the
                 desktop's Log in uses, or, signed in, the desktop's "Open dashboard". The founding offer
-                is the drawer's sign-up, the join bar and the closing card; the strip is gone. */}
+                is the drawer's sign-up, the join bar and the closing card; the strip is gone.
+                Landing-only (live) draws NO pill: there is no way in, and the constant folds the
+                branch away so the bundle carries neither label. */}
             {phone ? (
-              nav.mode === "anon" ? (
+              LANDING_ONLY ? null : nav.mode === "anon" ? (
                 <button type="button" className="mk-lg" onClick={() => { window.location.hash = "#/login"; }}>Log in</button>
               ) : (
                 <button type="button" className="mk-lg" onClick={() => onNavigate("dashboard")}>{nav.primaryLabel}</button>
               )
             ) : (<>
-            {nav.showLogIn && (
+            {!LANDING_ONLY && nav.showLogIn && (
               <button type="button" className="mk-login" onClick={() => { window.location.hash = "#/login"; }}>
                 Log in
               </button>
             )}
-            {nav.mode === "anon" ? (
+            {/* Landing-only folds this to the anon branch at build time, so the bundle carries no
+                "Open dashboard" (and no Log in above) for verify to find. */}
+            {LANDING_ONLY || nav.mode === "anon" ? (
               <button type="button" className="mk-btn mk-btn--cream" onClick={() => onNavigate("founders")}>
                 {nav.primaryLabel}
               </button>
@@ -253,7 +258,7 @@ export const MarketingShell: React.FC<{
                 {l.label}
               </button>
             ))}
-            {nav.showLogIn && (
+            {!LANDING_ONLY && nav.showLogIn && (
               <button type="button" onClick={pick(() => { window.location.hash = "#/login"; })}>
                 Log in
               </button>

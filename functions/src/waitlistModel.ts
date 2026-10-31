@@ -342,6 +342,119 @@ export const readCounter = (data: Record<string, unknown> | undefined): CounterS
   return { verifiedCount: verified, cap: cap === 0 ? DEFAULT_CAP : cap };
 };
 
+/* ══════════════ Founding and reserve numbers ══════════════ */
+
+/**
+ * A writer's founding number is assigned ONCE, inside the transaction that confirms them, and
+ * stored on their waitlist doc as `foundingNumber`. Nothing ever recomputes it.
+ *
+ * ⚠️ A NUMBER IS A PLACE, NOT A PERSON (Nick's ruling, 18 Oct). When a confirmed writer unsubscribes,
+ * their place is released and their number goes on the counter's `freedNumbers`. The next writer to
+ * confirm takes the LOWEST freed number. So numbers stay within 1–cap, "of 100" is always true, and
+ * no number is ever held by two people at once.
+ *
+ * The issued numbers are always exactly 1..highest minus the freed ones, so with nothing freed the
+ * next number is `verifiedCount + 1`, which no one holds.
+ *
+ * A reserve number is a place in the waiting list's queue (1, 2, 3 …), from the counter's
+ * `reserveIssued`. It only goes up.
+ */
+export interface Numbering {
+  /** Founding numbers released by unsubscribes, ascending, each within 1..cap. */
+  freed: number[];
+  /** Reserve numbers issued so far. */
+  reserveIssued: number;
+}
+
+export const readNumbering = (data: Record<string, unknown> | undefined): Numbering => {
+  const raw = Array.isArray(data?.freedNumbers) ? (data!.freedNumbers as unknown[]) : [];
+  const freed = [...new Set(raw.filter((v): v is number =>
+    typeof v === "number" && Number.isInteger(v) && v >= 1))].sort((a, b) => a - b);
+  const r = data?.reserveIssued;
+  const reserveIssued = typeof r === "number" && Number.isInteger(r) && r >= 0 ? r : 0;
+  return { freed, reserveIssued };
+};
+
+/** The number the next confirmed writer takes, and the freed list that leaves behind. */
+export const nextFoundingNumber = (
+  counter: CounterState, numbering: Numbering,
+): { foundingNumber: number; freedAfter: number[] } =>
+  numbering.freed.length > 0
+    ? { foundingNumber: numbering.freed[0], freedAfter: numbering.freed.slice(1) }
+    : { foundingNumber: counter.verifiedCount + 1, freedAfter: [] };
+
+/* ══════════════ The founding welcome ══════════════ */
+
+/**
+ * The confirmation link redirects to `/welcome`, and the page needs the writer's number. Putting the
+ * number in the URL would let anyone type "No. 1". So on every outcome with a person behind it, the
+ * verify handler mints a random REFERENCE, stores only its hash with a 30-minute expiry, and the page
+ * trades the reference for the number. A refresh inside the 30 minutes still works.
+ */
+export const WELCOME_PATH = "/welcome";
+export const WELCOME_REF_TTL_MS = 30 * 60 * 1000;
+export type WelcomeKind = "verified" | "already" | "waiting" | "expired" | "unknown";
+
+/** 192 random bits, URL-safe. */
+export const newWelcomeRef = (): string => randomBytes(24).toString("base64url");
+
+/** Where a confirmation link sends a person. The only thing after `v=` is the kind. */
+export const welcomeRedirect = (kind: WelcomeKind, ref: string | null): string =>
+  ref ? `${WELCOME_PATH}?v=${kind}&r=${encodeURIComponent(ref)}` : `${WELCOME_PATH}?v=${kind}`;
+
+export interface WelcomePayload {
+  kind: WelcomeKind;
+  foundingNumber?: number;
+  reserveNumber?: number;
+  /** The UK calendar date they confirmed, YYYY-MM-DD. Date only, by design. */
+  confirmedOn?: string;
+}
+
+const ukDate = (v: unknown): string | undefined => {
+  const d = v instanceof Date ? v
+    : v && typeof (v as { toDate?: () => Date }).toDate === "function" ? (v as { toDate: () => Date }).toDate()
+    : null;
+  if (!d || Number.isNaN(d.getTime())) return undefined;
+  /* en-CA formats as YYYY-MM-DD. */
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/London", year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
+};
+const posInt = (v: unknown): number | undefined =>
+  typeof v === "number" && Number.isInteger(v) && v >= 1 ? v : undefined;
+
+/**
+ * ⚠️ AN ALLOWLIST, NOT A FILTER. The page learns the kind, the writer's own number and the date
+ * they confirmed, and nothing else: no email, no source, no IP hash. Built field by field, so a new
+ * field on the document can never leak by default.
+ */
+export const welcomePayload = (doc: Record<string, unknown>): WelcomePayload => {
+  const kind = (doc.welcomeRefKind as WelcomeKind) ?? "unknown";
+  if (doc.status === "waiting") {
+    const reserveNumber = posInt(doc.reserveNumber);
+    const confirmedOn = ukDate(doc.reserveAt ?? doc.verifyTokenSpentAt);
+    return { kind, ...(reserveNumber ? { reserveNumber } : {}), ...(confirmedOn ? { confirmedOn } : {}) };
+  }
+  const foundingNumber = posInt(doc.foundingNumber);
+  const confirmedOn = ukDate(doc.verifiedAt);
+  return { kind, ...(foundingNumber ? { foundingNumber } : {}), ...(confirmedOn ? { confirmedOn } : {}) };
+};
+
+export const ANSWER_STAGE = ["getting-ready", "just-started", "in-the-thick", "revising"] as const;
+export const ANSWER_QUERIED = ["none", "1-10", "11-50", "50-plus"] as const;
+export const ANSWER_TRACKER = ["spreadsheet", "querytracker", "notebook", "inbox", "other"] as const;
+
+/** The three quick taps, validated server-side. Exactly these keys and values, or null. */
+export const readWelcomeAnswers = (body: unknown): {
+  answerStage: string; answerQueried: string; answerTracker: string;
+} | null => {
+  if (!body || typeof body !== "object" || Array.isArray(body)) return null;
+  const b = body as Record<string, unknown>;
+  const keys = Object.keys(b).filter((k) => k !== "r");
+  if (keys.length !== 3 || !["stage", "queried", "tracker"].every((k) => keys.includes(k))) return null;
+  const ok = (v: unknown, set: readonly string[]) => typeof v === "string" && set.includes(v);
+  if (!ok(b.stage, ANSWER_STAGE) || !ok(b.queried, ANSWER_QUERIED) || !ok(b.tracker, ANSWER_TRACKER)) return null;
+  return { answerStage: b.stage as string, answerQueried: b.queried as string, answerTracker: b.tracker as string };
+};
+
 /* ══════════════ The GET contract ══════════════ */
 
 export interface CountPayload {

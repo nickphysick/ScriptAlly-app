@@ -16,6 +16,7 @@ import React from "react";
 import { FOOTER_TAGLINE, SUPPORT_EMAIL } from "../lib/companyInfo";
 import { BRAND_MARK, artUrl } from "./brandArt";
 import { PaperPlane, StatusGlyph, STATUS_GLYPH_COUNT } from "./marketingMarks";
+import { LANDING_ONLY } from "../lib/siteMode";
 
 export const MarketingFooter: React.FC<{
   onNavigate: (tab: string, subPageName?: string) => void;
@@ -68,7 +69,8 @@ export const MarketingFooter: React.FC<{
             <ul>
               <li><button type="button" onClick={toFeatures}>Features</button></li>
               <li><button type="button" onClick={() => onNavigate("pricing")}>Pricing</button></li>
-              <li><button type="button" onClick={openApp}>Open QueryHawk</button></li>
+              {/* Landing-only: there is no app to open (src/lib/siteMode.ts). */}
+              {!LANDING_ONLY && <li><button type="button" onClick={openApp}>Open QueryHawk</button></li>}
             </ul>
           </div>
 
