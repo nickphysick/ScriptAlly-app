@@ -17,7 +17,7 @@
  *
  * ⚠️ PLAIN `fetch`, NOT THE RESEND SDK, AND DELIBERATELY. It is one documented POST to one
  * endpoint; a dependency would add an install to `functions/` and a supply-chain surface for
- * roughly twelve lines of code. Node 20 has global fetch. If the API ever needs more than this,
+ * roughly twelve lines of code. Node 22 has global fetch. If the API ever needs more than this,
  * that is the moment to reconsider — not before.
  */
 
