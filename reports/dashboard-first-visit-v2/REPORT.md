@@ -206,11 +206,10 @@ and **FV2's nine locks green against a preview of the integrated build** (10 pas
 
 - **Hosting:** deployed to dev, the served bundle checked after.
 - **Rules:** deployed to dev with Parts F and I (releases 15:45:04 and 16:22:22); the integration's file is the same.
-- **⚠️ The clean-up function is NOT deployed.** `firebase deploy --only functions:importDraftsCleanup --project
-  scriptally-dev` was refused: *"Runtime Node.js 20 was decommissioned on 2026-10-30. To deploy you must first upgrade your
-  runtime version."* Upgrading the runtime is a change to every function (`functions/package.json`), outside what this
-  pack may touch. Until it is deployed, a draft is deleted when its import finishes or is discarded, but not after 7 days.
-  **Your call: upgrade the functions runtime (its own small pack), then deploy `importDraftsCleanup` to dev.**
+- **The clean-up function is deployed to dev (31 Oct), on Node.js 22.** The first attempt was refused because Node.js 20 was
+  decommissioned on 30 Oct; Nick approved the upgrade, which landed on `main` as `b3ef6a0d` (`engines.node` 20 → 22) and was
+  cherry-picked onto the integration branch as `ca6276c6`. `functions:list` shows `importDraftsCleanup · scheduled ·
+  nodejs22`. Every other dev function is still on Node 20 and has not been redeployed; `release/live-1` (prod) still says 20.
 - **Not merged; prod untouched.** Don't deploy to prod before emails v1 lands (Part G says "we'll email you").
 
 ## Out of scope, reported
@@ -219,4 +218,4 @@ and **FV2's nine locks green against a preview of the integrated build** (10 pas
 - The ready path with agents offers no "Change it" (false premise 6).
 - `dashList`'s `start` group is now unreachable from the desktop (kept, tested).
 - Don't deploy this to prod before emails v1 lands: Part G tells writers "we'll email you".
-- The functions runtime: Node.js 20 is decommissioned, so no function can be deployed until it is upgraded.
+- The other functions are still on Node 20 on dev and prod; each moves to 22 on its next deploy. Prod's `release/live-1` needs the same `engines` change.
