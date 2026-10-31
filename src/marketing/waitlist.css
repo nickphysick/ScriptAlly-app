@@ -21,8 +21,10 @@
 
 /* ═════════════ Phones ═════════════ */
 .mk-wl { background: #f2eee8; color: #1c130f; font: 400 16px/1.55 var(--mk-f-serif); }
-/* 0-1-1, not `:where()`: brand.tsx names bare spans the app's sans and a zero-specificity rule loses to it. */
-.mk-wl p, .mk-wl span, .mk-wl b, .mk-wl small, .mk-wl li, .mk-wl summary, .mk-wl em, .mk-wl strong { font-family: inherit; }
+/* ⚠️ ZERO SPECIFICITY ON PURPOSE. A 0-1-1 `.mk-wl span` was tried and it OUTRANKED every single-class rule
+   on the page — the handwritten strap, the bar labels and the card's note all lost their faces. The few
+   spans brand.tsx would otherwise reach state their family on their own selector (`.mk-wl-more span`). */
+.mk-wl :where(p, span, b, small, li, summary, em, strong) { font-family: inherit; }
 .mk-wl button { font-family: var(--mk-f-serif); }
 
 /* The bar's Join (MarketingShell, on `/` at phone width): blush, ink, 36 tall. */
@@ -140,7 +142,7 @@
 .mk-wl-more { margin-top: 22px; border-top: 1px solid rgba(255, 255, 255, .16); }
 .mk-wl-more > div { padding: 14px 0; border-bottom: 1px solid rgba(255, 255, 255, .16); }
 .mk-wl-more b { display: block; font: 400 18px/1.3 var(--mk-f-display); color: #fff; }
-.mk-wl-more span { font-size: 15px; color: rgba(255, 255, 255, .75); }
+.mk-wl-more span { font-family: var(--mk-f-serif); font-size: 15px; color: rgba(255, 255, 255, .75); }
 
 /* ── The founding card (moved whole from marketing.css; the pill, the list and the link are retired) ── */
 .mk-close { padding: 44px 16px 8px; background: #f2eee8; }
@@ -151,7 +153,7 @@
 }
 .mk-ccart { position: absolute; right: 4px; top: -52px; width: 120px; height: auto; max-width: none; }
 .mk-ccard .mk-cch2 { font-family: var(--mk-f-display) !important; font-weight: 400 !important; letter-spacing: 0 !important; font-size: 28px !important; line-height: 1.18 !important; margin: 34px 0 10px; color: #1c130f; }
-.mk-cclead { margin: 0 0 6px; color: rgba(28, 19, 15, .74); }
+.mk-cclead { margin: 0 0 6px; font-family: var(--mk-f-serif); color: rgba(28, 19, 15, .74); }
 .mk-ccform { margin-top: 16px; }
 .mk-ccform input[type="email"] { border-color: rgba(28, 19, 15, .13); }
 .mk-ccform input[type="email"]:focus { box-shadow: 0 0 0 3px rgba(42, 58, 82, .15); }

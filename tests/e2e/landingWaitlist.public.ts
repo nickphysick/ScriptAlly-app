@@ -26,6 +26,8 @@ const MUTATIONS: Record<string, string> = {
   LW3: ".mk-jbar{transform:none!important;opacity:1!important;pointer-events:auto!important}",
   LW5: ".mk-frow--be{grid-template-columns:1fr 1fr!important}",
   LW6: ".mk-trkd{aspect-ratio:1600/800!important}",
+  /* The fault LW-F was written after: a 0-1-1 "inherit" rule outranking every single-class face rule. */
+  LWF: ".mk-wl p,.mk-wl span{font-family:inherit}",
 };
 const mutate = async (page: Page, name: string) => {
   if (process.env.LW_MUTATE === name) await page.addStyleTag({ content: MUTATIONS[name] });
@@ -238,4 +240,24 @@ test("LW-6 · desktop: the pile is drawn at the neighbouring illustration's size
   expect(r.cards, "the whole stack is drawn").toBe(5);
   expect(r.illo, "row 3's illustration has laid out").toBeGreaterThan(200);
   expect(Math.abs(r.pile / r.illo - 1), `pile ${r.pile.toFixed(1)} vs illustration ${r.illo.toFixed(1)}`).toBeLessThanOrEqual(0.1);
+});
+
+/**
+ * LW-F (beyond the brief's six): phones keep the ref's faces. Written after a 0-1-1 `.mk-wl span { font-family:
+ * inherit }` silently took the handwriting off "No more winging it." and the typewriter off every Birds-eye
+ * bar — through a green suite, because nothing read a computed face.
+ */
+test("LW-F · phones: each piece is set in the ref's face", async ({ page }) => {
+  await open(page, PHONE);
+  await mutate(page, "LWF");
+  const FACES: Record<string, string> = {
+    ".mk-wl-strap": "Caveat", ".mk-bew-lab": "Special Elite", ".mk-wl-feat h3": "Special Elite",
+    ".mk-wl-sub": "Source Serif 4", ".mk-wl-more span": "Source Serif 4", ".mk-cclead": "Source Serif 4",
+    ".mk-ccnote": "Source Sans 3",
+  };
+  await present(page, ...Object.keys(FACES));
+  const got = await page.evaluate((sels) => Object.fromEntries(sels.map((s) =>
+    [s, getComputedStyle(document.querySelector(s)!).fontFamily.split(",")[0].replace(/"/g, "").trim()])), Object.keys(FACES));
+  console.log("LW-F", JSON.stringify(got));
+  for (const [sel, face] of Object.entries(FACES)) expect(got[sel], sel).toBe(face);
 });
