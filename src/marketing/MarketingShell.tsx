@@ -17,6 +17,8 @@ import { LANDING_ONLY } from "../lib/siteMode";
 import { BRAND_MARK, artUrl } from "./brandArt";
 import { MarketingFooter } from "./MarketingFooter";
 import { usePhone } from "./usePhone";
+import { ConsentBar } from "./ConsentBar";
+import { CONSENT_EVENT, initAnalytics, trackPageView } from "./analytics";
 
 /* ── The brand artwork: the hawk and the drawn wordmark ──
    Both sit in public/ rather than src/assets/ so they are served at stable paths — and public/ is
@@ -46,6 +48,15 @@ export const MarketingShell: React.FC<{
   path: string;
   children: React.ReactNode;
 }> = ({ user, onNavigate, path, children }) => {
+  /* Analytics: loads only if the visitor has already said yes (see analytics.ts), then one page
+     view per public route. A yes given on this page sends this page's view at that moment. */
+  useEffect(() => { initAnalytics(); }, []);
+  useEffect(() => { trackPageView(path); }, [path]);
+  useEffect(() => {
+    const onConsent = () => trackPageView(path);
+    window.addEventListener(CONSENT_EVENT, onConsent);
+    return () => window.removeEventListener(CONSENT_EVENT, onConsent);
+  }, [path]);
   /* ⚠️ A CLASS TOGGLED BY A PASSIVE LISTENER, NOT A SCROLL-LINKED ANIMATION. The condense is a
      state change with a transition, so it runs on the compositor once and stops; a scroll-driven
      animation would recompute on every frame of every scroll for a two-state effect. */
@@ -276,6 +287,7 @@ export const MarketingShell: React.FC<{
           round that surface's bottom corners against it. Chrome on both sides of the sheet now
           belongs to the same component. */}
       <MarketingFooter onNavigate={onNavigate} />
+      <ConsentBar onPrivacy={() => onNavigate("privacy")} />
     </div>
   );
 };

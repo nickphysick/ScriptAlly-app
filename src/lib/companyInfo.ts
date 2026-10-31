@@ -68,7 +68,7 @@ export const DATA_REGION = "[europe-west2 — London]";
 export const DELETION_WINDOW_DAYS = 30;
 
 /** The date both legal documents state at the top of the band. */
-export const LEGAL_LAST_UPDATED = "15 Aug 2026";
+export const LEGAL_LAST_UPDATED = "31 Oct 2026";
 
 /** The footer's strapline, under the hawk and the name (17 Sep). */
 export const FOOTER_TAGLINE =

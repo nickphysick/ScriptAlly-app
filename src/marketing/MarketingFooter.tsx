@@ -17,6 +17,7 @@ import { FOOTER_TAGLINE, SUPPORT_EMAIL } from "../lib/companyInfo";
 import { BRAND_MARK, artUrl } from "./brandArt";
 import { PaperPlane, StatusGlyph, STATUS_GLYPH_COUNT } from "./marketingMarks";
 import { LANDING_ONLY } from "../lib/siteMode";
+import { analyticsAvailable, reopenConsent } from "./analytics";
 
 export const MarketingFooter: React.FC<{
   onNavigate: (tab: string, subPageName?: string) => void;
@@ -88,6 +89,9 @@ export const MarketingFooter: React.FC<{
             <ul>
               <li><button type="button" onClick={() => onNavigate("privacy")}>Privacy</button></li>
               <li><button type="button" onClick={() => onNavigate("terms")}>Terms</button></li>
+              {analyticsAvailable() && (
+                <li><button type="button" onClick={reopenConsent}>Cookie choices</button></li>
+              )}
             </ul>
           </div>
         </div>

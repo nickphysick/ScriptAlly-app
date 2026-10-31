@@ -230,14 +230,18 @@ describe("the legal pages are honest about being drafts", () => {
   });
 
   /**
-   * ⚠️ THE POLICY SAYS THERE IS NO COOKIE BANNER. That sentence is only true while the app sets
-   * nothing but auth tokens and interface preferences — so if a banner or an analytics tag ever
-   * arrives, this assertion is the thing that should stop it arriving silently.
+   * ⚠️ REWRITTEN 31 Oct: the public site now offers Google Analytics behind a consent bar. The
+   * policy must say so, and must say it only runs after Accept — the sentence that used to be
+   * locked here ("no cookie banner") stopped being true the day the tag arrived, which is what
+   * this assertion was for.
    */
-  it("the privacy policy covers cookies and local storage, and claims no banner", () => {
+  it("the privacy policy covers cookies, names Google Analytics, and says it waits for Accept", () => {
     const html = renderPage(<LegalPage doc="privacy" onNavigate={noNavigate} />, "/privacy");
     expect(html).toContain("Cookies and local storage");
-    expect(html).toContain("cookie banner");
+    expect(html).toContain("Google Analytics");
+    expect(html).toContain("only runs if you choose Accept");
+    expect(html).toContain("Cookie choices");
+    expect(html).not.toContain("no third-party analytics");
   });
 
   /** The rights section is the one a data subject arrives looking for; it must name a route out. */
