@@ -275,9 +275,7 @@
   width: 120px; height: auto; max-width: none;
   left: calc(var(--mk-bef-names) / 2 - 60px);
   top: calc(var(--mk-bef-head) - 120px * 287 / 300);
-  /* The drawing's sides are straight cuts; they fade out rather than stand as edges on the navy. */
-  -webkit-mask: linear-gradient(90deg, transparent 0, #000 18%, #000 82%, transparent 100%);
-  mask: linear-gradient(90deg, transparent 0, #000 18%, #000 82%, transparent 100%);
+  /* Fully opaque, no fade (Nick, 31 Oct). */
 }
 .mk-bef .mk-be-dates { height: var(--mk-bef-head); border-bottom: 0; background: #2a3a52; }
 .mk-bef .mk-be-mo, .mk-bef .mk-be-mo:nth-child(2) { background: transparent; }
