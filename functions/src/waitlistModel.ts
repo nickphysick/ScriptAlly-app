@@ -126,6 +126,33 @@ export const readSource = (raw: unknown): WaitlistSource =>
     ? (raw as WaitlistSource)
     : "unknown";
 
+/**
+ * Where the visitor came from: the `utm_*` tags (or `?ref=`) on the link that brought them, e.g.
+ * the Instagram link-in-bio `queryhawk.net/?utm_source=instagram`. `source` above is WHICH FORM;
+ * this is WHICH LINK. Recorded so a launch post can be judged by sign-ups, for every visitor —
+ * not only those who accepted analytics cookies.
+ *
+ * ⚠️ IT IS BROWSER INPUT, SO IT IS NARROWED HARD: three known keys only, each lower-cased,
+ * trimmed to 60 characters and cut to `[a-z0-9._-]`. Anything else is dropped, and an object with
+ * nothing left in it is `null`, so the field is omitted rather than stored empty.
+ */
+export interface Attribution { source?: string; medium?: string; campaign?: string }
+const ATTRIBUTION_KEYS = ["source", "medium", "campaign"] as const;
+const cleanTag = (v: unknown): string | null => {
+  if (typeof v !== "string") return null;
+  const t = v.toLowerCase().replace(/[^a-z0-9._-]/g, "").slice(0, 60);
+  return t || null;
+};
+export const readAttribution = (raw: unknown): Attribution | null => {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const out: Attribution = {};
+  for (const k of ATTRIBUTION_KEYS) {
+    const v = cleanTag((raw as Record<string, unknown>)[k]);
+    if (v) out[k] = v;
+  }
+  return Object.keys(out).length ? out : null;
+};
+
 /* ══════════════ Hashing ══════════════ */
 
 const sha256 = (s: string) => createHash("sha256").update(s).digest("hex");

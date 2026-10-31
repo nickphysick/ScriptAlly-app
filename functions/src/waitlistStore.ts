@@ -17,7 +17,7 @@
 import type { firestore } from "firebase-admin";
 import {
   CounterState, COUNTER_PATH, DEFAULT_CAP, RATELIMIT_COLLECTION, RATE_LIMIT_WINDOW_MS,
-  VERIFY_TTL_MS, WaitlistSource, WaitlistStatus,
+  VERIFY_TTL_MS, WaitlistSource, WaitlistStatus, Attribution,
   emailHash, mayResendConfirm, newVerifyToken, overRateLimit, rateLimitKey, readCounter,
   readNumbering, nextFoundingNumber, newWelcomeRef, welcomePayload, WELCOME_REF_TTL_MS,
   type WelcomeKind, type WelcomePayload,
@@ -77,6 +77,9 @@ export interface JoinArgs {
   emailNormalised: string;
   hashedIp: string | null;
   source: WaitlistSource;
+  /** The link's tags (`readAttribution`), or null. Written only when the document is CREATED, so
+      the first link that brought someone is kept and a later visit cannot overwrite it. */
+  attribution?: Attribution | null;
   nowMs: number;
   /** When false a join verifies immediately — see `REQUIRE_VERIFICATION` in the model. */
   requireVerification: boolean;
@@ -107,6 +110,7 @@ export interface JoinResult {
  */
 export const joinWaitlist = async (db: Db, args: JoinArgs): Promise<JoinResult> => {
   const { emailNormalised, hashedIp, source, nowMs, requireVerification } = args;
+  const tags = args.attribution ? { attribution: args.attribution } : {};
   const docId = emailHash(emailNormalised);
   const sRef = db.doc(`waitlist/${docId}`);
   const cRef = db.doc(COUNTER_PATH);
@@ -154,7 +158,7 @@ export const joinWaitlist = async (db: Db, args: JoinArgs): Promise<JoinResult> 
         email: emailNormalised, emailNormalised,
         createdAt: now, lastInteractionAt: now,
         verified: false, status: "waiting" as WaitlistStatus,
-        position: null, source, ...(hashedIp ? { ipHash: hashedIp } : {}),
+        position: null, source, ...tags, ...(hashedIp ? { ipHash: hashedIp } : {}),
       });
       return { outcome: "waiting" as const, status: "waiting" as WaitlistStatus, position: null, counter, docId };
     }
@@ -170,7 +174,7 @@ export const joinWaitlist = async (db: Db, args: JoinArgs): Promise<JoinResult> 
         verifyTokenExpiresAt: new Date(nowMs + VERIFY_TTL_MS),
         /* The throttle's clock starts when the first confirmation is issued, not when it lands. */
         lastConfirmSentAt: now,
-        source, ...(hashedIp ? { ipHash: hashedIp } : {}),
+        source, ...tags, ...(hashedIp ? { ipHash: hashedIp } : {}),
       });
       return {
         outcome: "joined" as const, status: "pending" as WaitlistStatus,
@@ -186,7 +190,7 @@ export const joinWaitlist = async (db: Db, args: JoinArgs): Promise<JoinResult> 
       email: emailNormalised, emailNormalised,
       createdAt: now, lastInteractionAt: now,
       verified: true, verifiedAt: now, status: "verified" as WaitlistStatus,
-      position: foundingNumber, foundingNumber, source, ...(hashedIp ? { ipHash: hashedIp } : {}),
+      position: foundingNumber, foundingNumber, source, ...tags, ...(hashedIp ? { ipHash: hashedIp } : {}),
     });
     writeCounter(tx, cRef, counter, nextCount, now, { freedNumbers: freedAfter });
     return {

@@ -28,7 +28,7 @@ import { defineSecret } from "firebase-functions/params";
 import { db } from "./firestore";
 import {
   ALLOWED_ORIGINS, GET_CACHE_SECONDS, MAX_BODY_BYTES, MIN_SUBMIT_MS, REQUIRE_VERIFICATION,
-  countPayload, ipHash, judgeJoin, normaliseEmail, readSource, readWelcomeAnswers, welcomeRedirect,
+  countPayload, ipHash, judgeJoin, normaliseEmail, readSource, readAttribution, readWelcomeAnswers, welcomeRedirect,
   type WelcomeKind,
 } from "./waitlistModel";
 import {
@@ -286,6 +286,7 @@ export const waitlist = onRequest(
 
         const email = normaliseEmail(body.email);
         const source = readSource(body.source);
+        const attribution = readAttribution(body.attribution);
         const verdict = judgeJoin({ email, trap: body.website, elapsedMs: body.elapsedMs });
 
         /* Hashed here rather than at the rate limit, so a SILENT rejection can be logged with it.
@@ -339,6 +340,7 @@ export const waitlist = onRequest(
           emailNormalised: email,
           hashedIp,
           source,
+          attribution,
           nowMs: Date.now(),
           requireVerification: REQUIRE_VERIFICATION,
         });

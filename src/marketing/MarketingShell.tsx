@@ -19,6 +19,7 @@ import { MarketingFooter } from "./MarketingFooter";
 import { usePhone } from "./usePhone";
 import { ConsentBar } from "./ConsentBar";
 import { CONSENT_EVENT, initAnalytics, trackPageView } from "./analytics";
+import { captureAttribution } from "./attribution";
 
 /* ── The brand artwork: the hawk and the drawn wordmark ──
    Both sit in public/ rather than src/assets/ so they are served at stable paths — and public/ is
@@ -50,7 +51,7 @@ export const MarketingShell: React.FC<{
 }> = ({ user, onNavigate, path, children }) => {
   /* Analytics: loads only if the visitor has already said yes (see analytics.ts), then one page
      view per public route. A yes given on this page sends this page's view at that moment. */
-  useEffect(() => { initAnalytics(); }, []);
+  useEffect(() => { captureAttribution(); initAnalytics(); }, []);
   useEffect(() => { trackPageView(path); }, [path]);
   useEffect(() => {
     const onConsent = () => trackPageView(path);
