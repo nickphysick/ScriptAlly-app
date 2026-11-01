@@ -79,6 +79,10 @@
 .mk-lc-wait i { width: 6px; height: 6px; border-radius: 50%; background: #a99f94; animation: mkLcDot 1.05s ease-in-out infinite; }
 .mk-lc-wait i:nth-child(2) { animation-delay: .15s; }
 .mk-lc-wait i:nth-child(3) { animation-delay: .3s; }
+/* Feature mode (landing perf fix v1): the pulse exists only while the story plays on screen — none before it
+   has run or once it rests, paused while scrolled away (`HeroCard`'s `data-pulse`). */
+[data-pulse="idle"] .mk-lc-wait i, [data-pulse="rest"] .mk-lc-wait i { animation: none; }
+[data-pulse="off"] .mk-lc-wait i { animation-play-state: paused; }
 @keyframes mkLcDot { 0%, 80%, 100% { opacity: .25; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-3px); } }
 
 /* The timeline's viewport: a fixed height the lines glide up through, and — once the story is told —
