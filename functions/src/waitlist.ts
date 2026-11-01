@@ -37,8 +37,8 @@ import {
 } from "./waitlistStore";
 import { RESEND_API_KEY, sendEmail } from "./email";
 import { resolveMailConfig } from "./emailConfig";
-import { prepareConfirm, prepareWelcome } from "./emailTemplates";
-import { parseUnsubscribeToken, unsubscribeToken } from "./waitlistModel";
+import { prepareConfirm, prepareWaiting, prepareWelcome } from "./emailTemplates";
+import { emailAfterVerify, parseUnsubscribeToken, unsubscribeToken } from "./waitlistModel";
 import { unsubscribeById } from "./waitlistStore";
 import { unsubscribePage } from "./unsubscribePage";
 import * as admin from "firebase-admin";
@@ -146,6 +146,26 @@ const sendWelcome = async (docId: string, position: number, cap: number, salt: s
   await sendEmail(to, "welcome", prepared.email);
 };
 
+/** Email 3, to a writer whose confirmation landed on the waiting list. Same refusals as the welcome. */
+const sendWaiting = async (docId: string, salt: string) => {
+  const cfg = resolveMailConfig(process.env);
+  const snap = await db.doc(`waitlist/${docId}`).get();
+  const to = (snap.get("email") as string) ?? "";
+  if (!to || !salt) {
+    console.error(JSON.stringify({
+      event: "email.refused", template: "waiting",
+      missing: [...(to ? [] : ["recipient"]), ...(salt ? [] : ["salt"])],
+    }));
+    return;
+  }
+  const prepared = prepareWaiting(cfg, unsubscribeToken(docId, salt));
+  if (!prepared.ok) {
+    console.error(JSON.stringify({ event: "email.refused", template: "waiting", missing: prepared.missing }));
+    return;
+  }
+  await sendEmail(to, "waiting", prepared.email);
+};
+
 export const waitlist = onRequest(
   { region: "europe-west2", timeoutSeconds: 30, memory: "256MiB", secrets: [IP_HASH_SALT, RESEND_API_KEY] },
   async (req, res) => {
@@ -192,9 +212,14 @@ export const waitlist = onRequest(
         const token = typeof req.query.token === "string" ? req.query.token : "";
         if (!token) { res.redirect(302, welcomeRedirect("unknown", null)); return; }
         const outcome = await verifyWaitlist(db, token, Date.now());
-        if (outcome.kind === "verified") {
+        /* ⚠️ ONE EMAIL PER TRANSITION, decided by `emailAfterVerify`: the welcome on `verified`,
+           email 3 on `waiting`, nothing on `already` (a repeat click, or a scanner's). */
+        const mail = emailAfterVerify(outcome.kind);
+        if (mail === "welcome" && outcome.kind === "verified") {
           await sendWelcome(outcome.docId, outcome.position, outcome.counter.cap,
                             IP_HASH_SALT.value());
+        } else if (mail === "waiting" && outcome.kind === "waiting") {
+          await sendWaiting(outcome.docId, IP_HASH_SALT.value());
         }
         /* ⚠️ A REDIRECT, NOT JSON. This URL is opened by a person from their email client, so the
            answer has to be a page: `/welcome` says what happened.

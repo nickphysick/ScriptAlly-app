@@ -37,7 +37,7 @@ const RESEND_ENDPOINT = "https://api.resend.com/emails";
 const SEND_TIMEOUT_MS = 10_000;
 
 /** Which message this is. Renderers live in `emailTemplates.ts`; this file only sends. */
-export type EmailTemplate = "confirm" | "welcome" | "feedback";
+export type EmailTemplate = "confirm" | "welcome" | "waiting" | "feedback";
 
 /** What a renderer produces. Both parts are required — see the plain-text note below. */
 export interface RenderedEmail {

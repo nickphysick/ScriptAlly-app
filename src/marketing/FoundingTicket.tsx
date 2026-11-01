@@ -8,7 +8,10 @@
  * shared sign-up, the places counter, the note and Privacy.
  *
  * ⚠️ THE NUMBER IS THE STORE'S, LIVE OR ABSENT: the next place is `claimed + 1` from the same reading
- * `HeroPlaces` takes. Unloaded, or with the cap reached, the stub shows the label alone, never a number.
+ * `HeroPlaces` takes. Unloaded, the stub shows the label alone; with the cap reached it reads "All fifty
+ * taken" on two lines, clear of the bird. Never a number that is not the next place.
+ * ⚠️ THE BIRD IS WHOLLY INSIDE THE STUB (founding emails v1, phase 2): ~150px, 10px in from the right
+ * and 6px up from the bottom, never cut by the stub's rounded corner. EM-5 measures its box.
  * ⚠️ THE FORM IS THE SHARED ONE AND ITS `source` IS UNCHANGED ("sealed-band", the server's value). The
  * small capitals on the stub's label are a ticket's printing, the one place on this page they are used.
  * ⚠️ `FOUNDING_GETS` IS NOT EDITED TO BOLD ITS LEADS: other pages read it. `FOUNDING_GET_LEADS` names
@@ -16,7 +19,7 @@
  */
 import React from "react";
 import {
-  FOUNDING_GETS, FOUNDING_GET_LEADS, CLOSE_HEADING, CLOSE_LEAD, CLOSE_NOTE, PASS_LABEL, passNumber, passOf,
+  FOUNDING_GETS, FOUNDING_GET_LEADS, CLOSE_HEADING, CLOSE_LEAD, CLOSE_NOTE, PASS_FULL, PASS_LABEL, passNumber, passOf,
 } from "./landingCopy";
 import { FoundingSignup } from "./FoundingSignup";
 import { HeroPlaces } from "./HeroPlaces";
@@ -36,8 +39,14 @@ export const ticketGets = () => FOUNDING_GETS.map((g, i) => {
 export const nextPlace = (count: { cap: number; claimed: number } | null | undefined): { n: number; cap: number } | null =>
   count && count.cap > 0 && count.claimed < count.cap ? { n: count.claimed + 1, cap: count.cap } : null;
 
+/** True only when a loaded count says the places are gone. Unloaded is never "full". */
+export const placesGone = (count: { cap: number; claimed: number } | null | undefined): boolean =>
+  !!count && count.cap > 0 && count.claimed >= count.cap;
+
 export const FoundingTicket: React.FC<{ onNavigate: (tab: string, subPageName?: string) => void }> = ({ onNavigate }) => {
-  const place = nextPlace(useFounding().count);
+  const { count } = useFounding();
+  const place = nextPlace(count);
+  const gone = placesGone(count);
   return (
     <section className="mk-close" aria-labelledby="mk-close-h">
       <div className="mk-tkt" id={CLOSE_FORM + "-signup"}>
@@ -45,6 +54,7 @@ export const FoundingTicket: React.FC<{ onNavigate: (tab: string, subPageName?: 
           <div className="mk-tkt-st">
             <small>{PASS_LABEL}</small>
             {place && <><b>{passNumber(place.n)}</b><span>{passOf(place.cap)}</span></>}
+            {gone && <b className="mk-tkt-full">{PASS_FULL}</b>}
           </div>
           <img src={v(PASS_BIRD)} alt="" width={PASS_BIRD.width} height={PASS_BIRD.height} loading="lazy" />
         </div>

@@ -236,22 +236,34 @@ test("LW-6 · desktop: the pile is drawn at the neighbouring illustration's size
   expect(Math.abs(r.pile / r.illo - 1), `pile ${r.pile.toFixed(1)} vs illustration ${r.illo.toFixed(1)}`).toBeLessThanOrEqual(0.1);
 });
 
-test.describe("LW-7 · phones: the Birds-eye heading and its rule are whole in the first screen, with room below", () => {
+/* LW-7, REPLACED (founding emails v1, phase 3): the drawer is its content's height, so the Birds-eye view
+   starts in the first screen. At 390×844 the heading, its rule, the hawk's head and the window's date row
+   are all inside it; at 430×932 the same, with ≥16px clear below the date row. */
+test.describe("LW-7 · phones: the Birds-eye heading, its rule, the hawk's head and the date row are in the first screen", () => {
   for (const vp of [PHONE, PHONE_L]) {
     test(`at ${vp.width}×${vp.height}`, async ({ page }) => {
       await open(page, vp);
       await mutate(page, "LW7");
-      await present(page, "#mk-be-h", ".mk-wl-hero");
+      await present(page, "#mk-be-h", ".mk-wl-hero", ".mk-wl-feat--first .mk-bef-hk", ".mk-wl-feat--first .mk-bef-lanehead");
       const r = await page.evaluate(() => {
-        const h = document.getElementById("mk-be-h")!.getBoundingClientRect();
-        const rule = parseFloat(getComputedStyle(document.getElementById("mk-be-h")!, "::after").height);
-        return { top: h.top, bottom: h.bottom, rule, vh: innerHeight, scrollY, drawer: document.querySelector(".mk-wl-hero")!.getBoundingClientRect().bottom };
+        const box = (sel: string) => { const b = document.querySelector(sel)!.getBoundingClientRect(); return { top: b.top, bottom: b.bottom }; };
+        const h = document.getElementById("mk-be-h")!;
+        const rule = parseFloat(getComputedStyle(h, "::after").height);
+        const hero = document.querySelector(".mk-wl-hero") as HTMLElement;
+        return { vh: innerHeight, scrollY, rule, heading: box("#mk-be-h"), drawer: box(".mk-wl-hero"),
+                 heroMin: getComputedStyle(hero).minHeight, hawk: box(".mk-wl-feat--first .mk-bef-hk"),
+                 dates: box(".mk-wl-feat--first .mk-bef-lanehead"), win: box(".mk-wl-feat--first .mk-bef-win") };
       });
       console.log(`LW-7 @${vp.width}`, JSON.stringify(r));
       expect(r.scrollY, "read at the top of the page").toBe(0);
+      expect(r.heroMin === "0px" || r.heroMin === "auto", `the drawer has no min-height (${r.heroMin})`).toBe(true);
       expect(r.rule, "the heading draws its rule (inside its box)").toBe(3);
-      expect(r.top, "the heading starts below the drawer").toBeGreaterThan(r.drawer);
-      expect(r.vh - r.bottom, "≥16px clear below the heading's rule").toBeGreaterThanOrEqual(16);
+      expect(r.heading.top, "the heading starts below the drawer").toBeGreaterThan(r.drawer.top);
+      for (const [name, b] of [["the heading and its rule", r.heading], ["the hawk's head", r.hawk], ["the date row", r.dates]] as const) {
+        expect(b.top, `${name}: top on screen`).toBeGreaterThanOrEqual(0);
+        expect(b.bottom, `${name}: bottom inside the first screen`).toBeLessThanOrEqual(r.vh);
+      }
+      if (vp === PHONE_L) expect(r.vh - r.dates.bottom, "≥16px clear below the date row").toBeGreaterThanOrEqual(16);
     });
   }
 });
@@ -383,12 +395,14 @@ test.describe("LW-12 · the founding pass states a number only when the count ha
     console.log("LW-12 loaded", JSON.stringify(s));
     expect(s).toBe("Founding writer passNo. 14of 50");
   });
-  test("full: the label alone", async ({ page }) => {
+  /* Founding emails v1 (1 Nov): full says so, "All fifty taken", and still states no number. */
+  test("full: no number, and the stub says the places are gone", async ({ page }) => {
     await open(page, PHONE, { count: 50, cap: 50 });
     await page.waitForTimeout(1500);
     const s = await stub(page);
     console.log("LW-12 full", JSON.stringify(s));
-    expect(s).toBe("Founding writer pass");
+    expect(s).toBe("Founding writer passAll fifty taken");
+    expect(s).not.toMatch(/No\./);
   });
 });
 

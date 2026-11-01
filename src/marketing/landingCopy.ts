@@ -248,10 +248,12 @@ export const FOUNDING_SENT =
 export const FOUNDING_DUPE =
   "That address is already signed up. If you haven't confirmed yet, look for our email " +
   "and click the link in it (check spam too).";
-/* The server has already put them on the waiting list when it answers `full`. */
+/* The server has already put them on the waiting list when it answers `full`.
+   ⚠️ FOUNDING EMAILS v1, DECISION 2(b): nothing moves a waiting writer into a freed place (an
+   unsubscribe frees a number for the next writer to CONFIRM), so the page promises the order and no
+   email. Promotion is a cap/ledger decision for Nick; when it exists, this line can say so. */
 export const FOUNDING_FULL =
-  `All ${FOUNDING_CAP_WORD} founding places have gone, so you're on the waiting list. ` +
-  "We'll email you if a place opens up.";
+  `All ${FOUNDING_CAP_WORD} founding places have gone, so you're on the waiting list, in the order people confirmed.`;
 export const FOUNDING_ERROR: CopyRun[] = [
   "That didn't send. Check the address and try again, or ",
   { link: "email us", mailto: supportMailto("QueryHawk founding members") },
@@ -713,9 +715,11 @@ export const DETAILS_PILLS: ReadonlyArray<{ label: string; key: FeatureRow["key"
 ];
 
 /* ── The founding pass (phones): the ticket's stub ──
-   ⚠️ THE NUMBER IS THE NEXT PLACE FROM THE STORE'S COUNT (claimed + 1), OR THERE IS NONE: unloaded, or
-   with the cap reached, the stub shows the label alone. */
+   ⚠️ THE NUMBER IS THE NEXT PLACE FROM THE STORE'S COUNT (claimed + 1), OR THERE IS NONE. Unloaded, the
+   stub shows the label alone; with the cap reached it says so ("All fifty taken", founding emails v1,
+   the ref's "Places gone" state) and still states no number. */
 export const PASS_LABEL = "Founding writer pass";
+export const PASS_FULL = `All ${FOUNDING_CAP_WORD} taken`;
 export const passNumber = (n: number) => `No. ${n}`;
 export const passOf = (cap: number) => `of ${cap}`;
 /** The lead phrase of each of `FOUNDING_GETS`, bolded on the ticket. The strings themselves never change. */

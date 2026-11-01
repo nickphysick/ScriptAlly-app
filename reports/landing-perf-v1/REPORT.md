@@ -4,7 +4,7 @@ Two briefs, one report:
 - **Perf fix v1, phases 1–3:** the "Every query tracked" card stops holding layers, its frame contains its pile, and the landing page uses lighter images.
 - **Split v1, phases 4–5:** queryhawk.net downloads the public site and nothing else.
 
-**Phase 5 stopped.** Its brief says to stop if lazy workspace routes need changes inside workspace pages, and they do (§6). Phase 4 is in, and it is the part that changes what queryhawk.net visitors download.
+**Phase 5 stopped, and is now deferred by Nick (§6a).** Its brief says to stop if lazy workspace routes need changes inside workspace pages, and they do (§6). Phase 4 is in, and it is the part that changes what queryhawk.net visitors download.
 
 ## For Nick: what a prod deploy changes for visitors
 
@@ -120,7 +120,7 @@ All locks were run on locally served builds (the `public` project).
 | SPLIT-1 cold-load budget | **red**: JS 810,549 B gz (limit 256,000); CSS 436,727 | green: JS 131,924 B gz, CSS 23,829, at both widths. Five largest at 1440: `journey-so-far.png` 293 KB, `home-for-your-agents.png` 223 KB, `PublicRoot-*.js` 209 KB raw / 70 KB gz, `index-*.js` 196 KB / 61 KB, `PublicRoot-*.css` 118 KB / 24 KB |
 | SPLIT-2 no workspace code (prod `dist`) | **red**: Dashboard, xlsx and jspdf in `index-CCXdiknq.js` | green: 0 hits in 6 files |
 | SPLIT-3 public paths render; sign-up round-trips | green, as it should be: it guards behaviour that must not change. Proved red by a named mutation (`SPLIT3`, the sent message hidden), which fails at "the sent message" | green at both widths: 8 paths with no page errors; the count arrives; one POST carrying the address and source; the sent message shows. The existing landing suites also pass on the new build: LW-1…12, LW-F, PERF-1…5, landingOnly, 44 passed |
-| SPLIT-4 whole-app build, signed out | **red**: all five markers in `index-DJumXKXg.js` | **red, by design until Phase 5:** all five markers in `AppRoot-*.js`. Green on the Phase 5 attempt: 61 + 376 KB gz, no markers |
+| SPLIT-4 whole-app build, signed out | **red**: all five markers in `index-DJumXKXg.js` | **skipped** (Phase 5 deferred, §6a): red on this build, all five markers in `AppRoot-*.js`. Green on the Phase 5 attempt: 61 + 376 KB gz, no markers |
 | SPLIT-5 the 16 public pages vs 43c0b8e4 | (it is the reference) | green: every visible element within ±1px, nothing added or gone. 14 pages are 0 pixels different; `/about` 5 px and `/terms` 4 px at 1440 (0.000%). Proved red by `SPLIT5` (heading 3px down: "nothing moved", 1 element named) and `SPLIT5b` (footer colour: 13.8% of pixels) |
 
 **SPLIT-5's method:**
@@ -165,6 +165,25 @@ It passed SPLIT-4 and the unit suite. On the signed-in route comparison, two rea
    - Keeping the cascade would mean raising specificity inside workspace sheets.
 
 I expect the same mount-order fault in other pages that measure on mount, so Phase 5 needs a pass over the pages themselves first.
+
+## 6a. Found, not fixed
+
+Phase 5 is deferred (Nick, 1 Nov): the public build is what visitors download, and dev is internal. The
+attempt stays here as `phase5-attempt.patch`, and SPLIT-4 is skipped with a pointer to it. Two latent
+bugs it found, both in workspace pages and neither changed:
+
+1. **Analytics, the "Under the hood" section tab (`components/analytics/A17Frame.tsx`, `SectionTab`).**
+   Its position is measured in a layout effect that reads the PARENT page's ref. React runs a child's layout
+   effect before attaching its parent's ref, so if the tab mounts in the same commit as the page, the ref is
+   null, the effect returns early, and (its deps never change) the tab stays `visibility: hidden` for good.
+   Today it works only because the page always mounts on its skeleton before the data arrives. Anything
+   that mounts the page with data already present (lazy loading did) hides the tab. Fix: read the ref in a
+   later effect, or place from a callback ref.
+2. **Lazy-page CSS order, seen on `/account/plan`.** With pages split into lazy chunks, each chunk's CSS
+   arrives as a later stylesheet, so equal-specificity rules resolve differently from the single bundle.
+   Seen: the plan comparison table's values lost their monospace face. Switching off CSS code-splitting
+   does not restore the order (32 blocks of rules move). Fix: either keep one stylesheet in today's order,
+   or give the affected rules enough specificity not to depend on order.
 
 ## 7. Screenshots and files here
 

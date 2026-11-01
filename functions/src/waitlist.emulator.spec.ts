@@ -709,3 +709,51 @@ describe("a confirmation is not re-sent on every submit", () => {
     expect(again.verifyToken).toBeUndefined();
   });
 });
+
+/* ══════════════ Founding emails v1 (1 Nov): EM-2 and EM-3 against real transactions ══════════════ */
+
+describe("founding emails v1", () => {
+  it("EM-2 · the welcome is built from the STORED founding number, for writers 1, 14 and 50", async () => {
+    const { prepareWelcome } = await import("./emailTemplates");
+    const { resolveMailConfig } = await import("./emailConfig");
+    const cfg = resolveMailConfig({ WAITLIST_PUBLIC_URL: "https://queryhawk.net" });
+    for (const n of [1, 14, 50]) {
+      await wipe();
+      await setCounter(n - 1, 50);
+      const email = `em2-${n}@example.com`;
+      const token = await seedPending(email);
+      const out = await verifyWaitlist(db, token, Date.now());
+      expect(out.kind, `writer ${n}`).toBe("verified");
+      if (out.kind !== "verified") continue;
+      const stored = (await db.doc(`waitlist/${emailHash(email)}`).get()).get("foundingNumber");
+      expect(stored, `writer ${n}'s stored number`).toBe(n);
+      const p = prepareWelcome(cfg, out.position, out.counter.cap, "unsub");
+      expect(p.ok).toBe(true);
+      if (p.ok) expect(p.email.subject).toBe(`You're in: founding writer No. ${stored}`);
+    }
+  });
+
+  it("EM-3 · with the cap lowered, a confirm that lands `waiting` sends email 3 once; the second click sends none", async () => {
+    const { emailAfterVerify } = await import("./waitlistModel");
+    await setCounter(2, 2);
+    const token = await seedPending("em3-wait@example.com");
+    const sent: (string | null)[] = [];
+    const first = await verifyWaitlist(db, token, Date.now());
+    sent.push(emailAfterVerify(first.kind));
+    const second = await verifyWaitlist(db, token, Date.now());
+    sent.push(emailAfterVerify(second.kind));
+    expect(first.kind).toBe("waiting");
+    expect(second.kind).toBe("already");
+    expect(sent.filter((s) => s === "waiting"), "exactly one email 3").toHaveLength(1);
+    expect(sent.filter((s) => s !== null), "and nothing else").toHaveLength(1);
+  });
+
+  it("EM-3 · a `verified` confirm never sends email 3, on either click", async () => {
+    const { emailAfterVerify } = await import("./waitlistModel");
+    await setCounter(0, 2);
+    const token = await seedPending("em3-in@example.com");
+    const kinds = [(await verifyWaitlist(db, token, Date.now())).kind, (await verifyWaitlist(db, token, Date.now())).kind];
+    expect(kinds).toEqual(["verified", "already"]);
+    expect(kinds.map(emailAfterVerify)).toEqual(["welcome", null]);
+  });
+});

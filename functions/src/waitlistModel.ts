@@ -559,3 +559,18 @@ export const judgeJoin = (input: JoinInput): JoinVerdict => {
   const verdict = checkEmail(input.email);
   return verdict === "ok" ? { kind: "ok" } : { kind: "bad-email", reason: verdict };
 };
+
+/* ══════════════ Which email a confirmation sends ══════════════ */
+
+/**
+ * The email a verify outcome sends, or none (founding emails v1, 1 Nov).
+ *
+ * ⚠️ ONLY THE TRANSITION SENDS. `verified` and `waiting` are returned once, by the click that moved
+ * the document out of `pending`; every later click on the same link is `already`, whatever the
+ * status, and sends nothing. So a writer on the waiting list gets email 3 exactly once, and a
+ * founding writer never gets it. Mail scanners that prefetch links count as the first click, which
+ * is why the decision rides the transition and not the request.
+ */
+export type VerifyEmail = "welcome" | "waiting" | null;
+export const emailAfterVerify = (kind: string): VerifyEmail =>
+  kind === "verified" ? "welcome" : kind === "waiting" ? "waiting" : null;
