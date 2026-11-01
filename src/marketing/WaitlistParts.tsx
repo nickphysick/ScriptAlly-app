@@ -24,7 +24,8 @@ export const reduceMotion = () =>
 
 /* ── The art, versioned by the first eight hex digits of each file's md5 (nothing in public/ is hashed) ── */
 export const BE_HAWK = { src: "/images/qc/be-hawk-head.png", version: "a10c3aa9", width: 300, height: 287 };
-export const POINTING_HAWK = { src: "/images/pointing-hawk.png", version: "dd4890ee", width: 408, height: 437 };
+/* WebP since landing perf fix v1: 40KB where the PNG is 147KB, same size and pixels. The PNG stays. */
+export const POINTING_HAWK = { src: "/images/pointing-hawk.webp", version: "50a213a9", width: 408, height: 437 };
 export const v = (a: { src: string; version: string }) => a.src + "?v=" + a.version;
 
 /** The refs' ring-tick marker. */
@@ -271,18 +272,28 @@ export const TrackFeature: React.FC<{ layout: "phone" | "desk" }> = ({ layout })
         Object.assign(hawk.style, { left: 226 * k + "px", top: 272 * k + "px", width: 140 * k + "px" });
         return;
       }
+      /* ⚠️ THE ROOT IS BOXED TIGHT AROUND THE CARDS (landing perf fix v1). The pile is the hero's whole 1280 stack;
+         its root used to be the frame's own box translated ~530px off the page's left edge. Now the cards are
+         shifted by their own extent's top-left (a margin, `--mk-pile-sx/sy`) and the root's box is that extent,
+         translated back by the same amount, so every card lands exactly where it did and the root sits inside
+         the frame. Read in the cards' natural coordinates (offsets plus the shift already applied). */
+      const sx0 = Number(pile.dataset.sx || 0), sy0 = Number(pile.dataset.sy || 0);
       let top = Infinity, bottom = -Infinity, left = Infinity, right = -Infinity;
       pile.querySelectorAll<HTMLElement>(".mk-lc").forEach((c) => {
         const cs = getComputedStyle(c).transform, m = new DOMMatrixReadOnly(cs === "none" ? undefined : cs);
         const hx = Math.abs(m.a) * c.offsetWidth / 2 + Math.abs(m.c) * c.offsetHeight / 2, hy = Math.abs(m.b) * c.offsetWidth / 2 + Math.abs(m.d) * c.offsetHeight / 2;
-        const cx = c.offsetLeft + c.offsetWidth / 2, cy = c.offsetTop + c.offsetHeight / 2;
+        const cx = c.offsetLeft + sx0 + c.offsetWidth / 2, cy = c.offsetTop + sy0 + c.offsetHeight / 2;
         top = Math.min(top, cy - hy); bottom = Math.max(bottom, cy + hy); left = Math.min(left, cx - hx); right = Math.max(right, cx + hx);
       });
+      const fl = front.offsetLeft + sx0, ft = front.offsetTop + sy0, fw = front.offsetWidth, fh = front.offsetHeight;
       /* The pile fills the frame's height (with a little air) and sits left of centre, leaving the hawk his room. */
       const s = Math.min((H * .96) / (bottom - top), (W * .78) / (right - left));
       const dx = W * .42 - (left + right) / 2 * s, dy = H / 2 - (top + bottom) / 2 * s;
-      pile.style.transform = `translate(${dx}px,${dy}px) scale(${s})`;
-      const base = dy + (front.offsetTop + front.offsetHeight) * s, fr = dx + (front.offsetLeft + front.offsetWidth) * s;
+      pile.dataset.sx = String(left); pile.dataset.sy = String(top);
+      pile.style.setProperty("--mk-pile-sx", left + "px"); pile.style.setProperty("--mk-pile-sy", top + "px");
+      pile.style.width = (right - left) + "px"; pile.style.height = (bottom - top) + "px";
+      pile.style.transform = `translate(${dx + left * s}px,${dy + top * s}px) scale(${s})`;
+      const base = dy + (ft + fh) * s, fr = dx + (fl + fw) * s;
       const hw = Math.min(W * .3, H * .42);
       Object.assign(hawk.style, { width: hw + "px", left: fr - hw * .32 + "px", top: base - hw * (POINTING_HAWK.height / POINTING_HAWK.width) + "px" });
     };

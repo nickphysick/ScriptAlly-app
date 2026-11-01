@@ -1,0 +1,36 @@
+/*
+ * The landing-only build's global stylesheet (split v1, phase 4). PublicRoot imports it; the whole
+ * app never does (it has index.css). Each marketing component still imports its own sheet.
+ *
+ * What is here is what the public pages were measured to use from outside src/marketing: every
+ * element on the eight public paths at 390 and 1440, and every rule that matched one, read from a
+ * dev server with the whole app's CSS loaded. Outside the marketing sheets that came to Tailwind's
+ * preflight, the phone rules below, and BrandProvider's injected faces (which are not CSS files).
+ * Every `:root` token sheet also matched `html`, but no public rule reads a token from them.
+ *
+ * ⚠️ THE FONT URL AND THE THREE FONT VARIABLES ARE COPIES OF index.css. Preflight sets `html`'s
+ * family from `--font-sans`, so without them the body falls back to the system face.
+ */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Source+Sans+Pro:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500;700&family=Caveat:wght@400;500;600;700&display=swap');
+/* Only the public files are scanned, so no workspace utility is generated here. */
+@import "tailwindcss" source(none);
+@source "./";
+@source "../components/ErrorBoundary.tsx";
+
+@theme {
+  --font-sans: "Source Sans 3", "Source Sans Pro", system-ui, -apple-system, sans-serif;
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+/* Copies of mobileShell.css's app-wide rules (Mobile Pass 1, Phase 6), the only ones that reach a
+   public page: no tap highlight, no rubber-banding, and the 16px input floor that stops iOS zooming
+   into the founding sign-up's field. */
+* { -webkit-tap-highlight-color: transparent; }
+@media (max-width: 767.98px) {
+  html,
+  body { overscroll-behavior-y: none; }
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+  textarea,
+  select { font-size: 16px !important; }
+}

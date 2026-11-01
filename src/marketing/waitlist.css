@@ -136,6 +136,10 @@
    `TrackFeature` sets the frame's height and places the card and the hawk from the ref's 342 × 458 frame;
    with no panel to cut him off, the hawk stands where the ref puts him (226, 272, 140 wide). */
 .mk-trk { position: relative; height: 458px; overflow: visible; }
+/* ⚠️ THE FRAMES CONTAIN THEIR PILES (landing perf fix v1): nothing inside can promote or invalidate anything
+   outside. Paint containment clips at the frame's edge, so `overflow-clip-margin` gives the card's shadow and
+   the hawk (which stands past the phone frame's right edge) the room they always had. */
+.mk-trk, .mk-trkd { contain: layout paint; isolation: isolate; overflow-clip-margin: 120px; }
 .mk-trk .mk-trk-card { position: absolute; inset: 0; transform: rotate(-2.3deg); transform-origin: 44% 42%; }
 .mk-trk-hawk { position: absolute; z-index: 3; height: auto; max-width: none; pointer-events: none; }
 .mk-trk-again {
@@ -468,7 +472,12 @@
    fitted to it by `TrackFeature`; the hawk stands bottom-right, his feet level with the front card's base. */
 .mk-trkd { position: relative; aspect-ratio: 1600 / 1250; height: auto; }
 .mk-trkd .mk-trk-card { position: absolute; inset: 0; }
-.mk-trkd .mk-hc-pile--feature { position: absolute; inset: 0; transform-origin: 0 0; pointer-events: none; }
+.mk-trkd .mk-hc-pile--feature { --mk-pile-sx: 0px; --mk-pile-sy: 0px; position: absolute; inset: auto; left: 0; top: 0; transform-origin: 0 0; pointer-events: none; }
+/* The cards shifted by the extent's top-left, so the root can be boxed tight around them (`TrackFeature`'s fit). */
+.mk-trkd .mk-hc-pile--feature > .mk-lc { margin-left: calc(-1 * var(--mk-pile-sx)); margin-top: calc(-1 * var(--mk-pile-sy)); }
+/* No blur on the back cards in feature mode (the phone never had it): a 1.3px blur at this size is a large
+   filtered layer per card for a softness nobody reads at a glance. */
+.mk-trkd .mk-lc.mk-lc--back { filter: none; }
 .mk-trkd .mk-lc[data-hc="front"] { pointer-events: none; }
 .mk-trkd .mk-trk-again { left: 6%; bottom: 2%; height: 36px; padding: 0 16px; font-size: 14px; }
 

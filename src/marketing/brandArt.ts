@@ -24,6 +24,16 @@ export const BRAND_MARK: BrandArt = {
 };
 
 /**
+ * The hawk at 80px wide (2x its largest drawn size, 40px), as WebP: 3.6KB where the 500px PNG is 245KB
+ * (landing perf fix v1). The waiting-list landing page's nav and footer only; every other page keeps
+ * `BRAND_MARK`. Same drawing, no recolour. Width and height attributes stay `BRAND_MARK`'s (they state
+ * only the ratio).
+ */
+export const BRAND_MARK_SMALL: BrandArt = {
+  src: "/images/queryhawk-logo-80.webp", version: "2755ad11", width: 80, height: 80,
+};
+
+/**
  * The drawn wordmark, re-supplied in a heavier serif on 17 Sep. Its lettering starts 5px inside
  * the file at nav size, where the previous drawing's started 22px in — which is most of why the
  * lockup's gap came down.

@@ -23,7 +23,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { Runs } from "./CopyRuns";
-import { isValidEmail } from "../lib/authActions";
+import { isValidEmail } from "../lib/emailShape";
 import {
   FOUNDING_FIELD_LABEL, FOUNDING_PLACEHOLDER, FOUNDING_CTA, FOUNDING_INVALID,
   FOUNDING_SENT, FOUNDING_DUPE, FOUNDING_FULL, FOUNDING_ERROR, FOUNDING_DOWN,

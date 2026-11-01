@@ -10,10 +10,8 @@
 import { GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "./firebase";
 
-/** A pragmatic email shape check (matches the mockup) — the real gate is Firebase itself. */
-export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-export const isValidEmail = (email: string): boolean => EMAIL_RE.test(email.trim());
+/** The email shape check lives in emailShape.ts so the public site can use it without Firebase Auth. */
+export { EMAIL_RE, isValidEmail } from "./emailShape";
 
 /** Firebase error code -> friendly, UK-spelling copy (the spec's mapping). */
 export const mapAuthError = (code?: string): string => {

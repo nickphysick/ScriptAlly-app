@@ -469,9 +469,9 @@ describe("the hero", () => {
 
   it("versions the binocular hawk's URL by the file's own content", () => {
     const here = dirname(fileURLToPath(import.meta.url));
-    const png = readFileSync(resolve(here, "../../public/images/contact/discover-binoculars-bird.png"));
+    const png = readFileSync(resolve(here, "../../public/images/contact/discover-binoculars-bird.webp"));
     const version = createHash("md5").update(png).digest("hex").slice(0, 8);
-    expect(hero()).toContain('src="/images/contact/discover-binoculars-bird.png?v=' + version + '"');
+    expect(hero()).toContain('src="/images/contact/discover-binoculars-bird.webp?v=' + version + '"');
   });
 
   /**
@@ -1088,7 +1088,7 @@ describe("the feature rows: the card pile, then five illustrations, each with it
     const v = (f: string) => createHash("md5").update(readFileSync(resolve(here, "../../public", "." + f))).digest("hex").slice(0, 8);
     const rows = imageRows();
     IMAGE_ROWS.forEach((row, i) => expect(rows[i], row.image).toContain('src="' + row.image + "?v=" + v(row.image) + '"'));
-    for (const f of ["/images/pointing-hawk.png"]) expect(band(), f).toContain('src="' + f + "?v=" + v(f) + '"');
+    for (const f of ["/images/pointing-hawk.webp"]) expect(band(), f).toContain('src="' + f + "?v=" + v(f) + '"');
   });
 });
 

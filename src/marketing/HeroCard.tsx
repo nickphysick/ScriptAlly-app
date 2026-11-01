@@ -151,10 +151,52 @@ function makeStory(root: HTMLElement, hooks: StoryHooks = {}) {
     tm.due = performance.now() + ms;
     tm.id = window.setTimeout(() => { timers = timers.filter((x) => x !== tm); tm.fn(); }, ms);
   };
-  const A = (el: Element, kf: Keyframe[], o: KeyframeAnimationOptions) => {
-    const a = el.animate(kf, Object.assign({ fill: "both", easing: "cubic-bezier(.2,.7,.2,1)" }, o)); anims.push(a); return a;
-  };
   const later = (fn: () => void, ms: number) => { const tm: Timer = { id: 0, fn, due: 0, left: ms }; timers.push(tm); if (paused) tm.left = ms; else arm(tm, ms); };
+  /* ⚠️ FEATURE MODE SCHEDULES AS IT GOES, AND LETS GO (landing perf fix v1, 1 Nov). The hero created every
+     step's animation up front with a delay — 249 at load in the feature row, 187 of them still alive (`fill:
+     both`) once finished, each holding its element in a compositor layer for good. In feature mode (`once`)
+     each animation is created when its step starts, on the story's own pausable timers, and when it finishes
+     its end state is committed as inline style and the animation is cancelled. What a backwards fill showed
+     before its start (a letter not yet typed, a chip not yet stamped) is held as inline style from the
+     moment the story is laid out, so every frame looks as it did. `restore()` puts every inline value it
+     touched back, so stopping, the resting card and Play again start from the markup as before. The hero
+     path (not `once`) is untouched. */
+  const lazy = !!hooks.once;
+  const touched = new Map<HTMLElement | SVGElement, Map<string, string>>();
+  const STYLE_SKIP = new Set(["offset", "easing", "composite"]);
+  const setStyle = (el: Element, f: Keyframe) => {
+    const st = (el as HTMLElement).style as unknown as Record<string, string>;
+    let mine = touched.get(el as HTMLElement); if (!mine) { mine = new Map(); touched.set(el as HTMLElement, mine); }
+    for (const [k, v] of Object.entries(f)) {
+      if (STYLE_SKIP.has(k) || v == null) continue;
+      if (!mine.has(k)) mine.set(k, st[k] ?? "");
+      st[k] = String(v);
+    }
+  };
+  const restore = () => { touched.forEach((m, el) => m.forEach((v, k) => { ((el as HTMLElement).style as unknown as Record<string, string>)[k] = v; })); touched.clear(); };
+  const letGo = (a: Animation, el: Element, kf: Keyframe[], fill: FillMode) => {
+    if (fill === "forwards" || fill === "both") {
+      /* Commit the end state, then drop the animation (and with it the layer). `commitStyles` needs a rendered
+         target; where it cannot, the last keyframe is written instead. */
+      try { const mine = touched.get(el as HTMLElement) ?? new Map<string, string>(); touched.set(el as HTMLElement, mine);
+        for (const k of Object.keys(kf[kf.length - 1])) if (!STYLE_SKIP.has(k) && !mine.has(k)) mine.set(k, ((el as HTMLElement).style as unknown as Record<string, string>)[k] ?? "");
+        a.commitStyles(); } catch { setStyle(el, kf[kf.length - 1]); }
+    }
+    a.cancel(); anims = anims.filter((x) => x !== a);
+  };
+  const A = (el: Element, kf: Keyframe[], o: KeyframeAnimationOptions) => {
+    const opts = Object.assign({ fill: "both", easing: "cubic-bezier(.2,.7,.2,1)" }, o) as KeyframeAnimationOptions & { fill: FillMode };
+    if (!lazy) { const a = el.animate(kf, opts); anims.push(a); return a; }
+    const delay = Number(opts.delay ?? 0);
+    /* What the old animation showed before it started: its first keyframe, from creation, where it filled
+       backwards — or at once, where it began at once and filled forwards. */
+    if (opts.fill === "both" || opts.fill === "backwards" || (delay <= 0 && opts.fill === "forwards")) setStyle(el, kf[0]);
+    later(() => {
+      const a = el.animate(kf, { ...opts, delay: 0 }); anims.push(a);
+      a.onfinish = () => letGo(a, el, kf, opts.fill);
+    }, delay);
+    return undefined;
+  };
   const BOUNCE = "cubic-bezier(.34,1.56,.64,1)";
   const KEY = 30;
   const type = (chars: HTMLElement[], t: number, key = KEY) => {
@@ -264,16 +306,22 @@ function makeStory(root: HTMLElement, hooks: StoryHooks = {}) {
     build(); show(99); psd.classList.remove("mk-late");
     ftT.textContent = "Send the full by 5 July"; ftA.textContent = "Mark full sent"; ftL.classList.add("mk-late");
   }
-  function cancelAll() { anims.forEach((a) => a.cancel()); anims = []; timers.forEach((tm) => clearTimeout(tm.id)); timers = []; cancelAnimationFrame(raf); clockOn = false; paused = false; }
+  /* The waiting dots' infinite pulse (CSS) runs only while the story is playing on screen: `idle` before it
+     has ever run (no animation exists at all), `on` while playing, `off` (paused) while scrolled away, and
+     `rest` (gone) once the story rests. Feature mode only. */
+  const pulse = (v: "idle" | "on" | "off" | "rest") => { if (lazy) root.dataset.pulse = v; };
+  function cancelAll() { anims.forEach((a) => a.cancel()); anims = []; timers.forEach((tm) => clearTimeout(tm.id)); timers = []; cancelAnimationFrame(raf); clockOn = false; paused = false; restore(); pulse("idle"); }
   /** Feature mode: hold the story exactly where it is (scrolled away), and carry on from there. */
   function pause() {
     if (paused) return; paused = true; pausedAt = performance.now();
+    if (root.dataset.pulse === "on") pulse("off");
     anims.forEach((a) => { if (a.playState === "running") a.pause(); });
     timers.forEach((tm) => { clearTimeout(tm.id); tm.left = Math.max(0, tm.due - pausedAt); });
     cancelAnimationFrame(raf);
   }
   function resume() {
     if (!paused) return; paused = false;
+    if (root.dataset.pulse === "off") pulse("on");
     const now = performance.now(); t0 += now - pausedAt;
     anims.forEach((a) => { if (a.playState === "paused") a.play(); });
     timers.forEach((tm) => arm(tm, tm.left));
@@ -479,17 +527,17 @@ function makeStory(root: HTMLElement, hooks: StoryHooks = {}) {
     t = e + 1400;
     prepClock(); clockOn = true; raf = requestAnimationFrame(runClock);
     /* Feature mode: no deal-away and no second run — the card rests on its final state. */
-    if (hooks.once) { later(() => hooks.onDone?.(), t + 1200); return; }
+    if (hooks.once) { later(() => { pulse("rest"); hooks.onDone?.(); }, t + 1200); return; }
     // hold, then this card is dealt away and the story starts again
     const out = t + 2600;
     A(front, [{ translate: "0 0", rotate: "0deg", opacity: 1 }, { translate: "-130% -20px", rotate: "-10deg", opacity: 0 }], { duration: 520, delay: out, fill: "forwards", easing: "cubic-bezier(.5,0,.75,0)" });
     later(() => { LEAD = 0; cancelAll(); playShort(true); }, out + 540);
   }
-  function start(lead: number) { LEAD = lead || 0; stop(); if (reduceMotion()) return; playShort(false); }
+  function start(lead: number) { LEAD = lead || 0; stop(); if (reduceMotion()) return; playShort(false); later(() => pulse("on"), 0); }
   /* Unmount: cancel everything and take back the dots this run added, so a second run (StrictMode,
      a remount) starts from the markup rather than from the leftovers of the first. */
-  function dispose() { cancelAll(); waits.forEach((w) => w?.remove()); slotWait.remove(); root.querySelectorAll(".mk-taskchip, .mk-pillpop, .mk-cgx").forEach((g) => g.remove()); }
-  setStatic();
+  function dispose() { cancelAll(); delete root.dataset.pulse; waits.forEach((w) => w?.remove()); slotWait.remove(); root.querySelectorAll(".mk-taskchip, .mk-pillpop, .mk-cgx").forEach((g) => g.remove()); }
+  setStatic(); pulse("idle");
   return { start, stop, dispose, pause, resume };
 }
 

@@ -14,7 +14,7 @@ import React, { useEffect, useRef, useState } from "react";
 import "./marketing.css";
 import { marketingNavState, MarketingNavUser } from "./marketingNav";
 import { LANDING_ONLY } from "../lib/siteMode";
-import { BRAND_MARK, artUrl } from "./brandArt";
+import { BRAND_MARK, BRAND_MARK_SMALL, artUrl } from "./brandArt";
 import { MarketingFooter } from "./MarketingFooter";
 import { usePhone } from "./usePhone";
 import { ConsentBar } from "./ConsentBar";
@@ -208,7 +208,7 @@ export const MarketingShell: React.FC<{
                 `alt=""` because the wordmark beside it already names the site — a second
                 announcement is noise to a screen reader, and the button's own aria-label names
                 the destination. */}
-            <img className="mk-logo" src={artUrl(BRAND_MARK)} alt="" />
+            <img className="mk-logo" src={artUrl(waitlist ? BRAND_MARK_SMALL : BRAND_MARK)} alt="" />
             {/* ⚠️ LIVE TYPE ON INK, AS THE APP'S SIDEBAR DRAWS IT (landing colours v2). The drawn
                 wordmark is dark artwork; it is not filtered to suit an ink bar, it is not drawn on
                 one. The button's aria-label still names the destination, and an aria-label

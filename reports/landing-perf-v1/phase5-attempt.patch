@@ -1,0 +1,263 @@
+diff --git a/src/App.tsx b/src/App.tsx
+index fd94f4c6..834372f0 100644
+--- a/src/App.tsx
++++ b/src/App.tsx
+@@ -3,35 +3,36 @@
+  * SPDX-License-Identifier: Apache-2.0
+  */
+ 
+-import React, { useState, useEffect } from "react";
++import React, { useState, useEffect, lazy, Suspense } from "react";
+ import { BrowserRouter, Navigate, useLocation, useNavigate } from "react-router-dom";
+ import { DbProvider, useScriptAllyDb } from "./lib/db";
+ import { ToastProvider } from "./components/toast/ToastProvider";
+ import { BrandProvider } from "./lib/brand";
+ import { Auth } from "./components/Auth";
+-import { AppShell, StagePage } from "./components/shell/AppShell";
++const AppShell = lazy(() => import("./components/shell/AppShell").then((m) => ({ default: m.AppShell })));
++const StagePage = lazy(() => import("./components/shell/AppShell").then((m) => ({ default: m.StagePage })));
+ // SidebarShell + QueriesRail are retired from the live path (the global AppShell absorbed the
+ // Queries rail) but still power the dev-only #/shell-lab review surface.
+-import { SidebarShell } from "./components/shell/SidebarShell";
+-import { QueriesRail } from "./components/shell/QueriesRail";
+-import { EditQueryHost } from "./components/EditQueryHost";
+-import { Dashboard } from "./components/Dashboard";
+-import { Queries } from "./components/Queries";
+-import { TodoRoute } from "./components/todo/TodoRoute";
+-import { Agents } from "./components/Agents";
+-import { DiscoverPage } from "./components/agents/discover1/DiscoverPage";
+-import { SubmissionPackages } from "./components/SubmissionPackages";
+-import { DiaryLab } from "./components/dashboard/DiaryLab";
+-import { ManuscriptPage } from "./components/manuscripts/v12/ManuscriptPage";
+-import { ComparableTitlesPage } from "./components/manuscripts/ComparableTitlesPage";
+-import { ImportPage } from "./components/import/ImportPage";
+-import { BrandStudio } from "./components/BrandStudio";
+-import { AddAgentFocusForm } from "./components/AddAgentFocusForm";
+-import { AddManuscriptFocusForm } from "./components/AddManuscriptFocusForm";
+-import { HelpCentre } from "./components/HelpCentre";
+-import { AccountSettings } from "./components/AccountSettings";
++const SidebarShell = lazy(() => import("./components/shell/SidebarShell").then((m) => ({ default: m.SidebarShell })));
++const QueriesRail = lazy(() => import("./components/shell/QueriesRail").then((m) => ({ default: m.QueriesRail })));
++const EditQueryHost = lazy(() => import("./components/EditQueryHost").then((m) => ({ default: m.EditQueryHost })));
++const Dashboard = lazy(() => import("./components/Dashboard").then((m) => ({ default: m.Dashboard })));
++const Queries = lazy(() => import("./components/Queries").then((m) => ({ default: m.Queries })));
++const TodoRoute = lazy(() => import("./components/todo/TodoRoute").then((m) => ({ default: m.TodoRoute })));
++const Agents = lazy(() => import("./components/Agents").then((m) => ({ default: m.Agents })));
++const DiscoverPage = lazy(() => import("./components/agents/discover1/DiscoverPage").then((m) => ({ default: m.DiscoverPage })));
++const SubmissionPackages = lazy(() => import("./components/SubmissionPackages").then((m) => ({ default: m.SubmissionPackages })));
++const DiaryLab = lazy(() => import("./components/dashboard/DiaryLab").then((m) => ({ default: m.DiaryLab })));
++const ManuscriptPage = lazy(() => import("./components/manuscripts/v12/ManuscriptPage").then((m) => ({ default: m.ManuscriptPage })));
++const ComparableTitlesPage = lazy(() => import("./components/manuscripts/ComparableTitlesPage").then((m) => ({ default: m.ComparableTitlesPage })));
++const ImportPage = lazy(() => import("./components/import/ImportPage").then((m) => ({ default: m.ImportPage })));
++const BrandStudio = lazy(() => import("./components/BrandStudio").then((m) => ({ default: m.BrandStudio })));
++const AddAgentFocusForm = lazy(() => import("./components/AddAgentFocusForm").then((m) => ({ default: m.AddAgentFocusForm })));
++const AddManuscriptFocusForm = lazy(() => import("./components/AddManuscriptFocusForm").then((m) => ({ default: m.AddManuscriptFocusForm })));
++const HelpCentre = lazy(() => import("./components/HelpCentre").then((m) => ({ default: m.HelpCentre })));
++const AccountSettings = lazy(() => import("./components/AccountSettings").then((m) => ({ default: m.AccountSettings })));
+ // Rail "+ Record a response" host (the dashboard keeps its own independent instance).
+-import { PasteEmailFlow } from "./components/emailImport/PasteEmailFlow";
++const PasteEmailFlow = lazy(() => import("./components/emailImport/PasteEmailFlow").then((m) => ({ default: m.PasteEmailFlow })));
+ import { PASTE_RESPONSE_EVENT, openQueryDrawer } from "./lib/queryActions/drawerStore";
+ import { closeQueryPanel, openResponsePicker, responsePickerHosted } from "./lib/queryPanelStore";
+ // Route tiers: marketing chrome for "/" + /pricing; EVERYTHING signed-in is workspace, in the
+@@ -47,33 +48,33 @@ import { routeBase } from "./lib/helpPath";
+ import { QUERIES_STATUS_PARAM, parseStatusFilter } from "./lib/queriesFilterParam";
+ import { todoPageForPath, todoRedirectFor } from "./lib/todoRoutes";
+ import { accountRedirectFor, accountSectionForPath } from "./lib/accountRoutes";
+-import { TodoCalendarPage } from "./components/todo/TodoCalendarPage";
+-import { TodoNoteboardPage } from "./components/todo/TodoNoteboardPage";
++const TodoCalendarPage = lazy(() => import("./components/todo/TodoCalendarPage").then((m) => ({ default: m.TodoCalendarPage })));
++const TodoNoteboardPage = lazy(() => import("./components/todo/TodoNoteboardPage").then((m) => ({ default: m.TodoNoteboardPage })));
+ // ⚠️ PARKED, NOT DELETED (Amendment 1, G4) — held for the public marketing site.
+ // import { TopNavHost } from "./components/shell/TopNavHost";
+-import { QueryAnalytics } from "./components/QueryAnalytics";
+-import { ResponsesPage } from "./components/responses/ResponsesPage";
+-import { TopNavPanelData } from "./components/shell/TopNavPanelData";
+-import { Onboarding } from "./components/Onboarding";
++const QueryAnalytics = lazy(() => import("./components/QueryAnalytics").then((m) => ({ default: m.QueryAnalytics })));
++const ResponsesPage = lazy(() => import("./components/responses/ResponsesPage").then((m) => ({ default: m.ResponsesPage })));
++const TopNavPanelData = lazy(() => import("./components/shell/TopNavPanelData").then((m) => ({ default: m.TopNavPanelData })));
++const Onboarding = lazy(() => import("./components/Onboarding").then((m) => ({ default: m.Onboarding })));
+ import { ErrorBoundary } from "./components/ErrorBoundary";
+-import { StatusDotDemo } from "./components/StatusDotDemo";
+-import { PlansPage } from "./components/PlansPage";
++const StatusDotDemo = lazy(() => import("./components/StatusDotDemo").then((m) => ({ default: m.StatusDotDemo })));
++const PlansPage = lazy(() => import("./components/PlansPage").then((m) => ({ default: m.PlansPage })));
+ import { QueryStatus, SubmissionMethod, UserPlan } from "./types";
+ // TEMP: Form11Drawer review harness (#/drawer-lab) — renders the Edit Agent / Edit Query drawers over
+ // a mock record so the shared shell can be eyeballed without signing in. DEV only.
+-import { EditQueryDrawer } from "./components/EditQueryDrawer";
++const EditQueryDrawer = lazy(() => import("./components/EditQueryDrawer").then((m) => ({ default: m.EditQueryDrawer })));
+ // TEMP: query reading-pane review harness (#/reading-pane-lab) — DEV only.
+-import { QueryTimeline } from "./components/reading-pane/QueryTimeline";
++const QueryTimeline = lazy(() => import("./components/reading-pane/QueryTimeline").then((m) => ({ default: m.QueryTimeline })));
+ // Dev review surface for the notes pieces (PostIt / quick-add / editor) — #/notes-lab, DEV only.
+-import { NotesLab } from "./components/notes/NotesLab";
++const NotesLab = lazy(() => import("./components/notes/NotesLab").then((m) => ({ default: m.NotesLab })));
+ // Dev review surface for the Contact list's three states — #/contact-lab, DEV only. The blank
+ // state is unreachable on any account that has agents, which is every real one.
+-import { ContactListLab } from "./components/agents/ContactListLab";
+-import { OnbLab } from "./components/onboarding/OnbLab";
+-import { QueryDrawer } from "./components/queryActions/QueryDrawer";
+-import { PracticeOverlay } from "./components/queries/practice/PracticeOverlay";
+-import { AgentCardHost } from "./components/agents/card/AgentCardHost";
+-import { UndoBar } from "./components/queryActions/UndoBar";
++const ContactListLab = lazy(() => import("./components/agents/ContactListLab").then((m) => ({ default: m.ContactListLab })));
++const OnbLab = lazy(() => import("./components/onboarding/OnbLab").then((m) => ({ default: m.OnbLab })));
++const QueryDrawer = lazy(() => import("./components/queryActions/QueryDrawer").then((m) => ({ default: m.QueryDrawer })));
++const PracticeOverlay = lazy(() => import("./components/queries/practice/PracticeOverlay").then((m) => ({ default: m.PracticeOverlay })));
++const AgentCardHost = lazy(() => import("./components/agents/card/AgentCardHost").then((m) => ({ default: m.AgentCardHost })));
++const UndoBar = lazy(() => import("./components/queryActions/UndoBar").then((m) => ({ default: m.UndoBar })));
+ import { Palette, X, Check, HelpCircle, Bell, Settings, ChevronDown } from "lucide-react";
+ import { motion, AnimatePresence } from "motion/react";
+ 
+@@ -257,6 +258,35 @@ export { pathFor } from "./lib/pathFor";
+ // marketing paths return from their tier branch before the unknown-path redirect (the focus
+ // tier is retired — capsule fixes P5).
+ 
++/**
++ * The boot splash: shown while Firebase Auth resolves the session, and (split v1, phase 5) while the
++ * signed-in app's code arrives. Both moments look the same, so a signed-in visitor sees one splash.
++ */
++const BootSplash = () => (
++  <div
++    style={{
++      position: "fixed",
++      inset: 0,
++      background: "#F5F0EA",
++      display: "flex",
++      alignItems: "center",
++      justifyContent: "center",
++    }}
++  >
++    <span
++      style={{
++        fontFamily: '"Playfair Display", Georgia, serif',
++        fontSize: 22,
++        letterSpacing: "-0.01em",
++        color: "#7c3a2a",
++        opacity: 0.45,
++      }}
++    >
++      QueryHawk
++    </span>
++  </div>
++);
++
+ function AppContent() {
+   const { currentUser, authReady, updateUserProfile } = useScriptAllyDb();
+ 
+@@ -288,6 +318,16 @@ function AppContent() {
+     window.addEventListener(PASTE_RESPONSE_EVENT, open);
+     return () => window.removeEventListener(PASTE_RESPONSE_EVENT, open);
+   }, []);
++  /* Split v1, phase 5 — the pages that mount on first visit (settings, plans, help, import) are fetched
++     once someone is signed in, so the first visit to one does not wait for its code. */
++  useEffect(() => {
++    if (!currentUser) return;
++    const t = window.setTimeout(() => {
++      void import("./components/AccountSettings"); void import("./components/PlansPage");
++      void import("./components/HelpCentre"); void import("./components/import/ImportPage");
++    }, 1500);
++    return () => window.clearTimeout(t);
++  }, [currentUser]);
+ 
+   useEffect(() => {
+     if (successToast) {
+@@ -415,32 +455,7 @@ function AppContent() {
+     return <LandingOnlySite path={path} hash={hash} onNavigate={handleNavigate} />;
+   }
+ 
+-  if (!authReady) {
+-    return (
+-      <div
+-        style={{
+-          position: "fixed",
+-          inset: 0,
+-          background: "#F5F0EA",
+-          display: "flex",
+-          alignItems: "center",
+-          justifyContent: "center",
+-        }}
+-      >
+-        <span
+-          style={{
+-            fontFamily: '"Playfair Display", Georgia, serif',
+-            fontSize: 22,
+-            letterSpacing: "-0.01em",
+-            color: "#7c3a2a",
+-            opacity: 0.45,
+-          }}
+-        >
+-          QueryHawk
+-        </span>
+-      </div>
+-    );
+-  }
++  if (!authReady) return <BootSplash />;
+ 
+   // ── Marketing tier (public): "/", "/pricing", "/terms" and "/privacy" render for EVERYONE. A
+   // signed-in user is never auto-redirected away from the landing — their nav shows
+@@ -713,22 +728,22 @@ function AppContent() {
+             and `.acct-page` continues the chain. /plans and /help keep the wrapper unchanged. */}
+         {routeKey === "account" && (
+           <StagePage active layout="fill">
+-            <AccountSettings section={accountSectionForPath(path) ?? "profile"} onNavigate={handleNavigate} />
++            <Suspense fallback={null}><AccountSettings section={accountSectionForPath(path) ?? "profile"} onNavigate={handleNavigate} /></Suspense>
+           </StagePage>
+         )}
+         {routeKey === "plans" && (
+           <StagePage active>
+-            <div className="sv2-focuscol"><PlansPage /></div>
++            <div className="sv2-focuscol"><Suspense fallback={null}><PlansPage /></Suspense></div>
+           </StagePage>
+         )}
+         {routeKey === "help" && (
+           <StagePage active>
+             {/* Help Centre v1 — its own column (1120, 40px either side), not the 860px focus column */}
+-            <HelpCentre />
++            <Suspense fallback={null}><HelpCentre /></Suspense>
+           </StagePage>
+         )}
+         {routeKey === "import" && (
+-          <StagePage active><ImportPage onNavigate={handleNavigate} /></StagePage>
++          <StagePage active><Suspense fallback={null}><ImportPage onNavigate={handleNavigate} /></Suspense></StagePage>
+         )}
+ 
+         {/* The legacy site footer ("QueryHawk · The Literary Querying Companion" + Help Centre)
+@@ -819,7 +834,7 @@ function AppContent() {
+             >
+               <X className="w-5 h-5" />
+             </button>
+-            <BrandStudio />
++            <Suspense fallback={null}><BrandStudio /></Suspense>
+           </div>
+         </div>
+       )}
+@@ -838,7 +853,10 @@ export default function App() {
+               with it (a hash is never part of the pathname). */}
+           <BrowserRouter>
+             <ToastProvider>
+-              <AppContent />
++              {/* Split v1, phase 5: the workspace is lazy; until its code arrives the boot splash stands in. */}
++              <Suspense fallback={<BootSplash />}>
++                <AppContent />
++              </Suspense>
+             </ToastProvider>
+           </BrowserRouter>
+         </BrandProvider>
+diff --git a/src/components/shell/contentColumn.test.ts b/src/components/shell/contentColumn.test.ts
+index 59f6ace6..2029cc4f 100644
+--- a/src/components/shell/contentColumn.test.ts
++++ b/src/components/shell/contentColumn.test.ts
+@@ -99,7 +99,9 @@ describe("route variants — declared once at the mount", () => {
+     }
+     /* Import was the one capped slot while it was a plain page. Since onboarding v5 part 3 it is a
+        grid page like the rest, so it declares no width kind either: the grid gives it its column. */
+-    expect(app).toContain('<StagePage active><ImportPage');
++    /* Split v1 (1 Nov): the page is lazy, so a Suspense sits between the slot and the page; the slot still
++       declares no width kind. */
++    expect(app).toContain('<StagePage active><Suspense fallback={null}><ImportPage');
+     expect(app).not.toContain('contentVariant="read"><Import');
+   });
+ 
