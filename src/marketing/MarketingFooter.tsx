@@ -14,7 +14,7 @@
 
 import React from "react";
 import { FOOTER_TAGLINE, SUPPORT_EMAIL } from "../lib/companyInfo";
-import { BRAND_MARK, artUrl } from "./brandArt";
+import { BRAND_MARK, BRAND_MARK_SMALL, artUrl } from "./brandArt";
 import { PaperPlane, StatusGlyph, STATUS_GLYPH_COUNT } from "./marketingMarks";
 import { LANDING_ONLY } from "../lib/siteMode";
 import { analyticsAvailable, reopenConsent } from "./analytics";
@@ -56,7 +56,7 @@ export const MarketingFooter: React.FC<{
             <div className="mk-brand">
               <img
                 className="mk-footmark"
-                src={artUrl(BRAND_MARK)}
+                src={artUrl(waitlist ? BRAND_MARK_SMALL : BRAND_MARK)}
                 alt=""
                 width={BRAND_MARK.width}
                 height={BRAND_MARK.height}

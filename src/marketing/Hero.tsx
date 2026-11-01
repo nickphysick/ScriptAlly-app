@@ -17,8 +17,9 @@ import { FoundingSignup } from "./FoundingSignup";
 import { HeroPlaces } from "./HeroPlaces";
 import { HERO_FORM } from "./WaitlistParts";
 
-/** The binocular hawk (523 px, sharper than `binocular-hawk.webp`), md5-versioned like every public/ file. */
-export const DESK_HERO_BIRD = { src: "/images/contact/discover-binoculars-bird.png", version: "649e3f0e", width: 523, height: 512 };
+/** The binocular hawk (523 px, sharper than `binocular-hawk.webp`), md5-versioned like every public/ file. WebP
+    since landing perf fix v1 (54KB where the PNG is 235KB, same size and pixels); the PNG stays for other pages. */
+export const DESK_HERO_BIRD = { src: "/images/contact/discover-binoculars-bird.webp", version: "bf3b2e8f", width: 523, height: 512 };
 
 export const Hero: React.FC<{
   onNavigate: (tab: string, subPageName?: string) => void;

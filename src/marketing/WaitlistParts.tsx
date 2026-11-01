@@ -24,7 +24,8 @@ export const reduceMotion = () =>
 
 /* ── The art, versioned by the first eight hex digits of each file's md5 (nothing in public/ is hashed) ── */
 export const BE_HAWK = { src: "/images/qc/be-hawk-head.png", version: "a10c3aa9", width: 300, height: 287 };
-export const POINTING_HAWK = { src: "/images/pointing-hawk.png", version: "dd4890ee", width: 408, height: 437 };
+/* WebP since landing perf fix v1: 40KB where the PNG is 147KB, same size and pixels. The PNG stays. */
+export const POINTING_HAWK = { src: "/images/pointing-hawk.webp", version: "50a213a9", width: 408, height: 437 };
 export const v = (a: { src: string; version: string }) => a.src + "?v=" + a.version;
 
 /** The refs' ring-tick marker. */
