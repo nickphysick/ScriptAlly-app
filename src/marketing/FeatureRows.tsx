@@ -15,8 +15,8 @@
  */
 
 import React from "react";
-import { FEATURE_ROWS, BE_HEADING, BE_LINE } from "./landingCopy";
-import { BirdsEyeFocus, TrackFeature } from "./WaitlistParts";
+import { FEATURE_ROWS, featureAnchor } from "./landingCopy";
+import { TrackFeature, Ticks, FeatureLine } from "./WaitlistParts";
 
 /* Each illustration's own facts, keyed by file.
    The SIZE is the file's pixel size. CSS sizes the image to its column, so it states only the ratio —
@@ -56,49 +56,34 @@ const lastTwoWords = (heading: string): [string, string] => {
 };
 
 /**
- * ⚠️ WAITLIST v1 (31 Oct, ref design-refs/landing-desktop-v5.html): row 1 is NEW — the Birds-eye focus
- * window (`BirdsEyeFocus`) beside the bird's-eye copy, which was the retired status band's heading.
- * Row 2 keeps "Every query tracked"'s words, and its picture is now the REAL card pile (`TrackFeature`),
- * played once when seen. Every other row is unchanged, copy included.
+ * ⚠️ WAITLIST v2 (1 Nov, ref design-refs/landing-desktop-v14.html): the Birds-eye row is GONE — the window is
+ * its own band under the hero (`BirdsEyeBand`). Each row is the heading over its navy rule, the line (with its
+ * struck word where it has one), a hairline and three ticks; each carries the anchor its banner pill scrolls
+ * to; and each sits on its own full-bleed band, alternating. "Every query tracked"'s picture is still the real
+ * card pile (`TrackFeature`).
  */
 export const FeatureRows: React.FC = () => (
   <section className="mk-featband" id="mk-features">
     <div className="mk-rows">
-      <div className="mk-frow mk-frow--be">
-        <div className="mk-befcell"><BirdsEyeFocus layout="desk" /></div>
-        <div className="mk-fcopy">
-          <h3>{BE_HEADING}</h3>
-          <p>{BE_LINE}</p>
-        </div>
-      </div>
       {FEATURE_ROWS.map((row) => {
         const art = ILLUSTRATIONS[row.image];
         const [lead, held] = lastTwoWords(row.heading);
-        if (row.key === "track") return (
-          <div className="mk-frow" key={row.key}>
-            <TrackFeature layout="desk" />
+        return (
+          <div className="mk-frow" key={row.key} id={featureAnchor(row.key)}>
+            {row.key === "track" ? <TrackFeature layout="desk" /> : (
+              <img
+                className="mk-rowillo"
+                src={row.image + "?v=" + art.version}
+                alt={row.alt}
+                width={art.width}
+                height={art.height}
+                loading="lazy"
+              />
+            )}
             <div className="mk-fcopy">
               <h3>{lead}<span className="mk-fkeep">{held}</span></h3>
-              <p>{row.body}</p>
-            </div>
-          </div>
-        );
-        return (
-          <div className="mk-frow" key={row.key}>
-            <img
-              className="mk-rowillo"
-              src={row.image + "?v=" + art.version}
-              alt={row.alt}
-              width={art.width}
-              height={art.height}
-              loading="lazy"
-            />
-            <div className="mk-fcopy">
-              <h3>
-                {lead}
-                <span className="mk-fkeep">{held}</span>
-              </h3>
-              <p>{row.body}</p>
+              <FeatureLine row={row} />
+              <Ticks items={row.points} disc className="mk-fticks" />
             </div>
           </div>
         );

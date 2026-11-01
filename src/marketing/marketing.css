@@ -695,7 +695,9 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 /* The section break above now opens this region, so the band itself only closes it. */
 /* container-type: the band is the query container the Track image's bleed measures the page against
    (100cqw is the band's own width, so a classic scrollbar is never counted as room). */
-.mk-featband { padding: 0 0 26px; margin-top: 0; container-type: inline-size; }
+/* ⚠️ `isolation: isolate` IS THE OTHER HALF OF THE ROWS' BANDS (waitlist v2): each `.mk-frow::before` sits at
+   `z-index: -1`, and without a stacking context here it would sink behind the page's own ground. */
+.mk-featband { padding: 0; margin-top: 0; container-type: inline-size; isolation: isolate; }
 
 /* ── The status band ── RETIRED (waitlist v1, 31 Oct): its heading is feature row 1's now, beside the
    Birds-eye window. */
@@ -707,9 +709,17 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
    the header's 120px back on top of that gave 152.6px, which read as a hole where a heading used
    to be. The band's hairline and its change of paper are the separator — it does not need a
    run-up as well. */
-.mk-rows { --mk-rows-cap: 1180px; --mk-rows-gutter: 56px; max-width: var(--mk-rows-cap); margin: 0 auto; padding: 16px var(--mk-rows-gutter) 30px; }
-.mk-frow { display: grid; grid-template-columns: 1.6fr 1fr; gap: 80px; align-items: center; padding: 60px 0; }
-.mk-frow + .mk-frow { border-top: 1px solid var(--mk-hair); }
+.mk-rows { --mk-rows-cap: 1180px; --mk-rows-gutter: 56px; max-width: var(--mk-rows-cap); margin: 0 auto; padding: 0 var(--mk-rows-gutter); }
+/* ⚠️ WAITLIST v2 (1 Nov, ref design-refs/landing-desktop-v14.html, "Alternating bands"): each row sits on its
+   own full-bleed band, #f4ede3 and #fbf6ef in turn, 84px above and below, no hairline between. The band is
+   the row's `::before`, as wide as the features band (`100cqw`), behind the row (`z-index: -1` inside the
+   band's isolation). Each row is also the in-page anchor its banner pill scrolls to. */
+.mk-frow {
+  position: relative; display: grid; grid-template-columns: 1.6fr 1fr; gap: 80px; align-items: center; padding: 84px 0;
+  scroll-margin-top: calc(var(--mk-nav-h) - 24px);
+}
+.mk-frow::before { content: ""; position: absolute; top: 0; bottom: 0; left: 0; right: 0; z-index: -1; background-color: #f4ede3; }
+.mk-frow:nth-child(even)::before { background-color: #fbf6ef; }
 /* THE FEATURE ROWS' OWN TYPE (15 Sep): a typewriter face for the heading and a text serif for the
    paragraph, both at full ink. Neither family is used anywhere else on the page; index.html loads both for
    these two rules alone, and marketingTokens.test.ts fails if any other rule, stylesheet or component
@@ -726,15 +736,19 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
    length across the whole column. The held last pair in FeatureRows.tsx stays: `balance` is
    ignored by older engines (Safari before 17.5), and there the pair is still what stops a heading
    ending on a single word. */
+/* ⚠️ 36px OVER A 52 × 3 NAVY RULE (waitlist v2), the heading capped at 460px so it balances over the copy. */
 .mk-frow h3 {
   font-family: "Special Elite", cursive !important; font-weight: 400; color: var(--mk-nearblack);
-  font-size: 44px; line-height: 1.18; letter-spacing: -0.005em; text-wrap: balance;
+  font-size: 36px; line-height: 1.2; letter-spacing: -0.005em; text-wrap: balance; max-width: 460px;
 }
+.mk-frow h3::after { content: ""; display: block; width: 52px; height: 3px; border-radius: 3px; background: var(--mk-navy); margin-top: 18px; }
 .mk-frow h3 .mk-fkeep { white-space: nowrap; font-family: inherit; }
 .mk-fcopy p {
-  font-family: "Source Serif 4", Georgia, serif; font-weight: 400; color: var(--mk-nearblack);
-  font-size: 21px; line-height: 1.7; margin-top: 14px; max-width: 520px;
+  font-family: "Source Serif 4", Georgia, serif; font-weight: 400; color: rgba(28, 19, 15, .78);
+  font-size: 19px; line-height: 1.6; margin-top: 16px; max-width: 440px;
 }
+/* The ticks under each row's line: a hairline, then the three, each with a rust check on a blush disc. */
+.mk-fticks { list-style: none; margin: 22px 0 0; padding: 22px 0 0; border-top: 1px solid rgba(28, 19, 15, .1); display: grid; gap: 12px; max-width: 440px; }
 /* The illustration at its own ratio: no crop, no frame, no fill — straight onto the band's ground. */
 .mk-rowillo { width: 100%; height: auto; min-width: 0; }
 /* EVERY ILLUSTRATION BLEEDS: it grows a third wider than its column, so a third taller at its own ratio,
@@ -757,6 +771,8 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   }
   .mk-frow:nth-child(odd) .mk-rowillo { margin-left: calc(-1 * var(--mk-bleed)); }
   .mk-frow:nth-child(even) .mk-rowillo { margin-right: calc(-1 * var(--mk-bleed)); }
+  /* Each row's band reaches the features band's edges, edge to edge however wide the page. */
+  .mk-frow::before { left: calc(50% - 50cqw); right: calc(50% - 50cqw); }
   /* THE COPY COLUMN REACHES OUTWARD; THE IMAGE COLUMN DOES NOT MOVE (16 Sep). A row reads as one
      centred unit because the copy grows toward the page edge on its OWN side — the mirror of the
      illustration's bleed above it — rather than by shrinking the image or re-dividing the grid.
@@ -802,9 +818,14 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
    ⚠️ COLOUR ONLY, NEVER THE `background` SHORTHAND — the same reason `.mk-lower` and `.mk-claimband`
    carry that warning. The shorthand resets every longhand, so the day someone adds an image here it
    would take the ground with it and the band would go transparent through a green build. */
+/* ⚠️ NAVY WITH ROUNDED TOP CORNERS, PULLED 36px UP OVER THE LAST FEATURE BAND (waitlist v2, ref
+   design-refs/landing-desktop-v14.html), so no strip of page ground shows between them: the corners round
+   onto the band's colour. Above the rows' bands in the stacking (`z-index: 1`). */
 .mk-vision {
-  background-color: var(--mk-stone);
-  margin-top: 104px;
+  position: relative; z-index: 1;
+  background-color: var(--mk-ink-shell);
+  border-radius: 36px 36px 0 0;
+  margin-top: -36px;
 }
 /* The page's own container, not the ref's. The ref is drawn in a 1440px frame at 120px gutters;
    every other band here is 1180 capped at 56, and one gutter down the page beats two that merely
@@ -821,7 +842,7 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-visionh2 {
   font-family: "Special Elite", cursive !important; font-weight: 400;
   font-size: 60px; line-height: 1.1; letter-spacing: -0.015em;
-  color: var(--mk-nearblack); margin: 0;
+  color: var(--mk-cream); margin: 0;
 }
 .mk-visionpoints {
   display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 56px; margin-top: 64px;
@@ -885,7 +906,6 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   .mk-visionh2 { font-size: 46px; }
   .mk-visionpoints { grid-template-columns: 1fr; gap: 56px; margin-top: 48px; }
   .mk-vfig { height: 180px; }
-  .mk-vision { margin-top: 72px; }
 }
 @media (max-width: 560px) {
   .mk-visionh2 { font-size: 36px; }
@@ -1256,8 +1276,8 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 
 /* ── Responsive baseline (presentable, not pixel-designed) ── */
 @media (max-width: 1080px) {
-  .mk-rows { padding: 10px 26px 22px; }
-  .mk-frow { grid-template-columns: 1fr; gap: 28px; padding: 44px 0; }
+  .mk-rows { padding: 0 26px; }
+  .mk-frow { grid-template-columns: 1fr; gap: 28px; padding: 56px 0; }
   .mk-frow:nth-child(even) { direction: ltr; }
   /* 0px, never a bare 0: calc(100% + 0) is invalid, and an invalid width draws the file's natural 2880px */
   .mk-rowillo { --mk-bleed: 0px; }

@@ -272,7 +272,9 @@ describe("the marketing chrome renders in both of its states", () => {
       const html = renderPage(shell(u, "/"), "/");
       expect(html).not.toContain("Log in");
       expect(html).not.toContain("Open dashboard");
-      expect(html).toContain("Become a Founding Writer");
+      /* waitlist v2 (1 Nov): the nav's pass says the CTA's own words, in sentence case. */
+      expect(html).toContain(HERO_CTA);
+      expect(html).not.toContain("Become a Founding Writer");
     }
   });
 
@@ -434,7 +436,8 @@ describe("the nav's condense is triggered by sentinels ahead of the nav", () => 
    The two-line headline, the sub's two lines, "See how it works", the card pile and the cast shadow left it. */
 describe("the hero", () => {
   const html = () => renderPage(<Landing onNavigate={noNavigate} />, "/");
-  const hero = () => sliceBetween(html(), 'class="mk-dh"', 'id="mk-features"', "the hero");
+  /* waitlist v2: the hero ends where the Birds-eye band begins. */
+  const hero = () => sliceBetween(html(), 'class="mk-dh"', 'class="mk-beb"', "the hero");
   const unesc = (s: string) => s.replace(/&quot;/g, '"').replace(/&#x27;/g, "'").replace(/&amp;/g, "&");
 
   it("asks the question as the page's only h1, word for word", () => {
@@ -999,54 +1002,55 @@ describe("the vision band: three points and no way out", () => {
  * markup the copy never asked for: a button, a link, a bold run, a badge, or the aria-hidden wrapper
  * the retired mockups sat in — which would silence the alt text.
  */
-/* RE-POINTED (waitlist v1, 31 Oct, ref design-refs/landing-desktop-v5.html): seven rows now. Row 1 is the
-   Birds-eye focus window and row 2's picture is the real card pile — both live components, not PNGs — so
-   the image-row laws (one image, its alt, its pixel size, its version) hold over the five image rows, and
-   rows 1 and 2 have laws of their own. Every row's heading and paragraph are still word for word. */
-describe("the feature rows: the Birds-eye window, the card pile, then five illustrations", () => {
+/* RE-POINTED (waitlist v2, 1 Nov, ref design-refs/landing-desktop-v14.html): six rows. The Birds-eye window left
+   the rows for its own band under the hero; row 1's picture is the real card pile, the other five are PNGs.
+   Every row is the heading, the line (the agents row's with its struck word), and three ticks, and carries
+   the anchor its banner pill scrolls to. */
+describe("the feature rows: the card pile, then five illustrations, each with its line and three ticks", () => {
   const html = () => renderPage(<Landing onNavigate={noNavigate} />, "/");
-  /* The slice's END anchor stops it running into the vision band — see the note that used to stand here:
-     whenever a section is inserted on this page, check what slices across it. */
   const band = () => sliceBetween(html(), 'id="mk-features"', 'class="mk-vision"', "the features band");
-  const rowsOf = (markup: string) => markup.split(/<div class="mk-frow(?: [^"]*)?">/).slice(1);
+  const rowsOf = (markup: string) => markup.split(/<div class="mk-frow(?: [^"]*)?"[^>]*>/).slice(1);
   const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/'/g, "&#x27;");
   const unesc = (s: string) => s.replace(/&quot;/g, '"').replace(/&#x27;/g, "'").replace(/&amp;/g, "&");
   const IMAGE_ROWS = FEATURE_ROWS.filter((r) => r.key !== "track");
-  const imageRows = () => rowsOf(band()).slice(2);
+  const imageRows = () => rowsOf(band()).slice(1);
+  const text = (m: string) => unesc(m.replace(/<[^>]+>/g, ""));
 
-  it("renders seven rows: the Birds-eye window, the card pile, then the five image rows in order", () => {
+  it("renders six rows in order, each its heading, line and three ticks, each with its anchor", () => {
     const rows = rowsOf(band());
-    expect(rows).toHaveLength(2 + IMAGE_ROWS.length);
-    expect(rows[0], "row 1 is the focus window").toContain('data-be="desk"');
-    expect(unesc(rows[0]), "row 1's heading").toContain("<h3>" + BE_HEADING + "</h3>");
-    expect(unesc(rows[0]), "row 1's paragraph").toContain("<p>" + BE_LINE + "</p>");
-    const track = FEATURE_ROWS.find((r) => r.key === "track")!;
-    expect(rows[1], "row 2 is the real pile").toContain('data-trk="desk"');
-    expect(unesc(rows[1].match(/<h3>([\s\S]*?)<\/h3>/)![1].replace(/<[^>]+>/g, "")), "row 2's heading").toBe(track.heading);
-    expect(rows[1]).toContain("<p>" + esc(track.body) + "</p>");
-    expect(rows[1], "the old illustration is gone from row 2").not.toContain(track.image);
-    imageRows().forEach((markup, i) => {
-      const row = IMAGE_ROWS[i];
-      const img = markup.indexOf('src="' + row.image + "?v=");
-      const h3 = markup.indexOf("<h3>");
+    expect(rows).toHaveLength(FEATURE_ROWS.length);
+    const ids = [...band().matchAll(/<div class="mk-frow"[^>]*id="([^"]+)"/g)].map((m) => m[1]);
+    expect(ids).toEqual(FEATURE_ROWS.map((r) => "mk-f-" + r.key));
+    expect(rows[0], "row 1 is the real pile").toContain('data-trk="desk"');
+    expect(rows[0], "the old illustration is gone from row 1").not.toContain("/images/track-agent-queries.png");
+    expect(band(), "no Birds-eye window among the rows").not.toContain('data-be="desk"');
+    rows.forEach((markup, i) => {
+      const row = FEATURE_ROWS[i];
       const heading = /<h3>([\s\S]*?)<\/h3>/.exec(markup);
       expect(heading, row.key + ": a heading").toBeTruthy();
-      expect(unesc(heading![1].replace(/<[^>]+>/g, "")), row.key + ": its heading, word for word").toBe(row.heading);
-      const p = markup.indexOf("<p>" + esc(row.body) + "</p>");
-      expect(img, row.key + ": its image").toBeGreaterThan(-1);
-      expect(h3, row.key + ": its heading, after the image").toBeGreaterThan(img);
-      expect(p, row.key + ": its paragraph, after the heading").toBeGreaterThan(h3);
+      expect(text(heading![1]), row.key + ": its heading, word for word").toBe(row.heading);
+      const p = /<p>([\s\S]*?)<\/p>/.exec(markup.slice(markup.indexOf('class="mk-fcopy"')));
+      expect(p, row.key + ": a line").toBeTruthy();
+      /* The line a reader hears is `body`; the struck word is aria-hidden decoration on top of it. */
+      const heard = unesc(p![1].replace(/<s [^>]*aria-hidden="true"[^>]*>[\s\S]*?<\/s>\s?/g, "").replace(/<[^>]+>/g, ""));
+      expect(heard, row.key + ": its line, as heard").toBe(row.body);
+      if (row.strike) expect(p![1], row.key + ": the struck word").toContain('<s class="mk-strike" aria-hidden="true">' + row.strike.word + "</s>");
+      const ticks = [...markup.slice(markup.indexOf('class="mk-fcopy"')).matchAll(/<li>([\s\S]*?)<\/li>/g)].map((m) => text(m[1]));
+      expect(ticks, row.key + ": its three ticks").toEqual([...row.points]);
+    });
+    imageRows().forEach((markup, i) => {
+      const row = IMAGE_ROWS[i];
+      expect(markup, row.key + ": its image").toContain('src="' + row.image + "?v=");
       expect(markup, row.key + ": its alt text").toContain('alt="' + esc(row.alt) + '"');
       expect(markup.match(/<img\b/g) ?? [], row.key + ": one image").toHaveLength(1);
-      expect(markup.match(/<p\b/g) ?? [], row.key + ": one paragraph").toHaveLength(1);
     });
   });
 
   /* The copy columns carry nothing but words; the only control in the band is the pile's "Play again". */
-  it("the copy carries no action, no link, no emphasis and no badge", () => {
-    const copies = [...band().matchAll(/<div class="mk-fcopy">([\s\S]*?)<\/div>/g)].map((m) => m[1]);
-    expect(copies, "seven copy columns").toHaveLength(2 + IMAGE_ROWS.length);
-    for (const markup of copies) for (const forbidden of ["<button", "<a ", "<b>", "<strong", "aria-hidden", "mk-protag", "mk-btn", "mk-tlink"]) {
+  it("the copy carries no action, no link and no badge", () => {
+    const copies = [...band().matchAll(/<div class="mk-fcopy">([\s\S]*?)<\/ul><\/div>/g)].map((m) => m[1]);
+    expect(copies, "six copy columns").toHaveLength(FEATURE_ROWS.length);
+    for (const markup of copies) for (const forbidden of ["<button", "<a ", "mk-protag", "mk-btn", "mk-tlink"]) {
       expect(markup, "a copy column renders " + forbidden).not.toContain(forbidden);
     }
     const buttons = [...band().matchAll(/<button[^>]*>([\s\S]*?)<\/button>/g)].map((m) => m[1]);
@@ -1065,27 +1069,47 @@ describe("the feature rows: the Birds-eye window, the card pile, then five illus
     });
   });
 
-  /**
-   * ⚠️ EVERY ROW HEADING FROM `FEATURE_ROWS` HOLDS ITS LAST TWO WORDS TOGETHER ON ONE LINE — row 2 included,
-   * whose picture changed and whose words did not. (Row 1's heading is the bird's-eye line, set as the ref sets it.)
-   */
   it("holds each heading's last two words together on one line", () => {
-    const rows = rowsOf(band()).slice(1);
+    const rows = rowsOf(band());
     FEATURE_ROWS.forEach((row, i) => {
       const held = row.heading.split(" ").slice(-2).join(" ");
       expect(rows[i], row.key + ": its last two words, held").toContain('<span class="mk-fkeep">' + esc(held) + "</span></h3>");
     });
   });
 
-  /**
-   * ⚠️ AN IMAGE REPLACED UNDER THE SAME FILENAME MUST NOT BE SERVED FROM A CACHE. Each URL carries the first
-   * eight hex digits of its file's own md5 — the image rows' illustrations, and the two hawks rows 1 and 2 draw.
-   */
   it("versions each image's URL by the file's own content", () => {
     const here = dirname(fileURLToPath(import.meta.url));
     const v = (f: string) => createHash("md5").update(readFileSync(resolve(here, "../../public", "." + f))).digest("hex").slice(0, 8);
     const rows = imageRows();
     IMAGE_ROWS.forEach((row, i) => expect(rows[i], row.image).toContain('src="' + row.image + "?v=" + v(row.image) + '"'));
-    for (const f of ["/images/qc/be-hawk-head.png", "/images/pointing-hawk.png"]) expect(band(), f).toContain('src="' + f + "?v=" + v(f) + '"');
+    for (const f of ["/images/pointing-hawk.png"]) expect(band(), f).toContain('src="' + f + "?v=" + v(f) + '"');
+  });
+});
+
+/* waitlist v2 (1 Nov): the Birds-eye band under the hero, and the details banner whose pills scroll to the rows. */
+describe("the Birds-eye band and the details banner", () => {
+  const html = () => renderPage(<Landing onNavigate={noNavigate} />, "/");
+  const unesc = (s: string) => s.replace(/&quot;/g, '"').replace(/&#x27;/g, "'").replace(/&amp;/g, "&");
+  const here = dirname(fileURLToPath(import.meta.url));
+  const v = (f: string) => createHash("md5").update(readFileSync(resolve(here, "../../public", "." + f))).digest("hex").slice(0, 8);
+
+  it("the band: heading, line, the focus window in its desktop layout, three ticks", () => {
+    const b = sliceBetween(html(), 'class="mk-beb"', 'class="mk-det mk-det--desk"', "the Birds-eye band");
+    expect(unesc(b)).toContain(BE_HEADING);
+    expect(unesc(b)).toContain('<p class="mk-beb-line">' + BE_LINE + "</p>");
+    expect(b).toContain('data-be="desk"');
+    expect(b, "the hawk, versioned").toContain('src="/images/qc/be-hawk-head.png?v=' + v("/images/qc/be-hawk-head.png") + '"');
+    expect(b.match(/<li>/g) ?? [], "three ticks").toHaveLength(3);
+    expect(b, "only \"Much\" bold").toContain("<b>Much</b> more sightly than a spreadsheet");
+  });
+
+  it("the banner: its pills are in-page anchors, and every one's target is on the page", () => {
+    const h = html();
+    const b = sliceBetween(h, 'class="mk-det mk-det--desk"', 'id="mk-features"', "the banner");
+    expect(b, "the portrait, versioned").toContain('src="/images/hawk-portrait.webp?v=' + v("/images/hawk-portrait.webp") + '"');
+    expect(b, "\"at-a-glance\" held").toContain('<span class="mk-det-keep">at-a-glance</span>');
+    const hrefs = [...b.matchAll(/<a href="([^"]+)"/g)].map((m) => m[1]);
+    expect(hrefs).toEqual(["#mk-f-track", "#mk-f-agents", "#mk-f-import", "#mk-f-packages", "#mk-f-email", "#mk-f-comps"]);
+    for (const href of hrefs) expect(h, href + "'s target").toContain('id="' + href.slice(1) + '"');
   });
 });

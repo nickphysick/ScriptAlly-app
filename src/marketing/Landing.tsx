@@ -24,6 +24,7 @@ import { Vision } from "./Vision";
 import { FoundingBand } from "./FoundingBand";
 import { JoinBar } from "./JoinBar";
 import { LandingPhone } from "./LandingPhone";
+import { BirdsEyeBand, DetailsBanner } from "./WaitlistParts";
 import { DOCUMENT_TITLE } from "./landingCopy";
 import "./waitlist.css";
 
@@ -46,6 +47,10 @@ export const Landing: React.FC<{ onNavigate: (tab: string, subPageName?: string)
     <div>
       <Hero onNavigate={onNavigate} />
       <div className="mk-lower">
+        {/* WAITLIST v2 (1 Nov): the Birds-eye view is its own band under the hero, then the details banner
+            whose pills scroll to the rows. */}
+        <BirdsEyeBand />
+        <DetailsBanner layout="desk" />
         <FeatureRows />
         {/* ⚠️ THE WHITE BAND SITS BETWEEN THE ROWS AND THE OFFER, AND THE ORDER IS THE ARGUMENT.
             The rows say what the product does; this says why it exists; the founding band asks for

@@ -84,7 +84,8 @@ describe("L2 · landing-only offers no way into the app", () => {
       const html = renderPage(
         <shell.MarketingShell user={user} onNavigate={noop} path="/"><p>page</p></shell.MarketingShell>, "/");
       expect(html, "the shell rendered").toMatch(LANDING_MARK);
-      expect(html).toContain("Become a Founding Writer");
+      /* waitlist v2 (1 Nov): on "/" the nav's founding pass says the CTA's own words, in sentence case. */
+      expect(html).toContain("Become a founding writer");
       for (const door of ["Log in", "Open dashboard", "Open QueryHawk"]) expect(html, door).not.toContain(door);
     }
   });

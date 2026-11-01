@@ -302,13 +302,64 @@
 .mk-be-tk::before { content: ""; position: absolute; left: 50%; top: -6px; width: 1px; height: 4px; background: #c2bab0; }
 .mk-be-ttag { position: absolute; bottom: 5px; transform: translateX(-50%); z-index: 4; background: #1b1310; color: #fff; font: 500 9px/1 var(--mk-f-mono); letter-spacing: .14em; padding: 4px 6px 3px; border-radius: 5px; }
 
-/* ── Feature row 1: the Birds-eye focus window (ref `.qh-d .D`, birdseye-focus-v1 option 2) ──
-   The window bleeds 120px into the page margin (as the row illustrations do) and never pushes the copy:
-   its cell keeps the grid's column and hands the extra width back with a matching negative margin. */
-.mk-befcell { min-width: 0; margin-top: 70px; margin-left: -120px; width: calc(100% + 120px); }
+/* ── The nav's founding pass (desktop, `NavPass`, ref `.qh-navh`): see-through, the label over a 4px places
+   bar whose blush fill is the share of places taken. The bar holds its box, invisible, until the count. ── */
+.mk-navpass {
+  display: inline-flex; flex-direction: column; justify-content: center; gap: 6px; height: 52px; box-sizing: border-box;
+  padding: 0 22px; border: 0; border-radius: 999px; cursor: pointer; color: #fff;
+  background: rgba(255, 255, 255, .08); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .2);
+  transition: background .2s, box-shadow .2s;
+}
+.mk-navpass:hover { background: rgba(255, 255, 255, .14); box-shadow: inset 0 0 0 1px rgba(232, 180, 163, .6); }
+.mk-navpass:focus-visible { outline: 2px solid #e8b4a3; outline-offset: 3px; }
+.mk-navpass > span { font: 600 16px/1 var(--mk-f-serif); color: #fff; white-space: nowrap; }
+.mk-navpass > em { display: block; height: 4px; border-radius: 4px; background: rgba(255, 255, 255, .18); overflow: hidden; }
+.mk-navpass > em.mk-wait { visibility: hidden; }
+.mk-navpass > em > i { display: block; height: 100%; border-radius: 4px; background: #e8b4a3; }
+
+/* ── The desktop's ticks: a rust check on a blush disc (ref `.qh-ticks`), in the band and under each row ── */
+.mk-dtick { flex: 0 0 22px; width: 22px; height: 22px; box-sizing: border-box; padding: 3px; margin-top: 1px; border-radius: 50%; background: #f7e1d8; color: #a2452a; }
+.mk-beb-ticks li, .mk-fticks li { display: flex; gap: 10px; align-items: flex-start; font: 400 17px/1.45 var(--mk-f-serif); color: #1c130f; }
+/* brand.tsx names bare spans as the app's sans; these take the list's serif. */
+.mk-beb-ticks span, .mk-fticks span { font: inherit; }
+.mk-beb-ticks b, .mk-fticks b { font-weight: 700; }
+
+/* ── The Birds-eye band, directly under the hero (`BirdsEyeBand`, ref `.qh-beband`) ──
+   The hero card's own width (`.mk-dh-wrap`); the heading on one line from 1280; the ticks in one centred row. */
+.mk-beb { padding: 96px 0 40px; }
+.mk-beb .mk-beb-h {
+  margin: 0; text-align: center; white-space: nowrap; color: #1c130f;
+  font-family: var(--mk-f-display) !important; font-weight: 400 !important; font-size: 40px !important; line-height: 1.15 !important; letter-spacing: -.005em !important;
+}
+.mk-beb-line { margin: 14px auto 0; max-width: 640px; text-align: center; font: 400 21px/1.6 var(--mk-f-serif); color: rgba(28, 19, 15, .74); }
+.mk-beb-stage { margin-top: 104px; }
+.mk-beb-ticks { display: flex; justify-content: center; flex-wrap: wrap; gap: 14px 44px; list-style: none; margin: 56px 0 0; padding: 0; }
+@media (max-width: 1279px) { .mk-beb .mk-beb-h { white-space: normal; text-wrap: balance; } }
+
+/* ── The details banner on desktop (`DetailsBanner layout="desk"`, ref `.qh-deep.qh-deep8`) ──
+   Navy, full bleed; the text left in a 760px column at the hero card's edge; the portrait 400px, vertically
+   centred, at the right, behind the pills (which are glossy: navy at .55 over an 8px blur). */
+.mk-det--desk { position: relative; overflow: hidden; margin-top: 40px; padding: 96px 72px; background: #1b2433; color: #fff; }
+.mk-det--desk .mk-det-in { max-width: 1156px; margin: 0 auto; }
+.mk-det--desk .mk-det-tx { position: relative; z-index: 2; max-width: 760px; }
+.mk-det--desk .mk-det-h {
+  margin: 0; max-width: 760px; color: #fff; text-wrap: balance;
+  font-family: var(--mk-f-display) !important; font-weight: 400 !important; font-size: 46px !important; line-height: 1.15 !important; letter-spacing: 0 !important;
+}
+.mk-det--desk .mk-det-sub { margin: 12px 0 0; font: 400 20px/1.6 var(--mk-f-serif); color: rgba(255, 255, 255, .8); }
+.mk-det--desk .mk-det-pills { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+.mk-det--desk .mk-det-pills a {
+  font: 600 15px/1 var(--mk-f-sans); color: #fff; text-decoration: none; border-radius: 999px; padding: 11px 16px;
+  background: rgba(42, 58, 82, .55); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .25), inset 0 1px 0 rgba(255, 255, 255, .18);
+}
+.mk-det--desk .mk-det-hawk { position: absolute; z-index: 1; right: max(40px, calc(50% - 640px)); top: 50%; width: 400px; height: 400px; max-width: none; transform: translateY(-50%); }
+
+/* ── The Birds-eye focus window (ref `.qh-d .D`, birdseye-focus-v1 option 2), desktop sizes; the phone's
+   overrides follow these rules. ── */
 .mk-bef {
-  --mk-bef-names: 196px; --mk-bef-head: 46px; --mk-bef-row: 44px;
-  --mk-bef-hk: 120px; --mk-bef-hkl: calc(var(--mk-bef-names) / 2 - 60px);
+  --mk-bef-names: 230px; --mk-bef-head: 52px; --mk-bef-row: 48px;
+  --mk-bef-hk: 136px; --mk-bef-hkl: 52px;
   position: relative; color: #1c130f;
 }
 .mk-bef-win {
@@ -353,23 +404,23 @@
 .mk-bef-rw.mk-on .mk-bef-who { border-left: 3px solid #a2452a; padding-left: 11px; }
 .mk-bef-lane { position: relative; height: 100%; }
 .mk-bef-bar {
-  position: absolute; top: 11px; height: 22px; border-radius: 5px;
+  position: absolute; top: calc((var(--mk-bef-row) - 22px) / 2); height: 22px; border-radius: 5px;
   transform-origin: left; transform: scaleX(0); transition: transform 1s cubic-bezier(.2, .8, .2, 1);
 }
-.mk-bef-bar > span { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); font: 400 12px/1 var(--mk-f-display); white-space: nowrap; color: #1c130f; }
+.mk-bef-bar > span { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); font: 400 13px/1 var(--mk-f-display); white-space: nowrap; color: #1c130f; }
 .mk-bef-rw:not(.mk-on) .mk-bef-bar { filter: grayscale(.7); opacity: .55; }
 .mk-bef.mk-go .mk-bef-bar { transform: none; }
-/* The detail card, beside Eleanor's row: its pointer is on her row's centre (the design's rule; both refs
-   draw it two rows lower), it overlaps the window's right edge and sits in front of the today line. */
+/* The detail card, inside the window's right side in the empty future space, level with rows 1–3; its pointer
+   is on Eleanor's row's centre, in front of the today line. */
 .mk-bef-peek {
-  position: absolute; z-index: 6; right: -56px; width: 230px; box-sizing: border-box;
-  top: calc(var(--mk-bef-head) + var(--mk-bef-row) * 2.5 - 47px);
+  position: absolute; z-index: 6; right: 18px; width: 236px; box-sizing: border-box;
+  top: calc(var(--mk-bef-head) + 12px);
   background: #fff; border-radius: 14px; padding: 16px 18px;
   box-shadow: 0 24px 50px -16px rgba(27, 36, 51, .35), 0 0 0 1px rgba(28, 19, 15, .07);
   opacity: 0; transform: translateY(10px); transition: opacity .6s 1.2s, transform .6s 1.2s;
 }
 .mk-bef.mk-go .mk-bef-peek { opacity: 1; transform: none; }
-.mk-bef-peek::before { content: ""; position: absolute; left: -7px; top: 40px; width: 14px; height: 14px; background: #fff; transform: rotate(45deg); box-shadow: -1px 1px 0 rgba(28, 19, 15, .07); }
+.mk-bef-peek::before { content: ""; position: absolute; left: -7px; top: calc(var(--mk-bef-row) * 2.5 - 19px); width: 14px; height: 14px; background: #fff; transform: rotate(45deg); box-shadow: -1px 1px 0 rgba(28, 19, 15, .07); }
 .mk-bef-ph { display: grid; grid-template-columns: 22px 1fr; column-gap: 8px; align-items: center; }
 .mk-bef-ph b { font: 600 15px/1.2 var(--mk-f-serif); }
 .mk-bef-ph small { grid-column: 2; margin-top: -2px; font: 400 12.5px/1.2 var(--mk-f-serif); color: #8a8077; }
@@ -421,10 +472,6 @@
 .mk-trkd .mk-lc[data-hc="front"] { pointer-events: none; }
 .mk-trkd .mk-trk-again { left: 6%; bottom: 2%; height: 36px; padding: 0 16px; font-size: 14px; }
 
-@media (max-width: 1080px) {
-  .mk-befcell { margin-left: 0; width: auto; margin-top: 40px; }
-  .mk-bef-peek { right: 8px; }
-}
 
 /* ── The waiting-list footer, desktop: brand, tagline, glyphs; © · Made in the UK · Privacy ── */
 .mk-foot--wl .mk-footgrid { grid-template-columns: 1fr; }

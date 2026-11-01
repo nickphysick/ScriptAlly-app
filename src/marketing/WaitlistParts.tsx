@@ -13,8 +13,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
   BE_DATES, BE_STAGE_RGB, BE_DESK_ROWS, BE_FOCUS, REPLAY_LABEL, BeStage, TickItem, FeatureRow,
-  DETAILS_HEADING, DETAILS_SUB, DETAILS_PILLS, featureAnchor,
+  DETAILS_HEADING, DETAILS_SUB, DETAILS_PILLS, featureAnchor, BE_HEADING, BE_LINE, BE_TICKS,
 } from "./landingCopy";
+import { useFounding, ensureCount } from "./foundingStore";
 import { HeroCard, HeroCardControl, HeroCardFeature, FEATURE_VISIBLE } from "./HeroCard";
 import { StatusGlyph } from "./marketingMarks";
 
@@ -176,6 +177,40 @@ export const BirdsEyeFocus: React.FC<{ layout: "desk" | "phone" }> = ({ layout }
         <span className="mk-bef-btn">{BE_FOCUS.action}</span>
       </div>
     </div>
+  );
+};
+
+/* ═════════════ Desktop: the Birds-eye band, directly under the hero ═════════════ */
+/**
+ * Full width at the hero card's own width (`.mk-dh-wrap`): the heading on one line, the line centred under
+ * it, the window, then the three ticks in one centred row (ref `.qh-beband`).
+ */
+export const BirdsEyeBand: React.FC = () => (
+  <section className="mk-beb" aria-labelledby="mk-beb-h">
+    <div className="mk-dh-wrap">
+      <h2 id="mk-beb-h" className="mk-beb-h">{BE_HEADING}</h2>
+      <p className="mk-beb-line">{BE_LINE}</p>
+      <div className="mk-beb-stage"><BirdsEyeFocus layout="desk" /></div>
+      <Ticks items={BE_TICKS} disc className="mk-beb-ticks" />
+    </div>
+  </section>
+);
+
+/* ═════════════ Desktop: the nav's founding pass (ref `.qh-navh`) ═════════════ */
+/**
+ * A see-through pill, "Become a founding writer" over a 4px places bar whose blush fill is the share of places
+ * taken — the same store reading `HeroPlaces` takes, live or absent (the bar holds its box, invisible, until
+ * the count arrives). It scrolls to the founding band's form.
+ */
+export const NavPass: React.FC<{ label: string }> = ({ label }) => {
+  const { count } = useFounding();
+  useEffect(ensureCount, []);
+  const pct = count && count.cap > 0 ? Math.min(100, (Math.min(count.claimed, count.cap) / count.cap) * 100) : null;
+  return (
+    <button type="button" className="mk-navpass" onClick={() => scrollToForm(BAND_FORM)}>
+      <span>{label}</span>
+      <em aria-hidden="true" className={pct === null ? "mk-wait" : undefined}><i style={{ width: (pct ?? 0) + "%" }} /></em>
+    </button>
   );
 };
 
