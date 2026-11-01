@@ -261,12 +261,14 @@ export const TrackFeature: React.FC<{ layout: "phone" | "desk" }> = ({ layout })
       if (!pile || !front || !hawk) return;
       const W = el.clientWidth, H = el.clientHeight;
       if (layout === "phone") {
-        /* The ref's frame is 342 × 458 at 390 wide; the card sits at (12, 18), 278 wide; the hawk at
-           (230, 318), 156 wide. Everything scales with the panel's width. */
+        /* The ref's frame is 342 × 458 at 390 wide; the card sits at (12, 18), 278 wide. The hawk stands at
+           (226, 272), 140 wide (v2, ref landing-mobile-v17 `.oA .trk .hawk`): with no blush panel left to cut
+           him off at the frame's edge, v1's (230, 318, 156) put him ~20px past the screen's right edge.
+           Everything scales with the frame's width. */
         const k = W / 342, s = 278 * k / front.offsetWidth;
         pile.style.transform = `translate(${12 * k - front.offsetLeft * s}px,${18 * k - front.offsetTop * s}px) scale(${s})`;
         el.style.height = 458 * k + "px";
-        Object.assign(hawk.style, { left: 230 * k + "px", top: 318 * k + "px", width: 156 * k + "px" });
+        Object.assign(hawk.style, { left: 226 * k + "px", top: 272 * k + "px", width: 140 * k + "px" });
         return;
       }
       let top = Infinity, bottom = -Infinity, left = Infinity, right = -Infinity;
