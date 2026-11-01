@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 import {
   welcomeRedirect, newWelcomeRef, welcomePayload, readWelcomeAnswers, WELCOME_REF_TTL_MS,
 } from "./waitlistModel";
-import { welcomeLead } from "./emailCopy";
+import { welcomeSubject } from "./emailCopy";
 
 describe("the redirect a confirmation link lands on", () => {
   it("for verified, already and waiting it carries the kind and a reference, and no number outside it", () => {
@@ -79,8 +79,8 @@ describe("the three quick taps", () => {
   });
 });
 
-describe("the welcome email's opening line", () => {
-  it("names the founding number, unpadded", () => {
-    expect(welcomeLead(23)).toBe("You're Founding Writer No. 23.");
+describe("the welcome email's subject", () => {
+  it("names the founding number, unpadded, in lower case (founding emails v1)", () => {
+    expect(welcomeSubject(23)).toBe("You're in: founding writer No. 23");
   });
 });

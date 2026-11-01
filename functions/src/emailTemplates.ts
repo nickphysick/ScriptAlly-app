@@ -1,27 +1,41 @@
 /**
- * emailTemplates — the two messages, rendered.
+ * emailTemplates — the three messages, rendered (founding emails v1, 1 Nov; ref
+ * design-refs/founding-emails-v1.html, "Proposed").
  *
  * Pure: a renderer takes URLs and figures and returns HTML and text. It never sends, never reads
  * config and never touches Firestore, so the whole of it is exercised in the root suite.
  *
  * ⚠️ A MESSAGE WITH A MISSING LINK IS NEVER SENT — `prepare*` returns a REFUSAL, not a message
- * with an empty href. Refusing is recoverable: somebody retries, or the config is fixed and it
- * runs again. A hundred invites carrying a dead link is not, and neither is a bulk send with no
- * unsubscribe route, which is a compliance failure as well as a broken promise. The refusal names
- * what was missing so the log says which value to set.
+ * with an empty href. Refusing is recoverable; a hundred invites carrying a dead link is not, and
+ * neither is a send with no unsubscribe route. The refusal names what was missing for the log.
  *
- * ⚠️ NO IMAGES, NO EXTERNAL ASSETS, NO TRACKING PIXEL. Nothing to block, nothing to fail to load,
- * nothing that turns a plain message into a "this sender is watching you" one. It also means the
- * HTML and the text say exactly the same things, which is the only way to keep them in step.
+ * ⚠️ BUILT FOR THE CLIENTS THAT RENDER WORST: Gmail (web and iOS), Apple Mail and Outlook.
+ *  - Tables and inline styles only. No class, no <style> block, no flex, no absolute positioning,
+ *    no SVG, no rgba (Outlook drops it; every translucent ink in the ref is precomputed as a hex
+ *    on the ground it sits on).
+ *  - No web font is relied on: every face names its fallback — the typewriter falls back to
+ *    Courier New, the serif to Georgia, the handwritten "Nick" to cursive.
+ *  - Images are PNG, absolute https URLs on the configured public origin (queryhawk.net on prod),
+ *    with width, height and an empty alt. Rounded corners are decoration: Outlook squares them.
+ *  - Outlook on Windows ignores max-width, so the 560px column is pinned there by an MSO-only table.
+ *
+ * ⚠️ NO TRACKING PIXEL, AND THE TEXT VERSION SAYS THE SAME WORDS. Two images, both content.
+ *
+ * ⚠️ THE CONFIRM LINK IS ALSO PRINTED AS TEXT, small and muted, under the button. The ref does not
+ * draw it; it stays because some clients and security gateways strip or rewrite buttons, and a
+ * verify link nobody can reach is a founding place lost. It adds no words, only the URL.
  */
 
 import { RenderedEmail } from "./email";
 import { MailConfig, unsubscribeLink, verifyLink } from "./emailConfig";
 import {
-  CONFIRM_CTA, CONFIRM_EXPIRY, CONFIRM_HEADING, CONFIRM_LEAD, CONFIRM_NEXT, CONFIRM_NOT_HELD,
-  CONFIRM_NOT_YOU, CONFIRM_SUBJECT, SIGN_OFF, UNSUBSCRIBE_LABEL, UNSUBSCRIBE_NOTE,
-  WELCOME_HEADING, WELCOME_NEXT, WELCOME_NO_DATE, WELCOME_PERKS, WELCOME_SUBJECT,
-  contactLine, welcomeLead,
+  BRAND_NAME, CONFIRM_CTA, CONFIRM_EXPIRY, CONFIRM_HEADING, CONFIRM_LEAD, CONFIRM_NEXT,
+  CONFIRM_NOT_HELD, CONFIRM_NOT_YOU, CONFIRM_PREHEADER, CONFIRM_SUBJECT, FOOT_LINE, PASS_LABEL,
+  SIGNATURE_NAME, SIGNATURE_ROLE, UNSUBSCRIBE_LABEL, UNSUBSCRIBE_NOTE, UNSUBSCRIBE_NOTE_WAITING,
+  WAITING_HEADING, WAITING_LEAD, WAITING_NOTE, WAITING_NOTHING_TO_DO, WAITING_PASS,
+  WAITING_PREHEADER, WAITING_SORRY, WAITING_SUBJECT, WELCOME_GET_HEADING, WELCOME_HEADING,
+  WELCOME_LEAD, WELCOME_NEXT, WELCOME_NEXT_HEADING, WELCOME_NOTE, WELCOME_PERKS, WELCOME_PREHEADER,
+  contactLine, contactText, passNumber, passOf, welcomeSubject,
 } from "./emailCopy";
 
 /* ══════════════ Refusal ══════════════ */
@@ -31,53 +45,179 @@ export type Prepared =
   /** `missing` names the values that were absent, for the log. Never shown to a reader. */
   | { ok: false; missing: string[] };
 
-/* ══════════════ Markup ══════════════ */
+/* ══════════════ Images ══════════════ */
+
+/** Paths under the public origin. The version is the first eight hex digits of the file's md5. */
+export const EMAIL_LOGO = { path: "/images/email/queryhawk-logo-60.png", version: "54b8f898", width: 30, height: 30 };
+export const EMAIL_BIRD = { path: "/images/founding-pass-bird-email.png", version: "3f3032f7", width: 170, height: 120 };
+
+const asset = (cfg: MailConfig, a: { path: string; version: string }): string | null => {
+  if (!cfg.publicUrl) return null;
+  try {
+    const url = new URL(a.path, cfg.publicUrl);
+    if (a.version) url.searchParams.set("v", a.version);
+    return url.toString();
+  } catch {
+    return null;
+  }
+};
+
+/* ══════════════ Tokens of the look ══════════════ */
+
+const INK = "#1c130f";
+/** rgba(28,19,15,.74) on the card #fffefb. */
+const BODY = "#57504c";
+/** rgba(28,19,15,.55) on the card. */
+const MUTED = "#827d79";
+/** rgba(28,19,15,.6) and .5 on the ground #f2eee8. */
+const FOOT_INK = "#726b66";
+const FOOT_FAINT = "#87807c";
+/** rgba(28,19,15,.22) on the card: the tear line. */
+const TEAR = "#cdcac7";
+const GROUND = "#f2eee8";
+const CARD = "#fffefb";
+const NAVY = "#2a3a52";
+const PANEL = "#f7ece6";
+const BLUSH = "#e8b4a3";
+const STUB_INK = "#7a3420";
+const RUST = "#a2452a";
+
+const TYPE = "'Special Elite','Courier New',Courier,monospace";
+const SERIF = "'Source Serif 4',Georgia,'Times New Roman',serif";
+const SANS = "'Source Sans 3',Helvetica,Arial,sans-serif";
+const HAND = "Caveat,'Comic Sans MS',cursive";
 
 /** ⚠️ Copy is ours, but it is still interpolated into markup — escape it rather than trust it. */
 const esc = (s: string): string =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-const INK = "#2e2722";
-const MUTED = "#6d5348";
-const BURG = "#7c3a2a";
+const TABLE = `role="presentation" cellpadding="0" cellspacing="0" border="0"`;
 
-const p = (text: string, colour = INK) =>
-  `<p style="margin:0 0 16px;font-size:16px;line-height:1.6;color:${colour}">${esc(text)}</p>`;
+/* ══════════════ Parts ══════════════ */
+
+const para = (html: string, o: { size?: number; colour?: string; margin?: string } = {}) =>
+  `<p style="margin:${o.margin ?? "0 0 16px"};font-family:${SERIF};font-size:${o.size ?? 16.5}px;` +
+  `line-height:1.6;color:${o.colour ?? BODY}">${html}</p>`;
+
+const heading = (text: string) =>
+  `<h1 style="margin:0 0 14px;font-family:${TYPE};font-size:28px;line-height:1.2;font-weight:400;color:${INK}">` +
+  `${esc(text)}</h1>` +
+  `<table ${TABLE} style="margin:0 0 20px"><tr><td width="44" height="3" bgcolor="${NAVY}" ` +
+  `style="width:44px;height:3px;background:${NAVY};border-radius:3px;font-size:0;line-height:0">&nbsp;</td></tr></table>`;
+
+const subheading = (text: string, margin = "0 0 8px") =>
+  `<h2 style="margin:${margin};font-family:${TYPE};font-size:20px;line-height:1.3;font-weight:400;color:${INK}">` +
+  `${esc(text)}</h2>`;
 
 const button = (href: string, label: string) =>
-  `<p style="margin:0 0 12px"><a href="${esc(href)}" ` +
-  `style="display:inline-block;background:${BURG};color:#fdfaf5;text-decoration:none;` +
-  `font-size:16px;font-weight:600;padding:13px 26px;border-radius:10px">${esc(label)}</a></p>`;
+  `<table ${TABLE} style="margin:6px 0 10px"><tr><td bgcolor="${NAVY}" style="background:${NAVY};border-radius:12px">` +
+  `<a href="${esc(href)}" style="display:inline-block;padding:15px 30px;font-family:${SERIF};font-size:17px;` +
+  `font-weight:600;line-height:1.2;color:#ffffff;text-decoration:none;border-radius:12px">${esc(label)}</a>` +
+  `</td></tr></table>`;
+
+const note = (bold: string, rest: string) =>
+  `<table ${TABLE} width="100%" style="margin:8px 0 22px"><tr><td bgcolor="${PANEL}" ` +
+  `style="background:${PANEL};border-radius:14px;padding:16px 18px">` +
+  `<p style="margin:0;font-family:${SERIF};font-size:15.5px;line-height:1.6;color:${INK}">` +
+  `<b>${esc(bold)}</b>${esc(rest)}</p></td></tr></table>`;
+
+const signature = (margin = "0 0 2px") =>
+  `<p style="margin:${margin};font-family:${HAND};font-size:34px;line-height:1;font-weight:600;color:${RUST}">` +
+  `${esc(SIGNATURE_NAME)}</p>` +
+  `<p style="margin:0;font-family:${SERIF};font-size:14px;line-height:1.6;color:${MUTED}">${esc(SIGNATURE_ROLE)}</p>`;
+
+/** "✓" in rust in its own cell: no SVG and no image, so it survives every client. */
+const ticks = (rows: readonly (readonly [string, string])[]) =>
+  `<table ${TABLE} style="margin:0 0 20px">` +
+  rows.map(([b, rest]) =>
+    `<tr><td valign="top" style="padding:5px 10px 5px 0;font-family:${SANS};font-size:16px;line-height:1.45;` +
+    `font-weight:700;color:${RUST}">&#10003;</td>` +
+    `<td style="padding:5px 0;font-family:${SERIF};font-size:16px;line-height:1.45;color:${INK}">` +
+    `<b>${esc(b)}</b>${esc(rest)}</td></tr>`).join("") +
+  `</table>`;
 
 /**
- * ⚠️ THE RAW URL IS PRINTED BENEATH THE BUTTON. Some clients strip or rewrite anchors, some
- * readers do not trust a button, and a security gateway may show the text but not the link. A
- * verify link nobody can reach is a founding place lost.
+ * The pass at the top of the card: a blush stub with the label and the big line on the left and the
+ * bird on the right, in table cells. ⚠️ THE BIRD IS FULLY INSIDE THE STUB — its own cell, 14px from
+ * the right and 6px from the bottom — because an email cannot position it over the edge and crop it
+ * the way the page does (Outlook ignores absolute positioning and overflow).
  */
-const rawLink = (href: string) =>
-  `<p style="margin:0 0 24px;font-size:13px;line-height:1.5;color:${MUTED};word-break:break-all">` +
-  `${esc(href)}</p>`;
+const pass = (cfg: MailConfig, big: string, small: string | null) => {
+  const bird = asset(cfg, EMAIL_BIRD)!;
+  return (
+    `<tr><td bgcolor="${BLUSH}" style="background:${BLUSH};border-radius:18px 18px 0 0">` +
+    `<table ${TABLE} width="100%"><tr>` +
+    `<td valign="top" style="padding:22px 8px 18px 26px">` +
+    `<p style="margin:0 0 6px;font-family:${SANS};font-size:11px;line-height:1;font-weight:700;letter-spacing:1.5px;` +
+    `color:${STUB_INK}">${esc(PASS_LABEL.toUpperCase())}</p>` +
+    `<p style="margin:0;font-family:${TYPE};font-size:46px;line-height:1.05;color:${INK}">` +
+    (small ? `<span style="white-space:nowrap">${esc(big)}</span>` : esc(big)) +
+    (small ? ` <span style="font-family:${SANS};font-size:15px;font-weight:600;color:${STUB_INK};white-space:nowrap">${esc(small)}</span>` : "") +
+    `</p></td>` +
+    /* 40% of the card, the bird at most 170px inside it: 170 on a desktop, ~125 on a 375px phone,
+       where a fixed 184px cell would leave "No. 14" no room. Outlook reads the width attribute. */
+    `<td width="40%" height="134" valign="bottom" align="right" style="height:134px;padding:0 14px 6px 0">` +
+    `<img src="${esc(bird)}" width="${EMAIL_BIRD.width}" height="${EMAIL_BIRD.height}" alt="" ` +
+    `style="display:block;width:100%;max-width:${EMAIL_BIRD.width}px;height:auto;border:0"></td>` +
+    `</tr></table></td></tr>` +
+    `<tr><td style="padding:0 18px"><div style="height:0;border-top:2px dashed ${TEAR};font-size:0;line-height:0">&nbsp;</div></td></tr>`
+  );
+};
 
-const foot = (unsubUrl: string, contact: string) =>
-  `<hr style="border:none;border-top:1px solid #e7ddd2;margin:28px 0 18px">` +
-  `<p style="margin:0 0 8px;font-size:13px;line-height:1.6;color:${MUTED}">` +
-  `${esc(contactLine(contact))}</p>` +
-  `<p style="margin:0;font-size:13px;line-height:1.6;color:${MUTED}">` +
-  `<a href="${esc(unsubUrl)}" style="color:${MUTED}">${esc(UNSUBSCRIBE_LABEL)}</a>` +
-  ` — ${esc(UNSUBSCRIBE_NOTE)}</p>`;
+const preheader = (text: string) =>
+  `<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;line-height:1px;color:${GROUND}">` +
+  `${esc(text)}${"&#8199;&#847;".repeat(40)}</div>`;
 
-const shell = (heading: string, inner: string) =>
-  `<div style="background:#f7f4ee;padding:28px 16px">` +
-  `<div style="max-width:560px;margin:0 auto;background:#fffefb;border:1px solid #e7ddd2;` +
-  `border-radius:14px;padding:32px 30px;font-family:-apple-system,BlinkMacSystemFont,` +
-  `'Segoe UI',Helvetica,Arial,sans-serif">` +
-  `<h1 style="margin:0 0 18px;font-size:22px;line-height:1.3;color:${INK};font-weight:600">` +
-  `${esc(heading)}</h1>${inner}</div></div>`;
+const footer = (cfg: MailConfig, unsubUrl: string, unsubNote: string) => {
+  const [a, addr, b] = contactLine(cfg.contactEmail);
+  return (
+    `<tr><td style="padding:18px 26px 0">` +
+    `<p style="margin:0 0 8px;font-family:${SERIF};font-size:13.5px;line-height:1.6;color:${FOOT_INK}">` +
+    `${esc(a)}<a href="mailto:${esc(addr)}" style="color:${FOOT_INK};text-decoration:underline">${esc(addr)}</a>${esc(b)}</p>` +
+    `<p style="margin:0;font-family:${SANS};font-size:12.5px;line-height:1.55;color:${FOOT_FAINT}">` +
+    `<a href="${esc(unsubUrl)}" style="color:${FOOT_FAINT};text-decoration:underline">${esc(UNSUBSCRIBE_LABEL)}</a>` +
+    ` · ${esc(unsubNote)}<br>${esc(FOOT_LINE)}</p></td></tr>`
+  );
+};
 
-const textFoot = (unsubUrl: string, contact: string) =>
-  `\n---\n${contactLine(contact)}\n\n${UNSUBSCRIBE_LABEL}: ${unsubUrl}\n${UNSUBSCRIBE_NOTE}\n`;
+/** The whole message: ground, logo row, card (with an optional pass), footer. */
+const shell = (cfg: MailConfig, o: {
+  preheader: string; pass?: string; body: string; unsubUrl: string; unsubNote: string;
+}) => {
+  const logo = asset(cfg, EMAIL_LOGO)!;
+  return (
+    `<!doctype html><html lang="en-GB"><head><meta charset="utf-8">` +
+    `<meta name="viewport" content="width=device-width,initial-scale=1">` +
+    `<meta name="x-apple-disable-message-reformatting"><title></title></head>` +
+    `<body style="margin:0;padding:0;background:${GROUND}">` +
+    preheader(o.preheader) +
+    `<table ${TABLE} width="100%" bgcolor="${GROUND}" style="background:${GROUND}"><tr><td align="center" style="padding:26px 14px 30px">` +
+    `<!--[if mso]><table ${TABLE} width="560" align="center"><tr><td><![endif]-->` +
+    `<table ${TABLE} width="100%" style="max-width:560px;margin:0 auto">` +
+    `<tr><td style="padding:0 6px 14px"><table ${TABLE}><tr>` +
+    `<td valign="middle" style="padding-right:8px"><img src="${esc(logo)}" width="${EMAIL_LOGO.width}" height="${EMAIL_LOGO.height}" alt="" style="display:block;border:0"></td>` +
+    `<td valign="middle" style="font-family:Georgia,serif;font-size:19px;font-weight:600;color:${INK}">${esc(BRAND_NAME)}</td>` +
+    `</tr></table></td></tr>` +
+    `<tr><td bgcolor="${CARD}" style="background:${CARD};border-radius:18px">` +
+    `<table ${TABLE} width="100%">` + (o.pass ?? "") +
+    `<tr><td style="padding:30px 28px 28px">${o.body}</td></tr></table>` +
+    `</td></tr>` +
+    footer(cfg, o.unsubUrl, o.unsubNote) +
+    `</table>` +
+    `<!--[if mso]></td></tr></table><![endif]-->` +
+    `</td></tr></table></body></html>`
+  );
+};
 
-/* ══════════════ A · Confirm your place ══════════════ */
+const textFoot = (cfg: MailConfig, unsubUrl: string, unsubNote: string) =>
+  `\n\n---\n${contactText(cfg.contactEmail)}\n\n${UNSUBSCRIBE_LABEL}: ${unsubUrl}\n${unsubNote}\n${FOOT_LINE}\n`;
+
+const textSignature = `${SIGNATURE_NAME}\n${SIGNATURE_ROLE}`;
+
+const needsImages = (cfg: MailConfig) =>
+  asset(cfg, EMAIL_LOGO) && asset(cfg, EMAIL_BIRD) ? [] : ["imageUrl"];
+
+/* ══════════════ 1 · Confirm your place ══════════════ */
 
 export const prepareConfirm = (
   cfg: MailConfig, verifyToken: string, unsubToken: string,
@@ -87,61 +227,108 @@ export const prepareConfirm = (
   const missing = [
     ...(verifyUrl ? [] : ["verifyUrl"]),
     ...(unsubUrl ? [] : ["unsubscribeUrl"]),
+    ...needsImages(cfg),
   ];
   /* ⚠️ EITHER LINK MISSING REFUSES THE WHOLE MESSAGE. A confirmation with no verify link asks for
      an action it does not offer; one with no unsubscribe link is not a message we may lawfully
      send. Neither degrades — both refuse. */
   if (missing.length) return { ok: false, missing };
 
+  const body =
+    heading(CONFIRM_HEADING) +
+    para(esc(CONFIRM_LEAD)) +
+    button(verifyUrl!, CONFIRM_CTA) +
+    para(esc(CONFIRM_EXPIRY), { size: 14, colour: MUTED, margin: "0 0 6px" }) +
+    `<p style="margin:0 0 20px;font-family:${SANS};font-size:11.5px;line-height:1.5;color:${MUTED};word-break:break-all">` +
+    `${esc(verifyUrl!)}</p>` +
+    note(CONFIRM_NOT_HELD[0], CONFIRM_NOT_HELD[1]) +
+    para(esc(CONFIRM_NEXT)) +
+    para(esc(CONFIRM_NOT_YOU), { size: 14.5, colour: MUTED, margin: "0 0 4px" });
+
   return {
     ok: true,
     email: {
       subject: CONFIRM_SUBJECT,
-      html: shell(CONFIRM_HEADING,
-        p(CONFIRM_LEAD) +
-        button(verifyUrl!, CONFIRM_CTA) +
-        rawLink(verifyUrl!) +
-        p(CONFIRM_EXPIRY, MUTED) +
-        p(CONFIRM_NOT_HELD) +
-        p(CONFIRM_NEXT) +
-        p(CONFIRM_NOT_YOU, MUTED) +
-        p(SIGN_OFF, MUTED) +
-        foot(unsubUrl!, cfg.contactEmail)),
+      html: shell(cfg, { preheader: CONFIRM_PREHEADER, body, unsubUrl: unsubUrl!, unsubNote: UNSUBSCRIBE_NOTE }),
       text: [
         CONFIRM_HEADING, "", CONFIRM_LEAD, "",
         `${CONFIRM_CTA}: ${verifyUrl}`, "",
-        CONFIRM_EXPIRY, "", CONFIRM_NOT_HELD, "", CONFIRM_NEXT, "", CONFIRM_NOT_YOU, "", SIGN_OFF,
-      ].join("\n") + textFoot(unsubUrl!, cfg.contactEmail),
+        CONFIRM_EXPIRY, "", CONFIRM_NOT_HELD.join(""), "", CONFIRM_NEXT, "", CONFIRM_NOT_YOU,
+      ].join("\n") + textFoot(cfg, unsubUrl!, UNSUBSCRIBE_NOTE),
     },
   };
 };
 
-/* ══════════════ B · You're in ══════════════ */
+/* ══════════════ 2 · You're in ══════════════ */
 
+/** `position` is the writer's STORED founding number, as the verify transaction returned it. */
 export const prepareWelcome = (
   cfg: MailConfig, position: number, cap: number, unsubToken: string,
 ): Prepared => {
   const unsubUrl = unsubscribeLink(cfg, unsubToken);
-  if (!unsubUrl) return { ok: false, missing: ["unsubscribeUrl"] };
+  const missing = [...(unsubUrl ? [] : ["unsubscribeUrl"]), ...needsImages(cfg)];
+  if (missing.length) return { ok: false, missing };
 
-  const lead = welcomeLead(position);
-  const perks = WELCOME_PERKS;
+  const body =
+    heading(WELCOME_HEADING) +
+    para(esc(WELCOME_LEAD), { margin: "0 0 20px" }) +
+    `<table ${TABLE} width="100%" style="margin:6px 0 24px"><tr>` +
+    `<td style="border-left:3px solid ${BLUSH};padding:2px 0 2px 18px">` +
+    WELCOME_NOTE.map((t, i) => para(esc(t), { colour: INK, margin: i === WELCOME_NOTE.length - 1 ? "0 0 10px" : "0 0 12px" })).join("") +
+    signature() +
+    `</td></tr></table>` +
+    subheading(WELCOME_GET_HEADING) +
+    ticks(WELCOME_PERKS) +
+    subheading(WELCOME_NEXT_HEADING, "6px 0 8px") +
+    WELCOME_NEXT.map((t) => para(esc(t))).join("");
+
   return {
     ok: true,
     email: {
-      subject: WELCOME_SUBJECT,
-      html: shell(WELCOME_HEADING,
-        p(lead) +
-        p(WELCOME_NEXT) +
-        p(WELCOME_NO_DATE) +
-        `<ul style="margin:0 0 16px;padding-left:20px;font-size:16px;line-height:1.7;color:${INK}">` +
-        perks.map((k) => `<li>${esc(k)}</li>`).join("") + `</ul>` +
-        p(SIGN_OFF, MUTED) +
-        foot(unsubUrl, cfg.contactEmail)),
+      subject: welcomeSubject(position),
+      html: shell(cfg, {
+        preheader: WELCOME_PREHEADER, pass: pass(cfg, passNumber(position), passOf(cap)),
+        body, unsubUrl: unsubUrl!, unsubNote: UNSUBSCRIBE_NOTE,
+      }),
       text: [
-        WELCOME_HEADING, "", lead, "", WELCOME_NEXT, "", WELCOME_NO_DATE, "",
-        ...perks.map((k) => `- ${k}`), "", SIGN_OFF,
-      ].join("\n") + textFoot(unsubUrl, cfg.contactEmail),
+        `${PASS_LABEL.toUpperCase()}: ${passNumber(position)} ${passOf(cap)}`, "",
+        WELCOME_HEADING, "", WELCOME_LEAD, "",
+        ...WELCOME_NOTE.flatMap((t) => [t, ""]), textSignature, "",
+        WELCOME_GET_HEADING, ...WELCOME_PERKS.map(([b, r]) => `✓ ${b}${r}`), "",
+        WELCOME_NEXT_HEADING, ...WELCOME_NEXT.flatMap((t) => [t, ""]),
+      ].join("\n").trimEnd() + textFoot(cfg, unsubUrl!, UNSUBSCRIBE_NOTE),
+    },
+  };
+};
+
+/* ══════════════ 3 · Waiting list ══════════════ */
+
+export const prepareWaiting = (cfg: MailConfig, unsubToken: string): Prepared => {
+  const unsubUrl = unsubscribeLink(cfg, unsubToken);
+  const missing = [...(unsubUrl ? [] : ["unsubscribeUrl"]), ...needsImages(cfg)];
+  if (missing.length) return { ok: false, missing };
+
+  const body =
+    heading(WAITING_HEADING) +
+    para(esc(WAITING_LEAD)) +
+    note(WAITING_NOTE[0], WAITING_NOTE[1]) +
+    para(esc(WAITING_NOTHING_TO_DO)) +
+    para(esc(WAITING_SORRY), { margin: "8px 0 4px" }) +
+    signature("0 0 4px");
+
+  return {
+    ok: true,
+    email: {
+      subject: WAITING_SUBJECT,
+      html: shell(cfg, {
+        preheader: WAITING_PREHEADER, pass: pass(cfg, WAITING_PASS, null),
+        body, unsubUrl: unsubUrl!, unsubNote: UNSUBSCRIBE_NOTE_WAITING,
+      }),
+      text: [
+        `${PASS_LABEL.toUpperCase()}: ${WAITING_PASS}`, "",
+        WAITING_HEADING, "", WAITING_LEAD, "", WAITING_NOTE.join(""), "",
+        WAITING_NOTHING_TO_DO, "", WAITING_SORRY, "", textSignature,
+      ].join("\n") + textFoot(cfg, unsubUrl!, UNSUBSCRIBE_NOTE_WAITING),
     },
   };
 };
