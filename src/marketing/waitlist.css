@@ -36,35 +36,37 @@
 
 /* ── The hero: a navy drawer pulled down over the page (waitlist v2, ref `.hero` v9–v13) ──
    Rounded at its foot, a soft shadow, a short grab line centred near its bottom edge; the sign-up sits
-   at its foot. `LandingPhone` sizes its min-height to the screen (the Birds-eye heading shows below it). */
+   at its foot. ⚠️ IT IS ITS CONTENT'S HEIGHT AND NOTHING MORE (founding emails v1, phase 3): no min-height,
+   no empty run before the form, so the Birds-eye view's heading, its rule, the hawk's head and the window's
+   date row all show in the first screen at 390×844 (LW-7). The numbers are the brief's. */
 .mk-wl-hero {
   position: relative; z-index: 2; display: flex; flex-direction: column;
-  background: #1b2433; color: #fff; padding: 30px 24px 34px;
+  background: #1b2433; color: #fff; padding: 26px 24px 30px;
   border-radius: 0 0 28px 28px; box-shadow: 0 14px 30px -12px rgba(27, 36, 51, .45);
 }
 .mk-wl-hero::after {
   content: ""; position: absolute; left: 50%; bottom: 12px; width: 40px; height: 4px; margin-left: -20px;
   border-radius: 4px; background: rgba(255, 255, 255, .28);
 }
-.mk-wl-herohawk { position: absolute; right: 8px; top: 226px; width: 156px; height: auto; max-width: none; }
+.mk-wl-herohawk { position: absolute; right: 10px; top: 206px; width: 142px; height: auto; max-width: none; }
 .mk-wl .mk-wl-q {
   margin: 0; font-family: var(--mk-f-display) !important; font-weight: 400 !important; letter-spacing: 0 !important;
-  font-size: 30px !important; line-height: 1.2 !important; color: rgba(255, 255, 255, .86);
+  font-size: 28px !important; line-height: 1.2 !important; color: rgba(255, 255, 255, .86);
 }
 .mk-wl-q .mk-wl-q1 { display: block; font: inherit; color: inherit; }
-.mk-wl-q .mk-wl-q2 { display: inline-block; margin-top: 2px; font-family: inherit; font-size: 42px; line-height: 1.1; color: #fff; }
+.mk-wl-q .mk-wl-q2 { display: inline-block; margin-top: 2px; font-family: inherit; font-size: 41px; line-height: 1.1; color: #fff; }
 .mk-wl-q2 mark {
   font: inherit; color: inherit; padding: 0;
   background: linear-gradient(transparent 70%, rgba(232, 180, 163, .5) 74%, rgba(232, 180, 163, .5) 92%, transparent 93%);
 }
-.mk-wl-strap { font: 600 34px/1.1 var(--mk-f-hand); color: #e8b4a3; margin: 18px 0 0; }
-.mk-wl-sub { font: 400 22px/1.45 var(--mk-f-serif); color: rgba(255, 255, 255, .86); margin: 28px 0 0; max-width: 210px; }
+.mk-wl-strap { font: 600 32px/1.1 var(--mk-f-hand); color: #e8b4a3; margin: 12px 0 0; }
+.mk-wl-sub { font: 400 21px/1.45 var(--mk-f-serif); color: rgba(255, 255, 255, .86); margin: 20px 0 0; max-width: 200px; }
 .mk-wl-see {
-  display: inline-flex; align-items: center; gap: 6px; align-self: flex-start; margin-top: 16px; padding-bottom: 2px;
+  display: inline-flex; align-items: center; gap: 6px; align-self: flex-start; margin-top: 12px; padding-bottom: 2px;
   color: #e8b4a3; font: 600 16px/1.3 var(--mk-f-serif); text-decoration: none; border-bottom: 1.5px solid rgba(232, 180, 163, .5);
 }
 .mk-wl-see:focus-visible { outline: 2px solid #e8b4a3; outline-offset: 3px; border-radius: 3px; }
-.mk-wl-signup { margin-top: auto; padding-top: 24px; }
+.mk-wl-signup { margin-top: 26px; }
 .mk-wl-form, .mk-ccform { display: grid; gap: 10px; }
 .mk-wl-form input[type="email"], .mk-ccform input[type="email"] {
   width: 100%; height: 50px; box-sizing: border-box; border-radius: 12px; border: 1px solid rgba(255, 255, 255, .25); background: #fff;
@@ -92,7 +94,7 @@
 .mk-wl-feat { margin: 0; padding: 62px 24px 48px; border-top: 1px solid rgba(28, 19, 15, .08); }
 .mk-wl-sec > .mk-wl-feat:nth-child(odd) { background: #f4ede3; }
 .mk-wl-sec > .mk-wl-feat:nth-child(even) { background: #fbf6ef; }
-.mk-wl-feat.mk-wl-feat--first { padding: 58px 24px 20px; border-top: 0; }
+.mk-wl-feat.mk-wl-feat--first { padding: 50px 24px 20px; border-top: 0; }
 .mk-wl-sec > .mk-det + .mk-wl-feat { border-top: 0; }
 .mk-wl .mk-wl-feat h3 {
   font-family: var(--mk-f-display) !important; font-weight: 400 !important; letter-spacing: 0 !important;
@@ -441,7 +443,7 @@
    ── The Birds-eye window on phones (`BirdsEyeFocus layout="phone"`, ref `.pb-w.pb-A`) ──
    The shared window's sizes, at phone scale: a 78px names column, a 44px navy date row, 31px rows. The
    detail card is in the flow under the window, tucked 34px up over its bottom-right, pointing up. */
-.mk-wl-feat--first .mk-bef { margin-top: 40px; }
+.mk-wl-feat--first .mk-bef { margin-top: 46px; } /* the window 46px below the heading's rule (founding emails v1, phase 3) */
 .mk-bef.mk-bef--phone { --mk-bef-names: 78px; --mk-bef-head: 44px; --mk-bef-row: 31px; --mk-bef-hk: 80px; --mk-bef-hkl: 4px; }
 .mk-bef--phone .mk-bef-win { border-radius: 14px; box-shadow: 0 22px 44px -18px rgba(27, 36, 51, .35), 0 0 0 1px rgba(28, 19, 15, .07); }
 .mk-bef--phone .mk-be-mo, .mk-bef--phone .mk-be-mo:nth-child(1) { background: transparent; }

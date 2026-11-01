@@ -14,7 +14,7 @@
  * hero's `source` is "landing-panel" and the pass's "sealed-band", as before.
  * ⚠️ NOTHING NAVIGATES: "See what it does", the six pills and every CTA scroll within the page.
  */
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   WAIT_HERO_Q, WAIT_HERO_STRAP, WAIT_HERO_SUB, SEE_WHAT, HERO_CTA, BE_HEADING, BE_TICKS,
   FEATURE_ROWS, PHONE_FEATURE_ORDER, featureAnchor, VISION_POINTS, MISSION_HEADING, FAQ_HEADING, FAQ, FeatureRow,
@@ -30,43 +30,12 @@ import { BirdsEyeFocus, DetailsBanner, TrackFeature, Ticks, FeatureLine, PageAnc
 export const HERO_BIRD = { src: "/images/binocular-hawk.webp", version: "6e3c0031", width: 380, height: 372 };
 /** The Birds-eye heading's id: "See what it does" scrolls to it. */
 export const BE_HEADING_ID = "mk-be-h";
-/** Clear space kept under the Birds-eye heading's rule in the first screen. */
-const HOLD_BELOW = 20;
 
 type Navigate = (tab: string, subPageName?: string) => void;
 
-/**
- * The drawer is sized to the screen: tall enough to fill it, short enough that the whole Birds-eye heading
- * and its rule show under it with room below. ⚠️ MEASURED, NOT A CONSTANT: the heading's distance below the
- * drawer's foot is read off the page (it does not depend on the drawer's height), and the screen's height
- * less the bar's. Never shorter than its content (min-height only).
- */
-const useDrawerHeight = (drawer: React.RefObject<HTMLElement | null>) => {
-  const [h, setH] = useState<number | null>(null);
-  useLayoutEffect(() => {
-    const read = () => {
-      const d = drawer.current, head = document.getElementById(BE_HEADING_ID);
-      if (!d || !head) return;
-      const bar = document.querySelector(".mk-navwrap")?.getBoundingClientRect().height ?? 0;
-      const below = head.getBoundingClientRect().bottom - d.getBoundingClientRect().bottom;
-      const want = Math.floor(window.innerHeight - bar - below - HOLD_BELOW);
-      setH((was) => (was === want ? was : want));
-    };
-    read();
-    const fonts = (document as Document & { fonts?: FontFaceSet }).fonts;
-    let live = true;
-    fonts?.ready.then(() => { if (live) read(); }, () => {});
-    window.addEventListener("resize", read);
-    return () => { live = false; window.removeEventListener("resize", read); };
-  }, [drawer]);
-  return h;
-};
-
 const PhoneHero: React.FC<{ onNavigate: Navigate }> = ({ onNavigate }) => {
-  const ref = useRef<HTMLElement>(null);
-  const h = useDrawerHeight(ref);
   return (
-    <section className="mk-wl-hero" ref={ref} aria-labelledby="mk-wl-hero-h" style={h ? { minHeight: h + "px" } : undefined}>
+    <section className="mk-wl-hero" aria-labelledby="mk-wl-hero-h">
       <img className="mk-wl-herohawk" src={HERO_BIRD.src + "?v=" + HERO_BIRD.version} alt="" width={HERO_BIRD.width} height={HERO_BIRD.height} />
       <h1 id="mk-wl-hero-h" className="mk-wl-q">
         <span className="mk-wl-q1">{WAIT_HERO_Q[0]}</span>{" "}<span className="mk-wl-q2"><mark>{WAIT_HERO_Q[1]}</mark></span>
