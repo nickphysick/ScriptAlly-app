@@ -191,7 +191,11 @@
 .mk-tkt-st small { display: block; margin-bottom: 4px; font: 700 11px/1.2 var(--mk-f-sans); letter-spacing: .14em; text-transform: uppercase; color: #7a3420; }
 .mk-tkt-st b { font: 400 42px/1 var(--mk-f-display); margin-right: 6px; color: #1c130f; }
 .mk-tkt-st span { font: 600 15px/1 var(--mk-f-sans); color: #7a3420; }
-.mk-tkt-stub img { position: absolute; right: -40px; bottom: -14px; width: 230px; height: auto; max-width: none; }
+/* Founding emails v1, phase 2: the bird is WHOLLY INSIDE the stub (EM-5) — 150px, 10px in, 6px up, so the
+   rounded corner never cuts it. 150 × 645/915 ≈ 106px tall + 6 = 112, the stub's min-height. */
+.mk-tkt-stub img { position: absolute; right: 10px; bottom: 6px; width: 150px; height: auto; max-width: none; }
+/* "All fifty taken": two lines, held clear of the bird by its measure (the stub's width less the bird's 160). */
+.mk-tkt-st b.mk-tkt-full { display: block; font-size: 24px; line-height: 1.1; margin-right: 0; max-width: 140px; }
 .mk-tkt-perf { position: relative; height: 0; margin: 0 16px; border-top: 2px dashed rgba(28, 19, 15, .25); }
 .mk-tkt-perf::before, .mk-tkt-perf::after { content: ""; position: absolute; top: -12px; width: 22px; height: 22px; border-radius: 50%; background: #f2eee8; }
 .mk-tkt-perf::before { left: -27px; }

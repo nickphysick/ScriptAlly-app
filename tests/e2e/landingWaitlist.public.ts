@@ -383,12 +383,14 @@ test.describe("LW-12 · the founding pass states a number only when the count ha
     console.log("LW-12 loaded", JSON.stringify(s));
     expect(s).toBe("Founding writer passNo. 14of 50");
   });
-  test("full: the label alone", async ({ page }) => {
+  /* Founding emails v1 (1 Nov): full says so, "All fifty taken", and still states no number. */
+  test("full: no number, and the stub says the places are gone", async ({ page }) => {
     await open(page, PHONE, { count: 50, cap: 50 });
     await page.waitForTimeout(1500);
     const s = await stub(page);
     console.log("LW-12 full", JSON.stringify(s));
-    expect(s).toBe("Founding writer pass");
+    expect(s).toBe("Founding writer passAll fifty taken");
+    expect(s).not.toMatch(/No\./);
   });
 });
 

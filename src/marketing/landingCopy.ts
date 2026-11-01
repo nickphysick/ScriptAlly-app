@@ -712,9 +712,11 @@ export const DETAILS_PILLS: ReadonlyArray<{ label: string; key: FeatureRow["key"
 ];
 
 /* ── The founding pass (phones): the ticket's stub ──
-   ⚠️ THE NUMBER IS THE NEXT PLACE FROM THE STORE'S COUNT (claimed + 1), OR THERE IS NONE: unloaded, or
-   with the cap reached, the stub shows the label alone. */
+   ⚠️ THE NUMBER IS THE NEXT PLACE FROM THE STORE'S COUNT (claimed + 1), OR THERE IS NONE. Unloaded, the
+   stub shows the label alone; with the cap reached it says so ("All fifty taken", founding emails v1,
+   the ref's "Places gone" state) and still states no number. */
 export const PASS_LABEL = "Founding writer pass";
+export const PASS_FULL = `All ${FOUNDING_CAP_WORD} taken`;
 export const passNumber = (n: number) => `No. ${n}`;
 export const passOf = (cap: number) => `of ${cap}`;
 /** The lead phrase of each of `FOUNDING_GETS`, bolded on the ticket. The strings themselves never change. */
