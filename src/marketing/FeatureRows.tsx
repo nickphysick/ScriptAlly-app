@@ -15,7 +15,7 @@
  */
 
 import React from "react";
-import { FEATURE_ROWS, BE_HEADING, BE_LINE_DESK } from "./landingCopy";
+import { FEATURE_ROWS, BE_HEADING, BE_LINE } from "./landingCopy";
 import { BirdsEyeFocus, TrackFeature } from "./WaitlistParts";
 
 /* Each illustration's own facts, keyed by file.
@@ -65,10 +65,10 @@ export const FeatureRows: React.FC = () => (
   <section className="mk-featband" id="mk-features">
     <div className="mk-rows">
       <div className="mk-frow mk-frow--be">
-        <div className="mk-befcell"><BirdsEyeFocus /></div>
+        <div className="mk-befcell"><BirdsEyeFocus layout="desk" /></div>
         <div className="mk-fcopy">
           <h3>{BE_HEADING}</h3>
-          <p>{BE_LINE_DESK}</p>
+          <p>{BE_LINE}</p>
         </div>
       </div>
       {FEATURE_ROWS.map((row) => {

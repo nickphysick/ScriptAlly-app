@@ -5,15 +5,15 @@
  * ⚠️ EVERYTHING THAT MOVES HERE OBEYS ONE RULE: it starts when it is at least 60% visible, pauses when it
  * is scrolled away, and under `prefers-reduced-motion` shows its finished state with nothing moving.
  *
- * ⚠️ THE TWO BIRDS-EYE PIECES ARE DIFFERENT ON PURPOSE AND ARE NOT TO BE UNIFIED. Phones get the tilted
- * showcase window, whose bars change one at a time with a chip; the desktop gets the focus window, one
- * row lit and the rest ghosted, with a detail card beside it. Their sample data is illustration, typed in
+ * ⚠️ ONE BIRDS-EYE WINDOW, TWO LAYOUTS (waitlist v2, 1 Nov; refs design-refs/landing-mobile-v17.html and
+ * landing-desktop-v14.html). `BirdsEyeFocus` draws both: one row lit, the rest ghosted, a detail card. The
+ * phones' tilted animated showcase (`BirdsEyeShowcase`) is RETIRED. Its sample data is illustration, typed in
  * `landingCopy.ts`; nothing reads the store or today's date.
  */
 import React, { useEffect, useRef, useState } from "react";
 import {
-  BE_DATES, BE_TITLE, BE_STAGE_NAME, BE_STAGE_RGB, BE_PHONE_START, BE_PHONE_EVENTS,
-  BE_DESK_ROWS, BE_FOCUS, REPLAY_LABEL, BeStage,
+  BE_DATES, BE_STAGE_RGB, BE_DESK_ROWS, BE_FOCUS, REPLAY_LABEL, BeStage, TickItem, FeatureRow,
+  DETAILS_HEADING, DETAILS_SUB, DETAILS_PILLS, featureAnchor,
 } from "./landingCopy";
 import { HeroCard, HeroCardControl, HeroCardFeature, FEATURE_VISIBLE } from "./HeroCard";
 import { StatusGlyph } from "./marketingMarks";
@@ -33,15 +33,47 @@ export const Tick: React.FC = () => (
     <path d="M6.2 10.3 8.8 12.8 13.8 7.6" fill="none" stroke="#a2452a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
-export const Ticks: React.FC<{ items: readonly string[] }> = ({ items }) => (
-  <ul className="mk-wl-ticks">{items.map((t) => <li key={t}><Tick /><span>{t}</span></li>)}</ul>
+/** The desktop's tick: a rust check on a blush disc (ref `.qh-ticks svg`). */
+export const DiscTick: React.FC = () => (
+  <svg className="mk-dtick" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+    <path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
 );
+const tickKey = (t: TickItem) => (typeof t === "string" ? t : t.b + t.rest);
+/** A list of ticks; an item may carry a bold lead. `disc` is the desktop's mark, `className` the list's own. */
+export const Ticks: React.FC<{ items: readonly TickItem[]; disc?: boolean; className?: string }> = ({ items, disc, className }) => (
+  <ul className={className ?? "mk-wl-ticks"}>
+    {items.map((t) => (
+      <li key={tickKey(t)}>{disc ? <DiscTick /> : <Tick />}<span>{typeof t === "string" ? t : <><b>{t.b}</b>{t.rest}</>}</span></li>
+    ))}
+  </ul>
+);
+
+/** A feature's line, with its struck word where it has one (the strike is decoration, hidden from readers). */
+export const FeatureLine: React.FC<{ row: FeatureRow; className?: string }> = ({ row, className }) => {
+  const s = row.strike;
+  if (!s) return <p className={className}>{row.body}</p>;
+  return (
+    <p className={className}>
+      {s.before}<s className="mk-strike" aria-hidden="true">{s.word}</s>{" "}{row.body.slice(s.before.length)}
+    </p>
+  );
+};
 
 /* ── Scrolling to a sign-up: every CTA on the page does this, and none navigates ── */
 /** The ids of the page's two sign-ups' fields (the `idPrefix` of each `FoundingSignup`, + "-email"). */
 export const HERO_FORM = "mk-hero";
 export const CLOSE_FORM = "mk-close";
 export const BAND_FORM = "mk-band";
+/** Scroll an element of this page to the top of the view, under the bar; instant under reduced motion. */
+export const scrollToId = (id: string) => {
+  const el = document.getElementById(id);
+  el?.scrollIntoView({ behavior: reduceMotion() ? "auto" : "smooth", block: "start" });
+};
+/** An in-page anchor: a real `#id` link that scrolls instead of changing the address. */
+export const PageAnchor: React.FC<{ to: string; className?: string; children: React.ReactNode }> = ({ to, className, children }) => (
+  <a href={"#" + to} className={className} onClick={(e) => { e.preventDefault(); scrollToId(to); }}>{children}</a>
+);
 export const scrollToForm = (prefix: string) => {
   const field = document.getElementById(prefix + "-email");
   const target = field ?? document.getElementById(prefix + "-signup");
@@ -83,107 +115,32 @@ const fill = (l: number, w: number, k: BeStage, after = .42) => {
   return `linear-gradient(90deg,rgb(${r},${g},${b}) ${cut}%,rgba(${r},${g},${b},${after}) ${cut}%)`;
 };
 
-/* ═════════════ Phones: the Birds-eye showcase (the v7 ref's `.bew` window, ported) ═════════════ */
-/**
- * The tilted window on a blush panel, a card behind it, the hawk's head rising from its ink header. One
- * change at a time with one chip; overdue bars carry a pulsing navy dot. The sequence plays TWICE and
- * then rests (the ref's own fix: anything that moves for more than five seconds needs a way to stop).
- * ⚠️ THE BARS ARE BUILT IMPERATIVELY, AS THE REF BUILDS THEM, INSIDE A NODE REACT NEVER RE-RENDERS —
- * each one is moved by a transition on left/width, and its label measured against its own width.
- */
-export const BirdsEyeShowcase: React.FC = () => {
-  const win = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const w = win.current; const show = w?.querySelector<HTMLElement>(".mk-bew-show"); if (!w || !show) return;
-    type Bar = { el: HTMLElement; l: number; w: number; k: BeStage; say: string; flag: boolean };
-    const T = BE_DATES.today;
-    const set = (o: Bar, l: number, wd: number, k: BeStage, say: string, instant = false) => {
-      o.el.style.transition = instant ? "none" : ""; o.el.style.left = l + "%"; o.el.style.width = wd + "%";
-      o.el.querySelector<HTMLElement>(".mk-bew-bc")!.style.background = fill(l, wd, k);
-      const lab = o.el.querySelector<HTMLElement>(".mk-bew-lab")!, W = show.clientWidth, bw = wd / 100 * W;
-      lab.textContent = say; let out = false;
-      if (lab.scrollWidth + 16 > bw) { lab.textContent = BE_STAGE_NAME[k]; if (lab.scrollWidth + 16 > bw) out = true; }
-      const fitsRight = (l + wd) / 100 * W + lab.scrollWidth + 12 < W;
-      o.el.classList.toggle("mk-out", out && fitsRight); o.el.classList.toggle("mk-outl", out && !fitsRight);
-      Object.assign(o, { l, w: wd, k, say }); o.el.classList.toggle("mk-over", o.flag);
-    };
-    const bars: Bar[] = BE_PHONE_START.map(([l, wd, k, say, flag], i) => {
-      const el = document.createElement("div"); el.className = "mk-bew-b"; el.style.top = (i * 34 + 6) + "px";
-      el.innerHTML = '<span class="mk-bew-bc"></span><span class="mk-bew-lab"></span><span class="mk-bew-bk"></span>';
-      show.append(el); const o: Bar = { el, l, w: wd, k, say, flag }; set(o, l, wd, k, say, true); return o;
-    });
-    void T;
-    /* Labels are measured against their bars, so they are measured again once the faces are in and on resize. */
-    const relabel = () => bars.forEach((o) => set(o, o.l, o.w, o.k, o.say, true));
-    const fonts = (document as Document & { fonts?: FontFaceSet }).fonts;
-    let live = true;
-    fonts?.ready.then(() => { if (live) relabel(); }, () => {});
-    window.addEventListener("resize", relabel);
-    const chips: number[] = [];
-    const chip = (o: Bar, text: string, blush: boolean) => {
-      show.querySelectorAll(".mk-bew-chip").forEach((c) => { c.classList.remove("mk-on"); chips.push(window.setTimeout(() => c.remove(), 300)); });
-      const c = document.createElement("span"); c.className = "mk-bew-chip" + (blush ? " mk-blush" : ""); c.textContent = text;
-      c.style.left = Math.min(74, Math.max(26, o.l + o.w)) + "%"; c.style.top = (parseFloat(o.el.style.top) - 3) + "px"; show.append(c);
-      requestAnimationFrame(() => requestAnimationFrame(() => c.classList.add("mk-on")));
-      chips.push(window.setTimeout(() => { c.classList.remove("mk-on"); chips.push(window.setTimeout(() => c.remove(), 400)); }, 2300));
-    };
-    const cleanup = () => { live = false; window.removeEventListener("resize", relabel); chips.forEach(clearTimeout); show.replaceChildren(); };
-    if (reduceMotion()) return cleanup;
-    /* Twice through, then rest. Each step waits for the one before; scrolling away clears the next. */
-    let i = 0, timer = 0, seen = false;
-    const N = BE_PHONE_EVENTS.length * 2;
-    const step = () => {
-      timer = 0; if (i >= N || !seen) return;
-      const [bi, l, wd, k, say, t, bl, fl] = BE_PHONE_EVENTS[i % BE_PHONE_EVENTS.length]; const o = bars[bi];
-      if (fl !== undefined) o.flag = !!fl;
-      set(o, l, wd, k, say); if (t) chip(o, t, !!bl); i++;
-      if (i < N) timer = window.setTimeout(step, t ? 2100 : 650);
-    };
-    const io = typeof IntersectionObserver !== "undefined" ? new IntersectionObserver((es) => es.forEach((e) => {
-      seen = e.intersectionRatio >= FEATURE_VISIBLE;
-      if (seen && !timer && i < N) timer = window.setTimeout(step, 600);
-      if (!seen && timer) { clearTimeout(timer); timer = 0; }
-    }), { threshold: [0, FEATURE_VISIBLE] }) : null;
-    io?.observe(w);
-    w.dataset.beState = "ready";
-    return () => { io?.disconnect(); clearTimeout(timer); cleanup(); };
-  }, []);
-
-  return (
-    <div className="mk-bew" aria-hidden="true">
-      <div className="mk-bew-panel">
-        <span className="mk-bew-back" />
-        <div className="mk-bew-win" ref={win} data-be="phone">
-          <div className="mk-bew-head"><img src={v(BE_HAWK)} alt="" width={BE_HAWK.width} height={BE_HAWK.height} /><b>{BE_TITLE}</b></div>
-          <Dates />
-          <div className="mk-bew-rows">
-            {BE_PHONE_START.map((_, i) => <div key={i} className="mk-bew-row" />)}
-            <span className="mk-bew-todaycol" style={{ left: BE_DATES.today + "%" }} />
-            <div className="mk-bew-show" />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-/* ═════════════ Desktop: the Birds-eye focus window (birdseye-focus-v1 option 2) ═════════════ */
+/* ═════════════ The Birds-eye focus window (birdseye-focus-v1 option 2; both layouts) ═════════════ */
 /**
  * The date row IS the navy header. One row in focus — Eleanor Whitfield, blush, a 3px rust edge, her bar
  * in colour; every other row a grey placeholder with its bar faded but still labelled. The bars draw in
- * once when the window is 60% visible, then the detail card fades in beside Eleanor's row, in front of
- * the today line and over the window's right edge. The hawk's head peeks up from the bottom edge of the
- * navy header, over the names column. Under reduced motion it is drawn finished, with nothing moving.
+ * once when the window is 60% visible, then the detail card fades in. The hawk's head stands on the navy
+ * header's bottom edge at the left, fully opaque, rising above the window. Under reduced motion it is
+ * drawn finished, with nothing moving.
+ *   · `desk`: the band under the hero — a 230px names column, all but the last row, and the detail card
+ *     inside the window's right side, level with rows 1–3, its pointer on Eleanor's row.
+ *   · `phone`: a 78px names column, Eleanor's first name over her surname, all eight rows, and the card
+ *     under the window, overlapping its bottom-right.
+ * ⚠️ ONE COMPONENT: the layouts differ by the sizes in their CSS variables, the name cell and the card's
+ * place — never by a second copy of the window.
  */
-export const BirdsEyeFocus: React.FC = () => {
+export const BirdsEyeFocus: React.FC<{ layout: "desk" | "phone" }> = ({ layout }) => {
   const root = useRef<HTMLDivElement>(null);
   const done = useRef(false);
   useEffect(() => {
     if (reduceMotion()) { root.current?.classList.add("mk-go", "mk-still"); done.current = true; }
   }, []);
   useSeen(root, (seen) => { if (seen && !done.current) { done.current = true; root.current?.classList.add("mk-go"); } });
+  const phone = layout === "phone";
+  const rows = phone ? BE_DESK_ROWS : BE_DESK_ROWS.slice(0, -1);
+  const [first, ...last] = BE_FOCUS.name.split(" ");
   return (
-    <div className="mk-bef" ref={root} data-be="desk" aria-hidden="true">
+    <div className={"mk-bef mk-bef--" + layout} ref={root} data-be={layout} aria-hidden="true">
       {/* The hawk stands on the navy header's bottom edge, in front of it, his head rising above the
           window (Nick, 31 Oct). Outside the window, which clips. */}
       <img className="mk-bef-hk" src={v(BE_HAWK)} alt="" width={BE_HAWK.width} height={BE_HAWK.height} />
@@ -194,13 +151,16 @@ export const BirdsEyeFocus: React.FC = () => {
         </div>
         <div className="mk-bef-body">
           <span className="mk-bef-tline" style={{ left: `calc(var(--mk-bef-names) + (100% - var(--mk-bef-names)) * ${BE_DATES.today / 100})` }} />
-          {BE_DESK_ROWS.map(([l, w, k, say, ghost], i) => (
+          {rows.map(([l, w, k, say, ghost], i) => (
             <div key={i} className={"mk-bef-rw" + (ghost ? "" : " mk-on")}>
               <div className="mk-bef-who">
                 {ghost ? (
                   <><span className="mk-bef-gc" /><span className="mk-bef-gt"><i style={{ width: ghost[0] + "%" }} /><i style={{ width: ghost[1] + "%" }} /></span></>
                 ) : (
-                  <><span className="mk-bef-gly"><StatusGlyph index={3} /></span><span><b>{BE_FOCUS.name}</b><small>{BE_FOCUS.agency}</small></span></>
+                  <><span className="mk-bef-gly"><StatusGlyph index={3} /></span>
+                    {phone
+                      ? <span><b>{first}</b><small>{last.join(" ")}</small></span>
+                      : <span><b>{BE_FOCUS.name}</b><small>{BE_FOCUS.agency}</small></span>}</>
                 )}
               </div>
               <div className="mk-bef-lane">
@@ -218,6 +178,29 @@ export const BirdsEyeFocus: React.FC = () => {
     </div>
   );
 };
+
+/* ═════════════ The details banner, after the Birds-eye view (both layouts) ═════════════ */
+/**
+ * A navy band: the hawk's portrait, the heading ("at-a-glance" held on one line), the sub-line and six pills,
+ * each an in-page anchor to its feature. Phones: centred, the portrait straddling the band's top edge, the
+ * pills a 2 × 3 grid. Desktop: the text left in a 760px column, the portrait right, behind the pills.
+ * ⚠️ NO EYEBROW ABOVE THE HEADING, AND NO UPPERCASE ANYWHERE IN IT (Nick, 1 Nov).
+ */
+export const HAWK_PORTRAIT = { src: "/images/hawk-portrait.webp", version: "a8d0e9fe", width: 500, height: 500 };
+export const DetailsBanner: React.FC<{ layout: "desk" | "phone" }> = ({ layout }) => (
+  <section className={"mk-det mk-det--" + layout} aria-labelledby="mk-det-h">
+    <div className="mk-det-in">
+      <img className="mk-det-hawk" src={v(HAWK_PORTRAIT)} alt="" width={HAWK_PORTRAIT.width} height={HAWK_PORTRAIT.height} loading="lazy" />
+      <div className="mk-det-tx">
+        <h2 id="mk-det-h" className="mk-det-h">{DETAILS_HEADING[0]}<span className="mk-det-keep">{DETAILS_HEADING[1]}</span>{DETAILS_HEADING[2]}</h2>
+        <p className="mk-det-sub">{DETAILS_SUB}</p>
+        <nav className="mk-det-pills" aria-label="Features">
+          {DETAILS_PILLS.map((p) => <PageAnchor key={p.key} to={featureAnchor(p.key)}>{p.label}</PageAnchor>)}
+        </nav>
+      </div>
+    </div>
+  </section>
+);
 
 /* ═════════════ "Every query tracked": the real card, played once ═════════════ */
 /**

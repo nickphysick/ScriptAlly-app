@@ -5,6 +5,8 @@
  * founding writer", a small pink track with "N places left" beneath it, and a pink "Join" on the right.
  * The whole bar is one button to the founding sign-up — the closing card's form, further down this page.
  *
+ * ⚠️ WAITLIST v2 (1 Nov): the founding card is the founding PASS now (`FoundingTicket`, `.mk-tkt`), and the
+ * bar watches it.
  * ⚠️ WAITLIST v1 (31 Oct, ref design-refs/landing-mobile-v7.html `.jbar`): it is a BUTTON that scrolls to
  * the founding card's sign-up — never a link to /founders — and the rule below changed with the page:
  *   · up once the hero's sign-up has scrolled under the bar;
@@ -51,7 +53,7 @@ export const JoinBar: React.FC = () => {
       raf = 0;
       const bar = document.querySelector(".mk-navwrap")?.getBoundingClientRect().bottom ?? 0;
       const head = document.getElementById(HERO_FORM + "-signup");
-      const card = document.querySelector(".mk-ccard");
+      const card = document.querySelector(".mk-tkt");
       const past = !!head && head.getBoundingClientRect().bottom < bar;
       const cardIn = !!card && card.getBoundingClientRect().top < window.innerHeight * CARD_AT;
       const next = past && !cardIn;

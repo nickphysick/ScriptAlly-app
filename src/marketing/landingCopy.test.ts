@@ -12,8 +12,9 @@
 
 import { describe, it, expect } from "vitest";
 import {
-  HERO_H1, HERO_CTA, FOUNDING_PERKS, WAIT_HERO_Q, WAIT_HERO_STRAP, WAIT_HERO_SUB, BE_HEADING, BE_LINE_PHONE,
-  BE_LINE_DESK, BE_TICKS, FAQ, WAIT_AGENTS, MISSION_EYEBROW,
+  HERO_H1, HERO_CTA, FOUNDING_PERKS, WAIT_HERO_Q, WAIT_HERO_STRAP, WAIT_HERO_SUB, BE_HEADING, BE_LINE,
+  BE_TICKS, FAQ, MISSION_HEADING, SEE_WHAT, DETAILS_HEADING, DETAILS_SUB, DETAILS_PILLS, PASS_LABEL,
+  FOUNDING_GET_LEADS, PHONE_FEATURE_ORDER, featureAnchor, passNumber, passOf, TickItem,
   HERO_PHONE_Q, HERO_PHONE_JOIN, HERO_PHONE_MS, HERO_PHONE_MS_FRONT, HERO_PHONE_TAGS, PHONE_STORY,
   DOCUMENT_TITLE, FEATURE_ROWS,
   VISION_HEADING, VISION_POINTS,
@@ -21,6 +22,8 @@ import {
   FOUNDING_SENT, FOUNDING_DUPE, FOUNDING_FULL, FOUNDING_ERROR, FOUNDING_DOWN,
   FOUNDING_NOTE, FOUNDING_INVALID, foundingCounterLabel, foundingCounterRest, foundingRemainingLabel,
 } from "./landingCopy";
+
+const tickText = (t: TickItem) => (typeof t === "string" ? t : t.b + t.rest);
 
 describe("landing copy — verbatim locks", () => {
   /**
@@ -75,22 +78,26 @@ describe("landing copy — verbatim locks", () => {
   it("says `No more winging it.` exactly once on the page", () => {
     const PHRASE = "No more winging it.";
     const said = [
-      BE_HEADING, BE_LINE_PHONE, BE_LINE_DESK, ...BE_TICKS, WAIT_HERO_SUB, ...WAIT_HERO_Q, MISSION_EYEBROW,
-      WAIT_AGENTS.heading, WAIT_AGENTS.line, ...WAIT_AGENTS.points, ...FAQ.flat(),
+      BE_HEADING, BE_LINE, ...BE_TICKS.map(tickText), WAIT_HERO_SUB, SEE_WHAT, ...WAIT_HERO_Q, MISSION_HEADING,
+      DETAILS_HEADING.join(""), DETAILS_SUB, ...DETAILS_PILLS.map((p) => p.label), PASS_LABEL, ...FAQ.flat(),
       HERO_H1, HERO_CTA,
       /* The phone hero's own strings (23 Oct): its strapline IS `HERO_H1`, so none of these may say it. */
       ...HERO_PHONE_Q, HERO_PHONE_JOIN, HERO_PHONE_MS, HERO_PHONE_MS_FRONT, ...HERO_PHONE_TAGS, PHONE_STORY.asked.label, ...Object.values(PHONE_STORY.chips).map((c) => c[0]),
       VISION_HEADING,
       ...VISION_POINTS.flatMap((p) => [p.heading, p.body]),
-      ...FEATURE_ROWS.flatMap((r) => [r.heading, r.body, r.alt]),
+      ...FEATURE_ROWS.flatMap((r) => [r.heading, r.body, r.alt, ...r.points]),
     ].filter((t) => t.includes(PHRASE));
     expect(said, `owners of the phrase: ${said.join(" | ")}`).toEqual([HERO_H1]);
   });
 
   it("the sub, word for word, and the old two-line sub retired", async () => {
-    expect(WAIT_HERO_SUB).toBe("Smarten your hunt for literary agent representation with QueryHawk.");
+    expect(WAIT_HERO_SUB).toBe("Smarten your search with QueryHawk.");
+    expect(SEE_WHAT).toBe("See what it does");
     const copy = await import("./landingCopy");
-    for (const gone of ["HERO_SUB", "HERO_SUB_LINES", "HERO_SUB_BRAND", "HERO_PLACES_REST"]) expect(gone in copy, `${gone} is retired`).toBe(false);
+    for (const gone of ["HERO_SUB", "HERO_SUB_LINES", "HERO_SUB_BRAND", "HERO_PLACES_REST",
+      /* waitlist v2 (1 Nov): one copy set for both layouts, and the phones' showcase window is retired. */
+      "FEATURE_STORY", "WAIT_AGENTS", "BE_LINE_PHONE", "BE_LINE_DESK", "VISION_NAVY", "MISSION_EYEBROW",
+      "BE_TITLE", "BE_PHONE_START", "BE_PHONE_EVENTS", "BE_STAGE_NAME"]) expect(gone in copy, `${gone} is retired`).toBe(false);
   });
 
   /**
@@ -418,51 +425,63 @@ describe("landing copy — verbatim locks", () => {
    * ⚠️ VERBATIM FROM THE WRITTEN BRIEF THE ROWS WERE REBUILT TO (14 Sep) — headings, paragraphs,
    * image files and alt text, in page order. Edit landingCopy.ts and here only, and together.
    */
+  /* ⚠️ WAITLIST v2 (1 Nov): ONE COPY SET FOR BOTH LAYOUTS — each row's heading, line and three ticks,
+     verbatim from the prompt (which matches design-refs/landing-mobile-v17.html and landing-desktop-v14.html).
+     The images and alt texts are unchanged. */
   it("six feature rows, verbatim, in order", () => {
     expect(FEATURE_ROWS).toEqual([
       {
         key: "track",
-        heading: "Every query tracked, from start to finish",
-        body: "A full history for everything you've sent, plus timely nudge reminders so that nothing slips through the cracks.",
+        heading: "Every query tracked, from first send to journey’s end.",
+        body: "Every query keeps a rich history of what happened. Whatever the outcome, we learn from it and use it to shape the rest of your campaign.",
+        points: ["Queries, partials and fulls on one card", "Reply-by dates worked out from each agent’s policy", "A nudge when an agent goes quiet"],
         image: "/images/track-agent-queries.png",
         alt: "A hawk pointing to a query record showing a submission's full history from first letter to reply.",
       },
       {
         key: "agents",
-        heading: "Your agents on file",
-        body: "Not just a name and an email. Their wish list, their response time, the specific sample they ask for — and a timeline of every interaction you've had with them.",
+        heading: "A home for your agents",
+        body: "Know your quarry. QueryHawk tracks the health of your agent list, making sure everything you need to query them smartly is up to date.",
+        strike: { before: "Know your ", word: "query" },
+        points: ["Their manuscript wish lists and the genres they’re after", "Their reply policies (always replies, or silence means no?) and response times", "Their contact details and socials"],
         image: "/images/home-for-your-agents.png",
         alt: "An agent record showing a wish list, a response time and the sample that agent asks for.",
       },
       {
         key: "import",
-        heading: "Your list so far comes with you",
-        body: "Spreadsheet? Notes? All in your head? We have two handy methods for bringing your querying history with you — or, of course, the option to start from scratch.",
+        heading: "Already querying? No problem: your list comes across with you.",
+        body: "Whether it’s handwritten notes or a messy spreadsheet, we’ll check your list and convert it into a smart QueryHawk database.",
+        points: ["Smart Import reads your list and converts it in minutes", "You check everything before we proceed", "Or if you’d rather, bring everything in by hand"],
         image: "/images/journey-so-far.png",
         alt: "A messy submissions spreadsheet beside the same queries brought across as a clean, dated list.",
       },
       {
         key: "packages",
-        heading: "Curate and compare with Submission Packages",
-        body: "Bundle your query letters, synopses and manuscript samples into packages. Attach them to queries and see which combinations or materials are generating most interest.",
+        heading: "Find the package that gets requests",
+        body: "Keep each version of your letter, synopsis and pages together, and see which mix has agents asking for more.",
+        points: ["Letter, synopsis and pages in one bundle", "Attach a package to any query", "Request rates for every package"],
         image: "/images/curate-and-compare.png",
         alt: "Two submission packages side by side, each showing which materials it holds and how many replies it drew.",
       },
       {
         key: "email",
-        heading: "Updates log themselves with Smart Email Drop",
-        body: "Sent another query? Had a reply? Copy and paste a sent or received email and QueryHawk will suggest the updates needed. Don't worry — you'll always have final say.",
+        heading: "Paste an email. We’ll do the admin.",
+        body: "Paste any email you’ve sent or received, and QueryHawk suggests the updates for you to check.",
+        points: ["Works with any email, sent or received", "Nothing changes until you say so", "Less typing, fewer missed updates"],
         image: "/images/smart-email-drop.png",
         alt: "A pasted agent email beside the update QueryHawk suggests from it, waiting to be approved.",
       },
       {
         key: "comps",
-        heading: "Compile your Comparable Titles",
-        body: "Build a library of comparable titles and add them to your query letters to position yourself in the market. Track which ones resonate, and have the Scout suggest new ones for your reading list.",
+        heading: "Comps that work for you",
+        body: "Build your library of comparable titles and track the performance of each.",
+        points: ["Add comps to letters", "Track responses and requests", "The Scout recommends good fits"],
         image: "/images/comparable-titles.png",
         alt: "A library of comparable titles beside new ones the Scout suggests for a reading list.",
       },
     ]);
+    /* Phones show the same six in their own order. */
+    expect(PHONE_FEATURE_ORDER).toEqual(["track", "agents", "email", "packages", "comps", "import"]);
     /* ⚠️ THE ORDER IS PART OF THE LOCK, BECAUSE THE ORDER IS THE PAGE'S. `FEATURE_ROWS` renders
        straight through with no sort, and `.mk-frow:nth-child(even)` flips the row — so this array's
        INDEX decides which illustrations sit left. Rows 1, 3 and 5 are image-left by construction,
@@ -475,10 +494,54 @@ describe("landing copy — verbatim locks", () => {
    * Pro-badge and flip fields cannot come back without this failing, and a body that is one string
    * cannot carry a bold run.
    */
-  it("a row carries nothing but its heading, paragraph, image and alt text", () => {
+  it("a row carries nothing but its heading, line, ticks, image and alt text (and a struck word)", () => {
     for (const row of FEATURE_ROWS) {
-      expect(Object.keys(row).sort(), row.key).toEqual(["alt", "body", "heading", "image", "key"]);
+      const keys = Object.keys(row).filter((k) => k !== "strike").sort();
+      expect(keys, row.key).toEqual(["alt", "body", "heading", "image", "key", "points"]);
       expect(typeof row.body, row.key).toBe("string");
+      expect(row.points, row.key).toHaveLength(3);
     }
+    /* The one struck word sits where the line it decorates says it does: `body` is the sentence a reader
+       hears, and the strike is inserted at `before`. */
+    const struck = FEATURE_ROWS.filter((r) => r.strike);
+    expect(struck.map((r) => r.key)).toEqual(["agents"]);
+    for (const r of struck) expect(r.body.startsWith(r.strike!.before), r.key).toBe(true);
+  });
+
+  /* ⚠️ WAITLIST v2 (1 Nov): the Birds-eye view's words, the details banner and the founding pass. */
+  it("the Birds-eye view, verbatim (only \"Much\" bold)", () => {
+    expect(BE_HEADING).toBe("A bird’s-eye view of your entire querying campaign");
+    expect(BE_LINE).toBe("Every query on one timeline, so you can quickly see what’s needed and when.");
+    expect(BE_TICKS).toEqual([
+      "All your queries from start to finish",
+      { b: "Much", rest: " more sightly than a spreadsheet" },
+      "Anything that needs you rises to the top",
+    ]);
+  });
+
+  it("the details banner, verbatim, its six pills in order with their features", () => {
+    expect(DETAILS_HEADING.join("")).toBe("Speedy set-up, at-a-glance intel, and deep dives on the detail.");
+    expect(DETAILS_HEADING[1], "the run held on one line").toBe("at-a-glance");
+    expect(DETAILS_SUB).toBe("Our tools do the legwork so you can focus on writing.");
+    expect(DETAILS_PILLS).toEqual([
+      { label: "Query tracking", key: "track" },
+      { label: "A home for your agents", key: "agents" },
+      { label: "Bring your list across", key: "import" },
+      { label: "Submission packages", key: "packages" },
+      { label: "Speedy email drop", key: "email" },
+      { label: "Comparable titles", key: "comps" },
+    ]);
+    /* Every pill names a feature that exists, and every feature has one pill. */
+    expect(DETAILS_PILLS.map((p) => p.key).sort()).toEqual(FEATURE_ROWS.map((r) => r.key).sort());
+    expect(featureAnchor("agents")).toBe("mk-f-agents");
+  });
+
+  it("the founding pass: its label, its number's words, and each get's bold lead found in the unchanged string", () => {
+    expect(MISSION_HEADING).toBe("Our mission? Simple.");
+    expect(PASS_LABEL).toBe("Founding writer pass");
+    expect(passNumber(14)).toBe("No. 14");
+    expect(passOf(50)).toBe("of 50");
+    expect(FOUNDING_GET_LEADS).toEqual(["QueryHawk Pro, free", "A direct line", "Smart Import", "An exclusive Early Bird discount"]);
+    FOUNDING_GETS.forEach((g, i) => expect(g.startsWith(FOUNDING_GET_LEADS[i]), g).toBe(true));
   });
 });

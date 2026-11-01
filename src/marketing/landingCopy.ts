@@ -321,7 +321,12 @@ export const DOCUMENT_TITLE = "QueryHawk — Take control of your querying journ
 export interface FeatureRow {
   key: string;
   heading: string;
+  /** The line under the heading, as a reader hears it. */
   body: string;
+  /** A word drawn struck through just before `body` continues past `strike.before` (decoration, hidden
+      from screen readers, so `body` stays the sentence they hear). */
+  strike?: { before: string; word: string };
+  points: readonly [string, string, string];
   image: string;
   alt: string;
 }
@@ -336,47 +341,59 @@ export interface FeatureRow {
 export const FEATURE_ROWS: FeatureRow[] = [
   {
     key: "track",
-    heading: "Every query tracked, from start to finish",
-    body: "A full history for everything you've sent, plus timely nudge reminders so that nothing slips through the cracks.",
+    heading: "Every query tracked, from first send to journey’s end.",
+    body: "Every query keeps a rich history of what happened. Whatever the outcome, we learn from it and use it to shape the rest of your campaign.",
+    points: ["Queries, partials and fulls on one card", "Reply-by dates worked out from each agent’s policy", "A nudge when an agent goes quiet"],
     image: "/images/track-agent-queries.png",
     alt: "A hawk pointing to a query record showing a submission's full history from first letter to reply.",
   },
   {
     key: "agents",
-    heading: "Your agents on file",
-    body: "Not just a name and an email. Their wish list, their response time, the specific sample they ask for — and a timeline of every interaction you've had with them.",
+    heading: "A home for your agents",
+    body: "Know your quarry. QueryHawk tracks the health of your agent list, making sure everything you need to query them smartly is up to date.",
+    strike: { before: "Know your ", word: "query" },
+    points: ["Their manuscript wish lists and the genres they’re after", "Their reply policies (always replies, or silence means no?) and response times", "Their contact details and socials"],
     image: "/images/home-for-your-agents.png",
     alt: "An agent record showing a wish list, a response time and the sample that agent asks for.",
   },
   {
     key: "import",
-    heading: "Your list so far comes with you",
-    body: "Spreadsheet? Notes? All in your head? We have two handy methods for bringing your querying history with you — or, of course, the option to start from scratch.",
+    heading: "Already querying? No problem: your list comes across with you.",
+    body: "Whether it’s handwritten notes or a messy spreadsheet, we’ll check your list and convert it into a smart QueryHawk database.",
+    points: ["Smart Import reads your list and converts it in minutes", "You check everything before we proceed", "Or if you’d rather, bring everything in by hand"],
     image: "/images/journey-so-far.png",
     alt: "A messy submissions spreadsheet beside the same queries brought across as a clean, dated list.",
   },
   {
     key: "packages",
-    heading: "Curate and compare with Submission Packages",
-    body: "Bundle your query letters, synopses and manuscript samples into packages. Attach them to queries and see which combinations or materials are generating most interest.",
+    heading: "Find the package that gets requests",
+    body: "Keep each version of your letter, synopsis and pages together, and see which mix has agents asking for more.",
+    points: ["Letter, synopsis and pages in one bundle", "Attach a package to any query", "Request rates for every package"],
     image: "/images/curate-and-compare.png",
     alt: "Two submission packages side by side, each showing which materials it holds and how many replies it drew.",
   },
   {
     key: "email",
-    heading: "Updates log themselves with Smart Email Drop",
-    body: "Sent another query? Had a reply? Copy and paste a sent or received email and QueryHawk will suggest the updates needed. Don't worry — you'll always have final say.",
+    heading: "Paste an email. We’ll do the admin.",
+    body: "Paste any email you’ve sent or received, and QueryHawk suggests the updates for you to check.",
+    points: ["Works with any email, sent or received", "Nothing changes until you say so", "Less typing, fewer missed updates"],
     image: "/images/smart-email-drop.png",
     alt: "A pasted agent email beside the update QueryHawk suggests from it, waiting to be approved.",
   },
   {
     key: "comps",
-    heading: "Compile your Comparable Titles",
-    body: "Build a library of comparable titles and add them to your query letters to position yourself in the market. Track which ones resonate, and have the Scout suggest new ones for your reading list.",
+    heading: "Comps that work for you",
+    body: "Build your library of comparable titles and track the performance of each.",
+    points: ["Add comps to letters", "Track responses and requests", "The Scout recommends good fits"],
     image: "/images/comparable-titles.png",
     alt: "A library of comparable titles beside new ones the Scout suggests for a reading list.",
   },
 ];
+
+/** Phones show the same six rows in their own order (waitlist v2, ref design-refs/landing-mobile-v17.html). */
+export const PHONE_FEATURE_ORDER: readonly FeatureRow["key"][] = ["track", "agents", "email", "packages", "comps", "import"];
+/** The in-page anchor each feature carries, which the details banner's pills scroll to. */
+export const featureAnchor = (key: string) => "mk-f-" + key;
 
 /* ══════════════ "Our vision is simple." — the white band under the feature rows ══════════════
    (ref design-refs/landing-v6.html)
@@ -427,43 +444,8 @@ export const VISION_POINTS: VisionPoint[] = [
 
 /* `VISION_LINK` ("Read our story") is RETIRED (waitlist v1): the landing page links nowhere but Privacy. */
 
-/* ══════════════ The landing page on phones (≤760px; landing on phones v3, 26 Oct) ══════════════
-   ref design-refs/landing-mobile-v3.html (the story and its closing beat; v2's ref for the rest).
-   Every string is the ref's, verbatim.
-
-   ⚠️ ONE FEATURE PER FLICK: each caption is a "N of 6" label, the heading, one short line and three
-   ticked points, in the ref's order — "Updates log themselves" third, "Your list so far comes with
-   you" last. Each names its row by `key`, so the picture, its size and its version still come from
-   `FEATURE_ROWS` and the desktop rows' table. */
-export interface FeatureCard { key: FeatureRow["key"]; heading: string; line: string; points: [string, string, string] }
-
-
-export const FEATURE_STORY: FeatureCard[] = [
-  { key: "track", heading: "Every query tracked, from start to finish", line: "A full history for everything you've sent, so nothing slips through the cracks.",
-    points: ["Queries, partials and fulls on one card", "Reply-by dates worked out for you", "Nudge reminders when an agent goes quiet"] },
-  { key: "agents", heading: "Your agents on file", line: "Not just a name and an email.",
-    points: ["Wish lists and what they ask for", "Typical response times", "Every interaction in one timeline"] },
-  { key: "email", heading: "Updates log themselves", line: "Paste a sent or received email and QueryHawk suggests the updates.",
-    points: ["Works with any email you paste in", "Suggestions, never automatic changes", "You always have the final say"] },
-  { key: "packages", heading: "Curate and compare packages", line: "Bundle your materials and see what gets requests.",
-    points: ["Letters, synopses and samples together", "Attach a package to any query", "See which combinations get interest"] },
-  { key: "comps", heading: "Compile your comparable titles", line: "Build the comps that position your book.",
-    points: ["A library of comparable titles", "Add them to your query letters", "Track which ones resonate"] },
-  { key: "import", heading: "Your list so far comes with you", line: "Already querying? Bring it all across.",
-    points: ["From a spreadsheet, notes or memory", "Smart Import sets it up for you", "Or start fresh in minutes"] },
-];
-
-/* The vision on navy (landing on phones v4, ref landing-mobile-v4.html `.nv`): v3's closing beat folded
-   into its top — the heading and the lead — then one frame and the three lines you swipe, each a
-   point's short line keyed to `VISION_POINTS` (whose headings are shared — "Make querying
-   straightforward." included), and the way out to /about. */
-/* ⚠️ WAITLIST v1 (31 Oct): the carousel's heading, lead, aria label and "Read our story →" are RETIRED
-   with `VisionNavy`. These short lines live on as the phone mission's two lines (`LandingPhone`). */
-export const VISION_NAVY: Record<string, string> = {
-  stories: "A captivating story should never be lost to a sub-par querying campaign.",
-  simple: "Everything you need to make the right call at the right time.",
-  write: "Less time in spreadsheets, more time doing what you love.",
-};
+/* `FEATURE_STORY` (the phones' own feature copy) and `VISION_NAVY` (the mission's short lines) are RETIRED
+   (waitlist v2, 1 Nov): both layouts read `FEATURE_ROWS`, and the phone mission shows the vision's own bodies. */
 
 /* The join bar that follows a reader down the landing page on phones. Its count's words are
    `navPlacesLeft`, the same phrase the other places-left lines use. */
@@ -658,21 +640,21 @@ export const PRICING_TIERS: PricingTier[] = [
 export const WAIT_HERO_Q = HERO_PHONE_Q;
 /** The handwritten line under it. It is `HERO_H1` — the phrase keeps one owner. */
 export const WAIT_HERO_STRAP = HERO_H1;
-export const WAIT_HERO_SUB = "Smarten your hunt for literary agent representation with QueryHawk.";
+export const WAIT_HERO_SUB = "Smarten your search with QueryHawk.";
+/** Phones only: the link under the sub-line, which scrolls to the Birds-eye heading. */
+export const SEE_WHAT = "See what it does";
 
 /* ── Feature 1: the Birds-eye view ── */
 export const BE_HEADING = "A bird’s-eye view of your entire querying campaign";
-/** Phones say it shorter. */
-export const BE_LINE_PHONE = "Every query on one timeline, so you can see at a glance what needs you and when.";
-export const BE_LINE_DESK = "Every query on one timeline, so you can see at a glance what needs you, what’s coming up and what can wait.";
-export const BE_TICKS = [
-  "What's overdue, what's coming up and what can wait",
-  "Every reply date worked out for you",
-  "Your next move flagged as it falls due",
-] as const;
-/** The phone window's ink header. */
-export const BE_TITLE = "Birds-eye view";
-
+/** Desktop only: phones have no line under the heading. */
+export const BE_LINE = "Every query on one timeline, so you can quickly see what’s needed and when.";
+/** A tick: plain words, or a bold lead and the rest of the sentence. */
+export type TickItem = string | { readonly b: string; readonly rest: string };
+export const BE_TICKS: readonly TickItem[] = [
+  "All your queries from start to finish",
+  { b: "Much", rest: " more sightly than a spreadsheet" },
+  "Anything that needs you rises to the top",
+];
 /** The drawn date row both windows share: month bands, Monday ticks, and where TODAY sits (% across). */
 export const BE_DATES = {
   months: [{ name: "October", from: 0, to: 66.3 }, { name: "November", from: 66.3, to: 100 }],
@@ -681,47 +663,14 @@ export const BE_DATES = {
   todayLabel: "TODAY",
 } as const;
 
-/** Stages the windows colour by, and the name a bar falls back to when its sentence will not fit. */
+/** Stages the window colours its bars by. */
 export type BeStage = "q" | "pr" | "ps" | "fr" | "fs" | "o";
-export const BE_STAGE_NAME: Record<BeStage, string> = {
-  q: "Queried", pr: "Partial requested", ps: "Partial sent", fr: "Full requested", fs: "Full sent", o: "Offer",
-};
 export const BE_STAGE_RGB: Record<BeStage, readonly [number, number, number]> = {
   q: [236, 226, 209], pr: [226, 160, 139], fr: [226, 160, 139], ps: [178, 194, 172], fs: [178, 194, 172], o: [156, 180, 204],
 };
 
-/** Phones: eight bars at rest — [left %, width %, stage, sentence, overdue]. */
-export const BE_PHONE_START: ReadonlyArray<readonly [number, number, BeStage, string, boolean]> = [
-  [30, 34, "fr", "Full requested · send by 12 Nov", false],
-  [0, 64, "q", "Reply 5 weeks overdue", true],
-  [12, 66, "ps", "Partial sent · reply by 30 Nov", false],
-  [42, 34, "o", "Offer · reply by 6 Nov", false],
-  [4, 78, "q", "Queried · reply by 23 Nov", false],
-  [48, 40, "fs", "Full sent · reply by 2 Dec", false],
-  [10, 54, "q", "Reply 2 weeks overdue", true],
-  [36, 56, "q", "Queried · reply by 26 Nov", false],
-];
-/** Phones: the story, one change at a time — [bar, left, width, stage, sentence, chip, blush chip, overdue]. */
-export const BE_PHONE_EVENTS: ReadonlyArray<readonly [number, number, number, BeStage, string, string | null, boolean?, boolean?]> = [
-  [1, 0, 64, "q", "Reply 5 weeks overdue", "Worth a nudge", true, true],
-  [0, 30, 34, "fr", "Full requested · send by 12 Nov", "Send the full", true, false],
-  [4, 60, 6, "pr", "Partial requested · send by 6 Nov", "Partial requested!", false, false],
-  [4, 60, 22, "pr", "Partial requested · send by 6 Nov", null],
-  [2, 12, 54, "ps", "Partial sent · reply by 3 Nov", "Reply due in 3 days", false, false],
-  [6, 10, 54, "q", "Reply 2 weeks overdue", "Worth a nudge", true, true],
-  [3, 42, 22, "o", "Offer · reply by 6 Nov", "Offer! Reply by Friday", true, false],
-  [5, 48, 16, "fs", "Reply 3 days overdue", "Worth a nudge", true, true],
-  [7, 58, 8, "fr", "Full requested · send by 30 Nov", "Full requested!", false, false],
-  [7, 58, 34, "fr", "Full requested · send by 30 Nov", null],
-  [0, 30, 34, "fr", "Full requested · send by 12 Nov", null],
-  [4, 4, 78, "q", "Queried · reply by 23 Nov", null],
-  [2, 12, 66, "ps", "Partial sent · reply by 30 Nov", null],
-  [3, 42, 34, "o", "Offer · reply by 6 Nov", null],
-  [5, 48, 40, "fs", "Full sent · reply by 2 Dec", null, false, false],
-  [7, 36, 56, "q", "Queried · reply by 26 Nov", null],
-];
-
-/** Desktop: the eight rows — [left %, width %, stage, sentence, ghost line widths %] — and the one in focus. */
+/** The window's rows (phones draw all eight, the desktop band the first seven) — [left %, width %, stage,
+    sentence, ghost line widths %] — and the one in focus. */
 export const BE_DESK_ROWS: ReadonlyArray<readonly [number, number, BeStage, string, readonly [number, number] | null]> = [
   [0, 64, "q", "Reply 5 weeks overdue", [78, 52]],
   [8, 56, "ps", "Reply 12 days overdue", [64, 46]],
@@ -740,18 +689,34 @@ export const BE_FOCUS = {
   action: "Mark full sent",
 } as const;
 
-/* ── Feature 2 onwards (phones): each a picture, a heading, a line and three ticks ──
-   The desktop rows keep `FEATURE_ROWS`' own words ("Your agents on file" stays there). */
-export const WAIT_AGENTS: FeatureCard = {
-  key: "agents", heading: "A home for your agents",
-  line: "Know your quarry. QueryHawk tracks the health of your agent list, making sure everything you need to query them smartly is up to date.",
-  points: ["Agent wish list and desired genres", "Reply policies and response times", "Contact details & correspondence notes"],
-};
 /** The card's "play again" pill, both layouts. */
 export const REPLAY_LABEL = "↻ Play again";
 
-/* ── The mission (phones, navy) ── */
-export const MISSION_EYEBROW = "Our mission? Simple.";
+/* ── The mission (phones, navy): the heading over the three vision cards ── */
+export const MISSION_HEADING = "Our mission? Simple.";
+
+/* ── The details banner, after the Birds-eye view (both layouts) ──
+   ⚠️ "at-a-glance" NEVER BREAKS ACROSS LINES: the heading is three runs and the middle one is held. */
+export const DETAILS_HEADING = ["Speedy set-up, ", "at-a-glance", " intel, and deep dives on the detail."] as const;
+export const DETAILS_SUB = "Our tools do the legwork so you can focus on writing.";
+/** The six pills, in order, each with the feature it scrolls to. */
+export const DETAILS_PILLS: ReadonlyArray<{ label: string; key: FeatureRow["key"] }> = [
+  { label: "Query tracking", key: "track" },
+  { label: "A home for your agents", key: "agents" },
+  { label: "Bring your list across", key: "import" },
+  { label: "Submission packages", key: "packages" },
+  { label: "Speedy email drop", key: "email" },
+  { label: "Comparable titles", key: "comps" },
+];
+
+/* ── The founding pass (phones): the ticket's stub ──
+   ⚠️ THE NUMBER IS THE NEXT PLACE FROM THE STORE'S COUNT (claimed + 1), OR THERE IS NONE: unloaded, or
+   with the cap reached, the stub shows the label alone. */
+export const PASS_LABEL = "Founding writer pass";
+export const passNumber = (n: number) => `No. ${n}`;
+export const passOf = (cap: number) => `of ${cap}`;
+/** The lead phrase of each of `FOUNDING_GETS`, bolded on the ticket. The strings themselves never change. */
+export const FOUNDING_GET_LEADS = ["QueryHawk Pro, free", "A direct line", "Smart Import", "An exclusive Early Bird discount"] as const;
 
 /* ── Questions (phones) ── */
 export const FAQ_HEADING = "Questions";

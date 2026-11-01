@@ -34,7 +34,7 @@ import { ContactPage } from "./ContactPage";
 import { FoundersPage } from "./FoundersPage";
 import { WelcomePage } from "./WelcomePage";
 import { LEGAL_COPY_REVIEWED } from "./legalCopy";
-import { HERO_H1, HERO_CTA, FEATURE_ROWS, WAIT_HERO_Q, WAIT_HERO_SUB, BE_HEADING, BE_LINE_DESK,
+import { HERO_H1, HERO_CTA, FEATURE_ROWS, WAIT_HERO_Q, WAIT_HERO_SUB, BE_HEADING, BE_LINE,
   VISION_HEADING, VISION_POINTS } from "./landingCopy";
 import { SUPPORT_EMAIL } from "../lib/companyInfo";
 import { sliceBetween } from "../test/sliceBetween";
@@ -1019,7 +1019,7 @@ describe("the feature rows: the Birds-eye window, the card pile, then five illus
     expect(rows).toHaveLength(2 + IMAGE_ROWS.length);
     expect(rows[0], "row 1 is the focus window").toContain('data-be="desk"');
     expect(unesc(rows[0]), "row 1's heading").toContain("<h3>" + BE_HEADING + "</h3>");
-    expect(unesc(rows[0]), "row 1's paragraph").toContain("<p>" + BE_LINE_DESK + "</p>");
+    expect(unesc(rows[0]), "row 1's paragraph").toContain("<p>" + BE_LINE + "</p>");
     const track = FEATURE_ROWS.find((r) => r.key === "track")!;
     expect(rows[1], "row 2 is the real pile").toContain('data-trk="desk"');
     expect(unesc(rows[1].match(/<h3>([\s\S]*?)<\/h3>/)![1].replace(/<[^>]+>/g, "")), "row 2's heading").toBe(track.heading);

@@ -32,7 +32,7 @@ import { VISION_HEADING, VISION_POINTS } from "./landingCopy";
    hour, so a picture replaced under the same filename would otherwise be served stale — which is
    exactly what happens the day the commissioned artwork lands. Replace a file, change its version;
    a smoke test reads every PNG's header against the size and its hash against the version. */
-const PLATES: Record<string, { width: number; height: number; version: string }> = {
+export const PLATES: Record<string, { width: number; height: number; version: string }> = {
   "/images/get-good-stories-told.png": { width: 482, height: 440, version: "8baf6c8a" },
   "/images/make-querying-simple.png": { width: 456, height: 440, version: "be581a5e" },
   "/images/let-writers-write.png": { width: 347, height: 440, version: "d481eb31" },
