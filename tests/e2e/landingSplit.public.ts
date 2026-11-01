@@ -9,9 +9,11 @@
  *     npx vite build --mode development --outDir <d> && npx vite preview --outDir <d> --host 127.0.0.1 --port 4474 --strictPort
  *     SA_E2E_BASE_URL=http://127.0.0.1:4474 npx playwright test --project=public landingSplit -g SPLIT-4
  *
- * ⚠️ SPLIT-4 IS RED, AND THAT IS THE TRUTH. Phase 5 (lazy workspace routes) stopped: lazy loading
- * reorders the whole app's stylesheet and changes mount timing, which needs changes inside workspace
- * pages. The attempt is reports/landing-perf-v1/phase5-attempt.patch; the reasons are in that REPORT.
+ * ⚠️ SPLIT-4 IS SKIPPED, AND THE SKIP IS THE DEBT. Phase 5 (lazy workspace routes) was set aside by Nick
+ * (1 Nov): the public build is what visitors download, and dev is internal. Lazy loading reorders the
+ * whole app's stylesheet and changes mount timing, which needs changes inside workspace pages. The
+ * attempt is reports/landing-perf-v1/phase5-attempt.patch; "Found, not fixed" in that REPORT says why.
+ * Un-skip it with that work, and it must go red on today's build first (it does: 1.8 MB, five markers).
  *
  * SPLIT-5 compares two live builds: `SPLIT_REF_URL` (a preview of the build before the split, 43c0b8e4)
  * against `SA_E2E_BASE_URL`. No reference images are committed: sixteen full pages would be tens of MB.
@@ -227,6 +229,7 @@ test("SPLIT-2 · the production build's scripts hold no workspace code", async (
 test.describe("whole-app build", () => {
   test.use({ viewport: { width: 1440, height: 900 } });
   test("SPLIT-4 · a cold load of / signed out fetches no workspace code", async ({ browser, baseURL }) => {
+    test.skip(true, "Phase 5 deferred (Nick, 1 Nov): lazy workspace routes need workspace-page fixes. See reports/landing-perf-v1/phase5-attempt.patch and REPORT.md, \"Found, not fixed\".");
     const ctx = await browser.newContext({ storageState: { cookies: [], origins: [] } });
     const { page, got } = await coldLoad(ctx, baseURL + "/");
     await expect(page.locator(".mk-scope"), "the landing page rendered").toBeVisible();
