@@ -1,99 +1,157 @@
 /**
- * LandingPhone — the waiting-list landing page at ≤760px (waitlist v1, 31 Oct; ref
- * design-refs/landing-mobile-v7.html, the page inside the phone frame — the notes beside it are not page).
+ * LandingPhone — the waiting-list landing page at ≤760px (waitlist v2, 1 Nov; ref
+ * design-refs/landing-mobile-v17.html, the page inside the phone frame — the notes beside it are stale).
  *
- * Top to bottom: the navy hero with its sign-up, the Birds-eye showcase, "Every query tracked" with the
- * real card, five more features, the mission on navy, the founding card, the questions. The bar above
- * and the footer below are the shell's; the join bar is `JoinBar`.
+ * Top to bottom: the hero, a navy drawer pulled down over the page with its sign-up at its foot; the
+ * Birds-eye view; the details banner; the six features ("format C" — heading over a navy rule, the line,
+ * the picture, the ticks in a soft panel) on alternating bands; the mission as a sideways swipe of three
+ * cards; the founding pass; the questions. The bar above and the footer below are the shell's; the join
+ * bar is `JoinBar`.
  *
- * ⚠️ THE PAGE SCROLLS AS A PAGE. No snapping, no sticky picture, no sideways carousel, no pull-up sheet —
- * all four were retired with this build (`HeroPhone`'s sheet, `FeatureStory`, `VisionNavy`).
+ * ⚠️ THE PAGE SCROLLS AS A PAGE. `html` never snaps; the mission's carousel is the ONE element with
+ * scroll-snap (it reverses v1's "no carousel", at Nick's request).
  * ⚠️ ONE ASK. The founding sign-up is the shared `FoundingSignup` + `foundingStore` + `HeroPlaces`; the
- * hero's `source` is "landing-panel" and the founding card's "sealed-band", as before.
+ * hero's `source` is "landing-panel" and the pass's "sealed-band", as before.
+ * ⚠️ NOTHING NAVIGATES: "See what it does", the six pills and every CTA scroll within the page.
  */
-import React from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import {
-  WAIT_HERO_Q, WAIT_HERO_STRAP, WAIT_HERO_SUB, HERO_CTA, BE_HEADING, BE_LINE_PHONE, BE_TICKS,
-  FEATURE_STORY, FEATURE_ROWS, WAIT_AGENTS, VISION_POINTS, VISION_NAVY, MISSION_EYEBROW,
-  FAQ_HEADING, FAQ, FeatureCard,
+  WAIT_HERO_Q, WAIT_HERO_STRAP, WAIT_HERO_SUB, SEE_WHAT, HERO_CTA, BE_HEADING, BE_TICKS,
+  FEATURE_ROWS, PHONE_FEATURE_ORDER, featureAnchor, VISION_POINTS, MISSION_HEADING, FAQ_HEADING, FAQ, FeatureRow,
 } from "./landingCopy";
 import { FoundingSignup } from "./FoundingSignup";
 import { HeroPlaces } from "./HeroPlaces";
 import { ILLUSTRATIONS } from "./FeatureRows";
-import { FoundingClose } from "./FoundingClose";
-import { BirdsEyeShowcase, TrackFeature, Ticks, HERO_FORM } from "./WaitlistParts";
+import { FoundingTicket } from "./FoundingTicket";
+import { PLATES } from "./Vision";
+import { BirdsEyeFocus, DetailsBanner, TrackFeature, Ticks, FeatureLine, PageAnchor, HERO_FORM } from "./WaitlistParts";
 
-/** The binocular hawk beside the phone hero's question. */
+/** The binocular hawk beside the phone hero's sub-line. */
 export const HERO_BIRD = { src: "/images/binocular-hawk.webp", version: "6e3c0031", width: 380, height: 372 };
-/** The mission's picture: the fireside, which is the vision band's first plate. */
-const FIRESIDE = { src: "/images/get-good-stories-told.png", version: "8baf6c8a", width: 482, height: 440 };
+/** The Birds-eye heading's id: "See what it does" scrolls to it. */
+export const BE_HEADING_ID = "mk-be-h";
+/** Clear space kept under the Birds-eye heading's rule in the first screen. */
+const HOLD_BELOW = 20;
 
 type Navigate = (tab: string, subPageName?: string) => void;
 
-const PhoneHero: React.FC<{ onNavigate: Navigate }> = ({ onNavigate }) => (
-  <section className="mk-wl-hero" aria-labelledby="mk-wl-hero-h">
-    <img className="mk-wl-herohawk" src={HERO_BIRD.src + "?v=" + HERO_BIRD.version} alt="" width={HERO_BIRD.width} height={HERO_BIRD.height} />
-    <h1 id="mk-wl-hero-h" className="mk-wl-q">
-      <span className="mk-wl-q1">{WAIT_HERO_Q[0]}</span>{" "}<span className="mk-wl-q2"><mark>{WAIT_HERO_Q[1]}</mark></span>
-    </h1>
-    <p className="mk-wl-strap">{WAIT_HERO_STRAP}</p>
-    <p className="mk-wl-sub">{WAIT_HERO_SUB}</p>
-    <div className="mk-wl-signup" id={HERO_FORM + "-signup"}>
-      <FoundingSignup idPrefix={HERO_FORM} source="landing-panel" formClass="mk-wl-form" ctaLabel={HERO_CTA}
-        afterForm={<HeroPlaces variant="line" />} onNavigate={onNavigate} />
-    </div>
-  </section>
-);
+/**
+ * The drawer is sized to the screen: tall enough to fill it, short enough that the whole Birds-eye heading
+ * and its rule show under it with room below. ⚠️ MEASURED, NOT A CONSTANT: the heading's distance below the
+ * drawer's foot is read off the page (it does not depend on the drawer's height), and the screen's height
+ * less the bar's. Never shorter than its content (min-height only).
+ */
+const useDrawerHeight = (drawer: React.RefObject<HTMLElement | null>) => {
+  const [h, setH] = useState<number | null>(null);
+  useLayoutEffect(() => {
+    const read = () => {
+      const d = drawer.current, head = document.getElementById(BE_HEADING_ID);
+      if (!d || !head) return;
+      const bar = document.querySelector(".mk-navwrap")?.getBoundingClientRect().height ?? 0;
+      const below = head.getBoundingClientRect().bottom - d.getBoundingClientRect().bottom;
+      const want = Math.floor(window.innerHeight - bar - below - HOLD_BELOW);
+      setH((was) => (was === want ? was : want));
+    };
+    read();
+    const fonts = (document as Document & { fonts?: FontFaceSet }).fonts;
+    let live = true;
+    fonts?.ready.then(() => { if (live) read(); }, () => {});
+    window.addEventListener("resize", read);
+    return () => { live = false; window.removeEventListener("resize", read); };
+  }, [drawer]);
+  return h;
+};
 
-/** One feature: the blush art panel, the heading, the line and three ticks. */
-const Feature: React.FC<{ card: FeatureCard }> = ({ card }) => {
-  const row = FEATURE_ROWS.find((r) => r.key === card.key)!;
+const PhoneHero: React.FC<{ onNavigate: Navigate }> = ({ onNavigate }) => {
+  const ref = useRef<HTMLElement>(null);
+  const h = useDrawerHeight(ref);
+  return (
+    <section className="mk-wl-hero" ref={ref} aria-labelledby="mk-wl-hero-h" style={h ? { minHeight: h + "px" } : undefined}>
+      <img className="mk-wl-herohawk" src={HERO_BIRD.src + "?v=" + HERO_BIRD.version} alt="" width={HERO_BIRD.width} height={HERO_BIRD.height} />
+      <h1 id="mk-wl-hero-h" className="mk-wl-q">
+        <span className="mk-wl-q1">{WAIT_HERO_Q[0]}</span>{" "}<span className="mk-wl-q2"><mark>{WAIT_HERO_Q[1]}</mark></span>
+      </h1>
+      <p className="mk-wl-strap">{WAIT_HERO_STRAP}</p>
+      <p className="mk-wl-sub">{WAIT_HERO_SUB}</p>
+      <PageAnchor to={BE_HEADING_ID} className="mk-wl-see">
+        {SEE_WHAT}{" "}
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
+          <path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </PageAnchor>
+      <div className="mk-wl-signup" id={HERO_FORM + "-signup"}>
+        <FoundingSignup idPrefix={HERO_FORM} source="landing-panel" formClass="mk-wl-form" ctaLabel={HERO_CTA}
+          afterForm={<HeroPlaces variant="line" />} onNavigate={onNavigate} />
+      </div>
+    </section>
+  );
+};
+
+/** One feature, format C: the heading over its navy rule, the line, the picture, the ticks in a soft panel. */
+const Feature: React.FC<{ row: FeatureRow }> = ({ row }) => {
   const art = ILLUSTRATIONS[row.image];
   return (
-    <div className="mk-wl-feat">
-      <div className="mk-wl-art"><img src={row.image + "?v=" + art.version} alt={row.alt} width={art.width} height={art.height} loading="lazy" /></div>
-      <h3>{card.heading}</h3>
-      <p>{card.line}</p>
-      <Ticks items={card.points} />
+    <div className="mk-wl-feat" id={featureAnchor(row.key)}>
+      <h3>{row.heading}</h3>
+      <FeatureLine row={row} className="mk-wl-fline" />
+      {row.key === "track"
+        ? <TrackFeature layout="phone" />
+        : <div className="mk-wl-art"><img src={row.image + "?v=" + art.version} alt={row.alt} width={art.width} height={art.height} loading="lazy" /></div>}
+      <Ticks items={row.points} />
     </div>
   );
 };
 
+/** The mission: three cream cards you swipe, one filling the width, the dot under the one in view. */
+const Mission: React.FC = () => {
+  const track = useRef<HTMLDivElement>(null);
+  const [at, setAt] = useState(0);
+  /* ⚠️ THE CARD IN VIEW IS DERIVED FROM THE SCROLL POSITION, never kept as a counter. */
+  const onScroll = () => {
+    const el = track.current, card = el?.querySelector<HTMLElement>(".mk-vcard");
+    if (!el || !card) return;
+    const step = card.offsetWidth + parseFloat(getComputedStyle(el).columnGap || "0");
+    const k = Math.max(0, Math.min(VISION_POINTS.length - 1, Math.round(el.scrollLeft / step)));
+    setAt((was) => (was === k ? was : k));
+  };
+  return (
+    <section className="mk-wl-why" aria-labelledby="mk-wl-why-h">
+      <h2 id="mk-wl-why-h" className="mk-wl-whyh">{MISSION_HEADING}</h2>
+      <div className="mk-vc" ref={track} onScroll={onScroll} tabIndex={0} aria-labelledby="mk-wl-why-h">
+        {VISION_POINTS.map((p) => (
+          <article key={p.key} className="mk-vcard">
+            <div className="mk-vimg"><img src={p.image + "?v=" + PLATES[p.image].version} alt="" width={PLATES[p.image].width} height={PLATES[p.image].height} loading="lazy" /></div>
+            <h3>{p.heading}</h3>
+            <p>{p.body}</p>
+          </article>
+        ))}
+      </div>
+      <div className="mk-vdots" aria-hidden="true">
+        {VISION_POINTS.map((p, i) => <i key={p.key} className={i === at ? "mk-on" : undefined} />)}
+      </div>
+    </section>
+  );
+};
+
 export const LandingPhone: React.FC<{ onNavigate: Navigate }> = ({ onNavigate }) => {
-  const track = FEATURE_STORY.find((f) => f.key === "track")!;
-  const rest = FEATURE_STORY.filter((f) => f.key !== "track").map((f) => (f.key === "agents" ? WAIT_AGENTS : f));
-  const stories = VISION_POINTS[0];
-  const more = VISION_POINTS.slice(1);
+  const rows = PHONE_FEATURE_ORDER.map((k) => FEATURE_ROWS.find((r) => r.key === k)!);
   return (
     <div className="mk-wl">
       <PhoneHero onNavigate={onNavigate} />
 
       <section className="mk-wl-sec" id="mk-features" aria-label="Features">
         <div className="mk-wl-feat mk-wl-feat--first">
-          <BirdsEyeShowcase />
-          <h3>{BE_HEADING}</h3>
-          <p>{BE_LINE_PHONE}</p>
+          <h3 id={BE_HEADING_ID}>{BE_HEADING}</h3>
+          <BirdsEyeFocus layout="phone" />
           <Ticks items={BE_TICKS} />
         </div>
-        <div className="mk-wl-feat">
-          <TrackFeature layout="phone" />
-          <h3>{track.heading}</h3>
-          <p>{track.line}</p>
-          <Ticks items={track.points} />
-        </div>
-        {rest.map((card) => <Feature key={card.key} card={card} />)}
+        <DetailsBanner layout="phone" />
+        {rows.map((row) => <Feature key={row.key} row={row} />)}
       </section>
 
-      <section className="mk-wl-why" aria-labelledby="mk-wl-why-h">
-        <div className="mk-wl-whyart"><img src={FIRESIDE.src + "?v=" + FIRESIDE.version} alt="" width={FIRESIDE.width} height={FIRESIDE.height} loading="lazy" /></div>
-        <h2 id="mk-wl-why-h" className="mk-wl-whyh"><span className="mk-wl-mq">{MISSION_EYEBROW}</span>{" "}{stories.heading}</h2>
-        <p>{stories.body}</p>
-        <div className="mk-wl-more">
-          {more.map((p) => <div key={p.key}><b>{p.heading}</b><span>{VISION_NAVY[p.key]}</span></div>)}
-        </div>
-      </section>
+      <Mission />
 
-      <FoundingClose onNavigate={onNavigate} />
+      <FoundingTicket onNavigate={onNavigate} />
 
       <section className="mk-wl-faq" aria-labelledby="mk-wl-faq-h">
         <h2 id="mk-wl-faq-h" className="mk-wl-faqh">{FAQ_HEADING}</h2>

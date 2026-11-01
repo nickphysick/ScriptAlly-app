@@ -426,25 +426,20 @@ test.describe("LC2", () => {
     expect(read).toBe(ROUTES.length * VPS.length);
   });
 
-  test("V1 the vision band is stone, holding three white cards", async ({ page }) => {
+  /* RE-POINTED (waitlist v2, 1 Nov, ref design-refs/landing-desktop-v14.html): the desktop's vision band is the
+     nav's navy now, still holding three white cards. On a phone there is no vision band at all: the mission
+     (`.mk-wl-why`, three cream cards you swipe) is the phone page's own, and LW-10 holds it. */
+  test("V1 the vision band is navy, holding three white cards", async ({ page }) => {
     test.skip(CAPTURE);
     for (const vp of VPS) {
       await open(page, "/", vp);
       if (vp.width <= PHONE) {
-        /* RETARGET (landing on phones v4, 26 Oct): on a phone the vision is navy with ONE frame of three
-           pictures (one showing) over three lines; the stone band with white cards is the desktop's. */
         const p = await page.evaluate(() => ({
-          band: getComputedStyle(document.querySelector(".mk-vision")!).backgroundColor,
-          frames: document.querySelectorAll(".mk-vision .mk-vbf").length,
-          showing: Array.from(document.querySelectorAll(".mk-vision .mk-vbf img")).filter((i) => +getComputedStyle(i).opacity > 0.9).length,
-          lines: document.querySelectorAll(".mk-vision .mk-vbt").length,
-          desk: document.querySelectorAll(".mk-vision .mk-vpoint").length,
+          vision: document.querySelectorAll(".mk-vision").length,
+          mission: document.querySelectorAll(".mk-wl-why .mk-vcard").length,
         }));
-        expect(p.band, `@${vp.width}: the phone's vision band is navy`).toBe("rgb(27, 36, 51)");
-        expect(p.frames, `@${vp.width}: one frame`).toBe(1);
-        expect(p.showing, `@${vp.width}: showing one picture`).toBe(1);
-        expect(p.lines, `@${vp.width}: three lines`).toBe(3);
-        expect(p.desk, `@${vp.width}: and none of the desktop's cards`).toBe(0);
+        expect(p.vision, `@${vp.width}: no vision band on a phone`).toBe(0);
+        expect(p.mission, `@${vp.width}: the mission's three cards instead`).toBe(3);
         continue;
       }
       const v = await page.evaluate(() => ({
@@ -454,7 +449,7 @@ test.describe("LC2", () => {
           return [s.backgroundColor, s.borderTopLeftRadius, s.borderBottomRightRadius];
         }),
       }));
-      expect(v.band).toBe("rgb(233, 230, 224)");
+      expect(v.band).toBe("rgb(27, 36, 51)");
       expect(v.cards.length).toBe(3);
       for (const c of v.cards) expect(c).toEqual(["rgb(255, 255, 255)", "14px", "14px"]);
       const overlap = await page.evaluate(() => {

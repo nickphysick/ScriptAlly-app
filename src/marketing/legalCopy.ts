@@ -170,19 +170,16 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentKey, LegalDocument> = {
         heading: "Cookies and local storage",
         blocks: [
           p(
-            "The QueryHawk app uses only what's strictly necessary to work: authentication tokens " +
-            "that keep you signed in, and local storage that remembers interface preferences (like " +
-            "a collapsed sidebar) on your own device. There are no advertising cookies and no " +
-            "cross-site trackers.",
+            "QueryHawk uses only what's strictly necessary to work: authentication tokens that " +
+            "keep you signed in, and local storage that remembers interface preferences (like a " +
+            "collapsed sidebar) on your own device. There are no advertising cookies, no " +
+            "cross-site trackers, and no third-party analytics — which is why you won't find a " +
+            "cookie banner here.",
           ),
           p(
-            "On our public website (queryhawk.net) we'd like to use Google Analytics to count " +
-            "visits and see which pages are useful, including which link brought you here. It " +
-            "sets cookies, so it only runs if you choose Accept on the cookie bar; if you choose " +
-            "No thanks, nothing loads. Google processes this data for us under its data processing " +
-            "terms, we don't use it for advertising, and we don't send it your email address. You " +
-            "can change your mind at any time from Cookie choices at the foot of the site, which " +
-            "also removes the cookies it set.",
+            "When you join the founding writers' waiting list, we note which link brought you " +
+            "to the site (for example, our Instagram page), so we know where our writers come " +
+            "from. It's stored with your sign-up and nowhere else.",
           ),
         ],
       },

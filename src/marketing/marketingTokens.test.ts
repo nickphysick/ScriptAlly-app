@@ -338,6 +338,11 @@ describe("no marketing rule reads a token that does not exist", () => {
     [...both.matchAll(/(--mk-[a-z0-9-]+)\s*:/g)].map((m) => m[1]),
   );
   const read = [...both.matchAll(/var\(\s*(--mk-[a-z0-9-]+)/g)].map((m) => m[1]);
+  /* ⚠️ THE WELCOME PAGE'S SHEET COUNTS AS A READER, NOT AS A SWEPT SHEET (waitlist v2, 1 Nov): once the vision
+     band went navy, `--mk-stone`'s only readers were there, and leaving it out would call a live token unread.
+     It is kept out of the other direction because it reads `--mk-blush`, which nothing declares — a fault on
+     /welcome, recorded in reports/landing-waitlist-v2/REPORT.md and outside this pass. */
+  const readAnywhere = [...read, ...[...decls(css("welcome.css")).matchAll(/var\(\s*(--mk-[a-z0-9-]+)/g)].map((m) => m[1])];
 
   it("reads at least the tokens we know about (the scan is not vacuous)", () => {
     expect(read.length).toBeGreaterThan(40);
@@ -354,7 +359,7 @@ describe("no marketing rule reads a token that does not exist", () => {
    * that does nothing — the next person to open the file goes looking for what it controls.
    */
   it("every token declared is read somewhere", () => {
-    const readSet = new Set(read);
+    const readSet = new Set(readAnywhere);
     const unread = [...declared].filter((t) => !readSet.has(t)).sort();
     expect(unread, `declared but never read: ${unread.join(", ")}`).toEqual([]);
   });
@@ -516,10 +521,15 @@ describe("the lower surface's one repaint is the vision band (was: the banner, t
   /* RE-POINTED (landing colours v2): the band is the app's stone and is the ONLY repaint left
      under the lower surface. Its two edge rules are gone — the colour change marks both edges —
      and each of its three points is a white card drawn outward from its column. */
-  it("the vision band is stone, with no edge rules, and its points are white cards", () => {
+  /* RE-POINTED (waitlist v2, 1 Nov, ref design-refs/landing-desktop-v14.html): the band is the nav's NAVY with
+     36px rounded top corners, pulled 36px up over the last feature band so no page ground shows between them. */
+  it("the vision band is navy with rounded top corners over the last feature band, and its points are white cards", () => {
     const band = ruleFor(".mk-vision");
-    expect(band).toMatch(/background-color:\s*var\(--mk-stone\)/);
-    expect(band, "the colour change marks the edges").not.toMatch(/border/);
+    expect(band).toMatch(/background-color:\s*var\(--mk-ink-shell\)/);
+    expect(band).toMatch(/border-radius:\s*36px 36px 0 0/);
+    expect(band, "it overlaps the last band by its own corner radius").toMatch(/margin-top:\s*-36px/);
+    expect(band, "and sits above the rows' bands").toMatch(/z-index:\s*1/);
+    expect(band, "the colour change marks the edges").not.toMatch(/border(?!-radius)/);
     expect(band, "separate longhands, never the shorthand").not.toMatch(/background:\s/);
     expect(band, "the drawing sits in the grid, not behind it").not.toMatch(/background-image/);
     expect(value(marketing, "--mk-stone")).toBe("#e9e6e0");
@@ -705,6 +715,8 @@ describe("the hero grid aligns per item, and overlaps by construction", () => {
       ".mk-frow:nth-child(even) .mk-rowillo",
       ".mk-frow:nth-child(odd) .mk-fcopy",
       ".mk-frow:nth-child(odd) .mk-rowillo",
+      /* the navy vision band pulled up over the last feature band by its own corner radius (waitlist v2) */
+      ".mk-vision",
       /* both sentinels cancel their own height so they occupy no space */
       ".mk-navsentinel--condense",
       ".mk-navsentinel--release",
@@ -930,19 +942,25 @@ describe("the feature rows alternate only while they sit side by side", () => {
 describe("the feature rows set their own type, and nothing else uses its families", () => {
   const decl = (body: string, prop: string) => new RegExp("(?:^|[;\\s{])" + prop + ":\\s*([^;]+);").exec(body)?.[1].trim();
 
-  it("the heading is Special Elite 400 at 44px, 1.18, -0.005em, full ink, balanced rather than measured", () => {
+  /* RE-POINTED (waitlist v2, 1 Nov, ref design-refs/landing-desktop-v14.html): 36px at 1.2 over a 52 × 3 navy
+     rule, capped at 460px so it balances over the copy. */
+  it("the heading is Special Elite 400 at 36px, 1.2, -0.005em, full ink, balanced, over a navy rule", () => {
     const h3 = ruleFor(".mk-frow h3");
     expect(decl(h3, "font-family"), "important, or the runtime brand rule owns every h3").toBe('"Special Elite", cursive !important');
     expect(decl(h3, "font-weight")).toBe("400");
-    expect(decl(h3, "font-size")).toBe("44px");
-    expect(decl(h3, "line-height")).toBe("1.18");
+    expect(decl(h3, "font-size")).toBe("36px");
+    expect(decl(h3, "line-height")).toBe("1.2");
     expect(decl(h3, "letter-spacing")).toBe("-0.005em");
     expect(decl(h3, "color")).toBe("var(--mk-nearblack)");
     expect(value(marketing, "--mk-nearblack"), "full ink").toBe("#1c130f");
     /* ⚠️ THE 13ch MEASURE IS GONE (17 Sep). It broke every heading early and left most of the copy
        column unused; `balance` sets the same words in even lines across the whole column. */
-    expect(decl(h3, "max-width"), "no measure narrows the heading").toBeUndefined();
-    expect(decl(h3, "text-wrap"), "the lines are balanced instead").toBe("balance");
+    expect(decl(h3, "max-width"), "the ref's 460px").toBe("460px");
+    expect(decl(h3, "text-wrap"), "the lines are balanced").toBe("balance");
+    const rule = ruleFor(".mk-frow h3::after");
+    expect(rule).toMatch(/width:\s*52px/);
+    expect(rule).toMatch(/height:\s*3px/);
+    expect(rule).toMatch(/background:\s*var\(--mk-navy\)/);
     const keep = ruleFor(".mk-frow h3 .mk-fkeep");
     expect(keep, "the held last two words").toMatch(/white-space:\s*nowrap/);
     expect(keep, "…in the heading's own family, not the runtime span rule's").toMatch(/font-family:\s*inherit/);
@@ -962,14 +980,14 @@ describe("the feature rows set their own type, and nothing else uses its familie
     expect(brand, "brand.tsx sets every span's family").toMatch(/[,\s]span\s*,[^{]*\{\s*font-family:/);
   });
 
-  it("the paragraph is Source Serif 4 400 at 21px, 1.7, full ink, 520px at most", () => {
+  it("the paragraph is Source Serif 4 400 at 19px, 1.6, ink at .78, 440px at most", () => {
     const p = ruleFor(".mk-fcopy p");
     expect(decl(p, "font-family")).toBe('"Source Serif 4", Georgia, serif');
     expect(decl(p, "font-weight")).toBe("400");
-    expect(decl(p, "font-size")).toBe("21px");
-    expect(decl(p, "line-height")).toBe("1.7");
-    expect(decl(p, "color")).toBe("var(--mk-nearblack)");
-    expect(decl(p, "max-width")).toBe("520px");
+    expect(decl(p, "font-size")).toBe("19px");
+    expect(decl(p, "line-height")).toBe("1.6");
+    expect(decl(p, "color")).toBe("rgba(28, 19, 15, .78)");
+    expect(decl(p, "max-width")).toBe("440px");
   });
 
   it("stacked, the heading is 34px capped to the held pair, and the paragraph 18px", () => {

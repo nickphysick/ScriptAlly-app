@@ -27,7 +27,7 @@ describe("the founding cap is one value", () => {
   });
   it("every string that states the cap states this one", () => {
     expect(PV4_H1).toBe(`A free QueryHawk campaign for our first ${FOUNDING_CAP} writers.`);
-    expect(FOUNDING_FULL.startsWith(`All ${FOUNDING_CAP_WORD} founding places are claimed.`)).toBe(true);
+    expect(FOUNDING_FULL.startsWith(`All ${FOUNDING_CAP_WORD} founding places have gone`)).toBe(true);
     const founding = PRICING_TIERS.find((t) => t.key === "founding")!;
     expect(founding.tag).toBe(`Available now · ${FOUNDING_CAP} places`);
     expect(FOUNDERS_LEDE).toContainEqual({ b: `${FOUNDING_CAP_WORD} writers` });

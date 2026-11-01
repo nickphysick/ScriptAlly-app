@@ -21,7 +21,7 @@ import { ConsentBar } from "./ConsentBar";
 import { CONSENT_EVENT, initAnalytics, trackPageView } from "./analytics";
 import { captureAttribution } from "./attribution";
 import { HERO_CTA, HERO_PHONE_JOIN } from "./landingCopy";
-import { BAND_FORM, joinTarget, scrollToForm } from "./WaitlistParts";
+import { joinTarget, scrollToForm, NavPass } from "./WaitlistParts";
 
 /* ── The brand artwork: the hawk and the drawn wordmark ──
    Both sit in public/ rather than src/assets/ so they are served at stable paths — and public/ is
@@ -224,7 +224,7 @@ export const MarketingShell: React.FC<{
               {phone ? (
                 <button type="button" className="mk-wljoin" onClick={() => scrollToForm(joinTarget())}>{HERO_PHONE_JOIN}</button>
               ) : (
-                <button type="button" className="mk-btn mk-btn--cream" onClick={() => scrollToForm(BAND_FORM)}>{marketingNavState(null).primaryLabel}</button>
+                <NavPass label={HERO_CTA} />
               )}
             </div>
           ) : (<>

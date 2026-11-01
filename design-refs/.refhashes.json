@@ -983,7 +983,20 @@
     "design-refs/dashboard-feed-v1/screens/04-queries-closed-1512@2x.png": "af261488655f53d687c1749cb161bb3b08be55c4991e9bdc01926f43006e27b1",
     "design-refs/dashboard-feed-v1/screens/05-sidebar-expanded-1512@2x.png": "02407636bfb3bfebb9c83a8954f34c63d295c6ae20e1b065c181a68d626f153f",
     "design-refs/dashboard-first-visit-v2/dashboard-first-visit-v2.html": "2533c753b628983794092d1b9b73c75cc69cd48363b1ae44bb8ab2ed609a31a8",
-    "design-refs/founding-welcome/founding-welcome-v1.html": "02adb390ae619794d67588b8bb659202e6c1e150c3256dbd2178101a7f450c19"
+    "design-refs/founding-welcome/founding-welcome-v1.html": "02adb390ae619794d67588b8bb659202e6c1e150c3256dbd2178101a7f450c19",
+    "design-refs/todo-list-v5-2/todo-list-v5-2.html": "a8e928c3ce5bd45f1b0d201ff2593c7fa701b9452c5122671a64f280b95720b9",
+    "design-refs/todo-list-v5/todo-list-v5.html": "8a9a29a962c25c81d16f65ea9b36a276c6eda2f6fad31af1fdd5b11823f3f7d9",
+    "design-refs/todo-list-view-contract.html": "b5cc117818a01182c8e65bf1791b09a6c140fc11548801c69e33f726a6eece0d",
+    "design-refs/todo-qc-style.html": "7675f3651966d5aedb024f243ddc7052268c76d6575eb51ffe21f74185121c35",
+    "design-refs/todo-reference-card.html": "a93d4a078af74d98ede267d02395f47dd1e21f5cd7774ae9dc96ee5f141358b9",
+    "design-refs/todo-sort-filter.html": "b8f70e1077442b79d9642fe6b1599318987ea64cfb82d73b80a3edc263c397d5",
+    "design-refs/todo-three-views-contract.html": "6114fc83eebf5abdf6a05412f93678b27dfe4903aa9cd20548dd1212b233fb4e",
+    "public/images/qc/qc-courier-disc.png": "bed183ffb8a3edb0c0ec7943015befafd3ae65ff8ae12d9fb7b90ad537d0e81f",
+    "public/images/qc/qc-list-perch.png": "a9fc31d38173b71832cf74d6347359b22f7e156e9449bc72ae59d6d9a976bcb0",
+    "public/images/qc/qc-plate-courier-figure.png": "b0e20bf289042551cfcb0ef2c08541101dedca014dc773199a5b1dd5873229a8",
+    "public/images/qc/qc-plate-courier.png": "a87188273c3497ba113a5e17e91fa954871b0599f775c21e6d835664eeeac86b",
+    "design-refs/landing-mobile-v17.html": "6efd78d5da34ca3a164721e690f1ce7ac282138a5df8bc45b5add701139f496c",
+    "design-refs/landing-desktop-v14.html": "22932b7a8141c474c5707585246db640fed4b584f1b092255d28d64fa6e0b8a0"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",

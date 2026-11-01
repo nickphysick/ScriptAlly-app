@@ -713,11 +713,15 @@ export const HeroCard: React.FC<{
     };
     const fonts = (document as Document & { fonts?: FontFaceSet }).fonts;
     if (fonts?.ready) fonts.ready.then(arm, arm); else arm();
-    io?.observe(el);
+    /* ⚠️ "SEEN" IS THE FRAME'S SHARE ON SCREEN, NOT THE PILE ROOT'S (waitlist v2, 1 Nov). On the desktop the pile
+       root is the hero's whole stack translated into the frame, and with the frame in the first, image-left row
+       that box sits ~530px off the page's left edge: measured, 25% "visible" with every card on screen, so the
+       story never started. The host is the frame `TrackFeature` draws; read here, after the commit, it is set. */
+    io?.observe(host.current ?? el);
     const control = feat.current?.control;
     if (control) control.current = { replay: () => { if (!live) return; story.start(0); if (!seen && io) story.pause(); } };
     return () => { live = false; io?.disconnect(); if (control) control.current = null; story.dispose(); };
-  }, [phone, isFeature]);
+  }, [phone, isFeature, host]);
 
   useEffect(() => {
     if (isFeature) return;
