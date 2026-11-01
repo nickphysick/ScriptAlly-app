@@ -62,7 +62,10 @@ describe("the production build", () => {
   it("P0 · it emitted a real bundle, so the sweeps below have something to read", () => {
     expect(files.some(([n]) => n === "index.html")).toBe(true);
     expect(files.filter(([n]) => /^assets\/index-.+\.js$/.test(n)).length).toBe(1);
-    expect(files.reduce((a, [, s]) => a + s.length, 0)).toBeGreaterThan(1_000_000);
+    /* Split v1 (1 Nov): the landing-only bundle is the public site alone now (~860 KB raw, from
+       ~4.9 MB), so "real" is the public pages' code being there, not a megabyte of anything. */
+    expect(files.reduce((a, [, s]) => a + s.length, 0)).toBeGreaterThan(300_000);
+    expect(files.some(([n, s]) => /\.js$/.test(n) && s.includes("mk-scope")), "the public pages' code is in it").toBe(true);
   });
 
   it("P1 · no lab hash is in any emitted file, comments included", () => {

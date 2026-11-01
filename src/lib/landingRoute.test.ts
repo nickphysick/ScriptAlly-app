@@ -52,7 +52,11 @@ const KEY = "scriptally_post_onboarding_tab";
  * failed against an empty string while naming `pathFor`. That is the repo's recorded bounded-slice
  * trap doing it in the mild direction; the same miss with a `not.toContain` would have gone green.
  */
-const PATH_FOR = sliceBetween(code, "export function pathFor", "\n}", "pathFor's body");
+/* Split v1 (1 Nov): `pathFor` moved to `lib/pathFor.ts` so the public site can navigate without App;
+   App re-exports it. Read from its own file now; the law asserted is unchanged. */
+const pathForCode = readFileSync(join(process.cwd(), "src/lib/pathFor.ts"), "utf8")
+  .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+const PATH_FOR = sliceBetween(pathForCode, "export function pathFor", "\n}", "pathFor's body");
 
 describe("Phase 4 · a first-ever load with empty persistence", () => {
   it("resolves to Dashboard through the tab bridge's default", () => {

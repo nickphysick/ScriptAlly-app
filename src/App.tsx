@@ -39,6 +39,8 @@ import { closeQueryPanel, openResponsePicker, responsePickerHosted } from "./lib
 import { MarketingShell } from "./marketing/MarketingShell";
 import { LandingOnlySite, MarketingPage } from "./marketing/LandingOnlySite";
 import { LANDING_ONLY, AUTH_HASH } from "./lib/siteMode";
+import { pathFor } from "./lib/pathFor";
+import { useHash } from "./lib/useHash";
 import { tierForPath, WORKSPACE_PATHS } from "./marketing/routeTiers";
 import { shellForRoute } from "./lib/shellForRoute";
 import { routeBase } from "./lib/helpPath";
@@ -249,73 +251,7 @@ const useStatusDotDemoRoute: () => boolean = import.meta.env.DEV
     }
   : () => false;
 
-/** Current location hash, re-rendering on change (no router — same pattern as above).
- *  Used only to choose the logged-out front door (landing vs. the auth deep-links). */
-const useHash = () => {
-  const [hash, setHash] = useState(() => window.location.hash);
-  useEffect(() => {
-    const onHashChange = () => setHash(window.location.hash);
-    window.addEventListener("hashchange", onHashChange);
-    return () => window.removeEventListener("hashchange", onHashChange);
-  }, []);
-  return hash;
-};
-
-/**
- * Maps a legacy (tab, subPageName) navigation call onto a router path. This is the write side of
- * the navigate bridge — existing onNavigate call sites keep their old vocabulary; the read side
- * (path → props) lives in AppContent. Focus-form interceptions never reach this function.
- */
-/**
- * ⚠️ EXPORTED SO IT CAN BE LOCKED. An unregistered tab falls through to `/dashboard`, which
- * is silent: the link works, it simply goes home. `/queries/analytics` was a live dead link
- * for exactly that reason, agreed to exist by four surfaces and denied by the one the router
- * asks. `marketingLinks.test.ts` now asserts every destination the public chrome offers.
- */
-export function pathFor(tab: string, subPageName?: string): string {
-  switch (tab) {
-    case "landing": return "/"; // marketing front door (wordmarks navigate here from any tier)
-    case "dashboard": return "/dashboard";
-    case "queries": {
-      // Named database aliases land on the desk; any OTHER subpage value is a query id
-      // (NavSearch deep-selection) — carried through ?q= exactly as Queries'
-      // "unrecognised subpage = id" contract expects. (The orphaned QueriesLanding and its
-      // ?view=landing niche are deleted — Tier 2 · Phase 5.)
-      const dbAliases = ["Query database", "Queries database", "All queries", "Hub"];
-      if (subPageName && !dbAliases.includes(subPageName)) return `/queries?q=${encodeURIComponent(subPageName)}`;
-      return "/queries";
-    }
-    case "todo": return "/todo";
-    case "agents": return subPageName === "Discover new agents" ? "/agents/discover" : "/agents";
-    case "manuscripts": {
-      if (subPageName === "Submission packages") return "/manuscripts/packages";
-      /* the dashboard's quick action — the packages page's Builder tab, where a package is made */
-      if (subPageName === "New package") return "/manuscripts/packages?tab=builder";
-      if (subPageName === "Comparable titles") return "/manuscripts/comps";
-      return "/manuscripts";
-    }
-    // Two pricing surfaces, and they answer different questions: PUBLIC /pricing is the shop
-    // window (marketing tier, writes nothing, sells nothing yet); /plans is the signed-in view of
-    // your own account. Consolidating them is a separate decision.
-    case "pricing": return "/pricing";
-    case "plans": return "/plans";
-    // Public legal documents — routes rather than static files, because hosting rewrites ** to
-    // /index.html and a file at these paths would be served the app instead.
-    case "terms": return "/terms";
-    case "privacy": return "/privacy";
-    // Company pages — public, marketing tier, reachable from the shared footer on every page.
-    case "about": return "/about";
-    case "contact": return "/contact";
-    // The founding-writers offer — the landing hero's panel and the sealed band both point here,
-    // and it is the nav's CTA until launch. Deliberately not a nav LINK: it is the call to
-    // action, not a section of the site.
-    case "founders": return "/founders";
-    case "import": return "/import";
-    case "help": return "/help";
-    case "account": return "/account";
-    default: return "/dashboard";
-  }
-}
+export { pathFor } from "./lib/pathFor";
 
 // The workspace route set lives in marketing/routeTiers.ts (one source for the tier model);
 // marketing paths return from their tier branch before the unknown-path redirect (the focus
