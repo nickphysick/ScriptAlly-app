@@ -9,11 +9,16 @@ import {createRoot} from 'react-dom/client';
  * it with a string literal, so the minifier sees `"true" === "true"` and drops the other branch,
  * and with it the other `import()` — a production bundle then holds no App chunk at all, not even
  * a lazy one. A constant imported from another module is not always folded.
+ *
+ * ⚠️ AND APPROOT IS NAMED FIRST, ON PURPOSE. The CSS of a build is ordered by the order modules are
+ * first met, and that walk reaches both imports before the dead branch is dropped. With PublicRoot
+ * first, the whole app's stylesheet came out with the 1,147 marketing rules moved to its front; with
+ * AppRoot first it is byte-identical to the build before the split.
  */
 const load: () => Promise<{ default: ComponentType }> =
-  import.meta.env.VITE_LANDING_ONLY === "true"
-    ? () => import('./marketing/PublicRoot')
-    : () => import('./AppRoot');
+  import.meta.env.VITE_LANDING_ONLY !== "true"
+    ? () => import('./AppRoot')
+    : () => import('./marketing/PublicRoot');
 
 load().then(({ default: Root }) => {
   createRoot(document.getElementById('root')!).render(
