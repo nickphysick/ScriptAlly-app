@@ -21,7 +21,7 @@ const STRINGS = [
   "AI only does the admin. It never writes for you, and nothing you store trains it.",
   "QueryHawk is run by Nick, an aspiring writer in London, UK, with a background in using data to tell stories (\"we\", \"us\"). We are the data controller for the personal data described in this policy, and you can reach us at hello@queryhawk.net.",
   "in the London (europe-west2) region.",
-  "AI does the admin, never the art. QueryHawk uses AI models only for menial, behind-the-scenes tasks: reading and sorting information you give it, so you don't have to retype it. It never writes your query letters, synopses or pages, never edits your work, and never creates or designs anything for you.",
+  "We only use AI for admin. QueryHawk uses AI models only for menial, behind-the-scenes tasks: reading and sorting information you give it, so you don't have to retype it. It never writes your query letters, synopses or pages, never edits your work, and never creates or designs anything for you.",
   "AI is used only when you run one of these features, never in the background:",
   "Smart Import — reads the spreadsheet or notes you upload and turns them into your agents and queries.",
   "Smart Email Drop — reads an email you paste in and suggests the updates to make. Nothing changes until you accept them.",
@@ -103,7 +103,7 @@ for (const vp of SIZES) {
       expect(await page.locator(".mk-pv-short li").count(), "four ticks").toBe(4);
       expect(await page.locator(".mk-pv-callout--navy").first().evaluate((e) => e.closest("section")!.id), "the navy callout opens the AI section").toBe("priv-s4");
       const lead = await page.locator(".mk-pv-callout--navy strong").first();
-      expect(await lead.textContent()).toBe("AI does the admin, never the art.");
+      expect(await lead.textContent()).toBe("We only use AI for admin.");
       expect(await lead.evaluate((e) => getComputedStyle(e).color), "the lead phrase is blush").toBe("rgb(232, 180, 163)");
       const whole = await page.evaluate(() => document.body.innerText + document.title + Array.from(document.querySelectorAll("meta")).map((m) => m.content).join(" "));
       expect(whole, "no surname anywhere").not.toMatch(/Physick/i);

@@ -45,7 +45,7 @@ const EXPECT = {
       "Thanks for putting your name down as a QueryHawk founding writer. There's just one thing left to do.",
       "Confirm my place",
       "This link works for 48 hours.",
-      "Your place isn't held until you click. There are fifty founding places and they go in the order people confirm. If the last one goes while this sits in your inbox, you'll go on the waiting list instead, and I'll tell you straight.",
+      "Your place isn't held until you click. There are fifty founding places and they go in the order people confirm. If the last one goes while this sits in your inbox, you'll go on the waiting list instead, and I'll let you know.",
       "Once you've confirmed, you'll get your founding writer pass, and your invite follows when your wave opens.",
       "Didn't ask for this? Just ignore it. Nothing happens without that click, and we won't write again.",
       /* privacy page v1: the sign-off, and the link as text under a hairline */
@@ -57,7 +57,7 @@ const EXPECT = {
   welcome: {
     email: welcome,
     subject: "You're in: founding writer No. 14",
-    preheader: "Your pass is inside. Welcome to the first fifty.",
+    preheader: "Your founding writer pass is inside.",
     strings: [
       "No. 14", "of 50",
       "That's your place confirmed.",
@@ -81,16 +81,16 @@ const EXPECT = {
   },
   waiting: {
     email: waiting,
-    subject: "You're first in line if a place opens",
+    subject: "You're on the founding writers' waiting list",
     preheader: "The fifty places went, but you're on the waiting list.",
     strings: [
       "Waiting list",
-      "The fifty places went, but you're next in line.",
+      "All fifty places have gone, but you're on the waiting list.",
       "Thanks for confirming. All fifty founding places were taken before your click came through, so you're on the waiting list, in the order people confirmed.",
       /* decision 2(b) */
       "You're on the list in the order people confirmed. If anything changes, you'll hear from me.",
       "You don't need to do anything else. Your address stays on the list, and you can take it off any time with the link below.",
-      "I'm sorry it wasn't this time, and thank you for wanting in.",
+      "Sorry we couldn't fit you in this time, and thank you for signing up.",
       "Nick", "Founder, QueryHawk",
       "This takes you off the waiting list.",
       ...FOOT,
@@ -276,7 +276,7 @@ describe("images off (Outlook's default): the alts and the text still read in or
       "Once you've confirmed", "Nick", "Founder, QueryHawk", "Didn't ask for this?", "Button not working?"]],
     welcome: [welcome, ["Founding writer pass: No. 14 of 50", "That's your place confirmed.", "Welcome aboard.",
       "Hi, I'm Nick.", "Nick Founder, QueryHawk", "What you get", "What happens next"]],
-    waiting: [waiting, ["Founding writer pass: Waiting list", "The fifty places went, but you're next in line.",
+    waiting: [waiting, ["Founding writer pass: Waiting list", "All fifty places have gone, but you're on the waiting list.",
       "Thanks for confirming.", "You're on the list in the order people confirmed.", "Nick Founder, QueryHawk"]],
   };
   for (const [name, [e, seq]] of Object.entries(ORDER)) {

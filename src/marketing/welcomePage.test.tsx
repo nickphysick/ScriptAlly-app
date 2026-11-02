@@ -128,7 +128,7 @@ describe("W4 · what each state draws and leaves out", () => {
   it("waiting (2(b)): its own note, no perks, no get-ready, and no 'If a place frees up' step", () => {
     expect(PLACES_OFFERED_ON).toBe(false);
     const t = text(view("waiting"));
-    expect(t).toContain("I'm sorry we couldn't hold a place for you this time");
+    expect(t).toContain("Sorry we couldn't fit you in this time, and thank you for signing up. You're confirmed and in the queue.");
     expect(t).toContain("Third in line, in the order writers confirmed.");
     expect(t).not.toContain(FOUNDING_GETS[0]);
     expect(t).not.toContain("Get ready for day one");

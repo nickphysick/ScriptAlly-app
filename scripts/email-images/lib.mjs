@@ -51,8 +51,8 @@ export const SPECS = [
     alt: "One click and you're on the list." },
   { name: "heading-welcome", file: "heading.html", vars: { TEXT: "That’s your place confirmed." },
     alt: "That's your place confirmed." },
-  { name: "heading-waiting", file: "heading.html", vars: { TEXT: "The fifty places went, but you’re next in line." },
-    alt: "The fifty places went, but you're next in line." },
+  { name: "heading-waiting", file: "heading.html", vars: { TEXT: "All fifty places have gone, but you’re on the waiting list." },
+    alt: "All fifty places have gone, but you're on the waiting list." },
   { name: "signature-nick", file: "signature.html", vars: { TEXT: "Nick" }, alt: "Nick" },
 ];
 

@@ -387,10 +387,10 @@ export const EMAIL_IMAGES: Record<string, EmailImage> = {
   },
   "heading-waiting": {
     "path": "/images/email/heading-waiting.png",
-    "version": "3d6e6268",
+    "version": "18f4ccac",
     "width": 504,
     "height": 90,
-    "alt": "The fifty places went, but you're next in line."
+    "alt": "All fifty places have gone, but you're on the waiting list."
   },
   "signature-nick": {
     "path": "/images/email/signature-nick.png",

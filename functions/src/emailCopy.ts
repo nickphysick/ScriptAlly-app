@@ -71,7 +71,7 @@ export const CONFIRM_EXPIRY = "This link works for 48 hours.";
 export const CONFIRM_NOT_HELD: [string, string] = [
   "Your place isn't held until you click.",
   " There are fifty founding places and they go in the order people confirm. If the last one goes " +
-  "while this sits in your inbox, you'll go on the waiting list instead, and I'll tell you straight.",
+  "while this sits in your inbox, you'll go on the waiting list instead, and I'll let you know.",
 ];
 export const CONFIRM_NEXT =
   "Once you've confirmed, you'll get your founding writer pass, and your invite follows when your wave opens.";
@@ -85,7 +85,7 @@ export const CONFIRM_NOT_YOU =
 /** The writer's stored founding number — never rounded and never estimated. Unpadded. */
 export const welcomeSubject = (foundingNumber: number): string =>
   `You're in: founding writer No. ${foundingNumber}`;
-export const WELCOME_PREHEADER = "Your pass is inside. Welcome to the first fifty.";
+export const WELCOME_PREHEADER = "Your founding writer pass is inside.";
 export const WELCOME_HEADING = "That's your place confirmed.";
 export const WELCOME_LEAD =
   "Welcome aboard. You're one of the first fifty writers to use QueryHawk, and this is your pass.";
@@ -118,10 +118,10 @@ export const WELCOME_NEXT: readonly string[] = [
 
 /* ══════════════ 3 · Waiting list ══════════════ */
 
-export const WAITING_SUBJECT = "You're first in line if a place opens";
+export const WAITING_SUBJECT = "You're on the founding writers' waiting list";
 export const WAITING_PREHEADER = "The fifty places went, but you're on the waiting list.";
 export const WAITING_PASS = "Waiting list";
-export const WAITING_HEADING = "The fifty places went, but you're next in line.";
+export const WAITING_HEADING = "All fifty places have gone, but you're on the waiting list.";
 export const WAITING_LEAD =
   "Thanks for confirming. All fifty founding places were taken before your click came through, so " +
   "you're on the waiting list, in the order people confirmed.";
@@ -133,4 +133,4 @@ export const WAITING_NOTE: [string, string] = [
 export const WAITING_NOTHING_TO_DO =
   "You don't need to do anything else. Your address stays on the list, and you can take it off any " +
   "time with the link below.";
-export const WAITING_SORRY = "I'm sorry it wasn't this time, and thank you for wanting in.";
+export const WAITING_SORRY = "Sorry we couldn't fit you in this time, and thank you for signing up.";

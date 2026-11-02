@@ -150,7 +150,7 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentKey, LegalDocument> = {
         heading: "How we use AI",
         blocks: [
           navyCallout(
-            { b: "AI does the admin, never the art." },
+            { b: "We only use AI for admin." },
             " QueryHawk uses AI models only for menial, behind-the-scenes tasks: reading and sorting " +
             "information you give it, so you don't have to retype it. It never writes your query " +
             "letters, synopses or pages, never edits your work, and never creates or designs anything for you.",
