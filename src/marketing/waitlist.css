@@ -201,8 +201,8 @@
   min-height: 112px; box-sizing: border-box; padding: 22px 20px 18px; background: #e8b4a3; border-radius: 24px 24px 0 0;
 }
 .mk-tkt-st { position: relative; z-index: 1; }
-/* A ticket's printing: the one place small capitals are used on this page. */
-.mk-tkt-st small { display: block; margin-bottom: 4px; font: 700 11px/1.2 var(--mk-f-sans); letter-spacing: .14em; text-transform: uppercase; color: #7a3420; }
+/* The pass label, in sentence case in the serif (welcome page v1): no small capitals on the pass. */
+.mk-tkt-st small { display: block; margin-bottom: 4px; font: 600 14px/1.2 var(--mk-f-serif); color: #7a3420; }
 .mk-tkt-st b { font: 400 42px/1 var(--mk-f-display); margin-right: 6px; color: #1c130f; }
 .mk-tkt-st span { font: 600 15px/1 var(--mk-f-sans); color: #7a3420; }
 /* Founding emails v1, phase 2: the bird is WHOLLY INSIDE the stub (EM-5) — 150px, 10px in, 6px up, so the

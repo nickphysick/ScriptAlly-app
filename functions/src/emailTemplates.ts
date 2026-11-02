@@ -85,7 +85,6 @@ const RUST = "#a2452a";
 const TYPE = "'Special Elite','Courier New',Courier,monospace";
 const SERIF = "'Source Serif 4',Georgia,'Times New Roman',serif";
 const SANS = "'Source Sans 3',Helvetica,Arial,sans-serif";
-const HAND = "Caveat,'Comic Sans MS',cursive";
 
 /** ⚠️ Copy is ours, but it is still interpolated into markup — escape it rather than trust it. */
 const esc = (s: string): string =>
@@ -121,8 +120,9 @@ const note = (bold: string, rest: string) =>
   `<p style="margin:0;font-family:${SERIF};font-size:15.5px;line-height:1.6;color:${INK}">` +
   `<b>${esc(bold)}</b>${esc(rest)}</p></td></tr></table>`;
 
+/** ⚠️ THE SIGN-OFF IS TYPED, NOT HANDWRITTEN (welcome page v1): Special Elite, falling back to Courier New. */
 const signature = (margin = "0 0 2px") =>
-  `<p style="margin:${margin};font-family:${HAND};font-size:34px;line-height:1;font-weight:600;color:${RUST}">` +
+  `<p style="margin:${margin};font-family:${TYPE};font-size:26px;line-height:1;color:${INK}">` +
   `${esc(SIGNATURE_NAME)}</p>` +
   `<p style="margin:0;font-family:${SERIF};font-size:14px;line-height:1.6;color:${MUTED}">${esc(SIGNATURE_ROLE)}</p>`;
 
@@ -148,8 +148,9 @@ const pass = (cfg: MailConfig, big: string, small: string | null) => {
     `<tr><td bgcolor="${BLUSH}" style="background:${BLUSH};border-radius:18px 18px 0 0">` +
     `<table ${TABLE} width="100%"><tr>` +
     `<td valign="top" style="padding:22px 8px 18px 26px">` +
-    `<p style="margin:0 0 6px;font-family:${SANS};font-size:11px;line-height:1;font-weight:700;letter-spacing:1.5px;` +
-    `color:${STUB_INK}">${esc(PASS_LABEL.toUpperCase())}</p>` +
+    /* The label in sentence case, in the serif: no small capitals anywhere on the pass. */
+    `<p style="margin:0 0 6px;font-family:${SERIF};font-size:15px;line-height:1.2;font-weight:600;` +
+    `color:${STUB_INK}">${esc(PASS_LABEL)}</p>` +
     `<p style="margin:0;font-family:${TYPE};font-size:46px;line-height:1.05;color:${INK}">` +
     (small ? `<span style="white-space:nowrap">${esc(big)}</span>` : esc(big)) +
     (small ? ` <span style="font-family:${SANS};font-size:15px;font-weight:600;color:${STUB_INK};white-space:nowrap">${esc(small)}</span>` : "") +
@@ -291,7 +292,7 @@ export const prepareWelcome = (
         body, unsubUrl: unsubUrl!, unsubNote: UNSUBSCRIBE_NOTE,
       }),
       text: [
-        `${PASS_LABEL.toUpperCase()}: ${passNumber(position)} ${passOf(cap)}`, "",
+        `${PASS_LABEL}: ${passNumber(position)} ${passOf(cap)}`, "",
         WELCOME_HEADING, "", WELCOME_LEAD, "",
         ...WELCOME_NOTE.flatMap((t) => [t, ""]), textSignature, "",
         WELCOME_GET_HEADING, ...WELCOME_PERKS.map(([b, r]) => `✓ ${b}${r}`), "",
@@ -325,7 +326,7 @@ export const prepareWaiting = (cfg: MailConfig, unsubToken: string): Prepared =>
         body, unsubUrl: unsubUrl!, unsubNote: UNSUBSCRIBE_NOTE_WAITING,
       }),
       text: [
-        `${PASS_LABEL.toUpperCase()}: ${WAITING_PASS}`, "",
+        `${PASS_LABEL}: ${WAITING_PASS}`, "",
         WAITING_HEADING, "", WAITING_LEAD, "", WAITING_NOTE.join(""), "",
         WAITING_NOTHING_TO_DO, "", WAITING_SORRY, "", textSignature,
       ].join("\n") + textFoot(cfg, unsubUrl!, UNSUBSCRIBE_NOTE_WAITING),
