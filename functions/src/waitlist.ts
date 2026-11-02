@@ -115,7 +115,10 @@ export const waitlist = onRequest(
          received; asking "are you sure" is a dark pattern, and offering to undo it is the same
          pattern wearing a friendlier face. */
       if (isUnsubscribe) {
-        if (req.method !== "GET") { res.status(405).json({ ok: false, error: "Method not allowed." }); return; }
+        /* GET from the link in the footer; POST from a mail client's own Unsubscribe button (RFC 8058
+           one-click: the body is `List-Unsubscribe=One-Click` and the token is in the URL, as for GET).
+           Both run the same idempotent transaction (launch readiness, 2 Nov). */
+        if (req.method !== "GET" && req.method !== "POST") { res.status(405).json({ ok: false, error: "Method not allowed." }); return; }
         const docId = parseUnsubscribeToken(req.query.token, IP_HASH_SALT.value());
         const outcome = docId ? await unsubscribeById(db, docId, Date.now()) : null;
         console.info(JSON.stringify({
@@ -329,8 +332,16 @@ export const waitlist = onRequest(
 
       res.status(405).json({ ok: false, error: "Method not allowed." });
     } catch (e) {
-      /* Log the real cause; never leak internals to the caller. */
-      console.error("waitlist: request failed:", e);
+      /* Log the real cause; never leak internals to the caller. ⚠️ STRUCTURED (launch readiness, 2 Nov),
+         so a Cloud Logging alert can match `jsonPayload.event="waitlist.error"` exactly. No address,
+         no body: the route, the method and the error's own name and message. */
+      console.error(JSON.stringify({
+        event: "waitlist.error",
+        route: (req.path || "").replace(/\/+$/, "") || "/",
+        method: req.method,
+        error: e instanceof Error ? e.name : typeof e,
+        message: e instanceof Error ? e.message.slice(0, 300) : String(e).slice(0, 300),
+      }));
       res.status(500).json({ ok: false, error: "Something went wrong. Please try again." });
     }
   },

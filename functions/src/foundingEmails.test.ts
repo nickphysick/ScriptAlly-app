@@ -297,3 +297,37 @@ describe("images off (Outlook's default): the alts and the text still read in or
     });
   }
 });
+
+/* ══════════════ Launch readiness (2 Nov): one-click unsubscribe headers ══════════════ */
+
+describe("EM-9 · every waitlist email carries List-Unsubscribe and the one-click marker", () => {
+  const all: Record<string, Prepared> = {
+    confirm: prepareConfirm(PROD, "tok", "unsub-tok"),
+    welcome: prepareWelcome(PROD, 14, 50, "unsub-tok"),
+    waiting: prepareWaiting(PROD, "unsub-tok"),
+  };
+  for (const [name, p] of Object.entries(all)) {
+    it(name, () => {
+      const e = ok(p);
+      const href = e.html.match(/href="([^"]*\/api\/waitlist\/unsubscribe\?token=[^"]+)"/)?.[1]?.replace(/&amp;/g, "&");
+      expect(href, "the footer's unsubscribe link").toBeTruthy();
+      expect(e.headers?.["List-Unsubscribe"]).toBe(`<${href}>`);
+      expect(e.headers?.["List-Unsubscribe-Post"]).toBe("List-Unsubscribe=One-Click");
+      expect(e.headers?.["List-Unsubscribe"]).toMatch(/^<https:\/\//);
+    });
+  }
+  it("the unsubscribe endpoint takes the one-click POST as well as the footer's GET", () => {
+    const src = readFileSync(join(process.cwd(), "functions/src/waitlist.ts"), "utf8");
+    expect(src).toMatch(/if \(req\.method !== "GET" && req\.method !== "POST"\) \{ res\.status\(405\)/);
+  });
+});
+
+describe("EM-10 · failures log structured lines a Cloud Logging alert can match", () => {
+  it("a failed waitlist request logs event waitlist.error; a failed send logs event email.send at error", () => {
+    const wl = readFileSync(join(process.cwd(), "functions/src/waitlist.ts"), "utf8");
+    expect(wl).toMatch(/console\.error\(JSON\.stringify\(\{\s*event: "waitlist\.error"/);
+    expect(wl, "no unstructured error line left").not.toMatch(/console\.error\("waitlist: request failed:"/);
+    const em = readFileSync(join(process.cwd(), "functions/src/email.ts"), "utf8");
+    for (const outcome of ["no-key", "rejected"]) expect(em).toMatch(new RegExp(`console\\.error\\(JSON\\.stringify\\(\\{[\\s\\S]{0,80}event: "email\\.send"[\\s\\S]{0,80}outcome: "${outcome}"`));
+  });
+});

@@ -126,3 +126,17 @@ describe("the reply-to warning is emitted when it is unset", () => {
     expect(String(warn.mock.calls[0]?.[0])).toContain("email.config");
   });
 });
+
+/* Launch readiness (2 Nov): a rendered email's headers reach Resend, and none are invented when absent. */
+describe("headers", () => {
+  it("passes List-Unsubscribe headers through, and sends none when there are none", async () => {
+    const stub = vi.fn(async (_url: string, _init?: RequestInit) => res(200, { id: "x" }));
+    vi.stubGlobal("fetch", stub);
+    const headers = { "List-Unsubscribe": "<https://queryhawk.net/api/waitlist/unsubscribe?token=t>", "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" };
+    await sendEmail("someone@example.com", "welcome", { ...RENDERED, headers }, ENV);
+    await sendEmail("someone@example.com", "welcome", RENDERED, ENV);
+    expect(JSON.parse(String(stub.mock.calls[0][1]?.body)).headers).toEqual(headers);
+    expect("headers" in JSON.parse(String(stub.mock.calls[1][1]?.body))).toBe(false);
+  });
+});
+
