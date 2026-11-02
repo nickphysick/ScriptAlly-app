@@ -660,7 +660,7 @@ export const BE_LINE = "Every query on one timeline, so you can quickly see what
 export type TickItem = string | { readonly b: string; readonly rest: string };
 export const BE_TICKS: readonly TickItem[] = [
   "All your queries from start to finish",
-  { b: "Much", rest: " more sightly than a spreadsheet" },
+  "Much easier on the eye than a spreadsheet",
   "Anything that needs you rises to the top",
 ];
 /** The drawn date row both windows share: month bands, Monday ticks, and where TODAY sits (% across). */
