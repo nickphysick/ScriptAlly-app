@@ -60,7 +60,7 @@ const pass = (html: string) => {
 describe("W1 · each state's heading, and the words around it", () => {
   const HEADINGS: Record<WelcomeKind, string> = {
     verified: "Welcome, founding writer.",
-    already: "You're already in.",
+    already: "You're already on the list.",
     waiting: "So close. You're third in line.",
     expired: "That link's 48 hours are up.",
     unknown: "We don't recognise that link.",

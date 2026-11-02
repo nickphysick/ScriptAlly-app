@@ -69,12 +69,12 @@ export const heroCopy = (kind: WelcomeKind, data: WelcomeData): HeroCopy => {
     case "verified":
       return {
         heading: "Welcome, founding writer.",
-        lede: "We're delighted to have you on board. You'll be one of the first writers to use QueryHawk, which means you'll shape its tools for all the writers who come after you. Your perks are locked in, and we'll be in touch.",
+        lede: "Everything's locked in. You'll be getting a QueryHawk campaign totally free of charge. Watch out for your invite – it'll be arriving soon.",
         line: "Your welcome email is on its way.",
       };
     case "already":
       return {
-        heading: "You're already in.",
+        heading: "You're already on the list.",
         lede: "That link had already done its job, usually because your email's security scanner opened it before you did. Nothing's wrong and nothing's changed: your founding place stands.",
         line: "Your welcome email is already with you.",
       };
@@ -154,7 +154,7 @@ export const nextSteps = (kind: WelcomeKind, data: WelcomeData): Step[] => {
     { title: "Your place is confirmed",
       body: n ? `Hello, founding writer number ${n}. We're honoured to have you on board.` : "Hello, founding writer. We're honoured to have you on board." },
     { title: "Your invitation arrives",
-      body: "We're letting people in a few at a time so that everyone gets a proper welcome and the best experience possible. We're aiming for mid-November." },
+      body: "We're letting people in a few at a time so that everyone gets a proper welcome and the best experience possible. We'll email you as soon as your wave opens." },
     setUp,
   ];
 };

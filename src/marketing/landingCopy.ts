@@ -247,7 +247,7 @@ export const FOUNDING_INVALID = "That doesn't look like an email address.";
    opposite, and a writer who believes it never confirms. Each line says what actually happened
    and what to do next. */
 export const FOUNDING_SENT =
-  "Nearly there. We've emailed you a link: click it to confirm your place. " +
+  "Nearly there. We've emailed you a link: click it to confirm your place on the waitlist. " +
   "If it isn't in your inbox in a few minutes, check your spam folder.";
 export const FOUNDING_DUPE =
   "That address is already signed up. If you haven't confirmed yet, look for our email " +
