@@ -402,6 +402,49 @@ export const readNumbering = (data: Record<string, unknown> | undefined): Number
   return { freed, reserveIssued };
 };
 
+/* ══════════════ Promotion (launch readiness, 2 Nov) ══════════════ */
+
+/**
+ * ⚠️ A FREED PLACE GOES TO THE NEXT CONFIRMED WRITER ON THE WAITING LIST, AUTOMATICALLY (Nick, 2 Nov).
+ * In the same transaction that releases a founding place, the waiting writer with the lowest reserve
+ * number becomes a founding writer. They take the released number (a number is a place, not a person:
+ * Nick's 18 Oct ruling, re-confirmed 2 Nov), so numbers stay within 1..cap and "of 50" stays true.
+ *
+ * Only CONFIRMED waiting writers are in the queue: those with a reserve number, which the verify path
+ * gives anyone who confirmed after the cap filled. A plain `waiting` document from a join past the cap
+ * has no reserve number and has not confirmed, so it is passed over.
+ *
+ * The rest move up: the remaining confirmed waiting writers are renumbered 1..k in their existing order
+ * (ties by document id, so the order is total), and the counter's `reserveIssued` becomes k, so the next
+ * writer to miss the cap is k + 1.
+ */
+export interface WaitingEntry { id: string; reserveNumber: number }
+export interface PromotionPlan {
+  /** The writer to promote, or null when nobody confirmed is waiting. */
+  next: WaitingEntry | null;
+  /** Every remaining confirmed waiting writer whose reserve number changes, with the new number. */
+  renumber: WaitingEntry[];
+  /** The counter's `reserveIssued` after the promotion. */
+  reserveIssued: number;
+}
+
+export const readWaitingEntry = (id: string, data: Record<string, unknown>): WaitingEntry | null => {
+  if (data.status !== "waiting") return null;
+  const r = data.reserveNumber;
+  return typeof r === "number" && Number.isInteger(r) && r >= 1 ? { id, reserveNumber: r } : null;
+};
+
+export const planPromotion = (waiting: WaitingEntry[]): PromotionPlan => {
+  const queue = [...waiting].sort((a, b) => a.reserveNumber - b.reserveNumber || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+  if (queue.length === 0) return { next: null, renumber: [], reserveIssued: 0 };
+  const [next, ...rest] = queue;
+  const renumber = rest
+    .map((w, i) => ({ id: w.id, reserveNumber: i + 1, was: w.reserveNumber }))
+    .filter((w) => w.reserveNumber !== w.was)
+    .map(({ id, reserveNumber }) => ({ id, reserveNumber }));
+  return { next, renumber, reserveIssued: rest.length };
+};
+
 /** The number the next confirmed writer takes, and the freed list that leaves behind. */
 export const nextFoundingNumber = (
   counter: CounterState, numbering: Numbering,

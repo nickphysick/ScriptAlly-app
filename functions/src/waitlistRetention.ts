@@ -23,7 +23,10 @@ import {
   DeletionReason, RETENTION_LIVE_ENV, WaitlistStatus,
   deletionReason, retentionIsLive,
 } from "./waitlistModel";
-import { COUNTER_PATH, readCounter } from "./waitlistModel";
+import { COUNTER_PATH, readCounter, readNumbering } from "./waitlistModel";
+import { readWaitingInTx, writeReleaseInTx, type Promotion } from "./waitlistStore";
+import { RESEND_API_KEY } from "./email";
+import { IP_HASH_SALT, sendWelcome } from "./waitlistMail";
 
 /**
  * ⚠️ A BATCH CEILING, AND IT IS LOGGED WHEN IT BITES. A job that silently stops at five hundred
@@ -33,7 +36,7 @@ import { COUNTER_PATH, readCounter } from "./waitlistModel";
  */
 const MAX_PER_RUN = 500;
 
-interface Tally { dormant: number; unsubscribed: number; released: number; scanned: number }
+interface Tally { dormant: number; unsubscribed: number; released: number; scanned: number; promoted: number }
 
 const toMillis = (v: unknown): number | null => {
   if (v instanceof Date) return v.getTime();
@@ -49,8 +52,9 @@ const toMillis = (v: unknown): number | null => {
  */
 export const runRetention = async (
   database: typeof db, nowMs: number, live: boolean,
-): Promise<Tally> => {
-  const tally: Tally = { dormant: 0, unsubscribed: 0, released: 0, scanned: 0 };
+): Promise<Tally & { promotions: Promotion[] }> => {
+  const tally: Tally = { dormant: 0, unsubscribed: 0, released: 0, scanned: 0, promoted: 0 };
+  const promotions: Promotion[] = [];
 
   /* ⚠️ THE WHOLE COLLECTION, NOT A QUERY. Two different conditions on two different fields, one of
      which may be absent, cannot be expressed as one Firestore query without a composite index and
@@ -83,22 +87,25 @@ export const runRetention = async (
     /* ⚠️ ONE TRANSACTION PER DOCUMENT: the delete and the counter move are the same fact. Per
        document rather than one batch, so a single unreadable record cannot abandon the whole run
        — and the counter is re-read inside, because other traffic moves it while this runs. */
-    await database.runTransaction(async (tx) => {
+    /* ⚠️ THE RELEASE IS THE UNSUBSCRIBE'S OWN (launch readiness, 2 Nov): the number goes back on the
+       freed list (it used to be dropped, so a dormant writer's number could never be issued again) and
+       the next confirmed waiting writer is promoted into the place. Email 2 is sent after the commit. */
+    const promoted = await database.runTransaction(async (tx) => {
       const cRef = database.doc(COUNTER_PATH);
-      const [dSnap, cSnap] = await Promise.all([tx.get(doc.ref), tx.get(cRef)]);
+      const [dSnap, cSnap, waiting] = await Promise.all([tx.get(doc.ref), tx.get(cRef), readWaitingInTx(database, tx)]);
       /* It may have changed since the scan — re-check rather than trust the read above. */
-      if (!dSnap.exists) return;
+      if (!dSnap.exists) return null;
       const stillVerified = (dSnap.get("status") as WaitlistStatus) === "verified";
-      const counter = readCounter(cSnap.exists ? (cSnap.data() as Record<string, unknown>) : undefined);
+      const data = cSnap.exists ? (cSnap.data() as Record<string, unknown>) : undefined;
+      const counter = readCounter(data);
+      const held = (dSnap.get("foundingNumber") as number | undefined) ?? (dSnap.get("position") as number | undefined) ?? null;
       tx.delete(doc.ref);
       if (stillVerified && counter.verifiedCount > 0) {
-        tx.set(cRef, {
-          verifiedCount: counter.verifiedCount - 1,
-          cap: counter.cap,
-          updatedAt: new Date(nowMs),
-        }, { merge: true });
+        return writeReleaseInTx(tx, database, cRef, counter, readNumbering(data), held, waiting, new Date(nowMs));
       }
+      return null;
     });
+    if (promoted) { tally.promoted += 1; promotions.push(promoted); }
   }
 
   console.info(JSON.stringify({
@@ -106,7 +113,7 @@ export const runRetention = async (
     mode: live ? "live" : "dry-run",
     ...tally,
   }));
-  return tally;
+  return { ...tally, promotions };
 };
 
 /**
@@ -121,6 +128,8 @@ export const waitlistRetention = onSchedule(
     region: "europe-west2",
     timeoutSeconds: 540,
     memory: "256MiB",
+    /* For email 2 to a writer a release promotes (launch readiness, 2 Nov). */
+    secrets: [IP_HASH_SALT, RESEND_API_KEY],
   },
   async () => {
     const live = retentionIsLive(process.env);
@@ -130,6 +139,7 @@ export const waitlistRetention = onSchedule(
         note: `set ${RETENTION_LIVE_ENV}=true to arm this job once its dry runs look right`,
       }));
     }
-    await runRetention(db, Date.now(), live);
+    const { promotions } = await runRetention(db, Date.now(), live);
+    for (const p of promotions) await sendWelcome(p.docId, p.foundingNumber, p.cap, IP_HASH_SALT.value());
   },
 );

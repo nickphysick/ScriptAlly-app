@@ -125,15 +125,17 @@ describe("W4 · what each state draws and leaves out", () => {
       expect(t).toContain("That's everything for now. Keep an eye on your inbox.");
     }
   });
-  it("waiting (2(b)): its own note, no perks, no get-ready, and no 'If a place frees up' step", () => {
-    expect(PLACES_OFFERED_ON).toBe(false);
+  /* Launch readiness (2 Nov): a freed place goes to the next writer in line (PROMO-1), so the 2(a) lines
+     are drawn. */
+  it("waiting: its own note, the 'If a place frees up' step, no perks, no get-ready", () => {
+    expect(PLACES_OFFERED_ON).toBe(true);
     const t = text(view("waiting"));
-    expect(t).toContain("Sorry we couldn't fit you in this time, and thank you for signing up. You're confirmed and in the queue.");
+    expect(t).toContain("The last founding place went while your email sat in your inbox. You're confirmed and on the waiting list, in the order people confirmed. If a founding place frees up, it's offered to the next writer in line.");
+    expect(t).toContain("Sorry we couldn't fit you in this time, and thank you for signing up. You're confirmed and in the queue, so if a place frees up, it's yours to take.");
     expect(t).toContain("Third in line, in the order writers confirmed.");
+    expect(t).toContain("If a place frees up It's offered to the next writer in line, and you'll hear by email straight away.");
     expect(t).not.toContain(FOUNDING_GETS[0]);
     expect(t).not.toContain("Get ready for day one");
-    expect(t).not.toContain("If a place frees up");
-    expect(t).not.toContain("it's yours to take");
   });
   it("expired and unknown: the drawer only, with the fresh-link form", () => {
     for (const k of ["expired", "unknown"] as const) {

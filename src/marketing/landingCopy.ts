@@ -248,12 +248,11 @@ export const FOUNDING_SENT =
 export const FOUNDING_DUPE =
   "That address is already signed up. If you haven't confirmed yet, look for our email " +
   "and click the link in it (check spam too).";
-/* The server has already put them on the waiting list when it answers `full`.
-   ⚠️ FOUNDING EMAILS v1, DECISION 2(b): nothing moves a waiting writer into a freed place (an
-   unsubscribe frees a number for the next writer to CONFIRM), so the page promises the order and no
-   email. Promotion is a cap/ledger decision for Nick; when it exists, this line can say so. */
+/* The server has already put them on the waiting list when it answers `full`. Since launch readiness
+   (2 Nov) a freed place goes to the next writer in line and they are emailed (PROMO-1), so the line
+   says so. */
 export const FOUNDING_FULL =
-  `All ${FOUNDING_CAP_WORD} founding places have gone, so you're on the waiting list, in the order people confirmed.`;
+  `All ${FOUNDING_CAP_WORD} founding places have gone, so you're on the waiting list. We'll email you if a place opens up.`;
 export const FOUNDING_ERROR: CopyRun[] = [
   "That didn't send. Check the address and try again, or ",
   { link: "email us", mailto: supportMailto("QueryHawk founding members") },

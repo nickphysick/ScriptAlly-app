@@ -88,7 +88,7 @@ const EXPECT = {
       "All fifty places have gone, but you're on the waiting list.",
       "Thanks for confirming. All fifty founding places were taken before your click came through, so you're on the waiting list, in the order people confirmed.",
       /* decision 2(b) */
-      "You're on the list in the order people confirmed. If anything changes, you'll hear from me.",
+      "If a founding writer gives up their place, it goes to the next person in line, and I'll email you straight away if that's you.",
       "You don't need to do anything else. Your address stays on the list, and you can take it off any time with the link below.",
       "Sorry we couldn't fit you in this time, and thank you for signing up.",
       "Nick", "Founder, QueryHawk",
@@ -196,15 +196,25 @@ describe("EM-3 · which email a confirmation sends", () => {
   });
 });
 
-describe("EM-4 · decision 2(b): nothing promises an email when a place opens", () => {
-  const BANNED = [/email you if a place opens/i, /straight away/i];
-  it("email 3, both parts", () => {
-    for (const b of BANNED) { expect(waiting.html).not.toMatch(b); expect(waiting.text).not.toMatch(b); }
+/* EM-4, THE PROMOTION BRANCH (launch readiness, 2 Nov). A freed place now goes to the next writer in line
+   and they are emailed (PROMO-1), so the waiting copy says so; the 2(b) "no promise" assertions are retired
+   with the reason they existed. */
+describe("EM-4 · a freed place goes to the next writer in line, and the waiting copy says so", () => {
+  it("email 3, both parts: the note's bold lead, then the promise of an email", () => {
+    for (const part of [waiting.html, waiting.text]) {
+      expect(part).toContain("If a founding writer gives up their place, it goes to the next person in line,");
+      expect(part).toContain("and I'll email you straight away if that's you.");
+      expect(part, "the old no-promise line is gone").not.toContain("If anything changes, you'll hear from me.");
+    }
+    expect(waiting.html, "the lead is bold").toMatch(/<(b|strong)\b[^>]*>If a founding writer gives up their place, it goes to the next person in line,<\/(b|strong)>/);
   });
-  it("the sign-up's own words (landingCopy), with FOUNDING_FULL saying the order and no email", () => {
+  it("the sign-up's own words (landingCopy): FOUNDING_FULL promises the email", () => {
     const src = readFileSync(join(process.cwd(), "src/marketing/landingCopy.ts"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
-    for (const b of BANNED) expect(src).not.toMatch(b);
-    expect(src).toContain("founding places have gone, so you're on the waiting list, in the order people confirmed.");
+    expect(src).toContain("founding places have gone, so you're on the waiting list. We'll email you if a place opens up.");
+  });
+  it("the unsubscribe path sends email 2 to the writer it promotes, from one place", () => {
+    const src = readFileSync(join(process.cwd(), "functions/src/waitlist.ts"), "utf8");
+    expect(src).toMatch(/if \(outcome\?\.promoted\) \{[\s\S]*?await sendWelcome\(outcome\.promoted\.docId, outcome\.promoted\.foundingNumber/);
   });
 });
 
@@ -277,7 +287,7 @@ describe("images off (Outlook's default): the alts and the text still read in or
     welcome: [welcome, ["Founding writer pass: No. 14 of 50", "That's your place confirmed.", "Welcome aboard.",
       "Hi, I'm Nick.", "Nick Founder, QueryHawk", "What you get", "What happens next"]],
     waiting: [waiting, ["Founding writer pass: Waiting list", "All fifty places have gone, but you're on the waiting list.",
-      "Thanks for confirming.", "You're on the list in the order people confirmed.", "Nick Founder, QueryHawk"]],
+      "Thanks for confirming.", "If a founding writer gives up their place, it goes to the next person in line,", "Nick Founder, QueryHawk"]],
   };
   for (const [name, [e, seq]] of Object.entries(ORDER)) {
     it(name, () => {

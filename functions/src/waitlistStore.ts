@@ -20,6 +20,7 @@ import {
   VERIFY_TTL_MS, WaitlistSource, WaitlistStatus, Attribution,
   emailHash, mayResendConfirm, newVerifyToken, overRateLimit, rateLimitKey, readCounter,
   readNumbering, nextFoundingNumber, newWelcomeRef, welcomePayload, WELCOME_REF_TTL_MS,
+  planPromotion, readWaitingEntry, type Numbering,
   type WelcomeKind, type WelcomePayload,
   tokenHash, tokensMatch,
 } from "./waitlistModel";
@@ -341,6 +342,62 @@ export const verifyWaitlist = async (
   });
 };
 
+/* ══════════════ Releasing a place, and promoting the next writer (launch readiness, 2 Nov) ══════════════ */
+
+/** The waiting writer a release promoted, for the caller to send email 2 to AFTER the commit. */
+export interface Promotion { docId: string; foundingNumber: number; cap: number }
+
+/**
+ * The read half of a release: every `waiting` document. A single-field equality query needs no composite
+ * index, and the list is small (it cannot outgrow the people who missed fifty places). Inside the
+ * transaction, so two releases racing for the same writer conflict and one of them re-runs.
+ */
+export const readWaitingInTx = (db: Db, tx: Tx) =>
+  tx.get(db.collection("waitlist").where("status", "==", "waiting"));
+
+/**
+ * The write half of a release. Call it only in the write phase, only for a document that really held a
+ * place (`verified`), and only once per release.
+ *
+ *   · Nobody confirmed is waiting: the count drops by one and the number goes on the freed list, for the
+ *     next writer to confirm (the place reopens; "places left" rises).
+ *   · Someone is: the count stays where it is, the next writer in the queue takes the lowest freed number
+ *     (usually the one just released), and the rest of the queue moves up.
+ *
+ * ⚠️ IT WRITES NO EMAIL. A transaction can re-run, so anything sent from inside one can be sent twice. It
+ * returns the promotion; the caller sends email 2 after the commit, exactly once per promotion.
+ */
+export const writeReleaseInTx = (
+  tx: Tx, db: Db, cRef: firestore.DocumentReference, counter: CounterState, numbering: Numbering,
+  held: number | null, waiting: firestore.QuerySnapshot, now: Date,
+): Promotion | null => {
+  const freedNumbers = held !== null && Number.isInteger(held) && held >= 1
+    ? [...new Set([...numbering.freed, held])].sort((a, b) => a - b)
+    : numbering.freed;
+  const plan = planPromotion(waiting.docs
+    .map((d) => readWaitingEntry(d.id, d.data() as Record<string, unknown>))
+    .filter((w): w is NonNullable<typeof w> => w !== null));
+
+  if (!plan.next) {
+    if (counter.verifiedCount > 0) writeCounter(tx, cRef, counter, counter.verifiedCount - 1, now, { freedNumbers });
+    return null;
+  }
+
+  const { foundingNumber, freedAfter } = nextFoundingNumber(counter, { ...numbering, freed: freedNumbers });
+  tx.set(db.doc(`waitlist/${plan.next.id}`), {
+    status: "verified" as WaitlistStatus, verified: true, verifiedAt: now, promotedAt: now,
+    position: foundingNumber, foundingNumber,
+    /* They leave the queue: no reserve number, and the queue below them moves up. */
+    reserveNumber: null, reserveAt: null, lastInteractionAt: now,
+  }, { merge: true });
+  for (const w of plan.renumber) tx.set(db.doc(`waitlist/${w.id}`), { reserveNumber: w.reserveNumber }, { merge: true });
+  /* The count is unchanged (one out, one in), unless the data was already short, in which case the
+     promoted writer is the place being counted. */
+  writeCounter(tx, cRef, counter, Math.max(counter.verifiedCount, 1), now,
+    { freedNumbers: freedAfter, reserveIssued: plan.reserveIssued });
+  return { docId: plan.next.id, foundingNumber, cap: counter.cap || DEFAULT_CAP };
+};
+
 /* ══════════════ Unsubscribing ══════════════ */
 
 export interface UnsubscribeOutcome {
@@ -350,6 +407,8 @@ export interface UnsubscribeOutcome {
   released: boolean;
   /** Their status before this call — so the page can say "you were already off the list". */
   was: WaitlistStatus | null;
+  /** Present only when the release promoted the next waiting writer (launch readiness, 2 Nov). */
+  promoted?: Promotion;
 }
 
 /**
@@ -378,8 +437,9 @@ export const unsubscribeById = async (
   const cRef = db.doc(COUNTER_PATH);
   const now = new Date(nowMs);
 
-  return db.runTransaction(async (tx: Tx) => {
-    const [sSnap, cSnap] = await Promise.all([tx.get(sRef), tx.get(cRef)]);
+  return db.runTransaction(async (tx: Tx): Promise<UnsubscribeOutcome> => {
+    /* Reads first: the writer, the counter, and the waiting queue (a release may promote from it). */
+    const [sSnap, cSnap, waiting] = await Promise.all([tx.get(sRef), tx.get(cRef), readWaitingInTx(db, tx)]);
     if (!sSnap.exists) return { found: false, released: false, was: null };
 
     const was = (sSnap.get("status") as WaitlistStatus) ?? "verified";
@@ -406,10 +466,8 @@ export const unsubscribeById = async (
     }, { merge: true });
 
     if (releases && counter.verifiedCount > 0) {
-      const freedNumbers = held !== null && Number.isInteger(held) && held >= 1
-        ? [...new Set([...numbering.freed, held])].sort((a, b) => a - b)
-        : numbering.freed;
-      writeCounter(tx, cRef, counter, counter.verifiedCount - 1, now, { freedNumbers });
+      const promoted = writeReleaseInTx(tx, db, cRef, counter, numbering, held, waiting, now);
+      if (promoted) return { found: true, released: true, was, promoted };
     }
     return { found: true, released: releases, was };
   });

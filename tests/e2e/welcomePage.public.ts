@@ -20,7 +20,7 @@ const DATA: Record<Kind, Record<string, unknown>> = {
   verified: { foundingNumber: 14 }, already: { foundingNumber: 14 }, waiting: { reserveNumber: 3 }, expired: {}, unknown: {},
 };
 
-/** Verbatim from the brief. Founding emails v1 found 2(b), so the waiting lede stops at "confirmed." */
+/** Verbatim from the brief. Since launch readiness (2 Nov) the waiting lede carries the promotion promise. */
 const COPY: Record<Kind, { heading: string; lede: string; pass: string[] }> = {
   verified: {
     heading: "Welcome, founding writer.",
@@ -34,7 +34,7 @@ const COPY: Record<Kind, { heading: string; lede: string; pass: string[] }> = {
   },
   waiting: {
     heading: "So close. You're third in line.",
-    lede: "The last founding place went while your email sat in your inbox. You're confirmed and on the waiting list, in the order people confirmed.",
+    lede: "The last founding place went while your email sat in your inbox. You're confirmed and on the waiting list, in the order people confirmed. If a founding place frees up, it's offered to the next writer in line.",
     pass: ["Waiting list", "3rd", "in line", "Reserve", "2 November 2026"],
   },
   expired: {
@@ -62,7 +62,7 @@ const MUTATIONS: Record<string, string | ((page: Page) => Promise<unknown>)> = {
   WEL3: async (page) => page.evaluate(() => { const b = document.querySelector('[data-probe="pass-big"]'); if (b) b.textContent = "No. 15"; }),
   WEL4: ".mk-wpass-bird{right:-40px!important;bottom:-14px!important;width:230px!important}",
   WEL5: "@media (prefers-reduced-motion: reduce){.mk-wpass-stamp{animation:mk-wpass-stamp 4s 1s both!important}}",
-  WEL6: async (page) => page.evaluate(() => { const l = document.querySelector(".mk-wel-lede"); if (l) l.textContent += " If a founding place frees up, it's offered to the next writer in line."; }),
+  WEL6: async (page) => page.evaluate(() => { const l = document.querySelector(".mk-wel-lede"); if (l) l.textContent = l.textContent!.replace(" If a founding place frees up, it's offered to the next writer in line.", ""); }),
 };
 const mutate = async (page: Page, ...names: string[]) => {
   const m = process.env.WEL_MUTATE;
@@ -215,16 +215,17 @@ for (const vp of SIZES) {
       expect(moving, "with motion allowed the stamp animates").toBe(1);
     });
 
-    test("WEL-6 · the waiting copy is founding emails' 2(b): no promise that a place goes on to them", async ({ page }) => {
+    /* WEL-6, THE PROMOTION BRANCH (launch readiness, 2 Nov): a freed place goes to the next writer in line
+       and they are emailed (PROMO-1), so the waiting page promises it in three places. */
+    test("WEL-6 · the waiting copy promises the next freed place, in the lede, the steps and the note", async ({ page }) => {
       await open(page, "waiting");
       await mutate(page, "WEL6");
       const body = await page.evaluate(() => (document.querySelector(".mk-wel") as HTMLElement).innerText);
-      for (const banned of [/frees? up/i, /offered to the next writer/i, /yours to take/i, /straight away/i, /What you get/, /Get ready for day one/]) {
-        expect(body, `waiting under 2(b) does not say ${banned}`).not.toMatch(banned);
-      }
-      expect(body).toContain("in the order people confirmed.");
-      expect(body).toContain("Sorry we couldn't fit you in this time, and thank you for signing up. You're confirmed and in the queue.");
+      expect(body).toContain("in the order people confirmed. If a founding place frees up, it's offered to the next writer in line.");
+      expect(body).toMatch(/If a place frees up\s+It's offered to the next writer in line, and you'll hear by email straight away\./);
+      expect(body).toContain("Sorry we couldn't fit you in this time, and thank you for signing up. You're confirmed and in the queue, so if a place frees up, it's yours to take.");
       expect(body).toContain("Third in line, in the order writers confirmed.");
+      for (const banned of [/What you get/, /Get ready for day one/]) expect(body, `waiting does not say ${banned}`).not.toMatch(banned);
     });
   });
 }

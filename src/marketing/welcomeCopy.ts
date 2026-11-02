@@ -10,12 +10,11 @@
  *     (no reference, or the lookup failed) every line that would carry it has a version without it.
  *   - No small capitals and no mono labels anywhere on the page.
  *
- * ⚠️ THE WAITING LIST PROMISES ONLY WHAT THE SYSTEM DOES (founding emails v1, decision 2(b)). An
- * unsubscribe puts the founding number back for the next writer to CONFIRM; nobody on the waiting
- * list is moved or emailed. So the waiting copy says "in the order people confirmed" and stops: the
- * 2(a) sentences ("If a founding place frees up, it's offered to the next writer in line", "so if a
- * place frees up, it's yours to take", and the "If a place frees up" step) are NOT drawn. WEL-6 holds
- * that. `PLACES_OFFERED_ON` is the one switch, false until a promotion is built.
+ * ⚠️ THE WAITING LIST PROMISES ONLY WHAT THE SYSTEM DOES. Since launch readiness (2 Nov) a freed place
+ * goes to the next confirmed writer on the waiting list automatically, and they are emailed (PROMO-1),
+ * so `PLACES_OFFERED_ON` is true and the 2(a) sentences are drawn: "If a founding place frees up, it's
+ * offered to the next writer in line", "so if a place frees up, it's yours to take", and the "If a
+ * place frees up" step. WEL-6 holds them.
  */
 import { FOUNDING_CAP } from "./foundingCap";
 
@@ -33,8 +32,8 @@ export interface WelcomeData {
   confirmedOn?: string;
 }
 
-/** Founding emails v1 found 2(b): freed places are NOT offered on to the waiting list. */
-export const PLACES_OFFERED_ON = false;
+/** Launch readiness (2 Nov): freed places ARE offered on to the waiting list (PROMO-1). */
+export const PLACES_OFFERED_ON = true;
 
 const ORDINAL_WORDS = ["first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth", "tenth"];
 /** 1 → "1st", 2 → "2nd", 11 → "11th", 23 → "23rd". */
