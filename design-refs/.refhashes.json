@@ -698,7 +698,9 @@
     "public/images/qc/qc-plate-courier.png": "a87188273c3497ba113a5e17e91fa954871b0599f775c21e6d835664eeeac86b",
     "design-refs/landing-mobile-v17.html": "6efd78d5da34ca3a164721e690f1ce7ac282138a5df8bc45b5add701139f496c",
     "design-refs/landing-desktop-v14.html": "22932b7a8141c474c5707585246db640fed4b584f1b092255d28d64fa6e0b8a0",
-    "design-refs/founding-emails-v1.html": "1d270a1c55acd262f2a96066638d61e90e092574c8121e9132d248c9452e4941"
+    "design-refs/founding-emails-v1.html": "1d270a1c55acd262f2a96066638d61e90e092574c8121e9132d248c9452e4941",
+    "design-refs/welcome-page-v1.html": "3945a862b0124a897775e5c2ce1f41b717d409715ffbe23fe042c14dc55dbc3f",
+    "design-refs/founding-emails-v2.html": "403096e5fff540466aea028ee30929a7cd3e4e24aecd61c2a44057bb6c085200"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",
