@@ -52,3 +52,21 @@ test("META-1 · the title, description and share tags are in the served HTML its
   expect(served.status()).toBe(200);
   expect(served.headers()["content-type"]).toContain("image/png");
 });
+
+/* CF-1, the served half (launch readiness, 2 Nov): the live page carries Cloudflare's beacon exactly once,
+   with the live token. (Without a token none is emitted: src/lib/cfBeacon.test.ts.) `META_MUTATE=CF1`
+   doubles the tag. */
+test("CF-1 · exactly one Cloudflare beacon in the live page's HTML, and no cookie banner", async ({ request, page }) => {
+  let html = await (await request.get("/")).text();
+  if (process.env.META_MUTATE === "CF1") html = html.replace("</head>", html.match(/<script defer src="https:\/\/static\.cloudflareinsights\.com[^>]*><\/script>/)?.[0] + "</head>");
+  const tags = html.match(/<script defer src="https:\/\/static\.cloudflareinsights\.com\/beacon\.min\.js" data-cf-beacon='\{"token": "([0-9a-f]{32})"\}'><\/script>/g) ?? [];
+  expect(tags.length, "one beacon").toBe(1);
+  expect(html.split("cloudflareinsights.com").length - 1, "and no other mention").toBe(1);
+  expect(tags[0]).toContain('"token": "ee52cb1f15964230836ca4f32696fbfb"');
+  /* No cookie, no banner: the page sets no cookie of its own and draws no consent prompt. */
+  await page.route(/cloudflareinsights\.com/, (r) => r.abort());
+  await page.goto("/");
+  await page.waitForTimeout(800);
+  expect((await page.context().cookies()).length, "no cookies").toBe(0);
+  expect(await page.getByText(/accept (all )?cookies|cookie (settings|choices)/i).count(), "no banner").toBe(0);
+});
