@@ -32,7 +32,7 @@ describe("RED-1 · the live site's hosting redirect", () => {
   it("leaves the live pages, the assets, the images and the API alone", () => {
     for (const p of ["/", "/welcome", "/welcome/", "/privacy", "/api/waitlist", "/api/waitlist/verify",
       "/assets/index-abc.js", "/images/og-share.png", "/status-dots/x.svg", "/favicon.ico", "/index.html",
-      "/apple-touch-icon.png", "/manifest.webmanifest"]) {
+      "/apple-touch-icon.png", "/manifest.webmanifest", "/robots.txt"]) {
       expect(re.test(p), p).toBe(false);
     }
   });

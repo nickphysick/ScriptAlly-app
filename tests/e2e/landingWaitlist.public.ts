@@ -52,9 +52,11 @@ const MUTATIONS: Record<string, string | ((page: Page) => Promise<void>)> = {
   BEP1: ".mk-bef--phone .mk-bef-hk{left:4px!important}",
   BEP1b: ".mk-bef--phone .mk-bef-ttag{display:none!important}.mk-bef--phone .mk-bef-win .mk-be-ttag{display:block!important}",
   BEP1c: ".mk-bef--phone .mk-be-mn--last{left:64%!important;right:auto!important}",
-  BEP2: ".mk-wl .mk-wl-feat--first h3{text-align:left!important}.mk-wl .mk-wl-feat--first h3::after{margin-left:0!important}",
+  BEP2: ".mk-wl .mk-wl-feat--first h2{text-align:left!important}.mk-wl .mk-wl-feat--first h2::after{margin-left:0!important}",
   /* PRIV-5 (2 Nov): the hero's Privacy link removed. */
   PRIV5: async (page) => page.evaluate(() => document.querySelectorAll(".mk-wl-hero .mk-betanote button, .mk-wl-hero .mk-betanote a").forEach((e) => e.remove())),
+  /* HEAD-1 (launch polish, 2 Nov): the Birds-eye heading back to an h3, straight after the hero's h1. */
+  HEAD1: async (page) => page.evaluate(() => { const h = document.getElementById("mk-be-h"); if (!h) return; const n = document.createElement("h3"); n.id = h.id; n.innerHTML = h.innerHTML; h.replaceWith(n); }),
   LW8: ".mk-det-h,.mk-fcopy p,.mk-wl-fline{text-transform:uppercase!important}",
   LW9: ".mk-frow,.mk-wl-feat{scroll-margin-top:-400px!important}",
   LW10: ".mk-vcard{flex-basis:80%!important}",
@@ -465,13 +467,34 @@ test.describe("PRIV-5 · phones: the hero's Privacy link is just under the butto
   }
 });
 
+/* HEAD-1 (launch polish, 2 Nov): the landing's visible headings start at its one h1 and never skip a level
+   going down (an h2 may follow an h1, never an h3), on phone and desktop. */
+test.describe("HEAD-1 · the landing's heading order never skips a level", () => {
+  for (const vp of [PHONE, DESK]) {
+    test(`at ${vp.width}px`, async ({ page }) => {
+      await open(page, vp);
+      await mutate(page, "HEAD1");
+      const levels = await page.evaluate(() => Array.from(document.querySelectorAll<HTMLElement>("h1, h2, h3, h4, h5, h6"))
+        .filter((h) => h.getClientRects().length > 0 && !h.closest("[aria-hidden='true']"))
+        .map((h) => ({ l: Number(h.tagName[1]), t: (h.textContent || "").trim().slice(0, 40) })));
+      console.log(`HEAD-1 @${vp.width}`, JSON.stringify(levels));
+      expect(levels.length, "the page has headings").toBeGreaterThan(4);
+      expect(levels[0].l, "the first heading is the h1").toBe(1);
+      expect(levels.filter((h) => h.l === 1), "one h1").toHaveLength(1);
+      for (let i = 1; i < levels.length; i++) {
+        expect(levels[i].l - levels[i - 1].l, `"${levels[i].t}" (h${levels[i].l}) after "${levels[i - 1].t}" (h${levels[i - 1].l})`).toBeLessThanOrEqual(1);
+      }
+    });
+  }
+});
+
 test.describe("LW-8 · no uppercase in the feature copy, the banner or the Birds-eye view", () => {
   for (const vp of [PHONE, DESK]) {
     test(`at ${vp.width}px`, async ({ page }) => {
       await open(page, vp);
       await mutate(page, "LW8");
       const scopes = vp === PHONE
-        ? ["#mk-features .mk-wl-feat > h3", "#mk-features .mk-wl-feat > p", "#mk-features .mk-wl-feat > ul", ".mk-det", ".mk-bef"]
+        ? ["#mk-features .mk-wl-feat > h2", "#mk-features .mk-wl-feat > h3", "#mk-features .mk-wl-feat > p", "#mk-features .mk-wl-feat > ul", ".mk-det", ".mk-bef"]
         : [".mk-beb", ".mk-det", ".mk-fcopy"];
       const r = await page.evaluate((ss) => {
         const els = ss.flatMap((s) => Array.from(document.querySelectorAll<HTMLElement>(s)).flatMap((e) => [e, ...Array.from(e.querySelectorAll<HTMLElement>("*"))]));
