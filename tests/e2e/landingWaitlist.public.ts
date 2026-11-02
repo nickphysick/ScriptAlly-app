@@ -31,7 +31,7 @@ const MUTATIONS: Record<string, string | ((page: Page) => Promise<void>)> = {
   LW5: ".mk-beb .mk-beb-h{white-space:normal!important;font-size:64px!important}",
   LW5b: ".mk-beb-stage{padding:0 60px}",
   LW6: ".mk-trkd{aspect-ratio:1600/800!important}",
-  /* LW-7 (welcome page v1, phase 1): the drawer's 75% floor removed; the floor made to bind on a short phone;
+  /* LW-7 (welcome page v1, phase 1): the drawer's 70% floor removed; the floor made to bind on a short phone;
      the strap at a size that wraps; the hawk dropped onto the link; the sub-line's measure under the hawk. */
   LW7: ".mk-wl-hero{min-height:0!important}",
   LW7b: ".mk-wl-hero{min-height:720px!important}",
@@ -243,7 +243,7 @@ test("LW-6 · desktop: the pile is drawn at the neighbouring illustration's size
   expect(Math.abs(r.pile / r.illo - 1), `pile ${r.pile.toFixed(1)} vs illustration ${r.illo.toFixed(1)}`).toBeLessThanOrEqual(0.1);
 });
 
-/* LW-7, REPLACED (welcome page v1, phase 1): the drawer's foot is at 75% of the screen (±2%) at 390×844 and
+/* LW-7, REPLACED (welcome page v1, phase 1): the drawer's foot is at 70% of the screen (±2%; 75% until 2 Nov) at 390×844 and
    430×932, with the Birds-eye heading and its rule wholly in the first screen; on a 375×667 phone the content
    is taller than that and the drawer is its content's height. At all three, "No more winging it." is one line
    and the binocular hawk touches neither the sub-line's ink nor the link, with those two centred on him (2 Nov). */
@@ -262,7 +262,7 @@ const drawer = (page: Page) => page.evaluate(() => {
 type Box = { top: number; bottom: number; left: number; right: number };
 const hits = (a: Box, z: Box) => a.left < z.right && a.right > z.left && a.top < z.bottom && a.bottom > z.top;
 
-test.describe("LW-7 · phones: the drawer reaches 75% of the screen, one-line strap, the hawk clear of the words", () => {
+test.describe("LW-7 · phones: the drawer reaches 70% of the screen, one-line strap, the hawk clear of the words", () => {
   for (const vp of [PHONE_S, PHONE, PHONE_L]) {
     test(`at ${vp.width}×${vp.height}`, async ({ page }) => {
       await open(page, vp);
@@ -272,10 +272,10 @@ test.describe("LW-7 · phones: the drawer reaches 75% of the screen, one-line st
       console.log(`LW-7 @${vp.width}`, JSON.stringify({ drawerBottom: r.drawer.bottom, share: r.drawer.bottom / r.vh, minH: r.minH, heading: r.heading, strapLines: r.strapLines, hawk: r.hawk }));
       expect(r.scrollY, "read at the top of the page").toBe(0);
       if (vp === PHONE_S) {
-        /* Content-height: the 75% floor does not bind, so the drawer is taller than its min-height. */
+        /* Content-height: the 70% floor does not bind, so the drawer is taller than its min-height. */
         expect(r.drawer.bottom - r.drawer.top, `the drawer is its content's height, not the floor (${r.minH}px)`).toBeGreaterThan(r.minH + 1);
       } else {
-        expect(Math.abs(r.drawer.bottom / r.vh - 0.75), `drawer bottom ${r.drawer.bottom.toFixed(1)} of ${r.vh}`).toBeLessThanOrEqual(0.02);
+        expect(Math.abs(r.drawer.bottom / r.vh - 0.70), `drawer bottom ${r.drawer.bottom.toFixed(1)} of ${r.vh}`).toBeLessThanOrEqual(0.02);
         expect(r.rule, "the heading draws its rule (inside its box)").toBe(3);
         expect(r.heading.top, "the heading starts below the drawer").toBeGreaterThan(r.drawer.bottom);
         expect(r.heading.bottom, "the heading and its rule are in the first screen").toBeLessThanOrEqual(r.vh);

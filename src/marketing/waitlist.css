@@ -36,13 +36,13 @@
 
 /* ── The hero: a navy drawer pulled down over the page (waitlist v2, ref `.hero` v9–v13) ──
    Rounded at its foot, a soft shadow, a short grab line centred near its bottom edge; the sign-up sits
-   at its foot. ⚠️ IT REACHES 75% OF THE SCREEN (welcome page v1, phase 1): its foot sits at 75svh, so the
+   at its foot. ⚠️ IT REACHES 70% OF THE SCREEN (2 Nov; it was 75%, which left too much empty navy): its foot sits at 70svh, so the
    min-height is that less the 60px bar above it. On a short phone the content is taller than that, and the
    drawer is its content's height. The Birds-eye heading and its rule stay in the first screen (LW-7). */
 .mk-wl-hero {
   position: relative; z-index: 2; display: flex; flex-direction: column; box-sizing: border-box;
-  min-height: calc(75svh - var(--mk-nav-h, 60px));
-  background: #1b2433; color: #fff; padding: 26px 24px 30px;
+  min-height: calc(70svh - var(--mk-nav-h, 60px));
+  background: #1b2433; color: #fff; padding: 18px 24px 24px;
   border-radius: 0 0 28px 28px; box-shadow: 0 14px 30px -12px rgba(27, 36, 51, .45);
 }
 /* The spare height is shared equally above the strap, the sub-line group and the sign-up: three auto
@@ -74,7 +74,7 @@
   font: inherit; color: inherit; padding: 0;
   background: linear-gradient(transparent 70%, rgba(232, 180, 163, .5) 74%, rgba(232, 180, 163, .5) 92%, transparent 93%);
 }
-.mk-wl-strap { font: 600 42px/1.05 var(--mk-f-hand); color: #e8b4a3; margin: 0; padding-top: 12px; white-space: nowrap; }
+.mk-wl-strap { font: 600 42px/1.05 var(--mk-f-hand); color: #e8b4a3; margin: 0; padding-top: 8px; white-space: nowrap; }
 /* The sub-line's measure stops 10px short of the hawk (his left edge is 150px in from the content's right). */
 .mk-wl-sub { position: relative; font: 400 21px/1.45 var(--mk-f-serif); color: rgba(255, 255, 255, .86); margin: 0; max-width: calc(100% - 160px); }
 .mk-wl-see {
@@ -110,7 +110,7 @@
 .mk-wl-feat { margin: 0; padding: 62px 24px 48px; border-top: 1px solid rgba(28, 19, 15, .08); }
 .mk-wl-sec > .mk-wl-feat:nth-child(odd) { background: #f4ede3; }
 .mk-wl-sec > .mk-wl-feat:nth-child(even) { background: #fbf6ef; }
-.mk-wl-feat.mk-wl-feat--first { padding: 50px 24px 20px; border-top: 0; }
+.mk-wl-feat.mk-wl-feat--first { padding: 66px 24px 20px; border-top: 0; } /* 66: a little more room under the drawer (2 Nov) */
 .mk-wl-sec > .mk-det + .mk-wl-feat { border-top: 0; }
 .mk-wl .mk-wl-feat h3 {
   font-family: var(--mk-f-display) !important; font-weight: 400 !important; letter-spacing: 0 !important;
