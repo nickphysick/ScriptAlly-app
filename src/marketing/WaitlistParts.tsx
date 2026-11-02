@@ -14,7 +14,9 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   BE_DATES, BE_STAGE_RGB, BE_DESK_ROWS, BE_FOCUS, REPLAY_LABEL, BeStage, TickItem, FeatureRow,
   DETAILS_HEADING, DETAILS_SUB, DETAILS_PILLS, featureAnchor, BE_HEADING, BE_LINE, BE_TICKS,
+  HERO_FOUNDING_HEADING, HERO_FOUNDING_TICKS, WAITLIST_CTA,
 } from "./landingCopy";
+import { HeroPlaces } from "./HeroPlaces";
 import { useFounding, ensureCount } from "./foundingStore";
 import { HeroCard, HeroCardControl, HeroCardFeature, FEATURE_VISIBLE } from "./HeroCard";
 import { StatusGlyph } from "./marketingMarks";
@@ -62,6 +64,24 @@ export const FeatureLine: React.FC<{ row: FeatureRow; className?: string }> = ({
   );
 };
 
+/* ── The founding block in each hero (waitlist clarity v1, 2 Nov; ref design-refs/landing-waitlist-clarity-v1.html
+   `.wl-founding` / `.dh-founding`): the heading, three ticks, one button and the places bar. No email field:
+   the founding section's form is the page's only sign-up, and the button goes there.
+   ⚠️ AN h2, WHERE THE REF DRAWS AN h3: it follows the hero's h1, and an h3 there would skip a level (the
+   launch-polish fix to the Birds-eye heading was the same correction). The look is the ref's.
+   ⚠️ THE BLOCK KEEPS THE OLD FORM'S `mk-hero-signup` ID: the join bar reads it to know the hero has passed. */
+export const HeroFounding: React.FC<{ layout: "phone" | "desk" }> = ({ layout }) => {
+  const p = layout === "phone" ? "mk-wl" : "mk-dh";
+  return (
+    <div className={p + "-founding"} id={HERO_FORM + "-signup"}>
+      <h2 className={p + "-fhead"}>{HERO_FOUNDING_HEADING}</h2>
+      <Ticks items={HERO_FOUNDING_TICKS} disc className={p + "-fticks"} />
+      <button type="button" className={p + "-fjoin"} onClick={() => scrollToForm(layout === "phone" ? CLOSE_FORM : BAND_FORM)}>{WAITLIST_CTA}</button>
+      <HeroPlaces variant="hero" />
+    </div>
+  );
+};
+
 /* ── Scrolling to a sign-up: every CTA on the page does this, and none navigates ── */
 /** The ids of the page's two sign-ups' fields (the `idPrefix` of each `FoundingSignup`, + "-email"). */
 export const HERO_FORM = "mk-hero";
@@ -73,8 +93,8 @@ export const scrollToId = (id: string) => {
   el?.scrollIntoView({ behavior: reduceMotion() ? "auto" : "smooth", block: "start" });
 };
 /** An in-page anchor: a real `#id` link that scrolls instead of changing the address. */
-export const PageAnchor: React.FC<{ to: string; className?: string; children: React.ReactNode }> = ({ to, className, children }) => (
-  <a href={"#" + to} className={className} onClick={(e) => { e.preventDefault(); scrollToId(to); }}>{children}</a>
+export const PageAnchor: React.FC<{ to: string; className?: string; label?: string; children: React.ReactNode }> = ({ to, className, label, children }) => (
+  <a href={"#" + to} className={className} aria-label={label} onClick={(e) => { e.preventDefault(); scrollToId(to); }}>{children}</a>
 );
 export const scrollToForm = (prefix: string) => {
   const field = document.getElementById(prefix + "-email");
