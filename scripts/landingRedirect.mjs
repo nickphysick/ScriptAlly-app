@@ -46,6 +46,13 @@ if (import.meta.url === `file://${process.argv[1]}`) console.log(landingRedirect
  * EXCEPT a file under /assets/, so a chunk a stale tab asks for after a deploy is a real 404 and
  * never the index page served as a script with status 200. Written without lookahead, because
  * hosting regexes are RE2: after "/", the path may not be "assets/" followed by anything.
+ *
+ * ⚠️ HOSTING MATCHES THE WHOLE PATH, NOT A PREFIX (CONFIRM-1, 2 Nov). The first version ended each
+ * branch at one character (`[^a]` with no `.*`), which is right for JavaScript's match-anywhere
+ * `test` and wrong for Hosting: live stored it with a `$` appended and served "Page Not Found" for
+ * /welcome and /privacy, so every founding confirm link landed on a Firebase 404. Every branch now
+ * consumes the rest of the path and the whole thing is anchored, so it means the same under both
+ * rules. `src/lib/confirmLink.test.ts` tests it the way Hosting matches.
  */
 export const SPA_REWRITE_REGEX =
-  "^/(?:$|[^a]|a(?:$|[^s]|s(?:$|[^s]|s(?:$|[^e]|e(?:$|[^t]|t(?:$|[^s]|s(?:$|[^/])))))))";
+  "^/(?:[^a].*|a(?:[^s].*|s(?:[^s].*|s(?:[^e].*|e(?:[^t].*|t(?:[^s].*|s(?:[^/].*)?)?)?)?)?)?)?$";
