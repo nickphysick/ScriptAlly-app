@@ -2,22 +2,27 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * The founding welcome (/welcome) — every word on the page, by state.
+ * The founding welcome (/welcome) — every word on the page, by state (welcome page v1, 2 Nov;
+ * ref design-refs/welcome-page-v1.html). Verbatim from the brief.
  *
- * The copy is the mock's (design-refs/founding-welcome/founding-welcome-v1.html, Direction A),
- * except where a rule overrides it:
- *   - nothing names the writer or their email (we hold no name, and the page never learns the
- *     address): "Confirmed with lucy@example.com" became "We've sent your welcome email";
- *   - nothing claims what the data can't support: the reserve place is the writer's own stored
- *     number or nothing ("first reserve" only when it is 1), "You're near the top of the list" is
- *     gone, and the Smart Import preview states no invented counts.
- * The only number on the page is the writer's own stored founding or reserve number.
+ *   - Nothing names the writer or their email: the page never learns the address.
+ *   - The only number on the page is the writer's own stored founding or reserve number. With none
+ *     (no reference, or the lookup failed) every line that would carry it has a version without it.
+ *   - No small capitals and no mono labels anywhere on the page.
+ *
+ * ⚠️ THE WAITING LIST PROMISES ONLY WHAT THE SYSTEM DOES (founding emails v1, decision 2(b)). An
+ * unsubscribe puts the founding number back for the next writer to CONFIRM; nobody on the waiting
+ * list is moved or emailed. So the waiting copy says "in the order people confirmed" and stops: the
+ * 2(a) sentences ("If a founding place frees up, it's offered to the next writer in line", "so if a
+ * place frees up, it's yours to take", and the "If a place frees up" step) are NOT drawn. WEL-6 holds
+ * that. `PLACES_OFFERED_ON` is the one switch, false until a promotion is built.
  */
+import { FOUNDING_CAP } from "./foundingCap";
 
 export const WELCOME_KINDS = ["verified", "already", "waiting", "expired", "unknown"] as const;
 export type WelcomeKind = (typeof WELCOME_KINDS)[number];
 
-/** No `v` → null (the page treats it as unknown). A value outside the five → `unknown`. */
+/** No `v` → unknown. A value outside the five → `unknown`. */
 export const parseWelcomeKind = (raw: string | null): WelcomeKind =>
   raw !== null && (WELCOME_KINDS as readonly string[]).includes(raw) ? (raw as WelcomeKind) : "unknown";
 
@@ -27,6 +32,9 @@ export interface WelcomeData {
   /** YYYY-MM-DD, the UK date they confirmed. */
   confirmedOn?: string;
 }
+
+/** Founding emails v1 found 2(b): freed places are NOT offered on to the waiting list. */
+export const PLACES_OFFERED_ON = false;
 
 const ORDINAL_WORDS = ["first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth", "tenth"];
 /** 1 → "1st", 2 → "2nd", 11 → "11th", 23 → "23rd". */
@@ -39,136 +47,127 @@ export const ordinal = (n: number): string => {
 export const ordinalWord = (n: number): string => ORDINAL_WORDS[n - 1] ?? ordinal(n);
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
-/** "023" — the card pads to three digits; prose never pads. */
-export const padNumber = (n: number): string => String(n).padStart(3, "0");
-
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-/** "2026-10-18" → { day: "18", mon: "Oct", month: "October", year: "2026" }, or null. */
-export const splitDate = (iso?: string) => {
+/** "2026-11-02" → "2 November 2026", or null. */
+export const longDate = (iso?: string): string | null => {
   const m = iso?.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (!m) return null;
-  const month = MONTHS[Number(m[2]) - 1];
-  return month ? { day: String(Number(m[3])), mon: month.slice(0, 3), month, year: m[1] } : null;
+  const month = m ? MONTHS[Number(m[2]) - 1] : undefined;
+  return m && month ? `${Number(m[3])} ${month} ${m[1]}` : null;
 };
 
-export interface StateCopy {
-  chip: string;
-  chipTone: "go" | "blush" | "stone";
-  headline: string;
+/* ══════════════ The drawer ══════════════ */
+
+export interface HeroCopy {
+  heading: string;
   lede: string;
-  /** The small mono line under the lede (verified/already only). */
-  sub?: string;
-  cardCaption: string;
+  /** The small blush line with the envelope (verified, already, waiting). */
+  line?: string;
 }
 
-/** Copy for one state, given whatever data the page has (possibly none). */
-export const stateCopy = (kind: WelcomeKind, data: WelcomeData): StateCopy => {
+export const heroCopy = (kind: WelcomeKind, data: WelcomeData): HeroCopy => {
   const r = data.reserveNumber;
   switch (kind) {
     case "verified":
       return {
-        chip: "✓ Place confirmed", chipTone: "go",
-        headline: "Welcome, Founding Writer.",
-        lede: "You're one of the fifty writers shaping QueryHawk before anyone else sees it. Your place is held, your perks are locked in, and the next thing you'll get from us is your invitation.",
-        sub: "We've sent your welcome email",
-        cardCaption: "Your founding card",
+        heading: "Welcome, founding writer.",
+        lede: "We're delighted to have you on board. You'll be one of the first writers to use QueryHawk, which means you'll shape its tools for all the writers who come after you. Your perks are locked in, and we'll be in touch.",
+        line: "Your welcome email is on its way.",
       };
     case "already":
       return {
-        chip: "✓ Already confirmed", chipTone: "go",
-        headline: "You're already in.",
+        heading: "You're already in.",
         lede: "That link had already done its job, usually because your email's security scanner opened it before you did. Nothing's wrong and nothing's changed: your founding place stands.",
-        sub: "We've sent your welcome email",
-        cardCaption: "Your founding card",
+        line: "Your welcome email is already with you.",
       };
     case "waiting":
       return {
-        chip: r ? `${cap(ordinalWord(r))} reserve` : "Reserve list", chipTone: "blush",
-        headline: r ? `So close. You're ${ordinalWord(r)} reserve.` : "So close. You're on the reserve list.",
-        lede: "The last founding place went while your email sat in your inbox. You're confirmed and on the waiting list in the order people confirmed. If a founding place frees up, it's offered to the next writer in line, and we'll tell you by email.",
-        cardCaption: r === 1
-          ? "Reserve card · first offered any place that frees up"
-          : "Reserve card · places that free up are offered in line order",
+        heading: r ? `So close. You're ${ordinalWord(r)} in line.` : "So close. You're on the waiting list.",
+        lede: "The last founding place went while your email sat in your inbox. You're confirmed and on the waiting list, in the order people confirmed." +
+          (PLACES_OFFERED_ON ? " If a founding place frees up, it's offered to the next writer in line." : ""),
+        line: "We've emailed you to say so.",
       };
     case "expired":
       return {
-        chip: "Link expired", chipTone: "stone",
-        headline: "That link's 48 hours are up.",
+        heading: "That link's 48 hours are up.",
         lede: "Your place wasn't held, but nothing's lost. Put your email in again and a fresh confirmation will be with you in a minute.",
-        cardCaption: "No place held yet: one click away",
       };
     case "unknown":
       return {
-        chip: "Link not recognised", chipTone: "stone",
-        headline: "We don't recognise that link.",
+        heading: "We don't recognise that link.",
         lede: "It may have been cut short by your email app. Put your email in again and you'll get a fresh confirmation.",
-        cardCaption: "No place held yet: one click away",
       };
   }
 };
 
 export const FRESH_LINK_CTA = "Send a fresh link";
 
-/* ── Nick's note ── (FOUNDER_PHOTO null → the initial disc) */
-export const FOUNDER_PHOTO: string | null = null;
-export const FOUNDER_INITIAL = "N";
-export const NOTE_THANKS =
-  "Thank you. Really. QueryHawk started because I was tracking my own queries in a spreadsheet that got harder to trust with every agent I added. You've just said you'll help me make it something every querying writer would want.";
-export const NOTE_WAITING = "I'm sorry we couldn't hold a place this time. I'd still love to hear from you while you wait.";
-export const NOTE_REPLY =
-  "If you've got a question, an idea, or a story about the querying trenches, reply to your welcome email. It comes straight to me, and I read every one.";
+/* ══════════════ The pass ══════════════ */
+
+export const PASS_LABEL = "Founding writer pass";
+export const PASS_LABEL_WAITING = "Waiting list";
+export const passBig = (n: number) => `No. ${n}`;
+export const PASS_OF = `of ${FOUNDING_CAP}`;
+export const PASS_IN_LINE = "in line";
+export const STAMP_CONFIRMED = "Confirmed";
+export const STAMP_RESERVE = "Reserve";
+/** The ghost pass on a link that held nothing: two lines, then the strip's line. */
+export const GHOST_BIG: [string, string] = ["Not yet", "held"];
+export const GHOST_STRIP = "One click away";
+
+/* ══════════════ Nick's note ══════════════ */
+
+/** Founding emails v2's note, word for word. */
+export const NOTE: readonly string[] = [
+  "Hi, I'm Nick. I spent a year designing and building QueryHawk alongside my day job, driven by the belief that good stories shouldn't be lost to a messy querying campaign.",
+  "I truly believe these tools give your manuscript the very best chance of landing with the right agent. Please use everything QueryHawk has to offer and let me know how you find it.",
+  "Very best of luck with your campaign, and thank you for being part of the journey. We'll speak soon.",
+];
+export const NOTE_WAITING: readonly string[] = [
+  "I'm sorry we couldn't hold a place for you this time, and thank you for wanting in. You're confirmed and in the queue" +
+    (PLACES_OFFERED_ON ? ", so if a place frees up, it's yours to take." : "."),
+  "In the meantime I'd still love to hear from you: reply to my email any time. It comes straight to me.",
+];
 export const NOTE_SIGN = "Nick";
 export const NOTE_ROLE = "Founder, QueryHawk";
 
-/* ── What happens next ── */
-export const NEXT_EYEBROW = "What happens next";
-export const NEXT_HEADING = "Three steps, and you've done the first.";
-export const stepOne = (kind: WelcomeKind, data: WelcomeData): { title: string; body: string } =>
-  kind === "waiting"
-    ? {
-        title: "You're on the list",
-        body: data.reserveNumber
-          ? `${cap(ordinalWord(data.reserveNumber))} reserve, in the order writers confirmed.`
-          : "On the reserve list, in the order writers confirmed.",
-      }
-    : {
-        title: "Your place is confirmed",
-        body: data.foundingNumber
-          ? `Founding Writer No. ${data.foundingNumber} is yours, and so are the perks below.`
-          : "Your founding place is yours, and so are the perks below.",
-      };
-export const STEP_ONE_WHEN = "Done · today";
-export const STEP_TWO = {
-  title: "Your invitation arrives",
-  body: "We're letting founding writers in a few at a time, so every one gets a proper welcome. Yours comes by email: one button, no codes.",
-  when: "By email · in waves",
-};
-export const STEP_THREE = {
-  title: "Set up in five minutes",
-  body: "Your name, your manuscript and the agents you've queried. Bring your tracking spreadsheet and Smart Import will read it for you.",
-  when: "On the day",
-};
-export const PERKS = [
-  "QueryHawk Pro, free for your whole querying campaign",
-  "Smart Import to bring your list across",
-  "A direct line to the founder",
-  "An Early Bird discount for the writers you invite",
-];
+/* ══════════════ What happens next ══════════════ */
 
-/* ── A first look ── */
-export const PEEK_EYEBROW = "A first look";
-export const PEEK_HEADING = "Here's what's waiting for you.";
-export const PEEKS = [
-  { title: "Query Centre", body: "Every query, where it stands, and what's due next, on one page." },
-  { title: "Contact list", body: "The agents you're after, who's open, and who has your pages." },
-  { title: "Smart Import", body: "Bring your spreadsheet. We'll do the typing." },
-];
-export const PEEK_FILE = "my-queries.xlsx";
-export const PEEK_DONE = "Every query and agent, read";
+export const NEXT_HEADING = "What happens next";
+export interface Step { title: string; body: string }
 
-/* ── Three quick taps ── (labels → the values the server accepts) */
-export const TAPS_EYEBROW = "Help shape QueryHawk · optional";
-export const TAPS_HEADING = "Three quick taps.";
+export const nextSteps = (kind: WelcomeKind, data: WelcomeData): Step[] => {
+  const setUp: Step = {
+    title: "Get set up",
+    body: "Spin through our speedy onboarding process and we'll tailor everything to exactly where your campaign stands. If you're partway through, we'll make it easy to bring your list on board.",
+  };
+  if (kind === "waiting") {
+    const r = data.reserveNumber;
+    return [
+      { title: "You're on the waiting list",
+        body: r ? `${cap(ordinalWord(r))} in line, in the order writers confirmed.` : "On the waiting list, in the order writers confirmed." },
+      /* 2(a) only: under 2(b) a freed place is not offered on, so the step is dropped. */
+      ...(PLACES_OFFERED_ON ? [{ title: "If a place frees up", body: "It's offered to the next writer in line, and you'll hear by email straight away." }] : []),
+      setUp,
+    ];
+  }
+  const n = data.foundingNumber;
+  return [
+    { title: "Your place is confirmed",
+      body: n ? `Hello, founding writer number ${n}. We're honoured to have you on board.` : "Hello, founding writer. We're honoured to have you on board." },
+    { title: "Your invitation arrives",
+      body: "We're letting people in a few at a time so that everyone gets a proper welcome and the best experience possible. We're aiming for mid-November." },
+    setUp,
+  ];
+};
+
+/* ══════════════ What you get ══════════════ (the landing page's own words, read from landingCopy) */
+
+export const GET_HEADING = "What you get";
+
+/* ══════════════ Help shape QueryHawk ══════════════ (labels → the values the server accepts) */
+
+export const TAPS_HEADING = "Help shape QueryHawk";
+export const TAPS_LEAD = "Three quick taps. It takes ten seconds, and it helps me decide who to invite first.";
 export const QUESTIONS = [
   { key: "stage", label: "Where are you with querying?", options: [
     ["getting-ready", "Getting ready"], ["just-started", "Just started"],
@@ -184,7 +183,7 @@ export const QUESTIONS = [
 ] as const;
 export type AnswerKey = (typeof QUESTIONS)[number]["key"];
 export const TAPS_SEND = "Send to Nick";
-export const TAPS_NOTE = "Takes ten seconds. It helps us decide who to invite first.";
+export const TAPS_NOTE = "Optional. You can close this page whenever you like.";
 export const TAPS_THANKS = "Thank you, that's really useful.";
 export const TAPS_THANKS_SUB = "You can close this page whenever you like.";
 export const TAPS_FAILED = "That didn't send — try again";
@@ -192,19 +191,21 @@ export const TAPS_FAILED = "That didn't send — try again";
 export const canSend = (a: Partial<Record<AnswerKey, string>>): boolean =>
   QUESTIONS.every((q) => typeof a[q.key] === "string" && (q.options as readonly (readonly [string, string])[]).some((o) => o[0] === a[q.key]));
 
-/* ── Have these to hand ── */
-export const READY_EYEBROW = "Get ready for day one";
-export const READY_HEADING = "Have these to hand.";
-export const READY_BODY = "Set-up is quickest when you've got your querying history nearby.";
+/* ══════════════ Get ready for day one ══════════════ */
+
+export const READY_HEADING = "Get ready for day one";
+export const READY_LEAD = "Set-up is quickest with your querying history nearby. Have these to hand:";
 export const READY_LIST = [
   "Your tracking spreadsheet, if you keep one",
   "The agents you've queried, and when",
   "Any requests or replies you're waiting on",
 ];
 
-/* ── Closing ── */
-export const CLOSE_LINE = "That's everything for now. Keep an eye on your inbox. We'll be in touch.";
-export const CLOSE_WAITING = "We'll email you the moment anything changes.";
-export const CLOSE_HAND = "See you soon";
+/* ══════════════ The close and the chrome ══════════════ */
+
+export const CLOSE_LINE = "That's everything for now. Keep an eye on your inbox.";
+export const CLOSE_SIGN = "See you soon";
+/** The footer on /welcome: the logo, then this line with Privacy as its one link. */
+export const WELCOME_FOOT = "© 2026 QueryHawk · Made in the UK, for writers";
 
 export const WELCOME_DOCUMENT_TITLE = "Welcome — QueryHawk";

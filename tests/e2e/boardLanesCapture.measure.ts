@@ -11,7 +11,7 @@ import { writeFileSync, mkdirSync, existsSync } from "node:fs";
  * absolute positions are expected to change and would report the intended change as damage.
  * What must not change is the board's own arrangement inside itself.
  *
- * ⚠️ NAMED OUT OF THE LOCK GLOB, AND THAT IS DELIBERATE. It requires `SA_LANES_TAG` and THROWS at
+ * ⚠️ NAMED OUT OF THE LOCK GLOB, AND THAT IS DELIBERATE. It requires `SA_LANES_TAG` and (until 2 Nov) THREW at
  * module load without one — which is right for a capture whose whole danger is writing over the
  * reference — but it also means a glob run that sweeps it in dies at COLLECTION, taking the whole
  * lock run with it. That happened once here under `qcCal*`. `boardDomCapture` is out of the glob
@@ -19,10 +19,13 @@ import { writeFileSync, mkdirSync, existsSync } from "node:fs";
  */
 const OUT = "/Users/nickphysick/ScriptAlly-app/reports/calendar-layout-dom";
 const TAG = process.env.SA_LANES_TAG;
-if (!TAG) throw new Error("SA_LANES_TAG is required (e.g. `before`, `after`)");
+/* ⚠️ NO TAG → SKIPPED, NEVER DEFAULTED. It used to THROW at load, which stopped Playwright collecting
+   the WHOLE suite, so `npm run e2e:emu` could not run as one command. A default would silently choose
+   which reference to overwrite (the reason above), so without the tag every case is a clean skip. */
+test.skip(!TAG, "SA_LANES_TAG is not set — this capture tool only runs when you name the capture (before / after).");
 
 for (const w of [1280, 1440, 1920]) {
-  test(`lanes geometry at ${w} (${TAG})`, async ({ page }) => {
+  test(`lanes geometry at ${w} (${TAG ?? "untagged"})`, async ({ page }) => {
     mkdirSync(OUT, { recursive: true });
     await openRoute(page, "/queries", { width: w, height: 1000 });
     await page.evaluate(() => {

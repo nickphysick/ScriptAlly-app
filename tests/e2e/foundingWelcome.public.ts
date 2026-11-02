@@ -7,7 +7,11 @@
  *     (functions/.secret.local: WAITLIST_IP_SALT=<anything>, RESEND_API_KEY= — empty, so no mail
  *      leaves; functions/.env.demo-scriptally-test: FIRESTORE_DATABASE_ID=(default). Both local only.)
  *   npx vite build --outDir <dir> && npx vite preview --outDir <dir> --host 127.0.0.1 --port 4733 --strictPort
- *   SA_E2E_BASE_URL=http://127.0.0.1:4733 npx playwright test --project public tests/e2e/foundingWelcome.public.ts
+ *   SA_E2E_FUNCTIONS=1 SA_E2E_BASE_URL=http://127.0.0.1:4733 npx playwright test --project public tests/e2e/foundingWelcome.public.ts
+ *
+ * ⚠️ OPT-IN (`SA_E2E_FUNCTIONS=1`). Its setup DELETES the `waitlist` and `ratelimits` collections in
+ * whatever functions emulator answers on 5001 — on 2 Nov a whole-suite run found ANOTHER session's
+ * emulator there and started clearing it. A general run (`npm run e2e:emu`) skips it.
  *
  * ⚠️ EVERY STATE IS REACHED THROUGH THE REAL VERIFY LINK. The spec seeds pending writers in the
  * emulator's Firestore, GETs the function's own /verify, and follows the 302 it answers — so the
@@ -26,12 +30,23 @@ const readings: Record<string, unknown> = {};
 
 /* The function's own compiled helpers and its own copy of the Admin SDK, so the seed hashes a token
    exactly as the function will. */
-process.env.FIRESTORE_EMULATOR_HOST ??= "127.0.0.1:8080";
-const req = createRequire(resolve("functions/package.json"));
-const admin = req("firebase-admin");
-const model = req("./lib/waitlistModel.js");
-if (admin.apps.length === 0) admin.initializeApp({ projectId: "demo-scriptally-test" });
-const db = admin.firestore();
+/* ⚠️ LOADED LAZILY, AND A MISSING PREREQUISITE IS A SKIP, NEVER A THROW. A require that threw at
+   module load stopped Playwright collecting the WHOLE suite, so `npm run e2e:emu` could not run as
+   one command; this spec needs its own recipe (the header) and is skipped with that as the reason. */
+const NEEDS = "opt-in: SA_E2E_FUNCTIONS=1, `npm --prefix functions run build` and the functions emulator on 5001 (see this file's header)";
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let admin: any, model: any = null, db: any;
+if (process.env.SA_E2E_FUNCTIONS === "1") try {
+  process.env.FIRESTORE_EMULATOR_HOST ??= "127.0.0.1:8080"; /* only on the opt-in: it leaks into the whole worker */
+  const req = createRequire(resolve("functions/package.json"));
+  admin = req("firebase-admin");
+  model = req("./lib/waitlistModel.js");
+  if (admin.apps.length === 0) admin.initializeApp({ projectId: "demo-scriptally-test" });
+  db = admin.firestore();
+} catch {
+  model = null;
+}
+test.skip(process.env.SA_E2E_FUNCTIONS !== "1" || !model, NEEDS);
 
 const seedPending = async (email: string, expiresInMs = 48 * 3600 * 1000): Promise<string> => {
   const token = model.newVerifyToken();
@@ -53,6 +68,8 @@ const LINKS: Record<string, string> = {};
 let verifiedEmail = "";
 
 test.beforeAll(async () => {
+  const up = await fetch(FN).then(() => true, () => false);
+  test.skip(!up, NEEDS);
   for (const c of ["waitlist", "ratelimits"]) {
     const snap = await db.collection(c).get();
     await Promise.all(snap.docs.map((d: { ref: { delete: () => Promise<unknown> } }) => d.ref.delete()));
@@ -101,13 +118,14 @@ const forward = async (page: Page, opts: { hold?: number; failAnswers?: boolean 
 };
 
 const HEADLINES: Record<string, RegExp> = {
-  verified: /^Welcome, Founding Writer\.$/,
+  verified: /^Welcome, founding writer\.$/,
   already: /^You're already in\.$/,
-  waiting: /^So close\. You're first reserve\.$/,
+  waiting: /^So close\. You're first in line\.$/,
   expired: /^That link's 48 hours are up\.$/,
   unknown: /^We don't recognise that link\.$/,
 };
-const CARD: Record<string, string> = { verified: "023", already: "024", waiting: "1st", expired: "—", unknown: "—" };
+/* Welcome page v1 (2 Nov): the pass's big line (the stored number as the pass prints it). */
+const CARD: Record<string, string> = { verified: "No. 23", already: "No. 24", waiting: "1st", expired: "Not yetheld", unknown: "Not yetheld" };
 
 for (const width of [1440, 390]) {
   test.describe(`at ${width}px`, () => {
@@ -120,7 +138,7 @@ for (const width of [1440, 390]) {
         const root = page.locator(`[data-welcome="${kind}"]`);
         await expect(root).toBeVisible();
         await expect(root.locator("h1")).toHaveText(HEADLINES[kind]);
-        await expect(page.locator('[data-probe="card-number"]')).toHaveText(CARD[kind]);
+        await expect(page.locator('[data-probe="pass-big"]')).toHaveText(CARD[kind]);
         const url = new URL(page.url());
         expect(url.pathname).toBe("/welcome");
         expect(url.search, "v and r are removed from the address").toBe("");
@@ -142,10 +160,10 @@ for (const width of [1440, 390]) {
       });
     }
 
-    test("the card does not move when the number lands", async ({ page }) => {
+    test("the pass does not move when the number lands", async ({ page }) => {
       await forward(page, { hold: 1500 });
       await page.goto(LINKS.verified);
-      const card = page.locator(".mk-wel-card");
+      const card = page.locator(".mk-wpass");
       await expect(card).toHaveClass(/is-loading/);
       const box = () => card.evaluate((el: HTMLElement) => {
         const r = el.getBoundingClientRect();
@@ -160,7 +178,7 @@ for (const width of [1440, 390]) {
       const before = await box();
       await expect(card, "the first reading was taken while the number was still on its way").toHaveClass(/is-loading/);
       await expect(card).not.toHaveClass(/is-loading/, { timeout: 6000 });
-      await expect(page.locator('[data-probe="card-number"]')).toHaveText("023");
+      await expect(page.locator('[data-probe="pass-big"]')).toHaveText("No. 23");
       const after = await box();
       readings[`stable@${width}`] = { before, after };
       for (const k of ["x", "y", "w", "h"] as const) expect(Math.abs(after[k] - before[k]), k).toBeLessThanOrEqual(0.5);
@@ -169,7 +187,7 @@ for (const width of [1440, 390]) {
     test("the stamp has landed by 1.5s, and reduced motion shows the final frame", async ({ page }) => {
       await forward(page);
       await page.goto(LINKS.verified);
-      const seal = page.locator(".mk-wel-seal");
+      const seal = page.locator(".mk-wpass-stamp");
       const timing = await seal.evaluate((el) => el.getAnimations().map((a) => (a.effect as KeyframeEffect).getComputedTiming().endTime));
       expect(timing.length, "the stamp animates").toBe(1);
       expect(Number(timing[0]), "it ends by 1500ms").toBeLessThanOrEqual(1500);
@@ -180,9 +198,9 @@ for (const width of [1440, 390]) {
       await page.emulateMedia({ reducedMotion: "reduce" });
       await page.reload();
       await page.goto(LINKS.verified);
-      await expect(page.locator(".mk-wel-card")).not.toHaveClass(/is-loading/);
+      await expect(page.locator(".mk-wpass")).not.toHaveClass(/is-loading/);
       const still = await page.evaluate(() => {
-        const card = document.querySelector(".mk-wel-card")!, seal = document.querySelector(".mk-wel-seal")!;
+        const card = document.querySelector(".mk-wpass")!, seal = document.querySelector(".mk-wpass-stamp")!;
         return {
           animations: document.getAnimations().length,
           sealOpacity: getComputedStyle(seal).opacity,
@@ -193,8 +211,8 @@ for (const width of [1440, 390]) {
       readings[`motion@${width}`] = { endTime: timing[0], reduced: still };
       expect(still.animations, "nothing animates").toBe(0);
       expect(still.sealOpacity).toBe("1");
-      /* rotate(-14deg) and rotate(-1.6deg): the final frame, not the first. */
-      expect(still.sealTransform).toMatch(/^matrix\(0\.97/);
+      /* rotate(-5deg) and rotate(2deg): the final frame, not the first (welcome page v1). */
+      expect(still.sealTransform).toMatch(/^matrix\(0\.996/);
       expect(still.cardTransform).toMatch(/^matrix\(0\.999/);
     });
   });

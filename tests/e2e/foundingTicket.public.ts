@@ -4,11 +4,15 @@
  *
  *   SA_E2E_BASE_URL=<a preview of a production build> npx playwright test --project=public foundingTicket
  * `EM_MUTATE=EM5` puts the bird back where it hung over the stub's edge (v2's right −40px, bottom −14px).
+ *
+ * Welcome page v1, phase 2: the label "Founding writer pass" is sentence case, in the serif at 600,
+ * #7a3420 — no small capitals on the pass. `EM_MUTATE=EM5b` puts the capitals back.
  */
 import { test, expect, Page } from "@playwright/test";
 
 const MUTATIONS: Record<string, string> = {
   EM5: ".mk-tkt-stub img{right:-40px!important;bottom:-14px!important;width:230px!important}",
+  EM5b: ".mk-tkt-st small{text-transform:uppercase!important;letter-spacing:.14em!important}",
 };
 
 async function open(page: Page, vp: { width: number; height: number }, count: { count: number; cap: number }) {
@@ -33,11 +37,19 @@ for (const vp of [{ width: 390, height: 844 }, { width: 430, height: 932 }]) {
         const box = (e: Element | null) => { if (!e) return null; const b = e.getBoundingClientRect(); return { l: b.left, t: b.top, r: b.right, b: b.bottom }; };
         const stub = document.querySelector(".mk-tkt-stub"), img = stub?.querySelector("img") as HTMLImageElement | null;
         return { stub: box(stub), img: box(img), loaded: !!img && img.complete && img.naturalWidth > 0,
-                 text: (document.querySelector(".mk-tkt-st")?.textContent ?? "").trim(), full: box(document.querySelector(".mk-tkt-full")) };
+                 text: (document.querySelector(".mk-tkt-st")?.textContent ?? "").trim(), full: box(document.querySelector(".mk-tkt-full")),
+                 label: (() => { const l = document.querySelector(".mk-tkt-st small"); if (!l) return null; const c = getComputedStyle(l);
+                   return { tt: c.textTransform, ls: c.letterSpacing, fw: c.fontWeight, colour: c.color, family: c.fontFamily }; })() };
       });
       console.log(`EM-5 ${vp.width} ${state.name}`, JSON.stringify(r));
       expect(r.stub && r.img, "the stub and its bird are on the page").toBeTruthy();
       expect(r.loaded, "the bird loaded").toBe(true);
+      expect(r.label, "the pass label is drawn").toBeTruthy();
+      expect(r.label!.tt, "the label is sentence case, never capitals").toBe("none");
+      expect(r.label!.ls, "no letter-spacing").toBe("normal");
+      expect(r.label!.fw, "600 weight").toBe("600");
+      expect(r.label!.colour, "#7a3420").toBe("rgb(122, 52, 32)");
+      expect(r.label!.family, "in the serif").toMatch(/Source Serif/);
       const s = r.stub!, i = r.img!;
       expect(i.l, "left edge inside").toBeGreaterThanOrEqual(s.l - 0.5);
       expect(i.t, "top edge inside").toBeGreaterThanOrEqual(s.t - 0.5);

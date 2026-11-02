@@ -338,10 +338,9 @@ describe("no marketing rule reads a token that does not exist", () => {
     [...both.matchAll(/(--mk-[a-z0-9-]+)\s*:/g)].map((m) => m[1]),
   );
   const read = [...both.matchAll(/var\(\s*(--mk-[a-z0-9-]+)/g)].map((m) => m[1]);
-  /* ⚠️ THE WELCOME PAGE'S SHEET COUNTS AS A READER, NOT AS A SWEPT SHEET (waitlist v2, 1 Nov): once the vision
-     band went navy, `--mk-stone`'s only readers were there, and leaving it out would call a live token unread.
-     It is kept out of the other direction because it reads `--mk-blush`, which nothing declares — a fault on
-     /welcome, recorded in reports/landing-waitlist-v2/REPORT.md and outside this pass. */
+  /* ⚠️ THE WELCOME PAGE'S SHEET COUNTS AS A READER (waitlist v2, 1 Nov). Since welcome page v1 (2 Nov) it
+     declares its own colours as `--wel-*` and reads only declared `--mk-*` tokens (the old sheet read
+     `--mk-blush`, which nothing declared); `--mk-stone`, whose last reader it was, is deleted. */
   const readAnywhere = [...read, ...[...decls(css("welcome.css")).matchAll(/var\(\s*(--mk-[a-z0-9-]+)/g)].map((m) => m[1])];
 
   it("reads at least the tokens we know about (the scan is not vacuous)", () => {
@@ -532,7 +531,7 @@ describe("the lower surface's one repaint is the vision band (was: the banner, t
     expect(band, "the colour change marks the edges").not.toMatch(/border(?!-radius)/);
     expect(band, "separate longhands, never the shorthand").not.toMatch(/background:\s/);
     expect(band, "the drawing sits in the grid, not behind it").not.toMatch(/background-image/);
-    expect(value(marketing, "--mk-stone")).toBe("#e9e6e0");
+    expect(marketing, "the stone token went with its last reader (welcome page v1)").not.toMatch(/--mk-stone:/);
     expect(marketing, "the edge token went with the rules").not.toMatch(/--mk-vision-edge/);
     const card = ruleFor(".mk-vpoint");
     expect(card).toMatch(/background-color:\s*var\(--mk-white\)/);
@@ -1127,11 +1126,9 @@ describe("the feature rows set their own type, and nothing else uses its familie
        `--clv-serif`, because a cross-PAGE `var()` read is the `--mk-hero-ground` trap: one sheet's
        refactor silently unstyling another page. The typewriter face there is READ (`var(--sp-type)`).
        An eighth file naming either face is still a decision this fails on. */
-    /* ⚠️ AN EIGHTH (founding welcome, 18 Oct), AND IT IS PUBLIC, NOT SIGNED-IN. The /welcome page's
-       card prints the writer's founding number in the typewriter face, as Direction A of
-       design-refs/founding-welcome/founding-welcome-v1.html draws it. ONE declaration, on
-       `.mk-wel-card .mk-wel-cardno`, in the page's own sheet (`marketing/welcome.css`); the number
-       inside inherits it. A ninth file naming either face is still a decision this fails on. */
+    /* ⚠️ THE EIGHTH OWNER IS GONE (welcome page v1, 2 Nov). The /welcome sheet used to name the
+       typewriter face for its card's number; the rebuilt page READS `--mk-f-display` and names no face.
+       An eighth file naming either face is still a decision this fails on. */
     expect(elsewhere.map((f) => f.slice(src.length + 1).replace(/\\/g, "/")).sort())
       .toEqual([
         "components/agents/contact/contactV11.css",
@@ -1140,7 +1137,6 @@ describe("the feature rows set their own type, and nothing else uses its familie
         "components/manuscripts/v12/msv12.css",
         "components/shell/primitives.css",
         "components/todo/taskPane.css",
-        "marketing/welcome.css",
       ]);
     const prim = decls(readFileSync(resolve(src, "components/shell/primitives.css"), "utf8"));
     const primOwners = [...prim.matchAll(/(?:^|\n)([^@{}][^{}]*?)\{([^{}]*)\}/g)]

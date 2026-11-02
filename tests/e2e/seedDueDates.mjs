@@ -20,6 +20,7 @@
  *   node tests/e2e/seedDueDates.mjs --clean  # remove exactly what it seeded
  * or from a spec:  seedDueDates() · cleanDueDates() · readListView() · restoreListView(v)
  */
+import { targetEnv, TARGET_PROJECT } from "./fsTarget.mjs";
 import { readFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { initializeApp } from "firebase/app";
@@ -57,12 +58,12 @@ export const localDay = (days) => {
 let session = null;
 async function connect() {
   if (session) return session;
-  const dev = env(".env.development");
+  const dev = targetEnv();
   const local = existsSync(".env.local") ? env(".env.local") : {};
   const PROJECT = dev.VITE_FIREBASE_PROJECT_ID;
   /* ⚠️ THE SAME REFUSAL EVERY SEEDER MAKES — a write pointed at prod by a stray env is not a thing
      to find out about afterwards */
-  if (PROJECT !== "scriptally-dev") throw new Error(`Refusing to touch "${PROJECT}" — scriptally-dev only.`);
+  if (PROJECT !== TARGET_PROJECT) throw new Error(`Refusing to touch "${PROJECT}" — scriptally-dev only.`);
   const PASSWORD = process.env.SA_E2E_PASSWORD ?? local.SA_E2E_PASSWORD;
   if (!PASSWORD) throw new Error("No SA_E2E_PASSWORD in .env.local");
   const app = initializeApp({

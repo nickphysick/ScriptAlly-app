@@ -20,6 +20,7 @@
  *   node tests/e2e/probeTasks.mjs --delete   remove them, naming each
  * or, from a spec:  await removeProbeTasks()      // in a finally
  */
+import { targetEnv, TARGET_PROJECT } from "./fsTarget.mjs";
 import { readFileSync, existsSync } from "node:fs";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
@@ -42,12 +43,12 @@ const env = (file) => Object.fromEntries(
  * @returns {Promise<string[]>} the titles removed (or, dry, the titles found)
  */
 export async function removeProbeTasks(opts = {}) {
-  const dev = env(".env.development");
+  const dev = targetEnv();
   const local = existsSync(".env.local") ? env(".env.local") : {};
   const PROJECT = dev.VITE_FIREBASE_PROJECT_ID;
   /* ⚠️ THE SAME REFUSAL THE SEEDER MAKES. A deletion pointed at prod by a stray env is not a thing
      to find out about afterwards. */
-  if (PROJECT !== "scriptally-dev") {
+  if (PROJECT !== TARGET_PROJECT) {
     throw new Error(`Refusing to touch "${PROJECT}" — this script is for scriptally-dev only.`);
   }
   const EMAIL = process.env.SA_E2E_EMAIL ?? "harness@scriptally.test";

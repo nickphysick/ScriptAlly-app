@@ -88,13 +88,13 @@ export const WELCOME_HEADING = "That's your place confirmed.";
 export const WELCOME_LEAD =
   "Welcome aboard. You're one of the first fifty writers to use QueryHawk, and this is your pass.";
 
+/** Welcome page v1, phase 2: founding-emails-v2's wording. */
 export const WELCOME_NOTE: readonly string[] = [
-  "Hi, I'm Nick, a keen writer with a background in simplifying data to drive smart decision making. " +
-  "I spent a year designing and building QueryHawk alongside my day job, driven by the belief that good " +
-  "stories shouldn't be lost to a messy querying campaign.",
+  "Hi, I'm Nick. I spent a year designing and building QueryHawk alongside my day job, driven by the belief " +
+  "that good stories shouldn't be lost to a messy querying campaign.",
   "I truly believe these tools give your manuscript the very best chance of landing with the right agent. " +
-  "Please use everything it has to offer, and let me know how you find it.",
-  "Very best of luck with your campaign, and thank you for being part of the journey.",
+  "Please use everything QueryHawk has to offer and let me know how you find it.",
+  "Very best of luck with your campaign, and thank you for being part of the journey. We'll speak soon.",
 ];
 
 export const WELCOME_GET_HEADING = "What you get";

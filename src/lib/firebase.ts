@@ -4,8 +4,15 @@
  */
 
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { connectAuthEmulator, getAuth } from "firebase/auth";
+import {
+  connectFirestoreEmulator,
+  initializeFirestore,
+  memoryLocalCache,
+  persistentLocalCache,
+  persistentMultipleTabManager,
+} from "firebase/firestore";
+import { EMULATOR_HOSTS, emulatorTargetError } from "./firebaseTarget";
 
 // Firebase config is environment-driven (.env.production / .env.development), so dev builds
 // can target a separate Firebase project without ever touching production data. The production
@@ -36,16 +43,49 @@ if (!import.meta.env.PROD) {
 
 // Firestore database id. Production uses a NAMED database (ai-studio-…, CRITICAL — the default
 // database would be a different, empty store). A dev project typically uses the default
-// database: leave VITE_FIREBASE_DATABASE_ID empty or "(default)" and getFirestore is called
-// without an id.
+// database: leave VITE_FIREBASE_DATABASE_ID empty or "(default)".
 const databaseId = import.meta.env.VITE_FIREBASE_DATABASE_ID;
+
+/* ⚠️ REFUSED BEFORE ANY SDK IS CREATED: an emulator build naming a real project. */
+const targetError = emulatorTargetError(import.meta.env);
+if (targetError) throw new Error(`[QueryHawk] ${targetError}`);
+/* Read inline (not via usesEmulators) so Vite folds it to a constant and a production bundle drops
+   the emulator branch entirely. firebaseTarget.test.ts holds the two readings equal. */
+const emulated = import.meta.env.VITE_USE_EMULATORS === "true";
+
+/**
+ * ⚠️ THE PERSISTENT CACHE IS WHAT MAKES A RELOAD CHEAP. Without it every reload re-read every
+ * document the listeners cover (~660 for a seeded account); with it a reload asks the server only
+ * for what changed since the cached snapshot. Loading still waits for the server where it must:
+ * `snapshotIsLoaded` in db.tsx refuses an EMPTY cached snapshot, and a cached snapshot with
+ * documents is real data. IndexedDB is absent in Node (the unit suites import this file), where
+ * the memory cache is the only honest choice.
+ */
+const localCache =
+  typeof indexedDB !== "undefined"
+    ? persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+    : memoryLocalCache();
 export const db =
   !databaseId || databaseId === "(default)"
-    ? getFirestore(app)
-    : getFirestore(app, databaseId);
+    ? initializeFirestore(app, { localCache })
+    : initializeFirestore(app, { localCache }, databaseId);
 
 // Initialize Firebase Authentication (bound to this app instance explicitly)
 export const auth = getAuth(app);
+
+/* Local work against the emulators (`npm run dev:emu`, `npm run e2e:emu`).
+   ⚠️ STORAGE IS IMPORTED DYNAMICALLY, AND ONLY HERE. The landing page loads this file (App Check
+   imports it), so a static `firebase/storage` import would put the Storage SDK on the public page's
+   critical path for a branch production never takes. `emulated` folds to false in a production
+   build, so the import is dropped there entirely. Connecting after a first `getStorage` is safe: it
+   only sets the host, and the same cached instance is what every later `getStorage(app)` returns. */
+if (emulated) {
+  connectFirestoreEmulator(db, EMULATOR_HOSTS.firestore.host, EMULATOR_HOSTS.firestore.port);
+  connectAuthEmulator(auth, EMULATOR_HOSTS.auth, { disableWarnings: true });
+  void import("firebase/storage").then(({ connectStorageEmulator, getStorage }) =>
+    connectStorageEmulator(getStorage(app), EMULATOR_HOSTS.storage.host, EMULATOR_HOSTS.storage.port),
+  );
+}
 
 // Error Handling Infrastructure as per Skill Requirements
 export enum OperationType {

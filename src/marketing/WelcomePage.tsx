@@ -3,14 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * WelcomePage — `/welcome`, where a founding writer lands after clicking their confirmation link.
- * Built to Direction A ("The card") of design-refs/founding-welcome/founding-welcome-v1.html.
+ * Welcome page v1 (2 Nov; ref design-refs/welcome-page-v1.html): the landing page's navy drawer with
+ * the writer's pass, then bands for Nick's note, what happens next, the perks, the optional three
+ * taps and a get-ready list. Every word is in `welcomeCopy.ts`.
  *
- * ⚠️ IT READS `v` AND `r` ONCE, THEN TAKES BOTH OUT OF THE ADDRESS, so a refresh, a bookmark or a
- * shared link never replays someone else's welcome. With a reference it asks the server for the
- * writer's number; if that fails, the same state shows without the number, never an error.
+ * ⚠️ THE MECHANICS ARE UNCHANGED FROM THE FIRST VERSION:
+ *   - `v` and `r` are read ONCE, then taken out of the address, so a refresh, a bookmark or a shared
+ *     link never replays someone else's welcome;
+ *   - with a reference the page asks the server for the writer's number (`fetchWelcome`); if that
+ *     fails the same state shows WITHOUT a number, never an error, and no number is ever estimated;
+ *   - the three taps exist only with a reference (`postAnswers` needs one);
+ *   - a link that held nothing offers the fresh-link form (`FoundingSignup`, source `founders-hero`).
  *
- * ⚠️ NOTHING HERE SELLS, AND THERE IS NO WAY INTO THE APP: they have already said yes, and the app
- * isn't open. The only number shown is the writer's own stored number.
+ * ⚠️ NOTHING HERE SELLS AND NOTHING LEAVES: the only link is Privacy (the shell's /welcome mode draws
+ * the bar as the logo alone and the footer as one line). No small capitals, no mono labels.
  *
  * `WelcomeView` is the drawing (rendered by the tests with fixed data); `WelcomePage` is the reading
  * of the URL and the two calls.
@@ -18,22 +24,83 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import "./welcome.css";
-import { FoundingCard } from "./FoundingCard";
 import { FoundingSignup } from "./FoundingSignup";
+import { PASS_BIRD, ticketGets } from "./FoundingTicket";
+import { ILLUSTRATIONS } from "./FeatureRows";
+import { BRAND_MARK_SMALL, artUrl } from "./brandArt";
 import { fetchWelcome, postAnswers } from "./welcomeData";
 import {
   type WelcomeKind, type WelcomeData, type AnswerKey,
-  parseWelcomeKind, stateCopy, stepOne, canSend, FRESH_LINK_CTA,
-  FOUNDER_PHOTO, FOUNDER_INITIAL, NOTE_THANKS, NOTE_WAITING, NOTE_REPLY, NOTE_SIGN, NOTE_ROLE,
-  NEXT_EYEBROW, NEXT_HEADING, STEP_ONE_WHEN, STEP_TWO, STEP_THREE, PERKS,
-  PEEK_EYEBROW, PEEK_HEADING, PEEKS, PEEK_FILE, PEEK_DONE,
-  TAPS_EYEBROW, TAPS_HEADING, QUESTIONS, TAPS_SEND, TAPS_NOTE, TAPS_THANKS, TAPS_THANKS_SUB, TAPS_FAILED,
-  READY_EYEBROW, READY_HEADING, READY_BODY, READY_LIST,
-  CLOSE_LINE, CLOSE_WAITING, CLOSE_HAND, WELCOME_DOCUMENT_TITLE,
+  parseWelcomeKind, heroCopy, nextSteps, canSend, ordinal, longDate, FRESH_LINK_CTA,
+  PASS_LABEL, PASS_LABEL_WAITING, passBig, PASS_OF, PASS_IN_LINE, STAMP_CONFIRMED, STAMP_RESERVE, GHOST_BIG, GHOST_STRIP,
+  NOTE, NOTE_WAITING, NOTE_SIGN, NOTE_ROLE, NEXT_HEADING, GET_HEADING,
+  TAPS_HEADING, TAPS_LEAD, QUESTIONS, TAPS_SEND, TAPS_NOTE, TAPS_THANKS, TAPS_THANKS_SUB, TAPS_FAILED,
+  READY_HEADING, READY_LEAD, READY_LIST, CLOSE_LINE, CLOSE_SIGN, WELCOME_DOCUMENT_TITLE,
 } from "./welcomeCopy";
 
 type Nav = (tab: string, subPageName?: string) => void;
 type SendState = "idle" | "sending" | "sent" | "failed";
+
+/** The Smart Import picture the landing page's "Bring your list across" row draws. */
+const IMPORT_ART = "/images/journey-so-far.png";
+
+/** The rust ring-and-tick the landing page's lists use. */
+const Tick: React.FC = () => (
+  <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true" focusable="false">
+    <circle cx="10" cy="10" r="8" fill="none" stroke="#a2452a" strokeWidth="1.6" />
+    <path d="M6.2 10.3 8.8 12.8 13.8 7.6" fill="none" stroke="#a2452a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+/* ── The pass ── */
+const Pass: React.FC<{ kind: WelcomeKind; data: WelcomeData | null; loading?: boolean }> = ({ kind, data, loading }) => {
+  const bird = <img className="mk-wpass-bird" src={`${PASS_BIRD.src}?v=${PASS_BIRD.version}`} alt="" width={PASS_BIRD.width} height={PASS_BIRD.height} />;
+  if (kind === "expired" || kind === "unknown") {
+    return (
+      <div className="mk-wpass mk-wpass--ghost" data-probe="pass">
+        <div className="mk-wpass-stub">
+          <div className="mk-wpass-tx">
+            <small>{PASS_LABEL}</small>
+            <b className="mk-wpass-big" data-probe="pass-big">{GHOST_BIG[0]}<br />{GHOST_BIG[1]}</b>
+          </div>
+          {bird}
+        </div>
+        <div className="mk-wpass-tear" />
+        <div className="mk-wpass-strip"><span className="mk-wpass-ghostline">{GHOST_STRIP}</span></div>
+      </div>
+    );
+  }
+  const waiting = kind === "waiting";
+  const n = waiting ? data?.reserveNumber : data?.foundingNumber;
+  const date = longDate(data?.confirmedOn);
+  return (
+    <div className={"mk-wpass" + (loading ? " is-loading" : "")} data-probe="pass">
+      <div className="mk-wpass-stub">
+        <div className="mk-wpass-tx">
+          <small>{waiting ? PASS_LABEL_WAITING : PASS_LABEL}</small>
+          {/* ⚠️ THE WRITER'S STORED NUMBER OR NOTHING. While it loads, and if it never comes, the line
+              keeps its height empty, so the pass does not move when the number lands. */}
+          <span className="mk-wpass-line">
+            {n ? (<>
+              <b className="mk-wpass-big" data-probe="pass-big">{waiting ? ordinal(n) : passBig(n)}</b>
+              <em>{waiting ? PASS_IN_LINE : PASS_OF}</em>
+            </>) : <b className="mk-wpass-big mk-wpass-big--empty" data-probe="pass-big" aria-hidden="true">&nbsp;</b>}
+          </span>
+        </div>
+        {bird}
+      </div>
+      <div className="mk-wpass-tear" />
+      <div className="mk-wpass-strip">
+        <span className="mk-wpass-brand"><img src={artUrl(BRAND_MARK_SMALL)} alt="" width={BRAND_MARK_SMALL.width} height={BRAND_MARK_SMALL.height} />QueryHawk</span>
+        <span className="mk-wpass-stamp" data-probe="stamp">
+          <span>{waiting ? STAMP_RESERVE : STAMP_CONFIRMED}</span>
+          {/* The date line is always there, empty until the lookup answers, so the stamp keeps its size. */}
+          <i aria-hidden={date ? undefined : true}>{date ?? " "}</i>
+        </span>
+      </div>
+    </div>
+  );
+};
 
 /* ── The three quick taps ── */
 const Taps: React.FC<{ onSend: (a: Record<AnswerKey, string>) => Promise<boolean> }> = ({ onSend }) => {
@@ -49,8 +116,8 @@ const Taps: React.FC<{ onSend: (a: Record<AnswerKey, string>) => Promise<boolean
   if (state === "sent") {
     return (
       <div className="mk-wel-thanks" role="status">
-        <i aria-hidden="true">✓</i>
-        <div><b>{TAPS_THANKS}</b><br /><span>{TAPS_THANKS_SUB}</span></div>
+        <Tick />
+        <p><b>{TAPS_THANKS}</b> {TAPS_THANKS_SUB}</p>
       </div>
     );
   }
@@ -70,55 +137,23 @@ const Taps: React.FC<{ onSend: (a: Record<AnswerKey, string>) => Promise<boolean
           </div>
         </div>
       ))}
-      <div className="mk-wel-meta">
-        <button type="button" className="mk-wel-btn mk-wel-btn--navy" disabled={!ready} onClick={() => void send()}>
-          {TAPS_SEND}
-        </button>
-        <small>{state === "failed" ? <span className="mk-wel-failed" role="alert">{TAPS_FAILED}</span> : TAPS_NOTE}</small>
+      <div className="mk-wel-send">
+        <button type="button" className="mk-wel-sendbtn" disabled={!ready} onClick={() => void send()}>{TAPS_SEND}</button>
+        <p>{state === "failed" ? <span className="mk-wel-failed" role="alert">{TAPS_FAILED}</span> : TAPS_NOTE}</p>
       </div>
     </div>
   );
 };
 
-/* ── The drawn previews (CSS only: no screenshots of real data) ── */
-const Peek: React.FC = () => (
-  <div className="mk-wel-peek">
-    <div className="mk-wel-shot">
-      <div className="mk-wel-scr" aria-hidden="true">
-        <div className="mui-bar"><i /><i /><i /></div>
-        {["", "late", "q", "c"].map((v, i) => (
-          <div className="mui-row" key={i}>
-            <div className={`d ${v === "q" ? "q" : v === "c" ? "c" : ""}`} />
-            <div><div className="l" /><div className="l2" /></div>
-            <div className={`t ${v === "q" ? "t--sage" : v === "c" ? "t--stone" : ""}`} />
-            <div className={`r ${v === "late" ? "late" : v === "c" ? "r--off" : ""}`} />
-          </div>
-        ))}
+/** A band: the page's alternating grounds, a typewriter heading over the 52 × 3 navy rule. */
+const Band: React.FC<{ tone: 1 | 2; heading?: string; first?: boolean; split?: boolean; children: React.ReactNode }> =
+  ({ tone, heading, first, split, children }) => (
+    <section className={`mk-wel-band mk-wel-band--${tone}` + (first ? " mk-wel-band--first" : "")}>
+      <div className={"mk-wel-in" + (split ? " mk-wel-split" : " mk-wel-in--narrow")}>
+        {heading ? <div><h2 className="mk-wel-h2">{heading}</h2>{children}</div> : children}
       </div>
-      <div className="mk-wel-cap"><b>{PEEKS[0].title}</b><span>{PEEKS[0].body}</span></div>
-    </div>
-    <div className="mk-wel-shot">
-      <div className="mk-wel-scr" aria-hidden="true">
-        {[[1, 1, 0, 0], [0, 0, 0, 0], [1, 1, 1, 0]].map((bars, i) => (
-          <div className="mui-card" key={i}>
-            <div className={`av${i === 1 ? " av--q" : ""}`} />
-            <div className="ln"><i /><i /></div>
-            <div className="tr">{bars.map((b, j) => <b key={j} className={b ? "" : "o"} />)}</div>
-          </div>
-        ))}
-      </div>
-      <div className="mk-wel-cap"><b>{PEEKS[1].title}</b><span>{PEEKS[1].body}</span></div>
-    </div>
-    <div className="mk-wel-shot">
-      <div className="mk-wel-scr" aria-hidden="true">
-        <div className="mui-file"><div className="sheetico" />{PEEK_FILE}</div>
-        <div className="mui-arrow">↓</div>
-        <div className="mui-done"><span>✓</span>{PEEK_DONE}</div>
-      </div>
-      <div className="mk-wel-cap"><b>{PEEKS[2].title}</b><span>{PEEKS[2].body}</span></div>
-    </div>
-  </div>
-);
+    </section>
+  );
 
 export const WelcomeView: React.FC<{
   kind: WelcomeKind;
@@ -129,104 +164,95 @@ export const WelcomeView: React.FC<{
   onNavigate: Nav;
   onSendAnswers?: (a: Record<AnswerKey, string>) => Promise<boolean>;
 }> = ({ kind, data, loading, welcomeRef, onNavigate, onSendAnswers }) => {
-  const copy = stateCopy(kind, data ?? {});
+  const d = data ?? {};
+  const hero = heroCopy(kind, d);
   const bad = kind === "expired" || kind === "unknown";
   const waiting = kind === "waiting";
-  const step = stepOne(kind, data ?? {});
+  const steps = nextSteps(kind, d);
+  const taps = !!(welcomeRef && onSendAnswers);
   const headRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => { headRef.current?.focus(); }, []);
 
+  /* The bands alternate from the note down, whatever is left out. */
+  const bands: Array<(tone: 1 | 2) => React.ReactNode> = [];
+  if (!bad) {
+    bands.push((t) => (
+      <Band tone={t} first key="note">
+        <section className="mk-wel-note" aria-label="A note from Nick">
+          {(waiting ? NOTE_WAITING : NOTE).map((p) => <p key={p}>{p}</p>)}
+          <div className="mk-wel-sig">{NOTE_SIGN}</div>
+          <div className="mk-wel-role">{NOTE_ROLE}</div>
+        </section>
+      </Band>
+    ));
+    bands.push((t) => (
+      <Band tone={t} heading={NEXT_HEADING} key="next">
+        <ol className="mk-wel-steps">
+          {steps.map((s, i) => (
+            <li key={s.title} className={i === 0 ? "is-done" : undefined}>
+              <span className="mk-wel-dot" aria-hidden="true">{i === 0 ? "✓" : i + 1}</span>
+              <div><h3 className="mk-wel-h3">{s.title}</h3><p>{s.body}</p></div>
+            </li>
+          ))}
+        </ol>
+      </Band>
+    ));
+    if (!waiting) bands.push((t) => (
+      <Band tone={t} heading={GET_HEADING} key="get">
+        <ul className="mk-wel-ticks">
+          {ticketGets().map((g) => (
+            <li key={typeof g === "string" ? g : g.b}><Tick />{typeof g === "string" ? <span>{g}</span> : <span><b>{g.b}</b>{g.rest}</span>}</li>
+          ))}
+        </ul>
+      </Band>
+    ));
+    if (taps) bands.push((t) => (
+      <Band tone={t} heading={TAPS_HEADING} key="taps">
+        <p className="mk-wel-lead">{TAPS_LEAD}</p>
+        <Taps onSend={onSendAnswers!} />
+      </Band>
+    ));
+    if (!waiting) bands.push((t) => (
+      <Band tone={t} split key="ready">
+        <div>
+          <h2 className="mk-wel-h2">{READY_HEADING}</h2>
+          <p className="mk-wel-lead">{READY_LEAD}</p>
+          <ul className="mk-wel-ticks">{READY_LIST.map((r) => <li key={r}><Tick /><span>{r}</span></li>)}</ul>
+        </div>
+        <div className="mk-wel-art">
+          <img src={`${IMPORT_ART}?v=${ILLUSTRATIONS[IMPORT_ART].version}`} alt="" width={ILLUSTRATIONS[IMPORT_ART].width} height={ILLUSTRATIONS[IMPORT_ART].height} loading="lazy" />
+        </div>
+      </Band>
+    ));
+  }
+
   return (
     <div className="mk-wel" data-welcome={kind}>
-      <div className="mk-wel-wrap">
-        <header className="mk-wel-hero">
-          <div className="mk-wel-herotext" role="status">
-            <span className={`mk-wel-chip mk-wel-chip--${copy.chipTone} mk-wel-rise`}>{copy.chip}</span>
-            <h1 className="mk-wel-h1 mk-wel-rise mk-wel-d1" ref={headRef} tabIndex={-1}>{copy.headline}</h1>
-            <p className="mk-wel-lede mk-wel-rise mk-wel-d2">{copy.lede}</p>
+      <header className="mk-wel-hero">
+        <div className="mk-wel-in mk-wel-heroin">
+          <div className="mk-wel-htx" role="status">
+            <h1 className="mk-wel-h1" ref={headRef} tabIndex={-1}>{hero.heading}</h1>
+            <p className="mk-wel-lede">{hero.lede}</p>
+            {hero.line && (
+              <p className="mk-wel-line"><span className="mk-wel-env" aria-hidden="true">✉</span>{hero.line}</p>
+            )}
             {bad && (
-              <div className="mk-wel-form mk-wel-rise mk-wel-d3">
+              <div className="mk-wel-form">
                 <FoundingSignup idPrefix="mk-welcome" ctaLabel={FRESH_LINK_CTA} source="founders-hero"
-                  formClass="mk-claimform" onNavigate={onNavigate} />
+                  formClass="mk-wl-form" onNavigate={onNavigate} />
               </div>
             )}
-            {copy.sub && <div className="mk-wel-sub mk-wel-rise mk-wel-d3">{copy.sub}</div>}
           </div>
-          <div className="mk-wel-cardcol">
-            <FoundingCard kind={kind} data={data} loading={loading} />
-            <div className="mk-wel-cardcap">{copy.cardCaption}</div>
-          </div>
-        </header>
-
-        {!bad && (
-          <>
-            <section className="mk-wel-note mk-wel-rise mk-wel-d4" aria-label="A note from Nick">
-              <div className="mk-wel-photo">
-                {FOUNDER_PHOTO ? <img src={FOUNDER_PHOTO} alt="Nick, QueryHawk's founder" /> : <span aria-hidden="true">{FOUNDER_INITIAL}</span>}
-              </div>
-              <div className="mk-wel-notebody">
-                <p>{waiting ? NOTE_WAITING : NOTE_THANKS}</p>
-                <p>{NOTE_REPLY}</p>
-                <div className="mk-wel-sig">{NOTE_SIGN}</div>
-                <div className="mk-wel-role">{NOTE_ROLE}</div>
-              </div>
-            </section>
-
-            <section className="mk-wel-sec">
-              <div className="mk-wel-eyebrow">{NEXT_EYEBROW}</div>
-              <h2 className="mk-wel-h2">{NEXT_HEADING}</h2>
-              <div className="mk-wel-steps">
-                <div className="mk-wel-step is-done">
-                  <div className="mk-wel-n" aria-hidden="true">✓</div>
-                  <h3 className="mk-wel-h3">{step.title}</h3><p>{step.body}</p>
-                  <div className="mk-wel-when">{STEP_ONE_WHEN}</div>
-                </div>
-                {[STEP_TWO, STEP_THREE].map((s, i) => (
-                  <div className="mk-wel-step" key={s.title}>
-                    <div className="mk-wel-n" aria-hidden="true">{i + 2}</div>
-                    <h3 className="mk-wel-h3">{s.title}</h3><p>{s.body}</p>
-                    <div className="mk-wel-when">{s.when}</div>
-                  </div>
-                ))}
-              </div>
-              {!waiting && (
-                <ul className="mk-wel-perks">
-                  {PERKS.map((p) => <li className="mk-wel-perk" key={p}><i aria-hidden="true">✓</i>{p}</li>)}
-                </ul>
-              )}
-            </section>
-
-            <section className="mk-wel-sec">
-              <div className="mk-wel-eyebrow">{PEEK_EYEBROW}</div>
-              <h2 className="mk-wel-h2">{PEEK_HEADING}</h2>
-              <Peek />
-            </section>
-
-            <section className="mk-wel-sec">
-              <div className="mk-wel-two">
-                {welcomeRef && onSendAnswers && (
-                  <div className="mk-wel-shape">
-                    <div className="mk-wel-eyebrow">{TAPS_EYEBROW}</div>
-                    <h2 className="mk-wel-h2 mk-wel-h2--sm">{TAPS_HEADING}</h2>
-                    <Taps onSend={onSendAnswers} />
-                  </div>
-                )}
-                <div className="mk-wel-ready">
-                  <div className="mk-wel-eyebrow">{READY_EYEBROW}</div>
-                  <h3 className="mk-wel-h3">{READY_HEADING}</h3>
-                  <p>{READY_BODY}</p>
-                  <ul>{READY_LIST.map((r) => <li key={r}><i aria-hidden="true">→</i>{r}</li>)}</ul>
-                </div>
-              </div>
-            </section>
-
-            <div className="mk-wel-close">
-              <p>{waiting ? CLOSE_WAITING : CLOSE_LINE}</p>
-              <div className="mk-wel-hand">{CLOSE_HAND}</div>
-            </div>
-          </>
-        )}
-      </div>
+          <div className="mk-wel-passcol"><Pass kind={kind} data={data} loading={loading} /></div>
+        </div>
+      </header>
+      {bands.map((b, i) => b(i % 2 === 0 ? 1 : 2))}
+      {!bad && (
+        <section className={`mk-wel-close mk-wel-band--${bands.length % 2 === 0 ? 1 : 2}`}>
+          <p>{CLOSE_LINE}</p>
+          <div className="mk-wel-closesign">{CLOSE_SIGN}</div>
+        </section>
+      )}
     </div>
   );
 };

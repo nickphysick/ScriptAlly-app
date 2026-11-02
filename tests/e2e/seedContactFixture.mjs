@@ -11,6 +11,7 @@
  * gaps), but NO reply-time gap — `responseTimeWeeks` ABSENT is the writer's "Unknown" and is not
  * flagged (ruling c; agentDataQualityNeeds flags only the quick-add stub 0).
  */
+import { targetEnv, TARGET_PROJECT } from "./fsTarget.mjs";
 import { readFileSync, existsSync } from "node:fs";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
@@ -18,9 +19,9 @@ import { collection, deleteDoc, doc, getDocs, getFirestore, query, setDoc, where
 
 const env = (p) => Object.fromEntries(readFileSync(p, "utf8").split("\n").filter((l) => l.includes("="))
   .map((l) => { const i = l.indexOf("="); return [l.slice(0, i), l.slice(i + 1).replace(/^["']|["']$/g, "")]; }));
-const dev = env(".env.development");
+const dev = targetEnv();
 const local = existsSync(".env.local") ? env(".env.local") : {};
-if (dev.VITE_FIREBASE_PROJECT_ID !== "scriptally-dev") throw new Error("dev only");
+if (dev.VITE_FIREBASE_PROJECT_ID !== TARGET_PROJECT) throw new Error("dev only");
 
 const EMAIL = process.env.SA_E2E_EMAIL ?? "harness@scriptally.test";
 const PASSWORD = process.env.SA_E2E_PASSWORD ?? local.SA_E2E_PASSWORD;

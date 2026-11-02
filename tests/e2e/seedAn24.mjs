@@ -14,6 +14,7 @@
  *   node tests/e2e/seedAn24.mjs baddate   # "Bad Reply Dates" (v24.1 R2) — a reply dated before its send, one 850 days after
  *   node tests/e2e/seedAn24.mjs restore
  */
+import { targetEnv, TARGET_PROJECT } from "./fsTarget.mjs";
 import { readFileSync, existsSync } from "node:fs";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
@@ -23,9 +24,9 @@ const env = (file) => Object.fromEntries(
   readFileSync(file, "utf8").split("\n").map((l) => l.trim()).filter((l) => l && !l.startsWith("#"))
     .map((l) => { const i = l.indexOf("="); return [l.slice(0, i), l.slice(i + 1).replace(/^["']|["']$/g, "")]; }),
 );
-const dev = env(".env.development");
+const dev = targetEnv();
 const local = existsSync(".env.local") ? env(".env.local") : {};
-if (dev.VITE_FIREBASE_PROJECT_ID !== "scriptally-dev") throw new Error(`Refusing to seed "${dev.VITE_FIREBASE_PROJECT_ID}" — dev only.`);
+if (dev.VITE_FIREBASE_PROJECT_ID !== TARGET_PROJECT) throw new Error(`Refusing to seed "${dev.VITE_FIREBASE_PROJECT_ID}" — dev only.`);
 const PASSWORD = process.env.SA_E2E_PASSWORD ?? local.SA_E2E_PASSWORD;
 if (!PASSWORD) throw new Error("No SA_E2E_PASSWORD in .env.local");
 const app = initializeApp({

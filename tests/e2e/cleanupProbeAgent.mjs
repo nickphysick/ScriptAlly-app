@@ -10,6 +10,7 @@
  *
  * DEV ONLY, like the seeder beside it. Prints what it deleted; the calling test asserts on it.
  */
+import { targetEnv, TARGET_PROJECT } from "./fsTarget.mjs";
 import { readFileSync, existsSync } from "node:fs";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
@@ -19,10 +20,10 @@ export const PROBE_NAME = "Zz Probe Agent";
 
 const env = (p) => Object.fromEntries(readFileSync(p, "utf8").split("\n").filter((l) => l.includes("="))
   .map((l) => { const i = l.indexOf("="); return [l.slice(0, i), l.slice(i + 1).replace(/^["']|["']$/g, "")]; }));
-const dev = env(new URL("../../.env.development", import.meta.url).pathname);
+const dev = targetEnv();
 const localPath = new URL("../../.env.local", import.meta.url).pathname;
 const local = existsSync(localPath) ? env(localPath) : {};
-if (dev.VITE_FIREBASE_PROJECT_ID !== "scriptally-dev") throw new Error("dev only");
+if (dev.VITE_FIREBASE_PROJECT_ID !== TARGET_PROJECT) throw new Error("dev only");
 
 const EMAIL = process.env.SA_E2E_EMAIL ?? "harness@scriptally.test";
 const PASSWORD = process.env.SA_E2E_PASSWORD ?? local.SA_E2E_PASSWORD;

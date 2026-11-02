@@ -56,9 +56,10 @@ const EXPECT = {
       "No. 14", "of 50",
       "That's your place confirmed.",
       "Welcome aboard. You're one of the first fifty writers to use QueryHawk, and this is your pass.",
-      "Hi, I'm Nick, a keen writer with a background in simplifying data to drive smart decision making. I spent a year designing and building QueryHawk alongside my day job, driven by the belief that good stories shouldn't be lost to a messy querying campaign.",
-      "I truly believe these tools give your manuscript the very best chance of landing with the right agent. Please use everything it has to offer, and let me know how you find it.",
-      "Very best of luck with your campaign, and thank you for being part of the journey.",
+      /* welcome page v1, phase 2: the note as founding-emails-v2 words it */
+      "Hi, I'm Nick. I spent a year designing and building QueryHawk alongside my day job, driven by the belief that good stories shouldn't be lost to a messy querying campaign.",
+      "I truly believe these tools give your manuscript the very best chance of landing with the right agent. Please use everything QueryHawk has to offer and let me know how you find it.",
+      "Very best of luck with your campaign, and thank you for being part of the journey. We'll speak soon.",
       "Nick", "Founder, QueryHawk",
       "What you get",
       "QueryHawk Pro, free for your entire querying campaign",
@@ -133,13 +134,40 @@ describe("EM-1 · each email renders, HTML and text, with the brief's words", ()
   });
 });
 
+describe("EM-1 · the sign-off and the pass label (welcome page v1, phase 2)", () => {
+  /* The <p> holding exactly "Nick", and the one holding the pass label, read from the HTML. */
+  const tagHolding = (html: string, text: string) => {
+    const m = html.match(new RegExp(`<p style="([^"]*)">${text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}</p>`));
+    return m ? m[1] : null;
+  };
+  for (const [name, e] of [["welcome", welcome], ["waiting", waiting]] as const) {
+    it(`${name}: "Nick" is typewriter (Special Elite, Courier New fallback), 26px, ink #1c130f, never handwritten`, () => {
+      const st = tagHolding(e.html, "Nick");
+      expect(st, "a paragraph holding the signature").not.toBeNull();
+      expect(st).toMatch(/font-family:'Special Elite','Courier New'/);
+      expect(st).toMatch(/font-size:26px/);
+      expect(st).toMatch(/color:#1c130f/);
+      expect(e.html).not.toMatch(/Caveat|cursive/);
+    });
+    it(`${name}: the pass label is "Founding writer pass" in sentence case, serif 600, #7a3420; no capitals in either part`, () => {
+      const st = tagHolding(e.html, "Founding writer pass");
+      expect(st, "the label, in sentence case").not.toBeNull();
+      expect(st).toMatch(/font-family:'Source Serif 4'/);
+      expect(st).toMatch(/font-weight:600/);
+      expect(st).toMatch(/color:#7a3420/);
+      expect(st).not.toMatch(/letter-spacing|text-transform/);
+      for (const part of [e.html, e.text]) expect(part).not.toMatch(/FOUNDING WRITER PASS/);
+    });
+  }
+});
+
 describe("EM-2 · the welcome's number is the number it is given (the stored one)", () => {
   for (const n of [1, 14, 50]) {
     it(`No. ${n}`, () => {
       const e = ok(prepareWelcome(PROD, n, 50, "unsub"));
       expect(e.subject).toBe(`You're in: founding writer No. ${n}`);
       expect(words(e.html)).toContain(`No. ${n} of 50`);
-      expect(e.text).toContain(`FOUNDING WRITER PASS: No. ${n} of 50`);
+      expect(e.text).toContain(`Founding writer pass: No. ${n} of 50`);
     });
   }
 });

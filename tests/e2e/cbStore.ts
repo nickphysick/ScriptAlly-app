@@ -11,6 +11,7 @@
  * ⚠️ DEV ONLY, AND LEAF WRITES ONLY: it refuses any project but scriptally-dev, and it writes
  *    `todoPrefs.noteboard` (and its children) by field path, never the `todoPrefs` map other pages share.
  */
+import { targetEnv, TARGET_PROJECT } from "./fsTarget.mjs";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { initializeApp, type FirebaseApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
@@ -25,9 +26,9 @@ let ready: Promise<{ app: FirebaseApp; db: Firestore; uid: string }> | null = nu
 function store() {
   if (!ready) {
     ready = (async () => {
-      const dev = env(".env.development");
+      const dev = targetEnv();
       const local = existsSync(".env.local") ? env(".env.local") : {};
-      if (dev.VITE_FIREBASE_PROJECT_ID !== "scriptally-dev") throw new Error(`Refusing to touch "${dev.VITE_FIREBASE_PROJECT_ID}".`);
+      if (dev.VITE_FIREBASE_PROJECT_ID !== TARGET_PROJECT) throw new Error(`Refusing to touch "${dev.VITE_FIREBASE_PROJECT_ID}".`);
       const password = process.env.SA_E2E_PASSWORD ?? local.SA_E2E_PASSWORD;
       if (!password) throw new Error("No SA_E2E_PASSWORD in .env.local");
       const app = initializeApp({

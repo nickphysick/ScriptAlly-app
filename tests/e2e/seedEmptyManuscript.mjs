@@ -16,6 +16,7 @@
  *   node tests/e2e/seedEmptyManuscript.mjs            # create, print the id
  *   node tests/e2e/seedEmptyManuscript.mjs --restore  # delete it
  */
+import { targetEnv, TARGET_PROJECT } from "./fsTarget.mjs";
 import { readFileSync, existsSync } from "node:fs";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
@@ -26,10 +27,10 @@ const env = (file) => Object.fromEntries(
     .map((l) => l.trim()).filter((l) => l && !l.startsWith("#"))
     .map((l) => { const i = l.indexOf("="); return [l.slice(0, i), l.slice(i + 1).replace(/^["']|["']$/g, "")]; }),
 );
-const dev = env(".env.development");
+const dev = targetEnv();
 const local = existsSync(".env.local") ? env(".env.local") : {};
 const PROJECT = dev.VITE_FIREBASE_PROJECT_ID;
-if (PROJECT !== "scriptally-dev") {
+if (PROJECT !== TARGET_PROJECT) {
   throw new Error(`Refusing to seed "${PROJECT}" — this script is for scriptally-dev only.`);
 }
 const EMAIL = process.env.SA_E2E_EMAIL ?? "harness@scriptally.test";

@@ -1,0 +1,22 @@
+Subject: Confirm your founding place
+
+One click and you're on the list.
+
+Thanks for putting your name down as a QueryHawk founding writer. There's just one thing left to do.
+
+Confirm my place: https://queryhawk.net/api/waitlist/verify?token=tok123
+
+This link works for 48 hours.
+
+Your place isn't held until you click. There are fifty founding places and they go in the order people confirm. If the last one goes while this sits in your inbox, you'll go on the waiting list instead, and I'll tell you straight.
+
+Once you've confirmed, you'll get your founding writer pass, and your invite follows when your wave opens.
+
+Didn't ask for this? Just ignore it. Nothing happens without that click, and we won't write again.
+
+---
+Questions, or something you'd like QueryHawk to do? Just reply, or write to hello@queryhawk.net. I read every one.
+
+Unsubscribe: https://queryhawk.net/api/waitlist/unsubscribe?token=unsub456
+This takes you off the list and frees your place for another writer.
+QueryHawk · Made in the UK, for writers

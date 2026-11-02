@@ -24,6 +24,7 @@
  *   node tests/e2e/seedAllQueried.mjs B         # three known mismatches left unqueried
  *   node tests/e2e/seedAllQueried.mjs --clean   # remove it
  */
+import { targetEnv, TARGET_PROJECT } from "./fsTarget.mjs";
 import { readFileSync, existsSync } from "node:fs";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
@@ -32,9 +33,9 @@ import { getFirestore, doc, getDocs, deleteDoc, collection, writeBatch, setDoc, 
 const env = (f) => Object.fromEntries(readFileSync(f, "utf8").split("\n").map((l) => l.trim())
   .filter((l) => l && !l.startsWith("#"))
   .map((l) => { const i = l.indexOf("="); return [l.slice(0, i), l.slice(i + 1).replace(/^["']|["']$/g, "")]; }));
-const dev = env(".env.development");
+const dev = targetEnv();
 const local = existsSync(".env.local") ? env(".env.local") : {};
-if (dev.VITE_FIREBASE_PROJECT_ID !== "scriptally-dev") throw new Error("dev only");
+if (dev.VITE_FIREBASE_PROJECT_ID !== TARGET_PROJECT) throw new Error("dev only");
 const EMAIL = process.env.SA_E2E_EMAIL ?? "harness@scriptally.test";
 const PASSWORD = process.env.SA_E2E_PASSWORD ?? local.SA_E2E_PASSWORD;
 if (!PASSWORD) throw new Error("No SA_E2E_PASSWORD in .env.local");

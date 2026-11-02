@@ -8,6 +8,7 @@
  *
  * ⚠️ DEV ONLY, and it refuses to run anywhere else.
  */
+import { targetEnv, TARGET_PROJECT } from "./fsTarget.mjs";
 import { readFileSync } from "node:fs";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
@@ -16,8 +17,8 @@ import { getFirestore, getDocs, collection } from "firebase/firestore";
 const env = (f) => Object.fromEntries(readFileSync(f, "utf8").split("\n").map((l) => l.trim())
   .filter((l) => l && !l.startsWith("#")).map((l) => { const i = l.indexOf("="); return [l.slice(0, i), l.slice(i + 1).replace(/^["']|["']$/g, "")]; }));
 
-const dev = env(".env.development");
-if (dev.VITE_FIREBASE_PROJECT_ID !== "scriptally-dev") { console.error("refusing: not scriptally-dev"); process.exit(1); }
+const dev = targetEnv();
+if (dev.VITE_FIREBASE_PROJECT_ID !== TARGET_PROJECT) { console.error("refusing: not scriptally-dev"); process.exit(1); }
 const app = initializeApp({ apiKey: dev.VITE_FIREBASE_API_KEY, authDomain: dev.VITE_FIREBASE_AUTH_DOMAIN, projectId: dev.VITE_FIREBASE_PROJECT_ID });
 const { user } = await signInWithEmailAndPassword(getAuth(app), "harness@scriptally.test", env(".env.local").SA_E2E_PASSWORD);
 const db = getFirestore(app);

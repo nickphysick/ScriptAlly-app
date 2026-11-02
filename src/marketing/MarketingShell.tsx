@@ -22,6 +22,7 @@ import { CONSENT_EVENT, initAnalytics, trackPageView } from "./analytics";
 import { captureAttribution } from "./attribution";
 import { HERO_CTA, HERO_PHONE_JOIN } from "./landingCopy";
 import { joinTarget, scrollToForm, NavPass } from "./WaitlistParts";
+import { WELCOME_FOOT } from "./welcomeCopy";
 
 /* ── The brand artwork: the hawk and the drawn wordmark ──
    Both sit in public/ rather than src/assets/ so they are served at stable paths — and public/ is
@@ -165,6 +166,9 @@ export const MarketingShell: React.FC<{
      card's once the hero is passed), "Become a Founding Writer" on the desktop (the founding band's).
      No links, no Log in, no menu; the logo scrolls to the top. Every other public page keeps its chrome. */
   const waitlist = path === "/";
+  /* ⚠️ /welcome IS A DEAD END ON PURPOSE (welcome page v1, 2 Nov): the bar is the logo and nothing else,
+     not even a button home, and the footer is one line whose only link is Privacy (WEL-2). */
+  const welcome = path === "/welcome";
   const toTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
   const toFeatures = () => {
@@ -202,6 +206,12 @@ export const MarketingShell: React.FC<{
       <div className="mk-navsentinel mk-navsentinel--release" ref={releaseRef} aria-hidden="true" />
       <div className={"mk-navwrap" + (scrolled ? " mk-scrolled" : "")}>
         <nav className="mk-nav" aria-label="Marketing">
+          {welcome ? (
+            <div className="mk-brand mk-brand--still">
+              <img className="mk-logo" src={artUrl(BRAND_MARK_SMALL)} alt="" />
+              <span className="mk-navword">QueryHawk</span>
+            </div>
+          ) : (<>
           <button type="button" className="mk-brand mk-brand-link" onClick={waitlist ? toTop : () => onNavigate("landing")} aria-label="QueryHawk home">
             {/* ⚠️ SHIPPED AS SUPPLIED — NO FILTER, NO RECOLOUR. The mark is artwork, not an icon that
                 takes the tier's ink, and its transparency is part of the drawing.
@@ -282,11 +292,12 @@ export const MarketingShell: React.FC<{
             <span /><span /><span />
           </button>
           </>)}
+          </>)}
         </nav>
 
         {/* The panel is inside the sticky wrapper so it travels with the nav and inherits its
             ground; it is only reachable below the breakpoint, where the links are hidden. */}
-        {menuOpen && !waitlist && (
+        {menuOpen && !waitlist && !welcome && (
           <div className="mk-navpanel" id="mk-navpanel" ref={panelRef}>
             {MENU_LINKS.map((l) => (
               <button key={l.label} type="button" onClick={pick(l.go)}
@@ -320,7 +331,15 @@ export const MarketingShell: React.FC<{
           last child — which put it INSIDE whatever the page's last surface was, so nothing could
           round that surface's bottom corners against it. Chrome on both sides of the sheet now
           belongs to the same component. */}
-      <MarketingFooter onNavigate={onNavigate} waitlist={waitlist} />
+      {welcome ? (
+        <footer className="mk-foot mk-foot--welcome">
+          <div className="mk-brand mk-brand--still">
+            <img className="mk-footmark" src={artUrl(BRAND_MARK_SMALL)} alt="" width={BRAND_MARK_SMALL.width} height={BRAND_MARK_SMALL.height} loading="lazy" />
+            <span className="mk-wordmark">QueryHawk</span>
+          </div>
+          <p>{WELCOME_FOOT} · <a href="/privacy" onClick={(e) => { e.preventDefault(); onNavigate("privacy"); }}>Privacy</a></p>
+        </footer>
+      ) : <MarketingFooter onNavigate={onNavigate} waitlist={waitlist} />}
       <ConsentBar onPrivacy={() => onNavigate("privacy")} />
     </div>
   );
