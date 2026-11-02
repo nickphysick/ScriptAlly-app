@@ -462,7 +462,8 @@ describe("the hero", () => {
   it("says \"No more winging it.\" once, by hand, then the sub", () => {
     const h = hero();
     expect(h).toContain('<p class="mk-dh-strap">' + HERO_H1 + "</p>");
-    expect(unesc(h)).toContain(WAIT_HERO_SUB);
+    expect(unesc(h.replace(/<[^>]+>/g, ""))).toContain(WAIT_HERO_SUB);
+    expect(h, "the brand is bold").toContain("<b>QueryHawk</b>");
   });
 
   it("asks for an address, and carries nothing that leaves the page", () => {

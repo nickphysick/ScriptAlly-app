@@ -12,7 +12,8 @@
  * ⚠️ THE TEXT NEVER ANIMATES. Only the places counter counts down, as everywhere.
  */
 import React from "react";
-import { WAIT_HERO_Q, WAIT_HERO_STRAP, WAIT_HERO_SUB, HERO_CTA } from "./landingCopy";
+import { WAIT_HERO_Q, WAIT_HERO_STRAP, HERO_CTA } from "./landingCopy";
+import { HeroTrio, HeroSub } from "./HeroLines";
 import { FoundingSignup } from "./FoundingSignup";
 import { HeroPlaces } from "./HeroPlaces";
 import { HERO_FORM } from "./WaitlistParts";
@@ -33,7 +34,8 @@ export const Hero: React.FC<{
             <span className="mk-dh-q2"><mark>{WAIT_HERO_Q[1]}</mark></span>
           </h1>
           <p className="mk-dh-strap">{WAIT_HERO_STRAP}</p>
-          <p className="mk-dh-sub">{WAIT_HERO_SUB}</p>
+          <HeroTrio prefix="mk-dh" />
+          <HeroSub prefix="mk-dh" />
           <div className="mk-dh-signup" id={HERO_FORM + "-signup"}>
             <FoundingSignup idPrefix={HERO_FORM} source="landing-panel" formClass="mk-dh-form" ctaLabel={HERO_CTA}
               afterForm={<HeroPlaces variant="line" />} onNavigate={onNavigate} />

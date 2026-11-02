@@ -35,35 +35,21 @@
 .mk-wljoin:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 
 /* ── The hero: a navy drawer pulled down over the page (waitlist v2, ref `.hero` v9–v13) ──
-   Rounded at its foot, a soft shadow, a short grab line centred near its bottom edge; the sign-up sits
-   at its foot. ⚠️ IT REACHES 70% OF THE SCREEN (2 Nov; it was 75%, which left too much empty navy): its foot sits at 70svh, so the
-   min-height is that less the 60px bar above it. On a short phone the content is taller than that, and the
-   drawer is its content's height. The Birds-eye heading and its rule stay in the first screen (LW-7). */
+   Rounded at its foot, a soft shadow, a short grab line centred in its bottom padding.
+   ⚠️ A CENTRED STACK THAT NEVER STRETCHES (2 Nov; until then it reached 70% of the screen, and the spare
+   height showed as empty navy). No min-height and no auto margins: the drawer is its content plus 34px
+   top and bottom on every phone, and each item states its own gap above it. LW-7 holds both. */
 .mk-wl-hero {
   position: relative; z-index: 2; display: flex; flex-direction: column; box-sizing: border-box;
-  min-height: calc(70svh - var(--mk-nav-h, 60px));
-  background: #1b2433; color: #fff; padding: 18px 24px 24px;
+  background: #1b2433; color: #fff; padding: 34px 24px; text-align: center;
   border-radius: 0 0 28px 28px; box-shadow: 0 14px 30px -12px rgba(27, 36, 51, .45);
 }
-/* The spare height is shared equally above the strap, the sub-line group and the sign-up: three auto
-   margins share it evenly. Today's gaps are the PADDING beneath them, so they are the minimum. */
-.mk-wl-hero > .mk-wl-strap, .mk-wl-hero > .mk-wl-subg, .mk-wl-hero > .mk-wl-signup { margin-top: auto; }
 .mk-wl-hero::after {
   content: ""; position: absolute; left: 50%; bottom: 12px; width: 40px; height: 4px; margin-left: -20px;
   border-radius: 4px; background: rgba(255, 255, 255, .28);
 }
-/* The binocular hawk, 170px wide, 4px from the drawer's right edge (the group sits inside the drawer's 24px
-   padding, so -20px here), his feet on the group's foot, which is the foot of "See what it does". His ink
-   fills the image, so the box is the drawing. */
-/* ⚠️ THE GROUP IS AT LEAST AS TALL AS THE HAWK (166px) PLUS 6px, its sub-line and link at its foot. He is
-   taller than the two of them, so without this his head rose above the group and covered the strap's full
-   stop at 375, where the drawer has no spare height to give. */
-/* ⚠️ THE WORDS ARE CENTRED ON THE HAWK (2 Nov, Nick: "a massive odd looking gap" under the strap). With
-   them at the group's foot, all 38px by which he is taller than the sub-line and link fell between the
-   strap and the sub-line. Centred, it is shared above and below them; the 6px on top keeps his crest off
-   the strap's full stop at 375, and the sign-up's 10px replaces the 26px that sat under the link. */
-.mk-wl-subg { position: relative; display: flex; flex-direction: column; justify-content: center; padding-top: 6px; min-height: 173px; }
-.mk-wl-herohawk { position: absolute; right: -20px; bottom: 0; width: 170px; height: auto; max-width: none; }
+/* The binocular hawk, 128px wide, centred, 14px under the strap. */
+.mk-wl-herohawk { display: block; width: 128px; height: auto; max-width: none; margin: 14px auto 0; }
 .mk-wl .mk-wl-q {
   margin: 0; font-family: var(--mk-f-display) !important; font-weight: 400 !important; letter-spacing: 0 !important;
   font-size: 28px !important; line-height: 1.2 !important; color: rgba(255, 255, 255, .86);
@@ -74,15 +60,19 @@
   font: inherit; color: inherit; padding: 0;
   background: linear-gradient(transparent 70%, rgba(232, 180, 163, .5) 74%, rgba(232, 180, 163, .5) 92%, transparent 93%);
 }
-.mk-wl-strap { font: 600 42px/1.05 var(--mk-f-hand); color: #e8b4a3; margin: 0; padding-top: 8px; white-space: nowrap; }
-/* The sub-line's measure stops 10px short of the hawk (his left edge is 150px in from the content's right). */
-.mk-wl-sub { position: relative; font: 400 21px/1.45 var(--mk-f-serif); color: rgba(255, 255, 255, .86); margin: 0; max-width: calc(100% - 160px); }
+.mk-wl-strap { font: 600 42px/1.05 var(--mk-f-hand); color: #e8b4a3; margin: 10px 0 0; white-space: nowrap; }
+/* The trio: three words in the typewriter face, a blush dot between each, one line. */
+.mk-wl-trio { display: flex; justify-content: center; align-items: baseline; margin: 6px 0 0; padding: 0; list-style: none; white-space: nowrap; }
+.mk-wl-trio li { font: 400 23px/1.2 var(--mk-f-display); color: #fff; }
+.mk-wl-dot { font: 400 29px/1 var(--mk-f-display); color: #e8b4a3; margin: 0 10px; }
+.mk-wl-sub { font: 400 20px/1.45 var(--mk-f-serif); color: rgba(255, 255, 255, .86); margin: 12px auto 0; max-width: 360px; text-wrap: balance; }
+.mk-wl-sub b { font-weight: 700; color: #fff; white-space: nowrap; }
 .mk-wl-see {
-  display: inline-flex; align-items: center; gap: 6px; align-self: flex-start; margin-top: 12px; padding-bottom: 2px;
+  display: inline-flex; align-items: center; gap: 6px; align-self: center; margin-top: 10px; padding-bottom: 2px;
   color: #e8b4a3; font: 600 16px/1.3 var(--mk-f-serif); text-decoration: none; border-bottom: 1.5px solid rgba(232, 180, 163, .5);
 }
 .mk-wl-see:focus-visible { outline: 2px solid #e8b4a3; outline-offset: 3px; border-radius: 3px; }
-.mk-wl-signup { padding-top: 10px; }
+.mk-wl-signup { margin-top: 26px; text-align: left; }
 .mk-wl-form, .mk-ccform { display: grid; gap: 10px; }
 .mk-wl-form input[type="email"], .mk-ccform input[type="email"] {
   width: 100%; height: 50px; box-sizing: border-box; border-radius: 12px; border: 1px solid rgba(255, 255, 255, .25); background: #fff;
@@ -110,7 +100,7 @@
 .mk-wl-feat { margin: 0; padding: 62px 24px 48px; border-top: 1px solid rgba(28, 19, 15, .08); }
 .mk-wl-sec > .mk-wl-feat:nth-child(odd) { background: #f4ede3; }
 .mk-wl-sec > .mk-wl-feat:nth-child(even) { background: #fbf6ef; }
-.mk-wl-feat.mk-wl-feat--first { padding: 66px 24px 20px; border-top: 0; } /* 66: a little more room under the drawer (2 Nov) */
+.mk-wl-feat.mk-wl-feat--first { padding: 54px 24px 20px; border-top: 0; } /* 54: 26px under the drawer, so the heading and its rule still fit a 390×844 screen under the taller stack (2 Nov) */
 .mk-wl-sec > .mk-det + .mk-wl-feat { border-top: 0; }
 .mk-wl .mk-wl-feat h3 {
   font-family: var(--mk-f-display) !important; font-weight: 400 !important; letter-spacing: 0 !important;
@@ -295,7 +285,12 @@
   background: linear-gradient(transparent 72%, rgba(232, 180, 163, .55) 72%, rgba(232, 180, 163, .55) 92%, transparent 92%);
 }
 .mk-dh-strap { margin: 14px 0 0; font: 600 40px/1.1 var(--mk-f-hand); color: #a2452a; }
-.mk-dh-sub { margin: 16px 0 28px; max-width: 480px; font: 400 21px/1.6 var(--mk-f-serif); color: rgba(28, 19, 15, .74); }
+/* The trio (2 Nov): 22px under the strap, the typewriter face, a rust dot between each word. */
+.mk-dh-trio { display: flex; align-items: baseline; margin: 22px 0 0; padding: 0; list-style: none; white-space: nowrap; }
+.mk-dh-trio li { font: 400 24px/1.2 var(--mk-f-display); color: #1c130f; }
+.mk-dh-dot { font: 400 30px/1 var(--mk-f-display); color: #a2452a; margin: 0 12px; }
+.mk-dh-sub { margin: 10px 0 28px; max-width: 480px; text-wrap: balance; font: 400 21px/1.6 var(--mk-f-serif); color: rgba(28, 19, 15, .74); }
+.mk-dh-sub b { font-weight: 700; color: #1c130f; white-space: nowrap; }
 .mk-dh-form { display: flex; gap: 10px; max-width: 560px; }
 .mk-dh-form input[type="email"] {
   flex: 1; min-width: 0; height: 56px; box-sizing: border-box; border-radius: 14px; border: 1px solid rgba(28, 19, 15, .15);
