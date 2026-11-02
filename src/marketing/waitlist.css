@@ -264,7 +264,12 @@
 /* ── The hero (ref `.qh-heroband`): a white card over the navy, the copy left and the binocular hawk right ──
    ⚠️ THE NAVY IS THE NAV'S OWN INK, CARRIED DOWN TO 58% OF THE BAND, then the lower surface — so the bar
    and the band are one ground, and the card sits half on each. Colour and image as separate longhands. */
+/* ⚠️ LIFTED ABOVE WHAT FOLLOWS (privacy page v1, addendum B): the card's shadow reaches ~80px below the
+   card and this section ends at the card's foot, so the next section's own ground painted over it and the
+   shadow stopped in a hard horizontal line, at the sides as well. `z-index: 1` puts the section, and the
+   shadow with it, above the following sections; none of them is stacked higher (HERO-1). */
 .mk-dh {
+  position: relative; z-index: 1;
   padding: 24px 0 0;
   background-color: var(--mk-lower);
   background-image: linear-gradient(var(--mk-ink-shell) 0, var(--mk-ink-shell) 58%, var(--mk-lower) 58%);
