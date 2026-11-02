@@ -1121,7 +1121,8 @@ describe("the Birds-eye band and the details banner", () => {
     expect(b).toContain('data-be="desk"');
     expect(b, "the hawk, versioned").toContain('src="/images/qc/be-hawk-head.png?v=' + v("/images/qc/be-hawk-head.png") + '"');
     expect(b.match(/<li>/g) ?? [], "three ticks").toHaveLength(3);
-    expect(b, "only \"Much\" bold").toContain("<b>Much</b> more sightly than a spreadsheet");
+    expect(b, "the second tick, with no bold (2 Nov)").toContain("<span>Much easier on the eye than a spreadsheet</span>");
+    expect(b, "no bold in the ticks").not.toMatch(/<li>(?:(?!<\/li>)[\s\S])*<b>/);
   });
 
   it("the banner: its pills are in-page anchors, and every one's target is on the page", () => {

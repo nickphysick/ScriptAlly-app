@@ -16,11 +16,10 @@
  * ⚠️ NO DATES. "When your wave opens" is honest; "in October" is a promise made by somebody who
  * does not know. "Weeks, not months" is Nick's own, hedged with "all being well".
  *
- * ⚠️ THE WAITING-LIST PROMISE FOLLOWS WHAT THE SYSTEM DOES (brief decision 2(b)). An unsubscribe
- * puts the founding number back on the freed list for the next writer to CONFIRM; nobody on the
- * waiting list is moved, numbered or emailed. So email 3 says "in the order people confirmed" and
- * "you'll hear from me" — never that a place goes to them, or that they will be emailed straight
- * away. Building that promotion is a cap/ledger decision for Nick (see the founding emails report).
+ * ⚠️ THE WAITING-LIST PROMISE FOLLOWS WHAT THE SYSTEM DOES. Since launch readiness (2 Nov) a freed
+ * founding place goes to the next confirmed writer on the waiting list automatically, in the same
+ * transaction that releases it, and they are sent email 2 (waitlistStore `writeReleaseInTx`, PROMO-1).
+ * So email 3 can now say so. (Until then it was decision 2(b): no promise, because nothing did it.)
  */
 
 /* ══════════════ Shared ══════════════ */
@@ -125,10 +124,10 @@ export const WAITING_HEADING = "All fifty places have gone, but you're on the wa
 export const WAITING_LEAD =
   "Thanks for confirming. All fifty founding places were taken before your click came through, so " +
   "you're on the waiting list, in the order people confirmed.";
-/** Decision 2(b): bold lead, then the rest. Promises only what the system does. */
+/** Bold lead, then the rest. True since a freed place promotes the next writer (2 Nov, PROMO-1). */
 export const WAITING_NOTE: [string, string] = [
-  "You're on the list in the order people confirmed.",
-  " If anything changes, you'll hear from me.",
+  "If a founding writer gives up their place, it goes to the next person in line,",
+  " and I'll email you straight away if that's you.",
 ];
 export const WAITING_NOTHING_TO_DO =
   "You don't need to do anything else. Your address stays on the list, and you can take it off any " +

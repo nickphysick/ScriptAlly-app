@@ -516,12 +516,12 @@ describe("landing copy — verbatim locks", () => {
   });
 
   /* ⚠️ WAITLIST v2 (1 Nov): the Birds-eye view's words, the details banner and the founding pass. */
-  it("the Birds-eye view, verbatim (only \"Much\" bold)", () => {
+  it("the Birds-eye view, verbatim (no bold since 2 Nov)", () => {
     expect(BE_HEADING).toBe("A bird’s-eye view of your entire querying campaign");
     expect(BE_LINE).toBe("Every query on one timeline, so you can quickly see what’s needed and when.");
     expect(BE_TICKS).toEqual([
       "All your queries from start to finish",
-      { b: "Much", rest: " more sightly than a spreadsheet" },
+      "Much easier on the eye than a spreadsheet",
       "Anything that needs you rises to the top",
     ]);
   });

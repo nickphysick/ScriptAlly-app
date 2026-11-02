@@ -18,7 +18,7 @@ import { readFileSync } from "node:fs";
 const APEX = "https://queryhawk.net";
 const WWW = "https://www.queryhawk.net";
 const SITE = "https://scriptally-app.web.app";
-const LIVE_TITLE = "QueryHawk: Query With Confidence";
+const LIVE_TITLE = "QueryHawk: track every query to a literary agent";
 const PROJECT_ID = "gen-lang-client-0801391782";
 /** Landing-only go-live needs the waitlist alone (runbook step 2). The rest are reported, not
  *  required: waitlistRetention is the optional dry-run job, and everything else waits for the app
@@ -59,13 +59,21 @@ const hosting = async () => {
   line([301, 302, 307, 308].includes(w.status) && loc.replace(/\/$/, "") === APEX, "hosting · www redirects to the apex", `${w.status} → ${loc || "none"}`);
   const s = await get(`${SITE}/`);
   line(titleOf(await s.text()) === LIVE_TITLE, "hosting · scriptally-app.web.app serves the same title");
-  const d = await get(`${APEX}/pricing`);
-  const dh = await d.text();
-  line(d.status === 200 && titleOf(dh) === LIVE_TITLE && dh.includes('id="root"'), "hosting · deep link /pricing returns the app shell", String(d.status));
-  /* LANDING-ONLY. A server sees no hash, and every path serves the same page, so what decides
-     whether /dashboard or /#/login shows the app is the JavaScript. Both must serve the landing's
-     page, and that page's bundle must contain no way into the app at all. */
-  for (const p of ["/dashboard", "/#/login"]) {
+  /* LAUNCH READINESS (2 Nov): the live site is three pages. Every other page (unfinished public pages,
+     the workspace, anything unknown) is a hosting-level 301 to / (firebase.json, RED-1). */
+  for (const p of ["/pricing", "/terms", "/founders", "/dashboard", "/nonsense"]) {
+    const d = await get(`${APEX}${p}`);
+    const loc = d.headers.get("location") ?? "";
+    line(d.status === 301 && new URL(loc, APEX).pathname === "/", `hosting · ${p} is a 301 to /`, `${d.status} → ${loc || "none"}`);
+  }
+  for (const p of ["/welcome?v=verified", "/privacy"]) {
+    const d = await get(`${APEX}${p}`);
+    line(d.status === 200 && titleOf(await d.text()) === LIVE_TITLE, `hosting · ${p} is served, not moved`, String(d.status));
+  }
+  /* LANDING-ONLY. A server sees no hash, so what decides whether /#/login shows the app is the
+     JavaScript. It must serve the landing's page, and that page's bundle must contain no way into the
+     app at all. */
+  for (const p of ["/#/login"]) {
     const r2 = await get(`${APEX}${p}`);
     const h2 = await r2.text();
     line(r2.status === 200 && titleOf(h2) === LIVE_TITLE && h2.match(/\/assets\/index-[\w-]+\.js/)?.[0] === asset,

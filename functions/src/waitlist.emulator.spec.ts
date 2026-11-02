@@ -645,7 +645,7 @@ describe("the retention job deletes nothing until it is armed", () => {
   it("an empty collection is a quiet no-op, not an error", async () => {
     await setCounter(0);
     expect(await runRetention(db, Date.now(), true))
-      .toEqual({ dormant: 0, unsubscribed: 0, released: 0, scanned: 0 });
+      .toEqual({ dormant: 0, unsubscribed: 0, released: 0, scanned: 0, promoted: 0, promotions: [] });
   });
 });
 
@@ -755,5 +755,100 @@ describe("founding emails v1", () => {
     const kinds = [(await verifyWaitlist(db, token, Date.now())).kind, (await verifyWaitlist(db, token, Date.now())).kind];
     expect(kinds).toEqual(["verified", "already"]);
     expect(kinds.map(emailAfterVerify)).toEqual(["welcome", null]);
+  });
+});
+
+/* ══════════════ PROMO-1 (launch readiness, 2 Nov): a freed place goes to the next writer in line ══════════════ */
+
+describe("PROMO-1 · a freed founding place promotes the next confirmed waiting writer", () => {
+  const CAP = 50;
+  const ref = (email: string) => db.doc(`waitlist/${emailHash(email)}`);
+  const data = async (email: string) => (await ref(email).get()).data() ?? {};
+  /** 50 founding writers (Nos. 1–50) and `waiting` confirmed reserves (Nos. 1…n), the counter to match. */
+  const seedFull = async (waiting: number, extra: Record<string, unknown> = {}) => {
+    const batch = db.batch();
+    const now = new Date();
+    for (let n = 1; n <= CAP; n++) {
+      batch.set(ref(`f${n}@example.com`), {
+        email: `f${n}@example.com`, emailNormalised: `f${n}@example.com`, createdAt: now, lastInteractionAt: now,
+        verified: true, verifiedAt: now, status: "verified", position: n, foundingNumber: n, source: "landing-panel",
+      });
+    }
+    for (let r = 1; r <= waiting; r++) {
+      batch.set(ref(`w${r}@example.com`), {
+        email: `w${r}@example.com`, emailNormalised: `w${r}@example.com`, createdAt: now, lastInteractionAt: now,
+        verified: false, status: "waiting", position: null, reserveNumber: r, reserveAt: now, source: "landing-panel",
+      });
+    }
+    batch.set(db.doc(COUNTER_PATH), { verifiedCount: CAP, cap: CAP, reserveIssued: waiting, ...extra });
+    await batch.commit();
+  };
+
+  it("unsubscribing No. 14: waiting #1 becomes No. 14 with exactly one email 2, and the reserves become 1 and 2", async () => {
+    await seedFull(3);
+    const first = await unsubscribeById(db, emailHash("f14@example.com"), Date.now());
+    const again = await unsubscribeById(db, emailHash("f14@example.com"), Date.now());
+    const emails = [first, again].filter((o) => o.promoted);
+    expect(emails, "exactly one email 2 across a click and a second click").toHaveLength(1);
+    expect(first.promoted).toEqual({ docId: emailHash("w1@example.com"), foundingNumber: 14, cap: CAP });
+    expect(again).toEqual({ found: true, released: false, was: "unsubscribed" });
+
+    const w1 = await data("w1@example.com");
+    expect([w1.status, w1.verified, w1.foundingNumber, w1.position, w1.reserveNumber ?? null]).toEqual(["verified", true, 14, 14, null]);
+    expect(w1.promotedAt, "promotion is recorded").toBeTruthy();
+    expect([(await data("w2@example.com")).reserveNumber, (await data("w3@example.com")).reserveNumber], "the queue moves up").toEqual([1, 2]);
+    const c = (await db.doc(COUNTER_PATH).get()).data()!;
+    expect(c.verifiedCount, "one out, one in").toBe(CAP);
+    expect(c.freedNumbers ?? [], "No. 14 is held again").toEqual([]);
+    expect(c.reserveIssued, "the next writer to miss the cap is reserve No. 3").toBe(2);
+    /* No number is held twice. */
+    const held = (await db.collection("waitlist").where("status", "==", "verified").get()).docs.map((d) => d.get("foundingNumber")).sort((a, b) => a - b);
+    expect(held).toEqual(Array.from({ length: CAP }, (_, i) => i + 1));
+  });
+
+  it("two concurrent unsubscribes promote two different writers, and never one twice", async () => {
+    await seedFull(3);
+    const out = await Promise.all([
+      unsubscribeById(db, emailHash("f7@example.com"), Date.now()),
+      unsubscribeById(db, emailHash("f31@example.com"), Date.now()),
+    ]);
+    const promoted = out.map((o) => o.promoted?.docId).filter(Boolean);
+    expect(promoted, "each release promoted someone").toHaveLength(2);
+    expect(new Set(promoted).size, "two different writers").toBe(2);
+    expect(new Set(promoted)).toEqual(new Set([emailHash("w1@example.com"), emailHash("w2@example.com")]));
+    expect(out.map((o) => o.promoted!.foundingNumber).sort((a, b) => a - b)).toEqual([7, 31]);
+    expect((await data("w3@example.com")).reserveNumber, "the last in line is now first").toBe(1);
+    const c = (await db.doc(COUNTER_PATH).get()).data()!;
+    expect([c.verifiedCount, c.reserveIssued, c.freedNumbers ?? []]).toEqual([CAP, 1, []]);
+  });
+
+  it("with nobody waiting the place reopens: places left goes from 0 to 1", async () => {
+    await seedFull(0);
+    const before = await counterOf();
+    expect(before.cap - before.verifiedCount).toBe(0);
+    const out = await unsubscribeById(db, emailHash("f50@example.com"), Date.now());
+    expect(out).toEqual({ found: true, released: true, was: "verified" });
+    const after = await counterOf();
+    expect(after.cap - after.verifiedCount, "one place open for new sign-ups").toBe(1);
+    expect((await db.doc(COUNTER_PATH).get()).get("freedNumbers"), "No. 50 waits for the next writer to confirm").toEqual([50]);
+  });
+
+  it("a writer who joined past the cap without confirming (no reserve number) is passed over", async () => {
+    await seedFull(1);
+    await ref("plain@example.com").set({ email: "plain@example.com", emailNormalised: "plain@example.com", status: "waiting",
+      verified: false, position: null, createdAt: new Date(0), lastInteractionAt: new Date(0), source: "landing-panel" });
+    const out = await unsubscribeById(db, emailHash("f2@example.com"), Date.now());
+    expect(out.promoted?.docId).toBe(emailHash("w1@example.com"));
+    expect((await data("plain@example.com")).status, "still waiting, unconfirmed").toBe("waiting");
+  });
+
+  it("the retention job's release promotes too, and gives back the dormant writer's number", async () => {
+    await seedFull(2);
+    await ref("f9@example.com").set({ lastInteractionAt: new Date(Date.now() - RETENTION_MS - 86_400_000) }, { merge: true });
+    const tally = await runRetention(db, Date.now(), true);
+    expect(tally.promoted).toBe(1);
+    expect(tally.promotions).toEqual([{ docId: emailHash("w1@example.com"), foundingNumber: 9, cap: CAP }]);
+    expect((await data("w2@example.com")).reserveNumber).toBe(1);
+    expect((await db.doc(COUNTER_PATH).get()).get("verifiedCount")).toBe(CAP);
   });
 });

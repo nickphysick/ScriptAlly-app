@@ -349,3 +349,30 @@ describe("retention decides by age, and never guesses", () => {
     expect(retentionIsLive({ [RETENTION_LIVE_ENV]: " TRUE " })).toBe(true);
   });
 });
+
+/* PROMO-1, the pure half (launch readiness, 2 Nov): who is promoted, and how the queue moves up. */
+describe("planPromotion", () => {
+  it("promotes the lowest reserve number and renumbers the rest 1..k", async () => {
+    const { planPromotion } = await import("./waitlistModel");
+    const plan = planPromotion([{ id: "c", reserveNumber: 3 }, { id: "a", reserveNumber: 1 }, { id: "b", reserveNumber: 2 }]);
+    expect(plan.next).toEqual({ id: "a", reserveNumber: 1 });
+    expect(plan.renumber).toEqual([{ id: "b", reserveNumber: 1 }, { id: "c", reserveNumber: 2 }]);
+    expect(plan.reserveIssued).toBe(2);
+  });
+  it("closes gaps left by earlier leavers, and breaks a tie by id", async () => {
+    const { planPromotion } = await import("./waitlistModel");
+    const plan = planPromotion([{ id: "z", reserveNumber: 5 }, { id: "y", reserveNumber: 5 }, { id: "x", reserveNumber: 9 }]);
+    expect(plan.next?.id).toBe("y");
+    expect(plan.renumber).toEqual([{ id: "z", reserveNumber: 1 }, { id: "x", reserveNumber: 2 }]);
+  });
+  it("nobody waiting: nobody promoted", async () => {
+    const { planPromotion } = await import("./waitlistModel");
+    expect(planPromotion([])).toEqual({ next: null, renumber: [], reserveIssued: 0 });
+  });
+  it("only a confirmed waiting writer (a reserve number) is in the queue", async () => {
+    const { readWaitingEntry } = await import("./waitlistModel");
+    expect(readWaitingEntry("a", { status: "waiting", reserveNumber: 2 })).toEqual({ id: "a", reserveNumber: 2 });
+    expect(readWaitingEntry("b", { status: "waiting" })).toBeNull();
+    expect(readWaitingEntry("c", { status: "verified", reserveNumber: 2 })).toBeNull();
+  });
+});

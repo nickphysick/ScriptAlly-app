@@ -239,6 +239,16 @@ const textSignature = `${SIGNATURE_NAME}\n${SIGNATURE_ROLE}`;
 const needsImages = (cfg: MailConfig) =>
   asset(cfg, EMAIL_LOGO) && asset(cfg, EMAIL_BIRD) ? [] : ["imageUrl"];
 
+/**
+ * RFC 2369 + RFC 8058 (launch readiness, 2 Nov): the message's own unsubscribe link as a header, and the
+ * one-click POST marker. A mail client's Unsubscribe button POSTs `List-Unsubscribe=One-Click` to the
+ * URL, which the waitlist function accepts (as it does a GET from the link in the footer).
+ */
+export const listUnsubscribe = (unsubUrl: string): Record<string, string> => ({
+  "List-Unsubscribe": `<${unsubUrl}>`,
+  "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+});
+
 /* ══════════════ 1 · Confirm your place ══════════════ */
 
 export const prepareConfirm = (
@@ -276,6 +286,7 @@ export const prepareConfirm = (
   return {
     ok: true,
     email: {
+      headers: listUnsubscribe(unsubUrl!),
       subject: CONFIRM_SUBJECT,
       html: shell(cfg, {
         preheader: CONFIRM_PREHEADER, pass: passImg(cfg, EMAIL_IMAGES["pass-pending"]),
@@ -320,6 +331,7 @@ export const prepareWelcome = (
   return {
     ok: true,
     email: {
+      headers: listUnsubscribe(unsubUrl!),
       subject: welcomeSubject(position),
       html: shell(cfg, {
         preheader: WELCOME_PREHEADER,
@@ -355,6 +367,7 @@ export const prepareWaiting = (cfg: MailConfig, unsubToken: string): Prepared =>
   return {
     ok: true,
     email: {
+      headers: listUnsubscribe(unsubUrl!),
       subject: WAITING_SUBJECT,
       html: shell(cfg, {
         preheader: WAITING_PREHEADER, pass: passImg(cfg, EMAIL_IMAGES["pass-waiting"]),

@@ -49,6 +49,12 @@ export interface RenderedEmail {
    * HTML is hostile. Every template ships both.
    */
   text: string;
+  /**
+   * Extra message headers (launch readiness, 2 Nov): every waitlist email carries `List-Unsubscribe`
+   * and `List-Unsubscribe-Post` (RFC 8058 one-click), which Gmail and Yahoo require of bulk senders and
+   * which put an Unsubscribe button beside the sender's name.
+   */
+  headers?: Record<string, string>;
 }
 
 export interface SendOutcome {
@@ -126,6 +132,7 @@ export const sendEmail = async (
         subject: rendered.subject,
         html: rendered.html,
         text: rendered.text,
+        ...(rendered.headers ? { headers: rendered.headers } : {}),
       }),
       signal: controller.signal,
     });

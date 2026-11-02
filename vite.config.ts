@@ -1,11 +1,20 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import {defineConfig} from 'vite';
+import {defineConfig, loadEnv, type Plugin} from 'vite';
+import { injectBeacon } from './scripts/cfBeacon.mjs';
 
-export default defineConfig(() => {
+/* Cloudflare Web Analytics (launch readiness, 2 Nov): the beacon goes into the built index.html when
+   VITE_CF_BEACON_TOKEN is set, which only .env.production does. See scripts/cfBeacon.mjs. */
+const cfBeacon = (token: string | undefined): Plugin => ({
+  name: 'qh-cf-beacon',
+  transformIndexHtml: { order: 'post', handler: (html) => injectBeacon(html, token) },
+});
+
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), 'VITE_');
   return {
-    plugins: [react(), tailwindcss()],
+    plugins: [react(), tailwindcss(), cfBeacon(env.VITE_CF_BEACON_TOKEN)],
     /* Help system v1 E — the feedback panel's VERSION line ("Beta, 19 Oct") is the build's date */
     define: { __QH_BUILD_DATE__: JSON.stringify(new Date().toISOString().slice(0, 10)) },
     resolve: {

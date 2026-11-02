@@ -29,7 +29,7 @@ export const LAB_HASHES = [
   "#/drawer-lab", "#/reading-pane-lab", "#/shell-lab",
 ] as const;
 
-export const LIVE_TITLE = "QueryHawk: Query With Confidence";
+export const LIVE_TITLE = "QueryHawk: track every query to a literary agent";
 
 const ROOT = process.cwd();
 let out = "";

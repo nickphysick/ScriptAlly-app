@@ -44,13 +44,15 @@ afterEach(() => { vi.unstubAllEnvs(); vi.resetModules(); });
 describe("L1 · landing-only renders the public site, or sends you home, and never the app", () => {
   const HOME = [
     ["/dashboard", ""], ["/agents", ""], ["/account", ""], ["/nonsense", ""],
-    ["/", "#/signup"], ["/", "#/login"], ["/", "#/signin"], ["/pricing", "#/login"],
+    ["/", "#/signup"], ["/", "#/login"], ["/", "#/signin"], ["/privacy", "#/login"],
+    /* Launch readiness (2 Nov): the unfinished public pages go home on the live site. */
+    ["/pricing", ""], ["/about", ""], ["/contact", ""], ["/founders", ""], ["/terms", ""],
   ] as const;
 
   it("the decision: every workspace or unknown path and every sign-in hash goes home", async () => {
     const { site } = await withFlag(true);
     for (const [path, hash] of HOME) expect(site.landingDecision(path, hash), `${path}${hash}`).toBe("home");
-    for (const path of ["/", "/founders", "/pricing", "/about", "/contact", "/terms", "/privacy"])
+    for (const path of ["/", "/welcome", "/privacy"])
       expect(site.landingDecision(path, ""), path).toBe("page");
   });
 

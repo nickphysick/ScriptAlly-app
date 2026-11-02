@@ -24,7 +24,6 @@
  */
 
 import { onRequest } from "firebase-functions/v2/https";
-import { defineSecret } from "firebase-functions/params";
 import { db } from "./firestore";
 import {
   ALLOWED_ORIGINS, GET_CACHE_SECONDS, MAX_BODY_BYTES, MIN_SUBMIT_MS, REQUIRE_VERIFICATION,
@@ -35,10 +34,9 @@ import {
   consumeRateLimit, joinWaitlist, readCounterState, verifyWaitlist,
   mintWelcomeRef, readWelcome, saveWelcomeAnswers,
 } from "./waitlistStore";
-import { RESEND_API_KEY, sendEmail } from "./email";
-import { resolveMailConfig } from "./emailConfig";
-import { prepareConfirm, prepareWaiting, prepareWelcome } from "./emailTemplates";
-import { emailAfterVerify, parseUnsubscribeToken, unsubscribeToken } from "./waitlistModel";
+import { RESEND_API_KEY } from "./email";
+import { IP_HASH_SALT, sendConfirm, sendWaiting, sendWelcome } from "./waitlistMail";
+import { emailAfterVerify, parseUnsubscribeToken } from "./waitlistModel";
 import { unsubscribeById } from "./waitlistStore";
 import { unsubscribePage } from "./unsubscribePage";
 import * as admin from "firebase-admin";
@@ -78,14 +76,7 @@ const monitorAppCheck = async (
   }
 };
 
-/**
- * ⚠️ THE IP SALT IS A SECRET AND NEVER HAS A DEFAULT IN CODE. A hard-coded fallback would look
- * like a salt and provide none — anyone with the repo could reverse every stored hash by
- * enumerating IPv4. When it is unset the function still works and simply stores no `ipHash`:
- * rate limiting degrades to per-window-without-identity rather than the build failing closed on a
- * public signup form.
- */
-const IP_HASH_SALT = defineSecret("WAITLIST_IP_SALT");
+
 
 
 const jsonHeaders = (res: { set: (k: string, v: string) => void }, origin: string | undefined) => {
@@ -96,74 +87,6 @@ const jsonHeaders = (res: { set: (k: string, v: string) => void }, origin: strin
     res.set("Access-Control-Allow-Origin", origin);
     res.set("Vary", "Origin");
   }
-};
-
-/**
- * ⚠️ A MESSAGE WITH A MISSING LINK IS NOT SENT, AND THE REFUSAL IS LOUD. `prepare*` returns what
- * was missing rather than a message with an empty href — refusing is recoverable (fix the config,
- * run it again) and a hundred invites carrying a dead link is not. An absent unsubscribe link
- * refuses too: that is a compliance failure, not a cosmetic one.
- *
- * ⚠️ THE UNSUBSCRIBE TOKEN NEEDS THE SALT, so an unset `WAITLIST_IP_SALT` refuses the send rather
- * than emailing an unsigned link. That is the one place the salt is load-bearing beyond rate
- * limiting, and it is why the refusal names it.
- */
-const sendConfirm = async (to: string, docId: string, verifyToken: string, salt: string) => {
-  const cfg = resolveMailConfig(process.env);
-  if (!salt) {
-    console.error(JSON.stringify({ event: "email.refused", template: "confirm", missing: ["salt"] }));
-    return;
-  }
-  const prepared = prepareConfirm(cfg, verifyToken, unsubscribeToken(docId, salt));
-  if (!prepared.ok) {
-    console.error(JSON.stringify({
-      event: "email.refused", template: "confirm", missing: prepared.missing,
-    }));
-    return;
-  }
-  await sendEmail(to, "confirm", prepared.email);
-};
-
-const sendWelcome = async (docId: string, position: number, cap: number, salt: string) => {
-  const cfg = resolveMailConfig(process.env);
-  /* The address is not in the verify request — it is on the document the token just verified. */
-  const snap = await db.doc(`waitlist/${docId}`).get();
-  const to = (snap.get("email") as string) ?? "";
-  if (!to || !salt) {
-    console.error(JSON.stringify({
-      event: "email.refused", template: "welcome",
-      missing: [...(to ? [] : ["recipient"]), ...(salt ? [] : ["salt"])],
-    }));
-    return;
-  }
-  const prepared = prepareWelcome(cfg, position, cap, unsubscribeToken(docId, salt));
-  if (!prepared.ok) {
-    console.error(JSON.stringify({
-      event: "email.refused", template: "welcome", missing: prepared.missing,
-    }));
-    return;
-  }
-  await sendEmail(to, "welcome", prepared.email);
-};
-
-/** Email 3, to a writer whose confirmation landed on the waiting list. Same refusals as the welcome. */
-const sendWaiting = async (docId: string, salt: string) => {
-  const cfg = resolveMailConfig(process.env);
-  const snap = await db.doc(`waitlist/${docId}`).get();
-  const to = (snap.get("email") as string) ?? "";
-  if (!to || !salt) {
-    console.error(JSON.stringify({
-      event: "email.refused", template: "waiting",
-      missing: [...(to ? [] : ["recipient"]), ...(salt ? [] : ["salt"])],
-    }));
-    return;
-  }
-  const prepared = prepareWaiting(cfg, unsubscribeToken(docId, salt));
-  if (!prepared.ok) {
-    console.error(JSON.stringify({ event: "email.refused", template: "waiting", missing: prepared.missing }));
-    return;
-  }
-  await sendEmail(to, "waiting", prepared.email);
 };
 
 export const waitlist = onRequest(
@@ -192,14 +115,25 @@ export const waitlist = onRequest(
          received; asking "are you sure" is a dark pattern, and offering to undo it is the same
          pattern wearing a friendlier face. */
       if (isUnsubscribe) {
-        if (req.method !== "GET") { res.status(405).json({ ok: false, error: "Method not allowed." }); return; }
+        /* GET from the link in the footer; POST from a mail client's own Unsubscribe button (RFC 8058
+           one-click: the body is `List-Unsubscribe=One-Click` and the token is in the URL, as for GET).
+           Both run the same idempotent transaction (launch readiness, 2 Nov). */
+        if (req.method !== "GET" && req.method !== "POST") { res.status(405).json({ ok: false, error: "Method not allowed." }); return; }
         const docId = parseUnsubscribeToken(req.query.token, IP_HASH_SALT.value());
         const outcome = docId ? await unsubscribeById(db, docId, Date.now()) : null;
         console.info(JSON.stringify({
           event: "waitlist.unsubscribe",
           result: !docId ? "bad-token" : !outcome!.found ? "not-found"
                   : outcome!.released ? "released" : "already",
+          promoted: !!outcome?.promoted,
         }));
+        /* ⚠️ A RELEASE THAT PROMOTED THE NEXT WAITING WRITER SENDS THEM EMAIL 2, HERE, AFTER THE COMMIT
+           (launch readiness, 2 Nov). The transaction returns the promotion only on the transition that
+           made it, so a second click, a scanner's fetch or a retry promotes nobody and sends nothing. */
+        if (outcome?.promoted) {
+          console.info(JSON.stringify({ event: "waitlist.promoted", foundingNumber: outcome.promoted.foundingNumber }));
+          await sendWelcome(outcome.promoted.docId, outcome.promoted.foundingNumber, outcome.promoted.cap, IP_HASH_SALT.value());
+        }
         res.set("Content-Type", "text/html; charset=utf-8");
         res.set("Cache-Control", "no-store");
         res.status(200).send(unsubscribePage(outcome));
@@ -398,8 +332,16 @@ export const waitlist = onRequest(
 
       res.status(405).json({ ok: false, error: "Method not allowed." });
     } catch (e) {
-      /* Log the real cause; never leak internals to the caller. */
-      console.error("waitlist: request failed:", e);
+      /* Log the real cause; never leak internals to the caller. ⚠️ STRUCTURED (launch readiness, 2 Nov),
+         so a Cloud Logging alert can match `jsonPayload.event="waitlist.error"` exactly. No address,
+         no body: the route, the method and the error's own name and message. */
+      console.error(JSON.stringify({
+        event: "waitlist.error",
+        route: (req.path || "").replace(/\/+$/, "") || "/",
+        method: req.method,
+        error: e instanceof Error ? e.name : typeof e,
+        message: e instanceof Error ? e.message.slice(0, 300) : String(e).slice(0, 300),
+      }));
       res.status(500).json({ ok: false, error: "Something went wrong. Please try again." });
     }
   },
