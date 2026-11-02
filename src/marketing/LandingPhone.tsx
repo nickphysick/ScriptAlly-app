@@ -36,18 +36,22 @@ type Navigate = (tab: string, subPageName?: string) => void;
 const PhoneHero: React.FC<{ onNavigate: Navigate }> = ({ onNavigate }) => {
   return (
     <section className="mk-wl-hero" aria-labelledby="mk-wl-hero-h">
-      <img className="mk-wl-herohawk" src={HERO_BIRD.src + "?v=" + HERO_BIRD.version} alt="" width={HERO_BIRD.width} height={HERO_BIRD.height} />
       <h1 id="mk-wl-hero-h" className="mk-wl-q">
         <span className="mk-wl-q1">{WAIT_HERO_Q[0]}</span>{" "}<span className="mk-wl-q2"><mark>{WAIT_HERO_Q[1]}</mark></span>
       </h1>
       <p className="mk-wl-strap">{WAIT_HERO_STRAP}</p>
-      <p className="mk-wl-sub">{WAIT_HERO_SUB}</p>
-      <PageAnchor to={BE_HEADING_ID} className="mk-wl-see">
-        {SEE_WHAT}{" "}
-        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
-          <path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </PageAnchor>
+      {/* The sub-line and its link are one group, and the hawk stands in it: wherever the drawer's spare
+          height puts the group, his feet stay level with the foot of "See what it does". */}
+      <div className="mk-wl-subg">
+        <img className="mk-wl-herohawk" src={HERO_BIRD.src + "?v=" + HERO_BIRD.version} alt="" width={HERO_BIRD.width} height={HERO_BIRD.height} />
+        <p className="mk-wl-sub">{WAIT_HERO_SUB}</p>
+        <PageAnchor to={BE_HEADING_ID} className="mk-wl-see">
+          {SEE_WHAT}{" "}
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
+            <path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </PageAnchor>
+      </div>
       <div className="mk-wl-signup" id={HERO_FORM + "-signup"}>
         <FoundingSignup idPrefix={HERO_FORM} source="landing-panel" formClass="mk-wl-form" ctaLabel={HERO_CTA}
           afterForm={<HeroPlaces variant="line" />} onNavigate={onNavigate} />

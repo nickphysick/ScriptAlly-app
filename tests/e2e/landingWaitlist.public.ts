@@ -31,7 +31,13 @@ const MUTATIONS: Record<string, string | ((page: Page) => Promise<void>)> = {
   LW5: ".mk-beb .mk-beb-h{white-space:normal!important;font-size:64px!important}",
   LW5b: ".mk-beb-stage{padding:0 60px}",
   LW6: ".mk-trkd{aspect-ratio:1600/800!important}",
-  LW7: ".mk-wl-hero{min-height:860px!important}",
+  /* LW-7 (welcome page v1, phase 1): the drawer's 75% floor removed; the floor made to bind on a short phone;
+     the strap at a size that wraps; the hawk dropped onto the link; the sub-line's measure under the hawk. */
+  LW7: ".mk-wl-hero{min-height:0!important}",
+  LW7b: ".mk-wl-hero{min-height:720px!important}",
+  LW7c: ".mk-wl-strap{font-size:58px!important;white-space:normal!important}",
+  LW7d: ".mk-wl-herohawk{bottom:-40px!important;right:auto!important;left:40px!important}",
+  LW7e: ".mk-wl-sub{max-width:none!important}",
   LW8: ".mk-det-h,.mk-fcopy p,.mk-wl-fline{text-transform:uppercase!important}",
   LW9: ".mk-frow,.mk-wl-feat{scroll-margin-top:-400px!important}",
   LW10: ".mk-vcard{flex-basis:80%!important}",
@@ -236,34 +242,49 @@ test("LW-6 · desktop: the pile is drawn at the neighbouring illustration's size
   expect(Math.abs(r.pile / r.illo - 1), `pile ${r.pile.toFixed(1)} vs illustration ${r.illo.toFixed(1)}`).toBeLessThanOrEqual(0.1);
 });
 
-/* LW-7, REPLACED (founding emails v1, phase 3): the drawer is its content's height, so the Birds-eye view
-   starts in the first screen. At 390×844 the heading, its rule, the hawk's head and the window's date row
-   are all inside it; at 430×932 the same, with ≥16px clear below the date row. */
-test.describe("LW-7 · phones: the Birds-eye heading, its rule, the hawk's head and the date row are in the first screen", () => {
-  for (const vp of [PHONE, PHONE_L]) {
+/* LW-7, REPLACED (welcome page v1, phase 1): the drawer's foot is at 75% of the screen (±2%) at 390×844 and
+   430×932, with the Birds-eye heading and its rule wholly in the first screen; on a 375×667 phone the content
+   is taller than that and the drawer is its content's height. At all three, "No more winging it." is one line
+   and the binocular hawk touches neither the sub-line's ink nor the link. */
+const PHONE_S = { width: 375, height: 667 };
+const drawer = (page: Page) => page.evaluate(() => {
+  const box = (e: Element) => { const b = e.getBoundingClientRect(); return { top: b.top, bottom: b.bottom, left: b.left, right: b.right }; };
+  const ink = (e: Element) => { const r = document.createRange(); r.selectNodeContents(e); return Array.from(r.getClientRects()).map((x) => ({ top: x.top, bottom: x.bottom, left: x.left, right: x.right })); };
+  const hero = document.querySelector(".mk-wl-hero") as HTMLElement;
+  const h = document.getElementById("mk-be-h")!;
+  const strap = ink(document.querySelector(".mk-wl-strap")!);
+  return { vh: innerHeight, scrollY, rule: parseFloat(getComputedStyle(h, "::after").height), drawer: box(hero),
+           minH: parseFloat(getComputedStyle(hero).minHeight) || 0, heading: box(h),
+           strapLines: new Set(strap.map((x) => Math.round(x.top))).size, strapRight: Math.max(...strap.map((x) => x.right)), heroRight: box(hero).right,
+           hawk: box(document.querySelector(".mk-wl-herohawk")!), sub: ink(document.querySelector(".mk-wl-sub")!), see: box(document.querySelector(".mk-wl-see")!) };
+});
+type Box = { top: number; bottom: number; left: number; right: number };
+const hits = (a: Box, z: Box) => a.left < z.right && a.right > z.left && a.top < z.bottom && a.bottom > z.top;
+
+test.describe("LW-7 · phones: the drawer reaches 75% of the screen, one-line strap, the hawk clear of the words", () => {
+  for (const vp of [PHONE_S, PHONE, PHONE_L]) {
     test(`at ${vp.width}×${vp.height}`, async ({ page }) => {
       await open(page, vp);
-      await mutate(page, "LW7");
-      await present(page, "#mk-be-h", ".mk-wl-hero", ".mk-wl-feat--first .mk-bef-hk", ".mk-wl-feat--first .mk-bef-lanehead");
-      const r = await page.evaluate(() => {
-        const box = (sel: string) => { const b = document.querySelector(sel)!.getBoundingClientRect(); return { top: b.top, bottom: b.bottom }; };
-        const h = document.getElementById("mk-be-h")!;
-        const rule = parseFloat(getComputedStyle(h, "::after").height);
-        const hero = document.querySelector(".mk-wl-hero") as HTMLElement;
-        return { vh: innerHeight, scrollY, rule, heading: box("#mk-be-h"), drawer: box(".mk-wl-hero"),
-                 heroMin: getComputedStyle(hero).minHeight, hawk: box(".mk-wl-feat--first .mk-bef-hk"),
-                 dates: box(".mk-wl-feat--first .mk-bef-lanehead"), win: box(".mk-wl-feat--first .mk-bef-win") };
-      });
-      console.log(`LW-7 @${vp.width}`, JSON.stringify(r));
+      await mutate(page, "LW7", "LW7b", "LW7c", "LW7d", "LW7e");
+      await present(page, "#mk-be-h", ".mk-wl-hero", ".mk-wl-strap", ".mk-wl-sub", ".mk-wl-see", ".mk-wl-herohawk");
+      const r = await drawer(page);
+      console.log(`LW-7 @${vp.width}`, JSON.stringify({ drawerBottom: r.drawer.bottom, share: r.drawer.bottom / r.vh, minH: r.minH, heading: r.heading, strapLines: r.strapLines, hawk: r.hawk }));
       expect(r.scrollY, "read at the top of the page").toBe(0);
-      expect(r.heroMin === "0px" || r.heroMin === "auto", `the drawer has no min-height (${r.heroMin})`).toBe(true);
-      expect(r.rule, "the heading draws its rule (inside its box)").toBe(3);
-      expect(r.heading.top, "the heading starts below the drawer").toBeGreaterThan(r.drawer.top);
-      for (const [name, b] of [["the heading and its rule", r.heading], ["the hawk's head", r.hawk], ["the date row", r.dates]] as const) {
-        expect(b.top, `${name}: top on screen`).toBeGreaterThanOrEqual(0);
-        expect(b.bottom, `${name}: bottom inside the first screen`).toBeLessThanOrEqual(r.vh);
+      if (vp === PHONE_S) {
+        /* Content-height: the 75% floor does not bind, so the drawer is taller than its min-height. */
+        expect(r.drawer.bottom - r.drawer.top, `the drawer is its content's height, not the floor (${r.minH}px)`).toBeGreaterThan(r.minH + 1);
+      } else {
+        expect(Math.abs(r.drawer.bottom / r.vh - 0.75), `drawer bottom ${r.drawer.bottom.toFixed(1)} of ${r.vh}`).toBeLessThanOrEqual(0.02);
+        expect(r.rule, "the heading draws its rule (inside its box)").toBe(3);
+        expect(r.heading.top, "the heading starts below the drawer").toBeGreaterThan(r.drawer.bottom);
+        expect(r.heading.bottom, "the heading and its rule are in the first screen").toBeLessThanOrEqual(r.vh);
       }
-      if (vp === PHONE_L) expect(r.vh - r.dates.bottom, "≥16px clear below the date row").toBeGreaterThanOrEqual(16);
+      expect(r.strapLines, "No more winging it. is one line").toBe(1);
+      expect(r.strapRight, "and it fits the drawer").toBeLessThanOrEqual(r.heroRight);
+      expect(r.sub.length, "the sub-line has ink").toBeGreaterThan(0);
+      for (const line of r.sub) expect(hits(r.hawk, line), `the hawk is clear of the sub-line (${JSON.stringify(line)})`).toBe(false);
+      expect(hits(r.hawk, r.see), "the hawk is clear of See what it does").toBe(false);
+      expect(Math.abs(r.hawk.bottom - r.see.bottom), "his feet are level with the link's foot").toBeLessThanOrEqual(1);
     });
   }
 });
