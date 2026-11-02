@@ -13,7 +13,7 @@
  */
 import React from "react";
 import { WAIT_HERO_Q, WAIT_HERO_STRAP, HERO_CTA } from "./landingCopy";
-import { HeroTrio, HeroSub } from "./HeroLines";
+import { HeroSub, HeroPillars } from "./HeroLines";
 import { FoundingSignup } from "./FoundingSignup";
 import { HeroPlaces } from "./HeroPlaces";
 import { HERO_FORM } from "./WaitlistParts";
@@ -34,8 +34,7 @@ export const Hero: React.FC<{
             <span className="mk-dh-q2"><mark>{WAIT_HERO_Q[1]}</mark></span>
           </h1>
           <p className="mk-dh-strap">{WAIT_HERO_STRAP}</p>
-          <HeroTrio prefix="mk-dh" />
-          <HeroSub prefix="mk-dh" />
+          <HeroSub />
           <div className="mk-dh-signup" id={HERO_FORM + "-signup"}>
             <FoundingSignup idPrefix={HERO_FORM} source="landing-panel" formClass="mk-dh-form" ctaLabel={HERO_CTA}
               afterForm={<HeroPlaces variant="line" />} onNavigate={onNavigate} />
@@ -44,6 +43,7 @@ export const Hero: React.FC<{
         <div className="mk-dh-art">
           <img src={DESK_HERO_BIRD.src + "?v=" + DESK_HERO_BIRD.version} alt="" width={DESK_HERO_BIRD.width} height={DESK_HERO_BIRD.height} />
         </div>
+        <HeroPillars />
       </div>
     </div>
   </section>

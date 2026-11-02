@@ -642,11 +642,17 @@ export const PRICING_TIERS: PricingTier[] = [
 export const WAIT_HERO_Q = HERO_PHONE_Q;
 /** The handwritten line under it. It is `HERO_H1` — the phrase keeps one owner. */
 export const WAIT_HERO_STRAP = HERO_H1;
-/** The sub-line, both layouts (2 Nov). `WAIT_HERO_SUB_BRAND` is drawn bold and never split across lines. */
+/** The sub-line: desktop only since hero v3 (2 Nov); phones show the lockup panel instead. `WAIT_HERO_SUB_BRAND` is drawn bold and never split across lines. */
 export const WAIT_HERO_SUB = "Give your manuscript the chance it deserves with QueryHawk.";
 export const WAIT_HERO_SUB_BRAND = "QueryHawk";
-/** The row above the sub-line, both layouts (2 Nov): three words in the typewriter face, a dot between each. */
+/** Phones (hero v3, 2 Nov): the lockup panel's first line, a dot between each word, over "QueryHawk". */
 export const HERO_TRIO = ["Query", "Track", "Discover"] as const;
+/** Desktop (hero v3, 2 Nov): the three columns along the hero card's foot. `key` names each for its class. */
+export const HERO_PILLARS = [
+  { key: "query", title: "Query", line: "Build your agent list" },
+  { key: "track", title: "Track", line: "Track your submissions" },
+  { key: "discover", title: "Discover", line: "Master the art of querying" },
+] as const;
 /** Phones only: the link under the sub-line, which scrolls to the Birds-eye heading. */
 export const SEE_WHAT = "See what it does";
 
