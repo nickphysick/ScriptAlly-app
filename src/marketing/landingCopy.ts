@@ -645,7 +645,11 @@ export const PRICING_TIERS: PricingTier[] = [
 export const WAIT_HERO_Q = HERO_PHONE_Q;
 /** The handwritten line under it. It is `HERO_H1` — the phrase keeps one owner. */
 export const WAIT_HERO_STRAP = HERO_H1;
-export const WAIT_HERO_SUB = "Smarten your search with QueryHawk.";
+/** The sub-line, both layouts (2 Nov). `WAIT_HERO_SUB_BRAND` is drawn bold and never split across lines. */
+export const WAIT_HERO_SUB = "Give your manuscript the chance it deserves with QueryHawk.";
+export const WAIT_HERO_SUB_BRAND = "QueryHawk";
+/** The row above the sub-line, both layouts (2 Nov): three words in the typewriter face, a dot between each. */
+export const HERO_TRIO = ["Query", "Track", "Discover"] as const;
 /** Phones only: the link under the sub-line, which scrolls to the Birds-eye heading. */
 export const SEE_WHAT = "See what it does";
 

@@ -91,7 +91,10 @@ describe("landing copy — verbatim locks", () => {
   });
 
   it("the sub, word for word, and the old two-line sub retired", async () => {
-    expect(WAIT_HERO_SUB).toBe("Smarten your search with QueryHawk.");
+    const copy0 = await import("./landingCopy");
+    expect(WAIT_HERO_SUB).toBe("Give your manuscript the chance it deserves with QueryHawk.");
+    expect(WAIT_HERO_SUB.endsWith(copy0.WAIT_HERO_SUB_BRAND + "."), "the brand ends the sub-line").toBe(true);
+    expect(copy0.HERO_TRIO).toEqual(["Query", "Track", "Discover"]);
     expect(SEE_WHAT).toBe("See what it does");
     const copy = await import("./landingCopy");
     for (const gone of ["HERO_SUB", "HERO_SUB_LINES", "HERO_SUB_BRAND", "HERO_PLACES_REST",

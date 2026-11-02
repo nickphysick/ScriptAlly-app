@@ -16,17 +16,18 @@
  */
 import React, { useRef, useState } from "react";
 import {
-  WAIT_HERO_Q, WAIT_HERO_STRAP, WAIT_HERO_SUB, SEE_WHAT, HERO_CTA, BE_HEADING, BE_TICKS,
+  WAIT_HERO_Q, WAIT_HERO_STRAP, SEE_WHAT, HERO_CTA, BE_HEADING, BE_TICKS,
   FEATURE_ROWS, PHONE_FEATURE_ORDER, featureAnchor, VISION_POINTS, MISSION_HEADING, FAQ_HEADING, FAQ, FeatureRow,
 } from "./landingCopy";
 import { FoundingSignup } from "./FoundingSignup";
+import { HeroTrio, HeroSub } from "./HeroLines";
 import { HeroPlaces } from "./HeroPlaces";
 import { ILLUSTRATIONS } from "./FeatureRows";
 import { FoundingTicket } from "./FoundingTicket";
 import { PLATES } from "./Vision";
 import { BirdsEyeFocus, DetailsBanner, TrackFeature, Ticks, FeatureLine, PageAnchor, HERO_FORM } from "./WaitlistParts";
 
-/** The binocular hawk beside the phone hero's sub-line. */
+/** The binocular hawk in the phone hero, centred under the strap. */
 export const HERO_BIRD = { src: "/images/binocular-hawk.webp", version: "6e3c0031", width: 380, height: 372 };
 /** The Birds-eye heading's id: "See what it does" scrolls to it. */
 export const BE_HEADING_ID = "mk-be-h";
@@ -40,18 +41,16 @@ const PhoneHero: React.FC<{ onNavigate: Navigate }> = ({ onNavigate }) => {
         <span className="mk-wl-q1">{WAIT_HERO_Q[0]}</span>{" "}<span className="mk-wl-q2"><mark>{WAIT_HERO_Q[1]}</mark></span>
       </h1>
       <p className="mk-wl-strap">{WAIT_HERO_STRAP}</p>
-      {/* The sub-line and its link are one group, and the hawk stands in it: wherever the drawer's spare
-          height puts the group, his feet stay level with the foot of "See what it does". */}
-      <div className="mk-wl-subg">
-        <img className="mk-wl-herohawk" src={HERO_BIRD.src + "?v=" + HERO_BIRD.version} alt="" width={HERO_BIRD.width} height={HERO_BIRD.height} />
-        <p className="mk-wl-sub">{WAIT_HERO_SUB}</p>
-        <PageAnchor to={BE_HEADING_ID} className="mk-wl-see">
-          {SEE_WHAT}{" "}
-          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
-            <path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </PageAnchor>
-      </div>
+      {/* A centred stack (2 Nov): the hawk, the trio, the sub-line and the link, each under the last. */}
+      <img className="mk-wl-herohawk" src={HERO_BIRD.src + "?v=" + HERO_BIRD.version} alt="" width={HERO_BIRD.width} height={HERO_BIRD.height} />
+      <HeroTrio prefix="mk-wl" />
+      <HeroSub prefix="mk-wl" />
+      <PageAnchor to={BE_HEADING_ID} className="mk-wl-see">
+        {SEE_WHAT}{" "}
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
+          <path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </PageAnchor>
       <div className="mk-wl-signup" id={HERO_FORM + "-signup"}>
         <FoundingSignup idPrefix={HERO_FORM} source="landing-panel" formClass="mk-wl-form" ctaLabel={HERO_CTA}
           afterForm={<HeroPlaces variant="line" />} onNavigate={onNavigate} />
