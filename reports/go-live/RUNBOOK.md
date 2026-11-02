@@ -521,6 +521,174 @@ As section 8. To return hosting and the function to release 1 exactly, redeploy 
 
 ---
 
+## 12 · Analytics: count only real visitors (2 Nov)
+
+Cloudflare Web Analytics used to be written into the built page, so it counted visits from
+wherever a production build ran: `127.0.0.1` test runs, local previews, and you. Now the page
+adds it only on **queryhawk.net** and **www.queryhawk.net**, and never in a browser that has
+opted out. Same token as before. Nothing else changes: no rules, no functions, no page content.
+
+> §11's Google Analytics steps (the consent bar, 11.4 step 7, 11.5) are out of date: GA came off
+> the public site on 31 Oct. Skip them.
+
+### 12.1 · Hosting, from `release/live-1`
+
+```bash
+cd /Users/nickphysick/ScriptAlly-live
+git fetch origin
+git checkout release/live-1
+git merge --ff-only origin/main
+npm run build && node scripts/live-preflight.mjs
+firebase deploy --only hosting --project prod
+node scripts/live-verify.mjs hosting
+```
+
+**Good:** `Fast-forward`, `PREFLIGHT PASSED.`, every verify line `PASS`.
+
+### 12.2 · Check it
+
+- **https://queryhawk.net/** in a private window, DevTools → Network: there is a request to
+  `static.cloudflareinsights.com/beacon.min.js`.
+- **https://dev.queryhawk.net/**, same view: **no** request to `cloudflareinsights.com`.
+
+### 12.3 · Opt yourself out
+
+Open this once in **every browser you use**, including your phone's main browser:
+
+```
+https://queryhawk.net/?notrack
+```
+
+The address bar drops the `?notrack` and that browser is never counted again. To undo it, open
+`https://queryhawk.net/?track`.
+
+**Instagram's in-app browser keeps its own storage**, so do it there too: tap your bio link,
+then add `?notrack` to the address in that browser (or open the link
+`https://queryhawk.net/?notrack` from a DM to yourself).
+
+Clearing a browser's site data clears the opt-out too; open `?notrack` again.
+
+### 12.4 · Past data
+
+The `127.0.0.1` entries already in Cloudflare stay there. In the Web Analytics dashboard, keep
+the filter **Host = queryhawk.net** (add **www.queryhawk.net** if it ever shows up).
+
+---
+
+## 13 · Fix the confirm link (2 Nov) — from `release/live-1`
+
+**What broke.** The confirm link itself works: the `waitlist` function confirms the sign-up, sends
+the welcome email, then redirects to `/welcome?v=verified`. Live Hosting then answers `/welcome`
+with Firebase's own "Page Not Found" page. `/privacy` has the same fault. The cause is the catch-all
+rewrite added in the 20:51 UTC hosting release (Chrome fix, `eceaa974`). Its regex only matched
+short paths, because Hosting matches the whole path. Report: `reports/confirm-link/REPORT.md`.
+
+**Nothing to change on the function.** Live's `waitlist` already has
+`WAITLIST_PUBLIC_URL=https://queryhawk.net` (read on 2 Nov from the deployed function's
+environment), so the links in the emails are right. **Don't redeploy any function for this.**
+
+### 13.1 · Bring the fix onto `release/live-1`
+
+The fix is commit `456efbac` on the local branch `release/live-1-confirm`, which is
+`release/live-1` plus that one commit. In your live checkout:
+
+```bash
+cd ~/ScriptAlly-live
+```
+
+```bash
+git merge --ff-only release/live-1-confirm
+```
+
+```bash
+git log --oneline -2
+```
+
+**Good:** the top line is `456efbac Confirm link fix: …`, and the next is `eceaa974 Live landing
+fix: …`. Then push it:
+
+```bash
+git push origin release/live-1
+```
+
+### 13.2 · Hosting, with the main `firebase.json`
+
+Never `--config firebase.holding.json`: that is the old holding site, and it has only the bare
+`/api/waitlist` rewrite.
+
+```bash
+npm run build && node scripts/live-preflight.mjs
+```
+
+**Good:** `PREFLIGHT PASSED.`
+
+```bash
+firebase deploy --only hosting --project prod
+```
+
+**Check it:**
+
+```bash
+for p in /welcome "/welcome?v=verified" /privacy /assets/nope.js; do echo "$p $(curl -s -o /dev/null -w '%{http_code}' "https://queryhawk.net$p")"; done
+```
+
+**Good:** `/welcome`, `/welcome?v=verified` and `/privacy` give `200`, and `/assets/nope.js`
+gives `404`. Then:
+
+```bash
+node scripts/live-verify.mjs all
+```
+
+**Good:** every line `PASS`.
+
+### 13.3 · The real test
+
+1. On https://queryhawk.net, join with `nick+confirmtest@queryhawk.net`.
+2. In the confirmation email, copy the link (don't click yet) and check it starts
+   `https://queryhawk.net/api/waitlist/verify?token=`.
+3. **Click it.** You land on queryhawk.net/welcome, headed **"Welcome, founding writer."** *(That
+   is the page's verified heading; the older "You're in." belongs to the retired /founders
+   state.)* A welcome email follows.
+4. **Click it again.** It reads **"You're already in."**
+5. **Remove the test entry:** Firebase console → Firestore Database → database
+   `ai-studio-ae82196c-…` → `waitlist` → document
+   `93a8cd5b6fb974609ce3d697f487ae522645712c662c800213521ae37942597a` (the SHA-256 of the address)
+   → **Delete document**.
+6. **Give the place back.** Deleting the entry doesn't decrement the counter. Open
+   `counters/waitlist` and reduce `verifiedCount` by exactly 1.
+7. **Confirm it went back:** `curl -s https://queryhawk.net/api/waitlist` shows the same `count`
+   as before your test (it read `"count":2` on 2 Nov at 21:33 UTC).
+
+**If it's urgent and 13.1–13.2 can't run:** Hosting → `scriptally-app` → Release history → the
+release of **2 Nov 20:24 UTC** (version `19cb0a3e`) → ⋯ → **Rollback**. That release uses a plain
+`**` catch-all, so /welcome works again, but it also puts the half-blank Chrome page back. Treat
+it as a stopgap only.
+
+### 13.4 · Who was affected
+
+The broken release went out at **20:51:56 UTC on 2 Nov** (version `b626679c`). Every earlier
+release used a plain `**` catch-all, so `/welcome` worked before then.
+
+The link's host was never wrong, and the function confirms the sign-up before it redirects. So
+**anyone who clicked during the fault IS confirmed** and has had their welcome email. They only saw
+a 404 page. Their links don't need re-sending. On 2 Nov the function's log shows one sign-up in the
+window: joined 21:18, confirmed 21:19:55, welcome email sent.
+
+To see everyone yourself:
+
+- **Confirmed during the fault:** Firestore → `ai-studio-ae82196c-…` → `waitlist` → **Filter** →
+  `verifiedAt` ≥ `2 Nov 2026 20:51 UTC`. These people saw the 404 after confirming. You might send
+  them a short note, but don't send a new link.
+- **Never confirmed since 18 Oct:** filter `status` == `pending` *and* `createdAt` ≥
+  `18 Oct 2026`. These people never clicked, or clicked a link that expired (48 hours). Hosting
+  didn't block them. Decide by hand whether to email them. There's no re-send feature, and none is
+  being added now.
+
+The same catch-all is in `firebase.dev.json`, so dev's `/welcome` also 404s until dev is
+redeployed from `main` (`61c1e6ad`), whenever you ask.
+
+---
+
 ## After the app opens (not now)
 
 When you decide to open the app on queryhawk.net:

@@ -53,16 +53,15 @@ test("META-1 · the title, description and share tags are in the served HTML its
   expect(served.headers()["content-type"]).toContain("image/png");
 });
 
-/* CF-1, the served half (launch readiness, 2 Nov): the live page carries Cloudflare's beacon exactly once,
-   with the live token. (Without a token none is emitted: src/lib/cfBeacon.test.ts.) `META_MUTATE=CF1`
-   doubles the tag. */
-test("CF-1 · exactly one Cloudflare beacon in the live page's HTML, and no cookie banner", async ({ request, page }) => {
+/* CF-1, the served half, RETARGETED 2 Nov: the HTML carries NO Cloudflare beacon. It used to be written into
+   the built page, so every production build counted visits from wherever it ran (127.0.0.1 included);
+   src/lib/cfAnalytics.ts now adds it at app start on queryhawk.net only (CF-2, unit and
+   tests/e2e/cfAnalytics.measure.ts). `META_MUTATE=CF1` puts the old static tag back. */
+test("CF-1 · no Cloudflare beacon in the served HTML, and no cookie banner", async ({ request, page }) => {
   let html = await (await request.get("/")).text();
-  if (process.env.META_MUTATE === "CF1") html = html.replace("</head>", html.match(/<script defer src="https:\/\/static\.cloudflareinsights\.com[^>]*><\/script>/)?.[0] + "</head>");
-  const tags = html.match(/<script defer src="https:\/\/static\.cloudflareinsights\.com\/beacon\.min\.js" data-cf-beacon='\{"token": "([0-9a-f]{32})"\}'><\/script>/g) ?? [];
-  expect(tags.length, "one beacon").toBe(1);
-  expect(html.split("cloudflareinsights.com").length - 1, "and no other mention").toBe(1);
-  expect(tags[0]).toContain('"token": "ee52cb1f15964230836ca4f32696fbfb"');
+  if (process.env.META_MUTATE === "CF1") html = html.replace("</head>", `<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "ee52cb1f15964230836ca4f32696fbfb"}'></script></head>`);
+  expect(html, "the page reached is the app's own HTML").toContain('<div id="root">');
+  expect(html.split("cloudflareinsights.com").length - 1, "no beacon in the HTML").toBe(0);
   /* No cookie, no banner: the page sets no cookie of its own and draws no consent prompt. */
   await page.route(/cloudflareinsights\.com/, (r) => r.abort());
   await page.goto("/");

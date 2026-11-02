@@ -1,6 +1,10 @@
 import {StrictMode, type ComponentType} from 'react';
 import {createRoot} from 'react-dom/client';
 import {reloadOnceForStaleChunk} from './lib/chunkReload';
+import {startAnalytics} from './lib/cfAnalytics';
+
+/* Cloudflare Web Analytics: on queryhawk.net only, before the router reads the URL (lib/cfAnalytics). */
+startAnalytics();
 
 /**
  * Split v1, phase 4 — the root is chosen by the build-time flag. A landing-only build (production,
