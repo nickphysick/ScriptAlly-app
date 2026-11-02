@@ -104,17 +104,17 @@
 .mk-wl-sec > .mk-wl-feat:nth-child(even) { background: #fbf6ef; }
 .mk-wl-feat.mk-wl-feat--first { padding: 54px 24px 20px; border-top: 0; } /* 54: 26px under the drawer, so the heading and its rule still fit a 390×844 screen under the taller stack (2 Nov) */
 .mk-wl-sec > .mk-det + .mk-wl-feat { border-top: 0; }
-.mk-wl .mk-wl-feat h3 {
+.mk-wl .mk-wl-feat :is(h2, h3) {
   font-family: var(--mk-f-display) !important; font-weight: 400 !important; letter-spacing: 0 !important;
   font-size: 25px !important; line-height: 1.2 !important; margin: 0 0 14px; color: #1c130f;
   scroll-margin-top: calc(var(--mk-nav-h, 60px) + 16px);
 }
-.mk-wl .mk-wl-feat h3::after { content: ""; display: block; width: 44px; height: 3px; border-radius: 3px; background: #2a3a52; margin-top: 14px; }
-.mk-wl .mk-wl-feat--first h3 { margin-bottom: 0; }
-.mk-wl .mk-wl-feat--first h3::after { margin-top: 12px; }
+.mk-wl .mk-wl-feat :is(h2, h3)::after { content: ""; display: block; width: 44px; height: 3px; border-radius: 3px; background: #2a3a52; margin-top: 14px; }
+.mk-wl .mk-wl-feat--first h2 { margin-bottom: 0; }
+.mk-wl .mk-wl-feat--first h2::after { margin-top: 12px; }
 /* The Birds-eye heading and its rule are centred on phones (2 Nov; BE-P2). */
-.mk-wl .mk-wl-feat--first h3 { text-align: center; }
-.mk-wl .mk-wl-feat--first h3::after { margin-left: auto; margin-right: auto; }
+.mk-wl .mk-wl-feat--first h2 { text-align: center; }
+.mk-wl .mk-wl-feat--first h2::after { margin-left: auto; margin-right: auto; }
 .mk-wl-feat { scroll-margin-top: calc(var(--mk-nav-h, 60px) + 4px); }
 .mk-wl-fline { margin: 0 0 18px; font: 400 16.5px/1.55 var(--mk-f-serif); color: rgba(28, 19, 15, .74); }
 .mk-strike { text-decoration: line-through; text-decoration-color: #a2452a; text-decoration-thickness: 2px; color: rgba(28, 19, 15, .6); font: inherit; } /* WCAG AA (launch polish, 2 Nov): same hue, darker, ≥4.6:1 */

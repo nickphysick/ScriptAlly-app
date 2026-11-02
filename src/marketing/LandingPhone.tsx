@@ -113,7 +113,8 @@ export const LandingPhone: React.FC<{ onNavigate: Navigate }> = ({ onNavigate })
 
       <section className="mk-wl-sec" id="mk-features" aria-label="Features">
         <div className="mk-wl-feat mk-wl-feat--first">
-          <h3 id={BE_HEADING_ID}>{BE_HEADING}</h3>
+          {/* An h2 (launch polish, 2 Nov): it follows the hero's h1, so an h3 skipped a level. Same look. */}
+          <h2 id={BE_HEADING_ID}>{BE_HEADING}</h2>
           <BirdsEyeFocus layout="phone" />
           <Ticks items={BE_TICKS} />
         </div>
