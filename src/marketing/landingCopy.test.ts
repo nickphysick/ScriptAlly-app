@@ -358,8 +358,10 @@ describe("landing copy — verbatim locks", () => {
     expect(FOUNDING_SENT).toContain("click it to confirm your place");
     expect(FOUNDING_SENT).not.toMatch(/you're on the list|no other mail/i);
     expect(FOUNDING_DUPE).toContain("click the link");
-    expect(FOUNDING_FULL).toContain("you're on the waiting list");
-    expect(FOUNDING_FULL).not.toMatch(/join the waiting list/i);
+    /* 2 Nov (Nick): past the cap they still confirm by email, so the line sends them to the link, and
+       promises the email a promotion sends (PROMO-1). */
+    expect(FOUNDING_FULL).toBe("All fifty founding places have gone, but we've emailed you a link: click it to join the waiting list, and we'll email you if a place opens up.");
+    expect(FOUNDING_FULL, "not on the list until they click").not.toMatch(/you're on the waiting list/i);
   });
 
   /**

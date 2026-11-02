@@ -142,6 +142,27 @@ describe("the cap holds under a race", () => {
     const doc = await db.doc(`waitlist/${emailHash("late@example.com")}`).get();
     expect(doc.exists).toBe(true);
     expect(doc.get("status")).toBe("waiting");
+    /* 2 Nov: with verification off they go straight into the queue, so promotion can reach them. */
+    expect(doc.get("reserveNumber")).toBe(1);
+  });
+
+  /* 2 Nov (Nick): past the cap, with verification ON (as prod runs), a join is a pending document with a
+     confirmation to send, answered as full; confirming puts them in the queue with a reserve number, and a
+     released place then promotes them. Before this, such a writer was written `waiting` with no reserve
+     number, got no email and was never promoted. */
+  it("with verification on, a join past the cap confirms by email, then queues and can be promoted", async () => {
+    await setCounter(0, 1);
+    await join("held@example.com");
+    expect((await counterOf()).verifiedCount, "the one place is taken").toBe(1);
+    const r = await join("later@example.com", { requireVerification: true });
+    expect(r.outcome, "answered as full").toBe("waiting");
+    expect(r.status).toBe("pending");
+    expect(r.verifyToken, "a confirmation to send").toBeTruthy();
+    const v = await verifyWaitlist(db, r.verifyToken!, Date.now());
+    expect(v.kind).toBe("waiting");
+    if (v.kind === "waiting") expect(v.reserveNumber).toBe(1);
+    const out = await unsubscribeById(db, emailHash("held@example.com"), Date.now());
+    expect(out.promoted?.docId, "the released place goes to them").toBe(emailHash("later@example.com"));
   });
 });
 
