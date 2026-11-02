@@ -59,6 +59,8 @@ export const CONFIRM_HEADING = "One click and you're on the list.";
 export const CONFIRM_LEAD =
   "Thanks for putting your name down as a QueryHawk founding writer. There's just one thing left to do.";
 export const CONFIRM_CTA = "Confirm my place";
+/** Under the sign-off (privacy page v1, confirm-email-v2): the link as text, for when the button won't work. */
+export const CONFIRM_LINK_HELP = "Button not working? Copy this link into your browser:";
 export const CONFIRM_EXPIRY = "This link works for 48 hours.";
 
 /**

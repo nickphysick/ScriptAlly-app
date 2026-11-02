@@ -1,0 +1,28 @@
+<!doctype html>
+<!-- The founding writer pass, as an email image (privacy page v1, phase 2). 560×150 at 2×.
+     Placeholders: {{BIG}} the big line, {{OF}} the small line beside it (or empty), {{STAMP}} the stamp,
+     {{STAMP_CLASS}} "pill" (dashed, pending) or "stamp" (solid), {{BIRD}} the fledgling's file URL. -->
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Source+Serif+4:opsz,wght@8..60,600&family=Source+Sans+3:wght@600&display=block" rel="stylesheet">
+<style>
+  html, body { margin: 0; background: #e8b4a3; }
+  .pass { position: relative; width: 560px; height: 150px; overflow: hidden; background: #e8b4a3; }
+  .tx { position: absolute; left: 28px; top: 23.5px; }
+  small { display: block; font: 600 16.4px/1.2 "Source Serif 4", Georgia, serif; color: #7a3420; }
+  .line { display: block; margin-top: 7px; white-space: nowrap; }
+  b { font: 400 48px/1 "Special Elite", "Courier New", monospace; color: #1c130f; }
+  em { margin-left: 8px; font: 600 17px/1 "Source Sans 3", Helvetica, Arial, sans-serif; font-style: normal; color: #7a3420; }
+  .pill, .stamp {
+    position: absolute; left: 28px; top: 108px; box-sizing: border-box; height: 31px; padding: 0 10px;
+    display: flex; align-items: center; border-radius: 10px; color: #7a3420;
+    font: 400 15px/1 "Special Elite", "Courier New", monospace;
+  }
+  .pill { border: 2px dashed #7a3420; transform: rotate(-3deg); transform-origin: center; }
+  .stamp { border: 2px solid #a2452a; color: #a2452a; }
+  img { position: absolute; right: 16px; bottom: 6px; width: 170px; height: auto; }
+</style></head>
+<body><div class="pass" id="shot">
+  <div class="tx"><small>Founding writer pass</small><span class="line"><b>{{BIG}}</b>{{OF}}</span></div>
+  <div class="{{STAMP_CLASS}}">{{STAMP}}</div>
+  <img src="{{BIRD}}" alt="">
+</div></body></html>
