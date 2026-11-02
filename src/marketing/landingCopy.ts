@@ -650,12 +650,6 @@ export const WAIT_HERO_SUB = "Give your manuscript the chance it deserves with Q
 export const WAIT_HERO_SUB_BRAND = "QueryHawk";
 /** Phones (hero v3, 2 Nov): the lockup panel's first line, a dot between each word, over "QueryHawk". */
 export const HERO_TRIO = ["Query", "Track", "Discover"] as const;
-/** Desktop (hero v3, 2 Nov): the three columns along the hero card's foot. `key` names each for its class. */
-export const HERO_PILLARS = [
-  { key: "query", title: "Query", line: "Build your agent list" },
-  { key: "track", title: "Track", line: "Track your submissions" },
-  { key: "discover", title: "Discover", line: "Master the art of querying" },
-] as const;
 /** Phones only: the link under the sub-line, which scrolls to the Birds-eye heading. */
 export const SEE_WHAT = "See what it does";
 
@@ -672,7 +666,9 @@ export const BE_TICKS: readonly TickItem[] = [
 ];
 /** The drawn date row both windows share: month bands, Monday ticks, and where TODAY sits (% across). */
 export const BE_DATES = {
-  months: [{ name: "October", from: 0, to: 66.3 }, { name: "November", from: 66.3, to: 100 }],
+  /* `short` is the phones' label (2 Nov, Nick): the full "November" does not fit between the hawk and the
+     window's right edge on a 375 or 390 phone. */
+  months: [{ name: "October", short: "Oct", from: 0, to: 66.3 }, { name: "November", short: "Nov", from: 66.3, to: 100 }],
   ticks: [{ at: 4.6, label: "5" }, { at: 20.6, label: "12" }, { at: 36.6, label: "19" }, { at: 52.6, label: "26" }, { at: 84.6, label: "9" }],
   today: 64,
   todayLabel: "TODAY",

@@ -13,7 +13,7 @@
  */
 import React from "react";
 import { WAIT_HERO_Q, WAIT_HERO_STRAP, HERO_CTA } from "./landingCopy";
-import { HeroSub, HeroPillars } from "./HeroLines";
+import { HeroSub } from "./HeroLines";
 import { FoundingSignup } from "./FoundingSignup";
 import { HeroPlaces } from "./HeroPlaces";
 import { HERO_FORM } from "./WaitlistParts";
@@ -43,7 +43,6 @@ export const Hero: React.FC<{
         <div className="mk-dh-art">
           <img src={DESK_HERO_BIRD.src + "?v=" + DESK_HERO_BIRD.version} alt="" width={DESK_HERO_BIRD.width} height={DESK_HERO_BIRD.height} />
         </div>
-        <HeroPillars />
       </div>
     </div>
   </section>
