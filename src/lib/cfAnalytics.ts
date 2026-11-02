@@ -8,6 +8,12 @@
  *
  *  - the hostname is EXACTLY one of `ANALYTICS_HOSTS`. An allowlist, never a suffix check:
  *    `endsWith("queryhawk.net")` would count dev.queryhawk.net and queryhawk.net.evil.com;
+ *  - this browser has not opted out. `?notrack` on any page sets `localStorage.qh_notrack = "1"`
+ *    for good; `?track` removes it. Either parameter is stripped from the address bar
+ *    (`history.replaceState`) so it is never shared or bookmarked. No UI: a founder's tool.
+ *
+ * ⚠️ STORAGE CAN THROW (private modes, blocked site data). Every access is wrapped, and a throw
+ * reads as NOT opted out: the opt-out is a convenience, and a broken page is not.
  *
  * ⚠️ NEVER TWICE. The guard is the beacon's own `<script>` already being in the document, which
  * holds under StrictMode's double effects and a hot module reload alike.
@@ -22,6 +28,8 @@ export const ANALYTICS_HOSTS: readonly string[] = ["queryhawk.net", "www.queryha
 export const BEACON_SRC = "https://static.cloudflareinsights.com/beacon.min.js";
 /** Cloudflare's own `data-cf-beacon` value, exactly as the build used to emit it. A public token. */
 export const BEACON_CONFIG = '{"token": "ee52cb1f15964230836ca4f32696fbfb"}';
+
+export const NOTRACK_KEY = "qh_notrack";
 
 /** The few pieces of the window this touches, so the tests can hand in their own. */
 export interface AnalyticsEnv {
@@ -50,9 +58,38 @@ const browserEnv = (): AnalyticsEnv => ({
   doc: document as unknown as AnalyticsEnv["doc"],
 });
 
-/** Adds Cloudflare's beacon once, on the live hosts only. */
+/** Reads `?notrack` / `?track`, records the choice, and takes the parameter out of the URL. */
+const applyOptOutParam = (env: AnalyticsEnv): void => {
+  const params = new URLSearchParams(env.search);
+  const off = params.has("notrack");
+  const on = params.has("track");
+  if (!off && !on) return;
+  try {
+    const s = env.storage();
+    if (on) s.removeItem(NOTRACK_KEY);
+    if (off) s.setItem(NOTRACK_KEY, "1");
+  } catch {
+    /* Storage refused: the choice cannot be kept, and the page carries on. */
+  }
+  params.delete("notrack");
+  params.delete("track");
+  const qs = params.toString();
+  env.replaceUrl(env.pathname + (qs ? `?${qs}` : "") + env.hash);
+};
+
+const optedOut = (env: AnalyticsEnv): boolean => {
+  try {
+    return env.storage().getItem(NOTRACK_KEY) === "1";
+  } catch {
+    return false;
+  }
+};
+
+/** Adds Cloudflare's beacon once, on the live hosts only, unless this browser has opted out. */
 export function startAnalytics(env: AnalyticsEnv = browserEnv()): void {
+  applyOptOutParam(env);
   if (!ANALYTICS_HOSTS.includes(env.hostname)) return;
+  if (optedOut(env)) return;
   if (env.doc.querySelector(`script[src="${BEACON_SRC}"]`)) return;
   const s = env.doc.createElement("script");
   s.defer = true;

@@ -3,13 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * CF-2 (2 Nov): Cloudflare's beacon loads on queryhawk.net and www.queryhawk.net only, never twice,
+ * not after `?notrack`,
  * and never from the built HTML. The served half (a production build on 127.0.0.1 makes no request
  * to Cloudflare) is tests/e2e/cfAnalytics.measure.ts.
  */
 import { describe, expect, it } from "vitest";
 import { existsSync, readdirSync, readFileSync, statSync } from "fs";
 import { join } from "path";
-import { ANALYTICS_HOSTS, BEACON_CONFIG, BEACON_SRC, startAnalytics, type AnalyticsEnv } from "./cfAnalytics";
+import { ANALYTICS_HOSTS, BEACON_CONFIG, BEACON_SRC, NOTRACK_KEY, startAnalytics, type AnalyticsEnv } from "./cfAnalytics";
 
 type FakeScript = { attrs: Record<string, string>; defer: boolean; src: string; setAttribute: (k: string, v: string) => void };
 
@@ -92,5 +93,51 @@ describe("CF-2 A3 · no built or source HTML carries the beacon", () => {
   it("the build injects nothing and carries no token", () => {
     expect(readFileSync(join(root, "vite.config.ts"), "utf8")).not.toMatch(/transformIndexHtml|cfBeacon|CF_BEACON/);
     expect(readFileSync(join(root, ".env.production"), "utf8")).not.toContain("CF_BEACON");
+  });
+});
+
+describe("CF-2 B · the ?notrack opt-out", () => {
+  it("B1 · ?notrack sets the flag, strips the parameter, adds no script; a later plain load adds none either", () => {
+    const store = new Map<string, string>();
+    const first = page("queryhawk.net", { search: "?utm_source=instagram&notrack", store });
+    startAnalytics(first.env);
+    expect(store.get(NOTRACK_KEY)).toBe("1");
+    expect(first.urls, "the parameter is gone, the rest kept").toEqual(["/privacy?utm_source=instagram#top"]);
+    expect(first.head).toHaveLength(0);
+    const later = page("queryhawk.net", { store });
+    startAnalytics(later.env);
+    expect(later.head, "still opted out on the next visit").toHaveLength(0);
+    expect(later.urls, "nothing to strip").toEqual([]);
+  });
+  it("B1 · a bare ?notrack leaves a clean URL", () => {
+    const p = page("queryhawk.net", { search: "?notrack" });
+    startAnalytics(p.env);
+    expect(p.urls).toEqual(["/privacy#top"]);
+  });
+  it("B2 · ?track clears the flag, and the beacon loads", () => {
+    const store = new Map<string, string>([[NOTRACK_KEY, "1"]]);
+    const back = page("queryhawk.net", { search: "?track", store });
+    startAnalytics(back.env);
+    expect(store.has(NOTRACK_KEY)).toBe(false);
+    expect(back.urls).toEqual(["/privacy#top"]);
+    expect(back.head).toHaveLength(1);
+    const next = page("queryhawk.net", { store });
+    startAnalytics(next.env);
+    expect(next.head, "and on the next run").toHaveLength(1);
+  });
+  it("B3 · storage that throws: the beacon still loads once and nothing throws", () => {
+    const p = page("queryhawk.net", { store: "throws" });
+    expect(() => { startAnalytics(p.env); startAnalytics(p.env); }).not.toThrow();
+    expect(p.head).toHaveLength(1);
+    const q = page("queryhawk.net", { search: "?notrack", store: "throws" });
+    expect(() => startAnalytics(q.env)).not.toThrow();
+    expect(q.urls, "the parameter is still stripped").toEqual(["/privacy#top"]);
+  });
+  it("the opt-out works on any host (so a dev visit can set it), and dev still loads nothing", () => {
+    const store = new Map<string, string>();
+    const p = page("dev.queryhawk.net", { search: "?notrack", store });
+    startAnalytics(p.env);
+    expect(store.get(NOTRACK_KEY)).toBe("1");
+    expect(p.head).toHaveLength(0);
   });
 });
