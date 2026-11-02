@@ -12,7 +12,6 @@ import {
   persistentLocalCache,
   persistentMultipleTabManager,
 } from "firebase/firestore";
-import { connectStorageEmulator, getStorage } from "firebase/storage";
 import { EMULATOR_HOSTS, emulatorTargetError } from "./firebaseTarget";
 
 // Firebase config is environment-driven (.env.production / .env.development), so dev builds
@@ -74,12 +73,18 @@ export const db =
 // Initialize Firebase Authentication (bound to this app instance explicitly)
 export const auth = getAuth(app);
 
-/* Local work against the emulators (`npm run dev:emu`, `npm run e2e:emu`). Storage's instance is
-   the cached one every later `getStorage(app)` returns, so connecting it here covers them all. */
+/* Local work against the emulators (`npm run dev:emu`, `npm run e2e:emu`).
+   ⚠️ STORAGE IS IMPORTED DYNAMICALLY, AND ONLY HERE. The landing page loads this file (App Check
+   imports it), so a static `firebase/storage` import would put the Storage SDK on the public page's
+   critical path for a branch production never takes. `emulated` folds to false in a production
+   build, so the import is dropped there entirely. Connecting after a first `getStorage` is safe: it
+   only sets the host, and the same cached instance is what every later `getStorage(app)` returns. */
 if (emulated) {
   connectFirestoreEmulator(db, EMULATOR_HOSTS.firestore.host, EMULATOR_HOSTS.firestore.port);
   connectAuthEmulator(auth, EMULATOR_HOSTS.auth, { disableWarnings: true });
-  connectStorageEmulator(getStorage(app), EMULATOR_HOSTS.storage.host, EMULATOR_HOSTS.storage.port);
+  void import("firebase/storage").then(({ connectStorageEmulator, getStorage }) =>
+    connectStorageEmulator(getStorage(app), EMULATOR_HOSTS.storage.host, EMULATOR_HOSTS.storage.port),
+  );
 }
 
 // Error Handling Infrastructure as per Skill Requirements

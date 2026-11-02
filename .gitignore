@@ -54,6 +54,6 @@ reports/comps-v28/.ledger-run
 # the eval report counts them and redacts every value it would print about them.
 tests/fixtures/smart-eval/real/
 
-# Emulator snapshot built locally by `npm run emu:seed` (auth export holds the harness password in plain text)
-tests/emulator-data/
+# The emulator snapshot is committed WITHOUT its auth half: the auth export stores the password in plain text
+tests/emulator-data/auth_export/
 dist-emu/

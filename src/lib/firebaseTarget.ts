@@ -11,10 +11,13 @@
  * anything added later) went to that real project. Refused at startup, before any SDK is created.
  */
 
+/* ⚠️ THE e2e EMULATORS HAVE THEIR OWN PORTS (firebase.emulator.json), not firebase.json's 8080/9099/9199:
+   those belong to `npm run test:rules` / `test:functions`, which other sessions run, and a long e2e run on
+   the same ports would block them (or be blocked) for hours. */
 export const EMULATOR_HOSTS = {
-  firestore: { host: "127.0.0.1", port: 8080 },
-  auth: "http://127.0.0.1:9099",
-  storage: { host: "127.0.0.1", port: 9199 },
+  firestore: { host: "127.0.0.1", port: 8085 },
+  auth: "http://127.0.0.1:9095",
+  storage: { host: "127.0.0.1", port: 9195 },
 } as const;
 
 export interface TargetEnv {

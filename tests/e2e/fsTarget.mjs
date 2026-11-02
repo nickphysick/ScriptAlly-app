@@ -25,7 +25,7 @@ export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 export const EMULATOR_PROJECT = "demo-scriptally";
 export const DEV_PROJECT = "scriptally-dev";
 export const PROD_PROJECT = "gen-lang-client-0801391782";
-export const EMULATOR_HOSTS = { firestore: "127.0.0.1:8080", auth: "127.0.0.1:9099", storage: "127.0.0.1:9199" };
+export const EMULATOR_HOSTS = { firestore: "127.0.0.1:8085", auth: "127.0.0.1:9095", storage: "127.0.0.1:9195" }; // firebase.emulator.json
 
 /** True only when someone asked, in this run, to touch real Firestore. */
 export function liveAllowed() {
@@ -89,10 +89,11 @@ export function targetEnv() {
     ...(globalThis.__FIREBASE_DEFAULTS__ ?? {}),
     emulatorHosts: { ...EMULATOR_HOSTS },
   };
-  /* firebase-admin reads these instead */
-  process.env.FIRESTORE_EMULATOR_HOST ??= EMULATOR_HOSTS.firestore;
-  process.env.FIREBASE_AUTH_EMULATOR_HOST ??= EMULATOR_HOSTS.auth;
-  process.env.FIREBASE_STORAGE_EMULATOR_HOST ??= EMULATOR_HOSTS.storage;
+  /* firebase-admin reads these instead — ASSIGNED, never `??=`: a value left by another spec in the same
+     worker (or the shell) could point at a different emulator, someone else's. */
+  process.env.FIRESTORE_EMULATOR_HOST = EMULATOR_HOSTS.firestore;
+  process.env.FIREBASE_AUTH_EMULATOR_HOST = EMULATOR_HOSTS.auth;
+  process.env.FIREBASE_STORAGE_EMULATOR_HOST = EMULATOR_HOSTS.storage;
   return {
     VITE_FIREBASE_API_KEY: "demo-key",
     VITE_FIREBASE_AUTH_DOMAIN: `${EMULATOR_PROJECT}.firebaseapp.com`,

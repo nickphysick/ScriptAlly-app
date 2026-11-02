@@ -7,7 +7,11 @@
  *     (functions/.secret.local: WAITLIST_IP_SALT=<anything>, RESEND_API_KEY= — empty, so no mail
  *      leaves; functions/.env.demo-scriptally-test: FIRESTORE_DATABASE_ID=(default). Both local only.)
  *   npx vite build --outDir <dir> && npx vite preview --outDir <dir> --host 127.0.0.1 --port 4733 --strictPort
- *   SA_E2E_BASE_URL=http://127.0.0.1:4733 npx playwright test --project public tests/e2e/foundingWelcome.public.ts
+ *   SA_E2E_FUNCTIONS=1 SA_E2E_BASE_URL=http://127.0.0.1:4733 npx playwright test --project public tests/e2e/foundingWelcome.public.ts
+ *
+ * ⚠️ OPT-IN (`SA_E2E_FUNCTIONS=1`). Its setup DELETES the `waitlist` and `ratelimits` collections in
+ * whatever functions emulator answers on 5001 — on 2 Nov a whole-suite run found ANOTHER session's
+ * emulator there and started clearing it. A general run (`npm run e2e:emu`) skips it.
  *
  * ⚠️ EVERY STATE IS REACHED THROUGH THE REAL VERIFY LINK. The spec seeds pending writers in the
  * emulator's Firestore, GETs the function's own /verify, and follows the 302 it answers — so the
@@ -26,12 +30,23 @@ const readings: Record<string, unknown> = {};
 
 /* The function's own compiled helpers and its own copy of the Admin SDK, so the seed hashes a token
    exactly as the function will. */
-process.env.FIRESTORE_EMULATOR_HOST ??= "127.0.0.1:8080";
-const req = createRequire(resolve("functions/package.json"));
-const admin = req("firebase-admin");
-const model = req("./lib/waitlistModel.js");
-if (admin.apps.length === 0) admin.initializeApp({ projectId: "demo-scriptally-test" });
-const db = admin.firestore();
+/* ⚠️ LOADED LAZILY, AND A MISSING PREREQUISITE IS A SKIP, NEVER A THROW. A require that threw at
+   module load stopped Playwright collecting the WHOLE suite, so `npm run e2e:emu` could not run as
+   one command; this spec needs its own recipe (the header) and is skipped with that as the reason. */
+const NEEDS = "opt-in: SA_E2E_FUNCTIONS=1, `npm --prefix functions run build` and the functions emulator on 5001 (see this file's header)";
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let admin: any, model: any = null, db: any;
+if (process.env.SA_E2E_FUNCTIONS === "1") try {
+  process.env.FIRESTORE_EMULATOR_HOST ??= "127.0.0.1:8080"; /* only on the opt-in: it leaks into the whole worker */
+  const req = createRequire(resolve("functions/package.json"));
+  admin = req("firebase-admin");
+  model = req("./lib/waitlistModel.js");
+  if (admin.apps.length === 0) admin.initializeApp({ projectId: "demo-scriptally-test" });
+  db = admin.firestore();
+} catch {
+  model = null;
+}
+test.skip(process.env.SA_E2E_FUNCTIONS !== "1" || !model, NEEDS);
 
 const seedPending = async (email: string, expiresInMs = 48 * 3600 * 1000): Promise<string> => {
   const token = model.newVerifyToken();
@@ -53,6 +68,8 @@ const LINKS: Record<string, string> = {};
 let verifiedEmail = "";
 
 test.beforeAll(async () => {
+  const up = await fetch(FN).then(() => true, () => false);
+  test.skip(!up, NEEDS);
   for (const c of ["waitlist", "ratelimits"]) {
     const snap = await db.collection(c).get();
     await Promise.all(snap.docs.map((d: { ref: { delete: () => Promise<unknown> } }) => d.ref.delete()));

@@ -139,6 +139,24 @@ describe("fsTarget's defaults", () => {
   });
 });
 
+describe("the committed emulator snapshot", () => {
+  it("carries Firestore and no auth export, so no password reaches this public repo", () => {
+    const meta = JSON.parse(read("tests/emulator-data/firebase-export-metadata.json"));
+    expect(meta.firestore).toBeTruthy();
+    expect(meta.auth).toBeUndefined();
+    const files = walk("tests/emulator-data");
+    expect(files.some((f) => f.includes("auth_export"))).toBe(false);
+    for (const f of files) expect(readFileSync(resolve(ROOT, f)).includes("fakeHash"), f).toBe(false);
+    expect(code(read("scripts/emu.mjs"))).toContain('rmSync(resolve(ROOT, DATA, "auth_export")');
+  });
+
+  it("every emulator session makes the harness login first", () => {
+    const src = code(read("scripts/emu.mjs"));
+    expect(src).toContain("node tests/emulator-seed/authUser.mjs && ");
+    expect((src.match(/withLogin\(/g) ?? []).length).toBe(2); /* dev and e2e */
+  });
+});
+
 describe("the browser harness", () => {
   it("playwright.config refuses a remote site without the opt-in", () => {
     const src = code(read("playwright.config.ts"));

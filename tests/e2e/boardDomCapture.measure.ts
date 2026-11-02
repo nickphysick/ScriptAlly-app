@@ -21,12 +21,10 @@ const OUT = "/Users/nickphysick/ScriptAlly-app/reports/calendar-extract-dom";
  * default — this repo already records that about `SA_E2E_BASE_URL`.
  */
 const TAG = process.env.SA_DOM_TAG;
-if (!TAG) {
-  throw new Error(
-    "SA_DOM_TAG is required — it names the capture (e.g. `before`, `after`). Without it this file "
-    + "would overwrite whichever set the last run happened to write.",
-  );
-}
+/* ⚠️ NO TAG → SKIPPED, NEVER DEFAULTED. It used to THROW at load, which stopped Playwright collecting
+   the WHOLE suite, so `npm run e2e:emu` could not run as one command. A default would silently choose
+   which reference to overwrite (the reason above), so without the tag every case is a clean skip. */
+test.skip(!TAG, "SA_DOM_TAG is not set — this capture tool only runs when you name the capture (before / after).");
 
 /* ⚠️ THE BOARD REGION, NOT THE PAGE — `.tl` is the board's root, the element declaring `--tl-days`.
    ⚠️ AND THE DOM ALONE IS NOT THE WHOLE NET. The board positions everything in `cqw` against
@@ -34,7 +32,7 @@ if (!TAG) {
    byte-identical. That is the design working, not the probe failing — but it means a width-
    dependent regression cannot show up in the HTML, so the geometry is captured beside it. */
 for (const w of [1280, 1440, 1920]) {
-  test(`dom · the board region at ${w} (${TAG})`, async ({ page }) => {
+  test(`dom · the board region at ${w} (${TAG ?? "untagged"})`, async ({ page }) => {
     mkdirSync(OUT, { recursive: true });
     await openRoute(page, "/todo/calendar", { width: w, height: 1000 });
     await page.waitForSelector(".tl", { timeout: 30000 });
