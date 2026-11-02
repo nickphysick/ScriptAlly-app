@@ -80,8 +80,8 @@ export const heroCopy = (kind: WelcomeKind, data: WelcomeData): HeroCopy => {
       };
     case "waiting":
       return {
-        heading: r ? `So close. You're ${ordinalWord(r)} in line.` : "So close. You're on the waiting list.",
-        lede: "The last founding place went while your email sat in your inbox. You're confirmed and on the waiting list, in the order people confirmed." +
+        heading: r ? `So close. You're ${ordinalWord(r)} in line.` : "So close. You're on the reserve list.",
+        lede: "The last founding place went while your email sat in your inbox. You're confirmed and on the reserve list, in the order people confirmed." +
           (PLACES_OFFERED_ON ? " If a founding place frees up, it's offered to the next writer in line." : ""),
         line: "We've emailed you to say so.",
       };
@@ -103,7 +103,8 @@ export const FRESH_LINK_CTA = "Send a fresh link";
 /* ══════════════ The pass ══════════════ */
 
 export const PASS_LABEL = "Founding writer pass";
-export const PASS_LABEL_WAITING = "Waiting list";
+/* "Reserve list" (waitlist clarity v1, 2 Nov): "waitlist" means everyone who signs up now. Names stay WAITING. */
+export const PASS_LABEL_WAITING = "Reserve list";
 export const passBig = (n: number) => `No. ${n}`;
 export const PASS_OF = `of ${FOUNDING_CAP}`;
 export const PASS_IN_LINE = "in line";
@@ -142,8 +143,8 @@ export const nextSteps = (kind: WelcomeKind, data: WelcomeData): Step[] => {
   if (kind === "waiting") {
     const r = data.reserveNumber;
     return [
-      { title: "You're on the waiting list",
-        body: r ? `${cap(ordinalWord(r))} in line, in the order writers confirmed.` : "On the waiting list, in the order writers confirmed." },
+      { title: "You're on the reserve list",
+        body: r ? `${cap(ordinalWord(r))} in line, in the order writers confirmed.` : "On the reserve list, in the order writers confirmed." },
       /* 2(a) only: under 2(b) a freed place is not offered on, so the step is dropped. */
       ...(PLACES_OFFERED_ON ? [{ title: "If a place frees up", body: "It's offered to the next writer in line, and you'll hear by email straight away." }] : []),
       setUp,
