@@ -38,6 +38,7 @@ const MUTATIONS: Record<string, string | ((page: Page) => Promise<void>)> = {
   LW7c: ".mk-wl-strap{font-size:58px!important;white-space:normal!important}",
   LW7d: ".mk-wl-herohawk{bottom:-40px!important;right:auto!important;left:40px!important}",
   LW7e: ".mk-wl-sub{max-width:none!important}",
+  LW7f: ".mk-wl-subg{justify-content:flex-end!important}",
   LW8: ".mk-det-h,.mk-fcopy p,.mk-wl-fline{text-transform:uppercase!important}",
   LW9: ".mk-frow,.mk-wl-feat{scroll-margin-top:-400px!important}",
   LW10: ".mk-vcard{flex-basis:80%!important}",
@@ -245,7 +246,7 @@ test("LW-6 · desktop: the pile is drawn at the neighbouring illustration's size
 /* LW-7, REPLACED (welcome page v1, phase 1): the drawer's foot is at 75% of the screen (±2%) at 390×844 and
    430×932, with the Birds-eye heading and its rule wholly in the first screen; on a 375×667 phone the content
    is taller than that and the drawer is its content's height. At all three, "No more winging it." is one line
-   and the binocular hawk touches neither the sub-line's ink nor the link. */
+   and the binocular hawk touches neither the sub-line's ink nor the link, with those two centred on him (2 Nov). */
 const PHONE_S = { width: 375, height: 667 };
 const drawer = (page: Page) => page.evaluate(() => {
   const box = (e: Element) => { const b = e.getBoundingClientRect(); return { top: b.top, bottom: b.bottom, left: b.left, right: b.right }; };
@@ -255,7 +256,7 @@ const drawer = (page: Page) => page.evaluate(() => {
   const strap = ink(document.querySelector(".mk-wl-strap")!);
   return { vh: innerHeight, scrollY, rule: parseFloat(getComputedStyle(h, "::after").height), drawer: box(hero),
            minH: parseFloat(getComputedStyle(hero).minHeight) || 0, heading: box(h),
-           strapLines: new Set(strap.map((x) => Math.round(x.top))).size, strapRight: Math.max(...strap.map((x) => x.right)), heroRight: box(hero).right,
+           strapLines: new Set(strap.map((x) => Math.round(x.top))).size, strapInk: strap, strapRight: Math.max(...strap.map((x) => x.right)), heroRight: box(hero).right,
            hawk: box(document.querySelector(".mk-wl-herohawk")!), sub: ink(document.querySelector(".mk-wl-sub")!), see: box(document.querySelector(".mk-wl-see")!) };
 });
 type Box = { top: number; bottom: number; left: number; right: number };
@@ -265,7 +266,7 @@ test.describe("LW-7 · phones: the drawer reaches 75% of the screen, one-line st
   for (const vp of [PHONE_S, PHONE, PHONE_L]) {
     test(`at ${vp.width}×${vp.height}`, async ({ page }) => {
       await open(page, vp);
-      await mutate(page, "LW7", "LW7b", "LW7c", "LW7d", "LW7e");
+      await mutate(page, "LW7", "LW7b", "LW7c", "LW7d", "LW7e", "LW7f");
       await present(page, "#mk-be-h", ".mk-wl-hero", ".mk-wl-strap", ".mk-wl-sub", ".mk-wl-see", ".mk-wl-herohawk");
       const r = await drawer(page);
       console.log(`LW-7 @${vp.width}`, JSON.stringify({ drawerBottom: r.drawer.bottom, share: r.drawer.bottom / r.vh, minH: r.minH, heading: r.heading, strapLines: r.strapLines, hawk: r.hawk }));
@@ -284,7 +285,12 @@ test.describe("LW-7 · phones: the drawer reaches 75% of the screen, one-line st
       expect(r.sub.length, "the sub-line has ink").toBeGreaterThan(0);
       for (const line of r.sub) expect(hits(r.hawk, line), `the hawk is clear of the sub-line (${JSON.stringify(line)})`).toBe(false);
       expect(hits(r.hawk, r.see), "the hawk is clear of See what it does").toBe(false);
-      expect(Math.abs(r.hawk.bottom - r.see.bottom), "his feet are level with the link's foot").toBeLessThanOrEqual(1);
+      /* 2 Nov: the words are centred on the hawk (with his feet at the link's foot, all his extra height fell
+         under the strap as one big gap). */
+      const words = { top: Math.min(...r.sub.map((x) => x.top)), bottom: r.see.bottom };
+      const off = (words.top + words.bottom) / 2 - (r.hawk.top + r.hawk.bottom) / 2;
+      expect(Math.abs(off), `the sub-line and link are centred on the hawk (off by ${off.toFixed(1)})`).toBeLessThanOrEqual(6);
+      expect(r.hawk.top, "his crest is below the strap's ink").toBeGreaterThanOrEqual(Math.max(...r.strapInk.map((x) => x.bottom)) - 6);
     });
   }
 });

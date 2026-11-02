@@ -58,7 +58,11 @@
 /* ⚠️ THE GROUP IS AT LEAST AS TALL AS THE HAWK (166px) PLUS 6px, its sub-line and link at its foot. He is
    taller than the two of them, so without this his head rose above the group and covered the strap's full
    stop at 375, where the drawer has no spare height to give. */
-.mk-wl-subg { position: relative; display: flex; flex-direction: column; justify-content: flex-end; padding-top: 20px; min-height: 173px; }
+/* ⚠️ THE WORDS ARE CENTRED ON THE HAWK (2 Nov, Nick: "a massive odd looking gap" under the strap). With
+   them at the group's foot, all 38px by which he is taller than the sub-line and link fell between the
+   strap and the sub-line. Centred, it is shared above and below them; the 6px on top keeps his crest off
+   the strap's full stop at 375, and the sign-up's 10px replaces the 26px that sat under the link. */
+.mk-wl-subg { position: relative; display: flex; flex-direction: column; justify-content: center; padding-top: 6px; min-height: 173px; }
 .mk-wl-herohawk { position: absolute; right: -20px; bottom: 0; width: 170px; height: auto; max-width: none; }
 .mk-wl .mk-wl-q {
   margin: 0; font-family: var(--mk-f-display) !important; font-weight: 400 !important; letter-spacing: 0 !important;
@@ -78,7 +82,7 @@
   color: #e8b4a3; font: 600 16px/1.3 var(--mk-f-serif); text-decoration: none; border-bottom: 1.5px solid rgba(232, 180, 163, .5);
 }
 .mk-wl-see:focus-visible { outline: 2px solid #e8b4a3; outline-offset: 3px; border-radius: 3px; }
-.mk-wl-signup { padding-top: 26px; }
+.mk-wl-signup { padding-top: 10px; }
 .mk-wl-form, .mk-ccform { display: grid; gap: 10px; }
 .mk-wl-form input[type="email"], .mk-ccform input[type="email"] {
   width: 100%; height: 50px; box-sizing: border-box; border-radius: 12px; border: 1px solid rgba(255, 255, 255, .25); background: #fff;
