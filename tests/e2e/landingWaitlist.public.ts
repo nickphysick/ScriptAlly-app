@@ -53,6 +53,8 @@ const MUTATIONS: Record<string, string | ((page: Page) => Promise<void>)> = {
   BEP1b: ".mk-bef--phone .mk-bef-ttag{display:none!important}.mk-bef--phone .mk-bef-win .mk-be-ttag{display:block!important}",
   BEP1c: ".mk-bef--phone .mk-be-mn--last{left:64%!important;right:auto!important}",
   BEP2: ".mk-wl .mk-wl-feat--first h3{text-align:left!important}.mk-wl .mk-wl-feat--first h3::after{margin-left:0!important}",
+  /* PRIV-5 (2 Nov): the hero's Privacy link removed. */
+  PRIV5: async (page) => page.evaluate(() => document.querySelectorAll(".mk-wl-hero .mk-betanote button, .mk-wl-hero .mk-betanote a").forEach((e) => e.remove())),
   LW8: ".mk-det-h,.mk-fcopy p,.mk-wl-fline{text-transform:uppercase!important}",
   LW9: ".mk-frow,.mk-wl-feat{scroll-margin-top:-400px!important}",
   LW10: ".mk-vcard{flex-basis:80%!important}",
@@ -272,7 +274,8 @@ const drawer = (page: Page) => page.evaluate(() => {
   const cs = getComputedStyle(hero);
   const h = document.getElementById("mk-be-h")!;
   const q = (s: string) => document.querySelector(".mk-wl-hero " + s);
-  const order = [".mk-wl-q", ".mk-wl-strap", ".mk-wl-herohawk", ".mk-wl-lock", ".mk-wl-see", ".mk-wl-signup"];
+  /* 2 Nov: "See what it does" moved to the drawer's foot, after the sign-up. */
+  const order = [".mk-wl-q", ".mk-wl-strap", ".mk-wl-herohawk", ".mk-wl-lock", ".mk-wl-signup", ".mk-wl-see"];
   const items = order.map((s) => { const e = q(s); return e ? { s, ...box(e) } : { s, top: NaN, bottom: NaN, left: NaN, right: NaN }; });
   /* The panel's two lines: the words' own boxes (the trio's dots are a different size, so read its words). */
   const trioWords = Array.from(document.querySelectorAll(".mk-wl-hero .mk-wl-lock-trio > span:not([aria-hidden])")).map((e) => e.getBoundingClientRect());
@@ -434,6 +437,32 @@ test("BE-P2 · phones: the Birds-eye heading and its rule are centred", async ({
   expect(r.rows.length, "the heading has ink").toBeGreaterThan(0);
   for (const c of r.rows) expect(Math.abs(c - r.mid), `a line of the heading is centred (off by ${(c - r.mid).toFixed(1)})`).toBeLessThanOrEqual(2);
   expect(Math.abs(r.rule - r.mid), `the rule is centred (off by ${(r.rule - r.mid).toFixed(1)})`).toBeLessThanOrEqual(2);
+});
+
+/* PRIV-5 (2 Nov): on the phone hero a Privacy link sits within 80px below the submit button, with and
+   without the places count loaded; and the hero's note is the short one, word for word. */
+test.describe("PRIV-5 · phones: the hero's Privacy link is just under the button", () => {
+  for (const count of [undefined, { count: 13, cap: 50 }]) {
+    test(count ? "with the places count" : "without the places count", async ({ page }) => {
+      await open(page, PHONE, count);
+      if (count) await expect(page.locator(".mk-wl-hero .mk-places--line:not(.mk-places--wait)")).toBeVisible();
+      await mutate(page, "PRIV5");
+      await present(page, ".mk-wl-hero button[type=submit]");
+      const r = await page.evaluate(() => {
+        const hero = document.querySelector(".mk-wl-hero")!;
+        const btn = hero.querySelector("button[type=submit]")!.getBoundingClientRect();
+        const link = Array.from(hero.querySelectorAll("a, button")).find((e) => e.textContent!.trim() === "Privacy");
+        const note = hero.querySelector(".mk-betanote");
+        return { btnBottom: btn.bottom, link: link ? link.getBoundingClientRect().top : null, note: note ? note.textContent : null };
+      });
+      console.log(`PRIV-5 ${count ? "count" : "none"}`, JSON.stringify(r));
+      expect(r.link, "the hero has a Privacy link").not.toBeNull();
+      const gap = r.link! - r.btnBottom;
+      expect(gap, `the Privacy link is below the button`).toBeGreaterThanOrEqual(0);
+      expect(gap, `the Privacy link is within 80px of the button (${gap.toFixed(1)})`).toBeLessThanOrEqual(80);
+      expect(r.note).toBe("We only email you about your invite. Privacy");
+    });
+  }
 });
 
 test.describe("LW-8 · no uppercase in the feature copy, the banner or the Birds-eye view", () => {

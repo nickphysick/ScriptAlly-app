@@ -96,6 +96,9 @@ describe("landing copy — verbatim locks", () => {
     expect(WAIT_HERO_SUB.endsWith(copy0.WAIT_HERO_SUB_BRAND + "."), "the brand ends the sub-line").toBe(true);
     expect(copy0.HERO_TRIO).toEqual(["Query", "Track", "Discover"]);
     expect("HERO_PILLARS" in copy0, "the desktop pillars strip is retired (2 Nov)").toBe(false);
+    /* 2 Nov: the phone hero's short privacy line; the founding ticket keeps FOUNDING_NOTE. */
+    expect(copy0.HERO_PRIVACY_SHORT).toEqual(["We only email you about your invite. ", { link: "Privacy", to: "privacy" }]);
+    expect(copy0.FOUNDING_NOTE).toEqual(["We'll only use your address to send your invite. ", { link: "Privacy", to: "privacy" }, "."]);
     expect(SEE_WHAT).toBe("See what it does");
     const copy = await import("./landingCopy");
     for (const gone of ["HERO_SUB", "HERO_SUB_LINES", "HERO_SUB_BRAND", "HERO_PLACES_REST",
