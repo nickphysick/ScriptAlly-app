@@ -1,0 +1,23 @@
+Subject: You're on the founding writers' waiting list
+
+Founding writer pass: Waiting list
+
+All fifty places have gone, but you're on the waiting list.
+
+Thanks for confirming. All fifty founding places were taken before your click came through, so you're on the waiting list, in the order people confirmed.
+
+You're on the list in the order people confirmed. If anything changes, you'll hear from me.
+
+You don't need to do anything else. Your address stays on the list, and you can take it off any time with the link below.
+
+Sorry we couldn't fit you in this time, and thank you for signing up.
+
+Nick
+Founder, QueryHawk
+
+---
+Questions, or something you'd like QueryHawk to do? Just reply, or write to hello@queryhawk.net. I read every one.
+
+Unsubscribe: http://127.0.0.1:4410/api/waitlist/unsubscribe?token=unsub
+This takes you off the waiting list.
+QueryHawk · Made in the UK, for writers
