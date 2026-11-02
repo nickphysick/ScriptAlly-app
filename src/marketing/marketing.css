@@ -182,7 +182,7 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
      are cards — so the band is the darker step and the cards are the white. The colour change
      marks both edges; `--mk-vision-edge` is deleted with the rules that read it.
      Pre-computed alphas, no `color-mix()`. */
-  --mk-stone: #e9e6e0;
+  /* `--mk-stone` is DELETED (welcome page v1, 2 Nov): its last reader was the old /welcome sheet. */
   /* `--mk-vision-rule` ("Read our story"'s underline) is RETIRED with the link (waitlist v1). */
   --mk-vision-body: rgba(28, 19, 15, .72);
   --mk-navy: #2a3a52;

@@ -62,11 +62,12 @@ const PUBLIC_ROUTES: [path: string, node: () => React.ReactElement, mustContain:
   ["/contact", () => <ContactPage onNavigate={noNavigate} />, "Get in touch"],
   /* Retarget, same law: the founders headline changed with the hero rebuild (16 Sep). */
   ["/founders", () => <FoundersPage onNavigate={noNavigate} />, "Help get things off the ground."],
-  /* The founding welcome a verify link lands on, one entry per state (founding-welcome, Part C).
-     There is no reference in a static render, so each renders its state without a number. */
-  ["/welcome?v=verified", () => <WelcomePage onNavigate={noNavigate} />, "Welcome, Founding Writer."],
+  /* The founding welcome a verify link lands on, one entry per state (founding-welcome, Part C;
+     rebuilt in welcome page v1, 2 Nov). There is no reference in a static render, so each renders
+     its state without a number. */
+  ["/welcome?v=verified", () => <WelcomePage onNavigate={noNavigate} />, "Welcome, founding writer."],
   ["/welcome?v=already", () => <WelcomePage onNavigate={noNavigate} />, "You&#x27;re already in."],
-  ["/welcome?v=waiting", () => <WelcomePage onNavigate={noNavigate} />, "So close. You&#x27;re on the reserve list."],
+  ["/welcome?v=waiting", () => <WelcomePage onNavigate={noNavigate} />, "So close. You&#x27;re on the waiting list."],
   ["/welcome?v=expired", () => <WelcomePage onNavigate={noNavigate} />, "That link&#x27;s 48 hours are up."],
   ["/welcome?v=unknown", () => <WelcomePage onNavigate={noNavigate} />, "We don&#x27;t recognise that link."],
   ["/terms", () => <LegalPage doc="terms" onNavigate={noNavigate} />, "Terms of Service"],

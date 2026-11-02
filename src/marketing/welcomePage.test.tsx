@@ -2,16 +2,17 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * /welcome — the founding welcome a confirmation link lands on (founding-welcome, Part C).
+ * /welcome — the founding welcome a confirmation link lands on (welcome page v1, 2 Nov; ref
+ * design-refs/welcome-page-v1.html).
  *
  * These read the rendered markup of `WelcomeView` with stubbed data, so a state can be drawn with a
- * number without a server. That the address is cleaned and the card holds still while the number
- * arrives are measured on a real page (tests/e2e/foundingWelcome.measure.ts).
+ * number without a server. What the browser does with it (no capitals anywhere, the bird inside the
+ * stub, the links, the stamp's motion, the mocked fetch) is measured on a production build in
+ * tests/e2e/welcomePage.public.ts (WEL-1 to WEL-6).
  */
-import { FOUNDING_CAP } from "./foundingCap";
 import { describe, expect, it, vi } from "vitest";
 import React from "react";
-import { readFileSync } from "fs";
+import { readFileSync, existsSync } from "fs";
 import { join } from "path";
 import { renderPage, noNavigate, stripComments } from "../test/pageSmoke";
 
@@ -22,18 +23,19 @@ vi.mock("../components/toast/ToastProvider", async () => (await import("../test/
 import { WelcomeView, WelcomePage } from "./WelcomePage";
 import { FoundersPage } from "./FoundersPage";
 import { FOUNDERS_H1 } from "./foundersCopy";
+import { FOUNDING_GETS } from "./landingCopy";
 import {
-  WELCOME_KINDS, type WelcomeKind, type WelcomeData, stateCopy, parseWelcomeKind, canSend,
-  ordinal, ordinalWord, padNumber, PERKS, TAPS_SEND, FOUNDER_INITIAL,
+  WELCOME_KINDS, type WelcomeKind, type WelcomeData, parseWelcomeKind, canSend,
+  ordinal, ordinalWord, longDate, TAPS_SEND, PLACES_OFFERED_ON,
 } from "./welcomeCopy";
 
 const text = (html: string) =>
-  html.replace(/<[^>]+>/g, " ").replace(/&#x27;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, "&").replace(/\s+/g, " ");
+  html.replace(/<[^>]+>/g, " ").replace(/&#x27;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, "&").replace(/&nbsp;/g, " ").replace(/\s+/g, " ");
 
 const DATA: Record<WelcomeKind, WelcomeData | null> = {
-  verified: { foundingNumber: 23, confirmedOn: "2026-10-18" },
-  already: { foundingNumber: 23, confirmedOn: "2026-10-18" },
-  waiting: { reserveNumber: 1, confirmedOn: "2026-10-18" },
+  verified: { foundingNumber: 14, confirmedOn: "2026-11-02" },
+  already: { foundingNumber: 14, confirmedOn: "2026-11-02" },
+  waiting: { reserveNumber: 3, confirmedOn: "2026-11-02" },
   expired: null,
   unknown: null,
 };
@@ -49,121 +51,103 @@ const view = (kind: WelcomeKind, opts: { data?: WelcomeData | null; loading?: bo
     />,
     "/welcome",
   );
+const pass = (html: string) => {
+  const i = html.indexOf('data-probe="pass"');
+  expect(i, "the pass is drawn").toBeGreaterThan(0);
+  return text(html.slice(i, html.indexOf("</header>", i)));
+};
 
-describe("W1 · each state draws its own headline", () => {
+describe("W1 · each state's heading, and the words around it", () => {
+  const HEADINGS: Record<WelcomeKind, string> = {
+    verified: "Welcome, founding writer.",
+    already: "You're already in.",
+    waiting: "So close. You're third in line.",
+    expired: "That link's 48 hours are up.",
+    unknown: "We don't recognise that link.",
+  };
   for (const kind of WELCOME_KINDS) {
-    it(kind, () => {
-      const html = view(kind);
-      const copy = stateCopy(kind, DATA[kind] ?? {});
-      expect(html).toContain(`data-welcome="${kind}"`);
-      expect(text(html)).toContain(copy.headline);
-      expect(text(html)).toContain(copy.chip);
-      /* Exactly one h1, and it is the state's. */
-      expect(html.match(/<h1\b/g)?.length).toBe(1);
-    });
+    it(kind, () => expect(text(view(kind))).toContain(HEADINGS[kind]));
   }
   it("v outside the five, or missing, is unknown", () => {
-    expect(parseWelcomeKind("hacked")).toBe("unknown");
-    expect(parseWelcomeKind("")).toBe("unknown");
+    expect(parseWelcomeKind("nonsense")).toBe("unknown");
     expect(parseWelcomeKind(null)).toBe("unknown");
   });
-  it("the reserve headline names the writer's own stored place, or none", () => {
-    expect(stateCopy("waiting", { reserveNumber: 1 }).headline).toBe("So close. You're first reserve.");
-    expect(stateCopy("waiting", { reserveNumber: 12 }).headline).toBe("So close. You're 12th reserve.");
-    expect(stateCopy("waiting", {}).headline).toBe("So close. You're on the reserve list.");
+  it("the waiting heading names the stored place, or none", () => {
+    expect(text(view("waiting", { data: { reserveNumber: 1 } }))).toContain("So close. You're first in line.");
+    expect(text(view("waiting", { data: {} }))).toContain("So close. You're on the waiting list.");
+  });
+  it("the formatters", () => {
+    expect([1, 2, 3, 11, 23].map(ordinal)).toEqual(["1st", "2nd", "3rd", "11th", "23rd"]);
+    expect([1, 3, 10, 11].map(ordinalWord)).toEqual(["first", "third", "tenth", "11th"]);
+    expect(longDate("2026-11-02")).toBe("2 November 2026");
+    expect(longDate("nope")).toBeNull();
   });
 });
 
-describe("W2 · the card states the stored number and nothing about the person", () => {
-  it("verified: 023 on the card, of the cap, the confirmed date, and no address", () => {
-    const html = view("verified");
-    expect(html).toContain('data-probe="card-number">023<');
-    expect(text(html)).toContain(`of ${FOUNDING_CAP}`);
-    expect(text(html)).not.toContain("of 100");
-    expect(text(html)).toContain("18 October 2026");
-    expect(html, "no email address anywhere on the page").not.toMatch(/@[a-z0-9-]+\./i);
-    expect(text(html)).toContain("Founding Writer No. 23");
+describe("W2 · the pass states the stored number and nothing else", () => {
+  it("verified: No. 14 of 50, Confirmed, the long date", () => {
+    expect(pass(view("verified"))).toMatch(/Founding writer pass No\. 14 of 50 .*QueryHawk Confirmed 2 November 2026/);
   });
-  it("waiting: the reserve card, with the reserve place as an ordinal", () => {
-    const html = view("waiting");
-    expect(html).toContain('data-card="reserve"');
-    expect(html).toContain('data-probe="card-number">1st<');
+  it("waiting: the waiting list, 3rd in line, Reserve", () => {
+    expect(pass(view("waiting"))).toMatch(/Waiting list 3rd in line .*Reserve 2 November 2026/);
   });
-  it("no number in the data → a dash, never an invented one", () => {
-    const html = view("verified", { data: { confirmedOn: "2026-10-18" } });
-    expect(html).toContain('data-probe="card-number">—<');
+  it("no number in the data → no number, never an invented one", () => {
+    const p = pass(view("verified", { data: null }));
+    expect(p).not.toMatch(/No\. \d/);
+    expect(p).not.toMatch(/of 50/);
+    expect(p).toContain("Confirmed");
   });
-  it("loading: the same card with an empty number slot, so it does not move when the number lands", () => {
-    const html = view("verified", { data: null, loading: true });
-    expect(html).toMatch(/class="mk-wel-card mk-wel-card--founding mk-wel-cardin is-loading"/);
-    expect(html).toContain('data-probe="card-number">\u00a0<');
-  });
-  it("the formatters", () => {
-    expect([1, 2, 3, 4, 11, 12, 13, 21, 22, 23, 101].map(ordinal)).toEqual(
-      ["1st", "2nd", "3rd", "4th", "11th", "12th", "13th", "21st", "22nd", "23rd", "101st"]);
-    expect(ordinalWord(3)).toBe("third");
-    expect(ordinalWord(11)).toBe("11th");
-    expect(padNumber(7)).toBe("007");
-    expect(padNumber(100)).toBe("100");
+  it("expired and unknown: the ghost, Not yet held, One click away", () => {
+    for (const k of ["expired", "unknown"] as const) expect(pass(view(k))).toMatch(/Founding writer pass Not yet held .*One click away/);
   });
 });
 
 describe("W3 · the three taps", () => {
   it("Send is disabled until all three are answered", () => {
-    const html = view("verified");
-    const btn = html.match(/<button[^>]*>Send to Nick<\/button>/)?.[0] ?? "";
-    expect(btn, "the button is rendered").toContain(TAPS_SEND);
-    expect(btn).toMatch(/\bdisabled=""/);
-    expect(canSend({})).toBe(false);
-    expect(canSend({ stage: "getting-ready", queried: "none" })).toBe(false);
-    expect(canSend({ stage: "getting-ready", queried: "none", tracker: "notebook" })).toBe(true);
-    expect(canSend({ stage: "getting-ready", queried: "none", tracker: "made-up" })).toBe(false);
+    expect(canSend({ stage: "just-started", queried: "11-50" })).toBe(false);
+    expect(canSend({ stage: "just-started", queried: "11-50", tracker: "spreadsheet" })).toBe(true);
+    expect(canSend({ stage: "just-started", queried: "11-50", tracker: "carrier pigeon" })).toBe(false);
   });
   it("no reference → no taps (there is nowhere to send them)", () => {
     expect(view("verified", { ref: null })).not.toContain(TAPS_SEND);
-  });
-  it("the failure line is the pack's words", () => {
-    const src = readFileSync(join(__dirname, "welcomeCopy.ts"), "utf8");
-    expect(src).toContain('"That didn\'t send — try again"');
+    expect(view("verified")).toContain(TAPS_SEND);
   });
 });
 
-describe("W4 · what each state leaves out", () => {
-  for (const kind of ["expired", "unknown"] as const) {
-    it(`${kind}: the hero only, a ghost card, and a sign-up form of its own`, () => {
-      const html = view(kind);
-      expect(html).toContain('data-card="ghost"');
-      expect(html).toContain('id="mk-welcome-email"');
-      for (const cls of ["mk-wel-note", "mk-wel-steps", "mk-wel-peek", "mk-wel-two", "mk-wel-close"])
-        expect(html, cls).not.toContain(`class="${cls}`);
-    });
-  }
-  it("waiting hides the perks; verified shows all three", () => {
-    const w = text(view("waiting"));
-    const v = text(view("verified"));
-    for (const p of PERKS) {
-      expect(w).not.toContain(p);
-      expect(v).toContain(p);
+describe("W4 · what each state draws and leaves out", () => {
+  it("verified and already: the note, three steps, the landing's four perks word for word, get ready, the close", () => {
+    for (const k of ["verified", "already"] as const) {
+      const t = text(view(k));
+      expect(t).toContain("Hi, I'm Nick.");
+      expect(t).toContain("Hello, founding writer number 14. We're honoured to have you on board.");
+      for (const g of FOUNDING_GETS) expect(t, g).toContain(g);
+      expect(t).toContain("Get ready for day one");
+      expect(t).toContain("That's everything for now. Keep an eye on your inbox.");
     }
   });
-  it("no 'Log in', no price, no 'Save as image' in any state", () => {
-    for (const kind of WELCOME_KINDS) {
-      const t = text(view(kind));
-      expect(t, kind).not.toMatch(/log in/i);
-      expect(t, kind).not.toMatch(/[£$€]\s?\d/);
-      expect(t, kind).not.toMatch(/save as image/i);
+  it("waiting (2(b)): its own note, no perks, no get-ready, and no 'If a place frees up' step", () => {
+    expect(PLACES_OFFERED_ON).toBe(false);
+    const t = text(view("waiting"));
+    expect(t).toContain("I'm sorry we couldn't hold a place for you this time");
+    expect(t).toContain("Third in line, in the order writers confirmed.");
+    expect(t).not.toContain(FOUNDING_GETS[0]);
+    expect(t).not.toContain("Get ready for day one");
+    expect(t).not.toContain("If a place frees up");
+    expect(t).not.toContain("it's yours to take");
+  });
+  it("expired and unknown: the drawer only, with the fresh-link form", () => {
+    for (const k of ["expired", "unknown"] as const) {
+      const t = text(view(k));
+      expect(t).toContain("Send a fresh link");
+      expect(t).not.toContain("What happens next");
+      expect(t).not.toContain("Hi, I'm Nick.");
     }
   });
-  it("no date on the page except the one the writer confirmed on", () => {
-    const months = /\b(January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\b/g;
-    for (const kind of WELCOME_KINDS) {
-      const found = new Set(text(view(kind)).match(months) ?? []);
-      found.delete("October"); found.delete("Oct");
-      expect([...found], kind).toEqual([]);
+  it("no 'Log in', no price, no email address in any state", () => {
+    for (const k of WELCOME_KINDS) {
+      const t = text(view(k));
+      expect(t).not.toMatch(/Log in|£\d|@[a-z0-9-]+\./i);
     }
-  });
-  it("the photo slot shows the initial while FOUNDER_PHOTO is unset", () => {
-    expect(view("verified")).toContain(`<span aria-hidden="true">${FOUNDER_INITIAL}</span>`);
   });
 });
 
@@ -175,15 +159,17 @@ describe("W5 · /founders?verified=<kind> goes on to /welcome, and /founders dra
   it("the plain page is unchanged", () => {
     expect(text(renderPage(<FoundersPage onNavigate={noNavigate} />, "/founders"))).toContain(FOUNDERS_H1);
   });
-  it("the old state block, its copy file and its rules are gone", () => {
-    const src = stripComments(readFileSync(join(__dirname, "FoundersPage.tsx"), "utf8"));
-    expect(src).toContain("/welcome?v=");
-    expect(src).not.toContain("VerifyState");
-    expect(src).not.toContain("foundersVerifyCopy");
-    const css = stripComments(readFileSync(join(__dirname, "marketing.css"), "utf8"));
-    for (const cls of ["mk-fwchip", "mk-fwvh", "mk-fwvform", "mk-fwverify"]) expect(css, cls).not.toContain(cls);
-  });
   it("the page itself renders from its URL", () => {
     expect(text(renderPage(<WelcomePage onNavigate={noNavigate} />, "/welcome?v=expired"))).toContain("That link's 48 hours are up.");
+  });
+});
+
+describe("W6 · the retired parts are gone (welcome page v1)", () => {
+  it("FoundingCard and the drawn previews have no file and no reader", () => {
+    expect(existsSync(join(__dirname, "FoundingCard.tsx"))).toBe(false);
+    const page = stripComments(readFileSync(join(__dirname, "WelcomePage.tsx"), "utf8"));
+    for (const gone of ["FoundingCard", "Peek", "mk-wel-shot", "mui-row"]) expect(page, gone).not.toContain(gone);
+    const css = stripComments(readFileSync(join(__dirname, "welcome.css"), "utf8"));
+    for (const gone of ["mk-wel-card", "mk-wel-peek", "mk-wel-eyebrow", "mk-wel-chip", "JetBrains Mono"]) expect(css, gone).not.toContain(gone);
   });
 });

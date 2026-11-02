@@ -118,13 +118,14 @@ const forward = async (page: Page, opts: { hold?: number; failAnswers?: boolean 
 };
 
 const HEADLINES: Record<string, RegExp> = {
-  verified: /^Welcome, Founding Writer\.$/,
+  verified: /^Welcome, founding writer\.$/,
   already: /^You're already in\.$/,
-  waiting: /^So close\. You're first reserve\.$/,
+  waiting: /^So close\. You're first in line\.$/,
   expired: /^That link's 48 hours are up\.$/,
   unknown: /^We don't recognise that link\.$/,
 };
-const CARD: Record<string, string> = { verified: "023", already: "024", waiting: "1st", expired: "—", unknown: "—" };
+/* Welcome page v1 (2 Nov): the pass's big line (the stored number as the pass prints it). */
+const CARD: Record<string, string> = { verified: "No. 23", already: "No. 24", waiting: "1st", expired: "Not yetheld", unknown: "Not yetheld" };
 
 for (const width of [1440, 390]) {
   test.describe(`at ${width}px`, () => {
@@ -137,7 +138,7 @@ for (const width of [1440, 390]) {
         const root = page.locator(`[data-welcome="${kind}"]`);
         await expect(root).toBeVisible();
         await expect(root.locator("h1")).toHaveText(HEADLINES[kind]);
-        await expect(page.locator('[data-probe="card-number"]')).toHaveText(CARD[kind]);
+        await expect(page.locator('[data-probe="pass-big"]')).toHaveText(CARD[kind]);
         const url = new URL(page.url());
         expect(url.pathname).toBe("/welcome");
         expect(url.search, "v and r are removed from the address").toBe("");
@@ -159,10 +160,10 @@ for (const width of [1440, 390]) {
       });
     }
 
-    test("the card does not move when the number lands", async ({ page }) => {
+    test("the pass does not move when the number lands", async ({ page }) => {
       await forward(page, { hold: 1500 });
       await page.goto(LINKS.verified);
-      const card = page.locator(".mk-wel-card");
+      const card = page.locator(".mk-wpass");
       await expect(card).toHaveClass(/is-loading/);
       const box = () => card.evaluate((el: HTMLElement) => {
         const r = el.getBoundingClientRect();
@@ -177,7 +178,7 @@ for (const width of [1440, 390]) {
       const before = await box();
       await expect(card, "the first reading was taken while the number was still on its way").toHaveClass(/is-loading/);
       await expect(card).not.toHaveClass(/is-loading/, { timeout: 6000 });
-      await expect(page.locator('[data-probe="card-number"]')).toHaveText("023");
+      await expect(page.locator('[data-probe="pass-big"]')).toHaveText("No. 23");
       const after = await box();
       readings[`stable@${width}`] = { before, after };
       for (const k of ["x", "y", "w", "h"] as const) expect(Math.abs(after[k] - before[k]), k).toBeLessThanOrEqual(0.5);
@@ -186,7 +187,7 @@ for (const width of [1440, 390]) {
     test("the stamp has landed by 1.5s, and reduced motion shows the final frame", async ({ page }) => {
       await forward(page);
       await page.goto(LINKS.verified);
-      const seal = page.locator(".mk-wel-seal");
+      const seal = page.locator(".mk-wpass-stamp");
       const timing = await seal.evaluate((el) => el.getAnimations().map((a) => (a.effect as KeyframeEffect).getComputedTiming().endTime));
       expect(timing.length, "the stamp animates").toBe(1);
       expect(Number(timing[0]), "it ends by 1500ms").toBeLessThanOrEqual(1500);
@@ -197,9 +198,9 @@ for (const width of [1440, 390]) {
       await page.emulateMedia({ reducedMotion: "reduce" });
       await page.reload();
       await page.goto(LINKS.verified);
-      await expect(page.locator(".mk-wel-card")).not.toHaveClass(/is-loading/);
+      await expect(page.locator(".mk-wpass")).not.toHaveClass(/is-loading/);
       const still = await page.evaluate(() => {
-        const card = document.querySelector(".mk-wel-card")!, seal = document.querySelector(".mk-wel-seal")!;
+        const card = document.querySelector(".mk-wpass")!, seal = document.querySelector(".mk-wpass-stamp")!;
         return {
           animations: document.getAnimations().length,
           sealOpacity: getComputedStyle(seal).opacity,
@@ -210,8 +211,8 @@ for (const width of [1440, 390]) {
       readings[`motion@${width}`] = { endTime: timing[0], reduced: still };
       expect(still.animations, "nothing animates").toBe(0);
       expect(still.sealOpacity).toBe("1");
-      /* rotate(-14deg) and rotate(-1.6deg): the final frame, not the first. */
-      expect(still.sealTransform).toMatch(/^matrix\(0\.97/);
+      /* rotate(-5deg) and rotate(2deg): the final frame, not the first (welcome page v1). */
+      expect(still.sealTransform).toMatch(/^matrix\(0\.996/);
       expect(still.cardTransform).toMatch(/^matrix\(0\.999/);
     });
   });
