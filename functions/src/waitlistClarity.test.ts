@@ -58,3 +58,24 @@ describe("WLC-4 · the confirm email is left as it is", () => {
     ]) expect(w).toContain(s);
   });
 });
+
+describe("WLC-5 · the overflow email calls it the reserve list", () => {
+  const m = ok(prepareWaiting(PROD, "unsub")) as Mail;
+
+  it("subject, preheader, pass, heading and lead", () => {
+    expect(m.subject).toBe("You're on the founding writers' reserve list");
+    const w = all(m);
+    for (const s of [
+      "The fifty places went, but you're on the reserve list.",
+      "Founding writer pass: Reserve list",
+      "All fifty places have gone, but you're on the reserve list.",
+      "Thanks for confirming. All fifty founding places were taken before your click came through, so you're on the reserve list, in the order people confirmed.",
+      "You don't need to do anything else. Your address stays on the reserve list, and you can take it off any time with the link below.",
+      "This takes you off the reserve list.",
+    ]) expect(w).toContain(s);
+  });
+
+  it("never says waiting list", () => {
+    expect(all(m)).not.toMatch(/waiting list/i);
+  });
+});

@@ -361,8 +361,8 @@ describe("landing copy — verbatim locks", () => {
     expect(FOUNDING_DUPE).toContain("click the link");
     /* 2 Nov (Nick): past the cap they still confirm by email, so the line sends them to the link, and
        promises the email a promotion sends (PROMO-1). */
-    expect(FOUNDING_FULL).toBe("All fifty founding places have gone, but we've emailed you a link: click it to join the waiting list, and we'll email you if a place opens up.");
-    expect(FOUNDING_FULL, "not on the list until they click").not.toMatch(/you're on the waiting list/i);
+    expect(FOUNDING_FULL).toBe("All fifty founding places have gone, but we've emailed you a link: click it to join the reserve list, and we'll email you if a place opens up.");
+    expect(FOUNDING_FULL, "not on the list until they click").not.toMatch(/you're on the reserve list/i);
   });
 
   /**

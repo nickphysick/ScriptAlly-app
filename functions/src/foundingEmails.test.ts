@@ -80,18 +80,18 @@ const EXPECT = {
   },
   waiting: {
     email: waiting,
-    subject: "You're on the founding writers' waiting list",
-    preheader: "The fifty places went, but you're on the waiting list.",
+    subject: "You're on the founding writers' reserve list",
+    preheader: "The fifty places went, but you're on the reserve list.",
     strings: [
-      "Waiting list",
-      "All fifty places have gone, but you're on the waiting list.",
-      "Thanks for confirming. All fifty founding places were taken before your click came through, so you're on the waiting list, in the order people confirmed.",
+      "Reserve list",
+      "All fifty places have gone, but you're on the reserve list.",
+      "Thanks for confirming. All fifty founding places were taken before your click came through, so you're on the reserve list, in the order people confirmed.",
       /* decision 2(b) */
       "If a founding writer gives up their place, it goes to the next person in line, and I'll email you straight away if that's you.",
-      "You don't need to do anything else. Your address stays on the list, and you can take it off any time with the link below.",
+      "You don't need to do anything else. Your address stays on the reserve list, and you can take it off any time with the link below.",
       "Sorry we couldn't fit you in this time, and thank you for signing up.",
       "Nick", "Founder, QueryHawk",
-      "This takes you off the waiting list.",
+      "This takes you off the reserve list.",
       ...FOOT,
     ],
   },
@@ -209,7 +209,7 @@ describe("EM-4 · a freed place goes to the next writer in line, and the waiting
   });
   it("the sign-up's own words (landingCopy): FOUNDING_FULL promises the email", () => {
     const src = readFileSync(join(process.cwd(), "src/marketing/landingCopy.ts"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
-    expect(src).toContain("founding places have gone, but we've emailed you a link: click it to join the waiting list, and we'll email you if a place opens up.");
+    expect(src).toContain("founding places have gone, but we've emailed you a link: click it to join the reserve list, and we'll email you if a place opens up.");
   });
   it("the unsubscribe path sends email 2 to the writer it promotes, from one place", () => {
     const src = readFileSync(join(process.cwd(), "functions/src/waitlist.ts"), "utf8");
@@ -285,7 +285,7 @@ describe("images off (Outlook's default): the alts and the text still read in or
       "Once you've confirmed", "Nick", "Founder, QueryHawk", "Didn't ask for this?", "Button not working?"]],
     welcome: [welcome, ["Founding writer pass: No. 14 of 50", "That's your place confirmed.", "Welcome aboard.",
       "Hi, I'm Nick.", "Nick Founder, QueryHawk", "What you get", "What happens next"]],
-    waiting: [waiting, ["Founding writer pass: Waiting list", "All fifty places have gone, but you're on the waiting list.",
+    waiting: [waiting, ["Founding writer pass: Reserve list", "All fifty places have gone, but you're on the reserve list.",
       "Thanks for confirming.", "If a founding writer gives up their place, it goes to the next person in line,", "Nick Founder, QueryHawk"]],
   };
   for (const [name, [e, seq]] of Object.entries(ORDER)) {

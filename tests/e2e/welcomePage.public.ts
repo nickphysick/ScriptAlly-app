@@ -34,8 +34,8 @@ const COPY: Record<Kind, { heading: string; lede: string; pass: string[] }> = {
   },
   waiting: {
     heading: "So close. You're third in line.",
-    lede: "The last founding place went while your email sat in your inbox. You're confirmed and on the waiting list, in the order people confirmed. If a founding place frees up, it's offered to the next writer in line.",
-    pass: ["Waiting list", "3rd", "in line", "Reserve", "2 November 2026"],
+    lede: "The last founding place went while your email sat in your inbox. You're confirmed and on the reserve list, in the order people confirmed. If a founding place frees up, it's offered to the next writer in line.",
+    pass: ["Reserve list", "3rd", "in line", "Reserve", "2 November 2026"],
   },
   expired: {
     heading: "That link's 48 hours are up.",

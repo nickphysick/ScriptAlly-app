@@ -74,7 +74,7 @@ describe("W1 · each state's heading, and the words around it", () => {
   });
   it("the waiting heading names the stored place, or none", () => {
     expect(text(view("waiting", { data: { reserveNumber: 1 } }))).toContain("So close. You're first in line.");
-    expect(text(view("waiting", { data: {} }))).toContain("So close. You're on the waiting list.");
+    expect(text(view("waiting", { data: {} }))).toContain("So close. You're on the reserve list.");
   });
   it("the formatters", () => {
     expect([1, 2, 3, 11, 23].map(ordinal)).toEqual(["1st", "2nd", "3rd", "11th", "23rd"]);
@@ -88,8 +88,8 @@ describe("W2 · the pass states the stored number and nothing else", () => {
   it("verified: No. 14 of 50, Confirmed, the long date", () => {
     expect(pass(view("verified"))).toMatch(/Founding writer pass No\. 14 of 50 .*QueryHawk Confirmed 2 November 2026/);
   });
-  it("waiting: the waiting list, 3rd in line, Reserve", () => {
-    expect(pass(view("waiting"))).toMatch(/Waiting list 3rd in line .*Reserve 2 November 2026/);
+  it("waiting: the reserve list, 3rd in line, Reserve", () => {
+    expect(pass(view("waiting"))).toMatch(/Reserve list 3rd in line .*Reserve 2 November 2026/);
   });
   it("no number in the data → no number, never an invented one", () => {
     const p = pass(view("verified", { data: null }));
@@ -130,7 +130,7 @@ describe("W4 · what each state draws and leaves out", () => {
   it("waiting: its own note, the 'If a place frees up' step, no perks, no get-ready", () => {
     expect(PLACES_OFFERED_ON).toBe(true);
     const t = text(view("waiting"));
-    expect(t).toContain("The last founding place went while your email sat in your inbox. You're confirmed and on the waiting list, in the order people confirmed. If a founding place frees up, it's offered to the next writer in line.");
+    expect(t).toContain("The last founding place went while your email sat in your inbox. You're confirmed and on the reserve list, in the order people confirmed. If a founding place frees up, it's offered to the next writer in line.");
     expect(t).toContain("Sorry we couldn't fit you in this time, and thank you for signing up. You're confirmed and in the queue, so if a place frees up, it's yours to take.");
     expect(t).toContain("Third in line, in the order writers confirmed.");
     expect(t).toContain("If a place frees up It's offered to the next writer in line, and you'll hear by email straight away.");

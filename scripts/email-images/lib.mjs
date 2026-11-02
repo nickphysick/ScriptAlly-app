@@ -44,15 +44,15 @@ export const SPECS = [
     alt: "Founding writer pass: almost yours. One click to go." },
   ...Array.from({ length: CAP }, (_, i) => passNo(i + 1)),
   { name: "pass-waiting", file: "pass.html",
-    vars: { BIG: "Waiting list", OF: "", STAMP: "Reserve", STAMP_CLASS: "stamp" },
-    alt: "Founding writer pass: Waiting list" },
+    vars: { BIG: "Reserve list", OF: "", STAMP: "Reserve", STAMP_CLASS: "stamp" },
+    alt: "Founding writer pass: Reserve list" },
   /* The picture sets a typographic apostrophe; the alt is the email copy's own words, word for word. */
   { name: "heading-confirm", file: "heading.html", vars: { TEXT: "One click and you’re on the list." },
     alt: "One click and you're on the list." },
   { name: "heading-welcome", file: "heading.html", vars: { TEXT: "That’s your place confirmed." },
     alt: "That's your place confirmed." },
-  { name: "heading-waiting", file: "heading.html", vars: { TEXT: "All fifty places have gone, but you’re on the waiting list." },
-    alt: "All fifty places have gone, but you're on the waiting list." },
+  { name: "heading-waiting", file: "heading.html", vars: { TEXT: "All fifty places have gone, but you’re on the reserve list." },
+    alt: "All fifty places have gone, but you're on the reserve list." },
   { name: "signature-nick", file: "signature.html", vars: { TEXT: "Nick" }, alt: "Nick" },
 ];
 
