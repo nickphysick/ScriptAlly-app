@@ -521,6 +521,60 @@ As section 8. To return hosting and the function to release 1 exactly, redeploy 
 
 ---
 
+## 12 · Analytics: count only real visitors (2 Nov)
+
+Cloudflare Web Analytics used to be written into the built page, so it counted visits from
+wherever a production build ran: `127.0.0.1` test runs, local previews, and you. Now the page
+adds it only on **queryhawk.net** and **www.queryhawk.net**, and never in a browser that has
+opted out. Same token as before. Nothing else changes: no rules, no functions, no page content.
+
+> §11's Google Analytics steps (the consent bar, 11.4 step 7, 11.5) are out of date: GA came off
+> the public site on 31 Oct. Skip them.
+
+### 12.1 · Hosting, from `release/live-1`
+
+```bash
+cd /Users/nickphysick/ScriptAlly-live
+git fetch origin
+git checkout release/live-1
+git merge --ff-only origin/main
+npm run build && node scripts/live-preflight.mjs
+firebase deploy --only hosting --project prod
+node scripts/live-verify.mjs hosting
+```
+
+**Good:** `Fast-forward`, `PREFLIGHT PASSED.`, every verify line `PASS`.
+
+### 12.2 · Check it
+
+- **https://queryhawk.net/** in a private window, DevTools → Network: there is a request to
+  `static.cloudflareinsights.com/beacon.min.js`.
+- **https://dev.queryhawk.net/**, same view: **no** request to `cloudflareinsights.com`.
+
+### 12.3 · Opt yourself out
+
+Open this once in **every browser you use**, including your phone's main browser:
+
+```
+https://queryhawk.net/?notrack
+```
+
+The address bar drops the `?notrack` and that browser is never counted again. To undo it, open
+`https://queryhawk.net/?track`.
+
+**Instagram's in-app browser keeps its own storage**, so do it there too: tap your bio link,
+then add `?notrack` to the address in that browser (or open the link
+`https://queryhawk.net/?notrack` from a DM to yourself).
+
+Clearing a browser's site data clears the opt-out too; open `?notrack` again.
+
+### 12.4 · Past data
+
+The `127.0.0.1` entries already in Cloudflare stay there. In the Web Analytics dashboard, keep
+the filter **Host = queryhawk.net** (add **www.queryhawk.net** if it ever shows up).
+
+---
+
 ## After the app opens (not now)
 
 When you decide to open the app on queryhawk.net:
