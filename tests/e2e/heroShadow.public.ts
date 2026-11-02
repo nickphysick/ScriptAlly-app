@@ -79,30 +79,3 @@ test("HERO-1 · the card's shadow fades to the ground below it, with no hard ste
   console.log("HERO-1 side", JSON.stringify({ sideWorst, at: sideSteps.indexOf(sideWorst) - 28, around: r.side.slice(24, 36) }));
   expect(sideWorst, `beside the card the shadow has no hard line (largest step ${sideWorst}/255 at ${sideSteps.indexOf(sideWorst) - 28}px from the bottom)`).toBeLessThanOrEqual(4);
 });
-
-/* HERO-2 (hero v3, 2 Nov): the three-column strip along the card's foot. At 1440×900 its left, right and
-   bottom edges are the card's (±1px), and its three columns are equal widths (±2px). `HERO_MUTATE=HERO2`
-   insets the strip; `HERO2b` makes the first column wider. */
-test("HERO-2 · the pillars strip is flush with the card's foot, in three equal columns", async ({ page }) => {
-  await page.route(/googletagmanager\.com|google-analytics\.com/, (r) => r.abort());
-  await page.goto("/");
-  await expect(page.locator(".mk-dh-card")).toBeVisible();
-  await page.evaluate(() => document.fonts.ready);
-  const m = process.env.HERO_MUTATE;
-  if (m === "HERO2") await page.addStyleTag({ content: ".mk-dh-pillars{margin:0 0 20px!important}" });
-  if (m === "HERO2b") await page.addStyleTag({ content: ".mk-dh-pillars{grid-template-columns:2fr 1fr 1fr!important}" });
-  await page.waitForTimeout(300);
-  expect(await page.locator(".mk-dh-pillars").count(), "the strip is on the page").toBe(1);
-  const r = await page.evaluate(() => {
-    const b = (e: Element) => e.getBoundingClientRect();
-    const card = b(document.querySelector(".mk-dh-card")!), strip = b(document.querySelector(".mk-dh-pillars")!);
-    const cols = Array.from(document.querySelectorAll(".mk-dh-pillars > .mk-dh-pillar")).map((e) => b(e).width);
-    return { card: { l: card.left, r: card.right, b: card.bottom }, strip: { l: strip.left, r: strip.right, b: strip.bottom }, cols };
-  });
-  console.log("HERO-2", JSON.stringify(r));
-  expect(Math.abs(r.strip.l - r.card.l), "left edges").toBeLessThanOrEqual(1);
-  expect(Math.abs(r.strip.r - r.card.r), "right edges").toBeLessThanOrEqual(1);
-  expect(Math.abs(r.strip.b - r.card.b), "bottom edges").toBeLessThanOrEqual(1);
-  expect(r.cols.length, "three columns").toBe(3);
-  expect(Math.max(...r.cols) - Math.min(...r.cols), `column widths ${r.cols.map((w) => w.toFixed(1)).join(", ")}`).toBeLessThanOrEqual(2);
-});

@@ -102,10 +102,10 @@ export function useSeen(ref: React.RefObject<HTMLElement | null>, onChange: (see
 }
 
 /** The date row both windows draw (month bands, Monday ticks, the TODAY tag). */
-const Dates: React.FC = () => (
+const Dates: React.FC<{ short?: boolean }> = ({ short }) => (
   <div className="mk-be-dates">
     {BE_DATES.months.map((m) => <span key={m.name} className="mk-be-mo" style={{ left: m.from + "%", width: (m.to - m.from) + "%" }} />)}
-    {BE_DATES.months.map((m) => <span key={m.name + "n"} className="mk-be-mn" style={{ left: `calc(${m.from}% + 8px)` }}>{m.name}</span>)}
+    {BE_DATES.months.map((m, i) => <span key={m.name + "n"} className={"mk-be-mn" + (i === BE_DATES.months.length - 1 ? " mk-be-mn--last" : "")} style={{ left: `calc(${m.from}% + 8px)` }}>{short ? m.short : m.name}</span>)}
     {BE_DATES.ticks.map((t) => <span key={t.label} className="mk-be-tk" style={{ left: t.at + "%" }}>{t.label}</span>)}
     <span className="mk-be-ttag" style={{ left: BE_DATES.today + "%" }}>{BE_DATES.todayLabel}</span>
   </div>
@@ -141,18 +141,25 @@ export const BirdsEyeFocus: React.FC<{ layout: "desk" | "phone" }> = ({ layout }
   const phone = layout === "phone";
   const rows = phone ? BE_DESK_ROWS : BE_DESK_ROWS.slice(0, -1);
   const [first, ...last] = BE_FOCUS.name.split(" ");
+  /* The today line's x, from the window's (and the root's) left: the names column plus the lane's width
+     × TODAY. The line, and on phones the hawk and the pill, are all placed from this one expression. */
+  const todayX = `calc(var(--mk-bef-names) + (100% - var(--mk-bef-names)) * ${BE_DATES.today / 100})`;
   return (
     <div className={"mk-bef mk-bef--" + layout} ref={root} data-be={layout} aria-hidden="true">
       {/* The hawk stands on the navy header's bottom edge, in front of it, his head rising above the
-          window (Nick, 31 Oct). Outside the window, which clips. */}
-      <img className="mk-bef-hk" src={v(BE_HAWK)} alt="" width={BE_HAWK.width} height={BE_HAWK.height} />
+          window (Nick, 31 Oct). Outside the window, which clips. On phones he stands on the today line. */}
+      <img className="mk-bef-hk" src={v(BE_HAWK)} alt="" width={BE_HAWK.width} height={BE_HAWK.height}
+        style={phone ? { left: `calc(${todayX} - var(--mk-bef-hk) / 2)` } : undefined} />
+      {/* Phones (2 Nov): the TODAY pill is drawn here, at the window's root, so it can sit in front of the
+          hawk; the window's own copy is hidden there (the window is its own stacking context, below him). */}
+      {phone && <span className="mk-be-ttag mk-bef-ttag" style={{ left: todayX }}>{BE_DATES.todayLabel}</span>}
       <div className="mk-bef-win">
         <div className="mk-bef-grid">
           <div className="mk-bef-whohead" />
-          <div className="mk-bef-lanehead"><Dates /></div>
+          <div className="mk-bef-lanehead"><Dates short={phone} /></div>
         </div>
         <div className="mk-bef-body">
-          <span className="mk-bef-tline" style={{ left: `calc(var(--mk-bef-names) + (100% - var(--mk-bef-names)) * ${BE_DATES.today / 100})` }} />
+          <span className="mk-bef-tline" style={{ left: todayX }} />
           {rows.map(([l, w, k, say, ghost], i) => (
             <div key={i} className={"mk-bef-rw" + (ghost ? "" : " mk-on")}>
               <div className="mk-bef-who">

@@ -111,6 +111,9 @@
 .mk-wl .mk-wl-feat h3::after { content: ""; display: block; width: 44px; height: 3px; border-radius: 3px; background: #2a3a52; margin-top: 14px; }
 .mk-wl .mk-wl-feat--first h3 { margin-bottom: 0; }
 .mk-wl .mk-wl-feat--first h3::after { margin-top: 12px; }
+/* The Birds-eye heading and its rule are centred on phones (2 Nov; BE-P2). */
+.mk-wl .mk-wl-feat--first h3 { text-align: center; }
+.mk-wl .mk-wl-feat--first h3::after { margin-left: auto; margin-right: auto; }
 .mk-wl-feat { scroll-margin-top: calc(var(--mk-nav-h, 60px) + 4px); }
 .mk-wl-fline { margin: 0 0 18px; font: 400 16.5px/1.55 var(--mk-f-serif); color: rgba(28, 19, 15, .74); }
 .mk-strike { text-decoration: line-through; text-decoration-color: #a2452a; text-decoration-thickness: 2px; color: rgba(28, 19, 15, .5); font: inherit; }
@@ -270,13 +273,9 @@
   background-image: linear-gradient(var(--mk-ink-shell) 0, var(--mk-ink-shell) 58%, var(--mk-lower) 58%);
 }
 .mk-dh-wrap { max-width: 1300px; margin: 0 auto; padding: 0 72px; box-sizing: border-box; }
-/* ⚠️ THE CARD HAS NO BOTTOM PADDING (hero v3): the pillars strip is its last row, pulled out to its left
-   and right edges by the card's own side padding (`--dh-pl`/`--dh-pr`, one owner each), so it sits flush
-   with the card's foot and takes its bottom corners (HERO-2). */
 .mk-dh-card {
-  --dh-pl: 72px; --dh-pr: 64px;
   display: grid; grid-template-columns: 1.15fr .85fr; align-items: center; gap: 40px;
-  padding: 64px var(--dh-pr) 0 var(--dh-pl); background: #fff; border-radius: 28px; box-shadow: 0 24px 60px rgba(27, 36, 51, .18);
+  padding: 64px 64px 56px 72px; background: #fff; border-radius: 28px; box-shadow: 0 24px 60px rgba(27, 36, 51, .18);
 }
 .mk-dh-copy { min-width: 0; color: #1c130f; }
 .mk-dh .mk-dh-q {
@@ -309,22 +308,9 @@
 .mk-dh .mk-betanote button, .mk-dh .mk-betanote a { color: inherit; font: inherit; }
 .mk-dh-art { display: flex; justify-content: center; }
 .mk-dh-art img { width: 100%; max-width: 360px; height: auto; }
-/* The pillars (hero v3, 2 Nov): three equal columns along the card's foot, divided by hairlines. */
-.mk-dh-pillars {
-  grid-column: 1 / -1; align-self: stretch; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin: 0 calc(-1 * var(--dh-pr)) 0 calc(-1 * var(--dh-pl)); padding: 0; list-style: none;
-  background: #faf6f1; border-top: 1px solid rgba(28, 19, 15, .1); border-radius: 0 0 28px 28px;
-}
-.mk-dh-pillar { padding: 24px 30px 26px 40px; }
-.mk-dh-pillar + .mk-dh-pillar { border-left: 1px solid rgba(28, 19, 15, .1); }
-.mk-dh-pillar b { display: block; font: 400 26px/1.2 var(--mk-f-display); color: #1c130f; }
-.mk-dh-pillar--track b { color: #a2452a; }
-.mk-dh-pillar span { display: block; margin-top: 6px; font: 400 17px/1.45 var(--mk-f-serif); color: rgba(28, 19, 15, .7); }
 @media (max-width: 1080px) {
   .mk-dh-wrap { padding: 0 32px; }
-  .mk-dh-card { --dh-pl: 48px; --dh-pr: 40px; padding: 48px var(--dh-pr) 0 var(--dh-pl); gap: 28px; }
-  .mk-dh-pillars { grid-template-columns: 1fr; }
-  .mk-dh-pillar + .mk-dh-pillar { border-left: 0; border-top: 1px solid rgba(28, 19, 15, .1); }
+  .mk-dh-card { padding: 48px 40px 44px 48px; gap: 28px; }
   .mk-dh-q .mk-dh-q2 { font-size: 54px; }
 }
 @media (max-width: 900px) {
@@ -481,6 +467,18 @@
 .mk-bef--phone .mk-be-tk { bottom: 6px; font-size: 9px; }
 .mk-bef--phone .mk-be-tk::before { display: none; }
 .mk-bef--phone .mk-be-ttag { bottom: 4px; font-size: 8px; letter-spacing: .12em; padding: 3px 5px 2px; border-radius: 4px; }
+/* Phones (2 Nov): the hawk stands on the today line, his centre on it (the line is the names column plus
+   the lane's width × today, placed inline from BE_DATES.today, as the line is); the TODAY pill is the root's copy, on the same line at the header's foot, in
+   front of him; the window's own pill is hidden. November moves to the header's right edge, clear of him.
+   The names column's header cell has no divider. */
+.mk-bef--phone .mk-bef-win .mk-be-ttag { display: none; }
+.mk-bef--phone .mk-bef-ttag {
+  bottom: auto; top: var(--mk-bef-head); z-index: 3;
+  transform: translate(-50%, calc(-100% - 4px));
+  background: #f4eee5; color: #1b1310;
+}
+.mk-bef--phone .mk-be-mn--last { left: auto !important; right: 8px; }
+.mk-bef--phone .mk-bef-whohead { border-right: 0; }
 .mk-bef--phone .mk-bef-who { gap: 5px; padding: 0 6px; }
 .mk-bef--phone .mk-bef-rw.mk-on .mk-bef-who { padding-left: 3px; }
 .mk-bef--phone .mk-bef-who b { font: 600 11.5px/1.05 var(--mk-f-serif); }

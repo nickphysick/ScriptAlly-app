@@ -95,10 +95,7 @@ describe("landing copy — verbatim locks", () => {
     expect(WAIT_HERO_SUB).toBe("Give your manuscript the chance it deserves with QueryHawk.");
     expect(WAIT_HERO_SUB.endsWith(copy0.WAIT_HERO_SUB_BRAND + "."), "the brand ends the sub-line").toBe(true);
     expect(copy0.HERO_TRIO).toEqual(["Query", "Track", "Discover"]);
-    expect(copy0.HERO_PILLARS.map((p) => [p.title, p.line])).toEqual([
-      ["Query", "Build your agent list"], ["Track", "Track your submissions"], ["Discover", "Master the art of querying"],
-    ]);
-    expect(copy0.HERO_PILLARS.map((p) => p.title), "the pillars are the trio's words").toEqual([...copy0.HERO_TRIO]);
+    expect("HERO_PILLARS" in copy0, "the desktop pillars strip is retired (2 Nov)").toBe(false);
     expect(SEE_WHAT).toBe("See what it does");
     const copy = await import("./landingCopy");
     for (const gone of ["HERO_SUB", "HERO_SUB_LINES", "HERO_SUB_BRAND", "HERO_PLACES_REST",

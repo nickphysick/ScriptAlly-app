@@ -46,7 +46,13 @@ const MUTATIONS: Record<string, string | ((page: Page) => Promise<void>)> = {
     document.head.append(st);
   }),
   LW7g: ".mk-wl-hero{min-height:820px!important}",
-  LW13: ".mk-wl-lock-trio,.mk-dh-pillar b{text-transform:uppercase!important}",
+  LW13: ".mk-wl-lock-trio,.mk-dh-sub{text-transform:uppercase!important}",
+  /* BE-P1/P2 (2 Nov): the hawk back at the names column; the pill back inside the window, under him;
+     November back at its month's start; the heading back to the left. */
+  BEP1: ".mk-bef--phone .mk-bef-hk{left:4px!important}",
+  BEP1b: ".mk-bef--phone .mk-bef-ttag{display:none!important}.mk-bef--phone .mk-bef-win .mk-be-ttag{display:block!important}",
+  BEP1c: ".mk-bef--phone .mk-be-mn--last{left:64%!important;right:auto!important}",
+  BEP2: ".mk-wl .mk-wl-feat--first h3{text-align:left!important}.mk-wl .mk-wl-feat--first h3::after{margin-left:0!important}",
   LW8: ".mk-det-h,.mk-fcopy p,.mk-wl-fline{text-transform:uppercase!important}",
   LW9: ".mk-frow,.mk-wl-feat{scroll-margin-top:-400px!important}",
   LW10: ".mk-vcard{flex-basis:80%!important}",
@@ -318,7 +324,7 @@ test.describe("LW-7 · phones: the drawer is a centred stack, as tall as its con
 /* LW-13 (hero v3, 2 Nov): the copy on each layout, word for word, and nothing in the hero uppercased.
    Phones: the lockup panel ("Query · Track · Discover" / "QueryHawk") reads to a screen reader as
    "Query, Track, Discover. QueryHawk", and there is no sub-line. Desktop: the sub-line with its bold brand,
-   no trio in the copy column, and the three pillars along the card's foot. */
+   no trio in the copy column and no pillars strip (retired 2 Nov). */
 test.describe("LW-13 · the hero's copy, both layouts", () => {
   for (const vp of [PHONE, DESK]) {
     test(`at ${vp.width}px`, async ({ page }) => {
@@ -342,7 +348,6 @@ test.describe("LW-13 · the hero's copy, both layouts", () => {
           brandWeight: sub?.querySelector("b") ? getComputedStyle(sub.querySelector("b")!).fontWeight : null,
           trio: !!root.querySelector("[class$='-trio']"),
           pillars: Array.from(root.querySelectorAll(".mk-dh-pillar")).map((p) => [p.querySelector("b")?.textContent, p.querySelector("span")?.textContent]),
-          trackRust: root.querySelector(".mk-dh-pillar--track b") ? getComputedStyle(root.querySelector(".mk-dh-pillar--track b")!).color : null,
 
         };
       }, hero);
@@ -359,11 +364,76 @@ test.describe("LW-13 · the hero's copy, both layouts", () => {
         expect(r.sub).toBe("Give your manuscript the chance it deserves with QueryHawk.");
         expect(r.brandWeight).toBe("700");
         expect(r.trio, "no trio row in the copy column").toBe(false);
-        expect(r.pillars).toEqual([["Query", "Build your agent list"], ["Track", "Track your submissions"], ["Discover", "Master the art of querying"]]);
-        expect(r.trackRust, "Track's title is rust").toBe("rgb(162, 69, 42)");
+        expect(r.pillars, "the pillars strip is retired (2 Nov)").toEqual([]);
       }
     });
   }
+});
+
+/* BE-P1 (2 Nov): in the phone Birds-eye window the hawk's head stands on the today line (his centre within
+   ±2px of it), the TODAY pill is wholly on screen and in front of him (elementFromPoint at its centre is the
+   pill), and the November label ("Nov" on phones, Nick 2 Nov: the full word does not fit beside him at 375
+   or 390) does not touch his box. At 375, 390, 411 and 430 wide. */
+type Box = { top: number; bottom: number; left: number; right: number };
+const hits = (a: Box, z: Box) => a.left < z.right && a.right > z.left && a.top < z.bottom && a.bottom > z.top;
+
+test.describe("BE-P1 · phones: the hawk on the today line, the pill in front, November clear", () => {
+  for (const vp of [PHONE_S, PHONE, PHONE_M, PHONE_L]) {
+    test(`at ${vp.width}×${vp.height}`, async ({ page }) => {
+      await open(page, vp);
+      await mutate(page, "BEP1", "BEP1b", "BEP1c");
+      await present(page, ".mk-bef--phone .mk-bef-hk", ".mk-bef--phone .mk-bef-tline");
+      await page.evaluate(() => { const w = document.querySelector(".mk-bef--phone")!; window.scrollTo({ top: scrollY + w.getBoundingClientRect().top - 160, behavior: "instant" as ScrollBehavior }); });
+      await page.waitForTimeout(300);
+      const r = await page.evaluate(() => {
+        const box = (e: Element) => { const b = e.getBoundingClientRect(); return { top: b.top, bottom: b.bottom, left: b.left, right: b.right }; };
+        const root = document.querySelector(".mk-bef--phone")!;
+        const hawk = box(root.querySelector(".mk-bef-hk")!);
+        const tl = box(root.querySelector(".mk-bef-tline")!);
+        const pills = Array.from(root.querySelectorAll<HTMLElement>(".mk-be-ttag")).filter((e) => getComputedStyle(e).display !== "none" && e.getBoundingClientRect().width > 0);
+        const pill = pills[0] ? box(pills[0]) : null;
+        /* The hawk is pointer-events: none, so elementFromPoint looks straight through him and would find the
+           pill whatever the stacking: switch him on for this one read. */
+        const hk = root.querySelector<HTMLElement>(".mk-bef-hk")!; const was = hk.style.pointerEvents; hk.style.pointerEvents = "auto";
+        const hit = pill ? document.elementFromPoint((pill.left + pill.right) / 2, (pill.top + pill.bottom) / 2) : null;
+        hk.style.pointerEvents = was;
+        const nov = Array.from(root.querySelectorAll(".mk-be-mn")).find((e) => e.textContent === "Nov");
+        return { vw: innerWidth, vh: innerHeight, hawk, tlx: (tl.left + tl.right) / 2, pill, pills: pills.length,
+                 onTop: !!(hit && pills[0] && (hit === pills[0] || pills[0].contains(hit))), hitIs: hit ? (hit as HTMLElement).className || hit.tagName : null,
+                 nov: nov ? box(nov) : null };
+      });
+      console.log(`BE-P1 @${vp.width}`, JSON.stringify(r));
+      const off = (r.hawk.left + r.hawk.right) / 2 - r.tlx;
+      expect(Math.abs(off), `the hawk's centre is on the today line (off by ${off.toFixed(1)})`).toBeLessThanOrEqual(2);
+      expect(r.pills, "one TODAY pill is drawn").toBe(1);
+      expect(r.pill!.top >= 0 && r.pill!.bottom <= r.vh && r.pill!.left >= 0 && r.pill!.right <= r.vw, "the pill is wholly on screen").toBe(true);
+      expect(r.onTop, `the pill is in front (the point hits ${r.hitIs})`).toBe(true);
+      expect(r.nov, "Nov is drawn").not.toBeNull();
+      expect(hits(r.hawk, r.nov!), `November is clear of the hawk (${JSON.stringify(r.nov)})`).toBe(false);
+    });
+  }
+});
+
+/* BE-P2 (2 Nov): the phone Birds-eye heading's words and its navy rule are centred (±2px). */
+test("BE-P2 · phones: the Birds-eye heading and its rule are centred", async ({ page }) => {
+  await open(page, PHONE);
+  await mutate(page, "BEP2");
+  await present(page, "#mk-be-h");
+  const r = await page.evaluate(() => {
+    const h = document.getElementById("mk-be-h")!;
+    const b = h.getBoundingClientRect(), cs = getComputedStyle(h), a = getComputedStyle(h, "::after");
+    const inner = { l: b.left + parseFloat(cs.paddingLeft), r: b.right - parseFloat(cs.paddingRight) };
+    const rg = document.createRange(); rg.selectNodeContents(h);
+    const lines = Array.from(rg.getClientRects()).filter((x) => x.width > 0);
+    const rowsByTop = new Map<number, { l: number; r: number }>();
+    for (const x of lines) { const k = Math.round(x.top); const v = rowsByTop.get(k); rowsByTop.set(k, v ? { l: Math.min(v.l, x.left), r: Math.max(v.r, x.right) } : { l: x.left, r: x.right }); }
+    const rule = { l: inner.l + parseFloat(a.marginLeft), w: parseFloat(a.width) };
+    return { mid: (inner.l + inner.r) / 2, rows: Array.from(rowsByTop.values()).map((x) => (x.l + x.r) / 2), rule: rule.l + rule.w / 2 };
+  });
+  console.log("BE-P2", JSON.stringify(r));
+  expect(r.rows.length, "the heading has ink").toBeGreaterThan(0);
+  for (const c of r.rows) expect(Math.abs(c - r.mid), `a line of the heading is centred (off by ${(c - r.mid).toFixed(1)})`).toBeLessThanOrEqual(2);
+  expect(Math.abs(r.rule - r.mid), `the rule is centred (off by ${(r.rule - r.mid).toFixed(1)})`).toBeLessThanOrEqual(2);
 });
 
 test.describe("LW-8 · no uppercase in the feature copy, the banner or the Birds-eye view", () => {
