@@ -256,7 +256,7 @@ export const FOUNDING_DUPE =
    what puts them on the waiting list with a reserve number, and a freed place then goes to the next
    writer in line, who is emailed (PROMO-1). So the line asks for the click and states the promise. */
 export const FOUNDING_FULL =
-  `All ${FOUNDING_CAP_WORD} founding places have gone, but we've emailed you a link: click it to join the waiting list, and we'll email you if a place opens up.`;
+  `All ${FOUNDING_CAP_WORD} founding places have gone, but we've emailed you a link: click it to join the reserve list, and we'll email you if a place opens up.`;
 export const FOUNDING_ERROR: CopyRun[] = [
   "That didn't send. Check the address and try again, or ",
   { link: "email us", mailto: supportMailto("QueryHawk founding members") },

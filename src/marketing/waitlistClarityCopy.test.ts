@@ -38,3 +38,19 @@ describe("WLC-4 · the landing's and the welcome page's copy, word for word", ()
     expect(words).not.toMatch(/\bmid-|weeks, not months/i);
   });
 });
+
+describe("WLC-5 · the overflow state is the reserve list, in every user-facing word", () => {
+  it("the landing's full message", () => {
+    expect(FOUNDING_FULL).toBe("All fifty founding places have gone, but we've emailed you a link: click it to join the reserve list, and we'll email you if a place opens up.");
+  });
+  it("the welcome page's reserve state: pass, heading, lede and steps", () => {
+    expect(PASS_LABEL_WAITING).toBe("Reserve list");
+    const h = heroCopy("waiting", {});
+    expect(h.heading).toBe("So close. You're on the reserve list.");
+    const steps = nextSteps("waiting", {});
+    expect(steps[0]).toEqual({ title: "You're on the reserve list", body: "On the reserve list, in the order writers confirmed." });
+    const all = [h.heading, h.lede, h.line ?? "", ...steps.flatMap((s) => [s.title, s.body]), heroCopy("waiting", { reserveNumber: 3 }).heading].join(" ");
+    expect(all).toContain("on the reserve list, in the order people confirmed");
+    expect(all).not.toMatch(/waiting list/i);
+  });
+});

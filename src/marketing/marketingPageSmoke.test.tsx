@@ -67,7 +67,7 @@ const PUBLIC_ROUTES: [path: string, node: () => React.ReactElement, mustContain:
      its state without a number. */
   ["/welcome?v=verified", () => <WelcomePage onNavigate={noNavigate} />, "Welcome, founding writer."],
   ["/welcome?v=already", () => <WelcomePage onNavigate={noNavigate} />, "You&#x27;re already on the list."],
-  ["/welcome?v=waiting", () => <WelcomePage onNavigate={noNavigate} />, "So close. You&#x27;re on the waiting list."],
+  ["/welcome?v=waiting", () => <WelcomePage onNavigate={noNavigate} />, "So close. You&#x27;re on the reserve list."],
   ["/welcome?v=expired", () => <WelcomePage onNavigate={noNavigate} />, "That link&#x27;s 48 hours are up."],
   ["/welcome?v=unknown", () => <WelcomePage onNavigate={noNavigate} />, "We don&#x27;t recognise that link."],
   ["/terms", () => <LegalPage doc="terms" onNavigate={noNavigate} />, "Terms of Service"],

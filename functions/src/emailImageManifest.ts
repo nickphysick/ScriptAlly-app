@@ -366,10 +366,10 @@ export const EMAIL_IMAGES: Record<string, EmailImage> = {
   },
   "pass-waiting": {
     "path": "/images/email/pass-waiting.png",
-    "version": "65d596fd",
+    "version": "e1ec50a5",
     "width": 560,
     "height": 150,
-    "alt": "Founding writer pass: Waiting list"
+    "alt": "Founding writer pass: Reserve list"
   },
   "heading-confirm": {
     "path": "/images/email/heading-confirm.png",
@@ -387,10 +387,10 @@ export const EMAIL_IMAGES: Record<string, EmailImage> = {
   },
   "heading-waiting": {
     "path": "/images/email/heading-waiting.png",
-    "version": "18f4ccac",
+    "version": "34eec1a3",
     "width": 504,
     "height": 90,
-    "alt": "All fifty places have gone, but you're on the waiting list."
+    "alt": "All fifty places have gone, but you're on the reserve list."
   },
   "signature-nick": {
     "path": "/images/email/signature-nick.png",

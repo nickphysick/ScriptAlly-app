@@ -43,7 +43,7 @@ export const UNSUBSCRIBE_LABEL = "Unsubscribe";
 
 /** ⚠️ SAY WHAT UNSUBSCRIBING COSTS. A place given up goes back to the list; that is worth knowing. */
 export const UNSUBSCRIBE_NOTE = "This takes you off the list and frees your place for another writer.";
-export const UNSUBSCRIBE_NOTE_WAITING = "This takes you off the waiting list.";
+export const UNSUBSCRIBE_NOTE_WAITING = "This takes you off the reserve list.";
 
 export const FOOT_LINE = "QueryHawk · Made in the UK, for writers";
 
@@ -116,21 +116,23 @@ export const WELCOME_NEXT: readonly string[] = [
      promises in the emails or on the welcome page. */
 ];
 
-/* ══════════════ 3 · Waiting list ══════════════ */
+/* ══════════════ 3 · Reserve list ══════════════
+   ⚠️ "RESERVE LIST" IN EVERY WORD A READER SEES (waitlist clarity v1, 2 Nov): "waitlist" now means everyone who
+   signs up, so the overflow state cannot also be the "waiting list". The constant names stay WAITING_*. */
 
-export const WAITING_SUBJECT = "You're on the founding writers' waiting list";
-export const WAITING_PREHEADER = "The fifty places went, but you're on the waiting list.";
-export const WAITING_PASS = "Waiting list";
-export const WAITING_HEADING = "All fifty places have gone, but you're on the waiting list.";
+export const WAITING_SUBJECT = "You're on the founding writers' reserve list";
+export const WAITING_PREHEADER = "The fifty places went, but you're on the reserve list.";
+export const WAITING_PASS = "Reserve list";
+export const WAITING_HEADING = "All fifty places have gone, but you're on the reserve list.";
 export const WAITING_LEAD =
   "Thanks for confirming. All fifty founding places were taken before your click came through, so " +
-  "you're on the waiting list, in the order people confirmed.";
+  "you're on the reserve list, in the order people confirmed.";
 /** Bold lead, then the rest. True since a freed place promotes the next writer (2 Nov, PROMO-1). */
 export const WAITING_NOTE: [string, string] = [
   "If a founding writer gives up their place, it goes to the next person in line,",
   " and I'll email you straight away if that's you.",
 ];
 export const WAITING_NOTHING_TO_DO =
-  "You don't need to do anything else. Your address stays on the list, and you can take it off any " +
+  "You don't need to do anything else. Your address stays on the reserve list, and you can take it off any " +
   "time with the link below.";
 export const WAITING_SORRY = "Sorry we couldn't fit you in this time, and thank you for signing up.";
