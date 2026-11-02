@@ -32,7 +32,7 @@ import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useFounding, ensureCount } from "./foundingStore";
 import { HERO_CTA, JOIN_BAR_CTA, navPlacesLeft } from "./landingCopy";
-import { HERO_FORM, CLOSE_FORM, scrollToForm } from "./WaitlistParts";
+import { HERO_FORM, scrollToJoin } from "./WaitlistParts";
 
 /** Away while the closing card's top is above this share of the viewport (the v7 ref's .9). */
 export const CARD_AT = 0.9;
@@ -71,7 +71,7 @@ export const JoinBar: React.FC = () => {
 
   if (!host) return null;
   return createPortal(
-    <button type="button" className={"mk-jbar" + (on ? " mk-on" : "")} onClick={() => scrollToForm(CLOSE_FORM)}
+    <button type="button" className={"mk-jbar" + (on ? " mk-on" : "")} onClick={scrollToJoin}
        aria-hidden={on ? undefined : true} tabIndex={on ? undefined : -1} data-live={live ? "1" : undefined}>
       <span className="mk-jbt">
         <b>{HERO_CTA}</b>

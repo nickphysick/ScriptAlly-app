@@ -149,3 +149,49 @@ describe("WLC-2b · the desktop ticks are set in the serif, not brand.tsx's sans
     expect(css("waitlist.css")).toMatch(/\n\.mk-dh-fticks li > span \{ font: inherit; \}/);
   });
 });
+
+/* ── WLC-3 · every "Join" goes to one form ── */
+import * as Parts from "./WaitlistParts";
+import { FOUNDING_CTA } from "./landingCopy";
+
+const src = (f: string) => readFileSync(join(process.cwd(), "src/marketing", f), "utf8")
+  .replace(/\{\/\*[\s\S]*?\*\/\}/g, "").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+
+describe("WLC-3 · every Join goes to the founding section's form", () => {
+  /** A stand-in for `document`: only what `joinDestination` asks of it. */
+  const doc = (band: boolean, card: boolean) => ({
+    querySelector: (s: string) => (s === ".mk-claimband" && band ? { band: true } : null),
+    getElementById: (id: string) => (id === "mk-close-signup" && card ? { card: true } : null),
+  });
+
+  it("desktop: the founding band, then its email field", () => {
+    const d = (Parts as Record<string, unknown>).joinDestination as ((x: unknown) => { target: unknown; field: string } | null) | undefined;
+    expect(typeof d, "joinDestination is exported").toBe("function");
+    expect(d!(doc(true, false))).toEqual({ target: { band: true }, field: "mk-band-email" });
+  });
+
+  it("phone: the Founding writer pass card, then its email field", () => {
+    const d = (Parts as Record<string, unknown>).joinDestination as (x: unknown) => unknown;
+    expect(d(doc(false, true))).toEqual({ target: { card: true }, field: "mk-close-email" });
+    expect(d(doc(false, false)), "nothing to go to").toBeNull();
+  });
+
+  it("the hero buttons, the phone nav's Join, the desktop nav's pass and the join bar all call scrollToJoin", () => {
+    expect(src("WaitlistParts.tsx")).toMatch(/className=\{p \+ "-fjoin"\} onClick=\{scrollToJoin\}/);
+    expect(src("WaitlistParts.tsx")).toMatch(/className="mk-navpass" onClick=\{scrollToJoin\}/);
+    expect(src("MarketingShell.tsx")).toMatch(/className="mk-wljoin" onClick=\{scrollToJoin\}/);
+    expect(src("JoinBar.tsx")).toMatch(/onClick=\{scrollToJoin\}/);
+    for (const f of ["WaitlistParts.tsx", "MarketingShell.tsx", "JoinBar.tsx", "Hero.tsx", "LandingPhone.tsx"])
+      expect(src(f), `${f}: the old two-form helpers are gone`).not.toMatch(/\bscrollToForm\b|\bjoinTarget\b/);
+  });
+
+  it("both targets clear the sticky nav", () => {
+    const m = css("marketing.css") + css("waitlist.css");
+    expect(m).toMatch(/\n\.mk-claimband \{[^}]*scroll-margin-top:\s*var\(--mk-nav-h[^}]*\}/);
+    expect(m).toMatch(/\n\.mk-tkt \{[^}]*scroll-margin-top:\s*calc\(var\(--mk-nav-h[^}]*\}/);
+  });
+
+  it("the founding form's button says Join the waitlist", () => {
+    expect(FOUNDING_CTA).toBe("Join the waitlist");
+  });
+});

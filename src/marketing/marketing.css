@@ -1091,7 +1091,9 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
    ⚠️ COLOUR ONLY, AND STILL NEVER THE SHORTHAND — same reason as `.mk-lower`: the shorthand resets
    every longhand, so the next person to add an image here would take the ground with it. */
 /* The band paints nothing now: the hawks stand on the sheet's own oat (landing colours v2). */
-.mk-claimband { padding: 72px 0; }
+/* Every "Join" scrolls here (clarity v1, 2 Nov): flush under the bar, as the ref's shot draws it. The margin is
+   the FULL bar height; the bar then condenses and pulls the band up to meet it (see `--mk-nav-h`). */
+.mk-claimband { padding: 72px 0; scroll-margin-top: var(--mk-nav-h, 88px); }
 /* ⚠️ `1fr 1.3fr` SO THE 430px CAP ACTUALLY BINDS. The old `0.72fr` column was 370px wide at 1440,
    which would have held the picture under its cap at every width; this one is 447px, so the
    drawing stops at 430 and sits centred in it. The 1280 override that followed the old smudge
