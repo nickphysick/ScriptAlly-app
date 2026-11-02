@@ -146,7 +146,7 @@ describe("the public pricing page sells nothing and writes nothing", () => {
     }
     const submits = [...html.matchAll(/<button[^>]*type="submit"[^>]*>/g)];
     expect(submits, "exactly one submit: the founding claim").toHaveLength(1);
-    expect(html).toContain("Claim your place");
+    expect(html, "the founding form's button (clarity v1)").toContain("Join the waitlist");
   });
 
   /**
@@ -552,7 +552,7 @@ describe("the founding sign-up — the hero's and the band's", () => {
     expect(h.match(/class="mk-trap"/g) ?? [], "one honeypot, so one form").toHaveLength(1);
     expect(h, "the hero has no field").not.toContain('id="mk-hero-email"');
     expect(h).toContain('id="mk-band-email"');
-    expect(h).toContain("Claim your place");
+    expect(h).toContain(WAITLIST_CTA);
     expect(h, "the panel's own ask went with it").not.toContain("Claim your spot");
     expect(h).toContain("Founding writers");
     expect(h).toContain("Join as a founding writer");
@@ -745,10 +745,11 @@ describe("the Founding Writers page", () => {
    * different: the hero said "Become a Founding Writer" — the NAV's words for the link that brings
    * a reader HERE — above a form on the page they had already reached. Two mounts of one act, so
    * both now say "Claim your place", and the old label's ABSENCE is what stops it returning.
+   * (Clarity v1, 2 Nov: the shared words are now "Join the waitlist".)
    */
   it("both sign-ups ask for the same thing, in the same words", () => {
     const h = html();
-    expect(h.match(/Claim your place/g) ?? [], "the hero and the banner").toHaveLength(2);
+    expect(h.match(/Join the waitlist/g) ?? [], "the hero and the banner").toHaveLength(2);
     expect(h, "the nav's wording does not belong above a form on this page")
       .not.toContain("Become a Founding Writer");
   });

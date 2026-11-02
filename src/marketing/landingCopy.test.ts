@@ -353,7 +353,7 @@ describe("landing copy — verbatim locks", () => {
       "All we ask is that you give us occasional feedback to help shape and refine QueryHawk " +
       "for when it opens to the wider writing community.",
     );
-    expect(FOUNDING_CTA).toBe("Claim your place");
+    expect(FOUNDING_CTA, "clarity v1 (2 Nov): the one ask's words").toBe("Join the waitlist");
     /* REWRITTEN 31 Oct: double opt-in. The message must send them to their inbox, and must not
        claim a place is held or that no other mail will come. */
     expect(FOUNDING_SENT).toContain("click it to confirm your place");

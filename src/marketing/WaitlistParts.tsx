@@ -76,7 +76,7 @@ export const HeroFounding: React.FC<{ layout: "phone" | "desk" }> = ({ layout })
     <div className={p + "-founding"} id={HERO_FORM + "-signup"}>
       <h2 className={p + "-fhead"}>{HERO_FOUNDING_HEADING}</h2>
       <Ticks items={HERO_FOUNDING_TICKS} disc className={p + "-fticks"} />
-      <button type="button" className={p + "-fjoin"} onClick={() => scrollToForm(layout === "phone" ? CLOSE_FORM : BAND_FORM)}>{WAITLIST_CTA}</button>
+      <button type="button" className={p + "-fjoin"} onClick={scrollToJoin}>{WAITLIST_CTA}</button>
       <HeroPlaces variant="hero" />
     </div>
   );
@@ -96,18 +96,58 @@ export const scrollToId = (id: string) => {
 export const PageAnchor: React.FC<{ to: string; className?: string; label?: string; children: React.ReactNode }> = ({ to, className, label, children }) => (
   <a href={"#" + to} className={className} aria-label={label} onClick={(e) => { e.preventDefault(); scrollToId(to); }}>{children}</a>
 );
-export const scrollToForm = (prefix: string) => {
-  const field = document.getElementById(prefix + "-email");
-  const target = field ?? document.getElementById(prefix + "-signup");
-  if (!target) return;
-  target.scrollIntoView({ behavior: reduceMotion() ? "auto" : "smooth", block: "center" });
-  field?.focus({ preventScroll: true });
+/* ── Every "Join" goes to ONE form (waitlist clarity v1, 2 Nov): the founding section's. ──
+   Desktop: the founding band (`.mk-claimband`), field `#mk-band-email`. Phones: the "Founding writer pass"
+   card (`#mk-close-signup`, the `.mk-tkt`), field `#mk-close-email`. Only one of the two layouts is mounted. */
+type JoinDoc = { querySelector(s: string): unknown; getElementById(id: string): unknown };
+/** Where a Join goes on the page that is mounted, or null when neither founding section is there. */
+export const joinDestination = <T,>(doc: JoinDoc): { target: T; field: string } | null => {
+  const band = doc.querySelector(".mk-claimband");
+  if (band) return { target: band as T, field: BAND_FORM + "-email" };
+  const card = doc.getElementById(CLOSE_FORM + "-signup");
+  return card ? { target: card as T, field: CLOSE_FORM + "-email" } : null;
 };
-/** Phones' Join: the hero's form while it is still ahead, the founding card's once the hero is passed. */
-export const joinTarget = (): string => {
-  const hero = document.getElementById(HERO_FORM + "-email");
-  const bar = document.querySelector(".mk-navwrap")?.getBoundingClientRect().bottom ?? 0;
-  return hero && hero.getBoundingClientRect().bottom > bar ? HERO_FORM : CLOSE_FORM;
+/** Calls `done` once the page has stopped moving: the scroll position AND the target's place on screen have both
+    held for six frames (the bar condenses, and the page can settle, after the scroll itself ends). Never later
+    than 2s. */
+const whenStill = (target: HTMLElement, done: () => void) => {
+  let fired = false, last = "", still = 0, raf = 0;
+  const finish = () => { if (fired) return; fired = true; cancelAnimationFrame(raf); clearTimeout(cap); done(); };
+  const cap = window.setTimeout(finish, 2000);
+  const tick = () => {
+    const now = window.scrollY + ":" + Math.round(target.getBoundingClientRect().top);
+    still = now === last ? still + 1 : 0; last = now;
+    if (still >= 6) finish(); else raf = requestAnimationFrame(tick);
+  };
+  raf = requestAnimationFrame(tick);
+};
+/**
+ * Scroll to the founding section, then focus its email field once the page is still (`preventScroll`, so
+ * focusing never moves the page). Smooth, or a jump under reduced motion. The section's `scroll-margin-top`
+ * clears the sticky nav.
+ * ⚠️ RE-ALIGNED ONCE IF IT DRIFTED, BY A JUMP, BEFORE THE FOCUS: the page can settle while a smooth scroll runs
+ * (measured 49px off on a phone and 72 on the desktop with the old scroll), and the field is then focused where
+ * it finally rests.
+ */
+export const scrollToJoin = () => {
+  const d = joinDestination<HTMLElement>(document);
+  if (!d) return;
+  const focus = () => document.getElementById(d.field)?.focus({ preventScroll: true });
+  const align = (smooth: boolean) => d.target.scrollIntoView({ behavior: smooth ? "smooth" : "instant", block: "start" });
+  /* How far the section is from where it should rest: the bar's CURRENT bottom plus whatever the margin adds
+     over the bar's full height (the margin is set from the full height, and the bar condenses on scroll). */
+  const drift = () => {
+    const cs = getComputedStyle(d.target);
+    const extra = (parseFloat(cs.scrollMarginTop) || 0) - (parseFloat(cs.getPropertyValue("--mk-nav-h")) || 0);
+    const bar = document.querySelector(".mk-navwrap")?.getBoundingClientRect().bottom ?? 0;
+    return d.target.getBoundingClientRect().top - (bar + extra);
+  };
+  align(!reduceMotion());
+  whenStill(d.target, () => {
+    const off = drift();
+    if (Math.abs(off) > 2) window.scrollBy({ top: off, behavior: "instant" });
+    focus();
+  });
 };
 
 /** One observer for "at least 60% visible", reporting each change. */
@@ -235,7 +275,7 @@ export const NavPass: React.FC<{ label: string }> = ({ label }) => {
   useEffect(ensureCount, []);
   const pct = count && count.cap > 0 ? Math.min(100, (Math.min(count.claimed, count.cap) / count.cap) * 100) : null;
   return (
-    <button type="button" className="mk-navpass" onClick={() => scrollToForm(BAND_FORM)}>
+    <button type="button" className="mk-navpass" onClick={scrollToJoin}>
       <span>{label}</span>
       <em aria-hidden="true" className={pct === null ? "mk-wait" : undefined}><i style={{ width: (pct ?? 0) + "%" }} /></em>
     </button>
