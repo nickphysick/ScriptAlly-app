@@ -35,18 +35,14 @@
 .mk-wljoin:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 
 /* ── The hero: a navy drawer pulled down over the page (waitlist v2, ref `.hero` v9–v13) ──
-   Rounded at its foot, a soft shadow, a short grab line centred in its bottom padding.
+   Rounded at its foot, a soft shadow (the grab line was retired on 2 Nov).
    ⚠️ A CENTRED STACK THAT NEVER STRETCHES (2 Nov; until then it reached 70% of the screen, and the spare
    height showed as empty navy). No min-height and no auto margins: the drawer is its content plus 34px
    top and bottom on every phone, and each item states its own gap above it. LW-7 holds both. */
 .mk-wl-hero {
   position: relative; z-index: 2; display: flex; flex-direction: column; box-sizing: border-box;
-  background: #1b2433; color: #fff; padding: 34px 24px; text-align: center;
+  background: #1b2433; color: #fff; padding: 34px 24px 26px; text-align: center;
   border-radius: 0 0 28px 28px; box-shadow: 0 14px 30px -12px rgba(27, 36, 51, .45);
-}
-.mk-wl-hero::after {
-  content: ""; position: absolute; left: 50%; bottom: 12px; width: 40px; height: 4px; margin-left: -20px;
-  border-radius: 4px; background: rgba(255, 255, 255, .28);
 }
 /* The binocular hawk, 128px wide, centred, 14px under the strap. */
 .mk-wl-herohawk { display: block; width: 128px; height: auto; max-width: none; margin: 14px auto 0; }
@@ -69,11 +65,17 @@
 .mk-wl-lock-dot { color: #e8b4a3; margin: 0 9px; }
 .mk-wl-lock-brand { font: 700 30px/1.15 var(--mk-f-serif); color: #fff; white-space: nowrap; }
 .mk-wl-see {
-  display: inline-flex; align-items: center; gap: 6px; align-self: center; margin-top: 12px; padding-bottom: 2px;
+  display: inline-flex; align-items: center; gap: 6px; align-self: center; margin-top: 22px; padding-bottom: 2px;
   color: #e8b4a3; font: 600 16px/1.3 var(--mk-f-serif); text-decoration: none; border-bottom: 1.5px solid rgba(232, 180, 163, .5);
 }
 .mk-wl-see:focus-visible { outline: 2px solid #e8b4a3; outline-offset: 3px; border-radius: 3px; }
-.mk-wl-signup { margin-top: 26px; text-align: left; }
+.mk-wl-signup { margin-top: 18px; text-align: left; }
+/* The short privacy line (2 Nov): 12px under the button, or 8px under the places line once the count is
+   there. ⚠️ ON PHONES THE PLACES LINE TAKES NO SPACE UNTIL ITS COUNT ARRIVES (Nick: the line sits 12px
+   under the button when there is no count), so the drawer grows by one line when it lands. */
+.mk-wl-hero .mk-places--line.mk-places--wait { display: none; }
+.mk-wl-hero .mk-betanote { margin: 12px 0 0; font: 400 12.5px/1.45 var(--mk-f-sans); color: rgba(255, 255, 255, .5); }
+.mk-wl-hero .mk-places--line:not(.mk-places--wait) + .mk-betanote { margin-top: 8px; }
 .mk-wl-form, .mk-ccform { display: grid; gap: 10px; }
 .mk-wl-form input[type="email"], .mk-ccform input[type="email"] {
   width: 100%; height: 50px; box-sizing: border-box; border-radius: 12px; border: 1px solid rgba(255, 255, 255, .25); background: #fff;
@@ -89,8 +91,7 @@
 .mk-wl-hero .mk-places--line { color: rgba(255, 255, 255, .8); }
 .mk-wl-hero .mk-places--line .mk-places-bar { background: rgba(255, 255, 255, .18); }
 .mk-wl-hero .mk-places--line .mk-places-bar i { background: #e8b4a3; }
-.mk-wl-hero .mk-betanote { margin: 10px 0 0; font: 400 13px/1.45 var(--mk-f-sans); color: rgba(255, 255, 255, .6); }
-.mk-wl-hero .mk-betanote button, .mk-wl-hero .mk-betanote a { color: inherit; font: inherit; }
+.mk-wl-hero .mk-betanote button, .mk-wl-hero .mk-betanote a { color: inherit; font: inherit; text-decoration: underline; }
 .mk-wl-hero .mk-betainvalid, .mk-wl-hero .mk-betamsg { color: #fff; }
 
 

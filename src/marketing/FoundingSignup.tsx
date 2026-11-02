@@ -22,7 +22,7 @@
  */
 
 import React, { useEffect, useRef, useState } from "react";
-import { Runs } from "./CopyRuns";
+import { Runs, CopyRun } from "./CopyRuns";
 import { isValidEmail } from "../lib/emailShape";
 import {
   FOUNDING_FIELD_LABEL, FOUNDING_PLACEHOLDER, FOUNDING_CTA, FOUNDING_INVALID,
@@ -73,7 +73,9 @@ export const FoundingSignup: React.FC<{
    * Layout only — the state machine and the outcome copy are untouched.
    */
   afterForm?: React.ReactNode;
-}> = ({ idPrefix, ctaLabel = FOUNDING_CTA, formClass, messages, source, onNavigate, afterForm }) => {
+  /** The privacy note's words (2 Nov: the phone hero passes a shorter line). Defaults to `FOUNDING_NOTE`. */
+  note?: CopyRun[];
+}> = ({ idPrefix, ctaLabel = FOUNDING_CTA, formClass, messages, source, onNavigate, afterForm, note = FOUNDING_NOTE }) => {
   const { state } = useFounding();
   const [email, setEmail] = useState("");
   const [invalid, setInvalid] = useState(false);
@@ -163,7 +165,7 @@ export const FoundingSignup: React.FC<{
             an address with no privacy link at all, which is a consent problem on two of the three
             surfaces that ask for one. A note that has to be remembered per mount is a note that
             will be missing from the next mount; inside the component it cannot be. */}
-        <p className="mk-betanote"><Runs runs={FOUNDING_NOTE} onNavigate={onNavigate} /></p>
+        <p className="mk-betanote"><Runs runs={note} onNavigate={onNavigate} /></p>
         </>
       )}
 

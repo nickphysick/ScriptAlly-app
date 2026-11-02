@@ -301,6 +301,8 @@ export const foundingPlacesLeftLabel = (claimed: number, cap: number) => navPlac
 /** The places line under each sign-up (waitlist v1): what it says, and what it is read as. */
 export const heroPlacesLabel = (left: number, cap: number) => `${left} of ${cap} founding places left`;
 
+/** The phone hero's shorter privacy line (2 Nov), in place of `FOUNDING_NOTE` there only. */
+export const HERO_PRIVACY_SHORT: CopyRun[] = ["We only email you about your invite. ", { link: "Privacy", to: "privacy" }];
 export const FOUNDING_NOTE: CopyRun[] = [
   "We'll only use your address to send your invite. ",
   { link: "Privacy", to: "privacy" },
