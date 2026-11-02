@@ -53,8 +53,6 @@ const MUTATIONS: Record<string, string | ((page: Page) => Promise<void>)> = {
   BEP1b: ".mk-bef--phone .mk-bef-ttag{display:none!important}.mk-bef--phone .mk-bef-win .mk-be-ttag{display:block!important}",
   BEP1c: ".mk-bef--phone .mk-be-mn--last{left:64%!important;right:auto!important}",
   BEP2: ".mk-wl .mk-wl-feat--first h2{text-align:left!important}.mk-wl .mk-wl-feat--first h2::after{margin-left:0!important}",
-  /* PRIV-5 (2 Nov): the hero's Privacy link removed. */
-  PRIV5: async (page) => page.evaluate(() => document.querySelectorAll(".mk-wl-hero .mk-betanote button, .mk-wl-hero .mk-betanote a").forEach((e) => e.remove())),
   /* HEAD-1 (launch polish, 2 Nov): the Birds-eye heading back to an h3, straight after the hero's h1. */
   HEAD1: async (page) => page.evaluate(() => { const h = document.getElementById("mk-be-h"); if (!h) return; const n = document.createElement("h3"); n.id = h.id; n.innerHTML = h.innerHTML; h.replaceWith(n); }),
   LW8: ".mk-det-h,.mk-fcopy p,.mk-wl-fline{text-transform:uppercase!important}",
@@ -276,13 +274,15 @@ const drawer = (page: Page) => page.evaluate(() => {
   const cs = getComputedStyle(hero);
   const h = document.getElementById("mk-be-h")!;
   const q = (s: string) => document.querySelector(".mk-wl-hero " + s);
-  /* 2 Nov: "See what it does" moved to the drawer's foot, after the sign-up. */
-  const order = [".mk-wl-q", ".mk-wl-strap", ".mk-wl-herohawk", ".mk-wl-lock", ".mk-wl-signup", ".mk-wl-see"];
+  /* Clarity v1 (2 Nov): the founding block ends the stack; "See what it does" is a chevron positioned on the
+     drawer's foot, out of the flow, so it is read on its own below (`see`). */
+  const order = [".mk-wl-q", ".mk-wl-strap", ".mk-wl-herohawk", ".mk-wl-lock", ".mk-wl-founding"];
   const items = order.map((s) => { const e = q(s); return e ? { s, ...box(e) } : { s, top: NaN, bottom: NaN, left: NaN, right: NaN }; });
   /* The panel's two lines: the words' own boxes (the trio's dots are a different size, so read its words). */
   const trioWords = Array.from(document.querySelectorAll(".mk-wl-hero .mk-wl-lock-trio > span:not([aria-hidden])")).map((e) => e.getBoundingClientRect());
   const brand = q(".mk-wl-lock-brand");
-  return { vh: innerHeight, scrollY, rule: parseFloat(getComputedStyle(h, "::after").height), drawer: box(hero), heading: box(h),
+  const see = q(".mk-wl-see");
+  return { see: see ? box(see) : null, vh: innerHeight, scrollY, rule: parseFloat(getComputedStyle(h, "::after").height), drawer: box(hero), heading: box(h),
            padTop: parseFloat(cs.paddingTop), padBottom: parseFloat(cs.paddingBottom), items,
            strapLines: lines(q(".mk-wl-strap")!),
            trioRows: new Set(trioWords.map((r) => Math.round(r.bottom))).size, trioWords: trioWords.length,
@@ -295,7 +295,7 @@ test.describe("LW-7 · phones: the drawer is a centred stack, as tall as its con
     test(`at ${vp.width}×${vp.height}`, async ({ page }) => {
       await open(page, vp);
       await mutate(page, "LW7", "LW7b", "LW7c", "LW7d", "LW7e", "LW7f", "LW7g");
-      await present(page, "#mk-be-h", ".mk-wl-hero", ".mk-wl-strap", ".mk-wl-lock", ".mk-wl-see", ".mk-wl-herohawk", ".mk-wl-signup");
+      await present(page, "#mk-be-h", ".mk-wl-hero", ".mk-wl-strap", ".mk-wl-lock", ".mk-wl-see", ".mk-wl-herohawk", ".mk-wl-founding");
       const r = await drawer(page);
       console.log(`LW-7 @${vp.width}`, JSON.stringify(r));
       expect(r.scrollY, "read at the top of the page").toBe(0);
@@ -306,7 +306,7 @@ test.describe("LW-7 · phones: the drawer is a centred stack, as tall as its con
       expect(Math.abs(got - want), `the drawer is ${got.toFixed(1)} tall; its content plus padding is ${want.toFixed(1)}`).toBeLessThanOrEqual(2);
       for (let i = 1; i < r.items.length; i++) {
         const gap = r.items[i].top - r.items[i - 1].bottom;
-        expect(gap, `gap ${r.items[i - 1].s} → ${r.items[i].s}`).toBeLessThanOrEqual(30);
+        expect(gap, `gap ${r.items[i - 1].s} → ${r.items[i].s}`).toBeLessThanOrEqual(40); /* 40: lockup → founding block, the ref's */
       }
       expect(r.strapLines, "No more winging it. is one line").toBe(1);
       const hawk = r.items[2];
@@ -320,8 +320,13 @@ test.describe("LW-7 · phones: the drawer is a centred stack, as tall as its con
       if (vp === PHONE || vp === PHONE_M) {
         expect(r.rule, "the heading draws its rule (inside its box)").toBe(3);
         expect(r.heading.top, "the heading starts below the drawer").toBeGreaterThan(r.drawer.bottom);
-        expect(r.heading.bottom, "the heading and its rule are in the first screen").toBeLessThanOrEqual(r.vh);
+        /* Clarity v1: the ref places the heading 87px under the drawer, so its rule can fall below the fold at
+           844; the chevron on the drawer's foot is what must be on the first screen, clear of the heading. */
+        expect(r.see!.bottom, "the chevron is on the first screen").toBeLessThanOrEqual(r.vh);
+        expect(r.heading.top, "the chevron overlaps nothing below it").toBeGreaterThan(r.see!.bottom);
       }
+      const seeMid = (r.see!.top + r.see!.bottom) / 2;
+      expect(Math.abs(seeMid - r.drawer.bottom), `the chevron straddles the drawer's foot (off by ${(seeMid - r.drawer.bottom).toFixed(1)})`).toBeLessThanOrEqual(1);
     });
   }
 });
@@ -441,31 +446,8 @@ test("BE-P2 · phones: the Birds-eye heading and its rule are centred", async ({
   expect(Math.abs(r.rule - r.mid), `the rule is centred (off by ${(r.rule - r.mid).toFixed(1)})`).toBeLessThanOrEqual(2);
 });
 
-/* PRIV-5 (2 Nov): on the phone hero a Privacy link sits within 80px below the submit button, with and
-   without the places count loaded; and the hero's note is the short one, word for word. */
-test.describe("PRIV-5 · phones: the hero's Privacy link is just under the button", () => {
-  for (const count of [undefined, { count: 13, cap: 50 }]) {
-    test(count ? "with the places count" : "without the places count", async ({ page }) => {
-      await open(page, PHONE, count);
-      if (count) await expect(page.locator(".mk-wl-hero .mk-places--line:not(.mk-places--wait)")).toBeVisible();
-      await mutate(page, "PRIV5");
-      await present(page, ".mk-wl-hero button[type=submit]");
-      const r = await page.evaluate(() => {
-        const hero = document.querySelector(".mk-wl-hero")!;
-        const btn = hero.querySelector("button[type=submit]")!.getBoundingClientRect();
-        const link = Array.from(hero.querySelectorAll("a, button")).find((e) => e.textContent!.trim() === "Privacy");
-        const note = hero.querySelector(".mk-betanote");
-        return { btnBottom: btn.bottom, link: link ? link.getBoundingClientRect().top : null, note: note ? note.textContent : null };
-      });
-      console.log(`PRIV-5 ${count ? "count" : "none"}`, JSON.stringify(r));
-      expect(r.link, "the hero has a Privacy link").not.toBeNull();
-      const gap = r.link! - r.btnBottom;
-      expect(gap, `the Privacy link is below the button`).toBeGreaterThanOrEqual(0);
-      expect(gap, `the Privacy link is within 80px of the button (${gap.toFixed(1)})`).toBeLessThanOrEqual(80);
-      expect(r.note).toBe("We only email you about your invite. Privacy");
-    });
-  }
-});
+/* PRIV-5 is RETIRED (waitlist clarity v1, 2 Nov): the phone hero has no form, so no Privacy link under a
+   button. The founding forms carry the full privacy line (`FOUNDING_NOTE`). */
 
 /* HEAD-1 (launch polish, 2 Nov): the landing's visible headings start at its one h1 and never skip a level
    going down (an h2 may follow an h1, never an h3), on phone and desktop. */

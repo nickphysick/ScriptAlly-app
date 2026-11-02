@@ -297,8 +297,20 @@ export const navPlacesLeft = (left: number) => `${left} places left`;
 /** The places line under each sign-up (waitlist v1): what it says, and what it is read as. */
 export const heroPlacesLabel = (left: number, cap: number) => `${left} of ${cap} founding places left`;
 
-/** The phone hero's shorter privacy line (2 Nov), in place of `FOUNDING_NOTE` there only. */
-export const HERO_PRIVACY_SHORT: CopyRun[] = ["We only email you about your invite. ", { link: "Privacy", to: "privacy" }];
+/* ── The founding block in both heroes (waitlist clarity v1, 2 Nov; ref design-refs/landing-waitlist-clarity-v1.html) ──
+   It replaced each hero's email form, places line and privacy line (`HERO_PRIVACY_SHORT` is retired with
+   the phone's). The founding section's form is the page's only sign-up; the hero's button goes there. */
+export const HERO_FOUNDING_HEADING = "We're looking for founding writers";
+export const HERO_FOUNDING_TICKS = [
+  "Everything QueryHawk has to offer",
+  "Free for your whole campaign",
+  "A direct line to the founder",
+] as const;
+/** Every "join" on the landing page: the heroes' buttons, the desktop nav's button, the founding form's button. */
+export const WAITLIST_CTA = "Join the waitlist";
+/** The places bar under the heroes' button: "N of 50 places left", the number set bold by the component. */
+export const placesLeftRest = (cap: number) => ` of ${cap} places left`;
+export const placesLeftLabel = (left: number, cap: number) => `${left}${placesLeftRest(cap)}`;
 export const FOUNDING_NOTE: CopyRun[] = [
   "We'll only use your address to send your invite. ",
   { link: "Privacy", to: "privacy" },

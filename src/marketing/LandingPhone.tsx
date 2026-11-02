@@ -16,16 +16,14 @@
  */
 import React, { useRef, useState } from "react";
 import {
-  WAIT_HERO_Q, WAIT_HERO_STRAP, SEE_WHAT, HERO_CTA, HERO_PRIVACY_SHORT, BE_HEADING, BE_TICKS,
+  WAIT_HERO_Q, WAIT_HERO_STRAP, SEE_WHAT, BE_HEADING, BE_TICKS,
   FEATURE_ROWS, PHONE_FEATURE_ORDER, featureAnchor, VISION_POINTS, MISSION_HEADING, FAQ_HEADING, FAQ, FeatureRow,
 } from "./landingCopy";
-import { FoundingSignup } from "./FoundingSignup";
 import { HeroLockup } from "./HeroLines";
-import { HeroPlaces } from "./HeroPlaces";
 import { ILLUSTRATIONS } from "./FeatureRows";
 import { FoundingTicket } from "./FoundingTicket";
 import { PLATES } from "./Vision";
-import { BirdsEyeFocus, DetailsBanner, TrackFeature, Ticks, FeatureLine, PageAnchor, HERO_FORM } from "./WaitlistParts";
+import { BirdsEyeFocus, DetailsBanner, TrackFeature, Ticks, FeatureLine, PageAnchor, HeroFounding } from "./WaitlistParts";
 
 /** The binocular hawk in the phone hero, centred under the strap. */
 export const HERO_BIRD = { src: "/images/binocular-hawk.webp", version: "6e3c0031", width: 380, height: 372 };
@@ -34,7 +32,7 @@ export const BE_HEADING_ID = "mk-be-h";
 
 type Navigate = (tab: string, subPageName?: string) => void;
 
-const PhoneHero: React.FC<{ onNavigate: Navigate }> = ({ onNavigate }) => {
+const PhoneHero: React.FC = () => {
   return (
     <section className="mk-wl-hero" aria-labelledby="mk-wl-hero-h">
       <h1 id="mk-wl-hero-h" className="mk-wl-q">
@@ -44,13 +42,10 @@ const PhoneHero: React.FC<{ onNavigate: Navigate }> = ({ onNavigate }) => {
       {/* A centred stack (2 Nov): the hawk, the lockup panel, the sign-up and the link, each under the last. */}
       <img className="mk-wl-herohawk" src={HERO_BIRD.src + "?v=" + HERO_BIRD.version} alt="" width={HERO_BIRD.width} height={HERO_BIRD.height} />
       <HeroLockup />
-      <div className="mk-wl-signup" id={HERO_FORM + "-signup"}>
-        <FoundingSignup idPrefix={HERO_FORM} source="landing-panel" formClass="mk-wl-form" ctaLabel={HERO_CTA}
-          afterForm={<HeroPlaces variant="line" />} onNavigate={onNavigate} note={HERO_PRIVACY_SHORT} />
-      </div>
-      {/* 2 Nov: "See what it does" sits at the drawer's foot, after the sign-up. */}
-      <PageAnchor to={BE_HEADING_ID} className="mk-wl-see">
-        {SEE_WHAT}{" "}
+      {/* Waitlist clarity v1 (2 Nov): the founding block in place of the form, places line and privacy line. */}
+      <HeroFounding layout="phone" />
+      {/* "See what it does" is a wordless chevron button on the hero's foot; its name is the words it lost. */}
+      <PageAnchor to={BE_HEADING_ID} className="mk-wl-see" label={SEE_WHAT}>
         <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
           <path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
@@ -109,7 +104,7 @@ export const LandingPhone: React.FC<{ onNavigate: Navigate }> = ({ onNavigate })
   const rows = PHONE_FEATURE_ORDER.map((k) => FEATURE_ROWS.find((r) => r.key === k)!);
   return (
     <div className="mk-wl">
-      <PhoneHero onNavigate={onNavigate} />
+      <PhoneHero />
 
       <section className="mk-wl-sec" id="mk-features" aria-label="Features">
         <div className="mk-wl-feat mk-wl-feat--first">
