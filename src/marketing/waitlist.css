@@ -18,6 +18,12 @@
 .mk-places--line .mk-places-bar i { display: block; height: 100%; background: #a2452a; border-radius: 9px; }
 .mk-places--line > span:last-child { font: inherit; margin: 0; letter-spacing: 0; text-transform: none; color: inherit; }
 .mk-places--line.mk-places--wait { visibility: hidden; }
+/* `HeroPlaces variant="hero"` (clarity v1): the bar full width, the words on the right, N bold. */
+.mk-places.mk-places--hero { display: flex; align-items: center; gap: 12px; white-space: nowrap; }
+.mk-places--hero .mk-places-bar { flex: 1; height: 6px; border-radius: 9px; overflow: hidden; }
+.mk-places--hero .mk-places-bar i { display: block; height: 100%; border-radius: 9px; }
+.mk-places--hero > span:last-child { font: inherit; margin: 0; letter-spacing: 0; text-transform: none; color: inherit; }
+.mk-places--hero b { font-weight: 600; }
 
 /* ═════════════ Phones ═════════════ */
 .mk-wl { background: #f2eee8; color: #1c130f; font: 400 16px/1.55 var(--mk-f-serif); }
@@ -38,10 +44,11 @@
    Rounded at its foot, a soft shadow (the grab line was retired on 2 Nov).
    ⚠️ A CENTRED STACK THAT NEVER STRETCHES (2 Nov; until then it reached 70% of the screen, and the spare
    height showed as empty navy). No min-height and no auto margins: the drawer is its content plus 34px
-   top and bottom on every phone, and each item states its own gap above it. LW-7 holds both. */
+   on top and 38px at the foot (clarity v1: room for the chevron's upper half, measured off the ref's in-context shot), and each item states its
+   own gap above it. LW-7 holds both. */
 .mk-wl-hero {
   position: relative; z-index: 2; display: flex; flex-direction: column; box-sizing: border-box;
-  background: #1b2433; color: #fff; padding: 34px 24px 26px; text-align: center;
+  background: #1b2433; color: #fff; padding: 34px 24px 38px; text-align: center;
   border-radius: 0 0 28px 28px; box-shadow: 0 14px 30px -12px rgba(27, 36, 51, .45);
 }
 /* The binocular hawk, 128px wide, centred, 14px under the strap. */
@@ -64,18 +71,41 @@
 .mk-wl-lock-trio { font: 400 20px/1.25 var(--mk-f-display); color: #fff; white-space: nowrap; }
 .mk-wl-lock-dot { color: #e8b4a3; margin: 0 9px; }
 .mk-wl-lock-brand { font: 700 30px/1.15 var(--mk-f-serif); color: #fff; white-space: nowrap; }
-.mk-wl-see {
-  display: inline-flex; align-items: center; gap: 6px; align-self: center; margin-top: 22px; padding-bottom: 2px;
-  color: #e8b4a3; font: 600 16px/1.3 var(--mk-f-serif); text-decoration: none; border-bottom: 1.5px solid rgba(232, 180, 163, .5);
+/* ── The founding block (waitlist clarity v1, 2 Nov; ref design-refs/landing-waitlist-clarity-v1.html `.wl-*`):
+   the heading centred, the ticks left, a full-width blush button, the places bar under it. ── */
+.mk-wl-founding { margin-top: 40px; text-align: left; }
+.mk-wl .mk-wl-fhead {
+  margin: 0 0 12px; text-align: center; white-space: nowrap; color: #fff;
+  font-family: var(--mk-f-serif) !important; font-weight: 600 !important; letter-spacing: 0 !important;
+  font-size: 21px !important; line-height: 1.2 !important;
 }
-.mk-wl-see:focus-visible { outline: 2px solid #e8b4a3; outline-offset: 3px; border-radius: 3px; }
-.mk-wl-signup { margin-top: 18px; text-align: left; }
-/* The short privacy line (2 Nov): 12px under the button, or 8px under the places line once the count is
-   there. ⚠️ ON PHONES THE PLACES LINE TAKES NO SPACE UNTIL ITS COUNT ARRIVES (Nick: the line sits 12px
-   under the button when there is no count), so the drawer grows by one line when it lands. */
-.mk-wl-hero .mk-places--line.mk-places--wait { display: none; }
-.mk-wl-hero .mk-betanote { margin: 12px 0 0; font: 400 12.5px/1.45 var(--mk-f-sans); color: rgba(255, 255, 255, .5); }
-.mk-wl-hero .mk-places--line:not(.mk-places--wait) + .mk-betanote { margin-top: 8px; }
+/* The ref draws 390 only; one line fits from 375 up (measured: 327px of ink in a 327px column at 375). Narrower
+   phones wrap it to two balanced lines rather than run it past the drawer's edge. */
+@media (max-width: 374px) { .mk-wl .mk-wl-fhead { white-space: normal; text-wrap: balance; } }
+.mk-wl-fticks { list-style: none; margin: 0 0 18px 6px; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+.mk-wl-fticks li { display: flex; align-items: center; gap: 8px; margin: 0; font: 400 15.5px/1.3 var(--mk-f-serif); color: rgba(255, 255, 255, .88); }
+.mk-wl-fticks .mk-dtick { flex: 0 0 20px; width: 20px; height: 20px; padding: 3px; margin-top: 0; background: rgba(232, 180, 163, .18); color: #e8b4a3; }
+.mk-wl-fticks .mk-dtick path { stroke-width: 2.2; }
+.mk-wl-fjoin {
+  display: flex; align-items: center; justify-content: center; width: 100%; height: 54px; border: 0; border-radius: 12px;
+  background: #e8b4a3; color: var(--mk-nearblack); font: 600 17px/1 var(--mk-f-serif); cursor: pointer;
+}
+.mk-wl-fjoin:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+/* ⚠️ ON PHONES THE PLACES BAR TAKES NO SPACE UNTIL ITS COUNT ARRIVES, as the places line did before it. */
+.mk-wl-hero .mk-places--hero { margin: 12px 2px 0; font: 400 14.5px/1 var(--mk-f-serif); color: rgba(255, 255, 255, .82); }
+.mk-wl-hero .mk-places--hero .mk-places-bar { background: rgba(255, 255, 255, .16); }
+.mk-wl-hero .mk-places--hero .mk-places-bar i { background: #e8b4a3; }
+.mk-wl-hero .mk-places--hero b { color: #fff; }
+.mk-wl-hero .mk-places--hero.mk-places--wait { display: none; }
+/* "See what it does" (clarity v1): no words, a 48px cream circle straddling the hero's rounded foot. Its
+   accessible name stays "See what it does"; the Birds-eye heading under it does the talking. */
+.mk-wl-see {
+  position: absolute; left: 50%; bottom: 0; transform: translate(-50%, 50%); z-index: 5;
+  width: 48px; height: 48px; border-radius: 50%; background: var(--mk-hero-ground); color: var(--mk-ink-shell);
+  display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(27, 36, 51, .25);
+}
+.mk-wl-see svg { width: 20px; height: 20px; }
+.mk-wl-see:focus-visible { outline: 2px solid #e8b4a3; outline-offset: 3px; }
 .mk-wl-form, .mk-ccform { display: grid; gap: 10px; }
 .mk-wl-form input[type="email"], .mk-ccform input[type="email"] {
   width: 100%; height: 50px; box-sizing: border-box; border-radius: 12px; border: 1px solid rgba(255, 255, 255, .25); background: #fff;
@@ -88,11 +118,6 @@
   font: 600 17px/1 var(--mk-f-serif); background: #e8b4a3; color: #1c130f;
 }
 .mk-wl-form .mk-btn:hover { background: #e8b4a3; color: #1c130f; }
-.mk-wl-hero .mk-places--line { color: rgba(255, 255, 255, .8); }
-.mk-wl-hero .mk-places--line .mk-places-bar { background: rgba(255, 255, 255, .18); }
-.mk-wl-hero .mk-places--line .mk-places-bar i { background: #e8b4a3; }
-.mk-wl-hero .mk-betanote button, .mk-wl-hero .mk-betanote a { color: inherit; font: inherit; text-decoration: underline; }
-.mk-wl-hero .mk-betainvalid, .mk-wl-hero .mk-betamsg { color: #fff; }
 
 
 /* ── The features ("format C"): the heading over a 44 × 3 navy rule, the line, the picture, the ticks in a
@@ -102,7 +127,7 @@
 .mk-wl-feat { margin: 0; padding: 62px 24px 48px; border-top: 1px solid rgba(28, 19, 15, .08); }
 .mk-wl-sec > .mk-wl-feat:nth-child(odd) { background: #f4ede3; }
 .mk-wl-sec > .mk-wl-feat:nth-child(even) { background: #fbf6ef; }
-.mk-wl-feat.mk-wl-feat--first { padding: 54px 24px 20px; border-top: 0; } /* 54: 26px under the drawer, so the heading and its rule still fit a 390×844 screen under the taller stack (2 Nov) */
+.mk-wl-feat.mk-wl-feat--first { padding: 112px 24px 20px; border-top: 0; } /* 112 (clarity v1, 2 Nov): the heading's ink 87px under the drawer's foot, as the ref's in-context shot places it, so the chevron overlaps nothing */
 .mk-wl-sec > .mk-det + .mk-wl-feat { border-top: 0; }
 .mk-wl .mk-wl-feat :is(h2, h3) {
   font-family: var(--mk-f-display) !important; font-weight: 400 !important; letter-spacing: 0 !important;
