@@ -81,6 +81,6 @@ describe("the three quick taps", () => {
 
 describe("the welcome email's subject", () => {
   it("names the founding number, unpadded, in lower case (founding emails v1)", () => {
-    expect(welcomeSubject(23)).toBe("You're in: founding writer No. 23");
+    expect(welcomeSubject(23)).toBe("You're on the list: founding writer No. 23");
   });
 });

@@ -83,11 +83,11 @@ export const CONFIRM_NOT_YOU =
 
 /** The writer's stored founding number — never rounded and never estimated. Unpadded. */
 export const welcomeSubject = (foundingNumber: number): string =>
-  `You're in: founding writer No. ${foundingNumber}`;
+  `You're on the list: founding writer No. ${foundingNumber}`;
 export const WELCOME_PREHEADER = "Your founding writer pass is inside.";
 export const WELCOME_HEADING = "That's your place confirmed.";
 export const WELCOME_LEAD =
-  "Welcome aboard. You're one of the first fifty writers to use QueryHawk, and this is your pass.";
+  "Welcome aboard. You'll be one of the first fifty writers to use QueryHawk.";
 
 /** Welcome page v1, phase 2: founding-emails-v2's wording. */
 export const WELCOME_NOTE: readonly string[] = [
@@ -112,7 +112,8 @@ export const WELCOME_NEXT: readonly string[] = [
   "We're opening QueryHawk to founding writers in waves rather than all at once, so we can fix what the " +
   "first group finds before the next arrives. When your wave opens, you'll get an invite with a link to " +
   "set up your account.",
-  "All being well, we're talking weeks, not months, and I'll keep you up to date as often as I can.",
+  /* "All being well, we're talking weeks, not months…" is RETIRED (waitlist clarity v1, 2 Nov): no timing
+     promises in the emails or on the welcome page. */
 ];
 
 /* ══════════════ 3 · Waiting list ══════════════ */

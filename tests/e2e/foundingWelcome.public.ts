@@ -119,7 +119,7 @@ const forward = async (page: Page, opts: { hold?: number; failAnswers?: boolean 
 
 const HEADLINES: Record<string, RegExp> = {
   verified: /^Welcome, founding writer\.$/,
-  already: /^You're already in\.$/,
+  already: /^You're already on the list\.$/,
   waiting: /^So close\. You're first in line\.$/,
   expired: /^That link's 48 hours are up\.$/,
   unknown: /^We don't recognise that link\.$/,

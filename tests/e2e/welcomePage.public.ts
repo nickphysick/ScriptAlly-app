@@ -24,11 +24,11 @@ const DATA: Record<Kind, Record<string, unknown>> = {
 const COPY: Record<Kind, { heading: string; lede: string; pass: string[] }> = {
   verified: {
     heading: "Welcome, founding writer.",
-    lede: "We're delighted to have you on board. You'll be one of the first writers to use QueryHawk, which means you'll shape its tools for all the writers who come after you. Your perks are locked in, and we'll be in touch.",
+    lede: "Everything's locked in. You'll be getting a QueryHawk campaign totally free of charge. Watch out for your invite – it'll be arriving soon.",
     pass: ["Founding writer pass", "No. 14", "of 50", "Confirmed", "2 November 2026"],
   },
   already: {
-    heading: "You're already in.",
+    heading: "You're already on the list.",
     lede: "That link had already done its job, usually because your email's security scanner opened it before you did. Nothing's wrong and nothing's changed: your founding place stands.",
     pass: ["Founding writer pass", "No. 14", "of 50", "Confirmed", "2 November 2026"],
   },
