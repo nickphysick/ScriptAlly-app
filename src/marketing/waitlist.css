@@ -61,14 +61,15 @@
   background: linear-gradient(transparent 70%, rgba(232, 180, 163, .5) 74%, rgba(232, 180, 163, .5) 92%, transparent 93%);
 }
 .mk-wl-strap { font: 600 42px/1.05 var(--mk-f-hand); color: #e8b4a3; margin: 10px 0 0; white-space: nowrap; }
-/* The trio: three words in the typewriter face, a blush dot between each, one line. */
-.mk-wl-trio { display: flex; justify-content: center; align-items: baseline; margin: 6px 0 0; padding: 0; list-style: none; white-space: nowrap; }
-.mk-wl-trio li { font: 400 23px/1.2 var(--mk-f-display); color: #fff; }
-.mk-wl-dot { font: 400 29px/1 var(--mk-f-display); color: #e8b4a3; margin: 0 10px; }
-.mk-wl-sub { font: 400 20px/1.45 var(--mk-f-serif); color: rgba(255, 255, 255, .86); margin: 12px auto 0; max-width: 360px; text-wrap: balance; }
-.mk-wl-sub b { font-weight: 700; color: #fff; white-space: nowrap; }
+/* The lockup panel (hero v3, 2 Nov): a fine blush outline, no fill, centred 6px under the hawk;
+   "Query · Track · Discover" in the typewriter face over "QueryHawk" in the serif. Two lines (LW-7). */
+.mk-wl-lock { align-self: center; margin-top: 6px; padding: 14px 26px 12px; border: 1.5px solid rgba(232, 180, 163, .5); border-radius: 16px; }
+.mk-wl-lock p { margin: 0; }
+.mk-wl-lock-trio { font: 400 20px/1.25 var(--mk-f-display); color: #fff; white-space: nowrap; }
+.mk-wl-lock-dot { color: #e8b4a3; margin: 0 9px; }
+.mk-wl-lock-brand { font: 700 30px/1.15 var(--mk-f-serif); color: #fff; white-space: nowrap; }
 .mk-wl-see {
-  display: inline-flex; align-items: center; gap: 6px; align-self: center; margin-top: 10px; padding-bottom: 2px;
+  display: inline-flex; align-items: center; gap: 6px; align-self: center; margin-top: 12px; padding-bottom: 2px;
   color: #e8b4a3; font: 600 16px/1.3 var(--mk-f-serif); text-decoration: none; border-bottom: 1.5px solid rgba(232, 180, 163, .5);
 }
 .mk-wl-see:focus-visible { outline: 2px solid #e8b4a3; outline-offset: 3px; border-radius: 3px; }
@@ -269,9 +270,13 @@
   background-image: linear-gradient(var(--mk-ink-shell) 0, var(--mk-ink-shell) 58%, var(--mk-lower) 58%);
 }
 .mk-dh-wrap { max-width: 1300px; margin: 0 auto; padding: 0 72px; box-sizing: border-box; }
+/* ⚠️ THE CARD HAS NO BOTTOM PADDING (hero v3): the pillars strip is its last row, pulled out to its left
+   and right edges by the card's own side padding (`--dh-pl`/`--dh-pr`, one owner each), so it sits flush
+   with the card's foot and takes its bottom corners (HERO-2). */
 .mk-dh-card {
+  --dh-pl: 72px; --dh-pr: 64px;
   display: grid; grid-template-columns: 1.15fr .85fr; align-items: center; gap: 40px;
-  padding: 64px 64px 56px 72px; background: #fff; border-radius: 28px; box-shadow: 0 24px 60px rgba(27, 36, 51, .18);
+  padding: 64px var(--dh-pr) 0 var(--dh-pl); background: #fff; border-radius: 28px; box-shadow: 0 24px 60px rgba(27, 36, 51, .18);
 }
 .mk-dh-copy { min-width: 0; color: #1c130f; }
 .mk-dh .mk-dh-q {
@@ -285,11 +290,7 @@
   background: linear-gradient(transparent 72%, rgba(232, 180, 163, .55) 72%, rgba(232, 180, 163, .55) 92%, transparent 92%);
 }
 .mk-dh-strap { margin: 14px 0 0; font: 600 40px/1.1 var(--mk-f-hand); color: #a2452a; }
-/* The trio (2 Nov): 22px under the strap, the typewriter face, a rust dot between each word. */
-.mk-dh-trio { display: flex; align-items: baseline; margin: 22px 0 0; padding: 0; list-style: none; white-space: nowrap; }
-.mk-dh-trio li { font: 400 24px/1.2 var(--mk-f-display); color: #1c130f; }
-.mk-dh-dot { font: 400 30px/1 var(--mk-f-display); color: #a2452a; margin: 0 12px; }
-.mk-dh-sub { margin: 10px 0 28px; max-width: 480px; text-wrap: balance; font: 400 21px/1.6 var(--mk-f-serif); color: rgba(28, 19, 15, .74); }
+.mk-dh-sub { margin: 16px 0 28px; max-width: 480px; text-wrap: balance; font: 400 21px/1.6 var(--mk-f-serif); color: rgba(28, 19, 15, .74); }
 .mk-dh-sub b { font-weight: 700; color: #1c130f; white-space: nowrap; }
 .mk-dh-form { display: flex; gap: 10px; max-width: 560px; }
 .mk-dh-form input[type="email"] {
@@ -308,9 +309,22 @@
 .mk-dh .mk-betanote button, .mk-dh .mk-betanote a { color: inherit; font: inherit; }
 .mk-dh-art { display: flex; justify-content: center; }
 .mk-dh-art img { width: 100%; max-width: 360px; height: auto; }
+/* The pillars (hero v3, 2 Nov): three equal columns along the card's foot, divided by hairlines. */
+.mk-dh-pillars {
+  grid-column: 1 / -1; align-self: stretch; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0 calc(-1 * var(--dh-pr)) 0 calc(-1 * var(--dh-pl)); padding: 0; list-style: none;
+  background: #faf6f1; border-top: 1px solid rgba(28, 19, 15, .1); border-radius: 0 0 28px 28px;
+}
+.mk-dh-pillar { padding: 24px 30px 26px 40px; }
+.mk-dh-pillar + .mk-dh-pillar { border-left: 1px solid rgba(28, 19, 15, .1); }
+.mk-dh-pillar b { display: block; font: 400 26px/1.2 var(--mk-f-display); color: #1c130f; }
+.mk-dh-pillar--track b { color: #a2452a; }
+.mk-dh-pillar span { display: block; margin-top: 6px; font: 400 17px/1.45 var(--mk-f-serif); color: rgba(28, 19, 15, .7); }
 @media (max-width: 1080px) {
   .mk-dh-wrap { padding: 0 32px; }
-  .mk-dh-card { padding: 48px 40px 44px 48px; gap: 28px; }
+  .mk-dh-card { --dh-pl: 48px; --dh-pr: 40px; padding: 48px var(--dh-pr) 0 var(--dh-pl); gap: 28px; }
+  .mk-dh-pillars { grid-template-columns: 1fr; }
+  .mk-dh-pillar + .mk-dh-pillar { border-left: 0; border-top: 1px solid rgba(28, 19, 15, .1); }
   .mk-dh-q .mk-dh-q2 { font-size: 54px; }
 }
 @media (max-width: 900px) {

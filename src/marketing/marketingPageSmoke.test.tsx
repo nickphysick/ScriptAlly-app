@@ -467,6 +467,9 @@ describe("the hero", () => {
     expect(h).toContain('<p class="mk-dh-strap">' + HERO_H1 + "</p>");
     expect(unesc(h.replace(/<[^>]+>/g, ""))).toContain(WAIT_HERO_SUB);
     expect(h, "the brand is bold").toContain("<b>QueryHawk</b>");
+    /* hero v3 (2 Nov): no trio row in the copy column; the three pillars along the card's foot. */
+    expect(h, "no trio row").not.toMatch(/-trio["\s]/);
+    expect(unesc(h.replace(/<[^>]+>/g, " ").replace(/\s+/g, " "))).toContain("Query Build your agent list Track Track your submissions Discover Master the art of querying");
   });
 
   it("asks for an address, and carries nothing that leaves the page", () => {

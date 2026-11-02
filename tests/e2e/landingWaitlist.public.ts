@@ -31,16 +31,22 @@ const MUTATIONS: Record<string, string | ((page: Page) => Promise<void>)> = {
   LW5: ".mk-beb .mk-beb-h{white-space:normal!important;font-size:64px!important}",
   LW5b: ".mk-beb-stage{padding:0 60px}",
   LW6: ".mk-trkd{aspect-ratio:1600/800!important}",
-  /* LW-7 (hero trio, 2 Nov): a stretching floor back on the drawer; a big gap; the strap and trio wrapping;
-     the hawk off centre; the brand split across lines. */
+  /* LW-7 (hero v3, 2 Nov): a stretching floor back on the drawer; a big gap; the strap wrapping; the hawk
+     off centre; the panel's lines run together or wrapping; and a floor that only makes it taller. */
   LW7: ".mk-wl-hero{min-height:820px!important;justify-content:space-between!important}",
-  LW7b: ".mk-wl-trio{margin-top:60px!important}",
+  LW7b: ".mk-wl-lock{margin-top:60px!important}",
   LW7c: ".mk-wl-strap{font-size:58px!important;white-space:normal!important}",
   LW7d: ".mk-wl-herohawk{margin-left:60px!important}",
-  LW7e: ".mk-wl-sub b{white-space:normal!important}.mk-wl-sub{max-width:110px!important;word-break:break-all!important}",
-  LW7f: ".mk-wl-trio{flex-wrap:wrap!important}.mk-wl-trio li{font-size:64px!important}",
+  LW7e: ".mk-wl-lock-brand{display:inline!important}.mk-wl-lock-trio{display:inline!important}",
+  /* The trio's spans sit with no space between them, so it has no place to break; the break adds them. */
+  LW7f: async (page) => page.evaluate(() => {
+    document.querySelectorAll(".mk-wl-lock-trio > span").forEach((s) => s.after(" "));
+    const st = document.createElement("style");
+    st.textContent = ".mk-wl-lock{max-width:180px!important}.mk-wl-lock-trio{white-space:normal!important}";
+    document.head.append(st);
+  }),
   LW7g: ".mk-wl-hero{min-height:820px!important}",
-  LW13: ".mk-wl-trio li,.mk-dh-trio li{text-transform:uppercase!important}",
+  LW13: ".mk-wl-lock-trio,.mk-dh-pillar b{text-transform:uppercase!important}",
   LW8: ".mk-det-h,.mk-fcopy p,.mk-wl-fline{text-transform:uppercase!important}",
   LW9: ".mk-frow,.mk-wl-feat{scroll-margin-top:-400px!important}",
   LW10: ".mk-vcard{flex-basis:80%!important}",
@@ -245,11 +251,11 @@ test("LW-6 · desktop: the pile is drawn at the neighbouring illustration's size
   expect(Math.abs(r.pile / r.illo - 1), `pile ${r.pile.toFixed(1)} vs illustration ${r.illo.toFixed(1)}`).toBeLessThanOrEqual(0.1);
 });
 
-/* LW-7, REPLACED AGAIN (hero trio, 2 Nov): the drawer is a centred stack with no stretching. At 375×667,
-   390×844, 411×915 and 430×932 its height is its content plus its padding (±2px), no gap between two
-   consecutive items is over 30px, the strap and the trio are one line each, the hawk is centred (±2px) and
-   "QueryHawk" in the sub-line is never split. At 390×844 and 411×915 the Birds-eye heading and its rule
-   are wholly in the first screen. (Until 2 Nov the drawer reached 70% of the screen, the hawk to one side.) */
+/* LW-7 (hero v3, 2 Nov; was the trio and sub-line until then): the drawer is a centred stack with no
+   stretching. At 375×667, 390×844, 411×915 and 430×932 its height is its content plus its padding (±2px),
+   no gap between two consecutive items is over 30px, the strap is one line, the hawk is centred (±2px),
+   and the lockup panel is exactly two lines — "Query · Track · Discover" over "QueryHawk". At 390×844
+   and 411×915 the Birds-eye heading and its rule are wholly in the first screen. */
 const PHONE_S = { width: 375, height: 667 };
 const PHONE_M = { width: 411, height: 915 };
 const drawer = (page: Page) => page.evaluate(() => {
@@ -260,15 +266,17 @@ const drawer = (page: Page) => page.evaluate(() => {
   const cs = getComputedStyle(hero);
   const h = document.getElementById("mk-be-h")!;
   const q = (s: string) => document.querySelector(".mk-wl-hero " + s);
-  const order = [".mk-wl-q", ".mk-wl-strap", ".mk-wl-herohawk", ".mk-wl-trio", ".mk-wl-sub", ".mk-wl-see", ".mk-wl-signup"];
+  const order = [".mk-wl-q", ".mk-wl-strap", ".mk-wl-herohawk", ".mk-wl-lock", ".mk-wl-see", ".mk-wl-signup"];
   const items = order.map((s) => { const e = q(s); return e ? { s, ...box(e) } : { s, top: NaN, bottom: NaN, left: NaN, right: NaN }; });
-  const brand = q(".mk-wl-sub b");
+  /* The panel's two lines: the words' own boxes (the trio's dots are a different size, so read its words). */
+  const trioWords = Array.from(document.querySelectorAll(".mk-wl-hero .mk-wl-lock-trio > span:not([aria-hidden])")).map((e) => e.getBoundingClientRect());
+  const brand = q(".mk-wl-lock-brand");
   return { vh: innerHeight, scrollY, rule: parseFloat(getComputedStyle(h, "::after").height), drawer: box(hero), heading: box(h),
            padTop: parseFloat(cs.paddingTop), padBottom: parseFloat(cs.paddingBottom), items,
            strapLines: lines(q(".mk-wl-strap")!),
-           /* The words' own boxes: the dots are a larger size, so the li boxes holding them start higher: compare their bottoms. */
-           trioLines: new Set(Array.from(document.querySelectorAll(".mk-wl-hero .mk-wl-trio > li")).map((li) => Math.round(li.getBoundingClientRect().bottom))).size,
-           brandRects: brand ? ink(brand).length : 0, brandText: brand?.textContent ?? null };
+           trioRows: new Set(trioWords.map((r) => Math.round(r.bottom))).size, trioWords: trioWords.length,
+           brandLines: brand ? lines(brand) : 0, trioBottom: Math.max(...trioWords.map((r) => r.bottom)), brandTop: brand ? box(brand).top : NaN,
+           subShown: !!q(".mk-wl-sub") };
 });
 
 test.describe("LW-7 · phones: the drawer is a centred stack, as tall as its content", () => {
@@ -276,7 +284,7 @@ test.describe("LW-7 · phones: the drawer is a centred stack, as tall as its con
     test(`at ${vp.width}×${vp.height}`, async ({ page }) => {
       await open(page, vp);
       await mutate(page, "LW7", "LW7b", "LW7c", "LW7d", "LW7e", "LW7f", "LW7g");
-      await present(page, "#mk-be-h", ".mk-wl-hero", ".mk-wl-strap", ".mk-wl-sub", ".mk-wl-see", ".mk-wl-herohawk", ".mk-wl-signup");
+      await present(page, "#mk-be-h", ".mk-wl-hero", ".mk-wl-strap", ".mk-wl-lock", ".mk-wl-see", ".mk-wl-herohawk", ".mk-wl-signup");
       const r = await drawer(page);
       console.log(`LW-7 @${vp.width}`, JSON.stringify(r));
       expect(r.scrollY, "read at the top of the page").toBe(0);
@@ -290,12 +298,14 @@ test.describe("LW-7 · phones: the drawer is a centred stack, as tall as its con
         expect(gap, `gap ${r.items[i - 1].s} → ${r.items[i].s}`).toBeLessThanOrEqual(30);
       }
       expect(r.strapLines, "No more winging it. is one line").toBe(1);
-      expect(r.trioLines, "the trio is one line").toBe(1);
       const hawk = r.items[2];
       const off = (hawk.left + hawk.right) / 2 - (r.drawer.left + r.drawer.right) / 2;
       expect(Math.abs(off), `the hawk is centred (off by ${off.toFixed(1)})`).toBeLessThanOrEqual(2);
-      expect(r.brandText, "the sub-line's brand is bold").toBe("QueryHawk");
-      expect(r.brandRects, "QueryHawk is never split").toBe(1);
+      expect(r.trioWords, "the panel's first line has its three words").toBe(3);
+      expect(r.trioRows, "Query · Track · Discover is one line").toBe(1);
+      expect(r.brandLines, "QueryHawk is one line").toBe(1);
+      expect(r.brandTop, "QueryHawk is the panel's second line").toBeGreaterThanOrEqual(r.trioBottom - 2);
+      expect(r.subShown, "the phone draws no sub-line").toBe(false);
       if (vp === PHONE || vp === PHONE_M) {
         expect(r.rule, "the heading draws its rule (inside its box)").toBe(3);
         expect(r.heading.top, "the heading starts below the drawer").toBeGreaterThan(r.drawer.bottom);
@@ -305,9 +315,11 @@ test.describe("LW-7 · phones: the drawer is a centred stack, as tall as its con
   }
 });
 
-/* LW-13 (hero trio, 2 Nov): the trio and the sub-line, word for word, on both layouts; the trio is a list
-   whose dots are hidden from assistive tech; nothing in the hero is uppercased. */
-test.describe("LW-13 · the hero's trio and sub-line, both layouts", () => {
+/* LW-13 (hero v3, 2 Nov): the copy on each layout, word for word, and nothing in the hero uppercased.
+   Phones: the lockup panel ("Query · Track · Discover" / "QueryHawk") reads to a screen reader as
+   "Query, Track, Discover. QueryHawk", and there is no sub-line. Desktop: the sub-line with its bold brand,
+   no trio in the copy column, and the three pillars along the card's foot. */
+test.describe("LW-13 · the hero's copy, both layouts", () => {
   for (const vp of [PHONE, DESK]) {
     test(`at ${vp.width}px`, async ({ page }) => {
       await open(page, vp);
@@ -316,29 +328,40 @@ test.describe("LW-13 · the hero's trio and sub-line, both layouts", () => {
       await present(page, hero);
       const r = await page.evaluate((h) => {
         const root = document.querySelector(h)!;
-        const trio = root.querySelector("ul[class$='-trio']");
         const els = [root, ...Array.from(root.querySelectorAll<HTMLElement>("*"))];
+        const lock = root.querySelector(".mk-wl-lock");
         const sub = root.querySelector("[class$='-sub']");
         return {
           n: els.length,
           upper: els.filter((e) => getComputedStyle(e as Element).textTransform === "uppercase").map((e) => (e as HTMLElement).className || e.tagName),
-          items: trio ? Array.from(trio.querySelectorAll(":scope > li")).map((li) => {
-            const c = li.cloneNode(true) as HTMLElement; c.querySelectorAll("[aria-hidden='true']").forEach((x) => x.remove()); return c.textContent!.trim();
-          }) : null,
-          dots: trio ? Array.from(trio.querySelectorAll("[aria-hidden='true']")).map((d) => d.textContent) : [],
-          face: trio ? getComputedStyle(trio.querySelector("li")!).fontFamily : "",
-          sub: sub?.textContent ?? null,
+          lockSr: lock?.querySelector(".mk-sr")?.textContent ?? null,
+          lockShown: lock ? Array.from(lock.querySelectorAll("[aria-hidden='true'] > *")).map((e) => e.textContent) : null,
+          lockDots: lock ? Array.from(lock.querySelectorAll(".mk-wl-lock-dot")).map((e) => e.textContent) : [],
+          lockFace: lock ? getComputedStyle(lock.querySelector(".mk-wl-lock-trio")!).fontFamily : "",
+          sub: sub ? sub.textContent : null,
           brandWeight: sub?.querySelector("b") ? getComputedStyle(sub.querySelector("b")!).fontWeight : null,
+          trio: !!root.querySelector("[class$='-trio']"),
+          pillars: Array.from(root.querySelectorAll(".mk-dh-pillar")).map((p) => [p.querySelector("b")?.textContent, p.querySelector("span")?.textContent]),
+          trackRust: root.querySelector(".mk-dh-pillar--track b") ? getComputedStyle(root.querySelector(".mk-dh-pillar--track b")!).color : null,
+
         };
       }, hero);
       console.log(`LW-13 @${vp.width}`, JSON.stringify(r));
       expect(r.n, "the sweep found the hero").toBeGreaterThan(10);
-      expect(r.items).toEqual(["Query", "Track", "Discover"]);
-      expect(r.dots, "two decorative middle dots").toEqual(["·", "·"]);
-      expect(r.face, "the typewriter face").toMatch(/Special Elite/);
-      expect(r.sub).toBe("Give your manuscript the chance it deserves with QueryHawk.");
-      expect(r.brandWeight).toBe("700");
       expect(r.upper).toEqual([]);
+      if (vp === PHONE) {
+        expect(r.lockSr, "the panel's reading").toBe("Query, Track, Discover. QueryHawk");
+        expect(r.lockShown).toEqual(["Query·Track·Discover", "QueryHawk"]);
+        expect(r.lockDots).toEqual(["·", "·"]);
+        expect(r.lockFace).toMatch(/Special Elite/);
+        expect(r.sub, "no sub-line on phones").toBeNull();
+      } else {
+        expect(r.sub).toBe("Give your manuscript the chance it deserves with QueryHawk.");
+        expect(r.brandWeight).toBe("700");
+        expect(r.trio, "no trio row in the copy column").toBe(false);
+        expect(r.pillars).toEqual([["Query", "Build your agent list"], ["Track", "Track your submissions"], ["Discover", "Master the art of querying"]]);
+        expect(r.trackRust, "Track's title is rust").toBe("rgb(162, 69, 42)");
+      }
     });
   }
 });
@@ -492,7 +515,7 @@ test("LW-F · phones: each piece is set in the ref's face", async ({ page }) => 
   await mutate(page, "LWF");
   const FACES: Record<string, string> = {
     ".mk-wl-strap": "Caveat", ".mk-bef-bar > span": "Special Elite", ".mk-wl-feat h3": "Special Elite",
-    ".mk-wl-sub": "Source Serif 4", ".mk-wl-fline": "Source Serif 4", ".mk-vcard p": "Source Serif 4",
+    ".mk-wl-lock-brand": "Source Serif 4", ".mk-wl-lock-trio": "Special Elite", ".mk-wl-fline": "Source Serif 4", ".mk-vcard p": "Source Serif 4",
     ".mk-cclead": "Source Serif 4", ".mk-ccnote": "Source Sans 3", ".mk-tkt-st b": "Special Elite",
   };
   await present(page, ...Object.keys(FACES));

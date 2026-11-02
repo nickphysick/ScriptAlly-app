@@ -20,7 +20,7 @@ import {
   FEATURE_ROWS, PHONE_FEATURE_ORDER, featureAnchor, VISION_POINTS, MISSION_HEADING, FAQ_HEADING, FAQ, FeatureRow,
 } from "./landingCopy";
 import { FoundingSignup } from "./FoundingSignup";
-import { HeroTrio, HeroSub } from "./HeroLines";
+import { HeroLockup } from "./HeroLines";
 import { HeroPlaces } from "./HeroPlaces";
 import { ILLUSTRATIONS } from "./FeatureRows";
 import { FoundingTicket } from "./FoundingTicket";
@@ -41,10 +41,9 @@ const PhoneHero: React.FC<{ onNavigate: Navigate }> = ({ onNavigate }) => {
         <span className="mk-wl-q1">{WAIT_HERO_Q[0]}</span>{" "}<span className="mk-wl-q2"><mark>{WAIT_HERO_Q[1]}</mark></span>
       </h1>
       <p className="mk-wl-strap">{WAIT_HERO_STRAP}</p>
-      {/* A centred stack (2 Nov): the hawk, the trio, the sub-line and the link, each under the last. */}
+      {/* A centred stack (2 Nov): the hawk, the lockup panel and the link, each under the last. */}
       <img className="mk-wl-herohawk" src={HERO_BIRD.src + "?v=" + HERO_BIRD.version} alt="" width={HERO_BIRD.width} height={HERO_BIRD.height} />
-      <HeroTrio prefix="mk-wl" />
-      <HeroSub prefix="mk-wl" />
+      <HeroLockup />
       <PageAnchor to={BE_HEADING_ID} className="mk-wl-see">
         {SEE_WHAT}{" "}
         <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
