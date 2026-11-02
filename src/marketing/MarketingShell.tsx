@@ -20,7 +20,7 @@ import { usePhone } from "./usePhone";
 import { ConsentBar } from "./ConsentBar";
 import { CONSENT_EVENT, initAnalytics, trackPageView } from "./analytics";
 import { captureAttribution } from "./attribution";
-import { HERO_CTA, HERO_PHONE_JOIN } from "./landingCopy";
+import { WAITLIST_CTA, HERO_PHONE_JOIN } from "./landingCopy";
 import { joinTarget, scrollToForm, NavPass } from "./WaitlistParts";
 import { WELCOME_FOOT } from "./welcomeCopy";
 
@@ -230,7 +230,7 @@ export const MarketingShell: React.FC<{
               {phone ? (
                 <button type="button" className="mk-wljoin" onClick={() => scrollToForm(joinTarget())}>{HERO_PHONE_JOIN}</button>
               ) : (
-                <NavPass label={HERO_CTA} />
+                <NavPass label={WAITLIST_CTA} />
               )}
             </div>
           ) : (<>
