@@ -66,9 +66,10 @@ Email 2 as rendered from the deployed code: `email/email2-welcome-640.png` and `
 text). Email 3: `email/email3-waiting-*`. These are drawn without web fonts, which is what Gmail does, so the
 typewriter shows as Courier.
 
-**Email 2 as received on dev:** waiting on you. I signed up `nick.physick+qh-welcome@googlemail.com` on dev
-after the deploy (2 Nov, about 10:55 UTC). Clicking the link in that confirm email sends the new welcome with
-pass No. 3. I'll add the screenshot to this report if you send it, and delete that record afterwards.
+**Email 2 as received on dev:** sent. `nick.physick+qh-welcome@googlemail.com` signed up on dev after the deploy
+(2 Nov, 10:41 UTC) and Nick clicked the confirm link: the record was confirmed as founding writer No. 3, so dev
+sent the new welcome ("You're in: founding writer No. 3") to that address. The record and its rate-limit
+entry were then deleted and the counter put back to cap 50 with 2 confirmed, so dev is as it was.
 
 ## Phase 3: /welcome
 
