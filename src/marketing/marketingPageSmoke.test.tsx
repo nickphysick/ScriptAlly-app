@@ -66,7 +66,7 @@ const PUBLIC_ROUTES: [path: string, node: () => React.ReactElement, mustContain:
      rebuilt in welcome page v1, 2 Nov). There is no reference in a static render, so each renders
      its state without a number. */
   ["/welcome?v=verified", () => <WelcomePage onNavigate={noNavigate} />, "Welcome, founding writer."],
-  ["/welcome?v=already", () => <WelcomePage onNavigate={noNavigate} />, "You&#x27;re already in."],
+  ["/welcome?v=already", () => <WelcomePage onNavigate={noNavigate} />, "You&#x27;re already on the list."],
   ["/welcome?v=waiting", () => <WelcomePage onNavigate={noNavigate} />, "So close. You&#x27;re on the waiting list."],
   ["/welcome?v=expired", () => <WelcomePage onNavigate={noNavigate} />, "That link&#x27;s 48 hours are up."],
   ["/welcome?v=unknown", () => <WelcomePage onNavigate={noNavigate} />, "We don&#x27;t recognise that link."],

@@ -56,12 +56,12 @@ const EXPECT = {
   },
   welcome: {
     email: welcome,
-    subject: "You're in: founding writer No. 14",
+    subject: "You're on the list: founding writer No. 14",
     preheader: "Your founding writer pass is inside.",
     strings: [
       "No. 14", "of 50",
       "That's your place confirmed.",
-      "Welcome aboard. You're one of the first fifty writers to use QueryHawk, and this is your pass.",
+      "Welcome aboard. You'll be one of the first fifty writers to use QueryHawk.",
       /* welcome page v1, phase 2: the note as founding-emails-v2 words it */
       "Hi, I'm Nick. I spent a year designing and building QueryHawk alongside my day job, driven by the belief that good stories shouldn't be lost to a messy querying campaign.",
       "I truly believe these tools give your manuscript the very best chance of landing with the right agent. Please use everything QueryHawk has to offer and let me know how you find it.",
@@ -74,7 +74,6 @@ const EXPECT = {
       "An exclusive Early Bird discount for the writers you invite when we launch",
       "What happens next",
       "We're opening QueryHawk to founding writers in waves rather than all at once, so we can fix what the first group finds before the next arrives. When your wave opens, you'll get an invite with a link to set up your account.",
-      "All being well, we're talking weeks, not months, and I'll keep you up to date as often as I can.",
       "This takes you off the list and frees your place for another writer.",
       ...FOOT,
     ],
@@ -175,7 +174,7 @@ describe("EM-2 · the welcome's number is the number it is given (the stored one
   for (const n of [1, 14, 50]) {
     it(`No. ${n}`, () => {
       const e = ok(prepareWelcome(PROD, n, 50, "unsub"));
-      expect(e.subject).toBe(`You're in: founding writer No. ${n}`);
+      expect(e.subject).toBe(`You're on the list: founding writer No. ${n}`);
       expect(words(e.html)).toContain(`No. ${n} of 50`);
       expect(e.text).toContain(`Founding writer pass: No. ${n} of 50`);
     });

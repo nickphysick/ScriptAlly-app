@@ -84,14 +84,14 @@ test("C2 · /welcome?v=already draws its state, then drops its parameters", asyn
   await page.goto("/welcome?v=already");
   const state = page.locator('[data-welcome="already"]');
   await expect(state).toBeVisible();
-  await expect(state.locator("h1")).toHaveText("You're already in.");
+  await expect(state.locator("h1")).toHaveText("You're already on the list.");
   await page.waitForTimeout(300);
   const url = new URL(page.url());
   const focused = await page.evaluate(() => document.activeElement?.textContent ?? null);
   readings["verified=already"] = { path: url.pathname, search: url.search, focused };
   expect(url.pathname).toBe("/welcome");
   expect(url.search, "the parameters are removed").toBe("");
-  expect(focused, "focus is on the headline").toBe("You're already in.");
+  expect(focused, "focus is on the headline").toBe("You're already on the list.");
 });
 
 test.describe("C3 · no way into the app in the public chrome", () => {
