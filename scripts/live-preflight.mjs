@@ -20,7 +20,7 @@ const PROJECT = "prod"; // .firebaserc alias for gen-lang-client-0801391782
 const PROD_ENV_FILE = "functions/.env.gen-lang-client-0801391782";
 /* landing-live was fast-forwarded into release/live-1 (18 Oct), and the runbook runs from there. */
 const BRANCHES = ["release/live-1"];
-const LIVE_TITLE = "QueryHawk: Query With Confidence";
+const LIVE_TITLE = "QueryHawk: track every query to a literary agent";
 /** Every lab hash App.tsx routes; `#/plans` is the DEV hash, not the `/plans` path. Kept equal to
  *  `LAB_HASHES` in src/lib/prodBuild.test.ts (that file's P1 is the same claim, at build time). */
 const LAB_HASHES = ["#/status-dots", "#/plans", "#/contact-lab", "#/onb-lab", "#/notes-lab",
