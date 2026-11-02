@@ -43,10 +43,13 @@ describe("the live Hosting config follows dev's", () => {
     expect(assets?.headers?.[0]?.value, "without it a returning reader keeps the old bundle").toContain("immutable");
   });
 
-  it("L3 · everything else in live's hosting block equals dev's, apart from `site`", () => {
-    const strip = ({ site: _s, ...rest }: Record<string, unknown>) => rest;
+  /* Launch readiness (2 Nov): live also carries `redirects`, the 301 that sends every page but /, /welcome
+     and /privacy home (RED-1, src/lib/landingRedirect.test.ts). Dev is the whole app, so it has none. */
+  it("L3 · everything else in live's hosting block equals dev's, apart from `site` and live's `redirects`", () => {
+    const strip = ({ site: _s, redirects: _r, ...rest }: Record<string, unknown>) => rest;
     expect(strip(live.hosting)).toEqual(strip(dev.hosting));
     expect(live.hosting.site).toBe("scriptally-app");
+    expect(Object.keys(live.hosting).filter((k) => !(k in dev.hosting)), "the one key live has that dev does not").toEqual(["redirects"]);
   });
 
   it("L4 · live's Firestore database is the named id the production build reads", () => {

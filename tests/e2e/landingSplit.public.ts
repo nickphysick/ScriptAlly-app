@@ -30,7 +30,8 @@ import { gzipSync } from "node:zlib";
 
 test.describe.configure({ timeout: 240_000 });
 
-const PATHS = ["/", "/pricing", "/about", "/contact", "/founders", "/welcome", "/terms", "/privacy"] as const;
+/* Launch readiness (2 Nov): the live site is three pages; the rest go home (RED-1, landingOnly C1). */
+const PATHS = ["/", "/welcome", "/privacy"] as const;
 const LAYOUTS = [{ name: "390", vp: { width: 390, height: 844 } }, { name: "1440", vp: { width: 1440, height: 900 } }] as const;
 
 /** The fixed list, each as a string the minifier keeps. */

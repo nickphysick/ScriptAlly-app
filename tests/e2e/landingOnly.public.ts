@@ -40,7 +40,10 @@ test.afterAll(() => {
 });
 
 test.describe("C1 · the public pages render, and nothing else ever does", () => {
-  for (const path of ["/", "/founders", "/pricing", "/about", "/contact"]) {
+  /* Launch readiness (2 Nov): the live site is three pages. /founders, /pricing, /about, /contact and
+     /terms are unfinished and go home with the workspace and anything unknown (also a hosting 301,
+     RED-1; this is the in-app backstop). */
+  for (const path of ["/", "/welcome", "/privacy"]) {
     test(`${path} renders`, async ({ page }) => {
       await watchForApp(page);
       await page.goto(path);
@@ -56,7 +59,7 @@ test.describe("C1 · the public pages render, and nothing else ever does", () =>
     });
   }
 
-  for (const target of ["/dashboard", "/agents", "/x", "/#/login", "/#/signup"]) {
+  for (const target of ["/dashboard", "/agents", "/x", "/#/login", "/#/signup", "/founders", "/pricing", "/about", "/contact", "/terms"]) {
     test(`${target} ends on / and never shows the app`, async ({ page }) => {
       await watchForApp(page);
       await page.goto(target);
@@ -74,8 +77,11 @@ test.describe("C1 · the public pages render, and nothing else ever does", () =>
   }
 });
 
-test("C2 · /founders?verified=already goes on to /welcome, which drops its parameters", async ({ page }) => {
-  await page.goto("/founders?verified=already");
+/* C2, RE-POINTED (launch readiness, 2 Nov): /founders is no longer a live page, so the old
+   `/founders?verified=<kind>` forward is gone with it (since 19 Oct the verify link lands on /welcome
+   itself). What stays is /welcome's own behaviour: it reads its `v`, then drops it. */
+test("C2 · /welcome?v=already draws its state, then drops its parameters", async ({ page }) => {
+  await page.goto("/welcome?v=already");
   const state = page.locator('[data-welcome="already"]');
   await expect(state).toBeVisible();
   await expect(state.locator("h1")).toHaveText("You're already in.");
@@ -93,7 +99,7 @@ test.describe("C3 · no way into the app in the public chrome", () => {
     test(`at ${width}px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 900 });
       const found: Record<string, string[]> = {};
-      for (const path of ["/", "/founders", "/pricing", "/about", "/contact"]) {
+      for (const path of ["/", "/welcome", "/privacy"]) {
         await page.goto(path);
         await expect(page.locator(".mk-scope")).toBeVisible();
         const burger = page.locator(".mk-burger");
@@ -107,7 +113,8 @@ test.describe("C3 · no way into the app in the public chrome", () => {
            branch), so /founders, /pricing, /about and /contact carry no "Become a founding writer" on a
            phone. Whether they should is a product decision, flagged in the waitlist v1 report. The doors
            check below is unchanged and runs on every path at both widths. */
-        if (width > 760 || path === "/") expect(text, `${path} has the founding CTA`).toMatch(/become a founding writer/i);
+        /* Launch readiness (2 Nov): /welcome and /privacy carry their own chrome, with no founding CTA. */
+        if (path === "/") expect(text, `${path} has the founding CTA`).toMatch(/become a founding writer/i);
       }
       readings[`chrome ${width}`] = found;
       for (const [path, doors] of Object.entries(found)) expect(doors, path).toEqual([]);
