@@ -32,6 +32,9 @@ export const HERO_H1 = "No more winging it.";
 
 /** The sign-up's button in the hero, on both layouts, and the join bar's words. */
 export const HERO_CTA = "Become a founding writer";
+/** Every "join" on the landing page: the heroes' buttons, the desktop nav's button, the founding form's button
+    (waitlist clarity v1, 2 Nov). ⚠️ ABOVE `FOUNDING_CTA`, WHICH READS IT: a const read before its line throws. */
+export const WAITLIST_CTA = "Join the waitlist";
 
 /* ── The hero on phones (≤760px; ref design-refs/landing-hero-mobile-v1.html) ──
    ⚠️ THE STRAPLINE IS `HERO_H1` ITSELF, NOT A SECOND STRING. On phones the desktop headline is not
@@ -212,7 +215,8 @@ export const FOUNDING_PERKS = [
 
 export const FOUNDING_FIELD_LABEL = "Email address";
 export const FOUNDING_PLACEHOLDER = "you@example.com";
-export const FOUNDING_CTA = "Claim your place";
+/** The founding form's button (clarity v1, 2 Nov): the same words as every "Join" that brings a reader to it. */
+export const FOUNDING_CTA = WAITLIST_CTA;
 
 
 /**
@@ -309,8 +313,6 @@ export const HERO_FOUNDING_TICKS = [
   "Free for your whole campaign",
   "A direct line to the founder",
 ] as const;
-/** Every "join" on the landing page: the heroes' buttons, the desktop nav's button, the founding form's button. */
-export const WAITLIST_CTA = "Join the waitlist";
 /** The places bar under the heroes' button: "N of 50 places left", the number set bold by the component. */
 export const placesLeftRest = (cap: number) => ` of ${cap} places left`;
 export const placesLeftLabel = (left: number, cap: number) => `${left}${placesLeftRest(cap)}`;

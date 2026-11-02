@@ -21,7 +21,7 @@ import { ConsentBar } from "./ConsentBar";
 import { CONSENT_EVENT, initAnalytics, trackPageView } from "./analytics";
 import { captureAttribution } from "./attribution";
 import { WAITLIST_CTA, HERO_PHONE_JOIN } from "./landingCopy";
-import { joinTarget, scrollToForm, NavPass } from "./WaitlistParts";
+import { scrollToJoin, NavPass } from "./WaitlistParts";
 import { WELCOME_FOOT } from "./welcomeCopy";
 
 /* ── The brand artwork: the hawk and the drawn wordmark ──
@@ -234,7 +234,7 @@ export const MarketingShell: React.FC<{
           {waitlist ? (
             <div className="mk-navright">
               {phone ? (
-                <button type="button" className="mk-wljoin" onClick={() => scrollToForm(joinTarget())}>{HERO_PHONE_JOIN}</button>
+                <button type="button" className="mk-wljoin" onClick={scrollToJoin}>{HERO_PHONE_JOIN}</button>
               ) : (
                 <NavPass label={WAITLIST_CTA} />
               )}
