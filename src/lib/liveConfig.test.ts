@@ -34,7 +34,9 @@ describe("the live Hosting config follows dev's", () => {
     const sources = live.hosting.rewrites.map((r: { source: string }) => r.source);
     expect(sources.indexOf("/api/waitlist")).toBeGreaterThanOrEqual(0);
     expect(sources.indexOf("/api/waitlist/**")).toBeGreaterThanOrEqual(0);
-    expect(sources.indexOf("**"), "the catch-all must come last").toBe(sources.length - 1);
+    // The catch-all is the SPA regex since STALE-1 (it skips /assets/), no longer a bare "**".
+    const catchAll = live.hosting.rewrites.findIndex((r: { destination?: string }) => r.destination === "/index.html");
+    expect(catchAll, "the catch-all must come last").toBe(sources.length - 1);
   });
 
   it("L2 · live's headers equal dev's: no-cache for the page, immutable for /assets/**", () => {

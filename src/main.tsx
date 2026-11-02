@@ -1,5 +1,6 @@
 import {StrictMode, type ComponentType} from 'react';
 import {createRoot} from 'react-dom/client';
+import {reloadOnceForStaleChunk} from './lib/chunkReload';
 
 /**
  * Split v1, phase 4 — the root is chosen by the build-time flag. A landing-only build (production,
@@ -20,10 +21,21 @@ const load: () => Promise<{ default: ComponentType }> =
     ? () => import('./AppRoot')
     : () => import('./marketing/PublicRoot');
 
+/**
+ * STALE-1: a tab opened before a deploy asks for the previous build's chunk after it, which is gone.
+ * Both ways that surfaces (this import, and Vite's preload helper for any lazy chunk later) reload
+ * the page once, which fetches the new build. lib/chunkReload stops a second reload looping.
+ */
+window.addEventListener('vite:preloadError', (event) => {
+  if (reloadOnceForStaleChunk()) event.preventDefault();
+});
+
 load().then(({ default: Root }) => {
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
       <Root />
     </StrictMode>,
   );
+}).catch((err) => {
+  if (!reloadOnceForStaleChunk()) throw err;
 });

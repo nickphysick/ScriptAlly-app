@@ -40,3 +40,12 @@ export function complementOf(words) {
 export const landingRedirectRegex = () => `^/${complementOf(KEEP)}(?:/.*)?$`;
 
 if (import.meta.url === `file://${process.argv[1]}`) console.log(landingRedirectRegex());
+
+/**
+ * STALE-1: the SPA catch-all rewrite for both hosting configs. It sends every path to index.html
+ * EXCEPT a file under /assets/, so a chunk a stale tab asks for after a deploy is a real 404 and
+ * never the index page served as a script with status 200. Written without lookahead, because
+ * hosting regexes are RE2: after "/", the path may not be "assets/" followed by anything.
+ */
+export const SPA_REWRITE_REGEX =
+  "^/(?:$|[^a]|a(?:$|[^s]|s(?:$|[^s]|s(?:$|[^e]|e(?:$|[^t]|t(?:$|[^s]|s(?:$|[^/])))))))";
