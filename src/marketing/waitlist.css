@@ -317,21 +317,31 @@
 .mk-dh-strap { margin: 14px 0 0; font: 600 40px/1.1 var(--mk-f-hand); color: #a2452a; }
 .mk-dh-sub { margin: 16px 0 28px; max-width: 480px; text-wrap: balance; font: 400 21px/1.6 var(--mk-f-serif); color: rgba(28, 19, 15, .74); }
 .mk-dh-sub b { font-weight: 700; color: #1c130f; white-space: nowrap; }
-.mk-dh-form { display: flex; gap: 10px; max-width: 560px; }
-.mk-dh-form input[type="email"] {
-  flex: 1; min-width: 0; height: 56px; box-sizing: border-box; border-radius: 14px; border: 1px solid rgba(28, 19, 15, .15);
-  background: #fff; padding: 0 18px; font: 400 17px/1 var(--mk-f-serif); color: #1c130f;
+/* ── The founding block (waitlist clarity v1, 2 Nov; ref design-refs/landing-waitlist-clarity-v1.html `.dh-*`):
+   the heading, three ticks stacked, the navy pill, the places bar. No form: the band's is the page's only one. ── */
+.mk-dh-founding { margin: 4px 0 0; max-width: 520px; }
+.mk-dh .mk-dh-fhead {
+  margin: 0 0 12px; color: var(--mk-nearblack);
+  font-family: var(--mk-f-serif) !important; font-weight: 600 !important; letter-spacing: 0 !important;
+  font-size: 22px !important; line-height: 1.25 !important;
 }
-.mk-dh-form input[type="email"]::placeholder { color: rgba(28, 19, 15, .42); }
-.mk-dh-form input[type="email"]:focus { outline: none; border-color: #2a3a52; box-shadow: 0 0 0 3px rgba(42, 58, 82, .15); }
-.mk-dh-form .mk-btn, .mk-dh-form .mk-btn:hover {
-  height: 56px; border: 0; border-radius: 999px; padding: 0 26px; white-space: nowrap;
-  background: #2a3a52; color: #fff; font: 600 17px/1 var(--mk-f-serif);
+.mk-dh-fticks { list-style: none; margin: 0 0 22px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.mk-dh-fticks li { display: flex; align-items: center; gap: 8px; margin: 0; font: 400 17px/1.3 var(--mk-f-serif); color: var(--mk-nearblack); }
+/* brand.tsx names a bare span as the app's sans, and the desktop has no page-wide reset (the phone's is `.mk-wl`). */
+.mk-dh-fticks li > span { font: inherit; }
+.mk-dh-fticks .mk-dtick { flex: 0 0 20px; width: 20px; height: 20px; padding: 3px; margin-top: 0; background: #f7e1d8; color: var(--mk-rust); }
+.mk-dh-fticks .mk-dtick path { stroke-width: 2.2; }
+.mk-dh-fjoin {
+  display: inline-flex; align-items: center; justify-content: center; height: 56px; padding: 0 34px; border: 0; border-radius: 999px;
+  background: var(--mk-navy); color: #fff; font: 600 18px/1 var(--mk-f-serif); cursor: pointer;
 }
-.mk-dh .mk-places--line { gap: 12px; margin-top: 16px; font-size: 15px; }
-.mk-dh .mk-places--line .mk-places-bar { flex-basis: 120px; height: 7px; }
-.mk-dh .mk-betanote { margin: 10px 0 0; font: 400 13.5px/1.45 var(--mk-f-sans); color: rgba(28, 19, 15, .59); } /* WCAG AA (launch polish, 2 Nov): same hue, darker, ≥4.6:1 */
-.mk-dh .mk-betanote button, .mk-dh .mk-betanote a { color: inherit; font: inherit; }
+.mk-dh-fjoin:focus-visible { outline: 2px solid var(--mk-navy); outline-offset: 3px; }
+/* The places bar keeps its box while the count loads (hidden, as the places line did), so nothing moves. */
+.mk-dh .mk-places--hero { margin: 14px 0 0; max-width: 420px; font: 400 15px/1 var(--mk-f-serif); color: rgba(28, 19, 15, .72); }
+.mk-dh .mk-places--hero .mk-places-bar { background: #f7e8e2; }
+.mk-dh .mk-places--hero .mk-places-bar i { background: var(--mk-rust); }
+.mk-dh .mk-places--hero b { color: var(--mk-nearblack); }
+.mk-dh .mk-places--hero.mk-places--wait { visibility: hidden; }
 .mk-dh-art { display: flex; justify-content: center; }
 .mk-dh-art img { width: 100%; max-width: 360px; height: auto; }
 @media (max-width: 1080px) {

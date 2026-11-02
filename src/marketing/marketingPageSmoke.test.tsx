@@ -34,7 +34,7 @@ import { ContactPage } from "./ContactPage";
 import { FoundersPage } from "./FoundersPage";
 import { WelcomePage } from "./WelcomePage";
 import { LEGAL_COPY_REVIEWED } from "./legalCopy";
-import { HERO_H1, HERO_CTA, FEATURE_ROWS, WAIT_HERO_Q, WAIT_HERO_SUB, BE_HEADING, BE_LINE,
+import { HERO_H1, WAITLIST_CTA, FEATURE_ROWS, WAIT_HERO_Q, WAIT_HERO_SUB, BE_HEADING, BE_LINE,
   VISION_HEADING, VISION_POINTS } from "./landingCopy";
 import { SUPPORT_EMAIL } from "../lib/companyInfo";
 import { sliceBetween } from "../test/sliceBetween";
@@ -286,8 +286,8 @@ describe("the marketing chrome renders in both of its states", () => {
       const html = renderPage(shell(u, "/"), "/");
       expect(html).not.toContain("Log in");
       expect(html).not.toContain("Open dashboard");
-      /* waitlist v2 (1 Nov): the nav's pass says the CTA's own words, in sentence case. */
-      expect(html).toContain(HERO_CTA);
+      /* Clarity v1 (2 Nov): the nav's pass says "Join the waitlist", the page's one ask. */
+      expect(html).toContain(WAITLIST_CTA);
       expect(html).not.toContain("Become a Founding Writer");
     }
   });
@@ -472,10 +472,11 @@ describe("the hero", () => {
     expect(h, "no pillars strip").not.toContain("mk-dh-pillar");
   });
 
-  it("asks for an address, and carries nothing that leaves the page", () => {
+  /* RE-POINTED (clarity v1, 2 Nov): the hero asks with a button, not a field; the band holds the form. */
+  it("asks with one button and no field, and carries nothing that leaves the page", () => {
     const h = hero();
-    expect(h).toContain('id="mk-hero-email"');
-    expect(h).toContain(HERO_CTA);
+    expect(h, "no field in the hero").not.toContain('id="mk-hero-email"');
+    expect(h).toContain(WAITLIST_CTA);
     expect(h, "the old in-page jump is retired").not.toContain('href="#pulse"');
     expect(h, "no card pile in the hero").not.toMatch(/["\s`]mk-hc-pile["\s`]/);
     expect(h, "no cast shadow").not.toContain("hawk-shadow.png");
@@ -548,10 +549,11 @@ describe("the status band is gone, and its glyphs survive in the footer", () => 
 describe("the founding sign-up — the hero's and the band's", () => {
   const html = () => renderPage(<Landing onNavigate={noNavigate} />, "/");
 
-  it("two forms, the hero's and the band's", () => {
+  /* RE-POINTED (clarity v1, 2 Nov): ONE form again, the band's; the hero's button scrolls to it. */
+  it("one form, the band's", () => {
     const h = html();
-    expect(h.match(/class="mk-trap"/g) ?? [], "two honeypots, so two forms").toHaveLength(2);
-    expect(h).toContain('id="mk-hero-email"');
+    expect(h.match(/class="mk-trap"/g) ?? [], "one honeypot, so one form").toHaveLength(1);
+    expect(h, "the hero has no field").not.toContain('id="mk-hero-email"');
     expect(h).toContain('id="mk-band-email"');
     expect(h).toContain("Claim your place");
     expect(h, "the panel's own ask went with it").not.toContain("Claim your spot");
@@ -602,9 +604,9 @@ describe("the founding sign-up — the hero's and the band's", () => {
     expect(html()).not.toContain("founding-seal-mark");
   });
 
-  it("the hero asks with its own form, and none of the retired panel's pieces", () => {
+  it("the hero asks with its button, and none of the retired panel's pieces", () => {
     const h = html();
-    expect(h).toContain(HERO_CTA);
+    expect(h).toContain(WAITLIST_CTA);
     for (const gone of ["mk-fmperks", "mk-fmrow", "mk-fmlearn", "mk-found-panel"]) {
       expect(h, `${gone} is retired`).not.toMatch(new RegExp('["\\s`]' + gone + '["\\s`]'));
     }
@@ -654,8 +656,8 @@ describe("the sign-up the landing does carry", () => {
   it("every sign-up on the page has its own ids and its own label", () => {
     const h = html();
     const ids = [...h.matchAll(/<input[^>]*id="([^"]+)"[^>]*type="email"/g)].map((m) => m[1]);
-    expect(ids.length, "the landing carries two sign-ups — the hero's and the band's").toBe(2);
-    expect(new Set(ids).size, `ids collide: ${ids.join(", ")}`).toBe(2);
+    expect(ids.length, "the landing carries one sign-up, the band's (clarity v1)").toBe(1);
+    expect(new Set(ids).size, `ids collide: ${ids.join(", ")}`).toBe(1);
     for (const id of ids) {
       const label = h.match(new RegExp(`<label[^>]*for="${id}"[^>]*>([^<]*)<`));
       expect(label, `${id} has its own label`).toBeTruthy();
@@ -666,7 +668,7 @@ describe("the sign-up the landing does carry", () => {
 
   it("…and one live region each, mounted empty before there is anything to announce", () => {
     const regions = [...html().matchAll(/<div class="mk-betamsgwrap"([^>]*)>([\s\S]*?)<\/div>/g)];
-    expect(regions.length, "one region per mount").toBe(2);
+    expect(regions.length, "one region per mount, and one mount").toBe(1);
     for (const [, attrs, body] of regions) {
       expect(attrs).toContain('aria-live="polite"');
       expect(attrs).toContain('role="status"');
