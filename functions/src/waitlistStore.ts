@@ -153,14 +153,34 @@ export const joinWaitlist = async (db: Db, args: JoinArgs): Promise<JoinResult> 
 
     const roomLeft = counter.verifiedCount < counter.cap;
 
-    /* ── The cap is full: they join the plain waiting list, and are told so. ── */
+    /* ── The cap is full: they are told so, and they still confirm by email (Nick, 2 Nov). ──
+       ⚠️ UNTIL 2 Nov THIS WROTE A PLAIN `waiting` DOCUMENT: no confirmation, no reserve number, no email,
+       and so never promoted when a place freed (promotion takes only confirmed writers). Now it is the
+       ordinary pending document and confirmation email; the verify transaction re-checks the cap and,
+       still full, gives them a reserve number and email 3, which is what puts them in line. With
+       verification off they go straight into the queue with a reserve number. */
     if (!roomLeft) {
+      if (requireVerification) {
+        const token = newVerifyToken();
+        tx.set(sRef, {
+          email: emailNormalised, emailNormalised,
+          createdAt: now, lastInteractionAt: now,
+          verified: false, status: "pending" as WaitlistStatus, position: null,
+          verifyTokenHash: tokenHash(token),
+          verifyTokenExpiresAt: new Date(nowMs + VERIFY_TTL_MS),
+          lastConfirmSentAt: now,
+          source, ...tags, ...(hashedIp ? { ipHash: hashedIp } : {}),
+        });
+        return { outcome: "waiting" as const, status: "pending" as WaitlistStatus, position: null, counter, docId, verifyToken: token };
+      }
+      const reserveNumber = readNumbering(cSnap.exists ? (cSnap.data() as Record<string, unknown>) : undefined).reserveIssued + 1;
       tx.set(sRef, {
         email: emailNormalised, emailNormalised,
         createdAt: now, lastInteractionAt: now,
-        verified: false, status: "waiting" as WaitlistStatus,
+        verified: false, status: "waiting" as WaitlistStatus, reserveNumber, reserveAt: now,
         position: null, source, ...tags, ...(hashedIp ? { ipHash: hashedIp } : {}),
       });
+      tx.set(cRef, { reserveIssued: reserveNumber, updatedAt: now }, { merge: true });
       return { outcome: "waiting" as const, status: "waiting" as WaitlistStatus, position: null, counter, docId };
     }
 

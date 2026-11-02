@@ -210,7 +210,7 @@ describe("EM-4 · a freed place goes to the next writer in line, and the waiting
   });
   it("the sign-up's own words (landingCopy): FOUNDING_FULL promises the email", () => {
     const src = readFileSync(join(process.cwd(), "src/marketing/landingCopy.ts"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
-    expect(src).toContain("founding places have gone, so you're on the waiting list. We'll email you if a place opens up.");
+    expect(src).toContain("founding places have gone, but we've emailed you a link: click it to join the waiting list, and we'll email you if a place opens up.");
   });
   it("the unsubscribe path sends email 2 to the writer it promotes, from one place", () => {
     const src = readFileSync(join(process.cwd(), "functions/src/waitlist.ts"), "utf8");
