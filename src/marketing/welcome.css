@@ -182,19 +182,6 @@
 .mk-wel-close p { margin: 0; font: italic 400 22px/1.5 var(--mk-f-serif); color: var(--wel-body); }
 .mk-wel-closesign { margin-top: 10px; font: 400 34px/1.2 var(--mk-f-display); color: var(--wel-rust); }
 
-/* ── The chrome on /welcome (MarketingShell): the logo is not a button, the footer is one line ── */
-.mk-brand--still { cursor: default; }
-.mk-foot--welcome {
-  /* The full width (the shell's column would shrink-wrap it), the bar's 1300 measure and its 56px
-     inset, so the footer's logo sits under the bar's. */
-  display: flex; justify-content: space-between; align-items: center; gap: 16px;
-  width: 100%; max-width: 1300px; margin: 0 auto; box-sizing: border-box; padding: 34px 56px;
-}
-.mk-foot--welcome .mk-footmark { height: 30px; }
-.mk-foot--welcome .mk-wordmark { font-size: 20px; }
-.mk-foot--welcome p { margin: 0; font: 400 14px/1.5 var(--mk-f-sans); color: rgba(255, 255, 255, .7); }
-.mk-foot--welcome a { color: inherit; text-decoration: underline; }
-
 /* ── Narrower: the pass above the words ── */
 @media (max-width: 1000px) {
   .mk-wel-heroin { grid-template-columns: 1fr; gap: 36px; }
@@ -242,7 +229,6 @@
   .mk-wel-split { grid-template-columns: 1fr; gap: 20px; }
   .mk-wel-close { padding: 50px 22px 60px; }
   .mk-wel-close p { font-size: 19px; }
-  .mk-foot--welcome { flex-direction: column; align-items: flex-start; gap: 12px; padding: 28px 22px; }
 }
 
 /* Reduced motion: the pass and the stamp at rest, as they finish. */

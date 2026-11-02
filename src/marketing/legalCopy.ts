@@ -5,24 +5,22 @@
  * Terms and Privacy copy — verbatim from design-refs/scriptally-terms.html and
  * design-refs/scriptally-privacy.html.
  *
- * ⚠️ IT IS A WORKING DRAFT AND IT SAYS SO ON THE PAGE. `LEGAL_COPY_REVIEWED` is false; the ribbon
- * renders because of that one flag, and setting it true removes the ribbon and changes nothing
- * else — no copy, no geometry, no route. Do not set it until a lawyer has read both documents.
+ * ⚠️ THE TERMS ARE A WORKING DRAFT AND SAY SO ON THE PAGE. `LEGAL_COPY_REVIEWED` is false; the ribbon
+ * renders because of that one flag. The PRIVACY policy left that state on 2 Nov (privacy page v1): it
+ * names its controller (Nick, no surname), states the checked region, and carries no ribbon and no
+ * bracketed text (`ribbonOff`; PRIV-1).
  *
- * ⚠️ THE BRACKETED VALUES ARE DELIBERATE AND MUST NOT BE FILLED IN BY GUESSING. They come from
+ * ⚠️ THE TERMS' BRACKETED VALUES ARE DELIBERATE AND MUST NOT BE FILLED IN BY GUESSING. They come from
  * `companyInfo.ts` and render brackets and all, so the page visibly has holes rather than quietly
- * asserting an entity, an address, an ICO number or a retention period that nobody has confirmed.
- * A legal page that looks finished and is not is worse than an obviously unfinished one.
+ * asserting an entity or an address nobody has confirmed.
  *
- * ⚠️ PRIVACY §4 IS NOT OPTIONAL. Three features send content the writer supplies to Anthropic's
- * API: Smart Import (functions/src/smartImport.ts) sends the CONTENTS of the uploaded spreadsheet,
- * the email drop (functions/src/emailImport.ts) sends the body of an agent's reply, and the comps
- * suggester (functions/src/suggestComps.ts) sends the manuscript's details. Trimming that section
- * would leave the product doing something no surface discloses.
+ * ⚠️ PRIVACY §4 ("How we use AI") IS NOT OPTIONAL, AND THE TERMS POINT AT IT BY NUMBER. Four features
+ * send content the writer supplies to Anthropic's API (Smart Import, the email drop, comps, agent
+ * details). Trimming it would leave the product doing something no surface discloses.
  *
- * ⚠️ PRIVACY §6 SAYS THERE IS NO COOKIE BANNER, AND THERE MUST NOT BE ONE. The claim is only true
- * while the app sets nothing but auth tokens and interface preferences; adding analytics or any
- * third-party tracker makes this paragraph false before it makes a banner necessary.
+ * ⚠️ PRIVACY §6 SAYS THERE IS NO COOKIE BANNER AND NAMES CLOUDFLARE WEB ANALYTICS (privacy page v1).
+ * Both stay true only while the app sets nothing but auth tokens and interface preferences and the
+ * public site counts visits with Cloudflare's cookieless beacon; any other tracker makes it false.
  *
  * ⚠️ PRIVACY §7 PROMISES DELETION IN [30] DAYS AND NO CODE ENFORCES IT. Account deletion ships
  * disabled behind `ACCOUNT_DELETION_ENABLED`. The disagreement is recorded rather than papered
@@ -31,8 +29,8 @@
 
 import { CopyRun } from "./CopyRuns";
 import {
-  DATA_REGION, DELETION_WINDOW_DAYS, ICO_REGISTRATION_NOTE, LEGAL_ENTITY_NAME,
-  LEGAL_LAST_UPDATED, REGISTERED_ADDRESS, SUPPORT_EMAIL, supportMailto,
+  DATA_REGION, DELETION_WINDOW_DAYS, LEGAL_ENTITY_NAME, LEGAL_LAST_UPDATED, PRIVACY_LAST_UPDATED,
+  REGISTERED_ADDRESS, SUPPORT_EMAIL, supportMailto,
 } from "../lib/companyInfo";
 
 /**
@@ -49,7 +47,7 @@ export type LegalDocumentKey = "terms" | "privacy";
 export type LegalBlock =
   | { kind: "p"; runs: CopyRun[] }
   | { kind: "list"; items: CopyRun[][] }
-  | { kind: "callout"; runs: CopyRun[] };
+  | { kind: "callout"; runs: CopyRun[]; tone?: "navy" };
 
 export interface LegalSection {
   heading: string;
@@ -65,12 +63,17 @@ export interface LegalDocument {
   draftBody: string;
   /** The plain-English summary above the numbered sections. */
   lede: string;
+  /** Privacy only (privacy page v1): "The short version" as ticks, drawn in place of the lede. */
+  shortVersion?: string[];
+  /** Privacy only: true = no working-draft ribbon, whatever `LEGAL_COPY_REVIEWED` says. */
+  ribbonOff?: boolean;
   sections: LegalSection[];
 }
 
 const p = (...runs: CopyRun[]): LegalBlock => ({ kind: "p", runs });
 const list = (...items: CopyRun[][]): LegalBlock => ({ kind: "list", items });
 const callout = (...runs: CopyRun[]): LegalBlock => ({ kind: "callout", runs });
+const navyCallout = (...runs: CopyRun[]): LegalBlock => ({ kind: "callout", runs, tone: "navy" });
 
 const privacyLink = (label = "privacy policy"): CopyRun => ({ link: label, to: "privacy" });
 const supportLink = (subject?: string): CopyRun => ({
@@ -79,27 +82,31 @@ const supportLink = (subject?: string): CopyRun => ({
 });
 
 export const LEGAL_DOCUMENTS: Record<LegalDocumentKey, LegalDocument> = {
+  /* ⚠️ PRIVACY PAGE v1 (2 Nov; ref design-refs/privacy-v1.html). No bracketed placeholder renders on
+     /privacy and it carries no working-draft ribbon (PRIV-1). The entity, address and ICO placeholders
+     are not read here any more; the Terms still read the first two. */
   privacy: {
     documentTitle: "Privacy Policy — QueryHawk",
-    eyebrow: "Legal · Privacy",
-    title: "Privacy Policy",
-    lastUpdated: LEGAL_LAST_UPDATED,
-    draftBody:
-      "This policy is a working draft and has not yet been legally reviewed. Bracketed items are " +
-      "pending confirmation.",
-    lede:
-      "The short version: your querying records and your writing belong to you. We collect only " +
-      "what the app needs to work, we don't sell it, we don't run advertising, and nothing you " +
-      "store is used to train AI models.",
+    eyebrow: "",
+    title: "Privacy",
+    lastUpdated: PRIVACY_LAST_UPDATED,
+    draftBody: "",
+    lede: "",
+    shortVersion: [
+      "Your querying records and your writing belong to you.",
+      "We collect only what the app needs to work.",
+      "We don't sell it, and we don't run advertising.",
+      "AI only does the admin. It never writes for you, and nothing you store trains it.",
+    ],
+    ribbonOff: true,
     sections: [
       {
         heading: "Who we are",
         blocks: [
           p(
-            "QueryHawk is operated by ", { b: LEGAL_ENTITY_NAME }, " of ", { b: REGISTERED_ADDRESS },
-            ", United Kingdom (\"we\", \"us\"). We are the data controller for the personal data " +
-            "described in this policy. You can reach us at ", supportLink("Privacy"), ". ",
-            ICO_REGISTRATION_NOTE,
+            "QueryHawk is run by ", { b: "Nick" }, ", an aspiring writer in London, UK, with a background " +
+            "in using data to tell stories (\"we\", \"us\"). We are the data controller for the " +
+            "personal data described in this policy, and you can reach us at ", supportLink("Privacy"), ".",
           ),
         ],
       },
@@ -133,24 +140,37 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentKey, LegalDocument> = {
           ),
         ],
       },
+      /* ⚠️ §4 STAYS §4: the Terms' "section 4 of the privacy policy" points here. Each bullet was
+         checked against the code (2 Nov): Smart Import (functions/src/smartImport.ts), the email drop
+         (emailImport.ts, writes nothing until accepted), comps (suggestComps.ts, reads the
+         manuscript's details) and agent details (assistAgentData.ts, public facts with their sources;
+         switched off behind ASSIST_LIVE, listed because the page describes the product). Smart Import
+         accepts spreadsheets only today; "or notes" is kept at Nick's ruling. */
       {
-        heading: "Smart Import and AI processing",
+        heading: "How we use AI",
         blocks: [
-          p(
-            "When you use Smart Import, the contents of the file you upload are transmitted to ",
-            { b: "Anthropic" },
-            " (the maker of the Claude AI models), which processes them on our behalf to extract " +
-            "your agents and queries into structured records. This happens only when you actively " +
-            "run an import — never in the background.",
+          navyCallout(
+            { b: "AI does the admin, never the art." },
+            " QueryHawk uses AI models only for menial, behind-the-scenes tasks: reading and sorting " +
+            "information you give it, so you don't have to retype it. It never writes your query " +
+            "letters, synopses or pages, never edits your work, and never creates or designs anything for you.",
+          ),
+          p("AI is used only when you run one of these features, never in the background:"),
+          list(
+            [{ b: "Smart Import" }, " — reads the spreadsheet or notes you upload and turns them into your agents and queries."],
+            [{ b: "Smart Email Drop" }, " — reads an email you paste in and suggests the updates to make. Nothing changes until you accept them."],
+            [{ b: "Comparable title suggestions" }, " — looks at the details you've entered about your manuscript and suggests published titles you might compare it to."],
+            [{ b: "Finding agent details" }, " — looks up an agent's public submission information and shows you where each detail came from, for you to check."],
           ),
           p(
-            "Under the commercial API terms we use, Anthropic does not use this data to train its " +
-            "models. The extracted records are stored in your account; the processing itself is " +
-            "transient.",
+            "These tasks are processed on our behalf by ", { b: "Anthropic" },
+            " (the maker of the Claude AI models). Under the commercial terms we use, Anthropic does " +
+            "not use this data to train its models. The results are stored in your account; the " +
+            "processing itself is transient.",
           ),
           callout(
-            "Your manuscripts, pitches, and notes stored in QueryHawk are ", { b: "not" },
-            " sent to any AI service unless you explicitly run a feature that says so on its face.",
+            "Your manuscripts, pitches and notes stored in QueryHawk are ", { b: "not" },
+            " sent to any AI service unless you run one of the features above.",
           ),
         ],
       },
@@ -172,9 +192,9 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentKey, LegalDocument> = {
           p(
             "QueryHawk uses only what's strictly necessary to work: authentication tokens that " +
             "keep you signed in, and local storage that remembers interface preferences (like a " +
-            "collapsed sidebar) on your own device. There are no advertising cookies, no " +
-            "cross-site trackers, and no third-party analytics — which is why you won't find a " +
-            "cookie banner here.",
+            "collapsed sidebar) on your own device. There are no advertising cookies and no " +
+            "cross-site trackers, which is why you won't find a cookie banner here. We count " +
+            "visits with Cloudflare Web Analytics, which doesn't use cookies or track you across sites.",
           ),
           p(
             "When you join the founding writers' waiting list, we note which link brought you " +
@@ -191,14 +211,8 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentKey, LegalDocument> = {
             "your data is deleted from our systems within ", { b: String(DELETION_WINDOW_DAYS) },
             " days, allowing for backup cycles.",
           ),
-          /* ⚠️ THE WAITLIST SENTENCE WAS CORRECTED TO MATCH THE JOB, NOT THE OTHER WAY ROUND. It
-             promised deletion "once launch invitations have gone out or on request, whichever is
-             sooner" — vague, unenforced, and not what any code did. `waitlistRetention` now deletes
-             on a stated schedule, so the page states that schedule.
-             ⚠️ AND THE TWO PERIODS HERE ARE DIFFERENT PROMISES ABOUT DIFFERENT THINGS. The 30 days
-             above is the window after ACCOUNT deletion; the 24 months below is how long a waitlist
-             entry survives without contact. Collapsing them into one number makes one of them
-             false. */
+          /* ⚠️ THE 30 DAYS ABOVE (after ACCOUNT deletion) AND THE 24 MONTHS BELOW (an untouched waitlist
+             entry) ARE DIFFERENT PROMISES ABOUT DIFFERENT THINGS; `waitlistRetention` enforces the second. */
           p(
             "If you join the founding writers' list we keep your email address, the page you signed " +
             "up from, and a one-way hash of your IP address — we never store the address itself. We " +
@@ -209,8 +223,8 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentKey, LegalDocument> = {
             "You can leave at any time using the unsubscribe link in any of those emails. It takes " +
             "effect immediately and frees your founding place. We also delete a waitlist entry " +
             "automatically ", { b: "24 months" }, " after we last heard from you, and within ",
-            { b: "30 days" }, " of you unsubscribing. If you would rather we removed you sooner, ",
-            { link: "write to us", to: "contact" }, " and we will.",
+            { b: "30 days" }, " of you unsubscribing. If you would rather we removed you sooner, email ",
+            supportLink("Privacy"), " and we will.",
           ),
         ],
       },

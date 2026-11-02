@@ -57,7 +57,7 @@ const LINES: Partial<Record<Kind, string>> = {
 const MUTATIONS: Record<string, string | ((page: Page) => Promise<unknown>)> = {
   WEL1: ".mk-wpass-tx small{text-transform:uppercase!important}",
   WEL1b: async (page) => page.evaluate(() => { const h = document.querySelector(".mk-wel-h1")!; h.textContent = h.textContent!.replace("founding writer", "Founding Writer").replace("in line", "reserve"); }),
-  WEL2: async (page) => page.evaluate(() => { const a = document.createElement("a"); a.href = "/about"; a.textContent = "About"; document.querySelector(".mk-foot--welcome p")!.append(" · ", a); }),
+  WEL2: async (page) => page.evaluate(() => { const a = document.createElement("a"); a.href = "/about"; a.textContent = "About"; document.querySelector(".mk-foot--bare p")!.append(" · ", a); }),
   WEL2b: async (page) => page.evaluate(() => { const d = document.querySelector(".mk-nav .mk-brand")!; const b = document.createElement("button"); b.className = "mk-brand-link"; b.textContent = "Home"; d.append(b); }),
   WEL3: async (page) => page.evaluate(() => { const b = document.querySelector('[data-probe="pass-big"]'); if (b) b.textContent = "No. 15"; }),
   WEL4: ".mk-wpass-bird{right:-40px!important;bottom:-14px!important;width:230px!important}",

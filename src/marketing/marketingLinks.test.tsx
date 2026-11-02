@@ -77,6 +77,14 @@ describe("the shared footer offers all five, on every public page", () => {
         <MarketingShell user={null} onNavigate={noNavigate} path={name}>{node()}</MarketingShell>, name);
       /* RE-POINTED (waitlist v1, 31 Oct): "/" is the waiting-list page, which links nowhere but
          Privacy — its footer is the waitlist variant and carries no other destination. */
+      /* RE-POINTED (privacy page v1, 2 Nov): /privacy is a dead end like /welcome — the bare footer, and its
+         "Privacy" is plain text there, so it carries no destination at all. */
+      if (name === "/privacy") {
+        expect(html.match(/class="mk-foot mk-foot--bare"/g) ?? [], "exactly one footer").toHaveLength(1);
+        for (const [label] of PUBLIC_DESTINATIONS) expect(html).not.toContain(`>${label}</button>`);
+        expect(html).toContain('<span aria-current="page">Privacy</span>');
+        return;
+      }
       if (name === "/") {
         expect(html.match(/class="mk-foot mk-foot--wl"/g) ?? [], "exactly one footer").toHaveLength(1);
         expect(html).toContain(">Privacy</button>");

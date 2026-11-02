@@ -18,8 +18,9 @@
  * the comps suggester. The section is not trimmable.
  */
 
-import React from "react";
+import React, { useEffect } from "react";
 import { LEGAL_DOCUMENTS, LEGAL_COPY_REVIEWED, DRAFT_TAG, LegalDocumentKey, LegalBlock } from "./legalCopy";
+import "./privacy.css";
 import { DocumentShell } from "./DocumentShell";
 import { LegalPlate } from "./marketingMarks";
 import { Runs } from "./CopyRuns";
@@ -37,6 +38,9 @@ const Block: React.FC<{ block: LegalBlock; onNavigate: Nav }> = ({ block, onNavi
       </ul>
     );
   }
+  if (block.kind === "callout" && block.tone === "navy") {
+    return <div className="mk-pv-callout mk-pv-callout--navy"><p><Runs runs={block.runs} onNavigate={onNavigate} /></p></div>;
+  }
   if (block.kind === "callout") {
     return (
       <div className="mk-callout">
@@ -48,7 +52,81 @@ const Block: React.FC<{ block: LegalBlock; onNavigate: Nav }> = ({ block, onNavi
   return <p><Runs runs={block.runs} onNavigate={onNavigate} /></p>;
 };
 
+/** The rust ring-and-tick the landing page's lists use, here in blush on navy. */
+const Tick: React.FC = () => (
+  <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true" focusable="false">
+    <circle cx="10" cy="10" r="8" fill="none" stroke="#e8b4a3" strokeWidth="1.6" />
+    <path d="M6.2 10.3 8.8 12.8 13.8 7.6" fill="none" stroke="#e8b4a3" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+/** "1. Who we are" → the section's anchor id. */
+export const privacySectionId = (i: number) => `priv-s${i + 1}`;
+
+/**
+ * /privacy — privacy page v1 (2 Nov; ref design-refs/privacy-v1.html): the landing page's navy drawer
+ * with the title, the date and "The short version", then a cream body with the contents beside
+ * numbered sections. The words are `legalCopy.ts`'s; the bar and footer are the shell's bare mode.
+ * ⚠️ NO BRACKETED PLACEHOLDER AND NO WORKING-DRAFT RIBBON (PRIV-1); the only links are mailto,
+ * ico.org.uk and the contents' own anchors (PRIV-2).
+ */
+const PrivacyView: React.FC<{ onNavigate: Nav }> = ({ onNavigate }) => {
+  const d = LEGAL_DOCUMENTS.privacy;
+  useEffect(() => {
+    const prev = document.title;
+    document.title = d.documentTitle;
+    return () => { document.title = prev; };
+  }, [d.documentTitle]);
+  /* The contents scroll smoothly to each section, and the address keeps the anchor. */
+  const go = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    e.preventDefault();
+    el.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+    history.replaceState(null, "", `#${id}`);
+  };
+  return (
+    <div className="mk-pv" data-privacy>
+      <header className="mk-pv-hero">
+        <div className="mk-pv-in">
+          <h1 className="mk-pv-h1">{d.title}</h1>
+          <p className="mk-pv-upd">Last updated {d.lastUpdated}</p>
+          {d.shortVersion && (
+            <section className="mk-pv-short" aria-labelledby="mk-pv-short-h">
+              <h2 className="mk-pv-shorth" id="mk-pv-short-h">The short version</h2>
+              <ul>{d.shortVersion.map((t) => <li key={t}><Tick /><span>{t}</span></li>)}</ul>
+            </section>
+          )}
+        </div>
+      </header>
+      <div className="mk-pv-body">
+        <div className="mk-pv-in mk-pv-grid">
+          <nav className="mk-pv-toc" aria-labelledby="mk-pv-toc-h">
+            <h2 className="mk-pv-toch" id="mk-pv-toc-h">On this page</h2>
+            <ol>
+              {d.sections.map((s, i) => (
+                <li key={s.heading}>
+                  <a href={`#${privacySectionId(i)}`} onClick={(e) => go(e, privacySectionId(i))}>{i + 1}. {s.heading}</a>
+                </li>
+              ))}
+            </ol>
+          </nav>
+          <div className="mk-pv-doc">
+            {d.sections.map((s, i) => (
+              <section className="mk-pv-sec" id={privacySectionId(i)} key={s.heading}>
+                <h2 className="mk-pv-h2"><span className="mk-pv-n">{i + 1}</span>{s.heading}</h2>
+                {s.blocks.map((block, j) => <Block key={j} block={block} onNavigate={onNavigate} />)}
+              </section>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export const LegalPage: React.FC<{ doc: LegalDocumentKey; onNavigate: Nav }> = ({ doc, onNavigate }) => {
+  if (doc === "privacy") return <PrivacyView onNavigate={onNavigate} />;
   const document_ = LEGAL_DOCUMENTS[doc];
 
   return (

@@ -1,0 +1,98 @@
+/*
+ * /privacy — privacy page v1 (2 Nov; ref design-refs/privacy-v1.html): the landing page's navy drawer
+ * with the title, the date and "The short version", then a cream body with the contents beside the
+ * numbered sections. The bar and footer are MarketingShell's bare mode.
+ *
+ * ⚠️ NO FACE IS NAMED HERE: the typewriter, serif and sans are READ from the tier's tokens.
+ * ⚠️ `brand.tsx` forces h1–h3, so the page's headings carry two classes and `!important`.
+ * ⚠️ NO SMALL CAPITALS.
+ */
+
+.mk-pv {
+  --pv-navy: #1b2433; --pv-navy2: #2a3a52; --pv-blush: #e8b4a3; --pv-rust: #a2452a;
+  --pv-ink: #1c130f; --pv-body: rgba(28, 19, 15, .85); --pv-cream: #fbf6ef;
+  background: var(--pv-cream); color: var(--pv-ink); font: 400 16px/1.55 var(--mk-f-serif);
+}
+/* The drawer runs on from the navy bar, and the page's ground is the body's cream to the footer. */
+.mk-sheet:has(.mk-pv) { border-top-left-radius: 0; border-top-right-radius: 0; background-color: #fbf6ef; }
+
+.mk-pv-in { max-width: 1120px; margin: 0 auto; padding: 0 64px; box-sizing: border-box; }
+
+/* ── The drawer ── */
+.mk-pv-hero {
+  position: relative; z-index: 2; background: var(--pv-navy); color: #fff; padding: 50px 0 60px;
+  border-radius: 0 0 36px 36px; box-shadow: 0 18px 34px -16px rgba(27, 36, 51, .55);
+}
+.mk-pv .mk-pv-h1 {
+  margin: 0; font-family: var(--mk-f-display) !important; font-weight: 400 !important; letter-spacing: 0 !important;
+  font-size: 64px !important; line-height: 1.1 !important; color: #fff;
+}
+.mk-pv-upd { margin: 12px 0 30px; font: 400 15px/1.4 var(--mk-f-sans); color: rgba(255, 255, 255, .6); }
+.mk-pv-short {
+  max-width: 760px; box-sizing: border-box; padding: 24px 28px; border-radius: 20px;
+  background: rgba(255, 255, 255, .06); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .14);
+}
+.mk-pv .mk-pv-shorth {
+  margin: 0 0 10px; font-family: var(--mk-f-display) !important; font-weight: 400 !important; letter-spacing: 0 !important;
+  font-size: 22px !important; line-height: 1.3 !important; color: var(--pv-blush);
+}
+.mk-pv-short ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px 28px; }
+.mk-pv-short li { display: flex; gap: 10px; font: 400 17px/1.45 var(--mk-f-serif); color: #fff; }
+.mk-pv-short li span { font: inherit; color: inherit; }
+.mk-pv-short svg { flex: none; margin-top: 2px; }
+
+/* ── The body: the contents beside the sections ── */
+.mk-pv-body { margin-top: -36px; padding: 90px 0 70px; }
+.mk-pv-grid { display: grid; grid-template-columns: 250px 1fr; gap: 64px; align-items: start; }
+.mk-pv-toc { position: sticky; top: calc(var(--mk-nav-h, 72px) + 20px); }
+.mk-pv .mk-pv-toch {
+  margin: 0 0 12px; font-family: var(--mk-f-display) !important; font-weight: 400 !important; letter-spacing: 0 !important;
+  font-size: 18px !important; line-height: 1.3 !important; color: var(--pv-ink);
+}
+.mk-pv-toc ol { list-style: none; margin: 0; padding: 0; border-left: 2px solid rgba(42, 58, 82, .15); }
+.mk-pv-toc a {
+  display: block; margin-left: -2px; padding: 6px 0 6px 14px; border-left: 2px solid transparent;
+  font: 400 15px/1.4 var(--mk-f-sans); color: rgba(28, 19, 15, .72); text-decoration: none;
+}
+.mk-pv-toc a:hover { color: var(--pv-ink); border-left-color: var(--pv-navy2); }
+.mk-pv-toc a:focus-visible { outline: 2px solid var(--pv-navy2); outline-offset: 2px; }
+
+.mk-pv-doc { max-width: 700px; min-width: 0; }
+.mk-pv-sec { padding: 0 0 34px; margin: 0 0 34px; border-bottom: 1px solid rgba(28, 19, 15, .1); scroll-margin-top: calc(var(--mk-nav-h, 72px) + 20px); }
+.mk-pv-sec:last-child { border-bottom: 0; margin-bottom: 0; }
+.mk-pv .mk-pv-h2 {
+  display: flex; gap: 14px; align-items: baseline; margin: 0 0 16px;
+  font-family: var(--mk-f-display) !important; font-weight: 400 !important; letter-spacing: 0 !important;
+  font-size: 28px !important; line-height: 1.25 !important; color: var(--pv-ink);
+}
+.mk-pv-n { min-width: 22px; font: 400 18px/1 var(--mk-f-display); color: var(--pv-rust); }
+.mk-pv-sec p { margin: 0 0 14px; font: 400 17.5px/1.7 var(--mk-f-serif); color: var(--pv-body); }
+.mk-pv-sec ul { list-style: none; margin: 0 0 14px; padding: 0; }
+.mk-pv-sec li { position: relative; margin: 0 0 10px; padding-left: 20px; font: 400 17px/1.6 var(--mk-f-serif); color: var(--pv-body); }
+.mk-pv-sec li::before { content: ""; position: absolute; left: 2px; top: .62em; width: 7px; height: 7px; border-radius: 50%; background: var(--pv-blush); }
+.mk-pv-sec a { color: var(--pv-navy2); text-decoration: underline; text-underline-offset: 2px; }
+.mk-pv-sec strong { font-weight: 700; color: var(--pv-ink); }
+/* Callouts: a blush panel; the AI section's first is navy with the blush lead phrase. */
+.mk-pv .mk-callout { display: block; margin: 0 0 14px; padding: 16px 18px; border: 0; border-radius: 14px; background: #f7ece6; }
+.mk-pv .mk-callout .mk-corule { display: none; }
+.mk-pv .mk-callout p, .mk-pv-callout p { margin: 0; font: 400 17px/1.6 var(--mk-f-serif); color: var(--pv-ink); }
+.mk-pv-callout--navy { margin: 0 0 18px; padding: 16px 18px; border-radius: 14px; background: var(--pv-navy); }
+.mk-pv .mk-pv-callout--navy p { color: #fff; }
+.mk-pv .mk-pv-callout--navy strong { color: var(--pv-blush); }
+
+/* ── Phones: one column, the contents as a white card above the sections ── */
+@media (max-width: 760px) {
+  .mk-pv-in { padding: 0 22px; }
+  .mk-pv-hero { padding: 30px 0 40px; border-radius: 0 0 28px 28px; }
+  .mk-pv .mk-pv-h1 { font-size: 46px !important; }
+  .mk-pv-upd { margin: 10px 0 22px; }
+  .mk-pv-short { padding: 18px; }
+  .mk-pv-short ul { grid-template-columns: 1fr; }
+  .mk-pv-short li { font-size: 16px; }
+  .mk-pv-body { padding: 70px 0 50px; }
+  .mk-pv-grid { grid-template-columns: 1fr; gap: 26px; }
+  .mk-pv-toc { position: static; padding: 16px 18px; border-radius: 16px; background: #fff; }
+  .mk-pv-toc a { font-size: 14.5px; padding: 5px 0 5px 12px; }
+  .mk-pv .mk-pv-h2 { font-size: 23px !important; }
+  .mk-pv-sec p, .mk-pv-sec li, .mk-pv .mk-callout p, .mk-pv-callout p { font-size: 16px; }
+}
