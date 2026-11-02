@@ -28,6 +28,7 @@
  * card, the To-do type preferences, and the seeded task. Every id goes in a restore file; `--clean`
  * touches exactly those and nothing else.
  */
+import { targetEnv, TARGET_PROJECT } from "./fsTarget.mjs";
 import { readFileSync, existsSync, writeFileSync, rmSync, mkdirSync } from "node:fs";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
@@ -41,9 +42,9 @@ import type { Activity, Agent, Query } from "../../src/types";
 const env = (f: string) => Object.fromEntries(readFileSync(f, "utf8").split("\n").map((l) => l.trim())
   .filter((l) => l && !l.startsWith("#"))
   .map((l) => { const i = l.indexOf("="); return [l.slice(0, i), l.slice(i + 1).replace(/^["']|["']$/g, "")]; }));
-const dev = env(".env.development");
+const dev = targetEnv();
 const local = existsSync(".env.local") ? env(".env.local") : {};
-if (dev.VITE_FIREBASE_PROJECT_ID !== "scriptally-dev") throw new Error("dev only");
+if (dev.VITE_FIREBASE_PROJECT_ID !== TARGET_PROJECT) throw new Error("dev only");
 
 const arg = process.argv.slice(2).join(" ");
 const SHAPE = /--shape=a/.test(arg) ? "a" : /--shape=b/.test(arg) ? "b" : null;

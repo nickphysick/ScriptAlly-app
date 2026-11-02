@@ -79,10 +79,17 @@ async function servesBuiltBundle(base: string): Promise<boolean> {
 
 export async function assertLocalBundleIsDev(): Promise<void> {
   const base = process.env.SA_E2E_BASE_URL ?? "";
-  if (!/^https?:\/\/(localhost|127\.0\.0\.1)/.test(base)) return;
+  const live = process.env.ALLOW_LIVE_FIRESTORE === "1";
+  /* ⚠️ THE LIVE GUARD. A remote site reads live Firestore; refused without the opt-in (the config
+     refuses it first — this is the second lock, for anything that reaches here another way). */
+  if (!/^https?:\/\/(localhost|127\.0\.0\.1)/.test(base)) {
+    if (!live) throw new Error(`${base || "(no base)"} reads live Firestore. Use \`npm run e2e:emu\`, or set ALLOW_LIVE_FIRESTORE=1.`);
+    return;
+  }
   if (!(await servesBuiltBundle(base))) return;
-  const dir = resolve(process.cwd(), "dist/assets");
-  if (!existsSync(dir)) throw new Error(`No dist/ to serve. Run \`npm run build:dev\` first.`);
+  const distDir = process.env.SA_E2E_DIST || "dist";
+  const dir = resolve(process.cwd(), distDir, "assets");
+  if (!existsSync(dir)) throw new Error(`No ${distDir}/ to serve. Run \`npm run e2e:emu\` (or \`npm run build:dev\` for a live run).`);
   const js = readdirSync(dir).filter((f) => f.endsWith(".js"));
   const bundle = js.map((f) => readFileSync(resolve(dir, f), "utf8")).join("");
   if (bundle.includes(PROD_PROJECT_ID)) {
@@ -104,6 +111,15 @@ export async function assertLocalBundleIsDev(): Promise<void> {
    * The newest source file against the newest bundle settles it. Anything under `src/` counts,
    * because anything under `src/` reaches the bundle.
    */
+  /* ⚠️ AND A LOCAL BUNDLE BUILT FOR scriptally-dev STILL READS LIVE FIRESTORE. Only an emulator-mode
+     bundle (it carries the demo- project id) is free to measure. */
+  if (!bundle.includes(EMULATOR_PROJECT_ID) && !live) {
+    throw new Error(
+      `dist/ is not an emulator build (no ${EMULATOR_PROJECT_ID} in it), so ${base} would read live ` +
+      `Firestore. Run \`npm run e2e:emu\`, or set ALLOW_LIVE_FIRESTORE=1 for a live run.`,
+    );
+  }
+
   const newest = (root: string): number => {
     let t = 0;
     for (const e of readdirSync(root, { withFileTypes: true })) {
@@ -126,3 +142,4 @@ export async function assertLocalBundleIsDev(): Promise<void> {
 
 /** The prod project id, the one string that must never appear in a locally-served bundle. */
 const PROD_PROJECT_ID = "gen-lang-client-0801391782";
+const EMULATOR_PROJECT_ID = "demo-scriptally";

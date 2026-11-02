@@ -13,6 +13,7 @@
  *
  * ⚠️ DEV ONLY, AND IT REFUSES ANYTHING ELSE — same guard and same auth path as rulesProbe.mjs.
  */
+import { targetEnv, TARGET_PROJECT } from "./fsTarget.mjs";
 import { readFileSync, existsSync } from "node:fs";
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
@@ -28,10 +29,10 @@ let cached: { db: Firestore; uid: string } | null = null;
 
 export async function devDb(): Promise<{ db: Firestore; uid: string }> {
   if (cached) return cached;
-  const dev = envFile(".env.development");
+  const dev = targetEnv();
   const local = existsSync(".env.local") ? envFile(".env.local") : {};
   const project = dev.VITE_FIREBASE_PROJECT_ID;
-  if (project !== "scriptally-dev") throw new Error(`Refusing to write to "${project}".`);
+  if (project !== TARGET_PROJECT) throw new Error(`Refusing to write to "${project}".`);
   const password = process.env.SA_E2E_PASSWORD ?? local.SA_E2E_PASSWORD;
   if (!password) throw new Error("No SA_E2E_PASSWORD in .env.local");
 

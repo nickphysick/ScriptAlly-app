@@ -17,6 +17,7 @@
  */
 import { createRequire } from "node:module";
 import { planFoundingBackfill } from "./foundingBackfillPlan.mjs";
+import { requireLiveOptIn } from "../tests/e2e/fsTarget.mjs";
 
 const require = createRequire(new URL("../functions/package.json", import.meta.url));
 const admin = require("firebase-admin");
@@ -31,6 +32,7 @@ if (!project || !database) {
   process.exit(2);
 }
 
+requireLiveOptIn(project);
 const app = admin.initializeApp({ projectId: project });
 const db = database === "(default)" ? getFirestore(app) : getFirestore(app, database);
 const ms = (v) => (v && typeof v.toMillis === "function" ? v.toMillis() : v instanceof Date ? v.getTime() : null);

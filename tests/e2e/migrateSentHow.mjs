@@ -26,6 +26,7 @@
  * carrying a snapshot (`sentMaterials`) and no package to `'individual'`, backing up the value it
  * REPLACED; `--revert` puts it back. Dry run unless `--apply` is passed too.
  */
+import { targetEnv, TARGET_PROJECT } from "./fsTarget.mjs";
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
@@ -36,10 +37,10 @@ const env = (file) => Object.fromEntries(
     .map((l) => l.trim()).filter((l) => l && !l.startsWith("#"))
     .map((l) => { const i = l.indexOf("="); return [l.slice(0, i), l.slice(i + 1).replace(/^["']|["']$/g, "")]; }),
 );
-const dev = env(".env.development");
+const dev = targetEnv();
 const local = existsSync(".env.local") ? env(".env.local") : {};
 const PROJECT = dev.VITE_FIREBASE_PROJECT_ID;
-if (PROJECT !== "scriptally-dev") throw new Error(`Refusing to touch "${PROJECT}".`);
+if (PROJECT !== TARGET_PROJECT) throw new Error(`Refusing to touch "${PROJECT}".`);
 const PASSWORD = process.env.SA_E2E_PASSWORD ?? local.SA_E2E_PASSWORD;
 if (!PASSWORD) throw new Error("No SA_E2E_PASSWORD in .env.local");
 

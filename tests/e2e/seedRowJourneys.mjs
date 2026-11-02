@@ -26,6 +26,7 @@
  *   node tests/e2e/seedRowJourneys.mjs           seed
  *   node tests/e2e/seedRowJourneys.mjs --clean   remove
  */
+import { targetEnv, TARGET_PROJECT } from "./fsTarget.mjs";
 import { readFileSync, existsSync } from "node:fs";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
@@ -34,9 +35,9 @@ import { getFirestore, doc, setDoc, deleteDoc, collection, getDocs } from "fireb
 const env = (f) => Object.fromEntries(readFileSync(f, "utf8").split("\n")
   .filter((l) => l.includes("=") && !l.trim().startsWith("#"))
   .map((l) => [l.slice(0, l.indexOf("=")).trim(), l.slice(l.indexOf("=") + 1).trim()]));
-const dev = env(".env.development");
+const dev = targetEnv();
 const local = existsSync(".env.local") ? env(".env.local") : {};
-if (dev.VITE_FIREBASE_PROJECT_ID !== "scriptally-dev") {
+if (dev.VITE_FIREBASE_PROJECT_ID !== TARGET_PROJECT) {
   throw new Error(`refusing: projectId is ${dev.VITE_FIREBASE_PROJECT_ID}, not scriptally-dev`);
 }
 const app = initializeApp({

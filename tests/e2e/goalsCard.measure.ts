@@ -17,6 +17,7 @@
  * ⚠️ THE TARGETS ARE DERIVED FROM THE ACCOUNT'S OWN COUNT, read off the unset card. Hard-coding a
  * target would produce state B on a quiet account and state C on a busy one, silently.
  */
+import { targetEnv, TARGET_PROJECT } from "./fsTarget.mjs";
 import { expect, test } from "@playwright/test";
 import { readFileSync, existsSync } from "node:fs";
 import { initializeApp } from "firebase/app";
@@ -30,9 +31,9 @@ const env = (file: string) => Object.fromEntries(
     .filter((l) => l && !l.startsWith("#"))
     .map((l) => { const i = l.indexOf("="); return [l.slice(0, i), l.slice(i + 1).replace(/^["']|["']$/g, "")]; }),
 ) as Record<string, string>;
-const dev = env(".env.development");
+const dev = targetEnv();
 const local = existsSync(".env.local") ? env(".env.local") : {};
-if (dev.VITE_FIREBASE_PROJECT_ID !== "scriptally-dev") throw new Error("Refusing to seed anything but dev.");
+if (dev.VITE_FIREBASE_PROJECT_ID !== TARGET_PROJECT) throw new Error("Refusing to seed anything but dev.");
 
 const app = initializeApp({
   apiKey: dev.VITE_FIREBASE_API_KEY, authDomain: dev.VITE_FIREBASE_AUTH_DOMAIN,

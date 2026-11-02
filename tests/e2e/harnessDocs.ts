@@ -9,6 +9,7 @@
  * Playwright tests run in Node, so this signs in with the same harness credentials the browser uses
  * and reads Firestore directly. It never writes.
  */
+import { targetEnv, TARGET_PROJECT } from "./fsTarget.mjs";
 import { readFileSync, existsSync } from "node:fs";
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
@@ -24,10 +25,10 @@ let cached: { db: any; uid: string } | null = null;
 
 export async function harnessDb(): Promise<{ db: any; uid: string }> {
   if (cached) return cached;
-  const dev = env(".env.development");
+  const dev = targetEnv();
   const local = existsSync(".env.local") ? env(".env.local") : {};
   const PROJECT = dev.VITE_FIREBASE_PROJECT_ID;
-  if (PROJECT !== "scriptally-dev") throw new Error(`Refusing to read "${PROJECT}".`);
+  if (PROJECT !== TARGET_PROJECT) throw new Error(`Refusing to read "${PROJECT}".`);
   const password = process.env.SA_E2E_PASSWORD ?? local.SA_E2E_PASSWORD;
   if (!password) throw new Error("No SA_E2E_PASSWORD in .env.local");
 

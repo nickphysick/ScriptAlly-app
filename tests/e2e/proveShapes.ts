@@ -16,6 +16,7 @@
  *   npx tsx tests/e2e/proveShapes.ts a
  *   npx tsx tests/e2e/proveShapes.ts b
  */
+import { targetEnv, TARGET_PROJECT } from "./fsTarget.mjs";
 import { readFileSync, existsSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { initializeApp } from "firebase/app";
@@ -25,9 +26,9 @@ import { getFirestore, getDocs, collection } from "firebase/firestore";
 const env = (f: string) => Object.fromEntries(readFileSync(f, "utf8").split("\n").map((l) => l.trim())
   .filter((l) => l && !l.startsWith("#"))
   .map((l) => { const i = l.indexOf("="); return [l.slice(0, i), l.slice(i + 1).replace(/^["']|["']$/g, "")]; }));
-const dev = env(".env.development");
+const dev = targetEnv();
 const local = existsSync(".env.local") ? env(".env.local") : {};
-if (dev.VITE_FIREBASE_PROJECT_ID !== "scriptally-dev") throw new Error("dev only");
+if (dev.VITE_FIREBASE_PROJECT_ID !== TARGET_PROJECT) throw new Error("dev only");
 
 const SHAPE = process.argv[2];
 if (SHAPE !== "a" && SHAPE !== "b") throw new Error("pass a or b");

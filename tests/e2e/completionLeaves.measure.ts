@@ -16,6 +16,7 @@
  * ⚠️ NO BACKTICKS OR REGEX LITERALS INSIDE ANY page.evaluate TEMPLATE. The runner refuses a run
  * under 15 assertions — silence is not a pass.
  */
+import { targetEnv, TARGET_PROJECT } from "./fsTarget.mjs";
 import { test, expect } from "@playwright/test";
 import { readFileSync, existsSync, writeFileSync, rmSync } from "node:fs";
 import { ensureSignedIn, liftMotionSuppression } from "./measure";
@@ -43,9 +44,9 @@ test("completion holds through the window, then the row leaves and the sheet mov
   const add = (id: string, ok: boolean, note = "") => out.push({ id, ok, note });
 
   /* ── the fixture: one task this run owns outright ─────────────────────────────────────── */
-  const dev = env(".env.development");
+  const dev = targetEnv();
   const local = existsSync(".env.local") ? env(".env.local") : {};
-  if (dev.VITE_FIREBASE_PROJECT_ID !== "scriptally-dev") throw new Error("dev only");
+  if (dev.VITE_FIREBASE_PROJECT_ID !== TARGET_PROJECT) throw new Error("dev only");
   const app = initializeApp({
     apiKey: dev.VITE_FIREBASE_API_KEY, authDomain: dev.VITE_FIREBASE_AUTH_DOMAIN,
     projectId: dev.VITE_FIREBASE_PROJECT_ID, storageBucket: dev.VITE_FIREBASE_STORAGE_BUCKET,

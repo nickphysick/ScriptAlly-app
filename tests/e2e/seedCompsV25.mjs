@@ -19,6 +19,7 @@
  *   --variant light            a fourth letter, v1b (Apr), recorded [Nine Miles Out], carrying queries 13 and 14,
  *                              so a comp has gone out with fewer than five queries (CX28 D1's hollow dot)
  */
+import { targetEnv, TARGET_PROJECT } from "./fsTarget.mjs";
 import { readFileSync, existsSync } from "node:fs";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
@@ -28,10 +29,10 @@ const env = (file) => Object.fromEntries(
   readFileSync(file, "utf8").split("\n").map((l) => l.trim()).filter((l) => l && !l.startsWith("#"))
     .map((l) => { const i = l.indexOf("="); return [l.slice(0, i), l.slice(i + 1).replace(/^["']|["']$/g, "")]; }),
 );
-const dev = env(".env.development");
+const dev = targetEnv();
 const local = existsSync(".env.local") ? env(".env.local") : {};
 const PROJECT = dev.VITE_FIREBASE_PROJECT_ID;
-if (PROJECT !== "scriptally-dev") throw new Error(`Refusing to seed "${PROJECT}" — this script is for scriptally-dev only.`);
+if (PROJECT !== TARGET_PROJECT) throw new Error(`Refusing to seed "${PROJECT}" — this script is for scriptally-dev only.`);
 const PASSWORD = process.env.SA_E2E_PASSWORD ?? local.SA_E2E_PASSWORD;
 if (!PASSWORD) throw new Error("No SA_E2E_PASSWORD in .env.local");
 const app = initializeApp({ apiKey: dev.VITE_FIREBASE_API_KEY, authDomain: dev.VITE_FIREBASE_AUTH_DOMAIN, projectId: PROJECT, appId: dev.VITE_FIREBASE_APP_ID });

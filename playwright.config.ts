@@ -65,6 +65,15 @@ function resolveBaseUrl(): string {
       throw new Error(`SA_E2E_BASE_URL points at production (${url}). The harness signs in and some measurements write. Refusing.`);
     }
   }
+  /* ⚠️ A DEPLOYED SITE READS LIVE FIRESTORE, SO IT IS OPT-IN. Every page load of a seeded account
+     reads ~660 documents over the internet; October's bill was mostly this. The default is a local
+     emulator-mode bundle (`npm run e2e:emu`); a remote target needs ALLOW_LIVE_FIRESTORE=1. */
+  if (!/^https?:\/\/(localhost|127\.0\.0\.1)(:|\/|$)/.test(url) && process.env.ALLOW_LIVE_FIRESTORE !== "1") {
+    throw new Error(
+      `SA_E2E_BASE_URL is ${url}, which reads live Firestore. Use \`npm run e2e:emu\`, or set ` +
+      "ALLOW_LIVE_FIRESTORE=1 if a live run is really what you want.",
+    );
+  }
   return url;
 }
 

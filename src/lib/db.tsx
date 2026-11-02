@@ -923,7 +923,12 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     };
 
     fetchCommunityAgents();
-  }, [currentUser]);
+    /* ⚠️ KEYED ON THE ID, NOT THE OBJECT. Every user-doc snapshot (and every optimistic
+       `setCurrentUser`) makes a new object, so `[currentUser]` re-read the whole communityAgents
+       collection on every write to the user doc. The list does not depend on anything in the user
+       doc, only on who is signed in, so it is read once per sign-in. */
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser?.id]);
 
   // Compute Tasks periodically based on records
   useEffect(() => {
