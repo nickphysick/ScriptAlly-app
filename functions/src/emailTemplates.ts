@@ -30,7 +30,7 @@ import { RenderedEmail } from "./email";
 import { MailConfig, unsubscribeLink, verifyLink } from "./emailConfig";
 import {
   BRAND_NAME, CONFIRM_CTA, CONFIRM_EXPIRY, CONFIRM_HEADING, CONFIRM_LEAD, CONFIRM_NEXT,
-  CONFIRM_NOT_HELD, CONFIRM_NOT_YOU, CONFIRM_PREHEADER, CONFIRM_SUBJECT, FOOT_LINE, PASS_LABEL,
+  CONFIRM_LINK_HELP, CONFIRM_NOT_HELD, CONFIRM_NOT_YOU, CONFIRM_PREHEADER, CONFIRM_SUBJECT, FOOT_LINE, PASS_LABEL,
   SIGNATURE_NAME, SIGNATURE_ROLE, UNSUBSCRIBE_LABEL, UNSUBSCRIBE_NOTE, UNSUBSCRIBE_NOTE_WAITING,
   WAITING_HEADING, WAITING_LEAD, WAITING_NOTE, WAITING_NOTHING_TO_DO, WAITING_PASS,
   WAITING_PREHEADER, WAITING_SORRY, WAITING_SUBJECT, WELCOME_GET_HEADING, WELCOME_HEADING,
@@ -48,6 +48,10 @@ export type Prepared =
 /* ══════════════ Images ══════════════ */
 
 /** Paths under the public origin. The version is the first eight hex digits of the file's md5. */
+/* The pass, the headings and the signature as images (privacy page v1, phase 2): email clients load no
+   web fonts, so the typewriter fell back to Courier. Built by scripts/email-images/build.mjs. */
+import { EMAIL_IMAGES, type EmailImage } from "./emailImageManifest";
+
 export const EMAIL_LOGO = { path: "/images/email/queryhawk-logo-60.png", version: "54b8f898", width: 30, height: 30 };
 export const EMAIL_BIRD = { path: "/images/founding-pass-bird-email.png", version: "3f3032f7", width: 170, height: 120 };
 
@@ -98,19 +102,21 @@ const para = (html: string, o: { size?: number; colour?: string; margin?: string
   `<p style="margin:${o.margin ?? "0 0 16px"};font-family:${SERIF};font-size:${o.size ?? 16.5}px;` +
   `line-height:1.6;color:${o.colour ?? BODY}">${html}</p>`;
 
-const heading = (text: string) =>
-  `<h1 style="margin:0 0 14px;font-family:${TYPE};font-size:28px;line-height:1.2;font-weight:400;color:${INK}">` +
-  `${esc(text)}</h1>` +
-  `<table ${TABLE} style="margin:0 0 20px"><tr><td width="44" height="3" bgcolor="${NAVY}" ` +
-  `style="width:44px;height:3px;background:${NAVY};border-radius:3px;font-size:0;line-height:0">&nbsp;</td></tr></table>`;
+/** A heading, as its image (the typewriter line and the navy rule are in the picture); the alt is the text. */
+const headingImg = (cfg: MailConfig, img: EmailImage) =>
+  `<img src="${esc(asset(cfg, img)!)}" width="${img.width}" height="${img.height}" alt="${esc(img.alt)}" ` +
+  `style="display:block;width:100%;max-width:${img.width}px;height:auto;border:0;margin:0 0 20px;` +
+  `font-family:${SERIF};font-size:24px;font-weight:700;line-height:1.25;color:${INK}">`;
 
+/** ⚠️ IN THE SERIF, NOT THE TYPEWRITER (privacy page v1): a live typewriter line is Courier in every email
+   client (EM-7), and these two have no image of their own. */
 const subheading = (text: string, margin = "0 0 8px") =>
-  `<h2 style="margin:${margin};font-family:${TYPE};font-size:20px;line-height:1.3;font-weight:400;color:${INK}">` +
+  `<h2 style="margin:${margin};font-family:${SERIF};font-size:18px;line-height:1.3;font-weight:600;color:${INK}">` +
   `${esc(text)}</h2>`;
 
 const button = (href: string, label: string) =>
   `<table ${TABLE} style="margin:6px 0 10px"><tr><td bgcolor="${NAVY}" style="background:${NAVY};border-radius:12px">` +
-  `<a href="${esc(href)}" style="display:inline-block;padding:15px 30px;font-family:${SERIF};font-size:17px;` +
+  `<a href="${esc(href)}" style="display:inline-block;padding:16px 30px;font-family:${SERIF};font-size:17px;` +
   `font-weight:600;line-height:1.2;color:#ffffff;text-decoration:none;border-radius:12px">${esc(label)}</a>` +
   `</td></tr></table>`;
 
@@ -120,11 +126,14 @@ const note = (bold: string, rest: string) =>
   `<p style="margin:0;font-family:${SERIF};font-size:15.5px;line-height:1.6;color:${INK}">` +
   `<b>${esc(bold)}</b>${esc(rest)}</p></td></tr></table>`;
 
-/** ⚠️ THE SIGN-OFF IS TYPED, NOT HANDWRITTEN (welcome page v1): Special Elite, falling back to Courier New. */
-const signature = (margin = "0 0 2px") =>
-  `<p style="margin:${margin};font-family:${TYPE};font-size:26px;line-height:1;color:${INK}">` +
-  `${esc(SIGNATURE_NAME)}</p>` +
-  `<p style="margin:0;font-family:${SERIF};font-size:14px;line-height:1.6;color:${MUTED}">${esc(SIGNATURE_ROLE)}</p>`;
+/** ⚠️ THE SIGN-OFF IS AN IMAGE (privacy page v1): "Nick" in the typewriter face, which no client loads as
+   text. Its alt is "Nick", so it still reads with images off. */
+const signature = (cfg: MailConfig, margin = "0 0 2px") => {
+  const img = EMAIL_IMAGES["signature-nick"];
+  return `<img src="${esc(asset(cfg, img)!)}" width="${img.width}" height="${img.height}" alt="${esc(img.alt)}" ` +
+    `style="display:block;border:0;margin:${margin};font-family:${SERIF};font-size:20px;color:${INK}">` +
+    `<p style="margin:0;font-family:${SERIF};font-size:14px;line-height:1.6;color:${MUTED}">${esc(SIGNATURE_ROLE)}</p>`;
+};
 
 /** "✓" in rust in its own cell: no SVG and no image, so it survives every client. */
 const ticks = (rows: readonly (readonly [string, string])[]) =>
@@ -164,6 +173,18 @@ const pass = (cfg: MailConfig, big: string, small: string | null) => {
     `<tr><td style="padding:0 18px"><div style="height:0;border-top:2px dashed ${TEAR};font-size:0;line-height:0">&nbsp;</div></td></tr>`
   );
 };
+
+/** The pass as its image, the full card width, then the dashed tear. With images off the alt reads on blush. */
+const passImg = (cfg: MailConfig, img: EmailImage) =>
+  `<tr><td bgcolor="${BLUSH}" style="background:${BLUSH};border-radius:18px 18px 0 0;line-height:0;font-size:0">` +
+  `<img src="${esc(asset(cfg, img)!)}" width="${img.width}" height="${img.height}" alt="${esc(img.alt)}" ` +
+  `style="display:block;width:100%;max-width:${img.width}px;height:auto;border:0;border-radius:18px 18px 0 0;` +
+  `font-family:${SERIF};font-size:16px;font-weight:600;line-height:1.5;color:${INK}"></td></tr>` +
+  `<tr><td style="padding:0 18px"><div style="height:0;border-top:2px dashed ${TEAR};font-size:0;line-height:0">&nbsp;</div></td></tr>`;
+
+/** The writer's numbered pass, or null when the number has no image (outside 1–50). */
+export const passImageFor = (n: number): EmailImage | null =>
+  Number.isInteger(n) && n >= 1 && n <= 50 ? EMAIL_IMAGES[`pass-${String(n).padStart(2, "0")}`] ?? null : null;
 
 const preheader = (text: string) =>
   `<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;line-height:1px;color:${GROUND}">` +
@@ -235,26 +256,35 @@ export const prepareConfirm = (
      send. Neither degrades — both refuse. */
   if (missing.length) return { ok: false, missing };
 
+  /* confirm-email-v2 (privacy page v1): the pending pass, the heading as an image, the button with its arrow,
+     the note, the sign-off, then under a hairline the "didn't ask" line and the link as text for when the
+     button won't work (the bare link no longer sits under the button). */
   const body =
-    heading(CONFIRM_HEADING) +
+    headingImg(cfg, EMAIL_IMAGES["heading-confirm"]) +
     para(esc(CONFIRM_LEAD)) +
-    button(verifyUrl!, CONFIRM_CTA) +
-    para(esc(CONFIRM_EXPIRY), { size: 14, colour: MUTED, margin: "0 0 6px" }) +
-    `<p style="margin:0 0 20px;font-family:${SANS};font-size:11.5px;line-height:1.5;color:${MUTED};word-break:break-all">` +
-    `${esc(verifyUrl!)}</p>` +
+    button(verifyUrl!, `${CONFIRM_CTA}\u00a0 →`) +
+    para(esc(CONFIRM_EXPIRY), { size: 14, colour: MUTED, margin: "0 0 22px" }) +
     note(CONFIRM_NOT_HELD[0], CONFIRM_NOT_HELD[1]) +
     para(esc(CONFIRM_NEXT)) +
-    para(esc(CONFIRM_NOT_YOU), { size: 14.5, colour: MUTED, margin: "0 0 4px" });
+    signature(cfg, "18px 0 2px") +
+    `<table ${TABLE} width="100%" style="margin:22px 0 0"><tr><td style="border-top:1px solid #ece6de;padding-top:14px">` +
+    para(esc(CONFIRM_NOT_YOU), { size: 14, colour: MUTED, margin: "0 0 10px" }) +
+    `<p style="margin:0;font-family:${SANS};font-size:12.5px;line-height:1.5;color:${MUTED}">${esc(CONFIRM_LINK_HELP)}<br>` +
+    `<a href="${esc(verifyUrl!)}" style="color:${NAVY};text-decoration:none;word-break:break-all">${esc(verifyUrl!)}</a></p>` +
+    `</td></tr></table>`;
 
   return {
     ok: true,
     email: {
       subject: CONFIRM_SUBJECT,
-      html: shell(cfg, { preheader: CONFIRM_PREHEADER, body, unsubUrl: unsubUrl!, unsubNote: UNSUBSCRIBE_NOTE }),
+      html: shell(cfg, {
+        preheader: CONFIRM_PREHEADER, pass: passImg(cfg, EMAIL_IMAGES["pass-pending"]),
+        body, unsubUrl: unsubUrl!, unsubNote: UNSUBSCRIBE_NOTE,
+      }),
       text: [
         CONFIRM_HEADING, "", CONFIRM_LEAD, "",
         `${CONFIRM_CTA}: ${verifyUrl}`, "",
-        CONFIRM_EXPIRY, "", CONFIRM_NOT_HELD.join(""), "", CONFIRM_NEXT, "", CONFIRM_NOT_YOU,
+        CONFIRM_EXPIRY, "", CONFIRM_NOT_HELD.join(""), "", CONFIRM_NEXT, "", textSignature, "", CONFIRM_NOT_YOU,
       ].join("\n") + textFoot(cfg, unsubUrl!, UNSUBSCRIBE_NOTE),
     },
   };
@@ -270,13 +300,17 @@ export const prepareWelcome = (
   const missing = [...(unsubUrl ? [] : ["unsubscribeUrl"]), ...needsImages(cfg)];
   if (missing.length) return { ok: false, missing };
 
+  /* ⚠️ THE PASS IMAGE IS THE STORED NUMBER'S OWN FILE. A number with no image (outside 1–50) falls back to
+     the HTML pass, logged, rather than showing somebody else's number. */
+  const passImage = passImageFor(position);
+  if (!passImage) console.warn(`[email] welcome: no pass image for No. ${position}; using the HTML pass`);
   const body =
-    heading(WELCOME_HEADING) +
+    headingImg(cfg, EMAIL_IMAGES["heading-welcome"]) +
     para(esc(WELCOME_LEAD), { margin: "0 0 20px" }) +
     `<table ${TABLE} width="100%" style="margin:6px 0 24px"><tr>` +
     `<td style="border-left:3px solid ${BLUSH};padding:2px 0 2px 18px">` +
     WELCOME_NOTE.map((t, i) => para(esc(t), { colour: INK, margin: i === WELCOME_NOTE.length - 1 ? "0 0 10px" : "0 0 12px" })).join("") +
-    signature() +
+    signature(cfg) +
     `</td></tr></table>` +
     subheading(WELCOME_GET_HEADING) +
     ticks(WELCOME_PERKS) +
@@ -288,7 +322,8 @@ export const prepareWelcome = (
     email: {
       subject: welcomeSubject(position),
       html: shell(cfg, {
-        preheader: WELCOME_PREHEADER, pass: pass(cfg, passNumber(position), passOf(cap)),
+        preheader: WELCOME_PREHEADER,
+        pass: passImage ? passImg(cfg, passImage) : pass(cfg, passNumber(position), passOf(cap)),
         body, unsubUrl: unsubUrl!, unsubNote: UNSUBSCRIBE_NOTE,
       }),
       text: [
@@ -310,19 +345,19 @@ export const prepareWaiting = (cfg: MailConfig, unsubToken: string): Prepared =>
   if (missing.length) return { ok: false, missing };
 
   const body =
-    heading(WAITING_HEADING) +
+    headingImg(cfg, EMAIL_IMAGES["heading-waiting"]) +
     para(esc(WAITING_LEAD)) +
     note(WAITING_NOTE[0], WAITING_NOTE[1]) +
     para(esc(WAITING_NOTHING_TO_DO)) +
     para(esc(WAITING_SORRY), { margin: "8px 0 4px" }) +
-    signature("0 0 4px");
+    signature(cfg, "0 0 4px");
 
   return {
     ok: true,
     email: {
       subject: WAITING_SUBJECT,
       html: shell(cfg, {
-        preheader: WAITING_PREHEADER, pass: pass(cfg, WAITING_PASS, null),
+        preheader: WAITING_PREHEADER, pass: passImg(cfg, EMAIL_IMAGES["pass-waiting"]),
         body, unsubUrl: unsubUrl!, unsubNote: UNSUBSCRIBE_NOTE_WAITING,
       }),
       text: [

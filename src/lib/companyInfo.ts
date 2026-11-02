@@ -48,8 +48,9 @@ export const REGISTERED_ADDRESS = "[REGISTERED / TRADING ADDRESS]";
 /** ICO registration — pending confirmation; rendered verbatim inside the privacy policy. */
 export const ICO_REGISTRATION_NOTE = "[ICO registration number: pending.]";
 
-/** The Firebase region the data sits in — bracketed until confirmed against the live project. */
-export const DATA_REGION = "[europe-west2 — London]";
+/** The Firebase region the data sits in. ⚠️ CHECKED AGAINST THE LIVE PROJECT (privacy page v1, 2 Nov):
+ *  `firebase firestore:databases:get <prod db> --project prod` reports Location europe-west2. */
+export const DATA_REGION = "London (europe-west2)";
 
 /**
  * Deletion window, in days. CONFIRMED — thirty days is what the backup cycle actually gives us,
@@ -67,8 +68,10 @@ export const DATA_REGION = "[europe-west2 — London]";
  */
 export const DELETION_WINDOW_DAYS = 30;
 
-/** The date both legal documents state at the top of the band. */
+/** The date the Terms state at the top of the band. */
 export const LEGAL_LAST_UPDATED = "31 Oct 2026";
+/** The privacy policy's own date: it changed on 2 Nov (privacy page v1), the Terms did not. */
+export const PRIVACY_LAST_UPDATED = "2 November 2026";
 
 /** The footer's strapline, under the hawk and the name (17 Sep). */
 export const FOOTER_TAGLINE =

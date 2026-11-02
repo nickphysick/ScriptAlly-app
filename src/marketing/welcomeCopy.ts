@@ -123,7 +123,7 @@ export const NOTE: readonly string[] = [
   "Very best of luck with your campaign, and thank you for being part of the journey. We'll speak soon.",
 ];
 export const NOTE_WAITING: readonly string[] = [
-  "I'm sorry we couldn't hold a place for you this time, and thank you for wanting in. You're confirmed and in the queue" +
+  "Sorry we couldn't fit you in this time, and thank you for signing up. You're confirmed and in the queue" +
     (PLACES_OFFERED_ON ? ", so if a place frees up, it's yours to take." : "."),
   "In the meantime I'd still love to hear from you: reply to my email any time. It comes straight to me.",
 ];

@@ -999,7 +999,9 @@
     "design-refs/landing-desktop-v14.html": "22932b7a8141c474c5707585246db640fed4b584f1b092255d28d64fa6e0b8a0",
     "design-refs/founding-emails-v1.html": "1d270a1c55acd262f2a96066638d61e90e092574c8121e9132d248c9452e4941",
     "design-refs/welcome-page-v1.html": "3945a862b0124a897775e5c2ce1f41b717d409715ffbe23fe042c14dc55dbc3f",
-    "design-refs/founding-emails-v2.html": "403096e5fff540466aea028ee30929a7cd3e4e24aecd61c2a44057bb6c085200"
+    "design-refs/founding-emails-v2.html": "403096e5fff540466aea028ee30929a7cd3e4e24aecd61c2a44057bb6c085200",
+    "design-refs/privacy-v1.html": "df4c0d09e53b1cb7e7684f01fceb27053dab89785a1f3d601e04d3b76b2faced",
+    "design-refs/confirm-email-v2.html": "1d09d7a81ddb561b92945a66c65f88e360a7187c358e908e5c82e309e8f42ffa"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",

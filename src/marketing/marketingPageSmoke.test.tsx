@@ -71,7 +71,8 @@ const PUBLIC_ROUTES: [path: string, node: () => React.ReactElement, mustContain:
   ["/welcome?v=expired", () => <WelcomePage onNavigate={noNavigate} />, "That link&#x27;s 48 hours are up."],
   ["/welcome?v=unknown", () => <WelcomePage onNavigate={noNavigate} />, "We don&#x27;t recognise that link."],
   ["/terms", () => <LegalPage doc="terms" onNavigate={noNavigate} />, "Terms of Service"],
-  ["/privacy", () => <LegalPage doc="privacy" onNavigate={noNavigate} />, "Privacy Policy"],
+  /* Retarget (privacy page v1, 2 Nov): the page's title is "Privacy". */
+  ["/privacy", () => <LegalPage doc="privacy" onNavigate={noNavigate} />, "The short version"],
 ];
 
 describe("every public marketing route renders for a LOGGED-OUT visitor", () => {
@@ -200,7 +201,9 @@ describe("the public pricing page sells nothing and writes nothing", () => {
  * finished and is not is worse than an obviously unfinished one, because nobody chases it.
  */
 describe("the legal pages are honest about being drafts", () => {
-  for (const doc of ["terms", "privacy"] as const) {
+  /* ⚠️ THE TERMS ONLY, SINCE PRIVACY PAGE v1 (2 Nov): /privacy states a named controller, the checked
+     region and no placeholder, so it carries no ribbon (PRIV-1); the Terms still have their placeholders. */
+  for (const doc of ["terms"] as const) {
     it(`/${doc} carries the working-draft ribbon while the copy is unreviewed`, () => {
       const html = renderPage(<LegalPage doc={doc} onNavigate={noNavigate} />, `/${doc}`);
       // The ribbon is a function of the flag, so assert the flag's state alongside its effect —
@@ -244,8 +247,15 @@ describe("the legal pages are honest about being drafts", () => {
     const html = renderPage(<LegalPage doc="privacy" onNavigate={noNavigate} />, "/privacy");
     expect(html).toContain("Cookies and local storage");
     expect(html).toContain("cookie banner");
-    expect(html).toContain("no third-party analytics");
+    /* privacy page v1: the analytics line names Cloudflare Web Analytics (no cookies, no cross-site tracking). */
+    expect(html).toContain("We count visits with Cloudflare Web Analytics");
     expect(html).toContain("which link brought you");
+  });
+
+  it("/privacy has no ribbon and no bracketed placeholder (privacy page v1)", () => {
+    const html = renderPage(<LegalPage doc="privacy" onNavigate={noNavigate} />, "/privacy");
+    expect(html).not.toContain("Working draft");
+    expect(html.replace(/<[^>]+>/g, " ")).not.toMatch(/\[[^\]]*\]/);
   });
 
   it("the live build carries no analytics id while the policy promises none", () => {

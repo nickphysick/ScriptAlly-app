@@ -5,10 +5,11 @@
  * ⚠️ THE STRINGS BELOW ARE TYPED FROM THE BRIEF, NOT IMPORTED FROM emailCopy. A lock that imports
  * the constant it checks agrees with any edit to that constant; these fail when the wording drifts.
  */
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { prepareConfirm, prepareWaiting, prepareWelcome, type Prepared } from "./emailTemplates";
+type Email = Extract<Prepared, { ok: true }>["email"];
 import { resolveMailConfig } from "./emailConfig";
 import { emailAfterVerify } from "./waitlistModel";
 
@@ -19,8 +20,11 @@ const welcome = ok(prepareWelcome(PROD, 14, 50, "unsub"));
 const waiting = ok(prepareWaiting(PROD, "unsub"));
 
 /** The HTML as a reader sees its words: tags gone, entities decoded, whitespace collapsed. */
+/* ⚠️ AN IMAGE READS AS ITS ALT TEXT, IN PLACE (privacy page v1): the pass, the headings and the sign-off
+   are images, and an email with images off reads them by their alts, so that is how this reads them. */
 const words = (html: string) => html
-  .replace(/<!--[\s\S]*?-->/g, " ").replace(/<\/?(a|b|span|u)\b[^>]*>/g, "").replace(/<[^>]+>/g, " ")
+  .replace(/<!--[\s\S]*?-->/g, " ").replace(/<img\b[^>]*\balt="([^"]*)"[^>]*>/g, " $1 ")
+  .replace(/<\/?(a|b|span|u)\b[^>]*>/g, "").replace(/<[^>]+>/g, " ")
   .replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&lt;/g, "<").replace(/&gt;/g, ">")
   .replace(/&#10003;/g, "✓").replace(/&nbsp;/g, " ").replace(/&#8199;|&#847;/g, "")
   .replace(/\s+/g, " ");
@@ -41,9 +45,11 @@ const EXPECT = {
       "Thanks for putting your name down as a QueryHawk founding writer. There's just one thing left to do.",
       "Confirm my place",
       "This link works for 48 hours.",
-      "Your place isn't held until you click. There are fifty founding places and they go in the order people confirm. If the last one goes while this sits in your inbox, you'll go on the waiting list instead, and I'll tell you straight.",
+      "Your place isn't held until you click. There are fifty founding places and they go in the order people confirm. If the last one goes while this sits in your inbox, you'll go on the waiting list instead, and I'll let you know.",
       "Once you've confirmed, you'll get your founding writer pass, and your invite follows when your wave opens.",
       "Didn't ask for this? Just ignore it. Nothing happens without that click, and we won't write again.",
+      /* privacy page v1: the sign-off, and the link as text under a hairline */
+      "Nick", "Founder, QueryHawk",
       "This takes you off the list and frees your place for another writer.",
       ...FOOT,
     ],
@@ -51,7 +57,7 @@ const EXPECT = {
   welcome: {
     email: welcome,
     subject: "You're in: founding writer No. 14",
-    preheader: "Your pass is inside. Welcome to the first fifty.",
+    preheader: "Your founding writer pass is inside.",
     strings: [
       "No. 14", "of 50",
       "That's your place confirmed.",
@@ -75,16 +81,16 @@ const EXPECT = {
   },
   waiting: {
     email: waiting,
-    subject: "You're first in line if a place opens",
+    subject: "You're on the founding writers' waiting list",
     preheader: "The fifty places went, but you're on the waiting list.",
     strings: [
       "Waiting list",
-      "The fifty places went, but you're next in line.",
+      "All fifty places have gone, but you're on the waiting list.",
       "Thanks for confirming. All fifty founding places were taken before your click came through, so you're on the waiting list, in the order people confirmed.",
       /* decision 2(b) */
       "You're on the list in the order people confirmed. If anything changes, you'll hear from me.",
       "You don't need to do anything else. Your address stays on the list, and you can take it off any time with the link below.",
-      "I'm sorry it wasn't this time, and thank you for wanting in.",
+      "Sorry we couldn't fit you in this time, and thank you for signing up.",
       "Nick", "Founder, QueryHawk",
       "This takes you off the waiting list.",
       ...FOOT,
@@ -111,12 +117,14 @@ describe("EM-1 · each email renders, HTML and text, with the brief's words", ()
       }
       expect(e.email.html).not.toMatch(/<svg/i);
       const imgs = e.email.html.match(/<img\b[^>]*>/g) ?? [];
-      expect(imgs.length, "the logo, and the bird where there is a pass").toBe(name === "confirm" ? 1 : 2);
+      /* privacy page v1: the logo, the pass, the heading and the sign-off. The logo's alt is empty because
+         "QueryHawk" is printed beside it; every other image's alt is its words. */
+      expect(imgs.length, "logo, pass, heading, sign-off").toBe(4);
       for (const img of imgs) {
         expect(img).toMatch(/\ssrc="https:\/\/queryhawk\.net\/images\/[^"]+\.png(\?v=[0-9a-f]{8})?"/);
-        expect(img).toMatch(/\swidth="\d+"/);
-        expect(img).toMatch(/\sheight="\d+"/);
-        expect(img).toMatch(/\salt=""/);
+        expect(img).toMatch(/\swidth="\d+(\.\d+)?"/);
+        expect(img).toMatch(/\sheight="\d+(\.\d+)?"/);
+        expect(img).toMatch(img.includes("queryhawk-logo") ? /\salt=""/ : /\salt="[^"]+"/);
       }
       /* tables and inline styles only */
       expect(e.email.html).not.toMatch(/<style|class="|display:\s*flex|position:\s*absolute|rgba\(/);
@@ -134,31 +142,33 @@ describe("EM-1 · each email renders, HTML and text, with the brief's words", ()
   });
 });
 
-describe("EM-1 · the sign-off and the pass label (welcome page v1, phase 2)", () => {
-  /* The <p> holding exactly "Nick", and the one holding the pass label, read from the HTML. */
-  const tagHolding = (html: string, text: string) => {
-    const m = html.match(new RegExp(`<p style="([^"]*)">${text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}</p>`));
-    return m ? m[1] : null;
-  };
-  for (const [name, e] of [["welcome", welcome], ["waiting", waiting]] as const) {
-    it(`${name}: "Nick" is typewriter (Special Elite, Courier New fallback), 26px, ink #1c130f, never handwritten`, () => {
-      const st = tagHolding(e.html, "Nick");
-      expect(st, "a paragraph holding the signature").not.toBeNull();
-      expect(st).toMatch(/font-family:'Special Elite','Courier New'/);
-      expect(st).toMatch(/font-size:26px/);
-      expect(st).toMatch(/color:#1c130f/);
+describe("EM-1 · the sign-off and the pass label (welcome page v1; images since privacy page v1)", () => {
+  for (const [name, e] of [["confirm", confirm], ["welcome", welcome], ["waiting", waiting]] as const) {
+    it(`${name}: the sign-off is the "Nick" image (alt "Nick"), then "Founder, QueryHawk"; never handwritten`, () => {
+      expect(e.html).toMatch(/<img src="https:\/\/queryhawk\.net\/images\/email\/signature-nick\.png\?v=[0-9a-f]{8}"[^>]*alt="Nick"[^>]*><p[^>]*>Founder, QueryHawk<\/p>/);
       expect(e.html).not.toMatch(/Caveat|cursive/);
     });
-    it(`${name}: the pass label is "Founding writer pass" in sentence case, serif 600, #7a3420; no capitals in either part`, () => {
-      const st = tagHolding(e.html, "Founding writer pass");
-      expect(st, "the label, in sentence case").not.toBeNull();
-      expect(st).toMatch(/font-family:'Source Serif 4'/);
-      expect(st).toMatch(/font-weight:600/);
-      expect(st).toMatch(/color:#7a3420/);
-      expect(st).not.toMatch(/letter-spacing|text-transform/);
+    it(`${name}: the pass label is sentence case in both parts; never capitals`, () => {
       for (const part of [e.html, e.text]) expect(part).not.toMatch(/FOUNDING WRITER PASS/);
+      expect(words(e.html)).toMatch(/Founding writer pass: /);
     });
   }
+  it("the HTML pass (the fallback for a number with no image) keeps its label: serif 600, #7a3420", () => {
+    const fb = ok(prepareWelcome(PROD, 51, 50, "unsub"));
+    expect(fb.html).toMatch(/<p style="[^"]*font-family:'Source Serif 4'[^"]*font-weight:600;[^"]*color:#7a3420">Founding writer pass<\/p>/);
+  });
+});
+
+describe("EM-1 · the confirm email's link moved under the sign-off (privacy page v1)", () => {
+  it("nothing but the expiry line between the button and the note; the link as text after the help line", () => {
+    const h = confirm.html;
+    const btn = h.indexOf("Confirm my place"), exp = h.indexOf("This link works for 48 hours."), help = h.indexOf("Button not working?");
+    expect(btn).toBeGreaterThan(0); expect(exp).toBeGreaterThan(btn); expect(help).toBeGreaterThan(exp);
+    expect(h.slice(btn, exp), "no link text between the button and the expiry line").not.toMatch(/>https:\/\/[^<]*verify\?token=/);
+    expect(h.slice(help)).toMatch(/<a href="https:\/\/queryhawk\.net\/api\/waitlist\/verify\?token=[^"]+" style="[^"]*word-break:break-all">https:\/\/queryhawk\.net\/api\/waitlist\/verify\?token=/);
+    expect(h).toContain("Confirm my place\u00a0 →");
+    expect(h).toMatch(/padding:16px 30px/);
+  });
 });
 
 describe("EM-2 · the welcome's number is the number it is given (the stored one)", () => {
@@ -196,4 +206,84 @@ describe("EM-4 · decision 2(b): nothing promises an email when a place opens", 
     for (const b of BANNED) expect(src).not.toMatch(b);
     expect(src).toContain("founding places have gone, so you're on the waiting list, in the order people confirmed.");
   });
+});
+
+/* ══════════════ Privacy page v1, phase 2: the brand in images ══════════════ */
+
+const imgsOf = (html: string) => (html.match(/<img\b[^>]*>/g) ?? []).map((t) => ({
+  src: t.match(/\ssrc="([^"]+)"/)?.[1] ?? "", alt: t.match(/\salt="([^"]*)"/)?.[1] ?? null,
+  width: Number(t.match(/\swidth="([\d.]+)"/)?.[1]), height: Number(t.match(/\sheight="([\d.]+)"/)?.[1]),
+}));
+const file = (src: string) => src.replace(/^https:\/\/queryhawk\.net\/images\/email\//, "").replace(/\?v=[0-9a-f]{8}$/, "");
+
+describe("EM-6 · each email names the right images: absolute https PNG, with width, height and alt", () => {
+  const WANT: Record<string, [Prepared, string[]]> = {
+    confirm: [prepareConfirm(PROD, "tok", "unsub"), ["pass-pending.png", "heading-confirm.png", "signature-nick.png"]],
+    welcome14: [prepareWelcome(PROD, 14, 50, "unsub"), ["pass-14.png", "heading-welcome.png", "signature-nick.png"]],
+    waiting: [prepareWaiting(PROD, "unsub"), ["pass-waiting.png", "heading-waiting.png", "signature-nick.png"]],
+  };
+  for (const [name, [p, files]] of Object.entries(WANT)) {
+    it(name, () => {
+      const imgs = imgsOf(ok(p).html).filter((i) => !i.src.includes("queryhawk-logo"));
+      expect(imgs.map((i) => file(i.src))).toEqual(files);
+      for (const i of imgs) {
+        expect(i.src).toMatch(/^https:\/\/queryhawk\.net\/images\/email\/[a-z0-9-]+\.png\?v=[0-9a-f]{8}$/);
+        expect(i.width).toBeGreaterThan(0); expect(i.height).toBeGreaterThan(0);
+        expect(i.alt, `${file(i.src)} has words for its alt`).toMatch(/\S/);
+      }
+    });
+  }
+  it("writer 14's pass reads No. 14 in its alt; every number 1–50 has its own file", () => {
+    expect(imgsOf(welcome.html).find((i) => file(i.src) === "pass-14.png")?.alt).toBe("Founding writer pass: No. 14 of 50");
+    for (let n = 1; n <= 50; n++) {
+      const pass = imgsOf(ok(prepareWelcome(PROD, n, 50, "unsub")).html).find((i) => /pass-\d\d\.png/.test(i.src));
+      expect(file(pass!.src), `No. ${n}`).toBe(`pass-${String(n).padStart(2, "0")}.png`);
+    }
+  });
+  it("51 has no image, so the welcome falls back to the HTML pass (and says so in the log)", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const fb = ok(prepareWelcome(PROD, 51, 50, "unsub"));
+    expect(imgsOf(fb.html).some((i) => /pass-\d+\.png/.test(i.src))).toBe(false);
+    expect(words(fb.html)).toContain("No. 51 of 50");
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("No. 51"));
+    warn.mockRestore();
+  });
+  it("every image the emails name exists in public/ at the version the URL carries", async () => {
+    const { createHash } = await import("node:crypto");
+    for (const [p] of Object.values(WANT)) for (const i of imgsOf(ok(p).html)) {
+      const path = i.src.replace(/^https:\/\/queryhawk\.net/, "").replace(/\?v=.*/, "");
+      const v = i.src.match(/\?v=([0-9a-f]{8})/)?.[1];
+      const buf = readFileSync(join(process.cwd(), "public", path));
+      expect(createHash("md5").update(buf).digest("hex").slice(0, 8), path).toBe(v);
+      expect(buf.length, `${path} ≤ 60 KB`).toBeLessThanOrEqual(60 * 1024);
+    }
+  });
+});
+
+describe("EM-7 · no typewriter text is left as live text (it would be Courier in every client)", () => {
+  for (const [name, e] of Object.entries({ confirm, welcome, waiting })) {
+    it(name, () => {
+      const live = e.html.replace(/<img\b[^>]*>/g, "");
+      expect(live, "no live text in Special Elite or Courier").not.toMatch(/Special Elite|Courier/);
+    });
+  }
+});
+
+describe("images off (Outlook's default): the alts and the text still read in order", () => {
+  const ORDER: Record<string, [Email, string[]]> = {
+    confirm: [confirm, ["Founding writer pass: almost yours. One click to go.", "One click and you're on the list.",
+      "Thanks for putting your name down", "Confirm my place", "This link works for 48 hours.", "Your place isn't held",
+      "Once you've confirmed", "Nick", "Founder, QueryHawk", "Didn't ask for this?", "Button not working?"]],
+    welcome: [welcome, ["Founding writer pass: No. 14 of 50", "That's your place confirmed.", "Welcome aboard.",
+      "Hi, I'm Nick.", "Nick Founder, QueryHawk", "What you get", "What happens next"]],
+    waiting: [waiting, ["Founding writer pass: Waiting list", "All fifty places have gone, but you're on the waiting list.",
+      "Thanks for confirming.", "You're on the list in the order people confirmed.", "Nick Founder, QueryHawk"]],
+  };
+  for (const [name, [e, seq]] of Object.entries(ORDER)) {
+    it(name, () => {
+      const t = words(e.html);
+      let at = -1;
+      for (const piece of seq) { const i = t.indexOf(piece, at + 1); expect(i, `"${piece}" after the one before`).toBeGreaterThan(at); at = i; }
+    });
+  }
 });

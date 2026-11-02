@@ -166,9 +166,11 @@ export const MarketingShell: React.FC<{
      card's once the hero is passed), "Become a Founding Writer" on the desktop (the founding band's).
      No links, no Log in, no menu; the logo scrolls to the top. Every other public page keeps its chrome. */
   const waitlist = path === "/";
-  /* ⚠️ /welcome IS A DEAD END ON PURPOSE (welcome page v1, 2 Nov): the bar is the logo and nothing else,
-     not even a button home, and the footer is one line whose only link is Privacy (WEL-2). */
-  const welcome = path === "/welcome";
+  /* ⚠️ /welcome AND /privacy ARE DEAD ENDS ON PURPOSE (welcome page v1 and privacy page v1, 2 Nov): the
+     bar is the logo and nothing else, not even a button home, and the footer is one line whose only
+     link is Privacy (WEL-2) — plain text on /privacy itself, which links to nothing (PRIV-2). */
+  const welcome = path === "/welcome" || path === "/privacy";
+  const onPrivacy = path === "/privacy";
   const toTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
   const toFeatures = () => {
@@ -332,12 +334,14 @@ export const MarketingShell: React.FC<{
           round that surface's bottom corners against it. Chrome on both sides of the sheet now
           belongs to the same component. */}
       {welcome ? (
-        <footer className="mk-foot mk-foot--welcome">
+        <footer className="mk-foot mk-foot--bare">
           <div className="mk-brand mk-brand--still">
             <img className="mk-footmark" src={artUrl(BRAND_MARK_SMALL)} alt="" width={BRAND_MARK_SMALL.width} height={BRAND_MARK_SMALL.height} loading="lazy" />
             <span className="mk-wordmark">QueryHawk</span>
           </div>
-          <p>{WELCOME_FOOT} · <a href="/privacy" onClick={(e) => { e.preventDefault(); onNavigate("privacy"); }}>Privacy</a></p>
+          <p>{WELCOME_FOOT} · {onPrivacy
+            ? <span aria-current="page">Privacy</span>
+            : <a href="/privacy" onClick={(e) => { e.preventDefault(); onNavigate("privacy"); }}>Privacy</a>}</p>
         </footer>
       ) : <MarketingFooter onNavigate={onNavigate} waitlist={waitlist} />}
       <ConsentBar onPrivacy={() => onNavigate("privacy")} />

@@ -2887,3 +2887,21 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   }
   .mk-navpanel .mk-navjoin:focus-visible { outline: 2px solid var(--mk-join); outline-offset: 3px; }
 }
+
+/* ── The bare chrome on /welcome and /privacy (MarketingShell): the logo is not a button, the footer
+   is one line (welcome page v1, privacy page v1). ── */
+.mk-brand--still { cursor: default; }
+.mk-foot--bare {
+  /* The full width (the shell's column would shrink-wrap it), the bar's 1300 measure and its 56px
+     inset, so the footer's logo sits under the bar's. */
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  width: 100%; max-width: 1300px; margin: 0 auto; box-sizing: border-box; padding: 34px 56px;
+}
+.mk-foot--bare .mk-footmark { height: 30px; }
+.mk-foot--bare .mk-wordmark { font-size: 20px; }
+.mk-foot--bare p { margin: 0; font: 400 14px/1.5 var(--mk-f-sans); color: rgba(255, 255, 255, .7); }
+.mk-foot--bare a { color: inherit; text-decoration: underline; }
+
+@media (max-width: 760px) {
+  .mk-foot--bare { flex-direction: column; align-items: flex-start; gap: 12px; padding: 28px 22px; }
+}
