@@ -70,3 +70,12 @@ test("CF-1 · exactly one Cloudflare beacon in the live page's HTML, and no cook
   expect((await page.context().cookies()).length, "no cookies").toBe(0);
   expect(await page.getByText(/accept (all )?cookies|cookie (settings|choices)/i).count(), "no banner").toBe(0);
 });
+
+/* ROBOTS-1 (2 Nov): /robots.txt is the real file, served as text, never the SPA's HTML. `META_MUTATE=ROBOTS1`
+   reads a path with no file behind it, which is what the site did before. */
+test("ROBOTS-1 · /robots.txt is served as plain text, allowing everything", async ({ request }) => {
+  const r = await request.get(process.env.META_MUTATE === "ROBOTS1" ? "/robots-missing.txt" : "/robots.txt");
+  expect(r.status()).toBe(200);
+  expect(r.headers()["content-type"], "text, not the app's HTML").toMatch(/^text\/plain/);
+  expect(await r.text()).toBe("User-agent: *\nAllow: /\n");
+});
