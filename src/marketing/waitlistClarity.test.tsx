@@ -106,17 +106,15 @@ const deskHero = () => renderToStaticMarkup(<Hero onNavigate={noNavigate} />);
 describe("WLC-2 · the desktop hero", () => {
   beforeEach(() => { mockCount = { cap: 50, claimed: 13 }; });
 
-  it("after the sub-line: the heading, the three ticks stacked, the navy pill and the places bar", () => {
+  it("after the sub-line: the navy pill and the places bar (hero trim, 3 Nov: no heading, no ticks — HT-2)", () => {
     const h = deskHero();
     const copy = h.slice(h.indexOf('class="mk-dh-copy"'));
     const iSub = copy.indexOf('class="mk-dh-sub"'), iBlock = copy.indexOf('class="mk-dh-founding"');
     expect(iSub, "the sub-line is there").toBeGreaterThan(0);
     expect(iBlock, "the block follows it").toBeGreaterThan(iSub);
-    const head = h.match(/<h2[^>]*class="mk-dh-fhead"[^>]*>([\s\S]*?)<\/h2>/);
-    expect(head && text(head[1])).toBe(HEADING);
-    const ticks = h.match(/<ul class="mk-dh-fticks">([\s\S]*?)<\/ul>/);
-    expect([...(ticks?.[1] ?? "").matchAll(/<li>([\s\S]*?)<\/li>/g)].map((m) => text(m[1]))).toEqual(TICKS);
-    expect(h).toMatch(/<button type="button" class="mk-dh-fjoin">Join the waitlist<\/button>/);
+    expect(h).not.toContain("mk-dh-fhead");
+    expect(h).not.toContain("mk-dh-fticks");
+    expect(h).toMatch(/<a href="#mk-band-email" class="mk-dh-fjoin">Become a founding writer<\/a>/);
     expect(h).toContain('aria-label="37 of 50 places left"');
   });
 
@@ -133,22 +131,15 @@ describe("WLC-2 · the desktop hero", () => {
     expect(renderToStaticMarkup(<NavPass label="Join the waitlist" />)).toContain("<span>Join the waitlist</span>");
   });
 
-  it("the desktop block's values are the ref's: 22px heading, 17px ticks, a 56px navy pill, a 420px places bar", () => {
+  it("the desktop pill keeps the ref's values: 56px high, navy (its width is HT-3's)", () => {
     const c = css("waitlist.css");
     const rule = (sel: string) => c.match(new RegExp("\\n" + sel.replace(/\./g, "\\.") + " \\{([^}]*)\\}"))?.[1] ?? "";
-    expect(rule(".mk-dh .mk-dh-fhead")).toMatch(/font-size:\s*22px/);
-    expect(rule(".mk-dh-fticks li")).toMatch(/17px/);
     expect(rule(".mk-dh-fjoin")).toMatch(/height:\s*56px/);
     expect(rule(".mk-dh-fjoin")).toMatch(/background:\s*var\(--mk-navy\)/);
-    expect(rule(".mk-dh .mk-places--hero")).toMatch(/max-width:\s*420px/);
   });
 });
 
-describe("WLC-2b · the desktop ticks are set in the serif, not brand.tsx's sans", () => {
-  it("the tick text inherits the list item's face", () => {
-    expect(css("waitlist.css")).toMatch(/\n\.mk-dh-fticks li > span \{ font: inherit; \}/);
-  });
-});
+/* WLC-2b (the desktop ticks' face) is retired with the ticks (hero trim, 3 Nov). */
 
 /* ── WLC-3 · every "Join" goes to one form ── */
 import * as Parts from "./WaitlistParts";
