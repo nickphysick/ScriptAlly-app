@@ -71,24 +71,12 @@
 .mk-wl-lock-trio { font: 400 20px/1.25 var(--mk-f-display); color: #fff; white-space: nowrap; }
 .mk-wl-lock-dot { color: #e8b4a3; margin: 0 9px; }
 .mk-wl-lock-brand { font: 700 30px/1.15 var(--mk-f-serif); color: #fff; white-space: nowrap; }
-/* ── The founding block (waitlist clarity v1, 2 Nov; ref design-refs/landing-waitlist-clarity-v1.html `.wl-*`):
-   the heading centred, the ticks left, a full-width blush button, the places bar under it. ── */
+/* ── The founding block (waitlist clarity v1, 2 Nov; trimmed 3 Nov): a full-width blush button, the places bar
+   under it. ── */
 .mk-wl-founding { margin-top: 40px; text-align: left; }
-.mk-wl .mk-wl-fhead {
-  margin: 0 0 12px; text-align: center; white-space: nowrap; color: #fff;
-  font-family: var(--mk-f-serif) !important; font-weight: 600 !important; letter-spacing: 0 !important;
-  font-size: 21px !important; line-height: 1.2 !important;
-}
-/* The ref draws 390 only; one line fits from 375 up (measured: 327px of ink in a 327px column at 375). Narrower
-   phones wrap it to two balanced lines rather than run it past the drawer's edge. */
-@media (max-width: 374px) { .mk-wl .mk-wl-fhead { white-space: normal; text-wrap: balance; } }
-.mk-wl-fticks { list-style: none; margin: 0 0 18px 6px; padding: 0; display: flex; flex-direction: column; gap: 9px; }
-.mk-wl-fticks li { display: flex; align-items: center; gap: 8px; margin: 0; font: 400 15.5px/1.3 var(--mk-f-serif); color: rgba(255, 255, 255, .88); }
-.mk-wl-fticks .mk-dtick { flex: 0 0 20px; width: 20px; height: 20px; padding: 3px; margin-top: 0; background: rgba(232, 180, 163, .18); color: #e8b4a3; }
-.mk-wl-fticks .mk-dtick path { stroke-width: 2.2; }
 .mk-wl-fjoin {
   display: flex; align-items: center; justify-content: center; width: 100%; height: 54px; border: 0; border-radius: 12px;
-  background: #e8b4a3; color: var(--mk-nearblack); font: 600 17px/1 var(--mk-f-serif); cursor: pointer;
+  background: #e8b4a3; color: var(--mk-nearblack); font: 600 17px/1 var(--mk-f-serif); text-decoration: none; cursor: pointer;
 }
 .mk-wl-fjoin:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 /* ⚠️ ON PHONES THE PLACES BAR TAKES NO SPACE UNTIL ITS COUNT ARRIVES, as the places line did before it. */
@@ -318,27 +306,20 @@
 .mk-dh-strap { margin: 14px 0 0; font: 600 40px/1.1 var(--mk-f-hand); color: #a2452a; }
 .mk-dh-sub { margin: 16px 0 28px; max-width: 480px; text-wrap: balance; font: 400 21px/1.6 var(--mk-f-serif); color: rgba(28, 19, 15, .74); }
 .mk-dh-sub b { font-weight: 700; color: #1c130f; white-space: nowrap; }
-/* ── The founding block (waitlist clarity v1, 2 Nov; ref design-refs/landing-waitlist-clarity-v1.html `.dh-*`):
-   the heading, three ticks stacked, the navy pill, the places bar. No form: the band's is the page's only one. ── */
-.mk-dh-founding { margin: 4px 0 0; max-width: 520px; }
-.mk-dh .mk-dh-fhead {
-  margin: 0 0 12px; color: var(--mk-nearblack);
-  font-family: var(--mk-f-serif) !important; font-weight: 600 !important; letter-spacing: 0 !important;
-  font-size: 22px !important; line-height: 1.25 !important;
-}
-.mk-dh-fticks { list-style: none; margin: 0 0 22px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-.mk-dh-fticks li { display: flex; align-items: center; gap: 8px; margin: 0; font: 400 17px/1.3 var(--mk-f-serif); color: var(--mk-nearblack); }
-/* brand.tsx names a bare span as the app's sans, and the desktop has no page-wide reset (the phone's is `.mk-wl`). */
-.mk-dh-fticks li > span { font: inherit; }
-.mk-dh-fticks .mk-dtick { flex: 0 0 20px; width: 20px; height: 20px; padding: 3px; margin-top: 0; background: #f7e1d8; color: var(--mk-rust); }
-.mk-dh-fticks .mk-dtick path { stroke-width: 2.2; }
+/* ── The founding block (waitlist clarity v1, 2 Nov; trimmed 3 Nov): the navy pill, then the places bar.
+   ⚠️ ONE WIDTH FOR THE PAIR, STATED ONCE: the block is a grid column `--mk-dh-fw` wide (never wider than the
+   copy column) and the button and the places bar both fill it, so they cannot drift apart. `max-content` alone
+   would not do: the bar's track is flexible, so the pair's natural width is only the label's.
+   36px from the sub-line: the block's own top margin. ⚠️ IT COLLAPSES WITH THE SUB-LINE'S 28px BOTTOM MARGIN, so
+   the gap is the larger of the two, never their sum. ── */
+.mk-dh-founding { --mk-dh-fw: 420px; display: grid; width: min(var(--mk-dh-fw), 100%); margin: 36px 0 0; }
 .mk-dh-fjoin {
-  display: inline-flex; align-items: center; justify-content: center; height: 56px; padding: 0 34px; border: 0; border-radius: 999px;
-  background: var(--mk-navy); color: #fff; font: 600 18px/1 var(--mk-f-serif); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; height: 56px; padding: 0 34px; border: 0; border-radius: 999px;
+  background: var(--mk-navy); color: #fff; font: 600 18px/1 var(--mk-f-serif); text-decoration: none; cursor: pointer;
 }
 .mk-dh-fjoin:focus-visible { outline: 2px solid var(--mk-navy); outline-offset: 3px; }
 /* The places bar keeps its box while the count loads (hidden, as the places line did), so nothing moves. */
-.mk-dh .mk-places--hero { margin: 14px 0 0; max-width: 420px; font: 400 15px/1 var(--mk-f-serif); color: rgba(28, 19, 15, .72); }
+.mk-dh .mk-places--hero { margin: 14px 0 0; font: 400 15px/1 var(--mk-f-serif); color: rgba(28, 19, 15, .72); }
 .mk-dh .mk-places--hero .mk-places-bar { background: #f7e8e2; }
 .mk-dh .mk-places--hero .mk-places-bar i { background: var(--mk-rust); }
 .mk-dh .mk-places--hero b { color: var(--mk-nearblack); }

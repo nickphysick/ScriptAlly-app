@@ -28,8 +28,6 @@ const unesc = (s: string) => s.replace(/&#x27;/g, "'").replace(/&amp;/g, "&").re
 const text = (h: string) => unesc(h.replace(/<[^>]+>/g, "")).replace(/\s+/g, " ").trim();
 const css = (f: string) => readFileSync(join(process.cwd(), "src/marketing", f), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
 
-export const HEADING = "We're looking for founding writers";
-export const TICKS = ["Everything QueryHawk has to offer", "Free for your whole campaign", "A direct line to the founder"];
 
 /** The phone hero's own markup, from its opening tag to the section's close. */
 const phoneHero = () => {
@@ -42,20 +40,12 @@ const phoneHero = () => {
 describe("WLC-1 · the phone hero", () => {
   beforeEach(() => { mockCount = { cap: 50, claimed: 13 }; });
 
-  it("heads the block 'We're looking for founding writers', then the three ticks in order", () => {
+  /* Hero trim (3 Nov): the heading and the ticks are gone, and the button is a link — HT-4 holds both. */
+  it("has one full-width 'Become a founding writer' link and no email field, heading, ticks or privacy line", () => {
     const h = phoneHero();
-    const head = h.match(/<h2[^>]*class="mk-wl-fhead"[^>]*>([\s\S]*?)<\/h2>/);
-    expect(head, "an h2 after the h1, so no level is skipped").toBeTruthy();
-    expect(text(head![1])).toBe(HEADING);
-    const ticks = h.match(/<ul class="mk-wl-fticks">([\s\S]*?)<\/ul>/);
-    expect(ticks, "the ticks list").toBeTruthy();
-    expect([...ticks![1].matchAll(/<li>([\s\S]*?)<\/li>/g)].map((m) => text(m[1]))).toEqual(TICKS);
-    expect(ticks![1].match(/class="mk-dtick"/g) ?? [], "the existing disc tick, three times").toHaveLength(3);
-  });
-
-  it("has one full-width Join the waitlist button and no email field, places line text or privacy line", () => {
-    const h = phoneHero();
-    expect(h).toMatch(/<button type="button" class="mk-wl-fjoin">Join the waitlist<\/button>/);
+    expect(h).toMatch(/<a href="#mk-close-signup" class="mk-wl-fjoin">Become a founding writer<\/a>/);
+    expect(h).not.toContain("mk-wl-fhead");
+    expect(h).not.toContain("mk-wl-fticks");
     expect(h, "no form in the hero").not.toMatch(/<form\b|type="email"/);
     expect(h, "no privacy line").not.toContain("mk-betanote");
     expect(h).not.toContain("Privacy");
@@ -106,17 +96,15 @@ const deskHero = () => renderToStaticMarkup(<Hero onNavigate={noNavigate} />);
 describe("WLC-2 · the desktop hero", () => {
   beforeEach(() => { mockCount = { cap: 50, claimed: 13 }; });
 
-  it("after the sub-line: the heading, the three ticks stacked, the navy pill and the places bar", () => {
+  it("after the sub-line: the navy pill and the places bar (hero trim, 3 Nov: no heading, no ticks — HT-2)", () => {
     const h = deskHero();
     const copy = h.slice(h.indexOf('class="mk-dh-copy"'));
     const iSub = copy.indexOf('class="mk-dh-sub"'), iBlock = copy.indexOf('class="mk-dh-founding"');
     expect(iSub, "the sub-line is there").toBeGreaterThan(0);
     expect(iBlock, "the block follows it").toBeGreaterThan(iSub);
-    const head = h.match(/<h2[^>]*class="mk-dh-fhead"[^>]*>([\s\S]*?)<\/h2>/);
-    expect(head && text(head[1])).toBe(HEADING);
-    const ticks = h.match(/<ul class="mk-dh-fticks">([\s\S]*?)<\/ul>/);
-    expect([...(ticks?.[1] ?? "").matchAll(/<li>([\s\S]*?)<\/li>/g)].map((m) => text(m[1]))).toEqual(TICKS);
-    expect(h).toMatch(/<button type="button" class="mk-dh-fjoin">Join the waitlist<\/button>/);
+    expect(h).not.toContain("mk-dh-fhead");
+    expect(h).not.toContain("mk-dh-fticks");
+    expect(h).toMatch(/<a href="#mk-band-email" class="mk-dh-fjoin">Become a founding writer<\/a>/);
     expect(h).toContain('aria-label="37 of 50 places left"');
   });
 
@@ -133,22 +121,15 @@ describe("WLC-2 · the desktop hero", () => {
     expect(renderToStaticMarkup(<NavPass label="Join the waitlist" />)).toContain("<span>Join the waitlist</span>");
   });
 
-  it("the desktop block's values are the ref's: 22px heading, 17px ticks, a 56px navy pill, a 420px places bar", () => {
+  it("the desktop pill keeps the ref's values: 56px high, navy (its width is HT-3's)", () => {
     const c = css("waitlist.css");
     const rule = (sel: string) => c.match(new RegExp("\\n" + sel.replace(/\./g, "\\.") + " \\{([^}]*)\\}"))?.[1] ?? "";
-    expect(rule(".mk-dh .mk-dh-fhead")).toMatch(/font-size:\s*22px/);
-    expect(rule(".mk-dh-fticks li")).toMatch(/17px/);
     expect(rule(".mk-dh-fjoin")).toMatch(/height:\s*56px/);
     expect(rule(".mk-dh-fjoin")).toMatch(/background:\s*var\(--mk-navy\)/);
-    expect(rule(".mk-dh .mk-places--hero")).toMatch(/max-width:\s*420px/);
   });
 });
 
-describe("WLC-2b · the desktop ticks are set in the serif, not brand.tsx's sans", () => {
-  it("the tick text inherits the list item's face", () => {
-    expect(css("waitlist.css")).toMatch(/\n\.mk-dh-fticks li > span \{ font: inherit; \}/);
-  });
-});
+/* WLC-2b (the desktop ticks' face) is retired with the ticks (hero trim, 3 Nov). */
 
 /* ── WLC-3 · every "Join" goes to one form ── */
 import * as Parts from "./WaitlistParts";
@@ -177,7 +158,9 @@ describe("WLC-3 · every Join goes to the founding section's form", () => {
   });
 
   it("the hero buttons, the phone nav's Join, the desktop nav's pass and the join bar all call scrollToJoin", () => {
-    expect(src("WaitlistParts.tsx")).toMatch(/className=\{p \+ "-fjoin"\} onClick=\{scrollToJoin\}/);
+    /* Hero trim (3 Nov): the heroes' links go through joinFromHero, which stops the jump and calls scrollToJoin. */
+    expect(src("WaitlistParts.tsx")).toMatch(/className=\{p \+ "-fjoin"\} onClick=\{joinFromHero\}/);
+    expect(src("WaitlistParts.tsx")).toMatch(/const joinFromHero = \(e: React\.MouseEvent\) => \{ e\.preventDefault\(\); scrollToJoin\(\); \};/);
     expect(src("WaitlistParts.tsx")).toMatch(/className="mk-navpass" onClick=\{scrollToJoin\}/);
     expect(src("MarketingShell.tsx")).toMatch(/className="mk-wljoin" onClick=\{scrollToJoin\}/);
     expect(src("JoinBar.tsx")).toMatch(/onClick=\{scrollToJoin\}/);

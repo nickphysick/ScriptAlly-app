@@ -34,7 +34,7 @@ import { ContactPage } from "./ContactPage";
 import { FoundersPage } from "./FoundersPage";
 import { WelcomePage } from "./WelcomePage";
 import { LEGAL_COPY_REVIEWED } from "./legalCopy";
-import { HERO_H1, WAITLIST_CTA, FEATURE_ROWS, WAIT_HERO_Q, WAIT_HERO_SUB, BE_HEADING, BE_LINE,
+import { HERO_H1, HERO_CTA, WAITLIST_CTA, FEATURE_ROWS, WAIT_HERO_Q, WAIT_HERO_SUB, BE_HEADING, BE_LINE,
   VISION_HEADING, VISION_POINTS } from "./landingCopy";
 import { SUPPORT_EMAIL } from "../lib/companyInfo";
 import { sliceBetween } from "../test/sliceBetween";
@@ -472,15 +472,16 @@ describe("the hero", () => {
     expect(h, "no pillars strip").not.toContain("mk-dh-pillar");
   });
 
-  /* RE-POINTED (clarity v1, 2 Nov): the hero asks with a button, not a field; the band holds the form. */
+  /* RE-POINTED (clarity v1, 2 Nov): the hero asks with a button, not a field; the band holds the form.
+     Hero trim (3 Nov): the button is "Become a founding writer", an in-page link to the band's field. */
   it("asks with one button and no field, and carries nothing that leaves the page", () => {
     const h = hero();
     expect(h, "no field in the hero").not.toContain('id="mk-hero-email"');
-    expect(h).toContain(WAITLIST_CTA);
+    expect(h).toContain(HERO_CTA);
     expect(h, "the old in-page jump is retired").not.toContain('href="#pulse"');
     expect(h, "no card pile in the hero").not.toMatch(/["\s`]mk-hc-pile["\s`]/);
     expect(h, "no cast shadow").not.toContain("hawk-shadow.png");
-    expect(h.match(/<a\b/g) ?? [], "no links").toHaveLength(0);
+    expect(h.match(/<a\b[^>]*>/g) ?? [], "one link, and it stays on the page").toEqual(['<a href="#mk-band-email" class="mk-dh-fjoin">']);
   });
 
   it("versions the binocular hawk's URL by the file's own content", () => {

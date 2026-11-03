@@ -16,6 +16,11 @@ const open = async (page: Page, vp: { width: number; height: number }) => {
   await page.setViewportSize(vp);
   await page.route("**/api/waitlist", (r) => r.fulfill({ contentType: "application/json", body: '{"visible":true,"cap":50,"count":13}' }));
   await page.goto("/", { waitUntil: "load" });
+  /* ⚠️ `document.fonts.ready` ALONE IS NOT ENOUGH ON A COLD LOAD: it can resolve before the font stylesheet has
+     arrived (0 faces loaded), and the hero's h1 then wraps in the fallback face for a moment — so a click in that
+     window lands while the page above the target is still changing height (measured: 45px on the phone hero),
+     and the reduced-motion case reads that settling as a scroll. Wait for a real face, then for all of them. */
+  await page.waitForFunction(() => [...document.fonts].some((f) => f.status === "loaded"));
   await page.evaluate(() => document.fonts.ready);
   /* Record where the page was when the field took focus, and every focus event's target. */
   await page.evaluate(() => {

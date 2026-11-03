@@ -32,8 +32,8 @@ export const HERO_H1 = "No more winging it.";
 
 /** The sign-up's button in the hero, on both layouts, and the join bar's words. */
 export const HERO_CTA = "Become a founding writer";
-/** Every "join" on the landing page: the heroes' buttons, the desktop nav's button, the founding form's button
-    (waitlist clarity v1, 2 Nov). ⚠️ ABOVE `FOUNDING_CTA`, WHICH READS IT: a const read before its line throws. */
+/** The desktop nav's button and the founding forms' buttons (waitlist clarity v1, 2 Nov). Since the hero trim
+    (3 Nov) the heroes' buttons read `HERO_CTA` instead; this is where the waitlist wording lives. ⚠️ ABOVE `FOUNDING_CTA`, WHICH READS IT: a const read before its line throws. */
 export const WAITLIST_CTA = "Join the waitlist";
 
 /* ── The hero on phones (≤760px; ref design-refs/landing-hero-mobile-v1.html) ──
@@ -304,15 +304,10 @@ export const foundingPlacesLeftLabel = (claimed: number, cap: number) => navPlac
 /** The places line under each sign-up (waitlist v1): what it says, and what it is read as. */
 export const heroPlacesLabel = (left: number, cap: number) => `${left} of ${cap} founding places left`;
 
-/* ── The founding block in both heroes (waitlist clarity v1, 2 Nov; ref design-refs/landing-waitlist-clarity-v1.html) ──
-   It replaced each hero's email form, places line and privacy line (`HERO_PRIVACY_SHORT` is retired with
-   the phone's). The founding section's form is the page's only sign-up; the hero's button goes there. */
-export const HERO_FOUNDING_HEADING = "We're looking for founding writers";
-export const HERO_FOUNDING_TICKS = [
-  "Everything QueryHawk has to offer",
-  "Free for your whole campaign",
-  "A direct line to the founder",
-] as const;
+/* ── The founding block in both heroes (waitlist clarity v1, 2 Nov; trimmed 3 Nov) ──
+   It replaced each hero's email form, places line and privacy line. Since the trim it is one button,
+   `HERO_CTA`, over the places bar: its heading and ticks (`HERO_FOUNDING_HEADING`, `HERO_FOUNDING_TICKS`) are
+   deleted. The founding section's form is the page's only sign-up, and its button keeps "Join the waitlist". */
 /** The places bar under the heroes' button: "N of 50 places left", the number set bold by the component. */
 export const placesLeftRest = (cap: number) => ` of ${cap} places left`;
 export const placesLeftLabel = (left: number, cap: number) => `${left}${placesLeftRest(cap)}`;
@@ -660,8 +655,8 @@ export const PRICING_TIERS: PricingTier[] = [
 export const WAIT_HERO_Q = HERO_PHONE_Q;
 /** The handwritten line under it. It is `HERO_H1` — the phrase keeps one owner. */
 export const WAIT_HERO_STRAP = HERO_H1;
-/** The sub-line: desktop only since hero v3 (2 Nov); phones show the lockup panel instead. `WAIT_HERO_SUB_BRAND` is drawn bold and never split across lines. */
-export const WAIT_HERO_SUB = "Give your manuscript the chance it deserves with QueryHawk.";
+/** The sub-line: desktop only since hero v3 (2 Nov); phones show the lockup panel instead. Hero trim (3 Nov): "Track your entire campaign". `WAIT_HERO_SUB_BRAND` is drawn bold and never split across lines. */
+export const WAIT_HERO_SUB = "Track your entire campaign with QueryHawk.";
 export const WAIT_HERO_SUB_BRAND = "QueryHawk";
 /** Phones (hero v3, 2 Nov): the lockup panel's first line, a dot between each word, over "QueryHawk". */
 export const HERO_TRIO = ["Query", "Track", "Discover"] as const;

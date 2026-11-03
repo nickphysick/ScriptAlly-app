@@ -371,7 +371,7 @@ test.describe("LW-13 · the hero's copy, both layouts", () => {
         expect(r.lockFace).toMatch(/Special Elite/);
         expect(r.sub, "no sub-line on phones").toBeNull();
       } else {
-        expect(r.sub).toBe("Give your manuscript the chance it deserves with QueryHawk.");
+        expect(r.sub).toBe("Track your entire campaign with QueryHawk.");
         expect(r.brandWeight).toBe("700");
         expect(r.trio, "no trio row in the copy column").toBe(false);
         expect(r.pillars, "the pillars strip is retired (2 Nov)").toEqual([]);
