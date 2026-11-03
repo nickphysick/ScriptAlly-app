@@ -127,6 +127,9 @@ import type { AgentEditPatch } from "../lib/saveAgentEdits";
 import type { RowSpec } from "./reading-pane/QueryTimeline";
 import type { QcRow } from "../lib/qcSummary";
 import { nextLine } from "../lib/qcRowLines";
+import { QcPage151, Track151 } from "./queries/centre/QcPage151";
+import { QcFilterPanel151 } from "./queries/centre/QcFilterMenu140";
+import { DEFAULT_SORT_151, QC_FULL_SCREEN, nextCell, sort151, whoSections, type Section, type Sort151 } from "../lib/qc151";
 import { pressView, twinTags } from "../lib/qc149";
 import { PIN_KEYS, usePinList } from "./shell/useFullScreenList";
 import { listCountTitle } from "./shell/ViewTitleRow";
@@ -2513,6 +2516,8 @@ export const Queries: React.FC<{
   const qc138Pop = usePopover<Qc138Pop>();
   /* v138 §C — the headings' sort (no Sort control), full screen, and the folded bands */
   const [qcSort138, setQcSort138] = useState<Qc138Sort>(() => qcRemView.sort);
+  /* v151 §7 — the table's headings sort (Due ascending by default), for the visit */
+  const [qcSort151, setQcSort151] = useState<Sort151>(DEFAULT_SORT_151);
   /* v140 §F — the list's unpinned scroll position, for the visit (QcList138 reads and writes it) */
   const qcScrollMemory = useMemo(() => ({ read: () => readQcVisit()?.scroll ?? 0, write: (y: number) => writeQcVisit({ scroll: y }) }), []);
   /* v140 §F — written as they change: the sort per device, the filters and the search for the visit */
@@ -2545,7 +2550,9 @@ export const Queries: React.FC<{
   /* v138.6 §A — the pin is the shared hook (`usePinList`, the Contact list's too): held sidebar, remembered per page
      and restored on the first frame, F and Esc, and the scroll position put back on the way out. `qcFull` keeps its
      name. */
-  const qcPin = usePinList("queries", { routeActive: routeActive && qcDesk, scroller: () => qc138Ref.current?.closest<HTMLElement>(".wpg-scroll") ?? null });
+  /* v151 §0 — FULL SCREEN IS NOT PART OF THIS PAGE: the hook stays, inert (`QC_FULL_SCREEN`), so nothing is restored,
+     held or bound to F. The full-screen code in QcList138/QcToolbar140 is unreferenced from the desktop page. */
+  const qcPin = usePinList("queries", { routeActive: QC_FULL_SCREEN && routeActive && qcDesk, scroller: () => qc138Ref.current?.closest<HTMLElement>(".wpg-scroll") ?? null });
   const qcFull = qcPin.full;
   /* v140 §C — the folder tab and the sheet lip go navy to join the band while this list is pinned and on screen, and
      ONLY then: a layout effect, so the tab never paints navy over an unpinned page (Contact list v19's own rule) */
@@ -4045,6 +4052,18 @@ export const Queries: React.FC<{
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [qcScoped, qcBoardCards]);
   const qcById = new Map(qcRows.map((r) => [r.id, r]));
+  /* §F (v138) — a row's timeline: the query's activity log, through the panel's own builder (v151's hover timeline reads it too) */
+  const qcLoadPeek = async (id: string) => {
+    if (isPracticeId(id)) return [];
+    const q0 = qcById.get(id)?.query;
+    if (!q0) return [];
+    const docs = await readQueryActivity(id);
+    const evs = docs.map((d) => ({ id: d.id, ...d.data }));
+    const noDate = undatedIds(evs as { id?: unknown; createdAt?: unknown }[]);
+    const rows0 = buildTimelineRows(evs, q0, agents.find((a) => a.id === q0.agentId) ?? null).map((r0) => (r0.activityId && noDate.has(r0.activityId) ? { ...r0, timeMs: undefined } : r0));
+    const dated = rows0.filter((r0) => typeof r0.timeMs === "number" && Number.isFinite(r0.timeMs));
+    return (dated.length ? dated : rows0).map((r0) => ({ name: r0.title, ms: dated.length ? r0.timeMs as number : NaN, status: r0.kind ? null : r0.status }));
+  };
   const sortedList = qcVisible.map((r) => r.query);
   /* ── the head's line, and the sentence's manuscript scope ──
      ⚠️ THE PAGE IS NOT SCOPED TO A MANUSCRIPT BY DEFAULT — the scope is the sentence's, default All —
@@ -7736,7 +7755,80 @@ export const Queries: React.FC<{
             * the tiles' and the pills' job; the shell's search still narrows the list.
             */}
           <QcCentre
-            header138={qc138Header}
+            /* v151 — on the desktop the whole page is QcPage151: header, banner, toolbar, the panel, the strip and the
+               table (or Birds-eye). The v150 header card, At a glance, Your queries, the navy bar and the list card
+               are not drawn; QcCentre's own body is not drawn either (`bodyless`). */
+            bodyless={qcDesk}
+            header138={qcDesk ? (() => {
+              const now151 = qcNow138;
+              const phrase151 = (r: QcRow) => nextLine(r, qcComing.get(r.id) ?? null, now151).phrase;
+              const sorted151 = sort151(qcVisible, qcSort151, (r) => nextCell(r, phrase151(r), now151).label);
+              const sections151: Section<QcRow>[] = qcGroup === "attention" ? whoSections(sorted151, now151)
+                : qcGroup === "none" ? (sorted151.length ? [{ key: "all", label: "", rows: sorted151 }] : [])
+                : qcListGroups(sorted151, qcGroup, now151, qcPackageName).map((g) => ({
+                  key: g.key, rows: g.rows,
+                  label: qcGroup === "package" ? (g.key === "pkg:none" ? "Nothing recorded" : `${g.label} package`) : g.label,
+                }));
+              if (practice && pipRow) sections151.unshift({ key: "practice", label: "Practice", rows: [pipRow] });
+              const strip151 = qc140Chips.filter((c) => !c.key.startsWith("where:"));
+              const keepWhere = () => setQcF138((f) => ({ ...emptyQc138Filters(), where: f.where }));
+              const clear151 = () => { keepWhere(); setQcFilter("all"); setQcCzCourt(null); setQcIds(null); };
+              const reset151 = () => { clear151(); setQcFind(""); };
+              const order151 = sections151.flatMap((x) => x.rows.map((r) => r.id));
+              const beEmpty = !showGridSkeleton && qcBeOrder.length === 0
+                ? (strip151.length ? "filtered" as const : qcF138.where === "closed" ? "closed" as const : null) : null;
+              return (
+                <QcPage151
+                  loading={showGridSkeleton}
+                  counts={showGridSkeleton ? null : { sent: qcScoped.length, active: qcScoped.filter((r) => whereItStands(r, now151) !== "closed").length, heardPct: qcBandFig.heardPct }}
+                  view={qcView150} onView={pickView150}
+                  onLog={() => onNavigate?.("queries", "Log a query")}
+                  onRecord={() => onNavigate?.("queries", "Record a response")}
+                  logDisabled={creating} logRef={logTriggerRef}
+                  onHow={() => { if (qcGuide.hidden) unhideQcGuide(); reopenGuide(); }}
+                  tabCounts={showGridSkeleton ? null : qcWhereN} total={qcScoped.length} where={qcF138.where}
+                  onWhere={(k) => setQcF138((f) => ({ ...f, where: k }))}
+                  find={qcFind} onFind={setQcFind} findRef={qcSheetFindRef}
+                  filterCount={strip151.filter((c) => c.key !== "find").length}
+                  onClearFilters={clear151}
+                  filterPanel={(close) => (
+                    <QcFilterPanel151 close={close} onResetAll={strip151.some((c) => c.key !== "find") ? clear151 : null} model={{
+                      filters: qcF138, onFilters: setQcF138, showing: qcVisible.length, total: qcScoped.length,
+                      quickN: qc140QuickN, stageCounts: qc138Counts.stage, sent: qc138Counts.sent,
+                      moreN: { dueWeek: qc138Counts.dueWeek, ...qc138Counts.more }, whereN: qcWhereN,
+                      filtered: qc140Chips.length > 0, onExport: exportQcList,
+                    }} />
+                  )}
+                  chips={strip151} showing={qcVisible.length} onResetAll={reset151}
+                  group={qcGroup} onGroup={setQcGroup}
+                  sort={qcSort151} onSort={setQcSort151}
+                  sections={showGridSkeleton ? [] : sections151}
+                  phraseOf={phrase151}
+                  nowMs={now151}
+                  selectedId={pipOpen ? PIP_ID : selectedQueryId}
+                  onOpen={(id) => { if (isPracticeId(id)) { openPip(); return; } cardSetRef.current = order151; onOpenQuery?.(id); }}
+                  onAct={(id) => {
+                    if (isPracticeId(id)) { openPip(); return; }
+                    const r = qcById.get(id);
+                    const req = r ? trayOpen(qcComing.get(id)?.bucket ?? null, r) : null;
+                    if (req) stepRow(req); else onOpenQuery?.(id);
+                  }}
+                  loadPeek={qcLoadPeek}
+                  signoff={!showGridSkeleton && qcScoped.length > 0 && qcF138.where === null && qc140Chips.length === 0 ? { total: qcScoped.length } : null}
+                  onImport={() => onNavigate?.("import")}
+                  birds={qcView150 === "birds" && !showGridSkeleton ? (
+                    <QcBirds150 groups={qcBeGroups} banded={qcBeGroup !== "none"} nowMs={qcNow138} moves={qcMoves}
+                      selectedId={selectedQueryId} closedN={beClosedCount(qcVisible, qcNow138)}
+                      lead={(r) => <Track151 row={r.row} />}
+                      pinkAct={(id) => { const r = qcById.get(id); return !!r && nextCell(r, null, now151).kind === "act"; }}
+                      onOpen={(id) => { cardSetRef.current = qcBeOrder; onOpenQuery?.(id); }}
+                      onAct={(id) => { const r = qcById.get(id); const req = r ? trayOpen(null, r) : null; if (req) stepRow(req); else onOpenQuery?.(id); }} />
+                  ) : null}
+                  birdsEmpty={beEmpty}
+                  beGroup={qcBeGroup} onBeGroup={setQcBeGroup} beSort={qcBeSort} onBeSort={setQcBeSort}
+                />
+              );
+            })() : qc138Header}
             full={qcDesk && qcFull}
             enter138={qcDesk && qc138In === "run"}
             v131={qcDesk}
