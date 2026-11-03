@@ -65,7 +65,11 @@ export const QcBirds150: React.FC<{
   selectedId: string | null;
   /** closed queries in the same filtered set (never drawn) */
   closedN: number;
-}> = ({ groups, banded, nowMs, moves, onOpen, onAct, selectedId, closedN }) => {
+  /** v151 §9 — drawn in place of the initials disc (the status track) */
+  lead?: (r: EyeRow) => React.ReactNode;
+  /** v151 §9 — true for a move of the writer's (your move or a nudge): the button is pink */
+  pinkAct?: (id: string) => boolean;
+}> = ({ groups, banded, nowMs, moves, onOpen, onAct, selectedId, closedN, lead, pinkAct }) => {
   const rootRef = useRef<HTMLDivElement>(null);
   const axRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -348,7 +352,7 @@ export const QcBirds150: React.FC<{
                   onClick={(e) => { if ((e.target as HTMLElement).closest("button")) return; openRow(r.id); }}
                   onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); openRow(r.id); } }}>
                   <div className="qc150-ag">
-                    <span className="qc150-d" aria-hidden="true">{r.row.initials}</span>
+                    {lead ? lead(r) : <span className="qc150-d" aria-hidden="true">{r.row.initials}</span>}
                     <span className="qc150-who"><b data-qc150="be-name">{r.row.agentName}</b><small>{r.row.agency}</small></span>
                   </div>
                   <div className="qc150-tl" data-qc150="be-track" data-qc150-tl="">
@@ -375,7 +379,7 @@ export const QcBirds150: React.FC<{
                     ) : null}
                   </div>
                   <div className="qc150-xa">
-                    {move ? <button type="button" data-qc150="be-act" onClick={(e) => { e.stopPropagation(); onAct(r.id); }}>{move.label}</button> : null}
+                    {move ? <button type="button" data-qc150="be-act" data-pk={pinkAct?.(r.id) ? "" : undefined} onClick={(e) => { e.stopPropagation(); onAct(r.id); }}>{move.label}</button> : null}
                   </div>
                 </div>
               );

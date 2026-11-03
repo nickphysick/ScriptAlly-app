@@ -67,12 +67,12 @@ async function open(page: Page, vp: VP) {
 const vis = (sel: string) => `[...document.querySelectorAll(${JSON.stringify(sel)})].filter((e) => e.getBoundingClientRect().height > 0)`;
 async function count(page: Page, sel: string): Promise<number> { return page.evaluate(`${vis(sel)}.length`) as Promise<number>; }
 async function toView(page: Page, v: "list" | "birds") {
-  await page.evaluate((x) => { const b = [...document.querySelectorAll<HTMLElement>(`[data-qc150="switch"] [data-v="${x}"]`)].find((e) => e.getBoundingClientRect().height > 0); b?.click(); }, v);
+  await page.evaluate((x) => { const b = [...document.querySelectorAll<HTMLElement>(`[data-qc150="switch"] [data-v="${x}"], [data-qc151="switch"] [data-v="${x}"]`)].find((e) => e.getBoundingClientRect().height > 0); b?.click(); }, v);
   await page.waitForTimeout(900);
 }
 async function scrollTitleTop(page: Page, gap = 20) {
   await page.evaluate((g) => {
-    const t = [...document.querySelectorAll<HTMLElement>("[data-qc150='title']")].find((e) => e.getBoundingClientRect().height > 0);
+    const t = [...document.querySelectorAll<HTMLElement>("[data-qc150='title'], [data-qc151='toolbar']")].find((e) => e.getBoundingClientRect().height > 0);
     const sc = t?.closest<HTMLElement>(".wpg-scroll");
     if (t && sc) sc.scrollTop += t.getBoundingClientRect().top - sc.getBoundingClientRect().top - g;
   }, gap);
@@ -404,7 +404,7 @@ for (const vp of SIZES) {
       L.done(6);
     });
 
-    test("L10 · pinning: after 800px of page scroll the navy bar's bottom is the date row's top, and both are on screen", async ({ page }) => {
+    test("L10 · pinning: after 800px of page scroll the date row pins flush under the navy bar (v151: at the sheet's top), on screen", async ({ page }) => {
       test.skip(!run("L10"));
       const L = new Ledger(`L10-${vp.width}`);
       await open(page, vp);
@@ -413,10 +413,17 @@ for (const vp of SIZES) {
       await page.evaluate(() => { const sc = document.querySelector<HTMLElement>("[data-qc150='birds']")?.closest<HTMLElement>(".wpg-scroll"); if (sc) sc.scrollTop = 800; });
       await page.waitForTimeout(600);
       const r = await page.evaluate(() => {
-        const tb = [...document.querySelectorAll<HTMLElement>(".qc140-tb")].find((e) => e.getBoundingClientRect().height > 0)!.getBoundingClientRect();
+        /* v151 §9 — no navy bar above it any more: the date row pins to the top of the sheet (the scroller's top) */
+        const v151 = !!document.querySelector("[data-qc151='birds-card']");
+        const tbEl = [...document.querySelectorAll<HTMLElement>(".qc140-tb")].find((e) => e.getBoundingClientRect().height > 0);
         const dr = document.querySelector<HTMLElement>("[data-qc150='daterow']")!.getBoundingClientRect();
         const sc = document.querySelector<HTMLElement>("[data-qc150='birds']")!.closest<HTMLElement>(".wpg-scroll")!;
-        return { tbB: tb.bottom, tbT: tb.top, drT: dr.top, drB: dr.bottom, top: sc.getBoundingClientRect().top, st: sc.scrollTop, vh: window.innerHeight };
+        const top = sc.getBoundingClientRect().top;
+        /* under the sheet's 12px lip: the lip's bottom is where the bar's bottom was */
+        const lip = [...document.querySelectorAll<HTMLElement>("[data-sheet-lip]")].map((l) => l.getBoundingClientRect()).filter((r) => r.height > 0 && Math.abs(r.top - top) < 1);
+        const cover = lip.length ? Math.max(...lip.map((r) => r.bottom)) : top;
+        const tb = v151 || !tbEl ? { bottom: cover, top } : tbEl.getBoundingClientRect();
+        return { tbB: tb.bottom, tbT: tb.top, drT: dr.top, drB: dr.bottom, top, st: sc.scrollTop, vh: window.innerHeight };
       });
       L.check("population: the page scrolled", r.st >= 700, String(r.st));
       L.check("flush", Math.abs(r.tbB - r.drT) <= 1, `${r.tbB.toFixed(1)} vs ${r.drT.toFixed(1)}`);
@@ -429,26 +436,40 @@ for (const vp of SIZES) {
       test.skip(!run("L11"));
       const L = new Ledger(`L11-${vp.width}`);
       await open(page, vp);
-      const listGroup = () => page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-ltb='group-name']")].find((e) => e.getBoundingClientRect().height > 0)?.textContent ?? "");
+      /* v151 — the list's grouping is read off its Group button's name; its bands are the table's plain sections */
+      const listGroup = () => page.evaluate(() => {
+        const old = [...document.querySelectorAll<HTMLElement>("[data-ltb='group-name']")].find((e) => e.getBoundingClientRect().height > 0)?.textContent;
+        if (old) return old;
+        return /Group the list by (.*)$/.exec(document.querySelector("[data-qc151='group']")?.getAttribute("aria-label") ?? "")?.[1] ?? "";
+      });
       const g0 = await listGroup();
       /* the list's own Status bands, the reference for the counts */
-      const listBands = await page.evaluate(() => Object.fromEntries([...document.querySelectorAll<HTMLElement>("[data-qcv='gband']")].filter((e) => e.getBoundingClientRect().height > 0)
-        .map((b) => [b.querySelector("[data-qcv='gband-t']")?.textContent ?? "", parseInt(b.querySelector("[data-qcv='gband-n']")?.textContent ?? "0", 10)])));
+      const listBands = await page.evaluate(() => Object.fromEntries([
+        ...[...document.querySelectorAll<HTMLElement>("[data-qcv='gband']")].filter((e) => e.getBoundingClientRect().height > 0)
+          .map((b) => [b.querySelector("[data-qcv='gband-t']")?.textContent ?? "", parseInt(b.querySelector("[data-qcv='gband-n']")?.textContent ?? "0", 10)]),
+        ...[...document.querySelectorAll<HTMLElement>("[data-qc151='section'] td")].map((td) => [td.childNodes[0]?.textContent?.trim() ?? "", parseInt(td.querySelector("small")?.textContent ?? "0", 10)]),
+      ]));
       /* the list on a grouping Birds-eye cannot pick, so a shared state would show */
-      await page.evaluate(() => ([...document.querySelectorAll<HTMLElement>("[data-qc140='group']")].find((e) => e.getBoundingClientRect().height > 0))?.click());
+      await page.evaluate(() => ([...document.querySelectorAll<HTMLElement>("[data-qc140='group'], [data-qc151='group']")].find((e) => e.getBoundingClientRect().height > 0))?.click());
       await page.waitForTimeout(300);
-      await page.evaluate(() => (document.querySelector("[data-qc140='group-opt'][data-g='action']") as HTMLElement | null)?.click());
+      await page.evaluate(() => (document.querySelector("[data-qc140='group-opt'][data-g='action'], [data-qc151='menu-opt'][data-v='action']") as HTMLElement | null)?.click());
       await page.waitForTimeout(700);
       const g1 = await listGroup();
       L.check("the list set to Next action", g1 === "Next action", g1);
       await toView(page, "birds");
       await scrollTitleTop(page);
       const sl0 = await page.evaluate(() => document.querySelector<HTMLElement>("[data-qc150='axis']")!.scrollLeft);
-      await page.evaluate(() => (document.querySelector("[data-qc150='be-group-pill']") as HTMLElement).click());
+      await page.evaluate(() => (document.querySelector("[data-qc150='be-group-pill'], [data-qc151='be-group']") as HTMLElement).click());
       await page.waitForTimeout(300);
-      const menu = await page.evaluate(() => { const m = document.querySelector<HTMLElement>("[data-qc150='be-menu']"); return m ? { t: m.querySelector("h6")?.textContent ?? "", opts: [...m.querySelectorAll("button")].map((b) => b.textContent ?? "") } : null; });
+      /* v151 — the radio-row menu: its title and each option's bold label */
+      const menu = await page.evaluate(() => {
+        const m = document.querySelector<HTMLElement>("[data-qc150='be-menu']");
+        if (m) return { t: m.querySelector("h6")?.textContent ?? "", opts: [...m.querySelectorAll("button")].map((b) => b.textContent ?? "") };
+        const n = document.querySelector<HTMLElement>("[data-qc151='menu'][data-k='be-group']");
+        return n ? { t: (n.querySelector(".qc140-mh")?.textContent ?? "").toUpperCase(), opts: [...n.querySelectorAll("[data-qc151='menu-opt'] b")].map((b) => b.textContent ?? "") } : null;
+      });
       L.check("menu", menu?.t === "GROUP BIRDS-EYE BY" && menu.opts.join() === "Urgency,Status,None", JSON.stringify(menu));
-      await page.evaluate(() => (document.querySelector("[data-qc150='be-menu'] [data-v='status']") as HTMLElement).click());
+      await page.evaluate(() => (document.querySelector("[data-qc150='be-menu'] [data-v='status'], [data-qc151='menu'][data-k='be-group'] [data-v='status']") as HTMLElement).click());
       await page.waitForTimeout(700);
       const bands = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-qc150='be-group']")].map((g) => ({ label: g.querySelector("[data-qc150='be-band'] b")?.textContent ?? "", n: +(g.querySelector("[data-qc150='be-band'] small")?.textContent ?? "0"), rows: g.querySelectorAll("[data-qc150='be-row']").length })));
       const ORDER = ["Queried", "Partial requested", "Partial sent", "Full requested", "Full sent", "Revise & resubmit", "Resubmitted", "Offer"];
@@ -462,6 +483,9 @@ for (const vp of SIZES) {
       L.check("the list's grouping held", (await listGroup()) === "Next action" && g0 !== "", `${g0} → Next action → ${await listGroup()}`);
       /* put the list back on its default */
       await page.evaluate(() => ([...document.querySelectorAll<HTMLElement>("[data-qc140='group-reset']")].find((e) => e.getBoundingClientRect().height > 0))?.click());
+      await page.evaluate(() => (document.querySelector("[data-qc151='group']") as HTMLElement | null)?.click());
+      await page.waitForTimeout(300);
+      await page.evaluate(() => (document.querySelector("[data-qc151='menu-opt'][data-v='attention']") as HTMLElement | null)?.click());
       await page.waitForTimeout(500);
       L.done(8);
     });

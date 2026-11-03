@@ -125,6 +125,49 @@ const GroupMenu: React.FC<{ anchor: HTMLElement; groupBy: GroupBy; onGroup: (g: 
   );
 };
 
+/**
+ * v151 §5 / §9 — THE GROUP MENU'S RADIO ROWS WITHOUT THE ROWS CONTROL, shared by the list's Group and Birds-eye's Group
+ * and Sort. Same markup and classes as `GroupMenu` above (its look), and the same arrow keys.
+ */
+export const RadioMenu151: React.FC<{
+  anchor: HTMLElement; title: string; k: string; value: string;
+  opts: readonly { key: string; label: string; line: string; divide?: boolean }[];
+  onPick: (v: string) => void;
+}> = ({ anchor, title, k, value, opts, onPick }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
+  useLayoutEffect(() => {
+    const r = anchor.getBoundingClientRect();
+    const w = 320;
+    setPos({ top: r.bottom + 8, left: Math.max(16, Math.min(r.right - w, window.innerWidth - w - 16)) });
+  }, [anchor]);
+  useEffect(() => { ref.current?.querySelector<HTMLElement>("[aria-checked='true']")?.focus({ preventScroll: true }); }, []);
+  const onKey = (e: React.KeyboardEvent) => {
+    if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+    const items = [...(ref.current?.querySelectorAll<HTMLElement>("button") ?? [])];
+    const i = items.indexOf(document.activeElement as HTMLElement);
+    if (!items.length) return;
+    e.preventDefault();
+    items[(i + (e.key === "ArrowDown" ? 1 : -1) + items.length) % items.length].focus();
+  };
+  return createPortal(
+    <div className="lpop qc140-gpop qc151-menu" data-lpop="group" data-qc151="menu" data-k={k} role="menu" aria-label={title} ref={ref} onKeyDown={onKey}
+      style={{ top: pos?.top ?? -9999, left: pos?.left ?? -9999 }}>
+      <div className="qc140-mh">{title}</div>
+      {opts.map((o) => (
+        <React.Fragment key={o.key}>
+          {o.divide ? <hr className="qc140-hr" /> : null}
+          <button type="button" role="menuitemradio" aria-checked={value === o.key} className="qc140-go" data-qc151="menu-opt" data-v={o.key}
+            onClick={() => { onPick(o.key); anchor.focus({ preventScroll: true }); }}>
+            <span className="qc140-rd" aria-hidden="true" /><b>{o.label}</b><small>{o.line}</small>
+          </button>
+        </React.Fragment>
+      ))}
+    </div>,
+    document.body,
+  );
+};
+
 export interface QcToolbar140Props {
   /** the list sheet: the jump targets and the scroller are found from it */
   rootRef: React.RefObject<HTMLElement | null>;

@@ -75,7 +75,6 @@ const MORE_ROWS: { key: "dueWeek" | "past" | "missing" | "overYear"; label: stri
  * ⚠️ THE MODEL AND THE COUNTS ARE v140 §D's AND v141 §A's, UNCHANGED (one filter state, the page's `Qc138Filters`).
  */
 export const QcFilterStrip142: React.FC<{ pop: PopoverState<Qc140Pop>; model: Qc140FilterModel; pinned: boolean }> = ({ pop, model, pinned }) => {
-  const { filters: f, onFilters, showing, total, quickN, stageCounts, sent, moreN, whereN, filtered, onExport } = model;
   const anchor = pop.open === "filters" ? pop.anchor : null;
   const ref = useRef<HTMLDivElement>(null);
   const host = anchor?.closest<HTMLElement>('[data-qc140="stack"]') ?? null;
@@ -90,14 +89,25 @@ export const QcFilterStrip142: React.FC<{ pop: PopoverState<Qc140Pop>; model: Qc
   }, [isOpen, anchor]);
   if (!anchor || !host) return null;
 
-  /* a change can shorten the list under a stuck toolbar; the scroll that clamps must not close the strip */
-  const set = (g: Qc138Filters) => quietScroll(() => onFilters(g));
   const close = () => { anchor.focus({ preventScroll: true }); pop.close(); };
-  const chip = (on: boolean) => `cl20-chip${on ? " on" : ""}`;
 
   return createPortal(
     <div className={`lpop cl20-fs-strip qc142-strip${pinned ? " qc142-strip--full" : ""}`} data-lpop="filters" data-qc140="filter-menu" data-qc142="filter-strip"
       role="dialog" aria-label="Filter queries" ref={ref}>
+      <FilterInner model={model} close={close} />
+    </div>,
+    host,
+  );
+};
+
+
+/** v151 §5 — the strip's header and three columns, shared by v142's strip and v151's inline panel (one content) */
+const FilterInner: React.FC<{ model: Qc140FilterModel; close: () => void; onResetAll?: () => void }> = ({ model, close, onResetAll }) => {
+  const { filters: f, onFilters, showing, total, quickN, stageCounts, sent, moreN, whereN, filtered, onExport } = model;
+  const set = (g: Qc138Filters) => quietScroll(() => onFilters(g));
+  const chip = (on: boolean) => `cl20-chip${on ? " on" : ""}`;
+  return (
+    <>
       <header className="cl20-fsh" data-qc140="filter-head">
         <b>Filter queries</b>
         <span data-qc140="filter-showing" data-qc142="filter-count">{showing} of {total} showing</span>
@@ -105,6 +115,7 @@ export const QcFilterStrip142: React.FC<{ pop: PopoverState<Qc140Pop>; model: Qc
         <button type="button" className="cl20-fsc qc1421-export" data-qc140="filter-export" data-qc1421="strip-export" disabled={showing === 0} onClick={onExport}>
           {exportLabel(showing, total, filtered)}
         </button>
+        {onResetAll ? <button type="button" className="cl20-fsc qc151-freset" data-qc151="panel-reset" onClick={onResetAll}>Reset all</button> : null}
         <button type="button" className="cl20-fsx" data-qc140="filter-close" aria-label="Close" onClick={close}>{CROSS140}</button>
       </header>
       <div className="cl20-fsb qc142-fsb" data-qc140="filter-body">
@@ -181,8 +192,21 @@ export const QcFilterStrip142: React.FC<{ pop: PopoverState<Qc140Pop>; model: Qc
           </div>
         </section>
       </div>
-    </div>,
-    host,
+    </>
+  );
+};
+
+/**
+ * v151 §5 — THE SAME PANEL, INLINE: between the toolbar and the table, the full content width, pushing the table down.
+ * "Reset all" joins its header once anything is chosen (`onResetAll`). No portal and no anchor: the page opens and closes it.
+ */
+export const QcFilterPanel151: React.FC<{ model: Qc140FilterModel; close: () => void; onResetAll: (() => void) | null }> = ({ model, close, onResetAll }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => { ref.current?.querySelector<HTMLElement>("[data-opt]:not(:disabled)")?.focus({ preventScroll: true }); }, []);
+  return (
+    <div className="cl20-fs-strip qc142-strip qc151-fpan" data-qc140="filter-menu" data-qc151="panel" role="dialog" aria-label="Filter queries" ref={ref}>
+      <FilterInner model={model} close={close} onResetAll={onResetAll ?? undefined} />
+    </div>
   );
 };
 

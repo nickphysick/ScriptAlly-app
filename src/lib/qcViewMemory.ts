@@ -37,8 +37,9 @@ export const QC_VIEW_VERSION = 1;
 /* ⚠️ v149 B5 — THE PAGE IS LIST-ONLY: v142's `view` field ("cards" | "list") is no longer read or written. A record still
    carrying `view: "cards"` keeps its other fields and opens the list. */
 export interface QcView { group: GroupBy; sort: Qc138Sort; density: QcDensity }
-/** v141 §C — the list opens grouped by Status (was "Who it's with", `attention`); a saved choice is still honoured */
-export const DEFAULT_QC_GROUP: GroupBy = "status";
+/** v151 §5 — the list opens grouped by "Who it's with" again (v141 §C had made it Status); Group reads as set (navy)
+ *  whenever it is not this default. A saved choice is still honoured. */
+export const DEFAULT_QC_GROUP: GroupBy = "attention";
 export const DEFAULT_QC_VIEW = (): QcView => ({ group: DEFAULT_QC_GROUP, sort: { ...DEFAULT_SORT_138 }, density: "comfortable" });
 
 /** a stored view made safe, field by field — null when it is not this version's shape at all */

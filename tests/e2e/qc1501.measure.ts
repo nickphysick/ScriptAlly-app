@@ -61,12 +61,12 @@ async function mutate(page: Page) {
 async function open(page: Page, vp: VP) { await openQc(page, vp); await mutate(page); }
 const click = (page: Page, sel: string) => page.evaluate((s) => ([...document.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().height > 0))?.click(), sel);
 async function toView(page: Page, v: "list" | "birds", compact = false) {
-  await click(page, `[data-qc150="switch"]${compact ? "[data-compact]" : ":not([data-compact])"} [data-v="${v}"]`);
+  await click(page, `[data-qc150="switch"]${compact ? "[data-compact]" : ":not([data-compact])"} [data-v="${v}"], [data-qc151="switch"] [data-v="${v}"]`);
   await page.waitForTimeout(900);
 }
 async function scrollTitleTop(page: Page) {
   await page.evaluate(() => {
-    const t = [...document.querySelectorAll<HTMLElement>("[data-qc150='title']")].find((e) => e.getBoundingClientRect().height > 0);
+    const t = [...document.querySelectorAll<HTMLElement>("[data-qc150='title'], [data-qc151='toolbar']")].find((e) => e.getBoundingClientRect().height > 0);
     const sc = t?.closest<HTMLElement>(".wpg-scroll");
     if (t && sc) sc.scrollTop += t.getBoundingClientRect().top - sc.getBoundingClientRect().top - 20;
   });
@@ -214,7 +214,8 @@ for (const vp of SIZES) {
       await page.waitForTimeout(400);
       const rest = await page.evaluate(() => {
         const xa = [...document.querySelectorAll<HTMLElement>("[data-qc150='be-row'] .qc150-xa")].filter((e) => e.querySelector("button"));
-        const sheet = [...document.querySelectorAll<HTMLElement>(".qc138-sheet")].find((e) => e.getBoundingClientRect().height > 0)!.getBoundingClientRect();
+        /* v151 §9 — the card's edge is the Birds-eye card's (the list sheet before it) */
+        const sheet = [...document.querySelectorAll<HTMLElement>(".qc138-sheet, [data-qc151='birds-card']")].find((e) => e.getBoundingClientRect().height > 0)!.getBoundingClientRect();
         const ax = document.querySelector<HTMLElement>("[data-qc150='axis']")!.getBoundingClientRect();
         const tl = document.querySelector<HTMLElement>("[data-qc150='be-track']")!.getBoundingClientRect();
         return { n: xa.length, shown: xa.filter((e) => +getComputedStyle(e).opacity > 0).length, axGap: sheet.right - ax.right, tlGap: sheet.right - tl.right };
