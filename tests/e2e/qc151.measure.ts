@@ -324,7 +324,7 @@ for (const vp of SIZES) {
       const lateIdx = def.map((s, i) => (/late$/.test(s) ? i : -1)).filter((i) => i >= 0);
       L.check("late rows lead", lateIdx.length > 0 && lateIdx.every((i, j) => i === j), `late at ${lateIdx.slice(0, 8).join(",")}`);
       const parse: Record<string, (s: string) => string | number | null> = {
-        agent: (s) => s.toLowerCase(), agency: (s) => s.toLowerCase(), queried: (s) => dateOf(s), heard: (s) => (s === "—" ? null : dateOf(s)), due: dueOf,
+        agent: (s) => s.toLowerCase(), agency: (s) => (s === "No agency" || s === "—" || s === "" ? null : s.toLowerCase()), /* a missing agency sorts last, as the page does */ queried: (s) => dateOf(s), heard: (s) => (s === "—" ? null : dateOf(s)), due: dueOf,
       };
       for (const k of ["agent", "agency", "queried", "heard", "due"]) {
         for (const desc of [false, true]) {
@@ -334,9 +334,10 @@ for (const vp of SIZES) {
           const vals = (await col(k === "agent" ? "agent" : k)).map(parse[k]);
           const nn = vals.filter((x) => x != null) as (string | number)[];
           const cmp = (a: string | number, b: string | number) => (typeof a === "number" && typeof b === "number" ? a - b : String(a).localeCompare(String(b)));
-          const ok = nn.every((x, i) => i === 0 || (desc ? cmp(x, nn[i - 1]) <= 0 : cmp(x, nn[i - 1]) >= 0));
+          const bad = nn.findIndex((x, i) => i > 0 && (desc ? cmp(x, nn[i - 1]) > 0 : cmp(x, nn[i - 1]) < 0));
+          const ok = bad < 0;
           const aria = await page.evaluate((kk) => document.querySelector(`[data-qc151='heading'][data-k='${kk}']`)?.getAttribute("aria-sort"), k);
-          L.check(`${k} ${desc ? "desc" : "asc"}`, ok && aria === (desc ? "descending" : "ascending"), `${aria} · ${vals.slice(0, 6).join(" | ")}`);
+          L.check(`${k} ${desc ? "desc" : "asc"}`, ok && aria === (desc ? "descending" : "ascending"), `${aria} · ${bad < 0 ? vals.slice(0, 6).join(" | ") : `out of order at ${bad}: “${nn[bad - 1]}” then “${nn[bad]}”`}`);
         }
       }
       L.done(14);
@@ -383,7 +384,17 @@ for (const vp of SIZES) {
       L.check("agent never truncates", byCol("agent") === 0, `${byCol("agent")}: ${tr.filter((x) => x.col === "agent").slice(0, 3).map((x) => x.full).join(" | ")}`);
       L.check("a truncated cell carries its full text", tr.every((x) => x.title === x.full), tr.filter((x) => x.title !== x.full).slice(0, 3).map((x) => `${x.col}:${x.full}→${x.title}`).join(" | "));
       L.check("where it stands gives way only after agency", byCol("stands") === 0 || byCol("agency") > 0, `agency ${byCol("agency")}, stands ${byCol("stands")}`);
-      L.done(9);
+      /* §7 — the headings pin to the top of the sheet, under its 12px lip, while the page scrolls */
+      await page.evaluate(() => { const sc = document.querySelector<HTMLElement>("[data-qc151='table']")?.closest<HTMLElement>(".wpg-scroll"); if (sc) sc.scrollTop = 900; });
+      await page.waitForTimeout(500);
+      const pin = await page.evaluate(() => {
+        const sc = document.querySelector<HTMLElement>("[data-qc151='table']")!.closest<HTMLElement>(".wpg-scroll")!;
+        const top = sc.getBoundingClientRect().top;
+        const lips = [...document.querySelectorAll<HTMLElement>("[data-sheet-lip]")].map((l) => l.getBoundingClientRect()).filter((r) => r.height > 0 && Math.abs(r.top - top) < 1);
+        return { th: document.querySelector("[data-qc151='table'] thead th")!.getBoundingClientRect().top, cover: lips.length ? Math.max(...lips.map((r) => r.bottom)) : top, st: sc.scrollTop };
+      });
+      L.check("headings pinned under the lip", pin.st > 500 && Math.abs(pin.th - pin.cover) <= 1, `th ${pin.th} vs lip ${pin.cover} (scrolled ${pin.st})`);
+      L.done(10);
     });
 
     test("L9 · next move: a pink button with ink text where there is a move; plain text otherwise; no links", async ({ page }) => {

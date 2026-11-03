@@ -419,7 +419,10 @@ for (const vp of SIZES) {
         const dr = document.querySelector<HTMLElement>("[data-qc150='daterow']")!.getBoundingClientRect();
         const sc = document.querySelector<HTMLElement>("[data-qc150='birds']")!.closest<HTMLElement>(".wpg-scroll")!;
         const top = sc.getBoundingClientRect().top;
-        const tb = v151 || !tbEl ? { bottom: top, top } : tbEl.getBoundingClientRect();
+        /* under the sheet's 12px lip: the lip's bottom is where the bar's bottom was */
+        const lip = [...document.querySelectorAll<HTMLElement>("[data-sheet-lip]")].map((l) => l.getBoundingClientRect()).filter((r) => r.height > 0 && Math.abs(r.top - top) < 1);
+        const cover = lip.length ? Math.max(...lip.map((r) => r.bottom)) : top;
+        const tb = v151 || !tbEl ? { bottom: cover, top } : tbEl.getBoundingClientRect();
         return { tbB: tb.bottom, tbT: tb.top, drT: dr.top, drB: dr.bottom, top, st: sc.scrollTop, vh: window.innerHeight };
       });
       L.check("population: the page scrolled", r.st >= 700, String(r.st));
