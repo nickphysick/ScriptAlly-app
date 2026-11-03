@@ -61,12 +61,12 @@ async function mutate(page: Page) {
 async function open(page: Page, vp: VP) { await openQc(page, vp); await mutate(page); }
 const click = (page: Page, sel: string) => page.evaluate((s) => ([...document.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().height > 0))?.click(), sel);
 async function toView(page: Page, v: "list" | "birds", compact = false) {
-  await click(page, `[data-qc150="switch"]${compact ? "[data-compact]" : ":not([data-compact])"} [data-v="${v}"]`);
+  await click(page, `[data-qc150="switch"]${compact ? "[data-compact]" : ":not([data-compact])"} [data-v="${v}"], [data-qc151="switch"] [data-v="${v}"]`);
   await page.waitForTimeout(900);
 }
 async function scrollTitleTop(page: Page) {
   await page.evaluate(() => {
-    const t = [...document.querySelectorAll<HTMLElement>("[data-qc150='title']")].find((e) => e.getBoundingClientRect().height > 0);
+    const t = [...document.querySelectorAll<HTMLElement>("[data-qc150='title'], [data-qc151='toolbar']")].find((e) => e.getBoundingClientRect().height > 0);
     const sc = t?.closest<HTMLElement>(".wpg-scroll");
     if (t && sc) sc.scrollTop += t.getBoundingClientRect().top - sc.getBoundingClientRect().top - 20;
   });

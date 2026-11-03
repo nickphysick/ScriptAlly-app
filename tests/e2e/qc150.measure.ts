@@ -67,12 +67,12 @@ async function open(page: Page, vp: VP) {
 const vis = (sel: string) => `[...document.querySelectorAll(${JSON.stringify(sel)})].filter((e) => e.getBoundingClientRect().height > 0)`;
 async function count(page: Page, sel: string): Promise<number> { return page.evaluate(`${vis(sel)}.length`) as Promise<number>; }
 async function toView(page: Page, v: "list" | "birds") {
-  await page.evaluate((x) => { const b = [...document.querySelectorAll<HTMLElement>(`[data-qc150="switch"] [data-v="${x}"]`)].find((e) => e.getBoundingClientRect().height > 0); b?.click(); }, v);
+  await page.evaluate((x) => { const b = [...document.querySelectorAll<HTMLElement>(`[data-qc150="switch"] [data-v="${x}"], [data-qc151="switch"] [data-v="${x}"]`)].find((e) => e.getBoundingClientRect().height > 0); b?.click(); }, v);
   await page.waitForTimeout(900);
 }
 async function scrollTitleTop(page: Page, gap = 20) {
   await page.evaluate((g) => {
-    const t = [...document.querySelectorAll<HTMLElement>("[data-qc150='title']")].find((e) => e.getBoundingClientRect().height > 0);
+    const t = [...document.querySelectorAll<HTMLElement>("[data-qc150='title'], [data-qc151='toolbar']")].find((e) => e.getBoundingClientRect().height > 0);
     const sc = t?.closest<HTMLElement>(".wpg-scroll");
     if (t && sc) sc.scrollTop += t.getBoundingClientRect().top - sc.getBoundingClientRect().top - g;
   }, gap);
