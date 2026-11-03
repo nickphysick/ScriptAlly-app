@@ -14,7 +14,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   BE_DATES, BE_STAGE_RGB, BE_DESK_ROWS, BE_FOCUS, REPLAY_LABEL, BeStage, TickItem, FeatureRow,
   DETAILS_HEADING, DETAILS_SUB, DETAILS_PILLS, featureAnchor, BE_HEADING, BE_LINE, BE_TICKS,
-  HERO_FOUNDING_HEADING, HERO_FOUNDING_TICKS, HERO_CTA,
+  HERO_CTA,
 } from "./landingCopy";
 import { HeroPlaces } from "./HeroPlaces";
 import { useFounding, ensureCount } from "./foundingStore";
