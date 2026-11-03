@@ -14,7 +14,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   BE_DATES, BE_STAGE_RGB, BE_DESK_ROWS, BE_FOCUS, REPLAY_LABEL, BeStage, TickItem, FeatureRow,
   DETAILS_HEADING, DETAILS_SUB, DETAILS_PILLS, featureAnchor, BE_HEADING, BE_LINE, BE_TICKS,
-  HERO_FOUNDING_HEADING, HERO_FOUNDING_TICKS, WAITLIST_CTA,
+  HERO_FOUNDING_HEADING, HERO_FOUNDING_TICKS, HERO_CTA, WAITLIST_CTA,
 } from "./landingCopy";
 import { HeroPlaces } from "./HeroPlaces";
 import { useFounding, ensureCount } from "./foundingStore";
@@ -64,19 +64,24 @@ export const FeatureLine: React.FC<{ row: FeatureRow; className?: string }> = ({
   );
 };
 
-/* ── The founding block in each hero (waitlist clarity v1, 2 Nov; ref design-refs/landing-waitlist-clarity-v1.html
-   `.wl-founding` / `.dh-founding`): the heading, three ticks, one button and the places bar. No email field:
-   the founding section's form is the page's only sign-up, and the button goes there.
-   ⚠️ AN h2, WHERE THE REF DRAWS AN h3: it follows the hero's h1, and an h3 there would skip a level (the
-   launch-polish fix to the Birds-eye heading was the same correction). The look is the ref's.
+/* ── The founding block in each hero (waitlist clarity v1, 2 Nov; trimmed 3 Nov) ──
+   One link, "Become a founding writer" (`HERO_CTA`, shared with the join bar), over the places bar. No email
+   field: the founding section's form is the page's only sign-up, and the link goes there — on the desktop to the
+   band's field, on phones to the "Founding writer pass" card — through `scrollToJoin` (scroll, then focus the
+   field once still). The href is the real target, so the link still reads and copies as one.
    ⚠️ THE BLOCK KEEPS THE OLD FORM'S `mk-hero-signup` ID: the join bar reads it to know the hero has passed. */
+const joinFromHero = (e: React.MouseEvent) => { e.preventDefault(); scrollToJoin(); };
 export const HeroFounding: React.FC<{ layout: "phone" | "desk" }> = ({ layout }) => {
-  const p = layout === "phone" ? "mk-wl" : "mk-dh";
+  const phone = layout === "phone";
+  const p = phone ? "mk-wl" : "mk-dh";
+  const to = phone ? CLOSE_FORM + "-signup" : BAND_FORM + "-email";
   return (
     <div className={p + "-founding"} id={HERO_FORM + "-signup"}>
-      <h2 className={p + "-fhead"}>{HERO_FOUNDING_HEADING}</h2>
-      <Ticks items={HERO_FOUNDING_TICKS} disc className={p + "-fticks"} />
-      <button type="button" className={p + "-fjoin"} onClick={scrollToJoin}>{WAITLIST_CTA}</button>
+      {phone ? <>
+        <h2 className={p + "-fhead"}>{HERO_FOUNDING_HEADING}</h2>
+        <Ticks items={HERO_FOUNDING_TICKS} disc className={p + "-fticks"} />
+        <button type="button" className={p + "-fjoin"} onClick={scrollToJoin}>{WAITLIST_CTA}</button>
+      </> : <a href={"#" + to} className={p + "-fjoin"} onClick={joinFromHero}>{HERO_CTA}</a>}
       <HeroPlaces variant="hero" />
     </div>
   );

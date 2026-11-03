@@ -318,27 +318,20 @@
 .mk-dh-strap { margin: 14px 0 0; font: 600 40px/1.1 var(--mk-f-hand); color: #a2452a; }
 .mk-dh-sub { margin: 16px 0 28px; max-width: 480px; text-wrap: balance; font: 400 21px/1.6 var(--mk-f-serif); color: rgba(28, 19, 15, .74); }
 .mk-dh-sub b { font-weight: 700; color: #1c130f; white-space: nowrap; }
-/* ── The founding block (waitlist clarity v1, 2 Nov; ref design-refs/landing-waitlist-clarity-v1.html `.dh-*`):
-   the heading, three ticks stacked, the navy pill, the places bar. No form: the band's is the page's only one. ── */
-.mk-dh-founding { margin: 4px 0 0; max-width: 520px; }
-.mk-dh .mk-dh-fhead {
-  margin: 0 0 12px; color: var(--mk-nearblack);
-  font-family: var(--mk-f-serif) !important; font-weight: 600 !important; letter-spacing: 0 !important;
-  font-size: 22px !important; line-height: 1.25 !important;
-}
-.mk-dh-fticks { list-style: none; margin: 0 0 22px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-.mk-dh-fticks li { display: flex; align-items: center; gap: 8px; margin: 0; font: 400 17px/1.3 var(--mk-f-serif); color: var(--mk-nearblack); }
-/* brand.tsx names a bare span as the app's sans, and the desktop has no page-wide reset (the phone's is `.mk-wl`). */
-.mk-dh-fticks li > span { font: inherit; }
-.mk-dh-fticks .mk-dtick { flex: 0 0 20px; width: 20px; height: 20px; padding: 3px; margin-top: 0; background: #f7e1d8; color: var(--mk-rust); }
-.mk-dh-fticks .mk-dtick path { stroke-width: 2.2; }
+/* ── The founding block (waitlist clarity v1, 2 Nov; trimmed 3 Nov): the navy pill, then the places bar.
+   ⚠️ ONE WIDTH FOR THE PAIR, STATED ONCE: the block is a grid column `--mk-dh-fw` wide (never wider than the
+   copy column) and the button and the places bar both fill it, so they cannot drift apart. `max-content` alone
+   would not do: the bar's track is flexible, so the pair's natural width is only the label's.
+   36px from the sub-line: the block's own top margin. ⚠️ IT COLLAPSES WITH THE SUB-LINE'S 28px BOTTOM MARGIN, so
+   the gap is the larger of the two, never their sum. ── */
+.mk-dh-founding { --mk-dh-fw: 420px; display: grid; width: min(var(--mk-dh-fw), 100%); margin: 36px 0 0; }
 .mk-dh-fjoin {
-  display: inline-flex; align-items: center; justify-content: center; height: 56px; padding: 0 34px; border: 0; border-radius: 999px;
-  background: var(--mk-navy); color: #fff; font: 600 18px/1 var(--mk-f-serif); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; height: 56px; padding: 0 34px; border: 0; border-radius: 999px;
+  background: var(--mk-navy); color: #fff; font: 600 18px/1 var(--mk-f-serif); text-decoration: none; cursor: pointer;
 }
 .mk-dh-fjoin:focus-visible { outline: 2px solid var(--mk-navy); outline-offset: 3px; }
 /* The places bar keeps its box while the count loads (hidden, as the places line did), so nothing moves. */
-.mk-dh .mk-places--hero { margin: 14px 0 0; max-width: 420px; font: 400 15px/1 var(--mk-f-serif); color: rgba(28, 19, 15, .72); }
+.mk-dh .mk-places--hero { margin: 14px 0 0; font: 400 15px/1 var(--mk-f-serif); color: rgba(28, 19, 15, .72); }
 .mk-dh .mk-places--hero .mk-places-bar { background: #f7e8e2; }
 .mk-dh .mk-places--hero .mk-places-bar i { background: var(--mk-rust); }
 .mk-dh .mk-places--hero b { color: var(--mk-nearblack); }
