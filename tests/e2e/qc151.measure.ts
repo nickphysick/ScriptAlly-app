@@ -255,7 +255,7 @@ for (const vp of SIZES) {
       L.check("Reset all clears the filters", !z.badge && z.chips === 0, JSON.stringify(z));
       L.check("Reset all clears the search", z.find === "", JSON.stringify(z.find));
       L.check("Reset all keeps the tab", z.tab === "quiet", String(z.tab));
-      L.done(7);
+      L.done(6);
     });
 
     test("L6 · group menu: five options with lines, a divider before No grouping, no Rows; each gives its sections", async ({ page }) => {
