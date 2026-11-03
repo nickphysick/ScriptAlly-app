@@ -347,7 +347,8 @@ for (const vp of SIZES) {
         h: row.getBoundingClientRect().height, kind: row.querySelector("[data-qc151='next']")?.getAttribute("data-kind"), late: row.querySelector("[data-qc151='due']")?.hasAttribute("data-late"),
         nameW: getComputedStyle(row.querySelector("[data-qc151='agent'] b")!).fontWeight, agC: getComputedStyle(row.querySelector("[data-qc151='agency']")!).color,
         agLines: Math.round(row.querySelector<HTMLElement>("[data-qc151='agency']")!.scrollHeight / parseFloat(getComputedStyle(row.querySelector("[data-qc151='agency']")!).lineHeight || "18")),
-        agH: (() => { const g = document.createRange(); g.selectNodeContents(row.querySelector("[data-qc151='agency']")!); return g.getClientRects().length; })(),
+        /* lines, by distinct tops of the text's boxes (an ellipsis cell reports more than one box on one line) */
+        agH: (() => { const g = document.createRange(); g.selectNodeContents(row.querySelector("[data-qc151='agency']")!); return new Set([...g.getClientRects()].map((x) => Math.round(x.top))).size; })(),
       })));
       L.check("population", r.length > 5, `${r.length}`);
       const kinds = new Set(r.map((x) => `${x.kind}${x.late ? "-late" : ""}`));
@@ -516,7 +517,9 @@ for (const vp of SIZES) {
         let overdue = 0;
         for (const r of rows) {
           const tl = r.querySelector<HTMLElement>("[data-qc150='be-track']");
-          if (tl && ax) out.push({ where: `${w} track width`, ok: Math.abs(tl.scrollWidth - ax.scrollWidth) <= 1 && Math.abs(tl.clientWidth - ax.clientWidth) <= 1, detail: `${tl.scrollWidth}/${tl.clientWidth} vs ${ax.scrollWidth}/${ax.clientWidth}` });
+          /* the TRACKS, not the scrollers: an axis label may hang past the axis track and widen its scroller */
+          const tk = tl?.querySelector<HTMLElement>(".qc150-trk"), at = ax?.querySelector<HTMLElement>(".qc150-axt");
+          if (tl && ax && tk && at) out.push({ where: `${w} track width`, ok: Math.abs(tk.offsetWidth - at.offsetWidth) <= 1 && Math.abs(tl.clientWidth - ax.clientWidth) <= 1, detail: `${tk.offsetWidth}/${tl.clientWidth} vs ${at.offsetWidth}/${ax.clientWidth}` });
           const bar = r.querySelector<HTMLElement>(".qc150-bar--o"); const dot = r.querySelector<HTMLElement>("[data-qc150='be-dot']");
           if (!bar || !dot || today == null || !tl) continue;
           const tb = tl.getBoundingClientRect(); const br = bar.getBoundingClientRect(); const dr = dot.getBoundingClientRect();
