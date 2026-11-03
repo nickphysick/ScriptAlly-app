@@ -581,8 +581,11 @@ test.describe("QC151 @ 390", () => {
     test.skip(!run("L16"));
     const L = new Ledger("L16-390");
     await page.addInitScript(() => { try { localStorage.setItem("sa.guide.queries", "1"); } catch { /* */ } });
-    await openRoute(page, "/queries", { width: 390, height: 844 });
-    await page.waitForTimeout(2500);
+    /* sign in where the shell's sidebar is visible, then go to the phone size (the sign-in check waits for it) */
+    await openRoute(page, "/queries", { width: 1440, height: 900 });
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.reload();
+    await page.waitForTimeout(3000);
     const shape = await page.evaluate(() => {
       const root = document.querySelector<HTMLElement>("[data-qm1], .qm1, [data-phone='queries']") ?? document.querySelector<HTMLElement>(".ws-window");
       const els = [...(root?.querySelectorAll<HTMLElement>("*") ?? [])].filter((e) => e.getBoundingClientRect().height > 0);
