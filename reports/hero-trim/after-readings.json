@@ -1,0 +1,120 @@
+{
+ "phone": {
+  "hero": {
+   "top": 60,
+   "bottom": 620.1,
+   "height": 560.1,
+   "left": 0,
+   "width": 390
+  },
+  "card": null,
+  "founding": {
+   "top": 501.6,
+   "bottom": 582.1,
+   "height": 80.5,
+   "left": 24,
+   "width": 342
+  },
+  "head": null,
+  "btn": {
+   "top": 501.6,
+   "bottom": 555.6,
+   "height": 54,
+   "left": 24,
+   "width": 342
+  },
+  "btnText": "Become a founding writer",
+  "btnTag": "A",
+  "places": {
+   "top": 567.6,
+   "bottom": 582.1,
+   "height": 14.5,
+   "left": 26,
+   "width": 338
+  },
+  "placesText": "48 of 50 places left",
+  "sub": null,
+  "subInk": null,
+  "subToBtn": null,
+  "see": {
+   "top": 596.1,
+   "bottom": 644.1,
+   "height": 48,
+   "left": 171,
+   "width": 48
+  },
+  "beH": {
+   "top": 704.1,
+   "bottom": 779.1,
+   "height": 75,
+   "left": 24,
+   "width": 342
+  },
+  "band": null,
+  "vh": 844
+ },
+ "desk": {
+  "hero": {
+   "top": 92,
+   "bottom": 588.4,
+   "height": 496.4,
+   "left": 0,
+   "width": 1440
+  },
+  "card": {
+   "top": 116,
+   "bottom": 588.4,
+   "height": 472.4,
+   "left": 142,
+   "width": 1156
+  },
+  "founding": {
+   "top": 442.7,
+   "bottom": 527.7,
+   "height": 85,
+   "left": 214,
+   "width": 420
+  },
+  "head": null,
+  "btn": {
+   "top": 442.7,
+   "bottom": 498.7,
+   "height": 56,
+   "left": 214,
+   "width": 420
+  },
+  "btnText": "Become a founding writer",
+  "btnTag": "A",
+  "places": {
+   "top": 512.7,
+   "bottom": 527.7,
+   "height": 15,
+   "left": 214,
+   "width": 420
+  },
+  "placesText": "48 of 50 places left",
+  "sub": {
+   "top": 373.1,
+   "bottom": 406.7,
+   "height": 33.6,
+   "left": 214,
+   "width": 480
+  },
+  "subText": "Track your entire campaign with QueryHawk.",
+  "subInk": {
+   "lines": 1,
+   "bottom": 404.109375
+  },
+  "subToBtn": 36,
+  "see": null,
+  "beH": null,
+  "band": {
+   "top": 588.4,
+   "bottom": 8344.7,
+   "height": 7756.3,
+   "left": 0,
+   "width": 1440
+  },
+  "vh": 900
+ }
+}
