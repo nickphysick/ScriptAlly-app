@@ -220,7 +220,9 @@
   @media (max-width: 1399px) {
     .qc151 { --qc151-w: min(calc(var(--hsheet-w, 1100px) - 56px), 1100px); }
     .qc151-tb { gap: 12px; }
-    .qc151-tabs { gap: 14px; }
+    .qc151-tabs { gap: 12px; }
+    /* Birds-eye adds Sort: its three buttons step in so the row stays inside the card's edge (measured: 16px over) */
+    .qc151[data-view="birds"] .qc151-bb { padding: 0 9px; }
     .qc151-ctl { padding-left: 10px; gap: 6px; }
     .qc151-bb { padding: 0 11px; gap: 7px; }
     .qc151-tbl th, .qc151-tbl td { padding-left: 7px; padding-right: 7px; }
