@@ -14,7 +14,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   BE_DATES, BE_STAGE_RGB, BE_DESK_ROWS, BE_FOCUS, REPLAY_LABEL, BeStage, TickItem, FeatureRow,
   DETAILS_HEADING, DETAILS_SUB, DETAILS_PILLS, featureAnchor, BE_HEADING, BE_LINE, BE_TICKS,
-  HERO_FOUNDING_HEADING, HERO_FOUNDING_TICKS, HERO_CTA, WAITLIST_CTA,
+  HERO_FOUNDING_HEADING, HERO_FOUNDING_TICKS, HERO_CTA,
 } from "./landingCopy";
 import { HeroPlaces } from "./HeroPlaces";
 import { useFounding, ensureCount } from "./foundingStore";
@@ -77,11 +77,7 @@ export const HeroFounding: React.FC<{ layout: "phone" | "desk" }> = ({ layout })
   const to = phone ? CLOSE_FORM + "-signup" : BAND_FORM + "-email";
   return (
     <div className={p + "-founding"} id={HERO_FORM + "-signup"}>
-      {phone ? <>
-        <h2 className={p + "-fhead"}>{HERO_FOUNDING_HEADING}</h2>
-        <Ticks items={HERO_FOUNDING_TICKS} disc className={p + "-fticks"} />
-        <button type="button" className={p + "-fjoin"} onClick={scrollToJoin}>{WAITLIST_CTA}</button>
-      </> : <a href={"#" + to} className={p + "-fjoin"} onClick={joinFromHero}>{HERO_CTA}</a>}
+      <a href={"#" + to} className={p + "-fjoin"} onClick={joinFromHero}>{HERO_CTA}</a>
       <HeroPlaces variant="hero" />
     </div>
   );

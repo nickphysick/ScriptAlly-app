@@ -28,8 +28,6 @@ const unesc = (s: string) => s.replace(/&#x27;/g, "'").replace(/&amp;/g, "&").re
 const text = (h: string) => unesc(h.replace(/<[^>]+>/g, "")).replace(/\s+/g, " ").trim();
 const css = (f: string) => readFileSync(join(process.cwd(), "src/marketing", f), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
 
-export const HEADING = "We're looking for founding writers";
-export const TICKS = ["Everything QueryHawk has to offer", "Free for your whole campaign", "A direct line to the founder"];
 
 /** The phone hero's own markup, from its opening tag to the section's close. */
 const phoneHero = () => {
@@ -42,20 +40,12 @@ const phoneHero = () => {
 describe("WLC-1 · the phone hero", () => {
   beforeEach(() => { mockCount = { cap: 50, claimed: 13 }; });
 
-  it("heads the block 'We're looking for founding writers', then the three ticks in order", () => {
+  /* Hero trim (3 Nov): the heading and the ticks are gone, and the button is a link — HT-4 holds both. */
+  it("has one full-width 'Become a founding writer' link and no email field, heading, ticks or privacy line", () => {
     const h = phoneHero();
-    const head = h.match(/<h2[^>]*class="mk-wl-fhead"[^>]*>([\s\S]*?)<\/h2>/);
-    expect(head, "an h2 after the h1, so no level is skipped").toBeTruthy();
-    expect(text(head![1])).toBe(HEADING);
-    const ticks = h.match(/<ul class="mk-wl-fticks">([\s\S]*?)<\/ul>/);
-    expect(ticks, "the ticks list").toBeTruthy();
-    expect([...ticks![1].matchAll(/<li>([\s\S]*?)<\/li>/g)].map((m) => text(m[1]))).toEqual(TICKS);
-    expect(ticks![1].match(/class="mk-dtick"/g) ?? [], "the existing disc tick, three times").toHaveLength(3);
-  });
-
-  it("has one full-width Join the waitlist button and no email field, places line text or privacy line", () => {
-    const h = phoneHero();
-    expect(h).toMatch(/<button type="button" class="mk-wl-fjoin">Join the waitlist<\/button>/);
+    expect(h).toMatch(/<a href="#mk-close-signup" class="mk-wl-fjoin">Become a founding writer<\/a>/);
+    expect(h).not.toContain("mk-wl-fhead");
+    expect(h).not.toContain("mk-wl-fticks");
     expect(h, "no form in the hero").not.toMatch(/<form\b|type="email"/);
     expect(h, "no privacy line").not.toContain("mk-betanote");
     expect(h).not.toContain("Privacy");
@@ -168,7 +158,9 @@ describe("WLC-3 · every Join goes to the founding section's form", () => {
   });
 
   it("the hero buttons, the phone nav's Join, the desktop nav's pass and the join bar all call scrollToJoin", () => {
-    expect(src("WaitlistParts.tsx")).toMatch(/className=\{p \+ "-fjoin"\} onClick=\{scrollToJoin\}/);
+    /* Hero trim (3 Nov): the heroes' links go through joinFromHero, which stops the jump and calls scrollToJoin. */
+    expect(src("WaitlistParts.tsx")).toMatch(/className=\{p \+ "-fjoin"\} onClick=\{joinFromHero\}/);
+    expect(src("WaitlistParts.tsx")).toMatch(/const joinFromHero = \(e: React\.MouseEvent\) => \{ e\.preventDefault\(\); scrollToJoin\(\); \};/);
     expect(src("WaitlistParts.tsx")).toMatch(/className="mk-navpass" onClick=\{scrollToJoin\}/);
     expect(src("MarketingShell.tsx")).toMatch(/className="mk-wljoin" onClick=\{scrollToJoin\}/);
     expect(src("JoinBar.tsx")).toMatch(/onClick=\{scrollToJoin\}/);
