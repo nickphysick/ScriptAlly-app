@@ -1,0 +1,32 @@
+[
+ {
+  "where": "strip shown",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "one chip per filter + the search",
+  "ok": true,
+  "detail": "[\"qp:over\",\"find\"]"
+ },
+ {
+  "where": "removing a chip updates the rows",
+  "ok": true,
+  "detail": "32 → 38"
+ },
+ {
+  "where": "Reset all clears the filters",
+  "ok": true,
+  "detail": "{\"tab\":\"all\",\"find\":\"\",\"chips\":0,\"badge\":false}"
+ },
+ {
+  "where": "Reset all clears the search",
+  "ok": true,
+  "detail": "\"\""
+ },
+ {
+  "where": "Reset all keeps the tab",
+  "ok": false,
+  "detail": "all"
+ }
+]

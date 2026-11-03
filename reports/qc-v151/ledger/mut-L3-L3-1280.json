@@ -1,0 +1,142 @@
+[
+ {
+  "where": "list population",
+  "ok": true,
+  "detail": "{\"h\":51,\"n\":2,\"tabs\":5}"
+ },
+ {
+  "where": "list one row",
+  "ok": true,
+  "detail": "height 51"
+ },
+ {
+  "where": "list BUTTON inside",
+  "ok": true,
+  "detail": "322.2 vs 1244"
+ },
+ {
+  "where": "list BUTTON inside",
+  "ok": true,
+  "detail": "436.6 vs 1244"
+ },
+ {
+  "where": "list BUTTON inside",
+  "ok": true,
+  "detail": "579.3 vs 1244"
+ },
+ {
+  "where": "list BUTTON inside",
+  "ok": true,
+  "detail": "694.8 vs 1244"
+ },
+ {
+  "where": "list BUTTON inside",
+  "ok": true,
+  "detail": "780.1 vs 1244"
+ },
+ {
+  "where": "list find inside",
+  "ok": true,
+  "detail": "1013.8 vs 1244"
+ },
+ {
+  "where": "list filters inside",
+  "ok": true,
+  "detail": "1129.0 vs 1244"
+ },
+ {
+  "where": "list group inside",
+  "ok": true,
+  "detail": "1244.0 vs 1244"
+ },
+ {
+  "where": "list filters button",
+  "ok": false,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "where": "list group button",
+  "ok": false,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "where": "list tabs are not buttons",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) rgba(0, 0, 0, 0) rgba(0, 0, 0, 0) rgba(0, 0, 0, 0) rgba(0, 0, 0, 0)"
+ },
+ {
+  "where": "birds population",
+  "ok": true,
+  "detail": "{\"h\":51,\"n\":3,\"tabs\":5}"
+ },
+ {
+  "where": "birds one row",
+  "ok": true,
+  "detail": "height 51"
+ },
+ {
+  "where": "birds BUTTON inside",
+  "ok": true,
+  "detail": "322.2 vs 1244"
+ },
+ {
+  "where": "birds BUTTON inside",
+  "ok": true,
+  "detail": "436.6 vs 1244"
+ },
+ {
+  "where": "birds BUTTON inside",
+  "ok": true,
+  "detail": "579.3 vs 1244"
+ },
+ {
+  "where": "birds BUTTON inside",
+  "ok": true,
+  "detail": "694.8 vs 1244"
+ },
+ {
+  "where": "birds BUTTON inside",
+  "ok": true,
+  "detail": "780.1 vs 1244"
+ },
+ {
+  "where": "birds find inside",
+  "ok": true,
+  "detail": "926.0 vs 1244"
+ },
+ {
+  "where": "birds filters inside",
+  "ok": true,
+  "detail": "1037.2 vs 1244"
+ },
+ {
+  "where": "birds be-group inside",
+  "ok": true,
+  "detail": "1148.2 vs 1244"
+ },
+ {
+  "where": "birds be-sort inside",
+  "ok": true,
+  "detail": "1244.0 vs 1244"
+ },
+ {
+  "where": "birds filters button",
+  "ok": false,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "where": "birds be-group button",
+  "ok": false,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "where": "birds be-sort button",
+  "ok": false,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "where": "birds tabs are not buttons",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) rgba(0, 0, 0, 0) rgba(0, 0, 0, 0) rgba(0, 0, 0, 0) rgba(0, 0, 0, 0)"
+ }
+]

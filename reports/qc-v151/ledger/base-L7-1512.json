@@ -1,0 +1,72 @@
+[
+ {
+  "where": "population",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "where": "default Due ascending (late, most late first; then soonest)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "undated last",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "late rows lead",
+  "ok": false,
+  "detail": "late at "
+ },
+ {
+  "where": "agent asc",
+  "ok": false,
+  "detail": "undefined · "
+ },
+ {
+  "where": "agent desc",
+  "ok": false,
+  "detail": "undefined · "
+ },
+ {
+  "where": "agency asc",
+  "ok": false,
+  "detail": "undefined · "
+ },
+ {
+  "where": "agency desc",
+  "ok": false,
+  "detail": "undefined · "
+ },
+ {
+  "where": "queried asc",
+  "ok": false,
+  "detail": "undefined · "
+ },
+ {
+  "where": "queried desc",
+  "ok": false,
+  "detail": "undefined · "
+ },
+ {
+  "where": "heard asc",
+  "ok": false,
+  "detail": "undefined · "
+ },
+ {
+  "where": "heard desc",
+  "ok": false,
+  "detail": "undefined · "
+ },
+ {
+  "where": "due asc",
+  "ok": false,
+  "detail": "undefined · "
+ },
+ {
+  "where": "due desc",
+  "ok": false,
+  "detail": "undefined · "
+ }
+]

@@ -1,0 +1,77 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "{\"header\":{\"l\":276,\"r\":1244,\"w\":968},\"banner\":{\"l\":276,\"r\":1244,\"w\":968},\"toolbar\":{\"l\":276,\"r\":1244,\"w\":968},\"table\":{\"l\":276,\"r\":1244,\"w\":968},\"signoff\":{\"l\":276,\"r\":1244,\"w\":968},\"birds\":{\"l\":276,\"r\":1244,\"w\":968}}"
+ },
+ {
+  "where": "formula",
+  "ok": true,
+  "detail": "W 968 (sheet 1024)"
+ },
+ {
+  "where": "header width",
+  "ok": true,
+  "detail": "968.0 vs 968"
+ },
+ {
+  "where": "header centred",
+  "ok": true,
+  "detail": "760.0 vs 760.0"
+ },
+ {
+  "where": "banner width",
+  "ok": true,
+  "detail": "968.0 vs 968"
+ },
+ {
+  "where": "banner centred",
+  "ok": true,
+  "detail": "760.0 vs 760.0"
+ },
+ {
+  "where": "toolbar width",
+  "ok": true,
+  "detail": "968.0 vs 968"
+ },
+ {
+  "where": "toolbar centred",
+  "ok": true,
+  "detail": "760.0 vs 760.0"
+ },
+ {
+  "where": "table width",
+  "ok": true,
+  "detail": "968.0 vs 968"
+ },
+ {
+  "where": "table centred",
+  "ok": true,
+  "detail": "760.0 vs 760.0"
+ },
+ {
+  "where": "signoff width",
+  "ok": true,
+  "detail": "968.0 vs 968"
+ },
+ {
+  "where": "signoff centred",
+  "ok": true,
+  "detail": "760.0 vs 760.0"
+ },
+ {
+  "where": "birds width",
+  "ok": true,
+  "detail": "968.0 vs 968"
+ },
+ {
+  "where": "birds centred",
+  "ok": true,
+  "detail": "760.0 vs 760.0"
+ },
+ {
+  "where": "title one line",
+  "ok": true,
+  "detail": "1 lines"
+ }
+]

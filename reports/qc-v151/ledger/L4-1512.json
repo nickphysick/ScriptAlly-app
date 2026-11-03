@@ -1,0 +1,77 @@
+[
+ {
+  "where": "population: rows",
+  "ok": true,
+  "detail": "88 rows"
+ },
+ {
+  "where": "panel open",
+  "ok": true,
+  "detail": "{\"open\":true,\"heads\":[\"Most used\",\"Where it stands\",\"Status\",\"What you sent\",\"More\"],\"cols\":3,\"title\":\"Filter queries\",\"between\":true}"
+ },
+ {
+  "where": "title",
+  "ok": true,
+  "detail": "Filter queries"
+ },
+ {
+  "where": "three columns",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "where": "heading Most used",
+  "ok": true,
+  "detail": "Most used|Where it stands|Status|What you sent|More"
+ },
+ {
+  "where": "heading Where it stands",
+  "ok": true,
+  "detail": "Most used|Where it stands|Status|What you sent|More"
+ },
+ {
+  "where": "heading Status",
+  "ok": true,
+  "detail": "Most used|Where it stands|Status|What you sent|More"
+ },
+ {
+  "where": "heading What you sent",
+  "ok": true,
+  "detail": "Most used|Where it stands|Status|What you sent|More"
+ },
+ {
+  "where": "heading More",
+  "ok": true,
+  "detail": "Most used|Where it stands|Status|What you sent|More"
+ },
+ {
+  "where": "inline, between toolbar and table",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "badge 1",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "where": "× shown",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "rows narrowed",
+  "ok": true,
+  "detail": "38 of 88"
+ },
+ {
+  "where": "× clears to the full list",
+  "ok": true,
+  "detail": "88 rows, badge null"
+ },
+ {
+  "where": "outside closes",
+  "ok": true,
+  "detail": "before 1"
+ }
+]

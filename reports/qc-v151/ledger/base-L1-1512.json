@@ -1,0 +1,12 @@
+[
+ {
+  "where": "population",
+  "ok": false,
+  "detail": "{\"header\":null,\"banner\":null,\"toolbar\":null,\"table\":null,\"signoff\":null,\"birds\":null}"
+ },
+ {
+  "where": "formula",
+  "ok": true,
+  "detail": "W 1100 (sheet 1256)"
+ }
+]

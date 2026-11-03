@@ -1,0 +1,7 @@
+[
+ {
+  "where": "the seeded row (node tests/e2e/seedQc150.mjs)",
+  "ok": false,
+  "detail": "row absent"
+ }
+]

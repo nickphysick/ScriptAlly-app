@@ -1,0 +1,142 @@
+[
+ {
+  "where": "6w home population",
+  "ok": true,
+  "detail": "71 rows, 151 boxes, 7 axis labels"
+ },
+ {
+  "where": "6w home overlap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "6w home clipped",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "6w back 500 population",
+  "ok": true,
+  "detail": "71 rows, 74 boxes, 7 axis labels"
+ },
+ {
+  "where": "6w back 500 overlap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "6w back 500 clipped",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "6w forward 900 population",
+  "ok": true,
+  "detail": "71 rows, 155 boxes, 7 axis labels"
+ },
+ {
+  "where": "6w forward 900 overlap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "6w forward 900 clipped",
+  "ok": false,
+  "detail": "thin-q-close: “Queried · overdue since 27 Sep” 324–570 in 568–592 | seed-query-22: “Queried · overdue since 1 Jan” 332–570 in 568–592 | msv12-q-1: “Queried · overdue since 1 Jan” 332–570 in 568–592"
+ },
+ {
+  "where": "3m home population",
+  "ok": true,
+  "detail": "71 rows, 157 boxes, 14 axis labels"
+ },
+ {
+  "where": "3m home overlap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "3m home clipped",
+  "ok": false,
+  "detail": "cor-move-a: “Partial sent” 493–610 in 568–617"
+ },
+ {
+  "where": "3m back 500 population",
+  "ok": true,
+  "detail": "69 rows, 86 boxes, 16 axis labels"
+ },
+ {
+  "where": "3m back 500 overlap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "3m back 500 clipped",
+  "ok": false,
+  "detail": "msv12-q-1: “Queried · overdue since 1 Jan” 1108–1345 in 1108–1274 | cor-undo: “Full sent · overdue since 29 Aug” 1136–1393 in 1136–1274 | cor-pair: “Partial sent · overdue since 3 Oct” 1082–1351 in 1082–1274"
+ },
+ {
+  "where": "3m forward 900 population",
+  "ok": true,
+  "detail": "71 rows, 157 boxes, 15 axis labels"
+ },
+ {
+  "where": "3m forward 900 overlap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "3m forward 900 clipped",
+  "ok": false,
+  "detail": "thin-q-close: “Queried · overdue since 27 Sep” 324–570 in 568–592 | seed-query-22: “Queried · overdue since 1 Jan” 332–570 in 568–592 | msv12-q-1: “Queried · overdue since 1 Jan” 332–570 in 568–592"
+ },
+ {
+  "where": "6m home population",
+  "ok": true,
+  "detail": "71 rows, 163 boxes, 29 axis labels"
+ },
+ {
+  "where": "6m home overlap",
+  "ok": false,
+  "detail": "msv12-q-1: “Queried · overdue since 1 Jan” × “” | msv12-q-1: “Queried · overdue since 1 Jan” × “297 DAYS OVER” | cor-undo: “Full sent · overdue since 29 Aug” × “”"
+ },
+ {
+  "where": "6m home clipped",
+  "ok": false,
+  "detail": "msv12-q-1: “Queried · overdue since 1 Jan” 799–1037 in 799–992 | cor-undo: “Queried” 554–639 in 568–679 | cor-undo: “Full sent · overdue since 29 Aug” 814–1071 in 814–992"
+ },
+ {
+  "where": "6m back 500 population",
+  "ok": true,
+  "detail": "50 rows, 52 boxes, 31 axis labels"
+ },
+ {
+  "where": "6m back 500 overlap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "6m back 500 clipped",
+  "ok": false,
+  "detail": "seed-query-22: “Queried · overdue since 1 Jan” 1233–1471 in 1233–1274 | seed-query-4: “Queried · overdue since 1 Jan” 1183–1420 in 1183–1274 | rj-nudge: “Queried · overdue since 10 Aug” 1037–1284 in 1037–1274"
+ },
+ {
+  "where": "6m forward 900 population",
+  "ok": true,
+  "detail": "71 rows, 157 boxes, 29 axis labels"
+ },
+ {
+  "where": "6m forward 900 overlap",
+  "ok": false,
+  "detail": "msv12-q-1: “Queried · overdue since 1 Jan” × “” | msv12-q-1: “Queried · overdue since 1 Jan” × “297 DAYS OVER” | cor-undo: “Full sent · overdue since 29 Aug” × “”"
+ },
+ {
+  "where": "6m forward 900 clipped",
+  "ok": false,
+  "detail": "thin-q-close: “Queried · overdue since 27 Sep” 324–570 in 568–592 | seed-query-22: “Queried · overdue since 1 Jan” 332–570 in 568–592 | msv12-q-1: “Queried · overdue since 1 Jan” 399–637 in 568–592"
+ },
+ {
+  "where": "boxes measured",
+  "ok": true,
+  "detail": "1152"
+ }
+]

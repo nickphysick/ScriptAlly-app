@@ -1,0 +1,27 @@
+[
+ {
+  "where": "population",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "where": "equal widths",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "equal heights",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "no detail, Next or Show them",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "faces account for every query",
+  "ok": true,
+  "detail": ""
+ }
+]

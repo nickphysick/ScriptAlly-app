@@ -1,0 +1,37 @@
+[
+ {
+  "where": "title text",
+  "ok": true,
+  "detail": "Here’s every query you’ve sent"
+ },
+ {
+  "where": "list line",
+  "ok": true,
+  "detail": "88 queries · 52% heard back · grouped by status, soonest due first"
+ },
+ {
+  "where": "switch centred",
+  "ok": false,
+  "detail": "410.1 vs 876.0"
+ },
+ {
+  "where": "switch under the line",
+  "ok": true,
+  "detail": "669.0 vs 642.0"
+ },
+ {
+  "where": "no switch in the bar",
+  "ok": false,
+  "detail": "2"
+ },
+ {
+  "where": "birds line",
+  "ok": true,
+  "detail": "71 live queries · on one timeline · most urgent first"
+ },
+ {
+  "where": "no switch in the bar (birds)",
+  "ok": false,
+  "detail": "2"
+ }
+]
