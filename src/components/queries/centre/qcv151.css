@@ -121,7 +121,7 @@
   .qc151-tbl { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 14px; table-layout: auto; }
   .qc151-tbl col.c-tk { width: 1%; }
   .qc151-tbl th {
-    position: sticky; top: 0; z-index: 3; text-align: left; padding: 0 8px; height: 48px; background: #efe9df; border-bottom: 1px solid var(--line);
+    position: sticky; top: var(--pin-cover, 0px); z-index: 3; text-align: left; padding: 0 8px; height: 48px; background: #efe9df; border-bottom: 1px solid var(--line);
     white-space: nowrap; font: 600 15px var(--sp-serif);
   }
   .qc151-tbl th button { all: unset; cursor: pointer; font: 600 15px/1 var(--sp-serif) !important; color: var(--ink); white-space: nowrap; }
@@ -200,7 +200,7 @@
   /* §9 Birds-eye, re-dressed in a white card */
   .qc151-be { margin: 14px 0 96px; border-radius: 14px; background: #fff; box-shadow: 0 0 0 1px var(--line); overflow: clip; }
   .qc151 .qc150-be.qc150-be { --aw: 340px; }
-  .qc151 .qc150-be .qc150-bvh { top: 0; }
+  .qc151 .qc150-be .qc150-bvh { top: var(--pin-cover, 0px); }
   .qc151 .qc150-be .qc150-bvb { padding: 0 16px 6px; }
   .qc151 .qc150-be .qc150-gb { background: transparent; color: var(--ink); border-radius: 0; padding: 22px 8px 10px; margin: 0; border-bottom: 1px solid #cfc5b7; }
   .qc151 .qc150-be .qc150-gb b { font: 400 20px/1.2 var(--sp-type) !important; }

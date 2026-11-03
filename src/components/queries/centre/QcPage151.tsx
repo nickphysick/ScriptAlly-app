@@ -15,6 +15,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { StatusDot } from "../../StatusDot";
 import { usePopover } from "../../shell/ListPills";
+import { usePinCover } from "../../shell/stickyStack";
 import { guideSeen, markGuideSeen } from "../../../lib/pageGuide";
 import { STAGE_NAME, type QcRow, type WhereKey } from "../../../lib/qcSummary";
 import type { PeekEvent } from "../../../lib/qc138";
@@ -195,6 +196,12 @@ const Stops151: React.FC<{ row: QcRow; events: PeekEvent[] | null; nowMs: number
 
 export const QcPage151: React.FC<QcPage151Props> = (p) => {
   const pop = usePopover<Pop151>();
+  /* the table's headings and Birds-eye's date row pin under the sheet's 12px lip (`--pin-cover`, measured on the
+     sheet), never under it: at top 0 the lip (z 19) covered their top 12px */
+  const rootRef = useRef<HTMLDivElement>(null);
+  const [sheet, setSheet] = useState<HTMLElement | null>(null);
+  useEffect(() => { setSheet(rootRef.current?.closest<HTMLElement>(".ws-window") ?? null); }, []);
+  usePinCover(sheet);
   const [panelOpen, setPanelOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const filBtnRef = useRef<HTMLButtonElement>(null);
@@ -249,7 +256,7 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
           onKeyDown={(e) => { if (e.key === "Enter" && e.target === e.currentTarget) { e.preventDefault(); p.onOpen(r.id); } }}>
           <td className="qc151-tk"><Track151 row={r} /></td>
           <td className="qc151-nm" data-qc151="agent"><b title={r.agentName}>{r.agentName}</b></td>
-          <td className="qc151-ag" data-qc151="agency" title={r.agency}>{r.agency}</td>
+          <td className="qc151-ag" data-qc151="agency" title={r.agency || undefined}>{r.agency || "—"}</td>
           <td className="qc151-ws" data-qc151="stands" title={standWords(r)}>{standWords(r)}</td>
           <td className="qc151-mono" data-qc151="queried">{r.sentMs != null ? shortDate(r.sentMs, p.nowMs) : "—"}</td>
           <td className="qc151-mono" data-qc151="heard">{heard != null ? shortDate(heard, p.nowMs) : "—"}</td>
@@ -271,7 +278,7 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
 
   const empty = p.sections.length === 0;
   return (
-    <div className="qc151" data-qc151="page" data-view={p.view}>
+    <div className="qc151" data-qc151="page" data-view={p.view} ref={rootRef}>
       <QcHeader151 counts={p.counts} view={p.view} onView={p.onView} loading={p.loading} onLog={p.onLog} onRecord={p.onRecord} logDisabled={p.logDisabled} logRef={p.logRef} />
       <QcBanner151 onHow={p.onHow} />
 
