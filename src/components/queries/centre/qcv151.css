@@ -25,7 +25,7 @@
   .qc151-hd { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; }
   .qc151-id { display: flex; align-items: center; gap: 20px; min-width: 0; }
   .qc151-id img { flex: none; width: 108px; height: auto; margin: -10px 0 -12px -6px; }
-  .qc151 .qc151-id h1 { margin: 0; font: 400 40px/1.3 var(--sp-type) !important; color: var(--ink) !important; letter-spacing: 0; }
+  .qc151 .qc151-id h1 { margin: 0; white-space: nowrap; font: 400 40px/1.3 var(--sp-type) !important; color: var(--ink) !important; letter-spacing: 0; }
   .qc151-cl { margin: 4px 0 0; font: 400 16px/1.45 var(--sp-serif); color: var(--mut); white-space: nowrap; }
   .qc151-cl b { font: 400 17px/1 var(--sp-type) !important; color: var(--ink); }
   .qc151-acts { display: flex; align-items: center; gap: 10px; flex: none; }
@@ -221,6 +221,12 @@
     .qc151 { --qc151-w: min(calc(var(--hsheet-w, 1100px) - 56px), 1100px); }
     .qc151-tb { gap: 12px; }
     .qc151-tabs { gap: 12px; }
+    /* the header holds "Your queries" on one line at 1280 (it wrapped): the controls step in */
+    .qc151-id { gap: 16px; }
+    .qc151-acts { gap: 8px; }
+    .qc151-sw { margin-right: 0; }
+    .qc151-sw button { padding: 0 11px; }
+    .qc151-hd .qc151-btn { padding: 0 16px; }
     /* Birds-eye adds Sort: its three buttons step in so the row stays inside the card's edge (measured: 16px over) */
     .qc151[data-view="birds"] .qc151-bb { padding: 0 9px; }
     .qc151-ctl { padding-left: 10px; gap: 6px; }

@@ -143,7 +143,10 @@ for (const vp of SIZES) {
           L.check(`${k} centred`, Math.abs((x.l + x.r) / 2 - mid) <= 1, `${((x.l + x.r) / 2).toFixed(1)} vs ${mid.toFixed(1)}`);
         }
       }
-      L.done(12);
+      /* the title holds one line (it wrapped at 1280 before the header's controls stepped in) */
+      const th = await page.evaluate(() => { const h = document.querySelector<HTMLElement>("[data-qc151='title']"); if (!h) return null; const g = document.createRange(); g.selectNodeContents(h); return new Set([...g.getClientRects()].map((x) => Math.round(x.top))).size; });
+      L.check("title one line", th === 1, `${th} lines`);
+      L.done(13);
     });
 
     test("L2 · removed: no At a glance, navy bar, Your queries block or Full screen; the full-screen code is still in the tree", async ({ page }) => {
