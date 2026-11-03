@@ -657,8 +657,8 @@ export const PRICING_TIERS: PricingTier[] = [
 export const WAIT_HERO_Q = HERO_PHONE_Q;
 /** The handwritten line under it. It is `HERO_H1` — the phrase keeps one owner. */
 export const WAIT_HERO_STRAP = HERO_H1;
-/** The sub-line: desktop only since hero v3 (2 Nov); phones show the lockup panel instead. `WAIT_HERO_SUB_BRAND` is drawn bold and never split across lines. */
-export const WAIT_HERO_SUB = "Give your manuscript the chance it deserves with QueryHawk.";
+/** The sub-line: desktop only since hero v3 (2 Nov); phones show the lockup panel instead. Hero trim (3 Nov): "Track your entire campaign". `WAIT_HERO_SUB_BRAND` is drawn bold and never split across lines. */
+export const WAIT_HERO_SUB = "Track your entire campaign with QueryHawk.";
 export const WAIT_HERO_SUB_BRAND = "QueryHawk";
 /** Phones (hero v3, 2 Nov): the lockup panel's first line, a dot between each word, over "QueryHawk". */
 export const HERO_TRIO = ["Query", "Track", "Discover"] as const;
