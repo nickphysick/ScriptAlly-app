@@ -750,7 +750,7 @@ describe("founding emails v1", () => {
       expect(stored, `writer ${n}'s stored number`).toBe(n);
       const p = prepareWelcome(cfg, out.position, out.counter.cap, "unsub");
       expect(p.ok).toBe(true);
-      if (p.ok) expect(p.email.subject).toBe(`You're in: founding writer No. ${stored}`);
+      if (p.ok) expect(p.email.subject).toBe(`You're on the list: founding writer No. ${stored}`);
     }
   });
 
