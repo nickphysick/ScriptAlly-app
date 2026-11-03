@@ -10,10 +10,15 @@
      and the panel paint their own grounds over it; the shell is outside this scroller. */
   .qc-wpg.qc-wpg--v11 > .wpg-scroll {
     background-color: #f2eee8;
-    background-image: url("/images/qc/doodle-tile.svg");
-    background-repeat: repeat;
-    background-size: 340px 360px;
-    background-attachment: local;
+    /* v151.1 §8 — the tile sits in the top 280px of the sheet only, faded as `mask: linear-gradient(#000 30%,
+       transparent)` would fade it: the ground's own colour laid OVER the tile, clear to 84px (30% of 280) and solid
+       from 280 down, so nothing below the header band (the card, the rows, the gaps between them) has a doodle behind
+       it. A gradient over the tile rather than a masked layer: the scroller is the page's, and a pseudo-element on it
+       would be one more box every page's sticky stack has to clear. */
+    background-image: linear-gradient(to bottom, rgba(242, 238, 232, 0) 84px, #f2eee8 280px), url("/images/qc/doodle-tile.svg");
+    background-repeat: no-repeat, repeat;
+    background-size: 100% 100%, 340px 360px;
+    background-attachment: local, local;
   }
 
   /* A2 · the header card: 22 above, 24 below; the title 40px with the highlighter; the hawk 140 tall */

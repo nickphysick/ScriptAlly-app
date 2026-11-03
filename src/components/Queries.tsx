@@ -130,6 +130,7 @@ import { nextLine } from "../lib/qcRowLines";
 import { QcPage151, Track151 } from "./queries/centre/QcPage151";
 import { QcFilterPanel151 } from "./queries/centre/QcFilterMenu140";
 import { DEFAULT_SORT_151, QC_FULL_SCREEN, nextCell, sort151, whoSections, type Section, type Sort151 } from "../lib/qc151";
+import { pillGroups, weekSummary } from "../lib/qc1511";
 import { pressView, twinTags } from "../lib/qc149";
 import { PIN_KEYS, usePinList } from "./shell/useFullScreenList";
 import { listCountTitle } from "./shell/ViewTitleRow";
@@ -4052,18 +4053,6 @@ export const Queries: React.FC<{
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [qcScoped, qcBoardCards]);
   const qcById = new Map(qcRows.map((r) => [r.id, r]));
-  /* §F (v138) — a row's timeline: the query's activity log, through the panel's own builder (v151's hover timeline reads it too) */
-  const qcLoadPeek = async (id: string) => {
-    if (isPracticeId(id)) return [];
-    const q0 = qcById.get(id)?.query;
-    if (!q0) return [];
-    const docs = await readQueryActivity(id);
-    const evs = docs.map((d) => ({ id: d.id, ...d.data }));
-    const noDate = undatedIds(evs as { id?: unknown; createdAt?: unknown }[]);
-    const rows0 = buildTimelineRows(evs, q0, agents.find((a) => a.id === q0.agentId) ?? null).map((r0) => (r0.activityId && noDate.has(r0.activityId) ? { ...r0, timeMs: undefined } : r0));
-    const dated = rows0.filter((r0) => typeof r0.timeMs === "number" && Number.isFinite(r0.timeMs));
-    return (dated.length ? dated : rows0).map((r0) => ({ name: r0.title, ms: dated.length ? r0.timeMs as number : NaN, status: r0.kind ? null : r0.status }));
-  };
   const sortedList = qcVisible.map((r) => r.query);
   /* ── the head's line, and the sentence's manuscript scope ──
      ⚠️ THE PAGE IS NOT SCOPED TO A MANUSCRIPT BY DEFAULT — the scope is the sentence's, default All —
@@ -7763,8 +7752,9 @@ export const Queries: React.FC<{
               const now151 = qcNow138;
               const phrase151 = (r: QcRow) => nextLine(r, qcComing.get(r.id) ?? null, now151).phrase;
               const sorted151 = sort151(qcVisible, qcSort151, (r) => nextCell(r, phrase151(r), now151).label);
-              const sections151: Section<QcRow>[] = qcGroup === "attention" ? whoSections(sorted151, now151)
-                : qcGroup === "none" ? (sorted151.length ? [{ key: "all", label: "", rows: sorted151 }] : [])
+              /* v151.1 §6 — on one quick filter, Who it's with has nothing left to group: one label row, no groups */
+              const sections151: Section<QcRow>[] = qcGroup === "attention" && qcF138.where === null ? whoSections(sorted151, now151)
+                : qcGroup === "none" || qcGroup === "attention" ? (sorted151.length ? [{ key: "all", label: "", rows: sorted151 }] : [])
                 : qcListGroups(sorted151, qcGroup, now151, qcPackageName).map((g) => ({
                   key: g.key, rows: g.rows,
                   label: qcGroup === "package" ? (g.key === "pkg:none" ? "Nothing recorded" : `${g.label} package`) : g.label,
@@ -7773,21 +7763,22 @@ export const Queries: React.FC<{
               const strip151 = qc140Chips.filter((c) => !c.key.startsWith("where:"));
               const keepWhere = () => setQcF138((f) => ({ ...emptyQc138Filters(), where: f.where }));
               const clear151 = () => { keepWhere(); setQcFilter("all"); setQcCzCourt(null); setQcIds(null); };
-              const reset151 = () => { clear151(); setQcFind(""); };
+              /* v151.1 §5 — Clear all: filters, search, grouping and sort (and Birds-eye's), never the quick filter */
+              const clearAll1511 = () => { clear151(); setQcFind(""); setQcGroup("attention"); setQcSort151(DEFAULT_SORT_151); setQcBeGroup("urgency"); setQcBeSort("due"); };
               const order151 = sections151.flatMap((x) => x.rows.map((r) => r.id));
               const beEmpty = !showGridSkeleton && qcBeOrder.length === 0
                 ? (strip151.length ? "filtered" as const : qcF138.where === "closed" ? "closed" as const : null) : null;
               return (
                 <QcPage151
                   loading={showGridSkeleton}
-                  counts={showGridSkeleton ? null : { sent: qcScoped.length, active: qcScoped.filter((r) => whereItStands(r, now151) !== "closed").length, heardPct: qcBandFig.heardPct }}
+                  summary={showGridSkeleton ? null : weekSummary(qcScoped, now151)}
                   view={qcView150} onView={pickView150}
                   onLog={() => onNavigate?.("queries", "Log a query")}
                   onRecord={() => onNavigate?.("queries", "Record a response")}
                   logDisabled={creating} logRef={logTriggerRef}
-                  onHow={() => { if (qcGuide.hidden) unhideQcGuide(); reopenGuide(); }}
                   tabCounts={showGridSkeleton ? null : qcWhereN} total={qcScoped.length} where={qcF138.where}
                   onWhere={(k) => setQcF138((f) => ({ ...f, where: k }))}
+                  showing={qcVisible.length}
                   find={qcFind} onFind={setQcFind} findRef={qcSheetFindRef}
                   filterCount={strip151.filter((c) => c.key !== "find").length}
                   onClearFilters={clear151}
@@ -7799,9 +7790,9 @@ export const Queries: React.FC<{
                       filtered: qc140Chips.length > 0, onExport: exportQcList,
                     }} />
                   )}
-                  chips={strip151} showing={qcVisible.length} onResetAll={reset151}
+                  pills={pillGroups(strip151)} onClearAll={clearAll1511}
                   group={qcGroup} onGroup={setQcGroup}
-                  sort={qcSort151} onSort={setQcSort151}
+                  sort={qcSort151} defaultSort={DEFAULT_SORT_151} onSort={setQcSort151}
                   sections={showGridSkeleton ? [] : sections151}
                   phraseOf={phrase151}
                   nowMs={now151}
@@ -7813,7 +7804,6 @@ export const Queries: React.FC<{
                     const req = r ? trayOpen(qcComing.get(id)?.bucket ?? null, r) : null;
                     if (req) stepRow(req); else onOpenQuery?.(id);
                   }}
-                  loadPeek={qcLoadPeek}
                   signoff={!showGridSkeleton && qcScoped.length > 0 && qcF138.where === null && qc140Chips.length === 0 ? { total: qcScoped.length } : null}
                   onImport={() => onNavigate?.("import")}
                   birds={qcView150 === "birds" && !showGridSkeleton ? (
