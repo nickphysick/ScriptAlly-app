@@ -214,7 +214,8 @@ for (const vp of SIZES) {
       await page.waitForTimeout(400);
       const rest = await page.evaluate(() => {
         const xa = [...document.querySelectorAll<HTMLElement>("[data-qc150='be-row'] .qc150-xa")].filter((e) => e.querySelector("button"));
-        const sheet = [...document.querySelectorAll<HTMLElement>(".qc138-sheet")].find((e) => e.getBoundingClientRect().height > 0)!.getBoundingClientRect();
+        /* v151 §9 — the card's edge is the Birds-eye card's (the list sheet before it) */
+        const sheet = [...document.querySelectorAll<HTMLElement>(".qc138-sheet, [data-qc151='birds-card']")].find((e) => e.getBoundingClientRect().height > 0)!.getBoundingClientRect();
         const ax = document.querySelector<HTMLElement>("[data-qc150='axis']")!.getBoundingClientRect();
         const tl = document.querySelector<HTMLElement>("[data-qc150='be-track']")!.getBoundingClientRect();
         return { n: xa.length, shown: xa.filter((e) => +getComputedStyle(e).opacity > 0).length, axGap: sheet.right - ax.right, tlGap: sheet.right - tl.right };
