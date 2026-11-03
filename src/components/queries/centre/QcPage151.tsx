@@ -250,7 +250,7 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
           <td className="qc151-tk"><Track151 row={r} /></td>
           <td className="qc151-nm" data-qc151="agent"><b title={r.agentName}>{r.agentName}</b></td>
           <td className="qc151-ag" data-qc151="agency" title={r.agency}>{r.agency}</td>
-          <td className="qc151-ws" data-qc151="stands">{standWords(r)}</td>
+          <td className="qc151-ws" data-qc151="stands" title={standWords(r)}>{standWords(r)}</td>
           <td className="qc151-mono" data-qc151="queried">{r.sentMs != null ? shortDate(r.sentMs, p.nowMs) : "—"}</td>
           <td className="qc151-mono" data-qc151="heard">{heard != null ? shortDate(heard, p.nowMs) : "—"}</td>
           <td className="qc151-nx" data-qc151="next" data-kind={nc.kind}>

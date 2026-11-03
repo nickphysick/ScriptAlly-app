@@ -134,7 +134,8 @@
   .qc151-rg.is-hot .qc151-r td, .qc151-r:hover td, .qc151-r.is-sel td { background: #fff !important; }
   .qc151-r:focus-visible { outline: 2px solid #c9765d; outline-offset: -2px; }
   .qc151-tbl td.qc151-tk { width: 1%; padding-right: 14px; }
-  .qc151-nm b { font-weight: 600; color: var(--ink); }
+  .qc151-nm b { font-weight: 600; color: var(--ink); white-space: nowrap; }
+  .qc151-tbl td.qc151-nm { overflow: visible; text-overflow: clip; }
   .qc151-tbl td.qc151-ag { color: var(--mut); }
   .qc151-tbl td.qc151-mono { font: 400 15.5px/1 var(--sp-type) !important; color: var(--mut); }
   .qc151-tbl td.qc151-due { color: var(--mut); }
@@ -225,10 +226,14 @@
     .qc151-tbl th, .qc151-tbl td { padding-left: 7px; padding-right: 7px; }
     .qc151-tbl td.qc151-tk { padding-right: 8px; }
     .qc151-st > span, .qc151-st > span > svg { width: 12px !important; height: 12px !important; }
-    /* the ref's own step for the button; then the longest names and agencies end in an ellipsis (never a wrap) */
+    /* the ref's own step for the button; then, where a row still cannot fit, the AGENCY gives way first and "Where it
+       stands" after it. An agent's name never truncates. Every cell that can truncate carries its full text as a title. */
     .qc151-mv { padding: 0 9px; font-size: 14px !important; }
-    .qc151-tbl td.qc151-ag { max-width: 132px; overflow: hidden; text-overflow: ellipsis; }
-    .qc151-tbl td.qc151-nm b { display: block; max-width: 150px; overflow: hidden; text-overflow: ellipsis; }
+    /* step 1 (Nick, 3 Nov): Agency takes the room the other columns leave (`width: 100%` with `max-width: 0`, so its
+       text never widens the table), down to a 120px floor. Measured on the test account at 1280: 137px, the table
+       exactly W. Steps 2 and 3 ("Where it stands" cells, then the heading reading "Stage") were not needed there and
+       are not built. */
+    .qc151-tbl td.qc151-ag { width: 100%; max-width: 0; min-width: 120px; overflow: hidden; text-overflow: ellipsis; }
     .qc151-cn { width: 3px; }
     .qc151-arr { display: none; }
     .qc151-end img { width: 90px; }
