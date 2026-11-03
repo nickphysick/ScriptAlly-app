@@ -60,7 +60,7 @@ const PAGE_MUT: Record<string, { css?: string; js?: string }> = {
   /* the link restored in place of the button */
   L9: { css: `.qc151 .qc151-mv.qc151-mv { background: transparent !important; color: #2a3a52 !important; text-decoration: underline !important; }` },
   /* four glyphs on a closed track */
-  L10: { js: `new MutationObserver(() => { for (const t of document.querySelectorAll('.qc151-trk--x:not([data-m])')) { t.setAttribute('data-m', ''); const s = t.querySelector('[data-qc151="step"]'); while (t.querySelectorAll('[data-qc151="step"]').length < 4) t.append(s.cloneNode(true)); t.setAttribute('data-n', '4'); } }).observe(document.body, { childList: true, subtree: true })` },
+  L10: { js: `(() => { const go = () => { for (const t of document.querySelectorAll('.qc151-trk--x:not([data-m])')) { t.setAttribute('data-m', ''); const s = t.querySelector('[data-qc151="step"]'); while (t.querySelectorAll('[data-qc151="step"]').length < 4) t.append(s.cloneNode(true)); t.setAttribute('data-n', '4'); } }; go(); new MutationObserver(go).observe(document.body, { childList: true, subtree: true }); })()` },
   /* L11 is a SOURCE mutation (qc151Mutate.sh): HOVER_MS set to 0 in QcPage151.tsx, rebuilt */
   /* the sign-off always shown */
   L12: { js: `(() => { let keep = null; new MutationObserver(() => { const s = document.querySelector('[data-qc151="signoff"]'); if (s) keep = s.cloneNode(true); else if (keep) { const p = document.querySelector('[data-qc151="page"]'); if (p && !p.querySelector('[data-qc151="signoff"]')) p.append(keep.cloneNode(true)); } }).observe(document.body, { childList: true, subtree: true }); })()` },
