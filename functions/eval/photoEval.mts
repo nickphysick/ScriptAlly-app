@@ -2,7 +2,7 @@
  * Smart Import from photos — the evaluation runner (smart-import-photos-v1, phase 4).
  *
  *   npx tsx functions/eval/photoEval.mts [--dry-run] [--runs N] [--only <glob>] [--label <name>]
- *                                        [--timing] [--confirm-spend]
+ *                                        [--timing] [--confirm-spend] [--real-out <dir>]
  *
  * For each rendered fixture (photoRender.mts; sharp and blurred) and each of Nick's own photos in
  * functions/eval/fixtures/photos-real/ (gitignored; skipped with a note when empty): prepare every
@@ -104,6 +104,7 @@ async function main() {
   await page.setContent("<html><body></body></html>");
   const client: MapClient = DRY ? null as any : (new Anthropic({ apiKey: k! }) as unknown as MapClient);
   const results: any[] = [];
+  const realReads: any[] = [];
   const outDir = join(root, "reports", "smart-import-photos-v1", `eval-${LABEL}`);
   mkdirSync(outDir, { recursive: true });
 
@@ -121,6 +122,7 @@ async function main() {
         results.push({ id: f.id, run, real: f.real, style: f.truth.style, blurred: f.id.endsWith("-blur"), pages: pages.length, payloadChars: payload,
           ms: o.ms, attempts: o.attempts, failure: o.failure, stopReason: o.stopReason ?? null, usage: o.usage, costUsd: DRY ? 0 : costUsd(MODEL, o.usage), score,
           ...(f.real ? {} : { result: o.result }) });
+        if (f.real) realReads.push({ id: f.id, run, result: o.result, wrong: score?.wrong ?? [] });
         console.log(`run ${run} ${f.id}: ${o.failure ?? "ok"} ${(o.ms / 1000).toFixed(1)}s ${score ? `names ${score.correct.name}/${score.entries} src ${score.src.hit}/${score.src.of}` : ""}`);
       }
     }));
@@ -137,6 +139,9 @@ async function main() {
     console.log(`10-page read: ${o.failure ?? "ok"} ${(o.ms / 1000).toFixed(1)}s, ${timing.rows} rows, payload ${payload} chars`);
   }
   await browser.close();
+  /* A writer's own list is never written into the repo; --real-out names a folder outside it. */
+  const realOut = val("--real-out");
+  if (realOut) { mkdirSync(realOut, { recursive: true }); writeFileSync(join(realOut, `real-${LABEL}.json`), JSON.stringify(realReads, null, 2) + "\n"); }
   writeFileSync(join(outDir, "results.json"), JSON.stringify({ model: MODEL, label: LABEL, dry: DRY, runs: RUNS, timing, results }, null, 2) + "\n");
   writeFileSync(join(outDir, "summary.md"), summary(results, timing));
   console.log(`\nWritten to ${outDir}`);

@@ -217,6 +217,9 @@ export interface QueryQuestionProps {
   onPatch: (p: Partial<ReviewQuery>) => void;
   onResolveReason: (code: ReviewReasonCode, patch?: Partial<ReviewQuery>) => void;
   onSwapDates: () => void;
+  /** Two dates (v1.1): "Neither is when I sent it" — both dates stay on their events, and the
+   *  sent-date question opens on this same card. */
+  onNeitherSent?: () => void;
   /** Photos: the agent's name (the crossed-out question) and agency (the mark question's quote). */
   agentName?: string;
   agentAgency?: string;

@@ -33,7 +33,7 @@ import { SmartImportResult, ReviewReasonCode } from "../../types/smartImport";
 import { QueryStatus } from "../../types";
 import { agentPrimary, AGENT_NOT_SPECIFIED } from "../../lib/agentDisplay";
 import {
-  ReviewAgent, ReviewQuery, CheckReason, openCrossedOthers, applyCrossedAnswer, settleAgentReason,
+  ReviewAgent, ReviewQuery, CheckReason, openCrossedOthers, applyCrossedAnswer, applyNeitherSent, settleAgentReason,
   resolveReason, fmtDate,
   dupNoteOpen, dupNoteKept, parseModel, modelToResult, autoSetAsideRows, applyAgentRemoval, seedUnidentifiedSetAside,
   removeDuplicateRecord, buildClusters, mergedAwayByKeeper,
@@ -391,6 +391,8 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
       return { ...q, sentDate: ev.date, sentDateRaw: ev.raw, timeline: [{ ...ev, date: q.sentDate, raw: q.sentDateRaw }, ...rest] };
     }));
   };
+  /* Two dates (v1.1): "Neither is when I sent it" (lib/smartImportReviewModel). */
+  const neitherSent = (id: string) => setQueries((xs) => applyNeitherSent(xs, id));
   // Re-open a settled query's typed reasons (session-only: flips resolved flags; the applied fixes stay).
   const reopenQueryReasons = (id: string) => {
     setQueries((xs) => xs.map((q) => (q.id === id ? { ...q, reasons: q.reasons.map((r) => ({ ...r, resolved: false })) } : q)));
@@ -630,6 +632,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
     if (open) return [{ ...base, body: (
       <QueryQuestion key={code} query={q} code={code} onPatch={(p) => patchQuery(q.id, p)}
         onResolveReason={(c, p) => resolveQueryReason(q.id, c, p)} onSwapDates={() => swapQueryDates(q.id)}
+        onNeitherSent={() => neitherSent(q.id)}
         agentName={name} agentAgency={agents.find((x) => x.id === q.agentRef)?.agency} crossedOthers={openCrossed(q.id).map((x) => agentNameOf(x.agentRef))}
         onCrossed={(answer, all) => answerCrossed([q.id, ...(all ? openCrossed(q.id).map((x) => x.id) : [])], answer)} />) }];
     return [{ ...base, body: <Answered reason={code} onChange={() => reopenQueryReasons(q.id)}>{STAGE_NAME[q.status]}, {q.sentDate ? `sent ${fmtDate(q.sentDate)}` : "kept undated"}.</Answered> }];

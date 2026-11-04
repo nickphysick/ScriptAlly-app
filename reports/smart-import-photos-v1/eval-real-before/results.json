@@ -1,0 +1,394 @@
+{
+  "model": "claude-sonnet-4-6",
+  "label": "real-before",
+  "dry": false,
+  "runs": 3,
+  "timing": null,
+  "results": [
+    {
+      "id": "real-notepad",
+      "run": 1,
+      "real": true,
+      "style": "hand",
+      "blurred": false,
+      "pages": 1,
+      "payloadChars": 183584,
+      "ms": 11038,
+      "attempts": 1,
+      "failure": null,
+      "stopReason": "end_turn",
+      "usage": {
+        "inputTokens": 1576,
+        "outputTokens": 629,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 3103
+      },
+      "costUsd": 0.02579925,
+      "score": {
+        "id": "real-notepad",
+        "entries": 7,
+        "matched": 7,
+        "spurious": 0,
+        "correct": {
+          "name": 7,
+          "agency": 6,
+          "status": 7,
+          "date": 7
+        },
+        "codes": {
+          "crossed-out": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "mark-unclear": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0
+          },
+          "illegible-agency": {
+            "tp": 0,
+            "fp": 1,
+            "fn": 0
+          },
+          "no-date": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          }
+        },
+        "src": {
+          "hit": 0,
+          "of": 0
+        },
+        "wrong": [
+          "real-notepad #4 Felix Arden: agency \"???\" (truth \"\")",
+          "real-notepad #4 Felix Arden: spurious illegible-agency"
+        ]
+      }
+    },
+    {
+      "id": "real-notebook-two-pages",
+      "run": 1,
+      "real": true,
+      "style": "hand",
+      "blurred": false,
+      "pages": 2,
+      "payloadChars": 363800,
+      "ms": 19640,
+      "attempts": 1,
+      "failure": null,
+      "stopReason": "end_turn",
+      "usage": {
+        "inputTokens": 3147,
+        "outputTokens": 1293,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 3103
+      },
+      "costUsd": 0.04047225,
+      "score": {
+        "id": "real-notebook-two-pages",
+        "entries": 14,
+        "matched": 14,
+        "spurious": 0,
+        "correct": {
+          "name": 14,
+          "agency": 14,
+          "status": 14,
+          "date": 11
+        },
+        "codes": {
+          "crossed-out": {
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          },
+          "mark-unclear": {
+            "tp": 3,
+            "fp": 0,
+            "fn": 0
+          },
+          "illegible-agency": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1
+          },
+          "no-date": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 3
+          }
+        },
+        "src": {
+          "hit": 0,
+          "of": 0
+        },
+        "wrong": [
+          "real-notebook-two-pages #2 Nadia Okafor: date 2026-09-03 (truth null from \"\")",
+          "real-notebook-two-pages #2 Nadia Okafor: missed no-date",
+          "real-notebook-two-pages #5 Imogen Price: missed illegible-agency",
+          "real-notebook-two-pages #6 Leo Marchetti: date 2026-09-11 (truth null from \"\")",
+          "real-notebook-two-pages #6 Leo Marchetti: missed no-date",
+          "real-notebook-two-pages #10 Kirsten Vale: date 2026-09-15 (truth null from \"\")",
+          "real-notebook-two-pages #10 Kirsten Vale: missed no-date"
+        ]
+      }
+    },
+    {
+      "id": "real-notepad",
+      "run": 2,
+      "real": true,
+      "style": "hand",
+      "blurred": false,
+      "pages": 1,
+      "payloadChars": 183584,
+      "ms": 10182,
+      "attempts": 1,
+      "failure": null,
+      "stopReason": "end_turn",
+      "usage": {
+        "inputTokens": 1576,
+        "outputTokens": 620,
+        "cacheReadTokens": 3103,
+        "cacheWriteTokens": 0
+      },
+      "costUsd": 0.014958899999999999,
+      "score": {
+        "id": "real-notepad",
+        "entries": 7,
+        "matched": 7,
+        "spurious": 0,
+        "correct": {
+          "name": 7,
+          "agency": 6,
+          "status": 7,
+          "date": 7
+        },
+        "codes": {
+          "crossed-out": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "mark-unclear": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0
+          },
+          "illegible-agency": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0
+          },
+          "no-date": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          }
+        },
+        "src": {
+          "hit": 0,
+          "of": 0
+        },
+        "wrong": [
+          "real-notepad #4 Felix Arden: agency \"???\" (truth \"\")"
+        ]
+      }
+    },
+    {
+      "id": "real-notebook-two-pages",
+      "run": 2,
+      "real": true,
+      "style": "hand",
+      "blurred": false,
+      "pages": 2,
+      "payloadChars": 363800,
+      "ms": 19372,
+      "attempts": 1,
+      "failure": null,
+      "stopReason": "end_turn",
+      "usage": {
+        "inputTokens": 3147,
+        "outputTokens": 1293,
+        "cacheReadTokens": 3103,
+        "cacheWriteTokens": 0
+      },
+      "costUsd": 0.029766900000000002,
+      "score": {
+        "id": "real-notebook-two-pages",
+        "entries": 14,
+        "matched": 14,
+        "spurious": 0,
+        "correct": {
+          "name": 14,
+          "agency": 14,
+          "status": 14,
+          "date": 11
+        },
+        "codes": {
+          "crossed-out": {
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          },
+          "mark-unclear": {
+            "tp": 3,
+            "fp": 0,
+            "fn": 0
+          },
+          "illegible-agency": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1
+          },
+          "no-date": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 3
+          }
+        },
+        "src": {
+          "hit": 0,
+          "of": 0
+        },
+        "wrong": [
+          "real-notebook-two-pages #2 Nadia Okafor: date 2026-09-03 (truth null from \"\")",
+          "real-notebook-two-pages #2 Nadia Okafor: missed no-date",
+          "real-notebook-two-pages #5 Imogen Price: missed illegible-agency",
+          "real-notebook-two-pages #6 Leo Marchetti: date 2026-09-11 (truth null from \"\")",
+          "real-notebook-two-pages #6 Leo Marchetti: missed no-date",
+          "real-notebook-two-pages #10 Kirsten Vale: date 2026-09-15 (truth null from \"\")",
+          "real-notebook-two-pages #10 Kirsten Vale: missed no-date"
+        ]
+      }
+    },
+    {
+      "id": "real-notepad",
+      "run": 3,
+      "real": true,
+      "style": "hand",
+      "blurred": false,
+      "pages": 1,
+      "payloadChars": 183584,
+      "ms": 10157,
+      "attempts": 1,
+      "failure": null,
+      "stopReason": "end_turn",
+      "usage": {
+        "inputTokens": 1576,
+        "outputTokens": 620,
+        "cacheReadTokens": 3103,
+        "cacheWriteTokens": 0
+      },
+      "costUsd": 0.014958899999999999,
+      "score": {
+        "id": "real-notepad",
+        "entries": 7,
+        "matched": 7,
+        "spurious": 0,
+        "correct": {
+          "name": 7,
+          "agency": 6,
+          "status": 7,
+          "date": 7
+        },
+        "codes": {
+          "crossed-out": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "mark-unclear": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0
+          },
+          "illegible-agency": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0
+          },
+          "no-date": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          }
+        },
+        "src": {
+          "hit": 0,
+          "of": 0
+        },
+        "wrong": [
+          "real-notepad #4 Felix Arden: agency \"???\" (truth \"\")"
+        ]
+      }
+    },
+    {
+      "id": "real-notebook-two-pages",
+      "run": 3,
+      "real": true,
+      "style": "hand",
+      "blurred": false,
+      "pages": 2,
+      "payloadChars": 363800,
+      "ms": 19180,
+      "attempts": 1,
+      "failure": null,
+      "stopReason": "end_turn",
+      "usage": {
+        "inputTokens": 3147,
+        "outputTokens": 1293,
+        "cacheReadTokens": 3103,
+        "cacheWriteTokens": 0
+      },
+      "costUsd": 0.029766900000000002,
+      "score": {
+        "id": "real-notebook-two-pages",
+        "entries": 14,
+        "matched": 14,
+        "spurious": 0,
+        "correct": {
+          "name": 14,
+          "agency": 14,
+          "status": 14,
+          "date": 11
+        },
+        "codes": {
+          "crossed-out": {
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          },
+          "mark-unclear": {
+            "tp": 3,
+            "fp": 0,
+            "fn": 0
+          },
+          "illegible-agency": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1
+          },
+          "no-date": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 3
+          }
+        },
+        "src": {
+          "hit": 0,
+          "of": 0
+        },
+        "wrong": [
+          "real-notebook-two-pages #2 Nadia Okafor: date 2026-09-03 (truth null from \"\")",
+          "real-notebook-two-pages #2 Nadia Okafor: missed no-date",
+          "real-notebook-two-pages #5 Imogen Price: missed illegible-agency",
+          "real-notebook-two-pages #6 Leo Marchetti: date 2026-09-11 (truth null from \"\")",
+          "real-notebook-two-pages #6 Leo Marchetti: missed no-date",
+          "real-notebook-two-pages #10 Kirsten Vale: date 2026-09-15 (truth null from \"\")",
+          "real-notebook-two-pages #10 Kirsten Vale: missed no-date"
+        ]
+      }
+    }
+  ]
+}
