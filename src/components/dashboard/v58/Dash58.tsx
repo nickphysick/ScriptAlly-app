@@ -59,6 +59,7 @@ const draftStore = () => import("../../../lib/importDraft");
 import { TOUR_DONE_PATH, TOUR_STOPS, registerTourReplay, tourDecision, tourState } from "../../../lib/dashTour";
 import { FirstWinStamp } from "../fv1/FirstWinStamp";
 import { Dash2Band } from "../v2/Dash2Band";
+import { wholeWeeksQuerying } from "../../../lib/dash2";
 import { Dash2Next } from "../v2/Dash2Next";
 import { Dash2Active } from "../v2/Dash2Active";
 import { Dash2Founding } from "../v2/Dash2Founding";
@@ -627,6 +628,7 @@ export const Dash58: React.FC<Dash58Props> = ({
               the feed, as tall as the grid row (the founding card fills the middle column, so the feed ends level with
               it). Before the first query the middle starts with the set-up card and the right holds the empty feed. */}
           <Dash2Band loading={loading} title={title} author={author} buttons={!pre}
+            weeks={loading ? null : wholeWeeksQuerying(scopedQueries, now)}
             onLog={logQuery} onRecord={() => onNavigate("queries", "Record a response")} onAddAgent={() => onNavigate("agents", "Add an agent")} />
           <div className="d2-grid" data-d2="grid">
             <div className="d2-col d2-left" data-d2="left">

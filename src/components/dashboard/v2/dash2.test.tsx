@@ -19,7 +19,7 @@ import { Dash2Band } from "./Dash2Band";
 import { nextReason } from "./Dash2Next";
 import { RANK_MIN } from "./Dash2Founding";
 import { TIERS } from "../../../lib/foundingStats";
-import { breakdownFor, changeText, dash2Weeks, dateLabels, indexActivities, visibleWeeks, waitingOnYou, weekAria, weeksQuerying } from "../../../lib/dash2";
+import { breakdownFor, changeText, dash2Weeks, dateLabels, indexActivities, visibleWeeks, waitingOnYou, weekAria, weeksQuerying, wholeWeeksQuerying, weeksTag } from "../../../lib/dash2";
 import { aggregateLedger, dailyLedger } from "../../../lib/oneScreen";
 import { latestNote, noteFrom, NO_NOTES } from "../../../lib/foundingNotes";
 import type { ListItem } from "../../../lib/dashList";
@@ -43,6 +43,31 @@ const page = (queries: Query[] = QS) => renderToStaticMarkup(
       currentUser={{ id: "u1", name: "Bethany Carter" } as unknown as User} activeManuscript={MS} onNavigate={() => {}} now={NOW} />
   </MemoryRouter>,
 );
+
+describe("DB21-A · the weeks-querying tag", () => {
+  it("counts WHOLE weeks since the manuscript's first send, by calendar day", () => {
+    expect(wholeWeeksQuerying(QS, NOW)).toBe(9); // first send 66 days ago
+    expect(wholeWeeksQuerying([q("x", QueryStatus.QUERIED, 6)], NOW)).toBe(0);
+    expect(wholeWeeksQuerying([q("x", QueryStatus.QUERIED, 7)], NOW)).toBe(1);
+    expect(wholeWeeksQuerying([q("x", QueryStatus.QUERIED, 13)], NOW)).toBe(1);
+    expect(wholeWeeksQuerying([q("x", QueryStatus.QUERIED, 14)], NOW)).toBe(2);
+    expect(wholeWeeksQuerying([], NOW)).toBe(null);
+    expect(wholeWeeksQuerying([{ ...q("x", QueryStatus.QUERIED, 0), dateSent: undefined } as unknown as Query], NOW)).toBe(null);
+  });
+  it("reads '1 week querying' in the singular", () => {
+    expect(weeksTag(1)).toBe("1 week querying");
+    expect(weeksTag(153)).toBe("153 weeks querying");
+  });
+  it("sits above the title in the band, and is absent with no send", () => {
+    const html = renderToStaticMarkup(<Dash2Band loading={false} title="T" author="A" buttons weeks={3} onLog={() => {}} onRecord={() => {}} onAddAgent={() => {}} />);
+    expect(html.indexOf("3 weeks querying")).toBeGreaterThan(-1);
+    expect(html.indexOf("3 weeks querying")).toBeLessThan(html.indexOf('data-d2="title"'));
+    const none = renderToStaticMarkup(<Dash2Band loading={false} title="T" author="A" buttons={false} weeks={null} onLog={() => {}} onRecord={() => {}} onAddAgent={() => {}} />);
+    expect(none).not.toContain("querying");
+    expect(page()).toContain("9 weeks querying");
+    expect(page([])).not.toContain("weeks querying");
+  });
+});
 
 describe("DB2-A · the band", () => {
   it("is the title, then 'by {author}', then the three actions — and no status label", () => {

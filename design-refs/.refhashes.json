@@ -1021,7 +1021,16 @@
     "design-refs/contact-list-v26/screens/09-sort-menu-1512@2x.png": "a820b3a50ff09358ad1142626a7e09364f5bb288cb3465eb3b89fd82990c669e",
     "design-refs/contact-list-v26/screens/10-filters-menu-1512@2x.png": "3cb0c8a503123c7fcb4a3e6089116994db5ffc9054aaef814e38ceb08696ce26",
     "design-refs/contact-list-v26/screens/11-missing-details-1512@2x.png": "bf1f56f56e92dfaa9dbadd8a7e3d8923b2bb3c3b5fa2457dd634f6734b391c1e",
-    "design-refs/submission-packages-v41/submission-packages-v41.html": "c5a0b3500bf62b22c9ea86116b28818f3147220b1ae8a5cc394b99b8ab4783aa"
+    "design-refs/submission-packages-v41/submission-packages-v41.html": "c5a0b3500bf62b22c9ea86116b28818f3147220b1ae8a5cc394b99b8ab4783aa",
+    "design-refs/dashboard-v2-1/dashboard-v2-1.html": "5dabe7d6e6c31a54c5d51d35f4f677887a62de304be774cf306b28bd7ff4d02e",
+    "design-refs/dashboard-v2-1/screens/01-dashboard-1280@2x.png": "18c28355d26e6ee130b62450beda0e70e9d084287c98b8249002e7e4eb837894",
+    "design-refs/dashboard-v2-1/screens/01-dashboard-1512@2x.png": "7a2fa077d6de03ec46cde00b234a1e5ce06efbb2a85158f68692eaf1e4767d29",
+    "design-refs/dashboard-v2-1/screens/02-dashboard-full-1280@2x.png": "9283c8b0159d6210026467428b95b835808707299a141130a96ce15c6dc30c43",
+    "design-refs/dashboard-v2-1/screens/02-dashboard-full-1512@2x.png": "56d40cd4a837521ac5f123a892e5a84653ea2e596c0b19937f083a3b74965446",
+    "design-refs/dashboard-v2-1/screens/03-week-hover-1280@2x.png": "5607ca2d57d9fa037bc90442262976ed956f6b5214a85d22669202726fecffbf",
+    "design-refs/dashboard-v2-1/screens/03-week-hover-1512@2x.png": "6852250d6c437fe57ee94baf1a89db7ffc1e7bbfea71d843c93e9f591487848a",
+    "design-refs/dashboard-v2-1/screens/04-feed-row-opened-1280@2x.png": "7a2e60a36ce8b659d605aac820edc501aa23bb28abb2e3116919f627684e6304",
+    "design-refs/dashboard-v2-1/screens/04-feed-row-opened-1512@2x.png": "fa4bf706c2475c89e52f093e437d1c826b54b3fce042a355423ea7ce19a7f740"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",

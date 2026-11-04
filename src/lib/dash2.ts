@@ -47,6 +47,24 @@ export function weeksQuerying(queries: readonly Query[], now: Date): number {
   return Math.max(1, Math.round((isoWeekStart(now).getTime() - earliest) / WEEK_MS) + 1);
 }
 
+/**
+ * Dashboard v2.1 · the band's tag: WHOLE weeks since the manuscript's first query was sent, by calendar day (so a week
+ * across the clocks changing is still seven days). Null before the first send — the tag is not drawn then.
+ * ⚠️ NOT `weeksQuerying`: that counts the ISO weeks a campaign spans, this week included, so a query sent on a Sunday
+ * read "2 weeks" on the Monday. The tag states elapsed whole weeks.
+ */
+export function wholeWeeksQuerying(queries: readonly Query[], now: Date): number | null {
+  const times = queries.map((q) => sentAt(q)).filter((t): t is number => t !== null && t <= now.getTime());
+  if (times.length === 0) return null;
+  const f = new Date(Math.min(...times));
+  const from = Date.UTC(f.getFullYear(), f.getMonth(), f.getDate());
+  const to = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.floor(Math.round((to - from) / 86_400_000) / 7);
+}
+
+/** "1 week querying" · "{n} weeks querying" */
+export const weeksTag = (n: number): string => `${n} ${n === 1 ? "week" : "weeks"} querying`;
+
 /** Sent since this ISO week began — the band's "+{n} this week". */
 export function sentThisWeek(queries: readonly Query[], now: Date): number {
   const from = isoWeekStart(now).getTime();
