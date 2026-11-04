@@ -38,6 +38,9 @@ import { Chip, Disc, initialsOf } from "./ImportParts";
 import { ambiguousReadings } from "../../lib/templateImport";
 import { STAGE_NAME } from "../../lib/qcSummary";
 import { TimelineStrip } from "./v9/TimelineStrip";
+import { DatePick } from "./v9/DatePick";
+import { cardCalendarStart } from "../../lib/importTimeline";
+import { localToday } from "../../lib/importTypedDate";
 
 /** The review list's words (import review v1; ref design-refs/onboarding/import-review-v1/
  *  review-agents.dc.html). A row the writer leaves out stays in its place, says so, and can be undone. */
@@ -261,9 +264,13 @@ export const QueryReasonPanel: React.FC<QueryReasonPanelProps> = ({ query, code,
   const [wording, setWording] = useState<QueryStatus>(query.status);
   const setDraft = (k: string, v: string) => setDrafts((d) => ({ ...d, [k]: v }));
 
-  const dateInput = (k: string, label: string, prefill: string | null) => (
+  /* v1.2: the timeline strip's date field and calendar (DatePick), never a native date input. The
+     calendar opens on the month the writer's words name, else the adjacent known date, else today. */
+  const today = localToday();
+  const dateInput = (k: string, label: string, prefill: string | null, words: string | null | undefined = query.sentDateRaw) => (
     <Field label={label}>
-      <input className="sf-in" type="date" aria-label={label} value={drafts[k] ?? dayOf(prefill)} onChange={(e) => setDraft(k, e.target.value)} />
+      <DatePick label={label} value={(drafts[k] ?? dayOf(prefill)) || null} onChange={(iso) => setDraft(k, iso ?? "")}
+        start={cardCalendarStart(query, today, words)} today={today} />
     </Field>
   );
   const solid = (label: string, onClick: () => void) => <button type="button" className="sf-btn sf-btn--sm" onClick={onClick}>{label}</button>;
@@ -339,7 +346,7 @@ export const QueryReasonPanel: React.FC<QueryReasonPanelProps> = ({ query, code,
           <div className="im-fixrow">
             {code === "ambiguous-response-date"
               ? ambiguousReadings(ev?.raw ?? "").map((iso) => <React.Fragment key={iso}>{solid(fmtDate(iso), () => setEvent(iso))}</React.Fragment>)
-              : <>{dateInput(code, "Date of last response", null)}{solid("Save date", () => { const v = drafts[code]; if (v) setEvent(v); })}</>}
+              : <>{dateInput(code, "Date of last response", null, null)}{solid("Save date", () => { const v = drafts[code]; if (v) setEvent(v); })}</>}
             {quiet("Leave undated", () => onResolveReason(code))}
           </div>
         </div>

@@ -22,7 +22,7 @@
  * Two dates found, or a sent-date question on a query that has events, is one card: the timeline as
  * a strip of steps (`TimelineStrip`), and one button that says what is missing until it is answered.
  */
-import React, { useRef, useState } from "react";
+import React, { useId, useRef, useState } from "react";
 import { QueryStatus } from "../../../types";
 import { ReviewReasonCode } from "../../../types/smartImport";
 import { ReviewAgent, ReviewQuery, QUERY_STATUS_OPTIONS, fmtDate, quoteStatuses } from "../../../lib/smartImportReviewModel";
@@ -31,7 +31,9 @@ import { ambiguousReadings } from "../../../lib/templateImport";
 import { StatusDot } from "../../StatusDot";
 import { QueryReasonPanel } from "../reviewRows";
 import { TimelineStrip } from "./TimelineStrip";
-import { STRIP_WORDS, stripNeed, stripButton } from "../../../lib/importTimeline";
+import { STRIP_WORDS, stripNeed, stripButton, cardCalendarStart } from "../../../lib/importTimeline";
+import { localToday } from "../../../lib/importTypedDate";
+import { DatePick } from "./DatePick";
 import "./onbV9.css";
 
 export const DECK_WORDS = {
@@ -231,13 +233,16 @@ export interface QueryQuestionProps {
   onCrossed?: (answer: "rejected" | "no-response" | "never", all: boolean) => void;
 }
 
-const DateField: React.FC<{ onSave: (iso: string) => void }> = ({ onSave }) => {
-  const [v, setV] = useState("");
-  const ref = useRef<HTMLInputElement>(null);
-  const save = () => { if (v) onSave(v); else ref.current?.focus(); };
+/* v1.2: the strip's own date field and calendar (DatePick), never a native date input. The
+   calendar opens on the month the writer's words name, else the adjacent known date, else today. */
+const DateField: React.FC<{ query: ReviewQuery; onSave: (iso: string) => void }> = ({ query, onSave }) => {
+  const [v, setV] = useState<string | null>(null);
+  const today = localToday();
+  const id = useId();
+  const save = () => { if (v) onSave(v); else document.getElementById(id)?.focus(); };
   return (
     <>
-      <Fld label="Date sent"><input ref={ref} className="sf-in" type="date" value={v} aria-label="Date sent" onChange={(e) => setV(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") save(); }} /></Fld>
+      <Fld label="Date sent"><DatePick id={id} label="Date sent" value={v} onChange={setV} start={cardCalendarStart(query, today)} onEnter={save} today={today} /></Fld>
       <button type="button" className="sf-btn sf-btn--sm" onClick={save}>{DECK_WORDS.dateSave}</button>
     </>
   );
@@ -282,7 +287,7 @@ export const QueryQuestion: React.FC<QueryQuestionProps> = (p) => {
             <button type="button" className="o9-pick" key={iso} data-reading={iso} onClick={() => onResolveReason(code, { sentDate: iso })}>{fmtDate(iso)}</button>
           ))}
           {typing
-            ? <DateField onSave={(iso) => onResolveReason(code, { sentDate: iso })} />
+            ? <DateField query={query} onSave={(iso) => onResolveReason(code, { sentDate: iso })} />
             : <Esc label={DECK_WORDS.twoWayNeither} onClick={() => setTyping(true)} />}
         </div>
       </div>
@@ -294,7 +299,7 @@ export const QueryQuestion: React.FC<QueryQuestionProps> = (p) => {
         <Ask>{raw ? <>Your sheet says <Raw>{raw}</Raw>. When was this sent?</> : DECK_WORDS.dateBlank}</Ask>
         <Why>{DECK_WORDS.dateWhy}</Why>
         <div className="o9-ans">
-          <DateField onSave={(iso) => onResolveReason(code, { sentDate: iso })} />
+          <DateField query={query} onSave={(iso) => onResolveReason(code, { sentDate: iso })} />
           <Esc label={DECK_WORDS.dateNone} note={DECK_WORDS.dateKept} onClick={() => onResolveReason(code, { sentDate: null })} />
         </div>
       </div>

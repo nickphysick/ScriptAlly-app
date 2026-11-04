@@ -97,4 +97,12 @@
 /* the ready row: Edit opens the same strip inline, under the row */
 .sf .o9-rowstrip { grid-column: 1 / -1; padding: 4px 0 6px; }
 
+/* the single-date cards' field (DatePick): the calendar floats under it, as the strip's does */
+.sf .o9-dpick { position: relative; display: block; }
+/* while its calendar is open, the deck and the ready list stop clipping, as they do for the strip */
+.sf .o9-deck:has(.o9-dpop), .sf .im-list:has(.o9-dpop) { overflow: visible; }
+.sf .o9-deck:has(.o9-dpop) .o9-deckhead { border-radius: 14px 14px 0 0; }
+.sf .im-list:has(.o9-dpop) .im-listhead { border-radius: 14px 14px 0 0; }
+.sf .o9-dpop .o9-rd { margin-top: 0; }
+
 @media (prefers-reduced-motion: reduce) { .sf .o9-spop { animation: none; } }

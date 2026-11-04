@@ -16,7 +16,7 @@ import { readFileSync, existsSync, mkdirSync, appendFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { assertLocalBundleIsDev } from "./bundleGuard";
 import { session, snapshot, enterSetup, restore, readImported, ACCOUNT_EMAIL } from "./importFixesAccount.mjs";
-import { answerAgents, readStep, stepTotal, showCard } from "./reviewDrive";
+import { answerAgents, readStep, stepTotal, showCard, fillDate } from "./reviewDrive";
 import { getDocs, collection } from "firebase/firestore";
 
 const OUT = resolve(process.cwd(), "reports/onb-v9");
@@ -226,7 +226,7 @@ test("WALK · template-mixed.csv through the gated review to the dashboard", asy
     for (let i = 0; i < 4 && (await page.locator('[data-im="primary"]').isDisabled()); i++) {
       const card = page.locator('[data-im="deck-card"]');
       const who = (await card.locator(".o9-qwho b").textContent()) ?? "";
-      if (/Jamal/.test(who)) { await card.locator('input[type="date"]').fill("2026-03-01"); await card.getByRole("button", { name: "Save date" }).click(); }
+      if (/Jamal/.test(who)) { await fillDate(card, "2026-03-01"); await card.getByRole("button", { name: "Save date" }).click(); }
       else await card.getByRole("button", { name: "I don't have this date" }).click();
     }
     const done = { head: await page.locator('[data-im="all-head"]').textContent(), line: await page.locator('[data-im="all-line"]').textContent(), primary: ((await page.locator('[data-im="primary"]').textContent()) ?? "").trim() };
