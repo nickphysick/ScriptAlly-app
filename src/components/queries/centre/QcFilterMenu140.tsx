@@ -102,7 +102,9 @@ export const QcFilterStrip142: React.FC<{ pop: PopoverState<Qc140Pop>; model: Qc
 
 
 /** v151 §5 — the strip's header and three columns, shared by v142's strip and v151's inline panel (one content) */
-const FilterInner: React.FC<{ model: Qc140FilterModel; close: () => void; onResetAll?: () => void }> = ({ model, close, onResetAll }) => {
+/* v151.2 §2 — `plainWhere`: the Query Centre's panel draws "Where it stands" without the four colour squares (who it's
+   with is no longer a colour on that page); every other host keeps them */
+const FilterInner: React.FC<{ model: Qc140FilterModel; close: () => void; onResetAll?: () => void; plainWhere?: boolean }> = ({ model, close, onResetAll, plainWhere = false }) => {
   const { filters: f, onFilters, showing, total, quickN, stageCounts, sent, moreN, whereN, filtered, onExport } = model;
   const set = (g: Qc138Filters) => quietScroll(() => onFilters(g));
   const chip = (on: boolean) => `cl20-chip${on ? " on" : ""}`;
@@ -144,7 +146,7 @@ const FilterInner: React.FC<{ model: Qc140FilterModel; close: () => void; onRese
               return (
                 <button key={k} type="button" className={chip(on)} data-qc141="where-opt" data-k={k} data-opt={`where:${k}`} data-n={n}
                   role="radio" aria-checked={on} title={WHERE_LABEL[k].title} disabled={!on && n === 0} onClick={() => set({ ...f, where: on ? null : k })}>
-                  <WhereMark k={k} />{WHERE_LABEL[k].label}<i>{n}</i>
+                  {plainWhere ? null : <WhereMark k={k} />}{WHERE_LABEL[k].label}<i>{n}</i>
                 </button>
               );
             })}
@@ -205,7 +207,7 @@ export const QcFilterPanel151: React.FC<{ model: Qc140FilterModel; close: () => 
   useEffect(() => { ref.current?.querySelector<HTMLElement>("[data-opt]:not(:disabled)")?.focus({ preventScroll: true }); }, []);
   return (
     <div className="cl20-fs-strip qc142-strip qc151-fpan" data-qc140="filter-menu" data-qc151="panel" role="dialog" aria-label="Filter queries" ref={ref}>
-      <FilterInner model={model} close={close} onResetAll={onResetAll ?? undefined} />
+      <FilterInner model={model} close={close} onResetAll={onResetAll ?? undefined} plainWhere />
     </div>
   );
 };
