@@ -25,3 +25,41 @@ export function headerSub(title: string | null | undefined): { lead: string; tit
   const t = title?.trim() || null;
   return t ? { lead: "What each agent receives for ", title: t, tail: ", and what works best." } : { lead: "What each agent receives, and what works best.", title: null, tail: "" };
 }
+
+/* ══ Part D · the current batch row ══ */
+export const BATCH_LEAD = "Your current batch is going out with";
+export const BATCH_LEAD_SHORT = "Going out with";
+export const BATCH_NONE = "Your current batch isn’t going out with a package yet.";
+export const BATCH_NONE_REST = "Choose one and it’s picked for you each time you log a query.";
+
+/* ══ Part E · the list ══ */
+export type ListTab = "all" | "out" | "ready" | "draft";
+export const LIST_TABS: [ListTab, string][] = [["all", "All"], ["out", "Out with agents"], ["ready", "Ready"], ["draft", "Draft"]];
+export const LIST_EMPTY = "No packages yet. Make one and pick it the next time you log a query.";
+export const packagesCount = (n: number) => `${n} package${n === 1 ? "" : "s"}`;
+
+type Stage = "draft" | "ready" | "out" | "retired";
+/** The tab counts, over the LIVE packages (retired ones are in no tab; "Show retired" adds them). */
+export function tabCounts(stages: readonly Stage[]): Record<ListTab, number> {
+  const live = stages.filter((s) => s !== "retired");
+  return { all: live.length, out: live.filter((s) => s === "out").length, ready: live.filter((s) => s === "ready").length, draft: live.filter((s) => s === "draft").length };
+}
+/** Which packages the list shows: the tab's live packages, then the retired ones when they are shown (any tab). */
+export function listFilter(stage: Stage, tab: ListTab, showRetired: boolean): boolean {
+  if (stage === "retired") return showRetired;
+  return tab === "all" || stage === tab;
+}
+/** The status pill's words (ref `stLabel`): a draft names what it still needs. */
+export function statusWords(stage: Stage, has: { version: boolean; letter: boolean }): string {
+  if (stage === "retired") return "Retired";
+  if (stage === "out") return "Out with agents";
+  if (stage === "ready") return "Ready to send";
+  const need = [has.version ? null : "a version", has.letter ? null : "a letter"].filter(Boolean);
+  return need.length ? `Draft · needs ${need.join(" and ")}` : "Draft";
+}
+/** The Asked for more cell: a dash before anything is sent, "Too early" before 4 answers, else the share. */
+export function rateWords(f: { sent: number; ranked: boolean; pct: number | null }): { k: "none" | "early" | "rate"; text: string } {
+  if (!f.sent) return { k: "none", text: "—" };
+  if (!f.ranked) return { k: "early", text: "Too early" };
+  return { k: "rate", text: `${f.pct ?? 0}%` };
+}
