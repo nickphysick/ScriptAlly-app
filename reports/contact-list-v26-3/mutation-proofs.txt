@@ -1,0 +1,4 @@
+CL263 mutation proofs (1512 × 900, emulator, one build). Each lock run under CL263_MUTATE=<lock>; the first red reading:
+K1: K1-1512 · not on the card at rest — 
+K2: K2-1512 · not for a not-queried agent — 
+K3: K3-1512 · card: no v24 panel — 

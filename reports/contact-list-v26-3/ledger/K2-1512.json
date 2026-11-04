@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "K2-1512",
+  "where": "you · the link shows",
+  "ok": true,
+  "detail": "cv25-agent-06"
+ },
+ {
+  "lock": "K2-1512",
+  "where": "agent · the link shows",
+  "ok": true,
+  "detail": "cv25-agent-05"
+ },
+ {
+  "lock": "K2-1512",
+  "where": "hidden while editing",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "K2-1512",
+  "where": "opens the query in the Query Centre",
+  "ok": true,
+  "detail": "http://127.0.0.1:4321/queries?q=cv25-q-05"
+ },
+ {
+  "lock": "K2-1512",
+  "where": "closed · the link shows",
+  "ok": true,
+  "detail": "cv25-agent-12"
+ },
+ {
+  "lock": "K2-1512",
+  "where": "not for a not-queried agent",
+  "ok": true,
+  "detail": ""
+ }
+]

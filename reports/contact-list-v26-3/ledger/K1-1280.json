@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "K1-1280",
+  "where": "not on the card at rest",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "K1-1280",
+  "where": "not in a single section's edit",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "K1-1280",
+  "where": "in Contact details",
+  "ok": true,
+  "detail": "{\"text\":\"Remove Sophie from your list\",\"under\":true,\"left\":true,\"font\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"14px\",\"color\":\"rgb(162, 69, 42)\",\"deco\":\"underline\"}"
+ },
+ {
+  "lock": "K1-1280",
+  "where": "words: Remove {first} from your list",
+  "ok": true,
+  "detail": "Remove Sophie from your list"
+ },
+ {
+  "lock": "K1-1280",
+  "where": "under the grid, left-aligned",
+  "ok": true,
+  "detail": "{\"text\":\"Remove Sophie from your list\",\"under\":true,\"left\":true,\"font\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"14px\",\"color\":\"rgb(162, 69, 42)\",\"deco\":\"underline\"}"
+ },
+ {
+  "lock": "K1-1280",
+  "where": "Special Elite 14, #a2452a, underlined",
+  "ok": true,
+  "detail": "{\"text\":\"Remove Sophie from your list\",\"under\":true,\"left\":true,\"font\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"14px\",\"color\":\"rgb(162, 69, 42)\",\"deco\":\"underline\"}"
+ },
+ {
+  "lock": "K1-1280",
+  "where": "opens the existing confirmation",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "K1-1280",
+  "where": "the confirmation keeps",
+  "ok": true,
+  "detail": ""
+ }
+]

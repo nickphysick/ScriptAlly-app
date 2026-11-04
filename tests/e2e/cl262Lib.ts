@@ -21,11 +21,11 @@ export const MUT = process.env.CL262_MUTATE ?? "";
 type Row = { lock: string; where: string; ok: boolean; detail: string };
 export class Ledger {
   rows: Row[] = [];
-  constructor(public name: string) {}
+  constructor(public name: string, public dir: string = DIR) {}
   check(where: string, ok: unknown, detail: string) { this.rows.push({ lock: this.name, where, ok: !!ok, detail }); }
   done(floor: number) {
-    mkdirSync(`${DIR}/ledger`, { recursive: true });
-    writeFileSync(`${DIR}/ledger/${MUT ? `mut-${MUT}-` : ""}${this.name}.json`, JSON.stringify(this.rows, null, 1));
+    mkdirSync(`${this.dir}/ledger`, { recursive: true });
+    writeFileSync(`${this.dir}/ledger/${(process.env.CL263_MUTATE || MUT) ? `mut-${process.env.CL263_MUTATE || MUT}-` : ""}${this.name}.json`, JSON.stringify(this.rows, null, 1));
     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
@@ -48,4 +48,4 @@ export async function openCard(page: Page, vp: VP, o: { stand?: string; id?: str
 }
 export const frameScroll = (page: Page) => page.evaluate(() => document.querySelector<HTMLElement>("[data-cl262='panel'] [data-apc='scroll']")?.scrollTop ?? -1);
 export async function cssBreak(page: Page, css: string) { await page.addStyleTag({ content: css }); await page.waitForTimeout(250); }
-export function shotDir() { mkdirSync(`${DIR}/shots`, { recursive: true }); return `${DIR}/shots`; }
+export function shotDir(dir: string = DIR) { mkdirSync(`${dir}/shots`, { recursive: true }); return `${dir}/shots`; }

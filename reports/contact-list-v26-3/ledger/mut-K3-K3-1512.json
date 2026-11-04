@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "K3-1512",
+  "where": "card: the shared drawer opens",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "K3-1512",
+  "where": "card: the agent is set (Theo Abara)",
+  "ok": true,
+  "detail": "LOG A QUERY\nLog a query\n×\n1\nAGENT AND BOOK\n2\nSENDING\n3\nWHAT YOU SENT\n4\nRESPONSE EXPECTATIONS\n5\nIF THEY DON'T REPLY\n6\nCHE"
+ },
+ {
+  "lock": "K3-1512",
+  "where": "card: no v24 panel",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "K3-1512",
+  "where": "top bar: the shared drawer opens on /agents",
+  "ok": true,
+  "detail": "http://127.0.0.1:4321/agents"
+ },
+ {
+  "lock": "K3-1512",
+  "where": "top bar: no v24 panel",
+  "ok": false,
+  "detail": ""
+ }
+]
