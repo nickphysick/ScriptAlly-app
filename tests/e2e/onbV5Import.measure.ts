@@ -10,7 +10,7 @@
  *
  * Every sweep states its population first. The e2e password is never printed.
  */
-import { settleStep, showCard } from "./reviewDrive";
+import { settleStep, showCard, fillDate } from "./reviewDrive";
 import { test, expect, Page } from "@playwright/test";
 import { appendFileSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -571,7 +571,7 @@ test.describe("OB2", () => {
           await (await on("q-q2")).getByRole("button", { name: /I sent the full/ }).click();                 // status-direction
           await (await on("q-q3")).getByRole("button", { name: "Keep as month" }).click();                   // missing-day
           await (await on("q-q4")).getByRole("button", { name: "Leave undated" }).click();                   // serial-outlier
-          await (await on("q-q5")).locator('input[type="date"]').fill("2024-06-01");                         // no-date
+          await fillDate(await on("q-q5"), "2024-06-01");                         // no-date
           await (await on("q-q5")).getByRole("button", { name: "Save date" }).click();
           await (await on("q-q6")).locator('[data-status="Partial Sent"]').click();                          // status-wording
           await (await on("q-q11")).getByRole("button", { name: "I don't have this date" }).click();          // two reasons, both

@@ -175,6 +175,8 @@ queries[] —
   "lineRaw" — the entry's whole line, transcribed verbatim. Words that are crossed out are written
     as the words they are (no strike-through markup).
   "markRaw" — the symbol beside the entry, when you flag "mark-unclear" (see below), e.g. "✗", "?".
+  "markMeaning" — what the page's own KEY says that symbol means, in the key's words ("pass"). Only
+    with markRaw, and only when the page has a key that defines that symbol (see KEYS below).
 agents[] —
   "readings" — up to THREE plausible readings of a name or agency the handwriting leaves genuinely
     unclear, best first, written as the full "Name, Agency" the writer would recognise (or just the
@@ -191,6 +193,21 @@ MORE REASON CODES — photos only, added to the list above; emit ONLY when they 
     that is "mark-unclear" with markRaw "✗".
   - "mark-unclear": there's a symbol beside the entry other than a tick (✗, ?, !, a circle, an arrow)
     whose meaning isn't plain from the line. Put the symbol in "markRaw" and give a best-guess status.
-A TICK (✓) beside an entry is NOT flagged: read it as "Queried" unless the line says otherwise.
+A TICK (✓) beside an entry is NOT flagged: read it as "Queried" unless the line says otherwise, or
+the page's key defines it (see KEYS below).
+
+A NAME THE WRITER WASN'T SURE OF — a "?" or "(?)" touching the agent's NAME, inside the name's own
+part of the line ("Leo Fairbairn? – Lattice – 2/9"), is the writer's doubt about the name, never part
+of it. Give the name WITHOUT it, flag "check-reading", and give that name as the only entry in the
+agent's "readings". This is ONLY for a "?" on the name itself. A "?" anywhere else — at the end of
+the line, after a status, a date or a note ("R&R ?", "sent partial ?", "26/2 – queried ?") — is a
+mark beside the entry, exactly as before: "mark-unclear" with markRaw "?".
+
+KEYS — a page may carry a key or legend for its marks ("✗ = pass", "✓ = sent", "x - no", "? =
+chase"). Read it as the writer's instructions for the marks on THAT page; it is never an entry.
+When a mark beside an entry is one the key defines, use the key's meaning for the status (✗ = pass
+→ "Rejected"; ✓ = sent → "Queried"), and still flag "mark-unclear" with that mark in "markRaw" and
+the key's words for it in "markMeaning". A mark the key does not define is handled as above, with
+no markMeaning. Without a key, nothing here changes.
 Put every reason code, including the two about a name or agency, in the entry's QUERY "reasons".
 `.trim();

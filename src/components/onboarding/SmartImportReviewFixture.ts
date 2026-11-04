@@ -180,3 +180,25 @@ export const REVIEW_FIXTURE_TIMELINE: SmartImportResult = {
     { agentRef: "t4", status: QueryStatus.QUERIED, sentDate: "2026-09-01", sentDateRaw: "1/9" },
   ],
 };
+
+/** Smart Import v1.2 (`#/onb-lab?s=review&fx=v12`), as the model reads Nick's messy list after this
+ *  pass: one agent written twice ("Jonah P." / "Jonah Petrakis"), a name read without its "?", a
+ *  ✗ the page's key explains, and a sent date the writer only gave as a month. */
+export const REVIEW_FIXTURE_V12: SmartImportResult = {
+  agents: [
+    { ref: "v1", name: "Jonah P.", agency: "Heron" },
+    { ref: "v2", name: "Jonah Petrakis", agency: "Heron Lit" },
+    { ref: "v3", name: "Leo Fairbairn", agency: "Lattice", readings: ["Leo Fairbairn, Lattice"] },
+    { ref: "v4", name: "Tom Hale", agency: "Hale & Co" },
+    { ref: "v5", name: "Rhea Oduya", agency: "Oduya Lit" },
+    { ref: "v6", name: "Cordelia Vane", agency: "Vane & Hart" },
+  ],
+  queries: [
+    { agentRef: "v1", status: QueryStatus.QUERIED, sentDate: "2026-08-12", sentDateRaw: "12/8" },
+    { agentRef: "v2", status: QueryStatus.PARTIAL_REQUESTED, sentDate: "2026-08-20", sentDateRaw: "20/8" },
+    { agentRef: "v3", status: QueryStatus.QUERIED, sentDate: "2026-09-02", sentDateRaw: "2/9", reasons: ["check-reading"], lineRaw: "Leo Fairbairn? – Lattice – 2/9" },
+    { agentRef: "v4", status: QueryStatus.REJECTED, sentDate: "2026-09-03", sentDateRaw: "3/9", reasons: ["mark-unclear"], markRaw: "✗", markMeaning: "pass", lineRaw: "Tom Hale – Hale & Co – 3/9 ✗" },
+    { agentRef: "v5", status: QueryStatus.QUERIED, sentDate: null, sentDateRaw: "early Oct", reasons: ["no-date"], lineRaw: "Rhea Oduya – Oduya Lit – early Oct" },
+    { agentRef: "v6", status: QueryStatus.QUERIED, sentDate: "2026-08-12", sentDateRaw: "12/8" },
+  ],
+};

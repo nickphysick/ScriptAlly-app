@@ -24,7 +24,8 @@ import {
   STRIP_EVENT_TYPES, STRIP_WORDS, stripEvents, stripOrder, nextEventType, whereItStands, eventBeforeSent,
   stepName, setSentDate, waiveSentDate, addEvent, editEvent, removeEvent, calendarStart,
 } from "../../../lib/importTimeline";
-import { readTypedDate, localToday, tileDate, longDate, monthGrid, monthTitle, stepMonth } from "../../../lib/importTypedDate";
+import { readTypedDate, localToday, tileDate, longDate } from "../../../lib/importTypedDate";
+import { DateCalendar } from "./DatePick";
 import { useEscapeLayer, ESC_LEVEL } from "../../../lib/escapeStack";
 import { StatusDot } from "../../StatusDot";
 import "./timelineStrip.css";
@@ -33,32 +34,6 @@ type Target = "sent" | "new" | number;
 const keyOf = (t: Target) => (typeof t === "number" ? `e${t}` : t);
 
 interface Draft { target: Target; type: QueryStatus; typed: string; sel: string | null; err: boolean; y: number; m: number }
-
-const DOW = ["M", "T", "W", "T", "F", "S", "S"];
-
-const Calendar: React.FC<{ d: Draft; today: string; onMonth: (y: number, m: number) => void; onPick: (iso: string) => void }> = ({ d, today, onMonth, onPick }) => {
-  const g = monthGrid(d.y, d.m);
-  const atToday = `${d.y}-${String(d.m).padStart(2, "0")}` >= today.slice(0, 7);
-  return (
-    <div className="o9-cal" data-strip="cal">
-      <div className="o9-calh">
-        <button type="button" className="o9-calnav" aria-label="Previous month" data-act="cal-prev" onClick={() => onMonth(...stepMonth(d.y, d.m, -1))}>‹</button>
-        <b data-strip="cal-title">{monthTitle(d.y, d.m)}</b>
-        <button type="button" className="o9-calnav" aria-label="Next month" data-act="cal-next" disabled={atToday} onClick={() => onMonth(...stepMonth(d.y, d.m, 1))}>›</button>
-      </div>
-      <div className="o9-calg">
-        {DOW.map((w, i) => <span key={i} className="o9-dow" aria-hidden="true">{w}</span>)}
-        {Array.from({ length: g.lead }, (_, i) => <span key={`b${i}`} />)}
-        {g.days.map((iso) => (
-          <button type="button" key={iso} data-day={iso} disabled={iso > today} aria-label={longDate(iso)} aria-pressed={iso === d.sel}
-            className={`o9-day${iso === d.sel ? " is-sel" : ""}${iso === today ? " is-today" : ""}`} onClick={() => onPick(iso)}>
-            {Number(iso.slice(8))}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-};
 
 export const TimelineStrip: React.FC<{ query: ReviewQuery; onChange: (next: ReviewQuery) => void; today?: string }> = ({ query, onChange, today: todayIn }) => {
   const today = todayIn ?? localToday();
@@ -172,7 +147,7 @@ export const TimelineStrip: React.FC<{ query: ReviewQuery; onChange: (next: Revi
         <div className="o9-rd" aria-live="polite" data-strip="readback">
           {d.err ? <span className="is-bad">{STRIP_WORDS.bad}</span> : d.sel ? <span className="is-ok">{longDate(d.sel)}</span> : <span className="is-hint">{STRIP_WORDS.hint}</span>}
         </div>
-        <Calendar d={d} today={today} onMonth={(y, m) => setD({ ...d, y, m })} onPick={(iso) => setD({ ...d, sel: iso, typed: "", err: false })} />
+        <DateCalendar y={d.y} m={d.m} sel={d.sel} today={today} onMonth={(y, m) => setD({ ...d, y, m })} onPick={(iso) => setD({ ...d, sel: iso, typed: "", err: false })} />
         <div className="o9-spopfoot">
           <button type="button" className="sf-btn sf-btn--sm" disabled={!d.sel} onClick={save} data-strip="save">{isNew ? STRIP_WORDS.addBtn : STRIP_WORDS.save}</button>
           <button type="button" className="sf-link sf-link--quiet" onClick={close} data-strip="cancel">{STRIP_WORDS.cancel}</button>
