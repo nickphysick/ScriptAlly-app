@@ -14,7 +14,7 @@
  */
 import { MONTHS_SHORT } from "./dates";
 import { QueryStatus } from "../types";
-import { ParsedAgent, ParsedQuery, SmartImportResult, ReviewReasonCode, REVIEW_REASON_CODES } from "../types/smartImport";
+import { ParsedAgent, ParsedQuery, SmartImportResult, ReviewReasonCode, REVIEW_REASON_CODES, PageSource } from "../types/smartImport";
 import { normaliseGenres } from "./manuscripts";
 import { impliedRungs, assignTimes } from "./impliedRungs";
 import { deriveStatus } from "./queryDerivation";
@@ -115,6 +115,11 @@ export interface ReviewQuery {
   /** Typed, resolvable reasons. A query can carry more than one. */
   reasons: QueryReason[];
   notes: string;
+  /** Photos only, read-only, never written: where the entry sits on the writer's photo, its whole
+   *  line verbatim, and an unexplained mark beside it. */
+  src?: PageSource;
+  lineRaw?: string;
+  markRaw?: string;
   removed: boolean;
   removedReason?: "Agent removed" | "Removed by you";
 }
@@ -298,6 +303,16 @@ export function queryReasonText(code: ReviewReasonCode, q: ReviewQuery): string 
       return q.notes
         ? `We couldn't tell who this one was for — it just said "${q.notes}". Who was it? You can name the agent or agency on the Agents step.`
         : `We couldn't tell who this one was for. You can name the agent or agency on the Agents step.`;
+    /* Photos only. The first two are asked on the Agents step (parseModel moves them onto the
+       agent), so these lines are only a fallback; the deck's own words are DECK_WORDS'. */
+    case "check-reading":
+      return "Handwriting can read more than one way. Check the name on the Agents step.";
+    case "illegible-agency":
+      return "We couldn't make out the agency. You can add it on the Agents step.";
+    case "crossed-out":
+      return "This line is crossed out. What does that mean for this query?";
+    case "mark-unclear":
+      return `There's a "${q.markRaw ?? "mark"}" beside this line. Where does this one stand?`;
   }
 }
 
@@ -323,6 +338,10 @@ export function focusReasonMeta(key: FocusReasonKey): { pill: string } {
     case "status-wording":     return { pill: "Status to clarify" };
     case "check-name":         return { pill: "Name to check" };
     case "needs-identifying":  return { pill: "Who's this for?" };
+    case "check-reading":      return { pill: "Name to check" };
+    case "illegible-agency":   return { pill: "Agency to check" };
+    case "crossed-out":        return { pill: "Crossed out" };
+    case "mark-unclear":       return { pill: "Mark to explain" };
   }
 }
 

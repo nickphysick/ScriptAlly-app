@@ -17,7 +17,7 @@ import Anthropic from "@anthropic-ai/sdk";
 // The request itself — model, prompt, temperature, ceiling, parse-and-repair, the one strict retry —
 // lives in the pure core so the evaluation harness makes exactly this call (functions/eval/). The
 // MODEL is still the single constant shared with the email-import path (emailImportCore.MODEL).
-import { mapSheet, streamHooks, MAX_SHEET_CHARS, MAX_SHEET_LINES } from "./smartImportCore";
+import { mapSheet, mapPages, pickImportInput, streamHooks, MAX_SHEET_CHARS, MAX_SHEET_LINES } from "./smartImportCore";
 
 const ANTHROPIC_API_KEY = defineSecret("ANTHROPIC_API_KEY");
 
@@ -52,11 +52,19 @@ export const smartImportMap = onCall(
     if (!req.auth) throw new HttpsError("unauthenticated", "Please sign in.");
     const uid = req.auth.uid;
 
-    const sheetText = (req.data?.sheetText ?? "") as string;
-    if (!sheetText.trim()) throw new HttpsError("invalid-argument", "No file content.");
-    if (sheetText.length > MAX_SHEET_CHARS) throw new HttpsError("invalid-argument", "File too large.");
-    if (sheetText.split("\n").length > MAX_SHEET_LINES)
-      throw new HttpsError("invalid-argument", "Too many rows — split the file or use the Import desk.");
+    // ── What to read: a sheet's text, OR photos of a list (smart-import-photos-v1), never both ──────
+    // Checked before anything is read from Firestore, so a malformed request never touches the
+    // entitlement. A photo request's pages are validated in full here (count, type, base64, size).
+    const input = pickImportInput(req.data);
+    if (input.kind === "error") throw new HttpsError("invalid-argument", input.message);
+    const pages = input.kind === "pages" ? input.pages : null;
+    const sheetText = input.kind === "sheet" ? input.sheetText : "";
+    if (!pages) {
+      if (!sheetText.trim()) throw new HttpsError("invalid-argument", "No file content.");
+      if (sheetText.length > MAX_SHEET_CHARS) throw new HttpsError("invalid-argument", "File too large.");
+      if (sheetText.split("\n").length > MAX_SHEET_LINES)
+        throw new HttpsError("invalid-argument", "Too many rows — split the file or use the Import desk.");
+    }
 
     // ── Entitlement gate (server-enforced, before the costly AI call) ─────────────────────────────
     // Free: 1 lifetime. Pro: 1 per UTC calendar month. The Pro allowance is independent of the
@@ -103,11 +111,13 @@ export const smartImportMap = onCall(
 
     // Progress travels beside the answer, never instead of it: when the browser streams, the row
     // count goes out as the reply is read; when it does not, streamHooks adds nothing at all.
-    const outcome = await mapSheet(client, sheetText, {
-      log: (m) => console.log(m),
-      logError: (m, cause) => (cause === undefined ? console.error(m) : console.error(m, cause)),
+    const hooks = {
+      log: (m: string) => console.log(m),
+      logError: (m: string, cause?: unknown) => (cause === undefined ? console.error(m) : console.error(m, cause)),
       ...streamHooks(req.acceptsStreaming, (chunk) => response?.sendChunk(chunk)),
-    });
+    };
+    // One gate, one consume, one stream for both inputs: only the request differs.
+    const outcome = pages ? await mapPages(client, pages, hooks) : await mapSheet(client, sheetText, hooks);
     if (outcome.failure === "api") {
       // The underlying cause was logged by mapSheet — the client only ever sees the generic error.
       throw new HttpsError("unavailable", "Couldn't read the file right now.");

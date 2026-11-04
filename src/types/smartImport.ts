@@ -31,7 +31,16 @@ export interface ParsedAgent {
    *  and test fixtures still type-check. Agent review flags come from `issues`. */
   confidence?: "high" | "low";
   issues?: string[];
+  /** Photos only: up to three plausible readings of a name or agency the handwriting leaves unclear,
+   *  best first (the best is also in name/agency). Goes with a query's "check-reading" code. Never
+   *  written to Firestore. */
+  readings?: string[];
 }
+
+/** Photos only: where an entry sits on the writer's photo. `p` is the 1-based page; `y` is the
+ *  entry's vertical band as fractions of the page height (0–1, top below bottom). Read-only, for
+ *  the review's cut-out; never written to Firestore. */
+export interface PageSource { p: number; y: [number, number] }
 
 /** Typed reason codes the review screen turns into plain-English copy + the right input. The union
  *  of the model's semantic codes (status-direction/status-wording) and the parser's mechanical codes
@@ -49,13 +58,20 @@ export type ReviewReasonCode =
   | "status-direction"
   | "status-wording"
   | "check-name"          // agent/agency cell was a note, not a name — real part extracted, confirm
-  | "needs-identifying";  // cell named no real agent/agency at all — writer must say who it was
+  | "needs-identifying"   // cell named no real agent/agency at all — writer must say who it was
+  // Photos only (smart-import-photos-v1). The first two are about the AGENT and are moved onto it
+  // by the review; the last two are about the query.
+  | "check-reading"       // a name or agency that reads more than one way (goes with ParsedAgent.readings)
+  | "illegible-agency"    // an agency is there but can't be made out; any legible start is in agency
+  | "crossed-out"         // the entry is struck through
+  | "mark-unclear";       // a symbol beside the entry (✗ ? ! …) whose meaning isn't plain (markRaw)
 
 export const REVIEW_REASON_CODES: readonly ReviewReasonCode[] = [
   "two-dates", "missing-day", "serial-outlier", "no-date",
   "unreadable-date", "ambiguous-date", "unreadable-response-date", "ambiguous-response-date",
   "status-direction", "status-wording",
   "check-name", "needs-identifying",
+  "check-reading", "illegible-agency", "crossed-out", "mark-unclear",
 ];
 
 /** A later pipeline event lifted from a note (conservative): the event, its code-parsed date
@@ -87,6 +103,11 @@ export interface ParsedQuery {
   /** Typed reason codes; copy is assembled client-side so the function payload stays tiny. */
   reasons?: ReviewReasonCode[];
   notes?: string;
+  /** Photos only, all three read-only and never written to Firestore: where the entry sits on the
+   *  writer's photo, the whole line transcribed verbatim, and an unexplained mark beside it. */
+  src?: PageSource;
+  lineRaw?: string;
+  markRaw?: string;
 }
 
 export interface StatusTranslation {

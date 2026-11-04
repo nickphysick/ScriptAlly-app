@@ -703,7 +703,8 @@
     "design-refs/founding-emails-v2.html": "403096e5fff540466aea028ee30929a7cd3e4e24aecd61c2a44057bb6c085200",
     "design-refs/privacy-v1.html": "df4c0d09e53b1cb7e7684f01fceb27053dab89785a1f3d601e04d3b76b2faced",
     "design-refs/confirm-email-v2.html": "1d09d7a81ddb561b92945a66c65f88e360a7187c358e908e5c82e309e8f42ffa",
-    "design-refs/landing-waitlist-clarity-v1.html": "4eb1fa7eb87ab238e9046c35e00eb5446cd722cf7b4257f6fda730f1d5aa6f70"
+    "design-refs/landing-waitlist-clarity-v1.html": "4eb1fa7eb87ab238e9046c35e00eb5446cd722cf7b4257f6fda730f1d5aa6f70",
+    "design-refs/smart-import-photos-v1.html": "b245e31a0858f683229d681f6997a1fec2a19f520f8a32df980184b49171e621"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",

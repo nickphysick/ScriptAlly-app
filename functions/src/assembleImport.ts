@@ -17,6 +17,8 @@ import { parseImportDate } from "./parseImportDate";
  *  with the client's ReviewReasonCode (src/types/smartImport.ts) — same cross-tsconfig duplication as
  *  the QueryStatus strings. */
 const MODEL_REASONS = new Set(["status-direction", "status-wording", "check-name", "needs-identifying"]);
+/** The four more a PHOTO read may emit (smart-import-photos-v1). A sheet read never keeps them. */
+const PHOTO_REASONS = new Set(["check-reading", "illegible-agency", "crossed-out", "mark-unclear"]);
 
 export interface TimelineOut { type: string; date: string | null; raw: string | null; }
 export interface QueryOut {
@@ -27,6 +29,40 @@ export interface QueryOut {
   timeline: TimelineOut[];
   reasons: string[];
   notes?: string;
+  /** Photos only — see src/types/smartImport.ts. */
+  src?: { p: number; y: [number, number] };
+  lineRaw?: string;
+  markRaw?: string;
+}
+
+export interface AssembleOpts {
+  /** A photo read: keep the photo reason codes and fields. `pageCount` bounds `src.p`. */
+  photos?: { pageCount: number };
+}
+
+/** A `src` the model gave, or null when any number is out of range. Never throws. */
+export function cleanSrc(v: unknown, pageCount: number): { p: number; y: [number, number] } | null {
+  if (!v || typeof v !== "object") return null;
+  const o = v as { p?: unknown; y?: unknown };
+  const p = o.p, y = o.y;
+  if (typeof p !== "number" || !Number.isInteger(p) || p < 1 || p > pageCount) return null;
+  if (!Array.isArray(y) || y.length !== 2) return null;
+  const [t, b] = y;
+  if (typeof t !== "number" || typeof b !== "number" || !Number.isFinite(t) || !Number.isFinite(b)) return null;
+  if (t < 0 || b > 1 || t >= b) return null;
+  return { p, y: [t, b] };
+}
+
+/** Up to three distinct, non-empty readings, or null. */
+export function cleanReadings(v: unknown): string[] | null {
+  if (!Array.isArray(v)) return null;
+  const out: string[] = [];
+  for (const r of v) {
+    const t = typeof r === "string" ? r.trim() : "";
+    if (t && !out.some((x) => x.toLowerCase() === t.toLowerCase())) out.push(t);
+    if (out.length === 3) break;
+  }
+  return out.length ? out : null;
 }
 
 const trimOrNull = (v: unknown): string | null => {
@@ -47,8 +83,9 @@ const isBareSerial = (raw: string | null): boolean => {
  * Turn the model's proposal into the final structured shape. Defensive: if `raw` isn't the expected
  * object, it's returned untouched (the client re-validates everything anyway).
  */
-export function assembleResult(raw: any): any {
+export function assembleResult(raw: any, opts: AssembleOpts = {}): any {
   if (!raw || typeof raw !== "object" || !Array.isArray(raw.queries)) return raw;
+  const photos = opts.photos ?? null;
 
   // Pass 1 — resolve every non-serial sent date to build the file's date span (the serial-outlier
   // oracle). Serials are excluded so one weird serial can't stretch the span it's measured against.
@@ -69,7 +106,7 @@ export function assembleResult(raw: any): any {
     const reasons = new Set<string>();
     // Model's semantic codes (filtered to the allow-list).
     for (const c of Array.isArray(q?.reasons) ? q.reasons : []) {
-      if (typeof c === "string" && MODEL_REASONS.has(c)) reasons.add(c);
+      if (typeof c === "string" && (MODEL_REASONS.has(c) || (photos && PHOTO_REASONS.has(c)))) reasons.add(c);
     }
     // Parser's mechanical code for the sent date (missing-day / serial-outlier / no-date).
     if (sent.reason) reasons.add(sent.reason);
@@ -97,8 +134,26 @@ export function assembleResult(raw: any): any {
     };
     const notes = trimOrNull(q?.notes);
     if (notes) out.notes = notes;
+    if (photos) {
+      const src = cleanSrc(q?.src, photos.pageCount);
+      if (src) out.src = src;
+      const lineRaw = trimOrNull(q?.lineRaw);
+      if (lineRaw) out.lineRaw = lineRaw;
+      const markRaw = trimOrNull(q?.markRaw);
+      if (markRaw && markRaw.length <= 12) out.markRaw = markRaw;
+    }
     return out;
   });
 
-  return { ...raw, queries };
+  if (!photos) return { ...raw, queries };
+  /* A photo read's agents: `readings` kept only as a clean list; nothing else about them changes. */
+  const agents = Array.isArray(raw.agents)
+    ? raw.agents.map((a: any) => {
+        if (!a || typeof a !== "object") return a;
+        const { readings, ...rest } = a;
+        const r = cleanReadings(readings);
+        return r ? { ...rest, readings: r } : rest;
+      })
+    : raw.agents;
+  return { ...raw, agents, queries };
 }
