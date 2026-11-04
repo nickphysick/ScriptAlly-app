@@ -62,6 +62,7 @@ import { materialWords } from "../../lib/agentPanel";
 import type { AgentFacts as Facts24 } from "../../lib/contactList";
 import { AgentCardPanel24 } from "./contact/AgentCardPanel24";
 import { AgentCardPanel262, requestCardClose, type CloseGuard } from "./contact/AgentCardPanel262";
+import { AgentCard262 } from "./contact/AgentCard262";
 import { agentHistory } from "../../lib/agentHistory";
 import { destroyManifest } from "../../lib/cascade";
 import type { ContactView, Group26Key } from "../../lib/contactListMemory";
@@ -1100,14 +1101,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             content in the same host) */}
         {cardFacts && active && !logSeed ? (
           <AgentCardPanel262 agentId={cardFacts.agent.id} onClose={() => setCardId(null)} guardRef={cardGuard}>
-            <div className="cl262-card" data-cl262="card">
-              <div className="cl262-frame" data-cl262="frame">
-                <div className="cl262-scroll" data-cl262="scroll">
-                  <AgentCard24 {...cardPropsFor(cardFacts, cardIndex, drawnOrder.length,
-                    (d) => { const n = drawnOrder[cardIndex + d]; if (n) pickCard(n); }, (id) => pickCard(id), requestCardClose)} />
-                </div>
-              </div>
-            </div>
+            {/* v26.2 B — the card's face: AgentPaperCard's panel variant, the landing sections, the next-step box */}
+            <AgentCard262 {...cardPropsFor(cardFacts, cardIndex, drawnOrder.length,
+              (d) => { const n = drawnOrder[cardIndex + d]; if (n) pickCard(n); }, (id) => pickCard(id), requestCardClose)} />
           </AgentCardPanel262>
         ) : null}
         </>

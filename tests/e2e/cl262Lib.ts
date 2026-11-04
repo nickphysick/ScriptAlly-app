@@ -33,7 +33,7 @@ export class Ledger {
   }
 }
 
-export const CARD = "[data-cl262='card']";
+export const CARD = "[data-cl262='panel'] .cl262-card";
 /** the list at its defaults, then the card on the first agent of a stand (you · agent · none · closed), arrival settled */
 export async function openCard(page: Page, vp: VP, o: { stand?: string; id?: string; settle?: boolean } = {}) {
   await openCl26(page, vp);
