@@ -1,0 +1,20 @@
+[
+ {
+  "lock": "D1",
+  "where": "population",
+  "ok": true,
+  "detail": "{\"tier\":\"2\",\"rank\":\"Archivist\",\"count\":\"6 of 8 notes\",\"no\":\"Founding writer · No. 23\",\"on\":\"Archivist\",\"steps\":6}"
+ },
+ {
+  "lock": "D1",
+  "where": "rank and count are the stats",
+  "ok": true,
+  "detail": "{\"tier\":\"2\",\"rank\":\"Archivist\",\"count\":\"6 of 8 notes\",\"no\":\"Founding writer · No. 23\",\"on\":\"Archivist\",\"steps\":6}"
+ },
+ {
+  "lock": "D1",
+  "where": "Like opens FeedbackDock with Like chosen",
+  "ok": true,
+  "detail": "Something I liked"
+ }
+]

@@ -1,0 +1,58 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Dashboard v2 · the founding writer card (3 Nov; ref design-refs/dashboard-v2). Scoped to `.d58.d2`; see dash2.css's header for the
+ * brand-font and portal rules every v2 sheet follows.
+ */
+/* ── Part D · the founding writer card ── */
+.d58.d2 .d2-fwframe { display: flex; flex-direction: column; }
+.d58.d2 .d2-fwtop { padding: 18px 22px; background: linear-gradient(135deg, #fbefe9 0%, #f4e0d7 100%); }
+.d58.d2 .d2-fwtags { display: flex; align-items: center; gap: 12px; }
+.d58.d2 .d2-fwno { display: inline-block; padding: 3px 11px; border-radius: 999px; background: #fff; color: #a0675a; font-weight: 600; font-size: 12.5px; }
+.d58.d2 .d2-fwhow { margin-left: auto; border: 0; background: none; padding: 0; cursor: pointer; font-size: 13.5px; font-weight: 600; color: #a0675a; text-decoration: underline; text-underline-offset: 3px; }
+.d58.d2 .d2-fwrank { display: grid; grid-template-columns: 110px 1fr; gap: 18px; align-items: center; margin-top: 10px; }
+.d58.d2 .d2-fwart { width: 110px; height: 88px; display: grid; place-items: center; }
+.d58.d2 .d2-fwart img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.d58.d2 .d2-fwart .d2-nest { width: 110px; height: auto; }
+.d58.d2 h3.d2-fwname { margin: 0; font-family: var(--d58-type) !important; font-weight: 400 !important; font-size: 26px !important; line-height: 1.3 !important; }
+.d58.d2 .d2-fwtx p { margin: 2px 0 0; font-size: 14.5px; line-height: 1.4; color: #3b322c; }
+.d58.d2 .d2-fwbar { height: 6px; border-radius: 3px; background: #ecd3c9; margin: 8px 0 4px; overflow: hidden; }
+.d58.d2 .d2-fwbar i { display: block; height: 100%; border-radius: 3px; background: #a0675a; }
+.d58.d2 .d2-fwtx small { font-size: 12.5px; color: var(--d2-muted); }
+.d58.d2 .d2-fwb { padding: 16px 22px; border-top: 1px solid var(--d2-hair); }
+.d58.d2 h3.d2-fwh { margin: 0 0 4px; font-family: var(--d58-type) !important; font-weight: 400 !important; font-size: 17px !important; line-height: 1.3 !important; }
+.d58.d2 .d2-fwp { margin: 0 0 12px; font-size: 14px; line-height: 1.45; color: var(--d2-muted); }
+.d58.d2 .d2-fwbtns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.d58.d2 .d2-fwbtns button { height: 62px; border: 0; border-radius: 12px; cursor: pointer; background: #faf6f1; box-shadow: inset 0 0 0 1px var(--d2-hair); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; font-weight: 600; font-size: 13px; color: var(--d2-ink); }
+.d58.d2 .d2-fwbtns button:hover { background: #f6e9e3; box-shadow: inset 0 0 0 1px #ecd3c9; }
+.d58.d2 .d2-fwbtns svg { width: 19px; height: 19px; color: #a0675a; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.d2-fwbtns button:focus-visible, .d2-fwhow:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
+.d58.d2 .d2-fwb--road { container: d2road / inline-size; }
+.d58.d2 .d2-road { list-style: none; margin: 10px 0 0; padding: 0; position: relative; display: flex; justify-content: space-between; }
+.d58.d2 .d2-road::before { content: ""; position: absolute; left: 16px; right: 16px; top: 16px; border-top: 2px dotted #e2c9bf; }
+.d58.d2 .d2-road li { position: relative; display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 0; font-size: 13px; color: var(--d2-muted); text-align: center; }
+.d58.d2 .d2-dt { width: 32px; height: 32px; border-radius: 50%; background: #fff; box-shadow: inset 0 0 0 1px var(--d2-hair); display: grid; place-items: center; overflow: hidden; }
+.d58.d2 .d2-dt img { width: 22px; filter: grayscale(1) opacity(0.4); }
+.d58.d2 .d2-dt .d2-hnest { width: 24px; height: auto; filter: grayscale(1) opacity(0.4); }
+.d58.d2 .d2-road b { font-weight: 400; }
+.d58.d2 .d2-road small { font-size: 11.5px; min-height: 1em; }
+.d58.d2 .d2-road li.is-on { color: var(--d2-ink); }
+.d58.d2 .d2-road li.is-on b { font-weight: 600; }
+.d58.d2 .d2-road li.is-on small { color: #a0675a; font-weight: 600; }
+.d58.d2 .d2-road li.is-on .d2-dt { box-shadow: 0 0 0 2.5px #a0675a; background: #fbefe9; }
+.d58.d2 .d2-road li.is-on .d2-dt :is(img, .d2-hnest) { filter: none; }
+.d58.d2 .d2-fwnote { background: #faf6f1; border-radius: 12px; padding: 12px 14px; font-style: italic; font-size: 14.5px; line-height: 1.45; }
+.d58.d2 .d2-fwtg { display: inline-block; margin-right: 6px; font-style: normal; font-weight: 600; font-size: 12px; color: #a0675a; }
+.d58.d2 .d2-fwnote small { display: block; margin-top: 6px; font-style: normal; font-size: 13px; color: var(--d2-muted); }
+.d58.d2 .d2-fwnote small b { color: var(--d2-ink); }
+.d58.d2 .d2-fwf { margin-top: auto; padding: 12px 20px; background: #fbf4ef; border-top: 1px solid var(--d2-hair); font-size: 13.5px; color: #a0675a; text-align: center; }
+@media (max-width: 1320px) { .d58.d2 .d2-road small { display: none; } }
+/* ⚠️ AND BY THE ROAD'S OWN WIDTH: the app's sidebar is 248px where the ref's is 68, so at 1512 the middle column is
+   ~380px and six labels with counts collide. Below 470px of road the counts go, and the names step down. */
+@container d2road (max-width: 470px) {
+  .d58.d2 .d2-road small:not(:empty) { display: none; }
+  .d58.d2 .d2-road li.is-on small { display: block; }
+  .d58.d2 .d2-road li { font-size: 12px; }
+}
+

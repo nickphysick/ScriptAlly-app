@@ -32,7 +32,7 @@ describe("FV2-H · what the slot holds", () => {
     expect(FINISH.title).toBe("That's you set up");
     expect(FINISH.text("querying")).toBe("Manuscript, agents, queries, materials and comparable titles: all in. From here on, the dashboard shows what needs doing next.");
     expect(FINISH.text("writing").startsWith("Manuscript, comparable titles, a shortlist and your letter: all in.")).toBe(true);
-    expect([FINISH.close, FINISH.note]).toEqual(["Close this list", "Your weekly goal and streak go here instead."]);
+    expect([FINISH.close, FINISH.note]).toEqual(["Close this list", "Next up shows what to do from here."] /* RE-POINTED (Dashboard v2) */);
   });
 });
 
@@ -60,9 +60,10 @@ describe("FV2-H · on the page", () => {
     expect(html).not.toContain('data-fv2="finish"');
     expect(html).toContain('data-fv2="gs-count"');
   });
-  it("closed: the goal sheet has the slot", () => {
+  /* RE-POINTED (Dashboard v2): the goal sheet is retired, so a closed Getting started leaves the slot empty */
+  it("closed: Getting started goes and nothing takes its place", () => {
     const html = page({ dash: { gsClosed: { "ms-1": true } } });
     expect(html).not.toContain('data-fv2="gs"');
-    expect(html).toContain('data-df1="goal"');
+    expect(html).not.toContain('data-df1="goal"');
   });
 });

@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "A1",
+  "where": "population",
+  "ok": true,
+  "detail": "lines [\"The Smoke Test\",\"by harness\"]"
+ },
+ {
+  "lock": "A1",
+  "where": "spans the grid",
+  "ok": true,
+  "detail": "band 960.0@280.0 grid 960.0@280.0"
+ },
+ {
+  "lock": "A1",
+  "where": "28px below the sheet's top, clear of its lip",
+  "ok": true,
+  "detail": "28.0px"
+ },
+ {
+  "lock": "A1",
+  "where": "title, then by-line",
+  "ok": true,
+  "detail": "[\"The Smoke Test\",\"by harness\"]"
+ },
+ {
+  "lock": "A1",
+  "where": "no status",
+  "ok": true,
+  "detail": "The Smoke Testby harnessLog a queryRecord a responseAdd an agent"
+ },
+ {
+  "lock": "A2",
+  "where": "population",
+  "ok": true,
+  "detail": "left [\"Next up\",\"Agents on file\",\"Closed queries\"] mid [\"Active queries\",\"Founding writer\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "right column width",
+  "ok": true,
+  "detail": "right 340.0 (want 340), xs 280,561,900"
+ },
+ {
+  "lock": "A2",
+  "where": "left order",
+  "ok": true,
+  "detail": "[\"Next up\",\"Agents on file\",\"Closed queries\"]"
+ },
+ {
+  "lock": "A2",
+  "where": "middle order",
+  "ok": true,
+  "detail": "[\"Active queries\",\"Founding writer\"]"
+ },
+ {
+  "lock": "A3",
+  "where": "removed",
+  "ok": true,
+  "detail": "still present: "
+ }
+]

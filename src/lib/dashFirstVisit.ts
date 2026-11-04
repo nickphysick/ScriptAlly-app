@@ -203,7 +203,7 @@ export const pathAfter = (choice: AnswerChoice, status: ManuscriptStatus | strin
 
 export const tipWrite = (i: number): UserPaths => ({ [`${ROOT}.tip`]: i });
 export const gsHideWrite = (msId: string): UserPaths => ({ [`${ROOT}.gsHidden.${seg(msId)}`]: true });
-/** first visit v2 (Part H): "Close this list" on the finish line — the goal sheet takes the slot, and it never comes back */
+/** first visit v2 (Part H): "Close this list" on the finish line — the list leaves for good (Dashboard v2: nothing takes the slot) */
 export const gsCloseWrite = (msId: string): UserPaths => ({ [`${ROOT}.gsClosed.${seg(msId)}`]: true });
 
 /* ── first visit v2, Part H: the finish line ── */
@@ -213,7 +213,8 @@ export const FINISH = {
     ? "Manuscript, comparable titles, a shortlist and your letter: all in. From here on, the dashboard shows what needs doing next."
     : "Manuscript, agents, queries, materials and comparable titles: all in. From here on, the dashboard shows what needs doing next."),
   close: "Close this list",
-  note: "Your weekly goal and streak go here instead.",
+  /* Dashboard v2: the goal sheet that used to take this slot is retired, so the note names what does follow */
+  note: "Next up shows what to do from here.",
 } as const;
 
 /**

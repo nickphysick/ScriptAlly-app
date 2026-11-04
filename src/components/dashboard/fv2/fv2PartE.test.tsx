@@ -32,8 +32,10 @@ describe("FV2-E · the example dashboard", () => {
     expect(html).toMatch(/data-fv2="example-body" inert=""/);
     expect(html.indexOf('data-fv2="example-back"')).toBeLessThan(html.indexOf('data-fv2="example-body"'));
     expect(html).toContain('data-fv2="querying"');
-    expect(html).toContain('data-df1="queries"');
-    expect(html).toContain('data-df1="goal"');
+    /* RE-POINTED (Dashboard v2): the example is the v2 querying page — Active queries and the feed, no goal sheet */
+    expect(html).toContain('data-d2-card="active"');
+    expect(html).toContain('data-d2="feed"');
+    expect(html).not.toContain('data-df1="goal"');
   });
   it("cannot open itself again, and strikes no stamp", () => {
     expect(html).not.toContain('data-fv2="example-link"');
