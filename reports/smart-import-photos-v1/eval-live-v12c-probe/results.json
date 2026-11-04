@@ -1,0 +1,1202 @@
+{
+  "model": "claude-sonnet-4-6",
+  "label": "live-v12c-probe",
+  "dry": false,
+  "runs": 2,
+  "timing": null,
+  "results": [
+    {
+      "id": "real-notepad",
+      "run": 1,
+      "real": true,
+      "style": "hand",
+      "blurred": false,
+      "pages": 1,
+      "payloadChars": 183584,
+      "ms": 10482,
+      "attempts": 1,
+      "failure": null,
+      "stopReason": "end_turn",
+      "usage": {
+        "inputTokens": 1576,
+        "outputTokens": 625,
+        "cacheReadTokens": 2313,
+        "cacheWriteTokens": 1737
+      },
+      "costUsd": 0.02131065,
+      "score": {
+        "id": "real-notepad",
+        "entries": 7,
+        "matched": 7,
+        "spurious": 0,
+        "correct": {
+          "name": 7,
+          "agency": 7,
+          "status": 7,
+          "date": 7
+        },
+        "codes": {
+          "crossed-out": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "mark-unclear": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0
+          },
+          "illegible-agency": {
+            "tp": 0,
+            "fp": 1,
+            "fn": 0
+          },
+          "no-date": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          }
+        },
+        "src": {
+          "hit": 0,
+          "of": 0
+        },
+        "wrong": [
+          "real-notepad #4 Felix Arden: spurious illegible-agency"
+        ]
+      }
+    },
+    {
+      "id": "real-notebook-two-pages",
+      "run": 1,
+      "real": true,
+      "style": "hand",
+      "blurred": false,
+      "pages": 2,
+      "payloadChars": 363800,
+      "ms": 19933,
+      "attempts": 1,
+      "failure": null,
+      "stopReason": "end_turn",
+      "usage": {
+        "inputTokens": 3147,
+        "outputTokens": 1318,
+        "cacheReadTokens": 2313,
+        "cacheWriteTokens": 1737
+      },
+      "costUsd": 0.036418650000000004,
+      "score": {
+        "id": "real-notebook-two-pages",
+        "entries": 14,
+        "matched": 14,
+        "spurious": 0,
+        "correct": {
+          "name": 14,
+          "agency": 14,
+          "status": 14,
+          "date": 14
+        },
+        "codes": {
+          "crossed-out": {
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          },
+          "mark-unclear": {
+            "tp": 3,
+            "fp": 0,
+            "fn": 0
+          },
+          "illegible-agency": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1
+          },
+          "no-date": {
+            "tp": 4,
+            "fp": 0,
+            "fn": 0
+          }
+        },
+        "src": {
+          "hit": 0,
+          "of": 0
+        },
+        "wrong": [
+          "real-notebook-two-pages #5 Imogen Price: missed illegible-agency"
+        ]
+      }
+    },
+    {
+      "id": "hand-indie-2p-blur",
+      "run": 1,
+      "real": false,
+      "style": "hand",
+      "blurred": true,
+      "pages": 2,
+      "payloadChars": 224236,
+      "ms": 22469,
+      "attempts": 1,
+      "failure": null,
+      "stopReason": "end_turn",
+      "usage": {
+        "inputTokens": 3147,
+        "outputTokens": 1666,
+        "cacheReadTokens": 2313,
+        "cacheWriteTokens": 1737
+      },
+      "costUsd": 0.04163865,
+      "score": {
+        "id": "hand-indie-2p-blur",
+        "entries": 18,
+        "matched": 18,
+        "spurious": 0,
+        "correct": {
+          "name": 15,
+          "agency": 18,
+          "status": 17,
+          "date": 16
+        },
+        "codes": {
+          "crossed-out": {
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          },
+          "mark-unclear": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "illegible-agency": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "no-date": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          }
+        },
+        "src": {
+          "hit": 4,
+          "of": 18
+        },
+        "wrong": [
+          "hand-indie-2p-blur #1 Meredith Hale: date 2026-04-05 (truth 2026-01-05 from \"5/1/2026\")",
+          "hand-indie-2p-blur #3 Stanley Abara: src {\"p\":1,\"y\":[0.24,0.3]} (line 1:0.202–0.255)",
+          "hand-indie-2p-blur #4 Barnaby Whitlock: src {\"p\":1,\"y\":[0.3,0.36]} (line 1:0.241–0.295)",
+          "hand-indie-2p-blur #5 Tomasz Quaye: src {\"p\":1,\"y\":[0.36,0.42]} (line 1:0.281–0.335)",
+          "hand-indie-2p-blur #6 Gideon Pennington: src {\"p\":1,\"y\":[0.42,0.48]} (line 1:0.321–0.375)",
+          "hand-indie-2p-blur #7 Lottie Castellano: src {\"p\":1,\"y\":[0.48,0.54]} (line 1:0.361–0.415)",
+          "hand-indie-2p-blur #8 Jonah Drummond: src {\"p\":1,\"y\":[0.54,0.6]} (line 1:0.401–0.455)",
+          "hand-indie-2p-blur #9 Esme Biddle: src {\"p\":1,\"y\":[0.6,0.66]} (line 1:0.441–0.495)",
+          "hand-indie-2p-blur #11 Juno Mróz: name \"Juno Mroz\"",
+          "hand-indie-2p-blur #11 Juno Mróz: status \"Partial Sent\" (truth \"Rejected\")",
+          "hand-indie-2p-blur #12 Barnaby Marchetti: src {\"p\":2,\"y\":[0.24,0.3]} (line 2:0.204–0.255)",
+          "hand-indie-2p-blur #13 Felix Sharma: src {\"p\":2,\"y\":[0.3,0.36]} (line 2:0.244–0.295)",
+          "hand-indie-2p-blur #14 Gideon Strand: src {\"p\":2,\"y\":[0.36,0.42]} (line 2:0.284–0.335)",
+          "hand-indie-2p-blur #15 Anouk Mróz: name \"Anouk Mroz\"",
+          "hand-indie-2p-blur #15 Anouk Mróz: src {\"p\":2,\"y\":[0.42,0.48]} (line 2:0.324–0.375)",
+          "hand-indie-2p-blur #16 Tom Mróz: name \"Tom Mroz\"",
+          "hand-indie-2p-blur #16 Tom Mróz: src {\"p\":2,\"y\":[0.48,0.54]} (line 2:0.364–0.415)",
+          "hand-indie-2p-blur #17 Sophie Huxley: date 2026-04-11 (truth 2026-04-17 from \"17 Apr\")",
+          "hand-indie-2p-blur #17 Sophie Huxley: src {\"p\":2,\"y\":[0.54,0.6]} (line 2:0.404–0.455)",
+          "hand-indie-2p-blur #18 Harriet Marchetti: src {\"p\":2,\"y\":[0.6,0.66]} (line 2:0.444–0.495)"
+        ]
+      },
+      "result": {
+        "agents": [
+          {
+            "ref": "a1",
+            "name": "Meredith Hale",
+            "agency": "Strand Literary"
+          },
+          {
+            "ref": "a2",
+            "name": "Bertie Ashworth",
+            "agency": "Vane & Hart"
+          },
+          {
+            "ref": "a3",
+            "name": "Stanley Abara"
+          },
+          {
+            "ref": "a4",
+            "name": "Barnaby Whitlock",
+            "agency": "Price & Partners"
+          },
+          {
+            "ref": "a5",
+            "name": "Tomasz Quaye",
+            "agency": "Hale Agency"
+          },
+          {
+            "ref": "a6",
+            "name": "Gideon Pennington",
+            "agency": "Fairbairn Associates"
+          },
+          {
+            "ref": "a7",
+            "name": "Lottie Castellano",
+            "agency": "Okafor Lit"
+          },
+          {
+            "ref": "a8",
+            "name": "Jonah Drummond",
+            "agency": "Okafor Lit"
+          },
+          {
+            "ref": "a9",
+            "name": "Esme Biddle",
+            "agency": "Vane & Hart"
+          },
+          {
+            "ref": "a10",
+            "name": "Ruth Drummond",
+            "agency": "Vane & Hart"
+          },
+          {
+            "ref": "a11",
+            "name": "Juno Mroz",
+            "agency": "Calloway Hunt"
+          },
+          {
+            "ref": "a12",
+            "name": "Barnaby Marchetti",
+            "agency": "Okafor Lit"
+          },
+          {
+            "ref": "a13",
+            "name": "Felix Sharma"
+          },
+          {
+            "ref": "a14",
+            "name": "Gideon Strand",
+            "agency": "Okafor Lit"
+          },
+          {
+            "ref": "a15",
+            "name": "Anouk Mroz",
+            "agency": "Achebe & Rowe"
+          },
+          {
+            "ref": "a16",
+            "name": "Tom Mroz",
+            "agency": "Calloway Hunt"
+          },
+          {
+            "ref": "a17",
+            "name": "Sophie Huxley",
+            "agency": "Achebe & Rowe"
+          },
+          {
+            "ref": "a18",
+            "name": "Harriet Marchetti",
+            "agency": "Okafor Lit"
+          }
+        ],
+        "queries": [
+          {
+            "agentRef": "a1",
+            "status": "Partial Sent",
+            "sentDate": "2026-04-05",
+            "sentDateRaw": "5/4/2026",
+            "timeline": [],
+            "reasons": [],
+            "src": {
+              "p": 1,
+              "y": [
+                0.12,
+                0.18
+              ]
+            },
+            "lineRaw": "Meredith Hale - Strand Literary - 5/4/2026 - sent partial"
+          },
+          {
+            "agentRef": "a2",
+            "status": "No Response",
+            "sentDate": "2026-03-26",
+            "sentDateRaw": "26/3/26",
+            "timeline": [],
+            "reasons": [],
+            "src": {
+              "p": 1,
+              "y": [
+                0.18,
+                0.24
+              ]
+            },
+            "lineRaw": "Bertie Ashworth - Vane & Hart - 26/3/26 - no reply"
+          },
+          {
+            "agentRef": "a3",
+            "status": "Partial Requested",
+            "sentDate": "2026-03-27",
+            "sentDateRaw": "27/3",
+            "timeline": [],
+            "reasons": [],
+            "src": {
+              "p": 1,
+              "y": [
+                0.24,
+                0.3
+              ]
+            },
+            "lineRaw": "Stanley Abara - 27/3 - partial req"
+          },
+          {
+            "agentRef": "a4",
+            "status": "Full Requested",
+            "sentDate": "2026-04-04",
+            "sentDateRaw": "4/4",
+            "timeline": [],
+            "reasons": [],
+            "src": {
+              "p": 1,
+              "y": [
+                0.3,
+                0.36
+              ]
+            },
+            "lineRaw": "Barnaby Whitlock - Price & Partners - 4/4 - full req"
+          },
+          {
+            "agentRef": "a5",
+            "status": "Queried",
+            "sentDate": "2026-06-17",
+            "sentDateRaw": "17/6",
+            "timeline": [],
+            "reasons": [],
+            "src": {
+              "p": 1,
+              "y": [
+                0.36,
+                0.42
+              ]
+            },
+            "lineRaw": "Tomasz Quaye - Hale Agency - 17/6 - queried"
+          },
+          {
+            "agentRef": "a6",
+            "status": "Queried",
+            "sentDate": "2026-02-21",
+            "sentDateRaw": "21/2",
+            "timeline": [],
+            "reasons": [
+              "illegible-agency"
+            ],
+            "src": {
+              "p": 1,
+              "y": [
+                0.42,
+                0.48
+              ]
+            },
+            "lineRaw": "Gideon Pennington - Fairbairn Associates - 21/2"
+          },
+          {
+            "agentRef": "a7",
+            "status": "Queried",
+            "sentDate": "2026-04-20",
+            "sentDateRaw": "20/4",
+            "timeline": [],
+            "reasons": [],
+            "src": {
+              "p": 1,
+              "y": [
+                0.48,
+                0.54
+              ]
+            },
+            "lineRaw": "Lottie Castellano - Okafor Lit - 20/4 ✓"
+          },
+          {
+            "agentRef": "a8",
+            "status": "Full Sent",
+            "sentDate": "2026-04-21",
+            "sentDateRaw": "21/4",
+            "timeline": [],
+            "reasons": [],
+            "src": {
+              "p": 1,
+              "y": [
+                0.54,
+                0.6
+              ]
+            },
+            "lineRaw": "Jonah Drummond - Okafor Lit - 21/4 - sent full"
+          },
+          {
+            "agentRef": "a9",
+            "status": "Queried",
+            "sentDate": "2026-06-01",
+            "sentDateRaw": "1/6/26",
+            "timeline": [],
+            "reasons": [],
+            "src": {
+              "p": 1,
+              "y": [
+                0.6,
+                0.66
+              ]
+            },
+            "lineRaw": "Esme Biddle - Vane & Hart - 1/6/26 ✓"
+          },
+          {
+            "agentRef": "a10",
+            "status": "Queried",
+            "sentDate": "2025-06-15",
+            "sentDateRaw": "15/6/25",
+            "timeline": [],
+            "reasons": [
+              "mark-unclear"
+            ],
+            "src": {
+              "p": 2,
+              "y": [
+                0.12,
+                0.18
+              ]
+            },
+            "lineRaw": "Ruth Drummond - Vane & Hart - 15/6/25 !",
+            "markRaw": "!"
+          },
+          {
+            "agentRef": "a11",
+            "status": "Partial Sent",
+            "sentDate": "2026-09-08",
+            "sentDateRaw": "8/9",
+            "timeline": [],
+            "reasons": [
+              "crossed-out"
+            ],
+            "src": {
+              "p": 2,
+              "y": [
+                0.18,
+                0.24
+              ]
+            },
+            "lineRaw": "Juno Mroz - Calloway Hunt - 8/9 - sent partial"
+          },
+          {
+            "agentRef": "a12",
+            "status": "Full Sent",
+            "sentDate": "2026-09-07",
+            "sentDateRaw": "7/9",
+            "timeline": [],
+            "reasons": [],
+            "src": {
+              "p": 2,
+              "y": [
+                0.24,
+                0.3
+              ]
+            },
+            "lineRaw": "Barnaby Marchetti - Okafor Lit - 7/9 - sent full"
+          },
+          {
+            "agentRef": "a13",
+            "status": "Partial Requested",
+            "sentDate": "2025-02-21",
+            "sentDateRaw": "21/2/25",
+            "timeline": [],
+            "reasons": [],
+            "src": {
+              "p": 2,
+              "y": [
+                0.3,
+                0.36
+              ]
+            },
+            "lineRaw": "Felix Sharma - 21/2/25 - partial req"
+          },
+          {
+            "agentRef": "a14",
+            "status": "Revise & Resubmit",
+            "sentDate": "2026-05-13",
+            "sentDateRaw": "13/5",
+            "timeline": [],
+            "reasons": [],
+            "src": {
+              "p": 2,
+              "y": [
+                0.36,
+                0.42
+              ]
+            },
+            "lineRaw": "Gideon Strand - Okafor Lit - 13/5 - R&R"
+          },
+          {
+            "agentRef": "a15",
+            "status": "Queried",
+            "sentDate": "2026-08-17",
+            "sentDateRaw": "17/8/26",
+            "timeline": [],
+            "reasons": [],
+            "src": {
+              "p": 2,
+              "y": [
+                0.42,
+                0.48
+              ]
+            },
+            "lineRaw": "Anouk Mroz - Achebe & Rowe - 17/8/26"
+          },
+          {
+            "agentRef": "a16",
+            "status": "Rejected",
+            "sentDate": "2026-05-03",
+            "sentDateRaw": "3/5/26",
+            "timeline": [],
+            "reasons": [
+              "crossed-out"
+            ],
+            "src": {
+              "p": 2,
+              "y": [
+                0.48,
+                0.54
+              ]
+            },
+            "lineRaw": "Tom Mroz - Calloway Hunt - 3/5/26"
+          },
+          {
+            "agentRef": "a17",
+            "status": "Queried",
+            "sentDate": "2026-04-11",
+            "sentDateRaw": "11 Apr",
+            "timeline": [],
+            "reasons": [],
+            "src": {
+              "p": 2,
+              "y": [
+                0.54,
+                0.6
+              ]
+            },
+            "lineRaw": "Sophie Huxley - Achebe & Rowe - 11 Apr ✓"
+          },
+          {
+            "agentRef": "a18",
+            "status": "Partial Sent",
+            "sentDate": null,
+            "sentDateRaw": null,
+            "timeline": [],
+            "reasons": [
+              "no-date"
+            ],
+            "src": {
+              "p": 2,
+              "y": [
+                0.6,
+                0.66
+              ]
+            },
+            "lineRaw": "Harriet Marchetti - Okafor Lit - sent partial"
+          }
+        ]
+      }
+    },
+    {
+      "id": "real-notepad",
+      "run": 2,
+      "real": true,
+      "style": "hand",
+      "blurred": false,
+      "pages": 1,
+      "payloadChars": 183584,
+      "ms": 10264,
+      "attempts": 1,
+      "failure": null,
+      "stopReason": "end_turn",
+      "usage": {
+        "inputTokens": 1576,
+        "outputTokens": 625,
+        "cacheReadTokens": 4050,
+        "cacheWriteTokens": 0
+      },
+      "costUsd": 0.015318,
+      "score": {
+        "id": "real-notepad",
+        "entries": 7,
+        "matched": 7,
+        "spurious": 0,
+        "correct": {
+          "name": 7,
+          "agency": 7,
+          "status": 7,
+          "date": 7
+        },
+        "codes": {
+          "crossed-out": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "mark-unclear": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0
+          },
+          "illegible-agency": {
+            "tp": 0,
+            "fp": 1,
+            "fn": 0
+          },
+          "no-date": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          }
+        },
+        "src": {
+          "hit": 0,
+          "of": 0
+        },
+        "wrong": [
+          "real-notepad #4 Felix Arden: spurious illegible-agency"
+        ]
+      }
+    },
+    {
+      "id": "real-notebook-two-pages",
+      "run": 2,
+      "real": true,
+      "style": "hand",
+      "blurred": false,
+      "pages": 2,
+      "payloadChars": 363800,
+      "ms": 20751,
+      "attempts": 1,
+      "failure": null,
+      "stopReason": "end_turn",
+      "usage": {
+        "inputTokens": 3147,
+        "outputTokens": 1318,
+        "cacheReadTokens": 4050,
+        "cacheWriteTokens": 0
+      },
+      "costUsd": 0.030426,
+      "score": {
+        "id": "real-notebook-two-pages",
+        "entries": 14,
+        "matched": 14,
+        "spurious": 0,
+        "correct": {
+          "name": 14,
+          "agency": 14,
+          "status": 14,
+          "date": 14
+        },
+        "codes": {
+          "crossed-out": {
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          },
+          "mark-unclear": {
+            "tp": 3,
+            "fp": 0,
+            "fn": 0
+          },
+          "illegible-agency": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1
+          },
+          "no-date": {
+            "tp": 4,
+            "fp": 0,
+            "fn": 0
+          }
+        },
+        "src": {
+          "hit": 0,
+          "of": 0
+        },
+        "wrong": [
+          "real-notebook-two-pages #5 Imogen Price: missed illegible-agency"
+        ]
+      }
+    },
+    {
+      "id": "hand-indie-2p-blur",
+      "run": 2,
+      "real": false,
+      "style": "hand",
+      "blurred": true,
+      "pages": 2,
+      "payloadChars": 224236,
+      "ms": 21846,
+      "attempts": 1,
+      "failure": null,
+      "stopReason": "end_turn",
+      "usage": {
+        "inputTokens": 3147,
+        "outputTokens": 1658,
+        "cacheReadTokens": 4050,
+        "cacheWriteTokens": 0
+      },
+      "costUsd": 0.035526,
+      "score": {
+        "id": "hand-indie-2p-blur",
+        "entries": 18,
+        "matched": 18,
+        "spurious": 0,
+        "correct": {
+          "name": 15,
+          "agency": 18,
+          "status": 16,
+          "date": 15
+        },
+        "codes": {
+          "crossed-out": {
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          },
+          "mark-unclear": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "illegible-agency": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1
+          },
+          "no-date": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          }
+        },
+        "src": {
+          "hit": 2,
+          "of": 18
+        },
+        "wrong": [
+          "hand-indie-2p-blur #1 Meredith Hale: date 2026-04-05 (truth 2026-01-05 from \"5/1/2026\")",
+          "hand-indie-2p-blur #2 Bertie Ashworth: src {\"p\":1,\"y\":[0.19,0.25]} (line 1:0.162–0.215)",
+          "hand-indie-2p-blur #3 Stanley Abara: src {\"p\":1,\"y\":[0.25,0.31]} (line 1:0.202–0.255)",
+          "hand-indie-2p-blur #4 Barnaby Whitlock: src {\"p\":1,\"y\":[0.31,0.37]} (line 1:0.241–0.295)",
+          "hand-indie-2p-blur #5 Tomasz Quaye: src {\"p\":1,\"y\":[0.37,0.43]} (line 1:0.281–0.335)",
+          "hand-indie-2p-blur #6 Gideon Pennington: missed illegible-agency",
+          "hand-indie-2p-blur #6 Gideon Pennington: src {\"p\":1,\"y\":[0.43,0.49]} (line 1:0.321–0.375)",
+          "hand-indie-2p-blur #7 Lottie Castellano: src {\"p\":1,\"y\":[0.49,0.55]} (line 1:0.361–0.415)",
+          "hand-indie-2p-blur #8 Jonah Drummond: src {\"p\":1,\"y\":[0.55,0.61]} (line 1:0.401–0.455)",
+          "hand-indie-2p-blur #9 Esme Biddle: src {\"p\":1,\"y\":[0.61,0.67]} (line 1:0.441–0.495)",
+          "hand-indie-2p-blur #11 Juno Mróz: name \"Juno Mroz\"",
+          "hand-indie-2p-blur #11 Juno Mróz: status \"Partial Sent\" (truth \"Rejected\")",
+          "hand-indie-2p-blur #11 Juno Mróz: src {\"p\":2,\"y\":[0.19,0.25]} (line 2:0.164–0.215)",
+          "hand-indie-2p-blur #12 Barnaby Marchetti: src {\"p\":2,\"y\":[0.25,0.31]} (line 2:0.204–0.255)",
+          "hand-indie-2p-blur #13 Felix Sharma: date 2025-02-24 (truth 2025-02-21 from \"21/2/25\")",
+          "hand-indie-2p-blur #13 Felix Sharma: src {\"p\":2,\"y\":[0.31,0.37]} (line 2:0.244–0.295)",
+          "hand-indie-2p-blur #14 Gideon Strand: src {\"p\":2,\"y\":[0.37,0.43]} (line 2:0.284–0.335)",
+          "hand-indie-2p-blur #15 Anouk Mróz: name \"Anouk Mroz\"",
+          "hand-indie-2p-blur #15 Anouk Mróz: src {\"p\":2,\"y\":[0.43,0.49]} (line 2:0.324–0.375)",
+          "hand-indie-2p-blur #16 Tom Mróz: name \"Tom Mroz\"",
+          "hand-indie-2p-blur #16 Tom Mróz: status \"Queried\" (truth \"Rejected\")",
+          "hand-indie-2p-blur #16 Tom Mróz: src {\"p\":2,\"y\":[0.49,0.55]} (line 2:0.364–0.415)",
+          "hand-indie-2p-blur #17 Sophie Huxley: date 2026-04-11 (truth 2026-04-17 from \"17 Apr\")",
+          "hand-indie-2p-blur #17 Sophie Huxley: src {\"p\":2,\"y\":[0.55,0.61]} (line 2:0.404–0.455)",
+          "hand-indie-2p-blur #18 Harriet Marchetti: src {\"p\":2,\"y\":[0.61,0.67]} (line 2:0.444–0.495)"
+        ]
+      },
+      "result": {
+        "agents": [
+          {
+            "ref": "a1",
+            "name": "Meredith Hale",
+            "agency": "Strand Literary"
+          },
+          {
+            "ref": "a2",
+            "name": "Bertie Ashworth",
+            "agency": "Vane & Hart"
+          },
+          {
+            "ref": "a3",
+            "name": "Stanley Abara"
+          },
+          {
+            "ref": "a4",
+            "name": "Barnaby Whitlock",
+            "agency": "Price & Partners"
+          },
+          {
+            "ref": "a5",
+            "name": "Tomasz Quaye",
+            "agency": "Hale Agency"
+          },
+          {
+            "ref": "a6",
+            "name": "Gideon Pennington",
+            "agency": "Fairbairn Associates"
+          },
+          {
+            "ref": "a7",
+            "name": "Lottie Castellano",
+            "agency": "Okafor Lit"
+          },
+          {
+            "ref": "a8",
+            "name": "Jonah Drummond",
+            "agency": "Okafor Lit"
+          },
+          {
+            "ref": "a9",
+            "name": "Esme Biddle",
+            "agency": "Vane & Hart"
+          },
+          {
+            "ref": "a10",
+            "name": "Ruth Drummond",
+            "agency": "Vane & Hart"
+          },
+          {
+            "ref": "a11",
+            "name": "Juno Mroz",
+            "agency": "Calloway Hunt"
+          },
+          {
+            "ref": "a12",
+            "name": "Barnaby Marchetti",
+            "agency": "Okafor Lit"
+          },
+          {
+            "ref": "a13",
+            "name": "Felix Sharma"
+          },
+          {
+            "ref": "a14",
+            "name": "Gideon Strand",
+            "agency": "Okafor Lit"
+          },
+          {
+            "ref": "a15",
+            "name": "Anouk Mroz",
+            "agency": "Achebe & Rowe"
+          },
+          {
+            "ref": "a16",
+            "name": "Tom Mroz",
+            "agency": "Calloway Hunt"
+          },
+          {
+            "ref": "a17",
+            "name": "Sophie Huxley",
+            "agency": "Achebe & Rowe"
+          },
+          {
+            "ref": "a18",
+            "name": "Harriet Marchetti",
+            "agency": "Okafor Lit"
+          }
+        ],
+        "queries": [
+          {
+            "agentRef": "a1",
+            "status": "Partial Sent",
+            "sentDate": "2026-04-05",
+            "sentDateRaw": "5/4/2026",
+            "timeline": [],
+            "reasons": [],
+            "src": {
+              "p": 1,
+              "y": [
+                0.13,
+                0.19
+              ]
+            },
+            "lineRaw": "Meredith Hale - Strand Literary - 5/4/2026 - sent partial"
+          },
+          {
+            "agentRef": "a2",
+            "status": "No Response",
+            "sentDate": "2026-03-26",
+            "sentDateRaw": "26/3/26",
+            "timeline": [],
+            "reasons": [],
+            "src": {
+              "p": 1,
+              "y": [
+                0.19,
+                0.25
+              ]
+            },
+            "lineRaw": "Bertie Ashworth - Vane & Hart - 26/3/26 - no reply"
+          },
+          {
+            "agentRef": "a3",
+            "status": "Partial Requested",
+            "sentDate": "2026-03-27",
+            "sentDateRaw": "27/3",
+            "timeline": [],
+            "reasons": [],
+            "src": {
+              "p": 1,
+              "y": [
+                0.25,
+                0.31
+              ]
+            },
+            "lineRaw": "Stanley Abara - 27/3 - partial req"
+          },
+          {
+            "agentRef": "a4",
+            "status": "Full Requested",
+            "sentDate": "2026-04-04",
+            "sentDateRaw": "4/4",
+            "timeline": [],
+            "reasons": [],
+            "src": {
+              "p": 1,
+              "y": [
+                0.31,
+                0.37
+              ]
+            },
+            "lineRaw": "Barnaby Whitlock - Price & Partners - 4/4 - full req"
+          },
+          {
+            "agentRef": "a5",
+            "status": "Queried",
+            "sentDate": "2026-06-17",
+            "sentDateRaw": "17/6",
+            "timeline": [],
+            "reasons": [],
+            "src": {
+              "p": 1,
+              "y": [
+                0.37,
+                0.43
+              ]
+            },
+            "lineRaw": "Tomasz Quaye - Hale Agency - 17/6 - queried"
+          },
+          {
+            "agentRef": "a6",
+            "status": "Queried",
+            "sentDate": "2026-02-21",
+            "sentDateRaw": "21/2",
+            "timeline": [],
+            "reasons": [],
+            "src": {
+              "p": 1,
+              "y": [
+                0.43,
+                0.49
+              ]
+            },
+            "lineRaw": "Gideon Pennington - Fairbairn Associates - 21/2"
+          },
+          {
+            "agentRef": "a7",
+            "status": "Queried",
+            "sentDate": "2026-04-20",
+            "sentDateRaw": "20/4",
+            "timeline": [],
+            "reasons": [],
+            "src": {
+              "p": 1,
+              "y": [
+                0.49,
+                0.55
+              ]
+            },
+            "lineRaw": "Lottie Castellano - Okafor Lit - 20/4 ✓"
+          },
+          {
+            "agentRef": "a8",
+            "status": "Full Sent",
+            "sentDate": "2026-04-21",
+            "sentDateRaw": "21/4",
+            "timeline": [],
+            "reasons": [],
+            "src": {
+              "p": 1,
+              "y": [
+                0.55,
+                0.61
+              ]
+            },
+            "lineRaw": "Jonah Drummond - Okafor Lit - 21/4 - sent full"
+          },
+          {
+            "agentRef": "a9",
+            "status": "Queried",
+            "sentDate": "2026-06-01",
+            "sentDateRaw": "1/6/26",
+            "timeline": [],
+            "reasons": [],
+            "src": {
+              "p": 1,
+              "y": [
+                0.61,
+                0.67
+              ]
+            },
+            "lineRaw": "Esme Biddle - Vane & Hart - 1/6/26 ✓"
+          },
+          {
+            "agentRef": "a10",
+            "status": "Queried",
+            "sentDate": "2025-06-15",
+            "sentDateRaw": "15/6/25",
+            "timeline": [],
+            "reasons": [
+              "mark-unclear"
+            ],
+            "src": {
+              "p": 2,
+              "y": [
+                0.13,
+                0.19
+              ]
+            },
+            "lineRaw": "Ruth Drummond - Vane & Hart - 15/6/25 !",
+            "markRaw": "!"
+          },
+          {
+            "agentRef": "a11",
+            "status": "Partial Sent",
+            "sentDate": "2026-09-08",
+            "sentDateRaw": "8/9",
+            "timeline": [],
+            "reasons": [
+              "crossed-out"
+            ],
+            "src": {
+              "p": 2,
+              "y": [
+                0.19,
+                0.25
+              ]
+            },
+            "lineRaw": "Juno Mroz - Calloway Hunt - 8/9 - sent partial"
+          },
+          {
+            "agentRef": "a12",
+            "status": "Full Sent",
+            "sentDate": "2026-09-07",
+            "sentDateRaw": "7/9",
+            "timeline": [],
+            "reasons": [],
+            "src": {
+              "p": 2,
+              "y": [
+                0.25,
+                0.31
+              ]
+            },
+            "lineRaw": "Barnaby Marchetti - Okafor Lit - 7/9 - sent full"
+          },
+          {
+            "agentRef": "a13",
+            "status": "Partial Requested",
+            "sentDate": "2025-02-24",
+            "sentDateRaw": "24/2/25",
+            "timeline": [],
+            "reasons": [],
+            "src": {
+              "p": 2,
+              "y": [
+                0.31,
+                0.37
+              ]
+            },
+            "lineRaw": "Felix Sharma - 24/2/25 - partial req"
+          },
+          {
+            "agentRef": "a14",
+            "status": "Revise & Resubmit",
+            "sentDate": "2026-05-13",
+            "sentDateRaw": "13/5",
+            "timeline": [],
+            "reasons": [],
+            "src": {
+              "p": 2,
+              "y": [
+                0.37,
+                0.43
+              ]
+            },
+            "lineRaw": "Gideon Strand - Okafor Lit - 13/5 - R&R"
+          },
+          {
+            "agentRef": "a15",
+            "status": "Queried",
+            "sentDate": "2026-08-17",
+            "sentDateRaw": "17/8/26",
+            "timeline": [],
+            "reasons": [],
+            "src": {
+              "p": 2,
+              "y": [
+                0.43,
+                0.49
+              ]
+            },
+            "lineRaw": "Anouk Mroz - Achebe & Rowe - 17/8/26"
+          },
+          {
+            "agentRef": "a16",
+            "status": "Queried",
+            "sentDate": "2026-05-03",
+            "sentDateRaw": "3/5/26",
+            "timeline": [],
+            "reasons": [
+              "crossed-out"
+            ],
+            "src": {
+              "p": 2,
+              "y": [
+                0.49,
+                0.55
+              ]
+            },
+            "lineRaw": "Tom Mroz - Calloway Hunt - 3/5/26"
+          },
+          {
+            "agentRef": "a17",
+            "status": "Queried",
+            "sentDate": "2026-04-11",
+            "sentDateRaw": "11 Apr",
+            "timeline": [],
+            "reasons": [],
+            "src": {
+              "p": 2,
+              "y": [
+                0.55,
+                0.61
+              ]
+            },
+            "lineRaw": "Sophie Huxley - Achebe & Rowe - 11 Apr ✓"
+          },
+          {
+            "agentRef": "a18",
+            "status": "Partial Sent",
+            "sentDate": null,
+            "sentDateRaw": null,
+            "timeline": [],
+            "reasons": [
+              "no-date"
+            ],
+            "src": {
+              "p": 2,
+              "y": [
+                0.61,
+                0.67
+              ]
+            },
+            "lineRaw": "Harriet Marchetti - Okafor Lit - sent partial"
+          }
+        ]
+      }
+    }
+  ]
+}
