@@ -50,8 +50,12 @@ export const OLD_PIN_KEYS = ["sa.pinList.agents", "sa.contactsFull"] as const;
    without it reads grouped, the v24 default — every record written before v24 carries `group: "none"` (the address
    book wrote its default on every visit), so reading `group` would have opened everyone ungrouped. `group` itself is
    kept as written and no longer read by the page. */
-export interface ListView { group: GroupKey; sort: SortKey; reversed: boolean; pinned: boolean; view: ContactView; byStatus: boolean }
-export const DEFAULT_LIST_VIEW = (): ListView => ({ group: "none", sort: "surname", reversed: false, pinned: false, view: "list", byStatus: true });
+/* Contact list v26 — `group26` joins version 1: the page's own grouping (Letter, Status or none). Absent reads Letter, the
+   v26 default (`group` and `byStatus` stay as written; the page no longer reads them). */
+export type Group26Key = "letter" | "status" | "none";
+export const GROUP26_KEYS: readonly Group26Key[] = ["letter", "status", "none"];
+export interface ListView { group: GroupKey; sort: SortKey; reversed: boolean; pinned: boolean; view: ContactView; byStatus: boolean; group26: Group26Key }
+export const DEFAULT_LIST_VIEW = (): ListView => ({ group: "none", sort: "surname", reversed: false, pinned: false, view: "list", byStatus: true, group26: "letter" });
 
 /** a stored view made safe — null when it is not this version's shape at all */
 export function sanitiseListView(raw: unknown): ListView | null {
@@ -67,11 +71,12 @@ export function sanitiseListView(raw: unknown): ListView | null {
     pinned: r.pinned === true,
     view: oneOf<ContactView>(r.view, CONTACT_VIEWS, d.view),
     byStatus: r.byStatus !== false,
+    group26: oneOf<Group26Key>(r.group26, GROUP26_KEYS, d.group26),
   };
 }
 
 export const serialiseListView = (m: ListView): string =>
-  JSON.stringify({ v: LIST_VIEW_VERSION, group: m.group, sort: m.sort, reversed: m.reversed, pinned: m.pinned, view: m.view, byStatus: m.byStatus });
+  JSON.stringify({ v: LIST_VIEW_VERSION, group: m.group, sort: m.sort, reversed: m.reversed, pinned: m.pinned, view: m.view, byStatus: m.byStatus, group26: m.group26 });
 
 /**
  * The device's view. Absent or unreadable reads as the defaults — except that a device with no `qh.cl.view` yet but a

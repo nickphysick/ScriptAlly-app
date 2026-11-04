@@ -1,0 +1,239 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Contact list v26 (design-refs/contact-list-v26/, screens 01–11) — THE LIST IS ONE BIG CARD: the landing page's framed
+ * card (white, padding 10, radius 22; a 1px #a5837b frame inside at radius 13, clipped) opening on a navy band.
+ *
+ *   B  the band       "{shown} agents" · Find · Filters · Group · Sort — the List / Cards switch and Full screen retired
+ *   C  the index      under the band: the sections the list draws, as jumps (A–Z, weeks, months or statuses)
+ *   D  the rows       three columns (Agent · What they want · Your query) and a margin labelling each section
+ *   E  the menus      Group (Letter · Status · No grouping), Sort (the four), Filters (quick picks, genres, submissions)
+ *
+ * ⚠️ THE PIN IS ONE STICKY BLOCK — the band, the index row, the applied row and the column headings — 12px below the
+ *    scroller's top. It sits inside the frame, which clips (`overflow: clip`, never `hidden`: hidden would make the frame
+ *    a scroll container and the pin would stick to it). While it is stuck a page-coloured mask behind it covers the 12px
+ *    above and the card's white sides beside it, so rows never show around it; at rest the mask is off.
+ * ⚠️ ONE READER, ON SCROLL (rAF, capture): whether the pin is stuck, and the section nearest the pinned headings.
+ */
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { StatusDot } from "../../StatusDot";
+import { QueryStatus } from "../../../types";
+import { agentInitials, agentPrimary } from "../../../lib/agentDisplay";
+import { type AgentFacts, type ContactFilters, type SortKey, genreList, hasMissingDetails } from "../../../lib/contactList";
+import { STAGE_NAME } from "../../../lib/qcSummary";
+import { CL_SORT_FIELDS } from "../../../lib/cardsSort";
+import { SortChipButton, SortChipMenu } from "../../shell/SortChip";
+import { usePopover } from "../../shell/ListPills";
+import { GROUP_ICON150 } from "../../queries/centre/QcToolbar140";
+import { FilterMenu } from "./ContactFilters24";
+import { NQ_RING } from "./ContactSheet24";
+import { GenrePills } from "../../shared/agentRowParts";
+import type { Group26Key } from "../../../lib/contactListMemory";
+import "./contactV26.css";
+
+export const GROUP26_LABEL: Record<Group26Key, string> = { letter: "Letter", status: "Status", none: "No grouping" };
+
+export interface ContactSheet26Props {
+  /** the agents the list shows, already filtered and sorted */
+  pool: readonly AgentFacts[];
+  all: readonly AgentFacts[];
+  group: Group26Key;
+  onGroup: (g: Group26Key) => void;
+  sortKey: SortKey;
+  reversed: boolean;
+  onSort: (v: { key: SortKey; reversed: boolean }) => void;
+  filters: ContactFilters;
+  onFilters: (f: ContactFilters) => void;
+  onClearAll: () => void;
+  search: string;
+  onSearch: (v: string) => void;
+  genreWord: (raw: string) => string;
+  genreHit: (raw: string) => boolean;
+  openId: string | null;
+  onOpen: (id: string) => void;
+  onExport: (rows: readonly AgentFacts[]) => void;
+}
+
+const I = {
+  filt: <svg className="cl26-ic" viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M3 5.5h14M5.5 10h9M8 14.5h4" /></svg>,
+  cv: <svg className="cl26-cv" viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M3 4.5l3 3 3-3" /></svg>,
+  find: <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4.5 4.5" /></svg>,
+};
+
+/** the stage words in Your query: the app's own names; not queried and closed-to-queries are their own */
+export function queryWords(x: AgentFacts): { kind: "nq" | "shut" | "stage"; words: string; status?: QueryStatus } {
+  const q = x.q;
+  if (!q || x.stand === "none") return x.door === "closed" ? { kind: "shut", words: "Closed to queries" } : { kind: "nq", words: "Not queried" };
+  return { kind: "stage", words: STAGE_NAME[q.status as QueryStatus] ?? String(q.status), status: q.status as QueryStatus };
+}
+
+export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
+  const pop = usePopover<"filters" | "group" | "sort">();
+  const cardRef = useRef<HTMLElement>(null);
+  const pinRef = useRef<HTMLDivElement>(null);
+  const bandRef = useRef<HTMLDivElement>(null);
+  const byId = useMemo(() => new Map(p.all.map((x) => [x.agent.id, x])), [p.all]);
+
+  /* the pin's height, published for the margin labels' sticky top */
+  useLayoutEffect(() => {
+    const pin = pinRef.current, card = cardRef.current;
+    if (!pin || !card) return undefined;
+    const put = () => card.style.setProperty("--cl26-pin-h", `${pin.offsetHeight}px`);
+    put();
+    if (typeof ResizeObserver === "undefined") return undefined;
+    const ro = new ResizeObserver(put);
+    ro.observe(pin);
+    return () => ro.disconnect();
+  }, []);
+
+  /* ONE READER: is the pin stuck */
+  const [stuck, setStuck] = useState(false);
+  const read = useCallback(() => {
+    const pin = pinRef.current, card = cardRef.current;
+    const sc = card?.closest<HTMLElement>(".wpg-scroll");
+    if (!pin || !card || !sc) return;
+    const top = sc.getBoundingClientRect().top;
+    const s = pin.getBoundingClientRect().top <= top + 12.5 && card.getBoundingClientRect().top < top + 12;
+    setStuck((v) => (v === s ? v : s));
+  }, []);
+  useEffect(() => {
+    const sc = cardRef.current?.closest<HTMLElement>(".wpg-scroll");
+    if (!sc) return undefined;
+    let raf = 0;
+    const on = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; read(); }); };
+    sc.addEventListener("scroll", on, { passive: true, capture: true });
+    window.addEventListener("resize", on);
+    read();
+    return () => { sc.removeEventListener("scroll", on, { capture: true } as EventListenerOptions); window.removeEventListener("resize", on); if (raf) cancelAnimationFrame(raf); };
+  }, [read]);
+
+  const filterN = p.filters.genres.length + (p.filters.open === "open" ? 1 : 0) + (p.filters.missing ? 1 : 0)
+    + (p.filters.action ? 1 : 0) + (p.filters.queried !== "either" ? 1 : 0) + (p.filters.status.length ? 1 : 0);
+  const allGenres = useMemo(
+    () => genreList(p.all, (k, raw) => p.genreWord(raw) || k).sort((a, b) => a.label.localeCompare(b.label)),
+    [p.all, p], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+  const openN = p.all.filter((x) => x.openKey === "open").length;
+  const groupChanged = p.group !== "letter";
+  const sortChanged = p.sortKey !== "surname" || p.reversed;
+  const sortBy = (k: SortKey) => p.onSort({ key: k, reversed: p.sortKey === k ? !p.reversed : false });
+
+  return (
+    <section className="cl26-card" data-cl26="card" ref={cardRef}>
+      <div className="cl26-frame" data-cl26="frame">
+        <div className="cl26-pin" data-cl26="pin" ref={pinRef} data-stuck={stuck ? "" : undefined}>
+          <div className="cl26-band" data-cl26="band" ref={bandRef}>
+            <b className="cl26-count" data-cl26="count" data-n={p.pool.length}>{p.pool.length} {p.pool.length === 1 ? "agent" : "agents"}</b>
+            <label className="cl26-find" data-cl26="find" data-cl24="find" data-nb1="find">
+              {I.find}
+              <input value={p.search} onChange={(e) => p.onSearch(e.target.value)} placeholder="Find an agent or agency" aria-label="Find an agent or agency" autoComplete="off" />
+            </label>
+            <span className="cl26-sp" aria-hidden="true" />
+            <button type="button" className="cl26-ch" data-cl26="filters" data-on={filterN ? "" : undefined} aria-haspopup="dialog" aria-expanded={pop.open === "filters"}
+              aria-label={filterN ? `Filters: ${filterN} applied` : "Filters"} onClick={(e) => pop.toggle("filters", e.currentTarget)}>
+              {I.filt}<span>Filters</span>{filterN ? <em className="cl26-n" data-cl26="filters-n">{filterN}</em> : null}
+            </button>
+            <button type="button" className="cl26-ch" data-cl26="group" data-on={groupChanged ? "" : undefined} aria-haspopup="menu" aria-expanded={pop.open === "group"}
+              aria-label={`Grouped by ${GROUP26_LABEL[p.group]}. Change the grouping`} onClick={(e) => pop.toggle("group", e.currentTarget)}>
+              {GROUP_ICON150}<span className="cl26-by">Grouped by</span><b>{GROUP26_LABEL[p.group]}</b>{I.cv}
+            </button>
+            <span className="cl26-sortw" data-on={sortChanged ? "" : undefined}>
+              <SortChipButton fields={CL_SORT_FIELDS} value={{ key: p.sortKey, reversed: p.reversed }} open={pop.open === "sort"} className="cl26-ch cl26-sort" ns="cl26"
+                onToggle={(a) => pop.toggle("sort", a)} />
+            </span>
+          </div>
+          <div className="cl26-th" role="row" data-cl26="heads">
+            <span className="cl26-thm" aria-hidden="true" />
+            <span role="columnheader" aria-sort={p.sortKey === "surname" ? (p.reversed ? "descending" : "ascending") : "none"}>
+              <button type="button" className={p.sortKey === "surname" ? "on" : undefined} data-cl26="head" data-key="surname" onClick={() => sortBy("surname")}>
+                Agent<i aria-hidden="true">{p.sortKey === "surname" && p.reversed ? "↑" : "↓"}</i>
+              </button>
+            </span>
+            <span role="columnheader" className="cl26-thx" data-cl26="head-want">What they want</span>
+            <span role="columnheader" aria-sort={p.sortKey === "status" ? (p.reversed ? "descending" : "ascending") : "none"}>
+              <button type="button" className={p.sortKey === "status" ? "on" : undefined} data-cl26="head" data-key="status" onClick={() => sortBy("status")}>
+                Your query<i aria-hidden="true">{p.sortKey === "status" && p.reversed ? "↑" : "↓"}</i>
+              </button>
+            </span>
+            <span aria-hidden="true" />
+          </div>
+        </div>
+
+        {p.pool.length === 0 ? (
+          <div className="cl26-none" data-cl26="none" role="status">
+            No agents match{p.search.trim() ? ` “${p.search.trim()}”` : ""}.
+            <button type="button" data-cl26="reset" onClick={p.onClearAll}>Clear search and filters</button>
+          </div>
+        ) : (
+          <div className="cl26-body" role="rowgroup" data-cl26="rows">
+            <div className="cl26-sec" data-cl26="section" data-k="all">
+              <span className="cl26-mg" aria-hidden="true" />
+              <div className="cl26-rows">
+                {p.pool.map((x) => <Row26 key={x.agent.id} x={byId.get(x.agent.id) ?? x} p={p} />)}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {pop.open === "filters" && pop.anchor ? (
+        <FilterMenu anchor={pop.anchor} filters={p.filters} onFilters={p.onFilters} genres={allGenres} openN={openN}
+          missingN={p.all.filter(hasMissingDetails).length}
+          showing={p.pool.length} total={p.all.length} onExport={() => p.onExport(p.pool)} />
+      ) : null}
+      {pop.open === "sort" && pop.anchor ? (
+        <SortChipMenu anchor={pop.anchor} fields={CL_SORT_FIELDS} value={{ key: p.sortKey, reversed: p.reversed }} ns="cl26" heading="Sort by" note={null}
+          onChange={(v) => p.onSort(v as { key: SortKey; reversed: boolean })} />
+      ) : null}
+      {pop.open === "group" && pop.anchor ? (
+        <div className="lpop cl26-gpop" data-lpop="group" data-cl26="group-menu" role="menu" aria-label="Group by"
+          style={{ top: pop.anchor.getBoundingClientRect().bottom + 8, left: Math.max(12, Math.min(pop.anchor.getBoundingClientRect().right - 300, window.innerWidth - 312)) }}>
+          {(["letter", "status", "none"] as const).map((g) => (
+            <button key={g} type="button" role="menuitemradio" aria-checked={p.group === g} data-cl26="group-opt" data-v={g} onClick={() => { p.onGroup(g); pop.close(); }}>
+              <b>{GROUP26_LABEL[g]}</b>
+            </button>
+          ))}
+        </div>
+      ) : null}
+    </section>
+  );
+};
+
+/** the agent's disc, coloured by who the query is with: navy (with the agent), navy with the rust "!" (your move), a
+ *  dotted ring (not queried), stone (closed) */
+export const Disc26: React.FC<{ x: AgentFacts; size?: number }> = ({ x, size }) => (
+  <span className={`cl26-dsc cl26-dsc--${x.stand}`} data-cl26="disc" data-k={x.stand} aria-hidden="true"
+    style={size ? ({ "--d": `${size}px` } as React.CSSProperties) : undefined}>
+    {agentInitials(x.agent).slice(0, 2)}
+    {x.stand === "you" ? <i className="cl26-bang">!</i> : null}
+  </span>
+);
+
+const Row26: React.FC<{ x: AgentFacts; p: ContactSheet26Props }> = ({ x, p }) => {
+  const a = x.agent;
+  const name = agentPrimary(a);
+  const agency = (a.name ?? "").trim() ? (a.agency ?? "").trim() : "";
+  const sub = [agency, x.loc].filter(Boolean).join(" · ");
+  const qw = queryWords(x);
+  const open = () => p.onOpen(a.id);
+  return (
+    <div role="row" tabIndex={0} className="cl26-row" data-cl26="row" data-id={a.id} data-k={x.stand} aria-current={p.openId === a.id ? "true" : undefined}
+      aria-label={`${name}${agency ? `, ${agency}` : ""}`}
+      onClick={(e) => { if ((e.target as HTMLElement).closest("button, a")) return; open(); }}
+      onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); open(); } }}>
+      <span role="cell" className="cl26-who" data-cl26="agent">
+        <Disc26 x={x} />
+        <span className="cl26-whot"><b data-cl26="name">{name}</b>{sub ? <small data-cl26="agency">{sub}</small> : null}</span>
+      </span>
+      <span role="cell" className="cl26-want" data-cl26="want">
+        <GenrePills genres={a.genres ?? []} hit={p.genreHit} word={p.genreWord} max={Infinity} empty="No genres yet" fit />
+      </span>
+      <span role="cell" className={`cl26-q cl26-q--${qw.kind}`} data-cl26="query" data-status={qw.status ?? qw.kind}>
+        {qw.kind === "stage" ? <StatusDot status={qw.status!} overrideSize={16} /> : qw.kind === "shut" ? <StatusDot status={QueryStatus.WITHDRAWN} overrideSize={16} /> : NQ_RING}
+        <span>{qw.words}</span>
+      </span>
+      <span role="cell" className="cl26-chev" aria-hidden="true">›</span>
+    </div>
+  );
+};

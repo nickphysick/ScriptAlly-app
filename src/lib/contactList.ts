@@ -659,7 +659,9 @@ export function contactGroups(
 
 export type SortKey = "surname" | "agency" | "reply" | "activity" | "status" | "added" | "fit" | "urgency" | "rating";
 /** Contact list v25.1 E4 — the List's five headings, each a sort; the pill, the menu and the remembered sort offer these */
-export const HEADING_SORTS: readonly SortKey[] = ["surname", "fit", "reply", "urgency", "rating"];
+/* Contact list v26 E — the four sorts the page offers (Surname, Date added, Reply time, Query status); the remembered sort
+   is one of these, an older key reads as A to Z */
+export const HEADING_SORTS: readonly SortKey[] = ["surname", "added", "reply", "status"];
 /** each with its italic line and the direction toggle's two words */
 export const SORT_OPTIONS: { key: SortKey; label: string; line: string; dir: [string, string] }[] = [
   { key: "surname", label: "Surname", line: "By family name", dir: ["A to Z", "Z to A"] },

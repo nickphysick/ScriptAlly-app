@@ -14,6 +14,7 @@
 import type { AgentFacts, ContactFilters, SortKey, StatusKey } from "./contactList";
 import { QUICK_PICKS, STATUS_GROUP_ORDER, STATUS_LABEL, addedMs, surnameInitial } from "./contactList";
 import { healthTone, RING_TONES } from "./contactV256";
+import { formatDate } from "./dates";
 import { SET_LABEL, SET_ORDER, type SetKey } from "./contactV24";
 
 /* ══ Part A · the header ═════════════════════════════════════════════════════════════════════════════════════════ */
@@ -92,7 +93,8 @@ export interface Section {
   ids: string[];
 }
 
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+/** the short month, through the app's one formatter (lib/dates — never "Sept") */
+const monthOf = (t: number): string => formatDate(t, { month: "short" });
 const weeksOf = (x: AgentFacts): number | null =>
   (typeof x.agent.responseTimeWeeks === "number" && x.agent.responseTimeWeeks > 0 ? x.agent.responseTimeWeeks : null);
 
@@ -144,7 +146,7 @@ export function sections(sorted: readonly AgentFacts[], group: Group26, sort: So
       else {
         const d = new Date(t);
         const y = d.getFullYear();
-        s = { key: `m:${y}-${d.getMonth()}`, kind, label: MONTHS[d.getMonth()], big: MONTHS[d.getMonth()], small: String(y), year: y };
+        s = { key: `m:${y}-${d.getMonth()}`, kind, label: monthOf(t), big: monthOf(t), small: String(y), year: y };
       }
     } else {
       const k = x.status14;

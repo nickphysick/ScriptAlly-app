@@ -22,7 +22,8 @@ describe("the Query Centre's fields", () => {
 describe("the Contact list's fields", () => {
   /* re-pointed (v25.1 E4): the five headings, Added and Submissions gone, Genres and Your rating sorting */
   it("are its five sortable headings, in their order", () => {
-    expect(CL_SORT_FIELDS.map((f) => f.key)).toEqual(["surname", "fit", "reply", "urgency", "rating"]);
+    /* RE-POINTED by Contact list v26 E: the page offers four sorts (v25.1's five headings retired with their columns) */
+    expect(CL_SORT_FIELDS.map((f) => f.key)).toEqual(["surname", "added", "reply", "status"]);
   });
 });
 

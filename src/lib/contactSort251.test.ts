@@ -47,8 +47,10 @@ describe("the heading sorts (v25.1 E4)", () => {
     expect(urgencyOf(xs[0], NOW)[0]).toBe(2);
   });
   it("the pill's fields are the five headings, in order, with their words", () => {
+    /* RE-POINTED by Contact list v26 E: the fields are the page's four sorts, in words, with no chip of their own (the
+       band's chip reads "Sorted by {field}") */
     expect(CL_SORT_FIELDS.map((f) => f.key)).toEqual([...HEADING_SORTS]);
-    expect(CL_SORT_FIELDS.map((f) => f.chip!(false))).toEqual(["Name A–Z", "Best genre fit", "Quickest reply", "Most urgent", "Highest rated"]);
-    expect(CL_SORT_FIELDS.map((f) => f.chip!(true))).toEqual(["Name Z–A", "Weakest genre fit", "Slowest reply", "Least urgent", "Lowest rated"]);
+    expect(CL_SORT_FIELDS.map((f) => f.label)).toEqual(["Surname", "Date added", "Reply time", "Query status"]);
+    expect(CL_SORT_FIELDS.map((f) => f.order.map((o) => o.label))).toEqual([["A to Z", "Z to A"], ["Newest first", "Oldest first"], ["Fastest first", "Slowest first"], ["Furthest on", "Earliest first"]]);
   });
 });
