@@ -29,7 +29,7 @@ const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/'/g, "&#x27;").repl
 const noop = () => {};
 const fork = (_was: CaptureOption, tier: "free" | "pro" = "free") =>
   renderToStaticMarkup(
-    <CaptureFork tier={tier} onChooseFile={noop} onDropFile={noop} onChoosePhotos={noop} onDropPhotos={noop} onUploadTemplate={noop}
+    <CaptureFork tier={tier} onChooseFile={noop} onDropFile={noop} onUsePhotos={noop} onDropPhotos={noop} onUploadTemplate={noop}
                  onAddByHand={noop} onBack={noop} onNothingYet={noop} onOpenImportDesk={noop} onDownloadTemplate={noop} />,
   ).replace(/<!-- -->/g, "");
 const text = (h: string) => h.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");

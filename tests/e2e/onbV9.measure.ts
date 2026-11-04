@@ -451,7 +451,7 @@ test.describe("F1", () => {
     }
     await shot(page, "fork-1440", true);
     /* each button still reaches its own handler */
-    for (const [sel, want] of [['[data-act="smart"]', "picker"], ['[data-act="photos"]', "photosPicker"], ['[data-act="download"]', "download"], ['[data-act="upload"]', "templatePicker"], ['[data-act="byhand"]', "byhand"]] as const) {
+    for (const [sel, want] of [['[data-act="smart"]', "picker"], ['[data-act="photos"]', "usePhotos"], ['[data-act="download"]', "download"], ['[data-act="upload"]', "templatePicker"], ['[data-act="byhand"]', "byhand"]] as const) {
       await page.evaluate(() => { window.__onbLab = { calls: [] }; });
       await page.locator(sel).click();
       expect(await page.evaluate(() => (window.__onbLab?.calls ?? []).map((c) => c.name)), sel).toEqual([want]);

@@ -87,7 +87,7 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
   const created = useRef<ManuscriptIdCache>({ id: null });
   const needsBook = !manuscript && !draft && !lab?.flow;
   const openPicker = (kind: "smart" | "photos" | "template") =>
-    kind === "smart" ? flowRef.current?.chooseFile() : kind === "photos" ? flowRef.current?.choosePhotos() : flowRef.current?.chooseTemplate();
+    kind === "smart" ? flowRef.current?.chooseFile() : kind === "photos" ? flowRef.current?.openPhotos() : flowRef.current?.chooseTemplate();
   const start = (kind: "smart" | "photos" | "template") => { if (needsBook) setBook(kind); else openPicker(kind); };
 
   const ensureManuscript = async (): Promise<string | null> => {
@@ -117,7 +117,7 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
   const act = (name: string, real: () => void) => (lab?.spy ? lab.spy(name) : real);
   const chooseSmart = act("picker", () => start("smart"));
   /* smart-import-photos-v1: the same Smart Import, read from photos of the list. */
-  const choosePhotos = act("photosPicker", () => start("photos"));
+  const usePhotos = act("usePhotos", () => start("photos"));
   const download = act("download", () => { void downloadTemplate(TEMPLATE_FILENAME); });
   const chooseTemplate = act("templatePicker", () => start("template"));
   const openMatcher = act("matcher", () => setView("matcher"));
@@ -157,7 +157,7 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
                 <p className="impg-p">{TILE_SMART.text}</p>
                 <div className="impg-acts">
                   <button type="button" className="impg-btn" data-act="smart" onClick={chooseSmart} disabled={!entitlement.allowed}>{TILE_SMART.action}</button>
-                  <button type="button" className="impg-btn impg-btn--line" data-act="photos" onClick={choosePhotos} disabled={!entitlement.allowed}>{CAPTURE_PHOTOS_ACTION}</button>
+                  <button type="button" className="impg-btn impg-btn--line" data-act="photos" onClick={usePhotos} disabled={!entitlement.allowed}>{CAPTURE_PHOTOS_ACTION}</button>
                 </div>
                 <p className="impg-fact" data-impg="fact">{smartFactLine(entitlement, dayMonth)}</p>
               </div>
@@ -198,7 +198,8 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
             initial={draft ?? emptyManuscriptFields()}
             onBack={() => setBook(null)}
             onContinue={(fields) => {
-              /* Held, not saved. The picker opens from this same press, so the browser lets it. */
+              /* Held, not saved. A file picker opens from this same press, so the browser lets it; photos
+                 open their own screen first, whose "Choose photos" opens the picker. */
               const kind = book;
               setDraft(fields); setBook(null);
               openPicker(kind);

@@ -37,8 +37,8 @@ export interface CaptureForkProps {
   onChooseFile: () => void;
   /** A file dropped on the Smart import tile: the same thing the picker's choice runs. */
   onDropFile: (file: File) => void;
-  /** "Use photos": open the photo picker (smart-import-photos-v1). */
-  onChoosePhotos: () => void;
+  /** "Use photos": the photos screen, empty (smart-import-photos-v1.1). Never the picker itself. */
+  onUsePhotos: () => void;
   /** Images dropped on the Smart import tile, with no spreadsheet among them. */
   onDropPhotos: (files: File[]) => void;
   /** "Upload my sheet": open the template picker. */
@@ -70,7 +70,7 @@ const Tile: React.FC<{ option: CaptureOption; fact: string; at: number; drop?: R
 );
 
 export const CaptureFork: React.FC<CaptureForkProps> = ({
-  tier, onChooseFile, onDropFile, onChoosePhotos, onDropPhotos, onUploadTemplate, onAddByHand, onBack, onNothingYet, onOpenImportDesk, onDownloadTemplate,
+  tier, onChooseFile, onDropFile, onUsePhotos, onDropPhotos, onUploadTemplate, onAddByHand, onBack, onNothingYet, onOpenImportDesk, onDownloadTemplate,
 }) => {
   const download = onDownloadTemplate ?? (() => { void downloadTemplate(TEMPLATE_FILENAME); });
   const [over, setOver] = useState(false);
@@ -95,7 +95,7 @@ export const CaptureFork: React.FC<CaptureForkProps> = ({
       <div className="sf-tiles">
         <Tile option="smart" fact={captureFact("smart", tier)} at={0.2} drop={dropProps} over={over}>
           <button type="button" className="sf-btn sf-btn--sm" data-act="smart" onClick={onChooseFile}>{CAPTURE_SMART_ACTION}</button>
-          <button type="button" className="sf-btn sf-btn--sm sf-btn--line" data-act="photos" onClick={onChoosePhotos}>{CAPTURE_PHOTOS_ACTION}</button>
+          <button type="button" className="sf-btn sf-btn--sm sf-btn--line" data-act="photos" onClick={onUsePhotos}>{CAPTURE_PHOTOS_ACTION}</button>
         </Tile>
         <Tile option="template" fact={captureFact("template", tier)} at={0.35}>
           <button type="button" className="sf-btn sf-btn--sm sf-btn--line" data-act="download" onClick={download}>{CAPTURE_TEMPLATE_DOWNLOAD}</button>

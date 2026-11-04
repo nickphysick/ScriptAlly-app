@@ -10,12 +10,16 @@
  * own image, prepared in the browser (photoPrepare.ts); the blur check runs there too and costs
  * nothing. A blurry page is named, never blocked.
  *
+ * EMPTY (v1.1): "Use photos" opens this screen with no pages, never the picker. One large "Add a page"
+ * tile stands in for the grid, and the primary reads "Choose photos". Both open the picker straight
+ * from their own click handler, with nothing awaited first, so the browser lets it.
+ *
  * Pages are read in the order shown. A page is moved by dragging it onto another, or with Alt and
  * an arrow key while it has focus; the numbers follow every change.
  */
 import React, { useEffect, useRef, useState } from "react";
 import { StepColumn, OpenTitle, StepCard, QLabel, BackLink, StepFoot } from "./setupParts";
-import { CONFIRM_TITLE, CONFIRM_SUB, HOW_EYEBROW } from "./ConfirmScreen";
+import { CONFIRM_SUB, HOW_EYEBROW } from "./ConfirmScreen";
 import { PHOTOS_WORDS as W, PHOTO_HOW_STEPS, MAX_PAGES, photosLede, firstUnresolvedBlur } from "../../lib/photoImport";
 import "./v9/onbV9.css";
 import "./importFlow.css";
@@ -47,6 +51,7 @@ export const PhotosScreen: React.FC<{
   const ready = pages.filter((p) => p.status === "ready").length;
   const preparing = pages.some((p) => p.status === "preparing");
   const blurAt = firstUnresolvedBlur(pages);
+  const empty = pages.length === 0;
   const [dragFrom, setDragFrom] = useState<number | null>(null);
 
   /* After a keyboard move the moved page keeps focus, wherever it now sits. */
@@ -69,10 +74,15 @@ export const PhotosScreen: React.FC<{
 
   return (
     <StepColumn wide screen="photos">
-      <OpenTitle title={CONFIRM_TITLE} sub={CONFIRM_SUB} />
+      <div className="o9-ptitle" data-sf="photos-title"><OpenTitle title={W.title} sub={CONFIRM_SUB} /></div>
       <div className="o9-conf">
         <StepCard className="o9-pop o9-d2">
-          <QLabel>{W.label}</QLabel>
+          <QLabel>{empty ? W.labelEmpty : W.label}</QLabel>
+          {empty ? (
+            <button type="button" className="o9-addpg o9-addpg--empty" data-act="add" data-sf="photos-empty" onClick={onAdd}>
+              <span aria-hidden="true">+</span>{W.add}
+            </button>
+          ) : (
           <div className="o9-photos" data-sf="photos" ref={gridRef}>
             {pages.map((p, i) => {
               const hard = p.status === "ready" && p.blurry && !p.kept;
@@ -109,6 +119,7 @@ export const PhotosScreen: React.FC<{
               <span aria-hidden="true">+</span>{W.add}
             </button>
           </div>
+          )}
           {blurAt >= 0 && (
             <div className="o9-pnote" data-sf="photo-note">
               <span><b>{W.blurLead(blurAt + 1)}</b> {W.blurRest}</span>
@@ -120,7 +131,9 @@ export const PhotosScreen: React.FC<{
           {message && <p className="o9-pnote" role="alert" data-sf="photo-message">{message}</p>}
           <p className="sf-lede o9-plede" data-sf="photos-lede">{photosLede(ready)}</p>
           <StepFoot left={<BackLink onClick={onBack} />}>
-            <button type="button" className="sf-btn" data-act="read" onClick={onRead} disabled={ready === 0 || preparing || !!busy}>{W.primary}</button>
+            {empty
+              ? <button type="button" className="sf-btn" data-act="choose" onClick={onAdd}>{W.choose}</button>
+              : <button type="button" className="sf-btn" data-act="read" onClick={onRead} disabled={ready === 0 || preparing || !!busy}>{W.primary}</button>}
           </StepFoot>
         </StepCard>
         <aside className="o9-how" data-o9="how" aria-labelledby="o9-how-h">

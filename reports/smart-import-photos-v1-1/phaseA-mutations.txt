@@ -1,0 +1,5 @@
+mutation A1: FAIL A1 {"n":2,"dropBottom":692,"vh":900,"covered":[{"label":"Romance","onTop":false,"at":"sf-lab"},{"label":"Romantasy","onTop":false,"at":"o9-pill"}],"picked":false}
+mutation A1b: PASS A1b {"up":false,"top":192,"bottom":552,"vh":560,"firstOnTop":true}
+mutation A2: FAIL A2 {"afterUse":{"clicks":1,"empty":false,"choose":null,"read":false,"title":null},"afterChoose":null}
+mutation A3: FAIL A3 {"1440x900":{"text":"Ok. Let's turn your photos into a smart QueryHawk database.","fontSize":"44px","family":"\"Special Elite\"","lines":1,"ink":1338,"col":1096,"height":48},"1204x800":{"text":"Ok. Let's turn your photos into a smart QueryHawk database.","fontSize":"37.324px","family":"\"Special Elite\"","lines":1,"ink":1135,"col":871,"height":40},"901x800":{"text":"Ok. Let's turn your pho
+mutation A1b (flip and scroll both removed): FAIL A1b {"up":false,"top":535,"bottom":895,"vh":560,"firstOnTop":false}

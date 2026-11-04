@@ -39,7 +39,12 @@ export const BLUR_THRESHOLD = 600;
 // ── Words ────────────────────────────────────────────────────────────────────────────────────────
 export const PHOTOS_WORDS = {
   useAction: "Use photos",
+  /** The photos screen's heading (v1.1). One line from a 900px window up: its size follows the
+   *  sheet's width (photoImport.css). The spreadsheet hand-off keeps CONFIRM_TITLE. */
+  title: "Ok. Let's turn your photos into a smart QueryHawk database.",
   label: "The photos you chose",
+  /** The label while no page has been added yet. */
+  labelEmpty: "Your photos",
   page: (n: number) => `Page ${n}`,
   replace: "Replace",
   remove: "Remove",
@@ -49,6 +54,8 @@ export const PHOTOS_WORDS = {
   preparing: "Getting it ready…",
   tip: "Up to 10 pages, read in this order. Drag a page to move it. For the clearest read, get the whole page in, flat, in good light.",
   primary: "Read my photos",
+  /** The primary before any page is added: it opens the picker, from its own click. */
+  choose: "Choose photos",
   blurLead: (n: number) => `Page ${n} looks blurry.`,
   blurRest: "A sharper photo means fewer questions later.",
   replacePage: (n: number) => `Replace page ${n}`,

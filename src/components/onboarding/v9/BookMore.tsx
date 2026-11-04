@@ -15,7 +15,7 @@
  *   · Age category: one of the shared list, each with a note saying what it means.
  *   · Word count: optional; digits only; 1,000 to 500,000.
  */
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AGE_CATEGORIES } from "../../../lib/manuscripts";
 import { BackLink, StepFoot, FieldError } from "../setupParts";
 import type { ManuscriptFieldsState } from "../ManuscriptFields";
@@ -62,6 +62,21 @@ export const BookMore: React.FC<BookMoreProps> = ({ title, name, initial, error,
     document.addEventListener("pointerdown", away);
     return () => document.removeEventListener("pointerdown", away);
   }, [open]);
+
+  /* v1.1: the list stays on screen. If it would run off the bottom of the window it opens upward
+     when there is room above the field; otherwise the card scrolls just far enough to show it. */
+  const dropRef = useRef<HTMLDivElement>(null);
+  const [dropUp, setDropUp] = useState(false);
+  const showing = open && typed.trim().length > 0;
+  useLayoutEffect(() => {
+    if (!showing) { setDropUp(false); return; }
+    const drop = dropRef.current, box = searchBox.current;
+    if (!drop || !box || dropUp) return;
+    const r = drop.getBoundingClientRect(), b = box.getBoundingClientRect();
+    if (r.bottom <= window.innerHeight - 12) return;
+    if (b.top - r.height - 18 >= 0) setDropUp(true);
+    else drop.scrollIntoView({ block: "nearest" });
+  }, [showing, hits.length, dropUp]);
 
   const pickFromSearch = (id: string) => { setPicked((p) => addGenre(p, id)); setTyped(""); setOpen(false); };
   const go = () => {
@@ -129,7 +144,7 @@ export const BookMore: React.FC<BookMoreProps> = ({ title, name, initial, error,
                 }}
               />
               {open && typed.trim() && (
-                <div className="o9-drop" id="o9-genre-drop" role="listbox" data-o9="genre-drop">
+                <div className={`o9-drop${dropUp ? " is-up" : ""}`} id="o9-genre-drop" role="listbox" data-o9="genre-drop" ref={dropRef}>
                   {hits.map((h) => (
                     <button key={h.id} type="button" role="option" aria-selected={false} data-genre={h.id} onClick={() => pickFromSearch(h.id)}>
                       {h.label.slice(0, h.start)}<b>{h.label.slice(h.start, h.start + h.length)}</b>{h.label.slice(h.start + h.length)}

@@ -60,8 +60,9 @@ export interface ImportFlowHandle {
   chooseTemplate: () => void;
   /** A file dropped on the host's drop zone: the Smart Import path. */
   dropFile: (file: File) => void;
-  /** Open the photo picker (smart-import-photos-v1): the Smart Import path, read from photos. */
-  choosePhotos: () => void;
+  /** "Use photos" (smart-import-photos-v1.1): the photos screen, empty. It never opens the picker:
+   *  that opens only from the screen's own "Choose photos" or "Add a page", in their click. */
+  openPhotos: () => void;
   /** Images dropped on the host's drop zone. */
   dropPhotos: (files: File[]) => void;
   /** Drop the file that was read and everything answered about it, and go back to idle. Nothing has
@@ -192,16 +193,21 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
     commitPhotos(photosNow.current.filter((_, k) => k !== i));
   };
   /* Photos chosen (or dropped) → the same client gate as a file; then the photos screen. */
+  const photosAllowed = (): boolean => {
+    if (entitlement.allowed) return true;
+    setBlocked({ reason: entitlement.reason as Blocked["reason"], nextAvailable: entitlement.nextAvailable });
+    setScreen("blocked");
+    return false;
+  };
   const pickPhotos = (files: File[]) => {
-    if (!entitlement.allowed) {
-      setBlocked({ reason: entitlement.reason as Blocked["reason"], nextAvailable: entitlement.nextAvailable });
-      setScreen("blocked");
-      return;
-    }
+    if (!photosAllowed()) return;
     if (!files.some(isImageFile)) return;
     addPhotos(files);
     setScreen("photos");
   };
+  /* "Use photos": the photos screen with no pages yet. The picker waits for the writer's own press
+     of "Choose photos" (v1.1: opened by itself it arrived late, after a pause, with no step behind it). */
+  const openPhotos = () => { if (photosAllowed()) setScreen("photos"); };
   /** Cells the template parser could not read. Each date flag is also a reason on its own query,
    *  which is what the review renders. */
   const [, setTemplateFlags] = useState<TemplateFlag[]>([]);
@@ -405,7 +411,7 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
     chooseFile: () => fileInputRef.current?.click(),
     chooseTemplate: () => templateInputRef.current?.click(),
     dropFile: pickFile,
-    choosePhotos: () => photoInputRef.current?.click(),
+    openPhotos,
     dropPhotos: pickPhotos,
     reset: () => {
       endPhotos();
