@@ -165,6 +165,8 @@ export const BranchB: React.FC<BranchBProps> = ({
           tier={entitlement.tier}
           onChooseFile={() => flowRef.current?.chooseFile()}
           onDropFile={(f) => flowRef.current?.dropFile(f)}
+          onChoosePhotos={() => flowRef.current?.choosePhotos()}
+          onDropPhotos={(fs) => flowRef.current?.dropPhotos(fs)}
           onUploadTemplate={() => flowRef.current?.chooseTemplate()}
           onAddByHand={onAddByHand}
           onBack={() => setScreen("book")}

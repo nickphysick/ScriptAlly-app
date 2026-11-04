@@ -34,6 +34,7 @@ import { useSmartImportEntitlement } from "../../lib/useSmartImportEntitlement";
 import type { SmartImportEntitlement } from "../../lib/smartImportEntitlement";
 import { TEMPLATE_FILENAME, downloadTemplate } from "../../lib/templateFile";
 import { dayMonth } from "../../lib/dates";
+import { CAPTURE_PHOTOS_ACTION } from "../../lib/captureFork";
 import { IMPORT_TITLE, IMPORT_SUB, TILE_SMART, TILE_TEMPLATE, TILE_MATCH, IMPORT_FOOTNOTE, IMPORT_FOOTNOTE_SECOND, smartFactLine } from "../../lib/importPage";
 
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
@@ -88,13 +89,14 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
   /* ── With no manuscript, the import opens on set-up's book step ──────────────────────────────
      The details are HELD, as in set-up: nothing is written until the import itself, when the
      manuscript is created once and every imported query attaches to it. */
-  const [book, setBook] = useState<null | "smart" | "template">(null);
+  const [book, setBook] = useState<null | "smart" | "photos" | "template">(null);
   const [draft, setDraft] = useState<ManuscriptFieldsState | null>(null);
   const [hostError, setHostError] = useState<string | null>(null);
   const created = useRef<ManuscriptIdCache>({ id: null });
   const needsBook = !manuscript && !draft && !lab?.flow;
-  const openPicker = (kind: "smart" | "template") => (kind === "smart" ? flowRef.current?.chooseFile() : flowRef.current?.chooseTemplate());
-  const start = (kind: "smart" | "template") => { if (needsBook) setBook(kind); else openPicker(kind); };
+  const openPicker = (kind: "smart" | "photos" | "template") =>
+    kind === "smart" ? flowRef.current?.chooseFile() : kind === "photos" ? flowRef.current?.choosePhotos() : flowRef.current?.chooseTemplate();
+  const start = (kind: "smart" | "photos" | "template") => { if (needsBook) setBook(kind); else openPicker(kind); };
 
   const ensureManuscript = async (): Promise<string | null> => {
     if (lab?.ensure) return lab.ensure();
@@ -154,6 +156,8 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
 
   const act = (name: string, real: () => void) => (lab?.spy ? lab.spy(name) : real);
   const chooseSmart = act("picker", () => start("smart"));
+  /* smart-import-photos-v1: the same Smart Import, read from photos of the list. */
+  const choosePhotos = act("photosPicker", () => start("photos"));
   const download = act("download", () => { void downloadTemplate(TEMPLATE_FILENAME); });
   const chooseTemplate = act("templatePicker", () => start("template"));
   const openMatcher = act("matcher", () => setView("matcher"));
@@ -199,6 +203,7 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
                 <p className="impg-p">{TILE_SMART.text}</p>
                 <div className="impg-acts">
                   <button type="button" className="impg-btn" data-act="smart" onClick={chooseSmart} disabled={!entitlement.allowed}>{TILE_SMART.action}</button>
+                  <button type="button" className="impg-btn impg-btn--line" data-act="photos" onClick={choosePhotos} disabled={!entitlement.allowed}>{CAPTURE_PHOTOS_ACTION}</button>
                 </div>
                 <p className="impg-fact" data-impg="fact">{smartFactLine(entitlement, dayMonth)}</p>
               </div>

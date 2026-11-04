@@ -22,9 +22,10 @@ import React, { useState } from "react";
 import {
   CaptureOption, CAPTURE_CHOICES, CAPTURE_HEADING, CAPTURE_SUB, CAPTURE_LATER,
   CAPTURE_ESCAPE_PREFIX, CAPTURE_ESCAPE_LINK, CAPTURE_ESCAPE_SUFFIX,
-  CAPTURE_SMART_ACTION, CAPTURE_TEMPLATE_DOWNLOAD, CAPTURE_TEMPLATE_UPLOAD, CAPTURE_HAND_ACTION,
-  captureFact, acceptsDroppedFile,
+  CAPTURE_SMART_ACTION, CAPTURE_PHOTOS_ACTION, CAPTURE_TEMPLATE_DOWNLOAD, CAPTURE_TEMPLATE_UPLOAD, CAPTURE_HAND_ACTION,
+  captureFact,
 } from "../../lib/captureFork";
+import { classifyDrop } from "../../lib/photoImport";
 import { TEMPLATE_FILENAME, downloadTemplate } from "../../lib/templateFile";
 import { StepColumn, OpenTitle, BackLink } from "./setupParts";
 import "./v9/onbV9.css";
@@ -36,6 +37,10 @@ export interface CaptureForkProps {
   onChooseFile: () => void;
   /** A file dropped on the Smart import tile: the same thing the picker's choice runs. */
   onDropFile: (file: File) => void;
+  /** "Use photos": open the photo picker (smart-import-photos-v1). */
+  onChoosePhotos: () => void;
+  /** Images dropped on the Smart import tile, with no spreadsheet among them. */
+  onDropPhotos: (files: File[]) => void;
   /** "Upload my sheet": open the template picker. */
   onUploadTemplate: () => void;
   /** "Add an agent". */
@@ -65,7 +70,7 @@ const Tile: React.FC<{ option: CaptureOption; fact: string; at: number; drop?: R
 );
 
 export const CaptureFork: React.FC<CaptureForkProps> = ({
-  tier, onChooseFile, onDropFile, onUploadTemplate, onAddByHand, onBack, onNothingYet, onOpenImportDesk, onDownloadTemplate,
+  tier, onChooseFile, onDropFile, onChoosePhotos, onDropPhotos, onUploadTemplate, onAddByHand, onBack, onNothingYet, onOpenImportDesk, onDownloadTemplate,
 }) => {
   const download = onDownloadTemplate ?? (() => { void downloadTemplate(TEMPLATE_FILENAME); });
   const [over, setOver] = useState(false);
@@ -76,9 +81,11 @@ export const CaptureFork: React.FC<CaptureForkProps> = ({
     onDrop: (e) => {
       e.preventDefault();
       setOver(false);
-      /* First file only; a type the picker would not have offered is ignored, not guessed at. */
-      const file = e.dataTransfer?.files?.[0];
-      if (file && acceptsDroppedFile(file.name)) onDropFile(file);
+      /* A spreadsheet in the drop is taken as today: the first one. With none, every image goes to
+         the photos screen. Anything else is ignored, not guessed at. */
+      const drop = classifyDrop(Array.from(e.dataTransfer?.files ?? []));
+      if (drop.kind === "sheet") onDropFile(drop.file);
+      else if (drop.kind === "photos") onDropPhotos(drop.files);
     },
   };
 
@@ -88,6 +95,7 @@ export const CaptureFork: React.FC<CaptureForkProps> = ({
       <div className="sf-tiles">
         <Tile option="smart" fact={captureFact("smart", tier)} at={0.2} drop={dropProps} over={over}>
           <button type="button" className="sf-btn sf-btn--sm" data-act="smart" onClick={onChooseFile}>{CAPTURE_SMART_ACTION}</button>
+          <button type="button" className="sf-btn sf-btn--sm sf-btn--line" data-act="photos" onClick={onChoosePhotos}>{CAPTURE_PHOTOS_ACTION}</button>
         </Tile>
         <Tile option="template" fact={captureFact("template", tier)} at={0.35}>
           <button type="button" className="sf-btn sf-btn--sm sf-btn--line" data-act="download" onClick={download}>{CAPTURE_TEMPLATE_DOWNLOAD}</button>

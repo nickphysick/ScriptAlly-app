@@ -57,3 +57,8 @@ tests/fixtures/smart-eval/real/
 # The emulator snapshot is committed WITHOUT its auth half: the auth export stores the password in plain text
 tests/emulator-data/auth_export/
 dist-emu/
+
+# Smart Import photo evaluation: rendered fixtures (made again by functions/eval/photoRender.mts)
+# and Nick's own photos with their truth (never committed).
+functions/eval/fixtures/photos/
+functions/eval/fixtures/photos-real/

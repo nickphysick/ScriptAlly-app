@@ -56,8 +56,9 @@ export function sampleRawFromBuffer(buf: ArrayBuffer | Uint8Array, max = 8): Raw
   });
 }
 
-/** What the reading loader is told: the row total before the call, then the stream's updates. */
-export type SmartImportUpdate = { type: "start"; rowsTotal: number } | ImportUpdate;
+/** What the reading loader is told: the row total before the call (or, for photos, that there is
+ *  none to know), then the stream's updates. */
+export type SmartImportUpdate = { type: "start"; rowsTotal: number } | { type: "start-photos" } | ImportUpdate;
 
 export async function runSmartImport(file: File, onUpdate?: (u: SmartImportUpdate) => void): Promise<SmartImportResult> {
   // Dev-only escape hatch: lets the review screen be exercised without a deployed function.
@@ -80,6 +81,27 @@ export async function runSmartImport(file: File, onUpdate?: (u: SmartImportUpdat
   return callWithProgress(
     fn as unknown as StreamableCallable<{ sheetText: string }, SmartImportResult>,
     { sheetText },
+    (u) => onUpdate?.(u),
+    SMART_IMPORT_CALL_TIMEOUT_MS,
+  );
+}
+
+/** One prepared page, as the callable takes it (src/lib/photoPrepare.ts makes them). */
+export interface PhotoPagePayload { mediaType: "image/jpeg"; data: string }
+
+/**
+ * Smart Import from photos (smart-import-photos-v1): the same callable, the same streamed call and
+ * the same timeout, with `{ pages }` in place of `{ sheetText }`. There is no row total to give the
+ * loader before the call, so it is told so and shows the rows read so far.
+ */
+export async function runSmartImportPages(pages: PhotoPagePayload[], onUpdate?: (u: SmartImportUpdate) => void): Promise<SmartImportResult> {
+  const mock = (window as any).__SA_SMART_IMPORT_MOCK as SmartImportResult | undefined;
+  if (mock) return mock;
+  const fn = httpsCallable(getFunctions(undefined, "europe-west2"), "smartImportMap", { timeout: SMART_IMPORT_CALL_TIMEOUT_MS });
+  onUpdate?.({ type: "start-photos" });
+  return callWithProgress(
+    fn as unknown as StreamableCallable<{ pages: PhotoPagePayload[] }, SmartImportResult>,
+    { pages },
     (u) => onUpdate?.(u),
     SMART_IMPORT_CALL_TIMEOUT_MS,
   );

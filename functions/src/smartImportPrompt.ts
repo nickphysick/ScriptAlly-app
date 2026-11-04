@@ -124,3 +124,51 @@ Rules recap:
 - Never invent data. Do NOT include any column-mapping or status-translation summary. Do NOT match
   against the user's existing database — that happens later in code.
 `.trim();
+
+/**
+ * The second system block for a PHOTO import (smart-import-photos-v1). It follows SYSTEM_PROMPT,
+ * unchanged, as its own cached block: the first block stays byte-identical to the spreadsheet
+ * request's, so both paths share that cache entry. The user message is the pages as image blocks,
+ * each after a "Page N" text block.
+ *
+ * Same division of labour as the sheet: the model reads MEANING and transcribes; dates stay
+ * VERBATIM (parseImportDate parses them, UK day-first); reason CODES only, the app writes the words.
+ */
+export const PHOTO_ADDENDUM = `
+THIS REQUEST IS PHOTOS, NOT CSV. Everything above still applies, with these changes.
+
+INPUT — instead of CSV text you receive photos or screenshots of the writer's list: a notebook page,
+a printout, a screenshot of a spreadsheet. It may be handwritten. Several pages may be ONE list:
+each image follows a "Page N" label, and you read the pages in that order, as one continuous list.
+- A list may have NO header row at all — read each line as an entry (agent, agency, date, status or
+  a note, in whatever order the writer used).
+- Ignore what isn't an entry: a title or heading (crossed-through or not), doodles, arrows to nowhere,
+  page numbers, margin notes that don't belong to a line.
+- Transcribe names, agencies and dates EXACTLY as written. Dates stay VERBATIM in sentDateRaw
+  ("12/8", "3 Sept", "30/5/25") — the app parses them, day first, exactly as for a sheet.
+
+EXTRA FIELDS — emit each ONLY when it applies (the same omit-empty rule as above):
+queries[] —
+  "src":{"p":1,"y":[0.18,0.24]} — where the entry sits: "p" is its 1-based page; "y" is its vertical
+    band on that page as fractions of the page's height (0 = top, 1 = bottom), top first. Be generous
+    rather than tight: the band should hold the whole line, with a little room above and below.
+  "lineRaw" — the entry's whole line, transcribed verbatim. Words that are crossed out are written
+    as the words they are (no strike-through markup).
+  "markRaw" — the symbol beside the entry, when you flag "mark-unclear" (see below), e.g. "✗", "?".
+agents[] —
+  "readings" — up to THREE plausible readings of a name or agency the handwriting leaves genuinely
+    unclear, best first, written as the full "Name, Agency" the writer would recognise (or just the
+    name when there's no agency). Put the best one in "name"/"agency" as well. Only with
+    "check-reading".
+
+MORE REASON CODES — photos only, added to the list above; emit ONLY when they genuinely apply:
+  - "check-reading": a name or agency on this entry reads more than one way in the handwriting. Put
+    your best reading in name/agency and the alternatives in the agent's "readings".
+  - "illegible-agency": an agency is written but you can't make it out. Put any legible start in
+    "agency" (e.g. "Price & P"), or leave it empty if none of it is legible.
+  - "crossed-out": the entry is struck through. Still give a best-guess "status" — "Rejected".
+  - "mark-unclear": there's a symbol beside the entry other than a tick (✗, ?, !, a circle, an arrow)
+    whose meaning isn't plain from the line. Put the symbol in "markRaw" and give a best-guess status.
+A TICK (✓) beside an entry is NOT flagged: read it as "Queried" unless the line says otherwise.
+Put every reason code, including the two about a name or agency, in the entry's QUERY "reasons".
+`.trim();

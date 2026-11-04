@@ -51,6 +51,9 @@ export interface LoaderProgress {
    *  plain call is in use, or nothing has arrived for QUIET_AFTER_MS (a server that predates the
    *  stream). With "none" the loader runs on the clock against the estimate. */
   stream: "live" | "none";
+  /** "photos" for a photo read (smart-import-photos-v1): no row total exists before the call, so
+   *  the bar never counts down and says how many rows have been read so far. Absent = a file. */
+  unit?: "photos";
 }
 
 export const PROGRESS_START: LoaderProgress = { rowsTotal: 0, rowsDone: 0, phase: "opening", stream: "live" };
@@ -58,10 +61,11 @@ export const PROGRESS_START: LoaderProgress = { rowsTotal: 0, rowsDone: 0, phase
 /** One update from the import call, applied to the loader's progress. Pure. */
 export function applyImportUpdate(
   p: LoaderProgress,
-  u: { type: "start"; rowsTotal: number } | { type: "rows"; rows: number } | { type: "retry" } | { type: "quiet" } | { type: "plain" } | { type: "result" },
+  u: { type: "start"; rowsTotal: number } | { type: "start-photos" } | { type: "rows"; rows: number } | { type: "retry" } | { type: "quiet" } | { type: "plain" } | { type: "result" },
 ): LoaderProgress {
   switch (u.type) {
     case "start": return { ...PROGRESS_START, rowsTotal: u.rowsTotal };
+    case "start-photos": return { ...PROGRESS_START, unit: "photos" };
     case "rows": return { ...p, phase: "reading", stream: "live", rowsDone: Math.max(0, u.rows) };
     case "retry": return { ...p, phase: "retry", rowsDone: 0 };
     case "quiet": return p.phase === "opening" ? { ...p, stream: "none" } : p;
@@ -204,6 +208,13 @@ export function footBar(i: FootInput): FootBar {
 
   if (i.ready) return { left: FOOT_READY, right: known ? `${N} of ${N} rows read` : "", fill: 100, ...none };
   if (phase === "tidying") return { left: "Tidying records…", right: "almost there", fill: 100, ...none };
+  /* PHOTOS: no total exists before the call, so there is no fraction and no countdown to give —
+     an estimate from the page count would be invented. Rows read so far, on the shimmer. */
+  if (i.progress.unit === "photos") {
+    if (phase === "retry") return { left: "Having another look…", right: "", fill: null, ...none };
+    if (phase === "opening" && stream === "live") return { left: "Opening your photos…", right: "", fill: null, ...none };
+    return { left: "Reading your photos…", right: rowsDone > 0 ? `${rowsDone} ${rowsDone === 1 ? "row" : "rows"} read so far` : "", fill: null, ...none };
+  }
   if (phase === "retry") return { left: "Having another look…", ...countdown(est - i.sinceRetryS), fill: 2 };
   if (stream === "none") {
     // No count is coming: fill by the clock against the estimate, held at 90% until the result.

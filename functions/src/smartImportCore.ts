@@ -13,7 +13,7 @@
  * a reply with no JSON object in it, NO retry on a reply that is JSON-shaped but unparseable (almost
  * always truncation at the ceiling — a second large call would not help).
  */
-import { SYSTEM_PROMPT } from "./smartImportPrompt";
+import { SYSTEM_PROMPT, PHOTO_ADDENDUM } from "./smartImportPrompt";
 import { assembleResult } from "./assembleImport";
 import { MODEL } from "./emailImportCore";
 import { createRowCounter } from "./progressCounter";
@@ -37,6 +37,68 @@ export const MAX_OUTPUT_TOKENS = 32000;
  */
 export const MAX_SHEET_LINES = 301;
 export const MAX_SHEET_CHARS = 200_000;
+
+// ── Photos (smart-import-photos-v1) ───────────────────────────────────────────────────────────────
+
+/** At most ten pages: most lists are one to three, and every page is read in one call. */
+export const MAX_PAGES = 10;
+/** The media types a page may be. The client always sends JPEG; PNG is accepted for a screenshot. */
+export const PAGE_MEDIA_TYPES = ["image/jpeg", "image/png"] as const;
+/** One page's base64, at most. Anthropic refuses an image over 5 MB (5,242,880 bytes of base64);
+ *  this sits under it. A 1568px JPEG at quality 0.82 is far smaller (~0.3–1 MB). */
+export const MAX_PAGE_CHARS = 5_000_000;
+/**
+ * All pages' base64 together, at most. MEASURED against the callable's request limit
+ * (reports/smart-import-photos-v1/: Cloud Functions 2nd gen, i.e. Cloud Run, refuses an HTTP/1
+ * request body over 32 MiB), with more than 25% margin — and under the Anthropic API's own 32 MB
+ * request limit. The client caps at the same number (src/lib/photoImport.ts), held equal by a lock.
+ */
+export const MAX_PAGES_CHARS = 20_000_000;
+
+export interface PageIn { mediaType: (typeof PAGE_MEDIA_TYPES)[number]; data: string }
+
+/** What the callable was asked to read. A string discriminant: the root typecheck runs with
+ *  strictNullChecks off and cannot narrow a boolean one. */
+export type ImportInput =
+  | { kind: "sheet"; sheetText: string }
+  | { kind: "pages"; pages: PageIn[] }
+  | { kind: "error"; message: string };
+
+const BASE64 = /^[A-Za-z0-9+/]+={0,2}$/;
+/** The first bytes a real file of each type starts with, as its base64 begins. */
+const MAGIC: Record<PageIn["mediaType"], string> = { "image/jpeg": "/9j/", "image/png": "iVBORw0KGgo" };
+
+/**
+ * Which of the two inputs the request carries, and whether a photo request is well formed. Pure, and
+ * the callable runs it BEFORE it reads anything — so a malformed request is refused without the
+ * entitlement being touched. A spreadsheet request is passed on as it always was (its own size checks
+ * stay in the callable); with neither key it reads as an empty sheet, so the message is the one it
+ * always was ("No file content.").
+ */
+export function pickImportInput(data: unknown): ImportInput {
+  const d = (data && typeof data === "object" ? data : {}) as { sheetText?: unknown; pages?: unknown };
+  const hasSheet = d.sheetText !== undefined && d.sheetText !== null;
+  const hasPages = d.pages !== undefined && d.pages !== null;
+  if (hasSheet && hasPages) return { kind: "error", message: "Send a sheet or photos, not both." };
+  if (!hasPages) return { kind: "sheet", sheetText: typeof d.sheetText === "string" ? d.sheetText : "" };
+  if (!Array.isArray(d.pages) || d.pages.length === 0) return { kind: "error", message: "No photos." };
+  if (d.pages.length > MAX_PAGES) return { kind: "error", message: `Up to ${MAX_PAGES} photos at a time.` };
+  let total = 0;
+  const pages: PageIn[] = [];
+  for (const raw of d.pages) {
+    const pg = (raw && typeof raw === "object" ? raw : {}) as { mediaType?: unknown; data?: unknown };
+    const mt = pg.mediaType;
+    if (typeof mt !== "string" || !(PAGE_MEDIA_TYPES as readonly string[]).includes(mt)) return { kind: "error", message: "Photos must be JPEG or PNG." };
+    const b64 = typeof pg.data === "string" ? pg.data : "";
+    if (!b64 || b64.length % 4 !== 0 || !BASE64.test(b64)) return { kind: "error", message: "A photo could not be read." };
+    if (!b64.startsWith(MAGIC[mt as PageIn["mediaType"]])) return { kind: "error", message: "A photo could not be read." };
+    if (b64.length > MAX_PAGE_CHARS) return { kind: "error", message: "A photo is too large." };
+    total += b64.length;
+    if (total > MAX_PAGES_CHARS) return { kind: "error", message: "The photos are too large together." };
+    pages.push({ mediaType: mt as PageIn["mediaType"], data: b64 });
+  }
+  return { kind: "pages", pages };
+}
 
 /** The reminder appended to the system prompt on the one strict retry. */
 export const STRICT_SUFFIX = "\n\nReturn ONLY the JSON object — no prose, no explanation, no code fences.";
@@ -166,8 +228,43 @@ export function mappingRequest(sheetText: string, strict: boolean) {
   };
 }
 
+/**
+ * The request body for one PHOTO mapping call. Two cached system blocks: SYSTEM_PROMPT unchanged
+ * (so it shares the sheet request's cache entry), then PHOTO_ADDENDUM — which carries the strict
+ * reminder on the retry, leaving the first block untouched. The user message is the pages in order,
+ * each image after a "Page N" text block.
+ */
+export function photoRequest(pages: PageIn[], strict: boolean) {
+  const content: any[] = [];
+  pages.forEach((pg, i) => {
+    content.push({ type: "text", text: `Page ${i + 1}` });
+    content.push({ type: "image", source: { type: "base64", media_type: pg.mediaType, data: pg.data } });
+  });
+  return {
+    model: MODEL,
+    max_tokens: MAX_OUTPUT_TOKENS,
+    temperature: 0,
+    system: [
+      { type: "text" as const, text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" as const } },
+      { type: "text" as const, text: strict ? PHOTO_ADDENDUM + STRICT_SUFFIX : PHOTO_ADDENDUM, cache_control: { type: "ephemeral" as const } },
+    ],
+    messages: [{ role: "user" as const, content }],
+  };
+}
+
 /** Map one sheet's text. Never throws: every failure comes back as `failure`. */
-export async function mapSheet(client: MapClient, sheetText: string, opts: MapOpts = {}): Promise<MapOutcome> {
+export function mapSheet(client: MapClient, sheetText: string, opts: MapOpts = {}): Promise<MapOutcome> {
+  return mapWith(client, (strict) => mappingRequest(sheetText, strict), (v) => assembleResult(v), opts);
+}
+
+/** Map photos of a list. The same parse-and-repair, retry rule and ceiling as a sheet; the result
+ *  carries the photo fields (src, lineRaw, markRaw, readings), range-checked by the assembler. */
+export function mapPages(client: MapClient, pages: PageIn[], opts: MapOpts = {}): Promise<MapOutcome> {
+  return mapWith(client, (strict) => photoRequest(pages, strict), (v) => assembleResult(v, { photos: { pageCount: pages.length } }), opts);
+}
+
+/** The one mapping loop both inputs share. */
+async function mapWith(client: MapClient, build: (strict: boolean) => any, assemble: (v: any) => any, opts: MapOpts): Promise<MapOutcome> {
   const log = opts.log ?? (() => {});
   const logError = opts.logError ?? (() => {});
   const now = opts.now ?? Date.now;
@@ -211,7 +308,7 @@ export async function mapSheet(client: MapClient, sheetText: string, opts: MapOp
   const w1 = watch();
   try {
     attempts++;
-    msg = await call(client, mappingRequest(sheetText, false), w1.onText);
+    msg = await call(client, build(false), w1.onText);
     w1.end();
   } catch (e) {
     // Log the underlying cause (status, message) — the caller only ever surfaces a generic error.
@@ -224,7 +321,7 @@ export async function mapSheet(client: MapClient, sheetText: string, opts: MapOp
   const first = parseReply(extractText(msg));
   if (first.ok) {
     log(`smartImportMap: mapped in ${now() - startedMs}ms`);
-    return done(assembleResult(first.value), null, msg?.stop_reason);
+    return done(assemble(first.value), null, msg?.stop_reason);
   }
   if (first.kind === "badjson") {
     // A JSON object was present but wouldn't parse — almost always truncation at the token ceiling.
@@ -240,7 +337,7 @@ export async function mapSheet(client: MapClient, sheetText: string, opts: MapOp
   try {
     attempts++;
     firstTokenMs = null;
-    retryMsg = await call(client, mappingRequest(sheetText, true), w2.onText);
+    retryMsg = await call(client, build(true), w2.onText);
     w2.end();
   } catch (e) {
     logError("Anthropic mapping retry call failed:", e);
@@ -250,7 +347,7 @@ export async function mapSheet(client: MapClient, sheetText: string, opts: MapOp
   const second = parseReply(extractText(retryMsg));
   if (second.ok) {
     log(`smartImportMap: mapped on retry in ${now() - startedMs}ms`);
-    return done(assembleResult(second.value), null, retryMsg?.stop_reason);
+    return done(assemble(second.value), null, retryMsg?.stop_reason);
   }
   // Still unusable. Log cause + duration only (no payload / user data / key).
   logError(`smartImportMap: mapping unusable after retry (${second.kind}) after ${now() - startedMs}ms`);
