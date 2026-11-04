@@ -23,7 +23,7 @@ import { liveCount, undatedLiveCount } from "../../../lib/dashBreakdown";
 import { closedTile } from "../../../lib/dashClosed";
 import { assembleBoardColumns } from "../../../lib/todoColumns";
 import { todoRows } from "../../../lib/dashTodo";
-import { dashList, type ListAction, type ListPlan } from "../../../lib/dashList";
+import { dashList, needsYouIds, type ListAction, type ListPlan } from "../../../lib/dashList";
 import { buildQcRows } from "../../../lib/qcSummary";
 import type { TaskCtx } from "../../../lib/dashTaskCard";
 import { gettingStartedRows } from "../../../lib/dashEmpty";
@@ -59,6 +59,7 @@ const draftStore = () => import("../../../lib/importDraft");
 import { TOUR_DONE_PATH, TOUR_STOPS, registerTourReplay, tourDecision, tourState } from "../../../lib/dashTour";
 import { FirstWinStamp } from "../fv1/FirstWinStamp";
 import { Dash2Band } from "../v2/Dash2Band";
+import { wholeWeeksQuerying } from "../../../lib/dash2";
 import { Dash2Next } from "../v2/Dash2Next";
 import { Dash2Active } from "../v2/Dash2Active";
 import { Dash2Founding } from "../v2/Dash2Founding";
@@ -317,6 +318,9 @@ export const Dash58: React.FC<Dash58Props> = ({
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scopedTasks, userTasks, queries, scopedQueries, agents, manuscripts, taskFlags, scopedActivities, activities, activeManuscript, currentUser, now, aid.drop.join(","), empty, versions, scopeId]);
+
+  /* v2.1: the feed opens a big event only while its query is in Next up's "Agents are waiting" group */
+  const needsYou = useMemo(() => needsYouIds(plan), [plan]);
 
   /* v71: the task card reads the Query Centre's own rows for the dates it draws */
   const taskCtx = useMemo<TaskCtx>(
@@ -627,6 +631,7 @@ export const Dash58: React.FC<Dash58Props> = ({
               the feed, as tall as the grid row (the founding card fills the middle column, so the feed ends level with
               it). Before the first query the middle starts with the set-up card and the right holds the empty feed. */}
           <Dash2Band loading={loading} title={title} author={author} buttons={!pre}
+            weeks={loading ? null : wholeWeeksQuerying(scopedQueries, now)}
             onLog={logQuery} onRecord={() => onNavigate("queries", "Record a response")} onAddAgent={() => onNavigate("agents", "Add an agent")} />
           <div className="d2-grid" data-d2="grid">
             <div className="d2-col d2-left" data-d2="left">
@@ -655,7 +660,7 @@ export const Dash58: React.FC<Dash58Props> = ({
                   />}
                 </div>
               ) : (
-                <Dash2Active loading={loading} queries={scopedQueries} activities={scopedActivities} qcRows={taskCtx.qcRows}
+                <Dash2Active loading={loading} queries={scopedQueries} activities={scopedActivities}
                   activeCount={activeCount} undatedCount={loading ? 0 : undatedLiveCount(scopedQueries)} now={now} />
               )}
               <Dash2Founding loading={loading} uid={fwUid} />
@@ -664,6 +669,7 @@ export const Dash58: React.FC<Dash58Props> = ({
               <div className="d2-feed" data-d2="feed">
                 {loading ? <FeedSkeleton /> : pre ? <EmptyFeed onExample={example ? undefined : openExample} /> : (
                   <F1Feed loading={loading} activities={scopedActivities} queries={queries} agents={agents} manuscripts={manuscripts} userName={author} now={now}
+                    needsYou={needsYou}
                     under={reminderNode && firstQuery ? { queryId: firstQuery.id, node: reminderNode } : null} />
                 )}
               </div>

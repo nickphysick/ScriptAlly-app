@@ -66,8 +66,8 @@ async function openDash(page: Page, vp: VP) {
   if (MUT === "F1") await page.evaluate(() => { const h = document.querySelector('[data-d2="hawk"]'); const root = document.querySelector(".d58.d2"); if (h && root) root.appendChild(h); });
   if (MUT === "A3") await page.evaluate(() => document.querySelector('[data-d2="left"]')?.insertAdjacentHTML("beforeend", '<div data-df1="tip-slot"><h3>Top tip</h3></div>'));
   if (MUT === "C1") await page.evaluate(() => document.querySelector('[data-d2="fill"]')?.setAttribute("transform", "matrix(0.94,0,0,1,12,0)"));
-  if (MUT === "C2") await page.evaluate(() => { const w = [...document.querySelectorAll<HTMLElement>('[data-d2="week"]')]; const t = w.map((x) => x.textContent); w.forEach((x, i) => { if (i > 0) x.textContent = t[i - 1]; }); });
-  if (MUT === "D1") await page.evaluate(() => { const e = document.querySelector('[data-d2="fw-rank"]'); if (e) e.textContent = "Egg"; const c = document.querySelector('[data-d2="fw-count"]'); if (c) c.textContent = "0 of 1 notes"; });
+  /* RE-POINTED (Dashboard v2.1) */ if (MUT === "C2") await page.evaluate(() => { const w = [...document.querySelectorAll<HTMLElement>('[data-d2="week"]')]; const t = w.map((x) => x.dataset.total ?? ""); w.forEach((x, i) => { if (i > 0) x.dataset.total = t[i - 1]; }); });
+  /* RE-POINTED (Dashboard v2.1) */ if (MUT === "D1") await page.evaluate(() => { const e = document.querySelector('[data-d2="fw-rank"]'); if (e) e.textContent = "Egg"; const c = document.querySelector<HTMLElement>('[data-d2-card="founding"]'); if (c) { c.dataset.done = "0"; c.dataset.needed = "1"; } });
   await page.waitForTimeout(150);
 }
 
@@ -99,7 +99,8 @@ for (const vp of SIZES) {
       const grid = document.querySelector<HTMLElement>('.d2 [data-d2="grid"]');
       const lines: string[] = [];
       if (band) {
-        const walk = document.createTreeWalker(band.querySelector(".d2-bandtx") ?? band, NodeFilter.SHOW_TEXT);
+        /* RE-POINTED (Dashboard v2.1) */ /* the weeks-querying tag (v2.1) sits above the title; the title-then-by-line law is about the lines under it */
+        const walk = document.createTreeWalker(band.querySelector(".d2-bandtx") ?? band, NodeFilter.SHOW_TEXT, { acceptNode: (n) => (n.parentElement?.closest('[data-d2="weeks-tag"]') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT) });
         const seen: { y: number; t: string }[] = [];
         while (walk.nextNode()) {
           const t = walk.currentNode.textContent ?? "";
@@ -123,7 +124,8 @@ for (const vp of SIZES) {
       return {
         inset: sheet && band ? band.getBoundingClientRect().top - sheet.top : -1,
         bandW: band?.getBoundingClientRect().width ?? 0, gridW: grid?.getBoundingClientRect().width ?? 0, gridX: grid?.getBoundingClientRect().x ?? 0, bandX: band?.getBoundingClientRect().x ?? 0,
-        lines, bandText: band?.textContent ?? "",
+        /* RE-POINTED (Dashboard v2.1) */ /* the tag is a count, not a status label: the no-status law reads the band without it */
+        lines, bandText: (band?.textContent ?? "").replace(band?.querySelector('[data-d2="weeks-tag"]')?.textContent ?? "\u0000", ""),
         title: document.querySelector('.d2 [data-d2="title"]')?.textContent?.trim() ?? "",
         by: document.querySelector('.d2 [data-d2="by"]')?.textContent?.trim() ?? "",
         left: order("left", ".os-card[aria-label]"), mid: order("mid", ".os-card[aria-label]"), cols,
@@ -192,7 +194,8 @@ for (const vp of SIZES) {
         hawk: card.querySelectorAll('img[src*="hawk"], img[src*="mentor"], img[src*="courier"]').length,
       };
     });
-    L.check("C1", "population: a painted fill", c1.lo > 0 && c1.hi > c1.lo + 50 && Math.abs(c1.h - 250) <= 1, `cols ${c1.lo.toFixed(1)}–${c1.hi.toFixed(1)}, h ${c1.h}`);
+    /* RE-POINTED (Dashboard v2.1) */ /* the chart is 280px tall in v2.1 */
+    L.check("C1", "population: a painted fill", c1.lo > 0 && c1.hi > c1.lo + 50 && Math.abs(c1.h - 280) <= 1, `cols ${c1.lo.toFixed(1)}–${c1.hi.toFixed(1)}, h ${c1.h}`);
     L.check("C1", "fill reaches the left inner edge", Math.abs(c1.lo - c1.inner.l) <= 2, `${c1.lo.toFixed(1)} vs ${c1.inner.l.toFixed(1)}`);
     L.check("C1", "fill reaches the right inner edge", Math.abs(c1.hi - c1.inner.r) <= 2, `${c1.hi.toFixed(1)} vs ${c1.inner.r.toFixed(1)}`);
     L.check("C1", "no pins, no hawk in the card", c1.pins === 0 && c1.statusDots === 0 && c1.hawk === 0, `pins ${c1.pins} dots ${c1.statusDots} hawk ${c1.hawk}`);
@@ -206,8 +209,9 @@ for (const vp of SIZES) {
     const scoped = scopeQueries(all, ms || null);
     const nowMs = await page.evaluate(() => Date.now());
     const plotW = (await box(page, '.d2 [data-d2="plot"]'))!.w;
-    const expected = visibleWeeks(dash2Weeks(scoped, new Date(nowMs)), plotW, 18).map((w) => w.total);
-    const circles = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('.d2 [data-d2="week"]')].map((w) => ({ t: Number(w.textContent), now: w.classList.contains("is-now"), bg: getComputedStyle(w).backgroundColor })));
+    /* RE-POINTED (Dashboard v2.1) */ /* v2.1: the points sit 22px in, and a week is a dot with no text — its figure is the button's data-total */
+    const expected = visibleWeeks(dash2Weeks(scoped, new Date(nowMs)), plotW, 22).map((w) => w.total);
+    const circles = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('.d2 [data-d2="week"]')].map((w) => ({ t: Number(w.dataset.total), now: w.classList.contains("is-now"), bg: getComputedStyle(w).backgroundColor })));
     L.check("C2", "population", circles.length >= 3 && expected.length >= 3, `${circles.length} circles, ${expected.length} expected`);
     L.check("C2", "one per week, each the derivation's", JSON.stringify(circles.map((c) => c.t)) === JSON.stringify(expected), `got ${circles.map((c) => c.t)} want ${expected}`);
     L.check("C2", "the last is navy", circles.at(-1)?.now === true && circles.at(-1)?.bg === "rgb(45, 58, 80)" && circles.slice(0, -1).every((c) => !c.now), `${circles.at(-1)?.bg}`);
@@ -232,7 +236,7 @@ for (const vp of SIZES) {
           shown: !!tip, date: tip?.querySelector('[data-d2="wtip-date"]')?.textContent ?? "", total: Number(tip?.querySelector('[data-d2="wtip-total"]')?.textContent),
           change: tip?.querySelector('[data-d2="wtip-change"]')?.textContent ?? "",
           rows: [...(tip?.querySelectorAll<HTMLElement>('[data-d2="wtip-row"]') ?? [])].map((r) => Number(r.dataset.n)),
-          wantDate: lab[1], wantTotal: Number(lab[2]), prev: Number(document.querySelectorAll<HTMLElement>('.d2 [data-d2="week"]')[i - 1].textContent),
+          /* RE-POINTED (Dashboard v2.1) */ wantDate: lab[1], wantTotal: Number(lab[2]), prev: Number(document.querySelectorAll<HTMLElement>('.d2 [data-d2="week"]')[i - 1].dataset.total),
           lineX: vr ? vr.left + vr.width / 2 : -1, cx: wr.left + wr.width / 2, tipOn: tip ? (() => { const b = tip.getBoundingClientRect(); return b.left >= 0 && b.right <= innerWidth && b.top >= 0 && b.bottom <= innerHeight; })() : false,
         };
       }, k);
@@ -258,13 +262,15 @@ for (const vp of SIZES) {
     await openDash(page, vp);
     const f = await page.evaluate(() => ({
       tier: document.querySelector<HTMLElement>('.d2 [data-d2-card="founding"]')?.dataset.tier,
-      rank: document.querySelector('.d2 [data-d2="fw-rank"]')?.textContent, count: document.querySelector('.d2 [data-d2="fw-count"]')?.textContent,
-      no: document.querySelector('.d2 [data-d2="fw-no"]')?.textContent, on: document.querySelector('.d2 [data-d2="fw-step"][data-on] b')?.textContent,
+      /* RE-POINTED (Dashboard v2.1) */ /* v2.1: no "{done} of {needed} notes" line (the ring draws it; the card carries both as data), the founding number is
+         "No. {n} · " beside How it works, and a road step names its rank in its title */
+      rank: document.querySelector('.d2 [data-d2="fw-rank"]')?.textContent, count: (() => { const c = document.querySelector<HTMLElement>('.d2 [data-d2-card="founding"]'); return c ? `${c.dataset.done} of ${c.dataset.needed} notes` : undefined; })(),
+      no: document.querySelector('.d2 [data-d2="fw-no"]')?.textContent, on: document.querySelector('.d2 [data-d2="fw-step"][data-on]')?.getAttribute("title"),
       steps: document.querySelectorAll('.d2 [data-d2="fw-step"]').length,
     }));
     const needed = TIERS.find((t) => t.key === "scout")!.min;
     L.check("D1", "population", f.steps === 6 && !!f.rank, JSON.stringify(f));
-    L.check("D1", "rank and count are the stats", f.rank === "Archivist" && f.count === `6 of ${needed} notes` && f.on === "Archivist" && f.no === "Founding writer · No. 23", JSON.stringify(f));
+    L.check("D1", "rank and count are the stats", f.rank === "Archivist" && f.count === `6 of ${needed} notes` && f.on === "Archivist" && f.no === "No. 23 · ", JSON.stringify(f));
     await page.locator('.d2 [data-d2="fw-tell"][data-key="like"]').click();
     await page.waitForTimeout(500);
     const chosen = await page.evaluate(() => document.querySelector("[data-fb='kind'][aria-checked='true']")?.getAttribute("data-k") ?? null);

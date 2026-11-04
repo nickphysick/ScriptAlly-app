@@ -28,7 +28,8 @@ const TAG: Record<FeedbackKind, NoteTag> = {
 /** what became of a note — the console's statuses, in the writer's words */
 export const OUTCOME: Record<string, string> = { read: "Read", planned: "Planned", built: "Now in the app", fixed: "Fixed" };
 export const SENT_OUTCOME = "Sent";
-export const NO_NOTES = "Nothing sent yet. Your first note counts towards Fledgling.";
+/** v2.1: the line where the last note would be, with no note yet — named for the writer's NEXT rank */
+export const noNotesLine = (nextRank: string): string => `Your first note counts towards ${nextRank}.`;
 
 const ms = (v: unknown): number | null => {
   if (typeof v === "number" && Number.isFinite(v)) return v;

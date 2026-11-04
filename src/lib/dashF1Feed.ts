@@ -75,6 +75,11 @@ export interface F1Big {
   pkg: string | null;
   /** the materials that went, on a full request only */
   mats: F1Mat[] | null;
+  /** Dashboard v2.1 · the collapsed row's sub-line: the card's own deadline figure ("Send by 26 Nov"), else
+   *  "{agent} · {agency}" */
+  sub: string;
+  /** Dashboard v2.1 · the collapsed row's date: the card's own when, without its time ("Yesterday", "28 Oct") */
+  day: string;
 }
 
 export interface F1Mini {
@@ -232,15 +237,19 @@ export function bigCard(ev: DrawerEvent, kind: F1Kind, ctx: F1Ctx): F1Big | null
     mats = named.length ? named.slice(0, 3) : null;
   }
   const out = e.dir === "out";
+  const due = figs.slice(0, 2).find((f) => f.label === "Send by" || f.label === "Reply by");
+  const when = whenLine(e.at, ctx.now);
   const sentWord = e.status === QueryStatus.FULL_SENT ? "a full manuscript" : "a partial";
   return {
     type: "big", id: e.id, kind, dir: e.dir, queryId: q.id, status: e.status,
     initials: out ? initialsOf(ctx.userName || "You") : initialsOf(who),
     name: out && kind === "sent" ? `You sent ${sentWord}` : who,
     meta: out && kind === "sent"
-      ? `${whenLine(e.at, ctx.now)} · to ${[who, agency].filter(Boolean).join(", ")}`
-      : [whenLine(e.at, ctx.now), agency].filter(Boolean).join(" · "),
+      ? `${when} · to ${[who, agency].filter(Boolean).join(", ")}`
+      : [when, agency].filter(Boolean).join(" · "),
     headline, figs: figs.slice(0, 2), stops: journeyStops(row, q, !!e.need, ctx.now), pkg, mats,
+    sub: due ? `${due.label} ${due.value}` : [who, agency].filter(Boolean).join(" · "),
+    day: when.replace(/ at .*$/, ""),
   };
 }
 

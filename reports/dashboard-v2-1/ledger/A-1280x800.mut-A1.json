@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "A1",
+  "where": "population: a querying account and a tag on screen",
+  "ok": true,
+  "detail": "n 132, tag 132 weeks querying (15.59375px)"
+ },
+ {
+  "lock": "A1",
+  "where": "reads the derivation's count",
+  "ok": true,
+  "detail": "132 weeks querying want 132 weeks querying"
+ },
+ {
+  "lock": "A1",
+  "where": "sits above the title",
+  "ok": false,
+  "detail": "tag bottom 260.8, title top 155.8, gap -105.1"
+ },
+ {
+  "lock": "A1",
+  "where": "rust, mono, 12px, uppercase",
+  "ok": true,
+  "detail": "rgb(217, 150, 122) \"JetBrains Mono\", ui-monospace, monospace 12px uppercase"
+ },
+ {
+  "lock": "A1",
+  "where": "population: the empty manuscript is on screen with no sends",
+  "ok": true,
+  "detail": "{\"scope\":\"cv25-ms-empty\",\"title\":\"Murphy's Day Out\",\"tag\":false,\"text\":\"Murphy's Day Out\\n\\nby harness\"}"
+ },
+ {
+  "lock": "A1",
+  "where": "no queries, no tag",
+  "ok": true,
+  "detail": "{\"scope\":\"cv25-ms-empty\",\"title\":\"Murphy's Day Out\",\"tag\":false,\"text\":\"Murphy's Day Out\\n\\nby harness\"}"
+ }
+]

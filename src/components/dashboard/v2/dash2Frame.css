@@ -24,6 +24,7 @@
 .d58.d2 .os-card .d60-band--slate .os-cardttl, .d58.d2 .os-card .d60-band--stone .os-cardttl { color: var(--d2-ink); }
 .d58.d2 .os-card .d60-band--slate .d60-bl { color: #5d5850; }
 .d58.d2 .d2-tone--navy { background: #2d3a50; color: #fffaf3; }
+.d58.d2 .d2-tone--rose, .d58.d2 .d2-tone--rose .os-cardttl { background: #f4e0d7; color: var(--d2-ink); }
 .d58.d2 .d2-tone--navy .os-cardttl { color: #fffaf3; }
 .d58.d2 .os-card .d60-hb { padding: 16px 18px 18px; }
 .d2-body { padding: 16px 18px 18px; }

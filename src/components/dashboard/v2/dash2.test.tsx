@@ -17,11 +17,12 @@ vi.mock("../../../lib/firebase", async () => (await import("../../../test/pageSm
 import { Dash58 } from "../v58/Dash58";
 import { Dash2Band } from "./Dash2Band";
 import { nextReason } from "./Dash2Next";
-import { RANK_MIN } from "./Dash2Founding";
+import { heroLine, RANK_MIN, ringRatio } from "./Dash2Founding";
+import { EDGE, HEADROOM, PLOT_H } from "./Dash2Active";
 import { TIERS } from "../../../lib/foundingStats";
-import { breakdownFor, changeText, dash2Weeks, dateLabels, indexActivities, visibleWeeks, waitingOnYou, weekAria, weeksQuerying } from "../../../lib/dash2";
+import { breakdownFor, changeText, dash2Weeks, dateLabels, indexActivities, visibleWeeks, weekAria, wholeWeeksQuerying, weeksTag } from "../../../lib/dash2";
 import { aggregateLedger, dailyLedger } from "../../../lib/oneScreen";
-import { latestNote, noteFrom, NO_NOTES } from "../../../lib/foundingNotes";
+import { latestNote, noteFrom, noNotesLine } from "../../../lib/foundingNotes";
 import type { ListItem } from "../../../lib/dashList";
 import type { TaskCtx } from "../../../lib/dashTaskCard";
 import { QueryStatus, type Agent, type Manuscript, type Query, type User } from "../../../types";
@@ -43,6 +44,41 @@ const page = (queries: Query[] = QS) => renderToStaticMarkup(
       currentUser={{ id: "u1", name: "Bethany Carter" } as unknown as User} activeManuscript={MS} onNavigate={() => {}} now={NOW} />
   </MemoryRouter>,
 );
+
+describe("DB21-A · the weeks-querying tag", () => {
+  it("counts WHOLE weeks since the manuscript's first send, by calendar day", () => {
+    expect(wholeWeeksQuerying(QS, NOW)).toBe(9); // first send 66 days ago
+    expect(wholeWeeksQuerying([q("x", QueryStatus.QUERIED, 6)], NOW)).toBe(0);
+    expect(wholeWeeksQuerying([q("x", QueryStatus.QUERIED, 7)], NOW)).toBe(1);
+    expect(wholeWeeksQuerying([q("x", QueryStatus.QUERIED, 13)], NOW)).toBe(1);
+    expect(wholeWeeksQuerying([q("x", QueryStatus.QUERIED, 14)], NOW)).toBe(2);
+    expect(wholeWeeksQuerying([], NOW)).toBe(null);
+    expect(wholeWeeksQuerying([{ ...q("x", QueryStatus.QUERIED, 0), dateSent: undefined } as unknown as Query], NOW)).toBe(null);
+  });
+  it("reads '1 week querying' in the singular", () => {
+    expect(weeksTag(1)).toBe("1 week querying");
+    expect(weeksTag(153)).toBe("153 weeks querying");
+  });
+  it("sits above the title in the band, and is absent with no send", () => {
+    const html = renderToStaticMarkup(<Dash2Band loading={false} title="T" author="A" buttons weeks={3} onLog={() => {}} onRecord={() => {}} onAddAgent={() => {}} />);
+    expect(html.indexOf("3 weeks querying")).toBeGreaterThan(-1);
+    expect(html.indexOf("3 weeks querying")).toBeLessThan(html.indexOf('data-d2="title"'));
+    const none = renderToStaticMarkup(<Dash2Band loading={false} title="T" author="A" buttons={false} weeks={null} onLog={() => {}} onRecord={() => {}} onAddAgent={() => {}} />);
+    expect(none).not.toContain("querying");
+    expect(page()).toContain("9 weeks querying");
+    expect(page([])).not.toContain("weeks querying");
+  });
+});
+
+describe("DB21-B · Active queries is the chart only", () => {
+  it("no tiles, and the chart's dimensions are v2.1's", () => {
+    const html = page();
+    const card = html.slice(html.indexOf('data-d2-card="active"'), html.indexOf('data-d2-card="founding"'));
+    expect(card.length).toBeGreaterThan(100);
+    for (const gone of ["waiting on you", "have replied", "weeks querying", 'data-d2="tiles"']) expect(card, gone).not.toContain(gone);
+    expect([PLOT_H, EDGE, HEADROOM]).toEqual([280, 22, 1.35]);
+  });
+});
 
 describe("DB2-A · the band", () => {
   it("is the title, then 'by {author}', then the three actions — and no status label", () => {
@@ -95,10 +131,6 @@ describe("DB2-C · the weeks", () => {
     expect(visibleWeeks(w, 396)).toEqual(w.slice(-13));
     expect(visibleWeeks(w, 2000).length).toBe(40);
   });
-  it("the tiles: waiting on you is the writer's court, offers included; weeks querying counts this one", () => {
-    expect(waitingOnYou(QS)).toBe(2); // partial requested + offer
-    expect(weeksQuerying(QS, NOW)).toBeGreaterThanOrEqual(10);
-  });
 });
 
 describe("DB2-D · the founding card", () => {
@@ -112,7 +144,26 @@ describe("DB2-D · the founding card", () => {
     expect(noteFrom({ kind: "Something I liked", message: "y" })?.outcome).toBe("Sent");
     expect(noteFrom({ kind: "Nonsense", message: "z" })).toBe(null);
     expect(latestNote([{ kind: "An idea", message: "old", createdAt: 1 }, { kind: "An idea", message: "new", createdAt: 9 }])?.text).toBe("new");
-    expect(NO_NOTES).toBe("Nothing sent yet. Your first note counts towards Fledgling.");
+    expect(noNotesLine("Fledgling")).toBe("Your first note counts towards Fledgling.");
+  });
+});
+
+describe("DB21-C · the founding card's hero", () => {
+  const say = (t: number, d: number) => { const l = heroLine(t, d); return `${l.lead}${l.rank ?? ""}${l.tail}`; };
+  it("only the Egg hatches; every later rank becomes, with its article", () => {
+    expect(say(0, 0)).toBe("One more note and you hatch into a Fledgling.");
+    expect(say(1, 1)).toBe("Two more notes and you become an Archivist.");
+    expect(say(2, 3)).toBe("Five more notes and you become a Scout.");
+    expect(say(4, 20)).toBe("Five more notes and you become a QueryHawk.");
+    expect(say(5, 30)).toBe("You’ve reached QueryHawk. Thank you.");
+    for (let t = 1; t < 5; t++) expect(say(t, RANK_MIN[t])).not.toContain("hatch");
+    expect(heroLine(0, 0).rank).toBe("Fledgling");
+  });
+  it("the ring is notes counted out of notes needed for the next rank, full at the top", () => {
+    expect(ringRatio(0, 0)).toBe(0);
+    expect(ringRatio(1, 2)).toBeCloseTo(2 / 3);
+    expect(ringRatio(2, 6)).toBeCloseTo(6 / 8);
+    expect(ringRatio(5, 40)).toBe(1);
   });
 });
 

@@ -1,0 +1,68 @@
+[
+ {
+  "lock": "D1",
+  "where": "population: the three seeded events are in the feed",
+  "ok": true,
+  "detail": "{\"db21-q-req\":{\"big\":true,\"row\":false,\"exp\":null,\"fold\":null,\"foldExp\":null,\"sub\":null,\"tag\":null},\"db21-q-offer\":{\"big\":true,\"row\":false,\"exp\":null,\"fold\":null,\"foldExp\":null,\"sub\":null,\"tag\":null},\"db21-q-sent\":{\"big\":false,\"row\":true,\"exp\":\"false\",\"fold\":null,\"foldExp\":null,\"sub\":\"Ingrid Marsh · Marsh & Weir\",\"tag\":\"BUTTON\"}}"
+ },
+ {
+  "lock": "D1",
+  "where": "a full requested, not yet sent: the full card",
+  "ok": true,
+  "detail": "{\"big\":true,\"row\":false,\"exp\":null,\"fold\":null,\"foldExp\":null,\"sub\":null,\"tag\":null}"
+ },
+ {
+  "lock": "D1",
+  "where": "an offer not yet answered: the full card",
+  "ok": true,
+  "detail": "{\"big\":true,\"row\":false,\"exp\":null,\"fold\":null,\"foldExp\":null,\"sub\":null,\"tag\":null}"
+ },
+ {
+  "lock": "D1",
+  "where": "a full already sent: a collapsed row, a button, not expanded",
+  "ok": true,
+  "detail": "{\"big\":false,\"row\":true,\"exp\":\"false\",\"fold\":null,\"foldExp\":null,\"sub\":\"Ingrid Marsh · Marsh & Weir\",\"tag\":\"BUTTON\"}"
+ },
+ {
+  "lock": "D1",
+  "where": "the collapsed row's sub-line names the agent",
+  "ok": true,
+  "detail": "Ingrid Marsh · Marsh & Weir"
+ },
+ {
+  "lock": "D1",
+  "where": "clicking the row opens the full card, with a fold button",
+  "ok": true,
+  "detail": "{\"big\":true,\"row\":false,\"exp\":null,\"fold\":\"Collapse\",\"foldExp\":\"true\",\"sub\":null,\"tag\":null}"
+ },
+ {
+  "lock": "D1",
+  "where": "population: the feed overflows and is scrolled",
+  "ok": true,
+  "detail": "{\"top\":478,\"over\":478,\"rowY\":228.28125}"
+ },
+ {
+  "lock": "D1",
+  "where": "the feed keeps its scroll position, the card where the row was",
+  "ok": true,
+  "detail": "scroll 478 → 478, row 228.3 → card 228.3"
+ },
+ {
+  "lock": "D1",
+  "where": "focus moves to the fold button",
+  "ok": true,
+  "detail": "fold"
+ },
+ {
+  "lock": "D1",
+  "where": "the fold collapses it again",
+  "ok": true,
+  "detail": "{\"big\":false,\"row\":true,\"exp\":\"false\",\"fold\":null,\"foldExp\":null,\"sub\":\"Ingrid Marsh · Marsh & Weir\",\"tag\":\"BUTTON\"}"
+ },
+ {
+  "lock": "D1",
+  "where": "folding keeps the place too, and focus returns to the row",
+  "ok": true,
+  "detail": "{\"top\":478,\"focus\":\"collapsed\"}"
+ }
+]

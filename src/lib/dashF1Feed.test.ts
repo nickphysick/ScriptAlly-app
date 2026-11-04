@@ -142,3 +142,17 @@ describe("DF1-D · mini rows, the switch and the days", () => {
     expect(journeyStops(undefined, Q, false, NOW)).toEqual([]);
   });
 });
+
+describe("DB21-D · a big event's collapsed row", () => {
+  it("says the deadline where the card has one", () => {
+    const c = f1Days([ev(entry({ id: "r", queryId: "q1", status: QueryStatus.FULL_REQUESTED, dir: "in", who: "Nadia Hussain" }))], "all", ctx)[0].items[0] as F1Big;
+    expect(c.sub).toBe("Send by 26 Nov");
+    expect(c.day).toBe("Today");
+  });
+  it("otherwise names the agent and the agency, and the day without its time", () => {
+    const q = { ...Q, status: QueryStatus.FULL_SENT, expectedSendDate: undefined } as unknown as Query;
+    const c = f1Days([ev(entry({ id: "s", queryId: "q1", status: QueryStatus.FULL_SENT, dir: "out", at: at(28, 11, 20) }))], "all", { ...ctx, queries: [q] })[0].items[0] as F1Big;
+    expect(c.sub).toBe("Nadia Hussain · Hussain Literary");
+    expect(c.day).toBe("28 Oct");
+  });
+});

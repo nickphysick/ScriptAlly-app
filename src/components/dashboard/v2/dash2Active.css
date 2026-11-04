@@ -8,24 +8,30 @@
 /* ── Part C · Active queries ── */
 .d58.d2 .d2-bpill { display: inline-flex; align-items: center; height: 28px; padding: 0 12px; border-radius: 999px; background: rgba(255, 250, 243, 0.14); color: #fffaf3; font-weight: 600; font-size: 13.5px; }
 .d58.d2 [data-d2-card="active"] .d2-meta { color: #fffaf3; }
-.d58.d2 .d2-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 14px 16px 0; }
-.d58.d2 .d2-tiles > div { min-width: 0; background: #f5f1ea; border-radius: 10px; padding: 10px 14px 11px; }
-.d58.d2 .d2-tiles b { display: block; font-family: var(--d58-type) !important; font-weight: 400; font-size: 28px; line-height: 1; }
-.d58.d2 .d2-tiles span { display: block; margin-top: 6px; font-size: 14px; line-height: 1.3; color: var(--d2-muted); }
-.d58.d2 .d2-plot { position: relative; margin-top: 8px; overflow: visible; }
+/* v2.1: no tiles — the card is the band, then the chart (ref design-refs/dashboard-v2-1) */
+.d58.d2 .d2-plot { position: relative; overflow: visible; }
 .d58.d2 .d2-plotsvg { position: absolute; inset: 0; display: block; }
-.d58.d2 .d2-wk {
-  position: absolute; z-index: 2; width: 26px; height: 26px; padding: 0; border: 0; border-radius: 50%; cursor: pointer;
-  transform: translate(-50%, -50%); transition: transform 0.15s ease;
-  background: #fff; box-shadow: 0 0 0 1.5px #1c130f; color: #1c130f;
-  font-family: var(--d58-type) !important; font-size: 12px; line-height: 1; display: grid; place-items: center;
+/* a week: a 9px white dot ringed in ink, centred on the line; 13px on hover or focus. The hit area is a 26px ring
+   round it (::before), so a 9px mark is not a 9px target. */
+.d58.d2 .d2-dot {
+  position: absolute; z-index: 2; box-sizing: border-box; width: 9px; height: 9px; padding: 0; border: 0; border-radius: 50%; cursor: pointer;
+  transform: translate(-50%, -50%); transition: width 0.12s ease, height 0.12s ease;
+  background: #fff; box-shadow: 0 0 0 1.5px #1c130f;
 }
-.d58.d2 .d2-wk:hover, .d58.d2 .d2-wk:focus-visible { transform: translate(-50%, -50%) scale(1.18); outline: none; box-shadow: 0 0 0 2px #1c130f, 0 0 0 5px rgba(45, 58, 80, 0.18); z-index: 3; }
-.d58.d2 .d2-wk.is-now { background: #2d3a50; color: #fff; box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px #1c130f; }
+.d58.d2 .d2-dot::before { content: ""; position: absolute; left: 50%; top: 50%; width: 26px; height: 26px; margin: -13px 0 0 -13px; border-radius: 50%; }
+.d58.d2 .d2-dot:hover, .d58.d2 .d2-dot:focus-visible { width: 13px; height: 13px; outline: none; z-index: 3; }
+/* this week: a 36px navy circle with a white halo and an ink ring, the total in Special Elite 15px cream */
+.d58.d2 .d2-wk {
+  position: absolute; z-index: 2; box-sizing: border-box; width: 36px; height: 36px; padding: 0; border: 0; border-radius: 50%; cursor: pointer;
+  transform: translate(-50%, -50%); transition: transform 0.15s ease;
+  background: #2d3a50; color: #fffaf3; box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px #1c130f;
+  font-family: var(--d58-type) !important; font-size: 15px; line-height: 1; display: grid; place-items: center;
+}
+.d58.d2 .d2-wk:hover, .d58.d2 .d2-wk:focus-visible { transform: translate(-50%, -50%) scale(1.08); outline: none; z-index: 3; }
 .d58.d2 .d2-vline { position: absolute; top: 0; bottom: 0; width: 0; margin-left: -0.75px; border-left: 1.5px dashed rgba(28, 19, 15, 0.45); z-index: 1; pointer-events: none; }
 .d58.d2 .d2-axis { position: absolute; left: 0; right: 0; bottom: 8px; height: 18px; z-index: 1; pointer-events: none; }
 .d58.d2 .d2-axis span { position: absolute; bottom: 0; font-size: 12.5px; line-height: 1.3; color: rgba(255, 250, 243, 0.75); white-space: nowrap; }
-@media (prefers-reduced-motion: reduce) { .d58.d2 .d2-wk { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .d58.d2 .d2-wk, .d58.d2 .d2-dot { transition: none; } }
 
 /* the week card — PORTALLED to <body>: literals and `:root` tokens only (`--sp-type`/`--sp-serif` are primitives.css's :root) */
 .d2-wtip {

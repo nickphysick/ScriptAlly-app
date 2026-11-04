@@ -137,6 +137,20 @@ export function listPlan(found: Partial<Record<ListGroupKey, ListItem[]>>): List
 }
 
 /**
+ * Dashboard v2.1 · the queries that still need the writer: the ones Next up's "Agents are waiting" group holds (the
+ * board's `req` cards — a partial, full or revision asked for and not yet sent, an offer not yet answered). The feed
+ * opens a big event only while its query is here. ⚠️ READ FROM THE PLAN, NEVER RE-DERIVED: the dashboard's two
+ * surfaces cannot disagree about whose move it is.
+ */
+export function needsYouIds(plan: ListPlan): Set<string> {
+  const ids = new Set<string>();
+  for (const it of plan.items) {
+    if (it.group === "req" && it.action.kind === "drawer" && it.action.request.queryId) ids.add(it.action.request.queryId);
+  }
+  return ids;
+}
+
+/**
  * The focus steps through the FIRST group only. `step` is clamped, so a group that shrinks under
  * the reader never leaves the card pointing past its end.
  */
