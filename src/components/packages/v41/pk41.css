@@ -37,3 +37,95 @@
 @media (min-width: 768px) and (max-width: 1400px) {
   .pk39-wpg > .wpg-scroll > .p6.p41:not(.p6-new) { padding-left: 36px; }
 }
+
+/* ══ B · THE FOUNDING WRITER STRIP (ref option D, `.k4-fbf`; screens 01, 13) ═════════════════════════════════════════
+   The sheet's full width, edge to edge: a direct child of the scroller, so it opts out of the grid's content measure
+   (0-3-0 beats `.wpg-scroll > *`). #fbefe9 → #f4e0d7 with a 1px #ecd3c9 rule under it, 57 tall. Its contents start on
+   the content column's left edge (the same 1288 cap and 40 / 36 inset as `.p41`) with 40 on the right. One line: the
+   second sentence goes at ≤1400 and the first ellipsises only as a last resort. */
+@media (min-width: 768px) {
+  .pk39-wpg > .wpg-scroll > .p41-fb {
+    box-sizing: border-box; width: 100%; max-width: none; margin: 0; padding: 0;
+    background: linear-gradient(90deg, #fbefe9, #f4e0d7); border-bottom: 1px solid #ecd3c9;
+  }
+  .p41-fb .p41-fb-in {
+    box-sizing: border-box; display: flex; align-items: center; gap: 14px; min-height: 56px;
+    max-width: 1288px; margin: 0 auto; padding: 8px 40px;
+  }
+  .p41-fb .p41-fb-img { flex: none; width: 30px; height: auto; margin: -6px 0 -8px; filter: drop-shadow(0 3px 4px rgba(28, 19, 15, 0.18)); }
+  .p41-fb .p41-fb-tag {
+    flex: none; display: inline-flex; align-items: center; height: 26px; padding: 0 11px; border-radius: 13px;
+    background: #fff; color: #9b4a57; box-shadow: 0 0 0 1px rgba(155, 74, 87, 0.18);
+    font: 600 13px/1 var(--sp-serif); white-space: nowrap;
+  }
+  .p41-fb .p41-fb-tx {
+    flex: 1; min-width: 0; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    font: 400 15px/1.4 var(--sp-serif); color: rgba(28, 19, 15, 0.75);
+  }
+  .p41-fb .p41-fb-tx b { margin-right: 4px; font: 400 16px var(--sp-type); color: #1c130f; }
+  .p41-fb .p41-fb-go {
+    flex: none; height: 34px; padding: 0 16px; border: 0; border-radius: 999px; background: #2d3a50; color: #fff;
+    font: 600 14.5px var(--sp-serif); white-space: nowrap; cursor: pointer;
+  }
+  .p41-fb .p41-fb-go:hover { background: #1c130f; }
+  .p41-fb .p41-fb-x {
+    flex: none; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 50%; background: none;
+    color: rgba(28, 19, 15, 0.5); font: 400 15px/1 var(--sp-serif); cursor: pointer;
+  }
+  .p41-fb .p41-fb-x:hover { background: rgba(28, 19, 15, 0.06); }
+  .p41-fb :is(.p41-fb-go, .p41-fb-x):focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
+  /* the folder tab and its curved foot take the strip's colour while the strip is on the page on screen (every page
+     stays mounted, so a hidden page's strip must not count: the shell's own `[data-stage-off]` test). The sheet's top
+     lip reads the same token, so it continues the strip rather than drawing a cream line above it. */
+  .ws-app.ws-app:has([data-pk41-fb]:not([data-stage-off] *)) .ws-main { --ink-tab: #fbefe9; }
+}
+@media (min-width: 768px) and (max-width: 1400px) {
+  .p41-fb .p41-fb-in { padding-left: 36px; padding-right: 36px; }
+  .p41-fb .p41-fb-tx { font-size: 14.5px; }
+  .p41-fb .p41-fb-tx b { font-size: 15.5px; }
+  .p41-fb .p41-fb-tx span { display: none; }
+}
+
+/* ══ C · THE HEADER (ref `.k4-hero.k4-thin`; screen 01) ═══════════════════════════════════════════════════════════════
+   Navy #2d3a50, radius 20, 18 / 22 / 18 / 30, `0 8px 22px rgba(27,36,51,.18)`, 14 above the batch row. The title in the
+   typewriter at 34 (29 at ≤1400) — ⚠️ brand.tsx forces every h1's face with `!important`, so this one needs its own and
+   two classes. One serif line under it at cream 75%, never wrapping. Two 40px pills on the right. */
+@media (min-width: 768px) {
+  .p41 .p41-hd {
+    box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 32px;
+    margin: 4px 0 14px; padding: 18px 22px 18px 30px; border-radius: 20px;
+    background: #2d3a50; color: #f4eee5; box-shadow: 0 8px 22px rgba(27, 36, 51, 0.18);
+  }
+  .p41 .p41-hd-t { min-width: 0; }
+  .p41 .p41-hd h1.p41-ttl {
+    display: flex; align-items: center; gap: 14px; margin: 0;
+    font: 400 34px/1.05 var(--sp-type) !important; letter-spacing: 0 !important; color: #fffaf3 !important;
+  }
+  .p41 .p41-hd .p41-pro {
+    display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px 0 8px; border-radius: 12px;
+    background: rgba(244, 238, 229, 0.12); box-shadow: inset 0 0 0 1px rgba(244, 238, 229, 0.25); color: #f4eee5;
+    font: 500 10.5px/1 var(--font-mono, ui-monospace, monospace); font-style: normal; letter-spacing: 0.16em; text-transform: uppercase;
+  }
+  .p41 .p41-hd .p41-pro::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #e0a188; }
+  .p41 .p41-hd .p41-sub {
+    margin: 6px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    font: 400 16.5px/1.4 var(--sp-serif); color: rgba(244, 238, 229, 0.75);
+  }
+  .p41 .p41-hd .p41-sub b { font-weight: 600; color: #fffaf3; }
+  .p41 .p41-hd-a { flex: none; display: flex; gap: 8px; }
+  .p41 :is(.p41-pb1, .p41-pb2) {
+    height: 40px; padding: 0 20px; border: 0; border-radius: 999px; font: 600 16px var(--sp-serif); white-space: nowrap; cursor: pointer;
+  }
+  .p41 .p41-pb1 { background: #f4eee5; color: #1c130f; }
+  .p41 .p41-pb1:hover { background: #fff; }
+  .p41 .p41-pb2 { background: none; color: #f4eee5; box-shadow: inset 0 0 0 1px rgba(244, 238, 229, 0.25); }
+  .p41 .p41-pb2:hover { background: rgba(244, 238, 229, 0.08); }
+  .p41 :is(.p41-pb1, .p41-pb2):focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
+}
+@media (min-width: 768px) and (max-width: 1400px) {
+  .p41 .p41-hd { gap: 14px; padding-left: 24px; padding-right: 18px; }
+  .p41 .p41-hd h1.p41-ttl { font-size: 29px !important; }
+  .p41 .p41-hd .p41-pro { height: 22px; font-size: 9.5px; }
+  .p41 .p41-hd .p41-sub { font-size: 14.5px; }
+  .p41 :is(.p41-pb1, .p41-pb2) { padding: 0 15px; font-size: 15px; }
+}

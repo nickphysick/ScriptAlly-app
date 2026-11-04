@@ -30,6 +30,11 @@ import { usePk26Model } from "./packages/v26/usePk26Model";
 import { Pk26Hero } from "./packages/v26/Pk26Header";
 import { Pk39HowItWorks } from "./packages/v26/Pk39HowItWorks";
 import { Pk26Builder, type LibTab } from "./packages/v26/Pk26Builder";
+import { Pk41Banner } from "./packages/v41/Pk41Banner";
+import { Pk41Header } from "./packages/v41/Pk41Header";
+import { useScriptAllyDb } from "../lib/db";
+import { packagesViaFounding } from "../lib/entitlements";
+import { FOUNDING_NOTE_PATH, foundingNoteHidden } from "../lib/packagesV41";
 import { Pk38Drawer } from "./packages/v26/Pk38Drawer";
 import { Pk38Results } from "./packages/v26/Pk38Results";
 import { libTabFromParam } from "../lib/packagesV38";
@@ -52,6 +57,11 @@ export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab:
   const { activeMs, live, active, msId, msPkgs, collectionsReady, letters, synopses, versionRows, comps } = model;
   const location = useLocation();
   const navigate = useNavigate();
+  /* v41 B: the founding writer strip — founding writers only, until dismissed (one leaf on the user) */
+  const { currentUser, updateUserPaths } = useScriptAllyDb();
+  const founding = packagesViaFounding(currentUser);
+  const showFounding = founding && !foundingNoteHidden(currentUser);
+  const setFoundingHidden = (hidden: boolean) => { void updateUserPaths({ [FOUNDING_NOTE_PATH]: hidden }); };
 
   const [curId, setCurId] = useState<string | null>(null);
   const [drawer, setDrawer] = useState<DrawerView | null>(null);
@@ -116,10 +126,12 @@ export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab:
 
   return (
     <WorkspacePageGrid className="pk39-wpg" scrollLabel="Submission packages" masthead={null}>
+      {showFounding ? <Pk41Banner onDismiss={() => setFoundingHidden(true)} /> : null}
       {/* v41 Phase 1: the page is the Dashboard v2 / Contact list language — no header card, explainer, raised panel or
           label tiles (each is replaced by a v41 part, below) */}
       <div ref={rootRef} className={`p6 p41${empty ? " p6-new" : ""}`} data-pk26="page" data-pk41="page">
-        {empty ? <Pk26Hero onBuild={() => part("builder")?.scrollIntoView({ block: "start", behavior: "smooth" })} onHow={() => setHow(true)} /> : null}
+        {empty ? <Pk26Hero onBuild={() => part("builder")?.scrollIntoView({ block: "start", behavior: "smooth" })} onHow={() => setHow(true)} />
+          : <Pk41Header title={activeMs?.title ?? null} onNew={() => setDialog({ m: "new" })} onHow={() => setHow(true)} />}
         <Pk26Builder model={model} retired={retired} current={current} onSelect={setCurId} onFigures={(p) => setPkdId(p.id)} askStep={askStep}
             onNewPackage={() => setDialog({ m: "new" })} onDuplicate={copy} onEditPackage={(p, focus) => setDialog({ m: "edit", id: p.id, ...(focus ? { focus } : {}) })}
             onOpenMaterial={(k, id) => setDrawer(k === "ext" ? { m: "ext", id } : { m: "mat", kind: k, id })}
