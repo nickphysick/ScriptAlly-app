@@ -14,9 +14,13 @@
  * STATUSES ARE PICKED, NEVER TYPED: the status question is the fixed set as buttons, each drawn
  * with its own ring by `StatusDot`.
  *
- * The reasons the Words table does not redraw (two dates found, a month with no day, a stray
- * spreadsheet number, a response date) keep the review's own question and controls
- * (`QueryReasonPanel`), inside the same card.
+ * The reasons the Words table does not redraw (a month with no day, a stray spreadsheet number, a
+ * response date) keep the review's own question and controls (`QueryReasonPanel`), inside the same
+ * card.
+ *
+ * A QUERY WITH A TIMELINE IS ASKED ABOUT IT WHOLE (ref design-refs/import-timeline-strip-v1.html).
+ * Two dates found, or a sent-date question on a query that has events, is one card: the timeline as
+ * a strip of steps (`TimelineStrip`), and one button that says what is missing until it is answered.
  */
 import React, { useRef, useState } from "react";
 import { QueryStatus } from "../../../types";
@@ -26,6 +30,8 @@ import { STAGE_NAME } from "../../../lib/qcSummary";
 import { ambiguousReadings } from "../../../lib/templateImport";
 import { StatusDot } from "../../StatusDot";
 import { QueryReasonPanel } from "../reviewRows";
+import { TimelineStrip } from "./TimelineStrip";
+import { STRIP_WORDS, stripNeed, stripButton } from "../../../lib/importTimeline";
 import "./onbV9.css";
 
 export const DECK_WORDS = {
@@ -216,10 +222,6 @@ export interface QueryQuestionProps {
   code: ReviewReasonCode;
   onPatch: (p: Partial<ReviewQuery>) => void;
   onResolveReason: (code: ReviewReasonCode, patch?: Partial<ReviewQuery>) => void;
-  onSwapDates: () => void;
-  /** Two dates (v1.1): "Neither is when I sent it" — both dates stay on their events, and the
-   *  sent-date question opens on this same card. */
-  onNeitherSent?: () => void;
   /** Photos: the agent's name (the crossed-out question) and agency (the mark question's quote). */
   agentName?: string;
   agentAgency?: string;
@@ -334,4 +336,19 @@ export const QueryQuestion: React.FC<QueryQuestionProps> = (p) => {
   }
   /* the reasons the deck does not redraw: the review's own question and controls */
   return <div className="o9-q o9-q--built"><QueryReasonPanel {...p} /></div>;
+};
+
+/** The timeline card: one question, the strip, one button. The button says what is missing until
+ *  the strip is answered, then "Yes, that's right", which answers every reason the strip replaced. */
+export const StripQuestion: React.FC<{ query: ReviewQuery; agentName: string | null; onChange: (q: ReviewQuery) => void; onConfirm: () => void; today?: string }> = ({ query, agentName, onChange, onConfirm, today }) => {
+  const need = stripNeed(query);
+  return (
+    <div className="o9-q o9-q--strip" data-reason="timeline" data-strip-host>
+      <Ask>{STRIP_WORDS.ask(agentName)}</Ask>
+      <TimelineStrip query={query} onChange={onChange} today={today} />
+      <div className="o9-striprow">
+        <button type="button" className="sf-btn" disabled={need !== null} onClick={onConfirm} data-strip="confirm">{stripButton(need)}</button>
+      </div>
+    </div>
+  );
 };

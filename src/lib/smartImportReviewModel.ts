@@ -125,6 +125,9 @@ export interface ReviewQuery {
   markRaw?: string;
   removed: boolean;
   removedReason?: "Agent removed" | "Removed by you";
+  /** The timeline strip's "I don't have it": the sent date is unknown and the writer has said so.
+   *  Client-only; modelToResult picks its fields explicitly and never carries it. */
+  sentWaived?: boolean;
 }
 
 const friendly = (issues?: string[]): string | null =>
@@ -476,23 +479,6 @@ export function parseModel(result: SmartImportResult): { agents: ReviewAgent[]; 
   });
 
   return { agents, queries };
-}
-
-// ── Two dates (v1.1): "Neither is when I sent it" ────────────────────────────────────────────────
-/**
- * Neither of the two dates is when the query went. Both stay on their events (the timeline is kept
- * whole), the sent date is cleared, the two-dates question is answered, and the query asks for its
- * sent date the way an undated one does: type it, or "I don't have this date". The same on both
- * paths.
- */
-export function applyNeitherSent(queries: readonly ReviewQuery[], id: string): ReviewQuery[] {
-  return queries.map((q) => {
-    if (q.id !== id) return q;
-    const reasons = q.reasons.map((r) => (r.code === "two-dates" ? { ...r, resolved: true } : r));
-    const ask = reasons.find((r) => r.code === "no-date");
-    const next = ask ? reasons.map((r) => (r === ask ? { ...r, resolved: false } : r)) : [...reasons, { code: "no-date" as ReviewReasonCode, resolved: false }];
-    return { ...q, sentDate: null, sentDateRaw: null, reasons: next };
-  });
 }
 
 // ── Photos (smart-import-photos-v1): answering the new questions ─────────────────────────────────

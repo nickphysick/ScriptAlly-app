@@ -45,7 +45,7 @@ export async function answerQuery(r: Locator, opts: { date?: string; undated?: b
   const press = async (name: RegExp) => { await tap(r.getByRole("button", { name }).first()); };
   const typeDate = async (iso: string) => { await r.locator('input[type="date"]').first().fill(iso); await press(/^Save date$/); };
   switch (code) {
-    case "two-dates": return press(/^Yes, that's right$/);
+    case "timeline": return answerStrip(r);
     case "missing-day": return press(/^Keep as month$/);
     case "serial-outlier": return press(/^That's right$/);
     case "no-date": return opts.date ? typeDate(opts.date) : press(/^(I don't have this date|Leave undated)$/);
@@ -54,6 +54,24 @@ export async function answerQuery(r: Locator, opts: { date?: string; undated?: b
     case "status-wording": return (await r.getByRole("button", { name: /^That's right$/ }).count()) ? press(/^That's right$/) : tap(r.locator("[data-status]").first());
     default: return tap(r.locator("button").first()); // ambiguous dates and status direction: the first reading offered
   }
+}
+
+/**
+ * The timeline strip (import-timeline-strip-v1): until its button says "Yes, that's right", the
+ * quickest honest answer for the first tile still missing one — the sent date waived ("I don't have
+ * it", which also clears "Fix the dates first"), an event dated today — then the button.
+ */
+export async function answerStrip(r: Locator) {
+  const confirm = r.locator('[data-strip="confirm"]');
+  for (let i = 0; i < 12 && !(await confirm.isEnabled()); i++) {
+    const order = /Fix the dates first/.test((await confirm.textContent()) ?? "");
+    const tile = order ? r.locator('[data-step="sent"]') : r.locator(".o9-stop.is-miss").first();
+    const step = await tile.getAttribute("data-step");
+    await tile.click();
+    if (step === "sent") await r.locator('[data-strip="waive"]').click();
+    else { await r.locator('[data-strip="date"]').fill("today"); await r.locator('[data-strip="save"]').click(); }
+  }
+  await confirm.click();
 }
 
 /** Every question the agents step is asking, answered: carry on, mark as checked, or remove. */

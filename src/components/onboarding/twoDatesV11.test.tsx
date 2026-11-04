@@ -1,60 +1,27 @@
 /**
- * Smart Import from photos v1.1 — the two-dates card's third answer, one date never shown as two,
- * and a ✗ kept out of the crossed-out answer-all.
+ * Smart Import from photos v1.1 — one date never shown as two, and a ✗ kept out of the crossed-out
+ * answer-all. (Its two-dates card, and that card's "Neither is when I sent it", were retired by the
+ * timeline strip: src/components/onboarding/v9/timelineStrip.test.tsx.)
  *
- * Locks: "Neither is when I sent it" keeps both events, clears the sent date, answers two-dates and
- * opens the sent-date question on the same card (both paths: the card is shared); a read whose sent
- * date is also an event's date reaches the card with that date once and the no-date question; the
- * apply-to-all lists only queries whose own code is crossed-out.
+ * Locks: a read whose sent date is also an event's date reaches the review with that date once and
+ * the no-date question; the apply-to-all lists only queries whose own code is crossed-out.
  */
 import React from "react";
 import { describe, it, expect } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { QueryStatus } from "../../types";
 import type { SmartImportResult } from "../../types/smartImport";
-import { parseModel, applyNeitherSent, openCrossedOthers, type ReviewQuery } from "../../lib/smartImportReviewModel";
-import { openQueryQuestions } from "../../lib/reviewGate";
+import { parseModel, openCrossedOthers, type ReviewQuery } from "../../lib/smartImportReviewModel";
 import { QueryQuestion } from "./v9/DeckQuestions";
-import { NEITHER_SENT } from "./reviewRows";
 
 const noop = () => {};
 const html = (n: React.ReactElement) => renderToStaticMarkup(n).replace(/<!-- -->/g, "").replace(/&#x27;/g, "'").replace(/&quot;/g, '"');
 const card = (q: ReviewQuery, extra: Record<string, unknown> = {}) => {
   const code = q.reasons.find((r) => !r.resolved)!.code;
-  return html(<QueryQuestion query={q} code={code} onPatch={noop} onResolveReason={noop} onSwapDates={noop} onNeitherSent={noop} {...extra} />);
+  return html(<QueryQuestion query={q} code={code} onPatch={noop} onResolveReason={noop} {...extra} />);
 };
 const result = (queries: SmartImportResult["queries"]): SmartImportResult =>
   ({ agents: [{ ref: "a1", name: "Kirsten Vale", agency: "Vale Agency" }, { ref: "a2", name: "Leo Marchetti", agency: "" }, { ref: "a3", name: "Rhys Hale", agency: "Hale Agency" }], queries } as SmartImportResult);
-const twoDates = parseModel(result([{ agentRef: "a1", status: QueryStatus.FULL_REQUESTED, sentDate: "2026-09-02", sentDateRaw: "2/9",
-  timeline: [{ type: QueryStatus.FULL_REQUESTED, date: "2026-09-15", raw: "15/9" }], reasons: ["two-dates"] }])).queries[0];
-
-describe("the two-dates card (v1.1)", () => {
-  it("offers a third way out, beside Swap the dates and It's just one date", () => {
-    expect(NEITHER_SENT).toBe("Neither is when I sent it");
-    const h = card(twoDates);
-    expect(h).toContain(">Swap the dates</button>");
-    expect(h).toContain(">It's just one date</button>");
-    expect(h).toContain(`>${NEITHER_SENT}</button>`);
-  });
-  it("Neither keeps both dates on their events, answers two-dates and opens the sent-date question on the same card", () => {
-    const [q] = applyNeitherSent([twoDates], twoDates.id);
-    expect(q.sentDate).toBeNull();
-    expect(q.sentDateRaw).toBeNull();
-    expect(q.timeline).toEqual(twoDates.timeline);
-    expect(q.reasons.find((r) => r.code === "two-dates")?.resolved).toBe(true);
-    expect(openQueryQuestions([q])).toEqual([{ id: q.id, code: "no-date" }]);
-    const h = card(q);
-    expect(h).toContain('data-reason="no-date"');
-    expect(h).toContain("I don't have this date");
-    expect(h).toMatch(/<input[^>]*type="date"/);
-  });
-  it("is the same on a spreadsheet import: the card is the one card for both paths", () => {
-    const sheet = { ...twoDates, src: undefined, lineRaw: undefined };
-    expect(card(sheet)).toContain(`>${NEITHER_SENT}</button>`);
-    expect(openQueryQuestions(applyNeitherSent([sheet], sheet.id))).toEqual([{ id: sheet.id, code: "no-date" }]);
-  });
-});
-
 describe("one date is never shown as two events", () => {
   const repeated = parseModel(result([{ agentRef: "a1", status: QueryStatus.FULL_SENT, sentDate: "2026-09-15", sentDateRaw: "15/9",
     timeline: [{ type: QueryStatus.FULL_REQUESTED, date: "2026-09-15", raw: "15/9" }, { type: QueryStatus.FULL_SENT, date: "2026-09-22", raw: "22/9" }],
