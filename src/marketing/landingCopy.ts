@@ -317,7 +317,7 @@ export const FOUNDING_NOTE: CopyRun[] = [
   ".",
 ];
 
-export const DOCUMENT_TITLE = "QueryHawk — Take control of your querying journey";
+export const DOCUMENT_TITLE = "QueryHawk: Your smart querying companion";
 
 /**
  * Feature-row copy — six rows, top to bottom, each an illustration, a heading and ONE paragraph.
