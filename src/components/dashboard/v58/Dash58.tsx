@@ -80,6 +80,7 @@ import "../f1/df1.css";
 /* ⚠️ AND FIRST VISIT v2 AFTER FEED v1: every first-visit state in the three columns */
 import "../fv2/fv2.css";
 import "../v2/dash2.css";
+import "../v2/dash2Feed.css";
 
 export interface Dash58Props {
   loading: boolean;

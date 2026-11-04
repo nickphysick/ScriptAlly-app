@@ -1,0 +1,12 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Dashboard v2 · the feed (3 Nov; ref design-refs/dashboard-v2). Scoped to `.d58.d2`; see dash2.css's header for the
+ * brand-font and portal rules every v2 sheet follows.
+ */
+/* ── Part E · the feed: the grid row's height, never its own ── */
+.d58.d2 .d2-feed { position: absolute; inset: 0; display: flex; flex-direction: column; min-height: 0; }
+.d58.d2 .d2-feed .df1-fscroll { -webkit-mask-image: linear-gradient(#000 calc(100% - 24px), transparent); mask-image: linear-gradient(#000 calc(100% - 24px), transparent); }
+.d58.d2 .d2-feed .df1-entry { border-radius: 16px; border: 1px solid #ece2d8; box-shadow: 0 1px 2px rgba(28, 19, 15, 0.08), 0 14px 28px -18px rgba(28, 19, 15, 0.3); }
+
