@@ -7,8 +7,8 @@ Branch **`query-centre-v151-2`** (pushed, **not merged**), built in its own work
 
 1. **"Gone quiet: Nudge →."** In the app a gone-quiet query's next move is **Consider closing** (v151.1 kept that as its
    button). This build follows the brief: the button reads "Nudge" and opens the **nudge** journey, which the panel
-   already offers on every live query with the agent. Consider closing is still in the query card. Flag if the button
-   should stay Consider closing.
+   already offers on every live query with the agent. Consider closing is still in the query card. **Ruled by Nick
+   (4 Nov): the button stays Nudge.**
 2. **Your move is not only sends and offers.** The app's Your move also holds queries just past the agent's reply date
    (inside the 28-day nudge window). The brief's Birds-eye rule ("overdue → Nudge, outlined") and "the list and
    Birds-eye match" meet there: those rows carry the **outlined Nudge**, in both views, not a navy button. Their Next
