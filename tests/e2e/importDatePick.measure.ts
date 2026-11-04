@@ -38,8 +38,12 @@ async function toQueries(page: Page, vp = WIDE) {
 /** Rhea Oduya's card, "early Oct": on a phone behind "Answer this". */
 async function rhea(page: Page) {
   const answer = page.getByRole("button", { name: /^Answer this$/ });
-  if (await answer.count()) await answer.first().click();
-  else await showCard(page, "q-q4");
+  if (await answer.count()) {
+    /* a phone asks one question at a time: Tom's ✗ comes first, so answer it and the sheet moves on */
+    await answer.first().click();
+    const tom = page.locator('.o9-q[data-reason="mark-unclear"]:visible');
+    if (await tom.count()) await tom.first().locator('[data-status="Rejected"]').click();
+  } else await showCard(page, "q-q4");
   const c = page.locator('.o9-q[data-reason="no-date"]:visible').first();
   await c.waitFor();
   return c;
