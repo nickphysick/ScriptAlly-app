@@ -1,21 +1,15 @@
 [
  {
   "lock": "L11",
-  "where": "pk40-ms: labels renders",
+  "where": "pk40-ms: list renders",
   "ok": true,
-  "detail": "labels"
+  "detail": "list"
  },
  {
   "lock": "L11",
-  "where": "pk40-ms: band renders",
+  "where": "pk40-ms: results renders",
   "ok": true,
-  "detail": "band"
- },
- {
-  "lock": "L11",
-  "where": "pk40-ms: agg renders",
-  "ok": true,
-  "detail": "agg"
+  "detail": "results"
  },
  {
   "lock": "L11",
@@ -25,21 +19,15 @@
  },
  {
   "lock": "L11",
-  "where": "pk40-new: labels renders",
+  "where": "pk40-new: hero (the brand-new page) renders",
   "ok": true,
-  "detail": "labels"
+  "detail": "hero (the brand-new page)"
  },
  {
   "lock": "L11",
-  "where": "pk40-new: band renders",
+  "where": "pk40-new: results renders",
   "ok": true,
-  "detail": "band"
- },
- {
-  "lock": "L11",
-  "where": "pk40-new: agg renders",
-  "ok": true,
-  "detail": "agg"
+  "detail": "results"
  },
  {
   "lock": "L11",

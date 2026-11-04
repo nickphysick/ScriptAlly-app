@@ -86,7 +86,8 @@ test.afterAll(() => { console.log(seed("--clean")); });
 
 /* ── L1 · the page's pattern ── */
 for (const size of SIZES) {
-  test(`L1 the page ground carries the packages pattern as the Contact list does; the header card is plain; nothing overflows, at ${size.width}`, async ({ page }) => {
+  /* retired by Submission packages v41 — tests/e2e/RETIRED-submission-packages-v41.md */
+  test.skip(`L1 the page ground carries the packages pattern as the Contact list does; the header card is plain; nothing overflows, at ${size.width}`, async ({ page }) => {
     test.setTimeout(180_000);
     const L = new Ledger(`L1-${size.width}`);
     await open(page, size);
@@ -119,7 +120,8 @@ for (const size of SIZES) {
 }
 
 /* ── L2 · three typewriter headings ── */
-test("L2 exactly three headings are set in the typewriter; the materials tab's label is the one exception", async ({ page }) => {
+/* retired by Submission packages v41 — tests/e2e/RETIRED-submission-packages-v41.md */
+test.skip("L2 exactly three headings are set in the typewriter; the materials tab's label is the one exception", async ({ page }) => {
   test.setTimeout(180_000);
   const L = new Ledger("L2");
   await open(page, SIZES[1]);
@@ -161,7 +163,8 @@ test("L2 exactly three headings are set in the typewriter; the materials tab's l
 
 /* ── L8 · the packages panel ── */
 for (const size of SIZES) {
-  test(`L8 one panel holds the labels and the builder; the explainer and the band are outside; the header card's edges, at ${size.width}`, async ({ page }) => {
+  /* retired by Submission packages v41 — tests/e2e/RETIRED-submission-packages-v41.md */
+  test.skip(`L8 one panel holds the labels and the builder; the explainer and the band are outside; the header card's edges, at ${size.width}`, async ({ page }) => {
     test.setTimeout(180_000);
     const L = new Ledger(`L8-${size.width}`);
     await open(page, size);
@@ -192,7 +195,8 @@ for (const size of SIZES) {
 }
 
 /* ── L9 · the version first ── */
-test("L9 the version leads: the packing list, the drawer, the pieces row and both tab rows; stored fields unchanged", async ({ page }) => {
+/* retired by Submission packages v41 — tests/e2e/RETIRED-submission-packages-v41.md */
+test.skip("L9 the version leads: the packing list, the drawer, the pieces row and both tab rows; stored fields unchanged", async ({ page }) => {
   test.setTimeout(240_000);
   const L = new Ledger("L9");
   const before = dump();

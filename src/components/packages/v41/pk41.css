@@ -109,7 +109,9 @@
   .p41 .p41-hd .p41-pro::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #e0a188; }
   .p41 .p41-hd .p41-sub {
     margin: 6px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    font: 400 16.5px/1.4 var(--sp-serif); color: rgba(244, 238, 229, 0.75);
+    /* ⚠️ 1.3, not the ref's 1.4: with the ref's values the header is 100.8 tall (35.7 + 6 + 23.1 + 36) against the pack's
+       ≤ 100; 1.3 is the house floor for a line that clips (overflow: hidden), and gives 99.1 */
+    font: 400 16.5px/1.3 var(--sp-serif); color: rgba(244, 238, 229, 0.75);
   }
   .p41 .p41-hd .p41-sub b { font-weight: 600; color: #fffaf3; }
   .p41 .p41-hd-a { flex: none; display: flex; gap: 8px; }

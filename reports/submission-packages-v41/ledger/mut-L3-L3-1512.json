@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "L3-1512",
+  "where": "height ≤ 100",
+  "ok": false,
+  "detail": "121.125"
+ },
+ {
+  "lock": "L3-1512",
+  "where": "navy",
+  "ok": true,
+  "detail": "rgb(45, 58, 80)"
+ },
+ {
+  "lock": "L3-1512",
+  "where": "subheader: one line (no overflow)",
+  "ok": true,
+  "detail": "488 / 488"
+ },
+ {
+  "lock": "L3-1512",
+  "where": "subheader: one line box",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "L3-1512",
+  "where": "subheader names the active manuscript",
+  "ok": true,
+  "detail": "What each agent receives for Locks of v40, and what works best."
+ },
+ {
+  "lock": "L3-1512",
+  "where": "no image in the header",
+  "ok": true,
+  "detail": "0"
+ }
+]

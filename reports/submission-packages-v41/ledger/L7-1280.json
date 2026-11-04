@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "L7-1280",
+  "where": "population: a sent package is open",
+  "ok": true,
+  "detail": "not sent"
+ },
+ {
+  "lock": "L7-1280",
+  "where": "population: its buttons",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "L7-1280",
+  "where": "“Note, copy or delete…” inside the preview well",
+  "ok": true,
+  "detail": "332–484.109375 in 316–1090"
+ },
+ {
+  "lock": "L7-1280",
+  "where": "“Make a copy” inside the preview well",
+  "ok": true,
+  "detail": "767.796875–892.890625 in 316–1090"
+ },
+ {
+  "lock": "L7-1280",
+  "where": "“Make a copy” is 42 tall",
+  "ok": true,
+  "detail": "42"
+ },
+ {
+  "lock": "L7-1280",
+  "where": "“Log a query with it” inside the preview well",
+  "ok": true,
+  "detail": "900.890625–1074 in 316–1090"
+ },
+ {
+  "lock": "L7-1280",
+  "where": "“Log a query with it” is 42 tall",
+  "ok": true,
+  "detail": "42"
+ }
+]

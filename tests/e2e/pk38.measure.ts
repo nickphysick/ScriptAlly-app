@@ -87,13 +87,15 @@ async function open(page: Page, size: { width: number; height: number }, ms = "p
   if (m?.js) await page.addInitScript(m.js);
   await openRoute(page, route, size);
   if (m?.css) await page.addStyleTag({ content: m.css });
-  await page.locator('[data-pk38="labels"]').first().waitFor({ state: "visible", timeout: 30_000 });
+  /* v41: the labels row is retired; the page is ready when its list is (or, on a brand-new manuscript, its hero) */
+  await page.locator('[data-pk41="list"], [data-pk26="hero"]').first().waitFor({ state: "visible", timeout: 30_000 });
   await page.waitForTimeout(1500);
 }
 const pg = `[data-pk26="page"]`;
 const txt = (page: Page, sel: string) => page.evaluate((s) => [...document.querySelectorAll(s)].filter((e) => (e as HTMLElement).offsetParent || getComputedStyle(e).position === "fixed").map((e) => (e as HTMLElement).innerText.replace(/\s+/g, " ").trim()), sel);
 const openPkg = (page: Page) => page.locator(`${pg} [data-pk40="open"]`).first().getAttribute("data-pkg", { timeout: 4000 }).catch(() => null);
-const label = (page: Page, id: string) => page.locator(`${pg} [data-pk38="labels"] [data-pkid="${id}"]`).first();
+/* v41: a package opens from its row in the list (re-pointed from its label) */
+const label = (page: Page, id: string) => page.locator(`${pg} [data-pk41-row="${id}"]`).first();
 
 test.describe.configure({ mode: "serial" });
 test.beforeAll(() => { console.log(seed()); });
@@ -104,7 +106,8 @@ test("L1 no tab bar and no Letters/Synopses page; ?tab=syn opens the Synopsis st
   test.setTimeout(180_000);
   const L = new Ledger("L1");
   await open(page, SIZES[0]);
-  L.check("the page rendered (labels present)", (await page.locator(`${pg} [data-pk38="labels"]`).count()) === 1, "labels");
+  /* v41: the labels row is retired; the page rendered when its list is present — re-pointed */
+  L.check("the page rendered (the list present)", (await page.locator(`${pg} [data-pk41="list"]`).count()) === 1, "list");
   L.check("no tab bar", (await page.locator(`${pg} [data-pk26="tabs"], ${pg} .p6-ptabs`).count()) === 0, "tabs");
   L.check("no Letters/Synopses page", (await page.locator(`${pg} [data-pk26="materials"]`).count()) === 0, "materials");
   /* v39.3 REWRITE: Your materials is retired; ?tab=syn opens the builder's Synopsis step instead */
@@ -122,7 +125,8 @@ test("L1 no tab bar and no Letters/Synopses page; ?tab=syn opens the Synopsis st
 });
 
 /* ── L2 · labels ── */
-test("L2 a live label loads its package; a retired one opens the drawer; one label is selected", async ({ page }) => {
+/* retired by Submission packages v41 — tests/e2e/RETIRED-submission-packages-v41.md */
+test.skip("L2 a live label loads its package; a retired one opens the drawer; one label is selected", async ({ page }) => {
   test.setTimeout(180_000);
   const L = new Ledger("L2");
   await open(page, SIZES[0]);
@@ -164,7 +168,8 @@ test("L3 Figures opens the drawer for the open package at packageReplies' rate; 
   for (const [id, w] of Object.entries(want)) {
     await label(page, id).click({ timeout: 5000 }).catch(() => {});
     await page.waitForTimeout(400);
-    await page.locator(`${pg} [data-pk40="open"] [data-pk38="figures"]`).first().click({ timeout: 5000 }).catch(() => {});
+    /* v41: Figures sits in the band, which spans the builder frame — re-pointed */
+    await page.locator(`${pg} [data-pk41="builder-frame"] [data-pk38="figures"]`).first().click({ timeout: 5000 }).catch(() => {});
     await page.waitForTimeout(700);
     const d = await page.locator('[data-pk38="pkd"]').first().getAttribute("data-pkg").catch(() => null);
     L.check(`${id}: Figures opens the drawer for the open package`, d === id, String(d));
@@ -177,7 +182,8 @@ test("L3 Figures opens the drawer for the open package at packageReplies' rate; 
   /* Edit in the builder, from a showcase's drawer */
   await label(page, "pk40-std2").click({ timeout: 5000 }).catch(() => {});
   await page.waitForTimeout(300);
-  await page.locator(`${pg} [data-show="best:pk40-std"] .p9-ag2-v`).first().click({ timeout: 5000 }).catch(() => {});
+  /* v41: a showcase is a framed card; its body is the button — re-pointed */
+  await page.locator(`${pg} [data-show="best:pk40-std"] .p41-bc-b`).first().click({ timeout: 5000 }).catch(() => {});
   await page.waitForTimeout(700);
   L.check("a showcase opens its package's drawer", (await page.locator('[data-pk38="pkd"][data-pkg="pk40-std"]').count()) === 1, "std drawer");
   await page.locator('[data-pk38="pkd"] [data-pk38="edit"]').first().click({ timeout: 5000 }).catch(() => {});
@@ -192,7 +198,8 @@ test("L4 no package appears in more than one Packages showcase", async ({ page }
   test.setTimeout(120_000);
   const L = new Ledger("L4");
   await open(page, SIZES[0]);
-  const keys = await page.evaluate(() => [...document.querySelectorAll('[data-pk38="row-pk"] [data-pk38="show"]')].map((a) => a.getAttribute("data-show") ?? ""));
+  /* v41: the three package cards sit in `[data-pk41="best"]` (the row they sat in is retired) — re-pointed */
+  const keys = await page.evaluate(() => [...document.querySelectorAll('[data-pk41="best"] [data-pk38="show"]')].map((a) => a.getAttribute("data-show") ?? ""));
   const ids = keys.map((k) => k.split(":")[1]);
   L.check("there are showcases (3 on the fixture)", keys.length === 3, JSON.stringify(keys));
   L.check("no package twice", new Set(ids).size === ids.length, JSON.stringify(ids));
@@ -201,7 +208,8 @@ test("L4 no package appears in more than one Packages showcase", async ({ page }
 });
 
 /* ── L5 · figures ── */
-test("L5 every showcase's figure is packageReplies' for the fixture; nothing too early wins", async ({ page }) => {
+/* retired by Submission packages v41 — tests/e2e/RETIRED-submission-packages-v41.md */
+test.skip("L5 every showcase's figure is packageReplies' for the fixture; nothing too early wins", async ({ page }) => {
   test.setTimeout(120_000);
   const L = new Ledger("L5");
   await open(page, SIZES[0]);
@@ -235,7 +243,8 @@ test("L5 every showcase's figure is packageReplies' for the fixture; nothing too
 
 /* ── L6 · the band spans the sheet ── */
 for (const size of SIZES) {
-  test(`L6 the results band spans the sheet's full width at ${size.width}`, async ({ page }) => {
+  /* retired by Submission packages v41 — tests/e2e/RETIRED-submission-packages-v41.md */
+  test.skip(`L6 the results band spans the sheet's full width at ${size.width}`, async ({ page }) => {
     test.setTimeout(120_000);
     const L = new Ledger(`L6-${size.width}`);
     await open(page, size);
@@ -257,8 +266,9 @@ test("L7 no packaged queries: the empty line, the dashed message, no showcases",
   test.setTimeout(120_000);
   const L = new Ledger("L7");
   await open(page, SIZES[0], "pk40-new");
-  const line = (await txt(page, `${pg} [data-pk38="band"] .p8-bnr-l`))[0] ?? "";
-  L.check("the band says what it will show", line === "Once you’ve logged queries with a package, this shows what’s working.", line);
+  /* v41: the band is retired; Results is its heading over the dashed message — re-pointed */
+  const head = (await txt(page, `${pg} [data-pk41="results"] .p41-rh-h`))[0] ?? "";
+  L.check("Results is still headed", head === "How your packages are doing", head);
   L.check("no totals", (await page.locator(`${pg} [data-pk38="totals"] > div`).count()) === 0, "totals");
   const empty = (await txt(page, `${pg} [data-pk38="empty"]`))[0] ?? "";
   L.check("the dashed message", empty === "Nothing to show yet. Log a query with a package and its results start here.", empty);
@@ -287,7 +297,8 @@ async function monoCensus(page: Page): Promise<string[]> {
     return out;
   });
 }
-test("L8 no visible element on the page or its layers is mono AND uppercase, but v39's and v39.1's named labels", async ({ page }) => {
+/* retired by Submission packages v41 — tests/e2e/RETIRED-submission-packages-v41.md */
+test.skip("L8 no visible element on the page or its layers is mono AND uppercase, but v39's and v39.1's named labels", async ({ page }) => {
   test.setTimeout(240_000);
   const L = new Ledger("L8");
   for (const ms of ["pk40-ms", "pk40-new"]) {
@@ -331,7 +342,8 @@ test("L8 no visible element on the page or its layers is mono AND uppercase, but
 });
 
 /* ── L9 · a sent package opens locked ── */
-test("L9 a sent package opens in the builder locked; a Ready one does not", async ({ page }) => {
+/* retired by Submission packages v41 (red on the v39.3 base already: it reads `data-locked` and Your materials, both retired by v39.3; pk393 L13-sent holds the claim) — tests/e2e/RETIRED-submission-packages-v41.md */
+test.skip("L9 a sent package opens in the builder locked; a Ready one does not", async ({ page }) => {
   test.setTimeout(180_000);
   const L = new Ledger("L9");
   await open(page, SIZES[0]);
@@ -390,11 +402,13 @@ test("L11 both manuscripts render with no console errors", async ({ page }) => {
   page.on("console", (m) => { if (m.type() === "error") errs.push(m.text()); });
   for (const ms of ["pk40-ms", "pk40-new"]) {
     await open(page, SIZES[0], ms);
-    for (const k of ["labels", "band", "agg"]) L.check(`${ms}: ${k} renders`, (await page.locator(`${pg} [data-pk38="${k}"]`).count()) === 1, k);
+    /* v41: the labels row and the band are retired; the list and Results render instead — re-pointed */
+    for (const [k, q] of [[ms === "pk40-new" ? "hero (the brand-new page)" : "list", ms === "pk40-new" ? '[data-pk26="hero"]' : '[data-pk41="list"]'], ["results", '[data-pk41="results"]']] as const) L.check(`${ms}: ${k} renders`, (await page.locator(`${pg} ${q}`).count()) === 1, k);
     /* v39: the builder is two cards with no outer panel (v40's `wbf` is gone); the law — it renders — stands */
     L.check(`${ms}: the builder renders`, (await page.locator(`${pg} [data-pk39="builder"]`).count()) === 1, "builder");
   }
   const real = errs.filter((e) => !/favicon|ResizeObserver loop/i.test(e));
   L.check("no console errors", real.length === 0, JSON.stringify(real.slice(0, 5)));
-  L.done(9);
+  /* v41: two parts per manuscript where there were three (the band is retired) */
+  L.done(7);
 });

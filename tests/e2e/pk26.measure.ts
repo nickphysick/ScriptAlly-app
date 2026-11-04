@@ -95,15 +95,16 @@ test("PK26-R the old address redirects with its query and opens that package", a
   L.check("query kept", url.searchParams.get("pkg") === "pk26-pkg-sent", url.search);
   const openId = await vis(page, '[data-pk26="open"]').getAttribute("data-pkg");
   L.check("that package is open", openId === "pk26-pkg-sent", String(openId));
-  /* v38: the package buttons are the labels row; the sent package opens (locked) in the builder */
-  const pressed = await vis(page, '[data-pk38="labels"] .p9-pkl-b[aria-pressed="true"] .p9-pkl-t b').textContent();
-  L.check("its label is the selected one", pressed === "Sent one", String(pressed));
+  /* v41: the labels row is retired; the package's row in the list is the open one ("Open below") — re-pointed */
+  const openRow = await vis(page, '[data-pk41-row].p41-on').getAttribute("data-pk41-row");
+  L.check("its row is the open one", openRow === "pk26-pkg-sent", String(openRow));
   L.done(4);
 });
 
 /* ── PK26-W ─────────────────────────────────────────────────────────────────────────────────────── */
 for (const size of SIZES) {
-  test(`PK26-W the three insets at ${size.width}`, async ({ page }) => {
+  /* retired by Submission packages v41 — tests/e2e/RETIRED-submission-packages-v41.md */
+  test.skip(`PK26-W the three insets at ${size.width}`, async ({ page }) => {
     test.setTimeout(180_000);
     const L = new Ledger(`PK26-W-${size.width}`);
     await open(page, size);
@@ -134,7 +135,8 @@ for (const size of SIZES) {
 
 /* ── PK26-D ─────────────────────────────────────────────────────────────────────────────────────── */
 for (const size of SIZES) {
-  test(`PK26-D the drawer's header stops at its inner border at ${size.width}`, async ({ page }) => {
+  /* retired by Submission packages v41 — tests/e2e/RETIRED-submission-packages-v41.md */
+  test.skip(`PK26-D the drawer's header stops at its inner border at ${size.width}`, async ({ page }) => {
     test.setTimeout(180_000);
     const L = new Ledger(`PK26-D-${size.width}`);
     /* v39.3: Your materials is retired; the letter step's Edit pencil opens the same drawer, on a live package */
@@ -206,9 +208,10 @@ test("PK26-H the package note is one line, or + Add a note", async ({ page }) =>
   test.setTimeout(180_000);
   const L = new Ledger("PK26-H");
   await open(page, SIZES[1]);
-  await vis(page, '[data-pk38="labels"] .p9-pkl-b[title="Sent one"]').click(); await page.waitForTimeout(400);
+  /* v41: opened from its row in the list (re-pointed from its label) */
+  await page.locator('[data-pk41="page"] [data-pk41-row]').filter({ hasText: "Sent one" }).first().click(); await page.waitForTimeout(400);
   const withNote = await page.evaluate(() => {
-    const h = [...document.querySelectorAll('[data-pk26="open"] .p9-po-tt')].find((e) => (e as HTMLElement).offsetParent) as HTMLElement;
+    const h = [...document.querySelectorAll('[data-pk41="builder-frame"] .p93-bh-t')].find((e) => (e as HTMLElement).offsetParent) as HTMLElement;
     const sm = h.querySelector("small") as HTMLElement;
     const h3 = h.querySelector("h3") as HTMLElement;
     return { text: sm?.textContent ?? "", h: sm?.getBoundingClientRect().height ?? 0, fs: sm ? parseFloat(getComputedStyle(sm).fontSize) : 0, cut: sm ? sm.scrollWidth > sm.clientWidth : false, h3h: h3.getBoundingClientRect().height, h3fs: parseFloat(getComputedStyle(h3).fontSize) };
@@ -217,8 +220,8 @@ test("PK26-H the package note is one line, or + Add a note", async ({ page }) =>
   L.check("…cut short (it is longer than the room)", withNote.cut, JSON.stringify(withNote));
   /* v39: the pencil is gone (the name is edited in place); the law — the name keeps one line — stands */
   L.check("the name keeps one line", withNote.h3h <= withNote.h3fs * 1.6, JSON.stringify(withNote));
-  await vis(page, '[data-pk38="labels"] .p9-pkl-b[title="Drag target"]').click(); await page.waitForTimeout(400);
-  const add = vis(page, '[data-pk26="open"] .p9-po-addnote');
+  await page.locator('[data-pk41="page"] [data-pk41-row]').filter({ hasText: "Drag target" }).first().click(); await page.waitForTimeout(400);
+  const add = vis(page, '[data-pk41="builder-frame"] .p93-addnote');
   /* v39: the note line itself, in the ref's words ("Add a note: who is this for?"); the law — no note offers one, and it
      opens Package details with the note focused — stands */
   L.check("no note: Add a note", (await add.count()) === 1 && (await add.textContent()) === "Add a note: who is this for?", String(await add.count()));

@@ -78,11 +78,13 @@ async function open(page: Page, size: { width: number; height: number }, ms = "p
   if (m?.js) await page.addInitScript(m.js);
   await openRoute(page, route, size);
   if (m?.css) await page.addStyleTag({ content: m.css });
-  if (route === "/queries/packages") await page.locator('[data-pk39="labels"]').first().waitFor({ state: "visible", timeout: 30_000 });
+  /* v41: the labels row is retired; the page is ready when its list is */
+  if (route === "/queries/packages") await page.locator('[data-pk41="list"]').first().waitFor({ state: "visible", timeout: 30_000 });
   await page.waitForTimeout(1500);
 }
 const pg = `[data-pk26="page"]`;
-const label = (page: Page, id: string) => page.locator(`${pg} [data-pk39="labels"] [data-pkid="${id}"]`).first();
+/* v41: a package opens from its row in the list (re-pointed from its label) */
+const label = (page: Page, id: string) => page.locator(`${pg} [data-pk41-row="${id}"]`).first();
 const box = (page: Page, sel: string) => page.evaluate((s) => {
   const e = [...document.querySelectorAll(s)].find((x) => (x as HTMLElement).offsetParent || getComputedStyle(x).position === "fixed");
   if (!e) return null; const r = e.getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height, top: r.top, bottom: r.bottom };
@@ -97,7 +99,8 @@ test.afterAll(() => { console.log(seed("--clean")); });
 
 /* ── L1 · the header is the Contact list's ── */
 for (const size of SIZES) {
-  test(`L1 the header card and title equal the Contact list's at ${size.width}; one "Pro"`, async ({ page }) => {
+  /* retired by Submission packages v41 — tests/e2e/RETIRED-submission-packages-v41.md */
+  test.skip(`L1 the header card and title equal the Contact list's at ${size.width}; one "Pro"`, async ({ page }) => {
     test.setTimeout(240_000);
     const L = new Ledger(`L1-${size.width}`);
     await open(page, size, "pk40-ms", "/agents");
@@ -121,7 +124,8 @@ for (const size of SIZES) {
 }
 
 /* ── L2 · colour ── */
-test("L2 a colour picked reaches the label, both headers, the showcase card and the list tile; no field reads Harbour", async ({ page }) => {
+/* retired by Submission packages v41 — tests/e2e/RETIRED-submission-packages-v41.md */
+test.skip("L2 a colour picked reaches the label, both headers, the showcase card and the list tile; no field reads Harbour", async ({ page }) => {
   test.setTimeout(240_000);
   const L = new Ledger("L2");
   await open(page, SIZES[0]);
@@ -163,7 +167,8 @@ test("L2 a colour picked reaches the label, both headers, the showcase card and 
 
 /* ── L3 · labels ── */
 for (const size of SIZES) {
-  test(`L3 the labels row spans the content width; none under 200; none ringed at ${size.width}`, async ({ page }) => {
+  /* retired by Submission packages v41 — tests/e2e/RETIRED-submission-packages-v41.md */
+  test.skip(`L3 the labels row spans the content width; none under 200; none ringed at ${size.width}`, async ({ page }) => {
     test.setTimeout(180_000);
     const L = new Ledger(`L3-${size.width}`);
     await open(page, size);
@@ -195,7 +200,8 @@ test("L5 rename writes once (draft and sent), Escape writes nothing, a sent pack
   const toasts: string[] = [];
   await page.exposeFunction("pk39Toast", (t: string) => toasts.push(t));
   await page.evaluate(() => new MutationObserver((ms) => { for (const m of ms) for (const n of m.addedNodes) { const t = (n as HTMLElement).innerText ?? ""; if (/Renamed to/.test(t)) (window as unknown as { pk39Toast: (t: string) => void }).pk39Toast(t); } }).observe(document.body, { subtree: true, childList: true }));
-  const name = () => page.locator(`${pg} [data-pk40="open"] [data-pk39="name"]`).first();
+  /* v41: the band (and the name in it) spans the builder frame, above `[data-pk40="open"]` — re-pointed */
+  const name = () => page.locator(`${pg} [data-pk41="builder-frame"] [data-pk39="name"]`).first();
   for (const [id, from, to] of [["pk40-ready", "Ready one", "Ready renamed"], ["pk40-std", "Standard", "Standard renamed"]] as const) {
     await label(page, id).click(); await page.waitForTimeout(400);
     L.check(`${id}: the name is editable in place`, (await name().getAttribute("contenteditable")) === "plaintext-only", String(await name().getAttribute("contenteditable")));
@@ -210,7 +216,8 @@ test("L5 rename writes once (draft and sent), Escape writes nothing, a sent pack
     await page.waitForTimeout(1500);
     L.check(`${id}: one write (one rename receipt)`, toasts.length === before + 1, JSON.stringify(toasts));
     L.check(`${id}: stored`, stored()[id]?.packageName === to, String(stored()[id]?.packageName));
-    L.check(`${id}: the label shows it`, ((await label(page, id).locator(".p9-pkl-t b").innerText()).trim()) === to, await label(page, id).locator(".p9-pkl-t b").innerText());
+    /* v41: the list row shows it (re-pointed from the label); the row's name may carry the Active tag after it */
+    L.check(`${id}: the list row shows it`, ((await label(page, id).locator(".p41-rn b").innerText()).trim().startsWith(to)), await label(page, id).locator(".p41-rn b").innerText());
     /* v39.3 REWRITE: a sent package's lock is the sent note between the header and the steps (Nick, 29 Oct); no padlock
        sits in the status pill or beside the name */
     const locks = await page.evaluate((p) => { const o = document.querySelector(`${p} [data-pk40="open"]`)!; return { note: o.querySelectorAll('[data-pk393="sent-note"]').length, stage: o.querySelectorAll('[data-pk39="stage-lock"]').length, name: o.querySelectorAll(".p9-po-tt .p9-po-lk, [data-pk39='name-lock']").length }; }, pg);
@@ -226,7 +233,8 @@ test("L5 rename writes once (draft and sent), Escape writes nothing, a sent pack
 });
 
 /* ── L6 · the full lists ── */
-test("L6 every package once; one piece type at a time; switching keeps scrollTop; rates are packageReplies'; ranked first", async ({ page }) => {
+/* retired by Submission packages v41 — tests/e2e/RETIRED-submission-packages-v41.md */
+test.skip("L6 every package once; one piece type at a time; switching keeps scrollTop; rates are packageReplies'; ranked first", async ({ page }) => {
   test.setTimeout(240_000);
   const L = new Ledger("L6");
   await open(page, SIZES[0]);
@@ -265,7 +273,8 @@ test("L6 every package once; one piece type at a time; switching keeps scrollTop
 });
 
 /* ── L7 · How it works ── */
-test("L7 How it works: both doors, five steps, Escape closes, focus back to the opener, the old dialog gone", async ({ page }) => {
+/* retired by Submission packages v41 — tests/e2e/RETIRED-submission-packages-v41.md */
+test.skip("L7 How it works: both doors, five steps, Escape closes, focus back to the opener, the old dialog gone", async ({ page }) => {
   test.setTimeout(240_000);
   const L = new Ledger("L7");
   for (const [ms, door] of [["pk40-ms", `${pg} [data-pk39="how"]`], ["pk40-new", `${pg} .p6-pb-bt .p6-hd-s`]] as const) {
@@ -289,7 +298,8 @@ test("L7 How it works: both doors, five steps, Escape closes, focus back to the 
 
 /* ── L8 · the pieces band, in pixels ── */
 for (const size of SIZES) {
-  test(`L8 the pieces band is painted across the sheet's full width at ${size.width}`, async ({ page }) => {
+  /* retired by Submission packages v41 — tests/e2e/RETIRED-submission-packages-v41.md */
+  test.skip(`L8 the pieces band is painted across the sheet's full width at ${size.width}`, async ({ page }) => {
     test.setTimeout(180_000);
     const L = new Ledger(`L8-${size.width}`);
     await open(page, size);

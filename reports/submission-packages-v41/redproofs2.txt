@@ -1,0 +1,80 @@
+== mutation L4 on the final build ==
+  ✗ L4-1512 · names the package — Somebody else / Standard
+[L4-1512] 11/12 green
+    Error: expect(received).toEqual(expected) // deep equality
+      48 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+  ✗ L4-1280 · names the package — Somebody else / Standard
+[L4-1280] 11/12 green
+    Error: expect(received).toEqual(expected) // deep equality
+      48 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+  2 failed
+  1 passed (1.2m)
+== mutation L5 on the final build ==
+  ✗ L5-1512 · the open package's row has the navy inset edge — none
+  ✗ L5-1512 · no packages: out is disabled at 40% — true 1
+  ✗ L5-1512 · no packages: ready is disabled at 40% — true 1
+  ✗ L5-1512 · no packages: draft is disabled at 40% — true 1
+[L5-1512] 18/22 green
+    Error: expect(received).toEqual(expected) // deep equality
+      48 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+  ✗ L5-1280 · the open package's row has the navy inset edge — none
+  ✗ L5-1280 · no packages: out is disabled at 40% — true 1
+  ✗ L5-1280 · no packages: ready is disabled at 40% — true 1
+  ✗ L5-1280 · no packages: draft is disabled at 40% — true 1
+[L5-1280] 18/22 green
+    Error: expect(received).toEqual(expected) // deep equality
+      48 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+  2 failed
+  1 passed (1.0m)
+== mutation L6 on the final build ==
+  ✗ L6-1512 · builder: a 7 ±1 white rim — 0,0,0,0 rgb(255, 255, 255)
+  ✗ L6-1512 · totals: a 7 ±1 white rim — 0,0,0,0 rgb(255, 255, 255)
+  ✗ L6-1512 · best: a 7 ±1 white rim — 0,0,0,0 rgb(255, 255, 255)
+  ✗ L6-1512 · best: its band — rgb(255, 255, 255) (want rgb(244, 230, 214))
+  ✗ L6-1512 · most: a 7 ±1 white rim — 0,0,0,0 rgb(255, 255, 255)
+  ✗ L6-1512 · prove: a 7 ±1 white rim — 0,0,0,0 rgb(255, 255, 255)
+  ✗ L6-1512 · tpk: a 7 ±1 white rim — 0,0,0,0 rgb(255, 255, 255)
+  ✗ L6-1512 · tpc: a 7 ±1 white rim — 0,0,0,0 rgb(255, 255, 255)
+[L6-1512] 20/28 green
+    Error: expect(received).toEqual(expected) // deep equality
+      48 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+  ✗ L6-1280 · builder: a 7 ±1 white rim — 0,0,0,0 rgb(255, 255, 255)
+  ✗ L6-1280 · totals: a 7 ±1 white rim — 0,0,0,0 rgb(255, 255, 255)
+  ✗ L6-1280 · best: a 7 ±1 white rim — 0,0,0,0 rgb(255, 255, 255)
+  ✗ L6-1280 · best: its band — rgb(255, 255, 255) (want rgb(244, 230, 214))
+  ✗ L6-1280 · most: a 7 ±1 white rim — 0,0,0,0 rgb(255, 255, 255)
+== mutation L7 on the final build ==
+  ✗ L7-1512 · “Log a query with it” inside the preview well — 1255.875–1480.5625 in 846.875–1321.984375
+[L7-1512] 6/7 green
+    Error: expect(received).toEqual(expected) // deep equality
+      48 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+[L7-1280] 7/7 green
+  1 failed
+  2 passed (48.0s)
+== mutation L8 on the final build ==
+  ✗ L8-1512 · 212 ±2 tall — 260
+  ✗ L8-1512 · clear of the content column — left 1181.640625 / content right 1354
+  ✗ L8-1512 · overlaps no element in the content column — ["p41-list","p41-rows","p41-row p41-on","p41-rr p41-rr-rate","p41-ra"]
+  ✗ L8-1512 · after scrolling 600: overlaps nothing — ["p41-build","p41-fr p41-bld","p41-fi","p93-b","p93-pv"]
+[L8-1512] 6/10 green
+    Error: expect(received).toEqual(expected) // deep equality
+      48 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+    Error: Command failed: node tests/e2e/pk41Fixture.mjs --show-banner
+    FirebaseError: Firebase: Exceeded quota for verifying passwords. (auth/quota-exceeded).
+    Error: Command failed: node tests/e2e/pk41Fixture.mjs --show-banner
+    FirebaseError: Firebase: Exceeded quota for verifying passwords. (auth/quota-exceeded).
+  2 failed
+  1 passed (32.5s)
+== mutation L9 on the final build ==
+  ✗ L9-1512 · five steps with the exact titles — ["Make a package","Drag them into the package","Set your current batch","Log a query with it","See what’s working"]
+  ✗ L9-1512 · no “Drag them into the package” — still there
+[L9-1512] 4/6 green
+    Error: expect(received).toEqual(expected) // deep equality
+      48 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+  ✗ L9-1280 · five steps with the exact titles — ["Make a package","Drag them into the package","Set your current batch","Log a query with it","See what’s working"]
+  ✗ L9-1280 · no “Drag them into the package” — still there
+[L9-1280] 4/6 green
+    Error: expect(received).toEqual(expected) // deep equality
+      48 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+  2 failed
+  1 passed (3.3m)

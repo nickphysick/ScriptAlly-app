@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "L8-1512",
+  "where": "present",
+  "ok": true,
+  "detail": "absent"
+ },
+ {
+  "lock": "L8-1512",
+  "where": "fixed",
+  "ok": true,
+  "detail": "fixed"
+ },
+ {
+  "lock": "L8-1512",
+  "where": "decorative",
+  "ok": true,
+  "detail": "true none"
+ },
+ {
+  "lock": "L8-1512",
+  "where": "bottom = the viewport's ±1",
+  "ok": true,
+  "detail": "982 / 982"
+ },
+ {
+  "lock": "L8-1512",
+  "where": "212 ±2 tall",
+  "ok": false,
+  "detail": "260"
+ },
+ {
+  "lock": "L8-1512",
+  "where": "clear of the content column",
+  "ok": false,
+  "detail": "left 1181.640625 / content right 1354"
+ },
+ {
+  "lock": "L8-1512",
+  "where": "overlaps no element in the content column",
+  "ok": false,
+  "detail": "[\"p41-list\",\"p41-rows\",\"p41-row p41-on\",\"p41-rr p41-rr-rate\",\"p41-ra\"]"
+ },
+ {
+  "lock": "L8-1512",
+  "where": "after scrolling 600: bottom = the viewport's ±1",
+  "ok": true,
+  "detail": "982 / 982"
+ },
+ {
+  "lock": "L8-1512",
+  "where": "after scrolling 600: overlaps nothing",
+  "ok": false,
+  "detail": "[\"p41-build\",\"p41-fr p41-bld\",\"p41-fi\",\"p93-b\",\"p93-pv\"]"
+ },
+ {
+  "lock": "L8-1512",
+  "where": "absent at 390 wide",
+  "ok": true,
+  "detail": "false"
+ }
+]
