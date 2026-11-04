@@ -57,7 +57,8 @@ async function openCard(page: Page, id: string, tab: "profile" | "history" = "pr
 const pane = "[data-cl24='panel'] [data-cl24='pane']";
 
 /* ═════════ G1 · Profile is the contact card ═════════ */
-test("CL255-G1 · Profile holds How, Reach (and Also at with colleagues), nothing about the query; the scale fills {reply weeks} of 12", async ({ page }) => {
+/* RETIRED by Contact list v26.2: the agent card's Profile tab is the landing card's sections now (CL262 J3–J6) — tests/e2e/RETIRED-contact-list-v26-2.md */
+test.skip("CL255-G1 · Profile holds How, Reach (and Also at with colleagues), nothing about the query; the scale fills {reply weeks} of 12", async ({ page }) => {
   test.setTimeout(420_000);
   const G1 = new Ledger("G1");
   const D = data();
@@ -102,7 +103,8 @@ test("CL255-G1 · Profile holds How, Reach (and Also at with colleagues), nothin
 });
 
 /* ═════════ G2 · Reach ═════════ */
-test("CL255-G2 · one row per contact field, in order; a missing one is dashed and opens its inline edit; Copy copies the email", async ({ page }) => {
+/* RETIRED by Contact list v26.2: the agent card's Profile tab is the landing card's sections now (CL262 J3–J6) — tests/e2e/RETIRED-contact-list-v26-2.md */
+test.skip("CL255-G2 · one row per contact field, in order; a missing one is dashed and opens its inline edit; Copy copies the email", async ({ page }) => {
   test.setTimeout(420_000);
   const G2 = new Ledger("G2");
   await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);

@@ -343,7 +343,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     </div>
   );
   const profile = (
-    <div className="cl262-body" data-cl262="profile">
+    <div className="cl262-body" data-cl262="profile" data-cl24="pane">
       {all && kit ? <Section k="contact" title="Contact details" editing={<EditContact form={form} agent={a} kit={kit} />} /> : null}
       <Section k="genres" title="Genres sought" onEdit={() => edit("genres")} editing={isOpen("genres") && kit ? <EditGenres form={form} kit={kit} isHit={p.genreHit} /> : undefined}>
         {genres.length ? (
@@ -367,7 +367,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
           {tiles.map((t) => (
             <span key={t.k} className={`cl262-tile${t.known ? "" : " gap"}`} data-cl262="tile" data-k={t.k} data-known={t.known ? "" : undefined}>
               {IC.tile[t.k]}
-              <span>{t.known ? <>{t.pre}<b>{t.bold}</b>{t.post}</> : <><i>{t.pre}</i>{t.k === "reply" ? <button type="button" className="cl262-tadd" data-cl262="tile-add" onClick={() => edit("how")}>Add</button> : null}</>}</span>
+              <span>{t.known ? <>{t.pre}<b>{t.bold}</b>{t.post.split(" · ")[0]}{t.post.includes(" · ") ? <small className="cl262-tpost"> · {t.post.split(" · ").slice(1).join(" · ")}</small> : null}</> : <><i>{t.pre}</i>{t.k === "reply" ? <button type="button" className="cl262-tadd" data-cl262="tile-add" onClick={() => edit("how")}>Add</button> : null}</>}</span>
             </span>
           ))}
         </div>
@@ -375,8 +375,8 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     </div>
   );
   const body = tab === "profile" ? profile
-    : tab === "history" ? <div className="cl262-body cl262-hist" data-cl262="history"><YouAndStory blocks={p.story?.blocks ?? []} heard={p.story?.heard ?? null} first={m.first} onOpenQuery={p.onOpenQuery} /></div>
-    : <div className="cl262-body cl262-notes" data-cl262="notes"><Notes p={p} first={m.first} /></div>;
+    : tab === "history" ? <div className="cl262-body cl262-hist" data-cl262="history" data-cl24="pane"><YouAndStory blocks={p.story?.blocks ?? []} heard={p.story?.heard ?? null} first={m.first} onOpenQuery={p.onOpenQuery} /></div>
+    : <div className="cl262-body cl262-notes" data-cl262="notes" data-cl24="pane"><Notes p={p} first={m.first} /></div>;
   const foot = (
     <div className="cl262-foot" data-cl262="foot">
       <span className="cl262-added apc-meta" data-cl262="added">{IC.clock}{added ? `Added ${added}` : "Added"}</span>

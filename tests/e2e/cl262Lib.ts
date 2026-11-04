@@ -46,6 +46,6 @@ export async function openCard(page: Page, vp: VP, o: { stand?: string; id?: str
   if (o.settle !== false) await page.waitForTimeout(900);
   return id ?? "";
 }
-export const frameScroll = (page: Page) => page.evaluate(() => document.querySelector<HTMLElement>("[data-cl262='scroll']")?.scrollTop ?? -1);
+export const frameScroll = (page: Page) => page.evaluate(() => document.querySelector<HTMLElement>("[data-cl262='panel'] [data-apc='scroll']")?.scrollTop ?? -1);
 export async function cssBreak(page: Page, css: string) { await page.addStyleTag({ content: css }); await page.waitForTimeout(250); }
 export function shotDir() { mkdirSync(`${DIR}/shots`, { recursive: true }); return `${DIR}/shots`; }

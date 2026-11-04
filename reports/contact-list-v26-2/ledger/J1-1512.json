@@ -1,0 +1,98 @@
+[
+ {
+  "lock": "J1-1512",
+  "where": "you · panel background",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "J1-1512",
+  "where": "you · panel padding",
+  "ok": true,
+  "detail": "0px"
+ },
+ {
+  "lock": "J1-1512",
+  "where": "you · frame is #a5837b",
+  "ok": true,
+  "detail": "rgb(165, 131, 123)|none|rgb(28, 19, 15)"
+ },
+ {
+  "lock": "J1-1512",
+  "where": "you · band #5e7189",
+  "ok": true,
+  "detail": "rgb(94, 113, 137)"
+ },
+ {
+  "lock": "J1-1512",
+  "where": "agent · panel background",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "J1-1512",
+  "where": "agent · panel padding",
+  "ok": true,
+  "detail": "0px"
+ },
+ {
+  "lock": "J1-1512",
+  "where": "agent · frame is #a5837b",
+  "ok": true,
+  "detail": "rgb(165, 131, 123)|none|rgb(28, 19, 15)"
+ },
+ {
+  "lock": "J1-1512",
+  "where": "agent · band #5e7189",
+  "ok": true,
+  "detail": "rgb(94, 113, 137)"
+ },
+ {
+  "lock": "J1-1512",
+  "where": "none · panel background",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "J1-1512",
+  "where": "none · panel padding",
+  "ok": true,
+  "detail": "0px"
+ },
+ {
+  "lock": "J1-1512",
+  "where": "none · frame is #a5837b",
+  "ok": true,
+  "detail": "rgb(165, 131, 123)|none|rgb(28, 19, 15)"
+ },
+ {
+  "lock": "J1-1512",
+  "where": "none · band #5e7189",
+  "ok": true,
+  "detail": "rgb(94, 113, 137)"
+ },
+ {
+  "lock": "J1-1512",
+  "where": "closed · panel background",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "J1-1512",
+  "where": "closed · panel padding",
+  "ok": true,
+  "detail": "0px"
+ },
+ {
+  "lock": "J1-1512",
+  "where": "closed · frame is #a5837b",
+  "ok": true,
+  "detail": "rgb(165, 131, 123)|none|rgb(28, 19, 15)"
+ },
+ {
+  "lock": "J1-1512",
+  "where": "closed · band #5e7189",
+  "ok": true,
+  "detail": "rgb(94, 113, 137)"
+ }
+]

@@ -93,7 +93,7 @@ export const AgentCardPanel262: React.FC<{
     <div className="cl262-panel" data-cl262="panel" data-cl24="panel" data-agent-id={agentId} role="dialog" aria-modal="false" aria-label="Agent"
       data-arrive={arriving ? "" : undefined} data-leave={leaving ? "" : undefined} data-reduce={reduce ? "" : undefined}
       style={box ? { top: box.top, bottom: box.bottom, right: box.right } : undefined}>
-      <div className="cl262-lean" data-cl262="lean" data-editing={editing ? "" : undefined}>
+      <div className="cl262-lean" data-cl262="lean" data-cl24="agent-card" data-editing={editing ? "" : undefined}>
         {children}
       </div>
     </div>,

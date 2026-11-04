@@ -254,3 +254,5 @@ button.cl262-hint { cursor: pointer; color: #2a3a52; text-decoration: underline;
 
 .cl262-card .cl262-fx .ae-step { background: #fff; }
 .cl262-card .cl262-fx .ae-seg button { font-family: var(--sp-type) !important; }
+/* the tile's tail ("· checked Jun", " replies") reads as an aside: smaller and grey, kept on the tile */
+.cl262-card .cl262-tile .cl262-tpost { font-size: 12px; color: rgba(42, 58, 82, 0.62); }
