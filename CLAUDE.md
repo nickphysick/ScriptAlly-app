@@ -703,6 +703,10 @@
 - **Locks:** `tests/e2e/publicPhonePolish.measure.ts` P1–P9 (`PP1_MUTATE=<lock>`, `PP1_BASE_URL` for P1), `tests/e2e/hitBoxes.ts`.
 
 ## Deployment
+- **`/Users/nickphysick/ScriptAlly-live` is the only prod deploy folder.**
+- **Prod only ever ships the pushed tip of `release/live-1`** (preflight check 4c fails on anything unpushed, behind or detached).
+- **Small landing changes: commit on `release/live-1`, push, then `npm run deploy:live-hosting` (Nick's to run).**
+- **Never deploy prod from a scratch worktree.**
 - **Dev can carry several unmerged branches at once. Before any dev deploy, name the branch the served bundle was built from. If it isn't the branch you're on, merge yours into it as a new branch and deploy that. A bundle-hash mismatch is a stop.**
 - **⚠️ DEV FIRESTORE RULES ARE CLAUDE'S TO DEPLOY (18 Aug). PROD REMAINS NICK'S — hosting, functions and rules alike.** The whole of the dev rules deploy is ONE command, and it names its config and its project because a bare deploy resolves `.firebaserc`'s default, which is PROD:
   ```
