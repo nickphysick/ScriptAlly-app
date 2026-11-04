@@ -38,7 +38,7 @@ export interface AgentFormOptions {
 
 export function useAgentForm(o: AgentFormOptions) {
   const { mode, agent, agents } = o;
-  const [base] = useState<CardDraft>(() => (agent ? draftOf(agent, o.personal) : { ...emptyCardDraft(), ...(o.defaultCountry ? { country: o.defaultCountry } : {}) }));
+  const [base, setBase] = useState<CardDraft>(() => (agent ? draftOf(agent, o.personal) : { ...emptyCardDraft(), ...(o.defaultCountry ? { country: o.defaultCountry } : {}) }));
   const [initial] = useState<CardDraft>(() => ({ ...base, ...(o.prefill ?? {}) }));
   const [d, setD] = useState<CardDraft>(initial);
   /* carried-over answers say so in the foot until the next edit */
@@ -83,7 +83,15 @@ export function useAgentForm(o: AgentFormOptions) {
     if ("error" in r) setFailure(r.error);
   }, [canSave, onSave, d, base]);
 
-  return { base, d, set, changed, problems, firstProblem, dirty, also, dup, canSave, saving, failure, carried, ask, setAsk, leave, discard, save };
+  /* Contact list v26.2 C — a fresh draft over the agent as it is now, WITHOUT remounting: the card edits in place, so the
+     form outlives each edit session and is re-based at the start of the next (and after a save or a cancel) */
+  const personal = o.personal;
+  const reset = useCallback((a: Agent | null) => {
+    const b = a ? draftOf(a, personal) : emptyCardDraft();
+    setBase(b); setD(b); setAsk(false); setFailure(null); setCarried(false);
+  }, [personal]);
+
+  return { reset, base, d, set, changed, problems, firstProblem, dirty, also, dup, canSave, saving, failure, carried, ask, setAsk, leave, discard, save };
 }
 
 export type AgentForm = ReturnType<typeof useAgentForm>;

@@ -1,0 +1,258 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Contact list v26.2 (design-refs/contact-list-v26-2/) — the agent card as the landing page's card, with editing on
+ * the card. The host and the card portal to document.body, so no page token reaches them: colours are literals and the
+ * faces are the shell's `:root` ones (`--sp-type`, `--sp-serif`, `--font-mono`).
+ *
+ * ⚠️ brand.tsx names bare spans, paragraphs and headings as the body faces at runtime: the faces here carry `!important`.
+ */
+
+/* ═════════ A · the host: no backdrop, no padding, no background ═════════ */
+.cl262-panel {
+  position: fixed; z-index: 61; top: 14px; bottom: 14px; right: 16px; width: 580px; box-sizing: border-box;
+  padding: 0; background: none; box-shadow: none; pointer-events: none;
+}
+@media (max-width: 1280px) { .cl262-panel { width: 540px; } }
+.cl262-lean {
+  height: 100%; pointer-events: auto; transform-origin: 70% 20%; transform: rotate(-1.2deg);
+  transition: transform 350ms cubic-bezier(.2, .8, .2, 1);
+}
+.cl262-lean[data-editing] { transform: rotate(0deg); }
+/* arrival: the host slides in while the card swings into its lean, once */
+.cl262-panel[data-arrive] { animation: cl262-in 420ms cubic-bezier(.2, .9, .25, 1.05) both; }
+.cl262-panel[data-arrive] .cl262-lean { animation: cl262-swing 700ms cubic-bezier(.2, .8, .2, 1); }
+.cl262-panel[data-leave] { animation: cl262-out 300ms cubic-bezier(.4, 0, .6, 1) forwards; }
+@keyframes cl262-in { from { transform: translateX(120%); } to { transform: translateX(0); } }
+@keyframes cl262-out { from { transform: translateX(0); } to { transform: translateX(120%); } }
+@keyframes cl262-swing {
+  0% { transform: rotate(3deg) translateX(30px); }
+  60% { transform: rotate(-2deg); }
+  100% { transform: rotate(-1.2deg); }
+}
+.cl262-panel[data-reduce] .cl262-lean { transition: none; }
+@media (prefers-reduced-motion: reduce) {
+  .cl262-panel, .cl262-panel .cl262-lean { animation: none !important; transition: none !important; }
+}
+
+/* the card: AgentPaperCard, framed, filling the height — white, padding 10, radius 22, the frame inside it */
+.cl262-card {
+  box-sizing: border-box; height: 100%; display: flex; flex-direction: column; padding: 10px; border-radius: 22px; background: #fff;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, .08), 0 40px 70px -30px rgba(28, 19, 15, .55), 0 12px 24px -16px rgba(28, 19, 15, .35);
+}
+.cl262-card > .cl262-frame, .cl262-card.apc > .apc-frame {
+  position: relative; flex: 1 1 auto; min-height: 0; box-sizing: border-box; display: flex; flex-direction: column;
+  border: 1px solid #a5837b; border-radius: 13px; overflow: hidden; background: #fff;
+}
+.cl262-frame > .cl262-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+/* the editor the card hands over to (until Part C) straightens it too */
+.cl262-lean:has([data-cl24="agent-card"][data-editing]) { transform: rotate(0deg); }
+
+/* ═════════ B · the card's face (AgentPaperCard's panel variant, on the Contact list) ═════════ */
+.cl262-lean { display: flex; flex-direction: column; }
+.cl262-card.apc.apc--panel { flex: 1 1 auto; min-height: 0; }
+.cl262-card.apc .apc-band { height: 56px; padding: 0 10px 0 18px; position: relative; z-index: 2; }
+.cl262-card.apc .apc-st { font-size: 10.5px !important; }
+.cl262-bandr { display: inline-flex; align-items: center; gap: 8px; }
+.cl262-stars { display: inline-flex; gap: 1px; margin-right: 6px; }
+.cl262-stars button {
+  padding: 0 1px; border: 0; background: none; cursor: pointer; color: #f4eee5; opacity: .35;
+  font: 400 16px/1 var(--sp-serif) !important;
+}
+.cl262-stars button[data-on] { opacity: 1; }
+.cl262-stars button:hover { opacity: .8; }
+.cl262-rb {
+  display: inline-grid; place-items: center; width: 34px; height: 34px; padding: 0; border: 0; border-radius: 50%; cursor: pointer;
+  background: rgba(244, 238, 229, .18); color: #f4eee5; font: 400 22px/1 var(--sp-serif) !important;
+}
+.cl262-rb:hover { background: rgba(244, 238, 229, .3); }
+.cl262-rb:focus-visible { outline: 2px solid #f4eee5; outline-offset: 1px; }
+.cl262-card.apc .apc-head { margin: 0 22px; padding: 22px 0 18px; gap: 16px; align-items: center; }
+.cl262-card.apc .apc-nm { font: 600 29px/1.1 var(--sp-serif) !important; color: #1c130f; }
+.cl262-card.apc .apc-ag { margin-top: 6px; }
+.cl262-card.apc .apc-meta { margin-top: 4px; display: block; }
+.cl262-dsc {
+  position: relative; flex: none; width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center; box-sizing: border-box;
+  font: 400 16px/1 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: .04em;
+}
+.cl262-dsc--agent, .cl262-dsc--you { background: #2a3a52; color: #f4eee5; }
+.cl262-dsc--none { background: #fff; color: #2a3a52; border: 1.5px dotted #2a3a52; }
+.cl262-dsc--closed { background: #e4e1db; color: rgba(28, 19, 15, .55); }
+.cl262-bang {
+  position: absolute; top: -3px; right: -3px; width: 19px; height: 19px; border-radius: 50%; display: grid; place-items: center;
+  background: #c9765d; color: #fff; box-shadow: 0 0 0 2.5px #fff; font: 700 12px/1 var(--sp-serif) !important; font-style: normal !important;
+}
+.cl262-links { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-top: 10px; }
+.cl262-links a {
+  display: inline-flex; align-items: center; gap: 6px; color: #1c130f; text-decoration: underline; text-underline-offset: 3px;
+  text-decoration-color: rgba(28, 19, 15, .3); font: 400 13.5px/1.3 var(--sp-type) !important;
+}
+.cl262-lk {
+  height: 26px; padding: 0 10px; border: 0; border-radius: 7px; background: #fff; cursor: pointer; color: #2a3a52;
+  box-shadow: inset 0 0 0 1.2px rgba(42, 58, 82, .4); font: 400 13.5px/1 var(--sp-type) !important;
+}
+.cl262-lk:hover { box-shadow: inset 0 0 0 1.2px #2a3a52; }
+
+/* the next-step box — the card's one coloured thing */
+.cl262-next {
+  display: flex; align-items: center; gap: 14px; margin: 0 14px 4px; padding: 14px 14px 14px 16px; border-radius: 12px;
+}
+.cl262-next[data-tone="you"] { background: #f6e3da; box-shadow: inset 0 0 0 1px rgba(162, 69, 42, .16); }
+.cl262-next[data-tone="agent"] { background: #e7ecf2; box-shadow: inset 0 0 0 1px rgba(42, 58, 82, .12); }
+.cl262-next[data-tone="closed"] { background: #efece7; }
+.cl262-next[data-tone="none"] { background: #fff; box-shadow: inset 0 0 0 1px rgba(42, 58, 82, .35); }
+.cl262-ndisc { flex: none; width: 34px; height: 34px; border-radius: 50%; background: #fff; display: grid; place-items: center; }
+.cl262-ndisc .cl24-nq { width: 18px; height: 18px; color: #2a3a52; }
+.cl262-next p { flex: 1; min-width: 0; margin: 0; display: flex; flex-direction: column; gap: 2px; }
+.cl262-next p b { font: 600 16px/1.3 var(--sp-serif) !important; color: #1c130f; }
+.cl262-next p i { font: italic 400 15px/1.35 var(--sp-serif) !important; color: rgba(28, 19, 15, .65); }
+.cl262-next button {
+  flex: none; height: 40px; padding: 0 16px; border: 0; border-radius: 10px; cursor: pointer; background: #2a3a52; color: #f4eee5;
+  font: 400 15px/1 var(--sp-type) !important;
+}
+.cl262-next[data-tone="closed"] button { background: #fff; color: #1c130f; box-shadow: inset 0 0 0 1.2px #1c130f; }
+
+/* the tabs */
+.cl262-tabs { display: flex; align-items: flex-end; gap: 22px; margin: 14px 22px 0; border-bottom: 1px solid rgba(28, 19, 15, .12); }
+.cl262-tab {
+  padding: 0 0 9px; margin-bottom: -1px; border: 0; border-bottom: 2px solid transparent; background: none; cursor: pointer;
+  color: rgba(28, 19, 15, .5); font: 400 17px/1.2 var(--sp-type) !important;
+}
+.cl262-tab[aria-selected="true"] { color: #1c130f; border-bottom-color: #1c130f; }
+.cl262-gapl { margin-left: auto; padding-bottom: 10px; font: italic 400 14px/1.2 var(--sp-serif) !important; color: #a2452a; }
+.cl262-gapl button { padding: 0; border: 0; background: none; cursor: pointer; color: #a2452a; text-decoration: underline; text-underline-offset: 3px; font: 400 14px/1 var(--sp-type) !important; }
+
+/* the sections */
+.cl262-body { padding-bottom: 8px; }
+.cl262-card.apc .cl262-sec { margin: 0 22px; padding: 16px 0; border-top: 1px solid rgba(28, 19, 15, .1); }
+.cl262-card.apc .cl262-body > .cl262-sec:first-child { border-top: 0; }
+.cl262-card.apc .cl262-sec h5 { display: flex; align-items: center; gap: 8px; min-height: 24px; margin: 0 0 10px; font-size: 10.5px !important; letter-spacing: .18em; }
+.cl262-pen {
+  display: inline-grid; place-items: center; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 7px; cursor: pointer;
+  background: #f4f0eb; color: #2a3a52; opacity: 0; transition: opacity 150ms ease;
+}
+.cl262-sec:hover .cl262-pen, .cl262-pen:focus-visible { opacity: 1; }
+.cl262-card.apc .apc-chip { font-size: 11px !important; padding: 8px 12px; }
+.cl262-card.apc .apc-wish { font-size: 19px !important; line-height: 1.45 !important; }
+.cl262-card.apc .apc-mat { font-size: 12px !important; padding: 8px 12px; }
+.cl262-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.cl262-tile {
+  display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px; border-radius: 9px; background: #f7f4ef; color: #1c130f;
+  font: 400 15px/1.35 var(--sp-serif) !important;
+}
+.cl262-tile > svg { flex: none; margin-top: 3px; color: #5e7189; }
+.cl262-tile span, .cl262-tile b, .cl262-tile i { font-family: var(--sp-serif) !important; }
+.cl262-tile b { font-weight: 600; }
+.cl262-tile.gap i { color: rgba(28, 19, 15, .55); }
+.cl262-tadd { margin-left: 6px; padding: 0; border: 0; background: none; cursor: pointer; color: #2a3a52; text-decoration: underline; font: 400 14px/1 var(--sp-type) !important; }
+
+/* gaps are ghost lines and one outlined "+ Add …" */
+.cl262-ghost { display: flex; align-items: center; gap: 14px; }
+.cl262-gb { flex: 1; min-width: 0; display: flex; gap: 8px; }
+.cl262-gb.lines { flex-direction: column; }
+.cl262-gb i { display: block; background: #ece7e0; }
+.cl262-gb.chips i { height: 30px; border-radius: 8px; flex: none; }
+.cl262-gb.lines i { height: 12px; border-radius: 6px; }
+.cl262-addb {
+  flex: none; height: 30px; padding: 0 12px; border: 0; border-radius: 8px; background: #fff; cursor: pointer; color: #2a3a52;
+  box-shadow: inset 0 0 0 1.3px rgba(42, 58, 82, .4); font: 400 14px/1 var(--sp-type) !important;
+}
+.cl262-addb:hover { box-shadow: inset 0 0 0 1.3px #2a3a52; }
+
+/* History and Notes, inside the card's sections */
+.cl262-hist, .cl262-notes { margin: 0 22px; padding-top: 16px; }
+.cl262-notes .cl24c-notes { width: 100%; box-sizing: border-box; min-height: 160px; }
+
+/* the foot */
+.cl262-foot {
+  flex: none; display: flex; align-items: center; justify-content: space-between; margin: 0 22px; padding: 14px 0 16px;
+  border-top: 1px solid rgba(28, 19, 15, .1);
+}
+.cl262-added { display: inline-flex; align-items: center; gap: 6px; }
+.cl262-pager { display: inline-flex; align-items: center; gap: 8px; font: 400 13px/1 var(--sp-type) !important; color: rgba(28, 19, 15, .6); }
+.cl262-pager span { font: inherit !important; }
+.cl262-pager button {
+  display: inline-grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 8px; background: #f4f0eb; color: #1c130f; cursor: pointer;
+}
+.cl262-pager button:disabled { opacity: .4; cursor: default; }
+.cl262-card.apc .cl262-foot .cl262-added { display: inline-flex; margin-top: 0; }
+
+/* ═════════ C · editing on the card ═════════ */
+.cl262-lean:has(.cl262-card.is-editing) { transform: rotate(0deg); }
+.cl262-editing {
+  display: inline-flex; align-items: center; height: 30px; padding: 0 12px; border-radius: 8px; background: #f4eee5; color: #1c130f;
+  font: 500 10.5px/1 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: .16em; text-transform: uppercase;
+}
+/* a section being edited: inset, tinted, a navy ring, no hairlines either side */
+.cl262-card.apc .cl262-sec.is-edit {
+  margin: 4px 12px; padding: 14px 10px 16px; border-radius: 12px; background: #f7f4ef; box-shadow: inset 0 0 0 1.5px #2a3a52; border-top: 0;
+}
+.cl262-card.apc .cl262-sec.is-edit + .cl262-sec { border-top: 0; }
+.cl262-card.apc .cl262-sec.is-edit h5 { margin-left: 2px; }
+/* genres: the editor's GenreField as toggle chips */
+.cl262-card .cl262-fx .ae-gtog { display: flex; flex-wrap: wrap; gap: 8px; }
+.cl262-card .cl262-fx .ae-gt {
+  height: 32px; padding: 0 12px; border: 0; border-radius: 8px; background: #fff; color: #1c130f; cursor: pointer;
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, .16); font: 400 14px/1 var(--sp-type) !important;
+}
+.cl262-card .cl262-fx .ae-gt.hit { box-shadow: inset 0 0 0 1px rgba(28, 19, 15, .16), inset 0 -2px 0 #5e7189; }
+.cl262-card .cl262-fx .ae-gt.on { background: #2a3a52; color: #f4eee5; box-shadow: none; }
+.cl262-card .cl262-fx .ae-gnote { margin: 12px 0 0; font: italic 400 14.5px/1.35 var(--sp-serif) !important; color: rgba(28, 19, 15, .65); }
+.cl262-card .cl262-fx .ae-gnote button { padding: 0; border: 0; background: none; cursor: pointer; color: #2a3a52; text-decoration: underline; text-underline-offset: 3px; font: inherit !important; }
+.cl262-card .cl262-fx .ae-gfind { margin-top: 10px; background: #fff; }
+/* the wishlist */
+.cl262-wishf { display: flex; flex-direction: column; gap: 6px; }
+.cl262-wta {
+  box-sizing: border-box; width: 100%; min-height: 96px; padding: 10px 12px; border: 0; border-radius: 10px; background: #fff; resize: vertical;
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, .16); color: #1c130f; font: italic 400 18px/1.45 var(--sp-serif) !important;
+}
+.cl262-wta:focus { outline: 2px solid #2a3a52; outline-offset: 0; }
+.cl262-cnt { align-self: flex-end; font: 400 12.5px/1 var(--sp-type) !important; color: rgba(28, 19, 15, .5); }
+/* materials: the editor's rows, 22px boxes, ticked navy with a cream ✓ */
+.cl262-card .cl262-fx .ae-mt { display: flex; flex-direction: column; gap: 10px; }
+.cl262-card .cl262-fx .ae-mtr { display: flex; align-items: center; gap: 10px; font: 400 15px/1.3 var(--sp-type) !important; }
+.cl262-card .cl262-fx .ae-mtr > span { font: inherit !important; }
+/* the editor's own box and tick (its ::after), at 22px; ticked is navy with a cream tick */
+.cl262-card .cl262-fx .ae-bx { flex: none; width: 22px; height: 22px; border-radius: 6px; display: inline-grid; place-items: center; }
+.cl262-card .cl262-fx .ae-bx.on { background: #2a3a52; }
+.cl262-card .cl262-fx .ae-bx.on::after { border-color: #f4eee5; }
+.cl262-card .cl262-fx .ae-mtx { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; }
+/* how they work: a 120px label column */
+.cl262-how { display: flex; flex-direction: column; gap: 12px; }
+.cl262-row { display: grid; grid-template-columns: 120px minmax(0, 1fr); align-items: center; gap: 10px; }
+.cl262-row > label { font: 400 14px/1.2 var(--sp-type) !important; color: rgba(28, 19, 15, .6); }
+.cl262-rf { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; min-width: 0; }
+.cl262-hint { padding: 0; border: 0; background: none; font: italic 400 14px/1.3 var(--sp-serif) !important; color: rgba(28, 19, 15, .6); }
+button.cl262-hint { cursor: pointer; color: #2a3a52; text-decoration: underline; text-underline-offset: 3px; }
+/* "Also changes": indented to the field column, white, a 3px rust edge */
+.cl262-also { margin: 2px 0 0 130px; padding: 8px 12px; border-radius: 8px; background: #fff; box-shadow: inset 3px 0 0 #a2452a; }
+.cl262-also em { display: block; margin-bottom: 4px; font: 400 13px/1.2 var(--sp-type) !important; font-style: normal !important; color: #a2452a; }
+.cl262-also p { margin: 0; font: 400 14px/1.4 var(--sp-serif) !important; color: #1c130f; }
+.cl262-sec[data-k="genres"] .cl262-also, .cl262-ctg .cl262-also { margin-left: 0; margin-top: 10px; }
+/* contact details: two columns */
+.cl262-ctg { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; }
+.cl262-ctg .cl262-also { grid-column: 1 / -1; }
+.cl262-cf { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.cl262-cf > label { font: 400 14px/1.2 var(--sp-type) !important; color: rgba(28, 19, 15, .6); }
+.cl262-card .cl262-fx .cl262-cf .ac-in, .cl262-card .cl262-fx .cl262-cf input { box-sizing: border-box; width: 100%; background: #fff; }
+.cl262-bad { font: italic 400 13px/1.3 var(--sp-serif) !important; color: #a2452a; }
+/* the save bar: at the card's foot while anything is open */
+.cl262-save {
+  flex: none; display: flex; align-items: center; gap: 14px; margin: 12px; padding: 12px 12px 12px 16px; border-radius: 12px;
+  background: #2a3a52; color: #f4eee5;
+}
+.cl262-save.is-guard { background: #a2452a; }
+.cl262-sv { flex: 1; min-width: 0; font: 400 15px/1.3 var(--sp-type) !important; }
+.cl262-sv b { font: inherit !important; font-weight: 400 !important; }
+.cl262-sv i { font: italic 400 14px/1.3 var(--sp-serif) !important; color: rgba(244, 238, 229, .8); }
+.cl262-sx { padding: 0; border: 0; background: none; color: #f4eee5; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; font: 400 15px/1 var(--sp-type) !important; }
+.cl262-sb { height: 40px; padding: 0 16px; border: 0; border-radius: 10px; background: #f4eee5; color: #1c130f; cursor: pointer; font: 400 15px/1 var(--sp-type) !important; }
+.cl262-sb:disabled { opacity: .45; cursor: default; }
+/* saved: the frame flashes a 2px sage inset for 1.2s */
+.cl262-card.apc.is-saved > .apc-frame { box-shadow: inset 0 0 0 2px #4e7d60; transition: box-shadow 200ms ease; }
+
+.cl262-card .cl262-fx .ae-step { background: #fff; }
+.cl262-card .cl262-fx .ae-seg button { font-family: var(--sp-type) !important; }
+/* the tile's tail ("· checked Jun", " replies") reads as an aside: smaller and grey, kept on the tile */
+.cl262-card .cl262-tile .cl262-tpost { font-size: 12px; color: rgba(42, 58, 82, 0.62); }

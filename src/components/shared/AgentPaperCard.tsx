@@ -78,6 +78,22 @@ export interface PaperPanelSlots {
   foot: React.ReactNode;
   /** the scrolling region's attributes (the tab it shows) */
   scrollAttrs?: Record<string, string | undefined>;
+  /* ── Contact list v26.2 B — optional, additive: absent, the panel draws exactly as before (the To-do page's) ── */
+  /** the band's colour (v26.2: #5e7189 on the Contact list's card); absent, the list header's slate */
+  band?: string;
+  /** the band's right side, already built (stars, edit, ✕); absent, the stars and ✕ */
+  bandRight?: React.ReactNode;
+  /** the head's disc, already built; absent, the initials disc */
+  disc?: React.ReactNode;
+  /** the line under the agency ("Bristol · replies in about 6 weeks") */
+  meta?: React.ReactNode;
+  /** what sits between the head and the tabs (the next-step box) */
+  afterHead?: React.ReactNode;
+  /** the scrolling region and the frame, for the card's scroll keeping */
+  scrollRef?: React.Ref<HTMLDivElement>;
+  frameRef?: React.Ref<HTMLDivElement>;
+  /** what sits after the scroll region inside the frame, before the foot (the save bar) */
+  afterScroll?: React.ReactNode;
 }
 
 const hrefOf = (url: string): string => (/^https?:\/\//i.test(url.trim()) ? url.trim() : `https://${url.trim()}`);
@@ -100,26 +116,32 @@ export const AgentPaperCard: React.FC<{
   if (variant === "panel" && panel) {
     return (
       <div className={`apc apc--panel${className ? ` ${className}` : ""}`} data-apc="card" data-variant="panel" data-status={d.status}>
-        <div className="apc-frame" data-apc="frame">
-          <div className="apc-band" data-apc="band" data-kind={d.status} style={{ background: PAPER_BAND }}>
+        <div className="apc-frame" data-apc="frame" ref={panel.frameRef}>
+          <div className="apc-band" data-apc="band" data-kind={d.status} style={{ background: panel.band ?? PAPER_BAND }}>
             <span className="apc-st" data-apc="status">{d.statusLabel}</span>
-            <span className="apc-bandr">
-              <Stars n={d.stars ?? 0} />
-              <button type="button" className="apc-x" data-apc="close" data-ap="close" aria-label={panel.closeLabel} onClick={panel.onClose}><span aria-hidden="true">{"×"}</span></button>
-            </span>
+            {panel.bandRight ?? (
+              <span className="apc-bandr">
+                <Stars n={d.stars ?? 0} />
+                <button type="button" className="apc-x" data-apc="close" data-ap="close" aria-label={panel.closeLabel} onClick={panel.onClose}><span aria-hidden="true">{"×"}</span></button>
+              </span>
+            )}
           </div>
-          <div className="apc-scroll" data-apc="scroll" {...panel.scrollAttrs}>
+          <div className="apc-scroll" data-apc="scroll" ref={panel.scrollRef} {...panel.scrollAttrs}>
             <div className="apc-head" data-apc="head">
-              <span className={`apc-disc${yourMove ? " cl252-yd" : ""}`} data-cl252={yourMove ? "yd" : undefined} aria-hidden="true">{d.initials}</span>
+              {panel.disc ?? <span className={`apc-disc${yourMove ? " cl252-yd" : ""}`} data-cl252={yourMove ? "yd" : undefined} aria-hidden="true">{d.initials}</span>}
               <div className="apc-who">
                 <h2 className="apc-nm" data-apc="name" data-ap="name" ref={panel.nameRef} tabIndex={-1}>{d.name}</h2>
-                {[d.agency?.trim(), d.city?.trim()].filter(Boolean).length ? <span className="apc-ag" data-ap="place">{[d.agency?.trim(), d.city?.trim()].filter(Boolean).join(" · ")}</span> : null}
+                {panel.meta !== undefined ? (
+                  <>{d.agency?.trim() ? <span className="apc-ag" data-ap="place">{d.agency.trim()}</span> : null}{panel.meta}</>
+                ) : [d.agency?.trim(), d.city?.trim()].filter(Boolean).length ? <span className="apc-ag" data-ap="place">{[d.agency?.trim(), d.city?.trim()].filter(Boolean).join(" · ")}</span> : null}
                 {panel.links}
               </div>
             </div>
+            {panel.afterHead}
             {panel.tabs}
             {panel.body}
           </div>
+          {panel.afterScroll}
           {panel.foot}
         </div>
       </div>

@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "J2-1512",
+  "where": "rest −1.2°",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "J2-1512",
+  "where": "editing 0°",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "J2-1512",
+  "where": "after editing −1.2°",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "J2-1512",
+  "where": "paging keeps the host",
+  "ok": true,
+  "detail": "{\"same\":true,\"arrive\":false}"
+ },
+ {
+  "lock": "J2-1512",
+  "where": "paging replays no arrival",
+  "ok": true,
+  "detail": "{\"same\":true,\"arrive\":false}"
+ },
+ {
+  "lock": "J2-1512",
+  "where": "paged card leans −1.2°",
+  "ok": false,
+  "detail": "0"
+ }
+]

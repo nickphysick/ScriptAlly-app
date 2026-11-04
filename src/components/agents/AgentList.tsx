@@ -61,6 +61,8 @@ import { materialRowsFromAgent } from "../../lib/agentMaterials";
 import { materialWords } from "../../lib/agentPanel";
 import type { AgentFacts as Facts24 } from "../../lib/contactList";
 import { AgentCardPanel24 } from "./contact/AgentCardPanel24";
+import { AgentCardPanel262, requestCardClose, type CloseGuard } from "./contact/AgentCardPanel262";
+import { AgentCard262 } from "./contact/AgentCard262";
 import { agentHistory } from "../../lib/agentHistory";
 import { destroyManifest } from "../../lib/cascade";
 import type { ContactView, Group26Key } from "../../lib/contactListMemory";
@@ -863,6 +865,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const cardNotes = useAgentNotes(notesAgent, currentUser?.id ?? null, writeAgentPatch);
   /* picking another agent while the edit mode has changes asks first (the drawer's discard confirm); the pick waits */
   const editLeave = useRef<(() => void) | null>(null);
+  /* v26.2 D — the card's discard guard: the host asks it before ✕ or Esc closes the card */
+  const cardGuard = useRef<CloseGuard | null>(null);
   const pendingPick = useRef<string | null>(null);
   const pickCard = useCallback((id: string) => {
     if (editLeave.current && id !== cardId) { pendingPick.current = id; editLeave.current(); return; }
@@ -917,6 +921,23 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         );
       },
       request: req ? { seq: req.seq, inline: req.inline, edit: req.edit ? { focus: req.edit.focus } : undefined } : null,
+      /* v26.2 C — editing on the card: one draft, the editor's own lists and Also-changes, one write (`saveDraft`),
+         and the page's toast ("Saved {first}'s card", with the save's snapshot Undo) */
+      form: {
+        personal: editOpts.personal, agents, msGenre: scoped?.genre ?? null, genrePool: editOpts.genrePool, personalGenres: editOpts.personalLabels,
+        allGenres: editOpts.allGenres, nowMs, onNewGenre: editOpts.onNewGenre,
+        alsoFor: (d, base) => alsoChanges(agent, toContactDraft(agent, base, d), hkEditCtx),
+        onSave: async (d, base) => {
+          const r = await saveDraft(agent, base, d, { emit: false });
+          if (!r.ok) return { ok: false, error: (r as { error: string }).error };
+          const undo = r.undo;
+          showToast({ message: `Saved ${first}’s card`, ...(undo ? { undo: async () => { await undo(); } } : {}) });
+          return { ok: true };
+        },
+        leaveRef: editLeave,
+        closeGuardRef: cardGuard,
+        resumePick: () => { const n = pendingPick.current; pendingPick.current = null; if (n) setCardId(n); },
+      },
     };
   };
   const cardPropsFor = (x: Facts24, index: number, total: number, onStep: (d: -1 | 1) => void, onOpenAgent: (id: string) => void, onClose?: () => void): AgentCard24Props => {
@@ -1093,11 +1114,14 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             <ContactLogFlow seed={logSeed} activeMsId={scoped?.id ?? null} onClose={() => setLogSeed(null)} />
           </AgentCardPanel24>
         ) : null}
+        {/* v26.2 A — THE PANEL IS THE CARD: no backdrop or padding, leaning, an arrival swing (once; paging swaps the
+            content in the same host) */}
         {cardFacts && active && !logSeed ? (
-          <AgentCardPanel24 agentId={cardFacts.agent.id} onClose={() => setCardId(null)}>
-            <AgentCard24 {...cardPropsFor(cardFacts, cardIndex, drawnOrder.length,
-              (d) => { const n = drawnOrder[cardIndex + d]; if (n) pickCard(n); }, (id) => pickCard(id), () => setCardId(null))} />
-          </AgentCardPanel24>
+          <AgentCardPanel262 agentId={cardFacts.agent.id} onClose={() => setCardId(null)} guardRef={cardGuard}>
+            {/* v26.2 B — the card's face: AgentPaperCard's panel variant, the landing sections, the next-step box */}
+            <AgentCard262 {...cardPropsFor(cardFacts, cardIndex, drawnOrder.length,
+              (d) => { const n = drawnOrder[cardIndex + d]; if (n) pickCard(n); }, (id) => pickCard(id), requestCardClose)} />
+          </AgentCardPanel262>
         ) : null}
         </>
         )}

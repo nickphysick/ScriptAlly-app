@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "J9-1512",
+  "where": "wishlist takes focus",
+  "ok": true,
+  "detail": "wish-input"
+ },
+ {
+  "lock": "J9-1512",
+  "where": "40 characters typed in one go",
+  "ok": true,
+  "detail": "40"
+ },
+ {
+  "lock": "J9-1512",
+  "where": "focus still on the wishlist",
+  "ok": true,
+  "detail": "wish-input"
+ },
+ {
+  "lock": "J9-1512",
+  "where": "edit all focuses Name",
+  "ok": true,
+  "detail": "{\"k\":\"name-input\",\"at\":10,\"len\":10}"
+ },
+ {
+  "lock": "J9-1512",
+  "where": "caret at the end",
+  "ok": true,
+  "detail": "{\"k\":\"name-input\",\"at\":10,\"len\":10}"
+ }
+]
