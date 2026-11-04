@@ -22,6 +22,7 @@
     "deploy:rules": "firebase deploy --only firestore:rules --project prod",
     "deploy:hosting": "npm run build && firebase deploy --only hosting --project prod",
     "deploy:dev": "npm run build:dev && firebase deploy --only hosting --config firebase.dev.json --project dev && firebase deploy --only functions:smartImportMap --project dev",
+    "deploy:live-hosting": "npm run build:prod && node scripts/live-preflight.mjs --hosting && firebase deploy --only hosting --project prod && node scripts/live-verify.mjs hosting",
     "deploy:prod": "npm run build:prod && firebase deploy --only hosting --project prod && firebase deploy --only functions:smartImportMap --project prod",
     "e2e": "playwright test",
     "e2e:emu": "node scripts/emu.mjs e2e",

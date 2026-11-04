@@ -4,6 +4,8 @@
  *
  *   node scripts/live-preflight.mjs          the go-live set (no AI functions)
  *   node scripts/live-preflight.mjs --ai     also require ANTHROPIC_API_KEY on live
+ *   node scripts/live-preflight.mjs --hosting   a hosting-only deploy: skips check 1 (the functions'
+ *                                               .env), which only a functions deploy reads
  *
  * One line per check, then a verdict. Exits 1 if any check fails.
  *
@@ -14,6 +16,7 @@ import { execFileSync } from "node:child_process";
 import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { pushedState } from "./livePushed.mjs";
 
 const ROOT = process.cwd();
 const PROJECT = "prod"; // .firebaserc alias for gen-lang-client-0801391782
@@ -30,6 +33,7 @@ const SECRETS = { waitlist: ["WAITLIST_IP_SALT", "RESEND_API_KEY"] };
 const AI_SECRETS = ["ANTHROPIC_API_KEY"];
 
 const ai = process.argv.includes("--ai");
+const hosting = process.argv.includes("--hosting");
 let failed = 0;
 const line = (ok, name, detail) => {
   if (!ok) failed++;
@@ -61,7 +65,9 @@ line(clientEnv.VITE_LANDING_ONLY === "true", "0 · VITE_LANDING_ONLY=true in .en
 const prodEnv = readEnv(PROD_ENV_FILE);
 const bareEnv = readEnv("functions/.env") ?? {};
 const clientDb = readEnv(".env.production")?.VITE_FIREBASE_DATABASE_ID;
-if (!prodEnv) {
+if (hosting) {
+  console.log(`SKIP  1 · ${PROD_ENV_FILE} — --hosting: only a functions deploy reads it`);
+} else if (!prodEnv) {
   line(false, `1 · ${PROD_ENV_FILE}`, "missing — Nick creates it (runbook step 0)");
 } else {
   line(prodEnv.FIRESTORE_DATABASE_ID === clientDb && !!clientDb, "1a · FIRESTORE_DATABASE_ID",
@@ -129,6 +135,10 @@ line(diff === "", "4a · no uncommitted change to a tracked file", diff ? diff.s
 const branch = sh("git", ["rev-parse", "--abbrev-ref", "HEAD"]).trim();
 line(BRANCHES.includes(branch), "4b · HEAD is " + BRANCHES.join(" or "),
   BRANCHES.includes(branch) ? `${branch} ${sh("git", ["rev-parse", "--short", "HEAD"]).trim()}` : `on ${branch}`);
+/* ⚠️ PROD SHIPS THE PUSHED TIP, EXACTLY (4 Nov). Prod was once built from 9 unpushed local commits and
+   then rolled back by a deploy from the pushed tip. scripts/livePushed.mjs; locked in src/lib/livePushed.test.ts. */
+const pushed = pushedState(ROOT, BRANCHES[0]);
+line(pushed.ok, `4c · HEAD is the pushed tip of ${BRANCHES[0]}`, pushed.detail);
 
 console.log(failed ? `\nPREFLIGHT FAILED — ${failed} check(s). Do not deploy.` : "\nPREFLIGHT PASSED.");
 process.exit(failed ? 1 : 0);
