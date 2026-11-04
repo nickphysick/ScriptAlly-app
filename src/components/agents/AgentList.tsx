@@ -44,13 +44,12 @@ import {
   useAgentCardRequest,
 } from "../../lib/agentCardStore";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { ContactHeader25 } from "./contact/ContactHeader24";
-import { ContactGlance251 } from "./contact/ContactGlance251";
+import { ContactHeader26 } from "./contact/ContactHeader26";
+import { applyPick, headerFigures, pickOn } from "../../lib/contactV26";
 import { ContactListTitle25 } from "./contact/ContactListTitle25";
 import { ContactLogFlow } from "./contact/ContactLogFlow";
 import { hostContactLog, type ContactLogSeed } from "../../lib/contactLogStore";
-import { GLANCE_ORDER, GLANCE_SETS, glanceCards, type GlanceKey as GlanceCardKey } from "../../lib/contactV25";
-import { glanceFeet } from "../../lib/contactV256";
+import { GLANCE_SETS } from "../../lib/contactV25";
 import { ContactSheet24, SheetSkeleton } from "./contact/ContactSheet24";
 import { AgentCard24, AgentCardWide24, type AgentCard24Props } from "./contact/AgentCard24";
 import { ContactAddressBook24 } from "./contact/ContactAddressBook24";
@@ -629,17 +628,13 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const health = useMemo(() => (healthStub === null ? health0 : { ...health0, pct: healthStub }), [health0, healthStub]);
   /* v24 A2 — the banner's figures: Housekeeping's gap count, the agents they belong to, and four faces */
   const banner = useMemo(() => bannerFigures(hk), [hk]);
-  /* v25 B — At a glance: List health (Housekeeping's percentage and gap total), then the three sets' cards */
-  /* v25.1 A — a face's colours are its agent's set */
-  const standById = useMemo(() => new Map(factsAll.map((x) => [x.agent.id, x.stand] as const)), [factsAll]);
-  const standOf = useCallback((id: string) => standById.get(id) ?? null, [standById]);
-  const glanceModel = useMemo(() => glanceCards(factsAll, pageState === "list" ? health : null, banner.gaps), [factsAll, pageState, health, banner.gaps]);
-  /* v25.6 B — the cells' foot lines, from the same facts and Housekeeping's gap total */
-  const glanceFoot = useMemo(() => glanceFeet(factsAll, book, (raw) => genreLabel(raw, currentUser?.personalGenres ?? []), banner.gaps), [factsAll, book, currentUser?.personalGenres, banner.gaps]);
-  const glancePressed = useMemo<GlanceCardKey | null>(
-    () => (sets ? GLANCE_ORDER.find((k) => { const g = GLANCE_SETS[k]; return !!g && g.length === sets.length && g.every((x) => sets.includes(x)); }) ?? null : null),
-    [sets],
-  );
+  /* v26 A — the header's sentence: every agent on file, the ones queried, the ones waiting on the writer */
+  const headFigures = useMemo(() => headerFigures(factsAll), [factsAll]);
+  /* v26 A — "Show me who": the Missing details quick pick (Part E's own), then the list card into view */
+  const showMissing = useCallback(() => {
+    setFilters((f) => (pickOn(f) === "missing" ? f : applyPick(f, "missing")));
+    requestAnimationFrame(() => mainColRef.current?.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" }));
+  }, []);
   /* v18 §F.1 — the drawer's figures: the same score, with its held and possible points */
   const listH0 = useMemo(() => healthOf(agents, hk), [agents, hk]);
   const listH = useMemo(() => (healthStub === null ? listH0 : { ...listH0, pct: healthStub }), [listH0, healthStub]);
@@ -1060,21 +1055,19 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         {/* v13 §8 — the loading beat: the group draws its own components as shimmering shapes, inert */}
         {/* v138.6 §A — a pinned list hides its header from the first frame, settling included (a restored pin must not
             flash the header while the list loads) */}
-        <div className="clv-group" data-v24="" data-v25="" data-full={full && (showList || pageState === "settling") ? "" : undefined} data-loading={pageState === "settling" ? "" : undefined}
+        <div className="clv-group" data-v24="" data-v25="" data-v26="" data-full={full && (showList || pageState === "settling") ? "" : undefined} data-loading={pageState === "settling" ? "" : undefined}
           aria-busy={pageState === "settling" || undefined}
           inert={pageState === "settling" || undefined}>
         {/* v17 §A — THE ONE LIGHT HEADER, on the page colour: the title block, the cut-out hawk, and the summary
             card that is the page's figures and its group filter (the strip's own `glance` state). Over a LIST
             only, and while settling: the blank account's page is ContactEmpty. */}
+        {/* v26 A — THE HEADER IS ONE NAVY PANEL (supersedes the title card and At a glance): the title, one sentence, two
+            buttons; List health on the right as a ring the archivist breaks out of. Its score and count are Housekeeping's. */}
         {(showList || pageState === "settling") && (
-          <ContactHeader25 loading={pageState !== "list"} msTitle={scoped?.title?.trim() || null}
-            addRef={addBtnRef} onAdd={openAdd}
-            onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined}>
-            {/* v25.1 A — At a glance as one ledger card (v25 B's four cards retired): List health opens Housekeeping; the
-                other three filter the list and Cards, a second press shows all */}
-            <ContactGlance251 cards={glanceModel} pressed={glancePressed} ready={pageState === "list"} standOf={standOf} feet={glanceFoot}
-              onCard={(k) => { if (k === "health") { openHk(); return; } setSets(glancePressed === k ? null : GLANCE_SETS[k]); }} />
-          </ContactHeader25>
+          <ContactHeader26 loading={pageState !== "list"} figures={pageState === "list" ? headFigures : null}
+            health={pageState === "list" ? health : null} addRef={addBtnRef} onAdd={openAdd}
+            onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined}
+            onOpenHealth={openHk} onShowWho={showMissing} />
         )}
         {pageState === "settling" && <SheetSkeleton />}
         <div className="clv-main" ref={mainColRef}>
