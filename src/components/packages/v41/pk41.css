@@ -308,29 +308,28 @@
   .p41 .p41-bld { margin: 0 0 0; }
   .p41 .p41-bld .p93-bh {
     display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto auto; gap: 16px; align-items: center;
-    margin: 0; padding: 16px 20px; border-radius: 0; background: #2d3a50; color: #fff;
+    margin: 0; border-radius: 0;
   }
-  .p41 .p41-bld .p93-bh-ic { width: 44px; height: 44px; border-radius: 10px; background: var(--pc, #1d4b63); color: #fff; box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85); }
+  .p41 .p41-bld .p93-bh-ic { width: 44px; height: 44px; border-radius: 10px; background: var(--pc, #1d4b63); color: #fff; }
   .p41 .p41-bld .p93-bh-ic .p9-pic { width: 22px; height: 22px; }
-  .p41 .p41-bld .p93-bh-t h3, .p41 .p41-bld .p93-bh-t h3 .p9-po-nm { font: 400 28px/1.3 var(--sp-type) !important; }
-  .p41 .p41-bld .p93-bh-t small { margin-top: 2px; font: italic 15px/1.35 var(--sp-serif); color: rgba(255, 255, 255, 0.72); }
+  .p41 .p41-bld .p93-bh-t small { margin-top: 2px; font: italic 15px/1.35 var(--sp-serif); }
   .p41 .p41-bld .p93-bh-act .p9-po-act {
-    display: inline-block; padding: 3px 7px; border-radius: 5px; background: #fff; color: #2d3a50;
+    display: inline-block; padding: 3px 7px; border-radius: 5px;
     font: 500 9.5px/1.2 var(--font-mono, monospace); font-style: normal; letter-spacing: .14em; text-transform: uppercase;
   }
-  .p41 .p41-bld .p93-mk { height: 34px; padding: 0 14px; border-radius: 7px; background: #fff; color: #2d3a50; font: 600 14px var(--sp-serif); }
-  .p41 .p41-bld .p93-mk:hover { background: #f4eee5; }
-  .p41 .p41-bld .p93-bh-s { height: 34px; padding: 0 14px; border-radius: 17px; background: rgba(255, 255, 255, 0.12); font: 600 15px/1 var(--sp-serif); }
-  .p41 .p41-bld .p93-bh-f { width: 38px; height: 38px; background: rgba(255, 255, 255, 0.12); }
+  .p41 .p41-bld .p93-mk { height: 34px; padding: 0 14px; border-radius: 7px; font: 600 14px var(--sp-serif); }
+  .p41 .p41-bld .p93-bh-s { height: 34px; padding: 0 14px; border-radius: 17px; font: 600 15px/1 var(--sp-serif); }
+  .p41 .p41-bld .p93-bh-f { width: 38px; height: 38px; }
   .p41 .p41-bld .p93-bh-f svg { width: 17px; height: 17px; stroke-width: 1.8; }
   /* the body: steps and the preview well */
-  .p41 .p41-bld .p93-b { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 28px; padding: 24px; align-items: start; }
+  .p41 .p41-bld .p93-b { grid-template-columns: minmax(0, 1fr); gap: 20px; padding: 24px; align-items: start; }
   .p41 .p41-bld .p41-span { grid-column: 1 / -1; }
   .p41 .p41-bld .p9-lc-from { margin: 0; }
   .p41 .p41-bld .p93-lock { align-items: center; gap: 12px; margin: 0; padding: 12px 16px; border-radius: 10px; background: #f5efe7; font: 15.5px/1.45 var(--sp-serif); color: rgba(28, 19, 15, 0.8); }
   .p41 .p41-bld .p93-lock > svg { width: 17px; height: 17px; margin: 0; }
-  .p41 .p41-bld .p93-lock > span { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; column-gap: 6px; }
-  .p41 .p41-bld .p93-lock-a { margin-left: auto; }
+  /* the sent note reads as one paragraph, its links after it */
+  .p41 .p41-bld .p93-lock > span { flex: 1; min-width: 0; display: block; }
+  .p41 .p41-bld .p93-lock-a { display: inline-flex; margin-left: 12px; }
   .p41 .p41-bld .p93-lock .p93-lnk { font: 600 15px var(--sp-serif); color: #1c130f; }
   .p41 .p41-bld .p93-lock .p93-lnk.p93-q { color: rgba(28, 19, 15, 0.58); font-weight: 400; }
   /* the steps: hairline rows in one bordered block */
@@ -363,7 +362,7 @@
   .p41 .p41-bld .p93-chip.p93-on { background: #2d3a50; }
   .p41 .p41-bld .p93-exts .p9-exa-b { height: 32px; border-radius: 16px; box-shadow: inset 0 0 0 1px rgba(45, 58, 80, 0.4); font: 600 14px var(--sp-serif); color: #2d3a50; }
   /* the preview: a beige well holding the white email card */
-  .p41 .p41-bld .p93-pv { position: sticky; top: 20px; align-self: start; box-sizing: border-box; padding: 14px 16px 16px; border-radius: 14px; background: #f5efe7; }
+  .p41 .p41-bld .p93-pv { align-self: start; box-sizing: border-box; padding: 14px 16px 16px; border-radius: 14px; background: #f5efe7; }
   .p41 .p41-bld .p93-pv .p93-pv-k { align-items: baseline; margin: 2px 4px 12px; }
   .p41 .p41-bld .p93-pv .p93-pv-k > span:first-child { font: 400 19px/1.3 var(--sp-type) !important; letter-spacing: 0; text-transform: none; color: #1c130f; }
   .p41 .p41-bld .p93-pv .p93-pv-k > span:last-child { font: italic 400 14px var(--sp-serif) !important; letter-spacing: 0; text-transform: none; color: rgba(28, 19, 15, 0.6); }
@@ -389,14 +388,45 @@
   /* v40's guidelines, kept, as a quiet note under the frame */
   .p41 .p41-build > .p9-gl { margin: 18px 0 0; }
 }
-@media (min-width: 768px) and (max-width: 1400px) {
-  .p41 .p41-bld .p93-b { grid-template-columns: minmax(0, 1fr); }
+
+/* ══ E · THE BUILDER IN THE WORKSPACE (ref `.lay-b .k4-bh`, `.lay-b .k4-bb`; screens 02–05) ══════════════════════════
+   Only the header is navy. The builder's band is the package's own colour, softly: a wash of it (11% on white) with a
+   5px stripe of the full colour along its top, ink text, padding 18 / 22. The tile has no ring; Active and Make active
+   are navy; the status pill and Figures are white with a hairline (the pill goes at ≤1400, where the rail row already
+   says it). Steps, then the preview UNDER them, one column; side by side from 1700. The preview is never sticky. */
+@media (min-width: 768px) {
+  .p41 .p41-bld .p93-bh {
+    padding: 18px 22px; color: #1c130f;
+    background: color-mix(in srgb, var(--pc, #1d4b63) 11%, #fff); box-shadow: inset 0 5px 0 var(--pc, #1d4b63);
+  }
+  .p41 .p41-bld .p93-bh-ic { box-shadow: none; }
+  .p41 .p41-bld .p93-bh-ic:focus-visible { outline-color: #2d3a50; }
+  .p41 .p41-bld .p93-bh-t h3, .p41 .p41-bld .p93-bh-t h3 .p9-po-nm { font: 400 25px/1.3 var(--sp-type) !important; color: #1c130f !important; }
+  .p41 .p41-bld .p93-bh-t h3 .p9-po-nm:not(.p9-locked):hover { border-bottom-color: rgba(28, 19, 15, 0.3); }
+  .p41 .p41-bld .p93-bh-t h3 .p9-po-nm:not(.p9-locked):focus { border-bottom-color: #1c130f; }
+  .p41 .p41-bld .p93-bh-t small { color: rgba(28, 19, 15, 0.6); }
+  .p41 .p41-bld .p93-addnote { color: rgba(28, 19, 15, 0.6); text-decoration-color: rgba(28, 19, 15, 0.3); }
+  .p41 .p41-bld .p93-bh-act .p9-po-act { background: #2d3a50; color: #fff; }
+  .p41 .p41-bld .p93-mk { background: #2d3a50; color: #fff; }
+  .p41 .p41-bld .p93-mk:hover { background: #1c130f; }
+  .p41 .p41-bld .p93-bh-s { background: #fff; color: #1c130f; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.12); }
+  .p41 .p41-bld .p93-bh-s > i { box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, 0.4); }
+  .p41 .p41-bld .p93-bh-s.p93-g > i { background: #3e7d5a; box-shadow: none; }
+  .p41 .p41-bld .p93-bh-f { background: #fff; color: #1c130f; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.12); }
+  .p41 .p41-bld .p93-bh-f:hover { background: #faf7f2; }
   .p41 .p41-bld .p93-pv { position: static; }
+}
+@media (min-width: 1700px) {
+  .p41 .p41-bld .p93-b { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+}
+@media (min-width: 768px) and (max-width: 1400px) {
+  .p41 .p41-bld .p93-bh-t h3, .p41 .p41-bld .p93-bh-t h3 .p9-po-nm { font-size: 23px !important; }
+  .p41 .p41-bld .p93-bh-s { display: none; }
 }
 
 /* ══ F · RESULTS (ref `.k4-res`; screens 05, 06) ═══════════════════════════════════════════════════════════════════════ */
 @media (min-width: 768px) {
-  .p41 .p41-res { display: grid; gap: 22px; margin-top: 64px; }
+  .p41 .p41-res { display: grid; gap: 22px; margin-top: 56px; }
   .p41 .p41-rh { display: flex; align-items: baseline; flex-wrap: wrap; gap: 16px; margin-bottom: -4px; }
   .p41 .p41-rh h2.p41-rh-h { margin: 0; font: 400 32px/1.3 var(--sp-type) !important; letter-spacing: 0 !important; text-transform: none !important; color: #1c130f !important; }
   .p41 .p41-rh > span { font: italic 16px var(--sp-serif); color: rgba(28, 19, 15, 0.6); }
