@@ -5,7 +5,7 @@
  * walked through the plan itself: which group is in focus, what the label says, what › does.
  */
 import { describe, expect, it } from "vitest";
-import { LIST_LABEL, LIST_ORDER, focusOf, groupHeading, listPlan, type ListGroupKey, type ListItem } from "./dashList";
+import { LIST_LABEL, LIST_ORDER, focusOf, groupHeading, listPlan, needsYouIds, type ListGroupKey, type ListItem, type ListPlan } from "./dashList";
 
 const item = (group: ListGroupKey, n: number): ListItem => ({
   key: `${group}-${n}`, group, tone: "house", pre: "", who: `${group} ${n}`, post: "", initials: "", fact: "", agency: "",
@@ -87,5 +87,14 @@ describe("dashList — the order is fixed: waiting → nudge → gone quiet → 
     const plan = listPlan(make({ req: 2 }));
     expect(focusOf(plan, 7).item?.key).toBe("req-2");
     expect(focusOf(plan, -3).item?.key).toBe("req-1");
+  });
+});
+
+describe("DB21-D · the queries that still need the writer", () => {
+  it("are the queries of Next up's 'Agents are waiting' items, and nothing else", () => {
+    const item = (group: string, queryId: string | undefined, kind = "drawer") => ({ group, action: kind === "drawer" ? { kind, request: { mode: "sent", queryId } } : { kind, tab: "todo" } });
+    const plan = { groups: [], thenLabel: "Then", all: { label: "All", tab: "todo" },
+      items: [item("req", "q1"), item("req", "q2"), item("nudge", "q3"), item("quiet", "q4"), item("house", undefined, "route")] } as unknown as ListPlan;
+    expect([...needsYouIds(plan)].sort()).toEqual(["q1", "q2"]);
   });
 });

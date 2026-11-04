@@ -23,7 +23,7 @@ import { liveCount, undatedLiveCount } from "../../../lib/dashBreakdown";
 import { closedTile } from "../../../lib/dashClosed";
 import { assembleBoardColumns } from "../../../lib/todoColumns";
 import { todoRows } from "../../../lib/dashTodo";
-import { dashList, type ListAction, type ListPlan } from "../../../lib/dashList";
+import { dashList, needsYouIds, type ListAction, type ListPlan } from "../../../lib/dashList";
 import { buildQcRows } from "../../../lib/qcSummary";
 import type { TaskCtx } from "../../../lib/dashTaskCard";
 import { gettingStartedRows } from "../../../lib/dashEmpty";
@@ -318,6 +318,9 @@ export const Dash58: React.FC<Dash58Props> = ({
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scopedTasks, userTasks, queries, scopedQueries, agents, manuscripts, taskFlags, scopedActivities, activities, activeManuscript, currentUser, now, aid.drop.join(","), empty, versions, scopeId]);
+
+  /* v2.1: the feed opens a big event only while its query is in Next up's "Agents are waiting" group */
+  const needsYou = useMemo(() => needsYouIds(plan), [plan]);
 
   /* v71: the task card reads the Query Centre's own rows for the dates it draws */
   const taskCtx = useMemo<TaskCtx>(
@@ -666,6 +669,7 @@ export const Dash58: React.FC<Dash58Props> = ({
               <div className="d2-feed" data-d2="feed">
                 {loading ? <FeedSkeleton /> : pre ? <EmptyFeed onExample={example ? undefined : openExample} /> : (
                   <F1Feed loading={loading} activities={scopedActivities} queries={queries} agents={agents} manuscripts={manuscripts} userName={author} now={now}
+                    needsYou={needsYou}
                     under={reminderNode && firstQuery ? { queryId: firstQuery.id, node: reminderNode } : null} />
                 )}
               </div>
