@@ -61,6 +61,7 @@ import { materialRowsFromAgent } from "../../lib/agentMaterials";
 import { materialWords } from "../../lib/agentPanel";
 import type { AgentFacts as Facts24 } from "../../lib/contactList";
 import { AgentCardPanel24 } from "./contact/AgentCardPanel24";
+import { AgentCardPanel262, requestCardClose, type CloseGuard } from "./contact/AgentCardPanel262";
 import { agentHistory } from "../../lib/agentHistory";
 import { destroyManifest } from "../../lib/cascade";
 import type { ContactView, Group26Key } from "../../lib/contactListMemory";
@@ -863,6 +864,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const cardNotes = useAgentNotes(notesAgent, currentUser?.id ?? null, writeAgentPatch);
   /* picking another agent while the edit mode has changes asks first (the drawer's discard confirm); the pick waits */
   const editLeave = useRef<(() => void) | null>(null);
+  /* v26.2 D — the card's discard guard: the host asks it before ✕ or Esc closes the card */
+  const cardGuard = useRef<CloseGuard | null>(null);
   const pendingPick = useRef<string | null>(null);
   const pickCard = useCallback((id: string) => {
     if (editLeave.current && id !== cardId) { pendingPick.current = id; editLeave.current(); return; }
@@ -1093,11 +1096,19 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             <ContactLogFlow seed={logSeed} activeMsId={scoped?.id ?? null} onClose={() => setLogSeed(null)} />
           </AgentCardPanel24>
         ) : null}
+        {/* v26.2 A — THE PANEL IS THE CARD: no backdrop or padding, leaning, an arrival swing (once; paging swaps the
+            content in the same host) */}
         {cardFacts && active && !logSeed ? (
-          <AgentCardPanel24 agentId={cardFacts.agent.id} onClose={() => setCardId(null)}>
-            <AgentCard24 {...cardPropsFor(cardFacts, cardIndex, drawnOrder.length,
-              (d) => { const n = drawnOrder[cardIndex + d]; if (n) pickCard(n); }, (id) => pickCard(id), () => setCardId(null))} />
-          </AgentCardPanel24>
+          <AgentCardPanel262 agentId={cardFacts.agent.id} onClose={() => setCardId(null)} guardRef={cardGuard}>
+            <div className="cl262-card" data-cl262="card">
+              <div className="cl262-frame" data-cl262="frame">
+                <div className="cl262-scroll" data-cl262="scroll">
+                  <AgentCard24 {...cardPropsFor(cardFacts, cardIndex, drawnOrder.length,
+                    (d) => { const n = drawnOrder[cardIndex + d]; if (n) pickCard(n); }, (id) => pickCard(id), requestCardClose)} />
+                </div>
+              </div>
+            </div>
+          </AgentCardPanel262>
         ) : null}
         </>
         )}

@@ -1,0 +1,50 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Contact list v26.2 (design-refs/contact-list-v26-2/) — the agent card as the landing page's card, with editing on
+ * the card. The host and the card portal to document.body, so no page token reaches them: colours are literals and the
+ * faces are the shell's `:root` ones (`--sp-type`, `--sp-serif`, `--font-mono`).
+ *
+ * ⚠️ brand.tsx names bare spans, paragraphs and headings as the body faces at runtime: the faces here carry `!important`.
+ */
+
+/* ═════════ A · the host: no backdrop, no padding, no background ═════════ */
+.cl262-panel {
+  position: fixed; z-index: 61; top: 14px; bottom: 14px; right: 16px; width: 580px; box-sizing: border-box;
+  padding: 0; background: none; box-shadow: none; pointer-events: none;
+}
+@media (max-width: 1280px) { .cl262-panel { width: 540px; } }
+.cl262-lean {
+  height: 100%; pointer-events: auto; transform-origin: 70% 20%; transform: rotate(-1.2deg);
+  transition: transform 350ms cubic-bezier(.2, .8, .2, 1);
+}
+.cl262-lean[data-editing] { transform: rotate(0deg); }
+/* arrival: the host slides in while the card swings into its lean, once */
+.cl262-panel[data-arrive] { animation: cl262-in 420ms cubic-bezier(.2, .9, .25, 1.05) both; }
+.cl262-panel[data-arrive] .cl262-lean { animation: cl262-swing 700ms cubic-bezier(.2, .8, .2, 1); }
+.cl262-panel[data-leave] { animation: cl262-out 300ms cubic-bezier(.4, 0, .6, 1) forwards; }
+@keyframes cl262-in { from { transform: translateX(120%); } to { transform: translateX(0); } }
+@keyframes cl262-out { from { transform: translateX(0); } to { transform: translateX(120%); } }
+@keyframes cl262-swing {
+  0% { transform: rotate(3deg) translateX(30px); }
+  60% { transform: rotate(-2deg); }
+  100% { transform: rotate(-1.2deg); }
+}
+.cl262-panel[data-reduce] .cl262-lean { transition: none; }
+@media (prefers-reduced-motion: reduce) {
+  .cl262-panel, .cl262-panel .cl262-lean { animation: none !important; transition: none !important; }
+}
+
+/* the card: AgentPaperCard, framed, filling the height — white, padding 10, radius 22, the frame inside it */
+.cl262-card {
+  box-sizing: border-box; height: 100%; display: flex; flex-direction: column; padding: 10px; border-radius: 22px; background: #fff;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, .08), 0 40px 70px -30px rgba(28, 19, 15, .55), 0 12px 24px -16px rgba(28, 19, 15, .35);
+}
+.cl262-card > .cl262-frame, .cl262-card.apc > .apc-frame {
+  position: relative; flex: 1 1 auto; min-height: 0; box-sizing: border-box; display: flex; flex-direction: column;
+  border: 1px solid #a5837b; border-radius: 13px; overflow: hidden; background: #fff;
+}
+.cl262-frame > .cl262-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+/* the editor the card hands over to (until Part C) straightens it too */
+.cl262-lean:has([data-cl24="agent-card"][data-editing]) { transform: rotate(0deg); }
