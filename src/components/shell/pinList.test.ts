@@ -17,6 +17,16 @@ describe("QC138.6 A1 · one pin for both lists", () => {
   for (const [page, file] of Object.entries(PAGES)) {
     it(`${page}: uses usePinList("${page}") and PinListButton`, () => {
       const src = code(file) + (page === "queries" ? code("src/components/queries/centre/QcList138.tsx") : "");
+      /* RE-POINTED by Contact list v26 B: full screen is RETIRED on the Contact list (the page is one list in one card), so
+         it has no pin at all — the law "one pin, the shared hook" now holds for the Query Centre alone, and the Contact
+         list is held to having none (no hook, no pin button, no address book). */
+      if (page === "agents") {
+        expect(src).not.toMatch(/usePinList\(/);
+        expect(src).not.toMatch(/<ContactAddressBook24\b/);
+        expect(src).toMatch(/<ContactSheet26\b/);
+        expect(code("src/components/agents/contact/ContactSheet26.tsx")).not.toMatch(/data-pin-list/);
+        return;
+      }
       expect(src).toMatch(new RegExp(`usePinList\\("${page}"`));
       /* RETARGETED (Contact list v24 B1/D2): the Contact list's pin is the list sheet's "Full screen" button in its navy
          bar (ContactSheet24) and full screen's "Exit full screen" in the cream row (ContactAddressBook24). The

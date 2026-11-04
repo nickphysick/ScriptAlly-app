@@ -46,6 +46,9 @@ import {
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { ContactHeader26 } from "./contact/ContactHeader26";
 import { applyPick, headerFigures, pickOn } from "../../lib/contactV26";
+import { SET_LABEL } from "../../lib/contactV24";
+/** v26 E — a set the page narrowed to from a link, in the applied row's words ("Querying" for Your move + With the agent) */
+const setsLabel = (sets: readonly SetKey[]): string => (sets.length === 2 && sets.includes("you") && sets.includes("agent") ? "Querying" : sets.map((k) => SET_LABEL[k]).join(" + "));
 import { ContactLogFlow } from "./contact/ContactLogFlow";
 import { hostContactLog, type ContactLogSeed } from "../../lib/contactLogStore";
 import { GLANCE_SETS } from "../../lib/contactV25";
@@ -1072,6 +1075,17 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
           filters={filters} onFilters={setFilters} onClearAll={clearFilters} search={search} onSearch={setSearch}
           genreWord={(raw) => genreLabel(raw, personalGenres)} genreHit={bookHit}
           openId={cardId} onOpen={pickCard} onJump={() => tickGuide.current("pin")}
+          wouldShow={(f) => factsAll.reduce((n, x) => n + (inPool(x) && inSet(x, sets) && matchesContactFilters(x, f) ? 1 : 0), 0)}
+          gapsOf={(id) => agentGapLine(hk, id)?.words ?? null}
+          onFill={(id) => {
+            if (!agents.some((x) => x.id === id)) return;
+            const g = agentGapAction(hk, id);
+            setHkOpenRef.current(false);
+            setCardId(id);
+            setEditReq({ id, seq: Date.now(), edit: { focus: g ? GAP_FOCUS[g.first].focus : "genres" } });
+          }}
+          setChip={sets ? { label: setsLabel(sets), onDrop: () => setSets(null) } : null}
+          onClearFilters={() => { setFilters(emptyContactFilters()); setSets(null); setGlance(null); }}
           onExport={(rows) => downloadAgentsCsv(rows, (raw) => genreLabel(raw, personalGenres))} />
         {/* v25.1 C4 — the top bar's "+ Log a query" opens here, in the agent card's panel, and never leaves the page */}
         {logSeed && active ? (

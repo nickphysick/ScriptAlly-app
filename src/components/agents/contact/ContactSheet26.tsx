@@ -20,17 +20,17 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useSta
 import { StatusDot } from "../../StatusDot";
 import { QueryStatus } from "../../../types";
 import { agentInitials, agentPrimary } from "../../../lib/agentDisplay";
-import { type AgentFacts, type ContactFilters, type SortKey, genreList, hasMissingDetails } from "../../../lib/contactList";
+import { type AgentFacts, type ContactFilters, type SortKey, appliedFilters, contactFilterCount, genreList } from "../../../lib/contactList";
 import { STAGE_NAME } from "../../../lib/qcSummary";
 import { CL_SORT_FIELDS } from "../../../lib/cardsSort";
 import { SortChipButton, SortChipMenu } from "../../shell/SortChip";
 import { usePopover } from "../../shell/ListPills";
 import { GROUP_ICON150 } from "../../queries/centre/QcToolbar140";
 import { FilterMenu } from "./ContactFilters24";
-import { NQ_RING, SetGlyph } from "./ContactSheet24";
+import { GroupMenu, NQ_RING, SetGlyph } from "./ContactSheet24";
 import { GenrePills } from "../../shared/agentRowParts";
 import type { Group26Key } from "../../../lib/contactListMemory";
-import { drawnSections, sections, type Section } from "../../../lib/contactV26";
+import { GROUP26_OPTIONS, PICKS26, applyPick, drawnSections, pickOn, sections, type Pick26Key, type Section } from "../../../lib/contactV26";
 import type { StatusKey } from "../../../lib/contactList";
 import "./contactV26.css";
 
@@ -57,6 +57,16 @@ export interface ContactSheet26Props {
   onExport: (rows: readonly AgentFacts[]) => void;
   /** the page guide's tick: an index entry was used */
   onJump?: () => void;
+  /** E — how many rows the list would show under these filters (Find and any page set still applied: `wouldShow`) */
+  wouldShow: (f: ContactFilters) => number;
+  /** E — Housekeeping's gap words for an agent ("reply time", "wishlist"…), in its order, or null */
+  gapsOf: (id: string) => readonly string[] | null;
+  /** E — "Fill in →": the card's editor at the agent's first missing field */
+  onFill: (id: string) => void;
+  /** E — a set the page narrowed to from a link (the dashboard's Agents on file), shown as its own applied chip */
+  setChip?: { label: string; onDrop: () => void } | null;
+  /** E — the applied row's "Clear filters" (the filters and any such set; Find is the band's own) */
+  onClearFilters: () => void;
 }
 
 const I = {
@@ -144,8 +154,11 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
     return () => { sc.removeEventListener("scroll", on, { capture: true } as EventListenerOptions); window.removeEventListener("resize", on); if (raf) cancelAnimationFrame(raf); };
   }, [read]);
 
-  const filterN = p.filters.genres.length + (p.filters.open === "open" ? 1 : 0) + (p.filters.missing ? 1 : 0)
-    + (p.filters.action ? 1 : 0) + (p.filters.queried !== "either" ? 1 : 0) + (p.filters.status.length ? 1 : 0);
+  /* E — one count per applied-filters chip (the pick "Ready to query" sets two filters, and shows two chips) */
+  const filterN = contactFilterCount(p.filters) + (p.setChip ? 1 : 0);
+  const applied = useMemo(() => appliedFilters(p.filters, (k) => p.genreWord(k) || k), [p.filters, p]); // eslint-disable-line react-hooks/exhaustive-deps
+  const on = pickOn(p.filters);
+  const picks = PICKS26.map((k) => ({ key: k.key, title: k.title, line: k.line, on: on === k.key, n: p.wouldShow(on === k.key ? p.filters : applyPick(p.filters, k.key)) }));
   const allGenres = useMemo(
     () => genreList(p.all, (k, raw) => p.genreWord(raw) || k).sort((a, b) => a.label.localeCompare(b.label)),
     [p.all, p], // eslint-disable-line react-hooks/exhaustive-deps
@@ -180,6 +193,18 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
             </span>
           </div>
           {p.group !== "none" && drawn.length > 0 ? <Index26 secs={secs} current={current ?? drawn[0]?.key ?? null} onJump={jump} /> : null}
+          {applied.length > 0 || p.setChip ? (
+            <div className="cl26-ap" data-cl26="applied" role="status">
+              <span className="cl26-aps">Showing <b>{p.pool.length}</b> of {p.all.length}</span>
+              {p.setChip ? (
+                <button type="button" className="cl26-apc" data-cl26="applied-chip" data-k="set" onClick={p.setChip.onDrop} aria-label={`Remove ${p.setChip.label}`}>{p.setChip.label} ×</button>
+              ) : null}
+              {applied.map((a) => (
+                <button key={a.key} type="button" className="cl26-apc" data-cl26="applied-chip" data-k={a.key} onClick={() => p.onFilters(a.drop(p.filters))} aria-label={`Remove ${a.label}`}>{a.label} ×</button>
+              ))}
+              <button type="button" className="cl26-apx" data-cl26="applied-clear" onClick={p.onClearFilters}>Clear filters</button>
+            </div>
+          ) : null}
           <div className="cl26-th" role="row" data-cl26="heads">
             <span className="cl26-thm" aria-hidden="true" />
             <span role="columnheader" aria-sort={p.sortKey === "surname" ? (p.reversed ? "descending" : "ascending") : "none"}>
@@ -230,8 +255,8 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
       </div>
 
       {pop.open === "filters" && pop.anchor ? (
-        <FilterMenu anchor={pop.anchor} filters={p.filters} onFilters={p.onFilters} genres={allGenres} openN={openN}
-          missingN={p.all.filter(hasMissingDetails).length}
+        <FilterMenu anchor={pop.anchor} filters={p.filters} onFilters={p.onFilters} genres={allGenres} openN={openN} className="cl26-fpop"
+          picks={picks} onPick={(k) => p.onFilters(applyPick(p.filters, k as Pick26Key))} genreHit={p.genreHit}
           showing={p.pool.length} total={p.all.length} onExport={() => p.onExport(p.pool)} />
       ) : null}
       {pop.open === "sort" && pop.anchor ? (
@@ -239,14 +264,7 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
           onChange={(v) => p.onSort(v as { key: SortKey; reversed: boolean })} />
       ) : null}
       {pop.open === "group" && pop.anchor ? (
-        <div className="lpop cl26-gpop" data-lpop="group" data-cl26="group-menu" role="menu" aria-label="Group by"
-          style={{ top: pop.anchor.getBoundingClientRect().bottom + 8, left: Math.max(12, Math.min(pop.anchor.getBoundingClientRect().right - 300, window.innerWidth - 312)) }}>
-          {(["letter", "status", "none"] as const).map((g) => (
-            <button key={g} type="button" role="menuitemradio" aria-checked={p.group === g} data-cl26="group-opt" data-v={g} onClick={() => { p.onGroup(g); pop.close(); }}>
-              <b>{GROUP26_LABEL[g]}</b>
-            </button>
-          ))}
-        </div>
+        <GroupMenu anchor={pop.anchor} options={GROUP26_OPTIONS} value={p.group} className="cl26-gpop" onPick={(g) => { p.onGroup(g); pop.close(); }} />
       ) : null}
     </section>
   );
@@ -284,6 +302,7 @@ const Row26: React.FC<{ x: AgentFacts; p: ContactSheet26Props }> = ({ x, p }) =>
   const agency = (a.name ?? "").trim() ? (a.agency ?? "").trim() : "";
   const sub = [agency, x.loc].filter(Boolean).join(" · ");
   const qw = queryWords(x);
+  const gaps = p.filters.missing ? p.gapsOf(a.id) : null;
   const open = () => p.onOpen(a.id);
   return (
     <div role="row" tabIndex={0} className="cl26-row" data-cl26="row" data-id={a.id} data-k={x.stand} aria-current={p.openId === a.id ? "true" : undefined}
@@ -292,7 +311,14 @@ const Row26: React.FC<{ x: AgentFacts; p: ContactSheet26Props }> = ({ x, p }) =>
       onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); open(); } }}>
       <span role="cell" className="cl26-who" data-cl26="agent">
         <Disc26 x={x} />
-        <span className="cl26-whot"><b data-cl26="name">{name}</b>{sub ? <small data-cl26="agency">{sub}</small> : null}</span>
+        <span className="cl26-whot"><b data-cl26="name">{name}</b>{sub ? <small data-cl26="agency">{sub}</small> : null}
+          {/* E — while Missing details is on: what this agent is missing, and the door to fill it in */}
+          {gaps && gaps.length ? (
+            <span className="cl26-miss" data-cl26="missing-line">
+              Missing {gaps.join(", ")} · <button type="button" data-cl26="fill" onClick={() => p.onFill(a.id)}>Fill in →</button>
+            </span>
+          ) : null}
+        </span>
       </span>
       <span role="cell" className="cl26-want" data-cl26="want">
         <GenrePills genres={a.genres ?? []} hit={p.genreHit} word={p.genreWord} max={Infinity} empty="No genres yet" fit />

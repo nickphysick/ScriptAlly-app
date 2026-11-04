@@ -12,7 +12,7 @@
  * Nothing here is stored. Every figure is the page's own facts (`AgentFacts`) or Housekeeping's own model.
  */
 import type { AgentFacts, ContactFilters, SortKey, StatusKey } from "./contactList";
-import { QUICK_PICKS, STATUS_GROUP_ORDER, STATUS_LABEL, addedMs, surnameInitial } from "./contactList";
+import { GROUP_OPTIONS, QUICK_PICKS, STATUS_GROUP_ORDER, STATUS_LABEL, addedMs, surnameInitial } from "./contactList";
 import { healthTone, RING_TONES } from "./contactV256";
 import { formatDate } from "./dates";
 import { SET_LABEL, SET_ORDER, type SetKey } from "./contactV24";
@@ -69,6 +69,13 @@ export function applyPick(f: ContactFilters, k: Pick26Key): ContactFilters {
 /* ══ Part C/D · the sections the list draws ══════════════════════════════════════════════════════════════════════ */
 
 export type Group26 = "letter" | "status" | "none";
+/** Part E — the Group menu's three: the library's own options (`GROUP_OPTIONS`, which already holds Letter), each with v26's
+ *  line. Action required, Country and Priority stay in the library and out of the menu. */
+export const GROUP26_OPTIONS: readonly { key: Group26; label: string; line: string }[] = (["letter", "status", "none"] as const).map((k) => ({
+  key: k,
+  label: GROUP_OPTIONS.find((g) => g.key === k)!.label,
+  line: k === "letter" ? "Surname initial, in the margin, A to Z" : k === "status" ? "Your move, querying, not queried, closed" : "One list, in the order you sort by",
+}));
 export const GROUP26: readonly Group26[] = ["letter", "status", "none"];
 /** the four sorts the page offers (the chip's menu and the two headings) */
 export const SORTS26: readonly SortKey[] = ["surname", "added", "reply", "status"];

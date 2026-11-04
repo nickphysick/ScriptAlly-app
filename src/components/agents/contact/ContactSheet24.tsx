@@ -229,32 +229,39 @@ export const ContactSheet24: React.FC<ContactSheet24Props> = (p) => {
           onChange={(v) => p.onSort(v as { key: SortKey; reversed: boolean })} />
       ) : null}
       {pop.open === "group" && pop.anchor ? (
-        <GroupMenu anchor={pop.anchor} grouped={p.grouped} onGrouped={(g) => { p.onGrouped(g); pop.close(); }} />
+        <GroupMenu anchor={pop.anchor} options={GROUP24} value={p.grouped ? "status" : "none"} onPick={(g) => { p.onGrouped(g === "status"); pop.close(); }} />
       ) : null}
     </div>
   );
 };
 
-/* ── the Group by menu: Status, or none ─────────────────────────────────────────────────────────────────────── */
-const GroupMenu: React.FC<{ anchor: HTMLElement; grouped: boolean; onGrouped: (g: boolean) => void }> = ({ anchor, grouped, onGrouped }) => {
+/* ── the Group by menu ─────────────────────────────────────────────────────────────────────────────────────── */
+/* Contact list v26 E — EXTENDED IN PLACE: the menu takes its options (a bold name and a line each) and the chosen key, so
+   v24's two (Status, No grouping) and v26's three (Letter, Status, No grouping) are one component. */
+export interface GroupMenuOption<K extends string> { key: K; label: string; line: string }
+export function GroupMenu<K extends string>({ anchor, options, value, onPick, className }: {
+  anchor: HTMLElement; options: readonly GroupMenuOption<K>[]; value: K; onPick: (k: K) => void; className?: string;
+}) {
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
   useLayoutEffect(() => {
     const r = anchor.getBoundingClientRect();
     setPos({ top: r.bottom + 8, left: Math.max(12, Math.min(r.right - 300, window.innerWidth - 312)) });
   }, [anchor]);
-  const opt = (on: boolean, label: string, line: string, v: boolean) => (
-    <button type="button" role="menuitemradio" aria-checked={on} className="cl24-gopt" data-cl24="group-opt" data-v={v ? "status" : "none"} onClick={() => onGrouped(v)}>
-      <i aria-hidden="true">{on ? "●" : ""}</i><span><b>{label}</b><small>{line}</small></span>
-    </button>
-  );
   return (
-    <div className="lpop cl24-gpop" data-lpop="group" data-cl24="group-menu" role="menu" aria-label="Group by" style={{ top: pos?.top ?? -9999, left: pos?.left ?? -9999 }}>
+    <div className={`lpop cl24-gpop${className ? ` ${className}` : ""}`} data-lpop="group" data-cl24="group-menu" role="menu" aria-label="Group by" style={{ top: pos?.top ?? -9999, left: pos?.left ?? -9999 }}>
       <h6>Group by</h6>
-      {opt(grouped, "Status", "Your move, querying, not queried, closed", true)}
-      {opt(!grouped, "No grouping", "One list, in the order you sort by", false)}
+      {options.map((o) => (
+        <button key={o.key} type="button" role="menuitemradio" aria-checked={value === o.key} className="cl24-gopt" data-cl24="group-opt" data-v={o.key} onClick={() => onPick(o.key)}>
+          <i aria-hidden="true">{value === o.key ? "●" : ""}</i><span><b>{o.label}</b><small>{o.line}</small></span>
+        </button>
+      ))}
     </div>
   );
-};
+}
+const GROUP24: readonly GroupMenuOption<"status" | "none">[] = [
+  { key: "status", label: "Status", line: "Your move, querying, not queried, closed" },
+  { key: "none", label: "No grouping", line: "One list, in the order you sort by" },
+];
 
 /* ── a List row ─────────────────────────────────────────────────────────────────────────────────────────────── */
 /* v25.2 A — the QueryHawk row: the typewriter name over agency · city in mono; the genre pills; replies in; the tally

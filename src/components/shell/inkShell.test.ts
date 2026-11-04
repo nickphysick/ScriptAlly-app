@@ -86,7 +86,8 @@ describe("ink fix-ups — the header card (the Query Centre's; the Contact list 
     /* Contact list v24: the page-local header is `ContactHeader25` (v25; was `ContactHeader24`) (the shared PageHeaderCard, as Versions and the Query
        Centre v149 draw it); v17–v23 drew `ContactLightHeader`, and before v17 `ContactOpenHeader`. The law is unchanged:
        no shared PageHeader over the list. */
-    expect(contacts).toMatch(/<ContactHeader25\b/);
+    /* RE-POINTED by Contact list v26 A: the page-local header is now `ContactHeader26`, the navy panel. */
+    expect(contacts).toMatch(/<ContactHeader26\b/);
     for (const f of ["src/components/QueryAnalytics.tsx"]) {
       expect(readFileSync(f, "utf8"), f).not.toMatch(/\n\s+card\n|\bcard=\{/);
     }
