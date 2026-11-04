@@ -49,8 +49,6 @@ import { applyPick, headerFigures, pickOn } from "../../lib/contactV26";
 import { SET_LABEL } from "../../lib/contactV24";
 /** v26 E — a set the page narrowed to from a link, in the applied row's words ("Querying" for Your move + With the agent) */
 const setsLabel = (sets: readonly SetKey[]): string => (sets.length === 2 && sets.includes("you") && sets.includes("agent") ? "Querying" : sets.map((k) => SET_LABEL[k]).join(" + "));
-import { ContactLogFlow } from "./contact/ContactLogFlow";
-import { hostContactLog, type ContactLogSeed } from "../../lib/contactLogStore";
 import { GLANCE_SETS } from "../../lib/contactV25";
 import { SheetSkeleton } from "./contact/ContactSheet24";
 import { ContactSheet26 } from "./contact/ContactSheet26";
@@ -60,7 +58,6 @@ import { heardWords, replyWeeksOf, storyBlocks } from "../../lib/contactStory255
 import { materialRowsFromAgent } from "../../lib/agentMaterials";
 import { materialWords } from "../../lib/agentPanel";
 import type { AgentFacts as Facts24 } from "../../lib/contactList";
-import { AgentCardPanel24 } from "./contact/AgentCardPanel24";
 import { AgentCardPanel262, requestCardClose, type CloseGuard } from "./contact/AgentCardPanel262";
 import { AgentCard262 } from "./contact/AgentCard262";
 import { agentHistory } from "../../lib/agentHistory";
@@ -194,14 +191,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   useEffect(() => { writeListView({ group: groupKey, sort: sortKey, reversed, view, byStatus, group26 }); }, [groupKey, sortKey, reversed, view, byStatus, group26]);
   /* v24 B2 — the agent whose card is open (Part C draws it); its row and card are marked */
   const [cardId, setCardId] = useState<string | null>(null);
-  /* v25.1 C4 — the in-place log flow: its seed while open. The page hosts it while it is the page on screen (and not a
-     sandbox); opening it closes the agent card, as one right-hand panel at a time. */
-  const [logSeed, setLogSeed] = useState<ContactLogSeed | null>(null);
-  useEffect(() => {
-    if (!active || sandbox) return undefined;
-    return hostContactLog((seed) => { setCardId(null); setLogSeed(seed); });
-  }, [active, sandbox]);
-  useEffect(() => { if (!active) setLogSeed(null); }, [active]);
   useEffect(() => { writeListVisit({ filters, search, glance }); }, [filters, search, glance]);
   const pop = usePopover<ContactPop>();
   /* v16 §E — FULL SCREEN is the shared `useFullScreenList` (Comparable titles v25 built it for both pages): the URL
@@ -1108,15 +1097,11 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
           setChip={sets ? { label: setsLabel(sets), onDrop: () => setSets(null) } : null}
           onClearFilters={() => { setFilters(emptyContactFilters()); setSets(null); setGlance(null); }}
           onExport={(rows) => downloadAgentsCsv(rows, (raw) => genreLabel(raw, personalGenres))} />
-        {/* v25.1 C4 — the top bar's "+ Log a query" opens here, in the agent card's panel, and never leaves the page */}
-        {logSeed && active ? (
-          <AgentCardPanel24 agentId="__log" onClose={() => setLogSeed(null)}>
-            <ContactLogFlow seed={logSeed} activeMsId={scoped?.id ?? null} onClose={() => setLogSeed(null)} />
-          </AgentCardPanel24>
-        ) : null}
+        {/* v26.3 B — Log a query on this page is the app's shared log drawer (App's navigate bridge and the card's own
+            button both call openQueryDrawer); the v24 panel's in-place log flow is retired */}
         {/* v26.2 A — THE PANEL IS THE CARD: no backdrop or padding, leaning, an arrival swing (once; paging swaps the
             content in the same host) */}
-        {cardFacts && active && !logSeed ? (
+        {cardFacts && active ? (
           <AgentCardPanel262 agentId={cardFacts.agent.id} onClose={() => setCardId(null)} guardRef={cardGuard}>
             {/* v26.2 B — the card's face: AgentPaperCard's panel variant, the landing sections, the next-step box */}
             <AgentCard262 {...cardPropsFor(cardFacts, cardIndex, drawnOrder.length,

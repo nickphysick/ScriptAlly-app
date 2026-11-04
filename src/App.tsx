@@ -83,7 +83,6 @@ import { openNewAgentCard } from "./lib/agentCardStore";
 import { UndoBar } from "./components/queryActions/UndoBar";
 import { Palette, X, Check, HelpCircle, Bell, Settings, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { openContactLog } from "./lib/contactLogStore";
 
 /** TEMP dev harness for the shared Form11Drawer (#/drawer-lab): renders EditQueryDrawer over a mock
  *  query so the shell can be reviewed without signing in. Sits inside DbProvider, so the drawer's
@@ -312,8 +311,12 @@ function AppContent() {
   // manuscript (the bookplate hero / Send-first) — every existing two-arg call is untouched.
   const handleNavigate = (tab: string, subPageName?: string, opts?: { agentId?: string; manuscriptId?: string }) => {
     if (subPageName === "Log a query" || subPageName === "Send a query") {
-      /* Contact list v25.1 C4 — on the Contact list the log flow opens IN PLACE, in its panel; elsewhere unchanged */
-      if (window.location.pathname === "/agents" && openContactLog({ agentId: opts?.agentId ?? null, manuscriptId: opts?.manuscriptId ?? null })) return;
+      /* Contact list v26.3 B — on the Contact list, Log a query opens the app's shared log drawer IN PLACE, the agent set
+         (the v24 panel's log path is retired); elsewhere unchanged */
+      if (window.location.pathname === "/agents") {
+        openQueryDrawer({ mode: "log", ...(opts?.agentId ? { agentId: opts.agentId } : {}), ...(opts?.manuscriptId ? { manuscriptId: opts.manuscriptId } : {}) });
+        return;
+      }
       // Inline creation lives on the hub, so this one NAVIGATES (the popup did not) and seeds it.
       setCreateQuerySeed({ agentId: opts?.agentId ?? null, manuscriptId: opts?.manuscriptId ?? null });
       navigate(pathFor("queries"));
