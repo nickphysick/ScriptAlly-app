@@ -241,9 +241,8 @@ describe("/queries/packages renders", () => {
     /* v41 C–E: the navy header (no art), the batch row and the list card with this package's row */
     expect(html).toContain('data-pk41="header"');
     expect(html).toContain("What each agent receives for <b>");
-    expect(html).toContain('data-pk41="list"');
-    expect(html).toContain('data-pk41-row="pk1"');
-    expect(html).toContain(">1 package<");
+    /* v41 (workspace): the full-width list with its headings and per-row buttons is retired; the rail replaces it */
+    expect(html).not.toContain('data-pk41="list"');
     expect(html).toContain('data-pk41="batch"');
     expect(html).not.toContain("Bundle it. Send it. Know what went.");
     expect(html).toContain('data-pk26="open"');

@@ -208,68 +208,6 @@
   .p41 .p41-bt-k:not(.p41-bt-kn) .p41-bt-ks { display: inline; }
 }
 
-/* ══ E · THE LIST: one card under a navy bar (ref `.k4-list`; screens 01, 13, 15) ══════════════════════════════════════
-   White, radius 20, the framed shadow, clipped. The bar #2d3a50 with the count (typewriter 21) and the index tabs
-   (typewriter 15, the count at 55%; selected = a white pill, ink text; none = disabled at 40%); "Show retired (n)"
-   right. Headings on #fbf9f6; rows on hairlines, 74 minimum. ⚠️ brand.tsx forces h2's face: two classes + !important. */
-@media (min-width: 768px) {
-  .p41 .p41-list {
-    margin: 0 0 34px; border-radius: 20px; background: #fff; overflow: hidden;
-    box-shadow: 0 1px 2px rgba(28, 19, 15, 0.08), 0 22px 40px -22px rgba(28, 19, 15, 0.32);
-  }
-  .p41 .p41-lb { display: flex; align-items: center; gap: 18px; padding: 12px 14px 12px 24px; background: #2d3a50; color: #f4eee5; }
-  .p41 .p41-lb h2.p41-lb-h { flex: none; margin: 0; font: 400 21px/1.3 var(--sp-type) !important; letter-spacing: 0 !important; text-transform: none !important; color: #fffaf3 !important; }
-  .p41 .p41-idx { display: flex; gap: 4px; margin-left: 8px; min-width: 0; }
-  .p41 .p41-idx button {
-    display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border: 0; border-radius: 7px;
-    background: none; color: #f4eee5; font: 400 15px var(--sp-type); white-space: nowrap; cursor: pointer;
-  }
-  .p41 .p41-idx button i { font: 400 13px var(--sp-type); font-style: normal; opacity: .55; }
-  .p41 .p41-idx button:hover { background: rgba(244, 238, 229, 0.14); }
-  .p41 .p41-idx button[aria-selected="true"] { background: #fff; color: #1c130f; }
-  .p41 .p41-idx button:disabled { opacity: .4; cursor: default; background: none; }
-  .p41 .p41-idx button:focus-visible { outline: 2px solid #f4eee5; outline-offset: 1px; }
-  .p41 .p41-lb .p41-ret { margin-left: auto; color: #f4eee5; font: italic 14.5px var(--sp-serif); text-decoration-color: rgba(244, 238, 229, 0.4); }
-  .p41 :is(.p41-hd2, .p41-row) {
-    display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1.15fr) 70px 130px 130px; align-items: center; column-gap: 16px;
-  }
-  .p41 .p41-hd2 { padding: 12px 24px 10px; background: #fbf9f6; border-bottom: 1px solid rgba(28, 19, 15, 0.1); }
-  .p41 .p41-hd2 > span { font: 400 14px var(--sp-type); color: rgba(28, 19, 15, 0.55); }
-  .p41 .p41-row { box-sizing: border-box; min-height: 74px; padding: 14px 24px; border-bottom: 1px solid rgba(28, 19, 15, 0.1); cursor: pointer; }
-  .p41 .p41-row:hover { background: #fcfaf7; }
-  .p41 .p41-row.p41-on { background: #f3f5f8; box-shadow: inset 3px 0 0 #2d3a50; }
-  .p41 .p41-row.p41-ret { opacity: .7; }
-  .p41 .p41-row:focus-visible { outline: 2px solid #2d3a50; outline-offset: -2px; }
-  .p41 .p41-rn { display: flex; align-items: center; gap: 14px; min-width: 0; }
-  .p41 .p41-rn > span { min-width: 0; }
-  .p41 .p41-rn b { display: flex; align-items: center; gap: 10px; font: 400 19px/1.3 var(--sp-type); color: #1c130f; }
-  .p41 .p41-rn small { display: block; margin-top: 4px; font: italic 14.5px var(--sp-serif); color: rgba(28, 19, 15, 0.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .p41 .p41-act { flex: none; padding: 3px 7px; border-radius: 5px; background: #2d3a50; color: #fff; font: 500 9.5px/1.2 var(--font-mono, monospace); font-style: normal; letter-spacing: .14em; text-transform: uppercase; }
-  .p41 .p41-st {
-    display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 13px 0 11px; border-radius: 16px;
-    background: #f5efe7; font: 400 15.5px var(--sp-serif); color: #1c130f; white-space: nowrap;
-  }
-  .p41 .p41-st > i { width: 9px; height: 9px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px currentColor; }
-  .p41 .p41-st-out > i { background: #2d3a50; box-shadow: none; }
-  .p41 .p41-st-ready > i { background: #3e7d5a; box-shadow: none; }
-  .p41 .p41-rc { font: 400 18px var(--sp-type); color: #1c130f; }
-  .p41 .p41-rr { font: 400 16px var(--sp-serif); color: rgba(28, 19, 15, 0.6); }
-  .p41 .p41-rr b { font: 400 18px var(--sp-type); color: #1c130f; }
-  .p41 .p41-ra { justify-self: end; display: flex; align-items: center; gap: 8px; }
-  .p41 .p41-ra em { font: italic 14.5px var(--sp-serif); color: rgba(28, 19, 15, 0.45); }
-  .p41 .p41-empty { margin: 0; padding: 22px 24px; border-bottom: 1px solid rgba(28, 19, 15, 0.1); font: italic 16px var(--sp-serif); color: rgba(28, 19, 15, 0.6); }
-  .p41 .p41-newrow {
-    display: flex; align-items: center; gap: 8px; width: 100%; height: 56px; padding: 0 24px; border: 0; background: none;
-    font: 600 16px var(--sp-serif); color: #2d3a50; cursor: pointer;
-  }
-  .p41 .p41-newrow:hover { background: #fcfaf7; }
-  .p41 .p41-newrow:focus-visible { outline: 2px solid #2d3a50; outline-offset: -2px; }
-}
-@media (min-width: 768px) and (max-width: 1400px) {
-  .p41 :is(.p41-hd2, .p41-row) { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.2fr) 50px 110px 110px; column-gap: 12px; }
-  .p41 .p41-idx button { padding: 0 9px; }
-}
-
 /* ⚠️ brand.tsx names `p, span, div, button, label` as the body sans on every route (0-0-1, no !important). v39.1 answered
    it with a forced-serif rule on `.p9-pb-build *`, which v41 leaves; so the page hands those elements the face of their
    parent instead (0-1-0 — every face this sheet names is at 0-2-0 or more, so it still wins). */
@@ -279,10 +217,6 @@
 /* ⚠️ brand.tsx names bare `span`s as the sans face on every route, so the spans inside a styled run hand the face back */
 @media (min-width: 768px) {
   .p41 .p41-bt-k > span, .p41-fb .p41-fb-tx > span { font: inherit; }
-  /* a draft that needs both pieces says so in full: its pill may take two lines rather than run into Sent */
-  .p41 .p41-row > [role="cell"] { min-width: 0; }
-  .p41 .p41-st { box-sizing: border-box; max-width: 100%; height: auto; min-height: 32px; padding-top: 5px; padding-bottom: 5px; white-space: normal; line-height: 1.25; }
-  .p41 .p41-st > i { flex: none; }
 }
 
 /* ══ F · THE SHARED FRAME (Dashboard v2's card, `dash2Frame.css` on the dev line; built here page-locally because that

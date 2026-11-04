@@ -4087,7 +4087,7 @@ body[data-ct=d] .db-sep span{color:rgba(42,58,82,.6)}
 <!-- the current batch: a thin row under the header -->
 <div class="k4-bt" id="k4Bt" aria-label="Your current batch"></div>
 
-<!-- the list: one card under a navy bar, as the Contact list's -->
+<div class="k4-ws">
 <section class="k4-list" aria-label="Your packages">
  <div class="k4-lb"><h2 id="k4Cnt"></h2><div class="k4-idx" role="tablist" id="k4Seg"></div><button class="k4-lnk k4-ret" id="k4Ret"></button></div>
  <div class="k4-rows" id="k4Rows"></div>
@@ -4095,6 +4095,7 @@ body[data-ct=d] .db-sep span{color:rgba(42,58,82,.6)}
 
 <!-- the open package, as a dashboard card -->
 <section class="k4-fr2 k4-bld" id="k4Bld" aria-label="The open package"></section>
+</div>
 
 <!-- results: framed cards, as the Dashboard's -->
 <section class="k4-res" aria-labelledby="k4ResH">
@@ -4533,9 +4534,78 @@ body.k4-fbon .ftab{background:#fbefe9}body.k4-fbon .ftab .fil{fill:#fbefe9}
 .k4-fbtab button.x{text-decoration:none;color:rgba(28,19,15,.5);width:26px;height:26px;border-radius:50%}
 .k4-hero.has-tab{margin-top:0;border-top-left-radius:20px}
 @media (max-width:1400px){.fb-a p{font-size:14.5px}.k4-fbtab span{font-size:13.5px}}
+/* ===== v42 layout options ===== */
+/* both: the batch lives inside the header, as its lower strip */
+.k4-hero.wbt{flex-wrap:wrap;padding-bottom:0;row-gap:0;margin-bottom:28px}
+.k4-hero.wbt .k4-bt{flex:0 0 calc(100% + 52px);box-sizing:border-box;margin:18px -22px 0 -30px;padding:8px 22px 8px 30px;min-height:54px;border-radius:0 0 20px 20px;background:rgba(0,0,0,.16);box-shadow:none;border-top:1px solid rgba(244,238,229,.1)}
+.k4-hero.wbt .k4-btk{color:rgba(244,238,229,.62)}.k4-hero.wbt .k4-btn b{color:#fffaf3}
+.k4-hero.wbt .k4-btn .k4-ic{box-shadow:0 0 0 1.5px rgba(244,238,229,.45)}
+.k4-hero.wbt .k4-btp>span{background:rgba(244,238,229,.1);color:#f4eee5}.k4-hero.wbt .k4-btp>span.no{background:none;box-shadow:inset 0 0 0 1px rgba(244,238,229,.22);color:rgba(244,238,229,.55)}
+.k4-hero.wbt .k4-btp .k4-t.ver{background:#f4eee5;color:var(--navy)}
+.k4-hero.wbt .k4-bta .k4-lnk{color:#f4eee5}.k4-hero.wbt .k4-bte{color:#f4eee5}
+/* both: only the header is navy. List bar on paper, builder band in the package's own colour, softly */
+.lay-a .k4-lb,.lay-b .k4-lb{background:#fbf9f6;color:var(--ink);border-bottom:1px solid var(--line)}
+.lay-a .k4-lb h2,.lay-b .k4-lb h2{color:var(--ink)}
+.lay-a .k4-idx button,.lay-b .k4-idx button{color:var(--ink)}
+.lay-a .k4-idx button:hover,.lay-b .k4-idx button:hover{background:rgba(28,19,15,.05)}
+.lay-a .k4-idx button[aria-selected=true],.lay-b .k4-idx button[aria-selected=true]{background:var(--navy);color:#fff}
+.lay-a .k4-ret,.lay-b .k4-ret{color:var(--ink);text-decoration-color:rgba(28,19,15,.3)}
+.lay-a .k4-bh,.lay-b .k4-bh{background:color-mix(in srgb,var(--pc) 11%,#fff);color:var(--ink);box-shadow:inset 0 5px 0 var(--pc)}
+.lay-a .k4-bh small,.lay-b .k4-bh small{color:var(--mute)}
+.lay-a .k4-bh h2[contenteditable]:hover,.lay-b .k4-bh h2[contenteditable]:hover{border-bottom-color:rgba(28,19,15,.3)}
+.lay-a .k4-bh .k4-act,.lay-b .k4-bh .k4-act{background:var(--navy);color:#fff}
+.lay-a .k4-mk,.lay-b .k4-mk{background:var(--navy);color:#fff}
+.lay-a .k4-bst,.lay-b .k4-bst{background:#fff;box-shadow:inset 0 0 0 1px rgba(28,19,15,.12)}
+.lay-a .k4-bst i,.lay-b .k4-bst i{box-shadow:inset 0 0 0 1.5px rgba(28,19,15,.4)}
+.lay-a .k4-fig,.lay-b .k4-fig{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1px rgba(28,19,15,.12)}
+.lay-a .k4-bh .k4-ic,.lay-b .k4-bh .k4-ic{box-shadow:none}
+.lay-a .k4-ws>.k4-list{margin-bottom:34px}
+/* B: workspace. Packages down the left, the open package on the right */
+.lay-b .k4-ws{display:grid;grid-template-columns:300px minmax(0,1fr);gap:20px;align-items:start}
+.lay-b .k4-list{position:sticky;top:14px;margin:0}
+.lay-b .k4-lb{flex-wrap:wrap;gap:8px 10px;padding:14px 14px 12px 18px}
+.lay-b .k4-lb h2{flex-basis:100%;font-size:19px}
+.lay-b .k4-idx{margin:0;flex-wrap:wrap;gap:2px}.lay-b .k4-idx button{height:28px;padding:0 9px;font-size:13.5px}
+.lay-b .k4-ret{position:absolute;right:16px;top:16px;font-size:13px}.lay-b .k4-lb{position:relative}
+.lay-b .k4-hd{display:none}
+.lay-b .k4-row{grid-template-columns:minmax(0,1fr);row-gap:6px;padding:12px 16px 12px 18px;min-height:0}
+.lay-b .k4-rn b{font-size:17px}.lay-b .k4-rn small{font-size:13.5px}.lay-b .k4-rn .k4-act{font-size:8.5px;padding:2px 5px}
+.lay-b .k4-row .k4-st{margin-left:52px;height:26px;padding:0 10px 0 9px;font-size:13.5px}
+.lay-b .k4-rc,.lay-b .k4-rr,.lay-b .k4-ra{display:none}
+.lay-b .k4-newrow{height:50px;padding:0 18px;font-size:15px}
+.lay-b .k4-empty{padding:16px 18px;font-size:14.5px}
+.lay-b .k4-bb{grid-template-columns:minmax(0,1fr);gap:20px}.lay-b .k4-pv{position:static}
+@media (min-width:1700px){.lay-b .k4-bb{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.lay-b .k4-bh h2{font-size:25px}
+.lay-b .k4-res{margin-top:56px}
+@media (max-width:1400px){.lay-b .k4-ws{grid-template-columns:262px minmax(0,1fr);gap:16px}.lay-b .k4-bh .k4-bst{display:none}.lay-b .k4-bh h2{font-size:23px}}
+.k4-hero.wbt .k4-btn::before{color:rgba(244,238,229,.62)!important}
+/* B refinements: a grouped rail */
+.lay-b .k4-list{max-height:calc(100vh - 92px);display:flex;flex-direction:column}
+.lay-b .k4-rows{overflow:auto;flex:1;min-height:0}
+.lay-b .k4-lb{padding:14px 18px 12px}.lay-b .k4-idx{display:none}
+.lay-b .k4-lb h2{font-size:19px;display:flex;align-items:center;gap:8px}.lay-b .k4-lb h2 i{font-style:normal;font-size:14px;color:rgba(28,19,15,.45)}
+.k4-rg{display:flex;align-items:center;gap:8px;width:100%;padding:14px 18px 6px;border:0;background:none;font:400 13.5px var(--machine);color:rgba(28,19,15,.55);text-align:left}
+.k4-rg i{font-style:normal;opacity:.7}
+.k4-rgt{cursor:pointer;margin-top:4px;border-top:1px solid var(--line);padding-top:12px;padding-bottom:10px}.k4-rgt em{margin-left:auto;font:italic 13px var(--serif);text-decoration:underline;text-underline-offset:2px}
+.k4-rr2{display:flex;align-items:center;gap:12px;padding:10px 18px 10px 15px;border-left:3px solid transparent;cursor:pointer}
+.k4-rr2:hover{background:#fcfaf7}
+.k4-rr2.on{background:color-mix(in srgb,var(--pc) 9%,#fff);border-left-color:var(--pc)}
+.k4-rr2.ret{opacity:.65}
+.k4-rr2 .k4-ic{width:34px;height:34px;border-radius:8px}.k4-rr2 .k4-ic svg{width:17px;height:17px}
+.k4-rr2>span{min-width:0}
+.k4-rr2 b{display:flex;align-items:center;gap:7px;font:400 16.5px/1.2 var(--machine)}
+.k4-rr2 b .k4-act{font-size:8.5px;padding:2px 5px}
+.k4-rr2 small{display:block;margin-top:3px;font:400 13.5px var(--serif);color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.k4-rr2 small b{display:inline;font:600 13.5px var(--serif);color:var(--ink)}.k4-rr2 small em{color:#9b4a57}
+.lay-b .k4-newrow{border-top:1px solid var(--line);margin-top:6px;flex:none}
+/* B: the open package wears its colour in the rail and the band */
+.lay-b .k4-bh{padding:18px 22px}
+.k4-mb .k4-ph{font:italic 15.5px var(--serif);color:var(--soft)}
+.k4-rr2:focus-visible{outline:2px solid var(--navy);outline-offset:-2px}
 .k4-lhbig{width:210px;height:auto;margin:-14px 10px -20px 0;filter:drop-shadow(0 8px 10px rgba(0,0,0,.28))}
 </style><script>(()=>{
-const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+let LAY='b';const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const SV=p=>`<svg viewBox="0 0 20 20">${p}</svg>`;
 const PIC={box:'<path d="M3 7l7-3.5L17 7v8l-7 3.5L3 15z"/><path d="M3 7l7 3.5L17 7M10 10.5V18.5"/>',crown:'<path d="M3 15.5h14M3.5 6.5l3.5 4 3-6 3 6 3.5-4-1.5 9h-10z"/>',globe:'<circle cx="10" cy="10" r="7.5"/><path d="M2.5 10h15M10 2.5c2.2 2.2 2.2 12.8 0 15M10 2.5c-2.2 2.2-2.2 12.8 0 15"/>',flag:'<path d="M4.5 17.5V3M4.5 3.5h10l-2 3.5 2 3.5h-10"/>',feather:'<path d="M16 4c-6 0-10.5 4.5-10.5 10.5V16M5.5 14.5C11 14.5 16 10 16 4"/><path d="M8 12h4.5"/>',flask:'<path d="M8 2.5h4M8.5 2.5v5L4 15.5a1.5 1.5 0 0 0 1.3 2h9.4a1.5 1.5 0 0 0 1.3-2L11.5 7.5v-5"/><path d="M6 13h8"/>',star:'<path d="M10 2.8l2.2 4.6 5 .7-3.6 3.5.9 5-4.5-2.4-4.5 2.4.9-5L2.8 8.1l5-.7z"/>',bolt:'<path d="M11 2.5L4.5 11h5l-1 6.5L15.5 9h-5z"/>',heart:'<path d="M10 16.5S3 12.3 3 7.6A3.6 3.6 0 0 1 10 6a3.6 3.6 0 0 1 7 1.6c0 4.7-7 8.9-7 8.9z"/>',compass:'<circle cx="10" cy="10" r="7.5"/><path d="M12.8 7.2l-1.6 4-4 1.6 1.6-4z"/>',pen:'<path d="M13.5 3.5l3 3L7 16H4v-3z"/>',key:'<circle cx="6.5" cy="13.5" r="3.5"/><path d="M9 11l7.5-7.5M14 6l2 2"/>'};
 const PCOL={harbour:'#1d4b63',lake:'#2c6782',teal:'#22595b',pine:'#2e5641',indigo:'#3b477a',plum:'#583a5a',slate:'#4a5466',charcoal:'#34373f'};
@@ -4623,7 +4693,13 @@ const hwClose=()=>{$('#k4Hw').hidden=true};
 document.addEventListener('keydown',e=>{if($('#k4Hw')&&!$('#k4Hw').hidden){if(e.key==='Escape')hwClose();if(e.key==='ArrowRight'&&HWS<HWT.length-1)hw(HWS+1);if(e.key==='ArrowLeft'&&HWS)hw(HWS-1)}});
 window.K4HW=hw;
 /* navy list bar + one card of rows */
-function rows(){const live=PK.filter(p=>!p.ret),c=k=>live.filter(p=>stage(p)===k).length;
+function rail(){const live=PK.filter(p=>!p.ret),ret=PK.filter(p=>p.ret);
+ $('#k4Cnt').innerHTML=`All packages <i>${live.length}</i>`;$('#k4Seg').innerHTML='';$('#k4Ret').style.display='none';
+ const meta=p=>{const st=stage(p),r=rate(p);if(st==='out'||st==='ret')return p.r>=MIN?`${p.s} sent · <b>${r}%</b> asked for more`:`${p.s} sent · ${p.r} of ${MIN} answers in`;if(st==='rdy')return 'Ready to send';return `<em>Needs ${need(p).map(k=>k==='ver'?'a version':'a letter').join(' and ')}</em>`};
+ const row=p=>`<div class="k4-rr2 ${p.id===CUR?'on':''} ${p.ret?'ret':''}" data-k4pk="${p.id}" style="--pc:${PCOL[p.col]}" role="button" tabindex="0">${ic(p)}<span><b>${p.name}${p.use?' <span class="k4-act">Active</span>':''}</b><small>${meta(p)}</small></span></div>`;
+ const grp=[['out','Out with agents'],['rdy','Ready'],['dr','Draft']].map(([k,l])=>{const L=live.filter(p=>stage(p)===k);return L.length?`<div class="k4-rg"><span>${l}</span><i>${L.length}</i></div>${L.map(row).join('')}`:''}).join('');
+ $('#k4Rows').innerHTML=(live.length?grp:'<p class="k4-empty">No packages yet. Make one and pick it the next time you log a query.</p>')+(ret.length?`<button class="k4-rg k4-rgt" id="k4RetT" aria-expanded="${RET}"><span>Retired</span><i>${ret.length}</i><em>${RET?'Hide':'Show'}</em></button>${RET?ret.map(row).join(''):''}`:'')+`<button class="k4-newrow" data-k4new>+ New package</button>`}
+function rows(){if(LAY==='b')return rail();$('#k4Ret').style.display='';const live=PK.filter(p=>!p.ret),c=k=>live.filter(p=>stage(p)===k).length;
  const list=PK.filter(p=>(RET||!p.ret)&&(TAB==='all'||stage(p)===TAB||(RET&&p.ret)));
  $('#k4Cnt').textContent=TAB==='all'&&!RET?`${live.length} package${live.length===1?'':'s'}`:`${list.length} of ${PK.length} packages`;
  $('#k4Seg').innerHTML=[['all','All',live.length],['out','Out with agents',c('out')],['rdy','Ready',c('rdy')],['dr','Draft',c('dr')]].map(([k,l,n])=>`<button role="tab" aria-selected="${TAB===k}" data-k4tab="${k}" ${n||k==='all'?'':'disabled'}>${l}<i>${n}</i></button>`).join('');
@@ -4641,13 +4717,13 @@ function bld(){const p=P(CUR),sent=!!p.s,ro=sent||p.ret,n=['ver','let'].filter(k
   <div class="k4-add"><button class="k4-lnk">${k==='ver'?'+ Save a new version':'+ Write or paste a new '+T[k].toLowerCase()}</button>${m&&k==='syn'?'<button class="k4-lnk q" data-k4rm="syn">Send without a synopsis</button>':''}</div></div></div>`};
  const v=f('ver',p.ver),l=f('let',p.let),s=f('syn',p.syn);
  const cta=ro?`<button class="k4-b2" data-k4copy>Make a copy</button>${p.ret?'':'<button class="k4-b1">Log a query with it</button>'}`:rdy?'<button class="k4-b1">Log a query with it</button>':`<button class="k4-b1" disabled>Add ${need(p).map(k=>k==='ver'?'a version':'a letter').join(' and ')} to send it</button>`;
- $('#k4Bld').innerHTML=`<div class="k4-fi"><div class="k4-bh">${ic(p).replace('class="k4-ic ','class="k4-ic k4-pick ').replace('<span','<span data-k4ic tabindex="0" role="button" aria-label="Change icon and colour" title="Change icon and colour"')}<div><h2 ${p.ret?'':'contenteditable="plaintext-only"'} spellcheck="false" data-k4name>${p.name}</h2><small>${p.note||'Add a note: who is this for?'}</small></div>
+ $('#k4Bld').innerHTML=`<div class="k4-fi"><div class="k4-bh" style="--pc:${PCOL[p.col]}">${ic(p).replace('class="k4-ic ','class="k4-ic k4-pick ').replace('<span','<span data-k4ic tabindex="0" role="button" aria-label="Change icon and colour" title="Change icon and colour"')}<div><h2 ${p.ret?'':'contenteditable="plaintext-only"'} spellcheck="false" data-k4name>${p.name}</h2><small>${p.note||'Add a note: who is this for?'}</small></div>
   ${p.use?'<span class="k4-act">Active</span>':p.ret?'':'<button class="k4-mk" data-k4use>Make active</button>'}<span class="k4-bst"><i class="${rdy||sent?'g':''}"></i>${p.ret?'Retired':sent?`Out with agents · ${p.s} sent ${I.lock}`:rdy?'Ready to send':`${n} of 2 needed`}</span><button class="k4-fig" title="Figures" aria-label="Figures" data-k4fig>${I.fig}</button></div>
  <div class="k4-bb">${ro?`<div class="k4-lock">${I.lock}<span><b>${p.ret?'Retired.':`Out with ${p.s} agents.`}</b> What went stays as it went. To change anything, make a copy.${p.s?` The ${p.s} already sent keep exactly what they got.`:''}</span><button class="k4-lnk" data-k4copy>Make a copy</button></div>`:''}
   <div class="k4-stp">${step('ver',1)}${step('let',2)}${step('syn',3)}<div class="k4-s ${ro?'ro':''}" data-k4hov="ext"><div class="k4-sh" style="cursor:default"><span class="k4-n">4</span><span><b>Also sends</b><small>Only when an agent asks</small></span><em></em></div><div class="k4-xs">${EXTS.map(x=>`<button class="k4-x ${p.ext.includes(x)?'on':''}" ${ro?'':`data-k4ext="${x}"`}>${p.ext.includes(x)?'✓ ':''}${x}</button>`).join('')}${ro?'':'<button class="k4-x add">+ Add</button>'}</div></div></div>
   <aside class="k4-pv"><div class="k4-pvk"><b>What an agent receives</b><span>Preview</span></div>
    <div class="k4-mail"><div class="k4-mh"><div><span>To</span><b style="font-weight:400">Jonathan Marsh <em>(example)</em></b></div><div><span>Subject</span>Query: MURPHY’S DAY OUT</div></div>
-   <div class="k4-mb" data-k4part="let">${l?`<p>Dear Jonathan,</p><p>${l.txt}</p><u></u><u></u>`:`<span class="ph">Your query letter goes here.</span>${ro?'':' <button class="k4-lnk" data-k4open="let">Choose a letter</button>'}`}</div>
+   <div class="k4-mb" data-k4part="let">${l?`<p>Dear Jonathan,</p><p>${l.txt}</p><u></u><u></u>`:`<span class="k4-ph">Your query letter goes here.</span>${ro?'':' <button class="k4-lnk" data-k4open="let">Choose a letter</button>'}`}</div>
    <div class="k4-at"><span class="k4-a ${v?'':'gh'}" data-k4part="ver">${v?`${tk('ver',v)}<span>Opening pages<small>from ${v.name}</small></span>`:'Pages: choose a version'}</span><span class="k4-a ${s?'':'gh'}" data-k4part="syn">${s?`${tk('syn',s)}<span>Synopsis<small>${s.name}</small></span>`:'No synopsis'}</span>${p.ext.map(x=>`<span class="k4-a" data-k4part="ext"><span class="k4-t ext">+</span><span>${x}<small>if asked</small></span></span>`).join('')}</div></div>
    <div class="k4-pf"><button class="k4-lnk" data-k4det>Note, copy or delete…</button><div>${cta}</div></div></aside></div></div>`}
 /* results */
@@ -4678,6 +4754,12 @@ document.addEventListener('click',e=>{let t;if(t=e.target.closest('[data-k4fb]')
  if(e.target.closest('[data-k4fbx]')){FB='none';$$('[data-k4fb]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.k4fb==='none'));fbanner();toast('Hidden. Find it again under How it works.');return}
  if(e.target.closest('[data-k4fbk]')){toast('Opens Give feedback, with Submission packages already chosen');return}});
 window.K4FB=k=>document.querySelector(`[data-k4fb="${k}"]`).click();
+
+function layout(){const k=$('#k4'),h=$('.k4-hero'),bt=$('#k4Bt');k.classList.remove('lay-a','lay-b');if(LAY!=='now')k.classList.add('lay-'+LAY);
+ if(LAY==='now'){h.classList.remove('wbt');h.after(bt)}else{h.classList.add('wbt');h.appendChild(bt)}rows()}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-k4lay]');if(!t)return;LAY=t.dataset.k4lay;$$('[data-k4lay]').forEach(x=>x.setAttribute('aria-pressed',x===t));layout()});
+window.K4LAY=k=>document.querySelector(`[data-k4lay="${k}"]`).click();
+setTimeout(layout);
 function render(){if(!render.fb){render.fb=1;setTimeout(fbanner)}batch();if(PK.length&&!P(CUR))CUR=PK.find(p=>!p.ret)?.id||PK[0].id;sum();rows();
  const has=PK.length>0,sent=PK.some(p=>p.s);$('#k4Bld').style.display=has?'':'none';$('.k4-res').style.display=sent?'':'none';if(has)bld();if(sent)res()}
 const ORIG=JSON.stringify(PK);
@@ -4702,7 +4784,7 @@ document.addEventListener('click',e=>{let t;const p=P(CUR);
  if(t=e.target.closest('[data-k4ic]')){const el=$('#k4Pop');if(!el.hidden){el.hidden=true}else pop(t);return}
  if(!e.target.closest('#k4Pop'))$('#k4Pop').hidden=true;
  if(t=e.target.closest('[data-k4tab]')){TAB=t.dataset.k4tab;rows();return}
- if(e.target.closest('#k4Ret')){RET=!RET;rows();return}
+ if(e.target.closest('#k4Ret,#k4RetT')){RET=!RET;rows();return}
  if(t=e.target.closest('[data-k4pk]')){CUR=t.dataset.k4pk;OPEN=null;render();$('#k4Bld').scrollIntoView({block:'start',behavior:'smooth'});return}
  if(t=e.target.closest('[data-k4ed]')){e.stopPropagation();toast('Opens this material in its drawer');return}
  if(t=e.target.closest('[data-k4pick]')){const [k,id]=t.dataset.k4pick.split(':');p[k]=id;OPEN=need(p)[0]||'__';render();return}
@@ -4726,7 +4808,7 @@ document.addEventListener('click',e=>{let t;const p=P(CUR);
  if(t=e.target.closest('[data-k4pct]')){PCT=t.dataset.k4pct;res();return}
 });
 document.addEventListener('mouseover',e=>{const t=e.target.closest('[data-k4hov]'),k=t?t.dataset.k4hov:null;if(k===HOV)return;HOV=k;$$('#k4Bld .hl').forEach(x=>x.classList.remove('hl'));if(k)$$(`#k4Bld [data-k4part="${k}"]`).forEach(x=>x.classList.add('hl'))});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){close();if(OPEN&&OPEN!=='__'){OPEN='__';bld()}}const n=e.target.closest&&e.target.closest('[data-k4name]');if(n&&e.key==='Enter'){e.preventDefault();n.blur()}});
+document.addEventListener('keydown',e=>{const rr=e.target.closest&&e.target.closest('.k4-rr2');if(rr&&(e.key==='ArrowDown'||e.key==='ArrowUp')){e.preventDefault();const all=$$('.k4-rr2'),i=all.indexOf(rr),n=all[i+(e.key==='ArrowDown'?1:-1)];if(n)n.focus();return}if(rr&&e.key==='Enter'){rr.click();return}if(e.key==='Escape'){close();if(OPEN&&OPEN!=='__'){OPEN='__';bld()}}const n=e.target.closest&&e.target.closest('[data-k4name]');if(n&&e.key==='Enter'){e.preventDefault();n.blur()}});
 document.addEventListener('focusout',e=>{const n=e.target.closest&&e.target.closest('[data-k4name]');if(!n)return;const v=n.textContent.trim();if(v&&v!==P(CUR).name){P(CUR).name=v;rows();res();toast(`Renamed to <b>${v}</b>`)}else n.textContent=P(CUR).name});
 render();
 })();

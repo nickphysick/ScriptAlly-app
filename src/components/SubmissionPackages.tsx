@@ -34,7 +34,6 @@ import { Pk26Builder, type LibTab } from "./packages/v26/Pk26Builder";
 import { Pk41Banner } from "./packages/v41/Pk41Banner";
 import { Pk41Header } from "./packages/v41/Pk41Header";
 import { Pk41Batch } from "./packages/v41/Pk41Batch";
-import { Pk41List } from "./packages/v41/Pk41List";
 import { useScriptAllyDb } from "../lib/db";
 import { packagesViaFounding } from "../lib/entitlements";
 import { FOUNDING_NOTE_PATH, foundingNoteHidden } from "../lib/packagesV41";
@@ -137,11 +136,9 @@ export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab:
       <div ref={rootRef} className={`p6 p41${empty ? " p6-new" : ""}`} data-pk26="page" data-pk41="page">
         {empty ? <Pk26Hero onBuild={() => part("builder")?.scrollIntoView({ block: "start", behavior: "smooth" })} onHow={() => setHow(true)} />
           : <Pk41Header title={activeMs?.title ?? null} onNew={() => setDialog({ m: "new" })} onHow={() => setHow(true)} />}
-        {/* v41 D–E: the current batch row and the package list (one card under a navy index bar); not on the brand-new page */}
+        {/* v41 C: the current batch row (moves into the header in Phase 2); the full-width list is retired (the rail replaces it) */}
         {empty ? null : <>
           <Pk41Batch model={model} onOpen={(p) => openInBuilder(p.id)} />
-          <Pk41List model={model} currentId={current?.id ?? null} showRetired={showRetired} onShowRetired={setShowRetired}
-            onOpen={(p) => openInBuilder(p.id)} onOpenRetired={(p) => setPkdId(p.id)} onNew={() => setDialog({ m: "new" })} />
         </>}
         <Pk26Builder model={model} retired={retired} current={current} onSelect={setCurId} onFigures={(p) => setPkdId(p.id)} askStep={askStep}
             onNewPackage={() => setDialog({ m: "new" })} onDuplicate={copy} onEditPackage={(p, focus) => setDialog({ m: "edit", id: p.id, ...(focus ? { focus } : {}) })}
