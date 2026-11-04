@@ -158,4 +158,15 @@ counts differ).
 
 ## 8 · Deploy
 
-DEPLOY
+- **Dev served `index-B3aMvt7Q.js`**, which a clean build of
+  **`dev/qc1511-db2-title-sip-qc1512-cl26-sip11-tl1-pk41-cl262-db21-sip12` (dd91ed650)** reproduces exactly. That line
+  already carried the stacked v41 (99e2ef45) under the later Contact list, Dashboard and Smart Import work.
+- The workspace v41 merged onto it as **`dev/qc1511-db2-title-sip-qc1512-cl26-sip11-tl1-pk41-cl262-db21-sip12-pk41w`
+  (44486b1e7)**, pushed. One conflict (`design-refs/.refhashes.json`: both sides kept, the v41 ref at its new hash). The
+  phone Packages page already read the new guide's `HOW_STEPS` from the earlier merge.
+- Gates on the merged tree: tsc 0, build clean, Vitest 751 of 752 files (11,341 passed, 3 skipped). The one red is
+  `firestoreTarget.test` (2 cases), dev's own: its scripts already fail it, `seedPk40.mjs` among them, and
+  `pk41Fixture.mjs` joins that list.
+- Re-checked the served hash just before deploying (still B3aMvt7Q), then hosting only, `--config firebase.dev.json
+  --project scriptally-dev`, from that clean merge worktree. **Dev now serves `index-syympTiN.js`.** SP41 L3 and L5 pass
+  against the live site at 1512. No rules or functions changed. Prod is untouched.
