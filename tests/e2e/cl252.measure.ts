@@ -10,6 +10,9 @@
  *    the page (CSS or DOM), or, for C1 and C3, against a build carrying the break (see the report).
  * ⚠️ THE TALLY, THE "+n", THE WISHLIST LINE AND THE DAY COUNT are held to Firestore (cl252Data.mjs), never to the page's
  *    own figures. C1 WRITES one agent's wishlist and puts it back through the toast's own Undo, in the same run.
+ *
+ * ⚠️ CONTACT LIST v26 (CL26, reports/contact-list-v26/REPORT.md): the cases marked RETIRED below test surfaces v26
+ *    removed; each says what replaced it. The rest still apply and run.
  */
 import { test, type Page } from "@playwright/test";
 import { execFileSync } from "node:child_process";
@@ -79,7 +82,8 @@ async function rows(page: Page) {
 }
 
 /* ═════════ A · the rows ═════════ */
-test("CL252-A1 A2 A3 A5 A6 A7 · the QueryHawk row", async ({ page }) => {
+/* RETIRED by Contact list v26 (CL26): the QueryHawk row retired: v26's three-column row (CL26 H8). */
+test.skip("CL252-A1 A2 A3 A5 A6 A7 · the QueryHawk row", async ({ page }) => {
   test.setTimeout(400_000);
   const L = { A1: new Ledger("A1"), A2: new Ledger("A2"), A3: new Ledger("A3"), A5: new Ledger("A5"), A6: new Ledger("A6"), A7: new Ledger("A7") };
   const D = data();
@@ -149,7 +153,8 @@ test("CL252-A1 A2 A3 A5 A6 A7 · the QueryHawk row", async ({ page }) => {
   doneAll([L.A1, 6], [L.A2, 20], [L.A3, 20], [L.A5, 20], [L.A6, 20], [L.A7, 10]);
 });
 
-test("CL252-A8 · missing details never show + Add at rest", async ({ page }) => {
+/* RETIRED by Contact list v26 (CL26): the five-column row's empty cells retired (v26 D). */
+test.skip("CL252-A8 · missing details never show + Add at rest", async ({ page }) => {
   test.setTimeout(300_000);
   const A8 = new Ledger("A8");
   /* re-pointed (Contact list v25.3): a row with gaps is now found from Firestore (the gaps no longer print), and on hover
@@ -180,7 +185,8 @@ test("CL252-A8 · missing details never show + Add at rest", async ({ page }) =>
 });
 
 /* ═════════ B · your move ═════════ */
-test("CL252-B1 · your move is a navy disc with a rust !, everywhere", async ({ page }) => {
+/* RETIRED by Contact list v26 (CL26): the your-move disc is v26's (navy with the rust '!', CL26 H8); Cards and full screen retired. */
+test.skip("CL252-B1 · your move is a navy disc with a rust !, everywhere", async ({ page }) => {
   test.setTimeout(400_000);
   const B1 = new Ledger("B1");
   const read = (scope: string) => page.evaluate((s) => [...document.querySelectorAll<HTMLElement>(s)].filter((e) => e.getBoundingClientRect().width > 0).map((e) => {

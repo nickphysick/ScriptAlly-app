@@ -16,6 +16,9 @@
  *
  * Every lock proves its population before its claim. `CL256_MUTATE=<lock>` applies that lock's named break in the page;
  * `CL256_BASE=1` marks a run against the base build (the ledger files are kept apart).
+ *
+ * ⚠️ CONTACT LIST v26 (CL26, reports/contact-list-v26/REPORT.md): the cases marked RETIRED below test surfaces v26
+ *    removed; each says what replaced it. The rest still apply and run.
  */
 import { test } from "@playwright/test";
 import { execFileSync } from "node:child_process";
@@ -61,7 +64,8 @@ const geo = (page: import("@playwright/test").Page) => page.evaluate(() => {
 });
 
 /* ══ H1 · pinning with a gap ══════════════════════════════════════════════════════════════════════════════════════ */
-test("H1 pin", async ({ page }) => {
+/* RETIRED by Contact list v26 (CL26): the v25.6 pin strip is replaced by v26's pin (CL26 H6 lands under it). */
+test.skip("H1 pin", async ({ page }) => {
   const L = new Ledger("H1");
   for (const vp of SIZES) for (const view of ["list", "cards"] as const) {
     const at = `${vp.width} ${view}`;
@@ -120,7 +124,8 @@ function independent(d: Data, msId: string) {
   return { want, passed };
 }
 
-test("H2 cells", async ({ page }) => {
+/* RETIRED by Contact list v26 (CL26): At a glance's cells retired (v26 A). */
+test.skip("H2 cells", async ({ page }) => {
   const L = new Ledger("H2");
   const d = JSON.parse(execFileSync("node", ["tests/e2e/cl256Data.mjs"], { encoding: "utf8" })) as Data;
   await openCl24(page, SIZES[0], { grouped: true });
@@ -163,7 +168,8 @@ test("H2 cells", async ({ page }) => {
 });
 
 /* ══ H3 · List health in navy, opening Housekeeping without filtering ════════════════════════════════════════════ */
-test("H3 navy", async ({ page }) => {
+/* RETIRED by Contact list v26 (CL26): the navy List health cell retired (v26 A; CL26 H2). */
+test.skip("H3 navy", async ({ page }) => {
   const L = new Ledger("H3");
   for (const vp of SIZES) {
     const at = `${vp.width}`;
@@ -196,7 +202,8 @@ test("H3 navy", async ({ page }) => {
 /* ══ H4 · the ring follows the score ═════════════════════════════════════════════════════════════════════════════
    The two mounted rings sit on navy: the At a glance cell and Housekeeping's ink header. The light treatment has no
    mounted ring today (ContactSummaryCard is mounted nowhere); it is held by the unit lock on ringColours. */
-test("H4 tone", async ({ page }) => {
+/* RETIRED by Contact list v26 (CL26): its subject is At a glance's List health cell, retired (v26 A); the page's ring is CL26 H2. Housekeeping's own HeadRing is unchanged and not re-measured here. */
+test.skip("H4 tone", async ({ page }) => {
   const L = new Ledger("H4");
   const vp: VP = SIZES[0];
   for (const pct of [93, 72, 44]) {
@@ -229,7 +236,8 @@ test("H4 tone", async ({ page }) => {
 });
 
 /* ══ H5 · the bar is clear of List health ════════════════════════════════════════════════════════════════════════ */
-test("H5 bar clear", async ({ page }) => {
+/* RETIRED by Contact list v26 (CL26): the v24 bar retired (CL26 H4). */
+test.skip("H5 bar clear", async ({ page }) => {
   const L = new Ledger("H5");
   for (const vp of SIZES) for (const state of ["list", "cards", "pinned"] as const) {
     const at = `${vp.width} ${state}`;
@@ -263,7 +271,8 @@ test("H5 bar clear", async ({ page }) => {
 });
 
 /* ══ H6 · typewriter menus ═══════════════════════════════════════════════════════════════════════════════════════ */
-test("H6 menus", async ({ page }) => {
+/* RETIRED by Contact list v26 (CL26): the menus are v26's (CL26 H10). */
+test.skip("H6 menus", async ({ page }) => {
   const L = new Ledger("H6");
   const vp: VP = SIZES[0];
   for (const full of [false, true]) {

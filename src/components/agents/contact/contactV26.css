@@ -218,7 +218,8 @@
 .cl26-ixe .cl26-ixn { font-size: 13px !important; opacity: .55; }
 .cl26-ixe:hover:not(:disabled) { background: rgba(244, 238, 229, .14); }
 .cl26-ixe:disabled { opacity: .3; cursor: default; }
-.cl26-ixe[aria-current="true"] { background: #fff; color: #1c130f; }
+/* the current entry stays white under the pointer too (the hover rule is 0-3-0) */
+.cl26-ix .cl26-ixe[aria-current="true"], .cl26-ix .cl26-ixe[aria-current="true"]:hover { background: #fff; color: #1c130f; }
 .cl26-ixe[aria-current="true"] .cl26-ixn { opacity: .55; }
 .cl26-ixe svg { flex: none; color: currentColor; }
 .cl26-ixy {
@@ -316,4 +317,10 @@
 .cl26-whot .cl26-miss button {
   padding: 0; border: 0; background: none; color: #a2452a; cursor: pointer; text-decoration: underline; text-underline-offset: 3px;
   font: 400 14px/1 var(--sp-type) !important; font-style: normal !important;
+}
+/* the Group menu's marker and the shared Sort menu's heading, on this page only (the Query Centre's sort menu keeps its
+   mono heading): every word in the three menus is the typewriter */
+.lpop.cl24-gpop.cl26-gpop .cl24-gopt i { font: 400 13px/1 var(--sp-type) !important; }
+.lpop.sc-pop[data-cl26="sort-menu"] .sc-mh {
+  font: 400 15px/1.2 var(--sp-type) !important; letter-spacing: 0; text-transform: none; font-style: normal; color: rgba(28, 19, 15, .55);
 }

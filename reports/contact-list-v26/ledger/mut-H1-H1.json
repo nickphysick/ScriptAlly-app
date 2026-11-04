@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "H1",
+  "where": "1512 panel found",
+  "ok": true,
+  "detail": "no panel"
+ },
+ {
+  "lock": "H1",
+  "where": "1512 navy",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "H1",
+  "where": "1512 title",
+  "ok": true,
+  "detail": "Contact list"
+ },
+ {
+  "lock": "H1",
+  "where": "1512 sentence",
+  "ok": true,
+  "detail": "53 agents on file. You’ve queried 14, and 4 are waiting on you."
+ },
+ {
+  "lock": "H1",
+  "where": "1512 two buttons",
+  "ok": true,
+  "detail": "[\"+ Add an agent\",\"Discover agents\"]"
+ },
+ {
+  "lock": "H1",
+  "where": "1512 ring beside the text",
+  "ok": false,
+  "detail": "the ring is under the left column"
+ },
+ {
+  "lock": "H1",
+  "where": "1512 height = left column ±2",
+  "ok": false,
+  "detail": "308.9375 vs 184.9375"
+ },
+ {
+  "lock": "H1",
+  "where": "1512 no At a glance",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H1",
+  "where": "1512 no title card",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H1",
+  "where": "1280 panel found",
+  "ok": true,
+  "detail": "no panel"
+ },
+ {
+  "lock": "H1",
+  "where": "1280 navy",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "H1",
+  "where": "1280 title",
+  "ok": true,
+  "detail": "Contact list"
+ },
+ {
+  "lock": "H1",
+  "where": "1280 sentence",
+  "ok": true,
+  "detail": "53 agents on file. You’ve queried 14, and 4 are waiting on you."
+ },
+ {
+  "lock": "H1",
+  "where": "1280 two buttons",
+  "ok": true,
+  "detail": "[\"+ Add an agent\",\"Discover agents\"]"
+ },
+ {
+  "lock": "H1",
+  "where": "1280 ring beside the text",
+  "ok": false,
+  "detail": "the ring is under the left column"
+ },
+ {
+  "lock": "H1",
+  "where": "1280 height = left column ±2",
+  "ok": false,
+  "detail": "308.9375 vs 184.9375"
+ },
+ {
+  "lock": "H1",
+  "where": "1280 no At a glance",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H1",
+  "where": "1280 no title card",
+  "ok": true,
+  "detail": "0"
+ }
+]

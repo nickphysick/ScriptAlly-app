@@ -228,7 +228,7 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
             <button type="button" data-cl26="reset" onClick={p.onClearAll}>Clear search and filters</button>
           </div>
         ) : (
-          <div className="cl26-body" role="rowgroup" data-cl26="rows" data-kind={drawn[0]?.kind ?? "all"}>
+          <div className="cl26-body" role="rowgroup" data-cl26="rows" data-cl24="table" data-kind={drawn[0]?.kind ?? "all"}>
             {drawn.map((sec) => (
               <div key={sec.key} className="cl26-sec" data-cl26="section" data-k={sec.key} data-kind={sec.kind} data-n={sec.ids.length}
                 ref={(el) => { if (el) secEls.current.set(sec.key, el); else secEls.current.delete(sec.key); }}>
@@ -305,13 +305,13 @@ const Row26: React.FC<{ x: AgentFacts; p: ContactSheet26Props }> = ({ x, p }) =>
   const gaps = p.filters.missing ? p.gapsOf(a.id) : null;
   const open = () => p.onOpen(a.id);
   return (
-    <div role="row" tabIndex={0} className="cl26-row" data-cl26="row" data-id={a.id} data-k={x.stand} aria-current={p.openId === a.id ? "true" : undefined}
+    <div role="row" tabIndex={0} className="cl26-row" data-cl26="row" data-cl24="row" data-id={a.id} data-k={x.stand} aria-current={p.openId === a.id ? "true" : undefined}
       aria-label={`${name}${agency ? `, ${agency}` : ""}`}
       onClick={(e) => { if ((e.target as HTMLElement).closest("button, a")) return; open(); }}
       onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); open(); } }}>
       <span role="cell" className="cl26-who" data-cl26="agent">
         <Disc26 x={x} />
-        <span className="cl26-whot"><b data-cl26="name">{name}</b>{sub ? <small data-cl26="agency">{sub}</small> : null}
+        <span className="cl26-whot"><b data-cl26="name" data-cl252="name">{name}</b>{sub ? <small data-cl26="agency">{sub}</small> : null}
           {/* E — while Missing details is on: what this agent is missing, and the door to fill it in */}
           {gaps && gaps.length ? (
             <span className="cl26-miss" data-cl26="missing-line">

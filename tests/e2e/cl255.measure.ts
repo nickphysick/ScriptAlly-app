@@ -11,6 +11,9 @@
  * ⚠️ INDEPENDENT FIGURES: the reply weeks, contact fields and each query's dated stages come from Firestore
  *    (cl255Data.mjs, read-only), never from the page's own derivation.
  * ⚠️ RED FIRST: `CL255_BASE=1` against v25.4 (the base build); `CL255_MUTATE=<lock>` applies the lock's break in the page.
+ *
+ * ⚠️ CONTACT LIST v26 (CL26, reports/contact-list-v26/REPORT.md): the cases marked RETIRED below test surfaces v26
+ *    removed; each says what replaced it. The rest still apply and run.
  */
 import { test, type Page } from "@playwright/test";
 import { execFileSync } from "node:child_process";
@@ -235,7 +238,8 @@ test("CL255-G4 · History for a not-queried agent is the dashed panel and no tim
 });
 
 /* ═════════ G5 · the wide card ═════════ */
-test("CL255-G5 · in full screen, column 2 holds How and Reach and column 3 the story — the panel's own pieces", async ({ page }) => {
+/* RETIRED by Contact list v26 (CL26): full screen retired (v26 B). */
+test.skip("CL255-G5 · in full screen, column 2 holds How and Reach and column 3 the story — the panel's own pieces", async ({ page }) => {
   test.setTimeout(300_000);
   const G5 = new Ledger("G5");
   for (const vp of SIZES) {
@@ -258,7 +262,8 @@ test("CL255-G5 · in full screen, column 2 holds How and Reach and column 3 the 
 });
 
 /* ═════════ G6 · Your move is the "!" ═════════ */
-test("CL255-G6 · every Your move group head and the band's key are the rust ! disc; single-stage glyphs unchanged", async ({ page }) => {
+/* RETIRED by Contact list v26 (CL26): group heads are v26's mini disc (CL26 H9); full screen's band retired. */
+test.skip("CL255-G6 · every Your move group head and the band's key are the rust ! disc; single-stage glyphs unchanged", async ({ page }) => {
   test.setTimeout(300_000);
   const G6 = new Ledger("G6");
   const half = () => { for (const m of document.querySelectorAll<HTMLElement>("[data-cl255='ym']")) { const s = document.createElement("span"); s.setAttribute("role", "img"); s.setAttribute("aria-label", "Partial Requested"); m.replaceWith(s); } };

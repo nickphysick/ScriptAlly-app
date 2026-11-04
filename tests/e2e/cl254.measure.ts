@@ -11,6 +11,9 @@
  * ⚠️ INDEPENDENT FIGURES: F2's stage and F3's genres / reply time are held to Firestore (cl254Data.mjs, read-only); F6's
  *    n to Housekeeping's OWN rendering (the drawer's By agent view, its gap chips per agent), never to the row.
  * ⚠️ RED FIRST: `CL254_BASE=1` against v25.3 (the base build); `CL254_MUTATE=<lock>` applies the lock's break in the page.
+ *
+ * ⚠️ CONTACT LIST v26 (CL26, reports/contact-list-v26/REPORT.md): the cases marked RETIRED below test surfaces v26
+ *    removed; each says what replaced it. The rest still apply and run.
  */
 import { test, type Page } from "@playwright/test";
 import { execFileSync } from "node:child_process";
@@ -63,7 +66,8 @@ const focusIn = (page: Page, sel: string) => page.evaluate((s) => {
 }, sel);
 
 /* ═════════ F1 · column order ═════════ */
-test("CL254-F1 · headings read Agent, What they want, Replies in, Your rating, Your query (no rating at 1280); each still sorts", async ({ page }) => {
+/* RETIRED by Contact list v26 (CL26): the five headings retired (v26 D; CL26 H10). */
+test.skip("CL254-F1 · headings read Agent, What they want, Replies in, Your rating, Your query (no rating at 1280); each still sorts", async ({ page }) => {
   test.setTimeout(300_000);
   const F1 = new Ledger("F1");
   const WANT: Record<number, string[]> = {
@@ -96,7 +100,8 @@ test("CL254-F1 · headings read Agent, What they want, Replies in, Your rating, 
 });
 
 /* ═════════ F2 · Your query, one line ═════════ */
-test("CL254-F2 · every queried row reads Queried or Queried · {stage} with the stage's glyph; no pill, day or track; Not queried", async ({ page }) => {
+/* RETIRED by Contact list v26 (CL26): 'Queried · {stage}' retired: the stage alone (v26 D; CL26 H8). */
+test.skip("CL254-F2 · every queried row reads Queried or Queried · {stage} with the stage's glyph; no pill, day or track; Not queried", async ({ page }) => {
   test.setTimeout(300_000);
   const F2 = new Ledger("F2");
   const D = data();
@@ -138,7 +143,8 @@ test("CL254-F2 · every queried row reads Queried or Queried · {stage} with the
 });
 
 /* ═════════ F3 · the sparse-profile link ═════════ */
-test("CL254-F3 · no genres: one always-shown link, spanning Replies in when there is no reply time; it opens the edit mode at the first gap", async ({ page }) => {
+/* RETIRED by Contact list v26 (CL26): the per-row profile link retired; Missing details shows 'Fill in →' (v26 E; CL26 H11). */
+test.skip("CL254-F3 · no genres: one always-shown link, spanning Replies in when there is no reply time; it opens the edit mode at the first gap", async ({ page }) => {
   test.setTimeout(420_000);
   const F3 = new Ledger("F3");
   seed();
@@ -196,7 +202,8 @@ test("CL254-F3 · no genres: one always-shown link, spanning Replies in when the
 });
 
 /* ═════════ F4 · no row actions ═════════ */
-test("CL254-F4 · hovering a row shows no gaps button and no copy / website icons; only not-queried rows offer Log a query", async ({ page }) => {
+/* RETIRED by Contact list v26 (CL26): row hover actions retired with the row (v26 D). */
+test.skip("CL254-F4 · hovering a row shows no gaps button and no copy / website icons; only not-queried rows offer Log a query", async ({ page }) => {
   test.setTimeout(300_000);
   const F4 = new Ledger("F4");
   for (const vp of SIZES) {
@@ -230,7 +237,8 @@ test("CL254-F4 · hovering a row shows no gaps button and no copy / website icon
 });
 
 /* ═════════ F5 · fit ═════════ */
-test("CL254-F5 · no Your query text is clipped or wrapped (1280 and 1512)", async ({ page }) => {
+/* RETIRED by Contact list v26 (CL26): Your query is one stage name now (CL26 H8). */
+test.skip("CL254-F5 · no Your query text is clipped or wrapped (1280 and 1512)", async ({ page }) => {
   test.setTimeout(240_000);
   const F5 = new Ledger("F5");
   for (const vp of [...SIZES].reverse()) {
@@ -253,7 +261,8 @@ test("CL254-F5 · no Your query text is clipped or wrapped (1280 and 1512)", asy
 });
 
 /* ═════════ F6 · where gaps live ═════════ */
-test("CL254-F6 · the card's Profile tab says {n} details missing (Housekeeping's n, absent at 0) and opens the edit mode; Missing details filters exactly those", async ({ page }) => {
+/* RETIRED by Contact list v26 (CL26): the Filters panel's Missing details toggle became a quick pick (v26 E; CL26 H3/H11); the card's line is CL255's card, unchanged. */
+test.skip("CL254-F6 · the card's Profile tab says {n} details missing (Housekeeping's n, absent at 0) and opens the edit mode; Missing details filters exactly those", async ({ page }) => {
   test.setTimeout(420_000);
   const F6 = new Ledger("F6");
   const vp = SIZES[0];

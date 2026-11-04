@@ -10,6 +10,9 @@
  * ⚠️ RED FIRST: `CL24_BASE=1` against the build before v24 (the locks find nothing of v24 and record readings rather
  *    than hang); `CL24_MUTATE=<lock>` applies that lock's named break in the page (CSS) or, for the four logic breaks,
  *    against a build carrying the mutation (see the report).
+ *
+ * ⚠️ CONTACT LIST v26 (CL26, reports/contact-list-v26/REPORT.md): the cases marked RETIRED below test surfaces v26
+ *    removed; each says what replaced it. The rest still apply and run.
  */
 import { test, type Page } from "@playwright/test";
 import { liftMotionSuppression } from "./measure";
@@ -34,7 +37,8 @@ const near = (a: number | undefined, b: number | undefined, d = 1) => a != null 
      gap line are Housekeeping's drawer's. The "k agents" reading is retired: the card states no k.
    · CL24-A3 (each chip's count is its rows; a chip shows exactly those) is RETIRED for CL25-B1/B2, which hold the
      cards to the same rows. Its "AND with Filters" reading is RE-POINTED to the Querying card. */
-test("CL24-A2 A3 (v25) · the List health card is Housekeeping's; a card ANDs with Filters", async ({ page }) => {
+/* RETIRED by Contact list v26 (CL26): List health card and At a glance retired (v26 A: the ring in the navy header; CL26 H2/H3). */
+test.skip("CL24-A2 A3 (v25) · the List health card is Housekeeping's; a card ANDs with Filters", async ({ page }) => {
   const A2 = new Ledger("A2"), A3 = new Ledger("A3");
   for (const vp of SIZES) {
     const at = `${vp.width}`;
@@ -77,7 +81,8 @@ test("CL24-A2 A3 (v25) · the List health card is Housekeeping's; a card ANDs wi
   A2.done(BASE ? 1 : 8); A3.done(BASE ? 1 : 6);
 });
 
-test("CL24-A2 (v25) · the List health card states no gaps when nothing is missing", async ({ page }) => {
+/* RETIRED by Contact list v26 (CL26): the List health card retired (v26 A); the ring states the gaps (CL26 H2/H3). */
+test.skip("CL24-A2 (v25) · the List health card states no gaps when nothing is missing", async ({ page }) => {
   /* re-pointed: the banner it held absent is retired; the card's gap line is what must go at no gaps */
   const L = new Ledger("A2-none");
   await page.addInitScript(() => { (window as unknown as { __SA_HK_ALL_FILLED: boolean }).__SA_HK_ALL_FILLED = true; });
@@ -90,7 +95,8 @@ test("CL24-A2 (v25) · the List health card states no gaps when nothing is missi
 });
 
 /* ═════════ B · the switch, List, Cards ═════════ */
-test("CL24-B1 B2 B3 · the switch in the bar; the grouped table; the cards", async ({ page }) => {
+/* RETIRED by Contact list v26 (CL26): the List / Cards switch, the grouped table and Cards retired (v26 B/D; CL26 H4/H8/H9). */
+test.skip("CL24-B1 B2 B3 · the switch in the bar; the grouped table; the cards", async ({ page }) => {
   const B1 = new Ledger("B1"), B2 = new Ledger("B2"), B3 = new Ledger("B3");
   for (const vp of SIZES) {
     const at = `${vp.width}`;
@@ -227,7 +233,8 @@ test("CL24-C1 C2 · the card in the Query Centre's panel; its actions", async ({
 });
 
 /* ═════════ D · full screen ═════════ */
-test("CL24-D1 D2 D3 · the band, the book, the slide", async ({ page }) => {
+/* RETIRED by Contact list v26 (CL26): full screen and the address book retired (v26 B; CL26 H4). */
+test.skip("CL24-D1 D2 D3 · the band, the book, the slide", async ({ page }) => {
   const D1 = new Ledger("D1"), D2 = new Ledger("D2"), D3 = new Ledger("D3");
   for (const vp of SIZES) {
     const at = `${vp.width}`;

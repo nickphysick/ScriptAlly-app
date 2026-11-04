@@ -1,0 +1,56 @@
+[
+ {
+  "lock": "H10",
+  "where": "Group: exactly Letter, Status, No grouping",
+  "ok": false,
+  "detail": "[\"Status\",\"No grouping\"]"
+ },
+ {
+  "lock": "H10",
+  "where": "Group: text (population)",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "H10",
+  "where": "Group: typewriter, upright",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "H10",
+  "where": "Sort: exactly the four",
+  "ok": true,
+  "detail": "[\"Surname\",\"Date added\",\"Reply time\",\"Query status\"]"
+ },
+ {
+  "lock": "H10",
+  "where": "Sort: text (population)",
+  "ok": true,
+  "detail": "7"
+ },
+ {
+  "lock": "H10",
+  "where": "Sort: typewriter, upright",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "H10",
+  "where": "Filters: the four quick picks, Missing details among them",
+  "ok": true,
+  "detail": "[\"Your move\",\"Ready to query\",\"Waiting to hear back\",\"Missing details\"]"
+ },
+ {
+  "lock": "H10",
+  "where": "Filters: text (population)",
+  "ok": true,
+  "detail": "33"
+ },
+ {
+  "lock": "H10",
+  "where": "Filters: typewriter, upright",
+  "ok": true,
+  "detail": ""
+ }
+]

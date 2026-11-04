@@ -11,6 +11,9 @@
  *    count taken from the row. E5's shown + n is held to Firestore (cl253Data.mjs, read-only).
  * ⚠️ RED FIRST: `CL253_BASE=1` against v25.2 (the base build); `CL253_MUTATE=<lock>` applies the lock's break in the page,
  *    or, for E2 and E3, against a build carrying it (see the report).
+ *
+ * ⚠️ CONTACT LIST v26 (CL26, reports/contact-list-v26/REPORT.md): the cases marked RETIRED below test surfaces v26
+ *    removed; each says what replaced it. The rest still apply and run.
  */
 import { test, type Page } from "@playwright/test";
 import { execFileSync } from "node:child_process";
@@ -43,7 +46,8 @@ const focusRow = (page: Page, id: string) => page.evaluate((i) => {
 }, id);
 
 /* ═════════ E1 · blank ═════════ */
-test("CL253-E1 · empty cells are blank, at rest and on hover; no wishlist, no line", async ({ page }) => {
+/* RETIRED by Contact list v26 (CL26): the five-column row's empty cells and wishlist line retired (v26 D). */
+test.skip("CL253-E1 · empty cells are blank, at rest and on hover; no wishlist, no line", async ({ page }) => {
   test.setTimeout(300_000);
   const E1 = new Ledger("E1");
   for (const vp of SIZES) {
@@ -81,7 +85,8 @@ test("CL253-E1 · empty cells are blank, at rest and on hover; no wishlist, no l
    `contact-list-v25-3` if the button ever returns. */
 
 /* ═════════ E5 · whole pills ═════════ */
-test("CL253-E5 · every pill is whole inside its cell; shown + n = genres", async ({ page }) => {
+/* RETIRED by Contact list v26 (CL26): the pills are measured by CL26 H8 in v26's What they want cell. */
+test.skip("CL253-E5 · every pill is whole inside its cell; shown + n = genres", async ({ page }) => {
   test.setTimeout(300_000);
   const E5 = new Ledger("E5");
   /* the fixture: one agent with seven long genres, which no cell can hold — written now, removed in the same run */
