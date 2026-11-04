@@ -25,6 +25,8 @@ import {
   type ReplyAct, type ThreadChip, type ThreadItem, type ThreadStepIn,
 } from "../../../lib/qcThread152";
 import "./qcv152card.css";
+import { PopCtx, useOutsideClose } from "./QcEdit152";
+import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 
 export interface QcCard152Data {
   state: QueryState;
@@ -68,6 +70,14 @@ export interface QcCard152Props {
   onReply: (act: ReplyAct) => void;
   onAgentField: (field: "wishlist" | "email" | "website" | "method" | "reply" | "materials" | null) => void;
   onCopyEmail: () => void;
+  /** §3–§4: the view the card shows — the reading card, or an editing or recording view (`editBody`) under the same
+   *  band and head; any view but "read" straightens the lean (§2.1) */
+  view?: "read" | "record" | "fork" | "fix" | "details";
+  editBody?: React.ReactNode;
+  /** Escape in an editing view: an open menu or calendar closes first, then the view steps back one level (§4.7) */
+  onBack?: () => void;
+  /** the step just added: its bubble slides in from its own side (§3.2) */
+  freshKey?: string | null;
 }
 
 const PEN = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10.5 2.5l3 3L6 13H3v-3z" /></svg>;
@@ -120,6 +130,16 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   const bandBg = d.state === "quiet" ? QUIET_BAND : head.bg;
   const dark = d.state === "offer" || d.state === "materials";
   const tip = useTip();
+  const view = p.view ?? "read";
+  const rootRef = useRef<HTMLDivElement>(null);
+  const [popOpen, setPopOpen] = useState<string | null>(null);
+  const [rootEl, setRootEl] = useState<HTMLElement | null>(null);
+  useLayoutEffect(() => { setRootEl(rootRef.current); }, []);
+  const pop = { root: rootEl, open: popOpen, setOpen: setPopOpen };
+  useOutsideClose(pop);
+  useEffect(() => { setPopOpen(null); }, [view, r.id]);
+  /* ONE Escape handler for the editing views: the open popover first, then one level back */
+  useEscapeLayer(view !== "read", () => { if (popOpen) setPopOpen(null); else p.onBack?.(); }, ESC_LEVEL.pageModal);
   const bodyRef = useRef<HTMLDivElement>(null);
   const thread: ThreadItem[] = buildThread(d.steps, { first, nowMs, state: d.state, replyMs: d.replyMs, agentWeeks: d.agentWeeks });
   const box = replyBox({ state: d.state, status: r.status, first, nowMs, dueMs: d.dueMs, replyMs: d.replyMs, closedMs: d.closedMs });
@@ -179,7 +199,7 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
           );
         }
         return (
-          <div key={it.key} className={`qc152-m ${it.side}`} data-qc152="msg" data-side={it.side} data-status={it.status ?? undefined} data-kind={it.kind ?? undefined}
+          <div key={it.key} className={`qc152-m ${it.side}${p.freshKey && (it.activityId === p.freshKey || it.key === p.freshKey) ? " new" : ""}`} data-qc152="msg" data-side={it.side} data-status={it.status ?? undefined} data-kind={it.kind ?? undefined}
             data-activity={it.activityId} style={{ animationDelay: `${i * 45}ms` }}>
             {it.side === "them" ? <span className="qc152-av" aria-hidden="true">{r.initials}</span> : null}
             <div className="qc152-bx" data-qc152="bubble">
@@ -256,7 +276,9 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   );
 
   return (
-    <div className="qc149c qcv-legacy qc152" data-qc149c="card" data-qc152="card" data-mode="view" data-view="read" data-id={r.id} data-state={d.state}>
+    <PopCtx.Provider value={pop}>
+    <div ref={rootRef} className="qc149c qcv-legacy qc152" data-qc149c="card" data-qc152="card" data-mode={view === "read" ? "view" : view} data-view={view}
+      data-lean={view === "read" ? undefined : "flat"} data-id={r.id} data-state={d.state}>
       <div className="qc152-in">
         <div className={`qc152-band${dark ? " dk" : ""}`} data-qc152="band" style={{ background: bandBg, color: head.fg }}>
           <span data-qc152="band-word">{r.status === QueryStatus.OFFER ? "OFFER" : STATE_BAND[d.state]}</span>
@@ -269,6 +291,7 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
           <div className="qc152-who"><div className="qc152-nm qcv-open-nm" data-qc149c="name">{r.agentName}</div><div className="qc152-ag">{(r.agency || "").toUpperCase()}</div></div>
           <span className="qc152-pill" data-qc152="pill"><span className="qc152-cap" style={{ background: STATUS_FILL[statusKind(r.status)] }}><StatusDot status={r.status} overrideSize={17} decorative /></span><span>{STAGE_NAME[r.status]}</span></span>
         </div>
+        {view !== "read" ? p.editBody : <>
         <div className="qc152-ms" data-qc152="book">
           <span className="qc152-bk" aria-hidden="true">{BOOK}</span>
           <div><small>QUERYING</small><b>{p.msTitle ?? "No manuscript"}</b>
@@ -288,8 +311,10 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
           <div className="qc152-rf" data-qc152="reply-field"><b data-qc152="reply-lead">{box.lead}</b><span data-qc152="reply-sub">{box.sub}</span></div>
           <button type="button" className={`qc152-rbtn ${box.tone === "navy" ? "nv" : "gh"}`} data-qc152="reply-btn" data-tone={box.tone} onClick={() => p.onReply(box.act)}>{box.button}{ARW}</button>
         </div>
+        </>}
       </div>
       {tip.node}
     </div>
+    </PopCtx.Provider>
   );
 };

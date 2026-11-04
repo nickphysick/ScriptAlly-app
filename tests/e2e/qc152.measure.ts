@@ -9,6 +9,7 @@
  *
  *   §1  L1 states · L2 colours · L3 filters
  *   §2  L4 card frame · L5 lean · L6 thread · L7 edit button · L8 reply box
+ *   §3  L9 capture
  */
 import { test, expect, type Page } from "@playwright/test";
 import { execSync } from "node:child_process";
@@ -57,6 +58,7 @@ const PAGE_MUT: Record<string, string> = {
   L5: `.spanel.qsp.qsp.qsp:has(> .spanel-own > [data-qc152="flat"]) { rotate: 1.6deg !important; }`,
   /* every bubble on the left */
   L6: `.qc152 .qc152-m.qc152-m { align-self: flex-start !important; }`,
+  /* (L9's mutation is a source break: the prefill taken from the generic default — qc152Mutate.sh) */
   /* the hover bridge (and the 350ms it stays) removed */
   L7: `.qc152 .qc152-m .qc152-bx::before { display: none !important; } .qc152 .qc152-m .qc152-fx, .qc152 .qc152-m:not(:hover) .qc152-fx { transition: none !important; }`,
 };
@@ -105,6 +107,13 @@ for (const vp of SIZES) {
       test.skip(!run("L1"));
       const L = new Ledger(`L1-${vp.width}`);
       await open(page, vp);
+      /* the setting is the account's, so start from the default whatever an earlier run left */
+      const setWeeks = async (w: number) => {
+        await page.locator("[data-qc152='quiet-setting'] button").first().click({ timeout: 8000 }).catch(() => {});
+        await page.locator(`[data-qc152='quiet-pop'] [data-weeks='${w}']`).click({ timeout: 8000 }).catch(() => {});
+        await page.keyboard.press("Escape"); await page.waitForTimeout(800);
+      };
+      await setWeeks(4);
       const s = await readStates(page);
       L.check("population: every fixture is on the page", Object.keys(EXPECT).every((k) => s[k]), JSON.stringify(Object.keys(s)));
       for (const [k, want] of Object.entries(EXPECT)) {
@@ -121,7 +130,8 @@ for (const vp of SIZES) {
         const t = await readStates(page);
         L.check("at 2 weeks the nudged-within-window query is Gone quiet", t.nudgedwait?.state === "quiet", JSON.stringify(t.nudgedwait));
         L.check("at 2 weeks Nudge due stays Nudge due (its reply date is a week gone)", t.nudge?.state === "nudge", JSON.stringify(t.nudge));
-        await page.locator("[data-qc152='quiet-pop'] [data-weeks='4']").click().catch(() => {});
+        await page.keyboard.press("Escape").catch(() => {});
+        await setWeeks(4);
       }
       L.done(20);
     });
@@ -339,6 +349,59 @@ for (const vp of SIZES) {
         await page.waitForTimeout(400);
       }
       L.done(30);
+    });
+  });
+
+  test.describe(`QC152 §3 @ ${vp.width}`, () => {
+    test("L9 · capture: Mark full sent prefills, saves one step, the card changes in one render, Undo restores byte-for-byte", async ({ page }) => {
+      test.skip(!run("L9"));
+      const L = new Ledger(`L9-${vp.width}`);
+      const dump = () => execSync("node tests/e2e/seedQc152.mjs --dump fullreq", { encoding: "utf8" }).trim().split("\n").pop()!;
+      await open(page, vp);
+      const before = dump();
+      await openCard(page, "fullreq");
+      L.check("population: the full-requested card's button reads Mark full sent", (await page.locator(`${CARD152} [data-qc152='reply-btn']`).textContent())?.startsWith("Mark full sent"), "");
+      await page.locator(`${CARD152} [data-qc152='reply-btn']`).click();
+      await page.waitForTimeout(600);
+      const f = await page.evaluate(() => {
+        const r = document.querySelector<HTMLElement>("[data-qp='panel'] [data-qc152='record']");
+        return r ? {
+          kind: r.dataset.kind ?? "", title: r.querySelector("[data-qc152='record-title']")?.textContent ?? "",
+          chosen: [...r.querySelectorAll<HTMLElement>("[data-qc152='opt'][aria-checked='true']")].map((o) => o.dataset.k),
+          date: r.querySelector("[data-qc152='date-btn']")?.textContent ?? "",
+          chips: [...r.querySelectorAll("[data-qc152='mat-chip']")].map((c) => c.textContent ?? ""),
+        } : null;
+      });
+      const now = new Date(); const today = `${now.getDate()} ${["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][now.getMonth()]} ${now.getFullYear()}`;
+      L.check("the form opens on Mark full sent with the step chosen", f?.kind === "full_sent" && f.title === "Mark full sent" && f.chosen.join() === "full_sent", JSON.stringify(f));
+      L.check("today's date", f?.date === today, `${f?.date} vs ${today}`);
+      L.check("the request's materials prefilled: the full manuscript and the synopsis it asked for", f?.chips.length === 2 && /^Full manuscript/.test(f.chips[0]) && f.chips[1] === "Synopsis", JSON.stringify(f?.chips));
+      await page.locator("[data-qp='panel'] [data-qc152='see-changes']").click();
+      await page.waitForTimeout(400);
+      L.check("See what changes shows the step being added", (await page.locator("[data-qp='panel'] [data-qc152='adding']").count()) === 1, "");
+      await page.locator("[data-qp='panel'] [data-qc152='save']").click();
+      const seen = await page.waitForFunction(() => {
+        const c = document.querySelector<HTMLElement>("[data-qp='panel'] [data-qc152='card']");
+        if (!c || c.dataset.view !== "read") return false;
+        const band = c.querySelector("[data-qc152='band-word']")?.textContent ?? "";
+        if (band !== "WITH THE AGENT") return false;
+        return { band, pill: c.querySelector("[data-qc152='pill']")?.textContent ?? "", act: c.querySelector<HTMLElement>("[data-qc152='reply']")?.dataset.act ?? "", state: c.dataset.state ?? "" };
+      }, null, { timeout: 15_000 }).then((h) => h.jsonValue()).catch(() => null) as { band: string; pill: string; act: string; state: string } | null;
+      L.check("in the same render: band, pill and reply box read With the agent", !!seen && seen.state === "agent" && /Full sent/.test(seen.pill) && seen.act === "resp", JSON.stringify(seen));
+      const after = JSON.parse(dump());
+      const added = after.log.filter((x: [string, unknown]) => !JSON.parse(before).log.some((y: [string, unknown]) => y[0] === x[0]));
+      L.check("exactly one step added", added.length === 1, String(added.length));
+      const a0 = added[0]?.[1] as { resultingStatus?: string; materials?: { kind: string }[]; createdAt?: { seconds?: number } } | undefined;
+      L.check("the step is Full sent with what was asked for", a0?.resultingStatus === "Full Sent" && a0.materials?.map((m) => m.kind).join() === "full,synopsis", JSON.stringify(a0));
+      L.check("dated today", !!a0?.createdAt?.seconds && new Date(a0.createdAt.seconds * 1000).toDateString() === now.toDateString(), JSON.stringify(a0?.createdAt));
+      const u = page.locator("[data-qad-undo]").first();
+      const had = await u.waitFor({ timeout: 6000 }).then(() => true).catch(() => false);
+      L.check("Undo is offered", had, "no undo");
+      if (had) await u.click();
+      await page.waitForTimeout(2500);
+      const restored = dump();
+      L.check("Undo restores the query, its log and its feed byte-for-byte", restored === before, restored === before ? "" : `${before.length} vs ${restored.length}`);
+      L.done(10);
     });
   });
 }

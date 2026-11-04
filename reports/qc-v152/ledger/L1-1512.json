@@ -2,7 +2,7 @@
  {
   "where": "population: every fixture is on the page",
   "ok": true,
-  "detail": "[\"offer\",\"materials\",\"nudge\",\"nudgedwait\",\"agent\",\"nudgedquiet\",\"quiet\",\"nrmn\",\"closed\"]"
+  "detail": "[\"offer\",\"fullreq\",\"materials\",\"nudge\",\"nudgedwait\",\"agent\",\"pkg\",\"long\",\"nudgedquiet\",\"quiet\",\"nrmn\",\"closed\"]"
  },
  {
   "where": "offer is offer",
@@ -93,6 +93,26 @@
   "where": "closed sits in the closed group",
   "ok": true,
   "detail": "{\"state\":\"closed\",\"where\":\"closed\",\"group\":\"closed\"}"
+ },
+ {
+  "where": "long is agent",
+  "ok": true,
+  "detail": "{\"state\":\"agent\",\"where\":\"agent\",\"group\":\"agent\"}"
+ },
+ {
+  "where": "long sits in the agent group",
+  "ok": true,
+  "detail": "{\"state\":\"agent\",\"where\":\"agent\",\"group\":\"agent\"}"
+ },
+ {
+  "where": "fullreq is materials",
+  "ok": true,
+  "detail": "{\"state\":\"materials\",\"where\":\"you\",\"group\":\"materials\"}"
+ },
+ {
+  "where": "fullreq sits in the materials group",
+  "ok": true,
+  "detail": "{\"state\":\"materials\",\"where\":\"you\",\"group\":\"materials\"}"
  },
  {
   "where": "the banner has the quiet-window setting",

@@ -24,7 +24,8 @@
   animation: qc152In 550ms cubic-bezier(0.22, 0.9, 0.28, 1.14) backwards;
 }
 @keyframes qc152In { from { translate: calc(100% + 120px) 0; rotate: 9deg; } to { translate: 0 0; rotate: 1.6deg; } }
-.spanel.qsp.qsp:has(> .spanel-own > [data-qc152="flat"]), .spanel.qsp.qsp[data-step]:has(> .spanel-own > [data-qc152]) { rotate: none; }
+.spanel.qsp.qsp:has(> .spanel-own > [data-qc152="flat"]), .spanel.qsp.qsp:has(> .spanel-own > [data-lean="flat"]),
+.spanel.qsp.qsp[data-step]:has(> .spanel-own > [data-qc152]) { rotate: none; }
 @media (max-width: 1400px) { .spanel.qsp.qsp:has(> .spanel-own > [data-qc152]) { width: 504px; right: 28px; } }
 @media (prefers-reduced-motion: reduce) {
   .spanel.qsp.qsp:has(> .spanel-own > [data-qc152]) { animation: none; transition: none; }
@@ -161,6 +162,12 @@
   .qc152 .qc152-th { padding: 6px 14px 12px; }
   .qc152 .qc152-rbtn { padding: 0 13px 0 15px; font-size: 13.5px; }
 }
+
+/* §3.2 the new step slides in from its own side */
+.qc152 .qc152-m.me.new { animation: qc152Fr 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
+.qc152 .qc152-m.them.new { animation: qc152Fl 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
+@keyframes qc152Fr { from { opacity: 0; translate: 60px 0; } to { opacity: 1; translate: 0 0; } }
+@keyframes qc152Fl { from { opacity: 0; translate: -60px 0; } to { opacity: 1; translate: 0 0; } }
 
 /* the tips (portalled to body) */
 .qc152-pop { position: fixed; z-index: 90; max-width: 250px; padding: 9px 12px; border-radius: 10px; background: #1c130f; color: #fff; font: 400 13.5px/1.4 var(--sp-serif); pointer-events: none; }

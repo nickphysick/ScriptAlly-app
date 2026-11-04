@@ -49,7 +49,7 @@ export const packageChip = (name: string | null): string => {
   return (/package$/i.test(n) ? n : `${n} package`).toUpperCase();
 };
 
-export type CardMode = "view" | "respond" | "edit";
+export type CardMode = "view" | "respond" | "edit" | "record" | "fork" | "fix" | "details";
 export type CardTab = "tracking" | "agent" | "materials" | "notes";
 export type RespChoice = "partial" | "full" | "pass" | "offer";
 
@@ -206,6 +206,9 @@ export interface QcQueryCard149Props {
   onReply152?: (act: ReplyAct) => void;
   onEditStep152?: (activityId: string | null) => void;
   onPencil152?: () => void;
+  /** §3–§4: the editing view's body (the record form, What needs changing?, Fix a mistake, the details) and its back */
+  edit152?: React.ReactNode;
+  onBack152?: () => void;
 }
 
 const blankEdits = (): CardEdits => ({ dates: {}, removed: [], added: null, packageKey: null, pieces: {}, agent: {} });
@@ -333,7 +336,7 @@ export const QcQueryCard149: React.FC<QcQueryCard149Props> = (p) => {
 
   /* ── v152 §2: the desktop reading view ── */
   const v152 = !phone && p.v152 ? p.v152 : null;
-  if (v152 && mode === "view") {
+  if (v152 && (mode === "view" || mode === "record" || mode === "fork" || mode === "fix" || mode === "details")) {
     return (
       <QcCard152 row={r} nowMs={nowMs} d={v152} first={p.agent.first} msTitle={p.msTitle} bookChips={p.bookChips} packageName={p.packageName}
         wishlist={p.wishlist.text} email={p.contact.email} website={p.contact.website} websiteHref={p.contact.websiteHref}
@@ -344,7 +347,8 @@ export const QcQueryCard149: React.FC<QcQueryCard149Props> = (p) => {
         onEditStep={(id) => (p.onEditStep152 ? p.onEditStep152(id) : (setTab("tracking"), p.onMode("edit")))}
         onReply={(a) => p.onReply152?.(a)}
         onAgentField={p.onAgentField}
-        onCopyEmail={p.onCopyEmail} />
+        onCopyEmail={p.onCopyEmail}
+        view={mode === "view" ? "read" : mode} editBody={p.edit152} onBack={p.onBack152} freshKey={p.freshKey} />
     );
   }
   const flat = v152 ? "flat" : undefined;

@@ -37,6 +37,7 @@ for L in "${@:-L1 L2 L3}"; do
   case "$L" in
     L1) F=src/lib/queryState.ts; srcbreak $F '  if (ms == null || ms > nowMs) return null;' '  if (ms == null || ms > nowMs || ms > 0) return null; /* MUT L1: ignore the nudge date */' ;;
     L8) F=src/components/Queries.tsx; srcbreak $F '    const reply152 = (a: ReplyAct) => {' '    const reply152 = (a: ReplyAct) => { void updateUserPaths({ "todoPrefs.queries.mutL8": Date.now() }); /* MUT L8: write on press */' ;;
+    L9) F=src/components/Queries.tsx; srcbreak $F 'if (k === "full_sent") return (reqMats?.length ? reqMats : [{ kind: "full" as const }]).map(withVer);' 'if (k === "full_sent") return ([{ kind: "full" as const }]).map(withVer); /* MUT L9: the generic default */' ;;
     L3) F=src/lib/queryState.ts; srcbreak $F 's === "offer" || s === "materials" || s === "nudge" ? "you" : s;' 's === "offer" || s === "materials" || s === "nudge" || s === "quiet" ? "you" : s; /* MUT L3 */' ;;
     *) F="" ;;
   esac
