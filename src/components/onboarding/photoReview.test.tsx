@@ -34,7 +34,7 @@ import { parseModel, modelToResult, applyCrossedAnswer, settleAgentReason, openC
 import { agentAsk, openAgentQuestions, openQueryQuestions, AGENT_ASK_CHIP, queriesAnswerLine, comingUpQueries } from "../../lib/reviewGate";
 import { focusReasonMeta } from "../../lib/smartImportReviewModel";
 import { ReadingQuestion, IllegibleAgencyQuestion, QueryQuestion, crossedAllLabel, markWording, splitReading } from "./v9/DeckQuestions";
-import { PhotoLead } from "./v9/PhotoSnip";
+import { PhotoLead, CUT_FROM_BANDS } from "./v9/PhotoSnip";
 import { snipRect } from "../../lib/photoImport";
 import { commitSmartImport } from "../../lib/smartImportCommit";
 
@@ -184,19 +184,31 @@ describe("Mark to explain", () => {
 });
 
 describe("the writer's own line above the question", () => {
-  it("with a src: the cut-out, its page, and See the whole page", () => {
-    const h = html(<PhotoLead src={{ p: 2, y: [0.1, 0.15] }} lineRaw="x" photos={PHOTOS} onSeePage={noop} />);
-    expect(h).toMatch(/<figure class="o9-snip" data-im="deck-snip" data-page="2"><canvas width="640" height="\d+"/);
-    expect(text(h)).toContain("Your page 2. See the whole page");
+  /* RE-POINTED (Nick, 4 Nov): the cut-out is off — the evaluation's bands held their line 18.1% of
+     the time — so a card quotes the line, with its page (869 of 870 right) to open in full. */
+  it("the cut-out from the bands is off, and a card never draws one", () => {
+    expect(CUT_FROM_BANDS).toBe(false);
+    expect(html(<PhotoLead src={{ p: 2, y: [0.1, 0.15] }} lineRaw="x" photos={PHOTOS} onSeePage={noop} />)).not.toContain("<canvas");
   });
-  it("without one (or one pointing at no page): the line quoted in the mono pill", () => {
+  it("with a line and its page: the line quoted, then Your page N. and See the whole page", () => {
+    const h = html(<PhotoLead src={{ p: 2, y: [0.1, 0.15] }} lineRaw="Rhys Hale – Hale Agency – 8/8" photos={PHOTOS} onSeePage={noop} />);
+    expect(h).toMatch(/^<figure class="o9-snip o9-snip--quote" data-im="deck-line" data-page="2"><p class="o9-snipline"><span class="o9-raw">“Rhys Hale – Hale Agency – 8\/8”<\/span><\/p><figcaption>/);
+    expect(text(h)).toBe("“Rhys Hale – Hale Agency – 8/8” Your page 2. See the whole page");
+    expect(h).toContain('data-act="see-page"');
+  });
+  it("the page shown is the one the writer saw it under, not the sent order", () => {
+    const shuffled = [{ ...PHOTOS[0], shown: 1 }, { ...PHOTOS[1], shown: 3 }];
+    expect(text(html(<PhotoLead src={{ p: 2, y: [0.1, 0.15] }} lineRaw="x" photos={shuffled} onSeePage={noop} />))).toContain("Your page 3.");
+  });
+  it("a line with no known page: the quote alone", () => {
     for (const src of [undefined, { p: 5, y: [0.1, 0.2] as [number, number] }]) {
       expect(html(<PhotoLead src={src} lineRaw="Imogen Price – Price & P.. – 19/8" photos={PHOTOS} onSeePage={noop} />))
-        .toBe('<p class="o9-snipline" data-im="deck-line"><span class="o9-raw">“Imogen Price – Price &amp; P.. – 19/8”</span></p>');
+        .toBe('<figure class="o9-snip o9-snip--quote" data-im="deck-line"><p class="o9-snipline"><span class="o9-raw">“Imogen Price – Price &amp; P.. – 19/8”</span></p></figure>');
     }
   });
-  it("with neither: nothing", () => {
+  it("no line: nothing, even with a page", () => {
     expect(html(<PhotoLead photos={PHOTOS} onSeePage={noop} />)).toBe("");
+    expect(html(<PhotoLead src={{ p: 1, y: [0.1, 0.2] }} photos={PHOTOS} onSeePage={noop} />)).toBe("");
   });
   it("the band is padded by 4% of the page height, the page's full width, at most 640 wide", () => {
     expect(snipRect({ y: [0.2, 0.25] }, 1176, 1568)).toEqual({ sx: 0, sy: Math.round(0.16 * 1568), sw: 1176, sh: Math.round(0.13 * 1568), dw: 640, dh: Math.round((Math.round(0.13 * 1568) * 640) / 1176) });
