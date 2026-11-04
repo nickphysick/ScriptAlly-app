@@ -85,17 +85,49 @@ nothing reaches any real project.
 failing, because it went on to scroll to a row that did not exist. It now stops with its readings when there is no
 collapsed row, so the mutation reports what was wrong.
 
-**B2's mutation is a source edit**, so its readings were written over B's own; they are kept as `B-*.mut-B2.json` and B
-was run again clean.
+**B2's mutation is a source edit**, so its readings were written over B's own; they are kept as `B-*.mut-B2.json`, and
+`B-*.json` are the clean readings from the run on the merged build (0 failed, highest point 86px, 30.7%).
 
 ## L1 · earlier suites
 
-_pending_
+| Suite | This branch | Base (`99e2ef45`) | Verdict |
+|---|---|---|---|
+| dashV2 (v2's own locks, 8 assertions re-pointed) | 13 passed | 13 passed | green |
+| dashFirstVisit (v1) | 4 passed | 4 passed | green |
+| dashFirstVisitV2 | 8 failed, 2 passed | **the same 8 failed** (A1, A2, B1, C1, D1, F1, G1, H1) | red before this pack: they wait for feed v1's layout (`data-df1="feed"`, `data-fv1="setup"`, the tour), which Dashboard v2 replaced |
+| dashMobileV1 | E1 failed (its desktop half), the phone cases skipped behind it | not run; the base's source renders neither selector | red before this pack: E1 expects `data-d58="buttons"` and the v71 task pager on the desktop, both gone with Dashboard v2. The phone half of E1 passes |
+| helpSystemV1 | **not run** — stopped to get the change to dev | not run | unverified |
+
+**Re-pointed assertions (all in `tests/e2e/dashV2.measure.ts`, each marked `RE-POINTED (Dashboard v2.1)`):**
+1. A1's walk from the title down skips the weeks tag, which now sits above it.
+2. A1's "no status label in the band" reads the band without the tag's text (a count, not a status).
+3. C1: the chart is 280px, not 250.
+4. C2: the points sit 22px in, and a week's figure is the button's `data-total` (a dot has no text).
+5. C2's mutation shifts `data-total` rather than the text.
+6. C3's previous week is read from `data-total`.
+7. D1's mutation sets the card's `data-done`/`data-needed`.
+8. D1 reads the note count from the card's data (the "{done} of {needed} notes" line is gone; the ring draws it), the current rank from the step's title, and the number as "No. 23 · ".
 
 ## Shots
 
-_pending_
+Each beside its reference in `design-refs/dashboard-v2-1/screens/`, captured on the emulator's harness account.
+
+| Reference | This build |
+|---|---|
+| `01-dashboard-1512@2x.png`, `01-dashboard-1280@2x.png` | `shots/01-dashboard-1512.png`, `shots/01-dashboard-1280.png` |
+| `02-dashboard-full-1512@2x.png`, `02-dashboard-full-1280@2x.png` | `shots/02-dashboard-full-1512.png`, `shots/02-dashboard-full-1280.png` |
+| `03-week-hover-1512@2x.png`, `03-week-hover-1280@2x.png` | `shots/03-week-hover-1512.png`, `shots/03-week-hover-1280.png` |
+| `04-feed-row-opened-1512@2x.png`, `04-feed-row-opened-1280@2x.png` | `shots/04-feed-row-opened-1512.png`, `shots/04-feed-row-opened-1280.png` |
+| (none) | `shots/collapsed-row-1512.png`, `shots/collapsed-row-1280.png`, `shots/01-feed-*.png` |
 
 ## Integration and dev
 
-_pending_
+- Dev was serving `index-CJ6SyN3r.js` from `dev/qc1511-db2-title-sip-qc1512-cl26-sip11-tl1-pk41-cl262` (`efa73df9`), not the
+  branch this pack was cut from: Contact list v26.2 landed on dev during the pack. `dashboard-v2-1` was merged into a new
+  branch cut from it, **`dev/qc1511-db2-title-sip-qc1512-cl26-sip11-tl1-pk41-cl262-db21`** (`08ac57cc`). The one conflict
+  was `design-refs/.refhashes.json` (both sides added refs; both kept; all 1,031 verify).
+- On the merge: tsc 0, functions tsc 0, both builds 0 with no CSS warnings, Vitest 11,312 passed and the same two
+  `firestoreTarget` failures the base carries; DB21 and dashV2 on the emulator: **22 passed**.
+- Deployed to dev (hosting only) from that clean checkout: **`index-Jr9Lv7ez.js`**, confirmed served. Not merged to main.
+- `dev/…-cl262-cl263` (Contact list v26.3) is pushed and not deployed; whoever deploys it next must merge this branch in or
+  it will take Dashboard v2.1 off dev.

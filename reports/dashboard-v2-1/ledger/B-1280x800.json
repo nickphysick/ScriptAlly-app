@@ -27,25 +27,25 @@
   "lock": "B2",
   "where": "a dot for every week but the last",
   "ok": true,
-  "detail": "[{\"now\":false,\"dot\":true,\"w\":9,\"h\":9,\"bg\":\"rgb(255, 255, 255)\",\"text\":\"\",\"cx\":22,\"cy\":57,\"line\":57,\"total\":35},{\"now\":false,\"dot\":true,\"w\":9,\"h\":9,\"bg\":\"rgb(255, 255, 255)\",\"text\":\"\",\"cx\":53.875,\"cy\":35.390625,\"line\":35.41693115234375,\"total\":39},{\"now\":false,\"dot\":true,\"w\":9,\"h\":9,\"bg\":\"rgb(255, 255, 255)\",\"text\":\"\",\"cx\":85.75,\"cy\":30,\"line\":30.008464813232422,\"total\":40}]"
+  "detail": "[{\"now\":false,\"dot\":true,\"w\":9,\"h\":9,\"bg\":\"rgb(255, 255, 255)\",\"text\":\"\",\"cx\":22,\"cy\":106,\"line\":106,\"total\":35},{\"now\":false,\"dot\":true,\"w\":9,\"h\":9,\"bg\":\"rgb(255, 255, 255)\",\"text\":\"\",\"cx\":53.875,\"cy\":90,\"line\":90.01254272460938,\"total\":39},{\"now\":false,\"dot\":true,\"w\":9,\"h\":9,\"bg\":\"rgb(255, 255, 255)\",\"text\":\"\",\"cx\":85.75,\"cy\":86,\"line\":86.00627136230469,\"total\":40}]"
  },
  {
   "lock": "B2",
   "where": "the last is a 36px navy circle holding the total",
   "ok": true,
-  "detail": "{\"now\":true,\"dot\":false,\"w\":36,\"h\":36,\"bg\":\"rgb(45, 58, 80)\",\"text\":\"39\",\"cx\":277,\"cy\":35.390625,\"line\":35.400001525878906,\"total\":39}"
+  "detail": "{\"now\":true,\"dot\":false,\"w\":36,\"h\":36,\"bg\":\"rgb(45, 58, 80)\",\"text\":\"39\",\"cx\":277,\"cy\":90,\"line\":90,\"total\":39}"
  },
  {
   "lock": "B2",
   "where": "every centre sits on the line ±2",
   "ok": true,
-  "detail": "max 0.03"
+  "detail": "max 0.01"
  },
  {
   "lock": "B2",
   "where": "the highest point is at least 25% of the plot below its top",
-  "ok": false,
-  "detail": "30.0 of 280 (10.7%)"
+  "ok": true,
+  "detail": "86.0 of 280 (30.7%)"
  },
  {
   "lock": "B3",

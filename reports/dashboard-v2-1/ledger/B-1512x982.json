@@ -27,25 +27,25 @@
   "lock": "B2",
   "where": "a dot for every week but the last",
   "ok": true,
-  "detail": "[{\"now\":false,\"dot\":true,\"w\":9,\"h\":9,\"bg\":\"rgb(255, 255, 255)\",\"text\":\"\",\"cx\":22,\"cy\":62.390625,\"line\":62.400001525878906,\"total\":34},{\"now\":false,\"dot\":true,\"w\":9,\"h\":9,\"bg\":\"rgb(255, 255, 255)\",\"text\":\"\",\"cx\":52.71875,\"cy\":67.796875,\"line\":67.79671478271484,\"total\":33},{\"now\":false,\"dot\":true,\"w\":9,\"h\":9,\"bg\":\"rgb(255, 255, 255)\",\"text\":\"\",\"cx\":83.453125,\"cy\":62.390625,\"line\":62.40821838378906,\"total\":34}]"
+  "detail": "[{\"now\":false,\"dot\":true,\"w\":9,\"h\":9,\"bg\":\"rgb(255, 255, 255)\",\"text\":\"\",\"cx\":22,\"cy\":110,\"line\":110,\"total\":34},{\"now\":false,\"dot\":true,\"w\":9,\"h\":9,\"bg\":\"rgb(255, 255, 255)\",\"text\":\"\",\"cx\":52.71875,\"cy\":114,\"line\":113.99756622314453,\"total\":33},{\"now\":false,\"dot\":true,\"w\":9,\"h\":9,\"bg\":\"rgb(255, 255, 255)\",\"text\":\"\",\"cx\":83.453125,\"cy\":110,\"line\":110.00608825683594,\"total\":34}]"
  },
  {
   "lock": "B2",
   "where": "the last is a 36px navy circle holding the total",
   "ok": true,
-  "detail": "{\"now\":true,\"dot\":false,\"w\":36,\"h\":36,\"bg\":\"rgb(45, 58, 80)\",\"text\":\"39\",\"cx\":360,\"cy\":35.390625,\"line\":35.400001525878906,\"total\":39}"
+  "detail": "{\"now\":true,\"dot\":false,\"w\":36,\"h\":36,\"bg\":\"rgb(45, 58, 80)\",\"text\":\"39\",\"cx\":360,\"cy\":90,\"line\":90,\"total\":39}"
  },
  {
   "lock": "B2",
   "where": "every centre sits on the line ±2",
   "ok": true,
-  "detail": "max 0.02"
+  "detail": "max 0.01"
  },
  {
   "lock": "B2",
   "where": "the highest point is at least 25% of the plot below its top",
-  "ok": false,
-  "detail": "30.0 of 280 (10.7%)"
+  "ok": true,
+  "detail": "86.0 of 280 (30.7%)"
  },
  {
   "lock": "B3",
