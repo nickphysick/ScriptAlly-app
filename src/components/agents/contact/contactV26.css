@@ -244,6 +244,30 @@
   display: grid; place-items: center; font: 700 8px/1 var(--sp-serif) !important; font-style: normal !important;
 }
 /* the StatusDots draw in ink; on the navy index they take the entry's colour (cream, or ink on the white current one) */
-.cl26-ixe svg [stroke]:not([stroke="none"]) { stroke: currentColor; }
-.cl26-ixe svg [fill]:not([fill="none"]):not([fill="transparent"]) { fill: currentColor; }
+/* StatusDot sets its ink as an inline `color` on the svg and draws in currentColor, so only !important reaches it */
+.cl26-ixe svg { color: inherit !important; }
 .cl26-ixe .cl24-nq { color: currentColor; }
+
+/* ═════════ D · the margin and the Status groups ═════════ */
+/* No grouping, and Grouped by Status: no margin — the rows sit 22 in (the headings follow) */
+.cl26-card[data-kind="all"], .cl26-card[data-kind="set"] { --cl26-m: 22px; }
+.cl26-mg { grid-column: 1; min-width: 0; }
+.cl26-rows { grid-column: 2; }
+.cl26-mgl {
+  position: sticky; top: calc(12px + var(--cl26-pin-h) + 8px); display: flex; flex-direction: column; align-items: flex-start; gap: 4px;
+  padding: 14px 4px 0 22px;
+}
+.cl26-mgl b { font: 400 30px/1 var(--sp-type) !important; color: #5e7189; font-weight: 400; white-space: nowrap; }
+.cl26-mgl small { font: 400 11.5px/1.2 var(--sp-type) !important; color: rgba(28, 19, 15, .5); }
+.cl26-mgl svg { color: #5e7189 !important; }
+.cl26-mgl .cl24-nq { width: 24px; height: 24px; color: #5e7189; }
+/* a Status group: a ruled heading across the row area, then its rows */
+.cl26-gh {
+  grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; padding: 18px 22px 10px; background: #fbf9f6;
+  border-bottom: 1px solid rgba(28, 19, 15, .1);
+}
+.cl26-gh b { font: 400 20px/1.2 var(--sp-type) !important; color: #1c130f; font-weight: 400; }
+.cl26-gh small { font: 400 15px/1 var(--sp-type) !important; color: rgba(28, 19, 15, .45); }
+.cl26-gh .cl26-mini { box-shadow: none; }
+.cl26-sec[data-kind="set"] { border-top: 0; }
+.cl26-sec[data-kind="set"] + .cl26-sec[data-kind="set"] .cl26-gh { border-top: 1px solid rgba(28, 19, 15, .1); }

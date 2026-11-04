@@ -156,7 +156,7 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
   const sortBy = (k: SortKey) => p.onSort({ key: k, reversed: p.sortKey === k ? !p.reversed : false });
 
   return (
-    <section className="cl26-card" data-cl26="card" ref={cardRef}>
+    <section className="cl26-card" data-cl26="card" ref={cardRef} data-kind={drawn[0]?.kind ?? "all"}>
       <div className="cl26-frame" data-cl26="frame">
         <div className="cl26-pin" data-cl26="pin" ref={pinRef} data-stuck={stuck ? "" : undefined}>
           <div className="cl26-band" data-cl26="band" ref={bandRef}>
@@ -207,7 +207,19 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
             {drawn.map((sec) => (
               <div key={sec.key} className="cl26-sec" data-cl26="section" data-k={sec.key} data-kind={sec.kind} data-n={sec.ids.length}
                 ref={(el) => { if (el) secEls.current.set(sec.key, el); else secEls.current.delete(sec.key); }}>
-                <span className="cl26-mg" data-cl26="margin" aria-hidden="true" />
+                {sec.kind === "set" ? (
+                  <div className="cl26-gh" data-cl26="group-head" data-k={sec.set}>
+                    <SectionGlyph s={sec} size={17} /><b>{sec.label}</b><small>{sec.ids.length}</small>
+                  </div>
+                ) : null}
+                <span className="cl26-mg" data-cl26="margin" aria-hidden="true">
+                  {sec.kind === "all" || sec.kind === "set" ? null : (
+                    <span className="cl26-mgl" data-cl26="margin-label" data-big={sec.big ?? ""} data-small={sec.small ?? ""}>
+                      {sec.kind === "stage" ? <SectionGlyph s={sec} size={24} /> : <b>{sec.big}</b>}
+                      {sec.small ? <small>{sec.small}</small> : null}
+                    </span>
+                  )}
+                </span>
                 <div className="cl26-rows">
                   {sec.ids.map((id) => { const x = byId.get(id); return x ? <Row26 key={id} x={x} p={p} /> : null; })}
                 </div>

@@ -12,7 +12,7 @@ test.describe.configure({ mode: "serial" });
 
 const STATES: [string, Open26][] = [
   ["01-page", {}], ["04-grouped-status", { group: "status" }], ["05-sorted-reply", { sort: "reply" }],
-  ["06-sorted-added", { sort: "added" }], ["07-no-grouping", { group: "none" }], ["03-health-48", { health: 48 }],
+  ["06-sorted-added", { sort: "added" }], ["07-no-grouping", { group: "none" }], ["xx-sorted-status", { sort: "status" }], ["03-health-48", { health: 48 }],
 ];
 
 test("CL26 shots — the page in each state", async ({ page }) => {
