@@ -1022,7 +1022,9 @@
     "design-refs/contact-list-v26/screens/10-filters-menu-1512@2x.png": "3cb0c8a503123c7fcb4a3e6089116994db5ffc9054aaef814e38ceb08696ce26",
     "design-refs/contact-list-v26/screens/11-missing-details-1512@2x.png": "bf1f56f56e92dfaa9dbadd8a7e3d8923b2bb3c3b5fa2457dd634f6734b391c1e",
     "design-refs/submission-packages-v41/submission-packages-v41.html": "c5a0b3500bf62b22c9ea86116b28818f3147220b1ae8a5cc394b99b8ab4783aa",
-    "design-refs/contact-list-v26-2/contact-list-v26-2.html": "01a15f1b5170efcf07e9c1d92dc531ff3a45ba9574085a5a1c9bc6dae9be1c33"
+    "design-refs/contact-list-v26-2/contact-list-v26-2.html": "01a15f1b5170efcf07e9c1d92dc531ff3a45ba9574085a5a1c9bc6dae9be1c33",
+    "design-refs/query-centre-v152/query-centre-v152.html": "fb9276ca8b21cbc04cafb5d7b825ab8d634783d5dfd4c61128a9e22a62a6c754",
+    "design-refs/query-centre-v152/query-states-v2.html": "8e03cf9cd9e2fd8e21f7571a2e6edc5999be89accc63197f456cd35c3fd74d38"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",
