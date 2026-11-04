@@ -5,7 +5,7 @@
 import { describe, expect, it } from "vitest";
 import { UserPlan, type User } from "../types";
 import { packagesViaFounding } from "./entitlements";
-import { FOUNDING_NOTE_PATH, foundingNoteHidden, headerSub, listFilter, packagesCount, rateWords, statusWords, tabCounts } from "./packagesV41";
+import { FOUNDING_NOTE_PATH, foundingNoteHidden, headerSub, railGroups, railLine, railLineText, statusWords } from "./packagesV41";
 
 const user = (plan: UserPlan, prefs?: User["todoPrefs"]) => ({ plan, todoPrefs: prefs }) as Pick<User, "plan" | "todoPrefs">;
 
@@ -40,30 +40,34 @@ describe("v41 C · the header's one line", () => {
   });
 });
 
-describe("v41 E · the list's tabs and words", () => {
-  const stages = ["out", "out", "ready", "draft", "retired"] as const;
-  it("counts the LIVE packages per tab; a retired one is in none", () => {
-    expect(tabCounts([...stages])).toEqual({ all: 4, out: 2, ready: 1, draft: 1 });
+describe("v41 D · the rail's groups and lines", () => {
+  const stages = ["draft", "out", "ready", "retired", "out"] as const;
+  const pk = stages.map((st, i) => ({ id: `p${i}`, st }));
+  it("groups Out with agents, Ready, Draft, in that order, each only when it has packages; retired fold apart", () => {
+    const r = railGroups(pk, (p) => p.st);
+    expect(r.groups.map((g) => [g.k, g.items.map((p) => p.id)])).toEqual([["out", ["p1", "p4"]], ["ready", ["p2"]], ["draft", ["p0"]]]);
+    expect(r.retired.map((p) => p.id)).toEqual(["p3"]);
+    expect(railGroups(pk.filter((p) => p.st !== "ready"), (p) => p.st).groups.map((g) => g.k)).toEqual(["out", "draft"]);
   });
-  it("shows a tab's packages, and the retired ones only when asked, on any tab", () => {
-    expect(listFilter("out", "all", false)).toBe(true);
-    expect(listFilter("out", "ready", false)).toBe(false);
-    expect(listFilter("retired", "all", false)).toBe(false);
-    expect(listFilter("retired", "draft", true)).toBe(true);
+  const f = (sent: number, answered: number, ranked: boolean, pct: number | null) => ({ sent, answered, ranked, pct });
+  const both = { version: true, letter: true };
+  it("out with agents: the rate once ranked, the answers in until then", () => {
+    expect(railLineText(railLine("out", f(5, 4, true, 40), both, 4))).toBe("5 sent · 40% asked for more");
+    expect(railLineText(railLine("out", f(3, 1, false, 33), both, 4))).toBe("3 sent · 1 of 4 answers in");
+    expect(railLineText(railLine("out", f(9, 7, false, null), both, 4))).toBe("9 sent · 4 of 4 answers in");
   });
-  it("singular at one", () => {
-    expect(packagesCount(1)).toBe("1 package");
-    expect(packagesCount(4)).toBe("4 packages");
+  it("ready, and what a draft still needs", () => {
+    expect(railLineText(railLine("ready", f(0, 0, false, null), both, 4))).toBe("Ready to send");
+    expect(railLineText(railLine("draft", f(0, 0, false, null), { version: true, letter: false }, 4))).toBe("Needs a letter");
+    expect(railLineText(railLine("draft", f(0, 0, false, null), { version: false, letter: true }, 4))).toBe("Needs a version");
+    expect(railLineText(railLine("draft", f(0, 0, false, null), { version: false, letter: false }, 4))).toBe("Needs a version and a letter");
   });
-  it("a draft names what it still needs", () => {
-    expect(statusWords("draft", { version: true, letter: false })).toBe("Draft · needs a letter");
-    expect(statusWords("draft", { version: false, letter: false })).toBe("Draft · needs a version and a letter");
-    expect(statusWords("ready", { version: true, letter: true })).toBe("Ready to send");
-    expect(statusWords("out", { version: true, letter: true })).toBe("Out with agents");
+  it("a retired package keeps its figures if it went out", () => {
+    expect(railLineText(railLine("retired", f(1, 1, false, 0), both, 4))).toBe("1 sent · 1 of 4 answers in");
+    expect(railLineText(railLine("retired", f(0, 0, false, null), both, 4))).toBe("Retired");
   });
-  it("asked for more: a dash before anything is sent, Too early until ranked, then the share", () => {
-    expect(rateWords({ sent: 0, ranked: false, pct: null }).text).toBe("—");
-    expect(rateWords({ sent: 3, ranked: false, pct: 33 }).text).toBe("Too early");
-    expect(rateWords({ sent: 5, ranked: true, pct: 40 }).text).toBe("40%");
+  it("the batch picker's status words", () => {
+    expect(statusWords("ready", both)).toBe("Ready to send");
+    expect(statusWords("out", both)).toBe("Out with agents");
   });
 });
