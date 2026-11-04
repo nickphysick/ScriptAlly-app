@@ -9,13 +9,13 @@
   "lock": "L1-1280",
   "where": "ground: the gradient",
   "ok": true,
-  "detail": "url(\"http://127.0.0.1:4317/images/packages/packages-pattern.svg\"), linear-gradient(rgb(251, 249, 245), rgb(238, 235, 229))"
+  "detail": "url(\"https://scriptally-dev.web.app/images/packages/packages-pattern.svg\"), linear-gradient(rgb(251, 249, 245), rgb(238, 235, 229))"
  },
  {
   "lock": "L1-1280",
   "where": "ground: the pattern over it",
   "ok": true,
-  "detail": "url(\"http://127.0.0.1:4317/images/packages/packages-pattern.svg\"), linear-gradient(rgb(251, 249, 245), rgb(238, 235, 229"
+  "detail": "url(\"https://scriptally-dev.web.app/images/packages/packages-pattern.svg\"), linear-gradient(rgb(251, 249, 245), rgb(238,"
  },
  {
   "lock": "L1-1280",
