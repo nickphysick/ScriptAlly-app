@@ -79,7 +79,7 @@ async function open(page: Page, size: { width: number; height: number }, ms = "p
   await openRoute(page, route, size);
   if (m?.css) await page.addStyleTag({ content: m.css });
   /* v41: the labels row is retired; the page is ready when its list is */
-  if (route === "/queries/packages") await page.locator('[data-pk41="list"]').first().waitFor({ state: "visible", timeout: 30_000 });
+  if (route === "/queries/packages") await page.locator('[data-pk41="rail"]').first().waitFor({ state: "visible", timeout: 30_000 });
   await page.waitForTimeout(1500);
 }
 const pg = `[data-pk26="page"]`;
@@ -216,8 +216,8 @@ test("L5 rename writes once (draft and sent), Escape writes nothing, a sent pack
     await page.waitForTimeout(1500);
     L.check(`${id}: one write (one rename receipt)`, toasts.length === before + 1, JSON.stringify(toasts));
     L.check(`${id}: stored`, stored()[id]?.packageName === to, String(stored()[id]?.packageName));
-    /* v41: the list row shows it (re-pointed from the label); the row's name may carry the Active tag after it */
-    L.check(`${id}: the list row shows it`, ((await label(page, id).locator(".p41-rn b").innerText()).trim().startsWith(to)), await label(page, id).locator(".p41-rn b").innerText());
+    /* v41: the rail row shows it (re-pointed from the label); the row's name may carry the Active tag after it */
+    L.check(`${id}: the rail row shows it`, ((await label(page, id).locator("span > b").first().innerText()).trim().startsWith(to)), await label(page, id).locator("span > b").first().innerText());
     /* v39.3 REWRITE: a sent package's lock is the sent note between the header and the steps (Nick, 29 Oct); no padlock
        sits in the status pill or beside the name */
     const locks = await page.evaluate((p) => { const o = document.querySelector(`${p} [data-pk40="open"]`)!; return { note: o.querySelectorAll('[data-pk393="sent-note"]').length, stage: o.querySelectorAll('[data-pk39="stage-lock"]').length, name: o.querySelectorAll(".p9-po-tt .p9-po-lk, [data-pk39='name-lock']").length }; }, pg);

@@ -72,7 +72,7 @@ async function open(page: Page, pkg: string) {
   if (m?.css) await page.addInitScript((css) => document.addEventListener("DOMContentLoaded", () => { const st = document.createElement("style"); st.textContent = css; document.head.appendChild(st); }), m.css);
   await openRoute(page, "/queries/packages", SIZE);
   /* v41: the labels row is retired — a package opens from its row in the list (re-pointed; the law is unchanged) */
-  await page.locator('[data-pk41="list"]').first().waitFor({ state: "visible", timeout: 30_000 });
+  await page.locator('[data-pk41="rail"]').first().waitFor({ state: "visible", timeout: 30_000 });
   await page.locator(`[data-pk26="page"] [data-pk41-row="${pkg}"]`).first().click();
   await page.waitForTimeout(900);
   /* bring the builder into view: hover and clicks then land on the steps */

@@ -1,15 +1,45 @@
 [
  {
   "lock": "L4-1512",
-  "where": "the row is the stored active package",
+  "where": "the strip is inside the header",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "flush left ±1",
+  "ok": false,
+  "detail": "30"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "flush right ±1",
+  "ok": false,
+  "detail": "22"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "flush bottom ±1",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "the strip is the stored active package",
   "ok": true,
   "detail": "pk40-std / pk40-std"
  },
  {
   "lock": "L4-1512",
+  "where": "Open → selects the active package",
+  "ok": true,
+  "detail": "pk40-std"
+ },
+ {
+  "lock": "L4-1512",
   "where": "names the package",
-  "ok": false,
-  "detail": "Somebody else / Standard"
+  "ok": true,
+  "detail": "Standard / Standard"
  },
  {
   "lock": "L4-1512",
@@ -37,7 +67,7 @@
  },
  {
   "lock": "L4-1512",
-  "where": "the row updates",
+  "where": "the strip updates",
   "ok": true,
   "detail": "pk40-ready"
  },
@@ -49,25 +79,13 @@
  },
  {
   "lock": "L4-1512",
-  "where": "the writer's own toast",
-  "ok": true,
-  "detail": "no toast"
- },
- {
-  "lock": "L4-1512",
   "where": "no active package: “Choose one →”",
   "ok": true,
   "detail": "missing"
  },
  {
   "lock": "L4-1512",
-  "where": "…and the sentence",
-  "ok": true,
-  "detail": "missing"
- },
- {
-  "lock": "L4-1512",
-  "where": "no packages: the row is absent",
+  "where": "no packages: the strip is absent",
   "ok": true,
   "detail": "present"
  }
