@@ -26,12 +26,13 @@ export const QC_SORT_FIELDS: readonly SortField<Qc138SortKey>[] = [
 /** Contact list v25.1 E4/E5 — its five headings, in their order, each a sort; the pill says the choice in words (no
  *  arrow): "Name A–Z", "Best genre fit", "Quickest reply", "Most urgent", "Highest rated", and their reverses */
 export const CL_SORT_FIELDS: readonly SortField<SortKey>[] = [
-  { key: "surname", label: "Name", order: AZ, chip: (r) => (r ? "Name Z–A" : "Name A–Z") },
-  { key: "fit", label: "Genre fit", order: [{ label: "Best fit first", reversed: false }, { label: "Weakest fit first", reversed: true }], chip: (r) => (r ? "Weakest genre fit" : "Best genre fit") },
-  { key: "reply", label: "Reply time", order: [{ label: "Quickest first", reversed: false }, { label: "Slowest first", reversed: true }], chip: (r) => (r ? "Slowest reply" : "Quickest reply") },
-  { key: "urgency", label: "Urgency", order: [{ label: "Most urgent first", reversed: false }, { label: "Least urgent first", reversed: true }], chip: (r) => (r ? "Least urgent" : "Most urgent") },
-  { key: "rating", label: "Your rating", order: [{ label: "Highest first", reversed: false }, { label: "Lowest first", reversed: true }], chip: (r) => (r ? "Lowest rated" : "Highest rated") },
-];
+  /* Contact list v26 E — the four sorts the page offers (the menu, the chip and the two sorting headings): Surname,
+     Date added, Reply time, Query status. v25.1's Genre fit, Urgency and Your rating left with their columns. */
+  { key: "surname", label: "Surname", order: AZ },
+  { key: "added", label: "Date added", order: [{ label: "Newest first", reversed: false }, { label: "Oldest first", reversed: true }] },
+  { key: "reply", label: "Reply time", order: [{ label: "Fastest first", reversed: false }, { label: "Slowest first", reversed: true }] },
+  { key: "status", label: "Query status", order: [{ label: "Furthest on", reversed: false }, { label: "Earliest first", reversed: true }] },
+]
 
 /**
  * cards-sort-search v1 §B — THE MONTH JUMPS for a list sorted by a date: one per month the rows fall in, in the order the

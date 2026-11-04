@@ -29,7 +29,15 @@ export const FilterMenu: React.FC<{
   openN: number; showing: number; total: number; onExport: () => void;
   /** v25.4 D — how many agents have any Housekeeping gap (the "Missing details" toggle; absent: no toggle) */
   missingN?: number;
-}> = ({ anchor, filters: f, onFilters, genres, openN, showing, total, onExport, missingN }) => {
+  /** Contact list v26 E — EXTENDED IN PLACE: the quick picks (radio, one at a time; a second click clears), each with the
+   *  count it would show. Given, they lead the menu, and Missing details is one of them (so the Profiles toggle is not
+   *  drawn). Absent, the menu is v24's. */
+  picks?: { key: string; title: string; line: string; n: number; on: boolean }[];
+  onPick?: (key: string) => void;
+  /** v26 E — a genre the manuscript in scope carries is ticked */
+  genreHit?: (key: string) => boolean;
+  className?: string;
+}> = ({ anchor, filters: f, onFilters, genres, openN, showing, total, onExport, missingN, picks, onPick, genreHit, className }) => {
   /* v25.6 — capped to the window, as ListPills' panels are: At a glance's foot lines lowered the bar 29px and the panel's
      last option ran under the window's bottom edge. It scrolls inside itself instead (its overflow is already auto). */
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
@@ -37,15 +45,28 @@ export const FilterMenu: React.FC<{
     const r = anchor.getBoundingClientRect();
     setPos({ top: r.bottom + 8, left: Math.max(12, Math.min(r.left, window.innerWidth - 332)) });
   }, [anchor]);
-  const any = f.genres.length > 0 || f.open === "open" || !!f.missing;
+  const any = f.genres.length > 0 || f.open === "open" || !!f.missing || (!!picks && picks.some((k) => k.on));
   const toggleGenre = (k: string) => onFilters({ ...f, genres: f.genres.includes(k) ? f.genres.filter((g) => g !== k) : [...f.genres, k], genreMode: "any" });
   return createPortal(
-    <div className="lpop nb1-pop" data-lpop="filters" data-nb1="filter-menu" role="dialog" aria-label="Filter agents" style={{ top: pos?.top ?? -9999, left: pos?.left ?? -9999, maxHeight: pos ? `calc(100vh - ${Math.round(pos.top) + 16}px)` : undefined }}>
-      <h6>Genres</h6>
+    <div className={`lpop nb1-pop${className ? ` ${className}` : ""}`} data-lpop="filters" data-nb1="filter-menu" role="dialog" aria-label="Filter agents" style={{ top: pos?.top ?? -9999, left: pos?.left ?? -9999, maxHeight: pos ? `calc(100vh - ${Math.round(pos.top) + 16}px)` : undefined }}>
+      {picks ? (
+        <>
+          <h6>Quick picks</h6>
+          <div className="nb1-qp" role="radiogroup" aria-label="Quick picks">
+            {picks.map((k) => (
+              <button key={k.key} type="button" role="radio" aria-checked={k.on} className="nb1-qpo" data-nb1="pick" data-k={k.key} onClick={() => onPick?.(k.key)}>
+                <span className="nb1-qpr" aria-hidden="true" />
+                <span className="nb1-qpt"><b>{k.title}</b><small>{k.line}</small></span><em>{k.n}</em>
+              </button>
+            ))}
+          </div>
+          <h6 className="nb1-gap">Genres</h6>
+        </>
+      ) : <h6>Genres</h6>}
       <div className="nb1-gch">
         {genres.map((g) => (
           <button key={g.key} type="button" data-nb1="genre" data-k={g.key} aria-pressed={f.genres.includes(g.key)} onClick={() => toggleGenre(g.key)}>
-            {g.label}<i>{g.n}</i>
+            {genreHit?.(g.key) ? "✓ " : null}{g.label}<i>{g.n}</i>
           </button>
         ))}
       </div>
@@ -54,7 +75,7 @@ export const FilterMenu: React.FC<{
         onClick={() => onFilters({ ...f, open: f.open === "open" ? "either" : "open" })}>
         <span className="nb1-bx" aria-hidden="true">{f.open === "open" ? "✓" : ""}</span>Open to queries only<em>{openN}</em>
       </button>
-      {missingN != null ? (
+      {missingN != null && !picks ? (
         <>
           <h6 className="nb1-gap">Profiles</h6>
           <button type="button" className="nb1-ck" data-nb1="missing" data-cl254="missing-filter" aria-pressed={!!f.missing}

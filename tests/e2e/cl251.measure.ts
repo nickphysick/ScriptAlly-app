@@ -10,6 +10,9 @@
  * ⚠️ RED FIRST: `CL251_BASE=1` against v25 (the base build); `CL251_MUTATE=<lock>` applies the lock's named break in the
  *    page (CSS or DOM), or, for C4 and E4, against a build carrying the break (see the report).
  * ⚠️ E2's "+n" and E3's stars are held to Firestore (cl251Agents.mjs), never to the page's own figures.
+ *
+ * ⚠️ CONTACT LIST v26 (CL26, reports/contact-list-v26/REPORT.md): the cases marked RETIRED below test surfaces v26
+ *    removed; each says what replaced it. The rest still apply and run.
  */
 import { test, type Page } from "@playwright/test";
 import { execFileSync } from "node:child_process";
@@ -62,7 +65,8 @@ async function head(page: Page, scope: string) {
 }
 
 /* ═════════ A · the ledger ═════════ */
-test("CL251-A1 A2 · one ledger card of four cells; a press filters, pale with a navy bar; List health opens Housekeeping", async ({ page }) => {
+/* RETIRED by Contact list v26 (CL26): At a glance (the ledger card) retired (v26 A; CL26 H1). */
+test.skip("CL251-A1 A2 · one ledger card of four cells; a press filters, pale with a navy bar; List health opens Housekeeping", async ({ page }) => {
   test.setTimeout(300_000);
   const A1 = new Ledger("A1"), A2 = new Ledger("A2");
   for (const vp of SIZES) {
@@ -209,7 +213,8 @@ test("CL251-B1 B2 B3 · the headers: Logging new query, Recording response and i
 });
 
 /* ═════════ C · the tidy-ups ═════════ */
-test("CL251-C1 C2 C3 C4 C5 · headings one size; no list health in the count line; the window fold; log in place; Group", async ({ page }) => {
+/* RETIRED by Contact list v26 (CL26): the headings, the count line and the window fold are v26's (CL26 H4/H10); log in place is unchanged and not re-measured here. */
+test.skip("CL251-C1 C2 C3 C4 C5 · headings one size; no list health in the count line; the window fold; log in place; Group", async ({ page }) => {
   test.setTimeout(360_000);
   const C1 = new Ledger("C1"), C2 = new Ledger("C2"), C3 = new Ledger("C3"), C4 = new Ledger("C4"), C5 = new Ledger("C5");
   for (const vp of SIZES) {
@@ -252,7 +257,8 @@ test("CL251-C1 C2 C3 C4 C5 · headings one size; no list health in the count lin
 });
 
 /* ═════════ E · the rows and the heading sorts ═════════ */
-test("CL251-E1 E2 E3 · no Submissions; Closed to queries; genres on one line, matches first and ticked; Your rating", async ({ page }) => {
+/* RETIRED by Contact list v26 (CL26): Submissions / Your rating columns retired; the row is three columns (v26 D; CL26 H8). */
+test.skip("CL251-E1 E2 E3 · no Submissions; Closed to queries; genres on one line, matches first and ticked; Your rating", async ({ page }) => {
   test.setTimeout(300_000);
   const E1 = new Ledger("E1"), E2 = new Ledger("E2"), E3 = new Ledger("E3");
   const truth = JSON.parse(execFileSync("node", ["tests/e2e/cl251Agents.mjs"], { encoding: "utf8" }).trim().split("\n").pop() ?? "{}") as Record<string, { stars: number | null; genres: number }>;
@@ -312,7 +318,8 @@ test("CL251-E1 E2 E3 · no Submissions; Closed to queries; genres on one line, m
   doneAll([E1, BASE ? 0 : 10], [E2, BASE ? 0 : 8], [E3, BASE ? 0 : 3]);
 });
 
-test("CL251-E4 E5 · every heading sorts, both ways; the pill and the count line say it; one sort for List and Cards", async ({ page }) => {
+/* RETIRED by Contact list v26 (CL26): the five heading sorts retired: two headings sort, the menu holds four (v26 D/E; CL26 H10). */
+test.skip("CL251-E4 E5 · every heading sorts, both ways; the pill and the count line say it; one sort for List and Cards", async ({ page }) => {
   test.setTimeout(400_000);
   const E4 = new Ledger("E4"), E5 = new Ledger("E5");
   const truth = JSON.parse(execFileSync("node", ["tests/e2e/cl251Agents.mjs"], { encoding: "utf8" }).trim().split("\n").pop() ?? "{}") as Record<string, { stars: number | null; genres: number }>;

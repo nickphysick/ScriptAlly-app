@@ -1,0 +1,11 @@
+H1 exit=1 [H1] 14/18 green    ✗ H1 · 1512 ring beside the text — the ring is under the left column   ✗ H1 · 1512 height = left column ±2 — 308.9375 vs 184.9375 
+H2 exit=1 [H2] 24/27 green    ✗ H2 · 93 no disc behind the archivist — rgb(255, 255, 255) / rgba(0, 0, 0, 0)   ✗ H2 · 72 no disc behind the archivist — rgb(255, 255, 255) / rgba(0, 0, 0, 0) 
+H3 exit=1 [H3] 3/7 green    ✗ H3 · Open opens Housekeeping — no drawer   ✗ H3 · Open does not filter — the applied row is up 
+H4 exit=1 [H4] 8/12 green    ✗ H4 · 1512 order — ["count","find","qc150-vsw","filters","group","sort"]   ✗ H4 · 1512 no List / Cards switch — 1 
+H5 exit=1 [H5] 13/18 green    ✗ H5 · letter+surname entries = sections, in order — ["l:Q","l:B","l:C","l:D","l:E","l:F","l:H","l:K"] vs ["l:A","l:B","l:C","l:D","l:E","l:F","l:H","l:K"]   ✗ H5 · letter+reply entries = sections, in order — ["l:Q","r:6","r:8","r:10","r:12","r:12+","r:?"] vs ["r:4","r:6","r:8","r:10","r:12","r:12+","r:?"] 
+H6 exit=1 [H6] 8/14 green    ✗ H6 · l:A lands under the headings — -42.0625   ✗ H6 · l:D lands under the headings — -41.0625 
+H7 exit=1 [H7] 4/7 green    ✗ H7 · the strip overflows — fits   ✗ H7 · the arrows are drawn — {"over":false,"next":false,"prev":false,"h":64} 
+H8 exit=1 [H8] 8/12 green    ✗ H8 · 1512 rows correct — msv12-agent-4 cells agent,want,query,,   ✗ H8 · 1512 no rating, replies, wishlist or profile link — 1 
+H9 exit=1 [H9] 6/9 green    ✗ H9 · each margin is its letter — ["4–8","B","C","D","E","F","H","K"]   ✗ H9 · week labels ≤ 12, then 12+ and ? — ["4–8","6","8","10","12","12+","?"] 
+H10 exit=1 [H10] 8/9 green    ✗ H10 · Group: exactly Letter, Status, No grouping — ["Status","No grouping"] 
+H11 exit=1 [H11] 6/7 green    ✗ H11 · Clear filters takes the row away — the applied row is still up 

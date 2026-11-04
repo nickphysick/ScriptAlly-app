@@ -84,7 +84,9 @@ export const CONTACT_CHECKLIST: readonly ChecklistItem<ContactGuideKey>[] = [
   { key: "search", title: "Search for an agent", line: "Find anyone on your list by name or agency." },
   /* Contact list v19 §K, v20 §G, v24 F — the third of six: "Go full screen". Its spotlight is the list's navy bar's Full
      screen button, and it ticks when the list goes full screen. The key stays "pin", so a tick already earned is kept. */
-  { key: "pin", title: "Go full screen", line: "Turn the list into an address book while you work." },
+  /* Contact list v26 C — full screen is retired, so the third item is the index row: "Jump through the list". The key
+     stays "pin", so a tick already earned is kept; it ticks when an index entry is used. */
+  { key: "pin", title: "Jump through the list", line: "Use the row under the bar to jump to a letter, a week or a month." },
   { key: "open", title: "Open an agent's card", line: "Everything you know about them, in one place." },
   { key: "edit", title: "Edit an agent", line: "Fix a detail, or add what they're looking for." },
   { key: "hk", title: "Do some housekeeping", line: "Fill in one gap and watch List health climb." },

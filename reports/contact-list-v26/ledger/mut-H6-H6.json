@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "H6",
+  "where": "entries (population)",
+  "ok": true,
+  "detail": "19"
+ },
+ {
+  "lock": "H6",
+  "where": "l:A lands under the headings",
+  "ok": false,
+  "detail": "-42.0625"
+ },
+ {
+  "lock": "H6",
+  "where": "l:A is current, white",
+  "ok": true,
+  "detail": "true rgb(255, 255, 255)"
+ },
+ {
+  "lock": "H6",
+  "where": "l:D lands under the headings",
+  "ok": false,
+  "detail": "-41.0625"
+ },
+ {
+  "lock": "H6",
+  "where": "l:D is current, white",
+  "ok": true,
+  "detail": "true rgb(255, 255, 255)"
+ },
+ {
+  "lock": "H6",
+  "where": "l:H lands under the headings",
+  "ok": false,
+  "detail": "-41.0625"
+ },
+ {
+  "lock": "H6",
+  "where": "l:H is current, white",
+  "ok": true,
+  "detail": "true rgb(255, 255, 255)"
+ },
+ {
+  "lock": "H6",
+  "where": "l:M lands under the headings",
+  "ok": false,
+  "detail": "-41.0625"
+ },
+ {
+  "lock": "H6",
+  "where": "l:M is current, white",
+  "ok": true,
+  "detail": "true rgb(255, 255, 255)"
+ },
+ {
+  "lock": "H6",
+  "where": "l:P lands under the headings",
+  "ok": false,
+  "detail": "-41.0625"
+ },
+ {
+  "lock": "H6",
+  "where": "l:P is current, white",
+  "ok": true,
+  "detail": "true rgb(255, 255, 255)"
+ },
+ {
+  "lock": "H6",
+  "where": "l:S lands under the headings",
+  "ok": false,
+  "detail": "-41.0625"
+ },
+ {
+  "lock": "H6",
+  "where": "l:S is current, white",
+  "ok": true,
+  "detail": "true rgb(255, 255, 255)"
+ },
+ {
+  "lock": "H6",
+  "where": "three or more jumps measured",
+  "ok": true,
+  "detail": "6"
+ }
+]

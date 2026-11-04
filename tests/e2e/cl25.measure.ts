@@ -11,6 +11,9 @@
  *    than hang); `CL25_MUTATE=<lock>` applies that lock's named break in the page (CSS or DOM), or, for B2 and F1,
  *    against a build carrying the mutation (see the report).
  * ⚠️ F1's n IS READ FROM FIRESTORE (cl25QueriesByBook.mjs), never from the page it checks.
+ *
+ * ⚠️ CONTACT LIST v26 (CL26, reports/contact-list-v26/REPORT.md): the cases marked RETIRED below test surfaces v26
+ *    removed; each says what replaced it. The rest still apply and run.
  */
 import { test, type Page } from "@playwright/test";
 import { BASE, Ledger, MUT, SIZES, box, mutate, mutateJs, openCl24, openQc149, scrollTo, sheetW } from "./cl25Lib";
@@ -39,7 +42,8 @@ async function rowsByGroup(page: Page) {
 }
 
 /* ═════════ A · the page and the header ═════════ */
-test("CL25-A1 A2 · the doodle sheet, the banner and chips gone, the highlighter; the card at the Query Centre's values", async ({ page }) => {
+/* RETIRED by Contact list v26 (CL26): the title card, its highlighter and the doodle sheet's header retired (v26 A; CL26 H1). */
+test.skip("CL25-A1 A2 · the doodle sheet, the banner and chips gone, the highlighter; the card at the Query Centre's values", async ({ page }) => {
   test.setTimeout(300_000);
   const A1 = new Ledger("A1"), A2 = new Ledger("A2");
   for (const vp of SIZES) {
@@ -97,7 +101,8 @@ test("CL25-A1 A2 · the doodle sheet, the banner and chips gone, the highlighter
    with a navy bar, a second press shows all, List health opens Housekeeping). */
 
 /* ═════════ C · the list title ═════════ */
-test("CL25-C1 · the title and count line on the list's left; the switch at its right, level with the count line", async ({ page }) => {
+/* RETIRED by Contact list v26 (CL26): the 'Every agent on file' title row and its switch retired (v26 B; CL26 H4). */
+test.skip("CL25-C1 · the title and count line on the list's left; the switch at its right, level with the count line", async ({ page }) => {
   test.setTimeout(240_000);
   const C1 = new Ledger("C1");
   for (const vp of SIZES) {
@@ -128,7 +133,8 @@ test("CL25-C1 · the title and count line on the list's left; the switch at its 
 });
 
 /* ═════════ D · one width; the bar ═════════ */
-test("CL25-D1 D2 · one width for every block; the bar's order, its typewriter, no prefixes, the 18px group icon", async ({ page }) => {
+/* RETIRED by Contact list v26 (CL26): the v25 bar retired: the band is v26's (count · Find · Filters · Group · Sort; CL26 H4). */
+test.skip("CL25-D1 D2 · one width for every block; the bar's order, its typewriter, no prefixes, the 18px group icon", async ({ page }) => {
   test.setTimeout(240_000);
   const D1 = new Ledger("D1"), D2 = new Ledger("D2");
   for (const vp of SIZES) {
@@ -178,7 +184,8 @@ test("CL25-D1 D2 · one width for every block; the bar's order, its typewriter, 
 });
 
 /* ═════════ E · full screen's cap ═════════ */
-test("CL25-E1 · at 2560 the book is ≤1600 and centred, the band spans the sheet, the archivist at G + 22; at 1512 nothing moves", async ({ page }) => {
+/* RETIRED by Contact list v26 (CL26): full screen retired (v26 B). */
+test.skip("CL25-E1 · at 2560 the book is ≤1600 and centred, the band spans the sheet, the archivist at G + 22; at 1512 nothing moves", async ({ page }) => {
   test.setTimeout(240_000);
   const E1 = new Ledger("E1");
   for (const vp of [{ width: 2560, height: 1440 }, { width: 1512, height: 900 }]) {

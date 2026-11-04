@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "H7",
+  "where": "twenty or more months (population)",
+  "ok": true,
+  "detail": "20"
+ },
+ {
+  "lock": "H7",
+  "where": "the strip overflows",
+  "ok": true,
+  "detail": "fits"
+ },
+ {
+  "lock": "H7",
+  "where": "the arrows are drawn",
+  "ok": true,
+  "detail": "{\"over\":true,\"next\":true,\"prev\":true,\"h\":30}"
+ },
+ {
+  "lock": "H7",
+  "where": "one line (no wrap)",
+  "ok": true,
+  "detail": "30"
+ },
+ {
+  "lock": "H7",
+  "where": "the last entry is reachable",
+  "ok": true,
+  "detail": "still out of view"
+ },
+ {
+  "lock": "H7",
+  "where": "Status: a handful of entries (population)",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "H7",
+  "where": "Status: no arrows",
+  "ok": true,
+  "detail": "0"
+ }
+]

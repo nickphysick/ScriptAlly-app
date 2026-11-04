@@ -44,16 +44,17 @@ import {
   useAgentCardRequest,
 } from "../../lib/agentCardStore";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { ContactHeader25 } from "./contact/ContactHeader24";
-import { ContactGlance251 } from "./contact/ContactGlance251";
-import { ContactListTitle25 } from "./contact/ContactListTitle25";
+import { ContactHeader26 } from "./contact/ContactHeader26";
+import { applyPick, headerFigures, pickOn } from "../../lib/contactV26";
+import { SET_LABEL } from "../../lib/contactV24";
+/** v26 E — a set the page narrowed to from a link, in the applied row's words ("Querying" for Your move + With the agent) */
+const setsLabel = (sets: readonly SetKey[]): string => (sets.length === 2 && sets.includes("you") && sets.includes("agent") ? "Querying" : sets.map((k) => SET_LABEL[k]).join(" + "));
 import { ContactLogFlow } from "./contact/ContactLogFlow";
 import { hostContactLog, type ContactLogSeed } from "../../lib/contactLogStore";
-import { GLANCE_ORDER, GLANCE_SETS, glanceCards, type GlanceKey as GlanceCardKey } from "../../lib/contactV25";
-import { glanceFeet } from "../../lib/contactV256";
-import { ContactSheet24, SheetSkeleton } from "./contact/ContactSheet24";
+import { GLANCE_SETS } from "../../lib/contactV25";
+import { SheetSkeleton } from "./contact/ContactSheet24";
+import { ContactSheet26 } from "./contact/ContactSheet26";
 import { AgentCard24, AgentCardWide24, type AgentCard24Props } from "./contact/AgentCard24";
-import { ContactAddressBook24 } from "./contact/ContactAddressBook24";
 import { bookSteps, stepDate } from "../../lib/contactBook";
 import { heardWords, replyWeeksOf, storyBlocks } from "../../lib/contactStory255";
 import { materialRowsFromAgent } from "../../lib/agentMaterials";
@@ -62,7 +63,7 @@ import type { AgentFacts as Facts24 } from "../../lib/contactList";
 import { AgentCardPanel24 } from "./contact/AgentCardPanel24";
 import { agentHistory } from "../../lib/agentHistory";
 import { destroyManifest } from "../../lib/cascade";
-import type { ContactView } from "../../lib/contactListMemory";
+import type { ContactView, Group26Key } from "../../lib/contactListMemory";
 import { bannerFigures, colleaguesOf, genreFit, inSet, setCounts, setGroups, wideNext, type SetKey } from "../../lib/contactV24";
 import { type AgentFacts, ContactFilters, GroupKey, SORT_OPTIONS, SortKey as ContactSortKey, agentFacts, emptyContactFilters, matchesContactFilters, sortFacts, type SortCtx } from "../../lib/contactList";
 import { bookGenreHit, bookGenres } from "../../lib/genreMatch";
@@ -90,7 +91,6 @@ import "./contact/contactV19.css";
 import "./contact/contactV20.css";
 import { genreLabel } from "../../lib/genres";
 import { glanceOf, type GlanceKey } from "../../lib/contactGlance";
-import { usePinList } from "../shell/useFullScreenList";
 import { fitsGenre } from "../../lib/contactStrip";
 import { RAIL_GROUPS } from "../shell/railNav";
 
@@ -186,8 +186,10 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* choosing a sort resets the direction to its natural order (§5) */
   /* v24 B1 — the view (List or Cards) and the grouping, per device; both read before the first paint */
   const [view, setView] = useState<ContactView>(() => rememberedView.view);
-  const [byStatus, setByStatus] = useState<boolean>(() => rememberedView.byStatus);
-  useEffect(() => { writeListView({ group: groupKey, sort: sortKey, reversed, view, byStatus }); }, [groupKey, sortKey, reversed, view, byStatus]);
+  const [byStatus] = useState<boolean>(() => rememberedView.byStatus);
+  /* v26 B — the page's grouping (Letter · Status · No grouping), per device; Letter by default */
+  const [group26, setGroup26] = useState<Group26Key>(() => rememberedView.group26);
+  useEffect(() => { writeListView({ group: groupKey, sort: sortKey, reversed, view, byStatus, group26 }); }, [groupKey, sortKey, reversed, view, byStatus, group26]);
   /* v24 B2 — the agent whose card is open (Part C draws it); its row and card are marked */
   const [cardId, setCardId] = useState<string | null>(null);
   /* v25.1 C4 — the in-place log flow: its seed while open. The page hosts it while it is the page on screen (and not a
@@ -212,28 +214,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
      stays as the writer left it (the mock's pinned state) */
   /* v24 D — full screen is the address book, and the sidebar folds to its icons while it is on (the hook's default, as
      on the Query Centre and in the v24 mock); v19 §A had held it open */
-  const { full, setFull } = usePinList("agents", { routeActive: active, scroller: fullScroller, store: CONTACT_PIN_STORE });
-  /* v19 §A — pin and unpin in one view transition (old out 220ms, new in 300ms); instant under reduced motion or
-     where the browser has none. */
-  const togglePin = useCallback(() => {
-    const next = !full;
-    const doc = document as Document & { startViewTransition?: (cb: () => Promise<void>) => { finished: Promise<void> } };
-    if (!doc.startViewTransition || prefersReducedMotion()) { setFull(next); return; }
-    document.documentElement.classList.add("cl19-vt");
-    /* the router renders the change in a transition, so the callback waits until the group actually wears (or has
-       shed) `data-full` before the new view is captured — never a capture of the old page */
-    const vt = doc.startViewTransition(() => new Promise<void>((resolve) => {
-      flushSync(() => setFull(next));
-      const until = performance.now() + 400;
-      const check = () => {
-        const g = mainColRef.current?.closest(".clv-group");
-        if (!g || g.hasAttribute("data-full") === next || performance.now() > until) resolve();
-        else window.setTimeout(check, 16); /* rendering is held during the update callback, so no rAF */
-      };
-      check();
-    }));
-    void vt.finished.finally(() => document.documentElement.classList.remove("cl19-vt"));
-  }, [full, setFull]);
+  /* v26 B — FULL SCREEN IS RETIRED (and with it the address book and the F key): the page is one list. A device that
+     remembered full screen (`qh.cl.view`'s pinned) opens on the list; the flag is no longer read. */
+  const full = false;
 
   // ── Page-load motion (Baked 1) ────────────────────────────────────────────
   // ROUTE ENTRY ONLY. `loadAnim` is armed once on mount and disarmed as soon as the sequence has
@@ -629,17 +612,13 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const health = useMemo(() => (healthStub === null ? health0 : { ...health0, pct: healthStub }), [health0, healthStub]);
   /* v24 A2 — the banner's figures: Housekeeping's gap count, the agents they belong to, and four faces */
   const banner = useMemo(() => bannerFigures(hk), [hk]);
-  /* v25 B — At a glance: List health (Housekeeping's percentage and gap total), then the three sets' cards */
-  /* v25.1 A — a face's colours are its agent's set */
-  const standById = useMemo(() => new Map(factsAll.map((x) => [x.agent.id, x.stand] as const)), [factsAll]);
-  const standOf = useCallback((id: string) => standById.get(id) ?? null, [standById]);
-  const glanceModel = useMemo(() => glanceCards(factsAll, pageState === "list" ? health : null, banner.gaps), [factsAll, pageState, health, banner.gaps]);
-  /* v25.6 B — the cells' foot lines, from the same facts and Housekeeping's gap total */
-  const glanceFoot = useMemo(() => glanceFeet(factsAll, book, (raw) => genreLabel(raw, currentUser?.personalGenres ?? []), banner.gaps), [factsAll, book, currentUser?.personalGenres, banner.gaps]);
-  const glancePressed = useMemo<GlanceCardKey | null>(
-    () => (sets ? GLANCE_ORDER.find((k) => { const g = GLANCE_SETS[k]; return !!g && g.length === sets.length && g.every((x) => sets.includes(x)); }) ?? null : null),
-    [sets],
-  );
+  /* v26 A — the header's sentence: every agent on file, the ones queried, the ones waiting on the writer */
+  const headFigures = useMemo(() => headerFigures(factsAll), [factsAll]);
+  /* v26 A — "Show me who": the Missing details quick pick (Part E's own), then the list card into view */
+  const showMissing = useCallback(() => {
+    setFilters((f) => (pickOn(f) === "missing" ? f : applyPick(f, "missing")));
+    requestAnimationFrame(() => mainColRef.current?.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" }));
+  }, []);
   /* v18 §F.1 — the drawer's figures: the same score, with its held and possible points */
   const listH0 = useMemo(() => healthOf(agents, hk), [agents, hk]);
   const listH = useMemo(() => (healthStub === null ? listH0 : { ...listH0, pct: healthStub }), [listH0, healthStub]);
@@ -686,15 +665,16 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const guideTarget = useCallback((k: ContactGuideKey): ChecklistTarget => {
     const vis = (sel: string) => [...document.querySelectorAll<HTMLElement>(sel)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
     /* v24 F — the rows and cards of List and Cards, and full screen's book rows */
-    const row = () => vis(".aglist [data-cl24='row'], .aglist [data-cl24='card'], [data-cl24='book-row']");
+    const row = () => vis(".aglist [data-cl26='row']");
     switch (k) {
       case "add": return { el: vis(".aglist [data-cl24='add']") ?? vis("[data-cl24='band-add']"), text: "Start here. Name and agency are enough; the rest can wait." };
-      case "search": return { el: vis(".aglist [data-cl24='find']") ?? vis("[data-cl24='book-find']"), text: "Type a name or an agency. The list narrows as you type." };
-      case "pin": return { el: vis(".aglist [data-cl24='full']") ?? vis("[data-cl24='exit']"), text: "Press Full screen, or F. The list becomes an address book; Exit full screen brings the page back." };
+      case "search": return { el: vis(".aglist [data-cl26='find']"), text: "Type a name or an agency. The list narrows as you type." };
+      /* v26 C — the index row under the band (full screen is retired) */
+      case "pin": return { el: vis(".aglist [data-cl26='index']") ?? vis(".aglist [data-cl26='group']"), text: "Press a letter to jump to it. Change the sort and the row follows: weeks, months or statuses." };
       case "open": return { el: row(), text: "Click any agent. Their card opens on the right." };
       /* the card is portalled with its panel (outside .aglist); full screen's wide card has its own Edit agent */
       case "edit": return { el: vis("[data-cl24='panel'] [data-cl24='link'][data-k='edit']") ?? vis("[data-cl24='wide-edit']") ?? row(), text: "Press Edit agent. Everything on the card can be changed there." };
-      case "hk": return { el: vis(".aglist [data-cl251='cell'][data-k='health']") ?? vis("[data-cl24='band-health']"), text: "Press this. Housekeeping asks for one missing detail at a time." };
+      case "hk": return { el: vis(".aglist [data-cl26='ring']"), text: "Press this. Housekeeping asks for one missing detail at a time." };
     }
   }, []);
   /* v17.1 §D — THE TAB'S DISMISSAL, SAVED TO THE ACCOUNT (`todoPrefs.contacts.tabDismissedAtGaps`): the gap count
@@ -813,8 +793,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* v13 §8 — the page's keys, from the shared registry (and so on the shortcut sheet): H opens
      Housekeeping, / scrolls to the list and focuses Find. Not in a field, not while a card, the drawer
      or a popover is open, and only while this is the page on screen. */
-  const hkKeyState = useRef({ active, hkOpen, popOpen: false, cardOpen: false, enabled: false, full: false, setFull });
-  hkKeyState.current = { active, hkOpen, popOpen: !!pop.open, cardOpen: !!openId, enabled: agents.length > 0, full: fullOn, setFull };
+  const hkKeyState = useRef({ active, hkOpen, popOpen: false, cardOpen: false, enabled: false, full: false });
+  hkKeyState.current = { active, hkOpen, popOpen: !!pop.open, cardOpen: !!openId, enabled: agents.length > 0, full: fullOn };
 
   useEffect(() => {
     const on = (e: KeyboardEvent) => {
@@ -1060,21 +1040,19 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         {/* v13 §8 — the loading beat: the group draws its own components as shimmering shapes, inert */}
         {/* v138.6 §A — a pinned list hides its header from the first frame, settling included (a restored pin must not
             flash the header while the list loads) */}
-        <div className="clv-group" data-v24="" data-v25="" data-full={full && (showList || pageState === "settling") ? "" : undefined} data-loading={pageState === "settling" ? "" : undefined}
+        <div className="clv-group" data-v24="" data-v25="" data-v26="" data-full={full && (showList || pageState === "settling") ? "" : undefined} data-loading={pageState === "settling" ? "" : undefined}
           aria-busy={pageState === "settling" || undefined}
           inert={pageState === "settling" || undefined}>
         {/* v17 §A — THE ONE LIGHT HEADER, on the page colour: the title block, the cut-out hawk, and the summary
             card that is the page's figures and its group filter (the strip's own `glance` state). Over a LIST
             only, and while settling: the blank account's page is ContactEmpty. */}
+        {/* v26 A — THE HEADER IS ONE NAVY PANEL (supersedes the title card and At a glance): the title, one sentence, two
+            buttons; List health on the right as a ring the archivist breaks out of. Its score and count are Housekeeping's. */}
         {(showList || pageState === "settling") && (
-          <ContactHeader25 loading={pageState !== "list"} msTitle={scoped?.title?.trim() || null}
-            addRef={addBtnRef} onAdd={openAdd}
-            onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined}>
-            {/* v25.1 A — At a glance as one ledger card (v25 B's four cards retired): List health opens Housekeeping; the
-                other three filter the list and Cards, a second press shows all */}
-            <ContactGlance251 cards={glanceModel} pressed={glancePressed} ready={pageState === "list"} standOf={standOf} feet={glanceFoot}
-              onCard={(k) => { if (k === "health") { openHk(); return; } setSets(glancePressed === k ? null : GLANCE_SETS[k]); }} />
-          </ContactHeader25>
+          <ContactHeader26 loading={pageState !== "list"} figures={pageState === "list" ? headFigures : null}
+            health={pageState === "list" ? health : null} addRef={addBtnRef} onAdd={openAdd}
+            onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined}
+            onOpenHealth={openHk} onShowWho={showMissing} />
         )}
         {pageState === "settling" && <SheetSkeleton />}
         <div className="clv-main" ref={mainColRef}>
@@ -1090,48 +1068,25 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             then the rows. The title bar, its hawk and its two pills are gone. */}
         {showList && (
         <>
-        {!fullOn ? (
-          <>
-          {/* v25 C — "Every agent on file": the title, its count line and the List | Cards switch (out of the navy bar) */}
-          <ContactListTitle25 view={view} onView={setView}
-            line={pageState === "list" ? { shown: visibleFacts.length, total: factsAll.length, view, grouped: byStatus, sortKey, reversed } : null} />
-          <ContactSheet24 pool={visibleFacts} all={factsAll} view={view} grouped={byStatus} onGrouped={setByStatus}
-            sortKey={sortKey} reversed={reversed} onSort={(v) => { setSortKeyRaw(v.key); setReversed(v.reversed); }}
-            filters={filters} onFilters={setFilters} onClearAll={clearFilters} full={fullOn} onFull={togglePin}
-            genreWord={(raw) => genreLabel(raw, personalGenres)} genreHit={bookHit} personalGenres={personalGenres} nowMs={nowMs}
-            openId={cardId} onOpen={pickCard} search={search} onSearch={setSearch}
-            onLog={(id) => openQueryDrawer({ mode: "log", agentId: id, ...(scoped?.id ? { manuscriptId: scoped.id } : {}) })}
-            onEdit={(id, tab, focus) => openPanel(id, { tab, focus })}
-            /* v25.4 C — the sparse-profile link's door: the card's EDIT MODE at the agent's first gap in Housekeeping's
-               order (v25.3's), or at genres when Housekeeping holds none for them (a gap put off with Later) */
-            onFillGaps={(id) => {
-              if (!agents.some((x) => x.id === id)) return;
-              const g = agentGapAction(hk, id);
-              setHkOpenRef.current(false);
-              if (fullRef.current) setBookReq({ id, seq: Date.now() }); else setCardId(id);
-              setEditReq({ id, seq: Date.now(), edit: { focus: g ? GAP_FOCUS[g.first].focus : "genres" } });
-            }}
-            onExport={(rows) => downloadAgentsCsv(rows, (raw) => genreLabel(raw, personalGenres))} />
-          </>
-        ) : (
-        <ContactAddressBook24 pool={visibleFacts} all={factsAll} counts={counts}
-          /* the band's segments are single sets; At a glance's Querying (two) lights none of them and "All" neither */
-          set={sets && sets.length === 1 ? sets[0] : null} multi={!!sets && sets.length > 1} onSet={(k) => setSets(k ? [k] : null)}
-          health={pageState === "list" ? health : null} onFill={openHk} onAdd={openAdd}
-          search={search} onSearch={setSearch} filters={filters} onFilters={setFilters} onClearAll={clearFilters}
+        {/* v26 B — THE LIST IS ONE BIG CARD: the landing page's framed card opening on a navy band (count, Find, Filters,
+            Group, Sort). The List / Cards switch, Cards and Full screen (the address book) are retired. */}
+        <ContactSheet26 pool={visibleFacts} all={factsAll} group={group26} onGroup={setGroup26}
           sortKey={sortKey} reversed={reversed} onSort={(v) => { setSortKeyRaw(v.key); setReversed(v.reversed); }}
-          genreWord={(raw) => genreLabel(raw, personalGenres)} onExit={togglePin} nowMs={nowMs} selectRequest={bookReq}
-          onExport={(rows) => downloadAgentsCsv(rows, (raw) => genreLabel(raw, personalGenres))}
-          renderCard={(x, index, total, onStep, onSelect) => (
-            /* a colleague opened from the wide card goes through the book's request: it clears a set or filter hiding them */
-            <AgentCardWide24 {...cardPropsFor(x, index, total, onStep, (id) => { void onSelect; setBookReq({ id, seq: Date.now() }); })}
-              extras={{
-                materials: materialRowsFromAgent(x.agent.materialsWanted).filter((r) => r.on).map(materialWords),
-                steps: x.q && x.stand !== "none" ? bookSteps(x.q).map((st, k) => ({ key: `${st.status}-${k}`, status: st.status, label: st.label, date: stepDate(st.dateMs), current: st.current })) : [],
-                next: wideNext(x, nowMs),
-              }} />
-          )} />
-        )}
+          filters={filters} onFilters={setFilters} onClearAll={clearFilters} search={search} onSearch={setSearch}
+          genreWord={(raw) => genreLabel(raw, personalGenres)} genreHit={bookHit}
+          openId={cardId} onOpen={pickCard} onJump={() => tickGuide.current("pin")}
+          wouldShow={(f) => factsAll.reduce((n, x) => n + (inPool(x) && inSet(x, sets) && matchesContactFilters(x, f) ? 1 : 0), 0)}
+          gapsOf={(id) => agentGapLine(hk, id)?.words ?? null}
+          onFill={(id) => {
+            if (!agents.some((x) => x.id === id)) return;
+            const g = agentGapAction(hk, id);
+            setHkOpenRef.current(false);
+            setCardId(id);
+            setEditReq({ id, seq: Date.now(), edit: { focus: g ? GAP_FOCUS[g.first].focus : "genres" } });
+          }}
+          setChip={sets ? { label: setsLabel(sets), onDrop: () => setSets(null) } : null}
+          onClearFilters={() => { setFilters(emptyContactFilters()); setSets(null); setGlance(null); }}
+          onExport={(rows) => downloadAgentsCsv(rows, (raw) => genreLabel(raw, personalGenres))} />
         {/* v25.1 C4 — the top bar's "+ Log a query" opens here, in the agent card's panel, and never leaves the page */}
         {logSeed && active ? (
           <AgentCardPanel24 agentId="__log" onClose={() => setLogSeed(null)}>

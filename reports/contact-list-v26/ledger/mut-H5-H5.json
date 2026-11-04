@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "H5",
+  "where": "letter+surname sections (population)",
+  "ok": true,
+  "detail": "19"
+ },
+ {
+  "lock": "H5",
+  "where": "letter+surname entries = sections, in order",
+  "ok": false,
+  "detail": "[\"l:Q\",\"l:B\",\"l:C\",\"l:D\",\"l:E\",\"l:F\",\"l:H\",\"l:K\"] vs [\"l:A\",\"l:B\",\"l:C\",\"l:D\",\"l:E\",\"l:F\",\"l:H\",\"l:K\"]"
+ },
+ {
+  "lock": "H5",
+  "where": "letter+surname counts are the rows",
+  "ok": true,
+  "detail": "a section's count is not its rows"
+ },
+ {
+  "lock": "H5",
+  "where": "A–Z: all 26, the empty ones disabled",
+  "ok": true,
+  "detail": "[\"l:Q\",\"l:B\",\"l:C\",\"l:D\",\"l:E\",\"l:F\",\"l:G\",\"l:H\",\"l:I\",\"l:J\",\"l:K\",\"l:L\",\"l:M\",\"l:N\",\"l:O\",\"l:P\",\"l:Q\",\"l:R\",\"l:S\",\"l:T\",\"l:U\",\"l:V\",\"l:W\",\"l:X\",\"l:Y\",\"l:Z\"]"
+ },
+ {
+  "lock": "H5",
+  "where": "letter+reply sections (population)",
+  "ok": true,
+  "detail": "7"
+ },
+ {
+  "lock": "H5",
+  "where": "letter+reply entries = sections, in order",
+  "ok": false,
+  "detail": "[\"l:Q\",\"r:6\",\"r:8\",\"r:10\",\"r:12\",\"r:12+\",\"r:?\"] vs [\"r:4\",\"r:6\",\"r:8\",\"r:10\",\"r:12\",\"r:12+\",\"r:?\"]"
+ },
+ {
+  "lock": "H5",
+  "where": "letter+reply counts are the rows",
+  "ok": true,
+  "detail": "a section's count is not its rows"
+ },
+ {
+  "lock": "H5",
+  "where": "letter+added sections (population)",
+  "ok": true,
+  "detail": "7"
+ },
+ {
+  "lock": "H5",
+  "where": "letter+added entries = sections, in order",
+  "ok": false,
+  "detail": "[\"l:Q\",\"m:2026-7\",\"m:2026-6\",\"m:2026-4\",\"m:2026-3\",\"m:2026-2\",\"m:2026-1\"] vs [\"m:2026-9\",\"m:2026-7\",\"m:2026-6\",\"m:2026-4\",\"m:2026-3\",\"m:2026-2\",\"m:2026-1\"]"
+ },
+ {
+  "lock": "H5",
+  "where": "letter+added counts are the rows",
+  "ok": true,
+  "detail": "a section's count is not its rows"
+ },
+ {
+  "lock": "H5",
+  "where": "letter+status sections (population)",
+  "ok": true,
+  "detail": "8"
+ },
+ {
+  "lock": "H5",
+  "where": "letter+status entries = sections, in order",
+  "ok": false,
+  "detail": "[\"l:Q\",\"t:fs\",\"t:fr\",\"t:ps\",\"t:pr\",\"t:queried\",\"t:none\",\"t:closed\"] vs [\"t:offer\",\"t:fs\",\"t:fr\",\"t:ps\",\"t:pr\",\"t:queried\",\"t:none\",\"t:closed\"]"
+ },
+ {
+  "lock": "H5",
+  "where": "letter+status counts are the rows",
+  "ok": true,
+  "detail": "a section's count is not its rows"
+ },
+ {
+  "lock": "H5",
+  "where": "status sections (population)",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "H5",
+  "where": "status entries = sections, in order",
+  "ok": false,
+  "detail": "[\"l:Q\",\"s:agent\",\"s:none\",\"s:closed\"] vs [\"s:you\",\"s:agent\",\"s:none\",\"s:closed\"]"
+ },
+ {
+  "lock": "H5",
+  "where": "status counts are the rows",
+  "ok": true,
+  "detail": "a section's count is not its rows"
+ },
+ {
+  "lock": "H5",
+  "where": "No grouping: rows (population)",
+  "ok": true,
+  "detail": "53"
+ },
+ {
+  "lock": "H5",
+  "where": "No grouping: no index",
+  "ok": true,
+  "detail": "an index is drawn"
+ }
+]
