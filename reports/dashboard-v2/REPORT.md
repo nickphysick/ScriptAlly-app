@@ -167,4 +167,10 @@ notes mapping, Next up's reason.
 
 ## Integration and dev
 
-See the integration section appended at deploy.
+- Dev moved during the pack: from `…-qc151` (`index-BxUVq9ZZ.js`) to `…-qc151-qc1511` at `3a78b808`
+  (`index-DtqaK0_V.js`, Query Centre v151.1, another session), confirmed by building that tip.
+- **Integration branch `dev/qc1511-db2`** = `3a78b808` + `dashboard-v2`, merge `56a72130` (one conflict: the hash
+  manifest, both sides adding entries; both kept). Gates there: tsc clean, both builds clean, Vitest 11,117 passed with the
+  base's two `firestoreTarget` reds only. DB2 13/13 (setup + 12) on the emulator.
+- **Deployed to dev, hosting only**, behind a compare-and-stop on the served hash: dev now serves **`index-D-8Op6Il.js`**.
+  Not merged to main. Prod untouched.
