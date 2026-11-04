@@ -22,8 +22,10 @@ import { usePinCover } from "../../shell/stickyStack";
 import { STAGE_NAME, whereItStands, type QcRow, type WhereKey } from "../../../lib/qcSummary";
 import { BE_GROUPS, BE_SORTS, type BeGroup, type BeSort } from "../../../lib/qc150";
 import { GROUP_BY_OPTIONS, type GroupBy } from "../../../lib/qcCalView";
-import { TAB_LABEL, isClosedRow, lastHeardMs, nextCell, pressSort, trackOf, type Section, type Sort151, type SortKey151 } from "../../../lib/qc151";
-import { PILL_FILL, TINT, dayLine, nextText, pillWords, yearSplit, type PillGroup, type WeekSummary } from "../../../lib/qc1511";
+import { TAB_LABEL, isClosedRow, lastHeardMs, pressSort, trackOf, type Section, type Sort151, type SortKey151 } from "../../../lib/qc151";
+import { dayLine, pillWords, yearSplit, type PillGroup, type WeekSummary } from "../../../lib/qc1511";
+import { STATUS_FILL, headFill, headTone, nextNum, rowAct, rowTag, statusKind } from "../../../lib/qc1512";
+import type { DrawerMode } from "../../../lib/queryActions/drawerStore";
 import { GROUP_LINE, RadioMenu151 } from "./QcToolbar140";
 import "./qcv151.css";
 
@@ -59,12 +61,19 @@ export const QcSwitch151: React.FC<{ view: View151; onView: (v: View151) => void
   </div>
 );
 
-/* ── §1 the header ── */
+/* ── §1 the header: v151.2's navy banner (the title, the count line, two pill buttons) ── */
+export interface CountLine1512 { ms: string | null; sent: number; active: number; heardPct: number }
 export const QcHeader151: React.FC<{
   loading: boolean; onLog: () => void; onRecord: () => void; logDisabled?: boolean; logRef?: React.Ref<HTMLButtonElement>;
-}> = ({ loading, onLog, onRecord, logDisabled = false, logRef }) => (
-  <header className="qc151-hd" data-qc151="header" data-qcv="open-header" data-own-header="">
-    <h1 data-page-title="true" data-qc151="title">Your queries</h1>
+  counts?: CountLine1512 | null;
+}> = ({ loading, onLog, onRecord, logDisabled = false, logRef, counts = null }) => (
+  <header className="qc151-hd qc1512-ban" data-qc151="header" data-qc1512="banner" data-qcv="open-header" data-own-header="">
+    <div className="qc1512-bt">
+      <h1 data-page-title="true" data-qc151="title">Your queries</h1>
+      <p className="qc1512-sub" data-qc1512="subline">
+        {counts ? <>{counts.ms ? <>{counts.ms} · </> : null}<b>{counts.sent}</b> sent · <b>{counts.active}</b> active · <b>{counts.heardPct}%</b> heard back</> : " "}
+      </p>
+    </div>
     <div className="qc151-acts">
       <button type="button" className="qc151-btn qc151-btn--g" data-qc151="record" data-qcv="oh-record" disabled={loading} onClick={onRecord}>Record a response</button>
       <button type="button" ref={logRef} className="qc151-btn qc151-btn--n" data-qc151="log" data-qcv="oh-log" disabled={loading || logDisabled} onClick={onLog}>+ Log a query</button>
@@ -106,6 +115,8 @@ export interface QcPage151Props {
   onRecord: () => void;
   logDisabled?: boolean;
   logRef?: React.Ref<HTMLButtonElement>;
+  /* §1 the banner's count line (v151.2) */
+  counts?: CountLine1512 | null;
   /* §2 */
   summary: WeekSummary | null;
   /* §3 the quick filters */
@@ -135,7 +146,8 @@ export interface QcPage151Props {
   nowMs: number;
   selectedId: string | null;
   onOpen: (id: string) => void;
-  onAct: (id: string) => void;
+  /** v151.2 — the row's one action (lib/qc1512 `rowAct`): its journey's mode */
+  onAct: (id: string, mode?: DrawerMode) => void;
   signoff: { total: number } | null;
   onImport: () => void;
   /* §9 Birds-eye */
@@ -237,39 +249,48 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
     <td key="act" className="qc1511-lbl c-act" />,
   ];
 
-  const row = (r: QcRow) => {
-    const phrase = p.phraseOf(r);
-    const nc = nextCell(r, phrase, p.nowMs);
-    const nt = nextText(r, p.nowMs);
+  /* v151.2 §4 — a row: 68px, a plain white start (Day N over the track), the name with its tag, the status as a white
+     tag with a coloured cap, the Next column's big number, and the one action (navy yours; outlined Nudge) */
+  const row = (r: QcRow, last: boolean) => {
+    const nn = nextNum(r, p.nowMs);
+    const act = rowAct(r, p.nowMs);
+    const tag = rowTag(r, p.nowMs);
     const wh = whereItStands(r, p.nowMs);
     const day = dayLine(r, p.nowMs);
     const closed = isClosedRow(r);
+    const sk = statusKind(r.status);
     return (
-      <tr key={r.id} className={`qc1511-r${p.selectedId === r.id ? " is-sel" : ""}`} data-qc151="row" data-qcv="row" data-id={r.id} data-status={r.status} data-where={wh} tabIndex={0}
+      <tr key={r.id} className={`qc1511-r qc1512-r${last ? " is-last" : ""}${p.selectedId === r.id ? " is-sel" : ""}`} data-qc151="row" data-qcv="row" data-id={r.id} data-status={r.status} data-where={wh} tabIndex={0}
         onClick={(e) => { if ((e.target as HTMLElement).closest("button")) return; p.onOpen(r.id); }}
         onKeyDown={(e) => { if (e.key === "Enter" && e.target === e.currentTarget) { e.preventDefault(); p.onOpen(r.id); } }}>
-        <td className="qc1511-tk" data-qc1511="tint" style={{ background: TINT[wh] }}>
+        <td className="qc1511-tk qc1512-tk" data-qc1511="tint">
           {day ? <span className="qc1511-day" data-qc1511="day">{day}</span> : null}
           <Track151 row={r} />
         </td>
         <td className="qc1511-nm" data-qc151="agent">
-          <b>{r.agentName}</b>
+          <span className="qc1512-nl"><b>{r.agentName}</b>{tag ? <span className={`qc1512-tag qc1512-tag--${tag}`} data-qc1512="tag" data-tag={tag}>{tag === "you" ? "Your move" : "Gone quiet"}</span> : null}</span>
           <span className="qc1511-agy" data-qc151="agency" title={r.agencyKey || undefined}>{r.agencyKey || "—"}</span>
         </td>
         <td className="qc1511-ws" data-qc151="stands">
-          <span className="qc1511-wp" data-qc1511="stand-pill" style={{ background: PILL_FILL[wh] }}>
-            {closed
-              ? <span className="qc151-st qc151-st--end qc1511-wx"><StatusDot status={QueryStatus.QUERIED} overrideSize={14} decorative /><CrossMark /></span>
-              : <StatusDot status={r.status} overrideSize={14} decorative />}
-            <span>{standWords(r)}</span>
+          <span className={`qc1512-wp${closed ? " is-closed" : ""}`} data-qc1511="stand-pill" data-sk={sk}>
+            <span className="qc1512-cap" data-qc1512="cap" style={{ background: STATUS_FILL[sk] }}>
+              {closed
+                ? <span className="qc151-st qc151-st--end qc1511-wx"><StatusDot status={QueryStatus.QUERIED} overrideSize={14} decorative /><CrossMark /></span>
+                : <StatusDot status={r.status} overrideSize={14} decorative />}
+            </span>
+            <span className="qc1512-wt">{standWords(r)}</span>
           </span>
         </td>
         <DateCell ms={r.sentMs} nowMs={p.nowMs} probe="queried" />
         <DateCell ms={lastHeardMs(r)} nowMs={p.nowMs} probe="heard" />
-        <td className={`qc1511-nx qc1511-nx--${nt.tone}`} data-qc151="next" data-tone={nt.tone}>{nt.text}</td>
+        <td className={`qc1512-nx qc1512-nx--${nn.kind === "dash" ? "none" : nn.tone}`} data-qc151="next" data-tone={nn.kind === "dash" ? "none" : nn.tone}>
+          {nn.kind === "num"
+            ? <span className="qc1512-nn"><b data-qc1512="next-n">{nn.n}</b><small data-qc1512="next-l">{nn.label[0]}<br />{nn.label[1]}</small></span>
+            : nn.kind === "text" ? <span className="qc1512-nt">{nn.text}</span> : "—"}
+        </td>
         <td className="qc1511-act" data-qc1511="action">
-          {nc.kind === "act"
-            ? <button type="button" className="qc151-mv" data-qc151="move" onClick={(e) => { e.stopPropagation(); p.onAct(r.id); }}>{nc.label}<span className="qc151-arr" aria-hidden="true"> →</span></button>
+          {act && act.tone !== "plain"
+            ? <button type="button" className={`qc151-mv qc1512-mv qc1512-mv--${act.tone}`} data-qc151="move" data-tone={act.tone} onClick={(e) => { e.stopPropagation(); p.onAct(r.id, act.mode); }}>{act.label}<span className="qc151-arr" aria-hidden="true"> →</span></button>
             : null}
         </td>
       </tr>
@@ -309,7 +330,7 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
   const empty = p.sections.length === 0;
   return (
     <div className="qc151" data-qc151="page" data-view={p.view} ref={rootRef}>
-      <QcHeader151 loading={p.loading} onLog={p.onLog} onRecord={p.onRecord} logDisabled={p.logDisabled} logRef={p.logRef} />
+      <QcHeader151 loading={p.loading} onLog={p.onLog} onRecord={p.onRecord} logDisabled={p.logDisabled} logRef={p.logRef} counts={p.counts} />
       <QcSummary1511 summary={p.summary} />
 
       {/* §3 the quick filters, and the switch on the same row */}
@@ -402,23 +423,31 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
                 <button type="button" className="qc151-btn qc151-btn--g" data-qc151="empty-reset" onClick={p.onClearAll}>Reset filters</button>
               </div>
             </td></tr></tbody>
-          ) : p.sections.map((s) => {
+          ) : p.sections.map((s, i) => {
             const shut = !!s.label && collapsed.has(s.key);
+            /* v151.2 §3 — each group is one card; its header is coloured by the grouping (lib/qc1512 `headTone`) */
+            const tone = headTone(p.group, s.key);
+            const statusHead = tone.startsWith("st-");
             return (
-              <tbody key={s.key} className={`qc1511-g${shut ? " is-shut" : ""}`} data-qc1511="group" data-k={s.key}>
-                <tr className="qc1511-gh" data-qc1511="group-header" data-k={s.key}>
-                  {s.label ? (
-                    <td className="qc1511-gt" colSpan={2}>
-                      <button type="button" className="qc1511-cv" data-qc1511="fold" aria-expanded={!shut} aria-label={`${shut ? "Show" : "Hide"} ${s.label}`} onClick={() => fold(s.key)}>{CHEV}</button>
-                      <span className="qc1511-gn" data-qc151="section">{s.label}</span><small>{s.rows.length}</small>
-                    </td>
-                  ) : (
-                    <><td className="qc1511-lbl c-tk" />{heading("agent", "Agent", "c-nm")}</>
-                  )}
-                  {labels()}
-                </tr>
-                {shut ? null : s.rows.map(row)}
-              </tbody>
+              <React.Fragment key={s.key}>
+                {i > 0 ? <tbody className="qc1512-gap" aria-hidden="true"><tr><td colSpan={7} /></tr></tbody> : null}
+                <tbody className={`qc1511-g qc1512-g${shut ? " is-shut" : ""}`} data-qc1511="group" data-k={s.key} data-tone={tone}
+                  style={{ ["--gh" as string]: headFill(tone) } as React.CSSProperties}>
+                  <tr className="qc1511-gh qc1512-gh" data-qc1511="group-header" data-k={s.key} data-tone={tone}>
+                    {s.label ? (
+                      <td className="qc1511-gt" colSpan={2}>
+                        <button type="button" className="qc1511-cv" data-qc1511="fold" aria-expanded={!shut} aria-label={`${shut ? "Show" : "Hide"} ${s.label}`} onClick={() => fold(s.key)}>{CHEV}</button>
+                        {statusHead ? <span className="qc1512-gg" aria-hidden="true"><StatusDot status={s.key} overrideSize={16} decorative /></span> : null}
+                        <span className="qc1511-gn" data-qc151="section">{s.label}</span><small>{s.rows.length}</small>
+                      </td>
+                    ) : (
+                      <><td className="qc1511-lbl c-tk" />{heading("agent", "Agent", "c-nm")}</>
+                    )}
+                    {labels()}
+                  </tr>
+                  {shut ? null : s.rows.map((r, j) => row(r, j === s.rows.length - 1))}
+                </tbody>
+              </React.Fragment>
             );
           })}
         </table>
