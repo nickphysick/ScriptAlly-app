@@ -105,3 +105,11 @@ Frame strips: `10-strip-arrival-1512` (the arrival, six frames 110ms apart) and 
 2. **The Also notes are long** (the engine's sentences, listing each page they touch). The mock's are short. A shorter
    wording is a copy change to `alsoChanges`, which other surfaces read too.
 3. **The log-a-query flow still opens the v24 panel** (`AgentCardPanel24`) on /agents; only browsing and editing moved.
+
+## On dev
+
+Integration branch `dev/qc1511-db2-title-sip-qc1512-cl26-sip11-tl1-pk41-cl262` (efa73df9): `contact-list-v26-2` merged
+into what dev was serving, `…-tl1-pk41` at 99e2ef45 (`index-CpIAV0Ww.js`, confirmed by building it). One conflict, the
+design-ref manifest (both sides enrolled refs; resolved by re-enrolling). On the integration branch: tsc clean; unit
+suite 11,304 passed with the same two pre-existing `firestoreTarget` reds; CL262 + CL26 38/38. Deployed to dev hosting
+only: **`index-CJ6SyN3r.js`**. Not merged to `main`. Both worktrees removed.
