@@ -18,7 +18,7 @@ import { readFileSync } from "node:fs";
 const APEX = "https://queryhawk.net";
 const WWW = "https://www.queryhawk.net";
 const SITE = "https://scriptally-app.web.app";
-const LIVE_TITLE = "QueryHawk: track every query to a literary agent";
+const LIVE_TITLE = "QueryHawk: Your smart querying companion";
 const PROJECT_ID = "gen-lang-client-0801391782";
 /** Landing-only go-live needs the waitlist alone (runbook step 2). The rest are reported, not
  *  required: waitlistRetention is the optional dry-run job, and everything else waits for the app

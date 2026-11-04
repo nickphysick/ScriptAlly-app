@@ -12,7 +12,7 @@ import { test, expect } from "@playwright/test";
 import { readFileSync, existsSync } from "fs";
 import { join } from "path";
 
-const TITLE = "QueryHawk: track every query to a literary agent";
+const TITLE = "QueryHawk: Your smart querying companion";
 const DESC = "Agents. Queries. Materials. Tasks. QueryHawk tracks your entire querying campaign and gives your manuscript the best chance of success. We're bringing 50 founding writers on board to test it. In return, they'll get the full package, free for their whole journey.";
 const IMG = "https://queryhawk.net/images/og-share.png";
 
