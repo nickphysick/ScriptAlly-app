@@ -136,7 +136,7 @@ const friendly = (issues?: string[]): string | null =>
 // ── Duplicate matching ────────────────────────────────────────────────────────────────────────────
 // Normalise an agency for comparison: lowercase, drop "& co" and common trade words/suffixes so
 // near-identical agencies match ("Pryce Lit" ≈ "Pryce Literary", "Okonkwo Lit" ≈ "Okonkwo Literary").
-const AGENCY_NOISE = /\b(literary|lit|agency|agencies|associates|management|mgmt|books|media|group|company|ltd|llc|inc|the)\b/g;
+const AGENCY_NOISE = /\b(literary|lit|agency|agencies|associates|assoc|management|mgmt|books|media|group|company|ltd|llc|inc|the)\b/g;
 export const agencyKey = (agency = ""): string =>
   agency.toLowerCase().replace(/&\s*co\b/g, " ").replace(AGENCY_NOISE, " ").replace(/[^a-z0-9]+/g, " ").trim();
 const surnameOf = (name = "") => { const p = name.trim().toLowerCase().split(/\s+/).filter(Boolean); return p[p.length - 1] || ""; };
@@ -156,6 +156,35 @@ export const nameCompatible = (n1 = "", n2 = ""): boolean => {
   const s1 = surnameOf(n1), s2 = surnameOf(n2);
   if (!s1 || !s2 || s1 !== s2) return false;
   return firstNameCompatible(firstOf(n1), firstOf(n2));
+};
+
+/* ── Likely duplicates at the same agency (smart-import-photos v1.2) ─────────────────────────────
+   A list written by hand shortens names: "Jonah P." on one line, "Jonah Petrakis" on the next, at
+   "Heron" and "Heron Lit". Inside ONE agency the surname may also be an initial or a prefix of the
+   other's, so long as one half of the name is whole on both sides: the same first name with a
+   shortened surname, or the same surname with a shortened first name. Two shortened halves ("J. P."
+   and "Jonah Petrakis") are not enough. Never applied without a matching agency, and never merged:
+   the writer decides on the Duplicates step. */
+const surnameShortOf = (a: string, b: string): boolean => {
+  const x = a.replace(/\.$/, ""), y = b.replace(/\.$/, "");
+  if (!x || !y || x === y) return false;
+  const [short, long] = x.length <= y.length ? [x, y] : [y, x];
+  return long.startsWith(short);
+};
+export const nameCompatibleAtAgency = (n1 = "", n2 = ""): boolean => {
+  if (nameCompatible(n1, n2)) return true;
+  const p1 = n1.trim().split(/\s+/).filter(Boolean), p2 = n2.trim().split(/\s+/).filter(Boolean);
+  if (p1.length < 2 || p2.length < 2) return false;           // a first name alone has no surname to shorten
+  const f1 = firstOf(n1).replace(/\.$/, ""), f2 = firstOf(n2).replace(/\.$/, "");
+  return f1 === f2 && surnameShortOf(surnameOf(n1), surnameOf(n2));
+};
+/** Two agency keys name one agency when equal, or when one is the other's first word(s): "heron" /
+ *  "heron books" after the suffixes are gone ("Heron" / "Heron Lit" are already equal). */
+export const agencyKeysMatch = (k1: string, k2: string): boolean => {
+  if (!k1 || !k2) return false;
+  if (k1 === k2) return true;
+  const [short, long] = k1.length <= k2.length ? [k1, k2] : [k2, k1];
+  return long.startsWith(short + " ");
 };
 
 // ── Query dates, status options & reason copy ────────────────────────────────────────────────────
@@ -402,23 +431,32 @@ export function parseModel(result: SmartImportResult): { agents: ReviewAgent[]; 
     if (key) (byAgency.get(key) ?? byAgency.set(key, []).get(key)!).push(a);
     else agencyLess.push(a);                        // agency missing → the name-only pool
   }
-  // Sub-cluster a group transitively (j ↔ jon ↔ jonathan all merge) — shared by both passes.
-  const subCluster = (group: ReviewAgent[]): ReviewAgent[][] => {
+  /* v1.2: agency keys where one is the other's first word(s) ("heron" / "heron books") are one
+     bucket. Keys are joined to the shortest key they match, so two longer names never meet through
+     a shorter one unless each matches it. */
+  const keys = [...byAgency.keys()].sort((a, b) => a.length - b.length || a.localeCompare(b));
+  for (const k of keys) {
+    const into = keys.find((s) => s !== k && s.length < k.length && byAgency.has(s) && agencyKeysMatch(s, k));
+    if (into) { byAgency.get(into)!.push(...byAgency.get(k)!); byAgency.delete(k); }
+  }
+  // Sub-cluster a group transitively (j ↔ jon ↔ jonathan all merge) — shared by both passes. Inside
+  // an agency the looser name rule applies; the agency-less pool keeps the strict one.
+  const subCluster = (group: ReviewAgent[], same: (a: string, b: string) => boolean = nameCompatible): ReviewAgent[][] => {
     const clusters: ReviewAgent[][] = [];
     for (const a of group) {
-      const hit = clusters.find((c) => c.some((m) => nameCompatible(m.name, a.name)));
+      const hit = clusters.find((c) => c.some((m) => same(m.name, a.name)));
       if (hit) hit.push(a); else clusters.push([a]);
     }
     return clusters;
   };
-  const agencyClusters = [...byAgency.values()].flatMap(subCluster);
+  const agencyClusters = [...byAgency.values()].flatMap((g) => subCluster(g, nameCompatibleAtAgency));
   agencyLess = agencyLess.filter((a) => {
     const hits = agencyClusters.filter((c) => c.some((m) => nameCompatible(m.name, a.name)));
     if (hits.length !== 1) return true; // 0 = nothing to join; 2+ = ambiguous — stays in the pool
     hits[0].push(a); // joins AFTER the present-agency members, so the leader keeps its agency
     return false;
   });
-  for (const cluster of [...agencyClusters, ...subCluster(agencyLess)]) {
+  for (const cluster of [...agencyClusters, ...subCluster(agencyLess, nameCompatible)]) {
     if (cluster.length < 2) continue;
     const [leader, ...rest] = cluster;
     leader.mergeWith = rest.map((r) => r.id);
