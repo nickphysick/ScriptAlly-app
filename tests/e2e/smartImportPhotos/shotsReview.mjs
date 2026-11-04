@@ -50,7 +50,7 @@ const card = async (name) => {
     const snip = c?.querySelector('[data-im="deck-snip"] canvas');
     return { chip: c?.querySelector('[data-im="deck-chip"]')?.textContent, ask: c?.querySelector('[data-im="deck-ask"]')?.textContent, why: c?.querySelector('[data-im="deck-why"]')?.textContent,
       snip: snip ? { w: snip.width, h: snip.height, inked: (() => { const d = snip.getContext("2d").getImageData(0, 0, snip.width, snip.height).data; let n = 0; for (let i = 0; i < d.length; i += 4) if (d[i] < 90) n++; return n; })() } : null,
-      caption: c?.querySelector('[data-im="deck-snip"] figcaption')?.textContent, pos: document.querySelector('[data-im="deck-pos"]')?.textContent,
+      caption: c?.querySelector('[data-im="deck-line"] figcaption, [data-im="deck-snip"] figcaption')?.textContent, quote: c?.querySelector('[data-im="deck-line"] .o9-raw')?.textContent, pos: document.querySelector('[data-im="deck-pos"]')?.textContent,
       primary: document.querySelector('[data-im="primary"]')?.textContent };
   });
   readings[name] = r;

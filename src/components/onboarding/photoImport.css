@@ -39,6 +39,27 @@
 .sf .o9-addpg:hover { background: rgba(var(--im-text-rgb), .04); color: var(--ink-on-light); }
 .sf .o9-addpg:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 3px; }
 .sf .o9-addpg[disabled] { opacity: .45; cursor: default; }
+/* Empty (v1.1): one large tile in place of the grid, before any page is added. */
+.sf .o9-addpg.o9-addpg--empty { aspect-ratio: auto; width: 100%; min-height: 220px; font-size: 17px; gap: 8px; }
+.sf .o9-addpg.o9-addpg--empty span { font-size: 36px; }
+.sf .o9-addpg--empty + .o9-ptip { margin-top: 14px; }
+
+/* ── The heading (v1.1): one line from a 900px window up ───────────────────────────────────────
+   The sheet's width decides the size: the header is a size container, so `cqi` is a share of the
+   column the heading sits in, and one clamp holds the line inside it. At the existing 44px the line
+   is wider than the column at every width this screen meets, so the clamp's middle term is the
+   size that fits: the line's ink is W_PER_PX × font-size wide (Special Elite, measured), and
+   100 / W_PER_PX cqi is that font-size for the whole column, less a little air. Below 900px the
+   heading may wrap, and balances, at the shared size. Only the header is a container: nothing
+   fixed sits inside it, so containment re-anchors nothing. */
+.sf .o9-ptitle { container-type: inline-size; }
+@media (min-width: 901px) {
+  .sf .o9-ptitle .sf-open .sf-title {
+    white-space: nowrap; max-width: none; text-wrap: nowrap;
+    font-size: clamp(16px, 3.2cqi, 44px);
+  }
+}
+
 .sf .o9-pnote {
   display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin: 16px 0 0; padding: 12px 14px; border-radius: 10px;
   background: var(--im-blush); color: var(--im-blush-ink); font-family: var(--sp-serif); font-size: 15px; line-height: 1.4;

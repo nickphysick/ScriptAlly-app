@@ -143,7 +143,7 @@ const LabPhotos: React.FC = () => {
         <CaptureFork
           tier="free"
           onChooseFile={() => flowRef.current?.chooseFile()} onDropFile={(f) => flowRef.current?.dropFile(f)}
-          onChoosePhotos={() => flowRef.current?.choosePhotos()} onDropPhotos={(fs) => flowRef.current?.dropPhotos(fs)}
+          onUsePhotos={() => flowRef.current?.openPhotos()} onDropPhotos={(fs) => flowRef.current?.dropPhotos(fs)}
           onUploadTemplate={labSpy("templatePicker")} onAddByHand={labSpy("byhand")} onBack={labSpy("back")}
           onNothingYet={labSpy("later")} onOpenImportDesk={labSpy("importDesk")} onDownloadTemplate={labSpy("download")}
         />
@@ -233,7 +233,7 @@ export const OnbLab: React.FC = () => {
       <LabSetup flow="B" at="list" manuscript plan={tier === "pro" ? UserPlan.PRO : UserPlan.FREE}>
         <CaptureFork
           tier={tier}
-          onChooseFile={labSpy("picker")} onDropFile={labSpy("pickFile")} onChoosePhotos={labSpy("photosPicker")} onDropPhotos={labSpy("pickPhotos")} onUploadTemplate={labSpy("templatePicker")}
+          onChooseFile={labSpy("picker")} onDropFile={labSpy("pickFile")} onUsePhotos={labSpy("usePhotos")} onDropPhotos={labSpy("pickPhotos")} onUploadTemplate={labSpy("templatePicker")}
           onAddByHand={labSpy("byhand")} onBack={labSpy("back")} onNothingYet={labSpy("skip")}
           onOpenImportDesk={labSpy("importDesk")} onDownloadTemplate={labSpy("download")}
         />

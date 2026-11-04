@@ -9,6 +9,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { PhotosScreen, type PhotoThumb } from "./PhotosScreen";
 import { CONFIRM_TITLE, CONFIRM_SUB } from "./ConfirmScreen";
+import { PHOTOS_WORDS } from "../../lib/photoImport";
 
 /* Comments stripped only where one can start (after whitespace or a brace), so the `/*` inside
    accept="image/*" is not read as a comment opening. */
@@ -22,11 +23,32 @@ const screen = (pages: PhotoThumb[], extra: Partial<React.ComponentProps<typeof 
 const text = (h: string) => h.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
 
 describe("the photos screen", () => {
-  it("keeps the hand-off's heading and subline", () => {
+  it("has its own heading (v1.1), word for word, over the hand-off's subline", () => {
     const h = screen([pg("a")]);
-    expect(h).toContain(CONFIRM_TITLE);
+    expect(PHOTOS_WORDS.title).toBe("Ok. Let's turn your photos into a smart QueryHawk database.");
+    expect(h).toContain(`<h1 class="sf-title">${PHOTOS_WORDS.title}</h1>`);
+    expect(h).not.toContain(CONFIRM_TITLE);
+    expect(CONFIRM_TITLE).toBe("Let QueryHawk Smart Import take it from here.");
     expect(h).toContain(CONFIRM_SUB);
     expect(h).toContain("The photos you chose");
+  });
+  it("empty (v1.1): one large Add a page tile, the tip, and Choose photos as the primary", () => {
+    const h = screen([]);
+    expect(h).toContain(PHOTOS_WORDS.title);
+    expect(h).toMatch(/<button type="button" class="o9-addpg o9-addpg--empty" data-act="add" data-sf="photos-empty"><span aria-hidden="true">\+<\/span>Add a page<\/button>/);
+    expect(h).not.toContain('data-sf="photos"');
+    expect(h).toContain(PHOTOS_WORDS.tip);
+    expect(h).toMatch(/<button type="button" class="sf-btn" data-act="choose">Choose photos<\/button>/);
+    expect(h).not.toContain('data-act="read"');
+    expect(text(h)).toContain("What happens next");
+    expect(screen([pg("a")])).toMatch(/data-act="read"[^>]*>Read my photos</);
+  });
+  it("Choose photos and the empty tile open the picker from their own click (onAdd), nothing else", () => {
+    const f = code("src/components/onboarding/PhotosScreen.tsx");
+    expect(f).toContain('data-act="choose" onClick={onAdd}');
+    expect(f).toContain('data-sf="photos-empty" onClick={onAdd}');
+    const i = code("src/components/import/ImportFlow.tsx");
+    expect(i).toContain("onAdd={() => photoInputRef.current?.click()}");
   });
   it("numbers the pages in order, each with Replace and Remove as words", () => {
     const h = screen([pg("a"), pg("b"), pg("c")]);
@@ -54,8 +76,9 @@ describe("the photos screen", () => {
     expect(text(h)).toMatch(/Page 1 Remove Page 2 Replace Remove/);
     expect(text(h)).toContain("We'll read your page and");
   });
-  it("Read my photos is off with no page, while a page is being got ready, and while fitting", () => {
-    expect(screen([])).toMatch(/data-act="read"[^>]*disabled/);
+  it("Read my photos is off with no readable page, while a page is being got ready, and while fitting", () => {
+    /* v1.1: with no page at all the primary is Choose photos (the empty test above). */
+    expect(screen([pg("a", { status: "failed", url: null })])).toMatch(/data-act="read"[^>]*disabled/);
     expect(text(screen([]))).toContain("Add a photo of each page of your list.");
     expect(screen([pg("a", { status: "preparing", url: null })])).toMatch(/data-act="read"[^>]*disabled/);
     expect(screen([pg("a")], { busy: true })).toMatch(/data-act="read"[^>]*disabled/);
@@ -87,7 +110,13 @@ describe("the ways in (locked)", () => {
     expect(input).toContain('accept="image/*"');
     expect(input).toMatch(/\bmultiple\b/);
     expect(input).not.toMatch(/capture/);
-    expect(f).toContain("choosePhotos: () => photoInputRef.current?.click(),");
+    /* v1.1: "Use photos" opens the screen; nothing but the screen's own buttons clicks the input */
+    expect(f).toContain("openPhotos,");
+    const at2 = f.indexOf("const openPhotos");
+    const body = f.slice(at2, f.indexOf("};", at2));
+    expect(body).toContain('setScreen("photos")');
+    expect(body).not.toContain("click");
+    expect(f).not.toContain("choosePhotos");
     expect(f).toContain("dropPhotos: pickPhotos,");
   });
   it("the photos screen takes the confirm's place for photos; the sheet's confirm is unchanged", () => {
@@ -97,17 +126,21 @@ describe("the ways in (locked)", () => {
   });
   it("photos go through the same client gate as a file", () => {
     const f = code("src/components/import/ImportFlow.tsx");
-    const at = f.indexOf("const pickPhotos");
-    expect(f.slice(at, f.indexOf("};", at))).toMatch(/if \(!entitlement\.allowed\)[\s\S]*setScreen\("blocked"\)/);
+    const gate = f.indexOf("const photosAllowed");
+    expect(f.slice(gate, f.indexOf("};", gate))).toMatch(/if \(entitlement\.allowed\) return true;[\s\S]*setScreen\("blocked"\)/);
+    for (const fn of ["const pickPhotos", "const openPhotos"]) {
+      const at = f.indexOf(fn);
+      expect(f.slice(at, f.indexOf("};", at))).toContain("photosAllowed()");
+    }
   });
   it("BranchB wires Use photos and a photo drop to the flow", () => {
     const b = code("src/components/onboarding/BranchB.tsx");
-    expect(b).toContain("onChoosePhotos={() => flowRef.current?.choosePhotos()}");
+    expect(b).toContain("onUsePhotos={() => flowRef.current?.openPhotos()}");
     expect(b).toContain("onDropPhotos={(fs) => flowRef.current?.dropPhotos(fs)}");
   });
   it("the Import page offers Use photos beside its Smart Import action, gated the same", () => {
     const p = code("src/components/import/ImportPage.tsx");
-    expect(p).toMatch(/data-act="smart" onClick=\{chooseSmart\} disabled=\{!entitlement\.allowed\}>\{TILE_SMART\.action\}<\/button>\s*<button type="button" className="impg-btn impg-btn--line" data-act="photos" onClick=\{choosePhotos\} disabled=\{!entitlement\.allowed\}>\{CAPTURE_PHOTOS_ACTION\}<\/button>/);
-    expect(p).toContain('kind === "photos" ? flowRef.current?.choosePhotos()');
+    expect(p).toMatch(/data-act="smart" onClick=\{chooseSmart\} disabled=\{!entitlement\.allowed\}>\{TILE_SMART\.action\}<\/button>\s*<button type="button" className="impg-btn impg-btn--line" data-act="photos" onClick=\{usePhotos\} disabled=\{!entitlement\.allowed\}>\{CAPTURE_PHOTOS_ACTION\}<\/button>/);
+    expect(p).toContain('kind === "photos" ? flowRef.current?.openPhotos()');
   });
 });

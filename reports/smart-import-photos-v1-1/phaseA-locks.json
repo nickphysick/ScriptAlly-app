@@ -1,0 +1,75 @@
+[
+  {
+    "id": "A1",
+    "ok": true,
+    "read": {
+      "n": 2,
+      "dropBottom": 692,
+      "vh": 900,
+      "covered": [],
+      "picked": true
+    }
+  },
+  {
+    "id": "A1b",
+    "ok": true,
+    "read": {
+      "up": true,
+      "top": 124,
+      "bottom": 484,
+      "vh": 560,
+      "firstOnTop": true
+    }
+  },
+  {
+    "id": "A2",
+    "ok": true,
+    "read": {
+      "afterUse": {
+        "clicks": 0,
+        "empty": true,
+        "choose": "Choose photos",
+        "read": false,
+        "title": "Ok. Let's turn your photos into a smart QueryHawk database."
+      },
+      "afterChoose": [
+        {
+          "sync": true
+        }
+      ]
+    }
+  },
+  {
+    "id": "A3",
+    "ok": true,
+    "read": {
+      "1440x900": {
+        "text": "Ok. Let's turn your photos into a smart QueryHawk database.",
+        "fontSize": "35.072px",
+        "family": "\"Special Elite\"",
+        "lines": 1,
+        "ink": 1067,
+        "col": 1096,
+        "height": 38
+      },
+      "1204x800": {
+        "text": "Ok. Let's turn your photos into a smart QueryHawk database.",
+        "fontSize": "27.871px",
+        "family": "\"Special Elite\"",
+        "lines": 1,
+        "ink": 848,
+        "col": 871,
+        "height": 30
+      },
+      "901x800": {
+        "text": "Ok. Let's turn your photos into a smart QueryHawk database.",
+        "fontSize": "18.795px",
+        "family": "\"Special Elite\"",
+        "lines": 1,
+        "ink": 572,
+        "col": 587,
+        "height": 20
+      }
+    }
+  }
+]

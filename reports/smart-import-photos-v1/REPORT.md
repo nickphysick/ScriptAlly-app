@@ -8,6 +8,15 @@ accuracy 93%, above its 85% bar). The model does not measure where each line sit
 spaced bands at too large a pitch, so the cut-outs drift down the page. That is a prompt/model problem
 for Nick and Claude, so it was reported, not tuned.
 
+## Follow-up (4 Nov): the card quotes the line
+
+Nick chose to quote the line rather than cut it from the photo. Since `7b8738ad` a review card shows
+the line as read (`lineRaw`) in the mono pill, with "Your page N." and "See the whole page" beneath.
+The page numbers can be trusted — right 869 of 870 times in the evaluation, 618 of 618 on multi-page
+lists — so the link stays; the band cut-out is still built, behind `CUT_FROM_BANDS` (off). The deck
+screenshots below were retaken after the change. Dev serves it (`index-CMvDw8SK.js`, branch
+`dev/qc1511-db2-title-sip` at 6cf4cc85). The STOP below still stands for the bands themselves.
+
 ## False premises
 
 1. **The ref was not in `design-refs/`.** It was in `~/Downloads` with the right hash; copied in and
@@ -169,7 +178,7 @@ overlap), a tick raises nothing (red), the quarter-page limit (red), a wrong nam
 
 ## How Nick tests it on dev
 
-- **Where:** https://scriptally-dev.web.app (serving `index-nfyNAAU3.js`). Signed in, go to **Import**
+- **Where:** https://scriptally-dev.web.app (serving `index-CMvDw8SK.js`). Signed in, go to **Import**
   (`/import`): the Smart import tile has **Use photos** beside "Import a spreadsheet". In set-up, it is
   the second button on the Smart import tile on "How shall we capture your existing agents &
   queries?". A drop of images on that tile works too.
@@ -182,7 +191,7 @@ overlap), a tick raises nothing (red), the quarter-page limit (red), a wrong nam
 ## Not done / open
 
 - Prod: nothing deployed (functions, hosting or rules).
-- The `src` STOP above; the cut-outs need a decision before this ships.
+- The `src` STOP above. Decided: cards quote the line (see the follow-up at the top); the cut-out waits for trustworthy bands.
 - The Import page tile's own text still says "QueryHawk reads the sheet…" (the brief didn't ask to
   change it).
 - After "I never sent it", the row's Undo brings the query back with the question already settled.
