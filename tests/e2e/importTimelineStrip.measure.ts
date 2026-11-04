@@ -25,7 +25,8 @@ const BREAKS: Record<string, string> = {
   R1: ".sf .o9-spop { position: static !important; }",
   R2: ".sf .o9-spop.is-up { top: calc(100% + 10px) !important; bottom: auto !important; }",
 };
-const card = (page: Page) => page.locator('[data-im="deck-card"]:has([data-strip="strip"])').first();
+/* the strip card's question block: in the deck on a desk, in the answer sheet on a phone */
+const card = (page: Page) => page.locator('.o9-q--strip:visible').first();
 
 async function toQueries(page: Page, vp = WIDE) {
   await lab(page, "s=review&fx=timeline", vp, { motion: "reduce" });
@@ -35,6 +36,9 @@ async function toQueries(page: Page, vp = WIDE) {
     await page.getByRole("button", { name: /^Continue/ }).click();
   }
   await page.waitForSelector('[data-im="review"][data-step="queries"]');
+  /* a phone's deck asks one question at a time behind "Answer this" */
+  const answer = page.getByRole("button", { name: /^Answer this$/ });
+  if (await answer.count()) await answer.first().click();
   await card(page).waitFor();
   if (BREAKS[MUTATE]) await page.addStyleTag({ content: BREAKS[MUTATE] });
   await settled(page, 400);
@@ -89,7 +93,9 @@ test.describe("import timeline strip", () => {
     await expect(pop).toHaveClass(/is-up/);
     const pb = (await pop.boundingBox())!, tb = (await tile.boundingBox())!;
     expect(pb.y + pb.height, "the pop-over ends above its tile").toBeLessThanOrEqual(tb.y);
-    expect(pb.y, "and starts inside the window").toBeGreaterThanOrEqual(0);
+    /* inside the scroll area it sits in, not just the window: the set-up sheet starts below the bar */
+    const portTop = await pop.evaluate((p) => { for (let e = p.parentElement; e; e = e.parentElement) if (/auto|scroll/.test(getComputedStyle(e).overflowY)) return Math.max(0, e.getBoundingClientRect().top); return 0; });
+    expect(pb.y, "and starts inside the scroll area").toBeGreaterThanOrEqual(portTop);
   });
 
   test("TS-R3 Esc, outside click and Cancel do not save; Enter saves", async ({ page }) => {
