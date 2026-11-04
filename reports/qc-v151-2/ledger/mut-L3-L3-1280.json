@@ -1,0 +1,137 @@
+[
+ {
+  "where": "who: population",
+  "ok": true,
+  "detail": "[\"you\",\"agent\",\"quiet\",\"closed\"]"
+ },
+ {
+  "where": "who · Your move",
+  "ok": true,
+  "detail": "rgb(42, 58, 82) rgb(255, 255, 255)"
+ },
+ {
+  "where": "who · With the agent",
+  "ok": false,
+  "detail": "rgb(42, 58, 82) rgb(28, 19, 15)"
+ },
+ {
+  "where": "who · Gone quiet",
+  "ok": false,
+  "detail": "rgb(42, 58, 82) rgb(28, 19, 15)"
+ },
+ {
+  "where": "who · Closed",
+  "ok": false,
+  "detail": "rgb(42, 58, 82) rgb(138, 128, 118)"
+ },
+ {
+  "where": "next action: population",
+  "ok": true,
+  "detail": "[\"Answer the offer\",\"Send your full\",\"Send your partial\",\"Send your revision\",\"Nudge\",\"Waiting to hear\",\"Nothing to do\"]"
+ },
+ {
+  "where": "next action: in the brief's order",
+  "ok": true,
+  "detail": "[\"Answer the offer\",\"Send your full\",\"Send your partial\",\"Send your revision\",\"Nudge\",\"Waiting to hear\",\"Nothing to do\"]"
+ },
+ {
+  "where": "next action · Answer the offer",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "where": "next action · Send your full",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "where": "next action · Send your partial",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "where": "next action · Send your revision",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "where": "next action · Nudge",
+  "ok": false,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "where": "next action · Waiting to hear",
+  "ok": false,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "where": "next action · Nothing to do",
+  "ok": false,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "where": "status: population",
+  "ok": true,
+  "detail": "[\"Queried\",\"Partial Requested\",\"Partial Sent\",\"Full Requested\",\"Full Sent\",\"Revise & Resubmit\",\"Offer\",\"Rejected\",\"No Response\",\"Withdrawn\"]"
+ },
+ {
+  "where": "status · Queried",
+  "ok": false,
+  "detail": "rgb(42, 58, 82) glyph true"
+ },
+ {
+  "where": "status · Partial Requested",
+  "ok": false,
+  "detail": "rgb(42, 58, 82) glyph true"
+ },
+ {
+  "where": "status · Partial Sent",
+  "ok": false,
+  "detail": "rgb(42, 58, 82) glyph true"
+ },
+ {
+  "where": "status · Full Requested",
+  "ok": false,
+  "detail": "rgb(42, 58, 82) glyph true"
+ },
+ {
+  "where": "status · Full Sent",
+  "ok": false,
+  "detail": "rgb(42, 58, 82) glyph true"
+ },
+ {
+  "where": "status · Revise & Resubmit",
+  "ok": false,
+  "detail": "rgb(42, 58, 82) glyph true"
+ },
+ {
+  "where": "status · Offer",
+  "ok": false,
+  "detail": "rgb(42, 58, 82) glyph true"
+ },
+ {
+  "where": "status · Rejected",
+  "ok": false,
+  "detail": "rgb(42, 58, 82) glyph true"
+ },
+ {
+  "where": "status · No Response",
+  "ok": false,
+  "detail": "rgb(42, 58, 82) glyph true"
+ },
+ {
+  "where": "status · Withdrawn",
+  "ok": false,
+  "detail": "rgb(42, 58, 82) glyph true"
+ },
+ {
+  "where": "package: population",
+  "ok": true,
+  "detail": "[\"pkg:Agents with MSWL\",\"pkg:Autumn round\",\"pkg:Comps-led variant\",\"pkg:First round\",\"pkg:Light\",\"pkg:Original\",\"pkg:Prologue-led\",\"pkg:Standard\",\"pkg:The Complete Autumn Submission Bundle for Literary Agents\",\"pkg:Unattributed set\",\"pkg:none\"]"
+ },
+ {
+  "where": "package: all stone",
+  "ok": false,
+  "detail": "[\"rgb(42, 58, 82)\"]"
+ }
+]

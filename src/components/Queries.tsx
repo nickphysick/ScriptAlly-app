@@ -131,6 +131,7 @@ import { QcPage151, Track151 } from "./queries/centre/QcPage151";
 import { QcFilterPanel151 } from "./queries/centre/QcFilterMenu140";
 import { DEFAULT_SORT_151, QC_FULL_SCREEN, nextCell, sort151, whoSections, type Section, type Sort151 } from "../lib/qc151";
 import { pillGroups, weekSummary } from "../lib/qc1511";
+import { actionSections, rowAct, statusKind } from "../lib/qc1512";
 import { pressView, twinTags } from "../lib/qc149";
 import { PIN_KEYS, usePinList } from "./shell/useFullScreenList";
 import { listCountTitle } from "./shell/ViewTitleRow";
@@ -231,7 +232,7 @@ import { rungFacts } from "../lib/queryPanelRungs";
 import { queryMaterialsToRows, draftMaterialsToQuery, draftExpectedOverrideIso } from "../lib/queryDraft";
 import { parseQty } from "../lib/createQty";
 import { compareAttention, type AttentionRow } from "../lib/queryAttentionSort";
-import { closeQueryDrawer, currentDrawerRequest, openQueryDrawer, showUndoBar, subscribeDrawer, subscribeDrawerPick, type OpenRequest } from "../lib/queryActions/drawerStore";
+import { closeQueryDrawer, currentDrawerRequest, openQueryDrawer, showUndoBar, subscribeDrawer, subscribeDrawerPick, type DrawerMode, type OpenRequest } from "../lib/queryActions/drawerStore";
 import { restoreSnapshot, takeSnapshot } from "../lib/queryActions/snapshot";
 import { deleteTimelineEntries, offerMarkedBy } from "../lib/entryDeleteWrite";
 import { DRAWER_LIVE, nextDoor, primaryDoor } from "../lib/queryActions/entry";
@@ -7755,6 +7756,8 @@ export const Queries: React.FC<{
               /* v151.1 §6 — on one quick filter, Who it's with has nothing left to group: one label row, no groups */
               const sections151: Section<QcRow>[] = qcGroup === "attention" && qcF138.where === null ? whoSections(sorted151, now151)
                 : qcGroup === "none" || qcGroup === "attention" ? (sorted151.length ? [{ key: "all", label: "", rows: sorted151 }] : [])
+                /* v151.2 §3 — Next action has its own seven groups, most urgent first (lib/qc1512) */
+                : qcGroup === "action" ? actionSections(sorted151, now151)
                 : qcListGroups(sorted151, qcGroup, now151, qcPackageName).map((g) => ({
                   key: g.key, rows: g.rows,
                   label: qcGroup === "package" ? (g.key === "pkg:none" ? "Nothing recorded" : `${g.label} package`) : g.label,
@@ -7771,6 +7774,7 @@ export const Queries: React.FC<{
               return (
                 <QcPage151
                   loading={showGridSkeleton}
+                  counts={showGridSkeleton ? null : { ms: qcLineTitle, sent: qcScoped.length, active: qcScoped.filter((r) => whereItStands(r, now151) !== "closed").length, heardPct: qcBandFig.heardPct }}
                   summary={showGridSkeleton ? null : weekSummary(qcScoped, now151)}
                   view={qcView150} onView={pickView150}
                   onLog={() => onNavigate?.("queries", "Log a query")}
@@ -7798,8 +7802,10 @@ export const Queries: React.FC<{
                   nowMs={now151}
                   selectedId={pipOpen ? PIP_ID : selectedQueryId}
                   onOpen={(id) => { if (isPracticeId(id)) { openPip(); return; } cardSetRef.current = order151; onOpenQuery?.(id); }}
-                  onAct={(id) => {
+                  onAct={(id, mode) => {
                     if (isPracticeId(id)) { openPip(); return; }
+                    /* v151.2 — the row's one action names its journey (lib/qc1512 `rowAct`): a gone-quiet row's is Nudge */
+                    if (mode && DRAWER_LIVE[mode]) { stepRow({ mode, queryId: id }); return; }
                     const r = qcById.get(id);
                     const req = r ? trayOpen(qcComing.get(id)?.bucket ?? null, r) : null;
                     if (req) stepRow(req); else onOpenQuery?.(id);
@@ -7810,9 +7816,14 @@ export const Queries: React.FC<{
                     <QcBirds150 groups={qcBeGroups} banded={qcBeGroup !== "none"} nowMs={qcNow138} moves={qcMoves}
                       selectedId={selectedQueryId} closedN={beClosedCount(qcVisible, qcNow138)}
                       lead={(r) => <Track151 row={r.row} />}
-                      pinkAct={(id) => { const r = qcById.get(id); return !!r && nextCell(r, null, now151).kind === "act"; }}
+                      act={(id) => { const r = qcById.get(id); return r ? rowAct(r, now151) : null; }}
+                      barKind={(r) => statusKind(r.row.status)}
                       onOpen={(id) => { cardSetRef.current = qcBeOrder; onOpenQuery?.(id); }}
-                      onAct={(id) => { const r = qcById.get(id); const req = r ? trayOpen(null, r) : null; if (req) stepRow(req); else onOpenQuery?.(id); }} />
+                      onAct={(id, mode) => {
+                        const m = mode as DrawerMode | undefined;
+                        if (m && DRAWER_LIVE[m]) { stepRow({ mode: m, queryId: id }); return; }
+                        const r = qcById.get(id); const req = r ? trayOpen(null, r) : null; if (req) stepRow(req); else onOpenQuery?.(id);
+                      }} />
                   ) : null}
                   birdsEmpty={beEmpty}
                   beGroup={qcBeGroup} onBeGroup={setQcBeGroup} beSort={qcBeSort} onBeSort={setQcBeSort}

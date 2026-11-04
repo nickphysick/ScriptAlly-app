@@ -1,0 +1,37 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "[\"All\",\"Your move\",\"With the agent\",\"Gone quiet\",\"Closed\"]"
+ },
+ {
+  "where": "order",
+  "ok": true,
+  "detail": "[\"All\",\"Your move\",\"With the agent\",\"Gone quiet\",\"Closed\"]"
+ },
+ {
+  "where": "All on a fresh load",
+  "ok": true,
+  "detail": "all"
+ },
+ {
+  "where": "chosen is navy, white",
+  "ok": true,
+  "detail": "rgb(42, 58, 82) rgb(255, 255, 255)"
+ },
+ {
+  "where": "the others are not filled",
+  "ok": true,
+  "detail": "[\"rgba(0, 0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"rgba(0, 0, 0, 0)\"]"
+ },
+ {
+  "where": "the switch on the same row, at the right",
+  "ok": true,
+  "detail": "0 0"
+ },
+ {
+  "where": "pressing one makes it navy",
+  "ok": true,
+  "detail": "[\"true\",\"rgb(42, 58, 82)\"]"
+ }
+]

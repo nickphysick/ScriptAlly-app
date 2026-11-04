@@ -1,0 +1,27 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "[22,38,10,18]"
+ },
+ {
+  "where": "Your move rows: one navy tag, white text, 20 tall",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "Gone quiet rows: one outlined tag",
+  "ok": true,
+  "detail": "[{\"w\":\"quiet\",\"n\":1,\"text\":\"Gone quiet\",\"bg\":\"rgba(0, 0, 0, 0)\",\"fg\":\"rgb(91, 79, 71)\",\"sh\":\"rgb(207, 197, 183) 0px 0px 0px 1px inset\",\"h\":20},{\"w\":\"quiet\",\"n\":1,\"text\":\"Gone quiet\",\"bg\":\"rgba(0, 0, 0, 0)\",\"fg\":\"rgb(91, 79, 71)\",\"sh\":\"rgb(207, 197, 183) 0px 0px 0px 1px inset\",\"h\":20}]"
+ },
+ {
+  "where": "With the agent and Closed rows: no tag",
+  "ok": true,
+  "detail": "0 tagged"
+ },
+ {
+  "where": "no With column",
+  "ok": true,
+  "detail": ""
+ }
+]

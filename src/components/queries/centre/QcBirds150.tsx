@@ -61,7 +61,7 @@ export const QcBirds150: React.FC<{
   /** each row's one next move — the action button's words */
   moves: ReadonlyMap<string, { label: string }>;
   onOpen: (id: string) => void;
-  onAct: (id: string) => void;
+  onAct: (id: string, mode?: string) => void;
   selectedId: string | null;
   /** closed queries in the same filtered set (never drawn) */
   closedN: number;
@@ -69,7 +69,12 @@ export const QcBirds150: React.FC<{
   lead?: (r: EyeRow) => React.ReactNode;
   /** v151 §9 — true for a move of the writer's (your move or a nudge): the button is pink */
   pinkAct?: (id: string) => boolean;
-}> = ({ groups, banded, nowMs, moves, onOpen, onAct, selectedId, closedN, lead, pinkAct }) => {
+  /** v151.2 §5 — the row's one action, the list's own (lib/qc1512 `rowAct`): its words, its colour and its journey.
+   *  Given, it replaces `moves` and `pinkAct`. */
+  act?: (id: string) => { tone: "navy" | "nudge" | "plain"; label: string; mode: string } | null;
+  /** v151.2 §5 — the current bar's status colour family (lib/qc1512 `statusKind`) */
+  barKind?: (r: EyeRow) => string;
+}> = ({ groups, banded, nowMs, moves, onOpen, onAct, selectedId, closedN, lead, pinkAct, act, barKind }) => {
   const rootRef = useRef<HTMLDivElement>(null);
   const axRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -369,7 +374,7 @@ export const QcBirds150: React.FC<{
                           );
                         })}
                         {l.cur && L ? (
-                          <div className={`qc150-bar qc150-bar--cur qc150-t-${l.cur.tint}${l.cur.overdue ? " qc150-bar--o" : ""}`} data-qc150="be-bar" data-from={l.cur.fromMs}
+                          <div className={`qc150-bar qc150-bar--cur qc150-t-${l.cur.tint}${l.cur.overdue ? " qc150-bar--o" : ""}`} data-qc150="be-bar" data-sk={barKind?.(r)} data-from={l.cur.fromMs}
                             title={l.cur.title} style={{ left: L.s, width: Math.max(L.e - L.s, 4) }}>
                             {L.inside ? <span className="qc150-lb" data-qc150="be-label" data-lb="cur" data-l={L.s} data-r={L.e - (l.cur.overdue ? 22 : 0)} data-lw={measure(L.inside, 14) + 28}>{L.inside}</span> : null}
                           </div>
@@ -379,7 +384,14 @@ export const QcBirds150: React.FC<{
                     ) : null}
                   </div>
                   <div className="qc150-xa">
-                    {move ? <button type="button" data-qc150="be-act" data-pk={pinkAct?.(r.id) ? "" : undefined} onClick={(e) => { e.stopPropagation(); onAct(r.id); }}>{move.label}</button> : null}
+                    {act ? (() => {
+                      const a = act(r.id);
+                      return a ? (
+                        <button type="button" data-qc150="be-act" data-tone={a.tone} onClick={(e) => { e.stopPropagation(); onAct(r.id, a.mode); }}>
+                          {a.label}{a.tone === "plain" ? null : <span className="qc151-arr" aria-hidden="true"> →</span>}
+                        </button>
+                      ) : null;
+                    })() : move ? <button type="button" data-qc150="be-act" data-pk={pinkAct?.(r.id) ? "" : undefined} onClick={(e) => { e.stopPropagation(); onAct(r.id); }}>{move.label}</button> : null}
                   </div>
                 </div>
               );

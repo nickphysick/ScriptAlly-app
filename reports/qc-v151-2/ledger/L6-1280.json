@@ -1,0 +1,32 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "52"
+ },
+ {
+  "where": "Special Elite 26px",
+  "ok": true,
+  "detail": "[\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace 26px\"]"
+ },
+ {
+  "where": "a two-line label",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "late and overdue in rust",
+  "ok": true,
+  "detail": "46"
+ },
+ {
+  "where": "with the agent: #8a8076",
+  "ok": true,
+  "detail": "[{\"w\":\"agent\",\"text\":\"11daysto reply\",\"num\":true,\"font\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"26px\",\"lines\":2,\"label\":\"days / to reply\",\"nc\":\"rgb(138, 128, 118)\",\"lc\":\"rgb(138, 128, 118)\"},{\"w\":\"agent\",\"text\":\"11daysto reply\",\"num\":true,\"font\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"26px\",\"lines\":2,\"label\":\"days / to reply\",\"nc\":\"rgb(138, 128, 118)\",\"lc\":\"rgb(138, 128, 118)\"}]"
+ },
+ {
+  "where": "closed: —",
+  "ok": true,
+  "detail": ""
+ }
+]

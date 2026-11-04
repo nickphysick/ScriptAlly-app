@@ -53,8 +53,8 @@ const PAGE_MUT: Record<string, { css?: string; js?: string }> = {
   L5: { js: `(() => { const go = () => { const c = document.querySelector('[data-qc1511="control-line"]'); if (c && !document.querySelector('[data-qc1511="pills"]')) { const d = document.createElement('div'); d.setAttribute('data-qc1511', 'pills'); d.className = 'qc1511-pr'; d.innerHTML = '<button class="qc1511-fadd">+ Filter</button>'; c.after(d); } }; go(); new MutationObserver(go).observe(document.body, { childList: true, subtree: true }); })()` },
   /* the group header not sticky */
   L6: { css: `.qc1511-gh.qc1511-gh td { position: static !important; }` },
-  /* the rows' spacing collapsed to 0 */
-  L7: { css: `.qc151-tbl.qc1511-tbl.qc1511-tbl { border-spacing: 0 !important; }` },
+  /* (re-pointed to v151.2) the rows' 8px spacing restored */
+  L7: { css: `.qc151-tbl.qc1511-tbl.qc1511-tbl { border-spacing: 0 8px !important; }` },
   /* the Agency column restored */
   L8: { js: `(() => { const go = () => { for (const r of document.querySelectorAll('[data-qc151="row"]:not([data-m8])')) { r.setAttribute('data-m8', ''); const td = document.createElement('td'); td.setAttribute('data-qc151', 'agency-col'); td.textContent = r.querySelector('[data-qc151="agency"]')?.textContent ?? ''; r.children[1].after(td); } for (const h of document.querySelectorAll('[data-qc1511="group-header"]:not([data-m8])')) { h.setAttribute('data-m8', ''); const td = document.createElement('td'); td.className = 'qc1511-lbl'; td.setAttribute('data-qc1511', 'label'); td.setAttribute('data-k', 'agency'); td.innerHTML = '<button>Agency</button>'; h.children[0].after(td); } }; go(); new MutationObserver(go).observe(document.body, { childList: true, subtree: true }); })()` },
   /* the button in the Next column */
@@ -371,34 +371,35 @@ for (const vp of SIZES) {
       L.done(12);
     });
 
-    test("L7 · mini cards: 8px apart, 16px corners, one height, the tinted end by who it's with, no Day on closed", async ({ page }) => {
+    /* RE-POINTED to v151.2 §3/§4 (design-refs/query-centre-v151-2/): the rows of a group are ONE card — 0 apart, 18px
+       outer corners, one height of 68, a plain white start — and a closed row still has no Day line */
+    test("L7 · rows (re-pointed to v151.2): one card per group, 0 apart, 18px corners, 68 tall, no tinted end, no Day on closed", async ({ page }) => {
       test.skip(!run("L7"));
       const L = new Ledger(`L7-${vp.width}`);
       await open(page, vp);
       const r = await page.evaluate(() => {
-        const out: { gaps: number[]; h: number[]; rad: string[]; tint: [string, string][]; closedDay: number; closed: number } = { gaps: [], h: [], rad: [], tint: [], closedDay: 0, closed: 0 };
+        const out: { gaps: number[]; h: number[]; rad: string[]; start: string[]; closedDay: number; closed: number } = { gaps: [], h: [], rad: [], start: [], closedDay: 0, closed: 0 };
         for (const gr of document.querySelectorAll<HTMLElement>("[data-qc1511='group']")) {
           const rows = [...gr.querySelectorAll<HTMLElement>("[data-qc151='row']")];
           rows.forEach((row, i) => {
             const b = row.getBoundingClientRect();
             out.h.push(b.height);
             if (i) out.gaps.push(b.top - rows[i - 1].getBoundingClientRect().bottom);
-            const f = row.firstElementChild as HTMLElement, l = row.lastElementChild as HTMLElement;
-            out.rad.push(`${getComputedStyle(f).borderTopLeftRadius}/${getComputedStyle(f).borderBottomLeftRadius}/${getComputedStyle(l).borderTopRightRadius}/${getComputedStyle(l).borderBottomRightRadius}`);
-            out.tint.push([row.dataset.where ?? "", getComputedStyle(f).backgroundColor]);
+            out.start.push(getComputedStyle(row.firstElementChild as HTMLElement).backgroundColor);
             if (row.dataset.where === "closed") { out.closed++; if (row.querySelector("[data-qc1511='day']")) out.closedDay++; }
           });
+          const last = rows[rows.length - 1];
+          if (last) out.rad.push(`${getComputedStyle(last.firstElementChild as HTMLElement).borderBottomLeftRadius}/${getComputedStyle(last.lastElementChild as HTMLElement).borderBottomRightRadius}`);
         }
         return out;
       });
       L.check("population", r.h.length > 5 && r.gaps.length > 3, `${r.h.length} rows`);
-      L.check("8 ±1 apart", r.gaps.every((g) => Math.abs(g - 8) <= 1), JSON.stringify([...new Set(r.gaps.map((g) => Math.round(g * 10) / 10))]));
-      L.check("outer corners ≥ 15", r.rad.every((s) => s.split("/").every((v) => parseFloat(v) >= 15)), [...new Set(r.rad)].join(" "));
+      L.check("0 apart", r.gaps.every((g) => Math.abs(g) <= 0.5), JSON.stringify([...new Set(r.gaps.map((g) => Math.round(g * 10) / 10))]));
+      L.check("the card's bottom corners 18 ±1", r.rad.every((s) => s.split("/").every((v) => Math.abs(parseFloat(v) - 18) <= 1)), [...new Set(r.rad)].join(" "));
       const h0 = Math.min(...r.h), h1 = Math.max(...r.h);
       L.check("one height ±1", h1 - h0 <= 1, `${h0}–${h1}`);
-      L.check("≈69", Math.abs(h0 - 69) <= 2, `${h0}`);
-      const TINT0: Record<string, string> = { you: "rgb(243, 227, 220)", agent: "rgb(227, 232, 238)", quiet: "rgb(239, 233, 223)", closed: "rgb(235, 231, 225)" };
-      L.check("tint by who it's with", r.tint.every(([w, b]) => TINT0[w] === b), JSON.stringify([...new Set(r.tint.map((x) => x.join(":")))]));
+      L.check("68", Math.abs(h0 - 68) <= 1, `${h0}`);
+      L.check("no tinted end", r.start.every((b) => b === "rgb(255, 255, 255)"), JSON.stringify([...new Set(r.start)]));
       L.check("closed: no Day", r.closed > 0 && r.closedDay === 0, `${r.closedDay}/${r.closed}`);
       L.done(7);
     });
@@ -430,7 +431,9 @@ for (const vp of SIZES) {
       L.done(5);
     });
 
-    test("L9 · next + action: no Due column; Next follows the rules in every group; the button pink, right, last; none on With the agent or Closed", async ({ page }) => {
+    /* RE-POINTED to v151.2 §4: the Next column is a big number and a two-line label (the same date rules); the button is
+       navy for a move of the writer's, an outlined Nudge past the reply date, and none on With the agent or Closed */
+    test("L9 · next + action (re-pointed to v151.2): no Due column; Next's number and label by group; navy or Nudge, right, last", async ({ page }) => {
       test.skip(!run("L9"));
       const L = new Ledger(`L9-${vp.width}`);
       await open(page, vp);
@@ -441,21 +444,23 @@ for (const vp of SIZES) {
           labels, dueCol: document.querySelectorAll("[data-qc151='due']").length,
           rows: rows.map((row) => {
             const nx = row.querySelector<HTMLElement>("[data-qc151='next']");
+            const lab = nx?.querySelector<HTMLElement>("[data-qc1512='next-l']");
             const btn = row.querySelector<HTMLElement>("[data-qc151='move']");
             const last = row.lastElementChild as HTMLElement;
             const rr = row.getBoundingClientRect();
             return {
-              w: row.dataset.where ?? "", t: (nx?.textContent ?? "").trim(), c: nx ? getComputedStyle(nx).color : "",
-              btn: !!btn, inLast: btn ? last.contains(btn) : null, bg: btn ? getComputedStyle(btn).backgroundColor : null, fg: btn ? getComputedStyle(btn).color : null,
+              w: row.dataset.where ?? "", t: lab ? `${nx?.querySelector("[data-qc1512='next-n']")?.textContent} ${lab.innerText.replace(/\n/g, " ")}` : (nx?.textContent ?? "").trim(),
+              c: nx ? getComputedStyle(nx.querySelector<HTMLElement>("[data-qc1512='next-n']") ?? nx).color : "",
+              btn: !!btn, tone: btn?.dataset.tone ?? null, inLast: btn ? last.contains(btn) : null, bg: btn ? getComputedStyle(btn).backgroundColor : null,
               right: btn ? rr.right - btn.getBoundingClientRect().right : null,
             };
           }),
         };
       });
       const RULE: Record<string, RegExp> = {
-        you: /^(\d+ days? late|Due today|Due tomorrow|Due (Mon|Tue|Wed|Thu|Fri|Sat|Sun) \d{1,2} [A-Z][a-z]{2}( ’\d\d)?|No date yet|Reply \d+ days? overdue)$/,
-        agent: /^(Reply due (today|(Mon|Tue|Wed|Thu|Fri|Sat|Sun) \d{1,2} [A-Z][a-z]{2}( ’\d\d)?)|Reply by \d{1,2} [A-Z][a-z]{2}( ’\d\d)?|No reply date)$/,
-        quiet: /^(Reply \d+ days? overdue|No reply in \d+ days?)$/,
+        you: /^(\d+ days? (late|left|overdue)|No date yet)$/,
+        agent: /^(\d+ days? to reply|No reply date)$/,
+        quiet: /^\d+ days? (overdue|no reply)$/,
         closed: /^—$/,
       };
       const by = (w: string) => r.rows.filter((x) => x.w === w);
@@ -465,17 +470,19 @@ for (const vp of SIZES) {
         const bad = by(w).filter((x) => !RULE[w].test(x.t));
         L.check(`Next words: ${w}`, bad.length === 0, JSON.stringify(bad.slice(0, 4).map((x) => x.t)));
       }
-      const lateRows = r.rows.filter((x) => /late$|overdue$|^Due (today|tomorrow)$|^No reply in/.test(x.t));
-      L.check("late words in rust 600", lateRows.length > 0 && lateRows.every((x) => x.c === "rgb(138, 58, 40)"), `${lateRows.length}`);
+      const lateRows = r.rows.filter((x) => /late$|overdue$|no reply$/.test(x.t));
+      L.check("late and overdue in rust", lateRows.length > 0 && lateRows.every((x) => x.c === "rgb(138, 58, 40)"), `${lateRows.length}`);
       const btns = r.rows.filter((x) => x.btn);
       L.check("buttons: last column, right", btns.length > 0 && btns.every((x) => x.inLast && x.right != null && x.right <= 14), JSON.stringify(btns.slice(0, 3)));
-      L.check("buttons: #f3c8ba, black text", btns.every((x) => x.bg === "rgb(243, 200, 186)" && x.fg === "rgb(28, 19, 15)"), JSON.stringify([...new Set(btns.map((x) => `${x.bg} ${x.fg}`))]));
-      L.check("Your move rows have a button", by("you").every((x) => x.btn), `${by("you").filter((x) => !x.btn).length} without`);
+      L.check("buttons: navy, or white Nudge", btns.every((x) => (x.tone === "navy" && x.bg === "rgb(42, 58, 82)") || (x.tone === "nudge" && x.bg === "rgb(255, 255, 255)")), JSON.stringify([...new Set(btns.map((x) => `${x.tone} ${x.bg}`))]));
+      L.check("Your move and Gone quiet rows have a button", [...by("you"), ...by("quiet")].every((x) => x.btn), "");
       L.check("With the agent and Closed: no button", [...by("agent"), ...by("closed")].every((x) => !x.btn), "");
       L.done(11);
     });
 
-    test("L10 · background: the doodles stay in the header band; the rows and the gaps between them sit on plain ground", async ({ page }) => {
+    /* RE-POINTED to v151.2 §3: the rows of a group now touch, so the gaps photographed are the 22px gaps BETWEEN the
+       group cards (the .qc1512-gap rows), wherever one is on screen below the band */
+    test("L10 · background (re-pointed to v151.2): the doodles stay in the header band; the gaps between the group cards sit on plain ground", async ({ page }) => {
       test.skip(!run("L10"));
       const L = new Ledger(`L10-${vp.width}`);
       await open(page, vp);
@@ -483,9 +490,9 @@ for (const vp of SIZES) {
       const GROUND: [number, number, number] = [242, 238, 232];
       const gaps: { y: number; off: number; n: number; spread: number; mid: string }[] = [];
       let scrolled = 0;
-      for (const startAt of [6, 14]) {
+      for (const startAt of [0, 1, 2]) {
         await page.evaluate((k) => {
-          const rows = [...document.querySelectorAll<HTMLElement>("[data-qc151='row']")];
+          const rows = [...document.querySelectorAll<HTMLElement>(".qc1512-gap")];
           const t = rows[Math.min(k, rows.length - 1)];
           const sc = t?.closest<HTMLElement>(".wpg-scroll");
           if (t && sc) sc.scrollTop += t.getBoundingClientRect().top - sc.getBoundingClientRect().top - 140;
@@ -494,12 +501,9 @@ for (const vp of SIZES) {
         const geo = await page.evaluate(() => {
           const sc = document.querySelector<HTMLElement>(".qc151")!.closest<HTMLElement>(".wpg-scroll")!;
           const top = sc.getBoundingClientRect().top;
-          const rows = [...document.querySelectorAll<HTMLElement>("[data-qc151='row']")].map((r) => r.getBoundingClientRect()).filter((b) => b.top > top + 80 && b.bottom < innerHeight - 4);
+          const rows = [...document.querySelectorAll<HTMLElement>(".qc1512-gap td")].map((r) => r.getBoundingClientRect()).filter((b) => b.top > top + 80 && b.bottom < innerHeight - 4);
           const out: { y: number; x0: number; x1: number }[] = [];
-          for (let i = 1; i < rows.length; i++) {
-            const d = rows[i].top - rows[i - 1].bottom;
-            if (d > 5 && d < 12) out.push({ y: Math.round((rows[i].top + rows[i - 1].bottom) / 2), x0: Math.ceil(rows[i].left) + 24, x1: Math.floor(rows[i].right) - 24 });
-          }
+          for (const b of rows) out.push({ y: Math.round(b.top + b.height / 2), x0: Math.ceil(b.left) + 24, x1: Math.floor(b.right) - 24 });
           return { out, scrolled: sc.scrollTop };
         });
         scrolled = Math.max(scrolled, geo.scrolled);
@@ -515,9 +519,9 @@ for (const vp of SIZES) {
           gaps.push({ y: g.y, off, n: line.length, spread, mid: med.join(",") });
         }
       }
-      L.check("population: ten gaps below the band", gaps.length >= 10 && scrolled > 280, JSON.stringify({ gaps: gaps.length, scrolled }));
+      L.check("population: three gaps below the band", gaps.length >= 3 && scrolled > 280, JSON.stringify({ gaps: gaps.length, scrolled }));
       for (const g of gaps.slice(0, 10)) L.check(`gap at y ${g.y}: one even colour, the ground under the cards' shadow`, g.n > 100 && g.off === 0 && g.spread <= 12, `${g.off}/${g.n} off · ${g.mid}`);
-      L.done(11);
+      L.done(4);
     });
   });
 }
