@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "B1",
+  "where": "population: the card is drawn",
+  "ok": true,
+  "detail": "{\"on\":true,\"len\":100,\"hits\":[\"waiting on you\",\"have replied\",\"weeks querying\"]}"
+ },
+ {
+  "lock": "B1",
+  "where": "no 'waiting on you', 'have replied' or 'weeks querying'",
+  "ok": false,
+  "detail": "[\"waiting on you\",\"have replied\",\"weeks querying\"]"
+ },
+ {
+  "lock": "B2",
+  "where": "population: weeks drawn and expected",
+  "ok": true,
+  "detail": "9 drawn, 9 expected"
+ },
+ {
+  "lock": "B2",
+  "where": "one per week, each the derivation's figure",
+  "ok": true,
+  "detail": "got 35,39,40,40,40,40,40,39,39 want 35,39,40,40,40,40,40,39,39"
+ },
+ {
+  "lock": "B2",
+  "where": "a dot for every week but the last",
+  "ok": true,
+  "detail": "[{\"now\":false,\"dot\":true,\"w\":9,\"h\":9,\"bg\":\"rgb(255, 255, 255)\",\"text\":\"\",\"cx\":22,\"cy\":106,\"line\":106,\"total\":35},{\"now\":false,\"dot\":true,\"w\":9,\"h\":9,\"bg\":\"rgb(255, 255, 255)\",\"text\":\"\",\"cx\":53.875,\"cy\":90,\"line\":90.01254272460938,\"total\":39},{\"now\":false,\"dot\":true,\"w\":9,\"h\":9,\"bg\":\"rgb(255, 255, 255)\",\"text\":\"\",\"cx\":85.75,\"cy\":86,\"line\":86.00627136230469,\"total\":40}]"
+ },
+ {
+  "lock": "B2",
+  "where": "the last is a 36px navy circle holding the total",
+  "ok": true,
+  "detail": "{\"now\":true,\"dot\":false,\"w\":36,\"h\":36,\"bg\":\"rgb(45, 58, 80)\",\"text\":\"39\",\"cx\":277,\"cy\":90,\"line\":90,\"total\":39}"
+ },
+ {
+  "lock": "B2",
+  "where": "every centre sits on the line ±2",
+  "ok": true,
+  "detail": "max 0.01"
+ },
+ {
+  "lock": "B2",
+  "where": "the highest point is at least 25% of the plot below its top",
+  "ok": true,
+  "detail": "86.0 of 280 (30.7%)"
+ },
+ {
+  "lock": "B3",
+  "where": "population: weeks to hover",
+  "ok": true,
+  "detail": "9"
+ },
+ {
+  "lock": "B3",
+  "where": "every dot and today's circle shows its own week",
+  "ok": true,
+  "detail": ""
+ }
+]
