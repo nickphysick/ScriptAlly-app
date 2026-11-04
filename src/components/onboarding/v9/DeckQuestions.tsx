@@ -304,13 +304,18 @@ export const QueryQuestion: React.FC<QueryQuestionProps> = (p) => {
   if (code === "mark-unclear") {
     const said = markWording(query, { name: p.agentName, agency: p.agentAgency });
     const mark = (query.markRaw ?? "").trim() || "mark";
+    const keyed = (query.markMeaning ?? "").trim() && (query.markRaw ?? "").trim() ? query.markMeaning!.trim() : "";
     return (
       <div className="o9-q" data-reason={code}>
-        <Ask>{said ? <>There's a <Raw>{mark}</Raw> after <Raw>{said}</Raw>. Where does this one stand?</> : <>There's a <Raw>{mark}</Raw> beside this line. Where does this one stand?</>}</Ask>
+        <Ask>{keyed
+          /* v1.2: the page's own key explains the mark; its reading is the status already chosen */
+          ? <>There's a <Raw>{mark}</Raw> after this line, and your key says {mark} means <Raw>{keyed}</Raw>. Is that right?</>
+          : said ? <>There's a <Raw>{mark}</Raw> after <Raw>{said}</Raw>. Where does this one stand?</> : <>There's a <Raw>{mark}</Raw> beside this line. Where does this one stand?</>}</Ask>
         <Why>{DECK_WORDS.markWhy}</Why>
         <div className="o9-ans" role="group" aria-label="Status">
           {QUERY_STATUS_OPTIONS.map((s) => (
-            <button type="button" className="o9-pick" key={s} data-status={s} onClick={() => onResolveReason(code, { status: s })}>
+            <button type="button" className={`o9-pick${keyed && s === query.status ? " is-on" : ""}`} key={s} data-status={s}
+              aria-pressed={keyed ? s === query.status : undefined} onClick={() => onResolveReason(code, { status: s })}>
               <StatusDot status={s} overrideSize={17} />{statusPickLabel(s)}
             </button>
           ))}

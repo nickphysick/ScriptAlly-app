@@ -70,6 +70,8 @@ export async function answerAgents(page: Page, opts: { scope?: string } = {}): P
     else if (await by("Mark as checked").count()) await by("Mark as checked").first().click();
     else if (await by("Remove this row").count()) await by("Remove this row").first().click();
     else if (await by("Merge them").count()) await by("Merge them").first().click();
+    /* a name or agency to check (photos): the first reading offered */
+    else if (await card.locator("[data-reading]").count()) await card.locator("[data-reading]").first().click();
     else break;
     n++;
   }

@@ -123,6 +123,8 @@ export interface ReviewQuery {
   src?: PageSource;
   lineRaw?: string;
   markRaw?: string;
+  /** v1.2: the page's own key for that mark ("pass"); the review's alone, never committed. */
+  markMeaning?: string;
   removed: boolean;
   removedReason?: "Agent removed" | "Removed by you";
   /** The timeline strip's "I don't have it": the sent date is unknown and the writer has said so.
@@ -351,6 +353,7 @@ export function queryReasonText(code: ReviewReasonCode, q: ReviewQuery): string 
     case "crossed-out":
       return "This line is crossed out. What does that mean for this query?";
     case "mark-unclear":
+      if (q.markRaw && q.markMeaning) return `There's a "${q.markRaw}" after this line, and your key says ${q.markRaw} means "${q.markMeaning}". Is that right?`;
       return `There's a "${q.markRaw ?? "mark"}" beside this line. Where does this one stand?`;
   }
 }
@@ -512,6 +515,7 @@ export function parseModel(result: SmartImportResult): { agents: ReviewAgent[]; 
       ...(q.src ? { src: q.src } : {}),
       ...(q.lineRaw ? { lineRaw: q.lineRaw } : {}),
       ...(q.markRaw ? { markRaw: q.markRaw } : {}),
+      ...(q.markRaw && q.markMeaning ? { markMeaning: q.markMeaning } : {}),
       removed: false,
     };
   });

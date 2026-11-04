@@ -108,6 +108,9 @@ export interface ParsedQuery {
   src?: PageSource;
   lineRaw?: string;
   markRaw?: string;
+  /** Photos only (v1.2), read-only like markRaw: what a key written on the page says that mark
+   *  means ("pass", for "✗ = pass"). The review quotes it back; it is never written to Firestore. */
+  markMeaning?: string;
 }
 
 export interface StatusTranslation {
