@@ -3,12 +3,9 @@
     "chip": "Agency to check",
     "ask": "We couldn't make out the agency next to Gideon Merriman.",
     "why": "It looks like it starts “Lowth”. Add it if you know it, or carry on without one.",
-    "snip": {
-      "w": 640,
-      "h": 114,
-      "inked": 3461
-    },
+    "snip": null,
     "caption": "Your page 1.See the whole page",
+    "quote": "“Gideon Merriman – Lowther Books – 23/4/2026 – full req”",
     "pos": "1 of 3",
     "primary": "Continue to queries · 3 to answer first"
   },
@@ -16,12 +13,9 @@
     "chip": "Name to check",
     "ask": "We read this as “Leo Kowalski” at “Fairbairn Associates”. Is that right?",
     "why": "Handwriting can read more than one way. Get the name right now and they're easy to find later.",
-    "snip": {
-      "w": 640,
-      "h": 114,
-      "inked": 3587
-    },
+    "snip": null,
     "caption": "Your page 1.See the whole page",
+    "quote": "“Leo Kowalski – Fairbairn Associates – 23 Aug – sent partial”",
     "pos": "2 of 3",
     "primary": "Continue to queries · 3 to answer first"
   },
@@ -35,12 +29,9 @@
     "chip": "Crossed out",
     "ask": "This line is crossed out. What does that mean for Kwame Achebe?",
     "why": "People cross lines out for different reasons. Tell us once and the query is tracked the right way.",
-    "snip": {
-      "w": 640,
-      "h": 114,
-      "inked": 3570
-    },
+    "snip": null,
     "caption": "Your page 1.See the whole page",
+    "quote": "“Kwame Achebe – Price & Partners – 11/4/2026 – sent”",
     "pos": "1 of 3",
     "primary": "Import and get started · 3 to answer first"
   },
@@ -52,12 +43,9 @@
     "chip": "Mark to explain",
     "ask": "There's a “✗” after “13/4 – R&R”. Where does this one stand?",
     "why": "Statuses are picked, never guessed.",
-    "snip": {
-      "w": 640,
-      "h": 114,
-      "inked": 3865
-    },
+    "snip": null,
     "caption": "Your page 1.See the whole page",
+    "quote": "“Callum Thorne – Fairbairn Associates – 13/4 – R&R ✗”",
     "pos": "2 of 3",
     "primary": "Import and get started · 1 to answer first"
   }
