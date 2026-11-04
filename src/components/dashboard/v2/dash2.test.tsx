@@ -18,8 +18,9 @@ import { Dash58 } from "../v58/Dash58";
 import { Dash2Band } from "./Dash2Band";
 import { nextReason } from "./Dash2Next";
 import { RANK_MIN } from "./Dash2Founding";
+import { EDGE, HEADROOM, PLOT_H } from "./Dash2Active";
 import { TIERS } from "../../../lib/foundingStats";
-import { breakdownFor, changeText, dash2Weeks, dateLabels, indexActivities, visibleWeeks, waitingOnYou, weekAria, weeksQuerying, wholeWeeksQuerying, weeksTag } from "../../../lib/dash2";
+import { breakdownFor, changeText, dash2Weeks, dateLabels, indexActivities, visibleWeeks, weekAria, wholeWeeksQuerying, weeksTag } from "../../../lib/dash2";
 import { aggregateLedger, dailyLedger } from "../../../lib/oneScreen";
 import { latestNote, noteFrom, NO_NOTES } from "../../../lib/foundingNotes";
 import type { ListItem } from "../../../lib/dashList";
@@ -66,6 +67,16 @@ describe("DB21-A · the weeks-querying tag", () => {
     expect(none).not.toContain("querying");
     expect(page()).toContain("9 weeks querying");
     expect(page([])).not.toContain("weeks querying");
+  });
+});
+
+describe("DB21-B · Active queries is the chart only", () => {
+  it("no tiles, and the chart's dimensions are v2.1's", () => {
+    const html = page();
+    const card = html.slice(html.indexOf('data-d2-card="active"'), html.indexOf('data-d2-card="founding"'));
+    expect(card.length).toBeGreaterThan(100);
+    for (const gone of ["waiting on you", "have replied", "weeks querying", 'data-d2="tiles"']) expect(card, gone).not.toContain(gone);
+    expect([PLOT_H, EDGE, HEADROOM]).toEqual([280, 22, 1.35]);
   });
 });
 
@@ -119,10 +130,6 @@ describe("DB2-C · the weeks", () => {
     const w = Array.from({ length: 40 }, (_, i) => i);
     expect(visibleWeeks(w, 396)).toEqual(w.slice(-13));
     expect(visibleWeeks(w, 2000).length).toBe(40);
-  });
-  it("the tiles: waiting on you is the writer's court, offers included; weeks querying counts this one", () => {
-    expect(waitingOnYou(QS)).toBe(2); // partial requested + offer
-    expect(weeksQuerying(QS, NOW)).toBeGreaterThanOrEqual(10);
   });
 });
 

@@ -657,7 +657,7 @@ export const Dash58: React.FC<Dash58Props> = ({
                   />}
                 </div>
               ) : (
-                <Dash2Active loading={loading} queries={scopedQueries} activities={scopedActivities} qcRows={taskCtx.qcRows}
+                <Dash2Active loading={loading} queries={scopedQueries} activities={scopedActivities}
                   activeCount={activeCount} undatedCount={loading ? 0 : undatedLiveCount(scopedQueries)} now={now} />
               )}
               <Dash2Founding loading={loading} uid={fwUid} />

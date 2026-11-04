@@ -5,53 +5,28 @@
  * dash2 — Dashboard v2's figures (3 Nov; ref design-refs/dashboard-v2).
  *
  * ⚠️ NOTHING HERE IS A NEW DERIVATION. The weekly totals are the ledger's own stock (`dailyLedger` → weekly), the
- * week's breakdown is `weekMix` folded by `weekCallout` (v116's three groups plus "Stage not dated"), "waiting on you"
- * is the Query Centre's `tileCourt`, "have replied" is the Responses page's own grouping, and "weeks querying" is the
- * old greeting's count. This module only arranges them for the card.
+ * week's breakdown is `weekMix` folded by `weekCallout` (v116's three groups plus "Stage not dated"), and the band's
+ * "weeks querying" is whole weeks since the first send. This module only arranges them for the card.
  */
 import type { Query } from "../types";
 import { aggregateLedger, dailyLedger, sentAt, type LedgerPoint } from "./oneScreen";
 import { indexActivities, weekMix, type ActivityIndex } from "./dashWeekMix";
 import { weekCallout, type WeekGroupKey } from "./dashHover";
 import { isoWeekStart } from "./dashboardStats";
-import { tileCourt, type QcRow } from "./qcSummary";
-import { respCounts, respItems } from "./responses";
 import type { Activity } from "../types";
 import { MONTHS_SHORT } from "./dates";
 
 const WEEK_MS = 7 * 86_400_000;
 const dayMonth = (d: Date) => `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}`;
 
-/* ── the three tiles ─────────────────────────────────────────────────────────────────────────── */
-
-/** Queries in the writer's court (a request, revise-and-resubmit or offer waiting on them) — the Query Centre's tile. */
-export const waitingOnYou = (queries: readonly Query[]): number =>
-  queries.filter((q) => tileCourt(q.status) === "you").length;
-
-/**
- * The share of sent queries an agent has answered (asked for more, or passed), rounded; null with nothing sent.
- * The answer groups are the Responses page's (`respItems`/`respCounts`); a query closed with no reply is not a reply.
- */
-export function repliedPct(rows: readonly QcRow[]): number | null {
-  const sent = rows.filter((r) => r.sentMs != null).length;
-  if (sent === 0) return null;
-  const c = respCounts(respItems(rows));
-  return Math.round(((c.more + c.passed) / sent) * 100);
-}
-
-/** ISO weeks since the earliest send, counting this one — the old greeting's "week N of querying", as a number. */
-export function weeksQuerying(queries: readonly Query[], now: Date): number {
-  const times = queries.map((q) => sentAt(q)).filter((t): t is number => t !== null);
-  if (times.length === 0) return 0;
-  const earliest = isoWeekStart(new Date(Math.min(...times))).getTime();
-  return Math.max(1, Math.round((isoWeekStart(now).getTime() - earliest) / WEEK_MS) + 1);
-}
+/* ── the band's tag ───────────────────────────────────────────────────────────────────────────── */
+/* v2.1 retired the three tiles (waiting on you, have replied, weeks querying) and their three helpers with them. */
 
 /**
  * Dashboard v2.1 · the band's tag: WHOLE weeks since the manuscript's first query was sent, by calendar day (so a week
  * across the clocks changing is still seven days). Null before the first send — the tag is not drawn then.
- * ⚠️ NOT `weeksQuerying`: that counts the ISO weeks a campaign spans, this week included, so a query sent on a Sunday
- * read "2 weeks" on the Monday. The tag states elapsed whole weeks.
+ * ⚠️ NOT v2's retired `weeksQuerying`, which counted the ISO weeks a campaign spans, this week included, so a query sent
+ * on a Sunday read "2 weeks" on the Monday. The tag states elapsed whole weeks.
  */
 export function wholeWeeksQuerying(queries: readonly Query[], now: Date): number | null {
   const times = queries.map((q) => sentAt(q)).filter((t): t is number => t !== null && t <= now.getTime());

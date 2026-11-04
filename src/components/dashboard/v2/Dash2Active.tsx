@@ -4,9 +4,11 @@
  *
  * Dashboard v2 · Active queries (Part C; ref design-refs/dashboard-v2, screens/01 and 03).
  *
- * A navy band ("{n} active queries", "+{n} this week"), three tiles, and a 250px chart whose navy fill runs edge to
- * edge of the frame: the first and last points sit 18px in and the line carries on flat to each edge. Each week's
- * point is a circled total; hovering or focusing one draws a dashed line through it and shows that week's breakdown.
+ * A navy band ("{n} active queries", "+{n} this week") and the chart — nothing else (v2.1 removed the three tiles;
+ * ref design-refs/dashboard-v2-1, screens/01 and 03). The chart is 280px tall and its navy fill runs edge to edge of
+ * the frame: the first and last points sit 22px in and the line carries on flat to each edge. The y-scale runs to
+ * 1.35 × the highest week, so the line sits mid-card. Each week is a small white dot; this week is a 36px navy circle
+ * holding the total. Hovering or focusing either draws a dashed line through it and shows that week's breakdown.
  * No event pins, no hawk, no grain.
  *
  * ⚠️ EVERY FIGURE IS AN EXISTING DERIVATION (lib/dash2): a circle's total is the ledger's weekly stock, the card's rows
@@ -16,29 +18,27 @@ import React, { useLayoutEffect, useMemo, useRef, useState } from "react";
 import "./dash2Active.css";
 import { createPortal } from "react-dom";
 import type { Activity, Query } from "../../../types";
-import type { QcRow } from "../../../lib/qcSummary";
 import { activeTitle } from "../OneScreenChart";
-import {
-  activityIndex, breakdownFor, dash2Weeks, dateLabels, repliedPct, sentThisWeek, visibleWeeks, waitingOnYou, weekAria, weeksQuerying,
-} from "../../../lib/dash2";
+import { activityIndex, breakdownFor, dash2Weeks, dateLabels, sentThisWeek, visibleWeeks, weekAria } from "../../../lib/dash2";
 import { Frame } from "./Frame";
 
-export const PLOT_H = 250;
-export const EDGE = 18;
-/** room above the highest point for its circle, and below the lowest for the date labels */
+export const PLOT_H = 280;
+export const EDGE = 22;
+/** the scale's top is this × the highest week, so the highest point sits well below the card's band */
+export const HEADROOM = 1.35;
+/** the plot's y-range: 30px of room at the top, 34px at the foot for the date labels */
 const TOP = 30;
-const BOTTOM = 44;
+const BOTTOM = 34;
 const TIP_W = 250;
 
 export const Dash2Active: React.FC<{
   loading: boolean;
   queries: readonly Query[];
   activities: readonly Activity[];
-  qcRows: readonly QcRow[];
   activeCount: number | null;
   undatedCount: number;
   now: Date;
-}> = ({ loading, queries, activities, qcRows, activeCount, undatedCount, now }) => {
+}> = ({ loading, queries, activities, activeCount, undatedCount, now }) => {
   const plotRef = useRef<HTMLDivElement | null>(null);
   const [w, setW] = useState(0);
   useLayoutEffect(() => {
@@ -61,10 +61,11 @@ export const Dash2Active: React.FC<{
   const [tipH, setTipH] = useState(200);
   const tipRef = (el: HTMLDivElement | null) => { if (el) { const h = el.offsetHeight; if (h > 0 && Math.abs(h - tipH) > 1) setTipH(h); } };
 
-  const max = Math.max(1, ...weeks.map((p) => p.total));
+  const max = Math.max(1, ...weeks.map((p) => p.total)) * HEADROOM;
   const H = PLOT_H;
+  const bot = H - BOTTOM;
   const xs = weeks.map((_, i) => (weeks.length === 1 ? w - EDGE : EDGE + (i * (w - 2 * EDGE)) / (weeks.length - 1)));
-  const ys = weeks.map((p) => TOP + (1 - p.total / max) * (H - TOP - BOTTOM));
+  const ys = weeks.map((p) => bot - (p.total / max) * (bot - TOP));
   const pts: [number, number][] = xs.map((x, i) => [x, ys[i]]);
   const line = pts.length ? [[0, ys[0]] as [number, number], ...pts, [w, ys[ys.length - 1]] as [number, number]] : [];
   const lineD = line.map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
@@ -92,9 +93,6 @@ export const Dash2Active: React.FC<{
     return { left, top };
   })();
 
-  const waiting = loading ? null : waitingOnYou(queries);
-  const replied = loading ? null : repliedPct(qcRows);
-  const wq = loading ? null : weeksQuerying(queries, now);
   const fresh = loading ? 0 : sentThisWeek(queries, now);
 
   return (
@@ -102,11 +100,6 @@ export const Dash2Active: React.FC<{
       title={activeTitle(activeCount, undatedCount)}
       meta={fresh > 0 ? <span className="d2-bpill" data-d2="this-week">+{fresh} this week</span> : null}>
       <div className="d2-aq" data-d2="aq">
-        <div className="d2-tiles" data-d2="tiles">
-          <div><b data-d2="tile-waiting">{waiting ?? " "}</b><span>waiting on you</span></div>
-          <div><b data-d2="tile-replied">{replied == null ? (loading ? " " : "—") : `${replied}%`}</b><span>have replied</span></div>
-          <div><b data-d2="tile-weeks">{wq ?? " "}</b><span>weeks querying</span></div>
-        </div>
         <div className="d2-plot" ref={plotRef} data-d2="plot" style={{ height: H }}>
           {w > 0 && weeks.length > 0 && (
             <>
@@ -123,12 +116,12 @@ export const Dash2Active: React.FC<{
               {hk !== null && <i className="d2-vline" data-d2="vline" style={{ left: xs[hk] }} />}
               {weeks.map((p, i) => (
                 <button key={p.start.getTime()} type="button"
-                  className={`d2-wk${p.now ? " is-now" : ""}`} data-d2="week" data-i={i + offset} data-total={p.total} data-at={p.atMs}
+                  className={p.now ? "d2-wk is-now" : "d2-dot"} data-d2="week" data-i={i + offset} data-total={p.total} data-at={p.atMs}
                   style={{ left: xs[i], top: ys[i] }}
                   aria-label={weekAria(p.label, p.total)} aria-describedby={hk === i ? "d2-wtip" : undefined}
                   onMouseEnter={(e) => show(i, e.currentTarget)} onMouseLeave={hide}
                   onFocus={(e) => show(i, e.currentTarget)} onBlur={hide}>
-                  {p.total}
+                  {p.now ? p.total : null}
                 </button>
               ))}
               <div className="d2-axis" aria-hidden="true">
