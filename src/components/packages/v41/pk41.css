@@ -586,6 +586,13 @@
 .p41-hw .p41hw-at span { padding: 4px 7px; border-radius: 6px; background: #f5efe7; font: 600 11px var(--sp-serif); }
 .p41-hw .p41hw-at .p41hw-gh { background: none; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.15); font-weight: 400; font-style: italic; color: rgba(28, 19, 15, 0.5); }
 .p41-hw .p41hw-bt { display: flex; align-items: center; gap: 7px; padding: 10px 12px; border-radius: 10px; background: #fff; box-shadow: 0 0 0 1px #e3d5c9, 0 10px 20px -14px rgba(28, 19, 15, 0.4); }
+/* step 3: the batch drawn as the header's lower strip, as the page has it */
+.p41-hw .p41hw-hdb { border-radius: 12px 12px 0 0; }
+.p41-hw .p41hw-btin { margin-top: -10px; border-radius: 0 0 12px 12px; background: #24304a; box-shadow: none; }
+.p41-hw .p41hw-btin em { color: rgba(244, 238, 229, 0.62) !important; }
+.p41-hw .p41hw-btin b { color: #fffaf3; }
+.p41-hw .p41hw-btin > span:not(.p41hw-ic) { background: rgba(244, 238, 229, 0.1) !important; color: #f4eee5; }
+.p41-hw .p41hw-btin > .p41hw-pt { color: #f4eee5; }
 .p41-hw .p41hw-bt em { white-space: nowrap; margin-right: 2px; font: italic 12px var(--sp-serif); color: rgba(28, 19, 15, 0.55); }
 .p41-hw .p41hw-bt b { margin-right: 2px; font: 400 14px var(--sp-type); }
 .p41-hw .p41hw-bt > span:not(.p41hw-ic) { padding: 3px 8px; border-radius: 10px; background: #f5efe7; font: 11.5px var(--sp-serif); white-space: nowrap; }

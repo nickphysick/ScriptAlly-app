@@ -20,8 +20,8 @@ import { useOverlay } from "../../shell/useOverlay";
 /** The five steps, in the pack's words. "4" is the real minimum-answers constant, never a literal. */
 export const HOW_STEPS: readonly [string, string][] = [
   ["Make a package", "Press + New package, give it a name and choose an icon and colour you’ll recognise. That look follows it everywhere: the list, the Query Centre and your results."],
-  ["Pick each piece", "Open a package and work down its steps. Start with the version of your book, because it decides which pages go out. Then add a query letter, a synopsis if you want one, and anything agents might ask for. The preview shows exactly what an agent receives."],
-  ["Set your current batch", "The row under the header shows what your current batch is going out with. Change it when you start a new batch, and it’s picked for you each time you log a query."],
+  ["Pick each piece", "Choose a package from the list on the left and work down its steps. Start with the version of your book, because it decides which pages go out. Then add a query letter, a synopsis if you want one, and anything agents might ask for. The preview shows exactly what an agent receives."],
+  ["Set your current batch", "The strip along the bottom of the header shows what your current batch is going out with. Change it when you start a new batch, and it’s picked for you each time you log a query."],
   ["Log a query with it", "Choose the package as you log a query and QueryHawk records exactly what went. Once a package is out with agents it locks, so what each agent got stays true. To change anything, make a copy."],
   ["See what’s working", `Further down, How your packages are doing ranks your packages by how often agents ask for more, then your versions, letters and synopses. Each one is ranked once ${MIN_SENDS_FOR_CLAIM} agents have answered, so one lucky reply can’t top the list.`],
 ];
@@ -50,8 +50,8 @@ const MINIS: React.ReactNode[] = [
       <div className="p41hw-at"><span>1 Opening pages</span><span className="p41hw-gh">No synopsis</span></div></div>
   </div>,
   <>
-    <div className="p41hw-hd p41hw-sm"><b>Your packages</b></div>
-    <div className="p41hw-bt"><em>Going out with</em><Tile c="#1d4b63" d={CROWN} /><b>Standard UK</b><span>1 Prologue cut</span><span>Hook-first</span><span className="p41hw-pt">Change</span></div>
+    <div className="p41hw-hd p41hw-sm p41hw-hdb"><b>Your packages</b></div>
+    <div className="p41hw-bt p41hw-btin"><em>Going out with</em><Tile c="#1d4b63" d={CROWN} /><b>Standard UK</b><span>1 Prologue cut</span><span>Hook-first</span><span className="p41hw-pt">Change</span></div>
   </>,
   <>
     <div className="p41hw-row"><Tile c="#1d4b63" d={CROWN} /><b>Standard UK</b><span className="p41hw-st"><i />Out with agents</span><em>5 sent</em></div>
