@@ -17,12 +17,12 @@ vi.mock("../../../lib/firebase", async () => (await import("../../../test/pageSm
 import { Dash58 } from "../v58/Dash58";
 import { Dash2Band } from "./Dash2Band";
 import { nextReason } from "./Dash2Next";
-import { RANK_MIN } from "./Dash2Founding";
+import { heroLine, RANK_MIN, ringRatio } from "./Dash2Founding";
 import { EDGE, HEADROOM, PLOT_H } from "./Dash2Active";
 import { TIERS } from "../../../lib/foundingStats";
 import { breakdownFor, changeText, dash2Weeks, dateLabels, indexActivities, visibleWeeks, weekAria, wholeWeeksQuerying, weeksTag } from "../../../lib/dash2";
 import { aggregateLedger, dailyLedger } from "../../../lib/oneScreen";
-import { latestNote, noteFrom, NO_NOTES } from "../../../lib/foundingNotes";
+import { latestNote, noteFrom, noNotesLine } from "../../../lib/foundingNotes";
 import type { ListItem } from "../../../lib/dashList";
 import type { TaskCtx } from "../../../lib/dashTaskCard";
 import { QueryStatus, type Agent, type Manuscript, type Query, type User } from "../../../types";
@@ -144,7 +144,26 @@ describe("DB2-D · the founding card", () => {
     expect(noteFrom({ kind: "Something I liked", message: "y" })?.outcome).toBe("Sent");
     expect(noteFrom({ kind: "Nonsense", message: "z" })).toBe(null);
     expect(latestNote([{ kind: "An idea", message: "old", createdAt: 1 }, { kind: "An idea", message: "new", createdAt: 9 }])?.text).toBe("new");
-    expect(NO_NOTES).toBe("Nothing sent yet. Your first note counts towards Fledgling.");
+    expect(noNotesLine("Fledgling")).toBe("Your first note counts towards Fledgling.");
+  });
+});
+
+describe("DB21-C · the founding card's hero", () => {
+  const say = (t: number, d: number) => { const l = heroLine(t, d); return `${l.lead}${l.rank ?? ""}${l.tail}`; };
+  it("only the Egg hatches; every later rank becomes, with its article", () => {
+    expect(say(0, 0)).toBe("One more note and you hatch into a Fledgling.");
+    expect(say(1, 1)).toBe("Two more notes and you become an Archivist.");
+    expect(say(2, 3)).toBe("Five more notes and you become a Scout.");
+    expect(say(4, 20)).toBe("Five more notes and you become a QueryHawk.");
+    expect(say(5, 30)).toBe("You’ve reached QueryHawk. Thank you.");
+    for (let t = 1; t < 5; t++) expect(say(t, RANK_MIN[t])).not.toContain("hatch");
+    expect(heroLine(0, 0).rank).toBe("Fledgling");
+  });
+  it("the ring is notes counted out of notes needed for the next rank, full at the top", () => {
+    expect(ringRatio(0, 0)).toBe(0);
+    expect(ringRatio(1, 2)).toBeCloseTo(2 / 3);
+    expect(ringRatio(2, 6)).toBeCloseTo(6 / 8);
+    expect(ringRatio(5, 40)).toBe(1);
   });
 });
 

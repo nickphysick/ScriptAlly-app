@@ -72,7 +72,7 @@
    shimmer blocks (Dash58's FeedSkeleton). The corner hawk is not in the grid. */
 .d58.d2 .d58-page[data-loading="1"] .d2-grid :is(.os-card, .d2-gs) * { visibility: hidden !important; }
 .d58.d2 .d58-page[data-loading="1"] .d2-grid :is(.os-card, .d2-gs) :is(.os-frame, .df1-goal) { visibility: visible !important; }
-.d58.d2 .d58-page[data-loading="1"] .d2-grid :is(.os-card, .d2-gs) :is(.os-band, .d2-fwtop, .fv2-gsh),
+.d58.d2 .d58-page[data-loading="1"] .d2-grid :is(.os-card, .d2-gs) :is(.os-band, .fv2-gsh),
 .d58.d2 .d2-fsk i {
   visibility: visible !important;
   background: linear-gradient(90deg, #e7e1d9 0%, #f1ece6 45%, #e7e1d9 90%) !important;
@@ -85,5 +85,5 @@
 .d58.d2 .d2-fsk i { display: block; height: 22px; width: 46%; border-radius: 8px; }
 .d58.d2 .d2-fsk i:nth-child(3n + 2), .d58.d2 .d2-fsk i:nth-child(3n + 3) { height: 64px; width: 100%; border-radius: 12px; }
 @media (prefers-reduced-motion: reduce) {
-  .d58.d2 .d58-page[data-loading="1"] .d2-grid :is(.os-band, .d2-fwtop, .fv2-gsh), .d58.d2 .d2-fsk i { animation: none; }
+  .d58.d2 .d58-page[data-loading="1"] .d2-grid :is(.os-band, .fv2-gsh), .d58.d2 .d2-fsk i { animation: none; }
 }
