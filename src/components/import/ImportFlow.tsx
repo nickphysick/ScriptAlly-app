@@ -19,7 +19,7 @@ import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } f
 import { useScriptAllyDb } from "../../lib/db";
 import { QueryStatus } from "../../types";
 import { SmartImportResult } from "../../types/smartImport";
-import { runSmartImport, validateSmartImport, ValidatedImport, sampleRawRecords, RawRecordSample } from "../../lib/smartImport";
+import { runSmartImport, runSmartImportPages, validateSmartImport, ValidatedImport, sampleRawRecords, RawRecordSample } from "../../lib/smartImport";
 import { applyImportUpdate, PROGRESS_START, type LoaderProgress } from "../../lib/importEstimate";
 import { useSmartImportEntitlement } from "../../lib/useSmartImportEntitlement";
 import { agentAgencyLine } from "../../lib/agentDisplay";
@@ -37,6 +37,9 @@ import { splitDuplicates, ALREADY_REASON } from "../../lib/importDuplicates";
 type AlreadyRow = { who: string; status: string; sentDate: string | null };
 import { manuscriptErrorLine, type ImportSource } from "../../lib/importLabels";
 import { ConfirmScreen } from "../onboarding/ConfirmScreen";
+import { PhotosScreen } from "../onboarding/PhotosScreen";
+import { MAX_PAGES, PHOTOS_WORDS, createUrlRegistry, isImageFile, movePage, type ReviewPhoto } from "../../lib/photoImport";
+import { preparePhoto, fitPhotos } from "../../lib/photoPrepare";
 import { UsedFree, UsedProMonth, Unreadable, NothingImported, Unloaded } from "../onboarding/DeadEnd";
 
 /** UX-only floor so the post-import loader is held for a deliberate minimum (never a fake delay on
@@ -44,7 +47,7 @@ import { UsedFree, UsedProMonth, Unreadable, NothingImported, Unloaded } from ".
 const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 /** Where the flow is. `idle` = nothing chosen yet: the host's own way in is on screen. */
-export type ImportFlowScreen = "idle" | "confirm" | "blocked" | "reading" | "overview" | "review" | "fallback" | "importing" | "done";
+export type ImportFlowScreen = "idle" | "confirm" | "photos" | "blocked" | "reading" | "overview" | "review" | "fallback" | "importing" | "done";
 
 /** A blocked Smart Import attempt — the structured reason the gate (or the pre-check) surfaced. */
 type Blocked = { reason: "free_used" | "pro_month_used"; nextAvailable?: string };
@@ -57,6 +60,10 @@ export interface ImportFlowHandle {
   chooseTemplate: () => void;
   /** A file dropped on the host's drop zone: the Smart Import path. */
   dropFile: (file: File) => void;
+  /** Open the photo picker (smart-import-photos-v1): the Smart Import path, read from photos. */
+  choosePhotos: () => void;
+  /** Images dropped on the host's drop zone. */
+  dropPhotos: (files: File[]) => void;
   /** Drop the file that was read and everything answered about it, and go back to idle. Nothing has
    *  been written at any point before the import, so there is nothing to undo. */
   reset: () => void;
@@ -104,8 +111,8 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
 
   const [screen, setScreen] = useState<ImportFlowScreen>(lab ? "overview" : "idle");
   useEffect(() => { onScreen?.(screen); }, [screen, onScreen]);
-  /** Back to the host's own way in. */
-  const toStart = () => { setScreen("idle"); onBackToStart?.(); };
+  /** Back to the host's own way in. The flow is over: any photos are dropped and their URLs revoked. */
+  const toStart = () => { endPhotos(); setScreen("idle"); onBackToStart?.(); };
 
   const [fileName, setFileName] = useState(lab?.fileName ?? "");
   const [validated, setValidated] = useState<ValidatedImport | null>(() => (lab ? validateSmartImport(lab.result) : null));
@@ -128,6 +135,73 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
   const [blocked, setBlocked] = useState<Blocked | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const templateInputRef = useRef<HTMLInputElement>(null);
+
+  /* ── Photos (smart-import-photos-v1) ─────────────────────────────────────────────────────────
+     The writer's own pages, held in memory for the flow and NOWHERE else: never uploaded but to
+     the callable, never written to Storage or Firestore. Every object URL goes through `urls`, and
+     `endPhotos` revokes them all when the flow ends (done, cancelled, back to the start, unmounted). */
+  type Page = { id: string; file: File; status: "preparing" | "ready" | "failed"; url: string | null; base64: string; width: number; height: number; blurry: boolean; kept: boolean };
+  const [photos, setPhotos] = useState<Page[]>([]);
+  const [photoMessage, setPhotoMessage] = useState<string | null>(null);
+  const [photoBusy, setPhotoBusy] = useState(false);
+  /** The pages that were read, in the order sent, with the number each was shown under. */
+  const [readPhotos, setReadPhotos] = useState<ReviewPhoto[]>([]);
+  const urls = useRef(createUrlRegistry());
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const replaceInputRef = useRef<HTMLInputElement>(null);
+  const replaceAt = useRef<number | null>(null);
+  const nextId = useRef(0);
+  const endPhotos = () => { urls.current.revokeAll(); photosNow.current = []; setPhotos([]); setReadPhotos([]); setPhotoMessage(null); setPhotoBusy(false); };
+  useEffect(() => () => urls.current.revokeAll(), []);
+
+  /** Prepare one file into the page with this id, in place. */
+  const prepareInto = (id: string, file: File) => {
+    void preparePhoto(file).then(
+      (pp) => {
+        const url = urls.current.make(pp.blob);
+        if (!photosNow.current.some((x) => x.id === id)) { urls.current.drop(url); return; } // removed meanwhile
+        commitPhotos(photosNow.current.map((x) => (x.id === id ? { ...x, status: "ready", url, base64: pp.base64, width: pp.width, height: pp.height, blurry: pp.blurry, kept: false } : x)));
+      },
+      () => commitPhotos(photosNow.current.map((x) => (x.id === id ? { ...x, status: "failed", url: null, base64: "" } : x))),
+    );
+  };
+  /* The pages as of the last change, so the handlers below decide outside a state updater (an
+     updater may run twice, and preparing a page or revoking a URL must happen once). */
+  const photosNow = useRef<Page[]>([]);
+  const commitPhotos = (next: Page[]) => { photosNow.current = next; setPhotos(next); };
+  const freshPage = (file: File): Page => ({ id: `p${nextId.current++}`, file, status: "preparing", url: null, base64: "", width: 0, height: 0, blurry: false, kept: false });
+  const addPhotos = (files: File[]) => {
+    setPhotoMessage(null);
+    const room = Math.max(0, MAX_PAGES - photosNow.current.length);
+    const added = files.filter(isImageFile).slice(0, room).map(freshPage);
+    commitPhotos([...photosNow.current, ...added]);
+    added.forEach((pg) => prepareInto(pg.id, pg.file));
+  };
+  const replacePhoto = (i: number, file: File) => {
+    const old = photosNow.current[i];
+    if (!old || !isImageFile(file)) return;
+    setPhotoMessage(null);
+    urls.current.drop(old.url);
+    const pg = freshPage(file);
+    commitPhotos(photosNow.current.map((x, k) => (k === i ? pg : x)));
+    prepareInto(pg.id, file);
+  };
+  const removePhoto = (i: number) => {
+    setPhotoMessage(null);
+    urls.current.drop(photosNow.current[i]?.url);
+    commitPhotos(photosNow.current.filter((_, k) => k !== i));
+  };
+  /* Photos chosen (or dropped) → the same client gate as a file; then the photos screen. */
+  const pickPhotos = (files: File[]) => {
+    if (!entitlement.allowed) {
+      setBlocked({ reason: entitlement.reason as Blocked["reason"], nextAvailable: entitlement.nextAvailable });
+      setScreen("blocked");
+      return;
+    }
+    if (!files.some(isImageFile)) return;
+    addPhotos(files);
+    setScreen("photos");
+  };
   /** Cells the template parser could not read. Each date flag is also a reason on its own query,
    *  which is what the review renders. */
   const [, setTemplateFlags] = useState<TemplateFlag[]>([]);
@@ -237,6 +311,40 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
     }
   };
 
+  /** "Read my photos": fit the ready pages under the cap, then the same reading loader and the same
+   *  error handling as a file. Nothing is sent before this press. */
+  const runPhotoMapping = async () => {
+    const ready = photos.filter((p) => p.status === "ready");
+    if (ready.length === 0) return;
+    setPhotoBusy(true); setPhotoMessage(null);
+    const fitted = await fitPhotos(ready.map((p) => p.file), ready.map((p) => p.base64)).catch(() => null);
+    setPhotoBusy(false);
+    if (!fitted) { setPhotoMessage(PHOTOS_WORDS.tooLarge); return; }
+    setReadPhotos(ready.map((p) => ({ shown: photos.indexOf(p) + 1, url: p.url!, width: p.width, height: p.height })));
+    setRawSample([]); setExtractComplete(false); setValidated(null); setRowsRead(null);
+    setImportSource("smart");
+    setScreen("reading");
+    try {
+      setReadProgress(PROGRESS_START);
+      const result: SmartImportResult = await runSmartImportPages(
+        fitted.map((data) => ({ mediaType: "image/jpeg" as const, data })),
+        (u) => setReadProgress((p) => applyImportUpdate(p, u)),
+      );
+      setReadProgress((p) => applyImportUpdate(p, { type: "result" }));
+      if (takeRead(result) === "nothing") return;
+      setExtractComplete(true);
+    } catch (e: any) {
+      const reason = e?.details?.reason;
+      if (reason === "free_used" || reason === "pro_month_used") {
+        setBlocked({ reason, nextAvailable: e?.details?.nextAvailable });
+        setScreen("blocked");
+        return;
+      }
+      console.error("Smart Import photo mapping failed:", e);
+      setScreen("fallback");
+    }
+  };
+
   /** Commit the final result the review hands back. The two-screen SmartImportReview owns every
    *  inline fix (statuses, dates, dedupe, exclusions, recovered names) and builds the result via
    *  modelToResult, so we just commit it — same deps and post-import flow as before. */
@@ -297,7 +405,10 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
     chooseFile: () => fileInputRef.current?.click(),
     chooseTemplate: () => templateInputRef.current?.click(),
     dropFile: pickFile,
+    choosePhotos: () => photoInputRef.current?.click(),
+    dropPhotos: pickPhotos,
     reset: () => {
+      endPhotos();
       setPendingFile(null); setValidated(null); setRawSample([]); setExtractComplete(false); setOutcome(null);
       setCommitError(null); setManuscriptFailed(false); setImportComplete(false); setBlocked(null); setRowsRead(null); setFileName("");
       setAlready([]); setNothingNew(false);
@@ -325,6 +436,25 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
         data-picker="template"
         onChange={(e) => { const f = e.target.files?.[0]; if (f) void pickTemplateFile(f); e.target.value = ""; }}
       />
+      {/* Photos: images only, several at once, and NO `capture` attribute — so a phone offers the
+          camera and the library both. */}
+      <input
+        ref={photoInputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        style={{ display: "none" }}
+        data-picker="photos"
+        onChange={(e) => { const fs = Array.from(e.target.files ?? []); if (fs.length) { if (screen === "photos") addPhotos(fs); else pickPhotos(fs); } e.target.value = ""; }}
+      />
+      <input
+        ref={replaceInputRef}
+        type="file"
+        accept="image/*"
+        style={{ display: "none" }}
+        data-picker="photo-replace"
+        onChange={(e) => { const f = e.target.files?.[0]; if (f && replaceAt.current !== null) replacePhoto(replaceAt.current, f); replaceAt.current = null; e.target.value = ""; }}
+      />
     </>
   );
 
@@ -340,6 +470,26 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
           onChange={() => fileInputRef.current?.click()}
           onBack={() => { setPendingFile(null); toStart(); }}
           onRead={() => { if (pendingFile) void runMapping(pendingFile); }}
+        />
+      </>
+    );
+  }
+
+  if (screen === "photos") {
+    return (
+      <>
+        {pickers}
+        <PhotosScreen
+          pages={photos.map((p) => ({ id: p.id, url: p.url, status: p.status, blurry: p.blurry, kept: p.kept }))}
+          onAdd={() => photoInputRef.current?.click()}
+          onReplace={(i) => { replaceAt.current = i; replaceInputRef.current?.click(); }}
+          onRemove={removePhoto}
+          onKeep={(i) => commitPhotos(photosNow.current.map((x, k) => (k === i ? { ...x, kept: true } : x)))}
+          onMove={(from, to) => { setPhotoMessage(null); commitPhotos(movePage(photosNow.current, from, to)); }}
+          onBack={() => toStart()}
+          onRead={() => { void runPhotoMapping(); }}
+          message={photoMessage}
+          busy={photoBusy}
         />
       </>
     );
@@ -398,7 +548,7 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
            the import was for, and the page that stood here ("That's everything captured") restated
            what the dashboard shows a moment later. `importComplete` is only ever set after the
            build's own success test (at least one query imported), so `outcome` is a success here. */
-        onProceed={() => { if (outcome) onImportComplete(outcome, "dashboard"); }}
+        onProceed={() => { if (outcome) { endPhotos(); onImportComplete(outcome, "dashboard"); } }}
       />
     );
   }

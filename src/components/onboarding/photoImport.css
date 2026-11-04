@@ -1,0 +1,67 @@
+/* ═══ Smart Import from photos (design-refs/smart-import-photos-v1.html) ═════════════════════════
+   The photos hand-off and the review's cut-out of the writer's own line. Ported from the ref's own
+   rules, which are built from the v9 parts; its tokens map onto the app's (--type → --sp-type,
+   --blush → --im-blush, --blush-ink → --im-blush-ink, --text-rgb → --im-text-rgb, --stamp →
+   --im-stamp). Everything sits under `.sf`, where those tokens are declared (importFlow.css).
+   ⚠️ NO `var()` INSIDE `@keyframes`. No green here, and no new mono eyebrow. */
+
+/* ── The photos card on the hand-off ─────────────────────────────────────────────────────────── */
+.sf .o9-photos { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px 12px; margin-top: 2px; }
+@media (max-width: 900px) { .sf .o9-photos { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.sf .o9-pthumb { margin: 0; display: grid; gap: 8px; min-width: 0; }
+.sf .o9-pthumb.is-dragging { opacity: .45; }
+.sf .o9-pimg {
+  position: relative; aspect-ratio: 3 / 4; border-radius: 8px; overflow: hidden; background: #8a7a69;
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, .18); cursor: grab; display: grid; place-items: center;
+}
+.sf .o9-pimg:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 3px; }
+.sf .o9-pimg img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.sf .o9-pwait {
+  position: relative; padding: 0 10px; text-align: center; font-family: var(--sp-type); font-size: 13.5px; line-height: 1.3;
+  color: rgba(244, 238, 229, .9);
+}
+.sf .o9-pimg:has(.o9-pwait) { background: rgba(var(--im-text-rgb), .08); box-shadow: inset 0 0 0 1.5px rgba(var(--im-text-rgb), .18); cursor: default; }
+.sf .o9-pimg:has(.o9-pwait) .o9-pwait { color: rgba(var(--im-text-rgb), .62); }
+.sf .o9-pflag {
+  position: absolute; left: 8px; right: 8px; bottom: 8px; background: var(--im-blush); color: var(--im-blush-ink);
+  border-radius: 8px; padding: 5px 8px 4px; font-family: var(--sp-type); font-size: 12.5px; line-height: 1.2; text-align: center;
+}
+.sf .o9-pthumb figcaption { display: grid; gap: 2px; justify-items: start; }
+.sf .o9-pthumb figcaption span { display: flex; gap: 12px; }
+.sf .o9-pthumb figcaption b { font-family: var(--sp-type); font-weight: 400; font-size: 15.5px; line-height: 1.3; }
+.sf .o9-pthumb figcaption .sf-link { font-size: 13.5px; text-underline-offset: 4px; }
+.sf .o9-addpg {
+  aspect-ratio: 3 / 4; border-radius: 8px; border: 1.5px dashed rgba(var(--im-text-rgb), .4); background: transparent;
+  display: grid; place-items: center; align-content: center; gap: 4px; font-family: var(--sp-type); font-size: 15px; line-height: 1.3;
+  color: rgba(var(--im-text-rgb), .75); cursor: pointer;
+}
+.sf .o9-addpg span { font-size: 28px; line-height: 1; }
+.sf .o9-addpg:hover { background: rgba(var(--im-text-rgb), .04); color: var(--ink-on-light); }
+.sf .o9-addpg:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 3px; }
+.sf .o9-addpg[disabled] { opacity: .45; cursor: default; }
+.sf .o9-pnote {
+  display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin: 16px 0 0; padding: 12px 14px; border-radius: 10px;
+  background: var(--im-blush); color: var(--im-blush-ink); font-family: var(--sp-serif); font-size: 15px; line-height: 1.4;
+}
+/* brand.tsx names a face on bare spans; the note's sentence keeps the note's own. */
+.sf .o9-pnote span, .sf .o9-pnote b { font-family: inherit; }
+.sf .o9-pnote b { font-weight: 600; }
+.sf .o9-pnote .sf-link { color: var(--im-blush-ink); font-size: 14.5px; text-decoration-color: rgba(91, 42, 31, .4); }
+.sf .o9-plede { margin: 18px 0 0; font-size: 16px; color: rgba(28, 19, 15, .78); }
+.sf .o9-ptip { margin: 10px 0 0; }
+
+/* ── The writer's own line, cut from their photo, on a review card ───────────────────────────── */
+.sf .o9-snip { margin: 0; display: grid; gap: 6px; justify-items: start; min-width: 0; }
+.sf .o9-snip canvas {
+  display: block; max-width: 100%; height: auto; border-radius: 6px;
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, .1), 0 4px 10px -8px rgba(0, 0, 0, .5);
+}
+.sf .o9-snip figcaption { font-size: 13.5px; line-height: 1.4; color: rgba(var(--im-text-rgb), .55); }
+.sf .o9-snip figcaption .sf-link { font-size: 13.5px; text-underline-offset: 4px; margin-left: 6px; }
+.sf .o9-snipline { margin: 0; }
+.sf .o9-tick { flex-basis: 100%; display: flex; align-items: center; gap: 10px; font-size: 15px; line-height: 1.4; color: rgba(var(--im-text-rgb), .78); }
+.sf .o9-tick input { width: 18px; height: 18px; accent-color: var(--im-band); }
+
+/* "See the whole page": the import's own confirm card (im-ask), holding the page. */
+.sf .o9-pageview.im-ask { width: min(760px, calc(100vw - 32px)); max-height: calc(100vh - 32px); display: grid; gap: 12px; overflow: auto; }
+.sf .o9-pageview img { display: block; width: 100%; height: auto; border-radius: 6px; }

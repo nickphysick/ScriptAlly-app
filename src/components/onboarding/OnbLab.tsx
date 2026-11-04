@@ -10,6 +10,8 @@
  *   #/onb-lab?s=frame&form=setup&flow=B&at=list&ms=1
  *   #/onb-lab?s=frame&form=account&mode=signin
  *   #/onb-lab?s=import-page&ent=free_available|free_used|pro_available|pro_month_used
+ *   #/onb-lab?s=photos — the real ImportFlow behind the fork, for photos (smart-import-photos-v1):
+ *     choose files on [data-picker="photos"]; set window.__SA_SMART_IMPORT_MOCK to read them.
  *
  * Served by every non-production build and gated at the call site on `MODE` (App.tsx), so
  * production carries none of it. No sign-in, and it writes nothing: every handler a screen is
@@ -37,6 +39,7 @@ import { HandoffNav, HANDOFF_TAB } from "./HandoffNav";
 import { ExitMode } from "./BranchB";
 import { useAskBeforeLeaving } from "./SkipSetupConfirm";
 import { ImportPage } from "../import/ImportPage";
+import { ImportFlow, type ImportFlowHandle, type ImportFlowScreen } from "../import/ImportFlow";
 import type { SmartImportEntitlement } from "../../lib/smartImportEntitlement";
 
 
@@ -125,6 +128,30 @@ const LabFlow: React.FC<{ fx: string | null; skip: number; none: boolean; floorM
   );
 };
 
+/** The real ImportFlow behind the fork, as BranchB wires it, with no fixture: every screen from the
+ *  photos screen on is the real code. The read is the mock result when one is set. */
+const LabPhotos: React.FC = () => {
+  const flowRef = React.useRef<ImportFlowHandle>(null);
+  const [screen, setScreen] = React.useState<ImportFlowScreen>("idle");
+  return (
+    <LabSetup flow="B" at="list" manuscript exit="open">
+      <ImportFlow
+        ref={flowRef} manuscriptTitle={LAB_TITLE} onEnsureManuscript={async () => "lab-ms"}
+        onAddByHand={labSpy("byhand")} onImportComplete={labSpy("importComplete")} onScreen={setScreen}
+      />
+      {screen === "idle" && (
+        <CaptureFork
+          tier="free"
+          onChooseFile={() => flowRef.current?.chooseFile()} onDropFile={(f) => flowRef.current?.dropFile(f)}
+          onChoosePhotos={() => flowRef.current?.choosePhotos()} onDropPhotos={(fs) => flowRef.current?.dropPhotos(fs)}
+          onUploadTemplate={labSpy("templatePicker")} onAddByHand={labSpy("byhand")} onBack={labSpy("back")}
+          onNothingYet={labSpy("later")} onOpenImportDesk={labSpy("importDesk")} onDownloadTemplate={labSpy("download")}
+        />
+      )}
+    </LabSetup>
+  );
+};
+
 const LabWelcome: React.FC = () => {
   const [sel, setSel] = React.useState<"starting" | "early" | "deep" | "interest" | null>(null);
   return <WelcomeStageScreen name={labQuery().get("name")} selected={sel} onSelect={setSel} onContinue={labSpy("continue")} />;
@@ -206,7 +233,7 @@ export const OnbLab: React.FC = () => {
       <LabSetup flow="B" at="list" manuscript plan={tier === "pro" ? UserPlan.PRO : UserPlan.FREE}>
         <CaptureFork
           tier={tier}
-          onChooseFile={labSpy("picker")} onDropFile={labSpy("pickFile")} onUploadTemplate={labSpy("templatePicker")}
+          onChooseFile={labSpy("picker")} onDropFile={labSpy("pickFile")} onChoosePhotos={labSpy("photosPicker")} onDropPhotos={labSpy("pickPhotos")} onUploadTemplate={labSpy("templatePicker")}
           onAddByHand={labSpy("byhand")} onBack={labSpy("back")} onNothingYet={labSpy("skip")}
           onOpenImportDesk={labSpy("importDesk")} onDownloadTemplate={labSpy("download")}
         />
@@ -260,6 +287,7 @@ export const OnbLab: React.FC = () => {
 
   if (s === "reading") return imp(<LabReading hold={q.get("hold")} rows={Number(q.get("rows")) || null} speed={Number(q.get("speed")) || 1} stream={q.get("stream")} />, "none");
   if (s === "importing") return <LabSetup flow="B" at="list" manuscript exit="none" appMode handingOff={q.get("handoff") === "1"}><LabImporting done={q.get("done") === "1"} loop={q.get("loop") === "1"} /></LabSetup>;
+  if (s === "photos") return <LabPhotos />;
   if (s === "flow") return <LabFlow fx={q.get("fx")} skip={Number(q.get("skip") ?? 0)} none={q.get("none") === "1"} floorMs={Number(q.get("floor") ?? 600)} />;
   if (s === "overview") return imp(<LabOverview fx={q.get("fx")} title={LAB_TITLE} rows={q.get("rows") ? Number(q.get("rows")) : null} />, "ask");
   if (s === "review") return imp(<LabReview fx={q.get("fx")} />, "ask");

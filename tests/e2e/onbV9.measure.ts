@@ -397,7 +397,7 @@ test.describe("B", () => {
 /* ════ F1 · the fork's tiles and the Smart Import hand-off ═══════════════════════════ */
 test.describe("F1", () => {
   const TILE_LINES: Record<string, string[]> = {
-    smart: ["Any spreadsheet, any layout", "QueryHawk reads it for you", "You check it before anything's saved"],
+    smart: ["A spreadsheet, or photos of your list", "QueryHawk reads it for you", "You check it before anything's saved"],
     template: ["A ready-made sheet to fill in", "Set columns, read exactly, every time", "Upload it back whenever you're done"],
     byhand: ["Straight to the agent form", "Quickest for a handful of agents", "Add more at any time"],
   };
@@ -441,7 +441,7 @@ test.describe("F1", () => {
         expect(x.paragraph, `${x.id}: the paragraph is gone`).toBe(0);
         expect(x.ringClass || x.ringAttr === "true" || /0px 0px 0px 2px/.test(x.ringShadow), `${x.id}: no ring on arrival (pick=${pick})`).toBe(false);
       }
-      expect(t.tiles[0].buttons).toEqual(["Import a spreadsheet"]);
+      expect(t.tiles[0].buttons).toEqual(["Import a spreadsheet", "Use photos"]);
       expect(t.tiles[1].buttons).toEqual(["Download the template", "Upload my sheet"]);
       expect(t.tiles[2].buttons).toEqual(["Add an agent"]);
       expect(t.tiles.map((x) => x.fact)).toEqual(["Uses your one Smart Import", "Always free", "Always free · Ends set-up"]);
@@ -451,7 +451,7 @@ test.describe("F1", () => {
     }
     await shot(page, "fork-1440", true);
     /* each button still reaches its own handler */
-    for (const [sel, want] of [['[data-act="smart"]', "picker"], ['[data-act="download"]', "download"], ['[data-act="upload"]', "templatePicker"], ['[data-act="byhand"]', "byhand"]] as const) {
+    for (const [sel, want] of [['[data-act="smart"]', "picker"], ['[data-act="photos"]', "photosPicker"], ['[data-act="download"]', "download"], ['[data-act="upload"]', "templatePicker"], ['[data-act="byhand"]', "byhand"]] as const) {
       await page.evaluate(() => { window.__onbLab = { calls: [] }; });
       await page.locator(sel).click();
       expect(await page.evaluate(() => (window.__onbLab?.calls ?? []).map((c) => c.name)), sel).toEqual([want]);

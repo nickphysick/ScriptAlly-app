@@ -106,7 +106,9 @@ describe("E1 BranchB wires each dead end to the built routes", () => {
   it("'Use the template' returns to the fork", () => {
     expect(b).toContain('onUseTemplate={() => { setBlocked(null); onUseTemplate?.(); toStart(); }}');
     expect(branchOnly).not.toContain("setImportOption");
-    expect(b).toContain('const toStart = () => { setScreen("idle"); onBackToStart?.(); };');
+    /* RE-POINTED (smart-import-photos-v1): toStart also ends the photos (endPhotos revokes their
+       URLs). The law is unchanged: it goes back to idle and hands the host its start. */
+    expect(b).toMatch(/const toStart = \(\) => \{ (?:endPhotos\(\); )?setScreen\("idle"\); onBackToStart\?\.\(\); \};/);
     expect(branchOnly).toContain('{flowScreen === "idle" && (');
   });
   it("the upgrade exit is gone from set-up: no prop, no caller, no hatch", () => {

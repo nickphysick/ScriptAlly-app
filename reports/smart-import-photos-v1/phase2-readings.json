@@ -1,0 +1,66 @@
+{
+  "390": {
+    "pages": [
+      {
+        "n": "1",
+        "status": "ready",
+        "hard": false,
+        "img": "1176x1568"
+      },
+      {
+        "n": "2",
+        "status": "ready",
+        "hard": true,
+        "img": "1176x1568"
+      },
+      {
+        "n": "3",
+        "status": "ready",
+        "hard": false,
+        "img": "1568x980"
+      }
+    ],
+    "note": "Page 2 looks blurry. A sharper photo means fewer questions later.Replace page 2Keep it",
+    "lede": "We'll read all 3 pages as one list and show you everything before anything is saved. You confirm what lands. The photos are deleted once they're read.",
+    "read": true,
+    "cols": 2
+  },
+  "1440": {
+    "pages": [
+      {
+        "n": "1",
+        "status": "ready",
+        "hard": false,
+        "img": "1176x1568"
+      },
+      {
+        "n": "2",
+        "status": "ready",
+        "hard": true,
+        "img": "1176x1568"
+      },
+      {
+        "n": "3",
+        "status": "ready",
+        "hard": false,
+        "img": "1568x980"
+      }
+    ],
+    "note": "Page 2 looks blurry. A sharper photo means fewer questions later.Replace page 2Keep it",
+    "lede": "We'll read all 3 pages as one list and show you everything before anything is saved. You confirm what lands. The photos are deleted once they're read.",
+    "read": true,
+    "cols": 4
+  },
+  "altMove": {
+    "movedToTwo": true,
+    "focusStayed": "2"
+  },
+  "afterKeep": {
+    "note": 0,
+    "hard": 0
+  },
+  "afterRemove": {
+    "pages": 2,
+    "lede": "We'll read all 2 pages as one list and show you everything before anything is saved. You confirm what lands. The photos are deleted once they're read."
+  }
+}

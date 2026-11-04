@@ -51,7 +51,8 @@ export const CAPTURE_CHOICES: Record<CaptureOption, CaptureChoice> = {
   smart: {
     key: "smart",
     title: "Smart import.",
-    lines: ["Any spreadsheet, any layout", "QueryHawk reads it for you", "You check it before anything's saved"],
+    /* smart-import-photos-v1: the first line widens to name photos; the other two are unchanged. */
+    lines: ["A spreadsheet, or photos of your list", "QueryHawk reads it for you", "You check it before anything's saved"],
   },
   template: {
     key: "template",
@@ -67,6 +68,9 @@ export const CAPTURE_CHOICES: Record<CaptureOption, CaptureChoice> = {
 
 /** Each tile's buttons, in order. The first is the tile's main action. */
 export const CAPTURE_SMART_ACTION = "Import a spreadsheet";
+/** The Smart import tile's second button (smart-import-photos-v1): the same import, the same
+ *  allowance and the same review, read from photos of the list. */
+export const CAPTURE_PHOTOS_ACTION = "Use photos";
 export const CAPTURE_TEMPLATE_DOWNLOAD = "Download the template";
 export const CAPTURE_TEMPLATE_UPLOAD = "Upload my sheet";
 export const CAPTURE_HAND_ACTION = "Add an agent";

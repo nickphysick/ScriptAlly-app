@@ -29,7 +29,7 @@ const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/'/g, "&#x27;").repl
 const noop = () => {};
 const fork = (_was: CaptureOption, tier: "free" | "pro" = "free") =>
   renderToStaticMarkup(
-    <CaptureFork tier={tier} onChooseFile={noop} onDropFile={noop} onUploadTemplate={noop}
+    <CaptureFork tier={tier} onChooseFile={noop} onDropFile={noop} onChoosePhotos={noop} onDropPhotos={noop} onUploadTemplate={noop}
                  onAddByHand={noop} onBack={noop} onNothingYet={noop} onOpenImportDesk={noop} onDownloadTemplate={noop} />,
   ).replace(/<!-- -->/g, "");
 const text = (h: string) => h.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
@@ -48,7 +48,8 @@ describe("W1 the fork's words", () => {
 
   /* RE-POINTED (onboarding v9): each tile's paragraph became three short lines. */
   it("each tile states three short lines, and no paragraph", () => {
-    expect(CAPTURE_CHOICES.smart.lines).toEqual(["Any spreadsheet, any layout", "QueryHawk reads it for you", "You check it before anything's saved"]);
+    /* RE-POINTED (smart-import-photos-v1): the first line widens to name photos. */
+    expect(CAPTURE_CHOICES.smart.lines).toEqual(["A spreadsheet, or photos of your list", "QueryHawk reads it for you", "You check it before anything's saved"]);
     expect(CAPTURE_CHOICES.template.lines).toEqual(["A ready-made sheet to fill in", "Set columns, read exactly, every time", "Upload it back whenever you're done"]);
     expect(CAPTURE_CHOICES.byhand.lines).toEqual(["Straight to the agent form", "Quickest for a handful of agents", "Add more at any time"]);
     const h = fork("smart");
@@ -58,7 +59,7 @@ describe("W1 the fork's words", () => {
 
   it("each tile's buttons carry the table's labels", () => {
     const h = fork("smart");
-    for (const label of ["Import a spreadsheet", "Download the template", "Upload my sheet", "Add an agent"]) {
+    for (const label of ["Import a spreadsheet", "Use photos", "Download the template", "Upload my sheet", "Add an agent"]) {
       expect(h).toMatch(new RegExp(`<button[^>]*>${label}</button>`));
     }
     expect(h, "the old shared primaries are gone").not.toMatch(/Continue to review|Take me to the agent form|Upload my filled-in sheet/);
@@ -115,8 +116,11 @@ describe("K1 three tiles, no radio, no ring", () => {
     const src = readFileSync(resolve(here, "CaptureFork.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
     expect(src).toMatch(/onDrop: \(e\) =>/);
     expect(src).toMatch(/<Tile option="smart"[^>]*drop=\{dropProps\}/);
-    expect(src).toMatch(/onDropFile\(file\)/);
-    expect(src, "first file only").toMatch(/files\?\.\[0\]/);
+    /* RE-POINTED (smart-import-photos-v1): a spreadsheet in the drop is taken as before (the first
+       one); with none, the images go to the photos screen. The rule is classifyDrop's, tested there. */
+    expect(src).toMatch(/classifyDrop\(Array\.from\(e\.dataTransfer\?\.files \?\? \[\]\)\)/);
+    expect(src).toMatch(/if \(drop\.kind === "sheet"\) onDropFile\(drop\.file\)/);
+    expect(src).toMatch(/else if \(drop\.kind === "photos"\) onDropPhotos\(drop\.files\)/);
   });
 
   /* Part 3 moved the pickers and their handlers into ImportFlow; the fork reaches them through the

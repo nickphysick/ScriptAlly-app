@@ -360,7 +360,7 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
           );
         })}
         {n === 0 ? (
-          <div className="im-ssl-empty">Reading your file…</div>
+          <div className="im-ssl-empty">{p.unit === "photos" ? "Reading your photos…" : "Reading your file…"}</div>
         ) : cards.map((card, i) => {
           const slot = SCATTER[i % SCATTER.length];
           const isDone = i < resolved;                 // crystallised (clean on-brand layer)
@@ -450,7 +450,7 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
         </span>
         <span className="im-ssl-left" data-im="left" aria-hidden>{bar.right}</span>
         <span className="sr-only" role="status">
-          {allShownResolved ? READY_TXT : phase === "tidying" ? "Tidying records" : phase === "opening" ? "Opening your file" : "Reading your file"}
+          {allShownResolved ? READY_TXT : phase === "tidying" ? "Tidying records" : phase === "opening" ? (p.unit === "photos" ? "Opening your photos" : "Opening your file") : p.unit === "photos" ? "Reading your photos" : "Reading your file"}
         </span>
       </div>
     </div>
