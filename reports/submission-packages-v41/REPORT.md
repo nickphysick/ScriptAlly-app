@@ -128,4 +128,16 @@ ref's screen. The fixture is the v40 harness's, not the ref's sample data (names
 
 ## 8 · Deploy
 
-See §8 below, written at deploy time.
+- **Dev had moved twice during the run** (another session was deploying). Immediately before the merge it served
+  `index-zpSLt2hT.js`, which a clean build of **`dev/qc1511-db2-title-sip-qc1512-cl26-sip11-tl1` (3fa49ac8)** reproduces
+  exactly.
+- v41 merged onto it as **`dev/qc1511-db2-title-sip-qc1512-cl26-sip11-tl1-pk41` (99e2ef45)**, pushed. One conflict
+  (`design-refs/.refhashes.json`: both sides kept) and one fix: dev's phone Packages page imported the deleted guide's
+  `HOW_STEPS`, and reads the new guide's.
+- Gates on the merged tree: tsc 0, build clean, Vitest 745 of 747 files (11,299 passed, 3 skipped). The two reds:
+  `firestoreTarget.test` is dev's own — 27 scripts on 3fa49ac8 already fail it (`seedPk40.mjs` among them; this pack's
+  `pk41Fixture.mjs` joins that list, as `seedPk40.mjs` does on this base, where no `fsTarget` exists); and
+  `compsSteps.test`, which reads only comps files and passes on its own (4/4), so the full-run failure was load.
+- Hosting only, `--config firebase.dev.json --project scriptally-dev`, from that clean merge worktree. **Dev now serves
+  `index-CpIAV0Ww.js`.** SP41 L1 and L3 pass against the live site at both widths. No rules or functions changed. Prod is
+  untouched.
