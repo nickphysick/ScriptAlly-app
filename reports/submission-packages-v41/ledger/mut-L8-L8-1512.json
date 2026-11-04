@@ -39,7 +39,7 @@
   "lock": "L8-1512",
   "where": "overlaps no element in the content column",
   "ok": false,
-  "detail": "[\"p41-list\",\"p41-rows\",\"p41-row p41-on\",\"p41-rr p41-rr-rate\",\"p41-ra\"]"
+  "detail": "[\"p41-ws\",\"p41-build\",\"p41-fr p41-bld\",\"p41-fi\",\"p93-b\"]"
  },
  {
   "lock": "L8-1512",
@@ -51,7 +51,7 @@
   "lock": "L8-1512",
   "where": "after scrolling 600: overlaps nothing",
   "ok": false,
-  "detail": "[\"p41-build\",\"p41-fr p41-bld\",\"p41-fi\",\"p93-b\",\"p93-pv\"]"
+  "detail": "[\"p41-ws\",\"p41-build\",\"p41-fr p41-bld\",\"p41-fi\",\"p93-b\"]"
  },
  {
   "lock": "L8-1512",

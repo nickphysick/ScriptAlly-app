@@ -32,23 +32,38 @@ export const BATCH_LEAD_SHORT = "Going out with";
 export const BATCH_NONE = "Your current batch isn’t going out with a package yet.";
 export const BATCH_NONE_REST = "Choose one and it’s picked for you each time you log a query.";
 
-/* ══ Part E · the list ══ */
-export type ListTab = "all" | "out" | "ready" | "draft";
-export const LIST_TABS: [ListTab, string][] = [["all", "All"], ["out", "Out with agents"], ["ready", "Ready"], ["draft", "Draft"]];
+/* ══ Part D · the packages rail ══ */
+export const RAIL_TITLE = "All packages";
 export const LIST_EMPTY = "No packages yet. Make one and pick it the next time you log a query.";
-export const packagesCount = (n: number) => `${n} package${n === 1 ? "" : "s"}`;
-
 type Stage = "draft" | "ready" | "out" | "retired";
-/** The tab counts, over the LIVE packages (retired ones are in no tab; "Show retired" adds them). */
-export function tabCounts(stages: readonly Stage[]): Record<ListTab, number> {
-  const live = stages.filter((s) => s !== "retired");
-  return { all: live.length, out: live.filter((s) => s === "out").length, ready: live.filter((s) => s === "ready").length, draft: live.filter((s) => s === "draft").length };
+/** The rail's groups, in this order, each drawn only when it has packages; retired ones fold into a footer group. */
+export const RAIL_GROUPS: readonly [Exclude<Stage, "retired">, string][] = [["out", "Out with agents"], ["ready", "Ready"], ["draft", "Draft"]];
+export function railGroups<T>(pkgs: readonly T[], stageOf: (p: T) => Stage): { groups: { k: Exclude<Stage, "retired">; label: string; items: T[] }[]; retired: T[] } {
+  return {
+    groups: RAIL_GROUPS.map(([k, label]) => ({ k, label, items: pkgs.filter((p) => stageOf(p) === k) })).filter((g) => g.items.length > 0),
+    retired: pkgs.filter((p) => stageOf(p) === "retired"),
+  };
 }
-/** Which packages the list shows: the tab's live packages, then the retired ones when they are shown (any tab). */
-export function listFilter(stage: Stage, tab: ListTab, showRetired: boolean): boolean {
-  if (stage === "retired") return showRetired;
-  return tab === "all" || stage === tab;
+/** A rail row's one line under the name (ref `meta`): what has happened to it, in its stage's words. */
+export type RailLine =
+  | { k: "rate"; sent: number; pct: number }
+  | { k: "answers"; sent: number; got: number; need: number }
+  | { k: "ready" }
+  | { k: "needs"; text: string }
+  | { k: "retired" };
+export function railLine(stage: Stage, f: { sent: number; answered: number; ranked: boolean; pct: number | null }, has: { version: boolean; letter: boolean }, need: number): RailLine {
+  if (stage === "out" || (stage === "retired" && f.sent > 0)) {
+    return f.ranked ? { k: "rate", sent: f.sent, pct: f.pct ?? 0 } : { k: "answers", sent: f.sent, got: Math.min(f.answered, need), need };
+  }
+  if (stage === "retired") return { k: "retired" };
+  if (stage === "ready") return { k: "ready" };
+  const n = [has.version ? null : "a version", has.letter ? null : "a letter"].filter(Boolean);
+  return { k: "needs", text: `Needs ${n.join(" and ")}` };
 }
+export const railLineText = (l: RailLine): string =>
+  l.k === "rate" ? `${l.sent} sent · ${l.pct}% asked for more` : l.k === "answers" ? `${l.sent} sent · ${l.got} of ${l.need} answers in`
+    : l.k === "ready" ? "Ready to send" : l.k === "needs" ? l.text : "Retired";
+
 /** The status pill's words (ref `stLabel`): a draft names what it still needs. */
 export function statusWords(stage: Stage, has: { version: boolean; letter: boolean }): string {
   if (stage === "retired") return "Retired";
@@ -56,10 +71,4 @@ export function statusWords(stage: Stage, has: { version: boolean; letter: boole
   if (stage === "ready") return "Ready to send";
   const need = [has.version ? null : "a version", has.letter ? null : "a letter"].filter(Boolean);
   return need.length ? `Draft · needs ${need.join(" and ")}` : "Draft";
-}
-/** The Asked for more cell: a dash before anything is sent, "Too early" before 4 answers, else the share. */
-export function rateWords(f: { sent: number; ranked: boolean; pct: number | null }): { k: "none" | "early" | "rate"; text: string } {
-  if (!f.sent) return { k: "none", text: "—" };
-  if (!f.ranked) return { k: "early", text: "Too early" };
-  return { k: "rate", text: `${f.pct ?? 0}%` };
 }

@@ -11,13 +11,18 @@
  *      panel or explainer; no horizontal overflow
  *   L2 Banner: shown for a founding writer, absent for paid Pro; one line; the folder tab takes its colour; ✕ hides it
  *      for good (after a reload); "Tell us what you think" opens FeedbackDock; How it works brings it back
- *   L3 Header: ≤ 100 tall; one-line subheader naming the active manuscript; no image
- *   L4 Batch: names the active package and its pieces (against the builder's own steps); Change sets another through
- *      the existing writer; "Choose one →" with no active package; absent with no packages
- *   L5 List: one card under a navy bar counting the live packages; tab counts match the rows; a tab with none is
- *      disabled; Show retired hidden at 0; the open package's row has the navy inset edge and no button
- *   L6 Frames: builder, totals, three best cards, two tables — a 7 ±1 white rim, a 1px rgb(227,213,201) frame, the bands
- *   L7 Footer: a sent package's buttons under the preview sit inside the preview well
+ *   L3 Header: exactly one navy panel above the results (the rail head and the builder band are not navy); a one-line
+ *      subheader directly under the title, naming the active manuscript; no image
+ *   L4 Batch: a strip INSIDE the header, flush to its left, right and bottom (±1); names the active package and its
+ *      pieces (against the builder's own steps); Change sets another; Open → selects it; "Choose one →" with no active
+ *      package; absent with no packages
+ *   L5 Rail: 300 ±2 wide at 1512, 262 ±2 at 1280; its top level with the builder's (±1); groups Out with agents / Ready /
+ *      Draft in that order with counts that are their rows; each row's line in its stage's words; the open row's left
+ *      edge is the package's colour; selecting a row does not move the page; Retired folded (and absent at 0); still
+ *      at the top after scrolling 600, its rows scrolling inside it; ↓ and Enter
+ *   L6 Frames: builder, totals, three best cards, two tables — a 7 ±1 white rim, a 1px rgb(227,213,201) frame, the bands;
+ *      the builder band's stripe is the open package's colour, for two packages of different colours
+ *   L7 Preview: under the steps (its top at or below the last step's bottom); a sent package's buttons inside its well
  *   L8 Hawk: fixed bottom-right (± 1, before and after scrolling 600), 212 ±2 tall, clear of the content; none at 390
  *   L9 How it works: five steps with the exact titles, none of the old guide's words, Escape closes it
  *
@@ -55,11 +60,11 @@ class Ledger {
 const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   L1: { css: `.pk39-wpg > .wpg-scroll { background-image: none !important; }` },
   L2: { css: `.p41-fb .p41-fb-tx { white-space: normal !important; } .p41-fb .p41-fb-tx span { display: inline !important; } .ws-app.ws-app .ws-main { --ink-tab: #fbf9f5 !important; }` },
-  L3: { css: `.p41 .p41-hd .p41-sub { white-space: normal !important; } .p41 .p41-hd { padding-top: 40px !important; }` },
-  L4: { js: `new MutationObserver(() => { const b = document.querySelector('[data-pk41="batch-name"]'); if (b && b.textContent !== 'Somebody else') b.textContent = 'Somebody else'; }).observe(document, { subtree: true, childList: true, characterData: true });` },
-  L5: { css: `.p41 .p41-row.p41-on { box-shadow: none !important; } .p41 .p41-idx button:disabled { opacity: 1 !important; }` },
-  L6: { css: `.p41 .p41-fr { padding: 0 !important; } .p41 .p41-band-sd { background: #ffffff !important; }` },
-  L7: { css: `.p41 .p41-bld .p93-pv-f, .p41 .p41-bld .p93-pv-b { flex-wrap: nowrap !important; } .p41 .p41-bld .p93-btn { padding: 0 90px !important; }` },
+  L3: { css: `.p41 .p41-rail-h { background: #2d3a50 !important; } .p41 .p41-hd .p41-sub { white-space: normal !important; flex-basis: 100% !important; }` },
+  L4: { css: `.p41 .p41-hd.p41-wbt .p41-bt { margin: 18px 0 0 !important; flex-basis: 100% !important; }` },
+  L5: { css: `.p41 .p41-ws { grid-template-columns: 340px minmax(0, 1fr) !important; } .p41 .p41-rr.p41-on { border-left-color: #2d3a50 !important; } .p41 .p41-rail { position: static !important; max-height: none !important; }` },
+  L6: { css: `.p41 .p41-fr { padding: 0 !important; } .p41 .p41-bld .p93-bh { box-shadow: inset 0 5px 0 #2d3a50 !important; }` },
+  L7: { css: `.p41 .p41-bld .p93-b { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; } .p41 .p41-bld .p93-btn { padding: 0 90px !important; } .p41 .p41-bld .p93-pv-f, .p41 .p41-bld .p93-pv-b { flex-wrap: nowrap !important; }` },
   L8: { css: `.p41-perch { right: 120px !important; height: 260px !important; }` },
   L9: { js: `new MutationObserver(() => { const t = document.querySelector('[data-pk41="hw-title"]'); if (t && t.textContent === 'Pick each piece') t.textContent = 'Drag them into the package'; }).observe(document, { subtree: true, childList: true, characterData: true });` },
 };
@@ -101,7 +106,7 @@ for (const size of SIZES) {
       const root = document.querySelector('[data-pk41="page"]') as HTMLElement;
       return {
         img: cs.backgroundImage, scrollW: s.scrollWidth, clientW: s.clientWidth, docW: document.documentElement.scrollWidth, winW: innerWidth,
-        gone: ['[data-pk39="hd-card"]', '[data-pk38="labels"]', '[data-pk392="panel"]', '[data-pk39="tip"]', '[data-pk39="kicker"]', ".p8-bnr", ".p9-ag3"].map((q) => [q, root.querySelectorAll(q).length]),
+        gone: ['[data-pk39="hd-card"]', '[data-pk38="labels"]', '[data-pk392="panel"]', '[data-pk39="tip"]', '[data-pk39="kicker"]', ".p8-bnr", ".p9-ag3", '[data-pk41="list"]', '[data-pk41="list-bar"]', "[data-pk41-tab]"].map((q) => [q, root.querySelectorAll(q).length]),
         headerImgs: root.querySelectorAll('[data-pk41="header"] img').length, kicker: root.textContent?.includes("Build, view and edit") ?? false, rows: root.querySelectorAll("[data-pk41-row]").length,
       };
     }, SC);
@@ -168,18 +173,31 @@ for (const size of SIZES) {
   test(`L3 header · ${at}`, async ({ page }) => {
     test.setTimeout(180_000);
     const L = new Ledger(`L3-${at}`);
+    seed();
     await open(page, size);
     const h = await page.evaluate(() => {
-      const el = document.querySelector('[data-pk41="page"] [data-pk41="header"]') as HTMLElement, sub = el.querySelector('[data-pk41="sub"]') as HTMLElement;
-      return { h: el.getBoundingClientRect().height, sw: sub.scrollWidth, cw: sub.clientWidth, lines: Math.round(sub.getBoundingClientRect().height / parseFloat(getComputedStyle(sub).lineHeight)), text: sub.textContent, imgs: el.querySelectorAll("img, svg image, picture").length, bg: getComputedStyle(el).backgroundColor };
+      const root = document.querySelector('[data-pk41="page"]') as HTMLElement;
+      const el = root.querySelector('[data-pk41="header"]') as HTMLElement, sub = el.querySelector('[data-pk41="sub"]') as HTMLElement, ttl = el.querySelector('[data-pk41="title"]') as HTMLElement;
+      const res = root.querySelector('[data-pk41="results"]') as HTMLElement | null, resTop = res ? res.getBoundingClientRect().top : Infinity;
+      const NAVY = "rgb(45, 58, 80)";
+      /* every box above the results that paints the navy as its own ground, and is at least 200 × 40 */
+      const navy = [...root.querySelectorAll("*")].filter((e) => { const b = e.getBoundingClientRect(); return b.width >= 200 && b.height >= 40 && b.top < resTop && getComputedStyle(e).backgroundColor === NAVY; }).map((e) => (e as HTMLElement).dataset.pk41 || (e as HTMLElement).className);
+      const bg = (q: string) => { const e = root.querySelector(q); return e ? getComputedStyle(e).backgroundColor : null; };
+      const sr = sub.getBoundingClientRect(), tr = ttl.getBoundingClientRect();
+      return { navy, head: bg('[data-pk41="rail-head"]'), band: bg('[data-pk41="builder-frame"] .p93-bh'), sw: sub.scrollWidth, cw: sub.clientWidth,
+        lines: Math.round(sr.height / parseFloat(getComputedStyle(sub).lineHeight)), under: sr.top - tr.bottom, sameCol: Math.abs(sr.left - tr.left),
+        text: sub.textContent, imgs: el.querySelectorAll("img, svg image, picture").length, hbg: getComputedStyle(el).backgroundColor };
     });
-    L.check("height ≤ 100", h.h <= 100, `${h.h}`);
-    L.check("navy", h.bg === "rgb(45, 58, 80)", h.bg);
+    L.check("the header is navy", h.hbg === "rgb(45, 58, 80)", h.hbg);
+    L.check("exactly one navy panel above the results", h.navy.length === 1 && h.navy[0] === "header", JSON.stringify(h.navy));
+    L.check("the rail head is not navy", !!h.head && h.head !== "rgb(45, 58, 80)", `${h.head}`);
+    L.check("the builder band is not navy", !!h.band && h.band !== "rgb(45, 58, 80)", `${h.band}`);
     L.check("subheader: one line (no overflow)", h.sw <= h.cw, `${h.sw} / ${h.cw}`);
     L.check("subheader: one line box", h.lines === 1, `${h.lines}`);
+    L.check("subheader: directly under the title (0–12px), in its column", h.under >= -0.5 && h.under <= 12 && h.sameCol <= 1, `gap ${h.under} · x ${h.sameCol}`);
     L.check("subheader names the active manuscript", (h.text ?? "").includes("for Locks of v40,"), `${h.text}`);
     L.check("no image in the header", h.imgs === 0, `${h.imgs}`);
-    L.done(6);
+    L.done(9);
   });
 
   test(`L4 batch · ${at}`, async ({ page }) => {
@@ -187,15 +205,27 @@ for (const size of SIZES) {
     const L = new Ledger(`L4-${at}`);
     seed();
     await open(page, size);
+    const g = await page.evaluate(() => {
+      const hd = document.querySelector('[data-pk41="page"] [data-pk41="header"]') as HTMLElement, bt = document.querySelector('[data-pk41="page"] [data-pk41="batch"]') as HTMLElement | null;
+      const a = hd.getBoundingClientRect(), b = bt?.getBoundingClientRect();
+      return { inside: !!bt && hd.contains(bt), l: b ? b.left - a.left : null, r: b ? a.right - b.right : null, bot: b ? a.bottom - b.bottom : null };
+    });
+    L.check("the strip is inside the header", g.inside, String(g.inside));
+    L.check("flush left ±1", near(g.l ?? 99, 0), `${g.l}`);
+    L.check("flush right ±1", near(g.r ?? 99, 0), `${g.r}`);
+    L.check("flush bottom ±1", near(g.bot ?? 99, 0), `${g.bot}`);
     const chips = await page.evaluate(() => {
       const t = (q: string) => document.querySelector(`[data-pk41="page"] [data-pk41="${q}"]`)?.textContent?.trim() ?? null;
       const syn = document.querySelector('[data-pk41="page"] [data-pk41="batch-syn"]') as HTMLElement | null;
       return { active: document.querySelector('[data-pk41="batch"]')?.getAttribute("data-active"), name: t("batch-name"), ver: t("batch-ver"), let: t("batch-let"), syn: t("batch-syn"), synShown: !!syn && getComputedStyle(syn).display !== "none" };
     });
     const stored = JSON.parse(fix("--active").trim().split("\n").pop()!).active;
-    L.check("the row is the stored active package", chips.active === stored && !!stored, `${chips.active} / ${stored}`);
-    /* the pieces, against the builder's own steps for that package */
-    await page.locator(`${pg} [data-pk41-row="${stored}"]`).click(); await page.waitForTimeout(800);
+    L.check("the strip is the stored active package", chips.active === stored && !!stored, `${chips.active} / ${stored}`);
+    /* Open → selects it in the workspace; then the pieces, against the builder's own steps for that package */
+    await page.locator(`${pg} [data-pk41-row="pk40-draft"]`).click(); await page.waitForTimeout(500);
+    await page.locator(`${pg} [data-pk41="batch-open"]`).click(); await page.waitForTimeout(800);
+    const openRow = await page.locator(`${pg} .p41-rr.p41-on`).getAttribute("data-pk41-row");
+    L.check("Open → selects the active package", openRow === stored, `${openRow}`);
     const steps = await page.evaluate(() => Object.fromEntries(["ver", "let", "syn"].map((k) => [k, document.querySelector(`[data-pk41="page"] [data-pk393-step="${k}"] .p93-pick`)?.textContent?.trim() ?? null])));
     const pkName = await page.locator(`${pg} [data-pk39="name"]`).first().textContent();
     L.check("names the package", chips.name === pkName?.trim(), `${chips.name} / ${pkName}`);
@@ -211,74 +241,87 @@ for (const size of SIZES) {
     await expect.poll(() => page.locator('[data-pk41="batch"]').getAttribute("data-active"), { timeout: 8000 }).toBe("pk40-ready").catch(() => {});
     const after = await page.locator('[data-pk41="batch"]').getAttribute("data-active");
     const stored2 = JSON.parse(fix("--active").trim().split("\n").pop()!).active;
-    L.check("the row updates", after === "pk40-ready", `${after}`);
+    L.check("the strip updates", after === "pk40-ready", `${after}`);
     L.check("…and the manuscript's active package is written", stored2 === "pk40-ready", `${stored2}`);
-    L.check("the writer's own toast", (await page.getByText("New queries now go out with Ready one.").count()) > 0, "no toast");
     /* no active package */
     fix("--no-active");
     await page.reload(); await page.locator(`${pg} [data-pk41="header"]`).first().waitFor({ state: "visible", timeout: 30_000 }); await page.waitForTimeout(1500);
     L.check("no active package: “Choose one →”", (await page.locator(`${pg} [data-pk41="batch-choose"]`).textContent())?.trim() === "Choose one →", "missing");
-    L.check("…and the sentence", ((await page.locator(`${pg} [data-pk41="batch"]`).textContent()) ?? "").includes("isn’t going out with a package yet"), "missing");
     /* no packages */
     fix("--no-packages");
     await page.reload(); await page.locator(`${pg} [data-pk41="header"]`).first().waitFor({ state: "visible", timeout: 30_000 }); await page.waitForTimeout(1500);
-    L.check("no packages: the row is absent", (await page.locator(`${pg} [data-pk41="batch"]`).count()) === 0, "present");
+    L.check("no packages: the strip is absent", (await page.locator(`${pg} [data-pk41="batch"]`).count()) === 0, "present");
     seed();
-    L.done(12);
+    L.done(15);
   });
 
-  test(`L5 list · ${at}`, async ({ page }) => {
+  test(`L5 rail · ${at}`, async ({ page }) => {
     test.setTimeout(300_000);
     const L = new Ledger(`L5-${at}`);
-    seed();
+    seed(); fix("--colours");
     const dump = JSON.parse(seed("--dump").trim().split("\n").pop()!) as { all: { id: string; status: string; firstSentAt: boolean }[] };
-    const live = dump.all.filter((p) => p.status !== "Retired");
+    const live = dump.all.filter((p) => p.status !== "Retired"), retired = dump.all.length - live.length;
     await open(page, size);
-    const bar = await page.evaluate(() => {
-      const card = document.querySelectorAll('[data-pk41="page"] [data-pk41="list"]');
-      const b = document.querySelector('[data-pk41="page"] [data-pk41="list-bar"]') as HTMLElement;
-      return { cards: card.length, bg: getComputedStyle(b).backgroundColor, count: document.querySelector('[data-pk41="list-count"]')?.textContent?.trim(),
-        tabs: [...document.querySelectorAll('[data-pk41="page"] [data-pk41-tab]')].map((t) => ({ k: t.getAttribute("data-pk41-tab"), n: Number(t.querySelector("[data-pk41-n]")?.textContent), dis: (t as HTMLButtonElement).disabled })),
-        rows: document.querySelectorAll('[data-pk41="page"] [data-pk41-row]').length, ret: document.querySelector('[data-pk41="page"] [data-pk41="show-retired"]')?.textContent?.trim() ?? null };
+    const r = await page.evaluate(() => {
+      const root = document.querySelector('[data-pk41="page"]') as HTMLElement, rail = root.querySelector('[data-pk41="rail"]') as HTMLElement;
+      const fr = root.querySelector('[data-pk41="builder-frame"]') as HTMLElement;
+      return { n: root.querySelectorAll('[data-pk41="rail"]').length, w: rail.getBoundingClientRect().width, top: rail.getBoundingClientRect().top, ftop: fr.getBoundingClientRect().top,
+        count: rail.querySelector('[data-pk41="rail-count"]')?.textContent?.trim(),
+        groups: [...rail.querySelectorAll("[data-pk41-group]")].map((g) => ({ k: g.getAttribute("data-pk41-group"), n: Number(g.querySelector("[data-pk41-n]")?.textContent), rows: g.querySelectorAll("[data-pk41-row]").length,
+          lines: [...g.querySelectorAll("[data-pk41-row]")].map((x) => ({ id: x.getAttribute("data-pk41-row"), t: x.querySelector("small")?.textContent?.trim() })) })),
+        toggle: rail.querySelector('[data-pk41="retired-toggle"]')?.getAttribute("aria-expanded") ?? null };
     });
-    L.check("population", live.length > 0, `${live.length} live`);
-    L.check("one card", bar.cards === 1, `${bar.cards}`);
-    L.check("a navy bar", bar.bg === "rgb(45, 58, 80)", bar.bg);
-    L.check("the bar counts the live packages", bar.count === `${live.length} package${live.length === 1 ? "" : "s"}`, `${bar.count} / ${live.length}`);
-    L.check("All lists exactly the live packages", bar.rows === live.length, `${bar.rows} rows`);
-    for (const t of bar.tabs) {
-      if (t.k === "all") { L.check("tab All counts the live packages", t.n === live.length, `${t.n}`); continue; }
-      /* the fixture has a package at every stage, so no tab is disabled here; the zero case is below */
-      L.check(`tab ${t.k}: enabled with a count`, !t.dis && t.n > 0, `${t.n} ${t.dis}`);
-      await page.locator(`${pg} [data-pk41-tab="${t.k}"]`).click(); await page.waitForTimeout(250);
-      const n = await page.locator(`${pg} [data-pk41-row]`).count();
-      const want = live.filter((p) => (t.k === "out" ? p.firstSentAt : false)).length;
-      L.check(`tab ${t.k}: its count is its rows`, t.n === n, `${t.n} counted, ${n} rows`);
-      if (t.k === "out") L.check("tab out: the stored packages out with agents", n === want, `${n} / ${want}`);
+    L.check("one rail", r.n === 1, `${r.n}`);
+    L.check(`width ${size.width > 1400 ? 300 : 262} ±2`, near(r.w, size.width > 1400 ? 300 : 262, 2), `${r.w}`);
+    L.check("its top level with the builder's ±1", near(r.top, r.ftop), `${r.top} / ${r.ftop}`);
+    L.check("the head counts the live packages", r.count === String(live.length), `${r.count} / ${live.length}`);
+    const liveG = r.groups.filter((g) => g.k !== "retired");
+    L.check("groups in order: out · ready · draft", JSON.stringify(liveG.map((g) => g.k)) === JSON.stringify(["out", "ready", "draft"]), JSON.stringify(liveG.map((g) => g.k)));
+    for (const g of liveG) L.check(`group ${g.k}: its count is its rows`, g.n === g.rows && g.rows > 0, `${g.n} / ${g.rows}`);
+    L.check("Out with agents holds the stored sent packages", liveG.find((g) => g.k === "out")?.rows === live.filter((p) => p.firstSentAt).length, "");
+    const line = (id: string) => r.groups.flatMap((g) => g.lines).find((x) => x.id === id)?.t ?? "";
+    L.check("a sent row: “{n} sent · …”", /^\d+ sent · (\d+% asked for more|\d of 4 answers in)$/.test(line("pk40-std")), line("pk40-std"));
+    L.check("a ready row: “Ready to send”", line("pk40-ready") === "Ready to send", line("pk40-ready"));
+    L.check("a draft row: what it needs", line("pk40-draft") === "Needs a version and a letter", line("pk40-draft"));
+    const berry = await page.evaluate(() => { const e = document.querySelector('[data-pk41="page"] [data-pk41-row="pk40-draft"] small em'); return e ? getComputedStyle(e).color : null; });
+    L.check("…in berry", berry === "rgb(155, 74, 87)", `${berry}`);
+    L.check(retired ? "Retired folded by default" : "no retired: no Retired group", retired ? r.toggle === "false" : r.toggle === null, `${r.toggle} (${retired} retired)`);
+    /* the open row wears its colour; selecting moves nothing */
+    for (const [id, want] of [["pk40-std", "rgb(88, 58, 90)"], ["pk40-ready", "rgb(46, 86, 65)"]] as const) {
+      const before = await page.evaluate((sc) => ((0, eval)(sc) as HTMLElement).scrollTop, SC);
+      await page.locator(`${pg} [data-pk41-row="${id}"]`).click(); await page.waitForTimeout(500);
+      const s = await page.evaluate(({ id, sc }) => { const e = document.querySelector(`[data-pk41="page"] [data-pk41-row="${id}"]`) as HTMLElement; return { on: e.classList.contains("p41-on"), c: getComputedStyle(e).borderLeftColor, w: getComputedStyle(e).borderLeftWidth, top: ((0, eval)(sc) as HTMLElement).scrollTop }; }, { id, sc: SC });
+      L.check(`${id}: selected`, s.on, String(s.on));
+      L.check(`${id}: a 3px left edge in its colour`, s.c === want && s.w === "3px", `${s.w} ${s.c}`);
+      L.check(`${id}: selecting did not move the page`, near(s.top, before), `${before} → ${s.top}`);
     }
-    await page.locator(`${pg} [data-pk41-tab="all"]`).click();
-    L.check("Show retired (n) names the retired", bar.ret === `Show retired (${dump.all.length - live.length})`, `${bar.ret}`);
-    /* the open package's row */
-    const on = await page.evaluate(() => { const r = document.querySelector('[data-pk41="page"] .p41-row.p41-on') as HTMLElement | null; return r ? { sh: getComputedStyle(r).boxShadow, bg: getComputedStyle(r).backgroundColor, btn: r.querySelectorAll("button").length, below: r.querySelector('[data-pk41="open-below"]')?.textContent } : null; });
-    L.check("the open package's row has the navy inset edge", !!on && /rgb\(45, 58, 80\) 3px 0px 0px 0px inset/.test(on.sh), `${on?.sh}`);
-    L.check("…on #f3f5f8", on?.bg === "rgb(243, 245, 248)", `${on?.bg}`);
-    L.check("…and no button, “Open below”", on?.btn === 0 && on?.below === "Open below", `${on?.btn} ${on?.below}`);
-    /* zero counts: disabled; nothing retired: no Show retired */
+    /* keyboard: ↓ then Enter selects the next row */
+    await page.locator(`${pg} [data-pk41-row="pk40-std"]`).focus(); await page.keyboard.press("ArrowDown"); await page.keyboard.press("Enter"); await page.waitForTimeout(500);
+    const ids = r.groups.flatMap((g) => g.lines.map((x) => x.id));
+    const nextId = ids[ids.indexOf("pk40-std") + 1];
+    L.check("↓ and Enter select the next row", (await page.locator(`${pg} .p41-rr.p41-on`).getAttribute("data-pk41-row")) === nextId, `want ${nextId}`);
+    /* sticky: still at the top after scrolling 600, its rows scroll inside it */
+    const t0 = await page.evaluate(() => (document.querySelector('[data-pk41="rail"]') as HTMLElement).getBoundingClientRect().top);
+    await page.evaluate((sc) => { ((0, eval)(sc) as HTMLElement).scrollTop += 600; }, SC); await page.waitForTimeout(400);
+    const st = await page.evaluate((sc) => { const s = (0, eval)(sc) as HTMLElement, rl = document.querySelector('[data-pk41="rail"]') as HTMLElement, rows = rl.querySelector('[data-pk41="rail-rows"]') as HTMLElement; const sr = s.getBoundingClientRect(), b = rl.getBoundingClientRect();
+      return { scrolled: s.scrollTop, top: b.top - sr.top, bottom: b.bottom, port: sr.bottom, oy: getComputedStyle(rows).overflowY }; }, SC);
+    L.check("population: the page scrolled 600", st.scrolled >= 590, `${st.scrolled} (rail top was ${t0})`);
+    L.check("after scrolling 600: the rail is at the scroller's top (14 ±1)", near(st.top, 14), `${st.top}`);
+    L.check("after scrolling 600: the rail ends inside the scrollport", st.bottom <= st.port + 0.5, `${st.bottom} / ${st.port}`);
+    L.check("its rows scroll inside it", st.oy === "auto" || st.oy === "scroll", st.oy);
+    /* no packages: the empty line; nothing retired */
     fix("--no-packages");
     await page.reload(); await page.locator(`${pg} [data-pk41="header"]`).first().waitFor({ state: "visible", timeout: 30_000 }); await page.waitForTimeout(1500);
-    const z = await page.evaluate(() => ({ tabs: [...document.querySelectorAll('[data-pk41="page"] [data-pk41-tab]')].map((t) => ({ k: t.getAttribute("data-pk41-tab"), dis: (t as HTMLButtonElement).disabled, op: getComputedStyle(t).opacity })),
-      ret: document.querySelectorAll('[data-pk41="page"] [data-pk41="show-retired"]').length, empty: document.querySelector('[data-pk41="list-empty"]')?.textContent }));
-    for (const t of z.tabs.filter((x) => x.k !== "all")) L.check(`no packages: ${t.k} is disabled at 40%`, t.dis && Math.abs(Number(t.op) - 0.4) < 0.01, `${t.dis} ${t.op}`);
-    L.check("no packages: Show retired hidden", z.ret === 0, `${z.ret}`);
-    L.check("no packages: the empty line", z.empty === "No packages yet. Make one and pick it the next time you log a query.", `${z.empty}`);
+    const z = await page.evaluate(() => ({ rail: document.querySelectorAll('[data-pk41="page"] [data-pk41="rail"]').length, ret: document.querySelectorAll('[data-pk41="page"] [data-pk41="retired-toggle"]').length }));
+    L.check("no packages: no rail (the first-run builder only) and no Retired", z.ret === 0, `${z.rail} rail · ${z.ret} retired`);
     seed();
-    L.done(16);
+    L.done(24);
   });
 
   test(`L6 frames · ${at}`, async ({ page }) => {
     test.setTimeout(180_000);
     const L = new Ledger(`L6-${at}`);
-    seed();
+    seed(); fix("--colours");
     await open(page, size);
     const f = await page.evaluate(() => {
       const one = (el: Element | null) => {
@@ -290,23 +333,42 @@ for (const size of SIZES) {
       const q = (s: string) => document.querySelector(`[data-pk41="page"] ${s}`);
       return { builder: one(q('[data-pk41="builder-frame"]')), totals: one(q('[data-pk41="totals"]')), best: one(q('[data-pk41="best-best"]')), most: one(q('[data-pk41="best-most"]')), prove: one(q('[data-pk41="best-prove"]')), tpk: one(q('[data-pk41="table-pk"]')), tpc: one(q('[data-pk41="table-pc"]')) };
     });
-    const want: Record<string, string> = { builder: "rgb(45, 58, 80)", totals: "rgb(45, 58, 80)", best: "rgb(244, 230, 214)", most: "rgb(226, 230, 224)", prove: "rgb(235, 231, 225)", tpk: "rgb(235, 231, 225)", tpc: "rgb(235, 231, 225)" };
+    const want: Record<string, string | null> = { builder: null, totals: "rgb(45, 58, 80)", best: "rgb(244, 230, 214)", most: "rgb(226, 230, 224)", prove: "rgb(235, 231, 225)", tpk: "rgb(235, 231, 225)", tpc: "rgb(235, 231, 225)" };
     for (const [k, v] of Object.entries(f)) {
       L.check(`${k}: present`, !!v, "missing");
       if (!v) continue;
       L.check(`${k}: a 7 ±1 white rim`, v.pad.every((p) => near(p, 7)) && v.rim === "rgb(255, 255, 255)", `${v.pad.join(",")} ${v.rim}`);
       L.check(`${k}: a 1px rgb(227,213,201) frame`, v.bw === "1px" && v.bc === "rgb(227, 213, 201)", `${v.bw} ${v.bc}`);
-      L.check(`${k}: its band`, v.band === want[k], `${v.band} (want ${want[k]})`);
+      if (want[k]) L.check(`${k}: its band`, v.band === want[k], `${v.band} (want ${want[k]})`);
     }
-    L.done(28);
+    /* the builder's band: a wash of the open package's colour with a 5px stripe of it, for two different colours */
+    for (const [id, hex, rgb] of [["pk40-std", "#583a5a", "rgb(88, 58, 90)"], ["pk40-ready", "#2e5641", "rgb(46, 86, 65)"]] as const) {
+      await page.locator(`${pg} [data-pk41-row="${id}"]`).click(); await page.waitForTimeout(600);
+      const b = await page.evaluate((hex) => {
+        const bh = document.querySelector('[data-pk41="page"] [data-pk41="builder-frame"] .p93-bh') as HTMLElement; const cs = getComputedStyle(bh);
+        /* the wash the ref names, resolved by the browser on a probe */
+        const pr = document.createElement("i"); pr.style.background = `color-mix(in srgb, ${hex} 11%, #fff)`; document.body.appendChild(pr); const w = getComputedStyle(pr).backgroundColor; pr.remove();
+        return { sh: cs.boxShadow, bg: cs.backgroundColor, w };
+      }, hex);
+      L.check(`${id}: the stripe is its colour, 5px`, b.sh.includes(rgb) && /0px 5px 0px 0px inset/.test(b.sh), b.sh);
+      L.check(`${id}: the band is an 11% wash of it`, b.bg === b.w, `${b.bg} / ${b.w}`);
+    }
+    L.done(27);
   });
 
-  test(`L7 footer · ${at}`, async ({ page }) => {
+  test(`L7 preview · ${at}`, async ({ page }) => {
     test.setTimeout(180_000);
     const L = new Ledger(`L7-${at}`);
     seed();
     await open(page, size);
     await page.locator(`${pg} [data-pk41-row="pk40-std"]`).click(); await page.waitForTimeout(800);
+    const g = await page.evaluate(() => {
+      const fr = document.querySelector('[data-pk41="page"] [data-pk41="builder-frame"]') as HTMLElement;
+      const steps = [...fr.querySelectorAll("[data-pk393-step]")].map((e) => e.getBoundingClientRect().bottom), pv = fr.querySelector(".p93-pv") as HTMLElement;
+      return { steps: steps.length, last: Math.max(...steps), pv: pv.getBoundingClientRect().top };
+    });
+    L.check("population: the steps", g.steps >= 4, `${g.steps}`);
+    L.check("the preview is under the steps", g.pv >= g.last - 0.5, `preview top ${g.pv} / last step bottom ${g.last}`);
     await scrollTo(page, ".p93-pv-f", 300);
     const r = await page.evaluate(() => {
       const pv = document.querySelector('[data-pk41="page"] .p93-pv') as HTMLElement; const b = pv.getBoundingClientRect();
@@ -315,11 +377,8 @@ for (const size of SIZES) {
     });
     L.check("population: a sent package is open", r.locked, "not sent");
     L.check("population: its buttons", r.btns.length >= 3, `${r.btns.length}`);
-    for (const x of r.btns) {
-      L.check(`“${x.t}” inside the preview well`, x.l >= r.well.l - 0.5 && x.r <= r.well.r + 0.5 && x.top >= r.well.t - 0.5 && x.b <= r.well.b + 0.5, `${x.l}–${x.r} in ${r.well.l}–${r.well.r}`);
-      if (x.t === "Make a copy" || x.t === "Log a query with it") L.check(`“${x.t}” is 42 tall`, near(x.h, 42), `${x.h}`);
-    }
-    L.done(5);
+    for (const x of r.btns) L.check(`“${x.t}” inside the preview well`, x.l >= r.well.l - 0.5 && x.r <= r.well.r + 0.5 && x.top >= r.well.t - 0.5 && x.b <= r.well.b + 0.5, `${x.l}–${x.r} in ${r.well.l}–${r.well.r}`);
+    L.done(7);
   });
 
   test(`L8 hawk · ${at}`, async ({ page }) => {

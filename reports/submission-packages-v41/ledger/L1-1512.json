@@ -67,6 +67,24 @@
  },
  {
   "lock": "L1-1512",
+  "where": "retired: [data-pk41=\"list\"]",
+  "ok": true,
+  "detail": "0 in the DOM"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "retired: [data-pk41=\"list-bar\"]",
+  "ok": true,
+  "detail": "0 in the DOM"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "retired: [data-pk41-tab]",
+  "ok": true,
+  "detail": "0 in the DOM"
+ },
+ {
+  "lock": "L1-1512",
   "where": "no BUILD, VIEW AND EDIT",
   "ok": true,
   "detail": "false"

@@ -2,10 +2,10 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Submission packages v41 Part D (screen 01; states 14, 15) — the current batch row, under the header: what new queries
+ * Submission packages v41 Part C (screens 01, 15, 16) — the current batch, the header's lower strip: what new queries
  * go out with. It names the ACTIVE package (the manuscript's `activePackageId`, the package the log journey picks by
  * default) with its version, letter and synopsis; "Change" opens a short picker of the Ready and Out-with-agents
- * packages, and a pick goes through the model's existing `makeActive` writer; "Open →" opens it in the builder. With no
+ * packages, and a pick goes through the model's existing `makeActive` writer; "Open →" selects it in the workspace. With no
  * active package it says so and offers "Choose one →"; with no live package at all it is not drawn.
  */
 import React, { useEffect, useRef, useState } from "react";

@@ -11,6 +11,7 @@
  *   node tests/e2e/pk41Fixture.mjs --no-active      # pk40-ms with no active package (state 14)
  *   node tests/e2e/pk41Fixture.mjs --no-packages    # delete pk40-ms's packages (state 15)
  *   node tests/e2e/pk41Fixture.mjs --active         # print pk40-ms's activePackageId
+ *   node tests/e2e/pk41Fixture.mjs --colours        # Standard → Plum, Ready one → Pine (L6's two band colours)
  */
 import { existsSync, readFileSync } from "node:fs";
 import { initializeApp } from "firebase/app";
@@ -37,6 +38,11 @@ if (has("--show-banner")) { await updateDoc(doc(db, "users", uid), { "todoPrefs.
 if (has("--banner")) { const u = (await getDoc(doc(db, "users", uid))).data(); console.log(JSON.stringify({ hidden: u?.todoPrefs?.packages?.foundingNoteHidden === true, plan: u?.plan })); }
 if (has("--no-active")) { await updateDoc(doc(db, "users", uid, "manuscripts", MS), { activePackageId: deleteField() }); console.log("pk40-ms: no active package"); }
 if (has("--active")) { console.log(JSON.stringify({ active: (await getDoc(doc(db, "users", uid, "manuscripts", MS))).data()?.activePackageId ?? null })); }
+if (has("--colours")) {
+  await updateDoc(doc(db, "users", uid, "packages", "pk40-std"), { colour: "plum" });
+  await updateDoc(doc(db, "users", uid, "packages", "pk40-ready"), { colour: "pine" });
+  console.log("pk40-std: plum · pk40-ready: pine");
+}
 if (has("--no-packages")) {
   let n = 0;
   for (const d of (await getDocs(collection(db, "users", uid, "packages"))).docs) if (d.data().manuscriptId === MS) { await deleteDoc(d.ref); n++; }

@@ -88,7 +88,7 @@ async function open(page: Page, size: { width: number; height: number }, ms = "p
   await openRoute(page, route, size);
   if (m?.css) await page.addStyleTag({ content: m.css });
   /* v41: the labels row is retired; the page is ready when its list is (or, on a brand-new manuscript, its hero) */
-  await page.locator('[data-pk41="list"], [data-pk26="hero"]').first().waitFor({ state: "visible", timeout: 30_000 });
+  await page.locator('[data-pk41="rail"], [data-pk26="hero"]').first().waitFor({ state: "visible", timeout: 30_000 });
   await page.waitForTimeout(1500);
 }
 const pg = `[data-pk26="page"]`;
@@ -107,7 +107,7 @@ test("L1 no tab bar and no Letters/Synopses page; ?tab=syn opens the Synopsis st
   const L = new Ledger("L1");
   await open(page, SIZES[0]);
   /* v41: the labels row is retired; the page rendered when its list is present — re-pointed */
-  L.check("the page rendered (the list present)", (await page.locator(`${pg} [data-pk41="list"]`).count()) === 1, "list");
+  L.check("the page rendered (the rail present)", (await page.locator(`${pg} [data-pk41="rail"]`).count()) === 1, "list");
   L.check("no tab bar", (await page.locator(`${pg} [data-pk26="tabs"], ${pg} .p6-ptabs`).count()) === 0, "tabs");
   L.check("no Letters/Synopses page", (await page.locator(`${pg} [data-pk26="materials"]`).count()) === 0, "materials");
   /* v39.3 REWRITE: Your materials is retired; ?tab=syn opens the builder's Synopsis step instead */
@@ -403,7 +403,7 @@ test("L11 both manuscripts render with no console errors", async ({ page }) => {
   for (const ms of ["pk40-ms", "pk40-new"]) {
     await open(page, SIZES[0], ms);
     /* v41: the labels row and the band are retired; the list and Results render instead — re-pointed */
-    for (const [k, q] of [[ms === "pk40-new" ? "hero (the brand-new page)" : "list", ms === "pk40-new" ? '[data-pk26="hero"]' : '[data-pk41="list"]'], ["results", '[data-pk41="results"]']] as const) L.check(`${ms}: ${k} renders`, (await page.locator(`${pg} ${q}`).count()) === 1, k);
+    for (const [k, q] of [[ms === "pk40-new" ? "hero (the brand-new page)" : "rail", ms === "pk40-new" ? '[data-pk26="hero"]' : '[data-pk41="rail"]'], ["results", '[data-pk41="results"]']] as const) L.check(`${ms}: ${k} renders`, (await page.locator(`${pg} ${q}`).count()) === 1, k);
     /* v39: the builder is two cards with no outer panel (v40's `wbf` is gone); the law — it renders — stands */
     L.check(`${ms}: the builder renders`, (await page.locator(`${pg} [data-pk39="builder"]`).count()) === 1, "builder");
   }

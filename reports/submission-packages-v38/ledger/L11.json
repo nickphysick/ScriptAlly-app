@@ -1,9 +1,9 @@
 [
  {
   "lock": "L11",
-  "where": "pk40-ms: list renders",
+  "where": "pk40-ms: rail renders",
   "ok": true,
-  "detail": "list"
+  "detail": "rail"
  },
  {
   "lock": "L11",

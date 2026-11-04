@@ -19,8 +19,8 @@ describe("v41 H · How it works", () => {
   });
   it("its copy is the pack's, exactly", () => {
     expect(HOW_STEPS[0][1]).toBe("Press + New package, give it a name and choose an icon and colour you’ll recognise. That look follows it everywhere: the list, the Query Centre and your results.");
-    expect(HOW_STEPS[1][1]).toBe("Open a package and work down its steps. Start with the version of your book, because it decides which pages go out. Then add a query letter, a synopsis if you want one, and anything agents might ask for. The preview shows exactly what an agent receives.");
-    expect(HOW_STEPS[2][1]).toBe("The row under the header shows what your current batch is going out with. Change it when you start a new batch, and it’s picked for you each time you log a query.");
+    expect(HOW_STEPS[1][1]).toBe("Choose a package from the list on the left and work down its steps. Start with the version of your book, because it decides which pages go out. Then add a query letter, a synopsis if you want one, and anything agents might ask for. The preview shows exactly what an agent receives.");
+    expect(HOW_STEPS[2][1]).toBe("The strip along the bottom of the header shows what your current batch is going out with. Change it when you start a new batch, and it’s picked for you each time you log a query.");
     expect(HOW_STEPS[3][1]).toBe("Choose the package as you log a query and QueryHawk records exactly what went. Once a package is out with agents it locks, so what each agent got stays true. To change anything, make a copy.");
     expect(HOW_STEPS[4][1]).toBe("Further down, How your packages are doing ranks your packages by how often agents ask for more, then your versions, letters and synopses. Each one is ranked once 4 agents have answered, so one lucky reply can’t top the list.");
   });

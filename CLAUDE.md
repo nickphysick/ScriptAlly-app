@@ -276,21 +276,21 @@
 - **No double saves:** one count of desk saves in flight, released in `finally` when the save settles — never a timer (TD52 H1 proves it offline). A journey's save is inside the desk's drawer, whose `busy` the desk reads from the slot.
 - **Locks:** `tests/e2e/todoV52.measure.ts` TD52 A1–A5, C1, D1, E1–E2, F1–F3, G1–G3, H1–H2, J1–J4, L1 (`td52Lib`, `TD52_MUTATE=<lock>`); unit `trayCalendar.test.ts`, `trayRows.test.ts`, `deskDoing.test.ts`, `trayHeaderV52.test.tsx`. Retired: `tests/e2e/RETIRED-todo-list-v5-2.md`.
 
-## Submission packages v41 — the page joins the app (4 Nov; ref = design-refs/submission-packages-v41/; report reports/submission-packages-v41/REPORT.md; branch `submission-packages-v41` off `submission-packages-v39-3`, NOT merged)
+## Submission packages v41 — the page joins the app as a workspace (4 Nov; ref = design-refs/submission-packages-v41/; report reports/submission-packages-v41/REPORT.md; branch `submission-packages-v41` off `submission-packages-v39-3`, NOT merged)
 Submission packages v41:
 
 * a founding-writer pink strip at the very top (founding writers only, dismissible; the folder tab turns pink with it);
-* a thin navy header (title, one-line subheader, How it works and + New package);
-* the current-batch row;
-* the package list as one card under a navy index bar;
-* the builder as a Dashboard framed card (navy band, steps and a beige preview well);
+* a thin navy header (title, one-line subheader, How it works and + New package) with the current batch as a strip along its bottom;
+* a workspace: a sticky packages rail on the left (grouped Out with agents / Ready / Draft, retired folded), the open package on the right;
+* the builder as a Dashboard framed card whose band is a soft wash of the package's own colour with a stripe in it (steps, then a beige preview well beneath; side by side at ≥1700);
 * results as framed cards.
 
 The Archivist stands pinned bottom-right; the content keeps a 150px right gutter for him. How it works has five steps matching this layout.
+- **⚠️ THE RAIL'S HEIGHT CAP IS THE SCROLLPORT (`--wpg-port-h` − 28), never `100vh − 92`** (the ref's frame starts at y 0; this page starts under the shell's bar). Selecting a row changes the builder and nothing else: no scroll. Its line is `railLine` (lib/packagesV41) over the drawer's own figures (`model.figPk`).
 - **⚠️ THERE IS NO FOUNDING-WRITER FIELD.** `packagesViaFounding(user)` (lib/entitlements) = `PACKAGES_OPEN_TO_ALL` and the plan is not paid Pro. The strip's dismissal is ONE leaf, `todoPrefs.packages.foundingNoteHidden` (no rules change); How it works offers "Show the founding writer note" back. FeedbackDock takes no topic: it already files against the shell's page name.
 - **⚠️ THE ARCHIVIST IS PORTALLED TO <body>** (`Pk41Hawk`): the scroller is a size container, which would make it the containing block of a fixed child. z-index 40 (below panels 65, the query drawer 70, popovers 80, the page drawers 300, How it works 430). **`right: -14px`, not the pack's -6**: at -6 the box sits 7.5px inside the content edge; the extra 8px are transparent.
 - **The shared frame is built page-locally** (pk41.css, `Frame` in Pk41Results): Dashboard v2's `Frame` is on the dev line, not this base. Lift candidate.
-- Parts: `packages/v41/` (`Pk41Banner`, `Pk41Header`, `Pk41Batch`, `Pk41List`, `Pk41Results`, `Pk41HowItWorks`, `Pk41Hawk`, `pk41.css`) + `lib/packagesV41.ts`. Retired and deleted: `Pk39Header`, `Pk39Tip`, the labels row (`Ring` kept), `Pk38Results`, `Pk39HowItWorks`. The builder (Pk393Builder) is restyled in place; its band now spans the frame.
+- Parts: `packages/v41/` (`Pk41Banner`, `Pk41Header`, `Pk41Batch`, `Pk41Rail`, `Pk41Results`, `Pk41HowItWorks`, `Pk41Hawk`, `pk41.css`) + `lib/packagesV41.ts`. Retired and deleted: `Pk39Header`, `Pk39Tip`, the labels row (`Ring` kept), `Pk38Results`, `Pk39HowItWorks`, and the stacked pass's full-width list (`Pk41List`). The builder (Pk393Builder) is restyled in place; its band now spans the frame.
 - Locks: `tests/e2e/pk41.measure.ts` L1–L9 (`PK41_MUTATE=L1…L9`), fixtures `seedPk40.mjs` + `pk41Fixture.mjs`; L2's paid-Pro half signs in as `dv1@scriptally.test`. Retired and re-pointed: `tests/e2e/RETIRED-submission-packages-v41.md`.
 
 ## Submission packages v39.3 — the builder is Steps + preview (29 Oct; ref = design-refs/submission-packages-v39-3/, option B only; report reports/submission-packages-v39-3/REPORT.md; branch `submission-packages-v39-3` off `submission-packages-v39-2`, NOT merged; on dev as `dev/…-pk392b-td7-fv1-pk393`, index-BiS1oLzC.js)

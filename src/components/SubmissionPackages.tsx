@@ -34,7 +34,7 @@ import { Pk26Builder, type LibTab } from "./packages/v26/Pk26Builder";
 import { Pk41Banner } from "./packages/v41/Pk41Banner";
 import { Pk41Header } from "./packages/v41/Pk41Header";
 import { Pk41Batch } from "./packages/v41/Pk41Batch";
-import { Pk41List } from "./packages/v41/Pk41List";
+import { Pk41Rail } from "./packages/v41/Pk41Rail";
 import { useScriptAllyDb } from "../lib/db";
 import { packagesViaFounding } from "../lib/entitlements";
 import { FOUNDING_NOTE_PATH, foundingNoteHidden } from "../lib/packagesV41";
@@ -125,8 +125,6 @@ export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab:
   const copy = (p: (typeof msPkgs)[number]) => { setPkdId(null); setDialog({ m: "new", copyOf: p.id }); };
   /* "Edit in the builder": load it, close the drawer, scroll to the builder */
   const editIn = (p: (typeof msPkgs)[number]) => { setPkdId(null); setPending({ pkg: p.id, scroll: true }); };
-  /* v41: a row's or the batch row's "Open →" loads that package into the builder below and brings the builder into view */
-  const openInBuilder = (id: string) => { setCurId(id); setPending({ pkg: id, scroll: true }); };
   const openNewMaterial = (k: "let" | "syn" | "ver") => setDrawer(k === "ver" ? { m: "newver", parentId: null } : { m: "newmat", kind: k });
 
   return (
@@ -136,17 +134,17 @@ export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab:
           label tiles (each is replaced by a v41 part, below) */}
       <div ref={rootRef} className={`p6 p41${empty ? " p6-new" : ""}`} data-pk26="page" data-pk41="page">
         {empty ? <Pk26Hero onBuild={() => part("builder")?.scrollIntoView({ block: "start", behavior: "smooth" })} onHow={() => setHow(true)} />
-          : <Pk41Header title={activeMs?.title ?? null} onNew={() => setDialog({ m: "new" })} onHow={() => setHow(true)} />}
-        {/* v41 D–E: the current batch row and the package list (one card under a navy index bar); not on the brand-new page */}
-        {empty ? null : <>
-          <Pk41Batch model={model} onOpen={(p) => openInBuilder(p.id)} />
-          <Pk41List model={model} currentId={current?.id ?? null} showRetired={showRetired} onShowRetired={setShowRetired}
-            onOpen={(p) => openInBuilder(p.id)} onOpenRetired={(p) => setPkdId(p.id)} onNew={() => setDialog({ m: "new" })} />
-        </>}
-        <Pk26Builder model={model} retired={retired} current={current} onSelect={setCurId} onFigures={(p) => setPkdId(p.id)} askStep={askStep}
+          : <Pk41Header title={activeMs?.title ?? null} onNew={() => setDialog({ m: "new" })} onHow={() => setHow(true)}
+            batch={live.length ? <Pk41Batch model={model} onOpen={(p) => setCurId(p.id)} /> : null} />}
+        {/* v41 D: the workspace — the packages rail on the left, the open package on the right (not on the brand-new page) */}
+        <div className={empty ? "p41-ws-off" : "p41-ws"} data-pk41="workspace">
+          {empty ? null : <Pk41Rail model={model} currentId={current?.id ?? null} showRetired={showRetired} onShowRetired={setShowRetired}
+            onSelect={(p) => setCurId(p.id)} onOpenRetired={(p) => setPkdId(p.id)} onNew={() => setDialog({ m: "new" })} />}
+          <Pk26Builder model={model} retired={retired} current={current} onSelect={setCurId} onFigures={(p) => setPkdId(p.id)} askStep={askStep}
             onNewPackage={() => setDialog({ m: "new" })} onDuplicate={copy} onEditPackage={(p, focus) => setDialog({ m: "edit", id: p.id, ...(focus ? { focus } : {}) })}
             onOpenMaterial={(k, id) => setDrawer(k === "ext" ? { m: "ext", id } : { m: "mat", kind: k, id })}
             onNewMaterial={openNewMaterial} onOpenVersions={goVersions} onOpenComps={goComps} />
+        </div>
         <Pk41Results model={model} onOpenPkg={(p) => setPkdId(p.id)} onOpenMaterial={(k, id) => setDrawer({ m: "mat", kind: k, id })}
           onOpenVersions={goVersions} onSeeQueries={goQueries} onAnalytics={goAnalytics} />
       </div>

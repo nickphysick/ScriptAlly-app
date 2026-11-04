@@ -50,37 +50,43 @@ for (const size of SIZES) {
     seed();
     await open(page, size);
     if (want("01-top")) await shot(page, "01-top", size.width);
-    if (want("02-builder-sent")) { await openPkg(page, "pk40-std"); await scrollTo(page, '[data-pk41="builder-frame"]', 40); await shot(page, "02-builder-sent", size.width); }
+    if (want("02-builder-sent-preview")) { await openPkg(page, "pk40-std"); await scrollTo(page, ".p93-pv", 60); await shot(page, "02-builder-sent-preview", size.width); }
     if (want("03-builder-draft")) { await openPkg(page, "pk40-draft"); await scrollTo(page, '[data-pk41="builder-frame"]', 40); await shot(page, "03-builder-draft", size.width); }
     if (want("04-builder-ready")) {
       await openPkg(page, "pk40-ready"); await scrollTo(page, '[data-pk41="builder-frame"]', 40);
       await page.locator('[data-pk393-step="let"]').first().hover(); await page.waitForTimeout(300);
       await shot(page, "04-builder-ready-linking", size.width);
     }
-    if (want("05-results")) { await scrollTo(page, '[data-pk41="results"]', 60); await shot(page, "05-results", size.width); }
-    if (want("06-results-tables")) { await scrollTo(page, '[data-pk41="table-pc"]', 260); await shot(page, "06-results-tables", size.width); }
-    if (want("07-drawer-new")) {
+    if (want("05-rail-retired-shown")) {
+      await scrollTo(page, '[data-pk41="header"]', 400);
+      await page.locator(`${pg} [data-pk41="retired-toggle"]`).click(); await page.waitForTimeout(400);
+      await shot(page, "05-rail-retired-shown", size.width);
+      await page.locator(`${pg} [data-pk41="retired-toggle"]`).click(); await page.waitForTimeout(300);
+    }
+    if (want("06-results")) { await scrollTo(page, '[data-pk41="results"]', 60); await shot(page, "06-results", size.width); }
+    if (want("07-results-tables")) { await scrollTo(page, '[data-pk41="table-pc"]', 260); await shot(page, "07-results-tables", size.width); }
+    if (want("08-drawer-new")) {
       await scrollTo(page, '[data-pk41="header"]', 200);
       await page.locator(`${pg} [data-pk41="new"]`).first().click(); await page.waitForTimeout(700);
-      await shot(page, "07-drawer-new", size.width); await page.keyboard.press("Escape"); await page.waitForTimeout(400);
+      await shot(page, "08-drawer-new", size.width); await page.keyboard.press("Escape"); await page.waitForTimeout(400);
     }
-    if (want("08-how")) {
+    if (want("09-how")) {
       await page.locator(`${pg} [data-pk41="how"]`).first().click(); await page.waitForTimeout(600);
       for (let i = 1; i <= 5; i++) {
-        await shot(page, `${7 + i < 10 ? "0" : ""}${7 + i}-how-it-works-${i}`, size.width);
+        await shot(page, `${8 + i < 10 ? "0" : ""}${8 + i}-how-it-works-${i}`, size.width);
         if (i < 5) { await page.keyboard.press("ArrowRight"); await page.waitForTimeout(500); }
       }
       await page.keyboard.press("Escape"); await page.waitForTimeout(300);
     }
-    if (want("13-banner")) {
+    if (want("14-banner")) {
       await scrollTo(page, '[data-pk41="header"]', 400);
       const x = page.locator('[data-pk41="banner-x"]').first();
       if (await x.count()) { await x.click(); await page.waitForTimeout(500); }
-      await shot(page, "13-banner-dismissed", size.width);
+      await shot(page, "14-banner-dismissed", size.width);
       /* put the strip back for the next width */
       execFileSync("node", ["tests/e2e/pk41Fixture.mjs", "--show-banner"], { stdio: "pipe" });
     }
-    for (const [name, arg] of [["14-no-active-package", "--no-active"], ["15-no-packages", "--no-packages"]] as const) {
+    for (const [name, arg] of [["15-no-active-package", "--no-active"], ["16-no-packages", "--no-packages"]] as const) {
       if (!want(name)) continue;
       execFileSync("node", ["tests/e2e/pk41Fixture.mjs", arg], { stdio: "pipe" });
       await page.reload(); await page.locator(`${pg} [data-pk41="header"]`).first().waitFor({ state: "visible", timeout: 30_000 }); await page.waitForTimeout(1500);

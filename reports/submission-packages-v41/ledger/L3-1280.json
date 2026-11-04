@@ -1,27 +1,45 @@
 [
  {
   "lock": "L3-1280",
-  "where": "height ≤ 100",
-  "ok": true,
-  "detail": "91.28125"
- },
- {
-  "lock": "L3-1280",
-  "where": "navy",
+  "where": "the header is navy",
   "ok": true,
   "detail": "rgb(45, 58, 80)"
  },
  {
   "lock": "L3-1280",
+  "where": "exactly one navy panel above the results",
+  "ok": true,
+  "detail": "[\"header\"]"
+ },
+ {
+  "lock": "L3-1280",
+  "where": "the rail head is not navy",
+  "ok": true,
+  "detail": "rgb(251, 249, 246)"
+ },
+ {
+  "lock": "L3-1280",
+  "where": "the builder band is not navy",
+  "ok": true,
+  "detail": "color(srgb 0.90251 0.922353 0.932706)"
+ },
+ {
+  "lock": "L3-1280",
   "where": "subheader: one line (no overflow)",
   "ok": true,
-  "detail": "437 / 437"
+  "detail": "515 / 515"
  },
  {
   "lock": "L3-1280",
   "where": "subheader: one line box",
   "ok": true,
   "detail": "1"
+ },
+ {
+  "lock": "L3-1280",
+  "where": "subheader: directly under the title (0–12px), in its column",
+  "ok": true,
+  "detail": "gap 6 · x 0"
  },
  {
   "lock": "L3-1280",

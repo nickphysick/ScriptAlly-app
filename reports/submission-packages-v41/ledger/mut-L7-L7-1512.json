@@ -1,6 +1,18 @@
 [
  {
   "lock": "L7-1512",
+  "where": "population: the steps",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "the preview is under the steps",
+  "ok": false,
+  "detail": "preview top 590.5625 / last step bottom 947.125"
+ },
+ {
+  "lock": "L7-1512",
   "where": "population: a sent package is open",
   "ok": true,
   "detail": "not sent"
@@ -15,30 +27,18 @@
   "lock": "L7-1512",
   "where": "“Note, copy or delete…” inside the preview well",
   "ok": true,
-  "detail": "862.875–1014.984375 in 846.875–1321.984375"
+  "detail": "1007–1159.109375 in 991–1322"
  },
  {
   "lock": "L7-1512",
   "where": "“Make a copy” inside the preview well",
-  "ok": true,
-  "detail": "1026.984375–1247.875 in 846.875–1321.984375"
- },
- {
-  "lock": "L7-1512",
-  "where": "“Make a copy” is 42 tall",
-  "ok": true,
-  "detail": "42"
+  "ok": false,
+  "detail": "1171.109375–1392 in 991–1322"
  },
  {
   "lock": "L7-1512",
   "where": "“Log a query with it” inside the preview well",
   "ok": false,
-  "detail": "1255.875–1480.5625 in 846.875–1321.984375"
- },
- {
-  "lock": "L7-1512",
-  "where": "“Log a query with it” is 42 tall",
-  "ok": true,
-  "detail": "42"
+  "detail": "1400–1624.6875 in 991–1322"
  }
 ]
