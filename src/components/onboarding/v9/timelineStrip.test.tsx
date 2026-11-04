@@ -112,10 +112,12 @@ describe("TS-B5 the ready row: Edit opens the strip, Done in place of Edit and D
     expect(h).not.toContain('type="date"');
     expect(h).toContain("Where it stands: <b>Queried, no reply yet</b>, with the agent.");
   });
-  it("closed: Edit and Don't import as before", () => {
+  it("closed: Edit (the ref's word, not Add details) and Don't import", () => {
     const h = html(<QueryRow query={cordelia} agentName="Cordelia Vane" origin="Vane & Hart" open={false} onToggleOpen={noop} onPatch={noop} onDelete={noop} onReopen={noop} />);
     expect(h).not.toContain('data-strip="strip"');
     expect(h).toContain("Don't import");
+    expect(h).toMatch(/data-im="row-action">Edit</);
+    expect(h).not.toContain("Add details");
   });
 });
 
