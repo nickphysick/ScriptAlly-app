@@ -494,9 +494,9 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
     choosePhotos: () => photoInputRef.current?.click(),
     dropPhotos: pickPhotos,
     reset: () => {
+      endPhotos();
       dropDraft();
       setResumeSnap(undefined);
-      endPhotos();
       setPendingFile(null); setValidated(null); setRawSample([]); setExtractComplete(false); setOutcome(null);
       setCommitError(null); setManuscriptFailed(false); setImportComplete(false); setBlocked(null); setRowsRead(null); setFileName("");
       setAlready([]); setNothingNew(false);
