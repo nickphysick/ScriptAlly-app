@@ -93,7 +93,8 @@
 @media (min-width: 768px) {
   .p41 .p41-hd {
     box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 32px;
-    margin: 4px 0 14px; padding: 18px 22px 18px 30px; border-radius: 20px;
+    position: relative; z-index: 5; /* the batch picker opens over the workspace */
+    margin: 4px 0 28px; padding: 18px 22px 18px 30px; border-radius: 20px;
     background: #2d3a50; color: #f4eee5; box-shadow: 0 8px 22px rgba(27, 36, 51, 0.18);
   }
   .p41 .p41-hd-t { min-width: 0; }
@@ -155,31 +156,39 @@
   .p41 :is(.p41-go, .p41-lnk):focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; border-radius: 4px; }
 }
 
-/* ══ D · THE CURRENT BATCH ROW (ref `.k4-bt`; screen 01, states 14, 15) ═══════════════════════════════════════════════
-   White, 58 tall, radius 14, a 1px #e3d5c9 ring and a soft drop, 26 above the list. The label shortens to "Going out
-   with" at ≤1300; the synopsis chip goes at ≤1400. */
+/* ══ C · THE CURRENT BATCH, AS THE HEADER'S LOWER STRIP (ref `.k4-hero.wbt .k4-bt`; screens 01, 15, 16) ═══════════════
+   Flush to the panel's sides and bottom (negative margins equal to the panel's own padding), 18 under the subheader,
+   ~54 tall, rgba(0,0,0,.16) on the navy under a 1px cream-10% rule, the bottom corners 20. Cream on navy throughout.
+   The label shortens to "Going out with" at ≤1300; the synopsis chip goes at ≤1400. With no package the strip is not
+   drawn and the panel keeps its bottom padding (`.p41-hd:not(.p41-wbt)`). */
 @media (min-width: 768px) {
-  .p41 .p41-bt {
-    position: relative; box-sizing: border-box; display: flex; align-items: center; gap: 16px; min-height: 58px;
-    margin: 0 0 26px; padding: 9px 12px 9px 22px; border-radius: 14px; background: #fff;
-    box-shadow: 0 0 0 1px #e3d5c9, 0 10px 22px -18px rgba(28, 19, 15, 0.35);
+  .p41 .p41-hd.p41-wbt { flex-wrap: wrap; row-gap: 0; padding-bottom: 0; }
+  .p41 .p41-hd.p41-wbt > .p41-hd-t { flex: 1 1 0; }
+  .p41 .p41-hd .p41-bt {
+    position: relative; box-sizing: border-box; display: flex; align-items: center; gap: 16px;
+    flex: 0 0 calc(100% + 52px); min-height: 54px; margin: 18px -22px 0 -30px; padding: 8px 22px 8px 30px;
+    border-radius: 0 0 20px 20px; background: rgba(0, 0, 0, 0.16); border-top: 1px solid rgba(244, 238, 229, 0.1); box-shadow: none;
   }
-  .p41 .p41-bt-k { flex: none; font: italic 400 15.5px var(--sp-serif); color: rgba(28, 19, 15, 0.6); }
+  .p41 .p41-bt-k { flex: none; font: italic 400 15.5px var(--sp-serif); color: rgba(244, 238, 229, 0.62); }
+  .p41 .p41-bt-k > span { font: inherit; }
   .p41 .p41-bt-k .p41-bt-ks { display: none; }
   .p41 .p41-bt-n { flex: none; display: inline-flex; align-items: center; gap: 10px; }
-  .p41 .p41-bt-n .p41-ic { width: 30px; height: 30px; border-radius: 7px; }
+  .p41 .p41-bt-n .p41-ic { width: 30px; height: 30px; border-radius: 7px; box-shadow: 0 0 0 1.5px rgba(244, 238, 229, 0.45); }
   .p41 .p41-bt-n .p41-ic .p41-pic { width: 15px; height: 15px; }
-  .p41 .p41-bt-n b { font: 400 20px/1.3 var(--sp-type); color: #1c130f; }
+  .p41 .p41-bt-n b { font: 400 20px/1.3 var(--sp-type); color: #fffaf3; }
   .p41 .p41-bt-p { display: flex; gap: 6px; min-width: 0; overflow: hidden; }
   .p41 .p41-bt-p > span {
     flex: none; display: inline-flex; align-items: center; gap: 7px; height: 30px; padding: 0 11px 0 4px; border-radius: 15px;
-    background: #f5efe7; font: 400 14.5px var(--sp-serif); color: #1c130f; white-space: nowrap;
+    background: rgba(244, 238, 229, 0.1); font: 400 14.5px var(--sp-serif); color: #f4eee5; white-space: nowrap;
   }
-  .p41 .p41-bt-p > span.p41-no { background: none; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.15); color: rgba(28, 19, 15, 0.45); font-style: italic; }
+  .p41 .p41-bt-p .p41-t-v { background: #f4eee5; color: #2d3a50; }
+  /* a missing piece is dashed (the pack's word; the ref draws a solid hairline) */
+  .p41 .p41-bt-p > span.p41-no { box-sizing: border-box; background: none; border: 1px dashed rgba(244, 238, 229, 0.3); color: rgba(244, 238, 229, 0.55); font-style: italic; }
   .p41 .p41-bt-p > span.p41-no .p41-t { opacity: .55; }
-  .p41 .p41-bt-e { flex: 1; min-width: 0; font: 400 15.5px var(--sp-serif); color: #1c130f; }
+  .p41 .p41-bt-e { flex: 1; min-width: 0; font: 400 15.5px var(--sp-serif); color: #f4eee5; }
   .p41 .p41-bt-a { margin-left: auto; flex: none; display: flex; align-items: center; gap: 14px; }
-  .p41 .p41-bt-a .p41-lnk { font-style: normal; }
+  .p41 .p41-bt-a .p41-lnk { font-style: normal; color: #f4eee5; text-decoration-color: rgba(244, 238, 229, 0.55); }
+  .p41 .p41-bt-a .p41-lnk:focus-visible, .p41 .p41-bt-a .p41-go:focus-visible { outline-color: #f4eee5; }
   /* the picker: under "Change", right-aligned to the row */
   .p41-bt-pop {
     position: absolute; z-index: 30; right: 12px; top: calc(100% + 8px); box-sizing: border-box; width: 340px; padding: 10px;
@@ -200,6 +209,7 @@
   .p41-bt-pop .p41-bt-none { margin: 4px 6px 6px; font: italic 14.5px/1.45 var(--sp-serif); color: rgba(28, 19, 15, 0.6); }
 }
 @media (min-width: 768px) and (max-width: 1400px) {
+  .p41 .p41-hd .p41-bt { flex-basis: calc(100% + 42px); margin: 18px -18px 0 -24px; padding: 8px 18px 8px 24px; }
   .p41 .p41-bt-k { font-size: 14.5px; }
   .p41 .p41-bt-p > .p41-bt-syn { display: none; }
 }

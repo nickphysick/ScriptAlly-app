@@ -135,11 +135,8 @@ export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab:
           label tiles (each is replaced by a v41 part, below) */}
       <div ref={rootRef} className={`p6 p41${empty ? " p6-new" : ""}`} data-pk26="page" data-pk41="page">
         {empty ? <Pk26Hero onBuild={() => part("builder")?.scrollIntoView({ block: "start", behavior: "smooth" })} onHow={() => setHow(true)} />
-          : <Pk41Header title={activeMs?.title ?? null} onNew={() => setDialog({ m: "new" })} onHow={() => setHow(true)} />}
-        {/* v41 C: the current batch row (moves into the header in Phase 2); the full-width list is retired (the rail replaces it) */}
-        {empty ? null : <>
-          <Pk41Batch model={model} onOpen={(p) => openInBuilder(p.id)} />
-        </>}
+          : <Pk41Header title={activeMs?.title ?? null} onNew={() => setDialog({ m: "new" })} onHow={() => setHow(true)}
+            batch={live.length ? <Pk41Batch model={model} onOpen={(p) => setCurId(p.id)} /> : null} />}
         <Pk26Builder model={model} retired={retired} current={current} onSelect={setCurId} onFigures={(p) => setPkdId(p.id)} askStep={askStep}
             onNewPackage={() => setDialog({ m: "new" })} onDuplicate={copy} onEditPackage={(p, focus) => setDialog({ m: "edit", id: p.id, ...(focus ? { focus } : {}) })}
             onOpenMaterial={(k, id) => setDrawer(k === "ext" ? { m: "ext", id } : { m: "mat", kind: k, id })}
