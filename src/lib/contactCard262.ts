@@ -52,7 +52,8 @@ export function nextStep(x: AgentFacts, first: string, call: CallBox | null, now
     return { tone: "agent", bold: `Waiting to hear from ${first}.`, sub: `${sub}.`, status: q.status as QueryStatus, button: { label: "Record a response", act: { kind: "journey", mode: "resp", queryId: q.id } } };
   }
   if (x.stand === "closed" && q) {
-    return { tone: "closed", bold: `${stageOf(x)}.`, sub: q.lastMs ? `Closed ${dm(q.lastMs)}.` : "This query is closed.", status: q.status as QueryStatus, button: { label: "See the query", act: { kind: "open", queryId: q.id } } };
+    /* v26.3 A — no button: "Open the query →" under the box is the way to the query, for every queried agent */
+    return { tone: "closed", bold: `${stageOf(x)}.`, sub: q.lastMs ? `Closed ${dm(q.lastMs)}.` : "This query is closed.", status: q.status as QueryStatus, button: null };
   }
   /* not queried */
   if (call?.kind === "hold") return { tone: "none", bold: call.bold, sub: call.sub, status: null, button: null };

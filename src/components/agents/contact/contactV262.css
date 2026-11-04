@@ -256,3 +256,12 @@ button.cl262-hint { cursor: pointer; color: #2a3a52; text-decoration: underline;
 .cl262-card .cl262-fx .ae-seg button { font-family: var(--sp-type) !important; }
 /* the tile's tail ("· checked Jun", " replies") reads as an aside: smaller and grey, kept on the tile */
 .cl262-card .cl262-tile .cl262-tpost { font-size: 12px; color: rgba(42, 58, 82, 0.62); }
+
+/* ══ v26.3 A ══════════════════════════════════════════════════════════════════════════════════════════════════════ */
+/* "Open the query →": one quiet link under the next-step box (hidden while editing) */
+.cl262-card .cl263-oq { display: flex; justify-content: flex-end; margin: 6px 14px 0; }
+.cl262-card .cl263-oq button { all: unset; cursor: pointer; font-family: var(--sp-type) !important; font-size: 14px; color: rgba(28, 19, 15, 0.7); }
+.cl262-card .cl263-oq button:hover, .cl262-card .cl263-oq button:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
+/* Remove: at the foot of Contact details, under the grid — quiet rust text, left-aligned */
+.cl262-card .cl263-rm { margin-top: 14px; text-align: left; }
+.cl262-card .cl263-rmb { all: unset; cursor: pointer; font-family: var(--sp-type) !important; font-size: 14px; color: #a2452a; text-decoration: underline; text-underline-offset: 3px; }

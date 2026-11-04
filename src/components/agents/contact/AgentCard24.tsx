@@ -402,15 +402,30 @@ export const History: React.FC<{ entries: readonly HistEntry[]; first: string; n
 };
 
 /** the footer: the clock line, the links by set, ‹ n / M › */
+/** REMOVE'S CONFIRMATION — the existing delete's own gate: with queries, type the agent's name (the cascade through
+ *  `deleteAgent` takes them and their history); without, one press. Shared by this card's foot and v26.3's Contact
+ *  details, so the two cannot drift. */
+export const RemoveConfirm: React.FC<{ name: string; deleteQueries: number; onKeep: () => void; onDelete: () => void }> = ({ name, deleteQueries, onKeep, onDelete }) => {
+  const [typed, setTyped] = useState("");
+  const heavy = deleteQueries > 0;
+  const ready = !heavy || canDestroy(typed.toLowerCase(), name.toLowerCase(), false);
+  return (
+    <div className="cl24c-del" data-cl24="remove-confirm" role="group" aria-label={`Remove ${name}`}>
+      <p>Remove {name}?{heavy ? ` This deletes ${deleteQueries} ${deleteQueries === 1 ? "query" : "queries"} and their history. Type their name to confirm.` : " This can’t be undone."}</p>
+      {heavy ? <input value={typed} onChange={(e) => setTyped(e.target.value)} placeholder={name} aria-label="Type the agent’s name" data-cl24="remove-typed" /> : null}
+      <span className="qc149c-sp" />
+      <button type="button" data-cl24="remove-keep" onClick={onKeep}>Keep</button>
+      <button type="button" className="go" data-cl24="remove-go" disabled={!ready} onClick={onDelete}>Remove</button>
+    </div>
+  );
+};
+
 export const Foot: React.FC<{ p: AgentCard24Props; set: SetKey; wide?: boolean; ed?: CardEdit }> = ({ p, set, wide, ed }) => {
   const a = p.x.agent;
   const added = addedLabel(a);
   const [confirm, setConfirm] = useState(false);
-  const [typed, setTyped] = useState("");
-  useEffect(() => { setConfirm(false); setTyped(""); }, [a.id]);
+  useEffect(() => { setConfirm(false); }, [a.id]);
   const name = (a.name ?? "").trim() || (a.agency ?? "").trim();
-  const heavy = p.deleteQueries > 0;
-  const ready = !heavy || canDestroy(typed.toLowerCase(), name.toLowerCase(), false);
   const q = p.x.q;
   const act = (k: FootLink) => {
     /* v25.2 C2 — "Edit agent" turns this card into the editor */
@@ -423,13 +438,7 @@ export const Foot: React.FC<{ p: AgentCard24Props; set: SetKey; wide?: boolean; 
   return (
     <div className={`qc149c-ft2${wide ? " cl24w-ft" : ""}`} data-cl24="footer">
       {confirm ? (
-        <div className="cl24c-del" data-cl24="remove-confirm" role="group" aria-label={`Remove ${name}`}>
-          <p>Remove {name}?{heavy ? ` This deletes ${p.deleteQueries} ${p.deleteQueries === 1 ? "query" : "queries"} and their history. Type their name to confirm.` : " This can’t be undone."}</p>
-          {heavy ? <input value={typed} onChange={(e) => setTyped(e.target.value)} placeholder={name} aria-label="Type the agent’s name" data-cl24="remove-typed" /> : null}
-          <span className="qc149c-sp" />
-          <button type="button" data-cl24="remove-keep" onClick={() => setConfirm(false)}>Keep</button>
-          <button type="button" className="go" data-cl24="remove-go" disabled={!ready} onClick={p.onDelete}>Remove</button>
-        </div>
+        <RemoveConfirm name={name} deleteQueries={p.deleteQueries} onKeep={() => setConfirm(false)} onDelete={p.onDelete} />
       ) : (
         <>
           {!wide ? (

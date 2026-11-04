@@ -25,7 +25,7 @@ import { hrefFor } from "../../../lib/quickAdd";
 import { AgentPaperCard, PaperIcon, type PaperCardData } from "../../shared/AgentPaperCard";
 import { bandWords, howTiles, materialChips, metaLine, nextStep, type NextStep } from "../../../lib/contactCard262";
 import { NQ_RING } from "./ContactSheet24";
-import { Notes, type AgentCard24Props, useCardModel } from "./AgentCard24";
+import { Notes, RemoveConfirm, type AgentCard24Props, useCardModel } from "./AgentCard24";
 import { YouAndStory } from "./AgentCardParts255";
 import type { AgentCardField } from "../../../lib/agentCardStore";
 import { requestCardClose } from "./AgentCardPanel262";
@@ -100,6 +100,24 @@ const Ghost: React.FC<{ kind: "chips" | "lines"; add: string; k: Sec262; onAdd?:
     </span>
     {onAdd ? <button type="button" className="cl262-addb" data-cl262="add" data-k={k} onClick={onAdd}>{add}</button> : null}
   </div>
+);
+
+/** v26.3 A — REMOVE, at the foot of Contact details (edit everything only): a quiet rust text button that opens the
+ *  existing delete's own confirmation (`RemoveConfirm`), unchanged; never on the card at rest */
+const RemoveLine: React.FC<{ first: string; name: string; deleteQueries: number; onDelete: () => void }> = ({ first, name, deleteQueries, onDelete }) => {
+  const [confirm, setConfirm] = useState(false);
+  return (
+    <div className="cl263-rm" data-cl263="remove">
+      {confirm ? <RemoveConfirm name={name} deleteQueries={deleteQueries} onKeep={() => setConfirm(false)} onDelete={onDelete} />
+        : <button type="button" className="cl263-rmb" data-cl263="remove-btn" onClick={() => setConfirm(true)}>Remove {first} from your list</button>}
+    </div>
+  );
+};
+
+/** v26.3 A — "Open the query →": under the next-step box, for an agent with a query; opens it in the Query Centre's
+ *  panel as "See the query" did. The box offers Record or Log; this is the one way to the query itself. */
+const OpenQuery: React.FC<{ queryId: string; onOpen: (id: string) => void }> = ({ queryId, onOpen }) => (
+  <div className="cl263-oq"><button type="button" data-cl263="open-query" onClick={() => onOpen(queryId)}>Open the query →</button></div>
 );
 
 export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
@@ -344,7 +362,8 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   );
   const profile = (
     <div className="cl262-body" data-cl262="profile" data-cl24="pane">
-      {all && kit ? <Section k="contact" title="Contact details" editing={<EditContact form={form} agent={a} kit={kit} />} /> : null}
+      {all && kit ? <Section k="contact" title="Contact details" editing={<EditContact form={form} agent={a} kit={kit} foot={<RemoveLine first={m.first} name={(a.name ?? "").trim() || (a.agency ?? "").trim()}
+        deleteQueries={p.deleteQueries} onDelete={() => { bypass.current = true; closeAll(); p.onDelete(); }} />} />} /> : null}
       <Section k="genres" title="Genres sought" onEdit={() => edit("genres")} editing={isOpen("genres") && kit ? <EditGenres form={form} kit={kit} isHit={p.genreHit} /> : undefined}>
         {genres.length ? (
           <span className="apc-chips" data-cl262="genres">
@@ -397,7 +416,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
           onDiscard={() => { const g = guard; discardThen(g ? g.run : () => {}); }} /> : null,
         band: CARD262_BAND, bandRight, disc: <Disc262 stand={x.stand} initials={data.initials} />,
         meta: meta ? <span className="apc-meta" data-cl262="meta">{meta}</span> : null,
-        afterHead: <NextBox s={step} p={p} />, scrollRef,
+        afterHead: <><NextBox s={step} p={p} />{x.q && !editing ? <OpenQuery queryId={x.q.id} onOpen={p.onOpenQuery} /> : null}</>, scrollRef,
         scrollAttrs: { "data-cl262": "scroll", "data-tab": tab },
       }} />
   );

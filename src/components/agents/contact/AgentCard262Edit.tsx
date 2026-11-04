@@ -116,7 +116,7 @@ export const EditHow: React.FC<{ form: AgentForm; agent: Agent; kit: CardFormKit
 };
 
 /** Contact details (edit everything only): Name, Agency, Country, City, Email, Website — two columns */
-export const EditContact: React.FC<{ form: AgentForm; agent: Agent; kit: CardFormKit; nameRef?: React.Ref<HTMLInputElement> }> = ({ form, agent, kit, nameRef }) => {
+export const EditContact: React.FC<{ form: AgentForm; agent: Agent; kit: CardFormKit; nameRef?: React.Ref<HTMLInputElement>; foot?: React.ReactNode }> = ({ form, agent, kit, nameRef, foot }) => {
   const d = form.d;
   const others = useMemo(() => kit.agents.filter((a) => a.id !== agent.id), [kit.agents, agent]);
   const agencies = useMemo(() => agencyOptions(others), [others]);
@@ -154,6 +154,8 @@ export const EditContact: React.FC<{ form: AgentForm; agent: Agent; kit: CardFor
       <div className="cl262-cf"><label>Website</label>
         <input className="ac-in" data-ae="website" value={d.website} placeholder="agency.co.uk" autoComplete="off" onChange={(e) => form.set({ website: e.target.value })} />{bad("website")}</div>
       <Also notes={form.also} fields={["who"]} k="who" />
+      {/* v26.3 A — Remove sits at the foot of Contact details, under the grid (edit everything only) */}
+      {foot}
     </div>
   );
 };
