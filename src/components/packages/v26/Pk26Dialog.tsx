@@ -15,12 +15,15 @@ import { PACKAGE_ICONS, type PackageColour, type PackageIcon, type SubmissionPac
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import { iconOf } from "../../../lib/packagesV26";
 import { colourOf, firstFreeColour, PACKAGE_COLOURS, pcStyle } from "../../../lib/packagesV39";
-import { Pic, PicBare } from "./icons";
+import { PicBare } from "./icons";
 import type { Pk26Model } from "./usePk26Model";
 
 /** `version`: a new package opened from Versions' "Add to a package" starts with that version as its pages. */
 /** `focus: "note"` opens Package details with "Who it's for" focused (the header bar's "+ Add a note", v26.1). */
 /** `copyOf` (v38): the package drawer's "Make a copy" opens New package with "a copy of {name}" chosen. */
+/** v41: the drawer header's art, the page's Archivist (public/images/packages/packages-hawk-standing.png) */
+export const DRAWER_ART = "/images/packages/packages-hawk-standing.png";
+
 export type DialogView = { m: "new"; version?: string; copyOf?: string } | { m: "edit"; id: string; focus?: "note" };
 
 export const Pk26Dialog: React.FC<{ model: Pk26Model; view: DialogView | null; onClose: () => void; onCreated: (id: string) => void }> = ({ model, view, onClose, onCreated }) => {
@@ -73,10 +76,12 @@ const Body: React.FC<{ shown: boolean; model: Pk26Model; p: SubmissionPackage | 
 
   return (
     <aside className={`p6-cx-drw${shown ? " p6-on" : ""}`} role="dialog" aria-modal="true" aria-labelledby="p6-pdT" data-pk26="dialog" data-pk391="pd">
-      <div className="p8-dh p8-dpk" style={pcStyle({ colour: col })} data-pk391="pd-head">
-        <span className="p8-ddisc"><Pic ic={ic} cls="p8-pic" /></span>
-        <div className="p8-tx"><h3 className="p6-id-pdT" id="p6-pdT">{p ? p.packageName : "New package"}</h3><small>{p ? "Package details" : "Name it, choose how it looks, then fill it in the builder."}</small></div>
-        <button type="button" className="p8-cx-x" aria-label="Close" onClick={onClose}>✕</button>
+      {/* v41 Part F: the drawer header option A — the Archivist on cream, one line under the title (ref `.k4-dh`) */}
+      <div className="p41-dh" data-pk391="pd-head" data-pk41="drawer-head">
+        <img className="p41-dh-art" src={DRAWER_ART} alt="" aria-hidden="true" />
+        <div className="p41-dh-tx"><h3 className="p6-id-pdT p41-dh-h" id="p6-pdT">{p ? `Editing ${p.packageName}` : "Making a new package"}</h3>
+          <small>{p ? "Rename it, change how it looks, or add a note on who it’s for." : "Give it a name and a look you’ll recognise. You’ll pick its pieces on the page."}</small></div>
+        <button type="button" className="p41-dh-x" aria-label="Close" onClick={onClose}>✕</button>
       </div>
       <div className="pa-db pa-pd-b" style={pcStyle({ colour: col })}>
         <label className="pa-pd-f"><span>Name</span><input ref={nameRef} className={`pa-id-pdName p6-id-pdName${err ? " p6-err" : ""}`} value={name} placeholder="e.g. Standard UK, US agents, Agents who want 50 pages" autoComplete="off" onChange={(e) => { setName(e.target.value); setErr(false); }} onKeyDown={onEnter} /></label>
@@ -94,7 +99,7 @@ const Body: React.FC<{ shown: boolean; model: Pk26Model; p: SubmissionPackage | 
         {p ? null : (
           <div className="pa-pd-f"><span>Start from</span>
             <div className="pa-pd-from p6-pd-from" role="radiogroup">
-              <button type="button" role="radio" aria-checked={from === "empty"} onClick={() => setFrom("empty")}><b>Empty</b><small>Drag pieces in yourself</small></button>
+              <button type="button" role="radio" aria-checked={from === "empty"} onClick={() => setFrom("empty")}><b>Empty</b><small>Pick each piece yourself</small></button>
               {used ? <button type="button" role="radio" aria-checked={from === used.id} onClick={() => setFrom(used.id)}><b>A copy of {used.packageName}</b><small>Same letter, synopsis and pages. Swap what’s different.</small></button> : null}
             </div>
           </div>

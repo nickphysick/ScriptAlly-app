@@ -38,7 +38,7 @@ import { useScriptAllyDb } from "../lib/db";
 import { packagesViaFounding } from "../lib/entitlements";
 import { FOUNDING_NOTE_PATH, foundingNoteHidden } from "../lib/packagesV41";
 import { Pk38Drawer } from "./packages/v26/Pk38Drawer";
-import { Pk38Results } from "./packages/v26/Pk38Results";
+import { Pk41Results } from "./packages/v41/Pk41Results";
 import { libTabFromParam } from "../lib/packagesV38";
 import { Pk26Drawer, type DrawerView } from "./packages/v26/Pk26Drawer";
 import { Pk26Dialog, type DialogView } from "./packages/v26/Pk26Dialog";
@@ -146,7 +146,7 @@ export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab:
             onNewPackage={() => setDialog({ m: "new" })} onDuplicate={copy} onEditPackage={(p, focus) => setDialog({ m: "edit", id: p.id, ...(focus ? { focus } : {}) })}
             onOpenMaterial={(k, id) => setDrawer(k === "ext" ? { m: "ext", id } : { m: "mat", kind: k, id })}
             onNewMaterial={openNewMaterial} onOpenVersions={goVersions} onOpenComps={goComps} />
-        <Pk38Results model={model} onOpenPkg={(p) => setPkdId(p.id)} onOpenMaterial={(k, id) => setDrawer({ m: "mat", kind: k, id })}
+        <Pk41Results model={model} onOpenPkg={(p) => setPkdId(p.id)} onOpenMaterial={(k, id) => setDrawer({ m: "mat", kind: k, id })}
           onOpenVersions={goVersions} onSeeQueries={goQueries} onAnalytics={goAnalytics} />
       </div>
       <Pk26Drawer model={model} view={routeActive ? drawer : null} go={setDrawer} onSeeQueries={goQueries} onOpenComps={goComps} />

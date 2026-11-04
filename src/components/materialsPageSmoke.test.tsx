@@ -221,7 +221,9 @@ describe("/queries/packages renders", () => {
     /* v41: the labels row is retired (the package list replaces it) */
     expect(html).not.toContain('data-pk38="labels"');
     expect(html).toContain("My first package");
-    expect(html).toContain("Once you’ve logged queries with a package, this shows what’s working.");
+    /* v41 F: the results band is retired; with nothing sent, Results is its heading over one quiet line */
+    expect(html).toContain(">How your packages are doing<");
+    expect(html).not.toContain('data-pk38="band"');
     expect(html).toContain('data-pk38="empty"');
     expect(html).not.toContain('data-pk38="show"');
     /* v39.1 G: the brand-new page has its own explanation, so no explainer line */
