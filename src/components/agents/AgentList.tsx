@@ -935,6 +935,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
           return { ok: true };
         },
         leaveRef: editLeave,
+        closeGuardRef: cardGuard,
         resumePick: () => { const n = pendingPick.current; pendingPick.current = null; if (n) setCardId(n); },
       },
     };

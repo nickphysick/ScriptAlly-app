@@ -136,6 +136,8 @@ export interface CardFormKit {
   leaveRef: React.MutableRefObject<(() => void) | null>;
   /** after the card lets a leave go ahead: the page carries out the pick it held */
   resumePick: () => void;
+  /** Contact list v26.2 D — the host's close (✕, Esc) asks this first: true lets it go ahead */
+  closeGuardRef?: React.MutableRefObject<(() => boolean) | null>;
 }
 
 /** where a door's field opens: in place when an inline edit holds it, else the edit mode at that field */

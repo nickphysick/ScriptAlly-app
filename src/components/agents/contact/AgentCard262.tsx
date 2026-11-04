@@ -16,7 +16,8 @@
  * ⚠️ IT DRAWS FROM THE PAGE'S OWN MODEL (`AgentCard24Props`, `useCardModel`): the call box, the gaps, the story and the
  *    edit kit are the ones the v25 card read, so nothing is derived twice.
  */
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import { StatusDot } from "../../StatusDot";
 import { agentInitials, agentPrimary } from "../../../lib/agentDisplay";
 import { addedLabel } from "../../../lib/contactList";
@@ -136,6 +137,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   /** open one section (adding it to any already open); the first opening starts a fresh draft */
   const openSec = (k: Sec262) => {
     if (!kit) { p.onEdit(undefined, SEC_FOCUS[k]); return; }
+    opened.current = { k, all: false };
     setTab("profile");
     setOpen((cur) => {
       if (cur.includes(k)) return cur;
@@ -146,13 +148,145 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   /** the band's pencil: every section, and Contact details at the top */
   const openAll = () => {
     if (!kit) { p.onEdit("who"); return; }
+    opened.current = { k: "contact", all: true };
     setTab("profile");
     setOpen((cur) => { if (!cur.length) resetRef.current(a); return ["contact", "genres", "wishlist", "materials", "how"]; });
   };
-  const cancel = () => { closeAll(); form.reset(a); };
+  const cancel = () => { setGuard(null); closeAll(); form.reset(a); };
   const edit = openSec;
   const isOpen = (k: Sec262) => open.includes(k);
   const all = open.includes("contact");
+
+  /* ══ Part D · keeping your place ══════════════════════════════════════════════════════════════════════════════
+     EDITING NEVER MOVES THE CARD UNDER YOU. The card, its frame and its scroller are never replaced (every change is a
+     re-render of the same elements), and THE ANCHOR RULE holds the section you are in: before an update the section
+     acted in (or, failing that, the first one visible below the band) is noted with its distance from the scroller's
+     top, and after every render `scrollTop` is corrected so it is the same distance again (±1px). A section growing or
+     shrinking above you never moves the one you're in. */
+  const anchor = useRef<{ k: string; off: number } | null>(null);
+  const secEl = (sc: HTMLElement, k: string) => sc.querySelector<HTMLElement>(`[data-cl262='sec'][data-k='${k}']`);
+  const offOf = (sc: HTMLElement, el: HTMLElement) => el.getBoundingClientRect().top - sc.getBoundingClientRect().top;
+  const firstVisible = (sc: HTMLElement): HTMLElement | null => {
+    const top = sc.getBoundingClientRect().top;
+    return [...sc.querySelectorAll<HTMLElement>("[data-cl262='sec']")].find((e) => e.getBoundingClientRect().bottom > top + 1) ?? null;
+  };
+  const pick = useCallback((target: EventTarget | null) => {
+    const sc = scrollRef.current;
+    if (!sc) return;
+    const el = (target instanceof Element ? target.closest<HTMLElement>("[data-cl262='sec']") : null) ?? firstVisible(sc);
+    anchor.current = el?.dataset.k ? { k: el.dataset.k, off: offOf(sc, el) } : null;
+  }, []);
+  const adjusting = useRef(false);
+  useEffect(() => {
+    const sc = scrollRef.current;
+    const frame = sc?.closest<HTMLElement>("[data-apc='frame']");
+    if (!sc || !frame) return undefined;
+    const onAct = (e: Event) => pick(e.target);
+    /* the user's own scroll re-notes the anchor: the first section visible */
+    const onScroll = () => { if (adjusting.current) { adjusting.current = false; return; } pick(null); };
+    frame.addEventListener("pointerdown", onAct, true);
+    frame.addEventListener("keydown", onAct, true);
+    frame.addEventListener("focusin", onAct, true);
+    sc.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      frame.removeEventListener("pointerdown", onAct, true);
+      frame.removeEventListener("keydown", onAct, true);
+      frame.removeEventListener("focusin", onAct, true);
+      sc.removeEventListener("scroll", onScroll);
+    };
+  }, [pick]);
+  /* every render: the anchored section back to its distance from the top */
+  useLayoutEffect(() => {
+    const sc = scrollRef.current, an = anchor.current;
+    if (!sc || !an) return;
+    const el = secEl(sc, an.k);
+    if (!el) return;
+    const delta = offOf(sc, el) - an.off;
+    if (Math.abs(delta) > 0.5) { adjusting.current = true; sc.scrollTop += delta; }
+  });
+
+  /* revealing and focus: a section opened on its own scrolls into view only by what it needs (plus 90px of air), or its
+     heading comes to 70px below the band when it was hidden; its first text field takes focus without scrolling */
+  const opened = useRef<{ k: Sec262; all: boolean } | null>(null);
+  useEffect(() => {
+    const o = opened.current;
+    const sc = scrollRef.current;
+    if (!o || !sc) return;
+    opened.current = null;
+    const el = secEl(sc, o.all ? "contact" : o.k);
+    if (!el) return;
+    const field = el.querySelector<HTMLInputElement | HTMLTextAreaElement>("textarea, input[data-ae='name']");
+    if (field) { field.focus({ preventScroll: true }); const n = field.value.length; try { field.setSelectionRange(n, n); } catch { /* not a text field */ } }
+    if (o.all) return;
+    const r = el.getBoundingClientRect(), b = sc.getBoundingClientRect();
+    const reduce = typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let by = 0;
+    if (r.top < b.top) by = r.top - b.top - 70;
+    else if (r.bottom > b.bottom) by = Math.min(r.bottom - b.bottom + 90, r.top - b.top - 70);
+    if (by) sc.scrollBy({ top: by, behavior: reduce ? "auto" : "smooth" });
+  }, [open]);
+
+  /* THE DISCARD GUARD: ✕, Esc, paging, another row and leaving the page all ask the draft; with unsaved changes the save
+     bar turns rust and nothing else happens until Keep editing or Discard is chosen */
+  const [guard, setGuard] = useState<{ n: number; run: () => void } | null>(null);
+  const dirtyRef = useRef(false);
+  dirtyRef.current = form.dirty;
+  const bypass = useRef(false);
+  const ask = useCallback((run: () => void): boolean => {
+    if (bypass.current || !dirtyRef.current) return true;
+    setGuard({ n: form.changed.length, run });
+    return false;
+  }, [form.changed.length]);
+  const discardThen = (run: () => void) => {
+    setGuard(null);
+    bypass.current = true;
+    closeAll();
+    resetRef.current(a);
+    run();
+    window.setTimeout(() => { bypass.current = false; }, 0);
+  };
+  /* the host's ✕ and Esc */
+  useEffect(() => {
+    const g = kit?.closeGuardRef;
+    if (!g) return undefined;
+    g.current = () => ask(() => requestCardClose());
+    return () => { g.current = null; };
+  }, [kit, ask]);
+  /* another row picked on the list, while there are unsaved changes */
+  useEffect(() => {
+    const l = kit?.leaveRef;
+    if (!l) return undefined;
+    l.current = form.dirty ? () => { if (ask(() => kit!.resumePick())) kit!.resumePick(); } : null;
+    return () => { if (l.current) l.current = null; };
+  }, [kit, form.dirty, ask]);
+  /* leaving the page (the tab or the window) */
+  useEffect(() => {
+    if (!form.dirty) return undefined;
+    const on = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ""; };
+    window.addEventListener("beforeunload", on);
+    return () => window.removeEventListener("beforeunload", on);
+  }, [form.dirty]);
+  const goStep = (d: -1 | 1) => { if (ask(() => p.onStep(d))) p.onStep(d); };
+  /* ⌘/Ctrl + Enter saves when there are changes */
+  const saveRef = useRef(form.save);
+  saveRef.current = form.save;
+  useEffect(() => {
+    const frame = scrollRef.current?.closest<HTMLElement>("[data-apc='frame']");
+    if (!frame) return undefined;
+    const on = (e: KeyboardEvent) => {
+      if (e.key !== "Enter" || !(e.metaKey || e.ctrlKey) || !dirtyRef.current) return;
+      e.preventDefault();
+      void saveRef.current();
+    };
+    frame.addEventListener("keydown", on);
+    return () => frame.removeEventListener("keydown", on);
+  }, []);
+  /* Esc while editing: the guard up means Keep editing; changes ask; no changes closes the open sections */
+  useEscapeLayer(editing || !!guard, () => {
+    if (guard) { setGuard(null); return; }
+    if (form.dirty) { setGuard({ n: form.changed.length, run: () => {} }); return; }
+    closeAll();
+  }, ESC_LEVEL.card);
 
   const genres = a.genres ?? [];
   const wish = (a.mswlNotes ?? "").trim();
@@ -181,7 +315,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
       </span>
       {all ? <span className="cl262-editing" data-cl262="editing-chip">Editing</span>
         : <button type="button" className="cl262-rb" data-cl262="edit-all" aria-label={`Edit everything about ${m.first}`} onClick={openAll}>{IC.pen}</button>}
-      <button type="button" className="cl262-rb" data-cl262="close" data-cl24="close" aria-label="Close the agent" onClick={() => (p.onClose ?? requestCardClose)()}><span aria-hidden="true">×</span></button>
+      <button type="button" className="cl262-rb" data-cl262="close" data-cl24="close" aria-label="Close the agent" onClick={() => requestCardClose()}><span aria-hidden="true">×</span></button>
     </span>
   );
   const links = (
@@ -247,9 +381,9 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     <div className="cl262-foot" data-cl262="foot">
       <span className="cl262-added apc-meta" data-cl262="added">{IC.clock}{added ? `Added ${added}` : "Added"}</span>
       <span className="cl262-pager" data-cl24="nav">
-        <button type="button" data-cl262="prev" data-cl24="prev" aria-label="Previous agent" disabled={p.index <= 0} onClick={() => p.onStep(-1)}>{IC.l}</button>
+        <button type="button" data-cl262="prev" data-cl24="prev" aria-label="Previous agent" disabled={p.index <= 0} onClick={() => goStep(-1)}>{IC.l}</button>
         <span data-cl24="pos">{p.index + 1} / {p.total}</span>
-        <button type="button" data-cl262="next-agent" data-cl24="next" aria-label="Next agent" disabled={p.index >= p.total - 1} onClick={() => p.onStep(1)}>{IC.r}</button>
+        <button type="button" data-cl262="next-agent" data-cl24="next" aria-label="Next agent" disabled={p.index >= p.total - 1} onClick={() => goStep(1)}>{IC.r}</button>
       </span>
     </div>
   );
@@ -257,9 +391,10 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     <AgentPaperCard variant="panel" className={`cl262-card${editing ? " is-editing" : ""}${flash ? " is-saved" : ""}`} data={data}
       panel={{
         onClose: () => (p.onClose ?? requestCardClose)(), closeLabel: "Close the agent", links, tabs, body,
-        /* the foot is hidden while editing; the save bar takes its place at the card's foot */
-        foot: editing ? null : foot,
-        afterScroll: editing ? <SaveBar form={form} guard={null} onCancel={cancel} onSave={() => void form.save()} onKeep={() => {}} onDiscard={cancel} /> : null,
+        /* while editing the save bar sits above the foot, which stays: ‹ › must still be pressable, and they ask the guard */
+        foot,
+        afterScroll: editing ? <SaveBar form={form} guard={guard} onCancel={cancel} onSave={() => void form.save()} onKeep={() => setGuard(null)}
+          onDiscard={() => { const g = guard; discardThen(g ? g.run : () => {}); }} /> : null,
         band: CARD262_BAND, bandRight, disc: <Disc262 stand={x.stand} initials={data.initials} />,
         meta: meta ? <span className="apc-meta" data-cl262="meta">{meta}</span> : null,
         afterHead: <NextBox s={step} p={p} />, scrollRef,
