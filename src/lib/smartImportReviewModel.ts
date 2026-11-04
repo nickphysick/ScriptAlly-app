@@ -125,6 +125,9 @@ export interface ReviewQuery {
   markRaw?: string;
   removed: boolean;
   removedReason?: "Agent removed" | "Removed by you";
+  /** The timeline strip's "I don't have it": the sent date is unknown and the writer has said so.
+   *  Client-only; modelToResult picks its fields explicitly and never carries it. */
+  sentWaived?: boolean;
 }
 
 const friendly = (issues?: string[]): string | null =>
