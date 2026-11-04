@@ -445,8 +445,9 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
     }
     const pkg = readFileSync(resolve(__dirname, "../SubmissionPackages.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
     /* Submission packages v26 (25 Oct): the root is `.p6` and states NO inline style at all — what it says about
-       its width lives in pk26.css / pk40.generated.css, which the chain above reads */
-    expect(pkg, "the Packages root changed shape — this assertion no longer reads it").toContain('className={`p6${empty ? " p6-new" : ""}`} data-pk26="page"');
+       its width lives in pk26.css / pk40.generated.css, which the chain above reads. v41 adds `.p41`, whose cap
+       (1288, the ref's) and padding live in packages/v41/pk41.css */
+    expect(pkg, "the Packages root changed shape — this assertion no longer reads it").toContain('className={`p6 p41${empty ? " p6-new" : ""}`} data-pk26="page"');
     expect(pkg, "Packages styles its root inline — invisible to every stylesheet lock").not.toMatch(/data-pk26="page"[^>]*style=/);
   });
 

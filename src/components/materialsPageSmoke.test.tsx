@@ -218,7 +218,8 @@ describe("/queries/packages renders", () => {
     /* v38: one page, no tabs — the labels row, the builder (a draft first package) and Results, empty: the band's
        empty line, no totals and the dashed "Nothing to show yet." (L7's unit half) */
     expect(html).not.toContain('data-pk26="tabs"');
-    expect(html).toContain('data-pk38="labels"');
+    /* v41: the labels row is retired (the package list replaces it) */
+    expect(html).not.toContain('data-pk38="labels"');
     expect(html).toContain("My first package");
     expect(html).toContain("Once you’ve logged queries with a package, this shows what’s working.");
     expect(html).toContain('data-pk38="empty"');
@@ -227,14 +228,14 @@ describe("/queries/packages renders", () => {
     expect(html).not.toContain('data-pk39="tip"');
   });
 
-  it("populated: the Contact list's header, the labels, and the builder's steps and preview (v39.3)", () => {
+  it("populated: the v41 page — no header card, explainer, raised panel or labels; the builder's steps and preview", () => {
     setActiveManuscript();
     const html = renderPageSeededWith(<SubmissionPackages />, "/queries/packages", { versions: [LETTER], packages: [PACKAGE] });
-    expect(html).toContain('data-pk26="header"');
-    /* v39 A: the Contact list's header card — the title in its highlighter, the Pro stamp, the one-line lede */
-    expect(html).toContain('data-pk39="hd-card"');
-    expect(html).toContain(">Submission packages<");
-    expect(html).toContain('title="Included with your Pro plan"');
+    /* v41 A: the v39 header card, the explainer, the raised panel and the labels row are gone from the DOM */
+    expect(html).not.toContain('data-pk39="hd-card"');
+    expect(html).not.toContain('data-pk392="panel"');
+    expect(html).not.toContain('data-pk38="labels"');
+    expect(html).toContain('data-pk41="page"');
     expect(html).not.toContain("Bundle it. Send it. Know what went.");
     expect(html).toContain('data-pk26="open"');
     expect(html).toContain(">Standard UK<");
@@ -251,11 +252,10 @@ describe("/queries/packages renders", () => {
     expect(html).not.toContain('data-pk26="hero"');
     /* v39 D–F: the label over two cards, the package's own header (picker tile, name in place, one status, Figures), the
        quiet foot with the details link, and no stepper row */
-    /* v39.1 G: the one-line explainer, with How it works and ✕ */
-    expect(html).toContain('data-pk39="tip"');
-    expect(html).toContain("A package is everything one agent receives:");
-    expect(html).toContain(">How it works →<");
-    expect(html).toContain(">Build, view and edit<");
+    /* v41 A: no explainer line and no "Build, view and edit" kicker */
+    expect(html).not.toContain('data-pk39="tip"');
+    expect(html).not.toContain("A package is everything one agent receives:");
+    expect(html).not.toContain(">Build, view and edit<");
     expect(html).toContain('data-pk39="pkg-head"');
     expect(html).toContain('aria-label="Change icon and colour"');
     expect(html).toContain('aria-label="Package name"');
@@ -265,8 +265,7 @@ describe("/queries/packages renders", () => {
     expect(html).toContain("1 of 2 needed");
     expect(html).toContain(">Note, copy or delete…<");
     expect(html).not.toContain("p6-lc-s");
-    /* v38: the label for the package, and no tab bar or tab page */
-    expect(html).toContain('data-pkid="pk1"');
+    /* no tab bar or tab page */
     expect(html).not.toContain('data-pk26="tabs"');
     expect(html).not.toContain('data-pk26="materials"');
   });

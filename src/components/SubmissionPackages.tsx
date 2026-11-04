@@ -29,10 +29,7 @@ import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 import { usePk26Model } from "./packages/v26/usePk26Model";
 import { Pk26Hero } from "./packages/v26/Pk26Header";
 import { Pk39HowItWorks } from "./packages/v26/Pk39HowItWorks";
-import { Pk39Header } from "./packages/v26/Pk39Header";
-import { Pk39Tip } from "./packages/v26/Pk39Tip";
 import { Pk26Builder, type LibTab } from "./packages/v26/Pk26Builder";
-import { Pk39Labels } from "./packages/v26/Pk39Labels";
 import { Pk38Drawer } from "./packages/v26/Pk38Drawer";
 import { Pk38Results } from "./packages/v26/Pk38Results";
 import { libTabFromParam } from "../lib/packagesV38";
@@ -48,6 +45,7 @@ import "./packages/v26/pk391.generated.css";
 import "./packages/v26/pk391.css";
 import "./packages/v26/pk392.css";
 import "./packages/v26/pk393.css";
+import "./packages/v41/pk41.css";
 
 export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab: string, sub?: string) => void }> = ({ active: routeActive = true }) => {
   const model = usePk26Model();
@@ -118,20 +116,14 @@ export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab:
 
   return (
     <WorkspacePageGrid className="pk39-wpg" scrollLabel="Submission packages" masthead={null}>
-      <div ref={rootRef} className={`p6${empty ? " p6-new" : ""}`} data-pk26="page">
-        {empty ? <Pk26Hero onBuild={() => part("builder")?.scrollIntoView({ block: "start", behavior: "smooth" })} onHow={() => setHow(true)} />
-          : <Pk39Header title={activeMs?.title ?? null} onNew={() => setDialog({ m: "new" })} onHow={() => setHow(true)} />}
-        {/* v39.1 G: the one-line explainer, above Your packages; never on the brand-new page */}
-        {empty || !collectionsReady ? null : <Pk39Tip onHow={() => setHow(true)} />}
-        {/* v39.2 B: Your packages and the builder are one raised panel (dressed only on the populated page) */}
-        <section className="p9-pkc" aria-label="Your packages and the builder" data-pk392="panel">
-        <Pk39Labels model={model} currentId={current?.id ?? null} showRetired={showRetired} onShowRetired={setShowRetired}
-          onPick={(p) => setCurId(p.id)} onOpenRetired={(p) => setPkdId(p.id)} onNew={() => setDialog({ m: "new" })} />
+      {/* v41 Phase 1: the page is the Dashboard v2 / Contact list language — no header card, explainer, raised panel or
+          label tiles (each is replaced by a v41 part, below) */}
+      <div ref={rootRef} className={`p6 p41${empty ? " p6-new" : ""}`} data-pk26="page" data-pk41="page">
+        {empty ? <Pk26Hero onBuild={() => part("builder")?.scrollIntoView({ block: "start", behavior: "smooth" })} onHow={() => setHow(true)} /> : null}
         <Pk26Builder model={model} retired={retired} current={current} onSelect={setCurId} onFigures={(p) => setPkdId(p.id)} askStep={askStep}
             onNewPackage={() => setDialog({ m: "new" })} onDuplicate={copy} onEditPackage={(p, focus) => setDialog({ m: "edit", id: p.id, ...(focus ? { focus } : {}) })}
             onOpenMaterial={(k, id) => setDrawer(k === "ext" ? { m: "ext", id } : { m: "mat", kind: k, id })}
             onNewMaterial={openNewMaterial} onOpenVersions={goVersions} onOpenComps={goComps} />
-        </section>
         <Pk38Results model={model} onOpenPkg={(p) => setPkdId(p.id)} onOpenMaterial={(k, id) => setDrawer({ m: "mat", kind: k, id })}
           onOpenVersions={goVersions} onSeeQueries={goQueries} onAnalytics={goAnalytics} />
       </div>

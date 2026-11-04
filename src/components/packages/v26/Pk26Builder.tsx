@@ -27,7 +27,6 @@ import { Pk393Builder } from "./Pk393Builder";
 export const DRAFT_ID = "__draft";
 export type LibTab = "let" | "syn" | "ver";
 
-export const BUILDER_KICKER = "Build, view and edit";
 export const STAGE_LOCK_TIP = "Locked: what each agent got stays as it was. You can still rename it; to change what goes out, make a copy.";
 export const PICKER_NOTE = "Shows on its label, in the Query Centre and in your results.";
 
@@ -85,8 +84,9 @@ export const Pk26Builder: React.FC<BuilderProps> = ({ model, retired, current, o
 
   return (
     <>
-      <section className="p9-pb-build" aria-label="Put a package together" data-pk26="builder" data-pk39="builder">
-        <p className="p9-bk-k" data-pk39="kicker">{BUILDER_KICKER}</p>
+      {/* v41: no "Build, view and edit" kicker; the section is no longer `.p9-pb-build`, so v39.1's forced-serif rule does
+          not reach the builder's typewriter names */}
+      <section className="p41-build" aria-label="The open package" data-pk26="builder" data-pk39="builder" data-pk41="builder">
         {/* v39.3: Steps + preview, or the start card when every package is retired */}
         {p ? <Pk393Builder model={model} p={p} isActive={active?.id === p.id || p.id === DRAFT_ID} onFigures={onFigures} onEdit={onEditPackage} onDuplicate={onDuplicate}
           onPut={put} onOpenMaterial={onOpenMaterial} onNewMaterial={onNewMaterial} onOpenVersions={onOpenVersions} onOpenComps={onOpenComps} askStep={askStep} />

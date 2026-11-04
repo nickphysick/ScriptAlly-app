@@ -1,0 +1,39 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Submission packages v41 (design-refs/submission-packages-v41/): the page in the language of Dashboard v2 and the
+ * Contact list address book: navy panels and bars, framed white cards, one card of hairline rows, soft pink for founding
+ * writers. Values are the ref's COMPUTED styles at 1512 and 1280, ported into the app's own class names (`p41-`); no
+ * `k4-` or `mn-` name ships. Desktop only (≥768), as every rule on this page since v39.
+ *
+ * ⚠️ EVERY RULE HERE NAMES `.p41` (or a portalled part's own root), so the v26–v39.3 sheets underneath stay as they were
+ *    for the parts v41 keeps (the drawers, the material drawer, the empty page's hero) and lose only what v41 restyles.
+ */
+
+/* ══ A · THE PAGE: the ground, the pattern and the column (screen 01) ══════════════════════════════════════════════════
+   The ground is the ref's `#scroll` gradient, #fbf9f5 → #eeebe5, fixed to the scroller's box (it does not stretch over
+   the whole content). The pattern is v39.2's tile, drawn the Contact list's way (contactV25.css A1): a repeated SVG with
+   its opacity BAKED IN at .085, the same figure the ref sets on its pseudo-element, scrolling with the page. The pack's
+   tile (art/packages-pattern-tile.svg) holds the same six motifs on a 240 tile; the shipped 340 × 360 tile is kept.
+   The column: capped at the ref's 1288 and centred; 40 on the left (36 at ≤1400), and 150 on the RIGHT, so the
+   Archivist pinned bottom-right (Part G) never covers content (content's right edge 1354 at 1512, 1122 at 1280). */
+@media (min-width: 768px) {
+  .pk39-wpg > .wpg-scroll:has(> .p41) {
+    background-color: #f2eee8;
+    background-image: url("/images/packages/packages-pattern.svg"), linear-gradient(180deg, #fbf9f5 0%, #eeebe5 100%);
+    background-repeat: repeat, no-repeat;
+    background-size: 340px 360px, 100% 100%;
+    background-attachment: local, scroll;
+  }
+  .pk39-wpg > .wpg-scroll > .p6.p41:not(.p6-new) {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 1288px;
+    margin: 0 auto;
+    padding: 30px 150px 96px 40px;
+  }
+}
+@media (min-width: 768px) and (max-width: 1400px) {
+  .pk39-wpg > .wpg-scroll > .p6.p41:not(.p6-new) { padding-left: 36px; }
+}
