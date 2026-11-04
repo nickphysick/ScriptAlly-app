@@ -2,53 +2,54 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Query Centre v151 (design-refs/query-centre-v151/, option B) — the desktop page: one width, a plain header, the info
- * banner, one toolbar row (tabs · search · Filters · Group, or Group and Sort in Birds-eye), the existing Filter queries
- * panel opened inline, the active-filter strip, then ONE TABLE with plain sections, or Birds-eye in a white card.
+ * Query Centre v151.1 (design-refs/query-centre-v151-1/; v151 underneath) — the desktop page: one width, a plain
+ * header, the "This week" summary card, one row of quick filters beside the List | Birds-eye switch, the control line
+ * (Showing N of M · search · Filters · Group, or Group and Sort in Birds-eye), the pill row while anything is set, the
+ * existing Filter queries panel opened inline, then ONE TABLE of mini-card rows under one header row per group, or
+ * Birds-eye in a white card.
  *
- * ⚠️ EVERY FIGURE IS THE PAGE'S OWN: the tabs are the "who it's with" filter (`qcF138.where`), the panel is v142's
- *    strip, the rows are `buildQcRows`' and each row's next move is `nextDoor` (lib/queryActions/entry).
+ * ⚠️ EVERY FIGURE IS THE PAGE'S OWN: the quick filters are the "who it's with" filter (`qcF138.where`), the panel is
+ *    v142's strip, the rows are `buildQcRows`' and each row's button is its `nextDoor` (lib/queryActions/entry).
  * ⚠️ ONE WIDTH (`--qc151-w`) for every block on the page, set once on `.qc151`.
- * ⚠️ THE HOVER TIMELINE LIVES IN THE ROW'S OWN <tbody>: the row and its timeline are one hover target, so moving the
- *    pointer from one to the other keeps it open and leaving both closes it.
+ * ⚠️ THE GROUP HEADER ROWS ARE STICKY CELLS IN ONE TABLE, as the ref's are: each sticks at the sheet's lip while its
+ *    group passes, and the next group's header (later in the table) paints over it when it arrives.
  */
 import React, { useEffect, useRef, useState } from "react";
+import { QueryStatus } from "../../../types";
 import { StatusDot } from "../../StatusDot";
 import { usePopover } from "../../shell/ListPills";
 import { usePinCover } from "../../shell/stickyStack";
-import { guideSeen, markGuideSeen } from "../../../lib/pageGuide";
-import { STAGE_NAME, type QcRow, type WhereKey } from "../../../lib/qcSummary";
-import type { PeekEvent } from "../../../lib/qc138";
+import { STAGE_NAME, whereItStands, type QcRow, type WhereKey } from "../../../lib/qcSummary";
 import { BE_GROUPS, BE_SORTS, type BeGroup, type BeSort } from "../../../lib/qc150";
 import { GROUP_BY_OPTIONS, type GroupBy } from "../../../lib/qcCalView";
-import {
-  COLUMNS_151, TAB_LABEL, dueCell, dueMsOf, isClosedRow, lastHeardMs, nextCell, pressSort, shortDate, trackOf,
-  type CountLine, type Section, type Sort151,
-} from "../../../lib/qc151";
+import { TAB_LABEL, isClosedRow, lastHeardMs, nextCell, pressSort, trackOf, type Section, type Sort151, type SortKey151 } from "../../../lib/qc151";
+import { PILL_FILL, TINT, dayLine, nextText, pillWords, yearSplit, type PillGroup, type WeekSummary } from "../../../lib/qc1511";
 import { GROUP_LINE, RadioMenu151 } from "./QcToolbar140";
-import { QC_DESK_HAWK } from "./QcHeader138";
-import type { Qc140Chip } from "./QcFilterMenu140";
 import "./qcv151.css";
 
-export const QC151_BANNER_KEY = "queries-explainer";
-export const HOVER_MS = 1000;
+export const HAWK_DESK = "/images/query-centre/hawk-desk.webp?v=1";
 
 const LIST_ICON = <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01" /></svg>;
 const BIRDS_ICON = <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9M4 12h14M4 17h6" /><circle cx="14" cy="7" r="1.6" /><circle cx="19" cy="12" r="1.6" /><circle cx="11" cy="17" r="1.6" /></svg>;
-const PLANE = <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3 10 14" /><path d="M21 3 14.5 21l-4-7-7-4z" /></svg>;
 const FIND = <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4.5 4.5" /></svg>;
 const FILTER = <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5.5h14M5.5 10h9M8 14.5h4" /></svg>;
 const GROUP = <svg className="gic" viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="2.5" width="15" height="6" rx="1.6" /><path d="M5.5 5.5h4" /><rect x="2.5" y="11.5" width="15" height="6" rx="1.6" /><path d="M5.5 14.5h4" /></svg>;
 const SORT = <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 4v12M3.5 13.5 6 16l2.5-2.5M14 16V4m-2.5 2.5L14 4l2.5 2.5" /></svg>;
 const CARET = <svg className="qc151-cv" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5l3 3 3-3" /></svg>;
 const CROSS = <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 3l6 6M9 3l-6 6" /></svg>;
+const CHEV = <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5l3 3 3-3" /></svg>;
 
 export type View151 = "list" | "birds";
 
-/** the Where it stands column: the status's own name; a closed query in the filter panel's short words (Passed, No reply,
- *  Withdrawn), so the column holds one line at 1280 */
+/** the Where it stands pill: the status's own name; a closed query in the filter panel's short words */
 const CLOSED_SHORT: Partial<Record<string, string>> = { "No Response": "No reply" };
 export const standWords = (r: Pick<QcRow, "status">): string => CLOSED_SHORT[r.status] ?? STAGE_NAME[r.status];
+
+/** the sort's column words (the headings', the Sort pill's). v151's Agency and Next move columns are folded away; a
+ *  sort still set on them from earlier in the visit keeps its own name. */
+const SORT_WORD: Record<SortKey151, string> = { agent: "Agent", agency: "Agency", stage: "Where it stands", queried: "Queried", heard: "Last heard", next: "Next move", due: "Next" };
+/** the arrow, the ref's: ↓ for the column's own direction (soonest / earliest first), ↑ reversed */
+export const arrow = (s: Sort151): string => (s.desc ? "↑" : "↓");
 
 /* ── the switch ── */
 export const QcSwitch151: React.FC<{ view: View151; onView: (v: View151) => void; loading: boolean }> = ({ view, onView, loading }) => (
@@ -58,42 +59,38 @@ export const QcSwitch151: React.FC<{ view: View151; onView: (v: View151) => void
   </div>
 );
 
-/* ── §2 the header ── */
+/* ── §1 the header ── */
 export const QcHeader151: React.FC<{
-  counts: CountLine | null; view: View151; onView: (v: View151) => void; loading: boolean;
-  onLog: () => void; onRecord: () => void; logDisabled?: boolean; logRef?: React.Ref<HTMLButtonElement>;
-}> = ({ counts, view, onView, loading, onLog, onRecord, logDisabled = false, logRef }) => (
+  loading: boolean; onLog: () => void; onRecord: () => void; logDisabled?: boolean; logRef?: React.Ref<HTMLButtonElement>;
+}> = ({ loading, onLog, onRecord, logDisabled = false, logRef }) => (
   <header className="qc151-hd" data-qc151="header" data-qcv="open-header" data-own-header="">
-    <div className="qc151-id">
-      <img src={`${QC_DESK_HAWK.src}?v=${QC_DESK_HAWK.version}`} alt="" width={108} />
-      <div>
-        <h1 data-page-title="true" data-qc151="title">Your queries</h1>
-        <p className="qc151-cl" data-qc151="count-line">
-          {counts ? <><b>{counts.sent}</b> sent · <b>{counts.active}</b> active · <b>{counts.heardPct}%</b> heard back</> : " "}
-        </p>
-      </div>
-    </div>
+    <h1 data-page-title="true" data-qc151="title">Your queries</h1>
     <div className="qc151-acts">
-      <QcSwitch151 view={view} onView={onView} loading={loading} />
       <button type="button" className="qc151-btn qc151-btn--g" data-qc151="record" data-qcv="oh-record" disabled={loading} onClick={onRecord}>Record a response</button>
       <button type="button" ref={logRef} className="qc151-btn qc151-btn--n" data-qc151="log" data-qcv="oh-log" disabled={loading || logDisabled} onClick={onLog}>+ Log a query</button>
     </div>
   </header>
 );
 
-/* ── §3 the info banner (dismissed in the packages banner's store, lib/pageGuide) ── */
-export const QcBanner151: React.FC<{ onHow: () => void }> = ({ onHow }) => {
-  const [gone, setGone] = useState(() => guideSeen(QC151_BANNER_KEY));
-  if (gone) return null;
-  return (
-    <section className="qc151-ibn" aria-label="About the Query Centre" data-qc151="banner">
-      <span className="qc151-ibn-ic" aria-hidden="true">{PLANE}</span>
-      <p><b>Each row is one query to one agent:</b> where it stands, what you sent and what happens next. Rest on a row to see its timeline, or press it to open the full query card.</p>
-      <button type="button" className="qc151-ibn-l" data-qc151="how" onClick={onHow}>How it works →</button>
-      <button type="button" className="qc151-ibn-x" aria-label="Dismiss" data-qc151="banner-x" onClick={() => { markGuideSeen(QC151_BANNER_KEY); setGone(true); }}>{CROSS}</button>
-    </section>
-  );
-};
+/* ── §2 the "This week" summary card ── */
+export const QcSummary1511: React.FC<{ summary: WeekSummary | null }> = ({ summary }) => (
+  <section className="qc1511-sum" aria-label="This week" data-qc1511="summary">
+    <div className="qc1511-sum-art" aria-hidden="true"><img src={HAWK_DESK} alt="" /></div>
+    <div className="qc1511-sum-tx">
+      <h2 data-qc1511="summary-heading">{summary ? summary.heading : " "}</h2>
+      {summary?.detail ? <p data-qc1511="summary-detail">{summary.detail}</p> : null}
+      {summary && summary.pills.length ? (
+        <div className="qc1511-sum-ps">
+          {summary.pills.map((p) => (
+            <span key={p.key} className={`qc1511-sx${p.late ? " is-late" : ""}`} data-qc1511="summary-pill" data-late={p.late ? "" : undefined}>
+              <StatusDot status={p.status} overrideSize={14} decorative />{p.text}
+            </span>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  </section>
+);
 
 /* ── §9 Birds-eye's Group and Sort menus' lines ── */
 const BE_GROUP_LINE: Record<BeGroup, string> = { urgency: "Overdue, upcoming, watch and wait", status: "Where each query stands", none: "One timeline" };
@@ -103,34 +100,35 @@ type Pop151 = "group" | "begroup" | "besort";
 
 export interface QcPage151Props {
   loading: boolean;
-  counts: CountLine | null;
   view: View151;
   onView: (v: View151) => void;
   onLog: () => void;
   onRecord: () => void;
   logDisabled?: boolean;
   logRef?: React.Ref<HTMLButtonElement>;
-  onHow: () => void;
-  /* §4 tabs */
+  /* §2 */
+  summary: WeekSummary | null;
+  /* §3 the quick filters */
   tabCounts: Record<WhereKey, number> | null;
   total: number;
   where: WhereKey | null;
   onWhere: (k: WhereKey | null) => void;
+  /* §4 the control line */
+  showing: number;
   find: string;
   onFind: (v: string) => void;
   findRef?: React.Ref<HTMLInputElement>;
-  /* §5 Filters */
   filterCount: number;
   onClearFilters: () => void;
   filterPanel: (close: () => void) => React.ReactNode;
-  /* §6 the strip */
-  chips: Qc140Chip[];
-  showing: number;
-  onResetAll: () => void;
-  /* §7 the table */
+  /* §5 the pills */
+  pills: PillGroup[];
+  onClearAll: () => void;
+  /* the table */
   group: GroupBy;
   onGroup: (g: GroupBy) => void;
   sort: Sort151;
+  defaultSort: Sort151;
   onSort: (s: Sort151) => void;
   sections: Section<QcRow>[];
   phraseOf: (r: QcRow) => string;
@@ -138,7 +136,6 @@ export interface QcPage151Props {
   selectedId: string | null;
   onOpen: (id: string) => void;
   onAct: (id: string) => void;
-  loadPeek: (id: string) => Promise<PeekEvent[]>;
   signoff: { total: number } | null;
   onImport: () => void;
   /* §9 Birds-eye */
@@ -150,7 +147,7 @@ export interface QcPage151Props {
   onBeSort: (s: BeSort) => void;
 }
 
-/* ── §7 the status track ── */
+/* ── the status track (v151 §7) ── */
 export const Track151: React.FC<{ row: Pick<QcRow, "status" | "furthest"> }> = ({ row }) => {
   const t = trackOf(row);
   return (
@@ -160,44 +157,30 @@ export const Track151: React.FC<{ row: Pick<QcRow, "status" | "furthest"> }> = (
           {k ? <i className={`qc151-cn qc151-cn--${s.state === "future" ? "f" : "p"}`} aria-hidden="true" /> : null}
           <span className={`qc151-st qc151-st--${s.state}`} data-qc151="step" data-state={s.state} data-status={s.status}>
             <StatusDot status={s.status} overrideSize={14} decorative />
-            {s.state === "end" ? <svg className="qc151-xx" viewBox="0 0 14 14" aria-hidden="true"><path className="h" d="M4.3 4.3l5.4 5.4M9.7 4.3l-5.4 5.4" /><path d="M4.3 4.3l5.4 5.4M9.7 4.3l-5.4 5.4" /></svg> : null}
+            {s.state === "end" ? <CrossMark /> : null}
           </span>
         </React.Fragment>
       ))}
     </span>
   );
 };
+const CrossMark: React.FC = () => (
+  <svg className="qc151-xx" viewBox="0 0 14 14" aria-hidden="true"><path className="h" d="M4.3 4.3l5.4 5.4M9.7 4.3l-5.4 5.4" /><path d="M4.3 4.3l5.4 5.4M9.7 4.3l-5.4 5.4" /></svg>
+);
 
-/* ── §7 the hover timeline ── */
-const Stops151: React.FC<{ row: QcRow; events: PeekEvent[] | null; nowMs: number; phrase: string }> = ({ row, events, nowMs, phrase }) => {
-  const closed = isClosedRow(row);
-  const up = (ms: number) => shortDate(ms, nowMs).toUpperCase();
-  const evs = (events ?? []).filter((e) => Number.isFinite(e.ms)).sort((a, b) => a.ms - b.ms);
-  const stops: { k: string; cls: string; name: string; date: string }[] = evs.map((e, i) => ({ k: `e${i}`, cls: "ev", name: e.name, date: up(e.ms) }));
-  if (!events) stops.push({ k: "ld", cls: "ev", name: "Loading", date: "" });
-  if (!closed) {
-    stops.push({ k: "today", cls: "t", name: "Today", date: up(nowMs) });
-    const due = dueMsOf(row);
-    const nc = nextCell(row, phrase, nowMs);
-    const late = due != null && due < nowMs;
-    stops.push({ k: "next", cls: late ? "d" : "f", name: nc.kind === "act" ? nc.label : phrase || "Reply due", date: due != null ? (late ? dueCell(due, nowMs)!.text.toUpperCase() : up(due)) : "NO DATE YET" });
-  }
-  return (
-    <div className="qc151-l1" data-qc151="timeline-line">
-      {stops.map((s, i) => (
-        <React.Fragment key={s.k}>
-          {i ? <span className={`qc151-ln${!closed && i === stops.length - 1 ? " qc151-ln--f" : ""}`} aria-hidden="true" /> : null}
-          <span className={`qc151-p qc151-p--${s.cls}`} data-qc151="stop" data-k={s.k}><i aria-hidden="true" /><b>{s.name}</b>{s.date ? <em>{s.date}</em> : null}</span>
-        </React.Fragment>
-      ))}
-    </div>
-  );
+/** a date cell: "2 Jul", and a lighter "’25" in another year */
+const DateCell: React.FC<{ ms: number | null; nowMs: number; probe: string }> = ({ ms, nowMs, probe }) => {
+  if (ms == null) return <td className="qc1511-d" data-qc151={probe}>{"—"}</td>;
+  const y = yearSplit(ms, nowMs);
+  return <td className="qc1511-d" data-qc151={probe}>{y.dm}{y.yr ? <span className="qc1511-yr"> {y.yr}</span> : null}</td>;
 };
+
+const COLLAPSE_KEY = "qh.qc.collapsed1511";
+const readCollapsed = (): Set<string> => { try { return new Set(JSON.parse(sessionStorage.getItem(COLLAPSE_KEY) ?? "[]") as string[]); } catch { return new Set(); } };
 
 export const QcPage151: React.FC<QcPage151Props> = (p) => {
   const pop = usePopover<Pop151>();
-  /* the table's headings and Birds-eye's date row pin under the sheet's 12px lip (`--pin-cover`, measured on the
-     sheet), never under it: at top 0 the lip (z 19) covered their top 12px */
+  /* the group headers and Birds-eye's date row pin under the sheet's 12px lip (`--pin-cover`, measured on the sheet) */
   const rootRef = useRef<HTMLDivElement>(null);
   const [sheet, setSheet] = useState<HTMLElement | null>(null);
   useEffect(() => { setSheet(rootRef.current?.closest<HTMLElement>(".ws-window") ?? null); }, []);
@@ -206,12 +189,12 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
   const panelRef = useRef<HTMLDivElement>(null);
   const filBtnRef = useRef<HTMLButtonElement>(null);
   const closePanel = () => setPanelOpen(false);
-  /* §5 — a press anywhere outside the panel closes it (the Filters button toggles it itself) */
+  /* a press anywhere outside the panel closes it; the Filters button, a filter pill and + Filter open it themselves */
   useEffect(() => {
     if (!panelOpen) return undefined;
     const down = (e: PointerEvent) => {
-      const t = e.target as Node;
-      if (panelRef.current?.contains(t) || filBtnRef.current?.contains(t)) return;
+      const t = e.target as Element;
+      if (panelRef.current?.contains(t) || filBtnRef.current?.contains(t) || t.closest?.("[data-opens-panel]")) return;
       setPanelOpen(false);
     };
     const key = (e: KeyboardEvent) => { if (e.key === "Escape") setPanelOpen(false); };
@@ -220,84 +203,137 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
     return () => { document.removeEventListener("pointerdown", down, true); document.removeEventListener("keydown", key); };
   }, [panelOpen]);
 
-  /* §7 — the hover timeline: 1000ms of rest on a row; one at a time; the row's tbody is the hover target */
-  const [hotId, setHotId] = useState<string | null>(null);
-  const timer = useRef<number | undefined>(undefined);
-  const cache = useRef(new Map<string, PeekEvent[]>());
-  const [, bump] = useState(0);
-  const enter = (id: string) => {
-    if (!cache.current.has(id)) {
-      p.loadPeek(id).then((ev) => { cache.current.set(id, ev); bump((n) => n + 1); }).catch(() => { cache.current.set(id, []); bump((n) => n + 1); });
-    }
-    window.clearTimeout(timer.current);
-    if (hotId && hotId !== id) setHotId(null);
-    timer.current = window.setTimeout(() => setHotId(id), HOVER_MS);
-  };
-  const leave = (id: string) => { window.clearTimeout(timer.current); setHotId((h) => (h === id ? null : h)); };
-  useEffect(() => () => window.clearTimeout(timer.current), []);
+  /* §6 — a group's rows fold away under its header, for the session */
+  const [collapsed, setCollapsed] = useState<Set<string>>(readCollapsed);
+  const fold = (k: string) => setCollapsed((c) => {
+    const n = new Set(c); if (n.has(k)) n.delete(k); else n.add(k);
+    try { sessionStorage.setItem(COLLAPSE_KEY, JSON.stringify([...n])); } catch { /* a private window */ }
+    return n;
+  });
 
   const birds = p.view === "birds";
   const filtersOn = p.filterCount > 0;
-  const showStrip = !panelOpen && (p.chips.length > 0);
   const groupOpt = GROUP_BY_OPTIONS.find((o) => o.key === p.group);
   const beGroupDef = p.beGroup === "urgency";
   const beSortDef = p.beSort === "due";
+  const sortDef = p.sort.key === p.defaultSort.key && p.sort.desc === p.defaultSort.desc;
+  const groupDef = p.group === "attention";
+  /* §5 — the row is drawn only while something is set */
+  const pillsOn = p.pills.length > 0 || p.find.trim() !== "" || (birds ? (!beGroupDef || !beSortDef) : (!groupDef || !sortDef));
+
+  const heading = (k: SortKey151, label: string, cls: string) => {
+    const on = p.sort.key === k;
+    return (
+      <td key={k} className={`qc1511-lbl ${cls}${on ? " is-on" : ""}`} data-qc1511="label" data-k={k} aria-sort={on ? (p.sort.desc ? "descending" : "ascending") : "none"}>
+        <button type="button" onClick={() => p.onSort(pressSort(p.sort, k))}>{label}<span className="qc1511-ar" aria-hidden="true">{on ? arrow(p.sort) : "↕"}</span></button>
+      </td>
+    );
+  };
+  const labels = () => [
+    heading("stage", "Where it stands", "c-ws"),
+    heading("queried", "Queried", "c-d"),
+    heading("heard", "Last heard", "c-d"),
+    heading("due", "Next", "c-nx"),
+    <td key="act" className="qc1511-lbl c-act" />,
+  ];
 
   const row = (r: QcRow) => {
     const phrase = p.phraseOf(r);
     const nc = nextCell(r, phrase, p.nowMs);
-    const due = dueCell(dueMsOf(r), p.nowMs);
-    const heard = lastHeardMs(r);
-    const hot = hotId === r.id;
+    const nt = nextText(r, p.nowMs);
+    const wh = whereItStands(r, p.nowMs);
+    const day = dayLine(r, p.nowMs);
+    const closed = isClosedRow(r);
     return (
-      <tbody key={r.id} className={`qc151-rg${hot ? " is-hot" : ""}`} data-qc151="row-group" onMouseEnter={() => enter(r.id)} onMouseLeave={() => leave(r.id)}>
-        <tr className={`qc151-r${p.selectedId === r.id ? " is-sel" : ""}`} data-qc151="row" data-qcv="row" data-id={r.id} data-status={r.status} tabIndex={0}
-          onClick={(e) => { if ((e.target as HTMLElement).closest("button")) return; p.onOpen(r.id); }}
-          onKeyDown={(e) => { if (e.key === "Enter" && e.target === e.currentTarget) { e.preventDefault(); p.onOpen(r.id); } }}>
-          <td className="qc151-tk"><Track151 row={r} /></td>
-          <td className="qc151-nm" data-qc151="agent"><b title={r.agentName}>{r.agentName}</b></td>
-          <td className="qc151-ag" data-qc151="agency" title={r.agency || undefined}>{r.agency || "—"}</td>
-          <td className="qc151-ws" data-qc151="stands" title={standWords(r)}>{standWords(r)}</td>
-          <td className="qc151-mono" data-qc151="queried">{r.sentMs != null ? shortDate(r.sentMs, p.nowMs) : "—"}</td>
-          <td className="qc151-mono" data-qc151="heard">{heard != null ? shortDate(heard, p.nowMs) : "—"}</td>
-          <td className="qc151-nx" data-qc151="next" data-kind={nc.kind}>
-            {nc.kind === "act"
-              ? <button type="button" className="qc151-mv" data-qc151="move" onClick={(e) => { e.stopPropagation(); p.onAct(r.id); }}>{nc.label}<span className="qc151-arr" aria-hidden="true"> →</span></button>
-              : <span className="qc151-wt">{nc.label}</span>}
-          </td>
-          <td className={`qc151-due${due?.late ? " is-late" : ""}`} data-qc151="due" data-late={due?.late ? "" : undefined}>{due ? due.text : "—"}</td>
-        </tr>
-        {hot ? (
-          <tr className="qc151-tlr" data-qc151="timeline">
-            <td colSpan={8}><div className="qc151-pk"><Stops151 row={r} events={cache.current.get(r.id) ?? null} nowMs={p.nowMs} phrase={phrase} /></div></td>
-          </tr>
-        ) : null}
-      </tbody>
+      <tr key={r.id} className={`qc1511-r${p.selectedId === r.id ? " is-sel" : ""}`} data-qc151="row" data-qcv="row" data-id={r.id} data-status={r.status} data-where={wh} tabIndex={0}
+        onClick={(e) => { if ((e.target as HTMLElement).closest("button")) return; p.onOpen(r.id); }}
+        onKeyDown={(e) => { if (e.key === "Enter" && e.target === e.currentTarget) { e.preventDefault(); p.onOpen(r.id); } }}>
+        <td className="qc1511-tk" data-qc1511="tint" style={{ background: TINT[wh] }}>
+          {day ? <span className="qc1511-day" data-qc1511="day">{day}</span> : null}
+          <Track151 row={r} />
+        </td>
+        <td className="qc1511-nm" data-qc151="agent">
+          <b>{r.agentName}</b>
+          <span className="qc1511-agy" data-qc151="agency" title={r.agencyKey || undefined}>{r.agencyKey || "—"}</span>
+        </td>
+        <td className="qc1511-ws" data-qc151="stands">
+          <span className="qc1511-wp" data-qc1511="stand-pill" style={{ background: PILL_FILL[wh] }}>
+            {closed
+              ? <span className="qc151-st qc151-st--end qc1511-wx"><StatusDot status={QueryStatus.QUERIED} overrideSize={14} decorative /><CrossMark /></span>
+              : <StatusDot status={r.status} overrideSize={14} decorative />}
+            <span>{standWords(r)}</span>
+          </span>
+        </td>
+        <DateCell ms={r.sentMs} nowMs={p.nowMs} probe="queried" />
+        <DateCell ms={lastHeardMs(r)} nowMs={p.nowMs} probe="heard" />
+        <td className={`qc1511-nx qc1511-nx--${nt.tone}`} data-qc151="next" data-tone={nt.tone}>{nt.text}</td>
+        <td className="qc1511-act" data-qc1511="action">
+          {nc.kind === "act"
+            ? <button type="button" className="qc151-mv" data-qc151="move" onClick={(e) => { e.stopPropagation(); p.onAct(r.id); }}>{nc.label}<span className="qc151-arr" aria-hidden="true"> →</span></button>
+            : null}
+        </td>
+      </tr>
     );
+  };
+
+  const pill = (key: string, body: React.ReactNode, onBody: (el: HTMLElement) => void, onX: () => void, xLabel: string, opensPanel = false) => (
+    <span key={key} className="qc1511-fp" data-qc1511="pill" data-k={key}>
+      <button type="button" className="qc1511-fpb" data-opens-panel={opensPanel ? "" : undefined} onClick={(e) => onBody(e.currentTarget)}>{body}</button>
+      <button type="button" className="qc1511-fx" data-qc1511="pill-x" aria-label={xLabel} onClick={onX}>{CROSS}</button>
+    </span>
+  );
+  const pillRow = () => {
+    const out: React.ReactNode[] = [];
+    for (const g of p.pills) {
+      const w = pillWords(g);
+      out.push(pill(`f:${g.key}`, w.field
+        ? <><span className="k">{w.field}</span><span className="op">{w.op}</span><span className="v">{w.value}</span></>
+        : <>{FILTER}<span className="v">{w.value}</span></>, () => setPanelOpen(true), g.off, `Remove ${w.field ?? w.value}`, true));
+    }
+    if (p.find.trim()) out.push(pill("find", <><span className="k">Name</span><span className="op">contains</span><span className="v">{p.find.trim()}</span></>,
+      () => (document.querySelector<HTMLInputElement>('[data-qc151="find"] input'))?.focus(), () => p.onFind(""), "Clear the search"));
+    if (birds) {
+      if (!beGroupDef) out.push(pill("group", <>{GROUP}<span className="k">Group</span><span className="v">{BE_GROUPS.find((g) => g.key === p.beGroup)?.label}</span></>,
+        (el) => pop.toggle("begroup", el), () => p.onBeGroup("urgency"), "Back to Urgency"));
+      if (!beSortDef) out.push(pill("sort", <>{SORT}<span className="k">Sort</span><span className="v">{BE_SORTS.find((s) => s.key === p.beSort)?.label}</span></>,
+        (el) => pop.toggle("besort", el), () => p.onBeSort("due"), "Back to Due date"));
+    } else {
+      if (!groupDef) out.push(pill("group", <>{GROUP}<span className="k">Group</span><span className="v">{groupOpt?.label}</span></>,
+        (el) => pop.toggle("group", el), () => p.onGroup("attention"), "Back to who it’s with"));
+      if (!sortDef) out.push(pill("sort", <>{SORT}<span className="k">Sort</span><span className="v">{SORT_WORD[p.sort.key]} {arrow(p.sort)}</span></>,
+        () => p.onSort({ key: p.sort.key, desc: !p.sort.desc }), () => p.onSort(p.defaultSort), "Back to the default sort"));
+    }
+    return out;
   };
 
   const empty = p.sections.length === 0;
   return (
     <div className="qc151" data-qc151="page" data-view={p.view} ref={rootRef}>
-      <QcHeader151 counts={p.counts} view={p.view} onView={p.onView} loading={p.loading} onLog={p.onLog} onRecord={p.onRecord} logDisabled={p.logDisabled} logRef={p.logRef} />
-      <QcBanner151 onHow={p.onHow} />
+      <QcHeader151 loading={p.loading} onLog={p.onLog} onRecord={p.onRecord} logDisabled={p.logDisabled} logRef={p.logRef} />
+      <QcSummary1511 summary={p.summary} />
 
-      {/* §4 the toolbar row */}
-      <div className="qc151-tb" data-qc151="toolbar" data-qcv="ws-head">
-        <nav className="qc151-tabs" aria-label="Who it's with" data-qc151="tabs">
-          <button type="button" className="qc151-tab" data-k="all" aria-pressed={p.where === null} disabled={p.loading} onClick={() => p.onWhere(null)}>All <b>{p.tabCounts ? p.total : ""}</b></button>
+      {/* §3 the quick filters, and the switch on the same row */}
+      <div className="qc1511-qr" data-qc1511="quick-row">
+        <nav className="qc1511-qf" aria-label="Who it's with" data-qc151="tabs" data-qc1511="quick">
+          <button type="button" className="qc1511-q" data-k="all" aria-pressed={p.where === null} disabled={p.loading} onClick={() => p.onWhere(null)}>All <b>{p.tabCounts ? p.total : ""}</b></button>
           {(["you", "agent", "quiet", "closed"] as const).map((k) => (
-            <button key={k} type="button" className="qc151-tab" data-k={k} aria-pressed={p.where === k} disabled={p.loading} onClick={() => p.onWhere(k)}>
+            <button key={k} type="button" className="qc1511-q" data-k={k} aria-pressed={p.where === k} disabled={p.loading} onClick={() => p.onWhere(k)}>
               {TAB_LABEL[k]} <b>{p.tabCounts ? p.tabCounts[k] : ""}</b>
             </button>
           ))}
         </nav>
-        <label className="qc151-sr" data-qc151="find" data-qc140="find">
-          {FIND}
-          <input ref={p.findRef} value={p.find} onChange={(e) => p.onFind(e.target.value)} placeholder="Find an agent" aria-label="Find an agent" autoComplete="off" disabled={p.loading} />
-          {p.find ? <button type="button" className="qc151-srx" aria-label="Clear the search" data-qc151="find-clear" onClick={() => p.onFind("")}>{CROSS}</button> : null}
-        </label>
+        <QcSwitch151 view={p.view} onView={p.onView} loading={p.loading} />
+      </div>
+
+      {/* §4 the control line */}
+      <div className="qc1511-cl" data-qc151="toolbar" data-qc1511="control-line" data-qcv="ws-head">
+        <span className="qc1511-show" data-qc1511="showing">Showing <b>{p.loading ? "" : p.showing}</b> of <b>{p.loading ? "" : p.total}</b> {p.total === 1 ? "query" : "queries"}</span>
         <div className="qc151-ctl" data-qc151="controls">
+          <label className="qc151-sr" data-qc151="find" data-qc140="find">
+            {FIND}
+            <input ref={p.findRef} value={p.find} onChange={(e) => p.onFind(e.target.value)} placeholder="Find an agent" aria-label="Find an agent" autoComplete="off" disabled={p.loading} />
+            {p.find ? <button type="button" className="qc151-srx" aria-label="Clear the search" data-qc151="find-clear" onClick={() => p.onFind("")}>{CROSS}</button> : null}
+          </label>
           <span className={`qc151-fw${panelOpen || filtersOn ? " is-on" : ""}`} data-qc151="filters-wrap">
             <button type="button" ref={filBtnRef} className="qc151-bb" data-qc151="filters" aria-expanded={panelOpen} aria-label={filtersOn ? `Filters: ${p.filterCount} on` : "Filters"} disabled={p.loading}
               onClick={() => setPanelOpen((o) => !o)}>
@@ -305,7 +341,7 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
             </button>
             {filtersOn ? <button type="button" className="qc151-bx" data-qc151="filters-clear" aria-label="Reset all filters" title="Reset filters" onClick={() => p.onClearFilters()}>{CROSS}</button> : null}
           </span>
-          <button type="button" className={`qc151-bb${(birds ? !beGroupDef : p.group !== "attention") ? " is-on" : ""}`} data-qc151={birds ? "be-group" : "group"} data-lp="qc151-group" aria-haspopup="menu"
+          <button type="button" className={`qc151-bb${(birds ? !beGroupDef : !groupDef) ? " is-on" : ""}`} data-qc151={birds ? "be-group" : "group"} data-lp="qc151-group" aria-haspopup="menu"
             aria-expanded={pop.open === (birds ? "begroup" : "group")} disabled={p.loading}
             aria-label={birds ? `Group Birds-eye by ${BE_GROUPS.find((g) => g.key === p.beGroup)?.label}` : `Group the list by ${groupOpt?.label ?? ""}`}
             onClick={(e) => pop.toggle(birds ? "begroup" : "group", e.currentTarget)}>{GROUP}<span>Group</span>{CARET}</button>
@@ -332,21 +368,17 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
         </div>
       </div>
 
-      {/* §5 the panel, inline */}
-      {panelOpen ? <div className="qc151-fpw" ref={panelRef} data-qc151="filter-panel">{p.filterPanel(() => { closePanel(); filBtnRef.current?.focus({ preventScroll: true }); })}</div> : null}
-
-      {/* §6 the active strip */}
-      {showStrip ? (
-        <div className="qc151-ast" data-qc151="strip" aria-live="polite">
-          <span className="qc151-ast-lb">Showing {p.showing} of {p.total}</span>
-          <span className="qc151-ast-cs">
-            {p.chips.map((c) => (
-              <button key={c.key} type="button" className="qc151-ast-c" data-qc151="strip-chip" data-k={c.key} aria-label={`Remove ${c.label}`} onClick={c.off}>{c.label}{CROSS}</button>
-            ))}
-          </span>
-          <button type="button" className="qc151-ast-r" data-qc151="strip-reset" onClick={p.onResetAll}>Reset all</button>
+      {/* §5 the pill row: not drawn at the defaults */}
+      {pillsOn ? (
+        <div className="qc1511-pr" data-qc1511="pills" aria-live="polite">
+          {pillRow()}
+          <button type="button" className="qc1511-fadd" data-qc1511="add-filter" data-opens-panel="" onClick={() => setPanelOpen(true)}>+ Filter</button>
+          <button type="button" className="qc1511-crs" data-qc1511="clear-all" onClick={p.onClearAll}>Clear all</button>
         </div>
       ) : null}
+
+      {/* the panel, inline, under the pill row */}
+      {panelOpen ? <div className="qc151-fpw" ref={panelRef} data-qc151="filter-panel">{p.filterPanel(() => { closePanel(); filBtnRef.current?.focus({ preventScroll: true }); })}</div> : null}
 
       {birds ? (
         <div className="qc151-be" data-qc151="birds-card">
@@ -355,44 +387,44 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
               <b>Nothing on the timeline</b>
               {p.birdsEmpty === "closed"
                 ? <><i>Closed queries don’t appear on Birds-eye. Switch to List to see them.</i><button type="button" className="qc151-btn qc151-btn--g" data-qc151="back-to-list" onClick={() => p.onView("list")}>Back to List</button></>
-                : <><i>No live queries match these filters.</i><button type="button" className="qc151-btn qc151-btn--g" data-qc151="birds-reset" onClick={p.onResetAll}>Reset filters</button></>}
+                : <><i>No live queries match these filters.</i><button type="button" className="qc151-btn qc151-btn--g" data-qc151="birds-reset" onClick={p.onClearAll}>Reset filters</button></>}
             </div>
           ) : p.birds}
         </div>
       ) : (
-        <table className="qc151-tbl" data-qc151="table" data-qcv="list">
-          <colgroup><col className="c-tk" /><col className="c-nm" /><col className="c-ag" /><col className="c-ws" /><col className="c-q" /><col className="c-h" /><col className="c-nx" /><col className="c-due" /></colgroup>
-          <thead>
-            <tr>
-              <th aria-label="Status" />
-              {COLUMNS_151.map((c) => {
-                const on = p.sort.key === c.key;
-                return (
-                  <th key={c.key} className={on ? "is-on" : undefined} data-qc151="heading" data-k={c.key} aria-sort={on ? (p.sort.desc ? "descending" : "ascending") : "none"}>
-                    <button type="button" onClick={() => p.onSort(pressSort(p.sort, c.key))}>{c.label}<span className="qc151-ar" aria-hidden="true">{on ? (p.sort.desc ? "↓" : "↑") : "↕"}</span></button>
-                  </th>
-                );
-              })}
-            </tr>
-          </thead>
+        <table className="qc151-tbl qc1511-tbl" data-qc151="table" data-qcv="list">
+          <colgroup><col className="c-tk" /><col className="c-nm" /><col className="c-ws" /><col className="c-d" /><col className="c-d" /><col className="c-nx" /><col className="c-act" /></colgroup>
           {empty ? (
-            <tbody><tr><td colSpan={8}>
+            <tbody><tr><td colSpan={7}>
               <div className="qc151-emp" data-qc151="no-matches">
                 <b>No queries match</b>
-                <i>{[...p.chips.map((c) => c.label), ...(p.where ? [TAB_LABEL[p.where]] : [])].join(" · ") || "this view"}</i>
-                <button type="button" className="qc151-btn qc151-btn--g" data-qc151="empty-reset" onClick={p.onResetAll}>Reset filters</button>
+                <i>{[...p.pills.map((g) => pillWords(g).value), ...(p.find.trim() ? [`“${p.find.trim()}”`] : []), ...(p.where ? [TAB_LABEL[p.where]] : [])].join(" · ") || "this view"}</i>
+                <button type="button" className="qc151-btn qc151-btn--g" data-qc151="empty-reset" onClick={p.onClearAll}>Reset filters</button>
               </div>
             </td></tr></tbody>
-          ) : p.sections.map((s) => (
-            <React.Fragment key={s.key}>
-              {s.label ? <tbody className="qc151-secg"><tr className="qc151-sec" data-qc151="section" data-k={s.key}><td colSpan={8}>{s.label}<small>{s.rows.length}</small></td></tr></tbody> : null}
-              {s.rows.map(row)}
-            </React.Fragment>
-          ))}
+          ) : p.sections.map((s) => {
+            const shut = !!s.label && collapsed.has(s.key);
+            return (
+              <tbody key={s.key} className={`qc1511-g${shut ? " is-shut" : ""}`} data-qc1511="group" data-k={s.key}>
+                <tr className="qc1511-gh" data-qc1511="group-header" data-k={s.key}>
+                  {s.label ? (
+                    <td className="qc1511-gt" colSpan={2}>
+                      <button type="button" className="qc1511-cv" data-qc1511="fold" aria-expanded={!shut} aria-label={`${shut ? "Show" : "Hide"} ${s.label}`} onClick={() => fold(s.key)}>{CHEV}</button>
+                      <span className="qc1511-gn" data-qc151="section">{s.label}</span><small>{s.rows.length}</small>
+                    </td>
+                  ) : (
+                    <><td className="qc1511-lbl c-tk" />{heading("agent", "Agent", "c-nm")}</>
+                  )}
+                  {labels()}
+                </tr>
+                {shut ? null : s.rows.map(row)}
+              </tbody>
+            );
+          })}
         </table>
       )}
 
-      {/* §7 the sign-off: All, nothing narrowing, List only */}
+      {/* the sign-off: All, nothing narrowing, List only */}
       {!birds && p.signoff ? (
         <section className="qc151-end" data-qc151="signoff">
           <img src="/images/query-centre/quill-ink.webp" alt="" />

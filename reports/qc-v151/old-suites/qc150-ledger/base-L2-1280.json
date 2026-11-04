@@ -1,0 +1,22 @@
+[
+ {
+  "where": "population",
+  "ok": false,
+  "detail": "0 cards, 88 rows"
+ },
+ {
+  "where": "order",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "cards share a height",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "no chips",
+  "ok": false,
+  "detail": "chips drawn"
+ }
+]

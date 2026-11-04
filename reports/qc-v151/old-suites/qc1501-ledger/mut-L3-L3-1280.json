@@ -1,0 +1,27 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "where": "equal widths",
+  "ok": false,
+  "detail": "340.0,200.0,200.0,200.0"
+ },
+ {
+  "where": "equal heights",
+  "ok": true,
+  "detail": "95.1,95.1,95.1,95.1"
+ },
+ {
+  "where": "no detail, Next or Show them",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "faces account for every query",
+  "ok": true,
+  "detail": "you 5+21/26,agent 5+7/12,quiet 5+28/33,closed 5+12/17"
+ }
+]

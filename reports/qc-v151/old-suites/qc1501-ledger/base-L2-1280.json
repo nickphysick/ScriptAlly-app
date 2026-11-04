@@ -1,0 +1,32 @@
+[
+ {
+  "where": "population",
+  "ok": false,
+  "detail": "{\"g\":null,\"y\":{\"fs\":\"24px\",\"ff\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"t\":\"Here’s every query you’ve sent\"},\"extra\":[\"no section\"]}"
+ },
+ {
+  "where": "At a glance text",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "where": "Your queries text",
+  "ok": false,
+  "detail": "Here’s every query you’ve sent"
+ },
+ {
+  "where": "28px both",
+  "ok": false,
+  "detail": "undefined / 24px"
+ },
+ {
+  "where": "one family",
+  "ok": false,
+  "detail": "undefined / \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "where": "no subheading",
+  "ok": false,
+  "detail": "[\"no section\"]"
+ }
+]

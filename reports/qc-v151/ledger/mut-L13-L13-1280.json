@@ -1,0 +1,22 @@
+[
+ {
+  "where": "in the header",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "before Record a response",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "→ birds: kept",
+  "ok": false,
+  "detail": "{\"tab\":\"agent\",\"n\":\"1\",\"find\":\"a\"} → {\"tab\":\"agent\",\"n\":null,\"find\":\"\"}"
+ },
+ {
+  "where": "→ list: kept",
+  "ok": false,
+  "detail": "{\"tab\":\"agent\",\"n\":\"1\",\"find\":\"a\"} → {\"tab\":\"agent\",\"n\":null,\"find\":\"\"}"
+ }
+]

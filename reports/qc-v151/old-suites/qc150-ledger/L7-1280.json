@@ -1,0 +1,142 @@
+[
+ {
+  "where": "6w home population",
+  "ok": true,
+  "detail": "70 rows, 152 boxes, 7 axis labels"
+ },
+ {
+  "where": "6w home overlap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "6w home clipped",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "6w back 500 population",
+  "ok": true,
+  "detail": "70 rows, 72 boxes, 8 axis labels"
+ },
+ {
+  "where": "6w back 500 overlap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "6w back 500 clipped",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "6w forward 900 population",
+  "ok": true,
+  "detail": "46 rows, 50 boxes, 8 axis labels"
+ },
+ {
+  "where": "6w forward 900 overlap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "6w forward 900 clipped",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "3m home population",
+  "ok": true,
+  "detail": "70 rows, 155 boxes, 14 axis labels"
+ },
+ {
+  "where": "3m home overlap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "3m home clipped",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "3m back 500 population",
+  "ok": true,
+  "detail": "53 rows, 60 boxes, 16 axis labels"
+ },
+ {
+  "where": "3m back 500 overlap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "3m back 500 clipped",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "3m forward 900 population",
+  "ok": true,
+  "detail": "46 rows, 48 boxes, 15 axis labels"
+ },
+ {
+  "where": "3m forward 900 overlap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "3m forward 900 clipped",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "6m home population",
+  "ok": true,
+  "detail": "70 rows, 159 boxes, 17 axis labels"
+ },
+ {
+  "where": "6m home overlap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "6m home clipped",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "6m back 500 population",
+  "ok": true,
+  "detail": "23 rows, 23 boxes, 19 axis labels"
+ },
+ {
+  "where": "6m back 500 overlap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "6m back 500 clipped",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "6m forward 900 population",
+  "ok": true,
+  "detail": "46 rows, 61 boxes, 18 axis labels"
+ },
+ {
+  "where": "6m forward 900 overlap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "6m forward 900 clipped",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "boxes measured",
+  "ok": true,
+  "detail": "780"
+ }
+]

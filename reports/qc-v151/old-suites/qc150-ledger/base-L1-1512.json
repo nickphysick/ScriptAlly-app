@@ -1,0 +1,42 @@
+[
+ {
+  "where": "sheet tile",
+  "ok": false,
+  "detail": "none"
+ },
+ {
+  "where": "tile size",
+  "ok": false,
+  "detail": "auto"
+ },
+ {
+  "where": "sheet colour",
+  "ok": false,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "where": "title 40px",
+  "ok": false,
+  "detail": "34px"
+ },
+ {
+  "where": "title underline",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "one sentence",
+  "ok": false,
+  "detail": "Every query you’ve sent, wherever it stands. Log what you send, record what comes back, and QueryHawk keeps track of who you’re waiting on and when to nudge."
+ },
+ {
+  "where": "header ≤200",
+  "ok": false,
+  "detail": "248.078125"
+ },
+ {
+  "where": "no banner",
+  "ok": false,
+  "detail": "1"
+ }
+]

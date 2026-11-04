@@ -1,0 +1,37 @@
+[
+ {
+  "where": "no floating pill",
+  "ok": false,
+  "detail": "pill in the DOM"
+ },
+ {
+  "where": "no drawer",
+  "ok": true,
+  "detail": "drawer in the DOM"
+ },
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "71"
+ },
+ {
+  "where": "opens that query",
+  "ok": true,
+  "detail": "seed-query-22 vs seed-query-22"
+ },
+ {
+  "where": "N / M is Birds-eye's",
+  "ok": true,
+  "detail": "2 / 71 vs 2 / 71"
+ },
+ {
+  "where": "the row is selected",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "› selects the next Birds-eye row",
+  "ok": true,
+  "detail": "msv12-q-1 vs msv12-q-1"
+ }
+]

@@ -1,0 +1,22 @@
+[
+ {
+  "where": "no v151 page on the phone",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "capture exists",
+  "ok": true,
+  "detail": "reports/qc-v151/phone-390.json"
+ },
+ {
+  "where": "same elements",
+  "ok": true,
+  "detail": "401 vs 401"
+ },
+ {
+  "where": "same classes",
+  "ok": true,
+  "detail": ""
+ }
+]

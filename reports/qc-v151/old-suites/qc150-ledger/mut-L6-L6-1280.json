@@ -1,0 +1,62 @@
+[
+ {
+  "where": "6w population",
+  "ok": true,
+  "detail": "5 bars, 39 dots"
+ },
+ {
+  "where": "6w tag ↔ line",
+  "ok": true,
+  "detail": "924.6 vs 924.2"
+ },
+ {
+  "where": "6w dots on the line",
+  "ok": false,
+  "detail": "39 off by 16.5,16.5,16.5"
+ },
+ {
+  "where": "6w bars on the axis",
+  "ok": false,
+  "detail": "5/5 off, e.g. 16.0,16.0"
+ },
+ {
+  "where": "3m population",
+  "ok": true,
+  "detail": "29 bars, 39 dots"
+ },
+ {
+  "where": "3m tag ↔ line",
+  "ok": true,
+  "detail": "860.3 vs 860.0"
+ },
+ {
+  "where": "3m dots on the line",
+  "ok": false,
+  "detail": "39 off by 16.3,16.3,16.3"
+ },
+ {
+  "where": "3m bars on the axis",
+  "ok": false,
+  "detail": "29/29 off, e.g. 16.0,16.0"
+ },
+ {
+  "where": "6m population",
+  "ok": true,
+  "detail": "77 bars, 39 dots"
+ },
+ {
+  "where": "6m tag ↔ line",
+  "ok": true,
+  "detail": "832.1 vs 832.5"
+ },
+ {
+  "where": "6m dots on the line",
+  "ok": false,
+  "detail": "39 off by 15.6,15.6,15.6"
+ },
+ {
+  "where": "6m bars on the axis",
+  "ok": false,
+  "detail": "77/77 off, e.g. 16.0,16.0"
+ }
+]
