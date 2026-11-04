@@ -6,9 +6,12 @@
  * 1512 × 900. Each asserts its population first and was red first: against the v150.1 build it replaces
  * (QC151_BASE=1) and against its named mutation (QC151_MUTATE=L<n>, applied in the page unless marked SOURCE).
  *
- *   L1 width · L2 removed · L3 toolbar · L4 filter panel · L5 strip · L6 group menu · L7 sort · L8 rows · L9 next move
- *   L10 track · L11 hover timeline · L12 sign-off · L13 switch · L14 Birds-eye alignment · L15 Birds-eye dress
- *   L16 phone unchanged (390 × 844, against a capture of the base build: QC151_CAPTURE=1)
+ *   L1 width · L2 removed · L4 filter panel · L6 group menu · L10 track · L12 sign-off · L14 Birds-eye alignment
+ *   L15 Birds-eye dress · L16 phone unchanged (390 × 844, against a capture of the base build: QC151_CAPTURE=1)
+ *
+ * ⚠️ v151.1 RETIRED L3, L5, L7, L8, L9, L11 AND L13, and re-pointed L1 (tests/e2e/RETIRED-query-centre-v151-1.md): the
+ *    toolbar row, the active strip, the eight-column table, its one-line rows, the Next move column, the hover timeline
+ *    and the switch in the header are all gone. QC1511 L1–L10 (tests/e2e/qc1511.measure.ts) hold their successors.
  */
 import { test, expect, type Page } from "@playwright/test";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -45,27 +48,14 @@ const PAGE_MUT: Record<string, { css?: string; js?: string }> = {
   L1: { css: `.qc151.qc151.qc151 { --qc151-w: min(calc(var(--hsheet-w) - 48px), 1200px) !important; }` },
   /* At a glance re-rendered */
   L2: { js: `(() => { const h = document.querySelector('[data-qc151="header"]'); if (h) { const g = document.createElement('section'); g.setAttribute('data-qc150', 'glance'); g.style.height = '100px'; g.textContent = 'At a glance'; h.after(g); } })()` },
-  /* the buttons lose their background */
-  L3: { css: `.qc151 .qc151-bb.qc151-bb, .qc151 .qc151-fw.qc151-fw { background: transparent !important; box-shadow: none !important; }` },
   /* × only closes the panel */
   L4: { js: `document.addEventListener('click', (e) => { const x = e.target.closest && e.target.closest('[data-qc151="filters-clear"]'); if (!x) return; e.stopImmediatePropagation(); e.preventDefault(); const f = document.querySelector('[data-qc151="filters"]'); if (f && f.getAttribute('aria-expanded') === 'true') f.click(); }, true)` },
-  /* Reset all also resets the tab */
-  L5: { js: `document.addEventListener('click', (e) => { if (e.target.closest && e.target.closest('[data-qc151="strip-reset"]')) setTimeout(() => document.querySelector('[data-qc151="tabs"] [data-k="all"]').click(), 0); }, true)` },
   /* Comfortable / Compact added to the menu */
   L6: { js: `new MutationObserver(() => { const m = document.querySelector('[data-qc151="menu"][data-k="group"]'); if (m && !m.querySelector('[data-qc140="rows"]')) { const r = document.createElement('div'); r.setAttribute('data-qc140', 'rows'); r.textContent = 'Rows Comfortable Compact'; m.append(r); } }).observe(document.body, { childList: true, subtree: true })` },
-  /* "7 days late" parsed as a date: the late rows land after the dated ones (the fault's output, reordered in place) */
-  L7: { js: `window.__qc151mut = () => { const t = document.querySelector('[data-qc151="table"]'); if (!t) return; const gs = [...t.querySelectorAll('tbody[data-qc151="row-group"]')]; const late = gs.filter((g) => /late$/.test(g.querySelector('[data-qc151="due"]').textContent.trim())); late.forEach((g) => t.append(g)); }` },
-  /* the agency wraps */
-  L8: { css: `.qc151 .qc151-tbl td.qc151-ag { white-space: normal !important; max-width: 70px !important; }` },
-  /* the link restored in place of the button */
-  L9: { css: `.qc151 .qc151-mv.qc151-mv { background: transparent !important; color: #2a3a52 !important; text-decoration: underline !important; }` },
   /* four glyphs on a closed track */
   L10: { js: `(() => { const go = () => { for (const t of document.querySelectorAll('.qc151-trk--x:not([data-m])')) { t.setAttribute('data-m', ''); const s = t.querySelector('[data-qc151="step"]'); while (t.querySelectorAll('[data-qc151="step"]').length < 4) t.append(s.cloneNode(true)); t.setAttribute('data-n', '4'); } }; go(); new MutationObserver(go).observe(document.body, { childList: true, subtree: true }); })()` },
-  /* L11 is a SOURCE mutation (qc151Mutate.sh): HOVER_MS set to 0 in QcPage151.tsx, rebuilt */
   /* the sign-off always shown */
   L12: { js: `(() => { let keep = null; new MutationObserver(() => { const s = document.querySelector('[data-qc151="signoff"]'); if (s) keep = s.cloneNode(true); else if (keep) { const p = document.querySelector('[data-qc151="page"]'); if (p && !p.querySelector('[data-qc151="signoff"]')) p.append(keep.cloneNode(true)); } }).observe(document.body, { childList: true, subtree: true }); })()` },
-  /* filters reset on the switch */
-  L13: { js: `document.addEventListener('click', (e) => { if (e.target.closest && e.target.closest('[data-qc151="switch"] button')) setTimeout(() => { const r = document.querySelector('[data-qc151="filters-clear"]'); if (r) r.click(); const x = document.querySelector('[data-qc151="find-clear"]'); if (x) x.click(); }, 0); }, true)` },
   /* the list's display:flex reaching Birds-eye's row track */
   L14: { css: `.qc151 .qc150-tl.qc150-tl { display: flex !important; } .qc151 .qc150-trk.qc150-trk { flex: 1 1 auto !important; min-width: 0 !important; width: auto !important; }` },
   /* the navy group bars restored */
@@ -118,19 +108,19 @@ async function scrollTo(page: Page, sel: string, pad = 120) {
 
 for (const vp of SIZES) {
   test.describe(`QC151 @ ${vp.width}`, () => {
-    test("L1 · one width: header, banner, toolbar, table, Birds-eye card and sign-off share edges; W = min(S − 80, 1100), S − 56 below 1400", async ({ page }) => {
+    test("L1 · one width: header, summary card, quick row, control line, table, Birds-eye card and sign-off share edges; W = min(S − 80, 1100), S − 56 below 1400", async ({ page }) => {
       test.skip(!run("L1"));
       const L = new Ledger(`L1-${vp.width}`);
       await open(page, vp);
       const read = () => page.evaluate(() => {
         const box = (s: string) => { const e = [...document.querySelectorAll<HTMLElement>(s)].find((x) => x.getBoundingClientRect().height > 0); const r = e?.getBoundingClientRect(); return r ? { l: r.left, r: r.right, w: r.width } : null; };
-        return { sheet: box(".ws-window"), header: box("[data-qc151='header']"), banner: box("[data-qc151='banner']"), toolbar: box("[data-qc151='toolbar']"), table: box("[data-qc151='table']"), signoff: box("[data-qc151='signoff']"), birds: box("[data-qc151='birds-card']"), win: innerWidth };
+        return { sheet: box(".ws-window"), header: box("[data-qc151='header']"), summary: box("[data-qc1511='summary']"), quick: box("[data-qc1511='quick-row']"), toolbar: box("[data-qc151='toolbar']"), table: box("[data-qc151='table']"), signoff: box("[data-qc151='signoff']"), birds: box("[data-qc151='birds-card']"), win: innerWidth };
       });
       const a = await read();
       await click(page, "[data-qc151='switch'] [data-v='birds']");
       await page.waitForTimeout(1200);
       const b = await read();
-      const parts = { header: a.header, banner: a.banner, toolbar: a.toolbar, table: a.table, signoff: a.signoff, birds: b.birds };
+      const parts = { header: a.header, summary: a.summary, quick: a.quick, toolbar: a.toolbar, table: a.table, signoff: a.signoff, birds: b.birds };
       L.check("population", !!a.sheet && Object.values(parts).every(Boolean), JSON.stringify(parts));
       if (a.sheet) {
         const W = Math.min(a.sheet.w - (a.win < 1400 ? 56 : 80), 1100);
@@ -146,7 +136,7 @@ for (const vp of SIZES) {
       /* the title holds one line (it wrapped at 1280 before the header's controls stepped in) */
       const th = await page.evaluate(() => { const h = document.querySelector<HTMLElement>("[data-qc151='title']"); if (!h) return null; const g = document.createRange(); g.selectNodeContents(h); return new Set([...g.getClientRects()].map((x) => Math.round(x.top))).size; });
       L.check("title one line", th === 1, `${th} lines`);
-      L.done(13);
+      L.done(17);
     });
 
     test("L2 · removed: no At a glance, navy bar, Your queries block or Full screen; the full-screen code is still in the tree", async ({ page }) => {
@@ -162,29 +152,6 @@ for (const vp of SIZES) {
       L.check("full-screen code kept", /Exit full screen/.test(src) && /onPin/.test(src), "QcToolbar140 carries the full-screen button");
       L.check("pin hook inert", /QC_FULL_SCREEN = false/.test(readFileSync("src/lib/qc151.ts", "utf8")), "QC_FULL_SCREEN");
       L.done(8);
-    });
-
-    test("L3 · toolbar: one row in both views, inside the table's edge; Filters, Group (and Sort) are white or navy buttons", async ({ page }) => {
-      test.skip(!run("L3"));
-      const L = new Ledger(`L3-${vp.width}`);
-      await open(page, vp);
-      for (const view of ["list", "birds"] as const) {
-        if (view === "birds") { await click(page, "[data-qc151='switch'] [data-v='birds']"); await page.waitForTimeout(1000); }
-        const r = await page.evaluate(() => {
-          const tb = [...document.querySelectorAll<HTMLElement>("[data-qc151='toolbar']")].find((e) => e.getBoundingClientRect().height > 0);
-          const edge = [...document.querySelectorAll<HTMLElement>("[data-qc151='table'], [data-qc151='birds-card']")].find((e) => e.getBoundingClientRect().height > 0)?.getBoundingClientRect().right ?? null;
-          const ctl = [...(tb?.querySelectorAll<HTMLElement>("button, label") ?? [])].map((e) => ({ k: e.getAttribute("data-qc151") ?? e.tagName, r: e.getBoundingClientRect().right }));
-          const btn = [...(tb?.querySelectorAll<HTMLElement>(".qc151-bb") ?? [])].map((e) => ({ k: e.getAttribute("data-qc151"), bg: getComputedStyle(e).backgroundColor }));
-          const tabs = [...(tb?.querySelectorAll<HTMLElement>(".qc151-tab") ?? [])].map((e) => getComputedStyle(e).backgroundColor);
-          return { h: tb?.getBoundingClientRect().height ?? null, edge, ctl, btn, tabs };
-        });
-        L.check(`${view} population`, r.h != null && r.edge != null && r.btn.length >= (view === "birds" ? 3 : 2) && r.tabs.length === 5, JSON.stringify({ h: r.h, n: r.btn.length, tabs: r.tabs.length }));
-        L.check(`${view} one row`, (r.h ?? 99) <= 54, `height ${r.h}`);
-        for (const c of r.ctl) L.check(`${view} ${c.k} inside`, r.edge != null && c.r <= r.edge + 1, `${c.r.toFixed(1)} vs ${r.edge}`);
-        for (const b of r.btn) L.check(`${view} ${b.k} button`, b.bg === WHITE || b.bg === NAVY, b.bg);
-        L.check(`${view} tabs are not buttons`, r.tabs.every((t) => t !== WHITE && t !== NAVY), r.tabs.join(" "));
-      }
-      L.done(14);
     });
 
     test("L4 · filter panel: the existing three columns inline; Overdue shows the badge and ×; × clears; outside closes", async ({ page }) => {
@@ -227,37 +194,6 @@ for (const vp of SIZES) {
       L.done(14);
     });
 
-    test("L5 · active strip: one chip per filter and the search; a chip's × narrows back; Reset all keeps the tab", async ({ page }) => {
-      test.skip(!run("L5"));
-      const L = new Ledger(`L5-${vp.width}`);
-      await open(page, vp, { group: "none" });
-      await click(page, "[data-qc151='tabs'] [data-k='quiet']");
-      await click(page, "[data-qc151='filters']");
-      await click(page, "[data-qc140='quick'][data-qp='over']");
-      await fill(page, "[data-qc151='find'] input", "a");
-      const t = await page.locator("[data-qc151='title']").first().boundingBox({ timeout: 5_000 }).catch(() => null);
-      if (t) await page.mouse.click(t.x + 4, t.y + 4);
-      await page.waitForTimeout(400);
-      const s = await page.evaluate(() => ({ strip: !!document.querySelector("[data-qc151='strip']"), chips: [...document.querySelectorAll("[data-qc151='strip-chip']")].map((c) => c.getAttribute("data-k")), rows: document.querySelectorAll("[data-qc151='row']").length }));
-      L.check("strip shown", s.strip, "");
-      L.check("one chip per filter + the search", s.chips.length === 2 && s.chips.includes("qp:over") && s.chips.includes("find"), JSON.stringify(s.chips));
-      await click(page, "[data-qc151='strip-chip'][data-k='qp:over']");
-      await page.waitForTimeout(300);
-      const r2 = await count(page, "[data-qc151='row']");
-      L.check("removing a chip updates the rows", r2 >= s.rows, `${s.rows} → ${r2}`);
-      await click(page, "[data-qc151='filters']");
-      await click(page, "[data-qc140='quick'][data-qp='over']");
-      if (t) await page.mouse.click(t.x + 4, t.y + 4);
-      await page.waitForTimeout(300);
-      await click(page, "[data-qc151='strip-reset']");
-      await page.waitForTimeout(400);
-      const z = await page.evaluate(() => ({ tab: document.querySelector("[data-qc151='tabs'] [aria-pressed='true']")?.getAttribute("data-k"), find: (document.querySelector("[data-qc151='find'] input") as HTMLInputElement)?.value, chips: document.querySelectorAll("[data-qc151='strip-chip']").length, badge: !!document.querySelector("[data-qc151='filters-n']") }));
-      L.check("Reset all clears the filters", !z.badge && z.chips === 0, JSON.stringify(z));
-      L.check("Reset all clears the search", z.find === "", JSON.stringify(z.find));
-      L.check("Reset all keeps the tab", z.tab === "quiet", String(z.tab));
-      L.done(6);
-    });
-
     test("L6 · group menu: five options with lines, a divider before No grouping, no Rows; each gives its sections", async ({ page }) => {
       test.skip(!run("L6"));
       const L = new Ledger(`L6-${vp.width}`);
@@ -282,7 +218,7 @@ for (const vp of SIZES) {
         await click(page, "[data-qc151='group']");
         await click(page, `[data-qc151='menu-opt'][data-v='${v}']`);
         await page.waitForTimeout(500);
-        const secs = await page.evaluate(() => [...document.querySelectorAll("[data-qc151='section'] td")].map((t) => t.childNodes[0]?.textContent?.trim() ?? ""));
+        const secs = await page.evaluate(() => [...document.querySelectorAll("[data-qc151='section']")].map((t) => (t.matches("td") ? t.childNodes[0]?.textContent : t.textContent)?.trim() ?? "") /* v151.1: the section's name is a span in its group header */);
         const ok = v === "none" ? secs.length === 0
           : v === "attention" ? secs.length > 0 && secs.every((x) => ["Your move", "With the agent", "Gone quiet", "Closed"].includes(x))
           : v === "package" ? secs.length > 0 && secs.every((x) => / package$/.test(x) || x === "Nothing recorded")
@@ -290,129 +226,6 @@ for (const vp of SIZES) {
         L.check(`${v} sections`, ok, secs.join(" | "));
       }
       L.done(15);
-    });
-
-    test("L7 · sort: each heading orders asc then desc; Due ascending is the default, late first (most late first)", async ({ page }) => {
-      test.skip(!run("L7"));
-      const L = new Ledger(`L7-${vp.width}`);
-      await open(page, vp, { group: "none" });
-      const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-      const now = await page.evaluate(() => Date.now());
-      const y0 = new Date(now).getFullYear();
-      const sod = (d: Date) => { d.setHours(0, 0, 0, 0); return d.getTime(); };
-      const dateOf = (s: string): number | null => {
-        const m = /(\d{1,2}) ([A-Z][a-z]{2})(?: (\d{4}))?$/.exec(s.trim());
-        return m ? sod(new Date(m[3] ? +m[3] : y0, MON.indexOf(m[2]), +m[1])) : null;
-      };
-      const dueOf = (s: string): number | null => {
-        const t = s.trim(); const day = 86_400_000; const today = sod(new Date(now));
-        const l = /^(\d+) days? late$/.exec(t); if (l) return today - +l[1] * day;
-        if (t === "Today") return today; if (t === "Tomorrow") return today + day;
-        if (t === "—") return null;
-        return dateOf(t);
-      };
-      const col = (k: string) => page.evaluate((kk) => [...document.querySelectorAll(`[data-qc151='row'] [data-qc151='${kk}']`)].map((e) => e.textContent?.trim() ?? ""), k);
-      const mutApply = () => page.evaluate(() => (window as unknown as { __qc151mut?: () => void }).__qc151mut?.());
-      await mutApply();
-      const def = await col("due");
-      L.check("population", def.length > 5, `${def.length}`);
-      const dv = def.map(dueOf);
-      const firstNull = dv.findIndex((x) => x == null);
-      const dated = (firstNull < 0 ? dv : dv.slice(0, firstNull)) as number[];
-      L.check("default Due ascending (late, most late first; then soonest)", dated.every((x, i) => i === 0 || x >= dated[i - 1]), def.slice(0, 12).join(" | "));
-      L.check("undated last", firstNull < 0 || dv.slice(firstNull).every((x) => x == null), def.slice(firstNull).slice(0, 6).join(" | "));
-      const lateIdx = def.map((s, i) => (/late$/.test(s) ? i : -1)).filter((i) => i >= 0);
-      L.check("late rows lead", lateIdx.length > 0 && lateIdx.every((i, j) => i === j), `late at ${lateIdx.slice(0, 8).join(",")}`);
-      const parse: Record<string, (s: string) => string | number | null> = {
-        agent: (s) => s.toLowerCase(), agency: (s) => (s === "No agency" || s === "—" || s === "" ? null : s.toLowerCase()), /* a missing agency sorts last, as the page does */ queried: (s) => dateOf(s), heard: (s) => (s === "—" ? null : dateOf(s)), due: dueOf,
-      };
-      for (const k of ["agent", "agency", "queried", "heard", "due"]) {
-        for (const desc of [false, true]) {
-          await click(page, `[data-qc151='heading'][data-k='${k === "agent" ? "agent" : k}'] button`);
-          await page.waitForTimeout(350);
-          await mutApply();
-          const vals = (await col(k === "agent" ? "agent" : k)).map(parse[k]);
-          const nn = vals.filter((x) => x != null) as (string | number)[];
-          const cmp = (a: string | number, b: string | number) => (typeof a === "number" && typeof b === "number" ? a - b : String(a).localeCompare(String(b)));
-          const bad = nn.findIndex((x, i) => i > 0 && (desc ? cmp(x, nn[i - 1]) > 0 : cmp(x, nn[i - 1]) < 0));
-          const ok = bad < 0;
-          const aria = await page.evaluate((kk) => document.querySelector(`[data-qc151='heading'][data-k='${kk}']`)?.getAttribute("aria-sort"), k);
-          L.check(`${k} ${desc ? "desc" : "asc"}`, ok && aria === (desc ? "descending" : "ascending"), `${aria} · ${bad < 0 ? vals.slice(0, 6).join(" | ") : `out of order at ${bad}: “${nn[bad - 1]}” then “${nn[bad]}”`}`);
-        }
-      }
-      L.done(14);
-    });
-
-    test("L8 · rows: one line, 54 tall, in every kind of row; Agent 600, agency #5b4f47", async ({ page }) => {
-      test.skip(!run("L8"));
-      const L = new Ledger(`L8-${vp.width}`);
-      await open(page, vp, { group: "none" });
-      const r = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-qc151='row']")].map((row) => ({
-        h: row.getBoundingClientRect().height, kind: row.querySelector("[data-qc151='next']")?.getAttribute("data-kind"), late: row.querySelector("[data-qc151='due']")?.hasAttribute("data-late"),
-        nameW: getComputedStyle(row.querySelector("[data-qc151='agent'] b")!).fontWeight, agC: getComputedStyle(row.querySelector("[data-qc151='agency']")!).color,
-        agLines: Math.round(row.querySelector<HTMLElement>("[data-qc151='agency']")!.scrollHeight / parseFloat(getComputedStyle(row.querySelector("[data-qc151='agency']")!).lineHeight || "18")),
-        /* lines, by distinct tops of the text's boxes (an ellipsis cell reports more than one box on one line) */
-        agH: (() => { const g = document.createRange(); g.selectNodeContents(row.querySelector("[data-qc151='agency']")!); return new Set([...g.getClientRects()].map((x) => Math.round(x.top))).size; })(),
-      })));
-      L.check("population", r.length > 5, `${r.length}`);
-      const kinds = new Set(r.map((x) => `${x.kind}${x.late ? "-late" : ""}`));
-      L.check("every row kind present", ["act", "text", "none"].every((k) => [...kinds].some((x) => x.startsWith(k))), [...kinds].join(","));
-      const bad = r.filter((x) => Math.abs(x.h - 54) > 1);
-      L.check("54 ± 1", bad.length === 0, `${bad.length} off: ${bad.slice(0, 4).map((b) => b.h).join(",")}`);
-      L.check("agent 600", r.every((x) => x.nameW === "600"), [...new Set(r.map((x) => x.nameW))].join(","));
-      L.check("agency #5b4f47", r.every((x) => x.agC === MUT_INK), [...new Set(r.map((x) => x.agC))].join(","));
-      L.check("agency one line", r.every((x) => x.agH <= 1), `${r.filter((x) => x.agH > 1).length} wrap`);
-      /* Nick, 3 Nov: an agent's name never truncates; any truncated cell carries its full text as a title */
-      const tr = await page.evaluate(() => {
-        const out: { col: string; full: string; title: string | null }[] = [];
-        for (const row of document.querySelectorAll<HTMLElement>("[data-qc151='row']")) {
-          for (const col of ["agent", "agency", "stands"]) {
-            const cell = row.querySelector<HTMLElement>(`[data-qc151='${col}']`)!;
-            const el = col === "agent" ? cell.querySelector<HTMLElement>("b")! : cell;
-            const g = document.createRange(); g.selectNodeContents(el);
-            const ink = g.getBoundingClientRect().width;
-            const box = el.getBoundingClientRect();
-            const cs = getComputedStyle(el);
-            const room = box.width - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
-            if (ink > room + 0.5 || el.scrollWidth > el.clientWidth + 1) out.push({ col, full: el.textContent?.trim() ?? "", title: el.getAttribute("title") });
-          }
-        }
-        return out;
-      });
-      const byCol = (c: string) => tr.filter((x) => x.col === c).length;
-      console.log(`  truncated at ${vp.width}: agent ${byCol("agent")}, agency ${byCol("agency")}, where it stands ${byCol("stands")} (of ${r.length} rows)`);
-      L.check("agent never truncates", byCol("agent") === 0, `${byCol("agent")}: ${tr.filter((x) => x.col === "agent").slice(0, 3).map((x) => x.full).join(" | ")}`);
-      L.check("a truncated cell carries its full text", tr.every((x) => x.title === x.full), tr.filter((x) => x.title !== x.full).slice(0, 3).map((x) => `${x.col}:${x.full}→${x.title}`).join(" | "));
-      L.check("where it stands gives way only after agency", byCol("stands") === 0 || byCol("agency") > 0, `agency ${byCol("agency")}, stands ${byCol("stands")}`);
-      /* §7 — the headings pin to the top of the sheet, under its 12px lip, while the page scrolls */
-      await page.evaluate(() => { const sc = document.querySelector<HTMLElement>("[data-qc151='table']")?.closest<HTMLElement>(".wpg-scroll"); if (sc) sc.scrollTop = 900; });
-      await page.waitForTimeout(500);
-      const pin = await page.evaluate(() => {
-        const sc = document.querySelector<HTMLElement>("[data-qc151='table']")!.closest<HTMLElement>(".wpg-scroll")!;
-        const top = sc.getBoundingClientRect().top;
-        const lips = [...document.querySelectorAll<HTMLElement>("[data-sheet-lip]")].map((l) => l.getBoundingClientRect()).filter((r) => r.height > 0 && Math.abs(r.top - top) < 1);
-        return { th: document.querySelector("[data-qc151='table'] thead th")!.getBoundingClientRect().top, cover: lips.length ? Math.max(...lips.map((r) => r.bottom)) : top, st: sc.scrollTop };
-      });
-      L.check("headings pinned under the lip", pin.st > 500 && Math.abs(pin.th - pin.cover) <= 1, `th ${pin.th} vs lip ${pin.cover} (scrolled ${pin.st})`);
-      L.done(10);
-    });
-
-    test("L9 · next move: a pink button with ink text where there is a move; plain text otherwise; no links", async ({ page }) => {
-      test.skip(!run("L9"));
-      const L = new Ledger(`L9-${vp.width}`);
-      await open(page, vp, { group: "none" });
-      const r = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-qc151='next']")].map((c) => {
-        const b = c.querySelector<HTMLElement>("button");
-        return { kind: c.getAttribute("data-kind"), bg: b ? getComputedStyle(b).backgroundColor : null, fg: b ? getComputedStyle(b).color : null, ul: b ? getComputedStyle(b).textDecorationLine : null, links: c.querySelectorAll("a").length, btn: !!b };
-      }));
-      const act = r.filter((x) => x.kind === "act"), txt = r.filter((x) => x.kind !== "act");
-      L.check("population: both kinds", act.length > 0 && txt.length > 0, `${act.length} act, ${txt.length} text`);
-      L.check("act: pink", act.every((x) => x.bg === PINK), [...new Set(act.map((x) => x.bg))].join(","));
-      L.check("act: ink text", act.every((x) => x.fg === INK), [...new Set(act.map((x) => x.fg))].join(","));
-      L.check("act: not underlined", act.every((x) => x.ul === "none"), [...new Set(act.map((x) => x.ul))].join(","));
-      L.check("text: no button", txt.every((x) => !x.btn), "");
-      L.check("no links", r.every((x) => x.links === 0), "");
-      L.done(6);
     });
 
     test("L10 · track: Full sent shows four glyphs with the third on; a closed query stops where it got to, crossed", async ({ page }) => {
@@ -439,36 +252,6 @@ for (const vp of SIZES) {
       L.done(9);
     });
 
-    test("L11 · hover timeline: nothing at 500ms, open at 1.2s, stays while in it, closes on leaving both; closed has no Today", async ({ page }) => {
-      test.skip(!run("L11"));
-      const L = new Ledger(`L11-${vp.width}`);
-      await open(page, vp, { group: "none" });
-      const live = page.locator("[data-qc151='row']:not([data-status='Rejected']):not([data-status='No Response']):not([data-status='Withdrawn'])").nth(1);
-      await live.scrollIntoViewIfNeeded({ timeout: 10_000 }).catch(() => {});
-      await live.hover({ position: { x: 300, y: 20 }, timeout: 10_000 }).catch(() => {});
-      await page.waitForTimeout(500);
-      const at500 = await count(page, "[data-qc151='timeline']");
-      await page.waitForTimeout(700);
-      const at1200 = await page.evaluate(() => { const t = document.querySelector("[data-qc151='timeline'] .qc151-pk"); return t ? getComputedStyle(t).backgroundColor : null; });
-      L.check("nothing at 500ms", at500 === 0, `${at500}`);
-      L.check("open at 1.2s, #fbefe9", at1200 === "rgb(251, 239, 233)", String(at1200));
-      const tl = await page.locator("[data-qc151='timeline'] .qc151-pk").boundingBox({ timeout: 3_000 }).catch(() => null);
-      if (tl) { await page.mouse.move(tl.x + tl.width / 2, tl.y + tl.height / 2, { steps: 4 }); await page.waitForTimeout(400); }
-      L.check("stays while in it", (await count(page, "[data-qc151='timeline']")) === 1, "");
-      const today = await count(page, "[data-qc151='timeline'] [data-k='today']");
-      L.check("live: Today stop", today === 1, `${today}`);
-      await page.mouse.move(5, 5, { steps: 3 });
-      await page.waitForTimeout(300);
-      L.check("closes on leaving both", (await count(page, "[data-qc151='timeline']")) === 0, "");
-      const closed = page.locator("[data-qc151='row'][data-status='Rejected'], [data-qc151='row'][data-status='No Response']").first();
-      await closed.scrollIntoViewIfNeeded({ timeout: 10_000 }).catch(() => {});
-      await closed.hover({ position: { x: 300, y: 20 }, timeout: 10_000 }).catch(() => {});
-      await page.waitForTimeout(1300);
-      const c = await page.evaluate(() => ({ open: document.querySelectorAll("[data-qc151='timeline']").length, today: document.querySelectorAll("[data-qc151='timeline'] [data-k='today']").length, next: document.querySelectorAll("[data-qc151='timeline'] [data-k='next']").length }));
-      L.check("closed: open, no Today, no next", c.open === 1 && c.today === 0 && c.next === 0, JSON.stringify(c));
-      L.done(6);
-    });
-
     test("L12 · sign-off: on All with nothing narrowing, in List only", async ({ page }) => {
       test.skip(!run("L12"));
       const L = new Ledger(`L12-${vp.width}`);
@@ -490,31 +273,6 @@ for (const vp of SIZES) {
       await click(page, "[data-qc151='switch'] [data-v='birds']"); await page.waitForTimeout(800);
       L.check("Birds-eye: absent", (await so()) === 0, "");
       L.done(6);
-    });
-
-    test("L13 · switch: in the header before Record a response; switching keeps the tab, the filters and the search", async ({ page }) => {
-      test.skip(!run("L13"));
-      const L = new Ledger(`L13-${vp.width}`);
-      await open(page, vp);
-      const pos = await page.evaluate(() => {
-        const sw = document.querySelector("[data-qc151='header'] [data-qc151='switch']");
-        const rec = document.querySelector("[data-qc151='header'] [data-qc151='record']");
-        return { inHeader: !!sw, before: !!sw && !!rec && !!(sw.compareDocumentPosition(rec) & Node.DOCUMENT_POSITION_FOLLOWING) && sw.getBoundingClientRect().right <= rec.getBoundingClientRect().left };
-      });
-      L.check("in the header", pos.inHeader, "");
-      L.check("before Record a response", pos.before, "");
-      await click(page, "[data-qc151='tabs'] [data-k='agent']");
-      await click(page, "[data-qc151='filters']"); await click(page, "[data-qc140='quick'][data-qp='wait']");
-      await fill(page, "[data-qc151='find'] input", "a");
-      const h = await page.locator("[data-qc151='title']").first().boundingBox({ timeout: 5_000 }).catch(() => null); if (h) await page.mouse.click(h.x + 4, h.y + 4);
-      const state = () => page.evaluate(() => ({ tab: document.querySelector("[data-qc151='tabs'] [aria-pressed='true']")?.getAttribute("data-k"), n: document.querySelector("[data-qc151='filters-n']")?.textContent ?? null, find: (document.querySelector("[data-qc151='find'] input") as HTMLInputElement)?.value }));
-      const s0 = await state();
-      for (const v of ["birds", "list"]) {
-        await click(page, `[data-qc151='switch'] [data-v='${v}']`); await page.waitForTimeout(800);
-        const s = await state();
-        L.check(`→ ${v}: kept`, JSON.stringify(s) === JSON.stringify(s0) && s0.n === "1" && s0.find === "a" && s0.tab === "agent", `${JSON.stringify(s0)} → ${JSON.stringify(s)}`);
-      }
-      L.done(4);
     });
 
     test("L14 · Birds-eye alignment: bar end, dot and today line agree after load, drag, back-to-today and each zoom; tracks = axis", async ({ page }) => {
