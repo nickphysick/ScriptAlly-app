@@ -2,12 +2,12 @@
 
 **Four of the five are fixed: the Jonah pair is asked as a duplicate, a "?" on a name is read as doubt, a key on the page explains its marks, and every single-date card uses the strip's date field and calendar. The fifth, "Lawe", is a model misreading, which the brief ruled out of scope.** It's all on `main` and on dev, where `index-B3aMvt7Q.js` and the `smartImportMap` function are deployed; prod is untouched.
 
-⚠️ **The dev Anthropic key is out of credit.** Partway through the second eval run every call came back: "Your credit balance is too low to access the Anthropic API." Smart Import on dev uses the same key, so **it won't read a file or a photo until the account is topped up.** Buying credits is yours to do.
+**The dev Anthropic key ran out of credit partway through the eval.** Nick topped it up, and the second run was completed for $0.53 within a $1 cap (§4). Spend after the top-up was $0.71 in all.
 
 ## 1. False premises, and what I decided
 
 1. **The messy-list fixture isn't in the repo.** `functions/eval/fixtures/photos-real/` holds only `notebook-two-pages` and `notepad`, so there's no `real-messy-one-page` and no `truth.json` to compare line by line. As the brief said, I asked nothing and used the eval's own fixtures. The five cases are rebuilt as a lab fixture, `#/onb-lab?s=review&fx=v12`, and are what the rendered locks run on. Copy the page and its truth into that folder and the next eval includes it.
-2. **The eval's second run is incomplete.** Run 1 of the final wording is whole (26 reads). In run 2, 12 reads went through before the credit ran out and 14 were refused. A re-run of those 14 was refused too. The table in §4 says which figures come from which run.
+2. **The eval's second run came in two parts.** 12 reads went through before the credit ran out, and the other 14 were re-run after the top-up (`eval-live-v12b-run2`). Together they make a complete second run of the shipped wording; none of the 52 reads failed.
 3. **My first wording of the "?" rule broke mark-unclear.** It told the model that a "?" after a name is the writer's doubt. The model applied that to a "?" anywhere at the end of a line ("R&R ?", "sent partial ?"), so mark-unclear recall fell from 71.1% to 42.1% over two full runs. The shipped rule only covers a "?" touching the name itself, and says outright that a "?" anywhere else is still a mark. Recall is now 89.5% (run 1) and 87.9% (runs 1 + 2).
 4. **The assembler enforces the "?" rule, not just the prompt.** "Never saved with the mark" has to hold whatever the model returns, so `assembleImport` strips "?", "??" and "(?)" off a photo read's agent name. It sets the one reading and adds `check-reading` to that agent's queries. Sheet reads are untouched.
 5. **On the Duplicates step, two rows that each hold one query read as one submission at two stages.** That's the step's existing behaviour for a same-agent pair ("Two rows for Jonah P.", keep one, use the other's date as history). The pair is asked and never merged without the writer. **The kept name is the first row's**, so in Nick's case the agent would be saved as "Jonah P.", not "Jonah Petrakis". A follow-up would be to prefer the fuller name.
@@ -42,22 +42,20 @@ The dev line is `dev/qc1511-db2-title-sip-qc1512-cl26-sip11-tl1-pk41-cl262-db21-
 
 ## 4. The eval, before and after
 
-Before is v1.1's final run (`eval-live-v11c`), and main's prompt hasn't changed since. "P / R" is precision / recall.
+Before is v1.1's final run (`eval-live-v11c`), and main's prompt hasn't changed since. "P / R" is precision / recall, and counts are found / expected.
 
 | Read | Reads | Name | Agency | Status | Date | Crossed-out P/R | Mark-unclear P/R | Illegible-agency P/R | No-date P/R |
 |---|---|---|---|---|---|---|---|---|---|
-| Before, 2 runs | 52 | 96.8 | 99.4 | 97.5 | 97.1 | 100 / 100 | 100 / 71.1 | 88.9 / 61.5 | 96.4 / 98.1 |
-| Before, run 1 | 26 | 96.8 | 99.6 | 97.5 | 97.0 | 100 / 100 | 100 / 68.4 | 88.9 / 61.5 | 96.3 / 96.3 |
+| Before, 2 runs | 52 | 96.8 | 99.4 | 97.5 | 97.1 | 100 / 100 (74/74) | 100 / 71.1 (27/38) | 88.9 / 61.5 (16/26) | 96.4 / 98.1 (53/54) |
 | First v1.2 wording, 2 runs (not shipped) | 52 | 96.9 | 99.7 | 97.6 | 97.2 | 100 / 100 | 100 / **42.1** | 88.2 / 57.7 | 96.4 / 100 |
-| **Shipped v1.2, run 1** | 26 | **97.0** | **99.8** | **97.7** | **97.5** | 100 / 100 | 100 / **89.5** | 87.5 / 53.8 | 96.4 / 100 |
-| Shipped v1.2, run 1 + 12 reads of run 2 | 38 | 95.8 | 99.4 | 97.9 | 96.6 | 100 / 100 | 100 / 87.9 | 93.3 / 56.0 | 97.4 / 100 |
-| Your own photos, shipped (run 1) | 2 | 100 | 100 | 100 | 100 | 100 / 100 | 100 / 100 | — | 100 / 100 |
-| Your own photos, before | 4 | 100 | 95.2 | 100 | 97.6 | 100 / 100 | 100 / 66.7 | — | 100 / 90.0 |
+| **Shipped v1.2, 2 runs** | 52 | **97.0** | **99.6** | **97.9** | **97.6** | 100 / 100 (74/74) | 100 / **89.5** (34/38) | 87.5 / 53.8 (14/26) | 98.2 / 100 (54/54) |
+| Before, your own photos | 4 | 100 | 95.2 | 100 | 97.6 | 100 / 100 | 100 / 66.7 (4/6) | 0 / 0 (0/2) | 100 / 90.0 |
+| Shipped, your own photos | 4 | 100 | 100 | 100 | 100 | 100 / 100 | 100 / 100 (6/6) | 0 / 0 (0/2) | 100 / 100 |
 
-- **The four fields hold.** Like for like on run 1, every field is level or up.
-- **The partial second run** is weighted towards the handwritten pages, which are the hardest ones, because only those got through before the credit ran out. That's why its name (95.8) and date (96.6) figures sit about a point under; it isn't a comparable sample.
-- **One code-level figure is past 2 points: illegible-agency recall,** 61.5% → 53.8% on run 1. That's 7 of 13 found against 8 of 13, so one read. Nothing in this pass touches agencies, and illegible-agency recall was already the eval's weakest figure. I couldn't run more to tell noise from a real drop, so **it's open**: re-run with credit and compare.
-- **Cost:** $3.90 in all: $1.79 for the full first wording, $0.84 for the probe and $1.27 for the shipped wording. The refused calls cost nothing.
+- **Every field is up**, and so are mark-unclear and no-date. On your own two pages every field is now 100%.
+- **Illegible-agency recall fell 16/26 → 14/26, and the whole drop is one entry:** Gideon Pennington on `hand-indie-2p-blur`, whose agency the fixture blurs so only "Fairb" can be read. Before this pass the model flagged it in both runs; with the shipped wording it read "Fairbairn Associates" outright, correctly, without the flag. The shipped wording's example was "Leo Fairbairn?", which put "Fairbairn" in the prompt.
+- **So the example is now "Leo Marsh?"** (`4fbfe1a44`, redeployed on dev). A probe of that fixture, two runs (`eval-live-v12c-probe`), brought the flag back in one of two. The rest looks like run-to-run noise on one blurred word, and the agency text is right every time. Within the $1 cap I stopped there, so the new example is measured on that fixture and your own pages only, not the full eval.
+- **Cost:** $3.90 before the credit ran out, then $0.53 for the rest of run 2 and $0.18 for the probe.
 
 ## 5. The messy list, line by line
 
@@ -115,7 +113,7 @@ Final run on dev (`index-B3aMvt7Q.js`): DP-R1 to DP-R3, the screenshots, and the
 
 ## 8. Loose ends
 
-- **Top up the dev Anthropic key**, then re-run the eval's second run to settle the illegible-agency figure (§4): `npx tsx functions/eval/photoEval.mts --runs 2 --label live-v12c --confirm-spend`, with the key from Secret Manager in the environment as before.
+- The "Leo Marsh?" example is measured on one fixture and your own pages; the next full eval (about $1.80 for two runs) would confirm it across all 26.
 - The Duplicates step keeps the first row's name ("Jonah P."). Preferring the fuller name of a pair is a small follow-up.
 - A key like "✓ = sent" asks about every ticked line. Fine on a short page, but worth watching on a long one.
 - Worktrees: six besides the primary belong to other sessions (`wt-emu`, `wt-qc152-base`, `ScriptAlly-cl263`, `ScriptAlly-live`, `ScriptAlly-qc152`, `ScriptAlly-rsp6`), over the house limit of five. I removed my own; say if you'd like the clean ones cleared.
