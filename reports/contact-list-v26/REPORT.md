@@ -125,3 +125,12 @@ Dev-build screens (emulator account) are in `shots/`, beside the references in `
 - **The stuck mask has no pixel lock.** H6 proves where things land, not how the pinned band looks over rows; `shots/xx-pinned-1512.png` is the look.
 - **At 1280 the sentence stays on one line** for the harness account; a longer account would wrap it to two (allowed).
 - **Pre-existing reds** (above) on the Query Centre's v150/v150.1/v149.2 locks and HR1 want a pass of their own against v151.
+
+## Integration and deploy
+
+- Dev moved during the run: at the start it served `index-CMvDw8SK.js` (`dev/qc1511-db2-title-sip`, 6cf4cc85, the base); by the deploy it served `index-DHeaujkr.js` from **`dev/qc1511-db2-title-sip-qc1512`** (ef312679, another session's Query Centre v151.2), confirmed by building that branch unmodified (same hash).
+- Integration branch **`dev/qc1511-db2-title-sip-qc1512-cl26`** (cc2174a2) = ef312679 + `contact-list-v26`. One conflict, the ref manifest (both sides enrolled refs); resolved by keeping the dev line's and re-enrolling v26's twelve with the check script.
+- Gates on the integration branch: `tsc` clean; `build:dev` and `vite build` clean; Vitest 740/741 files, 11,226 passed, 3 skipped, the same two pre-existing `firestoreTarget` cases failing; CL26 H1–H11 and CL255 G1–G4 green on the emulator.
+- Re-checked the served hash immediately before deploying (still `index-DHeaujkr.js`), then `firebase deploy --only hosting --config firebase.dev.json --project scriptally-dev`. **Dev now serves `index-DXb0CEpQ.js`.** Hosting only; no rules or functions changed. Prod untouched. Nothing merged to main.
+- The screens in `shots/` are from the emulator runs of this same code (the harness account's emulator copy), not a live dev sign-in.
+- Worktrees: `../ScriptAlly-cl26` and the scratchpad integration and base worktrees were removed at the end of the run; both branches are pushed.
