@@ -32,7 +32,7 @@ import { SmartImportResult, ReviewReasonCode } from "../../types/smartImport";
 import { QueryStatus } from "../../types";
 import { agentPrimary, AGENT_NOT_SPECIFIED } from "../../lib/agentDisplay";
 import {
-  ReviewAgent, ReviewQuery, CheckReason, openCrossedOthers, applyCrossedAnswer, applyNeitherSent, settleAgentReason,
+  ReviewAgent, ReviewQuery, CheckReason, openCrossedOthers, applyCrossedAnswer, settleAgentReason,
   resolveReason, fmtDate,
   dupNoteOpen, dupNoteKept, parseModel, modelToResult, autoSetAsideRows, applyAgentRemoval, seedUnidentifiedSetAside,
   removeDuplicateRecord, buildClusters, mergedAwayByKeeper,
@@ -45,7 +45,8 @@ import { AgentRow, QueryRow, DupeOpen, DupeKept, DupeMerged } from "./reviewRows
 import { Disc, initialsOf } from "./ImportParts";
 import { GoMark } from "./v9/GoMark";
 import { ReviewDeck, DeckCard } from "./v9/ReviewDeck";
-import { AgencyQuestion, NamelessQuestion, MappingQuestion, QueryQuestion, Answered, DECK_WORDS, ReadingQuestion, IllegibleAgencyQuestion } from "./v9/DeckQuestions";
+import { AgencyQuestion, NamelessQuestion, MappingQuestion, QueryQuestion, Answered, DECK_WORDS, ReadingQuestion, IllegibleAgencyQuestion, StripQuestion } from "./v9/DeckQuestions";
+import { stripEligible, showsStrip, confirmStrip, STRIP_CHIP } from "../../lib/importTimeline";
 import { PhotoLead, PageView } from "./v9/PhotoSnip";
 import type { ReviewPhoto } from "../../lib/photoImport";
 import "./photoImport.css";
@@ -368,16 +369,9 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
      for one query or (with the tick) every open one at once (lib/smartImportReviewModel). */
   const openCrossed = (exceptId: string) => openCrossedOthers(queries, exceptId);
   const answerCrossed = (ids: string[], answer: "rejected" | "no-response" | "never") => setQueries((xs) => applyCrossedAnswer(xs, ids, answer));
-  // Swap which date is the sent date vs the (first) timeline event — the two-dates "Swap" control.
-  const swapQueryDates = (id: string) => {
-    setQueries((xs) => xs.map((q) => {
-      if (q.id !== id || q.timeline.length === 0) return q;
-      const [ev, ...rest] = q.timeline;
-      return { ...q, sentDate: ev.date, sentDateRaw: ev.raw, timeline: [{ ...ev, date: q.sentDate, raw: q.sentDateRaw }, ...rest] };
-    }));
-  };
-  /* Two dates (v1.1): "Neither is when I sent it" (lib/smartImportReviewModel). */
-  const neitherSent = (id: string) => setQueries((xs) => applyNeitherSent(xs, id));
+  /* The timeline strip (design-refs/import-timeline-strip-v1.html): every edit replaces the query
+     whole (lib/importTimeline); "Yes, that's right" answers every reason the strip replaced. */
+  const replaceQuery = (next: ReviewQuery) => setQueries((xs) => xs.map((q) => (q.id === next.id ? next : q)));
   // Re-open a settled query's typed reasons (session-only: flips resolved flags; the applied fixes stay).
   const reopenQueryReasons = (id: string) => {
     setQueries((xs) => xs.map((q) => (q.id === id ? { ...q, reasons: q.reasons.map((r) => ({ ...r, resolved: false })) } : q)));
@@ -548,6 +542,10 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
   for (const a of agents) { const ask = agentAsk(a); if (ask && !agentDeck.current.some((d) => d.id === a.id)) agentDeck.current.push({ id: a.id, ask }); }
   const queryDeck = useRef<string[]>([]);
   for (const q of qActive) if (q.reasons.some((r) => !r.resolved) && !queryDeck.current.includes(q.id)) queryDeck.current.push(q.id);
+  /* Which queries the strip asks about, fixed once seen: removing a step must not turn the card back
+     into a single-date card under the writer's hand. */
+  const stripIds = useRef(new Set<string>());
+  for (const q of qActive) if (stripEligible(q)) stripIds.current.add(q.id);
 
   const agentCards = (): DeckCard[] => agentDeck.current.flatMap((d): DeckCard[] => {
     const a = agents.find((x) => x.id === d.id);
@@ -605,10 +603,15 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
       sub: `${originOf(q)} · ${statusAsk ? (q.sentDate ? fmtDate(q.sentDate) : "Undated") : STAGE_NAME[q.status]}`,
       chip: open ? focusReasonMeta(code).pill : "Answered",
     };
+    /* A query with a timeline is asked about it whole: one card, the strip, one button. */
+    if (showsStrip(q, stripIds.current)) {
+      const agent = agents.find((x) => x.id === q.agentRef);
+      return [{ ...base, chip: STRIP_CHIP, body: (
+        <StripQuestion query={q} agentName={agent?.name.trim() || null} onChange={replaceQuery} onConfirm={() => replaceQuery(confirmStrip(q))} />) }];
+    }
     if (open) return [{ ...base, body: (
       <QueryQuestion key={code} query={q} code={code} onPatch={(p) => patchQuery(q.id, p)}
-        onResolveReason={(c, p) => resolveQueryReason(q.id, c, p)} onSwapDates={() => swapQueryDates(q.id)}
-        onNeitherSent={() => neitherSent(q.id)}
+        onResolveReason={(c, p) => resolveQueryReason(q.id, c, p)}
         agentName={name} agentAgency={agents.find((x) => x.id === q.agentRef)?.agency} crossedOthers={openCrossed(q.id).map((x) => agentNameOf(x.agentRef))}
         onCrossed={(answer, all) => answerCrossed([q.id, ...(all ? openCrossed(q.id).map((x) => x.id) : [])], answer)} />) }];
     return [{ ...base, body: <Answered reason={code} onChange={() => reopenQueryReasons(q.id)}>{STAGE_NAME[q.status]}, {q.sentDate ? `sent ${fmtDate(q.sentDate)}` : "kept undated"}.</Answered> }];

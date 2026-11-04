@@ -140,7 +140,7 @@ describe("Crossed out", () => {
   const m = parseModel(PHOTO);
   const q = m.queries[2];
   const others = openCrossedOthers(m.queries, q.id).map(() => "Tom Rafferty");
-  const h = html(<QueryQuestion query={q} code="crossed-out" onPatch={noop} onResolveReason={noop} onSwapDates={noop} agentName="Rhys Hale" crossedOthers={others} onCrossed={noop} />);
+  const h = html(<QueryQuestion query={q} code="crossed-out" onPatch={noop} onResolveReason={noop} agentName="Rhys Hale" crossedOthers={others} onCrossed={noop} />);
   it("asks, and offers Passed, No response and I never sent it", () => {
     expect(text(h)).toContain("This line is crossed out. What does that mean for Rhys Hale?");
     expect(text(h)).toContain("People cross lines out for different reasons. Tell us once and the query is tracked the right way.");
@@ -150,7 +150,7 @@ describe("Crossed out", () => {
     expect(h).toMatch(/<input type="checkbox" checked=""\/>/);
     expect(text(h)).toContain("Use the same answer for the other crossed-out line (Tom Rafferty)");
     expect(crossedAllLabel(["A", "B", "C", "D"])).toBe("Use the same answer for the other crossed-out lines (A, B, C, …)");
-    const alone = html(<QueryQuestion query={q} code="crossed-out" onPatch={noop} onResolveReason={noop} onSwapDates={noop} agentName="Rhys Hale" crossedOthers={[]} onCrossed={noop} />);
+    const alone = html(<QueryQuestion query={q} code="crossed-out" onPatch={noop} onResolveReason={noop} agentName="Rhys Hale" crossedOthers={[]} onCrossed={noop} />);
     expect(alone).not.toContain("checkbox");
   });
   it("applied to all, every crossed-out card is answered and the count drops by both", () => {
@@ -173,7 +173,7 @@ describe("Crossed out", () => {
 
 describe("Mark to explain", () => {
   const q = parseModel(PHOTO).queries[4];
-  const h = html(<QueryQuestion query={q} code="mark-unclear" onPatch={noop} onResolveReason={noop} onSwapDates={noop} agentName="Leo Marchetti" agentAgency="Marchetti Lit" />);
+  const h = html(<QueryQuestion query={q} code="mark-unclear" onPatch={noop} onResolveReason={noop} agentName="Leo Marchetti" agentAgency="Marchetti Lit" />);
   it("quotes the mark and the words it follows, and offers the status set", () => {
     expect(ask(h)).toBe("There's a “✗” after “sent partial 11/9”. Where does this one stand?");
     expect(markWording({ lineRaw: "Callum Thorne – Fairbairn Associates – 13/4 – R&R ✗", markRaw: "✗" }, { name: "Callum Thorne", agency: "Fairbairn Associates" })).toBe("13/4 – R&R");

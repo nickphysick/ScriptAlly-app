@@ -155,3 +155,28 @@ export const REVIEW_FIXTURE_NAMELESS: SmartImportResult = {
     { agentRef: "n3", status: QueryStatus.FULL_REQUESTED, sentDate: "2026-04-01", sentDateRaw: "2026-04-01" },
   ],
 };
+
+/** Dev-only fixture for `#/onb-lab?s=review&fx=timeline` (ref design-refs/import-timeline-strip-v1.html):
+ *  Kirsten Vale as the photo read gives her (no sent date, Full requested 15/9, Full sent 22/9, the
+ *  line quoted, page 2), a spreadsheet row with two dates, and ready rows — Cordelia Vane among them,
+ *  sent on 12 August with nothing since. Every agent has an agency, so the agents step asks nothing. */
+export const REVIEW_FIXTURE_TIMELINE: SmartImportResult = {
+  agents: [
+    { ref: "t1", name: "Kirsten Vale", agency: "Vale Agency" },
+    { ref: "t2", name: "Cordelia Vane", agency: "Vane & Hart" },
+    { ref: "t3", name: "Nadia Okafor", agency: "Okafor Lit" },
+    { ref: "t4", name: "Hannah Biddle", agency: "Greaves" },
+    { ref: "t5", name: "Jamal Carter", agency: "Carter & Vale" },
+  ],
+  queries: [
+    { agentRef: "t1", status: QueryStatus.FULL_SENT, sentDate: null, sentDateRaw: null,
+      timeline: [{ type: QueryStatus.FULL_REQUESTED, date: "2026-09-15", raw: "15/9" }, { type: QueryStatus.FULL_SENT, date: "2026-09-22", raw: "22/9" }],
+      reasons: ["no-date"], lineRaw: "Kirsten Vale - Vale Agency - FULL!! 15/9 → sent full 22/9", src: { p: 2, y: [0.2, 0.25] } },
+    { agentRef: "t5", status: QueryStatus.FULL_REQUESTED, sentDate: "2026-03-14", sentDateRaw: "14/03/2026",
+      timeline: [{ type: QueryStatus.FULL_REQUESTED, date: "2026-03-20", raw: "20/3" }], reasons: ["two-dates"], notes: "requested full ms 20/3" },
+    { agentRef: "t2", status: QueryStatus.QUERIED, sentDate: "2026-08-12", sentDateRaw: "12/8" },
+    { agentRef: "t3", status: QueryStatus.PARTIAL_REQUESTED, sentDate: "2026-08-20", sentDateRaw: "20/8",
+      timeline: [{ type: QueryStatus.PARTIAL_REQUESTED, date: "2026-09-03", raw: "3/9" }] },
+    { agentRef: "t4", status: QueryStatus.QUERIED, sentDate: "2026-09-01", sentDateRaw: "1/9" },
+  ],
+};

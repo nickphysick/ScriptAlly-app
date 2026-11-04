@@ -37,6 +37,7 @@ import {
 import { Chip, Disc, initialsOf } from "./ImportParts";
 import { ambiguousReadings } from "../../lib/templateImport";
 import { STAGE_NAME } from "../../lib/qcSummary";
+import { TimelineStrip } from "./v9/TimelineStrip";
 
 /** The review list's words (import review v1; ref design-refs/onboarding/import-review-v1/
  *  review-agents.dc.html). A row the writer leaves out stays in its place, says so, and can be undone. */
@@ -250,14 +251,8 @@ export interface QueryReasonPanelProps {
   code: ReviewReasonCode;
   onPatch: (p: Partial<ReviewQuery>) => void;
   onResolveReason: (code: ReviewReasonCode, patch?: Partial<ReviewQuery>) => void;
-  onSwapDates: () => void;
-  /** Two dates (v1.1): neither date is the sent date. Both stay on their events; the sent-date
-   *  question follows. */
-  onNeitherSent?: () => void;
 }
-/** The two-dates card's third way out (v1.1), on both paths. */
-export const NEITHER_SENT = "Neither is when I sent it";
-export const QueryReasonPanel: React.FC<QueryReasonPanelProps> = ({ query, code, onPatch, onResolveReason, onSwapDates, onNeitherSent }) => {
+export const QueryReasonPanel: React.FC<QueryReasonPanelProps> = ({ query, code, onResolveReason }) => {
   // Per-reason local date drafts (so typing doesn't commit until "Save"), and the wording dropdown.
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [serialEditing, setSerialEditing] = useState(false);
@@ -274,33 +269,7 @@ export const QueryReasonPanel: React.FC<QueryReasonPanelProps> = ({ query, code,
   const question = <p className="im-fixq">{queryReasonText(code, query)}</p>;
 
   switch (code) {
-    case "two-dates": {
-      const ev = query.timeline[0];
-      return (
-        <div className="im-reason" data-reason={code}>
-          {question}
-          <div className="im-pair">
-            <div className="im-pairrow">
-              <span className="im-pairlab">Query sent<small>you → agent</small></span>
-              <input className="sf-in" type="date" aria-label="Query sent date" value={dayOf(query.sentDate)} onChange={(e) => onPatch({ sentDate: e.target.value || null })} />
-            </div>
-            {ev && (
-              <div className="im-pairrow">
-                <span className="im-pairlab">{ev.type}<small>agent → you</small></span>
-                <input className="sf-in" type="date" aria-label="Event date" value={dayOf(ev.date)}
-                  onChange={(e) => onPatch({ timeline: query.timeline.map((t, i) => (i === 0 ? { ...t, date: e.target.value || null } : t)) })} />
-              </div>
-            )}
-          </div>
-          <div className="im-fixrow">
-            {solid("Yes, that's right", () => onResolveReason("two-dates"))}
-            {ev && quiet("Swap the dates", onSwapDates)}
-            {quiet("It's just one date", () => onResolveReason("two-dates", { timeline: [] }))}
-            {onNeitherSent && quiet(NEITHER_SENT, onNeitherSent)}
-          </div>
-        </div>
-      );
-    }
+    /* "two-dates" is asked by the timeline strip (v9/DeckQuestions StripQuestion), never here. */
     case "missing-day":
       return (
         <div className="im-reason" data-reason={code}>
@@ -441,25 +410,20 @@ export const QueryRow: React.FC<QueryRowProps> = ({ query, agentName, origin, op
       </div>
       {out
         ? <OutEnd onUndo={() => onUndo?.()} />
-        : <LiveEnd open={open} added={!!added} onToggleOpen={onToggleOpen} onDelete={onDelete}
-            lead={<span className="im-stat" data-im="row-status"><StatusDot status={query.status} overrideSize={18} />{STAGE_NAME[query.status]}</span>} />}
+        : open
+          /* while the strip is open, Done is the one way out */
+          ? <div className="im-rwend"><button type="button" className="sf-btn sf-btn--sm" onClick={onToggleOpen} aria-expanded data-im="row-action">{ROW_WORDS.done}</button></div>
+          : <LiveEnd open={open} added={!!added} onToggleOpen={onToggleOpen} onDelete={onDelete}
+              lead={<span className="im-stat" data-im="row-status"><StatusDot status={query.status} overrideSize={18} />{STAGE_NAME[query.status]}</span>} />}
 
+      {/* Edit opens the timeline strip inline under the row; status follows its latest step. */}
       {!out && open && (
-        <DetailsPanel foot="Add what you remember and your timeline stays accurate." onDone={onToggleOpen}>
+        <div className="im-edit o9-rowstrip" data-im="row-edit" data-strip-host>
           {settledReasons && (
             <Said onChange={onReopen}>You've sorted this query — {query.status.toLowerCase()}{query.sentDate ? `, sent ${fmtDate(query.sentDate)}` : ""}.</Said>
           )}
-          <div className="im-editrow">
-            <Field label="Status">
-              <select className="sf-in" value={query.status} onChange={(e) => onPatch({ status: e.target.value as QueryStatus })}>
-                {QUERY_STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
-              </select>
-            </Field>
-            <Field label="Date sent">
-              <input className="sf-in" type="date" value={dayOf(query.sentDate)} onChange={(e) => onPatch({ sentDate: e.target.value || null })} />
-            </Field>
-          </div>
-        </DetailsPanel>
+          <TimelineStrip query={query} onChange={(next) => onPatch(next)} />
+        </div>
       )}
     </div>
   );

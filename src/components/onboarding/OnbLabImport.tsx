@@ -12,7 +12,7 @@
  *                                    hold=work stops on the last row; hold=open never sends the
  *                                    first chunk; stream=none sends no counts
  *   ?s=overview&fx=review|dupes|clear
- *   ?s=review&fx=review|dupes|clear   the three review steps, start to finish
+ *   ?s=review&fx=review|dupes|clear|timeline   the three review steps, start to finish
  *   ?s=importing[&done=1]
  *   ?s=flow&fx=…[&skip=N][&none=1][&floor=ms]   the real branch from the summary to the hand-over
  *
@@ -31,7 +31,7 @@ import { ScatterSettleLoader, LoaderCard } from "./ScatterSettleLoader";
 import { ImportingLoader } from "./ImportingLoader";
 import { ImportOverview } from "./ImportOverview";
 import { SmartImportReview } from "./SmartImportReview";
-import { REVIEW_FIXTURE, REVIEW_FIXTURE_DUPES, REVIEW_FIXTURE_CLEAR, REVIEW_FIXTURE_GATE, REVIEW_FIXTURE_NAMELESS } from "./SmartImportReviewFixture";
+import { REVIEW_FIXTURE, REVIEW_FIXTURE_DUPES, REVIEW_FIXTURE_CLEAR, REVIEW_FIXTURE_GATE, REVIEW_FIXTURE_NAMELESS, REVIEW_FIXTURE_TIMELINE } from "./SmartImportReviewFixture";
 
 declare global {
   interface Window { __onbLab?: { calls: Array<{ name: string; arg?: unknown }>; result?: unknown } }
@@ -43,7 +43,7 @@ const spy = (name: string) => (arg?: unknown) => {
 
 export const LAB_FILE = "my agents FINAL v3.csv";
 export const labFixture = (fx: string | null): SmartImportResult =>
-  fx === "dupes" ? REVIEW_FIXTURE_DUPES : fx === "clear" ? REVIEW_FIXTURE_CLEAR : fx === "gate" ? REVIEW_FIXTURE_GATE : fx === "nameless" ? REVIEW_FIXTURE_NAMELESS : REVIEW_FIXTURE;
+  fx === "dupes" ? REVIEW_FIXTURE_DUPES : fx === "clear" ? REVIEW_FIXTURE_CLEAR : fx === "gate" ? REVIEW_FIXTURE_GATE : fx === "nameless" ? REVIEW_FIXTURE_NAMELESS : fx === "timeline" ? REVIEW_FIXTURE_TIMELINE : REVIEW_FIXTURE;
 
 const SAMPLE: { messy: string; name: string; agency: string; date: string; status: QueryStatus }[] = [
   { messy: 'J. Carter · Carter & Vale · "replied, wants pages" · 44621', name: "Jamal Carter", agency: "Carter & Vale", date: "1 Mar 2022", status: QueryStatus.PARTIAL_REQUESTED },
@@ -130,8 +130,12 @@ export const LabOverview: React.FC<{ fx: string | null; title: string; rows?: nu
   <ImportOverview result={labFixture(fx)} manuscriptTitle={title} fileName={LAB_FILE} rowCount={rows ?? null} onContinue={spy("continue")} />
 );
 
+/* The timeline fixture's two pages, drawn plain, so "See the whole page" has a page to open. */
+const labPage = (n: number) => `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200"><rect width="900" height="1200" fill="#fbf9f5"/><text x="60" y="120" font-family="Georgia" font-size="40" fill="#1c130f">Page ${n}</text></svg>`)}`;
+const LAB_PHOTOS = [1, 2].map((n) => ({ shown: n, url: labPage(n), width: 900, height: 1200 }));
 export const LabReview: React.FC<{ fx: string | null }> = ({ fx }) => (
   <SmartImportReview
+    photos={fx === "timeline" ? LAB_PHOTOS : undefined}
     result={labFixture(fx)}
     manuscriptTitle="Murphy's Day Out"
     onBack={spy("back")}
