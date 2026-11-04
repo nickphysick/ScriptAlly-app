@@ -14,10 +14,19 @@
 /* ── the page: the landing page's warm gradient, on the dashboard's own scroller only ── */
 .dash-mode .ws-wbody:has(.d58.d2) { background: linear-gradient(180deg, #fbf9f5 0%, #eeebe5 100%); }
 .d58.d2 { --d2-navy: #2d3a50; --d2-ink: #1c130f; --d2-muted: #7d7067; --d2-rose: #a0675a; --d2-hair: #ebe4da; background: transparent; }
-.d58.d2 .d2-page { box-sizing: border-box; max-width: 1360px; margin: 0 auto; padding: 6px 10px 60px; font-family: var(--d58-serif); color: var(--d2-ink); }
+/* ⚠️ THE PAGE MAY SCROLL, as feed v1's did: v58's one-screen height (`.d58`'s height from the scrollport, the page
+   `flex: 1 1 0`) is switched off for this mode the way df1.css switches it off for `f1`. The page element is
+   `.d58-page` (v58's); the sheet's padding is the ref's 28px 32px around content capped at 1360px. */
+.d58[data-mode="d2"] { height: auto; }
+.d58[data-mode="d2"] .d58-page {
+  flex: none; box-sizing: border-box; width: 100%; max-width: calc(1360px + 64px); margin-inline: auto;
+  padding: 28px 32px 60px; font-family: var(--d58-serif); color: var(--d2-ink);
+}
 .d58.d2 :is(p, span, div, button, small, b, time, li, em, label) { font-family: inherit; }
 
-/* ── Part A · the navy band ── */
+/* ── Part A · the navy band ──
+   ⚠️ 28px FROM THE SHEET'S TOP (the ref's sheet padding): the shell's 12px sticky lip (SheetLip) covers the top of
+   every page's scroller, so a smaller inset puts the band's rounded corners under it. DB2 A1 measures it. */
 .d2-band {
   box-sizing: border-box; display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
   padding: 22px 28px; border-radius: 18px; background: #2d3a50; color: #fffaf3;
