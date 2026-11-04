@@ -116,6 +116,26 @@ export interface CardEditKit {
   /** the card's edit mode for this agent */
   renderEdit: (o: { focus?: AgentCardField; wide?: boolean; onDone: () => void }) => React.ReactNode;
   request: { seq: number; inline?: InlineField; edit?: { focus?: AgentCardField } } | null;
+  /** Contact list v26.2 C — editing ON the card: what one draft over the whole card needs — the editor's own lists, its
+   *  Also-changes dry run and its one save (absent: the card hands every edit to `renderEdit`) */
+  form?: CardFormKit;
+}
+export interface CardFormKit {
+  personal: import("../../../lib/genres").PersonalGenre[];
+  agents: readonly import("../../../types").Agent[];
+  msGenre: string | null;
+  genrePool: string[];
+  personalGenres: string[];
+  allGenres: readonly string[];
+  nowMs: number;
+  alsoFor: (d: CardDraft, base: CardDraft) => import("../../../lib/contactEdit").AlsoNote[];
+  /** the one write (the editor's existing save); its toast is the page's */
+  onSave: (d: CardDraft, base: CardDraft) => Promise<{ ok: true } | { ok: false; error: string }>;
+  onNewGenre: (typed: string) => Promise<{ ok: true; label: string } | { ok: false; reason: string }>;
+  /** the page's "another row was picked" / "leave" hook: the card sets it while it has unsaved changes */
+  leaveRef: React.MutableRefObject<(() => void) | null>;
+  /** after the card lets a leave go ahead: the page carries out the pick it held */
+  resumePick: () => void;
 }
 
 /** where a door's field opens: in place when an inline edit holds it, else the edit mode at that field */

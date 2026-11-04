@@ -23,3 +23,23 @@ test("CL262 shots — the card", async ({ page }) => {
   await openCard(page, SIZES[1], { stand: "you" });
   await page.screenshot({ path: `${shotDir()}/09-card-1280.png` });
 });
+
+test("CL262 shots — editing", async ({ page }) => {
+  test.setTimeout(300_000);
+  const pen = (k: string) => page.evaluate((key) => (document.querySelector(`[data-cl262='pen'][data-k='${key}']`) as HTMLElement | null)?.click(), k);
+  await openCard(page, SIZES[0], { stand: "none" });
+  await pen("genres"); await page.waitForTimeout(600);
+  await page.screenshot({ path: `${shotDir()}/04-edit-genres-1512.png` });
+  await openCard(page, SIZES[0], { stand: "you" });
+  await pen("materials"); await page.waitForTimeout(600);
+  await page.screenshot({ path: `${shotDir()}/05-edit-materials-1512.png` });
+  await openCard(page, SIZES[0], { stand: "agent" });
+  await pen("how"); await page.waitForTimeout(400);
+  await page.locator("[data-cl262='sec'][data-k='how'] [data-ae='weeks'] button[data-d='1']").first().click();
+  await page.locator("[data-cl262='sec'][data-k='how'] [data-ae='weeks'] button[data-d='1']").first().click();
+  await page.waitForTimeout(500);
+  await page.screenshot({ path: `${shotDir()}/06-edit-how-also-1512.png` });
+  await openCard(page, SIZES[0], { stand: "you" });
+  await page.locator("[data-cl262='edit-all']").first().click(); await page.waitForTimeout(600);
+  await page.screenshot({ path: `${shotDir()}/07-edit-all-1512.png` });
+});

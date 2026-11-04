@@ -16,7 +16,7 @@
  * ⚠️ IT DRAWS FROM THE PAGE'S OWN MODEL (`AgentCard24Props`, `useCardModel`): the call box, the gaps, the story and the
  *    edit kit are the ones the v25 card read, so nothing is derived twice.
  */
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { StatusDot } from "../../StatusDot";
 import { agentInitials, agentPrimary } from "../../../lib/agentDisplay";
 import { addedLabel } from "../../../lib/contactList";
@@ -28,6 +28,8 @@ import { Notes, type AgentCard24Props, useCardModel } from "./AgentCard24";
 import { YouAndStory } from "./AgentCardParts255";
 import type { AgentCardField } from "../../../lib/agentCardStore";
 import { requestCardClose } from "./AgentCardPanel262";
+import { useAgentForm } from "../card/useAgentForm";
+import { EditContact, EditGenres, EditHow, EditMaterials, EditWishlist, SaveBar } from "./AgentCard262Edit";
 import "./contactV262.css";
 
 /** the band's slate, for every agent (v26.2 ruling) */
@@ -83,10 +85,11 @@ export const NextBox: React.FC<{ s: NextStep; p: AgentCard24Props }> = ({ s, p }
 };
 
 /** a section: heading (with its pencil on hover), then its content or its ghost lines and one "+ Add …" */
-const Section: React.FC<{ k: Sec262; title: string; onEdit?: () => void; children: React.ReactNode }> = ({ k, title, onEdit, children }) => (
-  <section className="apc-sec cl262-sec" data-cl262="sec" data-k={k}>
-    <h5>{title}{onEdit ? <button type="button" className="cl262-pen" data-cl262="pen" data-k={k} aria-label={`Edit ${title.toLowerCase()}`} onClick={onEdit}>{IC.pen}</button> : null}</h5>
-    {children}
+const Section: React.FC<{ k: Sec262; title: string; onEdit?: () => void; editing?: React.ReactNode; children?: React.ReactNode }> = ({ k, title, onEdit, editing, children }) => (
+  <section className={`apc-sec cl262-sec${editing ? " is-edit" : ""}`} data-cl262="sec" data-k={k} data-editing={editing ? "" : undefined}>
+    <h5>{title}{onEdit && !editing ? <button type="button" className="cl262-pen" data-cl262="pen" data-k={k} aria-label={`Edit ${title.toLowerCase()}`} onClick={onEdit}>{IC.pen}</button> : null}</h5>
+    {/* the editor's own field styles live under its `.ac` root (box-sizing and face inheritance only) */}
+    {editing ? <div className="ac cl262-fx">{editing}</div> : children}
   </section>
 );
 const Ghost: React.FC<{ kind: "chips" | "lines"; add: string; k: Sec262; onAdd?: () => void }> = ({ kind, add, k, onAdd }) => (
@@ -105,10 +108,51 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   const [tab, setTab] = useState<Tab>("profile");
   useEffect(() => { setTab("profile"); }, [a.id]);
   const scrollRef = useRef<HTMLDivElement>(null);
-  /* until Part C, a section's edit is the existing editor in the card's body, at that section's field */
-  const [oldEdit, setOldEdit] = useState<Sec262 | null>(null);
-  useEffect(() => { setOldEdit(null); }, [a.id]);
-  const edit = (k: Sec262) => { if (p.onEditSection) p.onEditSection(k); else if (p.edit) setOldEdit(k); else p.onEdit(undefined, SEC_FOCUS[k]); };
+  /* ── Part C · editing on the card: one draft (the editor's own form), any number of open sections ── */
+  const kit = p.edit?.form ?? null;
+  const [open, setOpen] = useState<Sec262[]>([]);
+  const [flash, setFlash] = useState(false);
+  const editing = open.length > 0;
+  const closeAll = useCallback(() => setOpen([]), []);
+  const form = useAgentForm({
+    mode: "edit", agent: a, personal: kit?.personal ?? [], agents: kit?.agents ?? [],
+    alsoFor: kit?.alsoFor ?? (() => []),
+    onSave: async (d, base) => {
+      if (!kit) return { ok: false, error: "Nothing to save to." };
+      const r = await kit.onSave(d, base);
+      if ("error" in r) return r;
+      /* the sections close in place, the card leans back, and the frame flashes sage */
+      closeAll();
+      setFlash(true);
+      window.setTimeout(() => setFlash(false), 1200);
+      return r;
+    },
+    onLeave: closeAll,
+  });
+  const resetRef = useRef(form.reset);
+  resetRef.current = form.reset;
+  /* a new agent: nothing open, a fresh draft */
+  useEffect(() => { setOpen([]); resetRef.current(a); }, [a.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  /** open one section (adding it to any already open); the first opening starts a fresh draft */
+  const openSec = (k: Sec262) => {
+    if (!kit) { p.onEdit(undefined, SEC_FOCUS[k]); return; }
+    setTab("profile");
+    setOpen((cur) => {
+      if (cur.includes(k)) return cur;
+      if (!cur.length) resetRef.current(a);
+      return [...cur, k];
+    });
+  };
+  /** the band's pencil: every section, and Contact details at the top */
+  const openAll = () => {
+    if (!kit) { p.onEdit("who"); return; }
+    setTab("profile");
+    setOpen((cur) => { if (!cur.length) resetRef.current(a); return ["contact", "genres", "wishlist", "materials", "how"]; });
+  };
+  const cancel = () => { closeAll(); form.reset(a); };
+  const edit = openSec;
+  const isOpen = (k: Sec262) => open.includes(k);
+  const all = open.includes("contact");
 
   const genres = a.genres ?? [];
   const wish = (a.mswlNotes ?? "").trim();
@@ -135,16 +179,17 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
             aria-label={`${i} ${i === 1 ? "star" : "stars"}`} onClick={() => rate(i)}>★</button>
         ))}
       </span>
-      <button type="button" className="cl262-rb" data-cl262="edit-all" aria-label={`Edit ${m.first}`} onClick={() => edit("contact")}>{IC.pen}</button>
+      {all ? <span className="cl262-editing" data-cl262="editing-chip">Editing</span>
+        : <button type="button" className="cl262-rb" data-cl262="edit-all" aria-label={`Edit everything about ${m.first}`} onClick={openAll}>{IC.pen}</button>}
       <button type="button" className="cl262-rb" data-cl262="close" data-cl24="close" aria-label="Close the agent" onClick={() => (p.onClose ?? requestCardClose)()}><span aria-hidden="true">×</span></button>
     </span>
   );
   const links = (
     <span className="cl262-links" data-cl262="links">
       {site ? <a href={hrefFor(site) ?? "#"} target="_blank" rel="noopener noreferrer" data-cl262="website"><PaperIcon kind="web" />Website</a>
-        : <button type="button" className="cl262-lk" data-cl262="add-website" onClick={() => edit("contact")}>+ Website</button>}
+        : <button type="button" className="cl262-lk" data-cl262="add-website" onClick={openAll}>+ Website</button>}
       {email ? <a href={`mailto:${email}`} data-cl262="email"><PaperIcon kind="mail" />Email</a>
-        : <button type="button" className="cl262-lk" data-cl262="add-email" onClick={() => edit("contact")}>+ Email</button>}
+        : <button type="button" className="cl262-lk" data-cl262="add-email" onClick={openAll}>+ Email</button>}
     </span>
   );
   const gaps = p.gaps && p.gaps.n > 0 ? p.gaps : null;
@@ -165,7 +210,8 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   );
   const profile = (
     <div className="cl262-body" data-cl262="profile">
-      <Section k="genres" title="Genres sought" onEdit={() => edit("genres")}>
+      {all && kit ? <Section k="contact" title="Contact details" editing={<EditContact form={form} agent={a} kit={kit} />} /> : null}
+      <Section k="genres" title="Genres sought" onEdit={() => edit("genres")} editing={isOpen("genres") && kit ? <EditGenres form={form} kit={kit} isHit={p.genreHit} /> : undefined}>
         {genres.length ? (
           <span className="apc-chips" data-cl262="genres">
             {[...genres.filter((g) => p.genreHit(g)), ...genres.filter((g) => !p.genreHit(g))].map((g) => (
@@ -174,15 +220,15 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
           </span>
         ) : <Ghost kind="chips" add="+ Add genres" k="genres" onAdd={() => edit("genres")} />}
       </Section>
-      <Section k="wishlist" title="Manuscript wishlist" onEdit={() => edit("wishlist")}>
+      <Section k="wishlist" title="Manuscript wishlist" onEdit={() => edit("wishlist")} editing={isOpen("wishlist") ? <EditWishlist form={form} /> : undefined}>
         {wish ? <p className="apc-wish" data-cl262="wishlist">{wish}</p> : <Ghost kind="lines" add="+ Add their wishlist" k="wishlist" onAdd={() => edit("wishlist")} />}
       </Section>
-      <Section k="materials" title="Materials requested" onEdit={() => edit("materials")}>
+      <Section k="materials" title="Materials requested" onEdit={() => edit("materials")} editing={isOpen("materials") ? <EditMaterials form={form} /> : undefined}>
         {mats.length ? (
           <span className="apc-chips" data-cl262="materials">{mats.map((c) => <span key={c.label} className="apc-mat"><PaperIcon kind={c.kind} />{c.label}</span>)}</span>
         ) : <Ghost kind="chips" add="+ Add materials" k="materials" onAdd={() => edit("materials")} />}
       </Section>
-      <Section k="how" title={`How ${m.first} works`} onEdit={() => edit("how")}>
+      <Section k="how" title={`How ${m.first} works`} onEdit={() => edit("how")} editing={isOpen("how") && kit ? <EditHow form={form} agent={a} kit={kit} first={m.first} /> : undefined}>
         <div className="cl262-tiles" data-cl262="tiles">
           {tiles.map((t) => (
             <span key={t.k} className={`cl262-tile${t.known ? "" : " gap"}`} data-cl262="tile" data-k={t.k} data-known={t.known ? "" : undefined}>
@@ -194,8 +240,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
       </Section>
     </div>
   );
-  const body = oldEdit && p.edit ? <div className="cl262-body" data-cl262="old-edit">{p.edit.renderEdit({ focus: SEC_FOCUS[oldEdit], onDone: () => setOldEdit(null) })}</div>
-    : tab === "profile" ? profile
+  const body = tab === "profile" ? profile
     : tab === "history" ? <div className="cl262-body cl262-hist" data-cl262="history"><YouAndStory blocks={p.story?.blocks ?? []} heard={p.story?.heard ?? null} first={m.first} onOpenQuery={p.onOpenQuery} /></div>
     : <div className="cl262-body cl262-notes" data-cl262="notes"><Notes p={p} first={m.first} /></div>;
   const foot = (
@@ -209,9 +254,12 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     </div>
   );
   return (
-    <AgentPaperCard variant="panel" className="cl262-card" data={data}
+    <AgentPaperCard variant="panel" className={`cl262-card${editing ? " is-editing" : ""}${flash ? " is-saved" : ""}`} data={data}
       panel={{
-        onClose: () => (p.onClose ?? requestCardClose)(), closeLabel: "Close the agent", links, tabs, body, foot,
+        onClose: () => (p.onClose ?? requestCardClose)(), closeLabel: "Close the agent", links, tabs, body,
+        /* the foot is hidden while editing; the save bar takes its place at the card's foot */
+        foot: editing ? null : foot,
+        afterScroll: editing ? <SaveBar form={form} guard={null} onCancel={cancel} onSave={() => void form.save()} onKeep={() => {}} onDiscard={cancel} /> : null,
         band: CARD262_BAND, bandRight, disc: <Disc262 stand={x.stand} initials={data.initials} />,
         meta: meta ? <span className="apc-meta" data-cl262="meta">{meta}</span> : null,
         afterHead: <NextBox s={step} p={p} />, scrollRef,

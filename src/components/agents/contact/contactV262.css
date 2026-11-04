@@ -177,3 +177,80 @@
 }
 .cl262-pager button:disabled { opacity: .4; cursor: default; }
 .cl262-card.apc .cl262-foot .cl262-added { display: inline-flex; margin-top: 0; }
+
+/* ═════════ C · editing on the card ═════════ */
+.cl262-lean:has(.cl262-card.is-editing) { transform: rotate(0deg); }
+.cl262-editing {
+  display: inline-flex; align-items: center; height: 30px; padding: 0 12px; border-radius: 8px; background: #f4eee5; color: #1c130f;
+  font: 500 10.5px/1 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: .16em; text-transform: uppercase;
+}
+/* a section being edited: inset, tinted, a navy ring, no hairlines either side */
+.cl262-card.apc .cl262-sec.is-edit {
+  margin: 4px 12px; padding: 14px 10px 16px; border-radius: 12px; background: #f7f4ef; box-shadow: inset 0 0 0 1.5px #2a3a52; border-top: 0;
+}
+.cl262-card.apc .cl262-sec.is-edit + .cl262-sec { border-top: 0; }
+.cl262-card.apc .cl262-sec.is-edit h5 { margin-left: 2px; }
+/* genres: the editor's GenreField as toggle chips */
+.cl262-card .cl262-fx .ae-gtog { display: flex; flex-wrap: wrap; gap: 8px; }
+.cl262-card .cl262-fx .ae-gt {
+  height: 32px; padding: 0 12px; border: 0; border-radius: 8px; background: #fff; color: #1c130f; cursor: pointer;
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, .16); font: 400 14px/1 var(--sp-type) !important;
+}
+.cl262-card .cl262-fx .ae-gt.hit { box-shadow: inset 0 0 0 1px rgba(28, 19, 15, .16), inset 0 -2px 0 #5e7189; }
+.cl262-card .cl262-fx .ae-gt.on { background: #2a3a52; color: #f4eee5; box-shadow: none; }
+.cl262-card .cl262-fx .ae-gnote { margin: 12px 0 0; font: italic 400 14.5px/1.35 var(--sp-serif) !important; color: rgba(28, 19, 15, .65); }
+.cl262-card .cl262-fx .ae-gnote button { padding: 0; border: 0; background: none; cursor: pointer; color: #2a3a52; text-decoration: underline; text-underline-offset: 3px; font: inherit !important; }
+.cl262-card .cl262-fx .ae-gfind { margin-top: 10px; background: #fff; }
+/* the wishlist */
+.cl262-wishf { display: flex; flex-direction: column; gap: 6px; }
+.cl262-wta {
+  box-sizing: border-box; width: 100%; min-height: 96px; padding: 10px 12px; border: 0; border-radius: 10px; background: #fff; resize: vertical;
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, .16); color: #1c130f; font: italic 400 18px/1.45 var(--sp-serif) !important;
+}
+.cl262-wta:focus { outline: 2px solid #2a3a52; outline-offset: 0; }
+.cl262-cnt { align-self: flex-end; font: 400 12.5px/1 var(--sp-type) !important; color: rgba(28, 19, 15, .5); }
+/* materials: the editor's rows, 22px boxes, ticked navy with a cream ✓ */
+.cl262-card .cl262-fx .ae-mt { display: flex; flex-direction: column; gap: 10px; }
+.cl262-card .cl262-fx .ae-mtr { display: flex; align-items: center; gap: 10px; font: 400 15px/1.3 var(--sp-type) !important; }
+.cl262-card .cl262-fx .ae-mtr > span { font: inherit !important; }
+/* the editor's own box and tick (its ::after), at 22px; ticked is navy with a cream tick */
+.cl262-card .cl262-fx .ae-bx { flex: none; width: 22px; height: 22px; border-radius: 6px; display: inline-grid; place-items: center; }
+.cl262-card .cl262-fx .ae-bx.on { background: #2a3a52; }
+.cl262-card .cl262-fx .ae-bx.on::after { border-color: #f4eee5; }
+.cl262-card .cl262-fx .ae-mtx { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; }
+/* how they work: a 120px label column */
+.cl262-how { display: flex; flex-direction: column; gap: 12px; }
+.cl262-row { display: grid; grid-template-columns: 120px minmax(0, 1fr); align-items: center; gap: 10px; }
+.cl262-row > label { font: 400 14px/1.2 var(--sp-type) !important; color: rgba(28, 19, 15, .6); }
+.cl262-rf { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; min-width: 0; }
+.cl262-hint { padding: 0; border: 0; background: none; font: italic 400 14px/1.3 var(--sp-serif) !important; color: rgba(28, 19, 15, .6); }
+button.cl262-hint { cursor: pointer; color: #2a3a52; text-decoration: underline; text-underline-offset: 3px; }
+/* "Also changes": indented to the field column, white, a 3px rust edge */
+.cl262-also { margin: 2px 0 0 130px; padding: 8px 12px; border-radius: 8px; background: #fff; box-shadow: inset 3px 0 0 #a2452a; }
+.cl262-also em { display: block; margin-bottom: 4px; font: 400 13px/1.2 var(--sp-type) !important; font-style: normal !important; color: #a2452a; }
+.cl262-also p { margin: 0; font: 400 14px/1.4 var(--sp-serif) !important; color: #1c130f; }
+.cl262-sec[data-k="genres"] .cl262-also, .cl262-ctg .cl262-also { margin-left: 0; margin-top: 10px; }
+/* contact details: two columns */
+.cl262-ctg { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; }
+.cl262-ctg .cl262-also { grid-column: 1 / -1; }
+.cl262-cf { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.cl262-cf > label { font: 400 14px/1.2 var(--sp-type) !important; color: rgba(28, 19, 15, .6); }
+.cl262-card .cl262-fx .cl262-cf .ac-in, .cl262-card .cl262-fx .cl262-cf input { box-sizing: border-box; width: 100%; background: #fff; }
+.cl262-bad { font: italic 400 13px/1.3 var(--sp-serif) !important; color: #a2452a; }
+/* the save bar: at the card's foot while anything is open */
+.cl262-save {
+  flex: none; display: flex; align-items: center; gap: 14px; margin: 12px; padding: 12px 12px 12px 16px; border-radius: 12px;
+  background: #2a3a52; color: #f4eee5;
+}
+.cl262-save.is-guard { background: #a2452a; }
+.cl262-sv { flex: 1; min-width: 0; font: 400 15px/1.3 var(--sp-type) !important; }
+.cl262-sv b { font: inherit !important; font-weight: 400 !important; }
+.cl262-sv i { font: italic 400 14px/1.3 var(--sp-serif) !important; color: rgba(244, 238, 229, .8); }
+.cl262-sx { padding: 0; border: 0; background: none; color: #f4eee5; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; font: 400 15px/1 var(--sp-type) !important; }
+.cl262-sb { height: 40px; padding: 0 16px; border: 0; border-radius: 10px; background: #f4eee5; color: #1c130f; cursor: pointer; font: 400 15px/1 var(--sp-type) !important; }
+.cl262-sb:disabled { opacity: .45; cursor: default; }
+/* saved: the frame flashes a 2px sage inset for 1.2s */
+.cl262-card.apc.is-saved > .apc-frame { box-shadow: inset 0 0 0 2px #4e7d60; transition: box-shadow 200ms ease; }
+
+.cl262-card .cl262-fx .ae-step { background: #fff; }
+.cl262-card .cl262-fx .ae-seg button { font-family: var(--sp-type) !important; }

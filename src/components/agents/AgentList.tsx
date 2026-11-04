@@ -921,6 +921,22 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         );
       },
       request: req ? { seq: req.seq, inline: req.inline, edit: req.edit ? { focus: req.edit.focus } : undefined } : null,
+      /* v26.2 C — editing on the card: one draft, the editor's own lists and Also-changes, one write (`saveDraft`),
+         and the page's toast ("Saved {first}'s card", with the save's snapshot Undo) */
+      form: {
+        personal: editOpts.personal, agents, msGenre: scoped?.genre ?? null, genrePool: editOpts.genrePool, personalGenres: editOpts.personalLabels,
+        allGenres: editOpts.allGenres, nowMs, onNewGenre: editOpts.onNewGenre,
+        alsoFor: (d, base) => alsoChanges(agent, toContactDraft(agent, base, d), hkEditCtx),
+        onSave: async (d, base) => {
+          const r = await saveDraft(agent, base, d, { emit: false });
+          if (!r.ok) return { ok: false, error: (r as { error: string }).error };
+          const undo = r.undo;
+          showToast({ message: `Saved ${first}’s card`, ...(undo ? { undo: async () => { await undo(); } } : {}) });
+          return { ok: true };
+        },
+        leaveRef: editLeave,
+        resumePick: () => { const n = pendingPick.current; pendingPick.current = null; if (n) setCardId(n); },
+      },
     };
   };
   const cardPropsFor = (x: Facts24, index: number, total: number, onStep: (d: -1 | 1) => void, onOpenAgent: (id: string) => void, onClose?: () => void): AgentCard24Props => {
