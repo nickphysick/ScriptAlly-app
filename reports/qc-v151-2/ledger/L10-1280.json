@@ -1,0 +1,17 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "70"
+ },
+ {
+  "where": "current bars: the status colour",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "past bars grey",
+  "ok": true,
+  "detail": "[\"rgb(233, 233, 228)\"]"
+ }
+]

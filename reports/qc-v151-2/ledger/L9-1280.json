@@ -1,0 +1,47 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "{\"h\":true,\"bg\":\"rgb(42, 58, 82)\",\"tBg\":\"rgb(255, 255, 255)\",\"tFg\":\"rgb(42, 58, 82)\",\"mo\":[\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\"]}"
+ },
+ {
+  "where": "the date header navy",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "where": "TODAY white with navy text",
+  "ok": true,
+  "detail": "rgb(255, 255, 255) rgb(42, 58, 82)"
+ },
+ {
+  "where": "month names white",
+  "ok": true,
+  "detail": "[\"rgb(255, 255, 255)\"]"
+ },
+ {
+  "where": "load: today's line on the TODAY tag ±1",
+  "ok": true,
+  "detail": "{\"line\":967.1875,\"tag\":967.203125,\"inView\":true}"
+ },
+ {
+  "where": "drag: today's line on the TODAY tag ±1",
+  "ok": true,
+  "detail": "{\"line\":797.484375,\"tag\":797.203125,\"inView\":true}"
+ },
+ {
+  "where": "zoom 6w: today's line on the TODAY tag ±1",
+  "ok": true,
+  "detail": "{\"line\":675.546875,\"tag\":675.28125,\"inView\":true}"
+ },
+ {
+  "where": "zoom 6m: today's line on the TODAY tag ±1",
+  "ok": true,
+  "detail": "{\"line\":849.734375,\"tag\":849.59375,\"inView\":true}"
+ },
+ {
+  "where": "zoom 3m: today's line on the TODAY tag ±1",
+  "ok": true,
+  "detail": "{\"line\":797.484375,\"tag\":797.203125,\"inView\":true}"
+ }
+]

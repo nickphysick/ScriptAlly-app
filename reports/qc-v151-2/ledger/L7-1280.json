@@ -1,0 +1,37 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "[22,38,10,18]"
+ },
+ {
+  "where": "navy buttons: navy, white text",
+  "ok": true,
+  "detail": "[{\"id\":\"seed-query-7\",\"w\":\"you\",\"st\":\"Partial Requested\",\"btn\":{\"tone\":\"navy\",\"label\":\"Send your partial\",\"bg\":\"rgb(42, 58, 82)\",\"fg\":\"rgb(255, 255, 255)\",\"sh\":\"none\"}},{\"id\":\"seed-query-11\",\"w\":\"you\",\"st\":\"Revise & Resubmit\",\"btn\":{\"tone\":\"navy\",\"label\":\"Send your revision\",\"bg\":\"rgb(42, 58, 82)\",\"fg\":\"rgb(255, 255, 255)\",\"sh\":\"none\"}}]"
+ },
+ {
+  "where": "Nudge: white, navy text, outlined #c9cfd8",
+  "ok": true,
+  "detail": "[{\"id\":\"thin-q-gap-solo\",\"w\":\"you\",\"st\":\"Partial Sent\",\"btn\":{\"tone\":\"nudge\",\"label\":\"Nudge\",\"bg\":\"rgb(255, 255, 255)\",\"fg\":\"rgb(42, 58, 82)\",\"sh\":\"rgb(201, 207, 216) 0px 0px 0px 1.5px inset\"}},{\"id\":\"thin-q-remind\",\"w\":\"you\",\"st\":\"Queried\",\"btn\":{\"tone\":\"nudge\",\"label\":\"Nudge\",\"bg\":\"rgb(255, 255, 255)\",\"fg\":\"rgb(42, 58, 82)\",\"sh\":\"rgb(201, 207, 216) 0px 0px 0px 1.5px inset\"}}]"
+ },
+ {
+  "where": "every Your move row has a button; gone quiet's is Nudge",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "With the agent and Closed: none",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "Birds-eye population",
+  "ok": true,
+  "detail": "70"
+ },
+ {
+  "where": "Birds-eye: the list's colour and words for the same query",
+  "ok": true,
+  "detail": "[]"
+ }
+]

@@ -1,0 +1,42 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "{\"h\":true,\"bg\":\"rgba(0, 0, 0, 0)\",\"radius\":\"22px\",\"title\":\"Your queries\",\"tColor\":\"rgb(28, 19, 15)\",\"tFont\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"tSize\":\"44px\",\"sub\":\"88 sent · 70 active · 53% heard back\",\"figs\":[\"88\",\"70\",\"53%\"],\"subItalic\":\"italic\",\"figWhite\":true,\"log\":{\"bg\":\"rgb(255, 255, 255)\",\"fg\":\"rgb(42, 58, 82)\",\"h\":46,\"r\":\"999px\"},\"rec\":{\"bg\":\"rgba(0, 0, 0, 0)\",\"fg\":\"rgb(255, 255, 255)\",\"sh\":\"rgba(255, 255, 255, 0.35) 0px 0px 0px 1.5px inset\",\"h\":46,\"r\":\"999px\"},\"gap\":18}"
+ },
+ {
+  "where": "navy block, 22px corners",
+  "ok": false,
+  "detail": "rgba(0, 0, 0, 0) 22px"
+ },
+ {
+  "where": "Your queries in white Special Elite 44",
+  "ok": false,
+  "detail": "Your queries rgb(28, 19, 15) \"Special Elite\", \"Courier New\", Courier, monospace 44px"
+ },
+ {
+  "where": "the subline: … N sent · N active · N% heard back",
+  "ok": true,
+  "detail": "88 sent · 70 active · 53% heard back"
+ },
+ {
+  "where": "the subline italic, its figures white upright",
+  "ok": true,
+  "detail": "italic true"
+ },
+ {
+  "where": "Log: white with navy text, a 46px pill",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(255, 255, 255)\",\"fg\":\"rgb(42, 58, 82)\",\"h\":46,\"r\":\"999px\"}"
+ },
+ {
+  "where": "Record: outlined white, a 46px pill",
+  "ok": true,
+  "detail": "{\"bg\":\"rgba(0, 0, 0, 0)\",\"fg\":\"rgb(255, 255, 255)\",\"sh\":\"rgba(255, 255, 255, 0.35) 0px 0px 0px 1.5px inset\",\"h\":46,\"r\":\"999px\"}"
+ },
+ {
+  "where": "the week card 18 ±1 under it",
+  "ok": true,
+  "detail": "18"
+ }
+]

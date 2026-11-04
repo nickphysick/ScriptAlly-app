@@ -1,0 +1,37 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "88 rows"
+ },
+ {
+  "where": "0 apart",
+  "ok": true,
+  "detail": "[0]"
+ },
+ {
+  "where": "the card's bottom corners 18 ±1",
+  "ok": true,
+  "detail": "18px/18px"
+ },
+ {
+  "where": "one height ±1",
+  "ok": true,
+  "detail": "68–68"
+ },
+ {
+  "where": "68",
+  "ok": true,
+  "detail": "68"
+ },
+ {
+  "where": "no tinted end",
+  "ok": true,
+  "detail": "[\"rgb(255, 255, 255)\"]"
+ },
+ {
+  "where": "closed: no Day",
+  "ok": true,
+  "detail": "0/18"
+ }
+]

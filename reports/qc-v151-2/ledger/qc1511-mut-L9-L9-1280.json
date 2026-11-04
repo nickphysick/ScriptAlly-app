@@ -1,0 +1,57 @@
+[
+ {
+  "where": "population: every group drawn",
+  "ok": true,
+  "detail": "[22,10,38,18]"
+ },
+ {
+  "where": "no Due column",
+  "ok": true,
+  "detail": "[\"Where it stands\",\"Queried\",\"Last heard\",\"Next\"]"
+ },
+ {
+  "where": "Next words: you",
+  "ok": false,
+  "detail": "[\"No date yetSend your full →\",\"No date yetSend your partial →\",\"No date yetSend your partial →\",\"No date yetSend your partial →\"]"
+ },
+ {
+  "where": "Next words: agent",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "Next words: quiet",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "Next words: closed",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "late and overdue in rust",
+  "ok": true,
+  "detail": "46"
+ },
+ {
+  "where": "buttons: last column, right",
+  "ok": false,
+  "detail": "[{\"w\":\"you\",\"t\":\"31 days late\",\"c\":\"rgb(138, 58, 40)\",\"btn\":true,\"tone\":\"navy\",\"inLast\":false,\"bg\":\"rgb(42, 58, 82)\",\"right\":43.78125},{\"w\":\"you\",\"t\":\"20 days overdue\",\"c\":\"rgb(138, 58, 40)\",\"btn\":true,\"tone\":\"nudge\",\"inLast\":false,\"bg\":\"rgb(255, 255, 255)\",\"right\":94.65625},{\"w\":\"you\",\"t\":\"19 days overdue\",\"c\":\"rgb(138, 58, 40)\",\"btn\":true,\"tone\":\"nudge\",\"inLast\":false,\"bg\":\"rgb(255, 255, 255)\",\"right\":95.453125}]"
+ },
+ {
+  "where": "buttons: navy, or white Nudge",
+  "ok": true,
+  "detail": "[\"navy rgb(42, 58, 82)\",\"nudge rgb(255, 255, 255)\"]"
+ },
+ {
+  "where": "Your move and Gone quiet rows have a button",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "With the agent and Closed: no button",
+  "ok": true,
+  "detail": ""
+ }
+]

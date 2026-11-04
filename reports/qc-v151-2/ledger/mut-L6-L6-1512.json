@@ -1,0 +1,32 @@
+[
+ {
+  "where": "population",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "where": "Special Elite 26px",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "a two-line label",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "late and overdue in rust",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "where": "with the agent: #8a8076",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "where": "closed: —",
+  "ok": true,
+  "detail": ""
+ }
+]
