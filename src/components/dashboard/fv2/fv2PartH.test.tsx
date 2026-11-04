@@ -32,7 +32,7 @@ describe("FV2-H · what the slot holds", () => {
     expect(FINISH.title).toBe("That's you set up");
     expect(FINISH.text("querying")).toBe("Manuscript, agents, queries, materials and comparable titles: all in. From here on, the dashboard shows what needs doing next.");
     expect(FINISH.text("writing").startsWith("Manuscript, comparable titles, a shortlist and your letter: all in.")).toBe(true);
-    expect([FINISH.close, FINISH.note]).toEqual(["Close this list", "Your weekly goal and streak go here instead."]);
+    expect([FINISH.close, FINISH.note]).toEqual(["Close this list", "Next up shows what to do from here."] /* RE-POINTED (Dashboard v2) */);
   });
 });
 
