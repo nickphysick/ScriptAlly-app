@@ -108,9 +108,14 @@ export const TimelineStrip: React.FC<{ query: ReviewQuery; onChange: (next: Revi
     const lim = card?.getBoundingClientRect().right ?? window.innerWidth;
     const tileTop = p.parentElement?.getBoundingClientRect().top ?? 0;
     const right = r.right > lim - 8;
+    /* the room is the scroll area's, not the window's: the set-up sheet starts below the bar and clips */
+    let port = { top: 0, bottom: window.innerHeight };
+    for (let e = p.parentElement; e; e = e.parentElement) {
+      if (/auto|scroll/.test(getComputedStyle(e).overflowY)) { const b = e.getBoundingClientRect(); port = { top: Math.max(0, b.top), bottom: Math.min(window.innerHeight, b.bottom) }; break; }
+    }
     let up = false;
-    if (r.bottom > window.innerHeight - 12) {
-      if (tileTop - r.height - 20 > 0) up = true;
+    if (r.bottom > port.bottom - 12) {
+      if (tileTop - r.height - 20 > port.top) up = true;
       else p.scrollIntoView({ block: "nearest" });
     }
     if (right !== place.right || up !== place.up) setPlace({ up, right });
