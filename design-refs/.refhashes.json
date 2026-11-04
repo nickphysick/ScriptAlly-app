@@ -992,7 +992,20 @@
     "design-refs/privacy-v1.html": "df4c0d09e53b1cb7e7684f01fceb27053dab89785a1f3d601e04d3b76b2faced",
     "design-refs/confirm-email-v2.html": "1d09d7a81ddb561b92945a66c65f88e360a7187c358e908e5c82e309e8f42ffa",
     "design-refs/landing-waitlist-clarity-v1.html": "4eb1fa7eb87ab238e9046c35e00eb5446cd722cf7b4257f6fda730f1d5aa6f70",
-    "design-refs/query-centre-v151/query-centre-v151.html": "5f747c4f8e317687cdecded57ae5b9e45df9472af611ee2be4e679a7f45821f7"
+    "design-refs/query-centre-v151/query-centre-v151.html": "5f747c4f8e317687cdecded57ae5b9e45df9472af611ee2be4e679a7f45821f7",
+    "design-refs/dashboard-v2/dashboard-v2.html": "ab0a32a5a40b0cc9538c73024050415e268e08c6624a6b8ce4e905de654bd4c9",
+    "design-refs/dashboard-v2/screens/01-dashboard-1280@2x.png": "012c168298d07e8b85e6bc7446211650ce51c96d53d74aef3f382be1d63ae2a4",
+    "design-refs/dashboard-v2/screens/01-dashboard-1512@2x.png": "9633a0a453d5223a38ed922b1bea0dd90055c2ba8bcec601206f93d84125b9be",
+    "design-refs/dashboard-v2/screens/02-dashboard-full-1280@2x.png": "e685a559a31de5d7e777f2da98c6114aff4bf8bb86edbb534f18e8afcfee203e",
+    "design-refs/dashboard-v2/screens/02-dashboard-full-1512@2x.png": "870f191c121ac860d973ea1829c349d51b011e907fbb3af6a7de7c5b129dc74c",
+    "design-refs/dashboard-v2/screens/03-week-hover-1280@2x.png": "e96516c62dadadc21647786f3458fc557924cc85243c9d7b37fa2ba90066d56b",
+    "design-refs/dashboard-v2/screens/03-week-hover-1512@2x.png": "1423dfe9f75a12b4fe0e2043948a1c2efc9314603df70194316c8aef1dfff464",
+    "design-refs/dashboard-v2/screens/04-hawk-hover-1280@2x.png": "8ed1ee33aa1232fe1cd8617f8f3cf1395e104d3314cafc699aad2ebf0aa56e59",
+    "design-refs/dashboard-v2/screens/04-hawk-hover-1512@2x.png": "a308ca311678764554548618aebb0880d2a80819a150f8d70c1107dabcf4795a",
+    "design-refs/dashboard-v2/screens/05-feed-agents-1280@2x.png": "95307e6b013887cbf4019fad4c5c4a25ec9759792864a5e786a76a990a303779",
+    "design-refs/dashboard-v2/screens/05-feed-agents-1512@2x.png": "9a9359ff8325ad070315e08f15aeab7f97ac2870560aa977bb0f04a28a9731ba",
+    "design-refs/dashboard-v2/screens/06-scrolled-1280@2x.png": "ab0644cf4982237e6d07577a7c1105ed2fd786652b6bc7a3c704e49a7f7a5ef0",
+    "design-refs/dashboard-v2/screens/06-scrolled-1512@2x.png": "9c8d49b10f238d61febce166ccf38b7bbd4ad58a9af11f496822b2ae70057a7f"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",

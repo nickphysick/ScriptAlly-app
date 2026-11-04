@@ -39,7 +39,8 @@ describe("FV2-A · the manuscript card's label", () => {
   });
   it("is drawn in sentence case, never the old uppercase eyebrow", () => {
     const html = render([], ms(ManuscriptStatus.REVISING));
-    expect(html).toContain('data-df1="status">In revision<');
+    /* RE-POINTED (Dashboard v2): the band carries NO status label; the label's words are still bookLabel's (above) */
+    expect(html).not.toContain(">In revision<");
     expect(html).not.toContain("— GETTING READY —");
   });
 });
@@ -57,20 +58,24 @@ describe("FV2-A · Getting started is the sheet, the goal sheet takes the slot b
   it("first query: the queries card, Getting started in the goal slot with Hide, and no goal sheet", () => {
     const html = render([q("a", QueryStatus.QUERIED)]);
     expect(html).toContain('data-fv2="querying"');
-    expect(html).toContain('data-df1="queries"');
+    /* RE-POINTED (Dashboard v2): Active queries is its own card; Getting started heads the left column; no goal sheet */
+    expect(html).toContain('data-d2-card="active"');
     expect(html).toContain('data-fv2="gs"');
     expect(html).toContain('data-fv2="gs-hide"');
     expect(html).not.toContain('data-df1="goal"');
-    expect(html).toContain('data-df1="btn-log"');
+    expect(html).toContain('data-d2="log"');
   });
-  it("hidden: the goal sheet is back", () => {
+  /* RE-POINTED (Dashboard v2): the goal sheet is retired, so a hidden Getting started leaves the slot empty */
+  it("hidden: Getting started goes and nothing takes its place", () => {
     const html = render([q("a", QueryStatus.QUERIED)], ms(), [], { dash: { gsHidden: { "ms-1": true } } });
     expect(html).not.toContain('data-fv2="gs"');
-    expect(html).toContain('data-df1="goal"');
+    expect(html).not.toContain('data-df1="goal"');
+    expect(html).not.toContain('data-d2="gs-slot"');
   });
   it("Agents on file only once there is one agent", () => {
-    expect(render([q("a", QueryStatus.QUERIED)])).not.toContain('data-df1="agents"');
-    expect(render([q("a", QueryStatus.QUERIED)], ms(), [A1])).toContain('data-df1="agents"');
+    /* RE-POINTED (Dashboard v2): the hoop's own probe */
+    expect(render([q("a", QueryStatus.QUERIED)])).not.toContain('data-d60="agents-hoop"');
+    expect(render([q("a", QueryStatus.QUERIED)], ms(), [A1])).toContain('data-d60="agents-hoop"');
   });
   it("the task card's last Then: names Getting started while the sheet is open", () => {
     expect(THEN_FINISH_GS).toBe("finish getting started");

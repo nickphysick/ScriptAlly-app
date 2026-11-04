@@ -40,14 +40,20 @@ describe("DF1-C · Active and Closed, one card", () => {
   it("holds the app's own chart and Closed hoop, and the left column ends on the founding card", () => {
     const html = page();
     const at = (s: string) => html.indexOf(s);
-    expect(at('data-probe="chart-card"')).toBeGreaterThan(at('data-df1="queries-card"'));
-    expect(at('data-d60="closed-hoop"')).toBeGreaterThan(at('data-df1="queries-card"'));
-    expect(at('data-df1="agents"')).toBeGreaterThan(at('data-df1="queries"'));
-    expect(at('data-df1="founding"')).toBeGreaterThan(at('data-df1="agents"'));
-    expect(at('data-df1="founding"')).toBeLessThan(at('data-df1="feed"'));
+/* RE-POINTED (Dashboard v2, 3 Nov): the left column is Next up, Agents on file, Closed; the middle is Active queries,
+       then the founding card; the feed is the right column. Order in the markup is order on the page. */
+    for (const s of ['data-d2="left"', 'data-d2-card="next"', 'data-d60="agents-hoop"', 'data-d60="closed-hoop"', 'data-d2="mid"', 'data-d2-card="active"', 'data-d2-card="founding"', 'data-d2="right"', 'data-d2="feed"']) expect(at(s), s).toBeGreaterThan(-1);
+    expect(at('data-d2-card="next"')).toBeLessThan(at('data-d60="agents-hoop"'));
+    expect(at('data-d60="agents-hoop"')).toBeLessThan(at('data-d60="closed-hoop"'));
+    expect(at('data-d60="closed-hoop"')).toBeLessThan(at('data-d2="mid"'));
+    expect(at('data-d2-card="active"')).toBeLessThan(at('data-d2-card="founding"'));
+    expect(at('data-d2-card="founding"')).toBeLessThan(at('data-d2="right"'));
+    expect(html).not.toContain('data-probe="chart-card"');
   });
   it("draws no Agents on file card before the first agent (first visit v2, Part A)", () => {
-    expect(page([])).not.toContain('data-df1="agents"');
+    /* RE-POINTED (Dashboard v2): the hoop's own probe — the old slot attribute is gone, so asserting its absence was vacuous */
+    expect(page([])).not.toContain('data-d60="agents-hoop"');
+    expect(page()).toContain('data-d60="agents-hoop"');
   });
   it("words the founding card's footer for this page", () => {
     expect(FOUNDING_RANKS_F1).toBe("Top contributors win a weekly prize.");

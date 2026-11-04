@@ -51,9 +51,12 @@ describe("DF1-B · the manuscript card", () => {
           currentUser={user()} activeManuscript={MS} onNavigate={() => {}} now={NOW} />
       </MemoryRouter>,
     );
-    const at = html.indexOf('data-df1="book"');
+/* RE-POINTED (Dashboard v2, 3 Nov): the manuscript card is retired from the dashboard; the navy band is the page's
+       first thing, and it comes before the grid. */
+    const at = html.indexOf('data-d2="band"');
     expect(at).toBeGreaterThan(-1);
-    expect(at).toBeLessThan(html.indexOf('data-df1="queries"'));
+    expect(at).toBeLessThan(html.indexOf('data-d2="grid"'));
+    expect(html).not.toContain('data-df1="book"');
   });
 });
 

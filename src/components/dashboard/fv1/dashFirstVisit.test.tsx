@@ -50,22 +50,30 @@ describe("DFV-A · the pre-query page", () => {
      Right: Top tip, the Scout and the footer — no task card and no queries card. */
   it("renders the set-up card in the middle column, Getting started under the book, and no task card", () => {
     const at = (s: string) => html.indexOf(s);
-    expect(at('data-fv1="setup"')).toBeGreaterThan(at('data-df1="feed"'));
-    expect(at('data-fv2="empty-feed"')).toBeGreaterThan(at('data-fv1="setup"'));
-    expect(at('data-fv2="gs"')).toBeGreaterThan(at('data-df1="book"'));
-    expect(at('data-fv2="gs"')).toBeLessThan(at('data-df1="founding"'));
-    expect(html).toContain('data-df1="tip"');
+/* RE-POINTED (Dashboard v2, 3 Nov): the set-up card heads the middle column, Getting started heads the left, the empty feed
+       is the right column. Top tip is retired; still no task card and no Active queries card before the first query. */
+    for (const s of ['data-d2="left"', 'data-d2="mid"', 'data-d2="right"', 'data-fv1="setup"', 'data-fv2="gs"', 'data-fv2="empty-feed"']) expect(at(s), s).toBeGreaterThan(-1);
+    expect(at('data-fv2="gs"')).toBeGreaterThan(at('data-d2="left"'));
+    expect(at('data-fv2="gs"')).toBeLessThan(at('data-d2="mid"'));
+    expect(at('data-fv1="setup"')).toBeGreaterThan(at('data-d2="mid"'));
+    expect(at('data-fv1="setup"')).toBeLessThan(at('data-d2="right"'));
+    expect(at('data-fv2="empty-feed"')).toBeGreaterThan(at('data-d2="right"'));
+    expect(html).not.toContain("Top tip");
     expect(html).not.toContain('data-d71="task"');
-    expect(html).not.toContain('data-df1="queries"');
+    expect(html).not.toContain('data-d2-card="next"');
+    expect(html).not.toContain('data-d2-card="active"');
   });
-  it("draws the founding card in the left column, after Getting started", () => {
-    expect(html.indexOf('data-df1="founding"')).toBeLessThan(html.indexOf('data-df1="feed"'));
+  /* RE-POINTED (Dashboard v2): the founding card is the middle column's second card, under the set-up card */
+  it("draws the founding card in the middle column, after the set-up card", () => {
+    expect(html.indexOf('data-d2-card="founding"')).toBeGreaterThan(html.indexOf('data-fv1="setup"'));
+    expect(html.indexOf('data-d2-card="founding"')).toBeLessThan(html.indexOf('data-d2="right"'));
     expect(html).not.toContain('class="d59-rule"');
   });
-  it("carries no buttons on the manuscript card, and its label says Getting ready", () => {
-    expect(html).not.toContain('data-df1="btn-log"');
-    expect(html).not.toContain('data-df1="btn-record"');
-    expect(html).toContain('data-df1="status">Getting ready<');
+  /* RE-POINTED (Dashboard v2): the band carries no buttons before the first query, and no status label of any kind */
+  it("carries no buttons on the band before the first query, and no status label", () => {
+    expect(html).toContain('data-d2="band"');
+    expect(html).not.toContain('data-d2="buttons"');
+    expect(html).not.toContain(">Getting ready<");
   });
   it("retires the doors, the lift tiles and Where do I start?", () => {
     for (const gone of ["d60-door", "Ready for lift off?", "Where do I start?", "No queries out yet."]) expect(html).not.toContain(gone);
@@ -74,7 +82,8 @@ describe("DFV-A · the pre-query page", () => {
      with its buttons, is gone — the first-visit header is the pre-query page's alone. */
   it("the header's buttons and eyebrow belong to the pre-query page only", () => {
     const after = render([q("a", QueryStatus.QUERIED)]);
-    expect(after).toContain('data-df1="cols"');
+    expect(after).toContain('data-d2="grid"'); // RE-POINTED (Dashboard v2)
+    expect(after).toContain('data-d2="buttons"');
     expect(after).not.toContain('data-d58="header"');
     expect(after).not.toContain("— QUERYING —");
   });

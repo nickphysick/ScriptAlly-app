@@ -60,9 +60,10 @@ describe("FV2-H · on the page", () => {
     expect(html).not.toContain('data-fv2="finish"');
     expect(html).toContain('data-fv2="gs-count"');
   });
-  it("closed: the goal sheet has the slot", () => {
+  /* RE-POINTED (Dashboard v2): the goal sheet is retired, so a closed Getting started leaves the slot empty */
+  it("closed: Getting started goes and nothing takes its place", () => {
     const html = page({ dash: { gsClosed: { "ms-1": true } } });
     expect(html).not.toContain('data-fv2="gs"');
-    expect(html).toContain('data-df1="goal"');
+    expect(html).not.toContain('data-df1="goal"');
   });
 });

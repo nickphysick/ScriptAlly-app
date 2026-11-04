@@ -56,17 +56,20 @@ describe("/dashboard renders", () => {
        set-up card and the Mentor's tip, the task card is the one Getting started page, the eyebrow is the
        campaign's, and the header carries no buttons at all ("Where do I start?" and the doors are retired). */
     expect(html).toContain("Let&#x27;s get you set up");
-    expect(html).toContain("Top tip");
+    /* RE-POINTED (Dashboard v2): Top tip is retired */
+    expect(html).not.toContain("Top tip");
     expect(html).toContain("Getting started");
     /* ⚠️ RETARGETED A SEVENTH TIME (Dashboard first visit v2, Part A): the pre-query page is feed v1's three columns —
        the manuscript card's label says "Getting ready" (italic sentence case) and Getting started is the sheet under it */
-    expect(html).toContain(">Getting ready<");
+    /* RE-POINTED (Dashboard v2): the band carries no status label */
+    expect(html).not.toContain(">Getting ready<");
     expect(html).toContain('data-fv2="gs"');
     expect(html).not.toContain("Ready for lift off?");
     expect(html).not.toContain("Where do I start?");
     /* RETARGETED (Dashboard v93): the founding card is "Your contributions"; its band names it while its stats load */
     /* RETARGETED (Dashboard v105): the founding card is a press ID; its strip says FOUNDING WRITER while its stats load */
-    expect(html).toContain("FOUNDING WRITER");
+    /* RE-POINTED (Dashboard v2): the founding card's tag is "Founding writer" in sentence case */
+    expect(html).toContain("Founding writer");
   });
 
   /**
@@ -93,11 +96,11 @@ describe("/dashboard renders", () => {
     /* ⚠️ RETARGETED (Dashboard feed v1, Part A): the navy header band is retired from the querying page, so its eyebrow
        is no landmark; the page is the three columns. */
     expect(html).not.toContain("— QUERYING —");
-    expect(html).toContain('data-df1="cols"');
+    expect(html).toContain('data-d2="grid"'); // RE-POINTED (Dashboard v2)
     /* ⚠️ RETARGETED (Dashboard v71): "What's on the list today?" is retired with the list's title row.
        The right column's landmark is the task card's region, labelled "Your tasks". */
     expect(html).not.toContain("What&#x27;s on the list today?");
-    expect(html).toContain('aria-label="Your tasks"');
+    expect(html).toContain('aria-label="Next up"'); // RE-POINTED (Dashboard v2): the left column's task card
     /* ⚠️ "Querying goals" IS NOT A LANDMARK ON THIS PAGE ANY MORE (ref v22) — the card leaves the
        dashboard with the two-column layout. `Activity` is the right column's own name and is the
        landmark that replaces it, so this census still spans all three regions of the page. */
@@ -105,7 +108,8 @@ describe("/dashboard renders", () => {
        page has measured it, so a static render cannot see it (`DB59 T1` holds it on the rendered
        page). The right column's third landmark is the founding writer panel. */
     /* RETARGETED (Dashboard v77): the rebuilt card's band */
-    expect(html).toContain("FOUNDING WRITER");
+    /* RE-POINTED (Dashboard v2): the founding card's tag is "Founding writer" in sentence case */
+    expect(html).toContain("Founding writer");
     /* ⚠️ DAY ONE HAS STOOD DOWN, asserted on the CHART's own invitation. The first try used the
        rail's "The story starts with your first query." — which is the empty ACTIVITY FEED's line and
        shows on the seeded fixture too, so it discriminated nothing. A day-one check has to name copy
