@@ -30,12 +30,13 @@ restore() { local f="$1"; cp "$BK/$(echo "$f" | tr '/' '-')" "$f"; }
 if [ "${1:-}" = "BASE" ]; then
   [ -d "${QC152_BASE_DIST:-}" ] || { echo "QC152_BASE_DIST is not a directory"; exit 1; }
   rm -rf dist-emu && cp -R "$QC152_BASE_DIST" dist-emu && touch dist-emu/index.html
-  bash tests/e2e/qc152Run.sh "QC152_BASE=1 node scripts/emu-e2e-inner.mjs tests/e2e/qc152.measure.ts --project=measure --workers=1"
+  bash tests/e2e/qc152Run.sh "QC152_BASE=1 ${QC152_ONLY:+QC152_ONLY=$QC152_ONLY} node scripts/emu-e2e-inner.mjs tests/e2e/qc152.measure.ts --project=measure --workers=1"
   build; echo "rebuilt this tree into dist-emu"; exit 0
 fi
 for L in "${@:-L1 L2 L3}"; do
   case "$L" in
     L1) F=src/lib/queryState.ts; srcbreak $F '  if (ms == null || ms > nowMs) return null;' '  if (ms == null || ms > nowMs || ms > 0) return null; /* MUT L1: ignore the nudge date */' ;;
+    L8) F=src/components/Queries.tsx; srcbreak $F '    const reply152 = (a: ReplyAct) => {' '    const reply152 = (a: ReplyAct) => { void updateUserPaths({ "todoPrefs.queries.mutL8": Date.now() }); /* MUT L8: write on press */' ;;
     L3) F=src/lib/queryState.ts; srcbreak $F 's === "offer" || s === "materials" || s === "nudge" ? "you" : s;' 's === "offer" || s === "materials" || s === "nudge" || s === "quiet" ? "you" : s; /* MUT L3 */' ;;
     *) F="" ;;
   esac

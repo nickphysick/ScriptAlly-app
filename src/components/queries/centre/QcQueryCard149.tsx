@@ -30,6 +30,8 @@ import "../../../marketing/heroCard.css";
 import "./qcv149card.css";
 import { FlowHead, FLOW_WORDS, RECORD_LINE } from "../../shared/FlowHead";
 import { STAGE_STEPS, stageIndex } from "../../../lib/queriesPhone";
+import { QcCard152, type QcCard152Data } from "./QcCard152";
+import type { ReplyAct } from "../../../lib/qcThread152";
 
 
 /** the band's tint and ink, and the pill's ground, per set (the landing card's With you / With the agent / Closed;
@@ -166,7 +168,7 @@ export interface QcQueryCard149Props {
   agentView: AgentView;
   wishlist: { text: string; genres: { label: string; hit: boolean }[] };
   contact: { email: string; website: string; websiteHref: string | null; submission: string | null };
-  onAgentField: (field: "wishlist" | "email" | "website" | "method" | null) => void;
+  onAgentField: (field: "wishlist" | "email" | "website" | "method" | "reply" | "materials" | null) => void;
   onOpenPiece: (label: string) => void;
   onAddNote: (text: string) => void;
   onRespond: (k: RespChoice, dayMs: number, note: string) => Promise<boolean>;
@@ -195,6 +197,15 @@ export interface QcQueryCard149Props {
   onMore?: () => void;
   /** the sheet's closed foot: "View the wall" */
   onWall?: () => void;
+  /**
+   * Query Centre v152 §2 — on the desktop, the reading view is the chat-thread card (QcCard152) over these. The phone
+   * passes none and keeps this card's own layout. While it is set, the other modes wear `data-qc152="flat"`, which the
+   * frame reads to stop the lean (§2.1).
+   */
+  v152?: QcCard152Data;
+  onReply152?: (act: ReplyAct) => void;
+  onEditStep152?: (activityId: string | null) => void;
+  onPencil152?: () => void;
 }
 
 const blankEdits = (): CardEdits => ({ dates: {}, removed: [], added: null, packageKey: null, pieces: {}, agent: {} });
@@ -320,6 +331,24 @@ export const QcQueryCard149: React.FC<QcQueryCard149Props> = (p) => {
     </div>
   );
 
+  /* ── v152 §2: the desktop reading view ── */
+  const v152 = !phone && p.v152 ? p.v152 : null;
+  if (v152 && mode === "view") {
+    return (
+      <QcCard152 row={r} nowMs={nowMs} d={v152} first={p.agent.first} msTitle={p.msTitle} bookChips={p.bookChips} packageName={p.packageName}
+        wishlist={p.wishlist.text} email={p.contact.email} website={p.contact.website} websiteHref={p.contact.websiteHref}
+        tab={tab} onTab={setTab}
+        notes={<NotesPane first={p.agent.first} notes={p.notes} onAdd={p.onAddNote} resetKey={r.id} />}
+        onClose={p.onClose}
+        onPencil={() => (p.onPencil152 ? p.onPencil152() : p.onMode("edit"))}
+        onEditStep={(id) => (p.onEditStep152 ? p.onEditStep152(id) : (setTab("tracking"), p.onMode("edit")))}
+        onReply={(a) => p.onReply152?.(a)}
+        onAgentField={p.onAgentField}
+        onCopyEmail={p.onCopyEmail} />
+    );
+  }
+  const flat = v152 ? "flat" : undefined;
+
   /* ── respond mode ── */
   if (mode === "respond") {
     /* Contact list v25.1 B — the band is the header: "Recording response", and the answer's line once one is picked (it
@@ -330,7 +359,7 @@ export const QcQueryCard149: React.FC<QcQueryCard149Props> = (p) => {
         right={r.dayN != null ? <span className="mk-lc-day" data-qc149c="day"><span className="mk-odo-dk">Day</span> <span>{r.dayN}</span></span> : null} />
     );
     return (
-      <div className="qc149c qcv-legacy" data-qc149c="card" data-mode="respond" data-id={r.id} data-where={where}>
+      <div className="qc149c qcv-legacy" data-qc149c="card" data-mode="respond" data-id={r.id} data-where={where} data-qc152={flat}>
         <div className="mk-lc-in qc149c-in">
           {head}{agentRow}{book}
           <div className="qc149c-md" data-qc149c="respond">
@@ -567,7 +596,7 @@ export const QcQueryCard149: React.FC<QcQueryCard149Props> = (p) => {
   }
 
   return (
-    <div className={`qc149c qcv-legacy${editing ? " editing" : ""}`} data-qc149c="card" data-mode={mode} data-id={r.id} data-where={where}>
+    <div className={`qc149c qcv-legacy${editing ? " editing" : ""}`} data-qc149c="card" data-mode={mode} data-id={r.id} data-where={where} data-qc152={flat}>
       <div className="mk-lc-in qc149c-in">
         {band}
         {editing ? <div className="qc149c-edbar" data-qc149c="edit-bar"><i aria-hidden="true" />Editing this query</div> : null}

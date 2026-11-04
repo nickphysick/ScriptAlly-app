@@ -1,0 +1,32 @@
+[
+ {
+  "where": "population: a them bubble",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "where": "them: ✎ Edit shows beside the bubble on its open side",
+  "ok": true,
+  "detail": "{\"r\":{\"x\":987.29443359375,\"y\":491.92132568359375,\"width\":243.685546875,\"height\":58.74591064453125},\"f\":{\"x\":1237.912353515625,\"y\":512.780517578125,\"width\":58.2327880859375,\"height\":25.84820556640625}}"
+ },
+ {
+  "where": "them: the click lands — an editing view opens",
+  "ok": true,
+  "detail": "edit"
+ },
+ {
+  "where": "population: a me bubble",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "where": "me: ✎ Edit shows beside the bubble on its open side",
+  "ok": true,
+  "detail": "{\"r\":{\"x\":1215.6494140625,\"y\":401.7380065917969,\"width\":231.614501953125,\"height\":67.429443359375},\"f\":{\"x\":1150.6103515625,\"y\":418.2904052734375,\"width\":58.2327880859375,\"height\":25.848236083984375}}"
+ },
+ {
+  "where": "me: the click lands — an editing view opens",
+  "ok": true,
+  "detail": "edit"
+ }
+]

@@ -129,7 +129,11 @@ import type { QcRow } from "../lib/qcSummary";
 import { nextLine } from "../lib/qcRowLines";
 import { QcPage151, Track151 } from "./queries/centre/QcPage151";
 import { QcFilterPanel151 } from "./queries/centre/QcFilterMenu140";
-import { QUIET_WEEKS_PATH, quickOfRow, quietWeeksOf, stampRows } from "../lib/queryState";
+import { QUIET_WEEKS_PATH, quickOfRow, quietWeeksOf, stampRows, stateOf, queryState as qsOf } from "../lib/queryState";
+import { packagesUnlocked } from "../lib/entitlements";
+import { sideOf as side152, type ReplyAct, type ThreadStepIn } from "../lib/qcThread152";
+import { qc152DevFree } from "../lib/qc152ReviewAid";
+import type { QcCard152Data } from "./queries/centre/QcCard152";
 import { DEFAULT_SORT_151, QC_FULL_SCREEN, nextCell, sort151, whoSections, type Section, type Sort151 } from "../lib/qc151";
 import { pillGroups, weekSummary } from "../lib/qc1511";
 import { actionSections, rowAct, statusKind } from "../lib/qc1512";
@@ -227,7 +231,7 @@ import { QueryAgentTab, type AgentHistoryRow } from "./queries/QueryAgentTab";
 import { QueryLogSheet } from "./queries/QueryLogSheet";
 import { queriesForAgent } from "../lib/agentList";
 import { openAgentCard } from "../lib/agentCardStore";
-import { agentView as qcAgentView, bookChips as qcBookChips, nextStepOf, storySteps, stripOf, submissionWords, undatedIds } from "../lib/qcCardStory";
+import { agentView as qcAgentView, bookChips as qcBookChips, methodQualifier, nextStepOf, storySteps, stripOf, submissionWords, undatedIds } from "../lib/qcCardStory";
 import { hrefFor } from "../lib/quickAdd";
 import { rungFacts } from "../lib/queryPanelRungs";
 import { queryMaterialsToRows, draftMaterialsToQuery, draftExpectedOverrideIso } from "../lib/queryDraft";
@@ -5971,8 +5975,63 @@ export const Queries: React.FC<{
       return true;
     };
 
+    /* ══ v152 §2 — the desktop card's thread, reply box and tabs (lib/qcThread152 derives; this only gathers) ══
+       ⚠️ A STEP'S CHIPS ARE WHAT WAS RECORDED ON IT (recon A): Query sent shows the query's record, a step whose log
+          carries `materials` shows those, and every other step shows none — nothing is copied from a neighbour. */
+    let v152: QcCard152Data | undefined;
+    if (qcDesk) {
+      const free = !packagesUnlocked(currentUser) || (import.meta.env.MODE !== "production" ? qc152DevFree() : false);
+      const KIND: Record<string, string> = { ql: "Your query letter.", syn: "Your synopsis.", sample: "Your opening sample.", other: "What you sent with the query." };
+      const queryChips = sv.pieces.map((pc) => {
+        const label = pc.key === "sample" && pc.value ? capWord(pc.value.split(" · ")[0]) : pc.label;
+        const detail = free ? KIND[pc.key] ?? label
+          : pc.key === "sample" ? capWord(pc.value || "Opening sample")
+          : pc.value ? `${pc.label} · ${pc.value}` : KIND[pc.key] ?? label;
+        return { label, detail };
+      });
+      const evById = new Map((trackingEvents as { id?: string; materials?: unknown }[]).map((e) => [String(e.id ?? ""), e]));
+      const stepChips = (activityId?: string) => {
+        const m = activityId ? evById.get(activityId)?.materials : undefined;
+        if (!Array.isArray(m)) return [];
+        return m.map((x) => (typeof x === "string" ? x : String((x as { label?: unknown })?.label ?? ""))).filter(Boolean)
+          .map((label) => ({ label, detail: free ? label : label }));
+      };
+      const tSteps: ThreadStepIn[] = story.map((x) => ({
+        key: x.key, activityId: x.activityId, status: x.status, kind: x.kind, ms: x.ms,
+        chips: x.status === QueryStatus.QUERIED && !x.kind ? (stepChips(x.activityId).length ? stepChips(x.activityId) : queryChips) : stepChips(x.activityId),
+        via: x.status === QueryStatus.QUERIED && !x.kind ? methodQualifier(q.sendMethod) : null,
+      }));
+      const nrmnRaw = typeof (q as { nrmnOverride?: unknown }).nrmnOverride === "boolean" ? (q as { nrmnOverride?: boolean }).nrmnOverride! : ag?.noResponseMeansNo;
+      const state = stateOf(row) ?? qsOf({ ...row, nrmn: !!nrmnRaw }, { quietWeeks: qcQuietWeeks, nowMs: now });
+      const heard = [...tSteps].reverse().find((x) => x.ms != null && side152(x) === "them");
+      const lastMs = [...tSteps].reverse().find((x) => x.ms != null)?.ms ?? null;
+      const lsc = q.lastStatusChange ? new Date(q.lastStatusChange as string).getTime() : NaN;
+      v152 = {
+        state,
+        replyMs: (row as { replyMs?: number | null }).replyMs ?? row.expectedMs,
+        dueMs: row.court === "agent" ? null : row.expectedMs,
+        closedMs: state === "closed" ? (Number.isFinite(lsc) ? lsc : lastMs) : null,
+        steps: tSteps,
+        agentWeeks: storyCtx.agentWeeks,
+        nrmn: typeof nrmnRaw === "boolean" ? nrmnRaw : null,
+        free,
+        queriedVia: methodQualifier(q.sendMethod),
+        asks: (ag?.materialsWanted ?? []).map((x) => String(x)).filter(Boolean),
+        sentLabels: sent.map((x) => x.label),
+        lastHeardMs: heard?.ms ?? null,
+        how: submissionWords(ag),
+      };
+    }
+    const reply152 = (a: ReplyAct) => {
+      if (a === "resp") { setQcCardMode("respond"); return; }
+      const mode = a === "reopen" ? "resp" : a;
+      stepRow({ mode, queryId: q.id, ...(a === "close" ? { preset: { closeWhy: "noreply" as const } } : {}) });
+    };
+
     return (
       <QcQueryCard149
+        v152={v152}
+        onReply152={reply152}
         row={row}
         nowMs={now}
         msTitle={ms?.title ?? null}
@@ -6002,6 +6061,8 @@ export const Queries: React.FC<{
           if (f === null) openAgentCard(ag.id, { tab: "who", from: "qc" });
           else if (f === "wishlist") openAgentCard(ag.id, { tab: "want", focus: "wishlist", from: "qc" });
           else if (f === "method") openAgentCard(ag.id, { tab: "work", focus: "method", from: "qc" });
+          else if (f === "reply") openAgentCard(ag.id, { tab: "work", focus: "reply", from: "qc" });
+          else if (f === "materials") openAgentCard(ag.id, { tab: "work", focus: "materials", from: "qc" });
           else openAgentCard(ag.id, { tab: "who", focus: f, from: "qc" });
         }}
         due={row.court === "closed" ? { line: nl.line, hot: false } : { line: nl.line, hot: nl.hot }}

@@ -618,7 +618,10 @@ service cloud.firestore {
           'eventKey',
           // Clean-up pass (28 Sep): a starting step the migration reconstructed for a query whose log
           // was empty. Only `true` is valid — absence is the only way to say "a real event".
-          'reconstructed'
+          'reconstructed',
+          // Query Centre v152 (recon A): what went with, or was asked for on, THIS step — the card's thread reads it.
+          // OPTIONAL: every older step has none and stays valid. The feed twin's own `materials` has the same shape.
+          'materials'
         ])
         && (!data.keys().hasAny(['reconstructed']) || data.reconstructed == true)
         && data.type is string && data.type.size() <= 128
@@ -648,7 +651,8 @@ service cloud.firestore {
         && (!data.keys().hasAny(['materialsQuantity']) || (data.materialsQuantity is string && data.materialsQuantity.size() <= 64))
         && (!data.keys().hasAny(['fullVersionSent']) || (data.fullVersionSent is string && data.fullVersionSent.size() <= 128))
         && (!data.keys().hasAny(['feedbackType']) || (data.feedbackType is string && data.feedbackType.size() <= 64))
-        && (!data.keys().hasAny(['eventKey']) || (data.eventKey is string && data.eventKey.size() <= 64));
+        && (!data.keys().hasAny(['eventKey']) || (data.eventKey is string && data.eventKey.size() <= 64))
+        && (!data.keys().hasAny(['materials']) || (data.materials is list && data.materials.size() <= 20));
     }
 
     // (isValidTopLevelActivity is gone with the RETIRED users/{uid}/activity store — Tier 3 ·

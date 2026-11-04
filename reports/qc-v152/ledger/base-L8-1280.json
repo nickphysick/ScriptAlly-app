@@ -1,0 +1,152 @@
+[
+ {
+  "where": "offer: population — a reply box",
+  "ok": false,
+  "detail": "no card"
+ },
+ {
+  "where": "offer: field reads /^Answer the offer$/",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "offer: second line reads /^\\d+ days? left$/",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "offer: button reads Answer the offer (navy)",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "where": "offer: pressing the button writes nothing",
+  "ok": true,
+  "detail": "0 writes"
+ },
+ {
+  "where": "materials: population — a reply box",
+  "ok": false,
+  "detail": "no card"
+ },
+ {
+  "where": "materials: field reads /^Send the partial$/",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "materials: second line reads /^\\d+ days? left · by \\d{1,2} \\w{3}$/",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "materials: button reads Mark partial sent (navy)",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "where": "materials: pressing the button writes nothing",
+  "ok": true,
+  "detail": "0 writes"
+ },
+ {
+  "where": "nudge: population — a reply box",
+  "ok": false,
+  "detail": "no card"
+ },
+ {
+  "where": "nudge: field reads /^Nudge Priya\\?$/",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "nudge: second line reads /^Reply was due \\d{1,2} \\w{3}$/",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "nudge: button reads Nudge (outline)",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "where": "nudge: pressing the button writes nothing",
+  "ok": true,
+  "detail": "0 writes"
+ },
+ {
+  "where": "agent: population — a reply box",
+  "ok": false,
+  "detail": "no card"
+ },
+ {
+  "where": "agent: field reads /^Heard back\\?$/",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "agent: second line reads /^Record it when Rufus replies$/",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "agent: button reads Record a response (outline)",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "where": "agent: pressing the button writes nothing",
+  "ok": true,
+  "detail": "0 writes"
+ },
+ {
+  "where": "quiet: population — a reply box",
+  "ok": false,
+  "detail": "no card"
+ },
+ {
+  "where": "quiet: field reads /^Still nothing\\?$/",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "quiet: second line reads /^Close it, or keep waiting$/",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "quiet: button reads Close it (outline)",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "where": "quiet: pressing the button writes nothing",
+  "ok": true,
+  "detail": "0 writes"
+ },
+ {
+  "where": "closed: population — a reply box",
+  "ok": false,
+  "detail": "no card"
+ },
+ {
+  "where": "closed: field reads /^Closed$/",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "closed: second line reads /^Closed on \\d{1,2} \\w{3}$/",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "closed: button reads Reopen (outline)",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "where": "closed: pressing the button writes nothing",
+  "ok": true,
+  "detail": "0 writes"
+ }
+]

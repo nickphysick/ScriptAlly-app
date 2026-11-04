@@ -1,0 +1,295 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Query Centre v152 §2 (design-refs/query-centre-v152/, screens 04, 05, 06, 12, 14–16, 25, 26) — THE QUERY CARD'S
+ * DESKTOP READING VIEW, drawn by QcQueryCard149 (the one card, Nick's ruling) when it is not on a phone: the band in
+ * the query's state, the head, the book, the tabs, the TRACKING THREAD (each step a message, the waits between them),
+ * the Agent and Materials tabs, Notes unchanged, and the reply box as the footer.
+ *
+ * ⚠️ THE CARD WRITES NOTHING. The reply box's button, the pencil and each bubble's ✎ Edit hand back to the page; the
+ *    derivations are lib/qcThread152 (pure). The phone's card is QcQueryCard149's own and is not touched.
+ * ⚠️ IT PORTALS WITH THE PANEL (document.body), so no page token reaches it: colours are literals and the faces are
+ *    the `:root` --sp-* tokens. The tips are portalled again, to body, as fixed boxes — the panel leans, and a rotated
+ *    ancestor would be the containing block of anything fixed inside it.
+ */
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { StatusDot } from "../../StatusDot";
+import { QueryStatus } from "../../../types";
+import { STAGE_NAME, type QcRow } from "../../../lib/qcSummary";
+import { STATE_BAND, STATE_HEAD, QUIET_BAND, type QueryState } from "../../../lib/queryState";
+import { STATUS_FILL, statusKind } from "../../../lib/qc1512";
+import {
+  askChips, buildThread, dayLabel, materialsSummary, materialsTab, replyBox,
+  type ReplyAct, type ThreadChip, type ThreadItem, type ThreadStepIn,
+} from "../../../lib/qcThread152";
+import "./qcv152card.css";
+
+export interface QcCard152Data {
+  state: QueryState;
+  /** the stamped reply date */
+  replyMs: number | null;
+  /** the offer's deadline or the send-by date */
+  dueMs: number | null;
+  closedMs: number | null;
+  steps: ThreadStepIn[];
+  agentWeeks: number | null;
+  /** "no reply means no" (true), "always replies" (false), or not known */
+  nrmn: boolean | null;
+  /** Free accounts see no versions and no packages (the dev switch proves it) */
+  free: boolean;
+  queriedVia: string | null;
+  asks: string[];
+  sentLabels: string[];
+  lastHeardMs: number | null;
+  how: string | null;
+}
+export type CardTab152 = "tracking" | "agent" | "materials" | "notes";
+
+export interface QcCard152Props {
+  row: QcRow;
+  nowMs: number;
+  d: QcCard152Data;
+  first: string | null;
+  msTitle: string | null;
+  bookChips: string[];
+  packageName: string | null;
+  wishlist: string;
+  email: string;
+  website: string;
+  websiteHref: string | null;
+  tab: CardTab152;
+  onTab: (t: CardTab152) => void;
+  notes: React.ReactNode;
+  onClose: () => void;
+  onPencil: () => void;
+  onEditStep: (activityId: string | null) => void;
+  onReply: (act: ReplyAct) => void;
+  onAgentField: (field: "wishlist" | "email" | "website" | "method" | "reply" | "materials" | null) => void;
+  onCopyEmail: () => void;
+}
+
+const PEN = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10.5 2.5l3 3L6 13H3v-3z" /></svg>;
+const ARW = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5" /></svg>;
+const NUDGE = <svg viewBox="0 0 20 20" width="19" height="19" fill="none" stroke="#1c130f" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5" /><path d="M7 12.5h6l-.9-1.2V9a2.1 2.1 0 0 0-4.2 0v2.3zM9.2 14h1.6" /></svg>;
+const HOLD = <svg viewBox="0 0 20 20" width="19" height="19" fill="none" stroke="#1c130f" strokeWidth="1.5" aria-hidden="true"><circle cx="10" cy="10" r="7.5" /><path d="M7 10h6" strokeLinecap="round" /></svg>;
+const BOOK = <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#5f5a53" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true"><path d="M3.5 5.5c2.8-1.3 5.8-1.3 8.5.6 2.7-1.9 5.7-1.9 8.5-.6v13c-2.8-1.3-5.8-1.3-8.5.6-2.7-1.9-5.7-1.9-8.5-.6z" /><path d="M12 6.1v13" /></svg>;
+const MAIL = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><rect x="2" y="3.5" width="12" height="9" rx="1.5" /><path d="m2.5 4.5 5.5 4 5.5-4" /></svg>;
+const WEB = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><circle cx="8" cy="8" r="6" /><path d="M2 8h12M8 2c2 2 2 10 0 12M8 2c-2 2-2 10 0 12" /></svg>;
+
+/** the queries this page session has already opened: the thread builds in only the first time */
+const built = new Set<string>();
+
+/** one dark tip at a time, portalled to body (§2.4) */
+function useTip() {
+  const [tip, setTip] = useState<{ x: number; y: number; head: string | null; body: string } | null>(null);
+  const show = (el: Element, body: string, head: string | null = null) => {
+    const r = el.getBoundingClientRect();
+    setTip({ x: r.left + r.width / 2, y: r.top, head, body });
+  };
+  const hide = () => setTip(null);
+  const node = tip ? createPortal(<TipBox {...tip} />, document.body) : null;
+  return { show, hide, node, on: !!tip };
+}
+const TipBox: React.FC<{ x: number; y: number; head: string | null; body: string }> = ({ x, y, head, body }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const w = el.offsetWidth, h = el.offsetHeight;
+    const left = Math.max(8, Math.min(x - w / 2, window.innerWidth - w - 8));
+    const top = y - h - 8 < 8 ? y + 26 : y - h - 8;
+    setPos({ left, top });
+  }, [x, y, head, body]);
+  return (
+    <div ref={ref} className="qc152-pop" role="tooltip" data-qc152="tip" style={pos ? { left: pos.left, top: pos.top } : { left: -9999, top: -9999 }}>
+      {head ? <b>{head}</b> : null}{body}
+    </div>
+  );
+};
+
+const Glyph: React.FC<{ status: QueryStatus | null; kind: "nudge" | "holding" | null }> = ({ status, kind }) =>
+  kind === "nudge" ? NUDGE : kind === "holding" ? HOLD : status ? <StatusDot status={status} overrideSize={19} decorative /> : HOLD;
+
+export const QcCard152: React.FC<QcCard152Props> = (p) => {
+  const { row: r, nowMs, d } = p;
+  const first = p.first || "the agent";
+  const head = STATE_HEAD[d.state];
+  const bandBg = d.state === "quiet" ? QUIET_BAND : head.bg;
+  const dark = d.state === "offer" || d.state === "materials";
+  const tip = useTip();
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const thread: ThreadItem[] = buildThread(d.steps, { first, nowMs, state: d.state, replyMs: d.replyMs, agentWeeks: d.agentWeeks });
+  const box = replyBox({ state: d.state, status: r.status, first, nowMs, dueMs: d.dueMs, replyMs: d.replyMs, closedMs: d.closedMs });
+  const [buildId, setBuildId] = useState<string | null>(null);
+  useLayoutEffect(() => { if (!built.has(r.id)) { built.add(r.id); setBuildId(r.id); } else setBuildId(null); }, [r.id]);
+
+  /* the thread opens scrolled to the end, on every query and every return to Tracking */
+  useLayoutEffect(() => {
+    const el = bodyRef.current;
+    if (el && p.tab === "tracking") el.scrollTop = el.scrollHeight;
+    else if (el) el.scrollTop = 0;
+  }, [r.id, p.tab, thread.length]);
+  useEffect(() => { tip.hide(); }, [r.id, p.tab]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /* a chip's tip closes on any click elsewhere */
+  useEffect(() => {
+    if (!tip.on) return undefined;
+    const off = (e: MouseEvent) => { if (!(e.target as Element).closest?.(".qc152-ch")) tip.hide(); };
+    document.addEventListener("click", off);
+    return () => document.removeEventListener("click", off);
+  }, [tip.on]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const chips = (cs: ThreadChip[], key: string) => cs.length ? (
+    <span className="qc152-chs" data-qc152="chips">
+      {cs.map((c, i) => (
+        <button key={`${key}-${i}`} type="button" className="qc152-ch" data-qc152="chip"
+          onClick={(e) => { e.stopPropagation(); tip.show(e.currentTarget, c.detail, c.label); }}
+          onBlur={() => tip.hide()}>{c.label}</button>
+      ))}
+    </span>
+  ) : null;
+
+  const trackingPane = (
+    <div className={`qc152-th${buildId === r.id ? " build" : ""}`} data-qc152="thread">
+      {thread.map((it, i) => {
+        if (it.t === "wait") {
+          return (
+            <div key={it.key} className={`qc152-w${it.long ? " long" : ""}`} data-qc152="wait" data-edge={it.edge ?? undefined} data-label={it.label}
+              tabIndex={it.tip ? 0 : undefined} style={{ animationDelay: `${i * 45}ms` }}
+              onMouseEnter={it.tip ? (e) => tip.show(e.currentTarget.querySelector("span")!, it.tip!) : undefined}
+              onMouseLeave={it.tip ? tip.hide : undefined}
+              onFocus={it.tip ? (e) => tip.show(e.currentTarget.querySelector("span")!, it.tip!) : undefined}
+              onBlur={it.tip ? tip.hide : undefined}>
+              <i /><span>{it.label}</span><i />
+            </div>
+          );
+        }
+        if (it.t === "end") {
+          return (
+            <div key={it.key} className="qc152-m them" data-qc152="end" data-kind={it.kind} style={{ animationDelay: `${i * 45}ms` }}>
+              <span className="qc152-av" aria-hidden="true">{r.initials}</span>
+              <div className={`qc152-bx ${it.kind === "agent" ? "qc152-wait" : "qc152-quiet"}`}>
+                {it.ring != null ? <span className="qc152-ring" data-qc152="ring" style={{ ["--p" as string]: String(it.ring) }} aria-hidden="true" /> : null}
+                <div className="qc152-qx"><b>{it.title}</b><em>{it.sub}</em></div>
+              </div>
+            </div>
+          );
+        }
+        return (
+          <div key={it.key} className={`qc152-m ${it.side}`} data-qc152="msg" data-side={it.side} data-status={it.status ?? undefined} data-kind={it.kind ?? undefined}
+            data-activity={it.activityId} style={{ animationDelay: `${i * 45}ms` }}>
+            {it.side === "them" ? <span className="qc152-av" aria-hidden="true">{r.initials}</span> : null}
+            <div className="qc152-bx" data-qc152="bubble">
+              <span className="qc152-gd" data-qc152="disc" style={{ background: it.disc }}><Glyph status={it.status} kind={it.kind} /></span>
+              <div className="qc152-qx">
+                <div className="qc152-r1"><b data-qc152="msg-title">{it.title}</b><span className="qc152-dt" data-qc152="msg-date">{it.date}</span></div>
+                {it.chips.length || it.via ? <div className="qc152-r2">{chips(it.chips, it.key)}{it.via ? <em>{it.via}</em> : null}</div> : null}
+              </div>
+              <button type="button" className="qc152-fx" data-qc152="edit-step" aria-label={`Edit ${it.title}`}
+                onClick={() => p.onEditStep(it.activityId ?? null)}>✎ Edit</button>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+
+  /* §2.6 the Agent tab */
+  const ask = askChips(d.asks, d.sentLabels);
+  const lk = (v: string, icon: React.ReactNode, field: "email" | "website", label: string, href?: string | null) => v
+    ? (href ? <a className="qc152-lk" href={href} target="_blank" rel="noreferrer" data-qc152="link">{icon}{v}</a>
+      : <button type="button" className="qc152-lk" data-qc152="link" onClick={field === "email" ? p.onCopyEmail : undefined}>{icon}{v}</button>)
+    : <button type="button" className="qc152-lk miss" data-qc152="add" data-k={field} onClick={() => p.onAgentField(field)}>+ {label}</button>;
+  const agentPane = (
+    <div className="qc152-agt" data-qc152="agent-pane">
+      <div className="qc152-agq" data-qc152="agent-strip">
+        <div><small>Queried</small><b>{r.sentMs != null ? dayLabel(r.sentMs, nowMs) : "Not dated"}</b><em>{d.queriedVia ?? "how not recorded"}</em></div>
+        {d.free
+          ? <div><small>What went</small><b>{d.sentLabels.length} {d.sentLabels.length === 1 ? "thing" : "things"}</b><em>with the query</em></div>
+          : <div><small>Package</small><b>{p.packageName ?? "None"}</b><em>{d.sentLabels.length ? `${d.sentLabels.length} ${d.sentLabels.length === 1 ? "thing" : "things"} sent` : "nothing recorded"}</em></div>}
+        <div><small>Last heard</small><b>{d.lastHeardMs != null ? dayLabel(d.lastHeardMs, nowMs) : "Not yet"}</b>
+          <em>{d.lastHeardMs != null ? `${Math.max(0, Math.round((nowMs - d.lastHeardMs) / 86_400_000))} days ago` : r.sentMs != null ? `since ${dayLabel(r.sentMs, nowMs)}` : ""}</em></div>
+      </div>
+      <dl className="qc152-agf">
+        <dt>Replies in</dt>
+        <dd data-qc152="reply-in">{d.agentWeeks != null ? <>About <b>{d.agentWeeks} {d.agentWeeks === 1 ? "week" : "weeks"}</b></> : <button type="button" className="qc152-lk miss" data-qc152="add" data-k="reply" onClick={() => p.onAgentField("reply")}>+ Add reply time</button>}
+          {d.nrmn === true ? " · no reply means no" : d.nrmn === false ? " · always replies" : ""}</dd>
+        <dt>Asks for</dt>
+        <dd data-qc152="asks">{d.asks.length ? <>
+          <span className="qc152-askc">{ask.chips.map((c) => <i key={c.label} className={c.sent ? "ok" : "no"} data-qc152="ask" data-sent={c.sent ? "" : undefined}>{c.label}</i>)}</span>
+          {ask.missing.length ? <span className="qc152-fitn" data-qc152="ask-missing">You didn’t send {ask.missing.map((x) => x.toLowerCase()).join(", ")}</span>
+            : <span className="qc152-fity" data-qc152="ask-all">✓ You sent everything {first} asks for</span>}
+        </> : <button type="button" className="qc152-lk miss" data-qc152="add" data-k="asks" onClick={() => p.onAgentField("materials")}>+ Add what {first} asks for</button>}</dd>
+        <dt>How to submit</dt>
+        <dd>{d.how ?? <button type="button" className="qc152-lk miss" data-qc152="add" data-k="method" onClick={() => p.onAgentField("method")}>+ Add how {first} takes queries</button>}</dd>
+        <dt>Wishlist</dt>
+        <dd>{p.wishlist ? <q data-qc152="wishlist">{p.wishlist}</q> : <button type="button" className="qc152-lk miss" data-qc152="add" data-k="wishlist" onClick={() => p.onAgentField("wishlist")}>+ Add {first}’s wishlist</button>}</dd>
+        <dt>Contact</dt>
+        <dd className="qc152-lks">{lk(p.email, MAIL, "email", "Email")}{lk(p.website.replace(/^https?:\/\//, "").replace(/\/$/, ""), WEB, "website", "Website", p.websiteHref)}</dd>
+      </dl>
+      <button type="button" className="qc152-open" data-qc152="open-agent" onClick={() => p.onAgentField(null)}>✎ Open {first}’s card</button>
+    </div>
+  );
+
+  /* §2.7 the Materials tab */
+  const mt = materialsTab(d.steps, { first, nowMs, dueMs: d.dueMs, writerTurn: d.state === "materials" });
+  const matPane = (
+    <div className="qc152-mtl" data-qc152="materials-pane">
+      <p className="qc152-msum" data-qc152="mat-summary">{materialsSummary(mt.summary, first)}</p>
+      <ol>
+        {mt.blocks.map((b) => (
+          <li key={b.key} className={b.request ? "rq" : undefined} data-qc152="mat-block" data-request={b.request ? "" : undefined}>
+            <span className="qc152-mg"><StatusDot status={b.status} overrideSize={18} decorative /></span>
+            <div>
+              <div className="qc152-mh"><b>{b.title}{b.pkg && !d.free && p.packageName ? <> <span className="qc152-pkc" data-qc152="pkg-chip">{p.packageName}</span></> : null}</b><span>{b.date}</span></div>
+              <div className="qc152-mc">{b.chips.length ? b.chips.map((c, i) => <i key={i}>{c.label}</i>) : <em>Nothing recorded</em>}</div>
+              {b.note ? <p>{b.note}</p> : null}
+              <button type="button" className="qc152-mfx" data-qc152="mat-edit" onClick={() => p.onEditStep(b.activityId ?? null)}>✎ Edit</button>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+
+  return (
+    <div className="qc149c qcv-legacy qc152" data-qc149c="card" data-qc152="card" data-mode="view" data-view="read" data-id={r.id} data-state={d.state}>
+      <div className="qc152-in">
+        <div className={`qc152-band${dark ? " dk" : ""}`} data-qc152="band" style={{ background: bandBg, color: head.fg }}>
+          <span data-qc152="band-word">{r.status === QueryStatus.OFFER ? "OFFER" : STATE_BAND[d.state]}</span>
+          {d.state !== "closed" && r.dayN != null ? <span className="qc152-day" data-qc152="day">Day {r.dayN}</span> : <span className="qc152-day" />}
+          <button type="button" className="qc152-x" data-qc152="pencil" aria-label="Edit this query" title="Edit this query" onClick={p.onPencil}>{PEN}</button>
+          <button type="button" className="qc152-x" data-qc149c="close" aria-label="Close the query" title="Close" onClick={p.onClose}>✕</button>
+        </div>
+        <div className="qc152-agent">
+          <span className="qc152-disc" aria-hidden="true">{r.initials}</span>
+          <div className="qc152-who"><div className="qc152-nm qcv-open-nm" data-qc149c="name">{r.agentName}</div><div className="qc152-ag">{(r.agency || "").toUpperCase()}</div></div>
+          <span className="qc152-pill" data-qc152="pill"><span className="qc152-cap" style={{ background: STATUS_FILL[statusKind(r.status)] }}><StatusDot status={r.status} overrideSize={17} decorative /></span><span>{STAGE_NAME[r.status]}</span></span>
+        </div>
+        <div className="qc152-ms" data-qc152="book">
+          <span className="qc152-bk" aria-hidden="true">{BOOK}</span>
+          <div><small>QUERYING</small><b>{p.msTitle ?? "No manuscript"}</b>
+            {p.bookChips.length ? <div className="qc152-bkc">{p.bookChips.map((c) => <span key={c}>{c}</span>)}</div> : null}</div>
+        </div>
+        <div className="qc152-tabs" role="tablist" aria-label="The query">
+          {(["tracking", "agent", "materials", "notes"] as const).map((t) => (
+            <button key={t} type="button" role="tab" data-qc152="tab" data-tab={t} aria-selected={p.tab === t} onClick={() => p.onTab(t)}>
+              {t === "tracking" ? "Tracking" : t === "agent" ? "Agent" : t === "materials" ? "Materials" : "Notes"}
+            </button>
+          ))}
+        </div>
+        <div ref={bodyRef} className="qc152-body" data-qc152="body" role="tabpanel">
+          {p.tab === "tracking" ? trackingPane : p.tab === "agent" ? agentPane : p.tab === "materials" ? matPane : <div className="qc152-notes">{p.notes}</div>}
+        </div>
+        <div className={`qc152-rb${box.late ? " late" : ""}`} data-qc152="reply" data-act={box.act}>
+          <div className="qc152-rf" data-qc152="reply-field"><b data-qc152="reply-lead">{box.lead}</b><span data-qc152="reply-sub">{box.sub}</span></div>
+          <button type="button" className={`qc152-rbtn ${box.tone === "navy" ? "nv" : "gh"}`} data-qc152="reply-btn" data-tone={box.tone} onClick={() => p.onReply(box.act)}>{box.button}{ARW}</button>
+        </div>
+      </div>
+      {tip.node}
+    </div>
+  );
+};
