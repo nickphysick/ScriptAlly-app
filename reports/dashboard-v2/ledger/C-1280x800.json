@@ -1,0 +1,104 @@
+[
+ {
+  "lock": "C1",
+  "where": "population: a painted fill",
+  "ok": true,
+  "detail": "cols 569.4–868.4, h 250"
+ },
+ {
+  "lock": "C1",
+  "where": "fill reaches the left inner edge",
+  "ok": true,
+  "detail": "569.4 vs 569.4"
+ },
+ {
+  "lock": "C1",
+  "where": "fill reaches the right inner edge",
+  "ok": true,
+  "detail": "868.4 vs 868.0"
+ },
+ {
+  "lock": "C1",
+  "where": "no pins, no hawk in the card",
+  "ok": true,
+  "detail": "pins 0 dots 0 hawk 0"
+ },
+ {
+  "lock": "C2",
+  "where": "population",
+  "ok": true,
+  "detail": "9 circles, 9 expected"
+ },
+ {
+  "lock": "C2",
+  "where": "one per week, each the derivation's",
+  "ok": true,
+  "detail": "got 35,39,40,40,40,40,40,39,39 want 35,39,40,40,40,40,40,39,39"
+ },
+ {
+  "lock": "C2",
+  "where": "the last is navy",
+  "ok": true,
+  "detail": "rgb(45, 58, 80)"
+ },
+ {
+  "lock": "C3",
+  "where": "hover: shown",
+  "ok": true,
+  "detail": "shown true on screen true"
+ },
+ {
+  "lock": "C3",
+  "where": "hover: date, total, change",
+  "ok": true,
+  "detail": "12 Oct/40/no change want 12 Oct/40/no change"
+ },
+ {
+  "lock": "C3",
+  "where": "hover: rows sum",
+  "ok": true,
+  "detail": "22,4,10,4 → 40"
+ },
+ {
+  "lock": "C3",
+  "where": "hover: dashed line through the circle",
+  "ok": true,
+  "detail": "751.5 vs 751.8"
+ },
+ {
+  "lock": "C3",
+  "where": "hover: leaving hides both",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C3",
+  "where": "focus: shown",
+  "ok": true,
+  "detail": "shown true on screen true"
+ },
+ {
+  "lock": "C3",
+  "where": "focus: date, total, change",
+  "ok": true,
+  "detail": "12 Oct/40/no change want 12 Oct/40/no change"
+ },
+ {
+  "lock": "C3",
+  "where": "focus: rows sum",
+  "ok": true,
+  "detail": "22,4,10,4 → 40"
+ },
+ {
+  "lock": "C3",
+  "where": "focus: dashed line through the circle",
+  "ok": true,
+  "detail": "751.5 vs 751.8"
+ },
+ {
+  "lock": "C3",
+  "where": "focus: leaving hides both",
+  "ok": true,
+  "detail": "true"
+ }
+]

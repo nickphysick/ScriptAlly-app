@@ -76,6 +76,14 @@ const read = (page: Page) => page.evaluate(() => {
     /* RE-POINTED (Dashboard feed v1): once a query exists the buttons and the campaign word are the manuscript card's */
     bookButtons: (() => { const b = root?.querySelector<HTMLElement>(".df1-bkacts"); return b ? [...b.querySelectorAll("button")].map((x) => x.getAttribute("aria-label")) : null; })(),
     status: vis('[data-df1="status"]')?.textContent?.trim() ?? null,
+    /* RE-POINTED (Dashboard v2, 3 Nov): the band's buttons, Next up's count, and the v2 founding card */
+    bandButtons: (() => { const b = root?.querySelector<HTMLElement>('[data-d2="buttons"]'); return b ? [...b.querySelectorAll("button")].map((x) => x.getAttribute("aria-label") ?? x.textContent?.trim() ?? "") : null; })(),
+    bandText: vis('[data-d2="band"]')?.textContent ?? null,
+    nextMeta: vis('[data-d2-card="next"] .d2-meta')?.textContent?.trim() ?? null,
+    next: box('[data-d2-card="next"]'),
+    fw2: box('[data-d2-card="founding"]'),
+    fw2Parts: (() => { const f = vis('[data-d2-card="founding"]'); if (!f) return [] as string[]; return ["fw-top", "fw-tell", "fw-road", "fw-foot"].filter((k) => [...f.querySelectorAll<HTMLElement>(`[data-d2="${k}"]`)].some((e) => e.getBoundingClientRect().height > 0)); })(),
+    fw2Clipped: (() => { const f = vis('[data-d2-card="founding"]'); return f ? [...f.querySelectorAll<HTMLElement>("*")].filter((e) => e.clientHeight > 1 && e.clientWidth > 1 && e.scrollHeight > e.clientHeight + 1 && getComputedStyle(e).overflowY !== "visible").map((e) => e.className.toString().slice(0, 30)) : null; })(),
     fwClipped: (() => { const f = vis('[data-d71="fw"]'); return f ? [...f.querySelectorAll<HTMLElement>("*")].filter((e) => e.clientHeight > 1 && e.clientWidth > 1 && e.scrollHeight > e.clientHeight + 1 && getComputedStyle(e).overflowY !== "visible").map((e) => e.className.toString().slice(0, 30)) : null; })(),
     setup: box('[data-fv1="setup"]'), path: vis('[data-fv1="setup"]')?.dataset.path ?? null,
     /* first visit v2: the state the page is in, the card that leads the middle column, Top tip, the Getting started sheet */
@@ -116,18 +124,22 @@ test.describe("first visit", () => {
            leads the middle column, Top tip is the right column's, and Getting started is the sheet under the manuscript card
            rather than a page of the task card (there is no task card before a task). The law is unchanged: the pre-query
            page draws the set-up card, the tip and Getting started. */
-        L.check("A1", `${w} the first-visit page`, r.mode === "f1" && r.fv2 === "pre" && !!r.startCard && !!r.f1tip && !!r.gsSheet && r.taskGroup === null, JSON.stringify({ mode: r.mode, fv2: r.fv2, setup: !!r.startCard, tip: !!r.f1tip, gs: !!r.gsSheet, group: r.taskGroup }));
+        /* ⚠️ RE-POINTED AGAIN (Dashboard v2, 3 Nov): the page is v2's (`data-mode="d2"`); Top tip is retired, so the law is the
+           set-up card, Getting started, and no task card (neither v71's nor Next up) before the first query */
+        L.check("A1", `${w} the first-visit page`, r.mode === "d2" && r.fv2 === "pre" && !!r.startCard && !r.f1tip && !!r.gsSheet && r.taskGroup === null && !r.next, JSON.stringify({ mode: r.mode, fv2: r.fv2, setup: !!r.startCard, tip: !!r.f1tip, gs: !!r.gsSheet, group: r.taskGroup, next: !!r.next }));
         /* ⚠️ RE-POINTED (Dashboard feed v1, L1). These two compared the pre-query founding card with the querying page's
            and with the feed tab. The querying page's card is now a full-size card in a scrolling column (290px), so it is
            no longer the yardstick for a one-screen page's slot, and the tab is retired. The law they held — the
            pre-query card is never cut — is asserted directly: nothing in it clips, and no tab is drawn. */
-        L.check("A2", `${w} the founding card is drawn and nothing in it is cut`, !!r.fw && r.fwParts.length > 3 && Array.isArray(r.fwClipped) && r.fwClipped.length === 0, `parts ${r.fwParts.length} · clipped ${r.fwClipped?.join(",") || "none"} · pre ${r.fw?.h.toFixed(1)}px`);
+        /* RE-POINTED (Dashboard v2): the founding card is v2's, its four sections all drawn and nothing in it cut */
+        L.check("A2", `${w} the founding card is drawn and nothing in it is cut`, !!r.fw2 && r.fw2Parts.length === 4 && Array.isArray(r.fw2Clipped) && r.fw2Clipped.length === 0, `parts ${r.fw2Parts.join(",")} · clipped ${r.fw2Clipped?.join(",") || "none"} · pre ${r.fw2?.h.toFixed(1)}px`);
         L.check("A2", `${w} no feed tab (retired)`, !r.tab && !q.tab, JSON.stringify({ pre: r.tab, q: q.tab }));
         /* ⚠️ RE-POINTED (v2, Part A): no header at all; the manuscript card carries no buttons before the first query, and its
            label is the book's readiness in sentence case (this book is Drafting: "Still writing") */
-        L.check("A3", `${w} no buttons on the book; its label is the readiness`, r.bookButtons === null && r.status === "Still writing", JSON.stringify({ b: r.bookButtons, s: r.status }));
+        /* RE-POINTED (Dashboard v2): the band carries no buttons before the first query, and NO status label in any state */
+        L.check("A3", `${w} no buttons on the band; no status label`, r.bandButtons === null && r.status === null && !/still writing|getting ready/i.test(r.bandText ?? ""), JSON.stringify({ b: r.bandButtons, s: r.status }));
         /* RE-POINTED (Dashboard feed v1): the querying page has no header; its manuscript card carries the buttons and the word */
-        L.check("A3", `${w} once a query exists, Record a response and Querying`, !!q.bookButtons?.includes("Record a response") && q.status === "Querying", JSON.stringify({ b: q.bookButtons, s: q.status }));
+        L.check("A3", `${w} once a query exists, the band's three actions and still no status`, !!q.bandButtons?.includes("Record a response") && q.bandButtons.length === 3 && q.status === null && !/querying\b(?! )/i.test((q.bandText ?? "").replace("Log a query", "")), JSON.stringify({ b: q.bandButtons, s: q.status }));
         /* RETIRED (v2, Part A): "no scroll" was the one-screen pre-query page's law; the page is feed v1's now, which may
            scroll (tests/e2e/RETIRED-dashboard-first-visit-v2.md) */
         L.check("A5", `${w} the retired pieces are gone`, r.retired.length === 0, r.retired.join(","));
@@ -147,7 +159,8 @@ test.describe("first visit", () => {
     await openDash(page, { width: 1512, height: 900 }, PRE, { __SA_DASH_HOLD_MS: 8000 }, true);
     const r = await read(page);
     /* RE-POINTED (v2, Part A): the pre-query shape is feed v1's columns in their loading beat — the set-up card and no buttons */
-    L.check("A8", "loading, and the pre-query shape", r.loading === "1" && r.mode === "f1" && r.fv2 === "pre" && !!r.setup && r.bookButtons === null, JSON.stringify({ loading: r.loading, mode: r.mode, fv2: r.fv2, setup: !!r.setup, b: r.bookButtons }));
+    /* RE-POINTED (Dashboard v2): v2's mode; no band buttons while it loads */
+    L.check("A8", "loading, and the pre-query shape", r.loading === "1" && r.mode === "d2" && r.fv2 === "pre" && !!r.setup && r.bandButtons === null, JSON.stringify({ loading: r.loading, mode: r.mode, fv2: r.fv2, setup: !!r.setup, b: r.bandButtons }));
     L.done(1);
   });
 });
@@ -158,14 +171,11 @@ test("DFV-C · DFV-D — the pager at every size, no wrap-round, and no zeros on
   for (const vp of SIZES) {
     await openDash(page, vp, Q);
     const r = await read(page);
-    L.check("C1", `${tag(vp)} the pager states its count`, !!r.pos && r.pos.shown && /^\d+ of \d+$/.test(r.pos.text ?? ""), JSON.stringify(r.pos));
-    const n = Number(/of (\d+)/.exec(r.pos?.text ?? "")?.[1] ?? 0);
-    for (let i = r.index; i < n - 1; i++) { await page.locator('[data-d71="next"]:visible').click(); await page.waitForTimeout(200); }
-    const last = await read(page);
-    /* RE-POINTED (v2, Part A): the last page still never wraps round to the first; while the Getting started sheet is
-       open it says "Then: finish getting started" (the one place left to go), and nothing else */
-    L.check("C2", `${tag(vp)} the last page never wraps round`, last.index === n - 1 && (last.then === null || last.then === "Then: finish getting started"), `index ${last.index} of ${n} · then ${last.then}`);
+    /* ⚠️ RE-POINTED (Dashboard v2): the task card's pager is retired from the dashboard with the card. Next up states its
+       count in its band ("{shown} of {n}", shown at most 3); C2 (the last page never wraps round) has no pager to hold
+       and is RETIRED (tests/e2e/RETIRED-dashboard-v2.md). */
+    L.check("C1", `${tag(vp)} Next up states its count`, !!r.nextMeta && /^\d+ of \d+ · See all$/.test(r.nextMeta) && Number(/^(\d+)/.exec(r.nextMeta)![1]) <= 3, JSON.stringify(r.nextMeta));
     L.check("D1", `${tag(vp)} no zero rows and no "0 ready to query"`, r.zeroRows.length === 0 && !r.zeroReady, JSON.stringify({ rows: r.zeroRows, ready: r.zeroReady }));
   }
-  L.done(9);
+  L.done(6);
 });
