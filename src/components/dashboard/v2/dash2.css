@@ -60,3 +60,29 @@
   .d58.d2 .d2-pill:not(.d2-pill--pri) span { display: none; }
 }
 
+
+/* ── ONE LOADING STATE ON DASHBOARD v2 (smart-import-photos-v1.1, issue 6) ───────────────────────
+   While the page loads, EVERY card in the grid is the same pure skeleton: its real frame and size,
+   its band in the grey shimmer, and nothing inside (dash58.css's `d58-skcard` look, applied by the
+   page rather than by each card, so a card that forgets the class cannot leak its content: Next up,
+   Active queries, the Getting started sheet and the founding writer card all did). The contents stay
+   laid out (visibility, never display), so nothing moves when the data lands, and everything fills
+   in at once. The header band and its buttons are page chrome and stay. The feed column draws plain
+   shimmer blocks (Dash58's FeedSkeleton). The corner hawk is not in the grid. */
+.d58.d2 .d58-page[data-loading="1"] .d2-grid :is(.os-card, .d2-gs) * { visibility: hidden !important; }
+.d58.d2 .d58-page[data-loading="1"] .d2-grid :is(.os-card, .d2-gs) :is(.os-frame, .df1-goal) { visibility: visible !important; }
+.d58.d2 .d58-page[data-loading="1"] .d2-grid :is(.os-card, .d2-gs) :is(.os-band, .d2-fwtop, .fv2-gsh),
+.d58.d2 .d2-fsk i {
+  visibility: visible !important;
+  background: linear-gradient(90deg, #e7e1d9 0%, #f1ece6 45%, #e7e1d9 90%) !important;
+  background-size: 220% 100% !important;
+  animation: d58-sk-shimmer 1.4s linear infinite;
+  color: transparent !important; box-shadow: none !important;
+}
+.d58.d2 .d58-page[data-loading="1"] .d2-grid .d2-gs .fv2-gsh { border-radius: 8px; }
+.d58.d2 .d2-fsk { display: grid; gap: 14px; align-content: start; height: 100%; overflow: hidden; }
+.d58.d2 .d2-fsk i { display: block; height: 22px; width: 46%; border-radius: 8px; }
+.d58.d2 .d2-fsk i:nth-child(3n + 2), .d58.d2 .d2-fsk i:nth-child(3n + 3) { height: 64px; width: 100%; border-radius: 12px; }
+@media (prefers-reduced-motion: reduce) {
+  .d58.d2 .d58-page[data-loading="1"] .d2-grid :is(.os-band, .d2-fwtop, .fv2-gsh), .d58.d2 .d2-fsk i { animation: none; }
+}

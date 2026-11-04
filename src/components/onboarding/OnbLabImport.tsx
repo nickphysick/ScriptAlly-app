@@ -21,6 +21,7 @@
  * reached no build at all. Nothing here writes: `onImport` records its result on
  * `window.__onbLab.result`, where lock V4 reads it.
  */
+import { armMentorIntro } from "../../lib/mentorIntro";
 import React, { useEffect, useState } from "react";
 import { QueryStatus } from "../../types";
 import { SmartImportResult } from "../../types/smartImport";
@@ -125,7 +126,9 @@ export const labCommit = (opts: { skip: number; none: boolean }) => async (resul
 };
 export const LAB_UID = "onb-lab";
 
-export const LabImporting: React.FC<{ done: boolean; loop: boolean }> = ({ done, loop }) => {
+export const LabImporting: React.FC<{ done: boolean; loop: boolean; intro?: boolean }> = ({ done, loop, intro }) => {
+  /* `intro=1`: as after a real commit, the hawk plays his sequence on this loading page */
+  useState(() => { if (intro) armMentorIntro(); return null; });
   const [complete, setComplete] = useState(done);
   useEffect(() => {
     if (!loop) return;

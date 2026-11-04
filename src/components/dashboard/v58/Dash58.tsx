@@ -186,6 +186,12 @@ const ImportNoticeRow: React.FC<{ notice: ImportNotice; onDismiss: () => void; o
   );
 };
 
+/** The feed column while the page loads (v1.1): plain shimmer blocks, a day heading then two entries,
+ *  repeated. No text, so it cannot say anything about data that has not arrived. */
+const FeedSkeleton: React.FC = () => (
+  <div className="d2-fsk" data-d2="feed-skeleton" aria-hidden="true">{Array.from({ length: 9 }, (_, i) => <i key={i} />)}</div>
+);
+
 export const Dash58: React.FC<Dash58Props> = ({
   loading: dataLoading, queries, agents: agentsIn, manuscripts, tasks, userTasks, activities, taskFlags, currentUser,
   activeManuscript, onNavigate, now: nowProp, versions = [], smartImportUsage = null,
@@ -656,7 +662,7 @@ export const Dash58: React.FC<Dash58Props> = ({
             </div>
             <div className="d2-right" data-d2="right">
               <div className="d2-feed" data-d2="feed">
-                {pre ? <EmptyFeed onExample={example ? undefined : openExample} /> : (
+                {loading ? <FeedSkeleton /> : pre ? <EmptyFeed onExample={example ? undefined : openExample} /> : (
                   <F1Feed loading={loading} activities={scopedActivities} queries={queries} agents={agents} manuscripts={manuscripts} userName={author} now={now}
                     under={reminderNode && firstQuery ? { queryId: firstQuery.id, node: reminderNode } : null} />
                 )}

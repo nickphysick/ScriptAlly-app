@@ -1,0 +1,13 @@
+Phase C red-before (4 Nov), 1440 x 900, against the dev line at be591e11 (the merge of main into the cl26 line, before Phase C):
+  C1     FAIL: 21+ visible text nodes behind the progress card ("Getting started", "Next up", "Active queries", "waiting on you", "have replied",
+         "weeks querying", "Founding writer", "How it works", "Tell us something", the tiers from "Egg" to "QueryHawk", the feed's empty state);
+         bands not shimmering on the Getting started sheet, Next up, Active queries and the founding card.
+  C2-C4  FAIL: no hawk on the loading page at any time.
+  C5     FAIL: no hawk on the loading page.
+  C6     PASS (a guard: an ordinary loading page has no hawk, before and after).
+Mutations on the Phase C build (each restored from a backup afterwards):
+  DashGhost portals the hawk to <body> (the first build's fault): C2-C4 FAIL, onTop false at rest (the set-up frame, z-index 9999, paints over him).
+  Dash2Hawk without its reduced-motion branch: C5 FAIL (early: intro on, 2 animations running, drawing 237px below rest; later: looking).
+Emulator (npm run e2e:emu -- tests/e2e/hawkRest.measure.ts):
+  HR1 PASS at 1440 (loaded [1302,675,134,225] = resting [1302,675,134,225]) and 1280 (loaded [1142,575,134,225] = resting [1142,575,134,225]).
+  HR_MUTATE=offset (the loading page's hawk moved 6px): HR1 FAIL at both sizes (resting x 1296 / 1136).

@@ -1,0 +1,174 @@
+[
+  {
+    "id": "C1",
+    "ok": true,
+    "read": {
+      "cards": 6,
+      "cardNames": [
+        "d2-gs",
+        "next",
+        "os-card.d60-card.d60-hoopcard",
+        "os-card.d60-card.d60-hoopcard",
+        "active",
+        "founding"
+      ],
+      "bandsShimmer": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "texts": [],
+      "imgs": 0,
+      "feedSkeleton": true,
+      "buttons": true
+    }
+  },
+  {
+    "id": "C2-C4",
+    "ok": true,
+    "read": {
+      "before": {
+        "look": false,
+        "intro": true,
+        "rest": 1,
+        "looking": 0,
+        "riseTop": 912,
+        "boxTop": 675,
+        "box": [
+          1302,
+          675,
+          134,
+          225
+        ],
+        "animations": 2,
+        "onTop": true
+      },
+      "mid": {
+        "look": false,
+        "intro": true,
+        "rest": 1,
+        "looking": 0,
+        "riseTop": 670.3,
+        "boxTop": 675,
+        "box": [
+          1302,
+          675,
+          134,
+          225
+        ],
+        "animations": 2,
+        "onTop": true
+      },
+      "rest": {
+        "look": false,
+        "intro": true,
+        "rest": 1,
+        "looking": 0,
+        "riseTop": 675,
+        "boxTop": 675,
+        "box": [
+          1302,
+          675,
+          134,
+          225
+        ],
+        "animations": 0,
+        "onTop": true
+      },
+      "look": {
+        "look": true,
+        "intro": true,
+        "rest": 0.1671,
+        "looking": 0.8329,
+        "riseTop": 675,
+        "boxTop": 675,
+        "box": [
+          1302,
+          675,
+          134,
+          225
+        ],
+        "animations": 0,
+        "onTop": true
+      },
+      "back": {
+        "look": false,
+        "intro": false,
+        "rest": 1,
+        "looking": 0,
+        "riseTop": 675,
+        "boxTop": 675,
+        "box": [
+          1302,
+          675,
+          134,
+          225
+        ],
+        "animations": 0,
+        "onTop": true
+      },
+      "end": {
+        "look": false,
+        "intro": false,
+        "rest": 1,
+        "looking": 0,
+        "riseTop": 675,
+        "boxTop": 675,
+        "box": [
+          1302,
+          675,
+          134,
+          225
+        ],
+        "animations": 0,
+        "onTop": true
+      }
+    }
+  },
+  {
+    "id": "C5",
+    "ok": true,
+    "read": {
+      "early": {
+        "look": false,
+        "intro": false,
+        "rest": 1,
+        "looking": 0,
+        "riseTop": 675,
+        "boxTop": 675,
+        "box": [
+          1302,
+          675,
+          134,
+          225
+        ],
+        "animations": 0,
+        "onTop": true
+      },
+      "later": {
+        "look": false,
+        "intro": false,
+        "rest": 1,
+        "looking": 0,
+        "riseTop": 675,
+        "boxTop": 675,
+        "box": [
+          1302,
+          675,
+          134,
+          225
+        ],
+        "animations": 0,
+        "onTop": true
+      }
+    }
+  },
+  {
+    "id": "C6",
+    "ok": true,
+    "read": null
+  }
+]

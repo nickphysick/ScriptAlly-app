@@ -9,8 +9,13 @@
 .d2-perch { position: fixed; right: 4px; bottom: 0; z-index: 40; pointer-events: none; }
 .d2-perch[data-look] { pointer-events: auto; }
 .d2-perch img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: bottom right; filter: drop-shadow(-4px 6px 10px rgba(28, 19, 15, 0.18)); transition: opacity 0.25s ease; user-select: none; }
+.d2-perch .d2-rise { position: absolute; inset: 0; }
 .d2-perch .d2-p2 { opacity: 0; }
 .d2-perch[data-look] .d2-p1 { opacity: 0; }
 .d2-perch[data-look] .d2-p2 { opacity: 1; }
+/* After an import (v1.1): his look during the sequence, a 160ms cross-fade on the shared canvas */
+.d2-perch[data-intro] img { transition-duration: .16s; transition-timing-function: linear; }
+.d2-perch[data-intro-look] .d2-p1 { opacity: 0; }
+.d2-perch[data-intro-look] .d2-p2 { opacity: 1; }
 @media (prefers-reduced-motion: reduce) { .d2-perch img { transition: none; } }
 @media (max-width: 767px) { .d2-perch { display: none; } }

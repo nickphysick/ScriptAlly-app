@@ -15,6 +15,7 @@
  * fork, the Import page's tiles); while the flow is `idle` it renders only its two file pickers,
  * which the host opens through the ref.
  */
+import { armMentorIntro, disarmMentorIntro } from "../../lib/mentorIntro";
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import type { DraftMeta } from "../../lib/importDraft";
 /* ⚠️ LOADED WHEN FIRST NEEDED: `lib/importDraft` brings Firebase with it, and this flow is mounted by suites and labs that
@@ -436,6 +437,7 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
     setManuscriptFailed(false);
     setImportComplete(false);
     setScreen("importing"); // the loader shows the instant Import is pressed
+    armMentorIntro(); // v1.1: the dashboard's hawk plays his one sequence on the load that follows
     try {
       // Create (or reuse) the manuscript from the held details — the single deferred write — then
       // attach this import's queries to it. Idempotent: a retry after a failed commit reuses the id.
@@ -445,6 +447,7 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
            shows that when it is the limit, and the plain sentence for anything else. */
         setManuscriptFailed(true);
         setScreen("review");
+        disarmMentorIntro();
         return;
       }
       // Run the commit and a 5s UX floor together. The floor never hides an error: if the commit
@@ -488,6 +491,7 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
     } catch (e) {
       console.error("Smart Import commit failed:", e);
       setCommitError("Something went wrong bringing your pipeline in — nothing is lost. Try again, or use the Import desk.");
+      disarmMentorIntro();
       setScreen("review");
     }
   };
