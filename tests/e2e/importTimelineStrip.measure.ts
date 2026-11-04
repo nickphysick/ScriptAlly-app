@@ -175,6 +175,21 @@ test.describe("import timeline strip", () => {
     await expect(row.getByText("Don't import")).toHaveCount(1);
   });
 
+  test("TS-R6 on a phone, Save stays inside the scroll area when the month grows", async ({ page }) => {
+    await toQueries(page, PHONE);
+    await card(page).locator('[data-step="sent"]').click();
+    const pop = card(page).locator('[data-strip="pop"]');
+    await pop.locator('[data-strip="date"]').fill("30/8"); // August 2026 has six weeks
+    await page.waitForTimeout(150);
+    const r = await pop.locator('[data-strip="save"]').evaluate((s) => {
+      let bottom = window.innerHeight;
+      for (let e = s.parentElement; e; e = e.parentElement) if (/auto|scroll/.test(getComputedStyle(e).overflowY)) { bottom = Math.min(bottom, e.getBoundingClientRect().bottom); break; }
+      return { save: s.getBoundingClientRect().bottom, bottom, rows: s.closest('[data-strip="pop"]')!.querySelectorAll(".o9-day").length };
+    });
+    expect(r.rows, "the calendar shows August's 31 days").toBe(31);
+    expect(r.save, "Save ends inside its scroll area").toBeLessThanOrEqual(r.bottom + 0.5);
+  });
+
   test("TS-SHOTS the report's screenshots", async ({ page }) => {
     test.skip(!process.env.TS_SHOTS, "set TS_SHOTS=1");
     mkdirSync(OUT, { recursive: true });
