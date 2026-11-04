@@ -129,6 +129,7 @@ import type { QcRow } from "../lib/qcSummary";
 import { nextLine } from "../lib/qcRowLines";
 import { QcPage151, Track151 } from "./queries/centre/QcPage151";
 import { QcFilterPanel151 } from "./queries/centre/QcFilterMenu140";
+import { QUIET_WEEKS_PATH, quickOfRow, quietWeeksOf, stampRows } from "../lib/queryState";
 import { DEFAULT_SORT_151, QC_FULL_SCREEN, nextCell, sort151, whoSections, type Section, type Sort151 } from "../lib/qc151";
 import { pillGroups, weekSummary } from "../lib/qc1511";
 import { actionSections, rowAct, statusKind } from "../lib/qc1512";
@@ -2589,6 +2590,8 @@ export const Queries: React.FC<{
      reaches the module; the condition is a build-time constant, so the hook order cannot vary. */
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const lhOverride = import.meta.env.MODE !== "production" ? useLivingCountOverride() : null;
+  /* v152 §1.4 — the quiet window, the writer's one setting for it (todoPrefs.queries.quietWeeks) */
+  const qcQuietWeeks = quietWeeksOf(currentUser);
   const qcRows = useMemo(
     /* ⚠️ THE MODE CHECK IS HERE, NOT ONLY INSIDE THE AID, SO THE BUNDLER CAN DROP IT. With the gate
        only in `qcReviewAid` the guard folded correctly (`num = () => 0`, provably inert) and the
@@ -2596,10 +2599,12 @@ export const Queries: React.FC<{
        A statically-replaced `import.meta.env.MODE` makes this branch dead code in a production
        build, the import unreachable, and the module absent from the bundle. Verified by grepping
        `dist/`, not by reading this line. */
-    () => buildQcRows(
+    /* v152 §1 — the six states, stamped on each row once (lib/queryState): the desktop list, Birds-eye and the card read
+       `qs`; every other reader of these rows keeps `whereItStands` and `court` */
+    () => stampRows(buildQcRows(
       import.meta.env.MODE === "production" ? (queries as Query[]) : padLiveQueries(queries as Query[], agents, Date.now()),
-      agents, activities, Date.now()),
-    [queries, agents, activities],
+      agents, activities, Date.now()), agents, { quietWeeks: qcQuietWeeks, nowMs: Date.now() }),
+    [queries, agents, activities, qcQuietWeeks],
   );
 
   /* ── THE ?status= FILTER (shell-rebuild pack, Phase 3) ──
@@ -3937,14 +3942,16 @@ export const Queries: React.FC<{
   /* v140 §D — the quick picks' counts, over the scoped rows */
   const qc140QuickN = {
     /* v141.1 — the "Your move" quick pick is the "With you" set */
-    you: qcScoped.filter((r) => whereItStands(r, qcNow138) === "you").length,
+    you: qcScoped.filter((r) => quickOfRow(r, () => whereItStands(r, qcNow138)) === "you").length,
     over: qcScoped.filter((r) => r.pastExpected).length,
     wait: qcScoped.filter((r) => waitingRow(r)).length,
     offers: qcScoped.filter((r) => r.status === QueryStatus.OFFER).length,
   };
   /* v141 — the four sets over the scoped rows (lib/qcSummary `whereItStands`): the hero card, the pinned band and the
      Filters menu's "Where it stands" all state these, and all three write the one `qcF138.where` */
-  const qcWhereN = whereCounts(qcScoped, qcNow138);
+  /* v152 §1.5 — the quick filters' counts: Your move = Offers + Materials requested + Nudge due (lib/queryState) */
+  const qcWhereN: Record<WhereKey, number> = { you: 0, agent: 0, quiet: 0, closed: 0 };
+  for (const r of qcScoped) qcWhereN[quickOfRow(r, () => whereItStands(r, qcNow138))] += 1;
   /* v141 §B/§E — the pinned band's figures, read by the hero card's Heard back too (one computation, one number) */
   const qcBandFig = bandFigures(qcScoped, qcNow138);
   /* v141 §B — a card row or a band part: set (or, pressed again, clear) the one "Where it stands" filter; from the
@@ -7753,9 +7760,10 @@ export const Queries: React.FC<{
               const now151 = qcNow138;
               const phrase151 = (r: QcRow) => nextLine(r, qcComing.get(r.id) ?? null, now151).phrase;
               const sorted151 = sort151(qcVisible, qcSort151, (r) => nextCell(r, phrase151(r), now151).label);
-              /* v151.1 §6 — on one quick filter, Who it's with has nothing left to group: one label row, no groups */
-              const sections151: Section<QcRow>[] = qcGroup === "attention" && qcF138.where === null ? whoSections(sorted151, now151)
-                : qcGroup === "none" || qcGroup === "attention" ? (sorted151.length ? [{ key: "all", label: "", rows: sorted151 }] : [])
+              /* v152 §1.5 — Who it's with is the six states, and under a quick filter its headers still show (this
+                 supersedes v151.1 §6's single label row) */
+              const sections151: Section<QcRow>[] = qcGroup === "attention" ? whoSections(sorted151, now151)
+                : qcGroup === "none" ? (sorted151.length ? [{ key: "all", label: "", rows: sorted151 }] : [])
                 /* v151.2 §3 — Next action has its own seven groups, most urgent first (lib/qc1512) */
                 : qcGroup === "action" ? actionSections(sorted151, now151)
                 : qcListGroups(sorted151, qcGroup, now151, qcPackageName).map((g) => ({
@@ -7774,12 +7782,13 @@ export const Queries: React.FC<{
               return (
                 <QcPage151
                   loading={showGridSkeleton}
-                  counts={showGridSkeleton ? null : { ms: qcLineTitle, sent: qcScoped.length, active: qcScoped.filter((r) => whereItStands(r, now151) !== "closed").length, heardPct: qcBandFig.heardPct }}
+                  counts={showGridSkeleton ? null : { ms: qcLineTitle, sent: qcScoped.length, active: qcScoped.filter((r) => quickOfRow(r, () => whereItStands(r, now151)) !== "closed").length, heardPct: qcBandFig.heardPct }}
                   summary={showGridSkeleton ? null : weekSummary(qcScoped, now151)}
                   view={qcView150} onView={pickView150}
                   onLog={() => onNavigate?.("queries", "Log a query")}
                   onRecord={() => onNavigate?.("queries", "Record a response")}
                   logDisabled={creating} logRef={logTriggerRef}
+                  quietWeeks={qcQuietWeeks} onQuietWeeks={(w) => { void updateUserPaths({ [QUIET_WEEKS_PATH]: w }); }}
                   tabCounts={showGridSkeleton ? null : qcWhereN} total={qcScoped.length} where={qcF138.where}
                   onWhere={(k) => setQcF138((f) => ({ ...f, where: k }))}
                   showing={qcVisible.length}
@@ -7805,7 +7814,7 @@ export const Queries: React.FC<{
                   onAct={(id, mode) => {
                     if (isPracticeId(id)) { openPip(); return; }
                     /* v151.2 — the row's one action names its journey (lib/qc1512 `rowAct`): a gone-quiet row's is Nudge */
-                    if (mode && DRAWER_LIVE[mode]) { stepRow({ mode, queryId: id }); return; }
+                    if (mode && DRAWER_LIVE[mode]) { stepRow({ mode, queryId: id, ...(mode === "close" ? { preset: { closeWhy: "noreply" as const } } : {}) }); return; }
                     const r = qcById.get(id);
                     const req = r ? trayOpen(qcComing.get(id)?.bucket ?? null, r) : null;
                     if (req) stepRow(req); else onOpenQuery?.(id);
@@ -7821,7 +7830,7 @@ export const Queries: React.FC<{
                       onOpen={(id) => { cardSetRef.current = qcBeOrder; onOpenQuery?.(id); }}
                       onAct={(id, mode) => {
                         const m = mode as DrawerMode | undefined;
-                        if (m && DRAWER_LIVE[m]) { stepRow({ mode: m, queryId: id }); return; }
+                        if (m && DRAWER_LIVE[m]) { stepRow({ mode: m, queryId: id, ...(m === "close" ? { preset: { closeWhy: "noreply" as const } } : {}) }); return; }
                         const r = qcById.get(id); const req = r ? trayOpen(null, r) : null; if (req) stepRow(req); else onOpenQuery?.(id);
                       }} />
                   ) : null}

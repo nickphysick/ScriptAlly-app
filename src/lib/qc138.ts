@@ -17,6 +17,7 @@
 import { QueryStatus } from "../types";
 import { MONTHS_SHORT } from "./dates";
 import { whereItStands, type WhereKey } from "./qcSummary";
+import { quickOfRow } from "./queryState";
 
 export type GlyphKey = "q" | "pr" | "ps" | "fr" | "fs" | "of" | "cl";
 
@@ -193,9 +194,10 @@ export function matches138(r: Filterable, f: Qc138Filters, now: number, skip?: k
   if (skip !== "overYear" && f.overYear && !overAYear(r, now)) return false;
   /* v141.1 — the "Your move" quick pick IS the "With you" set (the nudge window, lib/nudgeWindow), so the two can never
      disagree; `isYourMoveRow` stays for the Contact list and the "Who it's with" bands, which this pack leaves alone */
-  if (skip !== "you" && f.you && whereItStands(r, now) !== "you") return false;
+  if (skip !== "you" && f.you && quickOfRow(r, () => whereItStands(r, now)) !== "you") return false;
   if (skip !== "waiting" && f.waiting && !(r.court === "agent" && !r.pastExpected)) return false;
-  if (skip !== "where" && f.where && whereItStands(r, now) !== f.where) return false;
+  /* v152 §1.5 — a row the page stamped filters by its six-state set (lib/queryState); others keep the old rule */
+  if (skip !== "where" && f.where && quickOfRow(r, () => whereItStands(r, now)) !== f.where) return false;
   return true;
 }
 

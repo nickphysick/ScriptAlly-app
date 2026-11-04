@@ -161,6 +161,10 @@
     position: sticky; top: var(--pin-cover, 0px); z-index: 4; padding: 14px 10px 13px; vertical-align: middle; background: var(--gh, #e3dbcf);
     font: 500 13px/1.2 var(--sp-serif) !important; color: var(--gh-lb);
   }
+  /* v152 §1.3 — Gone quiet: stone fading to white across the title cell only; the column labels sit on white, and a
+     1px hairline keeps the edge. No dashed or dotted border anywhere. */
+  .qc1512-g[data-tone="quiet"] .qc1511-gh td { background: #fff; box-shadow: inset 0 -1px 0 #ece6de; }
+  .qc1512-g[data-tone="quiet"] .qc1511-gh td.qc1511-gt { background: var(--gh); }
   .qc1511-gh td:first-child { border-top-left-radius: 18px; padding-left: 16px; }
   .qc1511-gh td:last-child { border-top-right-radius: 18px; }
   .qc1512-g.is-shut .qc1511-gh td:first-child { border-bottom-left-radius: 18px; }
@@ -196,6 +200,8 @@
   .qc1511-nm b { display: block; font: 600 17px/24px var(--sp-serif) !important; color: var(--ink); white-space: nowrap; }
   .qc1512-tag { flex: none; display: inline-flex; align-items: center; height: 20px; padding: 0 9px; border-radius: 999px; font: 600 12px/1 var(--sp-serif) !important; white-space: nowrap; }
   .qc1512-tag--you { background: var(--navy); color: #fff; }
+  /* v152 §1.5 — Nudge due: light blue, ink text */
+  .qc1512-tag--nudge { background: #c5d0dd; color: var(--ink); }
   .qc1512-tag--quiet { background: transparent; color: #5b4f47; box-shadow: inset 0 0 0 1px #cfc5b7; font-weight: 500 !important; }
   /* the agency never widens the column: its box is the cell's, and it cuts with a title */
   .qc1511-agy {
@@ -354,4 +360,27 @@
 /* §5 the menus (portalled to <body>): the existing radio rows, 320 wide */
 @media (min-width: 768px) {
   .qc151-menu { min-width: 320px; }
+}
+
+/* ── v152 §1.4 — the quiet window setting: a disc in the banner and its pop-over (query-states-v2.html) ── */
+@media (min-width: 768px) {
+  .qc151 .qc152-set { position: relative; display: inline-flex; }
+  .qc151 .qc152-setbtn {
+    all: unset; box-sizing: border-box; cursor: pointer; display: inline-grid; place-items: center; width: 46px; height: 46px;
+    border-radius: 999px; color: #fff; box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.35);
+  }
+  .qc151 .qc152-setbtn:hover, .qc151 .qc152-setbtn[aria-expanded="true"] { box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.6); background: rgba(255, 255, 255, 0.08); }
+  .qc151 .qc152-setbtn:focus-visible { outline: 2px solid #f3c8ba; outline-offset: 2px; }
+  .qc151 .qc152-setpop {
+    position: absolute; z-index: 30; top: calc(100% + 10px); right: 0; box-sizing: border-box; width: max-content; max-width: 560px;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; padding: 14px 16px; border-radius: 12px;
+    background: #fff; color: var(--ink); box-shadow: inset 0 0 0 1px #e2d9cc, 0 18px 34px -12px rgba(28, 19, 15, 0.3);
+  }
+  .qc151 .qc152-setpop b { flex-basis: 100%; font: 400 17px/1.3 var(--sp-type) !important; color: var(--ink); }
+  .qc151 .qc152-setpop em { flex-basis: 100%; font: italic 400 13.5px/1.35 var(--sp-serif) !important; color: #8a8076; }
+  .qc151 .qc152-setaf { font: italic 400 13.5px/1.35 var(--sp-serif) !important; color: #8a8076; }
+  .qc151 .qc152-sg { display: inline-flex; gap: 2px; padding: 3px; border-radius: 11px; background: #f3efe8; }
+  .qc151 .qc152-sg button { all: unset; cursor: pointer; padding: 6px 11px; border-radius: 8px; font: 400 14.5px/1.2 var(--sp-serif) !important; color: #5b4f47; }
+  .qc151 .qc152-sg button.on { background: var(--navy); color: #fff; }
+  .qc151 .qc152-sg button:focus-visible { outline: 2px solid var(--navy); outline-offset: 1px; }
 }

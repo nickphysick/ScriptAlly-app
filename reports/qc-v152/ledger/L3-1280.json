@@ -1,0 +1,27 @@
+[
+ {
+  "where": "population: rows in all three of Your move's groups, and Gone quiet",
+  "ok": true,
+  "detail": "{\"offer\":3,\"materials\":15,\"nudge\":7,\"quiet\":39,\"tab\":25}"
+ },
+ {
+  "where": "the Your move count is Offers + Materials requested + Nudge due",
+  "ok": true,
+  "detail": "{\"offer\":3,\"materials\":15,\"nudge\":7,\"quiet\":39,\"tab\":25}"
+ },
+ {
+  "where": "filtered: only Offers, Materials requested and Nudge due",
+  "ok": true,
+  "detail": "[\"offer\",\"materials\",\"nudge\"]"
+ },
+ {
+  "where": "filtered: as many rows as the count said",
+  "ok": true,
+  "detail": "25 vs 25"
+ },
+ {
+  "where": "filtered: the group headers still show",
+  "ok": true,
+  "detail": "{\"groups\":[\"offer\",\"materials\",\"nudge\"],\"rows\":25,\"heads\":3}"
+ }
+]

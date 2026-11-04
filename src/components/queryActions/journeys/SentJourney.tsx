@@ -14,6 +14,7 @@
  * as a CHECK: a second partial to one agent is legitimate (a resend) and unusual, which is exactly
  * what a check is for.
  */
+import { STAGE_RESPONSE_WINDOWS } from "../../../lib/queryAmbient";
 import React, { useMemo, useState } from "react";
 import { saveSent } from "../../../lib/queryActions/stepSaves";
 import { useScriptAllyDb } from "../../../lib/db";
@@ -184,7 +185,9 @@ export function SentJourney({ req, today, children }: JourneyProps) {
   });
 
   /* ---------- reading window ---------- */
-  const wk = kind === "partial" ? [6, 8, 10] : [8, 12, 16];
+  /* v152 — the usual window is the house one for both (STAGE_RESPONSE_WINDOWS, 12 and 12), the same source as the
+     page's clock; the partial no longer opens on its own 8 */
+  const wk = [8, kind === "partial" ? STAGE_RESPONSE_WINDOWS.partial : STAGE_RESPONSE_WINDOWS.full, 16];
   const ex: Anchor[] = wk.map((w, i) => {
     const d = addDays(sent, w * 7);
     return { k: `w${i}`, label: i === 1 ? `Usual for a ${kind === "partial" ? "partial" : "full"} · ${w} wks` : `${w} wks`, d, sub: dm(d) };
