@@ -144,8 +144,28 @@ each image follows a "Page N" label, and you read the pages in that order, as on
   a note, in whatever order the writer used).
 - Ignore what isn't an entry: a title or heading (crossed-through or not), doodles, arrows to nowhere,
   page numbers, margin notes that don't belong to a line.
-- Transcribe names, agencies and dates EXACTLY as written. Dates stay VERBATIM in sentDateRaw
-  ("12/8", "3 Sept", "30/5/25") — the app parses them, day first, exactly as for a sheet.
+- Transcribe names, agencies and dates EXACTLY as written. Dates stay VERBATIM ("12/8", "3 Sept",
+  "30/5/25") — the app parses them, day first, exactly as for a sheet.
+
+DATES ON A HANDWRITTEN LINE — a handwritten list has no Date-sent column, so decide what each date
+is from what is written beside it:
+- The parts of a line are what the writer split it into, with dashes, slashes or commas
+  ("Name – Agency – date – status").
+- A date written beside a status word or an event IN THE SAME PART, with no separator between them
+  ("FULL!! 15/9", "partial 3/9", "3/9 partial!", "sent full 22/9", "offer 8 Oct"), is THAT EVENT's
+  date. Carry it as a timeline entry with its verbatim "rawDate" — NEVER as sentDateRaw.
+- A date in a part of its own is the sent date, whatever the next part says: sentDateRaw. So
+  "Cordelia Vane – Vane & Hart – 12/8", "Tomasz Mroz – 30/5 – nothing yet" and "Daniel Pennington –
+  Strand Literary – 2/6 – full req" all have their date as sentDateRaw (the last with status
+  "Full Requested" and no timeline entry).
+- A line whose ONLY date sits in a part of its own ALWAYS has that date as sentDateRaw — whatever
+  follows it (a request, an R&R, an offer, a no) and whether or not the line is crossed out.
+- A line that begins with an arrow, a dash or an indent and carries no new agent name ("-> sent
+  full 22/9") CONTINUES the entry above it: its events belong to that query, and it is never an
+  entry of its own. The query's "status" is then its latest event.
+- So "Kirsten Vale – Vale Agency – FULL!! 15/9" followed by "-> sent full 22/9" is ONE query: no
+  sentDateRaw, timeline Full Requested 15/9 then Full Sent 22/9, status "Full Sent".
+- Never give the same date as both sentDateRaw and a timeline event.
 
 EXTRA FIELDS — emit each ONLY when it applies (the same omit-empty rule as above):
 queries[] —
@@ -166,7 +186,9 @@ MORE REASON CODES — photos only, added to the list above; emit ONLY when they 
     your best reading in name/agency and the alternatives in the agent's "readings".
   - "illegible-agency": an agency is written but you can't make it out. Put any legible start in
     "agency" (e.g. "Price & P"), or leave it empty if none of it is legible.
-  - "crossed-out": the entry is struck through. Still give a best-guess "status" — "Rejected".
+  - "crossed-out": the line itself is struck through — a line drawn ACROSS the writing. Still give a
+    best-guess "status" — "Rejected". A ✗ or an x written after an entry is NEVER "crossed-out":
+    that is "mark-unclear" with markRaw "✗".
   - "mark-unclear": there's a symbol beside the entry other than a tick (✗, ?, !, a circle, an arrow)
     whose meaning isn't plain from the line. Put the symbol in "markRaw" and give a best-guess status.
 A TICK (✓) beside an entry is NOT flagged: read it as "Queried" unless the line says otherwise.

@@ -445,16 +445,25 @@ export function parseModel(result: SmartImportResult): { agents: ReviewAgent[]; 
       const kind = AGENT_PHOTO_CODES[c as string];
       if (agent && kind && !agent.reasons.some((r) => r.kind === kind)) agent.reasons.push({ kind, note: "", resolved: false, undoable: true });
     }
+    /* v1.1: ONE DATE IS NEVER SHOWN AS TWO EVENTS. When the sent date is also one of the query's
+       event dates, the read gave one written date twice: it stays on the event, the sent date is
+       unknown, and the no-date question below asks for it. (The assembler does the same for a fresh
+       read; this catches any result that reaches the review without it.) */
+    let sentDate = q.sentDate ?? null, sentDateRaw = q.sentDateRaw ?? null;
+    if (sentDate && timeline.some((t) => t.date === sentDate)) {
+      sentDate = null; sentDateRaw = null;
+      for (let k = reasons.length - 1; k >= 0; k--) if (SENT_DATE_CODES.has(reasons[k].code)) reasons.splice(k, 1);
+    }
     /* v9: A MISSING SENT DATE IS ASKED ABOUT, ON BOTH PATHS. Smart Import already flags its own
        ("no-date"); the template path passed a blank cell in silence, so the row arrived as ready
        and undated. The query still lands undated if the writer says they do not have the date. */
-    if (!q.sentDate && !reasons.some((r) => SENT_DATE_CODES.has(r.code))) reasons.push({ code: "no-date", resolved: false });
+    if (!sentDate && !reasons.some((r) => SENT_DATE_CODES.has(r.code))) reasons.push({ code: "no-date", resolved: false });
     return {
       id: `q${i}`,
       agentRef: q.agentRef,
       status,
-      sentDate: q.sentDate ?? null,
-      sentDateRaw: q.sentDateRaw ?? null,
+      sentDate,
+      sentDateRaw,
       ...(q.statusRaw ? { statusRaw: q.statusRaw } : {}),
       timeline,
       reasons,
@@ -467,6 +476,23 @@ export function parseModel(result: SmartImportResult): { agents: ReviewAgent[]; 
   });
 
   return { agents, queries };
+}
+
+// ── Two dates (v1.1): "Neither is when I sent it" ────────────────────────────────────────────────
+/**
+ * Neither of the two dates is when the query went. Both stay on their events (the timeline is kept
+ * whole), the sent date is cleared, the two-dates question is answered, and the query asks for its
+ * sent date the way an undated one does: type it, or "I don't have this date". The same on both
+ * paths.
+ */
+export function applyNeitherSent(queries: readonly ReviewQuery[], id: string): ReviewQuery[] {
+  return queries.map((q) => {
+    if (q.id !== id) return q;
+    const reasons = q.reasons.map((r) => (r.code === "two-dates" ? { ...r, resolved: true } : r));
+    const ask = reasons.find((r) => r.code === "no-date");
+    const next = ask ? reasons.map((r) => (r === ask ? { ...r, resolved: false } : r)) : [...reasons, { code: "no-date" as ReviewReasonCode, resolved: false }];
+    return { ...q, sentDate: null, sentDateRaw: null, reasons: next };
+  });
 }
 
 // ── Photos (smart-import-photos-v1): answering the new questions ─────────────────────────────────

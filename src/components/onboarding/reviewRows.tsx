@@ -251,8 +251,13 @@ export interface QueryReasonPanelProps {
   onPatch: (p: Partial<ReviewQuery>) => void;
   onResolveReason: (code: ReviewReasonCode, patch?: Partial<ReviewQuery>) => void;
   onSwapDates: () => void;
+  /** Two dates (v1.1): neither date is the sent date. Both stay on their events; the sent-date
+   *  question follows. */
+  onNeitherSent?: () => void;
 }
-export const QueryReasonPanel: React.FC<QueryReasonPanelProps> = ({ query, code, onPatch, onResolveReason, onSwapDates }) => {
+/** The two-dates card's third way out (v1.1), on both paths. */
+export const NEITHER_SENT = "Neither is when I sent it";
+export const QueryReasonPanel: React.FC<QueryReasonPanelProps> = ({ query, code, onPatch, onResolveReason, onSwapDates, onNeitherSent }) => {
   // Per-reason local date drafts (so typing doesn't commit until "Save"), and the wording dropdown.
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [serialEditing, setSerialEditing] = useState(false);
@@ -291,6 +296,7 @@ export const QueryReasonPanel: React.FC<QueryReasonPanelProps> = ({ query, code,
             {solid("Yes, that's right", () => onResolveReason("two-dates"))}
             {ev && quiet("Swap the dates", onSwapDates)}
             {quiet("It's just one date", () => onResolveReason("two-dates", { timeline: [] }))}
+            {onNeitherSent && quiet(NEITHER_SENT, onNeitherSent)}
           </div>
         </div>
       );

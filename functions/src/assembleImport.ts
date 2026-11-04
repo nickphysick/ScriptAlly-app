@@ -120,15 +120,24 @@ export function assembleResult(raw: any, opts: AssembleOpts = {}): any {
         return { type: String(t.type).trim(), date: r ? parseImportDate(r, fileDates, { anchor: sent.date }).date : null, raw: r };
       });
 
+    /* v1.1: ONE DATE IS NEVER TWO EVENTS. When the sent date is also an event's date, the model has
+       given one written date twice (Kirsten Vale's "FULL!! 15/9" came back as both). It stays on
+       the event; the sent date is unknown, and the review asks for it. */
+    let sentDate = sent.date, sentRaw = sentDateRaw;
+    if (sentDate && timeline.some((t) => t.date === sentDate)) {
+      sentDate = null; sentRaw = null;
+      reasons.delete("missing-day"); reasons.delete("serial-outlier"); reasons.delete("ambiguous-date");
+      reasons.add("no-date");
+    }
     // A note-derived event sitting alongside a real sent date is the two-dates case (e.g. Jamal:
     // sent 14 Mar + "requested full 20/3") — the user confirms which is which.
-    if (timeline.length && sent.date) reasons.add("two-dates");
+    if (timeline.length && sentDate) reasons.add("two-dates");
 
     const out: QueryOut = {
       agentRef: q?.agentRef,
       status: q?.status,
-      sentDate: sent.date,
-      sentDateRaw,
+      sentDate,
+      sentDateRaw: sentRaw,
       timeline,
       reasons: Array.from(reasons),
     };
