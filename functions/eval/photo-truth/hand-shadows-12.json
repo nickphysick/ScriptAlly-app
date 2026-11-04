@@ -1,0 +1,196 @@
+{
+  "id": "hand-shadows-12",
+  "style": "hand",
+  "font": "Shadows Into Light",
+  "pages": 1,
+  "entries": [
+    {
+      "name": "Bertie Marchetti",
+      "agency": "Achebe & Rowe",
+      "date": "10/1/25",
+      "said": "no reply",
+      "expect": "Queried",
+      "accept": [
+        "No Response"
+      ],
+      "page": 1,
+      "band": [
+        0.12153117179870605,
+        0.1749569320678711
+      ],
+      "line": "Bertie Marchetti – Achebe & Rowe – 10/1/25 – no reply"
+    },
+    {
+      "name": "Amara Lindqvist",
+      "agency": "Lowther Books",
+      "date": "1/3/26",
+      "said": "",
+      "expect": "Queried",
+      "mark": "✓",
+      "page": 1,
+      "band": [
+        0.16151922225952148,
+        0.2149449920654297
+      ],
+      "line": "Amara Lindqvist – Lowther Books – 1/3/26 ✓"
+    },
+    {
+      "name": "Marcus Inglis",
+      "agency": "Fairbairn Associates",
+      "date": "23 Feb",
+      "said": "queried",
+      "expect": "Rejected",
+      "crossed": true,
+      "accept": [
+        "No Response",
+        "Withdrawn"
+      ],
+      "page": 1,
+      "band": [
+        0.2015072822570801,
+        0.2549330520629883
+      ],
+      "line": "Marcus Inglis – Fairbairn Associates – 23 Feb – queried"
+    },
+    {
+      "name": "Priyanka Abara",
+      "agency": "Lowther Books",
+      "date": "14 Aug",
+      "said": "no reply",
+      "expect": "Queried",
+      "accept": [
+        "No Response"
+      ],
+      "page": 1,
+      "band": [
+        0.24149534225463867,
+        0.2949211120605469
+      ],
+      "line": "Priyanka Abara – Lowther Books – 14 Aug – no reply"
+    },
+    {
+      "name": "Daniel Vane",
+      "agency": "Greaves",
+      "date": "",
+      "said": "sent full",
+      "expect": "Full Sent",
+      "page": 1,
+      "band": [
+        0.28148340225219726,
+        0.33490917205810544
+      ],
+      "line": "Daniel Vane – Greaves – sent full"
+    },
+    {
+      "name": "Felix Brennan",
+      "agency": "Calloway Hunt",
+      "date": "11 Sept",
+      "said": "pass",
+      "expect": "Rejected",
+      "page": 1,
+      "band": [
+        0.3214714813232422,
+        0.37489723205566405
+      ],
+      "line": "Felix Brennan – Calloway Hunt – 11 Sept – pass"
+    },
+    {
+      "name": "Ottilie Castellano",
+      "agency": "Hale Agency",
+      "date": "22/8",
+      "said": "",
+      "expect": "Queried",
+      "illegibleAgency": {
+        "legible": 5
+      },
+      "page": 1,
+      "band": [
+        0.36145954132080077,
+        0.41488529205322267
+      ],
+      "line": "Ottilie Castellano – Hale Agency – 22/8"
+    },
+    {
+      "name": "Meredith Mróz",
+      "agency": "Thorne Literary",
+      "date": "6/6",
+      "said": "",
+      "expect": "Queried",
+      "mark": "✓",
+      "page": 1,
+      "band": [
+        0.4014476013183594,
+        0.4548733520507813
+      ],
+      "line": "Meredith Mróz – Thorne Literary – 6/6 ✓"
+    },
+    {
+      "name": "Meredith Lowther",
+      "agency": "Ashworth Agency",
+      "date": "26/2",
+      "said": "queried",
+      "expect": "Queried",
+      "mark": "!",
+      "accept": [
+        "Queried",
+        "Partial Requested",
+        "Partial Sent",
+        "Full Requested",
+        "Full Sent",
+        "Revise & Resubmit",
+        "Offer",
+        "Rejected",
+        "Withdrawn",
+        "No Response"
+      ],
+      "page": 1,
+      "band": [
+        0.441435661315918,
+        0.49486141204833983
+      ],
+      "line": "Meredith Lowther – Ashworth Agency – 26/2 – queried !"
+    },
+    {
+      "name": "Harriet Achebe",
+      "agency": "",
+      "date": "13/9/2026",
+      "said": "no reply",
+      "expect": "Queried",
+      "accept": [
+        "No Response"
+      ],
+      "page": 1,
+      "band": [
+        0.48142372131347655,
+        0.5348494720458984
+      ],
+      "line": "Harriet Achebe – 13/9/2026 – no reply"
+    },
+    {
+      "name": "Sophie Castellano",
+      "agency": "Marchetti Lit",
+      "date": "17/7",
+      "said": "sent full",
+      "expect": "Full Sent",
+      "page": 1,
+      "band": [
+        0.5214117813110352,
+        0.574837532043457
+      ],
+      "line": "Sophie Castellano – Marchetti Lit – 17/7 – sent full"
+    },
+    {
+      "name": "Jonah Drummond",
+      "agency": "Marchetti Lit",
+      "date": "26/7/25",
+      "said": "sent partial",
+      "expect": "Partial Sent",
+      "page": 1,
+      "band": [
+        0.5613998413085938,
+        0.6148255920410156
+      ],
+      "line": "Jonah Drummond – Marchetti Lit – 26/7/25 – sent partial"
+    }
+  ]
+}

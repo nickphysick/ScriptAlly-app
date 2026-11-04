@@ -1,0 +1,139 @@
+{
+  "id": "hand-caveat-short",
+  "style": "hand",
+  "font": "Caveat",
+  "pages": 1,
+  "entries": [
+    {
+      "name": "Callum Osei",
+      "agency": "Achebe & Rowe",
+      "date": "6/4/2026",
+      "said": "partial req",
+      "expect": "Partial Requested",
+      "page": 1,
+      "band": [
+        0.12153117179870605,
+        0.1749569320678711
+      ],
+      "line": "Callum Osei – Achebe & Rowe – 6/4/2026 – partial req"
+    },
+    {
+      "name": "Cordelia Tremaine",
+      "agency": "Achebe & Rowe",
+      "date": "2/7",
+      "said": "",
+      "expect": "Queried",
+      "mark": "✓",
+      "page": 1,
+      "band": [
+        0.16151922225952148,
+        0.2149449920654297
+      ],
+      "line": "Cordelia Tremaine – Achebe & Rowe – 2/7 ✓"
+    },
+    {
+      "name": "Daniel Pennington",
+      "agency": "Strand Literary",
+      "date": "2/6",
+      "said": "full req",
+      "expect": "Rejected",
+      "crossed": true,
+      "accept": [
+        "No Response",
+        "Withdrawn"
+      ],
+      "page": 1,
+      "band": [
+        0.2015072822570801,
+        0.2549330520629883
+      ],
+      "line": "Daniel Pennington – Strand Literary – 2/6 – full req"
+    },
+    {
+      "name": "Juno Whitlock",
+      "agency": "Ashworth Agency",
+      "date": "",
+      "said": "R&R",
+      "expect": "Revise & Resubmit",
+      "mark": "?",
+      "accept": [
+        "Queried",
+        "Partial Requested",
+        "Partial Sent",
+        "Full Requested",
+        "Full Sent",
+        "Revise & Resubmit",
+        "Offer",
+        "Rejected",
+        "Withdrawn",
+        "No Response"
+      ],
+      "page": 1,
+      "band": [
+        0.24149534225463867,
+        0.2949211120605469
+      ],
+      "line": "Juno Whitlock – Ashworth Agency – R&R ?"
+    },
+    {
+      "name": "Hannah Thorne",
+      "agency": "Greaves",
+      "date": "16/3",
+      "said": "",
+      "expect": "Queried",
+      "page": 1,
+      "band": [
+        0.28148340225219726,
+        0.33490917205810544
+      ],
+      "line": "Hannah Thorne – Greaves – 16/3"
+    },
+    {
+      "name": "Dev Ashworth",
+      "agency": "Huxley Grant",
+      "date": "18/3/26",
+      "said": "no reply",
+      "expect": "Queried",
+      "accept": [
+        "No Response"
+      ],
+      "page": 1,
+      "band": [
+        0.3214714813232422,
+        0.37489723205566405
+      ],
+      "line": "Dev Ashworth – Huxley Grant – 18/3/26 – no reply"
+    },
+    {
+      "name": "Marcus Vane",
+      "agency": "Huxley Grant",
+      "date": "22/2/26",
+      "said": "full req",
+      "expect": "Rejected",
+      "crossed": true,
+      "accept": [
+        "No Response",
+        "Withdrawn"
+      ],
+      "page": 1,
+      "band": [
+        0.36145954132080077,
+        0.41488529205322267
+      ],
+      "line": "Marcus Vane – Huxley Grant – 22/2/26 – full req"
+    },
+    {
+      "name": "Rhys Kowalski",
+      "agency": "Fairbairn Associates",
+      "date": "14/1/26",
+      "said": "",
+      "expect": "Queried",
+      "page": 1,
+      "band": [
+        0.4014476013183594,
+        0.4548733520507813
+      ],
+      "line": "Rhys Kowalski – Fairbairn Associates – 14/1/26"
+    }
+  ]
+}

@@ -1,0 +1,166 @@
+{
+  "id": "hand-caveat-1p",
+  "style": "hand",
+  "font": "Caveat",
+  "pages": 1,
+  "entries": [
+    {
+      "name": "Amara Brennan",
+      "agency": "Brennan & Moss",
+      "date": "23/5",
+      "said": "sent partial",
+      "expect": "Partial Sent",
+      "page": 1,
+      "band": [
+        0.16151922225952148,
+        0.2149449920654297
+      ],
+      "line": "Amara Brennan – Brennan & Moss – 23/5 – sent partial"
+    },
+    {
+      "name": "Gideon Merriman",
+      "agency": "Lowther Books",
+      "date": "23/4/2026",
+      "said": "full req",
+      "expect": "Full Requested",
+      "illegibleAgency": {
+        "legible": 5
+      },
+      "page": 1,
+      "band": [
+        0.2015072822570801,
+        0.2549330520629883
+      ],
+      "line": "Gideon Merriman – Lowther Books – 23/4/2026 – full req"
+    },
+    {
+      "name": "Kwame Achebe",
+      "agency": "Price & Partners",
+      "date": "11/4/2026",
+      "said": "sent",
+      "expect": "Rejected",
+      "crossed": true,
+      "accept": [
+        "No Response",
+        "Withdrawn"
+      ],
+      "page": 1,
+      "band": [
+        0.24149534225463867,
+        0.2949211120605469
+      ],
+      "line": "Kwame Achebe – Price & Partners – 11/4/2026 – sent"
+    },
+    {
+      "name": "Leo Kowalski",
+      "agency": "Fairbairn Associates",
+      "date": "23 Aug",
+      "said": "sent partial",
+      "expect": "Partial Sent",
+      "page": 1,
+      "band": [
+        0.28148340225219726,
+        0.33490917205810544
+      ],
+      "line": "Leo Kowalski – Fairbairn Associates – 23 Aug – sent partial"
+    },
+    {
+      "name": "Priyanka Merriman",
+      "agency": "Okafor Lit",
+      "date": "21/9",
+      "said": "",
+      "expect": "Queried",
+      "mark": "✓",
+      "page": 1,
+      "band": [
+        0.3214714813232422,
+        0.37489723205566405
+      ],
+      "line": "Priyanka Merriman – Okafor Lit – 21/9 ✓"
+    },
+    {
+      "name": "Leo Ferreira",
+      "agency": "Castellano Lit",
+      "date": "16/8",
+      "said": "queried",
+      "expect": "Queried",
+      "page": 1,
+      "band": [
+        0.36145954132080077,
+        0.41488529205322267
+      ],
+      "line": "Leo Ferreira – Castellano Lit – 16/8 – queried"
+    },
+    {
+      "name": "Wilfred Delacroix",
+      "agency": "",
+      "date": "3/8/26",
+      "said": "full req",
+      "expect": "Full Requested",
+      "page": 1,
+      "band": [
+        0.4014476013183594,
+        0.4548733520507813
+      ],
+      "line": "Wilfred Delacroix – 3/8/26 – full req"
+    },
+    {
+      "name": "Gideon Mróz",
+      "agency": "Huxley Grant",
+      "date": "3/6",
+      "said": "",
+      "expect": "Queried",
+      "mark": "✓",
+      "page": 1,
+      "band": [
+        0.441435661315918,
+        0.49486141204833983
+      ],
+      "line": "Gideon Mróz – Huxley Grant – 3/6 ✓"
+    },
+    {
+      "name": "Callum Thorne",
+      "agency": "Fairbairn Associates",
+      "date": "13/4",
+      "said": "R&R",
+      "expect": "Revise & Resubmit",
+      "mark": "✗",
+      "accept": [
+        "Queried",
+        "Partial Requested",
+        "Partial Sent",
+        "Full Requested",
+        "Full Sent",
+        "Revise & Resubmit",
+        "Offer",
+        "Rejected",
+        "Withdrawn",
+        "No Response"
+      ],
+      "page": 1,
+      "band": [
+        0.48142372131347655,
+        0.5348494720458984
+      ],
+      "line": "Callum Thorne – Fairbairn Associates – 13/4 – R&R ✗"
+    },
+    {
+      "name": "Stanley Drummond",
+      "agency": "Marchetti Lit",
+      "date": "15 Apr",
+      "said": "no reply",
+      "expect": "Rejected",
+      "accept": [
+        "No Response",
+        "Withdrawn"
+      ],
+      "crossed": true,
+      "page": 1,
+      "band": [
+        0.5214117813110352,
+        0.574837532043457
+      ],
+      "line": "Stanley Drummond – Marchetti Lit – 15 Apr – no reply"
+    }
+  ]
+}

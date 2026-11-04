@@ -1,0 +1,176 @@
+{
+  "id": "shot-sheet-12",
+  "style": "shot",
+  "font": "Arial",
+  "pages": 1,
+  "entries": [
+    {
+      "name": "Freya Inglis",
+      "agency": "Vane & Hart",
+      "date": "12/4",
+      "said": "no reply",
+      "expect": "Queried",
+      "accept": [
+        "No Response"
+      ],
+      "page": 1,
+      "band": [
+        0.1605,
+        0.2115
+      ],
+      "line": "Freya Inglis Vane & Hart 12/4 no reply"
+    },
+    {
+      "name": "Dev Delacroix",
+      "agency": "",
+      "date": "20/6/26",
+      "said": "pass",
+      "expect": "Rejected",
+      "page": 1,
+      "band": [
+        0.2115,
+        0.2625
+      ],
+      "line": "Dev Delacroix  20/6/26 pass"
+    },
+    {
+      "name": "Ottilie Okafor",
+      "agency": "Huxley Grant",
+      "date": "23/3/25",
+      "said": "pass",
+      "expect": "Rejected",
+      "page": 1,
+      "band": [
+        0.2625,
+        0.3135
+      ],
+      "line": "Ottilie Okafor Huxley Grant 23/3/25 pass"
+    },
+    {
+      "name": "Wilfred Nakamura",
+      "agency": "Tremaine Lit",
+      "date": "18/6",
+      "said": "no reply",
+      "expect": "Queried",
+      "accept": [
+        "No Response"
+      ],
+      "page": 1,
+      "band": [
+        0.3135,
+        0.3645
+      ],
+      "line": "Wilfred Nakamura Tremaine Lit 18/6 no reply"
+    },
+    {
+      "name": "Daniel Lindqvist",
+      "agency": "Marchetti Lit",
+      "date": "8/7/2026",
+      "said": "pass",
+      "expect": "Rejected",
+      "page": 1,
+      "band": [
+        0.3645,
+        0.4155
+      ],
+      "line": "Daniel Lindqvist Marchetti Lit 8/7/2026 pass"
+    },
+    {
+      "name": "Rafferty Delacroix",
+      "agency": "Inglis & Day",
+      "date": "9/4/26",
+      "said": "sent full",
+      "expect": "Full Sent",
+      "page": 1,
+      "band": [
+        0.4155,
+        0.4665
+      ],
+      "line": "Rafferty Delacroix Inglis & Day 9/4/26 sent full"
+    },
+    {
+      "name": "Hannah Inglis",
+      "agency": "Fairbairn Associates",
+      "date": "2/5/25",
+      "said": "",
+      "expect": "Queried",
+      "page": 1,
+      "band": [
+        0.4665,
+        0.5175
+      ],
+      "line": "Hannah Inglis Fairbairn Associates 2/5/25 "
+    },
+    {
+      "name": "Elspeth Abara",
+      "agency": "Castellano Lit",
+      "date": "11/2/25",
+      "said": "no reply",
+      "expect": "Queried",
+      "accept": [
+        "No Response"
+      ],
+      "page": 1,
+      "band": [
+        0.5175,
+        0.5685
+      ],
+      "line": "Elspeth Abara Castellano Lit 11/2/25 no reply"
+    },
+    {
+      "name": "Ottilie Ventris",
+      "agency": "Price & Partners",
+      "date": "22/4/25",
+      "said": "no reply",
+      "expect": "Queried",
+      "accept": [
+        "No Response"
+      ],
+      "page": 1,
+      "band": [
+        0.5685,
+        0.6195
+      ],
+      "line": "Ottilie Ventris Price & Partners 22/4/25 no reply"
+    },
+    {
+      "name": "Edmund Strand",
+      "agency": "Achebe & Rowe",
+      "date": "",
+      "said": "partial req",
+      "expect": "Partial Requested",
+      "page": 1,
+      "band": [
+        0.6195,
+        0.6705
+      ],
+      "line": "Edmund Strand Achebe & Rowe  partial req"
+    },
+    {
+      "name": "Jonah Delacroix",
+      "agency": "Strand Literary",
+      "date": "5/8/26",
+      "said": "sent",
+      "expect": "Queried",
+      "page": 1,
+      "band": [
+        0.6705,
+        0.7215
+      ],
+      "line": "Jonah Delacroix Strand Literary 5/8/26 sent"
+    },
+    {
+      "name": "Dev Lowther",
+      "agency": "",
+      "date": "9/2/2026",
+      "said": "partial req",
+      "expect": "Partial Requested",
+      "page": 1,
+      "band": [
+        0.7215,
+        0.7725
+      ],
+      "line": "Dev Lowther  9/2/2026 partial req"
+    }
+  ]
+}

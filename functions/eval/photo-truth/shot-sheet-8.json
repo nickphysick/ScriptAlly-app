@@ -1,0 +1,117 @@
+{
+  "id": "shot-sheet-8",
+  "style": "shot",
+  "font": "Arial",
+  "pages": 1,
+  "entries": [
+    {
+      "name": "Lottie Ferreira",
+      "agency": "",
+      "date": "13/8",
+      "said": "sent partial",
+      "expect": "Partial Sent",
+      "page": 1,
+      "band": [
+        0.1605,
+        0.2115
+      ],
+      "line": "Lottie Ferreira  13/8 sent partial"
+    },
+    {
+      "name": "Marcus Calloway",
+      "agency": "Marchetti Lit",
+      "date": "22 Mar",
+      "said": "R&R",
+      "expect": "Rejected",
+      "crossed": true,
+      "accept": [
+        "No Response",
+        "Withdrawn"
+      ],
+      "page": 1,
+      "band": [
+        0.2115,
+        0.2625
+      ],
+      "line": "Marcus Calloway Marchetti Lit 22 Mar R&R"
+    },
+    {
+      "name": "Anouk Thorne",
+      "agency": "Greaves",
+      "date": "3 Mar",
+      "said": "sent partial",
+      "expect": "Partial Sent",
+      "page": 1,
+      "band": [
+        0.2625,
+        0.3135
+      ],
+      "line": "Anouk Thorne Greaves 3 Mar sent partial"
+    },
+    {
+      "name": "Kirsten Ferreira",
+      "agency": "Brennan & Moss",
+      "date": "17/8/2026",
+      "said": "sent partial",
+      "expect": "Partial Sent",
+      "page": 1,
+      "band": [
+        0.3135,
+        0.3645
+      ],
+      "line": "Kirsten Ferreira Brennan & Moss 17/8/2026 sent partial"
+    },
+    {
+      "name": "Esme Lacey",
+      "agency": "Thorne Literary",
+      "date": "10 Sept",
+      "said": "sent full",
+      "expect": "Full Sent",
+      "page": 1,
+      "band": [
+        0.3645,
+        0.4155
+      ],
+      "line": "Esme Lacey Thorne Literary 10 Sept sent full"
+    },
+    {
+      "name": "Gideon Ashworth",
+      "agency": "Fairbairn Associates",
+      "date": "7 May",
+      "said": "sent",
+      "expect": "Queried",
+      "page": 1,
+      "band": [
+        0.4155,
+        0.4665
+      ],
+      "line": "Gideon Ashworth Fairbairn Associates 7 May sent"
+    },
+    {
+      "name": "Daniel Strand",
+      "agency": "Strand Literary",
+      "date": "17/8/26",
+      "said": "sent full",
+      "expect": "Full Sent",
+      "page": 1,
+      "band": [
+        0.4665,
+        0.5175
+      ],
+      "line": "Daniel Strand Strand Literary 17/8/26 sent full"
+    },
+    {
+      "name": "Meredith Hale",
+      "agency": "Okafor Lit",
+      "date": "18/5",
+      "said": "full req",
+      "expect": "Full Requested",
+      "page": 1,
+      "band": [
+        0.5175,
+        0.5685
+      ],
+      "line": "Meredith Hale Okafor Lit 18/5 full req"
+    }
+  ]
+}

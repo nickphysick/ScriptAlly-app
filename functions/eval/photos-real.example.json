@@ -1,0 +1,12 @@
+{
+  "_how": "Put each list of your own in functions/eval/fixtures/photos-real/<name>/ (gitignored): its photos as page-1.jpg, page-2.jpg… in reading order, and a truth.json shaped like this file (without these _ keys). Then run: npx tsx functions/eval/photoEval.mts --only 'real-*'. One entry per line of the list, in order. 'expect' is the status a correct read gives the line (Queried, Partial Requested, Partial Sent, Full Requested, Full Sent, Revise & Resubmit, Offer, Rejected, Withdrawn, No Response); 'accept' lists any others that are equally right. 'date' is written exactly as on the page, or \"\" for none. 'mark' is a symbol after the line (✓ ✗ ? !). 'band' is optional: the line's top and bottom as fractions of the page's height; without it, src isn't scored.",
+  "id": "my-notebook",
+  "style": "hand",
+  "font": "my handwriting",
+  "pages": 1,
+  "entries": [
+    { "name": "Cordelia Vane", "agency": "Vane & Hart", "date": "12/8", "said": "", "expect": "Queried", "mark": "✓", "page": 1, "line": "Cordelia Vane – Vane & Hart – 12/8 ✓" },
+    { "name": "Rhys Hale", "agency": "Hale Agency", "date": "8/8", "said": "", "expect": "Rejected", "accept": ["No Response", "Withdrawn"], "crossed": true, "page": 1, "band": [0.31, 0.36], "line": "Rhys Hale – Hale Agency – 8/8" },
+    { "name": "Imogen Price", "agency": "Price & Partners", "date": "19/8", "said": "", "expect": "Queried", "illegibleAgency": { "legible": 9 }, "page": 1, "line": "Imogen Price – Price & P.. – 19/8" }
+  ]
+}
