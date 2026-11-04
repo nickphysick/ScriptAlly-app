@@ -31,15 +31,15 @@
  },
  {
   "lock": "L5",
-  "where": "pk40-ready: the label shows it",
+  "where": "pk40-ready: the list row shows it",
   "ok": true,
   "detail": "Ready renamed"
  },
  {
   "lock": "L5",
-  "where": "pk40-ready (not sent): no padlock",
+  "where": "pk40-ready (not sent): no sent note, no padlock",
   "ok": true,
-  "detail": "{\"stage\":0,\"name\":0}"
+  "detail": "{\"note\":0,\"stage\":0,\"name\":0}"
  },
  {
   "lock": "L5",
@@ -73,26 +73,20 @@
  },
  {
   "lock": "L5",
-  "where": "pk40-std: the label shows it",
+  "where": "pk40-std: the list row shows it",
   "ok": true,
-  "detail": "Standard renamed"
+  "detail": "Standard renamed\nACTIVE"
  },
  {
   "lock": "L5",
-  "where": "pk40-std (sent): exactly one padlock, in the stage",
+  "where": "pk40-std (sent): the sent note says it is locked",
   "ok": true,
-  "detail": "{\"stage\":1,\"name\":0}"
+  "detail": "{\"note\":1,\"stage\":0,\"name\":0}"
  },
  {
   "lock": "L5",
-  "where": "pk40-std (sent): none beside the name",
+  "where": "pk40-std (sent): no padlock in the pill or beside the name",
   "ok": true,
-  "detail": "{\"stage\":1,\"name\":0}"
- },
- {
-  "lock": "L5",
-  "where": "pk40-std (sent): the padlock's words",
-  "ok": true,
-  "detail": "title"
+  "detail": "{\"note\":1,\"stage\":0,\"name\":0}"
  }
 ]

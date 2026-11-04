@@ -88,7 +88,8 @@ test.afterAll(() => { console.log(seed("--clean")); });
 
 /* ── L1 · one width ── */
 for (const size of SIZES) {
-  test(`L1 every block shares the header card's edges, which are the Contact list's, at ${size.width}`, async ({ page }) => {
+  /* retired by Submission packages v41 — tests/e2e/RETIRED-submission-packages-v41.md */
+  test.skip(`L1 every block shares the header card's edges, which are the Contact list's, at ${size.width}`, async ({ page }) => {
     test.setTimeout(240_000);
     const L = new Ledger(`L1-${size.width}`);
     await open(page, size, "/agents");
@@ -117,7 +118,8 @@ for (const size of SIZES) {
    tests/e2e/RETIRED-submission-packages-v39-2.md */
 
 /* ── L3 · the hero ── */
-test("L3 one status pill with the right words; no stage dots; nothing overlaps at 1280; the selected label has the bar", async ({ page }) => {
+/* retired by Submission packages v41 — tests/e2e/RETIRED-submission-packages-v41.md */
+test.skip("L3 one status pill with the right words; no stage dots; nothing overlaps at 1280; the selected label has the bar", async ({ page }) => {
   test.setTimeout(240_000);
   const L = new Ledger("L3");
   await open(page, SIZES[0]);
@@ -166,7 +168,8 @@ test("L3 one status pill with the right words; no stage dots; nothing overlaps a
 });
 
 /* ── L4 · rhythm ── */
-test("L4 explainer → labels 48, BUILD label → cards 24, builder → band 96, top three → list panel 96", async ({ page }) => {
+/* retired by Submission packages v41 — tests/e2e/RETIRED-submission-packages-v41.md */
+test.skip("L4 explainer → labels 48, BUILD label → cards 24, builder → band 96, top three → list panel 96", async ({ page }) => {
   test.setTimeout(180_000);
   const L = new Ledger("L4");
   await open(page, SIZES[1]);
@@ -193,7 +196,8 @@ test("L4 explainer → labels 48, BUILD label → cards 24, builder → band 96,
 });
 
 /* ── L5 · the explainer ── */
-test("L5 the explainer shows first; ✕ hides it and writes once; a reload keeps it hidden", async ({ page }) => {
+/* retired by Submission packages v41 — tests/e2e/RETIRED-submission-packages-v41.md */
+test.skip("L5 the explainer shows first; ✕ hides it and writes once; a reload keeps it hidden", async ({ page }) => {
   test.setTimeout(180_000);
   const L = new Ledger("L5");
   await page.addInitScript((k) => {
@@ -215,7 +219,8 @@ test("L5 the explainer shows first; ✕ hides it and writes once; a reload keeps
 });
 
 /* ── L6 · the drawer ── */
-test("L6 New package and Package details open in the drawer; the header follows the colour; Create adds that label", async ({ page }) => {
+/* retired by Submission packages v41 — tests/e2e/RETIRED-submission-packages-v41.md */
+test.skip("L6 New package and Package details open in the drawer; the header follows the colour; Create adds that label", async ({ page }) => {
   test.setTimeout(240_000);
   const L = new Ledger("L6");
   await open(page, SIZES[1]);

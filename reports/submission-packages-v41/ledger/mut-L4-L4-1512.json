@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "L4-1512",
+  "where": "the row is the stored active package",
+  "ok": true,
+  "detail": "pk40-std / pk40-std"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "names the package",
+  "ok": false,
+  "detail": "Somebody else / Standard"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "its version",
+  "ok": true,
+  "detail": "1Fast-paced opening / Fast-paced opening"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "its letter",
+  "ok": true,
+  "detail": "Hook-first / Hook-first"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "its synopsis",
+  "ok": true,
+  "detail": "One-page / One-page shown true"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "Change lists the Ready and Out-with-agents packages",
+  "ok": true,
+  "detail": "[\"pk40-ready\",\"pk40-std2\",\"pk40-std\"]"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "the row updates",
+  "ok": true,
+  "detail": "pk40-ready"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "…and the manuscript's active package is written",
+  "ok": true,
+  "detail": "pk40-ready"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "the writer's own toast",
+  "ok": true,
+  "detail": "no toast"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "no active package: “Choose one →”",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "…and the sentence",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "no packages: the row is absent",
+  "ok": true,
+  "detail": "present"
+ }
+]

@@ -32,7 +32,8 @@ const seed = (...args: string[]) => execFileSync("node", ["tests/e2e/seedPk40.mj
 /* the fixture's letter A (seedPk40.mjs): its stored text and its summary differ on purpose */
 const LETTER_A_TEXT_START = "Murphy has twelve hours to get his father";
 const LETTER_A_SUMMARY = "Names The Trees, Small Pleasures";
-const RING = "rgb(29, 75, 99) 0px 0px 0px 2px";
+/* v41: the linking outline is the ref's navy on #eaf0f5 (v39.3 drew Harbour on #eef4f7) — re-pointed */
+const RING = "rgb(45, 58, 80) 0px 0px 0px 2px";
 
 type Row = { lock: string; where: string; ok: boolean; detail: string };
 class Ledger {
@@ -55,7 +56,7 @@ const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   /* L11: the body quotes the summary instead of the text */
   L11: { js: `new MutationObserver(() => { const o = document.querySelector('[data-pk393="opening"]'); if (o && o.textContent !== ${JSON.stringify(LETTER_A_SUMMARY)}) o.textContent = ${JSON.stringify(LETTER_A_SUMMARY)}; }).observe(document, { subtree: true, childList: true, characterData: true });` },
   /* L12: the whole mail card lights up for every step */
-  L12: { css: `[data-pk393="preview"]:not([data-hov=""]) [data-pk393-part] { background: #eef4f7 !important; box-shadow: 0 0 0 2px #1d4b63 !important; }` },
+  L12: { css: `[data-pk393="preview"]:not([data-hov=""]) [data-pk393-part] { background: #eaf0f5 !important; box-shadow: 0 0 0 2px #2d3a50 !important; }` },
   /* L13: the primary is never disabled */
   L13: { js: `new MutationObserver(() => { const b = document.querySelector('[data-pk393="primary"]'); if (b && b.disabled) b.disabled = false; }).observe(document, { subtree: true, childList: true, attributes: true });` },
   /* L13s: a sent package's step heads open again (they become buttons) */
@@ -70,11 +71,12 @@ async function open(page: Page, pkg: string) {
   if (m?.js) await page.addInitScript(m.js);
   if (m?.css) await page.addInitScript((css) => document.addEventListener("DOMContentLoaded", () => { const st = document.createElement("style"); st.textContent = css; document.head.appendChild(st); }), m.css);
   await openRoute(page, "/queries/packages", SIZE);
-  await page.locator('[data-pk39="labels"]').first().waitFor({ state: "visible", timeout: 30_000 });
-  await page.locator(`[data-pk26="page"] [data-pk39="labels"] [data-pkid="${pkg}"]`).first().click();
+  /* v41: the labels row is retired — a package opens from its row in the list (re-pointed; the law is unchanged) */
+  await page.locator('[data-pk41="list"]').first().waitFor({ state: "visible", timeout: 30_000 });
+  await page.locator(`[data-pk26="page"] [data-pk41-row="${pkg}"]`).first().click();
   await page.waitForTimeout(900);
   /* bring the builder into view: hover and clicks then land on the steps */
-  await page.evaluate(() => { const sc = [...document.querySelectorAll(".wpg-scroll")].find((x) => x.querySelector('[data-pk26="page"]')) as HTMLElement; const k = sc?.querySelector('[data-pk39="kicker"]'); if (sc && k) sc.scrollTop += k.getBoundingClientRect().top - sc.getBoundingClientRect().top - 12; });
+  await page.evaluate(() => { const sc = [...document.querySelectorAll(".wpg-scroll")].find((x) => x.querySelector('[data-pk26="page"]')) as HTMLElement; const k = sc?.querySelector('[data-pk41="builder-frame"]'); if (sc && k) sc.scrollTop += k.getBoundingClientRect().top - sc.getBoundingClientRect().top - 12; });
   await page.waitForTimeout(400);
 }
 const pg = `[data-pk26="page"]`;
@@ -172,12 +174,12 @@ test("L12 hovering each step outlines exactly its part of the preview", async ({
     const r = await page.evaluate((p) => [...document.querySelectorAll(`${p} [data-pk393-part]`)].map((e) => {
       const cs = getComputedStyle(e); return { part: (e as HTMLElement).dataset.pk393Part, sh: cs.boxShadow, bg: cs.backgroundColor };
     }), pg);
-    const lit = r.filter((x) => x.sh.includes("rgb(29, 75, 99) 0px 0px 0px 2px"));
+    const lit = r.filter((x) => x.sh.includes(RING));
     L.check(`${k}: its parts are on the page`, r.some((x) => x.part === k), JSON.stringify(r.map((x) => x.part)));
-    L.check(`${k}: exactly its part is outlined (2px Harbour on #eef4f7)`, lit.length > 0 && lit.every((x) => x.part === k && x.bg === "rgb(238, 244, 247)") && r.filter((x) => x.part === k).every((x) => x.sh.includes(RING)), JSON.stringify(lit));
+    L.check(`${k}: exactly its part is outlined (2px navy on #eaf0f5)`, lit.length > 0 && lit.every((x) => x.part === k && x.bg === "rgb(234, 240, 245)") && r.filter((x) => x.part === k).every((x) => x.sh.includes(RING)), JSON.stringify(lit));
   }
   await page.mouse.move(2, 2); await page.waitForTimeout(250);
-  const none = await page.evaluate((p) => [...document.querySelectorAll(`${p} [data-pk393-part]`)].filter((e) => getComputedStyle(e).boxShadow.includes("rgb(29, 75, 99) 0px 0px 0px 2px")).length, pg);
+  const none = await page.evaluate((p) => [...document.querySelectorAll(`${p} [data-pk393-part]`)].filter((e) => getComputedStyle(e).boxShadow.includes("rgb(45, 58, 80) 0px 0px 0px 2px")).length, pg);
   L.check("with no step hovered, nothing is outlined", none === 0, String(none));
   L.done(9);
 });

@@ -28,13 +28,18 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 import { usePk26Model } from "./packages/v26/usePk26Model";
 import { Pk26Hero } from "./packages/v26/Pk26Header";
-import { Pk39HowItWorks } from "./packages/v26/Pk39HowItWorks";
-import { Pk39Header } from "./packages/v26/Pk39Header";
-import { Pk39Tip } from "./packages/v26/Pk39Tip";
+import { Pk41HowItWorks } from "./packages/v41/Pk41HowItWorks";
+import { Pk41Hawk } from "./packages/v41/Pk41Hawk";
 import { Pk26Builder, type LibTab } from "./packages/v26/Pk26Builder";
-import { Pk39Labels } from "./packages/v26/Pk39Labels";
+import { Pk41Banner } from "./packages/v41/Pk41Banner";
+import { Pk41Header } from "./packages/v41/Pk41Header";
+import { Pk41Batch } from "./packages/v41/Pk41Batch";
+import { Pk41List } from "./packages/v41/Pk41List";
+import { useScriptAllyDb } from "../lib/db";
+import { packagesViaFounding } from "../lib/entitlements";
+import { FOUNDING_NOTE_PATH, foundingNoteHidden } from "../lib/packagesV41";
 import { Pk38Drawer } from "./packages/v26/Pk38Drawer";
-import { Pk38Results } from "./packages/v26/Pk38Results";
+import { Pk41Results } from "./packages/v41/Pk41Results";
 import { libTabFromParam } from "../lib/packagesV38";
 import { Pk26Drawer, type DrawerView } from "./packages/v26/Pk26Drawer";
 import { Pk26Dialog, type DialogView } from "./packages/v26/Pk26Dialog";
@@ -48,12 +53,18 @@ import "./packages/v26/pk391.generated.css";
 import "./packages/v26/pk391.css";
 import "./packages/v26/pk392.css";
 import "./packages/v26/pk393.css";
+import "./packages/v41/pk41.css";
 
 export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab: string, sub?: string) => void }> = ({ active: routeActive = true }) => {
   const model = usePk26Model();
   const { activeMs, live, active, msId, msPkgs, collectionsReady, letters, synopses, versionRows, comps } = model;
   const location = useLocation();
   const navigate = useNavigate();
+  /* v41 B: the founding writer strip — founding writers only, until dismissed (one leaf on the user) */
+  const { currentUser, updateUserPaths } = useScriptAllyDb();
+  const founding = packagesViaFounding(currentUser);
+  const showFounding = founding && !foundingNoteHidden(currentUser);
+  const setFoundingHidden = (hidden: boolean) => { void updateUserPaths({ [FOUNDING_NOTE_PATH]: hidden }); };
 
   const [curId, setCurId] = useState<string | null>(null);
   const [drawer, setDrawer] = useState<DrawerView | null>(null);
@@ -114,31 +125,38 @@ export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab:
   const copy = (p: (typeof msPkgs)[number]) => { setPkdId(null); setDialog({ m: "new", copyOf: p.id }); };
   /* "Edit in the builder": load it, close the drawer, scroll to the builder */
   const editIn = (p: (typeof msPkgs)[number]) => { setPkdId(null); setPending({ pkg: p.id, scroll: true }); };
+  /* v41: a row's or the batch row's "Open →" loads that package into the builder below and brings the builder into view */
+  const openInBuilder = (id: string) => { setCurId(id); setPending({ pkg: id, scroll: true }); };
   const openNewMaterial = (k: "let" | "syn" | "ver") => setDrawer(k === "ver" ? { m: "newver", parentId: null } : { m: "newmat", kind: k });
 
   return (
     <WorkspacePageGrid className="pk39-wpg" scrollLabel="Submission packages" masthead={null}>
-      <div ref={rootRef} className={`p6${empty ? " p6-new" : ""}`} data-pk26="page">
+      {showFounding ? <Pk41Banner onDismiss={() => setFoundingHidden(true)} /> : null}
+      {/* v41 Phase 1: the page is the Dashboard v2 / Contact list language — no header card, explainer, raised panel or
+          label tiles (each is replaced by a v41 part, below) */}
+      <div ref={rootRef} className={`p6 p41${empty ? " p6-new" : ""}`} data-pk26="page" data-pk41="page">
         {empty ? <Pk26Hero onBuild={() => part("builder")?.scrollIntoView({ block: "start", behavior: "smooth" })} onHow={() => setHow(true)} />
-          : <Pk39Header title={activeMs?.title ?? null} onNew={() => setDialog({ m: "new" })} onHow={() => setHow(true)} />}
-        {/* v39.1 G: the one-line explainer, above Your packages; never on the brand-new page */}
-        {empty || !collectionsReady ? null : <Pk39Tip onHow={() => setHow(true)} />}
-        {/* v39.2 B: Your packages and the builder are one raised panel (dressed only on the populated page) */}
-        <section className="p9-pkc" aria-label="Your packages and the builder" data-pk392="panel">
-        <Pk39Labels model={model} currentId={current?.id ?? null} showRetired={showRetired} onShowRetired={setShowRetired}
-          onPick={(p) => setCurId(p.id)} onOpenRetired={(p) => setPkdId(p.id)} onNew={() => setDialog({ m: "new" })} />
+          : <Pk41Header title={activeMs?.title ?? null} onNew={() => setDialog({ m: "new" })} onHow={() => setHow(true)} />}
+        {/* v41 D–E: the current batch row and the package list (one card under a navy index bar); not on the brand-new page */}
+        {empty ? null : <>
+          <Pk41Batch model={model} onOpen={(p) => openInBuilder(p.id)} />
+          <Pk41List model={model} currentId={current?.id ?? null} showRetired={showRetired} onShowRetired={setShowRetired}
+            onOpen={(p) => openInBuilder(p.id)} onOpenRetired={(p) => setPkdId(p.id)} onNew={() => setDialog({ m: "new" })} />
+        </>}
         <Pk26Builder model={model} retired={retired} current={current} onSelect={setCurId} onFigures={(p) => setPkdId(p.id)} askStep={askStep}
             onNewPackage={() => setDialog({ m: "new" })} onDuplicate={copy} onEditPackage={(p, focus) => setDialog({ m: "edit", id: p.id, ...(focus ? { focus } : {}) })}
             onOpenMaterial={(k, id) => setDrawer(k === "ext" ? { m: "ext", id } : { m: "mat", kind: k, id })}
             onNewMaterial={openNewMaterial} onOpenVersions={goVersions} onOpenComps={goComps} />
-        </section>
-        <Pk38Results model={model} onOpenPkg={(p) => setPkdId(p.id)} onOpenMaterial={(k, id) => setDrawer({ m: "mat", kind: k, id })}
+        <Pk41Results model={model} onOpenPkg={(p) => setPkdId(p.id)} onOpenMaterial={(k, id) => setDrawer({ m: "mat", kind: k, id })}
           onOpenVersions={goVersions} onSeeQueries={goQueries} onAnalytics={goAnalytics} />
       </div>
       <Pk26Drawer model={model} view={routeActive ? drawer : null} go={setDrawer} onSeeQueries={goQueries} onOpenComps={goComps} />
       <Pk26Dialog model={model} view={routeActive ? dialog : null} onClose={() => setDialog(null)} onCreated={(id) => setPending({ pkg: id, scroll: true })} />
       <Pk38Drawer model={model} p={routeActive ? pkdPkg : null} onClose={() => setPkdId(null)} onCopy={copy} onEdit={editIn} onSeeQueries={goQueries} />
-      <Pk39HowItWorks open={routeActive && how} onClose={() => setHow(false)} />
+      <Pk41HowItWorks open={routeActive && how} onClose={() => setHow(false)}
+        onShowFounding={founding && foundingNoteHidden(currentUser) ? () => setFoundingHidden(false) : undefined} />
+      {/* v41 G: the Archivist, pinned bottom-right while this page is on screen (portalled; desktop only, by CSS) */}
+      <Pk41Hawk on={routeActive && !empty} />
     </WorkspacePageGrid>
   );
 };

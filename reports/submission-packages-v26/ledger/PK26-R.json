@@ -19,8 +19,8 @@
  },
  {
   "lock": "PK26-R",
-  "where": "its label is the selected one",
+  "where": "its row is the open one",
   "ok": true,
-  "detail": "Sent one"
+  "detail": "pk26-pkg-sent"
  }
 ]

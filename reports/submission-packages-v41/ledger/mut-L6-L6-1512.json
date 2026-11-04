@@ -1,0 +1,170 @@
+[
+ {
+  "lock": "L6-1512",
+  "where": "builder: present",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "builder: a 7 ±1 white rim",
+  "ok": false,
+  "detail": "0,0,0,0 rgb(255, 255, 255)"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "builder: a 1px rgb(227,213,201) frame",
+  "ok": true,
+  "detail": "1px rgb(227, 213, 201)"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "builder: its band",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) (want rgb(45, 58, 80))"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "totals: present",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "totals: a 7 ±1 white rim",
+  "ok": false,
+  "detail": "0,0,0,0 rgb(255, 255, 255)"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "totals: a 1px rgb(227,213,201) frame",
+  "ok": true,
+  "detail": "1px rgb(227, 213, 201)"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "totals: its band",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) (want rgb(45, 58, 80))"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "best: present",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "best: a 7 ±1 white rim",
+  "ok": false,
+  "detail": "0,0,0,0 rgb(255, 255, 255)"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "best: a 1px rgb(227,213,201) frame",
+  "ok": true,
+  "detail": "1px rgb(227, 213, 201)"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "best: its band",
+  "ok": false,
+  "detail": "rgb(255, 255, 255) (want rgb(244, 230, 214))"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "most: present",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "most: a 7 ±1 white rim",
+  "ok": false,
+  "detail": "0,0,0,0 rgb(255, 255, 255)"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "most: a 1px rgb(227,213,201) frame",
+  "ok": true,
+  "detail": "1px rgb(227, 213, 201)"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "most: its band",
+  "ok": true,
+  "detail": "rgb(226, 230, 224) (want rgb(226, 230, 224))"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "prove: present",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "prove: a 7 ±1 white rim",
+  "ok": false,
+  "detail": "0,0,0,0 rgb(255, 255, 255)"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "prove: a 1px rgb(227,213,201) frame",
+  "ok": true,
+  "detail": "1px rgb(227, 213, 201)"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "prove: its band",
+  "ok": true,
+  "detail": "rgb(235, 231, 225) (want rgb(235, 231, 225))"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "tpk: present",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "tpk: a 7 ±1 white rim",
+  "ok": false,
+  "detail": "0,0,0,0 rgb(255, 255, 255)"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "tpk: a 1px rgb(227,213,201) frame",
+  "ok": true,
+  "detail": "1px rgb(227, 213, 201)"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "tpk: its band",
+  "ok": true,
+  "detail": "rgb(235, 231, 225) (want rgb(235, 231, 225))"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "tpc: present",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "tpc: a 7 ±1 white rim",
+  "ok": false,
+  "detail": "0,0,0,0 rgb(255, 255, 255)"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "tpc: a 1px rgb(227,213,201) frame",
+  "ok": true,
+  "detail": "1px rgb(227, 213, 201)"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "tpc: its band",
+  "ok": true,
+  "detail": "rgb(235, 231, 225) (want rgb(235, 231, 225))"
+ }
+]

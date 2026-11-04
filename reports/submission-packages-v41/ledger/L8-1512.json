@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "L8-1512",
+  "where": "present",
+  "ok": true,
+  "detail": "absent"
+ },
+ {
+  "lock": "L8-1512",
+  "where": "fixed",
+  "ok": true,
+  "detail": "fixed"
+ },
+ {
+  "lock": "L8-1512",
+  "where": "decorative",
+  "ok": true,
+  "detail": "true none"
+ },
+ {
+  "lock": "L8-1512",
+  "where": "bottom = the viewport's ±1",
+  "ok": true,
+  "detail": "982 / 982"
+ },
+ {
+  "lock": "L8-1512",
+  "where": "212 ±2 tall",
+  "ok": true,
+  "detail": "212"
+ },
+ {
+  "lock": "L8-1512",
+  "where": "clear of the content column",
+  "ok": true,
+  "detail": "left 1354.484375 / content right 1354"
+ },
+ {
+  "lock": "L8-1512",
+  "where": "overlaps no element in the content column",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L8-1512",
+  "where": "after scrolling 600: bottom = the viewport's ±1",
+  "ok": true,
+  "detail": "982 / 982"
+ },
+ {
+  "lock": "L8-1512",
+  "where": "after scrolling 600: overlaps nothing",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L8-1512",
+  "where": "absent at 390 wide",
+  "ok": true,
+  "detail": "false"
+ }
+]

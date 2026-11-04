@@ -192,13 +192,15 @@ const Header: React.FC<Pk393Props & { locked: boolean; out: boolean; sent: numbe
         <Pic ic={iconOf(p)} cls="p9-pic" />
       </button>
       <div className="p93-bh-t">
-        <h3>{draft ? <span className="p9-po-nm p9-locked">{p.packageName}</span> : <NameInPlace model={model} p={p} />}
-          {isActive && !draft ? <em className="p9-po-act">Active</em> : null}
-          {!draft && !isActive && canMakeActive(p, model.active?.id) ? <button type="button" className="p93-mk" onClick={() => void model.makeActive(p)}>Make active</button> : null}
-        </h3>
+        <h3>{draft ? <span className="p9-po-nm p9-locked">{p.packageName}</span> : <NameInPlace model={model} p={p} />}</h3>
         {p.note ? <small title={p.note}>{p.note}</small>
           : draft ? <small>{p.note}</small> : <small><button type="button" className="p93-addnote" onClick={() => onEdit(p, "note")}>Add a note: who is this for?</button></small>}
       </div>
+      {/* v41: Active / Make active is its own cell of the band, beside the status (ref `.k4-bh`) */}
+      <span className="p93-bh-act">
+        {isActive && !draft ? <em className="p9-po-act">Active</em> : null}
+        {!draft && !isActive && canMakeActive(p, model.active?.id) ? <button type="button" className="p93-mk" onClick={() => void model.makeActive(p)}>Make active</button> : null}
+      </span>
       <span className={`p93-bh-s${st.green ? " p93-g" : ""}`} data-pk39="status" data-pk393="status"><i aria-hidden="true" />{st.text}</span>
       {draft ? <span /> : (
         <button type="button" className="p93-bh-f" title="Figures" aria-label="Figures" data-pk38="figures" data-pk393="figures" onClick={() => onFigures(p)}>
@@ -299,12 +301,15 @@ export const Pk393Builder: React.FC<Pk393Props> = (props) => {
   }), [model.versionRows, model.letters, model.synopses]);
   const awayLet = model.lettersAll.filter((m) => m.retired), awaySyn = model.synopsesAll.filter((m) => m.retired);
   return (
+    /* v41 Part F: a Dashboard v2 framed card — a 7px white rim, an inner 1px #e3d5c9 frame — with the package's band in
+       navy across the whole card, then the steps and the preview well side by side */
+    <div className="p41-fr p41-bld" data-pk41="builder-frame">
+    <div className="p41-fi">
+    <Header {...props} locked={locked} out={out} sent={sent} />
     <div className="p93-b" data-pk393="builder" data-pk40="open" data-pk26="open" data-pkg={p.id}>
-      <div className="p93-col" data-pk393="steps-col">
-        <Header {...props} locked={locked} out={out} sent={sent} />
-        {from ? <div className="p9-lc-from">Copied from <b>{from.packageName}</b>. Change one piece, and Results can tell you what that piece did.</div> : null}
+        {from ? <div className="p9-lc-from p41-span">Copied from <b>{from.packageName}</b>. Change one piece, and Results can tell you what that piece did.</div> : null}
         {locked ? (
-          <div className="p93-lock" data-pk393="sent-note" data-pk38="lock-line">
+          <div className="p93-lock p41-span" data-pk393="sent-note" data-pk38="lock-line">
             <Lock />
             <span><b>{note.lead}</b>{note.rest}
               <span className="p93-lock-a">
@@ -314,6 +319,7 @@ export const Pk393Builder: React.FC<Pk393Props> = (props) => {
             </span>
           </div>
         ) : null}
+      <div className="p93-col" data-pk393="steps-col">
         <div className="p93-steps" data-pk393="steps">
           {(["ver", "let", "syn"] as const).map((k, n) => (
             <Step key={k} k={k} i={n + 1} p={p} items={items[k]} away={k === "ver" ? [] : k === "let" ? awayLet : awaySyn} open={eff === k} readOnly={locked}
@@ -330,6 +336,8 @@ export const Pk393Builder: React.FC<Pk393Props> = (props) => {
       <aside className="p93-pv" data-pk393="preview" data-hov={hov ?? ""}>
         <Preview model={model} p={p} hov={hov} locked={locked} onChooseLetter={() => setOpen("let")} onEdit={(x) => props.onEdit(x)} onDuplicate={onDuplicate} />
       </aside>
+    </div>
+    </div>
     </div>
   );
 };

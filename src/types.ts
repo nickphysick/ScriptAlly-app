@@ -116,6 +116,9 @@ export interface User {
        written ONLY by its dotted-path builders (lib/contactPrefs). `later` keys are
        "{agentId}:{gap}" → "YYYY-MM-DD"; `settled` holds "{agentId}:reply" ("Say it's not stated"). */
     contacts?: { later?: Record<string, string>; settled?: string[]; wishlistEvery?: number; wishlistNextOn?: string };
+    /* Submission packages v41 — the founding writer strip's dismissal, on the user so it stays hidden on every device;
+       the same unconstrained map, NO rules change, written as one leaf (lib/packagesV41 FOUNDING_NOTE_PATH) */
+    packages?: { foundingNoteHidden?: boolean };
   };
   /**
    * ⚠️ LEGACY, AND READ BY NOTHING. Superseded by `queryingGoals` below. Left in place rather

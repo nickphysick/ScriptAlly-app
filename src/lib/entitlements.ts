@@ -22,6 +22,17 @@ export function packagesUnlocked(user: Pick<User, "plan"> | null | undefined): b
 }
 
 /**
+ * Submission packages v41 — "a founding writer": someone whose packages come from FOUNDING ACCESS, not a paid plan.
+ * ⚠️ THERE IS NO FOUNDING FIELD ON THE ACCOUNT (see VERSIONS_FOUNDING_ACCESS below): during the beta every account is a
+ * founding member, and Pro pages are open to them through `PACKAGES_OPEN_TO_ALL`. So the answer is that constant and
+ * the plan: open to all, and not on paid Pro. A paid Pro user is never told the page is a founding perk; when founding
+ * access ends (the constant goes false) nobody is.
+ */
+export function packagesViaFounding(user: Pick<User, "plan"> | null | undefined): boolean {
+  return PACKAGES_OPEN_TO_ALL && !!user && user.plan !== UserPlan.PRO;
+}
+
+/**
  * ⚠️ VERSIONS IS PRO, AND FOUNDING MEMBERS HAVE IT IN FULL (Nick, 22 Oct; Versions v1). There is no founding
  * flag on the account: during the beta every account is a founding member (the sidebar's feedback card says so
  * to everyone), so founding access is this one constant, exactly as packages' is. When founding access ends,

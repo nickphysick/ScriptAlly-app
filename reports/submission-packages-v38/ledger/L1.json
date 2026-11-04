@@ -1,9 +1,9 @@
 [
  {
   "lock": "L1",
-  "where": "the page rendered (labels present)",
+  "where": "the page rendered (the list present)",
   "ok": true,
-  "detail": "labels"
+  "detail": "list"
  },
  {
   "lock": "L1",
@@ -19,32 +19,32 @@
  },
  {
   "lock": "L1",
-  "where": "Your materials is on the page",
+  "where": "the builder's steps are on the page, and no Your materials",
   "ok": true,
-  "detail": "lib"
+  "detail": "steps"
  },
  {
   "lock": "L1",
-  "where": "Your materials' tabs read",
+  "where": "the steps were read",
   "ok": true,
-  "detail": "[\"Letters 2=false\",\"Synopses 1=true\",\"Versions 2=false\"]"
+  "detail": "[\"ver=false\",\"let=false\",\"syn=true\",\"ext=false\"]"
  },
  {
   "lock": "L1",
-  "where": "?tab=syn → Synopses selected",
+  "where": "?tab=syn → the Synopsis step is open",
   "ok": true,
-  "detail": "[\"Letters 2=false\",\"Synopses 1=true\",\"Versions 2=false\"]"
+  "detail": "[\"ver=false\",\"let=false\",\"syn=true\",\"ext=false\"]"
  },
  {
   "lock": "L1",
-  "where": "…and only Synopses",
+  "where": "…and only that step",
   "ok": true,
-  "detail": "[\"Letters 2=false\",\"Synopses 1=true\",\"Versions 2=false\"]"
+  "detail": "[\"ver=false\",\"let=false\",\"syn=true\",\"ext=false\"]"
  },
  {
   "lock": "L1",
   "where": "…listing the synopsis",
   "ok": true,
-  "detail": "[\"One-page sent 10 · in 2 packages ✓ In package\"]"
+  "detail": "[\"One-page\"]"
  }
 ]

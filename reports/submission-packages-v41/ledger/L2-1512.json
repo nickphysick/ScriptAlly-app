@@ -1,0 +1,92 @@
+[
+ {
+  "lock": "L2-1512",
+  "where": "population: the harness is a founding writer (not paid Pro)",
+  "ok": true,
+  "detail": "plan Free"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "shown for a founding writer",
+  "ok": true,
+  "detail": "1 strips"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "one line: height ≤ 60",
+  "ok": true,
+  "detail": "57"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "one line: text scrollWidth ≤ clientWidth",
+  "ok": true,
+  "detail": "716 / 716"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "folder tab takes the strip's colour",
+  "ok": true,
+  "detail": "rgb(251, 239, 233)"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "its curved foot too",
+  "ok": true,
+  "detail": "rgb(251, 239, 233)"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "“Tell us what you think” opens FeedbackDock",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "✕ hides it",
+  "ok": true,
+  "detail": "still there"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "the dismissal is stored on the user",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "…and stays hidden after a reload",
+  "ok": true,
+  "detail": "back after reload"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "the folder tab is cream again",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "How it works offers the note back",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "…and it comes back",
+  "ok": true,
+  "detail": "not back"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "population: the Pro page rendered its header",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "absent for a paid Pro user",
+  "ok": true,
+  "detail": "0 strips"
+ }
+]

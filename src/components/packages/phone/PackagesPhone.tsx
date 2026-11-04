@@ -28,7 +28,8 @@ import { packageShowcases, bestPiece, thresholdWords, type Fig } from "../../../
 import { MIN_SENDS_FOR_CLAIM } from "../../../lib/packageMetrics";
 import { hexOf, firstFreeColour } from "../../../lib/packagesV39";
 import { PACKAGE_ICONS } from "../packageIcons";
-import { HOW_STEPS } from "../v26/Pk39HowItWorks";
+/* v41: the guide is Pk41HowItWorks now (Pk39HowItWorks is deleted); its five steps describe the page as it is */
+import { HOW_STEPS } from "../v41/Pk41HowItWorks";
 import { compUsage, compKey, letterFixed, MAX_LETTER_COMPS } from "../../../lib/compUsage";
 import { compAge, currentYear } from "../../../lib/compsPage";
 import { withCompAdded } from "../../../lib/comps";

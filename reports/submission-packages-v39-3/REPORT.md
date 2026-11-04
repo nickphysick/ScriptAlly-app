@@ -107,4 +107,11 @@ and 1100). The fixture differs from the ref's sample data (names, the letters' l
 
 ## 7 · Deploy
 
-(Filled in after the deploy.)
+- **Dev had moved again.** It served `index-DQ0k846l.js`: To-do list v7 and Dashboard first visit had merged onto the
+  v39.2 dev branch as `dev/…-pk392b-td7-fv1` (7d31b365). Confirmed by building 7d31b365: an exact match.
+- v39.3 merged onto it as **`dev/pk391-qm1-pk392-calx-pk392b-td7-fv1-pk393` (c3d2fc5c)**, pushed. The one conflict was
+  `design-refs/.refhashes.json`: both sides' entries kept. Gates on the merged tree: tsc 0, Vitest 690 files / 10,731
+  passed (3 skipped), build clean.
+- Hosting only, `--config firebase.dev.json --project scriptally-dev`, from that clean worktree. **Dev now serves
+  `index-BiS1oLzC.js`.** `pk393.measure.ts` (L10–L14) passes against the live site. No rules or functions changed. Prod
+  is untouched.

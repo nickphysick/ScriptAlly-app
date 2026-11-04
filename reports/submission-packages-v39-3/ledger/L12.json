@@ -7,9 +7,9 @@
  },
  {
   "lock": "L12",
-  "where": "ver: exactly its part is outlined (2px Harbour on #eef4f7)",
+  "where": "ver: exactly its part is outlined (2px navy on #eaf0f5)",
   "ok": true,
-  "detail": "[{\"part\":\"ver\",\"sh\":\"rgb(29, 75, 99) 0px 0px 0px 2px\",\"bg\":\"rgb(238, 244, 247)\"}]"
+  "detail": "[{\"part\":\"ver\",\"sh\":\"rgb(45, 58, 80) 0px 0px 0px 2px\",\"bg\":\"rgb(234, 240, 245)\"}]"
  },
  {
   "lock": "L12",
@@ -19,9 +19,9 @@
  },
  {
   "lock": "L12",
-  "where": "let: exactly its part is outlined (2px Harbour on #eef4f7)",
+  "where": "let: exactly its part is outlined (2px navy on #eaf0f5)",
   "ok": true,
-  "detail": "[{\"part\":\"let\",\"sh\":\"rgb(29, 75, 99) 0px 0px 0px 2px\",\"bg\":\"rgb(238, 244, 247)\"}]"
+  "detail": "[{\"part\":\"let\",\"sh\":\"rgb(45, 58, 80) 0px 0px 0px 2px\",\"bg\":\"rgb(234, 240, 245)\"}]"
  },
  {
   "lock": "L12",
@@ -31,9 +31,9 @@
  },
  {
   "lock": "L12",
-  "where": "syn: exactly its part is outlined (2px Harbour on #eef4f7)",
+  "where": "syn: exactly its part is outlined (2px navy on #eaf0f5)",
   "ok": true,
-  "detail": "[{\"part\":\"syn\",\"sh\":\"rgb(29, 75, 99) 0px 0px 0px 2px\",\"bg\":\"rgb(238, 244, 247)\"}]"
+  "detail": "[{\"part\":\"syn\",\"sh\":\"rgb(45, 58, 80) 0px 0px 0px 2px\",\"bg\":\"rgb(234, 240, 245)\"}]"
  },
  {
   "lock": "L12",
@@ -43,9 +43,9 @@
  },
  {
   "lock": "L12",
-  "where": "ext: exactly its part is outlined (2px Harbour on #eef4f7)",
+  "where": "ext: exactly its part is outlined (2px navy on #eaf0f5)",
   "ok": true,
-  "detail": "[{\"part\":\"ext\",\"sh\":\"rgb(29, 75, 99) 0px 0px 0px 2px\",\"bg\":\"rgb(238, 244, 247)\"}]"
+  "detail": "[{\"part\":\"ext\",\"sh\":\"rgb(45, 58, 80) 0px 0px 0px 2px\",\"bg\":\"rgb(234, 240, 245)\"}]"
  },
  {
   "lock": "L12",

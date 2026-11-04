@@ -1,0 +1,134 @@
+[
+ {
+  "lock": "L5-1512",
+  "where": "population",
+  "ok": true,
+  "detail": "4 live"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "one card",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "a navy bar",
+  "ok": true,
+  "detail": "rgb(45, 58, 80)"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "the bar counts the live packages",
+  "ok": true,
+  "detail": "4 packages / 4"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "All lists exactly the live packages",
+  "ok": true,
+  "detail": "4 rows"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "tab All counts the live packages",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "tab out: enabled with a count",
+  "ok": true,
+  "detail": "2 false"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "tab out: its count is its rows",
+  "ok": true,
+  "detail": "2 counted, 2 rows"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "tab out: the stored packages out with agents",
+  "ok": true,
+  "detail": "2 / 2"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "tab ready: enabled with a count",
+  "ok": true,
+  "detail": "1 false"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "tab ready: its count is its rows",
+  "ok": true,
+  "detail": "1 counted, 1 rows"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "tab draft: enabled with a count",
+  "ok": true,
+  "detail": "1 false"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "tab draft: its count is its rows",
+  "ok": true,
+  "detail": "1 counted, 1 rows"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "Show retired (n) names the retired",
+  "ok": true,
+  "detail": "Show retired (1)"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "the open package's row has the navy inset edge",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) 3px 0px 0px 0px inset"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "…on #f3f5f8",
+  "ok": true,
+  "detail": "rgb(243, 245, 248)"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "…and no button, “Open below”",
+  "ok": true,
+  "detail": "0 Open below"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "no packages: out is disabled at 40%",
+  "ok": true,
+  "detail": "true 0.4"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "no packages: ready is disabled at 40%",
+  "ok": true,
+  "detail": "true 0.4"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "no packages: draft is disabled at 40%",
+  "ok": true,
+  "detail": "true 0.4"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "no packages: Show retired hidden",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "no packages: the empty line",
+  "ok": true,
+  "detail": "No packages yet. Make one and pick it the next time you log a query."
+ }
+]
