@@ -27,9 +27,11 @@ import { SortChipButton, SortChipMenu } from "../../shell/SortChip";
 import { usePopover } from "../../shell/ListPills";
 import { GROUP_ICON150 } from "../../queries/centre/QcToolbar140";
 import { FilterMenu } from "./ContactFilters24";
-import { NQ_RING } from "./ContactSheet24";
+import { NQ_RING, SetGlyph } from "./ContactSheet24";
 import { GenrePills } from "../../shared/agentRowParts";
 import type { Group26Key } from "../../../lib/contactListMemory";
+import { drawnSections, sections, type Section } from "../../../lib/contactV26";
+import type { StatusKey } from "../../../lib/contactList";
 import "./contactV26.css";
 
 export const GROUP26_LABEL: Record<Group26Key, string> = { letter: "Letter", status: "Status", none: "No grouping" };
@@ -53,6 +55,8 @@ export interface ContactSheet26Props {
   openId: string | null;
   onOpen: (id: string) => void;
   onExport: (rows: readonly AgentFacts[]) => void;
+  /** the page guide's tick: an index entry was used */
+  onJump?: () => void;
 }
 
 const I = {
@@ -74,6 +78,12 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
   const pinRef = useRef<HTMLDivElement>(null);
   const bandRef = useRef<HTMLDivElement>(null);
   const byId = useMemo(() => new Map(p.all.map((x) => [x.agent.id, x])), [p.all]);
+  /* C/D — THE ONE PARTITION: the index names these and the list draws these, in this order */
+  const secs = useMemo(() => sections(p.pool, p.group, p.sortKey, p.reversed), [p.pool, p.group, p.sortKey, p.reversed]);
+  const drawn = useMemo(() => drawnSections(secs), [secs]);
+  const secEls = useRef(new Map<string, HTMLElement>());
+  const [current, setCurrent] = useState<string | null>(null);
+  const jumping = useRef<{ key: string; until: number } | null>(null);
 
   /* the pin's height, published for the margin labels' sticky top */
   useLayoutEffect(() => {
@@ -96,7 +106,33 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
     const top = sc.getBoundingClientRect().top;
     const s = pin.getBoundingClientRect().top <= top + 12.5 && card.getBoundingClientRect().top < top + 12;
     setStuck((v) => (v === s ? v : s));
+    /* the section nearest the pinned headings: the last one whose top has reached the headings' foot */
+    const line = top + 12 + pin.offsetHeight + 2;
+    let cur: string | null = null;
+    for (const sec of drawnRef.current) {
+      const el = secEls.current.get(sec.key);
+      if (!el) continue;
+      if (cur === null || el.getBoundingClientRect().top <= line) cur = sec.key; else break;
+    }
+    const j = jumping.current;
+    if (j && performance.now() < j.until) cur = j.key; else jumping.current = null;
+    setCurrent((v) => (v === cur ? v : cur));
   }, []);
+  const drawnRef = useRef(drawn);
+  drawnRef.current = drawn;
+  useEffect(() => { read(); }, [drawn, read]);
+  /* a click: the section's first row lands directly under the pinned headings */
+  const jump = useCallback((key: string) => {
+    const el = secEls.current.get(key), pin = pinRef.current;
+    const sc = cardRef.current?.closest<HTMLElement>(".wpg-scroll");
+    if (!el || !pin || !sc) return;
+    const delta = el.getBoundingClientRect().top - (sc.getBoundingClientRect().top + 12 + pin.offsetHeight);
+    const reduce = typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    jumping.current = { key, until: performance.now() + (reduce ? 50 : 900) };
+    setCurrent(key);
+    sc.scrollTo({ top: sc.scrollTop + delta, behavior: reduce ? "auto" : "smooth" });
+    p.onJump?.();
+  }, [p]);
   useEffect(() => {
     const sc = cardRef.current?.closest<HTMLElement>(".wpg-scroll");
     if (!sc) return undefined;
@@ -143,6 +179,7 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
                 onToggle={(a) => pop.toggle("sort", a)} />
             </span>
           </div>
+          {p.group !== "none" && drawn.length > 0 ? <Index26 secs={secs} current={current ?? drawn[0]?.key ?? null} onJump={jump} /> : null}
           <div className="cl26-th" role="row" data-cl26="heads">
             <span className="cl26-thm" aria-hidden="true" />
             <span role="columnheader" aria-sort={p.sortKey === "surname" ? (p.reversed ? "descending" : "ascending") : "none"}>
@@ -166,13 +203,16 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
             <button type="button" data-cl26="reset" onClick={p.onClearAll}>Clear search and filters</button>
           </div>
         ) : (
-          <div className="cl26-body" role="rowgroup" data-cl26="rows">
-            <div className="cl26-sec" data-cl26="section" data-k="all">
-              <span className="cl26-mg" aria-hidden="true" />
-              <div className="cl26-rows">
-                {p.pool.map((x) => <Row26 key={x.agent.id} x={byId.get(x.agent.id) ?? x} p={p} />)}
+          <div className="cl26-body" role="rowgroup" data-cl26="rows" data-kind={drawn[0]?.kind ?? "all"}>
+            {drawn.map((sec) => (
+              <div key={sec.key} className="cl26-sec" data-cl26="section" data-k={sec.key} data-kind={sec.kind} data-n={sec.ids.length}
+                ref={(el) => { if (el) secEls.current.set(sec.key, el); else secEls.current.delete(sec.key); }}>
+                <span className="cl26-mg" data-cl26="margin" aria-hidden="true" />
+                <div className="cl26-rows">
+                  {sec.ids.map((id) => { const x = byId.get(id); return x ? <Row26 key={id} x={x} p={p} /> : null; })}
+                </div>
               </div>
-            </div>
+            ))}
           </div>
         )}
       </div>
@@ -198,6 +238,22 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
       ) : null}
     </section>
   );
+};
+
+/** a stage section's glyph: the StatusDot of the stage (a closed run is the passed mark), the dotted ring for not queried */
+const STAGE_STATUS: Record<StatusKey, QueryStatus | null> = {
+  none: null, queried: QueryStatus.QUERIED, pr: QueryStatus.PARTIAL_REQUESTED, ps: QueryStatus.PARTIAL_SENT, fr: QueryStatus.FULL_REQUESTED,
+  fs: QueryStatus.FULL_SENT, rr: QueryStatus.REVISE_RESUBMIT, resub: QueryStatus.RESUBMITTED, offer: QueryStatus.OFFER, signed: QueryStatus.SIGNED,
+  closed: QueryStatus.REJECTED,
+};
+/** Your move as a group: the mini navy disc with the rust "!" (the row disc's own, small) */
+export const MiniYou: React.FC<{ size?: number }> = ({ size = 17 }) => (
+  <span className="cl26-mini" data-cl26="mini-you" aria-hidden="true" style={{ "--d": `${size}px` } as React.CSSProperties}><i>!</i></span>
+);
+export const SectionGlyph: React.FC<{ s: Section; size?: number }> = ({ s, size = 16 }) => {
+  if (s.set) return s.set === "you" ? <MiniYou size={size} /> : <SetGlyph k={s.set} size={size} />;
+  if (s.stage) { const st = STAGE_STATUS[s.stage]; return st ? <StatusDot status={st} overrideSize={size} /> : NQ_RING; }
+  return null;
 };
 
 /** the agent's disc, coloured by who the query is with: navy (with the agent), navy with the rust "!" (your move), a
@@ -234,6 +290,69 @@ const Row26: React.FC<{ x: AgentFacts; p: ContactSheet26Props }> = ({ x, p }) =>
         <span>{qw.words}</span>
       </span>
       <span role="cell" className="cl26-chev" aria-hidden="true">›</span>
+    </div>
+  );
+};
+
+/* ── C · the index row ──────────────────────────────────────────────────────────────────────────────────────────── */
+/* It names exactly the sections the list draws, in the same order (the one `sections` partition). A–Z under Letter by
+   Surname, equal widths, an empty letter at .3 and disabled; a week, a month (a year marker where the year changes) or a
+   status otherwise, each with its count. When the entries overflow, the strip scrolls sideways with a fade and an arrow
+   at each end; the current entry is kept in view. */
+const Index26: React.FC<{ secs: readonly Section[]; current: string | null; onJump: (key: string) => void }> = ({ secs, current, onJump }) => {
+  const stripRef = useRef<HTMLDivElement>(null);
+  const [over, setOver] = useState<{ l: boolean; r: boolean; on: boolean }>({ l: false, r: false, on: false });
+  const az = secs.length > 0 && secs[0].kind === "letter";
+  const measure = useCallback(() => {
+    const el = stripRef.current;
+    if (!el) return;
+    const on = el.scrollWidth > el.clientWidth + 1;
+    const next = { on, l: on && el.scrollLeft > 1, r: on && el.scrollLeft + el.clientWidth < el.scrollWidth - 1 };
+    setOver((v) => (v.on === next.on && v.l === next.l && v.r === next.r ? v : next));
+  }, []);
+  useLayoutEffect(() => {
+    measure();
+    const el = stripRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return undefined;
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [measure, secs]);
+  /* the current entry, centred when it changes */
+  useEffect(() => {
+    const el = stripRef.current;
+    const b = current ? el?.querySelector<HTMLElement>(`[data-cl26="ix"][data-k="${CSS.escape(current)}"]`) : null;
+    if (!el || !b || el.scrollWidth <= el.clientWidth + 1) return;
+    const left = b.offsetLeft - (el.clientWidth - b.offsetWidth) / 2;
+    el.scrollTo({ left: Math.max(0, left), behavior: "smooth" });
+  }, [current]);
+  const by = (dir: -1 | 1) => { const el = stripRef.current; if (el) el.scrollBy({ left: dir * el.clientWidth * 0.7, behavior: "smooth" }); };
+  let lastYear: number | null = null;
+  return (
+    <div className="cl26-ix" data-cl26="index" data-az={az ? "" : undefined} data-over={over.on ? "" : undefined} role="navigation" aria-label="Jump to a section">
+      {over.on ? <button type="button" className="cl26-ixa" data-cl26="ix-prev" aria-label="Scroll the index back" disabled={!over.l} onClick={() => by(-1)}>‹</button> : null}
+      <div className="cl26-ixw" data-l={over.l ? "" : undefined} data-r={over.r ? "" : undefined}>
+        <div className="cl26-ixs" ref={stripRef} onScroll={measure} data-cl26="ix-strip">
+          {secs.map((sec) => {
+            const empty = !!sec.empty || sec.ids.length === 0;
+            const year = sec.kind === "month" && sec.year != null && sec.year !== lastYear ? sec.year : null;
+            if (sec.kind === "month" && sec.year != null) lastYear = sec.year;
+            return (
+              <React.Fragment key={sec.key}>
+                {year != null ? <span className="cl26-ixy" data-cl26="ix-year">{year}</span> : null}
+                <button type="button" className="cl26-ixe" data-cl26="ix" data-k={sec.key} data-n={sec.ids.length}
+                  aria-current={current === sec.key ? "true" : undefined} disabled={empty} onClick={() => onJump(sec.key)}
+                  aria-label={az ? `${sec.label}${empty ? ", no agents" : `, ${sec.ids.length}`}` : `${sec.label}, ${sec.ids.length}`}>
+                  {sec.kind === "set" || sec.kind === "stage" ? <SectionGlyph s={sec} size={15} /> : null}
+                  <span className="cl26-ixl">{sec.label}</span>
+                  {az ? null : <em className="cl26-ixn">{sec.ids.length}</em>}
+                </button>
+              </React.Fragment>
+            );
+          })}
+        </div>
+      </div>
+      {over.on ? <button type="button" className="cl26-ixa" data-cl26="ix-next" aria-label="Scroll the index on" disabled={!over.r} onClick={() => by(1)}>›</button> : null}
     </div>
   );
 };

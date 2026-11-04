@@ -11,9 +11,9 @@ import type { User } from "../types";
 const user = (guide: unknown) => ({ todoPrefs: { contacts: { guide } } }) as unknown as User;
 
 describe("pageChecklist (v18.3 §F)", () => {
-  it("the Contact list's six items, in order (v19 §K: the third item; v20 §G renames it Go full screen, key unchanged)", () => {
+  it("the Contact list's six items, in order (v19 §K: the third item; v20 §G renamed it Go full screen; RE-POINTED by Contact list v26 C: full screen is retired, so it is Jump through the list, key unchanged)", () => {
     expect(CONTACT_CHECKLIST.map((i) => i.title)).toEqual([
-      "Add an agent", "Search for an agent", "Go full screen", "Open an agent's card", "Edit an agent", "Do some housekeeping",
+      "Add an agent", "Search for an agent", "Jump through the list", "Open an agent's card", "Edit an agent", "Do some housekeeping",
     ]);
     expect(CONTACT_CHECKLIST.map((i) => i.key)).toEqual(["add", "search", "pin", "open", "edit", "hk"]);
     /* v24 F — full screen is the address book now, and the line says so */
