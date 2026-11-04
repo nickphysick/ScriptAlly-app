@@ -50,6 +50,8 @@ export const ROW_WORDS = {
   undo: "Undo",
   add: "Add details",
   edit: "Edit details",
+  /* a query row's action: it opens the timeline strip */
+  editQuery: "Edit",
   close: "Close details",
   added: "Details added",
   agencyOnly: "Agency only",
@@ -85,7 +87,7 @@ const DontImportButton: React.FC<{ onClick: () => void }> = ({ onClick }) => (
 );
 
 /** A live row's right-hand end: "✓ Details added" once changed, the details link, "Don't import". */
-const LiveEnd: React.FC<{ open: boolean; added: boolean; onToggleOpen: () => void; onDelete: () => void; lead?: React.ReactNode }> = ({ open, added, onToggleOpen, onDelete, lead }) => (
+const LiveEnd: React.FC<{ open: boolean; added: boolean; onToggleOpen: () => void; onDelete: () => void; lead?: React.ReactNode; label?: string }> = ({ open, added, onToggleOpen, onDelete, lead, label }) => (
   <div className="im-rwend">
     {lead}
     {added && !open && (
@@ -95,7 +97,7 @@ const LiveEnd: React.FC<{ open: boolean; added: boolean; onToggleOpen: () => voi
       </span>
     )}
     <button type="button" className="im-detlink" onClick={onToggleOpen} aria-expanded={open} data-im="row-action">
-      {open ? ROW_WORDS.close : added ? ROW_WORDS.edit : ROW_WORDS.add}
+      {open ? ROW_WORDS.close : label ?? (added ? ROW_WORDS.edit : ROW_WORDS.add)}
     </button>
     <DontImportButton onClick={onDelete} />
   </div>
@@ -486,7 +488,7 @@ export const QueryRow: React.FC<QueryRowProps> = ({ query, agentName, origin, op
         : open
           /* while the strip is open, Done is the one way out */
           ? <div className="im-rwend"><button type="button" className="sf-btn sf-btn--sm" onClick={onToggleOpen} aria-expanded data-im="row-action">{ROW_WORDS.done}</button></div>
-          : <LiveEnd open={open} added={!!added} onToggleOpen={onToggleOpen} onDelete={onDelete}
+          : <LiveEnd open={open} added={!!added} onToggleOpen={onToggleOpen} onDelete={onDelete} label={ROW_WORDS.editQuery}
               lead={<span className="im-stat" data-im="row-status"><StatusDot status={query.status} overrideSize={18} />{STAGE_NAME[query.status]}</span>} />}
       </>)}
 
