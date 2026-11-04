@@ -1,0 +1,57 @@
+[
+ {
+  "where": "population",
+  "ok": false,
+  "detail": "{\"fs\":null,\"rows\":88,\"right\":null,\"bb\":null,\"oneLine\":false}"
+ },
+ {
+  "where": "20px",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "where": "N = rows shown (All)",
+  "ok": false,
+  "detail": "undefined vs 88"
+ },
+ {
+  "where": "tools flush right ±1",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "where": "one line",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "no container",
+  "ok": false,
+  "detail": "undefined undefined undefined"
+ },
+ {
+  "where": "a hairline under it",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "where": "N = rows on you",
+  "ok": false,
+  "detail": "undefined vs 88, M undefined"
+ },
+ {
+  "where": "N = rows on agent",
+  "ok": false,
+  "detail": "undefined vs 88, M undefined"
+ },
+ {
+  "where": "N = rows on closed",
+  "ok": false,
+  "detail": "undefined vs 88, M undefined"
+ },
+ {
+  "where": "N = rows under a search",
+  "ok": false,
+  "detail": "undefined vs 87"
+ }
+]

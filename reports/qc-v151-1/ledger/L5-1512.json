@@ -1,0 +1,62 @@
+[
+ {
+  "where": "not in the DOM at the defaults",
+  "ok": true,
+  "detail": "{\"row\":false,\"p\":[],\"over\":0}"
+ },
+ {
+  "where": "population: the panel opens",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "Overdue reads alone, no \"is\"",
+  "ok": true,
+  "detail": "{\"k\":\"f:most\",\"t\":\"Overdue\"}"
+ },
+ {
+  "where": "Status is any of Partial requested, Partial sent",
+  "ok": true,
+  "detail": "{\"k\":\"f:status\",\"t\":\"Status is any of Partial requested, Partial sent\"}"
+ },
+ {
+  "where": "never overflows",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "× on Status removes both",
+  "ok": true,
+  "detail": "[{\"k\":\"f:most\",\"t\":\"Overdue\"}] [\"false\",\"false\"]"
+ },
+ {
+  "where": "population: Group, its Status option and the Queried label were pressed",
+  "ok": true,
+  "detail": "[true,true,true]"
+ },
+ {
+  "where": "Group pill",
+  "ok": true,
+  "detail": "[{\"k\":\"f:most\",\"t\":\"Overdue\"},{\"k\":\"group\",\"t\":\"Group Status\"},{\"k\":\"sort\",\"t\":\"Sort Queried ↓\"}]"
+ },
+ {
+  "where": "Sort pill",
+  "ok": true,
+  "detail": "[{\"k\":\"f:most\",\"t\":\"Overdue\"},{\"k\":\"group\",\"t\":\"Group Status\"},{\"k\":\"sort\",\"t\":\"Sort Queried ↓\"}]"
+ },
+ {
+  "where": "Clear all: the row goes",
+  "ok": true,
+  "detail": "{\"row\":false,\"p\":[],\"over\":0}"
+ },
+ {
+  "where": "Clear all keeps the quick filter",
+  "ok": true,
+  "detail": "quiet"
+ },
+ {
+  "where": "Clear all: grouping back to who it's with",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ }
+]

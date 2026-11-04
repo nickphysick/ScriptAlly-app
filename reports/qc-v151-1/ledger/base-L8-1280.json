@@ -1,0 +1,27 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "88"
+ },
+ {
+  "where": "agency under the name, same cell",
+  "ok": false,
+  "detail": "88 not"
+ },
+ {
+  "where": "uppercase mono",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "no Agency column",
+  "ok": false,
+  "detail": "false 88 8"
+ },
+ {
+  "where": "agent names never truncate",
+  "ok": true,
+  "detail": "0 cut"
+ }
+]

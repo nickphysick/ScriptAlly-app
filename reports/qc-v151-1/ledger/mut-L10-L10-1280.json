@@ -1,0 +1,57 @@
+[
+ {
+  "where": "population: ten gaps below the band",
+  "ok": true,
+  "detail": "{\"gaps\":12,\"scrolled\":1440}"
+ },
+ {
+  "where": "gap at y 319: one even colour, the ground under the cards' shadow",
+  "ok": true,
+  "detail": "0/921 off · 234,230,225"
+ },
+ {
+  "where": "gap at y 396: one even colour, the ground under the cards' shadow",
+  "ok": false,
+  "detail": "40/921 off · 234,230,225"
+ },
+ {
+  "where": "gap at y 473: one even colour, the ground under the cards' shadow",
+  "ok": true,
+  "detail": "0/921 off · 234,230,225"
+ },
+ {
+  "where": "gap at y 550: one even colour, the ground under the cards' shadow",
+  "ok": false,
+  "detail": "9/921 off · 234,230,225"
+ },
+ {
+  "where": "gap at y 627: one even colour, the ground under the cards' shadow",
+  "ok": true,
+  "detail": "0/921 off · 234,230,225"
+ },
+ {
+  "where": "gap at y 704: one even colour, the ground under the cards' shadow",
+  "ok": true,
+  "detail": "0/921 off · 234,230,225"
+ },
+ {
+  "where": "gap at y 319: one even colour, the ground under the cards' shadow",
+  "ok": true,
+  "detail": "0/921 off · 234,230,225"
+ },
+ {
+  "where": "gap at y 396: one even colour, the ground under the cards' shadow",
+  "ok": false,
+  "detail": "45/921 off · 234,230,225"
+ },
+ {
+  "where": "gap at y 473: one even colour, the ground under the cards' shadow",
+  "ok": true,
+  "detail": "0/921 off · 234,230,225"
+ },
+ {
+  "where": "gap at y 550: one even colour, the ground under the cards' shadow",
+  "ok": true,
+  "detail": "0/921 off · 234,230,225"
+ }
+]

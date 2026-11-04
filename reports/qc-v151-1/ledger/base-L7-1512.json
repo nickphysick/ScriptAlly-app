@@ -1,0 +1,37 @@
+[
+ {
+  "where": "population",
+  "ok": false,
+  "detail": "0 rows"
+ },
+ {
+  "where": "8 ±1 apart",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "outer corners ≥ 15",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "one height ±1",
+  "ok": true,
+  "detail": "Infinity–-Infinity"
+ },
+ {
+  "where": "≈69",
+  "ok": false,
+  "detail": "Infinity"
+ },
+ {
+  "where": "tint by who it's with",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "closed: no Day",
+  "ok": false,
+  "detail": "0/0"
+ }
+]

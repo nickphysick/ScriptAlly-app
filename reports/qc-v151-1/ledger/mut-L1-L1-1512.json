@@ -1,0 +1,47 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "{\"page\":true,\"rows\":88,\"banner\":1,\"bannerText\":true,\"thead\":0,\"clDay\":false,\"cl\":true}"
+ },
+ {
+  "where": "no info banner",
+  "ok": false,
+  "detail": "{\"page\":true,\"rows\":88,\"banner\":1,\"bannerText\":true,\"thead\":0,\"clDay\":false,\"cl\":true}"
+ },
+ {
+  "where": "no master header row",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "no Day counter in the control line",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "no hover timeline after 1.5s",
+  "ok": true,
+  "detail": "{\"tl\":0}"
+ },
+ {
+  "where": "no tab heading on you",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "no tab heading on agent",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "no tab heading on quiet",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "no tab heading on closed",
+  "ok": true,
+  "detail": ""
+ }
+]

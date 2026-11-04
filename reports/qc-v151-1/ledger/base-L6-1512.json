@@ -1,0 +1,27 @@
+[
+ {
+  "where": "population",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "where": "its header sticks at the lip ±1 while the group passes",
+  "ok": false,
+  "detail": "{\"top\":null,\"cover\":0,\"lastBelow\":false,\"scrolled\":0}"
+ },
+ {
+  "where": "the chevron hides the rows and keeps the header",
+  "ok": false,
+  "detail": "{\"rows\":-1,\"header\":false,\"rot\":null}"
+ },
+ {
+  "where": "the chevron turns −90°",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "where": "one quick filter: one label row, Agent first",
+  "ok": false,
+  "detail": "{\"groups\":0,\"labels\":[]}"
+ }
+]

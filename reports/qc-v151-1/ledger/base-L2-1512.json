@@ -1,0 +1,37 @@
+[
+ {
+  "where": "population",
+  "ok": false,
+  "detail": "{\"card\":false,\"artBg\":null,\"artW\":0,\"img\":false,\"heading\":\"\",\"pills\":0,\"pillDots\":0,\"late\":[],\"ok\":[],\"l\":null,\"r\":null,\"you\":null}"
+ },
+ {
+  "where": "drawing panel",
+  "ok": false,
+  "detail": "null 0 img false"
+ },
+ {
+  "where": "heading",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "N is the Your move set",
+  "ok": false,
+  "detail": " · you NaN"
+ },
+ {
+  "where": "pills, each with a StatusDot",
+  "ok": true,
+  "detail": "0/0"
+ },
+ {
+  "where": "pill fills",
+  "ok": true,
+  "detail": "[[],[]]"
+ },
+ {
+  "where": "edges are the content's ±1",
+  "ok": false,
+  "detail": "null null"
+ }
+]

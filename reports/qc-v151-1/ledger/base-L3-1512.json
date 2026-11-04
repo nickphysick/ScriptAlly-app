@@ -1,0 +1,37 @@
+[
+ {
+  "where": "population",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "where": "order",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "where": "All on a fresh load",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "where": "chosen is navy, white",
+  "ok": false,
+  "detail": "null null"
+ },
+ {
+  "where": "the others are not filled",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "the switch on the same row, at the right",
+  "ok": false,
+  "detail": "null 338.6875"
+ },
+ {
+  "where": "pressing one makes it navy",
+  "ok": false,
+  "detail": "null"
+ }
+]

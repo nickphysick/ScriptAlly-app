@@ -1,0 +1,60 @@
+[
+ {
+  "where": "not in the DOM at the defaults",
+  "ok": true,
+  "detail": "{\"row\":false,\"p\":[],\"over\":0}"
+ },
+ {
+  "where": "population: the panel opens",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "Overdue reads alone, no \"is\"",
+  "ok": false
+ },
+ {
+  "where": "Status is any of Partial requested, Partial sent",
+  "ok": false
+ },
+ {
+  "where": "never overflows",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "× on Status removes both",
+  "ok": false,
+  "detail": "[] [\"true\",\"true\"]"
+ },
+ {
+  "where": "population: Group, its Status option and the Queried label were pressed",
+  "ok": false,
+  "detail": "[true,true,false]"
+ },
+ {
+  "where": "Group pill",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "where": "Sort pill",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "where": "Clear all: the row goes",
+  "ok": true,
+  "detail": "{\"row\":false,\"p\":[],\"over\":0}"
+ },
+ {
+  "where": "Clear all keeps the quick filter",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "where": "Clear all: grouping back to who it's with",
+  "ok": false,
+  "detail": "rgb(42, 58, 82)"
+ }
+]

@@ -1,0 +1,107 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "[\"you\",\"agent\",\"quiet\",\"closed\"]"
+ },
+ {
+  "where": "you: one header row",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "where": "you: title and count",
+  "ok": true,
+  "detail": "Your move 22"
+ },
+ {
+  "where": "you: four labels",
+  "ok": true,
+  "detail": "[\"stage\",\"queried\",\"heard\",\"due\"]"
+ },
+ {
+  "where": "you: labels over their columns ±2",
+  "ok": true,
+  "detail": "[[542.1875,542.1875],[733.5,733.5],[825.234375,825.234375],[917.109375,917.109375]]"
+ },
+ {
+  "where": "agent: one header row",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "where": "agent: title and count",
+  "ok": true,
+  "detail": "With the agent 10"
+ },
+ {
+  "where": "agent: four labels",
+  "ok": true,
+  "detail": "[\"stage\",\"queried\",\"heard\",\"due\"]"
+ },
+ {
+  "where": "agent: labels over their columns ±2",
+  "ok": true,
+  "detail": "[[542.1875,542.1875],[733.5,733.5],[825.234375,825.234375],[917.109375,917.109375]]"
+ },
+ {
+  "where": "quiet: one header row",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "where": "quiet: title and count",
+  "ok": true,
+  "detail": "Gone quiet 38"
+ },
+ {
+  "where": "quiet: four labels",
+  "ok": true,
+  "detail": "[\"stage\",\"queried\",\"heard\",\"due\"]"
+ },
+ {
+  "where": "quiet: labels over their columns ±2",
+  "ok": true,
+  "detail": "[[542.1875,542.1875],[733.5,733.5],[825.234375,825.234375],[917.109375,917.109375]]"
+ },
+ {
+  "where": "closed: one header row",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "where": "closed: title and count",
+  "ok": true,
+  "detail": "Closed 18"
+ },
+ {
+  "where": "closed: four labels",
+  "ok": true,
+  "detail": "[\"stage\",\"queried\",\"heard\",\"due\"]"
+ },
+ {
+  "where": "closed: labels over their columns ±2",
+  "ok": true,
+  "detail": "[[542.1875,542.1875],[733.5,733.5],[825.234375,825.234375],[917.109375,917.109375]]"
+ },
+ {
+  "where": "its header sticks at the lip ±1 while the group passes",
+  "ok": true,
+  "detail": "{\"top\":12,\"cover\":12,\"lastBelow\":true,\"scrolled\":2300}"
+ },
+ {
+  "where": "the chevron hides the rows and keeps the header",
+  "ok": true,
+  "detail": "{\"rows\":0,\"header\":true,\"rot\":\"matrix(0, -1, 1, 0, 0, 0)\"}"
+ },
+ {
+  "where": "the chevron turns −90°",
+  "ok": true,
+  "detail": "matrix(0, -1, 1, 0, 0, 0)"
+ },
+ {
+  "where": "one quick filter: one label row, Agent first",
+  "ok": true,
+  "detail": "{\"groups\":1,\"labels\":[\"Agent\",\"Where it stands\",\"Queried\",\"Last heard\",\"Next\"]}"
+ }
+]

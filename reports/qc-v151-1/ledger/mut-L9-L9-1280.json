@@ -1,0 +1,57 @@
+[
+ {
+  "where": "population: every group drawn",
+  "ok": true,
+  "detail": "[22,10,38,18]"
+ },
+ {
+  "where": "no Due column",
+  "ok": true,
+  "detail": "[\"Where it stands\",\"Queried\",\"Last heard\",\"Next\"]"
+ },
+ {
+  "where": "Next words: you",
+  "ok": false,
+  "detail": "[\"31 days lateSend partial →\",\"Reply 20 days overdueNudge →\",\"Reply 19 days overdueNudge →\",\"Reply 18 days overdueNudge →\"]"
+ },
+ {
+  "where": "Next words: agent",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "Next words: quiet",
+  "ok": false,
+  "detail": "[\"Reply 403 days overdueConsider closing →\",\"Reply 307 days overdueConsider closing →\",\"Reply 307 days overdueConsider closing →\",\"Reply 307 days overdueConsider closing →\"]"
+ },
+ {
+  "where": "Next words: closed",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "late words in rust 600",
+  "ok": true,
+  "detail": "6"
+ },
+ {
+  "where": "buttons: last column, right",
+  "ok": false,
+  "detail": "[{\"w\":\"you\",\"t\":\"31 days lateSend partial →\",\"c\":\"rgb(138, 58, 40)\",\"btn\":true,\"inLast\":false,\"bg\":\"rgb(243, 200, 186)\",\"fg\":\"rgb(28, 19, 15)\",\"right\":143.53125},{\"w\":\"you\",\"t\":\"Reply 20 days overdueNudge →\",\"c\":\"rgb(138, 58, 40)\",\"btn\":true,\"inLast\":false,\"bg\":\"rgb(243, 200, 186)\",\"fg\":\"rgb(28, 19, 15)\",\"right\":104.40625},{\"w\":\"you\",\"t\":\"Reply 19 days overdueNudge →\",\"c\":\"rgb(138, 58, 40)\",\"btn\":true,\"inLast\":false,\"bg\":\"rgb(243, 200, 186)\",\"fg\":\"rgb(28, 19, 15)\",\"right\":104.40625}]"
+ },
+ {
+  "where": "buttons: #f3c8ba, black text",
+  "ok": true,
+  "detail": "[\"rgb(243, 200, 186) rgb(28, 19, 15)\"]"
+ },
+ {
+  "where": "Your move rows have a button",
+  "ok": true,
+  "detail": "0 without"
+ },
+ {
+  "where": "With the agent and Closed: no button",
+  "ok": true,
+  "detail": ""
+ }
+]

@@ -1,0 +1,37 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "88 rows"
+ },
+ {
+  "where": "8 ±1 apart",
+  "ok": false,
+  "detail": "[0]"
+ },
+ {
+  "where": "outer corners ≥ 15",
+  "ok": true,
+  "detail": "16px/16px/16px/16px"
+ },
+ {
+  "where": "one height ±1",
+  "ok": true,
+  "detail": "69–69"
+ },
+ {
+  "where": "≈69",
+  "ok": true,
+  "detail": "69"
+ },
+ {
+  "where": "tint by who it's with",
+  "ok": true,
+  "detail": "[\"you:rgb(243, 227, 220)\",\"agent:rgb(227, 232, 238)\",\"quiet:rgb(239, 233, 223)\",\"closed:rgb(235, 231, 225)\"]"
+ },
+ {
+  "where": "closed: no Day",
+  "ok": true,
+  "detail": "0/18"
+ }
+]

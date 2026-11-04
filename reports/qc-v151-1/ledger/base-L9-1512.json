@@ -1,0 +1,57 @@
+[
+ {
+  "where": "population: every group drawn",
+  "ok": false,
+  "detail": "[0,0,0,0]"
+ },
+ {
+  "where": "no Due column",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "where": "Next words: you",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "Next words: agent",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "Next words: quiet",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "Next words: closed",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "late words in rust 600",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "where": "buttons: last column, right",
+  "ok": false,
+  "detail": "[{\"w\":\"\",\"t\":\"Send partial →\",\"c\":\"rgb(28, 19, 15)\",\"btn\":true,\"inLast\":false,\"bg\":\"rgb(243, 200, 186)\",\"fg\":\"rgb(28, 19, 15)\",\"right\":159.640625},{\"w\":\"\",\"t\":\"Nudge →\",\"c\":\"rgb(28, 19, 15)\",\"btn\":true,\"inLast\":false,\"bg\":\"rgb(243, 200, 186)\",\"fg\":\"rgb(28, 19, 15)\",\"right\":199.890625},{\"w\":\"\",\"t\":\"Nudge →\",\"c\":\"rgb(28, 19, 15)\",\"btn\":true,\"inLast\":false,\"bg\":\"rgb(243, 200, 186)\",\"fg\":\"rgb(28, 19, 15)\",\"right\":199.890625}]"
+ },
+ {
+  "where": "buttons: #f3c8ba, black text",
+  "ok": true,
+  "detail": "[\"rgb(243, 200, 186) rgb(28, 19, 15)\"]"
+ },
+ {
+  "where": "Your move rows have a button",
+  "ok": true,
+  "detail": "0 without"
+ },
+ {
+  "where": "With the agent and Closed: no button",
+  "ok": true,
+  "detail": ""
+ }
+]

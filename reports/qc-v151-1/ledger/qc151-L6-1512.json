@@ -1,0 +1,77 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "{\"title\":\"Group the list by\",\"opts\":[{\"v\":\"attention\",\"b\":\"Who it's with\",\"s\":\"Your move, waiting, closed\"},{\"v\":\"status\",\"b\":\"Status\",\"s\":\"Where each query stands\"},{\"v\":\"action\",\"b\":\"Next action\",\"s\":\"What happens next, and when\"},{\"v\":\"package\",\"b\":\"Submission package\",\"s\":\"What you sent\"},{\"v\":\"none\",\"b\":\"No grouping\",\"s\":\"One list, in the order you sort by\"}],\"hrBeforeNone\":true,\"rows\":false}"
+ },
+ {
+  "where": "title",
+  "ok": true,
+  "detail": "Group the list by"
+ },
+ {
+  "where": "five options in order",
+  "ok": true,
+  "detail": "attention,status,action,package,none"
+ },
+ {
+  "where": "attention words",
+  "ok": true,
+  "detail": "Who it's with / Your move, waiting, closed"
+ },
+ {
+  "where": "status words",
+  "ok": true,
+  "detail": "Status / Where each query stands"
+ },
+ {
+  "where": "action words",
+  "ok": true,
+  "detail": "Next action / What happens next, and when"
+ },
+ {
+  "where": "package words",
+  "ok": true,
+  "detail": "Submission package / What you sent"
+ },
+ {
+  "where": "none words",
+  "ok": true,
+  "detail": "No grouping / One list, in the order you sort by"
+ },
+ {
+  "where": "divider before No grouping",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "no Rows control",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "attention sections",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "status sections",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "action sections",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "package sections",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "none sections",
+  "ok": true,
+  "detail": ""
+ }
+]
