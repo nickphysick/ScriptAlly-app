@@ -17,7 +17,7 @@ describe("pageChecklist (v18.3 §F)", () => {
     ]);
     expect(CONTACT_CHECKLIST.map((i) => i.key)).toEqual(["add", "search", "pin", "open", "edit", "hk"]);
     /* v24 F — full screen is the address book now, and the line says so */
-    expect(CONTACT_CHECKLIST[2].line).toBe("Turn the list into an address book while you work.");
+    expect(CONTACT_CHECKLIST[2].line).toBe("Use the row under the bar to jump to a letter, a week or a month.");
     /* a fresh account: the counter reads 0 of 6 */
     expect(doneCount(CONTACT_CHECKLIST, contactGuideOf(null).done)).toBe(0);
     expect(CONTACT_CHECKLIST).toHaveLength(6);
