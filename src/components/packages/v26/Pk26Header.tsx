@@ -6,7 +6,7 @@
  * (`.pb-hero`, `#stage`); every class carries the `p6-` prefix that pk26.generated.css is written against.
  * ⚠️ v39: the navy header card and the How it works dialog (`#hwm`, which replayed this stage) are DELETED — the
  *    populated page opens on the Contact list's header (Pk39Header), and both doors open the five-step guide
- *    (Pk39HowItWorks). The brand-new hero keeps this stage as its illustration (the v39 ref's screen 18 draws it).
+ *    (Pk41HowItWorks since v41). The brand-new hero keeps this stage as its illustration (the v39 ref's screen 18 draws it).
  *
  * ⚠️ THE ANIMATION IS THE REF'S `.an` STAGE: three material cards drop into the package's slots, a tick lights for
  *    each, "Ready" appears, the package's label travels to a query's "What went" and the pieces fade in. 10s loop,

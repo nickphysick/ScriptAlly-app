@@ -28,7 +28,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 import { usePk26Model } from "./packages/v26/usePk26Model";
 import { Pk26Hero } from "./packages/v26/Pk26Header";
-import { Pk39HowItWorks } from "./packages/v26/Pk39HowItWorks";
+import { Pk41HowItWorks } from "./packages/v41/Pk41HowItWorks";
+import { Pk41Hawk } from "./packages/v41/Pk41Hawk";
 import { Pk26Builder, type LibTab } from "./packages/v26/Pk26Builder";
 import { Pk41Banner } from "./packages/v41/Pk41Banner";
 import { Pk41Header } from "./packages/v41/Pk41Header";
@@ -152,7 +153,10 @@ export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab:
       <Pk26Drawer model={model} view={routeActive ? drawer : null} go={setDrawer} onSeeQueries={goQueries} onOpenComps={goComps} />
       <Pk26Dialog model={model} view={routeActive ? dialog : null} onClose={() => setDialog(null)} onCreated={(id) => setPending({ pkg: id, scroll: true })} />
       <Pk38Drawer model={model} p={routeActive ? pkdPkg : null} onClose={() => setPkdId(null)} onCopy={copy} onEdit={editIn} onSeeQueries={goQueries} />
-      <Pk39HowItWorks open={routeActive && how} onClose={() => setHow(false)} />
+      <Pk41HowItWorks open={routeActive && how} onClose={() => setHow(false)}
+        onShowFounding={founding && foundingNoteHidden(currentUser) ? () => setFoundingHidden(false) : undefined} />
+      {/* v41 G: the Archivist, pinned bottom-right while this page is on screen (portalled; desktop only, by CSS) */}
+      <Pk41Hawk on={routeActive && !empty} />
     </WorkspacePageGrid>
   );
 };
