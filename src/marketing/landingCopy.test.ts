@@ -11,6 +11,8 @@
  */
 
 import { describe, it, expect } from "vitest";
+import { readFileSync } from "fs";
+import { join } from "path";
 import {
   HERO_H1, HERO_CTA, FOUNDING_PERKS, WAIT_HERO_Q, WAIT_HERO_STRAP, WAIT_HERO_SUB, BE_HEADING, BE_LINE,
   BE_TICKS, FAQ, MISSION_HEADING, SEE_WHAT, DETAILS_HEADING, DETAILS_SUB, DETAILS_PILLS, PASS_LABEL,
@@ -309,7 +311,14 @@ describe("landing copy — verbatim locks", () => {
   });
 
   it("document title", () => {
-    expect(DOCUMENT_TITLE).toBe("QueryHawk — Take control of your querying journey");
+    expect(DOCUMENT_TITLE).toBe("QueryHawk: Your smart querying companion");
+  });
+
+  /* The landing sets the tab title at runtime and index.html carries it for crawlers. They are one
+     title: read from the file, so a change to either without the other goes red. */
+  it("the runtime title is index.html's <title>", () => {
+    const html = readFileSync(join(process.cwd(), "index.html"), "utf8");
+    expect(DOCUMENT_TITLE).toBe(html.match(/<title>([^<]*)<\/title>/)?.[1]);
   });
 
   /**
