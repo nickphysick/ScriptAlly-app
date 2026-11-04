@@ -123,6 +123,13 @@ export const TimelineStrip: React.FC<{ query: ReviewQuery; onChange: (next: Revi
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [d?.target]);
 
+  /* A month with six weeks makes the pop-over a row taller: when the calendar turns, a pop-over
+     placed below its tile is brought into view again, so its foot is never left under a clip. */
+  useLayoutEffect(() => {
+    if (d && !place.up) popRef.current?.scrollIntoView({ block: "nearest" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [d?.y, d?.m]);
+
   /* A click outside the pop-over and its tile closes it, without saving. */
   useEffect(() => {
     if (!d) return;
