@@ -197,7 +197,7 @@ A TICK (✓) beside an entry is NOT flagged: read it as "Queried" unless the lin
 the page's key defines it (see KEYS below).
 
 A NAME THE WRITER WASN'T SURE OF — a "?" or "(?)" touching the agent's NAME, inside the name's own
-part of the line ("Leo Fairbairn? – Lattice – 2/9"), is the writer's doubt about the name, never part
+part of the line ("Leo Marsh? – Lattice – 2/9"), is the writer's doubt about the name, never part
 of it. Give the name WITHOUT it, flag "check-reading", and give that name as the only entry in the
 agent's "readings". This is ONLY for a "?" on the name itself. A "?" anywhere else — at the end of
 the line, after a status, a date or a note ("R&R ?", "sent partial ?", "26/2 – queried ?") — is a

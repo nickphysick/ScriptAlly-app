@@ -1,0 +1,1 @@
+Run 2 of eval-live-v12b: 12 reads in eval-live-v12b (run 2) went through before the API key ran out of credit; the other 14 are this folder's, re-run after the top-up. Together they are the shipped wording's full second run.
