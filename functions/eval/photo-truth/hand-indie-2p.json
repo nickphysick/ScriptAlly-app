@@ -1,0 +1,274 @@
+{
+  "id": "hand-indie-2p",
+  "style": "hand",
+  "font": "Indie Flower",
+  "pages": 2,
+  "entries": [
+    {
+      "name": "Meredith Hale",
+      "agency": "Strand Literary",
+      "date": "5/1/2026",
+      "said": "sent partial",
+      "expect": "Partial Sent",
+      "page": 1,
+      "band": [
+        0.12153117179870605,
+        0.1749569320678711
+      ],
+      "line": "Meredith Hale – Strand Literary – 5/1/2026 – sent partial"
+    },
+    {
+      "name": "Bertie Ashworth",
+      "agency": "Vane & Hart",
+      "date": "26/3/26",
+      "said": "no reply",
+      "expect": "Queried",
+      "accept": [
+        "No Response"
+      ],
+      "page": 1,
+      "band": [
+        0.16151922225952148,
+        0.2149449920654297
+      ],
+      "line": "Bertie Ashworth – Vane & Hart – 26/3/26 – no reply"
+    },
+    {
+      "name": "Stanley Abara",
+      "agency": "",
+      "date": "27/3",
+      "said": "partial req",
+      "expect": "Partial Requested",
+      "page": 1,
+      "band": [
+        0.2015072822570801,
+        0.2549330520629883
+      ],
+      "line": "Stanley Abara – 27/3 – partial req"
+    },
+    {
+      "name": "Barnaby Whitlock",
+      "agency": "Price & Partners",
+      "date": "4/4",
+      "said": "full req",
+      "expect": "Full Requested",
+      "page": 1,
+      "band": [
+        0.24149534225463867,
+        0.2949211120605469
+      ],
+      "line": "Barnaby Whitlock – Price & Partners – 4/4 – full req"
+    },
+    {
+      "name": "Tomasz Quaye",
+      "agency": "Hale Agency",
+      "date": "17/6",
+      "said": "queried",
+      "expect": "Queried",
+      "page": 1,
+      "band": [
+        0.28148340225219726,
+        0.33490917205810544
+      ],
+      "line": "Tomasz Quaye – Hale Agency – 17/6 – queried"
+    },
+    {
+      "name": "Gideon Pennington",
+      "agency": "Fairbairn Associates",
+      "date": "21/2",
+      "said": "",
+      "expect": "Queried",
+      "illegibleAgency": {
+        "legible": 5
+      },
+      "page": 1,
+      "band": [
+        0.3214714813232422,
+        0.37489723205566405
+      ],
+      "line": "Gideon Pennington – Fairbairn Associates – 21/2"
+    },
+    {
+      "name": "Lottie Castellano",
+      "agency": "Okafor Lit",
+      "date": "20/4",
+      "said": "",
+      "expect": "Queried",
+      "mark": "✓",
+      "page": 1,
+      "band": [
+        0.36145954132080077,
+        0.41488529205322267
+      ],
+      "line": "Lottie Castellano – Okafor Lit – 20/4 ✓"
+    },
+    {
+      "name": "Jonah Drummond",
+      "agency": "Okafor Lit",
+      "date": "21/4",
+      "said": "sent full",
+      "expect": "Full Sent",
+      "page": 1,
+      "band": [
+        0.4014476013183594,
+        0.4548733520507813
+      ],
+      "line": "Jonah Drummond – Okafor Lit – 21/4 – sent full"
+    },
+    {
+      "name": "Esme Biddle",
+      "agency": "Vane & Hart",
+      "date": "1/6/26",
+      "said": "",
+      "expect": "Queried",
+      "mark": "✓",
+      "page": 1,
+      "band": [
+        0.441435661315918,
+        0.49486141204833983
+      ],
+      "line": "Esme Biddle – Vane & Hart – 1/6/26 ✓"
+    },
+    {
+      "name": "Ruth Drummond",
+      "agency": "Vane & Hart",
+      "date": "15/6/25",
+      "said": "",
+      "expect": "Queried",
+      "mark": "!",
+      "accept": [
+        "Queried",
+        "Partial Requested",
+        "Partial Sent",
+        "Full Requested",
+        "Full Sent",
+        "Revise & Resubmit",
+        "Offer",
+        "Rejected",
+        "Withdrawn",
+        "No Response"
+      ],
+      "page": 2,
+      "band": [
+        0.1240190601348877,
+        0.17457027435302735
+      ],
+      "line": "Ruth Drummond – Vane & Hart – 15/6/25 !"
+    },
+    {
+      "name": "Juno Mróz",
+      "agency": "Calloway Hunt",
+      "date": "8/9",
+      "said": "sent partial",
+      "expect": "Rejected",
+      "crossed": true,
+      "accept": [
+        "No Response",
+        "Withdrawn"
+      ],
+      "page": 2,
+      "band": [
+        0.16401168823242188,
+        0.21456291198730468
+      ],
+      "line": "Juno Mróz – Calloway Hunt – 8/9 – sent partial"
+    },
+    {
+      "name": "Barnaby Marchetti",
+      "agency": "Okafor Lit",
+      "date": "7/9",
+      "said": "sent full",
+      "expect": "Full Sent",
+      "page": 2,
+      "band": [
+        0.20400430679321288,
+        0.2545555305480957
+      ],
+      "line": "Barnaby Marchetti – Okafor Lit – 7/9 – sent full"
+    },
+    {
+      "name": "Felix Sharma",
+      "agency": "",
+      "date": "21/2/25",
+      "said": "partial req",
+      "expect": "Partial Requested",
+      "page": 2,
+      "band": [
+        0.24399694442749023,
+        0.29454816818237306
+      ],
+      "line": "Felix Sharma – 21/2/25 – partial req"
+    },
+    {
+      "name": "Gideon Strand",
+      "agency": "Okafor Lit",
+      "date": "13/5",
+      "said": "R&R",
+      "expect": "Revise & Resubmit",
+      "page": 2,
+      "band": [
+        0.28398956298828126,
+        0.33454078674316406
+      ],
+      "line": "Gideon Strand – Okafor Lit – 13/5 – R&R"
+    },
+    {
+      "name": "Anouk Mróz",
+      "agency": "Achebe & Rowe",
+      "date": "17/8/26",
+      "said": "",
+      "expect": "Queried",
+      "page": 2,
+      "band": [
+        0.3239822006225586,
+        0.3745334243774414
+      ],
+      "line": "Anouk Mróz – Achebe & Rowe – 17/8/26"
+    },
+    {
+      "name": "Tom Mróz",
+      "agency": "Calloway Hunt",
+      "date": "3/5/26",
+      "said": "",
+      "expect": "Rejected",
+      "crossed": true,
+      "accept": [
+        "No Response",
+        "Withdrawn"
+      ],
+      "page": 2,
+      "band": [
+        0.36397483825683596,
+        0.41452606201171877
+      ],
+      "line": "Tom Mróz – Calloway Hunt – 3/5/26"
+    },
+    {
+      "name": "Sophie Huxley",
+      "agency": "Achebe & Rowe",
+      "date": "17 Apr",
+      "said": "",
+      "expect": "Queried",
+      "mark": "✓",
+      "page": 2,
+      "band": [
+        0.4039674377441406,
+        0.4545186614990234
+      ],
+      "line": "Sophie Huxley – Achebe & Rowe – 17 Apr ✓"
+    },
+    {
+      "name": "Harriet Marchetti",
+      "agency": "Okafor Lit",
+      "date": "",
+      "said": "sent partial",
+      "expect": "Partial Sent",
+      "page": 2,
+      "band": [
+        0.443960075378418,
+        0.4945112991333008
+      ],
+      "line": "Harriet Marchetti – Okafor Lit – sent partial"
+    }
+  ]
+}

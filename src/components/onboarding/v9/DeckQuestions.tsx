@@ -47,7 +47,41 @@ export const DECK_WORDS = {
   namelessRemove: "Remove this row",
   mappingDone: "Mark as checked",
   change: "Change this",
+  /* Photos (smart-import-photos-v1). Never he/she: an agent is named, or "they". */
+  readingWhy: "Handwriting can read more than one way. Get the name right now and they're easy to find later.",
+  readingNeither: "Neither · type it",
+  illegibleWhyEmpty: "Add it if you know it, or carry on without one.",
+  crossedWhy: "People cross lines out for different reasons. Tell us once and the query is tracked the right way.",
+  crossedPassed: "Passed",
+  crossedNoResponse: "No response",
+  crossedNever: "I never sent it",
+  markWhy: "Statuses are picked, never guessed.",
 } as const;
+/* The photo questions' sentences, built from the read's own values. */
+export const readingAsk = (name: string, agency: string) => (agency ? <>We read this as <Raw>{name}</Raw> at <Raw>{agency}</Raw>. Is that right?</> : <>We read this as <Raw>{name}</Raw>. Is that right?</>);
+export const illegibleAsk = (name: string) => `We couldn't make out the agency next to ${name}.`;
+export const illegibleWhy = (start: string) => (start ? <>It looks like it starts <Raw>{start}</Raw>. Add it if you know it, or carry on without one.</> : DECK_WORDS.illegibleWhyEmpty);
+export const crossedAsk = (name: string) => `This line is crossed out. What does that mean for ${name}?`;
+/** "Use the same answer for the other crossed-out line (Tom Rafferty)" — names, up to three. */
+export function crossedAllLabel(names: readonly string[]): string {
+  const shown = names.slice(0, 3).join(", ") + (names.length > 3 ? ", …" : "");
+  return `Use the same answer for the other crossed-out ${names.length === 1 ? "line" : "lines"} (${shown})`;
+}
+/** What the line says beside its mark: its status or notes wording — the notes, or the line itself
+ *  without the mark and without the agent's name and agency at its start. */
+export function markWording(q: { notes?: string; statusRaw?: string | null; lineRaw?: string; markRaw?: string }, who: { name?: string; agency?: string } = {}): string {
+  const fromNotes = (q.notes ?? "").trim() || (q.statusRaw ?? "").trim();
+  if (fromNotes) return fromNotes;
+  let line = (q.lineRaw ?? "").trim();
+  const mark = (q.markRaw ?? "").trim();
+  if (mark && line.endsWith(mark)) line = line.slice(0, -mark.length).trim();
+  const SEP = /^\s*[–—\-,:|]\s*/;
+  for (const part of [who.name, who.agency]) {
+    const t = (part ?? "").trim();
+    if (t && line.toLowerCase().startsWith(t.toLowerCase())) line = line.slice(t.length).replace(SEP, "");
+  }
+  return line.trim();
+}
 export const agencyAsk = (name: string) => `Which agency is ${name} with?`;
 /** The status set's labels: the Query Centre's own names, with the first one spelled out. */
 export const statusPickLabel = (s: QueryStatus): string => (s === QueryStatus.QUERIED ? "Queried, no reply yet" : STAGE_NAME[s]);
@@ -114,6 +148,61 @@ export const NamelessQuestion: React.FC<{ onSave: (who: { name: string; agency: 
   );
 };
 
+/** Photos: a name or agency that reads more than one way. Each reading is a pick; "Neither · type it"
+ *  opens the name and agency fields. A reading is "Name, Agency" or "Name". */
+export function splitReading(reading: string, agency: string): { name: string; agency: string } {
+  const at = reading.indexOf(", ");
+  return at > 0 ? { name: reading.slice(0, at).trim(), agency: reading.slice(at + 2).trim() } : { name: reading.trim(), agency };
+}
+export const ReadingQuestion: React.FC<{ agent: ReviewAgent; onSave: (who: { name: string; agency: string }) => void }> = ({ agent, onSave }) => {
+  const [typing, setTyping] = useState(false);
+  const [name, setName] = useState(agent.name);
+  const [agency, setAgency] = useState(agent.agency);
+  const ref = useRef<HTMLInputElement>(null);
+  const best = agent.agency ? `${agent.name}, ${agent.agency}` : agent.name;
+  const readings = agent.readings && agent.readings.length ? agent.readings : [best];
+  const save = () => { const n = name.trim(), a = agency.trim(); if (n || a) onSave({ name: n, agency: a }); else ref.current?.focus(); };
+  const enter = (e: React.KeyboardEvent) => { if (e.key === "Enter") save(); };
+  return (
+    <div className="o9-q" data-reason="agent-reading">
+      <Ask>{readingAsk(agent.name, agent.agency)}</Ask>
+      <Why>{DECK_WORDS.readingWhy}</Why>
+      <div className="o9-ans">
+        {readings.map((r) => (
+          <button type="button" className="o9-pick" key={r} data-reading={r} onClick={() => onSave(splitReading(r, agent.agency))}>{r}</button>
+        ))}
+        {typing ? (
+          <>
+            <Fld label="Agent name"><input ref={ref} className="sf-in" type="text" value={name} placeholder="Agent name" onChange={(e) => setName(e.target.value)} onKeyDown={enter} /></Fld>
+            <Fld label="Agency"><input className="sf-in" type="text" value={agency} placeholder="Agency name" onChange={(e) => setAgency(e.target.value)} onKeyDown={enter} /></Fld>
+            <button type="button" className="sf-btn sf-btn--sm" onClick={save}>{DECK_WORDS.namelessSave}</button>
+          </>
+        ) : <Esc label={DECK_WORDS.readingNeither} onClick={() => setTyping(true)} />}
+      </div>
+    </div>
+  );
+};
+
+/** Photos: an agency is written but can't be made out. The field starts with the legible part. */
+export const IllegibleAgencyQuestion: React.FC<{ agent: ReviewAgent; onSave: (agency: string) => void; onCarryOn: () => void }> = ({ agent, onSave, onCarryOn }) => {
+  const [v, setV] = useState(agent.agency);
+  const ref = useRef<HTMLInputElement>(null);
+  const save = () => { const t = v.trim(); if (t) onSave(t); else ref.current?.focus(); };
+  return (
+    <div className="o9-q" data-reason="agent-illegible">
+      <Ask>{illegibleAsk(agent.name || "this agent")}</Ask>
+      <Why>{illegibleWhy(agent.agency.trim())}</Why>
+      <div className="o9-ans">
+        <Fld label="Agency name">
+          <input ref={ref} className="sf-in" type="text" value={v} placeholder="Agency name" onChange={(e) => setV(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") save(); }} />
+        </Fld>
+        <button type="button" className="sf-btn sf-btn--sm" onClick={save}>{DECK_WORDS.agencySave}</button>
+        <Esc label={DECK_WORDS.agencyCarry} note={DECK_WORDS.agencyKept} onClick={onCarryOn} />
+      </div>
+    </div>
+  );
+};
+
 export const MappingQuestion: React.FC<{ note: string; onChecked: () => void }> = ({ note, onChecked }) => (
   <div className="o9-q" data-reason="agent-mapping">
     <Ask>{quoteStatuses(note)}</Ask>
@@ -128,6 +217,13 @@ export interface QueryQuestionProps {
   onPatch: (p: Partial<ReviewQuery>) => void;
   onResolveReason: (code: ReviewReasonCode, patch?: Partial<ReviewQuery>) => void;
   onSwapDates: () => void;
+  /** Photos: the agent's name (the crossed-out question) and agency (the mark question's quote). */
+  agentName?: string;
+  agentAgency?: string;
+  /** Photos: the other crossed-out lines still open, by agent name (for "Use the same answer…"). */
+  crossedOthers?: string[];
+  /** Photos: a crossed-out line's answer; `all` applies it to every other open crossed-out line. */
+  onCrossed?: (answer: "rejected" | "no-response" | "never", all: boolean) => void;
 }
 
 const DateField: React.FC<{ onSave: (iso: string) => void }> = ({ onSave }) => {
@@ -139,6 +235,30 @@ const DateField: React.FC<{ onSave: (iso: string) => void }> = ({ onSave }) => {
       <Fld label="Date sent"><input ref={ref} className="sf-in" type="date" value={v} aria-label="Date sent" onChange={(e) => setV(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") save(); }} /></Fld>
       <button type="button" className="sf-btn sf-btn--sm" onClick={save}>{DECK_WORDS.dateSave}</button>
     </>
+  );
+};
+
+/** Photos: a crossed-out line. Passed, No response, or "I never sent it" (the agent is kept, the
+ *  query is not imported). With other crossed-out lines open, one tick answers them all. */
+const CrossedQuestion: React.FC<QueryQuestionProps> = ({ agentName, crossedOthers = [], onCrossed }) => {
+  const [all, setAll] = useState(true);
+  const others = crossedOthers.length > 0;
+  const answer = (a: "rejected" | "no-response" | "never") => onCrossed?.(a, others && all);
+  return (
+    <div className="o9-q" data-reason="crossed-out">
+      <Ask>{crossedAsk(agentName || "this agent")}</Ask>
+      <Why>{DECK_WORDS.crossedWhy}</Why>
+      <div className="o9-ans">
+        <button type="button" className="o9-pick" data-crossed="rejected" onClick={() => answer("rejected")}><StatusDot status={QueryStatus.REJECTED} overrideSize={17} />{DECK_WORDS.crossedPassed}</button>
+        <button type="button" className="o9-pick" data-crossed="no-response" onClick={() => answer("no-response")}><StatusDot status={QueryStatus.NO_RESPONSE} overrideSize={17} />{DECK_WORDS.crossedNoResponse}</button>
+        <button type="button" className="o9-pick" data-crossed="never" onClick={() => answer("never")}>{DECK_WORDS.crossedNever}</button>
+        {others && (
+          <label className="o9-tick" data-im="crossed-all">
+            <input type="checkbox" checked={all} onChange={(e) => setAll(e.target.checked)} /> {crossedAllLabel(crossedOthers)}
+          </label>
+        )}
+      </div>
+    </div>
   );
 };
 
@@ -171,6 +291,24 @@ export const QueryQuestion: React.FC<QueryQuestionProps> = (p) => {
         <div className="o9-ans">
           <DateField onSave={(iso) => onResolveReason(code, { sentDate: iso })} />
           <Esc label={DECK_WORDS.dateNone} note={DECK_WORDS.dateKept} onClick={() => onResolveReason(code, { sentDate: null })} />
+        </div>
+      </div>
+    );
+  }
+  if (code === "crossed-out") return <CrossedQuestion {...p} />;
+  if (code === "mark-unclear") {
+    const said = markWording(query, { name: p.agentName, agency: p.agentAgency });
+    const mark = (query.markRaw ?? "").trim() || "mark";
+    return (
+      <div className="o9-q" data-reason={code}>
+        <Ask>{said ? <>There's a <Raw>{mark}</Raw> after <Raw>{said}</Raw>. Where does this one stand?</> : <>There's a <Raw>{mark}</Raw> beside this line. Where does this one stand?</>}</Ask>
+        <Why>{DECK_WORDS.markWhy}</Why>
+        <div className="o9-ans" role="group" aria-label="Status">
+          {QUERY_STATUS_OPTIONS.map((s) => (
+            <button type="button" className="o9-pick" key={s} data-status={s} onClick={() => onResolveReason(code, { status: s })}>
+              <StatusDot status={s} overrideSize={17} />{statusPickLabel(s)}
+            </button>
+          ))}
         </div>
       </div>
     );

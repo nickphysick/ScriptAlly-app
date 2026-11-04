@@ -686,6 +686,7 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
         onCancel={onCancel}
         resume={resumeSnap}
         onChange={keepDraft}
+        photos={readPhotos}
       />
     );
   }

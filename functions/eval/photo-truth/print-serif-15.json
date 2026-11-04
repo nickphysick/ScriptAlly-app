@@ -1,0 +1,214 @@
+{
+  "id": "print-serif-15",
+  "style": "print",
+  "font": "Georgia",
+  "pages": 1,
+  "entries": [
+    {
+      "name": "Callum Osei",
+      "agency": "",
+      "date": "13/9/25",
+      "said": "queried",
+      "expect": "Queried",
+      "page": 1,
+      "band": [
+        0.15463227272033692,
+        0.20415645599365234
+      ],
+      "line": "Callum Osei – 13/9/25 – queried"
+    },
+    {
+      "name": "Oliver Osei",
+      "agency": "Hale Agency",
+      "date": "10/6",
+      "said": "no reply",
+      "expect": "Queried",
+      "accept": [
+        "No Response"
+      ],
+      "page": 1,
+      "band": [
+        0.1908714485168457,
+        0.24039562225341796
+      ],
+      "line": "Oliver Osei – Hale Agency – 10/6 – no reply"
+    },
+    {
+      "name": "Rhys Strand",
+      "agency": "Castellano Lit",
+      "date": "23/1/26",
+      "said": "",
+      "expect": "Queried",
+      "page": 1,
+      "band": [
+        0.22711063385009767,
+        0.2766348075866699
+      ],
+      "line": "Rhys Strand – Castellano Lit – 23/1/26"
+    },
+    {
+      "name": "Kirsten Brennan",
+      "agency": "Okafor Lit",
+      "date": "19/8/25",
+      "said": "partial req",
+      "expect": "Partial Requested",
+      "page": 1,
+      "band": [
+        0.2633498001098633,
+        0.31287399291992185
+      ],
+      "line": "Kirsten Brennan – Okafor Lit – 19/8/25 – partial req"
+    },
+    {
+      "name": "Bertie Kowalski",
+      "agency": "Marchetti Lit",
+      "date": "11/3/2026",
+      "said": "",
+      "expect": "Queried",
+      "page": 1,
+      "band": [
+        0.29958898544311524,
+        0.3491131591796875
+      ],
+      "line": "Bertie Kowalski – Marchetti Lit – 11/3/2026"
+    },
+    {
+      "name": "Callum Whitlock",
+      "agency": "Brennan & Moss",
+      "date": "21/3/25",
+      "said": "R&R",
+      "expect": "Revise & Resubmit",
+      "page": 1,
+      "band": [
+        0.3358281707763672,
+        0.38535232543945314
+      ],
+      "line": "Callum Whitlock – Brennan & Moss – 21/3/25 – R&R"
+    },
+    {
+      "name": "Clemence Calloway",
+      "agency": "Greaves",
+      "date": "13/1",
+      "said": "pass",
+      "expect": "Rejected",
+      "page": 1,
+      "band": [
+        0.3720673370361328,
+        0.4215915298461914
+      ],
+      "line": "Clemence Calloway – Greaves – 13/1 – pass"
+    },
+    {
+      "name": "Ottilie Whitlock",
+      "agency": "Marchetti Lit",
+      "date": "6 Jun",
+      "said": "no reply",
+      "expect": "Queried",
+      "accept": [
+        "No Response"
+      ],
+      "page": 1,
+      "band": [
+        0.4083065414428711,
+        0.45783069610595706
+      ],
+      "line": "Ottilie Whitlock – Marchetti Lit – 6 Jun – no reply"
+    },
+    {
+      "name": "Nadia Vane",
+      "agency": "Hale Agency",
+      "date": "17/7",
+      "said": "sent",
+      "expect": "Queried",
+      "page": 1,
+      "band": [
+        0.44454570770263674,
+        0.49406986236572265
+      ],
+      "line": "Nadia Vane – Hale Agency – 17/7 – sent"
+    },
+    {
+      "name": "Elspeth Rafferty",
+      "agency": "Tremaine Lit",
+      "date": "",
+      "said": "sent full",
+      "expect": "Full Sent",
+      "page": 1,
+      "band": [
+        0.4807848739624023,
+        0.5303090667724609
+      ],
+      "line": "Elspeth Rafferty – Tremaine Lit – sent full"
+    },
+    {
+      "name": "Rhys Nakamura",
+      "agency": "Thorne Literary",
+      "date": "12/3",
+      "said": "sent full",
+      "expect": "Full Sent",
+      "page": 1,
+      "band": [
+        0.5170240783691407,
+        0.5665482330322266
+      ],
+      "line": "Rhys Nakamura – Thorne Literary – 12/3 – sent full"
+    },
+    {
+      "name": "Ruth Calloway",
+      "agency": "Achebe & Rowe",
+      "date": "5/6/26",
+      "said": "",
+      "expect": "Queried",
+      "page": 1,
+      "band": [
+        0.5532632446289063,
+        0.6027873992919922
+      ],
+      "line": "Ruth Calloway – Achebe & Rowe – 5/6/26"
+    },
+    {
+      "name": "Hannah Ashworth",
+      "agency": "",
+      "date": "12/7",
+      "said": "R&R",
+      "expect": "Revise & Resubmit",
+      "page": 1,
+      "band": [
+        0.5895024108886718,
+        0.6390266036987304
+      ],
+      "line": "Hannah Ashworth – 12/7 – R&R"
+    },
+    {
+      "name": "Sophie Lacey",
+      "agency": "Brennan & Moss",
+      "date": "26/5",
+      "said": "sent full",
+      "expect": "Rejected",
+      "crossed": true,
+      "accept": [
+        "No Response",
+        "Withdrawn"
+      ],
+      "page": 1,
+      "band": [
+        0.6257416152954102,
+        0.6752658081054688
+      ],
+      "line": "Sophie Lacey – Brennan & Moss – 26/5 – sent full"
+    },
+    {
+      "name": "Kwame Vane",
+      "agency": "Vane & Hart",
+      "date": "20/6",
+      "said": "pass",
+      "expect": "Rejected",
+      "page": 1,
+      "band": [
+        0.6619807434082031,
+        0.7115049743652344
+      ],
+      "line": "Kwame Vane – Vane & Hart – 20/6 – pass"
+    }
+  ]
+}

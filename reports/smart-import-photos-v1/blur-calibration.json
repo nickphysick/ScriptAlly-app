@@ -1,0 +1,253 @@
+{
+  "threshold": 120,
+  "sharp": {
+    "min": 5324.628626429045,
+    "max": 9846.183513700491
+  },
+  "blurred": {
+    "min": 84.56512704966788,
+    "max": 231.5566663349639
+  },
+  "rows": [
+    {
+      "set": "hand-caveat-1p-blur",
+      "page": "page-1.jpg",
+      "blurred": true,
+      "score": 207.2834408168602
+    },
+    {
+      "set": "hand-caveat-1p-sharp",
+      "page": "page-1.jpg",
+      "blurred": false,
+      "score": 8282.964641829492
+    },
+    {
+      "set": "hand-caveat-short-blur",
+      "page": "page-1.jpg",
+      "blurred": true,
+      "score": 158.03616365610725
+    },
+    {
+      "set": "hand-caveat-short-sharp",
+      "page": "page-1.jpg",
+      "blurred": false,
+      "score": 6305.682144082764
+    },
+    {
+      "set": "hand-indie-22-blur",
+      "page": "page-1.jpg",
+      "blurred": true,
+      "score": 200.29108768593196
+    },
+    {
+      "set": "hand-indie-22-blur",
+      "page": "page-2.jpg",
+      "blurred": true,
+      "score": 178.9050181493427
+    },
+    {
+      "set": "hand-indie-22-sharp",
+      "page": "page-1.jpg",
+      "blurred": false,
+      "score": 8984.912417252022
+    },
+    {
+      "set": "hand-indie-22-sharp",
+      "page": "page-2.jpg",
+      "blurred": false,
+      "score": 7765.38316974286
+    },
+    {
+      "set": "hand-indie-2p-blur",
+      "page": "page-1.jpg",
+      "blurred": true,
+      "score": 154.21411465762424
+    },
+    {
+      "set": "hand-indie-2p-blur",
+      "page": "page-2.jpg",
+      "blurred": true,
+      "score": 160.6083726795202
+    },
+    {
+      "set": "hand-indie-2p-sharp",
+      "page": "page-1.jpg",
+      "blurred": false,
+      "score": 6718.836877609717
+    },
+    {
+      "set": "hand-indie-2p-sharp",
+      "page": "page-2.jpg",
+      "blurred": false,
+      "score": 6534.187198286255
+    },
+    {
+      "set": "hand-shadows-12-blur",
+      "page": "page-1.jpg",
+      "blurred": true,
+      "score": 193.0059768941754
+    },
+    {
+      "set": "hand-shadows-12-sharp",
+      "page": "page-1.jpg",
+      "blurred": false,
+      "score": 9557.670405799805
+    },
+    {
+      "set": "hand-shadows-3p-blur",
+      "page": "page-1.jpg",
+      "blurred": true,
+      "score": 157.91496551307313
+    },
+    {
+      "set": "hand-shadows-3p-blur",
+      "page": "page-2.jpg",
+      "blurred": true,
+      "score": 157.18425798982295
+    },
+    {
+      "set": "hand-shadows-3p-blur",
+      "page": "page-3.jpg",
+      "blurred": true,
+      "score": 161.2344428999303
+    },
+    {
+      "set": "hand-shadows-3p-sharp",
+      "page": "page-1.jpg",
+      "blurred": false,
+      "score": 7254.742241758081
+    },
+    {
+      "set": "hand-shadows-3p-sharp",
+      "page": "page-2.jpg",
+      "blurred": false,
+      "score": 7597.376070171697
+    },
+    {
+      "set": "hand-shadows-3p-sharp",
+      "page": "page-3.jpg",
+      "blurred": false,
+      "score": 7833.828672395494
+    },
+    {
+      "set": "print-mono-40-blur",
+      "page": "page-1.jpg",
+      "blurred": true,
+      "score": 102.15241438277472
+    },
+    {
+      "set": "print-mono-40-blur",
+      "page": "page-2.jpg",
+      "blurred": true,
+      "score": 92.04866468631137
+    },
+    {
+      "set": "print-mono-40-blur",
+      "page": "page-3.jpg",
+      "blurred": true,
+      "score": 84.56512704966788
+    },
+    {
+      "set": "print-mono-40-sharp",
+      "page": "page-1.jpg",
+      "blurred": false,
+      "score": 6603.2098131958965
+    },
+    {
+      "set": "print-mono-40-sharp",
+      "page": "page-2.jpg",
+      "blurred": false,
+      "score": 6474.936404687689
+    },
+    {
+      "set": "print-mono-40-sharp",
+      "page": "page-3.jpg",
+      "blurred": false,
+      "score": 5871.054356300238
+    },
+    {
+      "set": "print-sans-26-blur",
+      "page": "page-1.jpg",
+      "blurred": true,
+      "score": 145.24632589210455
+    },
+    {
+      "set": "print-sans-26-blur",
+      "page": "page-2.jpg",
+      "blurred": true,
+      "score": 140.3226247879138
+    },
+    {
+      "set": "print-sans-26-sharp",
+      "page": "page-1.jpg",
+      "blurred": false,
+      "score": 9459.452423375944
+    },
+    {
+      "set": "print-sans-26-sharp",
+      "page": "page-2.jpg",
+      "blurred": false,
+      "score": 9405.393000192023
+    },
+    {
+      "set": "print-serif-15-blur",
+      "page": "page-1.jpg",
+      "blurred": true,
+      "score": 156.47644478429197
+    },
+    {
+      "set": "print-serif-15-sharp",
+      "page": "page-1.jpg",
+      "blurred": false,
+      "score": 9846.183513700491
+    },
+    {
+      "set": "shot-sheet-12-blur",
+      "page": "page-1.jpg",
+      "blurred": true,
+      "score": 231.5566663349639
+    },
+    {
+      "set": "shot-sheet-12-sharp",
+      "page": "page-1.jpg",
+      "blurred": false,
+      "score": 7826.6675636247855
+    },
+    {
+      "set": "shot-sheet-24-blur",
+      "page": "page-1.jpg",
+      "blurred": true,
+      "score": 217.01564246917889
+    },
+    {
+      "set": "shot-sheet-24-blur",
+      "page": "page-2.jpg",
+      "blurred": true,
+      "score": 217.60126936458468
+    },
+    {
+      "set": "shot-sheet-24-sharp",
+      "page": "page-1.jpg",
+      "blurred": false,
+      "score": 7539.697727534966
+    },
+    {
+      "set": "shot-sheet-24-sharp",
+      "page": "page-2.jpg",
+      "blurred": false,
+      "score": 7123.189855925819
+    },
+    {
+      "set": "shot-sheet-8-blur",
+      "page": "page-1.jpg",
+      "blurred": true,
+      "score": 173.66758153312017
+    },
+    {
+      "set": "shot-sheet-8-sharp",
+      "page": "page-1.jpg",
+      "blurred": false,
+      "score": 5324.628626429045
+    }
+  ]
+}

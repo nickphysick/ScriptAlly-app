@@ -1,0 +1,452 @@
+{
+  "id": "hand-shadows-3p",
+  "style": "hand",
+  "font": "Shadows Into Light",
+  "pages": 3,
+  "entries": [
+    {
+      "name": "Lottie Gale",
+      "agency": "Vane & Hart",
+      "date": "1/1",
+      "said": "",
+      "expect": "Queried",
+      "page": 1,
+      "band": [
+        0.16151922225952148,
+        0.2149449920654297
+      ],
+      "line": "Lottie Gale – Vane & Hart – 1/1"
+    },
+    {
+      "name": "Harriet Ashworth",
+      "agency": "",
+      "date": "21/3",
+      "said": "sent full",
+      "expect": "Full Sent",
+      "page": 1,
+      "band": [
+        0.2015072822570801,
+        0.2549330520629883
+      ],
+      "line": "Harriet Ashworth – 21/3 – sent full"
+    },
+    {
+      "name": "Marcus Merriman",
+      "agency": "",
+      "date": "12/6",
+      "said": "sent",
+      "expect": "Queried",
+      "page": 1,
+      "band": [
+        0.24149534225463867,
+        0.2949211120605469
+      ],
+      "line": "Marcus Merriman – 12/6 – sent"
+    },
+    {
+      "name": "Imogen Ferreira",
+      "agency": "Okafor Lit",
+      "date": "",
+      "said": "full req",
+      "expect": "Full Requested",
+      "page": 1,
+      "band": [
+        0.28148340225219726,
+        0.33490917205810544
+      ],
+      "line": "Imogen Ferreira – Okafor Lit – full req"
+    },
+    {
+      "name": "Meredith Strand",
+      "agency": "Huxley Grant",
+      "date": "6/4",
+      "said": "full req",
+      "expect": "Full Requested",
+      "page": 1,
+      "band": [
+        0.3214714813232422,
+        0.37489723205566405
+      ],
+      "line": "Meredith Strand – Huxley Grant – 6/4 – full req"
+    },
+    {
+      "name": "Ottilie Vane",
+      "agency": "Okafor Lit",
+      "date": "6/4",
+      "said": "",
+      "expect": "Queried",
+      "mark": "✓",
+      "page": 1,
+      "band": [
+        0.36145954132080077,
+        0.41488529205322267
+      ],
+      "line": "Ottilie Vane – Okafor Lit – 6/4 ✓"
+    },
+    {
+      "name": "Daniel Mróz",
+      "agency": "Greaves",
+      "date": "",
+      "said": "R&R",
+      "expect": "Revise & Resubmit",
+      "mark": "?",
+      "accept": [
+        "Queried",
+        "Partial Requested",
+        "Partial Sent",
+        "Full Requested",
+        "Full Sent",
+        "Revise & Resubmit",
+        "Offer",
+        "Rejected",
+        "Withdrawn",
+        "No Response"
+      ],
+      "page": 1,
+      "band": [
+        0.4014476013183594,
+        0.4548733520507813
+      ],
+      "line": "Daniel Mróz – Greaves – R&R ?"
+    },
+    {
+      "name": "Imogen Mróz",
+      "agency": "Tremaine Lit",
+      "date": "21/2/26",
+      "said": "sent full",
+      "expect": "Full Sent",
+      "page": 1,
+      "band": [
+        0.441435661315918,
+        0.49486141204833983
+      ],
+      "line": "Imogen Mróz – Tremaine Lit – 21/2/26 – sent full"
+    },
+    {
+      "name": "Nadia Calloway",
+      "agency": "Price & Partners",
+      "date": "4 Jul",
+      "said": "sent",
+      "expect": "Queried",
+      "page": 1,
+      "band": [
+        0.48142372131347655,
+        0.5348494720458984
+      ],
+      "line": "Nadia Calloway – Price & Partners – 4 Jul – sent"
+    },
+    {
+      "name": "Elspeth Gale",
+      "agency": "Thorne Literary",
+      "date": "25 Jun",
+      "said": "full req",
+      "expect": "Rejected",
+      "crossed": true,
+      "accept": [
+        "No Response",
+        "Withdrawn"
+      ],
+      "page": 1,
+      "band": [
+        0.5214117813110352,
+        0.574837532043457
+      ],
+      "line": "Elspeth Gale – Thorne Literary – 25 Jun – full req"
+    },
+    {
+      "name": "Ottilie Strand",
+      "agency": "Huxley Grant",
+      "date": "15/8",
+      "said": "",
+      "expect": "Queried",
+      "mark": "✓",
+      "page": 2,
+      "band": [
+        0.1240190601348877,
+        0.17457027435302735
+      ],
+      "line": "Ottilie Strand – Huxley Grant – 15/8 ✓"
+    },
+    {
+      "name": "Bertie Rafferty",
+      "agency": "Ashworth Agency",
+      "date": "11/2",
+      "said": "queried",
+      "expect": "Queried",
+      "page": 2,
+      "band": [
+        0.16401168823242188,
+        0.21456291198730468
+      ],
+      "line": "Bertie Rafferty – Ashworth Agency – 11/2 – queried"
+    },
+    {
+      "name": "Juno Price",
+      "agency": "Calloway Hunt",
+      "date": "10/9/25",
+      "said": "R&R",
+      "expect": "Rejected",
+      "crossed": true,
+      "accept": [
+        "No Response",
+        "Withdrawn"
+      ],
+      "page": 2,
+      "band": [
+        0.20400430679321288,
+        0.2545555305480957
+      ],
+      "line": "Juno Price – Calloway Hunt – 10/9/25 – R&R"
+    },
+    {
+      "name": "Leo Pennington",
+      "agency": "Lowther Books",
+      "date": "9/4",
+      "said": "sent",
+      "expect": "Queried",
+      "page": 2,
+      "band": [
+        0.24399694442749023,
+        0.29454816818237306
+      ],
+      "line": "Leo Pennington – Lowther Books – 9/4 – sent"
+    },
+    {
+      "name": "Bertie Nakamura",
+      "agency": "Inglis & Day",
+      "date": "26/6",
+      "said": "queried",
+      "expect": "Queried",
+      "page": 2,
+      "band": [
+        0.28398956298828126,
+        0.33454078674316406
+      ],
+      "line": "Bertie Nakamura – Inglis & Day – 26/6 – queried"
+    },
+    {
+      "name": "Rhys Castellano",
+      "agency": "Inglis & Day",
+      "date": "16 Aug",
+      "said": "",
+      "expect": "Queried",
+      "page": 2,
+      "band": [
+        0.3239822006225586,
+        0.3745334243774414
+      ],
+      "line": "Rhys Castellano – Inglis & Day – 16 Aug"
+    },
+    {
+      "name": "Barnaby Oyelaran",
+      "agency": "Inglis & Day",
+      "date": "21/1",
+      "said": "",
+      "expect": "Queried",
+      "page": 2,
+      "band": [
+        0.36397483825683596,
+        0.41452606201171877
+      ],
+      "line": "Barnaby Oyelaran – Inglis & Day – 21/1"
+    },
+    {
+      "name": "Nadia Delacroix",
+      "agency": "Achebe & Rowe",
+      "date": "5/4",
+      "said": "sent",
+      "expect": "Queried",
+      "page": 2,
+      "band": [
+        0.4039674377441406,
+        0.4545186614990234
+      ],
+      "line": "Nadia Delacroix – Achebe & Rowe – 5/4 – sent"
+    },
+    {
+      "name": "Amara Wexford",
+      "agency": "Strand Literary",
+      "date": "17/8",
+      "said": "R&R",
+      "expect": "Revise & Resubmit",
+      "page": 2,
+      "band": [
+        0.443960075378418,
+        0.4945112991333008
+      ],
+      "line": "Amara Wexford – Strand Literary – 17/8 – R&R"
+    },
+    {
+      "name": "Tom Lacey",
+      "agency": "Greaves",
+      "date": "15 Jun",
+      "said": "",
+      "expect": "Queried",
+      "mark": "✓",
+      "page": 2,
+      "band": [
+        0.4839527130126953,
+        0.5345039367675781
+      ],
+      "line": "Tom Lacey – Greaves – 15 Jun ✓"
+    },
+    {
+      "name": "Daniel Delacroix",
+      "agency": "Fairbairn Associates",
+      "date": "27/5",
+      "said": "no reply",
+      "expect": "Queried",
+      "accept": [
+        "No Response"
+      ],
+      "illegibleAgency": {
+        "legible": 5
+      },
+      "page": 3,
+      "band": [
+        0.12511260986328124,
+        0.17182897567749023
+      ],
+      "line": "Daniel Delacroix – Fairbairn Associates – 27/5 – no reply"
+    },
+    {
+      "name": "Freya Nakamura",
+      "agency": "Calloway Hunt",
+      "date": "10/6",
+      "said": "queried",
+      "expect": "Queried",
+      "mark": "✗",
+      "accept": [
+        "Queried",
+        "Partial Requested",
+        "Partial Sent",
+        "Full Requested",
+        "Full Sent",
+        "Revise & Resubmit",
+        "Offer",
+        "Rejected",
+        "Withdrawn",
+        "No Response"
+      ],
+      "page": 3,
+      "band": [
+        0.16510961532592774,
+        0.21182598114013673
+      ],
+      "line": "Freya Nakamura – Calloway Hunt – 10/6 – queried ✗"
+    },
+    {
+      "name": "Stanley Ventris",
+      "agency": "Huxley Grant",
+      "date": "20/8/2026",
+      "said": "",
+      "expect": "Rejected",
+      "crossed": true,
+      "accept": [
+        "No Response",
+        "Withdrawn"
+      ],
+      "page": 3,
+      "band": [
+        0.20510663986206054,
+        0.25182300567626953
+      ],
+      "line": "Stanley Ventris – Huxley Grant – 20/8/2026"
+    },
+    {
+      "name": "Imogen Marchetti",
+      "agency": "Ashworth Agency",
+      "date": "4/7",
+      "said": "pass",
+      "expect": "Rejected",
+      "page": 3,
+      "band": [
+        0.24510364532470702,
+        0.29182001113891604
+      ],
+      "line": "Imogen Marchetti – Ashworth Agency – 4/7 – pass"
+    },
+    {
+      "name": "Anouk Mbeki",
+      "agency": "Marchetti Lit",
+      "date": "5/8/25",
+      "said": "sent partial",
+      "expect": "Partial Sent",
+      "page": 3,
+      "band": [
+        0.2851006698608398,
+        0.3318170166015625
+      ],
+      "line": "Anouk Mbeki – Marchetti Lit – 5/8/25 – sent partial"
+    },
+    {
+      "name": "Dev Kowalski",
+      "agency": "Castellano Lit",
+      "date": "5/6/2026",
+      "said": "",
+      "expect": "Queried",
+      "mark": "✓",
+      "page": 3,
+      "band": [
+        0.32509769439697267,
+        0.37181404113769534
+      ],
+      "line": "Dev Kowalski – Castellano Lit – 5/6/2026 ✓"
+    },
+    {
+      "name": "Imogen Biddle",
+      "agency": "Castellano Lit",
+      "date": "24/2/26",
+      "said": "R&R",
+      "expect": "Revise & Resubmit",
+      "illegibleAgency": {
+        "legible": 5
+      },
+      "page": 3,
+      "band": [
+        0.36509468078613283,
+        0.41181106567382814
+      ],
+      "line": "Imogen Biddle – Castellano Lit – 24/2/26 – R&R"
+    },
+    {
+      "name": "Ottilie Drummond",
+      "agency": "Hale Agency",
+      "date": "16/4",
+      "said": "",
+      "expect": "Queried",
+      "page": 3,
+      "band": [
+        0.4050917053222656,
+        0.45180809020996093
+      ],
+      "line": "Ottilie Drummond – Hale Agency – 16/4"
+    },
+    {
+      "name": "Rafferty Lowther",
+      "agency": "",
+      "date": "10 Aug",
+      "said": "R&R",
+      "expect": "Revise & Resubmit",
+      "page": 3,
+      "band": [
+        0.4450887298583984,
+        0.4918050765991211
+      ],
+      "line": "Rafferty Lowther – 10 Aug – R&R"
+    },
+    {
+      "name": "Nadia Whitlock",
+      "agency": "Marchetti Lit",
+      "date": "21/1/2026",
+      "said": "sent partial",
+      "expect": "Partial Sent",
+      "page": 3,
+      "band": [
+        0.4850857543945313,
+        0.531802101135254
+      ],
+      "line": "Nadia Whitlock – Marchetti Lit – 21/1/2026 – sent partial"
+    }
+  ]
+}

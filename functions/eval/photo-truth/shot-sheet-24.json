@@ -1,0 +1,326 @@
+{
+  "id": "shot-sheet-24",
+  "style": "shot",
+  "font": "Arial",
+  "pages": 2,
+  "entries": [
+    {
+      "name": "Jonah Calloway",
+      "agency": "Inglis & Day",
+      "date": "16/5",
+      "said": "",
+      "expect": "Queried",
+      "page": 1,
+      "band": [
+        0.1605,
+        0.2115
+      ],
+      "line": "Jonah Calloway Inglis & Day 16/5 "
+    },
+    {
+      "name": "Lottie Calloway",
+      "agency": "Marchetti Lit",
+      "date": "3 Feb",
+      "said": "sent full",
+      "expect": "Full Sent",
+      "page": 1,
+      "band": [
+        0.2115,
+        0.2625
+      ],
+      "line": "Lottie Calloway Marchetti Lit 3 Feb sent full"
+    },
+    {
+      "name": "Amara Sharma",
+      "agency": "",
+      "date": "18/6/26",
+      "said": "",
+      "expect": "Queried",
+      "page": 1,
+      "band": [
+        0.2625,
+        0.3135
+      ],
+      "line": "Amara Sharma  18/6/26 "
+    },
+    {
+      "name": "Amara Lindqvist",
+      "agency": "",
+      "date": "7/3/26",
+      "said": "sent full",
+      "expect": "Full Sent",
+      "page": 1,
+      "band": [
+        0.3135,
+        0.3645
+      ],
+      "line": "Amara Lindqvist  7/3/26 sent full"
+    },
+    {
+      "name": "Rafferty Nakamura",
+      "agency": "Greaves",
+      "date": "12/9/25",
+      "said": "sent full",
+      "expect": "Full Sent",
+      "page": 1,
+      "band": [
+        0.3645,
+        0.4155
+      ],
+      "line": "Rafferty Nakamura Greaves 12/9/25 sent full"
+    },
+    {
+      "name": "Freya Inglis",
+      "agency": "Vane & Hart",
+      "date": "1/2/26",
+      "said": "no reply",
+      "expect": "Queried",
+      "accept": [
+        "No Response"
+      ],
+      "page": 1,
+      "band": [
+        0.4155,
+        0.4665
+      ],
+      "line": "Freya Inglis Vane & Hart 1/2/26 no reply"
+    },
+    {
+      "name": "Stanley Abara",
+      "agency": "Thorne Literary",
+      "date": "20/9/2026",
+      "said": "",
+      "expect": "Queried",
+      "page": 1,
+      "band": [
+        0.4665,
+        0.5175
+      ],
+      "line": "Stanley Abara Thorne Literary 20/9/2026 "
+    },
+    {
+      "name": "Freya Brennan",
+      "agency": "Brennan & Moss",
+      "date": "20/9",
+      "said": "",
+      "expect": "Queried",
+      "page": 1,
+      "band": [
+        0.5175,
+        0.5685
+      ],
+      "line": "Freya Brennan Brennan & Moss 20/9 "
+    },
+    {
+      "name": "Sophie Gale",
+      "agency": "Inglis & Day",
+      "date": "21/2/26",
+      "said": "sent",
+      "expect": "Queried",
+      "page": 1,
+      "band": [
+        0.5685,
+        0.6195
+      ],
+      "line": "Sophie Gale Inglis & Day 21/2/26 sent"
+    },
+    {
+      "name": "Juno Merriman",
+      "agency": "Greaves",
+      "date": "14/2/2026",
+      "said": "queried",
+      "expect": "Queried",
+      "page": 1,
+      "band": [
+        0.6195,
+        0.6705
+      ],
+      "line": "Juno Merriman Greaves 14/2/2026 queried"
+    },
+    {
+      "name": "Ottilie Brennan",
+      "agency": "Tremaine Lit",
+      "date": "4/2/25",
+      "said": "partial req",
+      "expect": "Partial Requested",
+      "page": 1,
+      "band": [
+        0.6705,
+        0.7215
+      ],
+      "line": "Ottilie Brennan Tremaine Lit 4/2/25 partial req"
+    },
+    {
+      "name": "Callum Biddle",
+      "agency": "Inglis & Day",
+      "date": "17/6/2026",
+      "said": "",
+      "expect": "Queried",
+      "page": 1,
+      "band": [
+        0.7215,
+        0.7725
+      ],
+      "line": "Callum Biddle Inglis & Day 17/6/2026 "
+    },
+    {
+      "name": "Juno Pennington",
+      "agency": "Okafor Lit",
+      "date": "1/3",
+      "said": "sent partial",
+      "expect": "Partial Sent",
+      "page": 2,
+      "band": [
+        0.1605,
+        0.2115
+      ],
+      "line": "Juno Pennington Okafor Lit 1/3 sent partial"
+    },
+    {
+      "name": "Tom Brennan",
+      "agency": "Greaves",
+      "date": "15/2",
+      "said": "no reply",
+      "expect": "Queried",
+      "accept": [
+        "No Response"
+      ],
+      "page": 2,
+      "band": [
+        0.2115,
+        0.2625
+      ],
+      "line": "Tom Brennan Greaves 15/2 no reply"
+    },
+    {
+      "name": "Leo Lowther",
+      "agency": "Brennan & Moss",
+      "date": "25/7/2026",
+      "said": "",
+      "expect": "Queried",
+      "page": 2,
+      "band": [
+        0.2625,
+        0.3135
+      ],
+      "line": "Leo Lowther Brennan & Moss 25/7/2026 "
+    },
+    {
+      "name": "Freya Oyelaran",
+      "agency": "Achebe & Rowe",
+      "date": "6/4/2026",
+      "said": "sent partial",
+      "expect": "Partial Sent",
+      "page": 2,
+      "band": [
+        0.3135,
+        0.3645
+      ],
+      "line": "Freya Oyelaran Achebe & Rowe 6/4/2026 sent partial"
+    },
+    {
+      "name": "Marcus Gale",
+      "agency": "Okafor Lit",
+      "date": "12/2",
+      "said": "pass",
+      "expect": "Rejected",
+      "page": 2,
+      "band": [
+        0.3645,
+        0.4155
+      ],
+      "line": "Marcus Gale Okafor Lit 12/2 pass"
+    },
+    {
+      "name": "Priyanka Inglis",
+      "agency": "Huxley Grant",
+      "date": "16/8",
+      "said": "R&R",
+      "expect": "Revise & Resubmit",
+      "page": 2,
+      "band": [
+        0.4155,
+        0.4665
+      ],
+      "line": "Priyanka Inglis Huxley Grant 16/8 R&R"
+    },
+    {
+      "name": "Isla Achebe",
+      "agency": "Tremaine Lit",
+      "date": "17 Apr",
+      "said": "queried",
+      "expect": "Queried",
+      "page": 2,
+      "band": [
+        0.4665,
+        0.5175
+      ],
+      "line": "Isla Achebe Tremaine Lit 17 Apr queried"
+    },
+    {
+      "name": "Clemence Thorne",
+      "agency": "Greaves",
+      "date": "8/6",
+      "said": "partial req",
+      "expect": "Partial Requested",
+      "page": 2,
+      "band": [
+        0.5175,
+        0.5685
+      ],
+      "line": "Clemence Thorne Greaves 8/6 partial req"
+    },
+    {
+      "name": "Callum Hale",
+      "agency": "Huxley Grant",
+      "date": "",
+      "said": "pass",
+      "expect": "Rejected",
+      "page": 2,
+      "band": [
+        0.5685,
+        0.6195
+      ],
+      "line": "Callum Hale Huxley Grant  pass"
+    },
+    {
+      "name": "Rafferty Vane",
+      "agency": "Okafor Lit",
+      "date": "13/3",
+      "said": "",
+      "expect": "Queried",
+      "page": 2,
+      "band": [
+        0.6195,
+        0.6705
+      ],
+      "line": "Rafferty Vane Okafor Lit 13/3 "
+    },
+    {
+      "name": "Isla Thorne",
+      "agency": "",
+      "date": "11/7",
+      "said": "queried",
+      "expect": "Queried",
+      "page": 2,
+      "band": [
+        0.6705,
+        0.7215
+      ],
+      "line": "Isla Thorne  11/7 queried"
+    },
+    {
+      "name": "Juno Thorne",
+      "agency": "Lowther Books",
+      "date": "23/5",
+      "said": "R&R",
+      "expect": "Revise & Resubmit",
+      "page": 2,
+      "band": [
+        0.7215,
+        0.7725
+      ],
+      "line": "Juno Thorne Lowther Books 23/5 R&R"
+    }
+  ]
+}

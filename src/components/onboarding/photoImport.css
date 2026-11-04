@@ -59,9 +59,10 @@
 .sf .o9-snip figcaption { font-size: 13.5px; line-height: 1.4; color: rgba(var(--im-text-rgb), .55); }
 .sf .o9-snip figcaption .sf-link { font-size: 13.5px; text-underline-offset: 4px; margin-left: 6px; }
 .sf .o9-snipline { margin: 0; }
-.sf .o9-tick { flex-basis: 100%; display: flex; align-items: center; gap: 10px; font-size: 15px; line-height: 1.4; color: rgba(var(--im-text-rgb), .78); }
+.sf .o9-tick { flex-basis: 100%; display: flex; align-items: center; gap: 10px; font-family: var(--sp-serif); font-size: 15px; line-height: 1.4; color: rgba(var(--im-text-rgb), .78); }
+.sf label.o9-tick { font-family: var(--sp-serif); }
 .sf .o9-tick input { width: 18px; height: 18px; accent-color: var(--im-band); }
 
 /* "See the whole page": the import's own confirm card (im-ask), holding the page. */
-.sf .o9-pageview.im-ask { width: min(760px, calc(100vw - 32px)); max-height: calc(100vh - 32px); display: grid; gap: 12px; overflow: auto; }
+.sf .o9-pageview.im-ask { width: min(760px, calc(100vw - 32px)); max-width: none; max-height: calc(100vh - 32px); display: grid; gap: 12px; overflow: auto; }
 .sf .o9-pageview img { display: block; width: 100%; height: auto; border-radius: 6px; }

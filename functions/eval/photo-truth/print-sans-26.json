@@ -1,0 +1,383 @@
+{
+  "id": "print-sans-26",
+  "style": "print",
+  "font": "Arial",
+  "pages": 2,
+  "entries": [
+    {
+      "name": "Isla Vale",
+      "agency": "Hale Agency",
+      "date": "10/9/26",
+      "said": "",
+      "expect": "Queried",
+      "page": 1,
+      "band": [
+        0.11839309692382813,
+        0.16791727066040038
+      ],
+      "line": "Isla Vale – Hale Agency – 10/9/26"
+    },
+    {
+      "name": "Freya Ferreira",
+      "agency": "Okafor Lit",
+      "date": "4/2/26",
+      "said": "",
+      "expect": "Queried",
+      "mark": "✓",
+      "page": 1,
+      "band": [
+        0.15463227272033692,
+        0.20415645599365234
+      ],
+      "line": "Freya Ferreira – Okafor Lit – 4/2/26 ✓"
+    },
+    {
+      "name": "Daniel Ashworth",
+      "agency": "Brennan & Moss",
+      "date": "22 Jun",
+      "said": "",
+      "expect": "Rejected",
+      "crossed": true,
+      "accept": [
+        "No Response",
+        "Withdrawn"
+      ],
+      "page": 1,
+      "band": [
+        0.1908714485168457,
+        0.24039562225341796
+      ],
+      "line": "Daniel Ashworth – Brennan & Moss – 22 Jun"
+    },
+    {
+      "name": "Imogen Abara",
+      "agency": "Vane & Hart",
+      "date": "2/6/26",
+      "said": "full req",
+      "expect": "Full Requested",
+      "page": 1,
+      "band": [
+        0.22711063385009767,
+        0.2766348075866699
+      ],
+      "line": "Imogen Abara – Vane & Hart – 2/6/26 – full req"
+    },
+    {
+      "name": "Daniel Mróz",
+      "agency": "Okafor Lit",
+      "date": "8/1",
+      "said": "no reply",
+      "expect": "Queried",
+      "accept": [
+        "No Response"
+      ],
+      "page": 1,
+      "band": [
+        0.2633498001098633,
+        0.31287399291992185
+      ],
+      "line": "Daniel Mróz – Okafor Lit – 8/1 – no reply"
+    },
+    {
+      "name": "Meredith Marchetti",
+      "agency": "",
+      "date": "4/1/26",
+      "said": "queried",
+      "expect": "Queried",
+      "page": 1,
+      "band": [
+        0.29958898544311524,
+        0.3491131591796875
+      ],
+      "line": "Meredith Marchetti – 4/1/26 – queried"
+    },
+    {
+      "name": "Hannah Calloway",
+      "agency": "Vane & Hart",
+      "date": "4/5",
+      "said": "sent partial",
+      "expect": "Rejected",
+      "crossed": true,
+      "accept": [
+        "No Response",
+        "Withdrawn"
+      ],
+      "page": 1,
+      "band": [
+        0.3358281707763672,
+        0.38535232543945314
+      ],
+      "line": "Hannah Calloway – Vane & Hart – 4/5 – sent partial"
+    },
+    {
+      "name": "Wilfred Lindqvist",
+      "agency": "Thorne Literary",
+      "date": "13/9/26",
+      "said": "full req",
+      "expect": "Full Requested",
+      "page": 1,
+      "band": [
+        0.3720673370361328,
+        0.4215915298461914
+      ],
+      "line": "Wilfred Lindqvist – Thorne Literary – 13/9/26 – full req"
+    },
+    {
+      "name": "Sophie Mróz",
+      "agency": "Thorne Literary",
+      "date": "15/6/25",
+      "said": "",
+      "expect": "Queried",
+      "mark": "✓",
+      "page": 1,
+      "band": [
+        0.4083065414428711,
+        0.45783069610595706
+      ],
+      "line": "Sophie Mróz – Thorne Literary – 15/6/25 ✓"
+    },
+    {
+      "name": "Imogen Gale",
+      "agency": "Okafor Lit",
+      "date": "2 Apr",
+      "said": "no reply",
+      "expect": "Queried",
+      "accept": [
+        "No Response"
+      ],
+      "page": 1,
+      "band": [
+        0.44454570770263674,
+        0.49406986236572265
+      ],
+      "line": "Imogen Gale – Okafor Lit – 2 Apr – no reply"
+    },
+    {
+      "name": "Felix Oyelaran",
+      "agency": "Greaves",
+      "date": "1/6/2026",
+      "said": "full req",
+      "expect": "Full Requested",
+      "page": 1,
+      "band": [
+        0.4807848739624023,
+        0.5303090667724609
+      ],
+      "line": "Felix Oyelaran – Greaves – 1/6/2026 – full req"
+    },
+    {
+      "name": "Harriet Whitlock",
+      "agency": "Greaves",
+      "date": "23/2/26",
+      "said": "queried",
+      "expect": "Queried",
+      "page": 1,
+      "band": [
+        0.5170240783691407,
+        0.5665482330322266
+      ],
+      "line": "Harriet Whitlock – Greaves – 23/2/26 – queried"
+    },
+    {
+      "name": "Leo Ventris",
+      "agency": "Brennan & Moss",
+      "date": "25 Mar",
+      "said": "full req",
+      "expect": "Full Requested",
+      "page": 1,
+      "band": [
+        0.5532632446289063,
+        0.6027873992919922
+      ],
+      "line": "Leo Ventris – Brennan & Moss – 25 Mar – full req"
+    },
+    {
+      "name": "Esme Ashworth",
+      "agency": "Strand Literary",
+      "date": "12/9/26",
+      "said": "",
+      "expect": "Queried",
+      "page": 2,
+      "band": [
+        0.11990979194641113,
+        0.16659172058105468
+      ],
+      "line": "Esme Ashworth – Strand Literary – 12/9/26"
+    },
+    {
+      "name": "Harriet Abara",
+      "agency": "Castellano Lit",
+      "date": "2/6",
+      "said": "",
+      "expect": "Queried",
+      "page": 2,
+      "band": [
+        0.1561531162261963,
+        0.20283504486083984
+      ],
+      "line": "Harriet Abara – Castellano Lit – 2/6"
+    },
+    {
+      "name": "Felix Ashworth",
+      "agency": "Lowther Books",
+      "date": "13/2",
+      "said": "no reply",
+      "expect": "Queried",
+      "accept": [
+        "No Response"
+      ],
+      "page": 2,
+      "band": [
+        0.19239643096923828,
+        0.239078369140625
+      ],
+      "line": "Felix Ashworth – Lowther Books – 13/2 – no reply"
+    },
+    {
+      "name": "Ruth Mróz",
+      "agency": "Fairbairn Associates",
+      "date": "25 Jun",
+      "said": "sent partial",
+      "expect": "Partial Sent",
+      "page": 2,
+      "band": [
+        0.22863975524902344,
+        0.27532167434692384
+      ],
+      "line": "Ruth Mróz – Fairbairn Associates – 25 Jun – sent partial"
+    },
+    {
+      "name": "Bertie Wexford",
+      "agency": "Calloway Hunt",
+      "date": "3/3/26",
+      "said": "full req",
+      "expect": "Full Requested",
+      "page": 2,
+      "band": [
+        0.2648830795288086,
+        0.311564998626709
+      ],
+      "line": "Bertie Wexford – Calloway Hunt – 3/3/26 – full req"
+    },
+    {
+      "name": "Amara Huxley",
+      "agency": "Ashworth Agency",
+      "date": "20/5/26",
+      "said": "pass",
+      "expect": "Rejected",
+      "page": 2,
+      "band": [
+        0.30112638473510744,
+        0.3478083038330078
+      ],
+      "line": "Amara Huxley – Ashworth Agency – 20/5/26 – pass"
+    },
+    {
+      "name": "Meredith Drummond",
+      "agency": "Huxley Grant",
+      "date": "20/3/2026",
+      "said": "partial req",
+      "expect": "Partial Requested",
+      "page": 2,
+      "band": [
+        0.3373697280883789,
+        0.384051628112793
+      ],
+      "line": "Meredith Drummond – Huxley Grant – 20/3/2026 – partial req"
+    },
+    {
+      "name": "Felix Inglis",
+      "agency": "",
+      "date": "25 Mar",
+      "said": "pass",
+      "expect": "Rejected",
+      "page": 2,
+      "band": [
+        0.3736130142211914,
+        0.42029495239257814
+      ],
+      "line": "Felix Inglis – 25 Mar – pass"
+    },
+    {
+      "name": "Meredith Thorne",
+      "agency": "Strand Literary",
+      "date": "4 Feb",
+      "said": "",
+      "expect": "Queried",
+      "page": 2,
+      "band": [
+        0.4098563385009766,
+        0.4565382766723633
+      ],
+      "line": "Meredith Thorne – Strand Literary – 4 Feb"
+    },
+    {
+      "name": "Oliver Wexford",
+      "agency": "Okafor Lit",
+      "date": "",
+      "said": "sent partial",
+      "expect": "Partial Sent",
+      "mark": "?",
+      "accept": [
+        "Queried",
+        "Partial Requested",
+        "Partial Sent",
+        "Full Requested",
+        "Full Sent",
+        "Revise & Resubmit",
+        "Offer",
+        "Rejected",
+        "Withdrawn",
+        "No Response"
+      ],
+      "page": 2,
+      "band": [
+        0.44609966278076174,
+        0.49278160095214846
+      ],
+      "line": "Oliver Wexford – Okafor Lit – sent partial ?"
+    },
+    {
+      "name": "Sophie Brennan",
+      "agency": "Vane & Hart",
+      "date": "15/5",
+      "said": "no reply",
+      "expect": "Queried",
+      "accept": [
+        "No Response"
+      ],
+      "page": 2,
+      "band": [
+        0.4823429870605469,
+        0.5290249252319336
+      ],
+      "line": "Sophie Brennan – Vane & Hart – 15/5 – no reply"
+    },
+    {
+      "name": "Marcus Vane",
+      "agency": "",
+      "date": "15/6",
+      "said": "full req",
+      "expect": "Full Requested",
+      "page": 2,
+      "band": [
+        0.5185863113403321,
+        0.5652682495117187
+      ],
+      "line": "Marcus Vane – 15/6 – full req"
+    },
+    {
+      "name": "Tomasz Lacey",
+      "agency": "Fairbairn Associates",
+      "date": "14/2",
+      "said": "",
+      "expect": "Queried",
+      "page": 2,
+      "band": [
+        0.5548296356201172,
+        0.6015115737915039
+      ],
+      "line": "Tomasz Lacey – Fairbairn Associates – 14/2"
+    }
+  ]
+}

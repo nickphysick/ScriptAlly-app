@@ -1,0 +1,64 @@
+{
+  "agency-to-check": {
+    "chip": "Agency to check",
+    "ask": "We couldn't make out the agency next to Gideon Merriman.",
+    "why": "It looks like it starts “Lowth”. Add it if you know it, or carry on without one.",
+    "snip": {
+      "w": 640,
+      "h": 114,
+      "inked": 3461
+    },
+    "caption": "Your page 1.See the whole page",
+    "pos": "1 of 3",
+    "primary": "Continue to queries · 3 to answer first"
+  },
+  "name-to-check": {
+    "chip": "Name to check",
+    "ask": "We read this as “Leo Kowalski” at “Fairbairn Associates”. Is that right?",
+    "why": "Handwriting can read more than one way. Get the name right now and they're easy to find later.",
+    "snip": {
+      "w": 640,
+      "h": 114,
+      "inked": 3587
+    },
+    "caption": "Your page 1.See the whole page",
+    "pos": "2 of 3",
+    "primary": "Continue to queries · 3 to answer first"
+  },
+  "wholePage": {
+    "focused": "close-page",
+    "img": 1176
+  },
+  "wholePageClosed": true,
+  "agentsPrimary": "Continue to queries",
+  "crossed-out": {
+    "chip": "Crossed out",
+    "ask": "This line is crossed out. What does that mean for Kwame Achebe?",
+    "why": "People cross lines out for different reasons. Tell us once and the query is tracked the right way.",
+    "snip": {
+      "w": 640,
+      "h": 114,
+      "inked": 3570
+    },
+    "caption": "Your page 1.See the whole page",
+    "pos": "1 of 3",
+    "primary": "Import and get started · 3 to answer first"
+  },
+  "crossedCount": {
+    "before": "1 of 3",
+    "after": "2 of 3"
+  },
+  "mark-to-explain": {
+    "chip": "Mark to explain",
+    "ask": "There's a “✗” after “13/4 – R&R”. Where does this one stand?",
+    "why": "Statuses are picked, never guessed.",
+    "snip": {
+      "w": 640,
+      "h": 114,
+      "inked": 3865
+    },
+    "caption": "Your page 1.See the whole page",
+    "pos": "2 of 3",
+    "primary": "Import and get started · 1 to answer first"
+  }
+}

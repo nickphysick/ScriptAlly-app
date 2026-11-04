@@ -1,0 +1,321 @@
+{
+  "id": "hand-indie-22",
+  "style": "hand",
+  "font": "Indie Flower",
+  "pages": 2,
+  "entries": [
+    {
+      "name": "Kirsten Drummond",
+      "agency": "Lowther Books",
+      "date": "7/6/25",
+      "said": "full req",
+      "expect": "Full Requested",
+      "page": 1,
+      "band": [
+        0.16151922225952148,
+        0.2149449920654297
+      ],
+      "line": "Kirsten Drummond – Lowther Books – 7/6/25 – full req"
+    },
+    {
+      "name": "Priyanka Biddle",
+      "agency": "Achebe & Rowe",
+      "date": "9 Jan",
+      "said": "",
+      "expect": "Queried",
+      "mark": "✓",
+      "page": 1,
+      "band": [
+        0.2015072822570801,
+        0.2549330520629883
+      ],
+      "line": "Priyanka Biddle – Achebe & Rowe – 9 Jan ✓"
+    },
+    {
+      "name": "Kirsten Mróz",
+      "agency": "Tremaine Lit",
+      "date": "26/8/26",
+      "said": "sent",
+      "expect": "Queried",
+      "page": 1,
+      "band": [
+        0.24149534225463867,
+        0.2949211120605469
+      ],
+      "line": "Kirsten Mróz – Tremaine Lit – 26/8/26 – sent"
+    },
+    {
+      "name": "Hannah Lowther",
+      "agency": "",
+      "date": "5/7",
+      "said": "",
+      "expect": "Queried",
+      "page": 1,
+      "band": [
+        0.28148340225219726,
+        0.33490917205810544
+      ],
+      "line": "Hannah Lowther – 5/7"
+    },
+    {
+      "name": "Marcus Gale",
+      "agency": "Brennan & Moss",
+      "date": "2/7/2026",
+      "said": "sent partial",
+      "expect": "Partial Sent",
+      "page": 1,
+      "band": [
+        0.3214714813232422,
+        0.37489723205566405
+      ],
+      "line": "Marcus Gale – Brennan & Moss – 2/7/2026 – sent partial"
+    },
+    {
+      "name": "Daniel Marchetti",
+      "agency": "Strand Literary",
+      "date": "20/6/2026",
+      "said": "sent",
+      "expect": "Queried",
+      "page": 1,
+      "band": [
+        0.36145954132080077,
+        0.41488529205322267
+      ],
+      "line": "Daniel Marchetti – Strand Literary – 20/6/2026 – sent"
+    },
+    {
+      "name": "Anouk Vane",
+      "agency": "Hale Agency",
+      "date": "3/7/2026",
+      "said": "no reply",
+      "expect": "Queried",
+      "accept": [
+        "No Response"
+      ],
+      "page": 1,
+      "band": [
+        0.4014476013183594,
+        0.4548733520507813
+      ],
+      "line": "Anouk Vane – Hale Agency – 3/7/2026 – no reply"
+    },
+    {
+      "name": "Tom Delacroix",
+      "agency": "Achebe & Rowe",
+      "date": "8/6/25",
+      "said": "no reply",
+      "expect": "Queried",
+      "accept": [
+        "Queried",
+        "Partial Requested",
+        "Partial Sent",
+        "Full Requested",
+        "Full Sent",
+        "Revise & Resubmit",
+        "Offer",
+        "Rejected",
+        "Withdrawn",
+        "No Response"
+      ],
+      "mark": "✗",
+      "page": 1,
+      "band": [
+        0.441435661315918,
+        0.49486141204833983
+      ],
+      "line": "Tom Delacroix – Achebe & Rowe – 8/6/25 – no reply ✗"
+    },
+    {
+      "name": "Priyanka Vane",
+      "agency": "Lowther Books",
+      "date": "4/3/25",
+      "said": "R&R",
+      "expect": "Revise & Resubmit",
+      "page": 1,
+      "band": [
+        0.48142372131347655,
+        0.5348494720458984
+      ],
+      "line": "Priyanka Vane – Lowther Books – 4/3/25 – R&R"
+    },
+    {
+      "name": "Rafferty Ashworth",
+      "agency": "",
+      "date": "7 Aug",
+      "said": "",
+      "expect": "Queried",
+      "page": 1,
+      "band": [
+        0.5214117813110352,
+        0.574837532043457
+      ],
+      "line": "Rafferty Ashworth – 7 Aug"
+    },
+    {
+      "name": "Kwame Kowalski",
+      "agency": "Tremaine Lit",
+      "date": "12 May",
+      "said": "full req",
+      "expect": "Full Requested",
+      "page": 1,
+      "band": [
+        0.5613998413085938,
+        0.6148255920410156
+      ],
+      "line": "Kwame Kowalski – Tremaine Lit – 12 May – full req"
+    },
+    {
+      "name": "Freya Osei",
+      "agency": "Tremaine Lit",
+      "date": "13 Mar",
+      "said": "",
+      "expect": "Queried",
+      "mark": "✓",
+      "page": 2,
+      "band": [
+        0.1240190601348877,
+        0.17457027435302735
+      ],
+      "line": "Freya Osei – Tremaine Lit – 13 Mar ✓"
+    },
+    {
+      "name": "Rhys Huxley",
+      "agency": "Greaves",
+      "date": "11 May",
+      "said": "R&R",
+      "expect": "Revise & Resubmit",
+      "page": 2,
+      "band": [
+        0.16401168823242188,
+        0.21456291198730468
+      ],
+      "line": "Rhys Huxley – Greaves – 11 May – R&R"
+    },
+    {
+      "name": "Tom Biddle",
+      "agency": "Okafor Lit",
+      "date": "1/1/26",
+      "said": "",
+      "expect": "Queried",
+      "page": 2,
+      "band": [
+        0.20400430679321288,
+        0.2545555305480957
+      ],
+      "line": "Tom Biddle – Okafor Lit – 1/1/26"
+    },
+    {
+      "name": "Dev Whitlock",
+      "agency": "Okafor Lit",
+      "date": "18/1/25",
+      "said": "queried",
+      "expect": "Queried",
+      "illegibleAgency": {
+        "legible": 5
+      },
+      "page": 2,
+      "band": [
+        0.24399694442749023,
+        0.29454816818237306
+      ],
+      "line": "Dev Whitlock – Okafor Lit – 18/1/25 – queried"
+    },
+    {
+      "name": "Amara Vale",
+      "agency": "Castellano Lit",
+      "date": "27 Mar",
+      "said": "",
+      "expect": "Queried",
+      "page": 2,
+      "band": [
+        0.28398956298828126,
+        0.33454078674316406
+      ],
+      "line": "Amara Vale – Castellano Lit – 27 Mar"
+    },
+    {
+      "name": "Esme Calloway",
+      "agency": "Brennan & Moss",
+      "date": "24 Sept",
+      "said": "queried",
+      "expect": "Queried",
+      "page": 2,
+      "band": [
+        0.3239822006225586,
+        0.3745334243774414
+      ],
+      "line": "Esme Calloway – Brennan & Moss – 24 Sept – queried"
+    },
+    {
+      "name": "Kirsten Lacey",
+      "agency": "Castellano Lit",
+      "date": "4/4",
+      "said": "pass",
+      "expect": "Rejected",
+      "crossed": true,
+      "accept": [
+        "No Response",
+        "Withdrawn"
+      ],
+      "page": 2,
+      "band": [
+        0.36397483825683596,
+        0.41452606201171877
+      ],
+      "line": "Kirsten Lacey – Castellano Lit – 4/4 – pass"
+    },
+    {
+      "name": "Oliver Lowther",
+      "agency": "Marchetti Lit",
+      "date": "21 Sept",
+      "said": "",
+      "expect": "Queried",
+      "page": 2,
+      "band": [
+        0.4039674377441406,
+        0.4545186614990234
+      ],
+      "line": "Oliver Lowther – Marchetti Lit – 21 Sept"
+    },
+    {
+      "name": "Barnaby Biddle",
+      "agency": "Marchetti Lit",
+      "date": "21/6",
+      "said": "",
+      "expect": "Queried",
+      "mark": "✓",
+      "page": 2,
+      "band": [
+        0.443960075378418,
+        0.4945112991333008
+      ],
+      "line": "Barnaby Biddle – Marchetti Lit – 21/6 ✓"
+    },
+    {
+      "name": "Elspeth Okafor",
+      "agency": "Price & Partners",
+      "date": "20/1/2026",
+      "said": "queried",
+      "expect": "Queried",
+      "page": 2,
+      "band": [
+        0.4839527130126953,
+        0.5345039367675781
+      ],
+      "line": "Elspeth Okafor – Price & Partners – 20/1/2026 – queried"
+    },
+    {
+      "name": "Amara Tremaine",
+      "agency": "Lowther Books",
+      "date": "13/8",
+      "said": "",
+      "expect": "Queried",
+      "page": 2,
+      "band": [
+        0.5239453506469727,
+        0.5744965744018554
+      ],
+      "line": "Amara Tremaine – Lowther Books – 13/8"
+    }
+  ]
+}

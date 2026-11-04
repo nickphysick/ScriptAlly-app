@@ -34,6 +34,8 @@ export interface DeckCard {
   answered: boolean;
   /** The question and its answers, or (once answered) what was said and the way to change it. */
   body: React.ReactNode;
+  /** Photos (smart-import-photos-v1): the writer's own line, cut from their photo, above the question. */
+  lead?: React.ReactNode;
 }
 
 export const DECK_TITLE = "Needs an answer";
@@ -97,6 +99,7 @@ export const ReviewDeck: React.FC<{
             <div><b>{card.name}</b><small>{card.sub}</small></div>
             <Chip hot={!card.answered} data-im="deck-chip">{card.chip}</Chip>
           </div>
+          {card.lead}
           {card.body}
         </div>
         <button type="button" className="o9-deckarrow" disabled={i === cards.length - 1} aria-label="Next question" onClick={() => setAt(i + 1)} data-im="deck-next">›</button>
