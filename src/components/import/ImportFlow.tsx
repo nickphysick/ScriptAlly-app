@@ -579,6 +579,7 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
         error={manuscriptFailed ? manuscriptErrorLine(hostError) : commitError}
         onImport={handleImport}
         onCancel={onCancel}
+        photos={readPhotos}
       />
     );
   }

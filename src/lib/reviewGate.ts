@@ -19,12 +19,18 @@ import type { ReviewAgent, ReviewQuery } from "./smartImportReviewModel";
 // ── Agents ─────────────────────────────────────────────────────────────────────────────────────
 /** What an agent row is asked. A row with neither a name nor an agency cannot be tracked, so it is
  *  asked first and cannot be left blank: it is named, or removed. */
-export type AgentAsk = "nameless" | "no-agency" | "mapping";
+export type AgentAsk = "nameless" | "reading" | "illegible" | "no-agency" | "mapping";
 
+/** Photos (smart-import-photos-v1): a name that reads more than one way is asked before anything else
+ *  about the row, and an agency that couldn't be made out before the plain "no agency" question —
+ *  its answers ("Save agency", "Carry on without an agency") settle both. */
+const openReason = (a: ReviewAgent, kind: "reading" | "illegible") => a.reasons.some((r) => r.kind === kind && !r.resolved);
 export function agentAsk(a: ReviewAgent): AgentAsk | null {
   if (a.deleted) return null;
   const name = a.name.trim(), agency = a.agency.trim();
   if (!name && !agency) return "nameless";
+  if (openReason(a, "reading")) return "reading";
+  if (openReason(a, "illegible")) return "illegible";
   if (name && !agency && !a.agencyWaived) return "no-agency";
   if (a.reasons.some((r) => r.kind === "mapping" && !r.resolved)) return "mapping";
   return null;
@@ -42,18 +48,20 @@ export const openQueryQuestions = (queries: readonly ReviewQuery[]): QueryQuesti
   queries.filter((q) => !q.removed).flatMap((q) => { const r = q.reasons.find((x) => !x.resolved); return r ? [{ id: q.id, code: r.code }] : []; });
 
 /** The four families the queries step's questions fall into. */
-export type QuestionFamily = "confirm" | "missing" | "status" | "other";
+export type QuestionFamily = "confirm" | "missing" | "status" | "crossed" | "mark" | "other";
 export function questionFamily(code: ReviewReasonCode): QuestionFamily {
   switch (code) {
     case "ambiguous-date": case "ambiguous-response-date": case "serial-outlier": case "two-dates": return "confirm";
     case "no-date": case "unreadable-date": case "unreadable-response-date": case "missing-day": return "missing";
     case "status-direction": case "status-wording": return "status";
+    case "crossed-out": return "crossed";
+    case "mark-unclear": return "mark";
     default: return "other";
   }
 }
 export type FamilyCounts = Record<QuestionFamily, number>;
 export function familyCounts(questions: readonly QueryQuestion[]): FamilyCounts {
-  const out: FamilyCounts = { confirm: 0, missing: 0, status: 0, other: 0 };
+  const out: FamilyCounts = { confirm: 0, missing: 0, status: 0, crossed: 0, mark: 0, other: 0 };
   for (const q of questions) out[questionFamily(q.code)] += 1;
   return out;
 }
@@ -65,8 +73,10 @@ const sentence = (parts: string[]) => parts.join(", ");
 /** The summary's line for the agents that need an answer. Zero parts are dropped. */
 export function agentsAnswerLine(questions: readonly AgentQuestion[]): string {
   const n = (ask: AgentAsk) => questions.filter((q) => q.ask === ask).length;
-  const noAgency = n("no-agency"), nameless = n("nameless"), mapping = n("mapping");
+  const noAgency = n("no-agency"), nameless = n("nameless"), mapping = n("mapping"), reading = n("reading"), illegible = n("illegible");
   const parts: string[] = [];
+  if (reading > 0) parts.push(`${reading} ${reading === 1 ? "has a name" : "have names"} to check.`);
+  if (illegible > 0) parts.push(`${illegible} ${illegible === 1 ? "has an agency" : "have agencies"} we couldn't make out.`);
   if (noAgency > 0) parts.push(`${noAgency} ${noAgency === 1 ? "has" : "have"} no agency. Add it, or say you're carrying on without one.`);
   if (nameless > 0) parts.push(`${s(nameless, "row has", "rows have")} no agent or agency. Name ${nameless === 1 ? "it" : "them"}, or remove ${nameless === 1 ? "it" : "them"}.`);
   if (mapping > 0) parts.push(`${mapping} ${mapping === 1 ? "has a detail" : "have a detail"} to check.`);
@@ -79,6 +89,8 @@ export function queriesAnswerLine(questions: readonly QueryQuestion[]): string {
   if (c.confirm > 0) parts.push(s(c.confirm, "date to confirm", "dates to confirm"));
   if (c.missing > 0) parts.push(s(c.missing, "date missing", "dates missing"));
   if (c.status > 0) parts.push(s(c.status, "status to clarify", "statuses to clarify"));
+  if (c.crossed > 0) parts.push(s(c.crossed, "crossed-out line", "crossed-out lines"));
+  if (c.mark > 0) parts.push(s(c.mark, "mark to explain", "marks to explain"));
   if (c.other > 0) parts.push(s(c.other, "detail to check", "details to check"));
   return parts.length ? `${sentence(parts)}. One pick each.` : "";
 }
@@ -90,10 +102,12 @@ export function comingUpQueries(rest: readonly QueryQuestion[]): string[] {
   if (c.confirm > 0) out.push(s(c.confirm, "more date to confirm", "more dates to confirm"));
   if (c.missing > 0) out.push(s(c.missing, "more date needed", "more dates needed"));
   if (c.status > 0) out.push(s(c.status, "more status to clarify", "more statuses to clarify"));
+  if (c.crossed > 0) out.push(s(c.crossed, "more crossed-out line", "more crossed-out lines"));
+  if (c.mark > 0) out.push(s(c.mark, "more mark to explain", "more marks to explain"));
   if (c.other > 0) out.push(s(c.other, "more detail to check", "more details to check"));
   return out;
 }
-export const AGENT_ASK_CHIP: Record<AgentAsk, string> = { "no-agency": "No agency name", nameless: "No agent or agency", mapping: "Detail to check" };
+export const AGENT_ASK_CHIP: Record<AgentAsk, string> = { "no-agency": "No agency name", nameless: "No agent or agency", mapping: "Detail to check", reading: "Name to check", illegible: "Agency to check" };
 export function comingUpAgents(rest: readonly AgentQuestion[], nameOf: (id: string) => string): string[] {
   return rest.map((q) => `${nameOf(q.id) || "A row"} · ${AGENT_ASK_CHIP[q.ask].toLowerCase()}`);
 }
@@ -120,7 +134,7 @@ export const gateHint = (step: "agents" | "queries", open: number): string =>
 export type AnswerKind = "confirmed" | "added" | "blank" | "status" | "checked";
 export function answerKind(code: ReviewReasonCode, q: ReviewQuery): AnswerKind {
   const family = questionFamily(code);
-  if (family === "status") return "status";
+  if (family === "status" || family === "crossed" || family === "mark") return "status";
   if (code === "unreadable-response-date" || code === "ambiguous-response-date") {
     const d = q.timeline[0]?.date ?? null;
     return !d ? "blank" : family === "confirm" ? "confirmed" : "added";

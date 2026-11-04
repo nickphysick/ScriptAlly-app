@@ -32,7 +32,7 @@ import { SmartImportResult, ReviewReasonCode } from "../../types/smartImport";
 import { QueryStatus } from "../../types";
 import { agentPrimary, AGENT_NOT_SPECIFIED } from "../../lib/agentDisplay";
 import {
-  ReviewAgent, ReviewQuery, CheckReason,
+  ReviewAgent, ReviewQuery, CheckReason, openCrossedOthers, applyCrossedAnswer, settleAgentReason,
   resolveReason, fmtDate,
   dupNoteOpen, dupNoteKept, parseModel, modelToResult, autoSetAsideRows, applyAgentRemoval, seedUnidentifiedSetAside,
   removeDuplicateRecord, buildClusters, mergedAwayByKeeper,
@@ -45,7 +45,10 @@ import { AgentRow, QueryRow, DupeOpen, DupeKept, DupeMerged } from "./reviewRows
 import { Disc, initialsOf } from "./ImportParts";
 import { GoMark } from "./v9/GoMark";
 import { ReviewDeck, DeckCard } from "./v9/ReviewDeck";
-import { AgencyQuestion, NamelessQuestion, MappingQuestion, QueryQuestion, Answered, DECK_WORDS } from "./v9/DeckQuestions";
+import { AgencyQuestion, NamelessQuestion, MappingQuestion, QueryQuestion, Answered, DECK_WORDS, ReadingQuestion, IllegibleAgencyQuestion } from "./v9/DeckQuestions";
+import { PhotoLead, PageView } from "./v9/PhotoSnip";
+import type { ReviewPhoto } from "../../lib/photoImport";
+import "./photoImport.css";
 import {
   agentAsk, AgentAsk, AGENT_ASK_CHIP, openAgentQuestions, openQueryQuestions, questionFamily,
   comingUpAgents, comingUpQueries, reviewSubline, gatePrimary, gateHint,
@@ -137,6 +140,8 @@ export interface SmartImportReviewProps {
   /** A commit error from the host (e.g. commitSmartImport threw) — surfaced above the list so a
    *  failed import is never silent. The host owns the message; this component just shows it. */
   error?: string | null;
+  /** Photos (smart-import-photos-v1): the pages that were read, in the order sent, for the cut-outs. */
+  photos?: ReviewPhoto[];
   /** Import the final working model. The component converts it (modelToResult) to a SmartImportResult
    *  ready for commitSmartImport(deps, result, manuscriptId). The host owns the commit deps; this
    *  component owns the conversion. */
@@ -149,8 +154,10 @@ export interface SmartImportReviewProps {
 
 type Step = "duplicates" | "agents" | "queries";
 
-export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, manuscriptTitle, onBack, error, onImport, onCancel }) => {
+export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, manuscriptTitle, onBack, error, onImport, onCancel, photos }) => {
   const initial = useMemo(() => parseModel(result), [result]);
+  /* Photos: the page open full size from "See the whole page", or none. */
+  const [viewPage, setViewPage] = useState<ReviewPhoto | null>(null);
   // v9: nothing is set aside before the review begins. A row with no agent and no agency is
   // asked about on the agents step.
   const seeded = initial;
@@ -357,6 +364,10 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
       ? { ...q, ...patch, reasons: q.reasons.map((r) => (r.code === code ? { ...r, resolved: true } : r)) }
       : q)));
   };
+  /* Photos: the other crossed-out lines still waiting for an answer, and a crossed-out line's answer
+     for one query or (with the tick) every open one at once (lib/smartImportReviewModel). */
+  const openCrossed = (exceptId: string) => openCrossedOthers(queries, exceptId);
+  const answerCrossed = (ids: string[], answer: "rejected" | "no-response" | "never") => setQueries((xs) => applyCrossedAnswer(xs, ids, answer));
   // Swap which date is the sent date vs the (first) timeline event — the two-dates "Swap" control.
   const swapQueryDates = (id: string) => {
     setQueries((xs) => xs.map((q) => {
@@ -553,9 +564,23 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
         onSave={({ name, agency }) => patch(a.id, { name, agency, agencyOnly: !name && !!agency })}
         onRemove={() => { const next = seedUnidentifiedSetAside(agents, queries, a.id); setAgents(next.agents); setQueries(next.queries); }}
       />) }];
-    if (ask === "no-agency") return [{ ...base, body: <AgencyQuestion agent={a} onSave={(agency) => patch(a.id, { agency })} onCarryOn={() => patch(a.id, { agencyWaived: true })} /> }];
-    if (ask === "mapping") return [{ ...base, body: <MappingQuestion note={a.reasons.find((r) => r.kind === "mapping" && !r.resolved)!.note} onChecked={() => resolveMapping(a.id)} /> }];
+    /* Photos: the writer's own line, from the first of this agent's queries that has one. */
+    const mine = queries.find((q) => q.agentRef === a.id && (q.src || q.lineRaw));
+    const lead = mine ? <PhotoLead src={mine.src} lineRaw={mine.lineRaw} photos={photos} onSeePage={setViewPage} /> : undefined;
+    const settle = (kind: CheckReason, p: Partial<ReviewAgent>) => setAgents((xs) => settleAgentReason(xs, a.id, kind, p));
+    if (ask === "reading") return [{ ...base, lead, body: <ReadingQuestion agent={a} onSave={({ name, agency }) => settle("reading", { name, agency, agencyOnly: !name && !!agency })} /> }];
+    if (ask === "illegible") return [{ ...base, lead, body: (
+      <IllegibleAgencyQuestion agent={a}
+        onSave={(agency) => settle("illegible", { agency, agencyWaived: false })}
+        onCarryOn={() => settle("illegible", { agency: "", agencyWaived: true })} />) }];
+    if (ask === "no-agency") return [{ ...base, lead, body: <AgencyQuestion agent={a} onSave={(agency) => patch(a.id, { agency })} onCarryOn={() => patch(a.id, { agencyWaived: true })} /> }];
+    if (ask === "mapping") return [{ ...base, lead, body: <MappingQuestion note={a.reasons.find((r) => r.kind === "mapping" && !r.resolved)!.note} onChecked={() => resolveMapping(a.id)} /> }];
     /* answered: what was said, and the way to change it */
+    const reopen = (kind: CheckReason) => setAgents((xs) => xs.map((x) => (x.id === a.id ? { ...x, reasons: x.reasons.map((r) => (r.kind === kind ? { ...r, resolved: false } : r)) } : x)));
+    if (d.ask === "reading") return [{ ...base, lead, body: <Answered reason="agent-reading" onChange={() => reopen("reading")}>Saved as {[a.name, a.agency].filter(Boolean).join(", ")}.</Answered> }];
+    if (d.ask === "illegible") return [{ ...base, lead, body: a.agency.trim()
+      ? <Answered reason="agent-illegible" onChange={() => reopen("illegible")}>Agency saved: {a.agency}.</Answered>
+      : <Answered reason="agent-illegible" onChange={() => { reopen("illegible"); patch(a.id, { agencyWaived: false }); }}>{DECK_WORDS.agencyKept}</Answered> }];
     if (a.deleted) return [{ ...base, name: "Unnamed row", body: <Answered reason="agent-nameless" onChange={() => restoreAgent(a.id)}>Row removed. It will be listed as not imported.</Answered> }];
     if (d.ask === "nameless") return [{ ...base, body: <Answered reason="agent-nameless" onChange={() => patch(a.id, { name: "", agency: "", agencyOnly: false })}>Saved as {who}.</Answered> }];
     if (d.ask === "no-agency") return [{ ...base, body: a.agency.trim()
@@ -571,15 +596,18 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
     const code = (open ?? q.reasons[q.reasons.length - 1]).code;
     const name = agentNameOf(q.agentRef);
     const statusAsk = questionFamily(code) === "status";
+    const lead = q.src || q.lineRaw ? <PhotoLead src={q.src} lineRaw={q.lineRaw} photos={photos} onSeePage={setViewPage} /> : undefined;
     const base = {
-      key: `q-${q.id}`, name, initials: initialsOf(name), answered: !open,
+      key: `q-${q.id}`, name, initials: initialsOf(name), answered: !open, lead,
       /* a date question shows the status it has; a status question shows the date it has */
       sub: `${originOf(q)} · ${statusAsk ? (q.sentDate ? fmtDate(q.sentDate) : "Undated") : STAGE_NAME[q.status]}`,
       chip: open ? focusReasonMeta(code).pill : "Answered",
     };
     if (open) return [{ ...base, body: (
       <QueryQuestion key={code} query={q} code={code} onPatch={(p) => patchQuery(q.id, p)}
-        onResolveReason={(c, p) => resolveQueryReason(q.id, c, p)} onSwapDates={() => swapQueryDates(q.id)} />) }];
+        onResolveReason={(c, p) => resolveQueryReason(q.id, c, p)} onSwapDates={() => swapQueryDates(q.id)}
+        agentName={name} agentAgency={agents.find((x) => x.id === q.agentRef)?.agency} crossedOthers={openCrossed(q.id).map((x) => agentNameOf(x.agentRef))}
+        onCrossed={(answer, all) => answerCrossed([q.id, ...(all ? openCrossed(q.id).map((x) => x.id) : [])], answer)} />) }];
     return [{ ...base, body: <Answered reason={code} onChange={() => reopenQueryReasons(q.id)}>{STAGE_NAME[q.status]}, {q.sentDate ? `sent ${fmtDate(q.sentDate)}` : "kept undated"}.</Answered> }];
   });
 
@@ -657,6 +685,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
         </div>
       )}
       {error && <p className="im-commiterr" role="alert" data-im="commit-error">{error}</p>}
+      {viewPage && <PageView photo={viewPage} onClose={() => setViewPage(null)} />}
       {!isDup && openCount > 0 && <ReviewDeck cards={cards} faq={<Questions items={faqs} open={openFaqs} onToggle={toggleFaq} />} />}
       {!isDup && openCount > 0 && coming.length > 0 && (
         <p className="o9-upnext o9-rise" data-im="coming-up"><span>{READY_LIST.lead}</span>{coming.map((c) => <Chip key={c}>{c}</Chip>)}</p>

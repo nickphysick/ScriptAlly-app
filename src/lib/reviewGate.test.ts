@@ -56,7 +56,9 @@ describe("the tiers say what is in them", () => {
     expect(queriesAnswerLine([])).toBe("");
   });
   it("every reason code belongs to a family", () => {
-    for (const c of REVIEW_REASON_CODES) expect(["confirm", "missing", "status", "other"]).toContain(questionFamily(c));
+    /* RE-POINTED (smart-import-photos-v1): a crossed-out line and a mark are families of their own. */
+    for (const c of REVIEW_REASON_CODES) expect(["confirm", "missing", "status", "crossed", "mark", "other"]).toContain(questionFamily(c));
+    expect([questionFamily("crossed-out"), questionFamily("mark-unclear")]).toEqual(["crossed", "mark"]);
   });
   it("coming up", () => {
     expect(comingUpQueries([...q("ambiguous-date", 1), ...q("no-date", 2), ...q("status-wording", 3)])).toEqual(["1 more date to confirm", "2 more dates needed", "3 more statuses to clarify"]);

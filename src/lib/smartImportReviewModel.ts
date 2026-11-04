@@ -55,11 +55,14 @@ export interface ReviewAgent {
    *  empty agency is honest; resolvable later from the agent's profile). Lifts the blocking
    *  needs-agency gate without inventing a placeholder. Only meaningful when a name is present. */
   agencyWaived?: boolean;
+  /** Photos only (smart-import-photos-v1): the model's readings of a name or agency the handwriting
+   *  left unclear, best first. Read-only, for the "Name to check" question; never written. */
+  readings?: string[];
 }
 
 /** Why a card asks something. `duplicate` resolves via the remove-one / keep-both controls; `mapping`
  *  is the low-confidence / flagged-by-the-mapper reason, resolved by "Mark as checked". */
-export type CheckReason = "duplicate" | "mapping";
+export type CheckReason = "duplicate" | "mapping" | "reading" | "illegible";
 /** `undoable` notes show an Undo beside "✓ Checked"; a destructively-merged duplicate is not. */
 export interface ReasonItem { kind: CheckReason; note: string; resolved: boolean; undoable: boolean; }
 
@@ -200,7 +203,7 @@ export function unresolvedDuplicateAgentIds(agents: ReviewAgent[]): Set<string> 
 
 export const agentTier = (a: ReviewAgent, inUnresolvedDup: boolean): ReviewTier =>
   inUnresolvedDup ? "fix"                                                    // the only hard fix (duplicates stage)
-    : (!a.agency.trim() && !a.agencyWaived) || a.reasons.some((r) => r.kind === "mapping" && !r.resolved) ? "sharpen"
+    : (!a.agency.trim() && !a.agencyWaived) || a.reasons.some((r) => r.kind !== "duplicate" && !r.resolved) ? "sharpen"
     : "ready";
 
 export const queryTier = (q: ReviewQuery): ReviewTier =>
@@ -224,7 +227,7 @@ export function reviewTallies(agents: ReviewAgent[], queries: ReviewQuery[]): Re
   const ag: PopulationTally = { total: liveAgents.length, ready: 0, fix: 0, sharpen: 0 };
   for (const a of liveAgents) {
     if (dupIds.has(a.id)) ag.fix++;
-    else if ((!a.agency.trim() && !a.agencyWaived) || a.reasons.some((r) => r.kind === "mapping" && !r.resolved)) ag.sharpen++;
+    else if ((!a.agency.trim() && !a.agencyWaived) || a.reasons.some((r) => r.kind !== "duplicate" && !r.resolved)) ag.sharpen++;
     else ag.ready++;
   }
   const qy: PopulationTally = { total: liveQueries.length, ready: 0, fix: 0, sharpen: 0 };
@@ -239,6 +242,10 @@ const isReviewReasonCode = (c: unknown): c is ReviewReasonCode =>
 /** Reason codes that describe the AGENT's identity (name/agency), not the query. Handled on the
  *  Agents stage; stripped from query reasons so they never render as query noise. */
 export const AGENT_IDENTITY_CODES = new Set<ReviewReasonCode>(["check-name", "needs-identifying"]);
+/** Photos only: the two codes about the agent's NAME or AGENCY. The model sets them on a query (its
+ *  shape has reasons on queries only); parseModel moves them onto that query's agent, where the
+ *  Agents step asks them. */
+export const AGENT_PHOTO_CODES: Record<string, CheckReason> = { "check-reading": "reading", "illegible-agency": "illegible" };
 /** The reasons that are about the SENT date. A query carrying one is already being asked for it. */
 export const SENT_DATE_CODES = new Set<ReviewReasonCode>(["no-date", "unreadable-date", "ambiguous-date", "missing-day", "serial-outlier", "two-dates"]);
 const coerceStatus = (s: unknown): QueryStatus | null =>
@@ -364,6 +371,7 @@ export function parseModel(result: SmartImportResult): { agents: ReviewAgent[]; 
     reasons: ((a.name || "").trim() && a.issues && a.issues.length
       ? [{ kind: "mapping", note: friendly(a.issues) || MAPPING_NOTE, resolved: false, undoable: true } as ReasonItem]
       : []),
+    ...(a.readings && a.readings.length ? { readings: a.readings.slice(0, 3) } : {}),
     mergeWith: [],
     mergeResolved: false,
     deleted: false,
@@ -428,8 +436,15 @@ export function parseModel(result: SmartImportResult): { agents: ReviewAgent[]; 
     // query — they're handled on the Agents stage (agency-only agents are captured/editable there; the
     // truly-unidentifiable are auto-set-aside). Strip them here so they never echo as query noise.
     const reasons: QueryReason[] = (q.reasons || [])
-      .filter((c): c is ReviewReasonCode => isReviewReasonCode(c) && !AGENT_IDENTITY_CODES.has(c))
+      .filter((c): c is ReviewReasonCode => isReviewReasonCode(c) && !AGENT_IDENTITY_CODES.has(c) && !(c in AGENT_PHOTO_CODES))
       .map((code) => ({ code, resolved: false }));
+    /* Photos: a name or agency to check is asked on the AGENT (once, however many of its queries
+       carry it). */
+    const agent = agents.find((a) => a.id === q.agentRef);
+    for (const c of q.reasons || []) {
+      const kind = AGENT_PHOTO_CODES[c as string];
+      if (agent && kind && !agent.reasons.some((r) => r.kind === kind)) agent.reasons.push({ kind, note: "", resolved: false, undoable: true });
+    }
     /* v9: A MISSING SENT DATE IS ASKED ABOUT, ON BOTH PATHS. Smart Import already flags its own
        ("no-date"); the template path passed a blank cell in silence, so the row arrived as ready
        and undated. The query still lands undated if the writer says they do not have the date. */
@@ -444,11 +459,39 @@ export function parseModel(result: SmartImportResult): { agents: ReviewAgent[]; 
       timeline,
       reasons,
       notes: q.notes ?? "",
+      ...(q.src ? { src: q.src } : {}),
+      ...(q.lineRaw ? { lineRaw: q.lineRaw } : {}),
+      ...(q.markRaw ? { markRaw: q.markRaw } : {}),
       removed: false,
     };
   });
 
   return { agents, queries };
+}
+
+// ── Photos (smart-import-photos-v1): answering the new questions ─────────────────────────────────
+/** The other crossed-out queries still waiting for an answer. */
+export const openCrossedOthers = (queries: readonly ReviewQuery[], exceptId: string): ReviewQuery[] =>
+  queries.filter((x) => !x.removed && x.id !== exceptId && x.reasons.some((r) => r.code === "crossed-out" && !r.resolved));
+
+/**
+ * A crossed-out line's answer, for these queries. Passed → Rejected, No response → No Response, and
+ * "I never sent it" leaves the query out of the import (its agent is kept). Each answers the question.
+ */
+export function applyCrossedAnswer(queries: ReviewQuery[], ids: readonly string[], answer: "rejected" | "no-response" | "never"): ReviewQuery[] {
+  const set = new Set(ids);
+  return queries.map((x) => {
+    if (!set.has(x.id)) return x;
+    const reasons = x.reasons.map((r) => (r.code === "crossed-out" ? { ...r, resolved: true } : r));
+    if (answer === "never") return { ...x, reasons, removed: true, removedReason: "Removed by you" as const };
+    return { ...x, reasons, status: answer === "rejected" ? QueryStatus.REJECTED : QueryStatus.NO_RESPONSE };
+  });
+}
+
+/** Settle an agent's photo question (a name to check, an agency that couldn't be read) with the
+ *  writer's answer: the patch applied, the reason resolved. */
+export function settleAgentReason(agents: ReviewAgent[], id: string, kind: CheckReason, patch: Partial<ReviewAgent>): ReviewAgent[] {
+  return agents.map((x) => (x.id === id ? { ...x, ...patch, reasons: x.reasons.map((r) => (r.kind === kind ? { ...r, resolved: true } : r)) } : x));
 }
 
 /** Pure cascade for the agents-screen bin: marks the agent deleted and all its not-yet-removed queries
@@ -709,8 +752,9 @@ export function applyDuplicateCollapse(
 export function modelToResult(result: SmartImportResult, agents: ReviewAgent[], queries: ReviewQuery[]): SmartImportResult {
   const origAgents = new Map((result.agents || []).map((a) => [a.ref, a]));
   const agentsOut: ParsedAgent[] = agents.filter((a) => !a.deleted).map((a) => {
-    const o = origAgents.get(a.id);
-    return { ...(o ?? { ref: a.id, name: a.name }), ref: a.id, name: a.name, agency: a.agency, genres: a.genres, website: a.website || o?.website,
+    /* The photo read's readings are the review's alone: never carried towards a write. */
+    const { readings: _readings, ...o } = origAgents.get(a.id) ?? ({ ref: a.id, name: a.name } as ParsedAgent);
+    return { ...o, ref: a.id, name: a.name, agency: a.agency, genres: a.genres, website: a.website || o?.website,
       // what the file gave or the writer set in review; null where neither did
       responseTimeWeeks: a.weeks,
       starRating: a.rating >= 1 && a.rating <= 5 ? a.rating : null,

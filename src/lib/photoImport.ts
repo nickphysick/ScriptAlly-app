@@ -183,6 +183,24 @@ export function fitsPayload(lengths: readonly number[]): boolean {
  *  number the writer saw it under on the photos screen; `url` is its prepared JPEG. */
 export interface ReviewPhoto { shown: number; url: string; width: number; height: number }
 
+/** The cut-out's widest drawing, in px. */
+export const SNIP_MAX_WIDTH = 640;
+/** Padding above and below the band, as a share of the page's height. */
+export const SNIP_PAD = 0.04;
+/**
+ * Where a cut-out is taken from on its page, and the size it is drawn at: the band `src.y`, padded by
+ * 4% of the page's height each side (clamped to the page), the page's full width, drawn at up to
+ * 640px wide with its own proportions.
+ */
+export function snipRect(src: { y: [number, number] }, width: number, height: number) {
+  const top = Math.max(0, src.y[0] - SNIP_PAD), bottom = Math.min(1, src.y[1] + SNIP_PAD);
+  const sx = 0, sw = width;
+  const sy = Math.round(top * height), sh = Math.max(1, Math.round((bottom - top) * height));
+  const dw = Math.min(SNIP_MAX_WIDTH, sw);
+  const dh = Math.max(1, Math.round((sh * dw) / sw));
+  return { sx, sy, sw, sh, dw, dh };
+}
+
 // ── Object URLs ──────────────────────────────────────────────────────────────────────────────────
 /**
  * Every object URL the flow makes goes through one of these, and `revokeAll` is called when the flow
