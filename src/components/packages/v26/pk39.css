@@ -130,9 +130,6 @@
 .p9-icp .p9-icp-ics button { height: 38px; padding: 0; border: 0; border-radius: 8px; background: #f6f2ec; color: #1c130f; cursor: pointer; display: grid; place-items: center; }
 .p9-icp .p9-icp-ics button svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; }
 .p9-icp .p9-icp-ics button[aria-pressed="true"] { background: var(--pc, #1d4b63); color: #fff; }
-.p9-icp .p9-icp-cols { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; }
-.p9-icp .p9-icp-cols button { aspect-ratio: 1; padding: 0; border: 0; border-radius: 50%; background: var(--sw); cursor: pointer; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08); }
-.p9-icp .p9-icp-cols button[aria-pressed="true"] { box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--sw); }
 .p9-icp button:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
 .p9-icp .p9-icp-f { margin: 14px 0 0; font: italic 400 12.5px/1.45 var(--sp-serif); color: rgba(28, 19, 15, 0.58); }
 

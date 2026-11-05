@@ -870,7 +870,8 @@
     "design-refs/submission-packages-v39-1/submission-packages-v39-1.html": "934c0dfa9eef84c4f79175555be2e5fef7edb2d486a00bf3f832e0767035060d",
     "design-refs/submission-packages-v39-2/submission-packages-v39-2.html": "8cf26f5cc3c4d8d5b8bf492eb6a89a5a7a73fb2ee49159f78752bb8d1ff0e27b",
     "design-refs/submission-packages-v39-3/package-builder-v39-3.html": "b334d89bf15b9cdc1b5f5dbf9d1834a4e47ff76f47ea1e504264a1bc5a8be970",
-    "design-refs/submission-packages-v41/submission-packages-v41.html": "281a1980aa3c203845e455c9c724eaf3ee77b4fdfd8f6d8571208442154be06b"
+    "design-refs/submission-packages-v41/submission-packages-v41.html": "281a1980aa3c203845e455c9c724eaf3ee77b4fdfd8f6d8571208442154be06b",
+    "design-refs/submission-packages-v42/submission-packages-v42.html": "13cb7d2c8b5bc05a87b24e3691e72a6c3d4c7c20fa200af4cc24ae4f70442cab"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",

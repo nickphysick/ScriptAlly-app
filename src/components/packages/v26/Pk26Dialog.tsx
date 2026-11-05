@@ -5,16 +5,16 @@
  * Submission packages v26 — New package and Package details. v39.1 Part H: they open in the app's slide-out drawer (the
  * package drawer's frame: `p6-layer` > `p6-cx-dim` + `aside.p6-cx-drw`, ref `#drw`), not a centred dialog. The header is
  * the package's own colour and follows the chosen swatch live, before anything is saved. The form is the ref's
- * (`pa-`, pk391.generated.css). Every handler, write and validation is v39's; only the container changed. Name (required), who it's for (optional), an icon from twelve, a colour from eight (v39), and for a new package "Start from": empty,
+ * (`pa-`, pk391.generated.css). Every handler, write and validation is v39's; only the container changed. Name (required), who it's for (optional), an icon from twelve, (v42: no colour; v39's eight are retired from the form), and for a new package "Start from": empty,
  * or a copy of the active package. Opened from the pencil or the icon tile it renames and re-icons a package and
  * offers "Delete package" — refused, with the reason, for one that has gone out with queries. Enter submits.
  */
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { PACKAGE_ICONS, type PackageColour, type PackageIcon, type SubmissionPackage } from "../../../types";
+import { PACKAGE_ICONS, type PackageIcon, type SubmissionPackage } from "../../../types";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import { iconOf } from "../../../lib/packagesV26";
-import { colourOf, firstFreeColour, PACKAGE_COLOURS, pcStyle } from "../../../lib/packagesV39";
+import { pcStyle } from "../../../lib/packagesV39";
 import { PicBare } from "./icons";
 import type { Pk26Model } from "./usePk26Model";
 
@@ -45,8 +45,8 @@ const Body: React.FC<{ shown: boolean; model: Pk26Model; p: SubmissionPackage | 
   const [name, setName] = useState(p?.packageName ?? "");
   const [note, setNote] = useState(p?.note ?? "");
   const [ic, setIc] = useState<PackageIcon>(p ? iconOf(p) : "star");
-  /* v39 C: a new package starts on the first colour no live package uses (Harbour when all eight are taken) */
-  const [col, setCol] = useState<PackageColour>(p ? colourOf(p) : firstFreeColour(model.msPkgs));
+  /* v42 A/E: no colour field. Package colours are not shown anywhere; an edit leaves a stored colour as it is, and a new
+     package is written without one (absent reads as Harbour, and nothing paints it). */
   /* the copy offered: the package "Make a copy" came from, else the active one */
   const used = (copyOf ? model.msPkgs.find((x) => x.id === copyOf) : null) ?? model.active;
   const [from, setFrom] = useState<string>(copyOf && used?.id === copyOf ? copyOf : "empty");
@@ -61,13 +61,13 @@ const Body: React.FC<{ shown: boolean; model: Pk26Model; p: SubmissionPackage | 
     if (!name.trim()) { setErr(true); nameRef.current?.focus(); return; }
     setBusy(true);
     if (p) {
-      const done = await model.saveDetails(p, { name, note, icon: ic, colour: col });
+      const done = await model.saveDetails(p, { name, note, icon: ic });
       setBusy(false);
       if (done) onClose();
       return;
     }
     const known = version && model.versionRows.some((v) => v.id === version) ? version : null;
-    const id = await model.createPackage({ name, note, icon: ic, colour: col, from: from === "empty" ? null : from, ...(known ? { piece: { kind: "ver" as const, id: known } } : {}) });
+    const id = await model.createPackage({ name, note, icon: ic, from: from === "empty" ? null : from, ...(known ? { piece: { kind: "ver" as const, id: known } } : {}) });
     setBusy(false);
     if (id) { onCreated(id); onClose(); }
   };
@@ -83,17 +83,12 @@ const Body: React.FC<{ shown: boolean; model: Pk26Model; p: SubmissionPackage | 
           <small>{p ? "Rename it, change how it looks, or add a note on who it’s for." : "Give it a name and a look you’ll recognise. You’ll pick its pieces on the page."}</small></div>
         <button type="button" className="p41-dh-x" aria-label="Close" onClick={onClose}>✕</button>
       </div>
-      <div className="pa-db pa-pd-b" style={pcStyle({ colour: col })}>
+      <div className="pa-db pa-pd-b" style={pcStyle(p)}>
         <label className="pa-pd-f"><span>Name</span><input ref={nameRef} className={`pa-id-pdName p6-id-pdName${err ? " p6-err" : ""}`} value={name} placeholder="e.g. Standard UK, US agents, Agents who want 50 pages" autoComplete="off" onChange={(e) => { setName(e.target.value); setErr(false); }} onKeyDown={onEnter} /></label>
         <label className="pa-pd-f"><span>Who it’s for <em>optional</em></span><input ref={noteRef} className="pa-id-pdNote p6-id-pdNote" value={note} placeholder="e.g. Agents who ask for a synopsis" autoComplete="off" onChange={(e) => setNote(e.target.value)} onKeyDown={onEnter} /></label>
         <div className="pa-pd-f"><span>Icon <em>so you can spot it in the Query Centre</em></span>
           <div className="pa-pd-ics" role="radiogroup" aria-label="Icon" data-pk391="pd-ics">
             {PACKAGE_ICONS.map((k) => <button type="button" key={k} role="radio" aria-checked={ic === k} aria-label={k} onClick={() => setIc(k)}><PicBare ic={k} /></button>)}
-          </div>
-        </div>
-        <div className="pa-pd-f"><span>Colour</span>
-          <div className="pa-pd-cols" role="radiogroup" aria-label="Colour" data-pk39="dlg-cols">
-            {PACKAGE_COLOURS.map((c) => <button type="button" key={c.key} role="radio" aria-checked={col === c.key} aria-label={c.name} title={c.name} data-col={c.key} style={{ ["--sw" as string]: c.hex }} onClick={() => setCol(c.key)} />)}
           </div>
         </div>
         {p ? null : (

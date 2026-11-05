@@ -187,7 +187,7 @@ const Header: React.FC<Pk393Props & { locked: boolean; out: boolean; sent: numbe
   const st = stepStatus(p, sent, out);
   return (
     <div className="p93-bh" style={pcStyle(p)} data-pk39="pkg-head" data-pk393="head">
-      <button ref={tile} type="button" className="p93-bh-ic" aria-label="Change icon and colour" title="Change icon and colour" aria-expanded={picker} aria-haspopup="dialog"
+      <button ref={tile} type="button" className="p93-bh-ic" aria-label="Change icon" title="Change icon" aria-expanded={picker} aria-haspopup="dialog"
         disabled={draft} data-pk39="tile" data-pk393="tile" onClick={() => setPicker((v) => !v)}>
         <Pic ic={iconOf(p)} cls="p9-pic" />
       </button>

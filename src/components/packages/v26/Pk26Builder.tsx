@@ -19,7 +19,7 @@ import { PACKAGE_ICONS, type PackageIcon, type SubmissionPackage } from "../../.
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import { extraSuggestions, iconOf, offersNewExtra } from "../../../lib/packagesV26";
 import { isLocked } from "../../../lib/packagesV40";
-import { colourOf, PACKAGE_COLOURS, pcStyle } from "../../../lib/packagesV39";
+import { pcStyle } from "../../../lib/packagesV39";
 import { PicBare } from "./icons";
 import type { PieceKind, Pk26Model } from "./usePk26Model";
 import { Pk393Builder } from "./Pk393Builder";
@@ -143,7 +143,8 @@ export const NameInPlace: React.FC<{ model: Pk26Model; p: SubmissionPackage }> =
   );
 };
 
-/** E — the icon-and-colour picker: a popover under the header's icon tile. A pick saves at once. */
+/** E — the icon picker: a popover under the header's icon tile. A pick saves at once. v42 A: icons only (the colour
+ *  swatches are retired; package colours are not shown anywhere). */
 export const LookPicker: React.FC<{ model: Pk26Model; p: SubmissionPackage; anchor: HTMLElement; onClose: () => void }> = ({ model, p, anchor, onClose }) => {
   const box = useRef<HTMLDivElement | null>(null);
   useEscapeLayer(true, onClose, ESC_LEVEL.page);
@@ -167,19 +168,13 @@ export const LookPicker: React.FC<{ model: Pk26Model; p: SubmissionPackage; anch
     window.addEventListener("resize", move);
     return () => { document.removeEventListener("pointerdown", down, true); window.removeEventListener("scroll", move, true); window.removeEventListener("resize", move); };
   }, [anchor, onClose]);
-  const ic = iconOf(p), col = colourOf(p);
+  const ic = iconOf(p);
   return createPortal(
-    <div className="p9-icp" ref={box} role="dialog" aria-label="Icon and colour" data-pk39="picker" style={{ ...pcStyle(p), left: pos.left, top: pos.top }}>
+    <div className="p9-icp" ref={box} role="dialog" aria-label="Icon" data-pk39="picker" style={{ ...pcStyle(p), left: pos.left, top: pos.top }}>
       <p className="p9-icp-k">Icon</p>
       <div className="p9-icp-ics">
         {PACKAGE_ICONS.map((k: PackageIcon) => (
           <button type="button" key={k} aria-pressed={ic === k} aria-label={k} data-ic={k} onClick={() => void model.setLook(p, { icon: k })}><PicBare ic={k} /></button>
-        ))}
-      </div>
-      <p className="p9-icp-k">Colour</p>
-      <div className="p9-icp-cols">
-        {PACKAGE_COLOURS.map((c) => (
-          <button type="button" key={c.key} aria-pressed={col === c.key} title={c.name} aria-label={c.name} data-col={c.key} style={{ ["--sw" as string]: c.hex }} onClick={() => void model.setLook(p, { colour: c.key })} />
         ))}
       </div>
       <p className="p9-icp-f">{PICKER_NOTE}</p>

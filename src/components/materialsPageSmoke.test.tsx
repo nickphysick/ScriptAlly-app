@@ -238,16 +238,15 @@ describe("/queries/packages renders", () => {
     expect(html).not.toContain('data-pk392="panel"');
     expect(html).not.toContain('data-pk38="labels"');
     expect(html).toContain('data-pk41="page"');
-    /* v41 C–E: the navy header (no art), the batch row and the list card with this package's row */
+    /* v41 C: the navy header (no art) */
     expect(html).toContain('data-pk41="header"');
     expect(html).toContain("What each agent receives for <b>");
     /* v41 (workspace): the full-width list with its headings and per-row buttons is retired; the rail replaces it */
     expect(html).not.toContain('data-pk41="list"');
-    /* v41 D: the workspace — the rail beside the open package, this package's row in it */
-    expect(html).toContain('data-pk41="rail"');
-    expect(html).toContain('data-pk41-row="pk1"');
-    expect(html).toContain("Needs a version");
-    expect(html).toContain('data-pk41="batch"');
+    /* v42 A: the rail and the header's batch strip are retired, element and rule */
+    expect(html).not.toContain('data-pk41="rail"');
+    expect(html).not.toContain('data-pk41-row=');
+    expect(html).not.toContain('data-pk41="batch"');
     expect(html).not.toContain("Bundle it. Send it. Know what went.");
     expect(html).toContain('data-pk26="open"');
     expect(html).toContain(">Standard UK<");
@@ -269,7 +268,7 @@ describe("/queries/packages renders", () => {
     expect(html).not.toContain("A package is everything one agent receives:");
     expect(html).not.toContain(">Build, view and edit<");
     expect(html).toContain('data-pk39="pkg-head"');
-    expect(html).toContain('aria-label="Change icon and colour"');
+    expect(html).toContain('aria-label="Change icon"'); /* v42 A: icons only */
     expect(html).toContain('aria-label="Package name"');
     /* v39.1 C: one status pill replaces v39's three-dot stage */
     expect((html.match(/data-pk39="status"/g) ?? []).length).toBe(1);

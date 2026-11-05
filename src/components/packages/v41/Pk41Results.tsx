@@ -22,7 +22,7 @@ import { bandTotals, MIN_SENDS_FOR_CLAIM, packageShowcases, thresholdWords, type
 import { countCells, fullListOrder, rateCell } from "../../../lib/packagesV39";
 import { Mark } from "../v26/icons";
 import type { MaterialRow, Pk26Model, VersionRow } from "../v26/usePk26Model";
-import { PkTile } from "./Pk41Batch";
+import { PkTile } from "../v42/PkTile";
 
 type PkItem = { id: string; name: string; retired?: boolean; f: Fig; ref: SubmissionPackage };
 type PieceKind = "let" | "syn" | "ver";
