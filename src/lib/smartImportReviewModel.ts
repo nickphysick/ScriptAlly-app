@@ -730,10 +730,10 @@ export function removeDuplicateRecord(
   const newMergeWith = remaining.filter((id) => id !== newLeaderId);
 
   /* v1.2.1: when the set becomes one agent and the writer did not pick the row, the agent takes the
-     set's fuller name and agency. The set is every row it ever held, merged-away ones included. */
+     set's fuller name and agency, from the rows still live in it. A row the writer has already
+     removed ("Remove this one") was their choice, so its name never comes back. */
   const identity = resolvingToOne && fill ? (() => {
-    const ids = new Set([leader.id, ...leader.mergeWith]);
-    const set = agents.filter((a) => ids.has(a.id) || (a.mergedIntoId && ids.has(resolveMergeKeeper(agents, a.mergedIntoId))));
+    const set = agents.filter((a) => groupIds.includes(a.id));
     const edited = set.some((a) => { const o = fill.originals.get(a.id); return !!o && (o.name !== a.name || o.agency !== a.agency); });
     const kept = agents.find((a) => a.id === survivorId)!;
     return fullerIdentity(set, kept, edited);

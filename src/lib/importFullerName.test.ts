@@ -82,6 +82,24 @@ describe("FN-3 the writer's word wins", () => {
   });
 });
 
+describe("FN-3b a row the writer removed never lends its name", () => {
+  it("a three-way: remove the fullest row, then answer the last pair; the removed name stays gone", () => {
+    const m = parseModel({
+      agents: [{ ref: "a", name: "Jonah P.", agency: "Heron" }, { ref: "b", name: "Jonah Petr", agency: "Heron" }, { ref: "c", name: "Jonah Petrakis", agency: "Heron Literary" }],
+      queries: [
+        { agentRef: "a", status: QueryStatus.QUERIED, sentDate: "2026-08-12", sentDateRaw: "12/8" },
+        { agentRef: "b", status: QueryStatus.FULL_REQUESTED, sentDate: "2026-08-20", sentDateRaw: "20/8" },
+        { agentRef: "c", status: QueryStatus.QUERIED, sentDate: "2026-08-02", sentDateRaw: "2/8" },
+      ],
+    } as unknown as SmartImportResult);
+    expect(m.agents[0].mergeWith).toEqual(["b", "c"]);
+    const fill = { originals: originalsOf(m.agents) };
+    const one = removeDuplicateRecord(m.agents, m.queries, "c");              // the writer removes Petrakis
+    const out = applyDuplicateCollapse(one.agents, one.queries, "b", undefined, fill);
+    expect(kept(out.agents)).toEqual(["Jonah Petr / Heron"]);
+  });
+});
+
 describe("FN-4 two different full forms keep the kept row's", () => {
   it("names", () => {
     const set = [{ name: "Jonah Petrakis", agency: "Heron" }, { name: "Jonah Peters", agency: "Heron" }, { name: "Jonah P.", agency: "Heron" }];
