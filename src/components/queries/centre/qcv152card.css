@@ -90,23 +90,43 @@
 .qc152 .qc152-m.me { align-self: flex-end; }
 .qc152 .qc152-m.them { align-self: flex-start; }
 .qc152 .qc152-av { flex: none; width: 24px; height: 24px; margin-top: 6px; border-radius: 50%; display: grid; place-items: center; background: #e3dbcf; color: #3f352e; font: 500 8.5px var(--sp-mono) !important; }
-.qc152 .qc152-bx { position: relative; display: flex; align-items: center; gap: 11px; padding: 9px 13px 9px 9px; border-radius: 14px; min-width: 230px; transition: box-shadow 0.15s; }
-.qc152 .qc152-m.them .qc152-bx { background: #faf7f2; box-shadow: inset 0 0 0 1px #e8dfd3; border-bottom-left-radius: 5px; }
-.qc152 .qc152-m.me .qc152-bx { background: #e9eef4; border-bottom-right-radius: 5px; }
-.qc152 .qc152-m[data-qc152="msg"]:hover .qc152-bx { box-shadow: inset 0 0 0 1px #c9bcab, 0 4px 12px -8px rgba(28, 19, 15, 0.35); }
-.qc152 .qc152-m.me[data-qc152="msg"]:hover .qc152-bx { box-shadow: inset 0 0 0 1px #b9c3d2, 0 4px 12px -8px rgba(28, 19, 15, 0.35); }
+/* v152.1 §2.2 THE COLOUR RULE: yours paper and always paper, no border; theirs tinted by what the reply was (--bt, set on the
+   bubble from lib/qcThread152 tintOf) with a 1px inset edge (--be). No navy inside the thread. */
+.qc152 .qc152-bx { position: relative; display: block; padding: 9px 13px 10px 10px; border-radius: 14px; min-width: 230px; transition: box-shadow 0.15s; }
+.qc152 .qc152-m.them .qc152-bx { background: var(--bt, #f1efec); box-shadow: inset 0 0 0 1px var(--be, #e3dfd9); border-bottom-left-radius: 5px; }
+.qc152 .qc152-m.me .qc152-bx { background: #f6f3ee; box-shadow: none; border-bottom-right-radius: 5px; }
+.qc152 .qc152-m[data-qc152="msg"]:hover .qc152-bx { box-shadow: inset 0 0 0 1px var(--be, #e3dfd9), 0 4px 12px -8px rgba(28, 19, 15, 0.35); }
+.qc152 .qc152-m.me[data-qc152="msg"]:hover .qc152-bx { box-shadow: 0 4px 12px -8px rgba(28, 19, 15, 0.35); }
+.qc152 .qc152-bw { display: flex; align-items: center; gap: 11px; }
+/* the glyph: ink on nothing, 18px in a 26px box, spanning both rows; a pass and your closes are grey */
+.qc152 .qc152-g0 { flex: none; width: 26px; height: 26px; display: grid; place-items: center; background: transparent; }
+.qc152 .qc152-g0 svg { width: 18px; height: 18px; }
+.qc152 .qc152-g0.grey svg { color: #8a8076 !important; stroke: #8a8076; }
+/* §2.4 a nudge quotes the query it follows up */
+.qc152 .qc152-fq { display: flex; align-items: center; gap: 6px; margin-bottom: 7px; padding: 5px 9px; border-radius: 8px; background: #fff; font: 400 12.5px/1.3 var(--sp-serif); color: #5b4f47; }
+.qc152 .qc152-fq i { width: 3px; align-self: stretch; border-radius: 2px; background: #c9b9a1; }
+.qc152 .qc152-fq b { font: 600 12.5px/1.3 var(--sp-serif); color: #5b4f47; }
+.qc152 .qc152-nth { font: 600 11px/1.3 var(--sp-serif) !important; color: #8a8076; white-space: nowrap; }
+.qc152 .qc152-dt.nod { font: italic 400 12px/1.3 var(--sp-serif) !important; letter-spacing: 0; text-transform: none; }
+/* §2.6 what the agent said */
+.qc152 .qc152-qt { margin-top: 7px; padding: 7px 10px; border-left: 3px solid rgba(28, 19, 15, 0.18); border-radius: 0 8px 8px 0; background: rgba(255, 255, 255, 0.55); font: italic 400 13.5px/1.4 var(--sp-serif); color: #3f352e; }
+/* §2.8 the fold */
+.qc152 .qc152-coll { all: unset; box-sizing: border-box; cursor: pointer; align-self: center; margin: 4px 0 6px; padding: 6px 14px; border-radius: 999px; background: #f3efe8; font: 400 13.5px/1.3 var(--sp-serif); color: #2a3a52; }
+.qc152 .qc152-coll:hover, .qc152 .qc152-coll:focus-visible { background: #ece6dc; }
+/* §2.9 the record and edit forms' draft: the thread's own colours, a dashed edge, "· draft" */
+.qc152 .qc152-m.drf .qc152-bx { box-shadow: none; outline: 1.5px dashed #9d917f; outline-offset: -1.5px; }
+.qc152 .qc152-drt { font: italic 400 12.5px/1.3 var(--sp-serif); color: #8a8076; white-space: nowrap; }
 .qc152 .qc152-gd { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; }
 .qc152 .qc152-gd svg { width: 19px; height: 19px; }
 .qc152 .qc152-qx { flex: 1; min-width: 0; display: block; }
-.qc152 .qc152-r1 { display: flex; align-items: baseline; gap: 10px; }
+.qc152 .qc152-r1 { display: flex; align-items: baseline; gap: 8px; }
 .qc152 .qc152-r1 b { font: 400 15.5px/1.3 var(--sp-serif); white-space: nowrap; }
 .qc152 .qc152-dt { margin-left: auto; font: 400 9.5px var(--sp-mono) !important; letter-spacing: 0.08em; text-transform: uppercase; color: #9a9087; white-space: nowrap; }
-.qc152 .qc152-m.me .qc152-dt { color: #7b8799; }
 .qc152 .qc152-r2 { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 5px; }
-.qc152 .qc152-r2 em, .qc152 .qc152-wait em, .qc152 .qc152-quiet em { font: italic 400 12.5px/1.35 var(--sp-serif); color: #7d7268; }
-.qc152 .qc152-m.me .qc152-r2 em { color: #5f6e82; }
+.qc152 .qc152-r2 em { font: italic 400 12.5px/1.35 var(--sp-serif); color: #7d7268; }
 .qc152 .qc152-chs { display: flex; flex-wrap: wrap; gap: 4px; }
-.qc152 .qc152-ch { all: unset; box-sizing: border-box; cursor: pointer; padding: 3px 7px; border-radius: 5px; background: #fff; box-shadow: inset 0 0 0 1px #e3dbd0; font: 400 8.5px/1.4 var(--sp-mono); letter-spacing: 0.1em; text-transform: uppercase; color: #5f5a53; }
+.qc152 .qc152-ch { all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; padding: 3px 7px; border-radius: 5px; background: rgba(255, 255, 255, 0.75); font: 400 8.5px/1.4 var(--sp-mono); letter-spacing: 0.1em; text-transform: uppercase; color: #5f5a53; }
+.qc152 .qc152-ch svg { flex: none; opacity: 0.7; }
 .qc152 .qc152-ch:hover, .qc152 .qc152-ch:focus-visible { box-shadow: inset 0 0 0 1px #b9ad9e; background: #f6f3ee; }
 
 /* §2.4 ✎ Edit beside a bubble, on its open side. The bubble's hover area reaches across the gap to it (an invisible
@@ -130,29 +150,30 @@
 .qc152 .qc152-w i { flex: 1; height: 1px; background: #efe9e0; }
 .qc152 .qc152-w span { flex: none; padding: 2px 9px; border-radius: 999px; background: #f7f3ed; font: 400 9px/1.5 var(--sp-mono) !important; letter-spacing: 0.1em; text-transform: uppercase; color: #a59a90; cursor: default; }
 .qc152 .qc152-w[tabindex]:hover span, .qc152 .qc152-w[tabindex]:focus span { background: #fff; box-shadow: inset 0 0 0 1px #c9bcab; color: #5b4f47; }
-.qc152 .qc152-w[data-edge="start"] { margin-top: 4px; }
-.qc152 .qc152-w[data-edge="start"] span { background: none; }
-.qc152 .qc152-w.long span { background: #f1e9dd; color: #86705a; }
-.qc152 .qc152-w[data-edge="now"] span { background: #fff; box-shadow: inset 0 0 0 1px #2a3a52; color: #2a3a52; }
-.qc152 .qc152-w[data-edge="now"] i { background: #d3dce7; }
-.qc152 .qc152-th.build .qc152-w[data-edge="now"] span { animation: qc152Now 2.4s ease-out 0.5s 1; }
-@keyframes qc152Now { 0% { box-shadow: inset 0 0 0 1px #2a3a52, 0 0 0 0 rgba(42, 58, 82, 0.35); } 60% { box-shadow: inset 0 0 0 1px #2a3a52, 0 0 0 8px rgba(42, 58, 82, 0); } }
-
-/* how it ends */
-.qc152 .qc152-wait, .qc152 .qc152-quiet { min-width: 0; }
-.qc152 .qc152-wait b, .qc152 .qc152-quiet b { display: block; font: 400 15px/1.3 var(--sp-serif); }
-.qc152 .qc152-m.them .qc152-quiet { background: linear-gradient(90deg, #efe9e0, #faf7f2 70%); box-shadow: none; }
-.qc152 .qc152-quiet b { color: #5b4f47; }
-.qc152 .qc152-ring { flex: none; position: relative; width: 30px; height: 30px; border-radius: 50%; background: conic-gradient(#2a3a52 calc(var(--p) * 360deg), #e3dbcf 0); }
-.qc152 .qc152-ring::after { content: ""; position: absolute; inset: 4px; border-radius: 50%; background: #faf7f2; }
+/* v152.1 §2.3 every wait the same size, however long: no long-wait colour, no today marker */
 
 /* §2.5 the reply box */
 .qc152 .qc152-rb { display: flex; align-items: center; gap: 12px; padding: 12px 14px 14px; border-top: 1px solid #ece6de; background: #fff; }
-.qc152 .qc152-rf { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; height: 44px; box-sizing: border-box; padding: 0 16px; border-radius: 22px; background: #f5f1ea; }
+/* v152.1 §3 one bar: a 52px rounded field (#f5f1ea) holding a 32px icon and two lines, then the 52px action */
+.qc152 .qc152-rf { flex: 1; min-width: 0; display: flex; align-items: center; gap: 11px; height: 52px; box-sizing: border-box; padding: 0 16px 0 10px; border-radius: 26px; background: #f5f1ea; }
+.qc152 .qc152-rft { min-width: 0; display: flex; flex-direction: column; }
 .qc152 .qc152-rf b { font: 600 14.5px/1.3 var(--sp-serif); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.qc152 .qc152-rf span { font: italic 400 12.5px/1.35 var(--sp-serif); color: #7d7268; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.qc152 .qc152-rb.late .qc152-rf span { color: #a2452a; }
-.qc152 .qc152-rbtn { all: unset; box-sizing: border-box; cursor: pointer; flex: none; display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px 0 18px; border-radius: 22px; font: 600 14.5px/1 var(--sp-serif); white-space: nowrap; }
+.qc152 .qc152-rft span { font: italic 400 12.5px/1.35 var(--sp-serif); color: #7d7268; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qc152 .qc152-rb.late .qc152-rft span, .qc152 .qc152-rb.late .qc152-fc { color: #a2452a; }
+/* the icon: the reply-time ring (navy on #e3dbcf, its fill the share of the window used), a clock, or the stage's glyph on its tint */
+.qc152 .qc152-fr { flex: none; position: relative; width: 32px; height: 32px; border-radius: 50%; background: conic-gradient(#2a3a52 calc(var(--p) * 360deg), #e3dbcf 0); }
+.qc152 .qc152-fr::after { content: ""; position: absolute; inset: 4.5px; border-radius: 50%; background: #f5f1ea; }
+.qc152 .qc152-fc, .qc152 .qc152-fg { flex: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: #fff; color: #8a8076; }
+.qc152 .qc152-fg svg { width: 17px; height: 17px; }
+.qc152 .qc152-fg.grey svg { color: #8a8076 !important; }
+.qc152 .qc152-rbtn { all: unset; box-sizing: border-box; cursor: pointer; flex: none; display: inline-flex; align-items: center; gap: 8px; height: 52px; padding: 0 16px 0 18px; border-radius: 26px; font: 600 14.5px/1 var(--sp-serif); white-space: nowrap; }
+/* the offer's second action: smaller, outlined, left of the main button */
+.qc152 .qc152-rbtn.sm { height: 40px; padding: 0 13px; border-radius: 20px; font-size: 13.5px; }
+/* with the second action the three don't fit a 504–540px card: the field keeps its two lines whole on its own row and the
+   two buttons sit beneath it, right-aligned (the refs never draw this case; reported) */
+.qc152 .qc152-rb:has(> .qc152-rbtn.sm) { flex-wrap: wrap; row-gap: 10px; }
+.qc152 .qc152-rb:has(> .qc152-rbtn.sm) > .qc152-rf { flex: 1 1 100%; }
+.qc152 .qc152-rb:has(> .qc152-rbtn.sm) > .qc152-rbtn.sm { margin-left: auto; }
 .qc152 .qc152-rbtn.nv { background: #2a3a52; color: #fff; }
 .qc152 .qc152-rbtn.gh { background: #fff; color: #2a3a52; box-shadow: inset 0 0 0 1.5px #2a3a52; }
 .qc152 .qc152-rbtn:hover { filter: brightness(1.12); }

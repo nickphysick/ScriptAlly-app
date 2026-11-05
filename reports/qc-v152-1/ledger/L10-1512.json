@@ -1,0 +1,62 @@
+[
+ {
+  "where": "population: Told other agents is one of what you did",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "the stepper reads 4 (its floor is 1)",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "where": "the draft is yours, with the count and the deadline",
+  "ok": true,
+  "detail": "Told 4 other agents · draft 5 NOV offer deadline 8 Nov"
+ },
+ {
+  "where": "it renders: yours, paper, Told 4 other agents, offer deadline {date}, the offer's glyph",
+  "ok": true,
+  "detail": "{\"side\":\"me\",\"status\":\"\",\"kind\":\"told\",\"title\":\"Told 4 other agents\",\"seen\":\"Told 4 other agents\\n5 NOV\\noffer deadline 8 Nov\",\"date\":\"5 NOV\",\"bg\":\"rgb(246, 243, 238)\",\"glyphBg\":\"rgba(0, 0, 0, 0)\",\"glyphW\":26,\"navy\":false,\"follows\":\"\",\"nth\":\"\",\"nudgeMark\":false,\"quotes\":[],\"via\":\"offer deadline 8 Nov\"}"
+ },
+ {
+  "where": "saved on the log: count 4 and the deadline",
+  "ok": true,
+  "detail": "{\"agentName\":\"Ottilie Vale\",\"createdAt\":{\"nanoseconds\":0,\"seconds\":1793880000},\"eventKey\":\"offer_told\",\"manuscriptTitle\":\"The Quiet Second\",\"note\":\"Told 4 other agents about Ottilie Vale’s offer\",\"queryId\":\"q152-offer2\",\"toldCount\":4,\"toldDeadline\":\"2026-11-08T12:00:00.000Z\",\"type\":\"Told other agents\"}"
+ },
+ {
+  "where": "the same save marked another live query as told",
+  "ok": true,
+  "detail": "{\"r\":\"q152-offer2\",\"t\":true,\"on\":\"2026-11-05T12:00:00.000Z\"}"
+ },
+ {
+  "where": "Undo: the offer back byte for byte",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "Undo: the marks gone from the other query",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "population: What did they say? (optional)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "it renders: one quote, their words",
+  "ok": true,
+  "detail": "[\"“Could you send the first three chapters?”\"]"
+ },
+ {
+  "where": "saved on the step as replyNote, and no older field written",
+  "ok": true,
+  "detail": "\"Could you send the first three chapters?\""
+ },
+ {
+  "where": "Undo: the query back byte for byte",
+  "ok": true,
+  "detail": ""
+ }
+]

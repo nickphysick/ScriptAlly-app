@@ -1034,7 +1034,12 @@
     "design-refs/submission-packages-v41/submission-packages-v41.html": "281a1980aa3c203845e455c9c724eaf3ee77b4fdfd8f6d8571208442154be06b",
     "design-refs/query-centre-v152/query-centre-v152.html": "fb9276ca8b21cbc04cafb5d7b825ab8d634783d5dfd4c61128a9e22a62a6c754",
     "design-refs/query-centre-v152/query-states-v2.html": "8e03cf9cd9e2fd8e21f7571a2e6edc5999be89accc63197f456cd35c3fd74d38",
-    "design-refs/submission-packages-v42/submission-packages-v42.html": "13cb7d2c8b5bc05a87b24e3691e72a6c3d4c7c20fa200af4cc24ae4f70442cab"
+    "design-refs/submission-packages-v42/submission-packages-v42.html": "13cb7d2c8b5bc05a87b24e3691e72a6c3d4c7c20fa200af4cc24ae4f70442cab",
+    "design-refs/query-centre-v152-1/events-only.html": "39717de5bf633052c931eb8a1f7da85de2f10f43bfd813005c3ee6fe9f0b39a2",
+    "design-refs/query-centre-v152-1/nudge-icons.html": "542f77eda21dd610ec3783d54079a44fdbdb698aea84139d4e54af9e19475920",
+    "design-refs/query-centre-v152-1/queried-and-no-reply.html": "835b001d815c5966bab96a5f1c434838784c805f80d40d3ac15035e1887bad03",
+    "design-refs/query-centre-v152-1/thread-colours-3.html": "90ffebabebf135c07d7e91b7d9c22eef50a253f575fcd4f454bd879306899a26",
+    "design-refs/query-centre-v152-1/thread-edge-cases.html": "b15fdd08c6496eb97388ee1962ae714f45b09e7b561ce5bd819ba0f5395a95d5"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",

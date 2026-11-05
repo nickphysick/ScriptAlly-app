@@ -1,0 +1,62 @@
+[
+ {
+  "where": "population: Queried rows with a cap",
+  "ok": true,
+  "detail": "46"
+ },
+ {
+  "where": "every Queried row's cap is #f2ebe0",
+  "ok": true,
+  "detail": "[\"rgb(242, 235, 224)\"]"
+ },
+ {
+  "where": "population: the list page swept",
+  "ok": true,
+  "detail": "10852"
+ },
+ {
+  "where": "no element on the list computes to #e6d9c6",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "a Queried card's pill cap is #f2ebe0",
+  "ok": true,
+  "detail": "rgb(242, 235, 224)"
+ },
+ {
+  "where": "no element with the card open computes to #e6d9c6",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "the Queried status group's header is #f4eee5",
+  "ok": true,
+  "detail": "rgb(244, 238, 229)"
+ },
+ {
+  "where": "no element grouped by status computes to #e6d9c6",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "population: Queried bars, watching and not",
+  "ok": true,
+  "detail": "[\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"upcoming\",\"upcoming\",\"upcoming\",\"watch\",\"watch\",\"watch\",\"watch\",\"watch\",\"nodate\",\"nodate\",\"nodate\",\"nodate\",\"nodate\",\"nodate\"]"
+ },
+ {
+  "where": "Queried bars are #f2ebe0",
+  "ok": true,
+  "detail": "[\"rgb(242, 235, 224)\"]"
+ },
+ {
+  "where": "watch-and-wait Queried bars are #f7f2ea",
+  "ok": true,
+  "detail": "[\"rgb(247, 242, 234)\"]"
+ },
+ {
+  "where": "no element on Birds-eye computes to #e6d9c6",
+  "ok": true,
+  "detail": "[]"
+ }
+]

@@ -31,9 +31,14 @@ for (const vp of [{ width: 390, height: 844 }, { width: 360, height: 780 }]) {
     const list = await read();
     await page.screenshot({ path: `${DIR}/${BASE ? "base" : "v152"}-list-${vp.width}.png` });
     /* an open query: the phone's own sheet */
-    await page.evaluate(() => { const r = document.querySelector<HTMLElement>("[data-id='q152-long']"); r?.scrollIntoView({ block: "center" }); r?.click(); });
+    /* v152.1: the phone's cards carry no row id, so v152's click found nothing and this "sheet" was the list again; the
+       card is opened by its agent's name, and the reading must differ from the list's or nothing opened */
+    const name = page.getByText("Jonathan Vale", { exact: true }).first();
+    await name.scrollIntoViewIfNeeded().catch(() => {});
+    await name.click({ timeout: 8000 }).catch(() => {});
     await page.waitForTimeout(1500);
     const sheet = await read();
+    if (sheet.text === list.text) throw new Error("the query's sheet did not open (its reading is the list's)");
     await page.screenshot({ path: `${DIR}/${BASE ? "base" : "v152"}-sheet-${vp.width}.png` });
     writeFileSync(`${DIR}/${BASE ? "base" : "v152"}-${vp.width}.json`, JSON.stringify({ list, sheet }, null, 1));
   });

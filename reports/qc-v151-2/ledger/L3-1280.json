@@ -97,7 +97,7 @@
  {
   "where": "status · Queried",
   "ok": true,
-  "detail": "rgb(230, 217, 198) glyph true"
+  "detail": "rgb(244, 238, 229) glyph true"
  },
  {
   "where": "status · Partial Requested",

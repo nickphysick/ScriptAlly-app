@@ -621,7 +621,10 @@ service cloud.firestore {
           'reconstructed',
           // Query Centre v152 (recon A): what went with, or was asked for on, THIS step — the card's thread reads it.
           // OPTIONAL: every older step has none and stays valid. The feed twin's own `materials` has the same shape.
-          'materials'
+          'materials',
+          // Query Centre v152.1: what the agent said on one of their replies (§2.6), and a "told other agents" step's count
+          // and the deadline you gave them (§2.5). All OPTIONAL, on this log only (no feed twin carries them).
+          'replyNote', 'toldCount', 'toldDeadline'
         ])
         && (!data.keys().hasAny(['reconstructed']) || data.reconstructed == true)
         && data.type is string && data.type.size() <= 128
@@ -652,7 +655,10 @@ service cloud.firestore {
         && (!data.keys().hasAny(['fullVersionSent']) || (data.fullVersionSent is string && data.fullVersionSent.size() <= 128))
         && (!data.keys().hasAny(['feedbackType']) || (data.feedbackType is string && data.feedbackType.size() <= 64))
         && (!data.keys().hasAny(['eventKey']) || (data.eventKey is string && data.eventKey.size() <= 64))
-        && (!data.keys().hasAny(['materials']) || (data.materials is list && data.materials.size() <= 20));
+        && (!data.keys().hasAny(['materials']) || (data.materials is list && data.materials.size() <= 20))
+        && (!data.keys().hasAny(['replyNote']) || (data.replyNote is string && data.replyNote.size() <= 500))
+        && (!data.keys().hasAny(['toldCount']) || (data.toldCount is int && data.toldCount >= 1 && data.toldCount <= 30))
+        && (!data.keys().hasAny(['toldDeadline']) || (data.toldDeadline is string && data.toldDeadline.size() <= 32));
     }
 
     // (isValidTopLevelActivity is gone with the RETIRED users/{uid}/activity store — Tier 3 ·

@@ -572,7 +572,7 @@
  {
   "where": "drag thin-q-close",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -582,7 +582,7 @@
  {
   "where": "drag seed-query-22",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -592,7 +592,7 @@
  {
   "where": "drag msv12-q-1",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -602,7 +602,7 @@
  {
   "where": "drag msv12-q-7",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -612,7 +612,7 @@
  {
   "where": "drag seed-query-4",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -622,7 +622,7 @@
  {
   "where": "drag seed-query-19",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -632,7 +632,7 @@
  {
   "where": "drag thin-q-cohort-2",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -642,7 +642,7 @@
  {
   "where": "drag thin-q-cohort-1",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -652,7 +652,7 @@
  {
   "where": "drag thin-q-cohort-6",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -662,7 +662,7 @@
  {
   "where": "drag thin-q-cohort-3",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -672,7 +672,7 @@
  {
   "where": "drag thin-q-cohort-5",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -682,7 +682,7 @@
  {
   "where": "drag thin-q-cohort-4",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -692,7 +692,7 @@
  {
   "where": "drag seed-query-10",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -702,7 +702,7 @@
  {
   "where": "drag seed-query-ms2-a",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -712,7 +712,7 @@
  {
   "where": "drag rj-nudge",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -722,7 +722,7 @@
  {
   "where": "drag thin-q-chase",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -732,7 +732,7 @@
  {
   "where": "drag seed-query-ms2-b",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -742,7 +742,7 @@
  {
   "where": "drag cv25-q-10",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -752,7 +752,7 @@
  {
   "where": "drag cv25-q-05",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -762,7 +762,7 @@
  {
   "where": "drag seed-cal-passed20-q",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -772,7 +772,7 @@
  {
   "where": "drag seed-query-6",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -782,7 +782,7 @@
  {
   "where": "drag seed-pkgq-1",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -792,7 +792,7 @@
  {
   "where": "drag seed-pkgq-2",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -802,7 +802,7 @@
  {
   "where": "drag seed-query-5",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -812,7 +812,7 @@
  {
   "where": "drag cor-undo",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -822,7 +822,7 @@
  {
   "where": "drag cor-move-b",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -832,7 +832,7 @@
  {
   "where": "drag seed-pkgq-7",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -842,7 +842,7 @@
  {
   "where": "drag seed-query-3",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -852,7 +852,7 @@
  {
   "where": "drag seed-query-7",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -862,7 +862,7 @@
  {
   "where": "drag seed-cal-near-q",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -872,7 +872,7 @@
  {
   "where": "drag cv25-q-11",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -882,7 +882,7 @@
  {
   "where": "drag seed-pkgq-9",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -892,7 +892,7 @@
  {
   "where": "drag seed-query-21",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -902,7 +902,7 @@
  {
   "where": "drag seed-pkgq-10",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -912,7 +912,7 @@
  {
   "where": "drag msv12-q-5",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -922,7 +922,7 @@
  {
   "where": "drag thin-q-remind",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -932,7 +932,7 @@
  {
   "where": "drag seed-query-11",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -942,7 +942,7 @@
  {
   "where": "drag msv12-q-2",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -952,7 +952,7 @@
  {
   "where": "drag seed-query-2",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -962,7 +962,7 @@
  {
   "where": "drag thin-q-gap-solo",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",
@@ -972,7 +972,7 @@
  {
   "where": "drag cor-pair",
   "ok": true,
-  "detail": "bar 942.1 dot 942.1 today 942.5"
+  "detail": "bar 944.1 dot 944.1 today 944.4"
  },
  {
   "where": "drag track width",

@@ -1,0 +1,47 @@
+[
+ {
+  "where": "long: population (waits)",
+  "ok": true,
+  "detail": "[{\"label\":\"30 days\",\"h\":18},{\"label\":\"20 days\",\"h\":18},{\"label\":\"40 days\",\"h\":18},{\"label\":\"40 days\",\"h\":18}]"
+ },
+ {
+  "where": "long: every wait the same height ±1",
+  "ok": true,
+  "detail": "[{\"label\":\"30 days\",\"h\":18},{\"label\":\"20 days\",\"h\":18},{\"label\":\"40 days\",\"h\":18},{\"label\":\"40 days\",\"h\":18}]"
+ },
+ {
+  "where": "seven: population (waits)",
+  "ok": true,
+  "detail": "[{\"label\":\"30 days\",\"h\":18},{\"label\":\"20 days\",\"h\":18},{\"label\":\"20 days\",\"h\":18},{\"label\":\"20 days\",\"h\":18},{\"label\":\"30 days\",\"h\":18},{\"label\":\"40 days\",\"h\":18}]"
+ },
+ {
+  "where": "seven: every wait the same height ±1",
+  "ok": true,
+  "detail": "[{\"label\":\"30 days\",\"h\":18},{\"label\":\"20 days\",\"h\":18},{\"label\":\"20 days\",\"h\":18},{\"label\":\"20 days\",\"h\":18},{\"label\":\"30 days\",\"h\":18},{\"label\":\"40 days\",\"h\":18}]"
+ },
+ {
+  "where": "undated: population (waits)",
+  "ok": true,
+  "detail": "[{\"label\":\"—\",\"h\":18},{\"label\":\"—\",\"h\":18}]"
+ },
+ {
+  "where": "undated: every wait the same height ±1",
+  "ok": true,
+  "detail": "[{\"label\":\"—\",\"h\":18},{\"label\":\"—\",\"h\":18}]"
+ },
+ {
+  "where": "undated: the undated step says No date, in its place (between Query sent and the send)",
+  "ok": true,
+  "detail": "[[\"Query sent\",\"17 AUG\"],[\"Asked for a partial\",\"No date\"],[\"Sent the partial\",\"16 OCT\"]]"
+ },
+ {
+  "where": "undated: both waits beside it show —",
+  "ok": true,
+  "detail": "[{\"label\":\"—\",\"h\":18},{\"label\":\"—\",\"h\":18}]"
+ },
+ {
+  "where": "undated: the send with no materials has no chips",
+  "ok": true,
+  "detail": ""
+ }
+]

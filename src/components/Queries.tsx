@@ -129,12 +129,13 @@ import { expectedFor, type QcRow } from "../lib/qcSummary";
 import { nextLine } from "../lib/qcRowLines";
 import { QcPage151, Track151 } from "./queries/centre/QcPage151";
 import { QcFilterPanel151 } from "./queries/centre/QcFilterMenu140";
-import { QUIET_WEEKS_PATH, quickOfRow, quietWeeksOf, stampRows, stateOf, queryState as qsOf } from "../lib/queryState";
+import { QUIET_WEEKS_PATH, nudgeMsOf, quickOfRow, quietWeeksOf, stampRows, stateOf, queryState as qsOf } from "../lib/queryState";
 import { packagesUnlocked } from "../lib/entitlements";
-import { sideOf as side152, type ReplyAct, type ThreadStepIn } from "../lib/qcThread152";
+import { dayLabel as dayLabel152, sideOf as side152, type ReplyAct, type ThreadStepIn } from "../lib/qcThread152";
+import { getActivityTime } from "../lib/queryDerivation";
 import { qc152DevFree } from "../lib/qc152ReviewAid";
 import { packageLockStamp } from "../lib/saveQueryEdits";
-import { commitPlan, planDetails, planFix, planRecord, readFeed, readLog, RECORD_STATUS, type FixStep, type RecordKind, type StepMaterial } from "../lib/qc152Write";
+import { commitPlan, planDetails, planFix, planRecord, readFeed, readLog, RECORD_STATUS, storedLabels, TOLD_TYPE, type FixStep, type RecordKind, type StepMaterial } from "../lib/qc152Write";
 import { QcDetails152, QcFix152, QcFork152, type FixRow, type PkgChoice } from "./queries/centre/QcFix152";
 import { askChips, readMat } from "../lib/qcThread152";
 import type { LogStep, StepType } from "../lib/qcLogic152";
@@ -6017,14 +6018,46 @@ export const Queries: React.FC<{
       const stepChips = (activityId?: string) => {
         const m = activityId ? evById.get(activityId)?.materials : undefined;
         if (!Array.isArray(m)) return [];
-        return m.map((x) => (typeof x === "string" ? x : String((x as { label?: unknown })?.label ?? ""))).filter(Boolean)
-          .map((label) => ({ label, detail: free ? label : label }));
+        /* v152.1 — a step's recorded materials are maps ({ kind, name, unit, n, versionId }: lib/qc152Write storeMats); v152
+           read a `label` they never carry, so every step's own materials drew nothing. Read them as the writer wrote them. */
+        const vs = bookVersionsOf(ms);
+        return storedLabels(m, { free, versionName: (id) => vs.find((v) => v.id === id)?.name ?? null, originalId: vs[0]?.id ?? null })
+          .map((label) => ({ label, detail: label }));
       };
+      /* v152.1 §2.6 — what the agent said: the step's own `replyNote`; on an older query, the one text the query holds for
+         that kind of reply, shown on the LATEST step of that kind only (display-only, Nick: rrNotes, rejectionFeedbackText,
+         offerNotes). A holding reply's words are its log note. New saves write `replyNote` and never the old fields. */
+      const evData = (id?: string) => (id ? (evStore.get(id) as Record<string, unknown> | undefined) : undefined);
+      const LEGACY: Partial<Record<string, string | undefined>> = {
+        [QueryStatus.REVISE_RESUBMIT]: q.rrNotes, [QueryStatus.REJECTED]: q.rejectionFeedbackText, [QueryStatus.OFFER]: q.offerNotes,
+      };
+      const latestOf = (st: QueryStatus | null) => [...story].reverse().find((y) => y.status === st && !y.kind)?.key;
+      const quoteOf = (x: (typeof story)[number]): string | null => {
+        const own = evData(x.activityId)?.replyNote;
+        if (typeof own === "string" && own.trim()) return own.trim();
+        if (x.kind === "holding") { const n = evData(x.activityId)?.note; return typeof n === "string" && n.trim() ? n.trim() : null; }
+        const leg = x.status && !x.kind ? LEGACY[x.status] : undefined;
+        return leg && leg.trim() && latestOf(x.status) === x.key ? leg.trim() : null;
+      };
+      /* §2.5 a close's reason, in italic: the close's first note, read as a phrase ("an offer elsewhere") */
+      const reason = (() => { const r = (q.closingNotes ?? "").split(" · ")[0].trim(); return r ? r.charAt(0).toLowerCase() + r.slice(1) : null; })();
       const tSteps: ThreadStepIn[] = story.map((x) => ({
         key: x.key, activityId: x.activityId, status: x.status, kind: x.kind, ms: x.ms,
         chips: x.status === QueryStatus.QUERIED && !x.kind ? (stepChips(x.activityId).length ? stepChips(x.activityId) : queryChips) : stepChips(x.activityId),
-        via: x.status === QueryStatus.QUERIED && !x.kind ? methodQualifier(q.sendMethod) : null,
+        via: x.status === QueryStatus.QUERIED && !x.kind ? methodQualifier(q.sendMethod)
+          : x.kind === "nudge" ? methodQualifier(q.sendMethod)
+          : !x.kind && (x.status === QueryStatus.WITHDRAWN || x.status === QueryStatus.NO_RESPONSE) ? reason : null,
+        quote: quoteOf(x),
       }));
+      /* §2.5 told other agents: its own steps on the log (not statuses, so the story does not carry them) */
+      for (const e of trackingEvents as { id?: string; type?: string; createdAt?: unknown; toldCount?: unknown; toldDeadline?: unknown }[]) {
+        if (e.type !== TOLD_TYPE || !e.id) continue;
+        const ms = getActivityTime(e.createdAt as never);
+        /* stored as the day at local noon, ISO (dayIso), as the marks' `offerToldOn` is */
+        const dl = typeof e.toldDeadline === "string" ? new Date(e.toldDeadline).getTime() : NaN;
+        tSteps.push({ key: `t-${e.id}`, activityId: e.id, status: null, kind: "told", ms: Number.isFinite(ms) && ms > 0 ? ms : null, chips: [],
+          toldCount: typeof e.toldCount === "number" ? e.toldCount : null, via: Number.isFinite(dl) ? `offer deadline ${dayLabel152(dl, now)}` : null });
+      }
       const nrmnRaw = typeof (q as { nrmnOverride?: unknown }).nrmnOverride === "boolean" ? (q as { nrmnOverride?: boolean }).nrmnOverride! : ag?.noResponseMeansNo;
       const state = stateOf(row) ?? qsOf({ ...row, nrmn: !!nrmnRaw }, { quietWeeks: qcQuietWeeks, nowMs: now });
       const heard = [...tSteps].reverse().find((x) => x.ms != null && side152(x) === "them");
@@ -6044,6 +6077,9 @@ export const Queries: React.FC<{
         sentLabels: sent.map((x) => x.label),
         lastHeardMs: heard?.ms ?? null,
         how: submissionWords(ag),
+        quietWeeks: qcQuietWeeks,
+        reason,
+        nudged: nudgeMsOf({ ...row, nrmn: !!nrmnRaw }, now) != null,
       };
     }
     /* §3 — the reply box's button opens the card's own form; nothing writes until its Save. An offer's answer and a
@@ -6051,7 +6087,8 @@ export const Queries: React.FC<{
     const reply152 = (a: ReplyAct) => {
       const rr = q.status === QueryStatus.REVISE_RESUBMIT;
       if (a === "offer" || a === "reopen" || (a === "sent" && rr)) { stepRow({ mode: a === "offer" ? "offer" : a === "reopen" ? "resp" : "sent", queryId: q.id }); return; }
-      setQc152Rec(a === "sent" ? (q.status === QueryStatus.FULL_REQUESTED ? "full_sent" : "partial_sent") : a === "nudge" ? "nudge" : a === "close" ? "noresp" : "resp");
+      /* v152.1 §3 "Tell other agents" opens the record form with Told other agents chosen */
+      setQc152Rec(a === "tell" ? "told" : a === "sent" ? (q.status === QueryStatus.FULL_REQUESTED ? "full_sent" : "partial_sent") : a === "nudge" ? "nudge" : a === "close" ? "noresp" : "resp");
       setQc152From("reply");
       setQcCardMode("record");
     };
@@ -6084,9 +6121,13 @@ export const Queries: React.FC<{
     }
     if (v152 && qcCardMode === "fix" && currentUser) {
       const rows: FixRow[] = v152.steps.flatMap((x) => {
-        const t = x.kind === "nudge" ? "nudge" : x.status ? T4[x.status] : undefined;
+        const t = x.kind === "nudge" ? "nudge" : x.kind === "told" ? "told" : x.status ? T4[x.status] : undefined;
         if (!t || x.ms == null || !x.activityId) return [];
-        return [{ id: x.activityId, t, d: x.ms, mats: storedMats(x.activityId) ?? (t === "queried" ? asMats(x.chips.map((c) => c.label)) : []) }];
+        /* v152.1 §2.5 a told step carries its count and the deadline you gave */
+        const ev = evStore.get(x.activityId) as { toldCount?: unknown; toldDeadline?: unknown } | undefined;
+        const dl = typeof ev?.toldDeadline === "string" ? new Date(ev.toldDeadline).getTime() : x.ms;
+        const told = t === "told" ? { count: typeof ev?.toldCount === "number" ? ev.toldCount : 1, deadlineMs: Number.isFinite(dl) ? dl : x.ms } : null;
+        return [{ id: x.activityId, t, d: x.ms, mats: storedMats(x.activityId) ?? (t === "queried" ? asMats(x.chips.map((c) => c.label)) : []), told }];
       });
       const pkgs: PkgChoice[] | null = v152.free ? null : packages.filter((k) => k.manuscriptId === q.manuscriptId && !(k as { retiredAt?: string }).retiredAt).map((k) => {
         const nm = (id: string) => scriptDb.versions.find((v) => v.id === id)?.versionName ?? null;
@@ -6104,7 +6145,7 @@ export const Queries: React.FC<{
           pkgNow={rec0.how === "package" && rec0.packageId ? { id: rec0.packageId, edition: rec0.edition, name: rec0.packageName ?? "the package" } : null}
           now={{ status: row.status, state: v152.state, replyMs: v152.replyMs, dueMs: v152.dueMs, dueWho: null }}
           after={(rs) => {
-            const last = [...rs].filter((x) => x.t !== "nudge").sort((a, b) => a.d - b.d).pop();
+            const last = [...rs].filter((x) => x.t !== "nudge" && x.t !== "told").sort((a, b) => a.d - b.d).pop();
             const ST: Record<string, QueryStatus> = { queried: QueryStatus.QUERIED, preq: QueryStatus.PARTIAL_REQUESTED, psent: QueryStatus.PARTIAL_SENT, freq: QueryStatus.FULL_REQUESTED, fsent: QueryStatus.FULL_SENT, offer: QueryStatus.OFFER, passed: QueryStatus.REJECTED, noresp: QueryStatus.NO_RESPONSE, withdrawn: QueryStatus.WITHDRAWN };
             const status = last ? ST[last.t] : row.status;
             const state = status === QueryStatus.OFFER ? "offer" : [QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED].includes(status as QueryStatus) ? "materials"
@@ -6118,13 +6159,16 @@ export const Queries: React.FC<{
             setQc152Busy(true);
             try {
               const [existing, feed] = await Promise.all([readLog(uid, q.id), readFeed(uid, q.id)]);
-              const K: Record<string, FixStep["kind"]> = { queried: "queried", preq: "partial_req", psent: "partial_sent", freq: "full_req", fsent: "full_sent", offer: "offer", nudge: "nudge", passed: "pass", noresp: "noresp", withdrawn: "withdrawn" };
-              const plan = planFix({ uid, q, agent: ag, ms, existing, feed, nowMs: Date.now(), quietWeeks: qcQuietWeeks },
-                rs.map((r) => ({ id: r.id, isNew: r.isNew, kind: K[r.t], dayMs: r.d, materials: r.mats })), removed, pkg);
+              const K: Record<string, FixStep["kind"]> = { queried: "queried", preq: "partial_req", psent: "partial_sent", freq: "full_req", fsent: "full_sent", offer: "offer", nudge: "nudge", passed: "pass", noresp: "noresp", withdrawn: "withdrawn", told: "told" };
+              /* v152.1 §2.5 the other queries this one's offer marked as told: a told step moved or removed moves or clears them */
+              const marked = queries.filter((x) => x.offerRefQueryId === q.id).map((x) => x.id);
+              const plan = planFix({ uid, q, agent: ag, ms, existing, feed, nowMs: Date.now(), quietWeeks: qcQuietWeeks, marked },
+                rs.map((r) => ({ id: r.id, isNew: r.isNew, kind: K[r.t], dayMs: r.d, materials: r.mats, told: r.told ?? null })), removed, pkg);
               /* a draft package picked here goes on query and locks: its stamp joins the same batch */
               const draftPkg = pkg?.id ? packages.find((k) => k.id === pkg.id && !k.firstSentAt) : undefined;
-              if (draftPkg) plan.update = [{ path: `packages/${draftPkg.id}`, data: packageLockStamp() }];
-              const snap = await commitPlan(uid, plan);
+              if (draftPkg) plan.update = [...(plan.update ?? []), { path: `packages/${draftPkg.id}`, data: packageLockStamp() }];
+              /* Undo restores the marked queries too: they are in the one snapshot */
+              const snap = await commitPlan(uid, plan, undefined, (plan.update ?? []).filter((u) => u.path.startsWith("queries/")).map((u) => u.path.split("/")[1]));
               setQcCardMode("view");
               showUndoBar({ message: `Fixed · ${ag?.name || ag?.agency || "The agent"}`, sub: removed.length ? `${removed.length} ${removed.length === 1 ? "STEP" : "STEPS"} REMOVED` : "THE RECORD IS CORRECTED", undo: async () => { await restoreSnapshot(snap); } });
               return true;
@@ -6173,10 +6217,11 @@ export const Queries: React.FC<{
         [QueryStatus.FULL_SENT]: "fsent", [QueryStatus.OFFER]: "offer", [QueryStatus.REJECTED]: "passed", [QueryStatus.NO_RESPONSE]: "noresp", [QueryStatus.WITHDRAWN]: "withdrawn",
       };
       const log: LogStep[] = v152.steps.flatMap((x) => {
-        const t = x.kind === "nudge" ? "nudge" : x.status ? T[x.status] : undefined;
+        const t = x.kind === "nudge" ? "nudge" : x.kind === "told" ? "told" : x.status ? T[x.status] : undefined;
         return t && x.ms != null ? [{ id: x.key, t, d: x.ms }] : [];
       });
-      const lastS = [...v152.steps].reverse().find((x) => x.ms != null) ?? null;
+      /* the latest dated step, by date (told steps are gathered after the story) */
+      const lastS = [...v152.steps].filter((x) => x.ms != null).sort((a, b) => a.ms! - b.ms!).pop() ?? null;
       const req = [...v152.steps].reverse().find((x) => x.status === QueryStatus.PARTIAL_REQUESTED || x.status === QueryStatus.FULL_REQUESTED) ?? null;
       const reqMats = (() => {
         const m = req?.activityId ? evStore.get(req.activityId)?.materials : undefined;
@@ -6201,6 +6246,8 @@ export const Queries: React.FC<{
       const dueWho = (s: string): RecordOutcome["dueWho"] => (s === "materials" || s === "offer" ? "you" : s === "closed" ? null : "agent");
       const nowO: RecordOutcome = { status: row.status, state: v152.state, replyMs: v152.replyMs, dueMs: v152.dueMs, dueWho: dueWho(v152.state) };
       const after = (k: RecordKind, day: number): RecordOutcome => {
+        /* §2.5 telling other agents changes nothing about where this query stands */
+        if (k === "told") return nowO;
         const status = RECORD_STATUS[k] ?? row.status;
         if (k === "partial_sent" || k === "full_sent") return { status, state: "agent", replyMs: day + 12 * W, dueMs: null, dueWho: "agent" };
         if (k === "nudge") return { status, state: "agent", replyMs: day + qcQuietWeeks * W, dueMs: null, dueWho: "agent" };
@@ -6209,25 +6256,34 @@ export const Queries: React.FC<{
         return { status, state: "closed", replyMs: null, dueMs: null, dueWho: null };
       };
       const uid = currentUser.id;
+      const tellOthers = (() => {
+        const others = offerOthers(q, queries, qaIsLive);
+        const dl = q.offerResponseDeadline ? new Date(q.offerResponseDeadline as string).getTime() : NaN;
+        return { others, canTell: row.status === QueryStatus.OFFER,
+          def: { count: Math.max(1, Math.min(30, others.length || 1)), deadlineMs: Number.isFinite(dl) && dl > now ? dl : now + 7 * 86_400_000 } };
+      })();
       edit152 = (
         <QcRecord152 key={`${q.id}:${qc152Rec}`} first={first} nowMs={now} initials={row.initials} log={log}
-          last={lastS ? { status: lastS.status, kind: lastS.kind, ms: lastS.ms, chips: lastS.chips.map((c) => c.label) } : null}
+          last={lastS ? { status: lastS.status, kind: lastS.kind, ms: lastS.ms, chips: lastS.chips.map((c) => c.label), toldCount: lastS.toldCount ?? null } : null}
           initial={qc152Rec} prefill={prefill} askedMs={req?.ms ?? null} env={env} now={nowO} after={after} busy={qc152Busy}
           onCancel={() => { setQcCardMode(qc152From === "fork" ? "fork" : "view"); setQc152Rec(null); }}
-          onSave={async (k, day, mats) => {
+          canTell={tellOthers.canTell} tellDefault={tellOthers.def}
+          onSave={async (k, day, mats, extra) => {
             if (qc152Busy) return false;
             setQc152Busy(true);
             try {
               const existing = await readLog(uid, q.id);
-              const plan = planRecord({ uid, q, agent: ag, ms, existing, nowMs: Date.now(), quietWeeks: qcQuietWeeks }, k, day, mats);
-              const snap = await commitPlan(uid, plan);
+              /* §2.5 one fact, one save: the told step and the marks on every other live query, in one batch and one snapshot */
+              const told = k === "told" && extra.told ? { ...extra.told, others: tellOthers.others.map((o) => ({ id: o.id, offerReply: o.offerReply ?? null })) } : undefined;
+              const plan = planRecord({ uid, q, agent: ag, ms, existing, nowMs: Date.now(), quietWeeks: qcQuietWeeks }, k, day, mats, { replyNote: extra.replyNote, told });
+              const snap = await commitPlan(uid, plan, undefined, told ? told.others.map((o) => o.id) : []);
               const newId = plan.set[0].path.split("/").pop() ?? null;
               setQcCardFresh(newId);
               window.setTimeout(() => setQcCardFresh(null), 1600);
               setQc152Rec(null);
               setQcCardMode("view");
               showUndoBar({
-                message: `${{ partial_req: "Partial requested", full_req: "Full requested", offer: "Offer", pass: "Passed", partial_sent: "Partial sent", full_sent: "Full sent", nudge: "Nudge", noresp: "Closed: no response" }[k]} · ${ag?.name || ag?.agency || "The agent"}`,
+                message: `${{ partial_req: "Partial requested", full_req: "Full requested", offer: "Offer", pass: "Passed", partial_sent: "Partial sent", full_sent: "Full sent", nudge: "Nudge", noresp: "Closed: no response", told: "Others told" }[k]} · ${ag?.name || ag?.agency || "The agent"}`,
                 sub: "ADDED TO THE TIMELINE",
                 undo: async () => { await restoreSnapshot(snap); },
               });

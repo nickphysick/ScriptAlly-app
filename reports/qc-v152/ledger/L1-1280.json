@@ -2,7 +2,7 @@
  {
   "where": "population: every fixture is on the page",
   "ok": true,
-  "detail": "[\"offer\",\"fullreq\",\"materials\",\"nudge\",\"nudgedwait\",\"agent\",\"pkg\",\"long\",\"nudgedquiet\",\"quiet\",\"nrmn\",\"closed\"]"
+  "detail": "[\"offertold\",\"offer\",\"offer2\",\"fullreq\",\"materials\",\"rr\",\"nudge\",\"nudgedwait\",\"agent\",\"sib2\",\"pkg\",\"long\",\"seven\",\"undated\",\"nudgedquiet\",\"quiet\",\"nrmn\",\"closed\",\"passed\",\"withdrew\"]"
  },
  {
   "where": "offer is offer",

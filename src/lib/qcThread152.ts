@@ -40,40 +40,75 @@ export interface ThreadStepIn {
   key: string;
   activityId?: string;
   status: QueryStatus | null;
-  kind: "nudge" | "holding" | null;
+  /** a step that is not a status: your nudge, their holding reply, and (v152.1 §2.5) telling other agents about an offer */
+  kind: "nudge" | "holding" | "told" | null;
   ms: number | null;
   chips: ThreadChip[];
-  /** Query sent's "by email" */
+  /** Query sent's "by email"; a close's reason; told's "offer deadline 16 Oct" (v152.1 §2.5) */
   via?: string | null;
+  /** v152.1 §2.6 — the one line the agent said, when there is one */
+  quote?: string | null;
+  /** v152.1 §2.5 — told other agents: how many */
+  toldCount?: number | null;
 }
 
 const THEM = new Set<string>([QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED, QueryStatus.REVISE_RESUBMIT, QueryStatus.OFFER, QueryStatus.REJECTED]);
 export function sideOf(s: Pick<ThreadStepIn, "status" | "kind">): Side {
   if (s.kind === "holding") return "them";
-  if (s.kind === "nudge") return "me";
+  if (s.kind === "nudge" || s.kind === "told") return "me";
   return s.status && THEM.has(s.status) ? "them" : "me";
 }
 const TITLE: Record<string, string> = {
   [QueryStatus.QUERIED]: "Query sent", [QueryStatus.PARTIAL_REQUESTED]: "Asked for a partial", [QueryStatus.PARTIAL_SENT]: "Sent the partial",
-  [QueryStatus.FULL_REQUESTED]: "Asked for the full", [QueryStatus.FULL_SENT]: "Sent the full", [QueryStatus.REVISE_RESUBMIT]: "Asked for a revision",
+  [QueryStatus.FULL_REQUESTED]: "Asked for the full", [QueryStatus.FULL_SENT]: "Sent the full", [QueryStatus.REVISE_RESUBMIT]: "Asked for a revision (R&R)",
   [QueryStatus.RESUBMITTED]: "Sent the revision", [QueryStatus.OFFER]: "Made an offer", [QueryStatus.REJECTED]: "Passed",
-  [QueryStatus.NO_RESPONSE]: "Closed: no response", [QueryStatus.WITHDRAWN]: "Withdrew the query", [QueryStatus.SIGNED]: "Signed",
+  [QueryStatus.NO_RESPONSE]: "Closed: no response", [QueryStatus.WITHDRAWN]: "You withdrew", [QueryStatus.SIGNED]: "Signed",
 };
-export function stepTitle(s: Pick<ThreadStepIn, "status" | "kind">, first: string): string {
+export function stepTitle(s: Pick<ThreadStepIn, "status" | "kind"> & { toldCount?: number | null }, first: string): string {
   if (s.kind === "nudge") return `You nudged ${first}`;
+  if (s.kind === "told") return s.toldCount ? `Told ${pl(s.toldCount, "other agent")}` : "Told other agents";
   if (s.kind === "holding") return "Sent a holding reply";
   return (s.status && TITLE[s.status]) || "A step";
 }
+/**
+ * v152.1 §2.2 — THE COLOUR RULE, like a messaging app: your bubbles are paper, always; the agent's are tinted by WHAT THE
+ * REPLY WAS, the status pills' family, with a 1px inset edge. The glyphs inside are colourless; there is no navy in the
+ * thread. A holding reply is the agent's but names no reply in the table, so it takes the pass's grey (reported).
+ */
+export const MY_PAPER = "#f6f3ee";
+export const AGENT_TINT: Record<string, { fill: string; edge: string }> = {
+  [QueryStatus.PARTIAL_REQUESTED]: { fill: "#f8e7e0", edge: "#efd2c7" },
+  [QueryStatus.FULL_REQUESTED]: { fill: "#e7edf4", edge: "#cfdae7" },
+  [QueryStatus.REVISE_RESUBMIT]: { fill: "#e7edf4", edge: "#cfdae7" },
+  [QueryStatus.OFFER]: { fill: "#e5eddf", edge: "#cddcc1" },
+  [QueryStatus.REJECTED]: { fill: "#f1efec", edge: "#e3dfd9" },
+};
+export function tintOf(s: Pick<ThreadStepIn, "status" | "kind">): { fill: string; edge: string } | null {
+  if (sideOf(s) === "me") return null;
+  return (s.kind === "holding" ? AGENT_TINT[QueryStatus.REJECTED] : s.status ? AGENT_TINT[s.status] : null) ?? AGENT_TINT[QueryStatus.REJECTED];
+}
+/** a pass and your closes are drawn in grey ink (#8a8076); every other glyph in ink */
+export const greyGlyph = (s: Pick<ThreadStepIn, "status" | "kind">): boolean =>
+  !s.kind && (s.status === QueryStatus.REJECTED || s.status === QueryStatus.NO_RESPONSE || s.status === QueryStatus.WITHDRAWN);
+
 /** the 34px disc's fill: the status's cap colour; Query sent and a nudge (and a holding reply) have none */
 export function discFill(s: Pick<ThreadStepIn, "status" | "kind">): string {
   if (s.kind || !s.status || s.status === QueryStatus.QUERIED) return "transparent";
   return STATUS_FILL[statusKind(s.status)];
 }
 
+/** v152.1 §2.1 — the thread holds only things that happened: a message per step and the wait between each two */
 export type ThreadItem =
-  | { t: "wait"; key: string; label: string; long: boolean; tip: string | null; edge: "start" | "now" | null }
-  | { t: "msg"; key: string; activityId?: string; side: Side; disc: string; status: QueryStatus | null; kind: "nudge" | "holding" | null; title: string; date: string; chips: ThreadChip[]; via: string | null }
-  | { t: "end"; key: string; kind: "agent" | "nudge" | "quiet"; title: string; sub: string; ring: number | null };
+  | { t: "wait"; key: string; label: string; tip: string | null }
+  | { t: "msg"; key: string; activityId?: string; side: Side; status: QueryStatus | null; kind: "nudge" | "holding" | "told" | null; title: string;
+      /** "No date" when the step has none (§2.7) */
+      date: string; dated: boolean; chips: ThreadChip[]; via: string | null;
+      /** the agent's bubble tint (§2.2); null on your side */
+      tint: { fill: string; edge: string } | null; grey: boolean;
+      /** §2.6 the agent's one quoted line */
+      quote: string | null;
+      /** §2.4 a nudge quotes the query it follows up, and counts itself from the 2nd */
+      follows: string | null; nth: string | null };
 
 export interface ThreadCtx {
   first: string;
@@ -125,49 +160,76 @@ export function waitTip(prev: ThreadStepIn, next: ThreadStepIn, n: number, c: Pi
   return `You ${what} ${d} after ${prevPhrase(prev, c.first, false)}.`;
 }
 
-/** the thread: Day 1, each step, the wait to the next, today, and how it ends (§2.3) */
+const ORD = ["", "", "2nd", "3rd"];
+const ordinal = (n: number) => ORD[n] ?? `${n}th`;
+/** v152.1 §2.1 — the thread: each step and the wait between each two, from your Query sent to the last thing that
+ *  happened. No "Day 1", no "today", no ending bubble: where it stands is the footer's (§3). */
+/** a status's place in the pipeline, for placing a step that carries no date */
+const STAGE_RANK: Partial<Record<string, number>> = {
+  [QueryStatus.QUERIED]: 0, [QueryStatus.PARTIAL_REQUESTED]: 1, [QueryStatus.PARTIAL_SENT]: 2, [QueryStatus.FULL_REQUESTED]: 3,
+  [QueryStatus.FULL_SENT]: 4, [QueryStatus.REVISE_RESUBMIT]: 5, [QueryStatus.RESUBMITTED]: 6, [QueryStatus.OFFER]: 7,
+  [QueryStatus.REJECTED]: 8, [QueryStatus.NO_RESPONSE]: 8, [QueryStatus.WITHDRAWN]: 8, [QueryStatus.SIGNED]: 9,
+};
+/**
+ * The steps in the order they happened (v152.1 §2.7): the dated ones by date, and each UNDATED step in its place in the
+ * pipeline — before the first dated step further along — with "—" either side. An imported step with no date carries no
+ * ordering key at all, so the stage is the only thing that can place it; v152 put it at the end of the thread, as
+ * though it were the latest thing that happened. An undated step with no status (a nudge) goes last.
+ */
+export function orderSteps(steps: readonly ThreadStepIn[]): ThreadStepIn[] {
+  const out = steps.filter((x) => x.ms != null).sort((a, b) => a.ms! - b.ms!);
+  for (const u of steps.filter((x) => x.ms == null)) {
+    const r = u.status && !u.kind ? STAGE_RANK[u.status] : undefined;
+    const i = r == null ? -1 : out.findIndex((x) => !!x.status && !x.kind && (STAGE_RANK[x.status] ?? -1) > r);
+    out.splice(i >= 0 ? i : out.length, 0, u);
+  }
+  return out;
+}
 export function buildThread(steps: readonly ThreadStepIn[], c: ThreadCtx): ThreadItem[] {
-  const S = [...steps].sort((a, b) => (a.ms ?? Infinity) - (b.ms ?? Infinity));
+  const S = orderSteps(steps);
   const out: ThreadItem[] = [];
-  if (!S.length) return out;
-  const s0 = S[0];
-  out.push({ t: "wait", key: "w-start", label: "Day 1", long: false, edge: "start",
-    tip: s0.ms != null ? `The day you sent the query: ${fullDay(s0.ms)}.` : null });
+  const q0 = S.find((x) => x.status === QueryStatus.QUERIED && !x.kind) ?? null;
+  let nudges = 0;
   S.forEach((s, i) => {
     if (i) {
       const p = S[i - 1];
+      /* §2.3 every wait the same size, whatever its length; "—" when either neighbour has no date */
       if (p.ms != null && s.ms != null) {
         const n = Math.max(0, days(s.ms, p.ms));
-        out.push({ t: "wait", key: `w-${s.key}`, label: n === 0 ? "Same day" : pl(n, "day"), long: n > 70, edge: null, tip: waitTip(p, s, n, c) });
-      } else out.push({ t: "wait", key: `w-${s.key}`, label: "Not dated", long: false, edge: null, tip: null });
+        out.push({ t: "wait", key: `w-${s.key}`, label: pl(n, "day"), tip: waitTip(p, s, n, c) });
+      } else out.push({ t: "wait", key: `w-${s.key}`, label: "—", tip: null });
     }
-    out.push({ t: "msg", key: s.key, activityId: s.activityId, side: sideOf(s), disc: discFill(s), status: s.status, kind: s.kind,
-      title: stepTitle(s, c.first), date: s.ms != null ? dayLabel(s.ms, c.nowMs) : "No date", chips: s.chips, via: s.via ?? null });
+    if (s.kind === "nudge") nudges += 1;
+    out.push({
+      t: "msg", key: s.key, activityId: s.activityId, side: sideOf(s), status: s.status, kind: s.kind,
+      title: stepTitle(s, c.first), date: s.ms != null ? dayLabel(s.ms, c.nowMs) : "No date", dated: s.ms != null,
+      chips: s.chips, via: s.via ?? null, tint: tintOf(s), grey: greyGlyph(s),
+      quote: sideOf(s) === "them" && (s.quote ?? "").trim() ? s.quote!.trim() : null,
+      follows: s.kind === "nudge" ? (q0?.ms != null ? `Query sent · ${dayLabel(q0.ms, c.nowMs)}` : "Query sent") : null,
+      nth: s.kind === "nudge" && nudges >= 2 ? `${ordinal(nudges)} nudge` : null,
+    });
   });
-  if (c.state === "closed") return out;
-  const lastMs = [...S].reverse().find((x) => x.ms != null)?.ms ?? null;
-  const since = lastMs != null ? Math.max(0, days(c.nowMs, lastMs)) : null;
-  out.push({ t: "wait", key: "w-now", label: since ? `${pl(since, "day")} · today` : "Today", long: false, edge: "now", tip: null });
-  const anchor = [...S].reverse().find((x) => x.ms != null && x.kind !== "nudge")?.ms ?? null;
-  if (c.state === "agent") {
-    const dn = anchor != null ? Math.max(1, days(c.nowMs, anchor)) : null;
-    if (c.replyMs != null && anchor != null) {
-      const tot = Math.max(1, days(c.replyMs, anchor));
-      out.push({ t: "end", key: "end", kind: "agent", title: `Waiting on ${c.first}`, sub: `Day ${dn} of about ${tot} · reply expected ${dayLabel(c.replyMs, c.nowMs)}`, ring: Math.min(1, dn! / tot) });
-    } else out.push({ t: "end", key: "end", kind: "agent", title: `Waiting on ${c.first}`, sub: dn != null ? `Day ${dn} · no reply date` : "No reply date", ring: null });
-  } else if (c.state === "nudge" && c.replyMs != null) {
-    const ago = Math.max(0, days(c.nowMs, c.replyMs));
-    out.push({ t: "end", key: "end", kind: "nudge", title: "No reply yet", sub: `Reply was due ${dayLabel(c.replyMs, c.nowMs)} · ${pl(ago, "day")} ago`, ring: null });
-  } else if (c.state === "quiet") {
-    out.push({ t: "end", key: "end", kind: "quiet", title: "No reply", sub: c.replyMs != null ? `Quiet since ${dayLabel(c.replyMs, c.nowMs)}` : "No reply yet", ring: null });
-  }
   return out;
 }
 
 /* ── §2.5 the reply box ─────────────────────────────────────────────────────────────────────────────────────── */
 
-export type ReplyAct = "offer" | "sent" | "nudge" | "resp" | "close" | "reopen";
-export interface ReplyBox { lead: string; sub: string; late: boolean; button: string; tone: "navy" | "outline"; act: ReplyAct }
+export type ReplyAct = "offer" | "sent" | "nudge" | "resp" | "close" | "reopen" | "tell";
+/**
+ * v152.1 §3 — THE FOOTER IS THE ONLY PLACE THAT SAYS WHERE THE QUERY STANDS: an icon (the stage's glyph on its tint, the
+ * reply-time ring, a clock, or the closed grey glyph), two lines, and the action. Its button opens the record form and
+ * never writes (as v152's reply box).
+ */
+export type FootIcon =
+  | { k: "stage"; status: QueryStatus; tint: string }
+  | { k: "ring"; p: number }
+  | { k: "clock" }
+  | { k: "grey"; status: QueryStatus };
+export interface ReplyBox {
+  icon: FootIcon; lead: string; sub: string; late: boolean; button: string; tone: "navy" | "outline"; act: ReplyAct;
+  /** §3 the offer's second action, "Tell other agents", while no told step exists */
+  second: { label: string; act: ReplyAct } | null;
+}
 export interface ReplyCtx {
   state: QueryState;
   status: QueryStatus | string;
@@ -175,10 +237,19 @@ export interface ReplyCtx {
   nowMs: number;
   /** the offer's deadline, or the send-by date (writer's turn) */
   dueMs: number | null;
-  /** the stamped reply date */
+  /** the stamped reply date (after a nudge: the nudge plus the quiet window) */
   replyMs: number | null;
   /** the day it closed */
   closedMs: number | null;
+  /** the thread's steps: whether you nudged, when the agent asked, a told step, how far it got */
+  steps?: readonly ThreadStepIn[];
+  /** the quiet window, weeks (the ring's "Quiet after N weeks") */
+  quietWeeks?: number;
+  /** a close's reason ("an offer elsewhere") */
+  reason?: string | null;
+  /** you nudged, by the states' own rule (lib/queryState nudgeMsOf: `lastNudgeSentDate`, else `nudgeDate`) — a nudge need
+   *  not be a step on the log, so the steps alone cannot say */
+  nudged?: boolean;
 }
 function leftWords(dueMs: number | null, nowMs: number): { sub: string; late: boolean } {
   if (dueMs == null) return { sub: "No date set", late: false };
@@ -187,26 +258,66 @@ function leftWords(dueMs: number | null, nowMs: number): { sub: string; late: bo
   if (n === 0) return { sub: `Due today · ${dayLabel(dueMs, nowMs)}`, late: false };
   return { sub: `${pl(n, "day")} left · by ${dayLabel(dueMs, nowMs)}`, late: false };
 }
+const FURTHEST: [QueryStatus, string][] = [
+  [QueryStatus.RESUBMITTED, "the revision"], [QueryStatus.FULL_SENT, "the full"], [QueryStatus.FULL_REQUESTED, "the full request"],
+  [QueryStatus.PARTIAL_SENT, "the partial"], [QueryStatus.PARTIAL_REQUESTED, "the partial request"],
+];
 export function replyBox(c: ReplyCtx): ReplyBox {
   const f = c.first;
+  const S = orderSteps(c.steps ?? []);
+  const lastOf = (st: QueryStatus) => [...S].reverse().find((x) => x.status === st && !x.kind) ?? null;
+  const told = [...S].reverse().find((x) => x.kind === "told") ?? null;
+  const base = { late: false, second: null };
   switch (c.state) {
     case "offer": {
       const w = leftWords(c.dueMs, c.nowMs);
-      return { lead: "Answer the offer", sub: w.sub.replace(/ · by .*$/, ""), late: w.late, button: "Answer the offer", tone: "navy", act: "offer" };
+      const by = c.dueMs != null ? ` · answer by ${dayLabel(c.dueMs, c.nowMs)}` : "";
+      const sub = told ? `You told ${told.toldCount ? pl(told.toldCount, "other", "others") : "others"}${told.via ? ` · ${told.via.replace(/^offer deadline/, "deadline")}` : ""}`
+        : w.late ? w.sub : `${w.sub.replace(/ · by .*$/, "")}${by}`;
+      return { ...base, icon: { k: "stage", status: QueryStatus.OFFER, tint: AGENT_TINT[QueryStatus.OFFER].fill }, lead: `${f} made an offer`, sub, late: !told && w.late,
+        button: "Answer the offer", tone: "navy", act: "offer", second: told ? null : { label: "Tell other agents", act: "tell" } };
     }
     case "materials": {
-      const k = c.status === QueryStatus.FULL_REQUESTED ? "full" : c.status === QueryStatus.REVISE_RESUBMIT ? "revision" : "partial";
+      if (c.status === QueryStatus.REVISE_RESUBMIT) {
+        const rr = lastOf(QueryStatus.REVISE_RESUBMIT);
+        return { ...base, icon: { k: "stage", status: QueryStatus.REVISE_RESUBMIT, tint: AGENT_TINT[QueryStatus.REVISE_RESUBMIT].fill }, lead: "Revise and resubmit",
+          sub: rr?.ms != null ? `${f} asked on ${dayLabel(rr.ms, c.nowMs)}` : `${f} asked for a revision`, button: "Mark revision sent", tone: "navy", act: "sent" };
+      }
+      const full = c.status === QueryStatus.FULL_REQUESTED;
+      const st = full ? QueryStatus.FULL_REQUESTED : QueryStatus.PARTIAL_REQUESTED;
       const w = leftWords(c.dueMs, c.nowMs);
-      return { lead: `Send the ${k}`, sub: w.sub, late: w.late, button: `Mark ${k} sent`, tone: "navy", act: "sent" };
+      return { ...base, icon: { k: "stage", status: st, tint: AGENT_TINT[st].fill }, lead: `Send the ${full ? "full" : "partial"}`, sub: w.sub, late: w.late,
+        button: `Mark ${full ? "full" : "partial"} sent`, tone: "navy", act: "sent" };
     }
-    case "nudge":
-      return { lead: `Nudge ${f}?`, sub: c.replyMs != null ? `Reply was due ${dayLabel(c.replyMs, c.nowMs)}` : "Reply is overdue", late: false, button: "Nudge", tone: "outline", act: "nudge" };
-    case "agent":
-      return { lead: "Heard back?", sub: `Record it when ${f} replies`, late: false, button: "Record a response", tone: "outline", act: "resp" };
+    case "nudge": {
+      const ago = c.replyMs != null ? Math.max(0, days(c.nowMs, c.replyMs)) : null;
+      return { ...base, icon: { k: "clock" }, lead: `No reply from ${f} yet`,
+        sub: c.replyMs != null ? `Reply was due ${dayLabel(c.replyMs, c.nowMs)} · ${pl(ago!, "day")} ago` : "Reply is overdue", late: true, button: "Nudge", tone: "outline", act: "nudge" };
+    }
+    case "agent": {
+      const nudged = c.nudged ?? S.some((x) => x.kind === "nudge" && x.ms != null && x.ms >= (Math.max(...S.filter((y) => !y.kind && y.ms != null).map((y) => y.ms!), 0)));
+      const anchor = [...S].reverse().find((x) => x.ms != null && x.kind !== "told")?.ms ?? null;
+      const p = anchor != null && c.replyMs != null && c.replyMs > anchor ? Math.max(0, Math.min(1, (c.nowMs - anchor) / (c.replyMs - anchor))) : 0;
+      const left = c.replyMs != null ? Math.max(0, days(c.replyMs, c.nowMs)) : null;
+      const sub = nudged && c.replyMs != null ? `Quiet after ${pl(c.quietWeeks ?? 4, "week")} · ${pl(left!, "day")} to go`
+        : c.replyMs != null ? `Reply expected by ${dayLabel(c.replyMs, c.nowMs)}` : "No reply date";
+      return { ...base, icon: { k: "ring", p }, lead: `Waiting on ${f}`, sub, button: "Record a response", tone: "outline", act: "resp" };
+    }
     case "quiet":
-      return { lead: "Still nothing?", sub: "Close it, or keep waiting", late: false, button: "Close it", tone: "outline", act: "close" };
-    default:
-      return { lead: "Closed", sub: c.closedMs != null ? `Closed on ${dayLabel(c.closedMs, c.nowMs)}` : "Closed", late: false, button: "Reopen", tone: "outline", act: "reopen" };
+      return { ...base, icon: { k: "clock" }, lead: `No reply from ${f}`,
+        sub: `${c.replyMs != null ? `Quiet since ${dayLabel(c.replyMs, c.nowMs)}` : "No reply yet"} · close it, or keep waiting`, button: "Close it", tone: "outline", act: "close" };
+    default: {
+      const st = (c.status as QueryStatus) ?? QueryStatus.REJECTED;
+      const on = c.closedMs != null ? dayLabel(c.closedMs, c.nowMs) : null;
+      if (st === QueryStatus.WITHDRAWN) {
+        return { ...base, icon: { k: "grey", status: st }, lead: "You withdrew", sub: [on, c.reason].filter(Boolean).join(" · ") || "Withdrawn", button: "Reopen", tone: "outline", act: "reopen" };
+      }
+      if (st === QueryStatus.NO_RESPONSE) {
+        return { ...base, icon: { k: "grey", status: st }, lead: "Closed: no response", sub: on ? `On ${on}${c.reason ? ` · ${c.reason}` : ""}` : "Closed", button: "Reopen", tone: "outline", act: "reopen" };
+      }
+      const after = FURTHEST.find(([x]) => S.some((y) => y.status === x && !y.kind))?.[1] ?? "the query";
+      return { ...base, icon: { k: "grey", status: QueryStatus.REJECTED }, lead: `${f} passed`, sub: on ? `On ${on} · after ${after}` : `After ${after}`, button: "Reopen", tone: "outline", act: "reopen" };
+    }
   }
 }
 

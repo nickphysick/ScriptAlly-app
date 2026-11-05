@@ -84,7 +84,9 @@ export const CalendarField: React.FC<{
   /** why a day is greyed, or "" */
   blocked: (dayMs: number) => string;
   onChange: (dayMs: number) => void;
-}> = ({ id, valueMs, nowMs, blocked, onChange }) => {
+  /** v152.1 §2.5 a deadline you gave others is ahead of today: let the calendar page forward */
+  future?: boolean;
+}> = ({ id, valueMs, nowMs, blocked, onChange, future }) => {
   const api = useContext(PopCtx);
   const open = api.open === `cal:${id}`;
   const btn = useRef<HTMLButtonElement>(null);
@@ -93,7 +95,7 @@ export const CalendarField: React.FC<{
   const m = new Date(month), y = m.getFullYear(), mo = m.getMonth();
   const lead = (new Date(y, mo, 1).getDay() + 6) % 7;
   const dim = new Date(y, mo + 1, 0).getDate();
-  const nextDisabled = new Date(y, mo + 1, 1).getTime() > nowMs;
+  const nextDisabled = !future && new Date(y, mo + 1, 1).getTime() > nowMs;
   const today = startOfDay(nowMs);
   const anyBlocked = Array.from({ length: dim }, (_, i) => new Date(y, mo, i + 1).getTime()).some((t) => t <= today && blocked(t));
   return (

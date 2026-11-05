@@ -22,14 +22,15 @@ const run = (id: string) => !ONLY || ONLY.split(",").includes(id);
 const SIZES = [{ width: 1280, height: 800 }, { width: 1512, height: 900 }] as const;
 type VP = { width: number; height: number };
 const NAVY = "rgb(42, 58, 82)", WHITE = "rgb(255, 255, 255)", LATE = "rgb(138, 58, 40)", FAINT = "rgb(138, 128, 118)";
-const SAND = "rgb(230, 217, 198)", PINK = "rgb(243, 211, 198)", LNAVY = "rgb(211, 220, 231)", SAGE = "rgb(203, 217, 190)", GREY = "rgb(241, 240, 238)";
+/* v152.1 §1 re-points Queried: the cap #f2ebe0 (was #e6d9c6), its watch-and-wait bar #f7f2ea, its group header #f4eee5 */
+const SAND = "rgb(242, 235, 224)", PINK = "rgb(243, 211, 198)", LNAVY = "rgb(211, 220, 231)", SAGE = "rgb(203, 217, 190)", GREY = "rgb(241, 240, 238)";
 const BLUE = "rgb(197, 208, 221)", STONE = "rgb(227, 219, 207)", FADED = "rgb(241, 239, 236)";
 /** the status colour, by status (the brief's table; R&R and Resubmitted with the full, Signed with the offer) */
 const STATUS_RGB: Record<string, string> = {
   "Queried": SAND, "Partial Requested": PINK, "Partial Sent": PINK, "Full Requested": LNAVY, "Full Sent": LNAVY,
   "Revise & Resubmit": LNAVY, "Resubmitted": LNAVY, "Offer": SAGE, "Signed": SAGE, "Rejected": GREY, "No Response": GREY, "Withdrawn": GREY,
 };
-const PALE: Record<string, string> = { [SAND]: "rgb(238, 229, 215)", [PINK]: "rgb(247, 226, 218)", [LNAVY]: "rgb(224, 230, 238)", [SAGE]: SAGE };
+const PALE: Record<string, string> = { [SAND]: "rgb(247, 242, 234)", [PINK]: "rgb(247, 226, 218)", [LNAVY]: "rgb(224, 230, 238)", [SAGE]: SAGE };
 
 class Ledger {
   rows: { where: string; ok: boolean; detail: string }[] = [];
@@ -198,7 +199,7 @@ for (const vp of SIZES) {
       await open(page, vp, { group: "status" });
       const st = await heads();
       L.check("status: population", st.length >= 3, JSON.stringify(st.map((x) => x.k)));
-      for (const h of st) L.check(`status · ${h.k}`, STATUS_RGB[h.k] === h.bg && h.glyph, `${h.bg} glyph ${h.glyph}`);
+      for (const h of st) L.check(`status · ${h.k}`, (h.k === "Queried" ? "rgb(244, 238, 229)" : STATUS_RGB[h.k]) === h.bg && h.glyph, `${h.bg} glyph ${h.glyph}`);
       await open(page, vp, { group: "package" });
       const pk = await heads();
       L.check("package: population", pk.length >= 1, JSON.stringify(pk.map((x) => x.k)));

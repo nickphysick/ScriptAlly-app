@@ -11,24 +11,26 @@
  *    step is greyed and the form points to Fix a mistake instead.
  */
 import React, { useContext, useMemo, useState } from "react";
-import { StatusDot } from "../../StatusDot";
 import type { QueryStatus } from "../../../types";
 import { STAGE_NAME } from "../../../lib/qcSummary";
 import { STATE_LABEL, type QueryState } from "../../../lib/queryState";
-import { RECORD_STATUS, matLabel, type RecordKind, type StepMaterial } from "../../../lib/qc152Write";
+import { RECORD_STATUS, REPLY_KINDS, REPLY_NOTE_MAX, matLabel, type RecordKind, type StepMaterial } from "../../../lib/qc152Write";
 import { dayBlocked, knock, type LogStep, type StepType } from "../../../lib/qcLogic152";
-import { dayLabel, discFill, sideOf, stepTitle } from "../../../lib/qcThread152";
+import { dayLabel, greyGlyph, sideOf, stepTitle, tintOf } from "../../../lib/qcThread152";
 import { CalendarField, MatChips, PopCtx, type MatEnv } from "./QcEdit152";
+import { Bubble, StepGlyph } from "./QcBubble152";
 import "./qcv152edit.css";
 
 const DAY = 86_400_000;
 export const KIND_STEP: Record<RecordKind, StepType> = {
-  partial_req: "preq", full_req: "freq", offer: "offer", pass: "passed", partial_sent: "psent", full_sent: "fsent", nudge: "nudge", noresp: "noresp",
+  partial_req: "preq", full_req: "freq", offer: "offer", pass: "passed", partial_sent: "psent", full_sent: "fsent", nudge: "nudge", noresp: "noresp", told: "told",
 };
-export const KIND_TITLE: Partial<Record<RecordKind, string>> = { partial_sent: "Mark partial sent", full_sent: "Mark full sent", nudge: "Log a nudge", noresp: "Close it" };
-const NUDGE = <svg viewBox="0 0 20 20" width="19" height="19" fill="none" stroke="#1c130f" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5" /><path d="M7 12.5h6l-.9-1.2V9a2.1 2.1 0 0 0-4.2 0v2.3zM9.2 14h1.6" /></svg>;
-const glyph = (k: RecordKind) => (k === "nudge" ? NUDGE : <StatusDot status={RECORD_STATUS[k]!} overrideSize={19} decorative />);
-const statusOf = (k: RecordKind) => ({ status: RECORD_STATUS[k], kind: k === "nudge" ? ("nudge" as const) : null });
+export const KIND_TITLE: Partial<Record<RecordKind, string>> = { partial_sent: "Mark partial sent", full_sent: "Mark full sent", nudge: "Log a nudge", noresp: "Close it", told: "Tell other agents" };
+const statusOf = (k: RecordKind) => ({ status: RECORD_STATUS[k], kind: k === "nudge" ? ("nudge" as const) : k === "told" ? ("told" as const) : null });
+const glyph = (k: RecordKind) => <span className={`qc152-g0${greyGlyph(statusOf(k)) ? " grey" : ""}`}>{StepGlyph(statusOf(k))}</span>;
+/** v152.1 §2.5 told other agents: the stepper's range */
+export const TOLD_MIN = 1, TOLD_MAX = 30;
+export interface RecordExtraIn { replyNote?: string; told?: { count: number; deadlineMs: number } }
 
 export interface RecordOutcome { status: QueryStatus | string; state: QueryState; replyMs: number | null; dueMs: number | null; dueWho: "you" | "agent" | null }
 export interface QcRecord152Props {
@@ -38,7 +40,7 @@ export interface QcRecord152Props {
   /** the log as it stands, for the checks */
   log: LogStep[];
   /** the latest step, for the preview */
-  last: { status: QueryStatus | null; kind: "nudge" | "holding" | null; ms: number | null; chips: string[] } | null;
+  last: { status: QueryStatus | null; kind: "nudge" | "holding" | "told" | null; ms: number | null; chips: string[]; toldCount?: number | null } | null;
   /** the button that opened it: a step (`Mark full sent`…), "resp" (Record a response: who replied), or null (every
    *  option: "Something changed since", from the pencil) */
   initial: RecordKind | "resp" | null;
@@ -51,17 +53,21 @@ export interface QcRecord152Props {
   now: RecordOutcome;
   after: (k: RecordKind, dayMs: number) => RecordOutcome;
   onCancel: () => void;
-  onSave: (k: RecordKind, dayMs: number, mats: StepMaterial[]) => Promise<boolean>;
+  onSave: (k: RecordKind, dayMs: number, mats: StepMaterial[], extra: RecordExtraIn) => Promise<boolean>;
   busy: boolean;
+  /** v152.1 §2.5 the query has an offer, so "Told other agents" is one of what you did; its defaults */
+  canTell?: boolean;
+  tellDefault?: { count: number; deadlineMs: number };
 }
 
 const OPTS: { head: string; side: "them" | "me"; kinds: RecordKind[] }[] = [
   { head: "Who replied", side: "them", kinds: ["partial_req", "full_req", "offer", "pass"] },
-  { head: "What you did", side: "me", kinds: ["partial_sent", "full_sent", "nudge", "noresp"] },
+  { head: "What you did", side: "me", kinds: ["partial_sent", "full_sent", "nudge", "noresp", "told"] },
 ];
 const optLabel = (k: RecordKind, f: string) => ({
   partial_req: `${f} asked for a partial`, full_req: `${f} asked for the full`, offer: `${f} made an offer`, pass: `${f} passed`,
   partial_sent: "You sent the partial", full_sent: "You sent the full", nudge: `You nudged ${f}`, noresp: "You closed it: no response",
+  told: "You told other agents about the offer",
 }[k]);
 
 export const QcRecord152: React.FC<QcRecord152Props> = (p) => {
@@ -73,13 +79,18 @@ export const QcRecord152: React.FC<QcRecord152Props> = (p) => {
   const respOnly = p.initial === "resp" && !all;
   const [day, setDay] = useState(today);
   const [mats, setMats] = useState<StepMaterial[]>(() => (p.initial && p.initial !== "resp" ? p.prefill(p.initial) : []));
+  /* §2.6 what they said; §2.5 told others: how many, and the deadline you gave */
+  const [note, setNote] = useState("");
+  const [toldN, setToldN] = useState(() => Math.max(TOLD_MIN, Math.min(TOLD_MAX, p.tellDefault?.count ?? 1)));
+  const [toldBy, setToldBy] = useState(() => p.tellDefault?.deadlineMs ?? today + 7 * DAY);
+  const kinds = (ks: RecordKind[]) => ks.filter((k) => k !== "told" || p.canTell);
   const floor = p.log.length ? Math.max(...p.log.map((x) => x.d)) : null;
   const c = { nowMs: p.nowMs, first: p.first };
   const why = (k: RecordKind, d = day): string => {
     if (floor != null && d < new Date(floor).setHours(0, 0, 0, 0)) return `That’s before the latest step (${dayLabel(floor, p.nowMs)}). To add a step you missed, use Fix a mistake.`;
     return knock(p.log, [...p.log, { id: "__new", t: KIND_STEP[k], d: d + 12 * 3600_000 }], "__new", c);
   };
-  const reasons = useMemo(() => Object.fromEntries((OPTS.flatMap((o) => o.kinds)).map((k) => [k, why(k)])) as Record<RecordKind, string>, [day, p.log]); // eslint-disable-line react-hooks/exhaustive-deps
+  const reasons = useMemo(() => Object.fromEntries((OPTS.flatMap((o) => kinds(o.kinds))).map((k) => [k, why(k)])) as Record<RecordKind, string>, [day, p.log]); // eslint-disable-line react-hooks/exhaustive-deps
   const blocked = (d: number) => dayBlocked(d, { nowMs: p.nowMs, floorMs: floor, check: kind ? (x) => (why(kind, x) ? "Out of order" : "") : undefined });
   const curWhy = kind ? reasons[kind] : "";
   const pick = (k: RecordKind) => { setKind(k); setMats(p.prefill(k)); api.setOpen(null); };
@@ -87,26 +98,28 @@ export const QcRecord152: React.FC<QcRecord152Props> = (p) => {
   const sendKind = kind === "partial_sent" || kind === "full_sent";
   const request = kind === "partial_req" || kind === "full_req";
   const gap = p.last?.ms != null ? Math.max(0, Math.round((day - new Date(p.last.ms).setHours(0, 0, 0, 0)) / DAY)) : null;
+  const reply = !!kind && REPLY_KINDS.includes(kind);
+  const extra = (): RecordExtraIn => (kind === "told" ? { told: { count: toldN, deadlineMs: toldBy } } : reply && note.trim() ? { replyNote: note.trim() } : {});
+  const draftStep = kind ? { ...statusOf(kind), toldCount: kind === "told" ? toldN : null } : null;
 
-  /* §3.1 the preview: the latest step (faded), the days since, and the draft on its own side */
+  /* §3.1 the preview: the latest step (faded), the days since, and the draft on its own side — v152.1 §2.9: in the thread's
+     own colours (yours paper, theirs in their stage colour) with a dashed edge and "· draft" */
   const preview = (
     <div className="qc152-th qc152-jprev" data-qc152="preview">
       {p.last ? (
-        <div className={`qc152-m ${sideOf(p.last)} ctx`}>
-          {sideOf(p.last) === "them" ? <span className="qc152-av" aria-hidden="true">{p.initials}</span> : null}
-          <div className="qc152-bx"><span className="qc152-gd" style={{ background: discFill(p.last) }}>{p.last.kind === "nudge" ? NUDGE : p.last.status ? <StatusDot status={p.last.status} overrideSize={19} decorative /> : null}</span>
-            <div className="qc152-qx"><div className="qc152-r1"><b>{stepTitle(p.last, p.first)}</b><span className="qc152-dt">{p.last.ms != null ? dayLabel(p.last.ms, p.nowMs) : ""}</span></div>
-              {p.last.chips.length ? <div className="qc152-r2"><span className="qc152-chs">{p.last.chips.map((x) => <span key={x} className="qc152-ch">{x}</span>)}</span></div> : null}</div></div>
-        </div>
+        <Bubble side={sideOf(p.last)} status={p.last.status} kind={p.last.kind} title={stepTitle(p.last, p.first)}
+          date={p.last.ms != null ? dayLabel(p.last.ms, p.nowMs) : "No date"} dated={p.last.ms != null} tint={tintOf(p.last)} grey={greyGlyph(p.last)} initials={p.initials}
+          chips={p.last.chips.length ? <span className="qc152-chs">{p.last.chips.map((x) => <span key={x} className="qc152-ch">{x}</span>)}</span> : null}
+          className="ctx" />
       ) : null}
-      <div className="qc152-w" data-edge={kind ? "now" : undefined}><i /><span data-qc152="preview-gap">{kind ? (gap ? `${gap} days later` : "Same day") : "What happened next?"}</span><i /></div>
-      {kind ? (
-        <div className={`qc152-m ${sideOf(statusOf(kind))} draft`} data-qc152="draft" data-side={sideOf(statusOf(kind))}>
-          {sideOf(statusOf(kind)) === "them" ? <span className="qc152-av" aria-hidden="true">{p.initials}</span> : null}
-          <div className="qc152-bx"><span className="qc152-gd" style={{ background: discFill(statusOf(kind)) }}>{glyph(kind)}</span>
-            <div className="qc152-qx"><div className="qc152-r1"><b data-qc152="draft-title">{stepTitle(statusOf(kind), p.first)}</b><span className="qc152-dt" data-qc152="draft-date">{dayLabel(day, p.nowMs)}</span></div>
-              {mats.length ? <div className="qc152-r2"><span className="qc152-chs" data-qc152="draft-chips">{mats.map((m, i) => <span key={i} className="qc152-ch">{matText(m, p.env)}</span>)}</span></div> : null}</div></div>
-        </div>
+      <div className="qc152-w"><i /><span data-qc152="preview-gap">{kind ? (gap ? `${gap} days later` : "Same day") : "What happened next?"}</span><i /></div>
+      {draftStep ? (
+        <Bubble side={sideOf(draftStep)} status={draftStep.status} kind={draftStep.kind} title={stepTitle(draftStep, p.first)}
+          date={dayLabel(day, p.nowMs)} dated tint={tintOf(draftStep)} grey={greyGlyph(draftStep)} initials={p.initials} draft
+          chips={mats.length ? <span className="qc152-chs" data-qc152="draft-chips">{mats.map((m, i) => <span key={i} className="qc152-ch">{matText(m, p.env)}</span>)}</span> : null}
+          via={kind === "told" ? `offer deadline ${dayLabel(toldBy, p.nowMs)}` : null}
+          quote={reply && note.trim() ? note.trim() : null}
+          outer={{ "data-qc152": "draft", "data-side": sideOf(draftStep) }} />
       ) : (
         <div className="qc152-m me draft empty"><div className="qc152-bx"><div className="qc152-qx"><b>Pick what happened below</b></div></div></div>
       )}
@@ -118,7 +131,7 @@ export const QcRecord152: React.FC<QcRecord152Props> = (p) => {
     return (
       <button key={k} type="button" role="radio" aria-checked={kind === k} className={`qc152-opt ${side}${kind === k ? " on" : ""}${w ? " dis" : ""}`}
         data-qc152="opt" data-k={k} disabled={!!w && kind !== k} onClick={() => pick(k)}>
-        <span className="qc152-gd sm" style={{ background: discFill(statusOf(k)) }}>{glyph(k)}</span>
+        <span className="qc152-gd sm">{glyph(k)}</span>
         <span><b>{optLabel(k, p.first)}</b>{w ? <em data-qc152="opt-why">{w}</em> : null}</span>
       </button>
     );
@@ -144,7 +157,7 @@ export const QcRecord152: React.FC<QcRecord152Props> = (p) => {
         <div className="qc152-actb">
           <div className="qc152-diff">
             <h4>You’re adding</h4>
-            <div className="qc152-dr" data-qc152="adding"><span className="qc152-gd sm">{glyph(kind)}</span><span><b>{stepTitle(statusOf(kind), p.first)}</b></span><span className="qc152-now">{dayLabel(day, p.nowMs)}</span></div>
+            <div className="qc152-dr" data-qc152="adding"><span className="qc152-gd sm">{glyph(kind)}</span><span><b>{stepTitle(draftStep!, p.first)}</b></span><span className="qc152-now">{dayLabel(day, p.nowMs)}</span></div>
             <h4>Which means</h4>
             <ul className="qc152-cons" data-qc152="consequences">{lines.map((l, i) => <li key={i}>{bolded(l)}</li>)}</ul>
             <p className="qc152-safe">This adds a step to the timeline. You can undo it straight after saving.</p>
@@ -152,7 +165,7 @@ export const QcRecord152: React.FC<QcRecord152Props> = (p) => {
         </div>
         <div className="qc152-ftA">
           <button type="button" className="qc152-ghost" data-qc152="back2" onClick={() => setStage("what")}>Back</button>
-          <button type="button" className="qc152-pbtn" data-qc152="save" disabled={p.busy} onClick={() => { void p.onSave(kind, day, mats); }}>Save</button>
+          <button type="button" className="qc152-pbtn" data-qc152="save" disabled={p.busy} onClick={() => { void p.onSave(kind, day, mats, extra()); }}>Save</button>
         </div>
       </div>
     );
@@ -172,14 +185,29 @@ export const QcRecord152: React.FC<QcRecord152Props> = (p) => {
           {all || respOnly ? OPTS.filter((o) => all || o.side === "them").map((o) => (
             <div key={o.head} className={`qc152-og ${o.side}`} data-qc152="opt-group" data-side={o.side}>
               <h4>{o.head}</h4>
-              {o.kinds.map((k) => option(k, o.side))}
+              {kinds(o.kinds).map((k) => option(k, o.side))}
             </div>
           )) : kind ? <div className={`qc152-og ${sideOf(statusOf(kind))} one`}>{option(kind, sideOf(statusOf(kind)))}</div> : null}
           {!all ? <button type="button" className="qc152-jalt" data-qc152="something-else" onClick={() => setAll(true)}>Something else happened instead</button> : null}
           <div className="qc152-jf">
             <div className="qc152-jrow"><span>When</span>
               <CalendarField id="rec" valueMs={day} nowMs={p.nowMs} blocked={blocked} onChange={setDay} /></div>
-            {kind && (mats.length || sendKind || request || kind === "offer") ? (
+            {kind === "told" ? (<>
+              <div className="qc152-jrow" data-qc152="told-count"><span>How many agents</span>
+                <span className="qc152-stp" role="group" aria-label="How many agents">
+                  <button type="button" aria-label="Fewer" data-qc152="told-less" disabled={toldN <= TOLD_MIN} onClick={() => setToldN((n) => Math.max(TOLD_MIN, n - 1))}>−</button>
+                  <b data-qc152="told-n">{toldN}</b>
+                  <button type="button" aria-label="More" data-qc152="told-more" disabled={toldN >= TOLD_MAX} onClick={() => setToldN((n) => Math.min(TOLD_MAX, n + 1))}>+</button>
+                </span></div>
+              <div className="qc152-jrow" data-qc152="told-deadline"><span>The deadline you gave</span>
+                <CalendarField id="told" valueMs={toldBy} nowMs={p.nowMs} future blocked={(d) => (d < day ? "Before the day you told them" : "")} onChange={setToldBy} /></div>
+            </>) : null}
+            {reply ? (
+              <label className="qc152-jnote" data-qc152="reply-note"><span>What did they say? (optional)</span>
+                <textarea value={note} maxLength={REPLY_NOTE_MAX} rows={2} placeholder="A line from their reply" onChange={(e) => setNote(e.target.value)} />
+              </label>
+            ) : null}
+            {kind && kind !== "told" && (mats.length || sendKind || request || kind === "offer") ? (
               <div className="qc152-jm"><span>{sendKind ? "What you’re sending" : "What went or was asked for"}</span>
                 <MatChips id="rec" mats={mats} onChange={setMats} env={p.env} stepMs={day} request={request} /></div>
             ) : null}
