@@ -25,7 +25,7 @@ const row = (o: { status: QueryStatus; expected?: number | null; stage?: number 
 
 describe("the colour scheme", () => {
   it("one colour per status family; requested and sent share it", () => {
-    expect(STATUS_FILL[statusKind(QueryStatus.QUERIED)]).toBe("#e6d9c6");
+    expect(STATUS_FILL[statusKind(QueryStatus.QUERIED)]).toBe("#f2ebe0"); // v152.1 §1
     expect(statusKind(QueryStatus.PARTIAL_REQUESTED)).toBe(statusKind(QueryStatus.PARTIAL_SENT));
     expect(STATUS_FILL[statusKind(QueryStatus.PARTIAL_SENT)]).toBe("#f3d3c6");
     expect(statusKind(QueryStatus.FULL_REQUESTED)).toBe(statusKind(QueryStatus.FULL_SENT));
@@ -44,7 +44,7 @@ describe("group headers", () => {
     expect(headFill(headTone("attention", "closed"))).toBe("#f1efec");
   });
   it("status: each header is its status colour; package: stone", () => {
-    expect(headFill(headTone("status", QueryStatus.QUERIED))).toBe("#e6d9c6");
+    expect(headFill(headTone("status", QueryStatus.QUERIED))).toBe("#f4eee5"); // v152.1 §1: a step paler than the cap
     expect(headFill(headTone("status", QueryStatus.REJECTED))).toBe("#f1f0ee");
     expect(headFill(headTone("package", "pkg:x"))).toBe("#e3dbcf");
   });

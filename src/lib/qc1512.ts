@@ -35,9 +35,10 @@ export function statusKind(s: QueryStatus | string): StatusKind {
     default: return "sand";
   }
 }
-export const STATUS_FILL: Record<StatusKind, string> = { sand: "#e6d9c6", pink: "#f3d3c6", navy: "#d3dce7", sage: "#cbd9be", grey: "#f1f0ee" };
+/* v152.1 §1 — Queried is the quietest colour: most queries sit there, so it must sit back (was #e6d9c6) */
+export const STATUS_FILL: Record<StatusKind, string> = { sand: "#f2ebe0", pink: "#f3d3c6", navy: "#d3dce7", sage: "#cbd9be", grey: "#f1f0ee" };
 /** Birds-eye's watch-and-wait rows: paler versions (the offer's family has none in the brief, so it keeps its own) */
-export const STATUS_PALE: Record<StatusKind, string> = { sand: "#eee5d7", pink: "#f7e2da", navy: "#e0e6ee", sage: "#cbd9be", grey: "#f1f0ee" };
+export const STATUS_PALE: Record<StatusKind, string> = { sand: "#f7f2ea", pink: "#f7e2da", navy: "#e0e6ee", sage: "#cbd9be", grey: "#f1f0ee" };
 export const CLOSED_TEXT = "#8a8076";
 
 /* ── group headers ─────────────────────────────────────────────────────────────────────────────────────────────── */
@@ -99,7 +100,9 @@ export function headTone(group: string, key: string): HeadTone {
   if (group === "status") return `st-${statusKind(key)}`;
   return "stone";
 }
-export const headFill = (t: HeadTone): string => (t.startsWith("st-") ? STATUS_FILL[t.slice(3) as StatusKind] : HEAD_FILL[t as keyof typeof HEAD_FILL]);
+/** a status group's header is its status colour — except Queried's, which is a step paler than its pill cap (v152.1 §1) */
+export const QUERIED_HEAD = "#f4eee5";
+export const headFill = (t: HeadTone): string => (t === "st-sand" ? QUERIED_HEAD : t.startsWith("st-") ? STATUS_FILL[t.slice(3) as StatusKind] : HEAD_FILL[t as keyof typeof HEAD_FILL]);
 
 /* ── the row's tag ─────────────────────────────────────────────────────────────────────────────────────────────── */
 

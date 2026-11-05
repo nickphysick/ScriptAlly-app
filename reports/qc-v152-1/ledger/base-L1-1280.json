@@ -1,0 +1,62 @@
+[
+ {
+  "where": "population: Queried rows with a cap",
+  "ok": true,
+  "detail": "45"
+ },
+ {
+  "where": "every Queried row's cap is #f2ebe0",
+  "ok": false,
+  "detail": "[\"rgb(230, 217, 198)\"]"
+ },
+ {
+  "where": "population: the list page swept",
+  "ok": true,
+  "detail": "10302"
+ },
+ {
+  "where": "no element on the list computes to #e6d9c6",
+  "ok": false,
+  "detail": "[\"span.qc1512-cap\",\"span.qc1512-cap\",\"span.qc1512-cap\",\"span.qc1512-cap\",\"span.qc1512-cap\",\"span.qc1512-cap\"]"
+ },
+ {
+  "where": "a Queried card's pill cap is #f2ebe0",
+  "ok": false,
+  "detail": "rgb(230, 217, 198)"
+ },
+ {
+  "where": "no element with the card open computes to #e6d9c6",
+  "ok": false,
+  "detail": "[\"span.qc1512-cap\",\"span.qc1512-cap\",\"span.qc1512-cap\",\"span.qc1512-cap\",\"span.qc1512-cap\",\"span.qc1512-cap\"]"
+ },
+ {
+  "where": "the Queried status group's header is #f4eee5",
+  "ok": false,
+  "detail": "rgb(230, 217, 198)"
+ },
+ {
+  "where": "no element grouped by status computes to #e6d9c6",
+  "ok": false,
+  "detail": "[\"td.qc1511-gt\",\"td.qc1511-lbl\",\"td.qc1511-lbl\",\"td.qc1511-lbl\",\"td.qc1511-lbl\",\"td.qc1511-lbl\"]"
+ },
+ {
+  "where": "population: Queried bars, watching and not",
+  "ok": true,
+  "detail": "[\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"upcoming\",\"upcoming\",\"upcoming\",\"watch\",\"watch\",\"watch\",\"watch\",\"nodate\",\"nodate\",\"nodate\",\"nodate\",\"nodate\",\"nodate\"]"
+ },
+ {
+  "where": "Queried bars are #f2ebe0",
+  "ok": false,
+  "detail": "[\"rgb(230, 217, 198)\"]"
+ },
+ {
+  "where": "watch-and-wait Queried bars are #f7f2ea",
+  "ok": false,
+  "detail": "[\"rgb(238, 229, 215)\"]"
+ },
+ {
+  "where": "no element on Birds-eye computes to #e6d9c6",
+  "ok": false,
+  "detail": "[\"div.qc150-bar\",\"div.qc150-bar\",\"div.qc150-bar\",\"div.qc150-bar\",\"div.qc150-bar\",\"div.qc150-bar\"]"
+ }
+]

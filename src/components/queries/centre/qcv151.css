@@ -310,11 +310,11 @@
 
   /* v151.2 §5 the current stage's bar is its status colour (lib/qc1512 statusKind); watch-and-wait rows paler; the
      past stays grey */
-  .qc151 .qc150-be .qc150-bar--cur[data-sk="sand"] { background: #e6d9c6; }
+  .qc151 .qc150-be .qc150-bar--cur[data-sk="sand"] { background: #f2ebe0; }
   .qc151 .qc150-be .qc150-bar--cur[data-sk="pink"] { background: #f3d3c6; }
   .qc151 .qc150-be .qc150-bar--cur[data-sk="navy"] { background: #d3dce7; }
   .qc151 .qc150-be .qc150-bar--cur[data-sk="sage"] { background: #cbd9be; }
-  .qc151 .qc150-be .qc150-br--w .qc150-bar--cur[data-sk="sand"] { background: #eee5d7; }
+  .qc151 .qc150-be .qc150-br--w .qc150-bar--cur[data-sk="sand"] { background: #f7f2ea; }
   .qc151 .qc150-be .qc150-br--w .qc150-bar--cur[data-sk="pink"] { background: #f7e2da; }
   .qc151 .qc150-be .qc150-br--w .qc150-bar--cur[data-sk="navy"] { background: #e0e6ee; }
 
