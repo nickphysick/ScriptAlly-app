@@ -175,12 +175,12 @@
   .wsr-fbi i { position: absolute; right: -3px; top: -3px; width: 9px; height: 9px; border-radius: 50%; background: var(--ink-terra); box-shadow: 0 0 0 2px var(--ink-shell); }
   .wsr-t { font: 600 11px/normal var(--sp-serif); color: var(--ink-terra); }
   .wsr-foot { flex: none; padding-top: 12px; display: flex; justify-content: center; }
-  .wsr-av {
+  .wsr .wsr-av {
     width: 32px; height: 32px; padding: 0; border-radius: 50%; border: 0; display: grid; place-items: center;
     background: rgba(var(--ink-cream-rgb), 0.1); color: var(--ink-cream);
     font: 600 12px/1 "Inter", system-ui, sans-serif; cursor: pointer;
   }
-  .wsr-av:hover { background: rgba(var(--ink-cream-rgb), 0.16); }
+  .wsr .wsr-av:hover { background: rgba(var(--ink-cream-rgb), 0.16); }
 
   /* keyboard focus: one terracotta ring everywhere in the rail */
   .wsr :focus-visible { outline: 2px solid var(--ink-terra) !important; outline-offset: 2px; border-radius: 10px; }
@@ -200,6 +200,53 @@
     .wsr-tog { position: static; transform: none; opacity: 1; pointer-events: auto; width: 34px; height: 26px; background: rgba(var(--ink-cream-rgb), 0.06); }
     .wsr-lgo:hover .wsr-home img { opacity: 1; }
   }
+}
+
+/* ── THE FULL SIDEBAR (248px) — today's layout and look, with the rail's grammar ────────────────────
+   Scoped under `.ws-panel .ws-pin` so these outrank inkShell.css's row rules by specificity, not order.
+   Values: the ref's `.qw-*`. */
+@media (min-width: 768px) {
+  .ws-panel > .ws-pin { padding: 16px 12px 12px; }
+  /* ⚠️ THE SETTINGS MODE SHOWS ITS LAYER WITH `.set-mode .ws-pin { opacity: 1 }` (inkShell.css); on the rail
+     the full layer must stay hidden there too, or it shows through over the rail's settings rows */
+  .set-mode .ws-panel:not(.sr-wide) > .ws-pin { opacity: 0; pointer-events: none; }
+  /* the shadow belongs to the floating sidebar only; pinned, it sits flat beside the page */
+  .ws-panel.sr-float { box-shadow: 14px 0 34px rgba(0, 0, 0, 0.3); }
+  .ws-panel.sr-wide:not(.sr-float) { box-shadow: none; }
+  .ws-panel .ws-pin .ws-logo { padding: 0 0 0 4px; gap: 6px; }
+  .ws-panel .ws-pin .ws-logo .ws-bwm { font-size: 17.5px; }
+  .ws-acts { display: inline-flex; gap: 2px; flex: none; margin-left: auto; }
+  .ws-panel .ws-acts .sb-toggle, .ws-pinbtn {
+    flex: none; width: 30px; height: 30px; min-width: 0; margin: 0; padding: 0; border: 0; border-radius: 8px;
+    display: grid; place-items: center; background: transparent; color: var(--ink-cream-66); cursor: pointer;
+    transition: background-color 0.12s ease, color 0.12s ease;
+  }
+  .ws-panel .ws-acts .sb-toggle:hover, .ws-pinbtn:hover:not(:disabled) { background: rgba(var(--ink-cream-rgb), 0.08); color: var(--ink-cream-92); }
+  .ws-pinbtn svg { width: 15px; height: 15px; transition: transform 0.2s ease; }
+  .ws-pinbtn[aria-pressed="true"] { color: var(--ink-terra); }
+  .ws-pinbtn[aria-pressed="true"] svg { transform: rotate(45deg); fill: rgba(217, 150, 122, 0.25); }
+  .ws-pinbtn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  /* the rows: quieter at rest; the current page is the rail's terracotta wash and heavier icon */
+  .ws-panel .ws-pin .ws-nav > .ws-ni:first-child { margin-top: 14px; }
+  .ws-panel .ws-pin .ws-lbl { font-family: var(--sp-serif); }
+  .ws-panel .ws-pin .ws-ni { color: rgba(var(--ink-cream-rgb), 0.58); }
+  .ws-panel .ws-pin .ws-ni .ws-ic { opacity: 0.5; transition: opacity 0.12s ease; }
+  .ws-panel .ws-pin .ws-ni .ws-ic svg { transition: stroke-width 0.18s ease; }
+  .ws-panel .ws-pin .ws-ni:not(.on):hover { background: rgba(var(--ink-cream-rgb), 0.06); color: rgba(var(--ink-cream-rgb), 0.92); }
+  .ws-panel .ws-pin .ws-ni:hover .ws-ic { opacity: 0.9; }
+  .ws-panel .ws-pin .ws-ni.att { color: var(--ink-bright); font-weight: 600; }
+  .ws-panel .ws-pin .ws-ni.on { background: rgba(var(--ink-terra-rgb), 0.16); color: var(--ink-bright); font-weight: 600; }
+  .ws-panel .ws-pin .ws-ni.on::before { content: none; }
+  .ws-panel .ws-pin .ws-ni.on .ws-ic { opacity: 1; color: var(--ink-terra); }
+  .ws-panel .ws-pin .ws-ni.on .ws-ic svg { stroke-width: 2.6; }
+  /* ⚠️ NO SIDEBAR LABEL IN THE BODY SANS (sidebar rail v1). The settings strip's plan card sets the sans
+     in its own sheet, and the plan line's dot is a bare span brand.tsx reaches; inside the sidebar both
+     take the serif. */
+  .ws-panel .set-plank, .ws-panel .set-plannote, .ws-panel .set-planlink, .ws-panel .set-planlink span,
+  .ws-panel .ws-pldot { font-family: var(--sp-serif); }
+  /* the picker's initials tile sits where the cover did */
+  .ws-ms--side .ws-ms-btn .wsr-init { flex: none; }
 }
 
 @media (min-width: 768px) and (prefers-reduced-motion: reduce) {

@@ -42,8 +42,8 @@ import { FolderTab, TabSibling } from "./FolderTab";
 import { inkTabAid } from "./inkTabAid";
 import { markPinnedToolbars } from "./pinnedToolbar";
 import { BarSwitcher } from "./BarSwitcher";
-import { BETA_MODE, BETA_PILL, FEEDBACK_FAB } from "../../lib/beta";
-import { useSidebarCollapsed } from "./useSidebarCollapsed";
+import { FEEDBACK_FAB } from "../../lib/beta";
+import { useSidebarState, SidebarMode } from "./useSidebarState";
 import { formatSidebarName, getInitials } from "../../lib/displayName";
 import { DeskTooltip } from "../dashboard/DeskTooltip";
 import { Rect as TipRect } from "../../lib/deskTooltip";
@@ -196,12 +196,14 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
      that rail left a state with no UI, so the state went too. This is a different shape: ONE
      sidebar whose width narrows to an icon rail — every row keeps existing, labels collapse in
      place, the toggle lives in the pagebar at the seam. There is no second component to drift. */
-  const sidebar = useSidebarCollapsed();
+  const sidebar = useSidebarState();
   /**
-   * SIDEBAR RAIL v1 — the full sidebar is shown, or the 80px rail. Both layers stay mounted; this is a
-   * class and `inert`, never a remount.
+   * SIDEBAR RAIL v1 — RAIL · FLOAT · PINNED (useSidebarState). The full sidebar shows when floating or
+   * pinned. Both layers stay mounted; switching is a class and `inert`, never a remount.
    */
-  const wide = !sidebar.collapsed;
+  const wide = sidebar.mode !== "rail";
+  const sidebarModeRef = useRef(sidebar.mode);
+  sidebarModeRef.current = sidebar.mode;
   const wideRef = useRef(wide);
   wideRef.current = wide;
   /**
@@ -211,11 +213,143 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
    */
   const sideVar = useRef<string | null>(null);
   useLayoutEffect(() => {
-    const v = wide ? "248px" : "80px";
+    /* 80px on the rail AND while floating — a floating sidebar lies over the page and takes no room */
+    const v = sidebar.mode === "pinned" ? "248px" : "80px";
     if (sideVar.current === v) return;
     sideVar.current = v;
     document.documentElement.style.setProperty("--shell-side-w", v);
-  }, [wide]);
+  }, [sidebar.mode]);
+
+  /* ══ THE MOTION (ref: setWide · openFloat · pin + glidePage · toRail · applyPinned · snapMargin) ══════
+     ⚠️ WIDTH AND MARGIN ARE SET ON THE PANEL IMPERATIVELY, in a layout effect, because two of the moves
+     need a step React cannot express: a margin that changes with its transition switched OFF (one
+     re-layout, then nothing re-lays out while the rest animates).
+       RAIL → FLOAT    width 80→248 and margin 0→−168 together: the footprint stays 80, the page never moves.
+       FLOAT → RAIL    the reverse.
+       FLOAT → PINNED  the margin snaps to 0 (the page makes room in ONE re-layout), then `.ws-main` glides
+                       in from translateX(−168px) — a transform, so nothing re-lays out while it moves.
+       PINNED → RAIL   the margin snaps to −168 first (the page takes the width back underneath, hidden),
+                       then width and margin animate back to 80/0 together.
+     Anything else (the first paint, a narrow window, a page's hold) is instant. */
+  const panelRef = useRef<HTMLDivElement | null>(null);
+  const prevMode = useRef<SidebarMode | null>(null);
+  const prevNarrow = useRef(sidebar.narrow);
+  useLayoutEffect(() => {
+    const el = panelRef.current;
+    if (!el) return;
+    const prev = prevMode.current;
+    const next = sidebar.mode;
+    const narrowFlip = prevNarrow.current !== sidebar.narrow;
+    prevMode.current = next;
+    prevNarrow.current = sidebar.narrow;
+    if (prev === next && !narrowFlip && el.style.width) return;
+    const geo: Record<SidebarMode, [string, string]> = { rail: ["80px", "0px"], float: ["248px", "-168px"], pinned: ["248px", "0px"] };
+    const [w, m] = geo[next];
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+    const animate = prev !== null && sidebar.ready && !narrowFlip && !reduce;
+    const snapMargin = (v: string) => {
+      el.classList.add("sr-nomargin");
+      el.style.marginRight = v;
+      void el.offsetWidth;
+      el.classList.remove("sr-nomargin");
+    };
+    if (!animate || (prev === "rail" && next === "pinned") || (prev === "pinned" && next === "float")) {
+      el.classList.add("sr-instant");
+      el.style.width = w;
+      el.style.marginRight = m;
+      void el.offsetWidth;
+      el.classList.remove("sr-instant");
+      return;
+    }
+    if (prev === "float" && next === "pinned") {
+      el.style.width = w;
+      snapMargin("0px");
+      const main = el.parentElement?.querySelector<HTMLElement>(":scope > .ws-main");
+      if (!main) return;
+      main.style.transition = "none";
+      main.style.transform = "translateX(-168px)";
+      void main.offsetWidth;
+      main.style.transition = "transform 0.26s cubic-bezier(0.2, 0.9, 0.3, 1)";
+      main.style.transform = "";
+      window.setTimeout(() => { main.style.transition = ""; }, 300);
+      return;
+    }
+    if (prev === "pinned" && next === "rail") snapMargin("-168px");
+    el.style.width = w;
+    el.style.marginRight = m;
+  }, [sidebar.mode, sidebar.narrow, sidebar.ready]);
+
+  /* ══ FLOAT GOES AWAY (ref: the pointerdown, Escape and dialog rules) ══════════════════════════════
+     A click on the page, Escape, or a dialog opening puts a floating sidebar back to the rail. Clicks
+     inside what the sidebar itself opened — the manuscript menu, the account menu, the feedback panel,
+     any menu, listbox or dialog — are not "the page". ⚠️ The search palette has no aria-modal, so the
+     dialog rule reads `role="dialog"` and a visible box, never aria-modal. Escape is taken in the
+     capture phase and marked handled, so the settings mode's own Escape (bubble phase, which checks
+     `defaultPrevented`) does not also leave settings. A PINNED sidebar ignores all of this. */
+  const toRailRef = useRef(sidebar.toRail);
+  toRailRef.current = sidebar.toRail;
+  useEffect(() => {
+    if (sidebar.mode !== "float") return undefined;
+    const panel = panelRef.current;
+    const MENUS = '[role="menu"], [role="listbox"], [role="dialog"], .ws-ms-menu--port, .fb-panel';
+    const OWN_DIALOGS = ".ws-ms-menu--port, .fb-panel";
+    const away = (e: PointerEvent) => {
+      const t = e.target as Element | null;
+      if (!t || panel?.contains(t) || t.closest?.(MENUS)) return;
+      toRailRef.current();
+    };
+    const key = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || e.defaultPrevented) return;
+      e.preventDefault();
+      toRailRef.current();
+    };
+    const dialogUp = () => [...document.querySelectorAll<HTMLElement>('[role="dialog"]')].some((d) =>
+      !panel?.contains(d) && !d.closest(OWN_DIALOGS) && d.offsetWidth > 0 && d.offsetHeight > 0);
+    const mo = new MutationObserver(() => { if (dialogUp()) toRailRef.current(); });
+    mo.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["style", "class", "hidden"] });
+    document.addEventListener("pointerdown", away, true);
+    window.addEventListener("keydown", key, true);
+    return () => {
+      mo.disconnect();
+      document.removeEventListener("pointerdown", away, true);
+      window.removeEventListener("keydown", key, true);
+    };
+  }, [sidebar.mode]);
+
+  /* ══ FOCUS: opening FLOAT moves focus to the current page's row; going back to the rail returns it to
+     the expand control, when focus was inside the full sidebar. ══ */
+  const expandRef = useRef<HTMLButtonElement | null>(null);
+  const focusPrev = useRef<SidebarMode | null>(null);
+  /* ⚠️ RECORDED AS IT HAPPENS: by the time the effect below runs the full layer is already `inert`, and
+     the browser has taken focus off it — so "was focus in the full sidebar" cannot be asked afterwards */
+  const focusInFull = useRef(false);
+  useEffect(() => {
+    const on = (e: FocusEvent) => {
+      focusInFull.current = !!panelRef.current?.querySelector(".ws-pin")?.contains(e.target as Node);
+    };
+    document.addEventListener("focusin", on);
+    return () => document.removeEventListener("focusin", on);
+  }, []);
+  useEffect(() => {
+    const prev = focusPrev.current;
+    focusPrev.current = sidebar.mode;
+    const panel = panelRef.current;
+    if (!panel || prev === null) return undefined;
+    if (prev === "rail" && sidebar.mode === "float") {
+      const t = window.setTimeout(() => {
+        const row = panel.querySelector<HTMLElement>('.ws-pin .ws-ni[aria-current="page"]')
+          ?? panel.querySelector<HTMLElement>(".ws-pin .ws-ni")
+          ?? panel.querySelector<HTMLElement>(".ws-pin button:not([disabled])");
+        row?.focus({ preventScroll: true });
+      }, 60);
+      return () => window.clearTimeout(t);
+    }
+    if (sidebar.mode === "rail" && focusInFull.current) {
+      focusInFull.current = false;
+      expandRef.current?.focus({ preventScroll: true });
+    }
+    return undefined;
+  }, [sidebar.mode]);
   useEffect(() => () => { document.documentElement.style.removeProperty("--shell-side-w"); sideVar.current = null; }, []);
 
   /* ══ SETTINGS MODE ════════════════════════════════════════════════════════════════════════
@@ -384,7 +518,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
     setRailTip(null);
   }, []);
   /* Expanding while a tip is open (the `[` key) would strand it beside a full-width sidebar. */
-  useEffect(() => { hideTip(); }, [sidebar.collapsed, hideTip]);
+  useEffect(() => { hideTip(); }, [sidebar.mode, hideTip]);
   /**
    * Handlers for one rail anchor. `when` gates rows to the collapsed state — the pack suppresses
    * rail tips entirely when expanded; the toggle passes `true` and its own 250ms. Copy is the
@@ -415,6 +549,11 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   const go = useCallback((path: string) => {
     onNavigatePath(path);
   }, [onNavigatePath]);
+  /* a page picked from the FLOATING full sidebar puts it away (ref: 120ms after the navigation) */
+  const pickPage = useCallback((path: string) => {
+    go(path);
+    if (sidebarModeRef.current === "float") window.setTimeout(() => toRailRef.current(), 120);
+  }, [go]);
 
   /** ⚠️ THE ACCORDION SURVIVES, THE COLLAPSE DOES NOT. A section row is still a destination AND a
       disclosure, so `sectionClick`'s open/go limbs are read; its `expand`/`collapse` limbs named
@@ -700,7 +839,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
        `.ws-panel`, which is a SIBLING of the workspace — so no page can see it from a descendant
        selector, and a page that wants to redistribute the width the panel gave back has nothing to
        key on. Same boolean, second mount, on the common ancestor. */
-    <div className={`ws-app${sidebar.collapsed ? " sb-shut" : ""}${settingsMode ? " set-mode" : ""}${dashMode ? " dash-mode" : ""}${groundMode ? " ground-mode" : ""}${sheetWide ? " sheet-wide" : ""}`}>
+    <div className={`ws-app${sidebar.mode !== "pinned" ? " sb-shut" : ""}${settingsMode ? " set-mode" : ""}${dashMode ? " dash-mode" : ""}${groundMode ? " ground-mode" : ""}${sheetWide ? " sheet-wide" : ""}`}>
 
       {/* ⚠️ `sb-ready` GATES THE WIDTH TRANSITION (sidebar-collapse pack, Phase 1). The collapsed
           state is read synchronously, so the first render is already narrow — but a transition
@@ -708,7 +847,9 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
           arrives two rAFs after mount; until then, state changes are instant. */}
       <div
         id="ws-sidebar"
-        className={`ws-panel${wide ? " sr-wide" : ""}${sidebar.ready ? " sb-ready" : ""}`}
+        ref={panelRef}
+        className={`ws-panel${wide ? " sr-wide" : ""}${sidebar.mode === "float" ? " sr-float" : ""}${sidebar.ready ? " sb-ready" : ""}`}
+        data-sidebar={sidebar.mode}
       >
         {/* SIDEBAR RAIL v1 — the 80px rail, the first of the box's two layers */}
         <div className="wsr-host" inert={wide}>
@@ -719,7 +860,8 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
             todoCount={todoCount}
             locked={proLocked}
             onGo={go}
-            onExpand={sidebar.toggle}
+            onExpand={sidebar.openFloat}
+            expandRef={expandRef}
             expanded={wide}
             markSrc={artUrl(APP_MARK)}
             switcher={
@@ -782,28 +924,40 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
           <div className="ws-logo" data-shell="logo">
             {/* ⚠️ THE MARK IS ARTWORK; THE WORDMARK IS TYPE (audit pack P4) — the hawk-head roundel,
                 bare on the ground, and "QueryHawk" set in type. The mark doubles as the route home. */}
-            <button type="button" className="ws-brand" onClick={() => go("/dashboard")} aria-label="QueryHawk — go to dashboard">
+            <button type="button" className="ws-brand" onClick={() => pickPage("/dashboard")} aria-label="QueryHawk — go to dashboard">
               <img className="ws-bmark" src={artUrl(APP_MARK)} width={APP_MARK.width} height={APP_MARK.height} alt="" aria-hidden="true" />
               <span className="ws-bwm">QueryHawk</span>
             </button>
-            {/* ⚠️ THE BETA STRIP RETIRES AT ≥768px (ink shell v1, Phase 1) and this chip says what it said.
-                Its other job — "tell us when you find one" — is the sidebar's feedback card now. */}
-            {BETA_MODE && <span className="ws-beta" data-shell="beta">{BETA_PILL.toUpperCase()}</span>}
-            {/* the collapse toggle — `[` and ⌘\ ride `aria-keyshortcuts` and the shortcuts registry */}
-            <button
-              type="button"
-              className="sb-toggle ws-tbcol"
-              onClick={sidebar.toggle}
-              aria-expanded={!sidebar.collapsed}
-              aria-controls="ws-sidebar"
-              aria-keyshortcuts="Meta+Backslash Control+Backslash BracketLeft"
-              aria-label={sidebar.collapsed ? "Expand sidebar" : "Collapse sidebar"}
-              {...railTipFor(sidebar.collapsed ? "Expand sidebar" : "Collapse sidebar", undefined, toggleKbd, 250, true)}
-            >
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
-                <rect x="3.5" y="4.5" width="17" height="15" rx="2.5" /><path d="M9.5 4.5v15" />
-              </svg>
-            </button>
+            {/* SIDEBAR RAIL v1 — the header's right: the pin, then the panel (close) control. The BETA chip
+                left this row with the redesign. */}
+            <span className="ws-acts">
+              <button
+                type="button"
+                className="ws-pinbtn"
+                onClick={() => (sidebar.mode === "pinned" ? sidebar.toRail() : sidebar.pin())}
+                aria-pressed={sidebar.mode === "pinned"}
+                aria-label={sidebar.mode === "pinned" ? "Unpin: back to the rail" : "Keep the sidebar open"}
+                title={sidebar.mode === "pinned" ? "Unpin" : sidebar.narrow ? "Pinning needs a wider window" : "Pin open"}
+                disabled={sidebar.narrow && sidebar.mode !== "pinned"}
+              >
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M12 17v5" /><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                className="sb-toggle ws-tbcol"
+                onClick={sidebar.toRail}
+                aria-expanded={wide}
+                aria-controls="ws-sidebar"
+                aria-keyshortcuts="BracketLeft Meta+Backslash Control+Backslash"
+                aria-label="Close sidebar"
+              >
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
+                  <rect x="3.5" y="4.5" width="17" height="15" rx="2.5" /><path d="M9.5 4.5v15" />
+                </svg>
+              </button>
+            </span>
           </div>
 
           {/* ══ THE MANUSCRIPT SELECTOR, moved here from the bar (ink shell v1). It switches exactly as it
@@ -819,6 +973,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
             onAdd={() => onNavigate?.("manuscripts", "Add a manuscript")}
             /* the active book's own page — the existing route and its `?m=` view param */
             onOpenActive={() => { if (activeMs) onNavigatePath(manuscriptViewHref(activeMs.id)); }}
+            railTileFor={railTileNode}
           />
 
           {/* ⚠️ "LOG A QUERY" HAS LEFT THE SIDEBAR FOR THE BAR (ink shell v1, Phase 2) — see the bar below.
@@ -849,6 +1004,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                     capture, then ruled groups all the way down, and the first rule is what separates
                     the button from the nav — so WORKSPACE is no longer a heading doing nothing.
                     The rule is the label's own `::after`, so the markup stays one text node. */}
+                {/* Dashboard has no heading (25 Oct): one row on its own, as on the rail */}
                 {sec.noHeading ? null : <div className="ws-glabel">{sec.label}</div>}
                 {(sec.children ?? []).map((ch) => {
                   const on = hit?.section === sec.id && hit?.child === ch.id;
@@ -866,8 +1022,8 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                          same way in both states rather than by a label span that collapses to 0px.
                          The tooltip is the portalled rail tip below, not a native `title` — two
                          tooltips on one hover would be one too many. */
-                      aria-label={sidebarLabel(ch)}
-                      onClick={() => go(ch.path)}
+                      aria-label={ch.label}
+                      onClick={() => pickPage(ch.path)}
                       {...railTipFor(sidebarLabel(ch), undefined, undefined, 120, false)}
                     >
                       <span className="ws-ic">{icons[ch.icon ?? ch.id] ?? icons[sec.id]}</span>
@@ -926,7 +1082,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
           <SettingsRail
             live={settingsMode}
             active={settingsSection}
-            onSelect={(id) => onNavigatePath(ACCOUNT_ROUTES.find((r) => r.id === id)!.path)}
+            onSelect={(id) => pickPage(ACCOUNT_ROUTES.find((r) => r.id === id)!.path)}
             onExit={leaveSettings}
             plan={currentUser?.plan === UserPlan.PRO ? "pro" : "free"}
           />

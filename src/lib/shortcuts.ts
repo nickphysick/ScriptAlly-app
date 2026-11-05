@@ -38,7 +38,7 @@ const k = (key: string, mod = false): KeyChord => ({ key, mod });
 
 export const SHORTCUTS = {
   search:           { chords: [k("k", true)], label: "Search", scope: "Everywhere", bound: "src/components/shell/usePalette.tsx", inFields: "works" },
-  sidebar:          { chords: [k("\\", true), k("[")], label: "Collapse or expand the sidebar", scope: "Everywhere", bound: "src/components/shell/useSidebarCollapsed.ts", inFields: "stands down" },
+  sidebar:          { chords: [k("\\", true), k("[")], label: "Open or close the sidebar", scope: "Everywhere", bound: "src/components/shell/useSidebarState.ts", inFields: "stands down" },
   switchManuscript: { chords: [k("m")], label: "Switch manuscript", scope: "Everywhere", bound: "src/components/shell/BarSwitcher.tsx", inFields: "stands down" },
   shortcuts:        { chords: [k("?")], label: "Show keyboard shortcuts", scope: "Everywhere", bound: "src/components/shell/ShortcutsSheet.tsx", inFields: "stands down" },
   undo:             { chords: [k("z", true)], label: "Undo, while its note is showing", scope: "Everywhere", bound: "src/components/queryActions/UndoBar.tsx", inFields: "stands down" },

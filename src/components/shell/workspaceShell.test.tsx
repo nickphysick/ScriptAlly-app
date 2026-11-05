@@ -417,7 +417,8 @@ describe("the sidebar", () => {
 
   /* ⚠️ RETARGETED from "the S tile navigates to the dashboard" — the mark still routes home. */
   it("the brand mark routes home", () => {
-    expect(srcCode).toMatch(/className="ws-brand"[\s\S]{0,120}go\("\/dashboard"\)/);
+    /* sidebar rail v1: through pickPage, which also puts a floating sidebar away */
+    expect(srcCode).toMatch(/className="ws-brand"[\s\S]{0,120}pickPage\("\/dashboard"\)/);
   });
 
   /* ⚠️ RETARGETED, INVERTED, from "has no avatar in the panel; the rail has it". */

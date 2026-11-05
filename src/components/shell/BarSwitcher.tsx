@@ -277,7 +277,8 @@ export const BarSwitcher: React.FC<BarSwitcherProps> = ({ manuscripts, queries =
         onClick={() => (open ? close(true) : openMenu())}
         onKeyDown={onBtnKey}
       >
-        <Cover ms={active} size="tile" titlePage={side} />
+        {/* sidebar rail v1: the full sidebar's picker wears the rail's initials tile */}
+        {side && railTileFor ? railTileFor(active.title) : <Cover ms={active} size="tile" titlePage={side} />}
         <span className="ws-ms-tx">
           <b className="ws-ms-t">{active.title}</b>
           {standing.status && (

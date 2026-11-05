@@ -817,7 +817,11 @@
   .ws-panel.sb-ready {
     transition: width 0.24s cubic-bezier(0.2, 0.9, 0.3, 1), margin-right 0.24s cubic-bezier(0.2, 0.9, 0.3, 1), box-shadow 0.24s ease;
   }
-  .ws-panel.sr-wide { width: 248px; }
+  /* ⚠️ WIDTH AND MARGIN ARE SET INLINE BY WorkspaceShell (the state machine's motion), never by a class:
+     rail 80/0 · float 248/−168 · pinned 248/0. These two classes are the motion's own switches. */
+  .ws-panel.sr-nomargin { transition: width 0.24s cubic-bezier(0.2, 0.9, 0.3, 1), box-shadow 0.24s ease !important; }
+  .ws-panel.sr-instant { transition: none !important; }
+  /* the floating sidebar's shadow is sidebarRail.css's (a plain black, which this sheet's token lock keeps out) */
   .ws-panel > .ws-pin {
     position: absolute;
     top: 0;

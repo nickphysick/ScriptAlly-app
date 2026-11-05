@@ -188,13 +188,21 @@ describe("the rendered states", () => {
     }
   });
 
-  it("expanded: no collapse class, toggle reads expanded, controls the panel by id", () => {
-    const html = renderShell(0);
-    expect(html).not.toContain("sb-collapsed");
-    expect(html).toContain('aria-controls="ws-sidebar"');
-    expect(html).toContain('aria-expanded="true"');
-    expect(html).toContain('aria-keyshortcuts="Meta+Backslash Control+Backslash BracketLeft"');
-    expect(html).toContain('aria-label="Main"');
+  /* ⚠️ RETARGETED (sidebar rail v1): the state is RAIL · FLOAT · PINNED under its own key; a stored pin
+     renders the full sidebar on the first markup, and its close control reads expanded. */
+  it("pinned: the full sidebar on the first markup, its close control reads expanded, controls the panel by id", () => {
+    localStorage.setItem("scriptally:sidebar-pinned", "1");
+    try {
+      const html = renderShell(0);
+      expect(html).not.toContain("sb-collapsed");
+      expect(html).toContain("sr-wide");
+      expect(html).toContain('aria-controls="ws-sidebar"');
+      expect(html).toMatch(/aria-expanded="true"[^>]*aria-controls="ws-sidebar"[^>]*aria-keyshortcuts="BracketLeft Meta\+Backslash Control\+Backslash"[^>]*aria-label="Close sidebar"/);
+      expect(html).toMatch(/class="ws-pinbtn"[^>]*aria-pressed="true"/);
+      expect(html).toContain('aria-label="Main"');
+    } finally {
+      localStorage.removeItem("scriptally:sidebar-pinned");
+    }
   });
 });
 
