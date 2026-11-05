@@ -9,7 +9,7 @@
 import { test, type Page } from "@playwright/test";
 import { execFileSync } from "node:child_process";
 import { mkdirSync } from "node:fs";
-import { openRoute } from "./measure";
+import { liftMotionSuppression, openRoute } from "./measure";
 
 const DIR = "reports/submission-packages-v42/app";
 const SIZES = [{ width: 1512, height: 982 }, { width: 1280, height: 832 }] as const;
@@ -77,6 +77,7 @@ for (const size of SIZES) {
     }
     if (want("11-how")) {
       await top(page);
+      await liftMotionSuppression(page);
       await page.locator(`${pg} [data-pk41="how"]`).first().click(); await page.waitForTimeout(5500);
       await shot(page, "11-how-it-works-mid", size.width);
       await page.waitForTimeout(8000);
