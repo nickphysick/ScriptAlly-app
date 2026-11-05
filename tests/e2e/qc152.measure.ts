@@ -234,7 +234,9 @@ for (const vp of SIZES) {
       L.done(4);
     });
 
-    test("L6 · thread: sides, discs, waits, today, scrolled to the end", async ({ page }) => {
+    /* re-pointed by v152.1 §2: the glyph is ink on nothing in a 26px box (no disc), every wait reads "N days", and the
+       thread ends on its last event — no "today" divider (QC1521 L2–L4 hold the rest) */
+    test("L6 · thread: sides, glyph boxes, waits, no today, scrolled to the end", async ({ page }) => {
       test.skip(!run("L6"));
       const L = new Ledger(`L6-${vp.width}`);
       await open(page, vp);
@@ -252,7 +254,7 @@ for (const vp of SIZES) {
           const tr = { left: b0.left + parseFloat(cs.paddingLeft), right: b0.right - parseFloat(cs.paddingRight) };
           const items = [...th.children].map((n) => {
             const e = n as HTMLElement, r = e.getBoundingClientRect();
-            const disc = e.querySelector<HTMLElement>("[data-qc152='disc']");
+            const disc = e.querySelector<HTMLElement>("[data-qc152='glyph']");
             return { k: e.dataset.qc152, side: e.dataset.side ?? "", status: e.dataset.status ?? "", kind: e.dataset.kind ?? "", label: e.dataset.label ?? "",
               left: r.left - tr.left, right: tr.right - r.right, disc: disc ? { w: disc.offsetWidth, bg: getComputedStyle(disc).backgroundColor } : null,
               date: e.querySelector("[data-qc152='msg-date']")?.textContent ?? "" };
@@ -266,8 +268,7 @@ for (const vp of SIZES) {
         for (const m of msgs) {
           const them = THEM.includes(m.status);
           L.check(`${k}: ${m.status || m.kind} sits ${them ? "left" : "right"}`, them ? m.left < 2 && m.right > 20 : m.right < 2 && m.left > 20, JSON.stringify(m));
-          const want = m.status === "Queried" || m.kind ? "rgba(0, 0, 0, 0)" : null;
-          L.check(`${k}: ${m.status || m.kind} has a 34px disc ${want ? "with no fill" : "in its cap colour"}`, m.disc?.w === 34 && (want ? m.disc.bg === want : m.disc.bg !== "rgba(0, 0, 0, 0)"), JSON.stringify(m.disc));
+          L.check(`${k}: ${m.status || m.kind} has a 26px glyph box with no fill`, m.disc?.w === 26 && m.disc.bg === "rgba(0, 0, 0, 0)", JSON.stringify(m.disc));
         }
         /* each wait shows the days between its neighbours */
         const it = t?.items ?? [];
@@ -275,11 +276,9 @@ for (const vp of SIZES) {
           if (it[i].k !== "wait" || it[i - 1].k !== "msg" || it[i + 1].k !== "msg") continue;
           const d = (s: string) => { const m = /^(\d{1,2}) (\w{3})(?: (\d{4}))?$/.exec(s); return m ? new Date(`${m[1]} ${m[2]} ${m[3] ?? new Date().getFullYear()}`).getTime() : NaN; };
           const n = Math.round((d(it[i + 1].date) - d(it[i - 1].date)) / 86_400_000);
-          L.check(`${k}: the wait between ${it[i - 1].date} and ${it[i + 1].date} reads ${n} days`, it[i].label === (n === 0 ? "Same day" : `${n} ${n === 1 ? "day" : "days"}`), it[i].label);
+          L.check(`${k}: the wait between ${it[i - 1].date} and ${it[i + 1].date} reads ${n} days`, it[i].label === `${n} ${n === 1 ? "day" : "days"}`, it[i].label);
         }
-        const lastWait = [...it].reverse().find((x) => x.k === "wait");
-        if (k === "closed") L.check("closed: no today divider", !it.some((x) => /today/i.test(x.label)), JSON.stringify(lastWait));
-        else L.check(`${k}: the last divider says today`, /today/i.test(lastWait?.label ?? ""), JSON.stringify(lastWait));
+        L.check(`${k}: no today divider, and the thread ends on a message`, !it.some((x) => /today/i.test(x.label)) && it[it.length - 1]?.k === "msg", JSON.stringify(it.slice(-2).map((x) => x.k)));
         L.check(`${k}: opens scrolled to the bottom`, t != null && Math.abs(t.scrolled) <= 2, String(t?.scrolled));
       }
       L.done(20);
@@ -315,6 +314,7 @@ for (const vp of SIZES) {
       L.done(6);
     });
 
+    /* re-pointed by v152.1 §3: the footer's two lines are where it stands (QC1521 L8 holds every row and the icon) */
     test("L8 · reply box: each state's field and button; pressing it writes nothing", async ({ page }) => {
       test.skip(!run("L8"));
       const L = new Ledger(`L8-${vp.width}`);
@@ -322,12 +322,12 @@ for (const vp of SIZES) {
       page.on("request", (q) => { if (/google\.firestore\.v1\.Firestore\/Write/.test(q.url())) writes++; });
       await open(page, vp);
       const WANT: Record<string, { lead: RegExp; sub: RegExp; btn: string; tone: string }> = {
-        offer: { lead: /^Answer the offer$/, sub: /^\d+ days? left$/, btn: "Answer the offer", tone: "navy" },
+        offer: { lead: /^Olive made an offer$/, sub: /^\d+ days? left · answer by \d{1,2} \w{3}$/, btn: "Answer the offer", tone: "navy" },
         materials: { lead: /^Send the partial$/, sub: /^\d+ days? left · by \d{1,2} \w{3}$/, btn: "Mark partial sent", tone: "navy" },
-        nudge: { lead: /^Nudge Priya\?$/, sub: /^Reply was due \d{1,2} \w{3}$/, btn: "Nudge", tone: "outline" },
-        agent: { lead: /^Heard back\?$/, sub: /^Record it when Rufus replies$/, btn: "Record a response", tone: "outline" },
-        quiet: { lead: /^Still nothing\?$/, sub: /^Close it, or keep waiting$/, btn: "Close it", tone: "outline" },
-        closed: { lead: /^Closed$/, sub: /^Closed on \d{1,2} \w{3}$/, btn: "Reopen", tone: "outline" },
+        nudge: { lead: /^No reply from Priya yet$/, sub: /^Reply was due \d{1,2} \w{3} · \d+ days? ago$/, btn: "Nudge", tone: "outline" },
+        agent: { lead: /^Waiting on Rufus$/, sub: /^Reply expected by \d{1,2} \w{3}$/, btn: "Record a response", tone: "outline" },
+        quiet: { lead: /^No reply from Quinn$/, sub: /^Quiet since \d{1,2} \w{3} · close it, or keep waiting$/, btn: "Close it", tone: "outline" },
+        closed: { lead: /^Clara passed$/, sub: /^On \d{1,2} \w{3} · after the query$/, btn: "Reopen", tone: "outline" },
       };
       for (const [k, w] of Object.entries(WANT)) {
         await openCard(page, k);

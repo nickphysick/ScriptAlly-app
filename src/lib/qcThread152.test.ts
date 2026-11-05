@@ -66,16 +66,29 @@ describe("the tips on a wait (§2.4)", () => {
   });
 });
 
-describe("the reply box (§2.5)", () => {
+describe("v152.1 §3 the footer: where it stands, one bar per state", () => {
   const base = { first: "Priya", nowMs: NOW, replyMs: null as number | null, closedMs: null as number | null, dueMs: null as number | null };
-  it("one field and one button per state", () => {
-    expect(replyBox({ ...base, state: "offer", status: QueryStatus.OFFER, dueMs: NOW + 6 * DAY })).toMatchObject({ lead: "Answer the offer", sub: "6 days left", button: "Answer the offer", tone: "navy" });
-    expect(replyBox({ ...base, state: "materials", status: QueryStatus.FULL_REQUESTED, dueMs: NOW + 7 * DAY })).toMatchObject({ lead: "Send the full", sub: "7 days left · by 15 Oct", button: "Mark full sent", tone: "navy" });
+  it("materials, R&R and the offer: the stage glyph on its tint, a navy action", () => {
+    expect(replyBox({ ...base, state: "materials", status: QueryStatus.FULL_REQUESTED, dueMs: NOW + 7 * DAY })).toMatchObject({ icon: { k: "stage", tint: "#e7edf4" }, lead: "Send the full", sub: "7 days left · by 15 Oct", button: "Mark full sent", tone: "navy" });
     expect(replyBox({ ...base, state: "materials", status: QueryStatus.PARTIAL_REQUESTED, dueMs: NOW - 8 * DAY })).toMatchObject({ sub: "8 days late", late: true, button: "Mark partial sent" });
-    expect(replyBox({ ...base, state: "nudge", status: QueryStatus.QUERIED, replyMs: NOW - 12 * DAY })).toMatchObject({ lead: "Nudge Priya?", sub: "Reply was due 26 Sep", button: "Nudge", tone: "outline" });
-    expect(replyBox({ ...base, state: "agent", status: QueryStatus.QUERIED })).toMatchObject({ lead: "Heard back?", sub: "Record it when Priya replies", button: "Record a response" });
-    expect(replyBox({ ...base, state: "quiet", status: QueryStatus.QUERIED })).toMatchObject({ lead: "Still nothing?", sub: "Close it, or keep waiting", button: "Close it" });
-    expect(replyBox({ ...base, state: "closed", status: QueryStatus.REJECTED, closedMs: Date.UTC(2026, 7, 11, 12) })).toMatchObject({ lead: "Closed", sub: "Closed on 11 Aug", button: "Reopen" });
+    expect(replyBox({ ...base, first: "Jonathan", state: "materials", status: QueryStatus.REVISE_RESUBMIT, steps: [st("rr", QueryStatus.REVISE_RESUBMIT, 7)] })).toMatchObject({ lead: "Revise and resubmit", sub: "Jonathan asked on 1 Oct", button: "Mark revision sent" });
+    expect(replyBox({ ...base, first: "Tom", state: "offer", status: QueryStatus.OFFER, dueMs: NOW + DAY })).toMatchObject({ icon: { k: "stage", tint: "#e5eddf" }, lead: "Tom made an offer", sub: "1 day left · answer by 9 Oct", button: "Answer the offer", second: { label: "Tell other agents", act: "tell" } });
+    const told = replyBox({ ...base, first: "Tom", state: "offer", status: QueryStatus.OFFER, dueMs: NOW + DAY, steps: [st("t", null, 1, { kind: "told", toldCount: 6, via: "offer deadline 16 Oct" })] });
+    expect(told).toMatchObject({ sub: "You told 6 others · deadline 16 Oct", second: null });
+  });
+  it("nudge due, with the agent, gone quiet: a clock or the ring, an outlined action", () => {
+    expect(replyBox({ ...base, state: "nudge", status: QueryStatus.QUERIED, replyMs: NOW - 12 * DAY })).toMatchObject({ icon: { k: "clock" }, lead: "No reply from Priya yet", sub: "Reply was due 26 Sep · 12 days ago", late: true, button: "Nudge", tone: "outline" });
+    const a = replyBox({ ...base, state: "agent", status: QueryStatus.QUERIED, replyMs: NOW + 3 * DAY, steps: [st("q", QueryStatus.QUERIED, 9)] });
+    expect(a).toMatchObject({ lead: "Waiting on Priya", sub: "Reply expected by 11 Oct", button: "Record a response" });
+    expect(a.icon.k === "ring" && a.icon.p).toBeCloseTo(9 / 12);
+    expect(replyBox({ ...base, state: "agent", status: QueryStatus.QUERIED, replyMs: NOW + 16 * DAY, quietWeeks: 4, steps: [st("q", QueryStatus.QUERIED, 99), st("n", null, 12, { kind: "nudge" })] }))
+      .toMatchObject({ sub: "Quiet after 4 weeks · 16 days to go" });
+    expect(replyBox({ ...base, first: "Daniel", state: "quiet", status: QueryStatus.QUERIED, replyMs: NOW - 4 * DAY })).toMatchObject({ icon: { k: "clock" }, lead: "No reply from Daniel", sub: "Quiet since 4 Oct · close it, or keep waiting", button: "Close it" });
+  });
+  it("closed: the grey glyph, who closed it and when, Reopen", () => {
+    expect(replyBox({ ...base, first: "Jonathan", state: "closed", status: QueryStatus.REJECTED, closedMs: NOW - 3 * DAY, steps: [st("q", QueryStatus.QUERIED, 90), st("fs", QueryStatus.FULL_SENT, 30), st("x", QueryStatus.REJECTED, 3)] }))
+      .toMatchObject({ icon: { k: "grey" }, lead: "Jonathan passed", sub: "On 5 Oct · after the full", button: "Reopen" });
+    expect(replyBox({ ...base, state: "closed", status: QueryStatus.WITHDRAWN, closedMs: NOW - 3 * DAY, reason: "signed elsewhere" })).toMatchObject({ lead: "You withdrew", sub: "5 Oct · signed elsewhere", button: "Reopen" });
   });
 });
 

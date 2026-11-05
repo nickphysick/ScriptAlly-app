@@ -5,19 +5,19 @@
   "detail": "no card"
  },
  {
-  "where": "offer: field reads /^Answer the offer$/",
+  "where": "offer: field reads /^Olive made an offer$/",
   "ok": true,
-  "detail": "Answer the offer"
+  "detail": "Olive made an offer"
  },
  {
-  "where": "offer: second line reads /^\\d+ days? left$/",
+  "where": "offer: second line reads /^\\d+ days? left · answer by \\d{1,2} \\w{3}$/",
   "ok": true,
-  "detail": "6 days left"
+  "detail": "6 days left · answer by 11 Nov"
  },
  {
   "where": "offer: button reads Answer the offer (navy)",
   "ok": true,
-  "detail": "{\"lead\":\"Answer the offer\",\"sub\":\"6 days left\",\"btn\":\"Answer the offer\",\"tone\":\"navy\"}"
+  "detail": "{\"lead\":\"Olive made an offer\",\"sub\":\"6 days left · answer by 11 Nov\",\"btn\":\"Answer the offer\",\"tone\":\"navy\"}"
  },
  {
   "where": "offer: pressing the button writes nothing",
@@ -55,19 +55,19 @@
   "detail": "no card"
  },
  {
-  "where": "nudge: field reads /^Nudge Priya\\?$/",
+  "where": "nudge: field reads /^No reply from Priya yet$/",
   "ok": true,
-  "detail": "Nudge Priya?"
+  "detail": "No reply from Priya yet"
  },
  {
-  "where": "nudge: second line reads /^Reply was due \\d{1,2} \\w{3}$/",
+  "where": "nudge: second line reads /^Reply was due \\d{1,2} \\w{3} · \\d+ days? ago$/",
   "ok": true,
-  "detail": "Reply was due 29 Oct"
+  "detail": "Reply was due 29 Oct · 7 days ago"
  },
  {
   "where": "nudge: button reads Nudge (outline)",
   "ok": true,
-  "detail": "{\"lead\":\"Nudge Priya?\",\"sub\":\"Reply was due 29 Oct\",\"btn\":\"Nudge\",\"tone\":\"outline\"}"
+  "detail": "{\"lead\":\"No reply from Priya yet\",\"sub\":\"Reply was due 29 Oct · 7 days ago\",\"btn\":\"Nudge\",\"tone\":\"outline\"}"
  },
  {
   "where": "nudge: pressing the button writes nothing",
@@ -80,19 +80,19 @@
   "detail": "no card"
  },
  {
-  "where": "agent: field reads /^Heard back\\?$/",
+  "where": "agent: field reads /^Waiting on Rufus$/",
   "ok": true,
-  "detail": "Heard back?"
+  "detail": "Waiting on Rufus"
  },
  {
-  "where": "agent: second line reads /^Record it when Rufus replies$/",
+  "where": "agent: second line reads /^Reply expected by \\d{1,2} \\w{3}$/",
   "ok": true,
-  "detail": "Record it when Rufus replies"
+  "detail": "Reply expected by 26 Nov"
  },
  {
   "where": "agent: button reads Record a response (outline)",
   "ok": true,
-  "detail": "{\"lead\":\"Heard back?\",\"sub\":\"Record it when Rufus replies\",\"btn\":\"Record a response\",\"tone\":\"outline\"}"
+  "detail": "{\"lead\":\"Waiting on Rufus\",\"sub\":\"Reply expected by 26 Nov\",\"btn\":\"Record a response\",\"tone\":\"outline\"}"
  },
  {
   "where": "agent: pressing the button writes nothing",
@@ -105,19 +105,19 @@
   "detail": "no card"
  },
  {
-  "where": "quiet: field reads /^Still nothing\\?$/",
+  "where": "quiet: field reads /^No reply from Quinn$/",
   "ok": true,
-  "detail": "Still nothing?"
+  "detail": "No reply from Quinn"
  },
  {
-  "where": "quiet: second line reads /^Close it, or keep waiting$/",
+  "where": "quiet: second line reads /^Quiet since \\d{1,2} \\w{3} · close it, or keep waiting$/",
   "ok": true,
-  "detail": "Close it, or keep waiting"
+  "detail": "Quiet since 26 Sep · close it, or keep waiting"
  },
  {
   "where": "quiet: button reads Close it (outline)",
   "ok": true,
-  "detail": "{\"lead\":\"Still nothing?\",\"sub\":\"Close it, or keep waiting\",\"btn\":\"Close it\",\"tone\":\"outline\"}"
+  "detail": "{\"lead\":\"No reply from Quinn\",\"sub\":\"Quiet since 26 Sep · close it, or keep waiting\",\"btn\":\"Close it\",\"tone\":\"outline\"}"
  },
  {
   "where": "quiet: pressing the button writes nothing",
@@ -130,19 +130,19 @@
   "detail": "no card"
  },
  {
-  "where": "closed: field reads /^Closed$/",
+  "where": "closed: field reads /^Clara passed$/",
   "ok": true,
-  "detail": "Closed"
+  "detail": "Clara passed"
  },
  {
-  "where": "closed: second line reads /^Closed on \\d{1,2} \\w{3}$/",
+  "where": "closed: second line reads /^On \\d{1,2} \\w{3} · after the query$/",
   "ok": true,
-  "detail": "Closed on 16 Oct"
+  "detail": "On 16 Oct · after the query"
  },
  {
   "where": "closed: button reads Reopen (outline)",
   "ok": true,
-  "detail": "{\"lead\":\"Closed\",\"sub\":\"Closed on 16 Oct\",\"btn\":\"Reopen\",\"tone\":\"outline\"}"
+  "detail": "{\"lead\":\"Clara passed\",\"sub\":\"On 16 Oct · after the query\",\"btn\":\"Reopen\",\"tone\":\"outline\"}"
  },
  {
   "where": "closed: pressing the button writes nothing",

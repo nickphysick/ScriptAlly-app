@@ -154,11 +154,21 @@
 
 /* §2.5 the reply box */
 .qc152 .qc152-rb { display: flex; align-items: center; gap: 12px; padding: 12px 14px 14px; border-top: 1px solid #ece6de; background: #fff; }
-.qc152 .qc152-rf { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; height: 44px; box-sizing: border-box; padding: 0 16px; border-radius: 22px; background: #f5f1ea; }
+/* v152.1 §3 one bar: a 52px rounded field (#f5f1ea) holding a 32px icon and two lines, then the 52px action */
+.qc152 .qc152-rf { flex: 1; min-width: 0; display: flex; align-items: center; gap: 11px; height: 52px; box-sizing: border-box; padding: 0 16px 0 10px; border-radius: 26px; background: #f5f1ea; }
+.qc152 .qc152-rft { min-width: 0; display: flex; flex-direction: column; }
 .qc152 .qc152-rf b { font: 600 14.5px/1.3 var(--sp-serif); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.qc152 .qc152-rf span { font: italic 400 12.5px/1.35 var(--sp-serif); color: #7d7268; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.qc152 .qc152-rb.late .qc152-rf span { color: #a2452a; }
-.qc152 .qc152-rbtn { all: unset; box-sizing: border-box; cursor: pointer; flex: none; display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px 0 18px; border-radius: 22px; font: 600 14.5px/1 var(--sp-serif); white-space: nowrap; }
+.qc152 .qc152-rft span { font: italic 400 12.5px/1.35 var(--sp-serif); color: #7d7268; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qc152 .qc152-rb.late .qc152-rft span, .qc152 .qc152-rb.late .qc152-fc { color: #a2452a; }
+/* the icon: the reply-time ring (navy on #e3dbcf, its fill the share of the window used), a clock, or the stage's glyph on its tint */
+.qc152 .qc152-fr { flex: none; position: relative; width: 32px; height: 32px; border-radius: 50%; background: conic-gradient(#2a3a52 calc(var(--p) * 360deg), #e3dbcf 0); }
+.qc152 .qc152-fr::after { content: ""; position: absolute; inset: 4.5px; border-radius: 50%; background: #f5f1ea; }
+.qc152 .qc152-fc, .qc152 .qc152-fg { flex: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: #fff; color: #8a8076; }
+.qc152 .qc152-fg svg { width: 17px; height: 17px; }
+.qc152 .qc152-fg.grey svg { color: #8a8076 !important; }
+.qc152 .qc152-rbtn { all: unset; box-sizing: border-box; cursor: pointer; flex: none; display: inline-flex; align-items: center; gap: 8px; height: 52px; padding: 0 16px 0 18px; border-radius: 26px; font: 600 14.5px/1 var(--sp-serif); white-space: nowrap; }
+/* the offer's second action: smaller, outlined, left of the main button */
+.qc152 .qc152-rbtn.sm { height: 40px; padding: 0 13px; border-radius: 20px; font-size: 13.5px; }
 .qc152 .qc152-rbtn.nv { background: #2a3a52; color: #fff; }
 .qc152 .qc152-rbtn.gh { background: #fff; color: #2a3a52; box-shadow: inset 0 0 0 1.5px #2a3a52; }
 .qc152 .qc152-rbtn:hover { filter: brightness(1.12); }

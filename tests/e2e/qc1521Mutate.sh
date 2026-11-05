@@ -49,6 +49,16 @@ for L in "$@"; do
     L5) F=src/components/queries/centre/QcPage151.tsx; srcbreak $F '<span className="qc1512-cap" data-qc1512="cap" style={{ background: STATUS_FILL[sk] }}>' '<span className="qc1512-cap" data-qc1512="cap" style={{ background: STATUS_FILL[sk] }}><svg data-qc152="nudge-mark" viewBox="0 0 20 20" width="10" height="10"><path d="M10 6.2v4.6" stroke="#1c130f" /></svg>{/* MUT L5: the "!" on a row */}' ;;
     L6) F=src/components/queries/centre/QcBubble152.tsx; srcbreak $F '{b.quote ? <div className="qc152-qt" data-qc152="quote">“{b.quote}”</div> : null}' '{b.side === "them" ? <div className="qc152-qt" data-qc152="quote">“{b.quote ?? ""}”</div> : null}{/* MUT L6: an empty quote */}' ;;
     L7) F=src/components/queries/centre/QcCard152.tsx; srcbreak $F 'export const FOLD_KEEP = 3;' 'export const FOLD_KEEP = 4; /* MUT L7: four after the fold */' ;;
+    L8) F=src/components/queries/centre/QcCard152.tsx; srcbreak $F '      })}
+    </div>
+  );
+
+  /* §2.6 the Agent tab */' '      })}
+      <div className="qc152-w" data-qc152="wait"><i /><span>{box.lead} · {box.sub}</span><i /></div>{/* MUT L8: the status line back in the thread */}
+    </div>
+  );
+
+  /* §2.6 the Agent tab */' ;;
     L10) F=src/lib/qc152Write.ts; srcbreak $F '      eventKey: TOLD_EVENT, toldCount: count, toldDeadline: dayIso(new Date(t.deadlineMs)) };' '      eventKey: TOLD_EVENT, toldCount: count }; /* MUT L10: saved without the deadline */' ;;
   esac
   build

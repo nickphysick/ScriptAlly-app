@@ -170,7 +170,10 @@ const readThread = (page: Page) => page.evaluate((c) => {
     const bx = m.querySelector<HTMLElement>("[data-qc152='bubble']")!, g = m.querySelector<HTMLElement>("[data-qc152='glyph']");
     return {
       side: m.dataset.side ?? "", status: m.dataset.status ?? "", kind: m.dataset.kind ?? "",
-      title: m.querySelector<HTMLElement>("[data-qc152='msg-title']")?.innerText.trim() ?? "", date: m.querySelector<HTMLElement>("[data-qc152='msg-date']")?.innerText.trim() ?? "",
+      title: m.querySelector<HTMLElement>("[data-qc152='msg-title']")?.innerText.trim() ?? "",
+      /* the bubble's RENDERED words: innerText on a hidden element falls back to its raw text, so the title alone
+         cannot say whether a reader sees it (L9's first mutation stayed green on exactly that) */
+      seen: bx.innerText, date: m.querySelector<HTMLElement>("[data-qc152='msg-date']")?.innerText.trim() ?? "",
       bg: getComputedStyle(bx).backgroundColor, glyphBg: g ? getComputedStyle(g).backgroundColor : "none", glyphW: g ? g.offsetWidth : 0,
       navy: [bx, ...bx.querySelectorAll<HTMLElement>("*")].some((e) => getComputedStyle(e).backgroundColor === "rgb(42, 58, 82)"),
       follows: m.querySelector<HTMLElement>("[data-qc152='follows']")?.innerText.replace(/\s+/g, " ").trim() ?? "",
@@ -341,7 +344,7 @@ for (const vp of SIZES) {
         for (const m of t?.msgs ?? []) {
           n++;
           const re = NAMES[m.kind === "nudge" || m.kind === "told" ? m.kind : m.status];
-          L.check(`${k} · ${m.status || m.kind}: its title names it (${m.title})`, !!re && re.test(m.title), m.title);
+          L.check(`${k} · ${m.status || m.kind}: its title names it, and is on screen (${m.title})`, !!re && re.test(m.title) && m.seen.includes(m.title), `${m.title} / seen: ${m.seen.replace(/\s+/g, " ").slice(0, 60)}`);
         }
       }
       L.check("population: every kind of step", n >= 20, `${n}`);
@@ -381,7 +384,7 @@ for (const vp of SIZES) {
       await click(page, "[data-qp='panel'] [data-qc152='told-deadline'] [data-qc152='date-btn']");
       if (!(await page.locator(`[data-qc152='day'][data-day='${target}']`).count())) await click(page, "[aria-label='Next month']");
       await click(page, `[data-qc152='day'][data-day='${target}']`);
-      const draft = await page.locator("[data-qp='panel'] [data-qc152='draft']").innerText().catch(() => "");
+      const draft = await page.locator("[data-qp='panel'] [data-qc152='draft']").first().innerText({ timeout: 5000 }).catch(() => "");
       L.check("the draft is yours, with the count and the deadline", /Told 4 other agents/.test(draft) && /offer deadline/.test(draft) && (await page.locator("[data-qp='panel'] [data-qc152='draft'][data-side='me']").count()) === 1, draft.replace(/\s+/g, " "));
       await click(page, "[data-qp='panel'] [data-qc152='see-changes']");
       await click(page, "[data-qp='panel'] [data-qc152='save']");
@@ -419,6 +422,70 @@ for (const vp of SIZES) {
       await page.waitForTimeout(2500);
       L.check("Undo: the query back byte for byte", JSON.stringify(dump("agent")) === JSON.stringify(b2), "");
       L.done(12);
+    });
+  });
+}
+
+/* ── §3 the footer (L8) ────────────────────────────────────────────────────────────────────────────────────────── */
+
+const D = String.raw`\d{1,2} [A-Z][a-z]{2}( \d{4})?`;
+/** one fixture per row of §3: [fixture, icon, line 1, line 2, button, tone, second action] */
+const FOOT: [string, string, RegExp, RegExp, string, string, string | null][] = [
+  ["fullreq", "stage", /^Send the full$/, new RegExp(String.raw`^\d+ days? left · by ${D}$`), "Mark full sent", "navy", null],
+  ["rr", "stage", /^Revise and resubmit$/, new RegExp(`^Rhea asked on ${D}$`), "Mark revision sent", "navy", null],
+  ["offer", "stage", /^Olive made an offer$/, new RegExp(String.raw`^\d+ days? left · answer by ${D}$`), "Answer the offer", "navy", "Tell other agents"],
+  ["offertold", "stage", /^Tom made an offer$/, new RegExp(`^You told 6 others · deadline ${D}$`), "Answer the offer", "navy", null],
+  ["nudge", "clock", /^No reply from Priya yet$/, new RegExp(String.raw`^Reply was due ${D} · \d+ days? ago$`), "Nudge", "outline", null],
+  ["agent", "ring", /^Waiting on Rufus$/, new RegExp(`^Reply expected by ${D}$`), "Record a response", "outline", null],
+  ["nudgedwait", "ring", /^Waiting on Wren$/, /^Quiet after 4 weeks · \d+ days? to go$/, "Record a response", "outline", null],
+  ["quiet", "clock", /^No reply from Quinn$/, new RegExp(`^Quiet since ${D} · close it, or keep waiting$`), "Close it", "outline", null],
+  ["passed", "grey", /^Paul passed$/, new RegExp(`^On ${D} · after the full$`), "Reopen", "outline", null],
+  ["withdrew", "grey", /^You withdrew$/, new RegExp(`^${D} · an offer elsewhere$`), "Reopen", "outline", null],
+];
+
+for (const vp of SIZES) {
+  test.describe(`QC1521 §3 @ ${vp.width}`, () => {
+    test("L8 · footer: each state's icon, two lines and action; the thread never says where it stands", async ({ page }) => {
+      test.skip(!run("L8"));
+      const L = new Ledger(`L8-${vp.width}`);
+      await open(page, vp);
+      /* the quiet window is the account's: start from the default */
+      await page.locator("[data-qc152='quiet-setting'] button").first().click({ timeout: 8000 }).catch(() => {});
+      await page.locator("[data-qc152='quiet-pop'] [data-weeks='4']").click({ timeout: 8000 }).catch(() => {});
+      await page.keyboard.press("Escape"); await page.waitForTimeout(800);
+      for (const [k, icon, l1, l2, btn, tone, second] of FOOT) {
+        await openCard(page, k);
+        const f = await page.evaluate((c) => {
+          const r = document.querySelector<HTMLElement>(`${c} [data-qc152='reply']`);
+          const sub = r?.querySelector<HTMLElement>("[data-qc152='reply-sub']");
+          return r ? {
+            icon: r.dataset.icon ?? "", l1: r.querySelector<HTMLElement>("[data-qc152='reply-lead']")?.innerText.trim() ?? "", l2: sub?.innerText.trim() ?? "",
+            l2c: sub ? getComputedStyle(sub).color : "", btn: r.querySelector<HTMLElement>("[data-qc152='reply-btn']")?.innerText.trim() ?? "",
+            tone: r.querySelector<HTMLElement>("[data-qc152='reply-btn']")?.dataset.tone ?? "", second: r.querySelector<HTMLElement>("[data-qc152='reply-second']")?.innerText.trim() ?? null,
+            h: r.querySelector<HTMLElement>("[data-qc152='reply-field']")?.offsetHeight ?? 0, iconW: r.querySelector<HTMLElement>("[data-qc152='foot-icon']")?.offsetWidth ?? 0,
+            /* the thread's words apart from its steps' own titles ("You withdrew" is both a step and where it stands) */
+            thread: (() => { const t = document.querySelector<HTMLElement>(`${c} [data-qc152='thread']`); if (!t) return null;
+              const x = t.cloneNode(true) as HTMLElement; x.querySelectorAll("[data-qc152='msg-title']").forEach((e) => e.remove()); return x.textContent ?? ""; })(),
+          } : null;
+        }, CARD);
+        L.check(`${k}: population (the footer and the thread)`, !!f && f.thread != null, JSON.stringify(f));
+        if (!f) continue;
+        L.check(`${k}: icon ${icon}, 32px`, f.icon === icon && f.iconW === 32, `${f.icon} ${f.iconW}`);
+        L.check(`${k}: line 1`, l1.test(f.l1), f.l1);
+        L.check(`${k}: line 2`, l2.test(f.l2), f.l2);
+        L.check(`${k}: the action (${btn}, ${tone})`, f.btn === btn && f.tone === tone, `${f.btn} ${f.tone}`);
+        L.check(`${k}: the second action`, f.second === second, String(f.second));
+        L.check(`${k}: the field is 52px`, f.h === 52, `${f.h}`);
+        L.check(`${k}: the thread never says where it stands`, !f.thread!.includes(f.l1) && !f.thread!.includes(f.l2), `${f.l1} / ${f.l2}`);
+        if (k === "nudge") L.check("nudge due: line 2 in rust", f.l2c === "rgb(162, 69, 42)", f.l2c);
+      }
+      /* "Tell other agents" opens the record form with Told other agents chosen */
+      await openCard(page, "offer");
+      await click(page, `${CARD} [data-qc152='reply-second']`);
+      await page.waitForTimeout(500);
+      const rec = await page.evaluate(() => ({ kind: document.querySelector<HTMLElement>("[data-qp='panel'] [data-qc152='record']")?.dataset.kind ?? "", count: !!document.querySelector("[data-qp='panel'] [data-qc152='told-count']") }));
+      L.check("Tell other agents opens the record form on Told other agents", rec.kind === "told" && rec.count, JSON.stringify(rec));
+      L.done(70);
     });
   });
 }

@@ -27,21 +27,21 @@
  {
   "where": "drag: today's line on the TODAY tag ±1",
   "ok": true,
-  "detail": "{\"line\":942.59375,\"tag\":942.125,\"inView\":true}"
+  "detail": "{\"line\":947.4375,\"tag\":947.125,\"inView\":true}"
  },
  {
   "where": "zoom 6w: today's line on the TODAY tag ±1",
   "ok": true,
-  "detail": "{\"line\":831.28125,\"tag\":831.28125,\"inView\":true}"
+  "detail": "{\"line\":841.78125,\"tag\":841.28125,\"inView\":true}"
  },
  {
   "where": "zoom 6m: today's line on the TODAY tag ±1",
   "ok": true,
-  "detail": "{\"line\":990.296875,\"tag\":990.0625,\"inView\":true}"
+  "detail": "{\"line\":992.71875,\"tag\":993.0625,\"inView\":true}"
  },
  {
   "where": "zoom 3m: today's line on the TODAY tag ±1",
   "ok": true,
-  "detail": "{\"line\":942.59375,\"tag\":942.125,\"inView\":true}"
+  "detail": "{\"line\":947.4375,\"tag\":947.125,\"inView\":true}"
  }
 ]

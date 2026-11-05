@@ -26,7 +26,7 @@ import {
 } from "../../../lib/qcThread152";
 import "./qcv152card.css";
 import { PopCtx, useOutsideClose } from "./QcEdit152";
-import { Bubble, chipIcon } from "./QcBubble152";
+import { Bubble, StepGlyph, chipIcon } from "./QcBubble152";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 
 export interface QcCard152Data {
@@ -47,6 +47,10 @@ export interface QcCard152Data {
   sentLabels: string[];
   lastHeardMs: number | null;
   how: string | null;
+  /** v152.1 §3 the footer: the quiet window (weeks) and a close's reason */
+  quietWeeks?: number;
+  reason?: string | null;
+  nudged?: boolean;
 }
 export type CardTab152 = "tracking" | "agent" | "materials" | "notes";
 
@@ -83,6 +87,7 @@ export interface QcCard152Props {
 
 const PEN = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10.5 2.5l3 3L6 13H3v-3z" /></svg>;
 const ARW = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5" /></svg>;
+const CLOCK = <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" aria-hidden="true"><circle cx="8" cy="8" r="6" /><path d="M8 4.6V8l2.3 1.4" /></svg>;
 const BOOK = <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#5f5a53" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true"><path d="M3.5 5.5c2.8-1.3 5.8-1.3 8.5.6 2.7-1.9 5.7-1.9 8.5-.6v13c-2.8-1.3-5.8-1.3-8.5.6-2.7-1.9-5.7-1.9-8.5-.6z" /><path d="M12 6.1v13" /></svg>;
 const MAIL = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><rect x="2" y="3.5" width="12" height="9" rx="1.5" /><path d="m2.5 4.5 5.5 4 5.5-4" /></svg>;
 const WEB = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><circle cx="8" cy="8" r="6" /><path d="M2 8h12M8 2c2 2 2 10 0 12M8 2c-2 2-2 10 0 12" /></svg>;
@@ -142,7 +147,7 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   useEscapeLayer(view !== "read", () => { if (popOpen) setPopOpen(null); else p.onBack?.(); }, ESC_LEVEL.pageModal);
   const bodyRef = useRef<HTMLDivElement>(null);
   const thread: ThreadItem[] = buildThread(d.steps, { first, nowMs, state: d.state, replyMs: d.replyMs, agentWeeks: d.agentWeeks });
-  const box = replyBox({ state: d.state, status: r.status, first, nowMs, dueMs: d.dueMs, replyMs: d.replyMs, closedMs: d.closedMs });
+  const box = replyBox({ state: d.state, status: r.status, first, nowMs, dueMs: d.dueMs, replyMs: d.replyMs, closedMs: d.closedMs, steps: d.steps, quietWeeks: d.quietWeeks, reason: d.reason ?? null, nudged: d.nudged });
   const [buildId, setBuildId] = useState<string | null>(null);
   /* §2.8 the fold opens for this card only, and folds again when the card reopens */
   const [unfold, setUnfold] = useState(false);
@@ -300,8 +305,15 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
         <div ref={bodyRef} className="qc152-body" data-qc152="body" role="tabpanel">
           {p.tab === "tracking" ? trackingPane : p.tab === "agent" ? agentPane : p.tab === "materials" ? matPane : <div className="qc152-notes">{p.notes}</div>}
         </div>
-        <div className={`qc152-rb${box.late ? " late" : ""}`} data-qc152="reply" data-act={box.act}>
-          <div className="qc152-rf" data-qc152="reply-field"><b data-qc152="reply-lead">{box.lead}</b><span data-qc152="reply-sub">{box.sub}</span></div>
+        {/* v152.1 §3 the footer: the only place that says where it stands — an icon, two lines, the action */}
+        <div className={`qc152-rb${box.late ? " late" : ""}`} data-qc152="reply" data-act={box.act} data-icon={box.icon.k}>
+          <div className="qc152-rf" data-qc152="reply-field">
+            {box.icon.k === "ring" ? <span className="qc152-fr" data-qc152="foot-icon" style={{ ["--p" as string]: String(box.icon.p) }} aria-hidden="true" />
+              : box.icon.k === "clock" ? <span className="qc152-fc" data-qc152="foot-icon" aria-hidden="true">{CLOCK}</span>
+              : <span className={`qc152-fg${box.icon.k === "grey" ? " grey" : ""}`} data-qc152="foot-icon" style={box.icon.k === "stage" ? { background: box.icon.tint } : undefined} aria-hidden="true">{StepGlyph({ status: box.icon.status, kind: null })}</span>}
+            <div className="qc152-rft"><b data-qc152="reply-lead">{box.lead}</b><span data-qc152="reply-sub">{box.sub}</span></div>
+          </div>
+          {box.second ? <button type="button" className="qc152-rbtn gh sm" data-qc152="reply-second" onClick={() => p.onReply(box.second!.act)}>{box.second.label}</button> : null}
           <button type="button" className={`qc152-rbtn ${box.tone === "navy" ? "nv" : "gh"}`} data-qc152="reply-btn" data-tone={box.tone} onClick={() => p.onReply(box.act)}>{box.button}{ARW}</button>
         </div>
         </>}

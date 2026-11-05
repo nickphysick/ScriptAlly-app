@@ -2,57 +2,57 @@
  {
   "where": "long: population — a thread with messages",
   "ok": true,
-  "detail": "[\"wait\",\"msg\",\"wait\",\"msg\",\"wait\",\"msg\",\"wait\",\"msg\",\"wait\",\"msg\",\"wait\",\"end\"]"
+  "detail": "[\"msg\",\"wait\",\"msg\",\"wait\",\"msg\",\"wait\",\"msg\",\"wait\",\"msg\"]"
  },
  {
   "where": "long: Queried sits right",
   "ok": true,
-  "detail": "{\"k\":\"msg\",\"side\":\"me\",\"status\":\"Queried\",\"kind\":\"\",\"label\":\"\",\"left\":258,\"right\":0,\"disc\":{\"w\":34,\"bg\":\"rgba(0, 0, 0, 0)\"},\"date\":\"8 Jun\"}"
+  "detail": "{\"k\":\"msg\",\"side\":\"me\",\"status\":\"Queried\",\"kind\":\"\",\"label\":\"\",\"left\":255.21875,\"right\":0,\"disc\":{\"w\":26,\"bg\":\"rgba(0, 0, 0, 0)\"},\"date\":\"8 Jun\"}"
  },
  {
-  "where": "long: Queried has a 34px disc with no fill",
+  "where": "long: Queried has a 26px glyph box with no fill",
   "ok": true,
-  "detail": "{\"w\":34,\"bg\":\"rgba(0, 0, 0, 0)\"}"
+  "detail": "{\"w\":26,\"bg\":\"rgba(0, 0, 0, 0)\"}"
  },
  {
   "where": "long: Partial Requested sits left",
   "ok": true,
-  "detail": "{\"k\":\"msg\",\"side\":\"them\",\"status\":\"Partial Requested\",\"kind\":\"\",\"label\":\"\",\"left\":0,\"right\":213.671875,\"disc\":{\"w\":34,\"bg\":\"rgb(243, 211, 198)\"},\"date\":\"8 Jul\"}"
+  "detail": "{\"k\":\"msg\",\"side\":\"them\",\"status\":\"Partial Requested\",\"kind\":\"\",\"label\":\"\",\"left\":0,\"right\":222.671875,\"disc\":{\"w\":26,\"bg\":\"rgba(0, 0, 0, 0)\"},\"date\":\"8 Jul\"}"
  },
  {
-  "where": "long: Partial Requested has a 34px disc in its cap colour",
+  "where": "long: Partial Requested has a 26px glyph box with no fill",
   "ok": true,
-  "detail": "{\"w\":34,\"bg\":\"rgb(243, 211, 198)\"}"
+  "detail": "{\"w\":26,\"bg\":\"rgba(0, 0, 0, 0)\"}"
  },
  {
   "where": "long: Partial Sent sits right",
   "ok": true,
-  "detail": "{\"k\":\"msg\",\"side\":\"me\",\"status\":\"Partial Sent\",\"kind\":\"\",\"label\":\"\",\"left\":258,\"right\":0,\"disc\":{\"w\":34,\"bg\":\"rgb(243, 211, 198)\"},\"date\":\"28 Jul\"}"
+  "detail": "{\"k\":\"msg\",\"side\":\"me\",\"status\":\"Partial Sent\",\"kind\":\"\",\"label\":\"\",\"left\":258,\"right\":0,\"disc\":{\"w\":26,\"bg\":\"rgba(0, 0, 0, 0)\"},\"date\":\"28 Jul\"}"
  },
  {
-  "where": "long: Partial Sent has a 34px disc in its cap colour",
+  "where": "long: Partial Sent has a 26px glyph box with no fill",
   "ok": true,
-  "detail": "{\"w\":34,\"bg\":\"rgb(243, 211, 198)\"}"
+  "detail": "{\"w\":26,\"bg\":\"rgba(0, 0, 0, 0)\"}"
  },
  {
   "where": "long: Full Requested sits left",
   "ok": true,
-  "detail": "{\"k\":\"msg\",\"side\":\"them\",\"status\":\"Full Requested\",\"kind\":\"\",\"label\":\"\",\"left\":0,\"right\":221.984375,\"disc\":{\"w\":34,\"bg\":\"rgb(211, 220, 231)\"},\"date\":\"6 Sep\"}"
+  "detail": "{\"k\":\"msg\",\"side\":\"them\",\"status\":\"Full Requested\",\"kind\":\"\",\"label\":\"\",\"left\":0,\"right\":226,\"disc\":{\"w\":26,\"bg\":\"rgba(0, 0, 0, 0)\"},\"date\":\"6 Sep\"}"
  },
  {
-  "where": "long: Full Requested has a 34px disc in its cap colour",
+  "where": "long: Full Requested has a 26px glyph box with no fill",
   "ok": true,
-  "detail": "{\"w\":34,\"bg\":\"rgb(211, 220, 231)\"}"
+  "detail": "{\"w\":26,\"bg\":\"rgba(0, 0, 0, 0)\"}"
  },
  {
   "where": "long: Full Sent sits right",
   "ok": true,
-  "detail": "{\"k\":\"msg\",\"side\":\"me\",\"status\":\"Full Sent\",\"kind\":\"\",\"label\":\"\",\"left\":258,\"right\":0,\"disc\":{\"w\":34,\"bg\":\"rgb(211, 220, 231)\"},\"date\":\"16 Oct\"}"
+  "detail": "{\"k\":\"msg\",\"side\":\"me\",\"status\":\"Full Sent\",\"kind\":\"\",\"label\":\"\",\"left\":258,\"right\":0,\"disc\":{\"w\":26,\"bg\":\"rgba(0, 0, 0, 0)\"},\"date\":\"16 Oct\"}"
  },
  {
-  "where": "long: Full Sent has a 34px disc in its cap colour",
+  "where": "long: Full Sent has a 26px glyph box with no fill",
   "ok": true,
-  "detail": "{\"w\":34,\"bg\":\"rgb(211, 220, 231)\"}"
+  "detail": "{\"w\":26,\"bg\":\"rgba(0, 0, 0, 0)\"}"
  },
  {
   "where": "long: the wait between 8 Jun and 8 Jul reads 30 days",
@@ -75,9 +75,9 @@
   "detail": "40 days"
  },
  {
-  "where": "long: the last divider says today",
+  "where": "long: no today divider, and the thread ends on a message",
   "ok": true,
-  "detail": "{\"k\":\"wait\",\"side\":\"\",\"status\":\"\",\"kind\":\"\",\"label\":\"20 days · today\",\"left\":0,\"right\":0,\"disc\":null,\"date\":\"\"}"
+  "detail": "[\"wait\",\"msg\"]"
  },
  {
   "where": "long: opens scrolled to the bottom",
@@ -87,27 +87,27 @@
  {
   "where": "materials: population — a thread with messages",
   "ok": true,
-  "detail": "[\"wait\",\"msg\",\"wait\",\"msg\",\"wait\"]"
+  "detail": "[\"msg\",\"wait\",\"msg\"]"
  },
  {
   "where": "materials: Queried sits right",
   "ok": true,
-  "detail": "{\"k\":\"msg\",\"side\":\"me\",\"status\":\"Queried\",\"kind\":\"\",\"label\":\"\",\"left\":258,\"right\":0,\"disc\":{\"w\":34,\"bg\":\"rgba(0, 0, 0, 0)\"},\"date\":\"6 Oct\"}"
+  "detail": "{\"k\":\"msg\",\"side\":\"me\",\"status\":\"Queried\",\"kind\":\"\",\"label\":\"\",\"left\":255.21875,\"right\":0,\"disc\":{\"w\":26,\"bg\":\"rgba(0, 0, 0, 0)\"},\"date\":\"6 Oct\"}"
  },
  {
-  "where": "materials: Queried has a 34px disc with no fill",
+  "where": "materials: Queried has a 26px glyph box with no fill",
   "ok": true,
-  "detail": "{\"w\":34,\"bg\":\"rgba(0, 0, 0, 0)\"}"
+  "detail": "{\"w\":26,\"bg\":\"rgba(0, 0, 0, 0)\"}"
  },
  {
   "where": "materials: Partial Requested sits left",
   "ok": true,
-  "detail": "{\"k\":\"msg\",\"side\":\"them\",\"status\":\"Partial Requested\",\"kind\":\"\",\"label\":\"\",\"left\":0,\"right\":213.671875,\"disc\":{\"w\":34,\"bg\":\"rgb(243, 211, 198)\"},\"date\":\"1 Nov\"}"
+  "detail": "{\"k\":\"msg\",\"side\":\"them\",\"status\":\"Partial Requested\",\"kind\":\"\",\"label\":\"\",\"left\":0,\"right\":222.671875,\"disc\":{\"w\":26,\"bg\":\"rgba(0, 0, 0, 0)\"},\"date\":\"1 Nov\"}"
  },
  {
-  "where": "materials: Partial Requested has a 34px disc in its cap colour",
+  "where": "materials: Partial Requested has a 26px glyph box with no fill",
   "ok": true,
-  "detail": "{\"w\":34,\"bg\":\"rgb(243, 211, 198)\"}"
+  "detail": "{\"w\":26,\"bg\":\"rgba(0, 0, 0, 0)\"}"
  },
  {
   "where": "materials: the wait between 6 Oct and 1 Nov reads 26 days",
@@ -115,9 +115,9 @@
   "detail": "26 days"
  },
  {
-  "where": "materials: the last divider says today",
+  "where": "materials: no today divider, and the thread ends on a message",
   "ok": true,
-  "detail": "{\"k\":\"wait\",\"side\":\"\",\"status\":\"\",\"kind\":\"\",\"label\":\"4 days · today\",\"left\":0,\"right\":0,\"disc\":null,\"date\":\"\"}"
+  "detail": "[\"wait\",\"msg\"]"
  },
  {
   "where": "materials: opens scrolled to the bottom",
@@ -127,27 +127,27 @@
  {
   "where": "closed: population — a thread with messages",
   "ok": true,
-  "detail": "[\"wait\",\"msg\",\"wait\",\"msg\"]"
+  "detail": "[\"msg\",\"wait\",\"msg\"]"
  },
  {
   "where": "closed: Queried sits right",
   "ok": true,
-  "detail": "{\"k\":\"msg\",\"side\":\"me\",\"status\":\"Queried\",\"kind\":\"\",\"label\":\"\",\"left\":258,\"right\":0,\"disc\":{\"w\":34,\"bg\":\"rgba(0, 0, 0, 0)\"},\"date\":\"6 Sep\"}"
+  "detail": "{\"k\":\"msg\",\"side\":\"me\",\"status\":\"Queried\",\"kind\":\"\",\"label\":\"\",\"left\":255.21875,\"right\":0,\"disc\":{\"w\":26,\"bg\":\"rgba(0, 0, 0, 0)\"},\"date\":\"6 Sep\"}"
  },
  {
-  "where": "closed: Queried has a 34px disc with no fill",
+  "where": "closed: Queried has a 26px glyph box with no fill",
   "ok": true,
-  "detail": "{\"w\":34,\"bg\":\"rgba(0, 0, 0, 0)\"}"
+  "detail": "{\"w\":26,\"bg\":\"rgba(0, 0, 0, 0)\"}"
  },
  {
   "where": "closed: Rejected sits left",
   "ok": true,
-  "detail": "{\"k\":\"msg\",\"side\":\"them\",\"status\":\"Rejected\",\"kind\":\"\",\"label\":\"\",\"left\":0,\"right\":226,\"disc\":{\"w\":34,\"bg\":\"rgb(241, 240, 238)\"},\"date\":\"16 Oct\"}"
+  "detail": "{\"k\":\"msg\",\"side\":\"them\",\"status\":\"Rejected\",\"kind\":\"\",\"label\":\"\",\"left\":0,\"right\":226,\"disc\":{\"w\":26,\"bg\":\"rgba(0, 0, 0, 0)\"},\"date\":\"16 Oct\"}"
  },
  {
-  "where": "closed: Rejected has a 34px disc in its cap colour",
+  "where": "closed: Rejected has a 26px glyph box with no fill",
   "ok": true,
-  "detail": "{\"w\":34,\"bg\":\"rgb(241, 240, 238)\"}"
+  "detail": "{\"w\":26,\"bg\":\"rgba(0, 0, 0, 0)\"}"
  },
  {
   "where": "closed: the wait between 6 Sep and 16 Oct reads 40 days",
@@ -155,9 +155,9 @@
   "detail": "40 days"
  },
  {
-  "where": "closed: no today divider",
+  "where": "closed: no today divider, and the thread ends on a message",
   "ok": true,
-  "detail": "{\"k\":\"wait\",\"side\":\"\",\"status\":\"\",\"kind\":\"\",\"label\":\"40 days\",\"left\":0,\"right\":0,\"disc\":null,\"date\":\"\"}"
+  "detail": "[\"wait\",\"msg\"]"
  },
  {
   "where": "closed: opens scrolled to the bottom",

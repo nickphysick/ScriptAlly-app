@@ -129,7 +129,7 @@ import { expectedFor, type QcRow } from "../lib/qcSummary";
 import { nextLine } from "../lib/qcRowLines";
 import { QcPage151, Track151 } from "./queries/centre/QcPage151";
 import { QcFilterPanel151 } from "./queries/centre/QcFilterMenu140";
-import { QUIET_WEEKS_PATH, quickOfRow, quietWeeksOf, stampRows, stateOf, queryState as qsOf } from "../lib/queryState";
+import { QUIET_WEEKS_PATH, nudgeMsOf, quickOfRow, quietWeeksOf, stampRows, stateOf, queryState as qsOf } from "../lib/queryState";
 import { packagesUnlocked } from "../lib/entitlements";
 import { dayLabel as dayLabel152, sideOf as side152, type ReplyAct, type ThreadStepIn } from "../lib/qcThread152";
 import { getActivityTime } from "../lib/queryDerivation";
@@ -6074,6 +6074,9 @@ export const Queries: React.FC<{
         sentLabels: sent.map((x) => x.label),
         lastHeardMs: heard?.ms ?? null,
         how: submissionWords(ag),
+        quietWeeks: qcQuietWeeks,
+        reason,
+        nudged: nudgeMsOf({ ...row, nrmn: !!nrmnRaw }, now) != null,
       };
     }
     /* §3 — the reply box's button opens the card's own form; nothing writes until its Save. An offer's answer and a
@@ -6081,7 +6084,8 @@ export const Queries: React.FC<{
     const reply152 = (a: ReplyAct) => {
       const rr = q.status === QueryStatus.REVISE_RESUBMIT;
       if (a === "offer" || a === "reopen" || (a === "sent" && rr)) { stepRow({ mode: a === "offer" ? "offer" : a === "reopen" ? "resp" : "sent", queryId: q.id }); return; }
-      setQc152Rec(a === "sent" ? (q.status === QueryStatus.FULL_REQUESTED ? "full_sent" : "partial_sent") : a === "nudge" ? "nudge" : a === "close" ? "noresp" : "resp");
+      /* v152.1 §3 "Tell other agents" opens the record form with Told other agents chosen */
+      setQc152Rec(a === "tell" ? "told" : a === "sent" ? (q.status === QueryStatus.FULL_REQUESTED ? "full_sent" : "partial_sent") : a === "nudge" ? "nudge" : a === "close" ? "noresp" : "resp");
       setQc152From("reply");
       setQcCardMode("record");
     };
