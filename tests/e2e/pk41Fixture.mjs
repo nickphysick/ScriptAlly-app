@@ -12,6 +12,8 @@
  *   node tests/e2e/pk41Fixture.mjs --no-packages    # delete pk40-ms's packages (state 15)
  *   node tests/e2e/pk41Fixture.mjs --active         # print pk40-ms's activePackageId
  *   node tests/e2e/pk41Fixture.mjs --colours        # Standard → Plum, Ready one → Pine (L6's two band colours)
+ *   node tests/e2e/pk41Fixture.mjs --one-package    # v42: keep only pk40-std (screen 14)
+ *   node tests/e2e/pk41Fixture.mjs --retired-only   # v42: keep only the retired pk40-old (the empty card + Retired (1))
  */
 import { existsSync, readFileSync } from "node:fs";
 import { initializeApp } from "firebase/app";
@@ -48,5 +50,12 @@ if (has("--no-packages")) {
   for (const d of (await getDocs(collection(db, "users", uid, "packages"))).docs) if (d.data().manuscriptId === MS) { await deleteDoc(d.ref); n++; }
   await updateDoc(doc(db, "users", uid, "manuscripts", MS), { activePackageId: deleteField() });
   console.log(`pk40-ms: ${n} packages removed`);
+}
+for (const [flag, keep] of [["--one-package", ["pk40-std"]], ["--retired-only", ["pk40-old"]]]) {
+  if (!has(flag)) continue;
+  let n = 0;
+  for (const d of (await getDocs(collection(db, "users", uid, "packages"))).docs) if (d.data().manuscriptId === MS && !keep.includes(d.id)) { await deleteDoc(d.ref); n++; }
+  if (flag === "--retired-only") await updateDoc(doc(db, "users", uid, "manuscripts", MS), { activePackageId: deleteField() });
+  console.log(`pk40-ms: ${n} packages removed, kept ${keep.join(", ")}`);
 }
 process.exit(0);

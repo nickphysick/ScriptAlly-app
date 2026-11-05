@@ -3,19 +3,19 @@
   "lock": "L1-1512",
   "where": "population",
   "ok": true,
-  "detail": "4 package rows"
+  "detail": "4 package tiles"
  },
  {
   "lock": "L1-1512",
   "where": "ground: the gradient",
   "ok": true,
-  "detail": "url(\"http://127.0.0.1:4317/images/packages/packages-pattern.svg\"), linear-gradient(rgb(251, 249, 245), rgb(238, 235, 229))"
+  "detail": "url(\"http://127.0.0.1:4342/images/packages/packages-pattern.svg\"), linear-gradient(rgb(251, 249, 245), rgb(238, 235, 229))"
  },
  {
   "lock": "L1-1512",
   "where": "ground: the pattern over it",
   "ok": true,
-  "detail": "url(\"http://127.0.0.1:4317/images/packages/packages-pattern.svg\"), linear-gradient(rgb(251, 249, 245), rgb(238, 235, 229"
+  "detail": "url(\"http://127.0.0.1:4342/images/packages/packages-pattern.svg\"), linear-gradient(rgb(251, 249, 245), rgb(238, 235, 229"
  },
  {
   "lock": "L1-1512",
@@ -80,6 +80,18 @@
  {
   "lock": "L1-1512",
   "where": "retired: [data-pk41-tab]",
+  "ok": true,
+  "detail": "0 in the DOM"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "retired: [data-pk41=\"rail\"]",
+  "ok": true,
+  "detail": "0 in the DOM"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "retired: [data-pk41=\"batch\"]",
   "ok": true,
   "detail": "0 in the DOM"
  },

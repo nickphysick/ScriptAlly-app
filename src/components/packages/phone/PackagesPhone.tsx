@@ -26,10 +26,9 @@ import { PhoneLetterEditor } from "../../phone/materials/PhoneLetterEditor";
 import { packageStage, STAGE_LABEL, isLocked, packageQueries, type Facts } from "../../../lib/packagesV40";
 import { packageShowcases, bestPiece, thresholdWords, type Fig } from "../../../lib/packagesV38";
 import { MIN_SENDS_FOR_CLAIM } from "../../../lib/packageMetrics";
-import { hexOf, firstFreeColour } from "../../../lib/packagesV39";
 import { PACKAGE_ICONS } from "../packageIcons";
-/* v41: the guide is Pk41HowItWorks now (Pk39HowItWorks is deleted); its five steps describe the page as it is */
-import { HOW_STEPS } from "../v41/Pk41HowItWorks";
+/* v42: the guide is How it works's four stations (v41's five steps are deleted) */
+import { HOW_STATIONS as HOW_STEPS, PACKAGE_NAVY } from "../../../lib/packagesV42";
 import { compUsage, compKey, letterFixed, MAX_LETTER_COMPS } from "../../../lib/compUsage";
 import { compAge, currentYear } from "../../../lib/compsPage";
 import { withCompAdded } from "../../../lib/comps";
@@ -96,8 +95,8 @@ export const PackagesPhone: React.FC<{ active: boolean }> = ({ active }) => {
     <div data-pa="pk-band">
       <div className="pa-pksub">What you send agents, and what’s working</div>
       {pk ? (
-        <button type="button" className="pa-apk" data-pa="pk-active" data-id={pk.id} data-pc={hexOf(pk)} onClick={() => nav.open("pkg", pk.id)}>
-          <span className="pa-apkh" style={{ background: hexOf(pk) }}>
+        <button type="button" className="pa-apk" data-pa="pk-active" data-id={pk.id} data-pc={PACKAGE_NAVY} onClick={() => nav.open("pkg", pk.id)}>
+          <span className="pa-apkh" style={{ background: PACKAGE_NAVY }}>
             <span className="pa-apkic" aria-hidden="true">{pkIcon(pk)}</span>
             <b>{pk.packageName}</b><span>New queries go out with this</span>
           </span>
@@ -229,7 +228,7 @@ const LcTag: React.FC<{ p: SubmissionPackage }> = ({ p }) => {
 
 const PkRow: React.FC<{ model: Pk26Model; p: SubmissionPackage; onOpen: () => void }> = ({ model, p, onOpen }) => (
   <button type="button" className="pa-pkrow" data-pa="pk-row" data-id={p.id} data-stage={packageStage(p)} onClick={onOpen}>
-    <span className="pa-pkic" style={{ background: hexOf(p) }} data-pc={hexOf(p)} aria-hidden="true">{pkIcon(p)}</span>
+    <span className="pa-pkic" style={{ background: PACKAGE_NAVY }} data-pc={PACKAGE_NAVY} aria-hidden="true">{pkIcon(p)}</span>
     <span className="pa-pkrt"><b>{p.packageName}</b><span className="pa-sub">{piecesLine(model, p)}</span></span>
     <LcTag p={p} />
   </button>
@@ -244,7 +243,7 @@ function landing(model: Pk26Model, usage?: Usage, letterNames?: (id: string) => 
   const best = packageShowcases(pks.map((i) => ({ id: i.id, name: i.name, f: i.f, retired: i.retired }))).find((s) => s.k === "best");
   if (best) {
     const p = model.msPkgs.find((x) => x.id === best.item.id)!;
-    cards.push({ key: "pk", rank: "Your best package", name: p.packageName, colour: hexOf(p), icon: pkIcon(p), metric: resultWords(best.item.f), line: piecesLine(model, p), target: ["pkg", p.id] });
+    cards.push({ key: "pk", rank: "Your best package", name: p.packageName, colour: PACKAGE_NAVY, icon: pkIcon(p), metric: resultWords(best.item.f), line: piecesLine(model, p), target: ["pkg", p.id] });
   } else hidden.push("package");
   const bl = bestPiece(model.figItems("let").map((i) => ({ id: i.id, name: i.name, f: i.f, retired: i.retired })));
   if (bl) {
@@ -371,7 +370,7 @@ const PackagePage: React.FC<{ model: Pk26Model; p: SubmissionPackage; nav: Retur
   const copy = async () => { const id = await model.duplicate(p); if (id) nav.replace("pkg", id); };
   return (
     <>
-      <div className="pa-band pa-band--page pa-pkband" style={{ background: hexOf(p) }} data-pa="pkg-band" data-pc={hexOf(p)}>
+      <div className="pa-band pa-band--page pa-pkband" style={{ background: PACKAGE_NAVY }} data-pa="pkg-band" data-pc={PACKAGE_NAVY}>
         <div className="pa-bandrow"><button type="button" className="pa-ring" aria-label="Back" data-pa="pk-back" onClick={nav.back}>{PI.back}</button><span className="pa-grow" /></div>
         <div className="pa-pkhead">
           <span className="pa-pkic big" aria-hidden="true">{pkIcon(p)}</span>
@@ -491,7 +490,7 @@ const BuilderPage: React.FC<{ model: Pk26Model; id: string; nav: ReturnType<type
     };
     let pid = existing?.id ?? null;
     if (!pid) {
-      pid = await model.createPackage({ name: fields.packageName, note: "", icon: "box" as PackageIcon, colour: firstFreeColour(model.msPkgs), from: null });
+      pid = await model.createPackage({ name: fields.packageName, note: "", icon: "box" as PackageIcon, from: null });
       if (!pid) { setSaving(false); return; }
     }
     const err = await db.updatePackage(pid, fields);
@@ -618,7 +617,7 @@ const MaterialPage: React.FC<{ model: Pk26Model; m: Pk26Model["lettersAll"][numb
       <div className="pa-shd"><h2 className="pa-h2">In these packages</h2></div>
       {m.inPackages.length ? (
         <div className="pa-card pa-pad0">{m.inPackages.map((p) => (
-          <button key={p.id} type="button" className="pa-pkrow" onClick={() => nav.open("pkg", p.id)}><span className="pa-pkic sm" style={{ background: hexOf(p) }} data-pc={hexOf(p)} aria-hidden="true">{pkIcon(p)}</span><span className="pa-pkrt"><b>{p.packageName}</b></span><LcTag p={p} /></button>
+          <button key={p.id} type="button" className="pa-pkrow" onClick={() => nav.open("pkg", p.id)}><span className="pa-pkic sm" style={{ background: PACKAGE_NAVY }} data-pc={PACKAGE_NAVY} aria-hidden="true">{pkIcon(p)}</span><span className="pa-pkrt"><b>{p.packageName}</b></span><LcTag p={p} /></button>
         ))}</div>
       ) : <p className="pa-sub">Not in a package yet.</p>}
       {earlier.length ? (

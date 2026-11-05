@@ -1,0 +1,177 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Submission packages v42 (design-refs/submission-packages-v42/): the stat tiles above the builder, the builder as one
+ * framed container with Dashboard bands (sage steps, sand preview, blush lock), navy package icons, the empty card and
+ * How it works as one animated infographic. Values are the ref's COMPUTED styles at 1512 and 1280, ported into the
+ * page's own class names (`p42-`); no `k4-`, `ig-` or `mn-` name ships. Desktop only (≥768), as every rule on this
+ * page since v39; the portalled infographic hangs off its own root.
+ *
+ * ⚠️ EVERY ON-PAGE RULE NAMES `.p41` (the page's root), so brand.tsx's bare-element faces and the v26–v41 sheets under
+ *    it lose only what v42 restyles.
+ */
+
+/* ══ C · THE STAT TILES (ref `.k4-tbs` / `.k4-tb` in the tiles layout; screens 01, 03, 06, 14) ═════════════════════════
+   A row on the page, 26 under the header (its 10px of top padding is room for the Current batch tag), the builder 26
+   under it (the bottom padding is room for the open tile's notch). The tiles share the row evenly, never wider than
+   300 (ref: 235 at 1512, 181 at 1280). A tile: white top (the navy icon tile and the serif name), beige foot (the
+   figure in the typewriter, its label in the serif). Open: a 2px navy ring and a notch. ══ */
+@media (min-width: 768px) {
+  .p41 .p42-tiles { display: flex; align-items: stretch; gap: 12px; margin: 26px 0 0; padding: 10px 0 21px; }
+  .p41 .p42-tile {
+    flex: 1 1 0; min-width: 0; max-width: 300px; position: relative; box-sizing: border-box;
+    display: flex; flex-direction: column; margin: 0; padding: 0; border: 0; border-radius: 14px;
+    background: #fff; color: #1c130f; text-align: left; cursor: pointer;
+    box-shadow: 0 0 0 1px #e3d5c9, 0 10px 22px -20px rgba(28, 19, 15, 0.4);
+    transition: box-shadow .15s;
+  }
+  .p41 .p42-tile:not(.p42-on):hover { box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.25), 0 10px 22px -20px rgba(28, 19, 15, 0.4); }
+  .p41 .p42-tile.p42-on { box-shadow: 0 0 0 2px #2d3a50, 0 14px 26px -18px rgba(28, 19, 15, 0.5); }
+  .p41 .p42-tile:focus-visible { outline: 2px solid #2d3a50; outline-offset: 3px; }
+  .p41 .p42-tile.p42-ret { opacity: .65; }
+  .p41 .p42-tt { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 14px 16px 12px; }
+  .p41 .p42-tt .p41-ic.p42-tic { width: 28px; height: 28px; border-radius: 7px; }
+  .p41 .p42-tt .p41-ic.p42-tic .p41-pic { width: 15px; height: 15px; }
+  .p41 .p42-tn { min-width: 0; font: 600 18px/1.25 var(--sp-serif); color: #1c130f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .p41 .p42-tf {
+    display: flex; align-items: baseline; gap: 8px; min-width: 0; margin-top: auto; padding: 12px 18px 14px;
+    border-radius: 0 0 14px 14px; background: #f5f1ea;
+  }
+  .p41 .p42-tf b.p42-big { flex: none; font: 400 22px/1 var(--sp-type); color: #1c130f; }
+  .p41 .p42-tf .p42-bl { min-width: 0; font: 400 14px/1.4 var(--sp-serif); color: rgba(28, 19, 15, 0.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* the notch: a small navy-edged diamond centred under the open tile, pointing down at the builder */
+  .p41 .p42-tile.p42-on::after {
+    content: ""; position: absolute; left: 50%; bottom: -8px; width: 14px; height: 14px; box-sizing: border-box;
+    background: #f5f1ea; border-right: 2px solid #2d3a50; border-bottom: 2px solid #2d3a50; border-bottom-right-radius: 3px;
+    transform: translateX(-50%) rotate(45deg);
+  }
+  /* Current batch: a small navy tag on the tile's top edge, left-aligned, never stretched */
+  .p41 .p42-cb {
+    position: absolute; top: -9px; left: 14px; z-index: 1; padding: 2px 7px; border-radius: 4px;
+    background: #2d3a50; color: #f4eee5; font: 500 8px/10px var(--font-mono, monospace); font-style: normal;
+    letter-spacing: .12em; text-transform: uppercase; white-space: nowrap;
+  }
+  .p41 .p42-retl {
+    flex: none; align-self: center; margin: 0 4px 0 0; padding: 1px 6px; border: 0; background: none; cursor: pointer;
+    font: italic 14px var(--sp-serif); color: #1c130f; white-space: nowrap;
+    text-decoration: underline; text-decoration-color: rgba(28, 19, 15, 0.3); text-underline-offset: 3px;
+  }
+  .p41 .p42-retl:hover { text-decoration-color: #1c130f; }
+  .p41 .p42-retl:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; border-radius: 4px; }
+}
+
+/* ══ D · THE BUILDER CONTAINER (ref `.k4-ws.boxed`; screens 02, 04, 05) ══════════════════════════════════════════════════
+   ONE framed container, the content's full width: white, radius 24, a 7px white rim with a hairline outside it, the
+   deep framed shadow. It is inset 7 from the column so the rim stays inside it, and sits 12 under the tile row (whose
+   21px of bottom padding is the notch's room), so the rim is 26 under the tiles. Inside, 26 of side room (19 at ≤1400),
+   24 above and 28 below. Dashboard v2's framed card (v41's `.p41-fr`: padding 7, radius 20, an inner #e3d5c9 frame at
+   14) is a different construction — the ref's values are ported here. Steps, bands and preview: pk41.css F. */
+@media (min-width: 768px) {
+  .p41 .p42-bw {
+    box-sizing: border-box; margin: 12px 7px 0; padding: 24px 0 28px; border-radius: 24px; background: #fff;
+    box-shadow: 0 0 0 7px #fff, 0 0 0 8px rgba(28, 19, 15, 0.07), 0 30px 50px -30px rgba(28, 19, 15, 0.4);
+  }
+  .p41 .p42-bwi { margin: 0 26px; }
+  /* a band: the Dashboard's palette A (sage steps; the preview's sand band is pk41.css's `.p93-pv-k`) */
+  .p41 .p42-band { padding: 13px 20px; font: 400 19px/1.3 var(--sp-type); color: #1c130f; border-bottom: 1px solid rgba(28, 19, 15, 0.07); }
+  .p41 .p42-band-sg { background: #e2e6e0; }
+}
+@media (min-width: 768px) and (max-width: 1400px) {
+  .p41 .p42-bwi { margin: 0 19px; }
+}
+
+/* ══ E · THE ICON HINT in the New and Details drawers (portalled: the rule hangs off the drawer's own class) ══ */
+.p6-cx-drw .p42-hint { display: block; margin: 0 0 10px; font: italic 14.5px/1.45 var(--sp-serif); color: rgba(28, 19, 15, 0.6); letter-spacing: 0; text-transform: none; }
+
+/* ══ F · THE EMPTY CARD (ref `.k4-emp`; screen 15): white, radius 20, framed like the builder; the Fledgling, the title in
+   the typewriter at 24, one line in the serif, a navy "+ New package" on the right. 26 under the header. ══ */
+@media (min-width: 768px) {
+  .p41 .p42-emp {
+    display: flex; align-items: center; gap: 22px; margin: 26px 0 0; padding: 24px 28px; border-radius: 20px; background: #fff;
+    box-shadow: 0 0 0 1px #e3d5c9, 0 22px 40px -24px rgba(28, 19, 15, 0.3);
+  }
+  .p41 .p42-emp-art { flex: none; width: auto; height: 90px; filter: drop-shadow(0 4px 5px rgba(28, 19, 15, 0.15)); }
+  .p41 .p42-emp-tx { min-width: 0; }
+  .p41 .p42-emp h2.p42-emp-h { margin: 0 0 6px; font: 400 24px/1.3 var(--sp-type) !important; letter-spacing: 0 !important; text-transform: none !important; color: #1c130f !important; }
+  .p41 .p42-emp p { margin: 0; max-width: 620px; font: 400 16px/1.5 var(--sp-serif); color: rgba(28, 19, 15, 0.6); }
+  .p41 .p42-emp-new {
+    flex: none; margin-left: auto; height: 44px; padding: 0 22px; border: 0; border-radius: 22px; cursor: pointer;
+    background: #2d3a50; color: #fff; font: 600 17px var(--sp-serif); white-space: nowrap;
+  }
+  .p41 .p42-emp-new:hover { background: #1c130f; }
+  .p41 .p42-emp-new:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
+  /* with only retired packages, the tile row holds just its link, under the card */
+  .p41 .p42-emp + .p42-tiles { margin-top: 8px; padding-top: 0; justify-content: flex-end; }
+}
+
+/* ══ G · HOW IT WORKS, ONE ANIMATED INFOGRAPHIC (ref `.k4-ig2[data-gs=d]`, `.ig-*`; screens 11, 12) ═════════════════════
+   Portalled to <body>, so every rule hangs off `.p42-hw` and states its own faces. The card is the ref's at both widths:
+   1080 wide, a 7px white rim at radius 22, the inner frame a #e3d5c9 hairline at 16 (head, stage and foot share it).
+   Four stations in one row, 40 apart (26 at ≤1400), joined by ONE dashed route 178 under the stage's top, behind the
+   drawings; each number disc wears a white 6px halo, so the route passes behind it.
+   ⚠️ THE FINISHED STATE IS EACH ELEMENT'S OWN STYLE. Only the animations (fill-mode `both`) hold the start state during
+   their delay, so with reduced motion (every animation off) everything is simply there. No `var()` sits inside a
+   keyframe: the delays are `var(--at)` / `var(--d)` on the rules. ══ */
+.p42-hw { position: fixed; inset: 0; z-index: 430; display: grid; place-items: center; background: rgba(27, 36, 51, 0.5); font-family: var(--sp-serif); color: #1c130f; }
+.p42-hw:focus { outline: 0; }
+.p42-hw :where(p, span, div, button, label, b, u) { font-family: inherit; }
+.p42-hw .p42-hwc {
+  position: relative; box-sizing: border-box; width: 1080px; max-width: calc(100vw - 32px); max-height: calc(100vh - 32px); overflow: auto;
+  padding: 7px; border-radius: 22px; background: #fff; box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.5);
+}
+.p42-hw .p42-hwx {
+  position: absolute; top: 16px; right: 16px; z-index: 2; width: 34px; height: 34px; padding: 0; border: 0; border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15); color: #1c130f; font: 400 15px/1 var(--sp-serif); cursor: pointer;
+}
+.p42-hw .p42-hwh {
+  padding: 28px 34px 6px; border: 1px solid #e3d5c9; border-bottom: 0; border-radius: 16px 16px 0 0;
+  background: linear-gradient(180deg, #fbf9f5, #fff);
+}
+.p42-hw h3.p42-hwt { margin: 0; font: 400 30px/1 var(--sp-type) !important; letter-spacing: 0 !important; text-transform: none !important; color: #1c130f !important; }
+.p42-hw .p42-hwh p { margin: 8px 0 0; max-width: 680px; font: 400 16.5px/1.5 var(--sp-serif); color: rgba(28, 19, 15, 0.7); }
+.p42-hw .p42-hws {
+  position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: 40px; align-items: start;
+  padding: 26px 30px 10px; border-left: 1px solid #e3d5c9; border-right: 1px solid #e3d5c9;
+}
+.p42-hw .p42-hw-route {
+  position: absolute; left: 30px; right: 30px; top: 178px; height: 0; border-top: 2px dashed rgba(45, 58, 80, 0.35);
+  transform-origin: left center;
+}
+.p42-hw .p42-hwb { position: relative; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.p42-hw .p42-hwa { height: 150px; display: grid; place-items: center; padding: 12px; box-sizing: border-box; }
+.p42-hw .p42-hw-svg { width: 100%; height: 136px; max-width: 190px; overflow: visible; }
+.p42-hw .p42-hw-tx { font-family: var(--sp-type); }
+.p42-hw .p42-hw-tn { font-family: var(--sp-serif); }
+.p42-hw .p42-hp { transform-box: fill-box; transform-origin: center bottom; }
+.p42-hw b.p42-hwbt { display: flex; align-items: center; gap: 8px; margin-top: 6px; font: 400 18px/1.25 var(--sp-type); color: #1c130f; }
+.p42-hw .p42-hwbt u {
+  flex: none; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; text-decoration: none;
+  background: #2d3a50; color: #fff; font: 600 11px/1 var(--sp-serif); box-shadow: 0 0 0 6px #fff;
+}
+.p42-hw .p42-hwb > span { font: 400 14.5px/1.45 var(--sp-serif); color: rgba(28, 19, 15, 0.68); }
+.p42-hw .p42-hwf {
+  display: flex; align-items: center; gap: 18px; padding: 16px 30px 22px;
+  border: 1px solid #e3d5c9; border-top: 0; border-radius: 0 0 16px 16px;
+}
+.p42-hw .p42-hwl { padding: 0; border: 0; background: none; font: 400 15px var(--sp-serif); color: #1c130f; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; white-space: nowrap; }
+.p42-hw .p42-hwl[data-pk42="hw-again"] { margin-right: auto; }
+.p42-hw .p42-hwfn { font-style: italic; color: #9b4a57; }
+.p42-hw .p42-hb1 { height: 42px; padding: 0 22px; border: 0; border-radius: 8px; background: #2d3a50; color: #fff; font: 600 16px var(--sp-serif); white-space: nowrap; cursor: pointer; box-shadow: 0 2px 6px -2px rgba(28, 19, 15, 0.35); }
+.p42-hw .p42-hb1:hover { background: #1c130f; }
+.p42-hw :is(.p42-hb1, .p42-hwx, .p42-hwl):focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
+@media (max-width: 1400px) {
+  .p42-hw .p42-hws { column-gap: 26px; padding: 22px 22px 8px; }
+  .p42-hw .p42-hw-route { left: 22px; right: 22px; }
+}
+
+/* the sequence (~12s): the route draws left to right; each station fades and rises at its own `--at`; the pieces in
+   its drawing settle at their own `--d`. Ease-out, no bounce. */
+@media (prefers-reduced-motion: no-preference) {
+  .p42-hw .p42-hw-route { animation: p42route 10.2s .3s cubic-bezier(.25, .6, .35, 1) both; }
+  .p42-hw .p42-hwb { animation: p42rise .9s var(--at, 0s) ease-out both; }
+  .p42-hw .p42-hp { animation: p42settle .9s var(--d, 0s) cubic-bezier(.2, .8, .3, 1) both; }
+}
+@keyframes p42route { from { transform: scaleX(0); } to { transform: none; } }
+@keyframes p42rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes p42settle { from { opacity: 0; transform: translateY(8px) scale(.94); } to { opacity: 1; transform: none; } }

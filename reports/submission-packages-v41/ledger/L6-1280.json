@@ -1,24 +1,6 @@
 [
  {
   "lock": "L6-1280",
-  "where": "builder: present",
-  "ok": true,
-  "detail": "missing"
- },
- {
-  "lock": "L6-1280",
-  "where": "builder: a 7 ±1 white rim",
-  "ok": true,
-  "detail": "7,7,7,7 rgb(255, 255, 255)"
- },
- {
-  "lock": "L6-1280",
-  "where": "builder: a 1px rgb(227,213,201) frame",
-  "ok": true,
-  "detail": "1px rgb(227, 213, 201)"
- },
- {
-  "lock": "L6-1280",
   "where": "totals: present",
   "ok": true,
   "detail": "missing"
@@ -160,29 +142,5 @@
   "where": "tpc: its band",
   "ok": true,
   "detail": "rgb(235, 231, 225) (want rgb(235, 231, 225))"
- },
- {
-  "lock": "L6-1280",
-  "where": "pk40-std: the stripe is its colour, 5px",
-  "ok": true,
-  "detail": "rgb(88, 58, 90) 0px 5px 0px 0px inset"
- },
- {
-  "lock": "L6-1280",
-  "where": "pk40-std: the band is an 11% wash of it",
-  "ok": true,
-  "detail": "color(srgb 0.927961 0.91502 0.928824) / color(srgb 0.927961 0.91502 0.928824)"
- },
- {
-  "lock": "L6-1280",
-  "where": "pk40-ready: the stripe is its colour, 5px",
-  "ok": true,
-  "detail": "rgb(46, 86, 65) 0px 5px 0px 0px inset"
- },
- {
-  "lock": "L6-1280",
-  "where": "pk40-ready: the band is an 11% wash of it",
-  "ok": true,
-  "detail": "color(srgb 0.909843 0.927098 0.918039) / color(srgb 0.909843 0.927098 0.918039)"
  }
 ]

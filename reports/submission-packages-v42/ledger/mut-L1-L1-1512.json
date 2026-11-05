@@ -1,0 +1,116 @@
+[
+ {
+  "lock": "L1-1512",
+  "where": "population: the tiles",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "page: no [data-pk41=\"rail\"]",
+  "ok": true,
+  "detail": "0 in the DOM"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "page: no [data-pk41=\"batch\"]",
+  "ok": false,
+  "detail": "1 in the DOM"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "page: no [data-pk41-row]",
+  "ok": true,
+  "detail": "0 in the DOM"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "page: no [data-pk41=\"batch-change\"]",
+  "ok": true,
+  "detail": "0 in the DOM"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "page: no [data-pk41=\"batch-picker\"]",
+  "ok": true,
+  "detail": "0 in the DOM"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "page: no [data-pk39=\"dlg-cols\"]",
+  "ok": true,
+  "detail": "0 in the DOM"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "no horizontal overflow (scroller)",
+  "ok": true,
+  "detail": "1256 > 1256"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "no horizontal overflow (document)",
+  "ok": true,
+  "detail": "1512 > 1512"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "New drawer: present",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "New drawer: no swatch",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "New drawer: no Colour field",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "Details drawer: present",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "Details drawer: no swatch",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "Details drawer: no Colour field",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "icon popover: present",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "icon popover: no swatch",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "icon popover: no Colour field",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "icon popover: the twelve icons",
+  "ok": true,
+  "detail": "12"
+ }
+]

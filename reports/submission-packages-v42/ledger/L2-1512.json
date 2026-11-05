@@ -1,0 +1,140 @@
+[
+ {
+  "lock": "L2-1512",
+  "where": "population: the row, the header and the builder",
+  "ok": true,
+  "detail": "[{\"t\":323.875,\"b\":456.875},295.875,468.875]"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "the row is under the header",
+  "ok": true,
+  "detail": "323.875 / 295.875"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "the row is above the builder",
+  "ok": true,
+  "detail": "456.875 / 468.875"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "the row is outside the builder's box",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "one tile per live package, in the data's order",
+  "ok": true,
+  "detail": "[\"pk40-draft\",\"pk40-ready\",\"pk40-std2\",\"pk40-std\"] / [\"pk40-draft\",\"pk40-ready\",\"pk40-std2\",\"pk40-std\"]"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "the retired package is absent",
+  "ok": true,
+  "detail": "[\"pk40-draft\",\"pk40-ready\",\"pk40-std2\",\"pk40-std\"]"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "each tile ≤ 300 wide",
+  "ok": true,
+  "detail": "[234.140625,234.15625,234.15625,234.15625]"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "the tiles' widths are equal ±1",
+  "ok": true,
+  "detail": "[234.140625,234.15625,234.15625,234.15625]"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "pk40-std (out): its foot",
+  "ok": true,
+  "detail": "40% asked for more"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "pk40-std2 (out): its foot",
+  "ok": true,
+  "detail": "2 of 4 answers in"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "pk40-ready: Ready to send",
+  "ok": true,
+  "detail": "Ready to send"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "pk40-draft: 0 of 2 pieces in",
+  "ok": true,
+  "detail": "0 of 2 pieces in"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "exactly one Current batch",
+  "ok": true,
+  "detail": "[\"pk40-std\"]"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "…and it is the active package",
+  "ok": true,
+  "detail": "pk40-std / pk40-std"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "Retired (1)",
+  "ok": true,
+  "detail": "Retired (1)"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "shown: the retired tile at 65%",
+  "ok": true,
+  "detail": "0.65"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "hidden again",
+  "ok": true,
+  "detail": "still there"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "population: the page was scrolled",
+  "ok": true,
+  "detail": "60"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "a click does not move the page",
+  "ok": true,
+  "detail": "60 → 60"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "…and opens that package",
+  "ok": true,
+  "detail": "not open"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "the open tile computes the 2px navy ring",
+  "ok": true,
+  "detail": "rgb(45, 58, 80) 0px 0px 0px 2px, rgba(28, 19, 15, 0.5) 0px 14px 26px -18px"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "no retired: no Retired link",
+  "ok": true,
+  "detail": "present"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "one package: one tile",
+  "ok": true,
+  "detail": "1"
+ }
+]

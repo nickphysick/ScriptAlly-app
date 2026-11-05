@@ -135,11 +135,11 @@
 
 /* ══ shared small parts: the package tile, the piece discs, the peach "Open →", the link ══ */
 @media (min-width: 768px) {
-  .p41 .p41-ic, .p41-bt-pop .p41-ic {
+  .p41 .p41-ic {
     flex: none; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 9px;
-    background: var(--pc, #1d4b63); color: #fff;
+    background: var(--pc, #2d3a50); color: #f4eee5; /* v42 E: navy, cream glyph, for every package */
   }
-  .p41 .p41-ic .p41-pic, .p41-bt-pop .p41-ic .p41-pic { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; }
+  .p41 .p41-ic .p41-pic { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; }
   .p41 .p41-t { flex: none; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 6px; font: 600 11px/1 var(--sp-serif); font-style: normal; }
   .p41 .p41-t svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; }
   .p41 .p41-t-v { border-radius: 50%; background: #2d3a50; color: #fff; }
@@ -156,118 +156,7 @@
   .p41 :is(.p41-go, .p41-lnk):focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; border-radius: 4px; }
 }
 
-/* ══ C · THE CURRENT BATCH, AS THE HEADER'S LOWER STRIP (ref `.k4-hero.wbt .k4-bt`; screens 01, 15, 16) ═══════════════
-   Flush to the panel's sides and bottom (negative margins equal to the panel's own padding), 18 under the subheader,
-   ~54 tall, rgba(0,0,0,.16) on the navy under a 1px cream-10% rule, the bottom corners 20. Cream on navy throughout.
-   The label shortens to "Going out with" at ≤1300; the synopsis chip goes at ≤1400. With no package the strip is not
-   drawn and the panel keeps its bottom padding (`.p41-hd:not(.p41-wbt)`). */
-@media (min-width: 768px) {
-  .p41 .p41-hd.p41-wbt { flex-wrap: wrap; row-gap: 0; padding-bottom: 0; }
-  .p41 .p41-hd.p41-wbt > .p41-hd-t { flex: 1 1 0; }
-  .p41 .p41-hd .p41-bt {
-    position: relative; box-sizing: border-box; display: flex; align-items: center; gap: 16px;
-    flex: 0 0 calc(100% + 52px); min-height: 54px; margin: 18px -22px 0 -30px; padding: 8px 22px 8px 30px;
-    border-radius: 0 0 20px 20px; background: rgba(0, 0, 0, 0.16); border-top: 1px solid rgba(244, 238, 229, 0.1); box-shadow: none;
-  }
-  .p41 .p41-bt-k { flex: none; font: italic 400 15.5px var(--sp-serif); color: rgba(244, 238, 229, 0.62); }
-  .p41 .p41-bt-k > span { font: inherit; }
-  .p41 .p41-bt-k .p41-bt-ks { display: none; }
-  .p41 .p41-bt-n { flex: none; display: inline-flex; align-items: center; gap: 10px; }
-  .p41 .p41-bt-n .p41-ic { width: 30px; height: 30px; border-radius: 7px; box-shadow: 0 0 0 1.5px rgba(244, 238, 229, 0.45); }
-  .p41 .p41-bt-n .p41-ic .p41-pic { width: 15px; height: 15px; }
-  .p41 .p41-bt-n b { font: 400 20px/1.3 var(--sp-type); color: #fffaf3; }
-  .p41 .p41-bt-p { display: flex; gap: 6px; min-width: 0; overflow: hidden; }
-  .p41 .p41-bt-p > span {
-    flex: none; display: inline-flex; align-items: center; gap: 7px; height: 30px; padding: 0 11px 0 4px; border-radius: 15px;
-    background: rgba(244, 238, 229, 0.1); font: 400 14.5px var(--sp-serif); color: #f4eee5; white-space: nowrap;
-  }
-  .p41 .p41-bt-p .p41-t-v { background: #f4eee5; color: #2d3a50; }
-  /* a missing piece is dashed (the pack's word; the ref draws a solid hairline) */
-  .p41 .p41-bt-p > span.p41-no { box-sizing: border-box; background: none; border: 1px dashed rgba(244, 238, 229, 0.3); color: rgba(244, 238, 229, 0.55); font-style: italic; }
-  .p41 .p41-bt-p > span.p41-no .p41-t { opacity: .55; }
-  .p41 .p41-bt-e { flex: 1; min-width: 0; font: 400 15.5px var(--sp-serif); color: #f4eee5; }
-  .p41 .p41-bt-a { margin-left: auto; flex: none; display: flex; align-items: center; gap: 14px; }
-  .p41 .p41-bt-a .p41-lnk { font-style: normal; color: #f4eee5; text-decoration-color: rgba(244, 238, 229, 0.55); }
-  .p41 .p41-bt-a .p41-lnk:focus-visible, .p41 .p41-bt-a .p41-go:focus-visible { outline-color: #f4eee5; }
-  /* the picker: under "Change", right-aligned to the row */
-  .p41-bt-pop {
-    position: absolute; z-index: 30; right: 12px; top: calc(100% + 8px); box-sizing: border-box; width: 340px; padding: 10px;
-    border-radius: 12px; background: #fff; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1), 0 20px 40px -16px rgba(28, 19, 15, 0.4);
-  }
-  .p41-bt-pop .p41-bt-pk { margin: 2px 6px 8px; font: 500 9.5px var(--font-mono, monospace); letter-spacing: .14em; text-transform: uppercase; color: rgba(28, 19, 15, 0.55); }
-  .p41-bt-pop .p41-bt-o {
-    width: 100%; display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px;
-    border: 0; border-radius: 9px; background: none; text-align: left; cursor: pointer;
-  }
-  .p41-bt-pop .p41-bt-o:hover, .p41-bt-pop .p41-bt-o:focus-visible { background: #f6f2ec; outline: 0; }
-  .p41-bt-pop .p41-bt-o.p41-on { background: #f3f5f8; box-shadow: inset 3px 0 0 #2d3a50; }
-  .p41-bt-pop .p41-ic { width: 30px; height: 30px; border-radius: 7px; }
-  .p41-bt-pop .p41-ic .p41-pic { width: 15px; height: 15px; }
-  .p41-bt-pop .p41-bt-o b { display: block; font: 400 17px var(--sp-type); color: #1c130f; }
-  .p41-bt-pop .p41-bt-o small { display: block; font: italic 13.5px var(--sp-serif); color: rgba(28, 19, 15, 0.6); }
-  .p41-bt-pop .p41-bt-o em { font: 500 9.5px var(--font-mono, monospace); font-style: normal; letter-spacing: .14em; text-transform: uppercase; padding: 3px 7px; border-radius: 5px; background: #2d3a50; color: #fff; }
-  .p41-bt-pop .p41-bt-none { margin: 4px 6px 6px; font: italic 14.5px/1.45 var(--sp-serif); color: rgba(28, 19, 15, 0.6); }
-}
-@media (min-width: 768px) and (max-width: 1400px) {
-  .p41 .p41-hd .p41-bt { flex-basis: calc(100% + 42px); margin: 18px -18px 0 -24px; padding: 8px 18px 8px 24px; }
-  .p41 .p41-bt-k { font-size: 14.5px; }
-  .p41 .p41-bt-p > .p41-bt-syn { display: none; }
-}
-@media (min-width: 768px) and (max-width: 1300px) {
-  .p41 .p41-bt-k:not(.p41-bt-kn) .p41-bt-kl { display: none; }
-  .p41 .p41-bt-k:not(.p41-bt-kn) .p41-bt-ks { display: inline; }
-}
-
-/* ══ D · THE WORKSPACE AND THE PACKAGES RAIL (ref `.lay-b .k4-ws`, `.k4-list`, `.k4-rr2`; screens 01–05, 16) ═══════════
-   300 | 1fr, 20 apart (262 and 16 at ≤1400), aligned to the top, 28 under the header. The rail is sticky at 14 in the
-   page's scroller, and ⚠️ ITS HEIGHT CAP IS THE SCROLLPORT, NOT THE VIEWPORT: the ref's `100vh − 92px` is its own
-   frame's arithmetic; here the scroller starts under the shell's bar, so the cap is the grid's published scrollport
-   (`--wpg-port-h`) less 14 above and 14 below. Its rows scroll inside it. */
-@media (min-width: 768px) {
-  .p41 .p41-ws { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 20px; align-items: start; }
-  .p41 .p41-ws > .p41-build { min-width: 0; }
-  .p41 .p41-rail {
-    position: sticky; top: 14px; box-sizing: border-box; display: flex; flex-direction: column;
-    max-height: calc(var(--wpg-port-h, 100vh) - 28px); border-radius: 20px; background: #fff; overflow: hidden;
-    box-shadow: 0 1px 2px rgba(28, 19, 15, 0.08), 0 22px 40px -22px rgba(28, 19, 15, 0.32);
-  }
-  .p41 .p41-rail-h { flex: none; padding: 14px 18px 12px; background: #fbf9f6; border-bottom: 1px solid rgba(28, 19, 15, 0.1); }
-  .p41 .p41-rail-h h2.p41-rail-t { display: flex; align-items: center; gap: 8px; margin: 0; font: 400 19px/1.3 var(--sp-type) !important; letter-spacing: 0 !important; text-transform: none !important; color: #1c130f !important; }
-  .p41 .p41-rail-t i { font: 400 14px var(--sp-type); font-style: normal; color: rgba(28, 19, 15, 0.45); }
-  .p41 .p41-rail-rows { flex: 1; min-height: 0; overflow: auto; }
-  .p41 .p41-rg {
-    box-sizing: border-box; display: flex; align-items: center; gap: 8px; width: 100%; padding: 14px 18px 6px; border: 0; background: none;
-    font: 400 13.5px var(--sp-type); color: rgba(28, 19, 15, 0.55); text-align: left;
-  }
-  .p41 .p41-rg i { font: inherit; font-style: normal; opacity: .7; }
-  .p41 .p41-rgt { cursor: pointer; margin-top: 4px; padding-top: 12px; padding-bottom: 10px; border-top: 1px solid rgba(28, 19, 15, 0.1); }
-  .p41 .p41-rgt em { margin-left: auto; font: italic 13px var(--sp-serif); text-decoration: underline; text-underline-offset: 2px; }
-  .p41 .p41-rgt:focus-visible { outline: 2px solid #2d3a50; outline-offset: -2px; }
-  .p41 .p41-rr { display: flex; align-items: center; gap: 12px; padding: 10px 18px 10px 15px; border-left: 3px solid transparent; cursor: pointer; }
-  .p41 .p41-rr:hover { background: #fcfaf7; }
-  .p41 .p41-rr.p41-on { background: color-mix(in srgb, var(--pc, #1d4b63) 9%, #fff); border-left-color: var(--pc, #1d4b63); }
-  .p41 .p41-rr.p41-ret { opacity: .65; }
-  .p41 .p41-rr:focus-visible { outline: 2px solid #2d3a50; outline-offset: -2px; }
-  .p41 .p41-rr .p41-ic { width: 34px; height: 34px; border-radius: 8px; }
-  .p41 .p41-rr .p41-ic .p41-pic { width: 17px; height: 17px; }
-  .p41 .p41-rr > span { min-width: 0; }
-  .p41 .p41-rr b { display: flex; align-items: center; gap: 7px; font: 400 16.5px/1.25 var(--sp-type); color: #1c130f; }
-  .p41 .p41-act { flex: none; padding: 3px 7px; border-radius: 5px; background: #2d3a50; color: #fff; font: 500 9.5px/1.2 var(--font-mono, monospace); font-style: normal; letter-spacing: .14em; text-transform: uppercase; }
-  .p41 .p41-rr b .p41-act { font-size: 8.5px; padding: 2px 5px; }
-  .p41 .p41-rr small { display: block; margin-top: 3px; font: 400 13.5px var(--sp-serif); color: rgba(28, 19, 15, 0.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .p41 .p41-rr small b { display: inline; font: 600 13.5px var(--sp-serif); color: #1c130f; }
-  .p41 .p41-rr small em { font-style: italic; color: #9b4a57; }
-  .p41 .p41-rail-empty { margin: 0; padding: 16px 18px; font: italic 14.5px var(--sp-serif); color: rgba(28, 19, 15, 0.6); }
-  .p41 .p41-rail-new {
-    flex: none; display: flex; align-items: center; width: 100%; height: 50px; margin-top: 6px; padding: 0 18px; border: 0;
-    border-top: 1px solid rgba(28, 19, 15, 0.1); background: none; font: 600 15px var(--sp-serif); color: #2d3a50; cursor: pointer;
-  }
-  .p41 .p41-rail-new:hover { background: #fcfaf7; }
-  .p41 .p41-rail-new:focus-visible { outline: 2px solid #2d3a50; outline-offset: -2px; }
-}
-@media (min-width: 768px) and (max-width: 1400px) {
-  .p41 .p41-ws { grid-template-columns: 262px minmax(0, 1fr); gap: 16px; }
-}
+/* ══ v42 A: the current batch strip (C) and the packages rail (D) are retired, rule and element (see pk42.css). ══ */
 
 /* ⚠️ brand.tsx names `p, span, div, button, label` as the body sans on every route (0-0-1, no !important). v39.1 answered
    it with a forced-serif rule on `.p9-pb-build *`, which v41 leaves; so the page hands those elements the face of their
@@ -277,7 +166,7 @@
 }
 /* ⚠️ brand.tsx names bare `span`s as the sans face on every route, so the spans inside a styled run hand the face back */
 @media (min-width: 768px) {
-  .p41 .p41-bt-k > span, .p41-fb .p41-fb-tx > span { font: inherit; }
+  .p41-fb .p41-fb-tx > span { font: inherit; }
 }
 
 /* ══ F · THE SHARED FRAME (Dashboard v2's card, `dash2Frame.css` on the dev line; built here page-locally because that
@@ -300,17 +189,17 @@
   .p41 .p41-band-st { background: #ebe7e1; }
 }
 
-/* ══ F · THE BUILDER (ref `.k4-bld`, `.k4-bh`, `.k4-bb`; screens 02–04) ══════════════════════════════════════════════════
-   The frame with a flat navy band (the package's colour now lives only on its tile), then the steps and the preview
-   well 28 apart, padded 24. One column at ≤1400 (the ref's `.k4-bb`), where the preview is no longer sticky. */
+/* ══ F · THE BUILDER (v42 ref `.k4-ws.boxed`, `.k4-bh`, `.k4-bb`; screens 02, 04, 05). v42 D: the container is
+   pk42.css's `.p42-bw`; here, the heading row (no band of its own), the sent note in blush, then the steps (a sage band)
+   BESIDE the preview (a sand band): 1fr + 480 with 22 between at >1400, two equal columns 16 apart at ≤1400. ══ */
 @media (min-width: 768px) {
   .p41 .p41-build { margin: 0; }
   .p41 .p41-bld { margin: 0 0 0; }
   .p41 .p41-bld .p93-bh {
     display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto auto; gap: 16px; align-items: center;
-    margin: 0; border-radius: 0;
+    margin: 0 0 22px; border-radius: 0;
   }
-  .p41 .p41-bld .p93-bh-ic { width: 44px; height: 44px; border-radius: 10px; background: var(--pc, #1d4b63); color: #fff; }
+  .p41 .p41-bld .p93-bh-ic { width: 48px; height: 48px; border-radius: 11px; background: #2d3a50; color: #f4eee5; }
   .p41 .p41-bld .p93-bh-ic .p9-pic { width: 22px; height: 22px; }
   .p41 .p41-bld .p93-bh-t small { margin-top: 2px; font: italic 15px/1.35 var(--sp-serif); }
   .p41 .p41-bld .p93-bh-act .p9-po-act {
@@ -322,24 +211,25 @@
   .p41 .p41-bld .p93-bh-f { width: 38px; height: 38px; }
   .p41 .p41-bld .p93-bh-f svg { width: 17px; height: 17px; stroke-width: 1.8; }
   /* the body: steps and the preview well */
-  .p41 .p41-bld .p93-b { grid-template-columns: minmax(0, 1fr); gap: 20px; padding: 24px; align-items: start; }
+  .p41 .p41-bld .p93-b { grid-template-columns: minmax(0, 1fr) 480px; gap: 22px; padding: 0; align-items: start; }
   .p41 .p41-bld .p41-span { grid-column: 1 / -1; }
   .p41 .p41-bld .p9-lc-from { margin: 0; }
-  .p41 .p41-bld .p93-lock { align-items: center; gap: 12px; margin: 0; padding: 12px 16px; border-radius: 10px; background: #f5efe7; font: 15.5px/1.45 var(--sp-serif); color: rgba(28, 19, 15, 0.8); }
+  .p41 .p41-bld .p93-lock { align-items: center; gap: 12px; margin: 0; padding: 12px 16px; border-radius: 12px; background: #f3e2dc; font: 15.5px/1.45 var(--sp-serif); color: rgba(28, 19, 15, 0.8); }
   .p41 .p41-bld .p93-lock > svg { width: 17px; height: 17px; margin: 0; }
   /* the sent note reads as one paragraph, its links after it */
   .p41 .p41-bld .p93-lock > span { flex: 1; min-width: 0; display: block; }
   .p41 .p41-bld .p93-lock-a { display: inline-flex; margin-left: 12px; }
   .p41 .p41-bld .p93-lock .p93-lnk { font: 600 15px var(--sp-serif); color: #1c130f; }
   .p41 .p41-bld .p93-lock .p93-lnk.p93-q { color: rgba(28, 19, 15, 0.58); font-weight: 400; }
-  /* the steps: hairline rows in one bordered block */
-  .p41 .p41-bld .p93-steps { gap: 0; border-radius: 12px; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1); overflow: hidden; }
+  /* the steps: one white card (radius 18, a #e3d5c9 hairline) under its sage band, hairline rows */
+  .p41 .p41-bld .p93-col { border-radius: 18px; background: #fff; box-shadow: 0 0 0 1px #e3d5c9; overflow: hidden; }
+  .p41 .p41-bld .p93-steps { gap: 0; border-radius: 0; box-shadow: none; overflow: visible; }
   .p41 .p41-bld .p93-step { border-radius: 0; box-shadow: none; border-top: 1px solid rgba(28, 19, 15, 0.1); background: #fff; }
   .p41 .p41-bld .p93-step:first-child { border-top: 0; }
-  .p41 .p41-bld .p93-step.p93-open { box-shadow: none; background: #fcfaf7; }
+  .p41 .p41-bld .p93-step.p93-open { box-shadow: none; background: #f3f6f2; }
   .p41 .p41-bld .p93-sh { grid-template-columns: 30px minmax(0, 1fr) auto; gap: 14px; padding: 16px 18px; border-radius: 0; }
   .p41 .p41-bld button.p93-sh:hover { background: #fcfaf7; }
-  .p41 .p41-bld .p93-step.p93-open > .p93-sh { background: #fcfaf7; box-shadow: inset 3px 0 0 #2d3a50; }
+  .p41 .p41-bld .p93-step.p93-open > .p93-sh { background: #f3f6f2; box-shadow: inset 4px 0 0 #4e6b58; }
   .p41 .p41-bld button.p93-sh:focus-visible { outline-color: #2d3a50; }
   .p41 .p41-bld .p93-st b { font: 600 17px/1.3 var(--sp-serif); }
   .p41 .p41-bld .p93-st small { margin-top: 2px; font: italic 14.5px/1.4 var(--sp-serif); color: rgba(28, 19, 15, 0.6); }
@@ -348,11 +238,11 @@
   .p41 .p41-bld .p93-sb { padding: 0 18px 16px 62px; }
   .p41 .p41-bld .p93-ch { background: #fff; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1); }
   .p41 .p41-bld .p93-ch:hover { background: #fff; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.25); }
-  .p41 .p41-bld .p93-ch.p93-sel { background: #fff; box-shadow: 0 0 0 2px #2d3a50; }
+  .p41 .p41-bld .p93-ch.p93-sel { background: #f3f6f2; box-shadow: 0 0 0 2px #4e6b58; }
   .p41 .p41-bld .p93-ch-b { grid-template-columns: 32px minmax(0, 1fr) 20px; gap: 12px; padding: 10px 12px; padding-right: 48px; }
   .p41 .p41-bld .p93-ch-t b { font: 600 15.5px/1.3 var(--sp-serif); }
   .p41 .p41-bld .p93-ch-t small { font: italic 13.5px/1.35 var(--sp-serif); color: rgba(28, 19, 15, 0.6); }
-  .p41 .p41-bld .p93-sel .p93-r { box-shadow: inset 0 0 0 5px #2d3a50; }
+  .p41 .p41-bld .p93-sel .p93-r { box-shadow: inset 0 0 0 5px #4e6b58; }
   .p41 .p41-bld .p93-tic { width: 32px; height: 32px; }
   .p41 .p41-bld .p93-tic.p93-t-v { background: #2d3a50; }
   .p41 .p41-bld .p93-lnk { color: #2d3a50; font-size: 14.5px; }
@@ -361,12 +251,15 @@
   .p41 .p41-bld .p93-chip > button:first-child, .p41 .p41-bld .p93-chip > span { height: 32px; padding: 0 13px; font: 600 14px/32px var(--sp-serif); border-radius: 16px; }
   .p41 .p41-bld .p93-chip.p93-on { background: #2d3a50; }
   .p41 .p41-bld .p93-exts .p9-exa-b { height: 32px; border-radius: 16px; box-shadow: inset 0 0 0 1px rgba(45, 58, 80, 0.4); font: 600 14px var(--sp-serif); color: #2d3a50; }
-  /* the preview: a beige well holding the white email card */
-  .p41 .p41-bld .p93-pv { align-self: start; box-sizing: border-box; padding: 14px 16px 16px; border-radius: 14px; background: #f5efe7; }
-  .p41 .p41-bld .p93-pv .p93-pv-k { align-items: baseline; margin: 2px 4px 12px; }
+  /* the preview: a sand band over a #fbf6f0 well holding the white email card */
+  .p41 .p41-bld .p93-pv { align-self: start; box-sizing: border-box; padding: 0 0 16px; border-radius: 18px; background: #fbf6f0; overflow: hidden; }
+  .p41 .p41-bld .p93-pv .p93-pv-k {
+    align-items: baseline; justify-content: space-between; margin: 0; padding: 13px 20px;
+    background: #f4e6d6; border-bottom: 1px solid rgba(28, 19, 15, 0.07);
+  }
   .p41 .p41-bld .p93-pv .p93-pv-k > span:first-child { font: 400 19px/1.3 var(--sp-type) !important; letter-spacing: 0; text-transform: none; color: #1c130f; }
   .p41 .p41-bld .p93-pv .p93-pv-k > span:last-child { font: italic 400 14px var(--sp-serif) !important; letter-spacing: 0; text-transform: none; color: rgba(28, 19, 15, 0.6); }
-  .p41 .p41-bld .p93-mail { border-radius: 10px; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1); }
+  .p41 .p41-bld .p93-mail { margin: 16px 16px 0; border-radius: 10px; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1); }
   .p41 .p41-bld .p93-mail-h { padding: 12px 16px; font: 15px/1.45 var(--sp-serif); border-bottom-color: rgba(28, 19, 15, 0.1); }
   .p41 .p41-bld .p93-mail-h > div { grid-template-columns: 68px minmax(0, 1fr); }
   .p41 .p41-bld .p93-mail-h span, .p41 .p41-bld .p93-mail-h em { color: rgba(28, 19, 15, 0.45); }
@@ -378,7 +271,7 @@
   .p41 .p41-bld .p93-a.p93-gh { background: none; outline: 0; box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, 0.18); padding-left: 13px; color: rgba(28, 19, 15, 0.45); }
   .p41 .p41-bld .p93-mail .p93-hl { background: #eaf0f5 !important; box-shadow: 0 0 0 2px #2d3a50 !important; }
   /* the row under the preview never spills out of the well: it wraps, and its buttons are 42 tall */
-  .p41 .p41-bld .p93-pv-f { flex-wrap: wrap; row-gap: 10px; }
+  .p41 .p41-bld .p93-pv-f { flex-wrap: wrap; row-gap: 10px; margin-top: 14px; padding: 0 16px; }
   .p41 .p41-bld .p93-pv-b { flex-wrap: wrap; justify-content: flex-end; margin-left: auto; }
   .p41 .p41-bld .p93-btn { height: 42px; padding: 0 16px; font-size: 16px; }
   .p41 .p41-bld .p93-b1 { background: #2d3a50; }
@@ -390,14 +283,13 @@
 }
 
 /* ══ E · THE BUILDER IN THE WORKSPACE (ref `.lay-b .k4-bh`, `.lay-b .k4-bb`; screens 02–05) ══════════════════════════
-   Only the header is navy. The builder's band is the package's own colour, softly: a wash of it (11% on white) with a
-   5px stripe of the full colour along its top, ink text, padding 18 / 22. The tile has no ring; Active and Make active
-   are navy; the status pill and Figures are white with a hairline (the pill goes at ≤1400, where the rail row already
-   says it). Steps, then the preview UNDER them, one column; side by side from 1700. The preview is never sticky. */
+   Only the header is navy. v42 A/D: the builder's heading row has no colour of its own (the wash and the stripe are
+   retired; it sits on the container's white), ink text, padding 0 2 18. The tile has no ring; "Use for current batch"
+   is navy; the status pill and Figures are white with a hairline (the pill goes at ≤1400, as the ref's does). Steps
+   and the preview side by side (section F). The preview is never sticky. */
 @media (min-width: 768px) {
   .p41 .p41-bld .p93-bh {
-    padding: 18px 22px; color: #1c130f;
-    background: color-mix(in srgb, var(--pc, #1d4b63) 11%, #fff); box-shadow: inset 0 5px 0 var(--pc, #1d4b63);
+    padding: 0 2px 18px; color: #1c130f; background: none; box-shadow: none;
   }
   .p41 .p41-bld .p93-bh-ic { box-shadow: none; }
   .p41 .p41-bld .p93-bh-ic:focus-visible { outline-color: #2d3a50; }
@@ -416,12 +308,11 @@
   .p41 .p41-bld .p93-bh-f:hover { background: #faf7f2; }
   .p41 .p41-bld .p93-pv { position: static; }
 }
-@media (min-width: 1700px) {
-  .p41 .p41-bld .p93-b { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
-}
 @media (min-width: 768px) and (max-width: 1400px) {
   .p41 .p41-bld .p93-bh-t h3, .p41 .p41-bld .p93-bh-t h3 .p9-po-nm { font-size: 23px !important; }
+  /* the ref's ≤1400 heading drops the status pill (the open tile's foot says where it stands) */
   .p41 .p41-bld .p93-bh-s { display: none; }
+  .p41 .p41-bld .p93-b { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
 }
 
 /* ══ F · RESULTS (ref `.k4-res`; screens 05, 06) ═══════════════════════════════════════════════════════════════════════ */
@@ -527,93 +418,4 @@
   }
 }
 
-/* ══ H · HOW IT WORKS (ref `.k4-hw`; screens 08–12): portalled, so every rule hangs off `.p41-hw` and states its faces ══ */
-.p41-hw { position: fixed; inset: 0; z-index: 430; display: grid; place-items: center; background: rgba(27, 36, 51, 0.5); font-family: var(--sp-serif); color: #1c130f; }
-.p41-hw:focus { outline: 0; }
-.p41-hw :where(p, span, div, button, label) { font-family: inherit; }
-.p41-hw .p41-hwc { position: relative; box-sizing: border-box; width: 620px; max-width: calc(100vw - 32px); padding: 7px; border-radius: 20px; background: #fff; box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.5); }
-.p41-hw .p41-hwx { position: absolute; top: 16px; right: 16px; z-index: 2; width: 34px; height: 34px; padding: 0; border: 0; border-radius: 50%; background: rgba(255, 255, 255, 0.85); color: #1c130f; font: 400 15px/1 var(--sp-serif); cursor: pointer; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15); }
-.p41-hw .p41-hwm { box-sizing: border-box; height: 250px; display: grid; place-items: center; overflow: hidden; border: 1px solid #e3d5c9; border-bottom: 0; border-radius: 14px 14px 0 0; background: linear-gradient(180deg, #fbf9f5, #eeebe5); }
-.p41-hw .p41-hwp { width: 500px; max-width: calc(100% - 40px); display: flex; flex-direction: column; gap: 10px; animation: p41hwin .35s ease-out; }
-@keyframes p41hwin { from { opacity: 0; transform: translateY(8px); } }
-.p41-hw .p41-hwb { padding: 22px 30px 6px; border-left: 1px solid #e3d5c9; border-right: 1px solid #e3d5c9; }
-.p41-hw .p41-hwn { font: italic 14px var(--sp-serif); color: rgba(28, 19, 15, 0.55); }
-.p41-hw h3.p41-hwt { margin: 4px 0 8px; font: 400 26px/1.3 var(--sp-type) !important; letter-spacing: 0 !important; text-transform: none !important; color: #1c130f !important; }
-.p41-hw .p41-hwb p { margin: 0; min-height: 104px; font: 400 16.5px/1.55 var(--sp-serif); color: rgba(28, 19, 15, 0.75); }
-.p41-hw .p41-hwf { display: flex; align-items: center; gap: 10px; padding: 16px 30px 22px; border: 1px solid #e3d5c9; border-top: 0; border-radius: 0 0 14px 14px; }
-.p41-hw .p41-hwd { display: flex; gap: 7px; margin-right: auto; }
-.p41-hw .p41-hwd button { width: 9px; height: 9px; padding: 0; border: 0; border-radius: 5px; background: #ddd5ca; cursor: pointer; transition: width .2s; }
-.p41-hw .p41-hwd button[aria-current="step"] { width: 24px; background: #2d3a50; }
-.p41-hw :is(.p41-hb1, .p41-hb2) { height: 42px; padding: 0 20px; border: 0; border-radius: 8px; font: 600 16px var(--sp-serif); white-space: nowrap; cursor: pointer; }
-.p41-hw .p41-hb1 { background: #2d3a50; color: #fff; box-shadow: 0 2px 6px -2px rgba(28, 19, 15, 0.35); }
-.p41-hw .p41-hb1:hover { background: #1c130f; }
-.p41-hw .p41-hb2 { background: #fff; color: #1c130f; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.2); }
-.p41-hw .p41-hb2:disabled { opacity: .4; cursor: default; }
-.p41-hw :is(.p41-hb1, .p41-hb2, .p41-hwx, .p41-hwd button, .p41-hwfn):focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
-.p41-hw .p41-hwfn { display: block; margin: 10px auto 6px; padding: 0; border: 0; background: none; font: italic 14.5px var(--sp-serif); color: #9b4a57; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
-/* the miniatures (the page as it is now, drawn small) */
-.p41-hw .p41hw-ic { flex: none; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 6px; background: var(--c); color: #fff; }
-.p41-hw .p41hw-ic svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; }
-.p41-hw .p41hw-hd { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-radius: 12px; background: #2d3a50; color: #fffaf3; }
-.p41-hw .p41hw-hd b { margin-right: auto; font: 400 19px var(--sp-type); }
-.p41-hw .p41hw-hd.p41hw-sm { padding: 9px 14px; }
-.p41-hw .p41hw-hd.p41hw-sm b { font-size: 16px; }
-.p41-hw :is(.p41hw-b1, .p41hw-b2) { height: 26px; padding: 0 11px; border-radius: 13px; font: 600 12px/26px var(--sp-serif); }
-.p41-hw .p41hw-b1 { background: #f4eee5; color: #1c130f; }
-.p41-hw .p41hw-b2 { box-shadow: inset 0 0 0 1px rgba(244, 238, 229, 0.3); }
-.p41-hw .p41hw-pulse { animation: p41hwpls 1.6s ease-in-out infinite; }
-@keyframes p41hwpls { 50% { box-shadow: 0 0 0 5px rgba(244, 238, 229, 0.25); } }
-.p41-hw .p41hw-drw { align-self: flex-end; width: 270px; margin-top: -2px; padding: 6px; border-radius: 12px; background: #fbf9f5; box-shadow: 0 14px 30px -14px rgba(28, 19, 15, 0.45); display: flex; flex-direction: column; gap: 8px; }
-.p41-hw .p41hw-dh { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; background: #f4eee5; }
-.p41-hw .p41hw-dh i { width: 16px; height: 22px; border-radius: 3px; background: #b98f74; }
-.p41-hw .p41hw-dh b { font: 400 14px var(--sp-type); }
-.p41-hw .p41hw-in { height: 28px; padding: 0 10px; border-radius: 6px; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.18); font: 13px/28px var(--sp-serif); }
-.p41-hw .p41hw-sw { display: flex; gap: 7px; padding: 0 4px 4px; }
-.p41-hw .p41hw-sw i { width: 20px; height: 20px; border-radius: 50%; }
-.p41-hw .p41hw-sw i.p41hw-on { box-shadow: 0 0 0 2px #fbf9f5, 0 0 0 3.5px #2c6782; }
-.p41-hw .p41hw-two { display: grid; grid-template-columns: 1fr 1.1fr; gap: 12px; }
-.p41-hw .p41hw-stp { border-radius: 10px; background: #fff; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1); }
-.p41-hw .p41hw-stp div { display: flex; align-items: center; gap: 9px; padding: 11px 12px; border-top: 1px solid rgba(28, 19, 15, 0.08); font: 600 13.5px var(--sp-serif); }
-.p41-hw .p41hw-stp div:first-child { border-top: 0; }
-.p41-hw .p41hw-stp i { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font: 600 10px var(--sp-serif); font-style: normal; box-shadow: inset 0 0 0 1.25px rgba(28, 19, 15, 0.25); }
-.p41-hw .p41hw-stp .p41hw-ok i { background: #3e7d5a; color: #fff; box-shadow: none; }
-.p41-hw .p41hw-mail { padding: 10px 12px; border-radius: 10px; background: #fff; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1), 0 0 0 8px #f5efe7; }
-.p41-hw .p41hw-mh { padding-bottom: 6px; border-bottom: 1px solid rgba(28, 19, 15, 0.08); font: 12px var(--sp-serif); color: rgba(28, 19, 15, 0.5); }
-.p41-hw .p41hw-mh b { font-weight: 400; color: #1c130f; }
-.p41-hw .p41hw-mail p { margin: 7px 0 6px; font: 12.5px var(--sp-serif); }
-.p41-hw .p41hw-mail u { display: block; height: 5px; margin: 5px 0; border-radius: 3px; background: #efe9e1; }
-.p41-hw .p41hw-at { display: flex; gap: 5px; margin-top: 8px; }
-.p41-hw .p41hw-at span { padding: 4px 7px; border-radius: 6px; background: #f5efe7; font: 600 11px var(--sp-serif); }
-.p41-hw .p41hw-at .p41hw-gh { background: none; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.15); font-weight: 400; font-style: italic; color: rgba(28, 19, 15, 0.5); }
-.p41-hw .p41hw-bt { display: flex; align-items: center; gap: 7px; padding: 10px 12px; border-radius: 10px; background: #fff; box-shadow: 0 0 0 1px #e3d5c9, 0 10px 20px -14px rgba(28, 19, 15, 0.4); }
-/* step 3: the batch drawn as the header's lower strip, as the page has it */
-.p41-hw .p41hw-hdb { border-radius: 12px 12px 0 0; }
-.p41-hw .p41hw-btin { margin-top: -10px; border-radius: 0 0 12px 12px; background: #24304a; box-shadow: none; }
-.p41-hw .p41hw-btin em { color: rgba(244, 238, 229, 0.62) !important; }
-.p41-hw .p41hw-btin b { color: #fffaf3; }
-.p41-hw .p41hw-btin > span:not(.p41hw-ic) { background: rgba(244, 238, 229, 0.1) !important; color: #f4eee5; }
-.p41-hw .p41hw-btin > .p41hw-pt { color: #f4eee5; }
-.p41-hw .p41hw-bt em { white-space: nowrap; margin-right: 2px; font: italic 12px var(--sp-serif); color: rgba(28, 19, 15, 0.55); }
-.p41-hw .p41hw-bt b { margin-right: 2px; font: 400 14px var(--sp-type); }
-.p41-hw .p41hw-bt > span:not(.p41hw-ic) { padding: 3px 8px; border-radius: 10px; background: #f5efe7; font: 11.5px var(--sp-serif); white-space: nowrap; }
-.p41-hw .p41hw-bt > .p41hw-pt { margin-left: auto; background: none !important; text-decoration: underline; font-weight: 600 !important; animation: p41hwplt 1.6s ease-in-out infinite; }
-@keyframes p41hwplt { 50% { color: #2c6782; } }
-.p41-hw .p41hw-row { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 10px; background: #fff; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1); }
-.p41-hw .p41hw-row b { font: 400 16px var(--sp-type); }
-.p41-hw .p41hw-row .p41hw-st { display: inline-flex; align-items: center; gap: 6px; margin-left: auto; padding: 4px 10px; border-radius: 12px; background: #f5efe7; font: 12.5px var(--sp-serif); }
-.p41-hw .p41hw-row .p41hw-st i { width: 7px; height: 7px; border-radius: 50%; background: #2d3a50; }
-.p41-hw .p41hw-row em { font: italic 12.5px var(--sp-serif); color: rgba(28, 19, 15, 0.55); }
-.p41-hw .p41hw-lock { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 10px; background: #f4eee5; font: 12.5px var(--sp-serif); }
-.p41-hw .p41hw-lock svg { flex: none; width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.6; }
-.p41-hw .p41hw-lock .p41hw-mk { margin-left: auto; font-weight: 600; text-decoration: underline; white-space: nowrap; }
-.p41-hw .p41hw-res { padding: 6px; border-radius: 14px; background: #fff; box-shadow: 0 14px 28px -18px rgba(28, 19, 15, 0.4); }
-.p41-hw .p41hw-rh { padding: 8px 12px; border-radius: 9px 9px 0 0; background: #f4e6d6; font: 400 15px var(--sp-type); }
-.p41-hw .p41hw-bar { display: grid; grid-template-columns: 22px 100px 1fr 46px; align-items: center; gap: 9px; padding: 8px 12px; font: 12.5px var(--sp-serif); }
-.p41-hw .p41hw-bar i { height: 7px; border-radius: 4px; background: #f1ece5; overflow: hidden; }
-.p41-hw .p41hw-bar i u { display: block; height: 100%; border-radius: 4px; background: #2d3a50; }
-.p41-hw .p41hw-bar i.p41hw-ey u { background: repeating-linear-gradient(135deg, #d9d2c8 0 3px, transparent 3px 6px); }
-.p41-hw .p41hw-bar b { text-align: right; font: 400 13px var(--sp-type); }
-@media (prefers-reduced-motion: reduce) {
-  .p41-hw .p41-hwp, .p41-hw .p41hw-pulse, .p41-hw .p41hw-pt { animation: none !important; }
-  .p41-hw .p41-hwd button { transition: none; }
-}
+/* ══ H · How it works: v41's five-step guide is RETIRED by v42 (packages/v42/Pk42HowItWorks, styled in pk42.css G). ══ */

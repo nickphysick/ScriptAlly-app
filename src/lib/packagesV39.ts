@@ -12,6 +12,7 @@
 import type { CSSProperties } from "react";
 import type { PackageColour, SubmissionPackage } from "../types";
 import type { Fig } from "./packagesV38";
+import { PACKAGE_NAVY } from "./packagesV42";
 
 export const PACKAGE_COLOURS: readonly { key: PackageColour; name: string; hex: string }[] = [
   { key: "harbour", name: "Harbour", hex: "#1d4b63" },
@@ -28,19 +29,16 @@ const BY_KEY = new Map(PACKAGE_COLOURS.map((c) => [c.key, c]));
 /** A package's colour key: its own, else Harbour (absent, or a value from outside the eight). */
 export const colourOf = (p: Pick<SubmissionPackage, "colour"> | null | undefined): PackageColour =>
   p?.colour && BY_KEY.has(p.colour) ? p.colour : "harbour";
-/** A package's colour as its hex — what every surface paints through `--pc`. */
+/** A package's stored colour as its hex. v42 Part E: kept as the reading of the stored field, and never painted. */
 export const hexOf = (p: Pick<SubmissionPackage, "colour"> | null | undefined): string => BY_KEY.get(colourOf(p))!.hex;
-/** The `--pc` custom property for an element that a package colours. */
-export const pcStyle = (p: Pick<SubmissionPackage, "colour"> | null | undefined) => ({ "--pc": hexOf(p) }) as CSSProperties;
-
 /**
- * The new-package dialog's first choice: the first colour, in palette order, that no LIVE package of the manuscript
- * already uses; Harbour when all eight are taken. A retired package's colour is free again.
+ * The `--pc` custom property every package surface paints through. v42 Part E: PACKAGE COLOURS ARE NOT SHOWN ANYWHERE —
+ * every package icon is navy (cream glyph), whatever the stored colour says. The argument is kept so every caller stays
+ * as it was; the stored field is kept, and not migrated.
  */
-export function firstFreeColour(pkgs: readonly Pick<SubmissionPackage, "colour" | "status">[]): PackageColour {
-  const used = new Set(pkgs.filter((p) => p.status !== "Retired").map((p) => colourOf(p)));
-  return PACKAGE_COLOURS.find((c) => !used.has(c.key))?.key ?? "harbour";
-}
+export const pcStyle = (_p?: Pick<SubmissionPackage, "colour"> | null) => ({ "--pc": PACKAGE_NAVY }) as CSSProperties;
+
+/* v42 A: the new-package dialog's first colour (`firstFreeColour`) is retired with the colour field. */
 
 /* ══ PART H · the full lists under Results ═════════════════════════════════════════════════════════════════════════
  * ⚠️ EVERY FIGURE IS packageReplies' (lib/packagesV38 `Fig`), exactly as the top three: the same first-answer rule,

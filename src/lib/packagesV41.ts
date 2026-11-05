@@ -26,24 +26,9 @@ export function headerSub(title: string | null | undefined): { lead: string; tit
   return t ? { lead: "What each agent receives for ", title: t, tail: ", and what works best." } : { lead: "What each agent receives, and what works best.", title: null, tail: "" };
 }
 
-/* ══ Part D · the current batch row ══ */
-export const BATCH_LEAD = "Your current batch is going out with";
-export const BATCH_LEAD_SHORT = "Going out with";
-export const BATCH_NONE = "Your current batch isn’t going out with a package yet.";
-export const BATCH_NONE_REST = "Choose one and it’s picked for you each time you log a query.";
-
-/* ══ Part D · the packages rail ══ */
-export const RAIL_TITLE = "All packages";
-export const LIST_EMPTY = "No packages yet. Make one and pick it the next time you log a query.";
+/* ══ Part D · a package's one line in its stage's words (v41's rail row; v42's stat tiles read it through
+   packagesV42.tileFoot). v42 retired the rail, the batch strip and its picker, and with them their words. ══ */
 type Stage = "draft" | "ready" | "out" | "retired";
-/** The rail's groups, in this order, each drawn only when it has packages; retired ones fold into a footer group. */
-export const RAIL_GROUPS: readonly [Exclude<Stage, "retired">, string][] = [["out", "Out with agents"], ["ready", "Ready"], ["draft", "Draft"]];
-export function railGroups<T>(pkgs: readonly T[], stageOf: (p: T) => Stage): { groups: { k: Exclude<Stage, "retired">; label: string; items: T[] }[]; retired: T[] } {
-  return {
-    groups: RAIL_GROUPS.map(([k, label]) => ({ k, label, items: pkgs.filter((p) => stageOf(p) === k) })).filter((g) => g.items.length > 0),
-    retired: pkgs.filter((p) => stageOf(p) === "retired"),
-  };
-}
 /** A rail row's one line under the name (ref `meta`): what has happened to it, in its stage's words. */
 export type RailLine =
   | { k: "rate"; sent: number; pct: number }
@@ -63,12 +48,3 @@ export function railLine(stage: Stage, f: { sent: number; answered: number; rank
 export const railLineText = (l: RailLine): string =>
   l.k === "rate" ? `${l.sent} sent · ${l.pct}% asked for more` : l.k === "answers" ? `${l.sent} sent · ${l.got} of ${l.need} answers in`
     : l.k === "ready" ? "Ready to send" : l.k === "needs" ? l.text : "Retired";
-
-/** The status pill's words (ref `stLabel`): a draft names what it still needs. */
-export function statusWords(stage: Stage, has: { version: boolean; letter: boolean }): string {
-  if (stage === "retired") return "Retired";
-  if (stage === "out") return "Out with agents";
-  if (stage === "ready") return "Ready to send";
-  const need = [has.version ? null : "a version", has.letter ? null : "a letter"].filter(Boolean);
-  return need.length ? `Draft · needs ${need.join(" and ")}` : "Draft";
-}

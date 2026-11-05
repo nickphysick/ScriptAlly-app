@@ -5,8 +5,8 @@
  * Submission packages — the builder: the "Build, view and edit" section. v39.3 (design-refs/submission-packages-v39-3/,
  * option B) REPLACES v39's two cards — Your materials (its folder tab, tabs and rows) and the package card with its
  * packing list — with Steps + preview (Pk393Builder). DRAG AND DROP IS RETIRED WITH THEM: pieces are picked in the steps.
- * This file keeps what the section owns: the draft first package and `put`, the start card, v40's package guidelines,
- * and the parts the new header reuses (the name in place, the icon-and-colour picker, "+ Add" for extras).
+ * This file keeps what the section owns: the draft first package and `put`, v40's package guidelines,
+ * and the parts the new header reuses (the name in place, the icon picker, "+ Add" for extras).
  *
  * ⚠️ WITH NO PACKAGE AT ALL the open package is a DRAFT — "My first package", nothing stored. The first piece picked
  *    creates the package with that piece in it, so an empty package is never written by accident.
@@ -19,8 +19,9 @@ import { PACKAGE_ICONS, type PackageIcon, type SubmissionPackage } from "../../.
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import { extraSuggestions, iconOf, offersNewExtra } from "../../../lib/packagesV26";
 import { isLocked } from "../../../lib/packagesV40";
-import { colourOf, PACKAGE_COLOURS, pcStyle } from "../../../lib/packagesV39";
+import { pcStyle } from "../../../lib/packagesV39";
 import { PicBare } from "./icons";
+import { ICON_HINT } from "../../../lib/packagesV42";
 import type { PieceKind, Pk26Model } from "./usePk26Model";
 import { Pk393Builder } from "./Pk393Builder";
 
@@ -28,7 +29,6 @@ export const DRAFT_ID = "__draft";
 export type LibTab = "let" | "syn" | "ver";
 
 export const STAGE_LOCK_TIP = "Locked: what each agent got stays as it was. You can still rename it; to change what goes out, make a copy.";
-export const PICKER_NOTE = "Shows on its label, in the Query Centre and in your results.";
 
 /* E5 — the package guidelines (v40), verbatim */
 const GUIDELINES: [string, string][] = [
@@ -42,15 +42,12 @@ const GUIDELINES: [string, string][] = [
 
 export interface BuilderProps {
   model: Pk26Model;
-  /** retired packages, for the start card's "Copy …" options (shown only when no live package is left) */
-  retired: SubmissionPackage[];
   current: SubmissionPackage | null;
   onSelect: (id: string) => void;
   /** v38 — Figures: the package drawer for the open package */
   onFigures: (p: SubmissionPackage) => void;
   /** a deep link (`?tab=let|syn|ver`) asks for that step open (the Your materials list it used to open is retired) */
   askStep: LibTab | null;
-  onNewPackage: () => void;
   onDuplicate: (p: SubmissionPackage) => void;
   onEditPackage: (p: SubmissionPackage, focus?: "note") => void;
   onOpenMaterial: (kind: "let" | "syn" | "ext", id: string) => void;
@@ -59,11 +56,11 @@ export interface BuilderProps {
   onOpenComps: () => void;
 }
 
-export const Pk26Builder: React.FC<BuilderProps> = ({ model, retired, current, onSelect, onFigures, askStep, onNewPackage, onDuplicate, onEditPackage, onOpenMaterial, onNewMaterial, onOpenVersions, onOpenComps }) => {
+export const Pk26Builder: React.FC<BuilderProps> = ({ model, current, onSelect, onFigures, askStep, onDuplicate, onEditPackage, onOpenMaterial, onNewMaterial, onOpenVersions, onOpenComps }) => {
   const { msPkgs, active, activeMs } = model;
 
-  /* the draft first package — only when the writer has no package at all; with packages and none live, the open
-     card is the start card instead (E4) */
+  /* the draft first package — only when the writer has no package at all (the brand-new page). v42 F: with packages and
+     none live, the page draws its empty card instead of the builder, so v40's start card is retired. */
   const draft: SubmissionPackage | null = useMemo(() => (current || !activeMs || msPkgs.length ? null : {
     id: DRAFT_ID, manuscriptId: activeMs.id, userId: "", packageName: "My first package",
     note: "Name it whatever helps you — “Standard”, “UK agents”", queryLetterVersionId: "", synopsisVersionId: "", samplePagesVersionId: "",
@@ -87,10 +84,10 @@ export const Pk26Builder: React.FC<BuilderProps> = ({ model, retired, current, o
       {/* v41: no "Build, view and edit" kicker; the section is no longer `.p9-pb-build`, so v39.1's forced-serif rule does
           not reach the builder's typewriter names */}
       <section className="p41-build" aria-label="The open package" data-pk26="builder" data-pk39="builder" data-pk41="builder">
-        {/* v39.3: Steps + preview, or the start card when every package is retired */}
+        {/* v39.3: Steps + preview */}
         {p ? <Pk393Builder model={model} p={p} isActive={active?.id === p.id || p.id === DRAFT_ID} onFigures={onFigures} onEdit={onEditPackage} onDuplicate={onDuplicate}
           onPut={put} onOpenMaterial={onOpenMaterial} onNewMaterial={onNewMaterial} onOpenVersions={onOpenVersions} onOpenComps={onOpenComps} askStep={askStep} />
-          : <StartCard retired={retired} onNewPackage={onNewPackage} onDuplicate={onDuplicate} />}
+          : null}
         {/* v40's package guidelines, kept (v39 draws none and asks for none to go). v39.1: inside the builder's own section,
             24 under the cards, so the builder ends 96 above the results band (the ref's rhythm) */}
         <div className="p6-wbf p9-gl">
@@ -103,24 +100,6 @@ export const Pk26Builder: React.FC<BuilderProps> = ({ model, retired, current, o
     </>
   );
 };
-
-/** E4 (v40) — the start card: no live package left (everything retired), so start from scratch or copy one. */
-const StartCard: React.FC<{ retired: SubmissionPackage[]; onNewPackage: () => void; onDuplicate: (p: SubmissionPackage) => void }> = ({ retired, onNewPackage, onDuplicate }) => (
-  <div className="p9-pk-open" data-pk40="start">
-    <div className="p6-pk-open p9-pk-start">
-      <div className="p6-wb-start">
-        <h3>Start a package</h3>
-        <p>Every package you’ve made is retired. Start a new one here.</p>
-        <div className="p6-wb-opts">
-          <button type="button" onClick={onNewPackage}><b>From scratch</b><small>Pick every piece yourself</small></button>
-          {retired.slice(0, 3).map((x) => (
-            <button type="button" key={x.id} onClick={() => onDuplicate(x)}><b>Copy {x.packageName}</b><small>Same pieces, then change one</small></button>
-          ))}
-        </div>
-      </div>
-    </div>
-  </div>
-);
 
 /** F — the name, edited in place (the app's "editable in place" grammar: a dashed underline on hover). */
 export const NameInPlace: React.FC<{ model: Pk26Model; p: SubmissionPackage }> = ({ model, p }) => {
@@ -143,7 +122,8 @@ export const NameInPlace: React.FC<{ model: Pk26Model; p: SubmissionPackage }> =
   );
 };
 
-/** E — the icon-and-colour picker: a popover under the header's icon tile. A pick saves at once. */
+/** E — the icon picker: a popover under the header's icon tile. A pick saves at once. v42 A: icons only (the colour
+ *  swatches are retired; package colours are not shown anywhere). */
 export const LookPicker: React.FC<{ model: Pk26Model; p: SubmissionPackage; anchor: HTMLElement; onClose: () => void }> = ({ model, p, anchor, onClose }) => {
   const box = useRef<HTMLDivElement | null>(null);
   useEscapeLayer(true, onClose, ESC_LEVEL.page);
@@ -167,22 +147,16 @@ export const LookPicker: React.FC<{ model: Pk26Model; p: SubmissionPackage; anch
     window.addEventListener("resize", move);
     return () => { document.removeEventListener("pointerdown", down, true); window.removeEventListener("scroll", move, true); window.removeEventListener("resize", move); };
   }, [anchor, onClose]);
-  const ic = iconOf(p), col = colourOf(p);
+  const ic = iconOf(p);
   return createPortal(
-    <div className="p9-icp" ref={box} role="dialog" aria-label="Icon and colour" data-pk39="picker" style={{ ...pcStyle(p), left: pos.left, top: pos.top }}>
+    <div className="p9-icp" ref={box} role="dialog" aria-label="Icon" data-pk39="picker" style={{ ...pcStyle(p), left: pos.left, top: pos.top }}>
       <p className="p9-icp-k">Icon</p>
       <div className="p9-icp-ics">
         {PACKAGE_ICONS.map((k: PackageIcon) => (
           <button type="button" key={k} aria-pressed={ic === k} aria-label={k} data-ic={k} onClick={() => void model.setLook(p, { icon: k })}><PicBare ic={k} /></button>
         ))}
       </div>
-      <p className="p9-icp-k">Colour</p>
-      <div className="p9-icp-cols">
-        {PACKAGE_COLOURS.map((c) => (
-          <button type="button" key={c.key} aria-pressed={col === c.key} title={c.name} aria-label={c.name} data-col={c.key} style={{ ["--sw" as string]: c.hex }} onClick={() => void model.setLook(p, { colour: c.key })} />
-        ))}
-      </div>
-      <p className="p9-icp-f">{PICKER_NOTE}</p>
+      <p className="p9-icp-f" data-pk42="icon-hint">{ICON_HINT}</p>
     </div>,
     document.body,
   );

@@ -27,6 +27,10 @@
  *   L9 How it works: five steps with the exact titles, none of the old guide's words, Escape closes it
  *
  * Breaks: `PK41_MUTATE=<L1…L9>` applies that lock's break in the page.
+ *
+ * v42 (5 Nov): L4 (the batch strip), L5 (the rail), L7 (the preview under the steps) and L9 (the five-step guide) are
+ * RETIRED with what they measured (tests/e2e/RETIRED-submission-packages-v42.md); L1, L3 and L6 are re-pointed to the
+ * stat tiles and the v42 builder (whose frame is pk42.measure.ts L3's). L2 and L8 stand as written.
  */
 import { expect, test, type Browser, type Page } from "@playwright/test";
 import { execFileSync } from "node:child_process";
@@ -60,10 +64,10 @@ class Ledger {
 const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   L1: { css: `.pk39-wpg > .wpg-scroll { background-image: none !important; }` },
   L2: { css: `.p41-fb .p41-fb-tx { white-space: normal !important; } .p41-fb .p41-fb-tx span { display: inline !important; } .ws-app.ws-app .ws-main { --ink-tab: #fbf9f5 !important; }` },
-  L3: { css: `.p41 .p41-rail-h { background: #2d3a50 !important; } .p41 .p41-hd .p41-sub { white-space: normal !important; flex-basis: 100% !important; }` },
+  L3: { css: `.p41 .p41-bld .p93-bh { background: #2d3a50 !important; } .p41 .p41-hd .p41-sub { white-space: normal !important; flex-basis: 100% !important; }` },
   L4: { css: `.p41 .p41-hd.p41-wbt .p41-bt { margin: 18px 0 0 !important; flex-basis: 100% !important; }` },
   L5: { css: `.p41 .p41-ws { grid-template-columns: 340px minmax(0, 1fr) !important; } .p41 .p41-rr.p41-on { border-left-color: #2d3a50 !important; } .p41 .p41-rail { position: static !important; max-height: none !important; }` },
-  L6: { css: `.p41 .p41-fr { padding: 0 !important; } .p41 .p41-bld .p93-bh { box-shadow: inset 0 5px 0 #2d3a50 !important; }` },
+  L6: { css: `.p41 .p41-fr { padding: 0 !important; }` },
   L7: { css: `.p41 .p41-bld .p93-b { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; } .p41 .p41-bld .p93-btn { padding: 0 90px !important; } .p41 .p41-bld .p93-pv-f, .p41 .p41-bld .p93-pv-b { flex-wrap: nowrap !important; }` },
   L8: { css: `.p41-perch { right: 120px !important; height: 260px !important; }` },
   L9: { js: `new MutationObserver(() => { const t = document.querySelector('[data-pk41="hw-title"]'); if (t && t.textContent === 'Pick each piece') t.textContent = 'Drag them into the package'; }).observe(document, { subtree: true, childList: true, characterData: true });` },
@@ -106,12 +110,12 @@ for (const size of SIZES) {
       const root = document.querySelector('[data-pk41="page"]') as HTMLElement;
       return {
         img: cs.backgroundImage, scrollW: s.scrollWidth, clientW: s.clientWidth, docW: document.documentElement.scrollWidth, winW: innerWidth,
-        gone: ['[data-pk39="hd-card"]', '[data-pk38="labels"]', '[data-pk392="panel"]', '[data-pk39="tip"]', '[data-pk39="kicker"]', ".p8-bnr", ".p9-ag3", '[data-pk41="list"]', '[data-pk41="list-bar"]', "[data-pk41-tab]"].map((q) => [q, root.querySelectorAll(q).length]),
-        headerImgs: root.querySelectorAll('[data-pk41="header"] img').length, kicker: root.textContent?.includes("Build, view and edit") ?? false, rows: root.querySelectorAll("[data-pk41-row]").length,
+        gone: ['[data-pk39="hd-card"]', '[data-pk38="labels"]', '[data-pk392="panel"]', '[data-pk39="tip"]', '[data-pk39="kicker"]', ".p8-bnr", ".p9-ag3", '[data-pk41="list"]', '[data-pk41="list-bar"]', "[data-pk41-tab]", '[data-pk41="rail"]', '[data-pk41="batch"]'].map((q) => [q, root.querySelectorAll(q).length]),
+        headerImgs: root.querySelectorAll('[data-pk41="header"] img').length, kicker: root.textContent?.includes("Build, view and edit") ?? false, rows: root.querySelectorAll("[data-pk42-tile]").length, /* v42: the stat tiles (re-pointed from the rail rows) */
       };
     }, SC);
     const [ours, theirs] = await Promise.all(["/images/packages/packages-pattern.svg", "/images/contact/doodle-tile.svg"].map((u) => page.evaluate(async (u) => (await (await fetch(u)).text()).match(/stroke-opacity="([\d.]+)"/)?.[1] ?? null, u)));
-    L.check("population", r.rows > 0, `${r.rows} package rows`);
+    L.check("population", r.rows > 0, `${r.rows} package tiles`);
     L.check("ground: the gradient", /linear-gradient\(rgb\(251, 249, 245\)( 0%)?, rgb\(238, 235, 229\)( 100%)?\)/.test(r.img), r.img.slice(0, 200));
     L.check("ground: the pattern over it", /packages-pattern\.svg/.test(r.img) && r.img.indexOf("packages-pattern") < r.img.indexOf("linear-gradient"), r.img.slice(0, 120));
     L.check("pattern at the Contact list's opacity", !!ours && ours === theirs, `packages ${ours} · contact ${theirs}`);
@@ -120,7 +124,7 @@ for (const size of SIZES) {
     L.check("no header art", r.headerImgs === 0, `${r.headerImgs}`);
     L.check("no horizontal overflow (scroller)", r.scrollW <= r.clientW, `${r.scrollW} > ${r.clientW}`);
     L.check("no horizontal overflow (document)", r.docW <= r.winW, `${r.docW} > ${r.winW}`);
-    L.done(12);
+    L.done(14);
   });
 
   test(`L2 banner · ${at}`, async ({ page, browser }) => {
@@ -190,17 +194,17 @@ for (const size of SIZES) {
     });
     L.check("the header is navy", h.hbg === "rgb(45, 58, 80)", h.hbg);
     L.check("exactly one navy panel above the results", h.navy.length === 1 && h.navy[0] === "header", JSON.stringify(h.navy));
-    L.check("the rail head is not navy", !!h.head && h.head !== "rgb(45, 58, 80)", `${h.head}`);
-    L.check("the builder band is not navy", !!h.band && h.band !== "rgb(45, 58, 80)", `${h.band}`);
+    L.check("the builder's heading row is not navy", !!h.band && h.band !== "rgb(45, 58, 80)", `${h.band}`);
     L.check("subheader: one line (no overflow)", h.sw <= h.cw, `${h.sw} / ${h.cw}`);
     L.check("subheader: one line box", h.lines === 1, `${h.lines}`);
     L.check("subheader: directly under the title (0–12px), in its column", h.under >= -0.5 && h.under <= 12 && h.sameCol <= 1, `gap ${h.under} · x ${h.sameCol}`);
     L.check("subheader names the active manuscript", (h.text ?? "").includes("for Locks of v40,"), `${h.text}`);
     L.check("no image in the header", h.imgs === 0, `${h.imgs}`);
-    L.done(9);
+    L.done(8);
   });
 
-  test(`L4 batch · ${at}`, async ({ page }) => {
+  /* v42: retired (RETIRED-submission-packages-v42.md) */
+  test.skip(`L4 batch · ${at}`, async ({ page }) => {
     test.setTimeout(300_000);
     const L = new Ledger(`L4-${at}`);
     seed();
@@ -255,7 +259,8 @@ for (const size of SIZES) {
     L.done(15);
   });
 
-  test(`L5 rail · ${at}`, async ({ page }) => {
+  /* v42: retired (RETIRED-submission-packages-v42.md) */
+  test.skip(`L5 rail · ${at}`, async ({ page }) => {
     test.setTimeout(300_000);
     const L = new Ledger(`L5-${at}`);
     seed(); fix("--colours");
@@ -321,7 +326,7 @@ for (const size of SIZES) {
   test(`L6 frames · ${at}`, async ({ page }) => {
     test.setTimeout(180_000);
     const L = new Ledger(`L6-${at}`);
-    seed(); fix("--colours");
+    seed();
     await open(page, size);
     const f = await page.evaluate(() => {
       const one = (el: Element | null) => {
@@ -331,9 +336,9 @@ for (const size of SIZES) {
         return { pad: [cs.paddingTop, cs.paddingRight, cs.paddingBottom, cs.paddingLeft].map(parseFloat), rim: cs.backgroundColor, bw: fi ? getComputedStyle(fi).borderTopWidth : null, bc: fi ? getComputedStyle(fi).borderTopColor : null, band: band ? getComputedStyle(band).backgroundColor : null };
       };
       const q = (s: string) => document.querySelector(`[data-pk41="page"] ${s}`);
-      return { builder: one(q('[data-pk41="builder-frame"]')), totals: one(q('[data-pk41="totals"]')), best: one(q('[data-pk41="best-best"]')), most: one(q('[data-pk41="best-most"]')), prove: one(q('[data-pk41="best-prove"]')), tpk: one(q('[data-pk41="table-pk"]')), tpc: one(q('[data-pk41="table-pc"]')) };
+      return { totals: one(q('[data-pk41="totals"]')), best: one(q('[data-pk41="best-best"]')), most: one(q('[data-pk41="best-most"]')), prove: one(q('[data-pk41="best-prove"]')), tpk: one(q('[data-pk41="table-pk"]')), tpc: one(q('[data-pk41="table-pc"]')) };
     });
-    const want: Record<string, string | null> = { builder: null, totals: "rgb(45, 58, 80)", best: "rgb(244, 230, 214)", most: "rgb(226, 230, 224)", prove: "rgb(235, 231, 225)", tpk: "rgb(235, 231, 225)", tpc: "rgb(235, 231, 225)" };
+    const want: Record<string, string | null> = { totals: "rgb(45, 58, 80)", best: "rgb(244, 230, 214)", most: "rgb(226, 230, 224)", prove: "rgb(235, 231, 225)", tpk: "rgb(235, 231, 225)", tpc: "rgb(235, 231, 225)" };
     for (const [k, v] of Object.entries(f)) {
       L.check(`${k}: present`, !!v, "missing");
       if (!v) continue;
@@ -341,22 +346,12 @@ for (const size of SIZES) {
       L.check(`${k}: a 1px rgb(227,213,201) frame`, v.bw === "1px" && v.bc === "rgb(227, 213, 201)", `${v.bw} ${v.bc}`);
       if (want[k]) L.check(`${k}: its band`, v.band === want[k], `${v.band} (want ${want[k]})`);
     }
-    /* the builder's band: a wash of the open package's colour with a 5px stripe of it, for two different colours */
-    for (const [id, hex, rgb] of [["pk40-std", "#583a5a", "rgb(88, 58, 90)"], ["pk40-ready", "#2e5641", "rgb(46, 86, 65)"]] as const) {
-      await page.locator(`${pg} [data-pk41-row="${id}"]`).click(); await page.waitForTimeout(600);
-      const b = await page.evaluate((hex) => {
-        const bh = document.querySelector('[data-pk41="page"] [data-pk41="builder-frame"] .p93-bh') as HTMLElement; const cs = getComputedStyle(bh);
-        /* the wash the ref names, resolved by the browser on a probe */
-        const pr = document.createElement("i"); pr.style.background = `color-mix(in srgb, ${hex} 11%, #fff)`; document.body.appendChild(pr); const w = getComputedStyle(pr).backgroundColor; pr.remove();
-        return { sh: cs.boxShadow, bg: cs.backgroundColor, w };
-      }, hex);
-      L.check(`${id}: the stripe is its colour, 5px`, b.sh.includes(rgb) && /0px 5px 0px 0px inset/.test(b.sh), b.sh);
-      L.check(`${id}: the band is an 11% wash of it`, b.bg === b.w, `${b.bg} / ${b.w}`);
-    }
-    L.done(27);
+    /* v42: the builder's frame and its colour band are retired here (pk42.measure.ts L3 holds the v42 container) */
+    L.done(24);
   });
 
-  test(`L7 preview · ${at}`, async ({ page }) => {
+  /* v42: retired (RETIRED-submission-packages-v42.md) */
+  test.skip(`L7 preview · ${at}`, async ({ page }) => {
     test.setTimeout(180_000);
     const L = new Ledger(`L7-${at}`);
     seed();
@@ -412,7 +407,8 @@ for (const size of SIZES) {
     L.done(10);
   });
 
-  test(`L9 how it works · ${at}`, async ({ page }) => {
+  /* v42: retired (RETIRED-submission-packages-v42.md) */
+  test.skip(`L9 how it works · ${at}`, async ({ page }) => {
     test.setTimeout(180_000);
     const L = new Ledger(`L9-${at}`);
     await open(page, size);

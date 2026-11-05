@@ -5,7 +5,7 @@
 import { describe, expect, it } from "vitest";
 import { UserPlan, type User } from "../types";
 import { packagesViaFounding } from "./entitlements";
-import { FOUNDING_NOTE_PATH, foundingNoteHidden, headerSub, railGroups, railLine, railLineText, statusWords } from "./packagesV41";
+import { FOUNDING_NOTE_PATH, foundingNoteHidden, headerSub, railLine, railLineText } from "./packagesV41";
 
 const user = (plan: UserPlan, prefs?: User["todoPrefs"]) => ({ plan, todoPrefs: prefs }) as Pick<User, "plan" | "todoPrefs">;
 
@@ -40,15 +40,7 @@ describe("v41 C · the header's one line", () => {
   });
 });
 
-describe("v41 D · the rail's groups and lines", () => {
-  const stages = ["draft", "out", "ready", "retired", "out"] as const;
-  const pk = stages.map((st, i) => ({ id: `p${i}`, st }));
-  it("groups Out with agents, Ready, Draft, in that order, each only when it has packages; retired fold apart", () => {
-    const r = railGroups(pk, (p) => p.st);
-    expect(r.groups.map((g) => [g.k, g.items.map((p) => p.id)])).toEqual([["out", ["p1", "p4"]], ["ready", ["p2"]], ["draft", ["p0"]]]);
-    expect(r.retired.map((p) => p.id)).toEqual(["p3"]);
-    expect(railGroups(pk.filter((p) => p.st !== "ready"), (p) => p.st).groups.map((g) => g.k)).toEqual(["out", "draft"]);
-  });
+describe("v41 D · a package's one line (the v42 tiles read it)", () => {
   const f = (sent: number, answered: number, ranked: boolean, pct: number | null) => ({ sent, answered, ranked, pct });
   const both = { version: true, letter: true };
   it("out with agents: the rate once ranked, the answers in until then", () => {
@@ -65,9 +57,5 @@ describe("v41 D · the rail's groups and lines", () => {
   it("a retired package keeps its figures if it went out", () => {
     expect(railLineText(railLine("retired", f(1, 1, false, 0), both, 4))).toBe("1 sent · 1 of 4 answers in");
     expect(railLineText(railLine("retired", f(0, 0, false, null), both, 4))).toBe("Retired");
-  });
-  it("the batch picker's status words", () => {
-    expect(statusWords("ready", both)).toBe("Ready to send");
-    expect(statusWords("out", both)).toBe("Out with agents");
   });
 });

@@ -35,6 +35,7 @@ import { Lock, Mark, Pic } from "./icons";
 import { AddExtra, DRAFT_ID, LookPicker, NameInPlace } from "./Pk26Builder";
 import type { MaterialRow, Pk26Model, VersionRow } from "./usePk26Model";
 import { greetingName, letterOpening, previewAgent, primaryLabel } from "../../../lib/packagesV393";
+import { STEPS_BAND, USE_FOR_BATCH } from "../../../lib/packagesV42";
 import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
 
 export type StepKey = "ver" | "let" | "syn";
@@ -187,7 +188,7 @@ const Header: React.FC<Pk393Props & { locked: boolean; out: boolean; sent: numbe
   const st = stepStatus(p, sent, out);
   return (
     <div className="p93-bh" style={pcStyle(p)} data-pk39="pkg-head" data-pk393="head">
-      <button ref={tile} type="button" className="p93-bh-ic" aria-label="Change icon and colour" title="Change icon and colour" aria-expanded={picker} aria-haspopup="dialog"
+      <button ref={tile} type="button" className="p93-bh-ic" aria-label="Change icon" title="Change icon" aria-expanded={picker} aria-haspopup="dialog"
         disabled={draft} data-pk39="tile" data-pk393="tile" onClick={() => setPicker((v) => !v)}>
         <Pic ic={iconOf(p)} cls="p9-pic" />
       </button>
@@ -196,10 +197,10 @@ const Header: React.FC<Pk393Props & { locked: boolean; out: boolean; sent: numbe
         {p.note ? <small title={p.note}>{p.note}</small>
           : draft ? <small>{p.note}</small> : <small><button type="button" className="p93-addnote" onClick={() => onEdit(p, "note")}>Add a note: who is this for?</button></small>}
       </div>
-      {/* v41: Active / Make active is its own cell of the band, beside the status (ref `.k4-bh`) */}
+      {/* v42 D: the current batch carries no button (its tile carries the tag); any other package that can go out offers
+          "Use for current batch", which is v40's active-package writer (`makeActive`), renamed in the UI only */}
       <span className="p93-bh-act">
-        {isActive && !draft ? <em className="p9-po-act">Active</em> : null}
-        {!draft && !isActive && canMakeActive(p, model.active?.id) ? <button type="button" className="p93-mk" onClick={() => void model.makeActive(p)}>Make active</button> : null}
+        {!draft && !isActive && canMakeActive(p, model.active?.id) ? <button type="button" className="p93-mk" data-pk42="use-batch" onClick={() => void model.makeActive(p)}>{USE_FOR_BATCH}</button> : null}
       </span>
       <span className={`p93-bh-s${st.green ? " p93-g" : ""}`} data-pk39="status" data-pk393="status"><i aria-hidden="true" />{st.text}</span>
       {draft ? <span /> : (
@@ -227,7 +228,7 @@ const Preview: React.FC<{ model: Pk26Model; p: SubmissionPackage; hov: string | 
   const title = (model.activeMs?.title ?? "").toUpperCase();
   return (
     <>
-      <div className="p93-pv-k"><span>What an agent receives</span><span>Preview</span></div>
+      <div className="p93-pv-k" data-pk42="preview-band"><span>What an agent receives</span><span>Preview</span></div>
       <div className="p93-mail" data-pk393="mail">
         <div className="p93-mail-h">
           <div><span>To</span><b data-pk393="to">{agent ? <>{agent.name.trim() || agent.agency} <em>(example)</em></> : <>An agent <em>(example)</em></>}</b></div>
@@ -301,10 +302,10 @@ export const Pk393Builder: React.FC<Pk393Props> = (props) => {
   }), [model.versionRows, model.letters, model.synopses]);
   const awayLet = model.lettersAll.filter((m) => m.retired), awaySyn = model.synopsesAll.filter((m) => m.retired);
   return (
-    /* v41 Part F: a Dashboard v2 framed card — a 7px white rim, an inner 1px #e3d5c9 frame — with the package's band in
-       navy across the whole card, then the steps and the preview well side by side */
-    <div className="p41-fr p41-bld" data-pk41="builder-frame">
-    <div className="p41-fi">
+    /* v42 D: ONE framed container — white, radius 24, a 7px white rim with a hairline outside it — holding the heading
+       row, the sent note (blush), and the steps (a sage band) beside the preview (a sand band) */
+    <div className="p42-bw p41-bld" data-pk41="builder-frame" data-pk42="builder">
+    <div className="p42-bwi">
     <Header {...props} locked={locked} out={out} sent={sent} />
     <div className="p93-b" data-pk393="builder" data-pk40="open" data-pk26="open" data-pkg={p.id}>
         {from ? <div className="p9-lc-from p41-span">Copied from <b>{from.packageName}</b>. Change one piece, and Results can tell you what that piece did.</div> : null}
@@ -320,6 +321,7 @@ export const Pk393Builder: React.FC<Pk393Props> = (props) => {
           </div>
         ) : null}
       <div className="p93-col" data-pk393="steps-col">
+        <div className="p42-band p42-band-sg" data-pk42="steps-band">{STEPS_BAND}</div>
         <div className="p93-steps" data-pk393="steps">
           {(["ver", "let", "syn"] as const).map((k, n) => (
             <Step key={k} k={k} i={n + 1} p={p} items={items[k]} away={k === "ver" ? [] : k === "let" ? awayLet : awaySyn} open={eff === k} readOnly={locked}

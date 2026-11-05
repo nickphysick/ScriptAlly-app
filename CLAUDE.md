@@ -276,7 +276,24 @@
 - **No double saves:** one count of desk saves in flight, released in `finally` when the save settles — never a timer (TD52 H1 proves it offline). A journey's save is inside the desk's drawer, whose `busy` the desk reads from the slot.
 - **Locks:** `tests/e2e/todoV52.measure.ts` TD52 A1–A5, C1, D1, E1–E2, F1–F3, G1–G3, H1–H2, J1–J4, L1 (`td52Lib`, `TD52_MUTATE=<lock>`); unit `trayCalendar.test.ts`, `trayRows.test.ts`, `deskDoing.test.ts`, `trayHeaderV52.test.tsx`. Retired: `tests/e2e/RETIRED-todo-list-v5-2.md`.
 
-## Submission packages v41 — the page joins the app as a workspace (4 Nov; ref = design-refs/submission-packages-v41/; report reports/submission-packages-v41/REPORT.md; branch `submission-packages-v41` off `submission-packages-v39-3`, NOT merged)
+## Submission packages v42 — stat tiles, one builder container, navy icons, an animated How it works (5 Nov; ref = design-refs/submission-packages-v42/; report reports/submission-packages-v42/REPORT.md; branch `submission-packages-v42` off `submission-packages-v41` @ ce2712af, NOT merged)
+Submission packages v42:
+
+* the founding-writer pink strip at the very top (founding writers only, dismissible; the folder tab turns pink with it);
+* a thin navy header (title, one-line subheader, How it works and + New package);
+* a row of stat tiles on the page (white top with navy icon and serif name, beige foot with the headline figure; the open tile ringed in navy with a notch; Current batch tagged; Retired (n) link);
+* one framed builder container with Dashboard bands (sage steps, sand preview, blush lock), steps and preview side by side, and 'Use for current batch';
+* results as framed cards, unchanged.
+
+Package colours are not shown anywhere; icons are navy (the stored colour field is kept). How it works is one animated infographic ('How packages work', four stations on one route, ~12s, reduced motion shows the end state). The Archivist stands pinned bottom-right; the content keeps a 150px right gutter.
+- **⚠️ NAVY IS ONE PLACE: `pcStyle` (lib/packagesV39) paints `PACKAGE_NAVY` whatever the package stores.** `colourOf` / `hexOf` / `PACKAGE_COLOURS` read the stored field and nothing outside lib/packagesV39 may call them (unit-locked); new packages are written without a colour. The Query Centre and the log-a-query journey never drew a package's icon or colour.
+- **⚠️ A TILE'S FOOT IS `tileFoot` (lib/packagesV42) over v41's `railLine`**, so its figures are packageReplies' (`model.figPk`) and the threshold is MIN_SENDS_FOR_CLAIM. "Use for current batch" is `makeActive` with its own gate (`canMakeActive`: Ready or Out), so a Draft has no button.
+- **⚠️ THE EMPTY CARD REPLACES THE TILES AND THE BUILDER WITH NO LIVE PACKAGE** — except on the brand-new page (no letters or synopses), where the hero still scrolls to v39.3's draft first package. v40's start card is retired.
+- **⚠️ HOW IT WORKS STATES THE FINISHED STATE AS EVERY ELEMENT'S OWN STYLE**; only the animations (fill-mode `both`, inside `prefers-reduced-motion: no-preference`) hold the start state. The dialog is the ref's computed 1080 at 1512 and 1280. The four drawings are separate components (`howArt.tsx`), placeholders for illustrator art.
+- Parts: `packages/v42/` (`Pk42Tiles`, `Pk42Empty`, `Pk42HowItWorks`, `howArt`, `PkTile`, `pk42.css`) + `lib/packagesV42.ts`; v41's `Pk41Banner`, `Pk41Header`, `Pk41Results`, `Pk41Hawk` and pk41.css stand. Deleted: `Pk41Rail`, `Pk41Batch` (PkTile moved), `Pk41HowItWorks`, the colour fields and swatches, `firstFreeColour`, v40's start card.
+- Locks: `tests/e2e/pk42.measure.ts` L1–L8 (`PK42_MUTATE=L1…L8`), fixtures `seedPk40.mjs` + `pk41Fixture.mjs` (`--one-package`, `--retired-only` added); unit `packagesV42.test.ts`, `pk42HowItWorks.test.tsx`. Retired and re-pointed: `tests/e2e/RETIRED-submission-packages-v42.md`.
+
+## Submission packages v41 — the page joins the app as a workspace (⚠️ SUPERSEDED by v42 above for the rail, the batch strip, the colour band and How it works; 4 Nov; ref = design-refs/submission-packages-v41/; report reports/submission-packages-v41/REPORT.md; branch `submission-packages-v41` off `submission-packages-v39-3`, NOT merged)
 Submission packages v41:
 
 * a founding-writer pink strip at the very top (founding writers only, dismissible; the folder tab turns pink with it);
