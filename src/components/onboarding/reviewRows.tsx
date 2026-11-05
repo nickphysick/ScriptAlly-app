@@ -452,6 +452,8 @@ export const MergedBar: React.FC<{ removedName: string; keptName: string; n: num
 
 /** An open set: each member is a row that can be removed as the duplicate, then "keep them". */
 export const DupeOpen: React.FC<{
+  /** The set's headline: the name it would become (v1.2.1); the leader's own when not given. */
+  title?: string;
   leader: ReviewAgent;
   members: ReviewAgent[];
   bars: ReviewAgent[];
@@ -459,9 +461,9 @@ export const DupeOpen: React.FC<{
   movedCount: (id: string) => number;
   onRemove: (id: string) => void;
   onKeepBoth: () => void;
-}> = ({ leader, members, bars, queryCount, movedCount, onRemove, onKeepBoth }) => (
+}> = ({ title, leader, members, bars, queryCount, movedCount, onRemove, onKeepBoth }) => (
   <div className="im-dupe" data-dup-set={leader.id} data-dup-state="open" data-dup-kind="agents">
-    <h3 className="im-dupeh">{leader.name || leader.agency || "This agent"}</h3>
+    <h3 className="im-dupeh">{title || leader.name || leader.agency || "This agent"}</h3>
     <p>{dupNoteOpen(leader.agency)}</p>
     <div className="im-picks">
       {members.map((m) => (
