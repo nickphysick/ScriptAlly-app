@@ -1,0 +1,112 @@
+[
+ {
+  "where": "population: every fixture is on the page",
+  "ok": true,
+  "detail": "[\"offer\",\"materials\",\"nudge\",\"agent\",\"nudgedquiet\",\"nudgedwait\",\"quiet\",\"nrmn\",\"closed\"]"
+ },
+ {
+  "where": "offer is offer",
+  "ok": true,
+  "detail": "{\"state\":\"offer\",\"where\":\"you\",\"group\":\"offer\"}"
+ },
+ {
+  "where": "offer sits in the offer group",
+  "ok": true,
+  "detail": "{\"state\":\"offer\",\"where\":\"you\",\"group\":\"offer\"}"
+ },
+ {
+  "where": "materials is materials",
+  "ok": true,
+  "detail": "{\"state\":\"materials\",\"where\":\"you\",\"group\":\"materials\"}"
+ },
+ {
+  "where": "materials sits in the materials group",
+  "ok": true,
+  "detail": "{\"state\":\"materials\",\"where\":\"you\",\"group\":\"materials\"}"
+ },
+ {
+  "where": "nudge is nudge",
+  "ok": true,
+  "detail": "{\"state\":\"nudge\",\"where\":\"you\",\"group\":\"nudge\"}"
+ },
+ {
+  "where": "nudge sits in the nudge group",
+  "ok": true,
+  "detail": "{\"state\":\"nudge\",\"where\":\"you\",\"group\":\"nudge\"}"
+ },
+ {
+  "where": "agent is agent",
+  "ok": true,
+  "detail": "{\"state\":\"agent\",\"where\":\"agent\",\"group\":\"agent\"}"
+ },
+ {
+  "where": "agent sits in the agent group",
+  "ok": true,
+  "detail": "{\"state\":\"agent\",\"where\":\"agent\",\"group\":\"agent\"}"
+ },
+ {
+  "where": "quiet is quiet",
+  "ok": true,
+  "detail": "{\"state\":\"quiet\",\"where\":\"quiet\",\"group\":\"quiet\"}"
+ },
+ {
+  "where": "quiet sits in the quiet group",
+  "ok": true,
+  "detail": "{\"state\":\"quiet\",\"where\":\"quiet\",\"group\":\"quiet\"}"
+ },
+ {
+  "where": "nrmn is quiet",
+  "ok": true,
+  "detail": "{\"state\":\"quiet\",\"where\":\"quiet\",\"group\":\"quiet\"}"
+ },
+ {
+  "where": "nrmn sits in the quiet group",
+  "ok": true,
+  "detail": "{\"state\":\"quiet\",\"where\":\"quiet\",\"group\":\"quiet\"}"
+ },
+ {
+  "where": "nudgedquiet is quiet",
+  "ok": true,
+  "detail": "{\"state\":\"quiet\",\"where\":\"quiet\",\"group\":\"quiet\"}"
+ },
+ {
+  "where": "nudgedquiet sits in the quiet group",
+  "ok": true,
+  "detail": "{\"state\":\"quiet\",\"where\":\"quiet\",\"group\":\"quiet\"}"
+ },
+ {
+  "where": "nudgedwait is agent",
+  "ok": false,
+  "detail": "{\"state\":\"quiet\",\"where\":\"quiet\",\"group\":\"quiet\"}"
+ },
+ {
+  "where": "nudgedwait sits in the agent group",
+  "ok": false,
+  "detail": "{\"state\":\"quiet\",\"where\":\"quiet\",\"group\":\"quiet\"}"
+ },
+ {
+  "where": "closed is closed",
+  "ok": true,
+  "detail": "{\"state\":\"closed\",\"where\":\"closed\",\"group\":\"closed\"}"
+ },
+ {
+  "where": "closed sits in the closed group",
+  "ok": true,
+  "detail": "{\"state\":\"closed\",\"where\":\"closed\",\"group\":\"closed\"}"
+ },
+ {
+  "where": "the banner has the quiet-window setting",
+  "ok": true,
+  "detail": "no [data-qc152=quiet-setting]"
+ },
+ {
+  "where": "at 2 weeks the nudged-within-window query is Gone quiet",
+  "ok": true,
+  "detail": "{\"state\":\"quiet\",\"where\":\"quiet\",\"group\":\"quiet\"}"
+ },
+ {
+  "where": "at 2 weeks Nudge due stays Nudge due (its reply date is a week gone)",
+  "ok": true,
+  "detail": "{\"state\":\"nudge\",\"where\":\"you\",\"group\":\"nudge\"}"
+ }
+]

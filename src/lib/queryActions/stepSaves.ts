@@ -12,6 +12,7 @@ import { db as fsdb } from "../firebase";
 import type { useScriptAllyDb } from "../db";
 import { QueryStatus, SubmissionMethod, type Agent, type EventKey, type Query } from "../../types";
 import { buildNudgeWrites } from "../logNudge";
+import { STAGE_RESPONSE_WINDOWS } from "../queryAmbient";
 import { addDays, dayIso, futureWeeks, offWeekend } from "./dates";
 
 type Db = ReturnType<typeof useScriptAllyDb>;
@@ -32,9 +33,10 @@ export interface SentPlan {
   bookVersionId?: string | null;
 }
 
-/** the sent journey's opening answers: the usual reading window (8 weeks for a partial, 12 for a full), then a nudge a week on */
+/** the sent journey's opening answers: the house reading window (STAGE_RESPONSE_WINDOWS: 12 weeks for a partial, 12 for
+ *  a full — v152 moved the partial off its own 8, so the save and the page's clock read one source), then a nudge a week on */
 export function sentDefaults(kind: SentKind, sent: Date): Pick<SentPlan, "exp" | "nd" | "label"> {
-  const exp = addDays(sent, (kind === "partial" ? 8 : 12) * 7);
+  const exp = addDays(sent, (kind === "partial" ? STAGE_RESPONSE_WINDOWS.partial : STAGE_RESPONSE_WINDOWS.full) * 7);
   return { exp, nd: offWeekend(addDays(exp, 7)), label: kind === "partial" ? "Partial" : kind === "full" ? "Full manuscript" : "Revised manuscript" };
 }
 

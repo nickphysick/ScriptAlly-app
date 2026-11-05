@@ -125,10 +125,23 @@ import { commitCardSave } from "../lib/agentCardSave";
 import { copyText } from "./agents/contact/ContactCells";
 import type { AgentEditPatch } from "../lib/saveAgentEdits";
 import type { RowSpec } from "./reading-pane/QueryTimeline";
-import type { QcRow } from "../lib/qcSummary";
+import { expectedFor, type QcRow } from "../lib/qcSummary";
 import { nextLine } from "../lib/qcRowLines";
 import { QcPage151, Track151 } from "./queries/centre/QcPage151";
 import { QcFilterPanel151 } from "./queries/centre/QcFilterMenu140";
+import { QUIET_WEEKS_PATH, quickOfRow, quietWeeksOf, stampRows, stateOf, queryState as qsOf } from "../lib/queryState";
+import { packagesUnlocked } from "../lib/entitlements";
+import { sideOf as side152, type ReplyAct, type ThreadStepIn } from "../lib/qcThread152";
+import { qc152DevFree } from "../lib/qc152ReviewAid";
+import { packageLockStamp } from "../lib/saveQueryEdits";
+import { commitPlan, planDetails, planFix, planRecord, readFeed, readLog, RECORD_STATUS, type FixStep, type RecordKind, type StepMaterial } from "../lib/qc152Write";
+import { QcDetails152, QcFix152, QcFork152, type FixRow, type PkgChoice } from "./queries/centre/QcFix152";
+import { askChips, readMat } from "../lib/qcThread152";
+import type { LogStep, StepType } from "../lib/qcLogic152";
+import { QcRecord152, type RecordOutcome } from "./queries/centre/QcRecord152";
+import type { MatEnv } from "./queries/centre/QcEdit152";
+import { inUseId as inUseBookVersion } from "../lib/versionsV2";
+import type { QcCard152Data } from "./queries/centre/QcCard152";
 import { DEFAULT_SORT_151, QC_FULL_SCREEN, nextCell, sort151, whoSections, type Section, type Sort151 } from "../lib/qc151";
 import { pillGroups, weekSummary } from "../lib/qc1511";
 import { actionSections, rowAct, statusKind } from "../lib/qc1512";
@@ -226,7 +239,7 @@ import { QueryAgentTab, type AgentHistoryRow } from "./queries/QueryAgentTab";
 import { QueryLogSheet } from "./queries/QueryLogSheet";
 import { queriesForAgent } from "../lib/agentList";
 import { openAgentCard } from "../lib/agentCardStore";
-import { agentView as qcAgentView, bookChips as qcBookChips, nextStepOf, storySteps, stripOf, submissionWords, undatedIds } from "../lib/qcCardStory";
+import { agentView as qcAgentView, bookChips as qcBookChips, methodQualifier, nextStepOf, storySteps, stripOf, submissionWords, undatedIds } from "../lib/qcCardStory";
 import { hrefFor } from "../lib/quickAdd";
 import { rungFacts } from "../lib/queryPanelRungs";
 import { queryMaterialsToRows, draftMaterialsToQuery, draftExpectedOverrideIso } from "../lib/queryDraft";
@@ -1788,6 +1801,12 @@ export const Queries: React.FC<{
      before the card has opened (the header's "Who replied?" opens a query straight into respond) */
   const [qcCardMode, setQcCardMode] = useState<CardMode>("view");
   const [qcCardFresh, setQcCardFresh] = useState<string | null>(null);
+  /* v152 §3 — what the record form opened on (the reply box's button), and a save in flight */
+  const [qc152Rec, setQc152Rec] = useState<RecordKind | "resp" | null>(null);
+  const [qc152Busy, setQc152Busy] = useState(false);
+  /* v152 §4 — the step Fix a mistake opens on (a bubble's ✎ Edit), and where the record form was opened from */
+  const [qc152Focus, setQc152Focus] = useState<string | null>(null);
+  const [qc152From, setQc152From] = useState<"reply" | "fork">("reply");
   const qcCardPendingMode = useRef<{ id: string; mode: CardMode } | null>(null);
   /* v149.1 B3 — the row's "add date" opens the card in edit mode at its undated step */
   const [qcEditUndated, setQcEditUndated] = useState(false);
@@ -2589,6 +2608,8 @@ export const Queries: React.FC<{
      reaches the module; the condition is a build-time constant, so the hook order cannot vary. */
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const lhOverride = import.meta.env.MODE !== "production" ? useLivingCountOverride() : null;
+  /* v152 §1.4 — the quiet window, the writer's one setting for it (todoPrefs.queries.quietWeeks) */
+  const qcQuietWeeks = quietWeeksOf(currentUser);
   const qcRows = useMemo(
     /* ⚠️ THE MODE CHECK IS HERE, NOT ONLY INSIDE THE AID, SO THE BUNDLER CAN DROP IT. With the gate
        only in `qcReviewAid` the guard folded correctly (`num = () => 0`, provably inert) and the
@@ -2596,10 +2617,17 @@ export const Queries: React.FC<{
        A statically-replaced `import.meta.env.MODE` makes this branch dead code in a production
        build, the import unreachable, and the module absent from the bundle. Verified by grepping
        `dist/`, not by reading this line. */
-    () => buildQcRows(
-      import.meta.env.MODE === "production" ? (queries as Query[]) : padLiveQueries(queries as Query[], agents, Date.now()),
-      agents, activities, Date.now()),
-    [queries, agents, activities],
+    /* v152 §1 — the six states, stamped on each row once (lib/queryState): the desktop list, Birds-eye and the card read
+       `qs`; every other reader of these rows keeps `whereItStands` and `court`.
+       ⚠️ DESKTOP ONLY: the phone page reads these same rows, and an unstamped row is what keeps it on the old rule (its
+       chips, its groups) — measured, a stamp moved its With you / With the agent / Gone quiet counts (qc152Phone L14). */
+    () => {
+      const rows = buildQcRows(
+        import.meta.env.MODE === "production" ? (queries as Query[]) : padLiveQueries(queries as Query[], agents, Date.now()),
+        agents, activities, Date.now());
+      return qmPhone ? rows : stampRows(rows, agents, { quietWeeks: qcQuietWeeks, nowMs: Date.now() });
+    },
+    [queries, agents, activities, qcQuietWeeks, qmPhone],
   );
 
   /* ── THE ?status= FILTER (shell-rebuild pack, Phase 3) ──
@@ -2962,8 +2990,12 @@ export const Queries: React.FC<{
   /* v149 C — another query in the panel opens in view mode, unless a flow asked for respond on that very query */
   useEffect(() => {
     const p = qcCardPendingMode.current;
-    if (p && p.id === cardQueryId) { setQcCardMode(p.mode); qcCardPendingMode.current = null; } else setQcCardMode("view");
-  }, [cardQueryId]);
+    /* v152 §3 — on the desktop "respond" is the card's own record form, opened on "Who replied" */
+    if (p && p.id === cardQueryId) {
+      if (p.mode === "respond" && qcDesk) { setQc152Rec("resp"); setQcCardMode("record"); } else setQcCardMode(p.mode);
+      qcCardPendingMode.current = null;
+    } else setQcCardMode("view");
+  }, [cardQueryId]); // eslint-disable-line react-hooks/exhaustive-deps
   /* v138 §G — a bulk action runs each ticked query's journey in turn: when the panel closes, the next one opens.
      `stepRow` is declared far below, so the effect reaches it through a ref the render keeps current. */
   const stepRowRef = useRef<((req: OpenRequest) => void) | null>(null);
@@ -3937,14 +3969,16 @@ export const Queries: React.FC<{
   /* v140 §D — the quick picks' counts, over the scoped rows */
   const qc140QuickN = {
     /* v141.1 — the "Your move" quick pick is the "With you" set */
-    you: qcScoped.filter((r) => whereItStands(r, qcNow138) === "you").length,
+    you: qcScoped.filter((r) => quickOfRow(r, () => whereItStands(r, qcNow138)) === "you").length,
     over: qcScoped.filter((r) => r.pastExpected).length,
     wait: qcScoped.filter((r) => waitingRow(r)).length,
     offers: qcScoped.filter((r) => r.status === QueryStatus.OFFER).length,
   };
   /* v141 — the four sets over the scoped rows (lib/qcSummary `whereItStands`): the hero card, the pinned band and the
      Filters menu's "Where it stands" all state these, and all three write the one `qcF138.where` */
-  const qcWhereN = whereCounts(qcScoped, qcNow138);
+  /* v152 §1.5 — the quick filters' counts: Your move = Offers + Materials requested + Nudge due (lib/queryState) */
+  const qcWhereN: Record<WhereKey, number> = { you: 0, agent: 0, quiet: 0, closed: 0 };
+  for (const r of qcScoped) qcWhereN[quickOfRow(r, () => whereItStands(r, qcNow138))] += 1;
   /* v141 §B/§E — the pinned band's figures, read by the hero card's Heard back too (one computation, one number) */
   const qcBandFig = bandFigures(qcScoped, qcNow138);
   /* v141 §B — a card row or a band part: set (or, pressed again, clear) the one "Where it stands" filter; from the
@@ -5964,8 +5998,261 @@ export const Queries: React.FC<{
       return true;
     };
 
+    /* ══ v152 §2 — the desktop card's thread, reply box and tabs (lib/qcThread152 derives; this only gathers) ══
+       ⚠️ A STEP'S CHIPS ARE WHAT WAS RECORDED ON IT (recon A): Query sent shows the query's record, a step whose log
+          carries `materials` shows those, and every other step shows none — nothing is copied from a neighbour. */
+    let v152: QcCard152Data | undefined;
+    const evStore = new Map((trackingEvents as { id?: string; materials?: unknown }[]).map((e) => [String(e.id ?? ""), e]));
+    if (qcDesk) {
+      const free = !packagesUnlocked(currentUser) || (import.meta.env.MODE !== "production" ? qc152DevFree() : false);
+      const KIND: Record<string, string> = { ql: "Your query letter.", syn: "Your synopsis.", sample: "Your opening sample.", other: "What you sent with the query." };
+      const queryChips = sv.pieces.map((pc) => {
+        const label = pc.key === "sample" && pc.value ? capWord(pc.value.split(" · ")[0]) : pc.label;
+        const detail = free ? KIND[pc.key] ?? label
+          : pc.key === "sample" ? capWord(pc.value || "Opening sample")
+          : pc.value ? `${pc.label} · ${pc.value}` : KIND[pc.key] ?? label;
+        return { label, detail };
+      });
+      const evById = evStore;
+      const stepChips = (activityId?: string) => {
+        const m = activityId ? evById.get(activityId)?.materials : undefined;
+        if (!Array.isArray(m)) return [];
+        return m.map((x) => (typeof x === "string" ? x : String((x as { label?: unknown })?.label ?? ""))).filter(Boolean)
+          .map((label) => ({ label, detail: free ? label : label }));
+      };
+      const tSteps: ThreadStepIn[] = story.map((x) => ({
+        key: x.key, activityId: x.activityId, status: x.status, kind: x.kind, ms: x.ms,
+        chips: x.status === QueryStatus.QUERIED && !x.kind ? (stepChips(x.activityId).length ? stepChips(x.activityId) : queryChips) : stepChips(x.activityId),
+        via: x.status === QueryStatus.QUERIED && !x.kind ? methodQualifier(q.sendMethod) : null,
+      }));
+      const nrmnRaw = typeof (q as { nrmnOverride?: unknown }).nrmnOverride === "boolean" ? (q as { nrmnOverride?: boolean }).nrmnOverride! : ag?.noResponseMeansNo;
+      const state = stateOf(row) ?? qsOf({ ...row, nrmn: !!nrmnRaw }, { quietWeeks: qcQuietWeeks, nowMs: now });
+      const heard = [...tSteps].reverse().find((x) => x.ms != null && side152(x) === "them");
+      const lastMs = [...tSteps].reverse().find((x) => x.ms != null)?.ms ?? null;
+      const lsc = q.lastStatusChange ? new Date(q.lastStatusChange as string).getTime() : NaN;
+      v152 = {
+        state,
+        replyMs: (row as { replyMs?: number | null }).replyMs ?? row.expectedMs,
+        dueMs: row.court === "agent" ? null : row.expectedMs,
+        closedMs: state === "closed" ? (Number.isFinite(lsc) ? lsc : lastMs) : null,
+        steps: tSteps,
+        agentWeeks: storyCtx.agentWeeks,
+        nrmn: typeof nrmnRaw === "boolean" ? nrmnRaw : null,
+        free,
+        queriedVia: methodQualifier(q.sendMethod),
+        asks: (ag?.materialsWanted ?? []).map((x) => String(x)).filter(Boolean),
+        sentLabels: sent.map((x) => x.label),
+        lastHeardMs: heard?.ms ?? null,
+        how: submissionWords(ag),
+      };
+    }
+    /* §3 — the reply box's button opens the card's own form; nothing writes until its Save. An offer's answer and a
+       revision's send keep their journeys (the form has no step for either), and Reopen is the late reply. */
+    const reply152 = (a: ReplyAct) => {
+      const rr = q.status === QueryStatus.REVISE_RESUBMIT;
+      if (a === "offer" || a === "reopen" || (a === "sent" && rr)) { stepRow({ mode: a === "offer" ? "offer" : a === "reopen" ? "resp" : "sent", queryId: q.id }); return; }
+      setQc152Rec(a === "sent" ? (q.status === QueryStatus.FULL_REQUESTED ? "full_sent" : "partial_sent") : a === "nudge" ? "nudge" : a === "close" ? "noresp" : "resp");
+      setQc152From("reply");
+      setQcCardMode("record");
+    };
+    /* what the material editors offer (§4.4): the book's versions (Pro), the saved letters and synopses, the one in use */
+    const qc152Env = (): MatEnv => ({
+      free: !!v152?.free,
+      versions: bookVersionsOf(ms).filter((v) => !(v as { archived?: boolean }).archived)
+        .map((v) => ({ id: v.id, name: v.name, madeMs: new Date(v.createdDate).getTime() })).sort((a, b) => a.madeMs - b.madeMs),
+      inUseVersionId: inUseBookVersion(ms, packages),
+      letters: scriptDb.versions.filter((v) => v.manuscriptId === q.manuscriptId && v.componentType === ComponentType.QUERY_LETTER).map((v) => ({ name: v.versionName })),
+      synopses: scriptDb.versions.filter((v) => v.manuscriptId === q.manuscriptId && v.componentType === ComponentType.SYNOPSIS).map((v) => ({ name: v.versionName })),
+    });
+    let edit152: React.ReactNode = null;
+    /* ── §4: the pencil's three ways in, Fix a mistake, and the details ── */
+    const T4: Partial<Record<string, FixRow["t"]>> = {
+      [QueryStatus.QUERIED]: "queried", [QueryStatus.PARTIAL_REQUESTED]: "preq", [QueryStatus.PARTIAL_SENT]: "psent", [QueryStatus.FULL_REQUESTED]: "freq",
+      [QueryStatus.FULL_SENT]: "fsent", [QueryStatus.OFFER]: "offer", [QueryStatus.REJECTED]: "passed", [QueryStatus.NO_RESPONSE]: "noresp", [QueryStatus.WITHDRAWN]: "withdrawn",
+    };
+    const asMats = (labels: string[]): StepMaterial[] => labels.map((l) => {
+      const m = readMat(l);
+      return m.kind === "sample" ? { kind: "sample" as const, unit: m.unit, n: m.n } : m.kind === "other" ? { kind: "other" as const, text: l } : { kind: m.kind };
+    });
+    const storedMats = (id?: string): StepMaterial[] | null => {
+      const m = id ? evStore.get(id)?.materials : undefined;
+      return Array.isArray(m) && m.length && typeof m[0] === "object" ? (m as StepMaterial[]).map((x) => ({ ...x })) : null;
+    };
+    if (v152 && qcCardMode === "fork") {
+      edit152 = <QcFork152 first={first} onBack={() => setQcCardMode("view")} onFix={() => { setQc152Focus(null); setQcCardMode("fix"); }}
+        onChanged={() => { setQc152Rec(null); setQc152From("fork"); setQcCardMode("record"); }} onDetails={() => setQcCardMode("details")} />;
+    }
+    if (v152 && qcCardMode === "fix" && currentUser) {
+      const rows: FixRow[] = v152.steps.flatMap((x) => {
+        const t = x.kind === "nudge" ? "nudge" : x.status ? T4[x.status] : undefined;
+        if (!t || x.ms == null || !x.activityId) return [];
+        return [{ id: x.activityId, t, d: x.ms, mats: storedMats(x.activityId) ?? (t === "queried" ? asMats(x.chips.map((c) => c.label)) : []) }];
+      });
+      const pkgs: PkgChoice[] | null = v152.free ? null : packages.filter((k) => k.manuscriptId === q.manuscriptId && !(k as { retiredAt?: string }).retiredAt).map((k) => {
+        const nm = (id: string) => scriptDb.versions.find((v) => v.id === id)?.versionName ?? null;
+        const mats: StepMaterial[] = [];
+        if (k.queryLetterVersionId) mats.push({ kind: "letter", name: nm(k.queryLetterVersionId) });
+        if (k.synopsisVersionId) mats.push({ kind: "synopsis", name: nm(k.synopsisVersionId) });
+        if (k.samplePagesVersionId || k.bookVersionId) mats.push({ kind: "sample", unit: "chapters", n: 3, versionId: k.bookVersionId ?? null });
+        const credited = queries.some((x) => sentRecordOf(x).packageId === k.id);
+        return { id: k.id, name: k.packageName, edition: k.edition ?? 1, draft: !k.firstSentAt && !credited, madeMs: new Date(k.createdDate as string).getTime(), mats };
+      });
+      const rec0 = sentRecordOf(q);
+      const uid = currentUser.id;
+      edit152 = (
+        <QcFix152 key={`fix:${q.id}`} first={first} nowMs={now} rows={rows} focusId={qc152Focus} env={qc152Env()} packages={pkgs}
+          pkgNow={rec0.how === "package" && rec0.packageId ? { id: rec0.packageId, edition: rec0.edition, name: rec0.packageName ?? "the package" } : null}
+          now={{ status: row.status, state: v152.state, replyMs: v152.replyMs, dueMs: v152.dueMs, dueWho: null }}
+          after={(rs) => {
+            const last = [...rs].filter((x) => x.t !== "nudge").sort((a, b) => a.d - b.d).pop();
+            const ST: Record<string, QueryStatus> = { queried: QueryStatus.QUERIED, preq: QueryStatus.PARTIAL_REQUESTED, psent: QueryStatus.PARTIAL_SENT, freq: QueryStatus.FULL_REQUESTED, fsent: QueryStatus.FULL_SENT, offer: QueryStatus.OFFER, passed: QueryStatus.REJECTED, noresp: QueryStatus.NO_RESPONSE, withdrawn: QueryStatus.WITHDRAWN };
+            const status = last ? ST[last.t] : row.status;
+            const state = status === QueryStatus.OFFER ? "offer" : [QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED].includes(status as QueryStatus) ? "materials"
+              : [QueryStatus.REJECTED, QueryStatus.NO_RESPONSE, QueryStatus.WITHDRAWN].includes(status as QueryStatus) ? "closed" : status === row.status ? v152.state : "agent";
+            return { status, state, replyMs: null, dueMs: null, dueWho: null };
+          }}
+          busy={qc152Busy}
+          onBack={() => setQcCardMode("fork")}
+          onSave={async (rs, removed, pkg) => {
+            if (qc152Busy) return false;
+            setQc152Busy(true);
+            try {
+              const [existing, feed] = await Promise.all([readLog(uid, q.id), readFeed(uid, q.id)]);
+              const K: Record<string, FixStep["kind"]> = { queried: "queried", preq: "partial_req", psent: "partial_sent", freq: "full_req", fsent: "full_sent", offer: "offer", nudge: "nudge", passed: "pass", noresp: "noresp", withdrawn: "withdrawn" };
+              const plan = planFix({ uid, q, agent: ag, ms, existing, feed, nowMs: Date.now(), quietWeeks: qcQuietWeeks },
+                rs.map((r) => ({ id: r.id, isNew: r.isNew, kind: K[r.t], dayMs: r.d, materials: r.mats })), removed, pkg);
+              /* a draft package picked here goes on query and locks: its stamp joins the same batch */
+              const draftPkg = pkg?.id ? packages.find((k) => k.id === pkg.id && !k.firstSentAt) : undefined;
+              if (draftPkg) plan.update = [{ path: `packages/${draftPkg.id}`, data: packageLockStamp() }];
+              const snap = await commitPlan(uid, plan);
+              setQcCardMode("view");
+              showUndoBar({ message: `Fixed · ${ag?.name || ag?.agency || "The agent"}`, sub: removed.length ? `${removed.length} ${removed.length === 1 ? "STEP" : "STEPS"} REMOVED` : "THE RECORD IS CORRECTED", undo: async () => { await restoreSnapshot(snap); } });
+              return true;
+            } catch (e) {
+              console.error("v152: the fix failed", e);
+              showToast({ message: "Couldn't save the fix. Nothing was changed." });
+              return false;
+            } finally { setQc152Busy(false); }
+          }} />
+      );
+    }
+    if (v152 && qcCardMode === "details" && currentUser) {
+      const uid = currentUser.id;
+      const choices = agents.map((a) => ({
+        id: a.id, name: agentPrimary(a), agency: agentAgencyLine(a), initials: agentInitials(a),
+        queried: queries.some((x) => x.agentId === a.id && x.manuscriptId === q.manuscriptId),
+        weeks: typeof a.responseTimeWeeks === "number" && a.responseTimeWeeks > 0 ? a.responseTimeWeeks : null,
+      }));
+      const fit = askChips(v152.asks, v152.sentLabels);
+      edit152 = (
+        <QcDetails152 key={`det:${q.id}`} first={first} nowMs={now} agentId={q.agentId} sendMethod={String(q.sendMethod ?? "Email")} agents={choices}
+          whatWent={v152.sentLabels} pkgName={sv.how === "package" ? sv.name : null} asks={v152.asks} missing={fit.missing} replyWeeks={v152.agentWeeks}
+          replyNow={v152.replyMs} replyFor={(id) => expectedFor(q, agents.find((a) => a.id === id) ?? null).ms} free={v152.free} busy={qc152Busy}
+          onBack={() => setQcCardMode("fork")}
+          onFixQuerySent={() => { setQc152Focus(v152!.steps.find((x) => x.status === QueryStatus.QUERIED)?.activityId ?? null); setQcCardMode("fix"); }}
+          onAgentCard={() => { if (ag) openAgentCard(ag.id, { tab: "work", focus: "reply", from: "qc" }); }}
+          onSave={async (next) => {
+            if (qc152Busy) return false;
+            setQc152Busy(true);
+            try {
+              const snap = await commitPlan(uid, planDetails(q, next));
+              setQcCardMode("view");
+              showUndoBar({ message: `Details saved · ${ag?.name || ag?.agency || "The agent"}`, sub: "THE QUERY IS UPDATED", undo: async () => { await restoreSnapshot(snap); } });
+              return true;
+            } catch (e) {
+              console.error("v152: the details save failed", e);
+              showToast({ message: "Couldn't save the details. Nothing was changed." });
+              return false;
+            } finally { setQc152Busy(false); }
+          }} />
+      );
+    }
+    if (v152 && qcCardMode === "record" && currentUser) {
+      const T: Partial<Record<string, StepType>> = {
+        [QueryStatus.QUERIED]: "queried", [QueryStatus.PARTIAL_REQUESTED]: "preq", [QueryStatus.PARTIAL_SENT]: "psent", [QueryStatus.FULL_REQUESTED]: "freq",
+        [QueryStatus.FULL_SENT]: "fsent", [QueryStatus.OFFER]: "offer", [QueryStatus.REJECTED]: "passed", [QueryStatus.NO_RESPONSE]: "noresp", [QueryStatus.WITHDRAWN]: "withdrawn",
+      };
+      const log: LogStep[] = v152.steps.flatMap((x) => {
+        const t = x.kind === "nudge" ? "nudge" : x.status ? T[x.status] : undefined;
+        return t && x.ms != null ? [{ id: x.key, t, d: x.ms }] : [];
+      });
+      const lastS = [...v152.steps].reverse().find((x) => x.ms != null) ?? null;
+      const req = [...v152.steps].reverse().find((x) => x.status === QueryStatus.PARTIAL_REQUESTED || x.status === QueryStatus.FULL_REQUESTED) ?? null;
+      const reqMats = (() => {
+        const m = req?.activityId ? evStore.get(req.activityId)?.materials : undefined;
+        return Array.isArray(m) ? m.filter((x): x is StepMaterial => !!x && typeof x === "object" && "kind" in x).map((x) => ({ ...x })) : null;
+      })();
+      const env = qc152Env();
+      const inUse = env.inUseVersionId;
+      const withVer = (m: StepMaterial): StepMaterial => (!v152.free && (m.kind === "sample" || m.kind === "full") && !m.versionId && inUse ? { ...m, versionId: inUse } : m);
+      const prefill = (k: RecordKind): StepMaterial[] => {
+        if (k === "full_sent") return (reqMats?.length ? reqMats : [{ kind: "full" as const }]).map(withVer);
+        if (k === "partial_sent") {
+          if (reqMats?.length) return reqMats.map(withVer);
+          const u = String(q.materialsRequestedType ?? "").toLowerCase(), n = Number(q.materialsRequestedQuantity);
+          const unit = u === "pages" || u === "chapters" || u === "words" ? u : "chapters";
+          return [withVer({ kind: "sample", unit, n: Number.isFinite(n) && n > 0 ? n : undefined }), ...(q.requestSynopsis ? [{ kind: "synopsis" as const }] : [])];
+        }
+        if (k === "partial_req") return [{ kind: "sample", unit: "chapters", n: 3 }];
+        if (k === "full_req") return [{ kind: "full" }];
+        return [];
+      };
+      const W = 7 * 86_400_000;
+      const dueWho = (s: string): RecordOutcome["dueWho"] => (s === "materials" || s === "offer" ? "you" : s === "closed" ? null : "agent");
+      const nowO: RecordOutcome = { status: row.status, state: v152.state, replyMs: v152.replyMs, dueMs: v152.dueMs, dueWho: dueWho(v152.state) };
+      const after = (k: RecordKind, day: number): RecordOutcome => {
+        const status = RECORD_STATUS[k] ?? row.status;
+        if (k === "partial_sent" || k === "full_sent") return { status, state: "agent", replyMs: day + 12 * W, dueMs: null, dueWho: "agent" };
+        if (k === "nudge") return { status, state: "agent", replyMs: day + qcQuietWeeks * W, dueMs: null, dueWho: "agent" };
+        if (k === "partial_req" || k === "full_req") return { status, state: "materials", replyMs: null, dueMs: null, dueWho: "you" };
+        if (k === "offer") return { status, state: "offer", replyMs: null, dueMs: null, dueWho: "you" };
+        return { status, state: "closed", replyMs: null, dueMs: null, dueWho: null };
+      };
+      const uid = currentUser.id;
+      edit152 = (
+        <QcRecord152 key={`${q.id}:${qc152Rec}`} first={first} nowMs={now} initials={row.initials} log={log}
+          last={lastS ? { status: lastS.status, kind: lastS.kind, ms: lastS.ms, chips: lastS.chips.map((c) => c.label) } : null}
+          initial={qc152Rec} prefill={prefill} askedMs={req?.ms ?? null} env={env} now={nowO} after={after} busy={qc152Busy}
+          onCancel={() => { setQcCardMode(qc152From === "fork" ? "fork" : "view"); setQc152Rec(null); }}
+          onSave={async (k, day, mats) => {
+            if (qc152Busy) return false;
+            setQc152Busy(true);
+            try {
+              const existing = await readLog(uid, q.id);
+              const plan = planRecord({ uid, q, agent: ag, ms, existing, nowMs: Date.now(), quietWeeks: qcQuietWeeks }, k, day, mats);
+              const snap = await commitPlan(uid, plan);
+              const newId = plan.set[0].path.split("/").pop() ?? null;
+              setQcCardFresh(newId);
+              window.setTimeout(() => setQcCardFresh(null), 1600);
+              setQc152Rec(null);
+              setQcCardMode("view");
+              showUndoBar({
+                message: `${{ partial_req: "Partial requested", full_req: "Full requested", offer: "Offer", pass: "Passed", partial_sent: "Partial sent", full_sent: "Full sent", nudge: "Nudge", noresp: "Closed: no response" }[k]} · ${ag?.name || ag?.agency || "The agent"}`,
+                sub: "ADDED TO THE TIMELINE",
+                undo: async () => { await restoreSnapshot(snap); },
+              });
+              return true;
+            } catch (e) {
+              console.error("v152: the save failed", e);
+              showToast({ message: "Couldn't save that. Nothing was changed." });
+              return false;
+            } finally { setQc152Busy(false); }
+          }} />
+      );
+    }
+
     return (
       <QcQueryCard149
+        v152={v152}
+        onReply152={reply152}
+        edit152={edit152}
+        onBack152={() => {
+          if (qcCardMode === "fix" || qcCardMode === "details") setQcCardMode("fork");
+          else if (qcCardMode === "record" && qc152From === "fork") { setQcCardMode("fork"); setQc152Rec(null); }
+          else { setQcCardMode("view"); setQc152Rec(null); }
+        }}
+        onPencil152={() => setQcCardMode("fork")}
+        onEditStep152={(id) => { setQc152Focus(id); setQcCardMode("fix"); }}
         row={row}
         nowMs={now}
         msTitle={ms?.title ?? null}
@@ -5995,6 +6282,8 @@ export const Queries: React.FC<{
           if (f === null) openAgentCard(ag.id, { tab: "who", from: "qc" });
           else if (f === "wishlist") openAgentCard(ag.id, { tab: "want", focus: "wishlist", from: "qc" });
           else if (f === "method") openAgentCard(ag.id, { tab: "work", focus: "method", from: "qc" });
+          else if (f === "reply") openAgentCard(ag.id, { tab: "work", focus: "reply", from: "qc" });
+          else if (f === "materials") openAgentCard(ag.id, { tab: "work", focus: "materials", from: "qc" });
           else openAgentCard(ag.id, { tab: "who", focus: f, from: "qc" });
         }}
         due={row.court === "closed" ? { line: nl.line, hot: false } : { line: nl.line, hot: nl.hot }}
@@ -6055,7 +6344,7 @@ export const Queries: React.FC<{
           onPick={(id) => {
             setQcFlow(null);
             cardSetRef.current = qcVisible.map((r) => r.id);
-            if (cardQueryId === id) { setQcCardMode("respond"); return; }
+            if (cardQueryId === id) { setQc152Rec("resp"); setQcCardMode("record"); return; }
             qcCardPendingMode.current = { id, mode: "respond" };
             onOpenQuery?.(id);
           }} />
@@ -7753,9 +8042,10 @@ export const Queries: React.FC<{
               const now151 = qcNow138;
               const phrase151 = (r: QcRow) => nextLine(r, qcComing.get(r.id) ?? null, now151).phrase;
               const sorted151 = sort151(qcVisible, qcSort151, (r) => nextCell(r, phrase151(r), now151).label);
-              /* v151.1 §6 — on one quick filter, Who it's with has nothing left to group: one label row, no groups */
-              const sections151: Section<QcRow>[] = qcGroup === "attention" && qcF138.where === null ? whoSections(sorted151, now151)
-                : qcGroup === "none" || qcGroup === "attention" ? (sorted151.length ? [{ key: "all", label: "", rows: sorted151 }] : [])
+              /* v152 §1.5 — Who it's with is the six states, and under a quick filter its headers still show (this
+                 supersedes v151.1 §6's single label row) */
+              const sections151: Section<QcRow>[] = qcGroup === "attention" ? whoSections(sorted151, now151)
+                : qcGroup === "none" ? (sorted151.length ? [{ key: "all", label: "", rows: sorted151 }] : [])
                 /* v151.2 §3 — Next action has its own seven groups, most urgent first (lib/qc1512) */
                 : qcGroup === "action" ? actionSections(sorted151, now151)
                 : qcListGroups(sorted151, qcGroup, now151, qcPackageName).map((g) => ({
@@ -7774,12 +8064,13 @@ export const Queries: React.FC<{
               return (
                 <QcPage151
                   loading={showGridSkeleton}
-                  counts={showGridSkeleton ? null : { ms: qcLineTitle, sent: qcScoped.length, active: qcScoped.filter((r) => whereItStands(r, now151) !== "closed").length, heardPct: qcBandFig.heardPct }}
+                  counts={showGridSkeleton ? null : { ms: qcLineTitle, sent: qcScoped.length, active: qcScoped.filter((r) => quickOfRow(r, () => whereItStands(r, now151)) !== "closed").length, heardPct: qcBandFig.heardPct }}
                   summary={showGridSkeleton ? null : weekSummary(qcScoped, now151)}
                   view={qcView150} onView={pickView150}
                   onLog={() => onNavigate?.("queries", "Log a query")}
                   onRecord={() => onNavigate?.("queries", "Record a response")}
                   logDisabled={creating} logRef={logTriggerRef}
+                  quietWeeks={qcQuietWeeks} onQuietWeeks={(w) => { void updateUserPaths({ [QUIET_WEEKS_PATH]: w }); }}
                   tabCounts={showGridSkeleton ? null : qcWhereN} total={qcScoped.length} where={qcF138.where}
                   onWhere={(k) => setQcF138((f) => ({ ...f, where: k }))}
                   showing={qcVisible.length}
@@ -7805,7 +8096,7 @@ export const Queries: React.FC<{
                   onAct={(id, mode) => {
                     if (isPracticeId(id)) { openPip(); return; }
                     /* v151.2 — the row's one action names its journey (lib/qc1512 `rowAct`): a gone-quiet row's is Nudge */
-                    if (mode && DRAWER_LIVE[mode]) { stepRow({ mode, queryId: id }); return; }
+                    if (mode && DRAWER_LIVE[mode]) { stepRow({ mode, queryId: id, ...(mode === "close" ? { preset: { closeWhy: "noreply" as const } } : {}) }); return; }
                     const r = qcById.get(id);
                     const req = r ? trayOpen(qcComing.get(id)?.bucket ?? null, r) : null;
                     if (req) stepRow(req); else onOpenQuery?.(id);
@@ -7821,7 +8112,7 @@ export const Queries: React.FC<{
                       onOpen={(id) => { cardSetRef.current = qcBeOrder; onOpenQuery?.(id); }}
                       onAct={(id, mode) => {
                         const m = mode as DrawerMode | undefined;
-                        if (m && DRAWER_LIVE[m]) { stepRow({ mode: m, queryId: id }); return; }
+                        if (m && DRAWER_LIVE[m]) { stepRow({ mode: m, queryId: id, ...(m === "close" ? { preset: { closeWhy: "noreply" as const } } : {}) }); return; }
                         const r = qcById.get(id); const req = r ? trayOpen(null, r) : null; if (req) stepRow(req); else onOpenQuery?.(id);
                       }} />
                   ) : null}

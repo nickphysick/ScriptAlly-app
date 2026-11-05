@@ -12,7 +12,7 @@
  {
   "where": "every body white, 30 tall, a 34px cap",
   "ok": true,
-  "detail": "[{\"st\":\"Partial Requested\",\"w\":\"you\",\"body\":\"rgb(255, 255, 255)\",\"cap\":\"rgb(243, 211, 198)\",\"capW\":34,\"h\":30,\"fg\":\"rgb(28, 19, 15)\"},{\"st\":\"Partial Sent\",\"w\":\"you\",\"body\":\"rgb(255, 255, 255)\",\"cap\":\"rgb(243, 211, 198)\",\"capW\":34,\"h\":30,\"fg\":\"rgb(28, 19, 15)\"}]"
+  "detail": "[{\"st\":\"Offer\",\"w\":\"you\",\"body\":\"rgb(255, 255, 255)\",\"cap\":\"rgb(203, 217, 190)\",\"capW\":34,\"h\":30,\"fg\":\"rgb(28, 19, 15)\"},{\"st\":\"Offer\",\"w\":\"you\",\"body\":\"rgb(255, 255, 255)\",\"cap\":\"rgb(203, 217, 190)\",\"capW\":34,\"h\":30,\"fg\":\"rgb(28, 19, 15)\"}]"
  },
  {
   "where": "Queried's cap is sand, not grey",

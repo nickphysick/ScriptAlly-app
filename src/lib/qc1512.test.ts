@@ -36,9 +36,10 @@ describe("the colour scheme", () => {
 });
 
 describe("group headers", () => {
-  it("who it's with: navy, light blue, stone, faded", () => {
+  it("who it's with: navy, light blue, stone, faded — and v152's Gone quiet, stone fading to white", () => {
     expect(headFill(headTone("attention", "you"))).toBe("#2a3a52");
-    expect(headFill(headTone("attention", "quiet"))).toBe("#c5d0dd");
+    expect(headFill(headTone("attention", "nudge"))).toBe("#c5d0dd");
+    expect(headFill(headTone("attention", "quiet"))).toMatch(/^linear-gradient\(90deg, #e3dbcf/);
     expect(headFill(headTone("attention", "agent"))).toBe("#e3dbcf");
     expect(headFill(headTone("attention", "closed"))).toBe("#f1efec");
   });
@@ -48,7 +49,7 @@ describe("group headers", () => {
     expect(headFill(headTone("package", "pkg:x"))).toBe("#e3dbcf");
   });
   it("next action: the order and colours", () => {
-    expect(ACTION_1512.map((g) => g.label)).toEqual(["Answer the offer", "Send your full", "Send your partial", "Send your revision", "Nudge", "Reply due soon", "Waiting to hear", "Nothing to do"]);
+    expect(ACTION_1512.map((g) => g.label)).toEqual(["Answer the offer", "Send your full", "Send your partial", "Send your revision", "Nudge", "Reply due soon", "Waiting to hear", "Close it", "Nothing to do"]);
     expect(headFill(headTone("action", "na:offer"))).toBe("#2a3a52");
     expect(headFill(headTone("action", "na:nudge"))).toBe("#c5d0dd");
     expect(headFill(headTone("action", "na:wait"))).toBe("#e3dbcf");
@@ -72,6 +73,9 @@ describe("the Next-action groups", () => {
     expect(s.find((x) => x.label === "Nudge")!.rows.map((r) => r.id)).toEqual(["nudge", "quiet"]);
     expect(s.reduce((n, x) => n + x.rows.length, 0)).toBe(rows.length);
     expect(actionGroup(row({ status: QueryStatus.QUERIED, expected: at(7) }), NOW)).toBe("wait");
+    /* v152: a row the page has stamped reads its state — Gone quiet is Close it, Nudge due is Nudge */
+    expect(actionGroup({ ...row({ status: QueryStatus.QUERIED, expected: at(-60) }), qs: "quiet" } as never, NOW)).toBe("close");
+    expect(actionGroup({ ...row({ status: QueryStatus.QUERIED, expected: at(-5) }), qs: "nudge" } as never, NOW)).toBe("nudge");
   });
 });
 

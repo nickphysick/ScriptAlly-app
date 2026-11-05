@@ -1,0 +1,77 @@
+[
+ {
+  "where": "agent: population — the v152 card is in the panel",
+  "ok": true,
+  "detail": "{\"w\":504,\"h\":700,\"cy\":400,\"right\":28,\"border\":\"1px solid rgb(217, 200, 186)\",\"radius\":\"14px\",\"card\":true,\"pad\":\"7px\"}"
+ },
+ {
+  "where": "agent: width 504 ±2",
+  "ok": true,
+  "detail": "{\"w\":504,\"h\":700,\"cy\":400,\"right\":28,\"border\":\"1px solid rgb(217, 200, 186)\",\"radius\":\"14px\",\"card\":true,\"pad\":\"7px\"}"
+ },
+ {
+  "where": "agent: height 700 ±1",
+  "ok": true,
+  "detail": "{\"w\":504,\"h\":700,\"cy\":400,\"right\":28,\"border\":\"1px solid rgb(217, 200, 186)\",\"radius\":\"14px\",\"card\":true,\"pad\":\"7px\"}"
+ },
+ {
+  "where": "agent: centred in the viewport ±2",
+  "ok": true,
+  "detail": "{\"w\":504,\"h\":700,\"cy\":400,\"right\":28,\"border\":\"1px solid rgb(217, 200, 186)\",\"radius\":\"14px\",\"card\":true,\"pad\":\"7px\"}"
+ },
+ {
+  "where": "agent: the inner border is 1px rgb(217, 200, 186) at radius 14",
+  "ok": true,
+  "detail": "{\"w\":504,\"h\":700,\"cy\":400,\"right\":28,\"border\":\"1px solid rgb(217, 200, 186)\",\"radius\":\"14px\",\"card\":true,\"pad\":\"7px\"}"
+ },
+ {
+  "where": "long: population — the v152 card is in the panel",
+  "ok": true,
+  "detail": "{\"w\":504,\"h\":700,\"cy\":400,\"right\":28,\"border\":\"1px solid rgb(217, 200, 186)\",\"radius\":\"14px\",\"card\":true,\"pad\":\"7px\"}"
+ },
+ {
+  "where": "long: width 504 ±2",
+  "ok": true,
+  "detail": "{\"w\":504,\"h\":700,\"cy\":400,\"right\":28,\"border\":\"1px solid rgb(217, 200, 186)\",\"radius\":\"14px\",\"card\":true,\"pad\":\"7px\"}"
+ },
+ {
+  "where": "long: height 700 ±1",
+  "ok": true,
+  "detail": "{\"w\":504,\"h\":700,\"cy\":400,\"right\":28,\"border\":\"1px solid rgb(217, 200, 186)\",\"radius\":\"14px\",\"card\":true,\"pad\":\"7px\"}"
+ },
+ {
+  "where": "long: centred in the viewport ±2",
+  "ok": true,
+  "detail": "{\"w\":504,\"h\":700,\"cy\":400,\"right\":28,\"border\":\"1px solid rgb(217, 200, 186)\",\"radius\":\"14px\",\"card\":true,\"pad\":\"7px\"}"
+ },
+ {
+  "where": "long: the inner border is 1px rgb(217, 200, 186) at radius 14",
+  "ok": true,
+  "detail": "{\"w\":504,\"h\":700,\"cy\":400,\"right\":28,\"border\":\"1px solid rgb(217, 200, 186)\",\"radius\":\"14px\",\"card\":true,\"pad\":\"7px\"}"
+ },
+ {
+  "where": "closed: population — the v152 card is in the panel",
+  "ok": true,
+  "detail": "{\"w\":504,\"h\":700,\"cy\":400,\"right\":28,\"border\":\"1px solid rgb(217, 200, 186)\",\"radius\":\"14px\",\"card\":true,\"pad\":\"7px\"}"
+ },
+ {
+  "where": "closed: width 504 ±2",
+  "ok": true,
+  "detail": "{\"w\":504,\"h\":700,\"cy\":400,\"right\":28,\"border\":\"1px solid rgb(217, 200, 186)\",\"radius\":\"14px\",\"card\":true,\"pad\":\"7px\"}"
+ },
+ {
+  "where": "closed: height 700 ±1",
+  "ok": true,
+  "detail": "{\"w\":504,\"h\":700,\"cy\":400,\"right\":28,\"border\":\"1px solid rgb(217, 200, 186)\",\"radius\":\"14px\",\"card\":true,\"pad\":\"7px\"}"
+ },
+ {
+  "where": "closed: centred in the viewport ±2",
+  "ok": true,
+  "detail": "{\"w\":504,\"h\":700,\"cy\":400,\"right\":28,\"border\":\"1px solid rgb(217, 200, 186)\",\"radius\":\"14px\",\"card\":true,\"pad\":\"7px\"}"
+ },
+ {
+  "where": "closed: the inner border is 1px rgb(217, 200, 186) at radius 14",
+  "ok": true,
+  "detail": "{\"w\":504,\"h\":700,\"cy\":400,\"right\":28,\"border\":\"1px solid rgb(217, 200, 186)\",\"radius\":\"14px\",\"card\":true,\"pad\":\"7px\"}"
+ }
+]

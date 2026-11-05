@@ -23,6 +23,7 @@ import { agentAgencyLine, agentInitials, agentPrimary } from "./agentDisplay";
 import { buildRows as analyticsRows } from "./analytics";
 import { compareAttention, type AttentionRow } from "./queryAttentionSort";
 import { resolveExpectedDate } from "./expectedDate";
+import { STAGE_RESPONSE_WINDOWS } from "./queryAmbient";
 import { cardMaterials, stateFor, turnFor, type CardMaterials, type State } from "./queryCardFacts";
 import type { DerivableActivity } from "./queryDerivation";
 import { anyToMs, dayN, isClosedStatus, stageHistory, type StageHistory } from "./qcStages";
@@ -152,7 +153,12 @@ export function expectedFor(q: Query, agent: Agent | undefined | null): { ms: nu
   if (court === "you") return { ms: anyToMs(q.expectedSendDate), kind: "sendBy" };
   if (court === "offer") return { ms: anyToMs(q.offerResponseDeadline), kind: "offer" };
   const sends = [q.dateSent, q.partialSentDate, q.fullSentDate].map(anyToMs).filter((t): t is number => t != null);
-  const r = resolveExpectedDate(q, sends.length ? Math.max(...sends) : null, agent?.responseTimeWeeks ?? null, null);
+  /* v152 (Nick's ruling on the recon) — the agent's one stated reply time is for the QUERY; a partial or a full reads
+     the house windows (12 and 12 weeks), here and in the sent journey's save, so the two agree */
+  const weeks = status === QueryStatus.PARTIAL_SENT ? STAGE_RESPONSE_WINDOWS.partial
+    : status === QueryStatus.FULL_SENT || status === QueryStatus.RESUBMITTED ? STAGE_RESPONSE_WINDOWS.full
+    : agent?.responseTimeWeeks ?? null;
+  const r = resolveExpectedDate(q, sends.length ? Math.max(...sends) : null, weeks, null);
   return { ms: r.ms, kind: "reply" };
 }
 

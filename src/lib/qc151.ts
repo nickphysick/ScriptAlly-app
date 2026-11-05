@@ -11,6 +11,7 @@
  */
 import { QueryStatus } from "../types";
 import { STAGE_NAME, whereItStands, type QcRow, type WhereKey } from "./qcSummary";
+import { STATE_LABEL, STATE_ORDER, stateOf } from "./queryState";
 import { nextDoor, nextWords } from "./queryActions/entry";
 import { MONTHS_SHORT } from "./dates";
 
@@ -115,6 +116,11 @@ export const TAB_LABEL: Record<WhereKey, string> = { you: "Your move", agent: "W
 export interface Section<T> { key: string; label: string; rows: T[] }
 /** Who it's with: the four tabs' own sets (`whereItStands`), in order, empty ones dropped; rows keep their sort */
 export function whoSections<T extends QcRow>(rows: readonly T[], nowMs: number): Section<T>[] {
+  /* v152 §1.5 — rows the page has stamped group into the six states, in their order (lib/queryState) */
+  if (rows.length && stateOf(rows[0])) {
+    return STATE_ORDER.map((k) => ({ key: k as string, label: STATE_LABEL[k], rows: rows.filter((r) => stateOf(r) === k) }))
+      .filter((s) => s.rows.length > 0);
+  }
   return WHO_GROUPS.map((g) => ({ key: g.key, label: g.label, rows: rows.filter((r) => whereItStands(r, nowMs) === g.key) }))
     .filter((s) => s.rows.length > 0);
 }

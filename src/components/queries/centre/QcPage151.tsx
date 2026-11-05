@@ -24,9 +24,11 @@ import { BE_GROUPS, BE_SORTS, type BeGroup, type BeSort } from "../../../lib/qc1
 import { GROUP_BY_OPTIONS, type GroupBy } from "../../../lib/qcCalView";
 import { TAB_LABEL, isClosedRow, lastHeardMs, pressSort, trackOf, type Section, type Sort151, type SortKey151 } from "../../../lib/qc151";
 import { dayLine, pillWords, yearSplit, type PillGroup, type WeekSummary } from "../../../lib/qc1511";
-import { STATUS_FILL, headFill, headTone, nextNum, rowAct, rowTag, statusKind } from "../../../lib/qc1512";
+import { ROW_TAG_WORDS, STATUS_FILL, headFill, headTone, nextNum, rowAct, rowTag, statusKind } from "../../../lib/qc1512";
+import { quickOfRow, stateOf } from "../../../lib/queryState";
 import type { DrawerMode } from "../../../lib/queryActions/drawerStore";
 import { GROUP_LINE, RadioMenu151 } from "./QcToolbar140";
+import { QcQuietSetting } from "./QcQuietSetting";
 import "./qcv151.css";
 
 export const HAWK_DESK = "/images/query-centre/hawk-desk.webp?v=1";
@@ -66,7 +68,9 @@ export interface CountLine1512 { ms: string | null; sent: number; active: number
 export const QcHeader151: React.FC<{
   loading: boolean; onLog: () => void; onRecord: () => void; logDisabled?: boolean; logRef?: React.Ref<HTMLButtonElement>;
   counts?: CountLine1512 | null;
-}> = ({ loading, onLog, onRecord, logDisabled = false, logRef, counts = null }) => (
+  /** v152 §1.4 — the quiet window, and its writer */
+  quietWeeks?: number; onQuietWeeks?: (w: number) => void;
+}> = ({ loading, onLog, onRecord, logDisabled = false, logRef, counts = null, quietWeeks, onQuietWeeks }) => (
   <header className="qc151-hd qc1512-ban" data-qc151="header" data-qc1512="banner" data-qcv="open-header" data-own-header="">
     <div className="qc1512-bt">
       <h1 data-page-title="true" data-qc151="title">Your queries</h1>
@@ -75,6 +79,7 @@ export const QcHeader151: React.FC<{
       </p>
     </div>
     <div className="qc151-acts">
+      {quietWeeks != null && onQuietWeeks ? <QcQuietSetting weeks={quietWeeks} onSet={onQuietWeeks} disabled={loading} /> : null}
       <button type="button" className="qc151-btn qc151-btn--g" data-qc151="record" data-qcv="oh-record" disabled={loading} onClick={onRecord}>Record a response</button>
       <button type="button" ref={logRef} className="qc151-btn qc151-btn--n" data-qc151="log" data-qcv="oh-log" disabled={loading || logDisabled} onClick={onLog}>+ Log a query</button>
     </div>
@@ -109,6 +114,9 @@ type Pop151 = "group" | "begroup" | "besort";
 
 export interface QcPage151Props {
   loading: boolean;
+  /** v152 §1.4 — the quiet window setting */
+  quietWeeks?: number;
+  onQuietWeeks?: (w: number) => void;
   view: View151;
   onView: (v: View151) => void;
   onLog: () => void;
@@ -255,12 +263,13 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
     const nn = nextNum(r, p.nowMs);
     const act = rowAct(r, p.nowMs);
     const tag = rowTag(r, p.nowMs);
-    const wh = whereItStands(r, p.nowMs);
+    const wh = quickOfRow(r, () => whereItStands(r, p.nowMs));
+    const qs = stateOf(r);
     const day = dayLine(r, p.nowMs);
     const closed = isClosedRow(r);
     const sk = statusKind(r.status);
     return (
-      <tr key={r.id} className={`qc1511-r qc1512-r${last ? " is-last" : ""}${p.selectedId === r.id ? " is-sel" : ""}`} data-qc151="row" data-qcv="row" data-id={r.id} data-status={r.status} data-where={wh} tabIndex={0}
+      <tr key={r.id} className={`qc1511-r qc1512-r${last ? " is-last" : ""}${p.selectedId === r.id ? " is-sel" : ""}`} data-qc151="row" data-qcv="row" data-id={r.id} data-status={r.status} data-where={wh} data-state={qs} tabIndex={0}
         onClick={(e) => { if ((e.target as HTMLElement).closest("button")) return; p.onOpen(r.id); }}
         onKeyDown={(e) => { if (e.key === "Enter" && e.target === e.currentTarget) { e.preventDefault(); p.onOpen(r.id); } }}>
         <td className="qc1511-tk qc1512-tk" data-qc1511="tint">
@@ -268,7 +277,7 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
           <Track151 row={r} />
         </td>
         <td className="qc1511-nm" data-qc151="agent">
-          <span className="qc1512-nl"><b>{r.agentName}</b>{tag ? <span className={`qc1512-tag qc1512-tag--${tag}`} data-qc1512="tag" data-tag={tag}>{tag === "you" ? "Your move" : "Gone quiet"}</span> : null}</span>
+          <span className="qc1512-nl"><b>{r.agentName}</b>{tag ? <span className={`qc1512-tag qc1512-tag--${tag}`} data-qc1512="tag" data-tag={tag}>{ROW_TAG_WORDS[tag]}</span> : null}</span>
           <span className="qc1511-agy" data-qc151="agency" title={r.agencyKey || undefined}>{r.agencyKey || "—"}</span>
         </td>
         <td className="qc1511-ws" data-qc151="stands">
@@ -330,7 +339,7 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
   const empty = p.sections.length === 0;
   return (
     <div className="qc151" data-qc151="page" data-view={p.view} ref={rootRef}>
-      <QcHeader151 loading={p.loading} onLog={p.onLog} onRecord={p.onRecord} logDisabled={p.logDisabled} logRef={p.logRef} counts={p.counts} />
+      <QcHeader151 loading={p.loading} onLog={p.onLog} onRecord={p.onRecord} logDisabled={p.logDisabled} logRef={p.logRef} counts={p.counts} quietWeeks={p.quietWeeks} onQuietWeeks={p.onQuietWeeks} />
       <QcSummary1511 summary={p.summary} />
 
       {/* §3 the quick filters, and the switch on the same row */}

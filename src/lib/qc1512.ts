@@ -12,6 +12,7 @@
  */
 import { QueryStatus } from "../types";
 import { whereItStands, type QcRow, type WhereKey } from "./qcSummary";
+import { QUIET_BAND_HEAD, stateOf, type QueryState } from "./queryState";
 import { nextDoor } from "./queryActions/entry";
 import { nextAction } from "./qcCalView";
 import { daysFrom, isClosedRow } from "./qc151";
@@ -41,12 +42,15 @@ export const CLOSED_TEXT = "#8a8076";
 
 /* ── group headers ─────────────────────────────────────────────────────────────────────────────────────────────── */
 
-export type HeadTone = "navy" | "blue" | "stone" | "faded" | `st-${StatusKind}`;
-export const HEAD_FILL: Record<"navy" | "blue" | "stone" | "faded", string> = { navy: "#2a3a52", blue: "#c5d0dd", stone: "#e3dbcf", faded: "#f1efec" };
+export type HeadTone = "navy" | "blue" | "stone" | "faded" | "quiet" | `st-${StatusKind}`;
+/* v152 §1.3 — Gone quiet is stone fading to white, across the title cell only (the column labels sit on white) */
+export const HEAD_FILL: Record<"navy" | "blue" | "stone" | "faded" | "quiet", string> = { navy: "#2a3a52", blue: "#c5d0dd", stone: "#e3dbcf", faded: "#f1efec", quiet: QUIET_BAND_HEAD };
 const WHO_TONE: Record<WhereKey, HeadTone> = { you: "navy", quiet: "blue", agent: "stone", closed: "faded" };
+/* v152 §1.1 — the six states' header colours: blues are yours, stone is theirs, fading stone is going cold, grey is done */
+export const STATE_TONE: Record<QueryState, HeadTone> = { offer: "navy", materials: "navy", nudge: "blue", agent: "stone", quiet: "quiet", closed: "faded" };
 
 /* the Next-action groups (v151.2 §3): their order, labels and header colours */
-export type Act1512 = "offer" | "full" | "partial" | "revision" | "nudge" | "soon" | "wait" | "none";
+export type Act1512 = "offer" | "full" | "partial" | "revision" | "nudge" | "soon" | "wait" | "close" | "none";
 export const ACTION_1512: readonly { key: Act1512; label: string; tone: HeadTone }[] = [
   { key: "offer", label: "Answer the offer", tone: "navy" },
   { key: "full", label: "Send your full", tone: "navy" },
@@ -56,6 +60,8 @@ export const ACTION_1512: readonly { key: Act1512; label: string; tone: HeadTone
   { key: "nudge", label: "Nudge", tone: "blue" },
   { key: "soon", label: "Reply due soon", tone: "stone" },
   { key: "wait", label: "Waiting to hear", tone: "stone" },
+  /* v152 §1.5 — Gone quiet queries: after Waiting to hear, before Nothing to do */
+  { key: "close", label: "Close it", tone: "quiet" },
   { key: "none", label: "Nothing to do", tone: "faded" },
 ];
 /**
@@ -68,8 +74,13 @@ export function actionGroup(r: QcRow, nowMs: number): Act1512 {
   if (isClosedRow(r) || r.court === "closed" || r.status === QueryStatus.SIGNED) return "none";
   const a = nextAction(r, nowMs);
   if (a === "offer" || a === "full" || a === "partial" || a === "revision") return a;
-  if (a === "nudge" || a === "close") return "nudge";
-  const left = r.expectedMs != null ? daysFrom(r.expectedMs, nowMs) : null;
+  /* v152 — a stamped row reads its state: Nudge due → Nudge, Gone quiet → Close it, with the agent → by its reply date */
+  const st = stateOf(r);
+  if (st === "nudge") return "nudge";
+  if (st === "quiet") return "close";
+  if (!st && (a === "nudge" || a === "close")) return "nudge";
+  const reply = st ? (r as { replyMs?: number | null }).replyMs ?? r.expectedMs : r.expectedMs;
+  const left = reply != null ? daysFrom(reply, nowMs) : null;
   return left != null && left >= 0 && left <= 6 ? "soon" : "wait";
 }
 export interface Sect<T> { key: string; label: string; rows: T[] }
@@ -82,6 +93,7 @@ export function actionSections<T extends QcRow>(rows: readonly T[], nowMs: numbe
 /** A section header's colour, by the grouping: who (by key), next action (by group), status (its status colour), the
  *  package grouping and anything ungrouped (stone). */
 export function headTone(group: string, key: string): HeadTone {
+  if (group === "attention" && key in STATE_TONE) return STATE_TONE[key as QueryState];
   if (group === "attention" && key in WHO_TONE) return WHO_TONE[key as WhereKey];
   if (key.startsWith("na:")) return ACTION_1512.find((g) => `na:${g.key}` === key)?.tone ?? "stone";
   if (group === "status") return `st-${statusKind(key)}`;
@@ -91,8 +103,14 @@ export const headFill = (t: HeadTone): string => (t.startsWith("st-") ? STATUS_F
 
 /* ── the row's tag ─────────────────────────────────────────────────────────────────────────────────────────────── */
 
-export type RowTag = "you" | "quiet" | null;
-export const rowTag = (r: QcRow, nowMs: number): RowTag => { const w = whereItStands(r, nowMs); return w === "you" || w === "quiet" ? w : null; };
+export type RowTag = "you" | "nudge" | "quiet" | null;
+/* v152 §1.5 — "Your move" on Offers and Materials requested, "Nudge due" on Nudge due, "Gone quiet" on Gone quiet */
+export const ROW_TAG_WORDS: Record<Exclude<RowTag, null>, string> = { you: "Your move", nudge: "Nudge due", quiet: "Gone quiet" };
+export const rowTag = (r: QcRow, nowMs: number): RowTag => {
+  const st = stateOf(r);
+  if (st) return st === "offer" || st === "materials" ? "you" : st === "nudge" ? "nudge" : st === "quiet" ? "quiet" : null;
+  const w = whereItStands(r, nowMs); return w === "you" || w === "quiet" ? w : null;
+};
 
 /* ── the Next column: a big number ─────────────────────────────────────────────────────────────────────────────── */
 
@@ -111,7 +129,14 @@ const unit = (n: number): string => (n === 1 ? "day" : "days");
  */
 export function nextNum(r: QcRow, nowMs: number): NextNum {
   if (isClosedRow(r) || r.court === "closed") return { kind: "dash" };
-  const due = r.expectedMs;
+  const st = stateOf(r);
+  /* v152 §1.5 — Gone quiet reads "N days quiet", counted from the reply date, in the late colour */
+  if (st === "quiet") {
+    const n = (r as { quietDays?: number | null }).quietDays;
+    if (n != null) return { kind: "num", n, label: [unit(n), "quiet"], tone: "late" };
+  }
+  /* after a nudge the reply is expected at the nudge date plus the quiet window (§1.2) */
+  const due = st && r.court === "agent" ? (r as { replyMs?: number | null }).replyMs ?? r.expectedMs : r.expectedMs;
   if (r.court === "agent") {
     if (due == null) {
       const inStage = r.stageStartMs != null ? Math.max(0, Math.round((sod(nowMs) - sod(r.stageStartMs)) / DAY)) : null;
@@ -143,7 +168,13 @@ export function rowAct(r: QcRow, nowMs: number): RowAct | null {
   if (isClosedRow(r) || r.court === "closed") return null;
   const door = nextDoor(r, nowMs);
   if (!door) return null;
-  const w = whereItStands(r, nowMs);
+  const st = stateOf(r);
+  /* v152 §1.5 — Gone quiet is "Close it", outlined, opening the close form; Nudge due is "Nudge"; with the agent (in
+     the reply time or the quiet window after a nudge) there is nothing to nudge */
+  if (st === "quiet") return { tone: "nudge", label: "Close it", mode: "close" };
+  if (st === "nudge") return { tone: "nudge", label: "Nudge", mode: "nudge" };
+  if (st === "agent" && door.mode === "nudge") return { tone: "plain", label: "Record a response", mode: "resp" };
+  const w = st ? null : whereItStands(r, nowMs);
   if (w === "quiet" || door.mode === "nudge") return { tone: "nudge", label: "Nudge", mode: "nudge" };
   if (door.mode === "offer") return { tone: "navy", label: "Answer the offer", mode: "offer" };
   if (door.mode === "sent") return { tone: "navy", label: SEND_WORDS[r.status] ?? door.label, mode: "sent" };

@@ -1,0 +1,152 @@
+[
+ {
+  "where": "offer: population — a reply box",
+  "ok": true,
+  "detail": "no card"
+ },
+ {
+  "where": "offer: field reads /^Answer the offer$/",
+  "ok": true,
+  "detail": "Answer the offer"
+ },
+ {
+  "where": "offer: second line reads /^\\d+ days? left$/",
+  "ok": true,
+  "detail": "6 days left"
+ },
+ {
+  "where": "offer: button reads Answer the offer (navy)",
+  "ok": true,
+  "detail": "{\"lead\":\"Answer the offer\",\"sub\":\"6 days left\",\"btn\":\"Answer the offer\",\"tone\":\"navy\"}"
+ },
+ {
+  "where": "offer: pressing the button writes nothing",
+  "ok": true,
+  "detail": "0 writes"
+ },
+ {
+  "where": "materials: population — a reply box",
+  "ok": true,
+  "detail": "no card"
+ },
+ {
+  "where": "materials: field reads /^Send the partial$/",
+  "ok": true,
+  "detail": "Send the partial"
+ },
+ {
+  "where": "materials: second line reads /^\\d+ days? left · by \\d{1,2} \\w{3}$/",
+  "ok": true,
+  "detail": "7 days left · by 12 Nov"
+ },
+ {
+  "where": "materials: button reads Mark partial sent (navy)",
+  "ok": true,
+  "detail": "{\"lead\":\"Send the partial\",\"sub\":\"7 days left · by 12 Nov\",\"btn\":\"Mark partial sent\",\"tone\":\"navy\"}"
+ },
+ {
+  "where": "materials: pressing the button writes nothing",
+  "ok": true,
+  "detail": "0 writes"
+ },
+ {
+  "where": "nudge: population — a reply box",
+  "ok": true,
+  "detail": "no card"
+ },
+ {
+  "where": "nudge: field reads /^Nudge Priya\\?$/",
+  "ok": true,
+  "detail": "Nudge Priya?"
+ },
+ {
+  "where": "nudge: second line reads /^Reply was due \\d{1,2} \\w{3}$/",
+  "ok": true,
+  "detail": "Reply was due 29 Oct"
+ },
+ {
+  "where": "nudge: button reads Nudge (outline)",
+  "ok": true,
+  "detail": "{\"lead\":\"Nudge Priya?\",\"sub\":\"Reply was due 29 Oct\",\"btn\":\"Nudge\",\"tone\":\"outline\"}"
+ },
+ {
+  "where": "nudge: pressing the button writes nothing",
+  "ok": true,
+  "detail": "0 writes"
+ },
+ {
+  "where": "agent: population — a reply box",
+  "ok": true,
+  "detail": "no card"
+ },
+ {
+  "where": "agent: field reads /^Heard back\\?$/",
+  "ok": true,
+  "detail": "Heard back?"
+ },
+ {
+  "where": "agent: second line reads /^Record it when Rufus replies$/",
+  "ok": true,
+  "detail": "Record it when Rufus replies"
+ },
+ {
+  "where": "agent: button reads Record a response (outline)",
+  "ok": true,
+  "detail": "{\"lead\":\"Heard back?\",\"sub\":\"Record it when Rufus replies\",\"btn\":\"Record a response\",\"tone\":\"outline\"}"
+ },
+ {
+  "where": "agent: pressing the button writes nothing",
+  "ok": true,
+  "detail": "0 writes"
+ },
+ {
+  "where": "quiet: population — a reply box",
+  "ok": true,
+  "detail": "no card"
+ },
+ {
+  "where": "quiet: field reads /^Still nothing\\?$/",
+  "ok": true,
+  "detail": "Still nothing?"
+ },
+ {
+  "where": "quiet: second line reads /^Close it, or keep waiting$/",
+  "ok": true,
+  "detail": "Close it, or keep waiting"
+ },
+ {
+  "where": "quiet: button reads Close it (outline)",
+  "ok": true,
+  "detail": "{\"lead\":\"Still nothing?\",\"sub\":\"Close it, or keep waiting\",\"btn\":\"Close it\",\"tone\":\"outline\"}"
+ },
+ {
+  "where": "quiet: pressing the button writes nothing",
+  "ok": true,
+  "detail": "0 writes"
+ },
+ {
+  "where": "closed: population — a reply box",
+  "ok": true,
+  "detail": "no card"
+ },
+ {
+  "where": "closed: field reads /^Closed$/",
+  "ok": true,
+  "detail": "Closed"
+ },
+ {
+  "where": "closed: second line reads /^Closed on \\d{1,2} \\w{3}$/",
+  "ok": true,
+  "detail": "Closed on 16 Oct"
+ },
+ {
+  "where": "closed: button reads Reopen (outline)",
+  "ok": true,
+  "detail": "{\"lead\":\"Closed\",\"sub\":\"Closed on 16 Oct\",\"btn\":\"Reopen\",\"tone\":\"outline\"}"
+ },
+ {
+  "where": "closed: pressing the button writes nothing",
+  "ok": true,
+  "detail": "0 writes"
+ }
+]

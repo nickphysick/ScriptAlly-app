@@ -11,6 +11,7 @@
  */
 import { QueryStatus } from "../types";
 import { whereItStands, type QcRow, type WhereKey } from "./qcSummary";
+import { quickOfRow } from "./queryState";
 import { writerExpectedMs } from "./expectedDate";
 import { MONTHS_SHORT } from "./dates";
 import { daysFrom, isClosedRow } from "./qc151";
@@ -56,7 +57,7 @@ export function nextText(r: QcRow, nowMs: number): NextText {
   if (r.court === "agent") {
     if (due == null) {
       const inStage = r.stageStartMs != null ? Math.max(0, Math.round((sod(nowMs) - sod(r.stageStartMs)) / DAY)) : null;
-      return whereItStands(r, nowMs) === "quiet" && inStage != null
+      return quickOfRow(r, () => whereItStands(r, nowMs)) === "quiet" && inStage != null
         ? { text: `No reply in ${days(inStage)}`, tone: "late" }
         : { text: "No reply date", tone: "faint" };
     }
@@ -138,7 +139,8 @@ const lateClause = (rows: QcRow[], nowMs: number): string => {
  * ⚠️ THE ZERO STATE IS THE PROMPT'S WORDING, NOT NICK'S: "Nothing needs you this week" · "Next reply due ‹date›."
  */
 export function weekSummary(rows: readonly QcRow[], nowMs: number): WeekSummary {
-  const mine = rows.filter((r) => whereItStands(r, nowMs) === "you");
+  /* v152 — the page stamps its rows; Your move is then Offers + Materials requested + Nudge due (lib/queryState) */
+  const mine = rows.filter((r) => quickOfRow(r, () => whereItStands(r, nowMs)) === "you");
   if (mine.length === 0) {
     const next = rows.filter((r) => r.court === "agent" && r.expectedMs != null && daysFrom(r.expectedMs, nowMs) >= 0)
       .map((r) => r.expectedMs!).sort((a, b) => a - b)[0];

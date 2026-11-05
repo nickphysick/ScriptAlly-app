@@ -52,7 +52,7 @@
  {
   "where": "attention sections",
   "ok": true,
-  "detail": "Your move | With the agent | Gone quiet | Closed"
+  "detail": "Offers | Materials requested | Nudge due | With the agent | Gone quiet | Closed"
  },
  {
   "where": "status sections",
@@ -62,7 +62,7 @@
  {
   "where": "action sections",
   "ok": true,
-  "detail": "Offer pending | Revision owed | Full owed | Partial owed | Nudge due | Consider closing | Waiting on the agent | Passed | Closed with no reply | Withdrawn"
+  "detail": "Answer the offer | Send your full | Send your partial | Send your revision | Nudge | Reply due soon | Waiting to hear | Close it | Nothing to do"
  },
  {
   "where": "package sections",
