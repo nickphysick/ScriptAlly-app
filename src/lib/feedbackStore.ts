@@ -42,7 +42,12 @@ export function registerFeedbackAnchor(el: HTMLElement): () => void {
 }
 /** The registered button that is on screen, or null (the phone draws none). */
 export function feedbackAnchor(): HTMLElement | null {
-  for (const el of anchors) { const r = el.getBoundingClientRect(); if (r.width > 0 && r.height > 0) return el; }
+  /* ⚠️ both sidebar layers stay mounted (sidebar rail v1), and the hidden one still has a box: it is
+     `inert`, so an anchor inside an inert subtree is not "on screen" */
+  for (const el of anchors) {
+    if (el.closest?.("[inert]")) continue;
+    const r = el.getBoundingClientRect(); if (r.width > 0 && r.height > 0) return el;
+  }
   return null;
 }
 

@@ -10,7 +10,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { QueryStatus } from "../types";
-import { workspaceSections, RAIL_SHORT_LABELS, railPageLabel, SETTINGS_RAIL_LABELS } from "./workspaceNav";
+import { workspaceSections, RAIL_SHORT_LABELS, railPageLabel, railSectionLabel, SETTINGS_RAIL_LABELS } from "./workspaceNav";
 import { ACCOUNT_ROUTES } from "./accountRoutes";
 import {
   CLOSED_QUERY_STATUSES, QUERIES_STATUS_PARAM, attentionCount, filterStateFor, isOverdueForReply,
@@ -367,6 +367,9 @@ describe("sidebar rail v1 — the nav the rail reads", () => {
       "Dashboard", "Queries", "Responses", "Analytics", "Packages", "Contact list", "Discover",
       "Manuscripts", "Versions", "Comparable titles", "To-do list", "Corkboard",
     ]);
+  });
+  it("the rail's section rows: Dashboard by its page, every other section by its own label", () => {
+    expect(nav.map(railSectionLabel)).toEqual(["Dashboard", "Queries", "Agents", "Your book", "Tasks"]);
   });
   it("the settings rail's short labels cover every account section", () => {
     expect(Object.keys(SETTINGS_RAIL_LABELS).sort()).toEqual(ACCOUNT_ROUTES.map((r) => r.id).sort());

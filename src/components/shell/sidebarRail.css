@@ -1,0 +1,210 @@
+/*
+ * Sidebar rail v1 (5 Nov) — the 80px labelled rail. Values are the normative ref's
+ * (design-refs/shell/sidebar-rail-v1.css), ported with its always-on modifiers flattened in:
+ * qr-sections qr-pill qr-rules f-serif qr-heavy qr-ground qr-quiet. The ref's rejected options
+ * (the hover peek, the page-name line, the dots, the top-bar feedback button) are not ported.
+ *
+ * Desktop only: the phone keeps its own bar.
+ *
+ * ⚠️ EVERY LABEL STATES ITS FONT FAMILY. brand.tsx names the body sans on every bare `span`, so a label
+ * that inherited its button's serif would render in Source Sans (it did, in the mock). A class beats the
+ * element selector, which is all it takes.
+ */
+@media (min-width: 768px) {
+  .wsr {
+    position: absolute; top: 0; left: 0; bottom: 0; width: 80px;
+    box-sizing: border-box; display: flex; flex-direction: column;
+    padding: 16px 6px 12px;
+    transition: opacity 0.16s ease 0.1s;
+  }
+  .wsr * { box-sizing: border-box; }
+  .wsr button { margin: 0; font: inherit; line-height: normal; appearance: none; -webkit-appearance: none; text-transform: none; letter-spacing: normal; }
+
+  /* ── the hawk, and the expand control that takes its place on hover ── */
+  .wsr-lgo { flex: none; height: 34px; display: flex; justify-content: center; position: relative; }
+  .wsr-home {
+    display: grid; place-items: center; width: 40px; height: 40px; margin-top: -3px; padding: 0;
+    border: 0; border-radius: 10px; background: transparent; cursor: pointer; transition: background-color 0.14s ease;
+  }
+  .wsr-home:hover { background: rgba(var(--ink-cream-rgb), 0.06); }
+  .wsr-home img { width: 34px; height: 34px; transition: opacity 0.16s ease; }
+  .wsr-tog {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 34px; height: 34px; padding: 0;
+    border: 0; border-radius: 9px; display: grid; place-items: center;
+    background: rgba(var(--ink-cream-rgb), 0.08); color: var(--ink-cream-92); cursor: pointer;
+    opacity: 0; pointer-events: none; transition: opacity 0.14s ease;
+  }
+  .wsr-tog svg { width: 16px; height: 16px; }
+  .wsr-lgo:hover .wsr-tog, .wsr-tog:focus-visible { opacity: 1; pointer-events: auto; }
+  .wsr-lgo:hover .wsr-home img, .wsr-lgo:has(.wsr-tog:focus-visible) .wsr-home img { opacity: 0; }
+
+  /* ── the manuscript tile ── */
+  .wsr-mswrap { flex: none; display: flex; justify-content: center; margin-top: 12px; }
+  .wsr .wsr-ms {
+    display: block; padding: 6px 10px; border: 0; background: transparent; border-radius: 10px; cursor: pointer;
+    width: auto; height: auto; box-shadow: none;
+  }
+  .wsr .wsr-ms:hover { background: rgba(var(--ink-cream-rgb), 0.06); }
+  .wsr-init {
+    width: 30px; height: 40px; border-radius: 3px; display: grid; place-items: center; position: relative;
+    background: var(--ink-cream); color: var(--sp-anthracite, #2a3a52);
+    font: 600 13px/1 var(--sp-serif); letter-spacing: 0.02em;
+    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.25), inset 0 0 0 1px rgba(42, 58, 82, 0.08);
+  }
+  .wsr-init::after { content: ""; position: absolute; left: 7px; right: 7px; bottom: 7px; height: 1px; background: rgba(42, 58, 82, 0.25); }
+  .wsr-init svg { width: 16px; height: 16px; }
+
+  /* ── the nav ── */
+  .wsr-nav, .wsr-setnav {
+    flex: 1; min-height: 0; overflow-y: auto; margin: 18px -6px 0; padding: 0 6px;
+    display: flex; flex-direction: column; scrollbar-width: none;
+  }
+  .wsr-nav::-webkit-scrollbar, .wsr-setnav::-webkit-scrollbar { display: none; }
+  .wsr-setnav { display: none; }
+  .wsr-settings .wsr-nav { display: none; }
+  .wsr-settings .wsr-setnav { display: flex; }
+
+  .wsr-sep { flex: none; height: 19px; position: relative; }
+  .wsr-sep::after {
+    content: ""; position: absolute; left: 50%; top: 9px; width: 28px; height: 1px; margin-left: -14px;
+    background: rgba(var(--ink-cream-rgb), 0.14);
+  }
+
+  /* a section: its row, and (when open) its pages, in one soft card */
+  .wsr-grp {
+    position: relative; flex: none; border-radius: 16px; margin: 0 -2px 4px; padding: 0 2px;
+    transition: background-color 0.22s ease, box-shadow 0.22s ease;
+  }
+  .wsr-grp.open { background: rgba(var(--ink-cream-rgb), 0.045); box-shadow: inset 0 0 0 1px rgba(var(--ink-cream-rgb), 0.07); }
+
+  .wsr-ni {
+    position: relative; flex: none; width: 100%; height: 58px; margin-bottom: 4px; padding: 0 2px;
+    border: 0; border-radius: 9px; background: transparent; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    color: var(--ink-cream-66);
+    transition: height 0.2s cubic-bezier(0.2, 0.9, 0.3, 1), background-color 0.14s ease, color 0.14s ease;
+  }
+  .wsr-grp .wsr-ni { margin-bottom: 4px; }
+  .wsr-setnav .wsr-ni { height: 54px; margin-bottom: 2px; }
+  .wsr-grp.open .wsr-ni.wsr-on { height: 52px; }
+
+  .wsr-ic {
+    display: grid; place-items: center; width: 48px; height: 30px; border-radius: 15px; opacity: 0.6;
+    transition: background-color 0.14s ease, opacity 0.12s ease;
+  }
+  .wsr-ic svg { width: 20px; height: 20px; transition: stroke-width 0.18s ease; }
+  .wsr-lbl {
+    font: 400 11.5px/1.15 var(--sp-serif); font-optical-sizing: auto; letter-spacing: -0.005em; white-space: nowrap;
+    color: rgba(var(--ink-cream-rgb), 0.74);
+  }
+
+  /* quieter inactive rows; hover brings them up */
+  .wsr-ni:not(.wsr-on) .wsr-lbl { color: rgba(var(--ink-cream-rgb), 0.58); }
+  .wsr-ni:not(.wsr-on) .wsr-ic { opacity: 0.5; }
+  .wsr-ni:not(.wsr-on):hover .wsr-lbl { color: rgba(var(--ink-cream-rgb), 0.9); }
+  .wsr-ni:not(.wsr-on):hover .wsr-ic { opacity: 0.9; background: rgba(var(--ink-cream-rgb), 0.07); }
+  .wsr-ni:not(.wsr-on):active .wsr-ic { background: rgba(var(--ink-cream-rgb), 0.12); }
+
+  /* the current section: the pill behind its icon, terracotta at a heavier stroke, a bright label */
+  .wsr-ni.wsr-on { color: var(--ink-bright); }
+  .wsr-ni.wsr-on .wsr-ic { opacity: 1; color: var(--ink-terra); background: rgba(var(--ink-terra-rgb), 0.2); }
+  .wsr-ni.wsr-on .wsr-ic svg { stroke-width: 2.6; }
+  .wsr-ni.wsr-on .wsr-lbl { color: var(--ink-bright); font-weight: 600; }
+  /* inside the open card the section reads as a heading: no pill of its own */
+  .wsr-grp.open .wsr-ni.wsr-on .wsr-ic { background: transparent; }
+  .wsr-back .wsr-lbl { color: var(--ink-cream-66); }
+
+  /* the count: a corner badge on the icon; absolute, so its arrival moves nothing */
+  .wsr-ct {
+    position: absolute; left: calc(50% + 9px); top: 3px; min-width: 16px; height: 15px; padding: 0 4px; border-radius: 8px;
+    background: var(--ink-terra); color: var(--ink-shell);
+    font: 600 9px/15px var(--font-mono, "JetBrains Mono", monospace); text-align: center;
+    box-shadow: 0 0 0 2px var(--ink-shell);
+  }
+  /* the Pro tag: small, sentence case, outlined in cream so it never competes with the terracotta */
+  .wsr-pro {
+    position: absolute; top: 0; left: calc(50% + 10px); padding: 0 4px; height: 13px; border-radius: 4px;
+    font: 600 8.5px/13px "Inter", system-ui, sans-serif; letter-spacing: 0.02em; color: rgba(var(--ink-cream-rgb), 0.78);
+    background: var(--ink-shell); box-shadow: inset 0 0 0 1px rgba(var(--ink-cream-rgb), 0.32);
+  }
+
+  /* the open section's pages */
+  .wsr-tray { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.26s cubic-bezier(0.2, 0.9, 0.3, 1); }
+  .wsr-grp.open .wsr-tray { grid-template-rows: 1fr; }
+  .wsr-tray-in {
+    min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: 2px; padding: 0;
+    transition: padding 0.26s cubic-bezier(0.2, 0.9, 0.3, 1);
+  }
+  .wsr-grp.open .wsr-tray-in { padding: 2px 0 6px; }
+  .wsr-sp {
+    position: relative; flex: none; height: 28px; padding: 0; border: 0; border-radius: 9px; background: transparent; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; color: rgba(var(--ink-cream-rgb), 0.6);
+    opacity: 0; transform: translateY(-4px);
+    transition: opacity 0.16s ease, transform 0.2s ease, background-color 0.12s ease, color 0.12s ease;
+  }
+  .wsr-grp.open .wsr-sp { opacity: 1; transform: none; }
+  .wsr-grp.open .wsr-sp:nth-child(2) { transition-delay: 0.03s, 0.03s, 0s, 0s; }
+  .wsr-grp.open .wsr-sp:nth-child(3) { transition-delay: 0.06s, 0.06s, 0s, 0s; }
+  .wsr-spl { font: 400 10px/1 var(--sp-serif); letter-spacing: -0.01em; white-space: nowrap; }
+  .wsr-sp:hover:not(.wsr-cur) { background: rgba(var(--ink-cream-rgb), 0.06); color: rgba(var(--ink-cream-rgb), 0.92); }
+  .wsr-sp.wsr-cur { background: rgba(var(--ink-terra-rgb), 0.2); color: var(--ink-bright); }
+  .wsr-sp.wsr-cur .wsr-spl { font-weight: 600; }
+  .wsr-spp {
+    position: absolute; right: -2px; top: -5px; padding: 0 3px; height: 12px; border-radius: 3px;
+    font: 600 8px/12px "Inter", system-ui, sans-serif; color: rgba(244, 238, 229, 0.78);
+    background: #222b3b; box-shadow: inset 0 0 0 1px rgba(244, 238, 229, 0.32);
+  }
+
+  /* motion: the pill grows out of the icon when the page changes */
+  @keyframes wsrPill { 0% { transform: scaleX(0.45); opacity: 0.4; } 60% { transform: scaleX(1.06); opacity: 1; } 100% { transform: scaleX(1); } }
+  @keyframes wsrLbl { 0% { opacity: 0.5; } 100% { opacity: 1; } }
+  .wsr-anim .wsr-ni.wsr-on .wsr-ic { animation: wsrPill 0.36s cubic-bezier(0.2, 0.9, 0.3, 1); }
+  .wsr-anim .wsr-ni.wsr-on .wsr-lbl { animation: wsrLbl 0.3s ease; }
+
+  /* ── the foot: Feedback, then the avatar ── */
+  .wsr-fb {
+    flex: none; margin: 12px 0; display: flex; flex-direction: column; align-items: center; gap: 5px;
+    border: 0; background: transparent; cursor: pointer; padding: 0;
+  }
+  .wsr-fbi {
+    position: relative; width: 42px; height: 34px; border-radius: 10px; box-shadow: inset 0 0 0 1.5px var(--ink-terra);
+    color: var(--ink-terra); display: grid; place-items: center; transition: background-color 0.14s ease;
+  }
+  .wsr-fb:hover .wsr-fbi { background: rgba(var(--ink-terra-rgb), 0.1); }
+  .wsr-fbi svg { width: 17px; height: 17px; }
+  .wsr-fbi i { position: absolute; right: -3px; top: -3px; width: 9px; height: 9px; border-radius: 50%; background: var(--ink-terra); box-shadow: 0 0 0 2px var(--ink-shell); }
+  .wsr-t { font: 600 11px/normal var(--sp-serif); color: var(--ink-terra); }
+  .wsr-foot { flex: none; padding-top: 12px; display: flex; justify-content: center; }
+  .wsr-av {
+    width: 32px; height: 32px; padding: 0; border-radius: 50%; border: 0; display: grid; place-items: center;
+    background: rgba(var(--ink-cream-rgb), 0.1); color: var(--ink-cream);
+    font: 600 12px/1 "Inter", system-ui, sans-serif; cursor: pointer;
+  }
+  .wsr-av:hover { background: rgba(var(--ink-cream-rgb), 0.16); }
+
+  /* keyboard focus: one terracotta ring everywhere in the rail */
+  .wsr :focus-visible { outline: 2px solid var(--ink-terra) !important; outline-offset: 2px; border-radius: 10px; }
+  .wsr .wsr-ni:focus-visible, .wsr .wsr-sp:focus-visible { outline-offset: -2px; }
+
+  /* ── short windows: rows keep their height, the icons and rules tighten, the nav scrolls ── */
+  @media (max-height: 919px) {
+    .wsr-ic { height: 24px !important; }
+    .wsr-sep { height: 8px !important; }
+    .wsr-sep::after { content: none !important; }
+    .wsr-mswrap { margin-top: 8px; }
+  }
+
+  /* ── touch screens: no hover, so the expand control sits permanently under the hawk ── */
+  @media (hover: none) {
+    .wsr-lgo { height: auto; flex-direction: column; align-items: center; gap: 6px; }
+    .wsr-tog { position: static; transform: none; opacity: 1; pointer-events: auto; width: 34px; height: 26px; background: rgba(var(--ink-cream-rgb), 0.06); }
+    .wsr-lgo:hover .wsr-home img { opacity: 1; }
+  }
+}
+
+@media (min-width: 768px) and (prefers-reduced-motion: reduce) {
+  .wsr, .wsr *, .wsr *::before, .wsr *::after { transition: none !important; animation: none !important; }
+}
+@media (max-width: 767px) {
+  .wsr { display: none; }
+}

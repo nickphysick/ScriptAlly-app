@@ -9,11 +9,9 @@
  * this repo records under "no element's position or size may be expressed as a literal that
  * another element owns" — and it would fight the collapse rather than follow it.
  *
- * ⚠️ THE COLLAPSED STATE IS THE APP NAV'S, REUSED, NOT REBUILT. `.sb-collapsed` is set on the
- * panel by the shell; the rail hides its own labels off that class exactly as `.ws-lbl` does, so
- * a reader who collapsed the sidebar keeps a collapsed sidebar when they open settings. Forcing
- * the rail open would be a relayout on entering the mode, which is the one thing the mode's
- * choreography is built to avoid.
+ * ⚠️ THERE IS NO COLLAPSED STATE HERE ANY MORE (sidebar rail v1, 5 Nov). On the 80px rail the
+ * settings sections are SidebarRail's own rows (Back, Profile … Your data); this layer is shown only
+ * in the full 248px sidebar.
  *
  * The layer mechanics (position, cross-fade, visibility) live in `workspaceShell.css` beside the
  * app nav they swap with — one mechanism, one place, so neither half can be edited alone.
@@ -173,20 +171,5 @@
   color: #8a7d6c;
 }
 
-/* ══ COLLAPSED — the app nav's own idiom, applied to this layer ═══════════════════════════════
-   ⚠️ `max-width: 0` AND `margin: 0` TOGETHER, never `display: none`. The label has to be able to
-   animate back, and a display swap cannot be transitioned; this is the pattern `.ws-lbl` already
-   uses two hundred lines away in `workspaceShell.css`. */
-.sb-collapsed .set-rail { padding: 0 8px 10px; }
-.sb-collapsed .set-railitem { justify-content: center; padding: 9px 0; gap: 0; }
-.sb-collapsed .set-railitem svg { margin: 0; }
-.sb-collapsed .set-backrail { justify-content: center; padding: 10px 0; gap: 0; }
-.sb-collapsed .set-railhead,
-.sb-collapsed .set-railfoot { display: none; }
-
-/* The label itself: it is a bare text node inside the button, so the button's own overflow is
-   what hides it. Zeroing the gap above is what stops a 10px hole standing where a word was. */
-.sb-collapsed .set-railitem,
-.sb-collapsed .set-backrail { font-size: 0; }
-.sb-collapsed .set-railitem svg,
-.sb-collapsed .set-backrail svg { font-size: 13.5px; }
+/* ══ COLLAPSED — retired with the 68px icon rail (sidebar rail v1, 5 Nov): on the rail the settings
+   sections are SidebarRail's own rows; this layer is only ever shown at the full sidebar's width. */

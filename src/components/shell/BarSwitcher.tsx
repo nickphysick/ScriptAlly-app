@@ -100,13 +100,19 @@ export interface BarSwitcherProps {
    * that the menu is PORTALLED: the sidebar clips (`overflow: hidden`), so a menu inside it would be cut
    * off at the panel's edge. Default `"bar"` keeps any other mount as it was.
    */
-  placement?: "bar" | "side";
+  placement?: "bar" | "side" | "rail";
+  /** Rail placement (sidebar rail v1): what the 80px rail's button shows in place of the cover and title. */
+  railTileFor?: (title: string | null) => React.ReactNode;
+  /** Rail placement: tooltip handlers for the tile (the shell's railTipFor), given the title. */
+  railTipProps?: (title: string | null) => Record<string, unknown>;
   /** The sidebar is collapsed: the tile shows its cover only, and the menu opens to its right. */
   collapsed?: boolean;
 }
 
-export const BarSwitcher: React.FC<BarSwitcherProps> = ({ manuscripts, queries = [], activeId, onPick, onAdd, onOpenActive, placement = "bar", collapsed = false }) => {
-  const side = placement === "side";
+export const BarSwitcher: React.FC<BarSwitcherProps> = ({ manuscripts, queries = [], activeId, onPick, onAdd, onOpenActive, placement = "bar", collapsed = false, railTileFor, railTipProps }) => {
+  /* the rail's tile is the side switcher's menu and data with a smaller button (sidebar rail v1) */
+  const rail = placement === "rail";
+  const side = placement === "side" || rail;
   const [open, setOpen] = useState(false);
   /* the portalled menu's place — measured from the tile when it opens, and on resize */
   const [at, setAt] = useState<{ left: number; top: number } | null>(null);
@@ -145,12 +151,12 @@ export const BarSwitcher: React.FC<BarSwitcherProps> = ({ manuscripts, queries =
     const place = () => {
       const r = btnRef.current?.getBoundingClientRect();
       if (!r) return;
-      setAt(collapsed ? { left: r.right + 10, top: r.top } : { left: r.left, top: r.bottom + 8 });
+      setAt(collapsed || rail ? { left: r.right + 10, top: r.top } : { left: r.left, top: r.bottom + 8 });
     };
     place();
     window.addEventListener("resize", place);
     return () => window.removeEventListener("resize", place);
-  }, [side, open, collapsed]);
+  }, [side, open, collapsed, rail]);
 
   /* the state flips between expanded and collapsed: whatever was open belongs to the other shape */
   useEffect(() => { setOpen(false); }, [collapsed]);
@@ -160,6 +166,8 @@ export const BarSwitcher: React.FC<BarSwitcherProps> = ({ manuscripts, queries =
     const onKey = (e: KeyboardEvent) => {
       if (open || !matchesShortcut(SHORTCUTS.switchManuscript, e) || shortcutBlocked(e)) return;
       if (!btnRef.current || btnRef.current.getBoundingClientRect().width === 0) return;
+      /* ⚠️ both sidebar layers stay mounted (sidebar rail v1): the hidden one is `inert`, and has a box */
+      if (btnRef.current.closest("[inert]")) return;
       e.preventDefault();
       openMenu();
     };
@@ -186,6 +194,15 @@ export const BarSwitcher: React.FC<BarSwitcherProps> = ({ manuscripts, queries =
 
   /* ⚠️ NO BOOK YET: the switcher is the door to adding one. */
   if (!active) {
+    if (rail) {
+      return (
+        <div className="ws-ms ws-ms--rail" data-shell="switcher" data-placement={placement}>
+          <button type="button" className="ws-ms-btn wsr-ms" onClick={onAdd} aria-label="Add a manuscript" {...(railTipProps?.(null) ?? {})}>
+            {railTileFor?.(null)}
+          </button>
+        </div>
+      );
+    }
     return (
       <div className={`ws-ms${side ? " ws-ms--side" : ""}`} data-shell="switcher" data-placement={placement}>
         <button type="button" className="ws-ms-btn" onClick={onAdd}>
@@ -231,7 +248,23 @@ export const BarSwitcher: React.FC<BarSwitcherProps> = ({ manuscripts, queries =
   };
 
   return (
-    <div className={`ws-ms${side ? " ws-ms--side" : ""}${open ? " is-open" : ""}`} data-shell="switcher" data-placement={placement} ref={rootRef}>
+    <div className={`ws-ms${rail ? " ws-ms--rail" : side ? " ws-ms--side" : ""}${open ? " is-open" : ""}`} data-shell="switcher" data-placement={placement} ref={rootRef}>
+      {rail ? (
+        <button
+          ref={btnRef}
+          type="button"
+          className="ws-ms-btn wsr-ms"
+          aria-haspopup="menu"
+          aria-expanded={open}
+          aria-label={`Manuscript: ${active.title}. Switch manuscript`}
+          aria-keyshortcuts={shortcutLabel("switchManuscript")}
+          onClick={() => (open ? close(true) : openMenu())}
+          onKeyDown={onBtnKey}
+          {...(railTipProps?.(active.title) ?? {})}
+        >
+          {railTileFor?.(active.title)}
+        </button>
+      ) : (
       <button
         ref={btnRef}
         type="button"
@@ -262,6 +295,7 @@ export const BarSwitcher: React.FC<BarSwitcherProps> = ({ manuscripts, queries =
           )}
         </span>
       </button>
+      )}
       {(() => {
         const menu = (
       <div

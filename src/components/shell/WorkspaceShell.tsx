@@ -70,6 +70,11 @@ import { claimTopbar, onTopbarClaim, releaseTopbar } from "../../lib/popoverLaye
 import { AnchoredPortal, useAnchoredPopover } from "./useAnchoredPopover";
 import { HelpMenu } from "./HelpMenu";
 import { registerFeedbackAnchor, setFeedbackPage } from "../../lib/feedbackStore";
+import { SidebarRail } from "./SidebarRail";
+import { railTile } from "../../lib/railTile";
+import { noteRailPage } from "../../lib/railMemory";
+import { railCountAid } from "../../lib/railReviewAid";
+import { discoverUnlocked, packagesUnlocked } from "../../lib/entitlements";
 
 /** The shared active-manuscript key. ⚠️ Packages, Comps and Manuscripts READ this — a selector
  *  that stops writing it breaks them silently, with no error and simply the wrong book. */
@@ -182,6 +187,8 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   }, [currentUser?.id]);
 
   const hit = useMemo(() => shellHitFor(sections, pathname, search), [sections, pathname, search]);
+  /* sidebar rail v1 — the page on screen is its section's last page, for the rail's section rows */
+  useEffect(() => { if (!isAccountPath(pathname)) noteRailPage(hit); }, [hit?.section, hit?.child, pathname]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ⚠️ COLLAPSE RETURNS — AS A NARROWING, NOT A REMOVAL (sidebar-collapse pack; supersedes the
      app-shell-v2 note that retired it). What v2 retired was the RAIL-AND-PANEL model, where the
@@ -190,6 +197,26 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
      sidebar whose width narrows to an icon rail — every row keeps existing, labels collapse in
      place, the toggle lives in the pagebar at the seam. There is no second component to drift. */
   const sidebar = useSidebarCollapsed();
+  /**
+   * SIDEBAR RAIL v1 — the full sidebar is shown, or the 80px rail. Both layers stay mounted; this is a
+   * class and `inert`, never a remount.
+   */
+  const wide = !sidebar.collapsed;
+  const wideRef = useRef(wide);
+  wideRef.current = wide;
+  /**
+   * ⚠️ `--shell-side-w` IS THE SIDEBAR'S LAYOUT FOOTPRINT, published on `<html>`, and it is written only
+   * when it CHANGES. Setting a property on the root re-styles the whole page; doing it on every render
+   * was a measured whole-page recalc in the mock.
+   */
+  const sideVar = useRef<string | null>(null);
+  useLayoutEffect(() => {
+    const v = wide ? "248px" : "80px";
+    if (sideVar.current === v) return;
+    sideVar.current = v;
+    document.documentElement.style.setProperty("--shell-side-w", v);
+  }, [wide]);
+  useEffect(() => () => { document.documentElement.style.removeProperty("--shell-side-w"); sideVar.current = null; }, []);
 
   /* ══ SETTINGS MODE ════════════════════════════════════════════════════════════════════════
      ⚠️ THE MODE IS DERIVED FROM THE ROUTE, NEVER HELD AS STATE. A boolean would have to be set on
@@ -267,6 +294,11 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   useEffect(() => {
     if (!settingsMode) return;
     const id = requestAnimationFrame(() => {
+      /* on the 80px rail the heading is in the hidden layer: the rail's current settings row takes focus */
+      if (!wideRef.current) {
+        document.querySelector<HTMLElement>('.wsr-setni[aria-current="page"]')?.focus({ preventScroll: true });
+        return;
+      }
       document.getElementById(SETTINGS_RAIL_HEADING_ID)?.focus({ preventScroll: true });
     });
     return () => cancelAnimationFrame(id);
@@ -632,7 +664,33 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
     };
   }, []);
 
+  /* the rail's manuscript tile: the book's initials on a cream title page, a stack for every book, the
+     Library glyph for a title with no letters (lib/railTile) */
+  const railTileNode = (title: string | null) => {
+    const t = railTile(title);
+    if (t.kind === "initials") return <span className="wsr-init" aria-hidden="true">{t.text}</span>;
+    return (
+      <span className={`wsr-init wsr-init--${t.kind}`} aria-hidden="true">
+        {t.kind === "stack" ? (
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5z" /><path d="m2 17 10 5 10-5" /><path d="m2 12 10 5 10-5" /></svg>
+        ) : (
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="m16 6 4 14" /><path d="M12 6v14" /><path d="M8 8v12" /><path d="M4 4v16" /></svg>
+        )}
+      </span>
+    );
+  };
   const plan = planLine(currentUser?.plan);
+  /* the To-do board's total — the only count in the nav, carried on the To-do list row */
+  const boardCount = sections.find((sx) => sx.id === "tasks")?.children?.find((c) => c.id === "list")?.count ?? 0;
+  /* ⚠️ the review aid is gated HERE, at the call site, so a production build drops the module */
+  const todoCount = import.meta.env.MODE !== "production" ? railCountAid(boardCount) : boardCount;
+  /* the Pro pages this account is NOT entitled to; empty while both are open to all */
+  const proLocked = useMemo(() => {
+    const out = new Set<string>();
+    if (!discoverUnlocked(currentUser)) out.add("discover");
+    if (!packagesUnlocked(currentUser)) out.add("packages");
+    return out;
+  }, [currentUser]);
   const name = currentUser?.name ?? "";
   const pageName = barPageName(sections, hit, pathname);
   useEffect(() => { setFeedbackPage(pageName?.name ?? null); }, [pageName?.name]);
@@ -650,9 +708,49 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
           arrives two rAFs after mount; until then, state changes are instant. */}
       <div
         id="ws-sidebar"
-        className={`ws-panel${sidebar.collapsed ? " sb-collapsed" : ""}${sidebar.ready ? " sb-ready" : ""}`}
+        className={`ws-panel${wide ? " sr-wide" : ""}${sidebar.ready ? " sb-ready" : ""}`}
       >
-        <div className="ws-pin">
+        {/* SIDEBAR RAIL v1 — the 80px rail, the first of the box's two layers */}
+        <div className="wsr-host" inert={wide}>
+          <SidebarRail
+            sections={sections}
+            icons={icons}
+            hit={hit}
+            todoCount={todoCount}
+            locked={proLocked}
+            onGo={go}
+            onExpand={sidebar.toggle}
+            expanded={wide}
+            markSrc={artUrl(APP_MARK)}
+            switcher={
+              <BarSwitcher
+                placement="rail"
+                manuscripts={manuscripts}
+                queries={queries}
+                activeId={activeMs?.id ?? null}
+                onPick={pickMs}
+                onAdd={() => onNavigate?.("manuscripts", "Add a manuscript")}
+                onOpenActive={() => { if (activeMs) onNavigatePath(manuscriptViewHref(activeMs.id)); }}
+                railTileFor={railTileNode}
+                railTipProps={(title) => railTipFor(title ? `${title} · switch manuscript` : "Add a manuscript", undefined, undefined, 120, !wide)}
+              />
+            }
+            settingsMode={settingsMode}
+            settingsSection={settingsSection}
+            onSettings={(id) => onNavigatePath(ACCOUNT_ROUTES.find((r) => r.id === id)!.path)}
+            onBack={leaveSettings}
+            onFeedback={onOpenFeedback}
+            feedbackOpen={feedbackOpen}
+            feedbackRef={fbAnchor}
+            onAccount={onOpenAccount}
+            initials={getInitials(name)}
+            who={formatSidebarName(name)}
+            planLabel={plan.label}
+            tip={(t, sub, kbd) => railTipFor(t, sub, kbd, kbd ? 250 : 120, !wide)}
+            toggleKbd={toggleKbd}
+          />
+        </div>
+        <div className="ws-pin" inert={!wide}>
 
           {/* ⚠️ THE BRAND SITS ABOVE THE MANUSCRIPT SELECTOR (app-shell-v2). It used to be the
               rail's ink tile; with the rail gone the sidebar is the leftmost chrome, so this is
@@ -713,7 +811,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               group and "Now showing…" are the switcher's own. Its menu portals past the panel's clip. */}
           <BarSwitcher
             placement="side"
-            collapsed={sidebar.collapsed}
+            collapsed={false}
             manuscripts={manuscripts}
             queries={queries}
             activeId={activeMs?.id ?? null}
@@ -770,7 +868,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                          tooltips on one hover would be one too many. */
                       aria-label={sidebarLabel(ch)}
                       onClick={() => go(ch.path)}
-                      {...railTipFor(sidebarLabel(ch), undefined, undefined, 120, sidebar.collapsed)}
+                      {...railTipFor(sidebarLabel(ch), undefined, undefined, 120, false)}
                     >
                       <span className="ws-ic">{icons[ch.icon ?? ch.id] ?? icons[sec.id]}</span>
                       {/* ⚠️ A SPAN, SO THE LABEL CAN COLLAPSE (sidebar-collapse pack, Phase 2). A
@@ -848,7 +946,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               <button
                 ref={fbAnchor} type="button" className="ws-fbi" onClick={onOpenFeedback} aria-expanded={feedbackOpen}
                 aria-label={FEEDBACK_FAB}
-                {...railTipFor(FEEDBACK_FAB, undefined, undefined, 120, sidebar.collapsed)}
+                {...railTipFor(FEEDBACK_FAB, undefined, undefined, 120, false)}
               >
                 {FEEDBACK_ICON}<i aria-hidden="true" />
               </button>
@@ -911,7 +1009,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                       full width (the starvation that split the row out was the pill sharing the name's
                       line). It stops propagation because it sits inside the row that opens the account
                       menu; that menu and Settings remain the other ways to the upgrade. */}
-                  {plan.upgrade && !sidebar.collapsed && (
+                  {plan.upgrade && (
                     <>
                       <span className="ws-pldot" aria-hidden="true"> · </span>
                       <button
@@ -927,8 +1025,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                 </span>
               </span>
             </div>
-            {!sidebar.collapsed && (
-              <button
+            <button
                 type="button"
                 className="ws-gear"
                 aria-label="Settings"
@@ -939,7 +1036,6 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   <path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1" />
                 </svg>
               </button>
-            )}
             </div>
             {/* ⚠️ THE FULL-WIDTH UPGRADE ROW (`.ws-upgrow`) IS RETIRED by ink shell v1 — see the plan line
                 above, where "Upgrade" now sits. */}

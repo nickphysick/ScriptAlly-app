@@ -44,3 +44,16 @@ export const VERSIONS_FOUNDING_ACCESS = true;
 export function versionsUnlocked(user: Pick<User, "plan"> | null | undefined, foundingAccess: boolean = VERSIONS_FOUNDING_ACCESS): boolean {
   return foundingAccess || user?.plan === UserPlan.PRO;
 }
+
+/**
+ * DISCOVER (sidebar rail v1, 5 Nov). Discover is a Pro page in the nav, but nothing has ever gated it
+ * (Discover v1: "Pro is the pill only"), and every account has full access for now, as with packages.
+ * The sidebar's Pro tag reads this, so it stays dormant until gating returns — one constant, like
+ * `PACKAGES_OPEN_TO_ALL`. This gates no route and no write; it only decides whether the tag is drawn.
+ */
+export const DISCOVER_OPEN_TO_ALL = true;
+
+/** True when this user has Discover. */
+export function discoverUnlocked(user: Pick<User, "plan"> | null | undefined): boolean {
+  return DISCOVER_OPEN_TO_ALL || user?.plan === UserPlan.PRO;
+}

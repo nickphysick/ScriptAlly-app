@@ -149,6 +149,14 @@ export const RAIL_SHORT_LABELS: Readonly<Record<string, string>> = {
   "m-comps": "Comps",
 };
 
+/**
+ * The label a SECTION row wears in the rail. Dashboard is a section with no heading of its own — one row,
+ * named by its page — so its row reads "Dashboard"; every other section reads its own label.
+ */
+export function railSectionLabel(sec: { id: string; label: string; children?: { label: string }[] }): string {
+  return sec.id === "workspace" ? sec.children?.[0]?.label ?? sec.label : sec.label;
+}
+
 /** The label a page wears in the rail's open card. */
 export function railPageLabel(child: { id: string; label: string }): string {
   return RAIL_SHORT_LABELS[child.id] ?? child.label;

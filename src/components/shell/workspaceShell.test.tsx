@@ -445,7 +445,9 @@ describe("the sidebar", () => {
     expect(user).toBeGreaterThan(row);
     expect(gear, "the gear").toBeGreaterThan(user);
     /* the user row CLOSES before the gear opens — a sibling, not a child */
-    expect(foot.slice(user, gear), "the user row is closed before the gear").toMatch(/<\/div>\s*\{!sidebar\.collapsed && \(\s*<button\s+type="button"\s*$/);
+    expect(foot.slice(user, gear), "the user row is closed before the gear").toMatch(/<\/div>\s*<button\s+type="button"\s*$/);
+    /* sidebar rail v1: the full sidebar is never collapsed (the rail is its own layer), so the gear is
+       always rendered — no `!sidebar.collapsed` guard */
     expect(foot.slice(gear)).toContain('aria-label="Settings"');
     expect(foot.slice(gear)).toContain('onClick={() => go("/account")}');
     /* ⚠️ RETARGETED (ink shell v1): the GEAR needs no stopPropagation, being a sibling — still true.

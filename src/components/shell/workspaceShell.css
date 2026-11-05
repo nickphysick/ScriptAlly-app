@@ -75,7 +75,7 @@
    and "sidebar right = window left" is a relational rule. Nothing else divides the two. */
 .ws-panel {
   flex: none;
-  width: var(--shell-side-w);
+  width: var(--shell-full-w, 248px);
   display: flex;
   flex-direction: column;
   position: relative;
@@ -95,7 +95,7 @@
    preflight would otherwise measure a different sidebar from the one the app serves. */
 .ws-pin {
   box-sizing: border-box;
-  width: var(--shell-side-w);
+  width: var(--shell-full-w, 248px);
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -617,13 +617,6 @@
   color: var(--sp-ink); letter-spacing: -0.01em; line-height: 1.45; white-space: nowrap;
   margin-left: 10px; max-width: 160px; overflow: hidden;
 }
-.sb-collapsed .ws-bwm { opacity: 0; max-width: 0; margin-left: 0; }
-/* the transition arrives with sb-ready — a collapsed sidebar restored on load must not animate
-   shut from the stylesheet's expanded values (Phase 1's flash guard) */
-.ws-panel.sb-ready .ws-bwm {
-  transition: opacity 140ms ease, max-width 240ms cubic-bezier(0.32, 0.72, 0.28, 1),
-    margin-left 240ms cubic-bezier(0.32, 0.72, 0.28, 1);
-}
 
 /* ⚠️ THE MASTHEAD'S HEIGHT NO LONGER COMES FROM `--head`. It was
    `calc(var(--head) + var(--shell-frame) + 1px)` for ONE reason: to close on the same continuous
@@ -986,89 +979,10 @@
 
 
 
-/* ══ SIDEBAR COLLAPSE — the icon rail (sidebar-collapse pack, Phase 2; ref
-   design-refs/sidebar-collapse-v1.html) ═══════════════════════════════════════════════════════
-   ONE sidebar whose width narrows in place: 224px ↔ 72px, `width` and `padding` only — never
-   `transform`, which would create a stacking context over the panel's illustrated marks and
-   isolate any blend. The content pane is `flex: 1 1 auto; min-width: 0` (.ws-main) and simply
-   reflows; it gets no width sums of its own.
-
-   ⚠️ EVERY TRANSITION HERE IS GATED ON `.sb-ready` — added two rAFs after mount — because the
-   collapsed state is restored SYNCHRONOUSLY and must not animate shut from the stylesheet's
-   expanded values on load. The panel's legacy 0.22s width transition (the sv2 `.shut` era's,
-   consumer-swept) is silenced outside sb-ready for the same reason. */
+/* ══ THE OLD 68px ICON RAIL IS RETIRED (sidebar rail v1, 5 Nov) — `.sb-collapsed` is set by nothing;
+   the rail is its own layer now (SidebarRail + sidebarRail.css), and the panel's box is inkShell.css's.
+   The flash guard stays: a sidebar restored on load must not animate from the stylesheet's width. */
 .ws-panel:not(.sb-ready) { transition: none; }
-.ws-panel.sb-ready,
-.ws-panel.sb-ready .ws-pin {
-  transition: width 240ms cubic-bezier(0.32, 0.72, 0.28, 1), padding 240ms cubic-bezier(0.32, 0.72, 0.28, 1);
-}
-/* 72px, the researched band's upper end — deliberately, because the rail carries mini-badges. */
-/* v3: 68px (`--shell-side-w-collapsed`), the ref's rail, with its own 16/10/12 padding and every row
-   centred — the icons, the switcher tile, the avatar and the mark all sit on the rail's midline. */
-.ws-panel.sb-collapsed,
-.sb-collapsed .ws-pin { width: var(--shell-side-w-collapsed); }
-.sb-collapsed .ws-pin { padding: 16px 10px 12px; align-items: center; }
-.sb-collapsed .ws-brand { padding: 0; justify-content: center; }
-.sb-collapsed .ws-nav { align-items: center; width: 100%; }
-
-
-.ws-panel.sb-ready .ws-lbl,
-.ws-panel.sb-ready .ws-utext {
-  transition: opacity 140ms ease, max-width 240ms cubic-bezier(0.32, 0.72, 0.28, 1),
-    margin 240ms cubic-bezier(0.32, 0.72, 0.28, 1);
-}
-
-/* nav rows: the icon centres; the label collapses in place. Radius, hover and the parchment
-   active card are UNTOUCHED — the pack adds a state, not a restyle. */
-/* the active item is a 40 × 34 anthracite tile */
-.sb-collapsed .ws-ni { justify-content: center; padding: 0; width: 40px; height: 34px; }
-.sb-collapsed .ws-lbl { opacity: 0; max-width: 0; margin-left: 0; }
-
-/* ⚠️ THE COUNT BECOMES A CORNER MINI-BADGE — same element, same value, restyled in place (the
-   mockup snaps this swap with display, so the snap is sanctioned). The dot hides: the pink badge
-   IS the alert at this size. No count → CountChip never rendered → no badge, for free. */
-/* v3: THE BADGE BECOMES A 5px DOT in the tile's corner (the ref's collapsed `.badge`). The figure goes
-   to `font-size: 0`; an urgent count keeps its own dot and its colour, and a plain count is drawn
-   the same size in the muted ink, so every badge is still visible at 68px. */
-.sb-collapsed .ws-ni .sp-ct {
-  position: absolute;
-  top: 5px;
-  right: 6px;
-  gap: 0;
-  margin: 0;
-  font-size: 0;
-  line-height: 0;
-}
-.sb-collapsed .ws-ni .sp-ct:not(:has(.sp-ct-dot))::before {
-  content: "";
-  display: block;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--shell-mute);
-}
-.sb-collapsed .ws-ni:hover > .sp-ct { transform: none; }
-
-/* section headings: the mono label yields to a centred hairline. `color: transparent`, never
-   display — the text keeps its exact box (the 22px-rhythm rule) and stays in the a11y tree. */
-/* v3: section labels become a 28px hairline (the ref's collapsed `h6`). `font-size: 0` rather than
-   `display: none`, so the heading stays in the accessibility tree. */
-.sb-collapsed .ws-glabel::after { content: none; }
-.sb-collapsed .ws-glabel { height: 1px; width: 28px; margin: 8px auto; padding: 0; background: var(--shell-hairline); font-size: 0; overflow: hidden; color: transparent; user-select: none; }
-
-
-
-
-/* user row: the avatar alone. The Upgrade pill zeroes its border and padding — a collapsed pill
-   that kept them would survive as a stray 10px lozenge of border beside the avatar. */
-/* the foot spans the 48px rail so the user row's hairline does (the ref's collapsed `.me`) */
-.sb-collapsed .ws-pfoot { width: 100%; }
-.sb-collapsed .ws-uacct { justify-content: center; padding: 6px 0 2px; width: 100%; box-sizing: border-box; }
-.sb-collapsed .ws-utext { flex: 0 1 0%; max-width: 0; max-height: 0; opacity: 0; margin-left: 0; }
-/* ⚠️ NO COLLAPSED RULE FOR THE PILL — it is not rendered at 72px at all (Option D), so there is
-   nothing to zero. The old rule had to null border AND padding or a collapsed pill survived as a
-   stray lozenge of border beside the avatar; removing the element outright retires that whole
-   class of leftover. The upgrade path stays reachable from the account menu and from Settings. */
 
 /* ══════════════════════════════════════════════════════════════════════════════════════════════
    SETTINGS MODE — the shell takeover

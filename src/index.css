@@ -207,6 +207,9 @@
      ⚠️ THE CREAM TIERS ARE CHANNELS PLUS ALPHA, never `color-mix()` (banned at runtime). The named
      tiers are the ref's; the in-between alphas (6/9/10/16/36%) read the same channels. */
   --ink-shell: #1b2433;
+  /* sidebar rail v1: the sidebar is lit from above — the ink lifts to these two at its top (inkShell.css) */
+  --ink-shell-lift: #232d3f;
+  --ink-shell-lift-2: #1d2637;
   --ink-shell-rgb: 27, 36, 51;
   --ink-cream: #f4eee5;
   --ink-cream-rgb: 244, 238, 229;
@@ -398,6 +401,9 @@
   --shell-side: #e6e4e0;                  /* "Stone": the sidebar surface — greige since v126 */
   --shell-rule: rgba(28, 19, 15, 0.10);   /* THE one hairline — sidebar edge + under the top bar */
   --shell-side-w: 248px;
+  /* sidebar rail v1: the full sidebar's own width. `--shell-side-w` is the sidebar's LAYOUT footprint —
+     WorkspaceShell publishes 80px on the rail and while floating, 248px only when pinned. */
+  --shell-full-w: 248px;
   --shell-side-w-collapsed: 68px;
   --shell-top-h: 64px;
   --shell-active-bg: var(--sp-anthracite);  /* the anthracite highlight (= the mock's --btn) */

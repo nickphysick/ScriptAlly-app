@@ -117,25 +117,33 @@ const renderShell = (todo: number) =>
 describe("the rendered states", () => {
   /* ⚠️ RETARGETED (ink shell v1): the badge is the SAME terracotta pill in both states — collapsed, CSS
      moves it to the icon's corner — so no count still means no badge at all. */
-  it("⚠️ the badge is the SAME pill, so no count still means no badge at all", () => {
+  /* ⚠️ RETARGETED (sidebar rail v1): the 68px icon rail is retired. The rail is its own layer with its own
+     corner badge (`.wsr-ct`), the full sidebar keeps its pill (`.ws-ct`); both layers are mounted, so the
+     figure is rendered once in each — and no count still means no badge in either. */
+  it("⚠️ the badge is one per layer, so no count still means no badge at all", () => {
     localStorage.setItem(SIDEBAR_COLLAPSED_KEY, "1");
     try {
-      const collapsed = renderShell(7);
-      expect(collapsed).toContain("sb-collapsed");
-      expect(collapsed.match(/class="ws-ct"/g)?.length).toBe(1);
+      const rail = renderShell(7);
+      expect(rail.match(/class="ws-ct"/g)?.length).toBe(1);
+      expect(rail.match(/class="wsr-ct"/g)?.length).toBe(1);
       expect(renderShell(0)).not.toMatch(/["\s`]ws-ct["\s`]/);
+      expect(renderShell(0)).not.toMatch(/["\s`]wsr-ct["\s`]/);
     } finally {
       localStorage.removeItem(SIDEBAR_COLLAPSED_KEY);
     }
   });
 
-  it("the synchronous read: a stored '1' renders collapsed on the FIRST markup, no effect needed", () => {
+  /* ⚠️ RETARGETED (sidebar rail v1): "collapsed" is the rail now — the panel without `sr-wide`, the rail
+     layer live and the full layer `inert`, all on the FIRST markup. */
+  it("the synchronous read: a stored '1' renders the rail on the FIRST markup, no effect needed", () => {
     localStorage.setItem(SIDEBAR_COLLAPSED_KEY, "1");
     try {
       const html = renderShell(0);
       expect(html).toContain('id="ws-sidebar"');
-      expect(html).toContain("sb-collapsed");
-      expect(html).toContain('aria-expanded="false"');
+      expect(html).not.toContain("sr-wide");
+      expect(html).toMatch(/class="ws-pin" inert=""/);
+      expect(html).not.toMatch(/class="wsr-host" inert=""/);
+      expect(html).toMatch(/class="wsr-tog"[^>]*aria-expanded="false"/);
     } finally {
       localStorage.removeItem(SIDEBAR_COLLAPSED_KEY);
     }
@@ -164,11 +172,17 @@ describe("the rendered states", () => {
   /* ⚠️ THE PILL IS REMOVED AT 72px, NOT SQUEEZED. Step 0 confirmed upgrade stays reachable from
      the account menu and Settings, so nothing becomes unreachable — and an absent element cannot
      leave the stray border a zeroed pill used to. */
-  it("⚠️ collapsed renders no Upgrade pill at all", () => {
+  /* ⚠️ RETARGETED (sidebar rail v1): the rail draws no Upgrade link — only the avatar. The full sidebar's
+     plan line keeps its link, in the layer that is `inert` while the rail shows. */
+  it("⚠️ the rail renders no Upgrade link; the full sidebar keeps it", () => {
     localStorage.setItem(SIDEBAR_COLLAPSED_KEY, "1");
     try {
-      expect(renderShell(0)).not.toContain("ws-upgrow");
-      expect(renderShell(0)).not.toContain("ws-uplink");
+      const html = renderShell(0);
+      expect(html).not.toContain("ws-upgrow");
+      const rail = html.slice(html.indexOf('class="wsr"'), html.indexOf('class="ws-pin"'));
+      expect(html.indexOf('class="wsr"'), "the rail layer").toBeGreaterThan(-1);
+      expect(rail).not.toContain("ws-uplink");
+      expect(rail).not.toContain(">Upgrade<");
     } finally {
       localStorage.removeItem(SIDEBAR_COLLAPSED_KEY);
     }
@@ -225,20 +239,20 @@ describe("the properties", () => {
     expect(cssRules, "the label's own margin is a term").toContain(".ws-lbl { display: inline-block; margin-left: 10px");
   });
 
-  it("⚠️ labels collapse by opacity/max-width, NEVER display — they stay in the a11y tree", () => {
-    /* ⚠️ ANCHORED ON A RULE, NOT PROSE — "SIDEBAR COLLAPSE" is a comment and cssRules strips
-       comments; the first draft anchored there and sliced from -1. */
-    const at = cssRules.indexOf(".ws-panel:not(.sb-ready)");
-    expect(at).toBeGreaterThan(-1);
-    const section = cssRules.slice(at);
-    for (const sel of [".ws-lbl", ".ws-glabel", ".ws-utext", ".ws-mstt", ".ws-bwm"]) {
-      const i = section.indexOf(`.sb-collapsed ${sel}`);
-      if (i === -1) continue; // .ws-bwm's collapse rule lives with the brand block, checked below
-      expect(section.slice(i, section.indexOf("}", i)), sel).not.toContain("display: none");
-    }
-    const bwm = cssRules.indexOf(".sb-collapsed .ws-bwm");
-    expect(bwm).toBeGreaterThan(-1);
-    expect(cssRules.slice(bwm, cssRules.indexOf("}", bwm))).not.toContain("display");
+  /* ⚠️ RETARGETED (sidebar rail v1): there is no collapsing label any more — the rail and the full sidebar
+     are two layers that cross-fade by OPACITY, and the hidden one is `inert`. What this lock still holds:
+     the retired `.sb-collapsed` rules are gone, and neither layer is hidden by `display`. */
+  it("⚠️ the layers cross-fade by opacity, never display — and the old collapse rules are gone", () => {
+    expect(cssRules).not.toContain(".sb-collapsed");
+    const ink = readFileSync(resolve(__dirname, "./inkShell.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    const at = ink.indexOf(".ws-panel > .ws-pin");
+    expect(at, "the full layer's rule").toBeGreaterThan(-1);
+    const rule = ink.slice(at, ink.indexOf("}", at));
+    expect(rule).toContain("opacity: 0");
+    expect(rule).not.toContain("display");
+    const wide = ink.indexOf(".ws-panel.sr-wide .wsr");
+    expect(wide, "the rail layer's hidden rule").toBeGreaterThan(-1);
+    expect(ink.slice(wide, ink.indexOf("}", wide))).not.toContain("display");
   });
 
   it("⚠️ no transform anywhere in the collapse section's transitions — blend isolation", () => {

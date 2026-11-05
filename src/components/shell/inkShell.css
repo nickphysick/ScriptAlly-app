@@ -799,62 +799,40 @@
 
 @media (min-width: 768px) {
 
-  /* ── Phase 4 · collapse ──────────────────────────────────────────────────────────────────────── */
-
-  /* 248 ↔ 68 over 0.24s on the house ease; the labels fade out in the first 160ms. The width tokens
-     (`--shell-side-w` / `--shell-side-w-collapsed`) and the `sb-ready` load guard are unchanged. */
-  .ws-panel.sb-ready,
-  .ws-panel.sb-ready .ws-pin {
-    transition: width 0.24s var(--ink-ease), padding 0.24s var(--ink-ease);
+  /* ── Sidebar rail v1 (5 Nov) · the box ─────────────────────────────────────────────────────────────
+     ⚠️ ONE BOX, TWO LAYERS, BOTH ALWAYS MOUNTED. The panel is 80px on the rail and 248px for the full
+     sidebar; the rail (`.wsr`, SidebarRail) and the full sidebar (`.ws-pin`) sit in it absolutely and
+     cross-fade. Switching is a class and `inert`, never a remount — a remount mid-animation cost a
+     ~180ms frame in the mock (measured). The old 68px icon rail (`.sb-collapsed`) is retired: nothing
+     sets the class any more. Values: design-refs/shell/sidebar-rail-v1.css (`.qr`, `.qr-c`, `.qr-w`). */
+  .ws-panel {
+    position: relative;
+    z-index: 40;
+    width: 80px;
+    overflow: hidden;
+    /* lit from above, with a hairline highlight on the right edge (the ref's qr-ground) */
+    background: linear-gradient(180deg, var(--ink-shell-lift) 0, var(--ink-shell-lift-2) 260px, var(--ink-shell) 520px);
+    box-shadow: inset -1px 0 0 rgba(var(--ink-cream-rgb), 0.04);
   }
-  .ws-panel.sb-ready .ws-lbl,
-  .ws-panel.sb-ready .ws-utext,
-  .ws-panel.sb-ready .ws-bwm,
-  .ws-panel.sb-ready .ws-beta,
-  .ws-panel.sb-ready .ws-ms--side .ws-ms-tx,
-  .ws-panel.sb-ready .ws-ms--side .ws-ms-chev {
-    transition: opacity 0.16s ease, max-width 0.24s var(--ink-ease), margin 0.24s var(--ink-ease);
+  .ws-panel.sb-ready {
+    transition: width 0.24s cubic-bezier(0.2, 0.9, 0.3, 1), margin-right 0.24s cubic-bezier(0.2, 0.9, 0.3, 1), box-shadow 0.24s ease;
   }
-
-  /* the rail's own inset: 13px each side of a 42px column, as the ref draws it */
-  .sb-collapsed .ws-pin { padding: 16px 13px 12px; align-items: stretch; }
-
-  /* the logo row: the mark alone, and the toggle takes its place while the mark is hovered */
-  .sb-collapsed .ws-logo { gap: 0; padding: 0; justify-content: center; }
-  .sb-collapsed .ws-logo .ws-brand { gap: 0; justify-content: center; }
-  .sb-collapsed .ws-logo .ws-bwm,
-  .sb-collapsed .ws-logo .ws-beta { opacity: 0; max-width: 0; margin: 0; padding: 0; overflow: hidden; box-shadow: none; }
-  .sb-collapsed .ws-logo .sb-toggle {
+  .ws-panel.sr-wide { width: 248px; }
+  .ws-panel > .ws-pin {
     position: absolute;
-    left: 50%;
-    top: 50%;
-    margin: 0;
-    transform: translate(-50%, -50%);
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 248px;
+    height: auto;
     opacity: 0;
     pointer-events: none;
-    background: rgba(var(--ink-cream-rgb), 0.08);
-    color: var(--ink-cream-92);
+    transition: opacity 0.1s ease;
   }
-  .sb-collapsed .ws-logo:hover .sb-toggle,
-  .sb-collapsed .ws-logo .sb-toggle:focus-visible { opacity: 1; pointer-events: auto; }
-  .sb-collapsed .ws-logo:hover .ws-bmark,
-  .sb-collapsed .ws-logo:has(.sb-toggle:focus-visible) .ws-bmark { opacity: 0; }
+  .ws-panel.sr-wide > .ws-pin { opacity: 1; pointer-events: auto; transition: opacity 0.16s ease 0.06s; }
+  .ws-panel.sr-wide .wsr { opacity: 0; pointer-events: none; transition: opacity 0.08s ease; }
 
-  /* the selector: its cover only */
-  .sb-collapsed .ws-ms--side .ws-ms-btn { padding: 6px 0; gap: 0; justify-content: center; background: transparent; box-shadow: none; }
-  .sb-collapsed .ws-ms--side .ws-ms-tx,
-  .sb-collapsed .ws-ms--side .ws-ms-chev { flex: 0 0 0; opacity: 0; max-width: 0; overflow: hidden; }
-
-  /* the group labels go — their spacing stays as the gaps between groups */
-  .sb-collapsed .ws-glabel {
-    width: auto;
-    height: 0;
-    margin: 14px 0 0;
-    background: transparent;
-    opacity: 0;
-  }
-
-  /* Manuscripts v27 Part E — a row's "PRO" tag (Versions): a small pill, a 4px rose dot. Gone when the sidebar folds. */
+  /* Manuscripts v27 Part E — a row's "PRO" tag (Versions): a small pill, a 4px rose dot. The rail draws its own tag (sidebarRail.css). */
   .ws-qpro {
     flex: none; margin-left: auto; box-sizing: border-box; display: inline-flex; align-items: center; gap: 5px;
     height: 16px; padding: 2px 5px; border-radius: 99px; background: rgba(var(--ink-cream-rgb), 0.1); color: var(--ink-rose);
@@ -863,40 +841,11 @@
     font: 600 7px/1 "JetBrains Mono", monospace; letter-spacing: 0.1em;
   }
   .ws-qpro::before { content: ""; width: 4px; height: 4px; border-radius: 50%; background: var(--ink-rose); }
-  .sb-collapsed .ws-qpro { display: none; }
   /* v26.1 — a label too long for its row beside a PRO tag is cut short with an ellipsis and keeps 6px off the tag,
      never clipped mid-letter under it ("Submission packages" needs 153px; the row gives a 600-weight label 140).
      The button's aria-label always carries the whole name. */
   .ws-ni .ws-lbl { min-width: 0; text-overflow: ellipsis; }
   .ws-ni:has(.ws-qpro) .ws-lbl { margin-right: 6px; }
-  .sb-collapsed .ws-ni:has(.ws-qpro) .ws-lbl { margin-right: 0; }
-
-  /* centred icon tiles, the selected edge pinned at the rail's left */
-  .sb-collapsed .ws-ni { width: 100%; height: 33px; padding: 0; justify-content: center; }
-  .sb-collapsed .ws-ni.on::before { left: calc(-1 * (var(--shell-side-w-collapsed) - 42px) / 2); }
-  /* the to-do count becomes a corner badge, ringed in ink so it reads off the icon */
-  .sb-collapsed .ws-ct {
-    position: absolute;
-    left: calc(50% + 4px);
-    top: 3px;
-    min-width: 16px;
-    height: 15px;
-    padding: 0 4px;
-    margin: 0;
-    font-size: 9px;
-    line-height: 15px;
-    box-shadow: 0 0 0 2px var(--ink-shell);
-  }
-
-  /* the feedback card becomes its icon, with the dot */
-  .sb-collapsed .ws-fbk { display: flex; justify-content: center; }
-  .sb-collapsed .ws-fbc,
-  .sb-collapsed .ws-fbb { display: none; }
-  .sb-collapsed .ws-fbi { display: grid; }
-
-  /* the foot: the avatar only (the gear and Upgrade are not rendered when collapsed) */
-  .sb-collapsed .ws-pfrow { border-top-color: transparent; }
-  .sb-collapsed .ws-uacct { padding: 0; justify-content: center; }
 }
 
 /* ⚠️ REDUCED MOTION: EVERY SHELL DURATION IS ZERO — the width, the labels, the tab's name swap, the

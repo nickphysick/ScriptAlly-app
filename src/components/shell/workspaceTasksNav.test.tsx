@@ -95,10 +95,15 @@ describe("⚠️ the TASKS section renders — same grammar, two rows, in order"
   it("⚠️ the count pill renders EXACTLY ONCE, on the To-do list row", () => {
     const withCount = renderShell("/todo", 7);
     expect(withCount.match(/class="ws-ct"/g)?.length).toBe(1);
+    /* sidebar rail v1: the rail carries the same figure as a corner badge on its Tasks row — once */
+    expect(withCount.match(/class="wsr-ct"/g)?.length).toBe(1);
     expect(withCount).not.toContain("sp-ct");
-    const listAt = withCount.indexOf(">To-do list<");
-    const nextRowAt = withCount.indexOf(">Corkboard<"); // the row after the list, since the Calendar page retired
-    const chipAt = withCount.indexOf("ws-ct");
+    /* the full sidebar's nav, after the rail layer: the rail's tray carries the same page names */
+    expect(withCount.indexOf('class="ws-pin"'), "the full sidebar layer is rendered").toBeGreaterThan(-1);
+    const full = withCount.slice(withCount.indexOf('class="ws-pin"'));
+    const listAt = full.indexOf(">To-do list<");
+    const nextRowAt = full.indexOf(">Corkboard<"); // the row after the list, since the Calendar page retired
+    const chipAt = full.indexOf("ws-ct");
     expect(chipAt).toBeGreaterThan(listAt);   // after the list row's label…
     expect(chipAt).toBeLessThan(nextRowAt);   // …and before the next row begins
     // the model behind it: count + urgent on the list child, nowhere else

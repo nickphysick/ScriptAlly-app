@@ -1,0 +1,17 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * railReviewAid — a DEV-ONLY review aid for the sidebar rail (sidebar rail v1).
+ *
+ * `window.__SA_RAIL_COUNT = 128` stands in for the To-do board's total, so the rail's "99+" badge can be
+ * measured on an account whose board is small. It fabricates INPUT, never output: the badge is still
+ * drawn by the rail's own `railCount`.
+ *
+ * ⚠️ THE CALL SITE CARRIES THE MODE GATE (`import.meta.env.MODE !== "production"`), so a production
+ * build drops this module entirely — a guard inside the module is not absence from the bundle.
+ */
+export function railCountAid(real: number): number {
+  const v = (globalThis as unknown as { __SA_RAIL_COUNT?: unknown }).__SA_RAIL_COUNT;
+  return typeof v === "number" && Number.isFinite(v) && v >= 0 ? v : real;
+}

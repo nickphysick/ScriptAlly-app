@@ -60,7 +60,8 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
    * inner edge and as wide as the sidebar's inner column, with the plan on an ink tile. Every other
    * opener (the phone's bar, the marketing nav, the dev shells) keeps the menu it had.
    */
-  const footRow = (anchor?.closest?.(".ws-pfrow") as HTMLElement | null) ?? null;
+  /* the full sidebar's foot row, or the rail's foot (sidebar rail v1): both open the ink menu above it */
+  const footRow = (anchor?.closest?.(".ws-pfrow, .wsr-foot") as HTMLElement | null) ?? null;
   const ink = !!footRow && typeof window !== "undefined" && !!window.matchMedia?.("(min-width: 768px)").matches;
 
   /* the foot row stays lit while its menu is open */
