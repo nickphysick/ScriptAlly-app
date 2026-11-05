@@ -33,6 +33,7 @@ import { Pk41Hawk } from "./packages/v41/Pk41Hawk";
 import { Pk26Builder, type LibTab } from "./packages/v26/Pk26Builder";
 import { Pk41Banner } from "./packages/v41/Pk41Banner";
 import { Pk41Header } from "./packages/v41/Pk41Header";
+import { Pk42Tiles } from "./packages/v42/Pk42Tiles";
 import { useScriptAllyDb } from "../lib/db";
 import { packagesViaFounding } from "../lib/entitlements";
 import { FOUNDING_NOTE_PATH, foundingNoteHidden } from "../lib/packagesV41";
@@ -52,6 +53,7 @@ import "./packages/v26/pk391.css";
 import "./packages/v26/pk392.css";
 import "./packages/v26/pk393.css";
 import "./packages/v41/pk41.css";
+import "./packages/v42/pk42.css";
 
 export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab: string, sub?: string) => void }> = ({ active: routeActive = true }) => {
   const model = usePk26Model();
@@ -133,6 +135,9 @@ export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab:
       <div ref={rootRef} className={`p6 p41${empty ? " p6-new" : ""}`} data-pk26="page" data-pk41="page">
         {empty ? <Pk26Hero onBuild={() => part("builder")?.scrollIntoView({ block: "start", behavior: "smooth" })} onHow={() => setHow(true)} />
           : <Pk41Header title={activeMs?.title ?? null} onNew={() => setDialog({ m: "new" })} onHow={() => setHow(true)} />}
+        {/* v42 C: the stat tiles, a row on the page between the header and the builder (not on the brand-new page) */}
+        {empty || !msPkgs.length ? null : <Pk42Tiles model={model} currentId={current?.id ?? null} showRetired={showRetired} onShowRetired={setShowRetired}
+          onSelect={(p) => setCurId(p.id)} onOpenRetired={(p) => setPkdId(p.id)} />}
         {/* v42 A: the rail is retired; the open package takes the column's full width */}
         <div className="p42-ws" data-pk41="workspace">
           <Pk26Builder model={model} retired={retired} current={current} onSelect={setCurId} onFigures={(p) => setPkdId(p.id)} askStep={askStep}

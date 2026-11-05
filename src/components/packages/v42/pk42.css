@@ -1,0 +1,62 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Submission packages v42 (design-refs/submission-packages-v42/): the stat tiles above the builder, the builder as one
+ * framed container with Dashboard bands (sage steps, sand preview, blush lock), navy package icons, the empty card and
+ * How it works as one animated infographic. Values are the ref's COMPUTED styles at 1512 and 1280, ported into the
+ * page's own class names (`p42-`); no `k4-`, `ig-` or `mn-` name ships. Desktop only (≥768), as every rule on this
+ * page since v39; the portalled infographic hangs off its own root.
+ *
+ * ⚠️ EVERY ON-PAGE RULE NAMES `.p41` (the page's root), so brand.tsx's bare-element faces and the v26–v41 sheets under
+ *    it lose only what v42 restyles.
+ */
+
+/* ══ C · THE STAT TILES (ref `.k4-tbs` / `.k4-tb` in the tiles layout; screens 01, 03, 06, 14) ═════════════════════════
+   A row on the page, 26 under the header (its 10px of top padding is room for the Current batch tag), the builder 26
+   under it (the bottom padding is room for the open tile's notch). The tiles share the row evenly, never wider than
+   300 (ref: 235 at 1512, 181 at 1280). A tile: white top (the navy icon tile and the serif name), beige foot (the
+   figure in the typewriter, its label in the serif). Open: a 2px navy ring and a notch. ══ */
+@media (min-width: 768px) {
+  .p41 .p42-tiles { display: flex; align-items: stretch; gap: 12px; margin: 26px 0 0; padding: 10px 0 14px; }
+  .p41 .p42-tile {
+    flex: 1 1 0; min-width: 0; max-width: 300px; position: relative; box-sizing: border-box;
+    display: flex; flex-direction: column; margin: 0; padding: 0; border: 0; border-radius: 14px;
+    background: #fff; color: #1c130f; text-align: left; cursor: pointer;
+    box-shadow: 0 0 0 1px #e3d5c9, 0 10px 22px -20px rgba(28, 19, 15, 0.4);
+    transition: box-shadow .15s;
+  }
+  .p41 .p42-tile:not(.p42-on):hover { box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.25), 0 10px 22px -20px rgba(28, 19, 15, 0.4); }
+  .p41 .p42-tile.p42-on { box-shadow: 0 0 0 2px #2d3a50, 0 14px 26px -18px rgba(28, 19, 15, 0.5); }
+  .p41 .p42-tile:focus-visible { outline: 2px solid #2d3a50; outline-offset: 3px; }
+  .p41 .p42-tile.p42-ret { opacity: .65; }
+  .p41 .p42-tt { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 14px 16px 12px; }
+  .p41 .p42-tt .p41-ic.p42-tic { width: 28px; height: 28px; border-radius: 7px; }
+  .p41 .p42-tt .p41-ic.p42-tic .p41-pic { width: 15px; height: 15px; }
+  .p41 .p42-tn { min-width: 0; font: 600 18px/1.25 var(--sp-serif); color: #1c130f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .p41 .p42-tf {
+    display: flex; align-items: baseline; gap: 8px; min-width: 0; margin-top: auto; padding: 12px 18px 14px;
+    border-radius: 0 0 14px 14px; background: #f5f1ea;
+  }
+  .p41 .p42-tf b.p42-big { flex: none; font: 400 22px/1 var(--sp-type); color: #1c130f; }
+  .p41 .p42-tf .p42-bl { min-width: 0; font: 400 14px/1.4 var(--sp-serif); color: rgba(28, 19, 15, 0.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* the notch: a small navy-edged diamond centred under the open tile, pointing down at the builder */
+  .p41 .p42-tile.p42-on::after {
+    content: ""; position: absolute; left: 50%; bottom: -8px; width: 14px; height: 14px; box-sizing: border-box;
+    background: #f5f1ea; border-right: 2px solid #2d3a50; border-bottom: 2px solid #2d3a50; border-bottom-right-radius: 3px;
+    transform: translateX(-50%) rotate(45deg);
+  }
+  /* Current batch: a small navy tag on the tile's top edge, left-aligned, never stretched */
+  .p41 .p42-cb {
+    position: absolute; top: -9px; left: 14px; z-index: 1; padding: 2px 7px; border-radius: 4px;
+    background: #2d3a50; color: #f4eee5; font: 500 8px/10px var(--font-mono, monospace); font-style: normal;
+    letter-spacing: .12em; text-transform: uppercase; white-space: nowrap;
+  }
+  .p41 .p42-retl {
+    flex: none; align-self: center; margin: 0 4px 0 0; padding: 1px 6px; border: 0; background: none; cursor: pointer;
+    font: italic 14px var(--sp-serif); color: #1c130f; white-space: nowrap;
+    text-decoration: underline; text-decoration-color: rgba(28, 19, 15, 0.3); text-underline-offset: 3px;
+  }
+  .p41 .p42-retl:hover { text-decoration-color: #1c130f; }
+  .p41 .p42-retl:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; border-radius: 4px; }
+}

@@ -247,6 +247,12 @@ describe("/queries/packages renders", () => {
     expect(html).not.toContain('data-pk41="rail"');
     expect(html).not.toContain('data-pk41-row=');
     expect(html).not.toContain('data-pk41="batch"');
+    /* v42 C: the stat tiles, between the header and the builder; this draft package's tile names what it still needs */
+    expect(html).toContain('data-pk42="tiles"');
+    expect(html).toContain('data-pk42-tile="pk1"');
+    expect(html).toContain(">pieces in<");
+    expect(html.indexOf('data-pk42="tiles"')).toBeLessThan(html.indexOf('data-pk41="builder"'));
+    expect(html.indexOf('data-pk41="header"')).toBeLessThan(html.indexOf('data-pk42="tiles"'));
     expect(html).not.toContain("Bundle it. Send it. Know what went.");
     expect(html).toContain('data-pk26="open"');
     expect(html).toContain(">Standard UK<");
