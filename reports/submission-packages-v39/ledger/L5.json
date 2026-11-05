@@ -31,7 +31,7 @@
  },
  {
   "lock": "L5",
-  "where": "pk40-ready: the rail row shows it",
+  "where": "pk40-ready: the tile shows it",
   "ok": true,
   "detail": "Ready renamed"
  },
@@ -73,9 +73,9 @@
  },
  {
   "lock": "L5",
-  "where": "pk40-std: the rail row shows it",
+  "where": "pk40-std: the tile shows it",
   "ok": true,
-  "detail": "Standard renamed\nACTIVE"
+  "detail": "Standard renamed"
  },
  {
   "lock": "L5",

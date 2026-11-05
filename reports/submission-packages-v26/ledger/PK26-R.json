@@ -19,7 +19,7 @@
  },
  {
   "lock": "PK26-R",
-  "where": "its row is the open one",
+  "where": "its tile is the open one",
   "ok": true,
   "detail": "pk26-pkg-sent"
  }

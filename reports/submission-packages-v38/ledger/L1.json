@@ -1,9 +1,9 @@
 [
  {
   "lock": "L1",
-  "where": "the page rendered (the rail present)",
+  "where": "the page rendered (the stat tiles present)",
   "ok": true,
-  "detail": "list"
+  "detail": "tiles"
  },
  {
   "lock": "L1",

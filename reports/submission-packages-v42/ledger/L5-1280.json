@@ -1,0 +1,68 @@
+[
+ {
+  "lock": "L5-1280",
+  "where": "New: open",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "lock": "L5-1280",
+  "where": "New: the title",
+  "ok": true,
+  "detail": "Making a new package"
+ },
+ {
+  "lock": "L5-1280",
+  "where": "New: the line",
+  "ok": true,
+  "detail": "Give it a name and an icon you’ll recognise. You’ll pick its pieces on the page."
+ },
+ {
+  "lock": "L5-1280",
+  "where": "New: the icon hint",
+  "ok": true,
+  "detail": "Pick one you’ll recognise. It shows on the tile, in the Query Centre and in your results."
+ },
+ {
+  "lock": "L5-1280",
+  "where": "New: the icons, no colour",
+  "ok": true,
+  "detail": "12 icons · 0 swatches"
+ },
+ {
+  "lock": "L5-1280",
+  "where": "Details: the title",
+  "ok": true,
+  "detail": "Editing Ready one"
+ },
+ {
+  "lock": "L5-1280",
+  "where": "Details: the line",
+  "ok": true,
+  "detail": "Rename it, change its icon, or add a note on who it’s for."
+ },
+ {
+  "lock": "L5-1280",
+  "where": "Details: the icon hint",
+  "ok": true,
+  "detail": "Pick one you’ll recognise. It shows on the tile, in the Query Centre and in your results."
+ },
+ {
+  "lock": "L5-1280",
+  "where": "Details: the icons, no colour",
+  "ok": true,
+  "detail": "12 icons · 0 swatches"
+ },
+ {
+  "lock": "L5-1280",
+  "where": "popover: the icon hint",
+  "ok": true,
+  "detail": "Pick one you’ll recognise. It shows on the tile, in the Query Centre and in your results."
+ },
+ {
+  "lock": "L5-1280",
+  "where": "popover: no colour",
+  "ok": true,
+  "detail": "0"
+ }
+]

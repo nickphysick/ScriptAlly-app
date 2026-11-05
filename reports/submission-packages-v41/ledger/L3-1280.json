@@ -13,21 +13,15 @@
  },
  {
   "lock": "L3-1280",
-  "where": "the rail head is not navy",
+  "where": "the builder's heading row is not navy",
   "ok": true,
-  "detail": "rgb(251, 249, 246)"
- },
- {
-  "lock": "L3-1280",
-  "where": "the builder band is not navy",
-  "ok": true,
-  "detail": "color(srgb 0.90251 0.922353 0.932706)"
+  "detail": "rgba(0, 0, 0, 0)"
  },
  {
   "lock": "L3-1280",
   "where": "subheader: one line (no overflow)",
   "ok": true,
-  "detail": "515 / 515"
+  "detail": "437 / 437"
  },
  {
   "lock": "L3-1280",

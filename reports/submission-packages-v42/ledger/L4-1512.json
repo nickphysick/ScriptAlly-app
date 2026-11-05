@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "L4-1512",
+  "where": "population: two packages with different stored colours",
+  "ok": true,
+  "detail": "plum / pine"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "pk40-std: the builder's icon tile is navy",
+  "ok": true,
+  "detail": "rgb(45, 58, 80)"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "pk40-std: its stat tile's icon is navy",
+  "ok": true,
+  "detail": "rgb(45, 58, 80)"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "pk40-ready: the builder's icon tile is navy",
+  "ok": true,
+  "detail": "rgb(45, 58, 80)"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "pk40-ready: its stat tile's icon is navy",
+  "ok": true,
+  "detail": "rgb(45, 58, 80)"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "population: the page's package icons (tiles, builder, results)",
+  "ok": true,
+  "detail": "13"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "every package icon on the page is navy",
+  "ok": true,
+  "detail": "[\"rgb(45, 58, 80)\"]"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "this page paints neither stored colour",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "population: the log-a-query journey is open",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "log-a-query paints neither stored colour",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "population: the Query Centre rendered its rows",
+  "ok": true,
+  "detail": "100"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "the Query Centre paints neither stored colour",
+  "ok": true,
+  "detail": "0"
+ }
+]

@@ -79,12 +79,13 @@ async function open(page: Page, size: { width: number; height: number }, ms = "p
   await openRoute(page, route, size);
   if (m?.css) await page.addStyleTag({ content: m.css });
   /* v41: the labels row is retired; the page is ready when its list is */
-  if (route === "/queries/packages") await page.locator('[data-pk41="rail"]').first().waitFor({ state: "visible", timeout: 30_000 });
+  if (route === "/queries/packages") await page.locator('[data-pk42="tiles"]').first().waitFor({ state: "visible", timeout: 30_000 });
   await page.waitForTimeout(1500);
 }
 const pg = `[data-pk26="page"]`;
 /* v41: a package opens from its row in the list (re-pointed from its label) */
-const label = (page: Page, id: string) => page.locator(`${pg} [data-pk41-row="${id}"]`).first();
+/* v42: a package's stat tile (the rail is retired) — re-pointed */
+const label = (page: Page, id: string) => page.locator(`${pg} [data-pk42-tile="${id}"]`).first();
 const box = (page: Page, sel: string) => page.evaluate((s) => {
   const e = [...document.querySelectorAll(s)].find((x) => (x as HTMLElement).offsetParent || getComputedStyle(x).position === "fixed");
   if (!e) return null; const r = e.getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height, top: r.top, bottom: r.bottom };
@@ -216,8 +217,8 @@ test("L5 rename writes once (draft and sent), Escape writes nothing, a sent pack
     await page.waitForTimeout(1500);
     L.check(`${id}: one write (one rename receipt)`, toasts.length === before + 1, JSON.stringify(toasts));
     L.check(`${id}: stored`, stored()[id]?.packageName === to, String(stored()[id]?.packageName));
-    /* v41: the rail row shows it (re-pointed from the label); the row's name may carry the Active tag after it */
-    L.check(`${id}: the rail row shows it`, ((await label(page, id).locator("span > b").first().innerText()).trim().startsWith(to)), await label(page, id).locator("span > b").first().innerText());
+    /* v42: the stat tile shows it (re-pointed from the rail row) */
+    L.check(`${id}: the tile shows it`, ((await label(page, id).locator('[data-pk42="tile-name"]').first().innerText()).trim() === to), await label(page, id).locator('[data-pk42="tile-name"]').first().innerText());
     /* v39.3 REWRITE: a sent package's lock is the sent note between the header and the steps (Nick, 29 Oct); no padlock
        sits in the status pill or beside the name */
     const locks = await page.evaluate((p) => { const o = document.querySelector(`${p} [data-pk40="open"]`)!; return { note: o.querySelectorAll('[data-pk393="sent-note"]').length, stage: o.querySelectorAll('[data-pk39="stage-lock"]').length, name: o.querySelectorAll(".p9-po-tt .p9-po-lk, [data-pk39='name-lock']").length }; }, pg);

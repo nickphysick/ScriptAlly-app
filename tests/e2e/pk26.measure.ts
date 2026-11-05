@@ -95,9 +95,9 @@ test("PK26-R the old address redirects with its query and opens that package", a
   L.check("query kept", url.searchParams.get("pkg") === "pk26-pkg-sent", url.search);
   const openId = await vis(page, '[data-pk26="open"]').getAttribute("data-pkg");
   L.check("that package is open", openId === "pk26-pkg-sent", String(openId));
-  /* v41: the labels row is retired; the package's row in the list is the open one ("Open below") — re-pointed */
-  const openRow = await vis(page, '[data-pk41-row].p41-on').getAttribute("data-pk41-row");
-  L.check("its row is the open one", openRow === "pk26-pkg-sent", String(openRow));
+  /* v42: the rail is retired; the package's stat tile is the open one — re-pointed */
+  const openRow = await vis(page, '[data-pk42-tile].p42-on').getAttribute("data-pk42-tile");
+  L.check("its tile is the open one", openRow === "pk26-pkg-sent", String(openRow));
   L.done(4);
 });
 
@@ -209,7 +209,7 @@ test("PK26-H the package note is one line, or + Add a note", async ({ page }) =>
   const L = new Ledger("PK26-H");
   await open(page, SIZES[1]);
   /* v41: opened from its row in the list (re-pointed from its label) */
-  await page.locator('[data-pk41="page"] [data-pk41-row]').filter({ hasText: "Sent one" }).first().click(); await page.waitForTimeout(400);
+  await page.locator('[data-pk41="page"] [data-pk42-tile]').filter({ hasText: "Sent one" }).first().click(); await page.waitForTimeout(400);
   const withNote = await page.evaluate(() => {
     const h = [...document.querySelectorAll('[data-pk41="builder-frame"] .p93-bh-t')].find((e) => (e as HTMLElement).offsetParent) as HTMLElement;
     const sm = h.querySelector("small") as HTMLElement;
@@ -220,7 +220,7 @@ test("PK26-H the package note is one line, or + Add a note", async ({ page }) =>
   L.check("…cut short (it is longer than the room)", withNote.cut, JSON.stringify(withNote));
   /* v39: the pencil is gone (the name is edited in place); the law — the name keeps one line — stands */
   L.check("the name keeps one line", withNote.h3h <= withNote.h3fs * 1.6, JSON.stringify(withNote));
-  await page.locator('[data-pk41="page"] [data-pk41-row]').filter({ hasText: "Drag target" }).first().click(); await page.waitForTimeout(400);
+  await page.locator('[data-pk41="page"] [data-pk42-tile]').filter({ hasText: "Drag target" }).first().click(); await page.waitForTimeout(400);
   const add = vis(page, '[data-pk41="builder-frame"] .p93-addnote');
   /* v39: the note line itself, in the ref's words ("Add a note: who is this for?"); the law — no note offers one, and it
      opens Package details with the note focused — stands */
