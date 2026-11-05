@@ -398,6 +398,8 @@ for (const vp of SIZES) {
       L.check("it renders: yours, paper, Told 4 other agents, offer deadline {date}, the offer's glyph", told?.side === "me" && told.bg === ME && told.title === "Told 4 other agents" && /^offer deadline \d{1,2} [A-Z][a-z]{2}/.test(told.via), JSON.stringify(told) + (errs.length ? ` errors: ${errs.join(" | ")}` : ""));
       const after = dump("offer2");
       const entry = after.log.map((x: [string, Record<string, unknown>]) => x[1]).find((d: Record<string, unknown>) => d.type === "Told other agents");
+      const feedRow = after.feed.map((x: [string, Record<string, unknown>]) => x[1]).find((d: Record<string, unknown>) => d.eventKey === "offer_told");
+      L.check("a feed row: You told 4 agents about Ottilie’s offer, no status", feedRow?.description === "You told 4 agents about Ottilie’s offer" && !("resultingStatus" in (feedRow ?? {})), JSON.stringify(feedRow));
       L.check("saved on the log: count 4 and the deadline", entry?.toldCount === 4 && typeof entry?.toldDeadline === "string" && isoDay(new Date(entry.toldDeadline as string).getTime()) === target, JSON.stringify(entry));
       const other = dump("sib2").q;
       L.check("the same save marked another live query as told", other?.offerRefQueryId === "q152-offer2" && other?.offerTold === true && typeof other?.offerToldOn === "string", JSON.stringify({ r: other?.offerRefQueryId, t: other?.offerTold, on: other?.offerToldOn }));
@@ -425,7 +427,7 @@ for (const vp of SIZES) {
       await page.locator("[data-qad-undo]").first().click({ timeout: 8000 }).catch(() => {});
       await page.waitForTimeout(2500);
       L.check("Undo: the query back byte for byte", JSON.stringify(dump("agent")) === JSON.stringify(b2), "");
-      L.done(12);
+      L.done(13);
     });
   });
 }

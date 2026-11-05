@@ -56,6 +56,8 @@ export interface FeedEntry {
   dayLabel: string;
   /** the pill's words — the verb of the row */
   pill: string;
+  /** the event's own key, where it has one (v152.1: `offer_told` has no status, so its family is read from this) */
+  eventKey?: string | null;
   /** the rung this event produced, for the pill's glyph; null on a row that is not about a query */
   status: QueryStatus | null;
   /** the state whose token fills the pill; null on a row that is not about a query */
@@ -528,6 +530,7 @@ export const feedEntries = (i: FeedInput): FeedEntry[] => {
          rust rule beside all thirty days of it and says nothing at all. */
       isNew: i.seenAt !== null && t > i.seenAt,
       dir, activityType: String(a.activityType), who, agency: provenance, need, met,
+      eventKey: typeof a.eventKey === "string" ? a.eventKey : null,
     });
   }
   return out;

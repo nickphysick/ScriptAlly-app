@@ -99,11 +99,14 @@ export const REPLY_NOTE_MAX = 500;
  * ⚠️ ONE FACT, ONE SAVE (Nick): the step IS the record. Saving it writes the step AND the per-query marks on each other live
  *    query (`offerRefQueryId`, `offerTold`, `offerToldOn`, `offerReply` — the offer journey's fields) in the same batch;
  *    editing its date moves `offerToldOn`, removing it clears the marks, and Undo restores both from one snapshot.
- * ⚠️ ITS EVENT KEY IS NOT ON THE SHARED `EventKey` UNION: no feed row is written for it, so no other page's label map
- *    needs an entry.
+ * ⚠️ IT HAS A FEED ROW (Nick: "one of the most important moments in a campaign"): "You told 6 agents about Tom's offer",
+ *    the `offer_told` event key, no status — so nothing that counts offers counts it.
  */
 export const TOLD_TYPE = "Told other agents";
-export const TOLD_EVENT = "offer_told";
+export const TOLD_EVENT: EventKey = "offer_told";
+/** the feed row's sentence: "You told 6 agents about Tom's offer" */
+export const toldLine = (count: number, agentName: string | null | undefined) =>
+  `You told ${count} agent${count === 1 ? "" : "s"} about ${(agentName ?? "").trim().split(/\s+/)[0] || "the agent"}’s offer`;
 export interface ToldMarkTarget { id: string; offerReply?: string | null }
 export interface RecordExtra {
   /** §2.6 what the agent said, on one of their replies */
@@ -178,7 +181,9 @@ export function planRecord(c: PlanCtx, kind: RecordKind, dayMs: number, material
     const count = Math.max(1, Math.min(30, Math.round(t.count)));
     const sub: DocumentData = { type: TOLD_TYPE, createdAt, note: `Told ${count} other agent${count === 1 ? "" : "s"} about ${name}’s offer`, ...base,
       eventKey: TOLD_EVENT, toldCount: count, toldDeadline: dayIso(new Date(t.deadlineMs)) };
-    return { queryId: q.id, set: [{ path: `queries/${q.id}/activity/${id}`, data: sub }], del: [], query: {}, update: markTold(q, t.others, tMs) };
+    const feedRow: DocumentData = { id, userId: c.uid, queryId: q.id, manuscriptId: q.manuscriptId || "", activityType: ActivityType.STATUS_CHANGED,
+      description: toldLine(count, agent?.name || agent?.agency), date: iso, details: "", eventKey: TOLD_EVENT, logEntryId: id };
+    return { queryId: q.id, set: [{ path: `queries/${q.id}/activity/${id}`, data: sub }, { path: `activities/${id}`, data: feedRow }], del: [], query: {}, update: markTold(q, t.others, tMs) };
   }
   const note = REPLY_KINDS.includes(kind) ? (extra.replyNote ?? "").trim().slice(0, REPLY_NOTE_MAX) : "";
   if (kind === "nudge") {
@@ -317,7 +322,7 @@ export function planFix(c: PlanCtx & { feed: RawActivityDoc[] }, draft: readonly
     if (JSON.stringify(cur.data.materials ?? []) !== JSON.stringify(mats)) { if (mats.length) next.materials = mats; else delete next.materials; changed = true; }
     if (s.kind === "told" && s.told) {
       const n = Math.max(1, Math.min(30, Math.round(s.told.count))), dl = dayIso(new Date(s.told.deadlineMs));
-      if (cur.data.toldCount !== n) { next.toldCount = n; changed = true; }
+      if (cur.data.toldCount !== n) { next.toldCount = n; next.note = `Told ${n} other agent${n === 1 ? "" : "s"} about ${c.agent?.name || c.agent?.agency || "the agent"}’s offer`; changed = true; }
       if (cur.data.toldDeadline !== dl) { next.toldDeadline = dl; changed = true; }
       if (!sameDay(t0, s.dayMs)) for (const id of c.marked ?? []) update.push({ path: `queries/${id}`, data: { offerToldOn: dayIso(new Date(s.dayMs)) } });
     }
@@ -330,6 +335,8 @@ export function planFix(c: PlanCtx & { feed: RawActivityDoc[] }, draft: readonly
       if (next.resultingStatus && f.resultingStatus !== undefined) f.resultingStatus = next.resultingStatus;
       f.date = new Date(getActivityTime(next.createdAt)).toISOString();
       if (mats.length) f.materials = mats; else delete f.materials;
+      /* a told step's feed row keeps its count in its words */
+      if (s.kind === "told" && typeof next.toldCount === "number") f.description = toldLine(next.toldCount, c.agent?.name || c.agent?.agency);
       set.push({ path: `activities/${tw.id}`, data: f });
     }
   }
