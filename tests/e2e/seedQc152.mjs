@@ -80,9 +80,45 @@ export const FIXTURES = [
   ["fullreq", "materials", "Full Requested", 8, 40, null, false],
   /* §4 — sent as the harness's own "Comps-led variant" package (L11: change a chip, the link clears on save) */
   ["pkg", "agent", "Queried", 8, 20, null, false],
+  /* v152.1 §2 — the thread's cases (QC1521 L2–L10): an R&R with the query's legacy note, a pass with the step's own reply
+     note, a withdrawal with its reason, an offer whose writer told six others, an undated imported step beside a send with
+     no materials, and a seven-step thread with two nudges (the fold and "2nd nudge") */
+  ["rr", "materials", "Revise & Resubmit", 6, 100, null, false],
+  ["passed", "closed", "Rejected", 6, 90, null, false],
+  ["withdrew", "closed", "Withdrawn", 6, 60, null, false],
+  ["offertold", "offer", "Offer", 6, 80, null, false],
+  ["undated", "agent", "Partial Sent", 6, 80, null, false],
+  ["seven", "agent", "Full Sent", 6, 180, null, false],
+  /* v152.1 L10 — an offer and a live sibling on the second manuscript, whose live queries all take the offer marks: on
+     seed-ms-1 the harness's seed-pkgq-4 (written by seedPackages.mjs outside the rules) refuses ANY update, and the told
+     save is one batch over every sibling, so it fails there whole (reported) */
+  ["offer2", "offer", "Offer", 6, 50, null, false],
+  ["sib2", "agent", "Queried", 4, 7, null, false],
 ];
+const MSOF = { offer2: "seed-ms-2", sib2: "seed-ms-2" };
 /** each fixture agent's first name, so the card's words read as they will for a writer */
-const FIRST = { offer: "Olive", materials: "Mira", nudge: "Priya", agent: "Rufus", quiet: "Quinn", nrmn: "Nina", nudgedquiet: "Nell", nudgedwait: "Wren", closed: "Clara", long: "Jonathan", fullreq: "Hannah", pkg: "Felix" };
+const FIRST = { offer: "Olive", materials: "Mira", nudge: "Priya", agent: "Rufus", quiet: "Quinn", nrmn: "Nina", nudgedquiet: "Nell", nudgedwait: "Wren", closed: "Clara", long: "Jonathan", fullreq: "Hannah", pkg: "Felix",
+  rr: "Rhea", passed: "Paul", withdrew: "Wanda", offertold: "Tom", undated: "Uma", seven: "Seth", offer2: "Ottilie", sib2: "Simon" };
+/** the v152.1 fixtures' steps: [key, type, days ago (null: undated), extra log fields] */
+const NUDGE = "Nudge sent", TOLD = "Told other agents";
+/** the day at local noon, ISO — how the app stores a day (lib/queryActions/dates dayIso) */
+const dayIso = (daysAgo) => { const d = new Date(NOW - daysAgo * DAY); d.setHours(12, 0, 0, 0); return d.toISOString(); };
+const STEPS1521 = {
+  rr: [["sent", "Queried", 100], ["freq", "Full Requested", 70], ["fsent", "Full Sent", 50], ["rr", "Revise & Resubmit", 10]],
+  passed: [["sent", "Queried", 90], ["freq", "Full Requested", 40], ["fsent", "Full Sent", 30], ["pass", "Rejected", 10, { replyNote: "Beautifully written, but I didn’t fall for it quite enough." }]],
+  withdrew: [["sent", "Queried", 60], ["wd", "Withdrawn", 5]],
+  offertold: [["sent", "Queried", 80], ["offer", "Offer", 10, { replyNote: "I’d love to represent this book." }], ["told", TOLD, 9, { toldCount: 6, toldDeadline: dayIso(-8), eventKey: "offer_told" }]],
+  undated: [["sent", "Queried", 80], ["preq", "Partial Requested", null], ["psent", "Partial Sent", 20]],
+  seven: [["sent", "Queried", 180], ["n1", NUDGE, 150], ["n2", NUDGE, 130], ["preq", "Partial Requested", 110], ["psent", "Partial Sent", 90], ["freq", "Full Requested", 60], ["fsent", "Full Sent", 20]],
+};
+const QUERY1521 = {
+  rr: { rrNotes: "Loved the voice. The middle sags; tighten the second act and I’d read it again.", fullRequestedDate: iso(70), fullSentDate: iso(50) },
+  passed: { fullRequestedDate: iso(40), fullSentDate: iso(30), rejectionFeedbackType: "detailed", rejectionFeedbackText: "An older note the step’s own words replace." },
+  withdrew: { closingReason: "Withdrew my submission", closingNotes: "An offer elsewhere" },
+  offertold: { offerResponseDeadline: iso(-5) },
+  undated: { partialSentDate: iso(20) },
+  seven: { partialRequestedDate: iso(110), partialSentDate: iso(90), fullRequestedDate: iso(60), fullSentDate: iso(20), lastNudgeSentDate: iso(130) },
+};
 const MS = "seed-ms-1";
 for (const [key, , status, weeks, sentAgo, nudgeAgo, nrmn] of FIXTURES) {
   const b = writeBatch(db);
@@ -96,7 +132,8 @@ for (const [key, , status, weeks, sentAgo, nudgeAgo, nrmn] of FIXTURES) {
     dateAdded: iso(200), lastCheckedDate: iso(5),
   });
   const sent = iso(sentAgo);
-  const q = { id: Q, userId: uid, agentId: AG, manuscriptId: MS, dateSent: sent, status, sendMethod: "Email",
+  const MSK = MSOF[key] ?? MS;
+  const q = { id: Q, userId: uid, agentId: AG, manuscriptId: MSK, dateSent: sent, status, sendMethod: "Email",
     personalisationNotes: `QC152 fixture: ${key}`, packageId: "", materialsWanted: ["Query letter"] };
   if (nudgeAgo != null) q.lastNudgeSentDate = iso(nudgeAgo);
   const steps = [["sent", "Queried", "Query Sent", sentAgo, `Query sent to ${name} at State & Window`]];
@@ -112,9 +149,29 @@ for (const [key, , status, weeks, sentAgo, nudgeAgo, nrmn] of FIXTURES) {
   if (status === "Offer") q.offerResponseDeadline = iso(-6);
   if (key === "pkg") Object.assign(q, { packageId: "seed-pkg-2", sentHow: "package", sentPackageId: "seed-pkg-2", sentPackageEdition: 1, sentPackageName: "Comps-led variant" });
   if (status === "Partial Requested") q.expectedSendDate = iso(-7);
+  /* v152.1 — its own steps and fields */
+  if (STEPS1521[key]) {
+    Object.assign(q, QUERY1521[key] ?? {});
+    const STATUSES = ["Queried", "Partial Requested", "Partial Sent", "Full Requested", "Full Sent", "Revise & Resubmit", "Offer", "Rejected", "Withdrawn", "No Response"];
+    let last = null;
+    for (const [sk, type, ago, extra] of STEPS1521[key]) {
+      const act = `${Q}-${sk}`, st = STATUSES.includes(type);
+      const created = ago == null ? "" : new Date(iso(ago));
+      b.set(doc(db, "users", uid, "queries", Q, "activity", act), { type, ...(st ? { resultingStatus: type } : {}), createdAt: created, note: `${type} · ${name}`, queryId: Q, agentName: name, manuscriptTitle: "seed",
+        ...(sk === "sent" ? { materials: [{ kind: "letter" }, { kind: "synopsis" }, { kind: "sample", unit: "pages", n: 10 }] } : {}), ...(extra ?? {}) });
+      if (st && ago != null) {
+        b.set(doc(db, "users", uid, "activities", act), { id: act, userId: uid, queryId: Q, manuscriptId: MSK, activityType: sk === "sent" ? "Query Sent" : "Status Changed", description: `${type} · ${name}`, date: iso(ago), details: "", resultingStatus: type });
+        last = ago;
+      }
+    }
+    if (status !== "Queried" && last != null) q.lastStatusChange = iso(last);
+    b.set(doc(db, "users", uid, "queries", Q), q);
+    await b.commit().catch((e) => { console.error(`q152: ${key} refused: ${e.code}`); throw e; });
+    continue;
+  }
   for (const [sk, res, type, ago, desc] of steps) {
     const act = `${Q}-${sk}`;
-    b.set(doc(db, "users", uid, "activities", act), { id: act, userId: uid, queryId: Q, manuscriptId: MS, activityType: type, description: desc, date: iso(ago), details: "", resultingStatus: res });
+    b.set(doc(db, "users", uid, "activities", act), { id: act, userId: uid, queryId: Q, manuscriptId: MSK, activityType: type, description: desc, date: iso(ago), details: "", resultingStatus: res });
     /* §3: the full request records what was asked, on both stores (the v152 step materials) */
     const mats = sk === "freq" && key === "fullreq" ? { materials: [{ kind: "full" }, { kind: "synopsis" }] }
       : sk === "sent" && key === "pkg" ? { materials: [{ kind: "letter", name: "Comps-forward" }, { kind: "synopsis", name: "One-page" }] } : {};

@@ -21,20 +21,21 @@
  */
 import { MONTHS_SHORT } from "./dates";
 
-export type StepType = "queried" | "preq" | "psent" | "freq" | "fsent" | "offer" | "nudge" | "passed" | "noresp" | "withdrawn";
+/** v152.1 adds "told": you told other agents about an offer — a step, never a status */
+export type StepType = "queried" | "preq" | "psent" | "freq" | "fsent" | "offer" | "nudge" | "passed" | "noresp" | "withdrawn" | "told";
 export interface LogStep { id: string; t: StepType; d: number }
 
 const DAY = 86_400_000;
 const fd = (ms: number) => { const d = new Date(ms); return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}`; };
 export const STEP_LABEL: Record<StepType, string> = {
   queried: "Query sent", preq: "Partial requested", psent: "Partial sent", freq: "Full requested", fsent: "Full sent",
-  offer: "Offer", nudge: "You nudged", passed: "Passed", noresp: "Closed: no response", withdrawn: "Withdrawn",
+  offer: "Offer", nudge: "You nudged", passed: "Passed", noresp: "Closed: no response", withdrawn: "Withdrawn", told: "Told other agents",
 };
 const RANK: Partial<Record<StepType, number>> = { preq: 1, psent: 2, freq: 3, fsent: 4, offer: 5 };
 const NEEDS: Partial<Record<StepType, StepType>> = { psent: "preq", fsent: "freq" };
 /** whose move the step leaves it: the agent's (a), yours (y) or closed (k) */
 const SIDE: Record<StepType, "a" | "y" | "k" | null> = {
-  queried: "a", preq: "y", psent: "a", freq: "y", fsent: "a", offer: "y", nudge: null, passed: "k", noresp: "k", withdrawn: "k",
+  queried: "a", preq: "y", psent: "a", freq: "y", fsent: "a", offer: "y", nudge: null, passed: "k", noresp: "k", withdrawn: "k", told: null,
 };
 const CLOSES = new Set<StepType>(["passed", "noresp", "withdrawn"]);
 const lab = (t: StepType, first: string) => (t === "nudge" ? `You nudged ${first}` : STEP_LABEL[t]);
@@ -65,6 +66,8 @@ export function validate(steps: readonly LogStep[], c: { nowMs: number; first: s
       if (e.t === "passed" && side === "y" && top!.t !== "offer") { put(e, `After “${STEP_LABEL[top!.t]}” the next step is yours, not a pass. Check the order.`); continue; }
       closed = e; continue;
     }
+    /* v152.1 §2.5 telling other agents follows an offer, and leaves the move where it was */
+    if (e.t === "told") { if (!seen.offer) put(e, "You can only tell other agents about an offer once there is one."); continue; }
     /* 6 */
     if (e.t === "nudge") { if (side === "y") put(e, `You nudge an agent while you’re waiting on them. After “${STEP_LABEL[top!.t]}” it’s your move.`); continue; }
     /* 4 */

@@ -26,6 +26,7 @@ import {
 } from "../../../lib/qcThread152";
 import "./qcv152card.css";
 import { PopCtx, useOutsideClose } from "./QcEdit152";
+import { Bubble, chipIcon } from "./QcBubble152";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 
 export interface QcCard152Data {
@@ -82,8 +83,6 @@ export interface QcCard152Props {
 
 const PEN = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10.5 2.5l3 3L6 13H3v-3z" /></svg>;
 const ARW = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5" /></svg>;
-const NUDGE = <svg viewBox="0 0 20 20" width="19" height="19" fill="none" stroke="#1c130f" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5" /><path d="M7 12.5h6l-.9-1.2V9a2.1 2.1 0 0 0-4.2 0v2.3zM9.2 14h1.6" /></svg>;
-const HOLD = <svg viewBox="0 0 20 20" width="19" height="19" fill="none" stroke="#1c130f" strokeWidth="1.5" aria-hidden="true"><circle cx="10" cy="10" r="7.5" /><path d="M7 10h6" strokeLinecap="round" /></svg>;
 const BOOK = <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#5f5a53" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true"><path d="M3.5 5.5c2.8-1.3 5.8-1.3 8.5.6 2.7-1.9 5.7-1.9 8.5-.6v13c-2.8-1.3-5.8-1.3-8.5.6-2.7-1.9-5.7-1.9-8.5-.6z" /><path d="M12 6.1v13" /></svg>;
 const MAIL = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><rect x="2" y="3.5" width="12" height="9" rx="1.5" /><path d="m2.5 4.5 5.5 4 5.5-4" /></svg>;
 const WEB = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><circle cx="8" cy="8" r="6" /><path d="M2 8h12M8 2c2 2 2 10 0 12M8 2c-2 2-2 10 0 12" /></svg>;
@@ -120,8 +119,9 @@ const TipBox: React.FC<{ x: number; y: number; head: string | null; body: string
   );
 };
 
-const Glyph: React.FC<{ status: QueryStatus | null; kind: "nudge" | "holding" | null }> = ({ status, kind }) =>
-  kind === "nudge" ? NUDGE : kind === "holding" ? HOLD : status ? <StatusDot status={status} overrideSize={19} decorative /> : HOLD;
+/** v152.1 §2.8 — a thread with more than five steps folds its earliest into one button; the last three always show */
+export const FOLD_OVER = 5;
+export const FOLD_KEEP = 3;
 
 export const QcCard152: React.FC<QcCard152Props> = (p) => {
   const { row: r, nowMs, d } = p;
@@ -144,6 +144,9 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   const thread: ThreadItem[] = buildThread(d.steps, { first, nowMs, state: d.state, replyMs: d.replyMs, agentWeeks: d.agentWeeks });
   const box = replyBox({ state: d.state, status: r.status, first, nowMs, dueMs: d.dueMs, replyMs: d.replyMs, closedMs: d.closedMs });
   const [buildId, setBuildId] = useState<string | null>(null);
+  /* §2.8 the fold opens for this card only, and folds again when the card reopens */
+  const [unfold, setUnfold] = useState(false);
+  useEffect(() => { setUnfold(false); }, [r.id]);
   useLayoutEffect(() => { if (!built.has(r.id)) { built.add(r.id); setBuildId(r.id); } else setBuildId(null); }, [r.id]);
 
   /* the thread opens scrolled to the end, on every query and every return to Tracking */
@@ -167,17 +170,24 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
       {cs.map((c, i) => (
         <button key={`${key}-${i}`} type="button" className="qc152-ch" data-qc152="chip"
           onClick={(e) => { e.stopPropagation(); tip.show(e.currentTarget, c.detail, c.label); }}
-          onBlur={() => tip.hide()}>{c.label}</button>
+          onBlur={() => tip.hide()}>{chipIcon(c.label)}{c.label}</button>
       ))}
     </span>
   ) : null;
 
+  /* §2.8 the fold: with more than five steps, everything before the last three sits behind one button */
+  const msgIdx = thread.map((it, i) => (it.t === "msg" ? i : -1)).filter((i) => i >= 0);
+  const folded = !unfold && msgIdx.length > FOLD_OVER ? msgIdx.length - FOLD_KEEP : 0;
+  const shown = folded ? thread.slice(msgIdx[folded]) : thread;
   const trackingPane = (
-    <div className={`qc152-th${buildId === r.id ? " build" : ""}`} data-qc152="thread">
-      {thread.map((it, i) => {
+    <div className={`qc152-th${buildId === r.id ? " build" : ""}`} data-qc152="thread" data-steps={msgIdx.length}>
+      {folded ? (
+        <button type="button" className="qc152-coll" data-qc152="fold" onClick={() => setUnfold(true)}>{folded} earlier {folded === 1 ? "step" : "steps"} · show</button>
+      ) : null}
+      {shown.map((it, i) => {
         if (it.t === "wait") {
           return (
-            <div key={it.key} className={`qc152-w${it.long ? " long" : ""}`} data-qc152="wait" data-edge={it.edge ?? undefined} data-label={it.label}
+            <div key={it.key} className="qc152-w" data-qc152="wait" data-label={it.label}
               tabIndex={it.tip ? 0 : undefined} style={{ animationDelay: `${i * 45}ms` }}
               onMouseEnter={it.tip ? (e) => tip.show(e.currentTarget.querySelector("span")!, it.tip!) : undefined}
               onMouseLeave={it.tip ? tip.hide : undefined}
@@ -187,31 +197,14 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
             </div>
           );
         }
-        if (it.t === "end") {
-          return (
-            <div key={it.key} className="qc152-m them" data-qc152="end" data-kind={it.kind} style={{ animationDelay: `${i * 45}ms` }}>
-              <span className="qc152-av" aria-hidden="true">{r.initials}</span>
-              <div className={`qc152-bx ${it.kind === "agent" ? "qc152-wait" : "qc152-quiet"}`}>
-                {it.ring != null ? <span className="qc152-ring" data-qc152="ring" style={{ ["--p" as string]: String(it.ring) }} aria-hidden="true" /> : null}
-                <div className="qc152-qx"><b>{it.title}</b><em>{it.sub}</em></div>
-              </div>
-            </div>
-          );
-        }
         return (
-          <div key={it.key} className={`qc152-m ${it.side}${p.freshKey && (it.activityId === p.freshKey || it.key === p.freshKey) ? " new" : ""}`} data-qc152="msg" data-side={it.side} data-status={it.status ?? undefined} data-kind={it.kind ?? undefined}
-            data-activity={it.activityId} style={{ animationDelay: `${i * 45}ms` }}>
-            {it.side === "them" ? <span className="qc152-av" aria-hidden="true">{r.initials}</span> : null}
-            <div className="qc152-bx" data-qc152="bubble">
-              <span className="qc152-gd" data-qc152="disc" style={{ background: it.disc }}><Glyph status={it.status} kind={it.kind} /></span>
-              <div className="qc152-qx">
-                <div className="qc152-r1"><b data-qc152="msg-title">{it.title}</b><span className="qc152-dt" data-qc152="msg-date">{it.date}</span></div>
-                {it.chips.length || it.via ? <div className="qc152-r2">{chips(it.chips, it.key)}{it.via ? <em>{it.via}</em> : null}</div> : null}
-              </div>
-              <button type="button" className="qc152-fx" data-qc152="edit-step" aria-label={`Edit ${it.title}`}
-                onClick={() => p.onEditStep(it.activityId ?? null)}>✎ Edit</button>
-            </div>
-          </div>
+          <Bubble key={it.key} side={it.side} status={it.status} kind={it.kind} title={it.title} date={it.date} dated={it.dated}
+            tint={it.tint} grey={it.grey} initials={r.initials} chips={chips(it.chips, it.key)} via={it.via} quote={it.quote} follows={it.follows} nth={it.nth}
+            className={p.freshKey && (it.activityId === p.freshKey || it.key === p.freshKey) ? "new" : undefined}
+            outer={{ "data-qc152": "msg", "data-side": it.side, "data-status": it.status ?? undefined, "data-kind": it.kind ?? undefined, "data-activity": it.activityId,
+              style: { animationDelay: `${i * 45}ms` } }}
+            after={<button type="button" className="qc152-fx" data-qc152="edit-step" aria-label={`Edit ${it.title}`}
+              onClick={() => p.onEditStep(it.activityId ?? null)}>✎ Edit</button>} />
         );
       })}
     </div>

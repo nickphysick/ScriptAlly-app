@@ -1,0 +1,252 @@
+[
+ {
+  "where": "agent: population (the thread)",
+  "ok": true,
+  "detail": "[\"Query sent\"]"
+ },
+ {
+  "where": "agent: no \"Waiting on\", \"No reply\" or \"today\"",
+  "ok": true,
+  "detail": "Query sent 29 OCT COVERING LETTER by email"
+ },
+ {
+  "where": "agent: no Day 1 divider",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "agent: the first bubble is Query sent",
+  "ok": true,
+  "detail": "Query sent"
+ },
+ {
+  "where": "agent: the last bubble is the latest step (Query sent)",
+  "ok": true,
+  "detail": "Query sent · msg"
+ },
+ {
+  "where": "nudge: population (the thread)",
+  "ok": true,
+  "detail": "[\"Query sent\"]"
+ },
+ {
+  "where": "nudge: no \"Waiting on\", \"No reply\" or \"today\"",
+  "ok": true,
+  "detail": "Query sent 15 OCT COVERING LETTER by email"
+ },
+ {
+  "where": "nudge: no Day 1 divider",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "nudge: the first bubble is Query sent",
+  "ok": true,
+  "detail": "Query sent"
+ },
+ {
+  "where": "nudge: the last bubble is the latest step (Query sent)",
+  "ok": true,
+  "detail": "Query sent · msg"
+ },
+ {
+  "where": "quiet: population (the thread)",
+  "ok": true,
+  "detail": "[\"Query sent\"]"
+ },
+ {
+  "where": "quiet: no \"Waiting on\", \"No reply\" or \"today\"",
+  "ok": true,
+  "detail": "Query sent 12 SEP COVERING LETTER by email"
+ },
+ {
+  "where": "quiet: no Day 1 divider",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "quiet: the first bubble is Query sent",
+  "ok": true,
+  "detail": "Query sent"
+ },
+ {
+  "where": "quiet: the last bubble is the latest step (Query sent)",
+  "ok": true,
+  "detail": "Query sent · msg"
+ },
+ {
+  "where": "materials: population (the thread)",
+  "ok": true,
+  "detail": "[\"Query sent\",\"Asked for a partial\"]"
+ },
+ {
+  "where": "materials: no \"Waiting on\", \"No reply\" or \"today\"",
+  "ok": true,
+  "detail": "Query sent 6 OCT COVERING LETTER by email 26 DAYS MV Asked for a partial 1 NOV"
+ },
+ {
+  "where": "materials: no Day 1 divider",
+  "ok": true,
+  "detail": "[\"26 days\"]"
+ },
+ {
+  "where": "materials: the first bubble is Query sent",
+  "ok": true,
+  "detail": "Query sent"
+ },
+ {
+  "where": "materials: the last bubble is the latest step (Asked for a partial)",
+  "ok": true,
+  "detail": "Asked for a partial · wait,msg"
+ },
+ {
+  "where": "long: population (the thread)",
+  "ok": true,
+  "detail": "[\"Query sent\",\"Asked for a partial\",\"Sent the partial\",\"Asked for the full\",\"Sent the full\"]"
+ },
+ {
+  "where": "long: no \"Waiting on\", \"No reply\" or \"today\"",
+  "ok": true,
+  "detail": "Query sent 8 JUN COVERING LETTER by email 30 DAYS JV Asked for a partial 8 JUL 20 DAYS Sent the partial 28 JUL 40 DAYS JV Asked for the full 6 SEP 40 DAYS Sent "
+ },
+ {
+  "where": "long: no Day 1 divider",
+  "ok": true,
+  "detail": "[\"30 days\",\"20 days\",\"40 days\",\"40 days\"]"
+ },
+ {
+  "where": "long: the first bubble is Query sent",
+  "ok": true,
+  "detail": "Query sent"
+ },
+ {
+  "where": "long: the last bubble is the latest step (Sent the full)",
+  "ok": true,
+  "detail": "Sent the full · wait,msg"
+ },
+ {
+  "where": "rr: population (the thread)",
+  "ok": true,
+  "detail": "[\"Query sent\",\"Asked for the full\",\"Sent the full\",\"Asked for a revision (R&R)\"]"
+ },
+ {
+  "where": "rr: no \"Waiting on\", \"No reply\" or \"today\"",
+  "ok": true,
+  "detail": "Query sent 28 JUL COVERING LETTER by email 30 DAYS RV Asked for the full 27 AUG 20 DAYS Sent the full 16 SEP 40 DAYS RV Asked for a revision (R&R) 26 OCT “Loved"
+ },
+ {
+  "where": "rr: no Day 1 divider",
+  "ok": true,
+  "detail": "[\"30 days\",\"20 days\",\"40 days\"]"
+ },
+ {
+  "where": "rr: the first bubble is Query sent",
+  "ok": true,
+  "detail": "Query sent"
+ },
+ {
+  "where": "rr: the last bubble is the latest step (Asked for a revision (R&R))",
+  "ok": true,
+  "detail": "Asked for a revision (R&R) · wait,msg"
+ },
+ {
+  "where": "passed: population (the thread)",
+  "ok": true,
+  "detail": "[\"Query sent\",\"Asked for the full\",\"Sent the full\",\"Passed\"]"
+ },
+ {
+  "where": "passed: no \"Waiting on\", \"No reply\" or \"today\"",
+  "ok": true,
+  "detail": "Query sent 7 AUG COVERING LETTER by email 50 DAYS PV Asked for the full 26 SEP 10 DAYS Sent the full 6 OCT 20 DAYS PV Passed 26 OCT “Beautifully written, but I "
+ },
+ {
+  "where": "passed: no Day 1 divider",
+  "ok": true,
+  "detail": "[\"50 days\",\"10 days\",\"20 days\"]"
+ },
+ {
+  "where": "passed: the first bubble is Query sent",
+  "ok": true,
+  "detail": "Query sent"
+ },
+ {
+  "where": "passed: the last bubble is the latest step (Passed)",
+  "ok": true,
+  "detail": "Passed · wait,msg"
+ },
+ {
+  "where": "withdrew: population (the thread)",
+  "ok": true,
+  "detail": "[\"Query sent\",\"You withdrew\"]"
+ },
+ {
+  "where": "withdrew: no \"Waiting on\", \"No reply\" or \"today\"",
+  "ok": true,
+  "detail": "Query sent 6 SEP COVERING LETTER by email 55 DAYS You withdrew 31 OCT an offer elsewhere"
+ },
+ {
+  "where": "withdrew: no Day 1 divider",
+  "ok": true,
+  "detail": "[\"55 days\"]"
+ },
+ {
+  "where": "withdrew: the first bubble is Query sent",
+  "ok": true,
+  "detail": "Query sent"
+ },
+ {
+  "where": "withdrew: the last bubble is the latest step (You withdrew)",
+  "ok": true,
+  "detail": "You withdrew · wait,msg"
+ },
+ {
+  "where": "offertold: population (the thread)",
+  "ok": true,
+  "detail": "[\"Query sent\",\"Made an offer\",\"Told 6 other agents\"]"
+ },
+ {
+  "where": "offertold: no \"Waiting on\", \"No reply\" or \"today\"",
+  "ok": true,
+  "detail": "Query sent 17 AUG COVERING LETTER by email 70 DAYS TV Made an offer 26 OCT “I’d love to represent this book.” 1 DAY Told 6 other agents 27 OCT offer deadline 13"
+ },
+ {
+  "where": "offertold: no Day 1 divider",
+  "ok": true,
+  "detail": "[\"70 days\",\"1 day\"]"
+ },
+ {
+  "where": "offertold: the first bubble is Query sent",
+  "ok": true,
+  "detail": "Query sent"
+ },
+ {
+  "where": "offertold: the last bubble is the latest step (Told 6 other agents)",
+  "ok": true,
+  "detail": "Told 6 other agents · wait,msg"
+ },
+ {
+  "where": "seven: population (the thread)",
+  "ok": true,
+  "detail": "[\"Query sent\",\"You nudged Seth\",\"You nudged Seth\",\"Asked for a partial\",\"Sent the partial\",\"Asked for the full\",\"Sent the full\"]"
+ },
+ {
+  "where": "seven: no \"Waiting on\", \"No reply\" or \"today\"",
+  "ok": true,
+  "detail": "Query sent 9 MAY COVERING LETTER by email ✎ Edit 30 DAYS Following up Query sent · 9 May You nudged Seth 8 JUN by email 20 DAYS Following up Query sent · 9 May "
+ },
+ {
+  "where": "seven: no Day 1 divider",
+  "ok": true,
+  "detail": "[\"30 days\",\"20 days\",\"20 days\",\"20 days\",\"30 days\",\"40 days\"]"
+ },
+ {
+  "where": "seven: the first bubble is Query sent",
+  "ok": true,
+  "detail": "Query sent"
+ },
+ {
+  "where": "seven: the last bubble is the latest step (Sent the full)",
+  "ok": true,
+  "detail": "Sent the full · wait,msg"
+ }
+]

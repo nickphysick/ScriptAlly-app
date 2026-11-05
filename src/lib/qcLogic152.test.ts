@@ -37,6 +37,12 @@ describe("the nine logic checks (v152 §4.3)", () => {
     expect(validate([...base.slice(0, 2), s("x", "passed", 30)], c).err.get("x")).toMatch(/the next step is yours, not a pass/);
     expect(validate([s("q", "queried", 100), s("o", "offer", 60), s("x", "passed", 30)], c).ok).toBe(true);
   });
+  it("v152.1 · telling other agents follows an offer, and leaves the move where it was", () => {
+    expect(validate([...base, s("t", "told", 30)], c).err.get("t")).toMatch(/once there is one/);
+    const o = [s("q", "queried", 100), s("o", "offer", 60), s("t", "told", 59)];
+    expect(validate(o, c).ok).toBe(true);
+    expect(validate([...o, s("x", "passed", 30)], c).ok).toBe(true);
+  });
   it("9 · no dates in the future", () => {
     expect(validate([...base, s("fut", "nudge", -3)], c).err.get("fut")).toMatch(/in the future/);
   });

@@ -38,6 +38,18 @@ for L in "$@"; do
   F=""
   case "$L" in
     L1) F=src/lib/qc1512.ts; srcbreak $F 'export const STATUS_FILL: Record<StatusKind, string> = { sand: "#f2ebe0",' 'export const STATUS_FILL: Record<StatusKind, string> = { sand: "#e6d9c6", /* MUT L1 */' ;;
+    L2) F=src/lib/qcThread152.ts; srcbreak $F '      nth: s.kind === "nudge" && nudges >= 2 ? `${ordinal(nudges)} nudge` : null,
+    });
+  });
+  return out;' '      nth: s.kind === "nudge" && nudges >= 2 ? `${ordinal(nudges)} nudge` : null,
+    });
+  });
+  if (c.state === "agent") out.push({ t: "wait", key: "w-end", label: `Waiting on ${c.first}`, tip: null }); /* MUT L2: the waiting bubble back */
+  return out;' ;;
+    L5) F=src/components/queries/centre/QcPage151.tsx; srcbreak $F '<span className="qc1512-cap" data-qc1512="cap" style={{ background: STATUS_FILL[sk] }}>' '<span className="qc1512-cap" data-qc1512="cap" style={{ background: STATUS_FILL[sk] }}><svg data-qc152="nudge-mark" viewBox="0 0 20 20" width="10" height="10"><path d="M10 6.2v4.6" stroke="#1c130f" /></svg>{/* MUT L5: the "!" on a row */}' ;;
+    L6) F=src/components/queries/centre/QcBubble152.tsx; srcbreak $F '{b.quote ? <div className="qc152-qt" data-qc152="quote">“{b.quote}”</div> : null}' '{b.side === "them" ? <div className="qc152-qt" data-qc152="quote">“{b.quote ?? ""}”</div> : null}{/* MUT L6: an empty quote */}' ;;
+    L7) F=src/components/queries/centre/QcCard152.tsx; srcbreak $F 'export const FOLD_KEEP = 3;' 'export const FOLD_KEEP = 4; /* MUT L7: four after the fold */' ;;
+    L10) F=src/lib/qc152Write.ts; srcbreak $F '      eventKey: TOLD_EVENT, toldCount: count, toldDeadline: dayIso(new Date(t.deadlineMs)) };' '      eventKey: TOLD_EVENT, toldCount: count }; /* MUT L10: saved without the deadline */' ;;
   esac
   build
   bash tests/e2e/qc152Run.sh "$(spec $L)"; echo "MUT-DONE-$L"

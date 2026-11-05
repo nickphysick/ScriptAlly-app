@@ -84,12 +84,39 @@ export function storeMats(ms: readonly StepMaterial[]): Record<string, unknown>[
 
 /* ── what a step is ─────────────────────────────────────────────────────────────────────────────────────────── */
 
-export type RecordKind = "partial_req" | "full_req" | "offer" | "pass" | "partial_sent" | "full_sent" | "nudge" | "noresp";
+export type RecordKind = "partial_req" | "full_req" | "offer" | "pass" | "partial_sent" | "full_sent" | "nudge" | "noresp" | "told";
 export const RECORD_STATUS: Record<RecordKind, QueryStatus | null> = {
   partial_req: QueryStatus.PARTIAL_REQUESTED, full_req: QueryStatus.FULL_REQUESTED, offer: QueryStatus.OFFER, pass: QueryStatus.REJECTED,
-  partial_sent: QueryStatus.PARTIAL_SENT, full_sent: QueryStatus.FULL_SENT, nudge: null, noresp: QueryStatus.NO_RESPONSE,
+  partial_sent: QueryStatus.PARTIAL_SENT, full_sent: QueryStatus.FULL_SENT, nudge: null, noresp: QueryStatus.NO_RESPONSE, told: null,
 };
-const EVENT: Record<RecordKind, EventKey> = {
+/** the agent's replies, which can carry what they said (v152.1 §2.6) */
+export const REPLY_KINDS: readonly RecordKind[] = ["partial_req", "full_req", "offer", "pass"];
+export const REPLY_NOTE_MAX = 500;
+
+/**
+ * v152.1 §2.5 — TOLD OTHER AGENTS ABOUT AN OFFER. A step on the offering query's own log (not a status: recompute ignores
+ * it), carrying how many you told and the deadline you gave them.
+ * ⚠️ ONE FACT, ONE SAVE (Nick): the step IS the record. Saving it writes the step AND the per-query marks on each other live
+ *    query (`offerRefQueryId`, `offerTold`, `offerToldOn`, `offerReply` — the offer journey's fields) in the same batch;
+ *    editing its date moves `offerToldOn`, removing it clears the marks, and Undo restores both from one snapshot.
+ * ⚠️ ITS EVENT KEY IS NOT ON THE SHARED `EventKey` UNION: no feed row is written for it, so no other page's label map
+ *    needs an entry.
+ */
+export const TOLD_TYPE = "Told other agents";
+export const TOLD_EVENT = "offer_told";
+export interface ToldMarkTarget { id: string; offerReply?: string | null }
+export interface RecordExtra {
+  /** §2.6 what the agent said, on one of their replies */
+  replyNote?: string;
+  /** §2.5 told other agents: how many, the deadline you gave, and the other live queries to mark */
+  told?: { count: number; deadlineMs: number; others: readonly ToldMarkTarget[] };
+}
+const markTold = (q: Query, others: readonly ToldMarkTarget[], tMs: number): NonNullable<WritePlan["update"]> =>
+  others.map((o) => ({ path: `queries/${o.id}`, data: { offerRefQueryId: q.id, offerTold: true, offerToldOn: dayIso(new Date(tMs)), offerReply: o.offerReply || "wait" } }));
+const clearTold = (ids: readonly string[]): NonNullable<WritePlan["update"]> =>
+  ids.map((id) => ({ path: `queries/${id}`, data: { offerRefQueryId: deleteField(), offerTold: deleteField(), offerToldOn: deleteField(), offerReply: deleteField() } }));
+
+const EVENT: Record<Exclude<RecordKind, "told">, EventKey> = {
   partial_req: "partial_requested", full_req: "full_requested", offer: "offer", pass: "pass",
   partial_sent: "partial_sent", full_sent: "full_sent", nudge: "nudge_sent", noresp: "closed_no_reply",
 };
@@ -111,6 +138,8 @@ export interface PlanCtx {
   nowMs: number;
   /** the quiet window, weeks: a nudge's check-back is the nudge plus it */
   quietWeeks: number;
+  /** v152.1 §2.5 — the other queries marked as told about this one's offer (`offerRefQueryId` is this query) */
+  marked?: readonly string[];
 }
 export interface WritePlan {
   queryId: string;
@@ -131,7 +160,7 @@ const respData = (over: Partial<RecordResponseData>): RecordResponseData => ({
 const UNIT_NAME: Record<SampleUnit, RecordResponseData["materialsType"]> = { pages: "Pages", chapters: "Chapters", words: "Words" };
 
 /** a new step, planned (§3): the activity in both stores and the query's fields after it */
-export function planRecord(c: PlanCtx, kind: RecordKind, dayMs: number, materials: readonly StepMaterial[]): WritePlan {
+export function planRecord(c: PlanCtx, kind: RecordKind, dayMs: number, materials: readonly StepMaterial[], extra: RecordExtra = {}): WritePlan {
   const { q, agent } = c;
   const id = `act-${Math.random().toString(36).slice(2, 11)}`;
   const tMs = stepTime(dayMs, c.existing);
@@ -143,6 +172,15 @@ export function planRecord(c: PlanCtx, kind: RecordKind, dayMs: number, material
   let sub: DocumentData, feed: DocumentData;
   const query: Record<string, unknown> = {};
 
+  if (kind === "told") {
+    const t = extra.told;
+    if (!t) throw new Error("Told other agents needs a count and a deadline");
+    const count = Math.max(1, Math.min(30, Math.round(t.count)));
+    const sub: DocumentData = { type: TOLD_TYPE, createdAt, note: `Told ${count} other agent${count === 1 ? "" : "s"} about ${name}’s offer`, ...base,
+      eventKey: TOLD_EVENT, toldCount: count, toldDeadline: dayIso(new Date(t.deadlineMs)) };
+    return { queryId: q.id, set: [{ path: `queries/${q.id}/activity/${id}`, data: sub }], del: [], query: {}, update: markTold(q, t.others, tMs) };
+  }
+  const note = REPLY_KINDS.includes(kind) ? (extra.replyNote ?? "").trim().slice(0, REPLY_NOTE_MAX) : "";
   if (kind === "nudge") {
     const check = new Date(tMs + c.quietWeeks * 7 * DAY).toISOString();
     const w = buildNudgeWrites(q, agent, { eventDate: iso, checkBackDate: check }, new Date(c.nowMs));
@@ -170,7 +208,7 @@ export function planRecord(c: PlanCtx, kind: RecordKind, dayMs: number, material
       : respData({ responseType: "rejected", dateReceived: day, eventKey: EVENT[kind] });
     const p = planResponse({ query: q, agent, manuscript: c.ms }, data);
     for (const [k, v] of Object.entries(p.details)) query[k] = v;
-    sub = { ...p.activityBase, createdAt, ...(mats.length ? { materials: mats } : {}) };
+    sub = { ...p.activityBase, createdAt, ...(mats.length ? { materials: mats } : {}), ...(note ? { replyNote: note } : {}) };
     const lg = buildLegacyActivity(p.newStatus, agent);
     feed = { id, userId: c.uid, queryId: q.id, manuscriptId: q.manuscriptId || "", activityType: ActivityType.STATUS_CHANGED, description: lg.description, date: iso,
       details: lg.details, resultingStatus: p.newStatus, ...(data.eventKey ? { eventKey: data.eventKey } : {}), logEntryId: id, ...(mats.length ? { materials: mats } : {}) };
@@ -223,6 +261,8 @@ export interface FixStep {
   kind: RecordKind | "queried" | "withdrawn";
   dayMs: number;
   materials: StepMaterial[];
+  /** v152.1 §2.5 a told step's count and the deadline you gave */
+  told?: { count: number; deadlineMs: number } | null;
 }
 export interface PkgPatch {
   /** the package now on Query sent, or null for none (a one-off) */
@@ -248,6 +288,10 @@ export function planFix(c: PlanCtx & { feed: RawActivityDoc[] }, draft: readonly
     if (tw) del.push(`activities/${tw.id}`);
   }
   let log = c.existing.filter((x) => !removed.includes(x.id));
+  const update: NonNullable<WritePlan["update"]> = [];
+  /* §2.5 a told step removed clears the marks it made; its date moved moves them (the marks are the step's, one fact) */
+  const toldGone = c.existing.some((x) => removed.includes(x.id) && x.data.type === TOLD_TYPE) && !log.some((x) => x.data.type === TOLD_TYPE);
+  if (toldGone) update.push(...clearTold(c.marked ?? []));
   for (const s of draft) {
     const st = STATUS_OF[s.kind];
     if (s.isNew) {
@@ -271,6 +315,12 @@ export function planFix(c: PlanCtx & { feed: RawActivityDoc[] }, draft: readonly
     }
     const mats = storeMats(s.materials);
     if (JSON.stringify(cur.data.materials ?? []) !== JSON.stringify(mats)) { if (mats.length) next.materials = mats; else delete next.materials; changed = true; }
+    if (s.kind === "told" && s.told) {
+      const n = Math.max(1, Math.min(30, Math.round(s.told.count))), dl = dayIso(new Date(s.told.deadlineMs));
+      if (cur.data.toldCount !== n) { next.toldCount = n; changed = true; }
+      if (cur.data.toldDeadline !== dl) { next.toldDeadline = dl; changed = true; }
+      if (!sameDay(t0, s.dayMs)) for (const id of c.marked ?? []) update.push({ path: `queries/${id}`, data: { offerToldOn: dayIso(new Date(s.dayMs)) } });
+    }
     if (!changed) continue;
     set.push({ path: `queries/${qid}/activity/${s.id}`, data: next });
     log = log.map((x) => (x.id === s.id ? { id: x.id, data: next } : x));
@@ -292,7 +342,7 @@ export function planFix(c: PlanCtx & { feed: RawActivityDoc[] }, draft: readonly
     else Object.assign(query, { sentHow: "individual", sentPackageId: undefined, packageId: "", sentPackageEdition: undefined, sentPackageName: undefined,
       ...(pkg.was ? { basedOnPackageId: pkg.was.id, basedOnPackageEdition: pkg.was.edition ?? 1 } : {}) });
   }
-  return withRecompute({ queryId: qid, set, del, query }, c.existing);
+  return withRecompute({ queryId: qid, set, del, query, ...(update.length ? { update } : {}) }, c.existing);
 }
 
 /** the feed's rows for one query (for twins) */

@@ -15,25 +15,40 @@ describe("the thread (v152 §2.3)", () => {
     expect([QueryStatus.QUERIED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT, QueryStatus.NO_RESPONSE, QueryStatus.WITHDRAWN].map((s) => sideOf({ status: s, kind: null }))).toEqual(["me", "me", "me", "me", "me"]);
     expect(sideOf({ status: null, kind: "nudge" })).toBe("me");
   });
-  it("the disc is the status's cap colour; Query sent and a nudge have none", () => {
+  it("the disc is the status's cap colour; Query sent and a nudge have none (the record form's options)", () => {
     expect(discFill({ status: QueryStatus.QUERIED, kind: null })).toBe("transparent");
     expect(discFill({ status: null, kind: "nudge" })).toBe("transparent");
     expect(discFill({ status: QueryStatus.PARTIAL_REQUESTED, kind: null })).toBe("#f3d3c6");
     expect(discFill({ status: QueryStatus.FULL_SENT, kind: null })).toBe("#d3dce7");
   });
-  it("Day 1, the days between steps, today, and the end by state", () => {
+  it("v152.1 §2.1 only events: no Day 1, no today, no ending; your Query sent first and the latest step last", () => {
     const t = buildThread([st("q", QueryStatus.QUERIED, 60), st("pr", QueryStatus.PARTIAL_REQUESTED, 16)], { ...ctx, state: "materials", replyMs: null });
-    expect(t.map((x) => x.t === "wait" ? x.label : x.t === "msg" ? x.side : x.kind)).toEqual(["Day 1", "me", "44 days", "them", "16 days · today"]);
+    expect(t.map((x) => (x.t === "wait" ? x.label : x.side))).toEqual(["me", "44 days", "them"]);
     const a = buildThread([st("q", QueryStatus.QUERIED, 23)], { ...ctx, state: "agent", replyMs: NOW + 33 * DAY });
-    const end = a[a.length - 1];
-    expect(end.t === "end" && end.sub).toBe("Day 23 of about 56 · reply expected 10 Nov");
-    expect(end.t === "end" && end.ring).toBeCloseTo(23 / 56);
-    const c = buildThread([st("q", QueryStatus.QUERIED, 90), st("x", QueryStatus.REJECTED, 20)], { ...ctx, state: "closed", replyMs: null });
-    expect(c.some((x) => x.t === "wait" && x.edge === "now")).toBe(false);
+    expect(a.map((x) => x.t)).toEqual(["msg"]);
   });
-  it("a wait over 70 days is long", () => {
-    const t = buildThread([st("q", QueryStatus.QUERIED, 100), st("x", QueryStatus.PARTIAL_REQUESTED, 20)], { ...ctx, state: "materials", replyMs: null });
-    expect(t.find((x) => x.t === "wait" && x.label === "80 days")).toMatchObject({ long: true });
+  it("v152.1 §2.3 every wait reads its days; '—' beside an undated step, which keeps its place", () => {
+    const t = buildThread([st("q", QueryStatus.QUERIED, 100), st("pr", QueryStatus.PARTIAL_REQUESTED, 0, { ms: null }), st("ps", QueryStatus.PARTIAL_SENT, 20)], { ...ctx, state: "agent", replyMs: null });
+    expect(t.map((x) => (x.t === "wait" ? x.label : x.key))).toEqual(["q", "—", "pr", "—", "ps"]);
+    expect(t.find((x) => x.t === "msg" && x.key === "pr")).toMatchObject({ date: "No date", dated: false });
+  });
+  it("v152.1 §2.2 yours paper (no tint), theirs tinted by the reply; a pass and your closes grey", () => {
+    const t = buildThread([st("q", QueryStatus.QUERIED, 90), st("fr", QueryStatus.FULL_REQUESTED, 60), st("rr", QueryStatus.REVISE_RESUBMIT, 40), st("x", QueryStatus.REJECTED, 20)], { ...ctx, state: "closed", replyMs: null });
+    const m = t.filter((x) => x.t === "msg") as Extract<(typeof t)[number], { t: "msg" }>[];
+    expect(m.map((x) => x.tint?.fill ?? null)).toEqual([null, "#e7edf4", "#e7edf4", "#f1efec"]);
+    expect(m.map((x) => x.grey)).toEqual([false, false, false, true]);
+    expect(m[2].title).toBe("Asked for a revision (R&R)");
+  });
+  it("v152.1 §2.4 a nudge quotes the query, and counts itself from the 2nd", () => {
+    const t = buildThread([st("q", QueryStatus.QUERIED, 90), st("n1", null, 60, { kind: "nudge" }), st("n2", null, 30, { kind: "nudge" })], { ...ctx, state: "agent", replyMs: null });
+    const n = t.filter((x) => x.t === "msg" && x.kind === "nudge") as Extract<(typeof t)[number], { t: "msg" }>[];
+    expect(n.map((x) => [x.side, x.follows, x.nth])).toEqual([["me", "Query sent · 10 Jul", null], ["me", "Query sent · 10 Jul", "2nd nudge"]]);
+  });
+  it("v152.1 §2.6 a quote on an agent step only; told other agents is yours", () => {
+    const t = buildThread([st("q", QueryStatus.QUERIED, 90, { quote: "not mine" }), st("o", QueryStatus.OFFER, 10, { quote: " I’d love to " }), st("t", null, 9, { kind: "told", toldCount: 6 })], { ...ctx, state: "offer", replyMs: null });
+    const m = t.filter((x) => x.t === "msg") as Extract<(typeof t)[number], { t: "msg" }>[];
+    expect(m.map((x) => x.quote)).toEqual([null, "I’d love to", null]);
+    expect(m[2]).toMatchObject({ side: "me", title: "Told 6 other agents" });
   });
 });
 

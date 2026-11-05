@@ -18,9 +18,10 @@ import { STAGE_NAME } from "../../../lib/qcSummary";
 import { STATE_LABEL } from "../../../lib/queryState";
 import { matLabel, type PkgPatch, type StepMaterial } from "../../../lib/qc152Write";
 import { dayBlocked, dependents, knock, STEP_LABEL, validate, type LogStep, type StepType } from "../../../lib/qcLogic152";
-import { dayLabel } from "../../../lib/qcThread152";
+import { dayLabel, tintOf } from "../../../lib/qcThread152";
+import { StepGlyph } from "./QcBubble152";
 import { CalendarField, MatChips, MenuField, PopCtx, Pop, fullDay, type MatEnv } from "./QcEdit152";
-import { Stepper, bolded, type RecordOutcome } from "./QcRecord152";
+import { Stepper, TOLD_MAX, TOLD_MIN, bolded, type RecordOutcome } from "./QcRecord152";
 import "./qcv152edit.css";
 
 const DAY = 86_400_000;
@@ -61,7 +62,7 @@ export const QcFork152: React.FC<{ first: string; onBack: () => void; onFix: () 
 /* ── §4.2 Fix a mistake ─────────────────────────────────────────────────────────────────────────────────────── */
 
 export type FixKind = StepType;
-export interface FixRow { id: string; t: StepType; d: number; mats: StepMaterial[]; isNew?: boolean }
+export interface FixRow { id: string; t: StepType; d: number; mats: StepMaterial[]; isNew?: boolean; told?: { count: number; deadlineMs: number } | null }
 export interface PkgChoice { id: string; name: string; edition: number; draft: boolean; madeMs: number; mats: StepMaterial[] }
 export interface QcFix152Props {
   first: string;
@@ -79,15 +80,23 @@ export interface QcFix152Props {
   onBack: () => void;
   onSave: (rows: FixRow[], removed: string[], pkg: PkgPatch | null) => Promise<boolean>;
 }
-const SIDE: Record<StepType, "them" | "me"> = { queried: "me", preq: "them", psent: "me", freq: "them", fsent: "me", offer: "them", nudge: "me", passed: "them", noresp: "me", withdrawn: "me" };
+const SIDE: Record<StepType, "them" | "me"> = { queried: "me", preq: "them", psent: "me", freq: "them", fsent: "me", offer: "them", nudge: "me", passed: "them", noresp: "me", withdrawn: "me", told: "me" };
 const T_STATUS: Partial<Record<StepType, QueryStatus>> = {
   queried: QueryStatus.QUERIED, preq: QueryStatus.PARTIAL_REQUESTED, psent: QueryStatus.PARTIAL_SENT, freq: QueryStatus.FULL_REQUESTED, fsent: QueryStatus.FULL_SENT,
   offer: QueryStatus.OFFER, passed: QueryStatus.REJECTED, noresp: QueryStatus.NO_RESPONSE, withdrawn: QueryStatus.WITHDRAWN,
 };
-const CAP: Partial<Record<StepType, string>> = { preq: "#f3d3c6", psent: "#f3d3c6", freq: "#d3dce7", fsent: "#d3dce7", offer: "#cbd9be", passed: "#f1f0ee", noresp: "#f1f0ee", withdrawn: "#f1f0ee" };
-const gl = (t: StepType) => (t === "nudge" ? NUDGE : <StatusDot status={T_STATUS[t]!} overrideSize={19} decorative />);
+void StatusDot;
+/** v152.1 §2.2 the glyph is ink on nothing (grey for a pass and your closes), as in the thread */
+const gl = (t: StepType) => (
+  <span className={`qc152-g0${t === "passed" || t === "noresp" || t === "withdrawn" ? " grey" : ""}`}>
+    {StepGlyph({ status: T_STATUS[t] ?? null, kind: t === "nudge" ? "nudge" : t === "told" ? "told" : null })}
+  </span>
+);
+/** §2.9 the step's bubble colours: yours paper, theirs in their stage colour */
+const tintFor = (t: StepType) => (SIDE[t] === "me" ? null : tintOf({ status: T_STATUS[t] ?? null, kind: null }));
 const TYPES: StepType[] = ["queried", "preq", "psent", "freq", "fsent", "offer", "nudge", "passed", "noresp"];
 const lab = (t: StepType, f: string) => (t === "nudge" ? `You nudged ${f}` : STEP_LABEL[t]);
+const sameTold = (a: FixRow["told"], b: FixRow["told"]) => (a?.count ?? null) === (b?.count ?? null) && new Date(a?.deadlineMs ?? 0).toDateString() === new Date(b?.deadlineMs ?? 0).toDateString();
 const sameMats = (a: StepMaterial[], b: StepMaterial[]) => JSON.stringify(a) === JSON.stringify(b);
 /** the package check (Nick's ruling): letter, synopsis and version only — the sample's amount stays the step's */
 const pkgKey = (ms: StepMaterial[]) => JSON.stringify({
@@ -122,6 +131,7 @@ export const QcFix152: React.FC<QcFix152Props> = (p) => {
       if (o.t !== r.t) out.push({ g: r.t, txt: `${lab(o.t, p.first)} is now **${lab(r.t, p.first)}**` });
       if (new Date(o.d).toDateString() !== new Date(r.d).toDateString()) out.push({ g: r.t, txt: lab(r.t, p.first), was: dayLabel(o.d, p.nowMs), now: dayLabel(r.d, p.nowMs) });
       if (!sameMats(o.mats, r.mats)) out.push({ g: r.t, txt: `${lab(r.t, p.first)}: what went changed` });
+      if (r.t === "told" && !sameTold(o.told, r.told)) out.push({ g: r.t, txt: `${lab(r.t, p.first)}: ${r.told?.count ?? 0} agents, deadline ${r.told ? dayLabel(r.told.deadlineMs, p.nowMs) : "none"}` });
     }
     for (const id of removed) { const o = orig.get(id); if (o) out.push({ g: o.t, txt: `Removed **${o.t === "nudge" ? "your nudge" : STEP_LABEL[o.t]}**`, was: dayLabel(o.d, p.nowMs) }); }
     if (pkgChanged && p.packages) out.push({ g: "queried", txt: "Package", was: p.pkgNow?.name ?? "None", now: pkg && !offPkg ? pkg.name : "None (a one-off)" });
@@ -147,7 +157,7 @@ export const QcFix152: React.FC<QcFix152Props> = (p) => {
         <div className="qc152-actb"><div className="qc152-diff">
           <h4>You changed</h4>
           {changes.map((x, i) => (
-            <div key={i} className="qc152-dr" data-qc152="change"><span className="qc152-gd sm" style={{ background: CAP[x.g] ?? "transparent" }}>{gl(x.g)}</span><span>{bolded(x.txt)}</span>
+            <div key={i} className="qc152-dr" data-qc152="change"><span className="qc152-gd sm">{gl(x.g)}</span><span>{bolded(x.txt)}</span>
               {x.was ? <span className="qc152-was">{x.was}</span> : <span />}{x.was && x.now ? <span className="qc152-to">→</span> : <span />}{x.now ? <span className="qc152-now">{x.now}</span> : <span />}</div>
           ))}
           <h4>Which means</h4>
@@ -188,7 +198,8 @@ export const QcFix152: React.FC<QcFix152Props> = (p) => {
         <ol className="qc152-fsteps" data-qc152="fix-steps">
           {sorted.map((r, i) => {
             const o = orig.get(r.id);
-            const changed = !o || r.isNew || o.t !== r.t || new Date(o.d).toDateString() !== new Date(r.d).toDateString() || !sameMats(o.mats, r.mats);
+            const changed = !o || r.isNew || o.t !== r.t || new Date(o.d).toDateString() !== new Date(r.d).toDateString() || !sameMats(o.mats, r.mats) || (r.t === "told" && !sameTold(o.told, r.told));
+            const tint = tintFor(r.t);
             const bad = V.err.get(r.id);
             const opts = TYPES.map((t) => ({ key: t, label: lab(t, p.first), glyph: gl(t), why: t === r.t ? "" : knock(log, log.map((x) => (x.id === r.id ? { ...x, t } : x)), r.id, c) }));
             const deps = ask === r.id ? dependents(log, r.id, c) : [];
@@ -196,11 +207,13 @@ export const QcFix152: React.FC<QcFix152Props> = (p) => {
             return (
               <React.Fragment key={r.id}>
                 <li className={`qc152-fs ${SIDE[r.t]}${changed ? " ch" : ""}${bad ? " bad" : ""}${sel === r.id ? " sel" : ""}`} data-qc152="fix-step" data-id={r.id} data-t={r.t}
-                  data-changed={changed ? "" : undefined} data-bad={bad ? "" : undefined} data-selected={sel === r.id ? "" : undefined} onFocusCapture={() => setSel(r.id)}>
-                  <span className="qc152-gd" style={{ background: r.t === "queried" || r.t === "nudge" ? "transparent" : CAP[r.t] }}>{gl(r.t)}</span>
+                  data-changed={changed ? "" : undefined} data-bad={bad ? "" : undefined} data-selected={sel === r.id ? "" : undefined} onFocusCapture={() => setSel(r.id)}
+                  style={tint ? ({ ["--bt" as string]: tint.fill, ["--be" as string]: tint.edge } as React.CSSProperties) : undefined}>
+                  <span className="qc152-gd">{gl(r.t)}</span>
                   <div className="qc152-fsb">
                     <div className="qc152-edr">
-                      <MenuField id={`t:${r.id}`} value={r.t} label={lab(r.t, p.first)} options={opts} wide onPick={(k) => setRow(r.id, { t: k as StepType })} />
+                      {r.t === "told" ? <span className="qc152-ftl" data-qc152="told-label">{lab(r.t, p.first)}</span>
+                        : <MenuField id={`t:${r.id}`} value={r.t} label={lab(r.t, p.first)} options={opts} wide onPick={(k) => setRow(r.id, { t: k as StepType })} />}
                       <CalendarField id={`d:${r.id}`} valueMs={r.d} nowMs={p.nowMs}
                         blocked={(dm) => dayBlocked(dm, { nowMs: p.nowMs, check: (x) => knock(log, log.map((y) => (y.id === r.id ? { ...y, d: x + 12 * 3600_000 } : y)), r.id, c) ? "Out of order" : "" })}
                         onChange={(dm) => setRow(r.id, { d: dm + 12 * 3600_000 })} />
@@ -221,7 +234,19 @@ export const QcFix152: React.FC<QcFix152Props> = (p) => {
                       const k = p.packages!.find((x) => x.id === id);
                       if (k) setRow(r.id, { mats: fillFromPkg(r.mats, k) });
                     }} onBack={() => { if (pkg) setRow(r.id, { mats: fillFromPkg(r.mats, pkg) }); }} /> : null}
-                    {r.t !== "nudge" && r.t !== "passed" && r.t !== "noresp" && r.t !== "withdrawn" && r.t !== "offer" ? (
+                    {r.t === "told" && r.told ? (
+                      <div className="qc152-ftold" data-qc152="fix-told">
+                        <span className="qc152-stp" role="group" aria-label="How many agents">
+                          <button type="button" aria-label="Fewer" disabled={r.told.count <= TOLD_MIN} onClick={() => setRow(r.id, { told: { ...r.told!, count: Math.max(TOLD_MIN, r.told!.count - 1) } })}>−</button>
+                          <b data-qc152="told-n">{r.told.count}</b>
+                          <button type="button" aria-label="More" disabled={r.told.count >= TOLD_MAX} onClick={() => setRow(r.id, { told: { ...r.told!, count: Math.min(TOLD_MAX, r.told!.count + 1) } })}>+</button>
+                        </span>
+                        <span className="qc152-ftx">agents, deadline</span>
+                        <CalendarField id={`tb:${r.id}`} valueMs={r.told.deadlineMs} nowMs={p.nowMs} future blocked={(dm) => (dm < new Date(r.d).setHours(0, 0, 0, 0) ? "Before the day you told them" : "")}
+                          onChange={(dm) => setRow(r.id, { told: { ...r.told!, deadlineMs: dm } })} />
+                      </div>
+                    ) : null}
+                    {r.t !== "nudge" && r.t !== "passed" && r.t !== "noresp" && r.t !== "withdrawn" && r.t !== "offer" && r.t !== "told" ? (
                       <MatChips id={`m:${r.id}`} mats={r.mats} env={p.env} stepMs={r.d} request={r.t === "preq" || r.t === "freq"} onChange={(m) => setRow(r.id, { mats: m })} />
                     ) : null}
                   </div>
