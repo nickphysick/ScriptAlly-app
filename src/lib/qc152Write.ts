@@ -17,7 +17,7 @@
  * ⚠️ EVERY STEP CARRIES ITS MATERIALS on both stores (`materials`, a list of maps). A request carries what was asked;
  *    a send, what went. Steps written before v152 carry none.
  */
-import { collection, deleteField, doc, getDocs, Timestamp, writeBatch, type DocumentData } from "firebase/firestore";
+import { collection, deleteField, doc, getDoc, getDocs, setDoc, Timestamp, updateDoc, writeBatch, type DocumentData } from "firebase/firestore";
 import { db } from "./firebase";
 import { ActivityType, QueryStatus, type Agent, type EventKey, type Manuscript, type Query } from "../types";
 import { planResponse, buildLegacyActivity, type RecordResponseData } from "./recordResponse";
@@ -343,6 +343,32 @@ export function planFix(c: PlanCtx & { feed: RawActivityDoc[] }, draft: readonly
       ...(pkg.was ? { basedOnPackageId: pkg.was.id, basedOnPackageEdition: pkg.was.edition ?? 1 } : {}) });
   }
   return withRecompute({ queryId: qid, set, del, query, ...(update.length ? { update } : {}) }, c.existing);
+}
+
+/**
+ * v152.1 — WHICH OTHER QUERIES REFUSE A TOLD SAVE'S MARKS. Called only after the save's one batch was refused. A query
+ * document at the rules' ceiling (about 24 stored fields: firestore.rules' `isValidQuery` checks every stored field on
+ * every write, and the request runs out of expressions) refuses ANY write that adds a field, while a no-op write to it is
+ * accepted — so the only honest probe is the real write. Each sibling's marks are tried on their own; the accepted ones
+ * are put back exactly as they were (their documents were read first), and the refused ones were never changed.
+ * Nick's ruling: the step and every accepted sibling then save in one batch, and the refused ones are named, never
+ * dropped silently.
+ */
+export async function refusedMarks(uid: string, plan: WritePlan): Promise<string[]> {
+  const marks = (plan.update ?? []).filter((u) => /^queries\/[^/]+$/.test(u.path));
+  const refused: string[] = [];
+  for (const u of marks) {
+    const ref = doc(db, `users/${uid}/${u.path}`);
+    const before = (await getDoc(ref)).data();
+    try {
+      await updateDoc(ref, u.data);
+      if (before) await setDoc(ref, before);
+    } catch (e) {
+      if ((e as { code?: string })?.code === "permission-denied") refused.push(u.path.split("/")[1]);
+      else throw e;
+    }
+  }
+  return refused;
 }
 
 /** the feed's rows for one query (for twins) */

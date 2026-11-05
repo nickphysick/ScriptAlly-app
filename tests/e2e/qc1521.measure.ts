@@ -493,3 +493,48 @@ for (const vp of SIZES) {
     });
   });
 }
+
+/* ── v152.1 follow-up: a told save with a sibling the rules refuse (L12) ───────────────────────────────────────── */
+
+const dumpq = (id: string) => execSync(`node tests/e2e/seedQc152.mjs --dumpq ${id}`, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim().split("\n").pop()!;
+const agentName = (id: string) => JSON.parse(execSync(`node tests/e2e/seedQc152.mjs --agentname ${id}`, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim().split("\n").pop()!);
+
+for (const vp of SIZES) {
+  test.describe(`QC1521 told, a refused sibling @ ${vp.width}`, () => {
+    test("L12 · a sibling the rules refuse: the save succeeds without it, the toast names it, Undo restores everything written", async ({ page }) => {
+      test.skip(!run("L12"));
+      const L = new Ledger(`L12-${vp.width}`);
+      /* seed-pkgq-4 (seed-ms-1) sits at the rules' field ceiling: it refuses any write that adds a field */
+      const refusedBefore = dumpq("seed-pkgq-4"), name = agentName(JSON.parse(refusedBefore).agentId);
+      L.check("population: the refused sibling is on the offer's manuscript and live", JSON.parse(refusedBefore)?.manuscriptId === "seed-ms-1" && !!name, `${name}`);
+      const offerBefore = dump("offer"), sibBefore = dump("agent");
+      await open2(page, vp);
+      await openCard(page, "offer");
+      await click(page, `${CARD} [data-qc152='reply-second']`);
+      await page.waitForTimeout(500);
+      for (let i = 0; i < 30; i++) await click(page, "[data-qp='panel'] [data-qc152='told-less']");
+      for (let i = 0; i < 5; i++) await click(page, "[data-qp='panel'] [data-qc152='told-more']");
+      await click(page, "[data-qp='panel'] [data-qc152='see-changes']");
+      await click(page, "[data-qp='panel'] [data-qc152='save']");
+      const toast = page.locator("[data-qad-toast] b").first();
+      await page.waitForFunction(() => /couldn.t be marked|·/.test(document.querySelector("[data-qad-toast] b")?.textContent ?? ""), null, { timeout: 45_000 }).catch(() => {});
+      const msg = (await toast.innerText({ timeout: 3000 }).catch(() => "")).replace(/\s+/g, " ");
+      L.check("the toast names the refused sibling: Saved. 1 query couldn't be marked: {agent}.", new RegExp(`Saved\\. 1 query couldn[’']t be marked: ${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\.`).test(msg), msg);
+      L.check("Undo is offered", await page.locator("[data-qad-undo]").count() > 0, "");
+      const after = dump("offer");
+      const entry = after.log.map((x: [string, Record<string, unknown>]) => x[1]).find((d: Record<string, unknown>) => d.type === "Told other agents");
+      L.check("the step saved, its count what was entered (6)", entry?.toldCount === 6, JSON.stringify(entry?.toldCount));
+      const sib = dump("agent").q;
+      L.check("an accepted sibling was marked in the same save", sib?.offerRefQueryId === "q152-offer" && sib?.offerTold === true, JSON.stringify({ r: sib?.offerRefQueryId, t: sib?.offerTold }));
+      L.check("the refused sibling is exactly as it was", dumpq("seed-pkgq-4") === refusedBefore, "");
+      const t = await readThread(page);
+      L.check("the bubble says what was entered: Told 6 other agents", t?.msgs.some((m) => m.kind === "told" && m.title === "Told 6 other agents"), JSON.stringify(t?.msgs.map((m) => m.title)));
+      await page.locator("[data-qad-undo]").first().click({ timeout: 8000 }).catch(() => {});
+      await page.waitForTimeout(3000);
+      L.check("Undo: the offer back byte for byte", JSON.stringify(dump("offer")) === JSON.stringify(offerBefore), "");
+      L.check("Undo: the accepted sibling back byte for byte", JSON.stringify(dump("agent")) === JSON.stringify(sibBefore), "");
+      L.check("Undo: the refused sibling still as it was", dumpq("seed-pkgq-4") === refusedBefore, "");
+      L.done(10);
+    });
+  });
+}

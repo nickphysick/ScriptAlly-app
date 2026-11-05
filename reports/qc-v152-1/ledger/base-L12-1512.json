@@ -1,0 +1,50 @@
+[
+ {
+  "where": "population: the refused sibling is on the offer's manuscript and live",
+  "ok": true,
+  "detail": "Priya Nair"
+ },
+ {
+  "where": "the toast names the refused sibling: Saved. 1 query couldn't be marked: {agent}.",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "Undo is offered",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "the step saved, its count what was entered (6)",
+  "ok": false
+ },
+ {
+  "where": "an accepted sibling was marked in the same save",
+  "ok": false,
+  "detail": "{}"
+ },
+ {
+  "where": "the refused sibling is exactly as it was",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "the bubble says what was entered: Told 6 other agents",
+  "ok": false
+ },
+ {
+  "where": "Undo: the offer back byte for byte",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "Undo: the accepted sibling back byte for byte",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "Undo: the refused sibling still as it was",
+  "ok": true,
+  "detail": ""
+ }
+]

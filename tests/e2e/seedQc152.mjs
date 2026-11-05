@@ -60,6 +60,15 @@ if (di > 0) {
   console.log(JSON.stringify(sortKeys({ q: qd, log, feed })));
   process.exit(0);
 }
+/* --dumpq <queryId>: any query, sorted (v152.1 L12: the refused sibling is left exactly as it was); --agentname <agentId> */
+const dq = process.argv.indexOf("--dumpq"), an = process.argv.indexOf("--agentname");
+if (dq > 0 || an > 0) {
+  const { getDoc } = await import("firebase/firestore");
+  const sortKeys = (o) => (o && typeof o === "object" && !Array.isArray(o) ? Object.fromEntries(Object.keys(o).sort().map((k) => [k, sortKeys(o[k])])) : Array.isArray(o) ? o.map(sortKeys) : o);
+  if (dq > 0) console.log(JSON.stringify(sortKeys((await getDoc(doc(db, "users", uid, "queries", process.argv[dq + 1]))).data() ?? null)));
+  else { const a = (await getDoc(doc(db, "users", uid, "agents", process.argv[an + 1]))).data(); console.log(JSON.stringify(a?.name || a?.agency || "")); }
+  process.exit(0);
+}
 await wipe();
 
 const iso = (daysAgo) => new Date(NOW - daysAgo * DAY).toISOString();

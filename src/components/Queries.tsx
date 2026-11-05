@@ -135,7 +135,7 @@ import { dayLabel as dayLabel152, sideOf as side152, type ReplyAct, type ThreadS
 import { getActivityTime } from "../lib/queryDerivation";
 import { qc152DevFree } from "../lib/qc152ReviewAid";
 import { packageLockStamp } from "../lib/saveQueryEdits";
-import { commitPlan, planDetails, planFix, planRecord, readFeed, readLog, RECORD_STATUS, storedLabels, TOLD_TYPE, type FixStep, type RecordKind, type StepMaterial } from "../lib/qc152Write";
+import { commitPlan, planDetails, planFix, planRecord, readFeed, readLog, RECORD_STATUS, refusedMarks, storedLabels, TOLD_TYPE, type FixStep, type RecordKind, type StepMaterial } from "../lib/qc152Write";
 import { QcDetails152, QcFix152, QcFork152, type FixRow, type PkgChoice } from "./queries/centre/QcFix152";
 import { askChips, readMat } from "../lib/qcThread152";
 import type { LogStep, StepType } from "../lib/qcLogic152";
@@ -6275,15 +6275,33 @@ export const Queries: React.FC<{
               const existing = await readLog(uid, q.id);
               /* §2.5 one fact, one save: the told step and the marks on every other live query, in one batch and one snapshot */
               const told = k === "told" && extra.told ? { ...extra.told, others: tellOthers.others.map((o) => ({ id: o.id, offerReply: o.offerReply ?? null })) } : undefined;
-              const plan = planRecord({ uid, q, agent: ag, ms, existing, nowMs: Date.now(), quietWeeks: qcQuietWeeks }, k, day, mats, { replyNote: extra.replyNote, told });
-              const snap = await commitPlan(uid, plan, undefined, told ? told.others.map((o) => o.id) : []);
+              const ctx = { uid, q, agent: ag, ms, existing, nowMs: Date.now(), quietWeeks: qcQuietWeeks };
+              let plan = planRecord(ctx, k, day, mats, { replyNote: extra.replyNote, told });
+              /* v152.1 — a sibling the rules refuse (a query at the rules' field ceiling) refuses the whole batch. Find which,
+                 then save the step and every accepted sibling in ONE batch, and name the refused ones in the toast: never
+                 silently (Nick). The step's count stays what the writer entered. */
+              let refused: string[] = [];
+              let snap: Awaited<ReturnType<typeof commitPlan>>;
+              try {
+                snap = await commitPlan(uid, plan, undefined, told ? told.others.map((o) => o.id) : []);
+              } catch (e) {
+                if (!told || (e as { code?: string })?.code !== "permission-denied") throw e;
+                refused = await refusedMarks(uid, plan);
+                if (!refused.length) throw e;
+                const kept = told.others.filter((o) => !refused.includes(o.id));
+                plan = planRecord(ctx, k, day, mats, { told: { ...told, others: kept } });
+                snap = await commitPlan(uid, plan, undefined, kept.map((o) => o.id));
+              }
+              const refusedNames = refused.map((id) => { const x = queries.find((y) => y.id === id); const a = agents.find((y) => y.id === x?.agentId); return a?.name || a?.agency || "an agent"; });
               const newId = plan.set[0].path.split("/").pop() ?? null;
               setQcCardFresh(newId);
               window.setTimeout(() => setQcCardFresh(null), 1600);
               setQc152Rec(null);
               setQcCardMode("view");
               showUndoBar({
-                message: `${{ partial_req: "Partial requested", full_req: "Full requested", offer: "Offer", pass: "Passed", partial_sent: "Partial sent", full_sent: "Full sent", nudge: "Nudge", noresp: "Closed: no response", told: "Others told" }[k]} · ${ag?.name || ag?.agency || "The agent"}`,
+                message: refused.length
+                  ? `Saved. ${refused.length} ${refused.length === 1 ? "query" : "queries"} couldn’t be marked: ${refusedNames.join(", ")}.`
+                  : `${{ partial_req: "Partial requested", full_req: "Full requested", offer: "Offer", pass: "Passed", partial_sent: "Partial sent", full_sent: "Full sent", nudge: "Nudge", noresp: "Closed: no response", told: "Others told" }[k]} · ${ag?.name || ag?.agency || "The agent"}`,
                 sub: "ADDED TO THE TIMELINE",
                 undo: async () => { await restoreSnapshot(snap); },
               });

@@ -59,6 +59,9 @@ for L in "$@"; do
   );
 
   /* §2.6 the Agent tab */' ;;
+    L12) F=src/components/Queries.tsx; srcbreak $F '                message: refused.length
+                  ? `Saved.' '                message: false /* MUT L12: the refused sibling dropped silently */
+                  ? `Saved.' ;;
     L10) F=src/lib/qc152Write.ts; srcbreak $F '      eventKey: TOLD_EVENT, toldCount: count, toldDeadline: dayIso(new Date(t.deadlineMs)) };' '      eventKey: TOLD_EVENT, toldCount: count }; /* MUT L10: saved without the deadline */' ;;
   esac
   build
