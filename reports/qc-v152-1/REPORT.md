@@ -1,6 +1,6 @@
 # Query Centre v152.1 — a quieter Queried, and the thread as a record of events
 
-Branch `query-centre-v152-1`, cut from `query-centre-v152` at `fd81a2961` (dev's line at the time was that branch plus Smart Import v1.2.1, which touches no Query Centre file). Desktop only; phones untouched. **Not merged.** Dev: §DEV.
+Branch `query-centre-v152-1`, cut from `query-centre-v152` at `fd81a2961` (dev's line at the time was that branch plus Smart Import v1.2.1, which touches no Query Centre file). Desktop only; phones untouched. **Not merged.** Dev: `index-BPUwFsPv.js` (5 Nov).
 
 ## False premises
 
@@ -32,7 +32,7 @@ Branch `query-centre-v152-1`, cut from `query-centre-v152` at `fd81a2961` (dev's
 | §1 A quieter Queried | `d90d08cda` |
 | §2 The thread | `982d4b5f9` |
 | §3 The footer | `1f549f1f1` |
-| Follow-up: step materials read as stored; the offer footer wraps | `§FUCOMMIT` |
+| Follow-up: step materials read as stored; the offer footer wraps | `1ea83daca` |
 
 ## 3 · Locks — red first, then green (1280 · 1512)
 
@@ -61,7 +61,7 @@ Branch `query-centre-v152-1`, cut from `query-centre-v152` at `fd81a2961` (dev's
 
 ## 5 · Rules (dev deployed; prod is yours)
 
-`isValidActivityNested` (the query's own log) allows three optional keys: `replyNote` (string ≤500), `toldCount` (int 1–30) and `toldDeadline` (string ≤32). **Dev: §DEVRULES. Prod: not deployed (yours).** The prod diff is those three keys in the `hasOnly` list plus their three checks; nothing else. The marks on other queries use fields the rules already allow.
+`isValidActivityNested` (the query's own log) allows three optional keys: `replyNote` (string ≤500), `toldCount` (int 1–30) and `toldDeadline` (string ≤32). **Dev: deployed 5 Nov, release `updateTime` 2026-11-05T22:08:11Z. Prod: not deployed (yours).** The prod diff is those three keys in the `hasOnly` list plus their three checks; nothing else. The marks on other queries use fields the rules already allow.
 
 ## 6 · Decisions taken under the brief
 
@@ -75,7 +75,7 @@ Branch `query-centre-v152-1`, cut from `query-centre-v152` at `fd81a2961` (dev's
 
 ## 7 · Dev
 
-§DEV
+Deployed 5 Nov from `dev/qc1511-db2-title-sip-qc1512-cl26-sip11-tl1-pk41-cl262-db21-sip12-pk41w-qc152-fn121-pk42-qc1521` (pushed): the branch dev was serving (`index-Bi8AGvkp.js`, matched exactly by rebuilding it) with `query-centre-v152-1` merged in. The one conflict was the design-ref hash manifest (both sides added entries); `check-design-refs` passes against disk. On the merged tree: tsc clean, build clean, Vitest 11,401 passed, 2 failed (`firestoreTarget`, the same older scripts as the baseline). **Dev serves `index-BPUwFsPv.js`.** Prod is untouched.
 
 ## 8 · Left undone
 
