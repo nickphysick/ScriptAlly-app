@@ -46,7 +46,7 @@ Branch `query-centre-v152`, in `../ScriptAlly-qc152`, cut from `efa73df9e` (`dev
 | §1 Query states | `56d2c3d1b` |
 | §2 The card as a chat thread | `1c5065b3a` |
 | §3 Recording | `b46b72884` |
-| §4 Editing | `§4COMMIT` |
+| §4 Editing | `757ccfe1c` |
 
 ## 3 · Locks, red then green
 
@@ -126,7 +126,7 @@ A writer's own expected date still outranks either. **This is the one change pho
 
 ## 8 · Rules
 
-`isValidActivityNested` allows an optional `materials` list (at most 20) on a step; the feed twin already allowed it. **Dev: §DEVRULES. Prod: not deployed (yours).** The prod diff is that one key plus the list check:
+`isValidActivityNested` allows an optional `materials` list (at most 20) on a step; the feed twin already allowed it. **Dev: deployed 5 Nov, release `updateTime` 2026-11-05T01:10:57Z. Prod: not deployed (yours).** The prod diff is that one key plus the list check:
 
 ```
 -          'reconstructed'
@@ -140,7 +140,7 @@ A writer's own expected date still outranks either. **This is the one change pho
 
 ## 9 · Dev
 
-§DEV
+Deployed 5 Nov from `dev/qc1511-db2-title-sip-qc1512-cl26-sip11-tl1-pk41-cl262-db21-sip12-pk41w-qc152` (pushed): the branch dev was serving (`index-syympTiN.js`, confirmed by rebuilding it — the only difference was the build-date constant) with `query-centre-v152` merged in. The one conflict was the design-ref hash manifest (both sides added entries); `check-design-refs` passes against disk. On the merged tree: tsc clean, build clean, Vitest 11,376 passed, 2 failed (`firestoreTarget`, the same 28 older scripts as the baseline). **Dev serves `index-DK3Clp8X.js`.** Prod is untouched.
 
 ## 10 · Left undone, with the reason
 
