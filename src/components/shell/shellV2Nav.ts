@@ -25,6 +25,7 @@
 import { TODO_ROUTES } from "../../lib/todoRoutes";
 import { ACCOUNT_SECTION_PATHS } from "../../lib/accountRoutes";
 import { routeBase } from "../../lib/helpPath";
+import { workspacePageForPath } from "../../lib/workspaceNav";
 
 export interface ShellV2Page {
   key: string;
@@ -205,11 +206,16 @@ export function railClickPlan(
 export function shellCrumbForPath(
   pathname: string
 ): { section: string; page: string } | null {
+  /* ⚠️ THE NAV PAGES READ THE WORKSPACE NAV (sidebar rail v1, Phase 1), the one list the desktop
+     sidebar, the folder tab and the palette read — this table's own rows said "Queries Hub" on the
+     phone long after the desktop called the page Query Centre. A one-page section (Dashboard,
+     Materials) states one name for both halves, the flat-page rule this crumb always had. The extras
+     below still name the off-nav routes (Import, settings, Plans, Help). */
+  const nav = workspacePageForPath(pathname);
+  if (nav) return { section: nav.single ? nav.page : nav.section, page: nav.page };
   const extra = CRUMB_EXTRAS[routeBase(pathname)];
   if (extra) return { section: extra.section, page: extra.page };
-  const hit = shellPageForPath(pathname);
-  if (!hit) return null;
-  return { section: hit.section ? hit.section.label : hit.page.label, page: hit.page.label };
+  return null;
 }
 
 

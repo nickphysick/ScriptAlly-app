@@ -116,7 +116,7 @@ describe("v2 shell — smoke renders", () => {
     expect(html).toContain("sv2-topbar");
     expect(html).toContain("sv2-tuck");        // the bar's only chrome control
     expect(html).toContain("sv2-crumb");
-    expect(html).toContain("Shelf");           // the section
+    expect(html).toContain("Your book</span>"); // the section — the workspace nav's name (sidebar rail v1)
     expect(html).toContain("<b>Manuscripts</b>"); // the page, bold and inert
     expect(html).toContain("sv2-vr");
     expect(html).toContain("sv2-scope");
@@ -146,7 +146,7 @@ describe("v2 shell — smoke renders", () => {
   it("the crumb is on EVERY workspace page", () => {
     /* /todo/today left this list with the page (tasks-consolidation P1, 9 Aug); /todo/corkboard
        takes its place (the Calendar page that held it was retired 29 Oct) so a Tasks SUB-page is still covered. */
-    for (const [path, page] of [["/queries", "Queries Hub"], ["/agents", "Contact list"], ["/todo", "To-do list"], ["/todo/corkboard", "Corkboard"], ["/import", "Import"]] as const) {
+    for (const [path, page] of [["/queries", "Query Centre"], ["/agents", "Contact list"], ["/todo", "To-do list"], ["/todo/corkboard", "Corkboard"], ["/import", "Import"]] as const) {
       const html = bar(path);
       expect(html, path).toContain("sv2-crumb");
       expect(html, path).toContain(`<b>${page}</b>`);

@@ -16,6 +16,7 @@
  */
 import { RailCaptureKey } from "../components/shell/railNav";
 import { TODO_ROUTES } from "./todoRoutes";
+import { workspaceSections } from "./workspaceNav";
 
 /** What activating a row does. Data only — the palette component performs it. */
 export type PaletteRun =
@@ -125,26 +126,34 @@ export const PALETTE_ACTIONS: PaletteItem[] = [
  * results**: typing "pack" should find the Packages page and "settings" should find Task
  * settings, because the thing people are looking for is as often a place as a record.
  */
+/* ⚠️ THE NAV PAGES ARE THE WORKSPACE NAV, IN ITS ORDER (sidebar rail v1, Phase 1). This list used to
+   restate them by hand — "Packages" where the sidebar said Submission packages, and no Responses or
+   Analytics at all — so the palette described a different app from the sidebar beside it. Titles are
+   the nav's own labels; the ids and the one-line blurbs stay keyed by path here, because an id is an
+   identifier and a blurb is the palette's own job. A nav page with no entry below still appears, with
+   no blurb, rather than silently going missing. */
+const NAV_PAGE_META: Readonly<Record<string, { id: string; subtitle: string }>> = {
+  "/dashboard": { id: "page:dashboard", subtitle: "Your desk" },
+  "/queries": { id: "page:queries", subtitle: "Every query and where it stands" },
+  "/queries/responses": { id: "page:responses", subtitle: "Every answer from agents" },
+  "/queries/analytics": { id: "page:analytics", subtitle: "How your querying is going" },
+  "/agents": { id: "page:agents", subtitle: "Everyone you are querying" },
+  "/agents/discover": { id: "page:discover", subtitle: "Find new agents" },
+  "/manuscripts": { id: "page:manuscripts", subtitle: "Your shelf" },
+  "/queries/packages": { id: "page:packages", subtitle: "Submission package workshop" },
+  "/manuscripts/versions": { id: "page:versions", subtitle: "Every version of your book, and what each one landed" },
+  "/manuscripts/comps": { id: "page:comps", subtitle: "Find comps for your book" },
+  ...Object.fromEntries(TODO_ROUTES.map((r) => [r.path, { id: r.id === "list" ? "page:todo" : `page:todo-${r.id}`, subtitle: r.blurb }])),
+};
+
 export const PALETTE_PAGES: PaletteItem[] = [
-  { id: "page:dashboard", group: "Pages", kind: "page", title: "Dashboard", subtitle: "Your desk", run: { kind: "path", path: "/dashboard" } },
-  { id: "page:queries", group: "Pages", kind: "page", title: "Query Centre", subtitle: "Every query and where it stands", run: { kind: "path", path: "/queries" } },
-  /* ⚠️ ALL FOUR INDEXED SEPARATELY. One "To-do" entry would make the palette the only place in the
-     app that treats the workspace as a single page — and ⌘K is global by definition (audit 9).
-     ⚠️ DERIVED FROM `TODO_ROUTES` (sidebar-IA fix, 6 Aug): these four restated the routes' labels
-     and blurbs by hand — the same definition the TASKS sidebar section and both breadcrumbs now
-     read, so the palette cannot drift from the nav. Ids keep their established `page:todo*` form
-     (an id is an identifier, not a caption). */
-  ...TODO_ROUTES.map((r): PaletteItem => ({
-    id: r.id === "list" ? "page:todo" : `page:todo-${r.id}`,
-    group: "Pages", kind: "page", title: r.label, subtitle: r.blurb,
-    run: { kind: "path", path: r.path },
+  ...workspaceSections({ todo: 0 }).flatMap((sec) => (sec.children ?? []).map((ch): PaletteItem => {
+    const meta = NAV_PAGE_META[ch.path];
+    return {
+      id: meta?.id ?? `page:${ch.id}`, group: "Pages", kind: "page", title: ch.label, subtitle: meta?.subtitle ?? "",
+      run: { kind: "path", path: ch.path },
+    };
   })),
-  { id: "page:packages", group: "Pages", kind: "page", title: "Submission packages", subtitle: "Submission package workshop", run: { kind: "path", path: "/queries/packages" } },
-  { id: "page:agents", group: "Pages", kind: "page", title: "Contact list", subtitle: "Everyone you are querying", run: { kind: "path", path: "/agents" } },
-  { id: "page:discover", group: "Pages", kind: "page", title: "Discover", subtitle: "Find new agents", run: { kind: "path", path: "/agents/discover" } },
-  { id: "page:manuscripts", group: "Pages", kind: "page", title: "Manuscripts", subtitle: "Your shelf", run: { kind: "path", path: "/manuscripts" } },
-  { id: "page:versions", group: "Pages", kind: "page", title: "Versions", subtitle: "Every version of your book, and what each one landed", run: { kind: "path", path: "/manuscripts/versions" } },
-  { id: "page:comps", group: "Pages", kind: "page", title: "Comparable titles", subtitle: "Find comps for your book", run: { kind: "path", path: "/manuscripts/comps" } },
   { id: "page:import", group: "Pages", kind: "page", title: "Import", subtitle: "Bring in queries from a spreadsheet", run: { kind: "path", path: "/import" } },
   { id: "page:account", group: "Pages", kind: "page", title: "Account", subtitle: "Your details and preferences", run: { kind: "path", path: "/account" } },
   { id: "page:plans", group: "Pages", kind: "page", title: "Plans", subtitle: "What Pro adds", run: { kind: "path", path: "/plans" } },

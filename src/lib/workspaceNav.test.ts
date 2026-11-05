@@ -10,7 +10,8 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { QueryStatus } from "../types";
-import { workspaceSections } from "./workspaceNav";
+import { workspaceSections, RAIL_SHORT_LABELS, railPageLabel, SETTINGS_RAIL_LABELS } from "./workspaceNav";
+import { ACCOUNT_ROUTES } from "./accountRoutes";
 import {
   CLOSED_QUERY_STATUSES, QUERIES_STATUS_PARAM, attentionCount, filterStateFor, isOverdueForReply,
   parseStatusFilter, queriesPathFor,
@@ -141,13 +142,14 @@ describe("The IA renders what exists — and nothing else", () => {
      they made the nav a second control surface for a page that already had one, so the two could
      disagree about what you were looking at — and they forced counts into a navigation column,
      which is how a nav becomes a dashboard. Two real destinations now. */
-  it("Queries carries exactly Query Centre, Submission packages, Analytics and Responses", () => {
+  it("Queries carries exactly Query Centre, Responses, Analytics and Submission packages (sidebar rail v1 order)", () => {
     /* Responses v2 (15 Oct) is a routed page with its own slot, so it is a destination, not a filter.
        Submission packages v26 (25 Oct) moved here from Materials: what goes out with a query sits with the queries,
        and its row is one line with the PRO tag, like Versions (v26.1). "Your book" keeps Manuscripts, Versions, Comparable titles. */
-    expect(byId("queries").children!.map((c) => c.label)).toEqual(["Query Centre", "Submission packages", "Analytics", "Responses"]);
+    /* sidebar rail v1 (5 Nov): most-used first — Responses after the Query Centre, Packages last */
+    expect(byId("queries").children!.map((c) => c.label)).toEqual(["Query Centre", "Responses", "Analytics", "Submission packages"]);
     const pkg = byId("queries").children!.find((c) => c.label === "Submission packages")!;
-    expect(pkg).toMatchObject({ path: "/queries/packages", pro: true });
+    expect(pkg).toMatchObject({ path: "/queries/packages", pro: "packages" }); /* rail v1: pro names its entitlement */
     /* SHORT IN THE SIDEBAR ONLY (25 Oct): `label` stays the page's full name; `navLabel` is what the row prints */
     expect(pkg).toMatchObject({ label: "Submission packages", navLabel: "Packages" });
     expect(byId("queries").children!.find((c) => c.id === "q-centre")).toMatchObject({ label: "Query Centre", navLabel: "Queries" });
@@ -328,5 +330,51 @@ describe("`Needs attention` is the past-reply-window set — ONE derivation, bot
       [q(QueryStatus.QUERIED, -1), q(QueryStatus.FULL_SENT, -5), q(QueryStatus.QUERIED, +3)],
       now,
     )).toBe(2);
+  });
+});
+
+/* ══ SIDEBAR RAIL v1 (5 Nov) — the section list on dev's nav, the rail's labels, the dormant Pro pages ══ */
+describe("sidebar rail v1 — the nav the rail reads", () => {
+  const nav = workspaceSections({ todo: 4 });
+  it("five sections, most-used first; no Materials label and no Calendar", () => {
+    expect(nav.map((s) => s.label)).toEqual(["Workspace", "Queries", "Agents", "Your book", "Tasks"]);
+    const labels = nav.flatMap((s) => (s.children ?? []).map((c) => c.label));
+    expect(labels).not.toContain("Calendar");
+    expect(nav.map((s) => s.label)).not.toContain("Materials");
+    expect(nav.find((s) => s.label === "Your book")!.children!.map((c) => c.label)).toEqual(["Manuscripts", "Versions", "Comparable titles"]);
+    expect(nav.find((s) => s.id === "tasks")!.children!.map((c) => c.label)).toEqual(["To-do list", "Corkboard"]);
+  });
+  it("every section names its own icon, and each is drawn; Your book has the Library icon", () => {
+    const appShell = readFileSync(resolve(__dirname, "../components/shell/AppShell.tsx"), "utf8");
+    const at = appShell.indexOf("const WORKSPACE_ICONS");
+    expect(at, "WORKSPACE_ICONS moved").toBeGreaterThan(-1);
+    const block = appShell.slice(at, appShell.indexOf("};", at));
+    for (const s of nav) {
+      expect(s.icon, `${s.id} needs a section icon`).toBeTruthy();
+      expect(block, `${s.id}: ${s.icon}`).toContain(`${s.icon}:`);
+    }
+    expect(nav.find((s) => s.label === "Your book")!.icon).toBe("library");
+  });
+  it("the rail's card labels: Packages and Comps are shortened, nothing else", () => {
+    expect(RAIL_SHORT_LABELS).toEqual({ "q-pkg": "Packages", "m-comps": "Comps" });
+    expect(nav.flatMap((s) => (s.children ?? []).map((c) => railPageLabel(c)))).toEqual([
+      "Dashboard", "Query Centre", "Responses", "Analytics", "Packages", "Contact list", "Discover",
+      "Manuscripts", "Versions", "Comps", "To-do list", "Corkboard",
+    ]);
+  });
+  it("the full sidebar's short labels: Queries and Packages (25 Oct), every other row its full name", () => {
+    expect(nav.flatMap((s) => (s.children ?? []).map((c) => sidebarLabel(c)))).toEqual([
+      "Dashboard", "Queries", "Responses", "Analytics", "Packages", "Contact list", "Discover",
+      "Manuscripts", "Versions", "Comparable titles", "To-do list", "Corkboard",
+    ]);
+  });
+  it("the settings rail's short labels cover every account section", () => {
+    expect(Object.keys(SETTINGS_RAIL_LABELS).sort()).toEqual(ACCOUNT_ROUTES.map((r) => r.id).sort());
+    expect(ACCOUNT_ROUTES.map((r) => SETTINGS_RAIL_LABELS[r.id]))
+      .toEqual(["Profile", "Security", "Plan", "Alerts", "Settings", "Tasks", "Your data"]);
+  });
+  it("Packages, Discover and Versions are the Pro pages, each named by its entitlement", () => {
+    const pro = nav.flatMap((s) => (s.children ?? []).filter((c) => c.pro).map((c) => `${c.label}:${c.pro}`));
+    expect(pro).toEqual(["Submission packages:packages", "Discover:discover", "Versions:versions"]);
   });
 });

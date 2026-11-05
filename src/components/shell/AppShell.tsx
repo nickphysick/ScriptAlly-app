@@ -190,6 +190,8 @@ export const WORKSPACE_ICONS: Record<string, React.ReactNode> = {
   queries: <Send aria-hidden="true" />,
   agents: <Users aria-hidden="true" />,
   materials: <Book aria-hidden="true" />,
+  /* sidebar rail v1: "Materials" split, and the book and its comps are the MANUSCRIPT section */
+  manuscript: <Library aria-hidden="true" />,
   /* ACCOUNT joined the nav when Settings came up out of the foot (audit pack P5). BOTH keys are
      added — the group's and the row's — per the parallel-surface warning below; adding the
      section without its glyph is the quiet half of that failure.

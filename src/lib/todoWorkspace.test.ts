@@ -101,6 +101,7 @@ describe("the app sidebar's TASKS section", () => {
 
   /* sidebar metrics pass: ACCOUNT left the nav (Settings is the foot's gear again), so Tasks is last. */
   it("sits below MATERIALS, last in the nav — and no To-do row survives under Workspace", () => {
+    /* sidebar rail v1 on dev's nav: Tasks last, after "Your book" (id `materials`) */
     expect(nav.map((s) => s.id)).toEqual(["workspace", "queries", "agents", "materials", "tasks"]);
     expect(nav.find((s) => s.id === "workspace")!.children!.map((c) => c.id)).toEqual(["dash"]);
   });

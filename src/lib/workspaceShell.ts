@@ -38,11 +38,13 @@ export interface ShellChild {
   count?: number;
   /** Burgundy dot — attention, not volume. */
   urgent?: boolean;
-  /** Manuscripts v27 Part E — a small "PRO" tag after the label (Versions). Shown to everyone for now. */
-  pro?: boolean;
   /** The row's OWN icon key. Every destination carries one now — the flat nav has no parent row
    *  to inherit from, and a row without an icon in a list of rows with them reads as broken. */
   icon?: string;
+  /** A Pro page, named by its entitlement (Manuscripts v27 Part E gave Versions a "PRO" tag shown to everyone;
+   *  sidebar rail v1 makes every Pro tag DORMANT): the rail and the full sidebar draw the tag only when the
+   *  user is NOT entitled (lib/entitlements). With today's founding access nobody sees one. */
+  pro?: "discover" | "packages" | "versions";
 }
 
 export interface ShellSection {
@@ -58,6 +60,8 @@ export interface ShellSection {
   /** The sidebar draws no heading over this group (Dashboard's, 25 Oct). The label stays: the folder tab and every
    *  section lookup still read it. */
   noHeading?: boolean;
+  /** The section's own icon key in WORKSPACE_ICONS (sidebar rail v1: the rail draws one row per section). */
+  icon?: string;
 }
 
 /** The text the SIDEBAR prints for a row — its short `navLabel` where it has one, else its full `label`. */

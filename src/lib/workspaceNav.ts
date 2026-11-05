@@ -58,96 +58,73 @@ const TASKS_ICON: Record<string, string> = {
 };
 
 export function workspaceSections(input: WorkspaceNavInput): ShellSection[] {
+  /* ⚠️ SIDEBAR RAIL v1 (5 Nov; section list ruled 5 Nov on dev's nav): five sections, most-used first —
+     Dashboard · Queries · Agents · Your book · Tasks. The rail, the full sidebar, the folder tab, the ⌘K
+     palette and the phone bar all read this one list. There is no Materials section and no Calendar
+     (retired 29 Oct). Each section names its own icon for the rail's section row. */
   return [
     {
       id: "workspace",
       label: "Workspace",
+      icon: "dash",
       def: "dash",
-      /* ⚠️ DASHBOARD SITS ON ITS OWN, WITH NO HEADING (Nick's ruling, 25 Oct), REVERSING the sidebar metrics pass's
-         "every group gets its heading". The label stays "Workspace" because the folder tab still names the group. */
+      /* ⚠️ DASHBOARD SITS ON ITS OWN, WITH NO HEADING (Nick's ruling, 25 Oct). The label stays "Workspace" because
+         the folder tab still names the group; the rail names the row by its page. */
       noHeading: true,
       children: [
         { id: "dash", label: "Dashboard", path: "/dashboard", icon: "dash" },
-        /* ⚠️ TO-DO LEFT THIS GROUP (sidebar-IA fix, 6 Aug — Nick's call, REVERSING the one-row
-           fold below). It is the TASKS section now. The old reasoning ("the sub-routes are
-           page-level views of one place") is superseded: four routed pages with their own
-           chrome are peers in the IA, and the fold left Calendar reachable from nowhere. */
       ],
     },
-    /* ⚠️ THE ORDER IS THE WORK'S ORDER (audit pack P5), and it CHANGED: Tasks used to lead,
-       directly after Workspace. It now sits fourth, after Queries · Agents · Materials.
-
-       The reasoning the 6 Aug fix recorded — that Tasks is a section rather than a page under
-       Querying — is untouched and still right; only its POSITION moved. The three sections above
-       it are the querying work itself, in the order it happens: you write to agents, you keep
-       agents, you keep the materials you send them. Tasks is what falls out of that work, so it
-       reads better after it than before it. */
     {
       id: "queries",
       label: "Queries",
+      icon: "send",
       def: "q-centre",
       children: [
-        /* ⚠️ SHORT LABELS IN THE SIDEBAR ONLY (Nick's ruling, 25 Oct): "Queries" and "Packages". `label` is still the
-           page's full name, which the folder tab, the bar, breadcrumbs and the palette read. */
+        /* ⚠️ SHORT LABELS IN THE FULL SIDEBAR ONLY (Nick's ruling, 25 Oct): "Queries" and "Packages". `label` is
+           still the page's full name, which the folder tab, the bar, breadcrumbs and the palette read; the rail's
+           card has its own short labels (RAIL_SHORT_LABELS below). */
         { id: "q-centre", label: "Query Centre", navLabel: "Queries", path: "/queries", icon: "send" },
-        /* Submission packages v26 (25 Oct): packages moved here from Materials — they are what goes out with a
-           query, so they sit with the queries. It is a one-line row like Versions, with the same PRO tag (v26.1). */
-        { id: "q-pkg", label: "Submission packages", navLabel: "Packages", path: "/queries/packages", icon: "folder", pro: true },
-        { id: "q-analytics", label: "Analytics", path: "/queries/analytics", icon: "chart" },
-        /* Responses v2 (15 Oct): the third Queries tab — every agent answer for the book in scope */
+        /* Responses v2 (15 Oct): every agent answer for the book in scope */
         { id: "q-responses", label: "Responses", path: "/queries/responses", icon: "replies" },
+        { id: "q-analytics", label: "Analytics", path: "/queries/analytics", icon: "chart" },
+        /* Submission packages v26 (25 Oct): packages moved here from Materials — they are what goes out with a
+           query. Last in the section (rail v1, most-used first). Pro, dormant while packages are open to all. */
+        { id: "q-pkg", label: "Submission packages", navLabel: "Packages", path: "/queries/packages", icon: "folder", pro: "packages" },
       ],
     },
     {
       id: "agents",
       label: "Agents",
+      icon: "people",
       def: "a-list",
       children: [
         { id: "a-list", label: "Contact list", path: "/agents", icon: "people" },
-        { id: "a-disc", label: "Discover", path: "/agents/discover", icon: "compass" },
+        /* Pro, dormant: nothing gates Discover (`DISCOVER_OPEN_TO_ALL`) */
+        { id: "a-disc", label: "Discover", path: "/agents/discover", icon: "compass", pro: "discover" },
       ],
     },
-    /* ⚠️ MANUSCRIPTS AND COMPARABLE TITLES JOIN MATERIALS (amendment 7 §6), and this RESTORES
-       access rather than adding features: both pages have been live and routed all along, reachable
-       only by typing the URL, because this section held nothing but Packages.
-       ⚠️ THE ROWS ARE LITERALS, matching every other section in this file. They are NOT derived from
-       `TODO_ROUTES` — that definition is the three To-do pages and drives the Tasks section alone.
-       (A shared MATERIALS_ROUTES definition would be the tidier shape, but there is no second
-       consumer to justify it yet; noted as a follow-up rather than done under a header pack.)
-       ⚠️ AND `def` MOVED WITH THE ORDER. Every other section defaults to its FIRST child, so the
-       rib now lands on Manuscripts rather than Packages — a deliberate behaviour change that comes
-       with leading the section, not an oversight.
-
-       ⚠️ THIS WHOLE SECTION WAS ERASED ONCE AND RE-LANDED. `a7b5d54`, a 141-file landing from a
-       stale base, reverted Materials to Submission packages alone — which left `/manuscripts`,
-       a routed page with its own plate card, tabs and panes, reachable only by typing the URL.
-       That is the inverse of the failure this file's header warns about: not a nav entry without
-       a route, but a route without a nav entry. Both leave the sidebar lying about the shape of
-       the app, and only one of them is visible from inside the nav model. */
-    /* ⚠️ RENAMED "YOUR BOOK" (Submission packages v26, 25 Oct): Submission packages moved to Queries, and what
-       is left here is the book itself — the manuscript, its versions and the titles it is compared with. The id
-       stays "materials" so the rail rib and every section lookup keyed on it are unchanged. */
+    /* ⚠️ "YOUR BOOK" (Submission packages v26, 25 Oct): the manuscript, its versions and the titles it is
+       compared with. The id stays "materials" so every section lookup keyed on it is unchanged; nothing a
+       writer reads says Materials. The rail draws it with the Library icon. */
     {
       id: "materials",
       label: "Your book",
+      icon: "library",
       def: "m-ms",
       children: [
         { id: "m-ms", label: "Manuscripts", path: "/manuscripts", icon: "library" },
-        /* Manuscripts v27 Part E — Versions moved out of Manuscripts onto its own page. Its PRO tag shows to everyone
-           for now (TODO(gating): when plans return, the tag means something only to Free accounts). */
-        { id: "m-ver", label: "Versions", path: "/manuscripts/versions", icon: "versions", pro: true },
+        /* Manuscripts v27 Part E — Versions on its own page. Pro, dormant under founding access. */
+        { id: "m-ver", label: "Versions", path: "/manuscripts/versions", icon: "versions", pro: "versions" },
         { id: "m-comps", label: "Comparable titles", path: "/manuscripts/comps", icon: "books" },
       ],
     },
-    /* ⚠️ ITS ROWS ARE `TODO_ROUTES` — the one definition of the To-do pages (labels, paths,
-       palette blurbs), so the sidebar, the ⌘K palette, the breadcrumb ("Tasks / To-do list") and
-       every route-section lookup follow from the same source and cannot drift. Do NOT hand-write
-       these rows to change the section's place in the list: the order lives here, the rows do
-       not. The urgency dot + count ride the To-do list row alone — the board's own total, and
-       still the ONLY count in the nav (Amendment 1, H5). */
+    /* ⚠️ ITS ROWS ARE `TODO_ROUTES` — the one definition of the To-do pages. The count rides the To-do list row
+       alone: the board's own total, and still the ONLY count in the nav (Amendment 1, H5). */
     {
       id: "tasks",
       label: "Tasks",
+      icon: "check",
       def: "list",
       children: TODO_ROUTES.map((r) => ({
         id: r.id,
@@ -157,14 +134,51 @@ export function workspaceSections(input: WorkspaceNavInput): ShellSection[] {
         ...(r.id === "list" ? { count: input.todo || undefined, urgent: true as const } : {}),
       })),
     },
-    /* ⚠️ THERE IS NO ACCOUNT SECTION — IT WAS HERE, AND IT WENT BACK TO THE FOOT (sidebar metrics
-       pass, Nick's call, REVERSING audit pack P5). P5 lifted Settings out of the foot into a one-row
-       ACCOUNT section on the argument that a lone row below the divider was "a destination living in
-       the furniture", the one page you could not find by reading down the nav. With the capture
-       button taking the sidebar's top slot every group carries a ruled heading, and a heading over a
-       single Settings row at the foot of the nav labelled nothing. Settings is the account's own
-       furniture: the gear at the user row's right (WorkspaceShell's foot), and still the first row
-       of the account menu the user row opens. The nav renders no Settings row; the bar still names
-       the settings pages (`barPageName`'s account branch). */
+    /* There is no Account section: Settings is the account's own furniture, reached from the foot. */
   ];
+}
+
+/**
+ * THE RAIL'S SHORT LABELS (sidebar rail v1). The 80px rail has room for about ten characters of 10px
+ * serif under each section, so two page names are shortened there and NOWHERE ELSE — the full sidebar,
+ * the folder tab, the palette and every aria-label keep the full name. Keyed by page id; a page that is
+ * not listed shows its own label.
+ */
+export const RAIL_SHORT_LABELS: Readonly<Record<string, string>> = {
+  "q-pkg": "Packages",
+  "m-comps": "Comps",
+};
+
+/** The label a page wears in the rail's open card. */
+export function railPageLabel(child: { id: string; label: string }): string {
+  return RAIL_SHORT_LABELS[child.id] ?? child.label;
+}
+
+/**
+ * THE SETTINGS RAIL'S SHORT LABELS (sidebar rail v1), keyed by `ACCOUNT_ROUTES` ids. The pages, the
+ * full sidebar and the aria-labels keep `ACCOUNT_ROUTES`' own names.
+ */
+export const SETTINGS_RAIL_LABELS: Readonly<Record<string, string>> = {
+  profile: "Profile",
+  security: "Security",
+  plan: "Plan",
+  notifications: "Alerts",
+  preferences: "Settings",
+  tasks: "Tasks",
+  data: "Your data",
+};
+
+/**
+ * Where a path sits in the nav — the section's label and the page's — or null when the path is not a
+ * nav page. The phone bar's title reads this (rail v1, Phase 1), so the phone and the desktop name a
+ * page from one list.
+ */
+export function workspacePageForPath(pathname: string): { section: string; page: string; single: boolean } | null {
+  const path = pathname.replace(/\/+$/, "") || "/";
+  for (const sec of workspaceSections({ todo: 0 })) {
+    const kids = sec.children ?? [];
+    const ch = kids.find((c) => c.path === path);
+    if (ch) return { section: sec.label, page: ch.label, single: kids.length === 1 };
+  }
+  return null;
 }
