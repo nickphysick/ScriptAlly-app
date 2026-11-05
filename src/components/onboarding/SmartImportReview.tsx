@@ -37,7 +37,7 @@ import {
   resolveReason, fmtDate,
   dupNoteOpen, dupNoteKept, parseModel, modelToResult, autoSetAsideRows, applyAgentRemoval, seedUnidentifiedSetAside,
   removeDuplicateRecord, buildClusters, mergedAwayByKeeper,
-  rowsIdentical, derivedCurrentStatus, applyDuplicateCollapse,
+  rowsIdentical, derivedCurrentStatus, applyDuplicateCollapse, originalsOf, fullerIdentity,
 } from "../../lib/smartImportReviewModel";
 import { importSteps } from "../../lib/importSummary";
 import { ReconcileCard, ReconcileCardRow } from "./ReconcileCard";
@@ -166,6 +166,9 @@ type Step = "duplicates" | "agents" | "queries";
 
 export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, manuscriptTitle, onBack, error, onImport, onCancel, resume, onChange, photos }) => {
   const initial = useMemo(() => parseModel(result), [result]);
+  /* the names and agencies as the file gave them: a merge fills in the fuller name (v1.2.1) only
+     where the writer has changed neither */
+  const originals = useMemo(() => originalsOf(initial.agents), [initial]);
   /* Photos: the page open full size from "See the whole page", or none. */
   const [viewPage, setViewPage] = useState<ReviewPhoto | null>(null);
   // v9: nothing is set aside before the review begins. A row with no agent and no agency is
@@ -307,14 +310,14 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
   // "Looks right" — merge the pair AND collapse their two query rows into one derived-history query.
   const reconcileCollapse = (leaderId: string, removedId: string, keptStatus: QueryStatus, keptId: string) => {
     snapReconcile(leaderId);
-    const next = applyDuplicateCollapse(agents, queries, removedId, keptStatus);
+    const next = applyDuplicateCollapse(agents, queries, removedId, keptStatus, { originals });
     setAgents(next.agents); setQueries(next.queries);
     setReconciled((r) => ({ ...r, [leaderId]: { keptId, kind: "collapsed" } }));
   };
   // "These are actually different submissions" — keep both as separate queries (the additive merge).
   const reconcileSplit = (leaderId: string, removedId: string, keptId: string) => {
     snapReconcile(leaderId);
-    const next = removeDuplicateRecord(agents, queries, removedId);
+    const next = removeDuplicateRecord(agents, queries, removedId, { originals });
     setAgents(next.agents); setQueries(next.queries);
     setReconciled((r) => ({ ...r, [leaderId]: { keptId, kind: "split" } }));
   };
@@ -423,7 +426,11 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
       const k = agents.find((a) => a.id === keeperId);
       if (!k || k.deleted) continue;
       const name = k.name || k.agency || "This agent";
-      const gone = bars.map((b) => `"${b.name || b.agency || "a row"}"`).join(", ");
+      /* the forms that went: once the kept agent has taken a fuller name (v1.2.1), the row it came
+         from is the one that "merged in" — never the kept name merged into itself */
+      const forms = [originals.get(keeperId)?.name ?? "", ...bars.map((b) => b.name || b.agency || "a row")];
+      const goneForms = forms.filter((f, i) => f && f !== k.name && forms.indexOf(f) === i);
+      const gone = (goneForms.length ? goneForms : bars.map((b) => b.name || b.agency || "a row")).map((f) => `"${f}"`).join(", ");
       out.push({ id: keeperId, name, initials: k.name ? initialsOf(k.name) : "–", merged: true, chip: DUPES_DONE.merged, at: idx.get(keeperId) ?? 0,
         sub: [k.name && k.agency ? k.agency : null, "kept", `${gone} merged in`].filter(Boolean).join(" · ") });
     }
@@ -439,8 +446,14 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
   // A flagged pair as the reconcile card: working while the cluster is open, sorted once
   // collapsed/split. Rows are the live member queries while open, or the pre-collapse snapshot once
   // resolved (one row is then removed but still shown so the harvest/summary reads correctly).
+  /* A set's headline names the agent it would become (v1.2.1): the fuller name, unless the writer has
+     changed a name or agency in it. */
+  const setName = (members: ReviewAgent[]): string => {
+    const k = members[0];
+    const edited = members.some((m) => { const o = originals.get(m.id); return !!o && (o.name !== m.name || o.agency !== m.agency); });
+    return fullerIdentity(members, k, edited).name || k.agency || "this agent";
+  };
   const renderReconcileCard = (leaderId: string, members: ReviewAgent[]) => {
-    const keeper = members[0];
     const res = reconciled[leaderId] ?? null;
     const snap = reconcileSnapRef.current[leaderId];
     const memberIds = new Set(members.map((m) => m.id));
@@ -453,7 +466,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
       <ReconcileCard
         key={`recon-${leaderId}`}
         setId={leaderId}
-        agentName={keeper.name || keeper.agency || "this agent"}
+        agentName={setName(members)}
         manuscriptTitle=""
         rows={rows}
         defaultKeptId={defaultKeptId}
@@ -500,7 +513,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
             continue;
           }
           units.push({ sort: at(c.leaderId, ...bars.map((b) => b.id)),
-            node: <DupeOpen key={`open-${c.leaderId}`} leader={c.members[0]} members={c.openMembers} bars={bars} queryCount={queryCount} movedCount={movedCount}
+            node: <DupeOpen key={`open-${c.leaderId}`} title={setName(c.openMembers)} leader={c.members[0]} members={c.openMembers} bars={bars} queryCount={queryCount} movedCount={movedCount}
                     onRemove={removeDuplicate} onKeepBoth={() => keepBoth(c.leaderId)} /> });
           placed.add(c.leaderId);
           bars.forEach((b) => placed.add(b.id));

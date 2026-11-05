@@ -102,9 +102,9 @@ test.describe("import date pick (v1.2)", () => {
     expect(await step(page)).toBe("duplicates");
     const set = page.locator('[data-dup-state="open"]');
     await expect(set).toHaveCount(1);
-    /* two rows that each hold one query read as one submission at two stages: "Two rows for Jonah P."
+    /* two rows that each hold one query read as one submission at two stages, headed with the fuller name (v1.2.1)
        (DUP-1 holds that both agents are in the set) */
-    await expect(set).toContainText("Two rows for Jonah P.");
+    await expect(set).toContainText("Two rows for Jonah Petrakis");
     await expect(set).toContainText("12 Aug 2026");
     await expect(set).toContainText("20 Aug 2026");
     await decideDuplicates(page); await next(page);
