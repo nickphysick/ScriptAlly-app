@@ -169,6 +169,11 @@
 .qc152 .qc152-rbtn { all: unset; box-sizing: border-box; cursor: pointer; flex: none; display: inline-flex; align-items: center; gap: 8px; height: 52px; padding: 0 16px 0 18px; border-radius: 26px; font: 600 14.5px/1 var(--sp-serif); white-space: nowrap; }
 /* the offer's second action: smaller, outlined, left of the main button */
 .qc152 .qc152-rbtn.sm { height: 40px; padding: 0 13px; border-radius: 20px; font-size: 13.5px; }
+/* with the second action the three don't fit a 504–540px card: the field keeps its two lines whole on its own row and the
+   two buttons sit beneath it, right-aligned (the refs never draw this case; reported) */
+.qc152 .qc152-rb:has(> .qc152-rbtn.sm) { flex-wrap: wrap; row-gap: 10px; }
+.qc152 .qc152-rb:has(> .qc152-rbtn.sm) > .qc152-rf { flex: 1 1 100%; }
+.qc152 .qc152-rb:has(> .qc152-rbtn.sm) > .qc152-rbtn.sm { margin-left: auto; }
 .qc152 .qc152-rbtn.nv { background: #2a3a52; color: #fff; }
 .qc152 .qc152-rbtn.gh { background: #fff; color: #2a3a52; box-shadow: inset 0 0 0 1.5px #2a3a52; }
 .qc152 .qc152-rbtn:hover { filter: brightness(1.12); }

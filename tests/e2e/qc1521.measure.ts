@@ -221,7 +221,11 @@ for (const vp of SIZES) {
         L.check(`${k}: the first bubble is Query sent`, t.msgs[0]?.title === "Query sent", t.msgs[0]?.title ?? "");
         L.check(`${k}: the last bubble is the latest step (${last})`, t.msgs[t.msgs.length - 1]?.title === last && t.order[t.order.length - 1] === "msg", `${t.msgs[t.msgs.length - 1]?.title} · ${t.order.slice(-2).join(",")}`);
       }
-      L.done(50);
+      /* a step's own recorded materials are its chips (v152 read a `label` the writer never stores, and drew none) */
+      await openCard(page, "fullreq");
+      const chips = await page.evaluate((c) => [...document.querySelectorAll<HTMLElement>(`${c} [data-qc152='msg'][data-status='Full Requested'] [data-qc152='chip']`)].map((e) => e.innerText.trim()), CARD);
+      L.check("fullreq: the request step shows what it recorded (the full and a synopsis)", JSON.stringify(chips) === JSON.stringify(["FULL MANUSCRIPT", "SYNOPSIS"]) || JSON.stringify(chips.map((x) => x.toLowerCase())) === JSON.stringify(["full manuscript", "synopsis"]), JSON.stringify(chips));
+      L.done(51);
     });
 
     test("L3 · colour rule: yours paper; theirs by the reply; no navy and no glyph fill in the thread", async ({ page }) => {

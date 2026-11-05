@@ -1,0 +1,322 @@
+[
+ {
+  "where": "long: population",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "where": "long · Query sent: paper",
+  "ok": false,
+  "detail": "rgb(233, 238, 244) (want rgb(246, 243, 238))"
+ },
+ {
+  "where": "long · Query sent: no navy inside",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "long · Query sent: the glyph box has no fill",
+  "ok": false,
+  "detail": "none 0px"
+ },
+ {
+  "where": "long · Asked for a partial: the Partial Requested tint",
+  "ok": false,
+  "detail": "rgb(250, 247, 242) (want rgb(248, 231, 224))"
+ },
+ {
+  "where": "long · Asked for a partial: no navy inside",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "long · Asked for a partial: the glyph box has no fill",
+  "ok": false,
+  "detail": "none 0px"
+ },
+ {
+  "where": "long · Sent the partial: paper",
+  "ok": false,
+  "detail": "rgb(233, 238, 244) (want rgb(246, 243, 238))"
+ },
+ {
+  "where": "long · Sent the partial: no navy inside",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "long · Sent the partial: the glyph box has no fill",
+  "ok": false,
+  "detail": "none 0px"
+ },
+ {
+  "where": "long · Asked for the full: the Full Requested tint",
+  "ok": false,
+  "detail": "rgb(250, 247, 242) (want rgb(231, 237, 244))"
+ },
+ {
+  "where": "long · Asked for the full: no navy inside",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "long · Asked for the full: the glyph box has no fill",
+  "ok": false,
+  "detail": "none 0px"
+ },
+ {
+  "where": "long · Sent the full: paper",
+  "ok": false,
+  "detail": "rgb(233, 238, 244) (want rgb(246, 243, 238))"
+ },
+ {
+  "where": "long · Sent the full: no navy inside",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "long · Sent the full: the glyph box has no fill",
+  "ok": false,
+  "detail": "none 0px"
+ },
+ {
+  "where": "rr: population",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "where": "rr · Query sent: paper",
+  "ok": false,
+  "detail": "rgb(233, 238, 244) (want rgb(246, 243, 238))"
+ },
+ {
+  "where": "rr · Query sent: no navy inside",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "rr · Query sent: the glyph box has no fill",
+  "ok": false,
+  "detail": "none 0px"
+ },
+ {
+  "where": "rr · Asked for the full: the Full Requested tint",
+  "ok": false,
+  "detail": "rgb(250, 247, 242) (want rgb(231, 237, 244))"
+ },
+ {
+  "where": "rr · Asked for the full: no navy inside",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "rr · Asked for the full: the glyph box has no fill",
+  "ok": false,
+  "detail": "none 0px"
+ },
+ {
+  "where": "rr · Sent the full: paper",
+  "ok": false,
+  "detail": "rgb(233, 238, 244) (want rgb(246, 243, 238))"
+ },
+ {
+  "where": "rr · Sent the full: no navy inside",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "rr · Sent the full: the glyph box has no fill",
+  "ok": false,
+  "detail": "none 0px"
+ },
+ {
+  "where": "rr · Asked for a revision: the Revise & Resubmit tint",
+  "ok": false,
+  "detail": "rgb(250, 247, 242) (want rgb(231, 237, 244))"
+ },
+ {
+  "where": "rr · Asked for a revision: no navy inside",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "rr · Asked for a revision: the glyph box has no fill",
+  "ok": false,
+  "detail": "none 0px"
+ },
+ {
+  "where": "passed: population",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "where": "passed · Query sent: paper",
+  "ok": false,
+  "detail": "rgb(233, 238, 244) (want rgb(246, 243, 238))"
+ },
+ {
+  "where": "passed · Query sent: no navy inside",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "passed · Query sent: the glyph box has no fill",
+  "ok": false,
+  "detail": "none 0px"
+ },
+ {
+  "where": "passed · Asked for the full: the Full Requested tint",
+  "ok": false,
+  "detail": "rgb(250, 247, 242) (want rgb(231, 237, 244))"
+ },
+ {
+  "where": "passed · Asked for the full: no navy inside",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "passed · Asked for the full: the glyph box has no fill",
+  "ok": false,
+  "detail": "none 0px"
+ },
+ {
+  "where": "passed · Sent the full: paper",
+  "ok": false,
+  "detail": "rgb(233, 238, 244) (want rgb(246, 243, 238))"
+ },
+ {
+  "where": "passed · Sent the full: no navy inside",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "passed · Sent the full: the glyph box has no fill",
+  "ok": false,
+  "detail": "none 0px"
+ },
+ {
+  "where": "passed · Passed: the Rejected tint",
+  "ok": false,
+  "detail": "rgb(250, 247, 242) (want rgb(241, 239, 236))"
+ },
+ {
+  "where": "passed · Passed: no navy inside",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "passed · Passed: the glyph box has no fill",
+  "ok": false,
+  "detail": "none 0px"
+ },
+ {
+  "where": "offertold: population",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "where": "offertold · Query sent: paper",
+  "ok": false,
+  "detail": "rgb(233, 238, 244) (want rgb(246, 243, 238))"
+ },
+ {
+  "where": "offertold · Query sent: no navy inside",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "offertold · Query sent: the glyph box has no fill",
+  "ok": false,
+  "detail": "none 0px"
+ },
+ {
+  "where": "offertold · Made an offer: the Offer tint",
+  "ok": false,
+  "detail": "rgb(250, 247, 242) (want rgb(229, 237, 223))"
+ },
+ {
+  "where": "offertold · Made an offer: no navy inside",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "offertold · Made an offer: the glyph box has no fill",
+  "ok": false,
+  "detail": "none 0px"
+ },
+ {
+  "where": "materials: population",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "where": "materials · Query sent: paper",
+  "ok": false,
+  "detail": "rgb(233, 238, 244) (want rgb(246, 243, 238))"
+ },
+ {
+  "where": "materials · Query sent: no navy inside",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "materials · Query sent: the glyph box has no fill",
+  "ok": false,
+  "detail": "none 0px"
+ },
+ {
+  "where": "materials · Asked for a partial: the Partial Requested tint",
+  "ok": false,
+  "detail": "rgb(250, 247, 242) (want rgb(248, 231, 224))"
+ },
+ {
+  "where": "materials · Asked for a partial: no navy inside",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "materials · Asked for a partial: the glyph box has no fill",
+  "ok": false,
+  "detail": "none 0px"
+ },
+ {
+  "where": "withdrew: population",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "where": "withdrew · Query sent: paper",
+  "ok": false,
+  "detail": "rgb(233, 238, 244) (want rgb(246, 243, 238))"
+ },
+ {
+  "where": "withdrew · Query sent: no navy inside",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "withdrew · Query sent: the glyph box has no fill",
+  "ok": false,
+  "detail": "none 0px"
+ },
+ {
+  "where": "withdrew · Withdrew the query: paper",
+  "ok": false,
+  "detail": "rgb(233, 238, 244) (want rgb(246, 243, 238))"
+ },
+ {
+  "where": "withdrew · Withdrew the query: no navy inside",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "withdrew · Withdrew the query: the glyph box has no fill",
+  "ok": false,
+  "detail": "none 0px"
+ },
+ {
+  "where": "every agent tint in the table was seen",
+  "ok": true,
+  "detail": "[\"Partial Requested\",\"Full Requested\",\"Revise & Resubmit\",\"Rejected\",\"Offer\"]"
+ }
+]

@@ -135,7 +135,7 @@ import { dayLabel as dayLabel152, sideOf as side152, type ReplyAct, type ThreadS
 import { getActivityTime } from "../lib/queryDerivation";
 import { qc152DevFree } from "../lib/qc152ReviewAid";
 import { packageLockStamp } from "../lib/saveQueryEdits";
-import { commitPlan, planDetails, planFix, planRecord, readFeed, readLog, RECORD_STATUS, TOLD_TYPE, type FixStep, type RecordKind, type StepMaterial } from "../lib/qc152Write";
+import { commitPlan, planDetails, planFix, planRecord, readFeed, readLog, RECORD_STATUS, storedLabels, TOLD_TYPE, type FixStep, type RecordKind, type StepMaterial } from "../lib/qc152Write";
 import { QcDetails152, QcFix152, QcFork152, type FixRow, type PkgChoice } from "./queries/centre/QcFix152";
 import { askChips, readMat } from "../lib/qcThread152";
 import type { LogStep, StepType } from "../lib/qcLogic152";
@@ -6018,8 +6018,11 @@ export const Queries: React.FC<{
       const stepChips = (activityId?: string) => {
         const m = activityId ? evById.get(activityId)?.materials : undefined;
         if (!Array.isArray(m)) return [];
-        return m.map((x) => (typeof x === "string" ? x : String((x as { label?: unknown })?.label ?? ""))).filter(Boolean)
-          .map((label) => ({ label, detail: free ? label : label }));
+        /* v152.1 — a step's recorded materials are maps ({ kind, name, unit, n, versionId }: lib/qc152Write storeMats); v152
+           read a `label` they never carry, so every step's own materials drew nothing. Read them as the writer wrote them. */
+        const vs = bookVersionsOf(ms);
+        return storedLabels(m, { free, versionName: (id) => vs.find((v) => v.id === id)?.name ?? null, originalId: vs[0]?.id ?? null })
+          .map((label) => ({ label, detail: label }));
       };
       /* v152.1 §2.6 — what the agent said: the step's own `replyNote`; on an older query, the one text the query holds for
          that kind of reply, shown on the LATEST step of that kind only (display-only, Nick: rrNotes, rejectionFeedbackText,

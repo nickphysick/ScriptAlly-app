@@ -2,7 +2,7 @@
  {
   "where": "population: Queried rows with a cap",
   "ok": true,
-  "detail": "45"
+  "detail": "46"
  },
  {
   "where": "every Queried row's cap is #f2ebe0",
@@ -12,7 +12,7 @@
  {
   "where": "population: the list page swept",
   "ok": true,
-  "detail": "10301"
+  "detail": "10851"
  },
  {
   "where": "no element on the list computes to #e6d9c6",
@@ -42,7 +42,7 @@
  {
   "where": "population: Queried bars, watching and not",
   "ok": true,
-  "detail": "[\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"upcoming\",\"upcoming\",\"upcoming\",\"watch\",\"watch\",\"watch\",\"watch\",\"nodate\",\"nodate\",\"nodate\",\"nodate\",\"nodate\",\"nodate\"]"
+  "detail": "[\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"overdue\",\"upcoming\",\"upcoming\",\"upcoming\",\"watch\",\"watch\",\"watch\",\"watch\",\"watch\",\"nodate\",\"nodate\",\"nodate\",\"nodate\",\"nodate\",\"nodate\"]"
  },
  {
   "where": "Queried bars are #f2ebe0",

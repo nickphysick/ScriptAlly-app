@@ -27,7 +27,7 @@
  {
   "where": "rr · Queried: its title names it, and is on screen (Query sent)",
   "ok": true,
-  "detail": "Query sent / seen: Query sent 28 JUL COVERING LETTER by email"
+  "detail": "Query sent / seen: Query sent 28 JUL QUERY LETTER SYNOPSIS 10 PAGES by email"
  },
  {
   "where": "rr · Full Requested: its title names it, and is on screen (Asked for the full)",
@@ -47,7 +47,7 @@
  {
   "where": "passed · Queried: its title names it, and is on screen (Query sent)",
   "ok": true,
-  "detail": "Query sent / seen: Query sent 7 AUG COVERING LETTER by email"
+  "detail": "Query sent / seen: Query sent 7 AUG QUERY LETTER SYNOPSIS 10 PAGES by email"
  },
  {
   "where": "passed · Full Requested: its title names it, and is on screen (Asked for the full)",
@@ -67,7 +67,7 @@
  {
   "where": "withdrew · Queried: its title names it, and is on screen (Query sent)",
   "ok": true,
-  "detail": "Query sent / seen: Query sent 6 SEP COVERING LETTER by email"
+  "detail": "Query sent / seen: Query sent 6 SEP QUERY LETTER SYNOPSIS 10 PAGES by email"
  },
  {
   "where": "withdrew · Withdrawn: its title names it, and is on screen (You withdrew)",
@@ -77,7 +77,7 @@
  {
   "where": "offertold · Queried: its title names it, and is on screen (Query sent)",
   "ok": true,
-  "detail": "Query sent / seen: Query sent 17 AUG COVERING LETTER by email"
+  "detail": "Query sent / seen: Query sent 17 AUG QUERY LETTER SYNOPSIS 10 PAGES by email"
  },
  {
   "where": "offertold · Offer: its title names it, and is on screen (Made an offer)",
@@ -92,7 +92,7 @@
  {
   "where": "seven · Queried: its title names it, and is on screen (Query sent)",
   "ok": true,
-  "detail": "Query sent / seen: Query sent 9 MAY COVERING LETTER by email ✎ Edit"
+  "detail": "Query sent / seen: Query sent 9 MAY QUERY LETTER SYNOPSIS 10 PAGES by email ✎ E"
  },
  {
   "where": "seven · nudge: its title names it, and is on screen (You nudged Seth)",
@@ -127,7 +127,7 @@
  {
   "where": "undated · Queried: its title names it, and is on screen (Query sent)",
   "ok": true,
-  "detail": "Query sent / seen: Query sent 17 AUG COVERING LETTER by email ✎ Edit"
+  "detail": "Query sent / seen: Query sent 17 AUG QUERY LETTER SYNOPSIS 10 PAGES by email ✎ "
  },
  {
   "where": "undated · Partial Requested: its title names it, and is on screen (Asked for a partial)",

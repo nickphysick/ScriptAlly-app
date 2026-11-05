@@ -132,7 +132,7 @@
  {
   "where": "rr: no \"Waiting on\", \"No reply\" or \"today\"",
   "ok": true,
-  "detail": "Query sent 28 JUL COVERING LETTER by email 30 DAYS RV Asked for the full 27 AUG 20 DAYS Sent the full 16 SEP 40 DAYS RV Asked for a revision (R&R) 26 OCT “Loved"
+  "detail": "Query sent 28 JUL QUERY LETTER SYNOPSIS 10 PAGES by email 30 DAYS RV Asked for the full 27 AUG 20 DAYS Sent the full 16 SEP 40 DAYS RV Asked for a revision (R&R"
  },
  {
   "where": "rr: no Day 1 divider",
@@ -157,7 +157,7 @@
  {
   "where": "passed: no \"Waiting on\", \"No reply\" or \"today\"",
   "ok": true,
-  "detail": "Query sent 7 AUG COVERING LETTER by email 50 DAYS PV Asked for the full 26 SEP 10 DAYS Sent the full 6 OCT 20 DAYS PV Passed 26 OCT “Beautifully written, but I "
+  "detail": "Query sent 7 AUG QUERY LETTER SYNOPSIS 10 PAGES by email 50 DAYS PV Asked for the full 26 SEP 10 DAYS Sent the full 6 OCT 20 DAYS PV Passed 26 OCT “Beautifully "
  },
  {
   "where": "passed: no Day 1 divider",
@@ -182,7 +182,7 @@
  {
   "where": "withdrew: no \"Waiting on\", \"No reply\" or \"today\"",
   "ok": true,
-  "detail": "Query sent 6 SEP COVERING LETTER by email 55 DAYS You withdrew 31 OCT an offer elsewhere"
+  "detail": "Query sent 6 SEP QUERY LETTER SYNOPSIS 10 PAGES by email 55 DAYS You withdrew 31 OCT an offer elsewhere"
  },
  {
   "where": "withdrew: no Day 1 divider",
@@ -207,7 +207,7 @@
  {
   "where": "offertold: no \"Waiting on\", \"No reply\" or \"today\"",
   "ok": true,
-  "detail": "Query sent 17 AUG COVERING LETTER by email 70 DAYS TV Made an offer 26 OCT “I’d love to represent this book.” 1 DAY Told 6 other agents 27 OCT offer deadline 13"
+  "detail": "Query sent 17 AUG QUERY LETTER SYNOPSIS 10 PAGES by email 70 DAYS TV Made an offer 26 OCT “I’d love to represent this book.” 1 DAY Told 6 other agents 27 OCT of"
  },
  {
   "where": "offertold: no Day 1 divider",
@@ -232,7 +232,7 @@
  {
   "where": "seven: no \"Waiting on\", \"No reply\" or \"today\"",
   "ok": true,
-  "detail": "Query sent 9 MAY COVERING LETTER by email ✎ Edit 30 DAYS Following up Query sent · 9 May You nudged Seth 8 JUN by email 20 DAYS Following up Query sent · 9 May "
+  "detail": "Query sent 9 MAY QUERY LETTER SYNOPSIS 10 PAGES by email ✎ Edit 30 DAYS Following up Query sent · 9 May You nudged Seth 8 JUN by email 20 DAYS Following up Quer"
  },
  {
   "where": "seven: no Day 1 divider",
@@ -248,5 +248,10 @@
   "where": "seven: the last bubble is the latest step (Sent the full)",
   "ok": true,
   "detail": "Sent the full · wait,msg"
+ },
+ {
+  "where": "fullreq: the request step shows what it recorded (the full and a synopsis)",
+  "ok": true,
+  "detail": "[\"FULL MANUSCRIPT\",\"SYNOPSIS\"]"
  }
 ]
