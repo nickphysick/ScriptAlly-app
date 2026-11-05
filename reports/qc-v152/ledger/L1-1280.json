@@ -115,6 +115,16 @@
   "detail": "{\"state\":\"materials\",\"where\":\"you\",\"group\":\"materials\"}"
  },
  {
+  "where": "pkg is agent",
+  "ok": true,
+  "detail": "{\"state\":\"agent\",\"where\":\"agent\",\"group\":\"agent\"}"
+ },
+ {
+  "where": "pkg sits in the agent group",
+  "ok": true,
+  "detail": "{\"state\":\"agent\",\"where\":\"agent\",\"group\":\"agent\"}"
+ },
+ {
   "where": "the banner has the quiet-window setting",
   "ok": true,
   "detail": "no [data-qc152=quiet-setting]"

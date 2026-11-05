@@ -22,7 +22,10 @@ import { classifyMaterial } from "./agentMaterials";
 import type { QueryState } from "./queryState";
 
 const DAY = 86_400_000;
-const days = (a: number, b: number) => Math.round((a - b) / DAY);
+/** whole CALENDAR days from b to a (local midnights): a wait between two dated steps is the days between the dates, never
+ *  the hours rounded — two steps 25 calendar days apart at different times of day must not read 26 */
+const midnight = (ms: number) => { const d = new Date(ms); d.setHours(0, 0, 0, 0); return d.getTime(); };
+const days = (a: number, b: number) => Math.round((midnight(a) - midnight(b)) / DAY);
 /** "16 May", with the year when it is not the year of `nowMs` */
 export function dayLabel(ms: number, nowMs: number): string {
   const d = new Date(ms);

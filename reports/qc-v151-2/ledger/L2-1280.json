@@ -2,20 +2,50 @@
  {
   "where": "population",
   "ok": true,
-  "detail": "[[\"you\",22],[\"agent\",10],[\"quiet\",38],[\"closed\",18]]"
+  "detail": "[[\"offer\",2],[\"materials\",14],[\"nudge\",6],[\"agent\",12],[\"quiet\",36],[\"closed\",18]]"
  },
  {
-  "where": "you: rows share the header's edges ±1",
+  "where": "offer: rows share the header's edges ±1",
   "ok": true,
   "detail": "[]"
  },
  {
-  "where": "you: 0 between rows",
+  "where": "offer: 0 between rows",
   "ok": true,
   "detail": "[0]"
  },
  {
-  "where": "you: outer corners 18 ±1",
+  "where": "offer: outer corners 18 ±1",
+  "ok": true,
+  "detail": "18px 18px 18px 18px"
+ },
+ {
+  "where": "materials: rows share the header's edges ±1",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "materials: 0 between rows",
+  "ok": true,
+  "detail": "[0]"
+ },
+ {
+  "where": "materials: outer corners 18 ±1",
+  "ok": true,
+  "detail": "18px 18px 18px 18px"
+ },
+ {
+  "where": "nudge: rows share the header's edges ±1",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "nudge: 0 between rows",
+  "ok": true,
+  "detail": "[0]"
+ },
+ {
+  "where": "nudge: outer corners 18 ±1",
   "ok": true,
   "detail": "18px 18px 18px 18px"
  },
@@ -65,7 +95,17 @@
   "detail": "18px 18px 18px 18px"
  },
  {
-  "where": "you → agent: 22 ±2",
+  "where": "offer → materials: 22 ±2",
+  "ok": true,
+  "detail": "22.0"
+ },
+ {
+  "where": "materials → nudge: 22 ±2",
+  "ok": true,
+  "detail": "22.0"
+ },
+ {
+  "where": "nudge → agent: 22 ±2",
   "ok": true,
   "detail": "22.0"
  },

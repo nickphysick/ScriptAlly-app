@@ -220,7 +220,8 @@ for (const vp of SIZES) {
         await page.waitForTimeout(500);
         const secs = await page.evaluate(() => [...document.querySelectorAll("[data-qc151='section']")].map((t) => (t.matches("td") ? t.childNodes[0]?.textContent : t.textContent)?.trim() ?? "") /* v151.1: the section's name is a span in its group header */);
         const ok = v === "none" ? secs.length === 0
-          : v === "attention" ? secs.length > 0 && secs.every((x) => ["Your move", "With the agent", "Gone quiet", "Closed"].includes(x))
+          /* re-pointed by v152 §1.5: "Who it's with" is the six states, in their order */
+          : v === "attention" ? secs.length > 0 && secs.every((x) => ["Offers", "Materials requested", "Nudge due", "With the agent", "Gone quiet", "Closed"].includes(x))
           : v === "package" ? secs.length > 0 && secs.every((x) => / package$/.test(x) || x === "Nothing recorded")
           : secs.length > 0;
         L.check(`${v} sections`, ok, secs.join(" | "));

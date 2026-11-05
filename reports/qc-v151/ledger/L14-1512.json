@@ -2,3331 +2,3361 @@
  {
   "where": "load population",
   "ok": true,
-  "detail": "70 rows, 40 overdue in view"
+  "detail": "70 rows, 41 overdue in view"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load thin-q-close",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load seed-query-22",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load msv12-q-1",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load msv12-q-7",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load seed-query-4",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load seed-query-19",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load thin-q-cohort-2",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load thin-q-cohort-1",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load thin-q-cohort-6",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load thin-q-cohort-3",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load thin-q-cohort-5",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
- },
- {
-  "where": "load seed-query-10",
-  "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
- },
- {
-  "where": "load track width",
-  "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load thin-q-cohort-4",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "load seed-query-10",
+  "ok": true,
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
+ },
+ {
+  "where": "load track width",
+  "ok": true,
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load seed-query-ms2-a",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
- },
- {
-  "where": "load seed-query-ms2-b",
-  "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
- },
- {
-  "where": "load track width",
-  "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load rj-nudge",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load thin-q-chase",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
-  "where": "load cor-undo",
+  "where": "load seed-query-ms2-b",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "load cv25-q-10",
+  "ok": true,
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
+ },
+ {
+  "where": "load track width",
+  "ok": true,
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "load cv25-q-05",
+  "ok": true,
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
+ },
+ {
+  "where": "load track width",
+  "ok": true,
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load seed-cal-passed20-q",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load seed-query-6",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
- },
- {
-  "where": "load seed-pkgq-9",
-  "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
- },
- {
-  "where": "load track width",
-  "ok": true,
-  "detail": "9104/744 vs 9104/744"
- },
- {
-  "where": "load seed-query-21",
-  "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
- },
- {
-  "where": "load track width",
-  "ok": true,
-  "detail": "9104/744 vs 9104/744"
- },
- {
-  "where": "load seed-pkgq-10",
-  "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
- },
- {
-  "where": "load track width",
-  "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load seed-pkgq-1",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load seed-pkgq-2",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load seed-query-5",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "load cor-undo",
+  "ok": true,
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
+ },
+ {
+  "where": "load track width",
+  "ok": true,
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load cor-move-b",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load seed-pkgq-7",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
- },
- {
-  "where": "load seed-query-23",
-  "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
- },
- {
-  "where": "load track width",
-  "ok": true,
-  "detail": "9104/744 vs 9104/744"
- },
- {
-  "where": "load cor-pair",
-  "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
- },
- {
-  "where": "load track width",
-  "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load seed-query-3",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load seed-query-7",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load seed-cal-near-q",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
-  "where": "load thin-q-gap-solo",
+  "where": "load cv25-q-11",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "load seed-pkgq-9",
+  "ok": true,
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
+ },
+ {
+  "where": "load track width",
+  "ok": true,
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "load seed-query-21",
+  "ok": true,
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
+ },
+ {
+  "where": "load track width",
+  "ok": true,
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "load seed-pkgq-10",
+  "ok": true,
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
+ },
+ {
+  "where": "load track width",
+  "ok": true,
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "load msv12-q-5",
+  "ok": true,
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
+ },
+ {
+  "where": "load track width",
+  "ok": true,
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load thin-q-remind",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
- },
- {
-  "where": "load seed-query-8",
-  "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
- },
- {
-  "where": "load track width",
-  "ok": true,
-  "detail": "9104/744 vs 9104/744"
- },
- {
-  "where": "load seed-pkgq-4",
-  "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
- },
- {
-  "where": "load track width",
-  "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load seed-query-11",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load msv12-q-2",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load seed-query-2",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "load thin-q-gap-solo",
+  "ok": true,
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "load cor-pair",
+  "ok": true,
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "load track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "load track width",
+  "ok": true,
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag population",
   "ok": true,
-  "detail": "70 rows, 40 overdue in view"
+  "detail": "70 rows, 41 overdue in view"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag thin-q-close",
   "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
+  "detail": "bar 942.1 dot 942.1 today 942.5"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag seed-query-22",
   "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
+  "detail": "bar 942.1 dot 942.1 today 942.5"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag msv12-q-1",
   "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
+  "detail": "bar 942.1 dot 942.1 today 942.5"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag msv12-q-7",
   "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
+  "detail": "bar 942.1 dot 942.1 today 942.5"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag seed-query-4",
   "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
+  "detail": "bar 942.1 dot 942.1 today 942.5"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag seed-query-19",
   "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
+  "detail": "bar 942.1 dot 942.1 today 942.5"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag thin-q-cohort-2",
   "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
+  "detail": "bar 942.1 dot 942.1 today 942.5"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag thin-q-cohort-1",
   "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
+  "detail": "bar 942.1 dot 942.1 today 942.5"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag thin-q-cohort-6",
   "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
+  "detail": "bar 942.1 dot 942.1 today 942.5"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag thin-q-cohort-3",
   "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
+  "detail": "bar 942.1 dot 942.1 today 942.5"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag thin-q-cohort-5",
   "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
+  "detail": "bar 942.1 dot 942.1 today 942.5"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
- },
- {
-  "where": "drag seed-query-10",
-  "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
- },
- {
-  "where": "drag track width",
-  "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag thin-q-cohort-4",
   "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
+  "detail": "bar 942.1 dot 942.1 today 942.5"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "drag seed-query-10",
+  "ok": true,
+  "detail": "bar 942.1 dot 942.1 today 942.5"
+ },
+ {
+  "where": "drag track width",
+  "ok": true,
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag seed-query-ms2-a",
   "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
+  "detail": "bar 942.1 dot 942.1 today 942.5"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
- },
- {
-  "where": "drag seed-query-ms2-b",
-  "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
- },
- {
-  "where": "drag track width",
-  "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag rj-nudge",
   "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
+  "detail": "bar 942.1 dot 942.1 today 942.5"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag thin-q-chase",
   "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
+  "detail": "bar 942.1 dot 942.1 today 942.5"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
-  "where": "drag cor-undo",
+  "where": "drag seed-query-ms2-b",
   "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
+  "detail": "bar 942.1 dot 942.1 today 942.5"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "drag cv25-q-10",
+  "ok": true,
+  "detail": "bar 942.1 dot 942.1 today 942.5"
+ },
+ {
+  "where": "drag track width",
+  "ok": true,
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "drag cv25-q-05",
+  "ok": true,
+  "detail": "bar 942.1 dot 942.1 today 942.5"
+ },
+ {
+  "where": "drag track width",
+  "ok": true,
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag seed-cal-passed20-q",
   "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
+  "detail": "bar 942.1 dot 942.1 today 942.5"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag seed-query-6",
   "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
+  "detail": "bar 942.1 dot 942.1 today 942.5"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
- },
- {
-  "where": "drag seed-pkgq-9",
-  "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
- },
- {
-  "where": "drag track width",
-  "ok": true,
-  "detail": "9104/744 vs 9104/744"
- },
- {
-  "where": "drag seed-query-21",
-  "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
- },
- {
-  "where": "drag track width",
-  "ok": true,
-  "detail": "9104/744 vs 9104/744"
- },
- {
-  "where": "drag seed-pkgq-10",
-  "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
- },
- {
-  "where": "drag track width",
-  "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag seed-pkgq-1",
   "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
+  "detail": "bar 942.1 dot 942.1 today 942.5"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag seed-pkgq-2",
   "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
+  "detail": "bar 942.1 dot 942.1 today 942.5"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag seed-query-5",
   "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
+  "detail": "bar 942.1 dot 942.1 today 942.5"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "drag cor-undo",
+  "ok": true,
+  "detail": "bar 942.1 dot 942.1 today 942.5"
+ },
+ {
+  "where": "drag track width",
+  "ok": true,
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag cor-move-b",
   "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
+  "detail": "bar 942.1 dot 942.1 today 942.5"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag seed-pkgq-7",
   "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
+  "detail": "bar 942.1 dot 942.1 today 942.5"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
- },
- {
-  "where": "drag seed-query-23",
-  "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
- },
- {
-  "where": "drag track width",
-  "ok": true,
-  "detail": "9104/744 vs 9104/744"
- },
- {
-  "where": "drag cor-pair",
-  "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
- },
- {
-  "where": "drag track width",
-  "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag seed-query-3",
   "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
+  "detail": "bar 942.1 dot 942.1 today 942.5"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag seed-query-7",
   "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
+  "detail": "bar 942.1 dot 942.1 today 942.5"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag seed-cal-near-q",
   "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
+  "detail": "bar 942.1 dot 942.1 today 942.5"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
-  "where": "drag thin-q-gap-solo",
+  "where": "drag cv25-q-11",
   "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
+  "detail": "bar 942.1 dot 942.1 today 942.5"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "drag seed-pkgq-9",
+  "ok": true,
+  "detail": "bar 942.1 dot 942.1 today 942.5"
+ },
+ {
+  "where": "drag track width",
+  "ok": true,
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "drag seed-query-21",
+  "ok": true,
+  "detail": "bar 942.1 dot 942.1 today 942.5"
+ },
+ {
+  "where": "drag track width",
+  "ok": true,
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "drag seed-pkgq-10",
+  "ok": true,
+  "detail": "bar 942.1 dot 942.1 today 942.5"
+ },
+ {
+  "where": "drag track width",
+  "ok": true,
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "drag msv12-q-5",
+  "ok": true,
+  "detail": "bar 942.1 dot 942.1 today 942.5"
+ },
+ {
+  "where": "drag track width",
+  "ok": true,
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag thin-q-remind",
   "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
+  "detail": "bar 942.1 dot 942.1 today 942.5"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
- },
- {
-  "where": "drag seed-query-8",
-  "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
- },
- {
-  "where": "drag track width",
-  "ok": true,
-  "detail": "9104/744 vs 9104/744"
- },
- {
-  "where": "drag seed-pkgq-4",
-  "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
- },
- {
-  "where": "drag track width",
-  "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag seed-query-11",
   "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
+  "detail": "bar 942.1 dot 942.1 today 942.5"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag msv12-q-2",
   "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
+  "detail": "bar 942.1 dot 942.1 today 942.5"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag seed-query-2",
   "ok": true,
-  "detail": "bar 942.8 dot 942.8 today 942.5"
+  "detail": "bar 942.1 dot 942.1 today 942.5"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "drag thin-q-gap-solo",
+  "ok": true,
+  "detail": "bar 942.1 dot 942.1 today 942.5"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "drag cor-pair",
+  "ok": true,
+  "detail": "bar 942.1 dot 942.1 today 942.5"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "drag track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "drag track width",
+  "ok": true,
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today population",
   "ok": true,
-  "detail": "70 rows, 40 overdue in view"
+  "detail": "70 rows, 41 overdue in view"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today thin-q-close",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today seed-query-22",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today msv12-q-1",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today msv12-q-7",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today seed-query-4",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today seed-query-19",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today thin-q-cohort-2",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today thin-q-cohort-1",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today thin-q-cohort-6",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today thin-q-cohort-3",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today thin-q-cohort-5",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
- },
- {
-  "where": "today seed-query-10",
-  "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
- },
- {
-  "where": "today track width",
-  "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today thin-q-cohort-4",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "today seed-query-10",
+  "ok": true,
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
+ },
+ {
+  "where": "today track width",
+  "ok": true,
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today seed-query-ms2-a",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
- },
- {
-  "where": "today seed-query-ms2-b",
-  "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
- },
- {
-  "where": "today track width",
-  "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today rj-nudge",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today thin-q-chase",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
-  "where": "today cor-undo",
+  "where": "today seed-query-ms2-b",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "today cv25-q-10",
+  "ok": true,
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
+ },
+ {
+  "where": "today track width",
+  "ok": true,
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "today cv25-q-05",
+  "ok": true,
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
+ },
+ {
+  "where": "today track width",
+  "ok": true,
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today seed-cal-passed20-q",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today seed-query-6",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
- },
- {
-  "where": "today seed-pkgq-9",
-  "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
- },
- {
-  "where": "today track width",
-  "ok": true,
-  "detail": "9104/744 vs 9104/744"
- },
- {
-  "where": "today seed-query-21",
-  "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
- },
- {
-  "where": "today track width",
-  "ok": true,
-  "detail": "9104/744 vs 9104/744"
- },
- {
-  "where": "today seed-pkgq-10",
-  "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
- },
- {
-  "where": "today track width",
-  "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today seed-pkgq-1",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today seed-pkgq-2",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today seed-query-5",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "today cor-undo",
+  "ok": true,
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
+ },
+ {
+  "where": "today track width",
+  "ok": true,
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today cor-move-b",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today seed-pkgq-7",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
- },
- {
-  "where": "today seed-query-23",
-  "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
- },
- {
-  "where": "today track width",
-  "ok": true,
-  "detail": "9104/744 vs 9104/744"
- },
- {
-  "where": "today cor-pair",
-  "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
- },
- {
-  "where": "today track width",
-  "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today seed-query-3",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today seed-query-7",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today seed-cal-near-q",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
-  "where": "today thin-q-gap-solo",
+  "where": "today cv25-q-11",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "today seed-pkgq-9",
+  "ok": true,
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
+ },
+ {
+  "where": "today track width",
+  "ok": true,
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "today seed-query-21",
+  "ok": true,
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
+ },
+ {
+  "where": "today track width",
+  "ok": true,
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "today seed-pkgq-10",
+  "ok": true,
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
+ },
+ {
+  "where": "today track width",
+  "ok": true,
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "today msv12-q-5",
+  "ok": true,
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
+ },
+ {
+  "where": "today track width",
+  "ok": true,
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today thin-q-remind",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
- },
- {
-  "where": "today seed-query-8",
-  "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
- },
- {
-  "where": "today track width",
-  "ok": true,
-  "detail": "9104/744 vs 9104/744"
- },
- {
-  "where": "today seed-pkgq-4",
-  "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
- },
- {
-  "where": "today track width",
-  "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today seed-query-11",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today msv12-q-2",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today seed-query-2",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "today thin-q-gap-solo",
+  "ok": true,
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "today cor-pair",
+  "ok": true,
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "today track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "today track width",
+  "ok": true,
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 6w population",
   "ok": true,
-  "detail": "70 rows, 40 overdue in view"
+  "detail": "70 rows, 41 overdue in view"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w thin-q-close",
   "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w seed-query-22",
   "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w msv12-q-1",
   "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w msv12-q-7",
   "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w seed-query-4",
   "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w seed-query-19",
   "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w thin-q-cohort-2",
   "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w thin-q-cohort-1",
   "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w thin-q-cohort-6",
   "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w thin-q-cohort-3",
   "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w thin-q-cohort-5",
   "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
- },
- {
-  "where": "zoom 6w seed-query-10",
-  "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
- },
- {
-  "where": "zoom 6w track width",
-  "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w thin-q-cohort-4",
   "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
+ },
+ {
+  "where": "zoom 6w seed-query-10",
+  "ok": true,
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
+ },
+ {
+  "where": "zoom 6w track width",
+  "ok": true,
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w seed-query-ms2-a",
   "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
- },
- {
-  "where": "zoom 6w seed-query-ms2-b",
-  "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
- },
- {
-  "where": "zoom 6w track width",
-  "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w rj-nudge",
   "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w thin-q-chase",
   "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
-  "where": "zoom 6w cor-undo",
+  "where": "zoom 6w seed-query-ms2-b",
   "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
+ },
+ {
+  "where": "zoom 6w cv25-q-10",
+  "ok": true,
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
+ },
+ {
+  "where": "zoom 6w track width",
+  "ok": true,
+  "detail": "18847/744 vs 18847/744"
+ },
+ {
+  "where": "zoom 6w cv25-q-05",
+  "ok": true,
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
+ },
+ {
+  "where": "zoom 6w track width",
+  "ok": true,
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w seed-cal-passed20-q",
   "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w seed-query-6",
   "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
- },
- {
-  "where": "zoom 6w seed-pkgq-9",
-  "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
- },
- {
-  "where": "zoom 6w track width",
-  "ok": true,
-  "detail": "18423/744 vs 18423/744"
- },
- {
-  "where": "zoom 6w seed-query-21",
-  "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
- },
- {
-  "where": "zoom 6w track width",
-  "ok": true,
-  "detail": "18423/744 vs 18423/744"
- },
- {
-  "where": "zoom 6w seed-pkgq-10",
-  "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
- },
- {
-  "where": "zoom 6w track width",
-  "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w seed-pkgq-1",
   "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w seed-pkgq-2",
   "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w seed-query-5",
   "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
+ },
+ {
+  "where": "zoom 6w cor-undo",
+  "ok": true,
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
+ },
+ {
+  "where": "zoom 6w track width",
+  "ok": true,
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w cor-move-b",
   "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w seed-pkgq-7",
   "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
- },
- {
-  "where": "zoom 6w seed-query-23",
-  "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
- },
- {
-  "where": "zoom 6w track width",
-  "ok": true,
-  "detail": "18423/744 vs 18423/744"
- },
- {
-  "where": "zoom 6w cor-pair",
-  "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
- },
- {
-  "where": "zoom 6w track width",
-  "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w seed-query-3",
   "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w seed-query-7",
   "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w seed-cal-near-q",
   "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
-  "where": "zoom 6w thin-q-gap-solo",
+  "where": "zoom 6w cv25-q-11",
   "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
+ },
+ {
+  "where": "zoom 6w seed-pkgq-9",
+  "ok": true,
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
+ },
+ {
+  "where": "zoom 6w track width",
+  "ok": true,
+  "detail": "18847/744 vs 18847/744"
+ },
+ {
+  "where": "zoom 6w seed-query-21",
+  "ok": true,
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
+ },
+ {
+  "where": "zoom 6w track width",
+  "ok": true,
+  "detail": "18847/744 vs 18847/744"
+ },
+ {
+  "where": "zoom 6w seed-pkgq-10",
+  "ok": true,
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
+ },
+ {
+  "where": "zoom 6w track width",
+  "ok": true,
+  "detail": "18847/744 vs 18847/744"
+ },
+ {
+  "where": "zoom 6w msv12-q-5",
+  "ok": true,
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
+ },
+ {
+  "where": "zoom 6w track width",
+  "ok": true,
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w thin-q-remind",
   "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
- },
- {
-  "where": "zoom 6w seed-query-8",
-  "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
- },
- {
-  "where": "zoom 6w track width",
-  "ok": true,
-  "detail": "18423/744 vs 18423/744"
- },
- {
-  "where": "zoom 6w seed-pkgq-4",
-  "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
- },
- {
-  "where": "zoom 6w track width",
-  "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w seed-query-11",
   "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w msv12-q-2",
   "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w seed-query-2",
   "ok": true,
-  "detail": "bar 1198.8 dot 1198.8 today 1199.2"
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
+ },
+ {
+  "where": "zoom 6w thin-q-gap-solo",
+  "ok": true,
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
+ },
+ {
+  "where": "zoom 6w cor-pair",
+  "ok": true,
+  "detail": "bar 1199.3 dot 1199.3 today 1199.2"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6w track width",
   "ok": true,
-  "detail": "18423/744 vs 18423/744"
+  "detail": "18847/744 vs 18847/744"
+ },
+ {
+  "where": "zoom 6w track width",
+  "ok": true,
+  "detail": "18847/744 vs 18847/744"
  },
  {
   "where": "zoom 6m population",
   "ok": true,
-  "detail": "70 rows, 40 overdue in view"
+  "detail": "70 rows, 41 overdue in view"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m thin-q-close",
   "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
+  "detail": "bar 1075.0 dot 1075.1 today 1075.2"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m seed-query-22",
   "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
+  "detail": "bar 1075.0 dot 1075.1 today 1075.2"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m msv12-q-1",
   "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
+  "detail": "bar 1075.1 dot 1075.1 today 1075.2"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m msv12-q-7",
   "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
+  "detail": "bar 1075.1 dot 1075.1 today 1075.2"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m seed-query-4",
   "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
+  "detail": "bar 1075.1 dot 1075.1 today 1075.2"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m seed-query-19",
   "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
+  "detail": "bar 1075.0 dot 1075.1 today 1075.2"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m thin-q-cohort-2",
   "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
+  "detail": "bar 1075.0 dot 1075.1 today 1075.2"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m thin-q-cohort-1",
   "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
+  "detail": "bar 1075.0 dot 1075.1 today 1075.2"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m thin-q-cohort-6",
   "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
+  "detail": "bar 1075.0 dot 1075.1 today 1075.2"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m thin-q-cohort-3",
   "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
+  "detail": "bar 1075.0 dot 1075.1 today 1075.2"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m thin-q-cohort-5",
   "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
+  "detail": "bar 1075.0 dot 1075.1 today 1075.2"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
- },
- {
-  "where": "zoom 6m seed-query-10",
-  "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
- },
- {
-  "where": "zoom 6m track width",
-  "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m thin-q-cohort-4",
   "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
+  "detail": "bar 1075.1 dot 1075.1 today 1075.2"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
+ },
+ {
+  "where": "zoom 6m seed-query-10",
+  "ok": true,
+  "detail": "bar 1075.1 dot 1075.1 today 1075.2"
+ },
+ {
+  "where": "zoom 6m track width",
+  "ok": true,
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m seed-query-ms2-a",
   "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
+  "detail": "bar 1075.0 dot 1075.1 today 1075.2"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
- },
- {
-  "where": "zoom 6m seed-query-ms2-b",
-  "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
- },
- {
-  "where": "zoom 6m track width",
-  "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m rj-nudge",
   "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
+  "detail": "bar 1075.0 dot 1075.1 today 1075.2"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m thin-q-chase",
   "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
+  "detail": "bar 1075.0 dot 1075.1 today 1075.2"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
-  "where": "zoom 6m cor-undo",
+  "where": "zoom 6m seed-query-ms2-b",
   "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
+  "detail": "bar 1075.0 dot 1075.1 today 1075.2"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
+ },
+ {
+  "where": "zoom 6m cv25-q-10",
+  "ok": true,
+  "detail": "bar 1075.0 dot 1075.1 today 1075.2"
+ },
+ {
+  "where": "zoom 6m track width",
+  "ok": true,
+  "detail": "5118/744 vs 5118/744"
+ },
+ {
+  "where": "zoom 6m cv25-q-05",
+  "ok": true,
+  "detail": "bar 1075.0 dot 1075.1 today 1075.2"
+ },
+ {
+  "where": "zoom 6m track width",
+  "ok": true,
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m seed-cal-passed20-q",
   "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
+  "detail": "bar 1075.0 dot 1075.1 today 1075.2"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m seed-query-6",
   "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
+  "detail": "bar 1075.0 dot 1075.1 today 1075.2"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
- },
- {
-  "where": "zoom 6m seed-pkgq-9",
-  "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
- },
- {
-  "where": "zoom 6m track width",
-  "ok": true,
-  "detail": "5110/744 vs 5110/744"
- },
- {
-  "where": "zoom 6m seed-query-21",
-  "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
- },
- {
-  "where": "zoom 6m track width",
-  "ok": true,
-  "detail": "5110/744 vs 5110/744"
- },
- {
-  "where": "zoom 6m seed-pkgq-10",
-  "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
- },
- {
-  "where": "zoom 6m track width",
-  "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m seed-pkgq-1",
   "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
+  "detail": "bar 1075.0 dot 1075.1 today 1075.2"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m seed-pkgq-2",
   "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
+  "detail": "bar 1075.0 dot 1075.1 today 1075.2"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m seed-query-5",
   "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
+  "detail": "bar 1075.1 dot 1075.1 today 1075.2"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
+ },
+ {
+  "where": "zoom 6m cor-undo",
+  "ok": true,
+  "detail": "bar 1075.0 dot 1075.1 today 1075.2"
+ },
+ {
+  "where": "zoom 6m track width",
+  "ok": true,
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m cor-move-b",
   "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
+  "detail": "bar 1075.0 dot 1075.1 today 1075.2"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m seed-pkgq-7",
   "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
+  "detail": "bar 1075.0 dot 1075.1 today 1075.2"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
- },
- {
-  "where": "zoom 6m seed-query-23",
-  "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
- },
- {
-  "where": "zoom 6m track width",
-  "ok": true,
-  "detail": "5110/744 vs 5110/744"
- },
- {
-  "where": "zoom 6m cor-pair",
-  "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
- },
- {
-  "where": "zoom 6m track width",
-  "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m seed-query-3",
   "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
+  "detail": "bar 1075.1 dot 1075.1 today 1075.2"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m seed-query-7",
   "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
+  "detail": "bar 1075.0 dot 1075.1 today 1075.2"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m seed-cal-near-q",
   "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
+  "detail": "bar 1075.1 dot 1075.1 today 1075.2"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
-  "where": "zoom 6m thin-q-gap-solo",
+  "where": "zoom 6m cv25-q-11",
   "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
+  "detail": "bar 1075.0 dot 1075.1 today 1075.2"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
+ },
+ {
+  "where": "zoom 6m seed-pkgq-9",
+  "ok": true,
+  "detail": "bar 1075.0 dot 1075.1 today 1075.2"
+ },
+ {
+  "where": "zoom 6m track width",
+  "ok": true,
+  "detail": "5118/744 vs 5118/744"
+ },
+ {
+  "where": "zoom 6m seed-query-21",
+  "ok": true,
+  "detail": "bar 1075.0 dot 1075.1 today 1075.2"
+ },
+ {
+  "where": "zoom 6m track width",
+  "ok": true,
+  "detail": "5118/744 vs 5118/744"
+ },
+ {
+  "where": "zoom 6m seed-pkgq-10",
+  "ok": true,
+  "detail": "bar 1075.1 dot 1075.1 today 1075.2"
+ },
+ {
+  "where": "zoom 6m track width",
+  "ok": true,
+  "detail": "5118/744 vs 5118/744"
+ },
+ {
+  "where": "zoom 6m msv12-q-5",
+  "ok": true,
+  "detail": "bar 1075.1 dot 1075.1 today 1075.2"
+ },
+ {
+  "where": "zoom 6m track width",
+  "ok": true,
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m thin-q-remind",
   "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
+  "detail": "bar 1075.0 dot 1075.1 today 1075.2"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
- },
- {
-  "where": "zoom 6m seed-query-8",
-  "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
- },
- {
-  "where": "zoom 6m track width",
-  "ok": true,
-  "detail": "5110/744 vs 5110/744"
- },
- {
-  "where": "zoom 6m seed-pkgq-4",
-  "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
- },
- {
-  "where": "zoom 6m track width",
-  "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m seed-query-11",
   "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
+  "detail": "bar 1075.1 dot 1075.1 today 1075.2"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m msv12-q-2",
   "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
+  "detail": "bar 1075.1 dot 1075.1 today 1075.2"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m seed-query-2",
   "ok": true,
-  "detail": "bar 1074.9 dot 1074.9 today 1075.2"
+  "detail": "bar 1075.0 dot 1075.1 today 1075.2"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
+ },
+ {
+  "where": "zoom 6m thin-q-gap-solo",
+  "ok": true,
+  "detail": "bar 1075.0 dot 1075.1 today 1075.2"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
+ },
+ {
+  "where": "zoom 6m cor-pair",
+  "ok": true,
+  "detail": "bar 1075.1 dot 1075.1 today 1075.2"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 6m track width",
   "ok": true,
-  "detail": "5110/744 vs 5110/744"
+  "detail": "5118/744 vs 5118/744"
+ },
+ {
+  "where": "zoom 6m track width",
+  "ok": true,
+  "detail": "5118/744 vs 5118/744"
  },
  {
   "where": "zoom 3m population",
   "ok": true,
-  "detail": "70 rows, 40 overdue in view"
+  "detail": "70 rows, 41 overdue in view"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m thin-q-close",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m seed-query-22",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m msv12-q-1",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m msv12-q-7",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m seed-query-4",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m seed-query-19",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m thin-q-cohort-2",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m thin-q-cohort-1",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m thin-q-cohort-6",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m thin-q-cohort-3",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m thin-q-cohort-5",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
- },
- {
-  "where": "zoom 3m seed-query-10",
-  "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
- },
- {
-  "where": "zoom 3m track width",
-  "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m thin-q-cohort-4",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "zoom 3m seed-query-10",
+  "ok": true,
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
+ },
+ {
+  "where": "zoom 3m track width",
+  "ok": true,
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m seed-query-ms2-a",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
- },
- {
-  "where": "zoom 3m seed-query-ms2-b",
-  "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
- },
- {
-  "where": "zoom 3m track width",
-  "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m rj-nudge",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m thin-q-chase",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
-  "where": "zoom 3m cor-undo",
+  "where": "zoom 3m seed-query-ms2-b",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "zoom 3m cv25-q-10",
+  "ok": true,
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
+ },
+ {
+  "where": "zoom 3m track width",
+  "ok": true,
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "zoom 3m cv25-q-05",
+  "ok": true,
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
+ },
+ {
+  "where": "zoom 3m track width",
+  "ok": true,
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m seed-cal-passed20-q",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m seed-query-6",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
- },
- {
-  "where": "zoom 3m seed-pkgq-9",
-  "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
- },
- {
-  "where": "zoom 3m track width",
-  "ok": true,
-  "detail": "9104/744 vs 9104/744"
- },
- {
-  "where": "zoom 3m seed-query-21",
-  "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
- },
- {
-  "where": "zoom 3m track width",
-  "ok": true,
-  "detail": "9104/744 vs 9104/744"
- },
- {
-  "where": "zoom 3m seed-pkgq-10",
-  "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
- },
- {
-  "where": "zoom 3m track width",
-  "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m seed-pkgq-1",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m seed-pkgq-2",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m seed-query-5",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "zoom 3m cor-undo",
+  "ok": true,
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
+ },
+ {
+  "where": "zoom 3m track width",
+  "ok": true,
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m cor-move-b",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m seed-pkgq-7",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
- },
- {
-  "where": "zoom 3m seed-query-23",
-  "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
- },
- {
-  "where": "zoom 3m track width",
-  "ok": true,
-  "detail": "9104/744 vs 9104/744"
- },
- {
-  "where": "zoom 3m cor-pair",
-  "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
- },
- {
-  "where": "zoom 3m track width",
-  "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m seed-query-3",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m seed-query-7",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m seed-cal-near-q",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
-  "where": "zoom 3m thin-q-gap-solo",
+  "where": "zoom 3m cv25-q-11",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "zoom 3m seed-pkgq-9",
+  "ok": true,
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
+ },
+ {
+  "where": "zoom 3m track width",
+  "ok": true,
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "zoom 3m seed-query-21",
+  "ok": true,
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
+ },
+ {
+  "where": "zoom 3m track width",
+  "ok": true,
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "zoom 3m seed-pkgq-10",
+  "ok": true,
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
+ },
+ {
+  "where": "zoom 3m track width",
+  "ok": true,
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "zoom 3m msv12-q-5",
+  "ok": true,
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
+ },
+ {
+  "where": "zoom 3m track width",
+  "ok": true,
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m thin-q-remind",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
- },
- {
-  "where": "zoom 3m seed-query-8",
-  "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
- },
- {
-  "where": "zoom 3m track width",
-  "ok": true,
-  "detail": "9104/744 vs 9104/744"
- },
- {
-  "where": "zoom 3m seed-pkgq-4",
-  "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
- },
- {
-  "where": "zoom 3m track width",
-  "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m seed-query-11",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m msv12-q-2",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m seed-query-2",
   "ok": true,
-  "detail": "bar 1112.8 dot 1112.8 today 1112.4"
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "zoom 3m thin-q-gap-solo",
+  "ok": true,
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "zoom 3m cor-pair",
+  "ok": true,
+  "detail": "bar 1112.1 dot 1112.1 today 1112.4"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
  },
  {
   "where": "zoom 3m track width",
   "ok": true,
-  "detail": "9104/744 vs 9104/744"
+  "detail": "9120/744 vs 9120/744"
+ },
+ {
+  "where": "zoom 3m track width",
+  "ok": true,
+  "detail": "9120/744 vs 9120/744"
  }
 ]

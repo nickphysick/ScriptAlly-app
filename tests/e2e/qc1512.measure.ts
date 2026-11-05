@@ -183,13 +183,15 @@ for (const vp of SIZES) {
       }));
       await open(page, vp);
       const who = await heads();
-      const WHO: Record<string, string> = { you: NAVY, quiet: BLUE, agent: STONE, closed: FADED };
+      /* re-pointed by v152 §1.1: the six states; Gone quiet's title cell is a gradient (QC152 L2 holds it), so its colour is clear */
+      const WHO: Record<string, string> = { offer: NAVY, materials: NAVY, nudge: BLUE, agent: STONE, quiet: "rgba(0, 0, 0, 0)", closed: FADED };
       L.check("who: population", who.length >= 3, JSON.stringify(who.map((x) => x.k)));
       for (const h of who) L.check(`who · ${h.label}`, WHO[h.k] === h.bg && (h.bg === NAVY ? h.fg === WHITE : h.fg !== WHITE), `${h.bg} ${h.fg}`);
       await open(page, vp, { group: "action" });
       const na = await heads();
-      const ORDER = ["Answer the offer", "Send your full", "Send your partial", "Send your revision", "Nudge", "Reply due soon", "Waiting to hear", "Nothing to do"];
-      const NA: Record<string, string> = { "Answer the offer": NAVY, "Send your full": NAVY, "Send your partial": NAVY, "Send your revision": NAVY, "Nudge": BLUE, "Reply due soon": STONE, "Waiting to hear": STONE, "Nothing to do": FADED };
+      /* re-pointed by v152 §1.5: Gone quiet's next action is "Close it", in its own gradient (clear here) */
+      const ORDER = ["Answer the offer", "Send your full", "Send your partial", "Send your revision", "Nudge", "Reply due soon", "Waiting to hear", "Close it", "Nothing to do"];
+      const NA: Record<string, string> = { "Answer the offer": NAVY, "Send your full": NAVY, "Send your partial": NAVY, "Send your revision": NAVY, "Nudge": BLUE, "Reply due soon": STONE, "Waiting to hear": STONE, "Close it": "rgba(0, 0, 0, 0)", "Nothing to do": FADED };
       L.check("next action: population", na.length >= 3, JSON.stringify(na.map((x) => x.label)));
       L.check("next action: in the brief's order", na.every((h, i) => i === 0 || ORDER.indexOf(h.label) > ORDER.indexOf(na[i - 1].label)) && na.every((h) => ORDER.includes(h.label)), JSON.stringify(na.map((x) => x.label)));
       for (const h of na) L.check(`next action · ${h.label}`, NA[h.label] === h.bg, h.bg);
@@ -218,7 +220,8 @@ for (const vp of SIZES) {
       }));
       const by = (w: string) => r.rows.filter((x) => x.w === w);
       L.check("population", by("you").length > 0 && by("quiet").length > 0 && by("agent").length > 0 && by("closed").length > 0, JSON.stringify(["you", "quiet", "agent", "closed"].map((w) => by(w).length)));
-      L.check("Your move rows: one navy tag, white text, 20 tall", by("you").every((x) => x.n === 1 && x.text === "Your move" && x.bg === NAVY && x.fg === WHITE && Math.abs(x.h - 20) <= 1), JSON.stringify(by("you").filter((x) => !(x.n === 1 && x.bg === NAVY)).slice(0, 2)));
+      /* re-pointed by v152 §1.5: Your move holds Nudge due too, whose tag is "Nudge due" in the light blue */
+      L.check("Your move rows: one tag, 20 tall — navy Your move, or light-blue Nudge due", by("you").every((x) => x.n === 1 && Math.abs(x.h - 20) <= 1 && ((x.text === "Your move" && x.bg === NAVY && x.fg === WHITE) || (x.text === "Nudge due" && x.bg === "rgb(197, 208, 221)" && x.fg !== WHITE))), JSON.stringify(by("you").filter((x) => !(x.n === 1)).slice(0, 2)));
       L.check("Gone quiet rows: one outlined tag", by("quiet").every((x) => x.n === 1 && x.text === "Gone quiet" && x.bg === "rgba(0, 0, 0, 0)" && /rgb\(207, 197, 183\)/.test(x.sh)), JSON.stringify(by("quiet").slice(0, 2)));
       L.check("With the agent and Closed rows: no tag", [...by("agent"), ...by("closed")].every((x) => x.n === 0), `${[...by("agent"), ...by("closed")].filter((x) => x.n).length} tagged`);
       L.check("no With column", !r.withCol, "");
@@ -281,8 +284,9 @@ for (const vp of SIZES) {
       L.check("population", by("you").length > 0 && by("quiet").length > 0, JSON.stringify(["you", "quiet", "agent", "closed"].map((w) => by(w).length)));
       const navy = rows.filter((x) => x.btn?.tone === "navy"), nudge = rows.filter((x) => x.btn?.tone === "nudge");
       L.check("navy buttons: navy, white text", navy.length > 0 && navy.every((x) => x.btn!.bg === NAVY && x.btn!.fg === WHITE), JSON.stringify(navy.slice(0, 2)));
-      L.check("Nudge: white, navy text, outlined #c9cfd8", nudge.length > 0 && nudge.every((x) => x.btn!.label === "Nudge" && x.btn!.bg === WHITE && x.btn!.fg === NAVY && /rgb\(201, 207, 216\)/.test(x.btn!.sh)), JSON.stringify(nudge.slice(0, 2)));
-      L.check("every Your move row has a button; gone quiet's is Nudge", by("you").every((x) => !!x.btn) && by("quiet").every((x) => x.btn?.tone === "nudge"), "");
+      /* re-pointed by v152 §1.5: the outlined button is Nudge on Nudge due and "Close it" on Gone quiet */
+      L.check("Nudge / Close it: white, navy text, outlined #c9cfd8", nudge.length > 0 && nudge.every((x) => (x.btn!.label === "Nudge" || x.btn!.label === "Close it") && x.btn!.bg === WHITE && x.btn!.fg === NAVY && /rgb\(201, 207, 216\)/.test(x.btn!.sh)), JSON.stringify(nudge.slice(0, 2)));
+      L.check("every Your move row has a button; gone quiet's is Close it", by("you").every((x) => !!x.btn) && by("quiet").every((x) => x.btn?.tone === "nudge" && x.btn?.label === "Close it"), "");
       L.check("With the agent and Closed: none", [...by("agent"), ...by("closed")].every((x) => !x.btn), "");
       const list = new Map(rows.map((x) => [x.id, x]));
       await click(page, "[data-qc151='switch'] [data-v='birds']"); await page.waitForTimeout(1500);

@@ -17,12 +17,12 @@
  {
   "where": "late and overdue in rust",
   "ok": true,
-  "detail": "46"
+  "detail": "8"
  },
  {
   "where": "with the agent: #8a8076",
   "ok": true,
-  "detail": "[{\"w\":\"agent\",\"text\":\"11daysto reply\",\"num\":true,\"font\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"26px\",\"lines\":2,\"label\":\"days / to reply\",\"nc\":\"rgb(138, 128, 118)\",\"lc\":\"rgb(138, 128, 118)\"},{\"w\":\"agent\",\"text\":\"11daysto reply\",\"num\":true,\"font\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"26px\",\"lines\":2,\"label\":\"days / to reply\",\"nc\":\"rgb(138, 128, 118)\",\"lc\":\"rgb(138, 128, 118)\"}]"
+  "detail": "[{\"w\":\"agent\",\"text\":\"6daysto reply\",\"num\":true,\"font\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"26px\",\"lines\":2,\"label\":\"days / to reply\",\"nc\":\"rgb(138, 128, 118)\",\"lc\":\"rgb(138, 128, 118)\"},{\"w\":\"agent\",\"text\":\"9daysto reply\",\"num\":true,\"font\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"26px\",\"lines\":2,\"label\":\"days / to reply\",\"nc\":\"rgb(138, 128, 118)\",\"lc\":\"rgb(138, 128, 118)\"}]"
  },
  {
   "where": "closed: —",

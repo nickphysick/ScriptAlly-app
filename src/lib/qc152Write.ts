@@ -119,6 +119,8 @@ export interface WritePlan {
   del: string[];
   /** the query's fields; undefined clears one */
   query: Record<string, unknown>;
+  /** fields merged into other documents in the same batch (a draft package's lock stamp, §4.5) */
+  update?: { path: string; data: DocumentData }[];
 }
 
 const respData = (over: Partial<RecordResponseData>): RecordResponseData => ({
@@ -203,9 +205,108 @@ export async function commitPlan(uid: string, plan: WritePlan, after?: () => Pro
   const b = writeBatch(db);
   for (const s of plan.set) b.set(doc(db, `users/${uid}/${s.path}`), s.data);
   for (const p of plan.del) b.delete(doc(db, `users/${uid}/${p}`));
+  for (const u of plan.update ?? []) b.update(doc(db, `users/${uid}/${u.path}`), u.data);
   const patch = Object.fromEntries(Object.entries(plan.query).map(([k, v]) => [k, v === undefined ? deleteField() : v]));
   if (Object.keys(patch).length) b.update(doc(db, `users/${uid}/queries/${plan.queryId}`), patch);
   await b.commit();
   if (after) { try { await after(); } catch (e) { console.error("v152: a follow-up write failed (non-fatal)", e); } }
   return snap;
+}
+
+/* ── §4.2 Fix a mistake: the record corrected, nothing new on the timeline ────────────────────────────────────── */
+
+export interface FixStep {
+  /** the activity's id; a step added here ("+ Add a step I missed") has `isNew` and a fresh id */
+  id: string;
+  isNew?: boolean;
+  /** the step's kind as the record form names it (a nudge, a send, a request, a close) */
+  kind: RecordKind | "queried" | "withdrawn";
+  dayMs: number;
+  materials: StepMaterial[];
+}
+export interface PkgPatch {
+  /** the package now on Query sent, or null for none (a one-off) */
+  id: string | null;
+  name: string | null;
+  edition: number | null;
+  /** was there one before (so clearing it records what it was based on) */
+  was: { id: string; edition: number | null } | null;
+}
+const STATUS_OF: Record<FixStep["kind"], QueryStatus | null> = { ...RECORD_STATUS, queried: QueryStatus.QUERIED, withdrawn: QueryStatus.WITHDRAWN };
+
+/** the feed's twin of a log entry: the same id, else the row that names it (`logEntryId`) */
+const twinOf = (feed: readonly RawActivityDoc[], id: string) => feed.find((f) => f.id === id) ?? feed.find((f) => f.data.logEntryId === id) ?? null;
+const sameDay = (a: number, b: number) => new Date(a).toDateString() === new Date(b).toDateString();
+
+export function planFix(c: PlanCtx & { feed: RawActivityDoc[] }, draft: readonly FixStep[], removed: readonly string[], pkg: PkgPatch | null): WritePlan {
+  const set: WritePlan["set"] = [], del: string[] = [];
+  const query: Record<string, unknown> = {};
+  const qid = c.q.id;
+  for (const id of removed) {
+    del.push(`queries/${qid}/activity/${id}`);
+    const tw = twinOf(c.feed, id);
+    if (tw) del.push(`activities/${tw.id}`);
+  }
+  let log = c.existing.filter((x) => !removed.includes(x.id));
+  for (const s of draft) {
+    const st = STATUS_OF[s.kind];
+    if (s.isNew) {
+      if (s.kind === "queried" || s.kind === "withdrawn") continue;
+      const p = planRecord({ ...c, existing: log }, s.kind, s.dayMs, s.materials);
+      set.push(...p.set);
+      for (const [k, v] of Object.entries(p.query)) if (!(k in query)) query[k] = v;
+      log = [...log, ...p.set.filter((x) => x.path.startsWith(`queries/${qid}/activity/`)).map((x) => ({ id: x.path.split("/").pop()!, data: x.data }))];
+      continue;
+    }
+    const cur = c.existing.find((x) => x.id === s.id);
+    if (!cur) continue;
+    const t0 = getActivityTime(cur.data.createdAt);
+    const next: DocumentData = { ...cur.data };
+    let changed = false;
+    if (s.kind !== "nudge" && st && cur.data.resultingStatus !== st && cur.data.type !== st) { next.type = st; next.resultingStatus = st; changed = true; }
+    if (!sameDay(t0, s.dayMs)) {
+      const d = new Date(s.dayMs); d.setHours(12, 0, 0, 0);
+      next.createdAt = typeof cur.data.createdAt === "string" ? d.toISOString() : Timestamp.fromMillis(d.getTime());
+      changed = true;
+    }
+    const mats = storeMats(s.materials);
+    if (JSON.stringify(cur.data.materials ?? []) !== JSON.stringify(mats)) { if (mats.length) next.materials = mats; else delete next.materials; changed = true; }
+    if (!changed) continue;
+    set.push({ path: `queries/${qid}/activity/${s.id}`, data: next });
+    log = log.map((x) => (x.id === s.id ? { id: x.id, data: next } : x));
+    const tw = twinOf(c.feed, s.id);
+    if (tw) {
+      const f: DocumentData = { ...tw.data };
+      if (next.resultingStatus && f.resultingStatus !== undefined) f.resultingStatus = next.resultingStatus;
+      f.date = new Date(getActivityTime(next.createdAt)).toISOString();
+      if (mats.length) f.materials = mats; else delete f.materials;
+      set.push({ path: `activities/${tw.id}`, data: f });
+    }
+  }
+  /* a nudge removed or moved: the query's nudge dates follow the nudges left (the reconcile the timeline delete uses) */
+  const nudges = log.filter((x) => x.data.type === "Nudge sent").map((x) => getActivityTime(x.data.createdAt)).sort((a, b) => a - b);
+  const lastN = nudges.length ? new Date(nudges[nudges.length - 1]).toISOString() : undefined;
+  if ((c.q.lastNudgeSentDate ?? undefined) !== lastN) query.lastNudgeSentDate = lastN;
+  if (pkg) {
+    if (pkg.id) Object.assign(query, { sentHow: "package", sentPackageId: pkg.id, packageId: pkg.id, sentPackageEdition: pkg.edition ?? 1, sentPackageName: pkg.name ?? undefined, basedOnPackageId: undefined, basedOnPackageEdition: undefined });
+    else Object.assign(query, { sentHow: "individual", sentPackageId: undefined, packageId: "", sentPackageEdition: undefined, sentPackageName: undefined,
+      ...(pkg.was ? { basedOnPackageId: pkg.was.id, basedOnPackageEdition: pkg.was.edition ?? 1 } : {}) });
+  }
+  return withRecompute({ queryId: qid, set, del, query }, c.existing);
+}
+
+/** the feed's rows for one query (for twins) */
+export async function readFeed(uid: string, queryId: string): Promise<RawActivityDoc[]> {
+  const { query: fq, where } = await import("firebase/firestore");
+  const snap = await getDocs(fq(collection(db, "users", uid, "activities"), where("queryId", "==", queryId)));
+  return snap.docs.map((d) => ({ id: d.id, data: d.data() }));
+}
+
+/* ── §4.6 Edit the query's details: who it went to, how it went ──────────────────────────────────────────────── */
+
+export function planDetails(q: Query, next: { agentId: string; sendMethod: string }): WritePlan {
+  const query: Record<string, unknown> = {};
+  if (next.agentId !== q.agentId) query.agentId = next.agentId;
+  if (next.sendMethod !== (q.sendMethod ?? "")) query.sendMethod = next.sendMethod;
+  return { queryId: q.id, set: [], del: [], query };
 }

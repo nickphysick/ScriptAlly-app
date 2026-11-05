@@ -145,3 +145,79 @@
 .qc152-pop2 .qc152-mpf { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px; padding-top: 10px; border-top: 1px solid #efe9e0; }
 .qc152-pop2 .qc152-mrm { all: unset; cursor: pointer; font: 400 13.5px/1.3 var(--sp-serif); color: #8a3a28; }
 .qc152-pop2 .qc152-mdone { all: unset; cursor: pointer; padding: 6px 14px; border-radius: 8px; background: #2a3a52; color: #fff; font: 600 13.5px/1.2 var(--sp-serif); }
+
+/* §4.1 What needs changing? */
+.qc152 .qc152-fork { display: flex; flex-direction: column; gap: 10px; padding: 12px 0; }
+.qc152 .qc152-fk { all: unset; box-sizing: border-box; cursor: pointer; display: grid; grid-template-columns: 40px 1fr auto; gap: 14px; align-items: center; padding: 16px; border-radius: 14px; background: #fff; box-shadow: inset 0 0 0 1.5px #e2d9cc; }
+.qc152 .qc152-fk:hover, .qc152 .qc152-fk:focus-visible { box-shadow: inset 0 0 0 1.5px #2a3a52; background: #fbfaf7; }
+.qc152 .qc152-fi { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: #f3efe8; color: #2a3a52; font-size: 18px; }
+.qc152 .qc152-fk b { display: block; font: 400 19px/1.3 var(--sp-type); }
+.qc152 .qc152-fk em { display: block; margin-top: 4px; font: normal 400 14.5px/1.4 var(--sp-serif); color: #6b645c; }
+.qc152 .qc152-ar { font-size: 18px; color: #8f8a82; }
+.qc152 .qc152-fk.lite { box-shadow: inset 0 0 0 1px #ece6de; }
+.qc152 .qc152-fk.lite b { font-size: 17px; }
+
+/* §4.2 Fix a mistake: steps as bubbles (the agent's left in paper, yours right in soft navy) */
+.qc152 .qc152-fsteps { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; }
+.qc152 .qc152-fs { display: grid; grid-template-columns: 34px 1fr; gap: 12px; align-items: start; padding: 10px 12px 12px; border-radius: 14px; }
+.qc152 .qc152-fs.them { margin-right: 28px; background: #faf7f2; box-shadow: inset 0 0 0 1px #e8dfd3; border-bottom-left-radius: 5px; }
+.qc152 .qc152-fs.me { margin-left: 28px; background: #e9eef4; border-bottom-right-radius: 5px; }
+.qc152 .qc152-fs.ch { box-shadow: inset 0 0 0 1.5px #5f7b93; }
+.qc152 .qc152-fs.bad { box-shadow: inset 0 0 0 1.5px #e2a08b; background: #fdf5f1; }
+.qc152 .qc152-fs.sel { box-shadow: inset 0 0 0 2px #2a3a52; }
+.qc152 .qc152-fsb { min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.qc152 .qc152-edr { display: flex; gap: 8px; align-items: center; }
+.qc152 .qc152-rm { all: unset; cursor: pointer; flex: none; width: 30px; height: 34px; display: grid; place-items: center; border-radius: 9px; color: #8f8a82; font-size: 12px; }
+.qc152 .qc152-rm:hover { background: #f6e7e0; color: #8a3a28; }
+.qc152 .qc152-rm[disabled] { opacity: 0.3; cursor: default; }
+.qc152 .qc152-err { display: flex; gap: 6px; font: 400 13.5px/1.35 var(--sp-serif); color: #8a3a28; }
+.qc152 .qc152-err::before { content: "!"; flex: none; display: grid; place-items: center; width: 16px; height: 16px; margin-top: 1px; border-radius: 50%; background: #8a3a28; color: #fff; font: 700 11px var(--sp-serif); }
+.qc152 .qc152-wasl { font: italic 400 13px/1.3 var(--sp-serif); color: #5f7b93; }
+.qc152 .qc152-ins { list-style: none; }
+.qc152 .qc152-ins button { all: unset; cursor: pointer; flex: none; font: 400 12.5px/1.3 var(--sp-serif); color: #2a3a52; text-decoration: underline; text-underline-offset: 3px; opacity: 0; transition: opacity 0.15s; }
+.qc152 .qc152-ins:hover button, .qc152 .qc152-ins:focus-within button { opacity: 1; }
+.qc152 .qc152-rmq { padding: 10px 12px; border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 1px #f0d6cb; font: 400 14px/1.45 var(--sp-serif); }
+.qc152 .qc152-rmq p { margin: 0 0 8px; }
+.qc152 .qc152-rmq div { display: flex; gap: 8px; }
+.qc152 .qc152-dbtn { all: unset; cursor: pointer; padding: 7px 12px; border-radius: 8px; background: #8a3a28; color: #fff; font: 600 13.5px/1.2 var(--sp-serif); }
+.qc152 .qc152-ghost.sm { height: 32px; font-size: 13.5px; }
+.qc152 .qc152-rmd { margin: 10px 0 0; font: 400 14px/1.45 var(--sp-serif); color: #8a3a28; }
+.qc152 .qc152-rmd button { all: unset; cursor: pointer; color: #2a3a52; text-decoration: underline; }
+/* §4.5 the package row on Query sent */
+.qc152 .qc152-pkr { display: flex; align-items: center; gap: 10px; }
+.qc152 .qc152-pkl0 { font: 400 14px/1.3 var(--sp-serif); color: #6b645c; }
+.qc152 .qc152-pkb { all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 8px; border: 1px dashed #c9bcab; font: 400 14px/1 var(--sp-serif); color: #6b645c; }
+.qc152 .qc152-pkb.on { border: 0; background: #2a3a52; color: #fff; }
+.qc152 .qc152-pkb b { font-weight: 600; }
+.qc152 .qc152-pkb em { font: italic 400 12.5px/1 var(--sp-serif); opacity: 0.85; }
+.qc152 .qc152-pkoff { padding: 10px 12px; border-radius: 10px; background: #f5ecdf; font: 400 13.5px/1.45 var(--sp-serif); color: #5f5a53; }
+.qc152 .qc152-pkoff button { all: unset; cursor: pointer; color: #2a3a52; text-decoration: underline; text-underline-offset: 3px; }
+
+/* §4.6 Edit the query's details */
+.qc152 .qc152-drow { display: grid; grid-template-columns: 110px 1fr; gap: 14px; padding: 14px 0; border-bottom: 1px solid #f0ebe3; }
+.qc152 .qc152-drow:last-of-type { border-bottom: 0; }
+.qc152 .qc152-dl { position: relative; padding-top: 8px; font: 400 15px/1.3 var(--sp-serif); color: #6b645c; }
+.qc152 .qc152-drow.ch .qc152-dl::after { content: ""; position: absolute; left: -10px; top: 15px; width: 6px; height: 6px; border-radius: 50%; background: #5f7b93; }
+.qc152 .qc152-dc { min-width: 0; }
+.qc152 .qc152-agb { height: 46px; justify-content: flex-start; }
+.qc152 .qc152-ddisc { flex: none; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: #f6f2ec; box-shadow: inset 0 0 0 1px #e3dbd0; font: 400 9.5px var(--sp-mono); color: #6c675f; }
+.qc152 .qc152-agn { display: flex; flex-direction: column; min-width: 0; }
+.qc152 .qc152-agn b { font: 600 15px/1.2 var(--sp-serif); }
+.qc152 .qc152-agn em { font: normal 400 9.5px/1.4 var(--sp-mono); letter-spacing: 0.14em; text-transform: uppercase; color: #8f8a82; }
+.qc152-pop2 .qc152-dfind input { all: unset; box-sizing: border-box; display: block; width: 100%; height: 34px; margin-bottom: 6px; padding: 0 10px; border-radius: 8px; box-shadow: inset 0 0 0 1px #d4cabd; font: 400 14.5px var(--sp-serif); }
+.qc152-pop2 .qc152-ddisc { flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: #f6f2ec; box-shadow: inset 0 0 0 1px #e3dbd0; font: 400 9px var(--sp-mono); color: #6c675f; }
+.qc152 .qc152-dseg2 { display: inline-flex; padding: 3px; border-radius: 10px; background: #f3efe8; }
+.qc152 .qc152-dseg2 button { all: unset; cursor: pointer; padding: 7px 12px; border-radius: 8px; font: 400 14.5px/1.2 var(--sp-serif); color: #6b645c; }
+.qc152 .qc152-dseg2 button[aria-checked="true"] { background: #2a3a52; color: #fff; }
+.qc152 .qc152-mc { display: flex; flex-wrap: wrap; gap: 6px; }
+.qc152 .qc152-mc i { font-style: normal; padding: 5px 9px; border-radius: 6px; background: #f5f1ea; font: 400 9.5px/1.4 var(--sp-mono); letter-spacing: 0.1em; text-transform: uppercase; color: #5f5a53; }
+.qc152 .qc152-pkc { display: inline-block; padding: 3px 8px; border-radius: 5px; background: #2a3a52; color: #fff; font: 600 12px/1.4 var(--sp-serif); }
+.qc152 .qc152-dfit { margin: 8px 0 0; font: 400 14px/1.45 var(--sp-serif); }
+.qc152 .qc152-dfit.warn { color: #8a3a28; }
+.qc152 .qc152-dfit.ok { color: #3f5a39; }
+.qc152 .qc152-dtxt { margin: 6px 0 0; font: 400 14.5px/1.45 var(--sp-serif); color: #5f5a53; }
+.qc152 .qc152-dlink { all: unset; cursor: pointer; display: inline-block; margin-top: 8px; font: 400 14px/1.3 var(--sp-serif); color: #2a3a52; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: #b9c3d2; }
+.qc152 .qc152-also { margin-top: 14px; padding: 12px 14px; border-radius: 12px; background: #ecf0f4; box-shadow: inset 0 0 0 1px #d6dee7; font: 400 14.5px/1.45 var(--sp-serif); color: #5f5a53; }
+.qc152 .qc152-also > b { display: block; margin-bottom: 6px; font: 400 15px/1.3 var(--sp-type); color: #1c130f; }
+.qc152 .qc152-also ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
+.qc152 .qc152-also ul b { color: #1c130f; font-weight: 600; }

@@ -12,7 +12,7 @@
 set -u
 cd "$(dirname "$0")/../.." || exit 1
 BK=/tmp/qc152-mut; mkdir -p "$BK"
-build() { npx vite build --mode emulator --outDir dist-emu --emptyOutDir > /tmp/qc152-mutbuild.txt 2>&1 || { echo "build failed"; exit 1; }; }
+build() { npx vite build --mode emulator --outDir dist-emu --emptyOutDir > /tmp/qc152-mutbuild.txt 2>&1 || { echo "build failed"; [ -n "${F:-}" ] && restore "$F"; exit 1; }; }
 spec() { echo "QC152_MUTATE=$1 QC152_ONLY=$1 node scripts/emu-e2e-inner.mjs tests/e2e/qc152.measure.ts --project=measure --workers=1"; }
 # a source break: <file> <python replace from> <to>
 srcbreak() {
@@ -38,6 +38,10 @@ for L in "${@:-L1 L2 L3}"; do
     L1) F=src/lib/queryState.ts; srcbreak $F '  if (ms == null || ms > nowMs) return null;' '  if (ms == null || ms > nowMs || ms > 0) return null; /* MUT L1: ignore the nudge date */' ;;
     L8) F=src/components/Queries.tsx; srcbreak $F '    const reply152 = (a: ReplyAct) => {' '    const reply152 = (a: ReplyAct) => { void updateUserPaths({ "todoPrefs.queries.mutL8": Date.now() }); /* MUT L8: write on press */' ;;
     L9) F=src/components/Queries.tsx; srcbreak $F 'if (k === "full_sent") return (reqMats?.length ? reqMats : [{ kind: "full" as const }]).map(withVer);' 'if (k === "full_sent") return ([{ kind: "full" as const }]).map(withVer); /* MUT L9: the generic default */' ;;
+    L10) F=src/lib/qcLogic152.ts; srcbreak $F '    if (need && !seen[need]) {' '    if (false && need && !seen[need]) { /* MUT L10: drop check 3 */' ;;
+    L11) F=src/lib/qc152Write.ts; srcbreak $F '  if (pkg) {' '  if (pkg && pkg.id) { /* MUT L11: keep the package link */' ;;
+    L12) F=src/components/queries/centre/QcFix152.tsx; srcbreak $F 'data-id={a.id} disabled={taken}' 'data-id={a.id} disabled={false} /* MUT L12: a duplicate agent allowed */' ;;
+    L13) F=src/components/queries/centre/QcFix152.tsx; srcbreak $F '<span className="qc152-dseg2" role="radiogroup" aria-label="Sent by">' '<span className="qc152-dseg2" role="radiogroup" aria-label="Sent by"><select aria-label="MUT L13: a native select"><option>Email</option></select>' ;;
     L3) F=src/lib/queryState.ts; srcbreak $F 's === "offer" || s === "materials" || s === "nudge" ? "you" : s;' 's === "offer" || s === "materials" || s === "nudge" || s === "quiet" ? "you" : s; /* MUT L3 */' ;;
     *) F="" ;;
   esac

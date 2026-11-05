@@ -2,7 +2,7 @@
  {
   "where": "population",
   "ok": true,
-  "detail": "{\"header\":{\"l\":276,\"r\":1244,\"w\":968},\"banner\":{\"l\":276,\"r\":1244,\"w\":968},\"toolbar\":{\"l\":276,\"r\":1244,\"w\":968},\"table\":{\"l\":276,\"r\":1244,\"w\":968},\"signoff\":{\"l\":276,\"r\":1244,\"w\":968},\"birds\":{\"l\":276,\"r\":1244,\"w\":968}}"
+  "detail": "{\"header\":{\"l\":276,\"r\":1244,\"w\":968},\"summary\":{\"l\":276,\"r\":1244,\"w\":968},\"quick\":{\"l\":276,\"r\":1244,\"w\":968},\"toolbar\":{\"l\":276,\"r\":1244,\"w\":968},\"table\":{\"l\":276,\"r\":1244,\"w\":968},\"signoff\":{\"l\":276,\"r\":1244,\"w\":968},\"birds\":{\"l\":276,\"r\":1244,\"w\":968}}"
  },
  {
   "where": "formula",
@@ -20,12 +20,22 @@
   "detail": "760.0 vs 760.0"
  },
  {
-  "where": "banner width",
+  "where": "summary width",
   "ok": true,
   "detail": "968.0 vs 968"
  },
  {
-  "where": "banner centred",
+  "where": "summary centred",
+  "ok": true,
+  "detail": "760.0 vs 760.0"
+ },
+ {
+  "where": "quick width",
+  "ok": true,
+  "detail": "968.0 vs 968"
+ },
+ {
+  "where": "quick centred",
   "ok": true,
   "detail": "760.0 vs 760.0"
  },

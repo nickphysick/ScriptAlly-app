@@ -2,12 +2,22 @@
  {
   "where": "who: population",
   "ok": true,
-  "detail": "[\"you\",\"agent\",\"quiet\",\"closed\"]"
+  "detail": "[\"offer\",\"materials\",\"nudge\",\"agent\",\"quiet\",\"closed\"]"
  },
  {
-  "where": "who · Your move",
+  "where": "who · Offers",
   "ok": true,
   "detail": "rgb(42, 58, 82) rgb(255, 255, 255)"
+ },
+ {
+  "where": "who · Materials requested",
+  "ok": true,
+  "detail": "rgb(42, 58, 82) rgb(255, 255, 255)"
+ },
+ {
+  "where": "who · Nudge due",
+  "ok": true,
+  "detail": "rgb(197, 208, 221) rgb(28, 19, 15)"
  },
  {
   "where": "who · With the agent",
@@ -17,7 +27,7 @@
  {
   "where": "who · Gone quiet",
   "ok": true,
-  "detail": "rgb(197, 208, 221) rgb(28, 19, 15)"
+  "detail": "rgba(0, 0, 0, 0) rgb(28, 19, 15)"
  },
  {
   "where": "who · Closed",
@@ -27,12 +37,12 @@
  {
   "where": "next action: population",
   "ok": true,
-  "detail": "[\"Answer the offer\",\"Send your full\",\"Send your partial\",\"Send your revision\",\"Nudge\",\"Waiting to hear\",\"Nothing to do\"]"
+  "detail": "[\"Answer the offer\",\"Send your full\",\"Send your partial\",\"Send your revision\",\"Nudge\",\"Reply due soon\",\"Waiting to hear\",\"Close it\",\"Nothing to do\"]"
  },
  {
   "where": "next action: in the brief's order",
   "ok": true,
-  "detail": "[\"Answer the offer\",\"Send your full\",\"Send your partial\",\"Send your revision\",\"Nudge\",\"Waiting to hear\",\"Nothing to do\"]"
+  "detail": "[\"Answer the offer\",\"Send your full\",\"Send your partial\",\"Send your revision\",\"Nudge\",\"Reply due soon\",\"Waiting to hear\",\"Close it\",\"Nothing to do\"]"
  },
  {
   "where": "next action · Answer the offer",
@@ -60,9 +70,19 @@
   "detail": "rgb(197, 208, 221)"
  },
  {
+  "where": "next action · Reply due soon",
+  "ok": true,
+  "detail": "rgb(227, 219, 207)"
+ },
+ {
   "where": "next action · Waiting to hear",
   "ok": true,
   "detail": "rgb(227, 219, 207)"
+ },
+ {
+  "where": "next action · Close it",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
  },
  {
   "where": "next action · Nothing to do",

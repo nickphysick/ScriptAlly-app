@@ -125,7 +125,7 @@ import { commitCardSave } from "../lib/agentCardSave";
 import { copyText } from "./agents/contact/ContactCells";
 import type { AgentEditPatch } from "../lib/saveAgentEdits";
 import type { RowSpec } from "./reading-pane/QueryTimeline";
-import type { QcRow } from "../lib/qcSummary";
+import { expectedFor, type QcRow } from "../lib/qcSummary";
 import { nextLine } from "../lib/qcRowLines";
 import { QcPage151, Track151 } from "./queries/centre/QcPage151";
 import { QcFilterPanel151 } from "./queries/centre/QcFilterMenu140";
@@ -133,7 +133,10 @@ import { QUIET_WEEKS_PATH, quickOfRow, quietWeeksOf, stampRows, stateOf, querySt
 import { packagesUnlocked } from "../lib/entitlements";
 import { sideOf as side152, type ReplyAct, type ThreadStepIn } from "../lib/qcThread152";
 import { qc152DevFree } from "../lib/qc152ReviewAid";
-import { commitPlan, planRecord, readLog, RECORD_STATUS, type RecordKind, type StepMaterial } from "../lib/qc152Write";
+import { packageLockStamp } from "../lib/saveQueryEdits";
+import { commitPlan, planDetails, planFix, planRecord, readFeed, readLog, RECORD_STATUS, type FixStep, type RecordKind, type StepMaterial } from "../lib/qc152Write";
+import { QcDetails152, QcFix152, QcFork152, type FixRow, type PkgChoice } from "./queries/centre/QcFix152";
+import { askChips, readMat } from "../lib/qcThread152";
 import type { LogStep, StepType } from "../lib/qcLogic152";
 import { QcRecord152, type RecordOutcome } from "./queries/centre/QcRecord152";
 import type { MatEnv } from "./queries/centre/QcEdit152";
@@ -1801,6 +1804,9 @@ export const Queries: React.FC<{
   /* v152 §3 — what the record form opened on (the reply box's button), and a save in flight */
   const [qc152Rec, setQc152Rec] = useState<RecordKind | "resp" | null>(null);
   const [qc152Busy, setQc152Busy] = useState(false);
+  /* v152 §4 — the step Fix a mistake opens on (a bubble's ✎ Edit), and where the record form was opened from */
+  const [qc152Focus, setQc152Focus] = useState<string | null>(null);
+  const [qc152From, setQc152From] = useState<"reply" | "fork">("reply");
   const qcCardPendingMode = useRef<{ id: string; mode: CardMode } | null>(null);
   /* v149.1 B3 — the row's "add date" opens the card in edit mode at its undated step */
   const [qcEditUndated, setQcEditUndated] = useState(false);
@@ -2612,11 +2618,16 @@ export const Queries: React.FC<{
        build, the import unreachable, and the module absent from the bundle. Verified by grepping
        `dist/`, not by reading this line. */
     /* v152 §1 — the six states, stamped on each row once (lib/queryState): the desktop list, Birds-eye and the card read
-       `qs`; every other reader of these rows keeps `whereItStands` and `court` */
-    () => stampRows(buildQcRows(
-      import.meta.env.MODE === "production" ? (queries as Query[]) : padLiveQueries(queries as Query[], agents, Date.now()),
-      agents, activities, Date.now()), agents, { quietWeeks: qcQuietWeeks, nowMs: Date.now() }),
-    [queries, agents, activities, qcQuietWeeks],
+       `qs`; every other reader of these rows keeps `whereItStands` and `court`.
+       ⚠️ DESKTOP ONLY: the phone page reads these same rows, and an unstamped row is what keeps it on the old rule (its
+       chips, its groups) — measured, a stamp moved its With you / With the agent / Gone quiet counts (qc152Phone L14). */
+    () => {
+      const rows = buildQcRows(
+        import.meta.env.MODE === "production" ? (queries as Query[]) : padLiveQueries(queries as Query[], agents, Date.now()),
+        agents, activities, Date.now());
+      return qmPhone ? rows : stampRows(rows, agents, { quietWeeks: qcQuietWeeks, nowMs: Date.now() });
+    },
+    [queries, agents, activities, qcQuietWeeks, qmPhone],
   );
 
   /* ── THE ?status= FILTER (shell-rebuild pack, Phase 3) ──
@@ -6041,9 +6052,9 @@ export const Queries: React.FC<{
       const rr = q.status === QueryStatus.REVISE_RESUBMIT;
       if (a === "offer" || a === "reopen" || (a === "sent" && rr)) { stepRow({ mode: a === "offer" ? "offer" : a === "reopen" ? "resp" : "sent", queryId: q.id }); return; }
       setQc152Rec(a === "sent" ? (q.status === QueryStatus.FULL_REQUESTED ? "full_sent" : "partial_sent") : a === "nudge" ? "nudge" : a === "close" ? "noresp" : "resp");
+      setQc152From("reply");
       setQcCardMode("record");
     };
-    let edit152: React.ReactNode = null;
     /* what the material editors offer (§4.4): the book's versions (Pro), the saved letters and synopses, the one in use */
     const qc152Env = (): MatEnv => ({
       free: !!v152?.free,
@@ -6053,6 +6064,109 @@ export const Queries: React.FC<{
       letters: scriptDb.versions.filter((v) => v.manuscriptId === q.manuscriptId && v.componentType === ComponentType.QUERY_LETTER).map((v) => ({ name: v.versionName })),
       synopses: scriptDb.versions.filter((v) => v.manuscriptId === q.manuscriptId && v.componentType === ComponentType.SYNOPSIS).map((v) => ({ name: v.versionName })),
     });
+    let edit152: React.ReactNode = null;
+    /* ── §4: the pencil's three ways in, Fix a mistake, and the details ── */
+    const T4: Partial<Record<string, FixRow["t"]>> = {
+      [QueryStatus.QUERIED]: "queried", [QueryStatus.PARTIAL_REQUESTED]: "preq", [QueryStatus.PARTIAL_SENT]: "psent", [QueryStatus.FULL_REQUESTED]: "freq",
+      [QueryStatus.FULL_SENT]: "fsent", [QueryStatus.OFFER]: "offer", [QueryStatus.REJECTED]: "passed", [QueryStatus.NO_RESPONSE]: "noresp", [QueryStatus.WITHDRAWN]: "withdrawn",
+    };
+    const asMats = (labels: string[]): StepMaterial[] => labels.map((l) => {
+      const m = readMat(l);
+      return m.kind === "sample" ? { kind: "sample" as const, unit: m.unit, n: m.n } : m.kind === "other" ? { kind: "other" as const, text: l } : { kind: m.kind };
+    });
+    const storedMats = (id?: string): StepMaterial[] | null => {
+      const m = id ? evStore.get(id)?.materials : undefined;
+      return Array.isArray(m) && m.length && typeof m[0] === "object" ? (m as StepMaterial[]).map((x) => ({ ...x })) : null;
+    };
+    if (v152 && qcCardMode === "fork") {
+      edit152 = <QcFork152 first={first} onBack={() => setQcCardMode("view")} onFix={() => { setQc152Focus(null); setQcCardMode("fix"); }}
+        onChanged={() => { setQc152Rec(null); setQc152From("fork"); setQcCardMode("record"); }} onDetails={() => setQcCardMode("details")} />;
+    }
+    if (v152 && qcCardMode === "fix" && currentUser) {
+      const rows: FixRow[] = v152.steps.flatMap((x) => {
+        const t = x.kind === "nudge" ? "nudge" : x.status ? T4[x.status] : undefined;
+        if (!t || x.ms == null || !x.activityId) return [];
+        return [{ id: x.activityId, t, d: x.ms, mats: storedMats(x.activityId) ?? (t === "queried" ? asMats(x.chips.map((c) => c.label)) : []) }];
+      });
+      const pkgs: PkgChoice[] | null = v152.free ? null : packages.filter((k) => k.manuscriptId === q.manuscriptId && !(k as { retiredAt?: string }).retiredAt).map((k) => {
+        const nm = (id: string) => scriptDb.versions.find((v) => v.id === id)?.versionName ?? null;
+        const mats: StepMaterial[] = [];
+        if (k.queryLetterVersionId) mats.push({ kind: "letter", name: nm(k.queryLetterVersionId) });
+        if (k.synopsisVersionId) mats.push({ kind: "synopsis", name: nm(k.synopsisVersionId) });
+        if (k.samplePagesVersionId || k.bookVersionId) mats.push({ kind: "sample", unit: "chapters", n: 3, versionId: k.bookVersionId ?? null });
+        const credited = queries.some((x) => sentRecordOf(x).packageId === k.id);
+        return { id: k.id, name: k.packageName, edition: k.edition ?? 1, draft: !k.firstSentAt && !credited, madeMs: new Date(k.createdDate as string).getTime(), mats };
+      });
+      const rec0 = sentRecordOf(q);
+      const uid = currentUser.id;
+      edit152 = (
+        <QcFix152 key={`fix:${q.id}`} first={first} nowMs={now} rows={rows} focusId={qc152Focus} env={qc152Env()} packages={pkgs}
+          pkgNow={rec0.how === "package" && rec0.packageId ? { id: rec0.packageId, edition: rec0.edition, name: rec0.packageName ?? "the package" } : null}
+          now={{ status: row.status, state: v152.state, replyMs: v152.replyMs, dueMs: v152.dueMs, dueWho: null }}
+          after={(rs) => {
+            const last = [...rs].filter((x) => x.t !== "nudge").sort((a, b) => a.d - b.d).pop();
+            const ST: Record<string, QueryStatus> = { queried: QueryStatus.QUERIED, preq: QueryStatus.PARTIAL_REQUESTED, psent: QueryStatus.PARTIAL_SENT, freq: QueryStatus.FULL_REQUESTED, fsent: QueryStatus.FULL_SENT, offer: QueryStatus.OFFER, passed: QueryStatus.REJECTED, noresp: QueryStatus.NO_RESPONSE, withdrawn: QueryStatus.WITHDRAWN };
+            const status = last ? ST[last.t] : row.status;
+            const state = status === QueryStatus.OFFER ? "offer" : [QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED].includes(status as QueryStatus) ? "materials"
+              : [QueryStatus.REJECTED, QueryStatus.NO_RESPONSE, QueryStatus.WITHDRAWN].includes(status as QueryStatus) ? "closed" : status === row.status ? v152.state : "agent";
+            return { status, state, replyMs: null, dueMs: null, dueWho: null };
+          }}
+          busy={qc152Busy}
+          onBack={() => setQcCardMode("fork")}
+          onSave={async (rs, removed, pkg) => {
+            if (qc152Busy) return false;
+            setQc152Busy(true);
+            try {
+              const [existing, feed] = await Promise.all([readLog(uid, q.id), readFeed(uid, q.id)]);
+              const K: Record<string, FixStep["kind"]> = { queried: "queried", preq: "partial_req", psent: "partial_sent", freq: "full_req", fsent: "full_sent", offer: "offer", nudge: "nudge", passed: "pass", noresp: "noresp", withdrawn: "withdrawn" };
+              const plan = planFix({ uid, q, agent: ag, ms, existing, feed, nowMs: Date.now(), quietWeeks: qcQuietWeeks },
+                rs.map((r) => ({ id: r.id, isNew: r.isNew, kind: K[r.t], dayMs: r.d, materials: r.mats })), removed, pkg);
+              /* a draft package picked here goes on query and locks: its stamp joins the same batch */
+              const draftPkg = pkg?.id ? packages.find((k) => k.id === pkg.id && !k.firstSentAt) : undefined;
+              if (draftPkg) plan.update = [{ path: `packages/${draftPkg.id}`, data: packageLockStamp() }];
+              const snap = await commitPlan(uid, plan);
+              setQcCardMode("view");
+              showUndoBar({ message: `Fixed · ${ag?.name || ag?.agency || "The agent"}`, sub: removed.length ? `${removed.length} ${removed.length === 1 ? "STEP" : "STEPS"} REMOVED` : "THE RECORD IS CORRECTED", undo: async () => { await restoreSnapshot(snap); } });
+              return true;
+            } catch (e) {
+              console.error("v152: the fix failed", e);
+              showToast({ message: "Couldn't save the fix. Nothing was changed." });
+              return false;
+            } finally { setQc152Busy(false); }
+          }} />
+      );
+    }
+    if (v152 && qcCardMode === "details" && currentUser) {
+      const uid = currentUser.id;
+      const choices = agents.map((a) => ({
+        id: a.id, name: agentPrimary(a), agency: agentAgencyLine(a), initials: agentInitials(a),
+        queried: queries.some((x) => x.agentId === a.id && x.manuscriptId === q.manuscriptId),
+        weeks: typeof a.responseTimeWeeks === "number" && a.responseTimeWeeks > 0 ? a.responseTimeWeeks : null,
+      }));
+      const fit = askChips(v152.asks, v152.sentLabels);
+      edit152 = (
+        <QcDetails152 key={`det:${q.id}`} first={first} nowMs={now} agentId={q.agentId} sendMethod={String(q.sendMethod ?? "Email")} agents={choices}
+          whatWent={v152.sentLabels} pkgName={sv.how === "package" ? sv.name : null} asks={v152.asks} missing={fit.missing} replyWeeks={v152.agentWeeks}
+          replyNow={v152.replyMs} replyFor={(id) => expectedFor(q, agents.find((a) => a.id === id) ?? null).ms} free={v152.free} busy={qc152Busy}
+          onBack={() => setQcCardMode("fork")}
+          onFixQuerySent={() => { setQc152Focus(v152!.steps.find((x) => x.status === QueryStatus.QUERIED)?.activityId ?? null); setQcCardMode("fix"); }}
+          onAgentCard={() => { if (ag) openAgentCard(ag.id, { tab: "work", focus: "reply", from: "qc" }); }}
+          onSave={async (next) => {
+            if (qc152Busy) return false;
+            setQc152Busy(true);
+            try {
+              const snap = await commitPlan(uid, planDetails(q, next));
+              setQcCardMode("view");
+              showUndoBar({ message: `Details saved · ${ag?.name || ag?.agency || "The agent"}`, sub: "THE QUERY IS UPDATED", undo: async () => { await restoreSnapshot(snap); } });
+              return true;
+            } catch (e) {
+              console.error("v152: the details save failed", e);
+              showToast({ message: "Couldn't save the details. Nothing was changed." });
+              return false;
+            } finally { setQc152Busy(false); }
+          }} />
+      );
+    }
     if (v152 && qcCardMode === "record" && currentUser) {
       const T: Partial<Record<string, StepType>> = {
         [QueryStatus.QUERIED]: "queried", [QueryStatus.PARTIAL_REQUESTED]: "preq", [QueryStatus.PARTIAL_SENT]: "psent", [QueryStatus.FULL_REQUESTED]: "freq",
@@ -6099,7 +6213,7 @@ export const Queries: React.FC<{
         <QcRecord152 key={`${q.id}:${qc152Rec}`} first={first} nowMs={now} initials={row.initials} log={log}
           last={lastS ? { status: lastS.status, kind: lastS.kind, ms: lastS.ms, chips: lastS.chips.map((c) => c.label) } : null}
           initial={qc152Rec} prefill={prefill} askedMs={req?.ms ?? null} env={env} now={nowO} after={after} busy={qc152Busy}
-          onCancel={() => { setQcCardMode("view"); setQc152Rec(null); }}
+          onCancel={() => { setQcCardMode(qc152From === "fork" ? "fork" : "view"); setQc152Rec(null); }}
           onSave={async (k, day, mats) => {
             if (qc152Busy) return false;
             setQc152Busy(true);
@@ -6132,7 +6246,13 @@ export const Queries: React.FC<{
         v152={v152}
         onReply152={reply152}
         edit152={edit152}
-        onBack152={() => { setQcCardMode("view"); setQc152Rec(null); }}
+        onBack152={() => {
+          if (qcCardMode === "fix" || qcCardMode === "details") setQcCardMode("fork");
+          else if (qcCardMode === "record" && qc152From === "fork") { setQcCardMode("fork"); setQc152Rec(null); }
+          else { setQcCardMode("view"); setQc152Rec(null); }
+        }}
+        onPencil152={() => setQcCardMode("fork")}
+        onEditStep152={(id) => { setQc152Focus(id); setQcCardMode("fix"); }}
         row={row}
         nowMs={now}
         msTitle={ms?.title ?? null}

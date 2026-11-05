@@ -7,12 +7,12 @@
  {
   "where": "the form opens on Mark full sent with the step chosen",
   "ok": true,
-  "detail": "{\"kind\":\"full_sent\",\"title\":\"Mark full sent\",\"chosen\":[\"full_sent\"],\"date\":\"4 Nov 2026\",\"chips\":[\"Full manuscript · Post-R&R (T. Marsh)\",\"Synopsis\"]}"
+  "detail": "{\"kind\":\"full_sent\",\"title\":\"Mark full sent\",\"chosen\":[\"full_sent\"],\"date\":\"5 Nov 2026\",\"chips\":[\"Full manuscript · Post-R&R (T. Marsh)\",\"Synopsis\"]}"
  },
  {
   "where": "today's date",
   "ok": true,
-  "detail": "4 Nov 2026 vs 4 Nov 2026"
+  "detail": "5 Nov 2026 vs 5 Nov 2026"
  },
  {
   "where": "the request's materials prefilled: the full manuscript and the synopsis it asked for",
@@ -37,12 +37,12 @@
  {
   "where": "the step is Full sent with what was asked for",
   "ok": true,
-  "detail": "{\"agentName\":\"Hannah Vale\",\"createdAt\":{\"nanoseconds\":0,\"seconds\":1793793600},\"eventKey\":\"full_sent\",\"manuscriptTitle\":\"The Smoke Test\",\"materials\":[{\"kind\":\"full\",\"versionId\":\"bv-rr\"},{\"kind\":\"synopsis\"}],\"note\":\"Full manuscript sent to Hannah Vale at State & Window\",\"queryId\":\"q152-fullreq\",\"resultingStatus\":\"Full Sent\",\"type\":\"Full Sent\"}"
+  "detail": "{\"agentName\":\"Hannah Vale\",\"createdAt\":{\"nanoseconds\":0,\"seconds\":1793880000},\"eventKey\":\"full_sent\",\"manuscriptTitle\":\"The Smoke Test\",\"materials\":[{\"kind\":\"full\",\"versionId\":\"bv-rr\"},{\"kind\":\"synopsis\"}],\"note\":\"Full manuscript sent to Hannah Vale at State & Window\",\"queryId\":\"q152-fullreq\",\"resultingStatus\":\"Full Sent\",\"type\":\"Full Sent\"}"
  },
  {
   "where": "dated today",
   "ok": true,
-  "detail": "{\"nanoseconds\":0,\"seconds\":1793793600}"
+  "detail": "{\"nanoseconds\":0,\"seconds\":1793880000}"
  },
  {
   "where": "Undo is offered",

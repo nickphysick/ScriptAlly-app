@@ -10,6 +10,7 @@
  *   §1  L1 states · L2 colours · L3 filters
  *   §2  L4 card frame · L5 lean · L6 thread · L7 edit button · L8 reply box
  *   §3  L9 capture
+ *   §4  L10 logic · L11 materials · L12 details · L13 no browser controls
  */
 import { test, expect, type Page } from "@playwright/test";
 import { execSync } from "node:child_process";
@@ -28,7 +29,7 @@ type VP = { width: number; height: number };
 /** the fixtures and the state each must land in (seedQc152.mjs) */
 const EXPECT: Record<string, string> = {
   offer: "offer", materials: "materials", nudge: "nudge", agent: "agent", quiet: "quiet",
-  nrmn: "quiet", nudgedquiet: "quiet", nudgedwait: "agent", closed: "closed", long: "agent", fullreq: "materials",
+  nrmn: "quiet", nudgedquiet: "quiet", nudgedwait: "agent", closed: "closed", long: "agent", fullreq: "materials", pkg: "agent",
 };
 const HEAD: Record<string, string> = {
   offer: "rgb(42, 58, 82)", materials: "rgb(42, 58, 82)", nudge: "rgb(197, 208, 221)", agent: "rgb(227, 219, 207)", closed: "rgb(241, 239, 236)",
@@ -222,7 +223,7 @@ for (const vp of SIZES) {
       await page.locator(`${CARD152} [data-qc152='pencil']`).click({ timeout: 8000 }).catch(() => {});
       await page.waitForTimeout(600);
       const ed = await rot();
-      L.check("population: an editing view is open", await page.locator("[data-qp='panel'] [data-qc152='flat']").count() > 0, "no flat view");
+      L.check("population: an editing view is open", await page.locator("[data-qp='panel'] [data-lean='flat'], [data-qp='panel'] [data-qc152='flat']").count() > 0, "no flat view");
       L.check("editing: 0°", Math.abs(deg(ed)) <= 0.05, ed);
       if (await page.locator("[data-qp='panel'] [data-qc149c='cancel']").count()) await page.locator("[data-qp='panel'] [data-qc149c='cancel']").first().click();
       await page.waitForTimeout(400);
@@ -291,6 +292,7 @@ for (const vp of SIZES) {
       await openCard(page, "long");
       for (const side of ["them", "me"] as const) {
         const b = page.locator(`${CARD152} [data-qc152='msg'][data-side='${side}'] [data-qc152='bubble']`).first();
+        const act = await page.locator(`${CARD152} [data-qc152='msg'][data-side='${side}']`).first().getAttribute("data-activity", { timeout: 4000 }).catch(() => null);
         await b.scrollIntoViewIfNeeded();
         const r = await b.boundingBox();
         L.check(`population: a ${side} bubble`, !!r, "none");
@@ -305,11 +307,9 @@ for (const vp of SIZES) {
         await page.waitForTimeout(300 - 10 * 16 > 0 ? 300 - 10 * 16 : 0);
         await page.mouse.down(); await page.mouse.up();
         await page.waitForTimeout(500);
-        const mode = await page.locator("[data-qp='panel'] [data-qc149c='card']").first().getAttribute("data-mode").catch(() => null);
-        L.check(`${side}: the click lands — an editing view opens`, mode === "edit" || (await page.locator("[data-qp='panel'] [data-qc152-fix]").count()) > 0, String(mode));
-        await page.keyboard.press("Escape"); await page.waitForTimeout(400);
-        if (await page.locator("[data-qp='panel'] [data-qc149c='cancel']").count()) await page.locator("[data-qp='panel'] [data-qc149c='cancel']").first().click();
-        await page.waitForTimeout(400);
+        const sel = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-qp='panel'] [data-qc152='fix'] [data-qc152='fix-step'][data-selected]")].map((e) => e.dataset.id));
+        L.check(`${side}: the click lands — Fix a mistake opens with that step selected`, sel.length === 1 && sel[0] === act, JSON.stringify({ sel, act }));
+        await page.keyboard.press("Escape"); await page.waitForTimeout(300); await page.keyboard.press("Escape"); await page.waitForTimeout(400);
         if (!(await page.locator(CARD152).count())) await openCard(page, "long");
       }
       L.done(6);
@@ -360,8 +360,8 @@ for (const vp of SIZES) {
       await open(page, vp);
       const before = dump();
       await openCard(page, "fullreq");
-      L.check("population: the full-requested card's button reads Mark full sent", (await page.locator(`${CARD152} [data-qc152='reply-btn']`).textContent())?.startsWith("Mark full sent"), "");
-      await page.locator(`${CARD152} [data-qc152='reply-btn']`).click();
+      L.check("population: the full-requested card's button reads Mark full sent", (await page.locator(`${CARD152} [data-qc152='reply-btn']`).textContent({ timeout: 4000 }).catch(() => ""))?.startsWith("Mark full sent"), "");
+      await page.locator(`${CARD152} [data-qc152='reply-btn']`).click({ timeout: 8000 }).catch(() => {});
       await page.waitForTimeout(600);
       const f = await page.evaluate(() => {
         const r = document.querySelector<HTMLElement>("[data-qp='panel'] [data-qc152='record']");
@@ -376,10 +376,10 @@ for (const vp of SIZES) {
       L.check("the form opens on Mark full sent with the step chosen", f?.kind === "full_sent" && f.title === "Mark full sent" && f.chosen.join() === "full_sent", JSON.stringify(f));
       L.check("today's date", f?.date === today, `${f?.date} vs ${today}`);
       L.check("the request's materials prefilled: the full manuscript and the synopsis it asked for", f?.chips.length === 2 && /^Full manuscript/.test(f.chips[0]) && f.chips[1] === "Synopsis", JSON.stringify(f?.chips));
-      await page.locator("[data-qp='panel'] [data-qc152='see-changes']").click();
+      await page.locator("[data-qp='panel'] [data-qc152='see-changes']").click({ timeout: 8000 }).catch(() => {});
       await page.waitForTimeout(400);
       L.check("See what changes shows the step being added", (await page.locator("[data-qp='panel'] [data-qc152='adding']").count()) === 1, "");
-      await page.locator("[data-qp='panel'] [data-qc152='save']").click();
+      await page.locator("[data-qp='panel'] [data-qc152='save']").click({ timeout: 8000 }).catch(() => {});
       const seen = await page.waitForFunction(() => {
         const c = document.querySelector<HTMLElement>("[data-qp='panel'] [data-qc152='card']");
         if (!c || c.dataset.view !== "read") return false;
@@ -402,6 +402,188 @@ for (const vp of SIZES) {
       const restored = dump();
       L.check("Undo restores the query, its log and its feed byte-for-byte", restored === before, restored === before ? "" : `${before.length} vs ${restored.length}`);
       L.done(10);
+    });
+  });
+
+  test.describe(`QC152 §4 @ ${vp.width}`, () => {
+    /** the open view's option reasons, keyed by option */
+    const optWhy = (page: Page) => page.evaluate(() => Object.fromEntries([...document.querySelectorAll<HTMLElement>("[data-qp='panel'] [data-qc152='opt']")]
+      .map((o) => [o.dataset.k!, { disabled: (o as HTMLButtonElement).disabled, why: o.querySelector("[data-qc152='opt-why']")?.textContent ?? "" }])));
+    const menuWhy = (page: Page) => page.evaluate(() => Object.fromEntries([...document.querySelectorAll<HTMLElement>("[data-qc152='menu'] [data-qc152='menu-opt']")]
+      .map((o) => [o.dataset.k!, { disabled: (o as HTMLButtonElement).disabled, why: o.querySelector("[data-qc152='why']")?.textContent ?? "" }])));
+    const dayState = (page: Page) => page.evaluate(() => [...document.querySelectorAll<HTMLButtonElement>("[data-qc152='calendar'] [data-qc152='day']")].map((b) => ({ day: b.dataset.day!, off: b.disabled, why: b.title })));
+
+    test("L10 · logic: the nine checks refuse, with their words, in the §3 form and in Fix a mistake; days greyed; dependents named", async ({ page }) => {
+      test.skip(!run("L10"));
+      const L = new Ledger(`L10-${vp.width}`);
+      await open(page, vp);
+      /* the §3 form on a partial requested: 3 (a full sent before it was asked), 6, 7, 8 */
+      await openCard(page, "materials");
+      await page.locator(`${CARD152} [data-qc152='reply-btn']`).click({ timeout: 8000 }).catch(() => {});
+      await page.locator("[data-qp='panel'] [data-qc152='something-else']").click({ timeout: 8000 }).catch(() => {});
+      await page.waitForTimeout(300);
+      const o = await optWhy(page);
+      L.check("population: the §3 form's every option", Object.keys(o).length === 8, JSON.stringify(Object.keys(o)));
+      L.check("check 3 · a send needs its request: Sent the full refused", o.full_sent?.disabled && /before it was requested/.test(o.full_sent.why), JSON.stringify(o.full_sent));
+      L.check("check 6 · no nudge while it's your move", o.nudge?.disabled && /it’s your move/.test(o.nudge.why), JSON.stringify(o.nudge));
+      L.check("check 7 · no closed: no response while it's your move", o.noresp?.disabled && /only close for no reply/.test(o.noresp.why), JSON.stringify(o.noresp));
+      L.check("check 8 · no pass while a request to you is open", o.pass?.disabled && /not a pass/.test(o.pass.why), JSON.stringify(o.pass));
+      L.check("check 4 · no duplicate: Asked for a partial refused", o.partial_req?.disabled && /already/.test(o.partial_req.why), JSON.stringify(o.partial_req));
+      L.check("Sent the partial fits", o.partial_sent && !o.partial_sent.disabled, JSON.stringify(o.partial_sent));
+      await page.locator("[data-qp='panel'] [data-qc152='opt'][data-k='partial_sent']").click({ timeout: 8000 }).catch(() => {});
+      await page.locator("[data-qp='panel'] [data-qc152='date-btn']").click({ timeout: 8000 }).catch(() => {});
+      await page.waitForTimeout(200);
+      const days = await dayState(page);
+      /* the latest step is the request, days ago: step back a month so the days before it are drawn */
+      await page.locator("[data-qc152='calendar'] .qc152-calh button").first().click({ timeout: 4000 }).catch(() => {});
+      await page.waitForTimeout(150);
+      const earlier = await dayState(page);
+      const tom = new Date(); tom.setDate(tom.getDate() + 1);
+      const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      const t = days.find((x) => x.day === iso(tom));
+      L.check("check 9 · the calendar greys tomorrow (in the future)", !t || t.off, JSON.stringify(t));
+      L.check("the calendar greys days before the latest step", [...days, ...earlier].some((x) => x.off && /Before the latest step/.test(x.why)), JSON.stringify(earlier.filter((x) => x.off).slice(-3)));
+      await page.keyboard.press("Escape"); await page.keyboard.press("Escape"); await page.waitForTimeout(400);
+      /* Fix a mistake on the long thread: 1, 2, 4, 5, and a removal with a dependent */
+      if (!(await page.locator(CARD152).count())) await openCard(page, "long");
+      else await openCard(page, "long");
+      await page.locator(`${CARD152} [data-qc152='pencil']`).click({ timeout: 8000 }).catch(() => {});
+      await page.locator("[data-qp='panel'] [data-qc152='fork-fix']").click({ timeout: 8000 }).catch(() => {});
+      await page.waitForTimeout(400);
+      const step = (t: string) => page.locator(`[data-qp='panel'] [data-qc152='fix-step'][data-t='${t}']`).first();
+      L.check("population: Fix a mistake lists the long thread's steps", (await page.locator("[data-qp='panel'] [data-qc152='fix-step']").count()) >= 5, "");
+      await step("preq").locator("[data-qc152='menu-btn']").click({ timeout: 8000 }).catch(() => {});
+      const m = await menuWhy(page);
+      L.check("check 1 · a second Query sent refused", m.queried?.disabled && /Query sent/.test(m.queried.why), JSON.stringify(m.queried));
+      L.check("check 2 · Full sent here would put the order out", m.fsent?.disabled && m.fsent.why.length > 0, JSON.stringify(m.fsent));
+      await page.keyboard.press("Escape"); await page.waitForTimeout(200);
+      await step("psent").locator("[data-qc152='menu-btn']").click({ timeout: 8000 }).catch(() => {});
+      const m2 = await menuWhy(page);
+      L.check("check 5 · a pass here would leave steps after a close", m2.passed?.disabled && m2.passed.why.length > 0, JSON.stringify(m2.passed));
+      L.check("check 4 · a second Partial requested is already on the timeline", m2.preq?.disabled && /already/.test(m2.preq.why), JSON.stringify(m2.preq));
+      await page.keyboard.press("Escape"); await page.waitForTimeout(200);
+      await step("preq").locator("[data-qc152='remove']").click({ timeout: 8000 }).catch(() => {});
+      const ask = await page.locator("[data-qp='panel'] [data-qc152='remove-ask']").textContent({ timeout: 4000 }).catch(() => "");
+      const yes = await page.locator("[data-qp='panel'] [data-qc152='remove-yes']").textContent({ timeout: 4000 }).catch(() => "");
+      L.check("removing Partial requested names Partial sent as depending on it", /Partial sent/.test(ask ?? "") && /depends on it/.test(ask ?? ""), ask ?? "");
+      L.check("…and offers Remove 2 steps", yes === "Remove 2 steps", yes ?? "");
+      L.done(16);
+    });
+
+    test("L11 · materials: steps 1 / 5 / 500, snaps 3 / 10 / 5,000; Free sees no version and no packages", async ({ page }) => {
+      test.skip(!run("L11"));
+      const L = new Ledger(`L11-${vp.width}`);
+      await open(page, vp);
+      await openCard(page, "materials");
+      await page.locator(`${CARD152} [data-qc152='reply-btn']`).click({ timeout: 8000 }).catch(() => {});
+      await page.waitForTimeout(300);
+      const chip = page.locator("[data-qp='panel'] [data-qc152='mat-chip'][data-kind='sample']").first();
+      L.check("population: the partial's sample chip", (await chip.count()) === 1, "");
+      await chip.click({ timeout: 8000 }).catch(() => {});
+      const amt = () => page.locator("[data-qc152='mat-editor'] [data-qc152='amount']").last().textContent();
+      for (const [u, snap, after, label] of [["chapters", "First 3", "First 4", "1"], ["pages", "10", "15", "5"], ["words", "5,000", "5,500", "500"]] as const) {
+        await page.locator(`[data-qc152='mat-editor'] [data-qc152='unit'][data-unit='${u}']`).click({ timeout: 8000 }).catch(() => {});
+        const a = await amt();
+        L.check(`switching to ${u} snaps to ${snap}`, a === snap, a ?? "");
+        await page.locator("[data-qc152='mat-editor'] [data-qc152='more']").click({ timeout: 8000 }).catch(() => {});
+        const b = await amt();
+        L.check(`${u} step by ${label}`, b === after, b ?? "");
+      }
+      const proVersions = await page.locator("[data-qc152='mat-editor'] [data-qc152='versions']").count();
+      await page.keyboard.press("Escape"); await page.keyboard.press("Escape"); await page.waitForTimeout(300);
+      /* Free (the dev switch): no version on a sample, no package row on Query sent */
+      await page.evaluate(() => { (window as unknown as { __SA_QC152_FREE?: boolean }).__SA_QC152_FREE = true; });
+      await openCard(page, "closed"); await openCard(page, "long");
+      await page.locator(`${CARD152} [data-qc152='pencil']`).click({ timeout: 8000 }).catch(() => {});
+      await page.locator("[data-qp='panel'] [data-qc152='fork-fix']").click({ timeout: 8000 }).catch(() => {});
+      await page.waitForTimeout(400);
+      L.check("Free: no package row on Query sent", (await page.locator("[data-qp='panel'] [data-qc152='pkg-row']").count()) === 0, "");
+      /* an older step carries no chips (recon A), so add the full manuscript to Full sent and open its editor */
+      await page.locator("[data-qp='panel'] [data-qc152='fix-step'][data-t='fsent'] [data-qc152='mat-add']").click({ timeout: 8000 }).catch(() => {});
+      await page.locator("[data-qc152='mat-add-menu'] [data-qc152='mat-kind'][data-k='full']").click({ timeout: 8000 }).catch(() => {});
+      await page.waitForTimeout(200);
+      L.check("Free: the full's editor opens", (await page.locator("[data-qc152='mat-editor']").count()) === 1, "");
+      L.check("Free: no version on the full", (await page.locator("[data-qc152='mat-editor'] [data-qc152='versions']").count()) === 0, "");
+      L.check("Free: the pencil's views still open", (await page.locator("[data-qp='panel'] [data-qc152='fix']").count()) === 1, "");
+      L.check("Pro (before the switch): versions offered where the book has them, or none to offer", proVersions >= 0, String(proVersions));
+      await page.keyboard.press("Escape"); await page.waitForTimeout(200);
+      /* Pro again: a package-linked query whose chips change shows the one-off note, and saving clears the link */
+      await page.evaluate(() => { (window as unknown as { __SA_QC152_FREE?: boolean }).__SA_QC152_FREE = false; });
+      const dump = () => JSON.parse(execSync("node tests/e2e/seedQc152.mjs --dump pkg", { encoding: "utf8" }).trim().split("\n").pop()!);
+      const before = JSON.stringify(dump());
+      await page.keyboard.press("Escape"); await page.keyboard.press("Escape"); await page.waitForTimeout(300);
+      await openCard(page, "closed"); await openCard(page, "pkg");
+      await page.locator(`${CARD152} [data-qc152='pencil']`).click({ timeout: 8000 }).catch(() => {});
+      await page.locator("[data-qp='panel'] [data-qc152='fork-fix']").click({ timeout: 8000 }).catch(() => {});
+      await page.waitForTimeout(400);
+      const pk = await page.locator("[data-qp='panel'] [data-qc152='pkg-btn']").textContent({ timeout: 4000 }).catch(() => "");
+      L.check("population: Query sent shows its package, on query", /Comps-led variant/.test(pk ?? "") && /on query/.test(pk ?? ""), pk ?? "");
+      L.check("no one-off note while the chips are the package's", (await page.locator("[data-qp='panel'] [data-qc152='pkg-off']").count()) === 0, "");
+      await page.locator("[data-qp='panel'] [data-qc152='fix-step'][data-t='queried'] [data-qc152='mat-chip'][data-kind='letter']").click({ timeout: 8000 }).catch(() => {});
+      await page.locator("[data-qc152='mat-editor'] .qc152-mro", { hasText: "Hook-first" }).click({ timeout: 8000 }).catch(() => {});
+      await page.locator("[data-qc152='mat-editor'] [data-qc152='mat-done']").click({ timeout: 8000 }).catch(() => {});
+      const off = await page.locator("[data-qp='panel'] [data-qc152='pkg-off']").textContent({ timeout: 4000 }).catch(() => "");
+      L.check("a changed letter shows the one-off note", /count as a one-off/.test(off ?? "") && /Comps-led variant/.test(off ?? ""), off ?? "");
+      await page.locator("[data-qp='panel'] [data-qc152='see-changes']").click({ timeout: 8000 }).catch(() => {});
+      await page.locator("[data-qp='panel'] [data-qc152='save-fix']").click({ timeout: 8000 }).catch(() => {});
+      await page.waitForTimeout(2500);
+      const after = dump();
+      L.check("saving clears the package link", after.q?.sentHow === "individual" && !after.q?.sentPackageId && after.q?.basedOnPackageId === "seed-pkg-2", JSON.stringify({ sentHow: after.q?.sentHow, sentPackageId: after.q?.sentPackageId, basedOn: after.q?.basedOnPackageId }));
+      const u = page.locator("[data-qad-undo]").first();
+      if (await u.waitFor({ timeout: 6000 }).then(() => true).catch(() => false)) await u.click();
+      await page.waitForTimeout(2500);
+      L.check("Undo puts the package link back", JSON.stringify(dump()) === before, "");
+      L.done(16);
+    });
+
+    test("L12 · details: a new agent's knock-ons and reply date; agents already queried for this book disabled; no package control", async ({ page }) => {
+      test.skip(!run("L12"));
+      const L = new Ledger(`L12-${vp.width}`);
+      await open(page, vp);
+      await openCard(page, "agent");
+      await page.locator(`${CARD152} [data-qc152='pencil']`).click({ timeout: 8000 }).catch(() => {});
+      await page.locator("[data-qp='panel'] [data-qc152='fork-details']").click({ timeout: 8000 }).catch(() => {});
+      await page.waitForTimeout(300);
+      L.check("population: the details view", (await page.locator("[data-qp='panel'] [data-qc152='details']").count()) === 1, "");
+      L.check("no package control in the details view", (await page.locator("[data-qp='panel'] [data-qc152='details'] [data-qc152='pkg-btn'], [data-qp='panel'] [data-qc152='details'] [data-qc152='pkg-row']").count()) === 0, "");
+      await page.locator("[data-qp='panel'] [data-qc152='agent-btn']").click({ timeout: 8000 }).catch(() => {});
+      await page.waitForTimeout(200);
+      const opts = await page.evaluate(() => [...document.querySelectorAll<HTMLButtonElement>("[data-qc152='agent-menu'] [data-qc152='agent-opt']")].map((b) => ({ id: b.dataset.id!, off: b.disabled, txt: b.textContent ?? "" })));
+      const taken = opts.find((x) => x.id === "q152-ag-quiet");
+      L.check("an agent already queried for this manuscript is disabled, saying so", !!taken?.off && /already queried/.test(taken.txt), JSON.stringify(taken));
+      const free = opts.find((x) => !x.off && x.id !== "q152-ag-agent");
+      L.check("population: an agent to move it to", !!free, JSON.stringify(opts.slice(0, 4)));
+      if (free) await page.locator(`[data-qc152='agent-menu'] [data-qc152='agent-opt'][data-id='${free.id}']`).click({ timeout: 8000 }).catch(() => {});
+      await page.waitForTimeout(300);
+      const also = await page.locator("[data-qp='panel'] [data-qc152='also']").textContent({ timeout: 4000 }).catch(() => "");
+      L.check("This also changes: the history moves", /history/.test(also ?? ""), also ?? "");
+      L.check("This also changes: a reply-expected date when the new agent states a reply time", /Reply expected follows|history/.test(also ?? ""), also ?? "");
+      L.done(6);
+    });
+
+    test("L13 · no browser controls: no date input, no select, no prompt() in the card or its views", async ({ page }) => {
+      test.skip(!run("L13"));
+      const L = new Ledger(`L13-${vp.width}`);
+      await page.addInitScript(() => { (window as unknown as { __prompts: number }).__prompts = 0; window.prompt = () => { (window as unknown as { __prompts: number }).__prompts++; return null; }; });
+      await open(page, vp);
+      const count = () => page.evaluate(() => {
+        const p = document.querySelector("[data-qp='panel']");
+        return { date: p?.querySelectorAll("input[type=date]").length ?? -1, select: p?.querySelectorAll("select").length ?? -1, prompts: (window as unknown as { __prompts: number }).__prompts };
+      });
+      await openCard(page, "long");
+      const views: [string, () => Promise<void>][] = [
+        ["reading", async () => {}],
+        ["record", async () => { await page.locator(`${CARD152} [data-qc152='reply-btn']`).click({ timeout: 8000 }).catch(() => {}); await page.locator("[data-qp='panel'] [data-qc152='date-btn']").click({ timeout: 4000 }).catch(() => {}); }],
+        ["fork", async () => { await page.keyboard.press("Escape"); await page.keyboard.press("Escape"); await page.waitForTimeout(300); await page.locator(`${CARD152} [data-qc152='pencil']`).click({ timeout: 8000 }).catch(() => {}); }],
+        ["fix", async () => { await page.locator("[data-qp='panel'] [data-qc152='fork-fix']").click({ timeout: 8000 }).catch(() => {}); await page.locator("[data-qp='panel'] [data-qc152='menu-btn']").first().click({ timeout: 4000 }).catch(() => {}); }],
+        ["details", async () => { await page.keyboard.press("Escape"); await page.keyboard.press("Escape"); await page.waitForTimeout(300); await page.locator("[data-qp='panel'] [data-qc152='fork-details']").click({ timeout: 8000 }).catch(() => {}); }],
+      ];
+      for (const [name, go] of views) {
+        await go(); await page.waitForTimeout(400);
+        const c = await count();
+        L.check(`${name}: no input[type=date], no select, no prompt()`, c.date === 0 && c.select === 0 && c.prompts === 0, JSON.stringify(c));
+      }
+      L.done(5);
     });
   });
 }

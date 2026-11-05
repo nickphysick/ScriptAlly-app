@@ -2,10 +2,10 @@
  {
   "where": "population",
   "ok": true,
-  "detail": "[22,38,10,18]"
+  "detail": "[22,36,12,18]"
  },
  {
-  "where": "Your move rows: one navy tag, white text, 20 tall",
+  "where": "Your move rows: one tag, 20 tall — navy Your move, or light-blue Nudge due",
   "ok": true,
   "detail": "[]"
  },
