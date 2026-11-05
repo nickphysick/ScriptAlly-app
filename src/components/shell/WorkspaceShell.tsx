@@ -44,6 +44,7 @@ import { markPinnedToolbars } from "./pinnedToolbar";
 import { BarSwitcher } from "./BarSwitcher";
 import { FEEDBACK_FAB } from "../../lib/beta";
 import { useSidebarState, SidebarMode } from "./useSidebarState";
+import { ESC_LEVEL, useEscapeLayer } from "../../lib/escapeStack";
 import { formatSidebarName, getInitials } from "../../lib/displayName";
 import { DeskTooltip } from "../dashboard/DeskTooltip";
 import { Rect as TipRect } from "../../lib/deskTooltip";
@@ -74,7 +75,7 @@ import { SidebarRail } from "./SidebarRail";
 import { railTile } from "../../lib/railTile";
 import { noteRailPage } from "../../lib/railMemory";
 import { railCountAid } from "../../lib/railReviewAid";
-import { discoverUnlocked, packagesUnlocked } from "../../lib/entitlements";
+import { discoverUnlocked, packagesUnlocked, versionsUnlocked } from "../../lib/entitlements";
 
 /** The shared active-manuscript key. ⚠️ Packages, Comps and Manuscripts READ this — a selector
  *  that stops writing it breaks them silently, with no error and simply the wrong book. */
@@ -188,7 +189,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
 
   const hit = useMemo(() => shellHitFor(sections, pathname, search), [sections, pathname, search]);
   /* sidebar rail v1 — the page on screen is its section's last page, for the rail's section rows */
-  useEffect(() => { if (!isAccountPath(pathname)) noteRailPage(hit); }, [hit?.section, hit?.child, pathname]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (!isAccountPath(pathname)) noteRailPage(hit, undefined, sections); }, [hit?.section, hit?.child, pathname]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ⚠️ COLLAPSE RETURNS — AS A NARROWING, NOT A REMOVAL (sidebar-collapse pack; supersedes the
      app-shell-v2 note that retired it). What v2 retired was the RAIL-AND-PANEL model, where the
@@ -298,23 +299,46 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
       if (!t || panel?.contains(t) || t.closest?.(MENUS)) return;
       toRailRef.current();
     };
-    const key = (e: KeyboardEvent) => {
-      if (e.key !== "Escape" || e.defaultPrevented) return;
-      e.preventDefault();
-      toRailRef.current();
+    /* ⚠️ "UP" MEANS SHOWN, NOT LAID OUT. Some dialogs stay mounted with their box while closed — the dashboard's
+       How-it-works modal is opacity 0, `aria-hidden` and `inert` on every route — and a box-only test read them as
+       open, so the float shut on the first DOM change anywhere. */
+    const shown = (d: HTMLElement) => {
+      if (d.offsetWidth === 0 || d.offsetHeight === 0) return false;
+      if (d.closest('[aria-hidden="true"], [inert]')) return false;
+      const cs = getComputedStyle(d);
+      return cs.visibility !== "hidden" && parseFloat(cs.opacity) > 0.05;
     };
     const dialogUp = () => [...document.querySelectorAll<HTMLElement>('[role="dialog"]')].some((d) =>
-      !panel?.contains(d) && !d.closest(OWN_DIALOGS) && d.offsetWidth > 0 && d.offsetHeight > 0);
-    const mo = new MutationObserver(() => { if (dialogUp()) toRailRef.current(); });
+      !panel?.contains(d) && !d.closest(OWN_DIALOGS) && shown(d));
+    /* a dialog that fades in is at opacity 0 when it mounts, and its fade makes no mutation: look again shortly after */
+    let again = 0;
+    const mo = new MutationObserver(() => {
+      if (dialogUp()) { toRailRef.current(); return; }
+      window.clearTimeout(again);
+      again = window.setTimeout(() => { if (dialogUp()) toRailRef.current(); }, 220);
+    });
     mo.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["style", "class", "hidden"] });
     document.addEventListener("pointerdown", away, true);
-    window.addEventListener("keydown", key, true);
     return () => {
+      window.clearTimeout(again);
       mo.disconnect();
       document.removeEventListener("pointerdown", away, true);
-      window.removeEventListener("keydown", key, true);
     };
   }, [sidebar.mode]);
+
+  /* ⚠️ ESCAPE IS A LAYER ON THE APP'S ONE ESCAPE STACK (lib/escapeStack), at `sidebarFloat`: the stack takes the
+     key on window in the capture phase, so a listener of the shell's own would hear it only when no page layer was
+     open. The layer stands down while focus is inside a menu the sidebar opened (the manuscript menu, the account
+     menu — both take focus when they open), so their own Escape closes them first; the next Escape closes the
+     float. The settings mode's Escape (bubble phase) reads `defaultPrevented`, which the stack sets. */
+  const [menuFocus, setMenuFocus] = useState(false);
+  useEffect(() => {
+    if (sidebar.mode !== "float") { setMenuFocus(false); return undefined; }
+    const on = (e: FocusEvent) => setMenuFocus(!!(e.target as Element | null)?.closest?.('[role="menu"]'));
+    document.addEventListener("focusin", on);
+    return () => document.removeEventListener("focusin", on);
+  }, [sidebar.mode]);
+  useEscapeLayer(sidebar.mode === "float" && !menuFocus, () => toRailRef.current(), ESC_LEVEL.sidebarFloat);
 
   /* ══ FOCUS: opening FLOAT moves focus to the current page's row; going back to the rail returns it to
      the expand control, when focus was inside the full sidebar. ══ */
@@ -828,6 +852,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
     const out = new Set<string>();
     if (!discoverUnlocked(currentUser)) out.add("discover");
     if (!packagesUnlocked(currentUser)) out.add("packages");
+    if (!versionsUnlocked(currentUser)) out.add("versions");
     return out;
   }, [currentUser]);
   const name = currentUser?.name ?? "";
@@ -1034,7 +1059,8 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                           flex gap beside a zero-width child would hold itself open and park the
                           icon 5px off the rail's centre. */}
                       <span className="ws-lbl">{sidebarLabel(ch)}</span>
-                      {ch.pro ? <span className="ws-qpro" data-shell="pro" aria-label="Pro">PRO</span> : null}
+                      {/* sidebar rail v1: the PRO tag is DORMANT — drawn only for an account not entitled to the page */}
+                      {ch.pro && proLocked.has(ch.pro) ? <span className="ws-qpro" data-shell="pro" aria-label="Pro">PRO</span> : null}
                       {att && <span className="ws-ct" data-shell="count" aria-label={`${ch.count} to do`}>{inkCount(ch.count!)}</span>}
                     </button>
                   );

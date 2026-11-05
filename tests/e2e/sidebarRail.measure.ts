@@ -43,17 +43,18 @@ async function tabSiblings(page: Page): Promise<string[]> {
 }
 
 test.describe("sidebar rail v1 — Phase 1, the nav model", () => {
-  test("SR1.1 the folder tab follows the new sections", async ({ page }) => {
+  test("SR1.1 the folder tab follows the sections", async ({ page }) => {
     await openRoute(page, "/manuscripts", WIDE);
     await expect(page.locator(".ws-ftn")).toHaveText("Manuscripts");
     const ms = await tabSiblings(page);
     console.log("[SR1.1] /manuscripts siblings", JSON.stringify(ms));
-    expect(ms).toEqual(["Comparable titles"]);
-    await openRoute(page, "/manuscripts/packages", WIDE);
+    /* dev's nav (5 Nov ruling): Your book = Manuscripts · Versions · Comparable titles */
+    expect(ms).toEqual(["Versions", "Comparable titles"]);
+    await openRoute(page, "/queries/packages", WIDE);
     await expect(page.locator(".ws-ftn")).toHaveText("Submission packages");
     const pk = await tabSiblings(page);
-    console.log("[SR1.1] /manuscripts/packages siblings", JSON.stringify(pk));
-    expect(pk).toEqual([]);
+    console.log("[SR1.1] /queries/packages siblings", JSON.stringify(pk));
+    expect(pk).toEqual(["Query Centre", "Responses", "Analytics"]);
   });
 
   test("SR1.2 the palette lists the nav's pages by the nav's names", async ({ page }) => {
@@ -61,7 +62,7 @@ test.describe("sidebar rail v1 — Phase 1, the nav model", () => {
     await page.keyboard.press(process.platform === "darwin" ? "Meta+k" : "Control+k");
     const input = page.locator('.sp-pal [role="combobox"]');
     await expect(input).toBeVisible();
-    for (const [term, title] of [["respon", "Responses"], ["analy", "Analytics"], ["submission", "Submission packages"], ["comparable", "Comparable titles"]] as const) {
+    for (const [term, title] of [["respon", "Responses"], ["analy", "Analytics"], ["submission", "Submission packages"], ["versions", "Versions"], ["comparable", "Comparable titles"]] as const) {
       await input.fill(term);
       const titles = await page.locator(".sp-res .sp-t1").allTextContents();
       console.log(`[SR1.2] "${term}"`, JSON.stringify(titles.slice(0, 6)));
@@ -69,15 +70,20 @@ test.describe("sidebar rail v1 — Phase 1, the nav model", () => {
     }
   });
 
-  test("SR1.3 the phone bar names /queries Query Centre", async ({ page }) => {
-    /* openRoute waits on the sidebar, which a phone hides: sign in wide, then reload at the phone's size */
+  test("SR1.3 the phone never says Queries Hub", async ({ page }) => {
+    /* dev's phone (Phone app v2) names its tab pages by the tab and everything under /manuscripts "Manuscripts"; the
+       crumb's "Query Centre" for /queries is unit-locked (shellV2Smoke). Here: the stale name is gone everywhere. */
     await openRoute(page, "/queries", WIDE);
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.reload();
-    await expect(page.locator(".sv2-crumb b").first()).toBeVisible({ timeout: 30_000 });
-    const crumb = (await page.locator(".sv2-crumb b").first().textContent())?.trim();
-    console.log("[SR1.3] phone crumb", crumb);
-    expect(crumb).toBe("Query Centre");
+    const seen: string[] = [];
+    for (const r of ["/queries", "/queries/analytics", "/queries/responses", "/manuscripts/comps", "/agents"]) {
+      await page.goto(r);
+      const title = page.locator('[data-pa="band-title"]').first();
+      await expect(title).toBeVisible({ timeout: 30_000 });
+      seen.push(`${r}=${(await title.textContent())?.trim()}`);
+      expect(await page.locator("body").innerText(), r).not.toContain("Queries Hub");
+    }
+    console.log("[SR1.3] phone band titles", JSON.stringify(seen));
   });
 });
 
@@ -137,7 +143,7 @@ test.describe("sidebar rail v1 — Phase 2, the rail", () => {
     await breakCss(page, "label", ".wsr-spl { font-size: 15px !important }");
     await breakCss(page, "railw", ".ws-panel { width: 84px !important }");
     const all: Fit[] = [];
-    for (const route of ["/queries", "/agents", "/manuscripts", "/todo", "/manuscripts/packages", "/dashboard"]) {
+    for (const route of ["/queries", "/agents", "/manuscripts/versions", "/todo", "/queries/packages", "/dashboard"]) {
       await openRoute(page, route, WIDE);
       const w = await page.locator("#ws-sidebar").evaluate((e) => (e as HTMLElement).offsetWidth);
       expect(w, route).toBe(80);
@@ -149,9 +155,11 @@ test.describe("sidebar rail v1 — Phase 2, the rail", () => {
     }
     expect(all.length).toBeGreaterThan(20);
     const texts = new Set(all.map((f) => f.text));
-    for (const t of ["Dashboard", "Queries", "Agents", "Manuscript", "Materials", "Tasks", "Query Centre", "Responses", "Analytics", "Contact list", "Discover", "Manuscripts", "Comps", "To-do list", "Calendar", "Corkboard", "Feedback"]) {
+    for (const t of ["Dashboard", "Queries", "Agents", "Your book", "Tasks", "Query Centre", "Responses", "Analytics", "Packages", "Contact list", "Discover", "Manuscripts", "Versions", "Comps", "To-do list", "Corkboard", "Feedback"]) {
       expect([...texts], `label "${t}" was measured`).toContain(t);
     }
+    const cut = all.filter((f) => f.lines !== 1 || !f.inside || f.overflow > 0);
+    console.log("[SR2.1] labels measured", all.length, "— wrapped, escaping or cut:", JSON.stringify(cut));
     for (const f of all) {
       expect(f.lines, `${f.text} is one line`).toBe(1);
       expect(f.inside, `${f.text} sits inside its row`).toBe(true);
@@ -162,12 +170,14 @@ test.describe("sidebar rail v1 — Phase 2, the rail", () => {
   test("SR2.2 the nav scrolls only on a short window, with the head and foot in view", async ({ page }) => {
     await onRail(page);
     await breakCss(page, "scroll", ".wsr-grp .wsr-ni { height: 92px !important }");
-    for (const h of [982, 900, 760]) {
+    /* dev's nav has five sections, one row fewer than the pack was drawn with: at 760 it now fits, so the
+       scrolling case is 640, where the rows cannot fit. 760 is reported, and still keeps its head and foot. */
+    for (const h of [982, 900, 760, 640]) {
       await openRoute(page, "/queries", { width: 1512, height: h });
       const r = await navScroll(page);
       console.log(`[SR2.2] ${h}px`, JSON.stringify(r));
-      if (h === 760) expect(r.scrolls, "760 scrolls").toBe(true);
-      else expect(r.scrolls, `${h} does not scroll`).toBe(false);
+      if (h === 640) expect(r.scrolls, "640 scrolls").toBe(true);
+      else if (h !== 760) expect(r.scrolls, `${h} does not scroll`).toBe(false);
       expect(r.headTop).toBeGreaterThanOrEqual(0);
       expect(r.footBottom).toBeLessThanOrEqual(r.vh);
     }
@@ -274,12 +284,18 @@ async function expandFromRail(page: Page) {
 }
 /** "A click on the page": the top bar's empty middle, a point no control owns. */
 async function clickPage(page: Page) {
+  /* ⚠️ the folder tab's siblings are positioned OVER the bar's spacer (dev's tab row), so the spacer's middle can be a
+     tab: aim between the last thing drawn on the left and the bar's right-hand controls */
   const p = await page.evaluate(() => {
     const bar = document.querySelector<HTMLElement>(".ws-pagebar")!.getBoundingClientRect();
-    const g = document.querySelector<HTMLElement>(".ws-grow")!.getBoundingClientRect();
-    return { x: g.left + g.width / 2, y: bar.top + bar.height / 2, w: g.width };
+    const right = document.querySelector<HTMLElement>(".ws-bright")!.getBoundingClientRect().left;
+    let left = bar.left;
+    for (const el of document.querySelectorAll<HTMLElement>(".ws-pagebar [data-shell='tab'], .ws-pagebar .ws-ftsib")) {
+      const b = el.getBoundingClientRect(); if (b.width > 0 && !el.closest(".ws-ftmeasure")) left = Math.max(left, b.right);
+    }
+    return { x: (left + right) / 2, y: bar.top + bar.height / 2, w: right - left };
   });
-  expect(p.w, "the bar has an empty middle to click").toBeGreaterThan(40);
+  expect(p.w, "the bar has an empty stretch to click").toBeGreaterThan(40);
   await page.mouse.click(p.x, p.y);
 }
 async function startPinned(page: Page) {
@@ -366,11 +382,16 @@ test.describe("sidebar rail v1 — Phase 3, RAIL · FLOAT · PINNED", () => {
     await page.keyboard.press(process.platform === "darwin" ? "Meta+k" : "Control+k");
     await expect(page.locator(".sp-pal")).toBeVisible();
     await expect.poll(() => mode(page), { message: "⌘K" }).toBe("rail");
-    await page.keyboard.press("Escape");
+    /* ⚠️ Escape does not close the ⌘K palette on dev, with or without this pack (probed on the unmodified dev build,
+       5 Nov) — so the page is opened afresh rather than the palette dismissed */
+    await openMoving(page, "/queries");
     await open();
     await page.locator(".ws-pin .ws-ms-btn").click();
     const menu = page.locator('.ws-ms-menu--port[data-open="true"]');
     await expect(menu).toBeVisible();
+    const dialogs = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[role="dialog"]')]
+      .filter((d) => d.offsetWidth > 0 && d.offsetHeight > 0).map((d) => d.className.toString().slice(0, 60)));
+    console.log("[SR3.4] visible dialogs with the manuscript menu open:", JSON.stringify(dialogs), "mode", await mode(page));
     await menu.locator(".ws-ms-hint").click();
     await page.waitForTimeout(300);
     expect(await mode(page), "a click inside the manuscript menu").toBe("float");
@@ -433,6 +454,8 @@ test.describe("sidebar rail v1 — Phase 3, RAIL · FLOAT · PINNED", () => {
     await onRail(page);
     await openMoving(page, "/queries");
     await clickPage(page);
+    console.log("[SR3.8] after the page click the URL is", page.url());
+    await expect(page).toHaveURL(/\/queries$/);
     await page.keyboard.press("[");
     await expect.poll(() => mode(page)).toBe("float");
     await expect.poll(() => page.evaluate(() => document.activeElement?.getAttribute("aria-label"))).toBe("Query Centre");
@@ -498,32 +521,47 @@ test.describe("sidebar rail v1 — Phase 4, screenshots", () => {
   test.use({ deviceScaleFactor: 2 });
   test.skip(!SHOTS, "SR_SHOTS names the folder");
 
-  test("SR4 the eight screenshots", async ({ page, browser }) => {
+  test("SR4 the five screenshots at 1512×982", async ({ page }) => {
     const full = async (name: string) => { await page.waitForTimeout(600); await page.screenshot({ path: `${SHOTS}/${name}.png` }); };
     await onRail(page);
     await openMoving(page, "/queries");
-    await full("1-rail-queries");
-    await openMoving(page, "/agents/discover");
-    await full("2-agents-card-discover");
+    await full("1-rail-query-centre");
+    await openMoving(page, "/manuscripts/versions");
+    await full("2-rail-your-book-versions");
     await openMoving(page, "/queries");
     await expandFromRail(page);
-    await full("3-float-queries");
+    await full("3-floating-sidebar");
     await page.locator(".ws-pinbtn").click();
-    await full("4-pinned-queries");
+    await page.locator('.ws-pin .ws-ni[aria-label="Contact list"]').click();
+    await expect(page).toHaveURL(/\/agents$/);
+    await full("4-pinned-contact-list");
     await page.locator(".ws-pin .ws-acts .sb-toggle").click();
     await openMoving(page, "/account/profile");
     await full("5-settings-rail");
-    await openMoving(page, "/queries", { width: 1024, height: 800 });
-    await expandFromRail(page);
-    await full("6-float-1024");
-    await openMoving(page, "/queries", { width: 1512, height: 760 });
-    await full("8-rail-760-tall");
-    const ctx = await browser.newContext({ viewport: { width: 1180, height: 820 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2, storageState: "tests/e2e/.auth/state.json" });
-    const touch = await ctx.newPage();
-    await onRail(touch);
-    await openRoute(touch, "/queries");
-    await touch.waitForTimeout(600);
-    await touch.screenshot({ path: `${SHOTS}/7-touch-header.png`, clip: { x: 0, y: 0, width: 300, height: 320 } });
-    await ctx.close();
+  });
+});
+
+/* ── the pinned sidebar fits at 1512×982 (Nick's ruling, 25 Oct): every row AND the full feedback card ── */
+test.describe("sidebar rail v1 — the full sidebar's height", () => {
+  test("SR5 at 1512×982 the pinned sidebar shows every row and the full Give feedback card, no nav scroll", async ({ page }) => {
+    await startPinned(page);
+    await breakCss(page, "tall", ".ws-panel .ws-pin .ws-ni { height: 40px !important }");
+    await openRoute(page, "/queries", WIDE);
+    expect(await mode(page)).toBe("pinned");
+    const r = await page.evaluate(() => {
+      const nav = document.querySelector<HTMLElement>(".ws-pin .ws-nav")!;
+      const card = document.querySelector<HTMLElement>(".ws-pin .ws-fbc");
+      const rows = [...nav.querySelectorAll<HTMLElement>(".ws-ni")];
+      const nb = nav.getBoundingClientRect();
+      const cut = rows.filter((x) => { const b = x.getBoundingClientRect(); return b.top < nb.top - 0.5 || b.bottom > nb.bottom + 0.5; }).map((x) => x.getAttribute("aria-label"));
+      const cs = card ? getComputedStyle(card) : null;
+      return { rows: rows.length, sh: nav.scrollHeight, ch: nav.clientHeight, cut, card: !!card && cs!.display !== "none" && card.getBoundingClientRect().height > 0,
+        cardBottom: card?.getBoundingClientRect().bottom ?? 0, vh: innerHeight, spare: nav.clientHeight - nav.scrollHeight };
+    });
+    console.log("[SR5]", JSON.stringify(r));
+    expect(r.rows).toBe(12);
+    expect(r.card, "the full feedback card shows").toBe(true);
+    expect(r.cut, "rows outside the nav's box").toEqual([]);
+    expect(r.sh, "the nav does not scroll").toBeLessThanOrEqual(r.ch);
   });
 });

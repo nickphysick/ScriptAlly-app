@@ -47,8 +47,9 @@ export const SHELL_SECTIONS: ShellV2Section[] = [
     key: "querying",
     label: "Querying",
     pages: [
-      { key: "queries-hub", label: "Queries Hub", path: "/queries" },
-      { key: "packages", label: "Packages", path: "/manuscripts/packages" },
+      /* sidebar rail v1: the page has been the Query Centre for months; Packages lives under Queries (25 Oct) */
+      { key: "queries-hub", label: "Query Centre", path: "/queries" },
+      { key: "packages", label: "Packages", path: "/queries/packages" },
     ],
   },
   {

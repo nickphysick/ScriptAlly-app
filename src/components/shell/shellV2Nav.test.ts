@@ -31,7 +31,8 @@ describe("shellV2Nav — the accordion model", () => {
 
   it("files Packages under Querying (product grammar, not URL tree) — and To-do is no longer there", () => {
     const querying = SHELL_SECTIONS.find((s) => s.key === "querying")!;
-    expect(querying.pages.map((p) => p.path)).toEqual(["/queries", "/manuscripts/packages"]);
+    expect(querying.pages.map((p) => p.path)).toEqual(["/queries", "/queries/packages"]); /* packages moved under Queries (25 Oct) */
+    expect(querying.pages.map((p) => p.label)).toEqual(["Query Centre", "Packages"]); /* never "Queries Hub" */
   });
 
   it("⚠️ Tasks is a WORKSPACE of TWO pages, and the list is the default at /todo itself", () => {
@@ -71,7 +72,7 @@ describe("shellV2Nav — the accordion model", () => {
 
 describe("shellV2Nav — path matching", () => {
   it("matches exactly (packages beats the manuscripts prefix); dashboard maps flat", () => {
-    expect(shellPageForPath("/manuscripts/packages")?.section?.key).toBe("querying");
+    expect(shellPageForPath("/queries/packages")?.section?.key).toBe("querying");
     expect(shellPageForPath("/manuscripts")?.section?.key).toBe("shelf");
     expect(shellPageForPath("/dashboard")?.section).toBeNull();
   });

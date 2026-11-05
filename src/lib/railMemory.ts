@@ -29,12 +29,29 @@ function read(storage: Pick<Storage, "getItem"> | null): Memory {
 
 const store = (): Storage | null => (typeof localStorage === "undefined" ? null : localStorage);
 
-/** Note the page on screen as its section's last page. Off-nav routes (no hit) note nothing. */
-export function noteRailPage(hit: ShellHit | null, storage: Pick<Storage, "getItem" | "setItem"> | null = store()): void {
+/**
+ * Note the page on screen as its section's last page. Off-nav routes (no hit) note nothing.
+ *
+ * ⚠️ IT ALSO DROPS WHAT THE NAV NO LONGER HAS. A page that was retired (Calendar, 29 Oct) or moved to another
+ * section (Submission packages left Materials for Queries, 25 Oct) would otherwise sit in storage for ever. A
+ * click on its section already falls back to the first page; pruning on the next write keeps the memory honest.
+ */
+export function noteRailPage(
+  hit: ShellHit | null,
+  storage: Pick<Storage, "getItem" | "setItem"> | null = store(),
+  sections?: ShellSection[],
+): void {
   if (!hit?.section || !hit.child) return;
   const mem = read(storage);
-  if (mem[hit.section] === hit.child) return;
-  mem[hit.section] = hit.child;
+  let dirty = false;
+  if (sections) {
+    for (const [sec, page] of Object.entries(mem)) {
+      const s = sections.find((x) => x.id === sec);
+      if (!s || !(s.children ?? []).some((c) => c.id === page)) { delete mem[sec]; dirty = true; }
+    }
+  }
+  if (mem[hit.section] !== hit.child) { mem[hit.section] = hit.child; dirty = true; }
+  if (!dirty) return;
   try { storage?.setItem(RAIL_LAST_PAGE_KEY, JSON.stringify(mem)); } catch { /* not worth an error */ }
 }
 

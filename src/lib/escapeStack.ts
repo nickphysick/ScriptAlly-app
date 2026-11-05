@@ -39,6 +39,9 @@ export const ESC_LEVEL = {
   card: 10,
   /** anything open INSIDE the card: a combobox, the calendar, the ⋯ menu */
   cardPopup: 20,
+  /** sidebar rail v1 — the full sidebar FLOATING over the page: above a page's own layers and a card's popup,
+   *  below a drawer (which a floating sidebar never sits over: a dialog opening puts it away). */
+  sidebarFloat: 25,
   /** the query drawer, which stacks over a docked card */
   drawer: 30,
   /** the docked card shown above its chip (v13 §7) — folds before the drawer hears the key, after a

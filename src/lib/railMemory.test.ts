@@ -32,6 +32,14 @@ describe("railMemory — the last page per section (sidebar rail v1)", () => {
     s.setItem(RAIL_LAST_PAGE_KEY, "{not json");
     expect(railPageFor(sec("agents"), null, s)).toBe("/agents");
   });
+  it("stale entries — a retired page, a page that moved section, a section that is gone — are dropped on the next write", () => {
+    const s = mem();
+    s.setItem(RAIL_LAST_PAGE_KEY, JSON.stringify({ tasks: "calendar", materials: "m-pkg", manuscript: "m-ms", agents: "a-disc" }));
+    expect(railPageFor(sec("tasks"), null, s)).toBe("/todo");
+    expect(railPageFor(sec("materials"), null, s)).toBe("/manuscripts");
+    noteRailPage({ section: "queries", child: "q-responses" }, s, NAV);
+    expect(JSON.parse(s.m.get(RAIL_LAST_PAGE_KEY)!)).toEqual({ agents: "a-disc", queries: "q-responses" });
+  });
   it("an off-nav route notes nothing", () => {
     const s = mem();
     noteRailPage(null, s);
