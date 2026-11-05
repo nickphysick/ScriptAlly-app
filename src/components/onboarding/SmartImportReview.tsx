@@ -36,7 +36,7 @@ import {
   resolveReason, fmtDate,
   dupNoteOpen, dupNoteKept, parseModel, modelToResult, autoSetAsideRows, applyAgentRemoval, seedUnidentifiedSetAside,
   removeDuplicateRecord, buildClusters, mergedAwayByKeeper,
-  rowsIdentical, derivedCurrentStatus, applyDuplicateCollapse,
+  rowsIdentical, derivedCurrentStatus, applyDuplicateCollapse, originalsOf, fullerIdentity,
 } from "../../lib/smartImportReviewModel";
 import { importSteps } from "../../lib/importSummary";
 import { ReconcileCard, ReconcileCardRow } from "./ReconcileCard";
@@ -157,6 +157,9 @@ type Step = "duplicates" | "agents" | "queries";
 
 export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, manuscriptTitle, onBack, error, onImport, onCancel, photos }) => {
   const initial = useMemo(() => parseModel(result), [result]);
+  /* the names and agencies as the file gave them: a merge fills in the fuller name (v1.2.1) only
+     where the writer has changed neither */
+  const originals = useMemo(() => originalsOf(initial.agents), [initial]);
   /* Photos: the page open full size from "See the whole page", or none. */
   const [viewPage, setViewPage] = useState<ReviewPhoto | null>(null);
   // v9: nothing is set aside before the review begins. A row with no agent and no agency is
@@ -292,14 +295,14 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
   // "Looks right" — merge the pair AND collapse their two query rows into one derived-history query.
   const reconcileCollapse = (leaderId: string, removedId: string, keptStatus: QueryStatus, keptId: string) => {
     snapReconcile(leaderId);
-    const next = applyDuplicateCollapse(agents, queries, removedId, keptStatus);
+    const next = applyDuplicateCollapse(agents, queries, removedId, keptStatus, { originals });
     setAgents(next.agents); setQueries(next.queries);
     setReconciled((r) => ({ ...r, [leaderId]: { keptId, kind: "collapsed" } }));
   };
   // "These are actually different submissions" — keep both as separate queries (the additive merge).
   const reconcileSplit = (leaderId: string, removedId: string, keptId: string) => {
     snapReconcile(leaderId);
-    const next = removeDuplicateRecord(agents, queries, removedId);
+    const next = removeDuplicateRecord(agents, queries, removedId, { originals });
     setAgents(next.agents); setQueries(next.queries);
     setReconciled((r) => ({ ...r, [leaderId]: { keptId, kind: "split" } }));
   };
