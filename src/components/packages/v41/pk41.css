@@ -189,17 +189,17 @@
   .p41 .p41-band-st { background: #ebe7e1; }
 }
 
-/* ══ F · THE BUILDER (ref `.k4-bld`, `.k4-bh`, `.k4-bb`; screens 02–04) ══════════════════════════════════════════════════
-   The frame with a flat navy band (the package's colour now lives only on its tile), then the steps and the preview
-   well 28 apart, padded 24. One column at ≤1400 (the ref's `.k4-bb`), where the preview is no longer sticky. */
+/* ══ F · THE BUILDER (v42 ref `.k4-ws.boxed`, `.k4-bh`, `.k4-bb`; screens 02, 04, 05). v42 D: the container is
+   pk42.css's `.p42-bw`; here, the heading row (no band of its own), the sent note in blush, then the steps (a sage band)
+   BESIDE the preview (a sand band): 1fr + 480 with 22 between at >1400, two equal columns 16 apart at ≤1400. ══ */
 @media (min-width: 768px) {
   .p41 .p41-build { margin: 0; }
   .p41 .p41-bld { margin: 0 0 0; }
   .p41 .p41-bld .p93-bh {
     display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto auto; gap: 16px; align-items: center;
-    margin: 0; border-radius: 0;
+    margin: 0 0 22px; border-radius: 0;
   }
-  .p41 .p41-bld .p93-bh-ic { width: 44px; height: 44px; border-radius: 10px; background: var(--pc, #1d4b63); color: #fff; }
+  .p41 .p41-bld .p93-bh-ic { width: 48px; height: 48px; border-radius: 11px; background: #2d3a50; color: #f4eee5; }
   .p41 .p41-bld .p93-bh-ic .p9-pic { width: 22px; height: 22px; }
   .p41 .p41-bld .p93-bh-t small { margin-top: 2px; font: italic 15px/1.35 var(--sp-serif); }
   .p41 .p41-bld .p93-bh-act .p9-po-act {
@@ -211,24 +211,25 @@
   .p41 .p41-bld .p93-bh-f { width: 38px; height: 38px; }
   .p41 .p41-bld .p93-bh-f svg { width: 17px; height: 17px; stroke-width: 1.8; }
   /* the body: steps and the preview well */
-  .p41 .p41-bld .p93-b { grid-template-columns: minmax(0, 1fr); gap: 20px; padding: 24px; align-items: start; }
+  .p41 .p41-bld .p93-b { grid-template-columns: minmax(0, 1fr) 480px; gap: 22px; padding: 0; align-items: start; }
   .p41 .p41-bld .p41-span { grid-column: 1 / -1; }
   .p41 .p41-bld .p9-lc-from { margin: 0; }
-  .p41 .p41-bld .p93-lock { align-items: center; gap: 12px; margin: 0; padding: 12px 16px; border-radius: 10px; background: #f5efe7; font: 15.5px/1.45 var(--sp-serif); color: rgba(28, 19, 15, 0.8); }
+  .p41 .p41-bld .p93-lock { align-items: center; gap: 12px; margin: 0; padding: 12px 16px; border-radius: 12px; background: #f3e2dc; font: 15.5px/1.45 var(--sp-serif); color: rgba(28, 19, 15, 0.8); }
   .p41 .p41-bld .p93-lock > svg { width: 17px; height: 17px; margin: 0; }
   /* the sent note reads as one paragraph, its links after it */
   .p41 .p41-bld .p93-lock > span { flex: 1; min-width: 0; display: block; }
   .p41 .p41-bld .p93-lock-a { display: inline-flex; margin-left: 12px; }
   .p41 .p41-bld .p93-lock .p93-lnk { font: 600 15px var(--sp-serif); color: #1c130f; }
   .p41 .p41-bld .p93-lock .p93-lnk.p93-q { color: rgba(28, 19, 15, 0.58); font-weight: 400; }
-  /* the steps: hairline rows in one bordered block */
-  .p41 .p41-bld .p93-steps { gap: 0; border-radius: 12px; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1); overflow: hidden; }
+  /* the steps: one white card (radius 18, a #e3d5c9 hairline) under its sage band, hairline rows */
+  .p41 .p41-bld .p93-col { border-radius: 18px; background: #fff; box-shadow: 0 0 0 1px #e3d5c9; overflow: hidden; }
+  .p41 .p41-bld .p93-steps { gap: 0; border-radius: 0; box-shadow: none; overflow: visible; }
   .p41 .p41-bld .p93-step { border-radius: 0; box-shadow: none; border-top: 1px solid rgba(28, 19, 15, 0.1); background: #fff; }
   .p41 .p41-bld .p93-step:first-child { border-top: 0; }
-  .p41 .p41-bld .p93-step.p93-open { box-shadow: none; background: #fcfaf7; }
+  .p41 .p41-bld .p93-step.p93-open { box-shadow: none; background: #f3f6f2; }
   .p41 .p41-bld .p93-sh { grid-template-columns: 30px minmax(0, 1fr) auto; gap: 14px; padding: 16px 18px; border-radius: 0; }
   .p41 .p41-bld button.p93-sh:hover { background: #fcfaf7; }
-  .p41 .p41-bld .p93-step.p93-open > .p93-sh { background: #fcfaf7; box-shadow: inset 3px 0 0 #2d3a50; }
+  .p41 .p41-bld .p93-step.p93-open > .p93-sh { background: #f3f6f2; box-shadow: inset 4px 0 0 #4e6b58; }
   .p41 .p41-bld button.p93-sh:focus-visible { outline-color: #2d3a50; }
   .p41 .p41-bld .p93-st b { font: 600 17px/1.3 var(--sp-serif); }
   .p41 .p41-bld .p93-st small { margin-top: 2px; font: italic 14.5px/1.4 var(--sp-serif); color: rgba(28, 19, 15, 0.6); }
@@ -237,11 +238,11 @@
   .p41 .p41-bld .p93-sb { padding: 0 18px 16px 62px; }
   .p41 .p41-bld .p93-ch { background: #fff; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1); }
   .p41 .p41-bld .p93-ch:hover { background: #fff; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.25); }
-  .p41 .p41-bld .p93-ch.p93-sel { background: #fff; box-shadow: 0 0 0 2px #2d3a50; }
+  .p41 .p41-bld .p93-ch.p93-sel { background: #f3f6f2; box-shadow: 0 0 0 2px #4e6b58; }
   .p41 .p41-bld .p93-ch-b { grid-template-columns: 32px minmax(0, 1fr) 20px; gap: 12px; padding: 10px 12px; padding-right: 48px; }
   .p41 .p41-bld .p93-ch-t b { font: 600 15.5px/1.3 var(--sp-serif); }
   .p41 .p41-bld .p93-ch-t small { font: italic 13.5px/1.35 var(--sp-serif); color: rgba(28, 19, 15, 0.6); }
-  .p41 .p41-bld .p93-sel .p93-r { box-shadow: inset 0 0 0 5px #2d3a50; }
+  .p41 .p41-bld .p93-sel .p93-r { box-shadow: inset 0 0 0 5px #4e6b58; }
   .p41 .p41-bld .p93-tic { width: 32px; height: 32px; }
   .p41 .p41-bld .p93-tic.p93-t-v { background: #2d3a50; }
   .p41 .p41-bld .p93-lnk { color: #2d3a50; font-size: 14.5px; }
@@ -250,12 +251,15 @@
   .p41 .p41-bld .p93-chip > button:first-child, .p41 .p41-bld .p93-chip > span { height: 32px; padding: 0 13px; font: 600 14px/32px var(--sp-serif); border-radius: 16px; }
   .p41 .p41-bld .p93-chip.p93-on { background: #2d3a50; }
   .p41 .p41-bld .p93-exts .p9-exa-b { height: 32px; border-radius: 16px; box-shadow: inset 0 0 0 1px rgba(45, 58, 80, 0.4); font: 600 14px var(--sp-serif); color: #2d3a50; }
-  /* the preview: a beige well holding the white email card */
-  .p41 .p41-bld .p93-pv { align-self: start; box-sizing: border-box; padding: 14px 16px 16px; border-radius: 14px; background: #f5efe7; }
-  .p41 .p41-bld .p93-pv .p93-pv-k { align-items: baseline; margin: 2px 4px 12px; }
+  /* the preview: a sand band over a #fbf6f0 well holding the white email card */
+  .p41 .p41-bld .p93-pv { align-self: start; box-sizing: border-box; padding: 0 0 16px; border-radius: 18px; background: #fbf6f0; overflow: hidden; }
+  .p41 .p41-bld .p93-pv .p93-pv-k {
+    align-items: baseline; justify-content: space-between; margin: 0; padding: 13px 20px;
+    background: #f4e6d6; border-bottom: 1px solid rgba(28, 19, 15, 0.07);
+  }
   .p41 .p41-bld .p93-pv .p93-pv-k > span:first-child { font: 400 19px/1.3 var(--sp-type) !important; letter-spacing: 0; text-transform: none; color: #1c130f; }
   .p41 .p41-bld .p93-pv .p93-pv-k > span:last-child { font: italic 400 14px var(--sp-serif) !important; letter-spacing: 0; text-transform: none; color: rgba(28, 19, 15, 0.6); }
-  .p41 .p41-bld .p93-mail { border-radius: 10px; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1); }
+  .p41 .p41-bld .p93-mail { margin: 16px 16px 0; border-radius: 10px; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1); }
   .p41 .p41-bld .p93-mail-h { padding: 12px 16px; font: 15px/1.45 var(--sp-serif); border-bottom-color: rgba(28, 19, 15, 0.1); }
   .p41 .p41-bld .p93-mail-h > div { grid-template-columns: 68px minmax(0, 1fr); }
   .p41 .p41-bld .p93-mail-h span, .p41 .p41-bld .p93-mail-h em { color: rgba(28, 19, 15, 0.45); }
@@ -267,7 +271,7 @@
   .p41 .p41-bld .p93-a.p93-gh { background: none; outline: 0; box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, 0.18); padding-left: 13px; color: rgba(28, 19, 15, 0.45); }
   .p41 .p41-bld .p93-mail .p93-hl { background: #eaf0f5 !important; box-shadow: 0 0 0 2px #2d3a50 !important; }
   /* the row under the preview never spills out of the well: it wraps, and its buttons are 42 tall */
-  .p41 .p41-bld .p93-pv-f { flex-wrap: wrap; row-gap: 10px; }
+  .p41 .p41-bld .p93-pv-f { flex-wrap: wrap; row-gap: 10px; margin-top: 14px; padding: 0 16px; }
   .p41 .p41-bld .p93-pv-b { flex-wrap: wrap; justify-content: flex-end; margin-left: auto; }
   .p41 .p41-bld .p93-btn { height: 42px; padding: 0 16px; font-size: 16px; }
   .p41 .p41-bld .p93-b1 { background: #2d3a50; }
@@ -279,13 +283,13 @@
 }
 
 /* ══ E · THE BUILDER IN THE WORKSPACE (ref `.lay-b .k4-bh`, `.lay-b .k4-bb`; screens 02–05) ══════════════════════════
-   Only the header is navy. v42 A: the builder's band has no colour of its own (the wash and the stripe are retired; it
-   sits on the builder's white), ink text, padding 18 / 22. The tile has no ring; Active and Make active
-   are navy; the status pill and Figures are white with a hairline (the pill goes at ≤1400, where the rail row already
-   says it). Steps, then the preview UNDER them, one column; side by side from 1700. The preview is never sticky. */
+   Only the header is navy. v42 A/D: the builder's heading row has no colour of its own (the wash and the stripe are
+   retired; it sits on the container's white), ink text, padding 0 2 18. The tile has no ring; "Use for current batch"
+   is navy; the status pill and Figures are white with a hairline (the pill goes at ≤1400, as the ref's does). Steps
+   and the preview side by side (section F). The preview is never sticky. */
 @media (min-width: 768px) {
   .p41 .p41-bld .p93-bh {
-    padding: 18px 22px; color: #1c130f; background: none; box-shadow: none;
+    padding: 0 2px 18px; color: #1c130f; background: none; box-shadow: none;
   }
   .p41 .p41-bld .p93-bh-ic { box-shadow: none; }
   .p41 .p41-bld .p93-bh-ic:focus-visible { outline-color: #2d3a50; }
@@ -304,12 +308,11 @@
   .p41 .p41-bld .p93-bh-f:hover { background: #faf7f2; }
   .p41 .p41-bld .p93-pv { position: static; }
 }
-@media (min-width: 1700px) {
-  .p41 .p41-bld .p93-b { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
-}
 @media (min-width: 768px) and (max-width: 1400px) {
   .p41 .p41-bld .p93-bh-t h3, .p41 .p41-bld .p93-bh-t h3 .p9-po-nm { font-size: 23px !important; }
+  /* the ref's ≤1400 heading drops the status pill (the open tile's foot says where it stands) */
   .p41 .p41-bld .p93-bh-s { display: none; }
+  .p41 .p41-bld .p93-b { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
 }
 
 /* ══ F · RESULTS (ref `.k4-res`; screens 05, 06) ═══════════════════════════════════════════════════════════════════════ */
