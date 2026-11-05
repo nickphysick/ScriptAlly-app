@@ -165,4 +165,13 @@ pk38 + pk26 10 passed / 10 skipped (skips are v41's and earlier retirements).
 
 ## 7 · Dev
 
-DEV
+Dev serves v42 from **`dev/qc1511-db2-title-sip-qc1512-cl26-sip11-tl1-pk41-cl262-db21-sip12-pk41w-qc152-fn121-pk42`**
+(6e13c224, pushed), bundle **`index-Bi8AGvkp.js`** (was `index-B4t-KZ6J.js`, which aed487e6 — the branch dev served —
+was rebuilt and matched before merging). Hosting only; no functions or rules. Prod untouched.
+
+The merge needed one integration fix: the dev line's phone Packages page (`PackagesPhone.tsx`, not on v42's base)
+imported v41's How it works steps and `firstFreeColour` and painted each package's stored colour in five places. On the
+merge branch it lists v42's four stations, paints packages navy and creates them without a colour (v42's colour lock
+caught the reads). **When v42 merges to main, the same change is needed wherever the phone page has landed.** On the
+merged tree the only reds are the two `firestoreTarget` cases already red on the dev line (28 older e2e scripts create
+their own Firebase app), kept out of the comparison as the pack directs.
