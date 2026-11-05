@@ -88,7 +88,7 @@
   /* the selected label: no ring, no glow, no lift; a 3px bar in its own colour, 18 in each side, 9 under it */
   .p9-pkl .p9-pkl-row .p9-pkl-b.p9-on.p9-on { transform: none !important; position: relative;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -1px 0 rgba(0, 0, 0, 0.18) !important; }
-  .p9-pkl .p9-pkl-row .p9-pkl-b.p9-on::before { content: ""; position: absolute; left: 18px; right: 18px; bottom: -9px; height: 3px; border-radius: 2px; background: var(--pc, #1d4b63); }
+  .p9-pkl .p9-pkl-row .p9-pkl-b.p9-on::before { content: ""; position: absolute; left: 18px; right: 18px; bottom: -9px; height: 3px; border-radius: 2px; background: var(--pc, #2d3a50); }
   /* the others step back, and come forward on hover */
   .p9-pkl .p9-pkl-row .p9-pkl-b:not(.p9-on):not(.p9-ret) { filter: saturate(0.75); opacity: 0.8 !important; transition: opacity 0.15s, filter 0.15s; }
   .p9-pkl .p9-pkl-row .p9-pkl-b:not(.p9-on):not(.p9-ret):hover { filter: none; opacity: 1 !important; }
@@ -114,8 +114,8 @@
    The generated sheet read the ref with every colour normalised to Harbour; the colour-bearing rules are restated here
    against the CHOSEN colour (`--pc`, set on the body by pcStyle) and each swatch's own `--sw`, so they follow the pick
    live. The header reads `--pc` through pk39.css's `.p8-dh.p8-dpk` rule. */
-.p6-cx-drw .pa-pd-ics > button[aria-checked="true"] { background-color: var(--pc, #1d4b63) !important; }
-.p6-cx-drw .pa-pd-from > button[aria-checked="true"] { box-shadow: inset 0 0 0 2px var(--pc, #1d4b63) !important; }
+.p6-cx-drw .pa-pd-ics > button[aria-checked="true"] { background-color: var(--pc, #2d3a50) !important; }
+.p6-cx-drw .pa-pd-from > button[aria-checked="true"] { box-shadow: inset 0 0 0 2px var(--pc, #2d3a50) !important; }
 /* the ref focused Name when it was read (2px ink ring); at rest both fields are the hairline, focus the ink */
 .p6-cx-drw .pa-pd-f .pa-id-pdName { box-shadow: inset 0 0 0 1px rgba(28,19,15,.16) !important; }
 .p6-cx-drw .pa-pd-f :is(.pa-id-pdName,.pa-id-pdNote):focus { box-shadow: inset 0 0 0 2px #2a3a52 !important; }

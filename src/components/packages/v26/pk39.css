@@ -52,13 +52,13 @@
    capture normalised every package to Harbour, so the generated sheet holds Harbour literals; these restate each
    colour-driven value with `--pc`, from the ref's own rules (v39.3 / v39.4 / v39.8). ══ */
 /* the labels (ref `.pkl-b:not(.pkl-new)`): the full colour under a soft gloss */
-.p9-pkl .p9-pkl-row .p9-pkl-b { background-color: var(--pc, #1d4b63) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.32), inset 0 -1px 0 rgba(0, 0, 0, 0.18), 0 1px 2px rgba(28, 19, 15, 0.12), 0 8px 16px -10px var(--pc, #1d4b63) !important; }
+.p9-pkl .p9-pkl-row .p9-pkl-b { background-color: var(--pc, #2d3a50) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.32), inset 0 -1px 0 rgba(0, 0, 0, 0.18), 0 1px 2px rgba(28, 19, 15, 0.12), 0 8px 16px -10px var(--pc, #2d3a50) !important; }
 /* selected: lifted 2px, a page-coloured gap and a ring in its own colour (ref `.pkl-b.on`) */
 .p9-pkl .p9-pkl-row .p9-pkl-b.p9-on {
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.32), inset 0 -1px 0 rgba(0, 0, 0, 0.18), 0 0 0 2px var(--ws-page, #f2ede6), 0 0 0 4px var(--pc, #1d4b63), 0 14px 22px -12px var(--pc, #1d4b63) !important; }
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.32), inset 0 -1px 0 rgba(0, 0, 0, 0.18), 0 0 0 2px var(--ws-page, #f2ede6), 0 0 0 4px var(--pc, #2d3a50), 0 14px 22px -12px var(--pc, #2d3a50) !important; }
 .p9-pkl .p9-pkl-b .p9-shc-ic,
-.p9-pkl .p9-pkl-row .p9-pkl-b > em { color: var(--pc, #1d4b63) !important; }
+.p9-pkl .p9-pkl-row .p9-pkl-b > em { color: var(--pc, #2d3a50) !important; }
 /* the ring on a label: white on the colour (ref `.pkl-b:not(.pkl-new) .rg circle`) */
 .p9-rg svg { transform: rotate(-90deg); }
 .p9-rg circle { fill: none; stroke-width: 6; }
@@ -66,8 +66,8 @@
 .p9-pkl .p9-pkl-b .p9-rg circle.p9-v { stroke: #fff; stroke-linecap: round; }
 .p9-pkl .p9-pkl-b .p9-rg.p9-early circle.p9-v { stroke-linecap: butt; }
 /* the package drawer's header (ref `.dh.dpk`) and its icon disc */
-.p8-dh.p8-dpk { background: var(--pc, #1d4b63) !important; }
-.p8-dh.p8-dpk .p8-ddisc { color: var(--pc, #1d4b63) !important; }
+.p8-dh.p8-dpk { background: var(--pc, #2d3a50) !important; }
+.p8-dh.p8-dpk .p8-ddisc { color: var(--pc, #2d3a50) !important; }
 
 /* ══ B · the labels: v40's ruling that this page carries no small mono capitals — the "Active" tab reads in the
    typewriter, sentence case (as v38's label tab did); the two exceptions v39 names are the Pro stamp and the
@@ -81,8 +81,8 @@
 /* the ref's 96 below the builder is carried by v40's guidelines, which sit 24 under the cards */
 .p9-pkc > .p9-pb-build { box-sizing: border-box; margin: 14px 48px 24px; padding: 0; background: none; border: 0; box-shadow: none; }
 /* the package's header in its colour, and the icon's ink on the cream tile (ref `.po-h`, `.po-ic`) */
-.p9-pb-grid.p9-v39 .p9-pk-open .p9-po-h { background: var(--pc, #1d4b63) !important; }
-.p9-pb-grid.p9-v39 .p9-po-h .p9-po-ic { color: var(--pc, #1d4b63) !important; }
+.p9-pb-grid.p9-v39 .p9-pk-open .p9-po-h { background: var(--pc, #2d3a50) !important; }
+.p9-pb-grid.p9-v39 .p9-po-h .p9-po-ic { color: var(--pc, #2d3a50) !important; }
 .p9-pb-grid.p9-v39 .p9-po-h .p9-po-ic:focus-visible .p9-po-icx { opacity: 1; }
 .p9-pb-grid.p9-v39 .p9-po-h .p9-po-ic[disabled] { cursor: default; }
 .p9-pb-grid.p9-v39 .p9-po-h .p9-po-ic[disabled] .p9-po-icx { display: none; }
@@ -119,7 +119,6 @@
 .p9-pb-grid.p9-v39 .p9-lib-list .p9-lib-empty { margin: 14px 10px; font: italic 400 14px/1.45 var(--sp-serif); color: rgba(28, 19, 15, 0.58); }
 /* v40's guidelines and start card, under the page root with no panel */
 .p6 > .p9-gl { margin: 0 48px 96px; background: none; box-shadow: none; }
-.p9-pk-open .p6-pk-open.p9-pk-start { padding: 28px 30px; }
 
 /* ══ E · the icon-and-colour picker (ref `.icp`, one block, ported by hand) ══ */
 .p9-icp { position: fixed; z-index: 80; box-sizing: border-box; width: 300px; padding: 16px; border-radius: 14px; background: #fff;
@@ -129,7 +128,7 @@
 .p9-icp .p9-icp-ics { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: 16px; }
 .p9-icp .p9-icp-ics button { height: 38px; padding: 0; border: 0; border-radius: 8px; background: #f6f2ec; color: #1c130f; cursor: pointer; display: grid; place-items: center; }
 .p9-icp .p9-icp-ics button svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; }
-.p9-icp .p9-icp-ics button[aria-pressed="true"] { background: var(--pc, #1d4b63); color: #fff; }
+.p9-icp .p9-icp-ics button[aria-pressed="true"] { background: var(--pc, #2d3a50); color: #fff; }
 .p9-icp button:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
 .p9-icp .p9-icp-f { margin: 14px 0 0; font: italic 400 12.5px/1.45 var(--sp-serif); color: rgba(28, 19, 15, 0.58); }
 
@@ -153,9 +152,9 @@
 
 /* ══ H · Results: what the capture cannot see, and the colour ══ */
 /* the showcase card's header and the full list's tile in the package's colour (ref `.ac-pk .ac-h`, `.rl-ic`) */
-.p9-agg3 .p9-ac-pk .p9-ac-h { background: var(--pc, #1d4b63) !important; }
-.p9-agg3 .p9-ac-pk .p9-ac-h .p9-shc-ic { color: var(--pc, #1d4b63) !important; }
-.p9-agg3 .p9-rl-r .p9-rl-n .p9-rl-ic { background: var(--pc, #1d4b63) !important; color: #fff !important; }
+.p9-agg3 .p9-ac-pk .p9-ac-h { background: var(--pc, #2d3a50) !important; }
+.p9-agg3 .p9-ac-pk .p9-ac-h .p9-shc-ic { color: var(--pc, #2d3a50) !important; }
+.p9-agg3 .p9-rl-r .p9-rl-n .p9-rl-ic { background: var(--pc, #2d3a50) !important; color: #fff !important; }
 /* the two list panels' grounds: #f8f5f0 under Packages, #f3eee7 inside the pieces band (ref v39.11) */
 .p9-agg3 .p9-ag3-row .p9-rlw { background-color: #f8f5f0 !important; }
 .p9-agg3 .p9-ag3-row + .p9-ag3-row .p9-rlw { background-color: #f3eee7 !important; }

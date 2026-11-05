@@ -80,3 +80,27 @@
 @media (min-width: 768px) and (max-width: 1400px) {
   .p41 .p42-bwi { margin: 0 19px; }
 }
+
+/* ══ E · THE ICON HINT in the New and Details drawers (portalled: the rule hangs off the drawer's own class) ══ */
+.p6-cx-drw .p42-hint { display: block; margin: 0 0 10px; font: italic 14.5px/1.45 var(--sp-serif); color: rgba(28, 19, 15, 0.6); letter-spacing: 0; text-transform: none; }
+
+/* ══ F · THE EMPTY CARD (ref `.k4-emp`; screen 15): white, radius 20, framed like the builder; the Fledgling, the title in
+   the typewriter at 24, one line in the serif, a navy "+ New package" on the right. 26 under the header. ══ */
+@media (min-width: 768px) {
+  .p41 .p42-emp {
+    display: flex; align-items: center; gap: 22px; margin: 26px 0 0; padding: 24px 28px; border-radius: 20px; background: #fff;
+    box-shadow: 0 0 0 1px #e3d5c9, 0 22px 40px -24px rgba(28, 19, 15, 0.3);
+  }
+  .p41 .p42-emp-art { flex: none; width: auto; height: 90px; filter: drop-shadow(0 4px 5px rgba(28, 19, 15, 0.15)); }
+  .p41 .p42-emp-tx { min-width: 0; }
+  .p41 .p42-emp h2.p42-emp-h { margin: 0 0 6px; font: 400 24px/1.3 var(--sp-type) !important; letter-spacing: 0 !important; text-transform: none !important; color: #1c130f !important; }
+  .p41 .p42-emp p { margin: 0; max-width: 620px; font: 400 16px/1.5 var(--sp-serif); color: rgba(28, 19, 15, 0.6); }
+  .p41 .p42-emp-new {
+    flex: none; margin-left: auto; height: 44px; padding: 0 22px; border: 0; border-radius: 22px; cursor: pointer;
+    background: #2d3a50; color: #fff; font: 600 17px var(--sp-serif); white-space: nowrap;
+  }
+  .p41 .p42-emp-new:hover { background: #1c130f; }
+  .p41 .p42-emp-new:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
+  /* with only retired packages, the tile row holds just its link, under the card */
+  .p41 .p42-emp + .p42-tiles { margin-top: 8px; padding-top: 0; justify-content: flex-end; }
+}

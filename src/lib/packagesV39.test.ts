@@ -8,7 +8,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { PACKAGE_COLOUR_KEYS } from "../types";
 import { EMPTY_FIG, type Fig } from "./packagesV38";
-import { colourOf, countCells, firstFreeColour, fullListOrder, hexOf, PACKAGE_COLOURS, pcStyle, rateCell } from "./packagesV39";
+import { colourOf, countCells, fullListOrder, hexOf, PACKAGE_COLOURS, pcStyle, rateCell } from "./packagesV39";
 
 describe("Part C · the palette", () => {
   it("is exactly the eight, in the pack's order, with the pack's names and hexes", () => {
@@ -34,25 +34,12 @@ describe("Part C · reading a package's colour", () => {
     expect(colourOf({ colour: "plum" })).toBe("plum");
     expect(hexOf({})).toBe("#1d4b63");
     expect(hexOf({ colour: "pine" })).toBe("#2e5641");
-    expect(pcStyle({ colour: "lake" })).toEqual({ "--pc": "#2c6782" });
+    /* v42 E: the stored colour is read, never painted — every package paints navy */
+    expect(pcStyle({ colour: "lake" })).toEqual({ "--pc": "#2d3a50" });
+    expect(pcStyle({ colour: "plum" })).toEqual(pcStyle({ colour: "pine" }));
   });
   it("a value from outside the eight (a stale or hand-edited record) reads as Harbour, never as itself", () => {
     expect(colourOf({ colour: "crimson" as never })).toBe("harbour");
-  });
-});
-
-describe("Part C · the new-package dialog's first choice", () => {
-  const live = (colour?: string) => ({ colour: colour as never, status: "Active" as const });
-  it("is the first colour no live package uses", () => {
-    expect(firstFreeColour([])).toBe("harbour");
-    expect(firstFreeColour([live()])).toBe("lake");
-    expect(firstFreeColour([live("harbour"), live("lake"), live("pine")])).toBe("teal");
-  });
-  it("a retired package's colour is free again", () => {
-    expect(firstFreeColour([{ colour: "harbour", status: "Retired" }])).toBe("harbour");
-  });
-  it("is Harbour when all eight are taken", () => {
-    expect(firstFreeColour(PACKAGE_COLOUR_KEYS.map((k) => live(k)))).toBe("harbour");
   });
 });
 

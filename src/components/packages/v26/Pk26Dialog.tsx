@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * Submission packages v26 — New package and Package details. v39.1 Part H: they open in the app's slide-out drawer (the
- * package drawer's frame: `p6-layer` > `p6-cx-dim` + `aside.p6-cx-drw`, ref `#drw`), not a centred dialog. The header is
- * the package's own colour and follows the chosen swatch live, before anything is saved. The form is the ref's
+ * package drawer's frame: `p6-layer` > `p6-cx-drw`, ref `#drw`), not a centred dialog. v41 F: the header is the
+ * Archivist on cream. v42 E: the words are lib/packagesV42's, and there is no colour field. The form is the ref's
  * (`pa-`, pk391.generated.css). Every handler, write and validation is v39's; only the container changed. Name (required), who it's for (optional), an icon from twelve, (v42: no colour; v39's eight are retired from the form), and for a new package "Start from": empty,
  * or a copy of the active package. Opened from the pencil or the icon tile it renames and re-icons a package and
  * offers "Delete package" — refused, with the reason, for one that has gone out with queries. Enter submits.
@@ -15,6 +15,7 @@ import { PACKAGE_ICONS, type PackageIcon, type SubmissionPackage } from "../../.
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import { iconOf } from "../../../lib/packagesV26";
 import { pcStyle } from "../../../lib/packagesV39";
+import { EDIT_SUB, editTitle, ICON_HINT, NEW_SUB, NEW_TITLE } from "../../../lib/packagesV42";
 import { PicBare } from "./icons";
 import type { Pk26Model } from "./usePk26Model";
 
@@ -79,14 +80,15 @@ const Body: React.FC<{ shown: boolean; model: Pk26Model; p: SubmissionPackage | 
       {/* v41 Part F: the drawer header option A — the Archivist on cream, one line under the title (ref `.k4-dh`) */}
       <div className="p41-dh" data-pk391="pd-head" data-pk41="drawer-head">
         <img className="p41-dh-art" src={DRAWER_ART} alt="" aria-hidden="true" />
-        <div className="p41-dh-tx"><h3 className="p6-id-pdT p41-dh-h" id="p6-pdT">{p ? `Editing ${p.packageName}` : "Making a new package"}</h3>
-          <small>{p ? "Rename it, change how it looks, or add a note on who it’s for." : "Give it a name and a look you’ll recognise. You’ll pick its pieces on the page."}</small></div>
+        <div className="p41-dh-tx"><h3 className="p6-id-pdT p41-dh-h" id="p6-pdT">{p ? editTitle(p.packageName) : NEW_TITLE}</h3>
+          <small data-pk42="drawer-sub">{p ? EDIT_SUB : NEW_SUB}</small></div>
         <button type="button" className="p41-dh-x" aria-label="Close" onClick={onClose}>✕</button>
       </div>
       <div className="pa-db pa-pd-b" style={pcStyle(p)}>
         <label className="pa-pd-f"><span>Name</span><input ref={nameRef} className={`pa-id-pdName p6-id-pdName${err ? " p6-err" : ""}`} value={name} placeholder="e.g. Standard UK, US agents, Agents who want 50 pages" autoComplete="off" onChange={(e) => { setName(e.target.value); setErr(false); }} onKeyDown={onEnter} /></label>
         <label className="pa-pd-f"><span>Who it’s for <em>optional</em></span><input ref={noteRef} className="pa-id-pdNote p6-id-pdNote" value={note} placeholder="e.g. Agents who ask for a synopsis" autoComplete="off" onChange={(e) => setNote(e.target.value)} onKeyDown={onEnter} /></label>
-        <div className="pa-pd-f"><span>Icon <em>so you can spot it in the Query Centre</em></span>
+        <div className="pa-pd-f"><span>Icon</span>
+          <small className="p42-hint" data-pk42="icon-hint">{ICON_HINT}</small>
           <div className="pa-pd-ics" role="radiogroup" aria-label="Icon" data-pk391="pd-ics">
             {PACKAGE_ICONS.map((k) => <button type="button" key={k} role="radio" aria-checked={ic === k} aria-label={k} onClick={() => setIc(k)}><PicBare ic={k} /></button>)}
           </div>

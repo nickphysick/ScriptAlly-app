@@ -91,9 +91,10 @@ for (const size of SIZES) {
       fix("--show-banner");
     }
     if (want("14-one-package")) {
-      seed("--one");
+      fix("--one-package");
       await open(page, size); await top(page);
       await shot(page, "14-one-package", size.width);
+      seed();
     }
     if (want("15-no-packages")) {
       fix("--no-packages");
