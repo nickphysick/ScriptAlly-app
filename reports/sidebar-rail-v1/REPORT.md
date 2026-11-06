@@ -1,162 +1,183 @@
-# Sidebar rail v1 — report
+# Sidebar rail v1 — report (on dev's nav)
 
-Branch `sidebar-rail-v1`, cut from `main` at `7e0e9aeec`. Three code commits plus this report:
-`0e43500ce` (Phase 1) · `d3c5df395` (Phase 2) · `150e1be7b` (Phase 3) · the report and screenshots (Phase 4).
-**Not merged. Not pushed. Not deployed to dev — see "The dev deploy stopped" below.**
+**On dev:** https://scriptally-dev.web.app serves `index-gBdGm9sz.js` (hosting only, 6 Nov), built from local branch
+`dev/qc1511-db2-title-sip-qc1512-cl26-sip11-tl1-pk41-cl262-db21-sip12-pk41w-qc152-fn121-pk42-qc1521-sr1` — which is
+`sidebar-rail-v1-dev`. Prod untouched. **Nothing pushed.**
 
-## False premises
+## The base moved, and the rebase followed it
 
-1. **The refs were not in the repo.** Both were in `~/Downloads` with exactly the prompt's sha256
-   (`c3c94297…` and `7e686cb0…`). Copied into `design-refs/shell/` and enrolled on the ref watchlist.
-2. **The ⌘K palette has no nav grouping.** It is one flat "Pages" list, and it had no Responses or
-   Analytics and called Submission packages "Packages". Its nav pages are now built from the workspace
-   nav, in its order, with its names.
-3. **The phone bar's title does not come from `mobileChrome.tsx`.** It is `ShellTopBar` (ShellV2.tsx)
-   reading `shellCrumbForPath` in `shellV2Nav.ts`. That function now reads the workspace nav first.
-4. **Nobody has a "founding" entitlement, and Discover has no entitlement at all.** To keep "nobody sees
-   a Pro tag today" true, `discoverUnlocked` was added beside `packagesUnlocked`, open to all
-   (`DISCOVER_OPEN_TO_ALL`). It gates nothing; it only decides whether the tag is drawn.
-5. **⚠️ The branch dev serves has a different nav from `main`.** This is the one that matters; see below.
+Your note named `dev/…-qc152-fn121`. By the time I started, dev was serving `index-BPUwFsPv.js` from the next line,
+`dev/…-qc152-fn121-pk42-qc1521` (Submission packages v42 and Query Centre v152.1 on top). Rebasing onto the older
+branch would have taken both off dev, so I rebased onto the one dev was serving, after rebuilding it and matching the
+hash. It contains `…-qc152-fn121`.
 
-## The dev deploy stopped
+The rebase replays the four commits onto a new branch, `sidebar-rail-v1-dev`. The original `sidebar-rail-v1` (on
+`main`) is left as it was.
 
-Dev serves `index-B4t-KZ6J.js`, built from
-`dev/qc1511-db2-title-sip-qc1512-cl26-sip11-tl1-pk41-cl262-db21-sip12-pk41w-qc152-fn121` (rebuilt
-and matched). Merging this branch onto it conflicts in 12 files, because that line carries other packs
-that changed the nav model:
+## Commits (on `sidebar-rail-v1-dev`)
 
-| | `main` (this pack's base, and the prompt) | the dev branch |
+| Commit | What |
+|---|---|
+| `77df05fe8` | Phase 1 replayed — the nav model (conflicts resolved to dev's nav, see below) |
+| `b4f65c7f0` | Phase 2 replayed — the 80px rail |
+| `b79257c2b` | Phase 3 replayed — the full sidebar, RAIL · FLOAT · PINNED |
+| `19372a894` | Phase 4 replayed — the first report (superseded by this one) |
+| `c9de54f8c` | Phase 5 — dev's nav finished in the rail, plus three fixes the dev line exposed |
+| `6dfb6c9c2` | the five screenshots |
+| this commit | this report |
+
+⚠️ **`77df05fe8`'s message still describes the Manuscript/Materials split it made on `main`.** The replay resolved it
+to dev's nav instead. I did not amend it (the house rule), so `c9de54f8c`'s message records what happened.
+
+## The conflicts, and how each was resolved
+
+The replay conflicted in 16 files over three commits (the earlier attempted merge showed 12).
+
+| File | Resolution |
+|---|---|
+| `lib/workspaceNav.ts` | Dev's model, reordered to your list; my section icons and rail helpers added. Detail below. |
+| `lib/workspaceShell.ts` | Both: dev's `noHeading` and `navLabel`, my section `icon`. `pro` became one field naming its entitlement (`"packages" \| "discover" \| "versions"`), replacing dev's boolean. |
+| `lib/searchPalette.ts` | Mine: the palette's nav pages come from the nav. Dev's `/queries/packages` path and the Versions blurb moved into its metadata. |
+| `lib/entitlements.ts` | Both: dev's `packagesViaFounding`, `VERSIONS_FOUNDING_ACCESS` and `versionsUnlocked`, plus my `discoverUnlocked`. |
+| `components/shell/WorkspaceShell.tsx` | Dev's `noHeading` flag decides Dashboard's heading. Rows print dev's short labels (`sidebarLabel`) but are named by their full page name, per the pack. My `pickPage` closes a floating sidebar. |
+| `components/shell/inkShell.css` | My box rules; dev's PRO-tag and ellipsis rules kept; the retired `.sb-collapsed` rules dropped from both sides. |
+| `design-refs/.refhashes.json` | Dev's, with the two refs enrolled again. |
+| 9 test files | Dev's versions, then retargeted to the new order and the dormant tags. |
+
+## Your nav, as built
+
+- **Rail (most-used first):** Dashboard, then a hairline rule · **Queries** (Query Centre, Responses, Analytics,
+  Packages) · **Agents** (Contact list, Discover) · **Your book** (Manuscripts, Versions, Comps) · **Tasks**
+  (To-do list, Corkboard).
+- **Full sidebar:** the same order under mono headings. Rows print "Packages" for Submission packages, as asked.
+  **Query Centre prints "Queries"**, dev's 25 Oct short label, which I kept. Your note only mentioned Packages, so
+  say if you'd rather that row read "Query Centre".
+- **No Materials and no Calendar** anywhere a writer reads.
+
+**Renamed:**
+- Pro marks now name their entitlement (`pro: true` → `"packages"`, `"discover"`, `"versions"`).
+- `ESC_LEVEL` gains `sidebarFloat` (25).
+- `SHELL_SECTIONS`' "Queries Hub" is now "Query Centre", and its Packages row points at `/queries/packages`.
+- **Not renamed:** Your book's internal id is still `materials` (dev's choice, so every lookup keyed on it holds).
+
+**Pro tags are dormant everywhere:** drawn only for an account that isn't entitled. Versions' tag used to show to
+everyone; it no longer does.
+
+**Discover (item 4) — confirmed.** `DISCOVER_OPEN_TO_ALL = true` and `discoverUnlocked()` sit in
+`lib/entitlements.ts` beside `PACKAGES_OPEN_TO_ALL`, in the same pattern. They're read in one place only: whether the
+tag is drawn. Nothing gates Discover for anyone.
+
+**Carried through:**
+- **Last-page memory:** stored entries for retired or moved pages (`tasks: calendar`, `materials: m-pkg`) are dropped
+  on the next write, and a click falls back to the section's first page. Unit-locked.
+- **Off-nav routes:** unchanged.
+- **Folder tab:** on `/manuscripts` it shows Versions and Comparable titles; on `/queries/packages`, Query Centre,
+  Responses and Analytics.
+- **Phone:** dev's phone titles its tab pages by the tab ("Queries") and everything under `/manuscripts` as
+  "Manuscripts". Pages off the tabs take the crumb, which reads the workspace nav. "Queries Hub" appears nowhere.
+
+**Card labels (10px Source Serif):** 51 rail labels measured across six routes; **none wraps, escapes its row or is
+cut.**
+
+## Item 5 — the height: no change needed
+
+At 1512×982, pinned, the full sidebar shows all 12 rows and the full Give feedback card:
+- nav 617 of 617px, no scroll;
+- card bottom at 906 of 982;
+- no row outside the nav's box.
+
+Dev's 25 Oct spacing was kept as it was, and dropping Calendar gives back a row. Locked as SR5, and proved red by
+forcing rows to 40px.
+
+## Three things the dev line exposed (fixed in `c9de54f8c`)
+
+1. **A floating sidebar shut itself on dev.** The dashboard's How-it-works modal stays mounted with its box while
+   closed (opacity 0, `aria-hidden`, `inert`), and my "a dialog opened" rule counted it. "Opened" now means shown. A
+   dialog that fades in is checked again 220ms later, because a fade makes no DOM change.
+2. **Escape didn't reach the floating sidebar.** Dev routes Escape through one shared stack on `window`. The float is
+   now a layer on it (`ESC_LEVEL.sidebarFloat`). The layer stands down while focus is in a menu the sidebar opened,
+   so that menu closes first.
+3. **"Click the page" in the tests hit a tab.** Dev's folder-tab siblings sit over the bar's spacer. Test-only fix.
+
+## Gates
+
+| | Result |
+|---|---|
+| tsc | clean |
+| `build:dev` | clean, no warnings |
+| Vitest | 11,424 passed, 2 failed |
+| Rail e2e | **22 of 22 pass** (emulators) |
+
+The two Vitest failures are both in `src/test/firestoreTarget.test.ts`, listing 28 seeding scripts from the dev line
+(`cl251Agents.mjs` and others). None of them differs between dev's tip and this branch, so they are red on dev
+already.
+
+**Readings (1512×982, `/queries`):**
+
+| Case | Measured |
+|---|---|
+| RAIL → FLOAT | 9 intermediate widths; the page's left edge stays at 80 |
+| FLOAT → PINNED | one re-layout (80 → 248), then 10–11 frames of glide |
+| PINNED → RAIL | left edge at 80 throughout; ends 80/80 |
+| Rail nav scroll | 982 and 900: no scroll · 760: 480 of 480, fits (it scrolled with six sections) · 640: scrolls, 458 in 360, head and foot in view |
+| Fonts | 78 labels; none in Source Sans |
+
+**The flaky test (SR3.2), 3 runs:** 3 of 3 pass, with 11, 10 and 11 glide frames. The re-layout frame on dev's
+`/queries` takes 117–133ms; the page is held still during it.
+
+**Red-before on this branch:** 7 locks broken on purpose, all 7 red on their own claim:
+
+| Lock | Broken by | Failed on |
 |---|---|---|
-| Calendar | a To-do page | **retired** (`2d6b796bf`) |
-| Submission packages | `/manuscripts/packages`, under Materials | **`/queries/packages`, under Queries**, short label "Packages" |
-| Versions | inside Manuscripts | **its own page** `/manuscripts/versions`, Pro |
-| The Materials section | Manuscripts · Comps · Packages | renamed **"Your book"**: Manuscripts · Versions · Comps |
-| Query Centre's sidebar label | Query Centre | **"Queries"** (25 Oct ruling) |
-| Dashboard | Workspace heading | no heading (25 Oct) — same as rail v1 |
+| SR2.1 | label size | "Query Centre sits inside its row" |
+| SR2.4 | full layer forced visible | "the full layer is hidden on the rail" |
+| SR3.1 | margin transition removed | "the page's left edge never moves" |
+| SR3.2 | glide removed | "frames of the transform moving" |
+| SR3.3 | margin transition removed | "no frame … moves the page's left edge" |
+| SR3.10 | label fonts set to inherit | "labels in Source Sans" |
+| SR5 | rows forced to 40px | "rows outside the nav's box" |
 
-The approved rail (5 Nov) puts Calendar under Tasks and Submission packages alone under Materials, which
-contradicts three of your 25 Oct rulings that are live on dev. Resolving the merge means choosing
-between them, so I aborted it, deleted the attempted branch, and left dev exactly as it was (still
-`index-B4t-KZ6J.js`). **Nothing was deployed.**
+## Found on dev, not fixed (not this pack's)
 
-Two ways forward, your call:
-- Rebase the rail onto the dev line's nav (Packages under Queries, Versions, no Calendar, "Your book"),
-  re-deriving the rail's sections from it; or
-- Keep the rail's section list and decide what happens to Versions and `/queries/packages`.
+- **Escape does not close the ⌘K palette on dev**, with or without this pack. I checked by building dev's tip untouched
+  and probing it: open the palette, press Escape, and it stays open, on `/queries` and `/queries/responses`. SR3.4
+  reloads the page rather than relying on it.
 
-## Phase 1 — the nav model (`0e43500ce`)
+## The 23 older e2e suites (item 6)
 
-**Changed:** `lib/workspaceNav.ts` (six sections in the new order; Manuscript + Materials split;
-Analytics third; section icons; `pro` marks; `RAIL_SHORT_LABELS`, `railPageLabel`,
-`SETTINGS_RAIL_LABELS`, `workspacePageForPath`), `lib/workspaceShell.ts` (the two optional fields),
-`AppShell.tsx` (`manuscript` icon), `shellV2Nav.ts` (phone crumb reads the nav), `lib/searchPalette.ts`
-(nav pages from the nav), six unit locks retargeted, plus new locks for the split, the short labels and
-the Pro pages.
+None of them uses the Calendar route or the old Materials nav. `qcV126` only names `todoCalendar.css` in a list of
+stylesheets. `rs2.measure.ts` isn't on this branch. Not run, not rewritten.
 
-**Gates:** tsc clean · build clean · Vitest no worse than baseline (baseline: 10,270 passed, 4 failing
-files, all under `functions/`).
+## Worktrees (item 8) — none removed
 
-**e2e (emulators):**
-- SR1.1 the folder tab on `/manuscripts` shows `["Comparable titles"]`; on `/manuscripts/packages`, `[]`.
-- SR1.2 the palette finds Responses, Analytics, Submission packages and Comparable titles by name.
-- SR1.3 the phone bar on `/queries` reads "Query Centre".
+There are 9 besides the main checkout now; the set has changed since the 7 I counted on 5 Nov.
 
-**Red-before:** the six unit locks were red against the old model before being retargeted (they
-encoded "Queries Hub", "Packages" and the five-section order). The e2e cases were not separately broken.
+| Worktree | Branch | State | Safe to remove? |
+|---|---|---|---|
+| `scratchpad/wt-emu` (another session) | detached | 63 modified | **No**: uncommitted edits |
+| `scratchpad/wt-qc1522-proof` (another session) | detached | 1 modified, process running in it | **No**: in use |
+| `scratchpad/wt-rr` (another session) | detached | 6 modified | **No**: uncommitted edits |
+| `ScriptAlly-cl263` | contact-list-v26-3 | clean, level with origin | **Yes** |
+| `ScriptAlly-live` | release/live-1 | clean (1 untracked file), level with origin | **No**: it's the only prod deploy folder |
+| `ScriptAlly-qc1521` | query-centre-v152-1 | 6 modified, 2 commits unpushed | **No** |
+| `ScriptAlly-rsp6` | responses-v6 | 8 modified, 12 untracked | **No** |
+| `ScriptAlly-rail2` (mine) | sidebar-rail-v1-dev | clean once this report is committed; not pushed | Yes once you've decided about pushing. The branch survives removal. |
 
-**Help Centre wording:** no article names the old sidebar grouping. The one structural hit is the Help
-area `{ id: "materials", name: "Materials", heading: "Manuscripts and packages" }`
-(`content/help/model.ts:26`). Left alone, as structural.
+## Screenshots (1512×982, deviceScaleFactor 2)
 
-## Phase 2 — the rail (`d3c5df395`)
-
-**Changed:** new `SidebarRail.tsx` + `sidebarRail.css` (the ref's values, its always-on modifiers
-flattened in); `lib/railMemory.ts` (last page per section), `lib/railTile.ts` (the initials tile),
-`lib/railReviewAid.ts` (dev-only `__SA_RAIL_COUNT`, gated at the call site); `WorkspaceShell.tsx`
-(both layers mounted, the hidden one `inert`; `--shell-side-w` published only on change);
-`BarSwitcher.tsx` (a `rail` placement; its shortcut ignores an inert copy); `feedbackStore.ts` (the
-anchor skips inert layers); `AccountMenu.tsx` (ink placement from the rail's foot too);
-`entitlements.ts` (`discoverUnlocked`); the old `.sb-collapsed` rules deleted from three sheets.
-
-**Gates:** tsc clean · build clean · Vitest 10,325 passed, 0 failed.
-
-**e2e at 1512×982, beta strip showing:**
-
-| Case | Measured |
-|---|---|
-| SR2.1 rail width | 80px on all six routes |
-| SR2.1 labels | every section, card and foot label one line, inside its row, not cut (60+ labels across six routes; "Query Centre" fits) |
-| SR2.2 nav scroll | 982: 698/698, no scroll · 900: 620/620, no scroll · 760: 494/480, scrolls; head top 57.75, foot bottom 748 of 760 |
-| SR2.3 last page | Agents → Discover → Tasks → Agents lands on `/agents/discover`; the card marks Discover |
-| SR2.4 off-nav, settings | `/help` lights nothing; `/account/profile` shows Back, Profile, Security, Plan, Alerts, Settings, Tasks, Your data with Profile current; Back returns to `/dashboard` |
-| SR2.5 count | 128 reads "99+" |
-| SR2.6 touch | at 1180×820, `(hover: none)` true; expand control opacity 1, 34×26 |
-
-**Red-before:** each case has a named in-page break (`SR_MUTATE`); all six went red. SR2.1's label half
-was proved alone (at 15px, "Query Centre sits inside its row" fails), because its width check had
-masked it on the first run.
-
-## Phase 3 — RAIL · FLOAT · PINNED (`150e1be7b`)
-
-**Changed:** new `useSidebarState.ts` (state, migration, narrow rule, `[`/⌘\); `WorkspaceShell.tsx`
-(the motion, close rules, focus rules, the full sidebar's pin and close buttons, Dashboard with no
-heading, rows that put a floating sidebar away); `sidebarRail.css` (the full layer's restyle, the float
-shadow, the settings-mode fix); `shortcuts.ts` (the binding's new home); five unit locks retargeted,
-new unit locks for the state derivation and migration.
-
-**Gates:** tsc clean · build clean · Vitest 10,331 passed, 0 failed.
-
-**e2e on `/queries`, every animation frame sampled:**
-
-| Case | Measured |
-|---|---|
-| SR3.1 RAIL→FLOAT | 9 intermediate widths (124.5 … 247); the page's left edge `[80]` in every frame |
-| SR3.2 FLOAT→PINNED | laid-out left `[80, 248]` (one re-layout); then 11–12 frames of transform (−168 → 0); ends at 248. 3/3 on repeat |
-| SR3.3 PINNED→RAIL | 6–7 frames of width animation; the left edge `[80]` throughout; ends 80/80 |
-| SR3.4 FLOAT closes | on a page pick, a page click, Escape and ⌘K; a click inside the manuscript menu keeps it |
-| SR3.5 PINNED | ignores Escape; survives navigation and a reload (248px, `--shell-side-w: 248px`) |
-| SR3.6 narrow | 1024×800 with pinned stored: rail; FLOAT opens; pin disabled, titled "Pinning needs a wider window"; 1512: pinned again |
-| SR3.7 migration | collapsed `"0"` → pinned; `"1"` → rail; nothing → rail |
-| SR3.8 keyboard | `[` opens FLOAT with focus on "Query Centre"; Escape returns focus to the expand control; `[` typed into the palette stays in the field |
-| SR3.9 reduced motion | each state change's first changed frame is its final width |
-| SR3.10 fonts | 78 labels; faces Source Serif 4, JetBrains Mono, Inter, Special Elite, Playfair; none in Source Sans |
-
-**Red-before (frame and font locks):**
-- Margin transition removed → SR3.1 fails on the left edge (`80, −88, −79.8, 77.3`); SR3.3 fails on the left edge (`239.1, 130.5`). Both proved with the left-edge assertion first.
-- Glide transition removed → SR3.2: 0 glide frames.
-- Label fonts set to inherit → SR3.10 lists every rail label in Source Sans 3.
-- Full layer forced visible in settings → SR2.4's new hidden-layer check fails.
-
-**Found and fixed by measuring, not reading:**
-- Labels in Source Sans: the rail avatar (my own `.wsr button { font: inherit }` outranked it) and four labels in the settings plan strip. Now the serif inside the sidebar.
-- On `/account/*`, an older `.set-mode .ws-pin { opacity: 1 }` rule showed the full layer through the rail (visible only in a screenshot; SR2.4 had checked only the rail's rows). Fixed, and SR2.4 now checks the hidden layer on every route it visits.
-
-## Things to know
-
-- **The one re-layout on `/queries` takes ~180–200ms.** FLOAT → PINNED holds the page at −168 by transform during it, so nothing jumps, but the glide starts that late.
-- **SR3.2 failed once in a full run** (5 glide frames, with a 100ms gap in the samples) while another session's e2e run loaded the machine. It passed 3/3 on repeat.
-- **At 982px tall the full sidebar's nav scrolls:** Corkboard sits behind the feedback card. The split added a heading. The card folds below 920px as before.
-- **The BETA chip is gone from the full sidebar's header row** (the spec says so). The beta strip above the window is unaffected.
-- **Measurement-only patch:** another session held the emulator ports, so my runs patched the ports (8186/9196/9296/4506/4322) for the run only and restored them afterwards. Nothing committed.
-- **This worktree symlinks `functions/node_modules`** (the harness needs `firebase-admin`). That is also why the four `functions/` test files pass here when they failed at baseline.
-
-## Deferred — and who owns it
-
-- **The dev deploy and the IA reconciliation above — Nick.**
-- **23 older e2e suites** select the old sidebar (`sb-toggle`, `.ws-ni`, the expanded default) and were not run: contactV16, contactV17, corkboardV1, drawerMotion, helpSystemV1Shots, helpCentreV1, helpSystemV1, inkShots, inkShell, msShots, onbV5, pageHeaderV1, qcChassis, qcV126, rs2, settingsMode, shellMenus, shellV3Mock, shellV3, signOut, sidebarCapture (+ inkLib, shellV3Lib). Most will now meet the rail by default. Whoever lands the rail retargets or retires them; I can do it once the IA question is settled.
-- **The palette's "Account" page entry** still says Account while the bar names the page Settings. Not touched.
-- **`useSidebarCollapsed.ts`** survives only for `isEditableTarget`, `SIDEBAR_COLLAPSED_KEY` (migration) and its tests; its hook is mounted nowhere. Retire it in a cleanup pass.
-- **Worktrees:** there were 7 besides the primary when this started. Offer to clean up the clean ones stands.
-
-## Screenshots (deviceScaleFactor 2)
-
-`reports/sidebar-rail-v1/`: `1-rail-queries.png` · `2-agents-card-discover.png` · `3-float-queries.png` ·
-`4-pinned-queries.png` · `5-settings-rail.png` · `6-float-1024.png` · `7-touch-header.png` (clip) ·
-`8-rail-760-tall.png`.
+`reports/sidebar-rail-v1/`:
+- `1-rail-query-centre.png`
+- `2-rail-your-book-versions.png`
+- `3-floating-sidebar.png`
+- `4-pinned-contact-list.png`
+- `5-settings-rail.png`
 
 ## Reproduce
 
 ```
 SR_SHOTS=<dir> npm run e2e:emu -- tests/e2e/sidebarRail.measure.ts --project=measure
-SR_MUTATE=all npm run e2e:emu -- tests/e2e/sidebarRail.measure.ts --project=measure -g SR2
+SR_MUTATE=frames,glide,font,tall,fullshow,label npm run e2e:emu -- tests/e2e/sidebarRail.measure.ts --project=measure
 ```
+
+Another session held the emulator ports for this whole run, so my runs used their own ports through a temporary
+patch, which was reverted after each run. Nothing from it is committed.
