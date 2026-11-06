@@ -539,9 +539,13 @@ for (const vp of SIZES) {
       const t = await readThread(page);
       L.check("the bubble says what was entered: Told 6 other agents", t?.msgs.some((m) => m.kind === "told" && m.title === "Told 6 other agents"), JSON.stringify(t?.msgs.map((m) => m.title)));
       await page.locator("[data-qad-undo]").first().click({ timeout: 8000 }).catch(() => {});
-      await page.waitForTimeout(3000);
+      /* Undo restores every snapshot in one batch; on a long shared run that batch can take longer than a fixed wait */
+      const want = JSON.stringify([offerBefore, sibBefore]);
+      for (let i = 0; i < 20 && JSON.stringify([dump("offer"), dump("agent")]) !== want; i++) await page.waitForTimeout(1000);
+      const sibAfter = dump("agent");
+      const sibDiff = Object.keys({ ...sibBefore.q, ...sibAfter.q }).filter((k) => JSON.stringify(sibBefore.q?.[k]) !== JSON.stringify(sibAfter.q?.[k]));
       L.check("Undo: the offer back byte for byte", JSON.stringify(dump("offer")) === JSON.stringify(offerBefore), "");
-      L.check("Undo: the accepted sibling back byte for byte", JSON.stringify(dump("agent")) === JSON.stringify(sibBefore), "");
+      L.check("Undo: the accepted sibling back byte for byte", JSON.stringify(sibAfter) === JSON.stringify(sibBefore), JSON.stringify({ fields: sibDiff, log: [sibBefore.log?.length, sibAfter.log?.length], feed: [sibBefore.feed?.length, sibAfter.feed?.length] }));
       L.check("Undo: the refused sibling still as it was", dumpq("seed-pkgq-4") === refusedBefore, "");
       L.done(10);
     });
