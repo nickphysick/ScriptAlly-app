@@ -233,6 +233,11 @@
   /* sidebar materials v1: a Pro section's tag after its heading (the row tag's look, beside the words rather than
      pushed to the row's end). The heading is a flex row in the ink shell. */
   .ws-panel .ws-pin .ws-glabel { display: flex; align-items: center; }
+  /* ⚠️ SIDEBAR MATERIALS v1 SPACING (6 Nov): headings 13 above and 5 below, rows 32 tall (they were 22/5 and 33; the
+     heading under Dashboard was 14). Six groups and thirteen rows must fit with the full feedback card at 1512×982,
+     no nav scroll (Nick, 25 Oct): the e2e lock SR5 measures it. The rail's own rows are untouched. */
+  .ws-panel .ws-pin .ws-glabel, .ws-panel .ws-pin .ws-nav > .ws-ni:first-child + .ws-glabel { margin: 13px 10px 5px; }
+  .ws-panel .ws-pin .ws-ni { height: 32px; }
   .ws-panel .ws-pin .ws-gpro { margin-left: 8px; letter-spacing: 0.1em; }
   .ws-panel .ws-pin .ws-ni { color: rgba(var(--ink-cream-rgb), 0.58); }
   .ws-panel .ws-pin .ws-ni .ws-ic { opacity: 0.5; transition: opacity 0.12s ease; }
