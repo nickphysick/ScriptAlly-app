@@ -173,15 +173,19 @@ rather than share them.
    - rules: `firebase deploy --only firestore:rules --config firebase.dev.json --project scriptally-dev`;
    - app: re-check that dev still serves `index-gBdGm9sz.js`, then deploy `todo-list-v51` as a new `dev/…-sr1-td51`
      branch (hosting only).
-   - ⚠️ That would drop the QC session's six newer `query-centre-v152-1` commits from dev unless they're stacked in too.
+   - ⚠️ **Dev moved while this ran.** It now serves **`index-C53uvdXY.js`** from `dev/…-sr1-qc1522` @ `6ef04863f`: my
+     base plus 8 Query Centre commits (v152.1's six and v152.2). A dry-run merge (`git merge-tree`) of `todo-list-v51`
+     into it is **clean, no conflicts**. The deploy would be that merge, as `dev/…-qc1522-td51`, re-gated and rebuilt,
+     with the served hash re-checked right before deploying. Deploying `todo-list-v51` alone would take the Query Centre's
+     v152.1 and v152.2 off dev.
 2. **Six e2e suites compare against the desktop tray** and will fail on their desktop half. They're left in place and
    named in `RETIRED-todo-list-v51.md`.
 3. **Decisions:**
    - the pin, Needs you now, the calendar drawer and bulk close (each can come back on the workspace);
    - whether the phone pop-up should get its intended inks;
    - whether the dashboard's Next up should count the same thing.
-4. **Worktrees:** there are 9 besides the primary, more than CLAUDE.md's five. Three are other sessions' scratchpad
-   worktrees and one is mine (`ScriptAlly-td51`, kept until the dev deploy and your review). I removed none.
+4. **Worktrees:** 6 besides the primary when this was written, more than CLAUDE.md's five. One is mine
+   (`ScriptAlly-td51`, kept until the dev deploy and your review), and I removed none.
 5. **CLAUDE.md's "direct to main" rule.** Proposed wording, not applied:
 
    > **Packs branch from the dev line, never commit to `main`.** Every pack since October runs on its own branch, cut
