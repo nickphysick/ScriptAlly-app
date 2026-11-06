@@ -75,14 +75,24 @@ export function foldStatus(tier: number, done: number): { bold: string; rest: st
 }
 
 /**
+ * The stored rank, as `cardTier`'s index. v105 wrote that index (0–5), and the rules accept nothing else; a tier NAME
+ * ("archivist") is read as its index rather than treated as absent, and nothing stored is ever rewritten to normalise it.
+ */
+export function seenRank(seen: unknown): number | null {
+  if (typeof seen === "number" && Number.isInteger(seen) && seen >= 0 && seen <= TOP_TIER) return seen;
+  if (typeof seen === "string") { const i = TIERS.findIndex((t) => t.key === seen.toLowerCase()); return i >= 0 ? i + 1 : null; }
+  return null;
+}
+
+/**
  * Part D · what the band does with the rank it last celebrated (`users.foundingSeenTier`):
  *   "silent" — nothing stored yet (an existing writer): store the current rank, no animation (an Egg stores 0, so its
  *              hatch is still celebrated later);
  *   "play"   — the rank is above the one stored: play the rank-up once, then store it;
  *   "none"   — otherwise. The Egg never plays.
  */
-export function rankUpDecision(tier: number, seen: number | null | undefined): "play" | "silent" | "none" {
-  const s = typeof seen === "number" && Number.isInteger(seen) ? seen : null;
+export function rankUpDecision(tier: number, seen: unknown): "play" | "silent" | "none" {
+  const s = seenRank(seen);
   if (s === null) return "silent";
   if (tier >= 1 && tier > s) return "play";
   return "none";

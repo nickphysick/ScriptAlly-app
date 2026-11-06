@@ -109,6 +109,28 @@
   .d58.d2 .d22-road li.is-next .d22-av { width: 44px; height: 44px; }
   .d58.d2 .d22-road::before, .d58.d2 .d22-fill { top: 20px; }
 }
+
+/* ── Part D · the rank-up, once (≈2.2s; ref screens/04 is its end) ── */
+.d58.d2 .d22-badge.is-hatch > span { position: absolute; inset: 0; display: grid; place-items: center; border-radius: 50%; overflow: hidden; }
+.d58.d2 .d22-badge.is-hatch .d22-prev { animation: d22-wob 0.9s ease-in-out 0.3s 1, d22-out 0.3s ease-in 1.2s forwards; }
+.d58.d2 .d22-badge.is-hatch .d22-new { opacity: 0; transform: scale(0.4); animation: d22-in 0.55s cubic-bezier(0.3, 1.6, 0.5, 1) 1.4s forwards; }
+.d58.d2 .d22-badge.is-hatch::after { content: ""; position: absolute; inset: -7px; border-radius: 50%; border: 2px solid #a0675a; opacity: 0; animation: d22-pulse 1s ease-out 1.55s 1; pointer-events: none; }
+.d58.d2 .d22-sp { position: absolute; left: 50%; top: 50%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; background: #a0675a; opacity: 0; pointer-events: none; }
+/* the sparks move by the Web Animations API (Dash2Founding): their offsets are per spark, and a var() in @keyframes fails here */
+.d58.d2 .d22-sp:nth-of-type(odd) { background: #e8b9a6; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; }
+.d58.d2 .d22-metx.is-up { animation: d22-fadeup 0.45s ease 1.6s both; }
+.d58.d2 .d22-road li.is-new .d22-av img { animation: d22-col 0.6s ease 1.8s both; }
+.d58.d2 .d22-road li.is-new .d22-tk { animation: d22-fade 0.3s ease 2.2s both; }
+@keyframes d22-wob { 0% { transform: rotate(0); } 20% { transform: rotate(-10deg); } 40% { transform: rotate(8deg); } 60% { transform: rotate(-5deg); } 80% { transform: rotate(2deg); } 100% { transform: rotate(0); } }
+@keyframes d22-out { to { opacity: 0; transform: scale(0.5); } }
+@keyframes d22-in { 0% { opacity: 0; transform: scale(0.4); } 100% { opacity: 1; transform: scale(1); } }
+@keyframes d22-pulse { 0% { opacity: 0.9; transform: scale(1); } 100% { opacity: 0; transform: scale(1.55); } }
+@keyframes d22-fadeup { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes d22-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes d22-col { from { filter: grayscale(1) sepia(0.3) contrast(0.92) opacity(0.55); } to { filter: none; } }
 @media (prefers-reduced-motion: reduce) {
+  .d58.d2 .d22-badge.is-hatch .d22-prev, .d58.d2 .d22-sp, .d58.d2 .d22-badge.is-hatch::after { animation: none; opacity: 0; }
+  .d58.d2 .d22-badge.is-hatch .d22-new { animation: none; opacity: 1; transform: none; }
+  .d58.d2 .d22-metx.is-up, .d58.d2 .d22-road li.is-new .d22-av img, .d58.d2 .d22-road li.is-new .d22-tk { animation: none; }
   .d58.d2 .d22-tip, .d58.d2 .d22-tell button, .d58.d2 .d22-tell .d22-ti { transition: none; }
 }

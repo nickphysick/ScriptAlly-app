@@ -21,13 +21,13 @@
  * v105's art and How it works. The words and the fill are lib/foundingBand, over `TIERS`. Nothing here sets a threshold.
  * ⚠️ NO HEADINGS: brand.tsx forces a face on bare h1–h3; the band's names are spans.
  */
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./dash2Founding.css";
 import { cardTier, useFoundingStats } from "../../../lib/foundingStats";
 import { composeFor, RANK_NAMES, type ComposeKey } from "../../../lib/foundingCard";
 import { feedbackDraft, openFeedback, setFeedbackDraft } from "../../../lib/feedbackStore";
 import { useLatestNote } from "../../../lib/foundingNotes";
-import { askLine, BIRDS, birdHover, birdState, birdSub, firstLine, outcomeDone, roadFill, TOP_TIER } from "../../../lib/foundingBand";
+import { askLine, BIRDS, birdHover, birdState, birdSub, firstLine, outcomeDone, rankUpDecision, roadFill, TOP_TIER } from "../../../lib/foundingBand";
 import { EggNest, ICONS, headFor } from "../v105/foundingArt";
 import { Dash105How } from "../v105/Dash105How";
 
@@ -61,11 +61,17 @@ const Tell: React.FC<{ small?: boolean }> = ({ small }) => {
   );
 };
 
+type Aid = { __SA_FOUNDING_STATS?: { seen?: unknown } | null };
+
 export const Dash2Founding: React.FC<{
   loading: boolean;
   uid: string | null;
-}> = ({ loading, uid }) => {
-  const { loading: sLoading, stats } = useFoundingStats(uid);
+  /** `users.foundingSeenTier`: the rank last celebrated; undefined = never stored */
+  seenTier?: number | null;
+  /** stores the rank celebrated; absent (the onboarding ghost, the example) → no rank-up and no write */
+  onSeen?: (tier: number) => void | Promise<void>;
+}> = ({ loading, uid, seenTier, onSeen }) => {
+  const { loading: sLoading, error: sError, stats, aided } = useFoundingStats(uid);
   const notes = useLatestNote(uid);
   const [howOpen, setHowOpen] = useState(false);
   const howRef = useRef<HTMLButtonElement | null>(null);
@@ -75,7 +81,37 @@ export const Dash2Founding: React.FC<{
   const top = tier >= TOP_TIER;
   const rank = RANK_NAMES[tier];
 
-  const up = null as { from: number; to: number } | null; /* Part D */
+  /* ── Part D · the rank-up: decided whenever the rank becomes known or rises, written once per rank ── */
+  const [up, setUp] = useState<{ from: number; to: number } | null>(null);
+  const handled = useRef<number | null>(null);
+  useEffect(() => {
+    if (busy || sError) return;
+    const aidSeen = aided && typeof window !== "undefined" ? (window as unknown as Aid).__SA_FOUNDING_STATS?.seen : undefined;
+    const seen = aided ? (typeof aidSeen === "number" ? aidSeen : undefined) : seenTier;
+    if (!aided && !onSeen) return;
+    if (handled.current === tier) return;
+    const d = rankUpDecision(tier, seen);
+    if (d === "none") { handled.current = tier; return; }
+    handled.current = tier;
+    if (d === "play") setUp({ from: tier - 1, to: tier });
+    /* the aid's stats are not the writer's: nothing derived from them is written (v105) */
+    if (!aided) void onSeen?.(tier);
+  }, [busy, sError, aided, tier, seenTier, onSeen]);
+
+  /* the eight sparks burst outward ~50px at 1.45s and fade (0.8s). By the Web Animations API, because each spark's
+     offset is its own and a var() inside @keyframes fails silently in this setup. Nothing under reduced motion. */
+  const badgeRef = useRef<HTMLSpanElement | null>(null);
+  useEffect(() => {
+    const el = badgeRef.current;
+    if (!up || !el || typeof el.animate !== "function") return undefined;
+    if (typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return undefined;
+    const anims = Array.from(el.querySelectorAll<HTMLElement>(".d22-sp")).map((sp) => sp.animate(
+      [{ opacity: 1, transform: "translate(0, 0)" }, { opacity: 0, transform: `translate(${sp.dataset.dx}px, ${sp.dataset.dy}px)` }],
+      { duration: 800, delay: 1450, easing: "ease-out", fill: "forwards" },
+    ));
+    return () => anims.forEach((a) => a.cancel());
+  }, [up]);
+
   const prefix = busy ? " " : firstLine(tier, !!up);
   const ask = askLine(tier, done, !!up);
   const fill = busy ? null : roadFill(tier, done);
@@ -100,7 +136,7 @@ export const Dash2Founding: React.FC<{
       </div>
       <div className="d22-body">
         <div className="d22-me" data-d2="fw-top">
-          <span className={`d22-badge${up ? " is-hatch" : ""}`} data-d2="fw-badge" aria-hidden="true">
+          <span ref={badgeRef} className={`d22-badge${up ? " is-hatch" : ""}`} data-d2="fw-badge" aria-hidden="true">
             {busy ? null : up ? (
               <>
                 <span className="d22-prev"><Art tier={up.from} /></span>

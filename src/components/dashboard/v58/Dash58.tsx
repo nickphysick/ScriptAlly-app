@@ -636,7 +636,9 @@ export const Dash58: React.FC<Dash58Props> = ({
             onLog={logQuery} onRecord={() => onNavigate("queries", "Record a response")} onAddAgent={() => onNavigate("agents", "Add an agent")} />
           {/* ⚠️ DASHBOARD v2.2 (Part A; ref design-refs/dashboard-v2-2): the founding writer is a full-width band under the
               navy header, never a card inside a column. */}
-          <Dash2Founding loading={loading} uid={fwUid} />
+          {/* Part D: the rank last celebrated is `users.foundingSeenTier` (v105's field); never written from the ghost or the example */}
+          <Dash2Founding loading={loading} uid={fwUid} seenTier={currentUser?.foundingSeenTier}
+            onSeen={example || !onFoundingSeen ? undefined : onFoundingSeen} />
           <div className="d2-grid" data-d2="grid">
             <div className="d2-col d2-left" data-d2="left">
               {gsSheetOpen && (

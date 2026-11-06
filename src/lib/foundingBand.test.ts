@@ -7,7 +7,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { TIERS } from "./foundingStats";
-import { askLine, BIRDS, birdHover, birdState, birdSub, firstLine, foldStatus, notesLeft, RANK_MIN, rankUpDecision, roadFill, TOP_TIER } from "./foundingBand";
+import { seenRank, askLine, BIRDS, birdHover, birdState, birdSub, firstLine, foldStatus, notesLeft, RANK_MIN, rankUpDecision, roadFill, TOP_TIER } from "./foundingBand";
 
 describe("foundingBand", () => {
   it("reads the server's tiers and nothing else", () => {
@@ -75,5 +75,15 @@ describe("foundingBand", () => {
     expect(rankUpDecision(3, 3)).toBe("none");
     expect(rankUpDecision(2, 3)).toBe("none");
     expect(rankUpDecision(0, 0)).toBe("none");
+    /* v105's value, left below the current rank, plays once */
+    expect(rankUpDecision(4, 2)).toBe("play");
+  });
+
+  it("reads the stored rank as v105 wrote it (cardTier's index), and a tier name as its index", () => {
+    expect([0, 1, 5].map(seenRank)).toEqual([0, 1, 5]);
+    expect(seenRank("archivist")).toBe(2);
+    expect(seenRank("Scout")).toBe(3);
+    for (const bad of [undefined, null, -1, 6, 1.5, "egg", {}]) expect(seenRank(bad)).toBeNull();
+    expect(rankUpDecision(3, "archivist")).toBe("play");
   });
 });
