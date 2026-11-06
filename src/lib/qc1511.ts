@@ -100,7 +100,9 @@ const SPELL = ["no", "one", "two", "three", "four", "five", "six", "seven", "eig
 const spell = (n: number): string => SPELL[n] ?? String(n);
 
 export interface SummaryPill { key: string; status: QueryStatus; text: string; late: boolean }
-export interface WeekSummary { n: number; heading: string; detail: string | null; pills: SummaryPill[] }
+/** v152.2 §1.3 — a to-do row under the sentence: the glyph, the job in bold, the time ("1 day left", "8 days late") */
+export interface TodoRow1522 { id: string; status: QueryStatus; job: string; when: string; late: boolean }
+export interface WeekSummary { n: number; heading: string; detail: string | null; pills: SummaryPill[]; todo: TodoRow1522[] }
 
 /** a Your move row's kind: its status, or a nudge (a waiting query in its nudge window) */
 const kindOf = (r: QcRow): Kind => KIND_OF[r.status] ?? "nudge";
@@ -144,7 +146,7 @@ export function weekSummary(rows: readonly QcRow[], nowMs: number): WeekSummary 
   if (mine.length === 0) {
     const next = rows.filter((r) => r.court === "agent" && r.expectedMs != null && daysFrom(r.expectedMs, nowMs) >= 0)
       .map((r) => r.expectedMs!).sort((a, b) => a - b)[0];
-    return { n: 0, heading: "Nothing needs you this week", detail: next != null ? `Next reply due ${dm(next, nowMs)}.` : null, pills: [] };
+    return { n: 0, heading: "Nothing needs you this week", detail: next != null ? `Next reply due ${dm(next, nowMs)}.` : null, pills: [], todo: [] };
   }
   const parts: string[] = [];
   const offers = mine.filter((r) => kindOf(r) === "offer");
@@ -174,7 +176,38 @@ export function weekSummary(rows: readonly QcRow[], nowMs: number): WeekSummary 
     heading: `${mine.length} ${mine.length === 1 ? "query needs" : "queries need"} you this week`,
     detail: parts.length ? sentence(parts) : null,
     pills,
+    todo: todoRows(mine, nowMs),
   };
+}
+
+/* ── v152.2 §1.3 — the banner's to-do rows ─────────────────────────────────────────────────────────────────────── */
+const JOB: Record<Kind, (n: string) => string> = {
+  offer: (n) => `Answer ${n}’s offer`,
+  partial: (n) => `Send ${n}’s partial`,
+  full: (n) => `Send ${n} the full`,
+  revision: (n) => `Send ${n} the revision`,
+  nudge: (n) => `Nudge ${n}`,
+};
+const dueOf = (r: QcRow): number | null => {
+  if (kindOf(r) === "offer") { const t = Date.parse(String(r.query.offerResponseDeadline ?? "")); if (Number.isFinite(t)) return t; }
+  return (r as { replyMs?: number | null }).replyMs ?? r.expectedMs;
+};
+/** up to four, most urgent first: offers, then late (latest first), then soonest due, then undated */
+export function todoRows(mine: readonly QcRow[], nowMs: number, max = 4): TodoRow1522[] {
+  const rank = (r: QcRow): [number, number] => {
+    if (kindOf(r) === "offer") return [0, dueOf(r) ?? Number.MAX_SAFE_INTEGER];
+    const due = dueOf(r);
+    if (due == null) return [3, 0];
+    const d = daysFrom(due, nowMs);
+    return d < 0 ? [1, d] : [2, d];
+  };
+  return [...mine].sort((a, b) => { const x = rank(a), y = rank(b); return x[0] - y[0] || x[1] - y[1]; }).slice(0, max).map((r) => {
+    const k = kindOf(r);
+    const due = dueOf(r);
+    const d = due != null ? daysFrom(due, nowMs) : null;
+    const when = d == null ? "No date yet" : d < 0 ? `${days(-d)} late` : d === 0 ? "Due today" : `${days(d)} left`;
+    return { id: r.id, status: KIND_GLYPH[k] === QueryStatus.QUERIED ? (r.status as QueryStatus) : KIND_GLYPH[k], job: JOB[k](r.agentName), when, late: d != null && d < 0 };
+  });
 }
 
 /* ── §5 the pill row ───────────────────────────────────────────────────────────────────────────────────────────── */

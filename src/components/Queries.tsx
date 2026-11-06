@@ -130,7 +130,9 @@ import { nextLine } from "../lib/qcRowLines";
 import { QcPage151, Track151 } from "./queries/centre/QcPage151";
 import { QcFilterPanel151 } from "./queries/centre/QcFilterMenu140";
 import { QUIET_WEEKS_PATH, nudgeMsOf, quickOfRow, quietWeeksOf, stampRows, stateOf, queryState as qsOf } from "../lib/queryState";
-import { packagesUnlocked } from "../lib/entitlements";
+import { packagesUnlocked, versionsUnlocked } from "../lib/entitlements";
+import { ACTION_LABEL, CLOSED_SET, listGroupOf, savedGroupOf } from "../lib/qc1522";
+import { qcPlanAid } from "../lib/qcReviewAid1522";
 import { dayLabel as dayLabel152, sideOf as side152, type ReplyAct, type ThreadStepIn } from "../lib/qcThread152";
 import { getActivityTime } from "../lib/queryDerivation";
 import { qc152DevFree } from "../lib/qc152ReviewAid";
@@ -145,7 +147,7 @@ import { inUseId as inUseBookVersion } from "../lib/versionsV2";
 import type { QcCard152Data } from "./queries/centre/QcCard152";
 import { DEFAULT_SORT_151, QC_FULL_SCREEN, nextCell, sort151, whoSections, type Section, type Sort151 } from "../lib/qc151";
 import { pillGroups, weekSummary } from "../lib/qc1511";
-import { actionSections, rowAct, statusKind } from "../lib/qc1512";
+import { rowAct, statusKind } from "../lib/qc1512";
 import { pressView, twinTags } from "../lib/qc149";
 import { PIN_KEYS, usePinList } from "./shell/useFullScreenList";
 import { listCountTitle } from "./shell/ViewTitleRow";
@@ -2481,6 +2483,9 @@ export const Queries: React.FC<{
   const qcRemVisit = useMemo(() => readQcVisit(), []);
   const [qcGroup, setQcGroupState] = useState<GroupBy>(() => qcRemView.group);
   const setQcGroup = useCallback((g: GroupBy) => { setQcGroupState(g); writeQcView({ group: g }); }, []);
+  /* v152.2 §1.1 — the desktop's Group menu: Status, Action (\`attention\`), Package. The ungrouped list (the pill's ×) is
+     for the visit only; the device remembers Action in its place. */
+  const setQcGroup1522 = useCallback((g: GroupBy) => { setQcGroupState(g); writeQcView({ group: savedGroupOf(g) }); }, []);
   /** §2 — the Find field in the list head; remembered for the visit (v140 §F). */
   const [qcFind, setQcFind] = useState(() => qcRemVisit?.search ?? "");
 
@@ -8118,13 +8123,21 @@ export const Queries: React.FC<{
               const sorted151 = sort151(qcVisible, qcSort151, (r) => nextCell(r, phrase151(r), now151).label);
               /* v152 §1.5 — Who it's with is the six states, and under a quick filter its headers still show (this
                  supersedes v151.1 §6's single label row) */
-              const sections151: Section<QcRow>[] = qcGroup === "attention" ? whoSections(sorted151, now151)
-                : qcGroup === "none" ? (sorted151.length ? [{ key: "all", label: "", rows: sorted151 }] : [])
-                /* v151.2 §3 — Next action has its own seven groups, most urgent first (lib/qc1512) */
-                : qcGroup === "action" ? actionSections(sorted151, now151)
-                : qcListGroups(sorted151, qcGroup, now151, qcPackageName).map((g) => ({
+              /* v152.2 §1.1 — three groupings: Status, Action (the six states, "With the agent" reading "Watch and wait"),
+                 Package (Pro or founding); "Next action" is gone and reads as Action */
+              const pkgOk1522 = (import.meta.env.MODE !== "production" ? qcPlanAid() : null) ?? versionsUnlocked(currentUser);
+              const group1522 = listGroupOf(qcGroup, pkgOk1522);
+              const statusGroups = (): Section<QcRow>[] => {
+                const live = qcListGroups(sorted151.filter((r) => !CLOSED_SET.includes(r.status)), "status", now151, qcPackageName).map((g) => ({ key: g.key, label: g.label, rows: g.rows }));
+                const shut = sorted151.filter((r) => CLOSED_SET.includes(r.status));
+                return shut.length ? [...live, { key: "closed", label: "Closed", rows: shut }] : live;
+              };
+              const sections151: Section<QcRow>[] = group1522 === "attention" ? whoSections(sorted151, now151).map((x) => ({ ...x, label: ACTION_LABEL[x.key as keyof typeof ACTION_LABEL] ?? x.label }))
+                : group1522 === "none" ? (sorted151.length ? [{ key: "all", label: "", rows: sorted151 }] : [])
+                : group1522 === "status" ? statusGroups()
+                : qcListGroups(sorted151, "package", now151, qcPackageName).map((g) => ({
                   key: g.key, rows: g.rows,
-                  label: qcGroup === "package" ? (g.key === "pkg:none" ? "Nothing recorded" : `${g.label} package`) : g.label,
+                  label: g.key === "pkg:none" ? "Nothing recorded" : `${g.label} package`,
                 }));
               if (practice && pipRow) sections151.unshift({ key: "practice", label: "Practice", rows: [pipRow] });
               const strip151 = qc140Chips.filter((c) => !c.key.startsWith("where:"));
@@ -8160,7 +8173,7 @@ export const Queries: React.FC<{
                     }} />
                   )}
                   pills={pillGroups(strip151)} onClearAll={clearAll1511}
-                  group={qcGroup} onGroup={setQcGroup}
+                  group={group1522} onGroup={setQcGroup1522} packageOk={pkgOk1522}
                   sort={qcSort151} defaultSort={DEFAULT_SORT_151} onSort={setQcSort151}
                   sections={showGridSkeleton ? [] : sections151}
                   phraseOf={phrase151}

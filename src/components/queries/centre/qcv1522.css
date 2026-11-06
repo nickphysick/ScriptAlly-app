@@ -1,0 +1,99 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Query Centre v152.2 §1 (design-refs/query-centre-v152-2/list-page.html, screens 01–08) — the list page: the banner's
+ * to-do rows, the one divider, the Group menu's plain heading and its Pro row, and one table per group with a sticky
+ * header whose tint lives on a layer inside a page-coloured square (so nothing shows past its rounded corners).
+ * Imported after qcv151.css; every rule here is scoped to `.qc151` or the menu.
+ */
+
+/* §1.3 the banner: the art panel is sand, the chips are up to four to-do rows in two columns */
+.qc151 .qc1511-sum-art { background: #f3eee6; }
+.qc151 .qc1522-todo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+.qc151 .qc1522-tr {
+  all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 10px; min-width: 0; padding: 9px 14px;
+  border-radius: 12px; background: #fbf9f5; box-shadow: inset 0 0 0 1px #ece6de; transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+.qc151 .qc1522-tr:hover { box-shadow: inset 0 0 0 1.5px #2a3a52; transform: translateY(-1px); }
+.qc151 .qc1522-tr:focus-visible { outline: 2px solid #c9765d; outline-offset: 2px; }
+.qc151 .qc1522-tr b { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 600 15.5px/1.35 var(--sp-serif) !important; color: #1c130f; }
+.qc151 .qc1522-tr i { flex: none; font: italic 400 13.5px/1.35 var(--sp-serif) !important; color: #8a7f75; white-space: nowrap; }
+.qc151 .qc1522-tr[data-late] i { color: #a2452a; }
+
+/* §1.4 one divider: 30px under the banner, 22px over the tabs; none under the Showing row */
+.qc151 .qc1522-dv { display: block; height: 0; margin: 30px 0 0; border: 0; border-top: 1px solid #ddd3c6; }
+.qc151 .qc1522-dv + .qc1511-qr { margin-top: 22px; }
+.qc151 .qc1511-cl { border-bottom: 0; }
+
+/* §1.1 the Group menu: a sentence-case serif heading; Package's Pro tag; the locked row at 60% */
+.qc1522-mh { padding: 6px 12px 8px; font: 400 13px/1.4 var(--sp-serif) !important; letter-spacing: 0; text-transform: none; color: #7d7268; }
+.qc1522-pro {
+  display: inline-block; margin-left: 8px; padding: 1px 7px; border-radius: 999px; background: #2a3a52; vertical-align: 2px;
+  font: 600 10.5px/1.5 var(--sp-serif) !important; color: #fff; letter-spacing: 0.02em;
+}
+.qc140-go.is-locked { opacity: 0.6; cursor: default; }
+.qc140-go.is-locked:hover { background: transparent; }
+
+/* §1.5 one table per group; fixed columns so every group's columns line up */
+.qc151 .qc1522-list { margin-top: 14px; }
+.qc151 .qc1522-t.qc1511-tbl { margin-top: 0; table-layout: fixed; }
+.qc151 .qc1522-t + .qc1522-t { margin-top: 22px; }
+.qc151 .qc1522-t col.c-tk { width: 104px; }
+.qc151 .qc1522-t col.c-ws { width: 21%; }
+.qc151 .qc1522-t col.c-d { width: 10%; }
+.qc151 .qc1522-t col.c-nx { width: 11%; }
+.qc151 .qc1522-t col.c-act { width: 176px; }
+.qc151 .qc1522-t td { overflow: hidden; text-overflow: ellipsis; }
+.qc151 .qc1522-t td.qc1511-act { width: auto; overflow: visible; }
+
+/* the header: a page-coloured square, with the tint, the corners and the hairline on a layer inside it */
+.qc151 .qc1522-t .qc1522-gh td {
+  box-sizing: border-box; background: #f4f0ea; border-radius: 0; box-shadow: none; overflow: visible;
+  color: #8a7f75;
+}
+.qc151 .qc1522-t .qc1522-gh td::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: #fff; box-shadow: inset 0 1.5px 0 #e2d9cc;
+}
+.qc151 .qc1522-t .qc1522-gh td.qc1511-gt::before { background: var(--gh); }
+.qc151 .qc1522-t:not([data-kind="tint"]):not([data-kind="pkg"]) .qc1522-gh td::before,
+.qc151 .qc1522-t[data-kind="tint"] .qc1522-gh td::before { background: var(--gh); }
+/* a tint that is a gradient (Gone quiet) runs across the title cell; the labels sit on white */
+.qc151 .qc1522-t[data-k="quiet"] .qc1522-gh td:not(.qc1511-gt)::before { background: #fff; }
+.qc151 .qc1522-t .qc1522-gh td:first-child::before { border-top-left-radius: 18px; box-shadow: inset 0 1.5px 0 #e2d9cc, inset 1.5px 0 0 #e2d9cc; }
+.qc151 .qc1522-t .qc1522-gh td:last-child::before { border-top-right-radius: 18px; box-shadow: inset 0 1.5px 0 #e2d9cc, inset -1.5px 0 0 #e2d9cc; }
+.qc151 .qc1522-t.is-shut .qc1522-gh td::before { box-shadow: inset 0 1.5px 0 #e2d9cc, inset 0 -1.5px 0 #e2d9cc; }
+.qc151 .qc1522-t.is-shut .qc1522-gh td:first-child::before { border-bottom-left-radius: 18px; box-shadow: inset 0 1.5px 0 #e2d9cc, inset 1.5px 0 0 #e2d9cc, inset 0 -1.5px 0 #e2d9cc; }
+.qc151 .qc1522-t.is-shut .qc1522-gh td:last-child::before { border-bottom-right-radius: 18px; box-shadow: inset 0 1.5px 0 #e2d9cc, inset -1.5px 0 0 #e2d9cc, inset 0 -1.5px 0 #e2d9cc; }
+/* when stuck, a 10px shadow fades below it */
+.qc151 .qc1522-t .qc1522-gh td::after {
+  content: ""; position: absolute; left: 0; right: 0; top: 100%; height: 10px; pointer-events: none; opacity: 0;
+  background: linear-gradient(rgba(28, 19, 15, 0.08), rgba(28, 19, 15, 0)); transition: opacity 0.15s ease;
+}
+.qc151 .qc1522-t[data-stuck] .qc1522-gh td::after { opacity: 1; }
+
+/* every header's text is ink: the title, the count, the column labels */
+.qc151 .qc1522-t .qc1522-gh td.qc1511-gt { color: #1c130f; }
+.qc151 .qc1522-t .qc1511-gn { color: #1c130f !important; }
+.qc151 .qc1522-t .qc1511-gt small { color: #7d7268 !important; }
+.qc151 .qc1522-t .qc1511-lbl button { color: #8a7f75 !important; }
+.qc151 .qc1522-t .qc1511-lbl button:hover, .qc151 .qc1522-t .qc1511-lbl.is-on button { color: #1c130f !important; }
+.qc151 .qc1522-t .qc1511-ar { color: rgba(28, 19, 15, 0.35) !important; }
+.qc151 .qc1522-t .qc1511-lbl.is-on .qc1511-ar { color: #1c130f !important; }
+.qc151 .qc1522-t .qc1511-cv { color: #1c130f; }
+.qc151 .qc1522-gin { display: inline-flex; align-items: center; gap: 0; }
+.qc151 .qc1522-gin small { margin-left: 8px; }
+
+/* Package: the name on a Harbour label with a white icon; Nothing recorded plain with a grey icon */
+.qc151 .qc1522-pl {
+  display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 14px 0 10px; border-radius: 10px; background: #2e4a5e;
+}
+.qc151 .qc1522-t .qc1522-pl .qc1511-gn { color: #fff !important; font-size: 19px !important; }
+.qc151 .qc1522-pk { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linejoin: round; stroke-linecap: round; }
+.qc151 .qc1522-pl .qc1522-pk { color: #fff; }
+.qc151 .qc1522-pki { display: inline-flex; margin-right: 8px; color: #a59a90; }
+
+@media (max-width: 1440px) {
+  .qc151 .qc1522-t col.c-tk { width: 90px; }
+  .qc151 .qc1522-t col.c-act { width: 160px; }
+}

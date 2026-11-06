@@ -21,15 +21,17 @@ import { usePopover } from "../../shell/ListPills";
 import { usePinCover } from "../../shell/stickyStack";
 import { STAGE_NAME, whereItStands, type QcRow, type WhereKey } from "../../../lib/qcSummary";
 import { BE_GROUPS, BE_SORTS, type BeGroup, type BeSort } from "../../../lib/qc150";
-import { GROUP_BY_OPTIONS, type GroupBy } from "../../../lib/qcCalView";
+import type { GroupBy } from "../../../lib/qcCalView";
 import { TAB_LABEL, isClosedRow, lastHeardMs, pressSort, trackOf, type Section, type Sort151, type SortKey151 } from "../../../lib/qc151";
 import { dayLine, pillWords, yearSplit, type PillGroup, type WeekSummary } from "../../../lib/qc1511";
-import { ROW_TAG_WORDS, STATUS_FILL, headFill, headTone, nextNum, rowAct, rowTag, statusKind } from "../../../lib/qc1512";
+import { STATUS_FILL, nextNum, rowAct, statusKind } from "../../../lib/qc1512";
 import { quickOfRow, stateOf } from "../../../lib/queryState";
 import type { DrawerMode } from "../../../lib/queryActions/drawerStore";
-import { GROUP_LINE, RadioMenu151 } from "./QcToolbar140";
+import { RadioMenu151 } from "./QcToolbar140";
+import { GROUP_1522, GROUP_MENU_HEAD, PACKAGE_LOCKED_LINE, head1522 } from "../../../lib/qc1522";
 import { QcQuietSetting } from "./QcQuietSetting";
 import "./qcv151.css";
+import "./qcv1522.css";
 
 export const HAWK_DESK = "/images/query-centre/hawk-desk.webp?v=1";
 
@@ -42,6 +44,8 @@ const SORT = <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 4v12M3.5 13
 const CARET = <svg className="qc151-cv" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5l3 3 3-3" /></svg>;
 const CROSS = <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 3l6 6M9 3l-6 6" /></svg>;
 const CHEV = <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5l3 3 3-3" /></svg>;
+/* v152.2 §1.2 — the package icon (the ref's): white on the Harbour label, grey on "Nothing recorded" */
+const PKG_ICON = <svg className="qc1522-pk" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 6.5 10 3l7 3.5v7L10 17l-7-3.5z" /><path d="M3 6.5 10 10l7-3.5M10 10v7" /></svg>;
 
 export type View151 = "list" | "birds";
 
@@ -87,18 +91,21 @@ export const QcHeader151: React.FC<{
 );
 
 /* ── §2 the "This week" summary card ── */
-export const QcSummary1511: React.FC<{ summary: WeekSummary | null }> = ({ summary }) => (
+/* v152.2 §1.3 — the chips are up to four to-do rows in two columns; a row opens that query's card */
+export const QcSummary1511: React.FC<{ summary: WeekSummary | null; onOpen?: (id: string) => void }> = ({ summary, onOpen }) => (
   <section className="qc1511-sum" aria-label="This week" data-qc1511="summary">
     <div className="qc1511-sum-art" aria-hidden="true"><img src={HAWK_DESK} alt="" /></div>
     <div className="qc1511-sum-tx">
       <h2 data-qc1511="summary-heading">{summary ? summary.heading : " "}</h2>
       {summary?.detail ? <p data-qc1511="summary-detail">{summary.detail}</p> : null}
-      {summary && summary.pills.length ? (
-        <div className="qc1511-sum-ps">
-          {summary.pills.map((p) => (
-            <span key={p.key} className={`qc1511-sx${p.late ? " is-late" : ""}`} data-qc1511="summary-pill" data-late={p.late ? "" : undefined}>
-              <StatusDot status={p.status} overrideSize={14} decorative />{p.text}
-            </span>
+      {summary && summary.todo.length ? (
+        <div className="qc1522-todo" data-qc1522="todo">
+          {summary.todo.map((t) => (
+            <button key={t.id} type="button" className="qc1522-tr" data-qc1522="todo-row" data-id={t.id} data-late={t.late ? "" : undefined} onClick={() => onOpen?.(t.id)}>
+              <StatusDot status={t.status} overrideSize={14} decorative />
+              <b>{t.job}</b>
+              <i>{t.when} →</i>
+            </button>
           ))}
         </div>
       ) : null}
@@ -146,6 +153,8 @@ export interface QcPage151Props {
   /* the table */
   group: GroupBy;
   onGroup: (g: GroupBy) => void;
+  /** v152.2 §1.1 — grouping by package: Pro or founding (lib/entitlements `versionsUnlocked`) */
+  packageOk: boolean;
   sort: Sort151;
   defaultSort: Sort151;
   onSort: (s: Sort151) => void;
@@ -223,6 +232,25 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
     return () => { document.removeEventListener("pointerdown", down, true); document.removeEventListener("keydown", key); };
   }, [panelOpen]);
 
+  /* v152.2 §1.5 — a stuck header casts a 10px shadow: it is stuck when it has slid down its own table (derived from the
+     boxes on every scroll, never an observer) */
+  useEffect(() => {
+    let raf = 0;
+    const read = () => {
+      raf = 0;
+      rootRef.current?.querySelectorAll<HTMLElement>(".qc1522-t").forEach((t) => {
+        const hd = t.querySelector<HTMLElement>(".qc1522-gh td");
+        if (!hd) return;
+        const stuck = hd.getBoundingClientRect().top - t.getBoundingClientRect().top > 0.5;
+        if (stuck !== t.hasAttribute("data-stuck")) t.toggleAttribute("data-stuck", stuck);
+      });
+    };
+    const on = () => { if (!raf) raf = requestAnimationFrame(read); };
+    document.addEventListener("scroll", on, true);
+    on();
+    return () => { document.removeEventListener("scroll", on, true); if (raf) cancelAnimationFrame(raf); };
+  }, []);
+
   /* §6 — a group's rows fold away under its header, for the session */
   const [collapsed, setCollapsed] = useState<Set<string>>(readCollapsed);
   const fold = (k: string) => setCollapsed((c) => {
@@ -233,7 +261,7 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
 
   const birds = p.view === "birds";
   const filtersOn = p.filterCount > 0;
-  const groupOpt = GROUP_BY_OPTIONS.find((o) => o.key === p.group);
+  const groupOpt = p.group === "none" ? { label: "No grouping" } : GROUP_1522.find((o) => o.key === p.group);
   const beGroupDef = p.beGroup === "urgency";
   const beSortDef = p.beSort === "due";
   const sortDef = p.sort.key === p.defaultSort.key && p.sort.desc === p.defaultSort.desc;
@@ -262,7 +290,6 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
   const row = (r: QcRow, last: boolean) => {
     const nn = nextNum(r, p.nowMs);
     const act = rowAct(r, p.nowMs);
-    const tag = rowTag(r, p.nowMs);
     const wh = quickOfRow(r, () => whereItStands(r, p.nowMs));
     const qs = stateOf(r);
     const day = dayLine(r, p.nowMs);
@@ -277,7 +304,7 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
           <Track151 row={r} />
         </td>
         <td className="qc1511-nm" data-qc151="agent">
-          <span className="qc1512-nl"><b>{r.agentName}</b>{tag ? <span className={`qc1512-tag qc1512-tag--${tag}`} data-qc1512="tag" data-tag={tag}>{ROW_TAG_WORDS[tag]}</span> : null}</span>
+          <span className="qc1512-nl"><b>{r.agentName}</b></span>
           <span className="qc1511-agy" data-qc151="agency" title={r.agencyKey || undefined}>{r.agencyKey || "—"}</span>
         </td>
         <td className="qc1511-ws" data-qc151="stands">
@@ -328,8 +355,9 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
       if (!beSortDef) out.push(pill("sort", <>{SORT}<span className="k">Sort</span><span className="v">{BE_SORTS.find((s) => s.key === p.beSort)?.label}</span></>,
         (el) => pop.toggle("besort", el), () => p.onBeSort("due"), "Back to Due date"));
     } else {
+      /* v152.2 §1.1 — the Group pill's × shows the one ungrouped list; on that list it gives Action back */
       if (!groupDef) out.push(pill("group", <>{GROUP}<span className="k">Group</span><span className="v">{groupOpt?.label}</span></>,
-        (el) => pop.toggle("group", el), () => p.onGroup("attention"), "Back to who it’s with"));
+        (el) => pop.toggle("group", el), () => p.onGroup(p.group === "none" ? "attention" : "none"), p.group === "none" ? "Group by action" : "Show one list"));
       if (!sortDef) out.push(pill("sort", <>{SORT}<span className="k">Sort</span><span className="v">{SORT_WORD[p.sort.key]} {arrow(p.sort)}</span></>,
         () => p.onSort({ key: p.sort.key, desc: !p.sort.desc }), () => p.onSort(p.defaultSort), "Back to the default sort"));
     }
@@ -340,7 +368,9 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
   return (
     <div className="qc151" data-qc151="page" data-view={p.view} ref={rootRef}>
       <QcHeader151 loading={p.loading} onLog={p.onLog} onRecord={p.onRecord} logDisabled={p.logDisabled} logRef={p.logRef} counts={p.counts} quietWeeks={p.quietWeeks} onQuietWeeks={p.onQuietWeeks} />
-      <QcSummary1511 summary={p.summary} />
+      <QcSummary1511 summary={p.summary} onOpen={p.onOpen} />
+      {/* v152.2 §1.4 — the one divider: banner above, tabs below */}
+      <hr className="qc1522-dv" data-qc1522="divider" />
 
       {/* §3 the quick filters, and the switch on the same row */}
       <div className="qc1511-qr" data-qc1511="quick-row">
@@ -381,8 +411,11 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
               onClick={(e) => pop.toggle("besort", e.currentTarget)}>{SORT}<span>Sort</span>{CARET}</button>
           ) : null}
           {pop.open === "group" && pop.anchor ? (
-            <RadioMenu151 anchor={pop.anchor} title="Group the list by" k="group" value={p.group}
-              opts={GROUP_BY_OPTIONS.map((o) => ({ key: o.key, label: o.label, line: GROUP_LINE[o.key], divide: o.key === "none" }))}
+            <RadioMenu151 anchor={pop.anchor} title={GROUP_MENU_HEAD} k="group" value={p.group} plainHead
+              opts={GROUP_1522.map((o) => {
+                const locked = !!o.pro && !p.packageOk;
+                return { key: o.key, label: o.label, line: locked ? PACKAGE_LOCKED_LINE : o.line, pro: o.pro, locked };
+              })}
               onPick={(v) => { p.onGroup(v as GroupBy); pop.close(); }} />
           ) : null}
           {pop.open === "begroup" && pop.anchor ? (
@@ -422,32 +455,37 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
           ) : p.birds}
         </div>
       ) : (
-        <table className="qc151-tbl qc1511-tbl" data-qc151="table" data-qcv="list">
-          <colgroup><col className="c-tk" /><col className="c-nm" /><col className="c-ws" /><col className="c-d" /><col className="c-d" /><col className="c-nx" /><col className="c-act" /></colgroup>
+        /* v152.2 §1.5 — EACH GROUP IS ITS OWN TABLE, so its sticky header leaves with its last row (a sticky cell sticks
+           to its whole table, never to its tbody). The columns are fixed widths, so every group's columns line up. */
+        <div className="qc1522-list" data-qc151="table" data-qcv="list">
           {empty ? (
-            <tbody><tr><td colSpan={7}>
+            <table className="qc151-tbl qc1511-tbl qc1522-t"><tbody><tr><td colSpan={7}>
               <div className="qc151-emp" data-qc151="no-matches">
                 <b>No queries match</b>
                 <i>{[...p.pills.map((g) => pillWords(g).value), ...(p.find.trim() ? [`“${p.find.trim()}”`] : []), ...(p.where ? [TAB_LABEL[p.where]] : [])].join(" · ") || "this view"}</i>
                 <button type="button" className="qc151-btn qc151-btn--g" data-qc151="empty-reset" onClick={p.onClearAll}>Reset filters</button>
               </div>
-            </td></tr></tbody>
-          ) : p.sections.map((s, i) => {
+            </td></tr></tbody></table>
+          ) : p.sections.map((s) => {
             const shut = !!s.label && collapsed.has(s.key);
-            /* v151.2 §3 — each group is one card; its header is coloured by the grouping (lib/qc1512 `headTone`) */
-            const tone = headTone(p.group, s.key);
-            const statusHead = tone.startsWith("st-");
+            const h = head1522(p.group, s.key);
+            const statusHead = p.group === "status" && s.key !== "closed";
             return (
-              <React.Fragment key={s.key}>
-                {i > 0 ? <tbody className="qc1512-gap" aria-hidden="true"><tr><td colSpan={7} /></tr></tbody> : null}
-                <tbody className={`qc1511-g qc1512-g${shut ? " is-shut" : ""}`} data-qc1511="group" data-k={s.key} data-tone={tone}
-                  style={{ ["--gh" as string]: headFill(tone) } as React.CSSProperties}>
-                  <tr className="qc1511-gh qc1512-gh" data-qc1511="group-header" data-k={s.key} data-tone={tone}>
+              <table key={s.key} className={`qc151-tbl qc1511-tbl qc1522-t${shut ? " is-shut" : ""}`} data-qc1511="group" data-k={s.key} data-kind={h.kind}
+                style={{ ["--gh" as string]: h.fill } as React.CSSProperties}>
+                <colgroup><col className="c-tk" /><col className="c-nm" /><col className="c-ws" /><col className="c-d" /><col className="c-d" /><col className="c-nx" /><col className="c-act" /></colgroup>
+                <tbody className={`qc1511-g qc1522-g${shut ? " is-shut" : ""}`}>
+                  <tr className="qc1511-gh qc1522-gh" data-qc1511="group-header" data-k={s.key} data-kind={h.kind}>
                     {s.label ? (
                       <td className="qc1511-gt" colSpan={2}>
-                        <button type="button" className="qc1511-cv" data-qc1511="fold" aria-expanded={!shut} aria-label={`${shut ? "Show" : "Hide"} ${s.label}`} onClick={() => fold(s.key)}>{CHEV}</button>
-                        {statusHead ? <span className="qc1512-gg" aria-hidden="true"><StatusDot status={s.key} overrideSize={16} decorative /></span> : null}
-                        <span className="qc1511-gn" data-qc151="section">{s.label}</span><small>{s.rows.length}</small>
+                        <span className="qc1522-gin">
+                          <button type="button" className="qc1511-cv" data-qc1511="fold" aria-expanded={!shut} aria-label={`${shut ? "Show" : "Hide"} ${s.label}`} onClick={() => fold(s.key)}>{CHEV}</button>
+                          {statusHead ? <span className="qc1512-gg" aria-hidden="true"><StatusDot status={s.key} overrideSize={16} decorative /></span> : null}
+                          {h.kind === "pkg"
+                            ? <span className="qc1522-pl" data-qc1522="pkg-label">{PKG_ICON}<span className="qc1511-gn" data-qc151="section">{s.label}</span></span>
+                            : <>{h.kind === "pkg-none" ? <span className="qc1522-pki" aria-hidden="true">{PKG_ICON}</span> : null}<span className="qc1511-gn" data-qc151="section">{s.label}</span></>}
+                          <small>{s.rows.length}</small>
+                        </span>
                       </td>
                     ) : (
                       <><td className="qc1511-lbl c-tk" />{heading("agent", "Agent", "c-nm")}</>
@@ -456,10 +494,10 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
                   </tr>
                   {shut ? null : s.rows.map((r, j) => row(r, j === s.rows.length - 1))}
                 </tbody>
-              </React.Fragment>
+              </table>
             );
           })}
-        </table>
+        </div>
       )}
 
       {/* the sign-off: All, nothing narrowing, List only */}
