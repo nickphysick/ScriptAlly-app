@@ -47,7 +47,7 @@ export const SnoozePop: React.FC<{
   const own = !!t.userTask;
   return createPortal(
     <div ref={ref} className="tws-layer tws-pop" role="dialog" aria-label="Snooze until" data-tws="snooze-pop" style={{ left: pos.left, bottom: pos.bottom }}>
-      <div className="tws-ph"><b>{own ? "Move it to…" : "Snooze until…"}</b><button type="button" className="tws-px" aria-label="Close" onClick={onClose}>✕</button></div>
+      <div className="tws-ph"><b>{own ? "Move it to…" : t.kind === "batch" ? `Snooze all ${t.batch?.length ?? 0} until…` : "Snooze until…"}</b><button type="button" className="tws-px" aria-label="Close" onClick={onClose}>✕</button></div>
       {limit.ceiling <= 0 ? <p className="tws-pp">{limit.why ?? "This one can’t be snoozed."}</p> : (
         <>
           {opts.map(([k, label, d]) => (
@@ -62,7 +62,7 @@ export const SnoozePop: React.FC<{
           {pick === "cal" && cal && days > limit.ceiling ? <div className="tws-warn">{limit.why ?? "That’s further than this task can wait."}</div> : null}
           {ready ? (
             <>
-              <button type="button" className="tws-go" data-tws="snooze-go" onClick={() => onSnooze(days, until)}>{ZZ}{own ? `Move it to ${fmt(until)}` : `Snooze until ${fmt(until)}`}</button>
+              <button type="button" className="tws-go" data-tws="snooze-go" onClick={() => onSnooze(days, until)}>{ZZ}{own ? `Move it to ${fmt(until)}` : t.kind === "batch" ? `Snooze all ${t.batch?.length ?? 0} until ${fmt(until)}` : `Snooze until ${fmt(until)}`}</button>
             </>
           ) : null}
         </>
@@ -98,6 +98,7 @@ export function dismissReasons(t: WsTask, ruleWord: string | null): Reason[] | n
       { k: "dismiss", label: `I don’t need this for ${a}`, sub: `Stops asking about ${a}’s details until you bring it back` },
       ...(ruleWord ? [{ k: "rule" as const, label: `Stop asking about ${ruleWord} for all agents`, sub: "You can turn it back on from the Done tab" }] : []),
     ];
+    case "batch": return [{ k: "dismiss", label: `Stop asking about all ${t.batch?.length ?? 0}`, sub: "They come off your list until you bring them back from the Done tab" }];
     case "own": return [{ k: "delete", label: "Delete this task", sub: "It goes for good once the undo has gone", warn: true }];
     default: return [{ k: "dismiss", label: "This doesn’t need doing", sub: "It comes off your list until you bring it back" }];
   }
@@ -123,7 +124,7 @@ export const DismissPop: React.FC<{
         </>
       ) : (
         <>
-          <div className="tws-ph"><b>{t.kind === "own" ? "Delete this task?" : "Why doesn’t it need doing?"}</b><button type="button" className="tws-px" aria-label="Close" onClick={onClose}>✕</button></div>
+          <div className="tws-ph"><b>{t.kind === "own" ? "Delete this task?" : t.kind === "batch" ? `Dismiss all ${t.batch?.length ?? 0}?` : "Why doesn’t it need doing?"}</b><button type="button" className="tws-px" aria-label="Close" onClick={onClose}>✕</button></div>
           {R.map((r) => (
             <button key={r.k} type="button" className="tws-po" role="radio" aria-checked={sel === r.k} data-warn={r.warn ? "" : undefined} onClick={() => setSel(r.k)}>
               <i className="tws-rd" /><span>{r.label}<small>{r.sub}</small></span>

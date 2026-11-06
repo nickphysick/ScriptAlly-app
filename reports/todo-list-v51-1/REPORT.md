@@ -94,9 +94,38 @@ change touches. The badge's label still begins with its number, which is the one
   other row does.
 - **Lock:** `todoWs.test.ts`: every Housekeeping row's title contains its agent's first name (the book, for "Start
   querying"), and the bulk card becomes one row per query. Red on the old model.
-- ⚠️ **For you:** Housekeeping on the harness account goes from 52 rows to 114, because the bulk card had folded about
-  60 materials gaps into one. Snoozing or dismissing one of those rows acts on the bulk card, so all of them move
-  together, as a profile-gap sweep's rows already do.
+- ~~Housekeeping goes from 52 rows to 114~~: **superseded by §5**, where the materials gaps are one row again.
+
+## 5. "Fill in what you sent" is one row again (after your first read)
+
+- **Tray.** With two or more queries missing what was sent, Housekeeping shows ONE row: "Fill in what you sent · {n}
+  queries". It counts as 1 in the tab, the group heading and "n/m". With exactly one, the row reads "Fill in what you
+  sent {first name}", as before. Every other Housekeeping row is unchanged (one per agent).
+  - The row gathers both kinds of card: the bulk card (three or more gaps) and the single-query cards below that
+    threshold. The queries are taken oldest first, from the same list the bulk card counts.
+- **Desk.** The task header reads "{first name} · 1 of {n}". The question is "What went to {first}?", with three tiles
+  (Query letter, Synopsis, Opening sample), and Log it saves that query's `materialsWanted`. The next query then opens
+  straight away, with a toast "Saved what you sent {first}." and Undo. There's no celebration until the last one.
+  - "Skip this one" moves to the next query and writes nothing. A skipped query comes round again after the others.
+- **Snooze and Dismiss** act on every card behind the row. The pop-ups read "Snooze all {n} until…" (and its button
+  "Snooze all {n} until {date}") and "Dismiss all {n}?", and the toasts "Snoozed all {n} until …" / "Dismissed all {n}".
+  Undo restores every flag it changed.
+- **Measured on the emulator's harness account:** the row reads "Fill in what you sent · 63 queries", the header
+  "Ottoline · 1 of 63"; Skip made 0 writes, a save made 1 and the header then read "of 62", Undo brought back "of 63",
+  and Snooze took the row off the tray and Undo put it back.
+- **Locks:**
+  - `todoWs.test.ts`, "the materials batch": a fixture with 60 gaps gives exactly 1 Housekeeping row, titled "· 60
+    queries", carrying all 60; the tab (the rows) equals the sum of the group headings; two single cards become one
+    row; one gap stays its own named row. **Red on the old model (5 failed), green on the new.**
+  - `todoWs.measure.ts`, "the materials batch": one row; "1 of n"; Skip writes nothing (counted on Firestore's write
+    channel, with a real save counted in the same case, so the instrument can see a write); a save opens "of n−1" with
+    a toast and no celebration; Snooze says "Snooze all n" and empties the row; Undo restores it.
+  - **Red by mutation**, one at a time, each at its own check:
+    - batch threshold raised so no batch forms → "the row names its count" failed ("Fill in what you sent the agent");
+    - Skip made to write → "Skip saves nothing" failed (it saw the `materialsWanted` write);
+    - the batch toast's "all" removed → failed on "Snoozed all 63 until" (got "Snoozed until Sat 7 Nov").
+  - Two of the mutation runs first lost a port race with another session's emulator run and measured nothing; they
+    were rerun.
 
 ## Commits
 
@@ -104,7 +133,8 @@ change touches. The badge's label still begins with its number, which is the one
 |---|---|
 | `ca6682dff` | Part 1: the phrase is built; `OTHER_WORDS` names the agent; `wsTasks` can expand the materials card; the v51.1 unit locks |
 | `410bc146d` | Part 2: one count; the badge's words; the read-only preview; the materials rows in the tray; the smoke's locks |
-| _part 3_ | `todoWs.measure.ts` (the two new cases, screenshots to `reports/todo-list-v51-1/`) and this report |
+| `d6a72f6e4` | `todoWs.measure.ts` (the two new cases, screenshots to `reports/todo-list-v51-1/`) and this report |
+| _part 4_ | §5: the materials batch row, its desk flow, the batch pop-ups, their unit and browser locks |
 
 ## Gates
 
@@ -113,8 +143,8 @@ change touches. The badge's label still begins with its number, which is the one
 | tsc | 0 errors | 0 errors |
 | production build | clean | clean |
 | `build:dev` | `index-D5NkQkKm.js` (dev) | `index-DDmfijWv.js` |
-| Vitest | 1 file / 2 tests red (`firestoreTarget`) | the same 2, 11,445 passed |
-| `todoWs.measure.ts` (emulator) | — | **12/12** |
+| Vitest | 1 file / 2 tests red (`firestoreTarget`) | the same 2, 11,449 passed |
+| `todoWs.measure.ts` (emulator) | — | **13/13** |
 
 ## Screens at 1512
 
@@ -130,4 +160,3 @@ change touches. The badge's label still begins with its number, which is the one
 
 - Deploy to dev (after you've read this). Before deploying I'll re-check that dev still serves `index-D5NkQkKm.js`,
   then deploy this branch as `dev/…-td51-td511`. No rules change in this round.
-- Whether Housekeeping should show every materials gap (114 rows here) or fold them again.

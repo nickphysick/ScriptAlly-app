@@ -21,6 +21,8 @@ import { saveNudgeSent, saveOfferDecision, saveOfferMoreTime, saveSent, sentDefa
 import type { useScriptAllyDb } from "../../../lib/db";
 import { saveClose, noreplyAnswers } from "../../../lib/queryActions/closeSave";
 import { courtOf, expectedFor } from "../../../lib/qcSummary";
+import { recordSweepRow, sweepWrites, toggleRowMaterial } from "../../../lib/materialsSweep";
+import type { MaterialRow } from "../../../lib/agentMaterials";
 import { recordQueryResponse, type RecordResponseData } from "../../../lib/recordResponse";
 import { packagesHeldBy, packagesIn, restoreSnapshot, takeSnapshot } from "../../../lib/queryActions/snapshot";
 import { commitCardSave } from "../../../lib/agentCardSave";
@@ -526,6 +528,45 @@ function fixFlow(ctx: FlowCtx, openCard: () => void): Flow {
 
 /* ── the builder ──────────────────────────────────────────────────────────────────────────────── */
 
+/* ── what you sent: one query of the batch (v51.1) ─────────────────────────────────────────────── */
+
+const MAT_TILES: [MaterialRow["key"], string][] = [["queryLetter", "Query letter"], ["synopsis", "Synopsis"], ["sample", "Opening sample"]];
+
+/**
+ * ⚠️ THE SWEEP'S OWN WRITE (lib/materialsSweep): a row built by `recordSweepRow`, ticked by `toggleRowMaterial`, written
+ * by `sweepWrites` as the query's `materialsWanted` — the same one write the page's bulk sweep makes, with the same undo
+ * (the value as it was). `ctx.t` is the batch row pointed at its current query by the workspace.
+ */
+function materialsFlow(ctx: FlowCtx): Flow {
+  const { t, A, set } = ctx;
+  const q = t.query!;
+  const picked = (A.mats as string[] | undefined) ?? [];
+  let row = recordSweepRow({ queryId: q.id, agentName: t.first, sentMs: 0 }, { sentOn: "" });
+  for (const k of picked) row = toggleRowMaterial([row], q.id, k as MaterialRow["key"])[0];
+  const names = MAT_TILES.filter(([k]) => picked.includes(k)).map(([, l], i) => (i ? l.toLowerCase() : l));
+  return {
+    questions: [{
+      key: "mats", title: `What went to ${t.first}?`, hint: "Tick everything that went with this query.", answered: picked.length > 0, summary: andList(names),
+      body: <Tiles name={`What went to ${t.first}`} multi opts={MAT_TILES.map(([k, l]) => ({ k, label: l, doc: true }))} value={picked}
+        onPick={(k) => set({ mats: picked.includes(k) ? picked.filter((x) => x !== k) : [...picked, k] })} />,
+    }],
+    sentence: <>You sent {t.first} your <b>{andList(names.map((n) => n.toLowerCase()))}</b>.</>,
+    consequences: [`Saved on ${t.first}’s query`, (t.batch?.length ?? 0) > 1 ? `Then the next of ${t.batch!.length - 1} opens` : "Leaves your tray"],
+    review: [`You sent ${t.first} your ${andList(names.map((n) => n.toLowerCase()))}.`, `That’s saved on the query, so it counts as recorded.`],
+    draft: {},
+    commit: async () => {
+      const w = sweepWrites([row])[0];
+      if (!w) throw new Error("Nothing ticked");
+      const before = q.materialsWanted;
+      await ctx.db.updateQuery(q.id, { materialsWanted: w.materialsWanted } as Partial<Query>);
+      return {
+        head: (t.batch?.length ?? 0) > 1 ? "Saved." : "All filled in.", msg: `Saved what you sent ${t.first}.`,
+        undo: async () => { await ctx.db.updateQuery(q.id, { materialsWanted: (before ?? []) as string[] } as Partial<Query>); },
+      };
+    },
+  };
+}
+
 export function buildFlow(ctx: FlowCtx, doors: { openPartial: () => void; openCard: () => void; openOther: (() => void) | null }): Flow {
   const k = ctx.t.kind;
   if ((k === "send" || k === "rr") && ctx.t.query) return sendFlow(ctx);
@@ -533,6 +574,9 @@ export function buildFlow(ctx: FlowCtx, doors: { openPartial: () => void; openCa
   if (k === "nudge" && ctx.t.query) return nudgeFlow(ctx);
   if (k === "quiet" && ctx.t.query) return quietFlow(ctx, doors.openPartial);
   if (k === "fix" && ctx.t.agent) return fixFlow(ctx, doors.openCard);
+  if (k === "batch" && ctx.t.query) return materialsFlow(ctx);
+  /* the one-query materials row is filled in on the desk the same way, and is the last of its kind */
+  if (k === "other" && ctx.t.query && (ctx.t.item.card.taskType === "materials_unrecorded" || ctx.t.item.card.taskType === "materials_unrecorded_bulk")) return materialsFlow(ctx);
   return {
     questions: [], sentence: null, consequences: [], review: ["", ""], draft: {}, commit: null,
     door: doors.openOther ? { label: "Open it ↗", open: doors.openOther } : undefined,

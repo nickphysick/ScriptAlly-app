@@ -154,7 +154,7 @@ describe("v51.1 — the priority phrase and the row titles", () => {
     row("offer", "decide", "you", "offer_received", zoe, QueryStatus.OFFER),
     row("nudge", "chase", "chase", "nudge_overdue", mk, QueryStatus.QUERIED),
     row("quiet", "close", "quiet", "no_response_close", zoe, QueryStatus.QUERIED),
-    row("mat", "fix", "tidy", "materials_unrecorded", zoe, QueryStatus.QUERIED),
+    row("mat", "fix", "tidy", "materials_unrecorded", zoe, QueryStatus.QUERIED, { relatedRecordId: "q-mat" }),
     row("tell", "fix", "tidy", "offer_tell", mk, QueryStatus.QUERIED),
     row("sendfull", "fix", "tidy", "offer_send_full", zoe, QueryStatus.QUERIED),
     row("wd", "fix", "tidy", "withdraw_tell", mk, QueryStatus.WITHDRAWN),
@@ -175,7 +175,7 @@ describe("v51.1 — the priority phrase and the row titles", () => {
     expect(doingPhrase(by("offer"))).toBe("Answering Zoë’s offer from Smith-Jones Literary");
     expect(doingPhrase(by("nudge"))).toBe("Nudging Mary-Kate at O’Rourke & Partners");
     expect(doingPhrase(by("quiet"))).toBe("Deciding what to do about Zoë at Smith-Jones Literary");
-    expect(doingPhrase(by("mat"))).toBe("Filling in what you sent Zoë at Smith-Jones Literary");
+    expect(doingPhrase(by("materials-batch"))).toBe("Filling in what you sent for 3 queries");
     expect(doingPhrase(by("tell"))).toBe("Telling Mary-Kate at O’Rourke & Partners about your offer");
     expect(doingPhrase(by("sendfull"))).toBe("Sending Zoë at Smith-Jones Literary your full");
     expect(doingPhrase(by("wd"))).toBe("Telling Mary-Kate at O’Rourke & Partners you’ve withdrawn");
@@ -192,20 +192,59 @@ describe("v51.1 — the priority phrase and the row titles", () => {
   });
   it("every housekeeping row names its agent (the book, for the one task about a book)", () => {
     const house = tasks2.filter((t) => t.group === "house");
-    expect(house.length).toBeGreaterThan(8);
+    expect(house.length).toBeGreaterThanOrEqual(8);
     for (const t of house) {
       if (t.item.card.taskType === "querying_unstarted") expect(t.title).toBe("Start querying ‘Murphy’s Day Out’");
+      /* the batch row names its count; each query in it names its agent on the desk */
+      else if (t.kind === "batch") expect(t.title).toMatch(/^Fill in what you sent · \d+ queries$/);
       else expect(t.title, t.key).toContain(t.first);
     }
-    expect(by("mat").title).toBe("Fill in what you sent Zoë");
     expect(by("tell").title).toBe("Tell Mary-Kate about your offer");
   });
-  it("the materials bulk card is one row per query, each naming its own agent", () => {
-    const rows = tasks2.filter((t) => t.key.startsWith("bulk|"));
-    expect(rows.map((t) => [t.key, t.title, t.query?.id])).toEqual([
-      ["bulk|qb1", "Fill in what you sent Zoë", "qb1"],
-      ["bulk|qb2", "Fill in what you sent Mary-Kate", "qb2"],
-    ]);
-    expect(rows.every((t) => t.type === "Fill in")).toBe(true);
+  it("the materials gaps are ONE row (Nick, v51.1): its queue holds both queries, oldest first", () => {
+    const rows = tasks2.filter((t) => t.item.card.taskType === "materials_unrecorded" || t.item.card.taskType === "materials_unrecorded_bulk");
+    expect(rows).toHaveLength(1);
+    expect(rows[0].kind).toBe("batch");
+    expect(rows[0].title).toBe("Fill in what you sent · 3 queries");
+    expect(rows[0].batch?.map((m) => m.queryId)).toEqual(["q-mat", "qb1", "qb2"]);
+  });
+});
+
+/* v51.1 (Nick) — "Fill in what you sent" is one row, counted as one */
+describe("the materials batch", () => {
+  const ag = Array.from({ length: 60 }, (_, n) => agent(`m${n}`, `Agent${n} Surname`, `Agency ${n}`));
+  const qs = ag.map((a, n) => q(`mq${n}`, a.id, QueryStatus.QUERIED));
+  const bulk = item({ key: "task-materials-bulk", bucket: "fix", group: "tidy", taskType: "materials_unrecorded_bulk" });
+  const send = item({ key: "send", bucket: "send", group: "you", taskType: "partial_requested", query: q("qs", "a2", QueryStatus.PARTIAL_REQUESTED), agent: clara, due: -2 });
+  const sixty = wsTasks([send, bulk], [...ag, clara], () => null, () => [], NOW, (i) => (i.card.taskType === "materials_unrecorded_bulk" ? qs.map((x) => ({ queryId: x.id, agentId: x.agentId })) : []), qs);
+
+  it("60 gaps are ONE row, titled with the count, holding all 60 and the card that stands for them", () => {
+    const rows = sixty.filter((t) => t.group === "house");
+    expect(rows).toHaveLength(1);
+    expect(rows[0].title).toBe("Fill in what you sent · 60 queries");
+    expect(rows[0].batch).toHaveLength(60);
+    expect(rows[0].batchItems?.map((i) => i.key)).toEqual(["task-materials-bulk"]);
+    expect(doingPhrase(rows[0])).toBe("Filling in what you sent for 60 queries");
+  });
+  it("the tab = the sum of the group headings = m (every count reads the same rows)", () => {
+    const secs = wsSections(sixty, "category");
+    expect(secs.reduce((n, x) => n + x.tasks.length, 0)).toBe(sixty.length);
+    expect(sixty.length).toBe(2);
+  });
+  it("two single gaps are one batch row whose snooze reaches both cards", () => {
+    const s1 = item({ key: "m1", bucket: "fix", group: "tidy", taskType: "materials_unrecorded", query: qs[0], agent: ag[0] });
+    const s2 = item({ key: "m2", bucket: "fix", group: "tidy", taskType: "materials_unrecorded", query: qs[1], agent: ag[1] });
+    (s1.card as { relatedRecordId?: string }).relatedRecordId = qs[0].id;
+    (s2.card as { relatedRecordId?: string }).relatedRecordId = qs[1].id;
+    const two = wsTasks([s1, s2], ag, () => null, () => [], NOW, () => [], qs);
+    expect(two).toHaveLength(1);
+    expect(two[0].title).toBe("Fill in what you sent · 2 queries");
+    expect(two[0].batchItems?.map((i) => i.key)).toEqual(["m1", "m2"]);
+  });
+  it("one gap is that query's own row, naming its agent", () => {
+    const s1 = item({ key: "m1", bucket: "fix", group: "tidy", taskType: "materials_unrecorded", query: qs[0], agent: ag[0] });
+    (s1.card as { relatedRecordId?: string }).relatedRecordId = qs[0].id;
+    const one = wsTasks([s1], ag, () => null, () => [], NOW, () => [], qs);
+    expect(one.map((t) => [t.kind, t.title])).toEqual([["other", "Fill in what you sent Agent0"]]);
   });
 });

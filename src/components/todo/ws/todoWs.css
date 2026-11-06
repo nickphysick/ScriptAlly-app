@@ -548,3 +548,5 @@
 /* v51.1 — the preview is read-only: the query card's footer (its action, More, the doors, Delete) and the stand card's
    links ("Set a send-by date" …) are not drawn in it; they work as normal in the real card the frame opens */
 .tws-pvz [data-qcv="open-foot"], .tws-pvz .qsc-links, .tws-pvz .qsc-link { display: none !important; }
+/* v51.1 — the batch row's "Skip this one": a quiet link under the questions */
+.tws-skip { margin-top: 14px; }

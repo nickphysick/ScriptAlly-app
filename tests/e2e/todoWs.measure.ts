@@ -279,3 +279,69 @@ test("tags stay reachable: Filters → Manage your tags opens the tags panel", a
   await page.locator('[data-tws="tags-open"]:visible').click();
   await expect(page.getByRole("dialog", { name: "Tags" }).or(page.locator('[aria-label="Tags"]')).first()).toBeVisible({ timeout: 10_000 });
 });
+
+/* v51.1 (Nick) — "Fill in what you sent" is ONE row, worked one query at a time. Writes are counted on Firestore's write
+   channel; a real save is counted too, so a "wrote nothing" is a reading by an instrument that can see a write. */
+async function writesDuring(page: Page, fn: () => Promise<void>, settleMs = 1500): Promise<string[]> {
+  const seen: string[] = [];
+  const on = (req: import("@playwright/test").Request) => {
+    if (req.method() !== "POST" || !/\/Write\/channel/.test(req.url())) return;
+    const body = decodeURIComponent(req.postData() ?? "");
+    if (/writes/.test(body)) seen.push(body);
+  };
+  page.on("request", on);
+  try { await fn(); await page.waitForTimeout(settleMs); } finally { page.off("request", on); }
+  return seen;
+}
+
+test("the materials batch: one row; one query at a time; Skip saves nothing; a save opens the next; Snooze snoozes them all", async ({ page }) => {
+  await open(page, SIZES[0]);
+  const pg = page.locator('[data-tws="page"]:visible');
+  const more = pg.locator(".tws-more");
+  if (await more.count()) await more.first().click();
+  const rows = pg.locator("[data-tws-row]").filter({ has: page.locator(".tws-tx b", { hasText: /^Fill in what you sent/ }) });
+  expect(await rows.count(), "one Fill in what you sent row").toBe(1);
+  const title = ((await rows.first().locator(".tws-tx b").textContent()) ?? "").trim();
+  const m = title.match(/^Fill in what you sent · (\d+) queries$/);
+  expect(m, `the row names its count: "${title}"`).not.toBeNull();
+  const n = Number(m![1]);
+  expect(n).toBeGreaterThan(1);
+  await rows.first().click();
+  const desk = page.locator('[data-tws="desk"]:visible');
+  const head = desk.locator('[data-tws="desk-title"]');
+  await expect(head).toHaveText(new RegExp(` · 1 of ${n}$`));
+  const first = ((await head.textContent()) ?? "").split(" · ")[0];
+
+  /* Skip this one: the next query opens, and nothing is written */
+  const skipWrites = await writesDuring(page, async () => { await desk.locator('[data-tws="skip"]').click(); });
+  expect(skipWrites, "Skip saves nothing").toEqual([]);
+  await expect(head).toHaveText(new RegExp(` · 2 of ${n}$`));
+
+  /* a save: written, a toast with Undo, the next query opens, no celebration — then Undo puts it back */
+  const saveWrites = await writesDuring(page, async () => {
+    await desk.locator('[data-tws-q="mats"] .tws-tile').first().click();
+    await desk.locator('[data-tws="next"]').click();
+    await desk.locator('[data-tws="log"]').click();
+  });
+  expect(saveWrites.length, "a save is a write (the instrument sees one)").toBeGreaterThan(0);
+  const toast = page.locator('[data-tws="toast"]');
+  await expect(toast).toContainText("Saved what you sent");
+  await expect(page.locator('[data-tws="yay"]:visible')).toHaveCount(0);
+  await expect(head).toHaveText(new RegExp(` of ${n - 1}$`));
+  await toast.getByRole("button", { name: "Undo" }).click();
+  await expect(head).toHaveText(new RegExp(` of ${n}$`), { timeout: 15_000 });
+  await page.screenshot({ path: `${DIR}/batch.png` });
+
+  /* Snooze from the desk: all of them, and it says so — then Undo */
+  await desk.getByRole("button", { name: /^Snooze/ }).first().click();
+  const pop = page.locator('[data-tws="snooze-pop"]');
+  await expect(pop).toContainText(`Snooze all ${n} until`);
+  await pop.getByRole("radio", { name: /Tomorrow/ }).click();
+  await expect(pop.locator('[data-tws="snooze-go"]')).toContainText(`Snooze all ${n} until`);
+  await pop.locator('[data-tws="snooze-go"]').click();
+  await expect(toast).toContainText(`Snoozed all ${n} until`);
+  await expect(pg.locator("[data-tws-row]").filter({ has: page.locator(".tws-tx b", { hasText: /^Fill in what you sent/ }) })).toHaveCount(0, { timeout: 15_000 });
+  await toast.getByRole("button", { name: "Undo" }).click();
+  await expect(pg.locator("[data-tws-row]").filter({ has: page.locator(".tws-tx b", { hasText: /^Fill in what you sent/ }) })).toHaveCount(1, { timeout: 15_000 });
+  console.log(JSON.stringify({ n, first, skipWrites: skipWrites.length, saveWrites: saveWrites.length }));
+});

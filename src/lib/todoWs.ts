@@ -22,7 +22,7 @@ import { isTaskType, type TaskType } from "./todoActions";
 const DAY = 86400000;
 const MONTHS_LONG = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-export type WsKind = "offer" | "send" | "rr" | "nudge" | "quiet" | "fix" | "own" | "other";
+export type WsKind = "offer" | "send" | "rr" | "nudge" | "quiet" | "fix" | "own" | "other" | "batch";
 export type WsGroupId = "wait" | "nudge" | "quiet" | "house" | "yours";
 export type WsType = "Send" | "Decide" | "Nudge" | "Close" | "Fill in";
 export type WsWhen = "Overdue" | "Due this week" | "Coming up" | "No date";
@@ -50,6 +50,10 @@ export interface WsTask {
   type: WsType | null;
   /** search haystack */
   hay: string;
+  /** a batch row (v51.1): the queries it works through, oldest first, and every board card it stands for (a snooze or a
+   *  dismiss reaches them all) */
+  batch?: { queryId: string; agentId: string }[];
+  batchItems?: TrayItem[];
 }
 
 export const WS_GROUPS: readonly { id: WsGroupId; name: string }[] = [
@@ -124,7 +128,7 @@ function kindOf(i: TrayItem, need?: AgentDataNeed): WsKind {
   }
 }
 
-const TYPE_OF: Record<WsKind, WsType | null> = { send: "Send", rr: "Send", own: "Send", offer: "Decide", nudge: "Nudge", quiet: "Close", fix: "Fill in", other: null };
+const TYPE_OF: Record<WsKind, WsType | null> = { send: "Send", rr: "Send", own: "Send", offer: "Decide", nudge: "Nudge", quiet: "Close", fix: "Fill in", other: null, batch: "Fill in" };
 
 function titleOf(kind: WsKind, i: TrayItem, first: string, need?: AgentDataNeed): string {
   switch (kind) {
@@ -164,8 +168,35 @@ export function wsTasks(items: readonly TrayItem[], agents: readonly Agent[], sw
       hay: `${title} ${agentName} ${agency}`.toLowerCase(),
     };
   };
+  /* ⚠️ "FILL IN WHAT YOU SENT" IS ONE ROW (v51.1, Nick): every materials gap — the board's single cards below its
+     threshold, or its one bulk card above it — folds into a single batch row, counted as one, that the desk works through
+     a query at a time. With exactly one gap it is that query's own row, "Fill in what you sent {first}". */
+  const MATS = new Set(["materials_unrecorded", "materials_unrecorded_bulk"]);
+  const matItems = items.filter((i) => MATS.has(i.card.taskType ?? ""));
+  const queue: { queryId: string; agentId: string }[] = [];
+  for (const i of matItems) {
+    const add = i.card.taskType === "materials_unrecorded_bulk" ? gapMembers(i)
+      : i.card.relatedRecordId ? [{ queryId: i.card.relatedRecordId, agentId: i.agent?.id ?? i.query?.agentId ?? "" }] : [];
+    for (const m of add) if (!queue.some((x) => x.queryId === m.queryId)) queue.push(m);
+  }
+  let batchPlaced = false;
   for (const i of items) {
     if (isNote(i.userTask)) continue;
+    if (MATS.has(i.card.taskType ?? "") && queue.length >= 2) {
+      if (batchPlaced) continue;
+      batchPlaced = true;
+      const head = queue[0];
+      const a0 = agents.find((x) => x.id === head.agentId);
+      const title = `Fill in what you sent · ${queue.length} queries`;
+      const names = queue.map((m) => { const a = agents.find((x) => x.id === m.agentId); return `${a?.name ?? ""} ${a?.agency ?? ""}`; }).join(" ");
+      out.push({
+        key: "materials-batch", item: i, kind: "batch", group: "house", title, first: a0 ? firstOf(a0) : "The agent",
+        agentName: "", agency: "", query: queries.find((q) => q.id === head.queryId), agent: a0, userTask: undefined, need: undefined,
+        dueDays: null, quietDays: null, type: "Fill in", hay: `${title} ${names}`.toLowerCase(),
+        batch: queue, batchItems: matItems,
+      });
+      continue;
+    }
     const need = sweepNeed(i);
     if (i.sweep && need) {
       for (const id of memberIds(i)) {
@@ -174,12 +205,10 @@ export function wsTasks(items: readonly TrayItem[], agents: readonly Agent[], sw
       }
       continue;
     }
-    if (i.card.taskType === "materials_unrecorded_bulk") {
-      const ms = gapMembers(i);
-      if (ms.length) {
-        for (const m of ms) out.push(make(i, agents.find((x) => x.id === m.agentId), undefined, `${i.key}|${m.queryId}`, queries.find((q) => q.id === m.queryId)));
-        continue;
-      }
+    /* one gap: that query's own row, naming its agent (a bulk card is only raised at three or more) */
+    if (i.card.taskType === "materials_unrecorded_bulk" && queue.length === 1) {
+      out.push(make(i, agents.find((x) => x.id === queue[0].agentId), undefined, `${i.key}|${queue[0].queryId}`, queries.find((q) => q.id === queue[0].queryId)));
+      continue;
     }
     out.push(make(i, i.agent, need ?? undefined, i.key));
   }
@@ -257,6 +286,7 @@ export function doingPhrase(t: WsTask): string {
       return t.need === "responseTime" ? `Adding how long ${who} takes to reply`
         : t.need === "mswl" ? `Adding ${poss(who)} wishlist` : `Adding what ${who} wants sent`;
     case "own": return t.title;
+    case "batch": return `Filling in what you sent for ${t.batch?.length ?? 0} queries`;
     case "other": {
       const tt = taskTypeOf(t.item);
       return tt ? OTHER_WORDS[tt].doing(who, bookOf(t.item)) : `Doing what ${who} needs`;
@@ -286,7 +316,7 @@ export function priorityTask(tasks: readonly WsTask[]): { task: WsTask | null; u
 
 export interface DayBit { big: string | null; small: string; late: boolean }
 export function dayBit(t: WsTask): DayBit {
-  if (t.kind === "fix" || t.kind === "other" && t.dueDays == null) return { big: null, small: "No date", late: false };
+  if (t.kind === "fix" || t.kind === "batch" || t.kind === "other" && t.dueDays == null) return { big: null, small: "No date", late: false };
   if (t.kind === "quiet") return { big: t.quietDays != null ? String(t.quietDays) : null, small: t.quietDays != null ? "days in" : "No date", late: false };
   if (t.dueDays == null) return { big: null, small: "No date", late: false };
   if (t.dueDays === 0) return { big: "Today", small: "", late: true };
@@ -336,6 +366,7 @@ export function mentorLine(t: WsTask, facts?: QuietFacts): string {
       return t.need === "responseTime" ? `A quick one. Knowing how long ${a} takes means I can tell you when a nudge is due.`
         : t.need === "mswl" ? `A quick one. ${poss(a)} wishlist helps you check your book is a fit.`
         : `A quick one. Knowing what ${a} wants sent means you’ll have it ready when you query.`;
+    case "batch": return `Let’s go through these one at a time. Tick what went to ${a} with this query, or skip it if you can’t remember.`;
     case "own": {
       const steps = t.userTask ? (t.userTask as UserTask & { steps?: unknown[] }).steps : undefined;
       return steps && steps.length ? "This one’s yours. Tick the steps off as you go, then mark it done." : "This one’s yours. Mark it done when it’s finished, or break it into steps if it’s a big one.";

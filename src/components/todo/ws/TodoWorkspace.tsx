@@ -108,6 +108,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   const all = useMemo(() => wsTasks(items, agents, sweepNeed, memberIds, now, gapMembers, queries), [items, agents, sweepNeed, memberIds, now, gapMembers, queries]);
   /** the card a task's flag sits on: a sweep member's own card */
   const cardOf = useCallback((t: WsTask): BoardCard => {
+    if (t.kind === "batch" && t.batchItems?.length) return t.batchItems[0].card;
     if (t.item.sweep && t.agent) return groupFor(t.item.card, trayDb)?.members.find((m) => m.agentId === t.agent!.id)?.card ?? t.item.card;
     return t.item.card;
   }, [trayDb]);
@@ -143,8 +144,11 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   const [adding, setAdding] = useState(false);
   const [pop, setPop] = useState<{ kind: "snooze" | "dismiss"; opener: HTMLElement | null } | null>(null);
   const [linkPicking, setLinkPicking] = useState(false);
+  /* the batch row's place (v51.1): queries skipped this time round, and queries saved but not yet gone from the board */
+  const [bSkip, setBSkip] = useState<ReadonlySet<string>>(() => new Set());
+  const [bSaved, setBSaved] = useState<ReadonlySet<string>>(() => new Set());
   const go = useCallback((key: string | null) => {
-    setSelKey(key); setA({}); setQi(0); setReview(false); setYay(null); setAdding(false); setPop(null); setLinkPicking(false);
+    setSelKey(key); setA({}); setQi(0); setReview(false); setYay(null); setAdding(false); setPop(null); setLinkPicking(false); setBSkip(new Set());
     /* the row is brought into the tray's own view; never scrollIntoView, which would scroll the page too */
     if (key) requestAnimationFrame(() => {
       const r = document.querySelector<HTMLElement>(`.tws [data-tws-row="${CSS.escape(key)}"]`);
@@ -229,6 +233,8 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     keys.map((k) => { const id = taskFlagId(k); return { id, was: taskFlags.find((f) => f.id === id) ?? null }; });
   const putBack = (cap: { id: string; was: TaskFlag | null }[]) => Promise.all(cap.map((c) => restoreTaskFlag(c.id, c.was))).then(() => undefined);
   const flagKeysFor = (t: WsTask) => {
+    /* a batch reaches every card it stands for: the bulk card, or each single card below the board's threshold */
+    if (t.kind === "batch") return (t.batchItems ?? []).map((i) => i.card).filter((c) => c.taskType && c.relatedRecordId).map((c) => flagKeyForTask(c.taskType!, c.relatedRecordId!));
     const c = cardOf(t);
     return c.taskType && c.relatedRecordId ? [flagKeyForTask(c.taskType, c.relatedRecordId)] : [];
   };
@@ -245,8 +251,13 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     const capped = Math.min(days, r.ceiling);
     if (capped <= 0) return null;
     const cap = captureFlags(flagKeysFor(t));
-    const w = snoozeCardWrites({ upsertTaskFlag, dismissTask }, c, capped, `until ${fmt(addDays(today, capped))}`, r.deadline && !r.deadline.passed ? dayDiff(dayFromYmd(r.deadline.ymd), today) : undefined);
-    if (!w) return null;
+    const cards = t.kind === "batch" ? (t.batchItems ?? []).map((i) => i.card) : [c];
+    let wrote = false;
+    for (const cc of cards) {
+      const w = snoozeCardWrites({ upsertTaskFlag, dismissTask }, cc, capped, `until ${fmt(addDays(today, capped))}`, r.deadline && !r.deadline.passed ? dayDiff(dayFromYmd(r.deadline.ymd), today) : undefined);
+      if (w) wrote = true;
+    }
+    if (!wrote) return null;
     return () => putBack(cap);
   };
 
@@ -256,7 +267,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     const undo = await snoozeTask(t, days);
     if (!undo) { flash("That task can’t be snoozed that far."); return; }
     go(next);
-    flash(t.userTask ? `Moved to ${fmt(until)}` : `Snoozed until ${fmt(until)}`, async () => { await undo(); go(t.key); });
+    flash(t.userTask ? `Moved to ${fmt(until)}` : t.kind === "batch" ? `Snoozed all ${t.batch?.length ?? 0} until ${fmt(until)}` : `Snoozed until ${fmt(until)}`, async () => { await undo(); go(t.key); });
   };
 
   const openCard = (t: WsTask, edit?: boolean) => {
@@ -304,7 +315,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     const at = new Date().toISOString();
     await Promise.all(keys.map((k) => upsertTaskFlag(k, { skippedAt: at })));
     go(next);
-    flash("Dismissed. You’ll find it under Done if you need it back.", async () => { await putBack(cap); go(t.key); });
+    flash(t.kind === "batch" ? `Dismissed all ${t.batch?.length ?? 0}. You’ll find them under Done if you need them back.` : "Dismissed. You’ll find it under Done if you need it back.", async () => { await putBack(cap); go(t.key); });
   };
 
   /* ── the Snoozed and Done tabs ── */
@@ -343,14 +354,36 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     flash(`“${asideTitle(a)}” is back in your tray.`);
   };
 
+  /* ── the batch row on the desk (v51.1): one query at a time ── */
+  const bRemaining = useMemo(() => (sel?.kind === "batch" ? (sel.batch ?? []).filter((m) => !bSaved.has(m.queryId)) : []), [sel, bSaved]);
+  const bCur = useMemo(() => bRemaining.find((m) => !bSkip.has(m.queryId)) ?? bRemaining[0] ?? null, [bRemaining, bSkip]);
+  const deskT: WsTask | null = useMemo(() => {
+    if (!sel || sel.kind !== "batch" || !bCur) return sel;
+    const a = agents.find((x) => x.id === bCur.agentId);
+    const first = (a?.name ?? "").trim().split(/\s+/)[0] || (a?.agency ?? "").trim() || "The agent";
+    return { ...sel, query: queries.find((q) => q.id === bCur.queryId), agent: a, first, agentName: (a?.name ?? "").trim() || (a?.agency ?? "").trim(), agency: (a?.agency ?? "").trim(), batch: bRemaining };
+  }, [sel, bCur, bRemaining, agents, queries]);
+  /* saved down to one: the batch becomes that query's own row, and the desk follows it */
+  useEffect(() => {
+    if (selKey !== "materials-batch" || all.some((x) => x.key === selKey)) return;
+    const one = all.find((x) => x.item.card.taskType === "materials_unrecorded" || x.item.card.taskType === "materials_unrecorded_bulk");
+    if (one) { setSelKey(one.key); setBSaved(new Set()); setBSkip(new Set()); }
+  }, [all, selKey]);
+  const skipOne = () => {
+    if (!bCur) return;
+    const others = bRemaining.filter((m) => m.queryId !== bCur.queryId && !bSkip.has(m.queryId));
+    setBSkip(others.length ? new Set([...bSkip, bCur.queryId]) : new Set([bCur.queryId]));
+    setA({}); setQi(0); setReview(false);
+  };
+
   /* ── the flow on the desk ── */
-  const qLog = useQueryLog(currentUser?.id ?? null, sel?.query?.id ?? null);
+  const qLog = useQueryLog(currentUser?.id ?? null, deskT?.query?.id ?? null);
   const userFirst = (currentUser?.name ?? "").trim().split(/\s+/)[0] || "";
   const flow: Flow | null = useMemo(() => {
-    if (!sel || sel.kind === "own") return null;
+    if (!sel || !deskT || sel.kind === "own") return null;
     const facts = quietFacts(sel);
     return buildFlow({
-      t: sel, A, set: (p) => setA((a) => ({ ...a, ...p })), today, uid: currentUser?.id ?? null, userFirst, queries, agents, manuscripts,
+      t: deskT, A, set: (p) => setA((a) => ({ ...a, ...p })), today, uid: currentUser?.id ?? null, userFirst, queries, agents, manuscripts,
       db: db as never, snoozeFor: (d) => snoozeTask(sel, d), waitCeiling: limitFor(sel).ceiling,
       said: (m) => flash(m), nudgedOn: facts.nudgedOn, suggestion: sel.kind === "quiet" ? quietSuggestion(facts) : null,
     }, {
@@ -365,7 +398,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
         return null;
       })(),
     });
-  }, [sel, A, today, currentUser?.id, userFirst, queries, agents, manuscripts, activities, taskFlags]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [sel, deskT, A, today, currentUser?.id, userFirst, queries, agents, manuscripts, activities, taskFlags]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const qs = flow?.questions ?? [];
   const cur = Math.min(qi, qs.length);
@@ -378,6 +411,15 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     try {
       const d = await flow.commit();
       setReview(false);
+      /* a batch with more to go: a toast with Undo, and the next query opens; the celebration waits for the last */
+      if (sel.kind === "batch" && bCur && bRemaining.length > 1) {
+        const qid = bCur.queryId;
+        setBSaved((x) => new Set([...x, qid]));
+        setBSkip((x) => { const n = new Set(x); n.delete(qid); return n; });
+        setA({}); setQi(0);
+        flash(d.msg, d.undo ? async () => { await d.undo!(); setBSaved((x) => { const n = new Set(x); n.delete(qid); return n; }); } : undefined);
+        return;
+      }
       setYay({ ...d, nextKey: next });
     } catch (e) {
       console.error("[to-do] the save failed", e);
@@ -571,7 +613,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
         </div></div>
       );
     }
-    const t = sel;
+    const t = deskT ?? sel;
     const chip = dueChip(t);
     const seqPos = seq.findIndex((x) => x.key === t.key);
     const band = t.group === "wait" ? "wait" : t.group;
@@ -719,8 +761,8 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     return (
       <div className="tws-wsx" data-tws="desk" style={{ containerType: "inline-size" } as React.CSSProperties}>
         <div className="tws-wh" data-band={band}>
-          <h2>{t.title}</h2>
-          {meta ? <span className="tws-m">{meta}</span> : null}
+          <h2 data-tws="desk-title">{t.kind === "batch" && bCur ? `${t.first} · ${bRemaining.indexOf(bCur) + 1} of ${bRemaining.length}` : t.title}</h2>
+          {meta ? <span className="tws-m">{t.kind === "batch" ? t.agency || meta : meta}</span> : null}
           <span className="tws-sp" />
           {chip ? <span className="tws-dchip" data-late={chip.late ? "" : undefined}><b>{chip.b}</b>{chip.s ? ` ${chip.s}` : ""}</span> : null}
           {seqPos >= 0 ? <span className="tws-pos" data-tws="pos"><b>{seqPos + 1}</b>/{seq.length}</span> : null}
@@ -728,7 +770,9 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
           <button type="button" className="tws-wb" aria-label="Next task (J)" title="Next (J)" onClick={() => move(1)}>›</button>
         </div>
         <div className="tws-wbody">
-          <div className="tws-wq">{main}</div>
+          <div className="tws-wq">{main}{t.kind === "batch" && bRemaining.length > 1 && !yay ? (
+            <div className="tws-skip"><button type="button" className="tws-lnk" data-tws="skip" onClick={skipOne}>Skip this one</button></div>
+          ) : null}</div>
           {side}
         </div>
         {foot}
