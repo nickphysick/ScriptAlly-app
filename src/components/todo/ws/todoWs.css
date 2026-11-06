@@ -550,3 +550,14 @@
 .tws-pvz [data-qcv="open-foot"], .tws-pvz .qsc-links, .tws-pvz .qsc-link { display: none !important; }
 /* v51.1 — the batch row's "Skip this one": a quiet link under the questions */
 .tws-skip { margin-top: 14px; }
+/* v52 Part D — the live Query Centre card (QcQueryCard149 over the v152 thread) is read-only in the preview: its
+   footer, its reply box, the pencil, the ✕, each step's edit control and the add buttons are not drawn here; they work
+   as normal in the real card the frame opens */
+.tws-pvz [data-qc1522="footer"], .tws-pvz [data-qc152="reply"], .tws-pvz [data-qc152="pencil"], .tws-pvz [data-qc149c="close"],
+.tws-pvz [data-qc152="edit-step"], .tws-pvz [data-qc152="add"], .tws-pvz [data-qc152="mat-edit"], .tws-pvz [data-qc1522="toast"] { display: none !important; }
+/* v52 Part D — the v152 card's frame (qcv152card.css) is a fixed panel centred in the viewport with a 1.6° lean and a
+   slide-in. In the preview the frame sits in the column, upright and still, as tall as the column: the same frame
+   (rim, radius, inner border), only placed. The selector out-ranks the frame's own (0-4-0 with :has). */
+.tws-pvz .spanel.qsp.qsp.tws-pvpanel:has(> .spanel-own > [data-qc152]), .tws-layer .spanel.qsp.qsp.tws-pvpanel:has(> .spanel-own > [data-qc152]) {
+  position: relative; top: auto; right: auto; bottom: auto; left: auto; width: 100%; height: 100%; rotate: none; animation: none; transition: none; z-index: auto;
+}

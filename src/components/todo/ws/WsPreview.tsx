@@ -2,27 +2,24 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * To-do list v50 §6 — THE CARD PREVIEW. The real Query Centre query card (`QcOpenCard` in the side panel's own dress,
- * its ledger built by `buildTimelineRows` exactly as the Query Centre builds it) or the real Contact list agent card
+ * To-do list v50 §6, v52 Part D — THE CARD PREVIEW. The live Query Centre query card (`QcQueryCard149` over the v152
+ * thread, from the Query Centre's own `buildCardView`) or the real Contact list agent card
  * (`AgentPaperCard`'s panel variant with the panel's own profile sections), laid out at its true width and scaled down
  * with CSS zoom to fit the column, like a legible thumbnail.
  *
  * ⚠️ IT IS A PICTURE OF THE CARD, NOT A SECOND COPY OF IT. Nothing inside takes a pointer: a press anywhere on it opens
  *    the card itself as a drawer, the same way it opens on the Query Centre and the Contact list.
  * ⚠️ THE PENDING CHANGE IS DRAWN BY THE CARD'S OWN RENDERERS: a draft step is a proposed activity in the timeline's
- *    activity shape (`__ghost`, the shape the Query Centre's desk already drafts with), outlined through the ledger's own
- *    highlight; a filled field is the agent as it will be once saved.
+ *    activity shape (`__ghost`), drawn as the query card's own composer draft (dashed, in its colour); a filled field is the agent as it will be once saved.
  */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { collection, onSnapshot, orderBy, query as fsQuery } from "firebase/firestore";
 import { db as fsdb } from "../../../lib/firebase";
-import type { Activity, Agent, Manuscript, Query, SubmissionPackage } from "../../../types";
-import { buildQcRows } from "../../../lib/qcSummary";
-import { buildTimelineRows } from "../../reading-pane/QueryTimeline";
-import { QueryLedger } from "../../queries/panel/QueryLedger";
-import { StandCard } from "../../queries/panel/StandCard";
-import { standCard } from "../../../lib/standCard";
-import { QcOpenCard } from "../../queries/centre/QcOpenCard";
+import { QueryStatus, type Activity, type Agent, type Manuscript, type Query, type SubmissionPackage } from "../../../types";
+import { buildQcRows, type QcRow } from "../../../lib/qcSummary";
+import { QcQueryCard149 } from "../../queries/centre/QcQueryCard149";
+import { buildCardView } from "../../queries/centre/qcCardView";
+import { NUDGE_NESTED_TYPE } from "../../../lib/logNudge";
 import { AgentCard262, type AgentCard262Props, type Sec262 } from "../../agents/contact/AgentCard262";
 import { agentFacts, agentRows } from "../../../lib/contactList";
 import { agentHistory } from "../../../lib/agentHistory";
@@ -35,8 +32,12 @@ import "../../shell/sidePanel.css";
 import "../../queries/queryPanelHost.css";
 import "../../agents/panel/agentPanel.css";
 
-/** the panel's true width: the side panel is 560, or 520 under 1440 */
-const TRUE_W = () => (typeof window !== "undefined" && window.innerWidth <= 1440 ? 520 : 560);
+/** the card's true width: the query card's v152 frame is 540, or 504 at 1400 and under (qcv152card.css); the agent
+ *  card's side panel is 560, or 520 at 1440 and under (sidePanel.css) */
+const TRUE_W = (kind: "query" | "agent" = "agent") => {
+  const w = typeof window !== "undefined" ? window.innerWidth : 1512;
+  return kind === "query" ? (w <= 1400 ? 504 : 540) : (w <= 1440 ? 520 : 560);
+};
 
 /** the query's own activity log, live (the Query Centre's listener, for one query) */
 export function useQueryLog(uid: string | null, queryId: string | null): Record<string, unknown>[] {
@@ -52,39 +53,51 @@ export function useQueryLog(uid: string | null, queryId: string | null): Record<
 
 export interface QueryCardProps {
   q: Query;
+  /** the query's row as the Query Centre stamps it (qcCardView's `stampedCardRows`) */
+  row: QcRow | null;
   agent: Agent | null;
-  activities: readonly Activity[];
-  agents: readonly Agent[];
+  queries: readonly Query[];
+  manuscripts: readonly Manuscript[];
   manuscript: Manuscript | null;
   packages: readonly SubmissionPackage[];
   log: Record<string, unknown>[];
   draft: Draft | null;
   nowMs: number;
+  quietWeeks: number;
+  /** packages locked for this writer (the card's materials read as the free plan's words) */
+  free: boolean;
 }
 
-/** the real query card, as the Query Centre composes it (the ledger and the stand card, from the same builders) */
-export const PreviewQueryCard: React.FC<QueryCardProps> = ({ q, agent, activities, agents, manuscript, packages, log, draft, nowMs }) => {
-  const shown: Query = draft?.status ? { ...q, status: draft.status } : q;
-  const row = useMemo(() => buildQcRows([shown], agents, activities as Activity[], nowMs)[0] ?? null, [shown, agents, activities, nowMs]);
-  if (!row) return null;
-  const evs = draft?.ghost ? [...log, draft.ghost] : log;
-  /* the timeline reads the query as it is (its stored stage dates), plus the draft step: a status patched in here would
-     make the builder date the draft from the query's own fields */
-  const ledgerRows = buildTimelineRows(evs as never[], q, agent as never);
-  const first = (agent?.name || "").trim().split(/\s+/)[0] || (agent?.agency ? "the agency" : "the agent");
-  const stand = (
-    <StandCard view={standCard({
-      status: row.status, first, agency: (agent?.agency || "").trim(), court: row.court, stageStartMs: row.stageStartMs, expectedMs: row.expectedMs,
-      windowWeeks: typeof agent?.responseTimeWeeks === "number" && agent.responseTimeWeeks > 0 ? agent.responseTimeWeeks : null,
-      unansweredNudgeMs: null, closedHow: row.closedHow, manuscriptTitle: manuscript?.title ?? null, hasSentDate: !!q.dateSent,
-      keepTracking: (q as { closureOfferDismissed?: boolean }).closureOfferDismissed === true, reminderOpen: false,
-    }, nowMs)} onLink={() => undefined} renderSetDate={() => null} />
-  );
-  const tracking = <QueryLedger rows={ledgerRows} stand={stand} nowMs={nowMs} sendMethod={q.sendMethod} revisionRound={q.revisionRound} highlightId={draft?.ghost ? "__ghost" : null} />;
-  const tags = manuscript ? [manuscript.genre, ...(manuscript.subGenres ?? [])].filter((x): x is string => !!x).slice(0, 2) : [];
+const noop = () => undefined;
+const noopAsync = async () => false;
+
+/**
+ * To-do list v52, Part D — THE QUERY CENTRE'S OWN CARD. `QcQueryCard149` over the v152 thread, its every prop from
+ * the one derivation the Query Centre reads (`buildCardView`), so a change to the card on the Query Centre is a change
+ * here too. Every handler is inert: the preview is a picture of the card, and a press anywhere opens the real one.
+ *
+ * ⚠️ THE PENDING CHANGE IS THE CARD'S OWN DRAFT: the task's new step is handed to the card as `card1522.draft`, the
+ *    dashed step the Query Centre's composer draws, built the way the composer builds it.
+ */
+export const PreviewQueryCard: React.FC<QueryCardProps> = ({ q, row, agent, queries, manuscripts, manuscript, packages, log, draft, nowMs, quietWeeks, free }) => {
+  const view = useMemo(() => (row ? buildCardView({ row, q, ag: agent, ms: manuscript, events: log, packages, queries, manuscripts, nowMs, quietWeeks, desk: true, free }) : null),
+    [row, q, agent, manuscript, log, packages, queries, manuscripts, nowMs, quietWeeks, free]);
+  if (!view || !view.v152) return null;
+  /* the task's new step, as the card's composer draft: built here as the composer builds its own (a status step, or a
+     nudge), never through the ledger, which folds a step into an existing one of the same status */
+  const g = draft?.ghost ?? null;
+  const gStatus = (g?.resultingStatus ?? g?.type) as QueryStatus | undefined;
+  const gNudge = g?.type === NUDGE_NESTED_TYPE;
+  const gMs = typeof g?.createdAt === "string" ? new Date(g.createdAt).getTime() : null;
+  const card1522 = g && (gNudge || (gStatus && Object.values(QueryStatus).includes(gStatus)))
+    ? { draft: { key: "__draft", status: gNudge ? null : gStatus!, kind: gNudge ? "nudge" as const : undefined, ms: gMs != null && Number.isFinite(gMs) ? gMs : nowMs, chips: [] } }
+    : {};
   return (
-    <QcOpenCard row={row} nowMs={nowMs} packages={[...packages]} manuscriptTitle={manuscript?.title ?? null} manuscript="caption" manuscriptTags={tags}
-      onPrimary={() => undefined} onAction={() => undefined} tracking={tracking} agentTab={tracking} notesTab={tracking} noteCount={0} />
+    <QcQueryCard149 {...view.display} card1522={card1522}
+      mode="view" onMode={noop} onClose={noop} onStep={noop} onPrimary={noop} onCloseQuery={noop} onContactList={noop} onCopyEmail={noop}
+      onAgentField={noop} onOpenPiece={noop} onAddNote={noop} onRespond={noopAsync} onSaveEdits={noopAsync}
+      index={0} total={1} notes={[]} packageChoices={[]} packageKey={null} pieces={[]} stepChoices={[]} removable={() => []}
+      onReply152={noop} onEditStep152={noop} onPencil152={noop} />
   );
 };
 
@@ -103,7 +116,6 @@ export interface AgentCardProps {
 
 /** the desk's section names, as the address book card names them (lib/contactCard262's Sec262) */
 const CARD_SEC: Record<string, Sec262> = { how: "how", wishlist: "wishlist", send: "materials", genres: "genres" };
-const noop = () => undefined;
 
 /**
  * The agent's card is the Contact list's own (Contact list v26.2, `AgentCard262`), with the draft value laid on the agent.
@@ -159,14 +171,14 @@ export const ScaledCard: React.FC<{ kind: "query" | "agent"; label: string; onOp
     const fit = () => {
       const w = el.clientWidth, hh = el.clientHeight;
       if (w <= 0 || hh <= 0) return;
-      const zz = full ? 1 : Math.min(1, w / TRUE_W());
+      const zz = full ? 1 : Math.min(1, w / TRUE_W(kind));
       setZ(zz); setH(hh / zz);
     };
     fit();
     const ro = new ResizeObserver(fit);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [full]);
+  }, [full, kind]);
   /* bring the change into view: the draft step, or the agent's section (never cutting off the head) */
   useEffect(() => {
     const el = slot.current;
@@ -175,7 +187,7 @@ export const ScaledCard: React.FC<{ kind: "query" | "agent"; label: string; onOp
       /* ⚠️ NEVER scrollIntoView: it scrolls every ancestor, the page's own scroller included, and the header would
          slide out of view. The card's own scroller is moved, and nothing else. */
       if (kind === "query") {
-        const tg = el.querySelector<HTMLElement>(".qlg-c--on");
+        const tg = el.querySelector<HTMLElement>("[data-qc1522=\"draft\"]");
         let sc: HTMLElement | null = tg?.parentElement ?? null;
         while (sc && sc !== el && !(sc.scrollHeight > sc.clientHeight + 1 && /(auto|scroll)/.test(getComputedStyle(sc).overflowY))) sc = sc.parentElement;
         if (tg && sc && sc !== el) {
@@ -203,7 +215,7 @@ export const ScaledCard: React.FC<{ kind: "query" | "agent"; label: string; onOp
       {/* ⚠️ READ-ONLY (v51.1): the card inside is a picture of the real one. `inert` takes every button and link in it out
           of clicks and focus; the query card's footer action and the stand card's links are hidden as well (todoWs.css),
           so nothing in the preview looks like it can be pressed. A click anywhere is the frame's: it opens the real card. */}
-      <div className="tws-pvz" data-tws="preview-card" inert style={{ zoom: z, width: TRUE_W(), height: h || undefined } as React.CSSProperties}>
+      <div className="tws-pvz" data-tws="preview-card" inert style={{ zoom: z, width: TRUE_W(kind), height: h || undefined } as React.CSSProperties}>
         <aside className={`spanel tws-pvpanel ${kind === "query" ? "qsp" : "qsp apn"}`}>
           <div className="spanel-own">{children}</div>
         </aside>

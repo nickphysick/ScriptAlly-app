@@ -48,6 +48,9 @@ import { nrmnOf, lastSendDay } from "../../queryActions/journeys/common";
 import { buildFlow, type Answers, type Flow, type FlowDone } from "./wsFlows";
 import { DatePick, DIS, TICK, ZZ, dayFromYmd } from "./WsControls";
 import { PreviewAgentCard, PreviewQueryCard, ScaledCard, useQueryLog } from "./WsPreview";
+import { stampedCardRows } from "../../queries/centre/qcCardView";
+import { quietWeeksOf } from "../../../lib/queryState";
+import { packagesUnlocked } from "../../../lib/entitlements";
 import { DismissPop, SnoozePop, type DismissChoice, type SnoozeLimit } from "./WsPops";
 import { OwnEmptySide, WsOwnTask } from "./WsOwnTask";
 import { StatusDot } from "../../StatusDot";
@@ -376,8 +379,15 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     setA({}); setQi(0); setReview(false);
   };
 
+  /* ── the card preview's rows: the Query Centre's own, stamped the same way (v52 Part D) ── */
+  const quietWeeks = quietWeeksOf(currentUser);
+  const cardRows = useMemo(() => new Map(stampedCardRows(queries, agents, activities, quietWeeks, now).map((r) => [r.id, r])),
+    [queries, agents, activities, quietWeeks, now]);
+  const cardFree = !packagesUnlocked(currentUser);
+
   /* ── the flow on the desk ── */
   const qLog = useQueryLog(currentUser?.id ?? null, deskT?.query?.id ?? null);
+  const linkLog = useQueryLog(currentUser?.id ?? null, deskT?.kind === "own" ? deskT.userTask?.queryId ?? null : null);
   const userFirst = (currentUser?.name ?? "").trim().split(/\s+/)[0] || "";
   const flow: Flow | null = useMemo(() => {
     if (!sel || !deskT || sel.kind === "own") return null;
@@ -708,7 +718,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
       if (own) {
         if (linkQ) return (
           <ScaledCard kind="query" full={full} focusKey={linkQ.id} label={`Open the full query card ↗`} onOpen={() => openLinked(t.userTask!)}>
-            <PreviewQueryCard q={linkQ} agent={linkA} activities={activities} agents={agents} manuscript={manuscripts.find((m) => m.id === linkQ.manuscriptId) ?? null} packages={packages} log={[]} draft={null} nowMs={now} />
+            <PreviewQueryCard q={linkQ} row={cardRows.get(linkQ.id) ?? null} agent={linkA} queries={queries} manuscripts={manuscripts} manuscript={manuscripts.find((m) => m.id === linkQ.manuscriptId) ?? null} packages={packages} log={linkLog} draft={null} nowMs={now} quietWeeks={quietWeeks} free={cardFree} />
           </ScaledCard>
         );
         if (linkA) return (
@@ -725,7 +735,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
       );
       if (t.query) return (
         <ScaledCard kind="query" full={full} focusKey={`${t.key}|${previewDraft?.status ?? ""}|${previewDraft?.ghost ? 1 : 0}`} label="Open the full query card ↗" onOpen={() => openCard(t)}>
-          <PreviewQueryCard q={t.query} agent={t.agent ?? null} activities={activities} agents={agents} manuscript={ms} packages={packages} log={qLog} draft={previewDraft} nowMs={now} />
+          <PreviewQueryCard q={t.query} row={cardRows.get(t.query.id) ?? null} agent={t.agent ?? null} queries={queries} manuscripts={manuscripts} manuscript={ms} packages={packages} log={qLog} draft={previewDraft} nowMs={now} quietWeeks={quietWeeks} free={cardFree} />
         </ScaledCard>
       );
       return null;
