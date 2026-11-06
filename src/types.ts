@@ -98,7 +98,11 @@ export interface User {
        `corkPrefs` (lib/corkboard), which is total. */
     noteboard?: {
       dismissedExamples?: string[]; order?: string[];
-      layout?: Record<string, { x: number; y: number }>; view?: "free" | "tidy";
+      layout?: Record<string, { x: number; y: number }>;
+      /* Corkboard v2: "board" | "piles" ("free"/"tidy" are v1's and read as "board"); `sort` absent reads "new".
+         `layout` and `dismissedExamples` are no longer read (left in place, not deleted). */
+      view?: "free" | "tidy" | "board" | "piles";
+      sort?: "mine" | "new" | "old" | "colour";
     };
     /* The Manuscripts landing's promo tiles, following the Noteboard's precedent exactly:
        `todoPrefs` is `is map` and unconstrained, so this page-scoped sub-map ships with NO rules
@@ -1087,13 +1091,21 @@ export interface JournalEntry {
  *  · createdAt / updatedAt / doneAt — full ISO datetime strings (new Date().toISOString()).
  * Every ACTIVE (not-done) note lives on the desk — there is no separate "pinned" flag.
  */
-export type NoteColour = "pink" | "sage" | "yellow";
+/* ⚠️ THE DASHBOARD DESK NOTES (`Note`, the separate `notes` collection, NotesLab) keep their own three papers: their
+   rules require one of these three on every write. Corkboard v2 gave the Corkboard's notes (`UserTask`) five new
+   papers; the old three are kept here as `LegacyNoteColour` and read through lib/noteboard's one mapping. */
+export type LegacyNoteColour = "pink" | "sage" | "yellow";
+export type DeskNoteColour = LegacyNoteColour;
+/** Corkboard v2: the five papers, Butter · Blush · Powder · Sand · Stone. No green: the brand has none. */
+export type NoteColour = "butter" | "blush" | "powder" | "sand" | "stone";
+/** What a stored note may carry: a new paper, or one of the old three (mapped when read, never rewritten). */
+export type StoredNoteColour = NoteColour | LegacyNoteColour;
 
 export interface Note {
   id: string;
   userId: string;
   text: string;
-  colour: NoteColour;
+  colour: DeskNoteColour;
   dueDate: string | null; // "YYYY-MM-DD" — optional; with a date the note is also a task
   done: boolean;
   doneAt: string | null; // full ISO datetime, stamped on completion
@@ -1225,7 +1237,9 @@ export interface UserTask {
      and yellow is applied when it is READ (lib/noteboard.noteColour) rather than written to it —
      a migration would be inventing a choice the writer never made. Meaningless on a dated task;
      nothing outside the Noteboard reads it. */
-  colour?: NoteColour;
+  colour?: StoredNoteColour;
+  /* Corkboard v2: kept first on the Corkboard, in every sort and on top of its pile. Optional; absent = not pinned. */
+  pinned?: boolean;
   /* board-optimise P7: minutes from the fixed ladder (lib/todoEstimate) — the pack's one
      addition to user-facing task state, justified in that file's head. Optional; absent means
      absent, and the Today head sums only what carries one. */

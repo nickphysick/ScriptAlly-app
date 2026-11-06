@@ -27,7 +27,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { UserPlan, UserTask } from "../../types";
 import { noteFilterLabel, NOTEBOARD_SUBTITLE } from "../../lib/noteboard";
-import { CORKBOARD_SUBLINE } from "../../lib/corkboard";
+const CORKBOARD_SUBLINE = "Notes to self and your own tasks, kept in one place."; // v1's subline, retired
 
 const here = __dirname;
 const css = readFileSync(join(here, "todoNoteboard.css"), "utf8");
@@ -81,19 +81,20 @@ describe("⚠️ the band is REHOMED, not drawn — the chassis already owns the
     /* and the header it DOES render is the shared one, not a local copy. RE-POINTED (Corkboard v1): the page
        left the fill chassis for the To-do list's scrolling arrangement, so the shared header is `PageHeader`
        itself (full, panel, living) rather than the family layout's masthead. The law is unchanged. */
-    expect(page).toContain('from "../shell/PageHeader"');
-    expect(page).toMatch(/<PageHeader\s+variant="full"\s+panel/);
+    /* RE-POINTED (Corkboard v2): the header is CbHeader, a page-local copy of the Contact list's navy panel
+       (lock CB2 holds the two equal on the rendered pages). One header, drawn once. */
+    expect(page).toContain('from "./corkboard/CbHeader"');
+    expect([...page.matchAll(/<CbHeader\b/g)].length).toBe(1);
+    expect(page).not.toMatch(/<PageHeader\b/);
     expect(page).not.toContain("TasksPageLayout");
   });
 
-  it("the subline is the Corkboard ref's sentence, verbatim (Corkboard v1 supersedes the Noteboard mockup's)", () => {
-    expect(CORKBOARD_SUBLINE).toBe("Notes to self and your own tasks, kept in one place.");
-    const ref = readFileSync(join(here, "../../../design-refs/corkboard-v4/corkboard-v4.html"), "utf8");
-    expect(ref).toContain(CORKBOARD_SUBLINE); // the ref is the authority, not this file
+  it("the header sentence is v13's (Corkboard v2 supersedes v4's subline, which is no longer drawn)", () => {
     seed.userTasks = [note({ id: "a" })];
-    expect(render()).toContain(CORKBOARD_SUBLINE);
-    /* the Noteboard's own sentence is no longer drawn; its constant stays in the pure layer, unread */
-    expect(render()).not.toContain(NOTEBOARD_SUBTITLE);
+    const html = render();
+    expect(html).toContain("note on your board.");
+    expect(html).not.toContain(CORKBOARD_SUBLINE);
+    expect(html).not.toContain(NOTEBOARD_SUBTITLE);
   });
 });
 
@@ -115,21 +116,22 @@ describe("⚠️ the FILTERED count exists only while something narrows; the boa
        large, where it cannot be taken for a label. What stays retired is a second tally in the row. */
     seed.userTasks = [note({ id: "a" }), note({ id: "b" })];
     const html = render();
-    const plain = html.replace(/\u00a0|&nbsp;/g, " ");
-    expect(plain).toMatch(/aria-label="2 notes pinned to your corkboard"/);
-    expect([...html.matchAll(/notes pinned/g)].length).toBe(2); // the h1's name and its words — one header
-    expect(html).not.toMatch(/["\s`]nb-fcount["\s`]/);
+    /* RE-POINTED (Corkboard v2): the count is the header's sentence ("2 notes on your board."), stated once */
+    expect(html).toContain("<b>2</b> notes on your board.");
+    expect([...html.matchAll(/on your board/g)].length).toBe(1);
+    expect(html).not.toMatch(/["\s`](nb-fcount|cb2-fcount)["\s`]/);
     expect(html).not.toMatch(/["\s`]tpl-eyebrow["\s`]/);
     seed.userTasks = [note({ id: "a" })];
-    expect(render().replace(/\u00a0|&nbsp;/g, " ")).toMatch(/aria-label="1 note pinned to your corkboard"/);
+    expect(render()).toContain("<b>One</b> note on your board.");
   });
 
   it("…and the source only mounts the count behind the narrowing condition", () => {
     const page = decls(readFileSync(join(here, "TodoNoteboardPage.tsx"), "utf8"));
-    expect(page).toContain("const narrowing = !!(search.trim() || tagSel);");
-    expect(page).toMatch(/\{narrowing && <span className="nb-fcount"[^>]*>\{noteFilterLabel\(notes\.length, pinned\.length\)\}/);
+    /* RE-POINTED (Corkboard v2): the header's glance rows narrow too, and the row's count is passed only then */
+    expect(page).toContain("const narrowing = !!(search.trim() || tagSel || special);");
+    expect(page).toMatch(/count=\{narrowing \?/);
     /* and the header counts the BOARD, never the filtered view */
-    expect(page).toContain("count: settled ? pinned.length : null");
+    expect(page).toContain("count={settled ? board.length : null}");
     /* the retired tally is gone from the page, not merely unrendered */
     expect(page).not.toContain("noteCountLabel");
     expect(page).not.toContain("eyebrow={");
@@ -144,26 +146,11 @@ describe("⚠️ A TOKEN DEFINED SOMEWHERE IS NOT A TOKEN IN SCOPE WHERE IT IS R
      tokens were undefined, every declaration reading one was silently DROPPED, and the drawer
      rendered FULLY TRANSPARENT with the board showing through its text. Six passing geometry
      measurements never looked at it; the screenshot did. */
-  it("every floating surface carries the token scope itself", () => {
-    const page = readFileSync(join(here, "TodoNoteboardPage.tsx"), "utf8");
-    /* the population first — a census of nothing passes trivially */
-    /* ⚠️ EVERY FLOATING SURFACE, INCLUDING ONES THAT READ NO TOKEN TODAY. The Tags sheet
-       (`nb-datepanel`) declared only a width and was therefore safe by accident — the first
-       `var(--nb-*)` anyone added to it would have been dropped silently. Scoped surfaces make
-       the fault impossible rather than absent, which is the standing preference. */
-    const floating = ["nb-drawer", "nb-scrim", "nb-taskpanel", "nb-datepanel"];
-    /* ⚠️ THE WHOLE ATTRIBUTE, NOT AN ADJACENCY. `nb-scope cal-daypanel nb-taskpanel` carries both
-       and would fail a check for the two tokens side by side — the first draft of this lock did
-       exactly that and reported a correctly-scoped element as unscoped. */
-    const attrs = [...page.matchAll(/className="([^"]*)"/g)].map((m) => m[1].split(/\s+/));
-    for (const cls of floating) {
-      const owner = attrs.find((a) => a.includes(cls));
-      expect(owner, `no element renders ${cls}`).toBeDefined();
-      expect(owner, `${cls} must carry nb-scope — it renders outside it`).toContain("nb-scope");
-    }
-    /* and nothing reads an --nb-* token from a class that is not inside a scoped element */
-    const scoped = [...page.matchAll(/className="([^"]*nb-scope[^"]*)"/g)].length;
-    expect(scoped, "the scope is not applied anywhere").toBeGreaterThanOrEqual(floating.length + 1);
+  it("every floating surface carries its tokens itself (Corkboard v2: the `cb2-layer` scope)", () => {
+    /* RE-POINTED (Corkboard v2): v1's drawer is retired; the floating surfaces are the pop-ups and the menu, which
+       portal outside `.cb2` and so declare the page's tokens on `.cb2-layer` themselves. Held in E/F's locks. */
+    const css = readFileSync(join(here, "corkboard/corkboard.css"), "utf8");
+    expect(css).toMatch(/\.cb2, \.cb2-layer \{/);
   });
 });
 

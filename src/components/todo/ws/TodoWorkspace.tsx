@@ -894,8 +894,9 @@ const ReviewDrawer: React.FC<{ label: string; kind: "query" | "agent"; onClose: 
   );
 };
 
-/** + Add a task: the words, a date, and notes. No "task or note" question: a task always has a date. */
-const AddTask: React.FC<{ today: Date; onCancel: () => void; onAdd: (text: string, due: string, detail: string) => Promise<void> }> = ({ today, onCancel, onAdd }) => {
+/** + Add a task: the words, a date, and notes. No "task or note" question: a task always has a date.
+ *  Exported for the Corkboard's "Add a task" (Corkboard v2), which hosts THIS form rather than a copy. */
+export const AddTask: React.FC<{ today: Date; onCancel: () => void; onAdd: (text: string, due: string, detail: string) => Promise<void> }> = ({ today, onCancel, onAdd }) => {
   const [text, setText] = useState("");
   const [due, setDue] = useState<string | null>(null);
   const [cal, setCal] = useState(false);

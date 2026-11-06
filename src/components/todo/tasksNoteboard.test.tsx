@@ -92,7 +92,7 @@ describe("⚠️ 'THE DATE IS THE DOOR' IS RETIRED — the board projects a task
        the date goes onto the note, ONE document renders one row everywhere, and the board keeps
        the note because the conversion stamps its paper. noteboardTask.test.ts holds the one-row
        probe against the To-do board's own selector. */
-    expect(page).toContain("updateUserTask(note.id, { dueDate: dateDraft })");
+    expect(page).toContain("updateUserTask(note.id, { dueDate: due })"); // RE-POINTED (Corkboard v2): the panel hands the date in
     expect(page).not.toContain("projectedTaskId");
     expect(page).not.toContain("give-date");   // the RETIRED door stays retired — this is not it back
   });
@@ -111,8 +111,9 @@ describe("⚠️ 'THE DATE IS THE DOOR' IS RETIRED — the board projects a task
   });
 
   it("the menu's door says so: Turn into a task…", () => {
-    expect(page).toContain('item.id === "make-task"');
-    expect(page).toContain("Add to tasks");
+    expect(page).toContain('if (act.a === "task") setTaskFor(note);'); // RE-POINTED (Corkboard v2): CbMenu's act
+    /* RE-POINTED (Corkboard v2): the panel's button is v13's "Add to my to-do list" */
+    expect(readFileSync(join(here, "corkboard/CbTaskDialogs.tsx"), "utf8")).toContain("Add to my to-do list");
   });
 });
 
@@ -134,19 +135,8 @@ describe("⚠️ the ⋯ menu — the SAME grammar, the SAME shell", () => {
     }
   });
 
-  it("the cards feed the SHARED PortalMenu and wear the SAME reserved-corner seat", () => {
-    expect(page).toContain("<PortalMenu");
-    expect(page).toContain('className="tbd-more cb-more"');
-    /* ⚠️ THE RESERVED CORNER IS RETIRED, not relaxed. `todoBoard.css` seats `.tbd-more`
-       `position: absolute` at a board card's bottom-right, and the body reserved 30px of padding
-       so the two never met. The mockup draws the ⋯ as the last item of the FOOT ROW, in flow, so
-       there is nothing to reserve against — the seat is overridden page-side (that file belongs
-       to the board and is not edited) and the padding went with the overlap. */
-    /* RE-POINTED (Corkboard v1): the ⋯ is top right, on hover and on focus (the ref's `.more`); the body
-       keeps 14px clear of it. Still the page's own seat, never an edit to the board's file. */
-    expect(css).toMatch(/\.nb-note\s+\.tbd-more\.cb-more\s*\{[^}]*position:\s*absolute/);
-    expect(css).not.toMatch(/padding-right:\s*30px/);
-  });
+  /* RETIRED (Corkboard v2): "the cards feed the SHARED PortalMenu" — the post-it's ⋯ is CbWall's, top right on hover
+     and focus (the ref's `.more`); its menu is the page's own (Part F). Recorded in tests/e2e/RETIRED-corkboard-v2.md. */
 });
 
 describe("⚠️ delete asks first and holds the LONG way back", () => {
@@ -154,7 +144,7 @@ describe("⚠️ delete asks first and holds the LONG way back", () => {
     /* ⚠️ THE VERB IS "REMOVE" NOW, not "Delete" — the approved set for this board is Pin a note ·
        Pin it · Remove note · Turn into a task · Detach from tasks. The confirm and the 8s window
        are unchanged. */
-    expect(page).toContain("await confirmAsk(`Remove “${note.text}”?`");
+    expect(page).toContain("await confirmAsk(`Remove “"); // RE-POINTED (Corkboard v2): long notes are cut at 90 characters, as the ref
     expect(page).toContain("}, 8000)");
     /* ⚠️ AND THE INVERSE IS THE WHOLE DOCUMENT NOW (finish run, Phase 2 — the second tightening
        of this line). First fix: carry createdAt so Undo stopped returning the note to the TOP.
@@ -182,10 +172,11 @@ describe("the tool row: search · the derived chips · Board/Column · Examples 
        pinned notes, with the defs supplying the label. The page's filter DIMENSION is unchanged:
        one tag at a time, or #All. */
     /* RE-POINTED (Corkboard v1): the chips sit in the row under the header now (`cb-filters`), with counts. */
-    const tools = sliceBetween(page, 'data-cb="filters"', 'data-cb="notes"');
-    expect(tools).toContain("cb-chip");
-    expect(tools).toContain("chips.map");
-    expect(page).toContain("noteTagChips(pinned, currentUser?.tags ?? [])");
+    /* RE-POINTED (Corkboard v2): the pills are CbToolRow's, handed the page's chips */
+    const tools = sliceBetween(page, "<CbToolRow", "/>");
+    expect(tools).toContain("chips={chips.map");
+    expect(readFileSync(join(here, "corkboard/CbToolRow.tsx"), "utf8")).toContain("chips.map");
+    expect(page).toContain("noteTagChips(board, currentUser?.tags ?? [])"); // RE-POINTED (Corkboard v2): `board` is the unfiltered list
     /* ⚠️ AND IT DERIVES FROM `pinned`, NOT `notes`. From the filtered view the chips would vanish
        as you used them — pick one and the rest disappear, because nothing left on the board
        carries them any more. */
@@ -201,24 +192,11 @@ describe("the tool row: search · the derived chips · Board/Column · Examples 
     /* RE-POINTED (Corkboard v1): the Corkboard's own row is the ref's — the add bar left, the filters right
        (`margin-left: auto` on the filters does what the spacer did) — and it carries no pink. */
     expect(page).not.toContain("<TplGrow />");
-    expect(page).toContain('className="cb-over"');
-    expect(css).toMatch(/\.cb-filters\s*\{[^}]*margin-left:\s*auto/);
+    /* RE-POINTED (Corkboard v2): its own row is CbToolRow; v1's `cb-over` is retired */
+    expect(page).toContain("<CbToolRow");
+    expect(page).not.toContain('className="cb-over"');
   });
 
-  it("the empty state TEACHES rather than apologises — and it is the WORKFLOW now", () => {
-    /* ⚠️ THE `.nb-empty` PANEL IS RETIRED (empty-state run). Its single paragraph — which
-       included the phrase this case used to pin, "give it a date from its ⋯ menu", wording the
-       kebab itself had already retired — is superseded by three illustrated panels. The claim is
-       unchanged and now lives with the component: noteboardEmptyState.test.tsx locks every word
-       against the ref. */
-    /* ⚠️ COMMENTS STRIPPED — the module's own docstring NAMES the retired phrase to explain the
-       substitution, so a raw read matched the prose and went red on correct code. */
-    const strip = (t: string) => t.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(?<!:)\/\/[^\n]*/g, "");
-    const empty = strip(readFileSync(join(here, "noteboardEmptyState.tsx"), "utf8"));
-    expect(empty).toContain("Your board is empty");
-    expect(empty).not.toContain("Sorry");
-    /* and the retired phrasing did not come back in with it */
-    expect(empty).not.toContain("Give it a date");
-    expect(page).not.toContain("give it a date from its ⋯ menu");
-  });
+  /* RETIRED (Corkboard v2): "the empty state TEACHES … it is the WORKFLOW now" — the workflow panels are retired; the
+     empty page is v13's ("What writers keep here", Part G), held by lock CB11. Recorded in tests/e2e/RETIRED-corkboard-v2.md. */
 });

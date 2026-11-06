@@ -82,9 +82,10 @@ describe("⚠️ ONE TagPicker, mounted in exactly three places", () => {
        than quietly dropped from the count: the title still says three, and this is where a reader
        finds out why it is two and what restoring the third would take. */
     expect(listPage, "the pane grew a tags slot without the mockup gaining one").not.toContain("tagsSlot=");
-    // 3. the ⋯ menu's Tags… sheet — on the board AND the noteboard, same component
+    // 3. the ⋯ menu's Tags… sheet — on the board. RE-POINTED (Corkboard v2): the Corkboard's Tags… sheet is retired;
+    //    Change tag… opens the note pop-up at its tag field, so the Corkboard mounts no TagPicker of its own.
     expect(listPage).toContain("MOUNT 3 of 3");
-    expect(noteboard.match(/<TagPicker/g)?.length).toBe(1);
+    expect(noteboard.match(/<TagPicker/g)).toBeNull();
     // and nobody builds a lookalike: the chips class exists only in the one component
     for (const [name, src] of [["list", listPage], ["noteboard", noteboard], ["dock", dock]] as const) {
       expect(src.includes("tgp-chips"), name).toBe(false);
@@ -97,7 +98,10 @@ describe("⚠️ ONE TagPicker, mounted in exactly three places", () => {
     expect(picker).toContain("normaliseTagLabel(draft)");
     // every mount passes onCreate through the user-doc write
     expect(listPage).toContain("createTagDef(tag)");
-    expect(noteboard).toContain("createTagDef(tag)");
+    /* RE-POINTED (Corkboard v2, dev line): the Corkboard mints through resolveTag (newTag → createTagDef). The To-do
+       composer it hosts is v51's "A new task" form, which takes no tags, so there is no onCreateTag to pass. */
+    expect(noteboard).toContain("await createTagDef(made)");
+    expect(noteboard).not.toContain("onCreateTag=");
   });
 });
 
@@ -138,12 +142,14 @@ describe("⚠️ tag filters combine ADDITIVELY with FILTERS (Urgent AND #synops
        colour wherever it appears. */
     const nb = readFileSync(join(here, "TodoNoteboardPage.tsx"), "utf8");
     /* the Noteboard: a derived chip row over the tags in use */
-    expect(nb).toContain("cb-chip"); // RE-POINTED (Corkboard v1): the chip row moved under the header
+    expect(nb).toContain("<CbToolRow"); // RE-POINTED (Corkboard v2): the pills are the tool row's
     expect(nb).toContain("noteTagChips(");
     expect(nb).not.toMatch(/["\s`]nb-tagwrap["\s`]/);   // the dropdown it replaced, bounded token
     /* both surfaces name a tag from the user's own defs, never from a raw id */
     expect(nb).toContain("currentUser?.tags ?? []");
-    expect(nb).toContain("TAG_PALETTE[def.colour]");
+    /* RE-POINTED (Corkboard v2): a post-it's tag is the ref's quiet pill, named from the defs (`tagLabel`); the
+       palette colours the To-do surfaces only */
+    expect(nb).toContain("userTags.find((t) => t.id === id)?.label");
     expect(side).toContain("TAG_PALETTE[t.colour]");
     /* and the free-text composer mints through the app's minter rather than an untracked string */
     expect(nb).toContain("newTag(label, userTags)");
@@ -192,7 +198,7 @@ describe("⚠️ tags survive note→task conversion — the date is the door, t
        copy is GONE, not shadowed. The claim throughout: a writer filtering #agents on the To-do
        board must not lose the task they made from an #agents note. */
     const make = sliceBetween(noteboard, "const makeTask", "const detachTask");
-    expect(make).toContain("updateUserTask(note.id, { dueDate: dateDraft })");
+    expect(make).toContain("updateUserTask(note.id, { dueDate: due })"); // RE-POINTED (Corkboard v2)
     expect(make).not.toContain("tags");
     expect(noteboard).not.toContain("projectedTaskId");
   });

@@ -25,7 +25,7 @@ import {
   ActivityType,
   JournalEntry,
   Note,
-  NoteColour,
+  StoredNoteColour,
   UserTask,
   TaskStep,
   SurfaceOffset,
@@ -483,7 +483,7 @@ interface DbContextType {
   // per-record "View tasks" popovers). Badge counts stay derived.
   userTasks: UserTask[];
   addUserTask: (fields: { id?: string; text?: string; detail?: string; queryId?: string; agentId?: string; manuscriptId?: string; dueDate?: string; surfaceOffset?: SurfaceOffset; tags?: string[]; createdAt?: string }) => Promise<string | undefined>;
-  updateUserTask: (id: string, fields: Partial<Pick<UserTask, "text" | "done">> & { completedAt?: string | null; detail?: string | null; dueDate?: string | null; surfaceOffset?: SurfaceOffset | null; committedDate?: string | null; tags?: string[] | null; estimateMin?: number | null; steps?: TaskStep[] | null; queryId?: string | null; agentId?: string | null }) => Promise<void>;
+  updateUserTask: (id: string, fields: Partial<Pick<UserTask, "text" | "done">> & { completedAt?: string | null; detail?: string | null; dueDate?: string | null; surfaceOffset?: SurfaceOffset | null; committedDate?: string | null; tags?: string[] | null; estimateMin?: number | null; steps?: TaskStep[] | null; pinned?: boolean | null; queryId?: string | null; agentId?: string | null; manuscriptId?: string | null }) => Promise<void>;
   deleteUserTask: (id: string) => Promise<void>;
   /** ⚠️ THE UNDO'S WRITE — the captured document, VERBATIM. A restore through addUserTask loses
    *  whatever that builder does not know about (it stamped createdAt once, then committedDate and
@@ -494,7 +494,7 @@ interface DbContextType {
      through handleFirestoreError and returns void, which is right for them and wrong for this:
      `colour` is not yet in the deployed rules allowlist, so the write CAN be denied, and a
      swatch that silently does nothing is worse than no swatch. It returns whether it landed. */
-  setUserTaskColour: (id: string, colour: NoteColour) => Promise<boolean>;
+  setUserTaskColour: (id: string, colour: StoredNoteColour) => Promise<boolean>;
 
   // Activity Actions
   addActivity: (act: Omit<Activity, "id" | "userId"> & { id?: string }) => Promise<{ success: boolean; error?: string }>;
@@ -3261,10 +3261,12 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       detail?: string | null; dueDate?: string | null; surfaceOffset?: SurfaceOffset | null;
       committedDate?: string | null; tags?: string[] | null; estimateMin?: number | null;
       steps?: TaskStep[] | null; queryId?: string | null; agentId?: string | null;
+      /* Corkboard v2: pin to top (false or null clears the field), and a note's manuscript link — null clears it. */
+      pinned?: boolean | null; manuscriptId?: string | null;
     },
   ) => {
     if (!currentUser) return;
-    const { committedDate, completedAt, detail, dueDate, surfaceOffset, tags, estimateMin, steps, queryId, agentId, ...rest } = fields;
+    const { committedDate, completedAt, detail, dueDate, surfaceOffset, tags, estimateMin, steps, queryId, agentId, pinned, manuscriptId, ...rest } = fields;
     const patch: Record<string, unknown> = { ...rest, updatedAt: new Date().toISOString() };
     /* To-do list v50: the checklist is written whole; null (or an emptied list) takes the field off the document.
        The links follow the same null-clears convention: "Unlink" is a deleteField, never a stored empty string. */
@@ -3291,6 +3293,10 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
        for the next reader who reasonably trusts the stamp. Found by the harness's first
        stored-field Undo assertion (completion-paths). */
     if (completedAt !== undefined) patch.completedAt = completedAt === null ? deleteField() : completedAt;
+    /* Corkboard v2 — an unpinned note carries no `pinned` at all (absence is "not pinned") */
+    if (pinned !== undefined) patch.pinned = pinned ? true : deleteField();
+    /* Corkboard v2 — a note's link can change after it is made (agent and query above); null removes the field */
+    if (manuscriptId !== undefined) patch.manuscriptId = manuscriptId === null ? deleteField() : manuscriptId;
     try {
       await updateDoc(doc(db, "users", currentUser.id, "tasks", id), patch);
     } catch (e) {
@@ -3339,7 +3345,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
    * say so. `false` means "the colour did not land"; the note still reads yellow, which is what
    * `noteColour` returns for a note that has none.
    */
-  const setUserTaskColour = async (id: string, colour: NoteColour): Promise<boolean> => {
+  const setUserTaskColour = async (id: string, colour: StoredNoteColour): Promise<boolean> => {
     if (!currentUser) return false;
     try {
       await updateDoc(doc(db, "users", currentUser.id, "tasks", id), {

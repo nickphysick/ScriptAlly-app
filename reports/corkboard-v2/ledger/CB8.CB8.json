@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "CB8",
+  "where": "first tag",
+  "ok": true,
+  "detail": "tags [\"cb2seed-tag-calls\"]"
+ },
+ {
+  "lock": "CB8",
+  "where": "rest kept",
+  "ok": false,
+  "detail": "was [\"cb2seed-tag-strategy\",\"cb2seed-tag-comps\"]"
+ },
+ {
+  "lock": "CB8",
+  "where": "undo",
+  "ok": true,
+  "detail": "after Undo [\"cb2seed-tag-strategy\",\"cb2seed-tag-comps\"]"
+ },
+ {
+  "lock": "CB8",
+  "where": "minted",
+  "ok": true,
+  "detail": "def {\"id\":\"tag-kzvb7l6f\",\"label\":\"cb2festival\",\"colour\":\"parchment\"}, tags [\"tag-kzvb7l6f\",\"cb2seed-tag-comps\"]"
+ },
+ {
+  "lock": "CB8",
+  "where": "minted keeps rest",
+  "ok": true,
+  "detail": "tags [\"tag-kzvb7l6f\",\"cb2seed-tag-comps\"]"
+ }
+]

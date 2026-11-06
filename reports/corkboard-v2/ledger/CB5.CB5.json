@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "CB5",
+  "where": "1512x982 long",
+  "ok": true,
+  "detail": "n13 (a paragraph) shows Read all"
+ },
+ {
+  "lock": "CB5",
+  "where": "1512x982 short",
+  "ok": false,
+  "detail": "n12 (one line) does not"
+ },
+ {
+  "lock": "CB5",
+  "where": "1512x982 only cut",
+  "ok": false,
+  "detail": "13 note(s) show Read all"
+ },
+ {
+  "lock": "CB5",
+  "where": "1280x800 long",
+  "ok": true,
+  "detail": "n13 (a paragraph) shows Read all"
+ },
+ {
+  "lock": "CB5",
+  "where": "1280x800 short",
+  "ok": false,
+  "detail": "n12 (one line) does not"
+ },
+ {
+  "lock": "CB5",
+  "where": "1280x800 only cut",
+  "ok": false,
+  "detail": "13 note(s) show Read all"
+ }
+]

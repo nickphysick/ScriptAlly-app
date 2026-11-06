@@ -62,8 +62,8 @@ describe("⚠️ one token, one geometry — equal title offsets by construction
        above an internal scroller it would leave a framed board a 400px window. It takes the To-do list's
        arrangement — the shared full header as the first row of its own scrolling group. */
     expect(noteboardPage).not.toContain("<TasksPageLayout");
-    expect(noteboardPage).toContain('from "../shell/PageHeader"');
-    expect(noteboardPage).toContain('variant="full"');
+    /* RE-POINTED (Corkboard v2): its header is CbHeader, the Contact list's navy panel restated */
+    expect(noteboardPage).toContain("<CbHeader");
     expect(noteboardPage).toContain("masthead={null}");
     expect(listPage).not.toContain("<TasksPageLayout");
     expect(listPage).toContain('from "../shell/PageHeader"');

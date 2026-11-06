@@ -1442,6 +1442,41 @@ describe('/users/{userId}/tasks', () => {
     );
   });
 
+  /* ⚠️ REVERSED BY CORKBOARD v2 (6 Nov, Nick's ruling): a note's link (agent, query or manuscript) can change after
+     it is made, so the three link fields are updatable. This case used to assert the opposite ("record scope is
+     create-only input"). */
+  it('Corkboard v2: an update may change or clear the link (queryId · agentId · manuscriptId)', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users', ALICE, 'tasks', 'task-1'), { ...validUserTask(ALICE), agentId: 'a-1' });
+    });
+    const db = aliceCtx().firestore();
+    await assertSucceeds(updateDoc(doc(db, 'users', ALICE, 'tasks', 'task-1'), { queryId: 'q-9', agentId: deleteField() }));
+    await assertSucceeds(updateDoc(doc(db, 'users', ALICE, 'tasks', 'task-1'), { manuscriptId: 'ms-2', queryId: deleteField() }));
+    await assertFails(updateDoc(doc(db, 'users', ALICE, 'tasks', 'task-1'), { agentId: 7 }));
+  });
+
+  /* CB14 — the five papers and pin to top, with the old three still valid */
+  it('Corkboard v2: accepts the five papers and the old three, refuses anything else', async () => {
+    const db = aliceCtx().firestore();
+    for (const colour of ['butter', 'blush', 'powder', 'sand', 'stone', 'yellow', 'pink', 'sage']) {
+      await assertSucceeds(setDoc(doc(db, 'users', ALICE, 'tasks', `t-${colour}`), { ...validUserTask(ALICE), id: `t-${colour}`, colour }));
+    }
+    await assertFails(setDoc(doc(db, 'users', ALICE, 'tasks', 't-green'), { ...validUserTask(ALICE), id: 't-green', colour: 'green' }));
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users', ALICE, 'tasks', 'task-1'), validUserTask(ALICE));
+    });
+    await assertSucceeds(updateDoc(doc(db, 'users', ALICE, 'tasks', 'task-1'), { colour: 'powder' }));
+    await assertFails(updateDoc(doc(db, 'users', ALICE, 'tasks', 'task-1'), { colour: 'chartreuse' }));
+  });
+
+  it('Corkboard v2: pinned is a bool, on create and on update', async () => {
+    const db = aliceCtx().firestore();
+    await assertSucceeds(setDoc(doc(db, 'users', ALICE, 'tasks', 't-pin'), { ...validUserTask(ALICE), id: 't-pin', pinned: true }));
+    await assertFails(setDoc(doc(db, 'users', ALICE, 'tasks', 't-pin2'), { ...validUserTask(ALICE), id: 't-pin2', pinned: 'yes' }));
+    await assertSucceeds(updateDoc(doc(db, 'users', ALICE, 'tasks', 't-pin'), { pinned: deleteField() }));
+    await assertSucceeds(updateDoc(doc(db, 'users', ALICE, 'tasks', 't-pin'), { pinned: true }));
+  });
+
   /**
    * ⚠️ WAS A KNOWN BUG — FIXED AND FLIPPED (6 Aug 2026).
    *

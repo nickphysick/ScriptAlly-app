@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "CB14",
+  "where": "five",
+  "ok": true,
+  "detail": "accepted butter, blush, powder, sand, stone"
+ },
+ {
+  "lock": "CB14",
+  "where": "old three",
+  "ok": false,
+  "detail": "accepted butter, blush, powder, sand, stone"
+ },
+ {
+  "lock": "CB14",
+  "where": "refused",
+  "ok": false,
+  "detail": "refused yellow, pink, sage, green"
+ },
+ {
+  "lock": "CB14",
+  "where": "pinned",
+  "ok": true,
+  "detail": "pinned accepted"
+ },
+ {
+  "lock": "CB14",
+  "where": "link",
+  "ok": true,
+  "detail": "a link change accepted"
+ }
+]
