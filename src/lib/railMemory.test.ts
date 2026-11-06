@@ -36,9 +36,22 @@ describe("railMemory — the last page per section (sidebar rail v1)", () => {
     const s = mem();
     s.setItem(RAIL_LAST_PAGE_KEY, JSON.stringify({ tasks: "calendar", materials: "m-pkg", manuscript: "m-ms", agents: "a-disc" }));
     expect(railPageFor(sec("tasks"), null, s)).toBe("/todo");
-    expect(railPageFor(sec("materials"), null, s)).toBe("/manuscripts");
+    expect(railPageFor(sec("materials"), null, s)).toBe("/materials/letters");
     noteRailPage({ section: "queries", child: "q-responses" }, s, NAV);
     expect(JSON.parse(s.m.get(RAIL_LAST_PAGE_KEY)!)).toEqual({ agents: "a-disc", queries: "q-responses" });
+  });
+  /* sidebar materials v1 (6 Nov): "materials" was Your book's id until today. A stored Your-book page under it is
+     dropped and Your book opens on Manuscripts; a stored Comps survives, because Comps is in Materials now. */
+  it("the 6 Nov regroup: an old Your-book entry under \"materials\" is dropped; a Comps entry stays", () => {
+    const s = mem();
+    s.setItem(RAIL_LAST_PAGE_KEY, JSON.stringify({ materials: "m-ver" }));
+    expect(railPageFor(sec("materials"), null, s)).toBe("/materials/letters");
+    expect(railPageFor(sec("book"), null, s)).toBe("/manuscripts");
+    noteRailPage({ section: "queries", child: "q-centre" }, s, NAV);
+    expect(JSON.parse(s.m.get(RAIL_LAST_PAGE_KEY)!)).toEqual({ queries: "q-centre" });
+    s.setItem(RAIL_LAST_PAGE_KEY, JSON.stringify({ materials: "m-comps" }));
+    noteRailPage({ section: "queries", child: "q-centre" }, s, NAV);
+    expect(railPageFor(sec("materials"), null, s)).toBe("/manuscripts/comps");
   });
   it("an off-nav route notes nothing", () => {
     const s = mem();

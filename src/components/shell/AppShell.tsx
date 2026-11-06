@@ -21,8 +21,8 @@ import { STAGE_REPLAY_EVENT } from "./BarSwitcher";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
-  ArrowLeftRight, Book, BookCopy, CalendarDays, Compass, LayoutGrid, Library, LineChart, ListChecks,
-  Send, Settings, StickyNote, Sun, Users,
+  ArrowLeftRight, Book, BookCopy, CalendarDays, Compass, FilePenLine, LayoutGrid, Library, LineChart, ListChecks,
+  Mail, Send, Settings, StickyNote, Sun, Users,
 } from "lucide-react";
 import { parchment } from "../../lib/designTokens";
 import { ShellTopBar } from "./ShellV2";
@@ -189,8 +189,10 @@ export const WORKSPACE_ICONS: Record<string, React.ReactNode> = {
   tasks: <ListChecks aria-hidden="true" />,
   queries: <Send aria-hidden="true" />,
   agents: <Users aria-hidden="true" />,
-  materials: <Book aria-hidden="true" />,
-  /* sidebar rail v1: "Materials" split, and the book and its comps are the MANUSCRIPT section */
+  /* sidebar materials v1 (6 Nov): "Your book" (id `book`) and "Materials" are two sections; the rail reads each
+     section's own `icon` key (library, mail), and these group keys stay for any reader that falls back to the id */
+  book: <Library aria-hidden="true" />,
+  materials: <Mail aria-hidden="true" />,
   manuscript: <Library aria-hidden="true" />,
   /* ACCOUNT joined the nav when Settings came up out of the foot (audit pack P5). BOTH keys are
      added — the group's and the row's — per the parallel-surface warning below; adding the
@@ -224,6 +226,9 @@ export const WORKSPACE_ICONS: Record<string, React.ReactNode> = {
      the second pair; this is the established vocabulary and the one the parity lock names. */
   library: <Library aria-hidden="true" />,
   books: <BookCopy aria-hidden="true" />,
+  /* sidebar materials v1 — the Materials section (Mail) and its Query letters row (FilePenLine) */
+  mail: <Mail aria-hidden="true" />,
+  letter: <FilePenLine aria-hidden="true" />,
   folder: <Book aria-hidden="true" />,
   /* Manuscripts v27 Part E — Versions: the mock's ⇆ */
   versions: <ArrowLeftRight aria-hidden="true" />,

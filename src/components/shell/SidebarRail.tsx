@@ -117,7 +117,8 @@ export const SidebarRail: React.FC<SidebarRailProps> = ({
     const on = sec.id === current;
     const open = on && multi;
     const single = !multi ? kids[0] : null;
-    const proHead = !!single?.pro && locked.has(single.pro);
+    /* the section head's tag: a Pro SECTION (Materials, 6 Nov), or a single-page section whose page is Pro */
+    const proHead = (!!sec.pro && locked.has(sec.pro)) || (!!single?.pro && locked.has(single.pro));
     const count = sec.id === "tasks" ? todoCount : 0;
     return (
       <div key={sec.id} className={`wsr-grp${multi ? " wsr-multi" : ""}${open ? " open" : ""}`} data-sec={sec.id}>
@@ -154,7 +155,8 @@ export const SidebarRail: React.FC<SidebarRailProps> = ({
                     onClick={() => onGo(ch.path)}
                   >
                     <span className="wsr-spl">{railPageLabel(ch)}</span>
-                    {ch.pro && locked.has(ch.pro) && <span className="wsr-spp" aria-label="Pro">Pro</span>}
+                    {/* sidebar materials v1: a Pro row in the card is a 5px outlined dot, top right; no text */}
+                    {ch.pro && locked.has(ch.pro) && <span className="wsr-spd" data-shell="pro" role="img" aria-label="Pro" />}
                   </button>
                 );
               })}

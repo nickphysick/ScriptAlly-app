@@ -74,8 +74,8 @@ import { registerFeedbackAnchor, setFeedbackPage } from "../../lib/feedbackStore
 import { SidebarRail } from "./SidebarRail";
 import { railTile } from "../../lib/railTile";
 import { noteRailPage } from "../../lib/railMemory";
-import { railCountAid } from "../../lib/railReviewAid";
-import { discoverUnlocked, packagesUnlocked, versionsUnlocked } from "../../lib/entitlements";
+import { navOpenAid, railCountAid } from "../../lib/railReviewAid";
+import { navLockedFor } from "../../lib/entitlements";
 
 /** The shared active-manuscript key. ⚠️ Packages, Comps and Manuscripts READ this — a selector
  *  that stops writing it breaks them silently, with no error and simply the wrong book. */
@@ -847,14 +847,12 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   const boardCount = sections.find((sx) => sx.id === "tasks")?.children?.find((c) => c.id === "list")?.count ?? 0;
   /* ⚠️ the review aid is gated HERE, at the call site, so a production build drops the module */
   const todoCount = import.meta.env.MODE !== "production" ? railCountAid(boardCount) : boardCount;
-  /* the Pro pages this account is NOT entitled to; empty while both are open to all */
-  const proLocked = useMemo(() => {
-    const out = new Set<string>();
-    if (!discoverUnlocked(currentUser)) out.add("discover");
-    if (!packagesUnlocked(currentUser)) out.add("packages");
-    if (!versionsUnlocked(currentUser)) out.add("versions");
-    return out;
-  }, [currentUser]);
+  /* the nav entitlements this account does NOT have (sidebar materials v1): empty while every switch is open to all.
+     ⚠️ the review aid is gated HERE, at the call site, so a production build drops it */
+  const proLocked = useMemo(
+    () => navLockedFor(currentUser, import.meta.env.MODE !== "production" ? navOpenAid() : undefined),
+    [currentUser],
+  );
   const name = currentUser?.name ?? "";
   const pageName = barPageName(sections, hit, pathname);
   useEffect(() => { setFeedbackPage(pageName?.name ?? null); }, [pageName?.name]);
@@ -1030,7 +1028,13 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                     the button from the nav — so WORKSPACE is no longer a heading doing nothing.
                     The rule is the label's own `::after`, so the markup stays one text node. */}
                 {/* Dashboard has no heading (25 Oct): one row on its own, as on the rail */}
-                {sec.noHeading ? null : <div className="ws-glabel">{sec.label}</div>}
+                {sec.noHeading ? null : (
+                  <div className="ws-glabel">
+                    {sec.label}
+                    {/* sidebar materials v1: a Pro SECTION's tag sits after its heading, and its rows carry none */}
+                    {sec.pro && proLocked.has(sec.pro) ? <span className="ws-qpro ws-gpro" data-shell="pro" aria-label="Pro">PRO</span> : null}
+                  </div>
+                )}
                 {(sec.children ?? []).map((ch) => {
                   const on = hit?.section === sec.id && hit?.child === ch.id;
                   /* ⚠️ A ROW WITH A LIVE COUNT ("needs you") GOES BOLD AND FULL-STRENGTH, and its count is a

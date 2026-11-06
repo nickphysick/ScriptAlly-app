@@ -48,13 +48,21 @@ test.describe("sidebar rail v1 — Phase 1, the nav model", () => {
     await expect(page.locator(".ws-ftn")).toHaveText("Manuscripts");
     const ms = await tabSiblings(page);
     console.log("[SR1.1] /manuscripts siblings", JSON.stringify(ms));
-    /* dev's nav (5 Nov ruling): Your book = Manuscripts · Versions · Comparable titles */
-    expect(ms).toEqual(["Versions", "Comparable titles"]);
+    /* sidebar materials v1 (6 Nov): Your book = Manuscripts · Versions; Materials = Query letters · Comps · Packages */
+    expect(ms).toEqual(["Versions"]);
+    await openRoute(page, "/manuscripts/versions", WIDE);
+    await expect(page.locator(".ws-ftn")).toHaveText("Versions");
+    expect(await tabSiblings(page)).toEqual(["Manuscripts"]);
+    await openRoute(page, "/materials/letters", WIDE);
+    await expect(page.locator(".ws-ftn")).toHaveText("Query letters");
+    const ql = await tabSiblings(page);
+    console.log("[SR1.1] /materials/letters siblings", JSON.stringify(ql));
+    expect(ql).toEqual(["Comparable titles", "Submission packages"]);
     await openRoute(page, "/queries/packages", WIDE);
     await expect(page.locator(".ws-ftn")).toHaveText("Submission packages");
     const pk = await tabSiblings(page);
     console.log("[SR1.1] /queries/packages siblings", JSON.stringify(pk));
-    expect(pk).toEqual(["Query Centre", "Responses", "Analytics"]);
+    expect(pk).toEqual(["Query letters", "Comparable titles"]);
   });
 
   test("SR1.2 the palette lists the nav's pages by the nav's names", async ({ page }) => {
@@ -62,7 +70,7 @@ test.describe("sidebar rail v1 — Phase 1, the nav model", () => {
     await page.keyboard.press(process.platform === "darwin" ? "Meta+k" : "Control+k");
     const input = page.locator('.sp-pal [role="combobox"]');
     await expect(input).toBeVisible();
-    for (const [term, title] of [["respon", "Responses"], ["analy", "Analytics"], ["submission", "Submission packages"], ["versions", "Versions"], ["comparable", "Comparable titles"]] as const) {
+    for (const [term, title] of [["respon", "Responses"], ["analy", "Analytics"], ["submission", "Submission packages"], ["versions", "Versions"], ["comparable", "Comparable titles"], ["letters", "Query letters"]] as const) {
       await input.fill(term);
       const titles = await page.locator(".sp-res .sp-t1").allTextContents();
       console.log(`[SR1.2] "${term}"`, JSON.stringify(titles.slice(0, 6)));
@@ -143,7 +151,7 @@ test.describe("sidebar rail v1 — Phase 2, the rail", () => {
     await breakCss(page, "label", ".wsr-spl { font-size: 15px !important }");
     await breakCss(page, "railw", ".ws-panel { width: 84px !important }");
     const all: Fit[] = [];
-    for (const route of ["/queries", "/agents", "/manuscripts/versions", "/todo", "/queries/packages", "/dashboard"]) {
+    for (const route of ["/queries", "/agents", "/manuscripts/versions", "/todo", "/materials/letters", "/dashboard"]) {
       await openRoute(page, route, WIDE);
       const w = await page.locator("#ws-sidebar").evaluate((e) => (e as HTMLElement).offsetWidth);
       expect(w, route).toBe(80);
@@ -155,7 +163,7 @@ test.describe("sidebar rail v1 — Phase 2, the rail", () => {
     }
     expect(all.length).toBeGreaterThan(20);
     const texts = new Set(all.map((f) => f.text));
-    for (const t of ["Dashboard", "Queries", "Agents", "Your book", "Tasks", "Query Centre", "Responses", "Analytics", "Packages", "Contact list", "Discover", "Manuscripts", "Versions", "Comps", "To-do list", "Corkboard", "Feedback"]) {
+    for (const t of ["Dashboard", "Queries", "Agents", "Your book", "Materials", "Tasks", "Query Centre", "Responses", "Analytics", "Contact list", "Discover", "Manuscripts", "Versions", "Query letters", "Comps", "Packages", "To-do list", "Corkboard", "Feedback"]) {
       expect([...texts], `label "${t}" was measured`).toContain(t);
     }
     const cut = all.filter((f) => f.lines !== 1 || !f.inside || f.overflow > 0);
@@ -521,23 +529,73 @@ test.describe("sidebar rail v1 — Phase 4, screenshots", () => {
   test.use({ deviceScaleFactor: 2 });
   test.skip(!SHOTS, "SR_SHOTS names the folder");
 
-  test("SR4 the five screenshots at 1512×982", async ({ page }) => {
+  test("SR4 the five screenshots at 1512×982 (sidebar materials v1)", async ({ page }) => {
+    test.skip(!SHOTS, "set SR_SHOTS to a folder to write the screenshots");
     const full = async (name: string) => { await page.waitForTimeout(600); await page.screenshot({ path: `${SHOTS}/${name}.png` }); };
     await onRail(page);
-    await openMoving(page, "/queries");
-    await full("1-rail-query-centre");
+    await openMoving(page, "/materials/letters");
+    await expect(page.locator('.wsr-grp[data-sec="materials"].open')).toHaveCount(1);
+    await full("1-rail-query-letters-materials-open");
     await openMoving(page, "/manuscripts/versions");
-    await full("2-rail-your-book-versions");
-    await openMoving(page, "/queries");
+    await expect(page.locator('.wsr-grp[data-sec="book"].open')).toHaveCount(1);
+    await full("2-rail-versions-your-book-open");
+    await openMoving(page, "/manuscripts/comps");
     await expandFromRail(page);
-    await full("3-floating-sidebar");
     await page.locator(".ws-pinbtn").click();
-    await page.locator('.ws-pin .ws-ni[aria-label="Contact list"]').click();
-    await expect(page).toHaveURL(/\/agents$/);
-    await full("4-pinned-contact-list");
-    await page.locator(".ws-pin .ws-acts .sb-toggle").click();
-    await openMoving(page, "/account/profile");
-    await full("5-settings-rail");
+    await expect.poll(() => mode(page)).toBe("pinned");
+    await full("3-pinned-comparable-titles");
+    /* a Free writer: the dev-only aid shuts every open-to-all switch, so the marks show */
+    await page.addInitScript(() => { (globalThis as unknown as { __SA_NAV_FREE?: boolean }).__SA_NAV_FREE = true; });
+    await openMoving(page, "/manuscripts/versions");
+    /* openMoving puts the shell back on the rail; pin it again so the shot shows the full sidebar's marks */
+    if ((await mode(page)) !== "pinned") { await expandFromRail(page); await page.locator(".ws-pinbtn").click(); }
+    await expect.poll(() => mode(page)).toBe("pinned");
+    await expect(page.locator('.ws-pin .ws-gpro')).toBeVisible();
+    await full("4-pinned-free-writer-marks");
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/queries");
+    await expect(page.locator('[data-pa="tabbar"]')).toBeVisible({ timeout: 30_000 });
+    await page.waitForTimeout(800);
+    await page.screenshot({ path: `${SHOTS}/5-phone-bar.png` });
+  });
+});
+
+/* ── Part D of sidebar materials v1: the two new cards ── */
+test.describe("sidebar materials v1 — the regrouped rail", () => {
+  test("SR6.1 Materials opens its card with three rows; Your book with two", async ({ page }) => {
+    await onRail(page);
+    await openRoute(page, "/materials/letters", WIDE);
+    const mat = page.locator('.wsr-grp[data-sec="materials"]');
+    await expect(mat).toHaveClass(/open/);
+    const rows = (await mat.locator(".wsr-sp").allTextContents()).map((t) => t.trim());
+    console.log("[SR6.1] Materials card", JSON.stringify(rows));
+    expect(rows).toEqual(["Query letters", "Comps", "Packages"]);
+    await expect(mat.locator('.wsr-sp.wsr-cur')).toHaveAttribute("data-go", "m-letters");
+    await expect(page.locator('.wsr-ni[data-sec="materials"] .wsr-lbl')).toHaveText("Materials");
+    /* the page itself: the light header's title and its one line */
+    await expect(page.locator('[data-ql="page"] h1')).toHaveText("Query letters");
+    await openRoute(page, "/manuscripts", WIDE);
+    const book = page.locator('.wsr-grp[data-sec="book"]');
+    await expect(book).toHaveClass(/open/);
+    const brows = (await book.locator(".wsr-sp").allTextContents()).map((t) => t.trim());
+    console.log("[SR6.1] Your book card", JSON.stringify(brows));
+    expect(brows).toEqual(["Manuscripts", "Versions"]);
+    /* the rail's section rows, in order */
+    const secs = (await page.locator(".wsr-grp .wsr-ni .wsr-lbl").allTextContents()).map((t) => t.trim());
+    expect(secs).toEqual(["Dashboard", "Queries", "Agents", "Your book", "Materials", "Tasks"]);
+  });
+  test("SR6.2 the full sidebar groups Materials under one heading with the full names", async ({ page }) => {
+    await startPinned(page);
+    await openRoute(page, "/materials/letters", WIDE);
+    const heads = (await page.locator(".ws-pin .ws-glabel").allTextContents()).map((t) => t.trim());
+    expect(heads).toEqual(["Queries", "Agents", "Your book", "Materials", "Tasks"]);
+    const names = await page.locator(".ws-pin .ws-ni").evaluateAll((els) => els.map((e) => (e.querySelector(".ws-lbl")?.textContent ?? "").trim()));
+    console.log("[SR6.2] full sidebar rows", JSON.stringify(names));
+    expect(names).toEqual(["Dashboard", "Queries", "Responses", "Analytics", "Contact list", "Discover", "Manuscripts", "Versions",
+      "Query letters", "Comparable titles", "Submission packages", "To-do list", "Corkboard"]);
+    await expect(page.locator('.ws-pin .ws-ni.on')).toHaveAttribute("aria-label", "Query letters");
+    /* a founding writer sees no Pro mark */
+    expect(await page.locator('[data-shell="pro"]').count()).toBe(0);
   });
 });
 
@@ -555,11 +613,13 @@ test.describe("sidebar rail v1 — the full sidebar's height", () => {
       const nb = nav.getBoundingClientRect();
       const cut = rows.filter((x) => { const b = x.getBoundingClientRect(); return b.top < nb.top - 0.5 || b.bottom > nb.bottom + 0.5; }).map((x) => x.getAttribute("aria-label"));
       const cs = card ? getComputedStyle(card) : null;
-      return { rows: rows.length, sh: nav.scrollHeight, ch: nav.clientHeight, cut, card: !!card && cs!.display !== "none" && card.getBoundingClientRect().height > 0,
+      return { heads: nav.querySelectorAll(".ws-glabel").length, rows: rows.length, sh: nav.scrollHeight, ch: nav.clientHeight, cut, card: !!card && cs!.display !== "none" && card.getBoundingClientRect().height > 0,
         cardBottom: card?.getBoundingClientRect().bottom ?? 0, vh: innerHeight, spare: nav.clientHeight - nav.scrollHeight };
     });
     console.log("[SR5]", JSON.stringify(r));
-    expect(r.rows).toBe(12);
+    /* sidebar materials v1 (6 Nov): Dashboard and twelve pages, under six groups */
+    expect(r.rows).toBe(13);
+    expect(r.heads, "five group headings").toBe(5);
     expect(r.card, "the full feedback card shows").toBe(true);
     expect(r.cut, "rows outside the nav's box").toEqual([]);
     expect(r.sh, "the nav does not scroll").toBeLessThanOrEqual(r.ch);
