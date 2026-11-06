@@ -102,16 +102,8 @@ describe("⚠️ the composer keeps what you have already written", () => {
     expect(new Set(all.map((d) => d.body)).size).toBe(1);
   });
 
-  it("one composer, several doors — the three paper squares and the empty state open the SAME one", () => {
-    /* two openers with two bodies is two surfaces for one action, and they drift */
-    const opens = [...page.matchAll(/openComposer\(/g)].length;
-    expect(opens).toBeGreaterThanOrEqual(2);
-    expect(page).toContain("const openComposer");
-    expect([...page.matchAll(/const openComposer\b/g)].length).toBe(1);
-    /* RE-POINTED (Corkboard v1): the ghost tile is retired — adding happens in the bar above the board
-       (baked decision 3) — so there is no tile for the composer to replace. */
-    expect(page).not.toMatch(/["\s`]nb-ghost["\s`]/);
-  });
+  /* RETIRED (Corkboard v2): "one composer, several doors" — v1's inline composer is replaced by the note pop-up
+     (Part E), whose doors are held there. Recorded in tests/e2e/RETIRED-corkboard-v2.md. */
 });
 
 describe("⚠️ the composer IS the editor — one component, two slots, never two hosts", () => {
@@ -128,26 +120,9 @@ describe("⚠️ the composer IS the editor — one component, two slots, never 
     expect(editCommit("Old words", "  Trimmed  ")).toBe("Trimmed");
   });
 
-  it("Edit routes into the composer; the bare-textarea editor is GONE, not shadowed", () => {
-    expect(page).toContain('if (item.id === "edit-task") openEditor(note);');
-    expect(page).toContain("const composerCard");
-    /* the retired pieces — bounded tokens, and the state that drove them */
-    expect(page).not.toMatch(/["\s`]nb-edit["\s`]/);
-    expect(page).not.toContain("setEditing");
-    expect(page).not.toContain("commitEdit");
-  });
+  /* RETIRED (Corkboard v2): "Edit routes into the composer" — v1's composerCard is gone. Recorded in tests/e2e/RETIRED-corkboard-v2.md. */
 
-  it("one composer node, mounted in exactly two places — the top slot and the note's slot", () => {
-    /* two MOUNTS of one closure, not two copies of the JSX — copies drift */
-    /* RE-POINTED (Corkboard v1): the two places are two ITEMS on the board built by one `composeItem` — the
-       first free space when pinning, the note's own key (so its own place) when editing. */
-    expect([...page.matchAll(/composerCard/g)].length).toBe(2);   // the const + the one item that mounts it
-    expect([...page.matchAll(/composeItem\(/g)].length).toBe(2);  // the top slot and the note's slot
-    expect(page).toContain("compose && !compose.id ? [composeItem(COMPOSE_KEY)] : []");
-    expect(page).toContain("n.id === compose?.id ? composeItem(n.id)");
-    /* and the commit button is the only fork */
-    expect(page).toContain('compose.id ? saveEdit() : pinNote()');
-  });
+  /* RETIRED (Corkboard v2): "one composer node, mounted in two places" — v1's board items. Recorded in tests/e2e/RETIRED-corkboard-v2.md. */
 
   it("the edit writes only what changed — and the untouched tag field cannot collapse a set", () => {
     const fn = page.slice(page.indexOf("const saveEdit"));

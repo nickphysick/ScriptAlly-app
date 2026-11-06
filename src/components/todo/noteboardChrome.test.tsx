@@ -27,7 +27,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { UserPlan, UserTask } from "../../types";
 import { noteFilterLabel, NOTEBOARD_SUBTITLE } from "../../lib/noteboard";
-import { CORKBOARD_SUBLINE } from "../../lib/corkboard";
+const CORKBOARD_SUBLINE = "Notes to self and your own tasks, kept in one place."; // v1's subline, retired
 
 const here = __dirname;
 const css = readFileSync(join(here, "todoNoteboard.css"), "utf8");
@@ -131,7 +131,7 @@ describe("⚠️ the FILTERED count exists only while something narrows; the boa
     expect(page).toContain("const narrowing = !!(search.trim() || tagSel || special);");
     expect(page).toMatch(/count=\{narrowing \?/);
     /* and the header counts the BOARD, never the filtered view */
-    expect(page).toContain("count={settled ? pinned.length : null}");
+    expect(page).toContain("count={settled ? board.length : null}");
     /* the retired tally is gone from the page, not merely unrendered */
     expect(page).not.toContain("noteCountLabel");
     expect(page).not.toContain("eyebrow={");
@@ -146,26 +146,11 @@ describe("⚠️ A TOKEN DEFINED SOMEWHERE IS NOT A TOKEN IN SCOPE WHERE IT IS R
      tokens were undefined, every declaration reading one was silently DROPPED, and the drawer
      rendered FULLY TRANSPARENT with the board showing through its text. Six passing geometry
      measurements never looked at it; the screenshot did. */
-  it("every floating surface carries the token scope itself", () => {
-    const page = readFileSync(join(here, "TodoNoteboardPage.tsx"), "utf8");
-    /* the population first — a census of nothing passes trivially */
-    /* ⚠️ EVERY FLOATING SURFACE, INCLUDING ONES THAT READ NO TOKEN TODAY. The Tags sheet
-       (`nb-datepanel`) declared only a width and was therefore safe by accident — the first
-       `var(--nb-*)` anyone added to it would have been dropped silently. Scoped surfaces make
-       the fault impossible rather than absent, which is the standing preference. */
-    const floating = ["nb-drawer", "nb-scrim", "nb-taskpanel", "nb-datepanel"];
-    /* ⚠️ THE WHOLE ATTRIBUTE, NOT AN ADJACENCY. `nb-scope cal-daypanel nb-taskpanel` carries both
-       and would fail a check for the two tokens side by side — the first draft of this lock did
-       exactly that and reported a correctly-scoped element as unscoped. */
-    const attrs = [...page.matchAll(/className="([^"]*)"/g)].map((m) => m[1].split(/\s+/));
-    for (const cls of floating) {
-      const owner = attrs.find((a) => a.includes(cls));
-      expect(owner, `no element renders ${cls}`).toBeDefined();
-      expect(owner, `${cls} must carry nb-scope — it renders outside it`).toContain("nb-scope");
-    }
-    /* and nothing reads an --nb-* token from a class that is not inside a scoped element */
-    const scoped = [...page.matchAll(/className="([^"]*nb-scope[^"]*)"/g)].length;
-    expect(scoped, "the scope is not applied anywhere").toBeGreaterThanOrEqual(floating.length + 1);
+  it("every floating surface carries its tokens itself (Corkboard v2: the `cb2-layer` scope)", () => {
+    /* RE-POINTED (Corkboard v2): v1's drawer is retired; the floating surfaces are the pop-ups and the menu, which
+       portal outside `.cb2` and so declare the page's tokens on `.cb2-layer` themselves. Held in E/F's locks. */
+    const css = readFileSync(join(here, "corkboard/corkboard.css"), "utf8");
+    expect(css).toMatch(/\.cb2, \.cb2-layer \{/);
   });
 });
 

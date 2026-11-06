@@ -183,7 +183,10 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
     /* ⚠️ THE EXAMPLES LEFT THE BOARD (workflow run, Phase 1) — "What writers keep here" is the
        DRAWER's heading now, and the drawer mounts only when open, so a render smoke cannot see
        it. The teaching state on the page is the workflow. */
-    expect(html).toContain("Your board is empty");
+    /* RE-POINTED (Corkboard v2): the empty header is v13's ("Pick a colour to start"); the examples beneath it are
+       Part G's and are held by corkboardV2Page.test.tsx */
+    expect(html).toContain("Jot down anything worth remembering while you query.");
+    expect(html).toContain("Pick a colour to start");
     expect(html).not.toContain("<aside");             // the contract's optional sidebar, absent
   });
 
@@ -191,9 +194,9 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
     seed.userTasks = [{ id: "n1", userId: "u1", text: "Open with the flood", detail: "Chapter one drags.", done: false, createdAt: "2026-08-01T09:00:00Z", updatedAt: "" }];
     const html = render(<TodoNoteboardPage onNavigate={() => {}} />);
     expect(html).toContain("Open with the flood");
-    expect(html).toContain("nb-board");  // renamed from nb-grid in the Noteboard rebuild
-    expect(html).toContain("Pinned 1 Aug"); // the pin date (the Corkboard's wording)
-    expect(html).toContain('data-cb="board"');
+    /* RE-POINTED (Corkboard v2): the wall, and "Added {d Mon}" (v13's wording) */
+    expect(html).toContain('data-cb2="wall"');
+    expect(html).toContain("Added 1 Aug");
   });
 });
 

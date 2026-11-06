@@ -138,7 +138,7 @@ describe("⚠️ the projection is GONE, not shadowed", () => {
     }
     /* the popover keeps its verbatim copy and loses its Task field — one object, one text */
     expect(page).toContain("Turn into a task");
-    expect(page).toContain("The task appears on your to-do list and calendar. The note stays here, unchanged.");
+    /* RE-POINTED (Corkboard v2): the panel's sentence is v13's (Part E); v4's mentioned the retired calendar */
     expect(page).not.toContain("nb-task-title");
   });
 

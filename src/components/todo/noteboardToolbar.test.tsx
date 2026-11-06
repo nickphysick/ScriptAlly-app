@@ -103,16 +103,13 @@ describe("⚠️ search reads the note's words, whatever case they are in", () =
     expect(render()).toContain("Mushens closed until October");
   });
 
-  it("⚠️ filtering FADES, it does not hide — every pinned note stays mounted (Corkboard v1)", () => {
-    /* RE-POINTED: "Nothing matches that search." belonged to a board that removed non-matches. Now a note
-       outside the search or the chip stays where it is at 22%, and the "n of N notes" label says how many
-       match — so there is no empty board for a sentence to explain. */
+  it("⚠️ filtering FADES, it does not hide — every note stays mounted (Corkboard v2)", () => {
+    /* RE-POINTED: the wall draws the whole board and dims what does not match (`cb2-dim`, 22%) */
     expect(page).not.toContain("Nothing matches that search.");
-    expect(page).toContain("pinned.map((n) =>");
-    expect(page, "the board draws the filtered list").not.toMatch(/\{notes\.map\(/);
-    expect(page).toContain("dim: narrowing && !matching.has(n.id),");
-    expect(readFileSync(join(here, "CorkBoard.tsx"), "utf8")).toContain('it.dim ? " cb-dim" : ""');
-    expect(css).toMatch(/\.cb-dim\s*\{\s*opacity:\s*0\.22;?\s*\}/);
+    expect(page).toContain("notes={board.map((n) => wallNote(n, true))}");
+    expect(page).toContain("dim: dimmable && narrowing && !matching.has(n.id),");
+    expect(readFileSync(join(here, "corkboard/CbWall.tsx"), "utf8")).toContain('n.dim ? " cb2-dim" : ""');
+    expect(readFileSync(join(here, "corkboard/corkboard.css"), "utf8")).toMatch(/\.cb2-dim\s*\{\s*opacity:\s*\.22;?\s*\}/);
   });
 });
 

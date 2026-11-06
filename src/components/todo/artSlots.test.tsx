@@ -148,11 +148,9 @@ describe("⚠️ WHERE ART DOES NOT GO — the two rejections, enforced", () => 
        no slot inside a card, on the board the app actually draws. */
     const taskBoard = readFileSync(join(here, "TaskBoard.tsx"), "utf8");
     expect(taskBoard, "the live board grew art inside a card").not.toContain("ArtSlot");
-    /* RE-POINTED (Corkboard v1): a note is drawn by `noteInner` on an item of `CorkBoard`, so the claim reads
-       both — the note's own content, and the board component that pins it. */
-    const noteCard = sliceBetween(noteboard, "const noteInner = (n: UserTask) => (", "const composeItem");
-    expect(noteCard).not.toContain("ArtSlot");
-    expect(readFileSync(join(here, "CorkBoard.tsx"), "utf8"), "the board grew art inside an item").not.toContain("ArtSlot");
+    /* RE-POINTED (Corkboard v2): a note is drawn by CbPostIt on CbWall, so the claim reads both. */
+    for (const f of ["corkboard/CbPostIt.tsx", "corkboard/CbWall.tsx"]) expect(readFileSync(join(here, f), "utf8"), f).not.toContain("ArtSlot");
+    expect(noteboard).not.toContain("<ArtSlot");
     /* the Calendar page's half retired with the page (29 Oct); its board lives on in the shared timeline */
     for (const f of ["TimelineBoard.tsx", "boardParts.tsx"]) {
       expect(readFileSync(join(here, "..", "shared", "timeline", f), "utf8"), f).not.toContain("ArtSlot");

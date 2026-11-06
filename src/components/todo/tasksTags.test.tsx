@@ -143,7 +143,9 @@ describe("⚠️ tag filters combine ADDITIVELY with FILTERS (Urgent AND #synops
     expect(nb).not.toMatch(/["\s`]nb-tagwrap["\s`]/);   // the dropdown it replaced, bounded token
     /* both surfaces name a tag from the user's own defs, never from a raw id */
     expect(nb).toContain("currentUser?.tags ?? []");
-    expect(nb).toContain("TAG_PALETTE[def.colour]");
+    /* RE-POINTED (Corkboard v2): a post-it's tag is the ref's quiet pill, named from the defs (`tagLabel`); the
+       palette colours the To-do surfaces only */
+    expect(nb).toContain("userTags.find((t) => t.id === id)?.label");
     expect(side).toContain("TAG_PALETTE[t.colour]");
     /* and the free-text composer mints through the app's minter rather than an untracked string */
     expect(nb).toContain("newTag(label, userTags)");

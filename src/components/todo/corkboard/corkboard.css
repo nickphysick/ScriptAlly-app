@@ -152,3 +152,85 @@
   .cb2-sep, .cb2-grow { display: none; }
   .cb2-chips { flex: 1 1 100%; order: 3; }
 }
+
+/* ═════════ C · the wall and the post-it (ref `.wall`, `.p-sticky`) ═════════ */
+.cb2-wallwrap { padding: 24px 0 0; }
+.cb2-wall { display: grid; grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: 24px; }
+.cb2-note { position: relative; cursor: pointer; outline: none; transition: transform .18s ease, opacity .2s ease; }
+.cb2-note:hover, .cb2-note:focus-visible { transform: translateY(-2px); }
+.cb2-note:focus-visible .cb2-paper { outline: 2px solid var(--cb2-navy); outline-offset: 3px; }
+.cb2-dim { opacity: .22; }
+.cb2-fresh { animation: cb2-land .45s ease; }
+@keyframes cb2-land { 0% { opacity: 0; transform: translateY(-10px); } 100% { opacity: 1; transform: none; } }
+.cb2-note[draggable="true"] { cursor: grab; }
+.cb2-lift { opacity: .35; }
+.cb2-lift .cb2-more { opacity: 0 !important; }
+body.cb2-dragging .cb2-note:hover { transform: none; }
+.cb2-ins-b::before, .cb2-ins-a::after { content: ""; position: absolute; top: 6px; bottom: 6px; width: 3px; border-radius: 2px; background: var(--cb2-navy); z-index: 4; }
+.cb2-ins-b::before { left: -14px; }
+.cb2-ins-a::after { right: -14px; }
+
+.cb2-paper {
+  position: relative; box-sizing: border-box; height: 100%; min-height: 232px; display: flex; flex-direction: column;
+  padding: 26px 22px 18px; border-radius: 2px; background: var(--c);
+  box-shadow: 0 1px 1px rgba(28, 19, 15, .05), 0 12px 18px -14px rgba(28, 19, 15, .45);
+}
+.cb2-paper::before { content: ""; position: absolute; inset: 0 0 auto; height: 22px; background: rgba(28, 19, 15, .035); pointer-events: none; }
+.cb2-paper::after {
+  content: ""; position: absolute; right: 0; bottom: 0; width: 26px; height: 26px; pointer-events: none;
+  background: linear-gradient(315deg, var(--cb2-page) 50%, rgba(28, 19, 15, .10) 50%, rgba(255, 255, 255, .35) 75%);
+}
+.cb2-note:hover .cb2-paper { box-shadow: 0 1px 1px rgba(28, 19, 15, .05), 0 18px 22px -14px rgba(28, 19, 15, .45); }
+/* the words: Special Elite, 17/1.42 (the ref's chosen face, its `FONTS[2]`) */
+.cb2 .cb2-body, .cb2-layer .cb2-body {
+  font: 400 17px/1.42 var(--cb2-type) !important; color: var(--cb2-ink) !important;
+  white-space: pre-wrap; overflow-wrap: anywhere; flex: 0 1 auto;
+}
+.cb2-body a { color: var(--cb2-link); }
+.cb2-body--clamp { display: -webkit-box; -webkit-line-clamp: 8; -webkit-box-orient: vertical; overflow: hidden; }
+.cb2 .cb2-readall { align-self: flex-start; margin-top: 6px; padding: 0; border: 0; background: none; cursor: pointer;
+  font: italic 400 13.5px/1.3 var(--cb2-serif) !important; color: var(--cb2-link) !important; }
+.cb2-readall[hidden] { display: none; }
+.cb2-lchip {
+  display: inline-flex; align-items: center; gap: 7px; max-width: 100%; margin-top: 12px; padding: 3px 10px 3px 3px; border-radius: 14px;
+  align-self: flex-start; background: rgba(255, 255, 255, .65); box-shadow: inset 0 0 0 1px rgba(28, 19, 15, .1); cursor: pointer;
+}
+.cb2-lchip:hover { background: #fff; }
+.cb2 .cb2-lchip i, .cb2-layer .cb2-lchip i {
+  width: 20px; height: 20px; border-radius: 10px; background: var(--cb2-you); color: #fff; display: grid; place-items: center; flex-shrink: 0;
+  font: 500 8px/1 var(--cb2-mono) !important; font-style: normal !important;
+}
+.cb2 .cb2-lchip i.cb2-ms, .cb2-layer .cb2-lchip i.cb2-ms { background: var(--cb2-navy); }
+.cb2 .cb2-lchip span, .cb2-layer .cb2-lchip span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font: 400 13.5px/1.3 var(--cb2-serif) !important; color: var(--cb2-ink) !important; }
+.cb2-nfoot { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin-top: auto; padding-top: 14px; }
+.cb2 .cb2-tag, .cb2-layer .cb2-tag { font: 400 13px/1.3 var(--cb2-serif) !important; padding: 2px 9px; border-radius: 10px; background: rgba(28, 19, 15, .06); color: var(--cb2-i72) !important; }
+.cb2 .cb2-when, .cb2-layer .cb2-when { font: italic 400 13.5px/1.3 var(--cb2-serif) !important; color: var(--cb2-i55) !important; }
+.cb2 .cb2-todo, .cb2-layer .cb2-todo { display: flex; align-items: center; gap: 6px; width: 100%; margin-top: 2px; font: 400 13.5px/1.3 var(--cb2-serif) !important; color: var(--cb2-i72) !important; }
+.cb2-todo svg { width: 13px; height: 13px; stroke: var(--cb2-navy); flex-shrink: 0; }
+.cb2 .cb2-pintag, .cb2-layer .cb2-pintag {
+  display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px 2px 7px; border-radius: 10px; background: var(--cb2-navy);
+  font: 400 13px/1.3 var(--cb2-serif) !important; color: var(--cb2-cream) !important;
+}
+.cb2-pintag svg { width: 12px; height: 12px; stroke: var(--cb2-cream); }
+.cb2-more {
+  position: absolute; top: 8px; right: 8px; z-index: 3; width: 30px; height: 30px; border: 0; border-radius: 15px; cursor: pointer;
+  display: grid; place-items: center; background: rgba(255, 255, 255, .75); box-shadow: 0 0 0 1px var(--cb2-i14); color: var(--cb2-ink);
+  opacity: 0; transition: opacity .15s;
+}
+.cb2-more svg { width: 15px; height: 15px; }
+.cb2-note:hover .cb2-more, .cb2-note:focus-within .cb2-more, .cb2-more[aria-expanded="true"] { opacity: 1; }
+@media (hover: none) { .cb2-more { opacity: 1; } }
+
+.cb2-nomatch { padding: 60px 20px; text-align: center; }
+.cb2 .cb2-nomatch h3 { margin: 0; font: 400 22px/1.3 var(--cb2-type) !important; color: var(--cb2-ink) !important; }
+.cb2 .cb2-nomatch p { margin: 8px 0 16px; font: 400 16px/1.45 var(--cb2-serif) !important; color: var(--cb2-i72) !important; }
+.cb2-btn {
+  height: 38px; padding: 0 16px; border: 0; border-radius: 10px; cursor: pointer; background: #fff; color: var(--cb2-ink);
+  box-shadow: 0 0 0 1px var(--cb2-i14), 0 4px 10px -6px rgba(28, 19, 15, .3); font: 400 14.5px/1 var(--cb2-type);
+}
+.cb2-btn:hover { box-shadow: 0 0 0 1px var(--cb2-i30), 0 4px 10px -6px rgba(28, 19, 15, .3); }
+.cb2-btn--navy { background: var(--cb2-navy); color: var(--cb2-cream); box-shadow: none; }
+.cb2-btn--navy:hover { background: var(--cb2-ink); }
+.cb2-btn:disabled { opacity: .45; cursor: default; }
+.cb2-v1compose { margin-top: 18px; }
+@media (max-width: 767.98px) { .cb2-wall { grid-template-columns: minmax(0, 1fr); } }

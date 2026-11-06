@@ -91,30 +91,9 @@ describe("⚠️ REVERSED: using one CREATES a note — the draft door is retire
     expect(new Set(NOTE_EXAMPLES.flatMap((g) => g.items.map((i) => i.body))).size).toBe(9);
   });
 
-  it("the drawer's action WRITES now, and the old link is gone rather than relabelled", () => {
-    expect(page).toContain("keepFromDrawer");
-    expect(page).toContain("Keep this");
-    expect(page).not.toContain("Use as a starting point");
-    expect(page).not.toContain("draftFromExample");
-    /* the write is the normal create path, and the drawer closes behind it */
-    const fn = page.slice(page.indexOf("const keepFromDrawer"));
-    expect(page.indexOf("const keepFromDrawer")).toBeGreaterThan(-1);
-    const handler = fn.slice(0, fn.indexOf("\n  };"));
-    expect(handler).toContain("addUserTask(");
-    expect(handler).toContain("setExamples(false)");
-  });
+  /* RETIRED (Corkboard v2): "the drawer's action WRITES now" — the drawer is retired; Keep this lives on the empty
+     page (Part G) and its write is held by lock CB11. Recorded in tests/e2e/RETIRED-corkboard-v2.md. */
 });
 
-describe("⚠️ the drawer is a sheet with a scrim, and it comes from the right", () => {
-  it("the sheet, its scrim and its close are all present and dismissible", () => {
-    for (const bit of ["nb-drawer", "nb-scrim", "What writers keep here"]) {
-      expect(page, bit).toContain(bit);
-    }
-    expect(css).toMatch(/\.nb-drawer\s*\{[^}]*position:\s*fixed/);
-    expect(css).toMatch(/\.nb-drawer\s*\{[^}]*right:\s*0/);
-    /* the scrim dismisses, and so does Escape — a sheet with one way out is a trap on a page
-       whose whole promise is that nothing is final */
-    expect(page).toContain("setExamples(false)");
-    expect(page).toMatch(/key === "Escape"/);
-  });
-});
+  /* RETIRED (Corkboard v2): "the sheet, its scrim and its close" — the examples drawer is retired. Recorded in tests/e2e/RETIRED-corkboard-v2.md. */
+
