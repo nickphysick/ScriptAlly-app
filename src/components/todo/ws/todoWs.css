@@ -545,3 +545,6 @@
 /* v51: the Filters menu's way in to tag management */
 .tws-menu .tws-mlink { display: block; margin: 12px 0 0; padding: 10px 0 0; width: 100%; border: 0; border-top: 1px solid var(--tw-hair); background: none; text-align: left; font: 600 14px var(--tw-serif); color: var(--tw-navy); cursor: pointer; }
 .tws-menu .tws-mlink:hover { text-decoration: underline; }
+/* v51.1 — the preview is read-only: the query card's footer (its action, More, the doors, Delete) and the stand card's
+   links ("Set a send-by date" …) are not drawn in it; they work as normal in the real card the frame opens */
+.tws-pvz [data-qcv="open-foot"], .tws-pvz .qsc-links, .tws-pvz .qsc-link { display: none !important; }

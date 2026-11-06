@@ -89,14 +89,31 @@ describe("the desktop To-do is the workspace, and the tray is gone", () => {
   });
 });
 
-describe("the To do tab counts what the sidebar badge counts", () => {
-  it("both read boardFigures(cols).cards off assembleBoardColumns, and the tab renders that figure", () => {
-    const strip = (x: string) => x.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
-    const ws = strip(readFileSync(join(__dirname, "TodoWorkspace.tsx"), "utf8"));
+/* ⚠️ RULE CHANGED BY NICK (v51.1, 6 Nov): the tab no longer shows the badge's figure. The To do tab, the desk's "n/m" and
+   the group headings all count the tray's rows; the sidebar badge keeps the "needs you" count and says so. */
+describe("one count on the page, and the badge says what it counts", () => {
+  const strip = (x: string) => x.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+  const ws = () => strip(readFileSync(join(__dirname, "TodoWorkspace.tsx"), "utf8"));
+  it("the tab and the n/m both count `seq`, the rows of every group", () => {
+    const w = ws();
+    expect(w).toContain("const seq = useMemo(() => sections.flatMap((s) => s.tasks), [sections]);");
+    expect(w).toMatch(/To do <b data-tws="todo-count">\{seq\.length\}<\/b>/);
+    expect(w).toMatch(/<b>\{seqPos \+ 1\}<\/b>\/\{seq\.length\}/);
+    expect(w, "the tab no longer reads the board's card count").not.toContain("boardFigures(");
+  });
+  it("the sidebar badges keep the needs-you count, with the tooltip \"{n} need you now\"", () => {
+    const rail = strip(readFileSync(join(__dirname, "..", "..", "shell", "SidebarRail.tsx"), "utf8"));
     const side = strip(readFileSync(join(__dirname, "..", "..", "shell", "ShellSidebar.tsx"), "utf8"));
     expect(side).toContain("return boardFigures(cols).cards;");
-    expect(ws).toContain("const todoCount = useMemo(() => boardFigures(cols).cards, [cols]);");
-    expect(ws).toMatch(/To do <b data-tws="todo-count">\{todoCount\}<\/b>/);
-    expect(ws, "the tab never counts the tray's rows").not.toMatch(/To do <b[^>]*>\{all\.length\}/);
+    expect(rail).toContain("title={`${count} need you now`}");
+  });
+});
+
+describe("the card preview is read-only", () => {
+  it("the previewed card is inert, and the query card's footer and links are not drawn in it", () => {
+    const pv = readFileSync(join(__dirname, "WsPreview.tsx"), "utf8");
+    expect(pv).toMatch(/className="tws-pvz" data-tws="preview-card" inert /);
+    const css = readFileSync(join(__dirname, "todoWs.css"), "utf8");
+    expect(css).toContain('.tws-pvz [data-qcv="open-foot"], .tws-pvz .qsc-links, .tws-pvz .qsc-link { display: none !important; }');
   });
 });

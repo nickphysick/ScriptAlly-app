@@ -19,7 +19,7 @@ import { createPortal } from "react-dom";
 import { useLocation, useNavigate } from "react-router-dom";
 import { WorkspacePageGrid } from "../../shell/WorkspacePageGrid";
 import { useScriptAllyDb } from "../../../lib/db";
-import { assembleBoardColumns, boardFigures } from "../../../lib/todoColumns";
+import { assembleBoardColumns } from "../../../lib/todoColumns";
 import { localYMD } from "../../../lib/shellSidebar";
 import type { BoardCard } from "../../../lib/todoBoard";
 import { SWEEP_NEED, groupFor, trayItem, type TrayDb, type TrayItem } from "../../../lib/todoTray";
@@ -51,6 +51,8 @@ import { PreviewAgentCard, PreviewQueryCard, ScaledCard, useQueryLog } from "./W
 import { DismissPop, SnoozePop, type DismissChoice, type SnoozeLimit } from "./WsPops";
 import { OwnEmptySide, WsOwnTask } from "./WsOwnTask";
 import { StatusDot } from "../../StatusDot";
+import { queriesMissingMaterials } from "../../../lib/queryMaterialsGap";
+import { agentPrimary } from "../../../lib/agentDisplay";
 import { AnchoredPanel } from "../AnchoredPanel";
 import TagsPane from "../TagsSheet";
 import "./todoWs.css";
@@ -93,16 +95,17 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, now, today: localYMD(now), mutedTaskRules: currentUser?.mutedTaskRules,
   }), [tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, now, currentUser?.mutedTaskRules]);
   const live: BoardCard[] = useMemo(() => [...cols.todo, ...cols.today], [cols]);
-  /* ⚠️ THE To do TAB'S NUMBER IS THE SIDEBAR BADGE'S (ShellSidebar: boardFigures(cols).cards over the same board call).
-     The tray itself draws a housekeeping sweep as one row per agent, so the rows can outnumber it; the Housekeeping
-     heading counts its own rows. */
-  const todoCount = useMemo(() => boardFigures(cols).cards, [cols]);
+
   const trayDb: TrayDb = useMemo(() => ({ queries, agents, manuscripts, userTasks, activities, packages, taskFlags, hkGroups }),
     [queries, agents, manuscripts, userTasks, activities, packages, taskFlags, hkGroups]);
   const items = useMemo(() => live.map((c) => trayItem(c, trayDb, now)), [live, trayDb, now]);
   const sweepNeed = useCallback((i: TrayItem) => (i.sweep ? SWEEP_NEED[(i.card as BoardCard & { sweepRule?: string }).sweepRule ?? ""] ?? null : null), []);
   const memberIds = useCallback((i: TrayItem) => (groupFor(i.card, trayDb)?.members ?? []).map((m) => m.agentId).filter((x): x is string => !!x), [trayDb]);
-  const all = useMemo(() => wsTasks(items, agents, sweepNeed, memberIds, now), [items, agents, sweepNeed, memberIds, now]);
+  /* v51.1 — the materials bulk card ("12 queries have no record of what you sent") is one row per query, each naming its
+     agent; its queries are the board's own (queriesMissingMaterials, the same call db.tsx makes to raise the card) */
+  const gaps = useMemo(() => queriesMissingMaterials({ queries, activities, agents, manuscripts, displayName: agentPrimary }), [queries, activities, agents, manuscripts]);
+  const gapMembers = useCallback((i: TrayItem) => (i.card.taskType === "materials_unrecorded_bulk" ? gaps.map((g) => ({ queryId: g.queryId, agentId: g.agentId })) : []), [gaps]);
+  const all = useMemo(() => wsTasks(items, agents, sweepNeed, memberIds, now, gapMembers, queries), [items, agents, sweepNeed, memberIds, now, gapMembers, queries]);
   /** the card a task's flag sits on: a sweep member's own card */
   const cardOf = useCallback((t: WsTask): BoardCard => {
     if (t.item.sweep && t.agent) return groupFor(t.item.card, trayDb)?.members.find((m) => m.agentId === t.agent!.id)?.card ?? t.item.card;
@@ -121,6 +124,9 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   const visible = useMemo(() => all.filter((t) => passes(t, filters)), [all, filters]);
   const sections = useMemo(() => wsSections(visible, grouping), [visible, grouping]);
   const order = useMemo(() => sections.flatMap((s) => (shut.has(s.id) ? [] : s.tasks)), [sections, shut]);
+  /* ⚠️ ONE COUNT (v51.1): the To do tab, the desk's "n/m" and the group headings all count the rows the tray holds —
+     every group, Housekeeping's one-row-per-agent included, a collapsed group too. ‹ › still step only the open groups. */
+  const seq = useMemo(() => sections.flatMap((s) => s.tasks), [sections]);
   const findRef = useRef<HTMLInputElement>(null);
   useEscapeLayer(!!menu, () => setMenu(null), ESC_LEVEL.page);
 
@@ -567,7 +573,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     }
     const t = sel;
     const chip = dueChip(t);
-    const pos = order.findIndex((x) => x.key === t.key);
+    const seqPos = seq.findIndex((x) => x.key === t.key);
     const band = t.group === "wait" ? "wait" : t.group;
     const meta = t.kind === "own" ? "Your task" : [t.agentName, t.agency && t.agency !== t.agentName ? t.agency : ""].filter(Boolean).join(" · ");
     const own = t.kind === "own" && t.userTask;
@@ -717,7 +723,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
           {meta ? <span className="tws-m">{meta}</span> : null}
           <span className="tws-sp" />
           {chip ? <span className="tws-dchip" data-late={chip.late ? "" : undefined}><b>{chip.b}</b>{chip.s ? ` ${chip.s}` : ""}</span> : null}
-          {pos >= 0 ? <span className="tws-pos"><b>{pos + 1}</b>/{order.length}</span> : null}
+          {seqPos >= 0 ? <span className="tws-pos" data-tws="pos"><b>{seqPos + 1}</b>/{seq.length}</span> : null}
           <button type="button" className="tws-wb" aria-label="Previous task (K)" title="Previous (K)" onClick={() => move(-1)}>‹</button>
           <button type="button" className="tws-wb" aria-label="Next task (J)" title="Next (J)" onClick={() => move(1)}>›</button>
         </div>
@@ -756,7 +762,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
             <aside className="tws-tray" data-tws="tray" aria-label="Your tasks">
               <div className="tws-th">
                 <div className="tws-seg" role="group" aria-label="Show">
-                  <button type="button" aria-pressed={tab === "todo"} onClick={() => setTab("todo")}>To do <b data-tws="todo-count">{todoCount}</b></button>
+                  <button type="button" aria-pressed={tab === "todo"} onClick={() => setTab("todo")}>To do <b data-tws="todo-count">{seq.length}</b></button>
                   <button type="button" aria-pressed={tab === "snoozed"} onClick={() => setTab("snoozed")}>Snoozed <b>{snoozed.length}</b></button>
                   <button type="button" aria-pressed={tab === "done"} onClick={() => setTab("done")}>Done <b>{done.length + dismissed.length}</b></button>
                 </div>

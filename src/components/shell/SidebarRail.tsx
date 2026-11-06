@@ -133,7 +133,8 @@ export const SidebarRail: React.FC<SidebarRailProps> = ({
         >
           <span className="wsr-ic">{icons[sec.icon ?? sec.id]}</span>
           <span className="wsr-lbl">{railSectionLabel(sec)}</span>
-          {count > 0 && <span className="wsr-ct" data-shell="count" aria-label={`${count} to do`}>{railCount(count)}</span>}
+          {/* v51.1 — the badge is the "needs you" count (boardFigures' cards), not the To-do list's rows: its tooltip says so */}
+          {count > 0 && <span className="wsr-ct" data-shell="count" aria-label={`${count} need you now`} title={`${count} need you now`}>{railCount(count)}</span>}
           {proHead && <span className="wsr-pro" aria-label="Pro">Pro</span>}
         </button>
         {multi && (

@@ -200,7 +200,10 @@ export const ScaledCard: React.FC<{ kind: "query" | "agent"; label: string; onOp
   return (
     <div ref={slot} className="tws-pvslot" role="button" tabIndex={0} aria-label={label} data-tws="preview" data-kind={kind}
       onClick={onOpen} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(); } }}>
-      <div className="tws-pvz" style={{ zoom: z, width: TRUE_W(), height: h || undefined } as React.CSSProperties}>
+      {/* ⚠️ READ-ONLY (v51.1): the card inside is a picture of the real one. `inert` takes every button and link in it out
+          of clicks and focus; the query card's footer action and the stand card's links are hidden as well (todoWs.css),
+          so nothing in the preview looks like it can be pressed. A click anywhere is the frame's: it opens the real card. */}
+      <div className="tws-pvz" data-tws="preview-card" inert style={{ zoom: z, width: TRUE_W(), height: h || undefined } as React.CSSProperties}>
         <aside className={`spanel tws-pvpanel ${kind === "query" ? "qsp" : "qsp apn"}`}>
           <div className="spanel-own">{children}</div>
         </aside>

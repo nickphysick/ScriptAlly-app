@@ -1061,7 +1061,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                       <span className="ws-lbl">{sidebarLabel(ch)}</span>
                       {/* sidebar rail v1: the PRO tag is DORMANT — drawn only for an account not entitled to the page */}
                       {ch.pro && proLocked.has(ch.pro) ? <span className="ws-qpro" data-shell="pro" aria-label="Pro">PRO</span> : null}
-                      {att && <span className="ws-ct" data-shell="count" aria-label={`${ch.count} to do`}>{inkCount(ch.count!)}</span>}
+                      {att && <span className="ws-ct" data-shell="count" aria-label={`${ch.count} need you now`} title={`${ch.count} need you now`}>{inkCount(ch.count!)}</span>}
                     </button>
                   );
                 })}
