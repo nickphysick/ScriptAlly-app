@@ -118,6 +118,19 @@ describe("/materials/letters renders", () => {
     expect(t).toContain("Early days: only 1 sent");
     expect(t).not.toContain("Once a second letter goes out");
   });
+  it("empty: the same header with no letters, the first-letter card and the explainer; no grid, no band", () => {
+    state.data = { ...base(), manuscripts: [MS()], versions: [], queries: [Q("q1", QueryStatus.QUERIED)] };
+    const h = render();
+    const t = text(h);
+    expect(h).toContain('data-state="empty"');
+    expect(t).toContain("No query letters yet");
+    expect(t).toContain("+ New letter");
+    expect(t).toContain("Write your first letter");
+    expect(t).toContain("Pick it when you log a query.");
+    expect(h).not.toContain('data-ql="grid"');
+    expect(h).not.toContain('data-ql="in-use"');
+    expect(h).not.toContain('id="ql-landing"');
+  });
   it("the route is registered with the router and the shell", () => {
     expect([...WORKSPACE_PATHS]).toContain("/materials/letters");
     expect([...WORKSPACE_SHELL_PATHS]).toContain("/materials/letters");

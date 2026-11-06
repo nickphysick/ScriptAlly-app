@@ -118,6 +118,10 @@ export const LetterDrawer: React.FC<{
     } finally { busy.current = false; }
   };
 
+  /* Part D — the first letter's note, kept on its view until the drawer closes or moves to another letter */
+  const [firstNote, setFirstNote] = useState<{ id: string; n: number } | null>(null);
+  useEffect(() => { if (!mode || (mode.kind === "letter" && firstNote && mode.id !== firstNote.id)) setFirstNote(null); }, [mode]); // eslint-disable-line react-hooks/exhaustive-deps
+
   /* editing a draft in place */
   const [editing, setEditing] = useState<string | null>(null);
   useEffect(() => { setEditing(null); }, [mode]);
@@ -192,7 +196,8 @@ export const LetterDrawer: React.FC<{
       const id = await addVersion(v as Parameters<typeof addVersion>[0]);
       if (!id) { showToast({ message: "That letter didn't save. Check your connection and try again." }); return; }
       setMode({ kind: "letter", id });
-      showToast({ message: earlier > 0 ? firstLetterNote(earlier) : `Saved ${name.trim()}.` });
+      if (earlier > 0) setFirstNote({ id, n: earlier });
+      showToast({ message: `Saved ${name.trim()}.` });
     } finally { setSaving(false); }
   };
 
@@ -261,6 +266,7 @@ export const LetterDrawer: React.FC<{
     const line = changedLine(letter, letter.id === firstId);
     content = tab === "letter" ? (
       <div data-ql="pane-letter">
+        {firstNote?.id === letter.id && <p className="qld-first" data-ql="first-note" role="status">{firstLetterNote(firstNote.n)}</p>}
         {prev ? (
           <div className="qld-chg" data-ql="changes">
             <span className="qld-chg-a">{prev.versionName}</span>

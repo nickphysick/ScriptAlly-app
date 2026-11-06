@@ -95,19 +95,21 @@ export const QueryLettersPage: React.FC<{ active?: boolean }> = ({ active = true
   const jump = () => document.getElementById("ql-landing")?.scrollIntoView({ behavior: "smooth", block: "start" });
   const newLetter = () => setMode({ kind: "new", from: null });
 
+  const empty = letters.length === 0;
+
   return (
-    <div className="qlp" data-ql="page">
+    <div className={`qlp${empty ? " qlp--empty" : ""}`} data-ql="page" data-state={empty ? "empty" : "filled"}>
       <header className="qlp-head" data-ql="header" data-own-header="">
         <img className="qlp-hawk" src="/images/dash/courier.png" alt="" />
         <div className="qlp-hm">
-          <h1 className="qlp-title" data-page-title="" tabIndex={-1}>{lettersTitle(live.length)}</h1>
+          <h1 className="qlp-title" data-page-title="" tabIndex={-1}>{empty ? "No query letters yet" : lettersTitle(live.length)}</h1>
           {ms && (
             <p className="qlp-by" data-ql="for"><i /><span><em>for</em> <b>{ms.title}</b></span><i /></p>
           )}
           <p className="qlp-sub" data-ql="line">{QUERY_LETTERS_LINE}</p>
           <div className="qlp-acts">
             <button type="button" className="qlp-b1" data-ql="new" onClick={newLetter}>+ New letter</button>
-            <button type="button" className="qlp-b2" data-ql="jump" onClick={jump}>Which letter is landing?</button>
+            {!empty && <button type="button" className="qlp-b2" data-ql="jump" onClick={jump}>Which letter is landing?</button>}
           </div>
         </div>
         {use && (
@@ -152,6 +154,22 @@ export const QueryLettersPage: React.FC<{ active?: boolean }> = ({ active = true
         )}
       </header>
 
+      {empty ? (
+        <section className="qlp-first" data-ql="first">
+          <button type="button" className="qlc qlc--new qlp-firstcard" data-ql="first-card" onClick={newLetter}>
+            <span className="qlc-newin">
+              <img src="/images/dash/quill.png" alt="" />
+              <b>Write your first letter</b>
+              <span>Type or paste it here, or upload the file you keep it in.</span>
+            </span>
+          </button>
+          <ol className="qlp-explain" data-ql="explainer">
+            <li><b>Write it here, or upload it.</b> Keep every version of your letter in one place.</li>
+            <li><b>Pick it when you log a query.</b> Or put it in a submission package.</li>
+            <li><b>See which letter lands.</b> Each letter shows how many agents asked for more.</li>
+          </ol>
+        </section>
+      ) : (<>
       <section className="qlp-sec" data-ql="letters">
         <div className="qlp-sech">
           <h2>Your letters</h2>
@@ -177,8 +195,9 @@ export const QueryLettersPage: React.FC<{ active?: boolean }> = ({ active = true
         )}
       </section>
 
-      <LetterDrawer mode={mode} setMode={setMode} ms={ms} facts={facts} live={live} inUseId={use?.id ?? null} firstId={firstId} routeActive={active} />
       <LandingBand facts={live.map((v) => facts.get(v.id)!).concat(retired.map((v) => facts.get(v.id)!))} inUseId={use?.id ?? null} firstId={firstId} onOpen={setOpenId} />
+      </>)}
+      <LetterDrawer mode={mode} setMode={setMode} ms={ms} facts={facts} live={live} inUseId={use?.id ?? null} firstId={firstId} routeActive={active} />
     </div>
   );
 };
