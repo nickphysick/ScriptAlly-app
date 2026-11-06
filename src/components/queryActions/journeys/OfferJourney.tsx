@@ -19,9 +19,8 @@ import React, { useMemo, useState } from "react";
 import { deleteField, doc, setDoc } from "firebase/firestore";
 import { db as fsdb } from "../../../lib/firebase";
 import { useScriptAllyDb } from "../../../lib/db";
-import { recomputeQuery } from "../../../lib/recomputeQuery";
 import { ActivityType, QueryStatus, type Query } from "../../../types";
-import { recordQueryResponse, type RecordResponseData } from "../../../lib/recordResponse";
+import { saveOfferDecision } from "../../../lib/queryActions/stepSaves";
 import { addDays, dayDiff, dayIso, fmt, futureWeeks, offWeekend, toDay, up } from "../../../lib/queryActions/dates";
 import type { TrackPoint } from "../../../lib/queryActions/track";
 import { DateField, Fl, Note, PlanTrack, Radios, Seg, TextBox, Toggle, Who, initialsOf } from "../controls";
@@ -34,12 +33,6 @@ type Reply = "wait" | "full" | "aside" | "offer";
 const REPLY: [Reply, string][] = [["wait", "Waiting"], ["full", "Wants the full"], ["aside", "Stepped aside"], ["offer", "Offered too"]];
 type Dec = "wait" | "accept" | "decline";
 
-const closeData = (on: Date, token: string, key: "withdrawn_on_offer" | "offer_declined", notes = ""): RecordResponseData => ({
-  responseType: "close", materialsType: "Pages", materialsQuantity: 0, materialsOtherText: "", expectedBy: "", sendReminderDate: "",
-  dateReceived: dayIso(on), rrNotes: "", feedbackType: "Form", feedbackText: "", privateReflection: "", rejectionLesson: "",
-  requeryPreference: "", offerDate: "", offerDeadline: "", offerNotes: "",
-  closingReason: "Withdrew my submission", closingNotes: notes, eventKey: key, closeAs: "withdrawn", closingToken: token,
-});
 
 /** Parking (§6.4): every answer as plain data, days as `YYYY-MM-DD`. */
 interface OfferAnswers {
@@ -203,7 +196,6 @@ export function OfferJourney({ req, today, children }: JourneyProps) {
     commit: async () => {
       if (!db.currentUser) throw new Error("Signed out");
       const uid = db.currentUser.id;
-      const ms = db.manuscripts.find((m) => m.id === q.manuscriptId) || null;
       /* the others' marks, and the call — saved in every decision */
       for (const o of others) {
         const patch: Record<string, unknown> = { offerRefQueryId: q.id, offerTold: !!told[o.id] };
@@ -222,31 +214,11 @@ export function OfferJourney({ req, today, children }: JourneyProps) {
       if (dec === "wait") {
         return { queryId: q.id, message: `Offer progress saved · ${agentName(agent)}`, sub: `ANSWER BY ${up(offerBy)}`, touched: [q.id] };
       }
+      /* the write is lib/queryActions/stepSaves — the To-do desk records an offer decision through the same function */
+      const n = await saveOfferDecision(db, q, agent, { dec, on: today, withdraw: wd, remindTell });
       if (dec === "decline") {
-        await recordQueryResponse({ userId: uid, query: q, agent, manuscript: ms }, closeData(today, "offer_declined", "offer_declined"));
         return { queryId: q.id, message: `Offer declined · ${agentName(agent)}`, sub: "YOUR OTHER QUERIES CARRY ON", touched: [q.id] };
       }
-      /* accept: a SIGNED rung, derived through recompute */
-      const id = "act-" + Math.random().toString(36).slice(2, 11);
-      const nowIso = new Date().toISOString();
-      const note = `Offer accepted — ${agent?.name || "the agent"} now represents this manuscript`;
-      await setDoc(doc(fsdb, "users", uid, "queries", q.id, "activity", id), { type: QueryStatus.SIGNED, resultingStatus: QueryStatus.SIGNED, createdAt: nowIso, note, queryId: q.id, agentName: agent?.name || "The agent", eventKey: "signed" });
-      await setDoc(doc(fsdb, "users", uid, "activities", id), { id, userId: uid, queryId: q.id, manuscriptId: q.manuscriptId, activityType: ActivityType.OFFER_ACCEPTED, description: note, date: nowIso, details: "", resultingStatus: QueryStatus.SIGNED, eventKey: "signed" });
-      await recomputeQuery(uid, q.id);
-      let n = 0;
-      for (const o of wd) {
-        await recordQueryResponse({ userId: uid, query: o, agent: db.agents.find((a) => a.id === o.agentId) || null, manuscript: ms }, closeData(today, "accepted_offer", "withdrawn_on_offer"));
-        const patch: Record<string, unknown> = {};
-        if (remindTell) patch.withdrawTold = false;
-        if (o.nudgeDate) patch.nudgeDate = deleteField();
-        if (o.closePlan) patch.closePlan = deleteField();
-        if (Object.keys(patch).length) await db.updateQuery(o.id, patch as Partial<Query>);
-        n++;
-      }
-      const clear: Record<string, unknown> = {};
-      if (q.nudgeDate) clear.nudgeDate = deleteField();
-      if (q.closePlan) clear.closePlan = deleteField();
-      if (Object.keys(clear).length) await db.updateQuery(q.id, clear as Partial<Query>);
       return { queryId: q.id, message: `Signed with ${agentName(agent)}`, sub: `${n} OTHER ${n === 1 ? "QUERY" : "QUERIES"} WITHDRAWN`, touched: [q.id, ...others.map((o) => o.id)] };
     },
   };
