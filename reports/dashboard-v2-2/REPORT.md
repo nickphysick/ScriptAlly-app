@@ -149,3 +149,15 @@ one worker, 1.2h). 23 passed, 26 failed, 4 skipped.
   those (Nick asked for speed), so `dashFirstVisitV2` F1, G1 and H1 and HS1-C1 to E2 were not re-run on base. None of
   them reads the founding card or the dashboard's columns: they are the first-visit tour and set-up card, the Help menu,
   the checklist pill and the Contact list's glossary cards, which mostly time out waiting for their own controls.
+
+## 9 · The dev deploy
+
+Dev moved twice during this run: the base's `index-c89gelcz.js` became `index-Dso0rUS3.js` (`…-qc1522b`), then
+`index-nX4606oV.js`. That build is `…-qc1522b-cb21` at `1e91c103d` (Corkboard v2.1), confirmed by building it and
+matching the hash. `dashboard-v2-2` was merged into a new branch cut from it:
+`dev/…-qc1522b-cb21-db22` at `e70a86aa8` (pushed). The merge was clean.
+
+On that branch the gates equal the baseline (tsc 0, both builds 0, Vitest 2 failed, the two `firestoreTarget`
+baseline tests), and DB22 A1 to E1 pass. The served hash was re-checked immediately before the deploy. The deploy was
+from a clean checkout, hosting only, to `scriptally-dev`. **Dev now serves `index-DTJ2vcyM.js`.** Not merged to main;
+prod untouched.
