@@ -20,6 +20,7 @@ import { addDays, dayDiff, dayIso, dm, fmt, offWeekend } from "../../../lib/quer
 import { saveNudgeSent, saveOfferDecision, saveOfferMoreTime, saveSent, sentDefaults, type SentKind } from "../../../lib/queryActions/stepSaves";
 import type { useScriptAllyDb } from "../../../lib/db";
 import { saveClose, noreplyAnswers } from "../../../lib/queryActions/closeSave";
+import { courtOf, expectedFor } from "../../../lib/qcSummary";
 import { recordQueryResponse, type RecordResponseData } from "../../../lib/recordResponse";
 import { packagesHeldBy, packagesIn, restoreSnapshot, takeSnapshot } from "../../../lib/queryActions/snapshot";
 import { commitCardSave } from "../../../lib/agentCardSave";
@@ -300,6 +301,23 @@ function nudgeFlow(ctx: FlowCtx): Flow {
   };
 }
 
+/**
+ * ⚠️ WHAT A NEW REPLY TIME CHANGES, BY A DRY RUN THROUGH THE REAL CLOCK (the Also-changes law). For each of this agent's
+ * live queries, the Query Centre's own `expectedFor` is run with the agent as it is and with the new weeks; a query is
+ * named only where the date moves. A partial or a full reads the house window (v152), and a writer's own date holds
+ * (the recency law), so neither is said to change — arithmetic on the send date would claim both did.
+ */
+export function replyDatesMoved(ctx: Pick<FlowCtx, "queries" | "manuscripts">, agent: Agent, weeks: number): { queryId: string; ms: number; title: string }[] {
+  const next = { ...agent, responseTimeWeeks: weeks };
+  return ctx.queries
+    .filter((q) => q.agentId === agent.id && courtOf(q.status as QueryStatus) === "agent")
+    .flatMap((q) => {
+      const was = expectedFor(q, agent).ms, now = expectedFor(q, next).ms;
+      if (now == null || now === was) return [];
+      return [{ queryId: q.id, ms: now, title: ctx.manuscripts.find((m) => m.id === q.manuscriptId)?.title?.trim() || "Untitled manuscript" }];
+    });
+}
+
 /* ── gone quiet ───────────────────────────────────────────────────────────────────────────────── */
 
 const WAITS: [string, string, (today: Date) => Date][] = [
@@ -471,16 +489,17 @@ function fixFlow(ctx: FlowCtx, openCard: () => void): Flow {
   };
   if (t.need === "responseTime") {
     const wk = typeof A.wk === "number" ? (A.wk as number) : null;
+    const moved = wk ? replyDatesMoved(ctx, agent, wk) : [];
     return {
       questions: [{
         key: "wk", title: `How long does ${t.first} usually take to reply?`, hint: "From their website or agency page. Drag to set it.", answered: !!wk, summary: wk ? `About ${wk} week${wk === 1 ? "" : "s"}` : "",
         body: <ReplySlider weeks={wk} onPick={(w) => set({ wk: w })} />,
       }],
       sentence: <>{t.first} replies in about <b>{wk} week{wk === 1 ? "" : "s"}</b>.</>,
-      consequences: [`Saved to ${t.first}’s card`, `Reply dates on ${t.first}’s live queries use ${wk} weeks from now on`, "Leaves your tray"],
-      review: [`${t.first} replies in about ${wk} weeks.`, `That goes on ${t.first}’s card, and reply dates are worked out from it from now on.`],
+      consequences: [`Saved to ${t.first}’s card`, ...moved.map((m) => `Reply expected by ${fmt(new Date(m.ms))}${moved.length > 1 ? ` (${m.title})` : ""}`), "Leaves your tray"],
+      review: [`${t.first} replies in about ${wk} weeks.`, moved.length === 1 ? `That goes on ${t.first}’s card, and your query’s reply is expected by ${fmt(new Date(moved[0].ms))}.` : `That goes on ${t.first}’s card.`],
       draft: wk ? { agentPatch: { responseTimeWeeks: wk }, section: "how" } : { section: "how" },
-      commit: async () => ({ head: `Saved to ${t.first}’s card.`, msg: `Reply dates for ${t.first} now use ${wk} weeks.`, undo: await save({ responseTimeWeeks: wk }) }),
+      commit: async () => ({ head: `Saved to ${t.first}’s card.`, msg: moved.length === 1 ? `Your query’s reply is now expected by ${fmt(new Date(moved[0].ms))}.` : moved.length ? `Reply dates for ${moved.length} of your queries to ${t.first} have moved.` : `${t.first}’s card is a little more complete.`, undo: await save({ responseTimeWeeks: wk }) }),
     };
   }
   if (t.need === "mswl") {

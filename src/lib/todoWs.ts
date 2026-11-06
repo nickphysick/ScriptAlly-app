@@ -273,11 +273,15 @@ export function mentorLine(t: WsTask, facts?: QuietFacts): string {
     case "send": return `${a} asked for your ${t.query?.status === QueryStatus.FULL_REQUESTED ? "full manuscript" : "partial"}. Once it’s gone, log it here and I’ll keep an eye out for ${poss(a)} reply.`;
     case "rr": return `${a} asked you to revise and resubmit. Once the new version’s gone, log it here and I’ll keep an eye out for the reply.`;
     case "offer": return `An offer! Take your time. Tell me what you said to ${a} and I’ll sort out what happens next.`;
-    case "nudge": return `${a} is past their reply time. A short, friendly nudge is completely normal. Let me know once you’ve sent it.`;
+    /* the agent's stated reply time is said only where it is set (Agent.responseTimeWeeks); otherwise nothing about it */
+    case "nudge": return facts?.windowWeeks
+      ? `${a} usually takes about ${facts.windowWeeks} weeks to reply, and that’s gone by. A short, friendly nudge is completely normal. Let me know once you’ve sent it.`
+      : `${a} hasn’t replied yet. A short, friendly nudge is completely normal. Let me know once you’ve sent it.`;
     case "quiet": {
       const weeks = t.quietDays != null ? Math.round(t.quietDays / 7) : null;
       if (facts?.nudgedOn) return `You nudged ${a} on ${facts.nudgedOn.getDate()} ${MONTHS_LONG[facts.nudgedOn.getMonth()]} and still nothing. You can close it, or give ${a} a little longer.`;
       if (facts?.nrmn && facts.windowWeeks && weeks != null) return `${t.agency || a} say no reply after ${facts.windowWeeks} weeks means no, and it’s been ${weeks} weeks. Closing it is reasonable, but it’s your call.`;
+      if (facts?.windowWeeks && weeks != null) return `${a} usually takes about ${facts.windowWeeks} weeks to reply, and it’s been ${weeks} weeks with no word. One polite nudge is normal before you give up on it.`;
       return `${weeks != null ? `It’s been ${weeks} weeks` : "It’s been a long while"} with no word from ${a}. One polite nudge is normal before you give up on it.`;
     }
     case "fix":

@@ -19,7 +19,7 @@ import { createPortal } from "react-dom";
 import { useLocation, useNavigate } from "react-router-dom";
 import { WorkspacePageGrid } from "../../shell/WorkspacePageGrid";
 import { useScriptAllyDb } from "../../../lib/db";
-import { assembleBoardColumns } from "../../../lib/todoColumns";
+import { assembleBoardColumns, boardFigures } from "../../../lib/todoColumns";
 import { localYMD } from "../../../lib/shellSidebar";
 import type { BoardCard } from "../../../lib/todoBoard";
 import { SWEEP_NEED, groupFor, trayItem, type TrayDb, type TrayItem } from "../../../lib/todoTray";
@@ -93,6 +93,10 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, now, today: localYMD(now), mutedTaskRules: currentUser?.mutedTaskRules,
   }), [tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, now, currentUser?.mutedTaskRules]);
   const live: BoardCard[] = useMemo(() => [...cols.todo, ...cols.today], [cols]);
+  /* ⚠️ THE To do TAB'S NUMBER IS THE SIDEBAR BADGE'S (ShellSidebar: boardFigures(cols).cards over the same board call).
+     The tray itself draws a housekeeping sweep as one row per agent, so the rows can outnumber it; the Housekeeping
+     heading counts its own rows. */
+  const todoCount = useMemo(() => boardFigures(cols).cards, [cols]);
   const trayDb: TrayDb = useMemo(() => ({ queries, agents, manuscripts, userTasks, activities, packages, taskFlags, hkGroups }),
     [queries, agents, manuscripts, userTasks, activities, packages, taskFlags, hkGroups]);
   const items = useMemo(() => live.map((c) => trayItem(c, trayDb, now)), [live, trayDb, now]);
@@ -597,7 +601,8 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
         </>
       );
     } else if (flow) {
-      const facts = t.kind === "quiet" ? quietFacts(t) : undefined;
+      /* the nudge and Gone quiet lines read the agent's stated reply time, where one is set */
+      const facts = t.kind === "quiet" || t.kind === "nudge" ? quietFacts(t) : undefined;
       main = (
         <>
           <div className="tws-mnote"><img src={MENTOR} alt="" /><p>{mentorLine(t, facts)}</p></div>
@@ -751,7 +756,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
             <aside className="tws-tray" data-tws="tray" aria-label="Your tasks">
               <div className="tws-th">
                 <div className="tws-seg" role="group" aria-label="Show">
-                  <button type="button" aria-pressed={tab === "todo"} onClick={() => setTab("todo")}>To do <b>{all.length}</b></button>
+                  <button type="button" aria-pressed={tab === "todo"} onClick={() => setTab("todo")}>To do <b data-tws="todo-count">{todoCount}</b></button>
                   <button type="button" aria-pressed={tab === "snoozed"} onClick={() => setTab("snoozed")}>Snoozed <b>{snoozed.length}</b></button>
                   <button type="button" aria-pressed={tab === "done"} onClick={() => setTab("done")}>Done <b>{done.length + dismissed.length}</b></button>
                 </div>

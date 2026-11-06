@@ -118,3 +118,20 @@ describe("the words", () => {
     expect(andList(["query letter", "synopsis", "full manuscript"])).toBe("query letter, synopsis and full manuscript");
   });
 });
+
+/* To-do list v51 — THE AGENT'S REPLY TIME, SAID ONLY WHERE IT IS SET (Agent.responseTimeWeeks) */
+describe("the reply time in the Mentor's words", () => {
+  const set = { nudgedOn: null, nrmn: false, windowWeeks: 6 };
+  const unset = { nudgedOn: null, nrmn: false, windowWeeks: null };
+  it("a nudge names the agent's reply time when it is set, and says nothing about it when it isn't", () => {
+    expect(mentorLine(byKey("nudge"), set)).toBe("Priya usually takes about 6 weeks to reply, and that’s gone by. A short, friendly nudge is completely normal. Let me know once you’ve sent it.");
+    const plain = mentorLine(byKey("nudge"), unset);
+    expect(plain).toBe("Priya hasn’t replied yet. A short, friendly nudge is completely normal. Let me know once you’ve sent it.");
+    expect(plain).not.toMatch(/reply time|usually|weeks/);
+    expect(mentorLine(byKey("nudge")), "no facts at all: nothing about it either").toBe(plain);
+  });
+  it("Gone quiet names it too, when set and nothing else outranks it", () => {
+    expect(mentorLine(byKey("quiet"), set)).toBe("Daniel usually takes about 6 weeks to reply, and it’s been 16 weeks with no word. One polite nudge is normal before you give up on it.");
+    expect(mentorLine(byKey("quiet"), unset)).toBe("It’s been 16 weeks with no word from Daniel. One polite nudge is normal before you give up on it.");
+  });
+});

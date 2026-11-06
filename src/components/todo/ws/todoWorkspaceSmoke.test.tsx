@@ -88,3 +88,15 @@ describe("the desktop To-do is the workspace, and the tray is gone", () => {
     expect(s).toContain('import { MonthCal, dayLabel } from "./MonthCal";');
   });
 });
+
+describe("the To do tab counts what the sidebar badge counts", () => {
+  it("both read boardFigures(cols).cards off assembleBoardColumns, and the tab renders that figure", () => {
+    const strip = (x: string) => x.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    const ws = strip(readFileSync(join(__dirname, "TodoWorkspace.tsx"), "utf8"));
+    const side = strip(readFileSync(join(__dirname, "..", "..", "shell", "ShellSidebar.tsx"), "utf8"));
+    expect(side).toContain("return boardFigures(cols).cards;");
+    expect(ws).toContain("const todoCount = useMemo(() => boardFigures(cols).cards, [cols]);");
+    expect(ws).toMatch(/To do <b data-tws="todo-count">\{todoCount\}<\/b>/);
+    expect(ws, "the tab never counts the tray's rows").not.toMatch(/To do <b[^>]*>\{all\.length\}/);
+  });
+});
