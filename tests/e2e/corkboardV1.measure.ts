@@ -141,12 +141,12 @@ test.describe("CB1 · Part B — the header and the add bar", () => {
         await page.waitForURL(/\/todo$/, { timeout: 10_000 }).catch(() => {});
       }, 1800);
       L.check("B2", where, new URL(page.url()).pathname === "/todo", `Task landed on ${new URL(page.url()).pathname}`);
-      /* RE-POINTED (To-do list v5.1): on the desktop the own-task composer is the compose card on the desk, in Task mode
-         (it was the v2 composer in a half drawer in v5). The law is unchanged: Task lands on /todo with that composer
-         open and nothing written. */
-      await page.locator('[data-todo-v5] [data-td5="compose"]').waitFor({ state: "visible", timeout: 10_000 }).catch(() => {});
-      const tc = await page.locator('[data-todo-v5] [data-td5="compose"]').evaluateAll((els) => els.map((e) => ({ task: e.getAttribute("data-mode") === "task" ? "Task" : "" })));
-      L.check("B2", where, tc.length === 1 && tc[0].task === "Task", `the own-task composer is ${tc.length ? `open (${tc[0].task || "not in Task mode"})` : "not open"}`);
+      /* RE-POINTED (To-do list v51): on the desktop the own-task composer is the workspace's "A new task" form, which makes
+         dated tasks only, so it has no Task/Note mode to check. The law is unchanged: Task lands on /todo with that
+         composer open and nothing written. (It was v5.1's compose card on the desk.) */
+      await page.locator('[data-tws="add"]:visible').waitFor({ state: "visible", timeout: 10_000 }).catch(() => {});
+      const tc = await page.locator('[data-tws="add"]:visible').evaluateAll((els) => els.map((e) => ({ task: e.querySelector('[aria-label="What do you need to do"]') ? "Task" : "" })));
+      L.check("B2", where, tc.length === 1 && tc[0].task === "Task", `the own-task composer is ${tc.length ? `open (${tc[0].task || "without its title field"})` : "not open"}`);
       L.check("B2", where, w2.length === 0, `pressing Task made ${w2.length} write(s): ${w2[0]?.slice(0, 160) ?? ""}`);
       await page.keyboard.press("Escape");
     }
@@ -496,10 +496,11 @@ test.describe("CB1 · Part D — the Your tasks card", () => {
           await page.waitForURL(/\/todo$/, { timeout: 10_000 }).catch(() => {});
         }, 2200);
         L.check("D1", `${where} · tick`, new URL(page.url()).pathname === "/todo", `the tick landed on ${new URL(page.url()).pathname}`);
-        /* RE-POINTED (To-do list v5): on the desktop the arrival SELECTS the task on the desk and opens nothing (Part D).
-           The law is unchanged: the tick hands the task to the To-do list, on that task, writing nothing. */
-        await page.locator(`[data-todo-v5] [data-td5="desk-card"][data-key="${tickId}"]`).waitFor({ timeout: 10_000 }).catch(() => {});
-        const pane = await page.locator('[data-todo-v5] [data-td5="desk-card"]').evaluateAll((els) => els.map((e) => (e.textContent ?? "").replace(/\s+/g, " ").slice(0, 400)));
+        /* RE-POINTED (To-do list v51): on the desktop the arrival SELECTS the task and the workspace's desk holds it (its
+           title is the desk's editable title field, so its VALUE is read). The law is unchanged: the tick hands the task
+           to the To-do list, on that task, writing nothing. (It was v5's desk card.) */
+        await page.locator('[data-tws="desk"]:visible [data-tws="own"]').waitFor({ timeout: 10_000 }).catch(() => {});
+        const pane = await page.locator('[data-tws="desk"]:visible [data-tws="own"] textarea.tws-ott').evaluateAll((els) => els.map((e) => (e as HTMLTextAreaElement).value.replace(/\s+/g, " ").slice(0, 400)));
         L.check("D1", `${where} · tick`, pane.length === 1 && pane[0].includes("Read chapters 1–3 aloud"), `the desk ${pane.length ? `holds "${pane[0].slice(0, 70)}…"` : "holds nothing"}`);
         L.check("D1", `${where} · tick`, writes.length === 0, `the tick made ${writes.length} write(s): ${(writes[0] ?? "").slice(0, 140)}`);
         L.check("D1", `${where} · tick`, canon(await store.task(tickId)) === before, "the task document is unchanged");

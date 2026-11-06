@@ -18,17 +18,22 @@ The desktop tray-and-desk page (`src/components/todo/v5/`, as To-do v7 and v12 l
 - `SetAsidePop` — moved to `src/components/todo/SetAsidePop.tsx`, with `MonthCal.tsx` (from the compose card) and
   `setAsidePop.css`: the rules from `todoV5.css` / `todoV52.css` that reached the phone (the unscoped ones), verbatim
 
-## Cases in other suites whose desktop half is now retired (left in place, not edited)
+## Other suites' desktop parts, updated on `dev/…-qc1522-td51` (their phone parts run unchanged)
 
-These compare something against the desktop `/todo` page by the tray's probes. Their desktop reads find nothing and the
-case fails; it does not pass vacuously. Each needs re-pointing at the workspace (`[data-tws=…]`) or retiring by its owner.
-
-- `corkboardV1.measure.ts` (C-cases reading `[data-todo-v5] [data-td5="compose"]` and `[data-td5="desk-card"]` after the
-  Corkboard's "+ Add a task" and its tick hand off to `/todo`)
-- `headerPanelV2.measure.ts` + `hp2Lib.ts` (`[data-td5="header"]` in the light-header census)
-- `hr1.measure.ts`, `hr1Shots.measure.ts` (the header rules' `/todo` row: `.td5-hd …`)
-- `phoneAppV2Shell.measure.ts` (the desktop tray's headline beside the phone's count)
-- `phoneAppV2Todo.measure.ts` (line 47: the desktop tray's `data-td7="count"` figures; its phone `SetAsidePop` cases stand)
-- `qcV138.measure.ts` (line 366: the tray's calendar rows)
+- `corkboardV1.measure.ts` — **re-pointed.** B2: "Task" lands on `/todo` with the workspace's "A new task" form open
+  (`[data-tws="add"]`), and nothing written. D1: the tick lands on `/todo` with that task on the desk (the desk's title
+  field's value). The laws are unchanged.
+- `hp2Lib.ts` — **re-pointed.** `LIGHT_HEADER_SEL` reads the workspace's header (`[data-tws="header"]`) for `/todo`, so
+  `headerPanelV2` P1 and `headerV3` H1 still check that the route shows its own header.
+- `headerPanelV2.measure.ts` P8 (the header's Set aside door) — **retired.** The workspace has no such door; its
+  Snoozed and Done tabs are held by `todoWs.measure.ts`. P7 (the phone at 390) keeps `/todo`.
+- `hr1.measure.ts` — **the To-do row retired** (its hero is gone; `todoWs.measure.ts` holds the workspace's header), and
+  the `HR1-5` mutation re-pointed to Analytics' right card, the same law. `hr1Shots.measure.ts` — the To-do shot retired.
+- `phoneAppV2Shell.measure.ts` (PA2-1) — **re-pointed.** The badge's reference is the phone To-do's own band tallies
+  (earlier + today, the same chain as `lib/todoDueTally`), where it was the desktop tray's headline.
+- `phoneAppV2Todo.measure.ts` (PA2-5) — **the desktop comparison retired** (band = the desktop tray's tallies); every
+  phone check stays, including the snooze pop-up's (`[data-td5="pop-passed"]`, `.td5-pchips`, still rendered by
+  `SetAsidePop`). Its floor drops by the one reading removed.
+- `qcV138.measure.ts` D1 — **re-pointed note** (never asserted): it records the workspace's tray headings.
 
 The workspace's own measurement is `tests/e2e/todoWs.measure.ts`.

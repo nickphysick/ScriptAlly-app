@@ -45,27 +45,19 @@ const bar = (page: Page) => page.evaluate(() => {
 for (const vp of PHONES) {
   test(`PA2-1 · the tab bar and the band · ${tag(vp)}`, async ({ page }) => {
     const L = new Ledger(PART, `tabs-${tag(vp)}`);
-    /* the To-do tray's own tally, read off its desktop headline (S1's reference): overdue + due today */
+    /* RE-POINTED (To-do list v51, 6 Nov): S1's reference was the desktop tray's headline (overdue + due today), and that
+       tray is gone. The phone's own To-do states the same two figures by the same chain (lib/trayCalendar's dayBuckets,
+       held equal to the badge's lib/todoDueTally by todoDueTally.test), so the reference is read there: its band's
+       "From earlier" and "Today" tallies. The law is unchanged: the badge equals the To-do list's overdue + today. */
     await prime(page);
-    await openRoute(page, "/todo", { width: 1512, height: 900 });
-    /* ⚠️ THE VISIBLE ONE: every page stays mounted, so `.first()` can pick a hidden copy and wait out the timeout */
-    /* To-do v12 (on dev from 29 Oct) replaced the td7 headline with "Needs you now" and its summary line; read whichever
-       this build draws — both state the tray's overdue and due-today counts */
-    await page.locator('[data-td7="headline"]:visible, [data-td12="summary"]:visible, [data-td12="none"]:visible, [data-td12="ack"]:visible').first().waitFor({ timeout: 30_000 });
-    await page.waitForTimeout(2500);
+    await openPhone(page, "/todo", vp);
+    await page.locator('[data-pa="todo-tallies"]').waitFor({ timeout: 30_000 });
+    await page.waitForTimeout(1500);
     const tray = await page.evaluate(() => {
-      const vis = (e: Element) => e.getBoundingClientRect().height > 0;
-      const head = [...document.querySelectorAll('[data-td7="headline"]')].find(vis) ?? null;
-      if (head) {
-        const n = (sel: string) => Number((head.querySelector(sel)?.textContent ?? "0").match(/\d+/)?.[0] ?? 0);
-        return { overdue: n('[data-td52="title-od"]'), today: n('[data-td52="title-today"]'), head: head.textContent ?? "" };
-      }
-      const sum = [...document.querySelectorAll('[data-td12="summary"], [data-td12="none"], [data-td12="ack"]')].find(vis) ?? null;
-      const t = sum?.textContent ?? "";
-      const od = t.match(/(\d+) overdue/), td = t.match(/(\d+) due today/);
-      return { overdue: od ? Number(od[1]) : 0, today: td ? Number(td[1]) : 0, head: t };
+      const n = (k: string) => Number(document.querySelector(`[data-pa="tally-${k}"]`)?.textContent ?? "NaN");
+      return { overdue: n("earlier"), today: n("today"), head: document.querySelector('[data-pa="todo-tallies"]')?.textContent ?? "" };
     });
-    L.check("pop", `${tag(vp)} the tray's headline was read`, tray.head.trim().length > 0, JSON.stringify(tray));
+    L.check("pop", `${tag(vp)} the To-do's tallies were read`, tray.head.trim().length > 0 && Number.isFinite(tray.overdue) && Number.isFinite(tray.today), JSON.stringify(tray));
 
     await openPhone(page, "/dashboard", vp);
     for (const [path, key] of [["/dashboard", "home"], ["/queries", "queries"], ["/todo", "todo"], ["/agents", "agents"]] as const) {

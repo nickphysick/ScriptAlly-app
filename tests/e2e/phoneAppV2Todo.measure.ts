@@ -42,15 +42,14 @@ const closeAny = async (page: Page) => {
 for (const vp of PHONES) {
   test(`PA2-5 · To-do · ${tag(vp)}`, async ({ page }) => {
     const L = new Ledger(PART, `todo-${tag(vp)}`);
-    /* T1 — the desktop tray's own tallies first */
-    await openRoute(page, "/todo", { width: 1512, height: 900 });
-    await page.locator('[data-td7="count"][data-f="overdue"]:visible').first().waitFor({ timeout: 30_000 }); await page.waitForTimeout(2500);
-    const desk = await page.evaluate(() => Object.fromEntries(["overdue", "today", "later"].map((f) => [f, Number(document.querySelector(`[data-td7="count"][data-f="${f}"] .td7-ctn`)?.textContent || "0")])));
+    /* RETIRED (To-do list v51, 6 Nov): T1's first half compared the band with the desktop tray's own tallies, and that
+       tray is gone (the desktop To-do is the task workspace, which has no overdue/today/later tallies). The band's
+       tallies are still held below: each group holds exactly its tally, and the badge is earlier + today (T7); the
+       chain itself is held by todoDueTally.test. */
     await openPhone(page, "/todo", vp);
     await page.locator('[data-pa="todo-tallies"]').waitFor({ timeout: 20_000 }); await page.waitForTimeout(800);
     const band = await page.evaluate(() => Object.fromEntries(["earlier", "today", "soon"].map((k) => [k, Number(document.querySelector(`[data-pa="tally-${k}"]`)?.textContent ?? NaN)])));
-    L.check("pop", `${tag(vp)} the desktop tray's tallies were read`, Object.values(desk).every(Number.isFinite), JSON.stringify(desk));
-    L.check("T1", `${tag(vp)} the band's tallies are the tray's own (from earlier · today · coming up)`, band.earlier === desk.overdue && band.today === desk.today && band.soon === desk.later, `${JSON.stringify(band)} vs ${JSON.stringify(desk)}`);
+    L.check("pop", `${tag(vp)} the band's tallies were read`, Object.values(band).every(Number.isFinite), JSON.stringify(band));
     const rows = await rowsNow(page);
     L.check("pop", `${tag(vp)} rows`, rows.length > 4, String(rows.length));
     L.check("T1", `${tag(vp)} each group holds exactly its tally`, rows.filter((r) => r.when === "earlier").length === band.earlier && rows.filter((r) => r.when === "today").length === band.today && rows.filter((r) => r.when === "soon").length === band.soon, JSON.stringify(rows.reduce<Record<string, number>>((a, r) => ((a[r.when] = (a[r.when] ?? 0) + 1), a), {})));
@@ -139,7 +138,8 @@ for (const vp of PHONES) {
         L.check("T5", `${tag(vp)} Undo puts the account back`, left2.length === 0, left2.slice(0, 4).join(", "));
       } else L.check("pop", `${tag(vp)} a nudge row`, false, "");
     }
-    L.done(vp.width === 390 ? 26 : 16);
+    /* To-do list v51: one reading fewer than before (the desktop tray comparison retired: two readings out, one in) */
+    L.done(vp.width === 390 ? 25 : 15);
   });
 
   test(`PA2-5 · the Corkboard · ${tag(vp)}`, async ({ page }) => {

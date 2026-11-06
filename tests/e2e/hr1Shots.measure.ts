@@ -26,7 +26,7 @@ const PAGES: [string, string, string, string?][] = [
   ["responses", "/queries/responses", "[data-rsp='header']"],
   ["discover", "/agents/discover", "[data-dv1='header']", "live"],
   /* Submission packages left the shared hero with v26 (25 Oct); its own shots are pk26Shots.measure.ts */
-  ["todo", "/todo", "[data-td5='header']"],
+  /* RETIRED (To-do list v51): the To-do list has no hero header; its page is shot by todoWs.measure.ts */
 ];
 const RULES: Record<number, { textX: number; stackB: number; ri: number; content: number }> = {
   1280: { textX: 243, stackB: 215, ri: 64, content: 259 },

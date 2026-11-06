@@ -67,15 +67,17 @@ const PAGES: PageMap[] = [
   { key: "discover", route: "/agents/discover", header: "[data-dv1='header']", eyebrow: "[data-dv1='header'] [data-dv1='eyebrow']", title: ".dv1-hd h1", byline: "[data-dv1='byline']", acts: "[data-dv1='header'] [data-dv1='acts']", right: "[data-dv1='header'] .dv1-card", rightTokenW: true, content: ".dv1-hd + *", init: "live" },
   /* RETIRED FOR SUBMISSION PACKAGES (v26, 25 Oct): its hero is the ref's own navy card, 92 in from the sheet's edges,
      held by PK26-W (tests/e2e/pk26.measure.ts) rather than by the shared hero geometry. */
-  { key: "todo", route: "/todo", header: "[data-td5='header']", eyebrow: ".td5-hd .td5-ey", title: ".td5-hd h1", byline: ".td5-hd .td5-by", acts: ".td5-hd .td5-acts", right: "[data-td5='card']", content: ".td5-hd .td5-fr" },
+  /* RETIRED FOR THE TO-DO LIST (To-do list v51, 6 Nov): its hero is gone — the desktop page opens on the task workspace's
+     slim navy header, which is not the shared hero, held by tests/e2e/todoWs.measure.ts ("the workspace at …"). */
 ];
 
 const MUTATIONS: Record<string, string> = {
   "HR1-1": `:root, .ws-app, .ws-app.sheet-wide { --hero-top: 42px !important; }`,
   "HR1-3": `.rsp-hd .rsp-left { margin-left: 0 !important; }`,
   "HR1-4": `.qc138-hd .qc138-hawk { height: calc(var(--hero-art-h) + 20px) !important; }`,
-  /* RE-POINTED (Submission packages v26): the v4 header it broke is gone; the To-do header's right column is the same law */
-  "HR1-5": `.td5-hd .td5-tr { margin-right: 0 !important; }`,
+  /* RE-POINTED (Submission packages v26), and again (To-do list v51): the To-do hero it broke is gone; Analytics' card is
+     the right item on the shared width token, so breaking its width is the same law */
+  "HR1-5": `.a21-lh .a21-card { width: 200px !important; }`,
   "HR1-6": `.a21-desk { margin-top: 54px !important; }`,
   "HR1-7": `.dv1-hd h1.dv1-title { margin-left: 4px !important; }`,
   "HR1-8": `.ms21-hd3, [data-slh='header'] { margin-top: 6px !important; }`,

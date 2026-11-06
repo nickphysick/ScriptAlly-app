@@ -164,30 +164,9 @@ test("P6 · no jump: the loading and loaded header boxes are equal", async ({ pa
 });
 
 /* ───────────────────────── P8 · the Set aside door ───────────────────────── */
-/* RE-POINTED (To-do list v5.1, Part I.5): the header's Set aside no longer opens a popover over the header — it switches
-   the tray to its Set aside tab. The claim this lock kept is the same: pressing the door lands the writer on the set-aside
-   list, on screen, and nothing covers it. */
-test("P8 · the header's Set aside door opens the tray's Set aside tab, on screen", async ({ page }) => {
-  const L = new Ledger("P8");
-  await prepare(page);
-  for (const vp of SIZES) {
-    await open(page, "/todo", vp);
-    const btn = page.locator('.ws-window [data-td5="header"] [data-td5="aside"]:visible').first();
-    L.check("P8 precondition: the header carries the Set aside door", `@${vp.width}`, (await btn.count()) === 1, `${await btn.count()}`);
-    await btn.click({ timeout: 8000 }).catch(() => {}); await page.waitForTimeout(500);
-    const r = await page.evaluate(() => {
-      const tab = [...document.querySelectorAll<HTMLElement>('.td5-root [data-td5="tab-aside"]')].find((e) => e.getBoundingClientRect().height > 0) ?? null;
-      if (!tab) return null; const x = tab.getBoundingClientRect();
-      const px = x.left + x.width / 2, py = x.top + x.height / 2; const e = document.elementsFromPoint(px, py)[0];
-      return { sel: tab.getAttribute("aria-selected"), box: { l: x.left, t: x.top, w: x.width, h: x.height }, on: px >= 0 && py >= 0 && px <= innerWidth && py <= innerHeight, first: !!e && tab.contains(e), top: e ? `${e.tagName.toLowerCase()}.${e.className.toString().split(" ")[0]}` : "nothing" };
-    });
-    L.check("P8 the Set aside tab is chosen", `@${vp.width}`, r?.sel === "true", r ? `aria-selected=${r.sel}` : "no tab");
-    L.check("P8 the tab's centre is on screen", `@${vp.width}`, !!r && r.on, r ? SHOW(r.box) : "no tab");
-    L.check("P8 the tab is first at its centre", `@${vp.width}`, !!r && r.first, r ? r.top : "no tab");
-    await page.locator('.td5-root [data-td5="tab-tray"]:visible').first().click({ timeout: 4000 }).catch(() => {});
-  }
-  L.done(SIZES.length * 4);
-});
+/* RETIRED (To-do list v51, 6 Nov): the tray's header Set aside door is gone with the tray. The workspace reaches what was
+   set aside through its own Snoozed and Done tabs, held by tests/e2e/todoWs.measure.ts ("the snoozed and done tabs, and
+   the pop-ups"); see tests/e2e/RETIRED-todo-list-v51.md. */
 
 /* ───────────────────────── P9 · Analytics ───────────────────────── */
 /* RETIRED (Analytics v21, 16 Oct): Analytics' desktop header is no longer the panel (AN21 A1 holds the light header), and
