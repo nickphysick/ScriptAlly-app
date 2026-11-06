@@ -73,7 +73,8 @@ export function stepTitle(s: Pick<ThreadStepIn, "status" | "kind"> & { toldCount
 /**
  * v152.1 §2.2 — THE COLOUR RULE, like a messaging app: your bubbles are paper, always; the agent's are tinted by WHAT THE
  * REPLY WAS, the status pills' family, with a 1px inset edge. The glyphs inside are colourless; there is no navy in the
- * thread. A holding reply is the agent's but names no reply in the table, so it takes the pass's grey (reported).
+ * thread. A holding reply is the agent's but is not a reply in the table: white with the agent hairline (Nick — grey means
+ * passed), its own glyph and its quoted note.
  */
 export const MY_PAPER = "#f6f3ee";
 export const AGENT_TINT: Record<string, { fill: string; edge: string }> = {
@@ -83,9 +84,11 @@ export const AGENT_TINT: Record<string, { fill: string; edge: string }> = {
   [QueryStatus.OFFER]: { fill: "#e5eddf", edge: "#cddcc1" },
   [QueryStatus.REJECTED]: { fill: "#f1efec", edge: "#e3dfd9" },
 };
+/** a holding reply: white, the agent hairline */
+export const HOLDING_TINT = { fill: "#ffffff", edge: "#e3dbd0" };
 export function tintOf(s: Pick<ThreadStepIn, "status" | "kind">): { fill: string; edge: string } | null {
   if (sideOf(s) === "me") return null;
-  return (s.kind === "holding" ? AGENT_TINT[QueryStatus.REJECTED] : s.status ? AGENT_TINT[s.status] : null) ?? AGENT_TINT[QueryStatus.REJECTED];
+  return (s.kind === "holding" ? HOLDING_TINT : s.status ? AGENT_TINT[s.status] : null) ?? AGENT_TINT[QueryStatus.REJECTED];
 }
 /** a pass and your closes are drawn in grey ink (#8a8076); every other glyph in ink */
 export const greyGlyph = (s: Pick<ThreadStepIn, "status" | "kind">): boolean =>

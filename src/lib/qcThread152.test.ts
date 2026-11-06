@@ -116,3 +116,11 @@ describe("the Materials tab (§2.7)", () => {
     expect(done.blocks.some((b) => b.request)).toBe(false);
   });
 });
+
+describe("v152.1 follow-up: a holding reply", () => {
+  it("is white with the agent hairline, never the pass's grey, and carries its note", () => {
+    const t = buildThread([st("q", QueryStatus.QUERIED, 30), st("h", null, 10, { kind: "holding", quote: "Thanks — reading now." })], { ...ctx, state: "agent", replyMs: null });
+    const h = t.find((x) => x.t === "msg" && x.kind === "holding") as Extract<(typeof t)[number], { t: "msg" }>;
+    expect(h).toMatchObject({ side: "them", tint: { fill: "#ffffff", edge: "#e3dbd0" }, grey: false, quote: "Thanks — reading now." });
+  });
+});

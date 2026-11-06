@@ -174,7 +174,7 @@ const readThread = (page: Page) => page.evaluate((c) => {
       /* the bubble's RENDERED words: innerText on a hidden element falls back to its raw text, so the title alone
          cannot say whether a reader sees it (L9's first mutation stayed green on exactly that) */
       seen: bx.innerText, date: m.querySelector<HTMLElement>("[data-qc152='msg-date']")?.innerText.trim() ?? "",
-      bg: getComputedStyle(bx).backgroundColor, glyphBg: g ? getComputedStyle(g).backgroundColor : "none", glyphW: g ? g.offsetWidth : 0,
+      bg: getComputedStyle(bx).backgroundColor, edge: getComputedStyle(bx).boxShadow, glyphBg: g ? getComputedStyle(g).backgroundColor : "none", glyphW: g ? g.offsetWidth : 0,
       navy: [bx, ...bx.querySelectorAll<HTMLElement>("*")].some((e) => getComputedStyle(e).backgroundColor === "rgb(42, 58, 82)"),
       follows: m.querySelector<HTMLElement>("[data-qc152='follows']")?.innerText.replace(/\s+/g, " ").trim() ?? "",
       nth: m.querySelector<HTMLElement>("[data-qc152='nth']")?.innerText.trim() ?? "",
@@ -233,11 +233,18 @@ for (const vp of SIZES) {
       const L = new Ledger(`L3-${vp.width}`);
       await open2(page, vp);
       const seen = new Set<string>();
-      for (const k of ["long", "rr", "passed", "offertold", "materials", "withdrew"]) {
+      for (const k of ["long", "rr", "passed", "offertold", "materials", "withdrew", "holding"]) {
         await openCard(page, k);
         const t = await readThread(page);
         L.check(`${k}: population`, !!t && t.msgs.length >= 2, `${t?.msgs.length}`);
         for (const m of t?.msgs ?? []) {
+          /* v152.1 follow-up: a holding reply is white with the agent hairline (grey means passed) */
+          if (m.kind === "holding") {
+            L.check(`${k} · holding reply: white, the agent hairline #e3dbd0, its note quoted, the hold glyph`,
+              m.bg === "rgb(255, 255, 255)" && m.edge.includes("rgb(227, 219, 208)") && m.quotes[0] === "“Thanks — reading now.”" && m.glyphW === 26, `${m.bg} ${m.edge} ${JSON.stringify(m.quotes)}`);
+            seen.add("holding");
+            continue;
+          }
           const want = m.side === "me" ? ME : TINT[m.status];
           if (m.side === "them") seen.add(m.status);
           L.check(`${k} · ${m.title}: ${m.side === "me" ? "paper" : `the ${m.status} tint`}`, !!want && m.bg === want, `${m.bg} (want ${want})`);
@@ -245,7 +252,7 @@ for (const vp of SIZES) {
           L.check(`${k} · ${m.title}: the glyph box has no fill`, m.glyphBg === "rgba(0, 0, 0, 0)" && m.glyphW === 26, `${m.glyphBg} ${m.glyphW}px`);
         }
       }
-      L.check("every agent tint in the table was seen", ["Partial Requested", "Full Requested", "Revise & Resubmit", "Offer", "Rejected"].every((s) => seen.has(s)), JSON.stringify([...seen]));
+      L.check("every agent tint in the table was seen, and the holding reply", ["Partial Requested", "Full Requested", "Revise & Resubmit", "Offer", "Rejected", "holding"].every((s) => seen.has(s)), JSON.stringify([...seen]));
       L.done(40);
     });
 

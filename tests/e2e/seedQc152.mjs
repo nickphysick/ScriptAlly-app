@@ -102,12 +102,14 @@ export const FIXTURES = [
      seed-ms-1 the harness's seed-pkgq-4 (written by seedPackages.mjs outside the rules) refuses ANY update, and the told
      save is one batch over every sibling, so it fails there whole (reported) */
   ["offer2", "offer", "Offer", 6, 50, null, false],
+  /* v152.1 follow-up: a holding reply (white, the agent hairline, its note quoted) */
+  ["holding", "agent", "Queried", 6, 30, null, false],
   ["sib2", "agent", "Queried", 4, 7, null, false],
 ];
 const MSOF = { offer2: "seed-ms-2", sib2: "seed-ms-2" };
 /** each fixture agent's first name, so the card's words read as they will for a writer */
 const FIRST = { offer: "Olive", materials: "Mira", nudge: "Priya", agent: "Rufus", quiet: "Quinn", nrmn: "Nina", nudgedquiet: "Nell", nudgedwait: "Wren", closed: "Clara", long: "Jonathan", fullreq: "Hannah", pkg: "Felix",
-  rr: "Rhea", passed: "Paul", withdrew: "Wanda", offertold: "Tom", undated: "Uma", seven: "Seth", offer2: "Ottilie", sib2: "Simon" };
+  rr: "Rhea", passed: "Paul", withdrew: "Wanda", offertold: "Tom", undated: "Uma", seven: "Seth", offer2: "Ottilie", sib2: "Simon", holding: "Hal" };
 /** the v152.1 fixtures' steps: [key, type, days ago (null: undated), extra log fields] */
 const NUDGE = "Nudge sent", TOLD = "Told other agents";
 /** the day at local noon, ISO — how the app stores a day (lib/queryActions/dates dayIso) */
@@ -118,6 +120,7 @@ const STEPS1521 = {
   withdrew: [["sent", "Queried", 60], ["wd", "Withdrawn", 5]],
   offertold: [["sent", "Queried", 80], ["offer", "Offer", 10, { replyNote: "I’d love to represent this book." }], ["told", TOLD, 9, { toldCount: 6, toldDeadline: dayIso(-8), eventKey: "offer_told" }]],
   undated: [["sent", "Queried", 80], ["preq", "Partial Requested", null], ["psent", "Partial Sent", 20]],
+  holding: [["sent", "Queried", 30], ["hold", "Holding reply", 10, { note: "Thanks — reading now." }]],
   seven: [["sent", "Queried", 180], ["n1", NUDGE, 150], ["n2", NUDGE, 130], ["preq", "Partial Requested", 110], ["psent", "Partial Sent", 90], ["freq", "Full Requested", 60], ["fsent", "Full Sent", 20]],
 };
 const QUERY1521 = {
