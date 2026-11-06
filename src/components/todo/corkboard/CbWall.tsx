@@ -29,6 +29,8 @@ export interface CbWallProps {
   menuFor: string | null;
   onOpen: (id: string) => void;
   onMenu: (id: string, anchor: HTMLElement) => void;
+  /** false in an open pile: a note is dragged onto another pile there, never between notes */
+  reorder?: boolean;
   /** a drop: `from` lands before (or after) `target` */
   onDrop?: (from: string, target: string, after: boolean) => void;
   /** a fresh note's id, for its landing animation */
@@ -49,7 +51,7 @@ function markClamped(root: HTMLElement | null) {
   }
 }
 
-export const CbWall: React.FC<CbWallProps> = ({ notes, draggable, menuFor, onOpen, onMenu, onDrop, fresh, id }) => {
+export const CbWall: React.FC<CbWallProps> = ({ notes, draggable, reorder = true, menuFor, onOpen, onMenu, onDrop, fresh, id }) => {
   const ref = useRef<HTMLDivElement | null>(null);
   const [drag, setDrag] = useState<string | null>(null);
   const [line, setLine] = useState<{ id: string; after: boolean } | null>(null);
@@ -90,14 +92,14 @@ export const CbWall: React.FC<CbWallProps> = ({ notes, draggable, menuFor, onOpe
               document.body.classList.add("cb2-dragging");
             } : undefined}
             onDragEnd={draggable ? end : undefined}
-            onDragOver={draggable ? (e) => {
+            onDragOver={draggable && reorder ? (e) => {
               if (!drag || drag === n.id || pinnedOf(drag) !== n.pinned) return;
               e.preventDefault();
               const r = e.currentTarget.getBoundingClientRect();
               const after = e.clientX > r.left + r.width / 2;
               if (line?.id !== n.id || line.after !== after) setLine({ id: n.id, after });
             } : undefined}
-            onDrop={draggable ? (e) => {
+            onDrop={draggable && reorder ? (e) => {
               e.preventDefault();
               if (drag && line && line.id === n.id) onDrop?.(drag, line.id, line.after);
               end();

@@ -33,7 +33,7 @@ import {
 } from "../../lib/noteboard";
 import { newTag } from "../../lib/todoTags";
 import {
-  boardPrefs, chipCounts, dropOrder, glance as glanceOf, inGlance, linkOf, sortBoard,
+  boardPrefs, chipCounts, dropOrder, glance as glanceOf, inGlance, linkOf, piles as pilesOf, sortBoard, tagsForPile,
   type BoardSort, type BoardView, type GlanceKey,
 } from "../../lib/corkboard";
 import { agentPrimary } from "../../lib/agentDisplay";
@@ -45,6 +45,7 @@ import { formatDate } from "../../lib/dates";
 import { CbHeader } from "./corkboard/CbHeader";
 import { CbToolRow } from "./corkboard/CbToolRow";
 import { CbWall, type WallNote } from "./corkboard/CbWall";
+import { CbPiles } from "./corkboard/CbPiles";
 import { noteWords, type PostItLink } from "./corkboard/CbPostIt";
 import "./tasksLayout.css";
 import "./taskChrome.css";
@@ -111,6 +112,8 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
   const [dateDraft, setDateDraft] = useState("");
   const [compose, setCompose] = useState<(NoteDraft & { id?: string }) | null>(null);
   const [saving, setSaving] = useState(false);
+  /** Piles: the open pile's tag ("" is Loose notes), or null for All piles */
+  const [openPile, setOpenPile] = useState<string | null>(null);
 
   /* ── the view, the sort and the order: remembered, one dotted leaf each ── */
   const prefs = boardPrefs(currentUser);
@@ -271,6 +274,32 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
   const dropOnWall = (from: string, target: string, after: boolean) =>
     void writeOrder(dropOrder(board.map((n) => n.id), from, target, after), sort !== "mine");
 
+  /* ── piles are tags: a move sets the pile's tag first and keeps the rest; Undo puts the tags back exactly ── */
+  const pileName = (k: string) => (k ? `#${tagLabel(k)}` : "Loose notes");
+  const moveToPile = async (noteId: string, k: string) => {
+    const n = userTasks.find((t) => t.id === noteId);
+    if (!n) return;
+    const was = n.tags ?? [];
+    const next = tagsForPile(was, k);
+    try { await updateUserTask(n.id, { tags: next.length ? next : null }); }
+    catch { flash("Couldn’t move that — try again?"); return; }
+    flash(`Moved to ${pileName(k)}`, { label: "Undo", fn: async () => { await updateUserTask(n.id, { tags: was.length ? was : null }); } });
+  };
+  /* a new pile mints its tag through the app's own minter (resolveTag → newTag / createTagDef) */
+  const newPile = async (noteId: string, name: string) => {
+    const n = userTasks.find((t) => t.id === noteId);
+    if (!n) return;
+    const ids = await resolveTag(name);
+    if (!ids) return;
+    const was = n.tags ?? [];
+    const next = tagsForPile(was, ids[0]);
+    try { await updateUserTask(n.id, { tags: next }); }
+    catch { flash("Couldn’t start that pile — try again?"); return; }
+    flash(`Started a new pile: #${name.trim().replace(/^#/, "")}`, {
+      label: "Undo", fn: async () => { await updateUserTask(n.id, { tags: was.length ? was : null }); },
+    });
+  };
+
   /* ── a note's link, and its door ── */
   const linkView = (n: UserTask): PostItLink | null => {
     const l = linkOf(n);
@@ -317,7 +346,7 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
     },
   });
 
-  const nothingMatches = narrowing && matching.size === 0;
+  const nothingMatches = view === "board" && narrowing && matching.size === 0;
   const empty = settled && board.length === 0;
 
   return (
@@ -367,7 +396,7 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
                   onTag={setTagSel}
                   count={narrowing ? (matching.size === board.length ? `All ${board.length} match` : `${matching.size} of ${board.length} match`) : null}
                   view={view}
-                  onView={(v) => void setBoardView(v)}
+                  onView={(v) => { setOpenPile(null); if (v === "piles") setTagSel(null); void setBoardView(v); }}
                   sort={sort}
                   onSort={(v) => void setBoardSort(v)}
                 />
@@ -378,6 +407,25 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
                       <p>Try another word, or clear the search.</p>
                       <button type="button" className="cb2-btn" onClick={() => { setSearch(""); setTagSel(null); setSpecial(null); }}>Show every note</button>
                     </div>
+                  ) : view === "piles" ? (
+                    <CbPiles
+                      piles={pilesOf(board.map((n) => ({ id: n.id, tags: n.tags, hex: paperHex(n.colour), text: n.text, matches: matching.has(n.id) })), tagLabel)}
+                      label={pileName}
+                      open={openPile}
+                      onOpen={setOpenPile}
+                      wall={openPile === null ? [] : board.filter((n) => (n.tags?.[0] ?? "") === openPile).map((n) => wallNote(n, !!search.trim()))}
+                      draggable={!phone}
+                      narrowing={narrowing}
+                      find={search}
+                      menuFor={menu?.note.id ?? null}
+                      onOpenNote={(id) => { const n = userTasks.find((t) => t.id === id); if (n) openEditor(n); }}
+                      onMenu={(id, anchor) => {
+                        const n = userTasks.find((t) => t.id === id);
+                        if (n) setMenu((m) => (m?.note.id === id ? null : { note: n, anchor }));
+                      }}
+                      onMove={(id, k) => void moveToPile(id, k)}
+                      onNewPile={(id, name) => void newPile(id, name)}
+                    />
                   ) : (
                     <CbWall
                       notes={board.map((n) => wallNote(n, true))}

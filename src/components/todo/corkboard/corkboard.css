@@ -234,3 +234,42 @@ body.cb2-dragging .cb2-note:hover { transform: none; }
 .cb2-btn:disabled { opacity: .45; cursor: default; }
 .cb2-v1compose { margin-top: 18px; }
 @media (max-width: 767.98px) { .cb2-wall { grid-template-columns: minmax(0, 1fr); } }
+
+/* ═════════ D · piles (ref `.pgrid2`, `.pile`, `.shelf`, `.mini`) ═════════ */
+.cb2-piles { padding-top: 6px; }
+.cb2-pgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: 34px 28px; }
+.cb2-pile { display: flex; flex-direction: column; gap: 12px; padding: 0; border: 0; background: none; cursor: pointer; text-align: left; border-radius: 8px; transition: opacity .2s; }
+.cb2-pile--dim { opacity: .25; }
+.cb2-stack { position: relative; height: 236px; transition: transform .18s; }
+.cb2-pile:hover .cb2-stack { transform: translateY(-3px); }
+.cb2-stack .cb2-paper { position: absolute; inset: 0; min-height: 0; overflow: hidden; }
+.cb2 .cb2-body--pile { display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
+.cb2-stack .cb2-s2 { transform: translate(7px, 7px) rotate(1.6deg); }
+.cb2-stack .cb2-s3 { transform: translate(-6px, 10px) rotate(-1.8deg); }
+.cb2-lab { display: flex; align-items: baseline; justify-content: space-between; border-top: 1px solid var(--cb2-i14); padding-top: 12px; margin-top: 8px; }
+.cb2 .cb2-lab b { font: 400 18px/1.3 var(--cb2-type) !important; color: var(--cb2-ink) !important; }
+.cb2 .cb2-lab span { font: italic 400 14.5px/1.3 var(--cb2-serif) !important; color: var(--cb2-i60) !important; }
+.cb2 .cb2-hint2 { margin: 14px 0 0; font: italic 400 14.5px/1.4 var(--cb2-serif) !important; color: var(--cb2-i55) !important; }
+.cb2-shelf { display: flex; gap: 14px; overflow-x: auto; padding: 8px 2px 18px; margin-bottom: 10px; border-bottom: 1px solid var(--cb2-i14); align-items: flex-end; }
+.cb2-back {
+  flex-shrink: 0; align-self: center; height: 38px; padding: 0 14px; border: 0; border-radius: 19px; cursor: pointer; background: #fff;
+  box-shadow: inset 0 0 0 1px var(--cb2-i14); font: 400 15px/1 var(--cb2-serif); color: var(--cb2-ink);
+}
+.cb2-mini { flex: 0 0 120px; display: flex; flex-direction: column; gap: 6px; padding: 0; border: 0; background: none; border-radius: 8px; text-align: left; cursor: pointer; }
+.cb2-sq { position: relative; display: block; height: 74px; transition: transform .15s; }
+.cb2-sq i { position: absolute; inset: 0; border-radius: 2px; box-shadow: 0 8px 10px -8px rgba(28, 19, 15, .45); }
+.cb2-sq i:nth-child(2) { transform: translate(4px, 4px) rotate(1.5deg); }
+.cb2 .cb2-mini b { font: 400 14px/1.3 var(--cb2-type) !important; color: var(--cb2-ink) !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cb2 .cb2-mini small { font: italic 400 12.5px/1.2 var(--cb2-serif) !important; color: var(--cb2-i55) !important; margin-top: -6px; }
+.cb2-mini--on .cb2-sq i:first-child { box-shadow: 0 0 0 2px var(--cb2-navy), 0 8px 10px -8px rgba(28, 19, 15, .45); }
+.cb2-mini--over .cb2-sq { transform: translateY(-3px) scale(1.05); }
+.cb2-mini--over .cb2-sq i:first-child { box-shadow: 0 0 0 2px var(--cb2-navy); }
+.cb2-newp { cursor: default; }
+.cb2-newp .cb2-sq { display: grid; place-items: center; font: 400 28px/1 var(--cb2-serif); color: var(--cb2-i45); }
+.cb2-newp .cb2-sq i { background: transparent; box-shadow: none; border: 1.5px dashed var(--cb2-i30); box-sizing: border-box; }
+.cb2-pname { display: flex; gap: 8px; align-items: center; margin-top: 6px; }
+.cb2-pname input { height: 34px; width: 150px; box-sizing: border-box; border: 0; border-radius: 8px; box-shadow: inset 0 0 0 1.5px var(--cb2-navy); padding: 0 10px; font: 400 15px/1 var(--cb2-serif); outline: 0; }
+.cb2-openhead { display: flex; align-items: baseline; gap: 12px; margin: 6px 0 18px; }
+.cb2 .cb2-openhead h2 { margin: 0; font: 400 26px/1.3 var(--cb2-type) !important; color: var(--cb2-ink) !important; }
+.cb2 .cb2-openhead span { font: italic 400 15.5px/1.3 var(--cb2-serif) !important; color: var(--cb2-i60) !important; }
+@media (max-width: 767.98px) { .cb2-pgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 16px; } .cb2-stack { height: 180px; } }
