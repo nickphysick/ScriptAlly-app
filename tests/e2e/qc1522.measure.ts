@@ -55,6 +55,8 @@ async function mutate(page: Page) {
 
 const seed = () => execSync("node tests/e2e/seedQc152.mjs", { encoding: "utf8", stdio: "pipe" });
 const dump = (key: string) => JSON.parse(execSync(`node tests/e2e/seedQc152.mjs --dump ${key}`, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim().split("\n").pop()!);
+/** any query, as sorted JSON (the harness's own siblings, which the seed does not reset) */
+const dumpq = (id: string): string => execSync(`node tests/e2e/seedQc152.mjs --dumpq ${id}`, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim().split("\n").pop()!;
 test.beforeEach(() => { seed(); });
 test.afterAll(() => { execSync("node tests/e2e/seedQc152.mjs --clean", { encoding: "utf8", stdio: "pipe" }); });
 
@@ -281,12 +283,14 @@ for (const vp of SIZES) {
       const list = await page.locator("[data-qc151='page']").innerText();
       L.check("population: the list", list.length > 500, String(list.length));
       L.check("the list never says 0 days", !/\b0\s*days?\b/i.test(list), (list.match(/.{20}\b0\s*days?\b.{20}/i) ?? [""])[0]);
-      for (const key of ["nudge", "agent", "nudgedwait", "undated", "seven", "materials", "offer"]) {
+      for (const key of ["nudge", "agent", "nudgedwait", "undated", "seven", "materials", "offer", "sameday"]) {
         await openCard(page, key);
         const c = await page.locator(CARD).innerText();
         L.check(`${key}: the card never says 0 days`, !/\b0\s*days?\b/i.test(c), (c.match(/.{20}\b0\s*days?\b.{20}/i) ?? [""])[0]);
+        /* a same-day gap is the case the zero rule is about: it must be on the page to be checked */
+        if (key === "sameday") L.check("sameday: population — the two steps on one day read Same day", /\bSame day\b/i.test(c), c.replace(/\s+/g, " ").slice(0, 160));
       }
-      L.done(9);
+      L.done(11);
     });
 
     /* ── §2 the card's look ── */
@@ -455,6 +459,8 @@ for (const vp of SIZES) {
     /* ── §6 the offer ── */
     if (run("L14")) test("L14 · offer: every open query listed; Done waits for all; Do the rest later → one to-do and Deciding; Tell them keeps ticks; Accept undoes in one", async ({ page }) => {
       const L = new Ledger(`L14-${vp.width}`);
+      const errs: string[] = [];
+      page.on("console", (m) => { if (m.type() === "error") errs.push(m.text().slice(0, 240)); });
       await open(page, vp);
       await openCard(page, "offer2");
       await click(page, C("[data-qc152='reply-btn']"));
@@ -484,6 +490,9 @@ for (const vp of SIZES) {
       }
       /* accept: the others close as withdrawn in one write; one Undo reverts both */
       const b1 = dump("offer2"), b2 = dump("sib2");
+      /* every other open query the accept withdraws, not only the fixture's: each must come back on Undo */
+      const others = ids.filter((i): i is string => !!i && i !== "q152-sib2");
+      const bo = Object.fromEntries(others.map((i) => [i, dumpq(i)]));
       await page.waitForTimeout(400);
       await click(page, C("[data-qc152='reply-btn']"));
       await click(page, C("[data-qc1522='offer-choices'] [data-v='accept']"));
@@ -498,7 +507,11 @@ for (const vp of SIZES) {
         log: [(x.log as unknown[])?.length, (y.log as unknown[])?.length], feed: [(x.feed as unknown[])?.length, (y.feed as unknown[])?.length] });
       L.check("one Undo reverts the offer", JSON.stringify(a1) === JSON.stringify(b1), diff(b1, a1));
       L.check("…and the sibling", JSON.stringify(a2) === JSON.stringify(b2), diff(b2, a2));
-      L.done(13);
+      let back = others.filter((i) => dumpq(i) !== bo[i]);
+      for (let i = 0; i < 15 && back.length; i++) { await page.waitForTimeout(1000); back = others.filter((x) => dumpq(x) !== bo[x]); }
+      L.check(`…and every other query it withdrew (${others.length})`, back.length === 0, JSON.stringify(back.map((i) => [i, JSON.parse(dumpq(i) || "null")?.status, JSON.parse(dumpq(i) || "null")?.offerRefQueryId])));
+      L.check("no undo was refused", !errs.some((e) => /undo refused/.test(e)), JSON.stringify(errs.filter((e) => /undo|permission/i.test(e)).slice(0, 3)));
+      L.done(15);
     });
 
     /* ── §7 reopen ── */
