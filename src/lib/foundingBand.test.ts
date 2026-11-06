@@ -87,3 +87,14 @@ describe("foundingBand", () => {
     expect(rankUpDecision(3, "archivist")).toBe("play");
   });
 });
+
+import { dashPrefsOf, foundingFoldWrite } from "./dashFirstVisit";
+describe("foundingBand · the stored fold (Part E)", () => {
+  it("is one dotted leaf under todoPrefs.dash, read as true only when stored true", () => {
+    expect(foundingFoldWrite(true)).toEqual({ "todoPrefs.dash.foundingFolded": true });
+    expect(foundingFoldWrite(false)).toEqual({ "todoPrefs.dash.foundingFolded": false });
+    expect(dashPrefsOf({ todoPrefs: { dash: { foundingFolded: true } } } as never).foundingFolded).toBe(true);
+    for (const v of [undefined, false, "yes", 1]) expect(dashPrefsOf({ todoPrefs: { dash: { foundingFolded: v } } } as never).foundingFolded).toBe(false);
+    expect(dashPrefsOf(null).foundingFolded).toBe(false);
+  });
+});

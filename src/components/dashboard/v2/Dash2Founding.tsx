@@ -27,7 +27,7 @@ import { cardTier, useFoundingStats } from "../../../lib/foundingStats";
 import { composeFor, RANK_NAMES, type ComposeKey } from "../../../lib/foundingCard";
 import { feedbackDraft, openFeedback, setFeedbackDraft } from "../../../lib/feedbackStore";
 import { useLatestNote } from "../../../lib/foundingNotes";
-import { askLine, BIRDS, birdHover, birdState, birdSub, firstLine, outcomeDone, rankUpDecision, roadFill, TOP_TIER } from "../../../lib/foundingBand";
+import { askLine, BIRDS, birdHover, birdState, birdSub, firstLine, foldStatus, outcomeDone, rankUpDecision, roadFill, TOP_TIER } from "../../../lib/foundingBand";
 import { EggNest, ICONS, headFor } from "../v105/foundingArt";
 import { Dash105How } from "../v105/Dash105How";
 
@@ -40,6 +40,9 @@ const TILES: readonly { key: ComposeKey; label: string }[] = [
 /* the eight sparks of the rank-up, from the ref */
 const SPARKS: readonly [number, number][] = [[-44, -30], [40, -36], [50, 14], [-48, 18], [-10, -52], [14, 50], [-30, 46], [34, 40]];
 
+const Chevron: React.FC<{ up: boolean }> = ({ up }) => (
+  <svg viewBox="0 0 24 24" aria-hidden="true" className="d22-gl"><path d={up ? "M6 15l6-6 6 6" : "M6 9l6 6 6-6"} /></svg>
+);
 const TICK = <svg viewBox="0 0 24 24" aria-hidden="true" className="d22-tki"><path d="M5 12.5l4.5 4.5L19 7" /></svg>;
 
 /** a rank's art: the bird's head, or the egg */
@@ -70,7 +73,11 @@ export const Dash2Founding: React.FC<{
   seenTier?: number | null;
   /** stores the rank celebrated; absent (the onboarding ghost, the example) → no rank-up and no write */
   onSeen?: (tier: number) => void | Promise<void>;
-}> = ({ loading, uid, seenTier, onSeen }) => {
+  /** the stored fold */
+  folded: boolean;
+  /** stores the fold; absent → the fold is this view's only */
+  onFold?: (folded: boolean) => void | Promise<void>;
+}> = ({ loading, uid, seenTier, onSeen, folded, onFold }) => {
   const { loading: sLoading, error: sError, stats, aided } = useFoundingStats(uid);
   const notes = useLatestNote(uid);
   const [howOpen, setHowOpen] = useState(false);
@@ -112,6 +119,17 @@ export const Dash2Founding: React.FC<{
     return () => anims.forEach((a) => a.cancel());
   }, [up]);
 
+  /* ── Part E · the fold: the stored value, held locally so the click answers at once ── */
+  const [foldNow, setFoldNow] = useState<boolean | null>(null);
+  const storedFold = foldNow ?? folded;
+  const showFolded = storedFold && !up;
+  const toggleFold = () => {
+    const next = !showFolded;
+    setFoldNow(next);
+    if (up) setUp(null);
+    void onFold?.(next);
+  };
+
   const prefix = busy ? " " : firstLine(tier, !!up);
   const ask = askLine(tier, done, !!up);
   const fill = busy ? null : roadFill(tier, done);
@@ -119,13 +137,37 @@ export const Dash2Founding: React.FC<{
   const tag = (
     <span className="d22-tag" data-d2="fw-tag">Founding writer{no ? <i data-d2="fw-no">No. {no}</i> : null}</span>
   );
+  const foldBtn = (
+    <button type="button" className="d22-fold" data-d2="fw-fold" aria-expanded={!showFolded}
+      aria-label={showFolded ? "Show founding writer" : "Fold founding writer"} onClick={toggleFold}>
+      <Chevron up={!showFolded} />
+    </button>
+  );
   const common = {
     role: "group", "aria-label": "Founding writer", "data-d2-card": "founding", "data-loading": busy ? "1" : "0",
     "data-tier": busy ? undefined : tier, "data-done": busy ? undefined : done,
   } as const;
 
+  if (showFolded) {
+    const fs = foldStatus(tier, done);
+    return (
+      <section {...common} className="d22-fw is-folded" data-folded="1">
+        <div className="d22-strip">
+          <span className="d22-fbadge" aria-hidden="true">{busy ? null : <Art tier={tier} />}</span>
+          {tag}
+          <span className="d22-fstat" data-d2="fw-fstat">
+            <b className="d22-frank">{busy ? " " : rank}</b>
+            {!busy && <> <em>{fs.bold}</em>{fs.rest}</>}
+          </span>
+          <Tell small />
+          {foldBtn}
+        </div>
+      </section>
+    );
+  }
+
   return (
-    <section {...common} className={`d22-fw${top ? " is-top" : ""}`} data-up={up ? "1" : undefined}>
+    <section {...common} className={`d22-fw${top ? " is-top" : ""}`} data-folded="0" data-up={up ? "1" : undefined}>
       <div className="d22-top">
         {tag}
         <span className="d22-prize">
@@ -133,6 +175,7 @@ export const Dash2Founding: React.FC<{
           <span>{PRIZE_LINE} · </span>
           <button ref={howRef} type="button" className="d22-how" data-d2="fw-how" aria-haspopup="dialog" aria-expanded={howOpen} onClick={() => setHowOpen(true)}>{HOW_LINK}</button>
         </span>
+        {foldBtn}
       </div>
       <div className="d22-body">
         <div className="d22-me" data-d2="fw-top">

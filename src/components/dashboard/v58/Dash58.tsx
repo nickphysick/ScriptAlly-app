@@ -41,7 +41,7 @@ import { F1Feed } from "../f1/F1Feed";
 import { agentCoverage, isPreQuery } from "../../../lib/dashFirstUse";
 import { ClosedHoop, AgentsHoop } from "../v60/Dash60Left";
 import { openNewAgentCard } from "../../../lib/agentCardStore";
-import { gsCloseWrite, gsSlot, REMINDER_NOT_NOW, REMINDER_YES, firstNameOf, shouldAskReminder, answerFor, answerWrite, bookLabel, gsRowDone, dashState, seg, dashPrefsOf, gsHideWrite, gsOrder, legacyStartOf, pathAfter, type AnswerChoice, type AnswerWrite, type DashState, type GsLink, type StartPath } from "../../../lib/dashFirstVisit";
+import { foundingFoldWrite, gsCloseWrite, gsSlot, REMINDER_NOT_NOW, REMINDER_YES, firstNameOf, shouldAskReminder, answerFor, answerWrite, bookLabel, gsRowDone, dashState, seg, dashPrefsOf, gsHideWrite, gsOrder, legacyStartOf, pathAfter, type AnswerChoice, type AnswerWrite, type DashState, type GsLink, type StartPath } from "../../../lib/dashFirstVisit";
 import type { UserPaths } from "../../../lib/userPaths";
 import { SetUpCard } from "../fv1/SetUpCard";
 import { GsSheet } from "../fv2/GsSheet";
@@ -638,7 +638,9 @@ export const Dash58: React.FC<Dash58Props> = ({
               navy header, never a card inside a column. */}
           {/* Part D: the rank last celebrated is `users.foundingSeenTier` (v105's field); never written from the ghost or the example */}
           <Dash2Founding loading={loading} uid={fwUid} seenTier={currentUser?.foundingSeenTier}
-            onSeen={example || !onFoundingSeen ? undefined : onFoundingSeen} />
+            onSeen={example || !onFoundingSeen ? undefined : onFoundingSeen}
+            /* Part E: the fold is `todoPrefs.dash.foundingFolded`, one dotted leaf; absent onPrefs → this view's only */
+            folded={prefs.foundingFolded} onFold={onPrefs && !example ? (f) => onPrefs(foundingFoldWrite(f)) : undefined} />
           <div className="d2-grid" data-d2="grid">
             <div className="d2-col d2-left" data-d2="left">
               {gsSheetOpen && (
