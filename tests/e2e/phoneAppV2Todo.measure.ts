@@ -142,30 +142,7 @@ for (const vp of PHONES) {
     L.done(vp.width === 390 ? 26 : 16);
   });
 
-  test(`PA2-5 · the Corkboard · ${tag(vp)}`, async ({ page }) => {
-    const L = new Ledger(PART, `cork-${tag(vp)}`);
-    await openRoute(page, "/todo/corkboard", { width: 1512, height: 900 });
-    await page.locator("[data-note]").first().waitFor({ timeout: 30_000 }); await page.waitForTimeout(1500);
-    const deskOrder = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-note]")].map((n) => n.dataset.note!));
-    await openPhone(page, "/todo/corkboard", vp);
-    await page.locator('[data-pa="note"]').first().waitFor({ timeout: 20_000 }); await page.waitForTimeout(600);
-    const read = () => page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-pa="cork"] [data-pa="note"]')].map((n) => ({ id: n.dataset.id!, tilt: Number(n.dataset.tilt), t: getComputedStyle(n).transform })));
-    const a = await read();
-    L.check("pop", `${tag(vp)} notes on both`, a.length > 2 && deskOrder.length > 2, `${a.length} / ${deskOrder.length}`);
-    L.check("T6", `${tag(vp)} the notes keep the board's order`, JSON.stringify(a.map((n) => n.id)) === JSON.stringify(deskOrder), `${a.map((n) => n.id).slice(0, 4)} vs ${deskOrder.slice(0, 4)}`);
-    L.check("T6", `${tag(vp)} every tilt is within −2° … +2°`, a.every((n) => Math.abs(n.tilt) <= 2), JSON.stringify(a.map((n) => n.tilt)));
-    const band = Number(await page.locator('[data-pa="notes-n"]').textContent());
-    L.check("T6", `${tag(vp)} the band counts the notes pinned`, band === a.length, `${band} vs ${a.length}`);
-    await page.reload(); await page.locator('[data-pa="note"]').first().waitFor({ timeout: 20_000 }); await page.waitForTimeout(600);
-    const b = await read();
-    L.check("T6", `${tag(vp)} each note's tilt is the same across two renders`, JSON.stringify(a.map((n) => [n.id, n.t])) === JSON.stringify(b.map((n) => [n.id, n.t])), "");
-    const col = await colourSweep(page, { roots: ".pa-band, .pa-cork, .pa-tabbar" });
-    L.check("T8", `${tag(vp)} Corkboard: white on navy, ink on blush, no green or red`, col.bad.length === 0 && col.navy > 0, col.bad.slice(0, 3).join(" | ") || `navy ${col.navy}`);
-    for (const s of await imageSweep(page)) L.check("T8", `${tag(vp)} Corkboard: no image twice`, new Set(s).size === s.length, JSON.stringify(s));
-    await shot(page, PART, `25-corkboard-${tag(vp)}`);
-    await page.locator('[data-pa="add-note"]').click(); await page.waitForTimeout(800);
-    L.check("T6", `${tag(vp)} Add a note opens the note flow`, (await page.locator('.pa-flow[data-pf="note"]').count()) === 1, "");
-    await page.locator('[data-pf="close"]').click().catch(() => {}); await page.waitForTimeout(300);
-    L.done(7);
-  });
+  /* RETIRED (Corkboard v2, 6 Nov): "PA2-5 · the Corkboard" read Phone app v2's own CorkPhone (`[data-pa="cork"]`), which
+     is retired: the Corkboard is one page at every width now. Its phone claims are lock CB12 (tests/e2e/corkboardV2.measure.ts).
+     Recorded in tests/e2e/RETIRED-corkboard-v2.md. */
 }

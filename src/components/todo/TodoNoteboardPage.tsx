@@ -42,6 +42,9 @@ import { CbToolRow } from "./corkboard/CbToolRow";
 import { CbWall, type WallNote } from "./corkboard/CbWall";
 import { CbPiles } from "./corkboard/CbPiles";
 import { CbMenu, type MenuAct } from "./corkboard/CbMenu";
+import { CbEmpty } from "./corkboard/CbEmpty";
+import type { NoteExample } from "./noteboardExamples";
+import { SHORTCUTS, matchesShortcut, shortcutBlocked } from "../../lib/shortcuts";
 import { CbNoteDialog, type NoteDraftV2 } from "./corkboard/CbNoteDialog";
 import { CbAddTask, CbTurnTask, todayLocal } from "./corkboard/CbTaskDialogs";
 import { BLANK_DRAFT, dayLabel, dueOf, type ComposeDraft } from "./v5/ComposeCard";
@@ -261,6 +264,19 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
     } : undefined);
   };
 
+  /* Keep this, on the empty page: a real note through the normal create path, its paper following on its own write */
+  const keepExample = async (ex: NoteExample) => {
+    try {
+      const tagIds = await resolveTag(ex.tag);
+      const id = await addUserTask({ text: ex.body, ...(tagIds ? { tags: tagIds } : {}) });
+      const paper = paperOf(ex.colour);
+      if (id && paper !== "butter") await setUserTaskColour(id, paper);
+      flash("Kept. It’s yours to change now.");
+    } catch {
+      flash("Couldn’t keep that — try again?");
+    }
+  };
+
   const deleteNote = async (note: UserTask) => {
     const receipt = noteReceipt(note);
     const ok = await confirmAsk(`Remove “${note.text.length > 90 ? `${note.text.slice(0, 90)}…` : note.text}”?`, { confirmLabel: "Remove note", cancelLabel: "Keep it" });
@@ -413,6 +429,22 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
     },
   });
 
+  /* N starts a new note — only while this page is the one on screen, never in a field or over a dialog */
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const openNew = useRef<() => void>(() => {});
+  openNew.current = () => openComposer();
+  useEffect(() => {
+    const on = (e: KeyboardEvent) => {
+      if (!matchesShortcut(SHORTCUTS.corkboardNew, e) || shortcutBlocked(e)) return;
+      const root = rootRef.current;
+      if (!root || root.getBoundingClientRect().height === 0) return;
+      e.preventDefault();
+      openNew.current();
+    };
+    document.addEventListener("keydown", on);
+    return () => document.removeEventListener("keydown", on);
+  }, []);
+
   const nothingMatches = view === "board" && narrowing && matching.size === 0;
   const empty = settled && board.length === 0;
 
@@ -420,7 +452,7 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
     <div className="t-f12 spine-root">
       {/* ⚠️ THE TOKENS SCOPE HERE, NOT ON THE ROOT: `tasksViewport` requires the exact `className="t-f12 spine-root"`
           on the Tasks pages, so a page that needs a class of its own hangs it one level down. */}
-      <div className="tdb-wrap today-off nb-scope cb2">
+      <div className="tdb-wrap today-off nb-scope cb2" ref={rootRef}>
         <WorkspacePageGrid className="tpl-wpg nb-wpg" scrollLabel="Corkboard" masthead={null}>
           <div className="nb-group cb2-page" data-cb="page" data-cb2="page" data-loading={settled ? undefined : ""}>
             <CbHeader
@@ -431,7 +463,7 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
               onNew={(c) => openComposer(c)}
               onTask={openTaskComposer}
             />
-            {empty ? null : (
+            {empty ? <CbEmpty onKeep={(ex) => void keepExample(ex)} /> : (
               <>
                 <CbToolRow
                   find={search}

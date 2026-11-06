@@ -360,3 +360,22 @@ body.cb2-dragging .cb2-note:hover { transform: none; }
 .cb2-menu hr { border: 0; border-top: 1px solid var(--cb2-i08); margin: 5px 4px; }
 .cb2-menu .cb2-del { color: var(--cb2-rust); }
 .cb2-layer .cb2-mlbl { padding: 6px 10px 2px; font: italic 400 13px/1.2 var(--cb2-serif) !important; color: var(--cb2-i55) !important; }
+
+/* ═════════ G · the empty page (ref `.gal`, screen 09) ═════════ */
+.cb2-gal { padding: 40px 0 0; }
+.cb2 .cb2-galh { margin: 0; font: 400 30px/1.25 var(--cb2-type) !important; color: var(--cb2-ink) !important; }
+.cb2 .cb2-galp { margin: 6px 0 26px; font: 400 17px/1.45 var(--cb2-serif) !important; color: var(--cb2-i72) !important; }
+.cb2-galgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: 24px; }
+.cb2-gitem { cursor: default; }
+.cb2-gitem:hover { transform: none; }
+.cb2-gitem .cb2-nfoot { margin-top: 14px; }
+.cb2-keep {
+  margin-top: 12px; align-self: flex-start; height: 32px; padding: 0 14px; border: 0; border-radius: 16px; cursor: pointer;
+  background: rgba(255, 255, 255, .7); box-shadow: inset 0 0 0 1px var(--cb2-i14); font: 400 14px/1 var(--cb2-serif); color: var(--cb2-ink);
+}
+.cb2-keep:hover { background: #fff; }
+@media (max-width: 767.98px) {
+  .cb2-page { padding-inline: 16px; box-sizing: border-box; width: 100%; }
+  .cb2-galgrid { grid-template-columns: minmax(0, 1fr); }
+  .cb2-shelf { margin-inline: -2px; }
+}

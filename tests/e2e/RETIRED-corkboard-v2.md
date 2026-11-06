@@ -33,3 +33,14 @@ add bar's labels) is deleted with its cases; recoverable at ce8aa34ee.
 
 Retargeted in place, each saying so at the case: artSlots, noteboardChrome (two), noteboardTask (the panel's
 sentence), noteboardToolbar (filtering fades), tasksNoteboard (two), tasksTags, todoPageSmoke (two).
+
+## Parts E–G
+
+| Retired | Why | Where the law went |
+|---|---|---|
+| v1's inline composer, the date panel, the Tags… sheet, the PortalMenu/noteMenu use on this page | replaced by the note pop-up, CbTurnTask and CbMenu | CB9, the pop-up and menu cases (PortalMenu itself stays: the To-do board uses it) |
+| src/components/todo/phone/CorkPhone.tsx (Phone app v2, Part 5C) | the Corkboard is one page at every width (screen 10) | CB12 |
+| tests/e2e/phoneAppV2Todo.measure.ts — "PA2-5 · the Corkboard" | it read CorkPhone's `[data-pa="cork"]` | CB12 |
+
+Retargeted in place: noteboardCompose (the menu), noteboardTask (two), tasksNoteboard (two), tasksTags (three),
+sidebarCapture SB9 (the Corkboard's page-scoped `n` joins the list).

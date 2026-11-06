@@ -78,3 +78,18 @@ describe("the header", () => {
     expect(plain(render())).toContain("Art to come");
   });
 });
+
+describe("the empty page", () => {
+  it("Pick a colour to start, only + New note, and the four examples from the app's own data, each with Keep this", () => {
+    seed.userTasks = [];
+    const html = render();
+    expect(plain(html)).toContain("Jot down anything worth remembering while you query.");
+    expect(plain(html)).toContain("Pick a colour to start");
+    expect(html).not.toContain('data-cb2="add-task"');
+    expect(plain(html)).toContain("What writers keep here");
+    expect(plain(html)).toContain("A few ideas to get you going. Keep any of them and it lands on your board, ready to change.");
+    expect([...html.matchAll(/data-cb2-example=""/g)].length).toBe(4);
+    expect([...html.matchAll(/>Keep this</g)].length).toBe(4);
+    expect(html).not.toContain('data-cb2="wall"');
+  });
+});
