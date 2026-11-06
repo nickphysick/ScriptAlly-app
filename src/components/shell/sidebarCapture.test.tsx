@@ -145,7 +145,7 @@ describe("SB9 — no key opens the menu", () => {
       expect(sc.scope, `${sc.bound} binds \`n\` everywhere — a global n would collide with the capture menu's own keys`).not.toBe("Everywhere");
       expect(sc.bound, "a shell file binds `n`").not.toMatch(/components\/shell\//);
     }
-    expect(nBound.map((sc) => sc.bound).sort()).toEqual(["src/components/agents/discover1/DvPicks.tsx", "src/components/manuscripts/ComparableTitlesPage.tsx", "src/components/todo/v5/TodoTray.tsx"]);
+    expect(nBound.map((sc) => sc.bound).sort()).toEqual(["src/components/agents/discover1/DvPicks.tsx", "src/components/manuscripts/ComparableTitlesPage.tsx", "src/components/todo/ws/TodoWorkspace.tsx"]);
   });
   it("the component binds no global key and advertises none", () => {
     expect(SRC).not.toMatch(/aria-keyshortcuts|matchesShortcut|SHORTCUTS/);

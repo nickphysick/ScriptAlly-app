@@ -12,9 +12,10 @@
  *    confirmation dialog: Undo replaces it.
  */
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
-import { presets, type SetAsideRules } from "../../../lib/todoSetAside";
-import { MonthCal, dayLabel } from "./ComposeCard";
+import { ESC_LEVEL, useEscapeLayer } from "../../lib/escapeStack";
+import { presets, type SetAsideRules } from "../../lib/todoSetAside";
+import { MonthCal, dayLabel } from "./MonthCal";
+import "./setAsidePop.css";
 
 const plusDays = (ymd: string, n: number) => { const [y, m, d] = ymd.split("-").map(Number); const x = new Date(y, m - 1, d + n, 12); return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, "0")}-${String(x.getDate()).padStart(2, "0")}`; };
 
