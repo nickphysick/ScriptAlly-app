@@ -42,7 +42,7 @@
  {
   "where": "Undo: the accepted sibling back byte for byte",
   "ok": true,
-  "detail": ""
+  "detail": "{\"fields\":[],\"log\":[1,1],\"feed\":[1,1]}"
  },
  {
   "where": "Undo: the refused sibling still as it was",

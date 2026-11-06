@@ -32,7 +32,7 @@
  {
   "where": "undated: the undated step says No date, in its place (between Query sent and the send)",
   "ok": true,
-  "detail": "[[\"Query sent\",\"17 AUG\"],[\"Asked for a partial\",\"No date\"],[\"Sent the partial\",\"16 OCT\"]]"
+  "detail": "[[\"Query sent\",\"18 AUG\"],[\"Asked for a partial\",\"No date\"],[\"Sent the partial\",\"17 OCT\"]]"
  },
  {
   "where": "undated: both waits beside it show —",
