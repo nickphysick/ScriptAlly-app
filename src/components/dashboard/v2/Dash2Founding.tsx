@@ -27,7 +27,7 @@ import { cardTier, useFoundingStats } from "../../../lib/foundingStats";
 import { composeFor, RANK_NAMES, type ComposeKey } from "../../../lib/foundingCard";
 import { feedbackDraft, openFeedback, setFeedbackDraft } from "../../../lib/feedbackStore";
 import { useLatestNote } from "../../../lib/foundingNotes";
-import { askLine, BIRDS, birdHover, birdState, birdSub, firstLine, foldStatus, outcomeDone, rankUpDecision, roadFill, TOP_TIER } from "../../../lib/foundingBand";
+import { askLine, BIRDS, birdHover, birdState, birdSub, firstLine, foldStatus, outcomeDone, rankUpDecision, roadFill, seenRank, TOP_TIER } from "../../../lib/foundingBand";
 import { EggNest, ICONS, headFor } from "../v105/foundingArt";
 import { Dash105How } from "../v105/Dash105How";
 
@@ -88,19 +88,27 @@ export const Dash2Founding: React.FC<{
   const top = tier >= TOP_TIER;
   const rank = RANK_NAMES[tier];
 
-  /* ── Part D · the rank-up: decided whenever the rank becomes known or rises, written once per rank ── */
+  /* ── Part D · the rank-up: decided whenever the rank OR the stored rank changes, played and written once per rank.
+     ⚠️ KEYED ON BOTH: the user doc can arrive first from Firestore's persistent cache and then from the server, so a
+     decision taken on the cached value alone could miss a rank-up the server's value calls for. ── */
   const [up, setUp] = useState<{ from: number; to: number } | null>(null);
-  const handled = useRef<number | null>(null);
+  const handled = useRef<string | null>(null);
+  const played = useRef<number | null>(null);
   useEffect(() => {
     if (busy || sError) return;
     const aidSeen = aided && typeof window !== "undefined" ? (window as unknown as Aid).__SA_FOUNDING_STATS?.seen : undefined;
     const seen = aided ? (typeof aidSeen === "number" ? aidSeen : undefined) : seenTier;
     if (!aided && !onSeen) return;
-    if (handled.current === tier) return;
+    const key = `${tier}|${seenRank(seen) ?? "-"}`;
+    if (handled.current === key) return;
+    handled.current = key;
     const d = rankUpDecision(tier, seen);
-    if (d === "none") { handled.current = tier; return; }
-    handled.current = tier;
-    if (d === "play") setUp({ from: tier - 1, to: tier });
+    if (d === "none") return;
+    if (d === "play") {
+      if (played.current === tier) return;
+      played.current = tier;
+      setUp({ from: tier - 1, to: tier });
+    }
     /* the aid's stats are not the writer's: nothing derived from them is written (v105) */
     if (!aided) void onSeen?.(tier);
   }, [busy, sError, aided, tier, seenTier, onSeen]);
