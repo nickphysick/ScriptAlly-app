@@ -149,10 +149,10 @@
   .wsr-sp:hover:not(.wsr-cur) { background: rgba(var(--ink-cream-rgb), 0.06); color: rgba(var(--ink-cream-rgb), 0.92); }
   .wsr-sp.wsr-cur { background: rgba(var(--ink-terra-rgb), 0.2); color: var(--ink-bright); }
   .wsr-sp.wsr-cur .wsr-spl { font-weight: 600; }
-  .wsr-spp {
-    position: absolute; right: -2px; top: -5px; padding: 0 3px; height: 12px; border-radius: 3px;
-    font: 600 8px/12px "Inter", system-ui, sans-serif; color: rgba(244, 238, 229, 0.78);
-    background: #222b3b; box-shadow: inset 0 0 0 1px rgba(244, 238, 229, 0.32);
+  /* sidebar materials v1: a Pro row in the open card (Versions) is a 5px outlined dot at the row's top right */
+  .wsr-spd {
+    position: absolute; right: 7px; top: 5px; box-sizing: border-box; width: 5px; height: 5px; border-radius: 50%;
+    background: transparent; box-shadow: inset 0 0 0 1px rgba(var(--ink-cream-rgb), 0.7);
   }
 
   /* motion: the pill grows out of the icon when the page changes */
@@ -230,6 +230,10 @@
   /* the rows: quieter at rest; the current page is the rail's terracotta wash and heavier icon */
   .ws-panel .ws-pin .ws-nav > .ws-ni:first-child { margin-top: 14px; }
   .ws-panel .ws-pin .ws-lbl { font-family: var(--sp-serif); }
+  /* sidebar materials v1: a Pro section's tag after its heading (the row tag's look, beside the words rather than
+     pushed to the row's end). The heading is a flex row in the ink shell. */
+  .ws-panel .ws-pin .ws-glabel { display: flex; align-items: center; }
+  .ws-panel .ws-pin .ws-gpro { margin-left: 8px; letter-spacing: 0.1em; }
   .ws-panel .ws-pin .ws-ni { color: rgba(var(--ink-cream-rgb), 0.58); }
   .ws-panel .ws-pin .ws-ni .ws-ic { opacity: 0.5; transition: opacity 0.12s ease; }
   .ws-panel .ws-pin .ws-ni .ws-ic svg { transition: stroke-width 0.18s ease; }

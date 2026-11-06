@@ -8,10 +8,21 @@
  * measured on an account whose board is small. It fabricates INPUT, never output: the badge is still
  * drawn by the rail's own `railCount`.
  *
+ * `window.__SA_NAV_FREE = true` (sidebar materials v1) closes every nav entitlement's open-to-all switch, so the
+ * nav's Pro marks can be seen as a Free writer will see them once gating returns. A Pro plan still has every mark
+ * off: `navLockedFor` decides, as it does for real.
+ *
  * ⚠️ THE CALL SITE CARRIES THE MODE GATE (`import.meta.env.MODE !== "production"`), so a production
  * build drops this module entirely — a guard inside the module is not absence from the bundle.
  */
 export function railCountAid(real: number): number {
   const v = (globalThis as unknown as { __SA_RAIL_COUNT?: unknown }).__SA_RAIL_COUNT;
   return typeof v === "number" && Number.isFinite(v) && v >= 0 ? v : real;
+}
+
+/** The open-to-all overrides `__SA_NAV_FREE` asks for: every switch shut, or none overridden. */
+export function navOpenAid(): { discover: false; packages: false; versions: false; materials: false } | undefined {
+  return (globalThis as unknown as { __SA_NAV_FREE?: unknown }).__SA_NAV_FREE === true
+    ? { discover: false, packages: false, versions: false, materials: false }
+    : undefined;
 }
