@@ -436,6 +436,12 @@ export interface Manuscript {
    * the active package's version, else the newest live version.
    */
   inUseBookVersionId?: string;
+  /**
+   * Query letters v1 (6 Nov) — the letter new queries go out with when they are not sent as a package. Absent until the
+   * writer chooses one; `lib/queryLetters.inUseLetter` then reads the active package's letter, else the newest live
+   * letter. No backfill. Rules: `isValidId`, and the manuscript update allowlist.
+   */
+  inUseLetterId?: string;
   /** Versions v2 (D1) — the highest version number ever given, so a number is never reused after a delete. */
   bookVersionSeq?: number;
 }
@@ -535,6 +541,13 @@ export interface ManuscriptVersion {
    * never a zero placeholder).
    */
   wordCount?: number;
+  /**
+   * Query letters v1 (6 Nov), letters only: the letter this one was written from ("A copy of …"), and what is different
+   * from it, as one to eight short lines (as Versions' `BookVersion.parentId` / `changes`). Both absent on a letter
+   * written before the page, and on a letter started from a blank page or a file (no parent).
+   */
+  parentId?: string;
+  changes?: string[];
 }
 
 /**

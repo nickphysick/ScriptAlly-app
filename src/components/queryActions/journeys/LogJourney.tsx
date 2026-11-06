@@ -10,6 +10,7 @@
  * CHECK the method differs from how the agent takes queries · BLOCK nothing marked as sent ·
  * CHECK the materials differ from the agent's guidelines · CHECK a nudge before the reply date.
  */
+import { inUseLetter } from "../../../lib/queryLetters";
 import { previousQueryFor } from "../../../lib/requery";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { materialsToQuery, saveLog, type IfNo } from "../../../lib/queryActions/logSave";
@@ -126,7 +127,8 @@ export function LogJourney({ req, today, children }: JourneyProps) {
     if (!pkgTouched) applyOrder(msId);
   }, [pkgKey]); // eslint-disable-line react-hooks/exhaustive-deps
   const ask = useMemo(() => guidelineAsk(agent), [agent]);
-  const qlV = currentVersion(msId, versions, ComponentType.QUERY_LETTER);
+  /* Query letters v1 (6 Nov): the individual send's letter is THE in-use letter — the Query letters page's one reader. */
+  const qlV = inUseLetter(ms ?? null, versions, packages);
   const synV = currentVersion(msId, versions, ComponentType.SYNOPSIS);
 
   /* ---------- picking an agent fills the rest from their guidelines ---------- */

@@ -168,6 +168,8 @@ service cloud.firestore {
         // is never reused). ⚠️ A RULE CANNOT LOOP OVER A LIST, so each version's own caps (a name of 1–40 characters,
         // 1–8 changes of 1–80) are the single writer's (lib/bookVersions.ts) and its tests', not this rule's.
         && (!data.keys().hasAny(['inUseBookVersionId']) || isValidId(data.inUseBookVersionId))
+        // QUERY LETTERS v1 (6 Nov) — the letter new non-package queries go out with. Optional, no backfill.
+        && (!data.keys().hasAny(['inUseLetterId']) || isValidId(data.inUseLetterId))
         && (!data.keys().hasAny(['bookVersionSeq']) || (data.bookVersionSeq is int && data.bookVersionSeq >= 0 && data.bookVersionSeq <= 10000))
         && data.status is string && (
           data.status == 'Drafting' ||
@@ -260,7 +262,11 @@ service cloud.firestore {
       // Rules cannot iterate the list, and cannot tell whether the letter has been sent (that needs a
       // QUERY over the user's queries, which rules cannot run), so "a sent letter's comps are fixed"
       // is enforced by the client (db.tsx updateVersion), not here.
-      && (!data.keys().hasAll(['compIds']) || (data.compIds is list && data.compIds.size() <= 12));
+      && (!data.keys().hasAll(['compIds']) || (data.compIds is list && data.compIds.size() <= 12))
+      // Query letters v1 (6 Nov): the letter this one was written from, and what changed (1–8 short lines; each line's
+      // length is the client's, as Versions' changes are). Both optional, letters only by the client.
+      && (!data.keys().hasAny(['parentId']) || (data.parentId is string && data.parentId.size() <= 128))
+      && (!data.keys().hasAny(['changes']) || (data.changes is list && data.changes.size() <= 8));
     }
 
     function isValidPackage(data, userId) {
@@ -933,6 +939,8 @@ service cloud.firestore {
             'title', 'genre', 'subGenres', 'ageCategory', 'wordCount', 'logline', 'comps', 'status', 'shelvedReason', 'statusChangedDate', 'notes', 'shelved', 'activePackageId', 'bookVersions',
             // Versions v2 (D2, D1)
             'inUseBookVersionId', 'bookVersionSeq',
+            // Query letters v1 (6 Nov)
+            'inUseLetterId',
             // book profile amendment 2 — see the two clauses in isValidManuscript above.
             'elevatorPitch', 'synopsis',
             // Manuscripts v12 — the hero's setting and series, and nothing else (the ruling was
@@ -962,7 +970,7 @@ service cloud.firestore {
           // be perfectly validated above and still be undeployable, because isValidVersion runs on
           // every write while hasOnly runs only on updates. Archiving IS an update and nothing else,
           // so leaving it out here would deny every archive silently while the validator said yes.
-          incoming().diff(existing()).affectedKeys().hasOnly(['versionName', 'fileAttached', 'fileName', 'contentDraft', 'notes', 'contentType', 'contentLink', 'wordCount', 'status', 'bookVersionId', 'compIds'])
+          incoming().diff(existing()).affectedKeys().hasOnly(['versionName', 'fileAttached', 'fileName', 'contentDraft', 'notes', 'contentType', 'contentLink', 'wordCount', 'status', 'bookVersionId', 'compIds', 'changes'])
         );
       }
 
