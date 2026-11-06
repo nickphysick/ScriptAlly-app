@@ -115,11 +115,9 @@ type Fit = { text: string; lines: number; inside: boolean; overflow: number };
 async function labelFits(page: Page): Promise<Fit[]> {
   return page.evaluate(() => {
     const out: Fit[] = [];
-    for (const el of document.querySelectorAll<HTMLElement>(".wsr .wsr-lbl, .wsr .wsr-spl, .wsr .wsr-t")) {
+    for (const el of document.querySelectorAll<HTMLElement>(".wsr .wsr-lbl, .wsr .wsr-t")) {
       const row = el.closest<HTMLElement>("button");
       if (!row || row.offsetWidth === 0 || getComputedStyle(row).visibility === "hidden") continue;
-      const tray = el.closest(".wsr-grp");
-      if (el.classList.contains("wsr-spl") && !tray?.classList.contains("open")) continue;
       if (el.closest(".wsr-setnav") && getComputedStyle(el.closest(".wsr-setnav")!).display === "none") continue;
       if (el.closest(".wsr-nav") && getComputedStyle(el.closest(".wsr-nav")!).display === "none") continue;
       const r = el.getBoundingClientRect();
@@ -148,7 +146,7 @@ async function navScroll(page: Page) {
 test.describe("sidebar rail v1 — Phase 2, the rail", () => {
   test("SR2.1 the rail is 80px and every label is one line inside its row", async ({ page }) => {
     await onRail(page);
-    await breakCss(page, "label", ".wsr-spl { font-size: 15px !important }");
+    await breakCss(page, "label", ".wsr-nav .wsr-lbl { font-size: 15px !important }");
     await breakCss(page, "railw", ".ws-panel { width: 84px !important }");
     const all: Fit[] = [];
     for (const route of ["/queries", "/agents", "/manuscripts/versions", "/todo", "/materials/letters", "/dashboard"]) {
@@ -161,9 +159,10 @@ test.describe("sidebar rail v1 — Phase 2, the rail", () => {
       console.log(`[SR2.1] ${route}`, JSON.stringify(fits.map((f) => `${f.text}:${f.lines}${f.inside ? "" : "!OUT"}`)));
       all.push(...fits);
     }
-    expect(all.length).toBeGreaterThan(20);
+    expect(all.length).toBeGreaterThan(30);
     const texts = new Set(all.map((f) => f.text));
-    for (const t of ["Dashboard", "Queries", "Agents", "Your book", "Materials", "Tasks", "Query Centre", "Responses", "Analytics", "Contact list", "Discover", "Manuscripts", "Versions", "Query letters", "Comps", "Packages", "To-do list", "Corkboard", "Feedback"]) {
+    /* sidebar rail v2: the five places and More, which takes the More page's short name (Versions here) */
+    for (const t of ["Dashboard", "Queries", "Agents", "Letters", "Tasks", "More", "Versions", "Feedback"]) {
       expect([...texts], `label "${t}" was measured`).toContain(t);
     }
     const cut = all.filter((f) => f.lines !== 1 || !f.inside || f.overflow > 0);
@@ -177,43 +176,23 @@ test.describe("sidebar rail v1 — Phase 2, the rail", () => {
 
   test("SR2.2 the nav scrolls only on a short window, with the head and foot in view", async ({ page }) => {
     await onRail(page);
-    await breakCss(page, "scroll", ".wsr-grp .wsr-ni { height: 92px !important }");
-    /* dev's nav has five sections, one row fewer than the pack was drawn with: at 760 it now fits, so the
-       scrolling case is 640, where the rows cannot fit. 760 is reported, and still keeps its head and foot. */
+    await breakCss(page, "scroll", ".wsr-nav .wsr-ni { height: 92px !important }");
+    /* sidebar rail v2: six items, so the nav fits from 760 up; 640 is reported, and keeps its head and foot */
     for (const h of [982, 900, 760, 640]) {
       await openRoute(page, "/queries", { width: 1512, height: h });
       const r = await navScroll(page);
       console.log(`[SR2.2] ${h}px`, JSON.stringify(r));
-      if (h === 640) expect(r.scrolls, "640 scrolls").toBe(true);
-      else if (h !== 760) expect(r.scrolls, `${h} does not scroll`).toBe(false);
+      if (h !== 640) expect(r.scrolls, `${h} does not scroll`).toBe(false);
       expect(r.headTop).toBeGreaterThanOrEqual(0);
       expect(r.footBottom).toBeLessThanOrEqual(r.vh);
     }
-  });
-
-  test("SR2.3 a section goes back to the page last used in it", async ({ page }) => {
-    await onRail(page);
-    if (broken("memory")) await page.addInitScript(() => {
-      const set = Storage.prototype.setItem;
-      Storage.prototype.setItem = function (k: string, v: string) { if (k !== "scriptally:rail-last-page") set.call(this, k, v); };
-    });
-    await openRoute(page, "/agents", WIDE);
-    await page.locator('.wsr-grp[data-sec="agents"] .wsr-sp[data-go="a-disc"]').click();
-    await expect(page).toHaveURL(/\/agents\/discover$/);
-    await page.locator('.wsr-ni[data-sec="tasks"]').click();
-    await expect(page).toHaveURL(/\/todo$/);
-    await page.locator('.wsr-ni[data-sec="agents"]').click();
-    await expect(page).toHaveURL(/\/agents\/discover$/);
-    const cur = await page.locator('.wsr-grp[data-sec="agents"].open .wsr-sp.wsr-cur').textContent();
-    console.log("[SR2.3] Agents card marks", cur);
-    expect(cur?.trim()).toBe("Discover");
   });
 
   test("SR2.4 off-nav routes light nothing; settings swap in their own rail", async ({ page }) => {
     await onRail(page);
     await breakCss(page, "fullshow", ".set-mode .ws-panel > .ws-pin { opacity: 1 !important }");
     await openRoute(page, "/help", WIDE);
-    if (broken("offnav")) await page.evaluate(() => document.querySelector(".wsr-ni[data-sec=agents]")?.classList.add("wsr-on"));
+    if (broken("offnav")) await page.evaluate(() => document.querySelector(".wsr-ni[data-go=a-list]")?.classList.add("wsr-on"));
     expect(await page.locator(".wsr .wsr-on").count(), "/help lights nothing").toBe(0);
     await openRoute(page, "/account/profile", WIDE);
     await expect(page.locator(".wsr.wsr-settings")).toHaveCount(1);
@@ -231,7 +210,7 @@ test.describe("sidebar rail v1 — Phase 2, the rail", () => {
     await onRail(page);
     await page.addInitScript(() => { (window as unknown as { __SA_RAIL_COUNT?: number }).__SA_RAIL_COUNT = 128; });
     await openRoute(page, "/queries", WIDE);
-    const ct = page.locator('.wsr-ni[data-sec="tasks"] .wsr-ct');
+    const ct = page.locator('.wsr-ni[data-go="list"] .wsr-ct');
     if (broken("count")) await ct.evaluate((e) => { e.textContent = "128"; });
     await expect(ct).toHaveText("99+");
   });
@@ -525,64 +504,56 @@ test.describe("sidebar rail v1 — Phase 3, RAIL · FLOAT · PINNED", () => {
 });
 
 /* ── Phase 4 — screenshots (SR_SHOTS=<dir>; skipped without it) ─────────────────────────────────────── */
-test.describe("sidebar rail v1 — Phase 4, screenshots", () => {
+test.describe("sidebar rail v2 — screenshots", () => {
   test.use({ deviceScaleFactor: 2 });
   test.skip(!SHOTS, "SR_SHOTS names the folder");
 
-  test("SR4 the five screenshots at 1512×982 (sidebar materials v1)", async ({ page }) => {
+  test("RV2 screenshots at 1512×982: rail, More open, a More page, pinned, keyboard focus, a Free writer", async ({ page }) => {
     test.skip(!SHOTS, "set SR_SHOTS to a folder to write the screenshots");
     const full = async (name: string) => { await page.waitForTimeout(600); await page.screenshot({ path: `${SHOTS}/${name}.png` }); };
     await onRail(page);
-    await openMoving(page, "/materials/letters");
-    await expect(page.locator('.wsr-grp[data-sec="materials"].open')).toHaveCount(1);
-    await full("1-rail-query-letters-materials-open");
-    await openMoving(page, "/manuscripts/versions");
-    await expect(page.locator('.wsr-grp[data-sec="book"].open')).toHaveCount(1);
-    await full("2-rail-versions-your-book-open");
-    await openMoving(page, "/manuscripts/comps");
+    await openMoving(page, "/queries");
+    await full("01-rail-query-centre");
+    await page.locator('[data-go="more"]').click();
+    await expect(page.locator('[data-shell="more"]')).toBeVisible();
+    await full("02-more-open");
+    await page.locator('[data-shell="more"] [data-go="q-responses"]').click();
+    await expect(page).toHaveURL(/\/queries\/responses$/);
+    await full("03-more-page-responses");
     await expandFromRail(page);
     await page.locator(".ws-pinbtn").click();
     await expect.poll(() => mode(page)).toBe("pinned");
-    await full("3-pinned-comparable-titles");
-    /* a Free writer: the dev-only aid shuts every open-to-all switch, so the marks show */
+    await full("04-pinned");
+    await page.locator(".ws-pinbtn").click();
+    await expect.poll(() => mode(page)).toBe("rail");
+    await page.mouse.move(700, 500);
+    await page.locator('[data-go="more"]').focus();
+    await page.keyboard.press("Enter");
+    await page.keyboard.press("ArrowDown");
+    await full("05-keyboard-focus");
+    await page.keyboard.press("Escape");
     await page.addInitScript(() => { (globalThis as unknown as { __SA_NAV_FREE?: boolean }).__SA_NAV_FREE = true; });
-    await openMoving(page, "/manuscripts/versions");
-    /* openMoving puts the shell back on the rail; pin it again so the shot shows the full sidebar's marks */
-    if ((await mode(page)) !== "pinned") { await expandFromRail(page); await page.locator(".ws-pinbtn").click(); }
-    await expect.poll(() => mode(page)).toBe("pinned");
-    await expect(page.locator('.ws-pin .ws-gpro')).toBeVisible();
-    await full("4-pinned-free-writer-marks");
-    await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("/queries");
-    await expect(page.locator('[data-pa="tabbar"]')).toBeVisible({ timeout: 30_000 });
-    await page.waitForTimeout(800);
-    await page.screenshot({ path: `${SHOTS}/5-phone-bar.png` });
+    await openMoving(page, "/materials/letters");
+    await page.locator('[data-go="more"]').click();
+    await expect(page.locator('[data-shell="more"] [data-shell="pro"]').first()).toBeVisible();
+    await full("06-free-writer");
   });
 });
 
 /* ── Part D of sidebar materials v1: the two new cards ── */
 test.describe("sidebar materials v1 — the regrouped rail", () => {
-  test("SR6.1 Materials opens its card with three rows; Your book with two", async ({ page }) => {
+  test("SR6.1 the rail is five places and More, each one click to its own page", async ({ page }) => {
     await onRail(page);
-    await openRoute(page, "/materials/letters", WIDE);
-    const mat = page.locator('.wsr-grp[data-sec="materials"]');
-    await expect(mat).toHaveClass(/open/);
-    const rows = (await mat.locator(".wsr-sp").allTextContents()).map((t) => t.trim());
-    console.log("[SR6.1] Materials card", JSON.stringify(rows));
-    expect(rows).toEqual(["Query letters", "Comps", "Packages"]);
-    await expect(mat.locator('.wsr-sp.wsr-cur')).toHaveAttribute("data-go", "m-letters");
-    await expect(page.locator('.wsr-ni[data-sec="materials"] .wsr-lbl')).toHaveText("Materials");
-    /* the page itself: the light header's title and its one line */
-    await expect(page.locator('[data-ql="page"] h1')).toHaveText("Query letters");
-    await openRoute(page, "/manuscripts", WIDE);
-    const book = page.locator('.wsr-grp[data-sec="book"]');
-    await expect(book).toHaveClass(/open/);
-    const brows = (await book.locator(".wsr-sp").allTextContents()).map((t) => t.trim());
-    console.log("[SR6.1] Your book card", JSON.stringify(brows));
-    expect(brows).toEqual(["Manuscripts", "Versions"]);
-    /* the rail's section rows, in order */
-    const secs = (await page.locator(".wsr-grp .wsr-ni .wsr-lbl").allTextContents()).map((t) => t.trim());
-    expect(secs).toEqual(["Dashboard", "Queries", "Agents", "Your book", "Materials", "Tasks"]);
+    await openRoute(page, "/dashboard", WIDE);
+    const labels = (await page.locator(".wsr-nav .wsr-ni .wsr-lbl").allTextContents()).map((t) => t.trim());
+    console.log("[SR6.1] rail", JSON.stringify(labels));
+    expect(labels).toEqual(["Dashboard", "Queries", "Agents", "Letters", "Tasks", "More"]);
+    await expect(page.locator(".wsr-nav .wsr-sep")).toHaveCount(1);
+    await page.locator('.wsr-ni[data-go="m-letters"]').click();
+    await expect(page).toHaveURL(/\/materials\/letters$/);
+    await expect(page.locator('.wsr-ni[data-go="m-letters"]')).toHaveClass(/wsr-on/);
+    await expect(page.locator('.wsr-nav .wsr-on')).toHaveCount(1);
+    await expect(page.locator('[data-ql="page"]')).toBeVisible();
   });
   test("SR6.2 the full sidebar groups Materials under one heading with the full names", async ({ page }) => {
     await startPinned(page);
@@ -596,6 +567,102 @@ test.describe("sidebar materials v1 — the regrouped rail", () => {
     await expect(page.locator('.ws-pin .ws-ni.on')).toHaveAttribute("aria-label", "Query letters");
     /* a founding writer sees no Pro mark */
     expect(await page.locator('[data-shell="pro"]').count()).toBe(0);
+  });
+});
+
+/* ── sidebar rail v2: More ── */
+test.describe("sidebar rail v2 — More", () => {
+  const panel = (page: Page) => page.locator('[data-shell="more"]');
+  const more = (page: Page) => page.locator('.wsr [data-go="more"]');
+
+  test("RV2.1 hover opens after a beat, and leaving both closes it", async ({ page }) => {
+    await onRail(page);
+    await openMoving(page, "/queries");
+    await more(page).hover();
+    await expect(panel(page)).toBeVisible();
+    await expect(more(page)).toHaveAttribute("aria-expanded", "true");
+    const g = await page.evaluate(() => {
+      const p = document.querySelector<HTMLElement>('[data-shell="more"]')!.getBoundingClientRect();
+      const r = document.querySelector<HTMLElement>(".wsr")!.getBoundingClientRect();
+      const b = document.querySelector<HTMLElement>('.wsr [data-go="more"]')!.getBoundingClientRect();
+      return { gap: p.left - r.right, dTop: b.top - p.top, w: p.width, inside: p.bottom <= innerHeight };
+    });
+    console.log("[RV2.1] panel", JSON.stringify(g));
+    expect(g.gap).toBeCloseTo(8, 0);
+    expect(g.w).toBe(248);
+    expect(g.inside).toBe(true);
+    const heads = (await panel(page).locator(".wsm-h").allTextContents()).map((t) => t.trim());
+    expect(heads).toEqual(["Queries", "Agents", "Your book", "Materials", "Tasks"]);
+    const rows = (await panel(page).locator('[role="menuitem"] .wsm-lbl').allTextContents()).map((t) => t.trim());
+    expect(rows).toEqual(["Responses", "Analytics", "Discover", "Manuscripts", "Versions", "Comparable titles", "Submission packages", "Corkboard"]);
+    await expect(panel(page)).toContainText("The pages you use most live on the rail.");
+    await page.mouse.move(900, 500);
+    await expect(panel(page)).toHaveCount(0);
+  });
+
+  test("RV2.2 a click holds it open; a click outside closes it", async ({ page }) => {
+    await onRail(page);
+    await openMoving(page, "/queries");
+    await more(page).click();
+    await expect(panel(page)).toBeVisible();
+    await page.mouse.move(900, 500);
+    await page.waitForTimeout(500);
+    await expect(panel(page), "held after the pointer leaves").toBeVisible();
+    await clickPage(page);
+    await expect(panel(page)).toHaveCount(0);
+  });
+
+  test("RV2.3 the keyboard: Enter opens on the first row, arrows move, Escape closes and returns focus to More", async ({ page }) => {
+    await onRail(page);
+    await openMoving(page, "/queries");
+    await page.mouse.move(900, 500);
+    await more(page).focus();
+    await page.keyboard.press("Enter");
+    await expect(panel(page)).toBeVisible();
+    await expect(panel(page).locator('[role="menuitem"]').first()).toBeFocused();
+    await page.keyboard.press("ArrowDown");
+    await expect(panel(page).locator('[data-go="q-analytics"]')).toBeFocused();
+    await page.keyboard.press("End");
+    await expect(panel(page).locator('[data-go="noteboard"]')).toBeFocused();
+    await page.keyboard.press("Escape");
+    await expect(panel(page)).toHaveCount(0);
+    await expect(more(page)).toBeFocused();
+  });
+
+  test("RV2.4 choosing Responses lands there, with More lit and named Responses", async ({ page }) => {
+    await onRail(page);
+    await openMoving(page, "/queries");
+    await more(page).click();
+    await panel(page).locator('[data-go="q-responses"]').click();
+    await expect(page).toHaveURL(/\/queries\/responses$/);
+    await expect(panel(page)).toHaveCount(0);
+    await expect(more(page)).toHaveClass(/wsr-on/);
+    await expect(more(page).locator(".wsr-lbl")).toHaveText("Responses");
+    await expect(page.locator('.wsr-nav .wsr-on')).toHaveCount(1);
+    await more(page).click();
+    await expect(panel(page).locator('[aria-current="page"]')).toHaveAttribute("data-go", "q-responses");
+  });
+
+  test("RV2.5 a Free writer sees the Pro marks on Letters and in the panel", async ({ page }) => {
+    await onRail(page);
+    await page.addInitScript(() => { (globalThis as unknown as { __SA_NAV_FREE?: boolean }).__SA_NAV_FREE = true; });
+    await openMoving(page, "/queries");
+    await expect(page.locator('.wsr-ni[data-go="m-letters"] .wsr-pro')).toBeVisible();
+    await more(page).click();
+    const marked = await panel(page).locator('[data-shell="pro"]').evaluateAll((els) => els.map((e) => {
+      const row = e.closest("[data-go]"); return row ? row.getAttribute("data-go") : `heading:${(e.parentElement?.textContent ?? "").replace("Pro", "").trim()}`;
+    }));
+    console.log("[RV2.5] marks", JSON.stringify(marked));
+    expect(marked.sort()).toEqual(["a-disc", "heading:Materials", "m-ver"]);
+  });
+
+  test("RV2.6 the panel never opens while the sidebar is pinned or floating", async ({ page }) => {
+    await startPinned(page);
+    await openMoving(page, "/queries");
+    await expect.poll(() => mode(page)).toBe("pinned");
+    await page.locator('.wsr [data-go="more"]').evaluate((b) => { (b as HTMLElement).dispatchEvent(new MouseEvent("click", { bubbles: true })); });
+    await page.waitForTimeout(400);
+    await expect(panel(page)).toHaveCount(0);
   });
 });
 
