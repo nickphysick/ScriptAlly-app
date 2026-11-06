@@ -28,7 +28,7 @@ import {
 } from "../../lib/noteboard";
 import { newTag } from "../../lib/todoTags";
 import {
-  boardPrefs, chipCounts, dropOrder, frontBack, glance as glanceOf, inGlance, linkFields, linkOf, piles as pilesOf, sortBoard, tagsForPile,
+  boardPrefs, chipCounts, dropOrder, frontBack, glance as glanceOf, inGlance, linkFields, linkOf, piles as pilesOf, sortBoard, stillStarted, tagsForPile,
   type BoardSort, type BoardView, type GlanceKey, type NoteLink,
   dayLabel,
 } from "../../lib/corkboard";
@@ -48,6 +48,7 @@ import type { NoteExample } from "./noteboardExamples";
 import { SHORTCUTS, matchesShortcut, shortcutBlocked } from "../../lib/shortcuts";
 import { CbNoteDialog, type NoteDraftV2 } from "./corkboard/CbNoteDialog";
 import { CbAddTask, CbTurnTask, todayLocal } from "./corkboard/CbTaskDialogs";
+import { CbStartPile } from "./corkboard/CbStartPile";
 import { noteWords, type PostItLink } from "./corkboard/CbPostIt";
 import "./tasksLayout.css";
 import "./taskChrome.css";
@@ -117,6 +118,8 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
   const [fresh, setFresh] = useState<string | null>(null);
   /** Piles: the open pile's tag ("" is Loose notes), or null for All piles */
   const [openPile, setOpenPile] = useState<string | null>(null);
+  /* Corkboard v2.1: the Start a pile / Add notes pop-up — `k` null starts one, a tag id adds to it; `sel` ticked on open */
+  const [startFor, setStartFor] = useState<{ k: string | null; sel: string[] } | null>(null);
 
   /* ── the view, the sort and the order: remembered, one dotted leaf each ── */
   const prefs = boardPrefs(currentUser);
@@ -298,6 +301,7 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
     if (act.a === "task") setTaskFor(note);
     if (act.a === "untask") void detachTask(note);
     if (act.a === "pile") void moveToPile(note.id, act.k);
+    if (act.a === "newpile") setStartFor({ k: null, sel: [note.id] });
     if (act.a === "remove") void deleteNote(note);
   };
   const togglePin = async (note: UserTask) => {
@@ -344,7 +348,8 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
     const next = tagsForPile(was, k);
     try { await updateUserTask(n.id, { tags: next.length ? next : null }); }
     catch { flash("Couldn’t move that — try again?"); return; }
-    flash(`Moved to ${pileName(k)}`, { label: "Undo", fn: async () => { await updateUserTask(n.id, { tags: was.length ? was : null }); } });
+    const wasStarted = prefs.started.includes(k);
+    flash(`Moved to ${pileName(k)}`, { label: "Undo", fn: async () => { await updateUserTask(n.id, { tags: was.length ? was : null }); if (wasStarted) await reStart(k); } });
   };
   /* a new pile mints its tag through the app's own minter (resolveTag → newTag / createTagDef) */
   const newPile = async (noteId: string, name: string) => {
@@ -359,6 +364,65 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
     flash(`Started a new pile: #${name.trim().replace(/^#/, "")}`, {
       label: "Undo", fn: async () => { await updateUserTask(n.id, { tags: was.length ? was : null }); },
     });
+  };
+
+  /* ── Corkboard v2.1: piles started here with no notes (todoPrefs.noteboard.started, one leaf). Only tags that still
+     exist are listed; a started pile leaves the list once it carries a note (by any route), and Remove pile takes it
+     off the list only — the tag definition is never deleted. ── */
+  const started = prefs.started.filter((k) => userTags.some((t) => t.id === k));
+  const startedKey = prefs.started.join(",");
+  useEffect(() => {
+    if (!settled || !collectionsReady) return;
+    const keep = stillStarted(prefs.started, storedTasks);
+    if (keep.length !== prefs.started.length) void updateUserPaths({ "todoPrefs.noteboard.started": keep }).catch(() => {});
+  }, [startedKey, storedTasks, settled, collectionsReady]); // eslint-disable-line react-hooks/exhaustive-deps
+  /** an Undo that empties a started pile again puts it back on the list, so it does not vanish */
+  const startedRef = useRef(prefs.started);
+  startedRef.current = prefs.started;
+  const reStart = async (k: string) => {
+    const now = startedRef.current;
+    if (!now.includes(k)) await updateUserPaths({ "todoPrefs.noteboard.started": [...now, k] });
+  };
+  const removePile = async (k: string) => {
+    try { await updateUserPaths({ "todoPrefs.noteboard.started": prefs.started.filter((x) => x !== k) }); }
+    catch { flash("Couldn’t remove that pile — try again?"); return; }
+    setOpenPile(null);
+    flash(`Removed ${pileName(k)}`, { label: "Undo", fn: async () => { await reStart(k); setOpenPile(k); } });
+  };
+
+  /* ── Corkboard v2.1: start a pile (mint its tag, as New pile does) or add notes to one; each ticked note moves by
+     v2's rule (the pile's tag first, the rest kept), and Undo puts every note's tags back exactly ── */
+  const nNotes = (n: number) => `${n} ${n === 1 ? "note" : "notes"}`;
+  const startSave = async (name: string, ids: string[]) => {
+    const sp = startFor;
+    if (!sp) return;
+    let k = sp.k;
+    if (!k) {
+      const got = await resolveTag(name);
+      if (!got) { flash("Couldn’t start that pile — try again?"); return; }
+      k = got[0];
+    }
+    const pile = k;
+    const wasStarted = prefs.started.includes(pile);
+    const moved = ids.map((id) => userTasks.find((t) => t.id === id)).filter((t): t is UserTask => !!t);
+    const before = moved.map((n) => [n.id, [...(n.tags ?? [])]] as const);
+    try {
+      await Promise.all(moved.map((n) => { const next = tagsForPile(n.tags, pile); return updateUserTask(n.id, { tags: next.length ? next : null }); }));
+    } catch { flash(sp.k ? "Couldn’t add those — try again?" : "Couldn’t start that pile — try again?"); return; }
+    /* a pile started with no notes is remembered here, so it stays listed while empty (Part C) */
+    if (!sp.k && !moved.length && !prefs.started.includes(pile)) {
+      try { await updateUserPaths({ "todoPrefs.noteboard.started": [...prefs.started, pile] }); }
+      catch { flash("Couldn’t start that pile — try again?"); return; }
+    }
+    setStartFor(null);
+    setTagSel(null);
+    if (view !== "piles") void setBoardView("piles");
+    setOpenPile(pile);
+    const lbl = `#${sp.k ? tagLabel(sp.k) : name}`;
+    const undo = moved.length
+      ? { label: "Undo", fn: async () => { await Promise.all(before.map(([id, t]) => updateUserTask(id, { tags: t.length ? [...t] : null }))); if (wasStarted) await reStart(pile); } }
+      : undefined;
+    flash(sp.k ? `Added ${nNotes(moved.length)} to ${lbl}` : moved.length ? `Started ${lbl} with ${nNotes(moved.length)}` : `Started ${lbl}`, undo);
   };
 
   /* ── a note's link, and its door ── */
@@ -471,7 +535,7 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
                     </div>
                   ) : view === "piles" ? (
                     <CbPiles
-                      piles={pilesOf(board.map((n) => ({ id: n.id, tags: n.tags, hex: paperHex(n.colour), text: n.text, matches: matching.has(n.id) })), tagLabel)}
+                      piles={pilesOf(board.map((n) => ({ id: n.id, tags: n.tags, hex: paperHex(n.colour), text: n.text, matches: matching.has(n.id) })), tagLabel, started)}
                       label={pileName}
                       open={openPile}
                       onOpen={setOpenPile}
@@ -487,6 +551,10 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
                       }}
                       onMove={(id, k) => void moveToPile(id, k)}
                       onNewPile={(id, name) => void newPile(id, name)}
+                      onStart={() => setStartFor({ k: null, sel: [] })}
+                      onAddNotes={(k) => setStartFor({ k, sel: [] })}
+                      canRemove={(k) => started.includes(k)}
+                      onRemove={(k) => void removePile(k)}
                     />
                   ) : (
                     <CbWall
@@ -500,6 +568,8 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
                         if (n) setMenu((m) => (m?.note.id === id ? null : { note: n, anchor }));
                       }}
                       onDrop={dropOnWall}
+                      /* Corkboard v2.1: the dashed "+ New note" tile, gone while find, a tag pill or a glance row narrows */
+                      onNew={narrowing ? undefined : () => openComposer()}
                     />
                   )}
                 </div>
@@ -515,9 +585,21 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
           pinned={!!menu.note.pinned}
           onTodo={!!menu.note.dueDate}
           view={view}
-          piles={pilesOf(board, tagLabel).filter((p) => p.k !== (menu.note.tags?.[0] ?? "")).map((p) => ({ k: p.k, name: pileName(p.k) }))}
+          piles={pilesOf(board, tagLabel, started).filter((p) => p.k !== (menu.note.tags?.[0] ?? "")).map((p) => ({ k: p.k, name: pileName(p.k) }))}
           onPick={onMenuPick}
           onClose={(returnFocus) => { setMenu((m) => { if (m && returnFocus) m.anchor.focus(); return null; }); }}
+        />
+      )}
+
+      {startFor && (
+        <CbStartPile
+          adding={startFor.k ? pileName(startFor.k) : null}
+          notes={board.filter((n) => !startFor.k || (n.tags?.[0] ?? "") !== startFor.k)
+            .map((n) => ({ id: n.id, hex: paperHex(n.colour), text: n.text, pile: pileName(n.tags?.[0] ?? "") }))}
+          have={new Set(pilesOf(board, tagLabel, started).filter((p) => p.k).map((p) => tagLabel(p.k).toLowerCase()))}
+          initial={startFor.sel}
+          onSave={(name, ids) => void startSave(name, ids)}
+          onClose={() => setStartFor(null)}
         />
       )}
 

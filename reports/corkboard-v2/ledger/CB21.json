@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "CB21",
+  "where": "1280 closed",
+  "ok": true,
+  "detail": "scrollWidth 1280 / 1280"
+ },
+ {
+  "lock": "CB21",
+  "where": "1280 open",
+  "ok": true,
+  "detail": "scrollWidth 1280 / 1280; dialog 360–920"
+ },
+ {
+  "lock": "CB21",
+  "where": "390 closed",
+  "ok": true,
+  "detail": "scrollWidth 390 / 390"
+ },
+ {
+  "lock": "CB21",
+  "where": "390 open",
+  "ok": true,
+  "detail": "scrollWidth 390 / 390; dialog 24–366"
+ }
+]

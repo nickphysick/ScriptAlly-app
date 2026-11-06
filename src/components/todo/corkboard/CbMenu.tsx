@@ -4,7 +4,8 @@
  *
  * CbMenu — a post-it's ⋯ menu (Corkboard v2, Part F; ref design-refs/corkboard-v13/, `openMenu`, screen 05), in this
  * order: Pin to top / Unpin · Move to front / Move to back (the Corkboard view) · ─ · Edit · Change colour… ·
- * Turn into a task… / Take off your to-do list · Change tag… · (Piles) ─ Move to pile: every other pile · ─ · Remove.
+ * Turn into a task… / Take off your to-do list · Change tag… · (Piles) ─ Move to pile: every other pile, then New pile…
+ * (v2.1) · ─ · Remove.
  *
  * It opens below its ⋯ (above it when there is no room), focuses its first item, moves with the arrow keys, closes
  * on Escape (focus back to the ⋯), on a press outside and on resize. It writes nothing: a pick names an action and
@@ -16,7 +17,7 @@ import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 
 export type MenuAct =
   | { a: "pin" } | { a: "front" } | { a: "back" } | { a: "edit" } | { a: "colour" } | { a: "task" } | { a: "untask" }
-  | { a: "tag" } | { a: "pile"; k: string } | { a: "remove" };
+  | { a: "tag" } | { a: "pile"; k: string } | { a: "newpile" } | { a: "remove" };
 
 export interface CbMenuProps {
   anchor: HTMLElement;
@@ -86,11 +87,13 @@ export const CbMenu: React.FC<CbMenuProps> = ({ anchor, pinned, onTodo, view, pi
       {item("Change colour…", { a: "colour" })}
       {onTodo ? item("Take off your to-do list", { a: "untask" }) : item("Turn into a task…", { a: "task" })}
       {item("Change tag…", { a: "tag" })}
-      {view === "piles" && piles.length ? (
+      {view === "piles" ? (
         <>
           <hr />
           <div className="cb2-mlbl" role="presentation">Move to pile</div>
           {piles.map((p) => <React.Fragment key={p.k || "__loose"}>{item(p.name, { a: "pile", k: p.k })}</React.Fragment>)}
+          {/* Corkboard v2.1: New pile… ends the group, and opens Start a pile with this note ticked */}
+          {item("New pile…", { a: "newpile" })}
         </>
       ) : null}
       <hr />

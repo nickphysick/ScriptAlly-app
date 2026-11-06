@@ -12,6 +12,7 @@
  */
 import type { Agent, Manuscript, Query, UserTask } from "../types";
 import { MONTHS_SHORT } from "./dates";
+import { normaliseTagLabel } from "./todoTags";
 
 /** How many notes carry each tag id; `null` is "All". Read from the UNFILTERED list, like the pills. */
 export function chipCounts(notes: readonly Pick<UserTask, "tags">[]): Map<string | null, number> {
@@ -28,17 +29,18 @@ export const TODO_OPEN_TASK_KEY = "sa.todoOpenTask";
 
 export type BoardView = "board" | "piles";
 export type BoardSort = "mine" | "new" | "old" | "colour";
-export interface BoardPrefs { view: BoardView; sort: BoardSort; order: string[] }
+export interface BoardPrefs { view: BoardView; sort: BoardSort; order: string[]; started: string[] }
 
 /**
  * The v2 preferences, read TOTALLY from `todoPrefs.noteboard`. v1's `free` / `tidy` read as `board`; an absent or
  * unknown sort reads `new`. `layout` and `dismissedExamples` are no longer read (they stay on the document).
  */
-export function boardPrefs(user: { todoPrefs?: { noteboard?: { view?: unknown; sort?: unknown; order?: unknown } } } | undefined | null): BoardPrefs {
+export function boardPrefs(user: { todoPrefs?: { noteboard?: { view?: unknown; sort?: unknown; order?: unknown; started?: unknown } } } | undefined | null): BoardPrefs {
   const raw = user?.todoPrefs?.noteboard;
   const sort: BoardSort = raw?.sort === "mine" || raw?.sort === "old" || raw?.sort === "colour" || raw?.sort === "new" ? raw.sort : "new";
   const order = Array.isArray(raw?.order) ? (raw!.order as unknown[]).filter((x): x is string => typeof x === "string") : [];
-  return { view: raw?.view === "piles" ? "piles" : "board", sort, order };
+  const started = Array.isArray(raw?.started) ? (raw!.started as unknown[]).filter((x): x is string => typeof x === "string" && !!x) : [];
+  return { view: raw?.view === "piles" ? "piles" : "board", sort, order, started };
 }
 
 export const SORT_LABEL: Readonly<Record<BoardSort, string>> = { mine: "My order", new: "Newest first", old: "Oldest first", colour: "By colour" };
@@ -149,8 +151,10 @@ export function frontBack(shown: readonly string[], id: string, where: "front" |
 
 /** Piles, A to Z by the tag's label, Loose notes last. `label` resolves a tag id. */
 export interface Pile<T> { k: string; notes: T[] }
-export function piles<T extends Pick<UserTask, "tags">>(notes: readonly T[], label: (id: string) => string): Pile<T>[] {
+export function piles<T extends Pick<UserTask, "tags">>(notes: readonly T[], label: (id: string) => string, started: readonly string[] = []): Pile<T>[] {
   const m = new Map<string, T[]>();
+  /* Corkboard v2.1: a pile started here with no notes yet is listed, empty (the caller passes only tags that exist) */
+  for (const k of started) if (k) m.set(k, []);
   for (const n of notes) { const k = pileOf(n); if (!m.has(k)) m.set(k, []); m.get(k)!.push(n); }
   const keys = [...m.keys()].filter((k) => k).sort((a, b) => label(a).localeCompare(label(b)));
   if (m.has("")) keys.push("");
@@ -205,3 +209,14 @@ export const DUE_CHIPS = [
 const WD = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 /** "Sun 18 Oct" — the month from the app's one month table (lib/dates) */
 export const dayLabel = (ymd: string) => { const d = dayOfYmd(ymd); return `${WD[d.getDay()]} ${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}`; };
+
+/* ── Corkboard v2.1: starting a pile ── */
+/** The Start a pile pop-up's suggestions, in the ref's order; those already piles are left out (up to six shown). */
+export const PILE_SUGGESTIONS = ["agents", "letter", "synopsis", "comps", "ideas", "research", "to-check"] as const;
+/** A typed pile name → the tag label it mints: no "#", spaces as hyphens, then the app's own tag normaliser. */
+export const pileSlug = (raw: string): string => normaliseTagLabel(raw.trim().replace(/^#+/, "").replace(/\s+/g, "-"));
+/** The started-here tags that are still empty: a started pile that has gained a note leaves the list. */
+export function stillStarted(started: readonly string[], notes: readonly Pick<UserTask, "tags">[]): string[] {
+  const used = new Set(notes.map(pileOf).filter(Boolean));
+  return started.filter((k) => !used.has(k));
+}

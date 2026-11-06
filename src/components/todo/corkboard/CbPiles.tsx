@@ -34,11 +34,18 @@ export interface CbPilesProps {
   onMenu: (id: string, anchor: HTMLElement) => void;
   onMove: (noteId: string, pile: string) => void;
   onNewPile: (noteId: string, name: string) => void;
+  /** Corkboard v2.1: the dashed "+ Start a pile" tile at the grid's end (ref v14 `#ghostPile`) */
+  onStart?: () => void;
+  /** Corkboard v2.1: "+ Add notes to this pile" in an open named pile */
+  onAddNotes?: (k: string) => void;
+  /** Corkboard v2.1 (Part C): an empty pile started here can be removed (off the started list only) */
+  canRemove?: (k: string) => boolean;
+  onRemove?: (k: string) => void;
 }
 
 const nNotes = (n: number) => `${n} ${n === 1 ? "note" : "notes"}`;
 
-export const CbPiles: React.FC<CbPilesProps> = ({ piles, label, open, onOpen, wall, draggable, narrowing, find, menuFor, onOpenNote, onMenu, onMove, onNewPile }) => {
+export const CbPiles: React.FC<CbPilesProps> = ({ piles, label, open, onOpen, wall, draggable, narrowing, find, menuFor, onOpenNote, onMenu, onMove, onNewPile, onStart, onAddNotes, canRemove, onRemove }) => {
   const [over, setOver] = useState<string | null>(null);
   const [naming, setNaming] = useState<string | null>(null);
   const [name, setName] = useState("");
@@ -52,6 +59,15 @@ export const CbPiles: React.FC<CbPilesProps> = ({ piles, label, open, onOpen, wa
   if (open === null || !cur) {
     return (
       <div className="cb2-piles" data-cb2="piles">
+        <div className="cb2-phead" data-cb2="piles-head">
+          <div>
+            <h2>Your piles</h2>
+            <p>{piles.some((p) => p.k)
+              ? "A pile is a tag. Open one to see its notes, or drag a note onto another pile to move it."
+              : "A pile gathers notes on the same theme, like agents to look into or synopsis notes. Start one and pick the notes to go in it."}</p>
+          </div>
+          <button type="button" className="cb2-btn cb2-btn--navy cb2-btn--sm2" data-cb2="start-pile-btn" onClick={() => onStart?.()}>+ Start a pile</button>
+        </div>
         <div className="cb2-pgrid">
           {piles.map((p) => {
             const top = p.notes.slice(0, 3);
@@ -62,18 +78,24 @@ export const CbPiles: React.FC<CbPilesProps> = ({ piles, label, open, onOpen, wa
               <button key={p.k || "__loose"} type="button" className={`cb2-pile${dim ? " cb2-pile--dim" : ""}`} data-pile={p.k}
                 aria-label={`${label(p.k)}, ${nNotes(p.notes.length)}`} onClick={() => onOpen(p.k)}>
                 <div className="cb2-stack">
-                  {top.slice().reverse().map((n, i, a) => (
+                  {top.length ? top.slice().reverse().map((n, i, a) => (
                     <div key={n.id} className={`cb2-paper cb2-s${a.length - i}`} style={{ ["--c" as string]: n.hex }}>
                       <div className="cb2-body cb2-body--pile">{n.text}</div>
                     </div>
-                  ))}
+                  )) : <div className="cb2-emptystack" data-cb2="empty-stack">Nothing in it yet</div>}
                 </div>
                 <div className="cb2-lab"><b>{label(p.k)}</b><span>{nNotes(p.notes.length)}</span></div>
               </button>
             );
           })}
+          <div className="cb2-gwrap">
+            <button type="button" className="cb2-ghost" data-cb2="ghost-pile" onClick={() => onStart?.()}>
+              <b>+ Start a pile</b>
+              <small>Name it, then pick the notes</small>
+            </button>
+            <div className="cb2-glab">New pile</div>
+          </div>
         </div>
-        <p className="cb2-hint2">Notes pile up by their tag. Open a pile, then drag a note onto another pile to move it.</p>
       </div>
     );
   }
@@ -119,8 +141,21 @@ export const CbPiles: React.FC<CbPilesProps> = ({ piles, label, open, onOpen, wa
           ) : <><b>New pile</b><small>drop a note here</small></>}
         </div>
       </div>
-      <div className="cb2-openhead"><h2>{label(cur.k)}</h2><span>{nNotes(cur.notes.length)}</span></div>
-      <CbWall notes={wall} draggable={draggable} reorder={false} menuFor={menuFor} onOpen={onOpenNote} onMenu={onMenu} />
+      <div className="cb2-openhead">
+        <h2>{label(cur.k)}</h2><span>{nNotes(cur.notes.length)}</span><span className="cb2-grow" />
+        {cur.k && !cur.notes.length && canRemove?.(cur.k)
+          ? <button type="button" className="cb2-rmpile" data-cb2="remove-pile" onClick={() => onRemove?.(cur.k)}>Remove pile</button> : null}
+        {cur.k ? <button type="button" className="cb2-btn cb2-btn--sm2" data-cb2="add-notes" onClick={() => onAddNotes?.(cur.k)}>+ Add notes to this pile</button> : null}
+      </div>
+      {cur.notes.length
+        ? <CbWall notes={wall} draggable={draggable} reorder={false} menuFor={menuFor} onOpen={onOpenNote} onMenu={onMenu} />
+        : (
+          <div className="cb2-pempty" data-cb2="pile-empty"
+            onDragOver={draggable ? (e) => e.preventDefault() : undefined}
+            onDrop={draggable ? (e) => { e.preventDefault(); const id = e.dataTransfer.getData("text/plain"); if (id) onMove(id, cur.k); } : undefined}>
+            <b>Nothing in this pile yet</b>Add notes with the button above, or drag one here from another pile.
+          </div>
+        )}
     </div>
   );
 };
