@@ -33,6 +33,8 @@ export interface QueryOut {
   src?: { p: number; y: [number, number] };
   lineRaw?: string;
   markRaw?: string;
+  /** Photos only (v1.2): what a key written on the page says the mark means ("pass"). */
+  markMeaning?: string;
 }
 
 export interface AssembleOpts {
@@ -65,6 +67,16 @@ export function cleanReadings(v: unknown): string[] | null {
   return out.length ? out : null;
 }
 
+/** v1.2: a name the writer marked as unsure ("Leo Fairbairn?", "Leo Fairbairn (?)"), without the
+ *  mark; null when the name carries none. The mark is never saved as part of a name. */
+export function unsureName(name: unknown): string | null {
+  if (typeof name !== "string") return null;
+  const m = name.match(/^(.*?)\s*(?:\(\s*\?\s*\)|\?+)\s*$/);
+  if (!m || m[1] === name) return null;
+  const bare = m[1].trim();
+  return bare ? bare : null;
+}
+
 const trimOrNull = (v: unknown): string | null => {
   if (v === null || v === undefined) return null;
   const s = String(v).trim();
@@ -86,6 +98,13 @@ const isBareSerial = (raw: string | null): boolean => {
 export function assembleResult(raw: any, opts: AssembleOpts = {}): any {
   if (!raw || typeof raw !== "object" || !Array.isArray(raw.queries)) return raw;
   const photos = opts.photos ?? null;
+
+  /* v1.2: a photo read's agents whose name carries a "?" — read as the name without it, and asked
+     about (check-reading, with that name as the only reading). Keyed by ref for the queries below. */
+  const unsure = new Set<string>();
+  if (photos && Array.isArray(raw.agents)) {
+    for (const a of raw.agents) if (a && typeof a === "object" && unsureName(a.name) && typeof a.ref === "string") unsure.add(a.ref);
+  }
 
   // Pass 1 — resolve every non-serial sent date to build the file's date span (the serial-outlier
   // oracle). Serials are excluded so one weird serial can't stretch the span it's measured against.
@@ -110,6 +129,7 @@ export function assembleResult(raw: any, opts: AssembleOpts = {}): any {
     }
     // Parser's mechanical code for the sent date (missing-day / serial-outlier / no-date).
     if (sent.reason) reasons.add(sent.reason);
+    if (unsure.has(q?.agentRef)) reasons.add("check-reading");
 
     // Timeline events — parse each note-derived rawDate the same deterministic way, anchored to the
     // query's sent year so a year-less event ("20/3") belongs to the year of the query it follows.
@@ -150,6 +170,9 @@ export function assembleResult(raw: any, opts: AssembleOpts = {}): any {
       if (lineRaw) out.lineRaw = lineRaw;
       const markRaw = trimOrNull(q?.markRaw);
       if (markRaw && markRaw.length <= 12) out.markRaw = markRaw;
+      /* what the page's own key says that mark means: only beside a mark it can explain */
+      const markMeaning = trimOrNull(q?.markMeaning);
+      if (out.markRaw && markMeaning && markMeaning.length <= 40 && reasons.has("mark-unclear")) out.markMeaning = markMeaning;
     }
     return out;
   });
@@ -160,6 +183,12 @@ export function assembleResult(raw: any, opts: AssembleOpts = {}): any {
     ? raw.agents.map((a: any) => {
         if (!a || typeof a !== "object") return a;
         const { readings, ...rest } = a;
+        const bare = unsureName(rest.name);
+        if (bare) {
+          /* the mark comes off the name, and the name without it is the one reading to confirm */
+          const agency = trimOrNull(rest.agency);
+          return { ...rest, name: bare, readings: [agency ? `${bare}, ${agency}` : bare] };
+        }
         const r = cleanReadings(readings);
         return r ? { ...rest, readings: r } : rest;
       })

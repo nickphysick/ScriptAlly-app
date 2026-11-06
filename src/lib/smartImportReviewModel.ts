@@ -123,6 +123,8 @@ export interface ReviewQuery {
   src?: PageSource;
   lineRaw?: string;
   markRaw?: string;
+  /** v1.2: the page's own key for that mark ("pass"); the review's alone, never committed. */
+  markMeaning?: string;
   removed: boolean;
   removedReason?: "Agent removed" | "Removed by you";
   /** The timeline strip's "I don't have it": the sent date is unknown and the writer has said so.
@@ -136,7 +138,7 @@ const friendly = (issues?: string[]): string | null =>
 // ── Duplicate matching ────────────────────────────────────────────────────────────────────────────
 // Normalise an agency for comparison: lowercase, drop "& co" and common trade words/suffixes so
 // near-identical agencies match ("Pryce Lit" ≈ "Pryce Literary", "Okonkwo Lit" ≈ "Okonkwo Literary").
-const AGENCY_NOISE = /\b(literary|lit|agency|agencies|associates|management|mgmt|books|media|group|company|ltd|llc|inc|the)\b/g;
+const AGENCY_NOISE = /\b(literary|lit|agency|agencies|associates|assoc|management|mgmt|books|media|group|company|ltd|llc|inc|the)\b/g;
 export const agencyKey = (agency = ""): string =>
   agency.toLowerCase().replace(/&\s*co\b/g, " ").replace(AGENCY_NOISE, " ").replace(/[^a-z0-9]+/g, " ").trim();
 const surnameOf = (name = "") => { const p = name.trim().toLowerCase().split(/\s+/).filter(Boolean); return p[p.length - 1] || ""; };
@@ -157,6 +159,64 @@ export const nameCompatible = (n1 = "", n2 = ""): boolean => {
   if (!s1 || !s2 || s1 !== s2) return false;
   return firstNameCompatible(firstOf(n1), firstOf(n2));
 };
+
+/* ── Likely duplicates at the same agency (smart-import-photos v1.2) ─────────────────────────────
+   A list written by hand shortens names: "Jonah P." on one line, "Jonah Petrakis" on the next, at
+   "Heron" and "Heron Lit". Inside ONE agency the surname may also be an initial or a prefix of the
+   other's, so long as one half of the name is whole on both sides: the same first name with a
+   shortened surname, or the same surname with a shortened first name. Two shortened halves ("J. P."
+   and "Jonah Petrakis") are not enough. Never applied without a matching agency, and never merged:
+   the writer decides on the Duplicates step. */
+const surnameShortOf = (a: string, b: string): boolean => {
+  const x = a.replace(/\.$/, ""), y = b.replace(/\.$/, "");
+  if (!x || !y || x === y) return false;
+  const [short, long] = x.length <= y.length ? [x, y] : [y, x];
+  return long.startsWith(short);
+};
+export const nameCompatibleAtAgency = (n1 = "", n2 = ""): boolean => {
+  if (nameCompatible(n1, n2)) return true;
+  const p1 = n1.trim().split(/\s+/).filter(Boolean), p2 = n2.trim().split(/\s+/).filter(Boolean);
+  if (p1.length < 2 || p2.length < 2) return false;           // a first name alone has no surname to shorten
+  const f1 = firstOf(n1).replace(/\.$/, ""), f2 = firstOf(n2).replace(/\.$/, "");
+  return f1 === f2 && surnameShortOf(surnameOf(n1), surnameOf(n2));
+};
+/** Two agency keys name one agency when equal, or when one is the other's first word(s): "heron" /
+ *  "heron books" after the suffixes are gone ("Heron" / "Heron Lit" are already equal). */
+export const agencyKeysMatch = (k1: string, k2: string): boolean => {
+  if (!k1 || !k2) return false;
+  if (k1 === k2) return true;
+  const [short, long] = k1.length <= k2.length ? [k1, k2] : [k2, k1];
+  return long.startsWith(short + " ");
+};
+
+/* ── The fuller name, when a duplicate set becomes one agent (v1.2.1) ────────────────────────────
+   "Jonah P." at "Heron" and "Jonah Petrakis" at "Heron Lit" become "Jonah Petrakis" at "Heron Lit",
+   whichever row is kept. A form is fuller when the other abbreviates it word by word: each word equal
+   or a prefix ("P." of "Petrakis", "J." of "Jonah"), and any missing words at the end ("Jonah" of
+   "Jonah Petrakis", "Heron" of "Heron Lit"). The fullest is the one form every other form in the set
+   equals or abbreviates; with two different full forms there is none, and the kept row keeps its own. */
+const wordsOf = (s: string): string[] => s.toLowerCase().split(/\s+/).map((w) => w.replace(/\.+$/, "")).filter(Boolean);
+/** True when `short` is `long` written shorter (never when they are the same form). */
+export const abbreviates = (short: string, long: string): boolean => {
+  const s = wordsOf(short), l = wordsOf(long);
+  if (l.length === 0 || s.length > l.length) return false;
+  if (!s.every((w, i) => l[i].startsWith(w))) return false;
+  return s.length < l.length || s.some((w, i) => w !== l[i]);
+};
+const sameForm = (a: string, b: string): boolean => wordsOf(a).join(" ") === wordsOf(b).join(" ");
+const fullestOf = (kept: string, forms: string[]): string => {
+  const all = forms.filter((f) => f.trim());
+  const top = all.find((c) => all.every((o) => sameForm(o, c) || abbreviates(o, c)));
+  return top && !sameForm(top, kept) ? top : kept;
+};
+/** The name and agency the one agent takes. `edited`: the writer has changed a name or agency in the
+ *  set, so the kept row's own values stand (their word always wins). */
+export function fullerIdentity(set: { name: string; agency: string }[], kept: { name: string; agency: string }, edited = false): { name: string; agency: string } {
+  if (edited) return { name: kept.name, agency: kept.agency };
+  const keptKey = agencyKey(kept.agency);
+  const agencies = set.map((m) => m.agency).filter((a) => !keptKey || agencyKeysMatch(agencyKey(a), keptKey));
+  return { name: fullestOf(kept.name, set.map((m) => m.name)), agency: fullestOf(kept.agency, agencies) };
+}
 
 // ── Query dates, status options & reason copy ────────────────────────────────────────────────────
 const MONTHS = MONTHS_SHORT;
@@ -322,6 +382,7 @@ export function queryReasonText(code: ReviewReasonCode, q: ReviewQuery): string 
     case "crossed-out":
       return "This line is crossed out. What does that mean for this query?";
     case "mark-unclear":
+      if (q.markRaw && q.markMeaning) return `There's a "${q.markRaw}" after this line, and your key says ${q.markRaw} means "${q.markMeaning}". Is that right?`;
       return `There's a "${q.markRaw ?? "mark"}" beside this line. Where does this one stand?`;
   }
 }
@@ -402,23 +463,32 @@ export function parseModel(result: SmartImportResult): { agents: ReviewAgent[]; 
     if (key) (byAgency.get(key) ?? byAgency.set(key, []).get(key)!).push(a);
     else agencyLess.push(a);                        // agency missing → the name-only pool
   }
-  // Sub-cluster a group transitively (j ↔ jon ↔ jonathan all merge) — shared by both passes.
-  const subCluster = (group: ReviewAgent[]): ReviewAgent[][] => {
+  /* v1.2: agency keys where one is the other's first word(s) ("heron" / "heron books") are one
+     bucket. Keys are joined to the shortest key they match, so two longer names never meet through
+     a shorter one unless each matches it. */
+  const keys = [...byAgency.keys()].sort((a, b) => a.length - b.length || a.localeCompare(b));
+  for (const k of keys) {
+    const into = keys.find((s) => s !== k && s.length < k.length && byAgency.has(s) && agencyKeysMatch(s, k));
+    if (into) { byAgency.get(into)!.push(...byAgency.get(k)!); byAgency.delete(k); }
+  }
+  // Sub-cluster a group transitively (j ↔ jon ↔ jonathan all merge) — shared by both passes. Inside
+  // an agency the looser name rule applies; the agency-less pool keeps the strict one.
+  const subCluster = (group: ReviewAgent[], same: (a: string, b: string) => boolean = nameCompatible): ReviewAgent[][] => {
     const clusters: ReviewAgent[][] = [];
     for (const a of group) {
-      const hit = clusters.find((c) => c.some((m) => nameCompatible(m.name, a.name)));
+      const hit = clusters.find((c) => c.some((m) => same(m.name, a.name)));
       if (hit) hit.push(a); else clusters.push([a]);
     }
     return clusters;
   };
-  const agencyClusters = [...byAgency.values()].flatMap(subCluster);
+  const agencyClusters = [...byAgency.values()].flatMap((g) => subCluster(g, nameCompatibleAtAgency));
   agencyLess = agencyLess.filter((a) => {
     const hits = agencyClusters.filter((c) => c.some((m) => nameCompatible(m.name, a.name)));
     if (hits.length !== 1) return true; // 0 = nothing to join; 2+ = ambiguous — stays in the pool
     hits[0].push(a); // joins AFTER the present-agency members, so the leader keeps its agency
     return false;
   });
-  for (const cluster of [...agencyClusters, ...subCluster(agencyLess)]) {
+  for (const cluster of [...agencyClusters, ...subCluster(agencyLess, nameCompatible)]) {
     if (cluster.length < 2) continue;
     const [leader, ...rest] = cluster;
     leader.mergeWith = rest.map((r) => r.id);
@@ -474,6 +544,7 @@ export function parseModel(result: SmartImportResult): { agents: ReviewAgent[]; 
       ...(q.src ? { src: q.src } : {}),
       ...(q.lineRaw ? { lineRaw: q.lineRaw } : {}),
       ...(q.markRaw ? { markRaw: q.markRaw } : {}),
+      ...(q.markRaw && q.markMeaning ? { markMeaning: q.markMeaning } : {}),
       removed: false,
     };
   });
@@ -629,6 +700,12 @@ export function mergedAwayByKeeper(agents: ReviewAgent[]): Map<string, ReviewAge
   return out;
 }
 
+/** Fill in the fuller name (v1.2.1) on a merge the writer did not make by picking a row. `originals`
+ *  is each agent's name and agency as read from the file, so an edit by the writer can be seen. */
+export interface FillIdentity { originals: ReadonlyMap<string, { name: string; agency: string }>; }
+export const originalsOf = (agents: ReviewAgent[]): FillIdentity["originals"] =>
+  new Map(agents.map((a): [string, { name: string; agency: string }] => [a.id, { name: a.name, agency: a.agency }]));
+
 /** Pure core of "Remove this one" on the duplicates stage (Fix 4 + the leader-removal fix). Sets aside
  *  ONLY the clicked record (`deleted` + setAsideStage "duplicates"), repoints its queries to the
  *  surviving keeper, and re-seats the rest of the cluster on a LIVE leader so a 3-way takes two
@@ -639,7 +716,8 @@ export function mergedAwayByKeeper(agents: ReviewAgent[]): Map<string, ReviewAge
 export function removeDuplicateRecord(
   agents: ReviewAgent[],
   queries: ReviewQuery[],
-  removedId: string
+  removedId: string,
+  fill?: FillIdentity
 ): { agents: ReviewAgent[]; queries: ReviewQuery[]; survivorId: string | null } {
   const leader = agents.find((a) => !a.deleted && !a.mergeResolved && a.mergeWith.length > 0 && (a.id === removedId || a.mergeWith.includes(removedId)));
   if (!leader) return { agents, queries, survivorId: null };
@@ -651,6 +729,15 @@ export function removeDuplicateRecord(
   const newLeaderId = survivorId;
   const newMergeWith = remaining.filter((id) => id !== newLeaderId);
 
+  /* v1.2.1: when the set becomes one agent and the writer did not pick the row, the agent takes the
+     set's fuller name and agency, from the rows still live in it. A row the writer has already
+     removed ("Remove this one") was their choice, so its name never comes back. */
+  const identity = resolvingToOne && fill ? (() => {
+    const set = agents.filter((a) => groupIds.includes(a.id));
+    const edited = set.some((a) => { const o = fill.originals.get(a.id); return !!o && (o.name !== a.name || o.agency !== a.agency); });
+    const kept = agents.find((a) => a.id === survivorId)!;
+    return fullerIdentity(set, kept, edited);
+  })() : null;
   const nextQueries = queries.map((q) => (q.agentRef === removedId ? { ...q, agentRef: survivorId } : q));
   const nextAgents = agents.map((a) => {
     // Set aside the clicked record only — and clear its mergeWith so it can never anchor a cluster.
@@ -663,7 +750,7 @@ export function removeDuplicateRecord(
         const reasons = a.reasons.some((r) => r.kind === "duplicate")
           ? a.reasons.map((r) => (r.kind === "duplicate" ? { ...r, resolved: true, undoable: false, note: dupNoteMerged } : r))
           : a.reasons;
-        return { ...a, mergeResolved: true, mergeWith: [], reasons };
+        return { ...a, ...(identity ?? {}), mergeResolved: true, mergeWith: [], reasons };
       }
       return a;
     }
@@ -741,9 +828,10 @@ export function applyDuplicateCollapse(
   agents: ReviewAgent[],
   queries: ReviewQuery[],
   removedId: string,
-  keptStatus?: QueryStatus
+  keptStatus?: QueryStatus,
+  fill?: FillIdentity
 ): { agents: ReviewAgent[]; queries: ReviewQuery[]; survivorId: string | null } {
-  const merged = removeDuplicateRecord(agents, queries, removedId);
+  const merged = removeDuplicateRecord(agents, queries, removedId, fill);
   if (!merged.survivorId) return merged;
   const survivorId = merged.survivorId;
   const rows = merged.queries.filter((q) => !q.removed && q.agentRef === survivorId);

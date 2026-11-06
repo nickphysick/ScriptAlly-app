@@ -39,11 +39,18 @@ export async function decideDuplicates(page: Page, opts: { scope?: string; keepO
   return n;
 }
 
+/** Type a date into a review card's date field (v1.2: the strip's DatePick, read day first; a
+ *  native date input before). `iso` is YYYY-MM-DD. */
+export async function fillDate(scope: Locator, iso: string) {
+  const [y, m, d] = iso.split("-").map(Number);
+  await scope.locator('[data-dpick="input"]').first().fill(`${d}/${m}/${y}`);
+}
+
 /** Answer one open queries question by its reason. */
 export async function answerQuery(r: Locator, opts: { date?: string; undated?: boolean } = {}) {
   const code = await r.getAttribute("data-reason");
   const press = async (name: RegExp) => { await tap(r.getByRole("button", { name }).first()); };
-  const typeDate = async (iso: string) => { await r.locator('input[type="date"]').first().fill(iso); await press(/^Save date$/); };
+  const typeDate = async (iso: string) => { await fillDate(r, iso); await press(/^Save date$/); };
   switch (code) {
     case "timeline": return answerStrip(r);
     case "missing-day": return press(/^Keep as month$/);
@@ -87,6 +94,8 @@ export async function answerAgents(page: Page, opts: { scope?: string } = {}): P
     else if (await by("Mark as checked").count()) await tap(by("Mark as checked").first());
     else if (await by("Remove this row").count()) await tap(by("Remove this row").first());
     else if (await by("Merge them").count()) await tap(by("Merge them").first());
+    /* a name or agency to check (photos): the first reading offered */
+    else if (await card.locator("[data-reading]").count()) await tap(card.locator("[data-reading]").first());
     else break;
     n++;
   }

@@ -40,8 +40,10 @@ const run = (cmd, args) => {
   if (r.status !== 0) process.exit(r.status ?? 1);
 };
 const quote = (a) => `'${String(a).replace(/'/g, `'\\''`)}'`;
+/* ⚠️ EVERY EMULATOR RUN GOES THROUGH scripts/emu-guard.mjs (disk pre-flight, debug logs to /dev/null,
+ * a watchdog, cleanup on exit). Never call `firebase emulators:*` directly — see that file. */
 const exec = (inner, extra = []) =>
-  run("npx", ["firebase", "emulators:exec", "--config", "firebase.emulator.json", "--only", ONLY, "--project", PROJECT, ...extra, inner]);
+  run("node", ["scripts/emu-guard.mjs", "npx", "firebase", "emulators:exec", "--config", "firebase.emulator.json", "--only", ONLY, "--project", PROJECT, ...extra, inner]);
 
 function seed() {
   exec("node tests/emulator-seed/seed.mjs", ["--export-on-exit", DATA]);

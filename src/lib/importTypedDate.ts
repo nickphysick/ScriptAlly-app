@@ -100,3 +100,20 @@ export const stepMonth = (y: number, m: number, by: 1 | -1): [number, number] =>
   const k = y * 12 + (m - 1) + by;
   return [Math.floor(k / 12), (k % 12) + 1];
 };
+
+/**
+ * The month the writer's own words point to (smart-import-photos v1.2): "early Oct", "sometime in
+ * Sept", "late October 2025". The calendar opens on it. Only a MONTH is ever taken: a day is never
+ * set from these words. With a year written it is that year's month; without one, the most recent
+ * such month that has begun. Null when the words name no month.
+ * @returns YYYY-MM-01, for the calendar to open on
+ */
+export function monthHint(raw: string | null | undefined, today: string): string | null {
+  const words = (raw ?? "").toLowerCase().replace(/(\d)(st|nd|rd|th)\b/g, "$1").split(/[^a-z0-9]+/).filter(Boolean);
+  const m = words.map(monthOf).find((n) => n > 0) ?? 0;
+  if (!m) return null;
+  const yw = words.find((w) => /^(19|20)\d\d$/.test(w));
+  const [ty, tm] = parts(today);
+  const y = yw ? Number(yw) : m > tm ? ty - 1 : ty;
+  return isoOf(y, m, 1);
+}

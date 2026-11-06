@@ -8,7 +8,7 @@
  */
 import { test, expect } from "@playwright/test";
 import { lab, record, shot, noOverflow, settled, MUTATE, WIDE, PHONE } from "./ob9Lib";
-import { decideDuplicates, answerAgents, answerQueries } from "./reviewDrive";
+import { decideDuplicates, answerAgents, answerQueries, fillDate } from "./reviewDrive";
 
 /* ════ W1 · the welcome ════ */
 test.describe("W1", () => {
@@ -758,10 +758,10 @@ test.describe("G", () => {
     /* each card by who it is about: the question asked, then the answer given */
     const plan: Record<string, { ask: string; chip: string; do: () => Promise<void> }> = {
       "Meredith Quaye": { ask: 'Your sheet says “03/05/2026”. Which did you mean?', chip: "Date to confirm", do: async () => { await card(page).locator('.o9-pick[data-reading]').first().click(); } },
-      "Ruth Castellano": { ask: 'Your sheet says “06/08/2026”. Which did you mean?', chip: "Date to confirm", do: async () => { await card(page).getByRole("button", { name: "Neither · type the date" }).click(); await card(page).locator('input[type="date"]').fill("2026-06-18"); await card(page).getByRole("button", { name: "Save date" }).click(); } },
-      "Sean O'Brien": { ask: 'Your sheet says “sometime in May”. When was this sent?', chip: "Date needed", do: async () => { await card(page).locator('input[type="date"]').fill("2026-05-14"); await card(page).getByRole("button", { name: "Save date" }).click(); } },
+      "Ruth Castellano": { ask: 'Your sheet says “06/08/2026”. Which did you mean?', chip: "Date to confirm", do: async () => { await card(page).getByRole("button", { name: "Neither · type the date" }).click(); await fillDate(card(page), "2026-06-18"); await card(page).getByRole("button", { name: "Save date" }).click(); } },
+      "Sean O'Brien": { ask: 'Your sheet says “sometime in May”. When was this sent?', chip: "Date needed", do: async () => { await fillDate(card(page), "2026-05-14"); await card(page).getByRole("button", { name: "Save date" }).click(); } },
       "Aoife Brennan": { ask: 'Your sheet says “spring”. When was this sent?', chip: "Date needed", do: async () => { await card(page).getByRole("button", { name: "I don't have this date" }).click(); } },
-      "Priyanka": { ask: "Your sheet has no date for this one. When was it sent?", chip: "Date needed", do: async () => { await card(page).locator('input[type="date"]').fill("2026-04-02"); await card(page).getByRole("button", { name: "Save date" }).click(); } },
+      "Priyanka": { ask: "Your sheet has no date for this one. When was it sent?", chip: "Date needed", do: async () => { await fillDate(card(page), "2026-04-02"); await card(page).getByRole("button", { name: "Save date" }).click(); } },
       "Rhys Hale": { ask: 'Your sheet says “waiting”. Where does this one stand?', chip: "Status to clarify", do: async () => { await card(page).locator('[data-status="Partial Requested"]').click(); } },
       "Harbour & Vale": { ask: 'Your sheet says “sent partial?”. Where does this one stand?', chip: "Status to clarify", do: async () => { await card(page).locator('[data-status="Partial Sent"]').click(); } },
       "Tom Rafferty": { ask: 'Your sheet says “no”. Where does this one stand?', chip: "Status to clarify", do: async () => { await card(page).locator('[data-status="Rejected"]').click(); } },

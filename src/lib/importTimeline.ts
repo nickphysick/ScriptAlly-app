@@ -20,6 +20,7 @@ import { QueryStatus } from "../types";
 import type { ReviewReasonCode } from "../types/smartImport";
 import type { ReviewQuery, ReviewTimelineEvent } from "./smartImportReviewModel";
 import { STAGE_NAME, tileCourt } from "./qcSummary";
+import { monthHint } from "./importTypedDate";
 
 /** The event types the pop-over offers, in the order a query moves through them, with their labels. */
 export const STRIP_EVENT_TYPES: { type: QueryStatus; label: string }[] = [
@@ -188,4 +189,17 @@ export function calendarStart(q: ReviewQuery, target: "sent" | "new" | number, t
   const at = order.indexOf(target);
   for (let k = at - 1; k >= 0; k--) { const d = day(evs[order[k]].date); if (d) return d; }
   return day(q.sentDate) || today;
+}
+
+/**
+ * The month a single-date card's calendar opens on (smart-import-photos v1.2): the month the
+ * writer's own words name ("early Oct" → October), else the adjacent known date (the query's first
+ * dated event, else its sent date), else today. Only the month is taken from the words.
+ */
+export function cardCalendarStart(q: ReviewQuery, today: string, words: string | null | undefined = q.sentDateRaw): string {
+  const hinted = monthHint(words, today);
+  if (hinted) return hinted;
+  const evs = stripEvents(q);
+  const dated = stripOrder(evs).map((i) => day(evs[i].date)).filter(Boolean);
+  return dated[0] || day(q.sentDate) || today;
 }
