@@ -12,6 +12,7 @@
  */
 import type { Agent, Manuscript, Query, UserTask } from "../types";
 import { MONTHS_SHORT } from "./dates";
+import { normaliseTagLabel } from "./todoTags";
 
 /** How many notes carry each tag id; `null` is "All". Read from the UNFILTERED list, like the pills. */
 export function chipCounts(notes: readonly Pick<UserTask, "tags">[]): Map<string | null, number> {
@@ -205,3 +206,9 @@ export const DUE_CHIPS = [
 const WD = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 /** "Sun 18 Oct" — the month from the app's one month table (lib/dates) */
 export const dayLabel = (ymd: string) => { const d = dayOfYmd(ymd); return `${WD[d.getDay()]} ${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}`; };
+
+/* ── Corkboard v2.1: starting a pile ── */
+/** The Start a pile pop-up's suggestions, in the ref's order; those already piles are left out (up to six shown). */
+export const PILE_SUGGESTIONS = ["agents", "letter", "synopsis", "comps", "ideas", "research", "to-check"] as const;
+/** A typed pile name → the tag label it mints: no "#", spaces as hyphens, then the app's own tag normaliser. */
+export const pileSlug = (raw: string): string => normaliseTagLabel(raw.trim().replace(/^#+/, "").replace(/\s+/g, "-"));

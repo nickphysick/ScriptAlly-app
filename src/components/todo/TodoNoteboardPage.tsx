@@ -48,6 +48,7 @@ import type { NoteExample } from "./noteboardExamples";
 import { SHORTCUTS, matchesShortcut, shortcutBlocked } from "../../lib/shortcuts";
 import { CbNoteDialog, type NoteDraftV2 } from "./corkboard/CbNoteDialog";
 import { CbAddTask, CbTurnTask, todayLocal } from "./corkboard/CbTaskDialogs";
+import { CbStartPile } from "./corkboard/CbStartPile";
 import { noteWords, type PostItLink } from "./corkboard/CbPostIt";
 import "./tasksLayout.css";
 import "./taskChrome.css";
@@ -117,6 +118,8 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
   const [fresh, setFresh] = useState<string | null>(null);
   /** Piles: the open pile's tag ("" is Loose notes), or null for All piles */
   const [openPile, setOpenPile] = useState<string | null>(null);
+  /* Corkboard v2.1: the Start a pile / Add notes pop-up — `k` null starts one, a tag id adds to it; `sel` ticked on open */
+  const [startFor, setStartFor] = useState<{ k: string | null; sel: string[] } | null>(null);
 
   /* ── the view, the sort and the order: remembered, one dotted leaf each ── */
   const prefs = boardPrefs(currentUser);
@@ -298,6 +301,7 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
     if (act.a === "task") setTaskFor(note);
     if (act.a === "untask") void detachTask(note);
     if (act.a === "pile") void moveToPile(note.id, act.k);
+    if (act.a === "newpile") setStartFor({ k: null, sel: [note.id] });
     if (act.a === "remove") void deleteNote(note);
   };
   const togglePin = async (note: UserTask) => {
@@ -359,6 +363,35 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
     flash(`Started a new pile: #${name.trim().replace(/^#/, "")}`, {
       label: "Undo", fn: async () => { await updateUserTask(n.id, { tags: was.length ? was : null }); },
     });
+  };
+
+  /* ── Corkboard v2.1: start a pile (mint its tag, as New pile does) or add notes to one; each ticked note moves by
+     v2's rule (the pile's tag first, the rest kept), and Undo puts every note's tags back exactly ── */
+  const nNotes = (n: number) => `${n} ${n === 1 ? "note" : "notes"}`;
+  const startSave = async (name: string, ids: string[]) => {
+    const sp = startFor;
+    if (!sp) return;
+    let k = sp.k;
+    if (!k) {
+      const got = await resolveTag(name);
+      if (!got) { flash("Couldn’t start that pile — try again?"); return; }
+      k = got[0];
+    }
+    const pile = k;
+    const moved = ids.map((id) => userTasks.find((t) => t.id === id)).filter((t): t is UserTask => !!t);
+    const before = moved.map((n) => [n.id, [...(n.tags ?? [])]] as const);
+    try {
+      await Promise.all(moved.map((n) => { const next = tagsForPile(n.tags, pile); return updateUserTask(n.id, { tags: next.length ? next : null }); }));
+    } catch { flash(sp.k ? "Couldn’t add those — try again?" : "Couldn’t start that pile — try again?"); return; }
+    setStartFor(null);
+    setTagSel(null);
+    if (view !== "piles") void setBoardView("piles");
+    setOpenPile(pile);
+    const lbl = `#${sp.k ? tagLabel(sp.k) : name}`;
+    const undo = moved.length
+      ? { label: "Undo", fn: async () => { await Promise.all(before.map(([id, t]) => updateUserTask(id, { tags: t.length ? [...t] : null }))); } }
+      : undefined;
+    flash(sp.k ? `Added ${nNotes(moved.length)} to ${lbl}` : moved.length ? `Started ${lbl} with ${nNotes(moved.length)}` : `Started ${lbl}`, undo);
   };
 
   /* ── a note's link, and its door ── */
@@ -487,6 +520,8 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
                       }}
                       onMove={(id, k) => void moveToPile(id, k)}
                       onNewPile={(id, name) => void newPile(id, name)}
+                      onStart={() => setStartFor({ k: null, sel: [] })}
+                      onAddNotes={(k) => setStartFor({ k, sel: [] })}
                     />
                   ) : (
                     <CbWall
@@ -520,6 +555,18 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
           piles={pilesOf(board, tagLabel).filter((p) => p.k !== (menu.note.tags?.[0] ?? "")).map((p) => ({ k: p.k, name: pileName(p.k) }))}
           onPick={onMenuPick}
           onClose={(returnFocus) => { setMenu((m) => { if (m && returnFocus) m.anchor.focus(); return null; }); }}
+        />
+      )}
+
+      {startFor && (
+        <CbStartPile
+          adding={startFor.k ? pileName(startFor.k) : null}
+          notes={board.filter((n) => !startFor.k || (n.tags?.[0] ?? "") !== startFor.k)
+            .map((n) => ({ id: n.id, hex: paperHex(n.colour), text: n.text, pile: pileName(n.tags?.[0] ?? "") }))}
+          have={new Set(pilesOf(board, tagLabel).filter((p) => p.k).map((p) => tagLabel(p.k).toLowerCase()))}
+          initial={startFor.sel}
+          onSave={(name, ids) => void startSave(name, ids)}
+          onClose={() => setStartFor(null)}
         />
       )}
 
