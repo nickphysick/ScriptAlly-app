@@ -397,3 +397,48 @@ export function replyWords(w: number | null): [string, string] {
 
 /** "Query letter, synopsis and full manuscript" */
 export const andList = (a: readonly string[]): string => (a.length < 2 ? (a[0] ?? "") : `${a.slice(0, -1).join(", ")} and ${a[a.length - 1]}`);
+
+/* ── To-do list v52 Part B — the tray's Start here card, and the collapsed strip ─────────────────── */
+
+/** Start here's italic reason: "Due tomorrow", "8 days late", or "Nothing urgent" (the priority task's own urgency) */
+export function startReason(p: { task: WsTask | null; urgent: boolean }): string {
+  const d = p.task?.dueDays;
+  if (!p.task || !p.urgent || d == null) return "Nothing urgent";
+  if (d < 0) return `${-d} ${d === -1 ? "day" : "days"} late`;
+  if (d === 0) return "Due today";
+  if (d === 1) return "Due tomorrow";
+  return `Due in ${d} days`;
+}
+
+/** the collapsed strip's group words */
+export const STRIP_GROUP: Record<WsGroupId, string> = { wait: "Waiting", nudge: "Nudges", quiet: "Quiet", house: "Fill in", yours: "Yours" };
+
+export interface StripWords { name: string; what: string; when: string; hot: boolean }
+
+/**
+ * A task in the collapsed strip: who (the agent's first name, or an own task's first two words), what it is, and when
+ * ("8d late", "Today", "Tmrw", "7d", "16 wks"; nothing when undated). `hot` is terracotta: late, today or tomorrow.
+ */
+export function stripWords(t: WsTask): StripWords {
+  const name = t.kind === "own" ? (t.userTask?.text ?? t.title).trim().split(/\s+/).slice(0, 2).join(" ") : t.first;
+  let what: string;
+  switch (t.kind) {
+    case "send": what = t.query?.status === QueryStatus.FULL_REQUESTED ? "Full" : "Partial"; break;
+    case "rr": what = "Revision"; break;
+    case "offer": what = "Offer"; break;
+    case "nudge": what = "Nudge"; break;
+    case "quiet": what = "Quiet"; break;
+    case "fix": what = t.need === "responseTime" ? "Reply time" : t.need === "mswl" ? "Wishlist" : "What to send"; break;
+    case "own": what = "Your task"; break;
+    case "batch": what = "What you sent"; break;
+    case "other": what = "To do"; break;
+    default: { const unhandled: never = t.kind; what = unhandled; }
+  }
+  if (t.kind === "quiet") return { name, what, when: t.quietDays != null ? `${Math.round(t.quietDays / 7)} wks` : "", hot: false };
+  if (t.kind === "fix" || t.kind === "batch" || t.dueDays == null) return { name, what, when: "", hot: false };
+  const d = t.dueDays;
+  if (d < 0) return { name, what, when: `${-d}d late`, hot: true };
+  if (d === 0) return { name, what, when: "Today", hot: true };
+  if (d === 1) return { name, what, when: "Tmrw", hot: true };
+  return { name, what, when: `${d}d`, hot: false };
+}

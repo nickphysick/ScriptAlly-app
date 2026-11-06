@@ -24,8 +24,8 @@ import { localYMD } from "../../../lib/shellSidebar";
 import type { BoardCard } from "../../../lib/todoBoard";
 import { SWEEP_NEED, groupFor, trayItem, type TrayDb, type TrayItem } from "../../../lib/todoTray";
 import {
-  NO_WS_FILTERS, WS_GROUPINGS, WS_TYPES, WS_WHENS, dayBit, doingPhrase, dueChip, mentorLine, passes, priorityTask, quietSuggestion, whenOf, wsSections, wsTasks,
-  type QuietFacts, type WsFilters, type WsGrouping, type WsTask, type WsType, type WsWhen,
+  NO_WS_FILTERS, STRIP_GROUP, WS_GROUPINGS, WS_TYPES, WS_WHENS, dayBit, doingPhrase, dueChip, mentorLine, passes, priorityTask, quietSuggestion, startReason, stripWords, whenOf, wsSections, wsTasks,
+  type QuietFacts, type WsFilters, type WsGroupId, type WsGrouping, type WsTask, type WsType, type WsWhen,
 } from "../../../lib/todoWs";
 import { clearedThisWeek, type ClearedAct } from "../../../lib/todoCleared";
 import { setAsideItems, setAsideLabel, RULE_TITLE, RULE_PLAIN, type SetAsideItem } from "../../../lib/taskSettings";
@@ -62,11 +62,27 @@ import "./todoWs.css";
 
 const MENTOR = "/images/todo/mentor.webp";
 const HOUR = "/images/todo/hour.webp";
+/** Start here's quill and inkpot: the app's own copy (the pack's start-here-quill.webp is the same drawing, re-encoded) */
+const QUILL = "/images/query-centre/quill-ink.webp";
+/** the collapsed tray, remembered per device (v52 Part B) */
+const SLIM_KEY = "sa.todoTraySlim";
+const readSlim = (): boolean => { try { return localStorage.getItem(SLIM_KEY) === "1"; } catch { return false; } };
+const writeSlim = (v: boolean) => { try { localStorage.setItem(SLIM_KEY, v ? "1" : "0"); } catch { /* private mode */ } };
 const DAY = 86400000;
 const UNDO_MS = 7000;
 
 const SVG_FILTER = <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5h14M6 10h8M8.5 15h3" /></svg>;
 const SVG_GROUP = <svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="2.5" width="15" height="6" rx="1.6" /><rect x="2.5" y="11.5" width="15" height="6" rx="1.6" /></svg>;
+const SVG_SLIM = <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M11 5l-5 5 5 5M16 5l-5 5 5 5" /></svg>;
+const SVG_WIDE = <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 5l5 5-5 5M9 5l5 5-5 5" /></svg>;
+/* housekeeping's job marks: a clock (reply time), a heart (wishlist), a tag (genres), a page (what was sent) */
+const HK_ICON: Record<"clock" | "heart" | "tag" | "page", React.ReactNode> = {
+  clock: <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="6.5" /><path d="M10 6.5V10l2.5 1.6" /></svg>,
+  heart: <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 15.5s-5.5-3.3-5.5-7.1A2.9 2.9 0 0 1 10 6.6a2.9 2.9 0 0 1 5.5 1.8c0 3.8-5.5 7.1-5.5 7.1z" /></svg>,
+  tag: <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4h6l6 6-6 6-6-6z" /><circle cx="7.5" cy="7.5" r="1" /></svg>,
+  page: <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 3.5h5.5L14.5 6.5V16.5H6z" /><path d="M11.5 3.5v3h3M8 10h4.5M8 12.8h4.5" /></svg>,
+};
+const hkIcon = (t: WsTask): React.ReactNode => (t.kind === "batch" || t.need === "materials" ? HK_ICON.page : t.need === "mswl" ? HK_ICON.heart : t.need === "responseTime" ? HK_ICON.clock : HK_ICON.tag);
 const SVG_FIND = <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><circle cx="7" cy="7" r="4.5" /><path d="M10.5 10.5L14 14" /></svg>;
 
 const initialsOf = (n: string) => { const w = n.trim().split(/\s+/).filter(Boolean); return (w.length > 1 ? w[0][0] + w[w.length - 1][0] : (w[0] ?? "").slice(0, 2)).toUpperCase() || "··"; };
@@ -125,6 +141,8 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   const [menu, setMenu] = useState<"f" | "g" | null>(null);
   const [shut, setShut] = useState<ReadonlySet<string>>(() => new Set());
   const [hkMore, setHkMore] = useState(false);
+  const [slim, setSlimState] = useState<boolean>(readSlim);
+  const setSlim = (v: boolean) => { setSlimState(v); writeSlim(v); setMenu(null); };
   const visible = useMemo(() => all.filter((t) => passes(t, filters)), [all, filters]);
   const sections = useMemo(() => wsSections(visible, grouping), [visible, grouping]);
   const order = useMemo(() => sections.flatMap((s) => (shut.has(s.id) ? [] : s.tasks)), [sections, shut]);
@@ -483,15 +501,18 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   const row = (t: WsTask) => {
     const b = dayBit(t);
     const on = !!sel && sel.key === t.key && !adding && !yay;
+    const house = t.group === "house";
     const glyph = t.query && (t.kind !== "fix") ? <StatusDot status={t.query.status as QueryStatus} overrideSize={18} decorative /> : null;
     return (
       <div key={t.key} className="tws-ti" role="button" tabIndex={0} data-tws-row={t.key} aria-current={on ? "true" : undefined}
         onClick={() => go(t.key)} onKeyDown={(e) => { if (e.key === "Enter") go(t.key); }} title={t.title}>
         {t.kind === "own" ? <span className="tws-av" data-k="own" aria-hidden="true" />
+          : house ? <span className="tws-hk" data-tws="hk-icon" aria-hidden="true">{hkIcon(t)}{t.kind === "batch" ? null : <i>{initialsOf(t.agentName || t.title)}</i>}</span>
           : glyph ? <span className="tws-av" data-k="glyph" aria-hidden="true">{glyph}</span>
           : <span className="tws-av" aria-hidden="true">{initialsOf(t.agentName || t.title)}</span>}
         <span className="tws-tx"><b>{t.title}</b><span>{t.kind === "own" ? "Your task" : t.agency || t.agentName || ""}</span></span>
-        <span className="tws-du" data-late={b.late ? "" : undefined}>{b.big ? <b>{b.big}</b> : null}{b.small ? <small>{b.small}</small> : null}</span>
+        {house ? <span className="tws-qf" data-tws="quick-fill">Quick fill</span>
+          : <span className="tws-du" data-late={b.late ? "" : undefined}>{b.big ? <b>{b.big}</b> : null}{b.small ? <small>{b.small}</small> : null}</span>}
         <span className="tws-qact">
           <span role="button" tabIndex={0} aria-label={t.kind === "own" ? "Move it" : "Snooze"} title={t.kind === "own" ? "Move it" : "Snooze"}
             onClick={(e) => { e.stopPropagation(); go(t.key); setPop({ kind: "snooze", opener: e.currentTarget as HTMLElement }); }}>{ZZ}</span>
@@ -501,6 +522,31 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
       </div>
     );
   };
+
+  /* ⚠️ DECLARED ABOVE trayBody, which reads it during render (an IIFE reading a later const is a TDZ that tsc cannot see) */
+  const sectionsBody = (() => {
+    if (!visible.length) return <div className="tws-empty">Nothing matches. <button type="button" onClick={() => setFilters(NO_WS_FILTERS)}>Show everything</button></div>;
+    return sections.map((s) => {
+      if (!s.tasks.length && s.id !== "yours") return null;
+      const isShut = shut.has(s.id);
+      const house = s.id === "house" && !hkMore && s.tasks.length > 4;
+      const rows = house ? s.tasks.slice(0, 4) : s.tasks;
+      return (
+        <React.Fragment key={s.id}>
+          <button type="button" className="tws-gb" data-band={s.band} aria-expanded={!isShut} onClick={() => setShut((x) => toggleSet(x, s.id))}>
+            <b>{s.name}</b><em>{s.tasks.length}</em><span className="tws-cv" aria-hidden="true">⌄</span>
+          </button>
+          {isShut ? null : (
+            <>
+              {rows.map(row)}
+              {house ? <button type="button" className="tws-more" onClick={() => setHkMore(true)}>Show {s.tasks.length - 4} more</button> : null}
+              {s.id === "yours" ? <button type="button" className="tws-addt" onClick={() => { setYay(null); setAdding(true); }}>+ Add a task</button> : null}
+            </>
+          )}
+        </React.Fragment>
+      );
+    });
+  })();
 
   const trayBody = (() => {
     if (tab === "snoozed") {
@@ -556,29 +602,22 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
       );
     }
     if (!all.length) return <div className="tws-empty">Nothing to do yet.</div>;
-    if (!visible.length) return <div className="tws-empty">Nothing matches. <button type="button" onClick={() => setFilters(NO_WS_FILTERS)}>Show everything</button></div>;
-    return sections.map((s) => {
-      if (!s.tasks.length && s.id !== "yours") return null;
-      const isShut = shut.has(s.id);
-      const house = s.id === "house" && !hkMore && s.tasks.length > 4;
-      const rows = house ? s.tasks.slice(0, 4) : s.tasks;
-      return (
-        <React.Fragment key={s.id}>
-          <button type="button" className="tws-gb" data-band={s.band} aria-expanded={!isShut} onClick={() => setShut((x) => toggleSet(x, s.id))}>
-            <b>{s.name}</b><em>{s.tasks.length}</em><span className="tws-cv" aria-hidden="true">⌄</span>
-          </button>
-          {isShut ? null : (
-            <>
-              {rows.map(row)}
-              {house ? <button type="button" className="tws-more" onClick={() => setHkMore(true)}>Show {s.tasks.length - 4} more</button> : null}
-              {s.id === "yours" ? <button type="button" className="tws-addt" onClick={() => { setYay(null); setAdding(true); }}>+ Add a task</button> : null}
-            </>
-          )}
-        </React.Fragment>
-      );
-    });
+    const pt = prio.task;
+    const start = pt ? (
+      <button type="button" className="tws-start" data-tws="start" data-on={onIt ? "" : undefined} aria-current={onIt ? "true" : undefined}
+        onClick={() => { setTab("todo"); setFilters(NO_WS_FILTERS); setShut(new Set()); go(pt.key); }}>
+        <img src={QUILL} alt="" aria-hidden="true" />
+        <span className="tws-stx">
+          <span className="tws-sk2">{prio.urgent ? "Start here" : "Nothing urgent · next best"}</span>
+          <b data-tws="start-phrase">{doingPhrase(pt)}</b>
+          <em>{onIt ? "You’re on it" : startReason(prio)}</em>
+        </span>
+        {onIt ? null : <span className="tws-sarr" aria-hidden="true">→</span>}
+      </button>
+    ) : null;
+    if (!visible.length) return <>{start}<div className="tws-empty">Nothing matches. <button type="button" onClick={() => setFilters(NO_WS_FILTERS)}>Show everything</button></div></>;
+    return <>{start}{sectionsBody}</>;
   })();
-
   /* ── render: the desk ── */
   const desk = (() => {
     if (adding) return <AddTask today={today} onCancel={() => setAdding(false)} onAdd={async (text, due, detail) => {
@@ -816,7 +855,34 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
             <button type="button" className="tws-addb" onClick={() => { setYay(null); setAdding(true); }}>+ Add a task</button>
           </header>
 
-          <div className="tws-ws" data-tws="workspace">
+          <div className="tws-ws" data-tws="workspace" data-slim={slim ? "" : undefined}>
+            {slim ? (
+              <aside className="tws-tray tws-strip" data-tws="tray" data-slim="" aria-label="Your tasks">
+                <button type="button" className="tws-wide" data-tws="expand" onClick={() => setSlim(false)}>{SVG_WIDE}<span>All tasks</span></button>
+                <div className="tws-sl" data-tws="list">
+                  {sections.map((sec) => (sec.tasks.length ? (
+                    <React.Fragment key={sec.id}>
+                      <div className="tws-sgb" data-band={sec.band}>{grouping === "category" ? STRIP_GROUP[sec.id as WsGroupId] ?? sec.name : sec.name}<em>{sec.tasks.length}</em></div>
+                      {sec.tasks.map((t) => {
+                        const w = stripWords(t);
+                        const on = !!sel && sel.key === t.key && !adding && !yay;
+                        const glyph = t.query && t.kind !== "fix" ? <StatusDot status={t.query.status as QueryStatus} overrideSize={16} decorative /> : null;
+                        return (
+                          <button key={t.key} type="button" className="tws-si" data-tws-row={t.key} data-tws-strip="" aria-current={on ? "true" : undefined} title={t.title} onClick={() => go(t.key)}>
+                            <span className="tws-sav" data-k={t.kind === "own" ? "own" : t.group === "house" ? "house" : undefined} aria-hidden="true">
+                              {t.kind === "own" ? null : t.group === "house" ? hkIcon(t) : glyph ?? initialsOf(t.agentName || t.title)}
+                            </span>
+                            <b data-tws="strip-name">{w.name}</b>
+                            <i data-tws="strip-what">{w.what}</i>
+                            {w.when ? <small data-tws="strip-when" data-hot={w.hot ? "" : undefined}>{w.when}</small> : null}
+                          </button>
+                        );
+                      })}
+                    </React.Fragment>
+                  ) : null))}
+                </div>
+              </aside>
+            ) : (
             <aside className="tws-tray" data-tws="tray" aria-label="Your tasks">
               <div className="tws-th">
                 <div className="tws-seg" role="group" aria-label="Show">
@@ -827,7 +893,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
                 {tab === "todo" ? (
                   <>
                     <div className="tws-row">
-                      <label className="tws-find">{SVG_FIND}<input ref={findRef} placeholder="Search tasks or agents" value={filters.q} aria-label="Search tasks or agents"
+                      <label className="tws-find">{SVG_FIND}<input ref={findRef} placeholder="Search tasks" value={filters.q} aria-label="Search tasks or agents"
                         onChange={(e) => setFilters((f) => ({ ...f, q: e.target.value }))} onKeyDown={(e) => { if (e.key === "Escape") { setFilters((f) => ({ ...f, q: "" })); (e.target as HTMLInputElement).blur(); } }} /></label>
                       <span style={{ position: "relative" }}>
                         <button type="button" ref={filtRef} className="tws-ib" data-on={nFilters ? "" : undefined} aria-label="Filters" aria-expanded={menu === "f"} onClick={() => setMenu(menu === "f" ? null : "f")}>{SVG_FILTER}{nFilters ? <span className="tws-nb">{nFilters}</span> : null}</button>
@@ -855,6 +921,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
                           </div>
                         ) : null}
                       </span>
+                      <button type="button" className="tws-ib" data-tws="collapse" aria-label="Collapse the tray" title="Collapse the tray" onClick={() => setSlim(true)}>{SVG_SLIM}</button>
                     </div>
                     {nFilters ? (
                       <div className="tws-chips">
@@ -867,6 +934,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
               </div>
               <div className="tws-tl" data-tws="list">{trayBody}</div>
             </aside>
+            )}
             <section className="tws-desk" data-tws="desk-col">{desk}</section>
           </div>
         </div>
