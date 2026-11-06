@@ -464,11 +464,14 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     return () => window.removeEventListener("keydown", on);
   });
 
-  /* ── the header's priority line ── */
+  /* ── the header's stats line (v52 Part A): the tray's own counts ──
+     ⚠️ "late" is a dated task past its date, Gone quiet excluded (it has no due date, only days since a send). The book
+        is named only when the account has one manuscript: the counts are the whole tray's, and a book's name in front of
+        them would say they were that book's alone. */
+  const lateN = seq.filter((t) => t.kind !== "quiet" && t.dueDays != null && t.dueDays < 0).length;
+  const statBook = manuscripts.length === 1 ? (manuscripts[0].title ?? "").trim() || null : null;
+  /* the priority task (shown in the tray's Start here card from Part B) */
   const prio = useMemo(() => priorityTask(all), [all]);
-  const headLine = !all.length ? <>Nothing here yet. Anything an agent asks for will land here.</>
-    : prio.task ? (prio.urgent ? <><b>{doingPhrase(prio.task)}</b> is highest priority right now</> : <>Nothing urgent right now. Next best: <b>{doingPhrase(prio.task)}</b></>)
-    : <>Nothing urgent right now.</>;
   const onIt = !!prio.task && !!sel && sel.key === prio.task.key && !yay && !adding && tab === "todo";
 
   /* ── render: the tray ── */
@@ -803,11 +806,12 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
       <WorkspacePageGrid className="tws-wpg" scrollLabel="To-do list" masthead={null}>
         <div className="tws" data-tws="page">
           <header className="tws-hd" data-tws="header">
-            <h1 className="tws-ttl" data-page-title>To-do list</h1>
-            <span className="tws-hdiv" aria-hidden="true" />
-            <span className="tws-hline" data-tws="priority">{headLine}</span>
-            {prio.task && all.length ? (onIt ? <span className="tws-hon">✓ You’re on it</span>
-              : <button type="button" className="tws-hgo" onClick={() => { setTab("todo"); setFilters(NO_WS_FILTERS); setShut(new Set()); go(prio.task!.key); }}>Go to it →</button>) : null}
+            <div className="tws-ht">
+              <h1 className="tws-ttl" data-page-title>Your to-do list</h1>
+              <p className="tws-stats" data-tws="stats">
+                {statBook ? <>{statBook} · </> : null}<b>{seq.length}</b> to do · <b>{lateN}</b> late · <b>{done.length}</b> done this week
+              </p>
+            </div>
             <span className="tws-sp" />
             <button type="button" className="tws-addb" onClick={() => { setYay(null); setAdding(true); }}>+ Add a task</button>
           </header>

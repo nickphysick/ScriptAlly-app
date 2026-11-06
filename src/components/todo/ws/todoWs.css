@@ -34,37 +34,40 @@
    row grows with its content, and a workspace sized from the row's height grows with it) */
 .tws-root { height: 100%; min-height: 0; }
 
-/* ── the page: a slim navy header, then the workspace that docks at the top ── */
-.tws { padding: 14px 0 24px; color: var(--tw-ink); font-family: var(--tw-serif); }
+/* ── the page (v52 Part A): one centred column, the Query Centre's width rule with a 1320 cap — the slim navy header,
+   then the workspace, filling the scrollport so the page itself never scrolls ──
+   ⚠️ THE HEIGHT IS THE SCROLLER'S OWN (--tws-port, its clientHeight: never 100vh); the column is a flex column and the
+      workspace takes what the header leaves, with a 520px floor. */
+.tws {
+  --tws-w: min(calc(var(--hsheet-w, 100%) - 80px), 1320px);
+  box-sizing: border-box; width: var(--tws-w); margin: 0 0 0 calc(50% - var(--tws-w) / 2);
+  height: var(--tws-port, 800px); display: flex; flex-direction: column; padding: 24px 0 12px;
+  color: var(--tw-ink); font-family: var(--tw-serif);
+}
+@media (max-width: 1399px) { .tws { --tws-w: min(calc(var(--hsheet-w, 100%) - 56px), 1320px); } }
 .tws *, .tws-layer * { box-sizing: border-box; }
 .tws :where(p, span, div, label, button, input, textarea) { font-family: inherit; }
 
+/* the header: the Query Centre's navy banner, slim (its radius, its navy, its outlined pill) */
 .tws-hd {
-  height: 56px; display: flex; align-items: center; gap: 14px; padding: 0 10px 0 12px; border-radius: 16px;
-  background: var(--tw-navy); color: #fff; margin-bottom: 10px;
+  flex: none; display: flex; align-items: center; gap: 16px; padding: 16px 22px 16px 32px; border-radius: 20px;
+  background: var(--tw-navy); color: #f4eee5; margin-bottom: 10px;
 }
-.tws .tws-hd h1.tws-ttl { margin: 0; padding-left: 12px; font: 400 23px/1 var(--tw-type) !important; color: #fff; white-space: nowrap; }
-.tws-hdiv { width: 1px; height: 22px; background: rgba(255, 255, 255, 0.22); flex: none; }
-.tws-hline { min-width: 0; font-size: 16px; line-height: 1.3; color: rgba(255, 255, 255, 0.82); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tws-hline b { color: #fff; font-weight: 600; }
-.tws-hgo {
-  flex: none; height: 30px; padding: 0 13px; border: 0; border-radius: 15px; cursor: pointer; font: 600 14px var(--tw-serif);
-  color: #fff; background: rgba(255, 255, 255, 0.12); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
-}
-.tws-hgo:hover { background: rgba(255, 255, 255, 0.2); }
-.tws-hon { flex: none; font: 600 14px var(--tw-serif); color: rgba(255, 255, 255, 0.82); white-space: nowrap; }
+.tws-ht { min-width: 0; }
+.tws .tws-hd h1.tws-ttl { margin: 0; font: 400 32px/1.3 var(--tw-type) !important; color: #f4eee5 !important; white-space: nowrap; }
+.tws .tws-stats { margin: 2px 0 0; font: italic 15.5px/1.35 var(--tw-serif); color: rgba(244, 238, 229, 0.82); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tws .tws-stats b { font: normal 400 16px var(--tw-type); color: #fff; }
 .tws-sp { flex: 1; min-width: 8px; }
 .tws-addb {
-  flex: none; height: 36px; padding: 0 16px; border: 0; border-radius: 18px; background: #fff; color: var(--tw-navy);
-  font: 600 14.5px var(--tw-serif); cursor: pointer;
+  flex: none; height: 46px; padding: 0 20px; border: 0; border-radius: 23px; background: transparent; color: #f4eee5; cursor: pointer;
+  font: 600 16px var(--tw-serif); box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, 0.55);
 }
-.tws-addb:hover { background: #f4f1ec; }
+.tws-addb:hover { box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, 0.9); }
 
-/* the workspace fills the scrollport under the header (--tws-port, the scroller's own height: never 100vh). On a short
-   screen it keeps a 560px floor, the page scrolls, and the workspace docks at the top. */
+/* the workspace takes the rest of the column (min 520); its panes scroll on their own */
 .tws-ws {
-  position: sticky; top: 8px; display: grid; grid-template-columns: 340px minmax(0, 1fr);
-  height: calc(var(--tws-port, 800px) - 104px); min-height: 560px; background: #fff; border-radius: 22px; overflow: hidden;
+  flex: 1 1 auto; min-height: 520px; display: grid; grid-template-columns: 340px minmax(0, 1fr);
+  background: #fff; border-radius: 22px; overflow: hidden;
   box-shadow: 0 0 0 1px #e2d9cc, 0 24px 48px -36px rgba(28, 19, 15, 0.5);
 }
 
