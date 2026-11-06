@@ -44,8 +44,11 @@ export interface ShellChild {
   /** A Pro page, named by its entitlement (Manuscripts v27 Part E gave Versions a "PRO" tag shown to everyone;
    *  sidebar rail v1 makes every Pro tag DORMANT): the rail and the full sidebar draw the tag only when the
    *  user is NOT entitled (lib/entitlements). With today's founding access nobody sees one. */
-  pro?: "discover" | "packages" | "versions";
+  pro?: ProEntitlement;
 }
+
+/** The entitlements a nav mark can name (lib/entitlements). "materials" covers a whole SECTION (sidebar materials v1). */
+export type ProEntitlement = "discover" | "packages" | "versions" | "materials";
 
 export interface ShellSection {
   id: string;
@@ -62,6 +65,9 @@ export interface ShellSection {
   noHeading?: boolean;
   /** The section's own icon key in WORKSPACE_ICONS (sidebar rail v1: the rail draws one row per section). */
   icon?: string;
+  /** A Pro SECTION (Materials, 6 Nov): the rail's section row and the full sidebar's group heading carry the tag,
+   *  and its rows carry none of their own. Dormant like a row's: drawn only when the user is not entitled. */
+  pro?: ProEntitlement;
 }
 
 /** The text the SIDEBAR prints for a row — its short `navLabel` where it has one, else its full `label`. */

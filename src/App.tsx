@@ -26,6 +26,7 @@ import { PACKAGES_PATH, packagesRedirectFor } from "./lib/packagesRoute";
 import { DiaryLab } from "./components/dashboard/DiaryLab";
 import { ComparableTitlesPage } from "./components/manuscripts/ComparableTitlesPage";
 import { VersionsV2Page } from "./components/versions/VersionsV2Page";
+import { QueryLettersPage } from "./components/letters/QueryLettersPage";
 import { ImportPage } from "./components/import/ImportPage";
 import { BrandStudio } from "./components/BrandStudio";
 import { AddManuscriptFocusForm } from "./components/AddManuscriptFocusForm";
@@ -730,6 +731,12 @@ function AppContent() {
               active={routeKey === "manuscripts" && !manuscriptsComps && !manuscriptsVersions}
             />
           )}
+        </StagePage>
+
+        {/* Sidebar materials v1 (6 Nov) — the Materials section's own route. Query letters is a placeholder until the
+            Query letters pack; Comparable titles and Submission packages keep their old addresses. */}
+        <StagePage active={routeKey === "materials"}>
+          <QueryLettersPage />
         </StagePage>
 
         {/* Secondary pages mount on demand (same lifecycle as the old conditional render).

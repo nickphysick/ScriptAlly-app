@@ -6,8 +6,7 @@
  *
  * ⚠️ THE SHELL RENDERS WHAT EXISTS, NEVER WHAT IS PLANNED. A nav entry with no route is a dead
  * link, and a dead link in permanent chrome is worse than an absent one because it looks like a
- * decision. `Learn` and `Documents` are therefore absent — neither has a route — which is why
- * Materials is CHILDLESS rather than a one-child accordion. TODO(documents-route).
+ * decision. `Learn` and `Documents` are therefore absent — neither has a route.
  *
  * ⚠️⚠️ AMENDMENT 1 (H) — THE SIDEBAR IS NAVIGATION ONLY. It never encodes a filter or a view of a
  * page; every entry is a distinct destination. This SUPERSEDES the original Baked 14, whose
@@ -58,10 +57,9 @@ const TASKS_ICON: Record<string, string> = {
 };
 
 export function workspaceSections(input: WorkspaceNavInput): ShellSection[] {
-  /* ⚠️ SIDEBAR RAIL v1 (5 Nov; section list ruled 5 Nov on dev's nav): five sections, most-used first —
-     Dashboard · Queries · Agents · Your book · Tasks. The rail, the full sidebar, the folder tab, the ⌘K
-     palette and the phone bar all read this one list. There is no Materials section and no Calendar
-     (retired 29 Oct). Each section names its own icon for the rail's section row. */
+  /* ⚠️ SIDEBAR MATERIALS v1 (6 Nov): six sections — Dashboard · Queries · Agents · Your book · Materials · Tasks.
+     The rail, the full sidebar, the folder tab, the ⌘K palette and the crumbs all read this one list. There is no
+     Calendar (retired 29 Oct). Each section names its own icon for the rail's section row. */
   return [
     {
       id: "workspace",
@@ -81,16 +79,13 @@ export function workspaceSections(input: WorkspaceNavInput): ShellSection[] {
       icon: "send",
       def: "q-centre",
       children: [
-        /* ⚠️ SHORT LABELS IN THE FULL SIDEBAR ONLY (Nick's ruling, 25 Oct): "Queries" and "Packages". `label` is
+        /* ⚠️ A SHORT LABEL IN THE FULL SIDEBAR ONLY (Nick's ruling, 25 Oct; kept 6 Nov): "Queries". `label` is
            still the page's full name, which the folder tab, the bar, breadcrumbs and the palette read; the rail's
            card has its own short labels (RAIL_SHORT_LABELS below). */
         { id: "q-centre", label: "Query Centre", navLabel: "Queries", path: "/queries", icon: "send" },
         /* Responses v2 (15 Oct): every agent answer for the book in scope */
         { id: "q-responses", label: "Responses", path: "/queries/responses", icon: "replies" },
         { id: "q-analytics", label: "Analytics", path: "/queries/analytics", icon: "chart" },
-        /* Submission packages v26 (25 Oct): packages moved here from Materials — they are what goes out with a
-           query. Last in the section (rail v1, most-used first). Pro, dormant while packages are open to all. */
-        { id: "q-pkg", label: "Submission packages", navLabel: "Packages", path: "/queries/packages", icon: "folder", pro: "packages" },
       ],
     },
     {
@@ -104,11 +99,11 @@ export function workspaceSections(input: WorkspaceNavInput): ShellSection[] {
         { id: "a-disc", label: "Discover", path: "/agents/discover", icon: "compass", pro: "discover" },
       ],
     },
-    /* ⚠️ "YOUR BOOK" (Submission packages v26, 25 Oct): the manuscript, its versions and the titles it is
-       compared with. The id stays "materials" so every section lookup keyed on it is unchanged; nothing a
-       writer reads says Materials. The rail draws it with the Library icon. */
+    /* ⚠️ "YOUR BOOK" — the manuscript and its versions (sidebar materials v1, 6 Nov). Its id is "book"; until 6 Nov it
+       was "materials", which now names the Materials section below. Stored last-used entries keyed "materials" that
+       name a Your-book page are dropped by railMemory and fall back to Manuscripts. The rail draws it with Library. */
     {
-      id: "materials",
+      id: "book",
       label: "Your book",
       icon: "library",
       def: "m-ms",
@@ -116,7 +111,21 @@ export function workspaceSections(input: WorkspaceNavInput): ShellSection[] {
         { id: "m-ms", label: "Manuscripts", path: "/manuscripts", icon: "library" },
         /* Manuscripts v27 Part E — Versions on its own page. Pro, dormant under founding access. */
         { id: "m-ver", label: "Versions", path: "/manuscripts/versions", icon: "versions", pro: "versions" },
+      ],
+    },
+    /* ⚠️ MATERIALS (sidebar materials v1, 6 Nov): what goes out with a query. The whole SECTION is Pro ("materials"),
+       so its rows carry no Pro mark of their own. Comps and Packages keep their old addresses (/manuscripts/comps,
+       /queries/packages): only the nav regroups. Query letters is new, at /materials/letters. */
+    {
+      id: "materials",
+      label: "Materials",
+      icon: "mail",
+      def: "m-letters",
+      pro: "materials",
+      children: [
+        { id: "m-letters", label: "Query letters", path: "/materials/letters", icon: "letter" },
         { id: "m-comps", label: "Comparable titles", path: "/manuscripts/comps", icon: "books" },
+        { id: "q-pkg", label: "Submission packages", path: "/queries/packages", icon: "folder" },
       ],
     },
     /* ⚠️ ITS ROWS ARE `TODO_ROUTES` — the one definition of the To-do pages. The count rides the To-do list row

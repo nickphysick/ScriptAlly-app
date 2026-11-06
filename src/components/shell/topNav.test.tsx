@@ -3,6 +3,7 @@
  * WHAT IS PLANNED — roughly half the pack's menu items had no route, and every one of them is
  * absent rather than dead or greyed.
  */
+import { workspaceSections } from "../../lib/workspaceNav";
 import { describe, it, expect, vi } from "vitest";
 import React from "react";
 import { readFileSync } from "node:fs";
@@ -78,8 +79,13 @@ describe("⚠️ the shell renders what EXISTS, never what is planned", () => {
      at a route that does not exist, so that is what this proves now, by walking every path. */
   it("NEITHER surface points at a route that does not exist", () => {
     const nav = readFileSync(resolve(__dirname, "../../lib/workspaceNav.ts"), "utf8");
-    for (const gone of ["Archive", "Query letters", "Synopses", "Opening samples", "Documents", "Learn"]) {
+    /* "Query letters" left this list on 6 Nov (sidebar materials v1): it has a route now, /materials/letters, which
+       the loop below proves for every workspace nav page. */
+    for (const gone of ["Archive", "Synopses", "Opening samples", "Documents", "Learn"]) {
       expect(nav, gone).not.toContain(`label: "${gone}"`);
+    }
+    for (const sec of workspaceSections({ todo: 0 })) {
+      for (const ch of sec.children ?? []) expect([...WORKSPACE_SHELL_PATHS], ch.path).toContain(ch.path.split("?")[0]);
     }
     const real = new Set([...WORKSPACE_SHELL_PATHS, ...TOPNAV_SHELL_PATHS]);
     const paths = NAV_MENUS

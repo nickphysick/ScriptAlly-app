@@ -1,0 +1,13 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The Query letters placeholder (sidebar materials v1). The page's own gutter; the header is lightHeader.css's.
+ * ⚠️ lib/brand.tsx forces bare paragraphs to the sans face, so the line states its face with two classes.
+ */
+.qlp { box-sizing: border-box; min-width: 0; padding: 40px clamp(28px, 3.2vw, 52px) 96px; }
+.slh .qlp-line.qlp-line { margin: 16px 0 0; max-width: 34em; font: italic 400 19px/1.45 var(--sp-serif) !important; color: #3a2e27; white-space: normal; }
+@media (max-width: 760px) {
+  .qlp { padding: 24px 18px 80px; }
+  .slh .qlp-line.qlp-line { font-size: 16px !important; }
+}

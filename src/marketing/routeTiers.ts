@@ -33,6 +33,8 @@ export const WORKSPACE_PATHS = new Set([
   "/todo", "/todo/corkboard",
   "/agents", "/agents/discover",
   "/manuscripts", "/manuscripts/comps", "/queries/packages", "/manuscripts/versions", "/import",
+  // Sidebar materials v1 (6 Nov): the Materials section's Query letters page.
+  "/materials/letters",
   "/account", "/plans", "/help",
   // Phone app v2 Part 7D: Streaks & goals, a phone page (a computer is sent to the dashboard).
   "/goals",

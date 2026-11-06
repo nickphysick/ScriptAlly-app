@@ -38,6 +38,7 @@ export function pathFor(tab: string, subPageName?: string): string {
       if (subPageName === "New package") return "/queries/packages?tab=builder";
       if (subPageName === "Comparable titles") return "/manuscripts/comps";
       if (subPageName === "Versions") return "/manuscripts/versions";
+      if (subPageName === "Query letters") return "/materials/letters";
       return "/manuscripts";
     }
     // Two pricing surfaces, and they answer different questions: PUBLIC /pricing is the shop

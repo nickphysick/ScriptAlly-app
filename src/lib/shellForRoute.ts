@@ -38,6 +38,7 @@ export const WORKSPACE_SHELL_PATHS = new Set([
   "/queries/packages",
   "/manuscripts/comps",
   "/manuscripts/versions", // Manuscripts v27 Part E — the interim Versions page
+  "/materials/letters", // sidebar materials v1 — Query letters
   // Data entry against your own records — it belongs beside the queries it creates.
   "/import",
   "/account", // Settings — the bare route, which redirects to its first section
