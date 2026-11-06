@@ -500,6 +500,8 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
                         if (n) setMenu((m) => (m?.note.id === id ? null : { note: n, anchor }));
                       }}
                       onDrop={dropOnWall}
+                      /* Corkboard v2.1: the dashed "+ New note" tile, gone while find, a tag pill or a glance row narrows */
+                      onNew={narrowing ? undefined : () => openComposer()}
                     />
                   )}
                 </div>

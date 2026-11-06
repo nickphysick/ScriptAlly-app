@@ -14,6 +14,7 @@
  */
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { PostIt, type PostItProps } from "./CbPostIt";
+import { NOTE_PAPERS } from "../../../lib/noteboard";
 
 export interface WallNote {
   id: string;
@@ -36,6 +37,11 @@ export interface CbWallProps {
   /** a fresh note's id, for its landing animation */
   fresh?: string | null;
   id?: string;
+  /**
+   * Corkboard v2.1: the dashed "+ New note" tile after the last post-it (ref v14 `#ghostNew`). The page passes it only
+   * where it belongs — the Corkboard view, while nothing narrows the wall — so its absence is the page's decision.
+   */
+  onNew?: () => void;
 }
 
 const Dots = () => (
@@ -51,7 +57,7 @@ function markClamped(root: HTMLElement | null) {
   }
 }
 
-export const CbWall: React.FC<CbWallProps> = ({ notes, draggable, reorder = true, menuFor, onOpen, onMenu, onDrop, fresh, id }) => {
+export const CbWall: React.FC<CbWallProps> = ({ notes, draggable, reorder = true, menuFor, onOpen, onMenu, onDrop, fresh, id, onNew }) => {
   const ref = useRef<HTMLDivElement | null>(null);
   const [drag, setDrag] = useState<string | null>(null);
   const [line, setLine] = useState<{ id: string; after: boolean } | null>(null);
@@ -121,6 +127,13 @@ export const CbWall: React.FC<CbWallProps> = ({ notes, draggable, reorder = true
           </div>
         );
       })}
+      {onNew ? (
+        <button type="button" className="cb2-ghost" data-cb2="ghost-new" onClick={onNew}>
+          <b>+ New note</b>
+          <small>or press N</small>
+          <span className="cb2-gsw" aria-hidden="true">{NOTE_PAPERS.map((p) => <i key={p.v} style={{ background: p.hex }} />)}</span>
+        </button>
+      ) : null}
     </div>
   );
 };

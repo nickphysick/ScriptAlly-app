@@ -277,6 +277,26 @@ body.cb2-dragging .cb2-note:hover { transform: none; }
 .cb2-openhead { display: flex; align-items: baseline; gap: 12px; margin: 6px 0 18px; }
 .cb2 .cb2-openhead h2 { margin: 0; font: 400 26px/1.3 var(--cb2-type) !important; color: var(--cb2-ink) !important; }
 .cb2 .cb2-openhead span { font: italic 400 15.5px/1.3 var(--cb2-serif) !important; color: var(--cb2-i60) !important; }
+/* ═════════ v2.1 · the dashed add tiles (ref v14 `.ghost`, `.gwrap`, `.emptystack`, `.mini .sq:empty`) ═════════ */
+.cb2-ghost {
+  box-sizing: border-box; min-height: 232px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  padding: 18px; border: 1.5px dashed rgba(28, 19, 15, .22); border-radius: 4px; background: rgba(255, 255, 255, .35); color: var(--cb2-i60);
+  text-align: center; cursor: pointer; transition: background .15s, border-color .15s, color .15s;
+}
+.cb2-ghost:hover { background: rgba(255, 255, 255, .75); border-color: rgba(45, 58, 80, .55); color: var(--cb2-ink); }
+.cb2 .cb2-ghost b { font: 400 19px/1.3 var(--cb2-type) !important; color: inherit !important; }
+.cb2 .cb2-ghost small { font: italic 400 14px/1.3 var(--cb2-serif) !important; color: var(--cb2-i45) !important; }
+.cb2-gsw { display: flex; gap: 6px; margin-top: 6px; }
+.cb2-gsw i { width: 16px; height: 16px; border-radius: 2px; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, .12); }
+.cb2-gwrap { display: flex; flex-direction: column; gap: 12px; }
+.cb2-gwrap .cb2-ghost { height: 236px; min-height: 0; }
+.cb2 .cb2-glab { border-top: 1px dashed var(--cb2-i14); padding-top: 12px; margin-top: 8px; font: italic 400 14.5px/1.3 var(--cb2-serif) !important; color: var(--cb2-i45) !important; }
+.cb2 .cb2-emptystack {
+  position: absolute; inset: 0; box-sizing: border-box; display: grid; place-items: center; border-radius: 3px; border: 1.5px dashed rgba(28, 19, 15, .22);
+  background: rgba(255, 255, 255, .3); font: italic 400 14.5px/1.3 var(--cb2-serif) !important; color: var(--cb2-i45) !important;
+}
+.cb2-sq:empty { box-sizing: border-box; border: 1.5px dashed var(--cb2-i30); border-radius: 2px; }
+@media (max-width: 767.98px) { .cb2-gwrap .cb2-ghost { height: 180px; } }
 @media (max-width: 767.98px) { .cb2-pgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 16px; } .cb2-stack { height: 180px; } }
 
 /* ═════════ E · the pop-ups (ref `.scrim`, `.dlg`, `.tdlg`); they portal to body and carry `.cb2-layer` ═════════ */
