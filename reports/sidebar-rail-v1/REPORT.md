@@ -50,8 +50,7 @@ The replay conflicted in 16 files over three commits (the earlier attempted merg
   Packages) · **Agents** (Contact list, Discover) · **Your book** (Manuscripts, Versions, Comps) · **Tasks**
   (To-do list, Corkboard).
 - **Full sidebar:** the same order under mono headings. Rows print "Packages" for Submission packages, as asked.
-  **Query Centre prints "Queries"**, dev's 25 Oct short label, which I kept. Your note only mentioned Packages, so
-  say if you'd rather that row read "Query Centre".
+  **Query Centre prints "Queries"**, dev's 25 Oct short label. Nick ruled to keep it (6 Nov).
 - **No Materials and no Calendar** anywhere a writer reads.
 
 **Renamed:**
