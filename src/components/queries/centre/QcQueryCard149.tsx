@@ -30,7 +30,7 @@ import "../../../marketing/heroCard.css";
 import "./qcv149card.css";
 import { FlowHead, FLOW_WORDS, RECORD_LINE } from "../../shared/FlowHead";
 import { STAGE_STEPS, stageIndex } from "../../../lib/queriesPhone";
-import { QcCard152, type QcCard152Data } from "./QcCard152";
+import { QcCard152, type QcCard152Data, type QcCard152Props } from "./QcCard152";
 import type { ReplyAct } from "../../../lib/qcThread152";
 
 
@@ -209,6 +209,8 @@ export interface QcQueryCard149Props {
   /** §3–§4: the editing view's body (the record form, What needs changing?, Fix a mistake, the details) and its back */
   edit152?: React.ReactNode;
   onBack152?: () => void;
+  /** v152.2 §2–§3 — the composer, its draft, the bubble edited in place, the toast and the footer's controls */
+  card1522?: Pick<QcCard152Props, "composer" | "draft" | "editingId" | "editNode" | "toast" | "burst" | "onFoot" | "onEditMats">;
 }
 
 const blankEdits = (): CardEdits => ({ dates: {}, removed: [], added: null, packageKey: null, pieces: {}, agent: {} });
@@ -348,7 +350,7 @@ export const QcQueryCard149: React.FC<QcQueryCard149Props> = (p) => {
         onReply={(a) => p.onReply152?.(a)}
         onAgentField={p.onAgentField}
         onCopyEmail={p.onCopyEmail}
-        view={mode === "view" ? "read" : mode} editBody={p.edit152} onBack={p.onBack152} freshKey={p.freshKey} />
+        view={mode === "view" ? "read" : mode} editBody={p.edit152} onBack={p.onBack152} freshKey={p.freshKey} {...(p.card1522 ?? {})} />
     );
   }
   const flat = v152 ? "flat" : undefined;

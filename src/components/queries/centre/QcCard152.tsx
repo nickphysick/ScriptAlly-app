@@ -25,6 +25,9 @@ import {
   type ReplyAct, type ThreadChip, type ThreadItem, type ThreadStepIn,
 } from "../../../lib/qcThread152";
 import "./qcv152card.css";
+import "./qcv1522card.css";
+import { band1522, footer1522, type FootAct, type FootCtx } from "../../../lib/qcFoot1522";
+import { waitWords } from "../../../lib/qc1522";
 import { PopCtx, useOutsideClose } from "./QcEdit152";
 import { Bubble, StepGlyph, chipIcon } from "./QcBubble152";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
@@ -51,6 +54,8 @@ export interface QcCard152Data {
   quietWeeks?: number;
   reason?: string | null;
   nudged?: boolean;
+  /** v152.2 §3.2 the footer's facts (lib/qcFoot1522) */
+  foot?: Omit<FootCtx, "state" | "status" | "first" | "nowMs">;
 }
 export type CardTab152 = "tracking" | "agent" | "materials" | "notes";
 
@@ -83,6 +88,20 @@ export interface QcCard152Props {
   onBack?: () => void;
   /** the step just added: its bubble slides in from its own side (§3.2) */
   freshKey?: string | null;
+  /** v152.2 §3 — the composer, open at the foot in place of the footer, and the draft it shows in the thread */
+  composer?: React.ReactNode;
+  draft?: ThreadStepIn | null;
+  /** v152.2 §2.4 — the bubble being edited in place (its activity id), and the form drawn in its place */
+  editingId?: string | null;
+  editNode?: React.ReactNode;
+  /** v152.2 §3.1 — the undo toast */
+  toast?: { msg: string; onUndo: () => void } | null;
+  /** v152.2 §6.1 — the accept burst */
+  burst?: number | null;
+  /** v152.2 §3.2 — a footer control: its composer */
+  onFoot?: (a: FootAct) => void;
+  /** v152.2 §2.6 — a sending step's materials, edited in the composer (null: "+ Add something you sent", the query step) */
+  onEditMats?: (activityId: string | null) => void;
 }
 
 const PEN = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10.5 2.5l3 3L6 13H3v-3z" /></svg>;
@@ -131,9 +150,12 @@ export const FOLD_KEEP = 3;
 export const QcCard152: React.FC<QcCard152Props> = (p) => {
   const { row: r, nowMs, d } = p;
   const first = p.first || "the agent";
-  const head = STATE_HEAD[d.state];
-  const bandBg = d.state === "quiet" ? QUIET_BAND : head.bg;
-  const dark = d.state === "offer" || d.state === "materials";
+  /* v152.2 §2.1 — every band is navy with white text, except Gone quiet and Closed */
+  const bnd = band1522(d.state, d.foot?.phase ?? null, QUIET_BAND);
+  const head = { fg: bnd.dark ? "#ffffff" : STATE_HEAD[d.state].fg === "#ffffff" ? "#1c130f" : STATE_HEAD[d.state].fg };
+  const bandBg = bnd.bg;
+  const dark = bnd.dark;
+  const jOpen = !!p.composer || !!p.editingId;
   const tip = useTip();
   const view = p.view ?? "read";
   const rootRef = useRef<HTMLDivElement>(null);
@@ -159,7 +181,7 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
     const el = bodyRef.current;
     if (el && p.tab === "tracking") el.scrollTop = el.scrollHeight;
     else if (el) el.scrollTop = 0;
-  }, [r.id, p.tab, thread.length]);
+  }, [r.id, p.tab, thread.length, !!p.composer, p.draft?.status, p.draft?.kind]);
   useEffect(() => { tip.hide(); }, [r.id, p.tab]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* a chip's tip closes on any click elsewhere */
@@ -180,6 +202,27 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
     </span>
   ) : null;
 
+  /* v152.2 §3.1 — the draft: the same derivation as a real step, after its own wait line, with a dashed edge in its colour */
+  const draftNode = (() => {
+    if (!p.draft) return null;
+    const all = buildThread([...d.steps, p.draft], { first, nowMs, state: d.state, replyMs: d.replyMs, agentWeeks: d.agentWeeks });
+    const at = all.findIndex((x) => x.t === "msg" && x.key === "__draft");
+    const m = all[at];
+    if (!m || m.t !== "msg") return null;
+    const prevMs = [...d.steps].filter((x) => x.ms != null).map((x) => x.ms!).sort((a, b) => a - b).pop() ?? null;
+    const gap = prevMs != null && p.draft.ms != null ? Math.max(0, Math.round((new Date(p.draft.ms).setHours(0, 0, 0, 0) - new Date(prevMs).setHours(0, 0, 0, 0)) / 86_400_000)) : null;
+    const col = m.side === "me" ? "#b9ad9e"
+      : m.status === QueryStatus.PARTIAL_REQUESTED ? "#e3b8a8" : m.status === QueryStatus.FULL_REQUESTED || m.status === QueryStatus.REVISE_RESUBMIT ? "#a9bdd3"
+      : m.status === QueryStatus.OFFER ? "#a9c094" : "#b9ad9e";
+    return <>
+      {gap != null ? <div className={`qc1522-lt ${m.side}`} data-qc1522="draft-wait">{waitWords(gap)}</div> : null}
+      <Bubble side={m.side} status={m.status} kind={m.kind} title={m.title} date={m.date} dated={m.dated} tint={m.tint} grey={m.grey} initials={r.initials}
+        chips={m.chips.length ? <span className="qc152-chs">{m.chips.map((c, k) => <span key={k} className="qc152-ch">{chipIcon(c.label)}{c.label}</span>)}</span> : null}
+        via={m.via} quote={m.quote} follows={m.follows} nth={null} sub={m.sub} className="qc1522-draft"
+        outer={{ "data-qc152": "msg", "data-qc1522": "draft", "data-side": m.side, style: { ["--dr" as string]: col } }} />
+    </>;
+  })();
+
   /* §2.8 the fold: with more than five steps, everything before the last three sits behind one button */
   const msgIdx = thread.map((it, i) => (it.t === "msg" ? i : -1)).filter((i) => i >= 0);
   const folded = !unfold && msgIdx.length > FOLD_OVER ? msgIdx.length - FOLD_KEEP : 0;
@@ -191,20 +234,14 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
       ) : null}
       {shown.map((it, i) => {
         if (it.t === "wait") {
-          return (
-            <div key={it.key} className="qc152-w" data-qc152="wait" data-label={it.label}
-              tabIndex={it.tip ? 0 : undefined} style={{ animationDelay: `${i * 45}ms` }}
-              onMouseEnter={it.tip ? (e) => tip.show(e.currentTarget.querySelector("span")!, it.tip!) : undefined}
-              onMouseLeave={it.tip ? tip.hide : undefined}
-              onFocus={it.tip ? (e) => tip.show(e.currentTarget.querySelector("span")!, it.tip!) : undefined}
-              onBlur={it.tip ? tip.hide : undefined}>
-              <i /><span>{it.label}</span><i />
-            </div>
-          );
+          /* v152.2 §2.2 — one italic line on the side of the next message; never a pill or a hairline */
+          if (folded && i === 0) return null;
+          return <div key={it.key} className={`qc1522-lt ${it.side}`} data-qc152="wait" data-qc1522="wait" data-side={it.side} data-label={it.label} title={it.tip ?? undefined}>{it.label}</div>;
         }
+        if (p.editingId && it.activityId === p.editingId && p.editNode) return <React.Fragment key={it.key}>{p.editNode}</React.Fragment>;
         return (
           <Bubble key={it.key} side={it.side} status={it.status} kind={it.kind} title={it.title} date={it.date} dated={it.dated}
-            tint={it.tint} grey={it.grey} initials={r.initials} chips={chips(it.chips, it.key)} via={it.via} quote={it.quote} follows={it.follows} nth={it.nth}
+            tint={it.tint} grey={it.grey} initials={r.initials} chips={chips(it.chips, it.key)} via={it.via} quote={it.quote} follows={it.follows} nth={it.nth} sub={it.sub}
             className={p.freshKey && (it.activityId === p.freshKey || it.key === p.freshKey) ? "new" : undefined}
             outer={{ "data-qc152": "msg", "data-side": it.side, "data-status": it.status ?? undefined, "data-kind": it.kind ?? undefined, "data-activity": it.activityId,
               style: { animationDelay: `${i * 45}ms` } }}
@@ -212,6 +249,7 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
               onClick={() => p.onEditStep(it.activityId ?? null)}>✎ Edit</button>} />
         );
       })}
+      {draftNode}
     </div>
   );
 
@@ -265,21 +303,22 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
               <div className="qc152-mh"><b>{b.title}{b.pkg && !d.free && p.packageName ? <> <span className="qc152-pkc" data-qc152="pkg-chip">{p.packageName}</span></> : null}</b><span>{b.date}</span></div>
               <div className="qc152-mc">{b.chips.length ? b.chips.map((c, i) => <i key={i}>{c.label}</i>) : <em>Nothing recorded</em>}</div>
               {b.note ? <p>{b.note}</p> : null}
-              <button type="button" className="qc152-mfx" data-qc152="mat-edit" onClick={() => p.onEditStep(b.activityId ?? null)}>✎ Edit</button>
+              {b.request ? null : <button type="button" className="qc152-mfx" data-qc152="mat-edit" onClick={() => (p.onEditMats ? p.onEditMats(b.activityId ?? null) : p.onEditStep(b.activityId ?? null))}>Edit</button>}
             </div>
           </li>
         ))}
       </ol>
+      {p.onEditMats ? <button type="button" className="qc1522-lk qc1522-madd" data-qc1522="add-sent" onClick={() => p.onEditMats!(null)}>+ Add something you sent</button> : null}
     </div>
   );
 
   return (
     <PopCtx.Provider value={pop}>
     <div ref={rootRef} className="qc149c qcv-legacy qc152" data-qc149c="card" data-qc152="card" data-mode={view === "read" ? "view" : view} data-view={view}
-      data-lean={view === "read" ? undefined : "flat"} data-id={r.id} data-state={d.state}>
+      data-lean={view === "read" && !jOpen ? undefined : "flat"} data-id={r.id} data-state={d.state} data-j={jOpen ? "" : undefined} data-phase={d.foot?.phase ?? undefined}>
       <div className="qc152-in">
         <div className={`qc152-band${dark ? " dk" : ""}`} data-qc152="band" style={{ background: bandBg, color: head.fg }}>
-          <span data-qc152="band-word">{r.status === QueryStatus.OFFER ? "OFFER" : STATE_BAND[d.state]}</span>
+          <span data-qc152="band-word">{d.foot ? bnd.word : r.status === QueryStatus.OFFER ? "OFFER" : STATE_BAND[d.state]}</span>
           {d.state !== "closed" && r.dayN != null ? <span className="qc152-day" data-qc152="day">Day {r.dayN}</span> : <span className="qc152-day" />}
           <button type="button" className="qc152-x" data-qc152="pencil" aria-label="Edit this query" title="Edit this query" onClick={p.onPencil}>{PEN}</button>
           <button type="button" className="qc152-x" data-qc149c="close" aria-label="Close the query" title="Close" onClick={p.onClose}>✕</button>
@@ -302,10 +341,25 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
             </button>
           ))}
         </div>
-        <div ref={bodyRef} className="qc152-body" data-qc152="body" role="tabpanel">
+        <div ref={bodyRef} className={`qc152-body${p.toast ? " qc1522-tpad" : ""}`} data-qc152="body" role="tabpanel">
           {p.tab === "tracking" ? trackingPane : p.tab === "agent" ? agentPane : p.tab === "materials" ? matPane : <div className="qc152-notes">{p.notes}</div>}
         </div>
-        {/* v152.1 §3 the footer: the only place that says where it stands — an icon, two lines, the action */}
+        {p.composer ? p.composer : d.foot ? (() => {
+          /* v152.2 §3.2 — the footer: two lines, the button, and the quieter link */
+          const ft = footer1522({ ...d.foot, state: d.state, status: r.status, first, nowMs });
+          return (
+            <div className={`qc152-rb${ft.late ? " late" : ""}`} data-qc152="reply" data-qc1522="footer" data-act={ft.button?.act ?? "none"} data-icon={ft.icon.k}>
+              <div className="qc152-rf" data-qc152="reply-field">
+                {ft.icon.k === "clock" ? <span className="qc152-fc" data-qc152="foot-icon" aria-hidden="true">{CLOCK}</span>
+                  : ft.icon.k === "ring" ? <span className="qc152-fr" data-qc152="foot-icon" style={{ ["--p" as string]: String(ft.icon.p) }} aria-hidden="true" />
+                  : <span className={`qc152-fg${ft.icon.k === "grey" ? " grey" : ""}`} data-qc152="foot-icon" style={ft.icon.k === "stage" ? { background: ft.icon.tint } : undefined} aria-hidden="true">{StepGlyph({ status: ft.icon.status, kind: null })}</span>}
+                <div className="qc152-rft"><b data-qc152="reply-lead">{ft.lead}</b><span data-qc152="reply-sub">{ft.sub}</span></div>
+              </div>
+              {ft.button ? <button type="button" className={`qc152-rbtn ${ft.button.tone === "navy" ? "nv" : "gh"}`} data-qc152="reply-btn" data-tone={ft.button.tone} data-act={ft.button.act} onClick={() => p.onFoot?.(ft.button!.act)}>{ft.button.label}{ft.button.tone === "navy" ? ARW : null}</button> : null}
+              {ft.link ? <button type="button" className="qc1522-flink" data-qc1522="foot-link" data-act={ft.link.act} onClick={() => p.onFoot?.(ft.link!.act)}>{ft.link.label}</button> : null}
+            </div>
+          );
+        })() : (
         <div className={`qc152-rb${box.late ? " late" : ""}`} data-qc152="reply" data-act={box.act} data-icon={box.icon.k}>
           <div className="qc152-rf" data-qc152="reply-field">
             {box.icon.k === "ring" ? <span className="qc152-fr" data-qc152="foot-icon" style={{ ["--p" as string]: String(box.icon.p) }} aria-hidden="true" />
@@ -316,7 +370,10 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
           {box.second ? <button type="button" className="qc152-rbtn gh sm" data-qc152="reply-second" onClick={() => p.onReply(box.second!.act)}>{box.second.label}</button> : null}
           <button type="button" className={`qc152-rbtn ${box.tone === "navy" ? "nv" : "gh"}`} data-qc152="reply-btn" data-tone={box.tone} onClick={() => p.onReply(box.act)}>{box.button}{ARW}</button>
         </div>
+        )}
         </>}
+        {p.toast ? <div className="qc1522-toast" role="status" data-qc1522="toast"><span>{p.toast.msg}</span><button type="button" data-qc1522="undo" onClick={p.toast.onUndo}>Undo</button></div> : null}
+        {p.burst ? <div key={p.burst} className="qc1522-burst" aria-hidden="true" data-qc1522="burst">{Array.from({ length: 46 }, (_, k) => <i key={k} style={{ left: `${(k * 37) % 100}%`, background: ["#f2ebe0", "#f3d3c6", "#d3dce7", "#cbd9be"][k % 4], animationDelay: `${(k % 7) * 0.08}s` }} />)}</div> : null}
       </div>
       {tip.node}
     </div>

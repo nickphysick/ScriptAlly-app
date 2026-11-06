@@ -922,6 +922,8 @@ export interface Query {
   sendReminderDate?: any; // Timestamp | string — self-reminder to send materials / resubmit
   offerDate?: any; // Timestamp | string
   offerResponseDeadline?: any; // Timestamp | string
+  /** v152.2 §7 — a pass taken off as recorded by mistake: the reply date restarts from this day (YYYY-MM-DD), not the send */
+  replyRestartedOn?: string;
   offerNotes?: string;
   closingReason?: string; // internal token: noResponseAfterWindow | withdrew | agentClosedSubmissions | other
   closingNotes?: string;

@@ -1,0 +1,166 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Query Centre v152.2 §2–§3 (design-refs/query-centre-v152-2/card-journeys.html) — the card's navy bands, the waits as
+ * one italic line, the in-place step editor, the composer, its draft, the discard strip and the undo toast.
+ * ⚠️ THE CARD PORTALS WITH THE PANEL, so no page token reaches it: colours are literals, faces the `:root` --sp-* tokens.
+ */
+
+/* §2.1 band buttons: white at 18% on navy, ink at 7% on the light bands */
+.qc152 .qc152-band.dk .qc152-x { background: rgba(255, 255, 255, 0.18); color: #fff; }
+.qc152 .qc152-band.dk .qc152-x:hover { background: rgba(255, 255, 255, 0.3); }
+.qc152 .qc152-band:not(.dk) .qc152-x { background: rgba(28, 19, 15, 0.07); color: #1c130f; }
+.qc152 .qc152-band:not(.dk) .qc152-x:hover { background: rgba(28, 19, 15, 0.13); }
+
+/* §2.2 a wait: one italic line, no hairline and no pill, on the side of the next message */
+.qc152 .qc1522-lt { margin: 12px 0 5px; font: italic 400 12.5px/1.3 var(--sp-serif) !important; color: #a59a90; }
+.qc152 .qc1522-lt.me { align-self: flex-end; margin-right: 6px; text-align: right; }
+.qc152 .qc1522-lt.them { align-self: flex-start; margin-left: 40px; }
+.qc152 .qc152-th { display: flex; flex-direction: column; }
+.qc152 .qc152-th > .qc152-m.me { align-self: flex-end; }
+.qc152 .qc152-th > .qc152-m.them { align-self: flex-start; }
+.qc152 .qc1522-sb { margin-top: 4px; font: italic 400 12.5px/1.35 var(--sp-serif) !important; color: #7d7268; }
+
+/* §3.1 the draft: a dashed edge in its final colour, a transparent fill */
+.qc152 .qc152-m.qc1522-draft .qc152-bx { background: transparent !important; box-shadow: none !important; border: 1.5px dashed var(--dr, #b9ad9e); }
+.qc152 .qc152-m.qc1522-draft .qc152-fx { display: none; }
+.qc152 .qc152-m.new { animation: qc1522Pop 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.25) both; }
+@keyframes qc1522Pop { from { opacity: 0; transform: translateY(10px) scale(0.96); } }
+
+/* while a composer or an edit is open: the book and tabs fold away, and no ✎ Edit shows */
+.qc152 .qc152-ms, .qc152 .qc152-tabs { transition: max-height 0.35s ease, margin 0.35s ease, padding 0.35s ease, opacity 0.25s ease; max-height: 160px; overflow: hidden; }
+.qc152[data-j] .qc152-ms { max-height: 0; margin-top: 0; margin-bottom: 0; padding-top: 0; padding-bottom: 0; opacity: 0; }
+.qc152[data-j] .qc152-tabs { max-height: 0; margin-top: 0; opacity: 0; border-color: transparent; }
+.qc152[data-j] .qc152-fx { display: none !important; }
+.qc152 .qc152-body.qc1522-tpad { padding-bottom: 64px; }
+
+/* §3.1 the composer: a white panel rising from the foot */
+.qc152 .qc1522-cp {
+  position: relative; display: flex; flex-direction: column; max-height: 66%; background: #fff; border-top: 1px solid #e6dfd4;
+  box-shadow: 0 -18px 30px -24px rgba(28, 19, 15, 0.35); animation: qc1522Up 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.qc152 .qc1522-cp.tall { max-height: 78%; }
+@keyframes qc1522Up { from { transform: translateY(24px); opacity: 0; } }
+.qc152 .qc1522-ch { flex: none; display: flex; align-items: center; gap: 10px; padding: 14px 16px 4px; }
+.qc152 .qc1522-ch h3 { flex: 1; margin: 0; font: 400 21px/1.3 var(--sp-type) !important; color: #1c130f; letter-spacing: 0; }
+.qc152 .qc1522-x { all: unset; box-sizing: border-box; cursor: pointer; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; color: #7d7268; }
+.qc152 .qc1522-x:hover { background: #f6f3ee; }
+.qc152 .qc1522-bk { all: unset; cursor: pointer; font: 400 14px var(--sp-serif) !important; color: #7d7268; }
+.qc152 .qc1522-bk:hover { color: #2a3a52; }
+.qc152 .qc1522-cb { flex: 1; min-height: 0; overflow: auto; padding: 6px 16px; }
+.qc152 .qc1522-cf { flex: none; display: flex; align-items: center; gap: 10px; padding: 10px 16px 14px; border-top: 1px solid #f0ebe3; }
+.qc152 .sp { flex: 1; }
+.qc152 .qc1522-sub { margin: 0 0 10px; font: 400 14.5px/1.45 var(--sp-serif) !important; color: #6f645b; }
+.qc152 .qc1522-sub.ink { color: #1c130f; }
+.qc152 .qc1522-sub b { font-weight: 500; color: #1c130f; }
+.qc152 .qc1522-acts { display: flex; gap: 16px; margin: -2px 0 14px; }
+.qc152 .qc1522-fl { display: grid; grid-template-columns: 118px minmax(0, 1fr); gap: 10px 12px; align-items: center; margin: 4px 0 12px; }
+.qc152 .qc1522-fl.tight { grid-template-columns: 96px minmax(0, 1fr); margin: 0; }
+.qc152 .qc1522-fl > label { align-self: start; padding-top: 7px; font: 400 14.5px var(--sp-serif) !important; color: #5b4f47; }
+.qc152 .qc1522-seg { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.qc152 .qc1522-seg > button, .qc152 .qc1522-pill {
+  all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 999px;
+  background: #fff; box-shadow: inset 0 0 0 1px #d9cfc2; font: 400 14px/1.3 var(--sp-serif) !important; color: #3d332c;
+}
+.qc152 .qc1522-seg > button:hover, .qc152 .qc1522-pill:hover { box-shadow: inset 0 0 0 1.5px #8e8274; }
+.qc152 .qc1522-seg > button.on { background: #2a3a52; color: #fff; box-shadow: none; }
+.qc152 .qc1522-seg > button.on svg * { stroke: #fff; }
+.qc152 .qc1522-seg > button.on svg [fill="#1c130f"] { fill: #fff; }
+.qc152 .qc1522-seg > button:disabled { opacity: 0.4; cursor: default; }
+.qc152 .qc1522-seg > button .g { display: inline-grid; place-items: center; width: 16px; height: 16px; }
+.qc152 .qc1522-seg > button .g svg { width: 15px; height: 15px; }
+.qc152 .qc1522-rts { margin: 2px 0 14px; }
+/* the "Another date" pill wraps the app's calendar button */
+.qc152 .qc1522-dp .qc152-qdb { border-radius: 999px; padding: 6px 12px; box-shadow: inset 0 0 0 1px #d9cfc2; background: #fff; font: 400 14px/1.3 var(--sp-serif) !important; color: #3d332c; }
+.qc152 .qc1522-dp.on .qc152-qdb { background: #2a3a52; color: #fff; box-shadow: none; }
+.qc152 .qc1522-mt { margin-top: 6px; }
+.qc152 .qc1522-hint { margin-top: 4px; font: italic 400 13px/1.4 var(--sp-serif) !important; color: #6f645b; }
+.qc152 .qc1522-lk { all: unset; cursor: pointer; font: 400 14px var(--sp-serif) !important; color: #2a3a52; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+.qc152 .qc1522-lk:hover { color: #1c130f; }
+.qc152 .qc1522-lk.rust { color: #a2452a; text-decoration: none; }
+.qc152 .qc1522-in, .qc152 .qc1522-ta, .qc152 .qc1522-sel {
+  box-sizing: border-box; width: 100%; padding: 7px 10px; border: 1px solid #d9cfc2; border-radius: 9px; background: #fff; outline: none;
+  font: 400 14.5px/1.45 var(--sp-serif) !important; color: #1c130f;
+}
+.qc152 .qc1522-sel { width: auto; max-width: 100%; }
+.qc152 .qc1522-ta { min-height: 62px; resize: vertical; }
+.qc152 .qc1522-in:focus, .qc152 .qc1522-ta:focus, .qc152 .qc1522-sel:focus { border-color: #2a3a52; box-shadow: 0 0 0 3px rgba(42, 58, 82, 0.12); }
+.qc152 .qc1522-chks { display: grid; gap: 6px; }
+.qc152 .qc1522-chk { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; cursor: pointer; font: 400 14.5px var(--sp-serif) !important; color: #1c130f; }
+.qc152 .qc1522-chks .qc1522-chk { margin: 0; }
+.qc152 .qc1522-chk input { width: 16px; height: 16px; accent-color: #2a3a52; }
+.qc152 .qc1522-b { font-weight: 500; }
+.qc152 .qc1522-tip { display: flex; gap: 10px; align-items: flex-start; margin: 0 0 12px; padding: 10px 12px; border-radius: 12px; background: #f6f1e8; font: 400 14.5px/1.45 var(--sp-serif) !important; color: #1c130f; }
+.qc152 .qc1522-tip svg { flex: none; margin-top: 2px; }
+.qc152 .qc1522-big { display: grid; gap: 8px; margin: 2px 0 8px; }
+.qc152 .qc1522-big > button { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; background: #fff; box-shadow: inset 0 0 0 1px #ddd3c6; }
+.qc152 .qc1522-big > button:hover { box-shadow: inset 0 0 0 1.5px #2a3a52; }
+.qc152 .qc1522-big .g { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: #f6f3ee; color: #5b4f47; }
+.qc152 .qc1522-big b { display: block; font: 500 16px/1.3 var(--sp-serif) !important; color: #1c130f; }
+.qc152 .qc1522-big span:not(.g):not(.ar) { display: block; font: 400 13.5px/1.4 var(--sp-serif) !important; color: #6f645b; }
+.qc152 .qc1522-big .ar { margin-left: auto; color: #a59a90; }
+.qc152 .qc1522-sumo { display: flex; align-items: center; gap: 12px; margin: 0 0 12px; padding: 10px 12px; border-radius: 12px; background: #e5eddf; box-shadow: inset 0 0 0 1px #cddcc1; }
+.qc152 .qc1522-sumo b { display: block; font: 500 15.5px var(--sp-serif) !important; }
+.qc152 .qc1522-sumo span:not(.g) { font: 400 13.5px var(--sp-serif) !important; color: #4b5a40; }
+.qc152 .qc1522-sumo .qc1522-lk { margin-left: auto; }
+.qc152 .qc1522-ag { margin: 0 0 8px; border-radius: 12px; box-shadow: inset 0 0 0 1px #e6ded2; overflow: hidden; }
+.qc152 .qc1522-ag .grp { padding: 7px 12px; background: #faf8f4; border-top: 1px solid #f0ebe3; font: 400 13px var(--sp-serif) !important; color: #6f645b; }
+.qc152 .qc1522-ag .grp:first-child { border-top: 0; }
+.qc152 .qc1522-ag .row { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-top: 1px solid #f0ebe3; }
+.qc152 .qc1522-ag .av { flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: #f6f3ee; box-shadow: inset 0 0 0 1px #e2d9cc; font: 500 9px var(--sp-mono) !important; }
+.qc152 .qc1522-ag .nm { flex: 1; min-width: 0; }
+.qc152 .qc1522-ag .nm b { display: block; font: 500 15px/1.2 var(--sp-serif) !important; }
+.qc152 .qc1522-ag .nm span { font: 400 13px var(--sp-serif) !important; color: #6f645b; }
+.qc152 .qc1522-ag .tk { all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px; box-shadow: inset 0 0 0 1px #d9cfc2; font: 400 13.5px var(--sp-serif) !important; }
+.qc152 .qc1522-ag .tk.on { background: #e5eddf; box-shadow: inset 0 0 0 1px #b7cba5; color: #3c5230; }
+.qc152 .qc1522-btn {
+  all: unset; box-sizing: border-box; cursor: pointer; flex: none; display: inline-flex; align-items: center; gap: 8px; height: 42px; padding: 0 17px; border-radius: 21px;
+  font: 600 14.5px var(--sp-serif) !important; white-space: nowrap; transition: filter 0.15s, transform 0.1s;
+}
+.qc152 .qc1522-btn.sm { height: 34px; padding: 0 14px; }
+.qc152 .qc1522-btn:active { transform: scale(0.97); }
+.qc152 .qc1522-btn.nv { background: #2a3a52; color: #fff; }
+.qc152 .qc1522-btn.gh { background: #fff; color: #2a3a52; box-shadow: inset 0 0 0 1.5px #2a3a52; }
+.qc152 .qc1522-btn:hover { filter: brightness(1.12); }
+.qc152 .qc1522-btn:disabled { opacity: 0.38; pointer-events: none; }
+.qc152 .qc1522-conf { flex: none; display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #fbf2ee; border-top: 1px solid #f0d9cf; font: 400 14.5px/1.4 var(--sp-serif) !important; color: #1c130f; }
+.qc152 .qc1522-conf.in { margin: 12px -14px -12px; border-radius: 0 0 12px 12px; }
+
+/* §2.4 the bubble's in-place form */
+.qc152 .qc1522-edit { max-width: 100%; align-self: stretch !important; }
+.qc152 .qc1522-ebx { width: 100%; padding: 12px 14px; border-radius: 14px; border: 1.5px solid #2a3a52; background: #fff; box-shadow: 0 10px 24px -16px rgba(28, 19, 15, 0.4); }
+.qc152 .qc1522-eh { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font: 500 15.5px var(--sp-serif) !important; }
+.qc152 .qc1522-eh .g { display: grid; place-items: center; width: 22px; height: 22px; }
+.qc152 .qc1522-ef { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+
+/* §3.2 the footer's link beside its button */
+.qc152 .qc1522-flink { all: unset; cursor: pointer; flex: none; padding: 0 4px; font: 400 14px var(--sp-serif) !important; color: #5b4f47; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+.qc152 .qc1522-flink:hover { color: #2a3a52; }
+
+/* §3.1 the undo toast: an ink pill, centred 86px above the foot */
+.qc152 .qc1522-toast {
+  position: absolute; left: 50%; bottom: 86px; z-index: 5; display: flex; align-items: center; gap: 14px; padding: 9px 10px 9px 16px; border-radius: 999px;
+  background: #1c130f; color: #fff; font: 400 14.5px var(--sp-serif) !important; white-space: nowrap; transform: translateX(-50%);
+  animation: qc1522Toast 0.25s ease both;
+}
+@keyframes qc1522Toast { from { opacity: 0; transform: translate(-50%, 10px); } }
+.qc152 .qc1522-toast button { all: unset; cursor: pointer; padding: 4px 10px; border-radius: 999px; background: rgba(255, 255, 255, 0.14); font: 600 13.5px var(--sp-serif) !important; color: #fff; }
+.qc152 .qc1522-toast button:hover { background: rgba(255, 255, 255, 0.26); }
+
+/* §6.1 accepting: a 2.2s burst in the four status tints */
+.qc152 .qc1522-burst { position: absolute; inset: 0; z-index: 6; pointer-events: none; overflow: hidden; }
+.qc152 .qc1522-burst i { position: absolute; top: -12px; width: 8px; height: 12px; border-radius: 2px; animation: qc1522Fall 2.2s cubic-bezier(0.3, 0.6, 0.5, 1) forwards; }
+@keyframes qc1522Fall { to { transform: translateY(720px) rotate(540deg); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .qc152 .qc1522-burst { display: none; }
+  .qc152 .qc1522-cp, .qc152 .qc152-m.new, .qc152 .qc1522-toast { animation: none; }
+}
+
+/* the toast and the burst sit over the card's inner frame */
+.qc152 .qc152-in { position: relative; }
+/* §2.6 "+ Add something you sent", under the Materials tab's last row */
+.qc152 .qc1522-madd { display: inline-block; margin: 12px 4px 4px; }
+/* §3.2 the footer's second line wraps to two lines rather than cutting off ("Answer by 9 Oct · 6 to tell") */
+.qc152 [data-qc1522="footer"] .qc152-rft span { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.qc152 [data-qc1522="footer"] .qc152-rft b { white-space: normal; }

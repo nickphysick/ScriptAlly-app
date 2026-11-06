@@ -23,13 +23,16 @@ describe("the thread (v152 §2.3)", () => {
   });
   it("v152.1 §2.1 only events: no Day 1, no today, no ending; your Query sent first and the latest step last", () => {
     const t = buildThread([st("q", QueryStatus.QUERIED, 60), st("pr", QueryStatus.PARTIAL_REQUESTED, 16)], { ...ctx, state: "materials", replyMs: null });
-    expect(t.map((x) => (x.t === "wait" ? x.label : x.side))).toEqual(["me", "44 days", "them"]);
+    expect(t.map((x) => (x.t === "wait" ? x.label : x.side))).toEqual(["me", "44 days later", "them"]);
     const a = buildThread([st("q", QueryStatus.QUERIED, 23)], { ...ctx, state: "agent", replyMs: NOW + 33 * DAY });
     expect(a.map((x) => x.t)).toEqual(["msg"]);
   });
-  it("v152.1 §2.3 every wait reads its days; '—' beside an undated step, which keeps its place", () => {
+  /* v152.2 §2.2 (supersedes v152.1 §2.3) — a wait is "N days later" on the next message's side; none beside an undated step */
+  it("v152.2 §2.2 a wait reads 'N days later'; no line beside an undated step, which keeps its place", () => {
     const t = buildThread([st("q", QueryStatus.QUERIED, 100), st("pr", QueryStatus.PARTIAL_REQUESTED, 0, { ms: null }), st("ps", QueryStatus.PARTIAL_SENT, 20)], { ...ctx, state: "agent", replyMs: null });
-    expect(t.map((x) => (x.t === "wait" ? x.label : x.key))).toEqual(["q", "—", "pr", "—", "ps"]);
+    expect(t.map((x) => (x.t === "wait" ? x.label : x.key))).toEqual(["q", "pr", "ps"]);
+    const w = buildThread([st("q", QueryStatus.QUERIED, 10), st("pr", QueryStatus.PARTIAL_REQUESTED, 10), st("ps", QueryStatus.PARTIAL_SENT, 9)], { ...ctx, state: "agent", replyMs: null });
+    expect(w.filter((x) => x.t === "wait").map((x) => x.t === "wait" ? [x.label, x.side] : null)).toEqual([["Same day", "them"], ["1 day later", "me"]]);
     expect(t.find((x) => x.t === "msg" && x.key === "pr")).toMatchObject({ date: "No date", dated: false });
   });
   it("v152.1 §2.2 yours paper (no tint), theirs tinted by the reply; a pass and your closes grey", () => {
@@ -48,7 +51,7 @@ describe("the thread (v152 §2.3)", () => {
     const t = buildThread([st("q", QueryStatus.QUERIED, 90, { quote: "not mine" }), st("o", QueryStatus.OFFER, 10, { quote: " I’d love to " }), st("t", null, 9, { kind: "told", toldCount: 6 })], { ...ctx, state: "offer", replyMs: null });
     const m = t.filter((x) => x.t === "msg") as Extract<(typeof t)[number], { t: "msg" }>[];
     expect(m.map((x) => x.quote)).toEqual([null, "I’d love to", null]);
-    expect(m[2]).toMatchObject({ side: "me", title: "Told 6 other agents" });
+    expect(m[2]).toMatchObject({ side: "me", title: "You told 6 agents about the offer" });
   });
 });
 

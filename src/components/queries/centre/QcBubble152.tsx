@@ -50,6 +50,8 @@ export interface BubbleProps {
   /** the chip row: rendered by the caller (the thread's chips are buttons with tips; a draft's are plain) */
   chips?: React.ReactNode;
   via?: string | null;
+  /** v152.2 §5 a line under the bubble ("Form rejection · open to more work") */
+  sub?: string | null;
   quote?: string | null;
   follows?: string | null;
   nth?: string | null;
@@ -82,6 +84,7 @@ export const Bubble: React.FC<BubbleProps> = (b) => {
             </div>
             {b.chips || b.via ? <div className="qc152-r2">{b.chips}{b.via ? <em data-qc152="via">{b.via}</em> : null}</div> : null}
             {b.quote ? <div className="qc152-qt" data-qc152="quote">“{b.quote}”</div> : null}
+            {b.sub ? <div className="qc1522-sb" data-qc1522="sub">{b.sub}</div> : null}
           </div>
         </div>
         {b.after}

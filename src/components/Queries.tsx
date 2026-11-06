@@ -133,16 +133,20 @@ import { QUIET_WEEKS_PATH, nudgeMsOf, quickOfRow, quietWeeksOf, stampRows, state
 import { packagesUnlocked, versionsUnlocked } from "../lib/entitlements";
 import { ACTION_LABEL, CLOSED_SET, listGroupOf, savedGroupOf } from "../lib/qc1522";
 import { qcPlanAid } from "../lib/qcReviewAid1522";
-import { dayLabel as dayLabel152, sideOf as side152, type ReplyAct, type ThreadStepIn } from "../lib/qcThread152";
+import { dayLabel as dayLabel152, orderSteps as orderSteps152, sideOf as side152, stepTitle as stepTitle152, type ThreadStepIn } from "../lib/qcThread152";
 import { getActivityTime } from "../lib/queryDerivation";
+import { anyToMs } from "../lib/qcStages";
 import { qc152DevFree } from "../lib/qc152ReviewAid";
 import { packageLockStamp } from "../lib/saveQueryEdits";
-import { commitPlan, planDetails, planFix, planRecord, readFeed, readLog, RECORD_STATUS, refusedMarks, storedLabels, TOLD_TYPE, type FixStep, type RecordKind, type StepMaterial } from "../lib/qc152Write";
-import { QcDetails152, QcFix152, QcFork152, type FixRow, type PkgChoice } from "./queries/centre/QcFix152";
-import { askChips, readMat } from "../lib/qcThread152";
-import type { LogStep, StepType } from "../lib/qcLogic152";
-import { QcRecord152, type RecordOutcome } from "./queries/centre/QcRecord152";
+import { commitMany, commitPlan, planFix, planRecord, readFeed, readLog, refusedMarks, storedLabels, TOLD_TYPE, type FixStep, type StepMaterial } from "../lib/qc152Write";
+import { readMat } from "../lib/qcThread152";
+import { dependents, STEP_LABEL, type LogStep, type StepType } from "../lib/qcLogic152";
 import type { MatEnv } from "./queries/centre/QcEdit152";
+import { QcComposer1522, type ComposerCtx, type ComposerSave, type Journey, type ReplyType } from "./queries/centre/QcComposer1522";
+import { QcStepEdit1522 } from "./queries/centre/QcStepEdit1522";
+import { holdsPages, planDetails1522, planReply, planSigned, planStepEdit, planTell, planUnpass } from "../lib/qc1522Write";
+import type { FootAct } from "../lib/qcFoot1522";
+import type { Snapshot } from "../lib/queryActions/snapshot";
 import { inUseId as inUseBookVersion } from "../lib/versionsV2";
 import type { QcCard152Data } from "./queries/centre/QcCard152";
 import { DEFAULT_SORT_151, QC_FULL_SCREEN, nextCell, sort151, whoSections, type Section, type Sort151 } from "../lib/qc151";
@@ -1805,12 +1809,25 @@ export const Queries: React.FC<{
   const [qcCardMode, setQcCardMode] = useState<CardMode>("view");
   const [qcCardFresh, setQcCardFresh] = useState<string | null>(null);
   /* v152 §3 — what the record form opened on (the reply box's button), and a save in flight */
-  const [qc152Rec, setQc152Rec] = useState<RecordKind | "resp" | null>(null);
   const [qc152Busy, setQc152Busy] = useState(false);
   /* v152 §4 — the step Fix a mistake opens on (a bubble's ✎ Edit), and where the record form was opened from */
-  const [qc152Focus, setQc152Focus] = useState<string | null>(null);
-  const [qc152From, setQc152From] = useState<"reply" | "fork">("reply");
+  /* v152.2 §3 — the card's composer (its journey; `n` remounts it), its draft, the bubble edited in place, the toast */
+  const [qc1522J, setQc1522J] = useState<{ j: Journey; n: number; reply?: ReplyType | null; mats?: ComposerCtx["mats"] } | null>(null);
+  const [qc1522Draft, setQc1522Draft] = useState<ThreadStepIn | null>(null);
+  const [qc1522Edit, setQc1522Edit] = useState<string | null>(null);
+  const [qc1522Toast, setQc1522Toast] = useState<{ msg: string; undo: () => Promise<void> } | null>(null);
+  const [qc1522Burst, setQc1522Burst] = useState<number | null>(null);
+  /* the toast lasts 5.2s; opening another composer dismisses it */
+  useEffect(() => { if (!qc1522Toast) return undefined; const t = window.setTimeout(() => setQc1522Toast(null), 5200); return () => window.clearTimeout(t); }, [qc1522Toast]);
+  useEffect(() => { if (!qc1522Burst) return undefined; const t = window.setTimeout(() => setQc1522Burst(null), 2400); return () => window.clearTimeout(t); }, [qc1522Burst]);
+  const FOOT_J: Record<FootAct, Journey> = { offer: "offer", tell: "tell", sent: "send", nudge: "nudge", close: "close", resp: "reply", reopen: "reopen" };
+  const open1522 = useCallback((a: FootAct | "details" | Journey, reply: ReplyType | null = null) => {
+    setQc1522Edit(null); setQc1522Toast(null); setQc1522Draft(null);
+    setQc1522J({ j: (FOOT_J as Record<string, Journey>)[a] ?? (a as Journey), n: Date.now(), reply });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const qcCardPendingMode = useRef<{ id: string; mode: CardMode } | null>(null);
+  /* v152.2 §1.6 — a list row's button opens that query's card with its composer (the footer's own journey) */
+  const qc1522Pending = useRef<{ id: string; a: FootAct } | null>(null);
   /* v149.1 B3 — the row's "add date" opens the card in edit mode at its undated step */
   const [qcEditUndated, setQcEditUndated] = useState(false);
   /* v149 Part D — the header's two flows in the same panel: a new query, and "Who replied?" */
@@ -2996,9 +3013,13 @@ export const Queries: React.FC<{
   /* v149 C — another query in the panel opens in view mode, unless a flow asked for respond on that very query */
   useEffect(() => {
     const p = qcCardPendingMode.current;
-    /* v152 §3 — on the desktop "respond" is the card's own record form, opened on "Who replied" */
+    /* v152.2 — another query's card opens with no composer, no edit and no toast; a list row's action opens its composer */
+    setQc1522J(null); setQc1522Edit(null); setQc1522Draft(null); setQc1522Toast(null);
+    const pj = qc1522Pending.current;
+    if (pj && pj.id === cardQueryId) { qc1522Pending.current = null; open1522(pj.a); }
     if (p && p.id === cardQueryId) {
-      if (p.mode === "respond" && qcDesk) { setQc152Rec("resp"); setQcCardMode("record"); } else setQcCardMode(p.mode);
+      /* v152.2 §5 — on the desktop "respond" is the card's composer, "What did they say?" */
+      if (p.mode === "respond" && qcDesk) { setQcCardMode("view"); open1522("resp"); } else setQcCardMode(p.mode);
       qcCardPendingMode.current = null;
     } else setQcCardMode("view");
   }, [cardQueryId]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -6046,6 +6067,26 @@ export const Queries: React.FC<{
       };
       /* §2.5 a close's reason, in italic: the close's first note, read as a phrase ("an offer elsewhere") */
       const reason = (() => { const r = (q.closingNotes ?? "").split(" · ")[0].trim(); return r ? r.charAt(0).toLowerCase() + r.slice(1) : null; })();
+      const latestKey = (st: QueryStatus) => [...story].reverse().find((y) => y.status === st && !y.kind)?.key;
+      const stepExtras152 = (x: (typeof story)[number]): Pick<ThreadStepIn, "askedFor" | "sub" | "event"> => {
+        const e = evData(x.activityId) ?? {};
+        const ev = typeof e.eventKey === "string" ? e.eventKey : null;
+        const askedFor = typeof e.askedFor === "string" && e.askedFor.trim() ? e.askedFor.trim() : null;
+        let sub: string | null = null;
+        if (x.status === QueryStatus.REJECTED && !x.kind) {
+          const fb = typeof e.feedbackType === "string" ? e.feedbackType : null;
+          const kind = fb ? (fb === "Yes" || fb === "detailed" ? "Personal rejection" : "Form rejection") : null;
+          sub = [kind, e.openToMore === true ? "open to more work" : null].filter(Boolean).join(" · ") || null;
+        }
+        if (x.status === QueryStatus.OFFER && !x.kind && latestKey(QueryStatus.OFFER) === x.key) { const t = anyToMs(q.offerResponseDeadline); if (t != null) sub = `Answer by ${dayLabel152(t, now)}`; }
+        if (x.status === QueryStatus.REVISE_RESUBMIT && !x.kind && q.status === QueryStatus.REVISE_RESUBMIT && latestKey(QueryStatus.REVISE_RESUBMIT) === x.key) {
+          const t = anyToMs(q.expectedSendDate); if (t != null) sub = `Resubmit by ${dayLabel152(t, now)}`;
+        }
+        if ((x.status === QueryStatus.FULL_REQUESTED || x.status === QueryStatus.PARTIAL_REQUESTED) && !x.kind && q.status === x.status && latestKey(x.status) === x.key) {
+          const t = anyToMs(q.expectedSendDate); if (t != null) sub = `Send by ${dayLabel152(t, now)}`;
+        }
+        return { askedFor, sub, event: ev };
+      };
       const tSteps: ThreadStepIn[] = story.map((x) => ({
         key: x.key, activityId: x.activityId, status: x.status, kind: x.kind, ms: x.ms,
         chips: x.status === QueryStatus.QUERIED && !x.kind ? (stepChips(x.activityId).length ? stepChips(x.activityId) : queryChips) : stepChips(x.activityId),
@@ -6053,6 +6094,8 @@ export const Queries: React.FC<{
           : x.kind === "nudge" ? methodQualifier(q.sendMethod)
           : !x.kind && (x.status === QueryStatus.WITHDRAWN || x.status === QueryStatus.NO_RESPONSE) ? reason : null,
         quote: quoteOf(x),
+        /* v152.2 §5 — what the step itself carries: "Something else", the kind of no, an offer's and an R&R's dates */
+        ...stepExtras152(x),
       }));
       /* §2.5 told other agents: its own steps on the log (not statuses, so the story does not carry them) */
       for (const e of trackingEvents as { id?: string; type?: string; createdAt?: unknown; toldCount?: unknown; toldDeadline?: unknown }[]) {
@@ -6085,33 +6128,43 @@ export const Queries: React.FC<{
         quietWeeks: qcQuietWeeks,
         reason,
         nudged: nudgeMsOf({ ...row, nrmn: !!nrmnRaw }, now) != null,
+        foot: (() => {
+          /* v152.2 §3.2 — the footer's facts: an offer answered with time taken is Deciding; signed is Offer accepted */
+          const toldStep = tSteps.some((x) => x.kind === "told");
+          const offerEv = [...(trackingEvents as { resultingStatus?: string; type?: string; tellLater?: unknown; createdAt?: unknown }[])]
+            .filter((e) => e.resultingStatus === QueryStatus.OFFER || e.type === QueryStatus.OFFER)
+            .sort((a, b) => getActivityTime(a.createdAt as never) - getActivityTime(b.createdAt as never)).pop();
+          const toTell = queries.filter((x) => x.offerRefQueryId === q.id && x.offerTold === false).length;
+          const phase = q.status === QueryStatus.SIGNED ? "signed" as const
+            : q.status === QueryStatus.OFFER ? (toldStep || offerEv?.tellLater === true ? "deciding" as const : "offer" as const) : null;
+          const reqStep = [...tSteps].reverse().find((x) => x.status === QueryStatus.PARTIAL_REQUESTED && !x.kind);
+          return {
+            fullName: ag?.name || ag?.agency || row.agentName,
+            phase,
+            dueMs: row.court === "agent" ? null : row.expectedMs,
+            replyMs: row.expectedMs,
+            nudgeMs: nudgeMsOf({ ...row, nrmn: !!nrmnRaw }, now),
+            quietWeeks: qcQuietWeeks,
+            closeLeads: !!(row as { closeLeads?: boolean }).closeLeads,
+            toTell: phase === "signed" && offerEv?.tellLater !== true ? 0 : toTell,
+            askedFor: q.status === QueryStatus.PARTIAL_REQUESTED ? reqStep?.askedFor ?? null : null,
+            closedMs: state === "closed" ? (Number.isFinite(lsc) ? lsc : lastMs) : null,
+            closedHow: q.status === QueryStatus.REJECTED ? "passed" as const : q.status === QueryStatus.NO_RESPONSE ? "noresp" as const
+              : q.status === QueryStatus.WITHDRAWN ? (q.closingReason === "offer_declined" ? "declined" as const : "withdrawn" as const) : null,
+          };
+        })(),
       };
     }
-    /* §3 — the reply box's button opens the card's own form; nothing writes until its Save. An offer's answer and a
-       revision's send keep their journeys (the form has no step for either), and Reopen is the late reply. */
-    const reply152 = (a: ReplyAct) => {
-      const rr = q.status === QueryStatus.REVISE_RESUBMIT;
-      if (a === "offer" || a === "reopen" || (a === "sent" && rr)) { stepRow({ mode: a === "offer" ? "offer" : a === "reopen" ? "resp" : "sent", queryId: q.id }); return; }
-      /* v152.1 §3 "Tell other agents" opens the record form with Told other agents chosen */
-      setQc152Rec(a === "tell" ? "told" : a === "sent" ? (q.status === QueryStatus.FULL_REQUESTED ? "full_sent" : "partial_sent") : a === "nudge" ? "nudge" : a === "close" ? "noresp" : "resp");
-      setQc152From("reply");
-      setQcCardMode("record");
-    };
     /* what the material editors offer (§4.4): the book's versions (Pro), the saved letters and synopses, the one in use */
+    const pro1522 = (import.meta.env.MODE !== "production" ? qcPlanAid() : null) ?? versionsUnlocked(currentUser);
     const qc152Env = (): MatEnv => ({
-      free: !!v152?.free,
+      free: !pro1522,
       versions: bookVersionsOf(ms).filter((v) => !(v as { archived?: boolean }).archived)
         .map((v) => ({ id: v.id, name: v.name, madeMs: new Date(v.createdDate).getTime() })).sort((a, b) => a.madeMs - b.madeMs),
       inUseVersionId: inUseBookVersion(ms, packages),
       letters: scriptDb.versions.filter((v) => v.manuscriptId === q.manuscriptId && v.componentType === ComponentType.QUERY_LETTER).map((v) => ({ name: v.versionName })),
       synopses: scriptDb.versions.filter((v) => v.manuscriptId === q.manuscriptId && v.componentType === ComponentType.SYNOPSIS).map((v) => ({ name: v.versionName })),
     });
-    let edit152: React.ReactNode = null;
-    /* ── §4: the pencil's three ways in, Fix a mistake, and the details ── */
-    const T4: Partial<Record<string, FixRow["t"]>> = {
-      [QueryStatus.QUERIED]: "queried", [QueryStatus.PARTIAL_REQUESTED]: "preq", [QueryStatus.PARTIAL_SENT]: "psent", [QueryStatus.FULL_REQUESTED]: "freq",
-      [QueryStatus.FULL_SENT]: "fsent", [QueryStatus.REVISE_RESUBMIT]: "rr", [QueryStatus.OFFER]: "offer", [QueryStatus.REJECTED]: "passed", [QueryStatus.NO_RESPONSE]: "noresp", [QueryStatus.WITHDRAWN]: "withdrawn",
-    };
     const asMats = (labels: string[]): StepMaterial[] => labels.map((l) => {
       const m = readMat(l);
       return m.kind === "sample" ? { kind: "sample" as const, unit: m.unit, n: m.n } : m.kind === "other" ? { kind: "other" as const, text: l } : { kind: m.kind };
@@ -6120,218 +6173,239 @@ export const Queries: React.FC<{
       const m = id ? evStore.get(id)?.materials : undefined;
       return Array.isArray(m) && m.length && typeof m[0] === "object" ? (m as StepMaterial[]).map((x) => ({ ...x })) : null;
     };
-    if (v152 && qcCardMode === "fork") {
-      edit152 = <QcFork152 first={first} onBack={() => setQcCardMode("view")} onFix={() => { setQc152Focus(null); setQcCardMode("fix"); }}
-        onChanged={() => { setQc152Rec(null); setQc152From("fork"); setQcCardMode("record"); }} onDetails={() => setQcCardMode("details")} />;
-    }
-    if (v152 && qcCardMode === "fix" && currentUser) {
-      const rows: FixRow[] = v152.steps.flatMap((x) => {
-        const t = x.kind === "nudge" ? "nudge" : x.kind === "told" ? "told" : x.status ? T4[x.status] : undefined;
-        if (!t || x.ms == null || !x.activityId) return [];
-        /* v152.1 §2.5 a told step carries its count and the deadline you gave */
-        const ev = evStore.get(x.activityId) as { toldCount?: unknown; toldDeadline?: unknown } | undefined;
-        const dl = typeof ev?.toldDeadline === "string" ? new Date(ev.toldDeadline).getTime() : x.ms;
-        const told = t === "told" ? { count: typeof ev?.toldCount === "number" ? ev.toldCount : 1, deadlineMs: Number.isFinite(dl) ? dl : x.ms } : null;
-        return [{ id: x.activityId, t, d: x.ms, mats: storedMats(x.activityId) ?? (t === "queried" ? asMats(x.chips.map((c) => c.label)) : []), told }];
-      });
-      const pkgs: PkgChoice[] | null = v152.free ? null : packages.filter((k) => k.manuscriptId === q.manuscriptId && !(k as { retiredAt?: string }).retiredAt).map((k) => {
-        const nm = (id: string) => scriptDb.versions.find((v) => v.id === id)?.versionName ?? null;
-        const mats: StepMaterial[] = [];
-        if (k.queryLetterVersionId) mats.push({ kind: "letter", name: nm(k.queryLetterVersionId) });
-        if (k.synopsisVersionId) mats.push({ kind: "synopsis", name: nm(k.synopsisVersionId) });
-        if (k.samplePagesVersionId || k.bookVersionId) mats.push({ kind: "sample", unit: "chapters", n: 3, versionId: k.bookVersionId ?? null });
-        const credited = queries.some((x) => sentRecordOf(x).packageId === k.id);
-        return { id: k.id, name: k.packageName, edition: k.edition ?? 1, draft: !k.firstSentAt && !credited, madeMs: new Date(k.createdDate as string).getTime(), mats };
-      });
-      const rec0 = sentRecordOf(q);
+
+    /* ══ v152.2 §2–§7 — THE COMPOSER, THE BUBBLE EDITED IN PLACE, AND THEIR SAVES ═══════════════════════════════════
+       Every footer action opens the composer at the foot of the card (QcComposer1522); ✎ Edit turns one bubble into a
+       small form (QcStepEdit1522). Each save is one plan on the page's batched writer (lib/qc1522Write), one snapshot,
+       and an undo toast inside the card. ⚠️ v152.1's "What needs changing?" fork, Fix a mistake, the record form and
+       "See what changes" are gone. */
+    let composer1522: React.ReactNode = null;
+    let edit1522: React.ReactNode = null;
+    const card1522: NonNullable<React.ComponentProps<typeof QcQueryCard149>["card1522"]> = {};
+    if (v152 && qcDesk && currentUser) {
       const uid = currentUser.id;
-      edit152 = (
-        <QcFix152 key={`fix:${q.id}`} first={first} nowMs={now} rows={rows} focusId={qc152Focus} env={qc152Env()} packages={pkgs}
-          pkgNow={rec0.how === "package" && rec0.packageId ? { id: rec0.packageId, edition: rec0.edition, name: rec0.packageName ?? "the package" } : null}
-          now={{ status: row.status, state: v152.state, replyMs: v152.replyMs, dueMs: v152.dueMs, dueWho: null }}
-          after={(rs) => {
-            const last = [...rs].filter((x) => x.t !== "nudge" && x.t !== "told").sort((a, b) => a.d - b.d).pop();
-            const ST: Record<string, QueryStatus> = { queried: QueryStatus.QUERIED, preq: QueryStatus.PARTIAL_REQUESTED, psent: QueryStatus.PARTIAL_SENT, freq: QueryStatus.FULL_REQUESTED, fsent: QueryStatus.FULL_SENT, rr: QueryStatus.REVISE_RESUBMIT, offer: QueryStatus.OFFER, passed: QueryStatus.REJECTED, noresp: QueryStatus.NO_RESPONSE, withdrawn: QueryStatus.WITHDRAWN };
-            const status = last ? ST[last.t] : row.status;
-            const state = status === QueryStatus.OFFER ? "offer" : [QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED, QueryStatus.REVISE_RESUBMIT].includes(status as QueryStatus) ? "materials"
-              : [QueryStatus.REJECTED, QueryStatus.NO_RESPONSE, QueryStatus.WITHDRAWN].includes(status as QueryStatus) ? "closed" : status === row.status ? v152.state : "agent";
-            return { status, state, replyMs: null, dueMs: null, dueWho: null };
-          }}
-          busy={qc152Busy}
-          onBack={() => setQcCardMode("fork")}
-          onSave={async (rs, removed, pkg) => {
-            if (qc152Busy) return false;
-            setQc152Busy(true);
-            try {
-              const [existing, feed] = await Promise.all([readLog(uid, q.id), readFeed(uid, q.id)]);
-              const K: Record<string, FixStep["kind"]> = { queried: "queried", preq: "partial_req", psent: "partial_sent", freq: "full_req", fsent: "full_sent", rr: "rr_req", offer: "offer", nudge: "nudge", passed: "pass", noresp: "noresp", withdrawn: "withdrawn", told: "told" };
-              /* v152.1 §2.5 the other queries this one's offer marked as told: a told step moved or removed moves or clears them */
-              const marked = queries.filter((x) => x.offerRefQueryId === q.id).map((x) => x.id);
-              const plan = planFix({ uid, q, agent: ag, ms, existing, feed, nowMs: Date.now(), quietWeeks: qcQuietWeeks, marked },
-                rs.map((r) => ({ id: r.id, isNew: r.isNew, kind: K[r.t], dayMs: r.d, materials: r.mats, told: r.told ?? null })), removed, pkg);
-              /* a draft package picked here goes on query and locks: its stamp joins the same batch */
-              const draftPkg = pkg?.id ? packages.find((k) => k.id === pkg.id && !k.firstSentAt) : undefined;
-              if (draftPkg) plan.update = [...(plan.update ?? []), { path: `packages/${draftPkg.id}`, data: packageLockStamp() }];
-              /* Undo restores the marked queries too: they are in the one snapshot */
-              const snap = await commitPlan(uid, plan, undefined, (plan.update ?? []).filter((u) => u.path.startsWith("queries/")).map((u) => u.path.split("/")[1]));
-              setQcCardMode("view");
-              showUndoBar({ message: `Fixed · ${ag?.name || ag?.agency || "The agent"}`, sub: removed.length ? `${removed.length} ${removed.length === 1 ? "STEP" : "STEPS"} REMOVED` : "THE RECORD IS CORRECTED", undo: async () => { await restoreSnapshot(snap); } });
-              return true;
-            } catch (e) {
-              console.error("v152: the fix failed", e);
-              showToast({ message: "Couldn't save the fix. Nothing was changed." });
-              return false;
-            } finally { setQc152Busy(false); }
-          }} />
-      );
-    }
-    if (v152 && qcCardMode === "details" && currentUser) {
-      const uid = currentUser.id;
-      const choices = agents.map((a) => ({
-        id: a.id, name: agentPrimary(a), agency: agentAgencyLine(a), initials: agentInitials(a),
-        queried: queries.some((x) => x.agentId === a.id && x.manuscriptId === q.manuscriptId),
-        weeks: typeof a.responseTimeWeeks === "number" && a.responseTimeWeeks > 0 ? a.responseTimeWeeks : null,
-      }));
-      const fit = askChips(v152.asks, v152.sentLabels);
-      edit152 = (
-        <QcDetails152 key={`det:${q.id}`} first={first} nowMs={now} agentId={q.agentId} sendMethod={String(q.sendMethod ?? "Email")} agents={choices}
-          whatWent={v152.sentLabels} pkgName={sv.how === "package" ? sv.name : null} asks={v152.asks} missing={fit.missing} replyWeeks={v152.agentWeeks}
-          replyNow={v152.replyMs} replyFor={(id) => expectedFor(q, agents.find((a) => a.id === id) ?? null).ms} free={v152.free} busy={qc152Busy}
-          onBack={() => setQcCardMode("fork")}
-          onFixQuerySent={() => { setQc152Focus(v152!.steps.find((x) => x.status === QueryStatus.QUERIED)?.activityId ?? null); setQcCardMode("fix"); }}
-          onAgentCard={() => { if (ag) openAgentCard(ag.id, { tab: "work", focus: "reply", from: "qc" }); }}
-          onSave={async (next) => {
-            if (qc152Busy) return false;
-            setQc152Busy(true);
-            try {
-              const snap = await commitPlan(uid, planDetails(q, next));
-              setQcCardMode("view");
-              showUndoBar({ message: `Details saved · ${ag?.name || ag?.agency || "The agent"}`, sub: "THE QUERY IS UPDATED", undo: async () => { await restoreSnapshot(snap); } });
-              return true;
-            } catch (e) {
-              console.error("v152: the details save failed", e);
-              showToast({ message: "Couldn't save the details. Nothing was changed." });
-              return false;
-            } finally { setQc152Busy(false); }
-          }} />
-      );
-    }
-    if (v152 && qcCardMode === "record" && currentUser) {
+      const env = qc152Env();
+      const steps1522 = v152.steps;
+      const dated = steps1522.filter((x) => x.ms != null).sort((a, b) => a.ms! - b.ms!);
+      const floorMs = dated.length ? dated[dated.length - 1].ms! : null;
       const T: Partial<Record<string, StepType>> = {
         [QueryStatus.QUERIED]: "queried", [QueryStatus.PARTIAL_REQUESTED]: "preq", [QueryStatus.PARTIAL_SENT]: "psent", [QueryStatus.FULL_REQUESTED]: "freq",
         [QueryStatus.FULL_SENT]: "fsent", [QueryStatus.REVISE_RESUBMIT]: "rr", [QueryStatus.OFFER]: "offer", [QueryStatus.REJECTED]: "passed", [QueryStatus.NO_RESPONSE]: "noresp", [QueryStatus.WITHDRAWN]: "withdrawn",
       };
-      const log: LogStep[] = v152.steps.flatMap((x) => {
+      const logOf = (xs: readonly ThreadStepIn[]): LogStep[] => xs.flatMap((x) => {
         const t = x.kind === "nudge" ? "nudge" : x.kind === "told" ? "told" : x.status ? T[x.status] : undefined;
-        return t && x.ms != null ? [{ id: x.key, t, d: x.ms }] : [];
+        return t && x.ms != null && x.activityId ? [{ id: x.activityId, t, d: x.ms }] : [];
       });
-      /* the latest dated step, by date (told steps are gathered after the story) */
-      const lastS = [...v152.steps].filter((x) => x.ms != null).sort((a, b) => a.ms! - b.ms!).pop() ?? null;
-      const req = [...v152.steps].reverse().find((x) => x.status === QueryStatus.PARTIAL_REQUESTED || x.status === QueryStatus.FULL_REQUESTED) ?? null;
+      const agentWord = ag?.name || ag?.agency || "The agent";
+      /* the request the send answers: what was asked, with the version in use (Pro) */
+      const req = [...steps1522].reverse().find((x) => x.status === QueryStatus.PARTIAL_REQUESTED || x.status === QueryStatus.FULL_REQUESTED || x.status === QueryStatus.REVISE_RESUBMIT) ?? null;
       const reqMats = (() => {
         const m = req?.activityId ? evStore.get(req.activityId)?.materials : undefined;
         return Array.isArray(m) ? m.filter((x): x is StepMaterial => !!x && typeof x === "object" && "kind" in x).map((x) => ({ ...x })) : null;
       })();
-      const env = qc152Env();
-      const inUse = env.inUseVersionId;
-      const withVer = (m: StepMaterial): StepMaterial => (!v152.free && (m.kind === "sample" || m.kind === "full") && !m.versionId && inUse ? { ...m, versionId: inUse } : m);
-      const prefill = (k: RecordKind): StepMaterial[] => {
-        if (k === "full_sent") return (reqMats?.length ? reqMats : [{ kind: "full" as const }]).map(withVer);
-        if (k === "partial_sent") {
-          if (reqMats?.length) return reqMats.map(withVer);
-          const u = String(q.materialsRequestedType ?? "").toLowerCase(), n = Number(q.materialsRequestedQuantity);
-          const unit = u === "pages" || u === "chapters" || u === "words" ? u : "chapters";
-          return [withVer({ kind: "sample", unit, n: Number.isFinite(n) && n > 0 ? n : undefined }), ...(q.requestSynopsis ? [{ kind: "synopsis" as const }] : [])];
-        }
-        if (k === "partial_req") return [{ kind: "sample", unit: "chapters", n: 3 }];
-        if (k === "full_req" || k === "rr_req") return [{ kind: "full" }];
-        return [];
-      };
-      const W = 7 * 86_400_000;
-      const dueWho = (s: string): RecordOutcome["dueWho"] => (s === "materials" || s === "offer" ? "you" : s === "closed" ? null : "agent");
-      const nowO: RecordOutcome = { status: row.status, state: v152.state, replyMs: v152.replyMs, dueMs: v152.dueMs, dueWho: dueWho(v152.state) };
-      const after = (k: RecordKind, day: number): RecordOutcome => {
-        /* §2.5 telling other agents changes nothing about where this query stands */
-        if (k === "told") return nowO;
-        const status = RECORD_STATUS[k] ?? row.status;
-        if (k === "partial_sent" || k === "full_sent") return { status, state: "agent", replyMs: day + 12 * W, dueMs: null, dueWho: "agent" };
-        if (k === "nudge") return { status, state: "agent", replyMs: day + qcQuietWeeks * W, dueMs: null, dueWho: "agent" };
-        if (k === "partial_req" || k === "full_req" || k === "rr_req") return { status, state: "materials", replyMs: null, dueMs: null, dueWho: "you" };
-        if (k === "offer") return { status, state: "offer", replyMs: null, dueMs: null, dueWho: "you" };
-        return { status, state: "closed", replyMs: null, dueMs: null, dueWho: null };
-      };
-      const uid = currentUser.id;
-      const tellOthers = (() => {
-        const others = offerOthers(q, queries, qaIsLive);
-        const dl = q.offerResponseDeadline ? new Date(q.offerResponseDeadline as string).getTime() : NaN;
-        return { others, canTell: row.status === QueryStatus.OFFER,
-          def: { count: Math.max(1, Math.min(30, others.length || 1)), deadlineMs: Number.isFinite(dl) && dl > now ? dl : now + 7 * 86_400_000 } };
+      const withVer = (m: StepMaterial): StepMaterial => (pro1522 && (m.kind === "sample" || m.kind === "full") && !m.versionId && env.inUseVersionId ? { ...m, versionId: env.inUseVersionId } : m);
+      const sendKind = q.status === QueryStatus.FULL_REQUESTED ? "full_sent" as const : q.status === QueryStatus.REVISE_RESUBMIT ? "resubmitted" as const : "partial_sent" as const;
+      const sendMats = (() => {
+        if (sendKind !== "partial_sent") return (reqMats?.length ? reqMats : [{ kind: "full" as const }]).map(withVer);
+        if (reqMats?.length) return reqMats.map(withVer);
+        const u = String(q.materialsRequestedType ?? "").toLowerCase(), n = Number(q.materialsRequestedQuantity);
+        const unit = u === "pages" || u === "chapters" || u === "words" ? u : "chapters";
+        return [withVer({ kind: "sample", unit, n: Number.isFinite(n) && n > 0 ? n : undefined }), ...(q.requestSynopsis ? [{ kind: "synopsis" as const }] : [])];
       })();
-      edit152 = (
-        <QcRecord152 key={`${q.id}:${qc152Rec}`} first={first} nowMs={now} initials={row.initials} log={log}
-          last={lastS ? { status: lastS.status, kind: lastS.kind, ms: lastS.ms, chips: lastS.chips.map((c) => c.label), toldCount: lastS.toldCount ?? null } : null}
-          initial={qc152Rec} prefill={prefill} askedMs={req?.ms ?? null} env={env} now={nowO} after={after} busy={qc152Busy}
-          onCancel={() => { setQcCardMode(qc152From === "fork" ? "fork" : "view"); setQc152Rec(null); }}
-          canTell={tellOthers.canTell} tellDefault={tellOthers.def}
-          onSave={async (k, day, mats, extra) => {
-            if (qc152Busy) return false;
-            setQc152Busy(true);
-            try {
-              const existing = await readLog(uid, q.id);
-              /* §2.5 one fact, one save: the told step and the marks on every other live query, in one batch and one snapshot */
-              const told = k === "told" && extra.told ? { ...extra.told, others: tellOthers.others.map((o) => ({ id: o.id, offerReply: o.offerReply ?? null })) } : undefined;
-              const ctx = { uid, q, agent: ag, ms, existing, nowMs: Date.now(), quietWeeks: qcQuietWeeks };
-              let plan = planRecord(ctx, k, day, mats, { replyNote: extra.replyNote, told });
-              /* v152.1 — a sibling the rules refuse (a query at the rules' field ceiling) refuses the whole batch. Find which,
-                 then save the step and every accepted sibling in ONE batch, and name the refused ones in the toast: never
-                 silently (Nick). The step's count stays what the writer entered. */
-              let refused: string[] = [];
-              let snap: Awaited<ReturnType<typeof commitPlan>>;
-              try {
-                snap = await commitPlan(uid, plan, undefined, told ? told.others.map((o) => o.id) : []);
-              } catch (e) {
-                if (!told || (e as { code?: string })?.code !== "permission-denied") throw e;
-                refused = await refusedMarks(uid, plan);
-                if (!refused.length) throw e;
-                const kept = told.others.filter((o) => !refused.includes(o.id));
-                plan = planRecord(ctx, k, day, mats, { told: { ...told, others: kept } });
-                snap = await commitPlan(uid, plan, undefined, kept.map((o) => o.id));
-              }
-              const refusedNames = refused.map((id) => { const x = queries.find((y) => y.id === id); const a = agents.find((y) => y.id === x?.agentId); return a?.name || a?.agency || "an agent"; });
-              const newId = plan.set[0].path.split("/").pop() ?? null;
-              setQcCardFresh(newId);
-              window.setTimeout(() => setQcCardFresh(null), 1600);
-              setQc152Rec(null);
-              setQcCardMode("view");
-              showUndoBar({
-                message: refused.length
-                  ? `Saved. ${refused.length} ${refused.length === 1 ? "query" : "queries"} couldn’t be marked: ${refusedNames.join(", ")}.`
-                  : `${{ partial_req: "Partial requested", full_req: "Full requested", rr_req: "Revise & resubmit", offer: "Offer", pass: "Passed", partial_sent: "Partial sent", full_sent: "Full sent", nudge: "Nudge", noresp: "Closed: no response", told: "Others told" }[k]} · ${ag?.name || ag?.agency || "The agent"}`,
-                sub: "ADDED TO THE TIMELINE",
-                undo: async () => { await restoreSnapshot(snap); },
-              });
-              return true;
-            } catch (e) {
-              console.error("v152: the save failed", e);
-              showToast({ message: "Couldn't save that. Nothing was changed." });
-              return false;
-            } finally { setQc152Busy(false); }
-          }} />
-      );
+      const pass = [...steps1522].reverse().find((x) => x.status === QueryStatus.REJECTED && !x.kind) ?? null;
+      const before = pass ? [...steps1522].filter((x) => x.ms != null && pass.ms != null && x.ms <= pass.ms && x !== pass).reverse().find((x) => !x.kind && x.status && [QueryStatus.QUERIED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT, QueryStatus.RESUBMITTED].includes(x.status)) : null;
+      const passedAfter = before?.status === QueryStatus.FULL_SENT ? "your full" : before?.status === QueryStatus.PARTIAL_SENT ? "your partial" : before?.status === QueryStatus.RESUBMITTED ? "your revision" : "your query";
+      const offerStep = [...steps1522].reverse().find((x) => x.status === QueryStatus.OFFER && !x.kind) ?? null;
+      const STAGE_HAS: Partial<Record<string, string>> = {
+        [QueryStatus.FULL_SENT]: "Has your full", [QueryStatus.RESUBMITTED]: "Has your revision", [QueryStatus.PARTIAL_SENT]: "Has your partial",
+        [QueryStatus.FULL_REQUESTED]: "Asked for your full", [QueryStatus.PARTIAL_REQUESTED]: "Asked for your partial", [QueryStatus.REVISE_RESUBMIT]: "Asked for a revision",
+      };
+      const live1522 = queries.filter((x) => x.id !== q.id && x.manuscriptId === q.manuscriptId && qaIsLive(x));
+      const others = live1522.map((x) => {
+        const a = agents.find((y) => y.id === x.agentId);
+        const sentMs = anyToMs(x.dateSent);
+        return {
+          id: x.id, name: a ? agentPrimary(a) : "An agent", initials: a ? agentInitials(a) : "?",
+          stage: STAGE_HAS[x.status] ?? (sentMs != null ? `Queried ${dayLabel152(sentMs, now)}` : "Queried"),
+          group: holdsPages(x.status) ? "pages" as const : "query" as const, email: (a?.email ?? "").trim(),
+          told: x.offerRefQueryId === q.id && x.offerTold === true, offerReply: x.offerReply ?? null, holdsPages: holdsPages(x.status),
+        };
+      }).sort((a, b) => (a.group === b.group ? a.name.localeCompare(b.name) : a.group === "pages" ? -1 : 1));
+      const via = String(q.sendMethod ?? "Email");
+      const pkgList = pro1522 ? packages.filter((k) => k.manuscriptId === q.manuscriptId && !(k as { retiredAt?: string }).retiredAt).map((k) => ({ id: k.id, name: k.packageName })) : null;
+      const rec0 = sentRecordOf(q);
+      const ctx: ComposerCtx = {
+        first, fullName: ag?.name || ag?.agency || row.agentName, nowMs: now, email: (ag?.email ?? "").trim(), floorMs, env, pro: pro1522,
+        sendKind, sendMats, queriedVia: via === "QueryManager" ? "QueryManager" : via === "Email" ? "Email" : "Other",
+        nudgedMs: nudgeMsOf({ ...row, nrmn: !!v152.nrmn }, now), queryOnly: q.status === QueryStatus.QUERIED, remindDays: 14,
+        passMs: pass?.ms ?? null, passedAfter, restartToMs: now + 28 * 86_400_000,
+        offerFromMs: offerStep?.ms ?? null, offerByMs: anyToMs(q.offerResponseDeadline), others,
+        openOthers: live1522.length, withPages: others.filter((o) => o.holdsPages).length,
+        agents: agents.map((a) => ({ id: a.id, name: agentPrimary(a), agency: agentAgencyLine(a) })), agentId: q.agentId, method: via,
+        packages: pkgList, packageId: rec0.how === "package" ? rec0.packageId ?? null : null, notes: "",
+        mats: qc1522J?.mats ?? null,
+      };
+      /* one save: plan it, commit it in one batch, then the toast and its Undo */
+      const done1522 = (snap: Snapshot, msg: string, freshId: string | null) => {
+        setQc1522J(null); setQc1522Draft(null); setQc1522Edit(null);
+        if (freshId) { setQcCardFresh(freshId); window.setTimeout(() => setQcCardFresh(null), 1600); }
+        setQc1522Toast({ msg, undo: async () => { await restoreSnapshot(snap); } });
+      };
+      const newId = (plan: { set: { path: string }[] }) => plan.set.find((x) => x.path.includes("/activity/"))?.path.split("/").pop() ?? null;
+      const run1522 = async (fn: () => Promise<void>): Promise<boolean> => {
+        if (qc152Busy) return false;
+        setQc152Busy(true);
+        /* the composer (or the bubble's form) gives way as the save starts: its draft would otherwise sit beside the new
+           step the local write has already drawn, until the server answers */
+        setQc1522J(null); setQc1522Draft(null); setQc1522Edit(null);
+        try { await fn(); return true; } catch (e) {
+          console.error("v152.2: the save failed", e);
+          showToast({ message: "Couldn't save that. Nothing was changed." });
+          return false;
+        } finally { setQc152Busy(false); }
+      };
+      const save1522 = (p: ComposerSave): Promise<boolean> => run1522(async () => {
+        const existing = await readLog(uid, q.id);
+        const pc = { uid, q, agent: ag, ms, existing, nowMs: Date.now(), quietWeeks: qcQuietWeeks };
+        if (p.j === "send") {
+          const plan = planRecord(pc, sendKind, p.dayMs, p.mats);
+          done1522(await commitPlan(uid, plan), sendKind === "partial_sent" ? "Partial sent" : sendKind === "resubmitted" ? "Revision sent" : "Full sent", newId(plan));
+        } else if (p.j === "nudge") {
+          const plan = planRecord(pc, "nudge", p.dayMs, [], { step: { sentVia: p.via } });
+          done1522(await commitPlan(uid, plan), "Nudge logged", newId(plan));
+        } else if (p.j === "close") {
+          const plan = p.as === "withdrawn" ? planRecord(pc, "withdrawn", p.dayMs, [], { withdraw: { token: "withdrew", event: "withdrawn" } }) : planRecord(pc, "noresp", p.dayMs, []);
+          done1522(await commitPlan(uid, plan), "Closed", newId(plan));
+        } else if (p.j === "reply") {
+          const plan = planReply(pc, { ...p, queryOnly: q.status === QueryStatus.QUERIED });
+          done1522(await commitPlan(uid, plan),
+            p.rt === "passed" ? `Closed as passed${p.wall ? " · added to your Wall of no" : ""}` : p.rt === "offer" ? "Offer added" : `${first}’s reply added`, newId(plan));
+        } else if (p.j === "unpass") {
+          if (!pass?.activityId) throw new Error("No pass to take off");
+          const feed = await readFeed(uid, q.id);
+          const plan = planUnpass({ ...pc, feed }, pass.activityId);
+          done1522(await commitPlan(uid, plan), "Pass taken off", null);
+        } else if (p.j === "tell") {
+          const feed = await readFeed(uid, q.id);
+          let plan = planTell({ ...pc, feed }, others, p.told, p.later, anyToMs(q.offerResponseDeadline));
+          const ids = others.map((o) => o.id);
+          let snap: Snapshot, refused: string[] = [];
+          try { snap = await commitPlan(uid, plan, undefined, ids); } catch (e) {
+            /* v152.1 — a sibling at the rules' field ceiling refuses the batch: save the rest, and name the refused ones */
+            if ((e as { code?: string })?.code !== "permission-denied") throw e;
+            refused = await refusedMarks(uid, plan);
+            if (!refused.length) throw e;
+            plan = planTell({ ...pc, feed }, others.filter((o) => !refused.includes(o.id)), p.told, p.later, anyToMs(q.offerResponseDeadline));
+            snap = await commitPlan(uid, plan, undefined, ids.filter((i) => !refused.includes(i)));
+          }
+          const n = others.filter((o) => p.told[o.id] && !o.told).length, left = others.filter((o) => !p.told[o.id]).length;
+          const names = refused.map((id) => others.find((o) => o.id === id)?.name ?? "an agent");
+          const msg = refused.length ? `Saved. Couldn’t mark ${names.join(", ")}`
+            : !left ? `All ${others.length} agents told`
+            : n ? `${n} told · the other ${left} ${left === 1 ? "is" : "are"} on your to-do list` : `${left} to tell · on your to-do list`;
+          done1522(snap, msg, newId(plan));
+        } else if (p.j === "accept") {
+          const feed = await readFeed(uid, q.id);
+          const holders = others.filter((o) => o.holdsPages).map((o) => o.id);
+          const plans = [planSigned({ ...pc, feed }, p.todo, holders)];
+          if (p.closeOthers) {
+            for (const o of live1522) {
+              const ox = await readLog(uid, o.id);
+              plans.push(planRecord({ uid, q: o, agent: agents.find((a) => a.id === o.agentId) ?? null, ms, existing: ox, nowMs: Date.now(), quietWeeks: qcQuietWeeks },
+                "withdrawn", Date.now(), [], { withdraw: { token: "accepted_offer", event: "withdrawn_on_offer" } }));
+            }
+          }
+          const snap = await commitMany(uid, plans, holders);
+          done1522(snap, "Offer accepted", newId(plans[0]));
+          setQc1522Burst(Date.now());
+        } else if (p.j === "decline") {
+          const plan = planRecord(pc, "withdrawn", Date.now(), [], { withdraw: { token: "offer_declined", event: "offer_declined", notes: p.note } });
+          done1522(await commitPlan(uid, plan), "Offer declined", newId(plan));
+        } else if (p.j === "details") {
+          const k = p.packageId ? packages.find((x) => x.id === p.packageId) : null;
+          const plan = planDetails1522(q, { agentId: p.agentId, method: p.method, pkg: k ? { id: k.id, name: k.packageName, edition: k.edition ?? 1 } : null, pkgChanged: !!pkgList && (p.packageId ?? null) !== ctx.packageId });
+          const snap = await commitPlan(uid, plan);
+          if (p.notes.trim()) await addJournalEntry(q.id, p.notes.trim());
+          done1522(snap, "Details saved", null);
+        } else if (p.j === "mats") {
+          const feed = await readFeed(uid, q.id);
+          const cur = steps1522.find((x) => x.activityId === p.stepId);
+          const kindOf = (x?: ThreadStepIn | null): FixStep["kind"] => (x?.status === QueryStatus.QUERIED ? "queried" : x?.status === QueryStatus.PARTIAL_SENT ? "partial_sent" : x?.status === QueryStatus.RESUBMITTED ? "resubmitted" : "full_sent");
+          const plan = planStepEdit({ ...pc, feed }, { id: p.stepId, kind: kindOf(cur), dayMs: cur?.ms ?? Date.now(), materials: p.mats }, null);
+          done1522(await commitPlan(uid, plan), "Materials saved", null);
+        }
+      });
+      if (qc1522J) {
+        composer1522 = (
+          <QcComposer1522 key={`${q.id}:${qc1522J.j}:${qc1522J.n}`} journey={qc1522J.j} replyStart={qc1522J.reply ?? null} ctx={ctx} busy={qc152Busy}
+            onDraft={setQc1522Draft} onSave={save1522}
+            onClose={() => { setQc1522J(null); setQc1522Draft(null); }}
+            onAddEmail={() => { setQc1522J(null); if (ag) openAgentCard(ag.id, { tab: "who", focus: "email", from: "qc" }); }}
+            onEditOffer={() => { setQc1522J(null); setQc1522Edit(offerStep?.activityId ?? null); }} />
+        );
+      }
+      /* §2.4 the bubble edited in place */
+      const ed = qc1522Edit ? steps1522.find((x) => x.activityId === qc1522Edit) ?? null : null;
+      /* an undated step can be edited too: giving it a date is the commonest reason to open it */
+      if (ed && ed.activityId) {
+        const i = dated.indexOf(ed);
+        const log = logOf(steps1522);
+        const deps = dependents(log, ed.activityId, { nowMs: now, first });
+        const depName = (d: LogStep) => { const s0 = steps1522.find((x) => x.activityId === d.id); return s0 ? stepTitle152(s0, first) : STEP_LABEL[d.t]; };
+        /* where the card goes back to: the latest status step left, in the thread's own order (undated ones by stage) */
+        const gone = new Set([ed.activityId, ...deps.map((d) => d.id)]);
+        const rest = orderSteps152(steps1522.filter((x) => !x.kind && x.status && !gone.has(x.activityId ?? ""))).pop();
+        const backTo = rest?.status ? STAGE_NAME[rest.status] ?? null : null;
+        const deleteText = `Delete this step? ${deps.length ? `${deps.map((d) => depName(d)).join(", ")} ${deps.length === 1 ? "depends" : "depend"} on it, so ${deps.length === 1 ? "it goes" : "they go"} too. ` : ""}${backTo ? `${first}’s card goes back to ${backTo}.` : "This removes the whole query."}`;
+        const words0 = typeof (evStore.get(ed.activityId) as { replyNote?: unknown } | undefined)?.replyNote === "string" ? String((evStore.get(ed.activityId) as { replyNote?: string }).replyNote) : (ed.quote ?? "");
+        const kind: FixStep["kind"] = ed.kind === "nudge" ? "nudge" : ed.kind === "told" ? "told" : ({ queried: "queried", preq: "partial_req", psent: "partial_sent", freq: "full_req", fsent: "full_sent", rr: "rr_req", offer: "offer", passed: "pass", noresp: "noresp", withdrawn: "withdrawn" } as Record<string, FixStep["kind"]>)[T[ed.status ?? ""] ?? "queried"] ?? "queried";
+        edit1522 = (
+          <QcStepEdit1522 key={ed.activityId} side={side152(ed)} status={ed.status} kind={ed.kind} title={stepTitle152(ed, first)} ms={ed.ms ?? new Date(now).setHours(0, 0, 0, 0)}
+            mats={storedMats(ed.activityId) ?? (ed.status === QueryStatus.QUERIED ? asMats(ed.chips.map((c) => c.label)) : [])}
+            request={ed.status === QueryStatus.PARTIAL_REQUESTED || ed.status === QueryStatus.FULL_REQUESTED || ed.status === QueryStatus.REVISE_RESUBMIT}
+            words={words0} first={first} env={env} nowMs={now} floorMs={i > 0 ? dated[i - 1].ms : null} ceilMs={i >= 0 && i < dated.length - 1 ? dated[i + 1].ms : null}
+            deleteText={deleteText} busy={qc152Busy}
+            onCancel={() => setQc1522Edit(null)}
+            onSave={(v) => run1522(async () => {
+              const [existing, feed] = await Promise.all([readLog(uid, q.id), readFeed(uid, q.id)]);
+              const plan = planStepEdit({ uid, q, agent: ag, ms, existing, feed, nowMs: Date.now(), quietWeeks: qcQuietWeeks },
+                { id: ed.activityId!, kind, dayMs: v.dayMs, materials: v.mats }, side152(ed) === "them" ? v.words : null);
+              done1522(await commitPlan(uid, plan), "Step saved", null);
+            })}
+            onDelete={() => run1522(async () => {
+              const [existing, feed] = await Promise.all([readLog(uid, q.id), readFeed(uid, q.id)]);
+              const marked = queries.filter((x) => x.offerRefQueryId === q.id).map((x) => x.id);
+              const plan = planFix({ uid, q, agent: ag, ms, existing, feed, nowMs: Date.now(), quietWeeks: qcQuietWeeks, marked }, [], [ed.activityId!, ...deps.map((d) => d.id)], null);
+              done1522(await commitPlan(uid, plan, undefined, marked), deps.length ? `${deps.length + 1} steps deleted` : "Step deleted", null);
+            })} />
+        );
+      }
+      card1522.composer = composer1522;
+      card1522.draft = qc1522J ? qc1522Draft : null;
+      card1522.editingId = edit1522 ? qc1522Edit : null;
+      card1522.editNode = edit1522;
+      card1522.toast = qc1522Toast ? { msg: qc1522Toast.msg, onUndo: () => { const t = qc1522Toast; setQc1522Toast(null); void t.undo(); } } : null;
+      card1522.burst = qc1522Burst;
+      card1522.onFoot = (a) => open1522(a);
+      card1522.onEditMats = (id) => {
+        const st = (id ? steps1522.find((x) => x.activityId === id) : steps1522.find((x) => x.status === QueryStatus.QUERIED && !x.kind)) ?? null;
+        if (!st?.activityId) return;
+        const title = st.status === QueryStatus.QUERIED ? "What went with the query" : st.status === QueryStatus.PARTIAL_SENT ? "What went with the partial" : st.status === QueryStatus.RESUBMITTED ? "What went with the revision" : "What went with the full";
+        setQc1522Edit(null);
+        setQc1522J({ j: "mats", n: Date.now(), mats: { stepId: st.activityId, title, mats: storedMats(st.activityId) ?? (st.status === QueryStatus.QUERIED ? asMats(st.chips.map((c) => c.label)) : []), stepMs: st.ms ?? now } });
+      };
     }
 
     return (
       <QcQueryCard149
         v152={v152}
-        onReply152={reply152}
-        edit152={edit152}
-        onBack152={() => {
-          if (qcCardMode === "fix" || qcCardMode === "details") setQcCardMode("fork");
-          else if (qcCardMode === "record" && qc152From === "fork") { setQcCardMode("fork"); setQc152Rec(null); }
-          else { setQcCardMode("view"); setQc152Rec(null); }
-        }}
-        onPencil152={() => setQcCardMode("fork")}
-        onEditStep152={(id) => { setQc152Focus(id); setQcCardMode("fix"); }}
+        onReply152={(a) => open1522(a)}
+        edit152={null}
+        onBack152={() => setQcCardMode("view")}
+        /* v152.2 §2.5 — the pencil goes straight to "Query details"; §2.4 ✎ Edit turns that bubble into a form in place */
+        onPencil152={() => open1522("details")}
+        onEditStep152={(id) => { setQc1522J(null); setQc1522Draft(null); setQc1522Toast(null); setQc1522Edit(id); }}
+        card1522={card1522}
         row={row}
         nowMs={now}
         msTitle={ms?.title ?? null}
@@ -6423,7 +6497,7 @@ export const Queries: React.FC<{
           onPick={(id) => {
             setQcFlow(null);
             cardSetRef.current = qcVisible.map((r) => r.id);
-            if (cardQueryId === id) { setQc152Rec("resp"); setQcCardMode("record"); return; }
+            if (cardQueryId === id) { setQcCardMode("view"); open1522("resp"); return; }
             qcCardPendingMode.current = { id, mode: "respond" };
             onOpenQuery?.(id);
           }} />
@@ -8182,6 +8256,12 @@ export const Queries: React.FC<{
                   onOpen={(id) => { if (isPracticeId(id)) { openPip(); return; } cardSetRef.current = order151; onOpenQuery?.(id); }}
                   onAct={(id, mode) => {
                     if (isPracticeId(id)) { openPip(); return; }
+                    /* v152.2 §1.6 — the row's button is the footer's: it opens the card with that composer */
+                    const fa: FootAct | null = mode === "nudge" ? "nudge" : mode === "close" ? "close" : mode === "sent" ? "sent" : mode === "offer" ? "offer" : mode === "resp" ? "resp" : null;
+                    if (fa) {
+                      if (cardQueryId === id) { open1522(fa); return; }
+                      qc1522Pending.current = { id, a: fa }; cardSetRef.current = order151; onOpenQuery?.(id); return;
+                    }
                     /* v151.2 — the row's one action names its journey (lib/qc1512 `rowAct`): a gone-quiet row's is Nudge */
                     if (mode && DRAWER_LIVE[mode]) { stepRow({ mode, queryId: id, ...(mode === "close" ? { preset: { closeWhy: "noreply" as const } } : {}) }); return; }
                     const r = qcById.get(id);
