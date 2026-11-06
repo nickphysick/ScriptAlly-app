@@ -13,7 +13,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { mkdirSync } from "node:fs";
 import { openRoute, liftMotionSuppression } from "./measure";
 
-const DIR = "reports/todo-list-v51";
+const DIR = "reports/todo-list-v51-1";
 const SIZES = [{ width: 1512, height: 900 }, { width: 1280, height: 800 }] as const;
 mkdirSync(DIR, { recursive: true });
 
@@ -202,34 +202,74 @@ test("the preview opens the real card as a drawer", async ({ page }) => {
   await page.screenshot({ path: `${DIR}/card-drawer.png` });
 });
 
-/* To-do list v51 — the To do tab's number is the sidebar badge's; the Housekeeping heading counts its own rows */
-test("the To do count is the sidebar badge, and Housekeeping counts its own rows", async ({ page }) => {
+/* ⚠️ RULE CHANGED (To-do list v51.1, Nick): the To do tab counts the tray's rows, so the tab, the group headings and the
+   desk's "n/m" always add up. The sidebar badge keeps the "needs you" count, and its tooltip says so. */
+test("one count: the To do tab = the group headings' sum = m in n/m; the badge says it needs you", async ({ page }) => {
   await open(page, SIZES[0]);
   const pg = page.locator('[data-tws="page"]:visible');
   await expect(pg.locator('[data-tws="todo-count"]')).toBeVisible();
-  await page.waitForTimeout(1500);
+  await pg.locator("[data-tws-row]").first().click();
+  await expect(pg.locator('[data-tws="pos"]')).toBeVisible();
+  await page.waitForTimeout(800);
   const more = pg.locator(".tws-more");
   if (await more.count()) await more.first().click();
   const read = await page.evaluate(() => {
     const root = [...document.querySelectorAll<HTMLElement>('[data-tws="page"]')].find((e) => e.getBoundingClientRect().height > 0)!;
     const tab = Number(root.querySelector('[data-tws="todo-count"]')?.textContent ?? "NaN");
-    const badge = [...document.querySelectorAll<HTMLElement>('[data-shell="count"]')].find((e) => e.getBoundingClientRect().height > 0) ?? null;
-    const badgeN = badge ? Number((badge.getAttribute("aria-label") ?? "").match(/^(\d+)/)?.[1] ?? "NaN") : 0;
-    /* each heading's own number, and the rows drawn between it and the next heading */
-    const heads = [...root.querySelectorAll<HTMLElement>(".tws-gb")];
-    const sections = heads.map((h) => {
+    const heads = [...root.querySelectorAll<HTMLElement>(".tws-gb")].map((h) => {
       let n = 0;
       for (let e = h.nextElementSibling; e && !e.classList.contains("tws-gb"); e = e.nextElementSibling) if (e.hasAttribute("data-tws-row")) n++;
       return { name: h.querySelector("b")?.textContent ?? "", says: Number(h.querySelector("em")?.textContent ?? "NaN"), rows: n, open: h.getAttribute("aria-expanded") === "true" };
     });
-    return { tab, badgeN, badgeShown: !!badge, sections, rows: root.querySelectorAll("[data-tws-row]").length };
+    const pos = (root.querySelector('[data-tws="pos"]')?.textContent ?? "").match(/^(\d+)\/(\d+)$/);
+    const badge = [...document.querySelectorAll<HTMLElement>('[data-shell="count"]')].find((e) => e.getBoundingClientRect().height > 0) ?? null;
+    return { tab, heads, n: pos ? Number(pos[1]) : NaN, m: pos ? Number(pos[2]) : NaN, badge: badge ? { title: badge.getAttribute("title"), text: badge.textContent } : null, rows: root.querySelectorAll("[data-tws-row]").length };
   });
   console.log(JSON.stringify(read));
-  expect(Number.isFinite(read.tab)).toBe(true);
-  expect(read.tab, "the To do tab says what the sidebar badge says").toBe(read.badgeN);
-  const house = read.sections.find((x) => x.name === "Housekeeping");
-  if (house && house.open) expect(house.says, "the Housekeeping heading counts its own rows").toBe(house.rows);
-  for (const x of read.sections.filter((y) => y.open)) expect(x.says, `${x.name}: the heading counts its rows`).toBe(x.rows);
+  const sum = read.heads.reduce((t, h) => t + h.says, 0);
+  expect(read.heads.length).toBeGreaterThan(2);
+  expect(read.tab, "the tab is the sum of the group headings").toBe(sum);
+  expect(read.m, "m in n/m is the same count").toBe(read.tab);
+  expect(read.n).toBeGreaterThanOrEqual(1);
+  for (const h of read.heads.filter((x) => x.open)) expect(h.says, `${h.name}: the heading counts its rows`).toBe(h.rows);
+  expect(read.badge, "the sidebar badge is drawn").not.toBeNull();
+  expect(read.badge!.title).toMatch(/^\d+ need you now$/);
+});
+
+/* v51.1 — the card preview is a picture: nothing in it can be pressed, and its actions are not drawn */
+test("the preview is read-only: no button or link inside it takes a click", async ({ page }) => {
+  await open(page, SIZES[0]);
+  const send = page.locator('[data-tws="page"]:visible [data-tws-row]').filter({ hasText: /^Send / }).first();
+  await send.click();
+  const card = page.locator('[data-tws="desk"]:visible [data-tws="preview-card"]');
+  await expect(card).toBeVisible();
+  await page.waitForTimeout(800);
+  const read = await card.evaluate((root) => {
+    const vis = (e: Element) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(e).visibility !== "hidden"; };
+    const ctl = [...root.querySelectorAll<HTMLElement>("button, a, [role='button'], [role='link'], [role='tab']")];
+    const shown = ctl.filter(vis);
+    const hits = shown.map((e) => {
+      const r = e.getBoundingClientRect();
+      const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+      e.focus();
+      return { label: (e.textContent ?? "").trim().slice(0, 30), hitItself: !!top && e.contains(top), focused: document.activeElement === e };
+    });
+    return {
+      total: ctl.length, shown: shown.length,
+      foot: [...root.querySelectorAll('[data-qcv="open-foot"]')].filter(vis).length,
+      links: [...root.querySelectorAll(".qsc-link")].filter(vis).length,
+      inert: root.hasAttribute("inert"),
+      reached: hits.filter((h) => h.hitItself || h.focused),
+    };
+  });
+  console.log(JSON.stringify(read));
+  expect(read.total, "the previewed card has controls to test").toBeGreaterThan(0);
+  expect(read.foot, "the footer action is not drawn").toBe(0);
+  expect(read.links, "the stand card's links are not drawn").toBe(0);
+  expect(read.reached, "no control in the preview takes a click or focus").toEqual([]);
+  /* and a click on the preview still opens the real card */
+  await page.locator('[data-tws="desk"]:visible [data-tws="preview"]').click();
+  await expect(page.locator(".spanel.qsp:not(.tws-pvpanel)").first()).toBeVisible({ timeout: 10_000 });
 });
 
 test("tags stay reachable: Filters → Manage your tags opens the tags panel", async ({ page }) => {
