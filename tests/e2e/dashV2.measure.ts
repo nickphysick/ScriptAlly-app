@@ -141,14 +141,16 @@ for (const vp of SIZES) {
     const want = vp.width >= 1321 ? 400 : 340;
     L.check("A2", "population", r.cols.length === 3 && r.left.length >= 2 && r.mid.length === 2, `left ${JSON.stringify(r.left)} mid ${JSON.stringify(r.mid)}`);
     L.check("A2", "right column width", Math.abs(r.cols[2].w - want) <= 2 && r.cols[2].x > r.cols[1].x && r.cols[1].x > r.cols[0].x, `right ${r.cols[2].w.toFixed(1)} (want ${want}), xs ${r.cols.map((c) => c.x.toFixed(0))}`);
-    const leftWant = ["Next up", "Agents on file", "Closed queries"].filter((n) => r.left.includes(n));
-    L.check("A2", "left order", JSON.stringify(r.left.filter((n) => leftWant.includes(n!))) === JSON.stringify(leftWant) && leftWant.length >= 2 && r.left[r.left.length - 1] === "Closed queries", JSON.stringify(r.left));
-    L.check("A2", "middle order", JSON.stringify(r.mid) === JSON.stringify(["Active queries", "Founding writer"]), JSON.stringify(r.mid));
+    /* RE-POINTED (Dashboard v2.2): left is Next up then Agents on file; the middle is the chart then Closed queries —
+       the founding writer is a band above the grid (DB22 A1) */
+    const leftWant = ["Next up", "Agents on file"].filter((n) => r.left.includes(n));
+    L.check("A2", "left order", JSON.stringify(r.left.filter((n) => leftWant.includes(n!))) === JSON.stringify(leftWant) && leftWant.length >= 2 && r.left[r.left.length - 1] === "Agents on file", JSON.stringify(r.left));
+    L.check("A2", "middle order", JSON.stringify(r.mid) === JSON.stringify(["Active queries", "Closed queries"]), JSON.stringify(r.mid));
     L.check("A3", "removed", r.gone.length === 0, `still present: ${r.gone.join(", ")}`);
     L.done(10);
   });
 
-  test(`DB2 B · the frame on all five cards · ${tag(vp)}`, async ({ page }) => {
+  test(`DB2 B · the frame on all four cards · ${tag(vp)}`, async ({ page }) => {
     const L = new Ledger(`B-${tag(vp)}`);
     await openDash(page, vp);
     const cards = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".d2 .os-card")].filter((e) => e.getBoundingClientRect().height > 0).map((c) => {
@@ -159,13 +161,15 @@ for (const vp of SIZES) {
       return { name: c.getAttribute("aria-label"), pad: [cs.paddingTop, cs.paddingRight, cs.paddingBottom, cs.paddingLeft].map(parseFloat), bg: cs.backgroundColor, border: fs ? `${fs.borderTopWidth} ${fs.borderTopColor}` : "", band: band ? getComputedStyle(band).backgroundColor : "" };
     }));
     const BANDS: Record<string, string> = { "Next up": "rgb(244, 230, 214)", "Agents on file": "rgb(226, 230, 224)", "Closed queries": "rgb(235, 231, 225)", "Active queries": "rgb(45, 58, 80)" };
-    L.check("B1", "population: five cards", cards.length === 5, JSON.stringify(cards.map((c) => c.name)));
+    /* ⚠️ RE-POINTED (Dashboard v2.2, Part A): the founding card left the columns and is a band under the header (DB22 A1, C1–C4),
+       so four framed cards remain. */
+    L.check("B1", "population: four cards", cards.length === 4, JSON.stringify(cards.map((c) => c.name)));
     for (const c of cards) {
       L.check("B1", `${c.name} rim`, c.pad.every((p) => Math.abs(p - 7) <= 1) && c.bg === "rgb(255, 255, 255)", `${c.pad} ${c.bg}`);
       L.check("B1", `${c.name} inner frame`, c.border === "1px rgb(227, 213, 201)", c.border);
       if (BANDS[c.name!]) L.check("B1", `${c.name} band`, c.band === BANDS[c.name!], c.band);
     }
-    L.done(14);
+    L.done(13);
   });
 
   test(`DB2 C · the chart, the weeks, the hover · ${tag(vp)}`, async ({ page }) => {
@@ -194,8 +198,8 @@ for (const vp of SIZES) {
         hawk: card.querySelectorAll('img[src*="hawk"], img[src*="mentor"], img[src*="courier"]').length,
       };
     });
-    /* RE-POINTED (Dashboard v2.1) */ /* the chart is 280px tall in v2.1 */
-    L.check("C1", "population: a painted fill", c1.lo > 0 && c1.hi > c1.lo + 50 && Math.abs(c1.h - 280) <= 1, `cols ${c1.lo.toFixed(1)}–${c1.hi.toFixed(1)}, h ${c1.h}`);
+    /* RE-POINTED (Dashboard v2.1, then v2.2) */ /* the chart is 270px tall in v2.2 */
+    L.check("C1", "population: a painted fill", c1.lo > 0 && c1.hi > c1.lo + 50 && Math.abs(c1.h - 270) <= 1, `cols ${c1.lo.toFixed(1)}–${c1.hi.toFixed(1)}, h ${c1.h}`);
     L.check("C1", "fill reaches the left inner edge", Math.abs(c1.lo - c1.inner.l) <= 2, `${c1.lo.toFixed(1)} vs ${c1.inner.l.toFixed(1)}`);
     L.check("C1", "fill reaches the right inner edge", Math.abs(c1.hi - c1.inner.r) <= 2, `${c1.hi.toFixed(1)} vs ${c1.inner.r.toFixed(1)}`);
     L.check("C1", "no pins, no hawk in the card", c1.pins === 0 && c1.statusDots === 0 && c1.hawk === 0, `pins ${c1.pins} dots ${c1.statusDots} hawk ${c1.hawk}`);
@@ -264,13 +268,17 @@ for (const vp of SIZES) {
       tier: document.querySelector<HTMLElement>('.d2 [data-d2-card="founding"]')?.dataset.tier,
       /* RE-POINTED (Dashboard v2.1) */ /* v2.1: no "{done} of {needed} notes" line (the ring draws it; the card carries both as data), the founding number is
          "No. {n} · " beside How it works, and a road step names its rank in its title */
-      rank: document.querySelector('.d2 [data-d2="fw-rank"]')?.textContent, count: (() => { const c = document.querySelector<HTMLElement>('.d2 [data-d2-card="founding"]'); return c ? `${c.dataset.done} of ${c.dataset.needed} notes` : undefined; })(),
-      no: document.querySelector('.d2 [data-d2="fw-no"]')?.textContent, on: document.querySelector('.d2 [data-d2="fw-step"][data-on]')?.getAttribute("title"),
+      /* RE-POINTED (Dashboard v2.2): the band — five birds (no Egg marker), the reached ones marked by state, the
+         founding number a pill ("No. 23"), the notes counted as the band's data-done; the next rank's notes are TIERS' */
+      rank: document.querySelector('.d2 [data-d2="fw-rank"]')?.textContent, count: document.querySelector<HTMLElement>('.d2 [data-d2-card="founding"]')?.dataset.done,
+      no: document.querySelector('.d2 [data-d2="fw-no"]')?.textContent,
+      on: [...document.querySelectorAll<HTMLElement>('.d2 [data-d2="fw-step"][data-state="reached"]')].map((x) => x.querySelector("b")?.textContent).join(","),
+      next: document.querySelector('.d2 [data-d2="fw-step"][data-state="next"] [data-d2="fw-sub"]')?.textContent,
       steps: document.querySelectorAll('.d2 [data-d2="fw-step"]').length,
     }));
     const needed = TIERS.find((t) => t.key === "scout")!.min;
-    L.check("D1", "population", f.steps === 6 && !!f.rank, JSON.stringify(f));
-    L.check("D1", "rank and count are the stats", f.rank === "Archivist" && f.count === `6 of ${needed} notes` && f.on === "Archivist" && f.no === "No. 23 · ", JSON.stringify(f));
+    L.check("D1", "population", f.steps === 5 && !!f.rank, JSON.stringify(f));
+    L.check("D1", "rank and count are the stats", f.rank === "Archivist" && f.count === "6" && f.on === "Fledgling,Archivist" && f.next === `${needed} notes` && f.no === "No. 23", JSON.stringify(f));
     await page.locator('.d2 [data-d2="fw-tell"][data-key="like"]').click();
     await page.waitForTimeout(500);
     const chosen = await page.evaluate(() => document.querySelector("[data-fb='kind'][aria-checked='true']")?.getAttribute("data-k") ?? null);
@@ -287,7 +295,10 @@ for (const vp of SIZES) {
     const fw = await box(page, '.d2 [data-d2-card="founding"]');
     const mid = await box(page, '.d2 [data-d2="mid"]');
     L.check("E1", "population", !!feed && !!fw && feed.h > 300, `feed ${feed?.h}`);
-    L.check("E1", "ends level with the founding card", !!feed && !!fw && Math.abs(feed.b - fw.b) <= 2 && Math.abs(fw.b - mid!.b) <= 2, `feed ${feed?.b.toFixed(1)} founding ${fw?.b.toFixed(1)} mid ${mid?.b.toFixed(1)}`);
+    /* RE-POINTED (Dashboard v2.2): the founding writer is above the grid, so the feed ends level with the taller of the
+       left and middle columns (their last cards), and the founding band ends above the feed's top */
+    const tallest = await page.evaluate(() => Math.max(...['left', 'mid'].map((c) => Math.max(...[...(document.querySelector(`.d2 [data-d2="${c}"]`)?.children ?? [])].map((k) => k.getBoundingClientRect().bottom)))));
+    L.check("E1", "ends level with the taller column", !!feed && !!fw && Math.abs(feed.b - tallest) <= 2 && fw.b < feed.y, `feed ${feed?.b.toFixed(1)} tallest ${tallest.toFixed(1)} founding ${fw?.b.toFixed(1)}`);
     L.check("E1", "starts at the grid's top", !!feed && !!mid && Math.abs(feed.y - mid.y) <= 2, `feed ${feed?.y.toFixed(1)} mid ${mid?.y.toFixed(1)}`);
     /* the switch, populations first (feed v1's rule): every filter shows something, and Agents shows only agents' */
     const sw = await page.evaluate(async () => {

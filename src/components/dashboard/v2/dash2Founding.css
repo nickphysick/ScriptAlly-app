@@ -2,87 +2,155 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Dashboard v2.1 · the founding writer card (4 Nov; ref design-refs/dashboard-v2-1). Scoped to `.d58.d2`; see dash2.css's header for the
- * brand-font and portal rules every v2 sheet follows.
+ * Dashboard v2.2 · the founding writer band (6 Nov; ref design-refs/dashboard-v2-2). Scoped to `.d58.d2`; see dash2.css's
+ * header for the brand-font rules every v2 sheet follows. v2.1's card rules (`d2-fw*`, `d2-road`) are retired with it.
+ * ⚠️ NO `var()` INSIDE @keyframes (it fails silently here): the frames animate opacity and transform only.
  */
-/* ── v2.1 Part C · the founding writer card: same frame, rose band ── */
-.d58.d2 .d2-fw .os-frame { display: flex; flex-direction: column; }
-.d58.d2 .d2-fwmeta { display: inline-flex; align-items: baseline; gap: 4px; }
-.d58.d2 .d2-fwbody { flex: 1 1 auto; display: flex; flex-direction: column; container: d2fw / inline-size; }
-/* the band's link wraps under the title rather than running into it in a narrow column */
-.d58.d2 .d2-fw .os-bandrow { flex-wrap: wrap; row-gap: 2px; }
-
-/* the hero: a 132px badge (104px at ≤1320px), then the text */
-.d58.d2 .d2-fwhero {
-  display: grid; grid-template-columns: 132px minmax(0, 1fr); grid-template-areas: "badge text" "badge road";
-  column-gap: 22px; row-gap: 0; align-items: center; padding: 22px 24px;
-  background: radial-gradient(140% 120% at 0% 0%, #fdf6f2 0%, #fff 60%);
+.d58.d2 .d22-fw {
+  box-sizing: border-box; margin-top: 18px; padding: 7px; border-radius: 22px; background: #fff;
+  box-shadow: 0 1px 2px rgba(28, 19, 15, 0.08), 0 22px 40px -22px rgba(28, 19, 15, 0.32);
+  color: var(--d2-ink); position: relative; z-index: 1;
 }
-.d58.d2 .d2-fwbadge { grid-area: badge; position: relative; width: 132px; height: 132px; }
-.d58.d2 .d2-fwring { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-.d58.d2 .d2-fwart { position: absolute; inset: 14px; border-radius: 50%; background: #fbefe9; display: grid; place-items: center; overflow: hidden; }
-.d58.d2 .d2-fwart img { width: 72%; height: 72%; object-fit: contain; }
-.d58.d2 .d2-fwart .d2-nest { width: 76%; height: auto; }
-.d58.d2 .d2-fwtx { grid-area: text; min-width: 0; align-self: end; }
-.d58.d2 .d2-fwroadw { grid-area: road; min-width: 0; align-self: start; }
-.d58.d2 .d2-fwtx small { display: block; font-family: var(--d58-serif); font-size: 14px; line-height: 1.3; color: var(--d2-muted); }
-.d58.d2 h3.d2-fwname { margin: 0; font-family: var(--d58-type) !important; font-weight: 400 !important; font-size: 34px !important; line-height: 1.3 !important; color: var(--d2-ink); }
-.d58.d2 .d2-fwtx p { margin: 4px 0 14px; font-family: var(--d58-serif); font-size: 15.5px; line-height: 1.45; color: #3b322c; }
-.d58.d2 .d2-fwtx p b { font-weight: 600; color: #a0675a; }
+.d58.d2 .d22-gl, .d58.d2 .d22-fw .d22-ti svg, .d58.d2 .d22-prize svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 
-/* the road: six 26px markers joined by dotted lines, the names on hover; the ends labelled under it */
-.d58.d2 .d2-road { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; }
-.d58.d2 .d2-road li { flex: none; position: relative; display: flex; align-items: center; }
-.d58.d2 .d2-road li + li { flex: 1 1 0; min-width: 40px; }
-.d58.d2 .d2-road li + li::before { content: ""; flex: 1 1 auto; min-width: 8px; height: 0; margin: 0 3px; border-top: 2px dotted #e2c9bf; }
-.d58.d2 .d2-dt { flex: none; width: 26px; height: 26px; border-radius: 50%; background: #fff; box-shadow: inset 0 0 0 1.5px #e3d0c7; display: grid; place-items: center; overflow: hidden; }
-.d58.d2 .d2-dt img { width: 17px; filter: grayscale(1) opacity(0.35); }
-.d58.d2 .d2-dt .d2-hnest { width: 19px; height: auto; filter: grayscale(1) opacity(0.35); }
-.d58.d2 .d2-road li.is-on .d2-dt { background: #a0675a; box-shadow: 0 0 0 3px #f4e0d7; }
-.d58.d2 .d2-road li.is-next .d2-dt { box-shadow: inset 0 0 0 1.5px #a0675a; }
-.d58.d2 .d2-road li.is-next .d2-dt :is(img, .d2-hnest) { filter: grayscale(0.3) opacity(0.8); }
-.d58.d2 .d2-roadends { display: flex; justify-content: space-between; margin-top: 6px; font-family: var(--d58-serif); font-size: 12.5px; color: var(--d2-muted); }
-
-/* the ask */
-.d58.d2 .d2-fwask { padding: 16px 24px 18px; border-top: 1px solid #f0e6df; }
-.d58.d2 .d2-fwask p { margin: 0 0 10px; font-family: var(--d58-serif); font-size: 15px; line-height: 1.4; color: #3b322c; }
-.d58.d2 .d2-fwbtns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-.d58.d2 .d2-fwbtns button {
-  height: 44px; border: 0; border-radius: 999px; cursor: pointer; background: #fff; box-shadow: inset 0 0 0 1px #e8d7cf;
-  display: flex; align-items: center; justify-content: center; gap: 8px; min-width: 0; padding: 0 10px;
-  font-family: var(--d58-serif); font-weight: 600; font-size: 14.5px; color: var(--d2-ink); white-space: nowrap;
+/* the top strip */
+.d58.d2 .d22-top {
+  display: flex; align-items: center; gap: 12px; padding: 7px 14px; border-radius: 15px 15px 0 0;
+  background: repeating-linear-gradient(-45deg, #f1d7cb 0 12px, #ebcdbf 12px 24px);
 }
-.d58.d2 .d2-fwbtns button:hover { background: #fbefe9; box-shadow: inset 0 0 0 1px #d9b8ab; }
-.d58.d2 .d2-fwbtns svg { flex: none; width: 16px; height: 16px; color: #a0675a; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
-.d2-fwbtns button:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
+.d58.d2 .d22-tag { display: inline-flex; align-items: center; gap: 10px; font-family: var(--d58-type) !important; font-size: 16px; line-height: 1.3; color: var(--d2-ink); white-space: nowrap; }
+.d58.d2 .d22-tag i { font-family: var(--d58-mono) !important; font-style: normal; font-weight: 500; font-size: 11.5px; line-height: 1.3; letter-spacing: 0.06em; color: #fff; background: #a0675a; border-radius: 999px; padding: 3px 9px; }
+.d58.d2 .d22-prize { margin-left: auto; display: inline-flex; align-items: center; gap: 7px; font-size: 13px; line-height: 1.3; color: #6b4237; white-space: nowrap; min-width: 0; }
+.d58.d2 .d22-prize > svg { width: 15px; height: 15px; flex: none; color: #a0675a; }
+.d58.d2 .d22-prize > span { white-space: pre; }
+.d58.d2 .d22-how { border: 0; background: none; padding: 0; cursor: pointer; font: inherit; font-weight: 700; color: #7a3f31; text-decoration: underline; text-underline-offset: 3px; }
+/* the fold button (Part E) */
+.d58.d2 .d22-fold {
+  width: 28px; height: 28px; margin-left: 6px; flex: none; border: 0; padding: 0; border-radius: 50%; cursor: pointer;
+  display: grid; place-items: center; background: rgba(255, 255, 255, 0.75); box-shadow: inset 0 0 0 1px #e2c8bc; color: #7a3f31;
+}
+.d58.d2 .d22-fold:hover { background: #fff; }
+.d58.d2 .d22-fold svg { width: 14px; height: 14px; }
+.d58.d2 :is(.d22-fold, .d22-how, .d22-tell button, .d22-road li):focus-visible { outline: 2px solid #7a3f31; outline-offset: 2px; }
 
-/* your last note: one line */
-.d58.d2 .d2-fwnote { display: flex; align-items: center; gap: 10px; margin: 0 24px 16px; padding: 11px 14px; border-radius: 12px; background: #f8f4ef; font-family: var(--d58-serif); font-size: 14px; min-width: 0; }
-.d58.d2 .d2-fwtg { flex: none; font-weight: 600; font-size: 12.5px; color: #a0675a; white-space: nowrap; }
-.d58.d2 .d2-fwq { flex: 1 1 auto; min-width: 0; font-style: italic; color: #3b322c; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.d58.d2 .d2-fwq--plain { font-style: normal; white-space: normal; }
-.d58.d2 .d2-fwst { flex: none; font-weight: 600; font-size: 12px; color: #5d5850; background: #efe9e2; border-radius: 999px; padding: 3px 9px; white-space: nowrap; }
-.d58.d2 .d2-fwst.is-done { color: #3f5a46; background: #e4ece4; }
+/* the body */
+.d58.d2 .d22-body {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px 28px; align-items: center;
+  padding: 12px 20px 11px; border: 1px solid #e6cfc4; border-top: 0; border-radius: 0 0 15px 15px;
+  background: radial-gradient(90% 160% at 0% 0%, #fcefe8 0%, #fff 46%);
+}
 
-/* the foot sits on the card's foot, whatever height the column gives it */
-.d58.d2 .d2-fwf { margin-top: auto; padding: 11px 24px; background: #fbf4ef; border-top: 1px solid #f0e6df; font-family: var(--d58-serif); font-size: 13.5px; color: #a0675a; text-align: center; }
+/* 1 · the rank */
+.d58.d2 .d22-me { display: flex; align-items: center; gap: 16px; }
+.d58.d2 .d22-badge {
+  position: relative; width: 66px; height: 66px; flex: none; border-radius: 50%; display: grid; place-items: center;
+  background: radial-gradient(circle at 40% 35%, #fff 0%, #f7e2d8 100%);
+  box-shadow: 0 0 0 3px #fff, 0 0 0 6px #a0675a, 0 0 0 11px rgba(160, 103, 90, 0.12), 0 8px 18px -8px rgba(160, 103, 90, 0.55);
+}
+.d58.d2 .d22-badge img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
+.d58.d2 .d22-badge .d22-egg { width: 46px; height: 37px; }
+.d58.d2 .d22-metx { display: flex; flex-direction: column; }
+.d58.d2 .d22-metx small { display: block; font-weight: 600; font-size: 13px; line-height: 1.3; color: #a0675a; }
+.d58.d2 .d22-rank { display: block; font-family: var(--d58-type) !important; font-weight: 400 !important; font-size: 31px; line-height: 1.15; color: var(--d2-ink); white-space: nowrap; }
+
+/* 2 · the road */
+.d58.d2 .d22-road { list-style: none; margin: 0; padding: 0; display: flex; justify-content: space-between; position: relative; min-width: 0; }
+.d58.d2 .d22-road::before { content: ""; position: absolute; left: 35px; right: 35px; top: 22px; border-top: 2px solid #ead7ce; }
+.d58.d2 .d22-fill { position: absolute; left: 35px; top: 22px; height: 2px; background: #a0675a; border-radius: 2px; z-index: 1; }
+.d58.d2 .d22-road li { position: relative; z-index: 2; width: 70px; flex: none; display: flex; flex-direction: column; align-items: center; gap: 1px; outline-offset: 2px; border-radius: 10px; }
+.d58.d2 .d22-avw { position: relative; height: 46px; display: grid; place-items: center; }
+.d58.d2 .d22-av { width: 46px; height: 46px; border-radius: 50%; overflow: hidden; background: #f4ebe5; box-shadow: 0 0 0 3px #fff, 0 0 0 4px #e2cdc3; }
+.d58.d2 .d22-av img { width: 100%; height: 100%; object-fit: cover; display: block; filter: grayscale(1) sepia(0.3) contrast(0.92) opacity(0.55); }
+.d58.d2 .d22-road b { margin-top: 3px; font-weight: 600; font-size: 12.5px; line-height: 1.3; color: #3b322c; white-space: nowrap; }
+.d58.d2 .d22-road small { font-size: 11.5px; line-height: 1.3; color: var(--d2-muted); white-space: nowrap; }
+.d58.d2 .d22-road li.is-next .d22-av { width: 48px; height: 48px; box-shadow: 0 0 0 3px #fff, 0 0 0 4.5px #a0675a; }
+.d58.d2 .d22-road li.is-next .d22-av img { filter: grayscale(0.3) opacity(0.9); }
+.d58.d2 .d22-road li.is-next small { color: #a0675a; }
+.d58.d2 .d22-road li.is-next::after { content: "Next"; position: absolute; top: -10px; right: -2px; z-index: 3; background: #a0675a; color: #fff; font-family: var(--d58-serif); font-weight: 600; font-size: 10px; line-height: 1.4; border-radius: 999px; padding: 1px 7px; box-shadow: 0 0 0 2px #fff; }
+.d58.d2 .d22-road li.is-reached .d22-av { box-shadow: 0 0 0 3px #fff, 0 0 0 4.5px #a0675a; }
+.d58.d2 .d22-road li.is-reached .d22-av img { filter: none; }
+.d58.d2 .d22-road li.is-reached b { color: var(--d2-ink); }
+.d58.d2 .d22-tk { position: absolute; right: -6px; bottom: -4px; width: 17px; height: 17px; border-radius: 50%; background: #a0675a; box-shadow: 0 0 0 2px #fff; display: grid; place-items: center; }
+.d58.d2 .d22-tk svg { width: 10px; height: 10px; fill: none; stroke: #fff; stroke-width: 3.6; stroke-linecap: round; stroke-linejoin: round; }
+/* a future bird's card, on hover or focus */
+.d58.d2 .d22-tip {
+  position: absolute; bottom: calc(100% + 12px); left: 50%; transform: translate(-50%, 4px); width: max-content; z-index: 6;
+  background: #fff; border-radius: 12px; padding: 10px 14px 11px; text-align: left; pointer-events: none; opacity: 0;
+  box-shadow: 0 0 0 1px #ecdcd4, 0 18px 32px -14px rgba(28, 19, 15, 0.42); transition: opacity 0.15s, transform 0.15s;
+}
+.d58.d2 .d22-tip::after { content: ""; position: absolute; left: 50%; bottom: -6px; width: 12px; height: 12px; background: #fff; transform: translateX(-50%) rotate(45deg); box-shadow: 1px 1px 0 #ecdcd4; }
+.d58.d2 .d22-road li:hover .d22-tip, .d58.d2 .d22-road li:focus-visible .d22-tip, .d58.d2 .d22-road li:focus .d22-tip { opacity: 1; transform: translate(-50%, 0); }
+.d58.d2 .d22-tn { display: block; font-family: var(--d58-type) !important; font-size: 18px; line-height: 1.3; color: var(--d2-ink); }
+.d58.d2 .d22-tc { display: block; margin-top: 2px; font-weight: 600; font-size: 12.5px; line-height: 1.3; color: #7a3f31; }
+
+/* 3 · the ask */
+.d58.d2 .d22-ask { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; padding: 10px 14px; border-radius: 16px; background: #fbf0ea; border: 1px solid #f0dbd1; }
+.d58.d2 .d22-ask p { margin: 0; font-size: 15px; line-height: 1.35; color: var(--d2-ink); text-align: right; }
+.d58.d2 .d22-ask p b { font-weight: 700; color: #7a3f31; }
+.d58.d2 .d22-tell { display: flex; gap: 8px; }
+.d58.d2 .d22-tell button {
+  height: 34px; padding: 0 13px 0 5px; display: inline-flex; align-items: center; gap: 6px; border: 0; border-radius: 999px; cursor: pointer;
+  background: #fff; box-shadow: inset 0 0 0 1px #e2c8bc, 0 1px 0 rgba(160, 103, 90, 0.18); font-weight: 600; font-size: 13.5px; color: var(--d2-ink); white-space: nowrap;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+.d58.d2 .d22-tell .d22-ti { width: 24px; height: 24px; flex: none; border-radius: 50%; background: #f6e2d9; color: #a0675a; display: grid; place-items: center; transition: background 0.15s, color 0.15s; }
+.d58.d2 .d22-tell .d22-ti svg { width: 13px; height: 13px; }
+.d58.d2 .d22-tell button:hover { background: #fff7f3; box-shadow: inset 0 0 0 1.5px #a0675a, 0 4px 10px -4px rgba(160, 103, 90, 0.45); }
+.d58.d2 .d22-tell button:hover .d22-ti { background: #a0675a; color: #fff; }
+.d58.d2 .d22-tell--sm button { height: 32px; }
+
+/* 4 · your last note */
+.d58.d2 .d22-last { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; min-width: 0; padding: 7px 12px; border-radius: 11px; background: #f8f4ef; font-size: 13.5px; line-height: 1.35; color: #3b322c; }
+.d58.d2 .d22-lt { font-weight: 700; color: #7a3f31; white-space: nowrap; }
+.d58.d2 .d22-last em { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.d58.d2 .d22-last i { flex: none; display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 999px; font-style: normal; font-weight: 600; font-size: 12px; line-height: 1.3; white-space: nowrap; background: #efe7df; color: #6b5a4e; }
+.d58.d2 .d22-last i.is-done { background: #e1ebe1; color: #355a3a; }
+.d58.d2 .d22-last i svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+
+/* the folded strip (Part E) */
+.d58.d2 .d22-fw.is-folded { padding: 6px; }
+.d58.d2 .d22-strip { display: flex; align-items: center; gap: 14px; padding: 6px 8px 6px 7px; border-radius: 16px; background: repeating-linear-gradient(-45deg, #f1d7cb 0 12px, #ebcdbf 12px 24px); }
+.d58.d2 .d22-fbadge { width: 38px; height: 38px; flex: none; border-radius: 50%; overflow: hidden; display: grid; place-items: center; background: radial-gradient(circle at 40% 35%, #fff 0%, #f7e2d8 100%); box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px #a0675a; }
+.d58.d2 .d22-fbadge img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.d58.d2 .d22-fbadge .d22-egg { width: 28px; height: 22px; }
+.d58.d2 .d22-fstat { padding-left: 14px; border-left: 1px solid rgba(122, 63, 49, 0.25); font-size: 14px; line-height: 1.3; color: #3b322c; white-space: nowrap; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.d58.d2 .d22-frank { font-family: var(--d58-type) !important; font-weight: 400; font-size: 18px; color: var(--d2-ink); margin-right: 4px; }
+.d58.d2 .d22-fstat em { font-style: normal; font-weight: 700; color: #7a3f31; }
+.d58.d2 .d22-strip .d22-tell { margin-left: auto; }
+.d58.d2 .d22-strip .d22-fold { margin-left: 0; }
 
 @media (max-width: 1320px) {
-  .d58.d2 .d2-fwhero { grid-template-columns: 104px minmax(0, 1fr); gap: 16px; padding: 18px; }
-  .d58.d2 .d2-fwbadge { width: 104px; height: 104px; }
-  .d58.d2 .d2-fwart { inset: 11px; }
-  .d58.d2 .d2-fwask, .d58.d2 .d2-fwf { padding-left: 18px; padding-right: 18px; }
-  .d58.d2 .d2-fwnote { margin: 0 18px 14px; }
+  .d58.d2 .d22-body { grid-template-columns: auto minmax(0, 1fr); }
+  .d58.d2 .d22-ask { grid-column: 1 / -1; flex-direction: row; justify-content: space-between; align-items: center; }
+  .d58.d2 .d22-ask p { text-align: left; }
+  .d58.d2 .d22-avw { height: 42px; }
+  .d58.d2 .d22-av { width: 42px; height: 42px; }
+  .d58.d2 .d22-road li.is-next .d22-av { width: 44px; height: 44px; }
+  .d58.d2 .d22-road::before, .d58.d2 .d22-fill { top: 20px; }
+  .d58.d2 .d22-fstat { display: none; }
 }
-/* ⚠️ THE APP'S MIDDLE COLUMN IS NARROWER THAN THE REF'S (a 248px sidebar where the ref draws 68), so at 1512 and 1280 the
-   text column cannot hold six 26px markers and their dots. Below 520px of card the road takes the hero's full width
-   under the badge and the text; below 330px the pills keep their words and drop their icons. */
-@container d2fw (max-width: 520px) {
-  .d58.d2 .d2-fwhero { grid-template-areas: "badge text" "road road"; row-gap: 16px; }
-  .d58.d2 .d2-fwtx { align-self: center; }
-  .d58.d2 .d2-fwtx p { margin-bottom: 0; }
-}
-@container d2fw (max-width: 330px) {
-  .d58.d2 .d2-fwbtns svg { display: none; }
-  .d58.d2 .d2-fwbtns button { font-size: 14px; padding: 0 6px; }
+
+/* ── Part D · the rank-up, once (≈2.2s; ref screens/04 is its end) ── */
+.d58.d2 .d22-badge.is-hatch > span { position: absolute; inset: 0; display: grid; place-items: center; border-radius: 50%; overflow: hidden; }
+.d58.d2 .d22-badge.is-hatch .d22-prev { animation: d22-wob 0.9s ease-in-out 0.3s 1, d22-out 0.3s ease-in 1.2s forwards; }
+.d58.d2 .d22-badge.is-hatch .d22-new { opacity: 0; transform: scale(0.4); animation: d22-in 0.55s cubic-bezier(0.3, 1.6, 0.5, 1) 1.4s forwards; }
+.d58.d2 .d22-badge.is-hatch::after { content: ""; position: absolute; inset: -7px; border-radius: 50%; border: 2px solid #a0675a; opacity: 0; animation: d22-pulse 1s ease-out 1.55s 1; pointer-events: none; }
+.d58.d2 .d22-sp { position: absolute; left: 50%; top: 50%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; background: #a0675a; opacity: 0; pointer-events: none; }
+/* the sparks move by the Web Animations API (Dash2Founding): their offsets are per spark, and a var() in @keyframes fails here */
+.d58.d2 .d22-sp:nth-of-type(odd) { background: #e8b9a6; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; }
+.d58.d2 .d22-metx.is-up { animation: d22-fadeup 0.45s ease 1.6s both; }
+.d58.d2 .d22-road li.is-new .d22-av img { animation: d22-col 0.6s ease 1.8s both; }
+.d58.d2 .d22-road li.is-new .d22-tk { animation: d22-fade 0.3s ease 2.2s both; }
+@keyframes d22-wob { 0% { transform: rotate(0); } 20% { transform: rotate(-10deg); } 40% { transform: rotate(8deg); } 60% { transform: rotate(-5deg); } 80% { transform: rotate(2deg); } 100% { transform: rotate(0); } }
+@keyframes d22-out { to { opacity: 0; transform: scale(0.5); } }
+@keyframes d22-in { 0% { opacity: 0; transform: scale(0.4); } 100% { opacity: 1; transform: scale(1); } }
+@keyframes d22-pulse { 0% { opacity: 0.9; transform: scale(1); } 100% { opacity: 0; transform: scale(1.55); } }
+@keyframes d22-fadeup { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes d22-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes d22-col { from { filter: grayscale(1) sepia(0.3) contrast(0.92) opacity(0.55); } to { filter: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .d58.d2 .d22-badge.is-hatch .d22-prev, .d58.d2 .d22-sp, .d58.d2 .d22-badge.is-hatch::after { animation: none; opacity: 0; }
+  .d58.d2 .d22-badge.is-hatch .d22-new { animation: none; opacity: 1; transform: none; }
+  .d58.d2 .d22-metx.is-up, .d58.d2 .d22-road li.is-new .d22-av img, .d58.d2 .d22-road li.is-new .d22-tk { animation: none; }
+  .d58.d2 .d22-tip, .d58.d2 .d22-tell button, .d58.d2 .d22-tell .d22-ti { transition: none; }
 }

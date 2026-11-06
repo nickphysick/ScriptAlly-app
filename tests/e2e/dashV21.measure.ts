@@ -146,7 +146,7 @@ for (const vp of SIZES) {
     const off = g.pts.map((p) => Math.abs(p.cy - p.line));
     L.check("B2", "every centre sits on the line ±2", off.every((d) => d <= 2), `max ${Math.max(...off).toFixed(2)}`);
     const top = Math.min(...g.pts.map((p) => p.cy));
-    L.check("B2", "the highest point is at least 25% of the plot below its top", top >= 0.25 * g.plotH && Math.abs(g.plotH - 280) <= 1, `${top.toFixed(1)} of ${g.plotH} (${(100 * top / g.plotH).toFixed(1)}%)`);
+    L.check("B2", "the highest point is at least 25% of the plot below its top", top >= 0.25 * g.plotH && Math.abs(g.plotH - 270) <= 1, /* RE-POINTED (v2.2): 270px */ `${top.toFixed(1)} of ${g.plotH} (${(100 * top / g.plotH).toFixed(1)}%)`);
 
     /* B3: every dot shows its own week's breakdown */
     await liftMotionSuppression(page);
@@ -172,61 +172,9 @@ for (const vp of SIZES) {
     L.done(10);
   });
 
-  test(`DB21 C · the founding card · ${tag(vp)}`, async ({ page }) => {
-    const L = new Ledger(`C-${tag(vp)}`);
-    const C = 2 * Math.PI * 54;
-    /* the dev aid hands the card a stats doc, so every rank is measured on one account */
-    const cases = [
-      { s: { contributions: 0, tier: null, nextTier: "fledgling", toNext: 1, foundingNo: 42 }, rank: "Egg", pre: "You’re an", next: "Fledgling", line: "One more note and you hatch into a Fledgling.", ratio: 0 },
-      { s: { contributions: 2, tier: "fledgling", nextTier: "archivist", toNext: 1, foundingNo: 42 }, rank: "Fledgling", pre: "You’re a", next: "Archivist", line: "One more note and you become an Archivist.", ratio: 2 / 3 },
-      { s: { contributions: 6, tier: "archivist", nextTier: "scout", toNext: 2, foundingNo: 42 }, rank: "Archivist", pre: "You’re an", next: "Scout", line: "Two more notes and you become a Scout.", ratio: 6 / 8 },
-      { s: { contributions: 30, tier: "queryhawk", nextTier: null, toNext: null, foundingNo: 42 }, rank: "QueryHawk", pre: "You’re a", next: null, line: "You’ve reached QueryHawk. Thank you.", ratio: 1 },
-    ];
-    for (const c of cases) {
-      const p = await page.context().newPage();
-      await p.addInitScript((s) => { Object.assign(window, { __SA_FOUNDING_STATS: { waiting: 0, topPct: null, ...s } }); }, c.s);
-      await openDash(p, vp);
-      /* "hard-code Fledgling": the next rank always reads Fledgling */
-      if (MUT === "C1") await p.evaluate(() => { const b = document.querySelector('.d2 [data-d2="fw-nextrank"]'); if (b) b.textContent = "Fledgling"; });
-      const f = await p.evaluate(() => {
-        const card = document.querySelector<HTMLElement>('.d2 [data-d2-card="founding"]')!;
-        const arc = card.querySelector<SVGCircleElement>('[data-d2="fw-arc"]');
-        const dash = arc ? getComputedStyle(arc).strokeDasharray.split(/[ ,]+/).map(parseFloat) : null;
-        const band = card.querySelector<HTMLElement>(".os-band");
-        return {
-          on: card.getBoundingClientRect().height > 200, band: band ? getComputedStyle(band).backgroundColor : null,
-          pre: card.querySelector('[data-d2="fw-pre"]')?.textContent, rank: card.querySelector('[data-d2="fw-rank"]')?.textContent,
-          line: card.querySelector('[data-d2="fw-next"]')?.textContent, next: card.querySelector('[data-d2="fw-nextrank"]')?.textContent ?? null,
-          arcLen: arc ? arc.getTotalLength() : 0, dashOn: dash ? dash[0] : 0,
-          badge: card.querySelector<HTMLElement>('[data-d2="fw-badge"]')?.getBoundingClientRect().width,
-          steps: card.querySelectorAll('[data-d2="fw-step"]').length, onStep: card.querySelector<HTMLElement>('[data-d2="fw-step"][data-on]')?.getAttribute("title"),
-          nextStep: card.querySelector<HTMLElement>('[data-d2="fw-step"][data-next]')?.getAttribute("title") ?? null,
-          no: card.querySelector('[data-d2="fw-no"]')?.textContent,
-          none: card.querySelector('[data-d2="fw-none"]')?.textContent ?? null, chip: !!card.querySelector('[data-d2="fw-outcome"]'),
-          tiles: card.querySelectorAll('[data-d2="fw-tell"]').length, tileH: card.querySelector<HTMLElement>('[data-d2="fw-tell"]')?.getBoundingClientRect().height,
-        };
-      });
-      const w = `${c.rank}`;
-      const ratio = c.ratio === 0 ? (f.dashOn ? f.dashOn / C : 0) : f.dashOn / C;
-      L.check("C1", `${w}: population`, f.on && f.steps === 6 && f.tiles === 3 && f.band === "rgb(244, 224, 215)", JSON.stringify({ steps: f.steps, tiles: f.tiles, band: f.band }));
-      L.check("C1", `${w}: the ring's arc is the notes ratio ±2%`, Math.abs(ratio - c.ratio) <= 0.02 && (c.ratio === 0 || Math.abs(f.arcLen - C) < 1), `${(ratio * 100).toFixed(1)}% want ${(c.ratio * 100).toFixed(1)}% (circle ${f.arcLen.toFixed(1)})`);
-      L.check("C1", `${w}: the rank, its article, the next rank`, f.rank === c.rank && f.pre === c.pre && f.next === c.next && f.onStep === c.rank && f.nextStep === c.next, JSON.stringify({ rank: f.rank, pre: f.pre, next: f.next, on: f.onStep, nx: f.nextStep }));
-      L.check("C1", `${w}: the line, and "hatch into" for the Egg alone`, f.line === c.line && (/hatch into/.test(f.line ?? "") === (c.rank === "Egg")), `${f.line}`);
-      L.check("C1", `${w}: the badge and the pills`, Math.abs((f.badge ?? 0) - (vp.width <= 1320 ? 104 : 132)) <= 1 && Math.abs((f.tileH ?? 0) - 44) <= 1, `badge ${f.badge} pill ${f.tileH}`);
-      L.check("C1", `${w}: no note, the first-note line and no chip`, c.next ? f.none === `Your first note counts towards ${c.next}.` && !f.chip : f.none === null && !f.chip, `${f.none} chip ${f.chip}`);
-      L.check("C1", `${w}: the founding number`, f.no === "No. 42 · ", `${f.no}`);
-      if (c.rank === "Egg") await shot(p, `02-dashboard-full-${vp.width}`, true);
-      if (c.rank === "Fledgling") {
-        await p.locator('.d2 [data-d2="fw-tell"][data-key="like"]').click();
-        await p.waitForTimeout(500);
-        const chosen = await p.evaluate(() => document.querySelector("[data-fb='kind'][aria-checked='true']")?.getAttribute("data-k") ?? null);
-        L.check("C1", "Like opens FeedbackDock with Like chosen", chosen === "Something I liked", `${chosen}`);
-        await p.keyboard.press("Escape");
-      }
-      await p.close();
-    }
-    L.done(29);
-  });
+  /* RETIRED (Dashboard v2.2): DB21 C measured v2.1's founding CARD — its 5px progress ring, 132px badge, six-marker road
+     and "Your first note counts towards…" line, none of which the v2.2 band has. Its words and every rank are held by
+     DB22 C1–C4 (tests/e2e/dashV22.measure.ts) and lib/foundingBand.test.ts. */
 }
 
 /* ── D1: the feed opens only what needs you. Seeded on the emulator, removed after. ── */

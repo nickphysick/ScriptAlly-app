@@ -123,5 +123,45 @@ export function breakdownFor(queries: readonly Query[], index: ActivityIndex, at
 /** "Week of 3 Aug: 14 active queries" — each circle's accessible name. */
 export const weekAria = (label: string, n: number): string => `Week of ${label}: ${n} active ${n === 1 ? "query" : "queries"}`;
 
+/* ── v2.2 · Sent: queries first sent, per week ──────────────────────────────────────────────────────── */
+
+export interface SentWeek {
+  /** queries first sent in this week (Monday to the next Monday, never past now) */
+  ids: string[];
+  n: number;
+  /** every query first sent up to the end of this week (or now) — "{n} sent in all" */
+  cumulative: number;
+}
+
+/** The end of a Monday-started week: the next Monday at local midnight (so a clocks-change week is still seven days). */
+const weekEnd = (start: Date): number => { const e = new Date(start); e.setDate(e.getDate() + 7); return e.getTime(); };
+
+/**
+ * One entry per week given (Active's own weeks, `dash2Weeks`), counting each query ONCE at its first-sent date
+ * (`sentAt`, the ledger's own). A query with no sent date is skipped, never placed. Newest last, as the weeks are.
+ */
+export function sentWeeks(queries: readonly Query[], weeks: readonly { start: Date }[], now: Date): SentWeek[] {
+  const nowMs = now.getTime();
+  const sent = queries
+    .map((q) => ({ id: q.id, t: sentAt(q) }))
+    .filter((x): x is { id: string; t: number } => x.t !== null && x.t <= nowMs)
+    .sort((a, b) => a.t - b.t);
+  return weeks.map((w) => {
+    const from = w.start.getTime(), to = Math.min(weekEnd(w.start), nowMs + 1);
+    const ids = sent.filter((x) => x.t >= from && x.t < to).map((x) => x.id);
+    return { ids, n: ids.length, cumulative: sent.filter((x) => x.t < to).length };
+  });
+}
+
+/** every query for this manuscript ever sent, up to now — the band's "{n} queries sent" */
+export function sentAllTime(queries: readonly Query[], now: Date): number {
+  return queries.filter((q) => { const s = sentAt(q); return s !== null && s <= now.getTime(); }).length;
+}
+
+/** "26 queries sent" / "1 query sent" */
+export const sentCount = (n: number): string => `${n} ${n === 1 ? "query" : "queries"} sent`;
+/** "Week of 3 Aug: 2 sent" — each Sent column's accessible name. */
+export const sentWeekAria = (label: string, n: number): string => `Week of ${label}: ${n} sent`;
+
 /** Pass-through so the card's caller can build the index once. */
 export const activityIndex = (activities: readonly Activity[]): ActivityIndex => indexActivities(activities);

@@ -116,6 +116,8 @@ export interface DashPrefs {
   reminder: "yes" | "not_now" | null;
   /** first visit v2 (Part H): Getting started closed from its finish line, per manuscript */
   gsClosed: Record<string, true>;
+  /** Dashboard v2.2 (Part E): the founding writer band folded to its slim strip */
+  foundingFolded: boolean;
 }
 
 const ROOT = "todoPrefs.dash";
@@ -126,7 +128,7 @@ export const seg = (id: string): string => id.replace(/[^A-Za-z0-9_-]/g, "_");
 /** Total reader: whatever is stored (or nothing), a well-formed value comes back. */
 export function dashPrefsOf(user: Pick<User, "todoPrefs"> | null | undefined): DashPrefs {
   const raw = ((user?.todoPrefs as { dash?: Record<string, unknown> } | undefined)?.dash ?? {}) as {
-    start?: Record<string, unknown>; tip?: unknown; wins?: Record<string, unknown>; gsHidden?: Record<string, unknown>; tour?: unknown; reminder?: unknown; gsClosed?: Record<string, unknown>;
+    start?: Record<string, unknown>; tip?: unknown; wins?: Record<string, unknown>; gsHidden?: Record<string, unknown>; tour?: unknown; reminder?: unknown; gsClosed?: Record<string, unknown>; foundingFolded?: unknown;
   };
   const start: Record<string, LegacyStart> = {};
   for (const [k, v] of Object.entries(raw.start ?? {})) if (v === "yes" || v === "notyet") start[k] = v;
@@ -143,6 +145,7 @@ export function dashPrefsOf(user: Pick<User, "todoPrefs"> | null | undefined): D
     tour: raw.tour === "done",
     reminder: raw.reminder === "yes" || raw.reminder === "not_now" ? raw.reminder : null,
     gsClosed: flags(raw.gsClosed),
+    foundingFolded: raw.foundingFolded === true,
   };
 }
 
@@ -204,6 +207,8 @@ export const pathAfter = (choice: AnswerChoice, status: ManuscriptStatus | strin
 export const tipWrite = (i: number): UserPaths => ({ [`${ROOT}.tip`]: i });
 export const gsHideWrite = (msId: string): UserPaths => ({ [`${ROOT}.gsHidden.${seg(msId)}`]: true });
 /** first visit v2 (Part H): "Close this list" on the finish line — the list leaves for good (Dashboard v2: nothing takes the slot) */
+/** Dashboard v2.2 (Part E): one dotted leaf, so it never wipes a sibling under `todoPrefs.dash`. */
+export const foundingFoldWrite = (folded: boolean): UserPaths => ({ [`${ROOT}.foundingFolded`]: folded });
 export const gsCloseWrite = (msId: string): UserPaths => ({ [`${ROOT}.gsClosed.${seg(msId)}`]: true });
 
 /* ── first visit v2, Part H: the finish line ── */

@@ -17,7 +17,7 @@ vi.mock("../../../lib/firebase", async () => (await import("../../../test/pageSm
 import { Dash58 } from "../v58/Dash58";
 import { Dash2Band } from "./Dash2Band";
 import { nextReason } from "./Dash2Next";
-import { heroLine, RANK_MIN, ringRatio } from "./Dash2Founding";
+import { RANK_MIN } from "../../../lib/foundingBand";
 import { EDGE, HEADROOM, PLOT_H } from "./Dash2Active";
 import { TIERS } from "../../../lib/foundingStats";
 import { breakdownFor, changeText, dash2Weeks, dateLabels, indexActivities, visibleWeeks, weekAria, wholeWeeksQuerying, weeksTag } from "../../../lib/dash2";
@@ -73,10 +73,12 @@ describe("DB21-A · the weeks-querying tag", () => {
 describe("DB21-B · Active queries is the chart only", () => {
   it("no tiles, and the chart's dimensions are v2.1's", () => {
     const html = page();
-    const card = html.slice(html.indexOf('data-d2-card="active"'), html.indexOf('data-d2-card="founding"'));
+    /* RE-POINTED (v2.2): the chart is followed by Closed queries in the middle column, no longer by the founding card */
+    const card = html.slice(html.indexOf('data-d2-card="active"'), html.indexOf('data-d60="closed-hoop"'));
     expect(card.length).toBeGreaterThan(100);
     for (const gone of ["waiting on you", "have replied", "weeks querying", 'data-d2="tiles"']) expect(card, gone).not.toContain(gone);
-    expect([PLOT_H, EDGE, HEADROOM]).toEqual([280, 22, 1.35]);
+    /* RE-POINTED (v2.2 Part B): the plot is 270px; the edge and Active's headroom are v2.1's */
+    expect([PLOT_H, EDGE, HEADROOM]).toEqual([270, 22, 1.35]);
   });
 });
 
@@ -148,24 +150,8 @@ describe("DB2-D · the founding card", () => {
   });
 });
 
-describe("DB21-C · the founding card's hero", () => {
-  const say = (t: number, d: number) => { const l = heroLine(t, d); return `${l.lead}${l.rank ?? ""}${l.tail}`; };
-  it("only the Egg hatches; every later rank becomes, with its article", () => {
-    expect(say(0, 0)).toBe("One more note and you hatch into a Fledgling.");
-    expect(say(1, 1)).toBe("Two more notes and you become an Archivist.");
-    expect(say(2, 3)).toBe("Five more notes and you become a Scout.");
-    expect(say(4, 20)).toBe("Five more notes and you become a QueryHawk.");
-    expect(say(5, 30)).toBe("You’ve reached QueryHawk. Thank you.");
-    for (let t = 1; t < 5; t++) expect(say(t, RANK_MIN[t])).not.toContain("hatch");
-    expect(heroLine(0, 0).rank).toBe("Fledgling");
-  });
-  it("the ring is notes counted out of notes needed for the next rank, full at the top", () => {
-    expect(ringRatio(0, 0)).toBe(0);
-    expect(ringRatio(1, 2)).toBeCloseTo(2 / 3);
-    expect(ringRatio(2, 6)).toBeCloseTo(6 / 8);
-    expect(ringRatio(5, 40)).toBe(1);
-  });
-});
+/* RETIRED (v2.2 Part C): DB21-C held v2.1's hero line and progress ring. The band has no ring, and its words are
+   lib/foundingBand's, held over every rank in foundingBand.test.ts (and on the page by DB22 C1). */
 
 describe("DB2-B · Next up's reason", () => {
   it("says how long there has been no reply, and in rose how long since the window ended", () => {

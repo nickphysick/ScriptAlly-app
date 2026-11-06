@@ -41,7 +41,7 @@ import { F1Feed } from "../f1/F1Feed";
 import { agentCoverage, isPreQuery } from "../../../lib/dashFirstUse";
 import { ClosedHoop, AgentsHoop } from "../v60/Dash60Left";
 import { openNewAgentCard } from "../../../lib/agentCardStore";
-import { gsCloseWrite, gsSlot, REMINDER_NOT_NOW, REMINDER_YES, firstNameOf, shouldAskReminder, answerFor, answerWrite, bookLabel, gsRowDone, dashState, seg, dashPrefsOf, gsHideWrite, gsOrder, legacyStartOf, pathAfter, type AnswerChoice, type AnswerWrite, type DashState, type GsLink, type StartPath } from "../../../lib/dashFirstVisit";
+import { foundingFoldWrite, gsCloseWrite, gsSlot, REMINDER_NOT_NOW, REMINDER_YES, firstNameOf, shouldAskReminder, answerFor, answerWrite, bookLabel, gsRowDone, dashState, seg, dashPrefsOf, gsHideWrite, gsOrder, legacyStartOf, pathAfter, type AnswerChoice, type AnswerWrite, type DashState, type GsLink, type StartPath } from "../../../lib/dashFirstVisit";
 import type { UserPaths } from "../../../lib/userPaths";
 import { SetUpCard } from "../fv1/SetUpCard";
 import { GsSheet } from "../fv2/GsSheet";
@@ -626,13 +626,21 @@ export const Dash58: React.FC<Dash58Props> = ({
         <div className="d58-page" data-d58="page" data-loading={loading ? "1" : "0"}>
           {exampleOpen ? <ExampleDashboard onBack={closeExample} /> : (<>
           {notice && <ImportNoticeRow notice={notice} onDismiss={dismissNotice} onListHeight={setNoticeListH} />}
-          {/* ⚠️ DASHBOARD v2 (3 Nov; ref design-refs/dashboard-v2): the navy title band, then three columns of framed cards —
-              left: Next up, Agents on file, Closed queries · middle: Active queries, then the founding writer card · right:
-              the feed, as tall as the grid row (the founding card fills the middle column, so the feed ends level with
-              it). Before the first query the middle starts with the set-up card and the right holds the empty feed. */}
+          {/* ⚠️ DASHBOARD v2 (3 Nov) as v2.2 lays it out (6 Nov; ref design-refs/dashboard-v2-2): the navy title band, the
+              founding writer band, then three columns of framed cards — left: Next up, then Agents on file · middle: the
+              queries chart, then Closed queries · right: the feed, as tall as the grid row (so its scroll area ends level
+              with the taller of the other two columns). Before the first query the middle holds the set-up card and the
+              right the empty feed. */}
           <Dash2Band loading={loading} title={title} author={author} buttons={!pre}
             weeks={loading ? null : wholeWeeksQuerying(scopedQueries, now)}
             onLog={logQuery} onRecord={() => onNavigate("queries", "Record a response")} onAddAgent={() => onNavigate("agents", "Add an agent")} />
+          {/* ⚠️ DASHBOARD v2.2 (Part A; ref design-refs/dashboard-v2-2): the founding writer is a full-width band under the
+              navy header, never a card inside a column. */}
+          {/* Part D: the rank last celebrated is `users.foundingSeenTier` (v105's field); never written from the ghost or the example */}
+          <Dash2Founding loading={loading} uid={fwUid} seenTier={currentUser?.foundingSeenTier}
+            onSeen={example || !onFoundingSeen ? undefined : onFoundingSeen}
+            /* Part E: the fold is `todoPrefs.dash.foundingFolded`, one dotted leaf; absent onPrefs → this view's only */
+            folded={prefs.foundingFolded} onFold={onPrefs && !example ? (f) => onPrefs(foundingFoldWrite(f)) : undefined} />
           <div className="d2-grid" data-d2="grid">
             <div className="d2-col d2-left" data-d2="left">
               {gsSheetOpen && (
@@ -643,7 +651,6 @@ export const Dash58: React.FC<Dash58Props> = ({
               )}
               {!pre && <Dash2Next loading={loading} plan={plan} ctx={taskCtx} onView={viewTask} onSeeAll={() => onNavigate(plan.all.tab, plan.all.sub)} />}
               {!pre && hasAgents && agentsCard}
-              {!pre && closedCard}
             </div>
             <div className="d2-col d2-mid" data-d2="mid">
               {pre ? (
@@ -660,10 +667,10 @@ export const Dash58: React.FC<Dash58Props> = ({
                   />}
                 </div>
               ) : (
-                <Dash2Active loading={loading} queries={scopedQueries} activities={scopedActivities}
+                <Dash2Active loading={loading} queries={scopedQueries} activities={scopedActivities} agents={agents}
                   activeCount={activeCount} undatedCount={loading ? 0 : undatedLiveCount(scopedQueries)} now={now} />
               )}
-              <Dash2Founding loading={loading} uid={fwUid} />
+              {!pre && closedCard}
             </div>
             <div className="d2-right" data-d2="right">
               <div className="d2-feed" data-d2="feed">

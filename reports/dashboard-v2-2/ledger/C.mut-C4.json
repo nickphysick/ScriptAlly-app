@@ -1,0 +1,506 @@
+[
+ {
+  "lock": "C1",
+  "where": "1512x982 E population",
+  "ok": true,
+  "detail": "5 birds"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982 E first line",
+  "ok": true,
+  "detail": "\"You’re an\""
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982 E rank",
+  "ok": true,
+  "detail": "\"Egg\""
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982 E ask",
+  "ok": true,
+  "detail": "\"One more note and you hatch into a Fledgling.\""
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982 E \"hatch into\" is the Egg's alone",
+  "ok": true,
+  "detail": "\"One more note and you hatch into a Fledgling.\""
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982 E reached birds",
+  "ok": true,
+  "detail": "Fledgling:next:1 note: Archivist:future:3 notes: Scout:future:8 notes: Mentor:future:15 notes: QueryHawk:future:25 notes:"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982 E no \"to confirm\"",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C2",
+  "where": "1512x982 E no fill",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "lock": "C3",
+  "where": "1512x982 E shows no last-note row",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "C4",
+  "where": "1512x982 E focusing Scout",
+  "ok": false,
+  "detail": "{\"text\":\"ScoutAt 8 notes · 8 to go\",\"op\":\"0\",\"reachedWithCard\":0,\"focusable\":true}"
+ },
+ {
+  "lock": "C4",
+  "where": "1512x982 E reached birds show no card",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982 F population",
+  "ok": true,
+  "detail": "5 birds"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982 F first line",
+  "ok": true,
+  "detail": "\"You’re a\""
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982 F rank",
+  "ok": true,
+  "detail": "\"Fledgling\""
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982 F ask",
+  "ok": true,
+  "detail": "\"One more note and you become an Archivist.\""
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982 F \"hatch into\" is the Egg's alone",
+  "ok": true,
+  "detail": "\"One more note and you become an Archivist.\""
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982 F reached birds",
+  "ok": true,
+  "detail": "Fledgling:reached:Reached:✓ Archivist:next:3 notes: Scout:future:8 notes: Mentor:future:15 notes: QueryHawk:future:25 notes:"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982 F no \"to confirm\"",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C2",
+  "where": "1512x982 F fill from Fledgling's centre",
+  "ok": true,
+  "detail": "446.2 vs 446.2"
+ },
+ {
+  "lock": "C2",
+  "where": "1512x982 F fill ends at 0.50 steps",
+  "ok": true,
+  "detail": "519.6 vs 519.6"
+ },
+ {
+  "lock": "C3",
+  "where": "1512x982 F shows the last note, now in the app",
+  "ok": true,
+  "detail": "true “Let me filter the Query Centre by agency” Now in the app"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982 A population",
+  "ok": true,
+  "detail": "5 birds"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982 A first line",
+  "ok": true,
+  "detail": "\"You’re an\""
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982 A rank",
+  "ok": true,
+  "detail": "\"Archivist\""
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982 A ask",
+  "ok": true,
+  "detail": "\"One more note and you become a Scout.\""
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982 A \"hatch into\" is the Egg's alone",
+  "ok": true,
+  "detail": "\"One more note and you become a Scout.\""
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982 A reached birds",
+  "ok": true,
+  "detail": "Fledgling:reached:Reached:✓ Archivist:reached:Reached:✓ Scout:next:8 notes: Mentor:future:15 notes: QueryHawk:future:25 notes:"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982 A no \"to confirm\"",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C2",
+  "where": "1512x982 A fill from Fledgling's centre",
+  "ok": true,
+  "detail": "440.6 vs 440.6"
+ },
+ {
+  "lock": "C2",
+  "where": "1512x982 A fill ends at 1.80 steps",
+  "ok": true,
+  "detail": "723.0 vs 723.0"
+ },
+ {
+  "lock": "C3",
+  "where": "1512x982 A's read note is the plain chip",
+  "ok": true,
+  "detail": "Read"
+ },
+ {
+  "lock": "C4",
+  "where": "1512x982 A focusing Scout",
+  "ok": false,
+  "detail": "{\"text\":\"ScoutAt 8 notes · 1 to go\",\"op\":\"0\",\"reachedWithCard\":0,\"focusable\":true}"
+ },
+ {
+  "lock": "C4",
+  "where": "1512x982 A reached birds show no card",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982 Q population",
+  "ok": true,
+  "detail": "5 birds"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982 Q first line",
+  "ok": true,
+  "detail": "\"You’ve reached\""
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982 Q rank",
+  "ok": true,
+  "detail": "\"QueryHawk\""
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982 Q ask",
+  "ok": true,
+  "detail": "\"Thank you. 52 notes and counting.\""
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982 Q \"hatch into\" is the Egg's alone",
+  "ok": true,
+  "detail": "\"Thank you. 52 notes and counting.\""
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982 Q reached birds",
+  "ok": true,
+  "detail": "Fledgling:reached:Reached:✓ Archivist:reached:Reached:✓ Scout:reached:Reached:✓ Mentor:reached:Reached:✓ QueryHawk:reached:Reached:✓"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982 Q no \"to confirm\"",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C2",
+  "where": "1512x982 Q fill from Fledgling's centre",
+  "ok": true,
+  "detail": "454.7 vs 454.7"
+ },
+ {
+  "lock": "C2",
+  "where": "1512x982 Q fill ends at 4.00 steps",
+  "ok": true,
+  "detail": "1072.6 vs 1072.6"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 E population",
+  "ok": true,
+  "detail": "5 birds"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 E first line",
+  "ok": true,
+  "detail": "\"You’re an\""
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 E rank",
+  "ok": true,
+  "detail": "\"Egg\""
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 E ask",
+  "ok": true,
+  "detail": "\"One more note and you hatch into a Fledgling.\""
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 E \"hatch into\" is the Egg's alone",
+  "ok": true,
+  "detail": "\"One more note and you hatch into a Fledgling.\""
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 E reached birds",
+  "ok": true,
+  "detail": "Fledgling:next:1 note: Archivist:future:3 notes: Scout:future:8 notes: Mentor:future:15 notes: QueryHawk:future:25 notes:"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 E no \"to confirm\"",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C2",
+  "where": "1280x800 E no fill",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "lock": "C3",
+  "where": "1280x800 E shows no last-note row",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "C4",
+  "where": "1280x800 E focusing Scout",
+  "ok": false,
+  "detail": "{\"text\":\"ScoutAt 8 notes · 8 to go\",\"op\":\"0\",\"reachedWithCard\":0,\"focusable\":true}"
+ },
+ {
+  "lock": "C4",
+  "where": "1280x800 E reached birds show no card",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 F population",
+  "ok": true,
+  "detail": "5 birds"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 F first line",
+  "ok": true,
+  "detail": "\"You’re a\""
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 F rank",
+  "ok": true,
+  "detail": "\"Fledgling\""
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 F ask",
+  "ok": true,
+  "detail": "\"One more note and you become an Archivist.\""
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 F \"hatch into\" is the Egg's alone",
+  "ok": true,
+  "detail": "\"One more note and you become an Archivist.\""
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 F reached birds",
+  "ok": true,
+  "detail": "Fledgling:reached:Reached:✓ Archivist:next:3 notes: Scout:future:8 notes: Mentor:future:15 notes: QueryHawk:future:25 notes:"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 F no \"to confirm\"",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C2",
+  "where": "1280x800 F fill from Fledgling's centre",
+  "ok": true,
+  "detail": "446.2 vs 446.2"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x800 F fill ends at 0.50 steps",
+  "ok": true,
+  "detail": "537.6 vs 537.6"
+ },
+ {
+  "lock": "C3",
+  "where": "1280x800 F shows the last note, now in the app",
+  "ok": true,
+  "detail": "true “Let me filter the Query Centre by agency” Now in the app"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 A population",
+  "ok": true,
+  "detail": "5 birds"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 A first line",
+  "ok": true,
+  "detail": "\"You’re an\""
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 A rank",
+  "ok": true,
+  "detail": "\"Archivist\""
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 A ask",
+  "ok": true,
+  "detail": "\"One more note and you become a Scout.\""
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 A \"hatch into\" is the Egg's alone",
+  "ok": true,
+  "detail": "\"One more note and you become a Scout.\""
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 A reached birds",
+  "ok": true,
+  "detail": "Fledgling:reached:Reached:✓ Archivist:reached:Reached:✓ Scout:next:8 notes: Mentor:future:15 notes: QueryHawk:future:25 notes:"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 A no \"to confirm\"",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C2",
+  "where": "1280x800 A fill from Fledgling's centre",
+  "ok": true,
+  "detail": "440.6 vs 440.6"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x800 A fill ends at 1.80 steps",
+  "ok": true,
+  "detail": "772.0 vs 772.0"
+ },
+ {
+  "lock": "C3",
+  "where": "1280x800 A's read note is the plain chip",
+  "ok": true,
+  "detail": "Read"
+ },
+ {
+  "lock": "C4",
+  "where": "1280x800 A focusing Scout",
+  "ok": false,
+  "detail": "{\"text\":\"ScoutAt 8 notes · 1 to go\",\"op\":\"0\",\"reachedWithCard\":0,\"focusable\":true}"
+ },
+ {
+  "lock": "C4",
+  "where": "1280x800 A reached birds show no card",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 Q population",
+  "ok": true,
+  "detail": "5 birds"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 Q first line",
+  "ok": true,
+  "detail": "\"You’ve reached\""
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 Q rank",
+  "ok": true,
+  "detail": "\"QueryHawk\""
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 Q ask",
+  "ok": true,
+  "detail": "\"Thank you. 52 notes and counting.\""
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 Q \"hatch into\" is the Egg's alone",
+  "ok": true,
+  "detail": "\"Thank you. 52 notes and counting.\""
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 Q reached birds",
+  "ok": true,
+  "detail": "Fledgling:reached:Reached:✓ Archivist:reached:Reached:✓ Scout:reached:Reached:✓ Mentor:reached:Reached:✓ QueryHawk:reached:Reached:✓"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 Q no \"to confirm\"",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C2",
+  "where": "1280x800 Q fill from Fledgling's centre",
+  "ok": true,
+  "detail": "454.7 vs 454.7"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x800 Q fill ends at 4.00 steps",
+  "ok": true,
+  "detail": "1177.0 vs 1177.0"
+ }
+]

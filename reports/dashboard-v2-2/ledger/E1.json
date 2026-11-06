@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "E1",
+  "where": "1512x982 population: the band open",
+  "ok": true,
+  "detail": "209.84375"
+ },
+ {
+  "lock": "E1",
+  "where": "1512x982 folded: 62 ±2",
+  "ok": true,
+  "detail": "62.0"
+ },
+ {
+  "lock": "E1",
+  "where": "1512x982 folded: no road, no note; three buttons; labelled",
+  "ok": true,
+  "detail": "{\"road\":false,\"note\":false,\"label\":\"Show founding writer\",\"exp\":\"false\",\"tells\":3,\"stat\":\"block\",\"statText\":\"Archivist 1 note to Scout\"}"
+ },
+ {
+  "lock": "E1",
+  "where": "1512x982 folded status",
+  "ok": true,
+  "detail": "block \"Archivist 1 note to Scout\""
+ },
+ {
+  "lock": "E1",
+  "where": "1512x982 stored",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "E1",
+  "where": "1512x982 survives a reload",
+  "ok": true,
+  "detail": "62.0"
+ },
+ {
+  "lock": "E1",
+  "where": "1512x982 unfolding restores the band",
+  "ok": true,
+  "detail": "209.8 vs 209.8"
+ },
+ {
+  "lock": "E1",
+  "where": "1512x982 unfold stored",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "E1",
+  "where": "1512x982 a pending rank-up shows the band unfolded",
+  "ok": true,
+  "detail": "{\"folded\":\"0\",\"hatch\":true}"
+ },
+ {
+  "lock": "E1",
+  "where": "1512x982 …without changing the stored fold",
+  "ok": true,
+  "detail": "{\"f\":true,\"s\":2}"
+ },
+ {
+  "lock": "E1",
+  "where": "1280x800 population: the band open",
+  "ok": true,
+  "detail": "269.78125"
+ },
+ {
+  "lock": "E1",
+  "where": "1280x800 folded: 62 ±2",
+  "ok": true,
+  "detail": "62.0"
+ },
+ {
+  "lock": "E1",
+  "where": "1280x800 folded: no road, no note; three buttons; labelled",
+  "ok": true,
+  "detail": "{\"road\":false,\"note\":false,\"label\":\"Show founding writer\",\"exp\":\"false\",\"tells\":3,\"stat\":\"none\",\"statText\":\"Archivist 1 note to Scout\"}"
+ },
+ {
+  "lock": "E1",
+  "where": "1280x800 folded status",
+  "ok": true,
+  "detail": "none \"Archivist 1 note to Scout\""
+ },
+ {
+  "lock": "E1",
+  "where": "1280x800 stored",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "E1",
+  "where": "1280x800 survives a reload",
+  "ok": true,
+  "detail": "62.0"
+ },
+ {
+  "lock": "E1",
+  "where": "1280x800 unfolding restores the band",
+  "ok": true,
+  "detail": "269.8 vs 269.8"
+ },
+ {
+  "lock": "E1",
+  "where": "1280x800 unfold stored",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "E1",
+  "where": "1280x800 a pending rank-up shows the band unfolded",
+  "ok": true,
+  "detail": "{\"folded\":\"0\",\"hatch\":true}"
+ },
+ {
+  "lock": "E1",
+  "where": "1280x800 …without changing the stored fold",
+  "ok": true,
+  "detail": "{\"f\":true,\"s\":2}"
+ }
+]
