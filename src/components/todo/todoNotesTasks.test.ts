@@ -119,7 +119,8 @@ describe("notes-and-tasks P2 — the composer + the schema", () => {
     // write is denied until one dev rules deploy lands. The client never carries it on a create
     // for that reason — hasOnly() denies the whole document for one unlisted key — so the note
     // is written plain and setUserTaskColour follows, returning whether the colour landed.
-    expect(rules).toContain("hasOnly(['text', 'detail', 'done', 'completedAt', 'updatedAt', 'dueDate', 'surfaceOffset', 'committedDate', 'tags', 'estimateMin', 'colour'])"); // update affectedKeys
+    /* retargeted, law unchanged (To-do list v50): the update list gained steps and the link, edited after creation */
+    expect(rules).toContain("hasOnly(['text', 'detail', 'done', 'completedAt', 'updatedAt', 'dueDate', 'surfaceOffset', 'committedDate', 'tags', 'estimateMin', 'colour', 'steps', 'queryId', 'agentId'])"); // update affectedKeys
   });
 
   it("two entry points, two default natures: the section opens NOTE, the hero opens TASK — RETIRED SURFACE (board+dock P1)", () => {

@@ -1237,4 +1237,11 @@ export interface UserTask {
   // document (never a taskFlag — those are stances on DERIVED tasks). Set = committed to that day's
   // list (rolls over once if the day passes); absent = not committed. Input, never derived.
   committedDate?: string;
+  /* To-do list v50 — the task's checklist, in order: each step's words and whether it is ticked. Optional; absent
+     means no steps. The workspace's "Add a step" appends, a tick flips `done`, and the footer counts them. The whole
+     list is written each time (a list, never a map keyed by index, so an order change cannot corrupt it). */
+  steps?: TaskStep[];
 }
+
+/** To-do list v50 — one step on an own task's checklist */
+export interface TaskStep { text: string; done: boolean }

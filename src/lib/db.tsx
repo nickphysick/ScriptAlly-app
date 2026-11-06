@@ -27,6 +27,7 @@ import {
   Note,
   NoteColour,
   UserTask,
+  TaskStep,
   SurfaceOffset,
   DismissedTask,
   TaskFlag,
@@ -482,7 +483,7 @@ interface DbContextType {
   // per-record "View tasks" popovers). Badge counts stay derived.
   userTasks: UserTask[];
   addUserTask: (fields: { id?: string; text?: string; detail?: string; queryId?: string; agentId?: string; manuscriptId?: string; dueDate?: string; surfaceOffset?: SurfaceOffset; tags?: string[]; createdAt?: string }) => Promise<string | undefined>;
-  updateUserTask: (id: string, fields: Partial<Pick<UserTask, "text" | "done">> & { completedAt?: string | null; detail?: string | null; dueDate?: string | null; surfaceOffset?: SurfaceOffset | null; committedDate?: string | null; tags?: string[] | null; estimateMin?: number | null }) => Promise<void>;
+  updateUserTask: (id: string, fields: Partial<Pick<UserTask, "text" | "done">> & { completedAt?: string | null; detail?: string | null; dueDate?: string | null; surfaceOffset?: SurfaceOffset | null; committedDate?: string | null; tags?: string[] | null; estimateMin?: number | null; steps?: TaskStep[] | null; queryId?: string | null; agentId?: string | null }) => Promise<void>;
   deleteUserTask: (id: string) => Promise<void>;
   /** ⚠️ THE UNDO'S WRITE — the captured document, VERBATIM. A restore through addUserTask loses
    *  whatever that builder does not know about (it stamped createdAt once, then committedDate and
@@ -3259,11 +3260,17 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       completedAt?: string | null;
       detail?: string | null; dueDate?: string | null; surfaceOffset?: SurfaceOffset | null;
       committedDate?: string | null; tags?: string[] | null; estimateMin?: number | null;
+      steps?: TaskStep[] | null; queryId?: string | null; agentId?: string | null;
     },
   ) => {
     if (!currentUser) return;
-    const { committedDate, completedAt, detail, dueDate, surfaceOffset, tags, estimateMin, ...rest } = fields;
+    const { committedDate, completedAt, detail, dueDate, surfaceOffset, tags, estimateMin, steps, queryId, agentId, ...rest } = fields;
     const patch: Record<string, unknown> = { ...rest, updatedAt: new Date().toISOString() };
+    /* To-do list v50: the checklist is written whole; null (or an emptied list) takes the field off the document.
+       The links follow the same null-clears convention: "Unlink" is a deleteField, never a stored empty string. */
+    if (steps !== undefined) patch.steps = steps === null || steps.length === 0 ? deleteField() : steps.map((x) => ({ text: x.text, done: !!x.done }));
+    if (queryId !== undefined) patch.queryId = queryId === null ? deleteField() : queryId;
+    if (agentId !== undefined) patch.agentId = agentId === null ? deleteField() : agentId;
     // `null` clears the Today's-list commitment (uncommit); a string sets it.
     if (committedDate !== undefined) patch.committedDate = committedDate === null ? deleteField() : committedDate;
     /* board fixes II P1 — the ⋯ Edit needs to CLEAR fields (a task losing its date becomes a

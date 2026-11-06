@@ -1414,13 +1414,31 @@ describe('/users/{userId}/tasks', () => {
     );
   });
 
-  it('rejects an update touching queryId (record scope is create-only input)', async () => {
+  /* ⚠️ FLIPPED (To-do list v50, 6 Nov 2026): the link was create-only input; the workspace links and unlinks an existing
+     task ("+ Link an agent or query", the chip's ✕), so queryId and agentId are updatable now. */
+  it('allows an update linking a task to a query and an agent (To-do v50)', async () => {
     await asAdmin(async (ctx) => {
       await setDoc(doc(ctx.firestore(), 'users', ALICE, 'tasks', 'task-1'), validUserTask(ALICE));
     });
     const db = aliceCtx().firestore();
+    await assertSucceeds(
+      updateDoc(doc(db, 'users', ALICE, 'tasks', 'task-1'), { queryId: 'q-9', agentId: 'a-9', updatedAt: '2026-11-06T10:00:00.000Z' })
+    );
+  });
+
+  it('allows a checklist of steps, and refuses a non-list or more than 50 (To-do v50)', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users', ALICE, 'tasks', 'task-1'), validUserTask(ALICE));
+    });
+    const db = aliceCtx().firestore();
+    await assertSucceeds(
+      updateDoc(doc(db, 'users', ALICE, 'tasks', 'task-1'), { steps: [{ text: 'Reread it', done: true }, { text: 'Cut the second half', done: false }], updatedAt: '2026-11-06T10:00:00.000Z' })
+    );
     await assertFails(
-      updateDoc(doc(db, 'users', ALICE, 'tasks', 'task-1'), { queryId: 'q-9' })
+      updateDoc(doc(db, 'users', ALICE, 'tasks', 'task-1'), { steps: 'Reread it', updatedAt: '2026-11-06T10:00:00.000Z' })
+    );
+    await assertFails(
+      updateDoc(doc(db, 'users', ALICE, 'tasks', 'task-1'), { steps: Array.from({ length: 51 }, (_, i) => ({ text: `Step ${i}`, done: false })), updatedAt: '2026-11-06T10:00:00.000Z' })
     );
   });
 
