@@ -82,9 +82,10 @@ describe("⚠️ ONE TagPicker, mounted in exactly three places", () => {
        than quietly dropped from the count: the title still says three, and this is where a reader
        finds out why it is two and what restoring the third would take. */
     expect(listPage, "the pane grew a tags slot without the mockup gaining one").not.toContain("tagsSlot=");
-    // 3. the ⋯ menu's Tags… sheet — on the board AND the noteboard, same component
+    // 3. the ⋯ menu's Tags… sheet — on the board. RE-POINTED (Corkboard v2): the Corkboard's Tags… sheet is retired;
+    //    Change tag… opens the note pop-up at its tag field, so the Corkboard mounts no TagPicker of its own.
     expect(listPage).toContain("MOUNT 3 of 3");
-    expect(noteboard.match(/<TagPicker/g)?.length).toBe(1);
+    expect(noteboard.match(/<TagPicker/g)).toBeNull();
     // and nobody builds a lookalike: the chips class exists only in the one component
     for (const [name, src] of [["list", listPage], ["noteboard", noteboard], ["dock", dock]] as const) {
       expect(src.includes("tgp-chips"), name).toBe(false);
@@ -97,7 +98,10 @@ describe("⚠️ ONE TagPicker, mounted in exactly three places", () => {
     expect(picker).toContain("normaliseTagLabel(draft)");
     // every mount passes onCreate through the user-doc write
     expect(listPage).toContain("createTagDef(tag)");
-    expect(noteboard).toContain("createTagDef(tag)");
+    /* RE-POINTED (Corkboard v2): the Corkboard mints through resolveTag (newTag → createTagDef) and the To-do
+       composer it hosts passes createTagDef as onCreateTag */
+    expect(noteboard).toContain("await createTagDef(made)");
+    expect(noteboard).toContain("onCreateTag={(t) => void createTagDef(t)}");
   });
 });
 

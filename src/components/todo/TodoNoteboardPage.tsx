@@ -19,19 +19,16 @@
  */
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
-import { PortalMenu } from "./PortalMenu";
 import { useConfirmAsk } from "./ConfirmAsk";
 import { useTodoToast } from "./useTodoToast";
 import { useScriptAllyDb } from "../../lib/db";
-import { noteMenu, MenuLeaf } from "../../lib/todoMenu";
-import { TagPicker } from "./TagPicker";
 import { useTagWrites } from "./useTagWrites";
 import {
   noteColour, sortNotes, noteReceipt, firstTagLabel, editCommit, noteTagChips, noteMatchesSearch, paperHex, paperOf, NOTE_COLOURS,
 } from "../../lib/noteboard";
 import { newTag } from "../../lib/todoTags";
 import {
-  boardPrefs, chipCounts, dropOrder, glance as glanceOf, inGlance, linkFields, linkOf, piles as pilesOf, sortBoard, tagsForPile,
+  boardPrefs, chipCounts, dropOrder, frontBack, glance as glanceOf, inGlance, linkFields, linkOf, piles as pilesOf, sortBoard, tagsForPile,
   type BoardSort, type BoardView, type GlanceKey, type NoteLink,
 } from "../../lib/corkboard";
 import { agentPrimary } from "../../lib/agentDisplay";
@@ -44,6 +41,7 @@ import { CbHeader } from "./corkboard/CbHeader";
 import { CbToolRow } from "./corkboard/CbToolRow";
 import { CbWall, type WallNote } from "./corkboard/CbWall";
 import { CbPiles } from "./corkboard/CbPiles";
+import { CbMenu, type MenuAct } from "./corkboard/CbMenu";
 import { CbNoteDialog, type NoteDraftV2 } from "./corkboard/CbNoteDialog";
 import { CbAddTask, CbTurnTask, todayLocal } from "./corkboard/CbTaskDialogs";
 import { BLANK_DRAFT, dayLabel, dueOf, type ComposeDraft } from "./v5/ComposeCard";
@@ -109,7 +107,6 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
   const [special, setSpecial] = useState<GlanceKey | null>(null);
   const [menu, setMenu] = useState<{ note: UserTask; anchor: HTMLElement } | null>(null);
   const [taskFor, setTaskFor] = useState<UserTask | null>(null);
-  const [tagsFor, setTagsFor] = useState<UserTask | null>(null);
   const [compose, setCompose] = useState<NoteDraftV2 | null>(null);
   const [composeTag, setComposeTag] = useState(false); // open the pop-up with the tag field focused (Change tag…)
   const [saving, setSaving] = useState(false);
@@ -148,7 +145,7 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
   /* ⚠️ "ADD A TASK" IS THE TO-DO LIST'S OWN COMPOSER, opened here in task mode (Part E) */
   const openTaskComposer = () => setTaskDraft({ ...BLANK_DRAFT, mode: "task" });
 
-  const { createTagDef, applyTagToggle } = useTagWrites(flash);
+  const { createTagDef } = useTagWrites(flash);
   /* a new note takes the last paper used this session, unless it was started from a swatch */
   const LAST = "sa.cb2LastColour";
   const lastColour = (): NoteColour => {
@@ -273,15 +270,25 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
     flash("Removed", { label: "Undo", fn: async () => { await restoreUserTask(receipt); flash("Back on the board"); } }, 8000);
   };
 
-  const onMenuPick = (item: MenuLeaf) => {
+  /* ── the ⋯ menu (Part F): a pick names an action; these are its writes ── */
+  const onMenuPick = (act: MenuAct) => {
     if (!menu) return;
     const note = menu.note;
     setMenu(null);
-    if (item.id === "edit-task") openEditor(note);
-    if (item.id === "make-task") setTaskFor(note);
-    if (item.id === "detach-task") void detachTask(note);
-    if (item.id === "tags") setTagsFor(note);
-    if (item.id === "delete-task") void deleteNote(note);
+    if (act.a === "pin") void togglePin(note);
+    if (act.a === "front" || act.a === "back") void writeOrder(frontBack(board.map((n) => n.id), note.id, act.a), sort !== "mine", act.a === "front" ? "Moved to the front" : "Moved to the back");
+    if (act.a === "edit" || act.a === "colour") openEditor(note);
+    if (act.a === "tag") openEditor(note, true);
+    if (act.a === "task") setTaskFor(note);
+    if (act.a === "untask") void detachTask(note);
+    if (act.a === "pile") void moveToPile(note.id, act.k);
+    if (act.a === "remove") void deleteNote(note);
+  };
+  const togglePin = async (note: UserTask) => {
+    const next = !note.pinned;
+    try { await updateUserTask(note.id, { pinned: next }); }
+    catch { flash("Couldn’t pin that — try again?"); return; }
+    flash(next ? "Pinned to the top" : "Unpinned");
   };
 
   /* ── Add a task: the To-do list's own composer; the write is the To-do list's own create, field for field (CB9) ── */
@@ -312,12 +319,14 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
   };
 
   /* ── the wall: one drop, one `order` write ── */
-  const writeOrder = async (ids: string[], toMine: boolean) => {
+  /** ONE write: the order leaf, with the sort leaf in the same call when the sort switches to My order */
+  const writeOrder = async (ids: string[], toMine: boolean, said?: string) => {
     const paths: Record<string, unknown> = { "todoPrefs.noteboard.order": ids };
     if (toMine) paths["todoPrefs.noteboard.sort"] = "mine";
     try {
       await updateUserPaths(paths);
-      if (toMine) flash("Sorted by your own order now");
+      if (said) flash(said);
+      else if (toMine) flash("Sorted by your own order now");
     } catch {
       flash("Couldn’t save that order — try again?");
     }
@@ -484,10 +493,12 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
       </div>
 
       {menu && (
-        <PortalMenu
+        <CbMenu
           anchor={menu.anchor}
-          groups={noteMenu(!!menu.note.dueDate)}
-          ariaLabel={`Actions for ${menu.note.text}`}
+          pinned={!!menu.note.pinned}
+          onTodo={!!menu.note.dueDate}
+          view={view}
+          piles={pilesOf(board, tagLabel).filter((p) => p.k !== (menu.note.tags?.[0] ?? "")).map((p) => ({ k: p.k, name: pileName(p.k) }))}
           onPick={onMenuPick}
           onClose={(returnFocus) => { setMenu((m) => { if (m && returnFocus) m.anchor.focus(); return null; }); }}
         />
@@ -528,22 +539,6 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
         />
       )}
 
-      {tagsFor && (
-        <div className="cal-dayscrim" onClick={() => setTagsFor(null)}>
-          <div className="nb-scope cal-daypanel nb-datepanel" role="dialog" aria-label={`Tags for ${tagsFor.text}`} onClick={(e) => e.stopPropagation()}>
-            <div className="cal-dayhead">
-              Tags — {tagsFor.text}
-              <button type="button" className="cal-dayx" aria-label="Close" onClick={() => setTagsFor(null)}>✕</button>
-            </div>
-            <TagPicker
-              tags={userTags}
-              selected={(userTasks.find((t) => t.id === tagsFor.id)?.tags) ?? []}
-              onToggle={(tid) => { const cur = userTasks.find((t) => t.id === tagsFor.id)?.tags; void applyTagToggle(tagsFor.id, cur, tid); }}
-              onCreate={(tag) => { const cur = userTasks.find((t) => t.id === tagsFor.id)?.tags; void createTagDef(tag); void applyTagToggle(tagsFor.id, cur, tag.id); }}
-            />
-          </div>
-        </div>
-      )}
 
       {confirmAskNode}
       {toast && (

@@ -111,7 +111,7 @@ describe("⚠️ 'THE DATE IS THE DOOR' IS RETIRED — the board projects a task
   });
 
   it("the menu's door says so: Turn into a task…", () => {
-    expect(page).toContain('item.id === "make-task"');
+    expect(page).toContain('if (act.a === "task") setTaskFor(note);'); // RE-POINTED (Corkboard v2): CbMenu's act
     /* RE-POINTED (Corkboard v2): the panel's button is v13's "Add to my to-do list" */
     expect(readFileSync(join(here, "corkboard/CbTaskDialogs.tsx"), "utf8")).toContain("Add to my to-do list");
   });

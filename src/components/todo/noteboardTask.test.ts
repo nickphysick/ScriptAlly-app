@@ -149,6 +149,11 @@ describe("⚠️ the projection is GONE, not shadowed", () => {
     expect(flat.map((l) => l.label)).toContain("Turn into a task…");
     const attached = noteMenu(true).flatMap((g) => g.entries) as MenuLeaf[];
     expect(attached.map((l) => l.label)).toContain("Detach from tasks");
-    expect(page).toContain("noteMenu(!!menu.note.dueDate)");
+    /* RE-POINTED (Corkboard v2): the Corkboard's own menu forks on the same fact — "Turn into a task…" or "Take off
+       your to-do list" (CbMenu). noteMenu above is the To-do board's and is unchanged. */
+    expect(page).toContain("onTodo={!!menu.note.dueDate}");
+    const menu = readFileSync(join(here, "corkboard/CbMenu.tsx"), "utf8");
+    expect(menu).toContain("Turn into a task…");
+    expect(menu).toContain("Take off your to-do list");
   });
 });

@@ -346,3 +346,17 @@ body.cb2-dragging .cb2-note:hover { transform: none; }
   .cb2-stage { border-radius: 18px 18px 0 0; padding: 22px; }
   .cb2-stagein { min-height: 0; }
 }
+
+/* ═════════ F · the ⋯ menu (ref `.menu`, screen 05) ═════════ */
+.cb2-menu {
+  position: fixed; z-index: 75; width: 220px; box-sizing: border-box; padding: 6px; border-radius: 12px; background: #fff;
+  box-shadow: 0 0 0 1px var(--cb2-i14), 0 20px 40px -18px rgba(28, 19, 15, .45);
+}
+.cb2-menu button {
+  display: flex; width: 100%; padding: 9px 10px; border: 0; border-radius: 8px; background: none; cursor: pointer; text-align: left;
+  font: 400 15px/1.25 var(--cb2-serif); color: var(--cb2-ink);
+}
+.cb2-menu button:hover, .cb2-menu button:focus-visible { background: #f6f3ee; outline: 0; }
+.cb2-menu hr { border: 0; border-top: 1px solid var(--cb2-i08); margin: 5px 4px; }
+.cb2-menu .cb2-del { color: var(--cb2-rust); }
+.cb2-layer .cb2-mlbl { padding: 6px 10px 2px; font: italic 400 13px/1.2 var(--cb2-serif) !important; color: var(--cb2-i55) !important; }

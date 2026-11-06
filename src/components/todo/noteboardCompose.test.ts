@@ -131,8 +131,7 @@ describe("⚠️ the composer IS the editor — one component, two slots, never 
     expect(body).toContain("if (body !== note.text)");
     expect(body).toContain("compose.colour !== noteColour(note)");
     expect(body).toContain("typed.toLowerCase() !== firstTagLabel(note, userTags).toLowerCase()");
-    /* PortalMenu untouched is asserted by the do-not-touch diff in the report; here, the menu
-       still offers the same leaves it did */
-    expect(page).toContain("noteMenu(");
+    /* RE-POINTED (Corkboard v2): the menu is the page's own CbMenu now (Part F) */
+    expect(page).toContain("<CbMenu");
   });
 });
