@@ -6,7 +6,7 @@
  * They run on every change and decide what is disabled: a step option, a calendar day, the Save button.
  *
  *   1. exactly one Query sent, and it is the earliest step
- *   2. stage order: partial requested < partial sent < full requested < full sent < offer
+ *   2. stage order: partial requested < partial sent < full requested < full sent < revise & resubmit < offer
  *   3. a send needs its request first
  *   4. no duplicate stage steps
  *   5. nothing after a close (passed, no response, withdrawn)
@@ -22,20 +22,20 @@
 import { MONTHS_SHORT } from "./dates";
 
 /** v152.1 adds "told": you told other agents about an offer — a step, never a status */
-export type StepType = "queried" | "preq" | "psent" | "freq" | "fsent" | "offer" | "nudge" | "passed" | "noresp" | "withdrawn" | "told";
+export type StepType = "queried" | "preq" | "psent" | "freq" | "fsent" | "rr" | "offer" | "nudge" | "passed" | "noresp" | "withdrawn" | "told";
 export interface LogStep { id: string; t: StepType; d: number }
 
 const DAY = 86_400_000;
 const fd = (ms: number) => { const d = new Date(ms); return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}`; };
 export const STEP_LABEL: Record<StepType, string> = {
-  queried: "Query sent", preq: "Partial requested", psent: "Partial sent", freq: "Full requested", fsent: "Full sent",
+  queried: "Query sent", preq: "Partial requested", psent: "Partial sent", freq: "Full requested", fsent: "Full sent", rr: "Revise & resubmit",
   offer: "Offer", nudge: "You nudged", passed: "Passed", noresp: "Closed: no response", withdrawn: "Withdrawn", told: "Told other agents",
 };
-const RANK: Partial<Record<StepType, number>> = { preq: 1, psent: 2, freq: 3, fsent: 4, offer: 5 };
+const RANK: Partial<Record<StepType, number>> = { preq: 1, psent: 2, freq: 3, fsent: 4, rr: 4.5, offer: 5 };
 const NEEDS: Partial<Record<StepType, StepType>> = { psent: "preq", fsent: "freq" };
 /** whose move the step leaves it: the agent's (a), yours (y) or closed (k) */
 const SIDE: Record<StepType, "a" | "y" | "k" | null> = {
-  queried: "a", preq: "y", psent: "a", freq: "y", fsent: "a", offer: "y", nudge: null, passed: "k", noresp: "k", withdrawn: "k", told: null,
+  queried: "a", preq: "y", psent: "a", freq: "y", fsent: "a", rr: "y", offer: "y", nudge: null, passed: "k", noresp: "k", withdrawn: "k", told: null,
 };
 const CLOSES = new Set<StepType>(["passed", "noresp", "withdrawn"]);
 const lab = (t: StepType, first: string) => (t === "nudge" ? `You nudged ${first}` : STEP_LABEL[t]);

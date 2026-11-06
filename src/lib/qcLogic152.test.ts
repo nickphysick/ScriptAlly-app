@@ -43,6 +43,14 @@ describe("the nine logic checks (v152 §4.3)", () => {
     expect(validate(o, c).ok).toBe(true);
     expect(validate([...o, s("x", "passed", 30)], c).ok).toBe(true);
   });
+  it("follow-up · an R&R comes after a request, makes it your move, and nothing earlier can follow it", () => {
+    const full = [s("q", "queried", 100), s("fr", "freq", 80), s("fs", "fsent", 60)];
+    expect(validate([...full, s("rr", "rr", 40)], c).ok).toBe(true);
+    expect(validate([...base, s("rr", "rr", 30)], c).ok).toBe(true);
+    expect(validate([...base, s("rr", "rr", 30), s("fr", "freq", 20)], c).err.get("fr")).toMatch(/can’t come after “Revise & resubmit”/);
+    expect(validate([...full, s("rr", "rr", 40), s("n", "nudge", 20)], c).err.get("n")).toMatch(/it’s your move/);
+    expect(validate([...full, s("rr", "rr", 40), s("o", "offer", 20)], c).ok).toBe(true);
+  });
   it("9 · no dates in the future", () => {
     expect(validate([...base, s("fut", "nudge", -3)], c).err.get("fut")).toMatch(/in the future/);
   });

@@ -6,7 +6,8 @@ set -u
 cd "$(dirname "$0")/../.." || exit 1
 export PATH="/opt/homebrew/opt/openjdk@21/bin:$PATH"; unset ALLOW_LIVE_FIRESTORE
 for i in $(seq 1 1080); do
-  lsof -nP -iTCP:8085 -iTCP:9095 -iTCP:4321 -iTCP:4405 -sTCP:LISTEN >/dev/null 2>&1 || break
+  # ⚠️ lsof exits 1 when ANY listed port is closed, so its exit code cannot say "all free": read its output
+  lsof -nP -iTCP:8085 -iTCP:9095 -iTCP:9195 -iTCP:4321 -iTCP:4405 -sTCP:LISTEN 2>/dev/null | grep -q LISTEN || break
   [ "$i" = 1 ] && echo "waiting for another session's emulators to finish…"
   sleep 5
 done

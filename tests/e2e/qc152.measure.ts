@@ -423,7 +423,7 @@ for (const vp of SIZES) {
       await page.locator("[data-qp='panel'] [data-qc152='something-else']").click({ timeout: 8000 }).catch(() => {});
       await page.waitForTimeout(300);
       const o = await optWhy(page);
-      L.check("population: the §3 form's every option", Object.keys(o).length === 8, JSON.stringify(Object.keys(o)));
+      L.check("population: the §3 form's every option", Object.keys(o).length === 9, JSON.stringify(Object.keys(o)));
       L.check("check 3 · a send needs its request: Sent the full refused", o.full_sent?.disabled && /before it was requested/.test(o.full_sent.why), JSON.stringify(o.full_sent));
       L.check("check 6 · no nudge while it's your move", o.nudge?.disabled && /it’s your move/.test(o.nudge.why), JSON.stringify(o.nudge));
       L.check("check 7 · no closed: no response while it's your move", o.noresp?.disabled && /only close for no reply/.test(o.noresp.why), JSON.stringify(o.noresp));

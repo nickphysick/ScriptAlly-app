@@ -17,7 +17,7 @@
  * ⚠️ EVERY STEP CARRIES ITS MATERIALS on both stores (`materials`, a list of maps). A request carries what was asked;
  *    a send, what went. Steps written before v152 carry none.
  */
-import { collection, deleteField, doc, getDocs, Timestamp, writeBatch, type DocumentData } from "firebase/firestore";
+import { collection, deleteField, doc, getDoc, getDocs, setDoc, Timestamp, updateDoc, writeBatch, type DocumentData } from "firebase/firestore";
 import { db } from "./firebase";
 import { ActivityType, QueryStatus, type Agent, type EventKey, type Manuscript, type Query } from "../types";
 import { planResponse, buildLegacyActivity, type RecordResponseData } from "./recordResponse";
@@ -84,13 +84,13 @@ export function storeMats(ms: readonly StepMaterial[]): Record<string, unknown>[
 
 /* ── what a step is ─────────────────────────────────────────────────────────────────────────────────────────── */
 
-export type RecordKind = "partial_req" | "full_req" | "offer" | "pass" | "partial_sent" | "full_sent" | "nudge" | "noresp" | "told";
+export type RecordKind = "partial_req" | "full_req" | "rr_req" | "offer" | "pass" | "partial_sent" | "full_sent" | "nudge" | "noresp" | "told";
 export const RECORD_STATUS: Record<RecordKind, QueryStatus | null> = {
-  partial_req: QueryStatus.PARTIAL_REQUESTED, full_req: QueryStatus.FULL_REQUESTED, offer: QueryStatus.OFFER, pass: QueryStatus.REJECTED,
+  partial_req: QueryStatus.PARTIAL_REQUESTED, full_req: QueryStatus.FULL_REQUESTED, rr_req: QueryStatus.REVISE_RESUBMIT, offer: QueryStatus.OFFER, pass: QueryStatus.REJECTED,
   partial_sent: QueryStatus.PARTIAL_SENT, full_sent: QueryStatus.FULL_SENT, nudge: null, noresp: QueryStatus.NO_RESPONSE, told: null,
 };
 /** the agent's replies, which can carry what they said (v152.1 §2.6) */
-export const REPLY_KINDS: readonly RecordKind[] = ["partial_req", "full_req", "offer", "pass"];
+export const REPLY_KINDS: readonly RecordKind[] = ["partial_req", "full_req", "rr_req", "offer", "pass"];
 export const REPLY_NOTE_MAX = 500;
 
 /**
@@ -99,11 +99,14 @@ export const REPLY_NOTE_MAX = 500;
  * ⚠️ ONE FACT, ONE SAVE (Nick): the step IS the record. Saving it writes the step AND the per-query marks on each other live
  *    query (`offerRefQueryId`, `offerTold`, `offerToldOn`, `offerReply` — the offer journey's fields) in the same batch;
  *    editing its date moves `offerToldOn`, removing it clears the marks, and Undo restores both from one snapshot.
- * ⚠️ ITS EVENT KEY IS NOT ON THE SHARED `EventKey` UNION: no feed row is written for it, so no other page's label map
- *    needs an entry.
+ * ⚠️ IT HAS A FEED ROW (Nick: "one of the most important moments in a campaign"): "You told 6 agents about Tom's offer",
+ *    the `offer_told` event key, no status — so nothing that counts offers counts it.
  */
 export const TOLD_TYPE = "Told other agents";
-export const TOLD_EVENT = "offer_told";
+export const TOLD_EVENT: EventKey = "offer_told";
+/** the feed row's sentence: "You told 6 agents about Tom's offer" */
+export const toldLine = (count: number, agentName: string | null | undefined) =>
+  `You told ${count} agent${count === 1 ? "" : "s"} about ${(agentName ?? "").trim().split(/\s+/)[0] || "the agent"}’s offer`;
 export interface ToldMarkTarget { id: string; offerReply?: string | null }
 export interface RecordExtra {
   /** §2.6 what the agent said, on one of their replies */
@@ -117,7 +120,7 @@ const clearTold = (ids: readonly string[]): NonNullable<WritePlan["update"]> =>
   ids.map((id) => ({ path: `queries/${id}`, data: { offerRefQueryId: deleteField(), offerTold: deleteField(), offerToldOn: deleteField(), offerReply: deleteField() } }));
 
 const EVENT: Record<Exclude<RecordKind, "told">, EventKey> = {
-  partial_req: "partial_requested", full_req: "full_requested", offer: "offer", pass: "pass",
+  partial_req: "partial_requested", full_req: "full_requested", rr_req: "rr_requested", offer: "offer", pass: "pass",
   partial_sent: "partial_sent", full_sent: "full_sent", nudge: "nudge_sent", noresp: "closed_no_reply",
 };
 
@@ -178,7 +181,9 @@ export function planRecord(c: PlanCtx, kind: RecordKind, dayMs: number, material
     const count = Math.max(1, Math.min(30, Math.round(t.count)));
     const sub: DocumentData = { type: TOLD_TYPE, createdAt, note: `Told ${count} other agent${count === 1 ? "" : "s"} about ${name}’s offer`, ...base,
       eventKey: TOLD_EVENT, toldCount: count, toldDeadline: dayIso(new Date(t.deadlineMs)) };
-    return { queryId: q.id, set: [{ path: `queries/${q.id}/activity/${id}`, data: sub }], del: [], query: {}, update: markTold(q, t.others, tMs) };
+    const feedRow: DocumentData = { id, userId: c.uid, queryId: q.id, manuscriptId: q.manuscriptId || "", activityType: ActivityType.STATUS_CHANGED,
+      description: toldLine(count, agent?.name || agent?.agency), date: iso, details: "", eventKey: TOLD_EVENT, logEntryId: id };
+    return { queryId: q.id, set: [{ path: `queries/${q.id}/activity/${id}`, data: sub }, { path: `activities/${id}`, data: feedRow }], del: [], query: {}, update: markTold(q, t.others, tMs) };
   }
   const note = REPLY_KINDS.includes(kind) ? (extra.replyNote ?? "").trim().slice(0, REPLY_NOTE_MAX) : "";
   if (kind === "nudge") {
@@ -204,6 +209,8 @@ export function planRecord(c: PlanCtx, kind: RecordKind, dayMs: number, material
     const data: RecordResponseData = kind === "noresp" ? closeRecord(noreplyAnswers(new Date(tMs)))
       : kind === "partial_req" ? respData({ responseType: "partial", dateReceived: day, materialsType: sample?.unit ? UNIT_NAME[sample.unit] : "Pages", materialsQuantity: sample?.n ?? 0, eventKey: EVENT[kind] })
       : kind === "full_req" ? respData({ responseType: "full", dateReceived: day, eventKey: EVENT[kind] })
+      /* an R&R is asked as the full is: what they asked for, and what they said (the reply note, never the old rrNotes) */
+      : kind === "rr_req" ? respData({ responseType: "rr", dateReceived: day, eventKey: EVENT[kind] })
       : kind === "offer" ? respData({ responseType: "offer", dateReceived: day, offerDate: day, eventKey: EVENT[kind] })
       : respData({ responseType: "rejected", dateReceived: day, eventKey: EVENT[kind] });
     const p = planResponse({ query: q, agent, manuscript: c.ms }, data);
@@ -317,7 +324,7 @@ export function planFix(c: PlanCtx & { feed: RawActivityDoc[] }, draft: readonly
     if (JSON.stringify(cur.data.materials ?? []) !== JSON.stringify(mats)) { if (mats.length) next.materials = mats; else delete next.materials; changed = true; }
     if (s.kind === "told" && s.told) {
       const n = Math.max(1, Math.min(30, Math.round(s.told.count))), dl = dayIso(new Date(s.told.deadlineMs));
-      if (cur.data.toldCount !== n) { next.toldCount = n; changed = true; }
+      if (cur.data.toldCount !== n) { next.toldCount = n; next.note = `Told ${n} other agent${n === 1 ? "" : "s"} about ${c.agent?.name || c.agent?.agency || "the agent"}’s offer`; changed = true; }
       if (cur.data.toldDeadline !== dl) { next.toldDeadline = dl; changed = true; }
       if (!sameDay(t0, s.dayMs)) for (const id of c.marked ?? []) update.push({ path: `queries/${id}`, data: { offerToldOn: dayIso(new Date(s.dayMs)) } });
     }
@@ -330,6 +337,8 @@ export function planFix(c: PlanCtx & { feed: RawActivityDoc[] }, draft: readonly
       if (next.resultingStatus && f.resultingStatus !== undefined) f.resultingStatus = next.resultingStatus;
       f.date = new Date(getActivityTime(next.createdAt)).toISOString();
       if (mats.length) f.materials = mats; else delete f.materials;
+      /* a told step's feed row keeps its count in its words */
+      if (s.kind === "told" && typeof next.toldCount === "number") f.description = toldLine(next.toldCount, c.agent?.name || c.agent?.agency);
       set.push({ path: `activities/${tw.id}`, data: f });
     }
   }
@@ -343,6 +352,32 @@ export function planFix(c: PlanCtx & { feed: RawActivityDoc[] }, draft: readonly
       ...(pkg.was ? { basedOnPackageId: pkg.was.id, basedOnPackageEdition: pkg.was.edition ?? 1 } : {}) });
   }
   return withRecompute({ queryId: qid, set, del, query, ...(update.length ? { update } : {}) }, c.existing);
+}
+
+/**
+ * v152.1 — WHICH OTHER QUERIES REFUSE A TOLD SAVE'S MARKS. Called only after the save's one batch was refused. A query
+ * document at the rules' ceiling (about 24 stored fields: firestore.rules' `isValidQuery` checks every stored field on
+ * every write, and the request runs out of expressions) refuses ANY write that adds a field, while a no-op write to it is
+ * accepted — so the only honest probe is the real write. Each sibling's marks are tried on their own; the accepted ones
+ * are put back exactly as they were (their documents were read first), and the refused ones were never changed.
+ * Nick's ruling: the step and every accepted sibling then save in one batch, and the refused ones are named, never
+ * dropped silently.
+ */
+export async function refusedMarks(uid: string, plan: WritePlan): Promise<string[]> {
+  const marks = (plan.update ?? []).filter((u) => /^queries\/[^/]+$/.test(u.path));
+  const refused: string[] = [];
+  for (const u of marks) {
+    const ref = doc(db, `users/${uid}/${u.path}`);
+    const before = (await getDoc(ref)).data();
+    try {
+      await updateDoc(ref, u.data);
+      if (before) await setDoc(ref, before);
+    } catch (e) {
+      if ((e as { code?: string })?.code === "permission-denied") refused.push(u.path.split("/")[1]);
+      else throw e;
+    }
+  }
+  return refused;
 }
 
 /** the feed's rows for one query (for twins) */

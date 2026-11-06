@@ -23,7 +23,7 @@ import "./qcv152edit.css";
 
 const DAY = 86_400_000;
 export const KIND_STEP: Record<RecordKind, StepType> = {
-  partial_req: "preq", full_req: "freq", offer: "offer", pass: "passed", partial_sent: "psent", full_sent: "fsent", nudge: "nudge", noresp: "noresp", told: "told",
+  partial_req: "preq", full_req: "freq", rr_req: "rr", offer: "offer", pass: "passed", partial_sent: "psent", full_sent: "fsent", nudge: "nudge", noresp: "noresp", told: "told",
 };
 export const KIND_TITLE: Partial<Record<RecordKind, string>> = { partial_sent: "Mark partial sent", full_sent: "Mark full sent", nudge: "Log a nudge", noresp: "Close it", told: "Tell other agents" };
 const statusOf = (k: RecordKind) => ({ status: RECORD_STATUS[k], kind: k === "nudge" ? ("nudge" as const) : k === "told" ? ("told" as const) : null });
@@ -61,11 +61,11 @@ export interface QcRecord152Props {
 }
 
 const OPTS: { head: string; side: "them" | "me"; kinds: RecordKind[] }[] = [
-  { head: "Who replied", side: "them", kinds: ["partial_req", "full_req", "offer", "pass"] },
+  { head: "Who replied", side: "them", kinds: ["partial_req", "full_req", "rr_req", "offer", "pass"] },
   { head: "What you did", side: "me", kinds: ["partial_sent", "full_sent", "nudge", "noresp", "told"] },
 ];
 const optLabel = (k: RecordKind, f: string) => ({
-  partial_req: `${f} asked for a partial`, full_req: `${f} asked for the full`, offer: `${f} made an offer`, pass: `${f} passed`,
+  partial_req: `${f} asked for a partial`, full_req: `${f} asked for the full`, rr_req: `${f} asked for a revision (R&R)`, offer: `${f} made an offer`, pass: `${f} passed`,
   partial_sent: "You sent the partial", full_sent: "You sent the full", nudge: `You nudged ${f}`, noresp: "You closed it: no response",
   told: "You told other agents about the offer",
 }[k]);
@@ -96,7 +96,7 @@ export const QcRecord152: React.FC<QcRecord152Props> = (p) => {
   const pick = (k: RecordKind) => { setKind(k); setMats(p.prefill(k)); api.setOpen(null); };
   const title = p.initial === "resp" ? "Record a response" : all || !kind ? "Something changed since" : KIND_TITLE[kind] ?? "Record a response";
   const sendKind = kind === "partial_sent" || kind === "full_sent";
-  const request = kind === "partial_req" || kind === "full_req";
+  const request = kind === "partial_req" || kind === "full_req" || kind === "rr_req";
   const gap = p.last?.ms != null ? Math.max(0, Math.round((day - new Date(p.last.ms).setHours(0, 0, 0, 0)) / DAY)) : null;
   const reply = !!kind && REPLY_KINDS.includes(kind);
   const extra = (): RecordExtraIn => (kind === "told" ? { told: { count: toldN, deadlineMs: toldBy } } : reply && note.trim() ? { replyNote: note.trim() } : {});

@@ -15,7 +15,8 @@ BK=/tmp/qc1521-mut; mkdir -p "$BK"
 F=""
 restore() { local f="$1"; cp "$BK/$(echo "$f" | tr '/' '-')" "$f"; }
 build() { npx vite build --mode emulator --outDir dist-emu --emptyOutDir > /tmp/qc1521-mutbuild.txt 2>&1 || { echo "build failed"; [ -n "$F" ] && restore "$F"; exit 1; }; }
-spec() { echo "QC1521_MUTATE=$1 QC1521_ONLY=$1 node scripts/emu-e2e-inner.mjs tests/e2e/qc1521.measure.ts --project=measure --workers=1"; }
+# a second mutation of one lock carries a letter (L10F runs L10)
+spec() { echo "QC1521_MUTATE=$1 QC1521_ONLY=${1%[A-Z]} node scripts/emu-e2e-inner.mjs tests/e2e/qc1521.measure.ts --project=measure --workers=1"; }
 # a source break: <file> <from> <to> (the anchor must occur exactly once)
 srcbreak() {
   local f="$1"; local b="$BK/$(echo "$f" | tr '/' '-')"
@@ -59,6 +60,12 @@ for L in "$@"; do
   );
 
   /* §2.6 the Agent tab */' ;;
+    L12) F=src/components/Queries.tsx; srcbreak $F '                message: refused.length
+                  ? `Saved.' '                message: false /* MUT L12: the refused sibling dropped silently */
+                  ? `Saved.' ;;
+    L13) F=src/components/queries/centre/QcRecord152.tsx; srcbreak $F 'kinds: ["partial_req", "full_req", "rr_req", "offer", "pass"]' 'kinds: ["partial_req", "full_req", "offer", "pass"] /* MUT L13: no R&R in Who replied */' ;;
+    L3H) F=src/lib/qcThread152.ts; srcbreak $F 'export const HOLDING_TINT = { fill: "#ffffff", edge: "#e3dbd0" };' 'export const HOLDING_TINT = { fill: "#f1efec", edge: "#e3dfd9" }; /* MUT L3H: the holding reply grey */' ;;
+    L10F) F=src/lib/qc152Write.ts; srcbreak $F '    return { queryId: q.id, set: [{ path: `queries/${q.id}/activity/${id}`, data: sub }, { path: `activities/${id}`, data: feedRow }],' '    void feedRow; /* MUT L10F: no feed row */ return { queryId: q.id, set: [{ path: `queries/${q.id}/activity/${id}`, data: sub }],' ;;
     L10) F=src/lib/qc152Write.ts; srcbreak $F '      eventKey: TOLD_EVENT, toldCount: count, toldDeadline: dayIso(new Date(t.deadlineMs)) };' '      eventKey: TOLD_EVENT, toldCount: count }; /* MUT L10: saved without the deadline */' ;;
   esac
   build

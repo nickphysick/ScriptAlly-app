@@ -1011,6 +1011,8 @@ export type EventKey =
   | "partial_requested" | "full_requested" | "rr_requested"
   | "partial_sent" | "full_sent" | "resubmitted"
   | "pass" | "offer" | "offer_call" | "offer_accepted" | "offer_declined" | "signed"
+  /** Query Centre v152.1: you told other agents about an offer (a step, never a status; Nick wants it in the feed) */
+  | "offer_told"
   | "nudge_sent"
   | "closed_no_reply" | "withdrawn" | "withdrawn_on_offer" | "closed_agent_gone"
   | "late_reply_reopened" | "entry_corrected"

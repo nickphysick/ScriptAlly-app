@@ -174,7 +174,7 @@ const readThread = (page: Page) => page.evaluate((c) => {
       /* the bubble's RENDERED words: innerText on a hidden element falls back to its raw text, so the title alone
          cannot say whether a reader sees it (L9's first mutation stayed green on exactly that) */
       seen: bx.innerText, date: m.querySelector<HTMLElement>("[data-qc152='msg-date']")?.innerText.trim() ?? "",
-      bg: getComputedStyle(bx).backgroundColor, glyphBg: g ? getComputedStyle(g).backgroundColor : "none", glyphW: g ? g.offsetWidth : 0,
+      bg: getComputedStyle(bx).backgroundColor, edge: getComputedStyle(bx).boxShadow, glyphBg: g ? getComputedStyle(g).backgroundColor : "none", glyphW: g ? g.offsetWidth : 0,
       navy: [bx, ...bx.querySelectorAll<HTMLElement>("*")].some((e) => getComputedStyle(e).backgroundColor === "rgb(42, 58, 82)"),
       follows: m.querySelector<HTMLElement>("[data-qc152='follows']")?.innerText.replace(/\s+/g, " ").trim() ?? "",
       nth: m.querySelector<HTMLElement>("[data-qc152='nth']")?.innerText.trim() ?? "",
@@ -233,11 +233,18 @@ for (const vp of SIZES) {
       const L = new Ledger(`L3-${vp.width}`);
       await open2(page, vp);
       const seen = new Set<string>();
-      for (const k of ["long", "rr", "passed", "offertold", "materials", "withdrew"]) {
+      for (const k of ["long", "rr", "passed", "offertold", "materials", "withdrew", "holding"]) {
         await openCard(page, k);
         const t = await readThread(page);
         L.check(`${k}: population`, !!t && t.msgs.length >= 2, `${t?.msgs.length}`);
         for (const m of t?.msgs ?? []) {
+          /* v152.1 follow-up: a holding reply is white with the agent hairline (grey means passed) */
+          if (m.kind === "holding") {
+            L.check(`${k} · holding reply: white, the agent hairline #e3dbd0, its note quoted, the hold glyph`,
+              m.bg === "rgb(255, 255, 255)" && m.edge.includes("rgb(227, 219, 208)") && m.quotes[0] === "“Thanks — reading now.”" && m.glyphW === 26, `${m.bg} ${m.edge} ${JSON.stringify(m.quotes)}`);
+            seen.add("holding");
+            continue;
+          }
           const want = m.side === "me" ? ME : TINT[m.status];
           if (m.side === "them") seen.add(m.status);
           L.check(`${k} · ${m.title}: ${m.side === "me" ? "paper" : `the ${m.status} tint`}`, !!want && m.bg === want, `${m.bg} (want ${want})`);
@@ -245,7 +252,7 @@ for (const vp of SIZES) {
           L.check(`${k} · ${m.title}: the glyph box has no fill`, m.glyphBg === "rgba(0, 0, 0, 0)" && m.glyphW === 26, `${m.glyphBg} ${m.glyphW}px`);
         }
       }
-      L.check("every agent tint in the table was seen", ["Partial Requested", "Full Requested", "Revise & Resubmit", "Offer", "Rejected"].every((s) => seen.has(s)), JSON.stringify([...seen]));
+      L.check("every agent tint in the table was seen, and the holding reply", ["Partial Requested", "Full Requested", "Revise & Resubmit", "Offer", "Rejected", "holding"].every((s) => seen.has(s)), JSON.stringify([...seen]));
       L.done(40);
     });
 
@@ -398,6 +405,8 @@ for (const vp of SIZES) {
       L.check("it renders: yours, paper, Told 4 other agents, offer deadline {date}, the offer's glyph", told?.side === "me" && told.bg === ME && told.title === "Told 4 other agents" && /^offer deadline \d{1,2} [A-Z][a-z]{2}/.test(told.via), JSON.stringify(told) + (errs.length ? ` errors: ${errs.join(" | ")}` : ""));
       const after = dump("offer2");
       const entry = after.log.map((x: [string, Record<string, unknown>]) => x[1]).find((d: Record<string, unknown>) => d.type === "Told other agents");
+      const feedRow = after.feed.map((x: [string, Record<string, unknown>]) => x[1]).find((d: Record<string, unknown>) => d.eventKey === "offer_told");
+      L.check("a feed row: You told 4 agents about Ottilie’s offer, no status", feedRow?.description === "You told 4 agents about Ottilie’s offer" && !("resultingStatus" in (feedRow ?? {})), JSON.stringify(feedRow));
       L.check("saved on the log: count 4 and the deadline", entry?.toldCount === 4 && typeof entry?.toldDeadline === "string" && isoDay(new Date(entry.toldDeadline as string).getTime()) === target, JSON.stringify(entry));
       const other = dump("sib2").q;
       L.check("the same save marked another live query as told", other?.offerRefQueryId === "q152-offer2" && other?.offerTold === true && typeof other?.offerToldOn === "string", JSON.stringify({ r: other?.offerRefQueryId, t: other?.offerTold, on: other?.offerToldOn }));
@@ -425,7 +434,7 @@ for (const vp of SIZES) {
       await page.locator("[data-qad-undo]").first().click({ timeout: 8000 }).catch(() => {});
       await page.waitForTimeout(2500);
       L.check("Undo: the query back byte for byte", JSON.stringify(dump("agent")) === JSON.stringify(b2), "");
-      L.done(12);
+      L.done(13);
     });
   });
 }
@@ -490,6 +499,92 @@ for (const vp of SIZES) {
       const rec = await page.evaluate(() => ({ kind: document.querySelector<HTMLElement>("[data-qp='panel'] [data-qc152='record']")?.dataset.kind ?? "", count: !!document.querySelector("[data-qp='panel'] [data-qc152='told-count']") }));
       L.check("Tell other agents opens the record form on Told other agents", rec.kind === "told" && rec.count, JSON.stringify(rec));
       L.done(70);
+    });
+  });
+}
+
+/* ── v152.1 follow-up: a told save with a sibling the rules refuse (L12) ───────────────────────────────────────── */
+
+const dumpq = (id: string) => execSync(`node tests/e2e/seedQc152.mjs --dumpq ${id}`, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim().split("\n").pop()!;
+const agentName = (id: string) => JSON.parse(execSync(`node tests/e2e/seedQc152.mjs --agentname ${id}`, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim().split("\n").pop()!);
+
+for (const vp of SIZES) {
+  test.describe(`QC1521 told, a refused sibling @ ${vp.width}`, () => {
+    test("L12 · a sibling the rules refuse: the save succeeds without it, the toast names it, Undo restores everything written", async ({ page }) => {
+      test.skip(!run("L12"));
+      const L = new Ledger(`L12-${vp.width}`);
+      /* seed-pkgq-4 (seed-ms-1) sits at the rules' field ceiling: it refuses any write that adds a field */
+      const refusedBefore = dumpq("seed-pkgq-4"), name = agentName(JSON.parse(refusedBefore).agentId);
+      L.check("population: the refused sibling is on the offer's manuscript and live", JSON.parse(refusedBefore)?.manuscriptId === "seed-ms-1" && !!name, `${name}`);
+      const offerBefore = dump("offer"), sibBefore = dump("agent");
+      await open2(page, vp);
+      await openCard(page, "offer");
+      await click(page, `${CARD} [data-qc152='reply-second']`);
+      await page.waitForTimeout(500);
+      for (let i = 0; i < 30; i++) await click(page, "[data-qp='panel'] [data-qc152='told-less']");
+      for (let i = 0; i < 5; i++) await click(page, "[data-qp='panel'] [data-qc152='told-more']");
+      await click(page, "[data-qp='panel'] [data-qc152='see-changes']");
+      await click(page, "[data-qp='panel'] [data-qc152='save']");
+      const toast = page.locator("[data-qad-toast] b").first();
+      await page.waitForFunction(() => /couldn.t be marked|·/.test(document.querySelector("[data-qad-toast] b")?.textContent ?? ""), null, { timeout: 45_000 }).catch(() => {});
+      const msg = (await toast.innerText({ timeout: 3000 }).catch(() => "")).replace(/\s+/g, " ");
+      L.check("the toast names the refused sibling: Saved. 1 query couldn't be marked: {agent}.", new RegExp(`Saved\\. 1 query couldn[’']t be marked: ${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\.`).test(msg), msg);
+      L.check("Undo is offered", await page.locator("[data-qad-undo]").count() > 0, "");
+      const after = dump("offer");
+      const entry = after.log.map((x: [string, Record<string, unknown>]) => x[1]).find((d: Record<string, unknown>) => d.type === "Told other agents");
+      L.check("the step saved, its count what was entered (6)", entry?.toldCount === 6, JSON.stringify(entry?.toldCount));
+      const sib = dump("agent").q;
+      L.check("an accepted sibling was marked in the same save", sib?.offerRefQueryId === "q152-offer" && sib?.offerTold === true, JSON.stringify({ r: sib?.offerRefQueryId, t: sib?.offerTold }));
+      L.check("the refused sibling is exactly as it was", dumpq("seed-pkgq-4") === refusedBefore, "");
+      const t = await readThread(page);
+      L.check("the bubble says what was entered: Told 6 other agents", t?.msgs.some((m) => m.kind === "told" && m.title === "Told 6 other agents"), JSON.stringify(t?.msgs.map((m) => m.title)));
+      await page.locator("[data-qad-undo]").first().click({ timeout: 8000 }).catch(() => {});
+      /* Undo restores every snapshot in one batch; on a long shared run that batch can take longer than a fixed wait */
+      const want = JSON.stringify([offerBefore, sibBefore]);
+      for (let i = 0; i < 20 && JSON.stringify([dump("offer"), dump("agent")]) !== want; i++) await page.waitForTimeout(1000);
+      const sibAfter = dump("agent");
+      const sibDiff = Object.keys({ ...sibBefore.q, ...sibAfter.q }).filter((k) => JSON.stringify(sibBefore.q?.[k]) !== JSON.stringify(sibAfter.q?.[k]));
+      L.check("Undo: the offer back byte for byte", JSON.stringify(dump("offer")) === JSON.stringify(offerBefore), "");
+      L.check("Undo: the accepted sibling back byte for byte", JSON.stringify(sibAfter) === JSON.stringify(sibBefore), JSON.stringify({ fields: sibDiff, log: [sibBefore.log?.length, sibAfter.log?.length], feed: [sibBefore.feed?.length, sibAfter.feed?.length] }));
+      L.check("Undo: the refused sibling still as it was", dumpq("seed-pkgq-4") === refusedBefore, "");
+      L.done(10);
+    });
+    test("L13 · R&R: Who replied offers it; what they asked for and what they said save on the step, it renders, the footer follows, Undo puts it back", async ({ page }) => {
+      test.skip(!run("L13"));
+      const L = new Ledger(`L13-${vp.width}`);
+      const before = dump("long");
+      await open(page, vp);
+      await openCard(page, "long");
+      await click(page, `${CARD} [data-qc152='reply-btn']`);
+      const opt = page.locator("[data-qp='panel'] [data-qc152='opt'][data-k='rr_req']");
+      const offered = (await opt.innerText({ timeout: 8000 }).catch(() => "")).includes("Jonathan asked for a revision (R&R)");
+      L.check("population: Who replied offers Jonathan asked for a revision (R&R)", offered, "");
+      /* without the option the rest cannot run: stop with a reading rather than a timeout */
+      if (!offered) { await page.keyboard.press("Escape"); L.done(9); return; }
+      await opt.click({ timeout: 8000 }).catch(() => {});
+      const chips = (await page.locator("[data-qp='panel'] [data-qc152='draft-chips']").innerText({ timeout: 5000 }).catch(() => "")).trim();
+      L.check("what they asked for: the full, as on a full request", /full/i.test(chips), chips);
+      const note = page.locator("[data-qp='panel'] [data-qc152='reply-note'] textarea");
+      L.check("population: What did they say? (optional)", await note.count() === 1, "");
+      await note.fill("Loved it. Could the middle move faster?").catch(() => {});
+      await click(page, "[data-qp='panel'] [data-qc152='see-changes']");
+      await click(page, "[data-qp='panel'] [data-qc152='save']");
+      await page.locator(`${CARD}[data-view='read'] [data-qc152='msg'][data-status='Revise & Resubmit']`).first().waitFor({ timeout: 15_000 }).catch(() => {});
+      const rr = (await readThread(page))?.msgs.find((m) => m.status === "Revise & Resubmit");
+      L.check("it renders: theirs, Asked for a revision (R&R), their words quoted", rr?.side === "them" && rr.title === "Asked for a revision (R&R)" && rr.quotes.length === 1 && rr.quotes[0] === "“Loved it. Could the middle move faster?”", JSON.stringify(rr));
+      const lead = (await page.locator(`${CARD} [data-qc152='reply-lead']`).innerText({ timeout: 5000 }).catch(() => "")).trim();
+      L.check("the footer follows: Revise and resubmit", lead === "Revise and resubmit", lead);
+      const after = dump("long");
+      const e = after.log.map((x: [string, Record<string, unknown>]) => x[1]).find((d: Record<string, unknown>) => d.resultingStatus === "Revise & Resubmit");
+      L.check("saved: the status, the rr_requested key, the full asked for, and the words as replyNote", after.q?.status === "Revise & Resubmit" && e?.eventKey === "rr_requested"
+        && JSON.stringify(e?.materials ?? []).includes("full") && e?.replyNote === "Loved it. Could the middle move faster?", JSON.stringify({ s: after.q?.status, k: e?.eventKey, m: e?.materials, n: e?.replyNote }));
+      L.check("no older field written (rrNotes)", !("rrNotes" in (after.q ?? {})), "");
+      const feed = after.feed.map((x: [string, Record<string, unknown>]) => x[1]).find((d: Record<string, unknown>) => d.eventKey === "rr_requested");
+      L.check("a feed row for it", feed?.resultingStatus === "Revise & Resubmit", JSON.stringify(feed));
+      await page.locator("[data-qad-undo]").first().click({ timeout: 8000 }).catch(() => {});
+      await page.waitForTimeout(2500);
+      L.check("Undo: the query back byte for byte", JSON.stringify(dump("long")) === JSON.stringify(before), "");
+      L.done(9);
     });
   });
 }

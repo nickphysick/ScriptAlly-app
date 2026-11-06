@@ -330,8 +330,33 @@
   "detail": "rgba(0, 0, 0, 0) 26px"
  },
  {
-  "where": "every agent tint in the table was seen",
+  "where": "holding: population",
   "ok": true,
-  "detail": "[\"Partial Requested\",\"Full Requested\",\"Revise & Resubmit\",\"Rejected\",\"Offer\"]"
+  "detail": "2"
+ },
+ {
+  "where": "holding · Query sent: paper",
+  "ok": true,
+  "detail": "rgb(246, 243, 238) (want rgb(246, 243, 238))"
+ },
+ {
+  "where": "holding · Query sent: no navy inside",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "holding · Query sent: the glyph box has no fill",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) 26px"
+ },
+ {
+  "where": "holding · holding reply: white, the agent hairline #e3dbd0, its note quoted, the hold glyph",
+  "ok": true,
+  "detail": "rgb(255, 255, 255) rgb(227, 219, 208) 0px 0px 0px 1px inset [\"“Thanks — reading now.”\"]"
+ },
+ {
+  "where": "every agent tint in the table was seen, and the holding reply",
+  "ok": true,
+  "detail": "[\"Partial Requested\",\"Full Requested\",\"Revise & Resubmit\",\"Rejected\",\"Offer\",\"holding\"]"
  }
 ]
