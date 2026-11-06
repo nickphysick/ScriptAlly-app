@@ -27,10 +27,10 @@
  * ⚠️ AND THESE ARE STARTING POINTS, NOT TEMPLATES. Using one seeds the composer with an
  * editable copy; nothing reaches the board until the writer presses Pin it.
  */
-import { NoteColour } from "../../types";
+import type { StoredNoteColour } from "../../types";
 
 export interface NoteExample {
-  colour: NoteColour;
+  colour: StoredNoteColour;
   tag: string;
   body: string;
 }

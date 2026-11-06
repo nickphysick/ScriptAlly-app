@@ -9,7 +9,7 @@
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Check, Trash2, X } from "lucide-react";
-import type { Note, NoteColour } from "../../types";
+import type { Note, DeskNoteColour } from "../../types";
 import {
   parchment,
   insetBorder,
@@ -25,13 +25,13 @@ import { NOTE_THEMES, NOTE_COLOURS, FONT_CAVEAT } from "./notesTheme";
 
 export interface NoteEditorProps {
   note: Note;
-  onSave: (id: string, fields: { text: string; colour: NoteColour; dueDate: string | null }) => void;
+  onSave: (id: string, fields: { text: string; colour: DeskNoteColour; dueDate: string | null }) => void;
   onComplete: (id: string) => void;
   onDelete: (id: string) => void;
   onClose: () => void;
 }
 
-const swatch = (c: NoteColour) => (
+const swatch = (c: DeskNoteColour) => (
   <span
     style={{
       display: "inline-block",
@@ -44,11 +44,11 @@ const swatch = (c: NoteColour) => (
   />
 );
 
-const COLOUR_LABEL: Record<NoteColour, string> = { pink: "Pink", sage: "Sage", yellow: "Yellow" };
+const COLOUR_LABEL: Record<DeskNoteColour, string> = { pink: "Pink", sage: "Sage", yellow: "Yellow" };
 
 export const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onComplete, onDelete, onClose }) => {
   const [text, setText] = useState(note.text);
-  const [colour, setColour] = useState<NoteColour>(note.colour);
+  const [colour, setColour] = useState<DeskNoteColour>(note.colour);
   const [dueDate, setDueDate] = useState(note.dueDate ?? "");
 
   useEffect(() => {
@@ -137,7 +137,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onComplete
             <div style={{ ...labelStyle, marginBottom: 6 }}>Colour</div>
             <BrandDropdown
               value={colour}
-              onChange={(v) => setColour(v as NoteColour)}
+              onChange={(v) => setColour(v as DeskNoteColour)}
               options={NOTE_COLOURS.map((c) => ({ value: c, label: COLOUR_LABEL[c], icon: swatch(c) }))}
             />
           </div>

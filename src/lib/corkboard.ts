@@ -40,7 +40,7 @@ export function chipCounts(notes: readonly Pick<UserTask, "tags">[]): Map<string
 }
 
 /** The three paper squares in the add bar, in the composer's own order, with the words a screen reader hears. */
-export const PAD_LABEL = { yellow: "Pin a yellow note", pink: "Pin a pink note", sage: "Pin a sage note" } as const;
+export const PAD_LABEL = { butter: "Pin a butter note", blush: "Pin a blush note", powder: "Pin a powder note", sand: "Pin a sand note", stone: "Pin a stone note" } as const;
 
 /* ── the board (Part C) ─────────────────────────────────────────────────────────────────────── */
 
@@ -219,3 +219,145 @@ export function ownTaskRows(tasks: readonly UserTask[], nowMs: number): OwnTasks
   const all = [...open, ...done].map((t) => ({ id: t.id, text: t.text, dueDate: t.dueDate!, done: t.done }));
   return { rows: all.slice(0, TASKS_CARD_MAX), total: all.length, more: all.length > TASKS_CARD_MAX };
 }
+
+/* ══ Corkboard v2 (6 Nov; ref design-refs/corkboard-v13/) — a wall of post-its, with piles ══════════════════════
+   Everything the v2 page states comes from these pure functions, so the locks call what the page calls. */
+
+export type BoardView = "board" | "piles";
+export type BoardSort = "mine" | "new" | "old" | "colour";
+export interface BoardPrefs { view: BoardView; sort: BoardSort; order: string[] }
+
+/**
+ * The v2 preferences, read TOTALLY from `todoPrefs.noteboard`. v1's `free` / `tidy` read as `board`; an absent or
+ * unknown sort reads `new`. `layout` and `dismissedExamples` are no longer read (they stay on the document).
+ */
+export function boardPrefs(user: { todoPrefs?: { noteboard?: { view?: unknown; sort?: unknown; order?: unknown } } } | undefined | null): BoardPrefs {
+  const raw = user?.todoPrefs?.noteboard;
+  const sort: BoardSort = raw?.sort === "mine" || raw?.sort === "old" || raw?.sort === "colour" || raw?.sort === "new" ? raw.sort : "new";
+  const order = Array.isArray(raw?.order) ? (raw!.order as unknown[]).filter((x): x is string => typeof x === "string") : [];
+  return { view: raw?.view === "piles" ? "piles" : "board", sort, order };
+}
+
+export const SORT_LABEL: Readonly<Record<BoardSort, string>> = { mine: "My order", new: "Newest first", old: "Oldest first", colour: "By colour" };
+export const SORTS: readonly BoardSort[] = ["mine", "new", "old", "colour"];
+
+/** A note's link: at most one of the three is set (the page never writes two). */
+export type NoteLink = { kind: "agent" | "query" | "manuscript"; id: string };
+export function linkOf(n: Pick<UserTask, "agentId" | "queryId" | "manuscriptId">): NoteLink | null {
+  if (n.queryId) return { kind: "query", id: n.queryId };
+  if (n.agentId) return { kind: "agent", id: n.agentId };
+  if (n.manuscriptId) return { kind: "manuscript", id: n.manuscriptId };
+  return null;
+}
+/**
+ * The link fields for a write that sets `link` (or clears every link with null): the chosen one carries its id, the
+ * other two are cleared, so a note never ends up carrying two. `null` here means "clear" (updateUserTask's convention).
+ */
+export function linkFields(link: NoteLink | null): { agentId: string | null; queryId: string | null; manuscriptId: string | null } {
+  return {
+    agentId: link?.kind === "agent" ? link.id : null,
+    queryId: link?.kind === "query" ? link.id : null,
+    manuscriptId: link?.kind === "manuscript" ? link.id : null,
+  };
+}
+
+/** A note's pile: its FIRST tag id, or "" for Loose notes. Piles are tags; there is no second grouping. */
+export const pileOf = (n: Pick<UserTask, "tags">): string => n.tags?.[0] ?? "";
+
+/** The header's three glance figures. "Linked" is any link (agent, query or manuscript), as the ref counts it. */
+export interface Glance { linked: number; onTodo: number; pinned: number }
+export function glance(notes: readonly Pick<UserTask, "agentId" | "queryId" | "manuscriptId" | "dueDate" | "pinned">[]): Glance {
+  let linked = 0, onTodo = 0, pinned = 0;
+  for (const n of notes) {
+    if (linkOf(n)) linked++;
+    if (n.dueDate) onTodo++;
+    if (n.pinned) pinned++;
+  }
+  return { linked, onTodo, pinned };
+}
+export type GlanceKey = keyof Glance;
+/** Does a note belong to a glance row (the header's filter)? */
+export function inGlance(n: Pick<UserTask, "agentId" | "queryId" | "manuscriptId" | "dueDate" | "pinned">, k: GlanceKey): boolean {
+  return k === "linked" ? !!linkOf(n) : k === "onTodo" ? !!n.dueDate : !!n.pinned;
+}
+/** The rows the header shows, in order, each with its words; a row at zero is not shown. */
+export function glanceRows(g: Glance): { k: GlanceKey; n: number; words: string }[] {
+  const rows: { k: GlanceKey; n: number; words: string }[] = [
+    { k: "linked", n: g.linked, words: g.linked === 1 ? "linked to an agent" : "linked to agents" },
+    { k: "onTodo", n: g.onTodo, words: "on your to-do list" },
+    { k: "pinned", n: g.pinned, words: "pinned to top" },
+  ];
+  return rows.filter((r) => r.n > 0);
+}
+
+/** The header's sentence, as runs: `b` is bold. */
+export function boardSentence(count: number, onTodo: number): { t: string; b?: true }[] {
+  if (count === 0) return [{ t: "Jot down anything worth remembering while you query." }];
+  const out: { t: string; b?: true }[] = count === 1
+    ? [{ t: "One", b: true }, { t: " note on your board." }]
+    : [{ t: String(count), b: true }, { t: " notes on your board." }];
+  if (onTodo > 0) out.push({ t: " " }, { t: String(onTodo), b: true }, { t: onTodo === 1 ? " is on your to-do list." : " are on your to-do list." });
+  return out;
+}
+
+const PAPER_ORDER = ["butter", "blush", "powder", "sand", "stone"];
+/**
+ * The wall's order. ⚠️ PINNED NOTES ARE ALWAYS FIRST, in every sort, and the sort orders each half: My order is the
+ * writer's stored order (anything unplaced newest first), By colour is the five papers' order then newest first.
+ * `paper` is passed in (lib/noteboard's mapping) so this file never holds a second colour table.
+ */
+export function sortBoard<T extends Pick<UserTask, "id" | "createdAt" | "pinned">>(
+  notes: readonly T[], sort: BoardSort, order: readonly string[], paper: (n: T) => string,
+): T[] {
+  const newest = (a: T, b: T) => (b.createdAt || "").localeCompare(a.createdAt || "");
+  let list: T[];
+  if (sort === "mine") {
+    const rank = new Map<string, number>();
+    order.forEach((id, i) => { if (!rank.has(id)) rank.set(id, i); });
+    list = [...notes].sort((a, b) => {
+      const ra = rank.get(a.id), rb = rank.get(b.id);
+      if (ra !== undefined && rb !== undefined) return ra - rb;
+      if (ra !== undefined) return -1;
+      if (rb !== undefined) return 1;
+      return newest(a, b);
+    });
+  } else if (sort === "old") list = [...notes].sort((a, b) => -newest(a, b));
+  else if (sort === "colour") list = [...notes].sort((a, b) => PAPER_ORDER.indexOf(paper(a)) - PAPER_ORDER.indexOf(paper(b)) || newest(a, b));
+  else list = [...notes].sort(newest);
+  return [...list.filter((n) => n.pinned), ...list.filter((n) => !n.pinned)];
+}
+
+/**
+ * Move `from` before (or after) `target` in the list as SHOWN. The whole shown list becomes the stored order, so the
+ * first drag in another sort fixes the order the writer was looking at. Total: the same ids out as in.
+ */
+export function dropOrder(shown: readonly string[], from: string, target: string, after: boolean): string[] {
+  if (from === target || !shown.includes(from) || !shown.includes(target)) return [...shown];
+  const next = shown.filter((id) => id !== from);
+  const ti = next.indexOf(target);
+  next.splice(after ? ti + 1 : ti, 0, from);
+  return next;
+}
+/** Move to the front or the back of the list as shown. */
+export function frontBack(shown: readonly string[], id: string, where: "front" | "back"): string[] {
+  const rest = shown.filter((x) => x !== id);
+  return where === "front" ? [id, ...rest] : [...rest, id];
+}
+
+/** Piles, A to Z by the tag's label, Loose notes last. `label` resolves a tag id. */
+export interface Pile<T> { k: string; notes: T[] }
+export function piles<T extends Pick<UserTask, "tags">>(notes: readonly T[], label: (id: string) => string): Pile<T>[] {
+  const m = new Map<string, T[]>();
+  for (const n of notes) { const k = pileOf(n); if (!m.has(k)) m.set(k, []); m.get(k)!.push(n); }
+  const keys = [...m.keys()].filter((k) => k).sort((a, b) => label(a).localeCompare(label(b)));
+  if (m.has("")) keys.push("");
+  return keys.map((k) => ({ k, notes: m.get(k)! }));
+}
+/** A note moved onto pile `k`: `k` becomes its first tag and every other tag stays ("" = Loose: the first tag goes). */
+export function tagsForPile(tags: readonly string[] | undefined, k: string): string[] {
+  const rest = (tags ?? []).slice(1).filter((t) => t !== k);
+  return k ? [k, ...rest] : rest;
+}
+
+/** A note longer than this many lines is cut on the wall, with "Read all". */
+export const LINE_CLAMP = 8;

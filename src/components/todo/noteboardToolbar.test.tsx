@@ -123,8 +123,8 @@ describe("⚠️ Board / Column is a segmented toggle — the sentence control i
     expect(page).not.toContain("Read as a column");
     seed.userTasks = [note("a", "one")];
     const html = render();
-    for (const name of ["Pin a yellow note", "Pin a pink note", "Pin a sage note"]) expect(html, name).toContain(`aria-label="${name}"`);
-    expect([...html.matchAll(/data-cb-pad="/g)].length).toBe(3);
+    for (const name of ["Pin a butter note", "Pin a blush note", "Pin a powder note", "Pin a sand note", "Pin a stone note"]) expect(html, name).toContain(`aria-label="${name}"`);
+    expect([...html.matchAll(/data-cb-pad="/g)].length).toBe(5);
     expect(page).toContain("onClick={() => openComposer({ colour: c })}");
   });
 

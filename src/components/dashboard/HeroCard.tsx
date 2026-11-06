@@ -10,7 +10,7 @@ import React from "react";
 import { Send, UserPlus, BookOpen, CornerUpLeft } from "lucide-react";
 import { MountCard } from "../MountCard";
 import { NotesDesk } from "../notes/NotesDesk";
-import type { Note, NoteColour } from "../../types";
+import type { Note, DeskNoteColour } from "../../types";
 import "./heroRim.css";
 import {
   headingInk,
@@ -110,8 +110,8 @@ export interface HeroCardProps {
   onAddManuscript: () => void;
   /** User notes for the desk fan (the paper-plane motif is kept as a faint accent above it). */
   notes: Note[];
-  onAddNote: (fields: { text: string; colour: NoteColour; dueDate: string | null }) => void;
-  onSaveNote: (id: string, fields: { text: string; colour: NoteColour; dueDate: string | null }) => void;
+  onAddNote: (fields: { text: string; colour: DeskNoteColour; dueDate: string | null }) => void;
+  onSaveNote: (id: string, fields: { text: string; colour: DeskNoteColour; dueDate: string | null }) => void;
   onCompleteNote: (id: string) => void;
   onDeleteNote: (id: string) => void;
 }

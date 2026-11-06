@@ -121,7 +121,7 @@ describe("⚠️ the conversion and its inverse are ONE FIELD each way", () => {
     /* the un-dated document is a note again, still papered, still on the board */
     const detached: UserTask = { ...DATED, dueDate: undefined };
     expect(sortNotes([detached]).map((n) => n.id)).toEqual([NOTE.id]);
-    expect(noteColour(detached)).toBe("yellow");
+    expect(noteColour(detached)).toBe("butter"); // Corkboard v2: the old yellow reads as butter
   });
 
   it("the badge derives from the note's OWN date — no second document to consult", () => {

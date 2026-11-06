@@ -693,7 +693,7 @@ service cloud.firestore {
     // Canonical stored user task. Record scope (queryId/agentId/manuscriptId) is optional user
     // input — string when present, rejecting a literal null.
     function isValidUserTask(data, userId) {
-      return data.keys().hasOnly(['id', 'userId', 'text', 'detail', 'done', 'completedAt', 'createdAt', 'updatedAt', 'queryId', 'agentId', 'manuscriptId', 'dueDate', 'surfaceOffset', 'committedDate', 'tags', 'estimateMin', 'colour'])
+      return data.keys().hasOnly(['id', 'userId', 'text', 'detail', 'done', 'completedAt', 'createdAt', 'updatedAt', 'queryId', 'agentId', 'manuscriptId', 'dueDate', 'surfaceOffset', 'committedDate', 'tags', 'estimateMin', 'colour', 'pinned'])
         && data.id is string && data.id.size() <= 128
         && data.userId == userId
         // No min length — the To-do board's blank-note flow creates an empty task then fills it.
@@ -710,7 +710,10 @@ service cloud.firestore {
         // denies the whole document for one unlisted key, so a create carrying it would lose the
         // note rather than the colour. `setUserTaskColour` sends it alone and returns whether it
         // landed; a note with none reads yellow. Same safe hasAny pattern as every optional above.
-        && (!data.keys().hasAny(['colour']) || (data.colour is string && data.colour in ['pink', 'sage', 'yellow']))
+        // Corkboard v2 (6 Nov): five new papers; the old three stay valid (they are mapped when read, never rewritten).
+        && (!data.keys().hasAny(['colour']) || (data.colour is string && data.colour in ['butter', 'blush', 'powder', 'sand', 'stone', 'pink', 'sage', 'yellow']))
+        // Corkboard v2: pin to top — a bool when present.
+        && (!data.keys().hasAny(['pinned']) || data.pinned is bool)
         && data.done is bool
         // SAFE optional-field pattern (hasAny guard) — matches every other optional field here. The
         // old `data.completedAt == null` errored on an ABSENT key (Firestore rules do NOT return null
@@ -1173,7 +1176,7 @@ service cloud.firestore {
         // locks pinned the old string; all three halves land together. The VALUE shape needs no
         // guard here — isValidUserTask already enforces it on every update.
         allow update: if isOwner(userId) && isValidId(taskId) && isValidUserTask(incoming(), userId) && (
-          incoming().diff(existing()).affectedKeys().hasOnly(['text', 'detail', 'done', 'completedAt', 'updatedAt', 'dueDate', 'surfaceOffset', 'committedDate', 'tags', 'estimateMin', 'colour'])
+          incoming().diff(existing()).affectedKeys().hasOnly(['text', 'detail', 'done', 'completedAt', 'updatedAt', 'dueDate', 'surfaceOffset', 'committedDate', 'tags', 'estimateMin', 'colour', 'pinned', 'agentId', 'queryId', 'manuscriptId'])
         );
       }
 

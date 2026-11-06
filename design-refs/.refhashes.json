@@ -1041,7 +1041,8 @@
     "design-refs/query-centre-v152-1/thread-colours-3.html": "90ffebabebf135c07d7e91b7d9c22eef50a253f575fcd4f454bd879306899a26",
     "design-refs/query-centre-v152-1/thread-edge-cases.html": "b15fdd08c6496eb97388ee1962ae714f45b09e7b561ce5bd819ba0f5395a95d5",
     "design-refs/shell/sidebar-rail-v1.css": "c3c94297e18a10524279b98a3828080c14a8deb38a77df51eea472401ac68ac3",
-    "design-refs/shell/sidebar-rail-v1.js": "7e686cb0e3584801199dc0ee783d10213efae7b70237f89b186d6f033cf89261"
+    "design-refs/shell/sidebar-rail-v1.js": "7e686cb0e3584801199dc0ee783d10213efae7b70237f89b186d6f033cf89261",
+    "design-refs/corkboard-v13/corkboard-v13.html": "039f1584c9f38ce88b14b2baac1727467f2b65dd685dc9703d9952ae35fb5bdf"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",

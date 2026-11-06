@@ -15,7 +15,7 @@
  *    the link and says it stays.
  */
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import type { Agent, Manuscript, NoteColour, Query, SurfaceOffset, TagDef, UserTask } from "../../../types";
+import type { Agent, Manuscript, Query, StoredNoteColour, SurfaceOffset, TagDef, UserTask } from "../../../types";
 import { TagPicker } from "../TagPicker";
 import { toggleTagSel } from "../../../lib/todoTags";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
@@ -34,7 +34,7 @@ export interface ComposeDraft {
   surface: SurfaceOffset;
   link: ComposeLink | null;
   tags: string[];
-  paper: NoteColour;
+  paper: StoredNoteColour;
 }
 export const BLANK_DRAFT: ComposeDraft = { mode: "task", text: "", detail: "", when: null, date: null, surface: "on-day", link: null, tags: [], paper: "yellow" };
 
@@ -65,8 +65,8 @@ const SURFACE: { v: SurfaceOffset; label: string; say: string; lead: number }[] 
 /** the day an own task joins the tray (its due day, less the chosen lead) */
 export const surfaceDay = (dueYmd: string, s: SurfaceOffset) => plus(dueYmd, -(SURFACE.find((x) => x.v === s)?.lead ?? 0));
 
-const PAPERS: { v: NoteColour; label: string }[] = [{ v: "yellow", label: "Yellow" }, { v: "pink", label: "Pink" }, { v: "sage", label: "Sage" }];
-const PAPER_BG: Record<NoteColour, string> = { yellow: "#f8f0dc", pink: "#f6e2dc", sage: "#e3ebdf" };
+const PAPERS: { v: StoredNoteColour; label: string }[] = [{ v: "yellow", label: "Yellow" }, { v: "pink", label: "Pink" }, { v: "sage", label: "Sage" }];
+const PAPER_BG: Partial<Record<StoredNoteColour, string>> = { yellow: "#f8f0dc", pink: "#f6e2dc", sage: "#e3ebdf" };
 
 /** the inline month calendar: Monday first, past days disabled — and, with `max`, every day after it (a snooze's cap) */
 export const MonthCal: React.FC<{ todayYmd: string; value: string | null; onPick: (ymd: string) => void; max?: string | null; min?: string }> = ({ todayYmd, value, onPick, max = null, min }) => {

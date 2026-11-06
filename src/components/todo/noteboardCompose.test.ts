@@ -93,12 +93,12 @@ describe("⚠️ remove and undo — the board comes back as it was, in order", 
 
 describe("⚠️ the composer keeps what you have already written", () => {
   it("changing the paper repaints and preserves the draft — body and tag both", () => {
-    const draft = { body: "Half a thought about\nthe opening", colour: "yellow" as const, tag: "letter" };
-    const next = composerWithColour(draft, "sage");
-    expect(next).toEqual({ ...draft, colour: "sage" });
-    /* three papers, three distinct results, one unchanged body */
-    const all = (["yellow", "pink", "sage"] as const).map((c) => composerWithColour(draft, c));
-    expect(new Set(all.map((d) => d.colour)).size).toBe(3);
+    const draft = { body: "Half a thought about\nthe opening", colour: "butter" as const, tag: "letter" };
+    const next = composerWithColour(draft, "powder");
+    expect(next).toEqual({ ...draft, colour: "powder" });
+    /* five papers (Corkboard v2), five distinct results, one unchanged body */
+    const all = (["butter", "blush", "powder", "sand", "stone"] as const).map((c) => composerWithColour(draft, c));
+    expect(new Set(all.map((d) => d.colour)).size).toBe(5);
     expect(new Set(all.map((d) => d.body)).size).toBe(1);
   });
 

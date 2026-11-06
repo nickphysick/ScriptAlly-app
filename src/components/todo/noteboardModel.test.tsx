@@ -38,7 +38,8 @@ describe("⚠️ absence is yellow, READ AT RENDER — never backfilled", () => 
     /* three genuinely different inputs, three distinct answers — a default asserted alone
        cannot tell a working derivation from `return \"yellow\"` */
     const answers = [note({}), note({ colour: "pink" }), note({ colour: "sage" })].map(noteColour);
-    expect(answers).toEqual(["yellow", "pink", "sage"]);
+    /* Corkboard v2: absence is butter, and the old papers read as their new names */
+    expect(answers).toEqual(["butter", "blush", "powder"]);
     expect(new Set(answers).size).toBe(3);
   });
 
@@ -50,20 +51,20 @@ describe("⚠️ absence is yellow, READ AT RENDER — never backfilled", () => 
     expect(dbSrc).not.toMatch(/colour:\s*"yellow"/);
     /* the default lives at the READ, in the pure layer, and nowhere else */
     const lib = decls(readFileSync(join(here, "../../lib/noteboard.ts"), "utf8"));
-    expect([...lib.matchAll(/\?\?\s*"yellow"/g)].length).toBe(1);
+    /* Corkboard v2: the default is `paperOf`'s, at the read (absence → "butter"), and nowhere else */
+    expect([...lib.matchAll(/if \(!c\) return "butter"/g)].length).toBe(1);
   });
 });
 
 describe("⚠️ the type is ADDITIVE, and it reuses the union that already existed", () => {
   it("UserTask gains an optional colour typed as the app's own NoteColour", () => {
-    expect(types).toMatch(/colour\?:\s*NoteColour/);
-    /* ⚠️ NOT A PARALLEL UNION. `NoteColour = "pink" | "sage" | "yellow"` has been in types.ts
-       since the dashboard post-its — the mockup's three colours exactly. A second union naming
-       the same three would be two lists to keep in step. */
-    expect(types).toContain('export type NoteColour = "pink" | "sage" | "yellow"');
-    expect([...types.matchAll(/type NoteColour/g)].length).toBe(1);
+    expect(types).toMatch(/colour\?:\s*StoredNoteColour/); // Corkboard v2: new papers or the old three
+    /* Corkboard v2: `NoteColour` is the five papers, declared once; the old three are `LegacyNoteColour`,
+       mapped when read (lib/noteboard `paperOf`). */
+    expect(types).toContain('export type NoteColour = "butter" | "blush" | "powder" | "sand" | "stone"');
+    expect([...types.matchAll(/type NoteColour\b/g)].length).toBe(1);
     /* and the board's own list is that union, not a hand-typed copy */
-    const declared: NoteColour[] = ["yellow", "pink", "sage"];
+    const declared: NoteColour[] = ["butter", "blush", "powder", "sand", "stone"];
     expect([...NOTE_COLOURS].sort()).toEqual([...declared].sort());
   });
 });
@@ -97,7 +98,7 @@ describe("⚠️ the rules are EDITED AND NOT DEPLOYED — the house pattern, st
        to see. The repo's own sliceBetween fails loudly naming the missing anchor. */
     const valid = sliceBetween(rules, "function isValidUserTask", "function isValidActivity");
     expect(valid).toContain("'colour'");                       // the create allowlist
-    expect(valid).toMatch(/colour in \['pink', 'sage', 'yellow'\]/); // the value shape
+    expect(valid).toMatch(/colour in \['butter', 'blush', 'powder', 'sand', 'stone', 'pink', 'sage', 'yellow'\]/); // the value shape (Corkboard v2)
     /* and the update's affectedKeys, or every colour change is denied while creates pass */
     const upd = rules.slice(rules.indexOf("match /tasks/{taskId}"));
     expect(rules.indexOf("match /tasks/{taskId}")).toBeGreaterThan(-1);

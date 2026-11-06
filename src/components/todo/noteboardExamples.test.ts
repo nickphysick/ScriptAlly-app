@@ -13,7 +13,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { NOTE_EXAMPLES, NOTE_EXAMPLE_DIVERGENCES } from "./noteboardExamples";
-import { draftFromExample } from "../../lib/noteboard";
+import { draftFromExample, paperOf } from "../../lib/noteboard";
 
 const here = __dirname;
 const decls = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
@@ -84,7 +84,7 @@ describe("⚠️ REVERSED: using one CREATES a note — the draft door is retire
       for (const ex of g.items) {
         const d = draftFromExample(ex);
         expect(d.body).toBe(ex.body);
-        expect(d.colour).toBe(ex.colour);
+        expect(d.colour).toBe(paperOf(ex.colour)); // Corkboard v2: the old papers are mapped when read
         expect(d.tag).toBe(ex.tag);
       }
     }

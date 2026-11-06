@@ -50,7 +50,7 @@ import {
   noteFilterLabel, noteColour, sortNotes, noteReceipt, firstTagLabel,
   noteboardPrefs, orderNotes, reorderIds, linkifyBody,
   composerWithColour, editCommit, emptyDraft, noteTagChips, noteMatchesSearch,
-  NOTE_COLOURS, NoteDraft,
+  NOTE_COLOURS, NoteDraft, paperOf,
 } from "../../lib/noteboard";
 import { newTag } from "../../lib/todoTags";
 import {
@@ -59,7 +59,7 @@ import {
   type CorkPos, type CorkView,
 } from "../../lib/corkboard";
 import { loadHoldForReview, onlyForReview } from "../../lib/corkboardReviewAid";
-import { NoteColour, UserTask, TagDef } from "../../types";
+import { StoredNoteColour, UserTask, TagDef } from "../../types";
 import { formatDate } from "../../lib/dates";
 import "./tasksLayout.css";
 import "./taskChrome.css";
@@ -273,12 +273,12 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
    * ⚠️ NO DISMISSAL. The examples are a place you visit now, not cards you send away, so the
    * `dismissedExamples` half of the prefs sub-map goes unread — see the report.
    */
-  const keepFromDrawer = async (ex: { body: string; colour: NoteColour; tag: string }) => {
+  const keepFromDrawer = async (ex: { body: string; colour: StoredNoteColour; tag: string }) => {
     try {
       const tagIds = await resolveTag(ex.tag);
       const id = await addUserTask({ text: ex.body, ...(tagIds ? { tags: tagIds } : {}) });
-      if (id && ex.colour !== "yellow") {
-        const landed = await setUserTaskColour(id, ex.colour);
+      if (id && paperOf(ex.colour) !== "butter") {
+        const landed = await setUserTaskColour(id, paperOf(ex.colour));
         if (!landed) flash("Kept — but the colour didn’t save. It’s yellow for now.");
       }
       setExamples(false);
@@ -317,7 +317,7 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
     try {
       const tagIds = await resolveTag(compose.tag);
       const id = await addUserTask({ text: body, ...(tagIds ? { tags: tagIds } : {}) });
-      if (id && compose.colour !== "yellow") {
+      if (id && compose.colour !== "butter") {
         const landed = await setUserTaskColour(id, compose.colour);
         if (!landed) flash("Pinned — but the colour didn’t save. It’s yellow for now.");
       }
@@ -402,7 +402,7 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
     const note = taskFor;
     try {
       if (note.colour === undefined) {
-        const landed = await setUserTaskColour(note.id, "yellow");
+        const landed = await setUserTaskColour(note.id, "butter");
         if (!landed) {
           flash("Couldn’t set that up — the note’s paper wouldn’t save. Try again?");
           return;
