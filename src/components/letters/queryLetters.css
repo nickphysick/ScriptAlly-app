@@ -16,6 +16,7 @@
 .qlp::before { content: ""; position: absolute; inset: 0 0 auto; height: 380px; z-index: -1; pointer-events: none;
   background: radial-gradient(60% 90% at 70% 0%, rgba(232, 200, 200, .28), transparent 70%); }
 .qlp > * { max-width: 1328px; margin-inline: auto; }
+.qlp:not(.qlp--empty) { padding-bottom: 0; }
 
 /* header */
 .qlp-head { position: relative; display: grid; grid-template-columns: 210px minmax(0, 1fr) auto; align-items: center; gap: 28px; padding: 30px 8px 34px; }
