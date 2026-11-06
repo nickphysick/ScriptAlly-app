@@ -89,6 +89,7 @@ const TABLE: Record<TaskType, { onBoard: boolean; with: DueSource | null; owner:
   dream_agent_unqueried:     { onBoard: false, with: null,      owner: "none",   ownerUndated: "none" },
   /* Query actions v1 (27 Sep): the drawer's derived tasks carry no natural date of their own. */
   offer_tell:                { onBoard: true,  with: null,      owner: "owed",   ownerUndated: "owed" },
+  offer_tell_all:            { onBoard: true,  with: null,      owner: "owed",   ownerUndated: "owed" },
   offer_send_full:           { onBoard: true,  with: null,      owner: "owed",   ownerUndated: "owed" },
   withdraw_tell:             { onBoard: true,  with: null,      owner: "none",   ownerUndated: "none" },
   signed_tell:               { onBoard: true,  with: null,      owner: "none",   ownerUndated: "none" },
