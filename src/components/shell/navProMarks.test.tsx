@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * The nav's Pro marks (sidebar materials v1, 6 Nov). A mark is drawn only for an entitlement the writer lacks:
- *   · rail: the "Pro" tag on the Materials section's head; a 5px outlined dot on Versions in Your book's card;
+ *   · rail (v2): the "Pro" tag on the Letters item (Materials is Pro); the More panel's marks are its own test;
  *   · full sidebar: a "PRO" tag after the MATERIALS heading, and on the Versions and Discover rows — never on Query
  *     letters, Comparable titles or Submission packages, because their heading already says it.
  * Today every switch is open, so a founding writer sees none. A Free writer is rendered with the switches shut
@@ -50,34 +50,34 @@ describe("sidebar materials v1 — the nav's Pro marks", () => {
     expect(h).toContain('data-shell="rail"'); /* and the rail */
     expect(h).not.toContain('data-shell="pro"');
     expect(h).not.toContain("wsr-pro");
-    expect(h).not.toContain("wsr-spd");
   });
 
-  it("a Free writer sees the Materials tag on the rail, the Versions dot, and the sidebar's three tags", () => {
+  it("a Free writer sees the Pro tag on the rail's Letters item only, and the sidebar's three tags", () => {
     G.__SA_NAV_FREE = true;
     const h = render("/manuscripts/versions");
-    /* rail: Materials' head carries "Pro"; no other section head does */
-    const heads = [...h.matchAll(/<button[^>]*class="wsr-ni[^"]*"[^>]*data-sec="([^"]+)"(?:(?!<\/button>).)*?<\/button>/gs)];
-    const withTag = heads.filter((m) => m[0].includes("wsr-pro")).map((m) => m[1]);
-    expect(withTag).toEqual(["materials"]);
-    /* rail card: Versions is a dot with no text, named Pro */
-    expect(h).toMatch(/data-go="m-ver"(?:(?!<\/button>).)*<span class="wsr-spd" data-shell="pro" role="img" aria-label="Pro"><\/span>/s);
-    /* every card's rows are in the DOM (a shut card is collapsed, not unmounted): Discover, the other Pro page, wears
-       the same dot in the Agents card; Materials' rows wear none */
-    const dotted = [...h.matchAll(/data-go="([^"]+)"(?:(?!<\/button>).)*?wsr-spd/gs)].map((m) => m[1]);
-    expect(dotted).toEqual(["a-disc", "m-ver"]);
+    const items = [...h.matchAll(/<button[^>]*class="wsr-ni[^"]*"[^>]*data-go="([^"]+)"(?:(?!<\/button>).)*?<\/button>/gs)];
+    expect(items.filter((m) => m[0].includes("wsr-pro")).map((m) => m[1])).toEqual(["m-letters"]);
     /* full sidebar: the MATERIALS heading, then Discover and Versions; no Materials row carries its own */
     expect(taggedHeads(h)).toEqual(["Materials"]);
     expect(taggedRows(h)).toEqual(["Discover", "Versions"]);
   });
 
-  it("on Query letters a Free writer's open Materials card carries no row dots, because the section says it", () => {
-    G.__SA_NAV_FREE = true;
-    const h = render("/materials/letters");
-    for (const id of ["m-letters", "m-comps", "q-pkg"]) {
-      expect(h, id).toMatch(new RegExp(`data-go="${id}"(?:(?!<\\/button>).)*<\\/button>`, "s"));
-      expect(h.match(new RegExp(`data-go="${id}"(?:(?!<\\/button>).)*<\\/button>`, "s"))![0], id).not.toContain("wsr-spd");
-    }
+  it("sidebar rail v2: More is a menu button, lit and named by the More page you are on", () => {
+    const more = (path: string) => render(path).match(/<button[^>]*data-go="more"[^>]*>(?:(?!<\/button>).)*<\/button>/s)![0];
+    const r = more("/queries/responses");
+    expect(r).toContain('aria-haspopup="menu"');
+    expect(r).toContain('aria-expanded="false"');
+    expect(r).toContain("wsr-on");
+    expect(r).toContain(">Responses<");
+    expect(r).toContain('aria-label="More: Responses"');
+    const q = more("/queries");
+    expect(q).not.toContain("wsr-on");
+    expect(q).toContain(">More<");
+    expect(more("/manuscripts/comps")).toContain(">Comps<");
+    /* the rail item lights only on its own page */
+    const h = render("/queries/responses");
+    expect(h).not.toMatch(/class="wsr-ni wsr-on"[^>]*data-go="q-centre"/);
+    expect(render("/queries")).toMatch(/class="wsr-ni wsr-on"[^>]*data-go="q-centre"/);
   });
 
   it("a paid Pro writer sees none, even with the switches shut", () => {
