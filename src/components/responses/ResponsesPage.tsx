@@ -22,7 +22,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useScriptAllyDb } from "../../lib/db";
 import { resolveScopedManuscript } from "../../lib/shellSidebar";
 import { buildQcRows } from "../../lib/qcSummary";
-import { carouselOrder, firstNameOf, goneQuiet, isEarlyDays, noteSplit, pageCounts, respCounts, respItems, stillOut, waitingRows, type NoKind, type RespItem } from "../../lib/responses";
+import { carouselOrder, firstNameOf, offWallIds, goneQuiet, isEarlyDays, noteSplit, pageCounts, respCounts, respItems, stillOut, waitingRows, type NoKind, type RespItem } from "../../lib/responses";
 import type { QcRow } from "../../lib/qcSummary";
 import { openQueryDrawer, type DrawerMode } from "../../lib/queryActions/drawerStore";
 import { openResponsePicker, responsePickerHosted } from "../../lib/queryPanelStore";
@@ -71,7 +71,10 @@ export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) 
     };
     /* the timing line's "gone past the reply time the agent gives": the gone-quiet queries that HAVE a reply date */
     const quietDated = goneQuiet(rows, nowMs).filter((r) => r.expectedMs != null).length;
-    return { nowMs, rows, items, counts, page, glance, quietDated, more: carouselOrder(items), out: stillOut(rows) };
+    /* v152.2 §5 — a pass whose "Add to my Wall of no" was unticked is counted, and kept off the Wall */
+    const off = offWallIds(activities as never);
+    const wallItems = off.size ? items.filter((i) => !off.has(i.id)) : items;
+    return { nowMs, rows, items, wallItems, counts, page, glance, quietDated, more: carouselOrder(items), out: stillOut(rows) };
     /* location.key: a switch of book re-opens the route, and the book is read from storage */
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queries, activities, agents, ms?.id, location.key]);
@@ -161,7 +164,7 @@ export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) 
               </>
             ) : null}
             {ready ? (
-              <Rsp5Wall items={model.items} nowMs={nowMs} msTitle={msTitle} kind={kind} onKind={setKind} selectedId={openId}
+              <Rsp5Wall items={model.wallItems} nowMs={nowMs} msTitle={msTitle} kind={kind} onKind={setKind} selectedId={openId}
                 onOpen={openAnswer} active={!!routeActive} agentFacts={agentFacts} onVisible={setVisible} />
             ) : null}
           </>

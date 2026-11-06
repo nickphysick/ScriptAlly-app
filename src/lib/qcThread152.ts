@@ -20,6 +20,7 @@ import { STAGE_RESPONSE_WINDOWS } from "./queryAmbient";
 import { STATUS_FILL, statusKind } from "./qc1512";
 import { classifyMaterial } from "./agentMaterials";
 import type { QueryState } from "./queryState";
+import { waitWords } from "./qc1522";
 
 const DAY = 86_400_000;
 /** whole CALENDAR days from b to a (local midnights): a wait between two dated steps is the days between the dates, never
@@ -50,6 +51,12 @@ export interface ThreadStepIn {
   quote?: string | null;
   /** v152.1 §2.5 — told other agents: how many */
   toldCount?: number | null;
+  /** v152.2 §5 — "Something else": what they asked for ("Asked for a synopsis") */
+  askedFor?: string | null;
+  /** v152.2 §5 — a line under the bubble: "Form rejection · open to more work", "Resubmit by 12 Nov", "Answer by 9 Oct" */
+  sub?: string | null;
+  /** the step's event key, where the status alone cannot say what it was (a declined offer is Withdrawn) */
+  event?: string | null;
 }
 
 const THEM = new Set<string>([QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED, QueryStatus.REVISE_RESUBMIT, QueryStatus.OFFER, QueryStatus.REJECTED]);
@@ -62,12 +69,16 @@ const TITLE: Record<string, string> = {
   [QueryStatus.QUERIED]: "Query sent", [QueryStatus.PARTIAL_REQUESTED]: "Asked for a partial", [QueryStatus.PARTIAL_SENT]: "Sent the partial",
   [QueryStatus.FULL_REQUESTED]: "Asked for the full", [QueryStatus.FULL_SENT]: "Sent the full", [QueryStatus.REVISE_RESUBMIT]: "Asked for a revision (R&R)",
   [QueryStatus.RESUBMITTED]: "Sent the revision", [QueryStatus.OFFER]: "Made an offer", [QueryStatus.REJECTED]: "Passed",
-  [QueryStatus.NO_RESPONSE]: "Closed: no response", [QueryStatus.WITHDRAWN]: "You withdrew", [QueryStatus.SIGNED]: "Signed",
+  [QueryStatus.NO_RESPONSE]: "You closed it: no response", [QueryStatus.WITHDRAWN]: "You withdrew it", [QueryStatus.SIGNED]: "Signed",
 };
-export function stepTitle(s: Pick<ThreadStepIn, "status" | "kind"> & { toldCount?: number | null }, first: string): string {
+export function stepTitle(s: Pick<ThreadStepIn, "status" | "kind"> & { toldCount?: number | null; askedFor?: string | null; event?: string | null }, first: string): string {
   if (s.kind === "nudge") return `You nudged ${first}`;
-  if (s.kind === "told") return s.toldCount ? `Told ${pl(s.toldCount, "other agent")}` : "Told other agents";
+  /* v152.2 §6.1 — "You told 2 agents about the offer" */
+  if (s.kind === "told") return s.toldCount ? `You told ${pl(s.toldCount, "agent")} about the offer` : "You told other agents about the offer";
   if (s.kind === "holding") return "Sent a holding reply";
+  if (s.askedFor && s.status === QueryStatus.PARTIAL_REQUESTED) return `Asked for ${s.askedFor.charAt(0).toLowerCase()}${s.askedFor.slice(1)}`;
+  if (s.status === QueryStatus.WITHDRAWN && s.event === "offer_declined") return "You declined the offer";
+  if (s.status === QueryStatus.SIGNED) return `You accepted ${first}’s offer`;
   return (s.status && TITLE[s.status]) || "A step";
 }
 /**
@@ -102,12 +113,15 @@ export function discFill(s: Pick<ThreadStepIn, "status" | "kind">): string {
 
 /** v152.1 §2.1 — the thread holds only things that happened: a message per step and the wait between each two */
 export type ThreadItem =
-  | { t: "wait"; key: string; label: string; tip: string | null }
+  /** v152.2 §2.2 — "44 days later" / "1 day later" / "Same day", on the side of the next message */
+  | { t: "wait"; key: string; label: string; tip: string | null; side: Side }
   | { t: "msg"; key: string; activityId?: string; side: Side; status: QueryStatus | null; kind: "nudge" | "holding" | "told" | null; title: string;
       /** "No date" when the step has none (§2.7) */
       date: string; dated: boolean; chips: ThreadChip[]; via: string | null;
       /** the agent's bubble tint (§2.2); null on your side */
       tint: { fill: string; edge: string } | null; grey: boolean;
+      /** v152.2 §5 a line under the bubble */
+      sub: string | null;
       /** §2.6 the agent's one quoted line */
       quote: string | null;
       /** §2.4 a nudge quotes the query it follows up, and counts itself from the 2nd */
@@ -144,7 +158,8 @@ export function usualWeeks(prev: ThreadStepIn, agentWeeks: number | null): numbe
 }
 /** §2.4 — a wait's tip, in facts */
 export function waitTip(prev: ThreadStepIn, next: ThreadStepIn, n: number, c: Pick<ThreadCtx, "first" | "agentWeeks">): string {
-  const d = pl(n, "day");
+  /* v152.2 §1.7 — never "0 days": the same day says so */
+  const d = n === 0 ? "the same day" : pl(n, "day");
   if (sideOf(next) === "them") {
     const u = usualWeeks(prev, c.agentWeeks);
     const head = `${c.first} replied ${d} after ${prevPhrase(prev, c.first, true)}.`;
@@ -196,16 +211,16 @@ export function buildThread(steps: readonly ThreadStepIn[], c: ThreadCtx): Threa
   S.forEach((s, i) => {
     if (i) {
       const p = S[i - 1];
-      /* §2.3 every wait the same size, whatever its length; "—" when either neighbour has no date */
+      /* v152.2 §2.2 — one italic line on the next message's side; none when either neighbour has no date */
       if (p.ms != null && s.ms != null) {
         const n = Math.max(0, days(s.ms, p.ms));
-        out.push({ t: "wait", key: `w-${s.key}`, label: pl(n, "day"), tip: waitTip(p, s, n, c) });
-      } else out.push({ t: "wait", key: `w-${s.key}`, label: "—", tip: null });
+        out.push({ t: "wait", key: `w-${s.key}`, label: waitWords(n), tip: waitTip(p, s, n, c), side: sideOf(s) });
+      }
     }
     if (s.kind === "nudge") nudges += 1;
     out.push({
       t: "msg", key: s.key, activityId: s.activityId, side: sideOf(s), status: s.status, kind: s.kind,
-      title: stepTitle(s, c.first), date: s.ms != null ? dayLabel(s.ms, c.nowMs) : "No date", dated: s.ms != null,
+      title: stepTitle(s, c.first), sub: s.sub ?? null, date: s.ms != null ? dayLabel(s.ms, c.nowMs) : "No date", dated: s.ms != null,
       chips: s.chips, via: s.via ?? null, tint: tintOf(s), grey: greyGlyph(s),
       quote: sideOf(s) === "them" && (s.quote ?? "").trim() ? s.quote!.trim() : null,
       follows: s.kind === "nudge" ? (q0?.ms != null ? `Query sent · ${dayLabel(q0.ms, c.nowMs)}` : "Query sent") : null,

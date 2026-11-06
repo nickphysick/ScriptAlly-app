@@ -166,6 +166,21 @@ export function respItems<R extends RespRowInput>(rows: readonly R[]): RespItem<
   return out;
 }
 
+/**
+ * v152.2 §5 — "Add to my Wall of no" unticked: the pass is recorded and counted, and kept off the Wall. The opt-out is
+ * `offWall: true` on the pass's own step (both stores); the latest pass on a query decides.
+ */
+export function offWallIds(activities: readonly { queryId?: string; resultingStatus?: string; date?: unknown; offWall?: unknown }[]): Set<string> {
+  const latest = new Map<string, { ms: number; off: boolean }>();
+  for (const a of activities) {
+    if (!a.queryId || a.resultingStatus !== QueryStatus.REJECTED) continue;
+    const ms = typeof a.date === "string" ? Date.parse(a.date) : 0;
+    const cur = latest.get(a.queryId);
+    if (!cur || ms >= cur.ms) latest.set(a.queryId, { ms, off: a.offWall === true });
+  }
+  return new Set([...latest].filter(([, v]) => v.off).map(([k]) => k));
+}
+
 /* ── counts and the reply rate ── */
 export interface RespCounts { more: number; passed: number; noReply: number; answered: number }
 export function respCounts(items: readonly RespItem[]): RespCounts {

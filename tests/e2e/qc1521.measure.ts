@@ -256,7 +256,7 @@ for (const vp of SIZES) {
       L.done(40);
     });
 
-    test("L4 · waits: every wait the same height; one beside an undated step shows —", async ({ page }) => {
+    test("L4 · waits: every wait the same height; one beside an undated step is left blank (re-pointed by v152.2 §1.7: it showed —)", async ({ page }) => {
       test.skip(!run("L4"));
       const L = new Ledger(`L4-${vp.width}`);
       await open2(page, vp);
@@ -265,12 +265,13 @@ for (const vp of SIZES) {
         if (k === "seven") await click(page, `${CARD} [data-qc152='fold']`);
         const t = await readThread(page);
         const hs = (t?.waits ?? []).map((w) => w.h);
-        L.check(`${k}: population (waits)`, hs.length >= 2, JSON.stringify(t?.waits));
-        L.check(`${k}: every wait the same height ±1`, hs.length > 0 && Math.max(...hs) - Math.min(...hs) <= 1, JSON.stringify(t?.waits));
+        L.check(`${k}: population (waits)`, hs.length >= (k === "undated" ? 0 : 2), JSON.stringify(t?.waits));
+        L.check(`${k}: every wait the same height ±1`, hs.length === 0 ? k === "undated" : Math.max(...hs) - Math.min(...hs) <= 1, JSON.stringify(t?.waits));
         if (k === "undated") {
           const i = t?.msgs.findIndex((m) => m.date === "No date") ?? -1;
           L.check("undated: the undated step says No date, in its place (between Query sent and the send)", i === 1, JSON.stringify(t?.msgs.map((m) => [m.title, m.date])));
-          L.check("undated: both waits beside it show —", t?.waits.length === 2 && t.waits.every((w) => w.label === "—"), JSON.stringify(t?.waits));
+          /* v152.2 §1.7: a wait whose end is undated has no number, so it is not drawn at all (it read "—") */
+          L.check("undated: no wait reads — (an undated gap is blank)", !(t?.waits ?? []).some((w) => w.label === "—" || w.label === ""), JSON.stringify(t?.waits));
           L.check("undated: the send with no materials has no chips", !(await page.locator(`${CARD} [data-qc152='msg'][data-status='Partial Sent'] [data-qc152='chip']`).count()), "");
         }
       }
@@ -372,7 +373,8 @@ const isoDay = (ms: number) => { const d = new Date(ms); return `${d.getFullYear
 for (const vp of SIZES) {
   test.describe(`QC1521 §2.5 @ ${vp.width}`, () => {
     test("L10 · new steps: Told other agents saves its count, deadline and the marks, and renders; a reply's words save and render; Undo puts both back", async ({ page }) => {
-      test.skip(!run("L10"));
+      /* RETIRED by v152.2: the record form (opt / see-changes / told-less) is gone; telling agents is QC1522 L14, a reply's words QC1522 L13 */
+      test.skip(true, "retired by v152.2 — see QC1522 L13, L14");
       const L = new Ledger(`L10-${vp.width}`);
       const errs: string[] = [];
       page.on("console", (m) => { if (m.type() === "error") errs.push(m.text().slice(0, 300)); });
@@ -459,7 +461,8 @@ const FOOT: [string, string, RegExp, RegExp, string, string, string | null][] = 
 for (const vp of SIZES) {
   test.describe(`QC1521 §3 @ ${vp.width}`, () => {
     test("L8 · footer: each state's icon, two lines and action; the thread never says where it stands", async ({ page }) => {
-      test.skip(!run("L8"));
+      /* RETIRED by v152.2 §3.2: the footer's table changed state by state (src/lib/qcFoot1522.test.ts) and its render is QC1522 L8, L17 */
+      test.skip(true, "retired by v152.2 — see qcFoot1522.test.ts and QC1522 L8, L17");
       const L = new Ledger(`L8-${vp.width}`);
       await open(page, vp);
       /* the quiet window is the account's: start from the default */
@@ -519,26 +522,26 @@ for (const vp of SIZES) {
       const offerBefore = dump("offer"), sibBefore = dump("agent");
       await open2(page, vp);
       await openCard(page, "offer");
-      await click(page, `${CARD} [data-qc152='reply-second']`);
-      await page.waitForTimeout(500);
-      for (let i = 0; i < 30; i++) await click(page, "[data-qp='panel'] [data-qc152='told-less']");
-      for (let i = 0; i < 5; i++) await click(page, "[data-qp='panel'] [data-qc152='told-more']");
-      await click(page, "[data-qp='panel'] [data-qc152='see-changes']");
-      await click(page, "[data-qp='panel'] [data-qc152='save']");
-      const toast = page.locator("[data-qad-toast] b").first();
-      await page.waitForFunction(() => /couldn.t be marked|·/.test(document.querySelector("[data-qad-toast] b")?.textContent ?? ""), null, { timeout: 45_000 }).catch(() => {});
-      const msg = (await toast.innerText({ timeout: 3000 }).catch(() => "")).replace(/\s+/g, " ");
-      L.check("the toast names the refused sibling: Saved. 1 query couldn't be marked: {agent}.", new RegExp(`Saved\\. 1 query couldn[’']t be marked: ${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\.`).test(msg), msg);
-      L.check("Undo is offered", await page.locator("[data-qad-undo]").count() > 0, "");
+      /* re-pointed by v152.2 §6.1: telling is the offer's Tell them list, every agent ticked, then Done */
+      await click(page, `${CARD} [data-qc152='reply-btn']`);
+      await click(page, `${CARD} [data-qc1522='offer-choices'] [data-v='time']`);
+      const ids = await page.locator(`${CARD} [data-qc1522='tell-row']`).evaluateAll((els) => els.map((e) => e.getAttribute("data-id")));
+      L.check("population: the refused sibling and an accepted one are both listed", ids.includes("seed-pkgq-4") && ids.includes("q152-agent"), JSON.stringify(ids));
+      for (const id of ids) await page.locator(`${CARD} [data-qc1522='tell-row'][data-id='${id}'] [data-qc1522='told']`).click({ timeout: 8000 }).catch(() => {});
+      await click(page, `${CARD} [data-qc1522='done']`);
+      await page.waitForFunction(() => /Couldn.t mark/.test(document.querySelector("[data-qc1522='toast']")?.textContent ?? ""), null, { timeout: 45_000 }).catch(() => {});
+      const msg = (await page.locator("[data-qc1522='toast']").first().innerText({ timeout: 3000 }).catch(() => "")).replace(/\s+/g, " ");
+      L.check("the toast names the refused sibling: Saved. Couldn’t mark {agent}", new RegExp(`Saved\\. Couldn[’']t mark ${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`).test(msg), msg);
+      L.check("Undo is offered", await page.locator("[data-qc1522='undo']").count() > 0, "");
       const after = dump("offer");
       const entry = after.log.map((x: [string, Record<string, unknown>]) => x[1]).find((d: Record<string, unknown>) => d.type === "Told other agents");
-      L.check("the step saved, its count what was entered (6)", entry?.toldCount === 6, JSON.stringify(entry?.toldCount));
+      L.check("the step saved, its count the agents told less the refused one", entry?.toldCount === ids.length - 1, JSON.stringify(entry?.toldCount));
       const sib = dump("agent").q;
       L.check("an accepted sibling was marked in the same save", sib?.offerRefQueryId === "q152-offer" && sib?.offerTold === true, JSON.stringify({ r: sib?.offerRefQueryId, t: sib?.offerTold }));
       L.check("the refused sibling is exactly as it was", dumpq("seed-pkgq-4") === refusedBefore, "");
       const t = await readThread(page);
-      L.check("the bubble says what was entered: Told 6 other agents", t?.msgs.some((m) => m.kind === "told" && m.title === "Told 6 other agents"), JSON.stringify(t?.msgs.map((m) => m.title)));
-      await page.locator("[data-qad-undo]").first().click({ timeout: 8000 }).catch(() => {});
+      L.check("the bubble says so: You told N agents about the offer", t?.msgs.some((m) => m.kind === "told" && m.title === `You told ${ids.length - 1} agents about the offer`), JSON.stringify(t?.msgs.map((m) => m.title)));
+      await page.locator("[data-qc1522='undo']").first().click({ timeout: 8000 }).catch(() => {});
       /* Undo restores every snapshot in one batch; on a long shared run that batch can take longer than a fixed wait */
       const want = JSON.stringify([offerBefore, sibBefore]);
       for (let i = 0; i < 20 && JSON.stringify([dump("offer"), dump("agent")]) !== want; i++) await page.waitForTimeout(1000);
@@ -550,7 +553,8 @@ for (const vp of SIZES) {
       L.done(10);
     });
     test("L13 · R&R: Who replied offers it; what they asked for and what they said save on the step, it renders, the footer follows, Undo puts it back", async ({ page }) => {
-      test.skip(!run("L13"));
+      /* RETIRED by v152.2 §5: R&R is a reply chip in What did they say? (QC1522 L13), saved through planReply */
+      test.skip(true, "retired by v152.2 — see QC1522 L13");
       const L = new Ledger(`L13-${vp.width}`);
       const before = dump("long");
       await open(page, vp);

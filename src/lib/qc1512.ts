@@ -136,6 +136,7 @@ export function nextNum(r: QcRow, nowMs: number): NextNum {
   /* v152 §1.5 — Gone quiet reads "N days quiet", counted from the reply date, in the late colour */
   if (st === "quiet") {
     const n = (r as { quietDays?: number | null }).quietDays;
+    if (n === 0) return { kind: "text", text: "Quiet from today", tone: "late" };
     if (n != null) return { kind: "num", n, label: [unit(n), "quiet"], tone: "late" };
   }
   /* after a nudge the reply is expected at the nudge date plus the quiet window (§1.2) */
@@ -143,16 +144,17 @@ export function nextNum(r: QcRow, nowMs: number): NextNum {
   if (r.court === "agent") {
     if (due == null) {
       const inStage = r.stageStartMs != null ? Math.max(0, Math.round((sod(nowMs) - sod(r.stageStartMs)) / DAY)) : null;
-      return whereItStands(r, nowMs) === "quiet" && inStage != null
+      return whereItStands(r, nowMs) === "quiet" && inStage != null && inStage > 0
         ? { kind: "num", n: inStage, label: [unit(inStage), "no reply"], tone: "late" }
         : { kind: "text", text: "No reply date", tone: "faint" };
     }
     const d = daysFrom(due, nowMs);
-    return d < 0 ? { kind: "num", n: -d, label: [unit(-d), "overdue"], tone: "late" } : { kind: "num", n: d, label: [unit(d), "to reply"], tone: "faint" };
+    /* v152.2 §1.7 — never "0 days": a reply due today says so */
+    return d < 0 ? { kind: "num", n: -d, label: [unit(-d), "overdue"], tone: "late" } : d === 0 ? { kind: "text", text: "Reply due today", tone: "faint" } : { kind: "num", n: d, label: [unit(d), "to reply"], tone: "faint" };
   }
   if (due == null) return { kind: "text", text: "No date yet", tone: "faint" };
   const d = daysFrom(due, nowMs);
-  return d < 0 ? { kind: "num", n: -d, label: [unit(-d), "late"], tone: "late" } : { kind: "num", n: d, label: [unit(d), "left"], tone: "ink" };
+  return d < 0 ? { kind: "num", n: -d, label: [unit(-d), "late"], tone: "late" } : d === 0 ? { kind: "text", text: "Due today", tone: "late" } : { kind: "num", n: d, label: [unit(d), "left"], tone: "ink" };
 }
 
 /* ── the row's one action: the list's button and Birds-eye's hover button ─────────────────────────────────────── */
@@ -174,7 +176,9 @@ export function rowAct(r: QcRow, nowMs: number): RowAct | null {
   const st = stateOf(r);
   /* v152 §1.5 — Gone quiet is "Close it", outlined, opening the close form; Nudge due is "Nudge"; with the agent (in
      the reply time or the quiet window after a nudge) there is nothing to nudge */
-  if (st === "quiet") return { tone: "nudge", label: "Close it", mode: "close" };
+  /* v152.2 §1.6 / §3.2 — the footer's rule: never nudged and under 8 weeks quiet → Nudge; nudged, or 8+ weeks → Close it */
+  if (st === "quiet") return (r as { closeLeads?: boolean }).closeLeads === false
+    ? { tone: "nudge", label: "Nudge", mode: "nudge" } : { tone: "nudge", label: "Close it", mode: "close" };
   if (st === "nudge") return { tone: "nudge", label: "Nudge", mode: "nudge" };
   if (st === "agent" && door.mode === "nudge") return { tone: "plain", label: "Record a response", mode: "resp" };
   const w = st ? null : whereItStands(r, nowMs);

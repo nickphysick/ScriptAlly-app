@@ -87,7 +87,9 @@ export function queryState(r: StateInput, c: Ctx): QueryState {
     return inStage > CLOSE_UNDATED_DAYS ? "quiet" : "agent";
   }
   if (!(r.expectedMs < c.nowMs)) return "agent";
-  if (r.nrmn) return "quiet";
+  /* v152.2 (Nick, 6 Nov) — "no reply means no" counts at the Queried stage only: a partial or full the agent asked for
+     is still waiting on them, whatever their silence policy for queries */
+  if (r.nrmn && r.status === QueryStatus.QUERIED) return "quiet";
   return c.nowMs - r.expectedMs > win ? "quiet" : "nudge";
 }
 
@@ -102,6 +104,19 @@ export function replyExpectedMs(r: StateInput, c: Ctx): number | null {
 export function daysQuiet(r: StateInput, c: Ctx): number | null {
   const from = r.expectedMs ?? (r.stageStartMs != null ? r.stageStartMs + CLOSE_UNDATED_DAYS * DAY : null);
   return from == null ? null : Math.max(0, Math.floor((c.nowMs - from) / DAY));
+}
+
+/**
+ * v152.2 §3.2 — on a Gone quiet query, does Close it lead (else Nudge)? The quiet window decides when a query is Gone
+ * quiet; this decides what it asks for: a nudged query, or one 8 weeks past its reply date (an undated stage counts
+ * from its own day, and is past the 84-day mark by the time it is quiet), leads with Close it.
+ */
+export const CLOSE_LEADS_DAYS = 56;
+export function closeLeads(r: StateInput, c: Ctx): boolean {
+  if (queryState(r, c) !== "quiet") return false;
+  if (nudgeMsOf(r, c.nowMs) != null) return true;
+  if (r.expectedMs == null) return true;
+  return c.nowMs - r.expectedMs >= CLOSE_LEADS_DAYS * DAY;
 }
 
 /** the quick filters' sets (§1.5): Your move covers Offers, Materials requested and Nudge due */
@@ -123,7 +138,7 @@ export const QUIET_BAND = "linear-gradient(90deg, #e3dbcf 0%, #ece6dd 18%, #fff 
 /* ── the page's rows (v152 §1.6): the state rides on the row, computed once where the rows are built ─────────────── */
 
 /** a row the v152 page has stamped; other readers' rows carry none of this and keep the old rule */
-export type Stamped = { qs?: QueryState; quietDays?: number | null; replyMs?: number | null };
+export type Stamped = { qs?: QueryState; quietDays?: number | null; replyMs?: number | null; closeLeads?: boolean; nudged?: boolean };
 export type StampableRow = { status: QueryStatus | string; expectedMs: number | null; stageStartMs?: number | null; sentMs?: number | null; query: StateInput["query"] & { agentId?: string; nrmnOverride?: boolean } };
 
 export function stampRows<T extends StampableRow>(
@@ -134,7 +149,8 @@ export function stampRows<T extends StampableRow>(
     const o = r.query.nrmnOverride;
     const inp: StateInput = { ...r, nrmn: typeof o === "boolean" ? o : nrmnOf.get(r.query.agentId ?? "") ?? false };
     const qs = queryState(inp, c);
-    return { ...r, qs, quietDays: qs === "quiet" ? daysQuiet(inp, c) : null, replyMs: replyExpectedMs(inp, c) };
+    return { ...r, qs, quietDays: qs === "quiet" ? daysQuiet(inp, c) : null, replyMs: replyExpectedMs(inp, c),
+      closeLeads: qs === "quiet" && closeLeads(inp, c), nudged: nudgeMsOf(inp, c.nowMs) != null };
   });
 }
 

@@ -84,10 +84,13 @@ export function storeMats(ms: readonly StepMaterial[]): Record<string, unknown>[
 
 /* ── what a step is ─────────────────────────────────────────────────────────────────────────────────────────── */
 
-export type RecordKind = "partial_req" | "full_req" | "rr_req" | "offer" | "pass" | "partial_sent" | "full_sent" | "nudge" | "noresp" | "told";
+export type RecordKind = "partial_req" | "full_req" | "rr_req" | "offer" | "pass" | "partial_sent" | "full_sent" | "nudge" | "noresp" | "told"
+  /** v152.2 §4.1 the revision sent; §4.3 / §6.1 a close as withdrawn (I withdrew it, declined, or accepted elsewhere) */
+  | "resubmitted" | "withdrawn";
 export const RECORD_STATUS: Record<RecordKind, QueryStatus | null> = {
   partial_req: QueryStatus.PARTIAL_REQUESTED, full_req: QueryStatus.FULL_REQUESTED, rr_req: QueryStatus.REVISE_RESUBMIT, offer: QueryStatus.OFFER, pass: QueryStatus.REJECTED,
   partial_sent: QueryStatus.PARTIAL_SENT, full_sent: QueryStatus.FULL_SENT, nudge: null, noresp: QueryStatus.NO_RESPONSE, told: null,
+  resubmitted: QueryStatus.RESUBMITTED, withdrawn: QueryStatus.WITHDRAWN,
 };
 /** the agent's replies, which can carry what they said (v152.1 §2.6) */
 export const REPLY_KINDS: readonly RecordKind[] = ["partial_req", "full_req", "rr_req", "offer", "pass"];
@@ -111,6 +114,12 @@ export interface ToldMarkTarget { id: string; offerReply?: string | null }
 export interface RecordExtra {
   /** §2.6 what the agent said, on one of their replies */
   replyNote?: string;
+  /** v152.2 §5 — fields over the reply's own answers (a deadline, an answer-by date, form or personal, what was asked) */
+  resp?: Partial<RecordResponseData>;
+  /** v152.2 — fields carried on the step itself, on both stores: `openToMore`, `offWall`, `askedFor`, `sentVia`, `tellLater` */
+  step?: Record<string, unknown>;
+  /** v152.2 §4.3 / §6.1 — a withdrawal's reason and its event: "withdrew" (I withdrew it), "offer_declined", "accepted_offer" */
+  withdraw?: { token: "withdrew" | "offer_declined" | "accepted_offer"; event: EventKey; notes?: string };
   /** §2.5 told other agents: how many, the deadline you gave, and the other live queries to mark */
   told?: { count: number; deadlineMs: number; others: readonly ToldMarkTarget[] };
 }
@@ -122,6 +131,7 @@ const clearTold = (ids: readonly string[]): NonNullable<WritePlan["update"]> =>
 const EVENT: Record<Exclude<RecordKind, "told">, EventKey> = {
   partial_req: "partial_requested", full_req: "full_requested", rr_req: "rr_requested", offer: "offer", pass: "pass",
   partial_sent: "partial_sent", full_sent: "full_sent", nudge: "nudge_sent", noresp: "closed_no_reply",
+  resubmitted: "resubmitted", withdrawn: "withdrawn",
 };
 
 /** the step's time: the chosen day at local noon (as the drawer dates a day), and after everything already logged */
@@ -192,27 +202,31 @@ export function planRecord(c: PlanCtx, kind: RecordKind, dayMs: number, material
     sub = { ...w.nested, ...base, createdAt: w.nested.createdAt, ...(mats.length ? { materials: mats } : {}), eventKey: EVENT.nudge };
     feed = { ...w.activity, id, userId: c.uid, eventKey: EVENT.nudge };
     Object.assign(query, w.queryUpdates);
-  } else if (kind === "partial_sent" || kind === "full_sent") {
+  } else if (kind === "partial_sent" || kind === "full_sent" || kind === "resubmitted") {
     const st = RECORD_STATUS[kind]!;
-    const desc = st === QueryStatus.PARTIAL_SENT ? `Partial manuscript sent to ${name} at ${agency}` : `Full manuscript sent to ${name} at ${agency}`;
+    const desc = st === QueryStatus.PARTIAL_SENT ? `Partial manuscript sent to ${name} at ${agency}`
+      : st === QueryStatus.RESUBMITTED ? `Revised manuscript sent to ${name} at ${agency}` : `Full manuscript sent to ${name} at ${agency}`;
     const ver = materials.find((m) => (m.kind === "sample" || m.kind === "full") && m.versionId)?.versionId ?? null;
     sub = { type: st, resultingStatus: st, createdAt, note: desc, ...base, eventKey: EVENT[kind], ...(mats.length ? { materials: mats } : {}) };
     feed = { id, userId: c.uid, queryId: q.id, manuscriptId: q.manuscriptId || "", activityType: ActivityType.MATERIALS_SENT, description: desc, date: iso,
       details: "", resultingStatus: st, eventKey: EVENT[kind], ...(mats.length ? { materials: mats } : {}), ...(ver ? { bookVersionId: ver } : {}) };
-    query.lastSentLabel = kind === "partial_sent" ? "Partial" : "Full manuscript";
+    query.lastSentLabel = kind === "partial_sent" ? "Partial" : kind === "resubmitted" ? "Revised manuscript" : "Full manuscript";
     if (q.expectedSendDate) query.expectedSendDate = undefined;
     if (q.sendReminderDate) query.sendReminderDate = undefined;
     if (kind === "full_sent" && ver) query.bookVersionId = ver;
   } else {
     const day = dayIso(new Date(tMs));
     const sample = materials.find((m) => m.kind === "sample");
-    const data: RecordResponseData = kind === "noresp" ? closeRecord(noreplyAnswers(new Date(tMs)))
+    const wd = extra.withdraw ?? { token: "withdrew" as const, event: EVENT.withdrawn };
+    const data0: RecordResponseData = kind === "noresp" ? closeRecord(noreplyAnswers(new Date(tMs)))
+      : kind === "withdrawn" ? respData({ responseType: "close", dateReceived: day, closingReason: "Withdrew my submission", closingNotes: wd.notes ?? "", eventKey: wd.event, closeAs: "withdrawn", closingToken: wd.token })
       : kind === "partial_req" ? respData({ responseType: "partial", dateReceived: day, materialsType: sample?.unit ? UNIT_NAME[sample.unit] : "Pages", materialsQuantity: sample?.n ?? 0, eventKey: EVENT[kind] })
       : kind === "full_req" ? respData({ responseType: "full", dateReceived: day, eventKey: EVENT[kind] })
       /* an R&R is asked as the full is: what they asked for, and what they said (the reply note, never the old rrNotes) */
       : kind === "rr_req" ? respData({ responseType: "rr", dateReceived: day, eventKey: EVENT[kind] })
       : kind === "offer" ? respData({ responseType: "offer", dateReceived: day, offerDate: day, eventKey: EVENT[kind] })
       : respData({ responseType: "rejected", dateReceived: day, eventKey: EVENT[kind] });
+    const data: RecordResponseData = { ...data0, ...(extra.resp ?? {}) };
     const p = planResponse({ query: q, agent, manuscript: c.ms }, data);
     for (const [k, v] of Object.entries(p.details)) query[k] = v;
     sub = { ...p.activityBase, createdAt, ...(mats.length ? { materials: mats } : {}), ...(note ? { replyNote: note } : {}) };
@@ -220,6 +234,9 @@ export function planRecord(c: PlanCtx, kind: RecordKind, dayMs: number, material
     feed = { id, userId: c.uid, queryId: q.id, manuscriptId: q.manuscriptId || "", activityType: ActivityType.STATUS_CHANGED, description: lg.description, date: iso,
       details: lg.details, resultingStatus: p.newStatus, ...(data.eventKey ? { eventKey: data.eventKey } : {}), logEntryId: id, ...(mats.length ? { materials: mats } : {}) };
   }
+  /* v152.2 — the step's own fields ride on both stores (the nested log's allowlist names them) */
+  const stepX = Object.fromEntries(Object.entries(extra.step ?? {}).filter(([, v]) => v !== undefined && v !== null && v !== ""));
+  if (Object.keys(stepX).length) { sub = { ...sub, ...stepX }; feed = { ...feed, ...stepX }; }
   const plan: WritePlan = { queryId: q.id, set: [{ path: `queries/${q.id}/activity/${id}`, data: sub }, { path: `activities/${id}`, data: feed }], del: [], query };
   return withRecompute(plan, c.existing);
 }
@@ -394,4 +411,23 @@ export function planDetails(q: Query, next: { agentId: string; sendMethod: strin
   if (next.agentId !== q.agentId) query.agentId = next.agentId;
   if (next.sendMethod !== (q.sendMethod ?? "")) query.sendMethod = next.sendMethod;
   return { queryId: q.id, set: [], del: [], query };
+}
+
+/**
+ * v152.2 §6.1 — SEVERAL QUERIES' PLANS IN ONE BATCH: accepting an offer writes the offer's Signed step and closes every
+ * other open query as withdrawn, all undoable together. One snapshot of every query touched, then one `writeBatch`.
+ */
+export async function commitMany(uid: string, plans: readonly WritePlan[], extraQueryIds: string[] = []): Promise<Snapshot> {
+  const ids = [...new Set([...plans.map((p) => p.queryId), ...extraQueryIds])];
+  const snap = await takeSnapshot(uid, ids);
+  const b = writeBatch(db);
+  for (const plan of plans) {
+    for (const s of plan.set) b.set(doc(db, `users/${uid}/${s.path}`), s.data);
+    for (const p of plan.del) b.delete(doc(db, `users/${uid}/${p}`));
+    for (const u of plan.update ?? []) b.update(doc(db, `users/${uid}/${u.path}`), u.data);
+    const patch = Object.fromEntries(Object.entries(plan.query).map(([k, v]) => [k, v === undefined ? deleteField() : v]));
+    if (Object.keys(patch).length) b.update(doc(db, `users/${uid}/queries/${plan.queryId}`), patch);
+  }
+  await b.commit();
+  return snap;
 }

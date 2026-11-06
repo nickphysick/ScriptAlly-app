@@ -131,9 +131,11 @@ const GroupMenu: React.FC<{ anchor: HTMLElement; groupBy: GroupBy; onGroup: (g: 
  */
 export const RadioMenu151: React.FC<{
   anchor: HTMLElement; title: string; k: string; value: string;
-  opts: readonly { key: string; label: string; line: string; divide?: boolean }[];
+  opts: readonly { key: string; label: string; line: string; divide?: boolean; pro?: boolean; locked?: boolean }[];
   onPick: (v: string) => void;
-}> = ({ anchor, title, k, value, opts, onPick }) => {
+  /** v152.2 §1.1 — the heading in sentence-case serif, never mono caps */
+  plainHead?: boolean;
+}> = ({ anchor, title, k, value, opts, onPick, plainHead = false }) => {
   const ref = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
   useLayoutEffect(() => {
@@ -153,13 +155,14 @@ export const RadioMenu151: React.FC<{
   return createPortal(
     <div className="lpop qc140-gpop qc151-menu" data-lpop="group" data-qc151="menu" data-k={k} role="menu" aria-label={title} ref={ref} onKeyDown={onKey}
       style={{ top: pos?.top ?? -9999, left: pos?.left ?? -9999 }}>
-      <div className="qc140-mh">{title}</div>
+      <div className={plainHead ? "qc1522-mh" : "qc140-mh"} data-qc1522="menu-head">{title}</div>
       {opts.map((o) => (
         <React.Fragment key={o.key}>
           {o.divide ? <hr className="qc140-hr" /> : null}
-          <button type="button" role="menuitemradio" aria-checked={value === o.key} className="qc140-go" data-qc151="menu-opt" data-v={o.key}
-            onClick={() => { onPick(o.key); anchor.focus({ preventScroll: true }); }}>
-            <span className="qc140-rd" aria-hidden="true" /><b>{o.label}</b><small>{o.line}</small>
+          <button type="button" role="menuitemradio" aria-checked={value === o.key} className={`qc140-go${o.locked ? " is-locked" : ""}`} data-qc151="menu-opt" data-v={o.key}
+            aria-disabled={o.locked ? "true" : undefined} data-locked={o.locked ? "" : undefined}
+            onClick={() => { if (o.locked) return; onPick(o.key); anchor.focus({ preventScroll: true }); }}>
+            <span className="qc140-rd" aria-hidden="true" /><b>{o.label}{o.pro ? <span className="qc1522-pro" data-qc1522="pro">Pro</span> : null}</b><small>{o.line}</small>
           </button>
         </React.Fragment>
       ))}

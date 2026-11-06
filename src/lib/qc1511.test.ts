@@ -82,7 +82,7 @@ describe("the summary card (v151.1 §2)", () => {
   });
   it("nothing: the zero state names the next reply due, and draws no pills", () => {
     const s = weekSummary([rows[4], rows[5]], NOW);
-    expect(s).toEqual({ n: 0, heading: "Nothing needs you this week", detail: "Next reply due 28 Oct.", pills: [] });
+    expect(s).toEqual({ n: 0, heading: "Nothing needs you this week", detail: "Next reply due 28 Oct.", pills: [], todo: [] });
   });
 });
 

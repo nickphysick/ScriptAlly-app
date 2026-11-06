@@ -2,7 +2,7 @@
  {
   "where": "fullreq: population (the footer and the thread)",
   "ok": true,
-  "detail": "{\"icon\":\"stage\",\"l1\":\"Send the full\",\"l2\":\"5 days left · by 10 Nov\",\"l2c\":\"rgb(125, 114, 104)\",\"btn\":\"Mark full sent\",\"tone\":\"navy\",\"second\":null,\"h\":52,\"iconW\":32,\"thread\":\"26 SepCovering letterby email✎ Edit31 daysHV27 OctFull manuscriptSynopsis✎ Edit\"}"
+  "detail": "{\"icon\":\"stage\",\"l1\":\"Send the full\",\"l2\":\"5 days left · by 11 Nov\",\"l2c\":\"rgb(125, 114, 104)\",\"btn\":\"Mark full sent\",\"tone\":\"navy\",\"second\":null,\"h\":52,\"iconW\":32,\"thread\":\"27 SepCovering letterby email✎ Edit31 daysHV28 OctFull manuscriptSynopsis✎ Edit\"}"
  },
  {
   "where": "fullreq: icon stage, 32px",
@@ -17,7 +17,7 @@
  {
   "where": "fullreq: line 2",
   "ok": true,
-  "detail": "5 days left · by 10 Nov"
+  "detail": "5 days left · by 11 Nov"
  },
  {
   "where": "fullreq: the action (Mark full sent, navy)",
@@ -37,12 +37,12 @@
  {
   "where": "fullreq: the thread never says where it stands",
   "ok": true,
-  "detail": "Send the full / 5 days left · by 10 Nov"
+  "detail": "Send the full / 5 days left · by 11 Nov"
  },
  {
   "where": "rr: population (the footer and the thread)",
   "ok": true,
-  "detail": "{\"icon\":\"stage\",\"l1\":\"Revise and resubmit\",\"l2\":\"Rhea asked on 26 Oct\",\"l2c\":\"rgb(125, 114, 104)\",\"btn\":\"Mark revision sent\",\"tone\":\"navy\",\"second\":null,\"h\":52,\"iconW\":32,\"thread\":\"28 JulQuery letterSynopsis10 pagesby email✎ Edit30 daysRV27 Aug✎ Edit20 days16 Sep✎ Edit40 daysRV26 Oct“Loved the voice. The middle sags; tighten the second act and I’d read it again.”✎ Edit\"}"
+  "detail": "{\"icon\":\"stage\",\"l1\":\"Revise and resubmit\",\"l2\":\"Rhea asked on 27 Oct\",\"l2c\":\"rgb(125, 114, 104)\",\"btn\":\"Mark revision sent\",\"tone\":\"navy\",\"second\":null,\"h\":52,\"iconW\":32,\"thread\":\"29 JulQuery letterSynopsis10 pagesby email✎ Edit30 daysRV28 Aug✎ Edit20 days17 Sep✎ Edit40 daysRV27 Oct“Loved the voice. The middle sags; tighten the second act and I’d read it again.”✎ Edit\"}"
  },
  {
   "where": "rr: icon stage, 32px",
@@ -57,7 +57,7 @@
  {
   "where": "rr: line 2",
   "ok": true,
-  "detail": "Rhea asked on 26 Oct"
+  "detail": "Rhea asked on 27 Oct"
  },
  {
   "where": "rr: the action (Mark revision sent, navy)",
@@ -77,12 +77,12 @@
  {
   "where": "rr: the thread never says where it stands",
   "ok": true,
-  "detail": "Revise and resubmit / Rhea asked on 26 Oct"
+  "detail": "Revise and resubmit / Rhea asked on 27 Oct"
  },
  {
   "where": "offer: population (the footer and the thread)",
   "ok": true,
-  "detail": "{\"icon\":\"stage\",\"l1\":\"Olive made an offer\",\"l2\":\"6 days left · answer by 11 Nov\",\"l2c\":\"rgb(125, 114, 104)\",\"btn\":\"Answer the offer\",\"tone\":\"navy\",\"second\":\"Tell other agents\",\"h\":52,\"iconW\":32,\"thread\":\"16 SepCovering letterby email✎ Edit44 daysOV30 Oct✎ Edit\"}"
+  "detail": "{\"icon\":\"stage\",\"l1\":\"Olive made an offer\",\"l2\":\"6 days left · answer by 12 Nov\",\"l2c\":\"rgb(125, 114, 104)\",\"btn\":\"Answer the offer\",\"tone\":\"navy\",\"second\":\"Tell other agents\",\"h\":52,\"iconW\":32,\"thread\":\"17 SepCovering letterby email✎ Edit44 daysOV31 Oct✎ Edit\"}"
  },
  {
   "where": "offer: icon stage, 32px",
@@ -97,7 +97,7 @@
  {
   "where": "offer: line 2",
   "ok": true,
-  "detail": "6 days left · answer by 11 Nov"
+  "detail": "6 days left · answer by 12 Nov"
  },
  {
   "where": "offer: the action (Answer the offer, navy)",
@@ -117,12 +117,12 @@
  {
   "where": "offer: the thread never says where it stands",
   "ok": true,
-  "detail": "Olive made an offer / 6 days left · answer by 11 Nov"
+  "detail": "Olive made an offer / 6 days left · answer by 12 Nov"
  },
  {
   "where": "offertold: population (the footer and the thread)",
   "ok": true,
-  "detail": "{\"icon\":\"stage\",\"l1\":\"Tom made an offer\",\"l2\":\"You told 6 others · deadline 13 Nov\",\"l2c\":\"rgb(125, 114, 104)\",\"btn\":\"Answer the offer\",\"tone\":\"navy\",\"second\":null,\"h\":52,\"iconW\":32,\"thread\":\"17 AugQuery letterSynopsis10 pagesby email✎ Edit70 daysTV26 Oct“I’d love to represent this book.”✎ Edit1 day27 Octoffer deadline 13 Nov✎ Edit\"}"
+  "detail": "{\"icon\":\"stage\",\"l1\":\"Tom made an offer\",\"l2\":\"You told 6 others · deadline 14 Nov\",\"l2c\":\"rgb(125, 114, 104)\",\"btn\":\"Answer the offer\",\"tone\":\"navy\",\"second\":null,\"h\":52,\"iconW\":32,\"thread\":\"18 AugQuery letterSynopsis10 pagesby email✎ Edit70 daysTV27 Oct“I’d love to represent this book.”✎ Edit1 day28 Octoffer deadline 14 Nov✎ Edit\"}"
  },
  {
   "where": "offertold: icon stage, 32px",
@@ -137,7 +137,7 @@
  {
   "where": "offertold: line 2",
   "ok": true,
-  "detail": "You told 6 others · deadline 13 Nov"
+  "detail": "You told 6 others · deadline 14 Nov"
  },
  {
   "where": "offertold: the action (Answer the offer, navy)",
@@ -157,12 +157,12 @@
  {
   "where": "offertold: the thread never says where it stands",
   "ok": true,
-  "detail": "Tom made an offer / You told 6 others · deadline 13 Nov"
+  "detail": "Tom made an offer / You told 6 others · deadline 14 Nov"
  },
  {
   "where": "nudge: population (the footer and the thread)",
   "ok": true,
-  "detail": "{\"icon\":\"clock\",\"l1\":\"No reply from Priya yet\",\"l2\":\"Reply was due 29 Oct · 7 days ago\",\"l2c\":\"rgb(162, 69, 42)\",\"btn\":\"Nudge\",\"tone\":\"outline\",\"second\":null,\"h\":52,\"iconW\":32,\"thread\":\"15 OctCovering letterby email✎ Edit\"}"
+  "detail": "{\"icon\":\"clock\",\"l1\":\"No reply from Priya yet\",\"l2\":\"Reply was due 30 Oct · 7 days ago\",\"l2c\":\"rgb(162, 69, 42)\",\"btn\":\"Nudge\",\"tone\":\"outline\",\"second\":null,\"h\":52,\"iconW\":32,\"thread\":\"16 OctCovering letterby email✎ Edit\"}"
  },
  {
   "where": "nudge: icon clock, 32px",
@@ -177,7 +177,7 @@
  {
   "where": "nudge: line 2",
   "ok": true,
-  "detail": "Reply was due 29 Oct · 7 days ago"
+  "detail": "Reply was due 30 Oct · 7 days ago"
  },
  {
   "where": "nudge: the action (Nudge, outline)",
@@ -197,7 +197,7 @@
  {
   "where": "nudge: the thread never says where it stands",
   "ok": true,
-  "detail": "No reply from Priya yet / Reply was due 29 Oct · 7 days ago"
+  "detail": "No reply from Priya yet / Reply was due 30 Oct · 7 days ago"
  },
  {
   "where": "nudge due: line 2 in rust",
@@ -207,7 +207,7 @@
  {
   "where": "agent: population (the footer and the thread)",
   "ok": true,
-  "detail": "{\"icon\":\"ring\",\"l1\":\"Waiting on Rufus\",\"l2\":\"Reply expected by 26 Nov\",\"l2c\":\"rgb(125, 114, 104)\",\"btn\":\"Record a response\",\"tone\":\"outline\",\"second\":null,\"h\":52,\"iconW\":32,\"thread\":\"29 OctCovering letterby email✎ Edit\"}"
+  "detail": "{\"icon\":\"ring\",\"l1\":\"Waiting on Rufus\",\"l2\":\"Reply expected by 27 Nov\",\"l2c\":\"rgb(125, 114, 104)\",\"btn\":\"Record a response\",\"tone\":\"outline\",\"second\":null,\"h\":52,\"iconW\":32,\"thread\":\"30 OctCovering letterby email✎ Edit\"}"
  },
  {
   "where": "agent: icon ring, 32px",
@@ -222,7 +222,7 @@
  {
   "where": "agent: line 2",
   "ok": true,
-  "detail": "Reply expected by 26 Nov"
+  "detail": "Reply expected by 27 Nov"
  },
  {
   "where": "agent: the action (Record a response, outline)",
@@ -242,12 +242,12 @@
  {
   "where": "agent: the thread never says where it stands",
   "ok": true,
-  "detail": "Waiting on Rufus / Reply expected by 26 Nov"
+  "detail": "Waiting on Rufus / Reply expected by 27 Nov"
  },
  {
   "where": "nudgedwait: population (the footer and the thread)",
   "ok": true,
-  "detail": "{\"icon\":\"ring\",\"l1\":\"Waiting on Wren\",\"l2\":\"Quiet after 4 weeks · 8 days to go\",\"l2c\":\"rgb(125, 114, 104)\",\"btn\":\"Record a response\",\"tone\":\"outline\",\"second\":null,\"h\":52,\"iconW\":32,\"thread\":\"12 SepCovering letterby email✎ Edit\"}"
+  "detail": "{\"icon\":\"ring\",\"l1\":\"Waiting on Wren\",\"l2\":\"Quiet after 4 weeks · 8 days to go\",\"l2c\":\"rgb(125, 114, 104)\",\"btn\":\"Record a response\",\"tone\":\"outline\",\"second\":null,\"h\":52,\"iconW\":32,\"thread\":\"13 SepCovering letterby email✎ Edit\"}"
  },
  {
   "where": "nudgedwait: icon ring, 32px",
@@ -287,7 +287,7 @@
  {
   "where": "quiet: population (the footer and the thread)",
   "ok": true,
-  "detail": "{\"icon\":\"clock\",\"l1\":\"No reply from Quinn\",\"l2\":\"Quiet since 26 Sep · close it, or keep waiting\",\"l2c\":\"rgb(125, 114, 104)\",\"btn\":\"Close it\",\"tone\":\"outline\",\"second\":null,\"h\":52,\"iconW\":32,\"thread\":\"12 SepCovering letterby email✎ Edit\"}"
+  "detail": "{\"icon\":\"clock\",\"l1\":\"No reply from Quinn\",\"l2\":\"Quiet since 27 Sep · close it, or keep waiting\",\"l2c\":\"rgb(125, 114, 104)\",\"btn\":\"Close it\",\"tone\":\"outline\",\"second\":null,\"h\":52,\"iconW\":32,\"thread\":\"13 SepCovering letterby email✎ Edit\"}"
  },
  {
   "where": "quiet: icon clock, 32px",
@@ -302,7 +302,7 @@
  {
   "where": "quiet: line 2",
   "ok": true,
-  "detail": "Quiet since 26 Sep · close it, or keep waiting"
+  "detail": "Quiet since 27 Sep · close it, or keep waiting"
  },
  {
   "where": "quiet: the action (Close it, outline)",
@@ -322,12 +322,12 @@
  {
   "where": "quiet: the thread never says where it stands",
   "ok": true,
-  "detail": "No reply from Quinn / Quiet since 26 Sep · close it, or keep waiting"
+  "detail": "No reply from Quinn / Quiet since 27 Sep · close it, or keep waiting"
  },
  {
   "where": "passed: population (the footer and the thread)",
   "ok": true,
-  "detail": "{\"icon\":\"grey\",\"l1\":\"Paul passed\",\"l2\":\"On 26 Oct · after the full\",\"l2c\":\"rgb(125, 114, 104)\",\"btn\":\"Reopen\",\"tone\":\"outline\",\"second\":null,\"h\":52,\"iconW\":32,\"thread\":\"7 AugQuery letterSynopsis10 pagesby email✎ Edit50 daysPV26 Sep✎ Edit10 days6 Oct✎ Edit20 daysPV26 Oct“Beautifully written, but I didn’t fall for it quite enough.”✎ Edit\"}"
+  "detail": "{\"icon\":\"grey\",\"l1\":\"Paul passed\",\"l2\":\"On 27 Oct · after the full\",\"l2c\":\"rgb(125, 114, 104)\",\"btn\":\"Reopen\",\"tone\":\"outline\",\"second\":null,\"h\":52,\"iconW\":32,\"thread\":\"8 AugQuery letterSynopsis10 pagesby email✎ Edit50 daysPV27 Sep✎ Edit10 days7 Oct✎ Edit20 daysPV27 Oct“Beautifully written, but I didn’t fall for it quite enough.”✎ Edit\"}"
  },
  {
   "where": "passed: icon grey, 32px",
@@ -342,7 +342,7 @@
  {
   "where": "passed: line 2",
   "ok": true,
-  "detail": "On 26 Oct · after the full"
+  "detail": "On 27 Oct · after the full"
  },
  {
   "where": "passed: the action (Reopen, outline)",
@@ -362,12 +362,12 @@
  {
   "where": "passed: the thread never says where it stands",
   "ok": true,
-  "detail": "Paul passed / On 26 Oct · after the full"
+  "detail": "Paul passed / On 27 Oct · after the full"
  },
  {
   "where": "withdrew: population (the footer and the thread)",
   "ok": true,
-  "detail": "{\"icon\":\"grey\",\"l1\":\"You withdrew\",\"l2\":\"31 Oct · an offer elsewhere\",\"l2c\":\"rgb(125, 114, 104)\",\"btn\":\"Reopen\",\"tone\":\"outline\",\"second\":null,\"h\":52,\"iconW\":32,\"thread\":\"6 SepQuery letterSynopsis10 pagesby email✎ Edit55 days31 Octan offer elsewhere✎ Edit\"}"
+  "detail": "{\"icon\":\"grey\",\"l1\":\"You withdrew\",\"l2\":\"1 Nov · an offer elsewhere\",\"l2c\":\"rgb(125, 114, 104)\",\"btn\":\"Reopen\",\"tone\":\"outline\",\"second\":null,\"h\":52,\"iconW\":32,\"thread\":\"7 SepQuery letterSynopsis10 pagesby email✎ Edit55 days1 Novan offer elsewhere✎ Edit\"}"
  },
  {
   "where": "withdrew: icon grey, 32px",
@@ -382,7 +382,7 @@
  {
   "where": "withdrew: line 2",
   "ok": true,
-  "detail": "31 Oct · an offer elsewhere"
+  "detail": "1 Nov · an offer elsewhere"
  },
  {
   "where": "withdrew: the action (Reopen, outline)",
@@ -402,7 +402,7 @@
  {
   "where": "withdrew: the thread never says where it stands",
   "ok": true,
-  "detail": "You withdrew / 31 Oct · an offer elsewhere"
+  "detail": "You withdrew / 1 Nov · an offer elsewhere"
  },
  {
   "where": "Tell other agents opens the record form on Told other agents",

@@ -113,6 +113,7 @@ export function taskCategory(card: BoardCard): Category {
     case "full_requested":
     /* Query actions v1 (K3): an agent waiting on the writer, like a request. */
     case "offer_tell":
+    case "offer_tell_all":
     case "offer_send_full":
       return "req";
     case "nudge_overdue":

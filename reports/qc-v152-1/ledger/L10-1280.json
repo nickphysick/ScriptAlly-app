@@ -12,27 +12,27 @@
  {
   "where": "the draft is yours, with the count and the deadline",
   "ok": true,
-  "detail": "Told 4 other agents · draft 5 NOV offer deadline 8 Nov"
+  "detail": "Told 4 other agents · draft 6 NOV offer deadline 9 Nov"
  },
  {
   "where": "it renders: yours, paper, Told 4 other agents, offer deadline {date}, the offer's glyph",
   "ok": true,
-  "detail": "{\"side\":\"me\",\"status\":\"\",\"kind\":\"told\",\"title\":\"Told 4 other agents\",\"seen\":\"Told 4 other agents\\n5 NOV\\noffer deadline 8 Nov\",\"date\":\"5 NOV\",\"bg\":\"rgb(246, 243, 238)\",\"glyphBg\":\"rgba(0, 0, 0, 0)\",\"glyphW\":26,\"navy\":false,\"follows\":\"\",\"nth\":\"\",\"nudgeMark\":false,\"quotes\":[],\"via\":\"offer deadline 8 Nov\"}"
+  "detail": "{\"side\":\"me\",\"status\":\"\",\"kind\":\"told\",\"title\":\"Told 4 other agents\",\"seen\":\"Told 4 other agents\\n6 NOV\\noffer deadline 9 Nov\",\"date\":\"6 NOV\",\"bg\":\"rgb(246, 243, 238)\",\"edge\":\"none\",\"glyphBg\":\"rgba(0, 0, 0, 0)\",\"glyphW\":26,\"navy\":false,\"follows\":\"\",\"nth\":\"\",\"nudgeMark\":false,\"quotes\":[],\"via\":\"offer deadline 9 Nov\"}"
  },
  {
   "where": "a feed row: You told 4 agents about Ottilie’s offer, no status",
   "ok": true,
-  "detail": "{\"activityType\":\"Status Changed\",\"date\":\"2026-11-05T12:00:00.000Z\",\"description\":\"You told 4 agents about Ottilie’s offer\",\"details\":\"\",\"eventKey\":\"offer_told\",\"id\":\"act-k344csk56\",\"logEntryId\":\"act-k344csk56\",\"manuscriptId\":\"seed-ms-2\",\"queryId\":\"q152-offer2\",\"userId\":\"LS4ymFFCEvhN82advZQJ5zkr7sv2\"}"
+  "detail": "{\"activityType\":\"Status Changed\",\"date\":\"2026-11-06T12:00:00.000Z\",\"description\":\"You told 4 agents about Ottilie’s offer\",\"details\":\"\",\"eventKey\":\"offer_told\",\"id\":\"act-86rit8a1e\",\"logEntryId\":\"act-86rit8a1e\",\"manuscriptId\":\"seed-ms-2\",\"queryId\":\"q152-offer2\",\"userId\":\"LS4ymFFCEvhN82advZQJ5zkr7sv2\"}"
  },
  {
   "where": "saved on the log: count 4 and the deadline",
   "ok": true,
-  "detail": "{\"agentName\":\"Ottilie Vale\",\"createdAt\":{\"nanoseconds\":0,\"seconds\":1793880000},\"eventKey\":\"offer_told\",\"manuscriptTitle\":\"The Quiet Second\",\"note\":\"Told 4 other agents about Ottilie Vale’s offer\",\"queryId\":\"q152-offer2\",\"toldCount\":4,\"toldDeadline\":\"2026-11-08T12:00:00.000Z\",\"type\":\"Told other agents\"}"
+  "detail": "{\"agentName\":\"Ottilie Vale\",\"createdAt\":{\"nanoseconds\":0,\"seconds\":1793966400},\"eventKey\":\"offer_told\",\"manuscriptTitle\":\"The Quiet Second\",\"note\":\"Told 4 other agents about Ottilie Vale’s offer\",\"queryId\":\"q152-offer2\",\"toldCount\":4,\"toldDeadline\":\"2026-11-09T12:00:00.000Z\",\"type\":\"Told other agents\"}"
  },
  {
   "where": "the same save marked another live query as told",
   "ok": true,
-  "detail": "{\"r\":\"q152-offer2\",\"t\":true,\"on\":\"2026-11-05T12:00:00.000Z\"}"
+  "detail": "{\"r\":\"q152-offer2\",\"t\":true,\"on\":\"2026-11-06T12:00:00.000Z\"}"
  },
  {
   "where": "Undo: the offer back byte for byte",

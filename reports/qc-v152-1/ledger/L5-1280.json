@@ -17,7 +17,7 @@
  {
   "where": "nudge 1 quotes the query: Following up · Query sent · {date}",
   "ok": true,
-  "detail": "Following up Query sent · 9 May"
+  "detail": "Following up Query sent · 10 May"
  },
  {
   "where": "nudge 1's glyph is the '!'",
@@ -37,7 +37,7 @@
  {
   "where": "nudge 2 quotes the query: Following up · Query sent · {date}",
   "ok": true,
-  "detail": "Following up Query sent · 9 May"
+  "detail": "Following up Query sent · 10 May"
  },
  {
   "where": "nudge 2's glyph is the '!'",

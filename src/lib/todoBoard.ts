@@ -38,7 +38,9 @@ export type BoardStream = "do" | "hk" | "nt" | "done";
 /** Derived task types the board surfaces (querying_unstarted / dream_agent are OUT of scope). */
 const DO_NEXT_TYPES: ReadonlySet<string> = new Set(["offer_received", "partial_requested", "full_requested", "revise_resubmit", "nudge_overdue",
   /* Query actions v1 (K3) — an agent waiting on the writer while an offer runs */
-  "offer_tell", "offer_send_full"]);
+  "offer_tell", "offer_send_full",
+  /* Query Centre v152.2 §6.1 — one card per offer: the agents still to tell */
+  "offer_tell_all"]);
 /* ⚠️ THE TWO MATERIALS TYPES ARE HOUSEKEEPING, NOT URGENT. A send that recorded nothing is a gap
    in your own history — worth closing, never something an agent is waiting on. Putting it in the
    `do` lane would make the urgent count disagree with what "urgent" means everywhere else. */
@@ -291,6 +293,10 @@ export function derivedCopy(task: Task, q: Query | undefined, ag: Agent | undefi
     /* ── QUERY ACTIONS v1 (K3) — derived from the drawer's flat fields; each opens its journey ── */
     case "offer_tell":
       return { kind: "OFFER", title: `Tell ${name} about your offer`, who: name, subtitle: msTitle, due: "", warn: true, status: q?.status, hk: false };
+    /* v152.2 §6.1 — "Tell 6 agents about Tom Ellery's offer · answer by 9 Oct": the title is the task's own (the count is
+       derived where the task is), the due cell the answer-by date */
+    case "offer_tell_all":
+      return { kind: "OFFER", title: task.title, who: name, subtitle: msTitle, due: q?.status === QueryStatus.OFFER ? offerDue(q?.offerResponseDeadline ? Date.parse(String(q.offerResponseDeadline)) : null, now) : "", warn: true, status: q?.status, hk: false };
     case "offer_send_full":
       return { kind: "AGENT WAITING", title: `Send the full to ${name}`, who: name, subtitle: msTitle, due: "", warn: true, status: q?.status, hk: false };
     case "withdraw_tell":

@@ -40,8 +40,8 @@ for L in "${@:-L1 L2 L3}"; do
     L9) F=src/components/Queries.tsx; srcbreak $F 'if (k === "full_sent") return (reqMats?.length ? reqMats : [{ kind: "full" as const }]).map(withVer);' 'if (k === "full_sent") return ([{ kind: "full" as const }]).map(withVer); /* MUT L9: the generic default */' ;;
     L10) F=src/lib/qcLogic152.ts; srcbreak $F '    if (need && !seen[need]) {' '    if (false && need && !seen[need]) { /* MUT L10: drop check 3 */' ;;
     L11) F=src/lib/qc152Write.ts; srcbreak $F '  if (pkg) {' '  if (pkg && pkg.id) { /* MUT L11: keep the package link */' ;;
-    L12) F=src/components/queries/centre/QcFix152.tsx; srcbreak $F 'data-id={a.id} disabled={taken}' 'data-id={a.id} disabled={false} /* MUT L12: a duplicate agent allowed */' ;;
-    L13) F=src/components/queries/centre/QcFix152.tsx; srcbreak $F '<span className="qc152-dseg2" role="radiogroup" aria-label="Sent by">' '<span className="qc152-dseg2" role="radiogroup" aria-label="Sent by"><select aria-label="MUT L13: a native select"><option>Email</option></select>' ;;
+    L12) echo "L12's subject (QcFix152.tsx) was deleted by v152.2: its edits are QcStepEdit1522 / QcComposer1522, proved by qc1522Mutate.sh L16"; continue ;;
+    L13) echo "L13's subject (QcFix152.tsx) was deleted by v152.2: see qc1522Mutate.sh L16"; continue ;;
     L3) F=src/lib/queryState.ts; srcbreak $F 's === "offer" || s === "materials" || s === "nudge" ? "you" : s;' 's === "offer" || s === "materials" || s === "nudge" || s === "quiet" ? "you" : s; /* MUT L3 */' ;;
     *) F="" ;;
   esac

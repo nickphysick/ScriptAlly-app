@@ -4,6 +4,7 @@
  */
 
 import { MONTHS_SHORT } from "./dates";
+import { findExistingAgent } from "./importDuplicates";
 import React, { createContext, useContext, useState, useEffect, useRef } from "react";
 import {
   User,
@@ -1019,14 +1020,24 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
          Change the field and the task changes with it; undo, edit and delete stay honest for free. */
       const offerRef = q.offerRefQueryId ? queries.find((x) => x.id === q.offerRefQueryId) : undefined;
       const liveOther = ![QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE, QueryStatus.SIGNED].includes(q.status);
-      if (offerRef && offerRef.status === QueryStatus.OFFER && q.offerTold === false && liveOther) {
-        calculatedTasks.push({
-          id: `task-offer-tell-${q.id}`, priority: "urgent",
-          title: `Tell ${aName} about your offer`,
-          description: `You have an offer on '${mTitle}'. Let ${aName} know, with your deadline.`,
-          manuscriptTitle: mTitle, context: `With agent ${aName}`, relatedRecordId: q.id,
-          taskType: "offer_tell", actionLabel: "Open the offer", actionPath: "queries",
-        });
+      /* ⚠️ v152.2 §6.1 (Nick, 6 Nov) — ONE CARD PER OFFER replaces the per-agent "Tell {agent}" cards, and it appears only
+         once the writer chose "Do it later" / "Do the rest later" (or accepted with the to-do ticked): the flag is
+         `tellLater` on the offer's step. The count is never stored — the other queries marked with this offer and not
+         yet told — and the card completes itself at 0. */
+      if ((q.status === QueryStatus.OFFER || q.status === QueryStatus.SIGNED)
+        && activities.some((a) => a.queryId === q.id && (a.resultingStatus === QueryStatus.OFFER) && (a as { tellLater?: unknown }).tellLater === true)) {
+        const left = queries.filter((x) => x.offerRefQueryId === q.id && x.offerTold === false).length;
+        if (left > 0) {
+          const by = q.status === QueryStatus.OFFER && q.offerResponseDeadline ? new Date(String(q.offerResponseDeadline)) : null;
+          const byWords = by && !Number.isNaN(by.getTime()) ? ` · answer by ${by.getDate()} ${MONTHS_SHORT[by.getMonth()]}` : "";
+          calculatedTasks.push({
+            id: `task-offer-tell-all-${q.id}`, priority: "urgent",
+            title: q.status === QueryStatus.SIGNED ? `Tell ${left} ${left === 1 ? "agent" : "agents"} you’ve signed with ${aName}` : `Tell ${left} ${left === 1 ? "agent" : "agents"} about ${aName}’s offer${byWords}`,
+            description: `You have an offer on '${mTitle}'.`,
+            manuscriptTitle: mTitle, context: `With agent ${aName}`, relatedRecordId: q.id,
+            taskType: "offer_tell_all", actionLabel: "Tell them", actionPath: "queries",
+          });
+        }
       }
       if (offerRef && q.offerReply === "full" && liveOther
         && [QueryStatus.QUERIED, QueryStatus.PARTIAL_REQUESTED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_REQUESTED].includes(q.status)) {
@@ -2172,6 +2183,15 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     bypassLimits: boolean = false
   ): Promise<{ success: boolean; error?: string; id?: string }> => {
     if (!currentUser) return { success: false, error: "Not logged in." };
+
+    /* ⚠️ v152.2 §1.7 (Nick, 6 Nov) — A NAME THAT MATCHES AN EXISTING AGENT, IGNORING CASE AND SPACES, MERGES INTO IT rather
+       than making a second record (a "PRIYA RAMAN" with no agency beside Priya Raman of Raman & Rowe). The import paths'
+       own rule, `sameAgent`: the same name, and the same agency or either side giving none. An explicit id (an import
+       that has already decided) is written as asked. */
+    if (!a.id && (a.name ?? "").trim()) {
+      const twin = findExistingAgent(agents, { name: a.name, agency: a.agency });
+      if (twin) return { success: true, id: twin.id };
+    }
 
     if (!bypassLimits && currentUser.plan === UserPlan.FREE && agents.length >= 5) {
       return {

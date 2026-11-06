@@ -37,7 +37,7 @@
  {
   "where": "a feed row for it",
   "ok": true,
-  "detail": "{\"activityType\":\"Status Changed\",\"date\":\"2026-11-06T12:00:00.000Z\",\"description\":\"Revise & Resubmit request received from Jonathan Vale at State & Window\",\"details\":\"Respond by 18 Dec 2026\",\"eventKey\":\"rr_requested\",\"id\":\"act-0bmetcpqu\",\"logEntryId\":\"act-0bmetcpqu\",\"manuscriptId\":\"seed-ms-1\",\"materials\":[{\"kind\":\"full\"}],\"queryId\":\"q152-long\",\"resultingStatus\":\"Revise & Resubmit\",\"userId\":\"LS4ymFFCEvhN82advZQJ5zkr7sv2\"}"
+  "detail": "{\"activityType\":\"Status Changed\",\"date\":\"2026-11-06T12:00:00.000Z\",\"description\":\"Revise & Resubmit request received from Jonathan Vale at State & Window\",\"details\":\"Respond by 18 Dec 2026\",\"eventKey\":\"rr_requested\",\"id\":\"act-box3se6xk\",\"logEntryId\":\"act-box3se6xk\",\"manuscriptId\":\"seed-ms-1\",\"materials\":[{\"kind\":\"full\"}],\"queryId\":\"q152-long\",\"resultingStatus\":\"Revise & Resubmit\",\"userId\":\"LS4ymFFCEvhN82advZQJ5zkr7sv2\"}"
  },
  {
   "where": "Undo: the query back byte for byte",

@@ -63,7 +63,7 @@ for L in "$@"; do
     L12) F=src/components/Queries.tsx; srcbreak $F '                message: refused.length
                   ? `Saved.' '                message: false /* MUT L12: the refused sibling dropped silently */
                   ? `Saved.' ;;
-    L13) F=src/components/queries/centre/QcRecord152.tsx; srcbreak $F 'kinds: ["partial_req", "full_req", "rr_req", "offer", "pass"]' 'kinds: ["partial_req", "full_req", "offer", "pass"] /* MUT L13: no R&R in Who replied */' ;;
+    L13) echo "L13's subject (QcRecord152.tsx) was deleted by v152.2: the reply chips are QcComposer1522, proved by qc1522Mutate.sh L13"; continue ;;
     L3H) F=src/lib/qcThread152.ts; srcbreak $F 'export const HOLDING_TINT = { fill: "#ffffff", edge: "#e3dbd0" };' 'export const HOLDING_TINT = { fill: "#f1efec", edge: "#e3dfd9" }; /* MUT L3H: the holding reply grey */' ;;
     L10F) F=src/lib/qc152Write.ts; srcbreak $F '    return { queryId: q.id, set: [{ path: `queries/${q.id}/activity/${id}`, data: sub }, { path: `activities/${id}`, data: feedRow }],' '    void feedRow; /* MUT L10F: no feed row */ return { queryId: q.id, set: [{ path: `queries/${q.id}/activity/${id}`, data: sub }],' ;;
     L10) F=src/lib/qc152Write.ts; srcbreak $F '      eventKey: TOLD_EVENT, toldCount: count, toldDeadline: dayIso(new Date(t.deadlineMs)) };' '      eventKey: TOLD_EVENT, toldCount: count }; /* MUT L10: saved without the deadline */' ;;

@@ -146,6 +146,7 @@ export interface QcRow {
   furthest: Furthest;
 }
 
+export const REPLY_RESTART_DAYS = 28;
 export function expectedFor(q: Query, agent: Agent | undefined | null): { ms: number | null; kind: ExpectedKind | null } {
   const status = q.status as QueryStatus;
   const court = courtOf(status);
@@ -159,6 +160,10 @@ export function expectedFor(q: Query, agent: Agent | undefined | null): { ms: nu
     : status === QueryStatus.FULL_SENT || status === QueryStatus.RESUBMITTED ? STAGE_RESPONSE_WINDOWS.full
     : agent?.responseTimeWeeks ?? null;
   const r = resolveExpectedDate(q, sends.length ? Math.max(...sends) : null, weeks, null);
+  /* v152.2 §7 — a pass taken off by mistake restarts the wait from that day: a reply is expected four weeks on, unless a
+     send since has its own date */
+  const restart = anyToMs(q.replyRestartedOn);
+  if (restart != null && (!sends.length || restart > Math.max(...sends))) return { ms: restart + REPLY_RESTART_DAYS * 86_400_000, kind: "reply" };
   return { ms: r.ms, kind: "reply" };
 }
 

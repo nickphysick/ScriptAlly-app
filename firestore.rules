@@ -521,6 +521,8 @@ service cloud.firestore {
         && (data.get('writerExpectedSetAt', null) == null || (data.writerExpectedSetAt is string && data.writerExpectedSetAt.size() <= 64))
         && (data.get('offerDate', null) == null || (data.offerDate is timestamp || data.offerDate is string))
         && (data.get('offerResponseDeadline', null) == null || (data.offerResponseDeadline is timestamp || data.offerResponseDeadline is string))
+        // Query Centre v152.2 §7: a pass taken off by mistake restarts the reply date from this day
+        && (data.get('replyRestartedOn', null) == null || (data.replyRestartedOn is string && data.replyRestartedOn.size() <= 32))
         && (data.get('offerNotes', null) == null || (data.offerNotes is string && data.offerNotes.size() <= 16384))
         && (data.get('closingReason', null) == null || (data.closingReason is string && data.closingReason.size() <= 256))
         && (data.get('closingNotes', null) == null || (data.closingNotes is string && data.closingNotes.size() <= 16384))
@@ -624,7 +626,10 @@ service cloud.firestore {
           'materials',
           // Query Centre v152.1: what the agent said on one of their replies (§2.6), and a "told other agents" step's count
           // and the deadline you gave them (§2.5). All OPTIONAL, on this log only (no feed twin carries them).
-          'replyNote', 'toldCount', 'toldDeadline'
+          'replyNote', 'toldCount', 'toldDeadline',
+          // Query Centre v152.2: a pass's "open to more work" and its Wall-of-no opt-out (§5), "Something else"'s words
+          // (§5), how a nudge went (§4.2), and the offer step's "tell the rest later" flag (§6.1). All OPTIONAL.
+          'openToMore', 'offWall', 'askedFor', 'sentVia', 'tellLater'
         ])
         && (!data.keys().hasAny(['reconstructed']) || data.reconstructed == true)
         && data.type is string && data.type.size() <= 128
@@ -658,7 +663,12 @@ service cloud.firestore {
         && (!data.keys().hasAny(['materials']) || (data.materials is list && data.materials.size() <= 20))
         && (!data.keys().hasAny(['replyNote']) || (data.replyNote is string && data.replyNote.size() <= 500))
         && (!data.keys().hasAny(['toldCount']) || (data.toldCount is int && data.toldCount >= 1 && data.toldCount <= 30))
-        && (!data.keys().hasAny(['toldDeadline']) || (data.toldDeadline is string && data.toldDeadline.size() <= 32));
+        && (!data.keys().hasAny(['toldDeadline']) || (data.toldDeadline is string && data.toldDeadline.size() <= 32))
+        && (!data.keys().hasAny(['openToMore']) || data.openToMore is bool)
+        && (!data.keys().hasAny(['offWall']) || data.offWall is bool)
+        && (!data.keys().hasAny(['askedFor']) || (data.askedFor is string && data.askedFor.size() <= 80))
+        && (!data.keys().hasAny(['sentVia']) || (data.sentVia is string && data.sentVia.size() <= 32))
+        && (!data.keys().hasAny(['tellLater']) || data.tellLater is bool);
     }
 
     // (isValidTopLevelActivity is gone with the RETIRED users/{uid}/activity store — Tier 3 ·
@@ -1079,7 +1089,7 @@ service cloud.firestore {
             'partialRequestedDate', 'partialSentDate', 'fullRequestedDate', 'fullSentDate',
             'lastStatusChange', 'responseReceivedAt', 'materialsRequestedType', 'materialsRequestedQuantity',
             'expectedSendDate', 'sendReminderDate', 'rrNotes', 'rejectionFeedbackType', 'rejectionFeedbackText',
-            'rejectionReflection', 'rejectionLesson', 'rejectedFromStatus', 'rejectedDate', 'offerDate', 'offerResponseDeadline', 'offerNotes', 'closingReason', 'closingNotes',
+            'rejectionReflection', 'rejectionLesson', 'rejectedFromStatus', 'rejectedDate', 'offerDate', 'offerResponseDeadline', 'offerNotes', 'closingReason', 'closingNotes', 'replyRestartedOn',
             // ⚠️ `packageId` TRAVELS WITH `materialsWanted` AND IS LISTED BESIDE IT ON PURPOSE.
             // `materialsLinkWrites` (packageMetrics.ts) enforces exactly one source of truth for a
             // query's materials — it writes the package link OR the free-text materials and always
@@ -1132,7 +1142,9 @@ service cloud.firestore {
           // filed under a query belonging to a different manuscript while the feed still counted
           // it against the old book — which is worse than the denial it replaces, because it looks
           // correct on the page the writer is standing on.
-          incoming().diff(existing()).affectedKeys().hasOnly(['activityType', 'description', 'date', 'details', 'resultingStatus', 'materials', 'queryId', 'manuscriptId', 'bookVersionId', 'eventKey'])
+          incoming().diff(existing()).affectedKeys().hasOnly(['activityType', 'description', 'date', 'details', 'resultingStatus', 'materials', 'queryId', 'manuscriptId', 'bookVersionId', 'eventKey',
+            // Query Centre v152.2 §6.1: the offer step's "tell the rest later" flag, set or cleared on its feed twin
+            'tellLater'])
         );
       }
 

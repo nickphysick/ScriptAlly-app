@@ -7,7 +7,7 @@
  {
   "where": "agent: no \"Waiting on\", \"No reply\" or \"today\"",
   "ok": true,
-  "detail": "Query sent 29 OCT COVERING LETTER by email"
+  "detail": "Query sent 30 OCT COVERING LETTER by email"
  },
  {
   "where": "agent: no Day 1 divider",
@@ -32,7 +32,7 @@
  {
   "where": "nudge: no \"Waiting on\", \"No reply\" or \"today\"",
   "ok": true,
-  "detail": "Query sent 15 OCT COVERING LETTER by email"
+  "detail": "Query sent 16 OCT COVERING LETTER by email"
  },
  {
   "where": "nudge: no Day 1 divider",
@@ -57,7 +57,7 @@
  {
   "where": "quiet: no \"Waiting on\", \"No reply\" or \"today\"",
   "ok": true,
-  "detail": "Query sent 12 SEP COVERING LETTER by email"
+  "detail": "Query sent 13 SEP COVERING LETTER by email"
  },
  {
   "where": "quiet: no Day 1 divider",
@@ -82,7 +82,7 @@
  {
   "where": "materials: no \"Waiting on\", \"No reply\" or \"today\"",
   "ok": true,
-  "detail": "Query sent 6 OCT COVERING LETTER by email 26 DAYS MV Asked for a partial 1 NOV"
+  "detail": "Query sent 7 OCT COVERING LETTER by email 26 DAYS MV Asked for a partial 2 NOV"
  },
  {
   "where": "materials: no Day 1 divider",
@@ -107,7 +107,7 @@
  {
   "where": "long: no \"Waiting on\", \"No reply\" or \"today\"",
   "ok": true,
-  "detail": "Query sent 8 JUN COVERING LETTER by email 30 DAYS JV Asked for a partial 8 JUL 20 DAYS Sent the partial 28 JUL 40 DAYS JV Asked for the full 6 SEP 40 DAYS Sent "
+  "detail": "Query sent 9 JUN COVERING LETTER by email 30 DAYS JV Asked for a partial 9 JUL 20 DAYS Sent the partial 29 JUL 40 DAYS JV Asked for the full 7 SEP 40 DAYS Sent "
  },
  {
   "where": "long: no Day 1 divider",
@@ -132,7 +132,7 @@
  {
   "where": "rr: no \"Waiting on\", \"No reply\" or \"today\"",
   "ok": true,
-  "detail": "Query sent 28 JUL QUERY LETTER SYNOPSIS 10 PAGES by email 30 DAYS RV Asked for the full 27 AUG 20 DAYS Sent the full 16 SEP 40 DAYS RV Asked for a revision (R&R"
+  "detail": "Query sent 29 JUL QUERY LETTER SYNOPSIS 10 PAGES by email 30 DAYS RV Asked for the full 28 AUG 20 DAYS Sent the full 17 SEP 40 DAYS RV Asked for a revision (R&R"
  },
  {
   "where": "rr: no Day 1 divider",
@@ -157,7 +157,7 @@
  {
   "where": "passed: no \"Waiting on\", \"No reply\" or \"today\"",
   "ok": true,
-  "detail": "Query sent 7 AUG QUERY LETTER SYNOPSIS 10 PAGES by email 50 DAYS PV Asked for the full 26 SEP 10 DAYS Sent the full 6 OCT 20 DAYS PV Passed 26 OCT “Beautifully "
+  "detail": "Query sent 8 AUG QUERY LETTER SYNOPSIS 10 PAGES by email 50 DAYS PV Asked for the full 27 SEP 10 DAYS Sent the full 7 OCT 20 DAYS PV Passed 27 OCT “Beautifully "
  },
  {
   "where": "passed: no Day 1 divider",
@@ -182,7 +182,7 @@
  {
   "where": "withdrew: no \"Waiting on\", \"No reply\" or \"today\"",
   "ok": true,
-  "detail": "Query sent 6 SEP QUERY LETTER SYNOPSIS 10 PAGES by email 55 DAYS You withdrew 31 OCT an offer elsewhere"
+  "detail": "Query sent 7 SEP QUERY LETTER SYNOPSIS 10 PAGES by email 55 DAYS You withdrew 1 NOV an offer elsewhere"
  },
  {
   "where": "withdrew: no Day 1 divider",
@@ -207,7 +207,7 @@
  {
   "where": "offertold: no \"Waiting on\", \"No reply\" or \"today\"",
   "ok": true,
-  "detail": "Query sent 17 AUG QUERY LETTER SYNOPSIS 10 PAGES by email 70 DAYS TV Made an offer 26 OCT “I’d love to represent this book.” 1 DAY Told 6 other agents 27 OCT of"
+  "detail": "Query sent 18 AUG QUERY LETTER SYNOPSIS 10 PAGES by email 70 DAYS TV Made an offer 27 OCT “I’d love to represent this book.” 1 DAY Told 6 other agents 28 OCT of"
  },
  {
   "where": "offertold: no Day 1 divider",
@@ -232,7 +232,7 @@
  {
   "where": "seven: no \"Waiting on\", \"No reply\" or \"today\"",
   "ok": true,
-  "detail": "Query sent 9 MAY QUERY LETTER SYNOPSIS 10 PAGES by email ✎ Edit 30 DAYS Following up Query sent · 9 May You nudged Seth 8 JUN by email 20 DAYS Following up Quer"
+  "detail": "Query sent 10 MAY QUERY LETTER SYNOPSIS 10 PAGES by email ✎ Edit 30 DAYS Following up Query sent · 10 May You nudged Seth 9 JUN by email 20 DAYS Following up Qu"
  },
  {
   "where": "seven: no Day 1 divider",

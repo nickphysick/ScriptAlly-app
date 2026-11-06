@@ -86,7 +86,9 @@ export const CalendarField: React.FC<{
   onChange: (dayMs: number) => void;
   /** v152.1 §2.5 a deadline you gave others is ahead of today: let the calendar page forward */
   future?: boolean;
-}> = ({ id, valueMs, nowMs, blocked, onChange, future }) => {
+  /** v152.2 §3.1 the button's words ("Another date"), in place of the date */
+  label?: string;
+}> = ({ id, valueMs, nowMs, blocked, onChange, future, label }) => {
   const api = useContext(PopCtx);
   const open = api.open === `cal:${id}`;
   const btn = useRef<HTMLButtonElement>(null);
@@ -101,7 +103,7 @@ export const CalendarField: React.FC<{
   return (
     <span className="qc152-qsel">
       <button ref={btn} type="button" className="qc152-qdb" data-qc152="date-btn" data-pop-anchor="" aria-haspopup="dialog" aria-expanded={open}
-        onClick={() => api.setOpen(open ? null : `cal:${id}`)}>{fullDay(valueMs)}{CAL_ICON}</button>
+        onClick={() => api.setOpen(open ? null : `cal:${id}`)}>{label ?? fullDay(valueMs)}{CAL_ICON}</button>
       {open ? (
         <Pop anchor={btn} align="right" className="qc152-cal" data="calendar">
           <div className="qc152-calh">
@@ -182,7 +184,9 @@ export const MatChips: React.FC<{
   stepMs: number;
   /** a request's chips take no version (§4.4) */
   request: boolean;
-}> = ({ id, mats, onChange, env, stepMs, request }) => {
+  /** v152.2 the add button's words ("+ Add") */
+  addLabel?: string;
+}> = ({ id, mats, onChange, env, stepMs, request, addLabel }) => {
   const api = useContext(PopCtx);
   const vName = (vid: string) => env.versions.find((v) => v.id === vid)?.name ?? null;
   const originalId = env.versions[0]?.id ?? null;
@@ -211,18 +215,18 @@ export const MatChips: React.FC<{
           onPut={(p) => put(i, p)} onDrop={() => drop(i)}
           onDone={() => { if (m.kind === "other" && !(m.text ?? "").trim()) drop(i); api.setOpen(null); }} />
       ))}
-      <AddMat id={`mat:${id}:add`} kinds={addable} onAdd={add} />
+      <AddMat id={`mat:${id}:add`} kinds={addable} onAdd={add} label={addLabel} />
     </div>
   );
 };
 
-const AddMat: React.FC<{ id: string; kinds: MatKind[]; onAdd: (k: MatKind) => void }> = ({ id, kinds, onAdd }) => {
+const AddMat: React.FC<{ id: string; kinds: MatKind[]; onAdd: (k: MatKind) => void; label?: string }> = ({ id, kinds, onAdd, label }) => {
   const api = useContext(PopCtx);
   const btn = useRef<HTMLButtonElement>(null);
   const open = api.open === id;
   return (
     <span className="qc152-mpw plus">
-      <button ref={btn} type="button" className="qc152-mp" data-qc152="mat-add" data-pop-anchor="" onClick={() => api.setOpen(open ? null : id)}>+ Material</button>
+      <button ref={btn} type="button" className="qc152-mp" data-qc152="mat-add" data-pop-anchor="" onClick={() => api.setOpen(open ? null : id)}>{label ?? "+ Material"}</button>
       {open ? (
         <Pop anchor={btn} className="qc152-menu" data="mat-add-menu">
           <div className="qc152-mph"><b>Add a material</b><em>One of each kind per step.</em></div>

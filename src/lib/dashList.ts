@@ -186,6 +186,7 @@ const ACT: Record<string, string> = {
   offer_send_full: "Send your full",
   offer_received: "Offer: next steps",
   offer_tell: "Tell them about your offer",
+  offer_tell_all: "Tell the other agents",
   nudge_overdue: "Record a nudge",
   no_response_close: "Close this query",
 };
