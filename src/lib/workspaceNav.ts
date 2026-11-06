@@ -23,7 +23,7 @@
  * ⚠️ AND SO THE ATTENTION SIGNAL LIVES ON TO-DO ALONE. With the filter children gone there is no
  * count under Queries and no badge on its rail icon.
  */
-import { ShellSection } from "./workspaceShell";
+import type { ShellChild, ShellHit, ShellSection } from "./workspaceShell";
 import { TODO_ROUTES } from "./todoRoutes";
 
 export interface WorkspaceNavInput {
@@ -70,7 +70,7 @@ export function workspaceSections(input: WorkspaceNavInput): ShellSection[] {
          the folder tab still names the group; the rail names the row by its page. */
       noHeading: true,
       children: [
-        { id: "dash", label: "Dashboard", path: "/dashboard", icon: "dash" },
+        { id: "dash", label: "Dashboard", path: "/dashboard", icon: "dash", rail: true },
       ],
     },
     {
@@ -80,9 +80,9 @@ export function workspaceSections(input: WorkspaceNavInput): ShellSection[] {
       def: "q-centre",
       children: [
         /* ⚠️ A SHORT LABEL IN THE FULL SIDEBAR ONLY (Nick's ruling, 25 Oct; kept 6 Nov): "Queries". `label` is
-           still the page's full name, which the folder tab, the bar, breadcrumbs and the palette read; the rail's
-           card has its own short labels (RAIL_SHORT_LABELS below). */
-        { id: "q-centre", label: "Query Centre", navLabel: "Queries", path: "/queries", icon: "send" },
+           still the page's full name, which the folder tab, the bar, breadcrumbs and the palette read. The rail
+           has its own short label (`railLabel`). */
+        { id: "q-centre", label: "Query Centre", navLabel: "Queries", path: "/queries", icon: "send", rail: true, railLabel: "Queries" },
         /* Responses v2 (15 Oct): every agent answer for the book in scope */
         { id: "q-responses", label: "Responses", path: "/queries/responses", icon: "replies" },
         { id: "q-analytics", label: "Analytics", path: "/queries/analytics", icon: "chart" },
@@ -94,14 +94,14 @@ export function workspaceSections(input: WorkspaceNavInput): ShellSection[] {
       icon: "people",
       def: "a-list",
       children: [
-        { id: "a-list", label: "Contact list", path: "/agents", icon: "people" },
+        { id: "a-list", label: "Contact list", path: "/agents", icon: "people", rail: true, railLabel: "Agents" },
         /* Pro, dormant: nothing gates Discover (`DISCOVER_OPEN_TO_ALL`) */
         { id: "a-disc", label: "Discover", path: "/agents/discover", icon: "compass", pro: "discover" },
       ],
     },
     /* ⚠️ "YOUR BOOK" — the manuscript and its versions (sidebar materials v1, 6 Nov). Its id is "book"; until 6 Nov it
        was "materials", which now names the Materials section below. Stored last-used entries keyed "materials" that
-       name a Your-book page are dropped by railMemory and fall back to Manuscripts. The rail draws it with Library. */
+       name a Your-book page were dropped by the rail's memory, retired with the section cards (sidebar rail v2). */
     {
       id: "book",
       label: "Your book",
@@ -123,9 +123,9 @@ export function workspaceSections(input: WorkspaceNavInput): ShellSection[] {
       def: "m-letters",
       pro: "materials",
       children: [
-        { id: "m-letters", label: "Query letters", path: "/materials/letters", icon: "letter" },
-        { id: "m-comps", label: "Comparable titles", path: "/manuscripts/comps", icon: "books" },
-        { id: "q-pkg", label: "Submission packages", path: "/queries/packages", icon: "folder" },
+        { id: "m-letters", label: "Query letters", path: "/materials/letters", icon: "letter", rail: true, railLabel: "Letters" },
+        { id: "m-comps", label: "Comparable titles", path: "/manuscripts/comps", icon: "books", railLabel: "Comps" },
+        { id: "q-pkg", label: "Submission packages", path: "/queries/packages", icon: "folder", railLabel: "Packages" },
       ],
     },
     /* ⚠️ ITS ROWS ARE `TODO_ROUTES` — the one definition of the To-do pages. The count rides the To-do list row
@@ -140,35 +140,38 @@ export function workspaceSections(input: WorkspaceNavInput): ShellSection[] {
         label: r.label,
         path: r.path,
         icon: TASKS_ICON[r.id],
-        ...(r.id === "list" ? { count: input.todo || undefined, urgent: true as const } : {}),
+        ...(r.id === "list" ? { count: input.todo || undefined, urgent: true as const, rail: true as const, railLabel: "Tasks" } : {}),
       })),
     },
     /* There is no Account section: Settings is the account's own furniture, reached from the foot. */
   ];
 }
 
-/**
- * THE RAIL'S SHORT LABELS (sidebar rail v1). The 80px rail has room for about ten characters of 10px
- * serif under each section, so two page names are shortened there and NOWHERE ELSE — the full sidebar,
- * the folder tab, the palette and every aria-label keep the full name. Keyed by page id; a page that is
- * not listed shows its own label.
- */
-export const RAIL_SHORT_LABELS: Readonly<Record<string, string>> = {
-  "q-pkg": "Packages",
-  "m-comps": "Comps",
-};
+/* ══ SIDEBAR RAIL v2 (6 Nov): five places and More ══════════════════════════════════════════════════════════════
+   The rail draws the pages flagged `rail`, in nav order; More holds every other page, grouped by its section. The
+   section cards, their trays and the per-section last-used memory of rail v1 are deleted. */
 
-/**
- * The label a SECTION row wears in the rail. Dashboard is a section with no heading of its own — one row,
- * named by its page — so its row reads "Dashboard"; every other section reads its own label.
- */
-export function railSectionLabel(sec: { id: string; label: string; children?: { label: string }[] }): string {
-  return sec.id === "workspace" ? sec.children?.[0]?.label ?? sec.label : sec.label;
+/** The rail's own items, in nav order. */
+export function railItems(sections: readonly ShellSection[]): ShellChild[] {
+  return sections.flatMap((s) => (s.children ?? []).filter((c) => c.rail));
 }
 
-/** The label a page wears in the rail's open card. */
-export function railPageLabel(child: { id: string; label: string }): string {
-  return RAIL_SHORT_LABELS[child.id] ?? child.label;
+/** The More panel's groups: each section's pages that are not on the rail, in nav order; empty sections left out. */
+export function moreGroups(sections: readonly ShellSection[]): { section: ShellSection; pages: ShellChild[] }[] {
+  return sections
+    .map((section) => ({ section, pages: (section.children ?? []).filter((c) => !c.rail) }))
+    .filter((g) => g.pages.length > 0);
+}
+
+/** A page's short rail name. */
+export const railLabelOf = (c: Pick<ShellChild, "label" | "railLabel">): string => c.railLabel ?? c.label;
+
+/** The More page you are on (lights More, which takes its short name), or null. */
+export function morePageFor(sections: readonly ShellSection[], hit: ShellHit | null): ShellChild | null {
+  if (!hit?.child) return null;
+  const sec = sections.find((s) => s.id === hit.section);
+  const ch = sec?.children?.find((c) => c.id === hit.child);
+  return ch && !ch.rail ? ch : null;
 }
 
 /**

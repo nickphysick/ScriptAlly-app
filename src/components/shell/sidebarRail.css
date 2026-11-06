@@ -70,23 +70,14 @@
     background: rgba(var(--ink-cream-rgb), 0.14);
   }
 
-  /* a section: its row, and (when open) its pages, in one soft card */
-  .wsr-grp {
-    position: relative; flex: none; border-radius: 16px; margin: 0 -2px 4px; padding: 0 2px;
-    transition: background-color 0.22s ease, box-shadow 0.22s ease;
-  }
-  .wsr-grp.open { background: rgba(var(--ink-cream-rgb), 0.045); box-shadow: inset 0 0 0 1px rgba(var(--ink-cream-rgb), 0.07); }
-
   .wsr-ni {
     position: relative; flex: none; width: 100%; height: 58px; margin-bottom: 4px; padding: 0 2px;
     border: 0; border-radius: 9px; background: transparent; cursor: pointer;
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
     color: var(--ink-cream-66);
-    transition: height 0.2s cubic-bezier(0.2, 0.9, 0.3, 1), background-color 0.14s ease, color 0.14s ease;
+    transition: background-color 0.14s ease, color 0.14s ease;
   }
-  .wsr-grp .wsr-ni { margin-bottom: 4px; }
   .wsr-setnav .wsr-ni { height: 54px; margin-bottom: 2px; }
-  .wsr-grp.open .wsr-ni.wsr-on { height: 52px; }
 
   .wsr-ic {
     display: grid; place-items: center; width: 48px; height: 30px; border-radius: 15px; opacity: 0.6;
@@ -110,8 +101,6 @@
   .wsr-ni.wsr-on .wsr-ic { opacity: 1; color: var(--ink-terra); background: rgba(var(--ink-terra-rgb), 0.2); }
   .wsr-ni.wsr-on .wsr-ic svg { stroke-width: 2.6; }
   .wsr-ni.wsr-on .wsr-lbl { color: var(--ink-bright); font-weight: 600; }
-  /* inside the open card the section reads as a heading: no pill of its own */
-  .wsr-grp.open .wsr-ni.wsr-on .wsr-ic { background: transparent; }
   .wsr-back .wsr-lbl { color: var(--ink-cream-66); }
 
   /* the count: a corner badge on the icon; absolute, so its arrival moves nothing */
@@ -127,39 +116,6 @@
     font: 600 8.5px/13px "Inter", system-ui, sans-serif; letter-spacing: 0.02em; color: rgba(var(--ink-cream-rgb), 0.78);
     background: var(--ink-shell); box-shadow: inset 0 0 0 1px rgba(var(--ink-cream-rgb), 0.32);
   }
-
-  /* the open section's pages */
-  .wsr-tray { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.26s cubic-bezier(0.2, 0.9, 0.3, 1); }
-  .wsr-grp.open .wsr-tray { grid-template-rows: 1fr; }
-  .wsr-tray-in {
-    min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: 2px; padding: 0;
-    transition: padding 0.26s cubic-bezier(0.2, 0.9, 0.3, 1);
-  }
-  .wsr-grp.open .wsr-tray-in { padding: 2px 0 6px; }
-  .wsr-sp {
-    position: relative; flex: none; height: 28px; padding: 0; border: 0; border-radius: 9px; background: transparent; cursor: pointer;
-    display: flex; align-items: center; justify-content: center; color: rgba(var(--ink-cream-rgb), 0.6);
-    opacity: 0; transform: translateY(-4px);
-    transition: opacity 0.16s ease, transform 0.2s ease, background-color 0.12s ease, color 0.12s ease;
-  }
-  .wsr-grp.open .wsr-sp { opacity: 1; transform: none; }
-  .wsr-grp.open .wsr-sp:nth-child(2) { transition-delay: 0.03s, 0.03s, 0s, 0s; }
-  .wsr-grp.open .wsr-sp:nth-child(3) { transition-delay: 0.06s, 0.06s, 0s, 0s; }
-  .wsr-spl { font: 400 10px/1 var(--sp-serif); letter-spacing: -0.01em; white-space: nowrap; }
-  .wsr-sp:hover:not(.wsr-cur) { background: rgba(var(--ink-cream-rgb), 0.06); color: rgba(var(--ink-cream-rgb), 0.92); }
-  .wsr-sp.wsr-cur { background: rgba(var(--ink-terra-rgb), 0.2); color: var(--ink-bright); }
-  .wsr-sp.wsr-cur .wsr-spl { font-weight: 600; }
-  /* sidebar materials v1: a Pro row in the open card (Versions) is a 5px outlined dot at the row's top right */
-  .wsr-spd {
-    position: absolute; right: 7px; top: 5px; box-sizing: border-box; width: 5px; height: 5px; border-radius: 50%;
-    background: transparent; box-shadow: inset 0 0 0 1px rgba(var(--ink-cream-rgb), 0.7);
-  }
-
-  /* motion: the pill grows out of the icon when the page changes */
-  @keyframes wsrPill { 0% { transform: scaleX(0.45); opacity: 0.4; } 60% { transform: scaleX(1.06); opacity: 1; } 100% { transform: scaleX(1); } }
-  @keyframes wsrLbl { 0% { opacity: 0.5; } 100% { opacity: 1; } }
-  .wsr-anim .wsr-ni.wsr-on .wsr-ic { animation: wsrPill 0.36s cubic-bezier(0.2, 0.9, 0.3, 1); }
-  .wsr-anim .wsr-ni.wsr-on .wsr-lbl { animation: wsrLbl 0.3s ease; }
 
   /* ── the foot: Feedback, then the avatar ── */
   .wsr-fb {
@@ -184,7 +140,7 @@
 
   /* keyboard focus: one terracotta ring everywhere in the rail */
   .wsr :focus-visible { outline: 2px solid var(--ink-terra) !important; outline-offset: 2px; border-radius: 10px; }
-  .wsr .wsr-ni:focus-visible, .wsr .wsr-sp:focus-visible { outline-offset: -2px; }
+  .wsr .wsr-ni:focus-visible { outline-offset: -2px; }
 
   /* ── short windows: rows keep their height, the icons and rules tighten, the nav scrolls ── */
   @media (max-height: 919px) {

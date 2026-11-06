@@ -5,23 +5,21 @@
  * SidebarRail — the 80px labelled rail (sidebar rail v1, 5 Nov; refs design-refs/shell/sidebar-rail-v1.css
  * + .js, the `.qr-c` layer).
  *
- * One row per SECTION, its icon over a short label. The section you are in, if it has several pages,
- * opens into a soft card with its pages beneath as small rows; a one-page section (Dashboard, Materials)
- * gets the pill behind its icon instead. Clicking a section goes to the page you last used in it.
+ * SIDEBAR RAIL v2 (6 Nov; refs design-refs/sidebar-rail-v2): the five places used most — Dashboard, Queries,
+ * Agents, Letters, Tasks — each one click to its own page, then More for everything else (`MorePanel`). An item
+ * lights only on its own page; on a page that lives in More, More lights and takes that page's short name. The
+ * section cards of rail v1, their trays, their animation and the per-section last-used memory are deleted.
  *
- * ⚠️ IT OWNS NO NAVIGATION STATE. Which section is lit is the shell's `hit` (the route); the last page
- * per section is `lib/railMemory`; the manuscript menu, the feedback panel and the account menu are the
- * shell's own components, opened from here. The rail is a second view of the same nav model, never a
- * second model.
+ * ⚠️ IT OWNS NO NAVIGATION STATE. Which item is lit is the shell's `hit` (the route); the items and More's groups are
+ * `workspaceNav`'s `railItems` / `moreGroups`, read from the one nav model the expanded sidebar reads too.
  *
  * ⚠️ EVERY LABEL SETS ITS OWN FONT FAMILY in sidebarRail.css. brand.tsx names a face on every bare
  * `span`; a label that inherited would render in the body sans (it did, in the mock).
  */
-import React, { useEffect, useRef, useState } from "react";
+import React from "react";
 import { ShellHit, ShellSection } from "../../lib/workspaceShell";
-import { railPageLabel, railSectionLabel, SETTINGS_RAIL_LABELS } from "../../lib/workspaceNav";
+import { morePageFor, railItems, railLabelOf, SETTINGS_RAIL_LABELS } from "../../lib/workspaceNav";
 import { ACCOUNT_ROUTES, AccountSectionId } from "../../lib/accountRoutes";
-import { railPageFor } from "../../lib/railMemory";
 import "./sidebarRail.css";
 
 /** The handlers a rail anchor takes for its tooltip — the shell's `railTipFor`, already bound. */
@@ -57,6 +55,8 @@ export interface SidebarRailProps {
   planLabel: string;
   tip: (title: string, sub?: string, kbd?: string) => TipProps;
   toggleKbd: string;
+  /** The More button and its panel (Part B); drawn by the shell so it can hold the panel's state. */
+  more?: React.ReactNode;
 }
 
 const FEEDBACK_ICON = (
@@ -67,6 +67,12 @@ const FEEDBACK_ICON = (
 export const PANEL_ICON = (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <rect x="3.5" y="4.5" width="17" height="15" rx="2.5" /><path d="M9.5 4.5v15" />
+  </svg>
+);
+/* More: the ellipsis */
+export const MORE_ICON = (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="5" cy="12" r="1.4" /><circle cx="12" cy="12" r="1.4" /><circle cx="19" cy="12" r="1.4" />
   </svg>
 );
 const BACK_ICON = (
@@ -92,82 +98,42 @@ export const railCount = (n: number): string => (n > 99 ? "99+" : String(n));
 export const SidebarRail: React.FC<SidebarRailProps> = ({
   sections, icons, hit, todoCount, locked, onGo, onExpand, expandRef, expanded, switcher, markSrc,
   settingsMode, settingsSection, onSettings, onBack, onFeedback, feedbackOpen = false, feedbackRef,
-  onAccount, initials, who, planLabel, tip, toggleKbd,
+  onAccount, initials, who, planLabel, tip, toggleKbd, more,
 }) => {
-  const current = settingsMode ? null : hit?.section ?? null;
   const page = settingsMode ? null : hit?.child ?? null;
+  const items = railItems(sections);
+  const morePage = settingsMode ? null : morePageFor(sections, hit);
+  const sectionOf = (id: string) => sections.find((x) => (x.children ?? []).some((c) => c.id === id));
 
-  /* the pill grows out of the icon when the page changes, and only then */
-  const [anim, setAnim] = useState(false);
-  const firstPage = useRef(true);
-  useEffect(() => {
-    if (firstPage.current) { firstPage.current = false; return undefined; }
-    setAnim(false);
-    const raf = requestAnimationFrame(() => setAnim(true));
-    const t = window.setTimeout(() => setAnim(false), 450);
-    return () => { cancelAnimationFrame(raf); window.clearTimeout(t); };
-  }, [page]);
-
-  const dash = sections.filter((s) => s.id === "workspace");
-  const rest = sections.filter((s) => s.id !== "workspace");
-
-  const group = (sec: ShellSection) => {
-    const kids = sec.children ?? [];
-    const multi = kids.length > 1;
-    const on = sec.id === current;
-    const open = on && multi;
-    const single = !multi ? kids[0] : null;
-    /* the section head's tag: a Pro SECTION (Materials, 6 Nov), or a single-page section whose page is Pro */
-    const proHead = (!!sec.pro && locked.has(sec.pro)) || (!!single?.pro && locked.has(single.pro));
-    const count = sec.id === "tasks" ? todoCount : 0;
+  const item = (ch: (typeof items)[number], i: number) => {
+    const on = ch.id === page;
+    const sec = sectionOf(ch.id);
+    /* the Pro tag: the page's own entitlement, or its section's (Letters sits in Materials) — dormant today */
+    const pro = (!!ch.pro && locked.has(ch.pro)) || (!!sec?.pro && locked.has(sec.pro));
+    const count = ch.id === "list" ? todoCount : 0;
     return (
-      <div key={sec.id} className={`wsr-grp${multi ? " wsr-multi" : ""}${open ? " open" : ""}`} data-sec={sec.id}>
+      <React.Fragment key={ch.id}>
         <button
           type="button"
           className={`wsr-ni${on ? " wsr-on" : ""}`}
-          data-sec={sec.id}
-          aria-label={railSectionLabel(sec)}
-          aria-expanded={multi ? open : undefined}
-          aria-current={on ? (multi ? "true" : "page") : undefined}
-          onClick={() => onGo(railPageFor(sec, hit))}
-          {...(single ? tip(single.label) : {})}
+          data-go={ch.id}
+          aria-label={ch.label}
+          aria-current={on ? "page" : undefined}
+          onClick={() => onGo(ch.path)}
+          {...tip(ch.label)}
         >
-          <span className="wsr-ic">{icons[sec.icon ?? sec.id]}</span>
-          <span className="wsr-lbl">{railSectionLabel(sec)}</span>
+          <span className="wsr-ic">{icons[ch.icon ?? ch.id]}</span>
+          <span className="wsr-lbl">{railLabelOf(ch)}</span>
           {count > 0 && <span className="wsr-ct" data-shell="count" aria-label={`${count} to do`}>{railCount(count)}</span>}
-          {proHead && <span className="wsr-pro" aria-label="Pro">Pro</span>}
+          {pro && <span className="wsr-pro" data-shell="pro" aria-label="Pro">Pro</span>}
         </button>
-        {multi && (
-          <div className="wsr-tray">
-            <div className="wsr-tray-in">
-              {kids.map((ch) => {
-                const here = ch.id === page && on;
-                return (
-                  <button
-                    type="button"
-                    key={ch.id}
-                    className={`wsr-sp${here ? " wsr-cur" : ""}`}
-                    data-go={ch.id}
-                    tabIndex={open ? 0 : -1}
-                    aria-label={ch.label}
-                    aria-current={here ? "page" : undefined}
-                    onClick={() => onGo(ch.path)}
-                  >
-                    <span className="wsr-spl">{railPageLabel(ch)}</span>
-                    {/* sidebar materials v1: a Pro row in the card is a 5px outlined dot, top right; no text */}
-                    {ch.pro && locked.has(ch.pro) && <span className="wsr-spd" data-shell="pro" role="img" aria-label="Pro" />}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-      </div>
+        {i === 0 && <div className="wsr-sep" aria-hidden="true" />}
+      </React.Fragment>
     );
   };
 
   return (
-    <div className={`wsr${settingsMode ? " wsr-settings" : ""}${anim ? " wsr-anim" : ""}`} data-shell="rail">
+    <div className={`wsr${settingsMode ? " wsr-settings" : ""}`} data-shell="rail">
       <div className="wsr-lgo">
         <button type="button" className="wsr-home" onClick={() => onGo("/dashboard")} aria-label="QueryHawk, go to Dashboard" {...tip("QueryHawk · go to Dashboard")}>
           <img src={markSrc} alt="" aria-hidden="true" width={34} height={34} />
@@ -188,9 +154,13 @@ export const SidebarRail: React.FC<SidebarRailProps> = ({
       </div>
       <div className="wsr-mswrap">{switcher}</div>
       <nav className="wsr-nav" aria-label="Main">
-        {dash.map(group)}
-        <div className="wsr-sep" aria-hidden="true" />
-        {rest.map(group)}
+        {items.map(item)}
+        {more ?? (
+          <button type="button" className={`wsr-ni wsr-more${morePage ? " wsr-on" : ""}`} data-go="more" aria-label={morePage ? `More: ${morePage.label}` : "More"}>
+            <span className="wsr-ic">{MORE_ICON}</span>
+            <span className="wsr-lbl">{morePage ? railLabelOf(morePage) : "More"}</span>
+          </button>
+        )}
       </nav>
       <nav className="wsr-setnav" aria-label="Settings">
         <button type="button" className="wsr-ni wsr-back" onClick={onBack} aria-label="Back to the app">

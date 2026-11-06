@@ -10,7 +10,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { QueryStatus } from "../types";
-import { workspaceSections, workspacePageForPath, RAIL_SHORT_LABELS, railPageLabel, railSectionLabel, SETTINGS_RAIL_LABELS } from "./workspaceNav";
+import { workspaceSections, workspacePageForPath, moreGroups, morePageFor, railItems, railLabelOf, SETTINGS_RAIL_LABELS } from "./workspaceNav";
 import { ACCOUNT_ROUTES } from "./accountRoutes";
 import {
   CLOSED_QUERY_STATUSES, QUERIES_STATUS_PARAM, attentionCount, filterStateFor, isOverdueForReply,
@@ -360,21 +360,36 @@ describe("sidebar rail v1 — the nav the rail reads", () => {
     expect(block).toContain("letter: <FilePenLine ");
     expect(nav.find((s) => s.id === "materials")!.children![0].icon).toBe("letter");
   });
-  it("the rail's card labels: Packages and Comps are shortened, nothing else", () => {
-    expect(RAIL_SHORT_LABELS).toEqual({ "q-pkg": "Packages", "m-comps": "Comps" });
-    expect(nav.flatMap((s) => (s.children ?? []).map((c) => railPageLabel(c)))).toEqual([
-      "Dashboard", "Query Centre", "Responses", "Analytics", "Contact list", "Discover",
-      "Manuscripts", "Versions", "Query letters", "Comps", "Packages", "To-do list", "Corkboard",
+  it("sidebar rail v2: five places on the rail, in order, by their short names", () => {
+    const items = railItems(nav);
+    expect(items.map((c) => c.id)).toEqual(["dash", "q-centre", "a-list", "m-letters", "list"]);
+    expect(items.map(railLabelOf)).toEqual(["Dashboard", "Queries", "Agents", "Letters", "Tasks"]);
+    expect(items.map((c) => c.label)).toEqual(["Dashboard", "Query Centre", "Contact list", "Query letters", "To-do list"]);
+  });
+  it("sidebar rail v2: everything else is in More, grouped by its section, with its short name", () => {
+    const g = moreGroups(nav).map((x) => [x.section.label, x.pages.map(railLabelOf)]);
+    expect(g).toEqual([
+      ["Queries", ["Responses", "Analytics"]],
+      ["Agents", ["Discover"]],
+      ["Your book", ["Manuscripts", "Versions"]],
+      ["Materials", ["Comps", "Packages"]],
+      ["Tasks", ["Corkboard"]],
     ]);
+    expect(moreGroups(nav).flatMap((x) => x.pages.map((p) => p.label))).toContain("Comparable titles");
+    /* every page is on the rail or in More, exactly once */
+    const all = nav.flatMap((s) => (s.children ?? []).map((c) => c.id)).sort();
+    expect([...railItems(nav).map((c) => c.id), ...moreGroups(nav).flatMap((x) => x.pages.map((p) => p.id))].sort()).toEqual(all);
+  });
+  it("sidebar rail v2: More lights on a More page only", () => {
+    expect(morePageFor(nav, { section: "queries", child: "q-responses" })?.id).toBe("q-responses");
+    expect(morePageFor(nav, { section: "queries", child: "q-centre" })).toBeNull();
+    expect(morePageFor(nav, null)).toBeNull();
   });
   it("the full sidebar's short label: Queries (25 Oct), every other row its full name", () => {
     expect(nav.flatMap((s) => (s.children ?? []).map((c) => sidebarLabel(c)))).toEqual([
       "Dashboard", "Queries", "Responses", "Analytics", "Contact list", "Discover",
       "Manuscripts", "Versions", "Query letters", "Comparable titles", "Submission packages", "To-do list", "Corkboard",
     ]);
-  });
-  it("the rail's section rows: Dashboard by its page, every other section by its own label", () => {
-    expect(nav.map(railSectionLabel)).toEqual(["Dashboard", "Queries", "Agents", "Your book", "Materials", "Tasks"]);
   });
   it("the settings rail's short labels cover every account section", () => {
     expect(Object.keys(SETTINGS_RAIL_LABELS).sort()).toEqual(ACCOUNT_ROUTES.map((r) => r.id).sort());

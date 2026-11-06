@@ -33,6 +33,14 @@ export interface ShellChild {
   /** The sidebar row's SHORT label, where it differs (Nick's ruling, 25 Oct: "Queries", "Packages"). The sidebar
    *  ALONE reads it — `sidebarLabel()` — so the page keeps its full name everywhere else. */
   navLabel?: string;
+  /**
+   * SIDEBAR RAIL v2 (6 Nov): the page has its own item on the 80px rail. Five pages carry it (Dashboard, Query
+   * Centre, Contact list, Query letters, To-do list); every other page lives in the rail's More panel, under its
+   * section. The rail, the More panel and the expanded sidebar all read this one model.
+   */
+  rail?: true;
+  /** The page's short name on the rail (its item's label, or More's label while you are on it). Absent = `label`. */
+  railLabel?: string;
   /** Where it goes, search included (e.g. "/queries?status=attention"). */
   path: string;
   count?: number;

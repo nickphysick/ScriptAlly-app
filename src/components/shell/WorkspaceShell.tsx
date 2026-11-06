@@ -73,7 +73,6 @@ import { HelpMenu } from "./HelpMenu";
 import { registerFeedbackAnchor, setFeedbackPage } from "../../lib/feedbackStore";
 import { SidebarRail } from "./SidebarRail";
 import { railTile } from "../../lib/railTile";
-import { noteRailPage } from "../../lib/railMemory";
 import { navOpenAid, railCountAid } from "../../lib/railReviewAid";
 import { navLockedFor } from "../../lib/entitlements";
 
@@ -188,8 +187,6 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   }, [currentUser?.id]);
 
   const hit = useMemo(() => shellHitFor(sections, pathname, search), [sections, pathname, search]);
-  /* sidebar rail v1 — the page on screen is its section's last page, for the rail's section rows */
-  useEffect(() => { if (!isAccountPath(pathname)) noteRailPage(hit, undefined, sections); }, [hit?.section, hit?.child, pathname]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ⚠️ COLLAPSE RETURNS — AS A NARROWING, NOT A REMOVAL (sidebar-collapse pack; supersedes the
      app-shell-v2 note that retired it). What v2 retired was the RAIL-AND-PANEL model, where the
