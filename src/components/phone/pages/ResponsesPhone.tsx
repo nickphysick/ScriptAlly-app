@@ -15,7 +15,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useScriptAllyDb } from "../../../lib/db";
 import { resolveScopedManuscript } from "../../../lib/shellSidebar";
 import { buildQcRows, STAGE_NAME, whereItStands, type QcRow } from "../../../lib/qcSummary";
-import { carouselOrder, listNos, pageCounts, respItems, typicalWait, type RespAnswer, type RespItem } from "../../../lib/responses";
+import { carouselOrder, listNos, offWallIds, pageCounts, respItems, typicalWait, type RespAnswer, type RespItem } from "../../../lib/responses";
 import { dayMonth } from "../../../lib/dates";
 import { cardAct } from "../../responses/RspCarousel";
 import { RspShare } from "../../responses/RspShare";
@@ -57,7 +57,8 @@ export function useResponsesModel() {
     const items = respItems(rows);
     return {
       ms, nowMs, items, page: pageCounts(items, rows), more: carouselOrder(items),
-      nos: listNos(items, { kind: null, find: "", sort: "date", desc: true }), wait: typicalWait(items),
+      /* v152.2 §5 — a pass kept off the Wall of no is off the phone's wall too (data, not layout) */
+      nos: listNos((() => { const off = offWallIds(activities as never); return off.size ? items.filter((i) => !off.has(i.id)) : items; })(), { kind: null, find: "", sort: "date", desc: true }), wait: typicalWait(items),
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- the stored book is the switch's signal
   }, [queries, activities, agents, manuscripts, location.key]);
