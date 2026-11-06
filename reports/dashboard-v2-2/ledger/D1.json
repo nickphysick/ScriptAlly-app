@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "D1",
+  "where": "1512x982 population: F seen 0",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "D1",
+  "where": "1512x982 the rank-up plays",
+  "ok": true,
+  "detail": "{\"hatch\":true,\"pre\":\"You’ve hatched into a\",\"ask\":\"Welcome, Fledgling. One more note to Archivist.\",\"anim\":\"d22-in\"}"
+ },
+ {
+  "lock": "D1",
+  "where": "1512x982 its words",
+  "ok": true,
+  "detail": "You’ve hatched into a · Welcome, Fledgling. One more note to Archivist."
+ },
+ {
+  "lock": "D1",
+  "where": "1512x982 then foundingSeenTier = Fledgling",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "D1",
+  "where": "1512x982 a reload does not play it",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "D1",
+  "where": "1512x982 reduced motion: the end state, nothing animating",
+  "ok": true,
+  "detail": "{\"hatch\":true,\"running\":0,\"newOp\":\"1\"}"
+ },
+ {
+  "lock": "D1",
+  "where": "1512x982 reduced motion: still written",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "D1",
+  "where": "1512x982 absent: no animation",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "D1",
+  "where": "1512x982 absent: set to the rank",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "D1",
+  "where": "1512x982 the Egg never plays",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "D1",
+  "where": "1280x800 population: F seen 0",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "D1",
+  "where": "1280x800 the rank-up plays",
+  "ok": true,
+  "detail": "{\"hatch\":true,\"pre\":\"You’ve hatched into a\",\"ask\":\"Welcome, Fledgling. One more note to Archivist.\",\"anim\":\"d22-in\"}"
+ },
+ {
+  "lock": "D1",
+  "where": "1280x800 its words",
+  "ok": true,
+  "detail": "You’ve hatched into a · Welcome, Fledgling. One more note to Archivist."
+ },
+ {
+  "lock": "D1",
+  "where": "1280x800 then foundingSeenTier = Fledgling",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "D1",
+  "where": "1280x800 a reload does not play it",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "D1",
+  "where": "1280x800 reduced motion: the end state, nothing animating",
+  "ok": true,
+  "detail": "{\"hatch\":true,\"running\":0,\"newOp\":\"1\"}"
+ },
+ {
+  "lock": "D1",
+  "where": "1280x800 reduced motion: still written",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "D1",
+  "where": "1280x800 absent: no animation",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "D1",
+  "where": "1280x800 absent: set to the rank",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "lock": "D1",
+  "where": "1280x800 the Egg never plays",
+  "ok": true,
+  "detail": ""
+ }
+]

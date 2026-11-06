@@ -132,7 +132,9 @@ test.describe("first visit", () => {
            no longer the yardstick for a one-screen page's slot, and the tab is retired. The law they held — the
            pre-query card is never cut — is asserted directly: nothing in it clips, and no tab is drawn. */
         /* RE-POINTED (Dashboard v2): the founding card is v2's, its four sections all drawn and nothing in it cut */
-        L.check("A2", `${w} the founding card is drawn and nothing in it is cut`, !!r.fw2 && r.fw2Parts.length === 4 && Array.isArray(r.fw2Clipped) && r.fw2Clipped.length === 0, `parts ${r.fw2Parts.join(",")} · clipped ${r.fw2Clipped?.join(",") || "none"} · pre ${r.fw2?.h.toFixed(1)}px`);
+        /* ⚠️ RE-POINTED (Dashboard v2.2, Part C): the founding card is a band under the header with three sections (top, the
+           tell column, the road); v2's foot is gone, its two links live in the tell column. The law stands: all drawn, none cut. */
+        L.check("A2", `${w} the founding card is drawn and nothing in it is cut`, !!r.fw2 && ["fw-top", "fw-tell", "fw-road"].every((k) => r.fw2Parts.includes(k)) && Array.isArray(r.fw2Clipped) && r.fw2Clipped.length === 0, `parts ${r.fw2Parts.join(",")} · clipped ${r.fw2Clipped?.join(",") || "none"} · pre ${r.fw2?.h.toFixed(1)}px`);
         L.check("A2", `${w} no feed tab (retired)`, !r.tab && !q.tab, JSON.stringify({ pre: r.tab, q: q.tab }));
         /* ⚠️ RE-POINTED (v2, Part A): no header at all; the manuscript card carries no buttons before the first query, and its
            label is the book's readiness in sentence case (this book is Drafting: "Still writing") */
