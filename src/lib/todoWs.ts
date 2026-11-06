@@ -103,6 +103,8 @@ export const OTHER_WORDS: Record<TaskType, OtherWords> = {
   materials_unrecorded: { title: (f) => `Fill in what you sent ${f}`, doing: (w) => `Filling in what you sent ${w}` },
   materials_unrecorded_bulk: { title: (f) => `Fill in what you sent ${f}`, doing: (w) => `Filling in what you sent ${w}` },
   offer_tell: { title: (f) => `Tell ${f} about your offer`, doing: (w) => `Telling ${w} about your offer` },
+  /* Query Centre v152.2 §6.1: one card per offer, naming the agent who made it (the count lives on the card's own title) */
+  offer_tell_all: { title: (f) => `Tell the other agents about ${poss(f)} offer`, doing: (w) => `Telling the other agents about ${poss(w)} offer` },
   offer_send_full: { title: (f) => `Send ${f} your full`, doing: (w) => `Sending ${w} your full` },
   withdraw_tell: { title: (f) => `Tell ${f} you’ve withdrawn`, doing: (w) => `Telling ${w} you’ve withdrawn` },
   signed_tell: { title: (f) => `Tell ${f} you’ve signed`, doing: (w) => `Telling ${w} you’ve signed` },
