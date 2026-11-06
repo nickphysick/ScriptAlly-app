@@ -736,7 +736,7 @@ function AppContent() {
         {/* Sidebar materials v1 (6 Nov) — the Materials section's own route. Query letters is a placeholder until the
             Query letters pack; Comparable titles and Submission packages keep their old addresses. */}
         <StagePage active={routeKey === "materials"}>
-          <QueryLettersPage />
+          <QueryLettersPage active={routeKey === "materials"} />
         </StagePage>
 
         {/* Secondary pages mount on demand (same lifecycle as the old conditional render).

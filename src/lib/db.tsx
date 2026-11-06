@@ -314,7 +314,7 @@ interface DbContextType {
   // Version Actions
   addVersion: (v: Omit<ManuscriptVersion, "id" | "userId" | "createdDate">) => Promise<string>;
   /** `unknown` values so a mode switch can pass `deleteField()` to UNSET rather than write a zero. */
-  updateVersion: (id: string, fields: Partial<Record<"versionName" | "contentDraft" | "fileAttached" | "fileName" | "notes" | "contentType" | "contentLink" | "wordCount" | "compIds", unknown>>, opts?: { restoring?: boolean }) => Promise<string | null>;
+  updateVersion: (id: string, fields: Partial<Record<"versionName" | "contentDraft" | "fileAttached" | "fileName" | "notes" | "contentType" | "contentLink" | "wordCount" | "compIds" | "changes", unknown>>, opts?: { restoring?: boolean }) => Promise<string | null>;
   /**
    * Delete a material outright. Returns `false` WITHOUT writing when a package still holds it.
    *
@@ -1855,7 +1855,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const updateVersion = async (
     id: string,
     fields: Partial<Record<
-      "versionName" | "contentDraft" | "fileAttached" | "fileName" | "notes" | "contentType" | "contentLink" | "wordCount" | "compIds",
+      "versionName" | "contentDraft" | "fileAttached" | "fileName" | "notes" | "contentType" | "contentLink" | "wordCount" | "compIds" | "changes",
       unknown
     >>,
     opts?: { restoring?: boolean },
