@@ -20,7 +20,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
 import { PortalMenu } from "./PortalMenu";
-import { BrandDatePicker } from "../forms/BrandDatePicker";
 import { useConfirmAsk } from "./ConfirmAsk";
 import { useTodoToast } from "./useTodoToast";
 import { useScriptAllyDb } from "../../lib/db";
@@ -28,24 +27,26 @@ import { noteMenu, MenuLeaf } from "../../lib/todoMenu";
 import { TagPicker } from "./TagPicker";
 import { useTagWrites } from "./useTagWrites";
 import {
-  noteColour, sortNotes, noteReceipt, firstTagLabel, composerWithColour, editCommit, emptyDraft, noteTagChips,
-  noteMatchesSearch, paperHex, NOTE_PAPERS, NoteDraft,
+  noteColour, sortNotes, noteReceipt, firstTagLabel, editCommit, noteTagChips, noteMatchesSearch, paperHex, paperOf, NOTE_COLOURS,
 } from "../../lib/noteboard";
 import { newTag } from "../../lib/todoTags";
 import {
-  boardPrefs, chipCounts, dropOrder, glance as glanceOf, inGlance, linkOf, piles as pilesOf, sortBoard, tagsForPile,
-  type BoardSort, type BoardView, type GlanceKey,
+  boardPrefs, chipCounts, dropOrder, glance as glanceOf, inGlance, linkFields, linkOf, piles as pilesOf, sortBoard, tagsForPile,
+  type BoardSort, type BoardView, type GlanceKey, type NoteLink,
 } from "../../lib/corkboard";
 import { agentPrimary } from "../../lib/agentDisplay";
 import { openAgentCard } from "../../lib/agentCardStore";
 import { openQueryPanel } from "../../lib/queryPanelStore";
 import { loadHoldForReview, onlyForReview } from "../../lib/corkboardReviewAid";
-import { UserTask } from "../../types";
+import { NoteColour, UserTask } from "../../types";
 import { formatDate } from "../../lib/dates";
 import { CbHeader } from "./corkboard/CbHeader";
 import { CbToolRow } from "./corkboard/CbToolRow";
 import { CbWall, type WallNote } from "./corkboard/CbWall";
 import { CbPiles } from "./corkboard/CbPiles";
+import { CbNoteDialog, type NoteDraftV2 } from "./corkboard/CbNoteDialog";
+import { CbAddTask, CbTurnTask, todayLocal } from "./corkboard/CbTaskDialogs";
+import { BLANK_DRAFT, dayLabel, dueOf, type ComposeDraft } from "./v5/ComposeCard";
 import { noteWords, type PostItLink } from "./corkboard/CbPostIt";
 import "./tasksLayout.css";
 import "./taskChrome.css";
@@ -109,9 +110,11 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
   const [menu, setMenu] = useState<{ note: UserTask; anchor: HTMLElement } | null>(null);
   const [taskFor, setTaskFor] = useState<UserTask | null>(null);
   const [tagsFor, setTagsFor] = useState<UserTask | null>(null);
-  const [dateDraft, setDateDraft] = useState("");
-  const [compose, setCompose] = useState<(NoteDraft & { id?: string }) | null>(null);
+  const [compose, setCompose] = useState<NoteDraftV2 | null>(null);
+  const [composeTag, setComposeTag] = useState(false); // open the pop-up with the tag field focused (Change tag…)
   const [saving, setSaving] = useState(false);
+  const [taskDraft, setTaskDraft] = useState<ComposeDraft | null>(null);
+  const [fresh, setFresh] = useState<string | null>(null);
   /** Piles: the open pile's tag ("" is Loose notes), or null for All piles */
   const [openPile, setOpenPile] = useState<string | null>(null);
 
@@ -142,15 +145,25 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
   const userTags = currentUser?.tags ?? [];
   const tagLabel = (id: string) => userTags.find((t) => t.id === id)?.label ?? id;
 
-  /* the To-do list's own composer, by its one-shot key (Part E hosts it on this page) */
-  const openTaskComposer = () => {
-    try { sessionStorage.setItem("sa.todoCompose", "task"); } catch { /* private mode */ }
-    onNavigatePath("/todo");
-  };
+  /* ⚠️ "ADD A TASK" IS THE TO-DO LIST'S OWN COMPOSER, opened here in task mode (Part E) */
+  const openTaskComposer = () => setTaskDraft({ ...BLANK_DRAFT, mode: "task" });
 
   const { createTagDef, applyTagToggle } = useTagWrites(flash);
-  const openComposer = (seed?: Partial<NoteDraft>) => setCompose({ ...emptyDraft(), ...seed });
-  const openEditor = (n: UserTask) => setCompose({ id: n.id, body: n.text, colour: noteColour(n), tag: firstTagLabel(n, userTags) });
+  /* a new note takes the last paper used this session, unless it was started from a swatch */
+  const LAST = "sa.cb2LastColour";
+  const lastColour = (): NoteColour => {
+    try { const v = sessionStorage.getItem(LAST); return (NOTE_COLOURS as readonly string[]).includes(v ?? "") ? (v as NoteColour) : "butter"; } catch { return "butter"; }
+  };
+  const openComposer = (colour?: NoteColour) => {
+    setComposeTag(false);
+    /* in an open pile, a new note starts in that pile */
+    const tag = view === "piles" && openPile ? tagLabel(openPile) : "";
+    setCompose({ body: "", colour: colour ?? lastColour(), tag, link: null });
+  };
+  const openEditor = (n: UserTask, focusTag = false) => {
+    setComposeTag(focusTag);
+    setCompose({ id: n.id, body: n.text, colour: noteColour(n), tag: firstTagLabel(n, userTags), link: linkOf(n) });
+  };
 
   /** The typed tag → a real TagDef id, minted through the app's own minter when new. */
   const resolveTag = async (raw: string): Promise<string[] | undefined> => {
@@ -172,12 +185,17 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
     setSaving(true);
     try {
       const tagIds = await resolveTag(compose.tag);
-      const id = await addUserTask({ text: body, ...(tagIds ? { tags: tagIds } : {}) });
+      const l = compose.link;
+      const link = l ? (l.kind === "agent" ? { agentId: l.id } : l.kind === "query" ? { queryId: l.id } : { manuscriptId: l.id }) : {};
+      const id = await addUserTask({ text: body, ...(tagIds ? { tags: tagIds } : {}), ...link });
       if (id && compose.colour !== "butter") {
         const landed = await setUserTaskColour(id, compose.colour);
         if (!landed) flash("Pinned — but the colour didn’t save. It’s butter for now.");
       }
+      try { sessionStorage.setItem(LAST, compose.colour); } catch { /* private mode */ }
       setCompose(null);
+      if (id) { setFresh(id); setSearch(""); setTagSel(null); setSpecial(null); }
+      flash("Pinned");
     } catch {
       flash("Couldn’t pin that — try again?");
     } finally {
@@ -201,9 +219,16 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
       const typed = compose.tag.trim().replace(/^#/, "");
       if (typed.toLowerCase() !== firstTagLabel(note, userTags).toLowerCase()) {
         if (!typed) await updateUserTask(note.id, { tags: null });
-        else { const ids = await resolveTag(typed); if (ids) await updateUserTask(note.id, { tags: ids }); }
+        else { const ids = await resolveTag(typed); if (ids) await updateUserTask(note.id, { tags: [...ids, ...(note.tags ?? []).slice(1).filter((t) => t !== ids[0])] }); }
       }
+      /* the link: written only when it changed, and at most one is ever set (linkFields clears the other two). A dated
+         note's To-do row reads the link from this same document, so it follows on the next snapshot. */
+      const was = linkOf(note);
+      const now: NoteLink | null = compose.link;
+      if ((was?.kind ?? "") !== (now?.kind ?? "") || (was?.id ?? "") !== (now?.id ?? "")) await updateUserTask(note.id, linkFields(now));
+      try { sessionStorage.setItem(LAST, compose.colour); } catch { /* private mode */ }
       setCompose(null);
+      flash("Saved");
     } catch {
       flash("Couldn’t save that — try again?");
     } finally {
@@ -212,18 +237,17 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
   };
 
   /** ⚠️ THE PAPER IS STAMPED BEFORE THE DATE (a dated note keeps its board place by its paper). */
-  const makeTask = async () => {
-    if (!taskFor || !dateDraft) return;
+  const makeTask = async (due: string) => {
+    if (!taskFor || !due) return;
     const note = taskFor;
     try {
       if (note.colour === undefined) {
         const landed = await setUserTaskColour(note.id, "butter");
         if (!landed) { flash("Couldn’t set that up — the note’s paper wouldn’t save. Try again?"); return; }
       }
-      await updateUserTask(note.id, { dueDate: dateDraft });
+      await updateUserTask(note.id, { dueDate: due });
       setTaskFor(null);
-      setDateDraft("");
-      flash(`On your to-do list for ${formatDate(new Date(dateDraft), { day: "numeric", month: "short" })}. The note stays here.`, {
+      flash(`On your to-do list for ${dayLabel(due)}. The note stays here.`, {
         label: "Undo", fn: async () => { await updateUserTask(note.id, { dueDate: null }); flash("Taken off your to-do list. The note stays here."); },
       });
     } catch {
@@ -254,10 +278,37 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
     const note = menu.note;
     setMenu(null);
     if (item.id === "edit-task") openEditor(note);
-    if (item.id === "make-task") { setTaskFor(note); setDateDraft(""); }
+    if (item.id === "make-task") setTaskFor(note);
     if (item.id === "detach-task") void detachTask(note);
     if (item.id === "tags") setTagsFor(note);
     if (item.id === "delete-task") void deleteNote(note);
+  };
+
+  /* ── Add a task: the To-do list's own composer; the write is the To-do list's own create, field for field (CB9) ── */
+  const todayYmd = todayLocal();
+  const saveTask = async (): Promise<boolean> => {
+    const d = taskDraft;
+    if (!d) return false;
+    const isTask = d.mode === "task";
+    const due = isTask ? dueOf(d, todayYmd) : null;
+    const text = d.text.trim();
+    if (!text || (isTask && !due)) return false;
+    const id = "task-" + Math.random().toString(36).slice(2, 11);
+    try {
+      const link = d.link ? (d.link.kind === "query" ? { queryId: d.link.id } : d.link.kind === "agent" ? { agentId: d.link.id } : { manuscriptId: d.link.id }) : {};
+      const got = await addUserTask({
+        id, text, ...(d.detail.trim() ? { detail: d.detail.trim() } : {}), ...(isTask ? { dueDate: due!, surfaceOffset: d.surface } : {}),
+        ...link, ...(d.tags.length ? { tags: d.tags } : {}),
+      });
+      if (!got) return false;
+      if (!isTask && paperOf(d.paper) !== "butter") await setUserTaskColour(id, paperOf(d.paper));
+    } catch {
+      return false;
+    }
+    setTaskDraft(null);
+    if (isTask) flash(`Added to your to-do list, due ${dayLabel(due!)}`, { label: "Open To-do list", fn: async () => { onNavigatePath("/todo"); } }, 4200);
+    else flash("Pinned to your corkboard");
+    return true;
   };
 
   /* ── the wall: one drop, one `order` write ── */
@@ -319,6 +370,13 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
     const name = m?.title || "Your manuscript";
     return { kind: "manuscript", initials: initials(name), name };
   };
+  const linkFor = (l: NoteLink): PostItLink & { sub: string } => {
+    const v = linkView({ agentId: l.kind === "agent" ? l.id : undefined, queryId: l.kind === "query" ? l.id : undefined, manuscriptId: l.kind === "manuscript" ? l.id : undefined } as UserTask)!;
+    const sub = l.kind === "manuscript" ? "Your manuscript"
+      : l.kind === "agent" ? (agents.find((a) => a.id === l.id)?.agency ?? "Agent")
+      : (() => { const q = queries.find((x) => x.id === l.id); return q ? String(q.status) : "Query"; })();
+    return { ...v, sub };
+  };
   const openLink = (n: UserTask) => {
     const l = linkOf(n);
     if (!l) return;
@@ -361,31 +419,9 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
               glance={glanceOf(board)}
               special={special}
               onSpecial={(k) => setSpecial((cur) => (cur === k ? null : k))}
-              onNew={(c) => openComposer(c ? { colour: c } : undefined)}
+              onNew={(c) => openComposer(c)}
               onTask={openTaskComposer}
             />
-            {compose ? (
-              <div className="nb-compose cb2-v1compose" style={{ background: paperHex(compose.colour) }}>
-                <textarea className="nb-body nb-ta" value={compose.body} autoFocus rows={Math.max(3, compose.body.split("\n").length)}
-                  placeholder="Write it down before it goes…" aria-label={compose.id ? "Edit the note" : "Note"} disabled={saving}
-                  onChange={(e) => setCompose({ ...compose, body: e.target.value })} onKeyDown={(e) => { if (e.key === "Escape") setCompose(null); }} />
-                <div className="nb-crow">
-                  <div className="nb-swatches">
-                    {NOTE_PAPERS.map((p) => (
-                      <button key={p.v} type="button" className="nb-sw" style={{ background: p.hex }} aria-label={p.name} aria-pressed={compose.colour === p.v}
-                        onClick={() => setCompose(composerWithColour(compose, p.v))} />
-                    ))}
-                  </div>
-                  <input className="nb-taginput" value={compose.tag} placeholder="#tag" aria-label="Tag" disabled={saving}
-                    onChange={(e) => setCompose({ ...compose, tag: e.target.value.replace(/^#/, "") })} />
-                  <div className="nb-cactions">
-                    <button type="button" className="nb-ccancel" disabled={saving} onClick={() => setCompose(null)}>Cancel</button>
-                    <button type="button" className="nb-csave" disabled={(!compose.id && !compose.body.trim()) || saving}
-                      onClick={() => void (compose.id ? saveEdit() : pinNote())}>{compose.id ? "Save" : "Pin it"}</button>
-                  </div>
-                </div>
-              </div>
-            ) : null}
             {empty ? null : (
               <>
                 <CbToolRow
@@ -429,6 +465,7 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
                   ) : (
                     <CbWall
                       notes={board.map((n) => wallNote(n, true))}
+                      fresh={fresh}
                       draggable={!phone}
                       menuFor={menu?.note.id ?? null}
                       onOpen={(id) => { const n = userTasks.find((t) => t.id === id); if (n) openEditor(n); }}
@@ -457,19 +494,38 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
       )}
 
       {taskFor && (
-        <div className="cal-dayscrim" onClick={() => setTaskFor(null)}>
-          <div className="nb-scope cal-daypanel nb-taskpanel" role="dialog" aria-label="Turn into a task" onClick={(e) => e.stopPropagation()}>
-            <div className="cal-dayhead">
-              Turn into a task
-              <button type="button" className="cal-dayx" aria-label="Close" onClick={() => setTaskFor(null)}>✕</button>
-            </div>
-            <BrandDatePicker value={dateDraft} onChange={setDateDraft} placeholder="Choose a date" />
-            <div className="nb-cactions">
-              <button type="button" className="nb-ccancel" onClick={() => setTaskFor(null)}>Cancel</button>
-              <button type="button" className="nb-csave" disabled={!dateDraft} onClick={() => void makeTask()}>Add to tasks</button>
-            </div>
-          </div>
-        </div>
+        <CbTurnTask todayYmd={todayYmd} hex={paperHex(taskFor.colour)} text={taskFor.text} onSave={(due) => void makeTask(due)} onClose={() => setTaskFor(null)} />
+      )}
+
+      {compose && (
+        <CbNoteDialog
+          draft={compose}
+          setDraft={setCompose}
+          saving={saving}
+          added={`Added ${dayMon(new Date().toISOString())}`}
+          linkView={linkFor}
+          queries={queries}
+          agents={agents}
+          manuscripts={manuscripts}
+          focusTag={composeTag}
+          onSave={() => void (compose.id ? saveEdit() : pinNote())}
+          onClose={() => setCompose(null)}
+        />
+      )}
+
+      {taskDraft && (
+        <CbAddTask
+          todayYmd={todayYmd}
+          draft={taskDraft}
+          setDraft={setTaskDraft}
+          queries={queries}
+          agents={agents}
+          manuscripts={manuscripts}
+          userTags={userTags}
+          onCreateTag={(t) => void createTagDef(t)}
+          onSave={saveTask}
+          onClose={() => setTaskDraft(null)}
+        />
       )}
 
       {tagsFor && (

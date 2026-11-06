@@ -194,7 +194,7 @@ describe("⚠️ tags survive note→task conversion — the date is the door, t
        copy is GONE, not shadowed. The claim throughout: a writer filtering #agents on the To-do
        board must not lose the task they made from an #agents note. */
     const make = sliceBetween(noteboard, "const makeTask", "const detachTask");
-    expect(make).toContain("updateUserTask(note.id, { dueDate: dateDraft })");
+    expect(make).toContain("updateUserTask(note.id, { dueDate: due })"); // RE-POINTED (Corkboard v2)
     expect(make).not.toContain("tags");
     expect(noteboard).not.toContain("projectedTaskId");
   });

@@ -68,6 +68,24 @@ export const surfaceDay = (dueYmd: string, s: SurfaceOffset) => plus(dueYmd, -(S
 const PAPERS: { v: StoredNoteColour; label: string }[] = [{ v: "yellow", label: "Yellow" }, { v: "pink", label: "Pink" }, { v: "sage", label: "Sage" }];
 const PAPER_BG: Partial<Record<StoredNoteColour, string>> = { yellow: "#f8f0dc", pink: "#f6e2dc", sage: "#e3ebdf" };
 
+/**
+ * The link finder's options: queries (named by their agent), then agents, then manuscripts, filtered by `find` and
+ * capped at 40. Exported so the Corkboard's note pop-up uses THIS finder rather than a second one (Corkboard v2).
+ */
+export function linkOptions(queries: Query[], agents: Agent[], manuscripts: Manuscript[], find: string): ComposeLink[] {
+  const q = find.trim().toLowerCase();
+  const out: ComposeLink[] = [
+    ...queries.map((x) => {
+      const a = agents.find((y) => y.id === x.agentId);
+      const name = (a?.name || a?.agency || "A query").trim();
+      return { kind: "query" as const, id: x.id, label: name, sub: [a?.agency, String(x.status)].filter(Boolean).join(" · ") };
+    }),
+    ...agents.map((a) => ({ kind: "agent" as const, id: a.id, label: (a.name || a.agency || "An agent").trim(), sub: [a.agency, "Agent"].filter(Boolean).join(" · ") })),
+    ...manuscripts.map((m) => ({ kind: "manuscript" as const, id: m.id, label: m.title || "A manuscript", sub: "Manuscript" })),
+  ];
+  return (q ? out.filter((l) => `${l.label} ${l.sub}`.toLowerCase().includes(q)) : out).slice(0, 40);
+}
+
 /** the inline month calendar: Monday first, past days disabled — and, with `max`, every day after it (a snooze's cap) */
 export const MonthCal: React.FC<{ todayYmd: string; value: string | null; onPick: (ymd: string) => void; max?: string | null; min?: string }> = ({ todayYmd, value, onPick, max = null, min }) => {
   const [anchor, setAnchor] = useState(() => { const d = dayOf(value ?? todayYmd); return new Date(d.getFullYear(), d.getMonth(), 1, 12); });
@@ -152,19 +170,7 @@ export const ComposeCard: React.FC<ComposeCardProps> = ({ todayYmd, draft, setDr
     if (!ok) setFailed(true);
   };
 
-  const links = useMemo(() => {
-    const q = find.trim().toLowerCase();
-    const out: ComposeLink[] = [
-      ...queries.map((x) => {
-        const a = agents.find((y) => y.id === x.agentId);
-        const name = (a?.name || a?.agency || "A query").trim();
-        return { kind: "query" as const, id: x.id, label: name, sub: [a?.agency, String(x.status)].filter(Boolean).join(" · ") };
-      }),
-      ...agents.map((a) => ({ kind: "agent" as const, id: a.id, label: (a.name || a.agency || "An agent").trim(), sub: [a.agency, "Agent"].filter(Boolean).join(" · ") })),
-      ...manuscripts.map((m) => ({ kind: "manuscript" as const, id: m.id, label: m.title || "A manuscript", sub: "Manuscript" })),
-    ];
-    return (q ? out.filter((l) => `${l.label} ${l.sub}`.toLowerCase().includes(q)) : out).slice(0, 40);
-  }, [find, queries, agents, manuscripts]);
+  const links = useMemo(() => linkOptions(queries, agents, manuscripts, find), [find, queries, agents, manuscripts]);
 
   const surfaceSay = SURFACE.find((x) => x.v === d.surface)?.say ?? "on the day";
   const consequence = isTask

@@ -92,7 +92,7 @@ describe("⚠️ 'THE DATE IS THE DOOR' IS RETIRED — the board projects a task
        the date goes onto the note, ONE document renders one row everywhere, and the board keeps
        the note because the conversion stamps its paper. noteboardTask.test.ts holds the one-row
        probe against the To-do board's own selector. */
-    expect(page).toContain("updateUserTask(note.id, { dueDate: dateDraft })");
+    expect(page).toContain("updateUserTask(note.id, { dueDate: due })"); // RE-POINTED (Corkboard v2): the panel hands the date in
     expect(page).not.toContain("projectedTaskId");
     expect(page).not.toContain("give-date");   // the RETIRED door stays retired — this is not it back
   });
@@ -112,7 +112,8 @@ describe("⚠️ 'THE DATE IS THE DOOR' IS RETIRED — the board projects a task
 
   it("the menu's door says so: Turn into a task…", () => {
     expect(page).toContain('item.id === "make-task"');
-    expect(page).toContain("Add to tasks");
+    /* RE-POINTED (Corkboard v2): the panel's button is v13's "Add to my to-do list" */
+    expect(readFileSync(join(here, "corkboard/CbTaskDialogs.tsx"), "utf8")).toContain("Add to my to-do list");
   });
 });
 

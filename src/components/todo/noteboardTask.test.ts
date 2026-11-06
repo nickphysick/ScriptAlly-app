@@ -105,7 +105,7 @@ describe("⚠️ the conversion and its inverse are ONE FIELD each way", () => {
     expect(page.indexOf("const makeTask")).toBeGreaterThan(-1);
     const body = fn.slice(0, fn.indexOf("\n  };"));
     const stampAt = body.indexOf("setUserTaskColour");
-    const dateAt = body.indexOf("dueDate: dateDraft");
+    const dateAt = body.indexOf("dueDate: due"); // RE-POINTED (Corkboard v2): the panel hands the date in
     expect(stampAt).toBeGreaterThan(-1);
     expect(dateAt).toBeGreaterThan(-1);
     expect(stampAt).toBeLessThan(dateAt);
@@ -137,7 +137,9 @@ describe("⚠️ the projection is GONE, not shadowed", () => {
       expect(page, dead).not.toContain(dead);
     }
     /* the popover keeps its verbatim copy and loses its Task field — one object, one text */
-    expect(page).toContain("Turn into a task");
+    /* RE-POINTED (Corkboard v2): the panel is CbTurnTask, opened by the menu's make-task */
+    expect(readFileSync(join(here, "corkboard/CbTaskDialogs.tsx"), "utf8")).toContain("Turn into a task");
+    expect(page).toContain("<CbTurnTask");
     /* RE-POINTED (Corkboard v2): the panel's sentence is v13's (Part E); v4's mentioned the retired calendar */
     expect(page).not.toContain("nb-task-title");
   });
