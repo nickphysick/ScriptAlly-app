@@ -6,7 +6,8 @@ menu, an empty page of examples and a phone layout. Five new papers (Butter, Blu
 yellow, pink and sage, which are mapped when read and never rewritten.
 
 Branch `corkboard-v2`, one commit per part (A–H) and one for the locks and this report (I), on
-`6ef04863f` — the branch dev served (§2). **Not merged to `main`.**
+`6ef04863f` — the branch dev served when I started (§2). **Not merged to `main`.** Dev now serves it from the
+integration branch `dev/…-qc1522-td51-td511-cb2` (§9), which also carries To-do v51.1 and needed re-pointing (§2b).
 
 ---
 
@@ -29,25 +30,33 @@ Branch `corkboard-v2`, one commit per part (A–H) and one for the locks and thi
 4. **The `HeroCard` in the brief is the dashboard's** (NotesLab), not the marketing hero. **`NotesPane.tsx` reads no
    colour at all**, so it needed nothing and was not touched.
 5. **A note's link could not change after it was made.** The update rule's `affectedKeys` did not list
-   `agentId`/`queryId`/`manuscriptId`, and Part A did not name the change. Asked; you ruled to widen it. Checked as
-   you asked: the To-do list reads the link live from the same document (`trayItem` takes `userTask.agentId` from
-   the same `userTasks` snapshot; `userCard` reads `t.agentId` / `t.manuscriptId`), so a changed agent or manuscript
-   link shows there on the next snapshot. **Gap, not fixed (`/todo` is out of bounds): a link to a QUERY never shows
-   on the To-do row** — the own-task row reads `agentId` only. That predates this work.
+   `agentId`/`queryId`/`manuscriptId`, and Part A did not name the change. Asked; you ruled to widen it, and to
+   confirm the To-do list reads the link live from the same document. **On the dev line (To-do v51.1) it does**:
+   the workspace's own-task view reads `task.queryId` / `task.agentId` from the same `userTasks` snapshot
+   (`ws/WsOwnTask`), so a changed agent or query link shows there on the next snapshot, with no copy. **Gap, not
+   fixed (`/todo` is out of bounds): a MANUSCRIPT link never shows on the To-do row** — v51's view and its own
+   picker know agents and queries only. (On the corkboard-v2 branch, the older v5.1 desk, it was the other way
+   round: agent and manuscript showed, query did not.) v51 stores a query link as `queryId` + its `agentId`; the
+   Corkboard reads the query first, so the two pages name the same link.
 6. **"Four example post-its from `NOTE_EXAMPLES`" and screen 09 disagree.** The ref's four are shortened rewrites
    of four `NOTE_EXAMPLES` entries. Built from the data, as the brief says: the same four entries, in the ref's
    order, so the words are longer and the papers are the data's (Butter, Butter, Blush, Blush), not the ref's.
-7. **The To-do composer is fuller than screen 06.** "Add a task" hosts the To-do list's own `ComposeCard`, which
-   keeps every question (the Task / Note switch, "When should it come to the top of your tray?", tags), so it is
-   longer than the ref's simplified dialog. Its writes are the To-do list's own (CB9).
+7. **The To-do composer is not screen 06 — and on the dev line it is a different composer.** On the branch, "Add a
+   task" hosts the v5.1 desk's `ComposeCard` (fuller than the ref: Task/Note, surfacing, tags). **To-do v51 deleted
+   that card**, so on the dev line it hosts v51's own "A new task" form (words, Today / Tomorrow / Next week / A
+   date…, notes), exported from `ws/TodoWorkspace` with no visual change. Either way its writes are the To-do
+   list's own (CB9). The new form takes no tags and no link.
 8. **The phone already had its own Corkboard.** Phone app v2 (Part 5C) routed phones to `CorkPhone`. Screen 10
    draws this page on a phone, so `/todo/corkboard` is now one page at every width; `CorkPhone.tsx` and PA2-5's
    Corkboard case are retired.
 9. **The folder tab already read "TASKS Corkboard"** (the nav table's section plus the route label). No shell edit.
 10. **The keyboard sheet shows every scope on every page.** `N` is added under a new "Corkboard" scope.
-11. **The link finder lived inside `ComposeCard`.** It is exported as a pure `linkOptions(...)` that ComposeCard
-    now calls too, so the note pop-up uses the same finder. That is an edit to a `/todo` file outside Part H, with
-    no visible change on `/todo`.
+11. **The link finder lived inside `ComposeCard`.** On the branch it is exported from there; on the dev line, where
+    `ComposeCard` is gone, the same function lives in `lib/corkboard.ts`. Both are edits outside Part H with no
+    visible change on `/todo`.
+16. **Part H has no subject on the dev line.** v51's composer makes dated tasks only and offers no paper, so there
+    is no Note mode on `/todo` to give five colours. CB13 is skipped there with that reason; it stands (and was
+    red on its break) on the branch.
 12. **Turn into a task stamps Butter, not yellow,** on a note with no colour (the paper is still written before the
     date, so the note keeps its board place).
 13. **"linked to agents" counts any link**, as the ref does (`n.link` of any kind), so a query or manuscript link
@@ -65,6 +74,16 @@ Built here, it gave `index-C53uvdXY.js`, the bundle dev was serving.
 Baseline before any edit: `tsc` clean; `npm run build` and `npm run build:dev` clean (no errors or warnings in the
 logs); Vitest 11,427 passed / 3 skipped, **2 failed** — both in `src/test/firestoreTarget.test.ts`, red on the base
 and on every commit since (the known-red set).
+
+## 2b. The dev line
+
+To-do v51.1 (`8b23dee26`, 13 commits past my base) reached dev while I built. Merging into it:
+- **Deleted by v51, edited by me:** `v5/ComposeCard.tsx`, `v5/TodoTray.tsx`, `v5/todoV5.css`. Taken as deleted;
+  the Corkboard re-pointed to v51's form (false premise 7) and the helpers moved into `lib/corkboard.ts`.
+- **Conflicts, each the union of both sides:** `firestore.rules` (v50 added `steps` and an updatable query/agent
+  link; I added `pinned`, the five papers and the manuscript link), `db.tsx` `updateUserTask`, and four tests.
+- On the merged tree: tsc, `npm run build` and `build:dev` clean; Vitest the same two known `firestoreTarget`
+  reds; locks CB1–CB12 and CB14 green, CB13 skipped; CB9's new break (a colour on the task) red.
 
 ## 3. Recon (§0)
 
@@ -129,7 +148,8 @@ ArtSlot brief (registered, unused), the `nb-` styles in `todoNoteboard.css` that
 
 ## 7. Rules — the prod change for you
 
-Dev is deployed (§9). **Prod is yours** — `firestore.rules`, three edits:
+Dev is deployed (§9). **Prod is yours** — `firestore.rules`, three edits (mine only; the dev line also carries
+To-do v50's `steps` and query/agent link, which are that pack's):
 
 1. `isValidUserTask`: `hasOnly([...])` gains `'pinned'`.
 2. `isValidUserTask`: the colour check takes
@@ -172,7 +192,15 @@ rules are checked separately in §9.
 
 ## 9. Deploy
 
-**DEPLOY_RESULTS**
+From the integration branch `dev/qc1511-…-qc1522-td51-td511-cb2` (`b6323dbaa`), in a clean scratch worktree.
+
+- **Rules:** `firebase deploy --only firestore:rules --config firebase.dev.json --project scriptally-dev`. Release
+  `updateTime` moved 13:05:38 → **15:40:04 UTC** (ruleset `a3c7b209`). Probe after a wait
+  (`ALLOW_LIVE_FIRESTORE=1 node tests/e2e/seedCorkboardV2.mjs rules`): the eight papers, `pinned` and a link change
+  accepted, `green` refused.
+- **Hosting:** dev served `index-c89gelcz.js` (To-do v51.1, which the integration branch contains), checked
+  immediately before deploying. `npm run build:dev` → `index-yuVLXxZt.js`; deployed; **dev now serves
+  `index-yuVLXxZt.js`.**
 
 ## 10. Screenshots
 
@@ -197,6 +225,7 @@ numbering.
 ## 11. Open, for you
 
 - Whether the dashboard desk notes (NotesLab) move to the five papers (false premise 3).
-- A query link on a dated note doesn't show on the To-do row (false premise 5).
+- A manuscript link on a dated note doesn't show on the To-do row on the dev line (false premise 5).
+- At merge to `main`, the Corkboard must follow whichever To-do composer `main` has (false premise 7).
 - The header ring's drawing: set `CORKBOARD_RING_ART` in `lib/corkboard.ts` when it arrives.
 - Prod rules (§7).
