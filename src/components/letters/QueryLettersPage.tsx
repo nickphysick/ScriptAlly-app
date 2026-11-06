@@ -26,6 +26,7 @@ import {
 } from "../../lib/queryLetters";
 import { LetterCard, NewLetterTile } from "./LetterCard";
 import { LandingBand } from "./LandingBand";
+import { LetterDrawer, type DrawerMode } from "./LetterDrawer";
 import "../shell/lightHeader.css";
 import "./queryLetters.css";
 
@@ -71,7 +72,8 @@ export const QueryLettersPage: React.FC<{ active?: boolean }> = ({ active = true
 
   const [showRetired, setShowRetired] = useState(false);
   const [picker, setPicker] = useState(false);
-  const [openId, setOpenId] = useState<string | null>(null);
+  const [mode, setMode] = useState<DrawerMode>(null);
+  const setOpenId = (id: string) => setMode({ kind: "letter", id });
   const pickRef = useRef<HTMLDivElement>(null);
   useEscapeLayer(picker && active, () => setPicker(false), ESC_LEVEL.page);
   useEffect(() => {
@@ -91,8 +93,7 @@ export const QueryLettersPage: React.FC<{ active?: boolean }> = ({ active = true
     void updateManuscriptQuiet(ms.id, { inUseLetterId: id });
   };
   const jump = () => document.getElementById("ql-landing")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  const newLetter = () => setOpenId("new");
-  void openId;
+  const newLetter = () => setMode({ kind: "new", from: null });
 
   return (
     <div className="qlp" data-ql="page">
@@ -176,6 +177,7 @@ export const QueryLettersPage: React.FC<{ active?: boolean }> = ({ active = true
         )}
       </section>
 
+      <LetterDrawer mode={mode} setMode={setMode} ms={ms} facts={facts} live={live} inUseId={use?.id ?? null} firstId={firstId} routeActive={active} />
       <LandingBand facts={live.map((v) => facts.get(v.id)!).concat(retired.map((v) => facts.get(v.id)!))} inUseId={use?.id ?? null} firstId={firstId} onOpen={setOpenId} />
     </div>
   );

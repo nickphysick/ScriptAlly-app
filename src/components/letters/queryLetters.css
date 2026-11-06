@@ -144,3 +144,80 @@
   .qlp > .qlb { margin-inline: -16px; padding-inline: 16px; }
   .qlb-tbar { width: 70px; }
 }
+
+/* Part C — the letter drawer. ⚠️ HalfDrawer PORTALS TO document.body, so nothing here may sit under `.qlp`: every rule
+   is scoped to the drawer's own probe, and it hands inheritance back from brand.tsx itself. */
+.hdr[data-hdr="letter"] { background: #f4eee5; font-family: var(--sp-serif); color: #1c130f; }
+.hdr[data-hdr="letter"] :where(span, p, div, b, i, em, small, button, a, label, li, ul, input, textarea) { font-family: inherit; }
+.hdr[data-hdr="letter"] :is(h3, h4, p) { margin: 0; }
+.hdr[data-hdr="letter"] button { cursor: pointer; }
+.hdr[data-hdr="letter"] .hdr-head { background: #2a3a52; color: #f4eee5; }
+.qld-h { position: relative; display: flex; gap: 16px; padding: 22px 24px 0; }
+.qld-ic { flex: none; width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; background: #f4eee5; color: #2a3a52; }
+.qld-ic svg { width: 22px; height: 22px; }
+.qld-ht { flex: 1; min-width: 0; padding-bottom: 18px; }
+.hdr h3.qld-title.qld-title { font: 400 26px/1.1 var(--sp-serif) !important; color: #f4eee5; padding-right: 40px; overflow-wrap: anywhere; }
+.qld-sub { display: block; margin-top: 6px; font-style: italic; font-size: 15px; color: rgba(244, 238, 229, .72); }
+.qld-tabs { display: flex; gap: 8px; margin-top: 16px; }
+.qld-tabs button { height: 34px; padding: 0 16px; border: 0; border-radius: 999px; background: rgba(244, 238, 229, .1); color: rgba(244, 238, 229, .82); font-size: 15px; }
+.qld-tabs button[aria-selected="true"] { background: #f4eee5; color: #1c130f; }
+.qld-x { position: absolute; top: 18px; right: 18px; width: 36px; height: 36px; border: 0; border-radius: 50%; display: grid; place-items: center; background: rgba(244, 238, 229, .1); color: #f4eee5; }
+.qld-x svg { width: 18px; height: 18px; }
+.hdr[data-hdr="letter"] :is(button, input, textarea):focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.qld-tabs button:focus-visible, .qld-x:focus-visible { outline-color: #f4eee5 !important; }
+.qld-db { padding: 22px 28px 28px; }
+.qld-sheet { display: block; width: 100%; padding: 28px 32px; background: #fff; border: 0; border-radius: 6px; box-shadow: 0 0 0 1px rgba(28, 19, 15, .1), 0 10px 22px -16px rgba(28, 19, 15, .4);
+  font-size: 16px; line-height: 1.6; color: #1c130f; white-space: pre-wrap; overflow-wrap: anywhere; outline: none; }
+.qld-sheet--edit { resize: vertical; min-height: 320px; box-shadow: 0 0 0 2px #2a3a52, 0 10px 22px -16px rgba(28, 19, 15, .4); }
+.qld-sheet--file { font-style: italic; color: rgba(28, 19, 15, .62); }
+.qld-chg { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; padding: 12px 14px; border-radius: 12px; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, .1); font-size: 14.5px; }
+.qld-chg--root { font-style: italic; color: rgba(28, 19, 15, .62); }
+.hdr .qld-chg-a, .hdr .qld-chg-b { flex: none; max-width: 30%; padding: 5px 10px; border-radius: 8px; font: 400 14px/1.2 var(--sp-type); background: #f2eee8; overflow-wrap: anywhere; }
+.hdr .qld-chg-b { background: #f8e8ea; color: #8f4a5a; }
+.qld-chg-ar { color: rgba(28, 19, 15, .35); display: grid; }
+.qld-chg-ar svg { width: 16px; height: 16px; }
+.qld-chg ul { flex: 1; margin: 0; padding: 0 0 0 16px; color: rgba(28, 19, 15, .78); }
+.qld-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 20px; }
+.hdr .qld-h4 { font: 400 17px/1.2 var(--sp-type); margin-bottom: 10px; }
+.qld-chip { display: inline-flex; align-items: center; gap: 6px; margin: 0 6px 6px 0; padding: 6px 11px; border: 0; border-radius: 999px; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, .14); font-size: 14px; color: #1c130f; }
+.qld-chip svg { width: 14px; height: 14px; color: rgba(28, 19, 15, .55); }
+.qld-chip--pk { background: #2a3a52; color: #f4eee5; box-shadow: none; }
+.qld-chip--pk svg { color: rgba(244, 238, 229, .75); }
+.qld-lnk { display: block; margin-top: 4px; padding: 0; border: 0; background: none; color: #2a3a52; font-size: 14.5px; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(42, 58, 82, .4); }
+.qld-none { font-style: italic; color: rgba(28, 19, 15, .55); font-size: 14.5px; }
+.qld-pad { padding: 30px 6px; }
+.qld-cells { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 24px; }
+.qld-cells div { padding: 14px 16px; background: #fff; border-radius: 12px; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, .1); }
+.hdr .qld-cells b { display: block; font: 400 30px/1 var(--sp-type); }
+.qld-cells span { display: block; margin-top: 6px; font-size: 14px; color: rgba(28, 19, 15, .62); }
+.qld-q { list-style: none; margin: 0 0 10px; padding: 0; background: #fff; border-radius: 12px; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, .1); overflow: hidden; }
+.qld-q li { border-bottom: 1px solid rgba(28, 19, 15, .07); }
+.qld-q li:last-child { border-bottom: 0; }
+.qld-q li > button { display: flex; width: 100%; align-items: center; gap: 12px; padding: 11px 14px; border: 0; background: none; text-align: left; color: inherit; }
+.qld-q li > button:hover { background: #faf6f1; }
+.hdr .qld-qi { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, .25); font: 500 10.5px/1 var(--font-mono); color: #2a3a52; }
+.qld-qn { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.hdr .qld-qn b { font: 400 16px/1.2 var(--sp-type); }
+.qld-qn small { font-style: italic; font-size: 13.5px; color: rgba(28, 19, 15, .58); }
+.hdr .qld-qs { font: 400 14px/1.2 var(--sp-type); text-align: right; }
+.qld-qs--more { color: #a2452a; }
+.qld-qs--no { color: rgba(28, 19, 15, .5); }
+.hdr .qld-qd { flex: none; width: 64px; text-align: right; font: 500 11px/1 var(--font-mono); color: rgba(28, 19, 15, .5); }
+.qld-df { display: flex; align-items: center; gap: 10px; padding: 14px 24px; background: #fff; border-top: 1px solid rgba(28, 19, 15, .1); }
+.qld-dfn { flex: 1; font-size: 14px; line-height: 1.35; color: rgba(28, 19, 15, .6); }
+.hdr .qld-b1, .hdr .qld-b2 { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border: 0; border-radius: 20px; font: 400 14.5px/1 var(--sp-type) !important; white-space: nowrap; }
+.qld-b1 { background: #2d3a50; color: #f4eee5; }
+.qld-b1:hover:not(:disabled) { background: #24324a; }
+.qld-b1:disabled { opacity: .55; cursor: default; }
+.qld-b2 { background: #fff; color: #1c130f; box-shadow: 0 0 0 1px rgba(28, 19, 15, .14), 0 4px 10px -6px rgba(28, 19, 15, .3); }
+.qld-b1 svg, .qld-b2 svg { width: 16px; height: 16px; }
+.qld-f { display: flex; flex-direction: column; gap: 7px; margin-bottom: 18px; }
+.hdr .qld-f > span { font: 400 16px/1 var(--sp-type); }
+.qld-f input { height: 44px; padding: 0 14px; border: 0; border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, .18); font-size: 16px; color: #1c130f; outline: none; }
+.qld-f input:focus { box-shadow: inset 0 0 0 2px #2a3a52; }
+.qld-hint { font-size: 13.5px; font-style: italic; color: rgba(28, 19, 15, .6); }
+.qld-seg { display: flex; gap: 8px; flex-wrap: wrap; }
+.qld-seg button { display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 14px; border: 0; border-radius: 999px; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, .16); font-size: 14.5px; color: #1c130f; }
+.qld-seg button svg { width: 14px; height: 14px; }
+.qld-seg button.on { background: #2a3a52; color: #f4eee5; box-shadow: none; }
+@media (max-width: 767px) { .hdr[data-hdr="letter"] { width: 100% !important; } .qld-meta { grid-template-columns: 1fr; } }
