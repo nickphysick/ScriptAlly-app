@@ -85,7 +85,8 @@ describe("⚠️ ONE document, ONE row — the whole point of the collapse", () 
              the Corkboard does — a plain create, then the paper's own write. It is allowed only because it papers a
              DATELESS note, so "dated ∧ papered" still means Corkboard-made; the guard is asserted below. */
           if (p.endsWith("v5/TodoTray.tsx")) {
-            expect(src, "the desk may paper a note only — never a dated task").toMatch(/if \(!isTask && d\.paper !== "yellow"\) await setUserTaskColour\(/);
+            /* RE-POINTED (Corkboard v2, Part H): absence is butter now, so the desk papers a note whose paper is not butter */
+            expect(src, "the desk may paper a note only — never a dated task").toMatch(/if \(!isTask && d\.paper !== "butter"\) await setUserTaskColour\(/);
             expect(src.match(/setUserTaskColour\(/g)?.length, "one colour write on the desk").toBe(1);
           } else if (!p.endsWith("TodoNoteboardPage.tsx") && !p.endsWith("db.tsx")) offenders.push(p);
         }

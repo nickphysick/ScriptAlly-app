@@ -15,7 +15,8 @@
  *    the link and says it stays.
  */
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import type { Agent, Manuscript, Query, StoredNoteColour, SurfaceOffset, TagDef, UserTask } from "../../../types";
+import type { Agent, Manuscript, NoteColour, Query, SurfaceOffset, TagDef, UserTask } from "../../../types";
+import { NOTE_PAPERS, paperHex } from "../../../lib/noteboard";
 import { TagPicker } from "../TagPicker";
 import { toggleTagSel } from "../../../lib/todoTags";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
@@ -34,9 +35,9 @@ export interface ComposeDraft {
   surface: SurfaceOffset;
   link: ComposeLink | null;
   tags: string[];
-  paper: StoredNoteColour;
+  paper: NoteColour;
 }
-export const BLANK_DRAFT: ComposeDraft = { mode: "task", text: "", detail: "", when: null, date: null, surface: "on-day", link: null, tags: [], paper: "yellow" };
+export const BLANK_DRAFT: ComposeDraft = { mode: "task", text: "", detail: "", when: null, date: null, surface: "on-day", link: null, tags: [], paper: "butter" };
 
 /* ── dates: local days, YYYY-MM-DD ── */
 const ymdOf = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -65,8 +66,9 @@ const SURFACE: { v: SurfaceOffset; label: string; say: string; lead: number }[] 
 /** the day an own task joins the tray (its due day, less the chosen lead) */
 export const surfaceDay = (dueYmd: string, s: SurfaceOffset) => plus(dueYmd, -(SURFACE.find((x) => x.v === s)?.lead ?? 0));
 
-const PAPERS: { v: StoredNoteColour; label: string }[] = [{ v: "yellow", label: "Yellow" }, { v: "pink", label: "Pink" }, { v: "sage", label: "Sage" }];
-const PAPER_BG: Partial<Record<StoredNoteColour, string>> = { yellow: "#f8f0dc", pink: "#f6e2dc", sage: "#e3ebdf" };
+/* Corkboard v2 (Part H): a note's paper is one of the five (Butter, Blush, Powder, Sand, Stone), from the one table in
+   lib/noteboard — the Corkboard's own. Old stored papers are mapped when read (noteColour), never rewritten. */
+const PAPERS = NOTE_PAPERS.map((p) => ({ v: p.v, label: p.name }));
 
 /**
  * The link finder's options: queries (named by their agent), then agents, then manuscripts, filtered by `find` and
@@ -179,7 +181,7 @@ export const ComposeCard: React.FC<ComposeCardProps> = ({ todayYmd, draft, setDr
 
   return (
     <article className="td5-dcard td5-compose" data-td5="compose" data-mode={d.mode} data-work="">
-      <div className="td5-chead" data-td5="desk-head" style={{ background: isTask ? g.tint : PAPER_BG[d.paper], color: g.ink }}>
+      <div className="td5-chead" data-td5="desk-head" style={{ background: isTask ? g.tint : paperHex(d.paper), color: g.ink }}>
         <span className="td5-cn">{edit ? (isTask ? "Edit task" : "Edit note") : isTask ? "New task" : "New note"}</span>
         <span className="td5-why">{isTask ? "From you" : "For your corkboard"}</span>
         <span className="td5-sp" />
@@ -228,7 +230,7 @@ export const ComposeCard: React.FC<ComposeCardProps> = ({ todayYmd, draft, setDr
             <div className="td5-q" data-td5="compose-paper">
               <div className="td5-qh"><b>Paper</b></div>
               <div className="td5-papers">
-                {PAPERS.map((p) => <button key={p.v} type="button" className="td5-paper" data-paper={p.v} aria-pressed={d.paper === p.v} onClick={() => set({ paper: p.v })}>{p.label}</button>)}
+                {PAPERS.map((p) => <button key={p.v} type="button" className="td5-paper" data-paper={p.v} aria-pressed={d.paper === p.v} style={{ background: paperHex(p.v) }} onClick={() => set({ paper: p.v })}>{p.label}</button>)}
               </div>
             </div>
           </>

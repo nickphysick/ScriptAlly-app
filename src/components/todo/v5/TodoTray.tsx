@@ -46,6 +46,7 @@ import { openQueryPanel } from "../../../lib/queryPanelStore";
 import { ESC_LEVEL, escapeDepth, useEscapeLayer } from "../../../lib/escapeStack";
 import { SHORTCUTS, isEditableTarget, matchesShortcut } from "../../../lib/shortcuts";
 import { TODO_OPEN_TASK_KEY } from "../../../lib/corkboard";
+import { noteColour } from "../../../lib/noteboard";
 import { setAsideItems, RULE_TITLE, RULE_PLAIN, type SetAsideItem } from "../../../lib/taskSettings";
 import { useTodoToast } from "../useTodoToast";
 import { useConfirmAsk } from "../ConfirmAsk";
@@ -704,7 +705,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
       : a ? { kind: "agent" as const, id: a.id, label: (a.name || a.agency || "An agent").trim(), sub: [a.agency, "Agent"].filter(Boolean).join(" · ") }
       : m ? { kind: "manuscript" as const, id: m.id, label: m.title || "A manuscript", sub: "Manuscript" } : null;
     return { mode: t.dueDate ? "task" : "note", text: t.text, detail: t.detail ?? "", when: t.dueDate ? "pick" : null, date: t.dueDate ?? null,
-      surface: t.surfaceOffset ?? "on-day", link, tags: t.tags ?? [], paper: t.colour ?? "yellow" };
+      surface: t.surfaceOffset ?? "on-day", link, tags: t.tags ?? [], paper: noteColour(t) };
   };
   /** "+ Add a task", the tray's add row, N, and an own task's Edit: the current journey parks first (§E) */
   const openCompose = (edit: UserTask | null = null) => {
@@ -745,7 +746,7 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
         });
         if (!got) return false;
         /* a note's paper is its own write, never part of the create (the rules' allowlist: db.setUserTaskColour) */
-        if (!isTask && d.paper !== "yellow") await setUserTaskColour(id, d.paper);
+        if (!isTask && d.paper !== "butter") await setUserTaskColour(id, d.paper);
       }
     } catch {
       return false;

@@ -430,12 +430,12 @@ body.td5-parked-here [data-qad-park-chip]:not(.ask) { display: none; }
 .td5-root .td5-calg button:disabled { color: rgba(28, 19, 15, 0.25); cursor: default; }
 .td5-root .td5-calg button[data-today] { box-shadow: inset 0 0 0 1px var(--td5-btn); }
 .td5-root .td5-calg button[aria-pressed="true"] { background: var(--td5-btn); color: var(--td5-cr); }
-.td5-papers { display: flex; gap: 10px; }
+.td5-papers { display: flex; flex-wrap: wrap; gap: 10px; }
 .td5-root .td5-paper { display: flex; align-items: flex-end; box-sizing: border-box; width: 84px; height: 46px; padding: 6px 8px; border: 0; border-radius: 6px; cursor: pointer;
   font: 500 17px/1 Caveat, cursive !important; color: var(--td5-ink); box-shadow: 0 6px 12px -8px rgba(28, 19, 15, 0.4); transform: rotate(-1deg); }
-.td5-root .td5-paper[data-paper="yellow"] { background: #f8f0dc; }
-.td5-root .td5-paper[data-paper="pink"] { background: #f6e2dc; transform: rotate(1deg); }
-.td5-root .td5-paper[data-paper="sage"] { background: #e3ebdf; transform: rotate(-0.5deg); }
+/* Corkboard v2 (Part H): five papers, each button painted from lib/noteboard's NOTE_PAPERS (inline), slightly turned */
+.td5-root .td5-paper:nth-child(2) { transform: rotate(1deg); }
+.td5-root .td5-paper:nth-child(4) { transform: rotate(-0.5deg); }
 .td5-root .td5-paper[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--td5-btn), 0 6px 12px -8px rgba(28, 19, 15, 0.4); }
 .td5-root .td5-addlink { display: inline-flex; align-items: center; height: 38px; padding: 0 16px; border: 1px dashed rgba(28, 19, 15, 0.28); border-radius: 19px; background: none; cursor: pointer; font: 400 15px/1 var(--sp-serif) !important; color: var(--td5-btn); }
 .td5-root .td5-addlink:hover { border-color: var(--td5-btn); background: #f7f9fc; }
