@@ -88,6 +88,36 @@ describe("/materials/letters renders", () => {
     expect(t).not.toMatch(/Query letter v2 The first letter/);
     expect(t).toContain("Not sent yet");
   });
+  it("the band: one sent letter shows its row, early days, and when the comparison begins; never hidden", () => {
+    state.data = {
+      ...base(), manuscripts: [MS()],
+      versions: [L("l1", "Query letter v1", "2026-03-01T10:00:00.000Z"), L("l2", "Query letter v2", "2026-05-20T10:00:00.000Z")],
+      queries: [Q("q1", QueryStatus.QUERIED, { sentVersions: ["l1"] }), Q("q2", QueryStatus.FULL_REQUESTED, { sentVersions: ["l1"] })],
+    };
+    const h = render();
+    const t = text(h);
+    expect(h).toContain('id="ql-landing"');
+    expect(t).toContain("Which letter is landing?");
+    expect(t).toContain("Every query remembers the letter it went with. Here's how each one is doing with agents.");
+    expect((h.match(/data-ql="row"/g) ?? []).length).toBe(1);
+    expect(t).toContain("Early days: only 2 sent");
+    expect(t).toContain("Once a second letter goes out, you'll see them side by side here.");
+    expect(t).toContain("“Asked for more” counts partial and full requests. A letter needs about 15 queries before its rate means much.");
+  });
+  it("the band at fifteen sent: enough to go on, two rows, no single-row line", () => {
+    const qs = Array.from({ length: 15 }, (_, i) => Q(`a${i}`, QueryStatus.QUERIED, { sentVersions: ["l1"] }));
+    state.data = {
+      ...base(), manuscripts: [MS()],
+      versions: [L("l1", "Query letter v1", "2026-03-01T10:00:00.000Z"), L("l2", "Query letter v2", "2026-05-20T10:00:00.000Z")],
+      queries: [...qs, Q("b", QueryStatus.QUERIED, { sentVersions: ["l2"] })],
+    };
+    const h = render();
+    const t = text(h);
+    expect((h.match(/data-ql="row"/g) ?? []).length).toBe(2);
+    expect(t).toContain("Enough to go on");
+    expect(t).toContain("Early days: only 1 sent");
+    expect(t).not.toContain("Once a second letter goes out");
+  });
   it("the route is registered with the router and the shell", () => {
     expect([...WORKSPACE_PATHS]).toContain("/materials/letters");
     expect([...WORKSPACE_SHELL_PATHS]).toContain("/materials/letters");

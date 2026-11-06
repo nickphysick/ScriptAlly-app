@@ -110,3 +110,37 @@
   .qlp-hawk { width: 120px; justify-self: start; }
   .qlp h1.qlp-title.qlp-title { font-size: 34px !important; }
 }
+
+/* Part B — which letter is landing: a full-width navy band (the page's own padding is paid back) */
+.qlp > .qlb { max-width: none; margin: 56px calc(-1 * clamp(20px, 2vw, 32px)) 0; padding: 40px clamp(20px, 2vw, 32px) 48px; background: #2a3a52; scroll-margin-top: 12px; }
+.qlb-in { max-width: 1328px; margin: 0 auto; }
+.qlb-h { display: flex; align-items: center; gap: 18px; color: #f4eee5; margin-bottom: 22px; }
+.qlb-h img { width: 58px; filter: drop-shadow(0 6px 8px rgba(0, 0, 0, .25)); }
+.qlp h2.qlb-title.qlb-title { font: 400 30px/1.1 var(--sp-serif) !important; color: #f4eee5; }
+.qlb-line { margin-top: 6px !important; font-size: 16px; color: rgba(244, 238, 229, .72); }
+.qlb-card { background: #fff; border-radius: 18px; padding: 8px 8px 0; box-shadow: 0 18px 36px -20px rgba(0, 0, 0, .5); overflow-x: auto; }
+.qlb-table { width: 100%; border-collapse: collapse; }
+.qlb-table thead th { padding: 14px 18px 12px; text-align: left; font: 500 10.5px/1 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: rgba(28, 19, 15, .7); border-bottom: 1px solid rgba(28, 19, 15, .12); white-space: nowrap; }
+.qlb-table tbody tr { cursor: pointer; }
+.qlb-table tbody tr:hover, .qlb-table tbody tr:focus-visible { background: #faf6f1; outline: none; }
+.qlb-table td, .qlb-table tbody th { padding: 16px 18px; border-bottom: 1px solid rgba(28, 19, 15, .08); font-size: 15.5px; text-align: left; vertical-align: middle; font-weight: 400; }
+.qlb-table tbody tr:last-child > * { border-bottom: 0; }
+.qlp .qlb-tn { font: 400 18px/1.2 var(--sp-type); }
+.qlb-table tbody th small { display: block; margin-top: 3px; font-style: italic; font-size: 14px; color: rgba(28, 19, 15, .58); }
+.qlb-table td small { color: rgba(28, 19, 15, .55); }
+.qlb-tuse { margin-left: 10px; padding: 3px 9px; border-radius: 999px; background: #f8e8ea; color: #8f4a5a; font-size: 12.5px; vertical-align: 2px; }
+.qlb-tmore { white-space: nowrap; }
+.qlp .qlb-tmore b { font: 400 18px/1 var(--sp-type); display: inline-block; min-width: 22px; }
+.qlb-tbar { display: inline-block; width: 140px; height: 8px; margin: 0 10px 0 6px; border-radius: 4px; background: rgba(28, 19, 15, .08); overflow: hidden; vertical-align: middle; }
+.qlb-tbar i { display: block; height: 100%; max-width: 100%; border-radius: 4px; background: #a2452a; }
+.qlp .qlb-tpc { font: 400 15px/1 var(--sp-type); color: rgba(28, 19, 15, .7); }
+.qlb-early { font-style: italic; color: #8f4a5a; }
+.qlb-ok { color: rgba(28, 19, 15, .6); }
+.qlb-note, .qlb-one, .qlb-empty { margin: 4px 10px 0 !important; padding: 14px 10px 16px; font-size: 14.5px; line-height: 1.45; color: rgba(28, 19, 15, .62); }
+.qlb-note { border-top: 1px dashed rgba(28, 19, 15, .14); }
+.qlb-one { font-style: italic; color: rgba(28, 19, 15, .7); }
+.qlb-empty { margin: 0 !important; padding: 26px 22px 28px; font-style: italic; }
+@media (max-width: 760px) {
+  .qlp > .qlb { margin-inline: -16px; padding-inline: 16px; }
+  .qlb-tbar { width: 70px; }
+}

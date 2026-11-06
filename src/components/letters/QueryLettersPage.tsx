@@ -25,6 +25,7 @@ import {
   type LetterFacts,
 } from "../../lib/queryLetters";
 import { LetterCard, NewLetterTile } from "./LetterCard";
+import { LandingBand } from "./LandingBand";
 import "../shell/lightHeader.css";
 import "./queryLetters.css";
 
@@ -174,6 +175,8 @@ export const QueryLettersPage: React.FC<{ active?: boolean }> = ({ active = true
           </div>
         )}
       </section>
+
+      <LandingBand facts={live.map((v) => facts.get(v.id)!).concat(retired.map((v) => facts.get(v.id)!))} inUseId={use?.id ?? null} firstId={firstId} onOpen={setOpenId} />
     </div>
   );
 };
