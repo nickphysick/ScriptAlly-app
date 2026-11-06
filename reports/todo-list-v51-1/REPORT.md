@@ -1,8 +1,8 @@
 # To-do v51.1 — fixes after the first look on dev (6 Nov)
 
-Branch **`todo-list-v51-1`**, cut from `dev/…-qc1522-td51` @ `c9db94d56`. Dev served `index-D5NkQkKm.js` when the
-branch was cut. Worktree `../ScriptAlly-td511`. **Not merged, not pushed, not deployed.** The dev build of this branch
-is **`index-DDmfijWv.js`**.
+Branch **`todo-list-v51-1`**, cut from `dev/…-qc1522-td51` @ `c9db94d56`. **Deployed to dev on 6 Nov as
+`dev/…-qc1522-td51-td511` (a fast-forward of the branch dev served), bundle `index-c89gelcz.js`.** Dev served
+`index-D5NkQkKm.js` immediately before the deploy. Hosting only; rules unchanged. Not merged to `main`, not pushed.
 
 ## Suites already failing on dev's branch (skipped)
 
@@ -158,5 +158,4 @@ change touches. The badge's label still begins with its number, which is the one
 
 ## Left for you
 
-- Deploy to dev (after you've read this). Before deploying I'll re-check that dev still serves `index-D5NkQkKm.js`,
-  then deploy this branch as `dev/…-td51-td511`. No rules change in this round.
+- Nothing pending from this round. Prod is yours.
