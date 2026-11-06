@@ -31,7 +31,7 @@ import { usePhoneBandSlot } from "../../phone/phoneBandStore";
 import { PhoneDisc } from "../../phone/PhoneDisc";
 import { PI } from "../../phone/phoneIcons";
 import { MobileSheet } from "../../shell/MobileSheet";
-import { SetAsidePop } from "../v5/SetAsidePop";
+import { SetAsidePop } from "../SetAsidePop";
 import { snoozeCardWrites } from "../snoozeWrites";
 import { openPhoneCompose } from "../../../lib/phoneCompose";
 import { CheckRow, checkLine, upNextVerb, useTodoDoors, useTodoPhoneModel, whyLine, type WhenGroup } from "./useTodoPhone";

@@ -49,9 +49,8 @@ export const SHORTCUTS = {
   todoSnooze:       { chords: [k("s")], label: "Snooze the task", scope: "To-do list", bound: "src/lib/taskShortcuts.ts", inFields: "stands down" },
   todoDismiss:      { chords: [k("d")], label: "Dismiss the task", scope: "To-do list", bound: "src/lib/taskShortcuts.ts", inFields: "stands down" },
   todoClose:        { chords: [k("Escape")], label: "Close the open task", scope: "To-do list", bound: "src/lib/taskShortcuts.ts", inFields: "stands down" },
-  /* To-do list v5 (desktop): the desk's action. j/k and / are the entries above, read by the same page. */
-  todoAct:          { chords: [k("e"), k("Enter")], label: "Act on the task on the desk", scope: "To-do list", bound: "src/components/todo/v5/TodoTray.tsx", inFields: "stands down" },
-  todoAdd:          { chords: [k("n")], label: "Add a task on the desk", scope: "To-do list", bound: "src/components/todo/v5/TodoTray.tsx", inFields: "stands down" },
+  /* To-do list v51 (desktop): add a task. j/k, /, s and d are the entries above, read by the same page. */
+  todoAdd:          { chords: [k("n")], label: "Add a task", scope: "To-do list", bound: "src/components/todo/ws/TodoWorkspace.tsx", inFields: "stands down" },
   taskChoice:       { chords: [k("1"), k("9")], label: "Choose an option by its number (1 to 9)", scope: "A task's choices", bound: "src/components/todo/TaskPane.tsx", inFields: "stands down" },
   compAdd:          { chords: [k("n")], label: "Add a comparable title", scope: "Comparable titles", bound: "src/components/manuscripts/ComparableTitlesPage.tsx", inFields: "stands down" },
   /* comps v25: the list's own keys — not in a field, and not while the drawer or the picker is open */
@@ -77,7 +76,6 @@ export const SHORTCUTS = {
   /* the Query Centre list's keys (v132 §4) — not in a field, and not while a card, a drawer or a popover is open */
   /* v138.6 §A — the pin: owned by the shared pin hook (usePinList), not by the page */
   qcPin:            { chords: [k("f")], label: "Full screen", scope: "Query Centre", bound: "src/components/shell/useFullScreenList.ts", inFields: "stands down" },
-  todoPin:          { chords: [k("f")], label: "Pin the list", scope: "To-do list", bound: "src/components/shell/useFullScreenList.ts", inFields: "stands down" },
   qcFind:           { chords: [k("/")], label: "Find a query", scope: "Query Centre", bound: "src/components/queries/centre/useQcListKeys.ts", inFields: "stands down" },
   qcDown:           { chords: [k("j"), k("ArrowDown")], label: "Next query", scope: "Query Centre", bound: "src/components/queries/centre/useQcListKeys.ts", inFields: "stands down" },
   qcUp:             { chords: [k("k"), k("ArrowUp")], label: "Previous query", scope: "Query Centre", bound: "src/components/queries/centre/useQcListKeys.ts", inFields: "stands down" },

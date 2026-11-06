@@ -1,0 +1,50 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The snooze / dismiss pop-up's own rules (SetAsidePop), moved verbatim out of the retired desktop tray's sheets
+ * (v5/todoV5.css and v5/todoV52.css) when To-do list v51 replaced that page. The phone's To-do still uses the pop-up,
+ * so these are exactly the rules that reached it before: the unscoped ones. The tray's `.td5-root …` rules never did
+ * (the phone has no .td5-root), and their `--td5-*` tokens were not in scope there either — the phone reads as before.
+ *
+ * ⚠️ EIGHT `color: var(--td5-…)` DECLARATIONS WERE DROPPED IN THE MOVE, AND THAT CHANGES NOTHING. The tokens were only
+ *    ever defined on the tray's `.td5-root`, which the phone never has, so on the phone each declaration resolved to
+ *    nothing and the text inherited its colour — exactly what it does with the declaration gone. (That the pop-up's
+ *    text never took its intended inks on the phone is a fault older than this move; giving it them is a design call.)
+ */
+.td5-sapop {position: absolute; left: 20px; z-index: 40; width: min(560px, calc(100% - 40px)); background: #fff; border-radius: 16px; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1), 0 24px 48px -20px rgba(28, 19, 15, 0.5); animation: td-popin 0.2s cubic-bezier(0.22, 0.8, 0.3, 1);}
+.td5-sapop::after {content: ""; position: absolute; left: var(--ax, 150px); bottom: -7px; width: 14px; height: 14px; background: #fff; transform: rotate(45deg); box-shadow: 3px 3px 4px -2px rgba(28, 19, 15, 0.12);}
+.td5-pbody {overflow: auto; overscroll-behavior: contain; border-radius: 16px 16px 0 0;}
+.td5-psec {padding: 16px 18px 6px;}
+.td5-psec + .td5-psec {padding-top: 14px; border-top: 1px solid rgba(28, 19, 15, 0.08);}
+.td5-ph {display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;}
+.td5-ph b {font: 400 18px/1.2 var(--sp-type) !important;}
+.td5-ph span {font: italic 400 13.5px/1.3 var(--sp-serif) !important;}
+.td5-pchips {display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;}
+.td5-pjn {margin: 0 0 10px; padding: 9px 12px; border-radius: 10px; background: #f6f3ee; font: 400 14px/1.45 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.7);}
+.td5-pjn b {display: inline-block; margin-right: 8px; font: 600 8.5px/1.2 var(--font-mono) !important; letter-spacing: 0.14em; text-transform: uppercase;}
+.td5-pdis b {display: block; font: 600 15px/1.3 var(--sp-serif) !important;}
+.td5-pdis small {display: block; margin-top: 2px; font: italic 400 13.5px/1.35 var(--sp-serif) !important;}
+.td5-pfoot {display: flex; padding: 8px 18px 12px; border-top: 1px solid rgba(28, 19, 15, 0.08);}
+.td5-pkeys {font: 600 9px/1.6 var(--font-mono) !important; letter-spacing: 0.12em; text-transform: uppercase;}
+.td5-pkeys kbd {display: inline-flex; align-items: center; justify-content: center; min-width: 16px; height: 16px; margin: 0 2px; padding: 0 3px; border-radius: 4px; background: #f3efe8; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.14); font: 600 9px/1 var(--font-mono) !important;}
+.td5-sapop .td52-explain {display: flex; align-items: flex-start; gap: 10px; margin: 0 0 10px; padding: 10px 12px; border-radius: 10px; background: #f3efe8; font: 400 13px/1.45 var(--sp-serif) !important; color: #1c130f;}
+.td5-sapop .td52-explain span, .td5-sapop .td52-explain b {font: inherit !important;}
+.td5-sapop .td52-explain b {font-weight: 600 !important;}
+.td5-sapop .td52-explain button {all: unset; flex: none; cursor: pointer; padding: 3px 8px; border-radius: 6px; background: #2a3a52; color: #fff; font: 600 9.5px/1.3 var(--font-mono) !important; letter-spacing: 0.1em;}
+
+/* the month calendar (MonthCal.tsx) */
+.td5-cal {width: 280px; margin-top: 12px; padding: 12px; border-radius: 14px; background: #fff; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.12), 0 18px 36px -20px rgba(28, 19, 15, 0.45);}
+.td5-calm {display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;}
+.td5-calm b {font: 400 16px/1.2 var(--sp-type) !important;}
+.td5-caldw, .td5-calg {display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center;}
+.td5-caldw i {padding: 4px 0; font: 600 9px/1 var(--font-mono) !important; font-style: normal;}
+.td52-dm .td5-cal {width: auto; margin: 6px 0 0; padding: 8px 4px 4px; border-radius: 0; box-shadow: none; border-top: 1px solid rgba(28, 19, 15, 0.08); background: none;}
+.td52-dm .td5-calm button {width: 26px; height: 26px; border: 0; border-radius: 50%; background: none; cursor: pointer; color: #2a3a52; font: 400 16px/1 var(--sp-serif) !important;}
+.td52-dm .td5-calm button:disabled {opacity: 0.3; cursor: default;}
+.td52-dm .td5-calg button {height: 32px; border: 0; border-radius: 8px; background: none; cursor: pointer; font: 400 14px/1 var(--sp-serif) !important; color: #1c130f;}
+.td52-dm .td5-calg button:hover:not(:disabled) {background: #f2eee8;}
+.td52-dm .td5-calg button:disabled {color: rgba(28, 19, 15, 0.25); cursor: default;}
+.td52-dm .td5-calg button[data-today] {box-shadow: inset 0 0 0 1px #2a3a52;}
+.td52-dm .td5-calg button[aria-pressed="true"] {background: #2a3a52; color: #f4eee5;}
+.td52-dm .td5-calg button:focus-visible {outline: 2px solid #2a3a52; outline-offset: 1px;}

@@ -44,8 +44,10 @@ describe("the To-do badge — tasks due today or earlier, as the tray counts the
     const t = todoDueTally(accounts[1][1]);
     expect(t.overdue + t.today).toBeGreaterThan(0);
   });
-  it("the tray reads the same four functions (so a change to its chain is a change here too)", () => {
-    const tray = readFileSync(resolve(__dirname, "../components/todo/v5/TodoTray.tsx"), "utf8");
+  /* ⚠️ RETARGETED, LAW UNCHANGED (To-do list v51): the desktop tray is retired; the page that still counts by this chain is
+     the phone's To-do (phone/useTodoPhone), whose headline the badge sits beside */
+  it("the phone's To-do reads the same four functions (so a change to its chain is a change here too)", () => {
+    const tray = readFileSync(resolve(__dirname, "../components/todo/phone/useTodoPhone.tsx"), "utf8");
     for (const fn of ["assembleBoardColumns(", "calendarItems(", "dayBuckets(", "londonToday("]) expect(tray).toContain(fn);
     expect(tray).toMatch(/\[\.\.\.cols\.todo, \.\.\.cols\.today\]/);
   });

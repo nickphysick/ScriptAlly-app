@@ -693,7 +693,7 @@ service cloud.firestore {
     // Canonical stored user task. Record scope (queryId/agentId/manuscriptId) is optional user
     // input — string when present, rejecting a literal null.
     function isValidUserTask(data, userId) {
-      return data.keys().hasOnly(['id', 'userId', 'text', 'detail', 'done', 'completedAt', 'createdAt', 'updatedAt', 'queryId', 'agentId', 'manuscriptId', 'dueDate', 'surfaceOffset', 'committedDate', 'tags', 'estimateMin', 'colour'])
+      return data.keys().hasOnly(['id', 'userId', 'text', 'detail', 'done', 'completedAt', 'createdAt', 'updatedAt', 'queryId', 'agentId', 'manuscriptId', 'dueDate', 'surfaceOffset', 'committedDate', 'tags', 'estimateMin', 'colour', 'steps'])
         && data.id is string && data.id.size() <= 128
         && data.userId == userId
         // No min length — the To-do board's blank-note flow creates an empty task then fills it.
@@ -711,6 +711,9 @@ service cloud.firestore {
         // note rather than the colour. `setUserTaskColour` sends it alone and returns whether it
         // landed; a note with none reads yellow. Same safe hasAny pattern as every optional above.
         && (!data.keys().hasAny(['colour']) || (data.colour is string && data.colour in ['pink', 'sage', 'yellow']))
+        // To-do list v50: the task's checklist — a list of at most 50 steps when present (the safe hasAny pattern).
+        // Each step is {text, done}; the list is written whole, and its items are not inspected one by one.
+        && (!data.keys().hasAny(['steps']) || (data.steps is list && data.steps.size() <= 50))
         && data.done is bool
         // SAFE optional-field pattern (hasAny guard) — matches every other optional field here. The
         // old `data.completedAt == null` errored on an ABSENT key (Firestore rules do NOT return null
@@ -1173,8 +1176,11 @@ service cloud.firestore {
         // locks pinned the old string; all three halves land together. The VALUE shape needs no
         // guard here — isValidUserTask already enforces it on every update.
         allow update: if isOwner(userId) && isValidId(taskId) && isValidUserTask(incoming(), userId) && (
-          incoming().diff(existing()).affectedKeys().hasOnly(['text', 'detail', 'done', 'completedAt', 'updatedAt', 'dueDate', 'surfaceOffset', 'committedDate', 'tags', 'estimateMin', 'colour'])
+          incoming().diff(existing()).affectedKeys().hasOnly(['text', 'detail', 'done', 'completedAt', 'updatedAt', 'dueDate', 'surfaceOffset', 'committedDate', 'tags', 'estimateMin', 'colour', 'steps', 'queryId', 'agentId'])
         );
+        // To-do list v50: `steps` (the task's checklist) and the link (`queryId` / `agentId`) are edited after the task
+        // is made — a step ticked, an agent linked or unlinked — so they join the update list. Their shapes are checked by
+        // isValidUserTask on every write, as every other field's is.
       }
 
       // ROUTE: DismissedTasks

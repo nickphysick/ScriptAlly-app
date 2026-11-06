@@ -15,8 +15,10 @@ const here = __dirname;
 const page = [
   join(here, "..", "shared", "timeline", "TimelineBoard.tsx"),
   join(here, "..", "shared", "timeline", "boardParts.tsx"),
-  join(here, "v5", "TrayCalendar.tsx"),
-  join(here, "v5", "TrayCalDrawer.tsx"),
+  /* RE-POINTED again (To-do list v51): the tray's calendar and its drawer are retired; the To-do surfaces that still draw
+     a calendar are the workspace's date picker and the snooze pop-up's month (both page's and phone's) */
+  join(here, "ws", "WsControls.tsx"),
+  join(here, "MonthCal.tsx"),
 ].map((f) => readFileSync(f, "utf8")).join("\n");
 const family = readFileSync(join(here, "..", "..", "lib", "todoFamily.ts"), "utf8");
 const cal = readFileSync(join(here, "..", "..", "lib", "todoCalendar.ts"), "utf8");
