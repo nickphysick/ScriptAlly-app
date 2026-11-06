@@ -153,6 +153,30 @@ if (cmd === "seed" || cmd === "clean") {
   try { await updateDoc(taskRef("cb2seed-rule-butter"), { agentId: "clv-fx-never", updatedAt: iso(0) }); out.link = "accepted"; } catch { out.link = "refused"; }
   for (const colour of ["butter", "blush", "powder", "sand", "stone", "yellow", "pink", "sage", "green"]) await deleteDoc(taskRef(`cb2seed-rule-${colour}`));
   console.log(JSON.stringify(out));
+} else if (cmd === "few") {
+  /* Corkboard v2.1: a "just started" board — three notes, no piles. f1 and f2 carry no tag; f3's FIRST tag is
+     "calls" and its second is "strategy", so the "strategy" def is in use while no pile has it first (CB18).
+     Any def labelled "agents" is dropped (emulator only), so Start a pile #agents must mint it through newTag. */
+  await clean();
+  const snap = await getDoc(userRef);
+  const keep = (snap.data()?.tags ?? []).filter((t) => !String(t.id).startsWith("cb2seed-") && String(t.label).toLowerCase() !== "agents");
+  const few = TAGS.filter((t) => t.label === "calls" || t.label === "strategy");
+  await updateDoc(userRef, { tags: [...keep, ...few], "todoPrefs.noteboard.started": deleteField() });
+  const F = [
+    { n: 1, colour: "butter", text: "Check whether Harlow want the synopsis pasted in or attached", tags: [], at: -2 },
+    { n: 2, colour: "blush", text: "Priya Nair — mention the podcast in the letter", tags: [], at: -1 },
+    { n: 3, colour: "powder", text: "Call notes: the agent panel liked recent comps", tags: ["calls", "strategy"], at: -3 },
+  ];
+  for (const x of F) {
+    const at = iso(x.at);
+    await setDoc(taskRef(`cb2seed-f${x.n}`), { id: `cb2seed-f${x.n}`, userId: uid, text: x.text, done: false, createdAt: at, updatedAt: at, colour: x.colour, ...(x.tags.length ? { tags: x.tags.map(TAG) } : {}) });
+  }
+  console.log("seeded the few-notes board (3 notes, 1 pile)");
+} else if (cmd === "started") {
+  /* set (or with no argument, clear) todoPrefs.noteboard.started to the given comma-separated fixture tag LABELS */
+  const ids = arg ? arg.split(",").map(TAG) : null;
+  await updateDoc(userRef, { "todoPrefs.noteboard.started": ids ?? deleteField() });
+  console.log(`started → ${ids ? ids.join(", ") : "absent"}`);
 } else if (cmd === "sweep") {
   const hits = await getDocs(collection(db, "users", uid, "tasks"));
   let n = 0;

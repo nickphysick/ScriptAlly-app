@@ -306,8 +306,8 @@ body.cb2-dragging .cb2-note:hover { transform: none; }
 .cb2-pempty { padding: 34px; border-radius: 14px; border: 1.5px dashed var(--cb2-i14); text-align: center; font: 400 16px/1.45 var(--cb2-serif); color: var(--cb2-i60); }
 .cb2 .cb2-pempty b { display: block; margin-bottom: 6px; font: 400 19px/1.3 var(--cb2-type) !important; color: var(--cb2-ink) !important; }
 /* Start a pile / Add notes (ref v14 `.sdlg`, screens 03 and 05), in the Turn-into-a-task dialog's frame */
-.cb2-sdlg .cb2-h4 { margin: 0 0 8px; }
-.cb2-sdlg .cb2-h4--gap { margin-top: 18px; }
+.cb2-layer .cb2-sdlg .cb2-h4 { margin: 0 0 8px; }
+.cb2-layer .cb2-sdlg .cb2-h4--gap { margin-top: 18px; }
 .cb2-pnin { display: flex; align-items: center; gap: 4px; height: 46px; box-sizing: border-box; padding: 0 12px; border-radius: 10px; box-shadow: inset 0 0 0 1px var(--cb2-i14); }
 .cb2-pnin:focus-within { box-shadow: inset 0 0 0 1.5px var(--cb2-navy); }
 .cb2-layer .cb2-pnin span { font: 400 18px/1 var(--cb2-type) !important; color: var(--cb2-i45) !important; }

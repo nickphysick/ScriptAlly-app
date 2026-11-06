@@ -1,0 +1,98 @@
+[
+ {
+  "lock": "CB18",
+  "where": "1512x982 toast",
+  "ok": true,
+  "detail": "toast \"Started #ideas\""
+ },
+ {
+  "lock": "CB18",
+  "where": "1512x982 started",
+  "ok": true,
+  "detail": "started [\"tag-ip07wrgt\"] def tag-ip07wrgt"
+ },
+ {
+  "lock": "CB18",
+  "where": "1512x982 empty panel",
+  "ok": true,
+  "detail": "the open empty pile shows no dashed panel"
+ },
+ {
+  "lock": "CB18",
+  "where": "1512x982 listed empty",
+  "ok": true,
+  "detail": "the empty pile's dashed stack: 1"
+ },
+ {
+  "lock": "CB18",
+  "where": "1512x982 drops off",
+  "ok": true,
+  "detail": "started []"
+ },
+ {
+  "lock": "CB18",
+  "where": "1512x982 removed from list",
+  "ok": true,
+  "detail": "started []"
+ },
+ {
+  "lock": "CB18",
+  "where": "1512x982 def kept",
+  "ok": true,
+  "detail": "the strategy def was deleted"
+ },
+ {
+  "lock": "CB18",
+  "where": "1512x982 f3 untouched",
+  "ok": true,
+  "detail": "f3 [\"cb2seed-tag-calls\",\"cb2seed-tag-strategy\"]"
+ },
+ {
+  "lock": "CB18",
+  "where": "1280x800 toast",
+  "ok": true,
+  "detail": "toast \"Started #ideas\""
+ },
+ {
+  "lock": "CB18",
+  "where": "1280x800 started",
+  "ok": true,
+  "detail": "started [\"tag-9pe8kj6v\"] def tag-9pe8kj6v"
+ },
+ {
+  "lock": "CB18",
+  "where": "1280x800 empty panel",
+  "ok": true,
+  "detail": "the open empty pile shows no dashed panel"
+ },
+ {
+  "lock": "CB18",
+  "where": "1280x800 listed empty",
+  "ok": true,
+  "detail": "the empty pile's dashed stack: 1"
+ },
+ {
+  "lock": "CB18",
+  "where": "1280x800 drops off",
+  "ok": true,
+  "detail": "started []"
+ },
+ {
+  "lock": "CB18",
+  "where": "1280x800 removed from list",
+  "ok": true,
+  "detail": "started []"
+ },
+ {
+  "lock": "CB18",
+  "where": "1280x800 def kept",
+  "ok": true,
+  "detail": "the strategy def was deleted"
+ },
+ {
+  "lock": "CB18",
+  "where": "1280x800 f3 untouched",
+  "ok": true,
+  "detail": "f3 [\"cb2seed-tag-calls\",\"cb2seed-tag-strategy\"]"
+ }
+]

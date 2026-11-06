@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "CB19",
+  "where": "1512x982 title",
+  "ok": true,
+  "detail": "\"Add notes to #agents\""
+ },
+ {
+  "lock": "CB19",
+  "where": "1512x982 excludes",
+  "ok": false,
+  "detail": "13 listed; own cb2seed-n2, cb2seed-n4"
+ },
+ {
+  "lock": "CB19",
+  "where": "1512x982 toast",
+  "ok": true,
+  "detail": "toast \"Added 1 note to #agentsUndo\""
+ },
+ {
+  "lock": "CB19",
+  "where": "1512x982 moved",
+  "ok": true,
+  "detail": "n12 [\"cb2seed-tag-agents\"] (was [\"cb2seed-tag-strategy\"])"
+ },
+ {
+  "lock": "CB19",
+  "where": "1512x982 undo",
+  "ok": true,
+  "detail": "n12 [\"cb2seed-tag-strategy\"]"
+ },
+ {
+  "lock": "CB19",
+  "where": "1280x800 title",
+  "ok": true,
+  "detail": "\"Add notes to #agents\""
+ },
+ {
+  "lock": "CB19",
+  "where": "1280x800 excludes",
+  "ok": false,
+  "detail": "13 listed; own cb2seed-n2, cb2seed-n4"
+ },
+ {
+  "lock": "CB19",
+  "where": "1280x800 toast",
+  "ok": true,
+  "detail": "toast \"Added 1 note to #agentsUndo\""
+ },
+ {
+  "lock": "CB19",
+  "where": "1280x800 moved",
+  "ok": true,
+  "detail": "n12 [\"cb2seed-tag-agents\"] (was [\"cb2seed-tag-strategy\"])"
+ },
+ {
+  "lock": "CB19",
+  "where": "1280x800 undo",
+  "ok": true,
+  "detail": "n12 [\"cb2seed-tag-strategy\"]"
+ }
+]
