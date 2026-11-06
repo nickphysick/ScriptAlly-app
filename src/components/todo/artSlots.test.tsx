@@ -192,8 +192,10 @@ describe("⚠️ each slot's TRIGGER — the conditions, named", () => {
     /* RE-POINTED (Corkboard v1): the page mounts ONE slot now — `corkboard-header`, the panel's drawing, a
        placeholder until it is supplied. `noteboard-empty` is still registered and still unused. */
     expect(noteboard).not.toContain('name="noteboard-empty"');
-    expect([...noteboard.matchAll(/<ArtSlot /g)].length).toBe(1);
-    expect(noteboard).toContain('<ArtSlot name="corkboard-header"');
+    /* RE-POINTED (Corkboard v2, 6 Nov): the header's drawing is the ring's own slot now (lib/corkboard
+       CORKBOARD_RING_ART, null until supplied), so the page mounts no ArtSlot. Both briefs stay registered. */
+    expect([...noteboard.matchAll(/<ArtSlot /g)].length).toBe(0);
+    expect(ART_SLOTS["corkboard-header"]).toBeDefined();
     expect(ART_SLOTS["noteboard-empty"]).toBeDefined();
     expect([ART_SLOTS["corkboard-header"].w, ART_SLOTS["corkboard-header"].h]).toEqual([250, 136]);
     expect(ART_SLOTS["corkboard-header"].src, "the drawing has not been supplied").toBeUndefined();

@@ -64,6 +64,10 @@ import { formatDate } from "../../lib/dates";
 import "./tasksLayout.css";
 import "./taskChrome.css";
 import "./todoNoteboard.css";
+import "./corkboard/corkboard.css";
+import { CbHeader } from "./corkboard/CbHeader";
+import { CbToolRow } from "./corkboard/CbToolRow";
+import { boardPrefs, glance as glanceOf, inGlance, type BoardSort, type BoardView, type GlanceKey } from "../../lib/corkboard";
 
 export interface TodoNoteboardPageProps {
   onNavigate: (tab: string, subPageName?: string) => void;
@@ -127,6 +131,8 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
 
   const [search, setSearch] = useState("");
   const [tagSel, setTagSel] = useState<string | null>(null); // one tag, or null for #All
+  /** Corkboard v2: the header's At a glance filter (null = none); pressing the pressed row clears it */
+  const [special, setSpecial] = useState<GlanceKey | null>(null);
   const [examples, setExamples] = useState(false); // the Examples drawer (P7)
   const [menu, setMenu] = useState<{ note: UserTask; anchor: HTMLElement } | null>(null);
   /** The note being turned into a task — the popover collects ONE answer now, the date. One
@@ -162,10 +168,11 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
   const notes = useMemo(() => {
     const all = pinned;
     const searched = all.filter((n) => noteMatchesSearch(n, search));
-    return tagSel ? searched.filter((n) => (n.tags ?? []).includes(tagSel)) : searched;
-  }, [pinned, search, tagSel]);
+    const tagged = tagSel ? searched.filter((n) => (n.tags ?? []).includes(tagSel)) : searched;
+    return special ? tagged.filter((n) => inGlance(n, special)) : tagged;
+  }, [pinned, search, tagSel, special]);
   const matching = useMemo(() => new Set(notes.map((n) => n.id)), [notes]);
-  const narrowing = !!(search.trim() || tagSel);
+  const narrowing = !!(search.trim() || tagSel || special);
   const counts = useMemo(() => chipCounts(pinned), [pinned]);
 
   /* THE HEADER (header v3, a number page): the notes on the board, unfiltered; null until settled. */
@@ -255,6 +262,16 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
       flash("Couldn’t save that position. Try again?");
       throw e;
     }
+  };
+  /* ── Corkboard v2 prefs: the view and the sort are remembered, one dotted leaf each (lock CB10) ── */
+  const prefs2 = boardPrefs(currentUser);
+  const setBoardView = async (next: BoardView) => {
+    try { await updateUserPaths({ "todoPrefs.noteboard.view": next }); }
+    catch { flash("Couldn’t save that view — try again?"); }
+  };
+  const setBoardSort = async (next: BoardSort) => {
+    try { await updateUserPaths({ "todoPrefs.noteboard.sort": next }); }
+    catch { flash("Couldn’t save that order — try again?"); }
   };
   const setView = async (next: CorkView) => {
     try { await updateUserPaths({ "todoPrefs.noteboard.view": next }); }
@@ -630,23 +647,20 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
       {/* ⚠️ THE TOKENS SCOPE HERE, NOT ON THE ROOT. `tasksViewport` requires the exact
           attribute `className="t-f12 spine-root"` on all four Tasks pages — the one-column law —
           so a page that needs a class of its own hangs it one level down. */}
-      <div className="tdb-wrap today-off nb-scope">
+      <div className="tdb-wrap today-off nb-scope cb2">
         {/* ⚠️ THE PAGE SCROLLS, AND ITS HEADER IS THE SHARED FULL PANEL (Corkboard v1) — the To-do list's own
             arrangement: the grid's masthead is declined and the header is the first row of the page's group.
             It left the Tasks family's fill chassis because a number panel is 260px tall: fixed above an
             internal scroller it would leave a framed board a 400px window at 1280 × 800. */}
         <WorkspacePageGrid className="tpl-wpg nb-wpg" scrollLabel="Corkboard" masthead={null}>
-          <div className="nb-group" data-cb="page" data-loading={settled ? undefined : ""}>
-            <PageHeader
-              variant="full"
-              panel
-              title="Corkboard"
-              description={CORKBOARD_SUBLINE}
-              living={living}
-              /* the drawing is not ready: a registered placeholder of its box (the Courier pinning a note) */
-              /* ⚠️ ONLY ON THE PANEL: at zero notes the header is the open sheet, where a navy-panel placeholder
-                 is a dashed box with nothing to stand on (seen on the first zero-notes render) */
-              art={living.empty ? undefined : <ArtSlot name="corkboard-header" maxWidth={250} className="cb-hart" />}
+          <div className="nb-group cb2-page" data-cb="page" data-cb2="page" data-loading={settled ? undefined : ""}>
+            <CbHeader
+              count={settled ? pinned.length : null}
+              glance={glanceOf(pinned)}
+              special={special}
+              onSpecial={(k) => setSpecial((cur) => (cur === k ? null : k))}
+              onNew={(c) => openComposer(c ? { colour: c } : undefined)}
+              onTask={openTaskComposer}
             />
             {/* ⚠️ ZERO NOTES IS THE BUILT EMPTY STATE AND NOTHING ELSE: no add bar, no filter row, no board.
                 The composer it opens is the one exception — it needs a board to sit on. */}
@@ -654,71 +668,18 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
               <NoteboardWorkflow empty onPin={() => openComposer()} onBrowse={() => setExamples(true)} />
             ) : (
               <>
-                <div className="cb-over" data-cb="over">
-                  <div className="cb-addrow" role="group" aria-label="Add to your board" data-cb="addrow">
-                    <span className="cb-addlab">Add to your board</span>
-                    <div className="cb-pads" title="Pin a note" data-cb="pads">
-                      {NOTE_COLOURS.map((c) => (
-                        <button
-                          key={c}
-                          type="button"
-                          className={`cb-pad nb-c-${c}`}
-                          aria-label={PAD_LABEL[c]}
-                          data-cb-pad={c}
-                          /* the built compose editor, with this paper already chosen */
-                          onClick={() => openComposer({ colour: c })}
-                        />
-                      ))}
-                      <span>Note</span>
-                    </div>
-                    <button type="button" className="cb-sup" data-cb="add-task" onClick={openTaskComposer}>
-                      <span className="cb-ico" aria-hidden>
-                        <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3" /><path d="M8 12.5l3 3 5-6" /></svg>
-                      </span>
-                      Task
-                    </button>
-                  </div>
-                  <div className="cb-filters" role="group" aria-label="Show" data-cb="filters">
-                    <input
-                      className="cb-find"
-                      type="text"
-                      placeholder="Find a note"
-                      aria-label="Find a note"
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === "Escape") setSearch(""); }}
-                    />
-                    {/* ⚠️ THE CHIPS ARE THE TAGS IN USE, not the taxonomy, and they read the UNFILTERED list —
-                        so do their counts. The defs supply the label: a raw `#t-letter` in a chip is a leak. */}
-                    {chips.map((c) => (
-                      <button
-                        key={c.id ?? "all"}
-                        type="button"
-                        className="cb-chip"
-                        aria-pressed={tagSel === c.id}
-                        data-cb-chip={c.id ?? "all"}
-                        onClick={() => setTagSel(c.id)}
-                      >
-                        {c.id === null ? c.label : `#${c.label}`} <b>{counts.get(c.id) ?? 0}</b>
-                      </button>
-                    ))}
-                    {/* ⚠️ TIDY IS A VIEW, NOT A REARRANGEMENT: it straightens and flows the notes into columns and
-                        writes the CHOICE (`view`), never the places — so "Back to free pinning" restores them. */}
-                    {!narrow && (
-                      <button
-                        type="button"
-                        className="cb-chip cb-chip--tool"
-                        aria-pressed={view === "tidy"}
-                        data-cb="tidy"
-                        onClick={() => void setView(view === "tidy" ? "free" : "tidy")}
-                      >
-                        {view === "tidy" ? "Back to free pinning" : "Tidy into columns"}
-                      </button>
-                    )}
-                    {/* only while something narrows — the pure label keeps the form in one place */}
-                    {narrowing && <span className="nb-fcount" data-cb="fcount">{noteFilterLabel(notes.length, pinned.length)}</span>}
-                  </div>
-                </div>
+                <CbToolRow
+                  find={search}
+                  onFind={setSearch}
+                  chips={chips.map((c) => ({ ...c, n: counts.get(c.id) ?? 0 }))}
+                  tag={tagSel}
+                  onTag={setTagSel}
+                  count={narrowing ? (notes.length === pinned.length ? `All ${pinned.length} match` : `${notes.length} of ${pinned.length} match`) : null}
+                  view={prefs2.view}
+                  onView={(v) => void setBoardView(v)}
+                  sort={prefs2.sort}
+                  onSort={(v) => void setBoardSort(v)}
+                />
 
                 {/* ⚠️ THE FRAME IS THERE WHILE THE NOTES ARE NOT (loading): the board's top never moves. */}
                 <div ref={boardRef} className="nb-board" data-cb="notes">

@@ -361,3 +361,9 @@ export function tagsForPile(tags: readonly string[] | undefined, k: string): str
 
 /** A note longer than this many lines is cut on the wall, with "Read all". */
 export const LINE_CLAMP = 8;
+
+/**
+ * The drawing in the header's ring. ⚠️ NULL UNTIL NICK'S ILLUSTRATOR DELIVERS IT: the ring then shows the dashed
+ * "Art to come" slot at the drawing's own box, so nothing moves when the image lands. Set this to its public path.
+ */
+export const CORKBOARD_RING_ART: string | null = null;

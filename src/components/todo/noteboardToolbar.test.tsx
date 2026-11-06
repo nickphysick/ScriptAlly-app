@@ -80,14 +80,15 @@ describe("⚠️ the chip row is DERIVED — #All, then the tags actually in use
   it("the RENDERED row says the same thing, in the same order", () => {
     seed.userTasks = [note("a", "one", ["t-letter"]), note("b", "two", ["t-agents"])];
     const html = render();
-    const at = html.indexOf('data-cb="filters"');
-    expect(at, "no filter row").toBeGreaterThan(-1);        // the anchor, before the slice
-    const stop = html.indexOf('data-cb="notes"', at);
-    expect(stop, "no board after the row").toBeGreaterThan(at);
+    /* RE-POINTED (Corkboard v2): the chips are the tool row's pills (`data-cb2="chips"`) */
+    const at = html.indexOf('data-cb2="chips"');
+    expect(at, "no chip row").toBeGreaterThan(-1);        // the anchor, before the slice
+    const stop = html.indexOf('data-cb2="view"', at);
+    expect(stop, "no view switch after the row").toBeGreaterThan(at);
     const row = html.slice(at, stop);
-    /* the ORDER is a property of the row, so it is read off the row. RE-POINTED (Corkboard v1): "All" has no
-       hash (the ref's chip), and every chip states its count from the UNFILTERED list. */
-    const labels = [">All <b>2</b>", ">#agents <b>1</b>", ">#letter <b>1</b>"];
+    /* the ORDER is a property of the row, so it is read off the row. "All" has no hash (the ref's pill), and
+       every pill states its count from the UNFILTERED list. */
+    const labels = ['>All <span class="cb2-chip">2</span>', '>#agents <span class="cb2-chip">1</span>', '>#letter <span class="cb2-chip">1</span>'];
     for (const [i, label] of labels.entries()) {
       expect(row.indexOf(label), label).toBeGreaterThan(-1);
       if (i > 0) expect(row.indexOf(label)).toBeGreaterThan(row.indexOf(labels[i - 1]));
@@ -116,27 +117,21 @@ describe("⚠️ search reads the note's words, whatever case they are in", () =
 });
 
 describe("⚠️ Board / Column is a segmented toggle — the sentence control is retired", () => {
-  it("the Note control is three paper buttons, each named, each opening the ONE composer with its colour", () => {
-    /* RE-POINTED (Corkboard v1): Board / Column is retired with the tool row. The claim that survives is the
-       one about a control a screen reader can use: each square is a button with its own name. */
-    expect(page).not.toContain("nb-viewtog");
-    expect(page).not.toContain("Read as a column");
-    seed.userTasks = [note("a", "one")];
-    const html = render();
-    for (const name of ["Pin a butter note", "Pin a blush note", "Pin a powder note", "Pin a sand note", "Pin a stone note"]) expect(html, name).toContain(`aria-label="${name}"`);
-    expect([...html.matchAll(/data-cb-pad="/g)].length).toBe(5);
-    expect(page).toContain("onClick={() => openComposer({ colour: c })}");
-  });
+  /* RETIRED (Corkboard v2): "the Note control is three paper buttons" — v1's add bar is gone. Its law (each
+     paper is a named button that starts a note in that colour) moved to the header's Pick a colour swatches,
+     held in corkboardV2Page.test.tsx. Recorded in tests/e2e/RETIRED-corkboard-v2.md. */
 
   it("the row under the header carries the Corkboard ref's controls: the add bar, find, the chips", () => {
     /* RE-POINTED (Corkboard v1): the tool row is replaced by the ref's row — "Add to your board" (Note in three
        papers, Task) on the left; Find a note and the tag chips on the right. Board/Column, Examples and the
        pink "Pin a note" have no place in it (reported for Nick; the examples drawer is reached from the empty
        state). */
-    for (const control of ["cb-addrow", "cb-pads", "cb-sup", "cb-find", "cb-chip", "Add to your board", "Find a note"]) {
-      expect(page, control).toContain(control);
-    }
-    for (const gone of ["nb-viewtog", "nb-search", ">Examples<", "Pin a note\n"]) expect(page, gone).not.toContain(gone);
+    /* RE-POINTED (Corkboard v2): the row is the ref's v13 row — find, the tag pills, the Corkboard / Piles switch
+       and the sort pill — drawn by CbToolRow. The add bar is retired (the header's buttons and swatches add). */
+    expect(page).toContain("<CbToolRow");
+    const row = readFileSync(join(here, "corkboard/CbToolRow.tsx"), "utf8");
+    for (const control of ["cb2-find", "cb2-pill", "cb2-seg", "Find a note", "Corkboard", "Piles"]) expect(row, control).toContain(control);
+    for (const gone of ["cb-addrow", "nb-viewtog", "nb-search", ">Examples<", "Pin a note\n"]) expect(page, gone).not.toContain(gone);
     /* the dropdown the chips replaced is gone — bounded token, never a substring */
     expect(page).not.toMatch(/["\s`]nb-tagwrap["\s`]/);
   });

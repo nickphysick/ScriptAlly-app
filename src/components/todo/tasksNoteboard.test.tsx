@@ -182,9 +182,10 @@ describe("the tool row: search · the derived chips · Board/Column · Examples 
        pinned notes, with the defs supplying the label. The page's filter DIMENSION is unchanged:
        one tag at a time, or #All. */
     /* RE-POINTED (Corkboard v1): the chips sit in the row under the header now (`cb-filters`), with counts. */
-    const tools = sliceBetween(page, 'data-cb="filters"', 'data-cb="notes"');
-    expect(tools).toContain("cb-chip");
-    expect(tools).toContain("chips.map");
+    /* RE-POINTED (Corkboard v2): the pills are CbToolRow's, handed the page's chips */
+    const tools = sliceBetween(page, "<CbToolRow", "/>");
+    expect(tools).toContain("chips={chips.map");
+    expect(readFileSync(join(here, "corkboard/CbToolRow.tsx"), "utf8")).toContain("chips.map");
     expect(page).toContain("noteTagChips(pinned, currentUser?.tags ?? [])");
     /* ⚠️ AND IT DERIVES FROM `pinned`, NOT `notes`. From the filtered view the chips would vanish
        as you used them — pick one and the rest disappear, because nothing left on the board
@@ -201,8 +202,9 @@ describe("the tool row: search · the derived chips · Board/Column · Examples 
     /* RE-POINTED (Corkboard v1): the Corkboard's own row is the ref's — the add bar left, the filters right
        (`margin-left: auto` on the filters does what the spacer did) — and it carries no pink. */
     expect(page).not.toContain("<TplGrow />");
-    expect(page).toContain('className="cb-over"');
-    expect(css).toMatch(/\.cb-filters\s*\{[^}]*margin-left:\s*auto/);
+    /* RE-POINTED (Corkboard v2): its own row is CbToolRow; v1's `cb-over` is retired */
+    expect(page).toContain("<CbToolRow");
+    expect(page).not.toContain('className="cb-over"');
   });
 
   it("the empty state TEACHES rather than apologises — and it is the WORKFLOW now", () => {
