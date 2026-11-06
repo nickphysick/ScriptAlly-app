@@ -545,5 +545,42 @@ for (const vp of SIZES) {
       L.check("Undo: the refused sibling still as it was", dumpq("seed-pkgq-4") === refusedBefore, "");
       L.done(10);
     });
+    test("L13 · R&R: Who replied offers it; what they asked for and what they said save on the step, it renders, the footer follows, Undo puts it back", async ({ page }) => {
+      test.skip(!run("L13"));
+      const L = new Ledger(`L13-${vp.width}`);
+      const before = dump("long");
+      await open(page, vp);
+      await openCard(page, "long");
+      await click(page, `${CARD} [data-qc152='reply-btn']`);
+      const opt = page.locator("[data-qp='panel'] [data-qc152='opt'][data-k='rr_req']");
+      const offered = (await opt.innerText({ timeout: 8000 }).catch(() => "")).includes("Jonathan asked for a revision (R&R)");
+      L.check("population: Who replied offers Jonathan asked for a revision (R&R)", offered, "");
+      /* without the option the rest cannot run: stop with a reading rather than a timeout */
+      if (!offered) { await page.keyboard.press("Escape"); L.done(9); return; }
+      await opt.click({ timeout: 8000 }).catch(() => {});
+      const chips = (await page.locator("[data-qp='panel'] [data-qc152='draft-chips']").innerText({ timeout: 5000 }).catch(() => "")).trim();
+      L.check("what they asked for: the full, as on a full request", /full/i.test(chips), chips);
+      const note = page.locator("[data-qp='panel'] [data-qc152='reply-note'] textarea");
+      L.check("population: What did they say? (optional)", await note.count() === 1, "");
+      await note.fill("Loved it. Could the middle move faster?").catch(() => {});
+      await click(page, "[data-qp='panel'] [data-qc152='see-changes']");
+      await click(page, "[data-qp='panel'] [data-qc152='save']");
+      await page.locator(`${CARD}[data-view='read'] [data-qc152='msg'][data-status='Revise & Resubmit']`).first().waitFor({ timeout: 15_000 }).catch(() => {});
+      const rr = (await readThread(page))?.msgs.find((m) => m.status === "Revise & Resubmit");
+      L.check("it renders: theirs, Asked for a revision (R&R), their words quoted", rr?.side === "them" && rr.title === "Asked for a revision (R&R)" && rr.quotes.length === 1 && rr.quotes[0] === "“Loved it. Could the middle move faster?”", JSON.stringify(rr));
+      const lead = (await page.locator(`${CARD} [data-qc152='reply-lead']`).innerText({ timeout: 5000 }).catch(() => "")).trim();
+      L.check("the footer follows: Revise and resubmit", lead === "Revise and resubmit", lead);
+      const after = dump("long");
+      const e = after.log.map((x: [string, Record<string, unknown>]) => x[1]).find((d: Record<string, unknown>) => d.resultingStatus === "Revise & Resubmit");
+      L.check("saved: the status, the rr_requested key, the full asked for, and the words as replyNote", after.q?.status === "Revise & Resubmit" && e?.eventKey === "rr_requested"
+        && JSON.stringify(e?.materials ?? []).includes("full") && e?.replyNote === "Loved it. Could the middle move faster?", JSON.stringify({ s: after.q?.status, k: e?.eventKey, m: e?.materials, n: e?.replyNote }));
+      L.check("no older field written (rrNotes)", !("rrNotes" in (after.q ?? {})), "");
+      const feed = after.feed.map((x: [string, Record<string, unknown>]) => x[1]).find((d: Record<string, unknown>) => d.eventKey === "rr_requested");
+      L.check("a feed row for it", feed?.resultingStatus === "Revise & Resubmit", JSON.stringify(feed));
+      await page.locator("[data-qad-undo]").first().click({ timeout: 8000 }).catch(() => {});
+      await page.waitForTimeout(2500);
+      L.check("Undo: the query back byte for byte", JSON.stringify(dump("long")) === JSON.stringify(before), "");
+      L.done(9);
+    });
   });
 }

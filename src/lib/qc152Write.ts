@@ -84,13 +84,13 @@ export function storeMats(ms: readonly StepMaterial[]): Record<string, unknown>[
 
 /* ── what a step is ─────────────────────────────────────────────────────────────────────────────────────────── */
 
-export type RecordKind = "partial_req" | "full_req" | "offer" | "pass" | "partial_sent" | "full_sent" | "nudge" | "noresp" | "told";
+export type RecordKind = "partial_req" | "full_req" | "rr_req" | "offer" | "pass" | "partial_sent" | "full_sent" | "nudge" | "noresp" | "told";
 export const RECORD_STATUS: Record<RecordKind, QueryStatus | null> = {
-  partial_req: QueryStatus.PARTIAL_REQUESTED, full_req: QueryStatus.FULL_REQUESTED, offer: QueryStatus.OFFER, pass: QueryStatus.REJECTED,
+  partial_req: QueryStatus.PARTIAL_REQUESTED, full_req: QueryStatus.FULL_REQUESTED, rr_req: QueryStatus.REVISE_RESUBMIT, offer: QueryStatus.OFFER, pass: QueryStatus.REJECTED,
   partial_sent: QueryStatus.PARTIAL_SENT, full_sent: QueryStatus.FULL_SENT, nudge: null, noresp: QueryStatus.NO_RESPONSE, told: null,
 };
 /** the agent's replies, which can carry what they said (v152.1 §2.6) */
-export const REPLY_KINDS: readonly RecordKind[] = ["partial_req", "full_req", "offer", "pass"];
+export const REPLY_KINDS: readonly RecordKind[] = ["partial_req", "full_req", "rr_req", "offer", "pass"];
 export const REPLY_NOTE_MAX = 500;
 
 /**
@@ -120,7 +120,7 @@ const clearTold = (ids: readonly string[]): NonNullable<WritePlan["update"]> =>
   ids.map((id) => ({ path: `queries/${id}`, data: { offerRefQueryId: deleteField(), offerTold: deleteField(), offerToldOn: deleteField(), offerReply: deleteField() } }));
 
 const EVENT: Record<Exclude<RecordKind, "told">, EventKey> = {
-  partial_req: "partial_requested", full_req: "full_requested", offer: "offer", pass: "pass",
+  partial_req: "partial_requested", full_req: "full_requested", rr_req: "rr_requested", offer: "offer", pass: "pass",
   partial_sent: "partial_sent", full_sent: "full_sent", nudge: "nudge_sent", noresp: "closed_no_reply",
 };
 
@@ -209,6 +209,8 @@ export function planRecord(c: PlanCtx, kind: RecordKind, dayMs: number, material
     const data: RecordResponseData = kind === "noresp" ? closeRecord(noreplyAnswers(new Date(tMs)))
       : kind === "partial_req" ? respData({ responseType: "partial", dateReceived: day, materialsType: sample?.unit ? UNIT_NAME[sample.unit] : "Pages", materialsQuantity: sample?.n ?? 0, eventKey: EVENT[kind] })
       : kind === "full_req" ? respData({ responseType: "full", dateReceived: day, eventKey: EVENT[kind] })
+      /* an R&R is asked as the full is: what they asked for, and what they said (the reply note, never the old rrNotes) */
+      : kind === "rr_req" ? respData({ responseType: "rr", dateReceived: day, eventKey: EVENT[kind] })
       : kind === "offer" ? respData({ responseType: "offer", dateReceived: day, offerDate: day, eventKey: EVENT[kind] })
       : respData({ responseType: "rejected", dateReceived: day, eventKey: EVENT[kind] });
     const p = planResponse({ query: q, agent, manuscript: c.ms }, data);

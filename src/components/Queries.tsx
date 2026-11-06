@@ -6105,7 +6105,7 @@ export const Queries: React.FC<{
     /* ── §4: the pencil's three ways in, Fix a mistake, and the details ── */
     const T4: Partial<Record<string, FixRow["t"]>> = {
       [QueryStatus.QUERIED]: "queried", [QueryStatus.PARTIAL_REQUESTED]: "preq", [QueryStatus.PARTIAL_SENT]: "psent", [QueryStatus.FULL_REQUESTED]: "freq",
-      [QueryStatus.FULL_SENT]: "fsent", [QueryStatus.OFFER]: "offer", [QueryStatus.REJECTED]: "passed", [QueryStatus.NO_RESPONSE]: "noresp", [QueryStatus.WITHDRAWN]: "withdrawn",
+      [QueryStatus.FULL_SENT]: "fsent", [QueryStatus.REVISE_RESUBMIT]: "rr", [QueryStatus.OFFER]: "offer", [QueryStatus.REJECTED]: "passed", [QueryStatus.NO_RESPONSE]: "noresp", [QueryStatus.WITHDRAWN]: "withdrawn",
     };
     const asMats = (labels: string[]): StepMaterial[] => labels.map((l) => {
       const m = readMat(l);
@@ -6146,9 +6146,9 @@ export const Queries: React.FC<{
           now={{ status: row.status, state: v152.state, replyMs: v152.replyMs, dueMs: v152.dueMs, dueWho: null }}
           after={(rs) => {
             const last = [...rs].filter((x) => x.t !== "nudge" && x.t !== "told").sort((a, b) => a.d - b.d).pop();
-            const ST: Record<string, QueryStatus> = { queried: QueryStatus.QUERIED, preq: QueryStatus.PARTIAL_REQUESTED, psent: QueryStatus.PARTIAL_SENT, freq: QueryStatus.FULL_REQUESTED, fsent: QueryStatus.FULL_SENT, offer: QueryStatus.OFFER, passed: QueryStatus.REJECTED, noresp: QueryStatus.NO_RESPONSE, withdrawn: QueryStatus.WITHDRAWN };
+            const ST: Record<string, QueryStatus> = { queried: QueryStatus.QUERIED, preq: QueryStatus.PARTIAL_REQUESTED, psent: QueryStatus.PARTIAL_SENT, freq: QueryStatus.FULL_REQUESTED, fsent: QueryStatus.FULL_SENT, rr: QueryStatus.REVISE_RESUBMIT, offer: QueryStatus.OFFER, passed: QueryStatus.REJECTED, noresp: QueryStatus.NO_RESPONSE, withdrawn: QueryStatus.WITHDRAWN };
             const status = last ? ST[last.t] : row.status;
-            const state = status === QueryStatus.OFFER ? "offer" : [QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED].includes(status as QueryStatus) ? "materials"
+            const state = status === QueryStatus.OFFER ? "offer" : [QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED, QueryStatus.REVISE_RESUBMIT].includes(status as QueryStatus) ? "materials"
               : [QueryStatus.REJECTED, QueryStatus.NO_RESPONSE, QueryStatus.WITHDRAWN].includes(status as QueryStatus) ? "closed" : status === row.status ? v152.state : "agent";
             return { status, state, replyMs: null, dueMs: null, dueWho: null };
           }}
@@ -6159,7 +6159,7 @@ export const Queries: React.FC<{
             setQc152Busy(true);
             try {
               const [existing, feed] = await Promise.all([readLog(uid, q.id), readFeed(uid, q.id)]);
-              const K: Record<string, FixStep["kind"]> = { queried: "queried", preq: "partial_req", psent: "partial_sent", freq: "full_req", fsent: "full_sent", offer: "offer", nudge: "nudge", passed: "pass", noresp: "noresp", withdrawn: "withdrawn", told: "told" };
+              const K: Record<string, FixStep["kind"]> = { queried: "queried", preq: "partial_req", psent: "partial_sent", freq: "full_req", fsent: "full_sent", rr: "rr_req", offer: "offer", nudge: "nudge", passed: "pass", noresp: "noresp", withdrawn: "withdrawn", told: "told" };
               /* v152.1 §2.5 the other queries this one's offer marked as told: a told step moved or removed moves or clears them */
               const marked = queries.filter((x) => x.offerRefQueryId === q.id).map((x) => x.id);
               const plan = planFix({ uid, q, agent: ag, ms, existing, feed, nowMs: Date.now(), quietWeeks: qcQuietWeeks, marked },
@@ -6214,7 +6214,7 @@ export const Queries: React.FC<{
     if (v152 && qcCardMode === "record" && currentUser) {
       const T: Partial<Record<string, StepType>> = {
         [QueryStatus.QUERIED]: "queried", [QueryStatus.PARTIAL_REQUESTED]: "preq", [QueryStatus.PARTIAL_SENT]: "psent", [QueryStatus.FULL_REQUESTED]: "freq",
-        [QueryStatus.FULL_SENT]: "fsent", [QueryStatus.OFFER]: "offer", [QueryStatus.REJECTED]: "passed", [QueryStatus.NO_RESPONSE]: "noresp", [QueryStatus.WITHDRAWN]: "withdrawn",
+        [QueryStatus.FULL_SENT]: "fsent", [QueryStatus.REVISE_RESUBMIT]: "rr", [QueryStatus.OFFER]: "offer", [QueryStatus.REJECTED]: "passed", [QueryStatus.NO_RESPONSE]: "noresp", [QueryStatus.WITHDRAWN]: "withdrawn",
       };
       const log: LogStep[] = v152.steps.flatMap((x) => {
         const t = x.kind === "nudge" ? "nudge" : x.kind === "told" ? "told" : x.status ? T[x.status] : undefined;
@@ -6239,7 +6239,7 @@ export const Queries: React.FC<{
           return [withVer({ kind: "sample", unit, n: Number.isFinite(n) && n > 0 ? n : undefined }), ...(q.requestSynopsis ? [{ kind: "synopsis" as const }] : [])];
         }
         if (k === "partial_req") return [{ kind: "sample", unit: "chapters", n: 3 }];
-        if (k === "full_req") return [{ kind: "full" }];
+        if (k === "full_req" || k === "rr_req") return [{ kind: "full" }];
         return [];
       };
       const W = 7 * 86_400_000;
@@ -6251,7 +6251,7 @@ export const Queries: React.FC<{
         const status = RECORD_STATUS[k] ?? row.status;
         if (k === "partial_sent" || k === "full_sent") return { status, state: "agent", replyMs: day + 12 * W, dueMs: null, dueWho: "agent" };
         if (k === "nudge") return { status, state: "agent", replyMs: day + qcQuietWeeks * W, dueMs: null, dueWho: "agent" };
-        if (k === "partial_req" || k === "full_req") return { status, state: "materials", replyMs: null, dueMs: null, dueWho: "you" };
+        if (k === "partial_req" || k === "full_req" || k === "rr_req") return { status, state: "materials", replyMs: null, dueMs: null, dueWho: "you" };
         if (k === "offer") return { status, state: "offer", replyMs: null, dueMs: null, dueWho: "you" };
         return { status, state: "closed", replyMs: null, dueMs: null, dueWho: null };
       };
@@ -6301,7 +6301,7 @@ export const Queries: React.FC<{
               showUndoBar({
                 message: refused.length
                   ? `Saved. ${refused.length} ${refused.length === 1 ? "query" : "queries"} couldn’t be marked: ${refusedNames.join(", ")}.`
-                  : `${{ partial_req: "Partial requested", full_req: "Full requested", offer: "Offer", pass: "Passed", partial_sent: "Partial sent", full_sent: "Full sent", nudge: "Nudge", noresp: "Closed: no response", told: "Others told" }[k]} · ${ag?.name || ag?.agency || "The agent"}`,
+                  : `${{ partial_req: "Partial requested", full_req: "Full requested", rr_req: "Revise & resubmit", offer: "Offer", pass: "Passed", partial_sent: "Partial sent", full_sent: "Full sent", nudge: "Nudge", noresp: "Closed: no response", told: "Others told" }[k]} · ${ag?.name || ag?.agency || "The agent"}`,
                 sub: "ADDED TO THE TIMELINE",
                 undo: async () => { await restoreSnapshot(snap); },
               });

@@ -1,0 +1,47 @@
+[
+ {
+  "where": "population: Who replied offers Jonathan asked for a revision (R&R)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "what they asked for: the full, as on a full request",
+  "ok": true,
+  "detail": "FULL MANUSCRIPT"
+ },
+ {
+  "where": "population: What did they say? (optional)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "it renders: theirs, Asked for a revision (R&R), their words quoted",
+  "ok": true,
+  "detail": "{\"side\":\"them\",\"status\":\"Revise & Resubmit\",\"kind\":\"\",\"title\":\"Asked for a revision (R&R)\",\"seen\":\"Asked for a revision (R&R)\\n6 NOV\\nFULL MANUSCRIPT\\n“Loved it. Could the middle move faster?”\",\"date\":\"6 NOV\",\"bg\":\"rgb(231, 237, 244)\",\"edge\":\"rgb(207, 218, 231) 0px 0px 0px 1px inset\",\"glyphBg\":\"rgba(0, 0, 0, 0)\",\"glyphW\":26,\"navy\":false,\"follows\":\"\",\"nth\":\"\",\"nudgeMark\":false,\"quotes\":[\"“Loved it. Could the middle move faster?”\"],\"via\":\"\"}"
+ },
+ {
+  "where": "the footer follows: Revise and resubmit",
+  "ok": true,
+  "detail": "Revise and resubmit"
+ },
+ {
+  "where": "saved: the status, the rr_requested key, the full asked for, and the words as replyNote",
+  "ok": true,
+  "detail": "{\"s\":\"Revise & Resubmit\",\"k\":\"rr_requested\",\"m\":[{\"kind\":\"full\"}],\"n\":\"Loved it. Could the middle move faster?\"}"
+ },
+ {
+  "where": "no older field written (rrNotes)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "a feed row for it",
+  "ok": true,
+  "detail": "{\"activityType\":\"Status Changed\",\"date\":\"2026-11-06T12:00:00.000Z\",\"description\":\"Revise & Resubmit request received from Jonathan Vale at State & Window\",\"details\":\"Respond by 18 Dec 2026\",\"eventKey\":\"rr_requested\",\"id\":\"act-vjnnc8z2s\",\"logEntryId\":\"act-vjnnc8z2s\",\"manuscriptId\":\"seed-ms-1\",\"materials\":[{\"kind\":\"full\"}],\"queryId\":\"q152-long\",\"resultingStatus\":\"Revise & Resubmit\",\"userId\":\"LS4ymFFCEvhN82advZQJ5zkr7sv2\"}"
+ },
+ {
+  "where": "Undo: the query back byte for byte",
+  "ok": true,
+  "detail": ""
+ }
+]

@@ -80,9 +80,9 @@ export interface QcFix152Props {
   onBack: () => void;
   onSave: (rows: FixRow[], removed: string[], pkg: PkgPatch | null) => Promise<boolean>;
 }
-const SIDE: Record<StepType, "them" | "me"> = { queried: "me", preq: "them", psent: "me", freq: "them", fsent: "me", offer: "them", nudge: "me", passed: "them", noresp: "me", withdrawn: "me", told: "me" };
+const SIDE: Record<StepType, "them" | "me"> = { queried: "me", preq: "them", psent: "me", freq: "them", fsent: "me", rr: "them", offer: "them", nudge: "me", passed: "them", noresp: "me", withdrawn: "me", told: "me" };
 const T_STATUS: Partial<Record<StepType, QueryStatus>> = {
-  queried: QueryStatus.QUERIED, preq: QueryStatus.PARTIAL_REQUESTED, psent: QueryStatus.PARTIAL_SENT, freq: QueryStatus.FULL_REQUESTED, fsent: QueryStatus.FULL_SENT,
+  queried: QueryStatus.QUERIED, preq: QueryStatus.PARTIAL_REQUESTED, psent: QueryStatus.PARTIAL_SENT, freq: QueryStatus.FULL_REQUESTED, fsent: QueryStatus.FULL_SENT, rr: QueryStatus.REVISE_RESUBMIT,
   offer: QueryStatus.OFFER, passed: QueryStatus.REJECTED, noresp: QueryStatus.NO_RESPONSE, withdrawn: QueryStatus.WITHDRAWN,
 };
 void StatusDot;
@@ -94,7 +94,7 @@ const gl = (t: StepType) => (
 );
 /** §2.9 the step's bubble colours: yours paper, theirs in their stage colour */
 const tintFor = (t: StepType) => (SIDE[t] === "me" ? null : tintOf({ status: T_STATUS[t] ?? null, kind: null }));
-const TYPES: StepType[] = ["queried", "preq", "psent", "freq", "fsent", "offer", "nudge", "passed", "noresp"];
+const TYPES: StepType[] = ["queried", "preq", "psent", "freq", "fsent", "rr", "offer", "nudge", "passed", "noresp"];
 const lab = (t: StepType, f: string) => (t === "nudge" ? `You nudged ${f}` : STEP_LABEL[t]);
 const sameTold = (a: FixRow["told"], b: FixRow["told"]) => (a?.count ?? null) === (b?.count ?? null) && new Date(a?.deadlineMs ?? 0).toDateString() === new Date(b?.deadlineMs ?? 0).toDateString();
 const sameMats = (a: StepMaterial[], b: StepMaterial[]) => JSON.stringify(a) === JSON.stringify(b);
