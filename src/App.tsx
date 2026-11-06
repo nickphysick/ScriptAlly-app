@@ -27,6 +27,7 @@ import { DiaryLab } from "./components/dashboard/DiaryLab";
 import { ComparableTitlesPage } from "./components/manuscripts/ComparableTitlesPage";
 import { VersionsV2Page } from "./components/versions/VersionsV2Page";
 import { QueryLettersPage } from "./components/letters/QueryLettersPage";
+import { MaterialsLock } from "./components/letters/MaterialsLock";
 import { ImportPage } from "./components/import/ImportPage";
 import { BrandStudio } from "./components/BrandStudio";
 import { AddManuscriptFocusForm } from "./components/AddManuscriptFocusForm";
@@ -661,7 +662,7 @@ function AppContent() {
 
         {/* Responses v2 (15 Oct) — every agent answer for the book in scope. A flowing page in the shared grid. */}
         <StagePage active={queriesPackages} layout="fill" clip>
-          <PackagesRoute active={queriesPackages} onNavigate={handleNavigate} />
+          <MaterialsLock page="packages"><PackagesRoute active={queriesPackages} onNavigate={handleNavigate} /></MaterialsLock>
         </StagePage>
         <StagePage active={queriesResponses} layout="fill" clip>
           <ResponsesRoute onNavigate={handleNavigate} routeActive={queriesResponses} />
@@ -715,7 +716,7 @@ function AppContent() {
             1200 — four width regimes across six pages that share two tokens. */}
         <StagePage active={routeKey === "manuscripts"} layout="fill">
           {manuscriptsComps ? (
-            <ComparableTitlesPage onNavigate={handleNavigate} />
+            <MaterialsLock page="comps"><ComparableTitlesPage onNavigate={handleNavigate} /></MaterialsLock>
           ) : manuscriptsVersions ? (
             /* Versions v2 (23 Oct) — the Versions page, built to design-refs/versions-v2. It replaces Versions v1
                (deleted in the same commit). v27 Part E's interim page stays in the tree, mounted nowhere. */
@@ -736,7 +737,7 @@ function AppContent() {
         {/* Sidebar materials v1 (6 Nov) — the Materials section's own route. Query letters is a placeholder until the
             Query letters pack; Comparable titles and Submission packages keep their old addresses. */}
         <StagePage active={routeKey === "materials"}>
-          <QueryLettersPage active={routeKey === "materials"} />
+          <MaterialsLock page="letters"><QueryLettersPage active={routeKey === "materials"} /></MaterialsLock>
         </StagePage>
 
         {/* Secondary pages mount on demand (same lifecycle as the old conditional render).
