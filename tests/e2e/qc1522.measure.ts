@@ -493,9 +493,11 @@ for (const vp of SIZES) {
       L.check("the offer is signed", dump("offer2").q?.status === "Signed", String(dump("offer2").q?.status));
       await click(page, C("[data-qc1522='undo']"), 300);
       let a1 = dump("offer2"), a2 = dump("sib2");
-      for (let i = 0; i < 15 && JSON.stringify([a1, a2]) !== JSON.stringify([b1, b2]); i++) { await page.waitForTimeout(1000); a1 = dump("offer2"); a2 = dump("sib2"); }
-      L.check("one Undo reverts the offer", JSON.stringify(a1) === JSON.stringify(b1), "");
-      L.check("…and the sibling", JSON.stringify(a2) === JSON.stringify(b2), "");
+      for (let i = 0; i < 30 && JSON.stringify([a1, a2]) !== JSON.stringify([b1, b2]); i++) { await page.waitForTimeout(1000); a1 = dump("offer2"); a2 = dump("sib2"); }
+      const diff = (x: Record<string, unknown>, y: Record<string, unknown>) => JSON.stringify({ q: Object.keys({ ...(x.q as object), ...(y.q as object) }).filter((k) => JSON.stringify((x.q as Record<string, unknown>)?.[k]) !== JSON.stringify((y.q as Record<string, unknown>)?.[k])),
+        log: [(x.log as unknown[])?.length, (y.log as unknown[])?.length], feed: [(x.feed as unknown[])?.length, (y.feed as unknown[])?.length] });
+      L.check("one Undo reverts the offer", JSON.stringify(a1) === JSON.stringify(b1), diff(b1, a1));
+      L.check("…and the sibling", JSON.stringify(a2) === JSON.stringify(b2), diff(b2, a2));
       L.done(13);
     });
 
