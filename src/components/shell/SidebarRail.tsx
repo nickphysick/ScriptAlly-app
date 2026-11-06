@@ -18,7 +18,8 @@
  */
 import React from "react";
 import { ShellHit, ShellSection } from "../../lib/workspaceShell";
-import { morePageFor, railItems, railLabelOf, SETTINGS_RAIL_LABELS } from "../../lib/workspaceNav";
+import { railItems, railLabelOf, SETTINGS_RAIL_LABELS } from "../../lib/workspaceNav";
+import { RailMore } from "./RailMore";
 import { ACCOUNT_ROUTES, AccountSectionId } from "../../lib/accountRoutes";
 import "./sidebarRail.css";
 
@@ -55,8 +56,6 @@ export interface SidebarRailProps {
   planLabel: string;
   tip: (title: string, sub?: string, kbd?: string) => TipProps;
   toggleKbd: string;
-  /** The More button and its panel (Part B); drawn by the shell so it can hold the panel's state. */
-  more?: React.ReactNode;
 }
 
 const FEEDBACK_ICON = (
@@ -67,12 +66,6 @@ const FEEDBACK_ICON = (
 export const PANEL_ICON = (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <rect x="3.5" y="4.5" width="17" height="15" rx="2.5" /><path d="M9.5 4.5v15" />
-  </svg>
-);
-/* More: the ellipsis */
-export const MORE_ICON = (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <circle cx="5" cy="12" r="1.4" /><circle cx="12" cy="12" r="1.4" /><circle cx="19" cy="12" r="1.4" />
   </svg>
 );
 const BACK_ICON = (
@@ -98,11 +91,10 @@ export const railCount = (n: number): string => (n > 99 ? "99+" : String(n));
 export const SidebarRail: React.FC<SidebarRailProps> = ({
   sections, icons, hit, todoCount, locked, onGo, onExpand, expandRef, expanded, switcher, markSrc,
   settingsMode, settingsSection, onSettings, onBack, onFeedback, feedbackOpen = false, feedbackRef,
-  onAccount, initials, who, planLabel, tip, toggleKbd, more,
+  onAccount, initials, who, planLabel, tip, toggleKbd,
 }) => {
   const page = settingsMode ? null : hit?.child ?? null;
   const items = railItems(sections);
-  const morePage = settingsMode ? null : morePageFor(sections, hit);
   const sectionOf = (id: string) => sections.find((x) => (x.children ?? []).some((c) => c.id === id));
 
   const item = (ch: (typeof items)[number], i: number) => {
@@ -155,12 +147,7 @@ export const SidebarRail: React.FC<SidebarRailProps> = ({
       <div className="wsr-mswrap">{switcher}</div>
       <nav className="wsr-nav" aria-label="Main">
         {items.map(item)}
-        {more ?? (
-          <button type="button" className={`wsr-ni wsr-more${morePage ? " wsr-on" : ""}`} data-go="more" aria-label={morePage ? `More: ${morePage.label}` : "More"}>
-            <span className="wsr-ic">{MORE_ICON}</span>
-            <span className="wsr-lbl">{morePage ? railLabelOf(morePage) : "More"}</span>
-          </button>
-        )}
+        <RailMore sections={sections} hit={settingsMode ? null : hit} icons={icons} locked={locked} onGo={onGo} disabled={expanded || settingsMode} />
       </nav>
       <nav className="wsr-setnav" aria-label="Settings">
         <button type="button" className="wsr-ni wsr-back" onClick={onBack} aria-label="Back to the app">

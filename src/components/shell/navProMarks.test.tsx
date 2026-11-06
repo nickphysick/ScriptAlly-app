@@ -62,6 +62,24 @@ describe("sidebar materials v1 — the nav's Pro marks", () => {
     expect(taggedRows(h)).toEqual(["Discover", "Versions"]);
   });
 
+  it("sidebar rail v2: More is a menu button, lit and named by the More page you are on", () => {
+    const more = (path: string) => render(path).match(/<button[^>]*data-go="more"[^>]*>(?:(?!<\/button>).)*<\/button>/s)![0];
+    const r = more("/queries/responses");
+    expect(r).toContain('aria-haspopup="menu"');
+    expect(r).toContain('aria-expanded="false"');
+    expect(r).toContain("wsr-on");
+    expect(r).toContain(">Responses<");
+    expect(r).toContain('aria-label="More: Responses"');
+    const q = more("/queries");
+    expect(q).not.toContain("wsr-on");
+    expect(q).toContain(">More<");
+    expect(more("/manuscripts/comps")).toContain(">Comps<");
+    /* the rail item lights only on its own page */
+    const h = render("/queries/responses");
+    expect(h).not.toMatch(/class="wsr-ni wsr-on"[^>]*data-go="q-centre"/);
+    expect(render("/queries")).toMatch(/class="wsr-ni wsr-on"[^>]*data-go="q-centre"/);
+  });
+
   it("a paid Pro writer sees none, even with the switches shut", () => {
     G.__SA_NAV_FREE = true;
     user.plan = UserPlan.PRO;

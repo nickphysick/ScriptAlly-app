@@ -1,0 +1,49 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The rail's More panel (sidebar rail v2, 6 Nov; design-refs/sidebar-rail-v2). Portalled to document.body, so every
+ * rule is scoped to `.wsm` and the panel hands inheritance back from brand.tsx itself. Over the page and the rail
+ * (z 72), under any dialog. No green; the current page wears the rail's terracotta wash.
+ */
+.wsm {
+  position: fixed; z-index: 72; box-sizing: border-box; width: 248px; max-height: calc(100vh - 16px); overflow-y: auto;
+  padding: 10px 8px 8px; border-radius: 14px; background: #1f2a3b; color: rgba(var(--ink-cream-rgb), 0.82);
+  box-shadow: 0 24px 48px -16px rgba(0, 0, 0, 0.6), 0 6px 14px -6px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(var(--ink-cream-rgb), 0.08);
+  font-family: var(--sp-serif); scrollbar-width: none;
+  opacity: 0; transform: translateX(-6px); transition: opacity 0.16s ease, transform 0.16s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+.wsm.is-in { opacity: 1; transform: none; }
+.wsm::-webkit-scrollbar { display: none; }
+.wsm *, .wsm *::before, .wsm *::after { box-sizing: border-box; }
+.wsm :where(span, p, div, button) { font-family: inherit; }
+.wsm .wsm-h {
+  display: flex; align-items: center; gap: 8px; padding: 4px 10px 6px;
+  font: 600 12.5px/1.2 var(--sp-serif); letter-spacing: 0; text-transform: none; color: rgba(var(--ink-cream-rgb), 0.46);
+}
+.wsm-rule { height: 1px; margin: 6px 10px 8px; background: rgba(var(--ink-cream-rgb), 0.1); }
+.wsm .wsm-row {
+  display: flex; align-items: center; gap: 10px; width: 100%; height: 34px; padding: 0 10px; border: 0; border-radius: 8px;
+  background: transparent; color: rgba(var(--ink-cream-rgb), 0.82); text-align: left; cursor: pointer;
+  font: 400 15px/1 var(--sp-serif);
+}
+.wsm .wsm-row:hover { background: rgba(var(--ink-cream-rgb), 0.07); color: rgba(var(--ink-cream-rgb), 0.95); }
+.wsm .wsm-row.wsm-cur { background: rgba(var(--ink-terra-rgb), 0.2); color: var(--ink-bright); font-weight: 600; }
+.wsm .wsm-row.wsm-cur .wsm-ic { color: var(--ink-terra); }
+.wsm .wsm-row:focus-visible { outline: 2px solid var(--ink-terra); outline-offset: -2px; }
+.wsm-ic { flex: none; display: grid; place-items: center; width: 16px; height: 16px; opacity: 0.8; }
+.wsm-ic svg { width: 16px; height: 16px; }
+.wsm .wsm-row.wsm-cur .wsm-ic { opacity: 1; }
+.wsm-lbl { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wsm .wsm-pro {
+  flex: none; padding: 0 5px; height: 15px; border-radius: 4px;
+  font: 600 9px/15px "Inter", system-ui, sans-serif; letter-spacing: 0.02em; color: rgba(var(--ink-cream-rgb), 0.78);
+  box-shadow: inset 0 0 0 1px rgba(var(--ink-cream-rgb), 0.32);
+}
+.wsm .wsm-foot { margin: 8px 10px 2px; padding-top: 8px; border-top: 1px solid rgba(var(--ink-cream-rgb), 0.1); font: italic 400 12.5px/1.35 var(--sp-serif); color: rgba(var(--ink-cream-rgb), 0.5); }
+
+/* the rail's More: its label is the page's short name while you are on it, cut with an ellipsis past 72px */
+.wsr .wsr-morelbl { max-width: 72px; overflow: hidden; text-overflow: ellipsis; }
+.wsr .wsr-more.wsr-moreopen:not(.wsr-on) .wsr-ic { opacity: 0.9; background: rgba(var(--ink-cream-rgb), 0.07); }
+
+@media (prefers-reduced-motion: reduce) { .wsm { transition: none; transform: none; } }
