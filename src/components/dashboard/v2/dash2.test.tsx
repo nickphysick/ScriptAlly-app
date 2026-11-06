@@ -77,7 +77,8 @@ describe("DB21-B · Active queries is the chart only", () => {
     const card = html.slice(html.indexOf('data-d2-card="active"'), html.indexOf('data-d60="closed-hoop"'));
     expect(card.length).toBeGreaterThan(100);
     for (const gone of ["waiting on you", "have replied", "weeks querying", 'data-d2="tiles"']) expect(card, gone).not.toContain(gone);
-    expect([PLOT_H, EDGE, HEADROOM]).toEqual([280, 22, 1.35]);
+    /* RE-POINTED (v2.2 Part B): the plot is 270px; the edge and Active's headroom are v2.1's */
+    expect([PLOT_H, EDGE, HEADROOM]).toEqual([270, 22, 1.35]);
   });
 });
 

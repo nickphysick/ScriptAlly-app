@@ -15,6 +15,8 @@ export const Frame: React.FC<{
   tone: FrameTone;
   title: React.ReactNode;
   meta?: React.ReactNode;
+  /** v2.2: beside the title, before the meta (the chart's change, "+3 this week") */
+  after?: React.ReactNode;
   label: string;
   probe: string;
   loading?: boolean;
@@ -22,13 +24,14 @@ export const Frame: React.FC<{
   /** extra `data-*` attributes for the section (the founding card's figures, read by its lock) */
   data?: Record<string, string | number | undefined>;
   children: React.ReactNode;
-}> = ({ tone, title, meta, label, probe, loading, className, data, children }) => (
+}> = ({ tone, title, meta, after, label, probe, loading, className, data, children }) => (
   <section className={`os-card d2-card${className ? ` ${className}` : ""}`} role="group" aria-label={label} data-d2-card={probe} data-loading={loading ? "1" : "0"}
     {...Object.fromEntries(Object.entries(data ?? {}).filter(([, v]) => v !== undefined).map(([k, v]) => [`data-${k}`, v]))}>
     <div className="os-frame">
       <div className={`os-band d2-tone--${tone}`}>
         <div className="os-bandrow">
           <h2 className="os-cardttl d2-cardttl">{title}</h2>
+          {after}
           {meta != null && <span className="d2-meta">{meta}</span>}
         </div>
       </div>

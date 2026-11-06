@@ -663,7 +663,7 @@ export const Dash58: React.FC<Dash58Props> = ({
                   />}
                 </div>
               ) : (
-                <Dash2Active loading={loading} queries={scopedQueries} activities={scopedActivities}
+                <Dash2Active loading={loading} queries={scopedQueries} activities={scopedActivities} agents={agents}
                   activeCount={activeCount} undatedCount={loading ? 0 : undatedLiveCount(scopedQueries)} now={now} />
               )}
               {!pre && closedCard}
