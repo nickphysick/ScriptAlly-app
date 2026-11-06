@@ -73,7 +73,8 @@ describe("DB21-A · the weeks-querying tag", () => {
 describe("DB21-B · Active queries is the chart only", () => {
   it("no tiles, and the chart's dimensions are v2.1's", () => {
     const html = page();
-    const card = html.slice(html.indexOf('data-d2-card="active"'), html.indexOf('data-d2-card="founding"'));
+    /* RE-POINTED (v2.2): the chart is followed by Closed queries in the middle column, no longer by the founding card */
+    const card = html.slice(html.indexOf('data-d2-card="active"'), html.indexOf('data-d60="closed-hoop"'));
     expect(card.length).toBeGreaterThan(100);
     for (const gone of ["waiting on you", "have replied", "weeks querying", 'data-d2="tiles"']) expect(card, gone).not.toContain(gone);
     expect([PLOT_H, EDGE, HEADROOM]).toEqual([280, 22, 1.35]);

@@ -86,3 +86,6 @@
   .d58.d2 .d2-fwbtns svg { display: none; }
   .d58.d2 .d2-fwbtns button { font-size: 14px; padding: 0 6px; }
 }
+
+/* v2.2 Part A: the card is a full-width band under the navy header, 18px below it, in the cards' frame (22px corners) */
+.d58.d2 .d58-page > .d2-fw { margin-top: 18px; border-radius: 22px; }

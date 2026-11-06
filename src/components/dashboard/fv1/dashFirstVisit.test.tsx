@@ -64,9 +64,11 @@ describe("DFV-A · the pre-query page", () => {
     expect(html).not.toContain('data-d2-card="active"');
   });
   /* RE-POINTED (Dashboard v2): the founding card is the middle column's second card, under the set-up card */
-  it("draws the founding card in the middle column, after the set-up card", () => {
-    expect(html.indexOf('data-d2-card="founding"')).toBeGreaterThan(html.indexOf('data-fv1="setup"'));
-    expect(html.indexOf('data-d2-card="founding"')).toBeLessThan(html.indexOf('data-d2="right"'));
+  /* RE-POINTED (Dashboard v2.2): the founding writer is the full-width band above the grid, before the set-up card */
+  it("draws the founding band above the grid, before the set-up card", () => {
+    expect(html.indexOf('data-d2-card="founding"')).toBeGreaterThan(-1);
+    expect(html.indexOf('data-d2-card="founding"')).toBeLessThan(html.indexOf('data-d2="grid"'));
+    expect(html.indexOf('data-d2="grid"')).toBeLessThan(html.indexOf('data-fv1="setup"'));
     expect(html).not.toContain('class="d59-rule"');
   });
   /* RE-POINTED (Dashboard v2): the band carries no buttons before the first query, and no status label of any kind */

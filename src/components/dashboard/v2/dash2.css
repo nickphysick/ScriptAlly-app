@@ -50,13 +50,13 @@
 .d2-gl { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 
 /* ── the grid ── */
-.d2-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr) 400px; gap: 24px; align-items: stretch; margin-top: 24px; }
+.d2-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr) 400px; gap: 24px; align-items: stretch; margin-top: 22px; }
+/* v2.2: no column grows to fill — each holds its cards at their own height, and the feed (absolute, inset 0) takes the
+   row's height, which is the taller of the left and middle columns */
 .d2-col { min-width: 0; display: flex; flex-direction: column; gap: 20px; }
-/* the founding card takes what is left of the middle column, so its foot is the row's foot and the feed ends level with it */
-.d2-mid > .d2-fw { flex: 1 1 auto; }
 .d2-right { position: relative; min-width: 0; min-height: 420px; }
 @media (max-width: 1320px) {
-  .d2-grid { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr) 340px; }
+  .d2-grid { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr) 340px; gap: 18px; }
   .d58.d2 .d2-pill:not(.d2-pill--pri) { padding: 0 12px; }
   .d58.d2 .d2-pill:not(.d2-pill--pri) span { display: none; }
 }
