@@ -17,6 +17,7 @@
 import { QueryStatus, type Agent, type Query, type UserTask } from "../types";
 import type { TrayItem } from "./todoTray";
 import type { AgentDataNeed } from "./agentDataQuality";
+import { isTaskType, type TaskType } from "./todoActions";
 
 const DAY = 86400000;
 const MONTHS_LONG = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -84,6 +85,34 @@ const NEED_TITLE: Record<AgentDataNeed, (f: string) => string> = {
   materials: (f) => `What does ${f} want sent?`,
 };
 
+/* ⚠️ EVERY TASK TYPE THE BOARD DOESN'T NAME HAS ITS OWN WORDS HERE (To-do list v51.1). The row's title names the agent
+   (the writer can tell two rows apart without opening them), and the header's phrase is built from the same kind, first
+   name and agency — never the card's own stored sentence, which is what put raw text in the header. Typed over every
+   TaskType, so a new type fails to compile until it says how it reads. The board's named kinds (offer, send, R&R,
+   nudge, close) and the profile gaps are handled by `titleOf` and `doingPhrase` directly; their entries here are never
+   read and say so. */
+type OtherWords = { title: (first: string, book: string) => string; doing: (who: string, book: string) => string };
+const NAMED: OtherWords = { title: (f) => f, doing: (w) => w };
+export const OTHER_WORDS: Record<TaskType, OtherWords> = {
+  offer_received: NAMED, partial_requested: NAMED, full_requested: NAMED, revise_resubmit: NAMED,
+  nudge_overdue: NAMED, no_response_close: NAMED, data_quality_poor: NAMED,
+  materials_unrecorded: { title: (f) => `Fill in what you sent ${f}`, doing: (w) => `Filling in what you sent ${w}` },
+  materials_unrecorded_bulk: { title: (f) => `Fill in what you sent ${f}`, doing: (w) => `Filling in what you sent ${w}` },
+  offer_tell: { title: (f) => `Tell ${f} about your offer`, doing: (w) => `Telling ${w} about your offer` },
+  offer_send_full: { title: (f) => `Send ${f} your full`, doing: (w) => `Sending ${w} your full` },
+  withdraw_tell: { title: (f) => `Tell ${f} you’ve withdrawn`, doing: (w) => `Telling ${w} you’ve withdrawn` },
+  signed_tell: { title: (f) => `Tell ${f} you’ve signed`, doing: (w) => `Telling ${w} you’ve signed` },
+  agent_recheck: { title: (f) => `Check on ${f}`, doing: (w) => `Checking on ${w}` },
+  dream_agent_unqueried: { title: (f) => `Query ${f}`, doing: (w) => `Querying ${w}` },
+  /* the one task about a book rather than an agent: it names the book */
+  querying_unstarted: { title: (_f, b) => `Start querying ${b}`, doing: (_w, b) => `Starting to query ${b}` },
+};
+const taskTypeOf = (i: TrayItem): TaskType | null => (isTaskType(i.card.taskType) ? i.card.taskType : null);
+const bookOf = (i: TrayItem): string => {
+  const t = (i.card as { manuscriptTitle?: string }).manuscriptTitle?.trim();
+  return t ? `‘${t}’` : "your book";
+};
+
 function kindOf(i: TrayItem, need?: AgentDataNeed): WsKind {
   if (i.userTask || i.bucket === "note") return "own";
   switch (i.bucket) {
@@ -106,15 +135,20 @@ function titleOf(kind: WsKind, i: TrayItem, first: string, need?: AgentDataNeed)
     case "quiet": return `${poss(first)} gone quiet`;
     case "fix": return NEED_TITLE[need!](first);
     case "own": return (i.userTask?.text ?? i.deed).trim() || "Your task";
-    default: return i.deed;
+    default: {
+      const tt = taskTypeOf(i);
+      return tt ? OTHER_WORDS[tt].title(first, bookOf(i)) : i.deed;
+    }
   }
 }
 
 /** One workspace task per tray item, and one per member of a housekeeping sweep. */
-export function wsTasks(items: readonly TrayItem[], agents: readonly Agent[], sweepNeed: (i: TrayItem) => AgentDataNeed | null, memberIds: (i: TrayItem) => string[], nowMs: number): WsTask[] {
+export function wsTasks(items: readonly TrayItem[], agents: readonly Agent[], sweepNeed: (i: TrayItem) => AgentDataNeed | null, memberIds: (i: TrayItem) => string[], nowMs: number,
+  /** the materials bulk card's queries ("12 queries have no record of what you sent"): one row each, naming its agent */
+  gapMembers: (i: TrayItem) => { queryId: string; agentId: string }[] = () => [], queries: readonly Query[] = []): WsTask[] {
   const today = localYmd(nowMs);
   const out: WsTask[] = [];
-  const make = (i: TrayItem, agent: Agent | undefined, need: AgentDataNeed | undefined, key: string): WsTask => {
+  const make = (i: TrayItem, agent: Agent | undefined, need: AgentDataNeed | undefined, key: string, query: Query | undefined = i.query): WsTask => {
     const kind = kindOf(i, need);
     const first = agent ? firstOf(agent) : "";
     const agentName = (agent?.name ?? "").trim() || (agent?.agency ?? "").trim();
@@ -125,7 +159,8 @@ export function wsTasks(items: readonly TrayItem[], agents: readonly Agent[], sw
     const title = titleOf(kind, i, first || "the agent", need);
     return {
       key, item: i, kind, group: GROUP_OF[i.group.id] ?? "house", title, first: first || "The agent", agentName, agency,
-      query: i.query, agent, userTask: i.userTask, need, dueDays, quietDays, type: TYPE_OF[kind],
+      query, agent, userTask: i.userTask, need, dueDays, quietDays,
+      type: kind === "other" && (i.card.taskType === "materials_unrecorded" || i.card.taskType === "materials_unrecorded_bulk") ? "Fill in" : TYPE_OF[kind],
       hay: `${title} ${agentName} ${agency}`.toLowerCase(),
     };
   };
@@ -138,6 +173,13 @@ export function wsTasks(items: readonly TrayItem[], agents: readonly Agent[], sw
         if (a) out.push(make(i, a, need, `${i.key}|${id}`));
       }
       continue;
+    }
+    if (i.card.taskType === "materials_unrecorded_bulk") {
+      const ms = gapMembers(i);
+      if (ms.length) {
+        for (const m of ms) out.push(make(i, agents.find((x) => x.id === m.agentId), undefined, `${i.key}|${m.queryId}`, queries.find((q) => q.id === m.queryId)));
+        continue;
+      }
     }
     out.push(make(i, i.agent, need ?? undefined, i.key));
   }
@@ -203,6 +245,7 @@ export function wsSections(tasks: readonly WsTask[], g: WsGrouping): WsSection[]
 
 /** "Sending Clara at Harbour Lane your partial" */
 export function doingPhrase(t: WsTask): string {
+  /* "{first} at {agency}" where both are known and differ; the first name alone otherwise */
   const who = t.agency && t.agentName && t.agentName !== t.agency ? `${t.first} at ${t.agency}` : t.first;
   switch (t.kind) {
     case "offer": return t.agency && t.agentName !== t.agency ? `Answering ${poss(t.first)} offer from ${t.agency}` : `Answering ${poss(t.first)} offer`;
@@ -213,7 +256,12 @@ export function doingPhrase(t: WsTask): string {
     case "fix":
       return t.need === "responseTime" ? `Adding how long ${who} takes to reply`
         : t.need === "mswl" ? `Adding ${poss(who)} wishlist` : `Adding what ${who} wants sent`;
-    default: return t.title;
+    case "own": return t.title;
+    case "other": {
+      const tt = taskTypeOf(t.item);
+      return tt ? OTHER_WORDS[tt].doing(who, bookOf(t.item)) : `Doing what ${who} needs`;
+    }
+    default: { const unhandled: never = t.kind; return unhandled; }
   }
 }
 

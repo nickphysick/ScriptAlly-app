@@ -135,3 +135,77 @@ describe("the reply time in the Mentor's words", () => {
     expect(mentorLine(byKey("quiet"), unset)).toBe("It’s been 16 weeks with no word from Daniel. One polite nudge is normal before you give up on it.");
   });
 });
+
+/* To-do list v51.1 — THE HEADER'S PHRASE IS BUILT, NEVER COPIED; EVERY HOUSEKEEPING ROW NAMES ITS AGENT.
+   Names with apostrophes, hyphens and accents, and every card carrying the raw text "o'r" as its own stored title and
+   deed: if any path copies stored text into the header or a row, that text appears and the case fails. */
+describe("v51.1 — the priority phrase and the row titles", () => {
+  const zoe = agent("z1", "Zoë O’Rourke", "Smith-Jones Literary");
+  const mk = agent("z2", "Mary-Kate Smith-Jones", "O’Rourke & Partners");
+  const solo = agent("z3", "", "Agence Zoë");
+  const RAW = "o'r";
+  const row = (key: string, bucket: string, group: keyof typeof GROUP, taskType: string, a: Agent, status: QueryStatus | null, extra: Record<string, unknown> = {}): TrayItem => {
+    const x = item({ key, bucket, group, taskType, agent: a, query: status ? q(`q-${key}`, a.id, status) : undefined, due: -3 });
+    return { ...x, deed: RAW, card: { ...(x.card as object), title: RAW, manuscriptTitle: "Murphy’s Day Out", ...extra } } as unknown as TrayItem;
+  };
+  const ROWS: TrayItem[] = [
+    row("send", "send", "you", "partial_requested", zoe, QueryStatus.PARTIAL_REQUESTED),
+    row("full", "send", "you", "full_requested", mk, QueryStatus.FULL_REQUESTED),
+    row("offer", "decide", "you", "offer_received", zoe, QueryStatus.OFFER),
+    row("nudge", "chase", "chase", "nudge_overdue", mk, QueryStatus.QUERIED),
+    row("quiet", "close", "quiet", "no_response_close", zoe, QueryStatus.QUERIED),
+    row("mat", "fix", "tidy", "materials_unrecorded", zoe, QueryStatus.QUERIED),
+    row("tell", "fix", "tidy", "offer_tell", mk, QueryStatus.QUERIED),
+    row("sendfull", "fix", "tidy", "offer_send_full", zoe, QueryStatus.QUERIED),
+    row("wd", "fix", "tidy", "withdraw_tell", mk, QueryStatus.WITHDRAWN),
+    row("signed", "fix", "tidy", "signed_tell", zoe, QueryStatus.WITHDRAWN),
+    row("recheck", "fix", "tidy", "agent_recheck", solo, QueryStatus.QUERIED),
+    row("dream", "fix", "tidy", "dream_agent_unqueried", mk, null),
+    row("start", "fix", "tidy", "querying_unstarted", solo, null),
+    row("bulk", "fix", "tidy", "materials_unrecorded_bulk", zoe, null),
+  ];
+  const tasks2 = wsTasks(ROWS, [zoe, mk, solo], () => null, () => [], NOW,
+    (i) => (i.card.taskType === "materials_unrecorded_bulk" ? [{ queryId: "qb1", agentId: "z1" }, { queryId: "qb2", agentId: "z2" }] : []),
+    [q("qb1", "z1", QueryStatus.QUERIED), q("qb2", "z2", QueryStatus.FULL_SENT)]);
+  const by = (k: string) => tasks2.find((t) => t.key === k)!;
+
+  it("each kind's phrase, from its kind, first name and agency", () => {
+    expect(doingPhrase(by("send"))).toBe("Sending Zoë at Smith-Jones Literary your partial");
+    expect(doingPhrase(by("full"))).toBe("Sending Mary-Kate at O’Rourke & Partners your full");
+    expect(doingPhrase(by("offer"))).toBe("Answering Zoë’s offer from Smith-Jones Literary");
+    expect(doingPhrase(by("nudge"))).toBe("Nudging Mary-Kate at O’Rourke & Partners");
+    expect(doingPhrase(by("quiet"))).toBe("Deciding what to do about Zoë at Smith-Jones Literary");
+    expect(doingPhrase(by("mat"))).toBe("Filling in what you sent Zoë at Smith-Jones Literary");
+    expect(doingPhrase(by("tell"))).toBe("Telling Mary-Kate at O’Rourke & Partners about your offer");
+    expect(doingPhrase(by("sendfull"))).toBe("Sending Zoë at Smith-Jones Literary your full");
+    expect(doingPhrase(by("wd"))).toBe("Telling Mary-Kate at O’Rourke & Partners you’ve withdrawn");
+    expect(doingPhrase(by("signed"))).toBe("Telling Zoë at Smith-Jones Literary you’ve signed");
+    expect(doingPhrase(by("recheck"))).toBe("Checking on Agence Zoë");
+    expect(doingPhrase(by("dream"))).toBe("Querying Mary-Kate at O’Rourke & Partners");
+    expect(doingPhrase(by("start"))).toBe("Starting to query ‘Murphy’s Day Out’");
+  });
+  it("no phrase and no title carries a card's stored text", () => {
+    for (const t of tasks2) {
+      expect(doingPhrase(t), t.key).not.toContain(RAW);
+      expect(t.title, t.key).not.toContain(RAW);
+    }
+  });
+  it("every housekeeping row names its agent (the book, for the one task about a book)", () => {
+    const house = tasks2.filter((t) => t.group === "house");
+    expect(house.length).toBeGreaterThan(8);
+    for (const t of house) {
+      if (t.item.card.taskType === "querying_unstarted") expect(t.title).toBe("Start querying ‘Murphy’s Day Out’");
+      else expect(t.title, t.key).toContain(t.first);
+    }
+    expect(by("mat").title).toBe("Fill in what you sent Zoë");
+    expect(by("tell").title).toBe("Tell Mary-Kate about your offer");
+  });
+  it("the materials bulk card is one row per query, each naming its own agent", () => {
+    const rows = tasks2.filter((t) => t.key.startsWith("bulk|"));
+    expect(rows.map((t) => [t.key, t.title, t.query?.id])).toEqual([
+      ["bulk|qb1", "Fill in what you sent Zoë", "qb1"],
+      ["bulk|qb2", "Fill in what you sent Mary-Kate", "qb2"],
+    ]);
+    expect(rows.every((t) => t.type === "Fill in")).toBe(true);
+  });
+});
