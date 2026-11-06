@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "CB11",
+  "where": "pick",
+  "ok": true,
+  "detail": "Pick a colour to start"
+ },
+ {
+  "lock": "CB11",
+  "where": "heading",
+  "ok": true,
+  "detail": "its words"
+ },
+ {
+  "lock": "CB11",
+  "where": "examples",
+  "ok": true,
+  "detail": "four examples"
+ },
+ {
+  "lock": "CB11",
+  "where": "no wall",
+  "ok": true,
+  "detail": "no wall"
+ },
+ {
+  "lock": "CB11",
+  "where": "created",
+  "ok": true,
+  "detail": "1 note(s) created"
+ },
+ {
+  "lock": "CB11",
+  "where": "left empty",
+  "ok": true,
+  "detail": "the wall, not the empty page"
+ }
+]

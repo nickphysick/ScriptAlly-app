@@ -22,10 +22,15 @@
   --cb2-mono: var(--sp-mono);
 }
 
-/* ═════════ the page: one width, the Contact list's (W = min(sheet − 48, 1200), centred on the sheet) ═════════ */
+/* ═════════ the page: one width, the Contact list's header's (contactV24.css `--cl24-list`, measured on /agents):
+   W = min(sheet − 64, 1136) + up to 80 more on a sheet over 1500, centred on the sheet. The scroll row's gutter
+   padding (`.wpg-scroll > *`) is taken off: the width is stated, so a gutter on top of it would shift the page. ═════════ */
 .cb2-page { padding-bottom: 80px; }
 @media (min-width: 768px) {
-  .cb2-page { --cb2-w: min(calc(var(--hsheet-w) - 48px), 1200px); width: var(--cb2-w); margin-left: calc(50% - var(--cb2-w) / 2); }
+  .wpg-scroll > .cb2-page {
+    --cb2-w: calc(min(var(--hsheet-w) - 64px, 1136px) + clamp(0px, (var(--hsheet-w) - 1499.5px) * 1000, 80px));
+    box-sizing: border-box; width: var(--cb2-w); padding-inline: 0; margin-left: calc(50% - var(--cb2-w) / 2);
+  }
 }
 
 /* ═════════ B · the header: the Contact list's navy panel (contactV26.css `.cl26-*`), restated ═════════ */

@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "CB7",
+  "where": "1512x982 one write",
+  "ok": true,
+  "detail": "1 user-document write(s): [{\"doc\":\"users/LS4ymFFCEvhN82advZQJ5zkr7sv2\",\"paths\":[\"todoPrefs.noteboard.order\",\"todoPrefs.noteboard.sort\"]}]"
+ },
+ {
+  "lock": "CB7",
+  "where": "1512x982 the leaf",
+  "ok": true,
+  "detail": "paths todoPrefs.noteboard.order, todoPrefs.noteboard.sort"
+ },
+ {
+  "lock": "CB7",
+  "where": "1512x982 My order",
+  "ok": true,
+  "detail": "the sort reads \"My order\""
+ },
+ {
+  "lock": "CB7",
+  "where": "1512x982 landed",
+  "ok": true,
+  "detail": "cb2seed-n11 at 1, cb2seed-n2 at 2"
+ },
+ {
+  "lock": "CB7",
+  "where": "1280x800 one write",
+  "ok": true,
+  "detail": "1 user-document write(s): [{\"doc\":\"users/LS4ymFFCEvhN82advZQJ5zkr7sv2\",\"paths\":[\"todoPrefs.noteboard.order\",\"todoPrefs.noteboard.sort\"]}]"
+ },
+ {
+  "lock": "CB7",
+  "where": "1280x800 the leaf",
+  "ok": true,
+  "detail": "paths todoPrefs.noteboard.order, todoPrefs.noteboard.sort"
+ },
+ {
+  "lock": "CB7",
+  "where": "1280x800 My order",
+  "ok": true,
+  "detail": "the sort reads \"My order\""
+ },
+ {
+  "lock": "CB7",
+  "where": "1280x800 landed",
+  "ok": true,
+  "detail": "cb2seed-n11 at 1, cb2seed-n2 at 2"
+ }
+]
