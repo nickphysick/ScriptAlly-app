@@ -103,6 +103,9 @@ export interface User {
          `layout` and `dismissedExamples` are no longer read (left in place, not deleted). */
       view?: "free" | "tidy" | "board" | "piles";
       sort?: "mine" | "new" | "old" | "colour";
+      /* Corkboard v2.1: tag ids of piles started here with no notes yet, so an empty pile stays listed. A tag id
+         leaves when its pile gains a note or the writer removes the pile; the tag definition itself is never deleted. */
+      started?: string[];
     };
     /* The Manuscripts landing's promo tiles, following the Noteboard's precedent exactly:
        `todoPrefs` is `is map` and unconstrained, so this page-scoped sub-map ships with NO rules

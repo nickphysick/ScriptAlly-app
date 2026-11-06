@@ -38,11 +38,14 @@ export interface CbPilesProps {
   onStart?: () => void;
   /** Corkboard v2.1: "+ Add notes to this pile" in an open named pile */
   onAddNotes?: (k: string) => void;
+  /** Corkboard v2.1 (Part C): an empty pile started here can be removed (off the started list only) */
+  canRemove?: (k: string) => boolean;
+  onRemove?: (k: string) => void;
 }
 
 const nNotes = (n: number) => `${n} ${n === 1 ? "note" : "notes"}`;
 
-export const CbPiles: React.FC<CbPilesProps> = ({ piles, label, open, onOpen, wall, draggable, narrowing, find, menuFor, onOpenNote, onMenu, onMove, onNewPile, onStart, onAddNotes }) => {
+export const CbPiles: React.FC<CbPilesProps> = ({ piles, label, open, onOpen, wall, draggable, narrowing, find, menuFor, onOpenNote, onMenu, onMove, onNewPile, onStart, onAddNotes, canRemove, onRemove }) => {
   const [over, setOver] = useState<string | null>(null);
   const [naming, setNaming] = useState<string | null>(null);
   const [name, setName] = useState("");
@@ -140,6 +143,8 @@ export const CbPiles: React.FC<CbPilesProps> = ({ piles, label, open, onOpen, wa
       </div>
       <div className="cb2-openhead">
         <h2>{label(cur.k)}</h2><span>{nNotes(cur.notes.length)}</span><span className="cb2-grow" />
+        {cur.k && !cur.notes.length && canRemove?.(cur.k)
+          ? <button type="button" className="cb2-rmpile" data-cb2="remove-pile" onClick={() => onRemove?.(cur.k)}>Remove pile</button> : null}
         {cur.k ? <button type="button" className="cb2-btn cb2-btn--sm2" data-cb2="add-notes" onClick={() => onAddNotes?.(cur.k)}>+ Add notes to this pile</button> : null}
       </div>
       {cur.notes.length

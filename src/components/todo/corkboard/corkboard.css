@@ -301,6 +301,8 @@ body.cb2-dragging .cb2-note:hover { transform: none; }
 .cb2 .cb2-phead p { margin: 6px 0 0; max-width: 640px; font: 400 16px/1.45 var(--cb2-serif) !important; color: var(--cb2-i72) !important; }
 .cb2-btn.cb2-btn--sm2 { flex-shrink: 0; height: 40px; padding: 0 16px; border-radius: 10px; font-size: 15.5px; white-space: nowrap; }
 .cb2-grow { flex: 1; }
+.cb2-rmpile { align-self: center; height: 40px; padding: 0 10px; border: 0; background: none; cursor: pointer; font: 400 15px/1 var(--cb2-serif); color: var(--cb2-i60); }
+.cb2-rmpile:hover { color: var(--cb2-ink); text-decoration: underline; text-underline-offset: 3px; }
 .cb2-pempty { padding: 34px; border-radius: 14px; border: 1.5px dashed var(--cb2-i14); text-align: center; font: 400 16px/1.45 var(--cb2-serif); color: var(--cb2-i60); }
 .cb2 .cb2-pempty b { display: block; margin-bottom: 6px; font: 400 19px/1.3 var(--cb2-type) !important; color: var(--cb2-ink) !important; }
 /* Start a pile / Add notes (ref v14 `.sdlg`, screens 03 and 05), in the Turn-into-a-task dialog's frame */

@@ -9,7 +9,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import {
   boardPrefs, boardSentence, dropOrder, frontBack, glance, glanceRows, inGlance, linkFields, linkOf, pileOf, piles,
-  sortBoard, tagsForPile,
+  sortBoard, tagsForPile, stillStarted, pileSlug, PILE_SUGGESTIONS,
 } from "./corkboard";
 import { LEGACY_PAPER, NOTE_PAPERS, noteColour, paperHex, paperOf } from "./noteboard";
 import type { UserTask } from "../types";
@@ -50,8 +50,26 @@ describe("prefs", () => {
     expect(boardPrefs({ todoPrefs: { noteboard: { view: "tidy" } } }).view).toBe("board");
     expect(boardPrefs({ todoPrefs: { noteboard: { view: "free" } } }).view).toBe("board");
     expect(boardPrefs({ todoPrefs: { noteboard: { view: "piles" } } }).view).toBe("piles");
-    expect(boardPrefs(null)).toEqual({ view: "board", sort: "new", order: [] });
-    expect(boardPrefs({ todoPrefs: { noteboard: { sort: "colour", order: ["a", 3, "b"] } } })).toEqual({ view: "board", sort: "colour", order: ["a", "b"] });
+    /* v2.1 adds `started` (the piles started here with no notes yet); absent reads [] */
+    expect(boardPrefs(null)).toEqual({ view: "board", sort: "new", order: [], started: [] });
+    expect(boardPrefs({ todoPrefs: { noteboard: { sort: "colour", order: ["a", 3, "b"] } } })).toEqual({ view: "board", sort: "colour", order: ["a", "b"], started: [] });
+    expect(boardPrefs({ todoPrefs: { noteboard: { started: ["t1", 2, "", "t2"] } } }).started).toEqual(["t1", "t2"]);
+  });
+});
+
+describe("Corkboard v2.1 · starting a pile", () => {
+  it("a started pile with no notes is listed, empty, in A to Z order; Loose stays last", () => {
+    const label = (k: string) => ({ ta: "agents", tz: "zeta", tn: "new" } as Record<string, string>)[k] ?? k;
+    const p = piles([{ tags: ["tz"] }, { tags: [] }], label, ["tn", "ta"]);
+    expect(p.map((x) => [x.k, x.notes.length])).toEqual([["ta", 0], ["tn", 0], ["tz", 1], ["", 1]]);
+  });
+  it("a started pile leaves the list once a note carries it as its first tag", () => {
+    expect(stillStarted(["a", "b"], [{ tags: ["b", "a"] }])).toEqual(["a"]);
+  });
+  it("a typed pile name becomes the tag label it mints", () => {
+    expect(pileSlug("#Agents to look into")).toBe("agents-to-look-into");
+    expect(pileSlug("  synopsis ")).toBe("synopsis");
+    expect([...PILE_SUGGESTIONS]).toEqual(["agents", "letter", "synopsis", "comps", "ideas", "research", "to-check"]);
   });
 });
 
