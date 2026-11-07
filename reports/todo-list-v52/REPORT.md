@@ -2,7 +2,7 @@
 
 Branch `todo-list-v52` (worktree `../ScriptAlly-td52`), cut from the branch dev was serving at the start:
 `dev/…-td51-td511-cb2-sm1-qc1522b-cb21-db22-ql1-rv2` @ `46a51815` (bundle `index-D4-_I14k.js`).
-Not merged to `main`. Dev deploy: not yet. It waits until you have read this report (see §7).
+Not merged to `main`. **Deployed to dev on 7 Nov** from `dev/…-ql1-rv2-td52` @ `5e32e62e` (the served branch with this one merged on top). Dev now serves bundle `index-Cwix18EF.js`; it served `index-D4-_I14k.js` before. The build was made from a clean checkout.
 
 ## 0 · False premises
 
@@ -129,7 +129,8 @@ cannot land before the celebration replaces it; it does not count the save funct
 - **`qcV152` at 1512 was not run on the base build**, so its result there is not compared.
 - **L5's red fires one step early.** The pointer is already over the strip after the « click, so the
   expand-on-hover break re-opens it immediately. It is still red, but on the 112 check, not on the hover check.
-- **Not deployed.** Per the brief, the dev deploy waits for your read. It will be a new `dev/…-td52` branch on
-  top of whatever dev is serving at that point, checked by bundle hash.
+- **On the dev branch, L10 failed twice before it passed.** It counted saves with a 0ms settle, so on a slow run it stopped
+  counting before the save went out. It now uses the helper's normal 1.5s settle (`688d478c`); after that, all 18 TD52 checks passed
+  there. L12 failed once at sign-in and passed when re-run.
 - **The local port shift is not committed.** This worktree moved its emulator ports so it could run beside other
   sessions. That change stays outside every commit and is undone when the worktree is removed.
