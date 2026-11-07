@@ -85,6 +85,9 @@ export interface User {
      entry, one write path, one place to look. Readers go through todoPrefs(), which is total. */
   todoPrefs?: {
     staleMonths?: number; goodDay?: number; rollForward?: boolean;
+    /* v52 (7 Nov): when each rule in `mutedTaskRules` was switched off — rule → ISO time. A preference, never a source:
+       a rule switched off before it existed simply has no date. Same unconstrained map, so NO rules change. */
+    switchedOffAt?: Record<string, string>;
     /* The Noteboard's own preferences (paper run, Phase 2) — the map already carries nested
        sub-maps in live data (the To-do list's view prefs write `listView` here), so a page-scoped
        sub-map follows an established precedent. `dismissedExamples` = example-paper ids sent away

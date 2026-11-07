@@ -27,7 +27,7 @@ import {
   type DoneRow, type QuietFacts, type WsFilters, type WsGroupId, type WsGrouping, type WsTask, type WsType, type WsWhen,
 } from "../../../lib/todoWs";
 import { clearedThisWeek, type ClearedAct } from "../../../lib/todoCleared";
-import { setAsideItems, setAsideLabel, RULE_TITLE, RULE_PLAIN, type SetAsideItem } from "../../../lib/taskSettings";
+import { setAsideItems, setAsideLabel, switchedOffRules, RULE_OFF_WORDS, RULE_TITLE, RULE_PLAIN, type SetAsideItem } from "../../../lib/taskSettings";
 import { flagForCard } from "../../../lib/todoColumns";
 import { flagKeyForTask, taskFlagId } from "../../../lib/taskFlags";
 import { setAsideRules } from "../../../lib/todoSetAside";
@@ -50,7 +50,7 @@ import { PreviewAgentCard, PreviewQueryCard, ScaledCard, useQueryLog } from "./W
 import { stampedCardRows } from "../../queries/centre/qcCardView";
 import { quietWeeksOf } from "../../../lib/queryState";
 import { packagesUnlocked } from "../../../lib/entitlements";
-import { DismissPop, SnoozePop, type DismissChoice, type SnoozeLimit } from "./WsPops";
+import { DismissPop, SnoozePop, SwitchedOffPop, type DismissChoice, type SnoozeLimit } from "./WsPops";
 import { OwnEmptySide, WsOwnTask } from "./WsOwnTask";
 import { StatusDot } from "../../StatusDot";
 import { queriesMissingMaterials } from "../../../lib/queryMaterialsGap";
@@ -99,7 +99,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   const db = useScriptAllyDb();
   const {
     tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, packages, currentUser, collectionsReady,
-    addUserTask, updateUserTask, deleteUserTask, restoreUserTask, upsertTaskFlag, dismissTask, restoreTaskFlag, updateUserProfile,
+    addUserTask, updateUserTask, deleteUserTask, restoreUserTask, upsertTaskFlag, dismissTask, restoreTaskFlag, updateUserProfile, updateUserPaths,
   } = db;
 
   /* the clock, re-read each minute */
@@ -162,6 +162,8 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   const [busy, setBusy] = useState(false);
   const [adding, setAdding] = useState(false);
   const [pop, setPop] = useState<{ kind: "snooze" | "dismiss"; opener: HTMLElement | null } | null>(null);
+  /** v52 (7 Nov): "Tasks you've switched off", opened from the Done tab's foot or the Filters menu */
+  const [offPop, setOffPop] = useState<HTMLElement | null>(null);
   const [linkPicking, setLinkPicking] = useState(false);
   /* the batch row's place (v51.1): queries skipped this time round, and queries saved but not yet gone from the board */
   const [bSkip, setBSkip] = useState<ReadonlySet<string>>(() => new Set());
@@ -317,6 +319,8 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
       if (!rule) return;
       const before = currentUser?.mutedTaskRules ?? [];
       await updateUserProfile({ mutedTaskRules: [...new Set([...before, rule])] });
+      /* when it was switched off, for "Tasks you've switched off" (a preference; the switch itself is mutedTaskRules) */
+      await updateUserPaths({ [`todoPrefs.switchedOffAt.${rule}`]: new Date().toISOString() });
       go(next);
       flash(`${RULE_TITLE[rule] ?? "That reminder"}: switched off for every agent`, async () => { await updateUserProfile({ mutedTaskRules: before }); });
       return;
@@ -363,6 +367,14 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   /** the Done tab's rows, this week only; their number is the header's "cleared this week" and the tab's count */
   const doneRows = doneTabRows(done, dismissed, asideTitle, now);
   const clearedN = doneRows.length;
+  /** v52 (7 Nov): the rules switched off for every agent, and the one way back for each */
+  const offRows = switchedOffRules(currentUser?.mutedTaskRules, currentUser?.todoPrefs?.switchedOffAt);
+  const turnOn = async (rule: string) => {
+    const before = currentUser?.mutedTaskRules ?? [];
+    await updateUserProfile({ mutedTaskRules: before.filter((k) => k !== rule) });
+    if (offRows.length <= 1) setOffPop(null);
+    flash(`${RULE_OFF_WORDS[rule] ?? RULE_TITLE[rule] ?? "Those tasks"} are back on.`, async () => { await updateUserProfile({ mutedTaskRules: before }); });
+  };
   const bringBack = async (a: SetAsideItem) => {
     const r = a.restore;
     if ("rule" in r) {
@@ -593,6 +605,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
               ))}
             </React.Fragment>
           ))}
+          {offRows.length ? <button type="button" className="tws-offlink" data-tws="off-open" onClick={(e) => setOffPop(e.currentTarget)}>Tasks you’ve switched off ({offRows.length})</button> : null}
         </>
       );
     }
@@ -880,6 +893,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
                             <div className="tws-fcs">{WS_WHENS.map((k) => <button key={k} type="button" className="tws-fc" aria-pressed={filters.whens.has(k)} disabled={!whenCount(k)} onClick={() => setFilters((f) => ({ ...f, whens: toggleSet(f.whens, k) }))}>{k}<em>{whenCount(k)}</em></button>)}</div>
                             {/* tag management's way in (the retired tray's Tags panel: TagsPane, the only place tags are edited) */}
                             <button type="button" className="tws-mlink" data-tws="tags-open" onClick={() => { setMenu(null); setTagsOpen(true); }}>Manage your tags</button>
+                            {offRows.length ? <button type="button" className="tws-mlink tws-mlink--off" data-tws="off-open" onClick={() => { setMenu(null); setOffPop(filtRef.current); }}>Tasks you’ve switched off ({offRows.length})</button> : null}
                           </div>
                         ) : null}
                       </span>
@@ -914,6 +928,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
           </div>
         </div>
       </WorkspacePageGrid>
+      {offPop && offRows.length ? <SwitchedOffPop rows={offRows} opener={offPop} onClose={() => setOffPop(null)} onTurnOn={(r) => void turnOn(r)} /> : null}
       {tagsOpen && filtRef.current ? (
         <AnchoredPanel anchor={filtRef.current} ariaLabel="Tags" variant="panel" onClose={(back) => { setTagsOpen(false); if (back) filtRef.current?.focus(); }}>
           <TagsPane />
