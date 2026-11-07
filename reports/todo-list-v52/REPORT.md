@@ -3,6 +3,10 @@
 Branch `todo-list-v52` (worktree `../ScriptAlly-td52`), cut from the branch dev was serving at the start:
 `dev/…-td51-td511-cb2-sm1-qc1522b-cb21-db22-ql1-rv2` @ `46a51815` (bundle `index-D4-_I14k.js`).
 Not merged to `main`. **Deployed to dev on 7 Nov** from `dev/…-ql1-rv2-td52` @ `5e32e62e` (the served branch with this one merged on top). Dev now serves bundle `index-Cwix18EF.js`; it served `index-D4-_I14k.js` before. The build was made from a clean checkout.
+**Redeployed 7 Nov, with the one "cleared this week" count (L14):** in the meantime another session had put Query Centre
+v152.2c and page width v1 on dev, on top of this branch (`…-td52-qc1522c-pw1`, `index-DFIRoZB0.js`, confirmed by a
+clean build). This branch is merged on top of that as `…-td52-qc1522c-pw1-td52b` @ `13b8496f`. There, tsc and both builds
+are clean and TD52 + todoWs pass 31 / 31. Dev now serves `index-C6ARwiDW.js`.
 
 ## 0 · False premises
 
