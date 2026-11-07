@@ -36,6 +36,9 @@ export interface PhoneBandProps {
   extra?: React.ReactNode;
   /** the page's key figure, beneath */
   slot?: React.ReactNode;
+  /** To-do on the phone v1 (D2): the To-do list's page band — back, the book chip, search and the page's own +
+   *  (passed as `extra`); no avatar. Only /todo sets it. */
+  todo?: boolean;
 }
 
 export const PhoneRing: React.FC<{ label: string; onClick: () => void; children: React.ReactNode; pa?: string }> = ({ label, onClick, children, pa }) => (
@@ -46,6 +49,25 @@ export const PhoneBand: React.FC<PhoneBandProps> = (p) => {
   const av = (
     <button type="button" className="pa-avring" aria-label="Open menu" aria-haspopup="dialog" onClick={p.onMenu} data-pa="menu-btn">{p.initials}</button>
   );
+  if (p.variant === "page" && p.todo) {
+    return (
+      <header className="pa-band pa-band--page pa-band--todo" data-pa="band" data-variant="page">
+        <div className="pa-bandrow">
+          <PhoneRing label="Back" onClick={() => p.onBack?.()} pa="back">{PI.back}</PhoneRing>
+          {p.book ? (
+            <button type="button" className="pa-bchip" onClick={() => p.onBook?.()} aria-haspopup="dialog" data-pa="book-chip">
+              {PI.book}<span className="pa-mt">{p.book}</span>
+            </button>
+          ) : null}
+          <span className="pa-grow" />
+          <PhoneRing label="Search" onClick={p.onSearch} pa="search-btn">{PI.search}</PhoneRing>
+          {p.extra}
+        </div>
+        <h1 className="pa-bt pa-bt--page" data-pa="band-title">{p.title}</h1>
+        {p.slot ? <div className="pa-bandslot" data-pa="band-slot">{p.slot}</div> : null}
+      </header>
+    );
+  }
   if (p.variant === "page") {
     return (
       <header className="pa-band pa-band--page" data-pa="band" data-variant="page">
