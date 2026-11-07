@@ -1138,7 +1138,8 @@
     "design-refs/query-centre-v152-2/screens/75-materials-edit-1512.png": "833408672652ce63af73df167cf94106b72b7bc7a4e74b4bf266ad9c60bb4cbf",
     "design-refs/query-centre-v152-2/screens/76-discard-1280.png": "0b017c89d57bd8eba1db80fad8cdea512cfae1024ec7aca82e7fda9c0c253f56",
     "design-refs/query-centre-v152-2/screens/76-discard-1512.png": "94ee5989e2f249b993b22af33e367029f5748155d96e506edd59bcbd5ee8692a",
-    "design-refs/corkboard-v14/corkboard-v14.html": "af7b14b3b8929713673116a1dc19a39a32fb447c94cecfeeba783efa2647afa3"
+    "design-refs/corkboard-v14/corkboard-v14.html": "af7b14b3b8929713673116a1dc19a39a32fb447c94cecfeeba783efa2647afa3",
+    "design-refs/todo-phone-v1/todo-phone-v1.html": "64c1ff97a088fc8e2e53aa5fe731c732e98556f01d01ece256ade39259e31ab2"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",
