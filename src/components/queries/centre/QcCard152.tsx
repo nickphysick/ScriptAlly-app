@@ -95,7 +95,7 @@ export interface QcCard152Props {
   editingId?: string | null;
   editNode?: React.ReactNode;
   /** v152.2 §3.1 — the undo toast */
-  toast?: { msg: string; onUndo: () => void } | null;
+  toast?: { msg: string; onUndo: (() => void) | null } | null;
   /** v152.2 §6.1 — the accept burst */
   burst?: number | null;
   /** v152.2 §3.2 — a footer control: its composer */
@@ -372,7 +372,7 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
         </div>
         )}
         </>}
-        {p.toast ? <div className="qc1522-toast" role="status" data-qc1522="toast"><span>{p.toast.msg}</span><button type="button" data-qc1522="undo" onClick={p.toast.onUndo}>Undo</button></div> : null}
+        {p.toast ? <div className="qc1522-toast" role="status" data-qc1522="toast"><span>{p.toast.msg}</span>{p.toast.onUndo ? <button type="button" data-qc1522="undo" onClick={p.toast.onUndo}>Undo</button> : null}</div> : null}
         {p.burst ? <div key={p.burst} className="qc1522-burst" aria-hidden="true" data-qc1522="burst">{Array.from({ length: 46 }, (_, k) => <i key={k} style={{ left: `${(k * 37) % 100}%`, background: ["#f2ebe0", "#f3d3c6", "#d3dce7", "#cbd9be"][k % 4], animationDelay: `${(k % 7) * 0.08}s` }} />)}</div> : null}
       </div>
       {tip.node}

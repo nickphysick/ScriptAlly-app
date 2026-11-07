@@ -1,0 +1,82 @@
+[
+ {
+  "where": "population: the other open queries",
+  "ok": true,
+  "detail": "[\"seed-query-ms2-b\",\"seed-query-ms2-a\",\"q152-sib2\"]"
+ },
+ {
+  "where": "the fixture's live sibling is listed",
+  "ok": true,
+  "detail": "[\"seed-query-ms2-b\",\"seed-query-ms2-a\",\"q152-sib2\"]"
+ },
+ {
+  "where": "Done waits for every agent",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "Done still waits with one left",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "the toast shows",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "the card moves to Deciding (\"DECIDING\")",
+  "ok": true,
+  "detail": "DECIDING"
+ },
+ {
+  "where": "the offer step carries tellLater (both stores)",
+  "ok": true,
+  "detail": "1/1"
+ },
+ {
+  "where": "the footer counts who's left (\"Answer by 12 Nov · 2 to tell\")",
+  "ok": true,
+  "detail": "Answer by 12 Nov · 2 to tell"
+ },
+ {
+  "where": "Tell them reopens the list with the ticks kept",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "where": "the toast shows",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "the sibling closed as withdrawn",
+  "ok": true,
+  "detail": "Withdrawn"
+ },
+ {
+  "where": "the offer is signed",
+  "ok": true,
+  "detail": "Signed"
+ },
+ {
+  "where": "one Undo reverts the offer",
+  "ok": true,
+  "detail": "{\"q\":[],\"log\":[3,3],\"feed\":[3,3]}"
+ },
+ {
+  "where": "…and the sibling",
+  "ok": true,
+  "detail": "{\"q\":[],\"log\":[1,1],\"feed\":[1,1]}"
+ },
+ {
+  "where": "…and every other query it withdrew (2)",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "no undo was refused",
+  "ok": true,
+  "detail": "[]"
+ }
+]

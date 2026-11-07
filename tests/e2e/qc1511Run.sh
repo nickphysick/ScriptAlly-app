@@ -10,5 +10,5 @@ for i in $(seq 1 1080); do
   [ "$i" = 1 ] && echo "waiting for another session's emulators to finish…"
   sleep 5
 done
-npx firebase emulators:exec --config firebase.emulator.json --only firestore,auth,storage --project demo-scriptally \
+node scripts/emu-guard.mjs npx firebase emulators:exec --config firebase.emulator.json --only firestore,auth,storage --project demo-scriptally \
   --import tests/emulator-data "node tests/emulator-seed/authUser.mjs && $1"

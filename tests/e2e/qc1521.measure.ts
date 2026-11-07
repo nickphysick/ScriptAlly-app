@@ -121,10 +121,14 @@ for (const vp of SIZES) {
       await open(page, vp, { group: "status" });
       const head = await page.evaluate(() => {
         const g = document.querySelector<HTMLElement>("[data-qc1511='group'][data-k='Queried']");
+        /* re-pointed by v152.2 §1.2: the tint is a whisper on the cell's ::before (the cell paints the page colour for the corners), mix(#f2ebe0 32%, #fff) */
         const td = g?.querySelector<HTMLElement>("[data-qc1511='group-header'] td");
-        return td ? getComputedStyle(td).backgroundColor : "";
+        const probe = document.createElement("i"); probe.style.background = "color-mix(in srgb, #f2ebe0 32%, #fff)"; document.body.append(probe);
+        const want = getComputedStyle(probe).backgroundColor; probe.remove();
+        return td ? `${getComputedStyle(td, "::before").backgroundColor}|${want}` : "";
       });
-      L.check("the Queried status group's header is #f4eee5", head === "rgb(244, 238, 229)", head);
+      const [hb, hw] = head.split("|");
+      L.check("the Queried status group's header is the v152.2 whisper mix(#f2ebe0 32%)", !!hb && hb === hw, head);
       const s3 = await sweep();
       L.check("no element grouped by status computes to #e6d9c6", s3.hits.length === 0, JSON.stringify(s3.hits.slice(0, 6)));
 
@@ -160,7 +164,7 @@ const TINT: Record<string, string> = {
 const NAMES: Record<string, RegExp> = {
   "Queried": /^Query sent$/, "Partial Requested": /^Asked for a partial$/, "Partial Sent": /^Sent the partial$/, "Full Requested": /^Asked for the full$/,
   "Full Sent": /^Sent the full$/, "Revise & Resubmit": /^Asked for a revision \(R&R\)$/, "Resubmitted": /^Sent the revision$/, "Offer": /^Made an offer$/,
-  "Rejected": /^Passed$/, "Withdrawn": /^You withdrew$/, "No Response": /^Closed: no response$/, nudge: /^You nudged \S+$/, told: /^Told \d+ other agents?$/,
+  "Rejected": /^Passed$/, "Withdrawn": /^You withdrew it$/, "No Response": /^Closed: no response$/, nudge: /^You nudged \S+$/, told: /^You told \d+ agents? about the offer$/,
 };
 /** every bubble in the open card's thread */
 const readThread = (page: Page) => page.evaluate((c) => {
@@ -201,7 +205,7 @@ async function open2(page: Page, vp: VP) {
 /** the latest step each fixture ends on, and how many steps it has */
 const LAST: Record<string, [string, number]> = {
   agent: ["Query sent", 1], nudge: ["Query sent", 1], quiet: ["Query sent", 1], materials: ["Asked for a partial", 2], long: ["Sent the full", 5],
-  rr: ["Asked for a revision (R&R)", 4], passed: ["Passed", 4], withdrew: ["You withdrew", 2], offertold: ["Told 6 other agents", 3], seven: ["Sent the full", 7],
+  rr: ["Asked for a revision (R&R)", 4], passed: ["Passed", 4], withdrew: ["You withdrew it", 2], offertold: ["You told 6 agents about the offer", 3], seven: ["Sent the full", 7],
 };
 
 for (const vp of SIZES) {
@@ -527,7 +531,10 @@ for (const vp of SIZES) {
       await click(page, `${CARD} [data-qc1522='offer-choices'] [data-v='time']`);
       const ids = await page.locator(`${CARD} [data-qc1522='tell-row']`).evaluateAll((els) => els.map((e) => e.getAttribute("data-id")));
       L.check("population: the refused sibling and an accepted one are both listed", ids.includes("seed-pkgq-4") && ids.includes("q152-agent"), JSON.stringify(ids));
-      for (const id of ids) await page.locator(`${CARD} [data-qc1522='tell-row'][data-id='${id}'] [data-qc1522='told']`).click({ timeout: 8000 }).catch(() => {});
+      /* tick every agent not already told (a told one starts pressed, and is not newly told) */
+      const fresh = await page.locator(`${CARD} [data-qc1522='tell-row']`).evaluateAll((els) => els.filter((e) => e.querySelector("[data-qc1522='told']")?.getAttribute("aria-pressed") !== "true").map((e) => e.getAttribute("data-id")));
+      L.check("population: the refused sibling is among those not yet told", fresh.includes("seed-pkgq-4"), JSON.stringify(fresh));
+      for (const id of fresh) await page.locator(`${CARD} [data-qc1522='tell-row'][data-id='${id}'] [data-qc1522='told']`).click({ timeout: 8000 }).catch(() => {});
       await click(page, `${CARD} [data-qc1522='done']`);
       await page.waitForFunction(() => /Couldn.t mark/.test(document.querySelector("[data-qc1522='toast']")?.textContent ?? ""), null, { timeout: 45_000 }).catch(() => {});
       const msg = (await page.locator("[data-qc1522='toast']").first().innerText({ timeout: 3000 }).catch(() => "")).replace(/\s+/g, " ");
@@ -535,12 +542,12 @@ for (const vp of SIZES) {
       L.check("Undo is offered", await page.locator("[data-qc1522='undo']").count() > 0, "");
       const after = dump("offer");
       const entry = after.log.map((x: [string, Record<string, unknown>]) => x[1]).find((d: Record<string, unknown>) => d.type === "Told other agents");
-      L.check("the step saved, its count the agents told less the refused one", entry?.toldCount === ids.length - 1, JSON.stringify(entry?.toldCount));
+      L.check("the step saved, its count the agents told less the refused one", entry?.toldCount === fresh.length - 1, JSON.stringify(entry?.toldCount));
       const sib = dump("agent").q;
       L.check("an accepted sibling was marked in the same save", sib?.offerRefQueryId === "q152-offer" && sib?.offerTold === true, JSON.stringify({ r: sib?.offerRefQueryId, t: sib?.offerTold }));
       L.check("the refused sibling is exactly as it was", dumpq("seed-pkgq-4") === refusedBefore, "");
       const t = await readThread(page);
-      L.check("the bubble says so: You told N agents about the offer", t?.msgs.some((m) => m.kind === "told" && m.title === `You told ${ids.length - 1} agents about the offer`), JSON.stringify(t?.msgs.map((m) => m.title)));
+      L.check("the bubble says so: You told N agents about the offer", t?.msgs.some((m) => m.kind === "told" && m.title === `You told ${fresh.length - 1} agents about the offer`), JSON.stringify(t?.msgs.map((m) => m.title)));
       await page.locator("[data-qc1522='undo']").first().click({ timeout: 8000 }).catch(() => {});
       /* Undo restores every snapshot in one batch; on a long shared run that batch can take longer than a fixed wait */
       const want = JSON.stringify([offerBefore, sibBefore]);

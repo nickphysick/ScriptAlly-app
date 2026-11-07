@@ -1,0 +1,82 @@
+[
+ {
+  "where": "seven: population",
+  "ok": true,
+  "detail": "{\"n\":6,\"pills\":6,\"sides\":[{\"w\":\"me\",\"next\":\"me\",\"italic\":\"italic\",\"label\":\"30 days later\"},{\"w\":\"me\",\"next\":\"me\",\"italic\":\"italic\",\"label\":\"20 days later\"},{\"w\":\"them\",\"next\":\"them\",\"italic\":\"italic\",\"label\":\"20 days later\"},{\"w\":\"me\",\"next\":\"me\",\"italic\":\"italic\",\"label\":\"20 days later\"},{\"w\":\"them\",\"next\":\"them\",\"italic\":\"italic\",\"label\":\"30 days later\"},{\"w\":\"me\",\"next\":\"me\",\"italic\":\"italic\",\"label\":\"40 days later\"}],\"undatedNext\":0,\"undated\":0}"
+ },
+ {
+  "where": "seven: no pill or hairline wait",
+  "ok": false,
+  "detail": "6"
+ },
+ {
+  "where": "seven: each on the next message's side, italic",
+  "ok": true,
+  "detail": "[{\"w\":\"me\",\"next\":\"me\",\"italic\":\"italic\",\"label\":\"30 days later\"},{\"w\":\"me\",\"next\":\"me\",\"italic\":\"italic\",\"label\":\"20 days later\"},{\"w\":\"them\",\"next\":\"them\",\"italic\":\"italic\",\"label\":\"20 days later\"},{\"w\":\"me\",\"next\":\"me\",\"italic\":\"italic\",\"label\":\"20 days later\"},{\"w\":\"them\",\"next\":\"them\",\"italic\":\"italic\",\"label\":\"30 days later\"},{\"w\":\"me\",\"next\":\"me\",\"italic\":\"italic\",\"label\":\"40 days later\"}]"
+ },
+ {
+  "where": "seven: no wait beside an undated step",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "undated: population",
+  "ok": true,
+  "detail": "{\"n\":0,\"pills\":0,\"sides\":[],\"undatedNext\":0,\"undated\":1}"
+ },
+ {
+  "where": "undated: no pill or hairline wait",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "undated: each on the next message's side, italic",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "undated: no wait beside an undated step",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "passed: population",
+  "ok": true,
+  "detail": "{\"n\":3,\"pills\":3,\"sides\":[{\"w\":\"them\",\"next\":\"them\",\"italic\":\"italic\",\"label\":\"50 days later\"},{\"w\":\"me\",\"next\":\"me\",\"italic\":\"italic\",\"label\":\"10 days later\"},{\"w\":\"them\",\"next\":\"them\",\"italic\":\"italic\",\"label\":\"20 days later\"}],\"undatedNext\":0,\"undated\":0}"
+ },
+ {
+  "where": "passed: no pill or hairline wait",
+  "ok": false,
+  "detail": "3"
+ },
+ {
+  "where": "passed: each on the next message's side, italic",
+  "ok": true,
+  "detail": "[{\"w\":\"them\",\"next\":\"them\",\"italic\":\"italic\",\"label\":\"50 days later\"},{\"w\":\"me\",\"next\":\"me\",\"italic\":\"italic\",\"label\":\"10 days later\"},{\"w\":\"them\",\"next\":\"them\",\"italic\":\"italic\",\"label\":\"20 days later\"}]"
+ },
+ {
+  "where": "passed: no wait beside an undated step",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "rr: population",
+  "ok": true,
+  "detail": "{\"n\":3,\"pills\":3,\"sides\":[{\"w\":\"them\",\"next\":\"them\",\"italic\":\"italic\",\"label\":\"30 days later\"},{\"w\":\"me\",\"next\":\"me\",\"italic\":\"italic\",\"label\":\"20 days later\"},{\"w\":\"them\",\"next\":\"them\",\"italic\":\"italic\",\"label\":\"40 days later\"}],\"undatedNext\":0,\"undated\":0}"
+ },
+ {
+  "where": "rr: no pill or hairline wait",
+  "ok": false,
+  "detail": "3"
+ },
+ {
+  "where": "rr: each on the next message's side, italic",
+  "ok": true,
+  "detail": "[{\"w\":\"them\",\"next\":\"them\",\"italic\":\"italic\",\"label\":\"30 days later\"},{\"w\":\"me\",\"next\":\"me\",\"italic\":\"italic\",\"label\":\"20 days later\"},{\"w\":\"them\",\"next\":\"them\",\"italic\":\"italic\",\"label\":\"40 days later\"}]"
+ },
+ {
+  "where": "rr: no wait beside an undated step",
+  "ok": true,
+  "detail": "0"
+ }
+]

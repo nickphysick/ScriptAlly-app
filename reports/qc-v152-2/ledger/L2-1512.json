@@ -1,0 +1,357 @@
+[
+ {
+  "where": "attention: population",
+  "ok": true,
+  "detail": "6"
+ },
+ {
+  "where": "attention offer: fill",
+  "ok": true,
+  "detail": "color(srgb 0.849647 0.860941 0.877882)|none vs color(srgb 0.849647 0.860941 0.877882)|none"
+ },
+ {
+  "where": "attention offer: title ink",
+  "ok": true,
+  "detail": "rgb(28, 19, 15)"
+ },
+ {
+  "where": "attention offer: no white text",
+  "ok": true,
+  "detail": "[\"rgb(28, 19, 15)\",\"rgb(125, 114, 104)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(28, 19, 15)\"]"
+ },
+ {
+  "where": "attention materials: fill",
+  "ok": true,
+  "detail": "color(srgb 0.849647 0.860941 0.877882)|none vs color(srgb 0.849647 0.860941 0.877882)|none"
+ },
+ {
+  "where": "attention materials: title ink",
+  "ok": true,
+  "detail": "rgb(28, 19, 15)"
+ },
+ {
+  "where": "attention materials: no white text",
+  "ok": true,
+  "detail": "[\"rgb(28, 19, 15)\",\"rgb(125, 114, 104)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(28, 19, 15)\"]"
+ },
+ {
+  "where": "attention nudge: fill",
+  "ok": true,
+  "detail": "color(srgb 0.927216 0.94102 0.957333)|none vs color(srgb 0.927216 0.94102 0.957333)|none"
+ },
+ {
+  "where": "attention nudge: title ink",
+  "ok": true,
+  "detail": "rgb(28, 19, 15)"
+ },
+ {
+  "where": "attention nudge: no white text",
+  "ok": true,
+  "detail": "[\"rgb(28, 19, 15)\",\"rgb(125, 114, 104)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(28, 19, 15)\"]"
+ },
+ {
+  "where": "attention agent: fill",
+  "ok": true,
+  "detail": "color(srgb 0.964863 0.954824 0.939765)|none vs color(srgb 0.964863 0.954824 0.939765)|none"
+ },
+ {
+  "where": "attention agent: title ink",
+  "ok": true,
+  "detail": "rgb(28, 19, 15)"
+ },
+ {
+  "where": "attention agent: no white text",
+  "ok": true,
+  "detail": "[\"rgb(28, 19, 15)\",\"rgb(125, 114, 104)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(28, 19, 15)\"]"
+ },
+ {
+  "where": "attention quiet: fill",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)|linear-gradient(90deg, color(srgb 0.964863 0.954824 0.939765), rgb(255, 255, 255) 60%) vs rgba(0, 0, 0, 0)|linear-gradient(90deg, color(srgb 0.964863 0.954824 0.939765), rgb(255, 255, 255) 60%)"
+ },
+ {
+  "where": "attention quiet: title ink",
+  "ok": true,
+  "detail": "rgb(28, 19, 15)"
+ },
+ {
+  "where": "attention quiet: no white text",
+  "ok": true,
+  "detail": "[\"rgb(28, 19, 15)\",\"rgb(125, 114, 104)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(28, 19, 15)\"]"
+ },
+ {
+  "where": "attention closed: fill",
+  "ok": true,
+  "detail": "rgb(248, 247, 245)|none vs rgb(248, 247, 245)|none"
+ },
+ {
+  "where": "attention closed: title ink",
+  "ok": true,
+  "detail": "rgb(28, 19, 15)"
+ },
+ {
+  "where": "attention closed: no white text",
+  "ok": true,
+  "detail": "[\"rgb(28, 19, 15)\",\"rgb(125, 114, 104)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(28, 19, 15)\"]"
+ },
+ {
+  "where": "status: population",
+  "ok": true,
+  "detail": "8"
+ },
+ {
+  "where": "status Queried: title ink",
+  "ok": true,
+  "detail": "rgb(28, 19, 15)"
+ },
+ {
+  "where": "status Queried: no white text",
+  "ok": true,
+  "detail": "[\"rgb(28, 19, 15)\",\"rgb(125, 114, 104)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(28, 19, 15)\"]"
+ },
+ {
+  "where": "status Partial Requested: title ink",
+  "ok": true,
+  "detail": "rgb(28, 19, 15)"
+ },
+ {
+  "where": "status Partial Requested: no white text",
+  "ok": true,
+  "detail": "[\"rgb(28, 19, 15)\",\"rgb(125, 114, 104)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(28, 19, 15)\"]"
+ },
+ {
+  "where": "status Partial Sent: title ink",
+  "ok": true,
+  "detail": "rgb(28, 19, 15)"
+ },
+ {
+  "where": "status Partial Sent: no white text",
+  "ok": true,
+  "detail": "[\"rgb(28, 19, 15)\",\"rgb(125, 114, 104)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(28, 19, 15)\"]"
+ },
+ {
+  "where": "status Full Requested: title ink",
+  "ok": true,
+  "detail": "rgb(28, 19, 15)"
+ },
+ {
+  "where": "status Full Requested: no white text",
+  "ok": true,
+  "detail": "[\"rgb(28, 19, 15)\",\"rgb(125, 114, 104)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(28, 19, 15)\"]"
+ },
+ {
+  "where": "status Full Sent: title ink",
+  "ok": true,
+  "detail": "rgb(28, 19, 15)"
+ },
+ {
+  "where": "status Full Sent: no white text",
+  "ok": true,
+  "detail": "[\"rgb(28, 19, 15)\",\"rgb(125, 114, 104)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(28, 19, 15)\"]"
+ },
+ {
+  "where": "status Revise & Resubmit: title ink",
+  "ok": true,
+  "detail": "rgb(28, 19, 15)"
+ },
+ {
+  "where": "status Revise & Resubmit: no white text",
+  "ok": true,
+  "detail": "[\"rgb(28, 19, 15)\",\"rgb(125, 114, 104)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(28, 19, 15)\"]"
+ },
+ {
+  "where": "status Offer: title ink",
+  "ok": true,
+  "detail": "rgb(28, 19, 15)"
+ },
+ {
+  "where": "status Offer: no white text",
+  "ok": true,
+  "detail": "[\"rgb(28, 19, 15)\",\"rgb(125, 114, 104)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(28, 19, 15)\"]"
+ },
+ {
+  "where": "status closed: fill",
+  "ok": true,
+  "detail": "rgb(248, 247, 245)|none vs rgb(248, 247, 245)|none"
+ },
+ {
+  "where": "status closed: title ink",
+  "ok": true,
+  "detail": "rgb(28, 19, 15)"
+ },
+ {
+  "where": "status closed: no white text",
+  "ok": true,
+  "detail": "[\"rgb(28, 19, 15)\",\"rgb(125, 114, 104)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(28, 19, 15)\"]"
+ },
+ {
+  "where": "package: population",
+  "ok": true,
+  "detail": "11"
+ },
+ {
+  "where": "package pkg:Agents with MSWL: fill",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)|none vs rgb(255, 255, 255)|none"
+ },
+ {
+  "where": "package pkg:Agents with MSWL: Harbour label",
+  "ok": true,
+  "detail": "rgb(46, 74, 94)"
+ },
+ {
+  "where": "package pkg:Agents with MSWL: no white text",
+  "ok": true,
+  "detail": "[\"rgb(125, 114, 104)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(28, 19, 15)\"]"
+ },
+ {
+  "where": "package pkg:Autumn round: fill",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)|none vs rgb(255, 255, 255)|none"
+ },
+ {
+  "where": "package pkg:Autumn round: Harbour label",
+  "ok": true,
+  "detail": "rgb(46, 74, 94)"
+ },
+ {
+  "where": "package pkg:Autumn round: no white text",
+  "ok": true,
+  "detail": "[\"rgb(125, 114, 104)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(28, 19, 15)\"]"
+ },
+ {
+  "where": "package pkg:Comps-led variant: fill",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)|none vs rgb(255, 255, 255)|none"
+ },
+ {
+  "where": "package pkg:Comps-led variant: Harbour label",
+  "ok": true,
+  "detail": "rgb(46, 74, 94)"
+ },
+ {
+  "where": "package pkg:Comps-led variant: no white text",
+  "ok": true,
+  "detail": "[\"rgb(125, 114, 104)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(28, 19, 15)\"]"
+ },
+ {
+  "where": "package pkg:First round: fill",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)|none vs rgb(255, 255, 255)|none"
+ },
+ {
+  "where": "package pkg:First round: Harbour label",
+  "ok": true,
+  "detail": "rgb(46, 74, 94)"
+ },
+ {
+  "where": "package pkg:First round: no white text",
+  "ok": true,
+  "detail": "[\"rgb(125, 114, 104)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(28, 19, 15)\"]"
+ },
+ {
+  "where": "package pkg:Light: fill",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)|none vs rgb(255, 255, 255)|none"
+ },
+ {
+  "where": "package pkg:Light: Harbour label",
+  "ok": true,
+  "detail": "rgb(46, 74, 94)"
+ },
+ {
+  "where": "package pkg:Light: no white text",
+  "ok": true,
+  "detail": "[\"rgb(125, 114, 104)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(28, 19, 15)\"]"
+ },
+ {
+  "where": "package pkg:Original: fill",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)|none vs rgb(255, 255, 255)|none"
+ },
+ {
+  "where": "package pkg:Original: Harbour label",
+  "ok": true,
+  "detail": "rgb(46, 74, 94)"
+ },
+ {
+  "where": "package pkg:Original: no white text",
+  "ok": true,
+  "detail": "[\"rgb(125, 114, 104)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(28, 19, 15)\"]"
+ },
+ {
+  "where": "package pkg:Prologue-led: fill",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)|none vs rgb(255, 255, 255)|none"
+ },
+ {
+  "where": "package pkg:Prologue-led: Harbour label",
+  "ok": true,
+  "detail": "rgb(46, 74, 94)"
+ },
+ {
+  "where": "package pkg:Prologue-led: no white text",
+  "ok": true,
+  "detail": "[\"rgb(125, 114, 104)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(28, 19, 15)\"]"
+ },
+ {
+  "where": "package pkg:Standard: fill",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)|none vs rgb(255, 255, 255)|none"
+ },
+ {
+  "where": "package pkg:Standard: Harbour label",
+  "ok": true,
+  "detail": "rgb(46, 74, 94)"
+ },
+ {
+  "where": "package pkg:Standard: no white text",
+  "ok": true,
+  "detail": "[\"rgb(125, 114, 104)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(28, 19, 15)\"]"
+ },
+ {
+  "where": "package pkg:The Complete Autumn Submission Bundle for Literary Agents: fill",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)|none vs rgb(255, 255, 255)|none"
+ },
+ {
+  "where": "package pkg:The Complete Autumn Submission Bundle for Literary Agents: Harbour label",
+  "ok": true,
+  "detail": "rgb(46, 74, 94)"
+ },
+ {
+  "where": "package pkg:The Complete Autumn Submission Bundle for Literary Agents: no white text",
+  "ok": true,
+  "detail": "[\"rgb(125, 114, 104)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(28, 19, 15)\"]"
+ },
+ {
+  "where": "package pkg:Unattributed set: fill",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)|none vs rgb(255, 255, 255)|none"
+ },
+ {
+  "where": "package pkg:Unattributed set: Harbour label",
+  "ok": true,
+  "detail": "rgb(46, 74, 94)"
+ },
+ {
+  "where": "package pkg:Unattributed set: no white text",
+  "ok": true,
+  "detail": "[\"rgb(125, 114, 104)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(28, 19, 15)\"]"
+ },
+ {
+  "where": "package pkg:none: fill",
+  "ok": true,
+  "detail": "rgb(246, 243, 238)|none vs rgb(246, 243, 238)|none"
+ },
+ {
+  "where": "package pkg:none: title ink",
+  "ok": true,
+  "detail": "rgb(28, 19, 15)"
+ },
+ {
+  "where": "package pkg:none: no white text",
+  "ok": true,
+  "detail": "[\"rgb(28, 19, 15)\",\"rgb(125, 114, 104)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(138, 127, 117)\",\"rgb(28, 19, 15)\"]"
+ }
+]
