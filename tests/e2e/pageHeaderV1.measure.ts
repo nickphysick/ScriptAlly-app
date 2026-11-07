@@ -203,13 +203,13 @@ test("§2 · the content column is centred, capped and equally margined", async 
       /* RE-POINTED (ink shell v1): the right margin is measured to the SHEET, 8px in from the window — INK1 */
       const leftGap = r.left - r.mainL, rightGap = r.winW - 8 - r.right;
       near("column", `§2 · equal left and right margins on ${route} at ${w} (${leftGap} / ${rightGap})`, leftGap - rightGap, 0, 1);
-      /* the gutter is the clamp, of the WINDOW */
-      near("column", `§2 · the gutter is clamp(28, 3.2vw, 52) at ${w}`, r.gut, Math.min(52, Math.max(28, w * 0.032)), 0.6);
-      /* content width = min(1360, main) − 2 × gutter */
-      near("column", `§2 · the content is min(1360, main) − 2 gutters on ${route} at ${w}`,
+      /* RE-POINTED (page width v1, 6 Nov): the gutter is a constant 40 (`--page-gutter`), the box 1256 + 80 */
+      near("column", `§2 · the gutter is 40 at ${w}`, r.gut, 40, 0.6);
+      /* content width = min(1336, main) − 2 × gutter */
+      near("column", `§2 · the content is min(1336, main) − 2 gutters on ${route} at ${w}`,
         /* RE-POINTED (ink shell v1): the sheet is .ws-main less the 8px frame on its right — INK1 */
-        r.contentW, Math.min(1360, r.mainW - 8) - 2 * r.gut, 1.2);
-      is("column", `§2 · …capped at 1360 (${route} at ${w})`, r.max, "1360px");
+        r.contentW, Math.min(1336, r.mainW - 8) - 2 * r.gut, 1.2);
+      is("column", `§2 · …capped at 1336 (${route} at ${w})`, r.max, "1336px");
       /* ⚠️ AND `border-box`, or the padding is ADDED to the cap and every margin reading still passes */
       is("column", `§2 · …with the gutter inside the cap (${route} at ${w})`, r.boxSizing, "border-box");
     }
