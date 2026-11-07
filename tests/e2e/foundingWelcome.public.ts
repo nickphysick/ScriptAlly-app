@@ -3,7 +3,7 @@
  * running on the emulator (founding-welcome, Part D). Never live, never dev.
  *
  *   npm --prefix functions run build
- *   firebase emulators:start --only functions,firestore --project demo-scriptally-test
+ *   node scripts/emu-guard.mjs npx firebase emulators:start --only functions,firestore --project demo-scriptally-test
  *     (functions/.secret.local: WAITLIST_IP_SALT=<anything>, RESEND_API_KEY= — empty, so no mail
  *      leaves; functions/.env.demo-scriptally-test: FIRESTORE_DATABASE_ID=(default). Both local only.)
  *   npx vite build --outDir <dir> && npx vite preview --outDir <dir> --host 127.0.0.1 --port 4733 --strictPort

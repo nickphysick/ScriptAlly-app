@@ -1,0 +1,127 @@
+[
+ {
+  "where": "materials: \"Mark the partial sent\"",
+  "ok": true,
+  "detail": "Mark the partial sent"
+ },
+ {
+  "where": "materials: the thread stays visible above",
+  "ok": true,
+  "detail": "272.578125"
+ },
+ {
+  "where": "materials: no \"See what changes\"",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "nudge: \"Nudge Priya\"",
+  "ok": true,
+  "detail": "Nudge Priya"
+ },
+ {
+  "where": "nudge: the thread stays visible above",
+  "ok": true,
+  "detail": "211.546875"
+ },
+ {
+  "where": "nudge: no \"See what changes\"",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "agent: \"What did Rufus say?\"",
+  "ok": true,
+  "detail": "What did Rufus say?"
+ },
+ {
+  "where": "agent: the thread stays visible above",
+  "ok": true,
+  "detail": "82.03125"
+ },
+ {
+  "where": "agent: no \"See what changes\"",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "nudgedquiet: \"Close Nell’s query\"",
+  "ok": true,
+  "detail": "Close Nell’s query"
+ },
+ {
+  "where": "nudgedquiet: the thread stays visible above",
+  "ok": true,
+  "detail": "162.28125"
+ },
+ {
+  "where": "nudgedquiet: no \"See what changes\"",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "closed: \"Reopen Clara’s query\"",
+  "ok": true,
+  "detail": "Reopen Clara’s query"
+ },
+ {
+  "where": "closed: the thread stays visible above",
+  "ok": true,
+  "detail": "160.28125"
+ },
+ {
+  "where": "closed: no \"See what changes\"",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "offer: \"Olive’s offer\"",
+  "ok": true,
+  "detail": "Olive’s offer"
+ },
+ {
+  "where": "offer: the thread stays visible above",
+  "ok": true,
+  "detail": "175.296875"
+ },
+ {
+  "where": "offer: no \"See what changes\"",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "agent: \"Query details\"",
+  "ok": true,
+  "detail": "Query details"
+ },
+ {
+  "where": "agent: the thread stays visible above",
+  "ok": true,
+  "detail": "82.03125"
+ },
+ {
+  "where": "agent: no \"See what changes\"",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "the toast shows",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "toast reads \"Partial sent · Undo\"",
+  "ok": true,
+  "detail": "Partial sent\nUndo"
+ },
+ {
+  "where": "the save wrote a step",
+  "ok": true,
+  "detail": "2 → 3"
+ },
+ {
+  "where": "Undo restores the query, its log and its feed byte for byte",
+  "ok": true,
+  "detail": ""
+ }
+]

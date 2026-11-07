@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Query Centre v152 — runs a spec on the emulator build, waiting for another session's emulators to finish first.
 #   bash tests/e2e/qc1512Run.sh "<env> node scripts/emu-e2e-inner.mjs <spec> --project=measure --workers=1"
+# ⚠️ Through scripts/emu-guard.mjs (disk pre-flight, logs to /dev/null, cleanup — which removes dist-emu/: build before each run).
 # ⚠️ The emulator ports (8085 / 9095 / 4321) are shared by every worktree on this machine: wait, never kill.
 set -u
 cd "$(dirname "$0")/../.." || exit 1
@@ -11,5 +12,5 @@ for i in $(seq 1 1080); do
   [ "$i" = 1 ] && echo "waiting for another session's emulators to finish…"
   sleep 5
 done
-npx firebase emulators:exec --config firebase.emulator.json --only firestore,auth,storage --project demo-scriptally \
+node scripts/emu-guard.mjs npx firebase emulators:exec --config firebase.emulator.json --only firestore,auth,storage --project demo-scriptally \
   --import tests/emulator-data "node tests/emulator-seed/authUser.mjs && $1"

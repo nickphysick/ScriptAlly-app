@@ -188,7 +188,7 @@ export function planRecord(c: PlanCtx, kind: RecordKind, dayMs: number, material
   if (kind === "told") {
     const t = extra.told;
     if (!t) throw new Error("Told other agents needs a count and a deadline");
-    const count = Math.max(1, Math.min(30, Math.round(t.count)));
+    const count = Math.max(1, Math.min(500, Math.round(t.count)));
     const sub: DocumentData = { type: TOLD_TYPE, createdAt, note: `Told ${count} other agent${count === 1 ? "" : "s"} about ${name}’s offer`, ...base,
       eventKey: TOLD_EVENT, toldCount: count, toldDeadline: dayIso(new Date(t.deadlineMs)) };
     const feedRow: DocumentData = { id, userId: c.uid, queryId: q.id, manuscriptId: q.manuscriptId || "", activityType: ActivityType.STATUS_CHANGED,
@@ -340,7 +340,7 @@ export function planFix(c: PlanCtx & { feed: RawActivityDoc[] }, draft: readonly
     const mats = storeMats(s.materials);
     if (JSON.stringify(cur.data.materials ?? []) !== JSON.stringify(mats)) { if (mats.length) next.materials = mats; else delete next.materials; changed = true; }
     if (s.kind === "told" && s.told) {
-      const n = Math.max(1, Math.min(30, Math.round(s.told.count))), dl = dayIso(new Date(s.told.deadlineMs));
+      const n = Math.max(1, Math.min(500, Math.round(s.told.count))), dl = dayIso(new Date(s.told.deadlineMs));
       if (cur.data.toldCount !== n) { next.toldCount = n; next.note = `Told ${n} other agent${n === 1 ? "" : "s"} about ${c.agent?.name || c.agent?.agency || "the agent"}’s offer`; changed = true; }
       if (cur.data.toldDeadline !== dl) { next.toldDeadline = dl; changed = true; }
       if (!sameDay(t0, s.dayMs)) for (const id of c.marked ?? []) update.push({ path: `queries/${id}`, data: { offerToldOn: dayIso(new Date(s.dayMs)) } });

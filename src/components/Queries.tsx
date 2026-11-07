@@ -1816,7 +1816,7 @@ export const Queries: React.FC<{
   const [qc1522J, setQc1522J] = useState<{ j: Journey; n: number; reply?: ReplyType | null; mats?: ComposerCtx["mats"] } | null>(null);
   const [qc1522Draft, setQc1522Draft] = useState<ThreadStepIn | null>(null);
   const [qc1522Edit, setQc1522Edit] = useState<string | null>(null);
-  const [qc1522Toast, setQc1522Toast] = useState<{ msg: string; undo: () => Promise<void> } | null>(null);
+  const [qc1522Toast, setQc1522Toast] = useState<{ msg: string; undo: (() => Promise<void>) | null } | null>(null);
   const [qc1522Burst, setQc1522Burst] = useState<number | null>(null);
   /* the toast lasts 5.2s; opening another composer dismisses it */
   useEffect(() => { if (!qc1522Toast) return undefined; const t = window.setTimeout(() => setQc1522Toast(null), 5200); return () => window.clearTimeout(t); }, [qc1522Toast]);
@@ -6244,7 +6244,11 @@ export const Queries: React.FC<{
       card1522.draft = qc1522J ? qc1522Draft : null;
       card1522.editingId = edit1522 ? qc1522Edit : null;
       card1522.editNode = edit1522;
-      card1522.toast = qc1522Toast ? { msg: qc1522Toast.msg, onUndo: () => { const t = qc1522Toast; setQc1522Toast(null); void t.undo(); } } : null;
+      card1522.toast = qc1522Toast ? { msg: qc1522Toast.msg, onUndo: qc1522Toast.undo ? () => {
+        const t = qc1522Toast; setQc1522Toast(null);
+        /* a restore the rules refuse writes nothing (one batch): say so, never leave the writer believing it was undone */
+        void t.undo?.().catch((e) => { console.error("v152.2 undo refused", (e as { code?: string })?.code ?? e); setQc1522Toast({ msg: "Couldn’t undo that. Nothing was changed.", undo: null }); });
+      } : null } : null;
       card1522.burst = qc1522Burst;
       card1522.onFoot = (a) => open1522(a);
       card1522.onEditMats = (id) => {
