@@ -189,10 +189,7 @@
 .vv2 .mh { --cw:150px }
 .vv2 .mcard { grid-template-columns:1fr;padding:12px }
 }
-.vv2 .mc { padding:0 24px }
-@container sheet (min-width: 1441px) {
-.vv2 .mc { padding:0 36px }
-}
+.vv2 .mc { padding:0 }
 .vv2 .ms25 .cx-sec { max-width:none;margin:56px 0 0 }
 .vv2 .ms25 .cx-sec.first { margin-top:44px }
 .vv2 .vsteps { background:#fff;border-radius:16px;box-shadow:0 0 0 1px var(--cx-i08);padding:28px 30px 24px }

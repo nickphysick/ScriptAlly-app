@@ -35,7 +35,8 @@
 .tws-root { height: 100%; min-height: 0; }
 
 /* ── the page: a slim navy header, then the workspace that docks at the top ── */
-.tws { padding: 14px 0 24px; color: var(--tw-ink); font-family: var(--tw-serif); }
+/* page width v1: block padding only — a `padding` shorthand here zeroed the shared gutter (`.wpg-scroll > *`) */
+.tws { padding-block: 14px 24px; color: var(--tw-ink); font-family: var(--tw-serif); }
 .tws *, .tws-layer * { box-sizing: border-box; }
 .tws :where(p, span, div, label, button, input, textarea) { font-family: inherit; }
 
