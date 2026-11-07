@@ -10,7 +10,7 @@
  *
  * ⚠️ EVERY FIGURE IS THE PAGE'S OWN: the quick filters are the "who it's with" filter (`qcF138.where`), the panel is
  *    v142's strip, the rows are `buildQcRows`' and each row's button is its `nextDoor` (lib/queryActions/entry).
- * ⚠️ ONE WIDTH (`--qc151-w`) for every block on the page, set once on `.qc151`.
+ * ⚠️ ONE WIDTH for every block on the page: `.qc151` fills the shared content column (page width v1).
  * ⚠️ THE GROUP HEADER ROWS ARE STICKY CELLS IN ONE TABLE, as the ref's are: each sticks at the sheet's lip while its
  *    group passes, and the next group's header (later in the table) paints over it when it arrives.
  */

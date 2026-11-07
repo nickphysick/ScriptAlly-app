@@ -11,8 +11,7 @@
    would add its 1360 cap and 3.2vw gutter on top; the Manuscripts page (the ref's own family, `.ms25`) answers this the
    same way — `max-width: none` and the page pays its own inset. */
 .wpg-scroll > .vv2 {
-  max-width: none;
-  padding-inline: 0;
+  /* page width v1: the shared column (`.wpg-scroll > *`) is the page's width and inset now */
   /* the ref's sheet (`.scroll`, the frame the extractor leaves out) is the size container its @container sheet rules
      and the header's 100cqw inset read; here the page root is that sheet */
   container: sheet / inline-size;

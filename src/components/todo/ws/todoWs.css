@@ -34,17 +34,17 @@
    row grows with its content, and a workspace sized from the row's height grows with it) */
 .tws-root { height: 100%; min-height: 0; }
 
-/* ── the page (v52 Part A): one centred column, the Query Centre's width rule with a 1320 cap — the slim navy header,
-   then the workspace, filling the scrollport so the page itself never scrolls ──
+/* ── the page (v52 Part A): the slim navy header, then the workspace, filling the scrollport so the page itself never
+   scrolls ──
    ⚠️ THE HEIGHT IS THE SCROLLER'S OWN (--tws-port, its clientHeight: never 100vh); the column is a flex column and the
-      workspace takes what the header leaves, with a 520px floor. */
+      workspace takes what the header leaves, with a 520px floor.
+   ⚠️ PAGE WIDTH v1 (Nick, 7 Nov): the To-do list takes the shared content column (`.wpg-scroll > *`: 1256 cap, 40px
+      gutter) like every other page. v52's own 1320 column is retired; block padding only, so the gutter survives. */
 .tws {
-  --tws-w: min(calc(var(--hsheet-w, 100%) - 80px), 1320px);
-  box-sizing: border-box; width: var(--tws-w); margin: 0 0 0 calc(50% - var(--tws-w) / 2);
-  height: var(--tws-port, 800px); display: flex; flex-direction: column; padding: 24px 0 12px;
+  box-sizing: border-box;
+  height: var(--tws-port, 800px); display: flex; flex-direction: column; padding-block: 24px 12px;
   color: var(--tw-ink); font-family: var(--tw-serif);
 }
-@media (max-width: 1399px) { .tws { --tws-w: min(calc(var(--hsheet-w, 100%) - 56px), 1320px); } }
 .tws *, .tws-layer * { box-sizing: border-box; }
 .tws :where(p, span, div, label, button, input, textarea) { font-family: inherit; }
 

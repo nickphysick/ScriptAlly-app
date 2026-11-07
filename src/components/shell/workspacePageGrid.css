@@ -469,6 +469,17 @@
  * chain — the height fault this repo has documented twice, reintroduced to solve a width problem.
  * The hems are children of `.wpg`, not of the scroller, so they are correctly outside this.
  */
+/**
+ * Page width v1 (6 Nov) — THE ONE CONTENT COLUMN, as two tokens. Every workspace page that has no width of its own
+ * reads these through the three rules below (the scroller's children, the toolband's inner, the masthead): a 1256px
+ * content width, centred, with a constant 40px gutter each side below the cap. The gutter used to be
+ * `clamp(28px, 3.2vw, 52px)`, which was 41 at a 1280 window and 48 at 1512; `--page-cap` keeps the 1256 that clamp
+ * gave past the cap (1360 − 2 × 52). Pages with their own width are listed in tests/e2e/pageWidth.measure.ts.
+ */
+:root {
+  --page-cap: 1256px;
+  --page-gutter: 40px;
+}
 .wpg-scroll > * {
   /**
    * ⚠️ `width: 100%` IS LOAD-BEARING AND ITS ABSENCE BROKE FIVE PAGES. On a FILL page the scroller
@@ -525,8 +536,8 @@
    * the sidebar collapsed.
    */
   box-sizing: border-box;
-  max-width: 1360px;
-  padding-inline: clamp(28px, 3.2vw, 52px);
+  max-width: calc(var(--page-cap) + var(--page-gutter) * 2);
+  padding-inline: var(--page-gutter);
   margin-inline: auto;
 }
 /**
@@ -791,8 +802,8 @@
   /* §2 — the toolband's inner takes the same column, so a page's controls line up with its content */
   box-sizing: border-box;
   width: 100%;
-  max-width: 1360px;
-  padding-inline: clamp(28px, 3.2vw, 52px);
+  max-width: calc(var(--page-cap) + var(--page-gutter) * 2);
+  padding-inline: var(--page-gutter);
   margin-inline: auto;
 }
 /* ⚠️ ONE SUBJECT NOW — the masthead lives inside the slab, and `.wpg-scroll > .wpg-mast` is kept
@@ -819,8 +830,8 @@
    */
   box-sizing: border-box;
   width: 100%;
-  max-width: 1360px;
-  padding-inline: clamp(28px, 3.2vw, 52px);
+  max-width: calc(var(--page-cap) + var(--page-gutter) * 2);
+  padding-inline: var(--page-gutter);
   margin-inline: auto;
 }
 .wpg-mast {

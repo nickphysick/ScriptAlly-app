@@ -176,9 +176,9 @@ export async function readFull(page: Page, sidePanelSel: string) {
     const hd = vis('[data-probe="page-header"][data-size="full"]');
     const bar = vis('[data-probe="navrow"]');
     if (!hd || !bar) return null;
-    /* the content column: the nearest ancestor carrying v1's 1360 cap, measured at its CONTENT box */
+    /* the content column: the nearest ancestor carrying the shared cap (page width v1: 1256 + 2 × 40), at its CONTENT box */
     let col: HTMLElement | null = hd.parentElement;
-    while (col && getComputedStyle(col).maxWidth !== "1360px") col = col.parentElement;
+    while (col && getComputedStyle(col).maxWidth !== "1336px") col = col.parentElement;
     const cr = col?.getBoundingClientRect(); const cs = col ? getComputedStyle(col) : null;
     const colL = cr && cs ? cr.left + parseFloat(cs.paddingLeft) : NaN;
     const colR = cr && cs ? cr.right - parseFloat(cs.paddingRight) : NaN;

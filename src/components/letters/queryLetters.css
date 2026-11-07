@@ -8,14 +8,14 @@
  * face with two classes and `!important`.
  */
 .qlp { position: relative; isolation: isolate; box-sizing: border-box; min-width: 0; min-height: 100%;
-  font-family: var(--sp-serif); color: #1c130f; padding: 0 clamp(20px, 2vw, 32px) 64px; }
+  font-family: var(--sp-serif); color: #1c130f; padding: 0 var(--page-gutter) 64px; }
 .qlp :where(span, p, div, b, i, em, small, button, a, label, li, ul, input, textarea) { font-family: inherit; }
 .qlp *, .qlp *::before, .qlp *::after { box-sizing: border-box; }
 .qlp :is(h1, h2, h3, h4, p) { margin: 0; }
 .qlp button { cursor: pointer; }
 .qlp::before { content: ""; position: absolute; inset: 0 0 auto; height: 380px; z-index: -1; pointer-events: none;
   background: radial-gradient(60% 90% at 70% 0%, rgba(232, 200, 200, .28), transparent 70%); }
-.qlp > * { max-width: 1328px; margin-inline: auto; }
+.qlp > * { max-width: var(--page-cap); margin-inline: auto; } /* page width v1: the shared column */
 .qlp:not(.qlp--empty) { padding-bottom: 0; }
 
 /* header */

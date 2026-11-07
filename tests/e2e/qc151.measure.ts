@@ -45,7 +45,8 @@ class Ledger {
 /** the named breaks, expressed in the page */
 const PAGE_MUT: Record<string, { css?: string; js?: string }> = {
   /* v150.1's width restored */
-  L1: { css: `.qc151.qc151.qc151 { --qc151-w: min(calc(var(--hsheet-w) - 48px), 1200px) !important; }` },
+  /* RE-POINTED (page width v1, 6 Nov): `--qc151-w` is retired, so the break states the old width directly */
+  L1: { css: `.qc151.qc151.qc151 { width: min(calc(var(--hsheet-w) - 48px), 1200px) !important; margin-left: calc(50% - min(calc(var(--hsheet-w) - 48px), 1200px) / 2) !important; }` },
   /* At a glance re-rendered */
   L2: { js: `(() => { const h = document.querySelector('[data-qc151="header"]'); if (h) { const g = document.createElement('section'); g.setAttribute('data-qc150', 'glance'); g.style.height = '100px'; g.textContent = 'At a glance'; h.after(g); } })()` },
   /* × only closes the panel */
@@ -108,7 +109,7 @@ async function scrollTo(page: Page, sel: string, pad = 120) {
 
 for (const vp of SIZES) {
   test.describe(`QC151 @ ${vp.width}`, () => {
-    test("L1 · one width: header, summary card, quick row, control line, table, Birds-eye card and sign-off share edges; W = min(S − 80, 1100), S − 56 below 1400", async ({ page }) => {
+    test("L1 · one width: header, summary card, quick row, control line, table, Birds-eye card and sign-off share edges; W = min(S − 80, 1256) (page width v1)", async ({ page }) => {
       test.skip(!run("L1"));
       const L = new Ledger(`L1-${vp.width}`);
       await open(page, vp);
@@ -123,8 +124,9 @@ for (const vp of SIZES) {
       const parts = { header: a.header, summary: a.summary, quick: a.quick, toolbar: a.toolbar, table: a.table, signoff: a.signoff, birds: b.birds };
       L.check("population", !!a.sheet && Object.values(parts).every(Boolean), JSON.stringify(parts));
       if (a.sheet) {
-        const W = Math.min(a.sheet.w - (a.win < 1400 ? 56 : 80), 1100);
-        const expectW = vp.width === 1512 ? 1100 : W;
+        /* RE-POINTED (page width v1, 6 Nov): the page is on the shared column — min(S − 2 × 40, 1256), centred */
+        const W = Math.min(a.sheet.w - 80, 1256);
+        const expectW = vp.width === 1512 ? 1176 : W;
         L.check("formula", Math.abs(W - expectW) <= 1, `W ${W} (sheet ${a.sheet.w})`);
         const mid = a.sheet.l + a.sheet.w / 2;
         for (const [k, x] of Object.entries(parts)) {

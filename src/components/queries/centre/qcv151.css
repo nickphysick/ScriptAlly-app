@@ -5,16 +5,16 @@
  * Query Centre v151.1 (design-refs/query-centre-v151-1/), over v151 (design-refs/query-centre-v151/, option B). Desktop only (768px and up); the phone keeps
  * queries-mobile-v1. Every rule is scoped to `.qc151`, or to its portalled menu (`.qc151-menu`).
  *
- * ⚠️ ONE WIDTH: W = min(S − 80, 1100), S − 56 below a 1400px window, where S is the page sheet (`--hsheet-w`). Every
- *    block is a child of `.qc151`, which is W wide and centred, so they share both edges by construction.
+ * ⚠️ ONE WIDTH: the shared content column (page width v1: `--page-cap` 1256, `--page-gutter` 40, workspacePageGrid.css).
+ *    Every block is a child of `.qc151`, which fills that column, so they share both edges by construction.
  * ⚠️ NO CLASS HERE MAY BE `.tl` OR `.trk`: Birds-eye's row track is `.qc150-tl` and a bare `display: flex` reaching it
  *    shrinks it and runs the bars past their dates (QC151 L14).
  */
 @media (min-width: 768px) {
   .qc151 {
     --ink: #1c130f; --mut: #5b4f47; --faint: #8a8076; --navy: #2a3a52; --line: #e6dfd5; --oat: #efe9df; --pink: #f3c8ba;
-    --qc151-w: min(calc(var(--hsheet-w, 1100px) - 80px), 1100px);
-    box-sizing: border-box; position: relative; width: var(--qc151-w); margin: 0 0 0 calc(50% - var(--qc151-w) / 2); padding-top: 30px;
+    /* page width v1: the page takes the shared column (`.wpg-scroll > *`, --page-cap / --page-gutter) — no width of its own */
+    box-sizing: border-box; position: relative; width: 100%; margin: 0; padding-top: 30px;
     color: var(--ink); font: 400 16px/1.45 var(--sp-serif);
     container-type: inline-size; container-name: qc151;
   }
@@ -320,7 +320,6 @@
 
   /* below a 1400px window */
   @media (max-width: 1399px) {
-    .qc151 { --qc151-w: min(calc(var(--hsheet-w, 1100px) - 56px), 1100px); }
     .qc151-acts { gap: 8px; }
     .qc151-sw { margin-right: 0; }
     .qc151-sw button { padding: 0 11px; }

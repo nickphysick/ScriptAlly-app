@@ -289,9 +289,11 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
      * now, which is what makes the column keep its air past 1360 — under the old form the content
      * ran the full 1360 at an ultrawide window and the gutter did nothing.
      */
+    /* page width v1 (6 Nov): re-pointed from the literals (1360, clamp(28px, 3.2vw, 52px)) to the two tokens; the
+       law is unchanged — the gutter is inside the cap — and pageWidth.test.ts holds the values (1256, 40). */
     const col = block(".wpg-scroll > *");
-    expect(col, "the scroller's children left the shared column").toContain("max-width: 1360px");
-    expect(col, "the gutter is outside the cap again").toContain("padding-inline: clamp(28px, 3.2vw, 52px)");
+    expect(col, "the scroller's children left the shared column").toContain("max-width: calc(var(--page-cap) + var(--page-gutter) * 2)");
+    expect(col, "the gutter is outside the cap again").toContain("padding-inline: var(--page-gutter)");
     expect(col, "the column stopped centring itself").toContain("margin-inline: auto");
     /* ⚠️ AND `border-box`, or the padding would be added to the 1360 rather than taken out of it —
        the cap would be 1464 wide and every "equal margins" reading would still pass. */
@@ -320,8 +322,8 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
      * reaching for. What must not come back is a measure of its own.
      */
     const mast = block(".wpg-scroll > .wpg-mast");
-    expect(mast, "the masthead left the shared column").toContain("max-width: 1360px");
-    expect(mast, "…and its gutter").toContain("padding-inline: clamp(28px, 3.2vw, 52px)");
+    expect(mast, "the masthead left the shared column").toContain("max-width: calc(var(--page-cap) + var(--page-gutter) * 2)");
+    expect(mast, "…and its gutter").toContain("padding-inline: var(--page-gutter)");
     expect(mast, "the masthead kept a measure of its own").not.toContain("--work-max");
     expect(mast, "…or a gutter of its own").not.toContain("--mast-gutter");
     expect(block(".wpg"), "the constant gutter is not defined on the grid").toContain("--mast-gutter: 35px");

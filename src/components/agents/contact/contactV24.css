@@ -15,11 +15,11 @@
 /* ═════════ A · the header, the banner, the view row ═════════ */
 @media (min-width: 768px) {
   .clv-group[data-v24] {
-    --cl24-in: clamp(24px, calc(24px + (var(--hsheet-w) - 1099.5px) * 1000), 32px);
-    --cl24-col: min(calc(var(--hsheet-w) - 64px), 1136px);
-    --cl24-ext: clamp(0px, calc((var(--hsheet-w) - 1499.5px) * 1000), 80px);
-    --cl24-list: calc(var(--cl24-col) + var(--cl24-ext));
-    --cl24-w: calc(var(--cl24-list) - 2 * var(--cl24-in));
+    /* page width v1: the header and the list take the shared column (`.wpg-scroll > *`): W is the group's own content
+       box, so `calc(50% − W / 2)` below is 0. ⚠️ contactV25.css's `--cl25-w` is NOT in the bundle (its importers are
+       unmounted), so this is the rule that renders. */
+    --cl24-list: 100%;
+    --cl24-w: 100%;
   }
   .clv-group[data-v24] > .cl24-hd {
     grid-column: 1 / -1; grid-row: 1; justify-self: start;

@@ -140,11 +140,12 @@ test.skip("CL25-D1 D2 · one width for every block; the bar's order, its typewri
   for (const vp of SIZES) {
     const at = `${vp.width}`;
     await openCl24(page, vp);
-    await mutate(page, "D1", ".clv-group[data-v24][data-v25].clv-group { --cl24-w: calc(min(calc(var(--hsheet-w) - 64px), 1136px) - 2 * var(--cl24-in)) !important; --cl24-list: min(calc(var(--hsheet-w) - 64px), 1136px) !important; }");
+    await mutate(page, "D1", ".clv-group[data-v24][data-v25].clv-group { --cl24-w: min(calc(var(--hsheet-w) - 64px), 1136px) !important; --cl24-list: min(calc(var(--hsheet-w) - 64px), 1136px) !important; }");
     /* ⚠️ the break must out-rank v25's own typewriter rule (0-4-1, !important) or it never applies */
     await mutate(page, "D2", ".clv-group[data-v25] .cl24-sheet .cl24-bar .cl24-ch--fil.cl24-ch--fil.cl24-ch--fil, .clv-group[data-v25] .cl24-sheet .cl24-bar .cl24-ch--fil.cl24-ch--fil.cl24-ch--fil * { font-family: Georgia, serif !important; }");
     const S = await sheetW(page);
-    const W = Math.min(S - 48, 1200);
+    /* RE-POINTED (page width v1, 6 Nov): the list is on the shared column — min(S − 2 × 40, 1256) */
+    const W = Math.min(S - 80, 1256);
     const b = {
       card: await box(page, "[data-cl25='hd-card']"), /* re-pointed (v25.1 A): At a glance is the ledger */ glance: await box(page, "[data-cl251='glance']"),
       title: await box(page, "[data-cl25='title']"), sheet: await box(page, "[data-cl24='sheet']"),
@@ -153,7 +154,7 @@ test.skip("CL25-D1 D2 · one width for every block; the bar's order, its typewri
     D1.check(`${at} population`, got.length === 4, `${got.length} of 4 blocks found`);
     D1.check(`${at} lefts`, got.every(([, v]) => near(v!.l, b.sheet?.l)), got.map(([k, v]) => `${k} ${f1(v!.l)}`).join(" · "));
     D1.check(`${at} rights`, got.every(([, v]) => near(v!.r, b.sheet?.r)), got.map(([k, v]) => `${k} ${f1(v!.r)}`).join(" · "));
-    D1.check(`${at} width`, near(b.sheet?.w, W), `list ${f1(b.sheet?.w)} against min(S − 48, 1200) = ${f1(W)} (S ${f1(S)})`);
+    D1.check(`${at} width`, near(b.sheet?.w, W), `list ${f1(b.sheet?.w)} against min(S − 80, 1256) = ${f1(W)} (S ${f1(S)})`);
 
     const bar = await page.evaluate(() => {
       const el = [...document.querySelectorAll<HTMLElement>("[data-cl24='bar']")].find((e) => e.offsetWidth);
