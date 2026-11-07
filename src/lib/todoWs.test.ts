@@ -8,7 +8,7 @@
 import { describe, expect, it } from "vitest";
 import { QueryStatus, type Agent, type Query, type UserTask } from "../types";
 import type { TrayItem } from "./todoTray";
-import { andList, dayBit, doingPhrase, dueChip, mentorLine, passes, priorityTask, replyWords, whenOf, wsSections, wsTasks, NO_WS_FILTERS, type WsTask } from "./todoWs";
+import { andList, dayBit, doingPhrase, dueChip, mentorLine, passes, priorityTask, replyWords, startReason, stripWords, whenOf, wsSections, wsTasks, NO_WS_FILTERS, STRIP_GROUP, type WsTask } from "./todoWs";
 
 const NOW = Date.parse("2026-11-05T10:00:00");
 const ymd = (d: number) => { const x = new Date(NOW + d * 86400000); return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, "0")}-${String(x.getDate()).padStart(2, "0")}`; };
@@ -183,6 +183,24 @@ describe("v51.1 — the priority phrase and the row titles", () => {
     expect(doingPhrase(by("recheck"))).toBe("Checking on Agence Zoë");
     expect(doingPhrase(by("dream"))).toBe("Querying Mary-Kate at O’Rourke & Partners");
     expect(doingPhrase(by("start"))).toBe("Starting to query ‘Murphy’s Day Out’");
+  });
+  /* v52 Part B — Start here reuses the phrase above unchanged; its reason and the collapsed strip's lines are built too */
+  it("v52 · Start here's reason", () => {
+    expect(startReason({ task: { ...by("offer"), dueDays: 1 }, urgent: true })).toBe("Due tomorrow");
+    expect(startReason({ task: { ...by("offer"), dueDays: 0 }, urgent: true })).toBe("Due today");
+    expect(startReason({ task: { ...by("send"), dueDays: -8 }, urgent: true })).toBe("8 days late");
+    expect(startReason({ task: { ...by("send"), dueDays: -1 }, urgent: true })).toBe("1 day late");
+    expect(startReason({ task: by("quiet"), urgent: false })).toBe("Nothing urgent");
+    expect(startReason({ task: null, urgent: false })).toBe("Nothing urgent");
+  });
+  it("v52 · the collapsed strip names each task by first name, kind and when, with apostrophes, hyphens and accents intact", () => {
+    expect(stripWords({ ...by("send"), dueDays: -8 })).toEqual({ name: "Zoë", what: "Partial", when: "8d late", hot: true });
+    expect(stripWords({ ...by("full"), dueDays: 7 })).toEqual({ name: "Mary-Kate", what: "Full", when: "7d", hot: false });
+    expect(stripWords({ ...by("offer"), dueDays: 1 })).toEqual({ name: "Zoë", what: "Offer", when: "Tmrw", hot: true });
+    expect(stripWords({ ...by("nudge"), dueDays: 0 })).toEqual({ name: "Mary-Kate", what: "Nudge", when: "Today", hot: true });
+    expect(stripWords({ ...by("quiet"), quietDays: 110 })).toEqual({ name: "Zoë", what: "Quiet", when: "16 wks", hot: false });
+    expect(stripWords(by("materials-batch")).when).toBe("");
+    expect(STRIP_GROUP).toEqual({ wait: "Waiting", nudge: "Nudges", quiet: "Quiet", house: "Fill in", yours: "Yours" });
   });
   it("no phrase and no title carries a card's stored text", () => {
     for (const t of tasks2) {

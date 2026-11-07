@@ -21,6 +21,8 @@ async function open(page: Page, vp: { width: number; height: number }) {
   await openRoute(page, "/todo", vp);
   await liftMotionSuppression(page);
   await expect(page.locator('[data-tws="page"]:visible')).toHaveCount(1, { timeout: 30_000 });
+  /* v52: wait for the tray's rows, so a `test.skip(no such row)` reads the tray and not the loading frame */
+  await expect(page.locator('[data-tws="page"]:visible [data-tws-row]').first()).toBeVisible({ timeout: 30_000 });
 }
 
 for (const vp of SIZES) {
