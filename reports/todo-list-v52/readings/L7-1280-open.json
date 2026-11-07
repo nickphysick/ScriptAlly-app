@@ -1,0 +1,600 @@
+[
+ {
+  "kind": "send",
+  "step": 0,
+  "key": "mats",
+  "p": {
+   "has": true,
+   "ok": true,
+   "inCol": true,
+   "inVp": true,
+   "hit": true,
+   "r": [
+    723,
+    708,
+    103,
+    46
+   ],
+   "col": [
+    462,
+    840
+   ],
+   "label": "Next →"
+  }
+ },
+ {
+  "kind": "send",
+  "step": 1,
+  "key": "ver",
+  "p": {
+   "has": true,
+   "ok": true,
+   "inCol": true,
+   "inVp": true,
+   "hit": true,
+   "r": [
+    723,
+    708,
+    103,
+    46
+   ],
+   "col": [
+    462,
+    840
+   ],
+   "label": "Next →"
+  }
+ },
+ {
+  "kind": "send",
+  "step": 2,
+  "key": "date",
+  "p": {
+   "has": true,
+   "ok": true,
+   "inCol": true,
+   "inVp": true,
+   "hit": true,
+   "r": [
+    689,
+    708,
+    137,
+    46
+   ],
+   "col": [
+    462,
+    840
+   ],
+   "label": "Continue →"
+  }
+ },
+ {
+  "kind": "send",
+  "step": 3,
+  "key": "summary",
+  "p": {
+   "has": true,
+   "ok": true,
+   "inCol": true,
+   "inVp": true,
+   "hit": true,
+   "r": [
+    712,
+    708,
+    115,
+    46
+   ],
+   "col": [
+    462,
+    840
+   ],
+   "label": "Log it"
+  }
+ },
+ {
+  "kind": "offer",
+  "step": 0,
+  "key": "ans",
+  "p": {
+   "has": true,
+   "ok": true,
+   "inCol": true,
+   "inVp": true,
+   "hit": true,
+   "r": [
+    689,
+    708,
+    137,
+    46
+   ],
+   "col": [
+    462,
+    840
+   ],
+   "label": "Continue →"
+  }
+ },
+ {
+  "kind": "offer",
+  "step": 1,
+  "key": "withdraw",
+  "p": {
+   "has": true,
+   "ok": true,
+   "inCol": true,
+   "inVp": true,
+   "hit": true,
+   "r": [
+    723,
+    708,
+    103,
+    46
+   ],
+   "col": [
+    462,
+    840
+   ],
+   "label": "Next →"
+  }
+ },
+ {
+  "kind": "offer",
+  "step": 2,
+  "key": "date",
+  "p": {
+   "has": true,
+   "ok": true,
+   "inCol": true,
+   "inVp": true,
+   "hit": true,
+   "r": [
+    689,
+    708,
+    137,
+    46
+   ],
+   "col": [
+    462,
+    840
+   ],
+   "label": "Continue →"
+  }
+ },
+ {
+  "kind": "offer",
+  "step": 3,
+  "key": "summary",
+  "p": {
+   "has": true,
+   "ok": true,
+   "inCol": true,
+   "inVp": true,
+   "hit": true,
+   "r": [
+    712,
+    708,
+    115,
+    46
+   ],
+   "col": [
+    462,
+    840
+   ],
+   "label": "Log it"
+  }
+ },
+ {
+  "kind": "other",
+  "step": 0,
+  "key": "mats",
+  "p": {
+   "has": true,
+   "ok": true,
+   "inCol": true,
+   "inVp": true,
+   "hit": true,
+   "r": [
+    723,
+    708,
+    103,
+    46
+   ],
+   "col": [
+    462,
+    840
+   ],
+   "label": "Next →"
+  }
+ },
+ {
+  "kind": "other",
+  "step": 1,
+  "key": "ver",
+  "p": {
+   "has": true,
+   "ok": true,
+   "inCol": true,
+   "inVp": true,
+   "hit": true,
+   "r": [
+    723,
+    708,
+    103,
+    46
+   ],
+   "col": [
+    462,
+    840
+   ],
+   "label": "Next →"
+  }
+ },
+ {
+  "kind": "other",
+  "step": 2,
+  "key": "date",
+  "p": {
+   "has": true,
+   "ok": true,
+   "inCol": true,
+   "inVp": true,
+   "hit": true,
+   "r": [
+    689,
+    708,
+    137,
+    46
+   ],
+   "col": [
+    462,
+    840
+   ],
+   "label": "Continue →"
+  }
+ },
+ {
+  "kind": "other",
+  "step": 3,
+  "key": "summary",
+  "p": {
+   "has": true,
+   "ok": true,
+   "inCol": true,
+   "inVp": true,
+   "hit": true,
+   "r": [
+    712,
+    708,
+    115,
+    46
+   ],
+   "col": [
+    462,
+    840
+   ],
+   "label": "Log it"
+  }
+ },
+ {
+  "kind": "nudge",
+  "step": 0,
+  "key": "sent",
+  "p": {
+   "has": true,
+   "ok": true,
+   "inCol": true,
+   "inVp": true,
+   "hit": true,
+   "r": [
+    723,
+    708,
+    103,
+    46
+   ],
+   "col": [
+    462,
+    840
+   ],
+   "label": "Next →"
+  }
+ },
+ {
+  "kind": "nudge",
+  "step": 1,
+  "key": "date",
+  "p": {
+   "has": true,
+   "ok": true,
+   "inCol": true,
+   "inVp": true,
+   "hit": true,
+   "r": [
+    689,
+    708,
+    137,
+    46
+   ],
+   "col": [
+    462,
+    840
+   ],
+   "label": "Continue →"
+  }
+ },
+ {
+  "kind": "nudge",
+  "step": 2,
+  "key": "summary",
+  "p": {
+   "has": true,
+   "ok": true,
+   "inCol": true,
+   "inVp": true,
+   "hit": true,
+   "r": [
+    712,
+    708,
+    115,
+    46
+   ],
+   "col": [
+    462,
+    840
+   ],
+   "label": "Log it"
+  }
+ },
+ {
+  "kind": "quiet",
+  "step": 0,
+  "key": "act",
+  "p": {
+   "has": true,
+   "ok": true,
+   "inCol": true,
+   "inVp": true,
+   "hit": true,
+   "r": [
+    723,
+    708,
+    103,
+    46
+   ],
+   "col": [
+    462,
+    840
+   ],
+   "label": "Next →"
+  }
+ },
+ {
+  "kind": "quiet",
+  "step": 1,
+  "key": "sent",
+  "p": {
+   "has": true,
+   "ok": true,
+   "inCol": true,
+   "inVp": true,
+   "hit": true,
+   "r": [
+    723,
+    708,
+    103,
+    46
+   ],
+   "col": [
+    462,
+    840
+   ],
+   "label": "Next →"
+  }
+ },
+ {
+  "kind": "quiet",
+  "step": 2,
+  "key": "date",
+  "p": {
+   "has": true,
+   "ok": true,
+   "inCol": true,
+   "inVp": true,
+   "hit": true,
+   "r": [
+    689,
+    708,
+    137,
+    46
+   ],
+   "col": [
+    462,
+    840
+   ],
+   "label": "Continue →"
+  }
+ },
+ {
+  "kind": "quiet",
+  "step": 3,
+  "key": "summary",
+  "p": {
+   "has": true,
+   "ok": true,
+   "inCol": true,
+   "inVp": true,
+   "hit": true,
+   "r": [
+    712,
+    708,
+    115,
+    46
+   ],
+   "col": [
+    462,
+    840
+   ],
+   "label": "Log it"
+  }
+ },
+ {
+  "kind": "batch",
+  "step": 0,
+  "key": "mats",
+  "p": {
+   "has": true,
+   "ok": true,
+   "inCol": true,
+   "inVp": true,
+   "hit": true,
+   "r": [
+    689,
+    708,
+    137,
+    46
+   ],
+   "col": [
+    462,
+    840
+   ],
+   "label": "Continue →"
+  }
+ },
+ {
+  "kind": "batch",
+  "step": 1,
+  "key": "summary",
+  "p": {
+   "has": true,
+   "ok": true,
+   "inCol": true,
+   "inVp": true,
+   "hit": true,
+   "r": [
+    712,
+    708,
+    115,
+    46
+   ],
+   "col": [
+    462,
+    840
+   ],
+   "label": "Log it"
+  }
+ },
+ {
+  "kind": "reply-time",
+  "step": 0,
+  "key": "wk",
+  "p": {
+   "has": true,
+   "ok": true,
+   "inCol": true,
+   "inVp": true,
+   "hit": true,
+   "r": [
+    689,
+    708,
+    137,
+    46
+   ],
+   "col": [
+    462,
+    840
+   ],
+   "label": "Continue →"
+  }
+ },
+ {
+  "kind": "reply-time",
+  "step": 1,
+  "key": "summary",
+  "p": {
+   "has": true,
+   "ok": true,
+   "inCol": true,
+   "inVp": true,
+   "hit": true,
+   "r": [
+    712,
+    708,
+    115,
+    46
+   ],
+   "col": [
+    462,
+    840
+   ],
+   "label": "Log it"
+  }
+ },
+ {
+  "kind": "wishlist",
+  "step": 0,
+  "key": "wish",
+  "p": {
+   "has": true,
+   "ok": true,
+   "inCol": true,
+   "inVp": true,
+   "hit": true,
+   "r": [
+    689,
+    708,
+    137,
+    46
+   ],
+   "col": [
+    462,
+    840
+   ],
+   "label": "Continue →"
+  }
+ },
+ {
+  "kind": "wishlist",
+  "step": 1,
+  "key": "summary",
+  "p": {
+   "has": true,
+   "ok": true,
+   "inCol": true,
+   "inVp": true,
+   "hit": true,
+   "r": [
+    712,
+    708,
+    115,
+    46
+   ],
+   "col": [
+    462,
+    840
+   ],
+   "label": "Log it"
+  }
+ },
+ {
+  "kind": "own",
+  "step": 0,
+  "key": "none",
+  "p": {
+   "has": true,
+   "ok": true,
+   "inCol": true,
+   "inVp": true,
+   "hit": true,
+   "r": [
+    673,
+    708,
+    153,
+    46
+   ],
+   "col": [
+    462,
+    840
+   ],
+   "label": "Mark done"
+  }
+ }
+]

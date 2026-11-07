@@ -7,7 +7,7 @@
  *
  * ⚠️ NOTHING HERE IS PRE-ANSWERED except the date, which opens on today and says so under the question.
  */
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { replyWords } from "../../../lib/todoWs";
 import { DOW, MONL, addDays, dayDiff } from "../../../lib/queryActions/dates";
 
@@ -70,6 +70,18 @@ export function DatePick({ value, onPick, today, dir }: { value: Date; onPick: (
   const minMonth = new Date(today.getFullYear(), today.getMonth() - (dir === "past" ? 24 : 0), 1);
   const maxMonth = new Date(today.getFullYear(), today.getMonth() + (dir === "future" ? 18 : 0), 1);
   const ok = (d: Date) => (dir === "past" ? dayDiff(d, today) <= 0 : dayDiff(d, today) > 0);
+  /* v52 Part C — the month opens beneath the strip, inside the question, and is brought wholly into the questions
+     column's own view (its scroller only — never scrollIntoView, which would move the page too), so the footer below
+     the column never sits over it */
+  const calRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const cal = calRef.current;
+    const sc = cal?.closest<HTMLElement>(".tws-wq");
+    if (!cal || !sc) return;
+    const over = cal.getBoundingClientRect().bottom - sc.getBoundingClientRect().bottom + 8;
+    if (over > 0) sc.scrollTop += over;
+  }, [open]);
   return (
     <div className="tws-dpick" data-tws="date">
       <div className="tws-dstrip">
@@ -84,7 +96,7 @@ export function DatePick({ value, onPick, today, dir }: { value: Date; onPick: (
         </button>
       </div>
       {open ? (
-        <div className="tws-mcal">
+        <div className="tws-mcal" ref={calRef} data-tws="calendar">
           <div className="tws-mh">
             <button type="button" aria-label="Previous month" disabled={month <= minMonth} onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))}>‹</button>
             <b>{MONL[month.getMonth()]} {month.getFullYear()}</b>

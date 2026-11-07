@@ -114,6 +114,7 @@ describe("the card preview is read-only", () => {
     const pv = readFileSync(join(__dirname, "WsPreview.tsx"), "utf8");
     expect(pv).toMatch(/className="tws-pvz" data-tws="preview-card" inert /);
     const css = readFileSync(join(__dirname, "todoWs.css"), "utf8");
-    expect(css).toContain('.tws-pvz [data-qcv="open-foot"], .tws-pvz .qsc-links, .tws-pvz .qsc-link { display: none !important; }');
+    /* v52 Part D: the preview draws the Query Centre's own card (QcQueryCard149 over the v152 thread); its controls are not drawn */
+    expect(css).toContain('.tws-pvz [data-qc1522="footer"], .tws-pvz [data-qc152="reply"], .tws-pvz [data-qc152="pencil"], .tws-pvz [data-qc149c="close"]');
   });
 });

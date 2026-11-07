@@ -3,7 +3,7 @@
  * rendered mockup at 1512 × 900, not out of its source (the mock is cumulative, 28 versions deep).
  *
  * ⚠️ NO GREEN ON THIS PAGE. Navy, slate, cream and blush only.
- * ⚠️ The palette is declared on `.tws` AND on `.tws-layer`: the review drawer and the pop-ups portal to the body, where
+ * ⚠️ The palette is declared on `.tws` AND on `.tws-layer`: the pop-ups and the toast portal to the body, where
  *    no ancestor declares it (a `var()` on an undeclared token paints nothing, silently).
  */
 .tws, .tws-layer {
@@ -34,37 +34,40 @@
    row grows with its content, and a workspace sized from the row's height grows with it) */
 .tws-root { height: 100%; min-height: 0; }
 
-/* ── the page: a slim navy header, then the workspace that docks at the top ── */
-.tws { padding: 14px 0 24px; color: var(--tw-ink); font-family: var(--tw-serif); }
+/* ── the page (v52 Part A): one centred column, the Query Centre's width rule with a 1320 cap — the slim navy header,
+   then the workspace, filling the scrollport so the page itself never scrolls ──
+   ⚠️ THE HEIGHT IS THE SCROLLER'S OWN (--tws-port, its clientHeight: never 100vh); the column is a flex column and the
+      workspace takes what the header leaves, with a 520px floor. */
+.tws {
+  --tws-w: min(calc(var(--hsheet-w, 100%) - 80px), 1320px);
+  box-sizing: border-box; width: var(--tws-w); margin: 0 0 0 calc(50% - var(--tws-w) / 2);
+  height: var(--tws-port, 800px); display: flex; flex-direction: column; padding: 24px 0 12px;
+  color: var(--tw-ink); font-family: var(--tw-serif);
+}
+@media (max-width: 1399px) { .tws { --tws-w: min(calc(var(--hsheet-w, 100%) - 56px), 1320px); } }
 .tws *, .tws-layer * { box-sizing: border-box; }
 .tws :where(p, span, div, label, button, input, textarea) { font-family: inherit; }
 
+/* the header: the Query Centre's navy banner, slim (its radius, its navy, its outlined pill) */
 .tws-hd {
-  height: 56px; display: flex; align-items: center; gap: 14px; padding: 0 10px 0 12px; border-radius: 16px;
-  background: var(--tw-navy); color: #fff; margin-bottom: 10px;
+  flex: none; display: flex; align-items: center; gap: 16px; padding: 16px 22px 16px 32px; border-radius: 20px;
+  background: var(--tw-navy); color: #f4eee5; margin-bottom: 10px;
 }
-.tws .tws-hd h1.tws-ttl { margin: 0; padding-left: 12px; font: 400 23px/1 var(--tw-type) !important; color: #fff; white-space: nowrap; }
-.tws-hdiv { width: 1px; height: 22px; background: rgba(255, 255, 255, 0.22); flex: none; }
-.tws-hline { min-width: 0; font-size: 16px; line-height: 1.3; color: rgba(255, 255, 255, 0.82); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tws-hline b { color: #fff; font-weight: 600; }
-.tws-hgo {
-  flex: none; height: 30px; padding: 0 13px; border: 0; border-radius: 15px; cursor: pointer; font: 600 14px var(--tw-serif);
-  color: #fff; background: rgba(255, 255, 255, 0.12); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
-}
-.tws-hgo:hover { background: rgba(255, 255, 255, 0.2); }
-.tws-hon { flex: none; font: 600 14px var(--tw-serif); color: rgba(255, 255, 255, 0.82); white-space: nowrap; }
+.tws-ht { min-width: 0; }
+.tws .tws-hd h1.tws-ttl { margin: 0; font: 400 32px/1.3 var(--tw-type) !important; color: #f4eee5 !important; white-space: nowrap; }
+.tws .tws-stats { margin: 2px 0 0; font: italic 15.5px/1.35 var(--tw-serif); color: rgba(244, 238, 229, 0.82); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tws .tws-stats b { font: normal 400 16px var(--tw-type); color: #fff; }
 .tws-sp { flex: 1; min-width: 8px; }
 .tws-addb {
-  flex: none; height: 36px; padding: 0 16px; border: 0; border-radius: 18px; background: #fff; color: var(--tw-navy);
-  font: 600 14.5px var(--tw-serif); cursor: pointer;
+  flex: none; height: 46px; padding: 0 20px; border: 0; border-radius: 23px; background: transparent; color: #f4eee5; cursor: pointer;
+  font: 600 16px var(--tw-serif); box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, 0.55);
 }
-.tws-addb:hover { background: #f4f1ec; }
+.tws-addb:hover { box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, 0.9); }
 
-/* the workspace fills the scrollport under the header (--tws-port, the scroller's own height: never 100vh). On a short
-   screen it keeps a 560px floor, the page scrolls, and the workspace docks at the top. */
+/* the workspace takes the rest of the column (min 520); its panes scroll on their own */
 .tws-ws {
-  position: sticky; top: 8px; display: grid; grid-template-columns: 340px minmax(0, 1fr);
-  height: calc(var(--tws-port, 800px) - 104px); min-height: 560px; background: #fff; border-radius: 22px; overflow: hidden;
+  flex: 1 1 auto; min-height: 520px; display: grid; grid-template-columns: 340px minmax(0, 1fr);
+  background: #fff; border-radius: 22px; overflow: hidden;
   box-shadow: 0 0 0 1px #e2d9cc, 0 24px 48px -36px rgba(28, 19, 15, 0.5);
 }
 
@@ -132,7 +135,7 @@
 .tws-gb[data-band="wait"] { background: var(--tw-navy2); color: #fff; }
 .tws-gb[data-band="nudge"] { background: #c5d0dd; color: var(--tw-ink); }
 .tws-gb[data-band="quiet"] { background: linear-gradient(90deg, #e3dbcf, #efe9e0 60%, #f7f3ee); color: var(--tw-ink); }
-.tws-gb[data-band="house"] { background: #fff; color: var(--tw-ink); box-shadow: inset 0 0 0 1px #e6dfd5; }
+.tws-gb[data-band="house"] { background: #e4ebf1; color: #2f4357; box-shadow: none; }
 .tws-gb[data-band="yours"] { background: #efe6d2; color: var(--tw-ink); }
 
 .tws-ti {
@@ -214,10 +217,23 @@
 }
 .tws-wb:hover { opacity: 1; }
 .tws-wbody { flex: 1; min-height: 0; display: flex; }
-.tws-wq { position: relative; flex: 1; min-width: 0; overflow-y: auto; padding: 6px 28px 20px; scrollbar-width: thin; }
-.tws-wp { position: relative; flex: none; width: 440px; background: var(--tw-cream); padding: 16px 16px 12px; display: flex; flex-direction: column; min-height: 0; border-left: 1px solid #efe9e0; }
-@container (max-width: 860px) { .tws-wp { width: 360px; } }
-.tws-wf { flex: none; display: flex; align-items: center; gap: 12px; padding: 10px 16px 10px 20px; border-top: 1px solid #efe9e0; background: #fff; }
+/* v52 Part C — the questions column holds the questions AND the footer; the preview runs full height beside it.
+   ⚠️ A SIZE CONTAINER, so the footer fits by the COLUMN's width (never the viewport's): see the two queries below. */
+.tws-wcol { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; container-type: inline-size; container-name: twscol; }
+.tws-wq { position: relative; flex: 1; min-width: 0; min-height: 0; overflow-y: auto; padding: 6px 24px 16px; scrollbar-width: thin; }
+/* the card preview: 390 at every size (v52 Part B), never growing with the screen */
+.tws-wp { position: relative; flex: none; width: 390px; background: var(--tw-cream); padding: 12px 12px 10px; display: flex; flex-direction: column; min-height: 0; border-left: 1px solid #efe9e0; }
+.tws-wf { flex: none; display: flex; align-items: center; gap: 10px; padding: 12px 14px 12px 18px; border-top: 1px solid #e6dfd5; background: #fff; }
+.tws-wf .tws-go { flex: none; }
+.tws-wf .tws-sb { flex: none; }
+.tws-wf em.tws-prog { flex: none; margin: 0 4px 0 0; font: italic 15px var(--tw-serif); color: var(--tw-mut2); white-space: nowrap; }
+/* the footer always fits its column: the primary never shrinks; Snooze and Dismiss go to their icons under 540,
+   "n of m" goes under 400 (each keeps its accessible name, its title and its key) */
+@container twscol (max-width: 539.98px) {
+  .tws-wf .tws-sb { width: 44px; padding: 0; justify-content: center; }
+  .tws-wf .tws-sb span, .tws-wf .tws-sb kbd { display: none; }
+}
+@container twscol (max-width: 399.98px) { .tws-wf em.tws-prog { display: none; } }
 .tws-sb {
   position: relative; height: 38px; display: inline-flex; align-items: center; gap: 8px; padding: 0 12px; border: 0; border-radius: 22px;
   background: #fff; color: var(--tw-ink); font: 600 14px var(--tw-serif); cursor: pointer; box-shadow: inset 0 0 0 1px #d4cabd;
@@ -225,12 +241,6 @@
 .tws-sb svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .tws-sb kbd { font: 11px var(--tw-mono); color: var(--tw-mut2); padding: 1px 5px; border-radius: 4px; box-shadow: inset 0 0 0 1px #e3dbcf; }
 .tws-sb[aria-expanded="true"] { box-shadow: inset 0 0 0 1.5px var(--tw-navy); }
-.tws-prog { display: flex; align-items: center; gap: 6px; margin-left: auto; font: 13.5px var(--tw-serif); color: var(--tw-mut2); }
-.tws-prog i { width: 22px; height: 5px; border-radius: 3px; background: #e3dbcf; }
-.tws-prog i[data-s="done"] { background: var(--tw-slate); }
-.tws-prog i[data-s="cur"] { background: var(--tw-navy); }
-.tws-prog em { font-style: normal; margin-left: 4px; white-space: nowrap; }
-
 /* the Mentor's bubble */
 .tws-mnote { display: flex; align-items: flex-start; gap: 18px; margin: 18px 0 10px; }
 .tws-mnote img { width: 56px; flex: none; margin-top: -2px; }
@@ -252,19 +262,6 @@
 .tws-qn svg { width: 13px; height: 13px; fill: none; stroke: #fff; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 .tws-q .tws-qbody { margin-left: 36px; }
 .tws-hint { display: block; margin: -4px 0 10px 36px; font: italic 14px/1.4 var(--tw-serif); color: var(--tw-mut); }
-.tws-qhint { display: block; margin: 8px 0 0; font: italic 13.5px var(--tw-serif); color: var(--tw-mut2); }
-.tws-qa {
-  display: grid; grid-template-columns: 26px auto minmax(0, 1fr) auto; align-items: center; gap: 12px; width: 100%; padding: 10px 0;
-  border: 0; border-bottom: 1px solid #f1ece4; background: none; text-align: left; cursor: pointer;
-}
-.tws-qa .tws-qn { background: var(--tw-slate); }
-.tws-qa .tws-qt { font: 14.5px var(--tw-serif); color: var(--tw-mut2); }
-.tws-qa b { font: 600 15px var(--tw-serif); color: var(--tw-ink); text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tws-qa .tws-qc { font: 13px var(--tw-serif); color: var(--tw-navy); text-decoration: underline; opacity: 0; transition: opacity 0.15s; }
-.tws-qa:hover .tws-qc, .tws-qa:focus-visible .tws-qc { opacity: 1; }
-.tws-qa[data-todo] { cursor: default; opacity: 0.45; border-bottom: 0; grid-template-columns: 26px 1fr; }
-.tws-qa[data-todo] .tws-qn { background: none; color: var(--tw-mut2); box-shadow: inset 0 0 0 1.4px #c8bdae; }
-
 /* option cards: cream, filling navy when picked */
 .tws-tiles { display: flex; flex-direction: column; gap: 8px; }
 .tws-tile {
@@ -290,11 +287,6 @@
 }
 .tws-tile[aria-pressed="true"] .tws-sugg, .tws-tile[aria-checked="true"] .tws-sugg { background: rgba(255, 255, 255, 0.85); color: var(--tw-blush-ink); }
 
-/* the primary under the current question: sticky at the foot of the column, above the cards, with a fade above it */
-.tws-qgo {
-  position: sticky; bottom: 0; z-index: 8; display: flex; align-items: center; justify-content: flex-end; gap: 14px;
-  margin: 16px 0 0 36px; padding: 14px 0 6px; background: linear-gradient(rgba(255, 255, 255, 0), #fff 30%);
-}
 .tws-go {
   height: 46px; display: inline-flex; align-items: center; gap: 8px; padding: 0 24px; border: 0; border-radius: 999px; background: var(--tw-navy);
   color: #fff; font: 600 16px var(--tw-serif); cursor: pointer; white-space: nowrap;
@@ -390,7 +382,7 @@
   pointer-events: none; white-space: nowrap;
 }
 .tws-pvslot:hover .tws-pvopen, .tws-pvslot:focus-visible .tws-pvopen { opacity: 1; transform: translate(-50%, 0); }
-.tws-pvz .spanel.tws-pvpanel, .tws-layer .spanel.tws-pvpanel {
+.tws-pvz .spanel.tws-pvpanel {
   position: relative; inset: auto; top: auto; right: auto; bottom: auto; width: 100%; height: 100%; z-index: auto; animation: none;
   box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.08), 0 18px 36px -26px rgba(28, 19, 15, 0.45);
 }
@@ -400,8 +392,6 @@
   border-radius: 12px; padding-left: 12px; padding-right: 12px; margin-left: -12px; margin-right: -12px;
   box-shadow: 0 0 0 2.5px var(--tw-terra), 0 0 0 7px rgba(201, 118, 93, 0.18);
 }
-.tws-pvz .qlg-c--on, .tws-layer .qlg-c--on { outline: 2px dashed var(--tw-terra); outline-offset: 4px; border-radius: 10px; }
-.tws-pvz [data-tws-target], .tws-layer [data-tws-target] { border-radius: 12px; box-shadow: 0 0 0 2.5px var(--tw-terra), 0 0 0 7px rgba(201, 118, 93, 0.18) !important; }
 .tws-olempty {
   flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center; padding: 24px;
   border: 1.5px dashed #cbbfae; border-radius: 16px; color: var(--tw-mut);
@@ -489,21 +479,6 @@
 .tws-opts button { height: 34px; padding: 0 14px; border: 0; border-radius: 17px; background: var(--tw-cream); box-shadow: inset 0 0 0 1px var(--tw-hair); font: 14.5px var(--tw-serif); cursor: pointer; }
 .tws-opts button[aria-checked="true"] { background: var(--tw-navy); color: #fff; box-shadow: none; }
 
-/* ── the review: the card in a full-height drawer, the confirmation beside it ── */
-.tws-rvside h3 { margin: 26px 0 10px; font: 400 24px var(--tw-type) !important; color: var(--tw-ink); }
-.tws-rvside .tws-l1 { margin: 0 0 8px; font: 600 18px/1.45 var(--tw-serif); color: var(--tw-ink); }
-.tws-rvside .tws-l2 { margin: 0 0 16px; font: 16px/1.5 var(--tw-serif); color: var(--tw-mut); }
-.tws-rvside .tws-hint3 { display: flex; gap: 8px; margin: 0; font: italic 14.5px/1.45 var(--tw-serif); color: var(--tw-mut2); }
-.tws-rvbtns { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 22px; }
-.tws-layer.tws-rvdr {
-  position: fixed; z-index: 60; top: 8px; right: 8px; bottom: 8px; width: min(600px, 44vw); border-radius: 18px; background: #fff; overflow: hidden;
-  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1), -30px 0 60px -40px rgba(28, 19, 15, 0.5); display: flex; flex-direction: column;
-  animation: tws-slide 0.28s cubic-bezier(.22, .8, .3, 1) both;
-}
-.tws-rvdr .tws-rvhd { flex: none; display: flex; align-items: center; gap: 10px; padding: 12px 16px; font: 600 14.5px var(--tw-serif); color: var(--tw-mut); border-bottom: 1px solid #efe9e0; }
-.tws-rvdr .tws-rvbody { flex: 1; min-height: 0; overflow: auto; }
-@keyframes tws-slide { from { transform: translateX(40px); opacity: 0; } }
-
 /* ── the pop-ups (snooze, dismiss) ── */
 .tws-layer.tws-pop {
   position: fixed; z-index: 70; width: 320px; padding: 12px; border-radius: 16px; background: #fff;
@@ -545,8 +520,94 @@
 /* v51: the Filters menu's way in to tag management */
 .tws-menu .tws-mlink { display: block; margin: 12px 0 0; padding: 10px 0 0; width: 100%; border: 0; border-top: 1px solid var(--tw-hair); background: none; text-align: left; font: 600 14px var(--tw-serif); color: var(--tw-navy); cursor: pointer; }
 .tws-menu .tws-mlink:hover { text-decoration: underline; }
-/* v51.1 — the preview is read-only: the query card's footer (its action, More, the doors, Delete) and the stand card's
-   links ("Set a send-by date" …) are not drawn in it; they work as normal in the real card the frame opens */
-.tws-pvz [data-qcv="open-foot"], .tws-pvz .qsc-links, .tws-pvz .qsc-link { display: none !important; }
 /* v51.1 — the batch row's "Skip this one": a quiet link under the questions */
 .tws-skip { margin-top: 14px; }
+/* v52 Part D — the live Query Centre card (QcQueryCard149 over the v152 thread) is read-only in the preview: its
+   footer, its reply box, the pencil, the ✕, each step's edit control and the add buttons are not drawn here; they work
+   as normal in the real card the frame opens */
+.tws-pvz [data-qc1522="footer"], .tws-pvz [data-qc152="reply"], .tws-pvz [data-qc152="pencil"], .tws-pvz [data-qc149c="close"],
+.tws-pvz [data-qc152="edit-step"], .tws-pvz [data-qc152="add"], .tws-pvz [data-qc152="mat-edit"], .tws-pvz [data-qc1522="toast"] { display: none !important; }
+/* v52 Part D — the v152 card's frame (qcv152card.css) is a fixed panel centred in the viewport with a 1.6° lean and a
+   slide-in. In the preview the frame sits in the column, upright and still, as tall as the column: the same frame
+   (rim, radius, inner border), only placed. The selector out-ranks the frame's own (0-4-0 with :has). */
+.tws-pvz .spanel.qsp.qsp.tws-pvpanel:has(> .spanel-own > [data-qc152]) {
+  position: relative; top: auto; right: auto; bottom: auto; left: auto; width: 100%; height: 100%; rotate: none; animation: none; transition: none; z-index: auto;
+}
+
+/* ── v52 Part B — the tray ── */
+.tws-ws[data-slim] { grid-template-columns: 112px minmax(0, 1fr); }
+
+/* Start here: the first thing in the To do list, a blush card with the quill (it replaces the header's priority line) */
+.tws-start {
+  display: grid; grid-template-columns: 50px minmax(0, 1fr) auto; align-items: center; gap: 12px; width: 100%; margin: 2px 0 6px;
+  padding: 12px 14px 12px 10px; border: 0; border-radius: 14px; background: #f8e2d8; color: var(--tw-bubble-ink); text-align: left; cursor: pointer;
+}
+.tws-start img { width: 50px; height: auto; display: block; }
+.tws-start .tws-stx { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.tws-start .tws-sk2 { font: 600 12.5px/1.35 var(--tw-serif); color: #9b4a33; }
+.tws-start b { font: 600 16px/1.35 var(--tw-serif); color: var(--tw-bubble-ink); }
+.tws-start em { font: italic 14px/1.4 var(--tw-serif); color: var(--tw-bubble-ink); opacity: 0.85; }
+.tws-start .tws-sarr { font-size: 18px; color: #9b4a33; }
+.tws-start:hover { background: #f5d8cb; }
+.tws-start[data-on] { box-shadow: inset 0 0 0 1.5px #9b4a33; cursor: default; }
+
+/* housekeeping rows: a slate icon tile for the job, the agent's initials on a badge, and "Quick fill" */
+.tws-hk {
+  position: relative; width: 36px; height: 36px; flex: none; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  background: #eef3f7; box-shadow: inset 0 0 0 1px #d3dde6; color: #5f7b93;
+}
+.tws-hk svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.tws-hk i {
+  position: absolute; right: -5px; bottom: -4px; min-width: 18px; height: 14px; padding: 0 3px; border-radius: 7px; background: #5f7b93; color: #fff;
+  font: normal 500 8.5px/14px var(--tw-mono); letter-spacing: 0.02em; text-align: center; box-shadow: 0 0 0 1.5px #fff;
+}
+.tws-qf { flex: none; height: 22px; display: inline-flex; align-items: center; padding: 0 9px; border-radius: 11px; background: #e4ebf1; color: #2f4357; font: 12px var(--tw-serif); white-space: nowrap; }
+
+/* the collapsed strip: 112 wide, each task its icon over three centred lines */
+.tws-strip { overflow: hidden; }
+.tws-wide {
+  flex: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 36px; margin: 12px 8px 4px; border: 0; border-radius: 10px;
+  background: #fff; box-shadow: inset 0 0 0 1px #d4cabd; color: var(--tw-ink); font: 600 13.5px var(--tw-serif); cursor: pointer; white-space: nowrap;
+}
+.tws-wide svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.tws-wide:hover { box-shadow: inset 0 0 0 1.5px var(--tw-navy); }
+.tws-sl { flex: 1; min-height: 0; overflow-y: auto; padding: 4px 8px 16px; scrollbar-width: none; }
+.tws-sgb { display: flex; align-items: center; justify-content: center; gap: 5px; height: 26px; margin: 10px 0 4px; border-radius: 8px; font: 600 12.5px var(--tw-serif); white-space: nowrap; }
+.tws-sgb em { font: normal 12px var(--tw-type); opacity: 0.8; }
+.tws-sgb[data-band="wait"] { background: var(--tw-navy2); color: #fff; }
+.tws-sgb[data-band="nudge"] { background: #c5d0dd; color: var(--tw-ink); }
+.tws-sgb[data-band="quiet"] { background: #ebe4d9; color: var(--tw-ink); }
+.tws-sgb[data-band="house"] { background: #e4ebf1; color: #2f4357; }
+.tws-sgb[data-band="yours"] { background: #efe6d2; color: var(--tw-ink); }
+.tws-si {
+  display: flex; flex-direction: column; align-items: center; gap: 1px; width: 100%; padding: 8px 4px; margin: 0 0 2px; border: 0; border-radius: 12px;
+  background: none; text-align: center; cursor: pointer; color: var(--tw-ink);
+}
+.tws-si:hover { background: #fff; }
+.tws-si[aria-current="true"] { background: #fff; box-shadow: inset 0 0 0 1.5px var(--tw-navy); }
+.tws-sav {
+  width: 30px; height: 30px; flex: none; margin-bottom: 4px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  background: #fff; box-shadow: inset 0 0 0 1px #e3dbcf; font: 500 9px var(--tw-mono); color: var(--tw-navy);
+}
+.tws-sav[data-k="own"] { box-shadow: inset 0 0 0 1.6px #b9ae9f; }
+.tws-sav[data-k="house"] { border-radius: 9px; background: #eef3f7; box-shadow: inset 0 0 0 1px #d3dde6; color: #5f7b93; }
+.tws-sav svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.tws-si b { max-width: 100%; font: 600 13px/1.25 var(--tw-serif); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tws-si i { font: italic 11.5px/1.25 var(--tw-serif); color: var(--tw-mut); }
+.tws-si small { font: 600 11px/1.3 var(--tw-serif); color: var(--tw-mut); }
+.tws-si small[data-hot] { color: #9b4a33; }
+
+/* ── v52 Part C — one question at a time: the answers so far as chips, then the open question ── */
+.tws-ans { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 18px; padding: 0 0 16px; border-bottom: 1px solid #e6dfd5; }
+.tws-ach {
+  display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 12px 0 6px; border: 0; border-radius: 17px; background: #f3eee6;
+  color: var(--tw-ink); font: 14.5px var(--tw-serif); cursor: pointer; max-width: 100%;
+}
+.tws-ach .tws-ack { width: 22px; height: 22px; flex: none; border-radius: 50%; background: #7d8ea6; display: flex; align-items: center; justify-content: center; }
+.tws-ach .tws-ack svg { width: 12px; height: 12px; fill: none; stroke: #fff; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.tws-ach b { font: 600 14.5px var(--tw-serif); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.tws-ach em { display: none; font: italic 13px var(--tw-serif); color: var(--tw-navy); }
+.tws-ach:hover em, .tws-ach:focus-visible em { display: inline; }
+.tws-ach:hover { background: #ece4d8; }
+.tws-wq .tws-q { margin-top: 0; padding-top: 4px; }
+.tws-wq .tws-story { margin: 0; }

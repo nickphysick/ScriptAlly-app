@@ -1,0 +1,33 @@
+{
+ "bg": "rgb(228, 235, 241)",
+ "rows": [
+  {
+   "title": "Fill in what you sent · 63 queries",
+   "tile": true,
+   "badge": false,
+   "chip": "Quick fill",
+   "noDate": false
+  },
+  {
+   "title": "How long does Edda take to reply?",
+   "tile": true,
+   "badge": true,
+   "chip": "Quick fill",
+   "noDate": false
+  },
+  {
+   "title": "Add Eleanor’s wishlist",
+   "tile": true,
+   "badge": true,
+   "chip": "Quick fill",
+   "noDate": false
+  },
+  {
+   "title": "Add William’s wishlist",
+   "tile": true,
+   "badge": true,
+   "chip": "Quick fill",
+   "noDate": false
+  }
+ ]
+}
