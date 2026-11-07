@@ -7,6 +7,9 @@ Not merged to `main`. **Deployed to dev on 7 Nov** from `dev/…-ql1-rv2-td52` @
 v152.2c and page width v1 on dev, on top of this branch (`…-td52-qc1522c-pw1`, `index-DFIRoZB0.js`, confirmed by a
 clean build). This branch is merged on top of that as `…-td52-qc1522c-pw1-td52b` @ `13b8496f`. There, tsc and both builds
 are clean and TD52 + todoWs pass 31 / 31. Dev now serves `index-C6ARwiDW.js`.
+**Redeployed again 7 Nov, with "Tasks you've switched off" (L15):** merged onto the same branch (still serving, unmoved),
+@ `0e21b57a`. tsc is clean, TD52 + todoWs pass 32 / 32, and the unit failures are the served branch's own three. Dev now
+serves `index-D507mjK0.js`.
 
 ## 0 · False premises
 
