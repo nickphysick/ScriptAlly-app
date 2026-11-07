@@ -1,0 +1,27 @@
+{
+ "mine": {
+  "id": "seed-pkgq-3",
+  "band": "MATERIALS REQUESTED",
+  "pill": "Full requested",
+  "name": "Marcus Reed",
+  "tabs": [
+   "Tracking",
+   "Agent",
+   "Materials",
+   "Notes"
+  ]
+ },
+ "theirs": {
+  "id": "seed-pkgq-3",
+  "band": "MATERIALS REQUESTED",
+  "pill": "Full requested",
+  "name": "Marcus Reed",
+  "tabs": [
+   "Tracking",
+   "Agent",
+   "Materials",
+   "Notes"
+  ]
+ },
+ "qid": "seed-pkgq-3"
+}
