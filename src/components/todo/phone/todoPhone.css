@@ -10,27 +10,12 @@
   /* the ref's .sheetpg rises 24px into the band's rounded foot */
   .pa-tdbody { position: relative; margin-top: -24px; padding: 18px 16px 120px; }
 
-  /* ── the band: the week and the tallies ── */
-  .pa-tdband { margin-top: 4px; }
-  .pa-wk { display: flex; justify-content: space-between; gap: 4px; margin-top: 14px; }
-  .pa-wkd { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 0 7px; border-radius: 16px; border: 0; background: transparent;
-    color: rgba(255, 255, 255, 0.75); font-family: var(--pa-sans); min-height: 62px; }
-  .pa-wkd .wd { font-size: 12px; }
-  .pa-wkd .wn { font-size: 19px; color: #fff; }
-  .pa-wkd .wdots { display: flex; gap: 3px; height: 5px; }
-  .pa-wkd .wdots i { width: 5px; height: 5px; border-radius: 50%; background: var(--pa-blush); }
-  .pa-wkd.on { background: #fff; color: var(--pa-navy); }
-  .pa-wkd.on .wn { color: var(--pa-navy); }
-  .pa-wkd.on .wdots i { background: var(--pa-navy); }
-  .pa-tdband .pa-bstats { display: flex; gap: 18px; margin-top: 14px; color: rgba(255, 255, 255, 0.75); font-size: 14px; flex-wrap: wrap; align-items: baseline; }
-  .pa-tdband .pa-bstats b { color: #fff; font-size: 24px; margin-right: 5px; }
+  /* (the week strip and the tallies are retired: To-do on the phone v1's band numbers replace them) */
 
   /* ── the switch and the groups ── */
   .pa-seg { display: flex; background: var(--pa-fill); border-radius: 999px; padding: 3px; margin: 2px 0 14px; }
   .pa-seg button { flex: 1; height: 38px; border: 0; border-radius: 999px; background: transparent; font: 600 14px var(--pa-sans); color: var(--pa-ink-2); }
   .pa-seg button[aria-pressed="true"] { background: #fff; color: var(--pa-ink); box-shadow: 0 1px 3px rgba(31, 38, 51, 0.12); }
-  .pa-tdfilter { margin: 0 0 4px; font-size: 14px; color: var(--pa-muted); }
-  .pa-tdfilter button { border: 0; background: none; padding: 0 0 0 2px; font: 600 14px var(--pa-sans); color: var(--pa-ink); text-decoration: underline; min-height: 44px; }
   .pa-tdnone { margin: 30px 4px; color: var(--pa-muted); font-size: 15px; }
   .pa-td .pa-rowhd { display: flex; align-items: center; gap: 8px; padding: 18px 0 6px; font-size: 13px; font-weight: 600; color: var(--pa-muted); }
 

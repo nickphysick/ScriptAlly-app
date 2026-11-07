@@ -160,7 +160,8 @@ test.describe("PLS1 the last screens on phones", () => {
       ["/queries/packages", "/manuscripts#packages", '[data-pa="ms-pkgs"]'],
       ["/manuscripts/comps", "/manuscripts#comps", "#comps"],
       ["/manuscripts/versions", "/manuscripts#versions", '[data-pa="ms-pro"]'],
-      ["/todo/calendar", "/todo", '[data-pa="wk-day"]'],
+      /* To-do on the phone v1 (7 Nov): the week strip is retired; the To-do list's mark is its band numbers */
+      ["/todo/calendar", "/todo", '[data-tdp="band-num"]'],
     ];
     for (const vp of PHONES) {
       await openPhone(page, "/dashboard", vp);
@@ -171,7 +172,7 @@ test.describe("PLS1 the last screens on phones", () => {
         await page.waitForTimeout(1500);
         const r = await page.evaluate((m) => {
           const el = document.querySelector<HTMLElement>(m);
-          const head = (el && el.id !== "comps" && el.dataset.pa !== "wk-day" ? el.previousElementSibling as HTMLElement : el) ?? null;
+          const head = (el && el.id !== "comps" && el.dataset.tdp !== "band-num" ? el.previousElementSibling as HTMLElement : el) ?? null;
           const t = head?.getBoundingClientRect().top ?? null;
           return { at: location.pathname + location.hash, top: t, vh: innerHeight };
         }, mark);
