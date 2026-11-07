@@ -110,10 +110,12 @@ What was run:
    - Two other sessions have each cut their own integration branch off the same base: `…-rv2-qc1522c` (pushed; very likely the one served) and `…-rv2-td52` (unpushed).
    - None contains the others, so whichever deploys last removes the other two from dev.
    - Needs one combined branch, or an order.
-2. **Conflict with To-do v52 — needs a ruling.**
-   - `…-rv2-td52` rewrites `.tws` as its own centred column with a **1320** cap.
-   - This pack puts the To-do list on the shared **1256** rule.
-   - The two cannot both land; W5 fails on td52's version.
+2. **⚠️ RULED (Nick, 7 Nov): THIS PACK OVERRIDES To-do v52's page width.**
+   - The To-do list follows the shared 1256 rule like every other page.
+   - v52's own `.tws` column (centred, **1320** cap, on `…-rv2-td52`) goes.
+   - **To-do v52's report must be re-pointed:** its Part A "one centred column … with a 1320 cap" no longer stands, and any v52 lock asserting 1320 for `.tws` re-points to the shared column.
+   - W5 holds it: `src/test/pageWidth.test.ts` lists `todoWs.css`'s `.tws` among the on-rule roots. Any width, `--hsheet-w` term or horizontal padding there fails the test, so v52's version cannot land unnoticed. The rendered W2–W4 also measure `/todo`.
+   - When the two branches meet, `todoWs.css` conflicts; resolve it to this pack's `.tws { padding-block: 14px 24px; … }` with no width of its own.
 3. **Row button overhang, Query Centre at 1920.**
    - The longest row buttons ("Send your revision →") overhang the list card's right edge by about 8px.
    - Not yet checked against the base build.
