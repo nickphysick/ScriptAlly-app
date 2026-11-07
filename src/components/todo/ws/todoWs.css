@@ -611,3 +611,13 @@
 .tws-ach:hover { background: #ece4d8; }
 .tws-wq .tws-q { margin-top: 0; padding-top: 4px; }
 .tws-wq .tws-story { margin: 0; }
+
+/* ── v52 (7 Nov): "Tasks you've switched off" — the quiet link at the Done tab's foot, the Filters menu entry, the pop-up ── */
+.tws-offlink { display: block; margin: 16px 12px 8px; padding: 0; border: 0; background: none; font: 13.5px var(--tw-serif); color: var(--tw-mut); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.tws-offlink:hover { color: var(--tw-navy); }
+.tws-menu .tws-mlink.tws-mlink--off { margin-top: 4px; padding-top: 8px; border-top: 0; }
+.tws-pop .tws-offrow { display: flex; align-items: center; gap: 12px; padding: 10px 4px; border-top: 1px solid var(--tw-hair); }
+.tws-pop .tws-offrow > span { flex: 1 1 auto; min-width: 0; font: 14.5px/1.35 var(--tw-serif); color: var(--tw-ink); }
+.tws-pop .tws-offrow small { display: block; margin-top: 2px; font: 12.5px var(--tw-serif); color: var(--tw-mut); }
+.tws-pop .tws-offon { flex: none; height: 30px; padding: 0 12px; border: 0; border-radius: 15px; background: #fff; color: var(--tw-navy); font: 600 13.5px var(--tw-serif); box-shadow: inset 0 0 0 1.5px var(--tw-navy); cursor: pointer; }
+.tws-pop .tws-offon:hover { background: var(--tw-navy); color: #fff; }

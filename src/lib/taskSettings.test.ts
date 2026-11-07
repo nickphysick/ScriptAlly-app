@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { describe, it, expect } from "vitest";
-import { TASK_SETTING_ROWS, setAsideItems, setAsideLabel, setAsideMeta } from "./taskSettings";
+import { TASK_SETTING_ROWS, setAsideItems, setAsideLabel, setAsideMeta, switchedOffRules } from "./taskSettings";
 import { MUTED_UNTIL, changeMs, dismissalHolds, isFlagSuppressing, subjectChange, subjectDatesChanges } from "./taskFlags";
 import { Agent, Query, QueryStatus, TaskFlag } from "../types";
 
@@ -99,5 +99,18 @@ describe("TD5 I1 (unit) — a dismissal holds until something newer is stored on
     expect(changeMs(noon)).toBe(new Date(2026, 9, 15).getTime() - 1);
     const timed = new Date(2026, 9, 14, 12, 0, 1).toISOString();
     expect(changeMs(timed)).toBe(Date.parse(timed));
+  });
+});
+
+/* ── v52, 7 Nov: "Tasks you've switched off" ── */
+describe("switchedOffRules", () => {
+  it("names each rule in plain words, for every agent, newest first, undated last, unknown keys dropped", () => {
+    const rows = switchedOffRules(["dq_mswl", "dq_responseTime", "gone_rule", "nudge_overdue"], { dq_responseTime: "2026-11-07T10:00:00Z", nudge_overdue: "2026-11-01T10:00:00Z" });
+    expect(rows.map((r) => r.words)).toEqual(["Reply-time questions, for every agent", "Nudge reminders, for every agent", "Wishlist questions, for every agent"]);
+    expect(rows[2].at).toBeNull();
+  });
+  it("nothing switched off, nothing listed", () => {
+    expect(switchedOffRules(undefined)).toEqual([]);
+    expect(switchedOffRules([])).toEqual([]);
   });
 });

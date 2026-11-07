@@ -539,3 +539,61 @@ test("L14 · one count: the header and the Done tab both say how many were clear
     await Promise.all(Object.values(paths).map(emuDel));
   }
 });
+
+/* ══ L15 the way back for a switched-off rule (7 Nov) ════════════════════════════════════════════════════════════════
+   Switch off "reply time, every agent" from a reply-time task's Dismiss pop-up; the rule is listed under "Tasks you've
+   switched off" on the Done tab; Turn back on brings every reply-time task back to To do; the toast's Undo takes them
+   away again. The account's mutedTaskRules and todoPrefs.switchedOffAt are put back from what was read first. */
+test("L15 · a switched-off rule is listed, comes back on, and Undo switches it off again", async ({ page }) => {
+  test.setTimeout(180_000);
+  await open(page, SIZES[1]);
+  const uid = await page.evaluate(async () => {
+    const db = await new Promise<IDBDatabase>((res, rej) => { const o = indexedDB.open("firebaseLocalStorageDb"); o.onsuccess = () => res(o.result); o.onerror = () => rej(o.error); });
+    const all = await new Promise<{ value: { uid: string } }[]>((res) => { const r = db.transaction("firebaseLocalStorage").objectStore("firebaseLocalStorage").getAll(); r.onsuccess = () => res(r.result); });
+    return all.find((x) => x.value?.uid)?.value.uid ?? null;
+  });
+  expect(uid, "the signed-in uid").toBeTruthy();
+  const userDoc = `${EMU}/users/${uid}`;
+  const before = await (await fetch(userDoc, { headers: OWNER })).json() as { fields?: Record<string, unknown> };
+  const pg = page.locator(PG);
+  const more = pg.locator(".tws-more");
+  const replyRows = async () => { if (await more.count()) await more.first().click().catch(() => undefined); return pg.locator("[data-tws-row]").filter({ hasText: /take to reply/ }).count(); };
+  try {
+    const n0 = await replyRows();
+    expect(n0, "the account has reply-time tasks to switch off").toBeGreaterThan(0);
+    await pg.locator("[data-tws-row]").filter({ hasText: /take to reply/ }).first().click();
+    await pg.locator('[data-tws="footer"] .tws-sb').nth(1).click();
+    const dp = page.locator('[data-tws="dismiss-pop"]');
+    await dp.locator(".tws-po", { hasText: /Stop asking about missing reply times/ }).click();
+    await expect(dp.locator(".tws-po", { hasText: /Stop asking/ }).locator("small")).toHaveText("You can turn them back on from the Done tab.");
+    await dp.locator(".tws-go").click();
+    await expect.poll(replyRows, { timeout: 15_000, message: "switched off: no reply-time tasks in To do" }).toBe(0);
+    await pg.locator(".tws-seg button", { hasText: "Done" }).click();
+    const link = pg.locator('[data-tws="off-open"]');
+    await expect(link, "the Done tab's foot names the switched-off tasks").toHaveText(/Tasks you’ve switched off \(\d+\)/, { timeout: 10_000 });
+    await link.click();
+    const pop = page.locator('[data-tws="off-pop"]');
+    const row = pop.locator('[data-tws-off="dq_responseTime"]');
+    await expect(row).toContainText("Reply-time questions, for every agent");
+    await expect(row).toContainText(/Switched off \w{3} \d{1,2} \w{3}/);
+    await row.getByRole("button", { name: "Turn back on" }).click();
+    /* the pop-up stays open while other rules are still off (the harness account has one); Escape closes it */
+    await expect(row).toHaveCount(0);
+    if (await pop.count()) { await page.keyboard.press("Escape"); await expect(pop).toHaveCount(0); }
+    await pg.locator(".tws-seg button", { hasText: "To do" }).click();
+    await expect.poll(replyRows, { timeout: 15_000, message: "turned back on: the reply-time tasks are back" }).toBe(n0);
+    const toast = page.locator('[data-tws="toast"]');
+    await expect(toast).toContainText("Reply-time questions are back on.");
+    await toast.getByRole("button", { name: "Undo" }).click();
+    await expect.poll(replyRows, { timeout: 15_000, message: "Undo: switched off again" }).toBe(0);
+    note(`L15${MUT ? `-${MUT}` : ""}`, { n0 });
+  } finally {
+    /* put the two fields back exactly as read: a field absent before is deleted by naming it in the mask with no value */
+    const keep: Record<string, unknown> = {};
+    if (before.fields?.mutedTaskRules) keep.mutedTaskRules = before.fields.mutedTaskRules;
+    const tp = (before.fields?.todoPrefs as { mapValue?: { fields?: Record<string, unknown> } } | undefined)?.mapValue?.fields?.switchedOffAt;
+    const mask = "updateMask.fieldPaths=mutedTaskRules&updateMask.fieldPaths=todoPrefs.switchedOffAt";
+    const body = { fields: { ...keep, ...(tp ? { todoPrefs: { mapValue: { fields: { switchedOffAt: tp } } } } : {}) } };
+    await fetch(`${userDoc}?${mask}`, { method: "PATCH", headers: OWNER, body: JSON.stringify(body) });
+  }
+});

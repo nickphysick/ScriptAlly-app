@@ -14,6 +14,7 @@ import { createPortal } from "react-dom";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import { addDays, dayDiff, fmt } from "../../../lib/queryActions/dates";
 import type { WsTask } from "../../../lib/todoWs";
+import type { SwitchedOff } from "../../../lib/taskSettings";
 import { DatePick, ZZ } from "./WsControls";
 
 export interface SnoozeLimit { ceiling: number; why: string | null }
@@ -96,7 +97,7 @@ export function dismissReasons(t: WsTask, ruleWord: string | null): Reason[] | n
     case "fix": return [
       ...(t.need === "responseTime" ? [{ k: "unknown" as const, label: `${a} doesn’t publish it`, sub: `Saved as “Not stated”, so ${a}’s card counts it as answered` }] : []),
       { k: "dismiss", label: `I don’t need this for ${a}`, sub: `Stops asking about ${a}’s details until you bring it back` },
-      ...(ruleWord ? [{ k: "rule" as const, label: `Stop asking about ${ruleWord} for all agents`, sub: "You can turn it back on from the Done tab" }] : []),
+      ...(ruleWord ? [{ k: "rule" as const, label: `Stop asking about ${ruleWord} for all agents`, sub: "You can turn them back on from the Done tab." }] : []),
     ];
     case "batch": return [{ k: "dismiss", label: `Stop asking about all ${t.batch?.length ?? 0}`, sub: "They come off your list until you bring them back from the Done tab" }];
     case "own": return [{ k: "delete", label: "Delete this task", sub: "It goes for good once the undo has gone", warn: true }];
@@ -134,6 +135,33 @@ export const DismissPop: React.FC<{
           {chosen ? <button type="button" className="tws-go" data-red={chosen.warn ? "" : undefined} onClick={() => onChoose(chosen.k)}>{btn}</button> : null}
         </>
       )}
+    </div>,
+    document.body,
+  );
+};
+
+/** v52 (7 Nov): the rules switched off for every agent, each with "Turn back on". Opened from the foot of the Done tab
+ *  and from the Filters menu. Placed above its opener where it fits, else below (the Filters button is near the top). */
+export const SwitchedOffPop: React.FC<{ rows: readonly SwitchedOff[]; opener: HTMLElement | null; onClose: () => void; onTurnOn: (rule: string) => void }> = ({ rows, opener, onClose, onTurnOn }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState<{ left: number; top?: number; bottom?: number }>({ left: -9999, bottom: 0 });
+  useLayoutEffect(() => {
+    if (!opener || !ref.current) return;
+    const b = opener.getBoundingClientRect();
+    const w = ref.current.offsetWidth, h = ref.current.offsetHeight;
+    const left = Math.max(8, Math.min(b.left, window.innerWidth - w - 8));
+    setPos(b.top - h - 16 > 0 ? { left, bottom: Math.max(8, window.innerHeight - b.top + 8) } : { left, top: Math.min(b.bottom + 8, window.innerHeight - h - 8) });
+  }, [opener, rows.length]);
+  useEscapeLayer(true, onClose, ESC_LEVEL.page);
+  return createPortal(
+    <div ref={ref} className="tws-layer tws-pop" role="dialog" aria-label="Tasks you’ve switched off" data-tws="off-pop" style={{ left: pos.left, top: pos.top, bottom: pos.bottom }}>
+      <div className="tws-ph"><b>Tasks you’ve switched off</b><button type="button" className="tws-px" aria-label="Close" onClick={onClose}>✕</button></div>
+      {rows.map((r) => (
+        <div key={r.rule} className="tws-offrow" data-tws-off={r.rule}>
+          <span>{r.words}{r.at ? <small>Switched off {fmt(new Date(r.at))}</small> : null}</span>
+          <button type="button" className="tws-offon" onClick={() => onTurnOn(r.rule)}>Turn back on</button>
+        </div>
+      ))}
     </div>,
     document.body,
   );

@@ -102,9 +102,27 @@ an own task ticked off now, a dismissal now, and a dismissal eight days ago.
 - Green with the fix: header 2, tab 2, 2 rows, last week's absent, and the intro exactly as specified.
 
 v51.1's `todoWs` check on the Done tab now looks for either intro.
-**⚠️ What this costs:** a dismissal with no date can't be placed in a week, so it no longer appears on the Done tab.
-That covers a switched-off rule ("Switched off for every agent") and an old-style mute. The Done tab was the only
-place to bring either back, so after this change there is no way to turn back on a rule switched off earlier.
+A dismissal with no date can't be placed in a week, so it no longer appears on the Done tab. You ruled that dismissing
+a single task is final once its week has passed. **A switched-off rule now has its own way back (L15, below).**
+
+**L15: "Tasks you've switched off" (added 7 Nov).** A quiet link, "Tasks you've switched off ({n})", sits at the foot of the
+Done tab and in the Filters menu under "Manage your tags". It is shown only when n > 0. It opens a pop-up in the
+Snooze/Dismiss style: one row per rule, such as "Reply-time questions, for every agent", with the date it was switched
+off and a **Turn back on** button. The toast offers Undo, and the rule's tasks come back to To do as soon as it is on.
+- **False premise:** the brief's "Wishlist questions for Isla Fraser". Switched-off rules are account-wide only, six of
+  them (`RULE_TITLE`). "I don't need this for Isla" is a single dated dismissal, which you ruled final after its week.
+  So every row reads "…, for every agent".
+- **False premise:** no rule kept a date. The date is now written when a rule is switched off, to
+  `todoPrefs.switchedOffAt.{rule}`, an open map, so no rules change is needed. A rule switched off before today shows
+  no date.
+- **False premise:** the copy "Turn them back on in task settings" is not in the app. The nearest is the Dismiss
+  pop-up's "Stop asking about … for all agents" option, whose subline is now "You can turn them back on from the
+  Done tab."
+
+L15 runs on the emulator: it switches off "missing reply times" from a reply-time task's Dismiss pop-up, finds the rule
+on the Done tab, turns it back on (the task returns to To do), then presses Undo (the task goes again). It puts the
+account's `mutedTaskRules` and `todoPrefs.switchedOffAt` back as it read them. It failed twice before it passed: first
+on the old copy, and then, with only the copy changed, on the missing link.
 
 **L10 and "the save once" (re-pointed 7 Nov, after the deploy):** one press of Log it on a nudge writes exactly three
 different documents, each once (`saveNudgeSent`, `lib/queryActions/stepSaves.ts`):
