@@ -12,7 +12,8 @@
  */
 import { test, expect, type Page } from "@playwright/test";
 import { execSync } from "node:child_process";
-import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { byPath, record, type Tally } from "./listenTally";
+import { appendFileSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { inflateSync } from "node:zlib";
 import { openRoute } from "./measure";
 
@@ -57,7 +58,19 @@ const seed = () => execSync("node tests/e2e/seedQc152.mjs", { encoding: "utf8", 
 const dump = (key: string) => JSON.parse(execSync(`node tests/e2e/seedQc152.mjs --dump ${key}`, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim().split("\n").pop()!);
 /** any query, as sorted JSON (the harness's own siblings, which the seed does not reset) */
 const dumpq = (id: string): string => execSync(`node tests/e2e/seedQc152.mjs --dumpq ${id}`, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim().split("\n").pop()!;
-test.beforeEach(() => { seed(); });
+/* LISTEN_OUT (a diagnostic, Nick 6 Nov): one JSON line per test with its Listen opens, targets by path, long-poll
+   reads and commits (tests/e2e/listenTally.ts), and how long the beforeEach seed took */
+const LISTEN_OUT = process.env.LISTEN_OUT;
+let tally: Tally | null = null, seedMs = 0;
+test.beforeEach(async ({ page }) => {
+  const s0 = Date.now(); seed(); seedMs = Date.now() - s0;
+  if (LISTEN_OUT) tally = record(page);
+});
+test.afterEach(async ({}, info) => {
+  if (!LISTEN_OUT || !tally) return;
+  appendFileSync(LISTEN_OUT, JSON.stringify({ test: info.title, project: info.project.name, ms: Date.now() - tally.t0, seedMs, opens: tally.opens.length, adds: tally.adds.length, removes: tally.removes, gets: tally.gets, commits: tally.commits.length, top: byPath(tally).slice(0, 12) }) + "\n");
+  tally = null;
+});
 test.afterAll(() => { execSync("node tests/e2e/seedQc152.mjs --clean", { encoding: "utf8", stdio: "pipe" }); });
 
 async function open(page: Page, vp: VP, o: { group?: string; plan?: "free" | "pro" } = {}) {

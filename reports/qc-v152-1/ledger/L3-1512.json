@@ -245,17 +245,17 @@
   "detail": "rgba(0, 0, 0, 0) 26px"
  },
  {
-  "where": "offertold · Told 6 other agents: paper",
+  "where": "offertold · You told 6 agents about the offer: paper",
   "ok": true,
   "detail": "rgb(246, 243, 238) (want rgb(246, 243, 238))"
  },
  {
-  "where": "offertold · Told 6 other agents: no navy inside",
+  "where": "offertold · You told 6 agents about the offer: no navy inside",
   "ok": true,
   "detail": ""
  },
  {
-  "where": "offertold · Told 6 other agents: the glyph box has no fill",
+  "where": "offertold · You told 6 agents about the offer: the glyph box has no fill",
   "ok": true,
   "detail": "rgba(0, 0, 0, 0) 26px"
  },
@@ -315,17 +315,17 @@
   "detail": "rgba(0, 0, 0, 0) 26px"
  },
  {
-  "where": "withdrew · You withdrew: paper",
+  "where": "withdrew · You withdrew it: paper",
   "ok": true,
   "detail": "rgb(246, 243, 238) (want rgb(246, 243, 238))"
  },
  {
-  "where": "withdrew · You withdrew: no navy inside",
+  "where": "withdrew · You withdrew it: no navy inside",
   "ok": true,
   "detail": ""
  },
  {
-  "where": "withdrew · You withdrew: the glyph box has no fill",
+  "where": "withdrew · You withdrew it: the glyph box has no fill",
   "ok": true,
   "detail": "rgba(0, 0, 0, 0) 26px"
  },

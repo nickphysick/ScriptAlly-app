@@ -1,0 +1,62 @@
+[
+ {
+  "where": "offer (offer): navy",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(42, 58, 82)\",\"img\":\"none\",\"fg\":\"rgb(255, 255, 255)\",\"state\":\"offer\"}"
+ },
+ {
+  "where": "offer (offer): white text",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "where": "materials (materials): navy",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(42, 58, 82)\",\"img\":\"none\",\"fg\":\"rgb(255, 255, 255)\",\"state\":\"materials\"}"
+ },
+ {
+  "where": "materials (materials): white text",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "where": "nudge (nudge): navy",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(42, 58, 82)\",\"img\":\"none\",\"fg\":\"rgb(255, 255, 255)\",\"state\":\"nudge\"}"
+ },
+ {
+  "where": "nudge (nudge): white text",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "where": "agent (agent): navy",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(42, 58, 82)\",\"img\":\"none\",\"fg\":\"rgb(255, 255, 255)\",\"state\":\"agent\"}"
+ },
+ {
+  "where": "agent (agent): white text",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "where": "quiet (quiet): not navy",
+  "ok": true,
+  "detail": "{\"bg\":\"rgba(0, 0, 0, 0)\",\"img\":\"linear-gradient(90deg, rgb(227, 219, 207) 0%, rgb(236, 230, 221) 18%, rgb(255, 255, 255) 42%)\",\"fg\":\"rgb(28, 19, 15)\",\"state\":\"quiet\"}"
+ },
+ {
+  "where": "closed (closed): not navy",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(241, 239, 236)\",\"img\":\"none\",\"fg\":\"rgb(138, 128, 118)\",\"state\":\"closed\"}"
+ },
+ {
+  "where": "rr (materials): navy",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(42, 58, 82)\",\"img\":\"none\",\"fg\":\"rgb(255, 255, 255)\",\"state\":\"materials\"}"
+ },
+ {
+  "where": "rr (materials): white text",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ }
+]

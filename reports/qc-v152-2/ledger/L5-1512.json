@@ -1,0 +1,27 @@
+[
+ {
+  "where": "population: a group with rows to scroll under its header",
+  "ok": true,
+  "detail": "offer"
+ },
+ {
+  "where": "the header is stuck",
+  "ok": true,
+  "detail": "{\"x0\":326,\"y0\":117.75,\"x1\":1426,\"stuck\":true,\"dpr\":1}"
+ },
+ {
+  "where": "top-left corner outside the arc is the page colour",
+  "ok": true,
+  "detail": "[244,240,234]"
+ },
+ {
+  "where": "top-right corner outside the arc is the page colour",
+  "ok": true,
+  "detail": "[244,240,234]"
+ },
+ {
+  "where": "a header never outlives its group",
+  "ok": true,
+  "detail": "{\"hb\":76.15625,\"tb\":76.15625}"
+ }
+]

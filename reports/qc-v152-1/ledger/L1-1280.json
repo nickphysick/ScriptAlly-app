@@ -12,7 +12,7 @@
  {
   "where": "population: the list page swept",
   "ok": true,
-  "detail": "10911"
+  "detail": "10934"
  },
  {
   "where": "no element on the list computes to #e6d9c6",
@@ -30,9 +30,9 @@
   "detail": "[]"
  },
  {
-  "where": "the Queried status group's header is #f4eee5",
+  "where": "the Queried status group's header is the v152.2 whisper mix(#f2ebe0 32%)",
   "ok": true,
-  "detail": "rgb(244, 238, 229)"
+  "detail": "color(srgb 0.983686 0.974902 0.961098)|color(srgb 0.983686 0.974902 0.961098)"
  },
  {
   "where": "no element grouped by status computes to #e6d9c6",

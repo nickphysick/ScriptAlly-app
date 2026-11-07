@@ -1,0 +1,42 @@
+[
+ {
+  "where": "quiet: the row leads with Nudge",
+  "ok": false,
+  "detail": "Close it"
+ },
+ {
+  "where": "quiet: the footer leads with Nudge",
+  "ok": true,
+  "detail": "Nudge"
+ },
+ {
+  "where": "quiet: the link is Close it",
+  "ok": true,
+  "detail": "Close it"
+ },
+ {
+  "where": "nudgedquiet: the row leads with Close it",
+  "ok": false,
+  "detail": "Nudge"
+ },
+ {
+  "where": "nudgedquiet: the footer leads with Close it",
+  "ok": true,
+  "detail": "Close it"
+ },
+ {
+  "where": "nudgedquiet: the link is Nudge again",
+  "ok": true,
+  "detail": "Nudge again"
+ },
+ {
+  "where": "population: a row 8+ weeks quiet",
+  "ok": true,
+  "detail": "21"
+ },
+ {
+  "where": "8+ weeks quiet leads with Close it",
+  "ok": false,
+  "detail": "[{\"id\":\"thin-q-close\",\"n\":405,\"lbl\":\"daysquiet\",\"btn\":\"Nudge\"},{\"id\":\"seed-query-22\",\"n\":309,\"lbl\":\"daysquiet\",\"btn\":\"Nudge\"},{\"id\":\"msv12-q-1\",\"n\":309,\"lbl\":\"daysquiet\",\"btn\":\"Nudge\"},{\"id\":\"msv12-q-7\",\"n\":309,\"lbl\":\"daysquiet\",\"btn\":\"Nudge\"}]"
+ }
+]

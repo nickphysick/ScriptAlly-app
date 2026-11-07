@@ -82,12 +82,12 @@
  {
   "where": "materials: no \"Waiting on\", \"No reply\" or \"today\"",
   "ok": true,
-  "detail": "Query sent 7 OCT COVERING LETTER by email 26 DAYS MV Asked for a partial 2 NOV"
+  "detail": "Query sent 7 OCT COVERING LETTER by email 26 days later MV Asked for a partial 2 NOV Send by 13 Nov"
  },
  {
   "where": "materials: no Day 1 divider",
   "ok": true,
-  "detail": "[\"26 days\"]"
+  "detail": "[\"26 days later\"]"
  },
  {
   "where": "materials: the first bubble is Query sent",
@@ -107,12 +107,12 @@
  {
   "where": "long: no \"Waiting on\", \"No reply\" or \"today\"",
   "ok": true,
-  "detail": "Query sent 9 JUN COVERING LETTER by email 30 DAYS JV Asked for a partial 9 JUL 20 DAYS Sent the partial 29 JUL 40 DAYS JV Asked for the full 7 SEP 40 DAYS Sent "
+  "detail": "Query sent 9 JUN COVERING LETTER by email 30 days later JV Asked for a partial 9 JUL 20 days later Sent the partial 29 JUL 40 days later JV Asked for the full 7"
  },
  {
   "where": "long: no Day 1 divider",
   "ok": true,
-  "detail": "[\"30 days\",\"20 days\",\"40 days\",\"40 days\"]"
+  "detail": "[\"30 days later\",\"20 days later\",\"40 days later\",\"40 days later\"]"
  },
  {
   "where": "long: the first bubble is Query sent",
@@ -132,12 +132,12 @@
  {
   "where": "rr: no \"Waiting on\", \"No reply\" or \"today\"",
   "ok": true,
-  "detail": "Query sent 29 JUL QUERY LETTER SYNOPSIS 10 PAGES by email 30 DAYS RV Asked for the full 28 AUG 20 DAYS Sent the full 17 SEP 40 DAYS RV Asked for a revision (R&R"
+  "detail": "Query sent 29 JUL QUERY LETTER SYNOPSIS 10 PAGES by email 30 days later RV Asked for the full 28 AUG 20 days later Sent the full 17 SEP 40 days later RV Asked f"
  },
  {
   "where": "rr: no Day 1 divider",
   "ok": true,
-  "detail": "[\"30 days\",\"20 days\",\"40 days\"]"
+  "detail": "[\"30 days later\",\"20 days later\",\"40 days later\"]"
  },
  {
   "where": "rr: the first bubble is Query sent",
@@ -157,12 +157,12 @@
  {
   "where": "passed: no \"Waiting on\", \"No reply\" or \"today\"",
   "ok": true,
-  "detail": "Query sent 8 AUG QUERY LETTER SYNOPSIS 10 PAGES by email 50 DAYS PV Asked for the full 27 SEP 10 DAYS Sent the full 7 OCT 20 DAYS PV Passed 27 OCT “Beautifully "
+  "detail": "Query sent 8 AUG QUERY LETTER SYNOPSIS 10 PAGES by email 50 days later PV Asked for the full 27 SEP 10 days later Sent the full 7 OCT 20 days later PV Passed 27"
  },
  {
   "where": "passed: no Day 1 divider",
   "ok": true,
-  "detail": "[\"50 days\",\"10 days\",\"20 days\"]"
+  "detail": "[\"50 days later\",\"10 days later\",\"20 days later\"]"
  },
  {
   "where": "passed: the first bubble is Query sent",
@@ -177,17 +177,17 @@
  {
   "where": "withdrew: population (the thread)",
   "ok": true,
-  "detail": "[\"Query sent\",\"You withdrew\"]"
+  "detail": "[\"Query sent\",\"You withdrew it\"]"
  },
  {
   "where": "withdrew: no \"Waiting on\", \"No reply\" or \"today\"",
   "ok": true,
-  "detail": "Query sent 7 SEP QUERY LETTER SYNOPSIS 10 PAGES by email 55 DAYS You withdrew 1 NOV an offer elsewhere"
+  "detail": "Query sent 7 SEP QUERY LETTER SYNOPSIS 10 PAGES by email 55 days later You withdrew it 1 NOV an offer elsewhere"
  },
  {
   "where": "withdrew: no Day 1 divider",
   "ok": true,
-  "detail": "[\"55 days\"]"
+  "detail": "[\"55 days later\"]"
  },
  {
   "where": "withdrew: the first bubble is Query sent",
@@ -195,24 +195,24 @@
   "detail": "Query sent"
  },
  {
-  "where": "withdrew: the last bubble is the latest step (You withdrew)",
+  "where": "withdrew: the last bubble is the latest step (You withdrew it)",
   "ok": true,
-  "detail": "You withdrew · wait,msg"
+  "detail": "You withdrew it · wait,msg"
  },
  {
   "where": "offertold: population (the thread)",
   "ok": true,
-  "detail": "[\"Query sent\",\"Made an offer\",\"Told 6 other agents\"]"
+  "detail": "[\"Query sent\",\"Made an offer\",\"You told 6 agents about the offer\"]"
  },
  {
   "where": "offertold: no \"Waiting on\", \"No reply\" or \"today\"",
   "ok": true,
-  "detail": "Query sent 18 AUG QUERY LETTER SYNOPSIS 10 PAGES by email 70 DAYS TV Made an offer 27 OCT “I’d love to represent this book.” 1 DAY Told 6 other agents 28 OCT of"
+  "detail": "Query sent 18 AUG QUERY LETTER SYNOPSIS 10 PAGES by email 70 days later TV Made an offer 27 OCT “I’d love to represent this book.” Answer by 11 Nov 1 day later "
  },
  {
   "where": "offertold: no Day 1 divider",
   "ok": true,
-  "detail": "[\"70 days\",\"1 day\"]"
+  "detail": "[\"70 days later\",\"1 day later\"]"
  },
  {
   "where": "offertold: the first bubble is Query sent",
@@ -220,9 +220,9 @@
   "detail": "Query sent"
  },
  {
-  "where": "offertold: the last bubble is the latest step (Told 6 other agents)",
+  "where": "offertold: the last bubble is the latest step (You told 6 agents about the offer)",
   "ok": true,
-  "detail": "Told 6 other agents · wait,msg"
+  "detail": "You told 6 agents about the offer · wait,msg"
  },
  {
   "where": "seven: population (the thread)",
@@ -232,12 +232,12 @@
  {
   "where": "seven: no \"Waiting on\", \"No reply\" or \"today\"",
   "ok": true,
-  "detail": "Query sent 10 MAY QUERY LETTER SYNOPSIS 10 PAGES by email ✎ Edit 30 DAYS Following up Query sent · 10 May You nudged Seth 9 JUN by email 20 DAYS Following up Qu"
+  "detail": "Query sent 10 MAY QUERY LETTER SYNOPSIS 10 PAGES by email ✎ Edit 30 days later Following up Query sent · 10 May You nudged Seth 9 JUN by email 20 days later Fol"
  },
  {
   "where": "seven: no Day 1 divider",
   "ok": true,
-  "detail": "[\"30 days\",\"20 days\",\"20 days\",\"20 days\",\"30 days\",\"40 days\"]"
+  "detail": "[\"30 days later\",\"20 days later\",\"20 days later\",\"20 days later\",\"30 days later\",\"40 days later\"]"
  },
  {
   "where": "seven: the first bubble is Query sent",

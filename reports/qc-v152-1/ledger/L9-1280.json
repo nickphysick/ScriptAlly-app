@@ -70,9 +70,9 @@
   "detail": "Query sent / seen: Query sent 7 SEP QUERY LETTER SYNOPSIS 10 PAGES by email"
  },
  {
-  "where": "withdrew · Withdrawn: its title names it, and is on screen (You withdrew)",
+  "where": "withdrew · Withdrawn: its title names it, and is on screen (You withdrew it)",
   "ok": true,
-  "detail": "You withdrew / seen: You withdrew 1 NOV an offer elsewhere"
+  "detail": "You withdrew it / seen: You withdrew it 1 NOV an offer elsewhere"
  },
  {
   "where": "offertold · Queried: its title names it, and is on screen (Query sent)",
@@ -82,12 +82,12 @@
  {
   "where": "offertold · Offer: its title names it, and is on screen (Made an offer)",
   "ok": true,
-  "detail": "Made an offer / seen: Made an offer 27 OCT “I’d love to represent this book.”"
+  "detail": "Made an offer / seen: Made an offer 27 OCT “I’d love to represent this book.” Answ"
  },
  {
-  "where": "offertold · told: its title names it, and is on screen (Told 6 other agents)",
+  "where": "offertold · told: its title names it, and is on screen (You told 6 agents about the offer)",
   "ok": true,
-  "detail": "Told 6 other agents / seen: Told 6 other agents 28 OCT offer deadline 14 Nov"
+  "detail": "You told 6 agents about the offer / seen: You told 6 agents about the offer 28 OCT offer deadline 14 N"
  },
  {
   "where": "seven · Queried: its title names it, and is on screen (Query sent)",

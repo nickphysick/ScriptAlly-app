@@ -1,0 +1,47 @@
+[
+ {
+  "where": "the toast shows",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "population: the pass was there",
+  "ok": true,
+  "detail": "[\"Full Requested\",\"Full Sent\",\"Rejected\",\"Queried\"]"
+ },
+ {
+  "where": "the pass is gone",
+  "ok": true,
+  "detail": "[\"Full Requested\",\"Full Sent\",\"Queried\"]"
+ },
+ {
+  "where": "nothing new on the thread",
+  "ok": true,
+  "detail": "4 → 3"
+ },
+ {
+  "where": "the reply date restarts from today",
+  "ok": true,
+  "detail": "2026-11-07T12:00:00.000Z"
+ },
+ {
+  "where": "Revise & resubmit is chosen",
+  "ok": true,
+  "detail": "on"
+ },
+ {
+  "where": "the toast shows (2)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "an R&R step after the pass",
+  "ok": true,
+  "detail": "[\"Queried\",\"Full Requested\",\"Full Sent\",\"Rejected\",\"Revise & Resubmit\"]"
+ },
+ {
+  "where": "the query is reopened",
+  "ok": true,
+  "detail": "Revise & Resubmit"
+ }
+]

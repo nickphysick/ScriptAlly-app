@@ -5,9 +5,19 @@
   "detail": "Priya Nair"
  },
  {
-  "where": "the toast names the refused sibling: Saved. 1 query couldn't be marked: {agent}.",
+  "where": "population: the refused sibling and an accepted one are both listed",
   "ok": true,
-  "detail": "Saved. 1 query couldn’t be marked: Priya Nair."
+  "detail": "[\"seed-pkgq-9\",\"seed-query-21\",\"seed-query-9\",\"seed-query-20\",\"seed-query-8\",\"cor-pair\",\"q152-fullreq\",\"rj-send\",\"seed-query-11\",\"q152-long\",\"cor-move-a\",\"seed-pkgq-3\",\"q152-materials\",\"seed-cal-passed865-q\",\"seed-pkgq-10\",\"seed-query-10\",\"seed-pkgq-4\",\"seed-query-7\",\"q152-rr\",\"seed-query-23\",\"cor-undo\",\"q152-sameday\",\"q152-seven\",\"rj-dupe\",\"q152-undated\",\"qc150l9-q\",\"seed-cal-bang-q\",\"probe-un-noagent\",\"seed-query-22\",\"seed-cal-passed20-q\",\"probe-dangling-pkg\",\"probe-goalstress-today\",\"seed-pkgq-1\",\"q152-pkg\",\"q152-holding\",\"seed-cal-soon-q\",\"seed-query-5\",\"seed-query-3\",\"q152-nudgedquiet\",\"q152-nrmn\",\"seed-query-12\",\"cor-move-b\",\"seed-query-4\",\"q152-nudge\",\"q152-quiet\",\"seed-pkgq-7\",\"seed-query-19\",\"q152-agent\",\"seed-query-6\",\"rj-nudge\",\"seed-pkgq-2\",\"seed-query-2\",\"q152-offertold\",\"seed-cal-near-q\",\"q152-nudgedwait\"]"
+ },
+ {
+  "where": "population: the refused sibling is among those not yet told",
+  "ok": true,
+  "detail": "[\"seed-pkgq-9\",\"seed-query-21\",\"seed-query-9\",\"seed-query-20\",\"seed-query-8\",\"cor-pair\",\"q152-fullreq\",\"rj-send\",\"seed-query-11\",\"q152-long\",\"cor-move-a\",\"seed-pkgq-3\",\"q152-materials\",\"seed-cal-passed865-q\",\"seed-pkgq-10\",\"seed-query-10\",\"seed-pkgq-4\",\"seed-query-7\",\"q152-rr\",\"seed-query-23\",\"cor-undo\",\"q152-sameday\",\"q152-seven\",\"rj-dupe\",\"q152-undated\",\"qc150l9-q\",\"seed-cal-bang-q\",\"probe-un-noagent\",\"seed-query-22\",\"seed-cal-passed20-q\",\"probe-dangling-pkg\",\"probe-goalstress-today\",\"seed-pkgq-1\",\"q152-pkg\",\"q152-holding\",\"seed-cal-soon-q\",\"seed-query-5\",\"seed-query-3\",\"q152-nudgedquiet\",\"q152-nrmn\",\"seed-query-12\",\"cor-move-b\",\"seed-query-4\",\"q152-nudge\",\"q152-quiet\",\"seed-pkgq-7\",\"seed-query-19\",\"q152-agent\",\"seed-query-6\",\"rj-nudge\",\"seed-pkgq-2\",\"seed-query-2\",\"q152-offertold\",\"seed-cal-near-q\",\"q152-nudgedwait\"]"
+ },
+ {
+  "where": "the toast names the refused sibling: Saved. Couldn’t mark {agent}",
+  "ok": true,
+  "detail": "Saved. Couldn’t mark Priya Nair Undo"
  },
  {
   "where": "Undo is offered",
@@ -15,9 +25,9 @@
   "detail": ""
  },
  {
-  "where": "the step saved, its count what was entered (6)",
+  "where": "the step saved, its count the agents told less the refused one",
   "ok": true,
-  "detail": "6"
+  "detail": "54"
  },
  {
   "where": "an accepted sibling was marked in the same save",
@@ -30,9 +40,9 @@
   "detail": ""
  },
  {
-  "where": "the bubble says what was entered: Told 6 other agents",
+  "where": "the bubble says so: You told N agents about the offer",
   "ok": true,
-  "detail": "[\"Query sent\",\"Made an offer\",\"Told 6 other agents\"]"
+  "detail": "[\"Query sent\",\"Made an offer\",\"You told 54 agents about the offer\"]"
  },
  {
   "where": "Undo: the offer back byte for byte",
