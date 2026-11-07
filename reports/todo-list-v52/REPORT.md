@@ -88,9 +88,16 @@ Run against the emulator (`npm run dev:emu` in this worktree on its own ports; s
 To-do preview read `["Tracking-PROBE","Agent","Materials","Notes"]` with nothing else changed; the file was restored
 from a path-named copy (no diff).
 
-**L10 and "the save once":** one Log it press produced 3 write requests on Firestore's write channel (the nudge's
-existing save; this pack did not change it). What the lock can hold is that the button takes one press and a second
-cannot land before the celebration replaces it; it does not count the save function's calls.
+**L10 and "the save once" (re-pointed 7 Nov, after the deploy):** one press of Log it on a nudge writes exactly three
+different documents, each once (`saveNudgeSent`, `lib/queryActions/stepSaves.ts`):
+1. `users/{uid}/queries/{id}/activity/act-…`: the step in the query's own log (`type`, `createdAt`, `note`, `eventKey: nudge_sent`, `reminderDate`, `agentName`, `queryId`).
+2. `users/{uid}/activities/act-…`, with the same id: its row in the global feed (`activityType`, `date`, `description`, `details`, `eventKey`, `id`, `manuscriptId`, `queryId`, `userId`).
+3. `users/{uid}/queries/{id}`: `lastNudgeSentDate` and `closePlan` set, and `nudgeDate` deleted.
+
+There is no separate task-completion write: the nudge task comes from the query, so those fields clear it. The earlier
+"3 writes" and "2 writes" counted network requests, which the SDK can batch. L10 now reads each request body and
+asserts these three documents exactly. It was red first, with the feed row written twice ("one press writes exactly
+these three documents, once each"), and green with the real save.
 
 **L13 no regression:** the neighbouring suites against the base build, on the same emulator snapshot:
 - `todoWs.measure.ts` (v51.1's To-do locks, re-pointed): **12 / 12 passed**.

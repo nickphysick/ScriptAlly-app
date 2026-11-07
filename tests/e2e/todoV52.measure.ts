@@ -340,15 +340,28 @@ test("L9 · the date: with the month open only Older is selected; the month clea
 });
 
 /* ══ L10 no review route (writes, and puts the account back) ═══════════════════════════════════════════════════════ */
-async function writesDuring(page: Page, fn: () => Promise<void>, settleMs = 1500): Promise<number> {
-  let n = 0;
+/** Every document write on Firestore's write channel while `fn` runs: the path under /documents/, the fields it sets,
+ *  and its update mask (a field in the mask but not in `fields` is a delete). Read from the request bodies, so it
+ *  counts DOCUMENTS, never requests: the SDK may batch several writes into one request, or split them across several. */
+interface DocWrite { path: string; fields: string[]; mask: string[] | null }
+async function docWritesDuring(page: Page, fn: () => Promise<void>, settleMs = 2500): Promise<DocWrite[]> {
+  const out: DocWrite[] = [];
   const on = (req: import("@playwright/test").Request) => {
     if (req.method() !== "POST" || !/\/Write\/channel/.test(req.url())) return;
-    if (/writes/.test(decodeURIComponent(req.postData() ?? ""))) n++;
+    const body = new URLSearchParams(req.postData() ?? "");
+    for (const [k, v] of body) {
+      if (!/^req\d+___data__$/.test(k)) continue;
+      let j: { writes?: { update?: { name: string; fields?: Record<string, unknown> }; updateMask?: { fieldPaths?: string[] } }[] };
+      try { j = JSON.parse(v); } catch { continue; }
+      for (const w of j.writes ?? []) {
+        if (!w.update) continue;
+        out.push({ path: w.update.name.split("/documents/")[1] ?? w.update.name, fields: Object.keys(w.update.fields ?? {}).sort(), mask: w.updateMask?.fieldPaths?.slice().sort() ?? null });
+      }
+    }
   };
   page.on("request", on);
   try { await fn(); await page.waitForTimeout(settleMs); } finally { page.off("request", on); }
-  return n;
+  return out;
 }
 test("L10 · no review route: Log it saves once and lands on the celebration (then Undo)", async ({ page }) => {
   /* the log-and-undo steps are todoWs.measure.ts's own ("a nudge, logged and undone"), which restore the account */
@@ -370,12 +383,11 @@ test("L10 · no review route: Log it saves once and lands on the celebration (th
   const log = d.locator('[data-tws="primary"][data-log]');
   await expect(log).toBeEnabled();
   let presses = 0;
-  const writes = await writesDuring(page, async () => {
+  const docs = await docWritesDuring(page, async () => {
     await log.click(); presses++;
     /* a second press, straight after: it must not land (the button is gone or disabled) */
     await log.click({ timeout: 300 }).then(() => presses++).catch(() => undefined);
   });
-  /* the default settle: the save leaves a moment after the press, so a 0ms settle counted 0 writes on a slow run */
   const yay = page.locator('[data-tws="yay"]:visible');
   await expect(yay).toBeVisible({ timeout: 15_000 });
   await expect(yay).toContainText("Nudge logged.");
@@ -383,8 +395,22 @@ test("L10 · no review route: Log it saves once and lands on the celebration (th
   /* put the account back before any assertion can stop the run (see `note`: nothing is written to disk mid-test) */
   await yay.getByRole("button", { name: "Undo" }).click();
   await expect(pg.locator("[data-tws-row]").filter({ hasText: title })).toHaveCount(1, { timeout: 20_000 });
-  note(`L10${MUT ? `-${MUT}` : ""}`, { link, writes, presses, title });
-  expect(writes, "the save is a write").toBeGreaterThan(0);
+  note(`L10${MUT ? `-${MUT}` : ""}`, { link, docs, presses, title });
+  /* exactly three documents, each written once (saveNudgeSent, lib/queryActions/stepSaves.ts): the step in the query's
+     own log, its projection in the global feed (one id, two stores), and the query's two nudge fields with the planned
+     nudge date cleared. Nothing completes a task: the nudge task is derived from the query, so these fields clear it. */
+  const shape = docs.map((d) => {
+    const rel = d.path.replace(/^users\/[^/]+\//, "");
+    const kind = /^queries\/[^/]+\/activity\/act-/.test(rel) ? "step" : /^activities\/act-/.test(rel) ? "feed" : /^queries\/[^/]+$/.test(rel) ? "query" : rel;
+    return { kind, fields: d.fields.join(","), mask: d.mask?.join(",") ?? null };
+  });
+  expect(shape, "one press writes exactly these three documents, once each").toEqual([
+    { kind: "step", fields: "agentName,createdAt,eventKey,note,queryId,reminderDate,type", mask: null },
+    { kind: "feed", fields: "activityType,date,description,details,eventKey,id,manuscriptId,queryId,userId", mask: null },
+    { kind: "query", fields: "closePlan,lastNudgeSentDate", mask: "closePlan,lastNudgeSentDate,nudgeDate" },
+  ]);
+  const ids = docs.filter((d) => /\/act-/.test(d.path)).map((d) => d.path.split("/").pop());
+  expect(new Set(ids).size, "the step and its feed row share one id").toBe(1);
   expect(presses, "Log it takes one press: a second cannot land").toBe(1);
 });
 

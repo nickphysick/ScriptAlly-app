@@ -1,6 +1,47 @@
 {
  "link": 0,
- "writes": 1,
+ "docs": [
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-3/activity/act-lm0r6xzw3",
+   "fields": [
+    "agentName",
+    "createdAt",
+    "eventKey",
+    "note",
+    "queryId",
+    "reminderDate",
+    "type"
+   ],
+   "mask": null
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/activities/act-lm0r6xzw3",
+   "fields": [
+    "activityType",
+    "date",
+    "description",
+    "details",
+    "eventKey",
+    "id",
+    "manuscriptId",
+    "queryId",
+    "userId"
+   ],
+   "mask": null
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-3",
+   "fields": [
+    "closePlan",
+    "lastNudgeSentDate"
+   ],
+   "mask": [
+    "closePlan",
+    "lastNudgeSentDate",
+    "nudgeDate"
+   ]
+  }
+ ],
  "presses": 1,
  "title": "Nudge Marcus"
 }
