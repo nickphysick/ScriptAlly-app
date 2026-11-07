@@ -374,7 +374,8 @@ test("L10 · no review route: Log it saves once and lands on the celebration (th
     await log.click(); presses++;
     /* a second press, straight after: it must not land (the button is gone or disabled) */
     await log.click({ timeout: 300 }).then(() => presses++).catch(() => undefined);
-  }, 0);
+  });
+  /* the default settle: the save leaves a moment after the press, so a 0ms settle counted 0 writes on a slow run */
   const yay = page.locator('[data-tws="yay"]:visible');
   await expect(yay).toBeVisible({ timeout: 15_000 });
   await expect(yay).toContainText("Nudge logged.");
