@@ -13,7 +13,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { mkdirSync } from "node:fs";
 import { openRoute, liftMotionSuppression } from "./measure";
 
-const DIR = "reports/todo-list-v51-1";
+const DIR = "reports/todo-list-v52";
 const SIZES = [{ width: 1512, height: 900 }, { width: 1280, height: 800 }] as const;
 mkdirSync(DIR, { recursive: true });
 
@@ -44,20 +44,21 @@ for (const vp of SIZES) {
       }
       return {
         header: box('[data-tws="header"]'), ws: box('[data-tws="workspace"]'), tray: box('[data-tws="tray"]'), desk: box('[data-tws="desk"]'),
-        side: box('[data-tws="side"]'), rows: root.querySelectorAll("[data-tws-row]").length, priority: root.querySelector('[data-tws="priority"]')?.textContent ?? "",
-        port: sc?.clientHeight ?? 0, wsH: ws.getBoundingClientRect().height, greens: greens.slice(0, 10),
+        side: box('[data-tws="side"]'), rows: root.querySelectorAll("[data-tws-row]").length,
+        port: sc?.clientHeight ?? 0, scrollH: sc?.scrollHeight ?? 0, wsH: ws.getBoundingClientRect().height, greens: greens.slice(0, 10),
         sections: [...root.querySelectorAll<HTMLElement>(".tws-gb b")].map((b) => b.textContent),
       };
     });
     console.log(JSON.stringify(read, null, 1));
     await page.screenshot({ path: `${DIR}/page-${vp.width}.png` });
-    expect(read.header?.h).toBeGreaterThan(50);
-    expect(read.header!.h).toBeLessThan(62);
+    /* v52: the slim navy header (title, stats line, + Add a task) is ~97 tall; TD52 L2 holds its contents */
+    expect(read.header?.h).toBeGreaterThan(80);
     expect(read.rows).toBeGreaterThan(0);
     expect(read.tray?.w).toBe(340);
     expect(read.greens).toEqual([]);
-    /* the workspace fills the scrollport under the header, with a 560px floor */
-    expect(Math.abs(read.wsH - Math.max(560, read.port - 104))).toBeLessThan(2);
+    /* v52: the workspace takes the column under the header (520 floor) and the page itself does not scroll */
+    expect(read.wsH).toBeGreaterThanOrEqual(520);
+    expect(read.scrollH, "the page does not scroll").toBe(read.port);
   });
 }
 
@@ -70,32 +71,22 @@ test("a send, answered to the summary (nothing is logged)", async ({ page }) => 
   await page.screenshot({ path: `${DIR}/send-1.png` });
   const desk = page.locator('[data-tws="desk"]:visible');
   await desk.locator(".tws-tile").first().click();
-  await desk.locator('[data-tws="next"]').click();
+  await desk.locator('[data-tws="primary"][data-next]').click();
   await page.waitForTimeout(300);
   for (let i = 0; i < 3; i++) {
     const tiles = desk.locator(".tws-q .tws-tile");
     if (await tiles.count()) await tiles.first().click();
-    const next = desk.locator('[data-tws="next"]');
+    const next = desk.locator('[data-tws="primary"][data-next]');
     if (!(await next.count())) break;
     await next.click();
     await page.waitForTimeout(250);
   }
   await expect(desk.locator('[data-tws="story"]')).toBeVisible();
-  await expect(desk.locator('[data-tws="log"]')).toBeEnabled();
+  await expect(desk.locator('[data-tws="primary"][data-log]')).toBeEnabled();
   await page.screenshot({ path: `${DIR}/send-summary.png` });
-  await desk.getByText("Check it on the card first").click();
-  await expect(page.locator('[data-tws="review-drawer"]')).toBeVisible();
-  await expect(desk.getByRole("button", { name: /Yes, log it/ })).toBeVisible();
-  await expect(desk.getByRole("button", { name: /Change something/ })).toBeVisible();
-  await page.waitForTimeout(400);
-  /* nothing in the workspace sits under the drawer */
-  const gap = await page.evaluate(() => {
-    const ws = [...document.querySelectorAll<HTMLElement>('[data-tws="workspace"]')].find((e) => e.getBoundingClientRect().height > 0)!;
-    const dr = document.querySelector<HTMLElement>('[data-tws="review-drawer"]')!;
-    return dr.getBoundingClientRect().left - ws.getBoundingClientRect().right;
-  });
-  expect(gap).toBeGreaterThanOrEqual(0);
-  await page.screenshot({ path: `${DIR}/send-review.png` });
+  /* v52 Part C: the review drawer is retired; Log it is the last step */
+  await expect(desk.getByText("Check it on the card first")).toHaveCount(0);
+  await expect(page.locator('[data-tws="review-drawer"]')).toHaveCount(0);
 });
 
 test("the snoozed and done tabs, and the pop-ups", async ({ page }) => {
@@ -179,10 +170,10 @@ test("a nudge, logged and undone: the celebration, then the task is back (the ac
   await nudge.click();
   const desk = page.locator('[data-tws="desk"]:visible');
   await desk.locator('[data-tws-q="sent"] .tws-tile').click();
-  await desk.locator('[data-tws="next"]').click();
-  await desk.locator('[data-tws="next"]').click();
+  await desk.locator('[data-tws="primary"][data-next]').click();
+  await desk.locator('[data-tws="primary"][data-next]').click();
   await expect(desk.locator('[data-tws="story"]')).toContainText("You nudged");
-  await desk.locator('[data-tws="log"]').click();
+  await desk.locator('[data-tws="primary"][data-log]').click();
   const yay = page.locator('[data-tws="yay"]:visible');
   await expect(yay).toBeVisible({ timeout: 15_000 });
   await expect(yay).toContainText("Nudge logged.");
@@ -256,8 +247,8 @@ test("the preview is read-only: no button or link inside it takes a click", asyn
     });
     return {
       total: ctl.length, shown: shown.length,
-      foot: [...root.querySelectorAll('[data-qcv="open-foot"]')].filter(vis).length,
-      links: [...root.querySelectorAll(".qsc-link")].filter(vis).length,
+      foot: [...root.querySelectorAll('[data-qc1522="footer"]')].filter(vis).length,
+      links: [...root.querySelectorAll('[data-qc152="reply"], [data-qc152="pencil"]')].filter(vis).length,
       inert: root.hasAttribute("inert"),
       reached: hits.filter((h) => h.hitItself || h.focused),
     };
@@ -265,7 +256,7 @@ test("the preview is read-only: no button or link inside it takes a click", asyn
   console.log(JSON.stringify(read));
   expect(read.total, "the previewed card has controls to test").toBeGreaterThan(0);
   expect(read.foot, "the footer action is not drawn").toBe(0);
-  expect(read.links, "the stand card's links are not drawn").toBe(0);
+  expect(read.links, "the reply box and the pencil are not drawn").toBe(0);
   expect(read.reached, "no control in the preview takes a click or focus").toEqual([]);
   /* and a click on the preview still opens the real card */
   await page.locator('[data-tws="desk"]:visible [data-tws="preview"]').click();
@@ -320,8 +311,8 @@ test("the materials batch: one row; one query at a time; Skip saves nothing; a s
   /* a save: written, a toast with Undo, the next query opens, no celebration — then Undo puts it back */
   const saveWrites = await writesDuring(page, async () => {
     await desk.locator('[data-tws-q="mats"] .tws-tile').first().click();
-    await desk.locator('[data-tws="next"]').click();
-    await desk.locator('[data-tws="log"]').click();
+    await desk.locator('[data-tws="primary"][data-next]').click();
+    await desk.locator('[data-tws="primary"][data-log]').click();
   });
   expect(saveWrites.length, "a save is a write (the instrument sees one)").toBeGreaterThan(0);
   const toast = page.locator('[data-tws="toast"]');

@@ -4,7 +4,7 @@
  *
  * To-do list v50 — WHAT EACH TASK ASKS, AND WHAT IT LOGS. One builder per task kind: the questions in order (each with
  * its answered test and its one-line summary), the plain sentence the summary box shows, the consequences listed under
- * it, the two lines the review beside the card reads, the draft the card preview shows, and the save.
+ * it, the draft the card preview shows, and the save.
  *
  * ⚠️ EVERY SAVE IS AN EXISTING ONE, AND THE DRAWER'S. A send is `saveSent`, a nudge `saveNudgeSent`, an offer decision
  *    `saveOfferDecision` (all lib/queryActions/stepSaves, which the drawer's journeys commit through), a reply `recordQueryResponse`, a close `saveClose`, an agent field `commitCardSave`. The query saves are wrapped in
@@ -57,7 +57,7 @@ export interface FlowCtx {
   suggestion: QuietAct | null;
 }
 
-export interface FlowQ { key: string; title: string; hint?: string; body: React.ReactNode; answered: boolean; summary: string; dateHint?: boolean }
+export interface FlowQ { key: string; title: string; hint?: string; body: React.ReactNode; answered: boolean; summary: string }
 
 /** What the card preview shows while the task is answered */
 export interface Draft {
@@ -77,7 +77,6 @@ export interface Flow {
   questions: FlowQ[];
   sentence: React.ReactNode;
   consequences: string[];
-  review: [string, string];
   draft: Draft;
   /** null: this task has no questions here; `door` opens where it is done */
   commit: (() => Promise<FlowDone>) | null;
@@ -102,7 +101,7 @@ async function snapshotted(ctx: FlowCtx, ids: string[], save: () => Promise<void
 const dateQ = (ctx: FlowCtx, key: string, title: string, dir: "past" | "future" = "past", fallback?: Date): FlowQ => {
   const v = typeof ctx.A[key] === "string" ? dayFromYmd(ctx.A[key] as string) : fallback ?? ctx.today;
   return {
-    key, title, answered: true, summary: longDay(v, ctx.today), dateHint: dir === "past" && dayDiff(v, ctx.today) === 0,
+    key, title, answered: true, summary: longDay(v, ctx.today),
     body: <DatePick value={v} today={ctx.today} dir={dir} onPick={(d) => ctx.set({ [key]: ymd(d) })} />,
   };
 };
@@ -159,7 +158,6 @@ function sendFlow(ctx: FlowCtx): Flow {
       `If nothing’s come by ${fmt(nd)}, “Nudge ${t.first}” comes onto your list`,
       "Leaves your tray",
     ],
-    review: [`You sent ${t.first} your ${list || asked.toLowerCase()}${verName ? ` (${verName})` : ""} ${dayPhrase(sent, today)}.`, `The query moves to ${lab}, with a reply expected by ${fmt(exp)}.`],
     draft: { status: target, ghost: { id: "__ghost", type: target, resultingStatus: target, createdAt: new Date(sent.getFullYear(), sent.getMonth(), sent.getDate(), 12).toISOString() } },
     commit: async () => {
       const label = capFirst(andList(mats.map((m) => m.toLowerCase())));
@@ -230,9 +228,6 @@ function offerFlow(ctx: FlowCtx): Flow {
   const status = ans === "accept" ? QueryStatus.SIGNED : ans === "decline" ? QueryStatus.WITHDRAWN : undefined;
   return {
     questions, sentence, consequences,
-    review: ans === "accept" ? [`You accepted ${t.first}’s offer ${dayPhrase(on, today)}.`, chosen.length ? `${chosen.length} other ${chosen.length === 1 ? "query is" : "queries are"} withdrawn, each with a task to tell the agent.` : "Your other queries stay as they are."]
-      : ans === "decline" ? [`You turned down ${t.first}’s offer ${dayPhrase(on, today)}.`, "The query moves to Closed."]
-      : [`You asked ${t.first} for more time.`, by ? `The offer stays open. Answering it stays on your list, due ${fmt(by)}.` : ""],
     draft: status ? { status, ghost: { id: "__ghost", type: status, resultingStatus: status, createdAt: new Date(on.getFullYear(), on.getMonth(), on.getDate(), 12).toISOString() } } : {},
     commit: async () => {
       if (ans === "more" && by) {
@@ -294,7 +289,6 @@ function nudgeFlow(ctx: FlowCtx): Flow {
     questions: qs,
     sentence: <>You nudged {t.first} <b>{dayPhrase(sent, today)}</b>.</>,
     consequences: [`If ${t.first} still hasn’t replied by ${fmt(then)}, I’ll suggest closing it`, "Leaves your tray"],
-    review: [`You nudged ${t.first} ${dayPhrase(sent, today)}.`, `If there’s still no reply by ${fmt(then)}, “Consider closing” comes onto your list.`],
     draft: { ghost: { id: "__ghost", ...ghost } },
     commit: async () => {
       const undo = await snapshotted(ctx, [q.id], () => saveNudgeSent(ctx.db, q, t.agent ?? null, nudgePlan(q, sent, then)));
@@ -354,7 +348,7 @@ function quietFlow(ctx: FlowCtx, openPartial: () => void): Flow {
     body: <Tiles name="What would you like to do" value={act ?? null} opts={ACTS} onPick={(k) => set({ act: k, sent: undefined, until: undefined, what: undefined, why: undefined })} />,
   }];
   const on = dateOf(A, "date", today);
-  const base: Omit<Flow, "questions"> = { sentence: null, consequences: [], review: ["", ""], draft: {}, commit: null };
+  const base: Omit<Flow, "questions"> = { sentence: null, consequences: [], draft: {}, commit: null };
 
   if (act === "nudge") {
     const p = nudgeParts(ctx, true);
@@ -363,7 +357,6 @@ function quietFlow(ctx: FlowCtx, openPartial: () => void): Flow {
       ...base, questions: [...questions, ...p.qs],
       sentence: <>You nudged {t.first} <b>{dayPhrase(p.sent, today)}</b>.</>,
       consequences: [`The query goes back to waiting on ${t.first}`, `If there’s still nothing by ${fmt(p.then)}, it comes back to you`, "Leaves your tray"],
-      review: [`You nudged ${t.first} ${dayPhrase(p.sent, today)}.`, `If there’s still no reply by ${fmt(p.then)}, it comes back onto your list.`],
       draft: { ghost: { id: "__ghost", ...ghost } },
       commit: async () => {
         const undo = await snapshotted(ctx, [q.id], () => saveNudgeSent(ctx.db, q, t.agent ?? null, nudgePlan(q, p.sent, p.then)));
@@ -386,7 +379,6 @@ function quietFlow(ctx: FlowCtx, openPartial: () => void): Flow {
       ...base, questions,
       sentence: <>You’re giving {t.first} until <b>{until ? fmt(until) : ""}</b>. The query stays open.</>,
       consequences: until ? [`Back on your list on ${fmt(until)} if there’s still no word`, "It stays in Gone quiet on the Query Centre", "Leaves your tray until then"] : [],
-      review: [`You’re giving ${t.first} until ${until ? fmt(until) : ""}.`, "The query stays open. If nothing’s come in by then, it’ll be back on your list."],
       commit: async () => {
         const undo = await ctx.snoozeFor(Math.max(1, dayDiff(until!, today)));
         return { head: "No rush.", msg: `${t.first}’s query stays open. You’ll see this again on ${fmt(until!)} if nothing comes in.`, undo: undo ?? undefined };
@@ -407,7 +399,6 @@ function quietFlow(ctx: FlowCtx, openPartial: () => void): Flow {
       return {
         ...base, questions,
         sentence: <>{t.first} asked for a partial.</>, consequences: [],
-        review: ["", ""],
         door: { label: "Say how much they asked for →", open: openPartial },
         commit: null,
       };
@@ -422,8 +413,6 @@ function quietFlow(ctx: FlowCtx, openPartial: () => void): Flow {
       consequences: what === "pass" ? ["The query moves to Closed, as passed", "It goes on your Responses page", "Leaves your tray"]
         : what === "full" ? ["The query moves to Full requested", `Sending it comes onto your list, due ${fmt(sendBy)}`, "This task leaves your tray"]
         : what === "offer" ? ["The query moves to Offer", `Answering the offer goes to the top of your list, due ${fmt(offerBy)}`, "This task leaves your tray"] : [],
-      review: [`${t.first} replied ${dayPhrase(on, today)}: ${(r?.label ?? "").replace("They ", "they ").toLowerCase()}.`,
-        what === "pass" ? "The query moves to Closed." : what === "full" ? `Sending the full comes onto your list, due ${fmt(sendBy)}.` : `Answering the offer comes onto your list, due ${fmt(offerBy)}.`],
       draft: r ? { status: r.status, ghost: { id: "__ghost", type: r.status, resultingStatus: r.status, createdAt: new Date(on.getFullYear(), on.getMonth(), on.getDate(), 12).toISOString() } } : {},
       commit: async () => {
         const rt = what === "pass" ? "rejected" : what === "full" ? "full" : "offer";
@@ -465,7 +454,6 @@ function quietFlow(ctx: FlowCtx, openPartial: () => void): Flow {
       ...base, questions,
       sentence: <>You’re closing your query to {t.first}: <b>{why === "withdraw" ? "you withdrew it" : "no reply"}</b>.</>,
       consequences: [`The query moves to Closed, as ${why === "withdraw" ? "withdrawn" : "no reply"}`, why === "withdraw" ? "It shows on your Responses page" : "It counts as no reply on your Responses page", "Leaves your tray"],
-      review: [`You’re closing your query to ${t.first}${why === "withdraw" ? ", withdrawn" : ""}.`, `It moves to Closed. If ${t.first} gets back to you, you can reopen it.`],
       draft: why ? { status, ghost: { id: "__ghost", type: status, resultingStatus: status, createdAt: new Date(on.getFullYear(), on.getMonth(), on.getDate(), 12).toISOString() } } : {},
       commit: async () => {
         const a = why === "withdraw"
@@ -499,7 +487,6 @@ function fixFlow(ctx: FlowCtx, openCard: () => void): Flow {
       }],
       sentence: <>{t.first} replies in about <b>{wk} week{wk === 1 ? "" : "s"}</b>.</>,
       consequences: [`Saved to ${t.first}’s card`, ...moved.map((m) => `Reply expected by ${fmt(new Date(m.ms))}${moved.length > 1 ? ` (${m.title})` : ""}`), "Leaves your tray"],
-      review: [`${t.first} replies in about ${wk} weeks.`, moved.length === 1 ? `That goes on ${t.first}’s card, and your query’s reply is expected by ${fmt(new Date(moved[0].ms))}.` : `That goes on ${t.first}’s card.`],
       draft: wk ? { agentPatch: { responseTimeWeeks: wk }, section: "how" } : { section: "how" },
       commit: async () => ({ head: `Saved to ${t.first}’s card.`, msg: moved.length === 1 ? `Your query’s reply is now expected by ${fmt(new Date(moved[0].ms))}.` : moved.length ? `Reply dates for ${moved.length} of your queries to ${t.first} have moved.` : `${t.first}’s card is a little more complete.`, undo: await save({ responseTimeWeeks: wk }) }),
     };
@@ -514,14 +501,13 @@ function fixFlow(ctx: FlowCtx, openCard: () => void): Flow {
       }],
       sentence: <>{t.first}’s wishlist goes on their card.</>,
       consequences: [`Saved to ${t.first}’s card`, "Leaves your tray"],
-      review: [`You’ve added ${t.first}’s wishlist.`, `It goes on ${t.first}’s card, so it’s there next time you’re deciding who to query.`],
       draft: wish.trim() ? { agentPatch: { mswlNotes: wish.trim() }, section: "wishlist" } : { section: "wishlist" },
       commit: async () => ({ head: `Saved to ${t.first}’s card.`, msg: `${t.first}’s card is a little more complete.`, undo: await save({ mswlNotes: wish.trim() }) }),
     };
   }
   /* what they want sent: the agent card's own materials control does this (a sample has a unit and an amount) */
   return {
-    questions: [], sentence: null, consequences: [], review: ["", ""], draft: { section: "send" }, commit: null,
+    questions: [], sentence: null, consequences: [], draft: { section: "send" }, commit: null,
     door: { label: `Open ${t.first}’s card at “Send them” ↗`, open: openCard },
   };
 }
@@ -552,7 +538,6 @@ function materialsFlow(ctx: FlowCtx): Flow {
     }],
     sentence: <>You sent {t.first} your <b>{andList(names.map((n) => n.toLowerCase()))}</b>.</>,
     consequences: [`Saved on ${t.first}’s query`, (t.batch?.length ?? 0) > 1 ? `Then the next of ${t.batch!.length - 1} opens` : "Leaves your tray"],
-    review: [`You sent ${t.first} your ${andList(names.map((n) => n.toLowerCase()))}.`, `That’s saved on the query, so it counts as recorded.`],
     draft: {},
     commit: async () => {
       const w = sweepWrites([row])[0];
@@ -578,7 +563,7 @@ export function buildFlow(ctx: FlowCtx, doors: { openPartial: () => void; openCa
   /* the one-query materials row is filled in on the desk the same way, and is the last of its kind */
   if (k === "other" && ctx.t.query && (ctx.t.item.card.taskType === "materials_unrecorded" || ctx.t.item.card.taskType === "materials_unrecorded_bulk")) return materialsFlow(ctx);
   return {
-    questions: [], sentence: null, consequences: [], review: ["", ""], draft: {}, commit: null,
+    questions: [], sentence: null, consequences: [], draft: {}, commit: null,
     door: doors.openOther ? { label: "Open it ↗", open: doors.openOther } : undefined,
   };
 }

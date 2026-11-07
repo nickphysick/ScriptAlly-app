@@ -3,7 +3,7 @@
  * rendered mockup at 1512 × 900, not out of its source (the mock is cumulative, 28 versions deep).
  *
  * ⚠️ NO GREEN ON THIS PAGE. Navy, slate, cream and blush only.
- * ⚠️ The palette is declared on `.tws` AND on `.tws-layer`: the review drawer and the pop-ups portal to the body, where
+ * ⚠️ The palette is declared on `.tws` AND on `.tws-layer`: the pop-ups and the toast portal to the body, where
  *    no ancestor declares it (a `var()` on an undeclared token paints nothing, silently).
  */
 .tws, .tws-layer {
@@ -241,12 +241,6 @@
 .tws-sb svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .tws-sb kbd { font: 11px var(--tw-mono); color: var(--tw-mut2); padding: 1px 5px; border-radius: 4px; box-shadow: inset 0 0 0 1px #e3dbcf; }
 .tws-sb[aria-expanded="true"] { box-shadow: inset 0 0 0 1.5px var(--tw-navy); }
-.tws-prog { display: flex; align-items: center; gap: 6px; margin-left: auto; font: 13.5px var(--tw-serif); color: var(--tw-mut2); }
-.tws-prog i { width: 22px; height: 5px; border-radius: 3px; background: #e3dbcf; }
-.tws-prog i[data-s="done"] { background: var(--tw-slate); }
-.tws-prog i[data-s="cur"] { background: var(--tw-navy); }
-.tws-prog em { font-style: normal; margin-left: 4px; white-space: nowrap; }
-
 /* the Mentor's bubble */
 .tws-mnote { display: flex; align-items: flex-start; gap: 18px; margin: 18px 0 10px; }
 .tws-mnote img { width: 56px; flex: none; margin-top: -2px; }
@@ -268,19 +262,6 @@
 .tws-qn svg { width: 13px; height: 13px; fill: none; stroke: #fff; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 .tws-q .tws-qbody { margin-left: 36px; }
 .tws-hint { display: block; margin: -4px 0 10px 36px; font: italic 14px/1.4 var(--tw-serif); color: var(--tw-mut); }
-.tws-qhint { display: block; margin: 8px 0 0; font: italic 13.5px var(--tw-serif); color: var(--tw-mut2); }
-.tws-qa {
-  display: grid; grid-template-columns: 26px auto minmax(0, 1fr) auto; align-items: center; gap: 12px; width: 100%; padding: 10px 0;
-  border: 0; border-bottom: 1px solid #f1ece4; background: none; text-align: left; cursor: pointer;
-}
-.tws-qa .tws-qn { background: var(--tw-slate); }
-.tws-qa .tws-qt { font: 14.5px var(--tw-serif); color: var(--tw-mut2); }
-.tws-qa b { font: 600 15px var(--tw-serif); color: var(--tw-ink); text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tws-qa .tws-qc { font: 13px var(--tw-serif); color: var(--tw-navy); text-decoration: underline; opacity: 0; transition: opacity 0.15s; }
-.tws-qa:hover .tws-qc, .tws-qa:focus-visible .tws-qc { opacity: 1; }
-.tws-qa[data-todo] { cursor: default; opacity: 0.45; border-bottom: 0; grid-template-columns: 26px 1fr; }
-.tws-qa[data-todo] .tws-qn { background: none; color: var(--tw-mut2); box-shadow: inset 0 0 0 1.4px #c8bdae; }
-
 /* option cards: cream, filling navy when picked */
 .tws-tiles { display: flex; flex-direction: column; gap: 8px; }
 .tws-tile {
@@ -306,11 +287,6 @@
 }
 .tws-tile[aria-pressed="true"] .tws-sugg, .tws-tile[aria-checked="true"] .tws-sugg { background: rgba(255, 255, 255, 0.85); color: var(--tw-blush-ink); }
 
-/* the primary under the current question: sticky at the foot of the column, above the cards, with a fade above it */
-.tws-qgo {
-  position: sticky; bottom: 0; z-index: 8; display: flex; align-items: center; justify-content: flex-end; gap: 14px;
-  margin: 16px 0 0 36px; padding: 14px 0 6px; background: linear-gradient(rgba(255, 255, 255, 0), #fff 30%);
-}
 .tws-go {
   height: 46px; display: inline-flex; align-items: center; gap: 8px; padding: 0 24px; border: 0; border-radius: 999px; background: var(--tw-navy);
   color: #fff; font: 600 16px var(--tw-serif); cursor: pointer; white-space: nowrap;
@@ -406,7 +382,7 @@
   pointer-events: none; white-space: nowrap;
 }
 .tws-pvslot:hover .tws-pvopen, .tws-pvslot:focus-visible .tws-pvopen { opacity: 1; transform: translate(-50%, 0); }
-.tws-pvz .spanel.tws-pvpanel, .tws-layer .spanel.tws-pvpanel {
+.tws-pvz .spanel.tws-pvpanel {
   position: relative; inset: auto; top: auto; right: auto; bottom: auto; width: 100%; height: 100%; z-index: auto; animation: none;
   box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.08), 0 18px 36px -26px rgba(28, 19, 15, 0.45);
 }
@@ -416,8 +392,6 @@
   border-radius: 12px; padding-left: 12px; padding-right: 12px; margin-left: -12px; margin-right: -12px;
   box-shadow: 0 0 0 2.5px var(--tw-terra), 0 0 0 7px rgba(201, 118, 93, 0.18);
 }
-.tws-pvz .qlg-c--on, .tws-layer .qlg-c--on { outline: 2px dashed var(--tw-terra); outline-offset: 4px; border-radius: 10px; }
-.tws-pvz [data-tws-target], .tws-layer [data-tws-target] { border-radius: 12px; box-shadow: 0 0 0 2.5px var(--tw-terra), 0 0 0 7px rgba(201, 118, 93, 0.18) !important; }
 .tws-olempty {
   flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center; padding: 24px;
   border: 1.5px dashed #cbbfae; border-radius: 16px; color: var(--tw-mut);
@@ -505,21 +479,6 @@
 .tws-opts button { height: 34px; padding: 0 14px; border: 0; border-radius: 17px; background: var(--tw-cream); box-shadow: inset 0 0 0 1px var(--tw-hair); font: 14.5px var(--tw-serif); cursor: pointer; }
 .tws-opts button[aria-checked="true"] { background: var(--tw-navy); color: #fff; box-shadow: none; }
 
-/* ── the review: the card in a full-height drawer, the confirmation beside it ── */
-.tws-rvside h3 { margin: 26px 0 10px; font: 400 24px var(--tw-type) !important; color: var(--tw-ink); }
-.tws-rvside .tws-l1 { margin: 0 0 8px; font: 600 18px/1.45 var(--tw-serif); color: var(--tw-ink); }
-.tws-rvside .tws-l2 { margin: 0 0 16px; font: 16px/1.5 var(--tw-serif); color: var(--tw-mut); }
-.tws-rvside .tws-hint3 { display: flex; gap: 8px; margin: 0; font: italic 14.5px/1.45 var(--tw-serif); color: var(--tw-mut2); }
-.tws-rvbtns { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 22px; }
-.tws-layer.tws-rvdr {
-  position: fixed; z-index: 60; top: 8px; right: 8px; bottom: 8px; width: min(600px, 44vw); border-radius: 18px; background: #fff; overflow: hidden;
-  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1), -30px 0 60px -40px rgba(28, 19, 15, 0.5); display: flex; flex-direction: column;
-  animation: tws-slide 0.28s cubic-bezier(.22, .8, .3, 1) both;
-}
-.tws-rvdr .tws-rvhd { flex: none; display: flex; align-items: center; gap: 10px; padding: 12px 16px; font: 600 14.5px var(--tw-serif); color: var(--tw-mut); border-bottom: 1px solid #efe9e0; }
-.tws-rvdr .tws-rvbody { flex: 1; min-height: 0; overflow: auto; }
-@keyframes tws-slide { from { transform: translateX(40px); opacity: 0; } }
-
 /* ── the pop-ups (snooze, dismiss) ── */
 .tws-layer.tws-pop {
   position: fixed; z-index: 70; width: 320px; padding: 12px; border-radius: 16px; background: #fff;
@@ -561,9 +520,6 @@
 /* v51: the Filters menu's way in to tag management */
 .tws-menu .tws-mlink { display: block; margin: 12px 0 0; padding: 10px 0 0; width: 100%; border: 0; border-top: 1px solid var(--tw-hair); background: none; text-align: left; font: 600 14px var(--tw-serif); color: var(--tw-navy); cursor: pointer; }
 .tws-menu .tws-mlink:hover { text-decoration: underline; }
-/* v51.1 — the preview is read-only: the query card's footer (its action, More, the doors, Delete) and the stand card's
-   links ("Set a send-by date" …) are not drawn in it; they work as normal in the real card the frame opens */
-.tws-pvz [data-qcv="open-foot"], .tws-pvz .qsc-links, .tws-pvz .qsc-link { display: none !important; }
 /* v51.1 — the batch row's "Skip this one": a quiet link under the questions */
 .tws-skip { margin-top: 14px; }
 /* v52 Part D — the live Query Centre card (QcQueryCard149 over the v152 thread) is read-only in the preview: its
@@ -574,7 +530,7 @@
 /* v52 Part D — the v152 card's frame (qcv152card.css) is a fixed panel centred in the viewport with a 1.6° lean and a
    slide-in. In the preview the frame sits in the column, upright and still, as tall as the column: the same frame
    (rim, radius, inner border), only placed. The selector out-ranks the frame's own (0-4-0 with :has). */
-.tws-pvz .spanel.qsp.qsp.tws-pvpanel:has(> .spanel-own > [data-qc152]), .tws-layer .spanel.qsp.qsp.tws-pvpanel:has(> .spanel-own > [data-qc152]) {
+.tws-pvz .spanel.qsp.qsp.tws-pvpanel:has(> .spanel-own > [data-qc152]) {
   position: relative; top: auto; right: auto; bottom: auto; left: auto; width: 100%; height: 100%; rotate: none; animation: none; transition: none; z-index: auto;
 }
 
