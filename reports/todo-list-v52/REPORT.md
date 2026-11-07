@@ -88,6 +88,20 @@ Run against the emulator (`npm run dev:emu` in this worktree on its own ports; s
 To-do preview read `["Tracking-PROBE","Agent","Materials","Notes"]` with nothing else changed; the file was restored
 from a path-named copy (no diff).
 
+**L14: one count for "cleared this week" (added 7 Nov, after the deploy).** The Done tab now lists this week only
+(Monday 00:00 London to the end of today): tasks ticked off and tasks dismissed, grouped by day as before. The header's
+"{n} cleared this week" and the tab's "Done {n}" are both the length of that one list (`doneTabRows`, `lib/todoWs.ts`).
+The intro reads "{n} cleared this week. Anything you dismissed is here too, in case you change your mind.", or
+"Nothing cleared yet this week." The lock writes three fixtures to the emulator and removes them in the same run:
+an own task ticked off now, a dismissal now, and a dismissal eight days ago.
+- Red on the old code: last week's dismissal was listed, the tab read 5 against the header's 1, and the header said "done this week".
+- Green with the fix: header 2, tab 2, 2 rows, last week's absent, and the intro exactly as specified.
+
+v51.1's `todoWs` check on the Done tab now looks for either intro.
+**⚠️ What this costs:** a dismissal with no date can't be placed in a week, so it no longer appears on the Done tab.
+That covers a switched-off rule ("Switched off for every agent") and an old-style mute. The Done tab was the only
+place to bring either back, so after this change there is no way to turn back on a rule switched off earlier.
+
 **L10 and "the save once" (re-pointed 7 Nov, after the deploy):** one press of Log it on a nudge writes exactly three
 different documents, each once (`saveNudgeSent`, `lib/queryActions/stepSaves.ts`):
 1. `users/{uid}/queries/{id}/activity/act-…`: the step in the query's own log (`type`, `createdAt`, `note`, `eventKey: nudge_sent`, `reminderDate`, `agentName`, `queryId`).

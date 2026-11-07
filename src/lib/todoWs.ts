@@ -18,6 +18,8 @@ import { QueryStatus, type Agent, type Query, type UserTask } from "../types";
 import type { TrayItem } from "./todoTray";
 import type { AgentDataNeed } from "./agentDataQuality";
 import { isTaskType, type TaskType } from "./todoActions";
+import { londonDayEnd, londonWeekStart, type ClearedAct } from "./todoCleared";
+import type { SetAsideItem } from "./taskSettings";
 
 const DAY = 86400000;
 const MONTHS_LONG = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -441,4 +443,23 @@ export function stripWords(t: WsTask): StripWords {
   if (d === 0) return { name, what, when: "Today", hot: true };
   if (d === 1) return { name, what, when: "Tmrw", hot: true };
   return { name, what, when: `${d}d`, hot: false };
+}
+
+/* ── To-do list v52 (7 Nov) — the Done tab and "cleared this week" are one count ───────────────── */
+
+export interface DoneRow { key: string; ms: number; label: string; sub: string; dis?: SetAsideItem }
+
+/**
+ * The Done tab's rows: what was ticked off and what was dismissed THIS WEEK (Monday 00:00 London to the end of today),
+ * newest first. Its length is the header's "{n} cleared this week" and the tab's count, so the two cannot disagree.
+ * ⚠️ A dismissal with no date (a switched-off rule, a legacy mute) cannot be placed in a week, so it is not listed.
+ */
+export function doneTabRows(done: readonly ClearedAct[], dismissed: readonly SetAsideItem[], titleOf: (a: SetAsideItem) => string, nowMs: number): DoneRow[] {
+  const from = londonWeekStart(nowMs), until = londonDayEnd(nowMs);
+  const inWeek = (t: number) => Number.isFinite(t) && t >= from && t < until;
+  return [
+    ...done.filter((d) => inWeek(d.at)).map((d) => ({ key: d.id, ms: d.at, label: d.label, sub: d.consequence })),
+    ...dismissed.filter((a) => inWeek(a.at ? Date.parse(a.at) : NaN))
+      .map((a) => ({ key: a.id, ms: Date.parse(a.at!), label: titleOf(a), sub: a.kind === "rule" ? "Switched off for every agent" : "Dismissed", dis: a })),
+  ].sort((x, y) => y.ms - x.ms);
 }
