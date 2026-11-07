@@ -15,7 +15,6 @@
  * ⚠️ EVERY WRITE IS AN EXISTING ONE (see `wsFlows`): nothing here writes a status, a flag or a task any other way.
  */
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import { useLocation, useNavigate } from "react-router-dom";
 import { WorkspacePageGrid } from "../../shell/WorkspacePageGrid";
 import { useScriptAllyDb } from "../../../lib/db";
@@ -159,7 +158,6 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   const sel = order.find((t) => t.key === selKey) ?? all.find((t) => t.key === selKey) ?? order[0] ?? null;
   const [A, setA] = useState<Answers>({});
   const [qi, setQi] = useState(0);
-  const [review, setReview] = useState(false);
   const [yay, setYay] = useState<Yay | null>(null);
   const [busy, setBusy] = useState(false);
   const [adding, setAdding] = useState(false);
@@ -169,7 +167,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   const [bSkip, setBSkip] = useState<ReadonlySet<string>>(() => new Set());
   const [bSaved, setBSaved] = useState<ReadonlySet<string>>(() => new Set());
   const go = useCallback((key: string | null) => {
-    setSelKey(key); setA({}); setQi(0); setReview(false); setYay(null); setAdding(false); setPop(null); setLinkPicking(false); setBSkip(new Set());
+    setSelKey(key); setA({}); setQi(0); setYay(null); setAdding(false); setPop(null); setLinkPicking(false); setBSkip(new Set());
     /* the row is brought into the tray's own view; never scrollIntoView, which would scroll the page too */
     if (key) requestAnimationFrame(() => {
       const r = document.querySelector<HTMLElement>(`.tws [data-tws-row="${CSS.escape(key)}"]`);
@@ -394,7 +392,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     if (!bCur) return;
     const others = bRemaining.filter((m) => m.queryId !== bCur.queryId && !bSkip.has(m.queryId));
     setBSkip(others.length ? new Set([...bSkip, bCur.queryId]) : new Set([bCur.queryId]));
-    setA({}); setQi(0); setReview(false);
+    setA({}); setQi(0);
   };
 
   /* ── the card preview's rows: the Query Centre's own, stamped the same way (v52 Part D) ── */
@@ -438,7 +436,6 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     const next = nextKeyAfter(sel);
     try {
       const d = await flow.commit();
-      setReview(false);
       /* a batch with more to go: a toast with Undo, and the next query opens; the celebration waits for the last */
       if (sel.kind === "batch" && bCur && bRemaining.length > 1) {
         const qid = bCur.queryId;
@@ -678,20 +675,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
 
     /* the questions column */
     let main: React.ReactNode;
-    if (review && flow) {
-      main = (
-        <div className="tws-rvside" data-tws="review">
-          <h3>Does this look right?</h3>
-          <p className="tws-l1">{flow.review[0]}</p>
-          {flow.review[1] ? <p className="tws-l2">{flow.review[1]}</p> : null}
-          <p className="tws-hint3"><span aria-hidden="true">→</span>{t.first}’s {t.kind === "fix" ? "card" : "query"} is open beside this, as it’ll look once logged. What’s changed is outlined.</p>
-          <div className="tws-rvbtns">
-            <button type="button" className="tws-lnk" onClick={() => setReview(false)}>← Change something</button>
-            <button type="button" className="tws-go" disabled={busy} onClick={() => void logIt()}>{TICK}Yes, log it</button>
-          </div>
-        </div>
-      );
-    } else if (own) {
+    if (own) {
       main = (
         <>
           <div className="tws-mnote"><img src={MENTOR} alt="" /><p>{steps.length ? "This one’s yours. Tick the steps off as you go, then mark it done." : "This one’s yours. Mark it done when it’s finished, or break it into steps if it’s a big one."}</p></div>
@@ -703,49 +687,32 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     } else if (flow) {
       /* the nudge and Gone quiet lines read the agent's stated reply time, where one is set */
       const facts = t.kind === "quiet" || t.kind === "nudge" ? quietFacts(t) : undefined;
+      const curQ = cur < qs.length ? qs[cur] : null;
       main = (
         <>
           <div className="tws-mnote"><img src={MENTOR} alt="" /><p>{mentorLine(t, facts)}</p></div>
-          {qs.map((q, i) => {
-            if (i < cur) {
-              return (
-                <button key={q.key} type="button" className="tws-qa" data-tws-qa={q.key} onClick={() => { setQi(i); setReview(false); }} aria-label={`${q.title}: ${q.summary}. Change`}>
-                  <span className="tws-qn">{TICK}</span><span className="tws-qt">{q.title}</span><b>{q.summary}</b><span className="tws-qc">Change</span>
+          {/* v52 Part C — the answers so far, as chips; only the open question below them; nothing upcoming */}
+          {cur > 0 ? (
+            <div className="tws-ans" data-tws="answers">
+              {qs.slice(0, cur).map((q, i) => (
+                <button key={q.key} type="button" className="tws-ach" data-tws-qa={q.key} title={q.title} aria-label={`${q.title}: ${q.summary}. Change`} onClick={() => setQi(i)}>
+                  <span className="tws-ack" aria-hidden="true">{TICK}</span><b>{q.summary}</b><em aria-hidden="true">Change</em>
                 </button>
-              );
-            }
-            if (i > cur) return <div key={q.key} className="tws-qa" data-todo=""><span className="tws-qn">{i + 1}</span><span className="tws-qt">{q.title}</span></div>;
-            return (
-              <div key={q.key} className="tws-q" data-tws-q={q.key}>
-                <div className="tws-qh"><span className="tws-qn">{i + 1}</span>{q.title}</div>
-                {q.hint ? <span className="tws-hint">{q.hint}</span> : null}
-                <div className="tws-qbody">
-                  {q.body}
-                  {q.dateHint ? <span className="tws-qhint">Today’s picked. Change it if it was another day.</span> : null}
-                </div>
-                <div className="tws-qgo">
-                  {flow.door && i === qs.length - 1 && q.answered ? <button type="button" className="tws-go" onClick={flow.door.open}>{flow.door.label}</button>
-                    : <button type="button" className="tws-go" data-tws="next" disabled={!q.answered} onClick={() => setQi(i + 1)}>{i === qs.length - 1 && !(t.kind === "quiet" && !A.act) ? "Continue" : "Next"} →</button>}
-                </div>
-              </div>
-            );
-          })}
-          {allDone && flow.commit ? (
-            <>
-              <div className="tws-story" data-tws="story">
-                <span className="tws-sk">That’s everything. Here’s what gets logged:</span>
-                <p>{flow.sentence}</p>
-                <ul>{flow.consequences.map((c) => <li key={c}>{TICK}{c}</li>)}</ul>
-              </div>
-              <div className="tws-qgo">
-                <button type="button" className="tws-lnk" onClick={() => setReview(true)}>Check it on the card first</button>
-                <button type="button" className="tws-go" data-tws="log" disabled={busy} onClick={() => void logIt()}>{TICK}Log it</button>
-              </div>
-            </>
+              ))}
+            </div>
           ) : null}
-          {qs.length === 0 && flow.door ? (
-            <div className="tws-qgo" style={{ marginLeft: 0, justifyContent: "flex-start" }}>
-              <button type="button" className="tws-go" onClick={flow.door.open}>{flow.door.label}</button>
+          {curQ ? (
+            <div key={curQ.key} className="tws-q" data-tws-q={curQ.key}>
+              <div className="tws-qh"><span className="tws-qn">{cur + 1}</span>{curQ.title}</div>
+              {curQ.hint ? <span className="tws-hint">{curQ.hint}</span> : null}
+              <div className="tws-qbody">{curQ.body}</div>
+            </div>
+          ) : null}
+          {allDone && flow.commit ? (
+            <div className="tws-story" data-tws="story">
+              <span className="tws-sk">That’s everything. Here’s what gets logged:</span>
+              <p>{flow.sentence}</p>
+              <ul>{flow.consequences.map((c) => <li key={c}>{TICK}{c}</li>)}</ul>
             </div>
           ) : null}
         </>
@@ -756,57 +723,68 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     const ms = t.query ? manuscripts.find((m) => m.id === t.query!.manuscriptId) ?? null : manuscripts[0] ?? null;
     /* the pending change shows once something has been answered */
     const previewDraft = flow && Object.values(A).some((v) => v !== undefined) ? flow.draft : flow ? { section: flow.draft.section } : null;
-    const previewFor = (full: boolean) => {
+    const previewFor = () => {
       if (own) {
         if (linkQ) return (
-          <ScaledCard kind="query" full={full} focusKey={linkQ.id} label={`Open the full query card ↗`} onOpen={() => openLinked(t.userTask!)}>
+          <ScaledCard kind="query" focusKey={linkQ.id} label={`Open the full query card ↗`} onOpen={() => openLinked(t.userTask!)}>
             <PreviewQueryCard q={linkQ} row={cardRows.get(linkQ.id) ?? null} agent={linkA} queries={queries} manuscripts={manuscripts} manuscript={manuscripts.find((m) => m.id === linkQ.manuscriptId) ?? null} packages={packages} log={linkLog} draft={null} nowMs={now} quietWeeks={quietWeeks} free={cardFree} />
           </ScaledCard>
         );
         if (linkA) return (
-          <ScaledCard kind="agent" full={full} focusKey={linkA.id} label="Open the full agent card ↗" onOpen={() => openLinked(t.userTask!)}>
+          <ScaledCard kind="agent" focusKey={linkA.id} label="Open the full agent card ↗" onOpen={() => openLinked(t.userTask!)}>
             <PreviewAgentCard agent={linkA} queries={queries} activities={activities} agents={agents} manuscript={manuscripts[0] ?? null} manuscripts={manuscripts} personalGenres={currentUser?.personalGenres ?? []} draft={null} nowMs={now} />
           </ScaledCard>
         );
         return null;
       }
       if (t.kind === "fix" && t.agent) return (
-        <ScaledCard kind="agent" full={full} focusKey={`${t.key}|${JSON.stringify(previewDraft?.agentPatch ?? {})}`} label="Open the full agent card ↗" onOpen={() => openCard(t)}>
+        <ScaledCard kind="agent" focusKey={`${t.key}|${JSON.stringify(previewDraft?.agentPatch ?? {})}`} label="Open the full agent card ↗" onOpen={() => openCard(t)}>
           <PreviewAgentCard agent={t.agent} queries={queries} activities={activities} agents={agents} manuscript={ms} manuscripts={manuscripts} personalGenres={currentUser?.personalGenres ?? []} draft={previewDraft} nowMs={now} />
         </ScaledCard>
       );
       if (t.query) return (
-        <ScaledCard kind="query" full={full} focusKey={`${t.key}|${previewDraft?.status ?? ""}|${previewDraft?.ghost ? 1 : 0}`} label="Open the full query card ↗" onOpen={() => openCard(t)}>
+        <ScaledCard kind="query" focusKey={`${t.key}|${previewDraft?.status ?? ""}|${previewDraft?.ghost ? 1 : 0}`} label="Open the full query card ↗" onOpen={() => openCard(t)}>
           <PreviewQueryCard q={t.query} row={cardRows.get(t.query.id) ?? null} agent={t.agent ?? null} queries={queries} manuscripts={manuscripts} manuscript={ms} packages={packages} log={qLog} draft={previewDraft} nowMs={now} quietWeeks={quietWeeks} free={cardFree} />
         </ScaledCard>
       );
       return null;
     };
     const side = own && !linked ? <div className="tws-wp"><div className="tws-wpl"><span>Linked card</span></div><OwnEmptySide onLink={() => setLinkPicking(true)} /></div>
-      : review ? null
-      : (() => { const p = previewFor(false); return p ? (
+      : (() => { const p = previewFor(); return p ? (
         <div className="tws-wp" data-tws="side">
           {own ? <div className="tws-wpl"><span>{`Linked: ${(linkA?.name || linkA?.agency || "").trim().split(/\s+/)[0]}’s ${linkQ ? "query" : "agent"} card`}</span></div> : null}
           {p}
         </div>
       ) : null; })();
 
-    /* the footer */
+    /* the footer (v52 Part C): the questions column's own. Snooze and Dismiss on the left; "n of m" and the ONE primary
+       button on the right, always in this place — nothing advances until it is pressed */
+    let primary: React.ReactNode = null;
+    let progress: string | null = null;
+    if (own) {
+      progress = steps.length ? `${steps.filter((x) => x.done).length} of ${steps.length} steps` : null;
+      primary = <button type="button" className="tws-go" data-tws="primary" disabled={busy} onClick={() => void ownDone(t)}>{TICK}Mark done</button>;
+    } else if (flow) {
+      const q = cur < qs.length ? qs[cur] : null;
+      const last = cur === qs.length - 1;
+      if (q && flow.door && last && q.answered) {
+        primary = <button type="button" className="tws-go" data-tws="primary" onClick={flow.door.open}>{flow.door.label}</button>;
+      } else if (q) {
+        primary = <button type="button" className="tws-go" data-tws="primary" data-next="" disabled={!q.answered} onClick={() => setQi(cur + 1)}>{last && !(t.kind === "quiet" && !A.act) ? "Continue" : "Next"} →</button>;
+      } else if (allDone && flow.commit) {
+        primary = <button type="button" className="tws-go" data-tws="primary" data-log="" disabled={busy} onClick={() => void logIt()}>{TICK}Log it</button>;
+      } else if (!qs.length && flow.door) {
+        primary = <button type="button" className="tws-go" data-tws="primary" onClick={flow.door.open}>{flow.door.label}</button>;
+      }
+      progress = !qs.length ? null : allDone ? "Ready to log" : `${cur + 1} of ${t.kind === "quiet" && !A.act ? "a few" : qs.length}`;
+    }
     const foot = (
-      <div className="tws-wf">
-        <button ref={snzRef} type="button" className="tws-sb" aria-expanded={pop?.kind === "snooze"} onClick={(e) => setPop(pop?.kind === "snooze" ? null : { kind: "snooze", opener: e.currentTarget })}>{ZZ}<span>{own ? "Move it" : "Snooze"}</span><kbd>S</kbd></button>
-        <button ref={disRef} type="button" className="tws-sb" aria-expanded={pop?.kind === "dismiss"} onClick={(e) => setPop(pop?.kind === "dismiss" ? null : { kind: "dismiss", opener: e.currentTarget })}>{DIS}<span>{own ? "Delete" : "Dismiss"}</span><kbd>D</kbd></button>
-        {own ? (
-          <>
-            <span className="tws-prog">{steps.length ? <>{steps.map((s, i) => <i key={i} data-s={s.done ? "done" : undefined} />)}<em>{steps.filter((s) => s.done).length} of {steps.length} steps</em></> : null}</span>
-            <button type="button" className="tws-go" disabled={busy} onClick={() => void ownDone(t)}>{TICK}Mark done</button>
-          </>
-        ) : qs.length ? (
-          <span className="tws-prog" aria-label={`Question ${Math.min(cur + 1, qs.length)} of ${qs.length}`}>
-            {qs.map((q, i) => <i key={q.key} data-s={i < cur ? "done" : i === cur ? "cur" : undefined} />)}
-            <em>{allDone ? "Ready to log" : `${cur + 1} of ${t.kind === "quiet" && !A.act ? "a few" : qs.length}`}</em>
-          </span>
-        ) : null}
+      <div className="tws-wf" data-tws="footer">
+        <button ref={snzRef} type="button" className="tws-sb" aria-label={own ? "Move it" : "Snooze"} title={own ? "Move it (S)" : "Snooze (S)"} aria-expanded={pop?.kind === "snooze"} onClick={(e) => setPop(pop?.kind === "snooze" ? null : { kind: "snooze", opener: e.currentTarget })}>{ZZ}<span>{own ? "Move it" : "Snooze"}</span><kbd>S</kbd></button>
+        <button ref={disRef} type="button" className="tws-sb" aria-label={own ? "Delete" : "Dismiss"} title={own ? "Delete (D)" : "Dismiss (D)"} aria-expanded={pop?.kind === "dismiss"} onClick={(e) => setPop(pop?.kind === "dismiss" ? null : { kind: "dismiss", opener: e.currentTarget })}>{DIS}<span>{own ? "Delete" : "Dismiss"}</span><kbd>D</kbd></button>
+        <span className="tws-sp" />
+        {progress ? <em className="tws-prog" data-tws="progress">{progress}</em> : null}
+        {primary}
       </div>
     );
 
@@ -822,19 +800,18 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
           <button type="button" className="tws-wb" aria-label="Next task (J)" title="Next (J)" onClick={() => move(1)}>›</button>
         </div>
         <div className="tws-wbody">
-          <div className="tws-wq">{main}{t.kind === "batch" && bRemaining.length > 1 && !yay ? (
-            <div className="tws-skip"><button type="button" className="tws-lnk" data-tws="skip" onClick={skipOne}>Skip this one</button></div>
-          ) : null}</div>
+          <div className="tws-wcol" data-tws="qcol">
+            <div className="tws-wq">{main}{t.kind === "batch" && bRemaining.length > 1 && !yay ? (
+              <div className="tws-skip"><button type="button" className="tws-lnk" data-tws="skip" onClick={skipOne}>Skip this one</button></div>
+            ) : null}</div>
+            {foot}
+          </div>
           {side}
         </div>
-        {foot}
         {pop?.kind === "snooze" ? <SnoozePop t={t} today={today} limit={limitFor(t)} opener={pop.opener} onClose={() => setPop(null)} onSnooze={(d, u) => void doSnooze(t, d, u)} /> : null}
         {pop?.kind === "dismiss" ? (
           <DismissPop t={t} ruleWord={(() => { const r = (t.item.card as BoardCard & { sweepRule?: string }).sweepRule; return r && r in RULE_PLAIN ? RULE_PLAIN[r] : null; })()}
             opener={pop.opener} onClose={() => setPop(null)} onSnoozeInstead={() => setPop({ kind: "snooze", opener: snzRef.current })} onChoose={(c) => void doDismiss(t, c)} />
-        ) : null}
-        {review && flow ? (
-          <ReviewDrawer kind={t.kind === "fix" ? "agent" : "query"} label={`${t.first}’s ${t.kind === "fix" ? "agent" : "query"} card, once logged`} onClose={() => setReview(false)}>{previewFor(true)}</ReviewDrawer>
         ) : null}
       </div>
     );
@@ -951,28 +928,6 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
         </div>
       ) : null}
     </div>
-  );
-};
-
-/** the review: the real card in a full-height drawer on the right, the confirmation beside it */
-const REVIEW_W = (kind: "query" | "agent") => (kind === "agent" ? 600 : 560);
-const ReviewDrawer: React.FC<{ label: string; kind: "query" | "agent"; onClose: () => void; children: React.ReactNode }> = ({ label, kind, onClose, children }) => {
-  useEscapeLayer(true, onClose, ESC_LEVEL.pageDrawer);
-  /* the workspace narrows to the left of the drawer, so nothing sits under it (the mock's "beside the card") */
-  useLayoutEffect(() => {
-    const ws = [...document.querySelectorAll<HTMLElement>('[data-tws="workspace"]')].find((e) => e.getBoundingClientRect().height > 0);
-    if (!ws) return undefined;
-    const fit = () => { const left = ws.getBoundingClientRect().left; ws.style.setProperty("width", `${Math.max(640, window.innerWidth - REVIEW_W(kind) - 8 - 14 - left)}px`); };
-    fit();
-    window.addEventListener("resize", fit);
-    return () => { window.removeEventListener("resize", fit); ws.style.removeProperty("width"); };
-  }, [kind]);
-  return createPortal(
-    <div className="tws-layer tws-rvdr" role="dialog" aria-label={label} data-tws="review-drawer" style={{ width: REVIEW_W(kind) }}>
-      <div className="tws-rvhd"><span>{label}</span><span className="tws-sp" /><button type="button" className="tws-lnk" onClick={onClose}>Close</button></div>
-      <div className="tws-rvbody">{children}</div>
-    </div>,
-    document.body,
   );
 };
 

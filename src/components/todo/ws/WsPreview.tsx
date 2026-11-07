@@ -161,7 +161,7 @@ export const PreviewAgentCard: React.FC<AgentCardProps> = ({ agent: a0, queries,
  * scrolls its own timeline to the draft step; an agent card scrolls to the section the task fills — never past the
  * card's head, so the agent's name is always in view.
  */
-export const ScaledCard: React.FC<{ kind: "query" | "agent"; label: string; onOpen: () => void; full?: boolean; children: React.ReactNode; focusKey: string }> = ({ kind, label, onOpen, full = false, children, focusKey }) => {
+export const ScaledCard: React.FC<{ kind: "query" | "agent"; label: string; onOpen: () => void; children: React.ReactNode; focusKey: string }> = ({ kind, label, onOpen, children, focusKey }) => {
   const slot = useRef<HTMLDivElement>(null);
   const [z, setZ] = useState(1);
   const [h, setH] = useState(0);
@@ -171,14 +171,14 @@ export const ScaledCard: React.FC<{ kind: "query" | "agent"; label: string; onOp
     const fit = () => {
       const w = el.clientWidth, hh = el.clientHeight;
       if (w <= 0 || hh <= 0) return;
-      const zz = full ? 1 : Math.min(1, w / TRUE_W(kind));
+      const zz = Math.min(1, w / TRUE_W(kind));
       setZ(zz); setH(hh / zz);
     };
     fit();
     const ro = new ResizeObserver(fit);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [full, kind]);
+  }, [kind]);
   /* bring the change into view: the draft step, or the agent's section (never cutting off the head) */
   useEffect(() => {
     const el = slot.current;
@@ -220,7 +220,7 @@ export const ScaledCard: React.FC<{ kind: "query" | "agent"; label: string; onOp
           <div className="spanel-own">{children}</div>
         </aside>
       </div>
-      {!full ? <span className="tws-pvopen" aria-hidden="true">{label}</span> : null}
+      <span className="tws-pvopen" aria-hidden="true">{label}</span>
     </div>
   );
 };
