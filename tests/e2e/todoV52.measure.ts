@@ -160,7 +160,7 @@ test("L2 · the header: title, stats, + Add a task; no priority line", async ({ 
   await expect(hd.locator("h1")).toHaveText("Your to-do list");
   const stats = ((await hd.locator('[data-tws="stats"]').textContent()) ?? "").replace(/\s+/g, " ").trim();
   note(`L2${MUT ? `-${MUT}` : ""}`, { stats, text: await hd.textContent() });
-  expect(stats).toMatch(/(^|· )\d+ to do · \d+ late · \d+ done this week$/);
+  expect(stats).toMatch(/(^|· )\d+ to do · \d+ late · \d+ cleared this week$/);
   await expect(hd.getByRole("button", { name: "+ Add a task" })).toBeVisible();
   const bad = await hd.evaluate((h) => [...h.querySelectorAll("*")].filter((e) => /highest priority|Start here/.test(e.textContent ?? "")).length);
   expect(bad, "nothing in the header says “highest priority” or “Start here”").toBe(0);
@@ -340,15 +340,28 @@ test("L9 · the date: with the month open only Older is selected; the month clea
 });
 
 /* ══ L10 no review route (writes, and puts the account back) ═══════════════════════════════════════════════════════ */
-async function writesDuring(page: Page, fn: () => Promise<void>, settleMs = 1500): Promise<number> {
-  let n = 0;
+/** Every document write on Firestore's write channel while `fn` runs: the path under /documents/, the fields it sets,
+ *  and its update mask (a field in the mask but not in `fields` is a delete). Read from the request bodies, so it
+ *  counts DOCUMENTS, never requests: the SDK may batch several writes into one request, or split them across several. */
+interface DocWrite { path: string; fields: string[]; mask: string[] | null }
+async function docWritesDuring(page: Page, fn: () => Promise<void>, settleMs = 2500): Promise<DocWrite[]> {
+  const out: DocWrite[] = [];
   const on = (req: import("@playwright/test").Request) => {
     if (req.method() !== "POST" || !/\/Write\/channel/.test(req.url())) return;
-    if (/writes/.test(decodeURIComponent(req.postData() ?? ""))) n++;
+    const body = new URLSearchParams(req.postData() ?? "");
+    for (const [k, v] of body) {
+      if (!/^req\d+___data__$/.test(k)) continue;
+      let j: { writes?: { update?: { name: string; fields?: Record<string, unknown> }; updateMask?: { fieldPaths?: string[] } }[] };
+      try { j = JSON.parse(v); } catch { continue; }
+      for (const w of j.writes ?? []) {
+        if (!w.update) continue;
+        out.push({ path: w.update.name.split("/documents/")[1] ?? w.update.name, fields: Object.keys(w.update.fields ?? {}).sort(), mask: w.updateMask?.fieldPaths?.slice().sort() ?? null });
+      }
+    }
   };
   page.on("request", on);
   try { await fn(); await page.waitForTimeout(settleMs); } finally { page.off("request", on); }
-  return n;
+  return out;
 }
 test("L10 · no review route: Log it saves once and lands on the celebration (then Undo)", async ({ page }) => {
   /* the log-and-undo steps are todoWs.measure.ts's own ("a nudge, logged and undone"), which restore the account */
@@ -370,11 +383,11 @@ test("L10 · no review route: Log it saves once and lands on the celebration (th
   const log = d.locator('[data-tws="primary"][data-log]');
   await expect(log).toBeEnabled();
   let presses = 0;
-  const writes = await writesDuring(page, async () => {
+  const docs = await docWritesDuring(page, async () => {
     await log.click(); presses++;
     /* a second press, straight after: it must not land (the button is gone or disabled) */
     await log.click({ timeout: 300 }).then(() => presses++).catch(() => undefined);
-  }, 0);
+  });
   const yay = page.locator('[data-tws="yay"]:visible');
   await expect(yay).toBeVisible({ timeout: 15_000 });
   await expect(yay).toContainText("Nudge logged.");
@@ -382,8 +395,22 @@ test("L10 · no review route: Log it saves once and lands on the celebration (th
   /* put the account back before any assertion can stop the run (see `note`: nothing is written to disk mid-test) */
   await yay.getByRole("button", { name: "Undo" }).click();
   await expect(pg.locator("[data-tws-row]").filter({ hasText: title })).toHaveCount(1, { timeout: 20_000 });
-  note(`L10${MUT ? `-${MUT}` : ""}`, { link, writes, presses, title });
-  expect(writes, "the save is a write").toBeGreaterThan(0);
+  note(`L10${MUT ? `-${MUT}` : ""}`, { link, docs, presses, title });
+  /* exactly three documents, each written once (saveNudgeSent, lib/queryActions/stepSaves.ts): the step in the query's
+     own log, its projection in the global feed (one id, two stores), and the query's two nudge fields with the planned
+     nudge date cleared. Nothing completes a task: the nudge task is derived from the query, so these fields clear it. */
+  const shape = docs.map((d) => {
+    const rel = d.path.replace(/^users\/[^/]+\//, "");
+    const kind = /^queries\/[^/]+\/activity\/act-/.test(rel) ? "step" : /^activities\/act-/.test(rel) ? "feed" : /^queries\/[^/]+$/.test(rel) ? "query" : rel;
+    return { kind, fields: d.fields.join(","), mask: d.mask?.join(",") ?? null };
+  });
+  expect(shape, "one press writes exactly these three documents, once each").toEqual([
+    { kind: "step", fields: "agentName,createdAt,eventKey,note,queryId,reminderDate,type", mask: null },
+    { kind: "feed", fields: "activityType,date,description,details,eventKey,id,manuscriptId,queryId,userId", mask: null },
+    { kind: "query", fields: "closePlan,lastNudgeSentDate", mask: "closePlan,lastNudgeSentDate,nudgeDate" },
+  ]);
+  const ids = docs.filter((d) => /\/act-/.test(d.path)).map((d) => d.path.split("/").pop());
+  expect(new Set(ids).size, "the step and its feed row share one id").toBe(1);
   expect(presses, "Log it takes one press: a second cannot land").toBe(1);
 });
 
@@ -452,5 +479,63 @@ test("L12 · Housekeeping: the slate header, icon tiles with initials, Quick fil
     if (!/^Fill in what you sent/.test(x.title)) expect(x.badge, `${x.title}: an initials badge`).toBe(true);
     expect(x.chip).toBe("Quick fill");
     expect(x.noDate, `${x.title}: no “No date”`).toBe(false);
+  }
+});
+
+/* ══ L14 one count for "cleared this week" (7 Nov) ═══════════════════════════════════════════════════════════════════
+   Fixtures written straight to the emulator (owner token, so no rules), and removed in the same run: one own task
+   ticked off now, one dismissal now, and one dismissal eight days ago (always before this week's Monday). The header
+   and the Done tab must say the same number, the tab must show exactly that many rows, and last week's dismissal must
+   not be among them. */
+const EMU = "http://127.0.0.1:8085/v1/projects/demo-scriptally/databases/(default)/documents";
+const OWNER = { Authorization: "Bearer owner", "Content-Type": "application/json" };
+const fsVal = (v: unknown): unknown => typeof v === "boolean" ? { booleanValue: v } : typeof v === "number" ? { integerValue: String(v) } : { stringValue: String(v) };
+const fsDoc = (o: Record<string, unknown>) => ({ fields: Object.fromEntries(Object.entries(o).map(([k, v]) => [k, fsVal(v)])) });
+async function emuPut(path: string, o: Record<string, unknown>) {
+  const r = await fetch(`${EMU}/${path}`, { method: "PATCH", headers: OWNER, body: JSON.stringify(fsDoc(o)) });
+  if (!r.ok) throw new Error(`emulator write ${path}: ${r.status} ${await r.text()}`);
+}
+const emuDel = (path: string) => fetch(`${EMU}/${path}`, { method: "DELETE", headers: OWNER });
+
+test("L14 · one count: the header and the Done tab both say how many were cleared this week, and nothing older shows", async ({ page }) => {
+  test.setTimeout(120_000);
+  await open(page, SIZES[1]);
+  const uid = await page.evaluate(() => {
+    for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i)!; if (k.startsWith("firebase:authUser:")) return JSON.parse(localStorage.getItem(k)!).uid as string; }
+    return null;
+  }) ?? await page.evaluate(async () => {
+    const db = await new Promise<IDBDatabase>((res, rej) => { const o = indexedDB.open("firebaseLocalStorageDb"); o.onsuccess = () => res(o.result); o.onerror = () => rej(o.error); });
+    const all = await new Promise<{ value: { uid: string } }[]>((res) => { const r = db.transaction("firebaseLocalStorage").objectStore("firebaseLocalStorage").getAll(); r.onsuccess = () => res(r.result); });
+    return all.find((x) => x.value?.uid)?.value.uid ?? null;
+  });
+  expect(uid, "the signed-in uid").toBeTruthy();
+  const ag = await (await fetch(`${EMU}/users/${uid}/agents?pageSize=2`, { headers: OWNER })).json() as { documents?: { name: string }[] };
+  const [a1, a2] = (ag.documents ?? []).map((d) => d.name.split("/").pop()!);
+  expect(a2, "two agents on the account").toBeTruthy();
+  const now = Date.now();
+  const paths = { done: `users/${uid}/tasks/td52-l14-done`, mine: `users/${uid}/taskFlags/td52-l14-this`, old: `users/${uid}/taskFlags/td52-l14-last` };
+  const hd = page.locator(`${PG} [data-tws="header"] [data-tws="stats"]`);
+  const tabBtn = page.locator(`${PG} .tws-seg button`, { hasText: "Done" });
+  const nOf = async (l: Locator) => Number(((await l.textContent()) ?? "").match(/(\d+) cleared this week|Done\s*(\d+)/)?.slice(1).find(Boolean) ?? NaN);
+  try {
+    await emuPut(paths.done, { id: "td52-l14-done", userId: uid, text: "L14 ticked off this week", done: true, createdAt: new Date(now - 3600e3).toISOString(), completedAt: new Date(now).toISOString() });
+    await emuPut(paths.mine, { id: "td52-l14-this", userId: uid, taskType: "data_quality_poor", agentId: a1, snoozeCount: 0, skippedAt: new Date(now).toISOString() });
+    await emuPut(paths.old, { id: "td52-l14-last", userId: uid, taskType: "data_quality_poor", agentId: a2, snoozeCount: 0, skippedAt: new Date(now - 8 * 864e5).toISOString() });
+    await mutate(page, "L14");
+    await tabBtn.click();
+    const list = page.locator(`${PG} [data-tws-done]`);
+    await expect(page.locator(`${PG} [data-tws-done="task:td52-l14-done"]`)).toHaveCount(1, { timeout: 15_000 });
+    await expect(page.locator(`${PG} [data-tws-done="flag-td52-l14-this"]`)).toHaveCount(1);
+    const header = await nOf(hd), tab = await nOf(tabBtn), rows = await list.count();
+    const lastShown = await page.locator(`${PG} [data-tws-done="flag-td52-l14-last"]`).count();
+    const intro = ((await page.locator(`${PG} .tws-note`).first().textContent()) ?? "").replace(/\s+/g, " ").trim();
+    note(`L14${MUT ? `-${MUT}` : ""}`, { header, tab, rows, lastShown, intro });
+    expect(lastShown, "last week's dismissal is not shown").toBe(0);
+    expect(tab, "the Done tab's count is the rows it shows").toBe(rows);
+    expect(header, "the header says the same number as the Done tab").toBe(tab);
+    expect(intro).toBe(`${header} cleared this week. Anything you dismissed is here too, in case you change your mind.`);
+    expect(rows, "with only the fixtures this week, the count is 2 (the harness snapshot holds nothing cleared this week)").toBe(2);
+  } finally {
+    await Promise.all(Object.values(paths).map(emuDel));
   }
 });

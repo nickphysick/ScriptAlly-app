@@ -5,10 +5,12 @@
  * To-do list v50 — the workspace's model (lib/todoWs): kinds and titles, the housekeeping expansion, notes kept out,
  * the priority line, the day counts and the Mentor's words.
  */
+import type { SetAsideItem } from "./taskSettings";
+import type { ClearedAct } from "./todoCleared";
 import { describe, expect, it } from "vitest";
 import { QueryStatus, type Agent, type Query, type UserTask } from "../types";
 import type { TrayItem } from "./todoTray";
-import { andList, dayBit, doingPhrase, dueChip, mentorLine, passes, priorityTask, replyWords, startReason, stripWords, whenOf, wsSections, wsTasks, NO_WS_FILTERS, STRIP_GROUP, type WsTask } from "./todoWs";
+import { andList, dayBit, doingPhrase, doneTabRows, dueChip, mentorLine, passes, priorityTask, replyWords, startReason, stripWords, whenOf, wsSections, wsTasks, NO_WS_FILTERS, STRIP_GROUP, type WsTask } from "./todoWs";
 
 const NOW = Date.parse("2026-11-05T10:00:00");
 const ymd = (d: number) => { const x = new Date(NOW + d * 86400000); return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, "0")}-${String(x.getDate()).padStart(2, "0")}`; };
@@ -264,5 +266,21 @@ describe("the materials batch", () => {
     (s1.card as { relatedRecordId?: string }).relatedRecordId = qs[0].id;
     const one = wsTasks([s1], ag, () => null, () => [], NOW, () => [], qs);
     expect(one.map((t) => [t.kind, t.title])).toEqual([["other", "Fill in what you sent Agent0"]]);
+  });
+});
+
+/* ── v52, 7 Nov: the Done tab and "cleared this week" are one count ── */
+describe("doneTabRows", () => {
+  /* Saturday 7 Nov 2026, noon London; the week began Monday 2 Nov 00:00 */
+  const now = Date.parse("2026-11-07T12:00:00Z");
+  const dis = (id: string, at?: string) => ({ id, kind: "dismiss", at, label: "x", who: "Ana", restore: {} }) as unknown as SetAsideItem;
+  const ticked = { id: "task:t1", at: Date.parse("2026-11-06T09:00:00Z"), label: "Ticked", consequence: "Off your list" } as unknown as ClearedAct;
+  it("lists this week's ticked-off and dismissed tasks only, and nothing older or undated", () => {
+    const rows = doneTabRows([ticked], [dis("this", "2026-11-05T10:00:00Z"), dis("last", "2026-10-30T10:00:00Z"), dis("undated")], (a) => a.id, now);
+    expect(rows.map((r) => r.key)).toEqual(["task:t1", "this"]);
+  });
+  it("Monday 00:00 London is in the week; Sunday 23:59 is not (GMT in November)", () => {
+    const rows = doneTabRows([], [dis("mon", "2026-11-02T00:00:00Z"), dis("sun", "2026-11-01T23:59:00Z")], (a) => a.id, now);
+    expect(rows.map((r) => r.key)).toEqual(["mon"]);
   });
 });

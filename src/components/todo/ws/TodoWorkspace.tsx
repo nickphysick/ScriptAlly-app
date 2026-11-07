@@ -23,8 +23,8 @@ import { localYMD } from "../../../lib/shellSidebar";
 import type { BoardCard } from "../../../lib/todoBoard";
 import { SWEEP_NEED, groupFor, trayItem, type TrayDb, type TrayItem } from "../../../lib/todoTray";
 import {
-  NO_WS_FILTERS, STRIP_GROUP, WS_GROUPINGS, WS_TYPES, WS_WHENS, dayBit, doingPhrase, dueChip, mentorLine, passes, priorityTask, quietSuggestion, startReason, stripWords, whenOf, wsSections, wsTasks,
-  type QuietFacts, type WsFilters, type WsGroupId, type WsGrouping, type WsTask, type WsType, type WsWhen,
+  NO_WS_FILTERS, STRIP_GROUP, WS_GROUPINGS, WS_TYPES, WS_WHENS, dayBit, doingPhrase, doneTabRows, dueChip, mentorLine, passes, priorityTask, quietSuggestion, startReason, stripWords, whenOf, wsSections, wsTasks,
+  type DoneRow, type QuietFacts, type WsFilters, type WsGroupId, type WsGrouping, type WsTask, type WsType, type WsWhen,
 } from "../../../lib/todoWs";
 import { clearedThisWeek, type ClearedAct } from "../../../lib/todoCleared";
 import { setAsideItems, setAsideLabel, RULE_TITLE, RULE_PLAIN, type SetAsideItem } from "../../../lib/taskSettings";
@@ -360,6 +360,9 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
       default: return setAsideLabel(a);
     }
   };
+  /** the Done tab's rows, this week only; their number is the header's "cleared this week" and the tab's count */
+  const doneRows = doneTabRows(done, dismissed, asideTitle, now);
+  const clearedN = doneRows.length;
   const bringBack = async (a: SetAsideItem) => {
     const r = a.restore;
     if ("rule" in r) {
@@ -572,16 +575,11 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
       );
     }
     if (tab === "done") {
-      type Row = { key: string; ms: number; label: string; sub: string; dis?: SetAsideItem };
-      const rows: Row[] = [
-        ...done.map((d) => ({ key: d.id, ms: d.at, label: d.label, sub: d.consequence })),
-        ...dismissed.map((a) => ({ key: a.id, ms: a.at ? Date.parse(a.at) : 0, label: asideTitle(a), sub: a.kind === "rule" ? "Switched off for every agent" : "Dismissed", dis: a })),
-      ].sort((x, y) => y.ms - x.ms);
-      const byDay = new Map<string, Row[]>();
-      for (const r of rows) { const k = r.ms ? dayWord(r.ms, today) : "Earlier"; byDay.set(k, [...(byDay.get(k) ?? []), r]); }
+      const byDay = new Map<string, DoneRow[]>();
+      for (const r of doneRows) { const k = dayWord(r.ms, today); byDay.set(k, [...(byDay.get(k) ?? []), r]); }
       return (
         <>
-          <p className="tws-note">{done.length ? <><b>{done.length} done this week.</b> Nice going.</> : "Nothing done yet this week."} Anything you dismissed is here too, in case you change your mind.</p>
+          <p className="tws-note">{clearedN ? <><b>{clearedN} cleared this week.</b> Anything you dismissed is here too, in case you change your mind.</> : "Nothing cleared yet this week."}</p>
           {[...byDay].map(([k, list]) => (
             <React.Fragment key={k}>
               <div className="tws-dlab">{k}</div>
@@ -825,7 +823,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
             <div className="tws-ht">
               <h1 className="tws-ttl" data-page-title>Your to-do list</h1>
               <p className="tws-stats" data-tws="stats">
-                {statBook ? <>{statBook} · </> : null}<b>{seq.length}</b> to do · <b>{lateN}</b> late · <b>{done.length}</b> done this week
+                {statBook ? <>{statBook} · </> : null}<b>{seq.length}</b> to do · <b>{lateN}</b> late · <b>{clearedN}</b> cleared this week
               </p>
             </div>
             <span className="tws-sp" />
@@ -865,7 +863,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
                 <div className="tws-seg" role="group" aria-label="Show">
                   <button type="button" aria-pressed={tab === "todo"} onClick={() => setTab("todo")}>To do <b data-tws="todo-count">{seq.length}</b></button>
                   <button type="button" aria-pressed={tab === "snoozed"} onClick={() => setTab("snoozed")}>Snoozed <b>{snoozed.length}</b></button>
-                  <button type="button" aria-pressed={tab === "done"} onClick={() => setTab("done")}>Done <b>{done.length + dismissed.length}</b></button>
+                  <button type="button" aria-pressed={tab === "done"} onClick={() => setTab("done")}>Done <b>{clearedN}</b></button>
                 </div>
                 {tab === "todo" ? (
                   <>

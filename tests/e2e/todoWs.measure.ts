@@ -98,7 +98,8 @@ test("the snoozed and done tabs, and the pop-ups", async ({ page }) => {
   await expect(tray.getByText(/come back to/)).toBeVisible();
   await page.screenshot({ path: `${DIR}/snoozed.png` });
   await tray.getByRole("button", { name: /^Done/ }).click();
-  await expect(tray.getByText(/dismissed is here too/)).toBeVisible();
+  /* v52 (7 Nov): the intro is "{n} cleared this week. …" or, with nothing cleared, "Nothing cleared yet this week." */
+  await expect(tray.getByText(/cleared this week\.|Nothing cleared yet this week\./)).toBeVisible();
   await page.screenshot({ path: `${DIR}/done.png` });
   await tray.getByRole("button", { name: /^To do/ }).click();
   const desk = page.locator('[data-tws="desk"]:visible');

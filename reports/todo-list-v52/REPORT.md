@@ -2,7 +2,7 @@
 
 Branch `todo-list-v52` (worktree `../ScriptAlly-td52`), cut from the branch dev was serving at the start:
 `dev/…-td51-td511-cb2-sm1-qc1522b-cb21-db22-ql1-rv2` @ `46a51815` (bundle `index-D4-_I14k.js`).
-Not merged to `main`. Dev deploy: not yet. It waits until you have read this report (see §7).
+Not merged to `main`. **Deployed to dev on 7 Nov** from `dev/…-ql1-rv2-td52` @ `5e32e62e` (the served branch with this one merged on top). Dev now serves bundle `index-Cwix18EF.js`; it served `index-D4-_I14k.js` before. The build was made from a clean checkout.
 
 ## 0 · False premises
 
@@ -88,9 +88,30 @@ Run against the emulator (`npm run dev:emu` in this worktree on its own ports; s
 To-do preview read `["Tracking-PROBE","Agent","Materials","Notes"]` with nothing else changed; the file was restored
 from a path-named copy (no diff).
 
-**L10 and "the save once":** one Log it press produced 3 write requests on Firestore's write channel (the nudge's
-existing save; this pack did not change it). What the lock can hold is that the button takes one press and a second
-cannot land before the celebration replaces it; it does not count the save function's calls.
+**L14: one count for "cleared this week" (added 7 Nov, after the deploy).** The Done tab now lists this week only
+(Monday 00:00 London to the end of today): tasks ticked off and tasks dismissed, grouped by day as before. The header's
+"{n} cleared this week" and the tab's "Done {n}" are both the length of that one list (`doneTabRows`, `lib/todoWs.ts`).
+The intro reads "{n} cleared this week. Anything you dismissed is here too, in case you change your mind.", or
+"Nothing cleared yet this week." The lock writes three fixtures to the emulator and removes them in the same run:
+an own task ticked off now, a dismissal now, and a dismissal eight days ago.
+- Red on the old code: last week's dismissal was listed, the tab read 5 against the header's 1, and the header said "done this week".
+- Green with the fix: header 2, tab 2, 2 rows, last week's absent, and the intro exactly as specified.
+
+v51.1's `todoWs` check on the Done tab now looks for either intro.
+**⚠️ What this costs:** a dismissal with no date can't be placed in a week, so it no longer appears on the Done tab.
+That covers a switched-off rule ("Switched off for every agent") and an old-style mute. The Done tab was the only
+place to bring either back, so after this change there is no way to turn back on a rule switched off earlier.
+
+**L10 and "the save once" (re-pointed 7 Nov, after the deploy):** one press of Log it on a nudge writes exactly three
+different documents, each once (`saveNudgeSent`, `lib/queryActions/stepSaves.ts`):
+1. `users/{uid}/queries/{id}/activity/act-…`: the step in the query's own log (`type`, `createdAt`, `note`, `eventKey: nudge_sent`, `reminderDate`, `agentName`, `queryId`).
+2. `users/{uid}/activities/act-…`, with the same id: its row in the global feed (`activityType`, `date`, `description`, `details`, `eventKey`, `id`, `manuscriptId`, `queryId`, `userId`).
+3. `users/{uid}/queries/{id}`: `lastNudgeSentDate` and `closePlan` set, and `nudgeDate` deleted.
+
+There is no separate task-completion write: the nudge task comes from the query, so those fields clear it. The earlier
+"3 writes" and "2 writes" counted network requests, which the SDK can batch. L10 now reads each request body and
+asserts these three documents exactly. It was red first, with the feed row written twice ("one press writes exactly
+these three documents, once each"), and green with the real save.
 
 **L13 no regression:** the neighbouring suites against the base build, on the same emulator snapshot:
 - `todoWs.measure.ts` (v51.1's To-do locks, re-pointed): **12 / 12 passed**.
@@ -129,7 +150,8 @@ cannot land before the celebration replaces it; it does not count the save funct
 - **`qcV152` at 1512 was not run on the base build**, so its result there is not compared.
 - **L5's red fires one step early.** The pointer is already over the strip after the « click, so the
   expand-on-hover break re-opens it immediately. It is still red, but on the 112 check, not on the hover check.
-- **Not deployed.** Per the brief, the dev deploy waits for your read. It will be a new `dev/…-td52` branch on
-  top of whatever dev is serving at that point, checked by bundle hash.
+- **On the dev branch, L10 failed twice before it passed.** It counted saves with a 0ms settle, so on a slow run it stopped
+  counting before the save went out. It now uses the helper's normal 1.5s settle (`688d478c`); after that, all 18 TD52 checks passed
+  there. L12 failed once at sign-in and passed when re-run.
 - **The local port shift is not committed.** This worktree moved its emulator ports so it could run beside other
   sessions. That change stays outside every commit and is undone when the worktree is removed.
