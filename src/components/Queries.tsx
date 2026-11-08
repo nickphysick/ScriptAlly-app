@@ -129,6 +129,8 @@ import { expectedFor, type QcRow } from "../lib/qcSummary";
 import { nextLine } from "../lib/qcRowLines";
 import { QcPage151, Track151 } from "./queries/centre/QcPage151";
 import { QcFilterPanel151 } from "./queries/centre/QcFilterMenu140";
+import { QcRail153 } from "./queries/centre/QcRail153";
+import { railCounts } from "../lib/qc153Rail";
 import { QUIET_WEEKS_PATH, nudgeMsOf, quickOfRow, quietWeeksOf, stampRows, stateOf, queryState as qsOf } from "../lib/queryState";
 import { packagesUnlocked, versionsUnlocked } from "../lib/entitlements";
 import { ACTION_LABEL, CLOSED_SET, listGroupOf, savedGroupOf } from "../lib/qc1522";
@@ -8057,11 +8059,15 @@ export const Queries: React.FC<{
                 }));
               if (practice && pipRow) sections151.unshift({ key: "practice", label: "Practice", rows: [pipRow] });
               const strip151 = qc140Chips.filter((c) => !c.key.startsWith("where:"));
-              const keepWhere = () => setQcF138((f) => ({ ...emptyQc138Filters(), where: f.where }));
+              /* v153 — "Where it stands" is in the rail now, so Reset clears it with the rest */
+              const keepWhere = () => setQcF138(emptyQc138Filters());
               const clear151 = () => { keepWhere(); setQcFilter("all"); setQcCzCourt(null); setQcIds(null); };
               /* v151.1 §5 — Clear all: filters, search, grouping and sort (and Birds-eye's), never the quick filter */
               const clearAll1511 = () => { clear151(); setQcFind(""); setQcGroup("attention"); setQcSort151(DEFAULT_SORT_151); setQcBeGroup("urgency"); setQcBeSort("due"); };
               const order151 = sections151.flatMap((x) => x.rows.map((r) => r.id));
+              /* v153 — the rail's faceted counts, over what the rail does not own (scope, search, the older narrowings) */
+              const railBase = qcScoped.filter((r) => (!qcIds || qcIds.has(r.id)) && matchesFilter(r, qcFilter) && matchesFind(r, qcFind) && (!qcCourtOn || tileCourt(r.status) === qcCourtOn));
+              const railN = railCounts(railBase, qcF138, qc138Counts.sent.map((o) => o.key), (r, g) => matches138(r, g, now151));
               const beEmpty = !showGridSkeleton && qcBeOrder.length === 0
                 ? (strip151.length ? "filtered" as const : qcF138.where === "closed" ? "closed" as const : null) : null;
               return (
@@ -8113,6 +8119,8 @@ export const Queries: React.FC<{
                   signoff={!showGridSkeleton && qcScoped.length > 0 && qcF138.where === null && qc140Chips.length === 0 ? { total: qcScoped.length } : null}
                   onImport={() => onNavigate?.("import")}
                   packageNameOf={(r) => { const k = pkgKeyOf(r); return k ? qcPackageName(k) : null; }}
+                  rail={<QcRail153 filters={qcF138} onFilters={setQcF138} counts={railN} sent={qc138Counts.sent} onReset={clear151}
+                    showing={qcVisible.length} total={qcScoped.length} onExport={exportQcList} loading={showGridSkeleton} />}
                   birds={qcView150 === "birds" && !showGridSkeleton ? (
                     <QcBirds150 groups={qcBeGroups} banded={qcBeGroup !== "none"} nowMs={qcNow138} moves={qcMoves}
                       selectedId={selectedQueryId} closedN={beClosedCount(qcVisible, qcNow138)}
