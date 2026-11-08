@@ -20,7 +20,7 @@
  * the call races a timeout. `window.__SA_ASSIST_LIVE = false` force-disables;
  * `__SA_ASSIST_FILL_MOCK` supplies canned results for a dev walk-through.
  */
-import { getFunctions, httpsCallable } from "firebase/functions";
+import { aiCallable } from "./aiCallable";
 import { Agent } from "../types";
 import { HkRule } from "./todoHousekeeping";
 
@@ -56,8 +56,11 @@ export interface AssistFillInput {
 
 export class AssistFillError extends Error {
   code: string;
-  constructor(code: string, message: string) {
+  /** The server's structured detail, e.g. `{ reason: "daily_limit" }` (lib/aiRefusal). */
+  details?: unknown;
+  constructor(code: string, message: string, details?: unknown) {
     super(message);
+    this.details = details;
     this.name = "AssistFillError";
     this.code = code;
   }
@@ -124,14 +127,14 @@ export async function fetchAssistedFill(input: AssistFillInput, opts?: { timeout
   const mock = (globalThis as { __SA_ASSIST_FILL_MOCK?: unknown }).__SA_ASSIST_FILL_MOCK;
   if (mock) return validateAssistPayload(mock);
   if (!assistLive()) throw new AssistFillError("unavailable", "Assisted fill isn’t switched on right now.");
-  const fn = httpsCallable(getFunctions(undefined, "europe-west2"), "assistAgentData");
+  const fn = await aiCallable("assistAgentData");
   try {
     const res = await raceTimeout(fn(input), opts?.timeoutMs ?? ASSIST_TIMEOUT_MS);
     return validateAssistPayload(res.data);
   } catch (e: unknown) {
     if (e instanceof AssistFillError) throw e; // the timeout, already typed
-    const err = e as { code?: string; message?: string };
+    const err = e as { code?: string; message?: string; details?: unknown };
     const code = String(err?.code || "").replace(/^functions\//, "") || "unknown";
-    throw new AssistFillError(code, err?.message || "Couldn’t reach assisted fill.");
+    throw new AssistFillError(code, err?.message || "Couldn’t reach assisted fill.", err?.details);
   }
 }

@@ -26,6 +26,7 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
 import { db } from "./firestore";
+import { claimDailySlot } from "./aiRateLimit";
 import Anthropic from "@anthropic-ai/sdk";
 import {
   MalformedSuggestionsError,
@@ -48,28 +49,12 @@ const MAX_ID_CHARS = 128;
 const MAX_SHELF_TITLES = 24;
 const MAX_TITLE_CHARS = 512;
 
-/**
- * ⚠️ ADMIN WRITES BYPASS SECURITY RULES, which is why this collection needs no rules block and is
- * invisible to the client. A limit the browser could read would tell a caller exactly how many runs
- * they had left; a limit the browser could WRITE would not be a limit.
- *
- * ⚠️ AND IT IS A TRANSACTION, not a read-then-write. Two runs fired together would otherwise both
- * read the same count and both pass.
- */
-async function claimRun(uid: string, today: string): Promise<boolean> {
-  const ref = db.doc(`scoutRateLimits/${uid}`);
-  return db.runTransaction(async (tx) => {
-    const snap = await tx.get(ref);
-    const sameDay = snap.exists && snap.get("day") === today;
-    const used = sameDay ? Number(snap.get("count") ?? 0) : 0;
-    if (used >= RUNS_PER_DAY) return false;
-    tx.set(ref, { day: today, count: used + 1 }, { merge: true });
-    return true;
-  });
-}
+/* The limit is claimed through the shared helper (aiRateLimit.ts), which is this file's old
+   `claimRun` lifted out unchanged: same document (`scoutRateLimits/{uid}`), same UTC day, same
+   transaction, same wording. */
 
 export const suggestComps = onCall(
-  { secrets: [ANTHROPIC_API_KEY], region: "europe-west2", timeoutSeconds: 300, memory: "512MiB" },
+  { secrets: [ANTHROPIC_API_KEY], region: "europe-west2", enforceAppCheck: true, timeoutSeconds: 300, memory: "512MiB" },
   async (req) => {
     // 1. Auth
     if (!req.auth) throw new HttpsError("unauthenticated", "Please sign in.");
@@ -112,13 +97,9 @@ export const suggestComps = onCall(
       .map((t) => t.slice(0, MAX_TITLE_CHARS));
 
     // 5. Rate limit — claimed BEFORE the model call, so a failed run still costs its slot
-    const today = new Date().toISOString().slice(0, 10);
-    if (!(await claimRun(uid, today))) {
-      throw new HttpsError(
-        "resource-exhausted",
-        `The Scout has been out ${RUNS_PER_DAY} times today. It can go again tomorrow.`
-      );
-    }
+    await claimDailySlot(db, uid, "scout", RUNS_PER_DAY, {
+      message: `The Scout has been out ${RUNS_PER_DAY} times today. It can go again tomorrow.`,
+    });
 
     // 6. Propose, then verify
     const input: SuggestInput = { manuscriptTitle, ageCategory, genre, logline, shelfTitles };

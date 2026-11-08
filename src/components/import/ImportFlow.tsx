@@ -55,6 +55,7 @@ import { PhotosScreen } from "../onboarding/PhotosScreen";
 import { MAX_PAGES, PHOTOS_WORDS, createUrlRegistry, isImageFile, movePage, type ReviewPhoto } from "../../lib/photoImport";
 import { preparePhoto, fitPhotos } from "../../lib/photoPrepare";
 import { UsedFree, UsedProMonth, Unreadable, NothingImported, Unloaded } from "../onboarding/DeadEnd";
+import { aiRefusalReason, IMPORT_IN_PROGRESS_MESSAGE } from "../../lib/aiRefusal";
 
 /** UX-only floor so the post-import loader is held for a deliberate minimum (never a fake delay on
  *  errors — Promise.all rejects as soon as the commit does). */
@@ -161,6 +162,8 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
   type Page = { id: string; file: File; status: "preparing" | "ready" | "failed"; url: string | null; base64: string; width: number; height: number; blurry: boolean; kept: boolean };
   const [photos, setPhotos] = useState<Page[]>([]);
   const [photoMessage, setPhotoMessage] = useState<string | null>(null);
+  /* The in_progress refusal's words on the confirm screen (lib/aiRefusal); cleared on the next read. */
+  const [confirmNote, setConfirmNote] = useState<string | null>(null);
   const [photoBusy, setPhotoBusy] = useState(false);
   /** The pages that were read, in the order sent, with the number each was shown under. */
   const [readPhotos, setReadPhotos] = useState<ReviewPhoto[]>([]);
@@ -369,6 +372,7 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
   const runMapping = async (file: File) => {
     setRawSample([]); setExtractComplete(false); setValidated(null); setRowsRead(null);
     setImportSource("smart");
+    setConfirmNote(null);
     setScreen("reading"); // the scatter-settle loader takes over from here
     // Display-only: show the writer's actual raw cells the instant they upload, scattered, while the
     // real extraction runs. Never feeds runSmartImport; a parse failure just leaves the loader plain.
@@ -387,6 +391,13 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
       if (reason === "free_used" || reason === "pro_month_used") {
         setBlocked({ reason, nextAvailable: e?.details?.nextAvailable });
         setScreen("blocked");
+        return;
+      }
+      /* Another read of this writer's import is already running (a second tab, a double press).
+         Nothing was spent; go back to the file and say so, rather than to the fallback. */
+      if (aiRefusalReason(e) === "in_progress") {
+        setConfirmNote(IMPORT_IN_PROGRESS_MESSAGE);
+        setScreen("confirm");
         return;
       }
       console.error("Smart Import mapping failed:", e);
@@ -421,6 +432,11 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
       if (reason === "free_used" || reason === "pro_month_used") {
         setBlocked({ reason, nextAvailable: e?.details?.nextAvailable });
         setScreen("blocked");
+        return;
+      }
+      if (aiRefusalReason(e) === "in_progress") {
+        setPhotoMessage(IMPORT_IN_PROGRESS_MESSAGE);
+        setScreen("photos");
         return;
       }
       console.error("Smart Import photo mapping failed:", e);
@@ -578,6 +594,7 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
           onChange={() => fileInputRef.current?.click()}
           onBack={() => { setPendingFile(null); toStart(); }}
           onRead={() => { if (pendingFile) void runMapping(pendingFile); }}
+          note={confirmNote}
         />
       </>
     );

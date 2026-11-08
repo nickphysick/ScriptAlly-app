@@ -9,7 +9,7 @@
  * Mirrors the smartImport.ts client pattern, incl. the dev-only mock escape hatch so the review UI
  * can be exercised without the function being deployed.
  */
-import { getFunctions, httpsCallable } from "firebase/functions";
+import { aiCallable } from "./aiCallable";
 
 export type EmailDirection = "received" | "sent";
 
@@ -49,8 +49,11 @@ export interface RunEmailImportArgs {
 /** A normalised error the flow can branch on: `permission-denied` → upsell; anything else → retry. */
 export class EmailImportError extends Error {
   code: string;
-  constructor(code: string, message: string) {
+  /** The server's structured detail, e.g. `{ reason: "daily_limit" }` (lib/aiRefusal). */
+  details?: unknown;
+  constructor(code: string, message: string, details?: unknown) {
     super(message);
+    this.details = details;
     this.name = "EmailImportError";
     this.code = code;
   }
@@ -62,7 +65,7 @@ export async function runEmailImport(args: RunEmailImportArgs): Promise<EmailPro
   const mock = (window as any).__SA_EMAIL_IMPORT_MOCK as EmailProposal | undefined;
   if (mock) return mock;
 
-  const fn = httpsCallable(getFunctions(undefined, "europe-west2"), "extractFromEmail");
+  const fn = await aiCallable("extractFromEmail");
   try {
     const res = await fn(args);
     return res.data as EmailProposal;
@@ -70,7 +73,7 @@ export async function runEmailImport(args: RunEmailImportArgs): Promise<EmailPro
     // Firebase callable errors arrive as code "functions/<reason>" (permission-denied, unavailable,
     // internal, unauthenticated, …). A network/not-deployed failure surfaces as internal/unavailable.
     const code = String(e?.code || "").replace(/^functions\//, "") || "unknown";
-    throw new EmailImportError(code, e?.message || "Couldn't reach the importer.");
+    throw new EmailImportError(code, e?.message || "Couldn't reach the importer.", e?.details);
   }
 }
 

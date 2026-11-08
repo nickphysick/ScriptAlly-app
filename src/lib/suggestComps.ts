@@ -14,7 +14,7 @@
  * `__SA_SCOUT_LIVE` (window) force-enables the live path for dev/preview; `__SA_SUGGEST_COMPS_MOCK`
  * supplies canned results without a function.
  */
-import { getFunctions, httpsCallable } from "firebase/functions";
+import { aiCallable } from "./aiCallable";
 import { CompMedia, CompTitle, CompVerification, User, UserPlan } from "../types";
 
 /**
@@ -257,7 +257,7 @@ export async function fetchCompRun(input: SuggestCompsInput, isPro: boolean): Pr
   if (!isPro) throw new SuggestCompsError("permission-denied", "The Scout is a Pro feature.");
   const mock = (globalThis as { __SA_SUGGEST_COMPS_MOCK?: unknown }).__SA_SUGGEST_COMPS_MOCK;
   if (mock) return validateRunPayload(mock);
-  const fn = httpsCallable(getFunctions(undefined, "europe-west2"), "suggestComps");
+  const fn = await aiCallable("suggestComps");
   try {
     const res = await fn(input);
     return validateRunPayload(res.data);

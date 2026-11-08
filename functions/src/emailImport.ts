@@ -17,6 +17,7 @@ import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
 import * as admin from "firebase-admin";
 import { db } from "./firestore";
+import { claimDailySlot } from "./aiRateLimit";
 import Anthropic from "@anthropic-ai/sdk";
 import {
   extractProposal,
@@ -42,8 +43,12 @@ const MAX_QUERIES = 50;
 const MAX_RUNGS_PER_QUERY = 6;
 const MAX_EMAIL_CHARS = 50_000;
 
+/** Runs per user per UTC day — the Scout's number. Pro accounts are limited too; no account gets
+ *  unlimited AI. Claimed before the model call, so a failed run still costs its slot. */
+const RUNS_PER_DAY = 10;
+
 export const extractFromEmail = onCall(
-  { secrets: [ANTHROPIC_API_KEY], region: "europe-west2", timeoutSeconds: 60, memory: "512MiB" },
+  { secrets: [ANTHROPIC_API_KEY], region: "europe-west2", enforceAppCheck: true, timeoutSeconds: 60, memory: "512MiB" },
   async (req) => {
     // 1. Auth
     if (!req.auth) throw new HttpsError("unauthenticated", "Please sign in.");
@@ -69,6 +74,9 @@ export const extractFromEmail = onCall(
 
     // 3. Read context server-side (the client never supplies agent/query data)
     const context = await readContext(uid, manuscriptId);
+
+    // 3b. Daily limit — claimed BEFORE the client is built (aiRateLimit.ts)
+    await claimDailySlot(db, uid, "extractFromEmail", RUNS_PER_DAY);
 
     // 4. Call Claude + 5. parse/validate (inside extractProposal)
     const client = new Anthropic({ apiKey: ANTHROPIC_API_KEY.value() });

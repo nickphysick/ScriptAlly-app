@@ -17,13 +17,23 @@ const world = vi.hoisted(() => ({
   mapPages: null as null | ((...a: any[]) => Promise<any>),
   mapSheet: null as null | ((...a: any[]) => Promise<any>),
 }));
-vi.mock("./firestore", () => ({
-  db: {
-    doc: (path: string) => ({
-      get: async () => { world.reads.push(path); return { get: (f: string) => world.store[path]?.[f] }; },
-      set: async (value: unknown) => { world.writes.push({ path, value }); },
-    }),
-  },
+vi.mock("./firestore", () => {
+  const ref = (path: string) => ({
+    path,
+    get: async () => { world.reads.push(path); return { get: (f: string) => world.store[path]?.[f] }; },
+    set: async (value: unknown) => { world.writes.push({ path, value }); },
+  });
+  /* The claim (AI spend guard Phase 2) is a transaction: its read and write are recorded like any other. */
+  const runTransaction = async (fn: (tx: unknown) => Promise<unknown>) =>
+    fn({
+      get: (r: { get: () => Promise<unknown> }) => r.get(),
+      set: (r: { path: string }, value: unknown) => { world.writes.push({ path: r.path, value }); },
+    });
+  return { db: { doc: ref, runTransaction } };
+});
+/* FieldValue sentinels, made readable so a write can be asserted by value. */
+vi.mock("firebase-admin/firestore", () => ({
+  FieldValue: { serverTimestamp: () => "<serverTimestamp>", delete: () => "<delete>" },
 }));
 vi.mock("firebase-functions/params", () => ({ defineSecret: () => ({ value: () => "test-key", name: "ANTHROPIC_API_KEY" }) }));
 vi.mock("./smartImportCore", async (orig) => {
@@ -114,16 +124,22 @@ describe("the callable refuses a malformed request BEFORE the entitlement is rea
 });
 
 describe("one entitlement for both inputs (locked)", () => {
-  it("is consumed on a usable photo result", async () => {
+  const ENT = "users/u1/private/entitlement";
+  const claim = { path: ENT, value: { smartImportPending: "<serverTimestamp>" } };
+  it("is claimed before the call and consumed on a usable photo result, releasing the claim", async () => {
     await run({ pages: [page()] });
-    expect(world.writes).toEqual([{ path: "users/u1/private/entitlement", value: { smartImportFreeUsed: true } }]);
+    expect(world.writes).toEqual([
+      claim,
+      { path: ENT, value: { smartImportFreeUsed: true, smartImportPending: "<delete>" } },
+    ]);
   });
-  it("is NOT consumed when the photo read fails", async () => {
+  it("is NOT consumed when the photo read fails — the claim is released instead", async () => {
     for (const failure of ["api", "badjson", "nonjson"]) {
       world.mapPages = vi.fn(async () => ({ ...GOOD, result: null, failure }));
       await expect(run({ pages: [page()] })).rejects.toBeTruthy();
     }
-    expect(world.writes).toEqual([]);
+    const release = { path: ENT, value: { smartImportPending: "<delete>" } };
+    expect(world.writes).toEqual([claim, release, claim, release, claim, release]);
   });
   it("a spent free import refuses photos exactly as it refuses a sheet", async () => {
     world.store["users/u1/private/entitlement"] = { smartImportFreeUsed: true };

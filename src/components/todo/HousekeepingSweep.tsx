@@ -41,6 +41,7 @@ import { HkGroup, HK_RULES, HK_PAYOFF, mutedMembersForRule } from "../../lib/tod
 import { StagedPayload, applyStaged } from "../../lib/todoWalk";
 import { saveHkRows } from "../../lib/hkSave";
 import { isProUser, fetchAssistedFill, AssistFillError, AssistFound } from "../../lib/assistFill";
+import { aiRefusalReason, DAILY_LIMIT_MESSAGE } from "../../lib/aiRefusal";
 import { Agent, Query } from "../../types";
 import { formatDate } from "../../lib/dates";
 
@@ -418,7 +419,7 @@ export const HousekeepingSweep: React.FC<HousekeepingSweepProps> = ({ items, onC
                 setNotFound(new Set(targets.map((m) => m.agentId!).filter((id) => !byId[id] && !(rows[id] ?? "").trim())));
                 setAssistMsg(rs.length ? `Found ${rs.length} of ${targets.length} — check each before saving.` : "Nothing sourced this time — enter them manually.");
               } catch (e) {
-                setAssistMsg(e instanceof AssistFillError && e.code === "deadline-exceeded" ? "Took too long — enter these manually." : "Couldn’t reach assisted fill — enter these manually.");
+                setAssistMsg(aiRefusalReason(e) === "daily_limit" ? DAILY_LIMIT_MESSAGE : e instanceof AssistFillError && e.code === "deadline-exceeded" ? "Took too long — enter these manually." : "Couldn’t reach assisted fill — enter these manually.");
               } finally { setAssisting(false); }
             }}>
               {assisting ? "Searching…" : <>✨ Find these for me{!pro && <span className="tdb-propill">Pro</span>}</>}
