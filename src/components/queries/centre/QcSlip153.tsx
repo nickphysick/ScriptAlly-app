@@ -29,9 +29,9 @@ import "../../containers/framedSlip.css";
 import "./qcv153.css";
 import "./qcv1531.css";
 
-const A_IN = <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.5 3.5 4 12M4 5.5V12h6.5" /></svg>;
-const A_OUT = <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3.5 12.5 12 4M5.5 4H12v6.5" /></svg>;
-const A_END = <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M4 8h8" /></svg>;
+const A_IN = <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.5 3.5 4 12M4 5.5V12h6.5" /></svg>;
+const A_OUT = <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3.5 12.5 12 4M5.5 4H12v6.5" /></svg>;
+const A_END = <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 8h8" /></svg>;
 
 export const FACT_ICON = {
   queried: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round"><path d="M14 2 1.8 7.2l5 2 2 5z" /><path d="M14 2 6.8 9.2" /></svg>,

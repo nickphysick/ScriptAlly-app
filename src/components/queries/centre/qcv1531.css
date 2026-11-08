@@ -115,6 +115,10 @@
   .qc151.qc153 .qc153-seal { width: 40px; height: 40px; font: 400 14px/1 var(--sp-type) !important; }
   .qc151.qc153 .qc153-nd--cur { width: 34px; height: 34px; }
   .qc151.qc153 .qc153-nd--cur svg { width: 20px; height: 20px; }
+  /* v153.3 — the arrow badge: a 19px disc carrying a 13px glyph, centred, 5px over the node's top-right. The rule above
+     reached the badge's own svg too (a 20px glyph in a 19px disc, spilling past its edge); this one is scoped to it. */
+  .qc151.qc153 .qc153-nd--cur .qc153-arw { box-sizing: border-box; top: -5px; right: -5px; width: 19px; height: 19px; padding: 0; place-items: center; overflow: hidden; }
+  .qc151.qc153 .qc153-nd--cur .qc153-arw svg { width: 13px; height: 13px; overflow: hidden; }
 
   /* the facts: four equal boxes, lined up under the name (14 + 40 + 14) */
   .qc151.qc153 .qc153-facts { grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 0 14px 14px 68px; }
