@@ -112,7 +112,10 @@ const pageCode = page.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, ""
        case: undo reverses through the EXISTING inverses, and no compensator was invented. Reading
        both files keeps that claim whole rather than narrowing it to whichever half is convenient. */
     const scope = page + readFileSync(join(here, "useTaskCommit.tsx"), "utf8");
-    for (const inv of ["undoQueryStatus(q.id, prev", "deleteActivity(acts[0].id)", "snoozedUntil: null, unbumpSnooze: true", /* ⚠️ THE INVERSE CLEARS THE STAMP NOW, and this case is the right place to notice. Its law —
+    /* RETARGETED (undo and bulk close v1, Phase 3): the nudge's inverse found the row through the FEED
+       (`deleteActivity(acts[0].id)`) and now takes the row id logNudge returned (`undoNudge`). The law holds:
+       it deletes exactly what the nudge wrote and puts the prior fields back — no compensating entry. */
+    for (const inv of ["undoQueryStatus(q.id, prev", "undoNudge(q.id, r.activityId!, r.prior ?? {})", "snoozedUntil: null, unbumpSnooze: true", /* ⚠️ THE INVERSE CLEARS THE STAMP NOW, and this case is the right place to notice. Its law —
        undo reverses through the EXISTING inverses, no compensator invented — is unchanged: this is
        the same `updateUserTask` call, widened to clear `completedAt` as well as `done`, because a
        task that is not done has no time at which it was done. Asserting the widened form means a
