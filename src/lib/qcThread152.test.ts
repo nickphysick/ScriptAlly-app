@@ -32,15 +32,18 @@ describe("the thread (v152 §2.3)", () => {
     const t = buildThread([st("q", QueryStatus.QUERIED, 100), st("pr", QueryStatus.PARTIAL_REQUESTED, 0, { ms: null }), st("ps", QueryStatus.PARTIAL_SENT, 20)], { ...ctx, state: "agent", replyMs: null });
     expect(t.map((x) => (x.t === "wait" ? x.label : x.key))).toEqual(["q", "pr", "ps"]);
     const w = buildThread([st("q", QueryStatus.QUERIED, 10), st("pr", QueryStatus.PARTIAL_REQUESTED, 10), st("ps", QueryStatus.PARTIAL_SENT, 9)], { ...ctx, state: "agent", replyMs: null });
-    expect(w.filter((x) => x.t === "wait").map((x) => x.t === "wait" ? [x.label, x.side] : null)).toEqual([["Same day", "them"], ["1 day later", "me"]]);
-    expect(t.find((x) => x.t === "msg" && x.key === "pr")).toMatchObject({ date: "No date", dated: false });
+    /* v53 (D9): no "Same day" line — the day pill says it; "x days later" stays for a real gap */
+    expect(w.filter((x) => x.t === "wait").map((x) => x.t === "wait" ? [x.label, x.side] : null)).toEqual([["1 day later", "me"]]);
+    expect(t.find((x) => x.t === "msg" && x.key === "pr")).toMatchObject({ date: "Not dated", dated: false, stamp: null, dayMs: null });
   });
   it("v152.1 §2.2 yours paper (no tint), theirs tinted by the reply; a pass and your closes grey", () => {
     const t = buildThread([st("q", QueryStatus.QUERIED, 90), st("fr", QueryStatus.FULL_REQUESTED, 60), st("rr", QueryStatus.REVISE_RESUBMIT, 40), st("x", QueryStatus.REJECTED, 20)], { ...ctx, state: "closed", replyMs: null });
     const m = t.filter((x) => x.t === "msg") as Extract<(typeof t)[number], { t: "msg" }>[];
     expect(m.map((x) => x.tint?.fill ?? null)).toEqual([null, "#e7edf4", "#e7edf4", "#f1efec"]);
     expect(m.map((x) => x.grey)).toEqual([false, false, false, true]);
-    expect(m[2].title).toBe("Asked for a revision (R&R)");
+    /* v53 (D9): the thread reads as messages */
+    expect(m.map((x) => x.title)).toEqual([`You sent ${ctx.first} your query`, `${ctx.first.charAt(0).toUpperCase()}${ctx.first.slice(1)} asked for your full manuscript`,
+      `${ctx.first.charAt(0).toUpperCase()}${ctx.first.slice(1)} asked you to revise and resubmit`, `${ctx.first.charAt(0).toUpperCase()}${ctx.first.slice(1)} passed`]);
   });
   it("v152.1 §2.4 a nudge quotes the query, and counts itself from the 2nd", () => {
     const t = buildThread([st("q", QueryStatus.QUERIED, 90), st("n1", null, 60, { kind: "nudge" }), st("n2", null, 30, { kind: "nudge" })], { ...ctx, state: "agent", replyMs: null });
@@ -125,5 +128,43 @@ describe("v152.1 follow-up: a holding reply", () => {
     const t = buildThread([st("q", QueryStatus.QUERIED, 30), st("h", null, 10, { kind: "holding", quote: "Thanks — reading now." })], { ...ctx, state: "agent", replyMs: null });
     const h = t.find((x) => x.t === "msg" && x.kind === "holding") as Extract<(typeof t)[number], { t: "msg" }>;
     expect(h).toMatchObject({ side: "them", tint: { fill: "#ffffff", edge: "#e3dbd0" }, grey: false, quote: "Thanks — reading now." });
+  });
+});
+
+describe("v53 (D9) — the thread reads as messages", () => {
+  it("every event type's words, by first name, and 'the agent' when none is saved; never he or she", async () => {
+    const { msgTitle } = await import("./qcThread152");
+    const all: [Parameters<typeof msgTitle>[0], string][] = [
+      [{ status: QueryStatus.QUERIED, kind: null }, "You sent Jonathan your query"],
+      [{ status: QueryStatus.PARTIAL_REQUESTED, kind: null }, "Jonathan asked for a partial"],
+      [{ status: QueryStatus.PARTIAL_REQUESTED, kind: null, askedFor: "The first three chapters" }, "Jonathan asked for the first three chapters"],
+      [{ status: QueryStatus.PARTIAL_SENT, kind: null }, "You sent Jonathan your partial"],
+      [{ status: QueryStatus.FULL_REQUESTED, kind: null }, "Jonathan asked for your full manuscript"],
+      [{ status: QueryStatus.FULL_SENT, kind: null }, "You sent Jonathan your full manuscript"],
+      [{ status: QueryStatus.REVISE_RESUBMIT, kind: null }, "Jonathan asked you to revise and resubmit"],
+      [{ status: QueryStatus.RESUBMITTED, kind: null }, "You sent Jonathan your revision"],
+      [{ status: QueryStatus.OFFER, kind: null }, "Jonathan offered"],
+      [{ status: QueryStatus.REJECTED, kind: null }, "Jonathan passed"],
+      [{ status: QueryStatus.NO_RESPONSE, kind: null }, "You closed it: no reply"],
+      [{ status: QueryStatus.WITHDRAWN, kind: null }, "You withdrew your query"],
+      [{ status: QueryStatus.WITHDRAWN, kind: null, event: "offer_declined" }, "You turned down Jonathan’s offer"],
+      [{ status: QueryStatus.SIGNED, kind: null }, "You accepted Jonathan’s offer"],
+      [{ status: null, kind: "nudge" }, "You nudged Jonathan"],
+      [{ status: null, kind: "holding" }, "Jonathan sent a holding reply"],
+      [{ status: null, kind: "told", toldCount: 2 }, "You told 2 agents about the offer"],
+    ];
+    for (const [s, words] of all) expect(msgTitle(s, "Jonathan")).toBe(words);
+    expect(msgTitle({ status: QueryStatus.REJECTED, kind: null }, "the agent")).toBe("The agent passed");
+    expect(msgTitle({ status: QueryStatus.QUERIED, kind: null }, "the agent")).toBe("You sent the agent your query");
+    const every = all.map(([s]) => msgTitle(s, "the agent")).join(" ");
+    expect(every).not.toMatch(/\b(he|she|him|her|his|hers)\b/i);
+  });
+  it("the stamp and the day pill", async () => {
+    const { stampOf, dayPill } = await import("./qcThread152");
+    const now = new Date(2026, 10, 8, 15).getTime();
+    expect(stampOf(new Date(2024, 3, 2, 9).getTime())).toBe("2 Apr");
+    expect(dayPill(new Date(2026, 10, 8, 9).getTime(), now)).toBe("Today");
+    expect(dayPill(new Date(2026, 10, 7, 23).getTime(), now)).toBe("Yesterday");
+    expect(dayPill(new Date(2024, 3, 2, 9).getTime(), now)).toBe("2 April 2024");
   });
 });

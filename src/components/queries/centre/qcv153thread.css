@@ -1,0 +1,62 @@
+/* ══ To-do list v53 (design-refs/todo-list-v53/todo-desk-v13.html) — THE QUERY CARD'S THREAD AS MESSAGES ══
+   D9, on the To-do card and the Query Centre's alike (QcCard152 is the one card): one bubble style, a centred day pill
+   above each day's messages, a short stamp in the bubble's corner that shares the last line when there is room (a hidden
+   copy at the end of the last line holds it), and the writer's send method as a small icon after the stamp.
+   D8, opt-in through QcCard152's `desk` prop (the To-do desk only): the book as one row, typing dots, the step being
+   checked, the step just logged, and a several-things send's paperclip.
+   ⚠️ THE CARD PORTALS WITH THE PANEL (document.body): literals and `:root` tokens only. No `var()` in a keyframe. */
+
+/* ── one bubble ── */
+.qc152 .qc152-th { gap: 6px; }
+.qc152 .qc152-th > .qc152-m.me + .qc152-m.them, .qc152 .qc152-th > .qc152-m.them + .qc152-m.me,
+.qc152 .qc152-th > .qc152-m.them + .qc152-dp, .qc152 .qc152-th > .qc152-m.me + .qc152-dp { margin-top: 6px; }
+.qc152 .qc152-bx { padding: 7px 10px 7px 12px; border-radius: 14px; min-width: 0; }
+.qc152 .qc152-m.them .qc152-bx { border-bottom-left-radius: 4px; }
+.qc152 .qc152-m.me .qc152-bx { border-bottom-right-radius: 4px; }
+.qc152 .qc152-r1 b { font: 400 15px/1.35 var(--sp-serif); white-space: normal; }
+.qc152 .qc152-r1 { display: block; }
+.qc152 .qc152-r1 .qc152-nth, .qc152 .qc152-r1 .qc152-drt { margin-left: 6px; }
+/* the stamp, and the hidden room it keeps on the last line */
+.qc152 .qc152-tsp { display: inline-block; visibility: hidden; padding-left: 10px; font: 400 12px/1 var(--sp-serif); white-space: nowrap; }
+.qc152 .qc152-ts { position: absolute; right: 10px; bottom: 6px; font: 400 12px/1 var(--sp-serif); color: #8a8076; white-space: nowrap; display: inline-flex; align-items: center; gap: 3px; }
+.qc152 .qc152-m.them .qc152-ts { color: #5d6b7c; }
+.qc152 .qc152-via { display: inline-flex; font-style: normal; color: inherit; }
+.qc152 .qc152-tsp .qc152-via { display: inline-flex; }
+/* the day pill; "x days later" stays for real gaps */
+.qc152 .qc152-dp { align-self: center; margin: 6px 0 2px; padding: 3px 10px; border-radius: 8px; background: #f3efe8; font: 400 12.5px/1.3 var(--sp-serif); color: #7a7066; }
+/* the wait, as a status line under the newest message */
+.qc152 .qc153-sl { align-self: center; margin: 6px 0 2px; font: italic 400 13.5px/1.35 var(--sp-serif); color: #7a7066; text-align: center; }
+
+/* ── D8: the To-do desk's dress ── */
+.qc152 .qc153-bkrow { display: flex; align-items: baseline; gap: 8px; margin: 0 16px; padding: 7px 12px; border-radius: 10px; background: #f2ebe0; white-space: nowrap; overflow: hidden; min-width: 0; }
+.qc152 .qc153-bkrow span { flex: none; font: 400 14px var(--sp-serif); color: #7a7066; }
+.qc152 .qc153-bkrow b { min-width: 0; font: 400 16px/1.3 var(--sp-type); overflow: hidden; text-overflow: ellipsis; }
+/* typing dots: three bobbing dots in a paper bubble, on the writer's side */
+.qc152 .qc153-typing { align-self: flex-end; }
+.qc152 .qc153-typing .qc152-bx { background: #f6f3ee; padding: 10px 14px; border-bottom-right-radius: 4px; }
+.qc152 .qc153-dots { display: inline-flex; gap: 4px; vertical-align: middle; }
+.qc152 .qc153-dots i { width: 7px; height: 7px; border-radius: 50%; background: #a59a8c; animation: qc153Bob 1.2s infinite ease-in-out; }
+.qc152 .qc153-dots i:nth-child(2) { animation-delay: 0.15s; }
+.qc152 .qc153-dots i:nth-child(3) { animation-delay: 0.3s; }
+@keyframes qc153Bob { 0%, 60%, 100% { transform: translateY(0); opacity: 0.5; } 30% { transform: translateY(-4px); opacity: 1; } }
+/* the step being checked: a soft navy ring that swells and fades (~1.8s), with "Checking" beside it */
+.qc152 .qc152-m.qc153-chk .qc152-bx { animation: qc153Review 1.8s ease-in-out infinite; box-shadow: 0 0 0 2px rgba(42, 58, 82, 0.35); }
+@keyframes qc153Review { 0%, 100% { box-shadow: 0 0 0 2px rgba(42, 58, 82, 0.35); } 50% { box-shadow: 0 0 0 6px rgba(42, 58, 82, 0.08); } }
+.qc152 .qc153-chkw { position: absolute; right: calc(100% + 8px); top: 50%; transform: translateY(-50%); font: italic 400 13px/1 var(--sp-serif); color: #2a3a52; white-space: nowrap; }
+/* the step just logged: the stamp */
+.qc152 .qc153-stamp {
+  position: absolute; right: -8px; top: -14px; padding: 2px 7px; border: 2px solid #2a3a52; border-radius: 6px; background: #fff;
+  font: 400 13px var(--sp-type); color: #2a3a52; transform: rotate(-8deg); animation: qc153Stamp 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes qc153Stamp { from { transform: rotate(-8deg) scale(1.8); opacity: 0; } to { transform: rotate(-8deg) scale(1); opacity: 1; } }
+/* a several-things send: the paperclip count, and the list on hover (it opens upward and is never cut off: the card's
+   thread clips, so it is drawn inside the bubble's own box and the bubble keeps room for it) */
+.qc152 .qc153-clip { position: relative; display: inline-flex; align-items: center; gap: 3px; margin-left: 6px; padding: 1px 7px; border-radius: 999px; background: #fff; box-shadow: inset 0 0 0 1px #e6dfd4; font: 400 13px var(--sp-serif); color: #3a332d; cursor: default; vertical-align: 1px; }
+.qc152 .qc153-clippop { display: none; position: absolute; right: 0; top: calc(100% + 6px); z-index: 5; flex-direction: column; padding: 8px 12px; border-radius: 10px; background: #2a3a52; color: #fff; font: 400 14px/1.5 var(--sp-serif); white-space: nowrap; text-align: left; }
+.qc152 .qc153-clip:hover .qc153-clippop, .qc152 .qc153-clip:focus .qc153-clippop { display: flex; }
+
+@media (prefers-reduced-motion: reduce) {
+  .qc152 .qc153-dots i { animation: none; opacity: 0.8; }
+  .qc152 .qc152-m.qc153-chk .qc152-bx { animation: none; box-shadow: 0 0 0 2px rgba(42, 58, 82, 0.45); }
+  .qc152 .qc153-stamp { animation: none; }
+}

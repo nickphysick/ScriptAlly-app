@@ -20,21 +20,38 @@ export const CLOCK = <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10"
 export const ARROW = <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 6l4 4-4 4" /></svg>;
 export const CAL = <svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3.5" y="4.5" width="13" height="12" rx="2" /><path d="M3.5 8.5h13M7 3v3M13 3v3" /></svg>;
 
+/** v53 (D4): Gone quiet's row glyph. The app has none, so this is todo-desk-v13's own: a dotted grey ring. It is not a
+ *  status (StatusDot stays the only status glyph); a nudge's is QcBubble152's NUDGE_MARK. */
+export const QUIET_MARK = <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#9a9086" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true" data-tws="quiet-mark"><circle cx="12" cy="12" r="8" strokeDasharray="1.5 2.6" /></svg>;
+/** v53 (D4): housekeeping's row icon, one small form for every job */
+export const FORM = <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#7a7066" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true" data-tws="form-mark"><rect x="6" y="4" width="12" height="16" rx="2" /><path d="M9 9h6M9 13h6" strokeLinecap="round" /></svg>;
+
 export interface TileOpt<K extends string> { k: K; label: string; sub?: string; suggested?: boolean; disabled?: boolean; doc?: boolean }
+
+/**
+ * v53 (D5) — THE DESK DRAWS ITS ANSWERS AS TILES. The desktop desk wraps its questions in `DeskTiles`; inside it every
+ * answer is a tile in a grid with an icon box (the tick once chosen), and a date question is Today / Yesterday / Older.
+ * Outside it (the phone's task screen renders the same flows) nothing changes.
+ */
+export const DeskTiles = React.createContext(false);
+const RING = <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="5.5" /></svg>;
+const BOX = <svg viewBox="0 0 20 20" aria-hidden="true"><rect x="4.5" y="4.5" width="11" height="11" rx="2.5" /></svg>;
 
 /** Option cards. One component for single and multi choice: they look the same. */
 export function Tiles<K extends string>({ opts, value, onPick, multi = false, name }: {
   opts: readonly TileOpt<K>[]; value: K | readonly K[] | null | undefined; onPick: (k: K) => void; multi?: boolean; name: string;
 }) {
+  const desk = React.useContext(DeskTiles);
   const on = (k: K) => (Array.isArray(value) ? value.includes(k) : value === k);
   return (
-    <div className="tws-tiles" role={multi ? "group" : "radiogroup"} aria-label={name}>
+    <div className="tws-tiles" role={multi ? "group" : "radiogroup"} aria-label={name} data-desk={desk ? "" : undefined}>
       {opts.map((o) => (
         <button key={o.k} type="button" className="tws-tile" data-tws-opt={o.k} disabled={o.disabled}
           {...(multi ? { "aria-pressed": on(o.k) } : { role: "radio", "aria-checked": on(o.k) })} onClick={() => onPick(o.k)}>
-          {o.doc ? <span className="tws-di">{DOC}</span> : null}
+          {desk ? <span className="tws-ti2" aria-hidden="true">{on(o.k) ? TICK : o.doc ? DOC : multi ? BOX : RING}</span>
+            : o.doc ? <span className="tws-di">{DOC}</span> : null}
           <span className="tws-tn">{o.label}{o.suggested ? <i className="tws-sugg">Suggested</i> : null}{o.sub ? <small>{o.sub}</small> : null}</span>
-          <span className="tws-tk">{TICK}</span>
+          {desk ? null : <span className="tws-tk">{TICK}</span>}
         </button>
       ))}
     </div>
@@ -58,7 +75,76 @@ export const dayPhrase = (d: Date, today: Date): string => {
  * The date picker: six days as a strip (back from today for a thing that happened, on from tomorrow for a thing ahead),
  * then a chip that opens a month for anything further.
  */
-export function DatePick({ value, onPick, today, dir }: { value: Date; onPick: (d: Date) => void; today: Date; dir: "past" | "future" }) {
+export function DatePick(p: { value: Date; onPick: (d: Date) => void; today: Date; dir: "past" | "future" }) {
+  const desk = React.useContext(DeskTiles);
+  return desk ? <DateTiles {...p} /> : <DateStrip {...p} />;
+}
+
+/** v53 (D5): the desk's date question as tiles — the two nearest days, then "Older" (or "Later"), which opens the month */
+function DateTiles({ value, onPick, today, dir }: { value: Date; onPick: (d: Date) => void; today: Date; dir: "past" | "future" }) {
+  const near = dir === "past" ? [today, addDays(today, -1)] : [addDays(today, 1), addDays(today, 7)];
+  const names = dir === "past" ? ["Today", "Yesterday"] : ["Tomorrow", "In a week"];
+  const inNear = near.some((d) => dayDiff(d, value) === 0);
+  const [open, setOpen] = useState(!inNear);
+  const short = (d: Date) => `${DOW[d.getDay()]} ${d.getDate()} ${MONL[d.getMonth()].slice(0, 3)}`;
+  return (
+    <div className="tws-dpick" data-tws="date">
+      <div className="tws-tiles" role="radiogroup" aria-label="Pick a day" data-desk="">
+        {near.map((d, i) => {
+          const on = !open && dayDiff(d, value) === 0;
+          return (
+            <button key={ymdOf(d)} type="button" className="tws-tile" role="radio" aria-checked={on} data-tws-day={i} onClick={() => { setOpen(false); onPick(d); }}>
+              <span className="tws-ti2" aria-hidden="true">{on ? TICK : CAL}</span>
+              <span className="tws-tn">{names[i]}<small>{short(d)}</small></span>
+            </button>
+          );
+        })}
+        <button type="button" className="tws-tile" role="radio" aria-checked={open || !inNear} data-tws-day="older" onClick={() => setOpen((o) => !o)}>
+          <span className="tws-ti2" aria-hidden="true">{open || !inNear ? TICK : CAL}</span>
+          <span className="tws-tn">{dir === "past" ? "Older" : "Later"}<small>{!inNear ? short(value) : "Pick from the month"}</small></span>
+        </button>
+      </div>
+      {open ? <MonthCal value={value} onPick={onPick} today={today} dir={dir} /> : null}
+    </div>
+  );
+}
+
+function MonthCal({ value, onPick, today, dir }: { value: Date; onPick: (d: Date) => void; today: Date; dir: "past" | "future" }) {
+  const [month, setMonth] = useState(() => new Date(value.getFullYear(), value.getMonth(), 1));
+  const first = new Date(month.getFullYear(), month.getMonth(), 1);
+  const n = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
+  const lead = (first.getDay() + 6) % 7;
+  const minMonth = new Date(today.getFullYear(), today.getMonth() - (dir === "past" ? 24 : 0), 1);
+  const maxMonth = new Date(today.getFullYear(), today.getMonth() + (dir === "future" ? 18 : 0), 1);
+  const ok = (d: Date) => (dir === "past" ? dayDiff(d, today) <= 0 : dayDiff(d, today) > 0);
+  const calRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const cal = calRef.current;
+    const sc = cal?.closest<HTMLElement>(".tws-wq");
+    if (!cal || !sc) return;
+    const over = cal.getBoundingClientRect().bottom - sc.getBoundingClientRect().bottom + 8;
+    if (over > 0) sc.scrollTop += over;
+  }, []);
+  return (
+    <div className="tws-mcal" ref={calRef} data-tws="calendar">
+      <div className="tws-mh">
+        <button type="button" aria-label="Previous month" disabled={month <= minMonth} onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))}>‹</button>
+        <b>{MONL[month.getMonth()]} {month.getFullYear()}</b>
+        <button type="button" aria-label="Next month" disabled={month >= maxMonth} onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))}>›</button>
+      </div>
+      <div className="tws-mg">
+        {["M", "T", "W", "T", "F", "S", "S"].map((x, i) => <i key={i}>{x}</i>)}
+        {Array.from({ length: lead }, (_, i) => <span key={`l${i}`} />)}
+        {Array.from({ length: n }, (_, i) => {
+          const d = new Date(month.getFullYear(), month.getMonth(), i + 1);
+          return <button key={i} type="button" disabled={!ok(d)} data-today={dayDiff(d, today) === 0 ? "" : undefined} aria-pressed={dayDiff(d, value) === 0} onClick={() => onPick(d)}>{i + 1}</button>;
+        })}
+      </div>
+    </div>
+  );
+}
+
+function DateStrip({ value, onPick, today, dir }: { value: Date; onPick: (d: Date) => void; today: Date; dir: "past" | "future" }) {
   const strip = Array.from({ length: 6 }, (_, i) => addDays(today, dir === "past" ? -i : i + 1));
   const inStrip = strip.some((d) => dayDiff(d, value) === 0);
   const [open, setOpen] = useState(!inStrip);

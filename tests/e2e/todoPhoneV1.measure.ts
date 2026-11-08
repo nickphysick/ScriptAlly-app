@@ -44,9 +44,11 @@ async function desk(page: Page) {
   await expect(pg.locator("[data-tws-row]").first()).toBeVisible({ timeout: 30_000 });
   await page.waitForTimeout(500);
   return pg.evaluate((r) => {
-    const stats = [...r.querySelectorAll('[data-tws="stats"] b')].map((b) => Number(b.textContent));
+    /* To-do list v53 (D2, D3): the desktop's counts are the tray's — late from the breakdown bar, cleared from Done */
+    const late = Number((r.querySelector('[data-tws="bar-late"]')?.textContent ?? "0").match(/\d+/)?.[0] ?? 0);
+    const cleared = Number([...r.querySelectorAll<HTMLElement>(".tws-seg button")].find((b) => /^Done/.test(b.textContent ?? ""))?.querySelector("b")?.textContent ?? 0);
     return {
-      todo: Number(r.querySelector('[data-tws="todo-count"]')?.textContent), late: stats[1], cleared: stats[2],
+      todo: Number(r.querySelector('[data-tws="todo-count"]')?.textContent), late, cleared,
       start: r.querySelector('[data-tws="start-phrase"]')?.textContent ?? null,
       groups: [...r.querySelectorAll(".tws-gb b")].map((b) => b.textContent ?? ""),
     };
@@ -121,8 +123,10 @@ for (const vp of SIZES) {
     if (MUT === "L3") await page.evaluate(() => { document.querySelector('[data-tdp="start-phrase"]')!.textContent = "Something else"; });
     const phrase = await page.locator('[data-tdp="start-phrase"]').textContent();
     note(`L3-${vp.width}`, { desk: d.start, phone: phrase });
-    expect(d.start, "the desktop names a priority task").toBeTruthy();
-    expect(phrase).toBe(d.start);
+    /* To-do list v53 (D4) took Start here off the desktop, so there is nothing there to compare with: the phone keeps its
+       own Start here (lib/todoWs priorityTask, unit-locked), and this holds that it is drawn (tests/e2e/RETIRED-todo-list-v53.md) */
+    expect(d.start, "the desktop has no Start here (v53)").toBeNull();
+    expect((phrase ?? "").trim().length, "the phone's Start here names a task").toBeGreaterThan(0);
   });
 
   test(`L4 · the groups are WS_GROUPS in order, and a collapse survives a reload · ${tag}`, async ({ page }) => {

@@ -227,6 +227,9 @@ export const WS_WHENS: readonly WsWhen[] = ["Overdue", "Due this week", "Coming 
 export const whenOf = (t: WsTask): WsWhen =>
   t.dueDays == null ? "No date" : t.dueDays < 0 ? "Overdue" : t.dueDays <= 6 ? "Due this week" : "Coming up";
 
+/** v53: a filter's and a group's words; "No date" is never shown (it read as a missing figure) */
+export const whenWord = (w: WsWhen): string => (w === "No date" ? "Not dated" : w);
+
 export interface WsFilters { q: string; types: ReadonlySet<WsType>; whens: ReadonlySet<WsWhen> }
 export const NO_WS_FILTERS: WsFilters = { q: "", types: new Set(), whens: new Set() };
 
@@ -244,7 +247,7 @@ export type WsGrouping = "category" | "urgency" | "when" | "agent" | "none";
 export const WS_GROUPINGS: readonly { id: WsGrouping; label: string; hint: string }[] = [
   { id: "category", label: "Category", hint: "Agents are waiting · Nudges · Gone quiet · Housekeeping · Yours" },
   { id: "urgency", label: "Urgency", hint: "Needs you now · Housekeeping · Yours" },
-  { id: "when", label: "When", hint: "Overdue · Due this week · Coming up · No date" },
+  { id: "when", label: "When", hint: "Overdue · Due this week · Coming up · Not dated" },
   { id: "agent", label: "Agent", hint: "What you owe each person" },
   { id: "none", label: "None", hint: "One flat list" },
 ];
@@ -265,7 +268,7 @@ export function wsSections(tasks: readonly WsTask[], g: WsGrouping): WsSection[]
     ];
   }
   if (g === "when") {
-    return WS_WHENS.map((w, n) => ({ id: w, name: w, band: (["wait", "nudge", "quiet", "house"] as const)[n], tasks: sorted.filter((t) => whenOf(t) === w) }));
+    return WS_WHENS.map((w, n) => ({ id: w, name: whenWord(w), band: (["wait", "nudge", "quiet", "house"] as const)[n], tasks: sorted.filter((t) => whenOf(t) === w) }));
   }
   if (g === "agent") {
     const names = [...new Set(sorted.map((t) => t.agentName || "Yours"))];
@@ -328,6 +331,49 @@ export function dayBit(t: WsTask): DayBit {
   return { big: String(t.dueDays), small: t.dueDays === 1 ? "day left" : "days left", late: false };
 }
 
+/* ── To-do list v53 (D4) — the tray row's right-hand figure, and the breakdown bar ─────────────────── */
+
+export interface TrayFigure { n: string; words: string; late: boolean }
+const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
+const dueFigure = (d: number): TrayFigure => d < 0 ? { n: String(-d), words: plural(-d, "day late", "days late"), late: true }
+  : d === 0 ? { n: "Today", words: "", late: true } : { n: String(d), words: plural(d, "day left", "days left"), late: false };
+/**
+ * The figure at a row's right: a request "{n} days waiting" (since the agent asked), a nudge "{n} days late", Gone quiet
+ * "{n} days quiet", an own task its due date. ⚠️ NEVER "No date": a task with no number to give shows none.
+ * Housekeeping shows its Quick fill label instead (null here).
+ */
+export function trayFigure(t: WsTask, nowMs: number): TrayFigure | null {
+  const waited = Number.isFinite(t.item.anchorMs) && t.kind !== "own" ? Math.max(0, Math.round((nowMs - t.item.anchorMs) / DAY)) : null;
+  const waiting = (): TrayFigure | null => (waited == null ? null : { n: String(waited), words: plural(waited, "day waiting", "days waiting"), late: false });
+  switch (t.kind) {
+    case "fix": case "batch": return null;
+    case "quiet": return t.quietDays == null ? null : { n: String(t.quietDays), words: plural(t.quietDays, "day quiet", "days quiet"), late: false };
+    case "send": case "rr": return waiting();
+    case "nudge": return t.dueDays == null ? waiting() : dueFigure(t.dueDays);
+    case "offer": case "own": case "other": return t.dueDays == null ? (t.kind === "own" ? null : waiting()) : dueFigure(t.dueDays);
+    default: { const unhandled: never = t.kind; return unhandled; }
+  }
+}
+
+export interface Breakdown { wait: number; nudge: number; quiet: number; house: number; late: number; need: number }
+/** the bar's counts, read off the category sections the tray draws (so the two cannot disagree) and the late count */
+export function breakdownOf(sections: readonly WsSection[]): Breakdown {
+  const n = (id: string) => sections.find((s) => s.id === id)?.tasks.length ?? 0;
+  const urgent = sections.filter((s) => s.id === "wait" || s.id === "nudge" || s.id === "quiet").flatMap((s) => s.tasks);
+  const late = sections.flatMap((s) => s.tasks).filter((t) => t.kind !== "quiet" && t.dueDays != null && t.dueDays < 0).length;
+  return { wait: n("wait"), nudge: n("nudge"), quiet: n("quiet"), house: n("house"), late, need: urgent.length };
+}
+
+/**
+ * v53 (D10): what finishing `t` clears — the whole list, its group, or neither. Read over the WHOLE list (never the
+ * tray's filtered view: a search must not turn one row into "All caught up").
+ */
+export function milestoneFor(all: readonly WsTask[], t: WsTask): "list" | "group" | null {
+  const rest = all.filter((x) => x.key !== t.key);
+  if (!rest.length) return "list";
+  return rest.some((x) => x.group === t.group) ? null : "group";
+}
+
 /** the desk header's due chip: [figure, words], or null */
 export function dueChip(t: WsTask): { b: string; s: string; late: boolean } | null {
   if (t.kind === "fix") return null;
@@ -352,8 +398,10 @@ export interface QuietFacts {
 export function mentorLine(t: WsTask, facts?: QuietFacts): string {
   const a = t.first;
   switch (t.kind) {
-    case "send": return `${a} asked for your ${t.query?.status === QueryStatus.FULL_REQUESTED ? "full manuscript" : "partial"}. Once it’s gone, log it here and I’ll keep an eye out for ${poss(a)} reply.`;
-    case "rr": return `${a} asked you to revise and resubmit. Once the new version’s gone, log it here and I’ll keep an eye out for the reply.`;
+    /* v53 (D12): the hawk only says what the app does — it works out dates and adds tasks; it never watches, checks or
+       hears from an agent, because the writer logs everything */
+    case "send": return `${a} asked for your ${t.query?.status === QueryStatus.FULL_REQUESTED ? "full manuscript" : "partial"}. Once you’ve sent it, log it here and I’ll work out when ${poss(a)} reply is due.`;
+    case "rr": return `${a} asked you to revise and resubmit. Once you’ve sent the new version, log it here and I’ll work out when ${poss(a)} reply is due.`;
     case "offer": return `An offer! Take your time. Tell me what you said to ${a} and I’ll sort out what happens next.`;
     /* the agent's stated reply time is said only where it is set (Agent.responseTimeWeeks); otherwise nothing about it */
     case "nudge": return facts?.windowWeeks

@@ -10,7 +10,7 @@ import type { ClearedAct } from "./todoCleared";
 import { describe, expect, it } from "vitest";
 import { QueryStatus, type Agent, type Query, type UserTask } from "../types";
 import type { TrayItem } from "./todoTray";
-import { andList, dayBit, doingPhrase, doneTabRows, dueChip, mentorLine, passes, priorityTask, replyWords, startReason, stripWords, whenOf, wsSections, wsTasks, NO_WS_FILTERS, STRIP_GROUP, type WsTask } from "./todoWs";
+import { andList, breakdownOf, milestoneFor, dayBit, doingPhrase, doneTabRows, trayFigure, dueChip, mentorLine, passes, priorityTask, replyWords, startReason, stripWords, whenOf, wsSections, wsTasks, NO_WS_FILTERS, STRIP_GROUP, type WsTask } from "./todoWs";
 
 const NOW = Date.parse("2026-11-05T10:00:00");
 const ymd = (d: number) => { const x = new Date(NOW + d * 86400000); return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, "0")}-${String(x.getDate()).padStart(2, "0")}`; };
@@ -106,7 +106,9 @@ describe("the words", () => {
   it("the Mentor speaks in the first person, and never guesses a pronoun for an agent", () => {
     const lines = tasks.map((t: WsTask) => mentorLine(t, { nudgedOn: null, nrmn: true, windowWeeks: 8 }));
     expect(lines.join(" ")).not.toMatch(/\b(he|she|him|her|his|hers)\b/i);
-    expect(mentorLine(byKey("send"))).toMatch(/I’ll keep an eye out/);
+    /* v53 (D12): the hawk says what the app does (works out a date), never that it watches or hears from anyone */
+    expect(mentorLine(byKey("send"))).toMatch(/Once you’ve sent it, log it here and I’ll work out when .+ reply is due\./);
+    expect(lines.join(" ")).not.toMatch(/keep an eye|watch|I’ll check|hear(s)? from/i);
     expect(mentorLine(byKey("quiet"), { nudgedOn: null, nrmn: true, windowWeeks: 8 })).toBe("Inkwell & Stone say no reply after 8 weeks means no, and it’s been 16 weeks. Closing it is reasonable, but it’s your call.");
   });
   it("the reply-time slider's readout", () => {
@@ -282,5 +284,36 @@ describe("doneTabRows", () => {
   it("Monday 00:00 London is in the week; Sunday 23:59 is not (GMT in November)", () => {
     const rows = doneTabRows([], [dis("mon", "2026-11-02T00:00:00Z"), dis("sun", "2026-11-01T23:59:00Z")], (a) => a.id, now);
     expect(rows.map((r) => r.key)).toEqual(["mon"]);
+  });
+});
+
+describe("v53 — the tray's figure and the breakdown bar", () => {
+  it("a request counts days waiting, a nudge days late, Gone quiet days quiet; never \"No date\"", () => {
+    const now = Date.parse("2026-11-08T12:00:00");
+    for (const t of tasks as WsTask[]) {
+      const f = trayFigure(t, now);
+      if (f) expect(`${f.n} ${f.words}`).not.toMatch(/No date/);
+      if (t.kind === "send" || t.kind === "rr") { if (f) expect(f.words).toMatch(/days? waiting/); }
+      if (t.kind === "quiet" && t.quietDays != null) expect(f?.words).toMatch(/days? quiet/);
+      if (t.kind === "fix" || t.kind === "batch") expect(f).toBeNull();
+    }
+  });
+  it("the bar's counts are the category groups' counts", () => {
+    const secs = wsSections(tasks as WsTask[], "category");
+    const b = breakdownOf(secs);
+    const n = (id: string) => secs.find((s) => s.id === id)!.tasks.length;
+    expect([b.wait, b.nudge, b.quiet, b.house]).toEqual([n("wait"), n("nudge"), n("quiet"), n("house")]);
+    expect(b.need).toBe(n("wait") + n("nudge") + n("quiet"));
+  });
+});
+
+describe("v53 — the milestone", () => {
+  it("a group cleared, the whole list cleared, or neither (over the whole list, never a filtered view)", () => {
+    const all = tasks as WsTask[];
+    const lone = all.find((t) => all.filter((x) => x.group === t.group).length === 1);
+    const many = all.find((t) => all.filter((x) => x.group === t.group).length > 1)!;
+    expect(milestoneFor(all, many)).toBeNull();
+    if (lone) expect(milestoneFor(all, lone)).toBe("group");
+    expect(milestoneFor([many], many)).toBe("list");
   });
 });

@@ -164,7 +164,7 @@ test("your own task: add it, a step, then delete it (the account is put back)", 
   await expect(row).toHaveCount(0, { timeout: 15_000 });
 });
 
-test("a nudge, logged and undone: the celebration, then the task is back (the account is put back)", async ({ page }) => {
+test("a nudge, logged and undone: the snackbar, then the task is back (the account is put back)", async ({ page }) => {
   await open(page, SIZES[0]);
   const pg = page.locator('[data-tws="page"]:visible');
   const nudge = pg.locator("[data-tws-row]").filter({ hasText: /^Nudge / }).first();
@@ -177,13 +177,14 @@ test("a nudge, logged and undone: the celebration, then the task is back (the ac
   await desk.locator('[data-tws="primary"][data-next]').click();
   await expect(desk.locator('[data-tws="story"]')).toContainText("You nudged");
   await desk.locator('[data-tws="primary"][data-log]').click();
-  const yay = page.locator('[data-tws="yay"]:visible');
-  await expect(yay).toBeVisible({ timeout: 15_000 });
-  await expect(yay).toContainText("Nudge logged.");
+  /* v53 (D10): no celebration for one task — the snackbar says what happened, with Undo */
+  const snack = page.locator('[data-tws="toast"][data-snack]');
+  await expect(snack).toBeVisible({ timeout: 15_000 });
+  await expect(snack).toContainText("Nudge logged for");
   await expect(pg.locator("[data-tws-row]").filter({ hasText: title })).toHaveCount(0, { timeout: 15_000 });
   await page.screenshot({ path: `${DIR}/logged.png` });
   /* put the account back: the drawer's snapshot restores every touched document */
-  await yay.getByRole("button", { name: "Undo" }).click();
+  await snack.locator('[data-tws="undo"]').click();
   await expect(pg.locator("[data-tws-row]").filter({ hasText: title })).toHaveCount(1, { timeout: 20_000 });
 });
 
@@ -212,7 +213,9 @@ test("one count: the To do tab = the group headings' sum = m in n/m; the badge s
     const tab = Number(root.querySelector('[data-tws="todo-count"]')?.textContent ?? "NaN");
     const heads = [...root.querySelectorAll<HTMLElement>(".tws-gb")].map((h) => {
       let n = 0;
-      for (let e = h.nextElementSibling; e && !e.classList.contains("tws-gb"); e = e.nextElementSibling) if (e.hasAttribute("data-tws-row")) n++;
+      /* v53: the heading sits in a wrapper with its Quick fill (.tws-gbw); its rows follow the wrapper */
+      const from = h.closest(".tws-gbw") ?? h;
+      for (let e = from.nextElementSibling; e && !e.classList.contains("tws-gb") && !e.classList.contains("tws-gbw"); e = e.nextElementSibling) if (e.hasAttribute("data-tws-row")) n++;
       return { name: h.querySelector("b")?.textContent ?? "", says: Number(h.querySelector("em")?.textContent ?? "NaN"), rows: n, open: h.getAttribute("aria-expanded") === "true" };
     });
     const pos = (root.querySelector('[data-tws="pos"]')?.textContent ?? "").match(/^(\d+)\/(\d+)$/);
