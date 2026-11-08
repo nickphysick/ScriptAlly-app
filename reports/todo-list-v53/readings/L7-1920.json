@@ -1,0 +1,65 @@
+{
+ "title": "Nudge Marcus",
+ "logged": "Logged",
+ "snack": "Nudge logged for Marcus · I’ll suggest closing it if nothing by Mon 7 DecUndo",
+ "deskAfter": "Nudge Joan",
+ "mile": 0,
+ "presses": 1,
+ "docs": [
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-3/activity/act-nrxsddjr3",
+   "fields": [
+    "agentName",
+    "createdAt",
+    "eventKey",
+    "note",
+    "queryId",
+    "reminderDate",
+    "type"
+   ],
+   "mask": null
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/activities/act-nrxsddjr3",
+   "fields": [
+    "activityType",
+    "date",
+    "description",
+    "details",
+    "eventKey",
+    "id",
+    "manuscriptId",
+    "queryId",
+    "userId"
+   ],
+   "mask": null
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-3",
+   "fields": [
+    "closePlan",
+    "lastNudgeSentDate"
+   ],
+   "mask": [
+    "closePlan",
+    "lastNudgeSentDate",
+    "nudgeDate"
+   ]
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-3",
+   "fields": [
+    "agentId",
+    "dateSent",
+    "id",
+    "manuscriptId",
+    "packageId",
+    "personalisationNotes",
+    "sendMethod",
+    "status",
+    "userId"
+   ],
+   "mask": null
+  }
+ ]
+}

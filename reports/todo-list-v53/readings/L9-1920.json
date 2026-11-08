@@ -1,0 +1,14 @@
+{
+ "grp": {
+  "wait": 16,
+  "nudge": 12,
+  "quiet": 15,
+  "house": 52
+ },
+ "bar": {
+  "wait": 16,
+  "nudge": 12,
+  "quiet": 15
+ },
+ "words": "43 need you · 29 late · 52 to tidy"
+}
