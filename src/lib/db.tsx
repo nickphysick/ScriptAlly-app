@@ -113,6 +113,7 @@ import { buildNudgeWrites, reconcileNudge, NUDGE_NESTED_TYPE, type StoredNudge }
 import { writeActivity } from "./activityWrite";
 import { createManuscript, updateManuscriptFields } from "./manuscriptWrite";
 import { narrate } from "./narrate";
+import { commitNudge } from "./nudgeWrite";
 import { resolveGenre, matchKey } from "./genres";
 import { commitAgentEdits, AgentEditPatch, AgentExtraWrite, SaveAgentResult } from "./saveAgentEdits";
 import { computeAgentDeadlineWrites } from "./computeAgentDeadlineWrites";
@@ -3806,41 +3807,26 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       ...(typeof (q as unknown as Record<string, unknown>).lastNudgeSentDate === "string" ? { lastNudgeSentDate: (q as unknown as Record<string, string>).lastNudgeSentDate } : {}),
     };
 
-    // 1) ONE event id for both stores (the saveQueryEdits same-id-twin convention).
-    //    1a — AUTHORITATIVE: the per-query subcollection the Tracking timeline reads. A failure
-    //    here aborts the nudge (nothing else may land without the source-of-truth row).
+    // ONE event id for both stores (the saveQueryEdits same-id-twin convention).
     const actId = "act-" + Math.random().toString(36).substr(2, 9);
-    try {
-      await setDoc(doc(db, "users", currentUser.id, "queries", queryId, "activity", actId), writes.nested);
-    } catch (e) {
-      handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/queries/${queryId}/activity/${actId}`);
-      return { success: false, error: "Failed to log nudge." };
-    }
-    //    1b — PROJECTION twin: the global feed the dashboard reads, derived from the SAME build +
-    //    id (never an independent parallel write). Best-effort: a missing twin must never fail the
-    //    nudge — the authoritative row already landed. (Pending the parked store consolidation.)
-    await addActivity({ ...writes.activity, id: actId });
-
-    try {
-      // 2) Set the next-nudge field + bookkeeping. updateQuery never touches status/responseDeadline.
-      await updateQuery(queryId, writes.queryUpdates);
-
-      // 3) Hide-and-resurface the nudge_overdue task on the check-back date — a taskFlag snooze.
-      //    The deterministic key means a repeat nudge updates the same flag (no stacked duplicates).
-      //    ⚠️ A DISMISSAL WITH NO RESURFACE DATE IS THE MUTE (journey round, Phase 5): the writer
-      //    answered "don't ask again", so the suggestion stops for THIS query rather than returning.
-      //    `MUTED_UNTIL` is the same indefinite value `dismissTask(…, "permanent")` writes, so the
-      //    two doors reach one state rather than two that have to be kept in step.
-      await upsertTaskFlag(flagKeyForTask("nudge_overdue", queryId), {
+    /* ⚠️ THE ROW AND THE DATE ARE ONE BATCH (timeline writer fix v1) — lib/nudgeWrite.ts.
+       1 — AUTHORITATIVE, together: the per-query row the Tracking timeline reads, and the query's
+           nudge fields (exactly what updateQuery wrote here). Either both land or neither.
+       2 — after it, and unable to fail the nudge: the PROJECTION twin in the global feed (same build,
+           same id), and the task flag that hides nudge_overdue until the check-back date.
+           ⚠️ A DISMISSAL WITH NO RESURFACE DATE IS THE MUTE (journey round, Phase 5): the writer
+           answered "don't ask again", so the suggestion stops for THIS query rather than returning.
+           `MUTED_UNTIL` is the same indefinite value `dismissTask(…, "permanent")` writes, so the
+           two doors reach one state rather than two that have to be kept in step. */
+    const r = await commitNudge(db, currentUser.id, queryId, actId, writes, {
+      writeTwin: () => addActivity({ ...writes.activity, id: actId }),
+      writeFlag: () => upsertTaskFlag(flagKeyForTask("nudge_overdue", queryId), {
         snoozedUntil: writes.dismissal.dismissType === "custom date"
           ? writes.dismissal.resurfaceDate
           : MUTED_UNTIL,
-      });
-      return { success: true, activityId: actId, prior };
-    } catch (e) {
-      handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/queries/${queryId} [logNudge]`);
-      return { success: false, error: "Failed to log nudge." };
-    }
+      }),
+    });
+    return r.success ? { success: true, activityId: actId, prior } : { success: false, error: r.error };
   };
 
   /**
