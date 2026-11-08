@@ -110,6 +110,7 @@ import { queriesForManuscript, queriesForAgent, activityIdsForQueries, flagIdsFo
 import { recomputeQuery as recomputeQueryOnline, subcollectionDocToDerivable, monotonicEventTime } from "./recomputeQuery";
 import { importedSentDate, seedsOwnHistory } from "./addQueryShape";
 import { buildNudgeWrites, reconcileNudge, NUDGE_NESTED_TYPE, type StoredNudge } from "./logNudge";
+import { writeActivity } from "./activityWrite";
 import { resolveGenre, matchKey } from "./genres";
 import { commitAgentEdits, AgentEditPatch, AgentExtraWrite, SaveAgentResult } from "./saveAgentEdits";
 import { computeAgentDeadlineWrites } from "./computeAgentDeadlineWrites";
@@ -1678,25 +1679,27 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       const orphanNote = orphanedBlobs.length
         ? `${orphanedBlobs.length} file${orphanedBlobs.length > 1 ? "s" : ""} could not be removed from storage: ${orphanedBlobs.join(", ")}`
         : "";
-      await addActivity({
+      const deleteRecord = await addActivity({
         activityType: ActivityType.MANUSCRIPT_DELETED,
         description: `You deleted “${msTitle}”${detail}`,
         manuscriptId: "",
         queryId: "",
         date: new Date().toISOString(),
         details: orphanNote,
-        /* ⚠️ LOGGED, NOT SWALLOWED. This was `.catch(() => {})`, which is right for a record nobody
-           depends on and wrong the moment it became the only durable trace of an orphaned blob: a
-           dropped failure is indistinguishable from no failure. The delete itself still stands. */
-      }).catch((e) => {
+      });
+      /* ⚠️ LOGGED, NOT SWALLOWED. The delete itself still stands; but this record is the only durable
+         trace of an orphaned blob, so a failure to write it is said out loud. addActivity RESOLVES
+         `{ success: false }` rather than rejecting (timeline writer fix v1), so this checks the result —
+         a `.catch` here would never run. */
+      if (!deleteRecord.success) {
         console.error(
           `[attachments] the delete record could not be written; ` +
           (orphanedBlobs.length
             ? `THE ONLY REMAINING TRACE OF ${orphanedBlobs.length} ORPHANED BLOB(S) IS THIS LINE: ${orphanedBlobs.join(", ")}`
             : "no orphans to report"),
-          e,
+          deleteRecord.error,
         );
-      });
+      }
     } catch (e) {
       handleFirestoreError(e, OperationType.DELETE, `users/${uid}/manuscripts/${id}`);
     }
@@ -2372,7 +2375,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         queryId: "",
         date: new Date().toISOString(),
         details: "",
-      }).catch(() => { /* best-effort: the delete itself succeeded */ });
+      }); // resolves { success: false } on failure (never rejects); the delete itself succeeded
     } catch (e) {
       handleFirestoreError(e, OperationType.DELETE, `users/${uid}/agents/${id}`);
     }
@@ -3324,23 +3327,14 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
-  // General add activity logger
+  // General add activity logger.
+  // ⚠️ IT NEVER THROWS (timeline writer fix v1): a failure is logged and returned as
+  // `{ success: false, error }` — see lib/activityWrite.ts. A caller whose entry IS the record checks
+  // `success`; every narration caller carries on, because its own action already landed.
   const addActivity = async (act: Omit<Activity, "id" | "userId"> & { id?: string }): Promise<{ success: boolean; error?: string }> => {
     if (!currentUser) return { success: false, error: "Session required." };
-    const id = act.id || "act-" + Math.random().toString(36).substr(2, 9);
-    const newAct: Activity = {
-      ...act,
-      id,
-      userId: currentUser.id
-    };
-
-    try {
-      await setDoc(doc(db, "users", currentUser.id, "activities", id), newAct);
-      return { success: true };
-    } catch (e) {
-      handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/activities/${id}`);
-      return { success: false, error: "Failed to persist activity." };
-    }
+    const r = await writeActivity(db, currentUser.id, act);
+    return r.success ? { success: true } : { success: false, error: r.error };
   };
 
   /**
