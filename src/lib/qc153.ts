@@ -97,7 +97,8 @@ export function queriedFact(r: Pick<QcRow, "sentMs">, nowMs: number): Fact {
 export function heardFact(r: Pick<QcRow, "history">, nowMs: number): Fact {
   const ms = lastHeardMs(r);
   if (ms == null) return { value: "No reply yet", line: null, soft: true };
-  const span = r.history.spans.find((s) => s.startMs === ms);
+  /* the AGENT's move on that day: a query sent the same day shares the date and must not name it */
+  const span = r.history.spans.find((s) => s.startMs === ms && (slipDir(s.status) === "in" || s.status === QueryStatus.REJECTED));
   return { value: shortDate(ms, nowMs), line: span ? standWords(span).toLowerCase() : null };
 }
 /** Next: the existing Next wording (lib/qc1512 `nextNum`), joined onto one value */

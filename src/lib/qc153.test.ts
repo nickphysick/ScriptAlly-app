@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { QueryStatus } from "../types";
-import { slipDir, slipTone, slipTrack } from "./qc153";
+import { heardFact, slipDir, slipTone, slipTrack } from "./qc153";
 
 const span = (status: QueryStatus, startMs: number) => ({ status, startMs, endMs: null, current: false });
 const hist = (...s: QueryStatus[]) => ({ spans: s.map((x, i) => span(x, 1000 + i)), currentStartMs: null, dated: true });
@@ -47,5 +47,12 @@ describe("the track marks skipped steps", () => {
   it("a closed span never counts as reaching a stage", () => {
     const t = slipTrack({ status: QueryStatus.OFFER, furthest: "full", history: hist(QueryStatus.QUERIED, QueryStatus.REJECTED, QueryStatus.OFFER) });
     expect(t.nodes).toEqual(["reached", "skip", "skip", "cur"]);
+  });
+});
+
+describe("Last heard names the agent's move", () => {
+  it("even when the query went out the same day", () => {
+    const h = { spans: [span(QueryStatus.QUERIED, 5000), span(QueryStatus.REVISE_RESUBMIT, 5000)], currentStartMs: null, dated: true };
+    expect(heardFact({ history: h }, 9000).line).toBe("revise & resubmit");
   });
 });
