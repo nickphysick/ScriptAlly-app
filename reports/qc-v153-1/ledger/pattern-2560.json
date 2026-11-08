@@ -1,0 +1,32 @@
+[
+ {
+  "where": "P2 the rail's header is white",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "where": "P2 with a 2px navy rule at its foot",
+  "ok": true,
+  "detail": "rgb(42, 58, 82) 0px -2px 0px 0px inset"
+ },
+ {
+  "where": "P1 precondition: a margin of ground beside the columns",
+  "ok": true,
+  "detail": "368px"
+ },
+ {
+  "where": "P1 precondition: the list is long",
+  "ok": true,
+  "detail": "max scroll 9124"
+ },
+ {
+  "where": "P1 precondition: scrolled to the foot",
+  "ok": true,
+  "detail": "9124 of 9124"
+ },
+ {
+  "where": "P1 the tile is visible at the foot of the list",
+  "ok": true,
+  "detail": "2291 stroke pixels of 110400 (top 2301)"
+ }
+]

@@ -1,0 +1,57 @@
+[
+ {
+  "where": "S1 population",
+  "ok": true,
+  "detail": "35 slips"
+ },
+ {
+  "where": "S1 every seal is 40px",
+  "ok": true,
+  "detail": "40"
+ },
+ {
+  "where": "S1 every current step is 34px",
+  "ok": true,
+  "detail": "34"
+ },
+ {
+  "where": "S1 four boxes: Queried, Last heard, Next, Their policy",
+  "ok": true,
+  "detail": "queried,heard,next,policy"
+ },
+ {
+  "where": "S1 the boxes are one row of four",
+  "ok": true,
+  "detail": "4 cols · 1 rows · slip 1300px"
+ },
+ {
+  "where": "S1 the first box lines up under the name",
+  "ok": true,
+  "detail": "570 vs 570"
+ },
+ {
+  "where": "S1 policy words are the four forms",
+  "ok": true,
+  "detail": "Replies to everyone | — | No reply means no"
+ },
+ {
+  "where": "S1 no policy value is cut off",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "S2 some slips carry a materials strip",
+  "ok": true,
+  "detail": "27"
+ },
+ {
+  "where": "S2 an asked chip is dashed, the others are not",
+  "ok": true,
+  "detail": "[{\"t\":\"Partialasked\",\"ask\":true,\"border\":\"dashed\"}]"
+ },
+ {
+  "where": "S2 the package reads 'Sent with …'",
+  "ok": true,
+  "detail": " | Sent with Light | Sent with Autumn round | Sent with The Complete Autumn Submission Bundle for Literary Agents"
+ }
+]
