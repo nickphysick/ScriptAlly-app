@@ -32,6 +32,9 @@ export interface NotifyPrefs {
   /** "Tell me when it's ready" on the dashboard's Scout card (Dashboard feed v1), one leaf (`notifyPrefs.scout`); here
    *  for the same reason as `discover`. Off until asked for. */
   scout: boolean;
+  /** "Tell me when it's ready" on the comps page's Scout section (Comparable titles v30), one leaf (`notifyPrefs.comps`);
+   *  here for the same reason as `discover`. Off until asked for. */
+  comps: boolean;
 }
 
 /**
@@ -43,7 +46,7 @@ export interface NotifyPrefs {
  * shipping a new setting at the behaviour it already had — and the behaviour it has is that a
  * writer who never opens this page would expect their reminders to work.
  */
-export const NOTIFY_DEFAULT: NotifyPrefs = { nudges: true, weeklyDigest: true, discover: false, scout: false };
+export const NOTIFY_DEFAULT: NotifyPrefs = { nudges: true, weeklyDigest: true, discover: false, scout: false, comps: false };
 
 export function notifyPrefs(stored: Partial<NotifyPrefs> | undefined | null): NotifyPrefs {
   const s = stored ?? {};
@@ -53,6 +56,7 @@ export function notifyPrefs(stored: Partial<NotifyPrefs> | undefined | null): No
     discover: typeof s.discover === "boolean" ? s.discover : NOTIFY_DEFAULT.discover,
     /* ⚠️ CARRIED THROUGH, because Settings saves the whole map from this reader: a key it did not know was dropped */
     scout: typeof s.scout === "boolean" ? s.scout : NOTIFY_DEFAULT.scout,
+    comps: typeof s.comps === "boolean" ? s.comps : NOTIFY_DEFAULT.comps,
   };
 }
 

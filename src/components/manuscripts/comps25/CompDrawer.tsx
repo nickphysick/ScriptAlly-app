@@ -11,6 +11,11 @@
  * read the same state.
  *
  * ⚠️ PORTALLED, so everything in it hangs off `.cv-layer` (literals and `:root` tokens).
+ *
+ * Comps v30 §E: the drawer wears v30's dress (comps30/comps30.css, `.cp30-layer`): a navy head with the cream
+ * media disc and the light ✕, three figures in one white box, sentence-case headings (no mono caps), the letters
+ * with their query counts, the queries it went out with (an asked-for-more outcome in rust), and the footer note.
+ * Its data, its journeys (edit, log in a letter), its focus return and its Escape stack are v28's, unchanged.
  */
 import React, { useRef } from "react";
 import type { CompTitle } from "../../../types";
@@ -18,9 +23,8 @@ import type { CompDraft } from "../../../lib/comps";
 import type { CompRow } from "../../../lib/compsLibrary";
 import { dayMonth } from "../../../lib/dates";
 import { HalfDrawer } from "../../shell/HalfDrawer";
-import { StatusDot } from "../../StatusDot";
 import { CompFormBody, CompFormFoot, TypeIcon, splitTags, useCompForm } from "../CompForm";
-import { CloseButton, KindIcon, LetterIcon, LockIcon } from "./marks";
+import { Close30, Env30, Media30 } from "../comps30/marks30";
 
 export const DRAWER_WIDTH = "min(640px, 54vw)";
 
@@ -56,7 +60,9 @@ export const CompDrawer: React.FC<{
   const open = !!state && (state.mode === "add" || !!row);
   const c = row?.comp;
   const editing = state?.mode === "edit" || state?.mode === "add";
-  const byline = c ? [c.author?.trim(), c.publisher?.trim() || (row!.kind === "book" ? "publisher not recorded" : ""), c.year ? String(c.year) : ""].filter(Boolean).join(" · ") : "";
+  const byline = c ? [c.author?.trim(), c.publisher?.trim(), c.year ? String(c.year) : ""].filter(Boolean).join(" · ") : "";
+  /** a letter's queries, of the ones this comp went out with */
+  const sentWith = (letterId: string) => row ? row.queries.filter((q) => q.letterId === letterId).length : 0;
   const tags = c ? splitTags(c.matchAxis) : [];
 
   const bodyRef = useRef<HTMLDivElement | null>(null);
@@ -75,40 +81,39 @@ export const CompDrawer: React.FC<{
   });
 
   const head = (
-    <div className="cv-layer cv-dh" data-cv="drawer-head">
+    <div className="cp30-layer cp30-dh" data-cv="drawer-head">
       {state?.mode === "add" || !row ? (
         <>
-          {/* a new comp's disc is ringed, and shows the type chosen below */}
-          <span className="cv-cdisc is-ring" data-cv="drawer-disc" data-media={form.f.media}><TypeIcon media={form.f.media} /></span>
-          <div>
-            <h3 className="cv-dt" data-cv="drawer-title">{first ? "Add your first comp" : "Add a comp"}</h3>
-            <small className="cv-dby">A book, film or show your manuscript sits beside.</small>
+          {/* a new comp's disc shows the type chosen below */}
+          <span className="cp30-md" data-cv="drawer-disc" data-media={form.f.media}><TypeIcon media={form.f.media} /></span>
+          <div className="cp30-dhx">
+            <h3 className="cp30-dtl" data-cv="drawer-title">{first ? "Add your first comp" : "Add a comp"}</h3>
+            <span className="cp30-dby" data-cv="drawer-sub">A book, film or show your manuscript sits beside.</span>
           </div>
         </>
       ) : (
         <>
-          <span className={`cv-cdisc${row.where === "none" ? " is-ring" : ""}`} data-cv="drawer-disc"><KindIcon kind={row.kind} /></span>
-          <div>
-            <h3 className="cv-dt" data-cv="drawer-title">{state?.mode === "edit" ? `Edit ${c!.title}` : c!.title}</h3>
-            <small className="cv-dby">{byline}</small>
+          <span className="cp30-md" data-cv="drawer-disc"><Media30 kind={row.kind} /></span>
+          <div className="cp30-dhx">
+            <h3 className="cp30-dtl" data-cv="drawer-title">{state?.mode === "edit" ? `Edit ${c!.title}` : c!.title}</h3>
+            {byline ? <span className="cp30-dby" data-cv="drawer-sub">{byline}</span> : null}
           </div>
         </>
       )}
-      <CloseButton className="cv-x" data-cv="drawer-close" onClick={editing ? p.onBack : p.onClose} />
+      <Close30 data-cv="drawer-close" onClick={editing ? p.onBack : p.onClose} />
     </div>
   );
 
+  const pct = row && row.queries.length ? Math.round((row.askedForMore / row.queries.length) * 100) : null;
   const foot = editing ? (
     <CompFormFoot form={form}
       onCancel={() => (state!.mode === "edit" ? p.onBack() : p.onClose())}
       onRemove={state!.mode === "edit" ? p.onRemove : undefined} removeBlocked={p.removeBlocked} />
   ) : row ? (
-    <div className="cv-layer cv-df" data-cv="drawer-foot">
-      <span data-cv="drawer-foot-line">{row.letters.some((l) => l.sent) ? "A sent letter names it, so that record is fixed." : "You can still change which letters name it."}</span>
-      <span className="cv-bt">
-        <button type="button" className="cv-ghost" data-cv="drawer-edit" onClick={() => p.onEdit(false)}>Edit</button>
-        <button type="button" className="cv-pillbtn" data-cv="drawer-pick" disabled={!row.ready} onClick={p.onPick}>Log in a letter</button>
-      </span>
+    <div className="cp30-layer cp30-df" data-cv="drawer-foot">
+      <p data-cv="drawer-foot-line">{row.letters.some((l) => l.sent) ? "A sent letter names it, so that record is fixed." : "You can change this comp freely."}</p>
+      <button type="button" className="cp30-btn is-s is-sm" data-cv="drawer-edit" onClick={() => p.onEdit(false)}>Edit</button>
+      <button type="button" className="cp30-btn is-p is-sm" data-cv="drawer-pick" disabled={!row.ready} onClick={p.onPick}>Log in a letter</button>
     </div>
   ) : undefined;
 
@@ -117,56 +122,49 @@ export const CompDrawer: React.FC<{
       {editing ? (
         <CompFormBody form={form} first={first} />
       ) : row ? (
-        <div className="cv-layer cv-db" data-cv="drawer-body">
-          <div className="cv-stat">
-            <div><span>Named in</span><b data-cv="stat-named">{row.letters.length ? `${row.letters.length} ${row.letters.length === 1 ? "letter" : "letters"}` : "No letter yet"}</b></div>
-            <div><span>Went out with</span><b data-cv="stat-seen">{row.queries.length ? `${row.queries.length} ${row.queries.length === 1 ? "query" : "queries"}` : "None yet"}</b></div>
-            <div><span>Asked for more</span><b data-cv="stat-asked">{row.queries.length ? `${row.askedForMore} · ${Math.round((row.askedForMore / row.queries.length) * 100)}%` : "—"}</b></div>
+        <div className="cp30-layer cp30-db" data-cv="drawer-body">
+          <div className="cp30-figs" data-cv="drawer-figs">
+            <div><b data-cv="stat-named">{row.letters.length}</b><span>{row.letters.length === 1 ? "letter names it" : "letters name it"}</span></div>
+            <div><b data-cv="stat-seen">{row.queries.length}</b><span>{row.queries.length === 1 ? "query it went out with" : "queries it went out with"}</span></div>
+            <div><b data-cv="stat-asked">{pct === null ? "–" : `${pct}%`}</b><span>{pct === null ? "none sent yet" : `${row.askedForMore} asked for more`}</span></div>
           </div>
 
-          <h5 className="cv-h5">Why it compares</h5>
+          <h4 className="cp30-h4">Why it compares</h4>
           {c!.note?.trim()
-            ? <p className="cv-why">{c!.note}</p>
-            : <p className="cv-why is-none">No note yet. <button type="button" className="cv-addl" data-cv="add-note" onClick={() => p.onEdit(true)}>Add one</button></p>}
-          {/* `matchAxis` split on "·" (trimmed, empties dropped): no chips and no label when there are none */}
+            ? <p className="cp30-dwhy">{c!.note}</p>
+            : <p className="cp30-dwhy is-none">No line yet. Add one so you remember why it&rsquo;s on your shelf.<button type="button" className="cp30-lnk" data-cv="add-note" onClick={() => p.onEdit(true)}>Add one</button></p>}
           {tags.length > 0 && (
-            <>
-              <h5 className="cv-h5" data-cv="drawer-tags-label">Matches on</h5>
-              <div className="cv-tags" data-cv="drawer-tags">{tags.map((t, i) => <span key={`${t}-${i}`}>{t}</span>)}</div>
-            </>
+            <div className="cp30-chips" data-cv="drawer-tags">{tags.map((t, i) => <span key={`${t}-${i}`} className="cp30-pill">{t}</span>)}</div>
           )}
 
-          <h5 className="cv-h5">Letters</h5>
-          {row.letters.length ? row.letters.map((l) => (
-            <div key={l.id} className="cv-lt" data-cv="drawer-letter">
-              <LetterIcon /><b>{l.short}</b>
-              <span className="cv-pk">{l.packages.length ? `in ${l.packages.join(", ")}` : "in no package"}</span>
-              <span className="cv-lk" data-cv="drawer-letter-state">{l.sent ? <><LockIcon />SENT · FIXED</> : "NOT SENT"}</span>
-            </div>
-          )) : <div className="cv-empq">{row.ready ? "Not logged in any letter yet." : "Add a publisher before a letter can name it."}</div>}
+          <h4 className="cp30-h4">Letters</h4>
+          {row.letters.length ? row.letters.map((l) => {
+            const n = sentWith(l.id);
+            return (
+              <div key={l.id} className="cp30-lrow" data-cv="drawer-letter">
+                <Env30 /><b>{l.name}</b>
+                <em data-cv="drawer-letter-state">{l.sent ? `Sent with ${n} · fixed` : "Not sent yet"}</em>
+              </div>
+            );
+          }) : <p className="cp30-dnil">{row.ready ? "No letter names it yet." : "Add a publisher and a year before a letter can name it."}</p>}
 
-          <h5 className="cv-h5">Queries it went out with · <span data-cv="drawer-qn">{row.queries.length}</span></h5>
           {row.queries.length ? (
-            <div className="cv-qt" data-cv="drawer-queries">
-              {row.queries.map((q) => (
-                <div key={q.id} className="cv-qr" data-cv="drawer-query" data-q={q.id}>
-                  <span className="cv-disc">{q.initials}</span>
-                  <span><b>{q.agentName}</b><small>{q.agency}</small></span>
-                  <span>
-                    <span className="cv-st"><StatusDot status={q.status} overrideSize={14} decorative />{statusWord(q.status)}</span>
-                    <small className="cv-via">{[p.letterShortOf(q.letterId), q.packageName].filter(Boolean).join(" · ")}</small>
-                  </span>
-                  <span className="cv-d">{q.dateSent ? dayMonth(q.dateSent).toUpperCase() : "NO DATE"}</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="cv-empq" data-cv="drawer-noq">
-              {row.letters.length
-                ? "The letter that names it hasn’t gone out yet. When it does, each query appears here."
-                : "Once it’s logged in a letter, every query that letter goes out with appears here."}
-            </div>
-          )}
+            <>
+              <h4 className="cp30-h4">Queries it went out with</h4>
+              <div data-cv="drawer-queries">
+                {row.queries.map((q) => (
+                  <div key={q.id} className="cp30-ag" data-cv="drawer-query" data-q={q.id}>
+                    <span className="cp30-av" aria-hidden="true">{q.initials}</span>
+                    <span className="cp30-aw"><b>{q.agentName}</b>{q.agency ? <small>{q.agency}</small> : null}</span>
+                    <span className={`cp30-r${q.asked ? " is-ask" : ""}`} data-cv="drawer-outcome">
+                      {statusWord(q.status)}
+                      <small>{[q.dateSent ? dayMonth(q.dateSent) : "No date", p.letterShortOf(q.letterId)].filter(Boolean).join(" · ")}</small>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : null}
         </div>
       ) : null}
     </HalfDrawer>

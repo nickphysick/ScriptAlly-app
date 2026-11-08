@@ -49,7 +49,7 @@ describe("CV25 A4: inQuery is retired", () => {
     /* comps v28: every file the page is built from, read from its folders (a hand-written list named two components
        after they were deleted), so a file added there is covered without an edit here */
     const dir = "src/components/manuscripts";
-    const files = ["ComparableTitlesPage.tsx", ...["comps25", "comps28"].flatMap((d) => readdirSync(`${dir}/${d}`).filter((f) => /\.tsx?$/.test(f) && !f.includes(".test.")).map((f) => `${d}/${f}`))];
+    const files = ["ComparableTitlesPage.tsx", ...["comps25", "comps28", "comps30"].flatMap((d) => readdirSync(`${dir}/${d}`).filter((f) => /\.tsx?$/.test(f) && !f.includes(".test.")).map((f) => `${d}/${f}`))];
     expect(files.length, "the page's files were found").toBeGreaterThan(10);
     const page = files.map((f) => readFileSync(`${dir}/${f}`, "utf8")).join("\n");
     /* an import, never a mention: comments in those files say what they do not reach */

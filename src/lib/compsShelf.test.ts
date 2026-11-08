@@ -11,7 +11,7 @@ import type { CompRow } from "./compsLibrary";
 import { averageAsked, letterRate } from "./compUsage";
 import { analyticsModel } from "./analyticsModel";
 import {
-  NO_FILTER, ageChip, filterShelf, kindsPresent, landingRows, letterBlocks, noticeOf, pickRecord, pickTip, restLine, slipOf,
+  NO_FILTER, ageChip, filterShelf, highlightOf, leadLine, letterCards, noticeOf, pickRecord, pickTip, statOf,
   sortShelf, whereCounts,
 } from "./compsShelf";
 
@@ -22,8 +22,8 @@ const row = (o: Partial<CompRow> & { title: string; index: number }): CompRow =>
 });
 const qs = (n: number) => Array.from({ length: n }, (_, i) => ({ id: `q${i}` })) as CompRow["queries"];
 
-describe("CX28 S3 · the age chip", () => {
-  const cases: [number, string, string][] = [[0, "This year", "new"], [1, "1 yr old", "new"], [3, "3 yrs old", "mid"], [5, "5 yrs old", "mid"], [6, "6 yrs old", "old"], [9, "9 yrs old", "old"]];
+describe("CX28 S3 · the age chip (v30: two tones, no sage)", () => {
+  const cases: [number, string, string][] = [[0, "This year", "plain"], [1, "1 yr old", "plain"], [3, "3 yrs old", "plain"], [5, "5 yrs old", "plain"], [6, "6 yrs old", "old"], [9, "9 yrs old", "old"]];
   for (const [age, text, tone] of cases) {
     it(`age ${age} reads "${text}" (${tone})`, () => {
       const c = ageChip(NOW - age, NOW)!;
@@ -33,18 +33,19 @@ describe("CX28 S3 · the age chip", () => {
     });
   }
   it("no year, no chip", () => expect(ageChip(undefined, NOW)).toBeNull());
-  it("blush begins at 6, never at 5", () => { expect(ageChip(NOW - 5, NOW)!.tone).toBe("mid"); expect(ageChip(NOW - 6, NOW)!.tone).toBe("old"); });
+  it("rust begins at 6, never at 5", () => { expect(ageChip(NOW - 5, NOW)!.tone).toBe("plain"); expect(ageChip(NOW - 6, NOW)!.tone).toBe("old"); });
 });
 
-describe("CX28 S2 (unit) · the slip, by state", () => {
-  it("not ready wins: a book with no publisher asks for one, anything else for a year", () => {
-    expect(slipOf(row({ title: "A", index: 0, ready: false, comp: { title: "A", year: 2020 }, where: "sent", queries: qs(3) }))).toEqual({ kind: "notready", text: "A letter can name it once it has a publisher.", link: "Add publisher" });
-    expect(slipOf(row({ title: "B", index: 1, ready: false, kind: "film", comp: { title: "B", media: "film" } }))).toEqual({ kind: "notready", text: "A letter can name it once it has a year.", link: "Add year" });
+describe("CP30 S3 (unit) · the stat card, by state", () => {
+  const L = (id: string, sent: boolean) => ({ id, name: `Letter ${id}`, short: id, sent, packages: [] });
+  it("a sent card names only the letters that went out; under five is early days; the meter is the rate in tens", () => {
+    const s = statOf(row({ title: "S", index: 0, where: "sent", queries: qs(4), askedForMore: 1, letters: [L("A", true), L("D", false), L("B", true)] }));
+    expect(s).toEqual({ kind: "sent", queries: 4, asked: 1, pct: 25, on: 3, letters: ["Letter A", "Letter B"], early: true });
+    expect(statOf(row({ title: "T", index: 1, where: "sent", queries: qs(9), askedForMore: 6, letters: [L("A", true)] }))).toMatchObject({ pct: 67, on: 7, early: false });
   });
-  it("sent, draft and shelf", () => {
-    expect(slipOf(row({ title: "S", index: 0, where: "sent", queries: qs(4), askedForMore: 1 }))).toEqual({ kind: "sent", queries: 4, asked: 1, pct: 25 });
-    expect(slipOf(row({ title: "D", index: 1, where: "unsent", letters: [{ id: "L", name: "Query letter v3", short: "QL v3", sent: false, packages: [] }] }))).toEqual({ kind: "draft", letter: "QL v3" });
-    expect(slipOf(row({ title: "N", index: 2 }))).toEqual({ kind: "shelf" });
+  it("draft names the unsent letters; shelf says nothing more", () => {
+    expect(statOf(row({ title: "D", index: 1, where: "unsent", letters: [L("V3", false)] }))).toEqual({ kind: "draft", letters: ["Letter V3"] });
+    expect(statOf(row({ title: "N", index: 2 }))).toEqual({ kind: "shelf" });
   });
 });
 
@@ -68,13 +69,12 @@ describe("CX28 S5 (unit) · filters compose; counts sum", () => {
     row({ title: "A", index: 0, where: "sent", queries: qs(1) }), row({ title: "B", index: 1, where: "unsent", kind: "tv" }),
     row({ title: "C", index: 2, kind: "tv", comp: { title: "C", publisher: "BBC Two" } }), row({ title: "D", index: 3 }),
   ];
-  it("where AND type AND find", () => {
-    expect(filterShelf(rows, { where: "shelf", kind: "tv", find: "" }).map((r) => r.comp.title)).toEqual(["C"]);
+  it("where AND find (v30: no type filter)", () => {
+    expect(filterShelf(rows, { where: "shelf", find: "" }).map((r) => r.comp.title)).toEqual(["C", "D"]);
     expect(filterShelf(rows, { ...NO_FILTER, find: "bbc" }).map((r) => r.comp.title)).toEqual(["C"]);
-    expect(filterShelf(rows, { where: "sent", kind: "tv", find: "" })).toEqual([]);
+    expect(filterShelf(rows, { where: "sent", find: "bbc" })).toEqual([]);
   });
   it("the where counts sum to the comp count", () => { const c = whereCounts(rows); expect(c.sent + c.draft + c.shelf).toBe(rows.length); expect(c).toEqual({ sent: 1, draft: 1, shelf: 2 }); });
-  it("type toggles appear only with two or more types", () => { expect(kindsPresent(rows)).toEqual(["book", "tv"]); expect(kindsPresent(rows.slice(0, 1))).toEqual(["book"]); });
 });
 
 describe("CX28 N1 (unit) · the notice", () => {
@@ -87,20 +87,51 @@ describe("CX28 N1 (unit) · the notice", () => {
   });
 });
 
-describe("CX28 D1/D2 (unit) · what's landing", () => {
-  it("by comp: sent comps only, most queries first, hollow under five", () => {
-    const rows = [row({ title: "A", index: 0, where: "sent", queries: qs(3), askedForMore: 1 }), row({ title: "B", index: 1, where: "sent", queries: qs(9), askedForMore: 6 }), row({ title: "C", index: 2 })];
-    expect(landingRows(rows).map((r) => [r.title, r.queries, r.pct, r.light])).toEqual([["B", 9, 67, false], ["A", 3, 33, true]]);
-    expect(restLine(rows)).toEqual({ lead: "1 comp hasn’t", rest: " gone out yet: C." });
+describe("CP30 H3 · the lead sentence's three shapes", () => {
+  const line = (n: number, sent: number) => { const l = leadLine(n, sent); return `${l.before}X${l.after}`; };
+  it("some sent, some waiting; words up to ten, sentence-cased", () => {
+    expect(line(7, 2)).toBe("Seven comps on file for X. Two have gone out with your queries, and five are waiting to be used.");
+    expect(line(12, 11)).toBe("12 comps on file for X. 11 have gone out with your queries, and one is waiting to be used.");
   });
-  it("by letter: sent recorded, then sent unrecorded, then unsent", () => {
+  it("singulars, and the 'and' clause dropped when nothing is waiting", () => {
+    expect(line(1, 1)).toBe("One comp on file for X. One has gone out with your queries.");
+    expect(line(3, 1)).toBe("Three comps on file for X. One has gone out with your queries, and two are waiting to be used.");
+    expect(line(4, 4)).toBe("Four comps on file for X. Four have gone out with your queries.");
+  });
+  it("none sent", () => expect(line(3, 0)).toBe("Three comps on file for X. None has gone out with a query yet."));
+});
+
+describe("CP30 H2 · the header's highlight", () => {
+  const r = (i: number, q: number, a: number) => row({ title: `C${i}`, index: i, where: q ? "sent" : "none", queries: qs(q), askedForMore: a });
+  it("ready: the best rate among comps with five or more queries; ties go to more queries, then shelf order", () => {
+    expect(highlightOf([r(0, 9, 3), r(1, 5, 4), r(2, 4, 4)])).toEqual({ kind: "ready", key: "k1", title: "C1", pct: 80, asked: 4, queries: 5 });
+    expect(highlightOf([r(0, 5, 2), r(1, 10, 4)])).toMatchObject({ key: "k1" });
+    expect(highlightOf([r(0, 5, 2), r(1, 5, 2)])).toMatchObject({ key: "k0" });
+  });
+  it("too soon: something out, nothing at five; nothing sent: nothing out", () => {
+    expect(highlightOf([r(0, 3, 1), r(1, 4, 0), r(2, 0, 0)])).toEqual({ kind: "soon", busiest: 4 });
+    expect(highlightOf([r(0, 0, 0)])).toEqual({ kind: "none" });
+    expect(highlightOf([])).toEqual({ kind: "none" });
+  });
+});
+
+describe("CP30 L1 (unit) · the letter cards", () => {
+  it("sent letters by queries then name, then drafts; logged, unrecorded and draft-empty", () => {
     const letters = [
-      { id: "L1", versionName: "v1", createdDate: "1" }, { id: "L2", versionName: "v2", createdDate: "2", compIds: ["a"] },
-      { id: "L3", versionName: "v3", createdDate: "3", compIds: [] }, { id: "L4", versionName: "v4", createdDate: "4", compIds: ["a"] },
+      { id: "L1", versionName: "Hook-first", createdDate: "1" },
+      { id: "L2", versionName: "Coastal pitch", createdDate: "2", compIds: ["a", "b"] },
+      { id: "L3", versionName: "Tide version", createdDate: "3", compIds: ["a"] },
+      { id: "L4", versionName: "Blank draft", createdDate: "4", compIds: [] },
+      { id: "L5", versionName: "Short and sharp", createdDate: "5", compIds: ["b"] },
     ];
-    const b = letterBlocks(letters, [{ id: "a", title: "A" }], new Map([["L1", 5], ["L4", 2]]), "L3", () => ({ asked: 0, sent: 0, pct: null }));
-    expect(b.map((x) => [x.id, x.group])).toEqual([["L4", "sent"], ["L1", "unrecorded"], ["L2", "unsent"], ["L3", "unsent"]]);
-    expect(b.find((x) => x.id === "L3")!.current).toBe(true);
+    const rows = [row({ title: "A", index: 0, comp: { id: "a", title: "A", year: 2021 } }), row({ title: "B", index: 1, comp: { id: "b", title: "B" } })];
+    const c = letterCards(letters, rows, new Map([["L1", 5], ["L2", 9], ["L5", 5]]), (id) => ({ asked: id === "L2" ? 6 : 0, sent: 0, pct: null }));
+    expect(c.map((x) => [x.name, x.middle])).toEqual([
+      ["Coastal pitch", "logged"], ["Hook-first", "unrecorded"], ["Short and sharp", "logged"], ["Blank draft", "empty"], ["Tide version", "logged"],
+    ]);
+    expect(c[0].comps.map((x) => [x.title, x.year])).toEqual([["A", 2021], ["B", null]]);
+    expect(c[0].rate.asked).toBe(6);
+    expect(c.filter((x) => x.draft).map((x) => x.id)).toEqual(["L4", "L3"]);
   });
   it("letterRate is asked ÷ queries for that letter", () => {
     const m = { letterOfQuery: new Map([["q1", "L"], ["q2", "L"], ["q3", "L"], ["q4", "M"]]), asked: new Set(["q1", "q4"]) };

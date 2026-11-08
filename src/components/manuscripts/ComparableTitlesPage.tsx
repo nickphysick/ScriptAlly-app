@@ -2,15 +2,16 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Comparable titles v28 (17 Oct; refs design-refs/comps-v28/). Route /manuscripts/comps.
+ * Comparable titles v30 (7 Nov; refs design-refs/comps-v30/), a restyle of v28 (17 Oct; design-refs/comps-v28/). Route
+ * /manuscripts/comps.
  *
  * Comps are TRACKED: a comp has a stable id, a query letter records the comps it mentions, and every
  * query is traced to its letter, so each comp knows which queries it went out with (lib/compUsage).
- * The page: the app's two-state header (the navy EmptyPanel with no comps, the LightHeader with them),
- * one notice for letters that went out before their comps were logged, "Your comp shelf" (a toolbar
- * over a grid of index cards), and "What's landing" (by comp and by letter). A card opens the comp
- * drawer; "Log comps in a letter" opens the picker. v25's list, grouping, full screen and "At a glance"
- * strip are retired.
+ * The page (v30): one navy title card (the highlight on its right), the blush notice for letters that went out
+ * before their comps were logged, "Your shelf" (one toolbar over paper cards or a list), "Which letter named which
+ * comps" (one card per query letter), and the Scout's home at the foot. With no comps: the navy card and "How it
+ * works." and nothing else. A card, a list row or a letter's comp opens the comp drawer; "Log comps in a letter"
+ * opens the picker. v28's light header, "What's landing", type toggles and floating Scout tab are retired.
  *
  * ⚠️ STORE FACTS. The order is array position; every figure is derived at render. Every comp write
  * goes through `normalizeComp` and `withCompIds`, so optional fields stay omit-empty and every comp
@@ -36,31 +37,30 @@ import { SAVE_FAILED, runWrite } from "../../lib/compsWrite";
 import { averageAsked, compKey, currentLetter, letterRate, ready, usageModel, withCompIds } from "../../lib/compUsage";
 import { buildRows, letterShort } from "../../lib/compsLibrary";
 import {
-  NO_FILTER, filterShelf, kindsPresent, landingRows, letterBlocks, noticeOf, restLine, sortShelf, whereCounts,
-  type ShelfFilter, type ShelfSort, type ShelfWhere,
+  NO_FILTER, filterShelf, highlightOf, letterCards, noticeOf, sortShelf, whereCounts,
+  type ShelfFilter, type ShelfSort,
 } from "../../lib/compsShelf";
 import { nextVersionName } from "../../lib/versionLock";
 import { escapeDepth } from "../../lib/escapeStack";
 import { useToast } from "../toast/ToastProvider";
 import { useCompsHold } from "../../lib/compsLoadHold";
-import { CompsHowDialog } from "./comps25/CompsHowDialog";
-import { CompsSteps } from "./comps25/CompsSteps";
 import { CompDrawer, DrawerState } from "./comps25/CompDrawer";
 import { CompLetterPicker, PickerRequest } from "./comps25/CompLetterPicker";
-import { CompsScout } from "./comps25/CompsScout";
-import { CompsStartPanel, CompsLightHeader } from "./comps28/CompsHeader";
-import { CompsNotice, CompsShelf } from "./comps28/CompsShelf";
-import { CompsLanding } from "./comps28/CompsLanding";
 import { CompsExplainDialog } from "./comps28/CompsExplainDialog";
 import { openerOf, refocus } from "./comps28/refocus";
+import { CompsTop30, type TopState } from "./comps30/CompsTop30";
+import { CompsHow30, CompsHowPop30 } from "./comps30/CompsHow30";
+import { CompsNotice30, CompsShelf30, type ShelfView } from "./comps30/CompsShelf30";
+import { CompsLetters30, CompsScout30 } from "./comps30/CompsLetters30";
 import "./compsV2.css";
 import "./comps25/compsV25.css";
 import "./comps28/comps28.css";
+import "./comps30/comps30.css";
 
 /** Shared with the sidebar's switcher and the packages page — the section's one active-manuscript key. */
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 export const COMPS_ROUTE = "/manuscripts/comps";
-export { COMPS_HEADER_ART } from "./comps28/art";
+export { COMPS_HEADER_ART } from "./comps30/CompsTop30";
 
 /** Not letter-ready: a book with no publisher, or anything with no year. */
 export const compMissingDetails = (c: CompTitle): boolean => !ready(c);
@@ -68,7 +68,7 @@ export const compMissingDetails = (c: CompTitle): boolean => !ready(c);
 export const ComparableTitlesPage: React.FC<{
   onNavigate?: (tab: string, subPageName?: string, opts?: { manuscriptId?: string }) => void;
 }> = ({ onNavigate }) => {
-  const { currentUser, manuscripts, versions, packages, queries, activities, agents, updateManuscript, updateVersion, addVersion, deleteVersion, collectionsReady } = useScriptAllyDb();
+  const { currentUser, manuscripts, versions, packages, queries, activities, agents, updateManuscript, updateVersion, addVersion, deleteVersion, collectionsReady, updateUserPaths } = useScriptAllyDb();
   const { showToast } = useToast();
   const location = useLocation();
   const routeActive = location.pathname === COMPS_ROUTE;
@@ -76,6 +76,8 @@ export const ComparableTitlesPage: React.FC<{
   /* ⚠️ EVERY HOOK ABOVE THE FIRST EARLY RETURN. */
   const [filter, setFilter] = useState<ShelfFilter>(NO_FILTER);
   const [sort, setSort] = useState<ShelfSort>("own");
+  /** v30: Cards or List, for the visit only */
+  const [mode, setMode] = useState<ShelfView>("cards");
   const [drawer, setDrawer] = useState<DrawerState | null>(null);
   const [picker, setPicker] = useState<PickerRequest | null>(null);
   /** the "How comp tracking works" pop-up (comps v27): the steps, one click from the header */
@@ -117,16 +119,14 @@ export const ComparableTitlesPage: React.FC<{
     comps, usage: model.usage, letters, packages: packages.filter((p) => p.manuscriptId === shown.id),
     queries, agents, asked: model.asked, letterOfQuery: model.letterOfQuery,
   }) : []), [model, shown, comps, letters, packages, queries, agents]);
-  const kinds = useMemo(() => kindsPresent(rows), [rows]);
-  /* a type toggle that has gone (its last comp of that type removed) no longer narrows the shelf */
-  const shelfFilter = filter.kind && !(kinds.length >= 2 && kinds.includes(filter.kind)) ? { ...filter, kind: null } : filter;
-  const view = useMemo(() => sortShelf(filterShelf(rows, shelfFilter), sort), [rows, shelfFilter, sort]);
+  const view = useMemo(() => sortShelf(filterShelf(rows, filter), sort), [rows, filter, sort]);
   const counts = useMemo(() => whereCounts(rows), [rows]);
   const nowLetter = activeMs ? currentLetter(activeMs.id, versions) : null;
   const now = currentYear();
   const notice = noticeOf(model?.unrecorded ?? []);
   const average = useMemo(() => (activeMs ? averageAsked(activeMs, queries, activities) : { asked: 0, sent: 0, pct: null }), [activeMs, queries, activities]);
-  const blocks = useMemo(() => (model ? letterBlocks(letters, comps, model.sentByLetter, nowLetter?.id ?? null, (id) => letterRate(model, id)) : []), [model, letters, comps, nowLetter]);
+  const cards = useMemo(() => (model ? letterCards(letters, rows, model.sentByLetter, (id) => letterRate(model, id)) : []), [model, letters, rows]);
+  const highlight = useMemo(() => highlightOf(rows), [rows]);
   const openRow = drawer && drawer.mode !== "add" ? rows.find((r) => r.key === drawer.key) ?? null : null;
 
   const openAdd = useCallback(() => {
@@ -302,56 +302,41 @@ export const ComparableTitlesPage: React.FC<{
   const isEmpty = comps.length === 0;
   const empty = !loading && !!activeMs && isEmpty;
   const listed = !loading && !!activeMs && !isEmpty;
-  const att = model?.attachment ?? null;
-  const toShelf = () => shelfRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  const toLanding = () => landRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  /** the header card's rows and the shelf's segmented control share one "where" */
-  const pickWhere = (w: ShelfWhere) => { setFilter((f) => ({ ...f, where: f.where === w ? null : w })); toShelf(); };
+  const toLetters = () => (landRef.current ?? shelfRef.current)?.scrollIntoView({ behavior: "smooth", block: "start" });
   const openPicker = (letterId: string | null, forKey?: string) => { setDrawer(null); setHow(false); setPicker({ letterId, forKey }); };
+  /* v30 §D: one leaf, read back from the user document, so it survives a reload */
+  const scoutAsked = !!currentUser.notifyPrefs?.comps;
+  const top: TopState = loading ? { kind: "loading" }
+    : !activeMs ? { kind: "nobook" }
+      : isEmpty ? { kind: "empty", book: activeMs.title }
+        : { kind: "listed", book: activeMs.title, total: comps.length, sent: counts.sent, highlight, full };
 
   return (
     <WorkspacePageGrid scrollLabel="Comparable titles" masthead={null}>
-      <div className="cpv-page cv-page cx-page" data-cpv="page" data-cv="page" data-cx="page" data-state={loading ? "loading" : empty ? "empty" : listed ? "listed" : "none"} ref={pageRef}>
-        <div className="cv-group" data-cv="group">
-          {empty || (!loading && !activeMs) ? (
-            <section className="cx-empty" data-cx="empty" aria-label="Comparable titles, before any comps">
-              <CompsStartPanel book={activeMs?.title ?? null} addRef={primaryRef} onAdd={activeMs ? openAdd : () => undefined} onExplain={() => setExplain(true)} />
-              {activeMs
-                ? <section className="cv-stepcard" data-cv="empty"><CompsSteps headingId="cv-hsteps-card-h" /></section>
-                : <p className="cv-hintline" data-cv="no-ms">No manuscript to compare yet. Add one in Manuscripts, then build its comps here.</p>}
-            </section>
-          ) : (
-            <CompsLightHeader
-              loading={loading} count={comps.length} book={activeMs?.title ?? null}
-              counts={listed ? counts : null} where={filter.where} attachment={att} full={full}
-              addRef={primaryRef}
-              onAdd={openAdd} onPick={() => openPicker(null)} onHow={() => setHow(true)}
-              onWhere={pickWhere} onLanding={toLanding}
+      <div className="cpv-page cp30" data-cpv="page" data-cp="page" data-state={loading ? "loading" : empty ? "empty" : listed ? "listed" : "none"} ref={pageRef}>
+        <CompsTop30 state={top} addRef={primaryRef}
+          onAdd={activeMs ? openAdd : () => undefined} onPick={() => openPicker(null)} onHow={() => setHow(true)} onExplain={() => setExplain(true)}
+          onOpen={(key) => setDrawer({ mode: "view", key })} onLetters={toLetters} />
+        {empty ? <CompsHow30 headingId="cp30-how-h" /> : null}
+        {listed ? (
+          <>
+            {notice ? <CompsNotice30 notice={notice} onLog={(id) => openPicker(id)} /> : null}
+            <CompsShelf30
+              rows={rows} view={view} counts={counts} filter={filter} sort={sort} mode={mode} now={now} canAdd={!full}
+              findRef={findRef} headRef={shelfRef}
+              onFilter={setFilter} onSort={setSort} onMode={setMode}
+              onOpen={(key) => setDrawer({ mode: "view", key })}
+              onPick={(key) => openPicker(null, key)}
+              onAdd={openAdd}
             />
-          )}
-          {listed ? (
-            <>
-              {notice ? <CompsNotice notice={notice} onLog={(id) => openPicker(id)} /> : null}
-              <CompsShelf
-                rows={rows} view={view} counts={counts} kinds={kinds} filter={shelfFilter} sort={sort} now={now}
-                openKey={drawer && drawer.mode !== "add" ? drawer.key : null} canAdd={!full}
-                findRef={findRef} headRef={shelfRef}
-                onFilter={setFilter} onSort={setSort}
-                onOpen={(key) => setDrawer({ mode: "view", key })}
-                onEdit={(key) => setDrawer({ mode: "edit", key, back: false })}
-                onPick={(key) => openPicker(null, key)}
-                onAdd={openAdd}
-              />
-              <CompsLanding
-                sent={att?.sent ?? 0} rows={landingRows(rows)} rest={restLine(rows)} average={average} letters={blocks}
-                bandRef={landRef}
-                onOpen={(key) => setDrawer({ mode: "view", key })}
-                onLog={(id) => openPicker(id)}
-              />
-            </>
-          ) : null}
-          {empty || listed ? <AppFooter onNavigate={(t, sub) => onNavigate?.(t, sub)} /> : null}
-        </div>
+            {letters.length ? (
+              <CompsLetters30 cards={cards} average={average} bandRef={landRef}
+                onOpen={(key) => setDrawer({ mode: "view", key })} onLog={(id) => openPicker(id)} />
+            ) : null}
+            <CompsScout30 asked={scoutAsked} onToggle={() => { void updateUserPaths({ "notifyPrefs.comps": !scoutAsked }); }} />
+          </>
+        ) : null}
+        {empty || listed ? <AppFooter onNavigate={(t, sub) => onNavigate?.(t, sub)} /> : null}
       </div>
 
       {activeMs && (
@@ -377,12 +362,7 @@ export const ComparableTitlesPage: React.FC<{
             onNewVersion={(letterId) => void newVersion(letterId)}
             onOpenPackages={() => { setPicker(null); onNavigate?.("manuscripts", "Submission packages"); }}
           />
-          <CompsHowDialog
-            open={routeActive && how && listed}
-            onClose={() => setHow(false)}
-            onPick={() => openPicker(null)}
-          />
-          {listed && <CompsScout msTitle={activeMs.title} routeActive={routeActive} hidden={anyLayer} />}
+          <CompsHowPop30 open={routeActive && how && listed} onClose={() => setHow(false)} />
         </>
       )}
       <CompsExplainDialog open={routeActive && explain} onClose={() => setExplain(false)} />

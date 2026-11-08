@@ -177,17 +177,20 @@ describe("/manuscripts/comps renders", () => {
     const html = renderPageSeeded(page(), "/manuscripts/comps");
     /* comps v25: the query line left the page (which comps a letter names is logged on the letter) */
     expect(html, "the query line is still on the page").not.toContain("Your query line");
-    /* comps v28: the shared light header (its card counts where the comps are used), the shelf of cards and "What's
-       landing" all rendered, with the comp as a card. The steps still open in a pop-up, so none are on the page. */
-    expect(html, "the light header did not render").toContain('data-slh="header"');
-    expect(html, "the header did not count the comps").toContain("1 comp on file");
-    expect(html, "the header card's rows did not render").toContain('data-slh="row"');
-    expect(html, "the pop-up's link did not render").toContain('data-cx="how-link"');
-    expect(html, "the steps are on the page").not.toContain('data-cv="how-step"');
-    expect(html, "the shelf did not render").toContain("Your comp shelf");
-    expect(html, "the comp's card did not render").toMatch(/data-cx="card"[^>]*>[\s\S]*The Smoke Comp/);
-    expect(html, "the card's slip did not run").toMatch(/data-slip="(notready|sent|draft|shelf)"/);
-    expect(html, "What's landing did not render").toContain("What’s landing");
+    /* comps v30: the navy title card with its highlight, the shelf of cards with each card's stat card, the Scout section;
+       the steps open in a pop-up, so none are on the page. */
+    expect(html, "the title card did not render").toContain('data-cp="top"');
+    expect(html, "the lead did not count the comps").toContain("One comp on file");
+    expect(html, "the highlight did not run").toMatch(/data-hl="(ready|soon|none)"/);
+    expect(html, "the pop-up's link did not render").toContain('data-cp="how"');
+    expect(html, "the steps are on the page").not.toContain('data-cp="how-steps"');
+    expect(html, "the shelf did not render").toContain("Your shelf");
+    expect(html, "the comp's card did not render").toMatch(/data-cp="card"[^>]*>[\s\S]*The Smoke Comp/);
+    expect(html, "the card's stat card did not run").toMatch(/data-stat="(sent|draft|shelf)"/);
+    expect(html, "the Scout section did not render").toContain('data-cp="scout"');
+    /* v28's light header, slip and "What's landing" are gone */
+    expect(html, "v28's light header is still on the page").not.toContain('data-slh="header"');
+    expect(html, "What's landing is still on the page").not.toContain("What’s landing");
     /* v25's list, strip and title panel are gone */
     expect(html, "the strip is still on the page").not.toContain("At a glance");
     expect(html, "the v25 list is still on the page").not.toContain('data-cv="row"');
