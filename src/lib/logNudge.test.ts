@@ -107,12 +107,23 @@ describe("P2 — the nudge reaches the AUTHORITATIVE store (and only once)", () 
     expect(writes.activity.queryId).toBe(writes.nested.queryId);
   });
 
-  it("db.tsx writes the authoritative row FIRST, then the same-id projection twin (artefact lock)", () => {
-    const db = readFileSync(resolve(__dirname, "./db.tsx"), "utf8");
-    const auth = db.indexOf('"queries", queryId, "activity", actId), writes.nested');
-    const twin = db.indexOf("addActivity({ ...writes.activity, id: actId })");
+  it("the authoritative row lands FIRST (with the date, in one batch), then the same-id projection twin (artefact lock)", () => {
+    // Retargeted 8 Nov 2026 (timeline writer fix v1): same law, new home. The row and the query's
+    // nudge fields are one batch in lib/nudgeWrite.ts, and the twin is written after the commit;
+    // db.tsx hands commitNudge the twin built from the SAME writes and id. Comments stripped, so
+    // a sentence about the order cannot satisfy it.
+    const strip = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    const core = strip(readFileSync(resolve(__dirname, "./nudgeWrite.ts"), "utf8"));
+    const auth = core.indexOf('batch.set(doc(firestore, "users", uid, "queries", queryId, "activity", actId), writes.nested)');
+    const date = core.indexOf('batch.update(doc(firestore, "users", uid, "queries", queryId), writes.queryUpdates)');
+    const commit = core.indexOf("await batch.commit()");
+    const twin = core.indexOf("after.writeTwin");
     expect(auth).toBeGreaterThan(-1);
-    expect(twin).toBeGreaterThan(auth); // authoritative first; the twin is emitted from it
+    expect(date).toBeGreaterThan(auth);
+    expect(commit).toBeGreaterThan(date);
+    expect(twin).toBeGreaterThan(commit); // the twin only after the authoritative batch landed
+    const db = strip(readFileSync(resolve(__dirname, "./db.tsx"), "utf8"));
+    expect(db).toContain("writeTwin: () => addActivity({ ...writes.activity, id: actId })");
     // The old projection-only write path is gone.
     expect(db.includes("await addActivity(writes.activity);")).toBe(false);
   });

@@ -36,7 +36,10 @@ describe("narratesManuscriptWrite", () => {
     expect(at, "updateManuscript moved").toBeGreaterThan(-1);
     expect(end, "updateManuscriptQuiet moved").toBeGreaterThan(at);
     const body = db.slice(at, end);
-    expect(body).toMatch(/if \(writeSuccess && narratesManuscriptWrite\(fields\)\)/);
+    // Retargeted 8 Nov 2026 (timeline writer fix v1): same law, new spelling. The MANUSCRIPT_UPDATED
+    // narrator is passed only when narratesManuscriptWrite(fields) is true, and "only after the write
+    // landed" moved into lib/manuscriptWrite.ts (held by manuscriptWrite.test.ts).
+    expect(body).toMatch(/narratesManuscriptWrite\(fields\)\s*\?\s*\(\) => addActivity\(\{\s*activityType: ActivityType\.MANUSCRIPT_UPDATED/);
     expect(body).toContain("ActivityType.MANUSCRIPT_UPDATED");
   });
 });

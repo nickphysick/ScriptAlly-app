@@ -114,6 +114,10 @@ import { queriesForManuscript, queriesForAgent, activityIdsForQueries, flagIdsFo
 import { recomputeQuery as recomputeQueryOnline, subcollectionDocToDerivable, monotonicEventTime } from "./recomputeQuery";
 import { importedSentDate, seedsOwnHistory } from "./addQueryShape";
 import { buildNudgeWrites, reconcileNudge, NUDGE_NESTED_TYPE, type StoredNudge } from "./logNudge";
+import { writeActivity } from "./activityWrite";
+import { createManuscript, updateManuscriptFields } from "./manuscriptWrite";
+import { narrate } from "./narrate";
+import { commitNudge } from "./nudgeWrite";
 import { resolveGenre, matchKey } from "./genres";
 import { commitAgentEdits, AgentEditPatch, AgentExtraWrite, SaveAgentResult } from "./saveAgentEdits";
 import { computeAgentDeadlineWrites } from "./computeAgentDeadlineWrites";
@@ -1537,35 +1541,21 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       };
     }
 
-    const id = m.id || "ms-" + Math.random().toString(36).substr(2, 9);
-    const newMs: Manuscript = {
-      ...m,
-      id,
-      userId: currentUser.id,
-      statusChangedDate: new Date().toISOString()
-    } as any;
-
-    let writeSuccess = false;
-    try {
-      await setDoc(doc(db, "users", currentUser.id, "manuscripts", id), newMs);
-      writeSuccess = true;
-    } catch (e) {
-      handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/manuscripts/${id}`);
-      return { success: false, error: "Database exception occurred." };
-    }
-
-    if (writeSuccess) {
-      await addActivity({
+    /* ⚠️ SUCCESS IS THE MANUSCRIPT WRITE ALONE (timeline writer fix v1) — lib/manuscriptWrite.ts.
+       The feed entry is narration: a failed one no longer reports a landed save as a failure, so the
+       form's retry can no longer make a second manuscript. */
+    return createManuscript(
+      db, currentUser.id, m,
+      (newMs) => addActivity({
         activityType: ActivityType.MANUSCRIPT_ADDED,
         description: `You added a new title ${newMs.title} to your manuscripts`,
-        manuscriptId: id,
+        manuscriptId: newMs.id,
         queryId: "",
         date: new Date().toISOString(),
         details: ""
-      });
-      return { success: true, id };
-    }
-    return { success: false, error: "Initialization failed." };
+      }),
+      (e, op, path) => handleFirestoreError(e, op === "write" ? OperationType.WRITE : OperationType.UPDATE, path),
+    );
   };
 
   const updateManuscript = async (id: string, fields: Partial<Manuscript>) => {
@@ -1574,34 +1564,30 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     if (!existingMs) return;
     const msTitle = existingMs.title;
 
-    let writeSuccess = false;
-    try {
-      const hasStatusChanged = fields.status && fields.status !== existingMs?.status;
-      const updates = {
-        ...fields,
-        ...(hasStatusChanged ? { statusChangedDate: new Date().toISOString() } : {})
-      };
-      await updateDoc(doc(db, "users", currentUser.id, "manuscripts", id), updates);
-      writeSuccess = true;
-    } catch (e) {
-      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/manuscripts/${id}`);
-    }
-
+    const hasStatusChanged = fields.status && fields.status !== existingMs?.status;
+    const updates = {
+      ...fields,
+      ...(hasStatusChanged ? { statusChangedDate: new Date().toISOString() } : {})
+    };
+    /* ⚠️ THE UPDATE DECIDES, THE FEED NARRATES (timeline writer fix v1) — lib/manuscriptWrite.ts.
+       A comps-only write is list maintenance and narrates nothing — lib/manuscriptFeed.ts. */
+    const landed = await updateManuscriptFields(
+      db, currentUser.id, id, updates,
+      narratesManuscriptWrite(fields)
+        ? () => addActivity({
+            activityType: ActivityType.MANUSCRIPT_UPDATED,
+            description: "You updated a manuscript's details",
+            manuscriptId: id,
+            queryId: "",
+            date: new Date().toISOString(),
+            details: ""
+          })
+        : null,
+      (e, op, path) => handleFirestoreError(e, op === "write" ? OperationType.WRITE : OperationType.UPDATE, path),
+    );
     /* first visit v2 (Part I): the writer's first comparable title, on any manuscript */
-    if (writeSuccess && Array.isArray(fields.comps) && fields.comps.length > 0 && manuscripts.every((m) => manuscriptComps(m).length === 0)) {
+    if (landed && Array.isArray(fields.comps) && fields.comps.length > 0 && manuscripts.every((m) => manuscriptComps(m).length === 0)) {
       logEvent(currentUser.id, "first_comp", eventPath(currentUser, existingMs));
-    }
-    /* a comps-only write is list maintenance and narrates nothing — lib/manuscriptFeed.ts */
-    if (writeSuccess && narratesManuscriptWrite(fields)) {
-      const dateStr = new Date().toISOString();
-      await addActivity({
-        activityType: ActivityType.MANUSCRIPT_UPDATED,
-        description: "You updated a manuscript's details",
-        manuscriptId: id,
-        queryId: "",
-        date: dateStr,
-        details: ""
-      });
     }
   };
 
@@ -1710,25 +1696,27 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       const orphanNote = orphanedBlobs.length
         ? `${orphanedBlobs.length} file${orphanedBlobs.length > 1 ? "s" : ""} could not be removed from storage: ${orphanedBlobs.join(", ")}`
         : "";
-      await addActivity({
+      const deleteRecord = await addActivity({
         activityType: ActivityType.MANUSCRIPT_DELETED,
         description: `You deleted “${msTitle}”${detail}`,
         manuscriptId: "",
         queryId: "",
         date: new Date().toISOString(),
         details: orphanNote,
-        /* ⚠️ LOGGED, NOT SWALLOWED. This was `.catch(() => {})`, which is right for a record nobody
-           depends on and wrong the moment it became the only durable trace of an orphaned blob: a
-           dropped failure is indistinguishable from no failure. The delete itself still stands. */
-      }).catch((e) => {
+      });
+      /* ⚠️ LOGGED, NOT SWALLOWED. The delete itself still stands; but this record is the only durable
+         trace of an orphaned blob, so a failure to write it is said out loud. addActivity RESOLVES
+         `{ success: false }` rather than rejecting (timeline writer fix v1), so this checks the result —
+         a `.catch` here would never run. */
+      if (!deleteRecord.success) {
         console.error(
           `[attachments] the delete record could not be written; ` +
           (orphanedBlobs.length
             ? `THE ONLY REMAINING TRACE OF ${orphanedBlobs.length} ORPHANED BLOB(S) IS THIS LINE: ${orphanedBlobs.join(", ")}`
             : "no orphans to report"),
-          e,
+          deleteRecord.error,
         );
-      });
+      }
     } catch (e) {
       handleFirestoreError(e, OperationType.DELETE, `users/${uid}/manuscripts/${id}`);
     }
@@ -2229,7 +2217,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     if (writeSuccess) {
       /* ⚠️ KEYED BY THE AGENT'S ID (clean-up pass, 28 Sep): the row is found by id, never by the name
          in its sentence, so renaming the agent can never make it look missing and grow a second. */
-      await addActivity({
+      /* ⚠️ NARRATION (timeline writer fix v1): the agent already landed; a missing entry cannot fail the add. */
+      await narrate(() => addActivity({
         id: `act-added-agent-${id}`,
         activityType: ActivityType.AGENT_ADDED,
         description: newAg.name?.trim()
@@ -2239,7 +2228,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         queryId: "",
         date: new Date().toISOString(),
         details: ""
-      });
+      }), `agent ${id} added`);
       /* Dashboard first visit v1 (Part B): the writer's first agent is the dashboard's first-win stamp */
       if (isFirstAgentWin(agents.length)) {
         noteFirstWin({ kind: "agent", uid: currentUser.id, msId: null, ...winCopy.agent(newAg.name ?? "", newAg.agency ?? "") });
@@ -2340,8 +2329,10 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         }
       }
 
+      /* ⚠️ NARRATION (timeline writer fix v1): the update already landed, and one missing entry never
+         stops the next one being written. */
       for (const act of activitiesToCreate) {
-        await addActivity(act);
+        await narrate(() => addActivity(act), `agent ${id} updated`);
       }
     }
   };
@@ -2412,14 +2403,14 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       // a failed log must never surface as a failed delete (the delete already committed).
       const qn = qIds.length;
       const detail = qn > 0 ? ` (and ${qn} quer${qn > 1 ? "ies" : "y"} removed)` : "";
-      await addActivity({
+      await narrate(() => addActivity({
         activityType: ActivityType.AGENT_DELETED,
         description: `You deleted ${agentName}${detail}`,
         manuscriptId: "",
         queryId: "",
         date: new Date().toISOString(),
         details: "",
-      }).catch(() => { /* best-effort: the delete itself succeeded */ });
+      }), `agent ${id} deleted`); // the delete itself succeeded
     } catch (e) {
       handleFirestoreError(e, OperationType.DELETE, `users/${uid}/agents/${id}`);
     }
@@ -3422,23 +3413,14 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
-  // General add activity logger
+  // General add activity logger.
+  // ⚠️ IT NEVER THROWS (timeline writer fix v1): a failure is logged and returned as
+  // `{ success: false, error }` — see lib/activityWrite.ts. A caller whose entry IS the record checks
+  // `success`; every narration caller carries on, because its own action already landed.
   const addActivity = async (act: Omit<Activity, "id" | "userId"> & { id?: string }): Promise<{ success: boolean; error?: string }> => {
     if (!currentUser) return { success: false, error: "Session required." };
-    const id = act.id || "act-" + Math.random().toString(36).substr(2, 9);
-    const newAct: Activity = {
-      ...act,
-      id,
-      userId: currentUser.id
-    };
-
-    try {
-      await setDoc(doc(db, "users", currentUser.id, "activities", id), newAct);
-      return { success: true };
-    } catch (e) {
-      handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/activities/${id}`);
-      return { success: false, error: "Failed to persist activity." };
-    }
+    const r = await writeActivity(db, currentUser.id, act);
+    return r.success ? { success: true } : { success: false, error: r.error };
   };
 
   /**
@@ -3923,41 +3905,26 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       ...(typeof (q as unknown as Record<string, unknown>).lastNudgeSentDate === "string" ? { lastNudgeSentDate: (q as unknown as Record<string, string>).lastNudgeSentDate } : {}),
     };
 
-    // 1) ONE event id for both stores (the saveQueryEdits same-id-twin convention).
-    //    1a — AUTHORITATIVE: the per-query subcollection the Tracking timeline reads. A failure
-    //    here aborts the nudge (nothing else may land without the source-of-truth row).
+    // ONE event id for both stores (the saveQueryEdits same-id-twin convention).
     const actId = "act-" + Math.random().toString(36).substr(2, 9);
-    try {
-      await setDoc(doc(db, "users", currentUser.id, "queries", queryId, "activity", actId), writes.nested);
-    } catch (e) {
-      handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/queries/${queryId}/activity/${actId}`);
-      return { success: false, error: "Failed to log nudge." };
-    }
-    //    1b — PROJECTION twin: the global feed the dashboard reads, derived from the SAME build +
-    //    id (never an independent parallel write). Best-effort: a missing twin must never fail the
-    //    nudge — the authoritative row already landed. (Pending the parked store consolidation.)
-    await addActivity({ ...writes.activity, id: actId });
-
-    try {
-      // 2) Set the next-nudge field + bookkeeping. updateQuery never touches status/responseDeadline.
-      await updateQuery(queryId, writes.queryUpdates);
-
-      // 3) Hide-and-resurface the nudge_overdue task on the check-back date — a taskFlag snooze.
-      //    The deterministic key means a repeat nudge updates the same flag (no stacked duplicates).
-      //    ⚠️ A DISMISSAL WITH NO RESURFACE DATE IS THE MUTE (journey round, Phase 5): the writer
-      //    answered "don't ask again", so the suggestion stops for THIS query rather than returning.
-      //    `MUTED_UNTIL` is the same indefinite value `dismissTask(…, "permanent")` writes, so the
-      //    two doors reach one state rather than two that have to be kept in step.
-      await upsertTaskFlag(flagKeyForTask("nudge_overdue", queryId), {
+    /* ⚠️ THE ROW AND THE DATE ARE ONE BATCH (timeline writer fix v1) — lib/nudgeWrite.ts.
+       1 — AUTHORITATIVE, together: the per-query row the Tracking timeline reads, and the query's
+           nudge fields (exactly what updateQuery wrote here). Either both land or neither.
+       2 — after it, and unable to fail the nudge: the PROJECTION twin in the global feed (same build,
+           same id), and the task flag that hides nudge_overdue until the check-back date.
+           ⚠️ A DISMISSAL WITH NO RESURFACE DATE IS THE MUTE (journey round, Phase 5): the writer
+           answered "don't ask again", so the suggestion stops for THIS query rather than returning.
+           `MUTED_UNTIL` is the same indefinite value `dismissTask(…, "permanent")` writes, so the
+           two doors reach one state rather than two that have to be kept in step. */
+    const r = await commitNudge(db, currentUser.id, queryId, actId, writes, {
+      writeTwin: () => addActivity({ ...writes.activity, id: actId }),
+      writeFlag: () => upsertTaskFlag(flagKeyForTask("nudge_overdue", queryId), {
         snoozedUntil: writes.dismissal.dismissType === "custom date"
           ? writes.dismissal.resurfaceDate
           : MUTED_UNTIL,
-      });
-      return { success: true, activityId: actId, prior };
-    } catch (e) {
-      handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/queries/${queryId} [logNudge]`);
-      return { success: false, error: "Failed to log nudge." };
-    }
+      }),
+    });
+    return r.success ? { success: true, activityId: actId, prior } : { success: false, error: r.error };
   };
 
   /**
@@ -3995,7 +3962,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/queries/${queryId}/activity/${actId}`);
       return { success: false, error: "Failed to record the reply.", undo: noop };
     }
-    await addActivity({ ...writes.activity, id: actId });
+    /* ⚠️ PROJECTION, AND IT CANNOT COST THE UNDO (timeline writer fix v1): the row already landed;
+       a throw here used to lose the undo closure below for a reply that was recorded. */
+    await narrate(() => addActivity({ ...writes.activity, id: actId }), `holding reply ${actId}`);
     return {
       success: true,
       undo: async () => {
@@ -4028,8 +3997,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/queries/${queryId}/activity/${actId}`);
       return { success: false, error: "Failed to record the decision." };
     }
-    // Projection twin — best-effort (the authoritative row already landed), same id.
-    await addActivity({ ...writes.activity, id: actId });
+    // Projection twin, same id. ⚠️ It cannot stop the recompute below (timeline writer fix v1): a
+    // throw here used to leave a DECLINED offer's query un-derived, its Withdrawn never written.
+    await narrate(() => addActivity({ ...writes.activity, id: actId }), `offer decision ${actId}`);
     try {
       await recompute(queryId);
       return { success: true };
