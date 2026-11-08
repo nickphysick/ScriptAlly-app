@@ -21,6 +21,8 @@
 }
 .hdr.is-in { transform: none; }
 .hdr-head { position: relative; flex: none; }
-.hdr-body { flex: 1 1 auto; min-height: 0; overflow: auto; }
+/* workspace width v2 (8 Nov): actions follow the content — the body hugs (grows to its content, shrinks and scrolls when
+   taller), so the footer sits directly under short content and pins to the foot of tall content. */
+.hdr-body { flex: 0 1 auto; min-height: 0; overflow: auto; }
 .hdr-foot { flex: none; }
 @media (prefers-reduced-motion: reduce) { .hdr, .hdr-dim { transition: none; } }

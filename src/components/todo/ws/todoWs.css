@@ -42,27 +42,34 @@
       gutter) like every other page. v52's own 1320 column is retired; block padding only, so the gutter survives. */
 .tws {
   box-sizing: border-box;
-  height: var(--tws-port, 800px); display: flex; flex-direction: column; padding-block: 24px 12px;
+  height: var(--tws-port, 800px); display: flex; flex-direction: column; padding-block: 0 12px; /* the title row pays its own 14px top (workspace width v2) */
   color: var(--tw-ink); font-family: var(--tw-serif);
 }
 .tws *, .tws-layer * { box-sizing: border-box; }
 .tws :where(p, span, div, label, button, input, textarea) { font-family: inherit; }
 
-/* the header: the Query Centre's navy banner, slim (its radius, its navy, its outlined pill) */
+/* the header (workspace width v2, 8 Nov): one light row on the page, no container — the title in the type face, a rust
+   late pill (absent at 0), a plain to-do pill, and the solid navy "+ Add a task" on the right. The navy card is gone. */
 .tws-hd {
-  flex: none; display: flex; align-items: center; gap: 16px; padding: 16px 22px 16px 32px; border-radius: 20px;
-  background: var(--tw-navy); color: #f4eee5; margin-bottom: 10px;
+  flex: none; display: flex; align-items: center; gap: 10px; padding: 14px 0 12px;
+  background: none; color: var(--tw-ink);
 }
-.tws-ht { min-width: 0; }
-.tws .tws-hd h1.tws-ttl { margin: 0; font: 400 32px/1.3 var(--tw-type) !important; color: #f4eee5 !important; white-space: nowrap; }
-.tws .tws-stats { margin: 2px 0 0; font: italic 15.5px/1.35 var(--tw-serif); color: rgba(244, 238, 229, 0.82); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tws .tws-stats b { font: normal 400 16px var(--tw-type); color: #fff; }
+.tws .tws-hd h1.tws-ttl {
+  margin: 0 6px 0 0; font: 400 23px/1.3 var(--tw-type) !important; color: var(--tw-ink) !important;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
+}
+.tws .tws-pl {
+  flex: none; display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px; border-radius: 14px;
+  background: #fff; box-shadow: inset 0 0 0 1px #e2d9cc; font: 400 15px/1 var(--tw-serif); color: var(--tw-ink); white-space: nowrap;
+}
+.tws .tws-pl[data-k="late"] { background: #f5e6df; box-shadow: none; color: #8a4a3c; }
+.tws .tws-pl i { font-style: normal; font-size: 10px; }
 .tws-sp { flex: 1; min-width: 8px; }
 .tws-addb {
-  flex: none; height: 46px; padding: 0 20px; border: 0; border-radius: 23px; background: transparent; color: #f4eee5; cursor: pointer;
-  font: 600 16px var(--tw-serif); box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, 0.55);
+  flex: none; height: 40px; padding: 0 18px; border: 0; border-radius: 20px; background: var(--tw-navy); color: #f4eee5; cursor: pointer;
+  font: 600 15.5px var(--tw-serif);
 }
-.tws-addb:hover { box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, 0.9); }
+.tws-addb:hover { background: #1f2c3f; }
 
 /* the workspace takes the rest of the column (min 520); its panes scroll on their own */
 .tws-ws {
@@ -220,7 +227,9 @@
 /* v52 Part C — the questions column holds the questions AND the footer; the preview runs full height beside it.
    ⚠️ A SIZE CONTAINER, so the footer fits by the COLUMN's width (never the viewport's): see the two queries below. */
 .tws-wcol { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; container-type: inline-size; container-name: twscol; }
-.tws-wq { position: relative; flex: 1; min-width: 0; min-height: 0; overflow-y: auto; padding: 6px 24px 16px; scrollbar-width: thin; }
+/* workspace width v2 (8 Nov): actions follow the content — the body hugs (grows to its content, shrinks and scrolls when
+   taller), so the footer sits directly under short content and pins to the foot of tall content. */
+.tws-wq { position: relative; flex: 0 1 auto; min-width: 0; min-height: 0; overflow-y: auto; padding: 6px 24px 16px; scrollbar-width: thin; }
 /* the card preview: 390 at every size (v52 Part B), never growing with the screen */
 .tws-wp { position: relative; flex: none; width: 390px; background: var(--tw-cream); padding: 12px 12px 10px; display: flex; flex-direction: column; min-height: 0; border-left: 1px solid #efe9e0; }
 .tws-wf { flex: none; display: flex; align-items: center; gap: 10px; padding: 12px 14px 12px 18px; border-top: 1px solid #e6dfd5; background: #fff; }
@@ -374,8 +383,8 @@
 
 /* the preview column */
 .tws-wpl { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; font: 13.5px var(--tw-serif); color: var(--tw-mut2); min-height: 20px; }
-.tws-pvslot { position: relative; flex: 1; min-height: 0; overflow: hidden; border-radius: 16px; cursor: pointer; }
-.tws-pvslot .tws-pvz { transform-origin: 0 0; pointer-events: none; }
+.tws-pvslot { position: relative; flex: 0 1 auto; min-height: 0; /* workspace width v2: hugs the card */ overflow: hidden; border-radius: 16px; cursor: pointer; }
+.tws-pvslot .tws-pvz { transform-origin: 0 0; pointer-events: none; display: flex; flex-direction: column; } /* a flex column, so its max-height shrinks the card and the card scrolls inside */
 .tws-pvopen {
   position: absolute; left: 50%; bottom: 14px; transform: translate(-50%, 6px); opacity: 0; transition: opacity 0.15s, transform 0.15s; z-index: 5;
   height: 34px; padding: 0 16px; border: 0; border-radius: 17px; background: var(--tw-navy); color: #fff; font: 600 14px var(--tw-serif);
@@ -383,7 +392,7 @@
 }
 .tws-pvslot:hover .tws-pvopen, .tws-pvslot:focus-visible .tws-pvopen { opacity: 1; transform: translate(-50%, 0); }
 .tws-pvz .spanel.tws-pvpanel {
-  position: relative; inset: auto; top: auto; right: auto; bottom: auto; width: 100%; height: 100%; z-index: auto; animation: none;
+  position: relative; inset: auto; top: auto; right: auto; bottom: auto; width: 100%; height: auto; flex: 0 1 auto; min-height: 0; z-index: auto; animation: none;
   box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.08), 0 18px 36px -26px rgba(28, 19, 15, 0.45);
 }
 /* the section the task fills, on the address book's card (AgentCard262's sections are data-cl262="sec" data-k="…") */
@@ -471,7 +480,7 @@
 .tws-btn[data-k="o"] { background: #fff; color: var(--tw-navy); box-shadow: inset 0 0 0 1.5px var(--tw-navy); }
 
 /* add a task */
-.tws-addcard { flex: 1; overflow: auto; padding: 22px 28px; }
+.tws-addcard { flex: 0 1 auto; min-height: 0; overflow: auto; padding: 22px 28px; }
 .tws-addcard input.tws-newt { width: 100%; height: 54px; padding: 0 2px; border: 0; border-bottom: 1.5px solid #d9d0c3; outline: 0; font: 400 24px var(--tw-type); background: none; }
 .tws-addcard input.tws-newt:focus { border-color: var(--tw-navy); }
 .tws-lbl { display: block; margin: 20px 0 8px; font: 600 14.5px var(--tw-serif); color: var(--tw-mut); }
@@ -531,7 +540,7 @@
    slide-in. In the preview the frame sits in the column, upright and still, as tall as the column: the same frame
    (rim, radius, inner border), only placed. The selector out-ranks the frame's own (0-4-0 with :has). */
 .tws-pvz .spanel.qsp.qsp.tws-pvpanel:has(> .spanel-own > [data-qc152]) {
-  position: relative; top: auto; right: auto; bottom: auto; left: auto; width: 100%; height: 100%; rotate: none; animation: none; transition: none; z-index: auto;
+  position: relative; top: auto; right: auto; bottom: auto; left: auto; width: 100%; height: auto; max-height: none; flex: 0 1 auto; min-height: 0; rotate: none; animation: none; transition: none; z-index: auto;
 }
 
 /* ── v52 Part B — the tray ── */
@@ -621,3 +630,13 @@
 .tws-pop .tws-offrow small { display: block; margin-top: 2px; font: 12.5px var(--tw-serif); color: var(--tw-mut); }
 .tws-pop .tws-offon { flex: none; height: 30px; padding: 0 12px; border: 0; border-radius: 15px; background: #fff; color: var(--tw-navy); font: 600 13.5px var(--tw-serif); box-shadow: inset 0 0 0 1.5px var(--tw-navy); cursor: pointer; }
 .tws-pop .tws-offon:hover { background: var(--tw-navy); color: #fff; }
+
+/* workspace width v2 (8 Nov): the side card is as tall as its content — the cream rail stays the desk's height, and the
+   card in it ends at its last item, scrolling inside only when it is taller than the rail (WsPreview's ScaledCard gives
+   it the rail's space as a maximum). The card is the shared query / agent card, dressed here by class, never forked. */
+.tws-wp > :not(.tws-wpl) { flex: 0 1 auto; min-height: 0; }
+.tws-wp .qc149c, .tws-wp .qc149c .qc149c-in, .tws-wp .qc149c .qc149c-pane { flex: 0 1 auto; }
+
+/* workspace width v2 (8 Nov): the desk is wider on a big screen, but a task's questions are read, not scanned — its
+   body stops at 680 and the rest of the desk is air. The footer and the preview rail are unaffected. */
+.tws-wq > *, .tws-addcard > * { max-width: 680px; }

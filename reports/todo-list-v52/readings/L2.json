@@ -1,4 +1,6 @@
 {
- "stats": "104 to do · 30 late · 0 cleared this week",
- "text": "Your to-do list104 to do · 30 late · 0 cleared this week+ Add a task"
+ "title": "To-do list",
+ "todo": "103 to do",
+ "late": "● 29 late",
+ "text": "To-do list● 29 late103 to do+ Add a task"
 }

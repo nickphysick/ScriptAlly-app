@@ -14,10 +14,9 @@
  * ⚠️ THE BOOK VIEW PORTALS TO THE BODY, so its sheet reads only `:root` tokens and literals.
  */
 
-/* ── the page root: the gutters (24 compact, 36 wide) replace the shared column's ── */
+/* ── the page root. ⚠️ WORKSPACE WIDTH v2 (8 Nov): it takes the shared workspace column (`--work-max` with
+   `--work-gutter` inside it, workspacePageGrid.css) — its own full-sheet width and 24 / 36px gutters are retired. ── */
 .wpg-scroll > .ms27 {
-  max-width: none;
-  padding-inline: 24px;
   container: ms27 / inline-size;
   --ms27-ink: #1c130f;
   --ms27-navy: #2a3a52;
@@ -25,7 +24,6 @@
   --ms27-serif: var(--msv12-serif);
   --ms27-txt: var(--hero-text-x, 243px);
 }
-.ws-app.sheet-wide .wpg-scroll > .ms27 { padding-inline: 36px; }
 .ms27 { color: var(--ms27-ink); font-family: var(--ms27-serif); }
 .ms27 :is(h1, h2, p, dl, dt, dd) { margin: 0; }
 .ms27 button { font: inherit; color: inherit; }

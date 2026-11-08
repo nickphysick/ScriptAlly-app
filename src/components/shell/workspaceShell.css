@@ -1180,7 +1180,7 @@
  * shell's root they were inherited by the rail too, and the rail gate (which diffs the rail's whole
  * computed style across routes) rightly reported two properties the rail had gained on this route.
  */
-.dash-mode .ws-main { --dash-page-max: 1440px; --dash-page-pad: 22px; }
+.dash-mode .ws-main { --dash-page-max: calc(var(--work-max) - 2 * var(--work-gutter)); --dash-page-pad: var(--work-gutter); } /* workspace width v2: the workspace column's tokens */
 /* ⚠️ THE PAGE FRAME'S TOP INSET, AS A TOKEN (app shell v3, the ref's `.win` 28px). Every other page
    brings its own inset through its grid's gutter; the dashboard's top offset USED to be the height of
    the bar that lay over it, so with the bar in the flow it reads the frame's 28px instead. */

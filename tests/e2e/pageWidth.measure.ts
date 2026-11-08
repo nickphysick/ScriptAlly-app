@@ -17,9 +17,10 @@ const MUTATE = process.env.PW1_MUTATE ?? "";
 const broken = (n: string) => MUTATE === "all" || MUTATE.split(",").includes(n);
 const SHOTS = process.env.PW1_SHOTS ?? "";
 
-/** The cap and gutter the shared rule states (workspacePageGrid.css `--page-cap`, `--page-gutter`). */
-const CAP = 1256;
-const GUTTER = 40;
+/** RE-POINTED (workspace width v2, 8 Nov): the column is `--work-max` (1660) with `--work-gutter` (32) inside it
+ *  (index.css), so the content is 1660 − 2 × 32 at the cap and the gutter is 32 below it. */
+const GUTTER = 32;
+const CAP = 1660 - 2 * GUTTER;
 
 /**
  * The pages on the shared column, each with the element whose CONTENT box is that column (`col`), and the blocks that
@@ -35,12 +36,13 @@ const PAGES: { route: string; col: string; blocks: string[] }[] = [
   { route: "/agents/discover", col: ".dv1-ae", blocks: [".dv1-ae"] },
   { route: "/manuscripts/versions", col: ".vv2 .mc", blocks: [".vv2 .mc"] },
   { route: "/materials/letters", col: ".qlp > .qlp-head", blocks: [".qlp > .qlp-head"] },
-  { route: "/manuscripts/comps", col: ".cv-group", blocks: [".cv-group"] },
+  { route: "/manuscripts/comps", col: ".cp30", blocks: [] } /* comps v30 renders .cp30 (re-pointed, workspace width v2) */,
   { route: "/todo", col: ".tws", blocks: [".tws-hd", ".tws-ws"] },
   { route: "/todo/corkboard", col: ".cb2-hd", blocks: [".cb2-hd", ".cb2-wallwrap"] },
+  { route: "/manuscripts", col: ".ms27", blocks: [] }, /* the root IS the column (no inner block to hold to its edges) */
 ];
 /** Pages with their own width (§0.3's flagged list): W1 and W6 only. */
-const OWN_WIDTH = ["/dashboard", "/manuscripts", "/queries/packages", "/account", "/help"];
+const OWN_WIDTH = ["/dashboard", "/queries/packages", "/account", "/help"]; /* the Dashboard is on the column but outside the grid; Packages keeps a hawk clearance (workspaceWidth.measure.ts reads both) */
 
 const SIZES = [
   { width: 1280, height: 800, open: true }, { width: 1280, height: 800, open: false },
@@ -53,8 +55,8 @@ async function mutate(page: Page) {
   const css: string[] = [];
   if (broken("indent")) css.push(".ws-pagebar .ws-ftab { left: 40px !important; }");
   if (broken("banner")) css.push(".qc151, .cl24-hd, .rsp5, .a17-flow, .dv1-ae, .vv2 .mh, .qlp > .qlp-head, .cv-group, .tws, .cb2-hd { margin-inline: -20px !important; width: auto !important; }");
-  if (broken("cap1100")) css.push(":root { --page-cap: 1100px !important; }");
-  if (broken("gutter24")) css.push(":root { --page-gutter: 24px !important; }");
+  if (broken("cap1100")) css.push(":root { --work-max: 1164px !important; }");
+  if (broken("gutter24")) css.push(":root { --work-gutter: 24px !important; }");
   if (broken("row1500")) css.push(".qc151 > *, .clv-main, .rsp5 > *, .cb2-wallwrap, .tws { min-width: 1500px !important; }");
   if (!css.length) return;
   await page.addInitScript((c) => {
