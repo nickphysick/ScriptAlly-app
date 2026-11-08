@@ -32,14 +32,14 @@ export async function openComps(page: Page, vp: Vp, o: { ms?: string; collapsed?
   await page.evaluate(async () => { await document.fonts.ready; });
   await page.evaluate(LIB);
   /* comps v28: the shelf's cards (v25's list rows are retired) */
-  if ((o.ms ?? MS) === MS && !o.hold) await page.waitForFunction(() => !!(window as any).__cv().querySelector('[data-cx="card"]'), null, { timeout: 30_000 });
+  if ((o.ms ?? MS) === MS && !o.hold) await page.waitForFunction(() => !!(window as any).__cv().querySelector('[data-cp="card"]'), null, { timeout: 30_000 });
   await page.waitForTimeout(400);
 }
 
 /** `__cv()` is the page on screen (it throws if there is none or two); `__box(e)` is a rounded rect. */
 export const LIB = `(() => {
   window.__cv = () => {
-    const all = [...document.querySelectorAll('[data-cv="page"]')].filter((e) => e.getBoundingClientRect().height > 0);
+    const all = [...document.querySelectorAll('[data-cp="page"]')].filter((e) => e.getBoundingClientRect().height > 0);
     if (all.length !== 1) throw new Error("expected one comps page on screen, found " + all.length);
     return all[0];
   };

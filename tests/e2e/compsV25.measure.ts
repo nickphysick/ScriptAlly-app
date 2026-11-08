@@ -53,7 +53,7 @@ async function open(page: Page, vp: Vp, lock: string, o: Parameters<typeof openC
   await openComps(page, vp, o);
   await mutate(page, lock);
 }
-const P = '[data-cv="page"] ';
+const P = '[data-cp="page"] ';
 const W = "(window as any)";
 void W;
 
@@ -82,9 +82,9 @@ test.describe("Comparable titles v25", () => {
     const had = before.comps.filter((c) => c.id).map((c) => c.id as string);
     L.check("the fixture holds a comp with no id", before.comps.length === FX.comps && had.length === FX.comps - 1, `${had.length} of ${before.comps.length} have ids`);
     await open(page, SIZES[0], "A1");
-    await scrollTo(page, '[data-cx="shelf"]', 24);
+    await scrollTo(page, '[data-cp="shelf"]', 24);
     /* edit Salt Road's publisher (comps v28: its card opens the drawer) */
-    await page.locator(`${P}[data-cx="card"][aria-label="Salt Road"]`).click();
+    await page.locator(`${P}[data-cp="card"][aria-label="Salt Road"]`).click();
     await page.waitForSelector('[data-hdr="comp"].is-in');
     await page.locator('[data-cv="drawer-edit"]').click();
     await page.locator("#cpv-f-pub").fill("Faber & Faber");
@@ -115,7 +115,7 @@ test.describe("Comparable titles v25", () => {
     const added = bid[bid.length - 1];
     /* a plain Add closes the drawer, so the new comp is opened from its card; Remove is in the edit form's foot */
     await page.waitForTimeout(700);
-    await page.locator(`${P}[data-cx="card"][aria-label="Low Water"]`).click();
+    await page.locator(`${P}[data-cp="card"][aria-label="Low Water"]`).click();
     await page.waitForSelector('[data-hdr="comp"].is-in');
     await page.locator('[data-cv="drawer-edit"]').click();
     await page.locator('[data-hdr="comp"] [data-cf="remove"]').click();
@@ -132,7 +132,7 @@ test.describe("Comparable titles v25", () => {
     seed("--empty");
     const before = dump();
     await open(page, SIZES[0], "E2");
-    await scrollTo(page, '[data-cx="shelf"]', 24);
+    await scrollTo(page, '[data-cp="shelf"]', 24);
     /* Nine Miles Out is in no letter: its card's "Log in a letter" opens the picker on the CURRENT letter (v3, not sent), ticked */
     /* everything that changes INSIDE the picker after it is first put in the document. An attribute record carries the
        value it had before, so the first frame's letter is known whenever this callback runs. */
@@ -146,7 +146,7 @@ test.describe("Comparable titles v25", () => {
         }
       }).observe(document.body, { subtree: true, childList: true, attributes: true, attributeOldValue: true, attributeFilter: ["data-letter", "data-fixed", "aria-checked", "aria-pressed"], characterData: true, characterDataOldValue: true });
     });
-    await page.locator(`${P}[data-cx="card"][aria-label="Nine Miles Out"] [data-cx="slip-pick"]`).click();
+    await page.locator(`${P}[data-cp="card"][aria-label="Nine Miles Out"] [data-cp="stat-pick"]`).click();
     await page.waitForSelector('[data-cv="picker"]');
     /* ⚠️ THE FIRST FRAME (comps v26.1). The picker opens with its letter already chosen: this reads it the moment it
        mounts, with no wait. v26 waited for it to settle, because the picker chose its letter in an effect. */
@@ -189,7 +189,7 @@ test.describe("Comparable titles v25", () => {
       return { letter: p.dataset.letter, fixed: p.dataset.fixed, can: li.filter((x) => x.getAttribute("aria-disabled") === "false").length, on: li.filter((x) => x.getAttribute("aria-checked") === "true").map((x) => x.dataset.key), save: !!p.querySelector('[data-cv="picker-save"]'), newv: p.querySelector('[data-cv="picker-newv"]')?.textContent ?? null, notice: p.querySelector('[data-cv="picker-notice"]')?.textContent ?? "", locks: [...p.querySelectorAll('[data-cv="picker-letter"]')].map((b) => `${(b as HTMLElement).dataset.letter}:${b.querySelector("svg") ? "lock" : "open"}`) };
     });
     /* the notice's door opens the picker on the unrecorded letter (comps v28: the one notice under the header) */
-    await page.locator(`${P}[data-cx="notice-log"]`).click();
+    await page.locator(`${P}[data-cp="notice-log"]`).click();
     await page.waitForSelector('[data-cv="picker"]');
     const s1 = await state();
     L.check("v1: sent, nothing recorded, open to one save", s1.letter === FX.L1 && s1.fixed === "false" && s1.save && s1.can === FX.comps - 1 && s1.on.length === 0, `${s1.letter} · fixed ${s1.fixed} · ${s1.can} tickable`);
@@ -222,12 +222,14 @@ test.describe("Comparable titles v25", () => {
     await page.locator('[data-cv="picker-save"]').click();
     await expect.poll(() => JSON.stringify(dump().letters[FX.L1]?.compIds), { timeout: 20_000 }).toBe(JSON.stringify(["cmp_cv25brit"]));
     await page.waitForTimeout(600);
-    const rows = await page.evaluate(() => { const w = window as any; const r = (w.__qa('[data-cx="card"]') as HTMLElement[]).find((x) => x.dataset.key === "cmp_cv25brit")!; return { where: r.dataset.where, n: (r.querySelector('[data-cx="slip-queries"]')?.textContent ?? ""), unrec: w.__qa('[data-cx="notice"]').length, rate: w.__q('[data-slh="ring-pct"]').textContent }; });
-    L.check("v1 saved once: its five queries are tracked", rows.where === "sent" && rows.n.startsWith("5 queries") && rows.unrec === 0 && rows.rate === "100%", JSON.stringify(rows));
-    /* comps v27: the door into the picker is in the "How comp tracking works" pop-up now */
+    const rows = await page.evaluate(() => { const w = window as any; const r = (w.__qa('[data-cp="card"]') as HTMLElement[]).find((x) => x.dataset.key === "cmp_cv25brit")!; const k = r.querySelector('[data-cp="stat"] .cp30-k')?.cloneNode(true) as HTMLElement | undefined; k?.querySelectorAll("small").forEach((x) => x.remove());
+      return { where: r.dataset.w, n: (r.querySelector('[data-cp="stat-line"]')?.textContent ?? ""), unrec: w.__qa('[data-cp="notice"]').length, rate: k?.textContent?.trim() ?? "" }; });
+    /* comps v30: the card's stat card states "{asked} of {queries} queries". v28's "100%" was the header ring's
+       logged ÷ sent, which v30 does not draw; the card's own rate is asked ÷ queries, a different figure. */
+    L.check("v1 saved once: its five queries are tracked", rows.where === "sent" && / of 5 queries/.test(rows.n) && rows.unrec === 0 && /^\d+%$/.test(rows.rate), JSON.stringify(rows));
+    /* comps v30: the header's "Log comps in a letter" is the door into the picker */
     await page.evaluate(() => { const sc = (window as any).__cv().closest(".wpg-scroll") as HTMLElement; sc.scrollTop = 0; });
-    await page.locator(`${P}[data-cx="how-link"]`).click();
-    await page.locator('[data-cv="how-pop"] [data-cv="how-pick"]').click();
+    await page.locator(`${P}[data-cp="pick"]`).click();
     await page.waitForSelector('[data-cv="picker"]');
     await page.locator(`[data-cv="picker-letter"][data-letter="${FX.L1}"]`).click();
     const s4 = await state();
