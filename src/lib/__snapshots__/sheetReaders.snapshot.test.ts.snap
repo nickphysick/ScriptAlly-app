@@ -1,0 +1,528 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > public/QueryHawk-pipeline-import-template.xlsx 1`] = `
+{
+  "cells": "7738:c22461ee4dce9f58",
+  "csv": "6042:f82eb0af5193a749",
+  "sample": "566:3ead62862af1718e",
+  "template": "196:5c5772cbd914cc61",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/import/matcher-agents.csv 1`] = `
+{
+  "cells": "497:2c8df19b19ea8b77",
+  "csv": "145:56d2b643a8061d94",
+  "sample": "179:bc618350c3e33508",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/import/matcher-queries.csv 1`] = `
+{
+  "cells": "850:ae0d62da25ed385e",
+  "csv": "266:9eba70d0c46019e5",
+  "sample": "349:e05dba77e6f6c485",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/import/smart-messy.xls 1`] = `
+{
+  "cells": "1428:fe723da16b1f4cec",
+  "csv": "338:7427e5605064d91d",
+  "sample": "444:55426734fab367c0",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/import/smart-messy.xlsx 1`] = `
+{
+  "cells": "1436:cfecf6364d258464",
+  "csv": "348:c14e5a4632e05c72",
+  "sample": "449:382251e097545e0b",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/import/template-dmy.csv 1`] = `
+{
+  "cells": "1450:c293cde67e3ca567",
+  "csv": "524:520559dc5c9fd3b5",
+  "sample": "436:da47e60eb49db7fc",
+  "template": "1343:a0ba3effbe3b30d7",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/import/template-iso.csv 1`] = `
+{
+  "cells": "1450:bd585e534c09e3e5",
+  "csv": "524:153793415f02d455",
+  "sample": "436:d7250cdf66861281",
+  "template": "1182:6ae20914d3417a9c",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/import/template-iso.xls 1`] = `
+{
+  "cells": "2332:e4de6ae012afbd3c",
+  "csv": "484:091c35cb30c35814",
+  "sample": "434:988f0bb5bbcac019",
+  "template": "2352:42fed4a5eeee2675",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/import/template-iso.xlsx 1`] = `
+{
+  "cells": "2364:d39b276161815996",
+  "csv": "524:153793415f02d455",
+  "sample": "436:d7250cdf66861281",
+  "template": "1182:6ae20914d3417a9c",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/import/template-mixed.csv 1`] = `
+{
+  "cells": "1072:7901b594b6c2e8e4",
+  "csv": "399:899a766e0703d91f",
+  "sample": "315:d9b0f4c71629f4ba",
+  "template": "1007:70685498b58718e7",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/import/template-window.csv 1`] = `
+{
+  "cells": "826:a92e2d6089a42d25",
+  "csv": "275:829ce3144f085b8c",
+  "sample": "175:98a68990763837c8",
+  "template": "428:0054352a1b16bfec",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/agentnotes-csv-10.csv 1`] = `
+{
+  "cells": "1712:58aafdfcb11ea8c4",
+  "csv": "678:6ac83fa448dae01d",
+  "sample": "622:0c7cc5901a6ffe69",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/agentnotes-csv-50.csv 1`] = `
+{
+  "cells": "7791:5832b0b10ebb1ee9",
+  "csv": "2911:625f45f9864dd5bf",
+  "sample": "613:131a11ba0eccf4bb",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/agentnotes-xlsx-50.xlsx 1`] = `
+{
+  "cells": "10825:05fd891732e4427b",
+  "csv": "2932:5194b777b5f71e15",
+  "sample": "611:9692ae85c13e543d",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/blank-xlsx-50.xlsx 1`] = `
+{
+  "cells": "11382:5ba2424110db2bb3",
+  "csv": "3049:33578b8efd4db114",
+  "sample": "593:84023924e4900c49",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/clean-csv-10.csv 1`] = `
+{
+  "cells": "1807:3579788fd94ab3b5",
+  "csv": "645:c6612f73bee7b8c2",
+  "sample": "653:f4fd77afa6704b75",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/clean-csv-50.csv 1`] = `
+{
+  "cells": "8000:2c9455f043a0700c",
+  "csv": "2837:63a27e2e9a553bf6",
+  "sample": "634:e1f8b063fdd5e14e",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/clean-xlsx-10.xlsx 1`] = `
+{
+  "cells": "2229:8ed05cc54a259ca7",
+  "csv": "570:e94b173c7f74dc4b",
+  "sample": "610:013f6edb49ed417f",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/colour-xlsx-10.xlsx 1`] = `
+{
+  "cells": "3078:c418fb83b7f33415",
+  "csv": "627:71ae987e0092b0f3",
+  "sample": "289:1ed95251eda369c8",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/colour-xlsx-50.xlsx 1`] = `
+{
+  "cells": "10702:361106f880dc08f1",
+  "csv": "2499:eb8c4edf0f2cd189",
+  "sample": "291:6b65ba2edc4a20f4",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/datestyles-csv-10.csv 1`] = `
+{
+  "cells": "1702:71de45d7ec00121b",
+  "csv": "588:294adf97c947f477",
+  "sample": "623:aba4871e89cb4d21",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/datestyles-csv-50.csv 1`] = `
+{
+  "cells": "7995:e98a63d6678aed57",
+  "csv": "2904:e172fff4ce9de0e9",
+  "sample": "602:5ae48b15cd32139a",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/datestyles-xlsx-50.xlsx 1`] = `
+{
+  "cells": "10835:92a8d69909530d47",
+  "csv": "2738:d9bf403fe30ef003",
+  "sample": "588:8c8d25f9c1b7268a",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/dupheader-csv-50.csv 1`] = `
+{
+  "cells": "8193:4cc160137e25c212",
+  "csv": "2935:ca7ecd5c1018e9c2",
+  "sample": "618:4a5fb86a2966992e",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/dupheader-xlsx-10.xlsx 1`] = `
+{
+  "cells": "2518:afcc99c982f3efd1",
+  "csv": "662:51328725e062c142",
+  "sample": "637:fbc96c312f62f633",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/emoji-csv-10.csv 1`] = `
+{
+  "cells": "1889:56301a33b68c5027",
+  "csv": "678:f74e7d7ad8778571",
+  "sample": "649:03ade49a9d6037cf",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/events-csv-10.csv 1`] = `
+{
+  "cells": "3316:47919b4c05aa0633",
+  "csv": "1183:443203384b56df24",
+  "sample": "616:cfd3e5a2df0e6e60",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/events-csv-50.csv 1`] = `
+{
+  "cells": "15391:815d1f7021a8af51",
+  "csv": "5365:ef1d184fe6e7d63c",
+  "sample": "622:186347b6394eb4a3",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/events-xlsx-10.xlsx 1`] = `
+{
+  "cells": "3225:92bc0dff30f626e0",
+  "csv": "915:5da0d7cd837fddb7",
+  "sample": "582:0c37ab0d87287603",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/kitchen-csv-50.csv 1`] = `
+{
+  "cells": "9144:e51114a3b85f88bc",
+  "csv": "3575:b49031e8e017286b",
+  "sample": "539:0d5a59ce25fd7d04",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/kitchen-csv-150.csv 1`] = `
+{
+  "cells": "25874:a53a58f7956c3dca",
+  "csv": "10268:6af77f29d3220089",
+  "sample": "605:7cb050c03207fb15",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/kitchen-xlsx-50.xlsx 1`] = `
+{
+  "cells": "20116:8af0c03858adec73",
+  "csv": "4805:3425733b838109b4",
+  "sample": "436:7b934528efda8099",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/kitchen-xlsx-150.xlsx 1`] = `
+{
+  "cells": "39996:3c1647344c6a36cb",
+  "csv": "10131:0841a79e65e7db63",
+  "sample": "397:1aedfe537bc56fde",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/links-xlsx-10.xlsx 1`] = `
+{
+  "cells": "2698:f02b66ae2dafa8b5",
+  "csv": "1023:30294bd7f49ca249",
+  "sample": "640:ffc6d7ccef519f9d",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/links-xlsx-50.xlsx 1`] = `
+{
+  "cells": "12233:e1ca0af5d1f6d31b",
+  "csv": "4677:a2496dbb0dff6aa1",
+  "sample": "628:be4de1837d91c598",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/merged-xlsx-10.xlsx 1`] = `
+{
+  "cells": "2255:93a09d3c471c22c3",
+  "csv": "614:8d52d172dc7b9991",
+  "sample": "570:23ae291bcd94b7b0",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/merged-xlsx-50.xlsx 1`] = `
+{
+  "cells": "10291:0a49d6c70b3f30ea",
+  "csv": "2970:988e0dc66c661c06",
+  "sample": "582:b140f1900bc0accc",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/notesdates-csv-10.csv 1`] = `
+{
+  "cells": "1953:0ceca0ffd5cfc293",
+  "csv": "718:93982483ee15170c",
+  "sample": "678:3ce53e5ad6be8d25",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/notesdates-csv-50.csv 1`] = `
+{
+  "cells": "8556:8a9414a6cb8d067f",
+  "csv": "3146:4ef8b43a5c3ab07f",
+  "sample": "670:9a6256b17debf250",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/notesdates-xlsx-50.xlsx 1`] = `
+{
+  "cells": "11009:0ab93b0014d88264",
+  "csv": "3020:14ed06e93a6f91e9",
+  "sample": "628:1c528aa4a4c19263",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/placeholders-csv-10.csv 1`] = `
+{
+  "cells": "1925:7b69c20859c8ad9c",
+  "csv": "667:7371579298bd7a78",
+  "sample": "525:7d1e2c0adc422f11",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/preamble-csv-10.csv 1`] = `
+{
+  "cells": "2009:b6a10633f383c359",
+  "csv": "726:12f14754bf64ba36",
+  "sample": "598:8cb4930b6c8be2c4",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/preamble-xlsx-50.xlsx 1`] = `
+{
+  "cells": "11528:3a5c95675f5c4583",
+  "csv": "3122:1b7896b828ea3f53",
+  "sample": "531:adea4f6f1d5d648f",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/serials-csv-10.csv 1`] = `
+{
+  "cells": "1711:d06f51f3cbc941b3",
+  "csv": "572:b9d609acf5b210a3",
+  "sample": "605:16b36f75b584a603",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/serials-xlsx-10.xlsx 1`] = `
+{
+  "cells": "2331:e608cef039dc9756",
+  "csv": "591:7fedbcdd0df80091",
+  "sample": "628:08a51f704194c4bc",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/size-csv-150.csv 1`] = `
+{
+  "cells": "24428:423d3af1904bd649",
+  "csv": "8724:32ad3badd89a473d",
+  "sample": "678:37ffeffc197704da",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/size-csv-200.csv 1`] = `
+{
+  "cells": "32308:b828bcaf82aa905c",
+  "csv": "11642:c0b9aa3fa49c6a33",
+  "sample": "644:869aad1a17a2a595",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/size-csv-250.csv 1`] = `
+{
+  "cells": "41155:40bb5c8c5fe5bc6b",
+  "csv": "14791:84980828a05632da",
+  "sample": "649:94546fc05a408ee6",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/size-csv-300.csv 1`] = `
+{
+  "cells": "48981:e6c9892253213a84",
+  "csv": "17581:c7cc8c898f600f3b",
+  "sample": "625:d8205ad31f251a9c",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/size-xlsx-300.xlsx 1`] = `
+{
+  "cells": "65938:c4398b36d45639fc",
+  "csv": "16800:7b6fa88ec9430dc9",
+  "sample": "647:985c2220384cfdaa",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/slang-csv-10.csv 1`] = `
+{
+  "cells": "1728:67d16b4203657e34",
+  "csv": "589:fa970e02a2167841",
+  "sample": "615:6f19189e1ac9c074",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/slang-csv-50.csv 1`] = `
+{
+  "cells": "8167:12455cfb0efbf95e",
+  "csv": "2952:03f847e4c09f3bed",
+  "sample": "610:c8491a55cb36f30d",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/slang-xlsx-10.xlsx 1`] = `
+{
+  "cells": "2199:f3b48665333dc5a6",
+  "csv": "555:a0d55c33fca1e01c",
+  "sample": "603:b800ec6740b65cab",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/tabscover-xlsx-10.xlsx 1`] = `
+{
+  "cells": "2556:d3163d1cbb5f0453",
+  "csv": "706:4f2506425d1aef25",
+  "sample": "109:901f96f2e0a62866",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/tabsrej-xlsx-10.xlsx 1`] = `
+{
+  "cells": "2584:1e088020701b6d85",
+  "csv": "745:8803fae44086faec",
+  "sample": "657:da217f7b1eaffada",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/tabssplit-xlsx-50.xlsx 1`] = `
+{
+  "cells": "11253:be47c7b74bedbe74",
+  "csv": "3096:8a0ffbe1e918dab7",
+  "sample": "641:d290a996956f6776",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/totals-csv-10.csv 1`] = `
+{
+  "cells": "1698:b72e2abab26fd7cc",
+  "csv": "573:0fbb20fdd6d562ef",
+  "sample": "575:bc272b4fff5b7fe3",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/unusualcols-csv-10.csv 1`] = `
+{
+  "cells": "2434:d7caba910899707b",
+  "csv": "930:cfd9d24fe6e8fada",
+  "sample": "697:1c8f2aea6991d0d8",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/unusualcols-xlsx-50.xlsx 1`] = `
+{
+  "cells": "15047:99f6ca5dab0edd3e",
+  "csv": "3977:2c4eda2adeb9b334",
+  "sample": "682:0b869a60ee92368c",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/usdates-csv-10.csv 1`] = `
+{
+  "cells": "1716:9bbc26073f9920ee",
+  "csv": "602:9632d77365344519",
+  "sample": "623:05a5b9f11c21717b",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/utf8-nobom-csv-10.csv 1`] = `
+{
+  "cells": "1718:a2121ed40916d760",
+  "csv": "604:e5de6208020ba30e",
+  "sample": "631:7ef665a279d9de2b",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/utf8-nobom-csv-50.csv 1`] = `
+{
+  "cells": "8470:d765158c64829e23",
+  "csv": "3158:d70defc6264dfd16",
+  "sample": "644:fb47bdf160ad626f",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/whitespace-csv-10.csv 1`] = `
+{
+  "cells": "1910:9cff2e5d2ea7fd0c",
+  "csv": "746:f8d7b04f212de2e2",
+  "sample": "662:1786068964cc3e18",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/wide-csv-10.csv 1`] = `
+{
+  "cells": "1903:b98a95f55fb9eccf",
+  "csv": "688:c4ef368a81f4e04d",
+  "sample": "622:bc776c9fc946118d",
+}
+`;
+
+exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/fixtures/smart-eval/wide-xlsx-50.xlsx 1`] = `
+{
+  "cells": "15229:5b383df99b88f2fd",
+  "csv": "3198:0f9102343483ac45",
+  "sample": "615:70fcacc09974aced",
+}
+`;
