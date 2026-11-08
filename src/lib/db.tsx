@@ -2356,14 +2356,14 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       // a failed log must never surface as a failed delete (the delete already committed).
       const qn = qIds.length;
       const detail = qn > 0 ? ` (and ${qn} quer${qn > 1 ? "ies" : "y"} removed)` : "";
-      await addActivity({
+      await narrate(() => addActivity({
         activityType: ActivityType.AGENT_DELETED,
         description: `You deleted ${agentName}${detail}`,
         manuscriptId: "",
         queryId: "",
         date: new Date().toISOString(),
         details: "",
-      }); // resolves { success: false } on failure (never rejects); the delete itself succeeded
+      }), `agent ${id} deleted`); // the delete itself succeeded
     } catch (e) {
       handleFirestoreError(e, OperationType.DELETE, `users/${uid}/agents/${id}`);
     }
@@ -3864,7 +3864,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/queries/${queryId}/activity/${actId}`);
       return { success: false, error: "Failed to record the reply.", undo: noop };
     }
-    await addActivity({ ...writes.activity, id: actId });
+    /* ⚠️ PROJECTION, AND IT CANNOT COST THE UNDO (timeline writer fix v1): the row already landed;
+       a throw here used to lose the undo closure below for a reply that was recorded. */
+    await narrate(() => addActivity({ ...writes.activity, id: actId }), `holding reply ${actId}`);
     return {
       success: true,
       undo: async () => {
@@ -3897,8 +3899,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/queries/${queryId}/activity/${actId}`);
       return { success: false, error: "Failed to record the decision." };
     }
-    // Projection twin — best-effort (the authoritative row already landed), same id.
-    await addActivity({ ...writes.activity, id: actId });
+    // Projection twin, same id. ⚠️ It cannot stop the recompute below (timeline writer fix v1): a
+    // throw here used to leave a DECLINED offer's query un-derived, its Withdrawn never written.
+    await narrate(() => addActivity({ ...writes.activity, id: actId }), `offer decision ${actId}`);
     try {
       await recompute(queryId);
       return { success: true };
