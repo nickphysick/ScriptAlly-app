@@ -157,6 +157,7 @@ for (const vp of SIZES) {
    book) or "To-do list", a late pill (absent at 0), a to-do pill, + Add a task. "Cleared this week" left the header;
    the Done tab and its intro still say it (L14). */
 test("L2 · the header: title, pills, + Add a task; no priority line", async ({ page }) => {
+  test.skip(true, "Retired by To-do list v53 — v53 D2: the thin header has no pills; TD53 L10 and the header's own words replace it.");
   await open(page, SIZES[1]);
   await mutate(page, "L2"); await mutate(page, "L3");
   const hd = page.locator(`${PG} [data-tws="header"]`);
@@ -175,6 +176,7 @@ test("L2 · the header: title, pills, + Add a task; no priority line", async ({ 
 
 /* ══ L3 Start here ══════════════════════════════════════════════════════════════════════════════════════════════ */
 test("L3 · Start here: first in the To do list; the quill, the phrase; opens its task; absent elsewhere", async ({ page }) => {
+  test.skip(true, "Retired by To-do list v53 — v53 D4: Start here is gone; TD53 L10 holds its absence.");
   await open(page, SIZES[1]);
   await mutate(page, "L3");
   const list = page.locator(`${PG} [data-tws="list"]`);
@@ -247,13 +249,14 @@ async function walkAll(page: Page, kinds: { kind: string; key: string }[], opts:
       keys.push(k0);
       const shape = await page.evaluate(() => {
         const root = [...document.querySelectorAll<HTMLElement>('[data-tws="page"]')].find((e) => e.getBoundingClientRect().height > 0)!;
-        return { qs: root.querySelectorAll("[data-tws-q]").length, chips: root.querySelectorAll('[data-tws="answers"] [data-tws-qa]').length };
+        /* v53 (D6): an earlier answer is a finished step on the rail, one line each (it was a chip in v52) */
+        return { qs: root.querySelectorAll("[data-tws-q]").length, chips: root.querySelectorAll('[data-tws="rail"] [data-st="done"] [data-tws-qa]').length };
       });
       const p = await primaryReading(page);
       out.push({ kind, step, key: k0, qs: shape.qs, chips: shape.chips, p });
       if (opts.checkL6 && k0 !== "summary" && k0 !== "none") {
         expect(shape.qs, `L6 ${kind} step ${step}: exactly one open question`).toBe(1);
-        expect(shape.chips, `L6 ${kind} step ${step}: each earlier answer is a chip`).toBe(step);
+        expect(shape.chips, `L6 ${kind} step ${step}: each earlier answer is a finished step on the rail`).toBe(step);
       }
       expect(p.ok, `L7 ${opts.tag} ${kind} step ${step}: the primary sits in its column, on screen, and owns its centre ${JSON.stringify(p)}`).toBe(true);
       const btn = primary(page);
@@ -273,9 +276,10 @@ async function walkAll(page: Page, kinds: { kind: string; key: string }[], opts:
       /* L6: a chip goes back to its question with the later answers kept */
       /* (two answers in, now on the third question) */
       if (opts.checkL6 && step === 1 && k1 !== "summary" && k1 !== "none") {
-        const chip0 = desk(page).locator('[data-tws="answers"] [data-tws-qa]').first();
+        /* v53 (D6): the earlier answer is a finished step on the rail, and its "change" goes back */
+        const chip0 = desk(page).locator('[data-tws="rail"] [data-st="done"] [data-tws-qa]').first();
         const back = await chip0.getAttribute("data-tws-qa");
-        await chip0.click();
+        await chip0.locator(".tws-chg").click();
         await page.waitForTimeout(200);
         expect(await stepKey(page), `L6 ${kind}: the chip returns to its question`).toBe(back);
         expect(back).toBe(keys[0]);
@@ -318,6 +322,7 @@ for (const vp of SIZES) {
 
 /* ══ L9 date ════════════════════════════════════════════════════════════════════════════════════════════════════ */
 test("L9 · the date: with the month open only Older is selected; the month clears the footer; no hint", async ({ page }) => {
+  test.skip(true, "Retired by To-do list v53 — v53 D5: the date is three tiles (Today, Yesterday, Older); TD53 L2 walks every step.");
   await open(page, SIZES[0]);
   const send = page.locator(`${PG} [data-tws-row]`).filter({ hasText: /^Send .* your (full|partial)/ }).first();
   await send.click();
@@ -371,6 +376,7 @@ async function docWritesDuring(page: Page, fn: () => Promise<void>, settleMs = 2
   return out;
 }
 test("L10 · no review route: Log it saves once and lands on the celebration (then Undo)", async ({ page }) => {
+  test.skip(true, "Retired by To-do list v53 — v53 D10: the celebration is gone; TD53 L7 holds the three writes, the snackbar and Undo.");
   /* the log-and-undo steps are todoWs.measure.ts's own ("a nudge, logged and undone"), which restore the account */
   await open(page, SIZES[1]);
   const pg = page.locator(PG);
@@ -457,6 +463,10 @@ test("L11 · the preview is the Query Centre's own card, and the Contact list's 
   await open(page, SIZES[1]);
   const more = page.locator(`${PG} .tws-more`);
   if (await more.count()) await more.first().click();
+  /* v53 (D4): Housekeeping starts folded */
+  const fold = page.locator(`${PG} [data-tws-group="house"] .tws-gb[aria-expanded="false"]`);
+  if (await fold.count()) await fold.click();
+  if (await more.count()) await more.first().click();
   const fix = page.locator(`${PG} [data-tws-row]`).filter({ hasText: /take to reply|wishlist/ }).first();
   await fix.click();
   await page.waitForTimeout(800);
@@ -465,6 +475,7 @@ test("L11 · the preview is the Query Centre's own card, and the Contact list's 
 
 /* ══ L12 housekeeping ═══════════════════════════════════════════════════════════════════════════════════════════ */
 test("L12 · Housekeeping: the slate header, icon tiles with initials, Quick fill, no “No date”", async ({ page }) => {
+  test.skip(true, "Retired by To-do list v53 — v53 D4: housekeeping starts folded with a form icon per row; TD53 L10 + L11 hold it.");
   await open(page, SIZES[1]);
   await mutate(page, "L12");
   const r = await page.evaluate(() => {
@@ -563,7 +574,13 @@ test("L15 · a switched-off rule is listed, comes back on, and Undo switches it 
   const before = await (await fetch(userDoc, { headers: OWNER })).json() as { fields?: Record<string, unknown> };
   const pg = page.locator(PG);
   const more = pg.locator(".tws-more");
-  const replyRows = async () => { if (await more.count()) await more.first().click().catch(() => undefined); return pg.locator("[data-tws-row]").filter({ hasText: /take to reply/ }).count(); };
+  /* v53 (D4): Housekeeping starts folded, so it is opened first */
+  const replyRows = async () => {
+    const fold = pg.locator('[data-tws-group="house"] .tws-gb[aria-expanded="false"]');
+    if (await fold.count()) await fold.click().catch(() => undefined);
+    if (await more.count()) await more.first().click().catch(() => undefined);
+    return pg.locator("[data-tws-row]").filter({ hasText: /take to reply/ }).count();
+  };
   try {
     const n0 = await replyRows();
     expect(n0, "the account has reply-time tasks to switch off").toBeGreaterThan(0);
