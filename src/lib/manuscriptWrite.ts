@@ -11,6 +11,9 @@
  * as the success it is removes that retry. (A stable id per form submission would close it from the
  * other side; that belongs to the manuscript dialog, which this pack does not touch — deferred.)
  *
+ * `updateManuscriptFields` resolves whether the update landed, for anything else a caller does only
+ * after a landed write.
+ *
  * A failure of the manuscript write itself is unchanged: it goes to `onWriteError`, which db.tsx
  * gives `handleFirestoreError`, and throws as it always has.
  */
@@ -42,12 +45,13 @@ export async function updateManuscriptFields(
   firestore: Firestore, uid: string, id: string, updates: Partial<Manuscript>,
   narrateUpdated: (() => Promise<unknown>) | null,
   onWriteError: OnWriteError,
-): Promise<void> {
+): Promise<boolean> {
   try {
     await updateDoc(doc(firestore, "users", uid, "manuscripts", id), updates);
   } catch (e) {
     onWriteError(e, "update", `users/${uid}/manuscripts/${id}`);
-    return;
+    return false;
   }
   if (narrateUpdated) await narrate(narrateUpdated, `manuscript ${id} updated`);
+  return true;
 }

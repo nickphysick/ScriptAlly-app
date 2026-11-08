@@ -80,7 +80,7 @@ describe("updateManuscriptFields — the write behind updateManuscript", () => {
   });
 
   it("the feed write fails after the update landed → resolves, and the update stands", async () => {
-    await expect(updateManuscriptFields(fs, UID, "m1", { title: "New" }, throwingNarrator, thrower)).resolves.toBeUndefined();
+    await expect(updateManuscriptFields(fs, UID, "m1", { title: "New" }, throwingNarrator, thrower)).resolves.toBe(true);
     expect(fakeStore.docs.get(`${MS_PREFIX}m1`)?.title).toBe("New");
   });
 });
