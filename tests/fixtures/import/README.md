@@ -13,3 +13,7 @@ Built by `node tests/fixtures/import/build.mjs`. Names are invented.
 - `template-window.csv` — the template with two agents: one whose row gives a response window (6 weeks), one whose row gives none.
 - `matcher-agents.csv` — an agents sheet for the column matcher: one row with a rating of 5, one with none, one with a rating that is not a number from 1 to 5.
 - `matcher-queries.csv` — a queries sheet for the column matcher: one ISO date, one blank, one unreadable ("sometime in May"), one that could mean two days (03/04/2026), one day-first (14/03/2026).
+
+## Added by the dependency audit fix (8 Nov 2026)
+
+- `smart-messy.xls` and `template-iso.xls` — the two `.xlsx` fixtures above, re-saved as legacy Excel 97–2003 (BIFF8) with the npm `xlsx` 0.18.5 build, before it was replaced by SheetJS's own CDN build. Made by a one-off script, not by `build.mjs`. Exercises: a `.xls` file reads to the same text, cells and template rows before and after the library swap (`src/lib/sheetReaders.snapshot.test.ts`).

@@ -40,7 +40,7 @@
     "react-dom": "^19.0.1",
     "react-router-dom": "^7.18.1",
     "vite": "^6.2.3",
-    "xlsx": "^0.18.5"
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^5.0.1",
