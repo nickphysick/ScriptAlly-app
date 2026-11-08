@@ -15,7 +15,7 @@
  *    group passes, and the next group's header (later in the table) paints over it when it arrives.
  */
 import React, { useEffect, useRef, useState } from "react";
-import { QueryStatus } from "../../../types";
+import { QueryStatus, type Agent } from "../../../types";
 import { StatusDot } from "../../StatusDot";
 import { usePopover } from "../../shell/ListPills";
 import { usePinCover } from "../../shell/stickyStack";
@@ -23,13 +23,13 @@ import { whereItStands, type QcRow, type WhereKey } from "../../../lib/qcSummary
 import { BE_GROUPS, BE_SORTS, type BeGroup, type BeSort } from "../../../lib/qc150";
 import type { GroupBy } from "../../../lib/qcCalView";
 import { TAB_LABEL, isClosedRow, lastHeardMs, pressSort, trackOf, type Section, type Sort151, type SortKey151 } from "../../../lib/qc151";
-import { dayLine, pillWords, yearSplit, type PillGroup, type WeekSummary } from "../../../lib/qc1511";
+import { dayLine, pillWords, yearSplit, type PillGroup } from "../../../lib/qc1511";
 import { STATUS_FILL, nextNum, rowAct, statusKind } from "../../../lib/qc1512";
 import { quickOfRow, stateOf } from "../../../lib/queryState";
 import type { DrawerMode } from "../../../lib/queryActions/drawerStore";
 import { RadioMenu151 } from "./QcToolbar140";
 import { GROUP_1522, GROUP_MENU_HEAD, PACKAGE_LOCKED_LINE, head1522 } from "../../../lib/qc1522";
-import { QcQuietSetting } from "./QcQuietSetting";
+import { QcHeader1531 } from "./QcHeader1531";
 import { QcSlip153 } from "./QcSlip153";
 import { QcBar153 } from "./QcBar153";
 import { ACTION_WHY_153, FOLD_LINE, foldInitials, isFoldKey } from "../../../lib/qc153";
@@ -37,8 +37,6 @@ import { sectionSwatch, standWords } from "../../../lib/qc153";
 import "./qcv151.css";
 import "./qcv1522.css";
 import "./qcv153.css";
-
-export const HAWK_DESK = "/images/query-centre/hawk-desk.webp?v=1";
 
 const LIST_ICON = <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01" /></svg>;
 const BIRDS_ICON = <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9M4 12h14M4 17h6" /><circle cx="14" cy="7" r="1.6" /><circle cx="19" cy="12" r="1.6" /><circle cx="11" cy="17" r="1.6" /></svg>;
@@ -71,36 +69,8 @@ export const QcSwitch151: React.FC<{ view: View151; onView: (v: View151) => void
   </div>
 );
 
-/* ── §1 the header: v151.2's navy banner (the title, the count line, two pill buttons) ── */
+/* ── §1 the header's figures (v151.2's count line; v153.1 reads its count and its manuscript) ── */
 export interface CountLine1512 { ms: string | null; sent: number; active: number; heardPct: number }
-export const QcHeader151: React.FC<{
-  loading: boolean; onLog: () => void; onRecord: () => void; logDisabled?: boolean; logRef?: React.Ref<HTMLButtonElement>;
-  counts?: CountLine1512 | null;
-  /** v152 §1.4 — the quiet window, and its writer */
-  quietWeeks?: number; onQuietWeeks?: (w: number) => void;
-}> = ({ loading, onLog, onRecord, logDisabled = false, logRef, counts = null, quietWeeks, onQuietWeeks }) => (
-  <header className="qc151-hd qc1512-ban" data-qc151="header" data-qc1512="banner" data-qcv="open-header" data-own-header="">
-    <div className="qc1512-bt">
-      <h1 data-page-title="true" data-qc151="title">Your queries</h1>
-      <p className="qc1512-sub" data-qc1512="subline">
-        {counts ? <>{counts.ms ? <>{counts.ms} · </> : null}<b>{counts.sent}</b> sent · <b>{counts.active}</b> active · <b>{counts.heardPct}%</b> heard back</> : " "}
-      </p>
-    </div>
-    <div className="qc151-acts">
-      {quietWeeks != null && onQuietWeeks ? <QcQuietSetting weeks={quietWeeks} onSet={onQuietWeeks} disabled={loading} /> : null}
-      <button type="button" className="qc151-btn qc151-btn--g" data-qc151="record" data-qcv="oh-record" disabled={loading} onClick={onRecord}>Record a response</button>
-      <button type="button" ref={logRef} className="qc151-btn qc151-btn--n" data-qc151="log" data-qcv="oh-log" disabled={loading || logDisabled} onClick={onLog}>+ Log a query</button>
-    </div>
-  </header>
-);
-
-/* ── §2 the "This week" line (v153): the hawk thumbnail and one sentence, on a white rounded strip ── */
-export const QcSummary1511: React.FC<{ summary: WeekSummary | null }> = ({ summary }) => (
-  <section className="qc153-slim" aria-label="This week" data-qc1511="summary">
-    <img src={HAWK_DESK} alt="" />
-    <p data-qc1511="summary-heading">{summary ? <><b>{summary.heading}.</b>{summary.detail ? <> {summary.detail}</> : null}</> : " "}</p>
-  </section>
-);
 
 /* ── §9 Birds-eye's Group and Sort menus' lines ── */
 const BE_GROUP_LINE: Record<BeGroup, string> = { urgency: "Overdue, upcoming, watch and wait", status: "Where each query stands", none: "One timeline" };
@@ -119,10 +89,10 @@ export interface QcPage151Props {
   onRecord: () => void;
   logDisabled?: boolean;
   logRef?: React.Ref<HTMLButtonElement>;
-  /* §1 the banner's count line (v151.2) */
+  /* §1 the header's count and manuscript (v153.1) */
   counts?: CountLine1512 | null;
-  /* §2 */
-  summary: WeekSummary | null;
+  /** v153.1 — the stage ring card, built by the page that owns the rail's filters */
+  ring?: React.ReactNode;
   /* §3 the quick filters */
   tabCounts: Record<WhereKey, number> | null;
   total: number;
@@ -157,6 +127,8 @@ export interface QcPage151Props {
   signoff: { total: number } | null;
   /** v153 — the slip's "Sent with": the package's name, or null when none is recorded */
   packageNameOf: (r: QcRow) => string | null;
+  /** v153.1 — the query's agent, for the slip's "Their policy" box */
+  agentOf?: (r: QcRow) => Pick<Agent, "noResponseMeansNo" | "responseTimeWeeks"> | null;
   /** v153 — the filter rail, drawn in the left column */
   rail?: React.ReactNode;
   onImport: () => void;
@@ -368,7 +340,7 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
     return n;
   });
   const slip = (r: QcRow) => (
-    <QcSlip153 key={r.id} row={r} nowMs={p.nowMs} selected={p.selectedId === r.id} packageName={p.packageNameOf(r)}
+    <QcSlip153 key={r.id} row={r} nowMs={p.nowMs} selected={p.selectedId === r.id} packageName={p.packageNameOf(r)} agent={p.agentOf?.(r) ?? null}
       act={rowAct(r, p.nowMs)} onOpen={p.onOpen} onAct={p.onAct} />
   );
   const only = p.sections.length === 1;
@@ -381,8 +353,8 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
   );
   return (
     <div className="qc151 qc153" data-qc151="page" data-view={p.view} ref={rootRef}>
-      <QcHeader151 loading={p.loading} onLog={p.onLog} onRecord={p.onRecord} logDisabled={p.logDisabled} logRef={p.logRef} counts={p.counts} quietWeeks={p.quietWeeks} onQuietWeeks={p.onQuietWeeks} />
-      <QcSummary1511 summary={p.summary} />
+      {/* v153.1 — the header on the page's own ground: the hawk, the title block and the stage ring card */}
+      <QcHeader1531 loading={p.loading} onLog={p.onLog} onRecord={p.onRecord} logDisabled={p.logDisabled} logRef={p.logRef} counts={p.counts} quietWeeks={p.quietWeeks} onQuietWeeks={p.onQuietWeeks} ring={p.ring} />
 
       {/* v153 — two columns: the filter rail (sticky) and the list column */}
       <div className="qc153-cl" data-qc153="columns">
