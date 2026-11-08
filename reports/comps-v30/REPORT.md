@@ -114,4 +114,10 @@ as gaps: the picker's tips, the two pop-ups' focus return, and loading against l
 
 ## 6. Dev deploy
 
-DEPLOY_LINE
+Dev hosting only, 8 Nov, from a clean detached checkout of
+`dev/qc1511-db2-title-sip-qc1512-cl26-sip11-tl1-pk41-cl262-db21-sip12-pk41w-qc152-fn121-pk42-qc1521-sr1-qc1522-td51-td511-cb2-sm1-qc1522b-cb21-db22-ql1-rv2-td52-qc1522c-pw1-td52b-cp30`
+@ `dd59a7ce2`. The branch dev served had **not** moved (still `0e21b57a6`, serving `index-D507mjK0.js`), so the new
+branch is that base plus this pack's two commits — a fast-forward, no merge needed. On that tree: tsc 0, `build:dev` 0
+with no error or warning lines, the scanner tests at the base's three reds, and the CP30 locks and the older comps locks
+as in §3 (the emulator build is the same source). **Dev now serves `index-CGunICPB.js`.** No rules, no functions, no
+prod. Not merged to `main`.
