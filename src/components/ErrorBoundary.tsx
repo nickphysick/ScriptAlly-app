@@ -8,9 +8,12 @@
  * blocked on the missing React types — class components couldn't type-check.)
  */
 import { Component, type ReactNode } from "react";
+import { reportBoundaryError } from "../lib/errorReporting";
 
 interface Props {
   children: ReactNode;
+  /** Crash reporting v1: the public site passes its home page, so the fallback offers a way back. */
+  homeHref?: string;
 }
 
 interface State {
@@ -28,8 +31,8 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: unknown) {
-    // Log only the message (no PII), consistent with handleFirestoreError.
-    console.error("UI error boundary caught:", error instanceof Error ? error.message : String(error));
+    // The last resort: a page or panel crash is caught nearer (PageBoundary); this is what is left.
+    reportBoundaryError(error, { boundary: "app" });
   }
 
   private handleReload = () => {
@@ -72,6 +75,11 @@ export class ErrorBoundary extends Component<Props, State> {
           >
             Reload
           </button>
+          {this.props.homeHref && (
+            <p style={{ fontSize: 14, marginTop: 16 }}>
+              <a href={this.props.homeHref} style={{ color: "#7c3a2a" }}>Back to the home page</a>
+            </p>
+          )}
         </div>
       </div>
     );

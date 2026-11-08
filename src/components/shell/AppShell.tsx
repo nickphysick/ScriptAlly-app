@@ -18,6 +18,7 @@
  * critical colours in this codebase before). Tailwind is used for layout/breakpoints only.
  */
 import { STAGE_REPLAY_EVENT } from "./BarSwitcher";
+import { PageBoundary } from "../PageBoundary";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
@@ -69,8 +70,11 @@ export const StagePage: React.FC<{
    *  centres the page inside a capped column (work 1600 / read 1200) — the ONE place a route
    *  declares its width kind. Omit → uncapped (the dashboard's exemption). See contentColumn.css. */
   contentVariant?: "work" | "read";
+  /** Crash reporting v1: the page's name. A named slot wraps its page in a PageBoundary, so a crash
+   *  shows a fallback in this slot only, and leaving the slot resets it. */
+  name?: string;
   children: React.ReactNode;
-}> = ({ active, layout = "flow", background, clip = false, contentVariant, children }) => {
+}> = ({ active, layout = "flow", background, clip = false, contentVariant, name, children }) => {
   const [entering, setEntering] = useState(false);
   const prevActive = useRef(false);
   React.useEffect(() => {
@@ -132,7 +136,7 @@ export const StagePage: React.FC<{
         minWidth: 0,
       }}
     >
-      {body}
+      {name ? <PageBoundary name={name} active={active}>{body}</PageBoundary> : body}
     </div>
   );
 };
@@ -584,13 +588,15 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
           it is PAGE-scoped: the hook returns a toast object its caller renders, so using it here
           would mean mounting a second toast surface app-wide beside the one every To-do page
           already draws. The seam is kept so a shell-level toast can take it the day one exists. */}
-      <FeedbackDock
-        uid={currentUser?.id}
-        email={currentUser?.email ?? null}
-        open={feedbackOpen}
-        onOpenChange={setFeedbackOpen}
-        onReceipt={() => {}}
-      />
+      <PageBoundary name="panel:feedback" kind="panel" onClose={() => setFeedbackOpen(false)}>
+        <FeedbackDock
+          uid={currentUser?.id}
+          email={currentUser?.email ?? null}
+          open={feedbackOpen}
+          onOpenChange={setFeedbackOpen}
+          onReceipt={() => {}}
+        />
+      </PageBoundary>
 
       </div>{/* closes .sv2-app.ws-host — EVERYTHING except the strip stays inside it, deliberately:
                  the floating chrome below (tab bar, sheets, dock, the dev lab) has always been a

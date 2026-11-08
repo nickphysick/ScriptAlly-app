@@ -32,7 +32,7 @@ import { HelpCentre } from "./components/HelpCentre";
 import { AccountSettings } from "./components/AccountSettings";
 // Rail "+ Record a response" host (the dashboard keeps its own independent instance).
 import { PasteEmailFlow } from "./components/emailImport/PasteEmailFlow";
-import { PASTE_RESPONSE_EVENT, openQueryDrawer } from "./lib/queryActions/drawerStore";
+import { PASTE_RESPONSE_EVENT, closeQueryDrawer, hideUndoBar, openQueryDrawer } from "./lib/queryActions/drawerStore";
 import { closeQueryPanel, openResponsePicker, responsePickerHosted } from "./lib/queryPanelStore";
 // Route tiers: marketing chrome for "/" + /pricing; EVERYTHING signed-in is workspace, in the
 // one capsule shell (the focus tier is retired — capsule fixes P5).
@@ -56,6 +56,8 @@ import { ResponsesPage } from "./components/responses/ResponsesPage";
 import { TopNavPanelData } from "./components/shell/TopNavPanelData";
 import { Onboarding } from "./components/Onboarding";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { PageBoundary, crashProbe } from "./components/PageBoundary";
+import { closeAgentCard } from "./lib/agentCardStore";
 import { StatusDotDemo } from "./components/StatusDotDemo";
 import { PlansPage } from "./components/PlansPage";
 import { QueryStatus, SubmissionMethod, UserPlan } from "./types";
@@ -590,7 +592,7 @@ function AppContent() {
             paired with `fit` on the work wrapper, so it took exactly the space under the bar and
             never scrolled. Nick dropped that lock: the page now grows with its rows and the stage
             scrolls it, so the slot is a plain block and the route is off `fit` in AppShell. */}
-        <StagePage active={routeKey === "dashboard"}>
+        <StagePage name="dashboard" active={routeKey === "dashboard"}>
           <Dashboard
             onNavigate={handleNavigate}
             searchQuery={searchQuery}
@@ -601,7 +603,7 @@ function AppContent() {
         {/* The Queries desk owns its internal scroll (no page scrollbar). F12: the page renders
             its OWN chrome (F12Page — its own crumb header + centred --maxw column), so the slot has
             no contentVariant cap; the .t-f12 root paints the oat ground edge-to-edge. */}
-        <StagePage active={routeKey === "queries" && !queriesAnalytics && !queriesResponses} layout="fill" clip>
+        <StagePage name="queries" active={routeKey === "queries" && !queriesAnalytics && !queriesResponses} layout="fill" clip>
           <Queries searchQuery={searchQuery} onNavigate={handleNavigate} activeSubPage={queriesSub} inShell
             statusFilter={queriesStatus} view={queriesView}
             onSelectView={() => { const n = new URLSearchParams(params); n.delete("view"); n.delete("q"); navigate({ pathname: "/queries", search: n.toString() ? `?${n.toString()}` : "" }); }}
@@ -628,19 +630,19 @@ function AppContent() {
             `fill` gives the slot `flex: 1; min-height: 0`, so it takes the REMAINING height of the
             fixed-viewport work wrapper and the chain resolves. Same fault as `.tpl-cols` and
             `.f12-body`; same tell — a page that scrolls where its spec says its rows do. */}
-        <StagePage active={queriesAnalytics} layout="fill" clip>
+        <StagePage name="analytics" active={queriesAnalytics} layout="fill" clip>
           <QueryAnalytics onNavigate={handleNavigate} />
         </StagePage>
 
         {/* Responses v2 (15 Oct) — every agent answer for the book in scope. A flowing page in the shared grid. */}
-        <StagePage active={queriesResponses} layout="fill" clip>
+        <StagePage name="responses" active={queriesResponses} layout="fill" clip>
           <ResponsesPage onNavigate={handleNavigate} routeActive={queriesResponses} />
         </StagePage>
 
         {/* THE TO-DO WORKSPACE — four routes under one routeKey (To-do workspace pack, Phase 1).
             The list page owns its internal scroll like the Queries desk and stays mounted so its
             mode/filter/selection survive; the other three are ordinary flow pages. */}
-        <StagePage active={routeKey === "todo" && todoPage === "list"} layout="fillColumn" clip>
+        <StagePage name="todo" active={routeKey === "todo" && todoPage === "list"} layout="fillColumn" clip>
           {/* To-do list v5: the tray and the desk on a desktop, the v2 page on a phone (TodoRoute chooses) */}
           <TodoRoute onNavigate={handleNavigate} />
         </StagePage>
@@ -655,12 +657,12 @@ function AppContent() {
             (Today's slot went with its page — tasks-consolidation P1.) */}
 
         {/* tasks-pages P3: the Calendar is REAL — the placeholder era ends here. */}
-        <StagePage active={routeKey === "todo" && todoPage === "calendar"} layout="fillColumn" clip>
+        <StagePage name="calendar" active={routeKey === "todo" && todoPage === "calendar"} layout="fillColumn" clip>
           <TodoCalendarPage onNavigate={handleNavigate} onNavigatePath={(p) => navigate(p)} />
         </StagePage>
 
         {/* tasks-pages P4: the Noteboard is REAL — the placeholder era ends for good. */}
-        <StagePage active={routeKey === "todo" && todoPage === "noteboard"} layout="fillColumn" clip>
+        <StagePage name="corkboard" active={routeKey === "todo" && todoPage === "noteboard"} layout="fillColumn" clip>
           <TodoNoteboardPage onNavigate={handleNavigate} onNavigatePath={(p) => navigate(p)} />
         </StagePage>
 
@@ -672,10 +674,10 @@ function AppContent() {
             together and centred the lot. Measured at 2400px against the built stylesheet:
             Contact list (no variant) 2400, Discover (`work`) 1600, Manuscripts (`read`)
             1200 — four width regimes across six pages that share two tokens. */}
-        <StagePage active={routeKey === "agents" && agentsDiscover} layout="fillColumn">
+        <StagePage name="discover" active={routeKey === "agents" && agentsDiscover} layout="fillColumn">
           <DiscoverPage onNavigate={handleNavigate} />
         </StagePage>
-        <StagePage active={routeKey === "agents" && !agentsDiscover} layout="fill" clip>
+        <StagePage name="agents" active={routeKey === "agents" && !agentsDiscover} layout="fill" clip>
           <Agents searchQuery={searchQuery} onNavigate={handleNavigate} active={routeKey === "agents" && !agentsDiscover} />
         </StagePage>
 
@@ -685,7 +687,7 @@ function AppContent() {
             together and centred the lot. Measured at 2400px against the built stylesheet:
             Contact list (no variant) 2400, Discover (`work`) 1600, Manuscripts (`read`)
             1200 — four width regimes across six pages that share two tokens. */}
-        <StagePage active={routeKey === "manuscripts"} layout="fill">
+        <StagePage name={manuscriptsPackages ? "packages" : manuscriptsComps ? "comps" : "manuscripts"} active={routeKey === "manuscripts"} layout="fill">
           {manuscriptsPackages ? (
             <SubmissionPackages />
           ) : manuscriptsComps ? (
@@ -712,23 +714,23 @@ function AppContent() {
             the STAGE scrolls rather than the settings plane. `fill` hands down flex:1/min-height:0
             and `.acct-page` continues the chain. /plans and /help keep the wrapper unchanged. */}
         {routeKey === "account" && (
-          <StagePage active layout="fill">
+          <StagePage name="account" active layout="fill">
             <AccountSettings section={accountSectionForPath(path) ?? "profile"} onNavigate={handleNavigate} />
           </StagePage>
         )}
         {routeKey === "plans" && (
-          <StagePage active>
+          <StagePage name="plans" active>
             <div className="sv2-focuscol"><PlansPage /></div>
           </StagePage>
         )}
         {routeKey === "help" && (
-          <StagePage active>
+          <StagePage name="help" active>
             {/* Help Centre v1 — its own column (1120, 40px either side), not the 860px focus column */}
             <HelpCentre />
           </StagePage>
         )}
         {routeKey === "import" && (
-          <StagePage active><ImportPage onNavigate={handleNavigate} /></StagePage>
+          <StagePage name="import" active><ImportPage onNavigate={handleNavigate} /></StagePage>
         )}
 
         {/* The legacy site footer ("QueryHawk · The Literary Querying Companion" + Help Centre)
@@ -740,36 +742,46 @@ function AppContent() {
       </EditQueryHost>
 
       {/* Focus Mode Overlay Dialog Form */}
-      <AddAgentFocusForm
-        isOpen={isAddAgentOpen}
-        onClose={() => setIsAddAgentOpen(false)}
-        onSuccessToast={(msg) => setSuccessToast(msg)}
-      />
+      {/* Crash reporting v1: every drawer and dock outside the pages has its own boundary, so a crash
+          in one is a one-line card ("This panel hit a problem.") rather than the whole screen. */}
+      <PageBoundary name="panel:add-agent" kind="panel" onClose={() => setIsAddAgentOpen(false)}>
+        <AddAgentFocusForm
+          isOpen={isAddAgentOpen}
+          onClose={() => setIsAddAgentOpen(false)}
+          onSuccessToast={(msg) => setSuccessToast(msg)}
+        />
+      </PageBoundary>
 
-      <AddManuscriptFocusForm
-        isOpen={isAddManuscriptOpen}
-        onClose={() => setIsAddManuscriptOpen(false)}
-        onSuccessToast={(msg) => setSuccessToast(msg)}
-      />
+      <PageBoundary name="panel:add-manuscript" kind="panel" onClose={() => setIsAddManuscriptOpen(false)}>
+        <AddManuscriptFocusForm
+          isOpen={isAddManuscriptOpen}
+          onClose={() => setIsAddManuscriptOpen(false)}
+          onSuccessToast={(msg) => setSuccessToast(msg)}
+        />
+      </PageBoundary>
 
       {/* Agent card v1 — THE agent card, mounted once for the workspace. Every surface opens it
           through `openAgentCard(…)` / `openNewAgentCard(…)` (lib/agentCardStore). */}
-      <AgentCardHost />
+      <PageBoundary name="panel:agent-card" kind="panel" onClose={closeAgentCard}><AgentCardHost /></PageBoundary>
 
       {/* Query actions v1 — THE query drawer and its undo bar, mounted once for the workspace.
           Every surface opens it through `openQueryDrawer(…)` (lib/queryActions/drawerStore). */}
       {/* v139 §B — the drawer alone sees the practice query, through its own copy of the context */}
-      <PracticeOverlay><QueryDrawer /></PracticeOverlay>
-      <UndoBar />
+      <PageBoundary name="panel:query-drawer" kind="panel" onClose={closeQueryDrawer}>
+        <PracticeOverlay><QueryDrawer /></PracticeOverlay>
+      </PageBoundary>
+      <PageBoundary name="panel:undo-bar" kind="panel" onClose={hideUndoBar}><UndoBar /></PageBoundary>
 
       {/* The Pro paste-an-email lane (v1.1): the existing flow, opened from the drawer's picker. */}
       {currentUser?.plan === UserPlan.PRO && (
-        <PasteEmailFlow
-          isOpen={isPasteResponseOpen}
-          onClose={() => setIsPasteResponseOpen(false)}
-          onNavigate={handleNavigate}
-          onSuccessToast={(msg) => setSuccessToast(msg)}
-        />
+        <PageBoundary name="panel:paste-email" kind="panel" onClose={() => setIsPasteResponseOpen(false)}>
+          <PasteEmailFlow
+            isOpen={isPasteResponseOpen}
+            onClose={() => setIsPasteResponseOpen(false)}
+            onNavigate={handleNavigate}
+            onSuccessToast={(msg) => setSuccessToast(msg)}
+          />
+        </PageBoundary>
       )}
 
       {/* Toast Notification HUD */}
@@ -831,6 +843,8 @@ function AppContent() {
 export default function App() {
   return (
     <ErrorBoundary>
+      {/* Crash reporting v1: the dev trigger's probe for the top level, outside every page boundary */}
+      {crashProbe("app")}
       <DbProvider>
         <BrandProvider>
           {/* BrowserRouter carries the URL; the dev-lab hashes (#/shell-lab etc.) and the pre-auth

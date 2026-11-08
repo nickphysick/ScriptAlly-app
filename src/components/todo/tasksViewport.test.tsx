@@ -108,7 +108,8 @@ describe("⚠️ THE PAGE NEVER SCROLLS — the frame is a window, the zones do 
 
   it("⚠️ THE TASKS SLOTS ARE FLEX COLUMNS — so their child can be a flex ITEM", () => {
     const app = readFileSync(join(here, "..", "..", "App.tsx"), "utf8");
-    const todoSlots = [...app.matchAll(/<StagePage active=\{routeKey === "todo"[^>]*>/g)].map((m) => m[0]);
+    /* retargeted (crash reporting v1): a slot now carries `name` before `active`; the law is the layout, not the order */
+    const todoSlots = [...app.matchAll(/<StagePage\b[^>]*active=\{routeKey === "todo"[^>]*>/g)].map((m) => m[0]);
     expect(todoSlots).toHaveLength(3); // list · calendar · noteboard (Today retired, P1 9 Aug)
     for (const slot of todoSlots) {
       /* `fill` renders the slot `display: block` (isFillCol is false without a contentVariant),
