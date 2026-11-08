@@ -131,6 +131,7 @@ import { QcPage151, Track151 } from "./queries/centre/QcPage151";
 import { QcFilterPanel151 } from "./queries/centre/QcFilterMenu140";
 import { QcRail153 } from "./queries/centre/QcRail153";
 import { railCounts } from "../lib/qc153Rail";
+import { slipTone } from "../lib/qc153";
 import { QUIET_WEEKS_PATH, nudgeMsOf, quickOfRow, quietWeeksOf, stampRows, stateOf, queryState as qsOf } from "../lib/queryState";
 import { packagesUnlocked, versionsUnlocked } from "../lib/entitlements";
 import { ACTION_LABEL, CLOSED_SET, listGroupOf, savedGroupOf } from "../lib/qc1522";
@@ -8126,7 +8127,7 @@ export const Queries: React.FC<{
                       selectedId={selectedQueryId} closedN={beClosedCount(qcVisible, qcNow138)}
                       lead={(r) => <Track151 row={r.row} />}
                       act={(id) => { const r = qcById.get(id); return r ? rowAct(r, now151) : null; }}
-                      barKind={(r) => statusKind(r.row.status)}
+                      barKind={(r) => slipTone(r.row.status)}
                       onOpen={(id) => { cardSetRef.current = qcBeOrder; onOpenQuery?.(id); }}
                       onAct={(id, mode) => {
                         const m = mode as DrawerMode | undefined;

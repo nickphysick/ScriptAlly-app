@@ -391,7 +391,7 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
           {controlLine}
 
           {birds ? (
-            <div className="qc151-be" data-qc151="birds-card">
+            <div className="qc151-be sa-slip" data-qc151="birds-card"><div className="sa-slip-in">
               {p.birdsEmpty ? (
                 <div className="qc151-emp" data-qc151="birds-empty">
                   <b>Nothing on the timeline</b>
@@ -400,7 +400,7 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
                     : <><i>No live queries match these filters.</i><button type="button" className="qc151-btn qc151-btn--g" data-qc151="birds-reset" onClick={p.onClearAll}>Reset filters</button></>}
                 </div>
               ) : p.birds}
-            </div>
+            </div></div>
           ) : (
             <div className="qc153-list" data-qc151="table" data-qcv="list">
               {empty ? (

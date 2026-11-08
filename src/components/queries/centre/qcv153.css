@@ -264,3 +264,25 @@
   .qc153-dd:disabled { cursor: default; opacity: 0.6; }
   @media (prefers-reduced-motion: reduce) { .qc153-find { transition: none; } }
 }
+
+/* ── Birds-eye in the list column (v153): the same framed card as the slips; bars in the stage palette; the
+   trailing labels in sentence case; no rust ───────────────────────────────────────────────────────────────── */
+@media (min-width: 768px) {
+  .qc151 .qc153-main > .qc151-be.sa-slip { margin: 14px 0 96px; border-radius: 20px; box-shadow: 0 1px 2px rgba(28, 19, 15, 0.08), 0 22px 40px -22px rgba(28, 19, 15, 0.32); overflow: visible; }
+  .qc151 .qc151-be.sa-slip > .sa-slip-in { overflow: clip; }
+  /* the stage palette: sand Queried, dusty rose Partial, blue Full, heather Offer; watch-and-wait rows the pale step */
+  .qc151 .qc150-be .qc150-bar--cur[data-sk="sand"] { background: #efe7da; }
+  .qc151 .qc150-be .qc150-bar--cur[data-sk="rose"] { background: #ecd6d2; }
+  .qc151 .qc150-be .qc150-bar--cur[data-sk="blue"] { background: #d9e1ea; }
+  .qc151 .qc150-be .qc150-bar--cur[data-sk="heather"] { background: #e7d6dc; }
+  .qc151 .qc150-be .qc150-br--w .qc150-bar--cur[data-sk="sand"] { background: #f6f1ea; }
+  .qc151 .qc150-be .qc150-br--w .qc150-bar--cur[data-sk="rose"] { background: #f4e6e3; }
+  .qc151 .qc150-be .qc150-br--w .qc150-bar--cur[data-sk="blue"] { background: #e7ecf2; }
+  .qc151 .qc150-be .qc150-br--w .qc150-bar--cur[data-sk="heather"] { background: #f0e5e9; }
+  /* "30 days over", "in 15 days": sentence case, Source Serif 14, ink, no tracking */
+  .qc151 .qc150-be .qc150-tx, .qc151 .qc150-be .qc150-tail--in .qc150-tx {
+    font: 400 14px/1 var(--sp-serif) !important; letter-spacing: 0; text-transform: none; color: #1c130f;
+  }
+  /* no rust: the menu's tick is navy */
+  .qc150-bvm button[aria-checked="true"]::after { color: #2a3a52; }
+}

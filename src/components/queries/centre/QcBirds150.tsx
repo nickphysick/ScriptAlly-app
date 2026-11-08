@@ -34,7 +34,7 @@ const WD = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"] as const;
 /** text width in the page's own faces (read from the :root tokens), cached; re-measured once the fonts land */
 const cache = new Map<string, number>();
 let ctx: CanvasRenderingContext2D | null = null;
-function measure(text: string, size: number, token: "--sp-type" | "--sp-mono" = "--sp-type", weight = 400, track = 0): number {
+function measure(text: string, size: number, token: "--sp-type" | "--sp-mono" | "--sp-serif" = "--sp-type", weight = 400, track = 0): number {
   const k = `${token}|${size}|${weight}|${track}|${text}`;
   const hit = cache.get(k);
   if (hit != null) return hit;
@@ -413,11 +413,12 @@ const Tail: React.FC<{ L: Laid; tx: number }> = ({ L, tx }) => {
   if (!l.cur) return null;
   const over = l.cur.overdue;
   const x0 = over ? tx : L.e + 10;
-  const mark = over ? `${l.daysOver} ${l.daysOver === 1 ? "DAY" : "DAYS"} OVER` : l.dueMs != null ? (l.inDays <= 0 ? "TODAY" : `IN ${l.inDays}D`) : "";
+  /* v153 — sentence case: "30 days over", "in 15 days", "today" */
+  const mark = over ? `${l.daysOver} ${l.daysOver === 1 ? "day" : "days"} over` : l.dueMs != null ? (l.inDays <= 0 ? "today" : `in ${l.inDays} ${l.inDays === 1 ? "day" : "days"}`) : "";
   const items: { key: string; node: React.ReactNode; w: number }[] = [];
   let x = x0 + (over ? 5 + 12 : 0);
   if (mark) {
-    const w = measure(mark, 11, "--sp-mono", 500, over ? 0.12 : 0.1);
+    const w = measure(mark, 14, "--sp-serif", 400, 0);
     items.push({ key: "m", w, node: <span className="qc150-tx" data-qc150="be-mark" data-wx={x} data-ww={w}>{mark}</span> });
     x += w + 12;
   }
