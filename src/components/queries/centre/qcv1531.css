@@ -91,3 +91,19 @@
 
   @media (prefers-reduced-motion: reduce) { .qc1531-seg, .qc1531-segn { transition: none; } }
 }
+
+/* ══ phase 2 · the faint pattern and the rail's header ═══════════════════════════════════════════════════════ */
+@media (min-width: 768px) {
+  /* the doodle tile now runs the whole page: clear to 84px, then the ground laid over it at .72 by 360px and held
+     there to the foot (the ref's gradient). This overrides v150's A1, which stopped the tile at 280px; the selector
+     carries `.ws-window` so it wins on specificity rather than on load order. */
+  .ws-window .qc-wpg.qc-wpg--v11 > .wpg-scroll {
+    background-color: #f2eee8;
+    background-image: linear-gradient(to bottom, rgba(242, 238, 232, 0) 84px, rgba(242, 238, 232, 0.72) 360px), url("/images/qc/doodle-tile.svg");
+    background-repeat: no-repeat, repeat;
+    background-size: 100% 100%, 340px 360px;
+    background-attachment: local, local;
+  }
+  /* the filter rail's header band: white, a 2px navy rule along its foot (it was sand) */
+  .qc153-rail .qc153-rbd { background: #fff; box-shadow: inset 0 -2px 0 #2a3a52; }
+}
