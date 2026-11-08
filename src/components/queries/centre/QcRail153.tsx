@@ -101,7 +101,7 @@ export const QcRail153: React.FC<QcRail153Props> = ({ filters: f, onFilters, cou
                     data-qc153="stand" data-k={row.key} data-n={n} disabled={loading || (!isOn && n === 0)} onClick={() => onFilters(toggleStand(f, row))}>
                     <span className="qc153-gl" aria-hidden="true"><StageGlyph k={glyphKey(row.key)} ring="peek" /></span>
                     <span className="qc153-tx">{row.label}</span>
-                    <span className="qc153-bar" aria-hidden="true"><i style={{ width: `${Math.round((n / standMax) * 100)}%` }} /></span>
+                    <span className="qc153-pbar" aria-hidden="true"><i style={{ width: `${Math.round((n / standMax) * 100)}%` }} /></span>
                     <span className="qc153-n">{n}</span>
                   </button>
                 );

@@ -189,9 +189,9 @@
   .qc153-gl { flex: none; display: grid; place-items: center; width: 18px; height: 18px; color: var(--mut); }
   .qc153-gl svg { display: block; width: 17px; height: 17px; }
   .qc153-fr.is-on .qc153-gl { color: var(--navy); }
-  .qc153-bar { flex: none; width: 34px; height: 4px; border-radius: 2px; background: #efe8de; overflow: hidden; }
-  .qc153-bar i { display: block; height: 100%; background: #cbbfae; }
-  .qc153-fr.is-on .qc153-bar i { background: var(--navy); }
+  .qc153-pbar { flex: none; width: 34px; height: 4px; border-radius: 2px; background: #efe8de; overflow: hidden; }
+  .qc153-pbar i { display: block; height: 100%; background: #cbbfae; }
+  .qc153-fr.is-on .qc153-pbar i { background: var(--navy); }
   .qc153-sw2 { position: relative; flex: none; width: 30px; height: 18px; border-radius: 9px; background: #ddd4c8; transition: background 0.2s; }
   .qc153-sw2::after { content: ""; position: absolute; left: 2px; top: 2px; width: 14px; height: 14px; border-radius: 50%; background: #fff; transition: left 0.2s; }
   .qc153-fr.is-on .qc153-sw2 { background: var(--navy); }
