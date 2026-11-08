@@ -210,3 +210,56 @@ for (const vp of SIZES) {
     L.done(80);
   });
 }
+
+/*   P1  the rail as chips: one white card (no rim, no inner line); a pill click turns its filter on exactly as the old
+ *       radio row did (one on at a time, the list narrows to the pill's count, a second click clears it); the tiles in
+ *       their stage colours; drawn chevrons; no proportion bars. */
+for (const vp of SIZES) {
+  test(`v153.3 P1 chips rail · ${vp.width}`, async ({ page }) => {
+    const L = new Ledger(`P1-${vp.width}`);
+    await openQc(page, vp);
+    const R = `${PAGE} [data-qc153='rail']`;
+    const frame = await page.evaluate((r) => {
+      const a = document.querySelector<HTMLElement>(r)!, cs = getComputedStyle(a), inn = a.firstElementChild as HTMLElement, ics = getComputedStyle(inn);
+      const tiles = Object.fromEntries([...a.querySelectorAll<HTMLElement>("[data-qc153='court']")].map((t) => [t.dataset.k, getComputedStyle(t).backgroundColor + " " + getComputedStyle(t).backgroundImage.slice(0, 60) + " r" + getComputedStyle(t).borderRadius]));
+      return { pad: cs.padding, radius: cs.borderRadius, bg: cs.backgroundColor, shadow: cs.boxShadow, innerBorder: ics.borderTopWidth, bars: a.querySelectorAll(".qc153-pbar").length, chevrons: a.querySelectorAll("[data-qc153='rail-fold'] i svg").length, typed: a.textContent!.includes("⌄"), tiles,
+        h5: getComputedStyle(a.querySelector("[data-qc153='rail-fold']")!).fontFamily + " " + getComputedStyle(a.querySelector("[data-qc153='rail-fold']")!).fontSize, sep: getComputedStyle(a.querySelectorAll<HTMLElement>("[data-qc153='rail-sec']")[1]).borderTopColor };
+    }, R);
+    L.check("one card: no rim padding", frame.pad === "0px", frame.pad);
+    L.check("radius 16, white", frame.radius === "16px" && frame.bg === "rgb(255, 255, 255)", `${frame.radius} ${frame.bg}`);
+    L.check("the ref's shadow", frame.shadow.startsWith("rgb(227, 213, 201) 0px 0px 0px 1px") && frame.shadow.includes("0px 18px 36px -24px"), frame.shadow);
+    L.check("no inner frame line", frame.innerBorder === "0px", frame.innerBorder);
+    L.check("no proportion bars", frame.bars === 0, `${frame.bars}`);
+    L.check("four drawn chevrons, none typed", frame.chevrons === 4 && !frame.typed, `${frame.chevrons} · typed ${frame.typed}`);
+    L.check("headings in the typewriter 15px", /Special Elite/.test(frame.h5) && frame.h5.endsWith("15px"), frame.h5);
+    L.check("hairline #f1ebe2 between sections", frame.sep === "rgb(241, 235, 226)", frame.sep);
+    L.check("tile With you dusty rose", frame.tiles.you?.startsWith("rgb(236, 214, 210)"), frame.tiles.you);
+    L.check("tile With the agent sand", frame.tiles.agent?.startsWith("rgb(239, 231, 218)"), frame.tiles.agent);
+    L.check("tile Gone quiet stone", frame.tiles.quiet?.startsWith("rgb(243, 239, 233)"), frame.tiles.quiet);
+    L.check("tile Closed striped", /repeating-linear-gradient/.test(frame.tiles.closed ?? ""), frame.tiles.closed);
+    L.check("tiles radius 12", Object.values(frame.tiles).every((t) => t.endsWith("r12px")), JSON.stringify(frame.tiles));
+
+    /* the bar's own count: slips in a folded group (Gone quiet, Closed) are not drawn, so they are not counted on the page */
+    const slips = async () => Number(await page.locator(`${PAGE} [data-qc153='count'] b`).first().textContent());
+    const total = await slips();
+    const pills = page.locator(`${R} [data-qc153='quick']:not([disabled])`);
+    const n = await pills.count();
+    L.check("population: pills that can be pressed", n >= 2, `${n}`);
+    const a = pills.nth(0), b = pills.nth(1);
+    const aN = Number(await a.getAttribute("data-n")), bN = Number(await b.getAttribute("data-n"));
+    await a.click(); await page.waitForTimeout(600);
+    L.check("a pill click turns it on", (await a.getAttribute("aria-checked")) === "true", `${await a.getAttribute("aria-checked")}`);
+    L.check("the list narrows to the pill's count", (await slips()) === aN, `${await slips()} vs ${aN}`);
+    L.check("the header says 1 on", (await page.locator(`${R} [data-qc153='rail-on']`).textContent()) === "1 on", `${await page.locator(`${R} [data-qc153='rail-on']`).textContent()}`);
+    const on = await a.evaluate((e) => ({ bg: getComputedStyle(e).backgroundColor, c: getComputedStyle(e).color }));
+    L.check("on: navy, cream text", on.bg === "rgb(42, 58, 82)" && on.c === "rgb(244, 238, 229)", `${on.bg} ${on.c}`);
+    const rb = (await page.locator(R).boundingBox())!;
+    await page.screenshot({ path: `${DIR}/rail-pill-on-${vp.width}.png`, clip: { x: rb.x - 16, y: Math.max(0, rb.y - 16), width: rb.width + 32, height: Math.min(rb.height + 32, vp.height - Math.max(0, rb.y - 16)) } });
+    await b.click(); await page.waitForTimeout(600);
+    L.check("one on at a time, as the radio was", (await a.getAttribute("aria-checked")) === "false" && (await b.getAttribute("aria-checked")) === "true", "switched");
+    L.check("the list follows the second pill", (await slips()) === bN, `${await slips()} vs ${bN}`);
+    await b.click(); await page.waitForTimeout(600);
+    L.check("a second click clears it", (await b.getAttribute("aria-checked")) === "false" && (await slips()) === total, `${await slips()} vs ${total}`);
+    L.done(18);
+  });
+}
