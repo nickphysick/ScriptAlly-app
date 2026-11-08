@@ -1250,6 +1250,15 @@ service cloud.firestore {
     // hash being reversed by enumerating IPv4 space.
     match /ratelimits/{window} { allow read, write: if false; }
 
+    // ROUTE: AI daily limits — NO client access, not even the owner's.
+    // One count per writer per feature per UTC day, written only by the AI callables
+    // (functions/src/aiRateLimit.ts) inside the transaction that claims a run BEFORE the model is
+    // called. A client READ would tell a caller how many paid runs they have left; a client WRITE
+    // or DELETE would reset the limit it is meant to enforce. The Scout keeps its original path.
+    // Both were already covered by the default-deny catch-all; these say so where it can be read.
+    match /scoutRateLimits/{uid} { allow read, write: if false; }
+    match /aiRateLimits/{uid}/features/{feature} { allow read, write: if false; }
+
     // ROUTE: Contact form (/contact) — NO client writes, admin-only reads.
     // The form posts to the `sendContactMessage` callable, which writes via the Admin SDK and
     // bypasses these rules. A client write path is deliberately absent: the form is PUBLIC, so an

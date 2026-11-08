@@ -19,6 +19,7 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
 import { db } from "./firestore";
+import { claimDailySlot } from "./aiRateLimit";
 import Anthropic from "@anthropic-ai/sdk";
 import { assistFromModel, MalformedAssistError, isAssistRule, AssistInput, AssistAgentInput, MAX_AGENTS } from "./assistAgentDataCore";
 
@@ -29,6 +30,10 @@ const ASSIST_REQUIRES_PRO = true;
 const PRO_PLAN = "Pro"; // mirrors UserPlan.PRO
 
 const MAX_NAME_CHARS = 200;
+
+/** Runs per user per UTC day — the Scout's number. Pro accounts are limited too; no account gets
+ *  unlimited AI. Claimed before the model call, so a failed run still costs its slot. */
+const RUNS_PER_DAY = 10;
 
 export const assistAgentData = onCall(
   { secrets: [ANTHROPIC_API_KEY], region: "europe-west2", timeoutSeconds: 120, memory: "512MiB" },
@@ -61,7 +66,10 @@ export const assistAgentData = onCall(
       throw new HttpsError("permission-denied", "Assisted fill is a Pro feature.");
     }
 
-    // 4. Call Claude (web search) + parse/validate
+    // 4. Daily limit — claimed BEFORE the client is built (aiRateLimit.ts)
+    await claimDailySlot(db, uid, "assistAgentData", RUNS_PER_DAY);
+
+    // 5. Call Claude (web search) + parse/validate
     const input: AssistInput = { rule, agents };
     const client = new Anthropic({ apiKey: ANTHROPIC_API_KEY.value() });
     try {

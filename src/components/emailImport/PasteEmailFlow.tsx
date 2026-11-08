@@ -15,6 +15,7 @@ import "../forms/forms.css";
 import { useScriptAllyDb } from "../../lib/db";
 import { pickableManuscripts } from "../../lib/lifecycle";
 import { runEmailImport, EmailImportError } from "../../lib/emailImport";
+import { aiRefusalReason, DAILY_LIMIT_MESSAGE } from "../../lib/aiRefusal";
 import type { EmailDirection, EmailProposal, ProposalRecord } from "../../lib/emailImport";
 import { commitEmailImport } from "../../lib/emailImportCommit";
 import { PasteScreen } from "./PasteScreen";
@@ -105,6 +106,8 @@ export const PasteEmailFlow: React.FC<PasteEmailFlowProps> = ({ isOpen, onClose,
       // Server enforces the Pro gate too — if it ever denies, show the upsell rather than an error.
       if (e instanceof EmailImportError && e.code === "permission-denied") {
         setStep("upsell");
+      } else if (aiRefusalReason(e) === "daily_limit") {
+        setError(DAILY_LIMIT_MESSAGE);
       } else {
         // Unavailable / not-yet-deployed / network — the graceful path until the function is live.
         setError("Couldn't reach the importer — please try again in a moment.");

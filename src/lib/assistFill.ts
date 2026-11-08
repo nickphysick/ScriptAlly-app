@@ -56,8 +56,11 @@ export interface AssistFillInput {
 
 export class AssistFillError extends Error {
   code: string;
-  constructor(code: string, message: string) {
+  /** The server's structured detail, e.g. `{ reason: "daily_limit" }` (lib/aiRefusal). */
+  details?: unknown;
+  constructor(code: string, message: string, details?: unknown) {
     super(message);
+    this.details = details;
     this.name = "AssistFillError";
     this.code = code;
   }
@@ -130,8 +133,8 @@ export async function fetchAssistedFill(input: AssistFillInput, opts?: { timeout
     return validateAssistPayload(res.data);
   } catch (e: unknown) {
     if (e instanceof AssistFillError) throw e; // the timeout, already typed
-    const err = e as { code?: string; message?: string };
+    const err = e as { code?: string; message?: string; details?: unknown };
     const code = String(err?.code || "").replace(/^functions\//, "") || "unknown";
-    throw new AssistFillError(code, err?.message || "Couldn’t reach assisted fill.");
+    throw new AssistFillError(code, err?.message || "Couldn’t reach assisted fill.", err?.details);
   }
 }
