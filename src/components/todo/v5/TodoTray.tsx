@@ -318,6 +318,24 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
   const savedUndos = useRef<{ queryId: string; mode: string; undo: () => Promise<void>; used: boolean }[]>([]);
   const tickUndos = useRef(new Map<string, () => Promise<void>>());
   const [, bump] = useState(0);
+  /* undo and bulk close v1 — a snapshot undo is all or nothing, so one that fails changed nothing: it is NOT spent,
+     the writer is told plainly, and the same undo is offered again. Marked used while it runs, so a second press
+     cannot start it twice, and handed back if it fails. */
+  type SavedUndo = { queryId: string; mode: string; undo: () => Promise<void>; used: boolean };
+  const runSavedUndo = useCallback(async (e: SavedUndo): Promise<boolean> => {
+    if (e.used) return true;
+    e.used = true;
+    try {
+      await e.undo();
+    } catch (err) {
+      e.used = false;
+      console.error("[to-do] undo failed", err);
+      flash("Couldn't undo that. Nothing was changed.", { label: "Undo", fn: async () => { await runSavedUndo(e); } }, 7000);
+      return false;
+    }
+    bump((x) => x + 1);
+    return true;
+  }, [flash]);
   const undoFor = useCallback((a: ClearedAct): (() => void) | null => {
     if (a.kind === "ticked" && a.taskId) {
       const fn = tickUndos.current.get(a.taskId);
@@ -325,8 +343,8 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
     }
     if (!a.queryId) return null;
     const e = savedUndos.current.find((s) => !s.used && s.queryId === a.queryId && (MODE_KINDS[s.mode] ?? []).includes(a.kind));
-    return e ? () => { e.used = true; void e.undo(); bump((x) => x + 1); } : null;
-  }, []);
+    return e ? () => { void runSavedUndo(e); } : null;
+  }, [runSavedUndo]);
 
   const { quickDone } = useTaskCommit({
     flash,
@@ -352,16 +370,13 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
       ...door, receipt: true,
       panel: { name, agency: a?.agency ?? "", first: name.split(/\s+/)[0] ?? "", back: false, slot: DESK_SLOT },
       onSaved: (r: SavedResult) => {
-        savedUndos.current.push({ queryId: r.queryId, mode: r.mode, undo: r.undo, used: false });
-        flash(r.message || "Recorded", { label: "Undo", fn: async () => {
-          const e = savedUndos.current.find((s) => s.undo === r.undo);
-          if (e) e.used = true;
-          await r.undo(); bump((x) => x + 1);
-        } });
+        const saved: SavedUndo = { queryId: r.queryId, mode: r.mode, undo: r.undo, used: false };
+        savedUndos.current.push(saved);
+        flash(r.message || "Recorded", { label: "Undo", fn: async () => { await runSavedUndo(saved); } });
       },
       onCancel: () => setPending(null),
     };
-  }, [queries, flash]);
+  }, [queries, flash, runSavedUndo]);
   /* ── v5.2 §H.4 · no double saves: one count of desk saves in flight, released when each save SETTLES (success or
      failure, `finally`) — never on a timer. A ref gates the keys synchronously; the state draws "Saving…". A journey's
      save happens inside the desk's drawer (its DrawerShell holds its own `busy`); the desk reads that from the slot. ── */

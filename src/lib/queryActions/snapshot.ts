@@ -23,7 +23,7 @@
  * the same values.
  */
 import {
-  collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, where,
+  collection, doc, getDoc, getDocs, query, where, writeBatch,
   type DocumentData,
 } from "firebase/firestore";
 import { db } from "../firebase";
@@ -87,18 +87,58 @@ export async function takeSnapshot(uid: string, queryIds: string[]): Promise<Sna
   return { uid, queryIds: ids, docs: await readSet(uid, ids) };
 }
 
+
+/** What is on the server now, read as the snapshot was — the after-state an undo compares against. */
+export async function readCurrent(s: Snapshot): Promise<Map<string, DocumentData>> {
+  return readSet(s.uid, s.queryIds);
+}
+
+/** Firestore's limit on the writes one batch may carry. */
+export const RESTORE_BATCH_LIMIT = 500;
+
+/** The undo was refused or failed before it committed: nothing was changed, so it can be tried again. */
+export class UndoFailedError extends Error {
+  constructor(message: string, readonly cause?: unknown) { super(message); this.name = "UndoFailedError"; }
+}
+
 /**
- * Put the set back. Documents that the save created are deleted FIRST — for a logged query that
- * includes the query itself, whose activity rows go before it so no row is ever left pointing at a
- * query that does not exist. The query documents are written back LAST, after their logs, so a
- * listener that recomputes on the query sees the finished log.
+ * Put the set back — ALL OF IT IN ONE BATCH (undo and bulk close v1, 8 Nov 2026).
+ *
+ * ⚠️ ONE COMMIT, SO A FAILURE CHANGES NOTHING. This used to delete and write documents one at a
+ * time, so a refused write partway left the query half restored: its log rewound and its status
+ * not, or the other way round. A `writeBatch` lands every delete and write or none of them, and an
+ * undo that fails can simply be tried again from the same snapshot.
+ *
+ * The order inside the batch is the old order — documents the save created are deleted first, the
+ * query documents are written last — but it no longer matters to anyone reading: a batch reaches
+ * every listener as one change, so no listener can see a log without its query, or the other way
+ * round. It is kept because it reads in the order the restore makes sense.
+ *
+ * ⚠️ NO CHUNKING. A plan larger than one batch is refused before anything is written, because two
+ * commits would put back the all-or-nothing this exists for. Measured on the harness account the
+ * largest snapshot is 358 documents (a whole book, for an accepted offer) and the largest RESTORE
+ * plan is far smaller — a book needs about 165 live queries before a "Signed" undo passes 500.
  */
 export async function restoreSnapshot(s: Snapshot): Promise<void> {
-  const now = await readSet(s.uid, s.queryIds);
-  const plan = planRestore(s.docs, now);
+  let plan: ReturnType<typeof planRestore>;
+  try {
+    plan = planRestore(s.docs, await readSet(s.uid, s.queryIds));
+  } catch (e) {
+    throw new UndoFailedError("Couldn't read what to put back, so nothing was changed.", e);
+  }
   const isQuery = (p: string) => /\/queries\/[^/]+$/.test(p);
   const rm = [...plan.remove].sort((a, b) => Number(isQuery(a)) - Number(isQuery(b)));
-  for (const p of rm) await deleteDoc(doc(db, p));
   const wr = [...plan.write].sort((a, b) => Number(isQuery(a.path)) - Number(isQuery(b.path)));
-  for (const w of wr) await setDoc(doc(db, w.path), w.data as DocumentData);
+  if (rm.length + wr.length === 0) return;
+  if (rm.length + wr.length > RESTORE_BATCH_LIMIT) {
+    throw new UndoFailedError(`This undo would change ${rm.length + wr.length} documents, more than one batch can hold (${RESTORE_BATCH_LIMIT}), so nothing was changed.`);
+  }
+  const batch = writeBatch(db);
+  for (const p of rm) batch.delete(doc(db, p));
+  for (const w of wr) batch.set(doc(db, w.path), w.data as DocumentData);
+  try {
+    await batch.commit();
+  } catch (e) {
+    throw new UndoFailedError("The undo was refused, so nothing was changed.", e);
+  }
 }
