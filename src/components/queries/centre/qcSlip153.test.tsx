@@ -36,4 +36,31 @@ describe("the slip", () => {
   it("draws no rust", () => {
     expect(html(row(QueryStatus.PARTIAL_REQUESTED, "you"))).not.toMatch(/a2452a|8a3a28|b4553f/i);
   });
+  /* v153.1 */
+  it("the fourth box is their policy, and Sent with is gone", () => {
+    const h = renderToStaticMarkup(
+      <QcSlip153 row={row(QueryStatus.QUERIED, "agent")} nowMs={NOW} selected={false} packageName="Spring round"
+        agent={{ noResponseMeansNo: true, responseTimeWeeks: 8 }} act={null} onOpen={() => {}} onAct={() => {}} />,
+    );
+    expect(h).toContain('data-k="policy"');
+    expect(h).toContain("Their policy");
+    expect(h).toContain("No reply means no");
+    expect(h).toContain("silence after 8 weeks");
+    expect(h).not.toContain('data-k="sent"');
+    expect(h).not.toContain(">Sent with<");
+  });
+  it("the materials strip: the package at its right, and a dashed chip for what was asked", () => {
+    const r = { ...row(QueryStatus.PARTIAL_REQUESTED, "you"), query: { id: "q1", materialsWanted: ["Synopsis"], materialsRequestedType: "pages", materialsRequestedQuantity: 50 } } as unknown as QcRow;
+    const h = html(r);
+    expect(h).toContain('data-qc1531="materials"');
+    expect(h).toMatch(/data-qc1531="mat"[^>]*>.*Synopsis/);
+    expect(h).toMatch(/data-asked=""[^>]*>.*First 50 pages<em>asked<\/em>/);
+    expect(h).toContain("Sent with Spring round");
+  });
+  it("no material data and no package: no strip", () => {
+    const h = renderToStaticMarkup(
+      <QcSlip153 row={row(QueryStatus.QUERIED, "agent")} nowMs={NOW} selected={false} packageName={null} act={null} onOpen={() => {}} onAct={() => {}} />,
+    );
+    expect(h).not.toContain('data-qc1531="materials"');
+  });
 });

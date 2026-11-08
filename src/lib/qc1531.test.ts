@@ -74,3 +74,47 @@ describe("a ring click is the rail's stage filter", () => {
     expect(g.stages).toContain(QueryStatus.QUERIED);
   });
 });
+
+import { policyWords, slipMaterials } from "./qc1531";
+
+describe("their policy, in words", () => {
+  it("replies to everyone, with and without a stated window", () => {
+    expect(policyWords({ noResponseMeansNo: false, responseTimeWeeks: 6 })).toEqual({ value: "Replies to everyone", line: "usually within 6 weeks" });
+    expect(policyWords({ noResponseMeansNo: false })).toEqual({ value: "Replies to everyone", line: null });
+  });
+  it("no reply means no, with and without a stated window", () => {
+    expect(policyWords({ noResponseMeansNo: true, responseTimeWeeks: 8 })).toEqual({ value: "No reply means no", line: "silence after 8 weeks" });
+    expect(policyWords({ noResponseMeansNo: true, responseTimeWeeks: 0 })).toEqual({ value: "No reply means no", line: null });
+  });
+  it("one week is singular", () => {
+    expect(policyWords({ noResponseMeansNo: false, responseTimeWeeks: 1 })?.line).toBe("usually within 1 week");
+  });
+  it("no policy at all is a dash with no line — never a guess", () => {
+    expect(policyWords(null)).toEqual({ value: "—", line: null });
+    expect(policyWords({ responseTimeWeeks: 6 })).toEqual({ value: "—", line: null });
+  });
+});
+
+/* "Query letter" is the stored token; materials.ts's one display map shows it as "Covering letter" (UK copy) */
+describe("the materials strip", () => {
+  it("a package only: no chips, just the package", () => {
+    expect(slipMaterials({}, QueryStatus.QUERIED, "Spring round")).toEqual({ chips: [], pkg: "Spring round" });
+  });
+  it("a partial asked: what went with the query, then the partial as a dashed 'asked' chip", () => {
+    const m = slipMaterials({ materialsWanted: ["Query letter", "Synopsis"], materialsRequestedType: "pages", materialsRequestedQuantity: 50 }, QueryStatus.PARTIAL_REQUESTED, "Autumn round")!;
+    expect(m.chips).toEqual([{ name: "Covering letter", asked: false }, { name: "Synopsis", asked: false }, { name: "First 50 pages", asked: true }]);
+    expect(m.pkg).toBe("Autumn round");
+  });
+  it("a partial sent: the same chip, solid", () => {
+    const m = slipMaterials({ materialsWanted: ["Query letter"], materialsRequestedType: "pages", materialsRequestedQuantity: 50, partialSentDate: "2026-09-01" }, QueryStatus.PARTIAL_SENT, null)!;
+    expect(m.chips).toEqual([{ name: "Covering letter", asked: false }, { name: "First 50 pages", asked: false }]);
+  });
+  it("a full asked after a partial went: the partial solid, the full dashed", () => {
+    const m = slipMaterials({ materialsRequestedType: "pages", materialsRequestedQuantity: 50, partialSentDate: "2026-09-01" }, QueryStatus.FULL_REQUESTED, null)!;
+    expect(m.chips).toEqual([{ name: "First 50 pages", asked: false }, { name: "Full manuscript", asked: true }]);
+  });
+  it("nothing recorded and no package: the strip is left out", () => {
+    expect(slipMaterials({}, QueryStatus.QUERIED, null)).toBeNull();
+    expect(slipMaterials({ materialsWanted: [] }, QueryStatus.REJECTED, "  ")).toBeNull();
+  });
+});

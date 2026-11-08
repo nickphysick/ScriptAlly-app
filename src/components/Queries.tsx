@@ -8122,6 +8122,7 @@ export const Queries: React.FC<{
                   signoff={!showGridSkeleton && qcScoped.length > 0 && qcF138.where === null && qc140Chips.length === 0 ? { total: qcScoped.length } : null}
                   onImport={() => onNavigate?.("import")}
                   packageNameOf={(r) => { const k = pkgKeyOf(r); return k ? qcPackageName(k) : null; }}
+                  agentOf={(r) => qcLivingAgents.get(r.query.agentId) ?? null}
                   rail={<QcRail153 filters={qcF138} onFilters={setQcF138} counts={railN} sent={qc138Counts.sent} onReset={clear151}
                     showing={qcVisible.length} total={qcScoped.length} onExport={exportQcList} loading={showGridSkeleton} />}
                   birds={qcView150 === "birds" && !showGridSkeleton ? (

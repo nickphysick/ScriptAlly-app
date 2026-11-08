@@ -15,7 +15,7 @@
  *    group passes, and the next group's header (later in the table) paints over it when it arrives.
  */
 import React, { useEffect, useRef, useState } from "react";
-import { QueryStatus } from "../../../types";
+import { QueryStatus, type Agent } from "../../../types";
 import { StatusDot } from "../../StatusDot";
 import { usePopover } from "../../shell/ListPills";
 import { usePinCover } from "../../shell/stickyStack";
@@ -127,6 +127,8 @@ export interface QcPage151Props {
   signoff: { total: number } | null;
   /** v153 — the slip's "Sent with": the package's name, or null when none is recorded */
   packageNameOf: (r: QcRow) => string | null;
+  /** v153.1 — the query's agent, for the slip's "Their policy" box */
+  agentOf?: (r: QcRow) => Pick<Agent, "noResponseMeansNo" | "responseTimeWeeks"> | null;
   /** v153 — the filter rail, drawn in the left column */
   rail?: React.ReactNode;
   onImport: () => void;
@@ -338,7 +340,7 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
     return n;
   });
   const slip = (r: QcRow) => (
-    <QcSlip153 key={r.id} row={r} nowMs={p.nowMs} selected={p.selectedId === r.id} packageName={p.packageNameOf(r)}
+    <QcSlip153 key={r.id} row={r} nowMs={p.nowMs} selected={p.selectedId === r.id} packageName={p.packageNameOf(r)} agent={p.agentOf?.(r) ?? null}
       act={rowAct(r, p.nowMs)} onOpen={p.onOpen} onAct={p.onAct} />
   );
   const only = p.sections.length === 1;
