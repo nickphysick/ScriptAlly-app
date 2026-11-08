@@ -1,0 +1,965 @@
+{
+  "base": "https://scriptally-dev.web.app",
+  "when": "2026-11-08T17:28:16.772Z",
+  "pages": {
+    "landing": {
+      "origins": {
+        "https://scriptally-dev.web.app": 12,
+        "https://fonts.googleapis.com": 4,
+        "https://fonts.gstatic.com": 8,
+        "https://firestore.googleapis.com": 3,
+        "https://static.cloudflareinsights.com": 1,
+        "https://cloudflareinsights.com": 1
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "violations": [],
+      "failed": [],
+      "errors": []
+    },
+    "pricing": {
+      "origins": {
+        "https://scriptally-dev.web.app": 7,
+        "https://fonts.googleapis.com": 4,
+        "https://fonts.gstatic.com": 6,
+        "https://firestore.googleapis.com": 3
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "violations": [],
+      "failed": [],
+      "errors": []
+    },
+    "about": {
+      "origins": {
+        "https://scriptally-dev.web.app": 6,
+        "https://fonts.googleapis.com": 4,
+        "https://fonts.gstatic.com": 7,
+        "https://firestore.googleapis.com": 3
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "violations": [],
+      "failed": [],
+      "errors": []
+    },
+    "contact": {
+      "origins": {
+        "https://scriptally-dev.web.app": 6,
+        "https://fonts.googleapis.com": 4,
+        "https://fonts.gstatic.com": 5,
+        "https://firestore.googleapis.com": 3
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "violations": [],
+      "failed": [],
+      "errors": []
+    },
+    "founders": {
+      "origins": {
+        "https://scriptally-dev.web.app": 8,
+        "https://fonts.googleapis.com": 4,
+        "https://fonts.gstatic.com": 7,
+        "https://firestore.googleapis.com": 3
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "violations": [],
+      "failed": [],
+      "errors": []
+    },
+    "terms": {
+      "origins": {
+        "https://scriptally-dev.web.app": 5,
+        "https://fonts.googleapis.com": 4,
+        "https://fonts.gstatic.com": 6,
+        "https://firestore.googleapis.com": 3
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "violations": [],
+      "failed": [],
+      "errors": []
+    },
+    "privacy": {
+      "origins": {
+        "https://scriptally-dev.web.app": 5,
+        "https://fonts.googleapis.com": 4,
+        "https://fonts.gstatic.com": 5,
+        "https://firestore.googleapis.com": 3
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "violations": [],
+      "failed": [],
+      "errors": []
+    },
+    "welcome": {
+      "origins": {
+        "https://scriptally-dev.web.app": 7,
+        "https://fonts.googleapis.com": 4,
+        "https://fonts.gstatic.com": 5,
+        "https://firestore.googleapis.com": 3
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "violations": [],
+      "failed": [],
+      "errors": []
+    },
+    "welcome-verified": {
+      "origins": {
+        "https://scriptally-dev.web.app": 7,
+        "https://fonts.googleapis.com": 4,
+        "https://fonts.gstatic.com": 5,
+        "https://firestore.googleapis.com": 3
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "violations": [],
+      "failed": [],
+      "errors": []
+    },
+    "waitlist": {
+      "origins": {
+        "https://scriptally-dev.web.app": 21,
+        "https://fonts.googleapis.com": 4,
+        "https://fonts.gstatic.com": 13,
+        "https://firestore.googleapis.com": 3,
+        "https://www.google.com": 5,
+        "https://www.gstatic.com": 5,
+        "https://content-firebaseappcheck.googleapis.com": 1
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+        "Connecting to 'https://www.google.com/recaptcha/enterprise/clr?k=6Le8y5ktAAAAAHgyTWVZph19MMEjxANehrZSa4RA' violates the following Content Security Policy directive: \"connect-src 'self' https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://content-firebaseappcheck.googleapis.com https://europe-west2-scriptally-dev.cloudfunctions.net https",
+        "Connecting to 'https://www.google.com/recaptcha/enterprise/clr?k=6Le8y5ktAAAAAHgyTWVZph19MMEjxANehrZSa4RA' violates the following Content Security Policy directive: \"connect-src 'self' https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://content-firebaseappcheck.googleapis.com https://europe-west2-scriptally-dev.cloudfunctions.net https"
+      ],
+      "violations": [
+        {
+          "directive": "connect-src",
+          "blocked": "https://www.google.com/recaptcha/enterprise/clr?k=6Le8y5ktAAAAAHgyTWVZph19MMEjxANehrZSa4RA",
+          "disposition": "report",
+          "source": "https://www.gstatic.com/recaptcha/releases/bSuJ2xBC8cFy7pM4Z3Hu9boH/recaptcha__en.js",
+          "line": 1587,
+          "sample": ""
+        },
+        {
+          "directive": "connect-src",
+          "blocked": "https://www.google.com/recaptcha/enterprise/clr?k=6Le8y5ktAAAAAHgyTWVZph19MMEjxANehrZSa4RA",
+          "disposition": "report",
+          "source": "https://www.gstatic.com/recaptcha/releases/bSuJ2xBC8cFy7pM4Z3Hu9boH/recaptcha__en.js",
+          "line": 1587,
+          "sample": ""
+        }
+      ],
+      "failed": [
+        "net::ERR_ABORTED https://www.google.com/recaptcha/enterprise/clr?k=6Le8y5ktAAAAAHgyTWVZph19MMEjxANehrZSa4RA",
+        "HTTP 403 https://content-firebaseappcheck.googleapis.com/v1/projects/scriptally-dev/apps/1:277835820251:web:937f4063d7b7d9a3d8f0fe:exchangeRecaptchaEnterpriseToken?key=A"
+      ],
+      "errors": []
+    },
+    "contact-submit": {
+      "origins": {
+        "https://scriptally-dev.web.app": 6,
+        "https://fonts.googleapis.com": 4,
+        "https://fonts.gstatic.com": 5,
+        "https://firestore.googleapis.com": 3,
+        "mailt": 1
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "violations": [],
+      "failed": [
+        "net::ERR_ABORTED mailto:hello@queryhawk.net?subject=QueryHawk%20%E2%80%94%20Question%20or%20feedback&body=CSP%20walk%3A%20aborted%20in%20the%20browser%2C%20never%20sent.%0A%0A%E"
+      ],
+      "errors": []
+    },
+    "signup": {
+      "origins": {
+        "https://scriptally-dev.web.app": 6,
+        "https://fonts.googleapis.com": 4,
+        "https://fonts.gstatic.com": 6,
+        "https://firestore.googleapis.com": 3
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "violations": [],
+      "failed": [],
+      "errors": []
+    },
+    "signin": {
+      "origins": {
+        "https://apis.google.com": 2,
+        "https://scriptally-dev.firebaseapp.com": 2,
+        "https://identitytoolkit.googleapis.com": 1,
+        "[popup] https://scriptally-dev.firebaseapp.com": 3,
+        "[popup] https://www.googleapis.com": 2
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "violations": [],
+      "failed": [
+        "[popup] HTTP 400 https://www.googleapis.com/identitytoolkit/v3/relyingparty/createAuthUri?key=AIzaSyB2YpcAy39idP--wQBiHpBwmoq1x2cajVQ"
+      ],
+      "errors": []
+    },
+    "signin-email": {
+      "origins": {
+        "https://identitytoolkit.googleapis.com": 2,
+        "https://firestore.googleapis.com": 13,
+        "https://scriptally-dev.web.app": 21,
+        "https://fonts.gstatic.com": 4,
+        "https://fonts.googleapis.com": 1
+      },
+      "csp": [],
+      "violations": [],
+      "failed": [],
+      "errors": []
+    },
+    "dashboard": {
+      "origins": {
+        "https://scriptally-dev.web.app": 25,
+        "https://fonts.googleapis.com": 5,
+        "https://identitytoolkit.googleapis.com": 1,
+        "https://fonts.gstatic.com": 8,
+        "https://firestore.googleapis.com": 18
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "violations": [],
+      "failed": [],
+      "errors": []
+    },
+    "queries": {
+      "origins": {
+        "https://scriptally-dev.web.app": 24,
+        "https://fonts.googleapis.com": 5,
+        "https://fonts.gstatic.com": 8,
+        "https://identitytoolkit.googleapis.com": 1,
+        "https://firestore.googleapis.com": 17
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "violations": [],
+      "failed": [],
+      "errors": []
+    },
+    "queries-full": {
+      "origins": {
+        "https://scriptally-dev.web.app": 24,
+        "https://fonts.googleapis.com": 5,
+        "https://identitytoolkit.googleapis.com": 1,
+        "https://fonts.gstatic.com": 8,
+        "https://firestore.googleapis.com": 17
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "violations": [],
+      "failed": [],
+      "errors": []
+    },
+    "birds-eye": {
+      "origins": {
+        "https://scriptally-dev.web.app": 24,
+        "https://fonts.googleapis.com": 5,
+        "https://fonts.gstatic.com": 7,
+        "https://identitytoolkit.googleapis.com": 1,
+        "https://firestore.googleapis.com": 17
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "violations": [],
+      "failed": [],
+      "errors": []
+    },
+    "analytics": {
+      "origins": {
+        "https://scriptally-dev.web.app": 24,
+        "https://fonts.googleapis.com": 5,
+        "https://identitytoolkit.googleapis.com": 1,
+        "https://fonts.gstatic.com": 10,
+        "https://firestore.googleapis.com": 17
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "violations": [],
+      "failed": [],
+      "errors": []
+    },
+    "responses": {
+      "origins": {
+        "https://scriptally-dev.web.app": 24,
+        "https://fonts.googleapis.com": 5,
+        "https://identitytoolkit.googleapis.com": 1,
+        "https://fonts.gstatic.com": 7,
+        "https://firestore.googleapis.com": 17
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "violations": [],
+      "failed": [],
+      "errors": []
+    },
+    "packages": {
+      "origins": {
+        "https://scriptally-dev.web.app": 25,
+        "https://fonts.googleapis.com": 5,
+        "https://identitytoolkit.googleapis.com": 1,
+        "https://fonts.gstatic.com": 8,
+        "https://firestore.googleapis.com": 19
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "violations": [],
+      "failed": [],
+      "errors": []
+    },
+    "contacts": {
+      "origins": {
+        "https://scriptally-dev.web.app": 23,
+        "https://fonts.googleapis.com": 5,
+        "https://identitytoolkit.googleapis.com": 1,
+        "https://fonts.gstatic.com": 7,
+        "https://firestore.googleapis.com": 16
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "violations": [],
+      "failed": [],
+      "errors": []
+    },
+    "discover": {
+      "origins": {
+        "https://scriptally-dev.web.app": 24,
+        "https://fonts.googleapis.com": 5,
+        "https://identitytoolkit.googleapis.com": 1,
+        "https://fonts.gstatic.com": 8,
+        "https://firestore.googleapis.com": 16
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "violations": [],
+      "failed": [],
+      "errors": []
+    },
+    "manuscripts": {
+      "origins": {
+        "https://scriptally-dev.web.app": 23,
+        "https://fonts.googleapis.com": 5,
+        "https://fonts.gstatic.com": 8,
+        "https://identitytoolkit.googleapis.com": 1,
+        "https://firestore.googleapis.com": 18
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "violations": [],
+      "failed": [],
+      "errors": []
+    },
+    "versions": {
+      "origins": {
+        "https://scriptally-dev.web.app": 23,
+        "https://fonts.googleapis.com": 5,
+        "https://identitytoolkit.googleapis.com": 1,
+        "https://fonts.gstatic.com": 7,
+        "https://firestore.googleapis.com": 18
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "violations": [],
+      "failed": [],
+      "errors": []
+    },
+    "comps": {
+      "origins": {
+        "https://scriptally-dev.web.app": 25,
+        "https://fonts.googleapis.com": 5,
+        "https://fonts.gstatic.com": 7,
+        "https://identitytoolkit.googleapis.com": 1,
+        "https://firestore.googleapis.com": 17
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "violations": [],
+      "failed": [],
+      "errors": []
+    },
+    "letters": {
+      "origins": {
+        "https://scriptally-dev.web.app": 23,
+        "https://fonts.googleapis.com": 5,
+        "https://identitytoolkit.googleapis.com": 1,
+        "https://fonts.gstatic.com": 8,
+        "https://firestore.googleapis.com": 16
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "violations": [],
+      "failed": [],
+      "errors": []
+    },
+    "todo": {
+      "origins": {
+        "https://scriptally-dev.web.app": 23,
+        "https://fonts.googleapis.com": 5,
+        "https://fonts.gstatic.com": 7,
+        "https://identitytoolkit.googleapis.com": 1,
+        "https://firestore.googleapis.com": 17
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "violations": [],
+      "failed": [],
+      "errors": []
+    },
+    "corkboard": {
+      "origins": {
+        "https://scriptally-dev.web.app": 23,
+        "https://fonts.googleapis.com": 5,
+        "https://identitytoolkit.googleapis.com": 1,
+        "https://fonts.gstatic.com": 8,
+        "https://firestore.googleapis.com": 16
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "violations": [],
+      "failed": [],
+      "errors": []
+    },
+    "goals": {
+      "origins": {
+        "https://scriptally-dev.web.app": 25,
+        "https://fonts.googleapis.com": 5,
+        "https://identitytoolkit.googleapis.com": 1,
+        "https://fonts.gstatic.com": 9,
+        "https://firestore.googleapis.com": 18
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "violations": [],
+      "failed": [],
+      "errors": []
+    },
+    "help": {
+      "origins": {
+        "https://scriptally-dev.web.app": 23,
+        "https://fonts.googleapis.com": 5,
+        "https://fonts.gstatic.com": 7,
+        "https://identitytoolkit.googleapis.com": 1,
+        "https://firestore.googleapis.com": 16
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "violations": [],
+      "failed": [],
+      "errors": []
+    },
+    "settings": {
+      "origins": {
+        "https://scriptally-dev.web.app": 23,
+        "https://fonts.googleapis.com": 5,
+        "https://identitytoolkit.googleapis.com": 1,
+        "https://fonts.gstatic.com": 8,
+        "https://firestore.googleapis.com": 16
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "violations": [],
+      "failed": [],
+      "errors": []
+    },
+    "settings-prefs": {
+      "origins": {
+        "https://scriptally-dev.web.app": 23,
+        "https://fonts.googleapis.com": 5,
+        "https://identitytoolkit.googleapis.com": 1,
+        "https://fonts.gstatic.com": 6,
+        "https://firestore.googleapis.com": 17
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "violations": [],
+      "failed": [],
+      "errors": []
+    },
+    "plans": {
+      "origins": {
+        "https://scriptally-dev.web.app": 23,
+        "https://fonts.googleapis.com": 5,
+        "https://identitytoolkit.googleapis.com": 1,
+        "https://fonts.gstatic.com": 10,
+        "https://firestore.googleapis.com": 17
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "violations": [],
+      "failed": [],
+      "errors": []
+    },
+    "query-drawer": {
+      "origins": {
+        "https://scriptally-dev.web.app": 24,
+        "https://fonts.googleapis.com": 5,
+        "https://identitytoolkit.googleapis.com": 1,
+        "https://fonts.gstatic.com": 8,
+        "https://firestore.googleapis.com": 19
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "violations": [],
+      "failed": [],
+      "errors": []
+    },
+    "edit-manuscript": {
+      "origins": {
+        "https://scriptally-dev.web.app": 23,
+        "https://fonts.googleapis.com": 5,
+        "https://identitytoolkit.googleapis.com": 1,
+        "https://fonts.gstatic.com": 8,
+        "https://firestore.googleapis.com": 16
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "violations": [],
+      "failed": [],
+      "errors": []
+    },
+    "import-sheet": {
+      "origins": {
+        "https://scriptally-dev.web.app": 23,
+        "https://fonts.googleapis.com": 5,
+        "https://identitytoolkit.googleapis.com": 1,
+        "https://fonts.gstatic.com": 6,
+        "https://firestore.googleapis.com": 17
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "violations": [],
+      "failed": [],
+      "errors": []
+    },
+    "import-photo": {
+      "origins": {
+        "https://scriptally-dev.web.app": 23,
+        "https://fonts.googleapis.com": 5,
+        "https://identitytoolkit.googleapis.com": 1,
+        "https://fonts.gstatic.com": 6,
+        "https://firestore.googleapis.com": 17
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "violations": [],
+      "failed": [],
+      "errors": []
+    },
+    "token-refresh": {
+      "origins": {
+        "https://scriptally-dev.web.app": 25,
+        "https://securetoken.googleapis.com": 2,
+        "https://fonts.googleapis.com": 5,
+        "https://fonts.gstatic.com": 8,
+        "https://identitytoolkit.googleapis.com": 1,
+        "https://firestore.googleapis.com": 17
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "violations": [],
+      "failed": [],
+      "errors": []
+    },
+    "feedback-dock": {
+      "origins": {
+        "https://scriptally-dev.web.app": 26,
+        "https://fonts.googleapis.com": 5,
+        "https://fonts.gstatic.com": 8,
+        "https://identitytoolkit.googleapis.com": 1,
+        "https://firestore.googleapis.com": 17,
+        "https://europe-west2-scriptally-dev.cloudfunctions.net": 1
+      },
+      "csp": [
+        "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+      ],
+      "violations": [],
+      "failed": [],
+      "errors": []
+    }
+  },
+  "checks": {
+    "fontsLanding": {
+      "loadedFamilies": [
+        "Caveat",
+        "JetBrains Mono",
+        "Playfair Display",
+        "Source Sans 3",
+        "Source Sans Pro",
+        "Source Serif 4",
+        "Special Elite"
+      ],
+      "headingStack": "\"Special Elite\", \"Courier New\", monospace",
+      "bodyStack": "Caveat, cursive",
+      "playfair": true,
+      "sourceSans3": true
+    },
+    "waitlist": {
+      "submitted": true,
+      "status": 200,
+      "appCheckHeader": false,
+      "recaptchaLoaded": true
+    },
+    "googlePopup": {
+      "opened": true,
+      "url": "https://scriptally-dev.firebaseapp.com"
+    },
+    "signedIn": true,
+    "fontsApp": {
+      "loadedFamilies": [
+        "Caveat",
+        "Inter",
+        "JetBrains Mono",
+        "Playfair Display",
+        "Source Sans 3",
+        "Source Sans Pro",
+        "Source Serif 4",
+        "Special Elite"
+      ],
+      "headingStack": "\"Playfair Display\", Garamond, Georgia, serif",
+      "bodyStack": "\"Source Sans 3\", system-ui, -apple-system, sans-serif",
+      "playfair": false,
+      "sourceSans3": false
+    },
+    "queryDrawer": true,
+    "editManuscript": true,
+    "smartImport": {
+      "sheetChosen": true,
+      "screenAfterSheet": "Settings",
+      "photosChosen": true,
+      "previews": 1
+    },
+    "feedbackDock": {
+      "opened": true,
+      "sent": true,
+      "withScreenshot": false
+    },
+    "storageCalls": [],
+    "functionCalls": [
+      {
+        "page": "feedback-dock",
+        "url": "https://europe-west2-scriptally-dev.cloudfunctions.net/sendBetaFeedback",
+        "method": "POST",
+        "appCheckHeader": false,
+        "authHeader": true
+      }
+    ],
+    "beaconPosts": [
+      {
+        "page": "landing",
+        "method": "POST"
+      }
+    ]
+  },
+  "summary": {
+    "landing": {
+      "csp": 1,
+      "violations": 0,
+      "failed": 0,
+      "errors": 0
+    },
+    "pricing": {
+      "csp": 1,
+      "violations": 0,
+      "failed": 0,
+      "errors": 0
+    },
+    "about": {
+      "csp": 1,
+      "violations": 0,
+      "failed": 0,
+      "errors": 0
+    },
+    "contact": {
+      "csp": 1,
+      "violations": 0,
+      "failed": 0,
+      "errors": 0
+    },
+    "founders": {
+      "csp": 1,
+      "violations": 0,
+      "failed": 0,
+      "errors": 0
+    },
+    "terms": {
+      "csp": 1,
+      "violations": 0,
+      "failed": 0,
+      "errors": 0
+    },
+    "privacy": {
+      "csp": 1,
+      "violations": 0,
+      "failed": 0,
+      "errors": 0
+    },
+    "welcome": {
+      "csp": 1,
+      "violations": 0,
+      "failed": 0,
+      "errors": 0
+    },
+    "welcome-verified": {
+      "csp": 1,
+      "violations": 0,
+      "failed": 0,
+      "errors": 0
+    },
+    "waitlist": {
+      "csp": 8,
+      "violations": 2,
+      "failed": 2,
+      "errors": 0
+    },
+    "contact-submit": {
+      "csp": 1,
+      "violations": 0,
+      "failed": 1,
+      "errors": 0
+    },
+    "signup": {
+      "csp": 1,
+      "violations": 0,
+      "failed": 0,
+      "errors": 0
+    },
+    "signin": {
+      "csp": 1,
+      "violations": 0,
+      "failed": 1,
+      "errors": 0
+    },
+    "signin-email": {
+      "csp": 0,
+      "violations": 0,
+      "failed": 0,
+      "errors": 0
+    },
+    "dashboard": {
+      "csp": 1,
+      "violations": 0,
+      "failed": 0,
+      "errors": 0
+    },
+    "queries": {
+      "csp": 1,
+      "violations": 0,
+      "failed": 0,
+      "errors": 0
+    },
+    "queries-full": {
+      "csp": 1,
+      "violations": 0,
+      "failed": 0,
+      "errors": 0
+    },
+    "birds-eye": {
+      "csp": 1,
+      "violations": 0,
+      "failed": 0,
+      "errors": 0
+    },
+    "analytics": {
+      "csp": 1,
+      "violations": 0,
+      "failed": 0,
+      "errors": 0
+    },
+    "responses": {
+      "csp": 1,
+      "violations": 0,
+      "failed": 0,
+      "errors": 0
+    },
+    "packages": {
+      "csp": 1,
+      "violations": 0,
+      "failed": 0,
+      "errors": 0
+    },
+    "contacts": {
+      "csp": 1,
+      "violations": 0,
+      "failed": 0,
+      "errors": 0
+    },
+    "discover": {
+      "csp": 1,
+      "violations": 0,
+      "failed": 0,
+      "errors": 0
+    },
+    "manuscripts": {
+      "csp": 1,
+      "violations": 0,
+      "failed": 0,
+      "errors": 0
+    },
+    "versions": {
+      "csp": 1,
+      "violations": 0,
+      "failed": 0,
+      "errors": 0
+    },
+    "comps": {
+      "csp": 1,
+      "violations": 0,
+      "failed": 0,
+      "errors": 0
+    },
+    "letters": {
+      "csp": 1,
+      "violations": 0,
+      "failed": 0,
+      "errors": 0
+    },
+    "todo": {
+      "csp": 1,
+      "violations": 0,
+      "failed": 0,
+      "errors": 0
+    },
+    "corkboard": {
+      "csp": 1,
+      "violations": 0,
+      "failed": 0,
+      "errors": 0
+    },
+    "goals": {
+      "csp": 1,
+      "violations": 0,
+      "failed": 0,
+      "errors": 0
+    },
+    "help": {
+      "csp": 1,
+      "violations": 0,
+      "failed": 0,
+      "errors": 0
+    },
+    "settings": {
+      "csp": 1,
+      "violations": 0,
+      "failed": 0,
+      "errors": 0
+    },
+    "settings-prefs": {
+      "csp": 1,
+      "violations": 0,
+      "failed": 0,
+      "errors": 0
+    },
+    "plans": {
+      "csp": 1,
+      "violations": 0,
+      "failed": 0,
+      "errors": 0
+    },
+    "query-drawer": {
+      "csp": 1,
+      "violations": 0,
+      "failed": 0,
+      "errors": 0
+    },
+    "edit-manuscript": {
+      "csp": 1,
+      "violations": 0,
+      "failed": 0,
+      "errors": 0
+    },
+    "import-sheet": {
+      "csp": 1,
+      "violations": 0,
+      "failed": 0,
+      "errors": 0
+    },
+    "import-photo": {
+      "csp": 1,
+      "violations": 0,
+      "failed": 0,
+      "errors": 0
+    },
+    "token-refresh": {
+      "csp": 1,
+      "violations": 0,
+      "failed": 0,
+      "errors": 0
+    },
+    "feedback-dock": {
+      "csp": 1,
+      "violations": 0,
+      "failed": 0,
+      "errors": 0
+    }
+  },
+  "allOrigins": {
+    "https://scriptally-dev.web.app": 735,
+    "https://fonts.googleapis.com": 179,
+    "https://fonts.gstatic.com": 282,
+    "https://firestore.googleapis.com": 492,
+    "https://static.cloudflareinsights.com": 1,
+    "https://cloudflareinsights.com": 1,
+    "https://www.google.com": 5,
+    "https://www.gstatic.com": 5,
+    "https://content-firebaseappcheck.googleapis.com": 1,
+    "mailt": 1,
+    "https://apis.google.com": 2,
+    "https://scriptally-dev.firebaseapp.com": 2,
+    "https://identitytoolkit.googleapis.com": 29,
+    "[popup] https://scriptally-dev.firebaseapp.com": 3,
+    "[popup] https://www.googleapis.com": 2,
+    "https://securetoken.googleapis.com": 2,
+    "https://europe-west2-scriptally-dev.cloudfunctions.net": 1
+  }
+}
