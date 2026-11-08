@@ -184,6 +184,14 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentKey, LegalDocument> = {
             "outside the UK, it is protected by recognised safeguards such as the UK Addendum to " +
             "the EU Standard Contractual Clauses.",
           ),
+          /* Crash reporting v1 (8 Nov): every claim below is enforced in lib/sentryScrub.ts — the page
+             without its query string, the error, the browser's name and version, and the Firebase uid. */
+          p(
+            "We use Sentry (Functional Software, Inc.) to tell us when something in QueryHawk breaks. " +
+            "When an error happens, Sentry receives the page it happened on, the error itself, your " +
+            "browser type and a random account ID, and stores them in the EU. It never receives what " +
+            "you've written, your email address or your IP address.",
+          ),
         ],
       },
       {

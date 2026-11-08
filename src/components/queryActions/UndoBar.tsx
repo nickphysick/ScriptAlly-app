@@ -16,7 +16,7 @@
 import { SHORTCUTS, matchesShortcut } from "../../lib/shortcuts";
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { hideUndoBar, subscribeUndoBar, type UndoToast } from "../../lib/queryActions/drawerStore";
+import { hideUndoBar, showUndoBar, subscribeUndoBar, type UndoToast } from "../../lib/queryActions/drawerStore";
 import "./queryDrawer.css";
 import { useIsMobile } from "../shell/mobileChrome";
 import { ArtPlaceholder, PhoneArt } from "../phone/PhoneArtSpot";
@@ -60,7 +60,18 @@ export function UndoBar() {
     if (!t?.undo || busy.current) return;
     busy.current = true;
     const msg = t.message.replace(" · ", " — ").toUpperCase();
-    try { await t.undo(); } finally { busy.current = false; }
+    /* undo and bulk close v1 — an undo is all or nothing (restoreSnapshot is one batch), so a failed one changed
+       nothing and stays on the bar to be tried again: the same undo, said plainly, never marked done */
+    try {
+      await t.undo();
+    } catch (e) {
+      console.error("[undo bar] undo failed", e);
+      busy.current = false;
+      const { id: _id, ...rest } = t;
+      showUndoBar({ ...rest, message: "Couldn't undo that. Nothing was changed.", sub: "PRESS UNDO TO TRY AGAIN" });
+      return;
+    }
+    busy.current = false;
     setT({ id: t.id + 1000000, message: "Undone", sub: msg, done: true });
   };
   const undoRef = useRef(doUndo);

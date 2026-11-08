@@ -7,7 +7,7 @@
  * `main.tsx` imports this INSTEAD of App when `VITE_LANDING_ONLY` is "true", so a production bundle
  * holds the public pages, the founding sign-up and nothing from the workspace. It does what App did
  * on its landing-only branch, and only that:
- *  - `ErrorBoundary`, as App wraps everything in it;
+ *  - `ErrorBoundary`, as App wraps everything in it (with a link home in its fallback);
  *  - `BrandProvider`, because its injected rules set the heading and body faces every public page
  *    reads (the marketing sheets restate them where they must win);
  *  - `BrowserRouter`, for `Navigate`, `useLocation` and the pages' own links;
@@ -49,7 +49,7 @@ const PublicContent: React.FC = () => {
 
 export default function PublicRoot() {
   return (
-    <ErrorBoundary>
+    <ErrorBoundary homeHref="/">
       <BrandProvider>
         <BrowserRouter>
           <PublicContent />

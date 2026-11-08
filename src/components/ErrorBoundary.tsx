@@ -21,9 +21,12 @@
  */
 import { Component, type ReactNode } from "react";
 import "./errorBoundary.css";
+import { reportBoundaryError } from "../lib/errorReporting";
 
 interface Props {
   children: ReactNode;
+  /** Crash reporting v1: where Go to Home goes (the public site passes "/"); the dashboard otherwise. */
+  homeHref?: string;
 }
 
 interface State {
@@ -44,9 +47,9 @@ export class ErrorBoundary extends Component<Props, State> {
     return { hasError: true };
   }
 
-  componentDidCatch(error: unknown) {
-    // Log only the message (no PII), consistent with handleFirestoreError.
-    console.error("UI error boundary caught:", error instanceof Error ? error.message : String(error));
+  componentDidCatch(error: unknown, info?: { componentStack?: string | null }) {
+    // The last resort: a page or panel crash is caught nearer (PageBoundary); this is what is left.
+    reportBoundaryError(error, { boundary: "app", componentStack: info?.componentStack ?? undefined });
   }
 
   private handleReload = () => {
@@ -55,7 +58,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
   private handleHome = () => {
     if (typeof window === "undefined") return;
-    window.history.pushState({}, "", "/dashboard");
+    window.history.pushState({}, "", this.props.homeHref ?? "/dashboard");
     window.dispatchEvent(new PopStateEvent("popstate"));
     this.setState({ hasError: false });
   };

@@ -118,6 +118,7 @@ import { writeActivity } from "./activityWrite";
 import { createManuscript, updateManuscriptFields } from "./manuscriptWrite";
 import { narrate } from "./narrate";
 import { commitNudge } from "./nudgeWrite";
+import { undoNudge as undoNudgeWrite } from "./nudgeUndo";
 import { resolveGenre, matchKey } from "./genres";
 import { commitAgentEdits, AgentEditPatch, AgentExtraWrite, SaveAgentResult } from "./saveAgentEdits";
 import { computeAgentDeadlineWrites } from "./computeAgentDeadlineWrites";
@@ -151,6 +152,7 @@ import { noteFirstWin } from "./firstWin";
 import { activeManuscriptOf, eventPath, logEvent } from "./events";
 import { manuscriptComps } from "./comps";
 import { isFirstAgentWin, isFirstQueryWin, winCopy } from "./dashFirstVisit";
+import { identifyForErrors } from "./sentry";
 
 // Connection validation test on boot as requested by skill
 async function testConnection() {
@@ -545,6 +547,8 @@ interface DbContextType {
   /* ⚠️ `checkBackDate` IS OPTIONAL — absent is "Don't ask again" (journey round, Phase 5): the nudge
      is recorded, no `nudgeDate` is written, and the dismissal is PERMANENT rather than dated. */
   logNudge: (queryId: string, args: { checkBackDate?: string; note?: string; eventDate?: string }) => Promise<{ success: boolean; error?: string; activityId?: string; prior?: { nudgeDate?: string; lastNudgeSentDate?: string } }>;
+  /** Undo a nudge by the row id `logNudge` returned, putting the nudge fields back from `prior` — one batch, never through the feed (lib/nudgeUndo). Rejects if nothing changed. */
+  undoNudge: (queryId: string, activityId: string, prior: { nudgeDate?: string; lastNudgeSentDate?: string }) => Promise<void>;
   recordOfferDecision: (queryId: string, decision: OfferDecision) => Promise<{ success: boolean; error?: string }>;
 
   // ⚠️ NO cleanDuplicates / wipeAndResetDatabase / seedUserDatabase. They backed two panels on the
@@ -626,6 +630,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     let unsubTaskFlags: () => void = () => {};
 
     const unsubAuth = onAuthStateChanged(auth, async (firebaseUser) => {
+      /* Crash reporting v1: error reports carry the uid and nothing else, and none once signed out */
+      identifyForErrors(firebaseUser ? firebaseUser.uid : null);
       if (!firebaseUser) {
         // No authenticated user — show the Auth screen
         setCurrentUser(null);
@@ -3927,6 +3933,16 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     return r.success ? { success: true, activityId: actId, prior } : { success: false, error: r.error };
   };
 
+  /* undo and bulk close v1, Phase 3 — the nudge's Undo keys off the authoritative row, never the feed: a feed twin
+     that failed to write (allowed since the timeline writer fix) used to leave the Undo nothing to find, or the
+     PREVIOUS nudge to remove. lib/nudgeUndo does it in one batch; the flag is released after, as deleteActivity did. */
+  const undoNudge = async (queryId: string, activityId: string, prior: { nudgeDate?: string; lastNudgeSentDate?: string }) => {
+    if (!currentUser) throw new Error("Session required.");
+    await undoNudgeWrite(db, currentUser.id, queryId, activityId, prior, {
+      releaseFlag: () => resolveTaskFlag(flagKeyForTask("nudge_overdue", queryId)),
+    });
+  };
+
   /**
    * PHASE 3 — record a reply that decides nothing.
    *
@@ -4104,6 +4120,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         updateUserPaths,
         dismissTask,
         logNudge,
+        undoNudge,
         recordOfferDecision
       }}
     >

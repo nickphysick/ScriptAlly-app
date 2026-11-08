@@ -28,7 +28,7 @@ import React from "react";
 import { useScriptAllyDb } from "../../lib/db";
 import { BoardCard } from "../../lib/todoBoard";
 import { JourneySendValues } from "../../lib/paneJourney";
-import { QueryStatus, ActivityType, Agent } from "../../types";
+import { QueryStatus, Agent } from "../../types";
 import { getPrimaryAction } from "../../lib/queryPrimaryAction";
 import { completionVia } from "../../lib/todoActions";
 import { quickSendPayload, quickNudgePayload, markSentWriteArgs, nudgeWriteArgs,
@@ -64,7 +64,7 @@ export function useTaskCommit(host: TaskCommitHost): TaskCommit {
   const {
     queries, agents, activities, userTasks,
     updateQuery, updateQueryStatus, updateUserTask, addUserTask, updateAgent,
-    recordMaterialsSent, recordOfferDecision, undoQueryStatus, logNudge, deleteActivity,
+    recordMaterialsSent, recordOfferDecision, undoQueryStatus, logNudge, undoNudge,
     upsertTaskFlag, resolveTaskFlag,
   } = useScriptAllyDb();
   /* ⚠️ THE HOOK HOLDS ITS OWN REF, for the same reason the page did: the nudge undo and the
@@ -83,7 +83,16 @@ export function useTaskCommit(host: TaskCommitHost): TaskCommit {
        not before: the page's restore reasons about a board the undo has already put back.
        ⚠️ BOTH ARMS ARE WRAPPED — the toast's button and the session's remembered redo take the
        same route, or an undo recalled through the session would leave the window running. */
-    const undoAndTell = async () => { await fn(); host.onUndone?.(c); };
+    /* undo and bulk close v1 — a failed undo changed nothing (each is one batch now), so it says so and offers itself
+       again, and the host is NOT told it was undone */
+    const undoAndTell = async (): Promise<void> => {
+      try { await fn(); } catch (e) {
+        console.error("[to-do] undo failed", e);
+        flash("Couldn't undo that. Nothing was changed.", { label: "Undo", fn: undoAndTell });
+        return;
+      }
+      host.onUndone?.(c);
+    };
     rememberUndo(c.key, undoAndTell);
     flash(`Done — “${c.title}”`, { label: "Undo", fn: undoAndTell });
   }
@@ -136,13 +145,8 @@ export function useTaskCommit(host: TaskCommitHost): TaskCommit {
       const p = quickNudgePayload({ cardKey: c.key, label: c.title, queryId: q.id, method: q.sendMethod, nowIso });
       const r = await logNudge(...nudgeWriteArgs(p, new Date().toISOString()));
       if (!r.success) { flash(r.error || "Couldn’t log the nudge."); return false; }
-      // deleteActivity on a NUDGE_SENT fully unwinds it (twins + nudgeDate fields + the flag).
-      const undo = async () => {
-        const acts = activitiesRef.current
-          .filter((a) => a.queryId === q.id && a.activityType === ActivityType.NUDGE_SENT)
-          .sort((x, y) => new Date(y.date).getTime() - new Date(x.date).getTime());
-        if (acts[0]?.id) await deleteActivity(acts[0].id);
-      };
+      // undo and bulk close v1 — by the row logNudge wrote, never the feed (lib/nudgeUndo): one batch.
+      const undo = () => undoNudge(q.id, r.activityId!, r.prior ?? {});
       doneToast(c, async () => { await undo(); flash("Restored"); });
       return true;
     }
@@ -267,12 +271,8 @@ export function useTaskCommit(host: TaskCommitHost): TaskCommit {
     };
     const r = await logNudge(...nudgeWriteArgs(p, nowIso));
     if (!r.success) { flash(r.error || "Couldn’t log the nudge."); return false; }
-    const undo = async () => {
-      const acts = activitiesRef.current
-        .filter((a) => a.queryId === q.id && a.activityType === ActivityType.NUDGE_SENT)
-        .sort((x, y) => new Date(y.date).getTime() - new Date(x.date).getTime());
-      if (acts[0]?.id) await deleteActivity(acts[0].id);
-    };
+    // undo and bulk close v1 — by the row logNudge wrote, never the feed (lib/nudgeUndo): one batch.
+    const undo = () => undoNudge(q.id, r.activityId!, r.prior ?? {});
     doneToast(card, async () => { await undo(); flash("Restored"); });
     return true;
   }
