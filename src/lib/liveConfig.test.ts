@@ -28,6 +28,16 @@ const dev = json("firebase.dev.json");
 const envDb = readFileSync(join(ROOT, ".env.production"), "utf8")
   .match(/^\s*VITE_FIREBASE_DATABASE_ID\s*=\s*(\S+)\s*$/m)?.[1];
 
+/* Security headers v1: the CSP, X-Frame-Options, nosniff, Referrer-Policy and Permissions-Policy
+   are written into both configs by scripts/csp.mjs, and DIFFER on purpose (each names its own
+   Firebase project; dev enforces the CSP while prod reports only). src/test/securityHeaders.test.ts
+   holds them; this suite compares everything else, as before. */
+const SECURITY = new Set(["Content-Security-Policy", "Content-Security-Policy-Report-Only", "X-Frame-Options", "X-Content-Type-Options", "Referrer-Policy", "Permissions-Policy"]);
+const withoutSecurity = (hosting: { headers?: { source: string; headers: { key: string }[] }[] }) => ({
+  ...hosting,
+  headers: hosting.headers?.map((b) => ({ ...b, headers: b.headers.filter((h) => !SECURITY.has(h.key)) })),
+});
+
 describe("the live Hosting config follows dev's", () => {
   it("L1 · live's rewrites equal dev's, waitlist pair ahead of the catch-all", () => {
     expect(live.hosting.rewrites).toEqual(dev.hosting.rewrites);
@@ -40,7 +50,7 @@ describe("the live Hosting config follows dev's", () => {
   });
 
   it("L2 · live's headers equal dev's: no-cache for the page, immutable for /assets/**", () => {
-    expect(live.hosting.headers).toEqual(dev.hosting.headers);
+    expect(withoutSecurity(live.hosting).headers).toEqual(withoutSecurity(dev.hosting).headers);
     const assets = live.hosting.headers?.find((h: { source: string }) => h.source === "/assets/**");
     expect(assets?.headers?.[0]?.value, "without it a returning reader keeps the old bundle").toContain("immutable");
   });
@@ -49,7 +59,7 @@ describe("the live Hosting config follows dev's", () => {
      and /privacy home (RED-1, src/lib/landingRedirect.test.ts). Dev is the whole app, so it has none. */
   it("L3 · everything else in live's hosting block equals dev's, apart from `site` and live's `redirects`", () => {
     const strip = ({ site: _s, redirects: _r, ...rest }: Record<string, unknown>) => rest;
-    expect(strip(live.hosting)).toEqual(strip(dev.hosting));
+    expect(strip(withoutSecurity(live.hosting))).toEqual(strip(withoutSecurity(dev.hosting)));
     expect(live.hosting.site).toBe("scriptally-app");
     expect(Object.keys(live.hosting).filter((k) => !(k in dev.hosting)), "the one key live has that dev does not").toEqual(["redirects"]);
   });
