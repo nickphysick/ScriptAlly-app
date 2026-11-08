@@ -263,3 +263,39 @@ for (const vp of SIZES) {
     L.done(18);
   });
 }
+
+/*   G1  the group headings, ruled: name (typewriter 21), a glass count chip in the group's colour (26×24 min, radius 7),
+ *       a 1px hairline filling the width, the description in italic at the right; centred; no swatch square. */
+for (const vp of SIZES) {
+  test(`v153.3 G1 ruled headings · ${vp.width}`, async ({ page }) => {
+    const L = new Ledger(`G1-${vp.width}`);
+    await openQc(page, vp);
+    const hs = await page.evaluate((sel) => [...document.querySelectorAll<HTMLElement>(`${sel} [data-qc153='heading']`)].map((h) => {
+      const r = (e: Element | null) => e ? e.getBoundingClientRect() : null;
+      const b = h.querySelector("b")!, sm = h.querySelector("small")!, ru = h.querySelector(".qc1533-rule"), em = h.querySelector("em, .qc153-lnk");
+      const bc = getComputedStyle(b), sc = getComputedStyle(sm), rc = ru ? getComputedStyle(ru) : null;
+      const mid = (x: DOMRect | null) => x ? x.top + x.height / 2 : NaN;
+      const hr = r(h)!, br = r(b)!, sr = r(sm)!, rr = r(ru), er = r(em);
+      return { name: b.textContent, font: `${bc.fontFamily.split(",")[0]} ${bc.fontSize}`, chip: { w: sr.width, h: sr.height, r: sc.borderRadius, bg: sc.backgroundColor, img: sc.backgroundImage.slice(0, 40), f: `${sc.fontFamily.split(",")[0]} ${sc.fontSize}`, sh: sc.boxShadow },
+        rule: rc ? { h: rr!.height, bg: rc.backgroundColor, left: rr!.left - sr.right, right: er ? er.left - rr!.right : hr.right - rr!.right } : null,
+        emRight: er ? hr.right - er.right : null, emItalic: em ? getComputedStyle(em).fontStyle : null,
+        centred: Math.max(...[br, sr, rr, er].filter(Boolean).map((x) => Math.abs(mid(x as DOMRect) - mid(hr)))), swatch: !!h.querySelector(".qc153-sw"), order: br.right <= sr.left && (!rr || sr.right <= rr.left) && (!rr || !er || rr.right <= er.left) };
+    }), PAGE);
+    L.check("population: headings", hs.length >= 2, `${hs.length}`);
+    for (const h of hs) {
+      L.check(`${h.name}: typewriter 21`, /Special Elite/.test(h.font) && h.font.endsWith("21px"), h.font);
+      L.check(`${h.name}: glass chip ≥26 wide, 24 tall, radius 7`, h.chip.w >= 25.9 && Math.abs(h.chip.h - 24) < 0.5 && h.chip.r === "7px" && /linear-gradient/.test(h.chip.img), `${h.chip.w}×${h.chip.h} r${h.chip.r} ${h.chip.bg}`);
+      L.check(`${h.name}: chip count in the typewriter 13.5`, /Special Elite/.test(h.chip.f) && h.chip.f.endsWith("13.5px"), h.chip.f);
+      L.check(`${h.name}: a 1px hairline fills the width`, !!h.rule && Math.abs(h.rule.h - 1) < 0.1 && h.rule.bg === "rgba(28, 19, 15, 0.14)", JSON.stringify(h.rule));
+      L.check(`${h.name}: name, count, rule, description in order`, h.order, `${h.order}`);
+      L.check(`${h.name}: the description italic, at the right`, h.emRight == null || (h.emRight < 1 && h.emItalic === "italic"), `${h.emRight} ${h.emItalic}`);
+      L.check(`${h.name}: all centred`, h.centred < 1.5, `${h.centred.toFixed(2)}`);
+      L.check(`${h.name}: no swatch square`, !h.swatch, `${h.swatch}`);
+    }
+    const first = page.locator(`${PAGE} [data-qc153='heading']`).first();
+    const hb = (await first.boundingBox())!;
+    await page.screenshot({ path: `${DIR}/heading-${vp.width}.png`, clip: { x: hb.x - 10, y: hb.y - 10, width: hb.width + 20, height: hb.height + 20 } });
+    writeFileSync(`${DIR}/headings-${vp.width}.json`, JSON.stringify(hs, null, 1));
+    L.done(16);
+  });
+}

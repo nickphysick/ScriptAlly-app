@@ -253,3 +253,19 @@
   .qc151 .qc153-rail .qc153-court[data-k="closed"] { background: repeating-linear-gradient(135deg, #f3f0eb 0 6px, #ebe6df 6px 8px); }
   .qc151 .qc153-rail .qc153-court.is-on { background: #2a3a52; color: #f4eee5; }
 }
+
+/* ══ v153.3 · the group headings, ruled (design-refs/query-centre-v153-3.html, its `ruled` headings) ═══════════════
+   In a row: the name in the typewriter 21, the count in a small glass chip in the group's colour, a hairline filling
+   the width, the description in italic at the right; all centred. The swatch square is gone. The folds are untouched. */
+@media (min-width: 768px) {
+  .qc151.qc153 .qc153-sec { display: flex; align-items: center; gap: 10px; }
+  .qc151.qc153 .qc153-sec b { font: 400 21px/1.3 var(--sp-type) !important; color: #1c130f; }
+  .qc151.qc153 .qc153-sec small {
+    box-sizing: border-box; display: inline-grid; place-items: center; min-width: 26px; height: 24px; padding: 0 7px; border-radius: 7px;
+    font: 400 13.5px/1 var(--sp-type) !important; color: #1c130f;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.1) 50%, transparent 52%), var(--sw, #efe7da);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7), 0 1px 2px rgba(28, 19, 15, 0.12);
+  }
+  .qc151.qc153 .qc1533-rule { display: block; flex: 1 1 0; min-width: 12px; height: 1px; margin: 0 4px; background: rgba(28, 19, 15, 0.14); }
+  .qc151.qc153 .qc153-sec em, .qc151.qc153 .qc153-sec .qc153-lnk--r { margin-left: 0; text-align: right; }
+}

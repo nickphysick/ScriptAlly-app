@@ -398,9 +398,8 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
                 return (
                   <section key={s.key} className="qc153-grp" data-qc1511="group" data-k={s.key} aria-label={s.label || "Queries"}>
                     {s.label ? (
-                      <div className="qc153-sec" data-qc153="heading">
-                        <span className="qc153-sw" style={{ background: sectionSwatch(p.group, s.key) }} aria-hidden="true" />
-                        <b data-qc151="section">{s.label}</b><small>{s.rows.length}</small>
+                      <div className="qc153-sec" data-qc153="heading" style={{ "--sw": sectionSwatch(p.group, s.key) } as React.CSSProperties}>
+                        <b data-qc151="section">{s.label}</b><small data-qc1533="count">{s.rows.length}</small><i className="qc1533-rule" aria-hidden="true" />
                         {folds
                           ? <button type="button" className="qc153-lnk qc153-lnk--r" data-qc153="fold-away" aria-expanded={true} onClick={() => openFold(s.key, false)}>Fold away</button>
                           : why ? <em>{why}</em> : null}
