@@ -1,0 +1,200 @@
+{
+ "gap": 26,
+ "hdPadB": "18px",
+ "slipWho": "Noah Bright, Bright Literary, Offer",
+ "headH": 80.59375,
+ "wordVsTrack": {
+  "wordLeft": 1559.015625,
+  "trackRight": 1602,
+  "wordTop": 579.34375,
+  "trackTop": 605.9375,
+  "sameLine": false
+ },
+ "card": {
+  "bg": "rgb(255, 255, 255)",
+  "border": "1px solid",
+  "shadow": true,
+  "bar": true,
+  "pile": true,
+  "mid": null,
+  "lgHead": null
+ },
+ "quiet": "Query Centre settings",
+ "nexts": [
+  {
+   "who": "Noah Bright, Bright Literary, Offer",
+   "value": "No date yet",
+   "line": null
+  },
+  {
+   "who": "Tom Ellery, Ellery & Finch, Offer",
+   "value": "No date yet",
+   "line": null
+  },
+  {
+   "who": "Rachel Lin, Lin Literary, Partial requested",
+   "value": "35 days late",
+   "line": null
+  },
+  {
+   "who": "Iris Kwan, Kwan & Hall, Revise & resubmit",
+   "value": "20 days late",
+   "line": null
+  },
+  {
+   "who": "Ana Duarte, Duarte Words, Full requested",
+   "value": "No date yet",
+   "line": null
+  },
+  {
+   "who": "Clara Beaumont, Harbour Lane, Partial requested",
+   "value": "No date yet",
+   "line": null
+  },
+  {
+   "who": "David Marsh, Marsh & Co, Partial requested",
+   "value": "No date yet",
+   "line": null
+  },
+  {
+   "who": "Edda Voss, Voss Literary, Partial requested",
+   "value": "No date yet",
+   "line": null
+  },
+  {
+   "who": "Imogen Vale, Vale & Wick, Full requested",
+   "value": "No date yet",
+   "line": null
+  },
+  {
+   "who": "Jonathan Marsh, The Marsh Agency, Full requested",
+   "value": "No date yet",
+   "line": null
+  },
+  {
+   "who": "Marcus Reed, Reed & Partners, Partial requested",
+   "value": "No date yet",
+   "line": null
+  },
+  {
+   "who": "Marcus Reed, Bloomsbury Quill, Partial requested",
+   "value": "No date yet",
+   "line": null
+  },
+  {
+   "who": "Marcus Reed, Reed & Partners, Full requested",
+   "value": "No date yet",
+   "line": null
+  },
+  {
+   "who": "Ottoline Frayn, Frayn Agency, Full requested",
+   "value": "No date yet",
+   "line": null
+  },
+  {
+   "who": "Theo Abara, Abara Grant Agency, Full requested",
+   "value": "No date yet",
+   "line": null
+  },
+  {
+   "who": "Tobias Hark, Hark Literary, Full requested",
+   "value": "No date yet",
+   "line": null
+  },
+  {
+   "who": "Ana Duarte, Duarte Words, Full sent",
+   "value": "25 days overdue",
+   "line": null
+  },
+  {
+   "who": "Peter Vance, Vance Associates, Partial sent",
+   "value": "23 days overdue",
+   "line": null
+  },
+  {
+   "who": "Sun-hee Park, Meridian Line, Full sent",
+   "value": "23 days overdue",
+   "line": null
+  },
+  {
+   "who": "Douglas Renner, Renner & Frost, Queried",
+   "value": "19 days overdue",
+   "line": null
+  },
+  {
+   "who": "Tom Ellery, Curtis Vane, Queried",
+   "value": "12 days overdue",
+   "line": null
+  },
+  {
+   "who": "Devendra Rao, Rao Agency, Partial sent",
+   "value": "10 days overdue",
+   "line": null
+  },
+  {
+   "who": "Elinor Hale, Cavendish & Roe, Partial sent",
+   "value": "8 days overdue",
+   "line": null
+  },
+  {
+   "who": "Rufus Oyelaran, Oyelaran Books, Partial sent",
+   "value": "3 days to reply",
+   "line": null
+  },
+  {
+   "who": "David Marsh, Marsh & Co, Partial sent",
+   "value": "6 days to reply",
+   "line": null
+  },
+  {
+   "who": "Elinor Hale, Cavendish & Roe, Queried",
+   "value": "7 days to reply",
+   "line": null
+  },
+  {
+   "who": "Elinor Hale, Cavendish & Roe, Queried",
+   "value": "7 days to reply",
+   "line": null
+  },
+  {
+   "who": "Priya Nair, Northbank Literary, Partial sent",
+   "value": "7 days to reply",
+   "line": null
+  },
+  {
+   "who": "Elinor Hale, Cavendish & Roe, Queried",
+   "value": "10 days to reply",
+   "line": null
+  },
+  {
+   "who": "Hester Blaine, Blaine & Vole, Queried",
+   "value": "1 day to reply",
+   "line": null
+  },
+  {
+   "who": "Wren Calloway, Calloway & Hart, Full sent",
+   "value": "60 days to reply",
+   "line": null
+  },
+  {
+   "who": "Agent not recorded, , Queried",
+   "value": "No reply date",
+   "line": null
+  },
+  {
+   "who": "Agent not recorded, , Queried",
+   "value": "No reply date",
+   "line": null
+  },
+  {
+   "who": "Fenella Strand, Brightwater Books, Queried",
+   "value": "No reply date",
+   "line": null
+  },
+  {
+   "who": "Nadia Hussain, Northgate Literary, Queried",
+   "value": "No reply date",
+   "line": null
+  }
+ ]
+}

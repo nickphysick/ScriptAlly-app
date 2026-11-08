@@ -1,0 +1,87 @@
+[
+ {
+  "where": "O1 no fill, border or shadow",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) · 0px none · shadow false"
+ },
+ {
+  "where": "O1 no navy bar, no pile",
+  "ok": true,
+  "detail": "bar false · pile false"
+ },
+ {
+  "where": "O1 the middle is sent less passed or closed",
+  "ok": true,
+  "detail": "70 = 88 − 18"
+ },
+ {
+  "where": "O1 the middle disc is the soft white",
+  "ok": true,
+  "detail": "rgba(255,255,255,.55)"
+ },
+ {
+  "where": "O1 the legend heading says N sent",
+  "ok": true,
+  "detail": "88 sent"
+ },
+ {
+  "where": "O1 under a 2px navy rule",
+  "ok": true,
+  "detail": "2px solid rgb(42, 58, 82)"
+ },
+ {
+  "where": "O2 the hovered segment stays, the rest fade",
+  "ok": true,
+  "detail": "[{\"k\":\"wait\",\"o\":1},{\"k\":\"partial\",\"o\":0.3},{\"k\":\"full\",\"o\":0.3},{\"k\":\"offer\",\"o\":0.3},{\"k\":\"closed\",\"o\":0.3}]"
+ },
+ {
+  "where": "O2 the tooltip names it",
+  "ok": true,
+  "detail": "Waiting to hear — 38 of 88 queries"
+ },
+ {
+  "where": "O2 the linked row takes the soft white fill",
+  "ok": true,
+  "detail": "rgba(255, 255, 255, 0.55)"
+ },
+ {
+  "where": "Q1 reads 'Gone quiet after N weeks', N the live setting",
+  "ok": true,
+  "detail": "Gone quiet after 4 weeks · checked 4"
+ },
+ {
+  "where": "Q1 the phrase opens the pop-over",
+  "ok": true,
+  "detail": "open"
+ },
+ {
+  "where": "Q1 Escape closes it",
+  "ok": true,
+  "detail": "closed"
+ },
+ {
+  "where": "G1 header content to the slim bar is the ref's",
+  "ok": true,
+  "detail": "30.0px · ref 30"
+ },
+ {
+  "where": "S1 the word sits beside the track, to its right",
+  "ok": true,
+  "detail": "Tom Ellery, Ellery & Finch, Offer"
+ },
+ {
+  "where": "S1 the header is two lines tall (within 6px of the ref)",
+  "ok": true,
+  "detail": "64.3px · ref 66.94"
+ },
+ {
+  "where": "S1 every Offer's Next has its second line",
+  "ok": true,
+  "detail": "2 offers"
+ },
+ {
+  "where": "S1 every Partial requested's Next has its second line",
+  "ok": true,
+  "detail": "asked 81 days ago | asked 67 days ago | asked 81 days ago | asked 57 days ago | asked 62 days ago | asked 59 days ago"
+ }
+]
