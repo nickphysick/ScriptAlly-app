@@ -71,6 +71,7 @@ export const appPolicy = ({ authDomain, functions }) => [
     "https://identitytoolkit.googleapis.com",   // sign-in and every signed-in page: Firebase Auth
     "https://securetoken.googleapis.com",       // signed-in pages: the hourly ID-token refresh
     "https://content-firebaseappcheck.googleapis.com", // waitlist: App Check token exchange
+    "https://www.google.com",                   // waitlist: reCAPTCHA Enterprise's clr call (report-only walk)
     functions,                                  // feedback dock (sendBetaFeedback), Smart Import: callables
     "https://cloudflareinsights.com",           // the Cloudflare beacon's report
   ]],
@@ -122,7 +123,11 @@ export const PERMISSIONS_POLICY = [
 export const headersFor = (cfg) => {
   const policy = cfg.kind === "holding" ? holdingPolicy() : appPolicy(projectOf(cfg.env));
   return [
-    { key: cfg.csp === "enforce" ? "Content-Security-Policy" : "Content-Security-Policy-Report-Only", value: serialise(policy) },
+    /* upgrade-insecure-requests does nothing in a report-only header, and Chrome says so in the
+       console on every page — which would read as a violation to anyone checking prod's console.
+       It is written only where the policy enforces. */
+    { key: cfg.csp === "enforce" ? "Content-Security-Policy" : "Content-Security-Policy-Report-Only",
+      value: serialise(cfg.csp === "enforce" ? policy : policy.filter(([k]) => k !== "upgrade-insecure-requests")) },
     { key: "X-Frame-Options", value: "DENY" },
     { key: "X-Content-Type-Options", value: "nosniff" },
     { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
