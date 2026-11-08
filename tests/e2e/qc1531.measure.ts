@@ -72,7 +72,7 @@ for (const vp of SIZES) {
     L.check("H1 three columns, the ring card on the right", !!h.art && !!h.main && !!h.card && h.art.x < h.main.x && h.main.x < h.card.x, `cols ${h.cols}`);
     L.check("H1 the hawk is 190 wide", h.art && Math.round(h.art.w) === 190, `${h.art?.w}`);
     L.check("H1 the header has no ground of its own", h.hdBg === "rgba(0, 0, 0, 0)", h.hdBg);
-    L.check("H1 the quiet-window setting survives", h.quiet, `${h.quiet}`);
+    L.check("H1 the quiet-window setting has left the header (v153.3: Settings)", !h.quiet, `${h.quiet}`);
     L.check("H1 title reads N queries sent", /^\d+ quer(y|ies) sent$/.test(h.title), h.title);
     console.log(`for line: ${h.forLine}`);
     /* H2 */

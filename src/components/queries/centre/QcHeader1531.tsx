@@ -8,10 +8,10 @@
  *
  * ⚠️ THE "for" LINE NAMES WHAT THE OLD COUNT LINE NAMED (`counts.ms`): the scoped manuscript, or the only one. With
  *    more than one manuscript and no scope the old line named none, so this one is left out rather than invented.
- * ⚠️ THE QUIET-WINDOW SETTING SURVIVES, after Record a response, as the same gear button it was in the banner.
+ * v153.3 — the quiet-window setting has left the header for Settings → Preferences → Queries; the action row is the
+ * two buttons and nothing else.
  */
 import React from "react";
-import { QcQuietSetting } from "./QcQuietSetting";
 import type { CountLine1512 } from "./QcPage151";
 import "./qcv1531.css";
 
@@ -23,10 +23,9 @@ export const sentTitle = (n: number): string => `${n} ${n === 1 ? "query" : "que
 export const QcHeader1531: React.FC<{
   loading: boolean; onLog: () => void; onRecord: () => void; logDisabled?: boolean; logRef?: React.Ref<HTMLButtonElement>;
   counts?: CountLine1512 | null;
-  quietWeeks?: number; onQuietWeeks?: (w: number) => void;
   /** the stage ring card (built by the page that owns the rail's filters) */
   ring?: React.ReactNode;
-}> = ({ loading, onLog, onRecord, logDisabled = false, logRef, counts = null, quietWeeks, onQuietWeeks, ring = null }) => (
+}> = ({ loading, onLog, onRecord, logDisabled = false, logRef, counts = null, ring = null }) => (
   <header className="qc1531-hd" data-qc151="header" data-qc1531="header" data-qcv="open-header" data-own-header="">
     <div className="qc1531-art" aria-hidden="true"><img src={ARMCHAIR_HAWK} alt="" width={190} /></div>
     <div className="qc1531-main">
@@ -37,7 +36,6 @@ export const QcHeader1531: React.FC<{
       <div className="qc1531-acts">
         <button type="button" ref={logRef} className="qc1531-b qc1531-b--n" data-qc151="log" data-qcv="oh-log" disabled={loading || logDisabled} onClick={onLog}>+ Log a query</button>
         <button type="button" className="qc1531-b qc1531-b--g" data-qc151="record" data-qcv="oh-record" disabled={loading} onClick={onRecord}>Record a response</button>
-        {quietWeeks != null && onQuietWeeks ? <QcQuietSetting weeks={quietWeeks} onSet={onQuietWeeks} disabled={loading} /> : null}
       </div>
     </div>
     <div className="qc1531-rc">{ring}</div>

@@ -134,7 +134,7 @@ import { QcStageRing1531 } from "./queries/centre/QcStageRing1531";
 import { ringCounts } from "../lib/qc1531";
 import { railCounts } from "../lib/qc153Rail";
 import { slipTone } from "../lib/qc153";
-import { QUIET_WEEKS_PATH, nudgeMsOf, quickOfRow, quietWeeksOf, stampRows, stateOf, queryState as qsOf } from "../lib/queryState";
+import { nudgeMsOf, quickOfRow, quietWeeksOf, stampRows, stateOf, queryState as qsOf } from "../lib/queryState";
 import { packagesUnlocked, versionsUnlocked } from "../lib/entitlements";
 import { ACTION_LABEL, CLOSED_SET, listGroupOf, savedGroupOf } from "../lib/qc1522";
 import { qcPlanAid } from "../lib/qcReviewAid1522";
@@ -8082,7 +8082,6 @@ export const Queries: React.FC<{
                   onLog={() => onNavigate?.("queries", "Log a query")}
                   onRecord={() => onNavigate?.("queries", "Record a response")}
                   logDisabled={creating} logRef={logTriggerRef}
-                  quietWeeks={qcQuietWeeks} onQuietWeeks={(w) => { void updateUserPaths({ [QUIET_WEEKS_PATH]: w }); }}
                   tabCounts={showGridSkeleton ? null : qcWhereN} total={qcScoped.length} where={qcF138.where}
                   onWhere={(k) => setQcF138((f) => ({ ...f, where: k }))}
                   showing={qcVisible.length}

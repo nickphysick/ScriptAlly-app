@@ -40,22 +40,8 @@
   .qc151 .qc1531-b--g:hover { box-shadow: inset 0 0 0 1px #b9ad9e, 0 2px 6px -4px rgba(28, 19, 15, 0.3); }
   .qc151 .qc1531-b:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
   .qc151 .qc1531-b:disabled { opacity: 0.55; cursor: default; }
-  /* the quiet setting, in words (v153.2): "Gone quiet after" muted italic, "8 weeks" in the typewriter, underlined */
-  .qc151 .qc1531-hd .qc152-setbtn.qc1532-qw {
-    width: auto; height: auto; margin-left: 6px; padding: 2px 0; border-radius: 4px; background: none; box-shadow: none;
-    display: inline-flex; align-items: baseline; gap: 6px; white-space: nowrap; color: var(--mut);
-    font: italic 400 14.5px/1.3 var(--sp-serif) !important;
-  }
-  .qc151 .qc1531-hd .qc1532-qw span { font: italic 400 14.5px/1.3 var(--sp-serif) !important; color: var(--mut); }
-  .qc151 .qc1531-hd .qc1532-qw b {
-    font: 400 14.5px/1.3 var(--sp-type) !important; color: var(--ink);
-    text-decoration: underline; text-decoration-color: #c9bfb2; text-underline-offset: 4px;
-  }
-  .qc151 .qc1531-hd .qc1532-qw:hover b, .qc151 .qc1531-hd .qc1532-qw[aria-expanded="true"] b { text-decoration-color: var(--ink); }
-  .qc151 .qc1531-hd .qc1532-qw:focus-visible { outline: 2px solid var(--navy); outline-offset: 3px; }
   /* nothing in the row wraps mid-label; the row itself may wrap */
   .qc1531-acts > * { white-space: nowrap; }
-  .qc151 .qc1531-hd .qc152-setpop { right: auto; left: 0; }
   .qc1531-rc { min-width: 0; }
 
   /* ── the stage ring card ────────────────────────────────────────────────────────────────────────────────── */
