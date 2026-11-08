@@ -31,6 +31,7 @@ import { RadioMenu151 } from "./QcToolbar140";
 import { GROUP_1522, GROUP_MENU_HEAD, PACKAGE_LOCKED_LINE, head1522 } from "../../../lib/qc1522";
 import { QcQuietSetting } from "./QcQuietSetting";
 import { QcSlip153 } from "./QcSlip153";
+import { QcBar153 } from "./QcBar153";
 import { ACTION_WHY_153, FOLD_LINE, foldInitials, isFoldKey } from "../../../lib/qc153";
 import { sectionSwatch, standWords } from "../../../lib/qc153";
 import "./qcv151.css";
@@ -371,35 +372,12 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
       act={rowAct(r, p.nowMs)} onOpen={p.onOpen} onAct={p.onAct} />
   );
   const only = p.sections.length === 1;
-  /* the control line over the list column: the switch, the count, search and Group (Birds-eye: Group and Sort) */
+  /* v153 — the slim bar at the top of the list column: the switch, the count, search, Sort and Group */
   const controlLine = (
-    <div className="qc1511-cl" data-qc151="toolbar" data-qc1511="control-line" data-qcv="ws-head">
-      <QcSwitch151 view={p.view} onView={p.onView} loading={p.loading} />
-      <span className="qc1511-show" data-qc1511="showing">Showing <b>{p.loading ? "" : p.showing}</b> of <b>{p.loading ? "" : p.total}</b> {p.total === 1 ? "query" : "queries"}</span>
-      <div className="qc151-ctl" data-qc151="controls">
-        <label className="qc151-sr" data-qc151="find" data-qc140="find">
-          {FIND}
-          <input ref={p.findRef} value={p.find} onChange={(e) => p.onFind(e.target.value)} placeholder="Find an agent" aria-label="Find an agent" autoComplete="off" disabled={p.loading} />
-          {p.find ? <button type="button" className="qc151-srx" aria-label="Clear the search" data-qc151="find-clear" onClick={() => p.onFind("")}>{CROSS}</button> : null}
-        </label>
-        <button type="button" className={`qc151-bb${(birds ? !beGroupDef : !groupDef) ? " is-on" : ""}`} data-qc151={birds ? "be-group" : "group"} data-lp="qc151-group" aria-haspopup="menu"
-          aria-expanded={pop.open === (birds ? "begroup" : "group")} disabled={p.loading}
-          onClick={(e) => pop.toggle(birds ? "begroup" : "group", e.currentTarget)}>{GROUP}<span>Group</span>{CARET}</button>
-        {pop.open === "group" && pop.anchor ? (
-          <RadioMenu151 anchor={pop.anchor} title={GROUP_MENU_HEAD} k="group" value={p.group} plainHead
-            opts={GROUP_1522.map((o) => {
-              const locked = !!o.pro && !p.packageOk;
-              return { key: o.key, label: o.label, line: locked ? PACKAGE_LOCKED_LINE : o.line, pro: o.pro, locked };
-            })}
-            onPick={(v) => { p.onGroup(v as GroupBy); pop.close(); }} />
-        ) : null}
-        {pop.open === "begroup" && pop.anchor ? (
-          <RadioMenu151 anchor={pop.anchor} title="Group Birds-eye by" k="be-group" value={p.beGroup}
-            opts={BE_GROUPS.map((o) => ({ key: o.key, label: o.label, line: BE_GROUP_LINE[o.key] }))}
-            onPick={(v) => { p.onBeGroup(v as BeGroup); pop.close(); }} />
-        ) : null}
-      </div>
-    </div>
+    <QcBar153 view={p.view} onView={p.onView} loading={p.loading} showing={p.showing} total={p.total}
+      find={p.find} onFind={p.onFind} findRef={p.findRef} sort={p.sort} onSort={p.onSort}
+      group={p.group} onGroup={p.onGroup} packageOk={p.packageOk}
+      beGroup={p.beGroup} onBeGroup={p.onBeGroup} beSort={p.beSort} onBeSort={p.onBeSort} />
   );
   return (
     <div className="qc151 qc153" data-qc151="page" data-view={p.view} ref={rootRef}>

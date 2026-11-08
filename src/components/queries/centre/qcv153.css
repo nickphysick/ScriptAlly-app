@@ -216,3 +216,51 @@
 
   @media (prefers-reduced-motion: reduce) { .qc153-sw2, .qc153-sw2::after, .qc153-rh5 i, .qc153-court { transition: none; } }
 }
+
+/* ── the slim bar ───────────────────────────────────────────────────────────────────────────────────────────── */
+@media (min-width: 768px) {
+  /* sticks under the sheet's lip (`--pin-cover`, measured on the sheet by the page) */
+  .qc153-bar {
+    position: sticky; top: var(--pin-cover, 12px); z-index: 20;
+    display: flex; align-items: center; gap: 10px; min-width: 0; padding: 7px; margin-bottom: 4px;
+    border-radius: 16px; background: #fff; box-shadow: 0 0 0 1px #e3d5c9, 0 12px 24px -18px rgba(28, 19, 15, 0.4);
+  }
+  .qc153-vsw { display: inline-flex; flex: none; padding: 3px; border-radius: 12px; background: #efe9df; }
+  .qc153-vsw button {
+    all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 12px;
+    border-radius: 9px; font: 400 14.5px/1 var(--sp-serif) !important; color: var(--mut); white-space: nowrap;
+  }
+  .qc153-vsw button svg { width: 15px; height: 15px; }
+  .qc153-vsw button[aria-pressed="true"] { background: var(--navy); color: #fff; font-weight: 600 !important; }
+  .qc153-vsw button:focus-visible { outline: 2px solid var(--navy); outline-offset: 1px; }
+  .qc153-vsw button:disabled { cursor: default; }
+  .qc151 .qc153-cnt { flex: none; padding: 0 6px 0 4px; font: 400 15px/1 var(--sp-serif) !important; color: var(--mut); white-space: nowrap; }
+  .qc151 .qc153-cnt b { font: 400 17px/1 var(--sp-type) !important; color: var(--ink); }
+  .qc153-find {
+    flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; height: 40px; padding: 0 8px 0 14px; border-radius: 12px;
+    background: #f7f3ee; color: var(--mut); transition: background 0.15s, box-shadow 0.15s;
+  }
+  .qc153-find:hover { background: #f2ede6; }
+  .qc153-find:focus-within { background: #fff; box-shadow: inset 0 0 0 1.5px var(--navy), 0 0 0 4px rgba(42, 58, 82, 0.08); }
+  .qc153-find > svg { flex: none; width: 17px; height: 17px; }
+  .qc153-find input { all: unset; flex: 1; min-width: 0; font: 400 15.5px/1.2 var(--sp-serif) !important; color: var(--ink); }
+  .qc153-find input::placeholder { color: #8f857b; }
+  .qc153-find kbd {
+    flex: none; padding: 3px 8px; border-radius: 7px; background: #fff; box-shadow: inset 0 0 0 1px #e1d8cc, 0 1px 0 #e1d8cc;
+    font: 400 12px/1 var(--sp-serif) !important; color: var(--mut);
+  }
+  .qc153-find:focus-within kbd { display: none; }
+  .qc153-findx { all: unset; cursor: pointer; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; color: var(--mut); }
+  .qc153-findx svg { width: 11px; height: 11px; }
+  .qc153-findx:focus-visible { outline: 2px solid var(--navy); }
+  .qc153-dd {
+    all: unset; box-sizing: border-box; cursor: pointer; flex: none; display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 11px;
+    border-radius: 12px; background: #fff; box-shadow: inset 0 0 0 1px #d4cabd, 0 1px 0 rgba(28, 19, 15, 0.06);
+    font: 400 14.5px/1 var(--sp-serif) !important; color: var(--ink); white-space: nowrap;
+  }
+  .qc153-dd:hover { box-shadow: inset 0 0 0 1px #b9ad9e; }
+  .qc153-dd:focus-visible { outline: 2px solid var(--navy); outline-offset: 1px; }
+  .qc153-dd b { font-weight: 600; }
+  .qc153-dd:disabled { cursor: default; opacity: 0.6; }
+  @media (prefers-reduced-motion: reduce) { .qc153-find { transition: none; } }
+}
