@@ -20,8 +20,14 @@ describe("Smart Import's timeouts run server < callable < loader", () => {
     expect(server).toBeLessThan(SMART_IMPORT_CALL_TIMEOUT_MS);
     expect(SMART_IMPORT_CALL_TIMEOUT_MS).toBeLessThan(loader);
   });
+  /* Retargeted (AI spend guard v1): the callable is now built through `aiCallable`, the one door that
+     initialises App Check first. The law is unchanged — every smartImportMap callable is handed the
+     timeout — and it is asserted for both call sites, the sheet and the photos. */
   it("hands the callable its timeout", () => {
-    expect(code("src/lib/smartImport.ts")).toMatch(/httpsCallable\([^;]*"smartImportMap",\s*\{\s*timeout:\s*SMART_IMPORT_CALL_TIMEOUT_MS\s*\}\)/);
+    const src = code("src/lib/smartImport.ts");
+    const sites = src.match(/aiCallable\("smartImportMap"[^;]*\)/g) ?? [];
+    expect(sites).toHaveLength(2);
+    for (const site of sites) expect(site).toMatch(/\{\s*timeout:\s*SMART_IMPORT_CALL_TIMEOUT_MS\s*\}/);
   });
 });
 

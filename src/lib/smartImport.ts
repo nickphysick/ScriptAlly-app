@@ -12,7 +12,7 @@ import { readSheetBook } from "./sheetCells";
 import { bufferToCsv } from "./sheetText";
 import { countDataRows } from "./importEstimate";
 import { callWithProgress, type ImportUpdate, type StreamableCallable } from "./smartImportStream";
-import { getFunctions, httpsCallable } from "firebase/functions";
+import { aiCallable } from "./aiCallable";
 import { QueryStatus } from "../types";
 import { SmartImportResult, ParsedQuery } from "../types/smartImport";
 
@@ -72,7 +72,7 @@ export async function runSmartImport(file: File, onUpdate?: (u: SmartImportUpdat
   }
   // The Firebase JS SDK's callable timeout defaults to 70s. The function's own is 300s, so this sits
   // just above it: a slow import fails with the SERVER's error, never the browser giving up first.
-  const fn = httpsCallable(getFunctions(undefined, "europe-west2"), "smartImportMap", { timeout: SMART_IMPORT_CALL_TIMEOUT_MS });
+  const fn = await aiCallable("smartImportMap", { timeout: SMART_IMPORT_CALL_TIMEOUT_MS });
   // The row total comes from the very text being sent, before the call — so the loader can say
   // "150 rows · about 2 minutes" while the file is still being opened.
   onUpdate?.({ type: "start", rowsTotal: countDataRows(sheetText) });
@@ -97,7 +97,7 @@ export interface PhotoPagePayload { mediaType: "image/jpeg"; data: string }
 export async function runSmartImportPages(pages: PhotoPagePayload[], onUpdate?: (u: SmartImportUpdate) => void): Promise<SmartImportResult> {
   const mock = (window as any).__SA_SMART_IMPORT_MOCK as SmartImportResult | undefined;
   if (mock) return mock;
-  const fn = httpsCallable(getFunctions(undefined, "europe-west2"), "smartImportMap", { timeout: SMART_IMPORT_CALL_TIMEOUT_MS });
+  const fn = await aiCallable("smartImportMap", { timeout: SMART_IMPORT_CALL_TIMEOUT_MS });
   onUpdate?.({ type: "start-photos" });
   return callWithProgress(
     fn as unknown as StreamableCallable<{ pages: PhotoPagePayload[] }, SmartImportResult>,

@@ -9,7 +9,7 @@
  * Mirrors the smartImport.ts client pattern, incl. the dev-only mock escape hatch so the review UI
  * can be exercised without the function being deployed.
  */
-import { getFunctions, httpsCallable } from "firebase/functions";
+import { aiCallable } from "./aiCallable";
 
 export type EmailDirection = "received" | "sent";
 
@@ -65,7 +65,7 @@ export async function runEmailImport(args: RunEmailImportArgs): Promise<EmailPro
   const mock = (window as any).__SA_EMAIL_IMPORT_MOCK as EmailProposal | undefined;
   if (mock) return mock;
 
-  const fn = httpsCallable(getFunctions(undefined, "europe-west2"), "extractFromEmail");
+  const fn = await aiCallable("extractFromEmail");
   try {
     const res = await fn(args);
     return res.data as EmailProposal;

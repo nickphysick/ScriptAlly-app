@@ -48,7 +48,7 @@ const MAX_EMAIL_CHARS = 50_000;
 const RUNS_PER_DAY = 10;
 
 export const extractFromEmail = onCall(
-  { secrets: [ANTHROPIC_API_KEY], region: "europe-west2", timeoutSeconds: 60, memory: "512MiB" },
+  { secrets: [ANTHROPIC_API_KEY], region: "europe-west2", enforceAppCheck: true, timeoutSeconds: 60, memory: "512MiB" },
   async (req) => {
     // 1. Auth
     if (!req.auth) throw new HttpsError("unauthenticated", "Please sign in.");

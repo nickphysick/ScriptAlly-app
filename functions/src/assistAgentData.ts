@@ -36,7 +36,7 @@ const MAX_NAME_CHARS = 200;
 const RUNS_PER_DAY = 10;
 
 export const assistAgentData = onCall(
-  { secrets: [ANTHROPIC_API_KEY], region: "europe-west2", timeoutSeconds: 120, memory: "512MiB" },
+  { secrets: [ANTHROPIC_API_KEY], region: "europe-west2", enforceAppCheck: true, timeoutSeconds: 120, memory: "512MiB" },
   async (req) => {
     // 1. Auth
     if (!req.auth) throw new HttpsError("unauthenticated", "Please sign in.");

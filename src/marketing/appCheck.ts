@@ -24,8 +24,24 @@
 
 import type { AppCheck } from "firebase/app-check";
 
-/** Set once. `null` means "tried and could not", which is different from "not tried yet". */
-let instance: AppCheck | null | undefined;
+/**
+ * Set once, and MEMOISED AS A PROMISE: two callers arriving together (the waitlist form and an AI
+ * callable, or two AI calls) share one init. A second `initializeAppCheck` on the same app throws,
+ * and would otherwise have set the shared instance to `null` for everyone.
+ * Resolves to `null` for "tried and could not", which is different from "not tried yet".
+ */
+let instance: Promise<AppCheck | null> | undefined;
+
+/**
+ * ⚠️ THE DEBUG PROVIDER IS FOR A LOCALHOST DEV SERVER ONLY, AND A PRODUCTION BUILD CANNOT CONTAIN IT.
+ * `import.meta.env.MODE` is replaced at build time, so in `vite build` (production) the whole
+ * condition is the constant `false` and the assignment is removed. On localhost the SDK then prints a
+ * debug token to the console, which must be registered in the dev project's App Check console.
+ */
+const debugAllowed = (): boolean =>
+  import.meta.env.MODE !== "production" &&
+  typeof location !== "undefined" &&
+  (location.hostname === "localhost" || location.hostname === "127.0.0.1");
 
 const siteKey = (): string => {
   const k = import.meta.env.VITE_APP_CHECK_SITE_KEY;
@@ -45,6 +61,9 @@ const init = async (): Promise<AppCheck | null> => {
       import("firebase/app-check"),
       import("../lib/firebase"),
     ]);
+    if (debugAllowed()) {
+      (self as unknown as { FIREBASE_APPCHECK_DEBUG_TOKEN?: boolean }).FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+    }
     return initializeAppCheck(app, {
       provider: new ReCaptchaEnterpriseProvider(key),
       /* The SDK refreshes the token behind the scenes; nothing here has to schedule it. */
@@ -64,15 +83,29 @@ const init = async (): Promise<AppCheck | null> => {
  * sends regardless — a signup must not depend on a bot defence that is being trialled.
  */
 export const appCheckToken = async (): Promise<string | null> => {
-  if (instance === undefined) instance = await init();
-  if (!instance) return null;
+  const ac = await ensureAppCheck();
+  if (!ac) return null;
   try {
     const { getToken } = await import("firebase/app-check");
-    const result = await getToken(instance, /* forceRefresh */ false);
+    const result = await getToken(ac, /* forceRefresh */ false);
     return result.token || null;
   } catch {
     return null;
   }
+};
+
+/**
+ * Initialise App Check (once, shared) and return it, or `null`.
+ *
+ * ⚠️ THE SIGNED-IN APP'S AI CALLABLES CALL THIS BEFORE THEIR FIRST REQUEST (src/lib/aiCallable.ts),
+ * because those functions ENFORCE App Check (`enforceAppCheck: true`). Once App Check is initialised
+ * on the default app, the Functions SDK attaches the `X-Firebase-AppCheck` header by itself. It is
+ * still lazy — someone who never uses an AI feature never loads reCAPTCHA — and it is the same
+ * provider and the same site key as the waitlist form, never a second set-up. Never throws.
+ */
+export const ensureAppCheck = (): Promise<AppCheck | null> => {
+  if (instance === undefined) instance = init();
+  return instance;
 };
 
 /** For the locks: whether a key is configured at all in this build. */

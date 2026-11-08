@@ -55,7 +55,7 @@ export const smartImportMap = onCall(
   // and a 50-row messy one 43s, so the old 90s failed real files. The client's callable timeout is set
   // just above this (src/lib/smartImport.ts, 310s) so the writer sees the server's error, not the
   // browser's; the reading screen's loader ceiling is just above that again (315s).
-  { secrets: [ANTHROPIC_API_KEY], region: "europe-west2", timeoutSeconds: 300, memory: "512MiB" },
+  { secrets: [ANTHROPIC_API_KEY], region: "europe-west2", enforceAppCheck: true, timeoutSeconds: 300, memory: "512MiB" },
   async (req, response) => {
     if (!req.auth) throw new HttpsError("unauthenticated", "Please sign in.");
     const uid = req.auth.uid;

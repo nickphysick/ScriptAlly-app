@@ -54,7 +54,7 @@ const MAX_TITLE_CHARS = 512;
    transaction, same wording. */
 
 export const suggestComps = onCall(
-  { secrets: [ANTHROPIC_API_KEY], region: "europe-west2", timeoutSeconds: 300, memory: "512MiB" },
+  { secrets: [ANTHROPIC_API_KEY], region: "europe-west2", enforceAppCheck: true, timeoutSeconds: 300, memory: "512MiB" },
   async (req) => {
     // 1. Auth
     if (!req.auth) throw new HttpsError("unauthenticated", "Please sign in.");

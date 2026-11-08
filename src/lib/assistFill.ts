@@ -20,7 +20,7 @@
  * the call races a timeout. `window.__SA_ASSIST_LIVE = false` force-disables;
  * `__SA_ASSIST_FILL_MOCK` supplies canned results for a dev walk-through.
  */
-import { getFunctions, httpsCallable } from "firebase/functions";
+import { aiCallable } from "./aiCallable";
 import { Agent } from "../types";
 import { HkRule } from "./todoHousekeeping";
 
@@ -127,7 +127,7 @@ export async function fetchAssistedFill(input: AssistFillInput, opts?: { timeout
   const mock = (globalThis as { __SA_ASSIST_FILL_MOCK?: unknown }).__SA_ASSIST_FILL_MOCK;
   if (mock) return validateAssistPayload(mock);
   if (!assistLive()) throw new AssistFillError("unavailable", "Assisted fill isn’t switched on right now.");
-  const fn = httpsCallable(getFunctions(undefined, "europe-west2"), "assistAgentData");
+  const fn = await aiCallable("assistAgentData");
   try {
     const res = await raceTimeout(fn(input), opts?.timeoutMs ?? ASSIST_TIMEOUT_MS);
     return validateAssistPayload(res.data);
