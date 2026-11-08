@@ -20,7 +20,7 @@ import { WorkspacePageGrid } from "../../shell/WorkspacePageGrid";
 import { useScriptAllyDb } from "../../../lib/db";
 import type { BoardCard } from "../../../lib/todoBoard";
 import {
-  NO_WS_FILTERS, STRIP_GROUP, WS_GROUPINGS, WS_TYPES, WS_WHENS, dayBit, doingPhrase, dueChip, mentorLine, passes, priorityTask, startReason, stripWords, whenOf, wsSections,
+  NO_WS_FILTERS, STRIP_GROUP, WS_GROUPINGS, WS_GROUPS, WS_TYPES, WS_WHENS, breakdownOf, dueChip, mentorLine, passes, milestoneFor, stripWords, trayFigure, whenOf, whenWord, wsSections,
   type DoneRow, type WsFilters, type WsGroupId, type WsGrouping, type WsTask, type WsType, type WsWhen,
 } from "../../../lib/todoWs";
 import { RULE_OFF_WORDS, RULE_TITLE, RULE_PLAIN, type SetAsideItem } from "../../../lib/taskSettings";
@@ -35,7 +35,8 @@ import { MON, addDays, dayDiff, fmt } from "../../../lib/queryActions/dates";
 import { QueryStatus, type UserTask } from "../../../types";
 import { type Answers, type Flow, type FlowDone } from "./wsFlows";
 import { useWsCore, useWsBatch } from "./useWsCore";
-import { DatePick, DIS, TICK, ZZ, dayFromYmd } from "./WsControls";
+import { DatePick, DeskTiles, DIS, FORM, QUIET_MARK, TICK, ZZ, dayFromYmd } from "./WsControls";
+import { NUDGE_MARK } from "../../queries/centre/QcBubble152";
 import { PreviewAgentCard, PreviewQueryCard, ScaledCard, useQueryLog } from "./WsPreview";
 import { stampedCardRows } from "../../queries/centre/qcCardView";
 import { quietWeeksOf } from "../../../lib/queryState";
@@ -49,14 +50,17 @@ import "./todoWs.css";
 
 const MENTOR = "/images/todo/mentor.webp";
 const HOUR = "/images/todo/hour.webp";
-/** Start here's quill and inkpot: the app's own copy (the pack's start-here-quill.webp is the same drawing, re-encoded) */
-const QUILL = "/images/query-centre/quill-ink.webp";
 /** the collapsed tray, remembered per device (v52 Part B) */
 const SLIM_KEY = "sa.todoTraySlim";
 const readSlim = (): boolean => { try { return localStorage.getItem(SLIM_KEY) === "1"; } catch { return false; } };
 const writeSlim = (v: boolean) => { try { localStorage.setItem(SLIM_KEY, v ? "1" : "0"); } catch { /* private mode */ } };
 const DAY = 86400000;
 const UNDO_MS = 7000;
+/** v53 (D10): the snackbar after a log runs for 6s; the stamp holds the logged task on the desk for ~850ms first */
+const SNACK_MS = 6000;
+const STAMP_MS = 850;
+const LEAVE_MS = 380;
+const reducedMotion = () => { try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { return false; } };
 
 const SVG_FILTER = <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5h14M6 10h8M8.5 15h3" /></svg>;
 const SVG_GROUP = <svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="2.5" width="15" height="6" rx="1.6" /><rect x="2.5" y="11.5" width="15" height="6" rx="1.6" /></svg>;
@@ -78,8 +82,24 @@ const dayWord = (ms: number, today: Date): string => {
   return n === 0 ? "Today" : n === -1 ? "Yesterday" : `${["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][d.getDay()]} ${d.getDate()} ${MON[d.getMonth()]}`;
 };
 
-interface Toast { msg: string; undo?: () => Promise<void> }
-interface Yay extends FlowDone { nextKey: string | null }
+const dayIsoOf = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+/** the check step's day words: Today, Yesterday, Tomorrow, else "31 Jan" */
+const whenWord3 = (d: Date, today: Date): string => { const n = dayDiff(d, today); return n === 0 ? "Today" : n === -1 ? "Yesterday" : n === 1 ? "Tomorrow" : fmt(d); };
+
+/** v53 (D10): a cleared group's words (the button names the next group, or the desk) */
+const MILESTONE: Partial<Record<string, { head: string; msg: string }>> = {
+  wait: { head: "No agents waiting on you.", msg: "You’ve sent everything that was asked for." },
+  nudge: { head: "No nudges due.", msg: "Every nudge on your list is logged." },
+  quiet: { head: "Nothing’s gone quiet.", msg: "Every quiet query has an answer from you." },
+  house: { head: "Housekeeping’s done.", msg: "Every gap on your list is filled in." },
+  yours: { head: "Your own tasks are done.", msg: "Nothing of yours is left on the list." },
+};
+
+interface Toast { msg: string; sub?: string; undo?: () => Promise<void>; id: number }
+/** v53 (D10): the task just logged, held on the desk and in the tray while it is stamped and slides out */
+interface Held { task: WsTask; phase: "stamp" | "leave" }
+/** v53 (D10): the celebration, for a milestone only — a group emptied, or the whole list */
+interface Mile { head: string; msg: string; btn: string }
 
 export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, opts?: { agentId?: string; manuscriptId?: string }) => void }> = ({ onNavigate }) => {
   const navigate = useNavigate();
@@ -95,8 +115,15 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   useEffect(() => { const id = window.setInterval(() => setNow(Date.now()), 60000); return () => window.clearInterval(id); }, []);
   /* To-do on the phone v1, Phase A: the workspace's brain is useWsCore, shared with the phone (moved, unchanged) */
   const core = useWsCore(now);
-  const { today, todayYmd, hkGroups: _hk, all, quietFacts, limitFor, snoozeTask, openCard, snoozed, doneRows, asideTitle, offRows } = core;
+  const { today, todayYmd, hkGroups: _hk, all: liveAll, quietFacts, limitFor, snoozeTask, openCard, snoozed, doneRows, asideTitle, offRows } = core;
   void _hk;
+
+  /* v53 (D10): while a logged task is stamped and slides out it stays in the tray (the save has already taken it off
+     the live board); the counts tick over once it has gone */
+  const [held, setHeld] = useState<Held | null>(null);
+  const [mile, setMile] = useState<Mile | null>(null);
+  const all = useMemo(() => (held && !liveAll.some((t) => t.key === held.task.key) ? [...liveAll, held.task] : liveAll), [liveAll, held]);
+  const logged = !!held;
 
   /* ── the tray: tab, filters, grouping ── */
   const [tab, setTab] = useState<"todo" | "snoozed" | "done">("todo");
@@ -105,7 +132,8 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   const [tagsOpen, setTagsOpen] = useState(false);
   const [grouping, setGrouping] = useState<WsGrouping>("category");
   const [menu, setMenu] = useState<"f" | "g" | null>(null);
-  const [shut, setShut] = useState<ReadonlySet<string>>(() => new Set());
+  /* v53 (D4): Housekeeping starts folded — its header, its count and Quick fill; the header opens it */
+  const [shut, setShut] = useState<ReadonlySet<string>>(() => new Set(["house"]));
   const [hkMore, setHkMore] = useState(false);
   const [slim, setSlimState] = useState<boolean>(readSlim);
   const setSlim = (v: boolean) => { setSlimState(v); writeSlim(v); setMenu(null); };
@@ -125,7 +153,6 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   const sel = order.find((t) => t.key === selKey) ?? all.find((t) => t.key === selKey) ?? order[0] ?? null;
   const [A, setA] = useState<Answers>({});
   const [qi, setQi] = useState(0);
-  const [yay, setYay] = useState<Yay | null>(null);
   const [busy, setBusy] = useState(false);
   const [adding, setAdding] = useState(false);
   const [pop, setPop] = useState<{ kind: "snooze" | "dismiss"; opener: HTMLElement | null } | null>(null);
@@ -137,7 +164,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   const batch = useWsBatch(sel, selKey, setSelKey, all);
   const { bRemaining, bCur, deskT } = batch;
   const go = useCallback((key: string | null) => {
-    setSelKey(key); setA({}); setQi(0); setYay(null); setAdding(false); setPop(null); setLinkPicking(false); batch.resetSkip();
+    setSelKey(key); setA({}); setQi(0); setMile(null); setAdding(false); setPop(null); setLinkPicking(false); batch.resetSkip();
     /* the row is brought into the tray's own view; never scrollIntoView, which would scroll the page too */
     if (key) requestAnimationFrame(() => {
       const r = document.querySelector<HTMLElement>(`.tws [data-tws-row="${CSS.escape(key)}"]`);
@@ -162,11 +189,11 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     try { id = sessionStorage.getItem(TODO_OPEN_TASK_KEY); compose = sessionStorage.getItem("sa.todoCompose"); } catch { /* private mode */ }
     try { sessionStorage.removeItem(TODO_OPEN_TASK_KEY); sessionStorage.removeItem("sa.todoCompose"); } catch { /* private mode */ }
     if (id) { const t = all.find((x) => x.userTask?.id === id || x.key === id); if (t) go(t.key); }
-    if (compose) { setYay(null); setAdding(true); }
+    if (compose) { setMile(null); setAdding(true); }
   }, [location.pathname, collectionsReady]); // eslint-disable-line react-hooks/exhaustive-deps
   /* the shell's "+ Task" while already on /todo: an event, not the one-shot key (AppShell, TODO_OPEN_COMPOSER) */
   useEffect(() => {
-    const on = () => { setYay(null); setAdding(true); };
+    const on = () => { setMile(null); setAdding(true); };
     window.addEventListener(TODO_OPEN_COMPOSER, on);
     return () => window.removeEventListener(TODO_OPEN_COMPOSER, on);
   }, []);
@@ -174,10 +201,11 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   /* ── the toast ── */
   const [toast, setToast] = useState<Toast | null>(null);
   const toastTimer = useRef<number | null>(null);
-  const flash = useCallback((msg: string, undo?: () => Promise<void>) => {
-    setToast({ msg, undo });
+  const toastSeq = useRef(0);
+  const flash = useCallback((msg: string, undo?: () => Promise<void>, sub?: string) => {
+    setToast({ msg, undo, sub, id: ++toastSeq.current });
     if (toastTimer.current) window.clearTimeout(toastTimer.current);
-    toastTimer.current = window.setTimeout(() => setToast(null), undo ? UNDO_MS : 3200);
+    toastTimer.current = window.setTimeout(() => setToast(null), sub ? SNACK_MS : undo ? UNDO_MS : 3200);
   }, []);
   useEffect(() => () => { if (toastTimer.current) window.clearTimeout(toastTimer.current); }, []);
 
@@ -193,6 +221,21 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     ro.observe(sc);
     return () => ro.disconnect();
   }, []);
+
+  /* ── v53 (D1): the questions scroll above the pinned footer; the footer takes a soft shadow while more is hidden
+     beneath its edge. Derived from the scroller's own numbers on scroll, resize and any change inside it. ── */
+  const [wqEl, setWqEl] = useState<HTMLDivElement | null>(null);
+  const [over, setOver] = useState(false);
+  useEffect(() => {
+    const el = wqEl;
+    if (!el) { setOver(false); return undefined; }
+    const f = () => setOver(el.scrollHeight > el.clientHeight + 2 && el.scrollTop + el.clientHeight < el.scrollHeight - 2);
+    f();
+    el.addEventListener("scroll", f, { passive: true });
+    const ro = new ResizeObserver(f); ro.observe(el);
+    const mo = new MutationObserver(f); mo.observe(el, { subtree: true, childList: true, characterData: true });
+    return () => { el.removeEventListener("scroll", f); ro.disconnect(); mo.disconnect(); };
+  }, [wqEl]);
 
   const nextKeyAfter = (t: WsTask): string | null => { const i = order.findIndex((x) => x.key === t.key); return (order[i + 1] ?? order[i - 1])?.key ?? null; };
 
@@ -256,22 +299,55 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   const qs = flow?.questions ?? [];
   const cur = Math.min(qi, qs.length);
   const allDone = qs.length > 0 && cur >= qs.length;
+  /* v53 (D7): the check step is open once every question is answered, on any flow that logs */
+  const onCheck = !!flow?.commit && cur >= qs.length;
 
+  /**
+   * v53 (D10) — "STAMP, THEN ON". Log it saves, then for ~850ms the desk shows it landed (the button reads "✓ Logged", the
+   * card's new step is real and stamped, the row's glyph ticks); then the row slides out, the desk crossfades to the next
+   * task, the counts tick over and the snackbar names what happened, with Undo. Only a milestone — a group emptied, or
+   * the whole list — earns the celebration.
+   * ⚠️ Undo is the save's own (the drawer's snapshot): every document back, and the task back in its place.
+   */
+  const finish = (t: WsTask, next: string | null, d: FlowDone, groupGone: boolean, listGone: boolean) => {
+    const go2 = () => {
+      setHeld(null);
+      go(next);
+      const undo = d.undo ? async () => { await d.undo!(); setMile(null); go(t.key); } : undefined;
+      flash(d.snack?.msg ?? d.head, undo, d.snack?.sub ?? d.msg);
+      if (listGone) setMile({ head: "All caught up.", msg: "Nothing needs you right now.", btn: "Back to the desk" });
+      else if (groupGone) {
+        const name = WS_GROUPS.find((g) => g.id === t.group)?.name ?? "";
+        const nextG = next ? WS_GROUPS.find((g) => g.id === all.find((x) => x.key === next)?.group)?.name ?? null : null;
+        const m = MILESTONE[t.group] ?? { head: `${name} is clear.`, msg: "" };
+        setMile({ head: m.head, msg: m.msg, btn: nextG ? `On to ${nextG.toLowerCase()} →` : "Back to the desk" });
+      }
+    };
+    if (reducedMotion()) { go2(); return; }
+    setHeld({ task: t, phase: "stamp" });
+    window.setTimeout(() => {
+      setHeld((h) => (h && h.task.key === t.key ? { ...h, phase: "leave" } : h));
+      window.setTimeout(go2, LEAVE_MS);
+    }, STAMP_MS);
+  };
   const logIt = async () => {
-    if (!sel || !flow?.commit || busy) return;
+    if (!sel || !flow?.commit || busy || held) return;
     setBusy(true);
-    const next = nextKeyAfter(sel);
+    const t = sel;
+    const next = nextKeyAfter(t);
+    const ms = milestoneFor(all, t);
+    const groupGone = ms === "group", listGone = ms === "list";
     try {
       const d = await flow.commit();
-      /* a batch with more to go: a toast with Undo, and the next query opens; the celebration waits for the last */
-      if (sel.kind === "batch" && bCur && bRemaining.length > 1) {
+      /* a batch with more to go: the snackbar, and the next query opens; the stamp waits for the last */
+      if (t.kind === "batch" && bCur && bRemaining.length > 1) {
         const qid = bCur.queryId;
         batch.markSaved(qid);
         setA({}); setQi(0);
-        flash(d.msg, d.undo ? async () => { await d.undo!(); batch.unmarkSaved(qid); } : undefined);
+        flash(d.snack?.msg ?? d.msg, d.undo ? async () => { await d.undo!(); batch.unmarkSaved(qid); } : undefined, d.snack?.sub);
         return;
       }
-      setYay({ ...d, nextKey: next });
+      finish(t, next, d, groupGone, listGone);
     } catch (e) {
       console.error("[to-do] the save failed", e);
       flash("Couldn’t save that. Nothing was changed.");
@@ -279,13 +355,26 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   };
   const ownDone = async (t: WsTask) => {
     const u = t.userTask;
-    if (!u || busy) return;
+    if (!u || busy || held) return;
     setBusy(true);
     const next = nextKeyAfter(t);
+    const ms = milestoneFor(all, t);
+    const groupGone = ms === "group", listGone = ms === "list";
     try {
       const undo = await core.ownDoneWrite(u);
-      setYay({ head: "Done.", msg: "One less thing on your mind.", nextKey: next, undo });
+      finish(t, next, { head: "Done.", msg: "", undo, snack: { msg: `Done: “${(u.text ?? "").trim() || "your task"}”`, sub: "it’s on your Done list" } }, groupGone, listGone);
     } catch { flash("Couldn’t save that. Nothing was changed."); } finally { setBusy(false); }
+  };
+
+  /* v53 (D8): the new bubble's paperclip lists what went; the card is a picture (inert), so the hover is read off the
+     chip's place under the pointer and the list is drawn over the page, where nothing can cut it off */
+  const [clipPop, setClipPop] = useState<{ x: number; y: number } | null>(null);
+  const clipHover = (e: React.MouseEvent<HTMLElement>) => {
+    const c = e.currentTarget.querySelector<HTMLElement>('[data-qc153="clip"]');
+    const r = c?.getBoundingClientRect();
+    const inside = !!r && e.clientX >= r.left - 2 && e.clientX <= r.right + 2 && e.clientY >= r.top - 2 && e.clientY <= r.bottom + 2;
+    if (inside && r && !clipPop) setClipPop({ x: r.left + r.width / 2, y: r.bottom });
+    else if (!inside && clipPop) setClipPop(null);
   };
 
   /* ── keys: J/K move, S snooze, D dismiss, / find, N add ── */
@@ -297,23 +386,30 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
       if (matchesShortcut(SHORTCUTS.todoDown, e) && tab === "todo") { e.preventDefault(); move(1); }
       else if (matchesShortcut(SHORTCUTS.todoUp, e) && tab === "todo") { e.preventDefault(); move(-1); }
       else if (matchesShortcut(SHORTCUTS.todoSearch, e)) { e.preventDefault(); findRef.current?.focus(); }
-      else if (matchesShortcut(SHORTCUTS.todoSnooze, e) && sel && !yay && !adding) { e.preventDefault(); setPop({ kind: "snooze", opener: snzRef.current }); }
-      else if (matchesShortcut(SHORTCUTS.todoDismiss, e) && sel && !yay && !adding) { e.preventDefault(); setPop({ kind: "dismiss", opener: disRef.current }); }
-      else if (matchesShortcut(SHORTCUTS.todoAdd, e)) { e.preventDefault(); setYay(null); setAdding(true); }
+      else if (matchesShortcut(SHORTCUTS.todoSnooze, e) && sel && !held && !adding) { e.preventDefault(); setPop({ kind: "snooze", opener: snzRef.current }); }
+      else if (matchesShortcut(SHORTCUTS.todoDismiss, e) && sel && !held && !adding) { e.preventDefault(); setPop({ kind: "dismiss", opener: disRef.current }); }
+      else if (matchesShortcut(SHORTCUTS.todoAdd, e)) { e.preventDefault(); setMile(null); setAdding(true); }
     };
     window.addEventListener("keydown", on);
     return () => window.removeEventListener("keydown", on);
   });
 
-  /* ── the header's stats line (v52 Part A): the tray's own counts ──
-     ⚠️ "late" is a dated task past its date, Gone quiet excluded (it has no due date, only days since a send). The book
-        is named only when the account has one manuscript: the counts are the whole tray's, and a book's name in front of
-        them would say they were that book's alone. */
-  const lateN = seq.filter((t) => t.kind !== "quiet" && t.dueDays != null && t.dueDays < 0).length;
+  /* ── v53 (D2): the thin header names the page, and the book beside it only when the account has one (the tray spans
+     every book, so a book's name over all of them would be false) ── */
   const statBook = manuscripts.length === 1 ? (manuscripts[0].title ?? "").trim() || null : null;
-  /* the priority task (shown in the tray's Start here card from Part B) */
-  const prio = useMemo(() => priorityTask(all), [all]);
-  const onIt = !!prio.task && !!sel && sel.key === prio.task.key && !yay && !adding && tab === "todo";
+  /* ── v53 (D3): the breakdown bar reads the category groups the tray draws, so its counts are the groups' counts ── */
+  const bd = useMemo(() => breakdownOf(wsSections(visible, "category")), [visible]);
+  const jump = (id: string) => {
+    setShut((x) => { const n = new Set(x); n.delete(id); return n; });
+    /* the TRAY scrolls, never the page: its own scrollTop, never scrollIntoView */
+    requestAnimationFrame(() => {
+      const list = document.querySelector<HTMLElement>(".tws [data-tws=\"list\"]");
+      const head = list?.querySelector<HTMLElement>(`[data-tws-group="${id}"]`);
+      if (!list || !head) return;
+      const top = head.getBoundingClientRect().top - list.getBoundingClientRect().top + list.scrollTop - 8;
+      list.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+    });
+  };
 
   /* ── render: the tray ── */
   const typeCount = (k: WsType) => all.filter((t) => t.type === k).length;
@@ -322,20 +418,24 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   const nFilters = filters.types.size + filters.whens.size;
 
   const row = (t: WsTask) => {
-    const b = dayBit(t);
-    const on = !!sel && sel.key === t.key && !adding && !yay;
+    const fig = trayFigure(t, now);
+    const on = !!sel && sel.key === t.key && !adding;
     const house = t.group === "house";
-    const glyph = t.query && (t.kind !== "fix") ? <StatusDot status={t.query.status as QueryStatus} overrideSize={18} decorative /> : null;
+    /* v53 (D4): every row leads with its glyph — the query's status (StatusDot), a nudge's "!" ring, Gone quiet's dotted
+       ring, a form for housekeeping, a real tick for the writer's own task */
+    const glyph = t.kind === "nudge" ? NUDGE_MARK : t.kind === "quiet" ? QUIET_MARK
+      : t.query ? <StatusDot status={t.query.status as QueryStatus} overrideSize={20} decorative /> : null;
     return (
-      <div key={t.key} className="tws-ti" role="button" tabIndex={0} data-tws-row={t.key} aria-current={on ? "true" : undefined}
+      <div key={t.key} className="tws-ti" role="button" tabIndex={0} data-tws-row={t.key} data-kind={t.kind} aria-current={on ? "true" : undefined}
+        data-ticked={held?.task.key === t.key ? "" : undefined} data-leaving={held?.task.key === t.key && held.phase === "leave" ? "" : undefined}
         onClick={() => go(t.key)} onKeyDown={(e) => { if (e.key === "Enter") go(t.key); }} title={t.title}>
-        {t.kind === "own" ? <span className="tws-av" data-k="own" aria-hidden="true" />
-          : house ? <span className="tws-hk" data-tws="hk-icon" aria-hidden="true">{hkIcon(t)}{t.kind === "batch" ? null : <i>{initialsOf(t.agentName || t.title)}</i>}</span>
-          : glyph ? <span className="tws-av" data-k="glyph" aria-hidden="true">{glyph}</span>
-          : <span className="tws-av" aria-hidden="true">{initialsOf(t.agentName || t.title)}</span>}
+        {t.kind === "own" ? <span className="tws-av" data-k="own" data-tws="glyph" aria-hidden="true">{TICK}</span>
+          : house ? <span className="tws-av" data-k="form" data-tws="glyph" aria-hidden="true">{FORM}</span>
+          : glyph ? <span className="tws-av" data-k="glyph" data-tws="glyph" aria-hidden="true">{glyph}</span>
+          : <span className="tws-av" data-tws="glyph" aria-hidden="true">{initialsOf(t.agentName || t.title)}</span>}
         <span className="tws-tx"><b>{t.title}</b><span>{t.kind === "own" ? "Your task" : t.agency || t.agentName || ""}</span></span>
         {house ? <span className="tws-qf" data-tws="quick-fill">Quick fill</span>
-          : <span className="tws-du" data-late={b.late ? "" : undefined}>{b.big ? <b>{b.big}</b> : null}{b.small ? <small>{b.small}</small> : null}</span>}
+          : <span className="tws-du" data-tws="figure" data-late={fig?.late ? "" : undefined}>{fig ? <><b>{fig.n}</b>{fig.words ? <small>{fig.words}</small> : null}</> : null}</span>}
         <span className="tws-qact">
           <span role="button" tabIndex={0} aria-label={t.kind === "own" ? "Move it" : "Snooze"} title={t.kind === "own" ? "Move it" : "Snooze"}
             onClick={(e) => { e.stopPropagation(); go(t.key); setPop({ kind: "snooze", opener: e.currentTarget as HTMLElement }); }}>{ZZ}</span>
@@ -356,14 +456,21 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
       const rows = house ? s.tasks.slice(0, 4) : s.tasks;
       return (
         <React.Fragment key={s.id}>
-          <button type="button" className="tws-gb" data-band={s.band} aria-expanded={!isShut} onClick={() => setShut((x) => toggleSet(x, s.id))}>
-            <b>{s.name}</b><em>{s.tasks.length}</em><span className="tws-cv" aria-hidden="true">⌄</span>
-          </button>
+          <div className="tws-gbw" data-tws-group={s.id}>
+            <button type="button" className="tws-gb" data-band={s.band} aria-expanded={!isShut} onClick={() => setShut((x) => toggleSet(x, s.id))}>
+              <b>{s.name}</b><em>{s.tasks.length}</em><span className="tws-cv" aria-hidden="true">⌄</span>
+            </button>
+            {/* v53 (D4): Housekeeping's Quick fill opens the group on its first task */}
+            {s.id === "house" && s.tasks.length ? (
+              <button type="button" className="tws-qfb" data-tws="quick-fill-group"
+                onClick={() => { setShut((x) => { const n = new Set(x); n.delete("house"); return n; }); go(s.tasks[0].key); }}>Quick fill</button>
+            ) : null}
+          </div>
           {isShut ? null : (
             <>
               {rows.map(row)}
               {house ? <button type="button" className="tws-more" onClick={() => setHkMore(true)}>Show {s.tasks.length - 4} more</button> : null}
-              {s.id === "yours" ? <button type="button" className="tws-addt" onClick={() => { setYay(null); setAdding(true); }}>+ Add a task</button> : null}
+              {s.id === "yours" ? <button type="button" className="tws-addt" onClick={() => { setMile(null); setAdding(true); }}>+ Add a task</button> : null}
             </>
           )}
         </React.Fragment>
@@ -421,21 +528,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
       );
     }
     if (!all.length) return <div className="tws-empty">Nothing to do yet.</div>;
-    const pt = prio.task;
-    const start = pt ? (
-      <button type="button" className="tws-start" data-tws="start" data-on={onIt ? "" : undefined} aria-current={onIt ? "true" : undefined}
-        onClick={() => { setTab("todo"); setFilters(NO_WS_FILTERS); setShut(new Set()); go(pt.key); }}>
-        <img src={QUILL} alt="" aria-hidden="true" />
-        <span className="tws-stx">
-          <span className="tws-sk2">{prio.urgent ? "Start here" : "Nothing urgent · next best"}</span>
-          <b data-tws="start-phrase">{doingPhrase(pt)}</b>
-          <em>{onIt ? "You’re on it" : startReason(prio)}</em>
-        </span>
-        {onIt ? null : <span className="tws-sarr" aria-hidden="true">→</span>}
-      </button>
-    ) : null;
-    if (!visible.length) return <>{start}<div className="tws-empty">Nothing matches. <button type="button" onClick={() => setFilters(NO_WS_FILTERS)}>Show everything</button></div></>;
-    return <>{start}{sectionsBody}</>;
+    return sectionsBody;
   })();
   /* ── render: the desk ── */
   const desk = (() => {
@@ -448,24 +541,6 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
       flash(`Added “${text}”.`);
       if (id && selRef.current === before) go(id);
     }} />;
-    if (yay) {
-      const nx = yay.nextKey ? all.find((t) => t.key === yay.nextKey) ?? null : null;
-      return (
-        <div className="tws-wsx" data-tws="yay">
-          <div className="tws-yay">
-            <span className="tws-ytick">{TICK}</span>
-            <h2>{yay.head}</h2>
-            <p>{yay.msg}</p>
-            {nx ? (
-              <div className="tws-ynext"><span>Next up</span>
-                <button type="button" className="tws-ynx" onClick={() => go(nx.key)}><b>{nx.title}</b><em>{nx.kind === "own" ? "Your task" : nx.agency || nx.agentName}</em><i>→</i></button>
-              </div>
-            ) : <button type="button" className="tws-go" onClick={() => go(order[0]?.key ?? null)}>Back to your tray</button>}
-            {yay.undo ? <button type="button" className="tws-lnk" onClick={async () => { const u = yay.undo!; setYay(null); try { await u(); flash("Undone."); } catch { flash("Couldn’t undo that."); } }}>Undo</button> : null}
-          </div>
-        </div>
-      );
-    }
     if (!all.length) {
       return (
         <div className="tws-wsx"><div className="tws-calm">
@@ -510,46 +585,80 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
       /* the nudge and Gone quiet lines read the agent's stated reply time, where one is set */
       const facts = t.kind === "quiet" || t.kind === "nudge" ? quietFacts(t) : undefined;
       const curQ = cur < qs.length ? qs[cur] : null;
+      const hasCheck = !!flow.commit;
+      /* v53 (D6) — THE STEPS AS A RAIL: one question open, the finished ones a line each ("change" goes back with the
+         later answers kept), the ones to come a grey line; "Check it, then log it" is the last step on every kind that
+         logs (D7). The hawk sits above the rail, and steps aside on the check step. */
       main = (
-        <>
-          <div className="tws-mnote"><img src={MENTOR} alt="" /><p>{mentorLine(t, facts)}</p></div>
-          {/* v52 Part C — the answers so far, as chips; only the open question below them; nothing upcoming */}
-          {cur > 0 ? (
-            <div className="tws-ans" data-tws="answers">
-              {qs.slice(0, cur).map((q, i) => (
-                <button key={q.key} type="button" className="tws-ach" data-tws-qa={q.key} title={q.title} aria-label={`${q.title}: ${q.summary}. Change`} onClick={() => setQi(i)}>
-                  <span className="tws-ack" aria-hidden="true">{TICK}</span><b>{q.summary}</b><em aria-hidden="true">Change</em>
-                </button>
-              ))}
-            </div>
-          ) : null}
-          {curQ ? (
-            <div key={curQ.key} className="tws-q" data-tws-q={curQ.key}>
-              <div className="tws-qh"><span className="tws-qn">{cur + 1}</span>{curQ.title}</div>
-              {curQ.hint ? <span className="tws-hint">{curQ.hint}</span> : null}
-              <div className="tws-qbody">{curQ.body}</div>
-            </div>
-          ) : null}
-          {allDone && flow.commit ? (
-            <div className="tws-story" data-tws="story">
-              <span className="tws-sk">That’s everything. Here’s what gets logged:</span>
-              <p>{flow.sentence}</p>
-              <ul>{flow.consequences.map((c) => <li key={c}>{TICK}{c}</li>)}</ul>
-            </div>
-          ) : null}
-        </>
+        <DeskTiles.Provider value={true}>
+          {onCheck ? null : <div className="tws-mnote" data-tws="hawk"><img src={MENTOR} alt="" /><p>{mentorLine(t, facts)}</p></div>}
+          <ol className="tws-rail" data-tws="rail">
+            {qs.map((q, i) => i < cur ? (
+              <li key={q.key} className="tws-st" data-st="done" data-tws-step={q.key}>
+                <span className="tws-sn" aria-hidden="true">{TICK}</span>
+                <div className="tws-sx"><span className="tws-sq">{q.title}</span>
+                  <span className="tws-sa" data-tws-qa={q.key}><b>{q.summary}</b> · <button type="button" className="tws-chg" aria-label={`Change: ${q.title}`} onClick={() => setQi(i)}>change</button></span></div>
+              </li>
+            ) : i === cur && curQ ? (
+              <li key={q.key} className="tws-st tws-q" data-st="open" data-tws-q={q.key} data-tws-step={q.key}>
+                <span className="tws-sn" aria-hidden="true">{i + 1}</span>
+                <div className="tws-sx"><h3 className="tws-qh">{q.title}</h3>
+                  {q.hint ? <span className="tws-hint">{q.hint}</span> : null}
+                  <div className="tws-qbody">{q.body}</div></div>
+              </li>
+            ) : (
+              <li key={q.key} className="tws-st" data-st="todo" data-tws-step={q.key}>
+                <span className="tws-sn" aria-hidden="true">{i + 1}</span>
+                <div className="tws-sx"><span className="tws-sq">{q.title}</span></div>
+              </li>
+            ))}
+            {hasCheck ? (
+              <li className="tws-st" data-st={onCheck ? "open" : "todo"} data-tws="check" data-tws-step="check">
+                <span className="tws-sn" aria-hidden="true">{qs.length + 1}</span>
+                <div className="tws-sx">
+                  {onCheck ? <h3 className="tws-qh tws-chh">Check it, then log it</h3> : <span className="tws-sq">Check it, then log it</span>}
+                  {onCheck ? (
+                    <div className="tws-sumx" data-tws="story">
+                      <span className="tws-ill" data-art="courier-hawk" aria-hidden="true" />
+                      <div className="tws-sumb">
+                        <p className="tws-lead" data-tws="sentence">{flow.sentence}</p>
+                        {flow.timeline?.length ? (
+                          <ol className="tws-tl3" data-tws="timeline" data-n={Math.min(3, flow.timeline.length)}>
+                            {flow.timeline.slice(0, 3).map((pt, k) => (
+                              <li key={k} data-now={k === 0 ? "" : undefined} data-tws-at={dayIsoOf(pt.at)}>
+                                <span className="tws-tart" data-art={pt.art} aria-hidden="true" />
+                                <span className="tws-tdot" aria-hidden="true" />
+                                <b className="tws-twhen">{whenWord3(pt.at, today)}</b>
+                                <span className="tws-twhat">{pt.what}</span>
+                              </li>
+                            ))}
+                          </ol>
+                        ) : null}
+                        <p className="tws-after" data-tws="after">{flow.after ?? "This task leaves your list."} The card on the right shows how it’ll look.</p>
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+              </li>
+            ) : null}
+          </ol>
+        </DeskTiles.Provider>
       );
     }
 
     /* the card preview column */
     const ms = t.query ? manuscripts.find((m) => m.id === t.query!.manuscriptId) ?? null : manuscripts[0] ?? null;
     /* the pending change shows once something has been answered */
-    const previewDraft = flow && Object.values(A).some((v) => v !== undefined) ? flow.draft : flow ? { section: flow.draft.section } : null;
+    /* once logged, the draft only names the new step (for the card's stamp); the card itself is the live one */
+    const previewDraft = held ? flow?.draft ?? null : flow && Object.values(A).some((v) => v !== undefined) ? flow.draft : flow ? { section: flow.draft.section } : null;
+    /* v53 (D8): typing dots while questions are open, the future card on the check step, the stamped card once logged */
+    const cardMode: "typing" | "future" | "logged" | "plain" = held?.task.key === t.key ? "logged"
+      : onCheck && flow?.draft.ghost ? "future" : flow?.commit && cur < qs.length ? "typing" : "plain";
     const previewFor = () => {
       if (own) {
         if (linkQ) return (
           <ScaledCard kind="query" focusKey={linkQ.id} label={`Open the full query card ↗`} onOpen={() => openLinked(t.userTask!)}>
-            <PreviewQueryCard q={linkQ} row={cardRows.get(linkQ.id) ?? null} agent={linkA} queries={queries} manuscripts={manuscripts} manuscript={manuscripts.find((m) => m.id === linkQ.manuscriptId) ?? null} packages={packages} log={linkLog} draft={null} nowMs={now} quietWeeks={quietWeeks} free={cardFree} />
+            <PreviewQueryCard q={linkQ} row={cardRows.get(linkQ.id) ?? null} agent={linkA} queries={queries} manuscripts={manuscripts} manuscript={manuscripts.find((m) => m.id === linkQ.manuscriptId) ?? null} packages={packages} log={linkLog} draft={null} nowMs={now} quietWeeks={quietWeeks} free={cardFree} mode="plain" />
           </ScaledCard>
         );
         if (linkA) return (
@@ -565,16 +674,18 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
         </ScaledCard>
       );
       if (t.query) return (
-        <ScaledCard kind="query" focusKey={`${t.key}|${previewDraft?.status ?? ""}|${previewDraft?.ghost ? 1 : 0}`} label="Open the full query card ↗" onOpen={() => openCard(t)}>
-          <PreviewQueryCard q={t.query} row={cardRows.get(t.query.id) ?? null} agent={t.agent ?? null} queries={queries} manuscripts={manuscripts} manuscript={ms} packages={packages} log={qLog} draft={previewDraft} nowMs={now} quietWeeks={quietWeeks} free={cardFree} />
+        <ScaledCard kind="query" focusKey={`${t.key}|${cardMode}`} label="Open the full query card ↗" onOpen={() => openCard(t)}>
+          <PreviewQueryCard q={t.query} row={cardRows.get(t.query.id) ?? null} agent={t.agent ?? null} queries={queries} manuscripts={manuscripts} manuscript={ms} packages={packages} log={qLog} draft={previewDraft} nowMs={now} quietWeeks={quietWeeks} free={cardFree}
+            mode={cardMode} agents={agents} activities={activities} />
         </ScaledCard>
       );
       return null;
     };
     const side = own && !linked ? <div className="tws-wp"><div className="tws-wpl"><span>Linked card</span></div><OwnEmptySide onLink={() => setLinkPicking(true)} /></div>
-      : (() => { const p = previewFor(); return p ? (
-        <div className="tws-wp" data-tws="side">
+      : (() => { const p = previewFor(); const fut = cardMode === "future" && !!t.query; return p ? (
+        <div className="tws-wp" data-tws="side" data-future={fut ? "" : undefined} onMouseMove={clipHover} onMouseLeave={() => setClipPop(null)}>
           {own ? <div className="tws-wpl"><span>{`Linked: ${(linkA?.name || linkA?.agency || "").trim().split(/\s+/)[0]}’s ${linkQ ? "query" : "agent"} card`}</span></div> : null}
+          {fut ? <p className="tws-flabel" data-tws="future-label">How {t.first}’s card will look once you log it</p> : null}
           {p}
         </div>
       ) : null; })();
@@ -583,35 +694,39 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
        button on the right, always in this place — nothing advances until it is pressed */
     let primary: React.ReactNode = null;
     let progress: string | null = null;
+    let back: React.ReactNode = null;
     if (own) {
       progress = steps.length ? `${steps.filter((x) => x.done).length} of ${steps.length} steps` : null;
       primary = <button type="button" className="tws-go" data-tws="primary" disabled={busy} onClick={() => void ownDone(t)}>{TICK}Mark done</button>;
     } else if (flow) {
       const q = cur < qs.length ? qs[cur] : null;
       const last = cur === qs.length - 1;
+      const total = qs.length + (flow.commit ? 1 : 0);
       if (q && flow.door && last && q.answered) {
         primary = <button type="button" className="tws-go" data-tws="primary" onClick={flow.door.open}>{flow.door.label}</button>;
       } else if (q) {
-        primary = <button type="button" className="tws-go" data-tws="primary" data-next="" disabled={!q.answered} onClick={() => setQi(cur + 1)}>{last && !(t.kind === "quiet" && !A.act) ? "Continue" : "Next"} →</button>;
-      } else if (allDone && flow.commit) {
-        primary = <button type="button" className="tws-go" data-tws="primary" data-log="" disabled={busy} onClick={() => void logIt()}>{TICK}Log it</button>;
+        primary = <button type="button" className="tws-go" data-tws="primary" data-next="" disabled={!q.answered} onClick={() => setQi(cur + 1)}>Next →</button>;
+      } else if (onCheck) {
+        primary = <button type="button" className="tws-go" data-tws="primary" data-log="" data-logged={logged ? "" : undefined} disabled={busy || logged} onClick={() => void logIt()}>{logged ? <>{TICK}Logged</> : flow.verb ?? "Log it"}</button>;
       } else if (!qs.length && flow.door) {
         primary = <button type="button" className="tws-go" data-tws="primary" onClick={flow.door.open}>{flow.door.label}</button>;
       }
-      progress = !qs.length ? null : allDone ? "Ready to log" : `${cur + 1} of ${t.kind === "quiet" && !A.act ? "a few" : qs.length}`;
+      progress = !total ? null : `${cur + 1} of ${t.kind === "quiet" && !A.act ? "a few" : total}`;
+      back = cur > 0 && !logged ? <button type="button" className="tws-sb tws-back" data-tws="back" onClick={() => setQi(cur - 1)}>← Back</button> : null;
     }
     const foot = (
-      <div className="tws-wf" data-tws="footer">
+      <div className="tws-wf" data-tws="footer" data-over={over ? "" : undefined}>
         <button ref={snzRef} type="button" className="tws-sb" aria-label={own ? "Move it" : "Snooze"} title={own ? "Move it (S)" : "Snooze (S)"} aria-expanded={pop?.kind === "snooze"} onClick={(e) => setPop(pop?.kind === "snooze" ? null : { kind: "snooze", opener: e.currentTarget })}>{ZZ}<span>{own ? "Move it" : "Snooze"}</span><kbd>S</kbd></button>
         <button ref={disRef} type="button" className="tws-sb" aria-label={own ? "Delete" : "Dismiss"} title={own ? "Delete (D)" : "Dismiss (D)"} aria-expanded={pop?.kind === "dismiss"} onClick={(e) => setPop(pop?.kind === "dismiss" ? null : { kind: "dismiss", opener: e.currentTarget })}>{DIS}<span>{own ? "Delete" : "Dismiss"}</span><kbd>D</kbd></button>
         <span className="tws-sp" />
         {progress ? <em className="tws-prog" data-tws="progress">{progress}</em> : null}
+        {back}
         {primary}
       </div>
     );
 
     return (
-      <div className="tws-wsx" data-tws="desk" style={{ containerType: "inline-size" } as React.CSSProperties}>
+      <div key={t.key} className="tws-wsx tws-in" data-tws="desk" data-phase={held?.task.key === t.key ? held.phase : undefined} style={{ containerType: "inline-size" } as React.CSSProperties}>
         <div className="tws-wh" data-band={band}>
           <h2 data-tws="desk-title">{t.kind === "batch" && bCur ? `${t.first} · ${bRemaining.indexOf(bCur) + 1} of ${bRemaining.length}` : t.title}</h2>
           {meta ? <span className="tws-m">{t.kind === "batch" ? t.agency || meta : meta}</span> : null}
@@ -623,7 +738,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
         </div>
         <div className="tws-wbody">
           <div className="tws-wcol" data-tws="qcol">
-            <div className="tws-wq">{main}{t.kind === "batch" && bRemaining.length > 1 && !yay ? (
+            <div className="tws-wq" ref={setWqEl} data-tws="questions">{main}{t.kind === "batch" && bRemaining.length > 1 && !held ? (
               <div className="tws-skip"><button type="button" className="tws-lnk" data-tws="skip" onClick={skipOne}>Skip this one</button></div>
             ) : null}</div>
             {foot}
@@ -643,15 +758,13 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     <div ref={rootRef} className="tws-root" data-tws="root">
       <WorkspacePageGrid className="tws-wpg" scrollLabel="To-do list" masthead={null}>
         <div className="tws" data-tws="page">
-          {/* Workspace width v2 (8 Nov): the slim title row — no card, no eyebrow. The book's name when the account has
-              one book (tasks span every book, so naming one over all of them would be false), else "To-do list"; the
-              late pill (hidden at 0) and the to-do pill read the same figures the old subline did. */}
+          {/* v53 (D2): the thin header — the page's name in the typewriter face, the book's beside it in grey (one book
+              only), "+ Add a task" on the right. No picture and no counts: the counts are the tray's bar. */}
           <header className="tws-hd" data-tws="header">
-            <h1 className="tws-ttl" data-page-title>{statBook ?? "To-do list"}</h1>
-            {lateN ? <span className="tws-pl" data-k="late" data-tws="late-pill"><i aria-hidden="true">●</i> {lateN} late</span> : null}
-            <span className="tws-pl" data-tws="todo-pill">{seq.length} to do</span>
+            <h1 className="tws-ttl" data-page-title>Your to-do list</h1>
+            {statBook ? <span className="tws-tsub" data-tws="book">{statBook}</span> : null}
             <span className="tws-sp" />
-            <button type="button" className="tws-addb" onClick={() => { setYay(null); setAdding(true); }}>+ Add a task</button>
+            <button type="button" className="tws-addb" onClick={() => { setMile(null); setAdding(true); }}>+ Add a task</button>
           </header>
 
           <div className="tws-ws" data-tws="workspace" data-slim={slim ? "" : undefined}>
@@ -664,7 +777,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
                       <div className="tws-sgb" data-band={sec.band}>{grouping === "category" ? STRIP_GROUP[sec.id as WsGroupId] ?? sec.name : sec.name}<em>{sec.tasks.length}</em></div>
                       {sec.tasks.map((t) => {
                         const w = stripWords(t);
-                        const on = !!sel && sel.key === t.key && !adding && !yay;
+                        const on = !!sel && sel.key === t.key && !adding;
                         const glyph = t.query && t.kind !== "fix" ? <StatusDot status={t.query.status as QueryStatus} overrideSize={16} decorative /> : null;
                         return (
                           <button key={t.key} type="button" className="tws-si" data-tws-row={t.key} data-tws-strip="" aria-current={on ? "true" : undefined} title={t.title} onClick={() => go(t.key)}>
@@ -689,6 +802,20 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
                   <button type="button" aria-pressed={tab === "snoozed"} onClick={() => setTab("snoozed")}>Snoozed <b>{snoozed.length}</b></button>
                   <button type="button" aria-pressed={tab === "done"} onClick={() => setTab("done")}>Done <b>{clearedN}</b></button>
                 </div>
+                {tab === "todo" && grouping === "category" && bd.need + bd.house > 0 ? (
+                  /* v53 (D3): one thin bar split into the three urgent groups, then the words; a part scrolls the tray */
+                  <div className="tws-bd" data-tws="breakdown">
+                    {bd.need ? (
+                      <div className="tws-bar" data-tws="bar">
+                        {([["wait", bd.wait, "agents waiting"], ["nudge", bd.nudge, "nudges due"], ["quiet", bd.quiet, "gone quiet"]] as const).map(([k, n, w]) => n ? (
+                          <button key={k} type="button" data-k={k} data-n={n} style={{ flexGrow: n }} aria-label={`${n} ${w}`} title={`${n} ${w}`} onClick={() => jump(k)} />
+                        ) : null)}
+                      </div>
+                    ) : null}
+                    <p data-tws="bar-words"><b>{bd.need}</b> need you{bd.late ? <> · <span className="tws-bdl" data-tws="bar-late">{bd.late} late</span></> : null}
+                      {bd.house ? <> · <button type="button" className="tws-bdt" data-tws="bar-tidy" onClick={() => jump("house")}>{bd.house} to tidy</button></> : null}</p>
+                  </div>
+                ) : null}
                 {tab === "todo" ? (
                   <>
                     <div className="tws-row">
@@ -701,7 +828,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
                             <h6>Task type</h6>
                             <div className="tws-fcs">{WS_TYPES.map((k) => <button key={k} type="button" className="tws-fc" aria-pressed={filters.types.has(k)} disabled={!typeCount(k)} onClick={() => setFilters((f) => ({ ...f, types: toggleSet(f.types, k) }))}>{k}<em>{typeCount(k)}</em></button>)}</div>
                             <h6>When</h6>
-                            <div className="tws-fcs">{WS_WHENS.map((k) => <button key={k} type="button" className="tws-fc" aria-pressed={filters.whens.has(k)} disabled={!whenCount(k)} onClick={() => setFilters((f) => ({ ...f, whens: toggleSet(f.whens, k) }))}>{k}<em>{whenCount(k)}</em></button>)}</div>
+                            <div className="tws-fcs">{WS_WHENS.map((k) => <button key={k} type="button" className="tws-fc" aria-pressed={filters.whens.has(k)} disabled={!whenCount(k)} onClick={() => setFilters((f) => ({ ...f, whens: toggleSet(f.whens, k) }))}>{whenWord(k)}<em>{whenCount(k)}</em></button>)}</div>
                             {/* tag management's way in (the retired tray's Tags panel: TagsPane, the only place tags are edited) */}
                             <button type="button" className="tws-mlink" data-tws="tags-open" onClick={() => { setMenu(null); setTagsOpen(true); }}>Manage your tags</button>
                             {offRows.length ? <button type="button" className="tws-mlink tws-mlink--off" data-tws="off-open" onClick={() => { setMenu(null); setOffPop(filtRef.current); }}>Tasks you’ve switched off ({offRows.length})</button> : null}
@@ -726,7 +853,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
                     {nFilters ? (
                       <div className="tws-chips">
                         {[...filters.types].map((k) => <button key={k} type="button" className="tws-chip" onClick={() => setFilters((f) => ({ ...f, types: toggleSet(f.types, k) }))}>{k}<i>✕</i></button>)}
-                        {[...filters.whens].map((k) => <button key={k} type="button" className="tws-chip" onClick={() => setFilters((f) => ({ ...f, whens: toggleSet(f.whens, k) }))}>{k}<i>✕</i></button>)}
+                        {[...filters.whens].map((k) => <button key={k} type="button" className="tws-chip" onClick={() => setFilters((f) => ({ ...f, whens: toggleSet(f.whens, k) }))}>{whenWord(k)}<i>✕</i></button>)}
                       </div>
                     ) : null}
                   </>
@@ -735,7 +862,14 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
               <div className="tws-tl" data-tws="list">{trayBody}</div>
             </aside>
             )}
-            <section className="tws-desk" data-tws="desk-col">{desk}</section>
+            <section className="tws-desk" data-tws="desk-col">{desk}
+              {mile ? (
+                <div className="tws-mile" data-tws="milestone" role="status">
+                  <div><span className="tws-mph" data-art="hawk" aria-hidden="true" /><h2>{mile.head}</h2>{mile.msg ? <p>{mile.msg}</p> : null}
+                    <button type="button" className="tws-mbtn" data-tws="milestone-go" onClick={() => setMile(null)}>{mile.btn}</button></div>
+                </div>
+              ) : null}
+            </section>
           </div>
         </div>
       </WorkspacePageGrid>
@@ -745,10 +879,18 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
           <TagsPane />
         </AnchoredPanel>
       ) : null}
+      {clipPop && flow?.draft.sent && flow.draft.sent.length > 1 ? (
+        <div className="tws-layer tws-clippop" role="tooltip" data-tws="clip-pop"
+          style={{ left: Math.max(8, Math.min(clipPop.x - 110, window.innerWidth - 228)), top: Math.min(clipPop.y + 8, window.innerHeight - 140) }}>
+          {flow.draft.sent.map((x) => <span key={x}>{x}</span>)}{flow.draft.version ? <span className="tws-cpv">{flow.draft.version}</span> : null}
+        </div>
+      ) : null}
       {toast ? (
-        <div className="tws-layer tws-toast" role="status" data-tws="toast">
-          <span>{toast.msg}</span>
-          {toast.undo ? <button type="button" onClick={async () => { const u = toast.undo!; setToast(null); try { await u(); } catch { flash("Couldn’t undo that."); } }}>Undo</button> : null}
+        <div key={toast.id} className="tws-layer tws-toast" role="status" data-tws="toast" data-snack={toast.sub ? "" : undefined}>
+          {toast.sub ? <span className="tws-snt" aria-hidden="true">{TICK}</span> : null}
+          <span>{toast.msg}{toast.sub ? <small data-tws="snack-sub"> · {toast.sub}</small> : null}</span>
+          {toast.undo ? <button type="button" data-tws="undo" onClick={async () => { const u = toast.undo!; setToast(null); try { await u(); } catch { flash("Couldn’t undo that."); } }}>Undo</button> : null}
+          {toast.sub ? <span className="tws-snbar" aria-hidden="true"><i /></span> : null}
         </div>
       ) : null}
     </div>

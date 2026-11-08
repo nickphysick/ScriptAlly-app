@@ -15,10 +15,12 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { collection, onSnapshot, orderBy, query as fsQuery } from "firebase/firestore";
 import { db as fsdb } from "../../../lib/firebase";
-import { QueryStatus, type Activity, type Agent, type Manuscript, type Query, type SubmissionPackage } from "../../../types";
+import { ActivityType, QueryStatus, type Activity, type Agent, type Manuscript, type Query, type SubmissionPackage } from "../../../types";
 import { buildQcRows, type QcRow } from "../../../lib/qcSummary";
 import { QcQueryCard149 } from "../../queries/centre/QcQueryCard149";
-import { buildCardView } from "../../queries/centre/qcCardView";
+import { buildCardView, stampedCardRows } from "../../queries/centre/qcCardView";
+import { computeRecomputedFields, recomputedPatch } from "../../../lib/recomputeFields";
+import { orderSteps, type ThreadStepIn } from "../../../lib/qcThread152";
 import { NUDGE_NESTED_TYPE } from "../../../lib/logNudge";
 import { AgentCard262, type AgentCard262Props, type Sec262 } from "../../agents/contact/AgentCard262";
 import { agentFacts, agentRows } from "../../../lib/contactList";
@@ -66,6 +68,17 @@ export interface QueryCardProps {
   quietWeeks: number;
   /** packages locked for this writer (the card's materials read as the free plan's words) */
   free: boolean;
+  /**
+   * v53 (D8): what the card shows — "typing" while questions are open (dots where the new step will go), "future" on
+   * the check step (the card as it will be once the save lands, drawn through its own derivation), "logged" just after
+   * the save (the live card, its newest step stamped), or "plain".
+   */
+  /** ⚠️ ABSENT ON THE PHONE (its card sheet): no mode keeps the card exactly as v52 drew it — the draft as the
+   *  composer's dashed step, the book as it is. Only the desktop desk passes a mode. */
+  mode?: "typing" | "future" | "logged" | "plain";
+  /** the card's inputs for the future state (the Query Centre's row is re-stamped over the future query) */
+  agents?: readonly Agent[];
+  activities?: readonly Activity[];
 }
 
 const noop = () => undefined;
@@ -79,27 +92,78 @@ const noopAsync = async () => false;
  * ⚠️ THE PENDING CHANGE IS THE CARD'S OWN DRAFT: the task's new step is handed to the card as `card1522.draft`, the
  *    dashed step the Query Centre's composer draws, built the way the composer builds it.
  */
-export const PreviewQueryCard: React.FC<QueryCardProps> = ({ q, row, agent, queries, manuscripts, manuscript, packages, log, draft, nowMs, quietWeeks, free }) => {
-  const view = useMemo(() => (row ? buildCardView({ row, q, ag: agent, ms: manuscript, events: log, packages, queries, manuscripts, nowMs, quietWeeks, desk: true, free }) : null),
-    [row, q, agent, manuscript, log, packages, queries, manuscripts, nowMs, quietWeeks, free]);
+export const PreviewQueryCard: React.FC<QueryCardProps> = ({ q, row, agent, queries, manuscripts, manuscript, packages, log, draft, nowMs, quietWeeks, free, mode: modeIn, agents, activities }) => {
+  const legacy = modeIn === undefined;
+  const mode = modeIn ?? "plain";
+  /* v53 (D8) — THE FUTURE STATE IS THE CARD'S OWN DERIVATION OVER THE SAVE'S RESULT: the new step joins the query's log,
+     the ten recomputed fields come from the recompute's own pure half (lib/recomputeFields), the flow's other writes
+     (dates, a cleared nudge) are laid on, and the Query Centre's row is re-stamped over the future query. Nothing about
+     the future card is drawn by hand. */
+  const future = useMemo(() => {
+    if (mode !== "future" || !draft?.ghost) return null;
+    const ghost = draft.ghost;
+    const events = [...log, ghost];
+    const raw = events.map((e) => ({ id: String(e.id), data: e }));
+    const fq = { ...q, ...(draft.future ?? {}), ...recomputedPatch(computeRecomputedFields(raw)) } as Query;
+    for (const [k, v] of Object.entries(fq)) if (v === undefined) delete (fq as unknown as Record<string, unknown>)[k];
+    const fqs = queries.map((x) => (x.id === q.id ? fq : x));
+    const st = (ghost.resultingStatus ?? ghost.type) as QueryStatus | undefined;
+    const feed: Activity[] = [...(activities ?? []) as Activity[], ...(st && Object.values(QueryStatus).includes(st)
+      ? [{ id: "__ghost", queryId: q.id, manuscriptId: q.manuscriptId, date: ghost.createdAt as string, resultingStatus: st, description: "",
+        activityType: st === QueryStatus.PARTIAL_SENT || st === QueryStatus.FULL_SENT || st === QueryStatus.RESUBMITTED ? ActivityType.MATERIALS_SENT : ActivityType.STATUS_CHANGED } as unknown as Activity] : [])];
+    const frow = stampedCardRows(fqs, agents ?? [], feed, quietWeeks, nowMs).find((x) => x.id === q.id) ?? row;
+    return { q: fq, queries: fqs, row: frow, events };
+  }, [mode, draft, log, q, queries, agents, activities, quietWeeks, nowMs, row]);
+  const vq = future?.q ?? q, vrow = future?.row ?? row, vqueries = future?.queries ?? queries, vlog = future?.events ?? log;
+  const view = useMemo(() => (vrow ? buildCardView({ row: vrow, q: vq, ag: agent, ms: manuscript, events: vlog, packages, queries: vqueries, manuscripts, nowMs, quietWeeks, desk: true, free }) : null),
+    [vrow, vq, agent, manuscript, vlog, packages, vqueries, manuscripts, nowMs, quietWeeks, free]);
   if (!view || !view.v152) return null;
-  /* the task's new step, as the card's composer draft: built here as the composer builds its own (a status step, or a
-     nudge), never through the ledger, which folds a step into an existing one of the same status */
-  const g = draft?.ghost ?? null;
-  const gStatus = (g?.resultingStatus ?? g?.type) as QueryStatus | undefined;
-  const gNudge = g?.type === NUDGE_NESTED_TYPE;
-  const gMs = typeof g?.createdAt === "string" ? new Date(g.createdAt).getTime() : null;
-  const card1522 = g && (gNudge || (gStatus && Object.values(QueryStatus).includes(gStatus)))
-    ? { draft: { key: "__draft", status: gNudge ? null : gStatus!, kind: gNudge ? "nudge" as const : undefined, ms: gMs != null && Number.isFinite(gMs) ? gMs : nowMs, chips: [] } }
-    : {};
+  /* the step just logged, found the way the future card finds it (in "logged") */
+  const newest = mode === "logged" ? newStepKey(view.v152.steps, draft?.ghost ?? null) : null;
+  const sent = draft?.sent ?? [];
+  /* the phone's sheet (no mode): v52's drawing, the task's new step as the composer's dashed draft */
+  if (legacy) {
+    const g = draft?.ghost ?? null;
+    const gStatus = (g?.resultingStatus ?? g?.type) as QueryStatus | undefined;
+    const gNudge = g?.type === NUDGE_NESTED_TYPE;
+    const gMs = typeof g?.createdAt === "string" ? new Date(g.createdAt).getTime() : null;
+    const card1522 = g && (gNudge || (gStatus && Object.values(QueryStatus).includes(gStatus)))
+      ? { draft: { key: "__draft", status: gNudge ? null : gStatus!, kind: gNudge ? "nudge" as const : undefined, ms: gMs != null && Number.isFinite(gMs) ? gMs : nowMs, chips: [] } }
+      : {};
+    return (
+      <QcQueryCard149 {...view.display} card1522={card1522}
+        mode="view" onMode={noop} onClose={noop} onStep={noop} onPrimary={noop} onCloseQuery={noop} onContactList={noop} onCopyEmail={noop}
+        onAgentField={noop} onOpenPiece={noop} onAddNote={noop} onRespond={noopAsync} onSaveEdits={noopAsync}
+        index={0} total={1} notes={[]} packageChoices={[]} packageKey={null} pieces={[]} stepChoices={[]} removable={() => []}
+        onReply152={noop} onEditStep152={noop} onPencil152={noop} />
+    );
+  }
+  const desk = {
+    bookRow: true,
+    typing: mode === "typing",
+    /* the step being checked is the future thread's newest step of the save's kind — found in the card's own steps, so
+       it is the bubble the card draws for it (the history can date it from the feed, not the new log entry) */
+    checkKey: mode === "future" ? newStepKey(view.v152.steps, draft?.ghost ?? null) : null,
+    stampKey: newest,
+    clip: mode === "future" && sent.length > 1 ? { key: newStepKey(view.v152.steps, draft?.ghost ?? null) ?? "__ghost", items: sent, version: draft?.version ?? null } : null,
+  };
   return (
-    <QcQueryCard149 {...view.display} card1522={card1522}
+    <QcQueryCard149 {...view.display} card1522={{ desk }}
       mode="view" onMode={noop} onClose={noop} onStep={noop} onPrimary={noop} onCloseQuery={noop} onContactList={noop} onCopyEmail={noop}
       onAgentField={noop} onOpenPiece={noop} onAddNote={noop} onRespond={noopAsync} onSaveEdits={noopAsync}
       index={0} total={1} notes={[]} packageChoices={[]} packageKey={null} pieces={[]} stepChoices={[]} removable={() => []}
       onReply152={noop} onEditStep152={noop} onPencil152={noop} />
   );
 };
+
+/** the newest step in a card's thread matching the save's new step (its status, or a nudge) */
+function newStepKey(steps: readonly ThreadStepIn[], ghost: Record<string, unknown> | null): string | null {
+  if (!ghost) return null;
+  const nudge = ghost.type === NUDGE_NESTED_TYPE;
+  const st = (ghost.resultingStatus ?? ghost.type) as string | undefined;
+  const hit = orderSteps(steps).filter((x) => (nudge ? x.kind === "nudge" : !x.kind && x.status === st)).pop();
+  return hit ? hit.key : null;
+}
 
 export interface AgentCardProps {
   agent: Agent;

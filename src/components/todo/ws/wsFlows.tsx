@@ -3,14 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * To-do list v50 — WHAT EACH TASK ASKS, AND WHAT IT LOGS. One builder per task kind: the questions in order (each with
- * its answered test and its one-line summary), the plain sentence the summary box shows, the consequences listed under
+ * its answered test and its one-line summary), the plain sentence the check step shows, the dated points listed under
  * it, the draft the card preview shows, and the save.
  *
  * ⚠️ EVERY SAVE IS AN EXISTING ONE, AND THE DRAWER'S. A send is `saveSent`, a nudge `saveNudgeSent`, an offer decision
  *    `saveOfferDecision` (all lib/queryActions/stepSaves, which the drawer's journeys commit through), a reply `recordQueryResponse`, a close `saveClose`, an agent field `commitCardSave`. The query saves are wrapped in
  *    the drawer's own snapshot so Undo puts every touched document back exactly; an agent save brings its own.
- * ⚠️ EVERY CONSEQUENCE LINE IS SOMETHING THE SAVE DOES. A reply date is the one the save writes; "I'll suggest a nudge"
- *    is said only where a nudge date is written; "I'll suggest closing it" only where a "Consider closing" plan is.
+ * ⚠️ EVERY POINT ON THE CHECK STEP'S TIMELINE IS SOMETHING THE SAVE DOES (v50's rule, v53's timeline): a date is the one
+ *    the save writes; "Nudge {first}" is said only where a nudge date is written; "I'll suggest closing it" only where a
+ *    "Consider closing" plan is. TD53 L4 compares the dates with the save's own writes.
  */
 import React from "react";
 import { deleteField } from "firebase/firestore";
@@ -26,6 +27,7 @@ import type { MaterialRow } from "../../../lib/agentMaterials";
 import { recordQueryResponse, type RecordResponseData } from "../../../lib/recordResponse";
 import { packagesHeldBy, packagesIn, restoreSnapshot, takeSnapshot } from "../../../lib/queryActions/snapshot";
 import { commitCardSave } from "../../../lib/agentCardSave";
+import { writerExpectedWrite } from "../../../lib/expectedDate";
 import { buildNudgeWrites } from "../../../lib/logNudge";
 import { requestSample } from "../../queryActions/journeys/SentJourney";
 import { capFirst, sampleName } from "../../../lib/queryActions/sample";
@@ -69,18 +71,34 @@ export interface Draft {
   agentPatch?: Partial<Agent>;
   /** the agent card section the task fills in */
   section?: "how" | "wishlist" | "send";
+  /** v53 (D8): the query's fields as the save leaves them (undefined: the save removes the field); the card's future
+   *  state is drawn from these plus the new step, through the card's own derivation */
+  future?: Record<string, unknown>;
+  /** v53 (D8): what went, when it was more than the one thing (the new bubble's paperclip), and the version */
+  sent?: string[];
+  version?: string | null;
 }
 
-export interface FlowDone { head: string; msg: string; undo?: () => Promise<void> }
+/** v53 (D7): one dated point on the check step's timeline — something the save writes, on the day it is for */
+export interface FlowPoint { at: Date; what: React.ReactNode; art: "stamp" | "letter" | "nudge" | "card" | "close" | "calendar" | "offer" }
+
+export interface FlowDone { head: string; msg: string; undo?: () => Promise<void>;
+  /** v53 (D10): the desk's snackbar — what happened, and one detail */
+  snack?: { msg: string; sub: string } }
 
 export interface Flow {
   questions: FlowQ[];
   sentence: React.ReactNode;
-  consequences: string[];
   draft: Draft;
   /** null: this task has no questions here; `door` opens where it is done */
   commit: (() => Promise<FlowDone>) | null;
   door?: { label: string; open: () => void };
+  /** v53 (D7): the check step's dated points (at most three), every one a thing the save writes */
+  timeline?: FlowPoint[];
+  /** v53 (D7): the check step's closing line, where "This task leaves your list" is not true */
+  after?: string;
+  /** v53 (D7): the final button, where it is not "Log it" */
+  verb?: string;
 }
 
 const dateOf = (A: Answers, k: string, today: Date): Date => (typeof A[k] === "string" ? dayFromYmd(A[k] as string) : today);
@@ -152,17 +170,21 @@ function sendFlow(ctx: FlowCtx): Flow {
   return {
     questions,
     sentence: <>You sent {t.first} your <b>{list || asked.toLowerCase()}</b>{verName ? ` (${verName})` : ""} <b>{dayPhrase(sent, today)}</b>.</>,
-    consequences: [
-      `The query moves to ${lab}`,
-      `Reply expected by ${fmt(exp)}`,
-      `If nothing’s come by ${fmt(nd)}, “Nudge ${t.first}” comes onto your list`,
-      "Leaves your tray",
+    timeline: [
+      { at: sent, what: <>Your query moves to <b>{lab}</b></>, art: "stamp" },
+      { at: exp, what: <>{t.first}’s reply is expected</>, art: "letter" },
+      { at: nd, what: <>If nothing’s come, “Nudge {t.first}” comes onto your list</>, art: "nudge" },
     ],
-    draft: { status: target, ghost: { id: "__ghost", type: target, resultingStatus: target, createdAt: new Date(sent.getFullYear(), sent.getMonth(), sent.getDate(), 12).toISOString() } },
+    draft: {
+      status: target, ghost: { id: "__ghost", type: target, resultingStatus: target, createdAt: new Date(sent.getFullYear(), sent.getMonth(), sent.getDate(), 12).toISOString() },
+      future: { ...writerExpectedWrite(new Date(dayIso(exp)).toISOString()), nudgeDate: new Date(dayIso(nd)).toISOString(), expectedSendDate: undefined, sendReminderDate: undefined, lastSentLabel: capFirst(andList(mats.map((m) => m.toLowerCase()))) },
+      sent: mats, version: verName,
+    },
     commit: async () => {
       const label = capFirst(andList(mats.map((m) => m.toLowerCase())));
       const undo = await snapshotted(ctx, [q.id], () => saveSent(ctx.db, q, { kind, sent, exp, nd, label, bookVersionId: askVer ? ver : null }));
-      return { head: "Sent. Nice work.", msg: `${t.first}’s reply is expected by ${fmt(exp)}. If nothing’s come by ${fmt(nd)}, I’ll put “Nudge ${t.first}” on your list.`, undo };
+      return { head: "Sent. Nice work.", msg: `${t.first}’s reply is expected by ${fmt(exp)}. If nothing’s come by ${fmt(nd)}, I’ll put “Nudge ${t.first}” on your list.`, undo,
+        snack: { msg: `${lab} to ${t.first}`, sub: `reply expected by ${fmt(exp)}` } };
     },
   };
 }
@@ -216,29 +238,33 @@ function offerFlow(ctx: FlowCtx): Flow {
   const on = dateOf(A, "date", today);
   const by = typeof A.by === "string" ? dayFromYmd(A.by as string) : null;
   const chosen = others.filter((o) => (wd ?? []).includes(o.id));
-  const consequences = ans === "accept" ? [
-    `${t.first} becomes your agent for this book`,
-    ...(chosen.length ? [`${chosen.length} other ${chosen.length === 1 ? "query closes" : "queries close"} as withdrawn`, `A “Tell them you’ve signed” task for ${chosen.length === 1 ? "that agent" : "each of them"}`] : []),
-    "Leaves your tray",
-  ] : ans === "decline" ? ["The query moves to Closed, as offer declined", "Your other queries carry on as they were", "Leaves your tray"]
-    : ans === "more" && by ? ["The offer stays open", `Answering it stays on your list, due ${fmt(by)}`] : [];
   const sentence = ans === "accept" ? <>You accepted {t.first}’s offer <b>{dayPhrase(on, today)}</b>.</>
     : ans === "decline" ? <>You turned down {t.first}’s offer <b>{dayPhrase(on, today)}</b>.</>
     : <>You asked {t.first} for more time, and you’ll answer by <b>{by ? longDay(by, today) : ""}</b>.</>;
   const status = ans === "accept" ? QueryStatus.SIGNED : ans === "decline" ? QueryStatus.WITHDRAWN : undefined;
+  const timeline: FlowPoint[] = ans === "accept" ? [
+    { at: on, what: <>{t.first} becomes your agent for this book</>, art: "offer" },
+    ...(chosen.length ? [{ at: on, what: <>{chosen.length} other {chosen.length === 1 ? "query closes" : "queries close"} as withdrawn, with a “Tell them you’ve signed” task for {chosen.length === 1 ? "that agent" : "each"}</>, art: "close" as const }] : []),
+  ] : ans === "decline" ? [{ at: on, what: <>The query moves to <b>Closed</b>, as offer declined</>, art: "close" }]
+    : ans === "more" && by ? [{ at: today, what: <>The offer stays open</>, art: "offer" }, { at: by, what: <>Answering {t.first}’s offer is due</>, art: "calendar" }] : [];
   return {
-    questions, sentence, consequences,
-    draft: status ? { status, ghost: { id: "__ghost", type: status, resultingStatus: status, createdAt: new Date(on.getFullYear(), on.getMonth(), on.getDate(), 12).toISOString() } } : {},
+    questions, sentence, timeline,
+    after: ans === "more" && by ? `This task stays on your list, due ${fmt(by)}.` : undefined,
+    draft: status ? { status, ghost: { id: "__ghost", type: status, resultingStatus: status, createdAt: new Date(on.getFullYear(), on.getMonth(), on.getDate(), 12).toISOString() } }
+      : ans === "more" && by ? { future: { offerResponseDeadline: dayIso(by) } } : {},
     commit: async () => {
       if (ans === "more" && by) {
         const undo = await snapshotted(ctx, [q.id], () => saveOfferMoreTime(ctx.db, q, by));
-        return { head: "Answer recorded.", msg: `The offer stays open. Answering ${t.first} stays on your list, due ${fmt(by)}.`, undo };
+        return { head: "Answer recorded.", msg: `The offer stays open. Answering ${t.first} stays on your list, due ${fmt(by)}.`, undo,
+          snack: { msg: "Answer recorded", sub: `answering ${t.first} is due ${fmt(by)}` } };
       }
       const dec = ans === "accept" ? "accept" : "decline";
       const undo = await snapshotted(ctx, [q.id, ...chosen.map((o) => o.id)], async () => { await saveOfferDecision(ctx.db, q, t.agent ?? null, { dec, on, withdraw: chosen, remindTell: true }); });
       return dec === "accept"
-        ? { head: "Congratulations!", msg: chosen.length ? `Next, let the other agents know. A “Tell them you’ve signed” task is on your list for each one.` : `${t.first} is now your agent for this book.`, undo }
-        : { head: "Answer recorded.", msg: `${t.first}’s query is closed as offer declined. Your other queries carry on.`, undo };
+        ? { head: "Congratulations!", msg: chosen.length ? `Next, let the other agents know. A “Tell them you’ve signed” task is on your list for each one.` : `${t.first} is now your agent for this book.`, undo,
+          snack: { msg: `You accepted ${t.first}’s offer`, sub: chosen.length ? `${chosen.length} other ${chosen.length === 1 ? "query" : "queries"} withdrawn` : `${t.first} is your agent for this book` } }
+        : { head: "Answer recorded.", msg: `${t.first}’s query is closed as offer declined. Your other queries carry on.`, undo,
+          snack: { msg: `You turned down ${t.first}’s offer`, sub: "the query is closed" } };
     },
   };
 }
@@ -284,15 +310,20 @@ function nudgeFlow(ctx: FlowCtx): Flow {
   const { t, today } = ctx;
   const q = t.query!;
   const { qs, sent, then } = nudgeParts(ctx, false);
-  const ghost = buildNudgeWrites(q, t.agent ?? null, { checkBackDate: dayIso(then), note: "", eventDate: dayIso(sent) } as never, new Date()).nested;
+  const nw = buildNudgeWrites(q, t.agent ?? null, { checkBackDate: dayIso(then), note: "", eventDate: dayIso(sent) } as never, new Date());
+  const ghost = nw.nested;
   return {
     questions: qs,
     sentence: <>You nudged {t.first} <b>{dayPhrase(sent, today)}</b>.</>,
-    consequences: [`If ${t.first} still hasn’t replied by ${fmt(then)}, I’ll suggest closing it`, "Leaves your tray"],
-    draft: { ghost: { id: "__ghost", ...ghost } },
+    timeline: [
+      { at: sent, what: <>Your nudge to {t.first} is logged</>, art: "nudge" },
+      { at: then, what: <>If {t.first} still hasn’t replied, I’ll suggest closing it</>, art: "close" },
+    ],
+    draft: { ghost: { id: "__ghost", ...ghost }, future: { lastNudgeSentDate: nw.queryUpdates.lastNudgeSentDate, closePlan: dayIso(then), nudgeDate: undefined } },
     commit: async () => {
       const undo = await snapshotted(ctx, [q.id], () => saveNudgeSent(ctx.db, q, t.agent ?? null, nudgePlan(q, sent, then)));
-      return { head: "Nudge logged.", msg: `If ${t.first} still hasn’t replied by ${fmt(then)}, I’ll suggest closing it.`, undo };
+      return { head: "Nudge logged.", msg: `If ${t.first} still hasn’t replied by ${fmt(then)}, I’ll suggest closing it.`, undo,
+        snack: { msg: `Nudge logged for ${t.first}`, sub: `I’ll suggest closing it if nothing by ${fmt(then)}` } };
     },
   };
 }
@@ -348,19 +379,24 @@ function quietFlow(ctx: FlowCtx, openPartial: () => void): Flow {
     body: <Tiles name="What would you like to do" value={act ?? null} opts={ACTS} onPick={(k) => set({ act: k, sent: undefined, until: undefined, what: undefined, why: undefined })} />,
   }];
   const on = dateOf(A, "date", today);
-  const base: Omit<Flow, "questions"> = { sentence: null, consequences: [], draft: {}, commit: null };
+  const base: Omit<Flow, "questions"> = { sentence: null, draft: {}, commit: null };
 
   if (act === "nudge") {
     const p = nudgeParts(ctx, true);
-    const ghost = buildNudgeWrites(q, t.agent ?? null, { checkBackDate: dayIso(p.then), note: "", eventDate: dayIso(p.sent) } as never, new Date()).nested;
+    const nw = buildNudgeWrites(q, t.agent ?? null, { checkBackDate: dayIso(p.then), note: "", eventDate: dayIso(p.sent) } as never, new Date());
+    const ghost = nw.nested;
     return {
       ...base, questions: [...questions, ...p.qs],
       sentence: <>You nudged {t.first} <b>{dayPhrase(p.sent, today)}</b>.</>,
-      consequences: [`The query goes back to waiting on ${t.first}`, `If there’s still nothing by ${fmt(p.then)}, it comes back to you`, "Leaves your tray"],
-      draft: { ghost: { id: "__ghost", ...ghost } },
+      timeline: [
+        { at: p.sent, what: <>Your nudge is logged, and the query goes back to waiting on {t.first}</>, art: "nudge" },
+        { at: p.then, what: <>If there’s still nothing, it comes back to you</>, art: "calendar" },
+      ],
+      draft: { ghost: { id: "__ghost", ...ghost }, future: { lastNudgeSentDate: nw.queryUpdates.lastNudgeSentDate, closePlan: dayIso(p.then), nudgeDate: undefined } },
       commit: async () => {
         const undo = await snapshotted(ctx, [q.id], () => saveNudgeSent(ctx.db, q, t.agent ?? null, nudgePlan(q, p.sent, p.then)));
-        return { head: "Nudge logged.", msg: `If ${t.first} still hasn’t replied by ${fmt(p.then)}, this will come back to you.`, undo };
+        return { head: "Nudge logged.", msg: `If ${t.first} still hasn’t replied by ${fmt(p.then)}, this will come back to you.`, undo,
+          snack: { msg: `Nudge logged for ${t.first}`, sub: `back on your list ${fmt(p.then)} if there’s still nothing` } };
       },
     };
   }
@@ -378,10 +414,12 @@ function quietFlow(ctx: FlowCtx, openPartial: () => void): Flow {
     return {
       ...base, questions,
       sentence: <>You’re giving {t.first} until <b>{until ? fmt(until) : ""}</b>. The query stays open.</>,
-      consequences: until ? [`Back on your list on ${fmt(until)} if there’s still no word`, "It stays in Gone quiet on the Query Centre", "Leaves your tray until then"] : [],
+      timeline: until ? [{ at: until, what: <>Back on your list if there’s still no word</>, art: "calendar" }] : [],
+      after: until ? `This task leaves your list until ${fmt(until)}.` : undefined,
       commit: async () => {
         const undo = await ctx.snoozeFor(Math.max(1, dayDiff(until!, today)));
-        return { head: "No rush.", msg: `${t.first}’s query stays open. You’ll see this again on ${fmt(until!)} if nothing comes in.`, undo: undo ?? undefined };
+        return { head: "No rush.", msg: `${t.first}’s query stays open. You’ll see this again on ${fmt(until!)} if nothing comes in.`, undo: undo ?? undefined,
+          snack: { msg: `Waiting on ${t.first}`, sub: `back on your list ${fmt(until!)}` } };
       },
     };
   }
@@ -398,7 +436,7 @@ function quietFlow(ctx: FlowCtx, openPartial: () => void): Flow {
     if (what === "partial") {
       return {
         ...base, questions,
-        sentence: <>{t.first} asked for a partial.</>, consequences: [],
+        sentence: <>{t.first} asked for a partial.</>,
         door: { label: "Say how much they asked for →", open: openPartial },
         commit: null,
       };
@@ -410,10 +448,11 @@ function quietFlow(ctx: FlowCtx, openPartial: () => void): Flow {
     return {
       ...base, questions,
       sentence: <>{t.first} replied <b>{dayPhrase(on, today)}</b>: <b>{(r?.label ?? "").replace("They ", "they ")}</b>.</>,
-      consequences: what === "pass" ? ["The query moves to Closed, as passed", "It goes on your Responses page", "Leaves your tray"]
-        : what === "full" ? ["The query moves to Full requested", `Sending it comes onto your list, due ${fmt(sendBy)}`, "This task leaves your tray"]
-        : what === "offer" ? ["The query moves to Offer", `Answering the offer goes to the top of your list, due ${fmt(offerBy)}`, "This task leaves your tray"] : [],
-      draft: r ? { status: r.status, ghost: { id: "__ghost", type: r.status, resultingStatus: r.status, createdAt: new Date(on.getFullYear(), on.getMonth(), on.getDate(), 12).toISOString() } } : {},
+      timeline: what === "pass" ? [{ at: on, what: <>The query moves to <b>Closed</b>, as passed</>, art: "close" }]
+        : what === "full" ? [{ at: on, what: <>The query moves to <b>Full requested</b></>, art: "letter" }, { at: sendBy, what: <>Sending the full is due on your list</>, art: "calendar" }]
+        : what === "offer" ? [{ at: on, what: <>The query moves to <b>Offer</b></>, art: "offer" }, { at: offerBy, what: <>Answering the offer is due</>, art: "calendar" }] : [],
+      draft: r ? { status: r.status, ghost: { id: "__ghost", type: r.status, resultingStatus: r.status, createdAt: new Date(on.getFullYear(), on.getMonth(), on.getDate(), 12).toISOString() },
+        future: { nudgeDate: undefined, closePlan: undefined, ...(what === "full" ? { expectedSendDate: dayIso(sendBy) } : {}), ...(what === "offer" ? { offerResponseDeadline: dayIso(offerBy) } : {}) } } : {},
       commit: async () => {
         const rt = what === "pass" ? "rejected" : what === "full" ? "full" : "offer";
         const data: RecordResponseData = {
@@ -433,9 +472,9 @@ function quietFlow(ctx: FlowCtx, openPartial: () => void): Flow {
           if (q.closePlan) extra.closePlan = deleteField();
           if (Object.keys(extra).length) await ctx.db.updateQuery(q.id, extra as Partial<Query>);
         });
-        return what === "pass" ? { head: "Logged.", msg: "It’s on your Responses page now.", undo }
-          : what === "offer" ? { head: "Congratulations!", msg: `Answering ${t.first}’s offer is at the top of your list.`, undo }
-          : { head: "Good news!", msg: `${t.first} wants to read more. Sending the full is now on your list.`, undo };
+        return what === "pass" ? { head: "Logged.", msg: "It’s on your Responses page now.", undo, snack: { msg: `${t.first} passed`, sub: "it’s on your Responses page" } }
+          : what === "offer" ? { head: "Congratulations!", msg: `Answering ${t.first}’s offer is at the top of your list.`, undo, snack: { msg: `${t.first} made an offer`, sub: `answering it is due ${fmt(offerBy)}` } }
+          : { head: "Good news!", msg: `${t.first} wants to read more. Sending the full is now on your list.`, undo, snack: { msg: `${t.first} asked for your full manuscript`, sub: `sending it is due ${fmt(sendBy)}` } };
       },
     };
   }
@@ -453,14 +492,16 @@ function quietFlow(ctx: FlowCtx, openPartial: () => void): Flow {
     return {
       ...base, questions,
       sentence: <>You’re closing your query to {t.first}: <b>{why === "withdraw" ? "you withdrew it" : "no reply"}</b>.</>,
-      consequences: [`The query moves to Closed, as ${why === "withdraw" ? "withdrawn" : "no reply"}`, why === "withdraw" ? "It shows on your Responses page" : "It counts as no reply on your Responses page", "Leaves your tray"],
-      draft: why ? { status, ghost: { id: "__ghost", type: status, resultingStatus: status, createdAt: new Date(on.getFullYear(), on.getMonth(), on.getDate(), 12).toISOString() } } : {},
+      timeline: why ? [{ at: on, what: <>The query moves to <b>Closed</b>, as {why === "withdraw" ? "withdrawn" : "no reply"}</>, art: "close" }] : [],
+      verb: "Close it",
+      draft: why ? { status, ghost: { id: "__ghost", type: status, resultingStatus: status, createdAt: new Date(on.getFullYear(), on.getMonth(), on.getDate(), 12).toISOString() }, future: { nudgeDate: undefined, closePlan: undefined } } : {},
       commit: async () => {
         const a = why === "withdraw"
           ? { why: "withdraw" as const, on, wd: "other" as const, told: true, remindTell: false, recheck: "no" as const, note: "" }
           : { ...noreplyAnswers(on), on };
         const undo = await snapshotted(ctx, [q.id], () => saveClose(ctx.db, q, t.agent ?? null, a, today));
-        return { head: "Closed.", msg: `It’s on your Responses page now. If ${t.first} ever gets back to you, you can reopen it.`, undo };
+        return { head: "Closed.", msg: `It’s on your Responses page now. If ${t.first} ever gets back to you, you can reopen it.`, undo,
+          snack: { msg: `Closed your query to ${t.first}`, sub: "it’s on your Responses page" } };
       },
     };
   }
@@ -486,9 +527,13 @@ function fixFlow(ctx: FlowCtx, openCard: () => void): Flow {
         body: <ReplySlider weeks={wk} onPick={(w) => set({ wk: w })} />,
       }],
       sentence: <>{t.first} replies in about <b>{wk} week{wk === 1 ? "" : "s"}</b>.</>,
-      consequences: [`Saved to ${t.first}’s card`, ...moved.map((m) => `Reply expected by ${fmt(new Date(m.ms))}${moved.length > 1 ? ` (${m.title})` : ""}`), "Leaves your tray"],
+      timeline: [
+        { at: ctx.today, what: <>Saved to {t.first}’s card</>, art: "card" },
+        ...moved.slice(0, 2).map((m) => ({ at: new Date(m.ms), what: <>Your query’s reply is now expected{moved.length > 1 ? ` (${m.title})` : ""}</>, art: "letter" as const })),
+      ],
       draft: wk ? { agentPatch: { responseTimeWeeks: wk }, section: "how" } : { section: "how" },
-      commit: async () => ({ head: `Saved to ${t.first}’s card.`, msg: moved.length === 1 ? `Your query’s reply is now expected by ${fmt(new Date(moved[0].ms))}.` : moved.length ? `Reply dates for ${moved.length} of your queries to ${t.first} have moved.` : `${t.first}’s card is a little more complete.`, undo: await save({ responseTimeWeeks: wk }) }),
+      commit: async () => ({ head: `Saved to ${t.first}’s card.`, msg: moved.length === 1 ? `Your query’s reply is now expected by ${fmt(new Date(moved[0].ms))}.` : moved.length ? `Reply dates for ${moved.length} of your queries to ${t.first} have moved.` : `${t.first}’s card is a little more complete.`, undo: await save({ responseTimeWeeks: wk }),
+        snack: { msg: `Saved to ${t.first}’s card`, sub: `replies in about ${wk} week${wk === 1 ? "" : "s"}` } }),
     };
   }
   if (t.need === "mswl") {
@@ -500,14 +545,15 @@ function fixFlow(ctx: FlowCtx, openCard: () => void): Flow {
         body: <textarea className="tws-ta" placeholder="Paste it here" value={wish} onChange={(e) => set({ wish: e.target.value })} aria-label={`What ${t.first} is looking for`} />,
       }],
       sentence: <>{t.first}’s wishlist goes on their card.</>,
-      consequences: [`Saved to ${t.first}’s card`, "Leaves your tray"],
+      timeline: [{ at: ctx.today, what: <>{t.first}’s wishlist is saved to their card</>, art: "card" }],
       draft: wish.trim() ? { agentPatch: { mswlNotes: wish.trim() }, section: "wishlist" } : { section: "wishlist" },
-      commit: async () => ({ head: `Saved to ${t.first}’s card.`, msg: `${t.first}’s card is a little more complete.`, undo: await save({ mswlNotes: wish.trim() }) }),
+      commit: async () => ({ head: `Saved to ${t.first}’s card.`, msg: `${t.first}’s card is a little more complete.`, undo: await save({ mswlNotes: wish.trim() }),
+        snack: { msg: `Saved to ${t.first}’s card`, sub: "their wishlist" } }),
     };
   }
   /* what they want sent: the agent card's own materials control does this (a sample has a unit and an amount) */
   return {
-    questions: [], sentence: null, consequences: [], draft: { section: "send" }, commit: null,
+    questions: [], sentence: null, draft: { section: "send" }, commit: null,
     door: { label: `Open ${t.first}’s card at “Send them” ↗`, open: openCard },
   };
 }
@@ -537,7 +583,8 @@ function materialsFlow(ctx: FlowCtx): Flow {
         onPick={(k) => set({ mats: picked.includes(k) ? picked.filter((x) => x !== k) : [...picked, k] })} />,
     }],
     sentence: <>You sent {t.first} your <b>{andList(names.map((n) => n.toLowerCase()))}</b>.</>,
-    consequences: [`Saved on ${t.first}’s query`, (t.batch?.length ?? 0) > 1 ? `Then the next of ${t.batch!.length - 1} opens` : "Leaves your tray"],
+    timeline: [{ at: ctx.today, what: <>What you sent is saved on your query to {t.first}</>, art: "card" }],
+    after: (t.batch?.length ?? 0) > 1 ? `Then the next of ${t.batch!.length - 1} opens.` : undefined,
     draft: {},
     commit: async () => {
       const w = sweepWrites([row])[0];
@@ -546,6 +593,7 @@ function materialsFlow(ctx: FlowCtx): Flow {
       await ctx.db.updateQuery(q.id, { materialsWanted: w.materialsWanted } as Partial<Query>);
       return {
         head: (t.batch?.length ?? 0) > 1 ? "Saved." : "All filled in.", msg: `Saved what you sent ${t.first}.`,
+        snack: { msg: `Saved what you sent ${t.first}`, sub: andList(names.map((n) => n.toLowerCase())) },
         undo: async () => { await ctx.db.updateQuery(q.id, { materialsWanted: (before ?? []) as string[] } as Partial<Query>); },
       };
     },
@@ -563,7 +611,7 @@ export function buildFlow(ctx: FlowCtx, doors: { openPartial: () => void; openCa
   /* the one-query materials row is filled in on the desk the same way, and is the last of its kind */
   if (k === "other" && ctx.t.query && (ctx.t.item.card.taskType === "materials_unrecorded" || ctx.t.item.card.taskType === "materials_unrecorded_bulk")) return materialsFlow(ctx);
   return {
-    questions: [], sentence: null, consequences: [], draft: {}, commit: null,
+    questions: [], sentence: null, draft: {}, commit: null,
     door: doors.openOther ? { label: "Open it ↗", open: doors.openOther } : undefined,
   };
 }
