@@ -1,0 +1,100 @@
+{
+ "title": "Send Marcus your full",
+ "pts": [
+  "2026-11-08",
+  "2027-01-31",
+  "2027-02-08"
+ ],
+ "future": {
+  "band": "WITH THE AGENT",
+  "pill": "Full sent",
+  "title": "You sent Marcus your full manuscript",
+  "stamp": "21 Aug",
+  "status": "Waiting for Marcus · reply expected by 31 Jan 2027"
+ },
+ "after": {
+  "band": "WITH THE AGENT",
+  "pill": "Full sent",
+  "title": "You sent Marcus your full manuscript",
+  "stamp": "21 Aug",
+  "status": "Waiting for Marcus · reply expected by 31 Jan 2027"
+ },
+ "docs": [
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-pkgq-3",
+   "fields": [
+    "nudgeDate",
+    "writerExpectedDate",
+    "writerExpectedSetAt"
+   ]
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-pkgq-3/activity/act-dp3i4flb1",
+   "fields": [
+    "agentName",
+    "createdAt",
+    "eventKey",
+    "manuscriptTitle",
+    "note",
+    "queryId",
+    "resultingStatus",
+    "type"
+   ]
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/activities/act-dp3i4flb1",
+   "fields": [
+    "activityType",
+    "bookVersionId",
+    "date",
+    "description",
+    "details",
+    "eventKey",
+    "id",
+    "manuscriptId",
+    "queryId",
+    "resultingStatus",
+    "userId"
+   ]
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-pkgq-3",
+   "fields": [
+    "fullRequestedDate",
+    "fullSentDate",
+    "hasAgentResponded",
+    "lastStatusChange",
+    "responseReceivedAt",
+    "revisionRound",
+    "status"
+   ]
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-pkgq-3",
+   "fields": [
+    "lastSentLabel"
+   ]
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-pkgq-3",
+   "fields": [
+    "agentId",
+    "dateSent",
+    "fullRequestedDate",
+    "hasAgentResponded",
+    "id",
+    "manuscriptId",
+    "packageId",
+    "personalisationNotes",
+    "responseReceivedAt",
+    "revisionRound",
+    "sendMethod",
+    "sentHow",
+    "sentPackageEdition",
+    "sentPackageId",
+    "status",
+    "userId"
+   ]
+  }
+ ]
+}
