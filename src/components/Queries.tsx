@@ -8112,6 +8112,7 @@ export const Queries: React.FC<{
                   }}
                   signoff={!showGridSkeleton && qcScoped.length > 0 && qcF138.where === null && qc140Chips.length === 0 ? { total: qcScoped.length } : null}
                   onImport={() => onNavigate?.("import")}
+                  packageNameOf={(r) => { const k = pkgKeyOf(r); return k ? qcPackageName(k) : null; }}
                   birds={qcView150 === "birds" && !showGridSkeleton ? (
                     <QcBirds150 groups={qcBeGroups} banded={qcBeGroup !== "none"} nowMs={qcNow138} moves={qcMoves}
                       selectedId={selectedQueryId} closedN={beClosedCount(qcVisible, qcNow138)}

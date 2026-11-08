@@ -19,7 +19,7 @@ import { QueryStatus } from "../../../types";
 import { StatusDot } from "../../StatusDot";
 import { usePopover } from "../../shell/ListPills";
 import { usePinCover } from "../../shell/stickyStack";
-import { STAGE_NAME, whereItStands, type QcRow, type WhereKey } from "../../../lib/qcSummary";
+import { whereItStands, type QcRow, type WhereKey } from "../../../lib/qcSummary";
 import { BE_GROUPS, BE_SORTS, type BeGroup, type BeSort } from "../../../lib/qc150";
 import type { GroupBy } from "../../../lib/qcCalView";
 import { TAB_LABEL, isClosedRow, lastHeardMs, pressSort, trackOf, type Section, type Sort151, type SortKey151 } from "../../../lib/qc151";
@@ -30,8 +30,12 @@ import type { DrawerMode } from "../../../lib/queryActions/drawerStore";
 import { RadioMenu151 } from "./QcToolbar140";
 import { GROUP_1522, GROUP_MENU_HEAD, PACKAGE_LOCKED_LINE, head1522 } from "../../../lib/qc1522";
 import { QcQuietSetting } from "./QcQuietSetting";
+import { QcSlip153 } from "./QcSlip153";
+import { ACTION_WHY_153, FOLD_LINE, foldInitials, isFoldKey } from "../../../lib/qc153";
+import { sectionSwatch, standWords } from "../../../lib/qc153";
 import "./qcv151.css";
 import "./qcv1522.css";
+import "./qcv153.css";
 
 export const HAWK_DESK = "/images/query-centre/hawk-desk.webp?v=1";
 
@@ -49,9 +53,8 @@ const PKG_ICON = <svg className="qc1522-pk" viewBox="0 0 20 20" aria-hidden="tru
 
 export type View151 = "list" | "birds";
 
-/** the Where it stands pill: the status's own name; a closed query in the filter panel's short words */
-const CLOSED_SHORT: Partial<Record<string, string>> = { "No Response": "No reply" };
-export const standWords = (r: Pick<QcRow, "status">): string => CLOSED_SHORT[r.status] ?? STAGE_NAME[r.status];
+/** the Where it stands words: moved to lib/qc153 (the slip reads them), re-exported for this file's older readers */
+export { standWords } from "../../../lib/qc153";
 
 /** the sort's column words (the headings', the Sort pill's). v151's Agency and Next move columns are folded away; a
  *  sort still set on them from earlier in the visit keeps its own name. */
@@ -90,26 +93,11 @@ export const QcHeader151: React.FC<{
   </header>
 );
 
-/* ── §2 the "This week" summary card ── */
-/* v152.2 §1.3 — the chips are up to four to-do rows in two columns; a row opens that query's card */
-export const QcSummary1511: React.FC<{ summary: WeekSummary | null; onOpen?: (id: string) => void }> = ({ summary, onOpen }) => (
-  <section className="qc1511-sum" aria-label="This week" data-qc1511="summary">
-    <div className="qc1511-sum-art" aria-hidden="true"><img src={HAWK_DESK} alt="" /></div>
-    <div className="qc1511-sum-tx">
-      <h2 data-qc1511="summary-heading">{summary ? summary.heading : " "}</h2>
-      {summary?.detail ? <p data-qc1511="summary-detail">{summary.detail}</p> : null}
-      {summary && summary.todo.length ? (
-        <div className="qc1522-todo" data-qc1522="todo">
-          {summary.todo.map((t) => (
-            <button key={t.id} type="button" className="qc1522-tr" data-qc1522="todo-row" data-id={t.id} data-late={t.late ? "" : undefined} onClick={() => onOpen?.(t.id)}>
-              <StatusDot status={t.status} overrideSize={14} decorative />
-              <b>{t.job}</b>
-              <i>{t.when} →</i>
-            </button>
-          ))}
-        </div>
-      ) : null}
-    </div>
+/* ── §2 the "This week" line (v153): the hawk thumbnail and one sentence, on a white rounded strip ── */
+export const QcSummary1511: React.FC<{ summary: WeekSummary | null }> = ({ summary }) => (
+  <section className="qc153-slim" aria-label="This week" data-qc1511="summary">
+    <img src={HAWK_DESK} alt="" />
+    <p data-qc1511="summary-heading">{summary ? <><b>{summary.heading}.</b>{summary.detail ? <> {summary.detail}</> : null}</> : " "}</p>
   </section>
 );
 
@@ -166,6 +154,10 @@ export interface QcPage151Props {
   /** v151.2 — the row's one action (lib/qc1512 `rowAct`): its journey's mode */
   onAct: (id: string, mode?: DrawerMode) => void;
   signoff: { total: number } | null;
+  /** v153 — the slip's "Sent with": the package's name, or null when none is recorded */
+  packageNameOf: (r: QcRow) => string | null;
+  /** v153 — the filter rail, drawn in the left column */
+  rail?: React.ReactNode;
   onImport: () => void;
   /* §9 Birds-eye */
   birds: React.ReactNode;
@@ -204,6 +196,8 @@ const DateCell: React.FC<{ ms: number | null; nowMs: number; probe: string }> = 
   return <td className="qc1511-d" data-qc151={probe}>{y.dm}{y.yr ? <span className="qc1511-yr"> {y.yr}</span> : null}</td>;
 };
 
+const OPENED_KEY = "qh.qc.folds153";
+const readOpened = (): Set<string> => { try { return new Set(JSON.parse(sessionStorage.getItem(OPENED_KEY) ?? "[]") as string[]); } catch { return new Set(); } };
 const COLLAPSE_KEY = "qh.qc.collapsed1511";
 const readCollapsed = (): Set<string> => { try { return new Set(JSON.parse(sessionStorage.getItem(COLLAPSE_KEY) ?? "[]") as string[]); } catch { return new Set(); } };
 
@@ -365,155 +359,129 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
   };
 
   const empty = p.sections.length === 0;
+  /* v153 — a fold opens in place, for the session */
+  const [opened, setOpened] = useState<Set<string>>(readOpened);
+  const openFold = (k: string, on: boolean) => setOpened((c) => {
+    const n = new Set(c); if (on) n.add(k); else n.delete(k);
+    try { sessionStorage.setItem(OPENED_KEY, JSON.stringify([...n])); } catch { /* a private window */ }
+    return n;
+  });
+  const slip = (r: QcRow) => (
+    <QcSlip153 key={r.id} row={r} nowMs={p.nowMs} selected={p.selectedId === r.id} packageName={p.packageNameOf(r)}
+      act={rowAct(r, p.nowMs)} onOpen={p.onOpen} onAct={p.onAct} />
+  );
+  const only = p.sections.length === 1;
+  /* the control line over the list column: the switch, the count, search and Group (Birds-eye: Group and Sort) */
+  const controlLine = (
+    <div className="qc1511-cl" data-qc151="toolbar" data-qc1511="control-line" data-qcv="ws-head">
+      <QcSwitch151 view={p.view} onView={p.onView} loading={p.loading} />
+      <span className="qc1511-show" data-qc1511="showing">Showing <b>{p.loading ? "" : p.showing}</b> of <b>{p.loading ? "" : p.total}</b> {p.total === 1 ? "query" : "queries"}</span>
+      <div className="qc151-ctl" data-qc151="controls">
+        <label className="qc151-sr" data-qc151="find" data-qc140="find">
+          {FIND}
+          <input ref={p.findRef} value={p.find} onChange={(e) => p.onFind(e.target.value)} placeholder="Find an agent" aria-label="Find an agent" autoComplete="off" disabled={p.loading} />
+          {p.find ? <button type="button" className="qc151-srx" aria-label="Clear the search" data-qc151="find-clear" onClick={() => p.onFind("")}>{CROSS}</button> : null}
+        </label>
+        <button type="button" className={`qc151-bb${(birds ? !beGroupDef : !groupDef) ? " is-on" : ""}`} data-qc151={birds ? "be-group" : "group"} data-lp="qc151-group" aria-haspopup="menu"
+          aria-expanded={pop.open === (birds ? "begroup" : "group")} disabled={p.loading}
+          onClick={(e) => pop.toggle(birds ? "begroup" : "group", e.currentTarget)}>{GROUP}<span>Group</span>{CARET}</button>
+        {pop.open === "group" && pop.anchor ? (
+          <RadioMenu151 anchor={pop.anchor} title={GROUP_MENU_HEAD} k="group" value={p.group} plainHead
+            opts={GROUP_1522.map((o) => {
+              const locked = !!o.pro && !p.packageOk;
+              return { key: o.key, label: o.label, line: locked ? PACKAGE_LOCKED_LINE : o.line, pro: o.pro, locked };
+            })}
+            onPick={(v) => { p.onGroup(v as GroupBy); pop.close(); }} />
+        ) : null}
+        {pop.open === "begroup" && pop.anchor ? (
+          <RadioMenu151 anchor={pop.anchor} title="Group Birds-eye by" k="be-group" value={p.beGroup}
+            opts={BE_GROUPS.map((o) => ({ key: o.key, label: o.label, line: BE_GROUP_LINE[o.key] }))}
+            onPick={(v) => { p.onBeGroup(v as BeGroup); pop.close(); }} />
+        ) : null}
+      </div>
+    </div>
+  );
   return (
-    <div className="qc151" data-qc151="page" data-view={p.view} ref={rootRef}>
+    <div className="qc151 qc153" data-qc151="page" data-view={p.view} ref={rootRef}>
       <QcHeader151 loading={p.loading} onLog={p.onLog} onRecord={p.onRecord} logDisabled={p.logDisabled} logRef={p.logRef} counts={p.counts} quietWeeks={p.quietWeeks} onQuietWeeks={p.onQuietWeeks} />
-      <QcSummary1511 summary={p.summary} onOpen={p.onOpen} />
-      {/* v152.2 §1.4 — the one divider: banner above, tabs below */}
-      <hr className="qc1522-dv" data-qc1522="divider" />
+      <QcSummary1511 summary={p.summary} />
 
-      {/* §3 the quick filters, and the switch on the same row */}
-      <div className="qc1511-qr" data-qc1511="quick-row">
-        <nav className="qc1511-qf" aria-label="Who it's with" data-qc151="tabs" data-qc1511="quick">
-          <button type="button" className="qc1511-q" data-k="all" aria-pressed={p.where === null} disabled={p.loading} onClick={() => p.onWhere(null)}>All <b>{p.tabCounts ? p.total : ""}</b></button>
-          {(["you", "agent", "quiet", "closed"] as const).map((k) => (
-            <button key={k} type="button" className="qc1511-q" data-k={k} aria-pressed={p.where === k} disabled={p.loading} onClick={() => p.onWhere(k)}>
-              {TAB_LABEL[k]} <b>{p.tabCounts ? p.tabCounts[k] : ""}</b>
-            </button>
-          ))}
-        </nav>
-        <QcSwitch151 view={p.view} onView={p.onView} loading={p.loading} />
-      </div>
+      {/* v153 — two columns: the filter rail (sticky) and the list column */}
+      <div className="qc153-cl" data-qc153="columns">
+        <div className="qc153-railcol" data-qc153="rail-column">{p.rail ?? null}</div>
+        <div className="qc153-main" data-qc153="list-column">
+          {controlLine}
 
-      {/* §4 the control line */}
-      <div className="qc1511-cl" data-qc151="toolbar" data-qc1511="control-line" data-qcv="ws-head">
-        <span className="qc1511-show" data-qc1511="showing">Showing <b>{p.loading ? "" : p.showing}</b> of <b>{p.loading ? "" : p.total}</b> {p.total === 1 ? "query" : "queries"}</span>
-        <div className="qc151-ctl" data-qc151="controls">
-          <label className="qc151-sr" data-qc151="find" data-qc140="find">
-            {FIND}
-            <input ref={p.findRef} value={p.find} onChange={(e) => p.onFind(e.target.value)} placeholder="Find an agent" aria-label="Find an agent" autoComplete="off" disabled={p.loading} />
-            {p.find ? <button type="button" className="qc151-srx" aria-label="Clear the search" data-qc151="find-clear" onClick={() => p.onFind("")}>{CROSS}</button> : null}
-          </label>
-          <span className={`qc151-fw${panelOpen || filtersOn ? " is-on" : ""}`} data-qc151="filters-wrap">
-            <button type="button" ref={filBtnRef} className="qc151-bb" data-qc151="filters" aria-expanded={panelOpen} aria-label={filtersOn ? `Filters: ${p.filterCount} on` : "Filters"} disabled={p.loading}
-              onClick={() => setPanelOpen((o) => !o)}>
-              {FILTER}<span>Filters</span>{filtersOn ? <em className="qc151-n" data-qc151="filters-n">{p.filterCount}</em> : null}
-            </button>
-            {filtersOn ? <button type="button" className="qc151-bx" data-qc151="filters-clear" aria-label="Reset all filters" title="Reset filters" onClick={() => p.onClearFilters()}>{CROSS}</button> : null}
-          </span>
-          <button type="button" className={`qc151-bb${(birds ? !beGroupDef : !groupDef) ? " is-on" : ""}`} data-qc151={birds ? "be-group" : "group"} data-lp="qc151-group" aria-haspopup="menu"
-            aria-expanded={pop.open === (birds ? "begroup" : "group")} disabled={p.loading}
-            aria-label={birds ? `Group Birds-eye by ${BE_GROUPS.find((g) => g.key === p.beGroup)?.label}` : `Group the list by ${groupOpt?.label ?? ""}`}
-            onClick={(e) => pop.toggle(birds ? "begroup" : "group", e.currentTarget)}>{GROUP}<span>Group</span>{CARET}</button>
           {birds ? (
-            <button type="button" className={`qc151-bb${!beSortDef ? " is-on" : ""}`} data-qc151="be-sort" data-lp="qc151-sort" aria-haspopup="menu" aria-expanded={pop.open === "besort"} disabled={p.loading}
-              aria-label={`Sort within groups by ${BE_SORTS.find((s) => s.key === p.beSort)?.label}`}
-              onClick={(e) => pop.toggle("besort", e.currentTarget)}>{SORT}<span>Sort</span>{CARET}</button>
-          ) : null}
-          {pop.open === "group" && pop.anchor ? (
-            <RadioMenu151 anchor={pop.anchor} title={GROUP_MENU_HEAD} k="group" value={p.group} plainHead
-              opts={GROUP_1522.map((o) => {
-                const locked = !!o.pro && !p.packageOk;
-                return { key: o.key, label: o.label, line: locked ? PACKAGE_LOCKED_LINE : o.line, pro: o.pro, locked };
+            <div className="qc151-be" data-qc151="birds-card">
+              {p.birdsEmpty ? (
+                <div className="qc151-emp" data-qc151="birds-empty">
+                  <b>Nothing on the timeline</b>
+                  {p.birdsEmpty === "closed"
+                    ? <><i>Closed queries don’t appear on Birds-eye. Switch to List to see them.</i><button type="button" className="qc151-btn qc151-btn--g" data-qc151="back-to-list" onClick={() => p.onView("list")}>Back to List</button></>
+                    : <><i>No live queries match these filters.</i><button type="button" className="qc151-btn qc151-btn--g" data-qc151="birds-reset" onClick={p.onClearAll}>Reset filters</button></>}
+                </div>
+              ) : p.birds}
+            </div>
+          ) : (
+            <div className="qc153-list" data-qc151="table" data-qcv="list">
+              {empty ? (
+                <div className="qc151-emp" data-qc151="no-matches">
+                  <b>No queries match</b>
+                  <i>{[...p.pills.map((g) => pillWords(g).value), ...(p.find.trim() ? [`“${p.find.trim()}”`] : []), ...(p.where ? [TAB_LABEL[p.where]] : [])].join(" · ") || "this view"}</i>
+                  <button type="button" className="qc151-btn qc151-btn--g" data-qc151="empty-reset" onClick={p.onClearAll}>Reset filters</button>
+                </div>
+              ) : p.sections.map((s) => {
+                const folds = isFoldKey(p.group, s.key) && !only;
+                const fk = s.key === "quiet" ? "quiet" : "closed";
+                if (folds && !opened.has(s.key)) {
+                  const st = foldInitials(s.rows);
+                  return (
+                    <div key={s.key} className={`qc153-fold qc153-fold--${fk}`} data-qc153="fold" data-k={s.key}>
+                      <div className="qc153-ftx"><b>{s.label}</b><small>{s.rows.length}</small><p>{FOLD_LINE[fk]}</p></div>
+                      <span className="qc153-stack" aria-hidden="true">
+                        {st.shown.map((x) => <span key={x.id} className="qc153-sm">{x.initials}</span>)}
+                        {st.more ? <span className="qc153-sm qc153-sm--more">+{st.more}</span> : null}
+                      </span>
+                      <button type="button" className="qc153-lnk" data-qc153="show-all" aria-expanded={false} onClick={() => openFold(s.key, true)}>Show all →</button>
+                    </div>
+                  );
+                }
+                const why = p.group === "attention" ? ACTION_WHY_153[s.key] : undefined;
+                return (
+                  <section key={s.key} className="qc153-grp" data-qc1511="group" data-k={s.key} aria-label={s.label || "Queries"}>
+                    {s.label ? (
+                      <div className="qc153-sec" data-qc153="heading">
+                        <span className="qc153-sw" style={{ background: sectionSwatch(p.group, s.key) }} aria-hidden="true" />
+                        <b data-qc151="section">{s.label}</b><small>{s.rows.length}</small>
+                        {folds
+                          ? <button type="button" className="qc153-lnk qc153-lnk--r" data-qc153="fold-away" aria-expanded={true} onClick={() => openFold(s.key, false)}>Fold away</button>
+                          : why ? <em>{why}</em> : null}
+                      </div>
+                    ) : null}
+                    {s.rows.map(slip)}
+                  </section>
+                );
               })}
-              onPick={(v) => { p.onGroup(v as GroupBy); pop.close(); }} />
-          ) : null}
-          {pop.open === "begroup" && pop.anchor ? (
-            <RadioMenu151 anchor={pop.anchor} title="Group Birds-eye by" k="be-group" value={p.beGroup}
-              opts={BE_GROUPS.map((o) => ({ key: o.key, label: o.label, line: BE_GROUP_LINE[o.key] }))}
-              onPick={(v) => { p.onBeGroup(v as BeGroup); pop.close(); }} />
-          ) : null}
-          {pop.open === "besort" && pop.anchor ? (
-            <RadioMenu151 anchor={pop.anchor} title="Sort within groups by" k="be-sort" value={p.beSort}
-              opts={BE_SORTS.map((o) => ({ key: o.key, label: o.label, line: BE_SORT_LINE[o.key] }))}
-              onPick={(v) => { p.onBeSort(v as BeSort); pop.close(); }} />
+            </div>
+          )}
+
+          {/* the sign-off: All, nothing narrowing, List only */}
+          {!birds && p.signoff ? (
+            <section className="qc151-end" data-qc151="signoff">
+              <img src="/images/query-centre/quill-ink.webp" alt="" />
+              <div>
+                <h2>That’s all {p.signoff.total}.</h2>
+                <p>When you send the next one, log it here and QueryHawk will keep count of the days.</p>
+              </div>
+              <div className="qc151-end-b">
+                <button type="button" className="qc151-btn qc151-btn--g" data-qc151="import" onClick={p.onImport}>Import from a spreadsheet</button>
+                <button type="button" className="qc151-btn qc151-btn--n" data-qc151="signoff-log" onClick={p.onLog}>+ Log a query</button>
+              </div>
+            </section>
           ) : null}
         </div>
       </div>
-
-      {/* §5 the pill row: not drawn at the defaults */}
-      {pillsOn ? (
-        <div className="qc1511-pr" data-qc1511="pills" aria-live="polite">
-          {pillRow()}
-          <button type="button" className="qc1511-fadd" data-qc1511="add-filter" data-opens-panel="" onClick={() => setPanelOpen(true)}>+ Filter</button>
-          <button type="button" className="qc1511-crs" data-qc1511="clear-all" onClick={p.onClearAll}>Clear all</button>
-        </div>
-      ) : null}
-
-      {/* the panel, inline, under the pill row */}
-      {panelOpen ? <div className="qc151-fpw" ref={panelRef} data-qc151="filter-panel">{p.filterPanel(() => { closePanel(); filBtnRef.current?.focus({ preventScroll: true }); })}</div> : null}
-
-      {birds ? (
-        <div className="qc151-be" data-qc151="birds-card">
-          {p.birdsEmpty ? (
-            <div className="qc151-emp" data-qc151="birds-empty">
-              <b>Nothing on the timeline</b>
-              {p.birdsEmpty === "closed"
-                ? <><i>Closed queries don’t appear on Birds-eye. Switch to List to see them.</i><button type="button" className="qc151-btn qc151-btn--g" data-qc151="back-to-list" onClick={() => p.onView("list")}>Back to List</button></>
-                : <><i>No live queries match these filters.</i><button type="button" className="qc151-btn qc151-btn--g" data-qc151="birds-reset" onClick={p.onClearAll}>Reset filters</button></>}
-            </div>
-          ) : p.birds}
-        </div>
-      ) : (
-        /* v152.2 §1.5 — EACH GROUP IS ITS OWN TABLE, so its sticky header leaves with its last row (a sticky cell sticks
-           to its whole table, never to its tbody). The columns are fixed widths, so every group's columns line up. */
-        <div className="qc1522-list" data-qc151="table" data-qcv="list">
-          {empty ? (
-            <table className="qc151-tbl qc1511-tbl qc1522-t"><tbody><tr><td colSpan={7}>
-              <div className="qc151-emp" data-qc151="no-matches">
-                <b>No queries match</b>
-                <i>{[...p.pills.map((g) => pillWords(g).value), ...(p.find.trim() ? [`“${p.find.trim()}”`] : []), ...(p.where ? [TAB_LABEL[p.where]] : [])].join(" · ") || "this view"}</i>
-                <button type="button" className="qc151-btn qc151-btn--g" data-qc151="empty-reset" onClick={p.onClearAll}>Reset filters</button>
-              </div>
-            </td></tr></tbody></table>
-          ) : p.sections.map((s) => {
-            const shut = !!s.label && collapsed.has(s.key);
-            const h = head1522(p.group, s.key);
-            const statusHead = p.group === "status" && s.key !== "closed";
-            return (
-              <table key={s.key} className={`qc151-tbl qc1511-tbl qc1522-t${shut ? " is-shut" : ""}`} data-qc1511="group" data-k={s.key} data-kind={h.kind}
-                style={{ ["--gh" as string]: h.fill } as React.CSSProperties}>
-                <colgroup><col className="c-tk" /><col className="c-nm" /><col className="c-ws" /><col className="c-d" /><col className="c-d" /><col className="c-nx" /><col className="c-act" /></colgroup>
-                <tbody className={`qc1511-g qc1522-g${shut ? " is-shut" : ""}`}>
-                  <tr className="qc1511-gh qc1522-gh" data-qc1511="group-header" data-k={s.key} data-kind={h.kind}>
-                    {s.label ? (
-                      <td className="qc1511-gt" colSpan={2}>
-                        <span className="qc1522-gin">
-                          <button type="button" className="qc1511-cv" data-qc1511="fold" aria-expanded={!shut} aria-label={`${shut ? "Show" : "Hide"} ${s.label}`} onClick={() => fold(s.key)}>{CHEV}</button>
-                          {statusHead ? <span className="qc1512-gg" aria-hidden="true"><StatusDot status={s.key} overrideSize={16} decorative /></span> : null}
-                          {h.kind === "pkg"
-                            ? <span className="qc1522-pl" data-qc1522="pkg-label">{PKG_ICON}<span className="qc1511-gn" data-qc151="section">{s.label}</span></span>
-                            : <>{h.kind === "pkg-none" ? <span className="qc1522-pki" aria-hidden="true">{PKG_ICON}</span> : null}<span className="qc1511-gn" data-qc151="section">{s.label}</span></>}
-                          <small>{s.rows.length}</small>
-                        </span>
-                      </td>
-                    ) : (
-                      <><td className="qc1511-lbl c-tk" />{heading("agent", "Agent", "c-nm")}</>
-                    )}
-                    {labels()}
-                  </tr>
-                  {shut ? null : s.rows.map((r, j) => row(r, j === s.rows.length - 1))}
-                </tbody>
-              </table>
-            );
-          })}
-        </div>
-      )}
-
-      {/* the sign-off: All, nothing narrowing, List only */}
-      {!birds && p.signoff ? (
-        <section className="qc151-end" data-qc151="signoff">
-          <img src="/images/query-centre/quill-ink.webp" alt="" />
-          <div>
-            <h2>That’s all {p.signoff.total}.</h2>
-            <p>When you send the next one, log it here and QueryHawk will keep count of the days.</p>
-          </div>
-          <div className="qc151-end-b">
-            <button type="button" className="qc151-btn qc151-btn--g" data-qc151="import" onClick={p.onImport}>Import from a spreadsheet</button>
-            <button type="button" className="qc151-btn qc151-btn--n" data-qc151="signoff-log" onClick={p.onLog}>+ Log a query</button>
-          </div>
-        </section>
-      ) : null}
     </div>
   );
 };
