@@ -111,6 +111,8 @@ import { recomputeQuery as recomputeQueryOnline, subcollectionDocToDerivable, mo
 import { importedSentDate, seedsOwnHistory } from "./addQueryShape";
 import { buildNudgeWrites, reconcileNudge, NUDGE_NESTED_TYPE, type StoredNudge } from "./logNudge";
 import { writeActivity } from "./activityWrite";
+import { createManuscript, updateManuscriptFields } from "./manuscriptWrite";
+import { narrate } from "./narrate";
 import { resolveGenre, matchKey } from "./genres";
 import { commitAgentEdits, AgentEditPatch, AgentExtraWrite, SaveAgentResult } from "./saveAgentEdits";
 import { computeAgentDeadlineWrites } from "./computeAgentDeadlineWrites";
@@ -1510,35 +1512,21 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       };
     }
 
-    const id = m.id || "ms-" + Math.random().toString(36).substr(2, 9);
-    const newMs: Manuscript = {
-      ...m,
-      id,
-      userId: currentUser.id,
-      statusChangedDate: new Date().toISOString()
-    } as any;
-
-    let writeSuccess = false;
-    try {
-      await setDoc(doc(db, "users", currentUser.id, "manuscripts", id), newMs);
-      writeSuccess = true;
-    } catch (e) {
-      handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/manuscripts/${id}`);
-      return { success: false, error: "Database exception occurred." };
-    }
-
-    if (writeSuccess) {
-      await addActivity({
+    /* ⚠️ SUCCESS IS THE MANUSCRIPT WRITE ALONE (timeline writer fix v1) — lib/manuscriptWrite.ts.
+       The feed entry is narration: a failed one no longer reports a landed save as a failure, so the
+       form's retry can no longer make a second manuscript. */
+    return createManuscript(
+      db, currentUser.id, m,
+      (newMs) => addActivity({
         activityType: ActivityType.MANUSCRIPT_ADDED,
         description: `You added a new title ${newMs.title} to your manuscripts`,
-        manuscriptId: id,
+        manuscriptId: newMs.id,
         queryId: "",
         date: new Date().toISOString(),
         details: ""
-      });
-      return { success: true, id };
-    }
-    return { success: false, error: "Initialization failed." };
+      }),
+      (e, op, path) => handleFirestoreError(e, op === "write" ? OperationType.WRITE : OperationType.UPDATE, path),
+    );
   };
 
   const updateManuscript = async (id: string, fields: Partial<Manuscript>) => {
@@ -1547,31 +1535,27 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     if (!existingMs) return;
     const msTitle = existingMs.title;
 
-    let writeSuccess = false;
-    try {
-      const hasStatusChanged = fields.status && fields.status !== existingMs?.status;
-      const updates = {
-        ...fields,
-        ...(hasStatusChanged ? { statusChangedDate: new Date().toISOString() } : {})
-      };
-      await updateDoc(doc(db, "users", currentUser.id, "manuscripts", id), updates);
-      writeSuccess = true;
-    } catch (e) {
-      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/manuscripts/${id}`);
-    }
-
-    /* a comps-only write is list maintenance and narrates nothing — lib/manuscriptFeed.ts */
-    if (writeSuccess && narratesManuscriptWrite(fields)) {
-      const dateStr = new Date().toISOString();
-      await addActivity({
-        activityType: ActivityType.MANUSCRIPT_UPDATED,
-        description: "You updated a manuscript's details",
-        manuscriptId: id,
-        queryId: "",
-        date: dateStr,
-        details: ""
-      });
-    }
+    const hasStatusChanged = fields.status && fields.status !== existingMs?.status;
+    const updates = {
+      ...fields,
+      ...(hasStatusChanged ? { statusChangedDate: new Date().toISOString() } : {})
+    };
+    /* ⚠️ THE UPDATE DECIDES, THE FEED NARRATES (timeline writer fix v1) — lib/manuscriptWrite.ts.
+       A comps-only write is list maintenance and narrates nothing — lib/manuscriptFeed.ts. */
+    await updateManuscriptFields(
+      db, currentUser.id, id, updates,
+      narratesManuscriptWrite(fields)
+        ? () => addActivity({
+            activityType: ActivityType.MANUSCRIPT_UPDATED,
+            description: "You updated a manuscript's details",
+            manuscriptId: id,
+            queryId: "",
+            date: new Date().toISOString(),
+            details: ""
+          })
+        : null,
+      (e, op, path) => handleFirestoreError(e, op === "write" ? OperationType.WRITE : OperationType.UPDATE, path),
+    );
   };
 
   /**
@@ -2191,7 +2175,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     if (writeSuccess) {
       /* ⚠️ KEYED BY THE AGENT'S ID (clean-up pass, 28 Sep): the row is found by id, never by the name
          in its sentence, so renaming the agent can never make it look missing and grow a second. */
-      await addActivity({
+      /* ⚠️ NARRATION (timeline writer fix v1): the agent already landed; a missing entry cannot fail the add. */
+      await narrate(() => addActivity({
         id: `act-added-agent-${id}`,
         activityType: ActivityType.AGENT_ADDED,
         description: newAg.name?.trim()
@@ -2201,7 +2186,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         queryId: "",
         date: new Date().toISOString(),
         details: ""
-      });
+      }), `agent ${id} added`);
       return { success: true, id };
     }
     return { success: false, error: "Operation failed." };
@@ -2296,8 +2281,10 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         }
       }
 
+      /* ⚠️ NARRATION (timeline writer fix v1): the update already landed, and one missing entry never
+         stops the next one being written. */
       for (const act of activitiesToCreate) {
-        await addActivity(act);
+        await narrate(() => addActivity(act), `agent ${id} updated`);
       }
     }
   };
