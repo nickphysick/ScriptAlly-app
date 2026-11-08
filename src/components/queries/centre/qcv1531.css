@@ -1,0 +1,93 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Query Centre v153.1 (design-refs/query-centre-v153-1.html, read from the rendered page at 1920) — the header with the
+ * stage ring card. Desktop only (768px and up), like every Query Centre rule since v131.
+ *
+ * Faces are READ, never named: --font-serif (Playfair), --sp-type (Special Elite), --sp-serif (Source Serif). Every
+ * face carries `!important`, and the headings two classes, because brand.tsx forces a face on h1/h2 and bare buttons.
+ * ⚠️ NO RED OR RUST TEXT anywhere: the ring's inks are the slip headers' own stage inks.
+ */
+@media (min-width: 768px) {
+  /* ── the header: three columns on the page's own ground ─────────────────────────────────────────────────── */
+  .qc1531-hd {
+    --ink: #1c130f; --mut: #5b4f47; --navy: #2a3a52; --cream: #f4eee5;
+    box-sizing: border-box; display: grid; grid-template-columns: 190px minmax(0, 1fr) minmax(400px, 560px);
+    align-items: center; gap: 36px; padding: 0 0 18px; color: var(--ink);
+  }
+  .qc1531-hd * { box-sizing: border-box; }
+  .qc1531-art img { display: block; width: 190px; height: auto; filter: drop-shadow(0 14px 14px rgba(28, 19, 15, 0.12)); }
+  .qc1531-main { min-width: 0; }
+  /* the title: Playfair 54/600. Mixed case at 1.05 is the ref's; nothing above it clips, so the descenders print */
+  .qc151 .qc1531-hd h1.qc1531-t {
+    margin: 0; font: 600 54px/1.05 var(--font-serif) !important; color: var(--ink) !important; letter-spacing: 0;
+    white-space: nowrap; overflow: visible; min-height: 1.05em;
+  }
+  .qc1531-for { display: flex; align-items: center; gap: 18px; max-width: 640px; margin: 8px 0 12px; }
+  .qc1531-for i { flex: 1 1 0; height: 1px; background: #cfc5b7; }
+  .qc151 .qc1531-for span { flex: none; max-width: 70%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 21px/1.25 var(--sp-type) !important; color: var(--ink); }
+  .qc151 .qc1531-for em { margin-right: 6px; font: italic 400 19px/1.25 var(--sp-serif) !important; color: var(--mut); }
+  /* with no "for" line (several manuscripts, none scoped) the buttons keep the same distance from the title */
+  .qc1531-t + .qc1531-acts { margin-top: 18px; }
+  .qc1531-acts { display: flex; align-items: center; flex-wrap: wrap; gap: 14px; }
+  .qc151 .qc1531-b {
+    all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; height: 46px; padding: 0 22px;
+    border-radius: 12px; font: 400 16.5px/1 var(--sp-type) !important; white-space: nowrap;
+  }
+  .qc151 .qc1531-b--n { background: var(--navy); color: #fff; }
+  .qc151 .qc1531-b--g { background: #fff; color: var(--ink); box-shadow: inset 0 0 0 1px #d9d0c3, 0 2px 6px -4px rgba(28, 19, 15, 0.3); }
+  .qc151 .qc1531-b--g:hover { box-shadow: inset 0 0 0 1px #b9ad9e, 0 2px 6px -4px rgba(28, 19, 15, 0.3); }
+  .qc151 .qc1531-b:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
+  .qc151 .qc1531-b:disabled { opacity: 0.55; cursor: default; }
+  /* the quiet-window gear, re-inked for a light ground (it was white on the navy banner) */
+  .qc151 .qc1531-hd .qc152-setbtn { color: var(--ink); box-shadow: inset 0 0 0 1px #d9d0c3; background: #fff; }
+  .qc151 .qc1531-hd .qc152-setbtn:hover, .qc151 .qc1531-hd .qc152-setbtn[aria-expanded="true"] { box-shadow: inset 0 0 0 1px #b9ad9e; background: #fff; }
+  .qc151 .qc1531-hd .qc152-setbtn:focus-visible { outline: 2px solid var(--navy); }
+  .qc151 .qc1531-hd .qc152-setpop { right: auto; left: 0; }
+  .qc1531-rc { min-width: 0; }
+
+  /* ── the stage ring card ────────────────────────────────────────────────────────────────────────────────── */
+  .qc1531-ring {
+    position: relative; background: #fff; border: 1px solid #e3d5c9; border-radius: 14px;
+    box-shadow: 0 1px 2px rgba(28, 19, 15, 0.08), 0 22px 40px -22px rgba(28, 19, 15, 0.32);
+  }
+  .qc1531-rh { display: flex; align-items: baseline; gap: 12px; padding: 11px 14px; border-radius: 13px 13px 0 0; background: var(--navy); }
+  .qc151 .qc1531-rh h2 { margin: 0; font: 400 19px/1 var(--sp-type) !important; color: var(--cream) !important; letter-spacing: 0; }
+  .qc151 .qc1531-rh small { margin-left: auto; font: italic 400 13.5px/1 var(--sp-serif) !important; color: rgba(244, 238, 229, 0.72); white-space: nowrap; }
+  .qc1531-rb { display: grid; grid-template-columns: 214px minmax(0, 1fr); align-items: center; gap: 20px; padding: 8px 18px 10px 10px; }
+  .qc1531-rsvg { position: relative; width: 214px; height: 214px; }
+  .qc1531-rsvg svg { display: block; overflow: visible; }
+  .qc1531-seg { cursor: pointer; transition: opacity 0.15s; }
+  .qc1531-segn { pointer-events: none; font: 400 13px var(--sp-type); transition: opacity 0.15s; }
+  .qc1531-rb.is-hv .qc1531-seg:not(.is-on), .qc1531-rb.is-hv .qc1531-segn:not(.is-on) { opacity: 0.3; }
+  /* the pile overflows onto the ring: it takes no pointer, so the segment under it is still the target */
+  .qc1531-pile { pointer-events: none; }
+  /* the tooltip follows the pointer, dark as the ref's */
+  .qc1531-tip {
+    position: absolute; z-index: 5; pointer-events: none; white-space: nowrap;
+    padding: 7px 10px; border-radius: 8px; background: var(--ink); color: var(--cream);
+    font: 400 13px/1.35 var(--sp-serif); box-shadow: 0 8px 18px -8px rgba(28, 19, 15, 0.45);
+  }
+  .qc1531-tip.is-flip { transform: translateX(-100%); }
+  .qc151 .qc1531-tip b { font: 400 13.5px/1.35 var(--sp-type) !important; color: var(--cream); }
+
+  .qc1531-lg { margin: 0; padding: 0; list-style: none; min-width: 0; }
+  .qc1531-lg li + li { border-top: 1px solid #f1ebe2; }
+  .qc151 .qc1531-lg button {
+    all: unset; box-sizing: border-box; cursor: pointer; width: 100%;
+    display: grid; grid-template-columns: 16px minmax(0, 1fr) auto 40px; align-items: center; gap: 10px;
+    padding: 8px 10px; border-radius: 7px; font: 400 15px/1.2 var(--sp-serif) !important; color: var(--ink);
+  }
+  .qc151 .qc1531-lg button:disabled { cursor: default; }
+  .qc151 .qc1531-lg button.is-on, .qc151 .qc1531-lg button.is-pick { background: #f6f1ea; }
+  .qc151 .qc1531-lg button.is-pick .qc1531-lbl { text-decoration: underline; text-decoration-color: rgba(42, 58, 82, 0.55); text-underline-offset: 3px; }
+  .qc151 .qc1531-lg button:focus-visible { outline: 2px solid var(--navy); outline-offset: -2px; }
+  .qc1531-sw { display: block; width: 16px; height: 16px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.12); }
+  .qc1531-sw.is-hatch { background: repeating-linear-gradient(45deg, #d8d1c7 0 2px, #f1eee9 2px 5px); }
+  .qc1531-lbl { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .qc151 .qc1531-lg b { font: 400 17px/1 var(--sp-type) !important; text-align: right; }
+  .qc151 .qc1531-lg em { font: italic 400 13px/1 var(--sp-serif) !important; color: var(--mut); text-align: right; }
+
+  @media (prefers-reduced-motion: reduce) { .qc1531-seg, .qc1531-segn { transition: none; } }
+}

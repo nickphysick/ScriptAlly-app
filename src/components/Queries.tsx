@@ -130,6 +130,8 @@ import { nextLine } from "../lib/qcRowLines";
 import { QcPage151, Track151 } from "./queries/centre/QcPage151";
 import { QcFilterPanel151 } from "./queries/centre/QcFilterMenu140";
 import { QcRail153 } from "./queries/centre/QcRail153";
+import { QcStageRing1531 } from "./queries/centre/QcStageRing1531";
+import { ringCounts } from "../lib/qc1531";
 import { railCounts } from "../lib/qc153Rail";
 import { slipTone } from "../lib/qc153";
 import { QUIET_WEEKS_PATH, nudgeMsOf, quickOfRow, quietWeeksOf, stampRows, stateOf, queryState as qsOf } from "../lib/queryState";
@@ -154,7 +156,7 @@ import { inUseId as inUseBookVersion } from "../lib/versionsV2";
 import type { QcCard152Data } from "./queries/centre/QcCard152";
 import { buildCardView, capWord } from "./queries/centre/qcCardView";
 import { DEFAULT_SORT_151, QC_FULL_SCREEN, nextCell, sort151, whoSections, type Section, type Sort151 } from "../lib/qc151";
-import { pillGroups, weekSummary } from "../lib/qc1511";
+import { pillGroups } from "../lib/qc1511";
 import { rowAct, statusKind } from "../lib/qc1512";
 import { pressView, twinTags } from "../lib/qc149";
 import { PIN_KEYS, usePinList } from "./shell/useFullScreenList";
@@ -8075,7 +8077,7 @@ export const Queries: React.FC<{
                 <QcPage151
                   loading={showGridSkeleton}
                   counts={showGridSkeleton ? null : { ms: qcLineTitle, sent: qcScoped.length, active: qcScoped.filter((r) => quickOfRow(r, () => whereItStands(r, now151)) !== "closed").length, heardPct: qcBandFig.heardPct }}
-                  summary={showGridSkeleton ? null : weekSummary(qcScoped, now151)}
+                  ring={<QcStageRing1531 counts={showGridSkeleton ? null : ringCounts(qcScoped.map((r) => r.status))} filters={qcF138} onFilters={setQcF138} />}
                   view={qcView150} onView={pickView150}
                   onLog={() => onNavigate?.("queries", "Log a query")}
                   onRecord={() => onNavigate?.("queries", "Record a response")}
