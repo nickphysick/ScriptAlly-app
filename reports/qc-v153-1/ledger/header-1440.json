@@ -1,0 +1,77 @@
+[
+ {
+  "where": "H1 no navy banner, no This week line",
+  "ok": true,
+  "detail": "banner false · slim false"
+ },
+ {
+  "where": "H1 three columns, the ring card on the right",
+  "ok": true,
+  "detail": "cols 190px 466px 560px"
+ },
+ {
+  "where": "H1 the hawk is 190 wide",
+  "ok": true,
+  "detail": "190"
+ },
+ {
+  "where": "H1 the header has no ground of its own",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "where": "H1 the quiet-window setting survives",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "where": "H1 title reads N queries sent",
+  "ok": true,
+  "detail": "88 queries sent"
+ },
+ {
+  "where": "H2 the legend sums to the sent figure",
+  "ok": true,
+  "detail": "88 vs 88"
+ },
+ {
+  "where": "H2 the card's header agrees",
+  "ok": true,
+  "detail": "70 still in play · 88 sent"
+ },
+ {
+  "where": "H2 five rows, each named 'label, n of total'",
+  "ok": true,
+  "detail": "Waiting to hear, 38 of 88 | Partial requested, 14 of 88 | Full requested, 16 of 88 | Offer, 2 of 88 | Passed or closed, 18 of 88"
+ },
+ {
+  "where": "H3 the hovered segment stays, the others fade to 30%",
+  "ok": true,
+  "detail": "[{\"k\":\"wait\",\"o\":1},{\"k\":\"partial\",\"o\":0.3},{\"k\":\"full\",\"o\":0.3},{\"k\":\"offer\",\"o\":0.3},{\"k\":\"closed\",\"o\":0.3}]"
+ },
+ {
+  "where": "H3 the tooltip names it",
+  "ok": true,
+  "detail": "Waiting to hear — 38 of 88 queries"
+ },
+ {
+  "where": "H4 the list narrows to that bucket",
+  "ok": true,
+  "detail": "35 → 12 (Partial Requested, Partial Sent)"
+ },
+ {
+  "where": "H4 the rail shows it on",
+  "ok": true,
+  "detail": "Partial requested6 | Partial sent8"
+ },
+ {
+  "where": "H4 the legend row is pressed",
+  "ok": true,
+  "detail": "partial"
+ },
+ {
+  "where": "H4 a second click clears it",
+  "ok": true,
+  "detail": "35 vs 35"
+ }
+]

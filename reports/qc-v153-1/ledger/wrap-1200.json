@@ -1,0 +1,17 @@
+[
+ {
+  "where": "S3 population",
+  "ok": true,
+  "detail": "35"
+ },
+ {
+  "where": "S3 two columns, two rows",
+  "ok": true,
+  "detail": "2 cols · 2 rows · slip 752px"
+ },
+ {
+  "where": "S3 no policy value cut off",
+  "ok": true,
+  "detail": ""
+ }
+]
