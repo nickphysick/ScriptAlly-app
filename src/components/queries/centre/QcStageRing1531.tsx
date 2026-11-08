@@ -75,6 +75,7 @@ export const QcStageRing1531: React.FC<QcStageRingProps> = ({ counts, filters, o
               const b = RING_BUCKETS.find((x) => x.key === a.key)!;
               const stroke = a.key === "closed" ? "url(#qc1531-hatch)" : b.fill;
               const cls = `qc1531-seg${hv === a.key ? " is-on" : ""}${ringOn(filters, a.key) ? " is-pick" : ""}`;
+              /* a zero bucket draws no segment, so only the legend row needs disabling (as the rail's zero rows are) */
               const ev = { onMouseEnter: (e: React.MouseEvent) => enter(a.key, e), onMouseMove: (e: React.MouseEvent) => place(e.clientX, e.clientY), onMouseLeave: leave, onClick: () => toggle(a.key) };
               return a.full
                 ? <circle key={a.key} className={cls} data-qc1531="seg" data-k={a.key} cx={RING_GEO.c} cy={RING_GEO.c} r={RING_GEO.r} fill="none" stroke={stroke} strokeWidth={RING_GEO.w} {...ev} />
@@ -99,7 +100,7 @@ export const QcStageRing1531: React.FC<QcStageRingProps> = ({ counts, filters, o
             return (
               <li key={b.key}>
                 <button type="button" className={`${hv === b.key ? "is-on " : ""}${on ? "is-pick" : ""}`.trim() || undefined}
-                  data-qc1531="legend-row" data-k={b.key} aria-pressed={on} disabled={!counts}
+                  data-qc1531="legend-row" data-k={b.key} aria-pressed={on} disabled={!counts || (!on && n(b.key) === 0)}
                   aria-label={`${b.label}, ${n(b.key)} of ${total}`}
                   onMouseEnter={(e) => enter(b.key, e)} onMouseMove={(e) => place(e.clientX, e.clientY)} onMouseLeave={leave}
                   onFocus={(e) => { setHv(b.key); const r = e.currentTarget.getBoundingClientRect(); place(r.right - 150, r.bottom - 4); }} onBlur={leave}
