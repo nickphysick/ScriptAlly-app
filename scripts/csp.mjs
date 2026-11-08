@@ -25,7 +25,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 
 /** Each hosting config, the env file its project is read from, and whether its CSP enforces. */
 export const CONFIGS = [
-  { file: "firebase.dev.json", env: ".env.development", csp: "report-only", kind: "app" },
+  { file: "firebase.dev.json", env: ".env.development", csp: "enforce", kind: "app" },
 ];
 
 const readEnv = (file) => {
