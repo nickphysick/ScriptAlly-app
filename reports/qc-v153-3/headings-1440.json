@@ -1,0 +1,98 @@
+[
+ {
+  "name": "Offers",
+  "font": "\"Special Elite\" 21px",
+  "chip": {
+   "w": 26,
+   "h": 24,
+   "r": "7px",
+   "bg": "rgb(231, 214, 220)",
+   "img": "linear-gradient(rgba(255, 255, 255, 0.6)",
+   "f": "\"Special Elite\" 13.5px",
+   "sh": "rgba(255, 255, 255, 0.7) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.12) 0px 1px 2px 0px"
+  },
+  "rule": {
+   "h": 1,
+   "bg": "rgba(28, 19, 15, 0.14)",
+   "left": 14,
+   "right": 14
+  },
+  "emRight": 0,
+  "emItalic": "italic",
+  "centred": 0.0078125,
+  "swatch": false,
+  "order": true
+ },
+ {
+  "name": "Materials requested",
+  "font": "\"Special Elite\" 21px",
+  "chip": {
+   "w": 29.625,
+   "h": 24,
+   "r": "7px",
+   "bg": "rgb(236, 214, 210)",
+   "img": "linear-gradient(rgba(255, 255, 255, 0.6)",
+   "f": "\"Special Elite\" 13.5px",
+   "sh": "rgba(255, 255, 255, 0.7) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.12) 0px 1px 2px 0px"
+  },
+  "rule": {
+   "h": 1,
+   "bg": "rgba(28, 19, 15, 0.14)",
+   "left": 14,
+   "right": 14
+  },
+  "emRight": 0,
+  "emItalic": "italic",
+  "centred": 0.0078125,
+  "swatch": false,
+  "order": true
+ },
+ {
+  "name": "Nudge due",
+  "font": "\"Special Elite\" 21px",
+  "chip": {
+   "w": 26,
+   "h": 24,
+   "r": "7px",
+   "bg": "rgb(239, 231, 218)",
+   "img": "linear-gradient(rgba(255, 255, 255, 0.6)",
+   "f": "\"Special Elite\" 13.5px",
+   "sh": "rgba(255, 255, 255, 0.7) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.12) 0px 1px 2px 0px"
+  },
+  "rule": {
+   "h": 1,
+   "bg": "rgba(28, 19, 15, 0.14)",
+   "left": 14,
+   "right": 14
+  },
+  "emRight": 0,
+  "emItalic": "italic",
+  "centred": 0.0078125,
+  "swatch": false,
+  "order": true
+ },
+ {
+  "name": "Watch and wait",
+  "font": "\"Special Elite\" 21px",
+  "chip": {
+   "w": 29.453125,
+   "h": 24,
+   "r": "7px",
+   "bg": "rgb(239, 231, 218)",
+   "img": "linear-gradient(rgba(255, 255, 255, 0.6)",
+   "f": "\"Special Elite\" 13.5px",
+   "sh": "rgba(255, 255, 255, 0.7) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.12) 0px 1px 2px 0px"
+  },
+  "rule": {
+   "h": 1,
+   "bg": "rgba(28, 19, 15, 0.14)",
+   "left": 14,
+   "right": 14
+  },
+  "emRight": 0,
+  "emItalic": "italic",
+  "centred": 0.0078125,
+  "swatch": false,
+  "order": true
+ }
+]

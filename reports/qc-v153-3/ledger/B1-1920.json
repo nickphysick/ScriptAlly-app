@@ -1,0 +1,492 @@
+[
+ {
+  "name": "population: badges on screen",
+  "ok": true,
+  "got": "35"
+ },
+ {
+  "name": "both an in and an out badge measured",
+  "ok": true,
+  "got": "in,out"
+ },
+ {
+  "name": "in@503 disc 19px",
+  "ok": true,
+  "got": "19×19"
+ },
+ {
+  "name": "in@503 glyph 13px",
+  "ok": true,
+  "got": "13×13"
+ },
+ {
+  "name": "in@503 glyph centred",
+  "ok": true,
+  "got": "0.00, 0.00"
+ },
+ {
+  "name": "in@503 overhangs 5 right, 5 up",
+  "ok": true,
+  "got": "right +5.00 · up 5.00"
+ },
+ {
+  "name": "in@503 the glyph's ink stays inside the disc",
+  "ok": true,
+  "got": "{\"path\":{\"x\":1707.265625,\"y\":509.015625,\"w\":6.90625,\"h\":6.90625,\"r\":1714.171875,\"b\":515.921875},\"badge\":{\"x\":1701.015625,\"y\":503.171875,\"w\":19,\"h\":19,\"r\":1720.015625,\"b\":522.171875}}"
+ },
+ {
+  "name": "in@503 stroke 2",
+  "ok": true,
+  "got": "2"
+ },
+ {
+  "name": "in@503 soft shadow",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.25) 0px 1px 3px 0px"
+ },
+ {
+  "name": "in@503 navy disc",
+  "ok": true,
+  "got": "rgb(42, 58, 82)"
+ },
+ {
+  "name": "in@700 disc 19px",
+  "ok": true,
+  "got": "19×19"
+ },
+ {
+  "name": "in@700 glyph 13px",
+  "ok": true,
+  "got": "13×13"
+ },
+ {
+  "name": "in@700 glyph centred",
+  "ok": true,
+  "got": "0.00, 0.00"
+ },
+ {
+  "name": "in@700 overhangs 5 right, 5 up",
+  "ok": true,
+  "got": "right +5.00 · up 5.00"
+ },
+ {
+  "name": "in@700 the glyph's ink stays inside the disc",
+  "ok": true,
+  "got": "{\"path\":{\"x\":1707.265625,\"y\":705.9375,\"w\":6.90625,\"h\":6.90625,\"r\":1714.171875,\"b\":712.84375},\"badge\":{\"x\":1701.015625,\"y\":700.09375,\"w\":19,\"h\":19,\"r\":1720.015625,\"b\":719.09375}}"
+ },
+ {
+  "name": "in@700 stroke 2",
+  "ok": true,
+  "got": "2"
+ },
+ {
+  "name": "in@700 soft shadow",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.25) 0px 1px 3px 0px"
+ },
+ {
+  "name": "in@700 navy disc",
+  "ok": true,
+  "got": "rgb(42, 58, 82)"
+ },
+ {
+  "name": "in@944 disc 19px",
+  "ok": true,
+  "got": "19×19"
+ },
+ {
+  "name": "in@944 glyph 13px",
+  "ok": true,
+  "got": "13×13"
+ },
+ {
+  "name": "in@944 glyph centred",
+  "ok": true,
+  "got": "0.00, 0.00"
+ },
+ {
+  "name": "in@944 overhangs 5 right, 5 up",
+  "ok": true,
+  "got": "right +5.00 · up 5.00"
+ },
+ {
+  "name": "in@944 the glyph's ink stays inside the disc",
+  "ok": true,
+  "got": "{\"path\":{\"x\":1530.640625,\"y\":950.15625,\"w\":6.90625,\"h\":6.90625,\"r\":1537.546875,\"b\":957.0625},\"badge\":{\"x\":1524.390625,\"y\":944.3125,\"w\":19,\"h\":19,\"r\":1543.390625,\"b\":963.3125}}"
+ },
+ {
+  "name": "in@944 stroke 2",
+  "ok": true,
+  "got": "2"
+ },
+ {
+  "name": "in@944 soft shadow",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.25) 0px 1px 3px 0px"
+ },
+ {
+  "name": "in@944 navy disc",
+  "ok": true,
+  "got": "rgb(42, 58, 82)"
+ },
+ {
+  "name": "in@1141 disc 19px",
+  "ok": true,
+  "got": "19×19"
+ },
+ {
+  "name": "in@1141 glyph 13px",
+  "ok": true,
+  "got": "13×13"
+ },
+ {
+  "name": "in@1141 glyph centred",
+  "ok": true,
+  "got": "0.00, 0.00"
+ },
+ {
+  "name": "in@1141 overhangs 5 right, 5 up",
+  "ok": true,
+  "got": "right +5.00 · up 5.00"
+ },
+ {
+  "name": "in@1141 the glyph's ink stays inside the disc",
+  "ok": true,
+  "got": "{\"path\":{\"x\":1566.390625,\"y\":1147.078125,\"w\":6.90625,\"h\":6.90625,\"r\":1573.296875,\"b\":1153.984375},\"badge\":{\"x\":1560.140625,\"y\":1141.234375,\"w\":19,\"h\":19,\"r\":1579.140625,\"b\":1160.234375}}"
+ },
+ {
+  "name": "in@1141 stroke 2",
+  "ok": true,
+  "got": "2"
+ },
+ {
+  "name": "in@1141 soft shadow",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.25) 0px 1px 3px 0px"
+ },
+ {
+  "name": "in@1141 navy disc",
+  "ok": true,
+  "got": "rgb(42, 58, 82)"
+ },
+ {
+  "name": "in@1338 disc 19px",
+  "ok": true,
+  "got": "19×19"
+ },
+ {
+  "name": "in@1338 glyph 13px",
+  "ok": true,
+  "got": "13×13"
+ },
+ {
+  "name": "in@1338 glyph centred",
+  "ok": true,
+  "got": "0.00, 0.00"
+ },
+ {
+  "name": "in@1338 overhangs 5 right, 5 up",
+  "ok": true,
+  "got": "right +5.00 · up 5.00"
+ },
+ {
+  "name": "in@1338 the glyph's ink stays inside the disc",
+  "ok": true,
+  "got": "{\"path\":{\"x\":1591.546875,\"y\":1344,\"w\":6.90625,\"h\":6.90625,\"r\":1598.453125,\"b\":1350.90625},\"badge\":{\"x\":1585.296875,\"y\":1338.15625,\"w\":19,\"h\":19,\"r\":1604.296875,\"b\":1357.15625}}"
+ },
+ {
+  "name": "in@1338 stroke 2",
+  "ok": true,
+  "got": "2"
+ },
+ {
+  "name": "in@1338 soft shadow",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.25) 0px 1px 3px 0px"
+ },
+ {
+  "name": "in@1338 navy disc",
+  "ok": true,
+  "got": "rgb(42, 58, 82)"
+ },
+ {
+  "name": "in@1535 disc 19px",
+  "ok": true,
+  "got": "19×19"
+ },
+ {
+  "name": "in@1535 glyph 13px",
+  "ok": true,
+  "got": "13×13"
+ },
+ {
+  "name": "in@1535 glyph centred",
+  "ok": true,
+  "got": "0.00, 0.00"
+ },
+ {
+  "name": "in@1535 overhangs 5 right, 5 up",
+  "ok": true,
+  "got": "right +5.00 · up 5.00"
+ },
+ {
+  "name": "in@1535 the glyph's ink stays inside the disc",
+  "ok": true,
+  "got": "{\"path\":{\"x\":1530.640625,\"y\":1540.921875,\"w\":6.90625,\"h\":6.90625,\"r\":1537.546875,\"b\":1547.828125},\"badge\":{\"x\":1524.390625,\"y\":1535.078125,\"w\":19,\"h\":19,\"r\":1543.390625,\"b\":1554.078125}}"
+ },
+ {
+  "name": "in@1535 stroke 2",
+  "ok": true,
+  "got": "2"
+ },
+ {
+  "name": "in@1535 soft shadow",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.25) 0px 1px 3px 0px"
+ },
+ {
+  "name": "in@1535 navy disc",
+  "ok": true,
+  "got": "rgb(42, 58, 82)"
+ },
+ {
+  "name": "in@1732 disc 19px",
+  "ok": true,
+  "got": "19×19"
+ },
+ {
+  "name": "in@1732 glyph 13px",
+  "ok": true,
+  "got": "13×13"
+ },
+ {
+  "name": "in@1732 glyph centred",
+  "ok": true,
+  "got": "0.00, 0.00"
+ },
+ {
+  "name": "in@1732 overhangs 5 right, 5 up",
+  "ok": true,
+  "got": "right +5.00 · up 5.00"
+ },
+ {
+  "name": "in@1732 the glyph's ink stays inside the disc",
+  "ok": true,
+  "got": "{\"path\":{\"x\":1530.640625,\"y\":1737.84375,\"w\":6.90625,\"h\":6.90625,\"r\":1537.546875,\"b\":1744.75},\"badge\":{\"x\":1524.390625,\"y\":1732,\"w\":19,\"h\":19,\"r\":1543.390625,\"b\":1751}}"
+ },
+ {
+  "name": "in@1732 stroke 2",
+  "ok": true,
+  "got": "2"
+ },
+ {
+  "name": "in@1732 soft shadow",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.25) 0px 1px 3px 0px"
+ },
+ {
+  "name": "in@1732 navy disc",
+  "ok": true,
+  "got": "rgb(42, 58, 82)"
+ },
+ {
+  "name": "in@1929 disc 19px",
+  "ok": true,
+  "got": "19×19"
+ },
+ {
+  "name": "in@1929 glyph 13px",
+  "ok": true,
+  "got": "13×13"
+ },
+ {
+  "name": "in@1929 glyph centred",
+  "ok": true,
+  "got": "0.00, 0.00"
+ },
+ {
+  "name": "in@1929 overhangs 5 right, 5 up",
+  "ok": true,
+  "got": "right +5.00 · up 5.00"
+ },
+ {
+  "name": "in@1929 the glyph's ink stays inside the disc",
+  "ok": true,
+  "got": "{\"path\":{\"x\":1530.640625,\"y\":1934.765625,\"w\":6.90625,\"h\":6.90625,\"r\":1537.546875,\"b\":1941.671875},\"badge\":{\"x\":1524.390625,\"y\":1928.921875,\"w\":19,\"h\":19,\"r\":1543.390625,\"b\":1947.921875}}"
+ },
+ {
+  "name": "in@1929 stroke 2",
+  "ok": true,
+  "got": "2"
+ },
+ {
+  "name": "in@1929 soft shadow",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.25) 0px 1px 3px 0px"
+ },
+ {
+  "name": "in@1929 navy disc",
+  "ok": true,
+  "got": "rgb(42, 58, 82)"
+ },
+ {
+  "name": "in@2126 disc 19px",
+  "ok": true,
+  "got": "19×19"
+ },
+ {
+  "name": "in@2126 glyph 13px",
+  "ok": true,
+  "got": "13×13"
+ },
+ {
+  "name": "in@2126 glyph centred",
+  "ok": true,
+  "got": "0.00, 0.00"
+ },
+ {
+  "name": "in@2126 overhangs 5 right, 5 up",
+  "ok": true,
+  "got": "right +5.00 · up 5.00"
+ },
+ {
+  "name": "in@2126 the glyph's ink stays inside the disc",
+  "ok": true,
+  "got": "{\"path\":{\"x\":1591.546875,\"y\":2131.6875,\"w\":6.90625,\"h\":6.90625,\"r\":1598.453125,\"b\":2138.59375},\"badge\":{\"x\":1585.296875,\"y\":2125.84375,\"w\":19,\"h\":19,\"r\":1604.296875,\"b\":2144.84375}}"
+ },
+ {
+  "name": "in@2126 stroke 2",
+  "ok": true,
+  "got": "2"
+ },
+ {
+  "name": "in@2126 soft shadow",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.25) 0px 1px 3px 0px"
+ },
+ {
+  "name": "in@2126 navy disc",
+  "ok": true,
+  "got": "rgb(42, 58, 82)"
+ },
+ {
+  "name": "in@2323 disc 19px",
+  "ok": true,
+  "got": "19×19"
+ },
+ {
+  "name": "in@2323 glyph 13px",
+  "ok": true,
+  "got": "13×13"
+ },
+ {
+  "name": "in@2323 glyph centred",
+  "ok": true,
+  "got": "0.00, 0.00"
+ },
+ {
+  "name": "in@2323 overhangs 5 right, 5 up",
+  "ok": true,
+  "got": "right +5.00 · up 5.00"
+ },
+ {
+  "name": "in@2323 the glyph's ink stays inside the disc",
+  "ok": true,
+  "got": "{\"path\":{\"x\":1591.546875,\"y\":2328.609375,\"w\":6.90625,\"h\":6.90625,\"r\":1598.453125,\"b\":2335.515625},\"badge\":{\"x\":1585.296875,\"y\":2322.765625,\"w\":19,\"h\":19,\"r\":1604.296875,\"b\":2341.765625}}"
+ },
+ {
+  "name": "in@2323 stroke 2",
+  "ok": true,
+  "got": "2"
+ },
+ {
+  "name": "in@2323 soft shadow",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.25) 0px 1px 3px 0px"
+ },
+ {
+  "name": "in@2323 navy disc",
+  "ok": true,
+  "got": "rgb(42, 58, 82)"
+ },
+ {
+  "name": "in@2520 disc 19px",
+  "ok": true,
+  "got": "19×19"
+ },
+ {
+  "name": "in@2520 glyph 13px",
+  "ok": true,
+  "got": "13×13"
+ },
+ {
+  "name": "in@2520 glyph centred",
+  "ok": true,
+  "got": "0.00, 0.00"
+ },
+ {
+  "name": "in@2520 overhangs 5 right, 5 up",
+  "ok": true,
+  "got": "right +5.00 · up 5.00"
+ },
+ {
+  "name": "in@2520 the glyph's ink stays inside the disc",
+  "ok": true,
+  "got": "{\"path\":{\"x\":1530.640625,\"y\":2525.53125,\"w\":6.90625,\"h\":6.90625,\"r\":1537.546875,\"b\":2532.4375},\"badge\":{\"x\":1524.390625,\"y\":2519.6875,\"w\":19,\"h\":19,\"r\":1543.390625,\"b\":2538.6875}}"
+ },
+ {
+  "name": "in@2520 stroke 2",
+  "ok": true,
+  "got": "2"
+ },
+ {
+  "name": "in@2520 soft shadow",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.25) 0px 1px 3px 0px"
+ },
+ {
+  "name": "in@2520 navy disc",
+  "ok": true,
+  "got": "rgb(42, 58, 82)"
+ },
+ {
+  "name": "in@2717 disc 19px",
+  "ok": true,
+  "got": "19×19"
+ },
+ {
+  "name": "in@2717 glyph 13px",
+  "ok": true,
+  "got": "13×13"
+ },
+ {
+  "name": "in@2717 glyph centred",
+  "ok": true,
+  "got": "0.00, 0.00"
+ },
+ {
+  "name": "in@2717 overhangs 5 right, 5 up",
+  "ok": true,
+  "got": "right +5.00 · up 5.00"
+ },
+ {
+  "name": "in@2717 the glyph's ink stays inside the disc",
+  "ok": true,
+  "got": "{\"path\":{\"x\":1530.640625,\"y\":2722.453125,\"w\":6.90625,\"h\":6.90625,\"r\":1537.546875,\"b\":2729.359375},\"badge\":{\"x\":1524.390625,\"y\":2716.609375,\"w\":19,\"h\":19,\"r\":1543.390625,\"b\":2735.609375}}"
+ },
+ {
+  "name": "in@2717 stroke 2",
+  "ok": true,
+  "got": "2"
+ },
+ {
+  "name": "in@2717 soft shadow",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.25) 0px 1px 3px 0px"
+ },
+ {
+  "name": "in@2717 navy disc",
+  "ok": true,
+  "got": "rgb(42, 58, 82)"
+ }
+]

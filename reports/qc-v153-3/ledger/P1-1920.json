@@ -1,0 +1,107 @@
+[
+ {
+  "name": "one card: no rim padding",
+  "ok": true,
+  "got": "0px"
+ },
+ {
+  "name": "radius 16, white",
+  "ok": true,
+  "got": "16px rgb(255, 255, 255)"
+ },
+ {
+  "name": "the ref's shadow",
+  "ok": true,
+  "got": "rgb(227, 213, 201) 0px 0px 0px 1px, rgba(28, 19, 15, 0.06) 0px 1px 2px 0px, rgba(28, 19, 15, 0.3) 0px 18px 36px -24px"
+ },
+ {
+  "name": "no inner frame line",
+  "ok": true,
+  "got": "0px"
+ },
+ {
+  "name": "no proportion bars",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "four drawn chevrons, none typed",
+  "ok": true,
+  "got": "4 · typed false"
+ },
+ {
+  "name": "headings in the typewriter 15px",
+  "ok": true,
+  "got": "\"Special Elite\", \"Courier New\", Courier, monospace 15px"
+ },
+ {
+  "name": "hairline #f1ebe2 between sections",
+  "ok": true,
+  "got": "rgb(241, 235, 226)"
+ },
+ {
+  "name": "tile With you dusty rose",
+  "ok": true,
+  "got": "rgb(236, 214, 210) none r12px"
+ },
+ {
+  "name": "tile With the agent sand",
+  "ok": true,
+  "got": "rgb(239, 231, 218) none r12px"
+ },
+ {
+  "name": "tile Gone quiet stone",
+  "ok": true,
+  "got": "rgb(243, 239, 233) none r12px"
+ },
+ {
+  "name": "tile Closed striped",
+  "ok": true,
+  "got": "rgba(0, 0, 0, 0) repeating-linear-gradient(135deg, rgb(243, 240, 235) 0px, rg r12px"
+ },
+ {
+  "name": "tiles radius 12",
+  "ok": true,
+  "got": "{\"you\":\"rgb(236, 214, 210) none r12px\",\"agent\":\"rgb(239, 231, 218) none r12px\",\"quiet\":\"rgb(243, 239, 233) none r12px\",\"closed\":\"rgba(0, 0, 0, 0) repeating-linear-gradient(135deg, rgb(243, 240, 235) 0px, rg r12px\"}"
+ },
+ {
+  "name": "population: pills that can be pressed",
+  "ok": true,
+  "got": "4"
+ },
+ {
+  "name": "a pill click turns it on",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "the list narrows to the pill's count",
+  "ok": true,
+  "got": "23 vs 23"
+ },
+ {
+  "name": "the header says 1 on",
+  "ok": true,
+  "got": "1 on"
+ },
+ {
+  "name": "on: navy, cream text",
+  "ok": true,
+  "got": "rgb(42, 58, 82) rgb(244, 238, 229)"
+ },
+ {
+  "name": "one on at a time, as the radio was",
+  "ok": true,
+  "got": "switched"
+ },
+ {
+  "name": "the list follows the second pill",
+  "ok": true,
+  "got": "39 vs 39"
+ },
+ {
+  "name": "a second click clears it",
+  "ok": true,
+  "got": "88 vs 88"
+ }
+]
