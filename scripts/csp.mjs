@@ -26,6 +26,12 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 /** Each hosting config, the env file its project is read from, and whether its CSP enforces. */
 export const CONFIGS = [
   { file: "firebase.dev.json", env: ".env.development", csp: "enforce", kind: "app" },
+  /* Prod: report-only until Nick has watched it clean (reports/security-headers-v1/REPORT.md). */
+  { file: "firebase.json", env: ".env.production", csp: "report-only", kind: "app" },
+  /* The holding page, still deployed to prod's DEFAULT site (gen-lang-client-0801391782.web.app
+     and .firebaseapp.com, which is also prod's auth domain — Firebase's own /__/auth/* pages do
+     not receive these headers, checked on dev's default site). */
+  { file: "firebase.holding.json", env: ".env.production", csp: "report-only", kind: "holding" },
 ];
 
 const readEnv = (file) => {
