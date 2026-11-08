@@ -189,3 +189,8 @@
 @media (min-width: 768px) {
   .qc151 .qc1531-hd { padding-bottom: 4px; }
 }
+
+/* ══ v153.2 · the slip's header back to two lines: the status word beside the track, not above it ═══════════════ */
+@media (min-width: 768px) {
+  .qc151.qc153 .qc153-st { flex-direction: row; align-items: center; gap: 14px; }
+}
