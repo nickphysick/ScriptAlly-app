@@ -98,8 +98,12 @@ jobs:
       - name: Build
         run: npm run build
 
+      # ⚠️ THIS STEP FAILS THE BUILD (8 Nov 2026). It used to be `npm audit --audit-level=high
+      # || true`, which could not fail. scripts/audit-gate.mjs audits the root AND functions/ and
+      # fails on any critical/high advisory not named, with its reason and date, in
+      # scripts/audit-allowlist.mjs. A registry that gives no report is a failure, not a pass.
       - name: Dependency audit
-        run: npm audit --audit-level=high || true
+        run: node scripts/audit-gate.mjs
 
       - name: Secret scan (gitleaks)
         uses: gitleaks/gitleaks-action@v2
