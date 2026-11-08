@@ -13,6 +13,7 @@ import {
   persistentMultipleTabManager,
 } from "firebase/firestore";
 import { EMULATOR_HOSTS, emulatorTargetError } from "./firebaseTarget";
+import { reportFirestoreError } from "./errorReporting";
 
 // Firebase config is environment-driven (.env.production / .env.development), so dev builds
 // can target a separate Firebase project without ever touching production data. The production
@@ -114,6 +115,7 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
     operationType,
     path,
   };
-  console.error(`Firestore error [${errInfo.operationType}]${path ? ` ${path}` : ""}: ${errInfo.error}`);
-  throw new Error(`Firestore ${errInfo.operationType} failed${path ? ` at ${path}` : ""}: ${errInfo.error}`);
+  /* Crash reporting v1: logged and reported to Sentry in lib/errorReporting, with the operation and the
+     path's SHAPE (document ids replaced by {id}); it returns the same error this has always thrown. */
+  throw reportFirestoreError(errInfo.error, error, errInfo.operationType, path);
 }

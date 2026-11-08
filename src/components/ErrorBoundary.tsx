@@ -30,9 +30,9 @@ export class ErrorBoundary extends Component<Props, State> {
     return { hasError: true };
   }
 
-  componentDidCatch(error: unknown) {
+  componentDidCatch(error: unknown, info?: { componentStack?: string | null }) {
     // The last resort: a page or panel crash is caught nearer (PageBoundary); this is what is left.
-    reportBoundaryError(error, { boundary: "app" });
+    reportBoundaryError(error, { boundary: "app", componentStack: info?.componentStack ?? undefined });
   }
 
   private handleReload = () => {

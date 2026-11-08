@@ -71,8 +71,8 @@ export class PageBoundary extends Component<Props, State> {
     return { failed: true };
   }
 
-  componentDidCatch(error: unknown) {
-    reportBoundaryError(error, { boundary: this.props.name });
+  componentDidCatch(error: unknown, info?: { componentStack?: string | null }) {
+    reportBoundaryError(error, { boundary: this.props.name, componentStack: info?.componentStack ?? undefined });
   }
 
   componentDidUpdate(prev: Props) {

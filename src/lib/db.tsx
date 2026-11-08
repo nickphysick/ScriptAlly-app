@@ -144,6 +144,7 @@ import { agentPrimary } from "./agentDisplay";
 import { taskSurvivesMute } from "./todoHousekeeping";
 import { buildOfferDecisionWrites, hasOfferDecision, OfferDecision } from "./offerDecision";
 import { applyUserPaths, type UserPaths } from "./userPaths";
+import { identifyForErrors } from "./sentry";
 
 // Connection validation test on boot as requested by skill
 async function testConnection() {
@@ -611,6 +612,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     let unsubTaskFlags: () => void = () => {};
 
     const unsubAuth = onAuthStateChanged(auth, async (firebaseUser) => {
+      /* Crash reporting v1: error reports carry the uid and nothing else, and none once signed out */
+      identifyForErrors(firebaseUser ? firebaseUser.uid : null);
       if (!firebaseUser) {
         // No authenticated user — show the Auth screen
         setCurrentUser(null);
