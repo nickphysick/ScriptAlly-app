@@ -111,7 +111,6 @@
 
   .qc153-sec { display: flex; align-items: center; gap: 10px; margin: 24px 0 10px; }
   .qc153-grp:first-child .qc153-sec { margin-top: 14px; }
-  .qc153-sw { flex: none; width: 14px; height: 14px; border-radius: 4px; }
   .qc151 .qc153-sec b { font: 400 22px/1.3 var(--sp-type) !important; color: var(--ink); }
   .qc151 .qc153-sec small { font: 400 15px/1 var(--sp-serif) !important; color: var(--faint); }
   .qc151 .qc153-sec em { margin-left: auto; font: italic 400 14px/1.3 var(--sp-serif) !important; color: var(--faint); }
@@ -145,7 +144,7 @@
   /* sticky inside a column that stretches to the row (`.qc153-railcol`), so it has room to travel; its height is the
      scrollport's (published by the workspace grid), never the viewport's */
   .qc153-rail { position: sticky; top: calc(var(--pin-cover, 12px) + 12px); }
-  .qc153-rail .sa-slip-in { max-height: calc(var(--wpg-port-h, 100vh) - var(--pin-cover, 12px) - 40px); overflow-y: auto; overscroll-behavior: contain; }
+  .qc153-rail .qc153-rin { max-height: calc(var(--wpg-port-h, 100vh) - var(--pin-cover, 12px) - 40px); overflow-y: auto; overscroll-behavior: contain; }
   .qc153-rbd { display: flex; align-items: baseline; gap: 10px; padding: 12px 14px; background: #f4e6d6; }
   .qc151 .qc153-rbd b { font: 400 20px/1.3 var(--sp-type) !important; color: var(--ink); }
   .qc151 .qc153-ron { font: 400 13px/1 var(--sp-serif) !important; color: var(--mut); }

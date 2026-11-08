@@ -6,7 +6,7 @@
  *   O1  the ring is open: no fill, border, shadow, bar or pile; the middle is sent less passed or closed; the legend
  *       heading says "N sent".
  *   O2  hovering a legend row keeps its segment and fades the rest; the tooltip names it.
- *   Q1  the quiet control reads "Gone quiet after N weeks", N the pop-over's checked choice, and opens the pop-over.
+ *   Q1  (v153.3) the header carries no quiet control: it moved to Settings.
  *   G1  the header's content to the slim bar is the ref's 30px (±1).
  *   S1  Tom Ellery's slip (else the first Offer): the word beside the track on one line; the header's height; every
  *       Offer and every Partial requested shows its Next second line.
@@ -121,20 +121,8 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1920, height: 1080 }] a
     await page.screenshot({ path: `${DIR}/ring-hover-${vp.width}.png`, clip: { x: rc.x - 20, y: Math.max(0, rc.y - 30), width: rc.width + 40, height: rc.height + 60 } });
     await page.mouse.move(2, 2);
 
-    /* Q1 */
-    const q = page.locator(`${PAGE} [data-qc152="quiet-setting"] button`).first();
-    const qText = (await q.textContent())?.replace(/\s+/g, " ").trim() ?? "";
-    await q.click();
-    const pop = page.locator(`${PAGE} [data-qc152="quiet-pop"]`);
-    await expect(pop).toBeVisible({ timeout: 5000 });
-    const checked = await pop.locator('[role="radio"][aria-checked="true"]').getAttribute("data-weeks");
-    L.check("Q1 reads 'Gone quiet after N weeks', N the live setting", qText === `Gone quiet after ${checked} weeks`, `${qText} · checked ${checked}`);
-    L.check("Q1 the phrase opens the pop-over", await pop.isVisible(), "open");
-    const hb = (await page.locator(`${PAGE} [data-qc1531="header"]`).boundingBox())!;
-    await page.screenshot({ path: `${DIR}/quiet-open-${vp.width}.png`, clip: { x: hb.x - 10, y: Math.max(0, hb.y - 10), width: hb.width + 20, height: hb.height + 140 } });
-    await page.keyboard.press("Escape");
-    await expect(pop).toBeHidden({ timeout: 5000 });
-    L.check("Q1 Escape closes it", true, "closed");
+    /* Q1 — v153.3: the quiet control left the header for Settings (its check there: qc1533 S1) */
+    L.check("Q1 the header carries no quiet control", (await page.locator(`${PAGE} [data-qc152="quiet-setting"]`).count()) === 0, "gone");
 
     /* G1 */
     L.check("G1 header content to the slim bar is the ref's", Math.abs(r.visGap - REF_GAP) <= 1, `${r.visGap.toFixed(1)}px · ref ${REF_GAP}`);
@@ -156,6 +144,6 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1920, height: 1080 }] a
     await el.scrollIntoViewIfNeeded(); await el.hover(); await page.waitForTimeout(300);
     const b = (await el.boundingBox())!;
     await page.screenshot({ path: `${DIR}/slip-tom-${vp.width}.png`, clip: { x: b.x - 20, y: b.y - 20, width: b.width + 40, height: b.height + 50 } });
-    L.done(17);
+    L.done(15); /* v153.3: Q1's pop-over checks left with the control (now one absence check) */
   });
 }

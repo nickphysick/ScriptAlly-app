@@ -12,6 +12,7 @@
  *   §3  L9 capture
  *   §4  L10 logic · L11 materials · L12 details · L13 no browser controls
  */
+import { setQuietWeeksInSettings } from "./quietSetting";
 import { test, expect, type Page } from "@playwright/test";
 import { execSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
@@ -108,12 +109,10 @@ for (const vp of SIZES) {
       test.skip(!run("L1"));
       const L = new Ledger(`L1-${vp.width}`);
       await open(page, vp);
-      /* the setting is the account's, so start from the default whatever an earlier run left */
-      const setWeeks = async (w: number) => {
-        await page.locator("[data-qc152='quiet-setting'] button").first().click({ timeout: 8000 }).catch(() => {});
-        await page.locator(`[data-qc152='quiet-pop'] [data-weeks='${w}']`).click({ timeout: 8000 }).catch(() => {});
-        await page.keyboard.press("Escape"); await page.waitForTimeout(800);
-      };
+      /* the setting is the account's, so start from the default whatever an earlier run left. v153.3 — it is set in
+         Settings now (tests/e2e/quietSetting.ts), so each change re-opens the page */
+      const setWeeks = async (w: number) => { await setQuietWeeksInSettings(page, w); await open(page, vp); };
+      L.check("the header no longer carries the quiet-window setting (v153.3: it is in Settings)", await page.locator("[data-qc152='quiet-setting']").count() === 0, "found [data-qc152=quiet-setting]");
       await setWeeks(4);
       const s = await readStates(page);
       L.check("population: every fixture is on the page", Object.keys(EXPECT).every((k) => s[k]), JSON.stringify(Object.keys(s)));
@@ -122,18 +121,12 @@ for (const vp of SIZES) {
         L.check(`${k} sits in the ${want} group`, s[k]?.group === want, JSON.stringify(s[k]));
       }
       /* the setting: 2 weeks after the nudge */
-      const gear = page.locator("[data-qc152='quiet-setting'] button").first();
-      L.check("the banner has the quiet-window setting", await gear.count() > 0, "no [data-qc152=quiet-setting]");
-      if (await gear.count()) {
-        await gear.click();
-        await page.locator("[data-qc152='quiet-pop'] [data-weeks='2']").click();
-        await page.waitForFunction(() => document.querySelector("[data-id='q152-nudgedwait']")?.getAttribute("data-state") === "quiet", null, { timeout: 15_000 }).catch(() => {});
-        const t = await readStates(page);
-        L.check("at 2 weeks the nudged-within-window query is Gone quiet", t.nudgedwait?.state === "quiet", JSON.stringify(t.nudgedwait));
-        L.check("at 2 weeks Nudge due stays Nudge due (its reply date is a week gone)", t.nudge?.state === "nudge", JSON.stringify(t.nudge));
-        await page.keyboard.press("Escape").catch(() => {});
-        await setWeeks(4);
-      }
+      await setWeeks(2);
+      await page.waitForFunction(() => document.querySelector("[data-id='q152-nudgedwait']")?.getAttribute("data-state") === "quiet", null, { timeout: 15_000 }).catch(() => {});
+      const t = await readStates(page);
+      L.check("at 2 weeks the nudged-within-window query is Gone quiet", t.nudgedwait?.state === "quiet", JSON.stringify(t.nudgedwait));
+      L.check("at 2 weeks Nudge due stays Nudge due (its reply date is a week gone)", t.nudge?.state === "nudge", JSON.stringify(t.nudge));
+      await setQuietWeeksInSettings(page, 4);
       L.done(20);
     });
 

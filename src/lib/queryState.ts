@@ -45,6 +45,8 @@ export const STATE_BAND: Record<QueryState, string> = {
 export const QUIET_WEEKS = [2, 3, 4, 6, 8] as const;
 export const DEFAULT_QUIET_WEEKS = 4;
 export const QUIET_WEEKS_PATH = "todoPrefs.queries.quietWeeks";
+/** v153.3 — the one write that sets the window (Settings → Preferences → Queries), a single leaf */
+export const quietWeeksPaths = (w: number): Record<string, number> => ({ [QUIET_WEEKS_PATH]: w });
 export function quietWeeksOf(user: { todoPrefs?: unknown } | null | undefined): number {
   const v = ((user?.todoPrefs as { queries?: { quietWeeks?: unknown } } | undefined)?.queries?.quietWeeks);
   return typeof v === "number" && (QUIET_WEEKS as readonly number[]).includes(v) ? v : DEFAULT_QUIET_WEEKS;

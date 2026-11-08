@@ -60,6 +60,7 @@ import "./settings/settings.css";
 import { CountryCombobox } from "./forms";
 import { PlanComparison } from "./plans/PlanComparison";
 import { todoPrefs, STALE_MONTHS_CHOICES } from "../lib/todoPrefs";
+import { QUIET_WEEKS, quietWeeksOf, quietWeeksPaths } from "../lib/queryState";
 import { deskPrefPaths, type DeskPrefPatch } from "../lib/userPaths";
 import { useSmartImportEntitlement } from "../lib/useSmartImportEntitlement";
 import { smartImportLine } from "../lib/smartImportEntitlement";
@@ -591,6 +592,18 @@ export const AccountSettings: React.FC<{
       savedReceipt(what);
     } catch {
       showToast({ message: `Couldn't save ${what.toLowerCase()} — try again?`, duration: 4000 });
+    }
+  };
+
+  /* v153.3 — the quiet window, moved here from the Query Centre header. Same leaf, same reader (`quietWeeksOf`); a
+     receipt like every other select on this page. */
+  const quietWeeks = quietWeeksOf(currentUser);
+  const saveQuietWeeks = async (w: number) => {
+    try {
+      await updateUserPaths(quietWeeksPaths(w));
+      savedReceipt("Gone quiet setting");
+    } catch {
+      showToast({ message: "Couldn't save the gone quiet setting — try again?", duration: 4000 });
     }
   };
 
@@ -1193,6 +1206,26 @@ export const AccountSettings: React.FC<{
             preference, it is a visible untruth, and it is the same fault that removed Pen name, the
             author-photo control and the sessions button. They arrive with a shared formatter, not
             before one. */}
+      </SettingsCard>
+
+      {/* v153.3 — the Query Centre's one setting. A small card of its own rather than an eighth rail section: one
+          control does not earn a route, and a route would have to be added to four path tables. */}
+      <SettingsCard heading="Queries" headingId="acct-h-queries">
+        <SettingsRow
+          label="Treat a query as gone quiet after"
+          description={<em className="acct-quiet-help" style={{ fontStyle: "italic" }}>Queries with no reply after this long move to Gone quiet.</em>}
+          control={
+            <select
+              id="account-quiet-weeks"
+              aria-label="Treat a query as gone quiet after"
+              className="acct-input acct-select sc-grow"
+              value={quietWeeks}
+              onChange={(e) => { void saveQuietWeeks(Number(e.target.value)); }}
+            >
+              {QUIET_WEEKS.map((w) => <option key={w} value={w}>{w} weeks</option>)}
+            </select>
+          }
+        />
       </SettingsCard>
     </>
   );

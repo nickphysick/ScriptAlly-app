@@ -12,11 +12,9 @@
  *
  * ⚠️ NO NEW FIELDS. Everything here reads what the query and its agent already carry.
  */
-import { QueryStatus, type Agent, type Query } from "../types";
+import { QueryStatus, type Agent } from "../types";
 import type { Qc138Filters } from "./qc138";
 import { SLIP_TONE_FILL } from "./qc153";
-import { partialAsked } from "./qcCardStory";
-import { formatQueryMaterial } from "./materials";
 
 /* ── the stage ring ───────────────────────────────────────────────────────────────────────────────────────────── */
 
@@ -124,39 +122,4 @@ export function policyWords(a: Pick<Agent, "noResponseMeansNo" | "responseTimeWe
     : { value: "Replies to everyone", line: w ? `usually within ${weeks(w)}` : null };
 }
 
-/* ── materials ────────────────────────────────────────────────────────────────────────────────────────────────── */
-
-export interface MatChip { name: string; asked: boolean }
-export interface SlipMaterials { chips: MatChip[]; pkg: string | null }
-
-type MatQuery = Pick<Query, "materialsWanted" | "materialsRequestedType" | "materialsRequestedQuantity" | "requestFrom" | "requestFromUnit" | "partialSentDate" | "fullSentDate">;
-
-const FULL_ASKED: readonly QueryStatus[] = [QueryStatus.FULL_REQUESTED];
-const FULL_SENT: readonly QueryStatus[] = [QueryStatus.FULL_SENT, QueryStatus.RESUBMITTED, QueryStatus.REVISE_RESUBMIT, QueryStatus.OFFER, QueryStatus.SIGNED];
-
-/**
- * The chips: what went with the query (`materialsWanted`), then a partial (asked while it is Partial requested;
- * sent once it went), then the full (asked while Full requested; sent once it went), then a revision asked for or
- * sent. A dashed "asked" chip is something the agent asked for that has not gone yet.
- * Returns null when the query carries no material data and no package: the strip is left out, never invented.
- */
-export function slipMaterials(q: MatQuery, status: QueryStatus | string, packageName: string | null): SlipMaterials | null {
-  const chips: MatChip[] = [];
-  const seen = new Set<string>();
-  const add = (name: string, asked: boolean) => {
-    const k = name.trim().toLowerCase();
-    if (!k || seen.has(k)) return;
-    seen.add(k); chips.push({ name: name.trim(), asked });
-  };
-  for (const item of q.materialsWanted ?? []) add(formatQueryMaterial(item), false);
-  const st = status as QueryStatus;
-  if (st === QueryStatus.PARTIAL_REQUESTED) add(partialAsked(q), true);
-  else if (st === QueryStatus.PARTIAL_SENT || q.partialSentDate) add(partialAsked(q), false);
-  if (FULL_ASKED.includes(st)) add("Full manuscript", true);
-  else if (FULL_SENT.includes(st) || q.fullSentDate) add("Full manuscript", false);
-  if (st === QueryStatus.REVISE_RESUBMIT) add("Revised manuscript", true);
-  else if (st === QueryStatus.RESUBMITTED) add("Revised manuscript", false);
-  const pkg = packageName?.trim() || null;
-  if (!chips.length && !pkg) return null;
-  return { chips, pkg };
-}
+/* ── materials: v153.3 moved them to the paperclip tab (lib/qc1533 `materialGroups`) ── */

@@ -80,9 +80,6 @@ type Pop151 = "group" | "begroup" | "besort";
 
 export interface QcPage151Props {
   loading: boolean;
-  /** v152 §1.4 — the quiet window setting */
-  quietWeeks?: number;
-  onQuietWeeks?: (w: number) => void;
   view: View151;
   onView: (v: View151) => void;
   onLog: () => void;
@@ -354,7 +351,7 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
   return (
     <div className="qc151 qc153" data-qc151="page" data-view={p.view} ref={rootRef}>
       {/* v153.1 — the header on the page's own ground: the hawk, the title block and the stage ring card */}
-      <QcHeader1531 loading={p.loading} onLog={p.onLog} onRecord={p.onRecord} logDisabled={p.logDisabled} logRef={p.logRef} counts={p.counts} quietWeeks={p.quietWeeks} onQuietWeeks={p.onQuietWeeks} ring={p.ring} />
+      <QcHeader1531 loading={p.loading} onLog={p.onLog} onRecord={p.onRecord} logDisabled={p.logDisabled} logRef={p.logRef} counts={p.counts} ring={p.ring} />
 
       {/* v153 — two columns: the filter rail (sticky) and the list column */}
       <div className="qc153-cl" data-qc153="columns">
@@ -401,9 +398,8 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
                 return (
                   <section key={s.key} className="qc153-grp" data-qc1511="group" data-k={s.key} aria-label={s.label || "Queries"}>
                     {s.label ? (
-                      <div className="qc153-sec" data-qc153="heading">
-                        <span className="qc153-sw" style={{ background: sectionSwatch(p.group, s.key) }} aria-hidden="true" />
-                        <b data-qc151="section">{s.label}</b><small>{s.rows.length}</small>
+                      <div className="qc153-sec" data-qc153="heading" style={{ "--sw": sectionSwatch(p.group, s.key) } as React.CSSProperties}>
+                        <b data-qc151="section">{s.label}</b><small data-qc1533="count">{s.rows.length}</small><i className="qc1533-rule" aria-hidden="true" />
                         {folds
                           ? <button type="button" className="qc153-lnk qc153-lnk--r" data-qc153="fold-away" aria-expanded={true} onClick={() => openFold(s.key, false)}>Fold away</button>
                           : why ? <em>{why}</em> : null}
