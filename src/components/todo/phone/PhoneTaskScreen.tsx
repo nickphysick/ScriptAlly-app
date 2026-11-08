@@ -91,8 +91,11 @@ export const PhoneTaskScreen: React.FC<PhoneTaskScreenProps> = ({ core, tasks, s
     return () => { release(); document.body.classList.remove("tdp-task-on"); };
   }, []);
   useEscapeLayer(true, onClose, ESC_LEVEL.page);
-  /* a task gone from the board (saved elsewhere, or the last of the list): back to the list */
-  useEffect(() => { if (key && !sel) onClose(); }, [key, sel]); // eslint-disable-line react-hooks/exhaustive-deps
+  /* a task gone from the board (saved elsewhere, or the last of the list): back to the list.
+     ⚠️ NOT WHILE A SAVE IS IN FLIGHT: Firestore applies the write locally before `commit()` resolves, so the task leaves
+     the board a moment before the save hands over the next one — closing then would throw away "the next task opens". */
+  const saving = useRef(false);
+  useEffect(() => { if (key && !sel && !saving.current) onClose(); }, [key, sel]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const flash = (m: string, undo?: () => Promise<void>) => showUndoBar({ message: m, sub: "", ...(undo ? { undo } : {}) });
   const flow = useMemo(() => core.makeFlow(sel, deskT, A, setA, (m) => flash(m)),
@@ -122,6 +125,7 @@ export const PhoneTaskScreen: React.FC<PhoneTaskScreenProps> = ({ core, tasks, s
   const logIt = async () => {
     if (!flow?.commit || busy) return;
     setBusy(true);
+    saving.current = true;
     const next = nextKeyAfter(sel);
     try {
       const d = await flow.commit();
@@ -137,14 +141,15 @@ export const PhoneTaskScreen: React.FC<PhoneTaskScreenProps> = ({ core, tasks, s
     } catch (e) {
       console.error("[to-do] the save failed", e);
       flash("Couldn’t save that. Nothing was changed.");
-    } finally { setBusy(false); }
+    } finally { setBusy(false); saving.current = false; }
   };
   const ownDone = async () => {
     if (!own || busy) return;
     setBusy(true);
+    saving.current = true;
     const next = nextKeyAfter(sel);
     try { const undo = await core.ownDoneWrite(own); flash("Done. One less thing on your mind.", undo); go(next); }
-    catch { flash("Couldn’t save that. Nothing was changed."); } finally { setBusy(false); }
+    catch { flash("Couldn’t save that. Nothing was changed."); } finally { setBusy(false); saving.current = false; }
   };
 
   /* ── Later: the existing snooze sheet over the desktop's own writer ── */
@@ -153,7 +158,8 @@ export const PhoneTaskScreen: React.FC<PhoneTaskScreenProps> = ({ core, tasks, s
   const snooze = async (days: number, ymd: string) => {
     setLater(false);
     const next = nextKeyAfter(sel);
-    const undo = await core.snoozeTask(sel, days);
+    saving.current = true;
+    const undo = await core.snoozeTask(sel, days).finally(() => { saving.current = false; });
     if (!undo) { flash("That task can’t be snoozed that far."); return; }
     const [y, m, dd] = ymd.split("-").map(Number);
     flash(core.snoozeWords(sel, new Date(y, m - 1, dd)), undo);
@@ -166,7 +172,8 @@ export const PhoneTaskScreen: React.FC<PhoneTaskScreenProps> = ({ core, tasks, s
     if (c === "card") { core.openCard(t); return; }
     if (c === "withdraw" && t.query) { openQueryDrawer({ mode: "close", queryId: t.query.id, preset: { closeWhy: "withdraw" } } as never); return; }
     const next = nextKeyAfter(sel);
-    const w = await core.dismissWrite(sel, c);
+    saving.current = true;
+    const w = await core.dismissWrite(sel, c).finally(() => { saving.current = false; });
     if (w === "error") { flash("Couldn’t save that. Nothing was changed."); return; }
     if (!w) return;
     flash(w.msg, w.undo);

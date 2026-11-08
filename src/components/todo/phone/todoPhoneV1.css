@@ -82,7 +82,8 @@
   .tdp-tnav { display: flex; align-items: center; gap: 8px; }
   .tdp-tnav .pa-ring { width: 44px; height: 44px; }
   .tdp-pos { margin-left: auto; margin-right: 4px; font: 400 13px var(--pa-sans) !important; color: #fff; }
-  .tdp-ttitle { margin: 12px 0 2px; font: 400 23px/1.25 var(--pa-type) !important; color: #fff; }
+  /* two classes: brand.tsx forces `h1:not(.wsh-title)` into the serif with !important (0-1-1) */
+  .tdp-task .tdp-ttitle { margin: 12px 0 2px; font: 400 23px/1.25 var(--pa-type) !important; color: #fff; }
   .tdp-tsub { margin: 0; font: italic 400 14px/1.35 var(--pa-sans) !important; color: #fff; }
   .tdp-mini { display: block; margin-top: 14px; border-radius: 16px; overflow: hidden; background: #fff; color: var(--pa-ink); cursor: pointer; }
   .tdp-minih { display: flex; justify-content: space-between; align-items: center; padding: 7px 12px; background: var(--pa-navy-2); color: #fff; font: 400 12.5px var(--pa-sans) !important; }
@@ -130,7 +131,7 @@
   /* the date strip and the month: white, on the page */
   .tdp-qbody .tws-dpick { background: #fff; border-radius: 16px; box-shadow: var(--pa-sh); padding: 12px; }
   .tdp-qbody .tws-dstrip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-  .tdp-qbody .tws-dchip2 { min-width: 0; min-height: 52px; }
+  .tdp-qbody .tws-dchip2 { width: 100%; min-width: 0; height: 54px; }
   .tdp-qbody textarea, .tdp-qbody input { font-size: 16px !important; }
 
   /* the footer: Later, Dismiss, "n of m", and the one pill */
