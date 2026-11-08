@@ -210,7 +210,7 @@ export interface QcQueryCard149Props {
   edit152?: React.ReactNode;
   onBack152?: () => void;
   /** v152.2 §2–§3 — the composer, its draft, the bubble edited in place, the toast and the footer's controls */
-  card1522?: Pick<QcCard152Props, "composer" | "draft" | "editingId" | "editNode" | "toast" | "burst" | "onFoot" | "onEditMats">;
+  card1522?: Pick<QcCard152Props, "composer" | "draft" | "editingId" | "editNode" | "toast" | "burst" | "onFoot" | "onEditMats" | "desk">;
 }
 
 const blankEdits = (): CardEdits => ({ dates: {}, removed: [], added: null, packageKey: null, pieces: {}, agent: {} });

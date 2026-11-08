@@ -37,6 +37,14 @@ const ICO_S = <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke
 const ICO_P = <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><path d="M5 2.5h7v10H5z" /><path d="M3.5 4.5v10h7" /></svg>;
 export const chipIcon = (label: string) => (/letter/i.test(label) ? ICO_L : /synopsis/i.test(label) ? ICO_S : ICO_P);
 
+/* v53 (D9): how a writer's step went, after the stamp — the envelope for email, the agent card's form for an online form
+   or QueryManager (AgentCardParts255 IC255.form), and a small parcel for post (the app had no post mark) */
+const VIA_ICON: Record<"email" | "form" | "post", React.ReactNode> = {
+  email: <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><rect x="2" y="3.5" width="12" height="9" rx="1.5" /><path d="m2.5 4.5 5.5 4 5.5-4" /></svg>,
+  form: <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2" /><path d="M9 8h6M9 12h6M9 16h3" /></svg>,
+  post: <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" aria-hidden="true"><path d="M2.5 5.5 8 2.5l5.5 3v6L8 14.5l-5.5-3z" /><path d="M2.5 5.5 8 8.5l5.5-3M8 8.5v6" /></svg>,
+};
+
 export interface BubbleProps {
   side: "me" | "them";
   status: QueryStatus | null;
@@ -57,6 +65,12 @@ export interface BubbleProps {
   nth?: string | null;
   /** §2.9 the record and edit forms' preview: a dashed edge and "· draft" after the title */
   draft?: boolean;
+  /** v53 (D9): the corner stamp ("2 Apr"); none when the step is undated */
+  stamp?: string | null;
+  /** v53 (D9): how the writer's step went, shown as a small icon after the stamp */
+  viaIcon?: "email" | "form" | "post" | null;
+  /** v53 (D8): a mark beside the bubble (the To-do's "Checking"), or a stamp over its corner ("Logged") */
+  mark?: React.ReactNode;
   /** the outer element's extra props (data-*, class, style) */
   outer?: Record<string, unknown>;
   /** after the bubble's contents (the thread's ✎ Edit) */
@@ -66,6 +80,14 @@ export interface BubbleProps {
 
 export const Bubble: React.FC<BubbleProps> = (b) => {
   const style = b.tint ? ({ ["--bt" as string]: b.tint.fill, ["--be" as string]: b.tint.edge } as React.CSSProperties) : undefined;
+  const icon = b.side === "me" && b.viaIcon ? <i className="qc152-via" data-qc152="via-icon" data-via={b.viaIcon}>{VIA_ICON[b.viaIcon]}</i> : null;
+  /* the stamp sits in the bubble's bottom-right corner; a hidden copy at the end of the last line keeps its room, so the
+     two share the line when there is space and the stamp drops below it when there is not */
+  const ts = b.stamp ? <>{b.stamp}{icon}</> : null;
+  const room = ts ? <span className="qc152-tsp" aria-hidden="true">{ts}</span> : null;
+  /* the via WORDS stay only where they are not a method (a close's reason, an offer deadline) */
+  const viaText = b.via && !(b.side === "me" && b.viaIcon) ? b.via : null;
+  const tail = b.sub ? "sub" : b.quote ? "quote" : b.chips || viaText ? "r2" : "r1";
   return (
     <div {...(b.outer as React.HTMLAttributes<HTMLDivElement>)} className={`qc152-m ${b.side}${b.draft ? " drf" : ""}${b.className ? ` ${b.className}` : ""}`}>
       {b.side === "them" ? <span className="qc152-av" aria-hidden="true">{b.initials}</span> : null}
@@ -80,13 +102,15 @@ export const Bubble: React.FC<BubbleProps> = (b) => {
               <b data-qc152="msg-title">{b.title}</b>
               {b.nth ? <span className="qc152-nth" data-qc152="nth">{b.nth}</span> : null}
               {b.draft ? <span className="qc152-drt" data-qc152="draft-mark">· draft</span> : null}
-              <span className={`qc152-dt${b.dated ? "" : " nod"}`} data-qc152="msg-date">{b.date}</span>
+              {tail === "r1" ? room : null}
             </div>
-            {b.chips || b.via ? <div className="qc152-r2">{b.chips}{b.via ? <em data-qc152="via">{b.via}</em> : null}</div> : null}
-            {b.quote ? <div className="qc152-qt" data-qc152="quote">“{b.quote}”</div> : null}
-            {b.sub ? <div className="qc1522-sb" data-qc1522="sub">{b.sub}</div> : null}
+            {b.chips || viaText ? <div className="qc152-r2">{b.chips}{viaText ? <em data-qc152="via">{viaText}</em> : null}{tail === "r2" ? room : null}</div> : null}
+            {b.quote ? <div className="qc152-qt" data-qc152="quote">“{b.quote}”{tail === "quote" ? room : null}</div> : null}
+            {b.sub ? <div className="qc1522-sb" data-qc1522="sub">{b.sub}{tail === "sub" ? room : null}</div> : null}
           </div>
         </div>
+        {ts ? <span className="qc152-ts" data-qc152="msg-date">{ts}</span> : null}
+        {b.mark}
         {b.after}
       </div>
     </div>

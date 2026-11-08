@@ -82,6 +82,56 @@ export function stepTitle(s: Pick<ThreadStepIn, "status" | "kind"> & { toldCount
   return (s.status && TITLE[s.status]) || "A step";
 }
 /**
+ * To-do list v53 (D9) — THE THREAD READS AS MESSAGES. Each bubble says who did what, in the first person for the writer
+ * and by first name for the agent ("the agent" when no first name is saved; never he or she):
+ *   Queried · You sent {first} your query        Partial requested · {First} asked for a partial (or what they asked for)
+ *   Partial sent · You sent {first} your partial  Full requested · {First} asked for your full manuscript
+ *   Full sent · You sent {first} your full manuscript   R&R · {First} asked you to revise and resubmit
+ *   Resubmitted · You sent {first} your revision  Offer · {First} offered   Rejected · {First} passed
+ *   No response · You closed it: no reply         Withdrawn · You withdrew your query (an offer declined: You turned down
+ *   {first}'s offer)   Signed · You accepted {first}'s offer   a nudge · You nudged {first}
+ *   a holding reply · {First} sent a holding reply   told · You told {n} agents about the offer
+ * `stepTitle` (the composer's and the step editor's headings) is unchanged.
+ */
+const capFirst = (x: string) => x.charAt(0).toUpperCase() + x.slice(1);
+export function msgTitle(s: Pick<ThreadStepIn, "status" | "kind"> & { toldCount?: number | null; askedFor?: string | null; event?: string | null }, first: string): string {
+  const F = capFirst(first);
+  if (s.kind === "nudge") return `You nudged ${first}`;
+  if (s.kind === "told") return s.toldCount ? `You told ${pl(s.toldCount, "agent")} about the offer` : "You told other agents about the offer";
+  if (s.kind === "holding") return `${F} sent a holding reply`;
+  switch (s.status) {
+    case QueryStatus.QUERIED: return `You sent ${first} your query`;
+    case QueryStatus.PARTIAL_REQUESTED: return s.askedFor ? `${F} asked for ${s.askedFor.charAt(0).toLowerCase()}${s.askedFor.slice(1)}` : `${F} asked for a partial`;
+    case QueryStatus.PARTIAL_SENT: return `You sent ${first} your partial`;
+    case QueryStatus.FULL_REQUESTED: return `${F} asked for your full manuscript`;
+    case QueryStatus.FULL_SENT: return `You sent ${first} your full manuscript`;
+    case QueryStatus.REVISE_RESUBMIT: return `${F} asked you to revise and resubmit`;
+    case QueryStatus.RESUBMITTED: return `You sent ${first} your revision`;
+    case QueryStatus.OFFER: return `${F} offered`;
+    case QueryStatus.REJECTED: return `${F} passed`;
+    case QueryStatus.NO_RESPONSE: return "You closed it: no reply";
+    case QueryStatus.WITHDRAWN: return s.event === "offer_declined" ? `You turned down ${first}’s offer` : "You withdrew your query";
+    case QueryStatus.SIGNED: return `You accepted ${first}’s offer`;
+    default: return "A step";
+  }
+}
+/** v53 (D9): a bubble's short stamp ("2 Apr"), and the day pill above each day's messages ("Today", "Yesterday", "2 April 2024") */
+export const stampOf = (ms: number): string => { const d = new Date(ms); return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}`; };
+const MONTHS_FULL = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+export function dayPill(ms: number, nowMs: number): string {
+  const n = days(nowMs, ms);
+  if (n === 0) return "Today";
+  if (n === 1) return "Yesterday";
+  const d = new Date(ms);
+  return `${d.getDate()} ${MONTHS_FULL[d.getMonth()]} ${d.getFullYear()}`;
+}
+/** v53 (D9): how a writer's step went, read off the step's own method words ("by email", "by online form", "by post") */
+export function viaKind(via: string | null | undefined): "email" | "form" | "post" | null {
+  const v = (via ?? "").toLowerCase();
+  return /email/.test(v) ? "email" : /form|querymanager/.test(v) ? "form" : /post/.test(v) ? "post" : null;
+}
+
+/**
  * v152.1 §2.2 — THE COLOUR RULE, like a messaging app: your bubbles are paper, always; the agent's are tinted by WHAT THE
  * REPLY WAS, the status pills' family, with a 1px inset edge. The glyphs inside are colourless; there is no navy in the
  * thread. A holding reply is the agent's but is not a reply in the table: white with the agent hairline (Nick — grey means
@@ -118,6 +168,8 @@ export type ThreadItem =
   | { t: "msg"; key: string; activityId?: string; side: Side; status: QueryStatus | null; kind: "nudge" | "holding" | "told" | null; title: string;
       /** "No date" when the step has none (§2.7) */
       date: string; dated: boolean; chips: ThreadChip[]; via: string | null;
+      /** v53 (D9): the bubble's corner stamp ("2 Apr"), and its local midnight for the day pills; null when undated */
+      stamp: string | null; dayMs: number | null;
       /** the agent's bubble tint (§2.2); null on your side */
       tint: { fill: string; edge: string } | null; grey: boolean;
       /** v152.2 §5 a line under the bubble */
@@ -211,8 +263,9 @@ export function buildThread(steps: readonly ThreadStepIn[], c: ThreadCtx): Threa
   S.forEach((s, i) => {
     if (i) {
       const p = S[i - 1];
-      /* v152.2 §2.2 — one italic line on the next message's side; none when either neighbour has no date */
-      if (p.ms != null && s.ms != null) {
+      /* v152.2 §2.2 — one italic line on the next message's side; none when either neighbour has no date.
+         v53 (D9): none for the same day either ("Same day" is dropped; the day pill says it) */
+      if (p.ms != null && s.ms != null && days(s.ms, p.ms) > 0) {
         const n = Math.max(0, days(s.ms, p.ms));
         out.push({ t: "wait", key: `w-${s.key}`, label: waitWords(n), tip: waitTip(p, s, n, c), side: sideOf(s) });
       }
@@ -220,7 +273,8 @@ export function buildThread(steps: readonly ThreadStepIn[], c: ThreadCtx): Threa
     if (s.kind === "nudge") nudges += 1;
     out.push({
       t: "msg", key: s.key, activityId: s.activityId, side: sideOf(s), status: s.status, kind: s.kind,
-      title: stepTitle(s, c.first), sub: s.sub ?? null, date: s.ms != null ? dayLabel(s.ms, c.nowMs) : "No date", dated: s.ms != null,
+      title: msgTitle(s, c.first), sub: s.sub ?? null, date: s.ms != null ? dayLabel(s.ms, c.nowMs) : "Not dated", dated: s.ms != null,
+      stamp: s.ms != null ? stampOf(s.ms) : null, dayMs: s.ms != null ? midnight(s.ms) : null,
       chips: s.chips, via: s.via ?? null, tint: tintOf(s), grey: greyGlyph(s),
       quote: sideOf(s) === "them" && (s.quote ?? "").trim() ? s.quote!.trim() : null,
       follows: s.kind === "nudge" ? (q0?.ms != null ? `Query sent · ${dayLabel(q0.ms, c.nowMs)}` : "Query sent") : null,

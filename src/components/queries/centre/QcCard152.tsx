@@ -21,11 +21,12 @@ import { STAGE_NAME, type QcRow } from "../../../lib/qcSummary";
 import { STATE_BAND, STATE_HEAD, QUIET_BAND, type QueryState } from "../../../lib/queryState";
 import { STATUS_FILL, statusKind } from "../../../lib/qc1512";
 import {
-  askChips, buildThread, dayLabel, materialsSummary, materialsTab, replyBox,
+  askChips, buildThread, dayLabel, dayPill, materialsSummary, materialsTab, replyBox, viaKind,
   type ReplyAct, type ThreadChip, type ThreadItem, type ThreadStepIn,
 } from "../../../lib/qcThread152";
 import "./qcv152card.css";
 import "./qcv1522card.css";
+import "./qcv153thread.css";
 import { band1522, footer1522, type FootAct, type FootCtx } from "../../../lib/qcFoot1522";
 import { waitWords } from "../../../lib/qc1522";
 import { PopCtx, useOutsideClose } from "./QcEdit152";
@@ -102,11 +103,16 @@ export interface QcCard152Props {
   onFoot?: (a: FootAct) => void;
   /** v152.2 §2.6 — a sending step's materials, edited in the composer (null: "+ Add something you sent", the query step) */
   onEditMats?: (activityId: string | null) => void;
+  /** To-do list v53 (D8) — the To-do desk's dress, opt-in (the Query Centre passes none): the book as one row; typing dots
+   *  where the new step will go; the step being checked (a soft pulsing ring and "Checking"); the step just logged
+   *  (a "Logged" stamp); a send of several things as "your materials" with a paperclip */
+  desk?: { bookRow?: boolean; typing?: boolean; checkKey?: string | null; stampKey?: string | null; clip?: { key: string; items: string[]; version: string | null } | null };
 }
 
 const PEN = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10.5 2.5l3 3L6 13H3v-3z" /></svg>;
 const ARW = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5" /></svg>;
 const CLOCK = <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" aria-hidden="true"><circle cx="8" cy="8" r="6" /><path d="M8 4.6V8l2.3 1.4" /></svg>;
+const CLIP = <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true"><path d="M10.5 4.5 5.8 9.2a1.6 1.6 0 0 0 2.3 2.3l5-5a3 3 0 0 0-4.3-4.3L3.6 7.4a4.2 4.2 0 0 0 6 6l3.4-3.4" /></svg>;
 const BOOK = <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#5f5a53" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true"><path d="M3.5 5.5c2.8-1.3 5.8-1.3 8.5.6 2.7-1.9 5.7-1.9 8.5-.6v13c-2.8-1.3-5.8-1.3-8.5.6-2.7-1.9-5.7-1.9-8.5-.6z" /><path d="M12 6.1v13" /></svg>;
 const MAIL = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><rect x="2" y="3.5" width="12" height="9" rx="1.5" /><path d="m2.5 4.5 5.5 4 5.5-4" /></svg>;
 const WEB = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><circle cx="8" cy="8" r="6" /><path d="M2 8h12M8 2c2 2 2 10 0 12M8 2c-2 2-2 10 0 12" /></svg>;
@@ -218,11 +224,21 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
       {gap != null ? <div className={`qc1522-lt ${m.side}`} data-qc1522="draft-wait">{waitWords(gap)}</div> : null}
       <Bubble side={m.side} status={m.status} kind={m.kind} title={m.title} date={m.date} dated={m.dated} tint={m.tint} grey={m.grey} initials={r.initials}
         chips={m.chips.length ? <span className="qc152-chs">{m.chips.map((c, k) => <span key={k} className="qc152-ch">{chipIcon(c.label)}{c.label}</span>)}</span> : null}
-        via={m.via} quote={m.quote} follows={m.follows} nth={null} sub={m.sub} className="qc1522-draft"
+        via={m.via} quote={m.quote} follows={m.follows} nth={null} sub={m.sub} className="qc1522-draft" stamp={m.stamp} viaIcon={m.side === "me" ? viaKind(m.via) : null}
         outer={{ "data-qc152": "msg", "data-qc1522": "draft", "data-side": m.side, style: { ["--dr" as string]: col } }} />
     </>;
   })();
 
+  const desk = p.desk ?? {};
+  let lastDay: number | null = null;
+  /* v53 (D9): the line under the newest message says what the wait is, while it is with the agent */
+  const statusLine = d.state === "agent" || d.state === "nudge"
+    ? `Waiting for ${first}${d.replyMs != null ? ` · reply expected by ${dayLabel(d.replyMs, nowMs)}` : ""}` : null;
+  const clipChip = (c: { items: string[]; version: string | null }) => (
+    <span className="qc153-clip" data-qc153="clip" tabIndex={0}>{CLIP}{c.items.length}
+      <span className="qc153-clippop" role="tooltip" data-qc153="clip-pop">{c.items.map((x) => <span key={x}>{x}</span>)}{c.version ? <span>{c.version}</span> : null}</span>
+    </span>
+  );
   /* §2.8 the fold: with more than five steps, everything before the last three sits behind one button */
   const msgIdx = thread.map((it, i) => (it.t === "msg" ? i : -1)).filter((i) => i >= 0);
   const folded = !unfold && msgIdx.length > FOLD_OVER ? msgIdx.length - FOLD_KEEP : 0;
@@ -239,17 +255,33 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
           return <div key={it.key} className={`qc1522-lt ${it.side}`} data-qc152="wait" data-qc1522="wait" data-side={it.side} data-label={it.label} title={it.tip ?? undefined}>{it.label}</div>;
         }
         if (p.editingId && it.activityId === p.editingId && p.editNode) return <React.Fragment key={it.key}>{p.editNode}</React.Fragment>;
+        /* v53 (D9): a small centred day pill above each day's first message */
+        const pill = it.dayMs != null && it.dayMs !== lastDay ? <div className="qc152-dp" data-qc152="day-pill">{dayPill(it.dayMs, nowMs)}</div> : null;
+        if (it.dayMs != null) lastDay = it.dayMs;
+        const clip = desk.clip && (it.activityId === desk.clip.key || it.key === desk.clip.key) ? desk.clip : null;
+        const checking = !!desk.checkKey && (it.activityId === desk.checkKey || it.key === desk.checkKey);
+        const stamped = !!desk.stampKey && (it.activityId === desk.stampKey || it.key === desk.stampKey);
         return (
-          <Bubble key={it.key} side={it.side} status={it.status} kind={it.kind} title={it.title} date={it.date} dated={it.dated}
-            tint={it.tint} grey={it.grey} initials={r.initials} chips={chips(it.chips, it.key)} via={it.via} quote={it.quote} follows={it.follows} nth={it.nth} sub={it.sub}
-            className={p.freshKey && (it.activityId === p.freshKey || it.key === p.freshKey) ? "new" : undefined}
-            outer={{ "data-qc152": "msg", "data-side": it.side, "data-status": it.status ?? undefined, "data-kind": it.kind ?? undefined, "data-activity": it.activityId,
-              style: { animationDelay: `${i * 45}ms` } }}
-            after={<button type="button" className="qc152-fx" data-qc152="edit-step" aria-label={`Edit ${it.title}`}
-              onClick={() => p.onEditStep(it.activityId ?? null)}>✎ Edit</button>} />
+          <React.Fragment key={it.key}>
+            {pill}
+            <Bubble side={it.side} status={it.status} kind={it.kind} title={clip ? `You sent ${first} your materials` : it.title} date={it.date} dated={it.dated}
+              stamp={it.stamp} viaIcon={it.side === "me" ? viaKind(it.via) : null}
+              tint={it.tint} grey={it.grey} initials={r.initials} chips={clip ? clipChip(clip) : chips(it.chips, it.key)} via={it.via} quote={it.quote} follows={it.follows} nth={it.nth} sub={it.sub}
+              className={[p.freshKey && (it.activityId === p.freshKey || it.key === p.freshKey) ? "new" : "", checking ? "qc153-chk" : "", stamped ? "qc153-lgd" : ""].filter(Boolean).join(" ") || undefined}
+              mark={checking ? <span className="qc153-chkw" data-qc153="checking">Checking</span> : stamped ? <span className="qc153-stamp" data-qc153="logged">Logged</span> : null}
+              outer={{ "data-qc152": "msg", "data-side": it.side, "data-status": it.status ?? undefined, "data-kind": it.kind ?? undefined, "data-activity": it.activityId,
+                style: { animationDelay: `${i * 45}ms` } }}
+              after={<button type="button" className="qc152-fx" data-qc152="edit-step" aria-label={`Edit ${it.title}`}
+                onClick={() => p.onEditStep(it.activityId ?? null)}>✎ Edit</button>} />
+          </React.Fragment>
         );
       })}
       {draftNode}
+      {desk.typing ? (
+        /* v53 (D8): while the To-do's questions are open, the writer is "typing" where the new step will go */
+        <div className="qc152-m me qc153-typing" data-qc153="typing"><div className="qc152-bx" data-qc152="bubble"><span className="qc153-dots" aria-label="Being logged"><i /><i /><i /></span></div></div>
+      ) : null}
+      {statusLine ? <div className="qc153-sl" data-qc153="status-line">{statusLine}</div> : null}
     </div>
   );
 
@@ -329,11 +361,16 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
           <span className="qc152-pill" data-qc152="pill"><span className="qc152-cap" style={{ background: STATUS_FILL[statusKind(r.status)] }}><StatusDot status={r.status} overrideSize={17} decorative /></span><span>{STAGE_NAME[r.status]}</span></span>
         </div>
         {view !== "read" ? p.editBody : <>
+        {desk.bookRow ? (
+          /* v53 (D8): the To-do card's book is one row — its height goes to Tracking */
+          <div className="qc153-bkrow" data-qc152="book" data-qc153="book-row"><span>Querying</span><b>{p.msTitle ?? "No manuscript"}</b></div>
+        ) : (
         <div className="qc152-ms" data-qc152="book">
           <span className="qc152-bk" aria-hidden="true">{BOOK}</span>
           <div><small>QUERYING</small><b>{p.msTitle ?? "No manuscript"}</b>
             {p.bookChips.length ? <div className="qc152-bkc">{p.bookChips.map((c) => <span key={c}>{c}</span>)}</div> : null}</div>
         </div>
+        )}
         <div className="qc152-tabs" role="tablist" aria-label="The query">
           {(["tracking", "agent", "materials", "notes"] as const).map((t) => (
             <button key={t} type="button" role="tab" data-qc152="tab" data-tab={t} aria-selected={p.tab === t} onClick={() => p.onTab(t)}>
