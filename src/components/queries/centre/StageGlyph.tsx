@@ -53,3 +53,31 @@ export const StageGlyph: React.FC<{ k: StageKey | "key"; className?: string; das
     </svg>
   );
 };
+
+/**
+ * Query Centre v153 — THE FOUR-STEP TRACK'S NODES, in StageGlyph's grammar on its 40-unit box (the ref's NODE set):
+ * queried a ring, partial a half, full a filled bullseye, offer a document (filled at the offer step). A closed query's
+ * current step is its closed glyph: a dash ring (Passed), the dashed clock (No reply), a slash ring (Withdrawn).
+ */
+export type TrackNodeKind = "q" | "partial" | "full" | "offer" | "offer-on" | "rj" | "nr" | "wd";
+export const TrackNode: React.FC<{ k: TrackNodeKind; className?: string }> = ({ k, className }) => {
+  if (k === "nr") {
+    return (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true" data-qc153="node" data-k={k}>
+        <circle cx="12" cy="12" r="8.5" strokeDasharray="2.6 2.6" /><path d="M12 7.5v5l3 2" />
+      </svg>
+    );
+  }
+  const ring = <circle cx="20" cy="20" r="14" fill="none" stroke="currentColor" strokeWidth="3.2" />;
+  return (
+    <svg className={className} viewBox="0 0 40 40" aria-hidden="true" data-qc153="node" data-k={k}>
+      {k === "q" || k === "partial" || k === "full" || k === "rj" || k === "wd" ? ring : null}
+      {k === "partial" ? <path d="M20 6A14 14 0 0 0 20 34Z" fill="currentColor" /> : null}
+      {k === "full" ? <circle cx="20" cy="20" r="8.5" fill="currentColor" /> : null}
+      {k === "offer" ? <g fill="none" stroke="currentColor" strokeWidth="3"><path d="M10 5h14l7 7v23H10z" /><path d="M15 21h11M15 27h11" /></g> : null}
+      {k === "offer-on" ? <><path d="M10 5h14l7 7v23H10z" fill="currentColor" stroke="currentColor" strokeWidth="3" /><path d="M15 21h11M15 27h11" stroke="#fff" strokeWidth="3" /></> : null}
+      {k === "rj" ? <path d="M13 20h14" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" /> : null}
+      {k === "wd" ? <path d="M15 25l10-10" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" /> : null}
+    </svg>
+  );
+};
