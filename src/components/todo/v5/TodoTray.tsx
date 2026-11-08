@@ -71,7 +71,8 @@ import { TrayDialMenu, type DialOpt } from "./TrayDialMenu";
 import { lateTag, rowLines } from "../../../lib/trayRows";
 import { doingTitle } from "../../../lib/deskDoing";
 import { noreplyAnswers, saveClose } from "../../../lib/queryActions/closeSave";
-import { packagesHeldBy, packagesIn, restoreSnapshot, takeSnapshot } from "../../../lib/queryActions/snapshot";
+import { packagesHeldBy, packagesIn, readCurrent, restoreSnapshot, takeSnapshot, type Snapshot } from "../../../lib/queryActions/snapshot";
+import { bulkCloseMessage, closeOne } from "../../../lib/queryActions/bulkClose";
 import { todayDay } from "../../../lib/queryActions/dates";
 import { owes } from "../../queryActions/journeys/common";
 import type { DrawerMode } from "../../../lib/queryActions/drawerStore";
@@ -909,34 +910,54 @@ export const TodoTray: React.FC<{ onNavigate: (tab: string, sub?: string, opts?:
     if (!uid) return;
     const chosen = visible.filter((i) => bulk.has(i.key) && bulkable(i));
     const today0 = todayDay();
-    const undos: (() => Promise<void>)[] = [];
-    let failed = 0;
+    /* undo and bulk close v1 — a throw from the save says nothing about whether the query closed (it can throw after
+       the close lands), so `closeOne` reads it back: closed goes in the Undo, a half-written one is put back, and one
+       that cannot be checked is shown as unknown and keeps its Undo. The message counts only what really happened. */
+    const kept: SavedUndo[] = [];
+    let closed = 0, failed = 0, unknown = 0;
     for (const it of chosen) {
       const q = it.query!;
       const agent = agents.find((a) => a.id === q.agentId) ?? null;
+      let snap: Snapshot;
       try {
-        const snap = await takeSnapshot(uid, [q.id]);
-        await saveClose(db, q, agent, noreplyAnswers(today0), today0);
-        const undo = async () => { const after = await packagesHeldBy(uid, snap.queryIds); await restoreSnapshot(snap); await db.reconcileStamps([...packagesIn(snap), ...after]); };
-        undos.push(undo);
-        savedUndos.current.push({ queryId: q.id, mode: "close", undo, used: false });
+        snap = await takeSnapshot(uid, [q.id]);
       } catch (e) {
-        console.error("[to-do] bulk close: a save failed", e);
+        console.error("[to-do] bulk close: couldn't read the query before closing it, so it was left alone", e);
         failed++;
+        continue;
       }
+      const out = await closeOne({
+        save: () => saveClose(db, q, agent, noreplyAnswers(today0), today0),
+        snap, queryPath: `users/${uid}/queries/${q.id}`,
+        readNow: () => readCurrent(snap), restore: restoreSnapshot,
+        log: (msg, e) => console.error(`[to-do] ${msg} (query ${q.id})`, e),
+      });
+      if (out.kind === "failed") { failed++; continue; }
+      if (out.kind === "closed") closed++; else unknown++;
+      const undo = async () => { const after = await packagesHeldBy(uid, snap.queryIds); await restoreSnapshot(snap); await db.reconcileStamps([...packagesIn(snap), ...after]); };
+      const saved: SavedUndo = { queryId: q.id, mode: "close", undo, used: false };
+      kept.push(saved);
+      savedUndos.current.push(saved);
     }
     setBulk(new Set());
-    const k = undos.length;
-    if (!k) { flash("Couldn't close those queries. Nothing was changed."); return; }
-    flash(`Closed ${k} ${k === 1 ? "query" : "queries"} · Moved to Closed${failed ? ` · ${failed} couldn't be closed` : ""}`, { label: "Undo", fn: async () => {
-      for (const u of [...undos].reverse()) {
-        const e = savedUndos.current.find((x) => x.undo === u);
-        if (e?.used) continue;
-        if (e) e.used = true;
-        await u();
+    const message = bulkCloseMessage(closed, failed, unknown);
+    if (!kept.length) { flash(message); return; }
+    /* one Undo for every query that closed (or may have): each is put back whole, on its own */
+    const undoAll = async () => {
+      let notUndone = 0;
+      for (const e of [...kept].reverse()) {
+        if (e.used) continue;
+        e.used = true;
+        try { await e.undo(); } catch (err) { e.used = false; notUndone++; console.error("[to-do] bulk close undo failed", err); }
       }
       bump((x) => x + 1);
-    } }, UNDO_MS);
+      if (notUndone) {
+        flash(notUndone === kept.length ? "Couldn't undo that. Nothing was changed."
+          : `Reopened ${kept.length - notUndone} · ${notUndone} couldn't be undone, and ${notUndone === 1 ? "it is" : "they are"} unchanged`,
+        { label: "Undo", fn: undoAll }, UNDO_MS);
+      }
+    };
+    flash(message, { label: "Undo", fn: undoAll }, UNDO_MS);
   });
   /* v5.2 §H.3 — the explainer, once: GOT IT is stored on the user (todoPrefs.tray.explainedSetAside, one leaf) */
   const [explainedHere, setExplainedHere] = useState(false);
