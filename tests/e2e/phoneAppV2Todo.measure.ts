@@ -41,6 +41,7 @@ const closeAny = async (page: Page) => {
 
 for (const vp of PHONES) {
   test(`PA2-5 · To-do · ${tag(vp)}`, async ({ page }) => {
+    test.skip(true, "RETIRED by To-do on the phone v1 (7 Nov): the week strip, the tallies, the day filter and the drawer doors this case measures are gone. Successors: TDP1 L1–L10 (tests/e2e/todoPhoneV1.measure.ts). Not re-pointed: T6 (the Corkboard's notes) and T8's colour sweep on /todo/corkboard — listed in reports/todo-phone-v1/REPORT.md.");
     const L = new Ledger(PART, `todo-${tag(vp)}`);
     /* RETIRED (To-do list v51, 6 Nov): T1's first half compared the band with the desktop tray's own tallies, and that
        tray is gone (the desktop To-do is the task workspace, which has no overdue/today/later tallies). The band's

@@ -43,7 +43,10 @@ import { closedTile } from "../../../lib/dashClosed";
 import { agentCoverage } from "../../../lib/dashFirstUse";
 import { localYMD } from "../../../lib/shellSidebar";
 import "./dashPhone.css";
-import { CheckRow, checkLine, useTodoDoors, useTodoPhoneModel } from "../../todo/phone/useTodoPhone";
+import { CheckRow, checkLine, useTodoPhoneModel } from "../../todo/phone/useTodoPhone";
+import { useWsCore } from "../../todo/ws/useWsCore";
+import { PhoneTaskScreen } from "../../todo/phone/PhoneTaskScreen";
+import { phoneOrder } from "../../../lib/todoPhone";
 import { PI } from "../../phone/phoneIcons";
 
 export interface DashPhoneProps {
@@ -268,7 +271,12 @@ export const HOME_TODO_MAX = 4;
 const HomeTodo: React.FC<{ onSeeAll: () => void }> = ({ onSeeAll }) => {
   const [now] = useState(() => Date.now());
   const model = useTodoPhoneModel(now);
-  const { act, openRow, askNode } = useTodoDoors(model, true);
+  /* To-do on the phone v1 (D5): a tap, or the tick, opens the To-do list's own task screen (the desktop's questions),
+     walking the whole list in its own order — never the Query Centre drawer */
+  const core = useWsCore(now);
+  const seq = useMemo(() => phoneOrder(core.all), [core.all]);
+  const [open, setOpen] = useState<string | null>(null);
+  const openItem = (key: string) => { const t = seq.find((x) => x.item.key === key) ?? core.all.find((x) => x.item.key === key); if (t) setOpen(t.key); };
   const due = model.items.filter((i) => { const w = model.whenOf(i); return w === "earlier" || w === "today"; })
     .sort((a, b) => ((model.dayOf.get(a.key) ?? "9") < (model.dayOf.get(b.key) ?? "9") ? -1 : 1));
   return (
@@ -279,11 +287,11 @@ const HomeTodo: React.FC<{ onSeeAll: () => void }> = ({ onSeeAll }) => {
         <div className="pa-card pa-todocard" data-pa="home-todo" data-count={due.length}>
           {due.slice(0, HOME_TODO_MAX).map((i) => (
             <CheckRow key={i.key} i={i} line={checkLine(i, model.dayOf.get(i.key) ?? null, model.today)} chev={<span className="pa-chev">{PI.chev}</span>}
-              onTick={() => act(i)} onOpen={() => openRow(i)} />
+              onTick={() => openItem(i.key)} onOpen={() => openItem(i.key)} />
           ))}
         </div>
       ) : <p className="pa-sub" data-pa="home-todo-none" style={{ margin: "0 2px" }}>Nothing due today.</p>}
-      {askNode}
+      {open ? <PhoneTaskScreen core={core} tasks={seq} startKey={open} now={now} onClose={() => setOpen(null)} /> : null}
     </>
   );
 };

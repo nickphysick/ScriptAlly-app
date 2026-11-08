@@ -403,7 +403,9 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
     if (tab === "packages") return "Packages";
     if (tab === "agents") return "Agents";
     /* Phone round two v1 (2B): To-do is a page now, opened from Home, the menu and the + sheet */
-    if (pathname === "/todo" || pathname.startsWith("/todo/")) return "To-do";
+    /* To-do on the phone v1 (D2): the list's own title */
+    if (pathname === "/todo") return "Your to-do list";
+    if (pathname.startsWith("/todo/")) return "To-do";
     /* Phone app v2 Part 8B: a settings section names itself in the band (the index is "Settings") */
     const section = ACCOUNT_ROUTES.find((r) => r.path === pathname);
     if (section) return section.label;
@@ -638,6 +640,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
             }}
             slot={bandSlots[pathname] ?? null}
             extra={bandExtras[pathname] ?? null}
+            todo={pathname === "/todo"}
           />
         ) : (
         <div className="ws-mobilebar">

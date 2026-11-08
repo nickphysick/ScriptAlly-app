@@ -11,25 +11,17 @@
  * `trayItem`, its days `calendarItems` and its tallies `dayBuckets` — the same calls, in the same order, as the desktop
  * tray and the badge (lib/todoDueTally).
  *
- * ⚠️ A TICK NEVER COMPLETES A TASK THAT NEEDS A FLOW. `act` is the old verb button's handler: a send, a nudge or a close
- * OPENS its journey, a profile gap opens the agent card, and only the writer's own task is ticked off — after asking.
+ * To-do on the phone v1: the doors (`useTodoDoors`), Up next's words (`whyLine`, `upNextVerb`) and the To-do page's use of
+ * this model are retired — the To-do list and Home's taps now open the desktop's own task screen (PhoneTaskScreen). Home
+ * still reads this model for its short list of what is due.
  */
-import React, { useMemo, useState } from "react";
-import { createPortal } from "react-dom";
-import { useNavigate } from "react-router-dom";
+import React, { useMemo } from "react";
 import { useScriptAllyDb } from "../../../lib/db";
 import { assembleBoardColumns } from "../../../lib/todoColumns";
 import { localYMD } from "../../../lib/shellSidebar";
 import { calendarItems, counted, dayBuckets, londonToday, type CalItem } from "../../../lib/trayCalendar";
-import { trayItem, SWEEP_NEED, type TrayDb, type TrayItem } from "../../../lib/todoTray";
+import { trayItem, type TrayDb, type TrayItem } from "../../../lib/todoTray";
 import { overdueLabel } from "../../../lib/trayRows";
-import { dayMonth } from "../../../lib/dates";
-import { drawerDoorForTask } from "../../../lib/queryActions/entry";
-import { openQueryDrawer, showUndoBar } from "../../../lib/queryActions/drawerStore";
-import { dataNeedTarget, openAgentCard } from "../../../lib/agentCardStore";
-import { agentDataQualityNeeds } from "../../../lib/agentDataQuality";
-import { openPhoneCompose } from "../../../lib/phoneCompose";
-import { useTaskCommit } from "../useTaskCommit";
 import type { BoardCard } from "../../../lib/todoBoard";
 import "./todoCheck.css";
 
@@ -93,98 +85,6 @@ export function checkLine(i: TrayItem, day: string | null, today: string): { tex
   const late = day && day < today ? overdueLabel(day, today) : null;
   const where = i.agent ? (i.agent.agency?.trim() || (checkTitle(i).includes((i.agent.name || "").trim()) ? "" : i.agent.name?.trim() || "")) : i.sub;
   return { text: where || "", late };
-}
-
-const DAY = 86_400_000;
-const msOf = (v: unknown): number | null => {
-  if (v == null || v === "") return null;
-  const t = typeof v === "object" && v && "toDate" in (v as object) ? (v as { toDate(): Date }).toDate().getTime() : new Date(v as string).getTime();
-  return Number.isFinite(t) ? t : null;
-};
-const weeksWord = (n: number) => (n === 1 ? "a week" : `${n} weeks`);
-
-/**
- * Up next's sentence (ref boot2 `WHY`): THE FACTS ONLY, from the task's own data — when it was asked for, or how long
- * since the query went — and when it fell due. No advice the desktop To-do does not already give; nothing guessed: a
- * fact with no date behind it is left out.
- */
-export function whyLine(i: TrayItem, day: string | null, today: string, nowMs: number): string {
-  const q = i.query;
-  const first = (i.agent?.name || "").trim().split(/\s+/)[0] || (i.agent?.agency || "").trim();
-  const parts: string[] = [];
-  if (q) {
-    const asked = i.bucket === "send" || i.bucket === "decide"
-      ? msOf(q.status === "Offer" ? q.offerDate : q.status === "Full Requested" ? q.fullRequestedDate : q.status === "Partial Requested" ? q.partialRequestedDate : null) ?? msOf(q.lastStatusChange)
-      : null;
-    const sent = msOf(q.dateSent);
-    if (asked != null) parts.push(`${first || "The agent"} ${q.status === "Offer" ? "made the offer" : "asked"} on ${dayMonth(asked)}.`);
-    else if ((i.bucket === "chase" || i.bucket === "close") && sent != null) {
-      const w = Math.floor((nowMs - sent) / (7 * DAY));
-      parts.push(w >= 1 ? `${weeksWord(w).replace(/^a/, "A")} since your query.` : `You queried on ${dayMonth(sent)}.`);
-      const win = i.agent?.responseTimeWeeks;
-      if (win && win > 0 && w >= win) parts.push(`Their stated reply time is ${weeksWord(win)}.`);
-    }
-  } else if (i.userTask?.detail?.trim()) parts.push(i.userTask.detail.trim());
-  if (day && day < today) parts.push(`${overdueLabel(day, today)}.`);
-  else if (day === today) parts.push("Due today.");
-  return parts.join(" ");
-}
-
-/** the primary's words on the Up next card (ref boot2 `VERB`), by the tray's bucket */
-export function upNextVerb(i: Pick<TrayItem, "bucket" | "card" | "userTask">): string {
-  if (i.userTask) return "Mark done";
-  switch (i.bucket) {
-    case "send": return "Send it";
-    case "decide": return i.card.taskType === "revise_resubmit" ? "Send it" : "Decide";
-    case "chase": return "Write the nudge";
-    case "close": return "Decide";
-    case "fix": return "Add it";
-    default: return "Mark done";
-  }
-}
-
-/** The doors a task row offers. `ask` is the "tick it off?" confirmation, rendered by `askNode`. */
-export function useTodoDoors(model: Pick<TodoPhoneModel, "hkGroups">, active: boolean) {
-  const { queries } = useScriptAllyDb();
-  const navigate = useNavigate();
-  const { quickDone } = useTaskCommit({
-    flash: (message, action) => showUndoBar({ message, sub: "", ...(action ? { undo: async () => { await action.fn(); } } : {}) }),
-    rememberUndo: () => {},
-    confirmAsk: async (msg) => window.confirm(msg),
-    openFlow: () => {},
-  });
-  const [ask, setAsk] = useState<TrayItem | null>(null);
-  /** the old verb button's handler: each door OPENS its journey; only the writer's own task is ticked (after asking) */
-  const act = (i: TrayItem) => {
-    const c = i.card;
-    if (i.sweep) {
-      const group = model.hkGroups.find((g) => g.rule === (c as BoardCard & { sweepRule?: string }).sweepRule);
-      const need = group ? SWEEP_NEED[group.rule] : undefined;
-      const first = group?.members[0]?.agentId;
-      if (first) openAgentCard(first, { ...(need ? dataNeedTarget([need]) ?? {} : {}), from: "task" });
-      return;
-    }
-    if (c.userTaskId) { setAsk(i); return; }
-    if (c.taskType === "data_quality_poor" && i.agent) { openAgentCard(i.agent.id, { ...(dataNeedTarget(agentDataQualityNeeds(i.agent)) ?? {}), from: "task" }); return; }
-    const door = drawerDoorForTask(c.taskType, c.relatedRecordId, (id) => queries.find((x) => x.id === id)?.offerRefQueryId);
-    if (door) openQueryDrawer(door);
-  };
-  const openRow = (i: TrayItem) => {
-    if (i.query) { navigate({ pathname: "/queries", search: `?q=${encodeURIComponent(i.query.id)}` }); return; }
-    if (i.userTask) openPhoneCompose("task", { id: i.userTask.id, text: i.userTask.text ?? "", detail: i.userTask.detail ?? "", due: i.userTask.dueDate ?? null });
-  };
-  const askNode = ask && active ? createPortal(
-    <div className="pa-layer pa-doneask" role="dialog" aria-modal="true" aria-label="Tick it off" data-pa="done-ask">
-      <div className="pa-doneask-card">
-        <b>Tick off “{ask.deed}”?</b>
-        <span>It leaves your list. You can undo it straight after.</span>
-        <div>
-          <button type="button" className="keep" onClick={() => setAsk(null)}>Not yet</button>
-          <button type="button" className="go" data-pa="done-go" onClick={() => { const c = ask.card; setAsk(null); void quickDone(c); }}>Tick it off</button>
-        </div>
-      </div>
-    </div>, document.body) : null;
-  return { act, openRow, askNode };
 }
 
 /** A checklist row (ref boot2 `.ck`): a 24px round tick, the title and its line, a chevron. The tick runs `onTick` (the

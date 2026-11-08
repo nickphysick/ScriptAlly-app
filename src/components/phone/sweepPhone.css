@@ -55,6 +55,4 @@
   /* the blush strip of a card takes ink, its count included (W2) */
   .pa-nh .pa-sub { color: var(--pa-ink) !important; }
   /* the week strip at 360: seven days of at least 44px (W6) */
-  .pa-band .pa-wk { gap: 2px; margin-left: -6px; margin-right: -6px; }
-  .pa-band .pa-wkd { min-width: 44px; }
 }

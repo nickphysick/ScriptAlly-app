@@ -49,15 +49,20 @@ for (const vp of PHONES) {
        tray is gone. The phone's own To-do states the same two figures by the same chain (lib/trayCalendar's dayBuckets,
        held equal to the badge's lib/todoDueTally by todoDueTally.test), so the reference is read there: its band's
        "From earlier" and "Today" tallies. The law is unchanged: the badge equals the To-do list's overdue + today. */
+    /* RE-POINTED AGAIN (To-do on the phone v1, 7 Nov): the To-do list's band no longer prints the two tallies (its numbers
+       are the To do / Snoozed / Done switch). Home's To-do card lists exactly the counted items from earlier and today
+       (useTodoPhoneModel's `whenOf`, over the same calendarItems as dayBuckets), and states how many in `data-count`, so
+       the reference is read there as overdue + today in one figure. */
     await prime(page);
-    await openPhone(page, "/todo", vp);
-    await page.locator('[data-pa="todo-tallies"]').waitFor({ timeout: 30_000 });
+    await openPhone(page, "/dashboard", vp);
     await page.waitForTimeout(1500);
     const tray = await page.evaluate(() => {
-      const n = (k: string) => Number(document.querySelector(`[data-pa="tally-${k}"]`)?.textContent ?? "NaN");
-      return { overdue: n("earlier"), today: n("today"), head: document.querySelector('[data-pa="todo-tallies"]')?.textContent ?? "" };
+      const card = document.querySelector<HTMLElement>('[data-pa="home-todo"]');
+      const none = !!document.querySelector('[data-pa="home-todo-none"]');
+      const due = card ? Number(card.dataset.count) : none ? 0 : NaN;
+      return { overdue: due, today: 0, head: card || none ? "home-todo" : "" };
     });
-    L.check("pop", `${tag(vp)} the To-do's tallies were read`, tray.head.trim().length > 0 && Number.isFinite(tray.overdue) && Number.isFinite(tray.today), JSON.stringify(tray));
+    L.check("pop", `${tag(vp)} Home's To-do count was read`, tray.head.length > 0 && Number.isFinite(tray.overdue), JSON.stringify(tray));
 
     await openPhone(page, "/dashboard", vp);
     for (const [path, key] of [["/dashboard", "home"], ["/queries", "queries"], ["/todo", "todo"], ["/agents", "agents"]] as const) {

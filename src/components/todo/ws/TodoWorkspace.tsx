@@ -18,43 +18,31 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useSta
 import { useLocation, useNavigate } from "react-router-dom";
 import { WorkspacePageGrid } from "../../shell/WorkspacePageGrid";
 import { useScriptAllyDb } from "../../../lib/db";
-import { assembleBoardColumns } from "../../../lib/todoColumns";
-import { localYMD } from "../../../lib/shellSidebar";
 import type { BoardCard } from "../../../lib/todoBoard";
-import { SWEEP_NEED, groupFor, trayItem, type TrayDb, type TrayItem } from "../../../lib/todoTray";
 import {
-  NO_WS_FILTERS, STRIP_GROUP, WS_GROUPINGS, WS_TYPES, WS_WHENS, dayBit, doingPhrase, doneTabRows, dueChip, mentorLine, passes, priorityTask, quietSuggestion, startReason, stripWords, whenOf, wsSections, wsTasks,
-  type DoneRow, type QuietFacts, type WsFilters, type WsGroupId, type WsGrouping, type WsTask, type WsType, type WsWhen,
+  NO_WS_FILTERS, STRIP_GROUP, WS_GROUPINGS, WS_TYPES, WS_WHENS, dayBit, doingPhrase, dueChip, mentorLine, passes, priorityTask, startReason, stripWords, whenOf, wsSections,
+  type DoneRow, type WsFilters, type WsGroupId, type WsGrouping, type WsTask, type WsType, type WsWhen,
 } from "../../../lib/todoWs";
-import { clearedThisWeek, type ClearedAct } from "../../../lib/todoCleared";
-import { setAsideItems, setAsideLabel, switchedOffRules, RULE_OFF_WORDS, RULE_TITLE, RULE_PLAIN, type SetAsideItem } from "../../../lib/taskSettings";
-import { flagForCard } from "../../../lib/todoColumns";
-import { flagKeyForTask, taskFlagId } from "../../../lib/taskFlags";
-import { setAsideRules } from "../../../lib/todoSetAside";
-import { snoozeCardWrites } from "../snoozeWrites";
+import { RULE_OFF_WORDS, RULE_TITLE, RULE_PLAIN, type SetAsideItem } from "../../../lib/taskSettings";
 import { openQueryPanel } from "../../../lib/queryPanelStore";
 import { openAgentCard } from "../../../lib/agentCardStore";
 import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
-import { drawerDoorForTask } from "../../../lib/queryActions/entry";
-import { commitCardSave } from "../../../lib/agentCardSave";
 import { ESC_LEVEL, escapeDepth, useEscapeLayer } from "../../../lib/escapeStack";
 import { SHORTCUTS, isEditableTarget, matchesShortcut } from "../../../lib/shortcuts";
 import { TODO_OPEN_TASK_KEY } from "../../../lib/corkboard";
 import { TODO_OPEN_COMPOSER } from "../../../lib/todoRoutes";
-import { MON, addDays, dayDiff, fmt, toDay, todayDay } from "../../../lib/queryActions/dates";
-import { ActivityType, QueryStatus, type TaskFlag, type UserTask } from "../../../types";
-import { nrmnOf, lastSendDay } from "../../queryActions/journeys/common";
-import { buildFlow, type Answers, type Flow, type FlowDone } from "./wsFlows";
+import { MON, addDays, dayDiff, fmt } from "../../../lib/queryActions/dates";
+import { QueryStatus, type UserTask } from "../../../types";
+import { type Answers, type Flow, type FlowDone } from "./wsFlows";
+import { useWsCore, useWsBatch } from "./useWsCore";
 import { DatePick, DIS, TICK, ZZ, dayFromYmd } from "./WsControls";
 import { PreviewAgentCard, PreviewQueryCard, ScaledCard, useQueryLog } from "./WsPreview";
 import { stampedCardRows } from "../../queries/centre/qcCardView";
 import { quietWeeksOf } from "../../../lib/queryState";
 import { packagesUnlocked } from "../../../lib/entitlements";
-import { DismissPop, SnoozePop, SwitchedOffPop, type DismissChoice, type SnoozeLimit } from "./WsPops";
+import { DismissPop, SnoozePop, SwitchedOffPop, type DismissChoice } from "./WsPops";
 import { OwnEmptySide, WsOwnTask } from "./WsOwnTask";
 import { StatusDot } from "../../StatusDot";
-import { queriesMissingMaterials } from "../../../lib/queryMaterialsGap";
-import { agentPrimary } from "../../../lib/agentDisplay";
 import { AnchoredPanel } from "../AnchoredPanel";
 import TagsPane from "../TagsSheet";
 import "./todoWs.css";
@@ -105,31 +93,10 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   /* the clock, re-read each minute */
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => { const id = window.setInterval(() => setNow(Date.now()), 60000); return () => window.clearInterval(id); }, []);
-  const today = useMemo(() => todayDay(), [now]); // eslint-disable-line react-hooks/exhaustive-deps
-  const todayYmd = localYMD(now);
-
-  /* ── the one board, and the tasks it holds ── */
-  const { cols, hkGroups } = useMemo(() => assembleBoardColumns({
-    tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, now, today: localYMD(now), mutedTaskRules: currentUser?.mutedTaskRules,
-  }), [tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, now, currentUser?.mutedTaskRules]);
-  const live: BoardCard[] = useMemo(() => [...cols.todo, ...cols.today], [cols]);
-
-  const trayDb: TrayDb = useMemo(() => ({ queries, agents, manuscripts, userTasks, activities, packages, taskFlags, hkGroups }),
-    [queries, agents, manuscripts, userTasks, activities, packages, taskFlags, hkGroups]);
-  const items = useMemo(() => live.map((c) => trayItem(c, trayDb, now)), [live, trayDb, now]);
-  const sweepNeed = useCallback((i: TrayItem) => (i.sweep ? SWEEP_NEED[(i.card as BoardCard & { sweepRule?: string }).sweepRule ?? ""] ?? null : null), []);
-  const memberIds = useCallback((i: TrayItem) => (groupFor(i.card, trayDb)?.members ?? []).map((m) => m.agentId).filter((x): x is string => !!x), [trayDb]);
-  /* v51.1 — the materials bulk card ("12 queries have no record of what you sent") is one row per query, each naming its
-     agent; its queries are the board's own (queriesMissingMaterials, the same call db.tsx makes to raise the card) */
-  const gaps = useMemo(() => queriesMissingMaterials({ queries, activities, agents, manuscripts, displayName: agentPrimary }), [queries, activities, agents, manuscripts]);
-  const gapMembers = useCallback((i: TrayItem) => (i.card.taskType === "materials_unrecorded_bulk" ? gaps.map((g) => ({ queryId: g.queryId, agentId: g.agentId })) : []), [gaps]);
-  const all = useMemo(() => wsTasks(items, agents, sweepNeed, memberIds, now, gapMembers, queries), [items, agents, sweepNeed, memberIds, now, gapMembers, queries]);
-  /** the card a task's flag sits on: a sweep member's own card */
-  const cardOf = useCallback((t: WsTask): BoardCard => {
-    if (t.kind === "batch" && t.batchItems?.length) return t.batchItems[0].card;
-    if (t.item.sweep && t.agent) return groupFor(t.item.card, trayDb)?.members.find((m) => m.agentId === t.agent!.id)?.card ?? t.item.card;
-    return t.item.card;
-  }, [trayDb]);
+  /* To-do on the phone v1, Phase A: the workspace's brain is useWsCore, shared with the phone (moved, unchanged) */
+  const core = useWsCore(now);
+  const { today, todayYmd, hkGroups: _hk, all, quietFacts, limitFor, snoozeTask, openCard, snoozed, doneRows, asideTitle, offRows } = core;
+  void _hk;
 
   /* ── the tray: tab, filters, grouping ── */
   const [tab, setTab] = useState<"todo" | "snoozed" | "done">("todo");
@@ -166,10 +133,11 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   const [offPop, setOffPop] = useState<HTMLElement | null>(null);
   const [linkPicking, setLinkPicking] = useState(false);
   /* the batch row's place (v51.1): queries skipped this time round, and queries saved but not yet gone from the board */
-  const [bSkip, setBSkip] = useState<ReadonlySet<string>>(() => new Set());
-  const [bSaved, setBSaved] = useState<ReadonlySet<string>>(() => new Set());
+  /* ⚠️ DECLARED ABOVE `go`, which resets its skips (moved to useWsBatch, unchanged) */
+  const batch = useWsBatch(sel, selKey, setSelKey, all);
+  const { bRemaining, bCur, deskT } = batch;
   const go = useCallback((key: string | null) => {
-    setSelKey(key); setA({}); setQi(0); setYay(null); setAdding(false); setPop(null); setLinkPicking(false); setBSkip(new Set());
+    setSelKey(key); setA({}); setQi(0); setYay(null); setAdding(false); setPop(null); setLinkPicking(false); batch.resetSkip();
     /* the row is brought into the tray's own view; never scrollIntoView, which would scroll the page too */
     if (key) requestAnimationFrame(() => {
       const r = document.querySelector<HTMLElement>(`.tws [data-tws-row="${CSS.escape(key)}"]`);
@@ -226,61 +194,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     return () => ro.disconnect();
   }, []);
 
-  /* ── the task's facts the flows read ── */
-  const quietFacts = useCallback((t: WsTask): QuietFacts => {
-    const q = t.query;
-    if (!q) return { nudgedOn: null, nrmn: false, windowWeeks: null };
-    const since = lastSendDay(q);
-    const nudges = activities.filter((a) => a.queryId === q.id && a.activityType === ActivityType.NUDGE_SENT).map((a) => toDay(a.date)).filter((d): d is Date => !!d);
-    const lastN = toDay(q.lastNudgeSentDate);
-    const all2 = lastN ? [...nudges, lastN] : nudges;
-    const after = all2.filter((d) => !since || d.getTime() >= since.getTime()).sort((a, b) => b.getTime() - a.getTime());
-    const wk = typeof t.agent?.responseTimeWeeks === "number" && t.agent.responseTimeWeeks > 0 ? t.agent.responseTimeWeeks : null;
-    return { nudgedOn: after[0] ?? null, nrmn: nrmnOf(q, t.agent ?? null), windowWeeks: wk };
-  }, [activities]);
-
-  const limitFor = useCallback((t: WsTask): SnoozeLimit => {
-    if (t.userTask) return { ceiling: 3650, why: null };
-    const c = cardOf(t);
-    const r = setAsideRules(c, t.query, flagForCard(c, taskFlags)?.snoozeCount ?? 0, todayYmd);
-    const dl = r.deadline;
-    const why = r.ceiling <= 0 ? `This can’t be snoozed. Your ${dl?.what ?? "date"} ${dl && dl.ymd < todayYmd ? "has passed" : "is today"}.`
-      : r.offer ? "An offer can wait a day at most." : dl ? `It can’t go past your ${dl.what}.` : null;
-    return { ceiling: r.ceiling, why };
-  }, [cardOf, taskFlags, todayYmd]);
-
-  /* ── set aside: snooze, dismiss, a switched-off rule, delete — each with Undo, each putting back what was there ── */
-  const captureFlags = (keys: { taskType: string; queryId?: string; agentId?: string }[]) =>
-    keys.map((k) => { const id = taskFlagId(k); return { id, was: taskFlags.find((f) => f.id === id) ?? null }; });
-  const putBack = (cap: { id: string; was: TaskFlag | null }[]) => Promise.all(cap.map((c) => restoreTaskFlag(c.id, c.was))).then(() => undefined);
-  const flagKeysFor = (t: WsTask) => {
-    /* a batch reaches every card it stands for: the bulk card, or each single card below the board's threshold */
-    if (t.kind === "batch") return (t.batchItems ?? []).map((i) => i.card).filter((c) => c.taskType && c.relatedRecordId).map((c) => flagKeyForTask(c.taskType!, c.relatedRecordId!));
-    const c = cardOf(t);
-    return c.taskType && c.relatedRecordId ? [flagKeyForTask(c.taskType, c.relatedRecordId)] : [];
-  };
   const nextKeyAfter = (t: WsTask): string | null => { const i = order.findIndex((x) => x.key === t.key); return (order[i + 1] ?? order[i - 1])?.key ?? null; };
-
-  const snoozeTask = async (t: WsTask, days: number): Promise<(() => Promise<void>) | null> => {
-    if (t.userTask) {
-      const was = t.userTask;
-      await updateUserTask(was.id, { dueDate: localYMD(Date.now() + days * DAY) });
-      return async () => { await restoreUserTask(was); };
-    }
-    const c = cardOf(t);
-    const r = setAsideRules(c, t.query, flagForCard(c, taskFlags)?.snoozeCount ?? 0, todayYmd);
-    const capped = Math.min(days, r.ceiling);
-    if (capped <= 0) return null;
-    const cap = captureFlags(flagKeysFor(t));
-    const cards = t.kind === "batch" ? (t.batchItems ?? []).map((i) => i.card) : [c];
-    let wrote = false;
-    for (const cc of cards) {
-      const w = snoozeCardWrites({ upsertTaskFlag, dismissTask }, cc, capped, `until ${fmt(addDays(today, capped))}`, r.deadline && !r.deadline.passed ? dayDiff(dayFromYmd(r.deadline.ymd), today) : undefined);
-      if (w) wrote = true;
-    }
-    if (!wrote) return null;
-    return () => putBack(cap);
-  };
 
   const doSnooze = async (t: WsTask, days: number, until: Date) => {
     setPop(null);
@@ -288,14 +202,9 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     const undo = await snoozeTask(t, days);
     if (!undo) { flash("That task can’t be snoozed that far."); return; }
     go(next);
-    flash(t.userTask ? `Moved to ${fmt(until)}` : t.kind === "batch" ? `Snoozed all ${t.batch?.length ?? 0} until ${fmt(until)}` : `Snoozed until ${fmt(until)}`, async () => { await undo(); go(t.key); });
+    flash(core.snoozeWords(t, until), async () => { await undo(); go(t.key); });
   };
 
-  const openCard = (t: WsTask, edit?: boolean) => {
-    if (t.kind === "fix" && t.agent) { openAgentCard(t.agent.id, edit ? { tab: "who" as never } : {}); return; }
-    if (t.query) { openQueryPanel(t.query.id, "other"); return; }
-    if (t.agent) openAgentCard(t.agent.id);
-  };
   const openLinked = (u: UserTask) => {
     if (u.queryId) openQueryPanel(u.queryId, "other");
     else if (u.agentId) openAgentCard(u.agentId);
@@ -307,68 +216,15 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     if (c === "card") { openCard(t); return; }
     if (c === "withdraw" && t.query) { openQueryDrawer({ mode: "close", queryId: t.query.id, preset: { closeWhy: "withdraw" } } as never); return; }
     const next = nextKeyAfter(t);
-    if (c === "delete" && t.userTask) {
-      const was = t.userTask;
-      await deleteUserTask(was.id);
-      go(next);
-      flash(`Deleted “${was.text}”`, async () => { await restoreUserTask(was); go(t.key); });
-      return;
-    }
-    if (c === "rule") {
-      const rule = (t.item.card as BoardCard & { sweepRule?: string }).sweepRule;
-      if (!rule) return;
-      const before = currentUser?.mutedTaskRules ?? [];
-      await updateUserProfile({ mutedTaskRules: [...new Set([...before, rule])] });
-      /* when it was switched off, for "Tasks you've switched off" (a preference; the switch itself is mutedTaskRules) */
-      await updateUserPaths({ [`todoPrefs.switchedOffAt.${rule}`]: new Date().toISOString() });
-      go(next);
-      flash(`${RULE_TITLE[rule] ?? "That reminder"}: switched off for every agent`, async () => { await updateUserProfile({ mutedTaskRules: before }); });
-      return;
-    }
-    if (c === "unknown" && t.agent && currentUser) {
-      const out = await commitCardSave({ uid: currentUser.id, agent: t.agent, queries, patch: { responseTimeWeeks: null } as never, resolveTaskFlag: db.resolveTaskFlag });
-      if ("error" in out.res) { flash("Couldn’t save that. Nothing was changed."); return; }
-      go(next);
-      flash(`Saved. ${t.first}’s card says “Not stated”.`, out.undo ? async () => { await out.undo!(); go(t.key); } : undefined);
-      return;
-    }
-    const keys = flagKeysFor(t);
-    if (!keys.length) return;
-    const cap = captureFlags(keys);
-    const at = new Date().toISOString();
-    await Promise.all(keys.map((k) => upsertTaskFlag(k, { skippedAt: at })));
+    const w = await core.dismissWrite(t, c);
+    if (w === "error") { flash("Couldn’t save that. Nothing was changed."); return; }
+    if (!w) return;
     go(next);
-    flash(t.kind === "batch" ? `Dismissed all ${t.batch?.length ?? 0}. You’ll find them under Done if you need them back.` : "Dismissed. You’ll find it under Done if you need it back.", async () => { await putBack(cap); go(t.key); });
+    flash(w.msg, w.undo ? async () => { await w.undo!(); if (w.back) go(t.key); } : undefined);
   };
 
   /* ── the Snoozed and Done tabs ── */
-  const aside: SetAsideItem[] = useMemo(() => setAsideItems(currentUser, taskFlags, agents, queries, now), [currentUser, taskFlags, agents, queries, now]);
-  const snoozed = aside.filter((a) => a.kind === "snooze");
-  const dismissed = aside.filter((a) => a.kind !== "snooze");
-  const done: ClearedAct[] = useMemo(() => clearedThisWeek({ activities, taskFlags, userTasks, queries, agents }, now), [activities, taskFlags, userTasks, queries, agents, now]);
-  /** a snoozed or dismissed task, named the way the tray names it */
-  const asideTitle = (a: SetAsideItem): string => {
-    if (a.kind === "rule") return a.label;
-    const f = a.flag;
-    const first = (a.who || "").trim().split(/\s+/)[0] || "the agent";
-    const p = first.endsWith("s") ? `${first}’` : `${first}’s`;
-    switch (f?.taskType) {
-      case "partial_requested": return `Send ${first} your partial`;
-      case "full_requested": return `Send ${first} your full`;
-      case "revise_resubmit": return `Send ${first} your revision`;
-      case "offer_received": return `Answer ${p} offer`;
-      case "nudge_overdue": return `Nudge ${first}`;
-      case "no_response_close": return `${p} gone quiet`;
-      case "data_quality_poor": return `Fill in ${p} details`;
-      case "user_task": return userTasks.find((u) => u.id === f.queryId)?.text ?? "Your task";
-      default: return setAsideLabel(a);
-    }
-  };
-  /** the Done tab's rows, this week only; their number is the header's "cleared this week" and the tab's count */
-  const doneRows = doneTabRows(done, dismissed, asideTitle, now);
   const clearedN = doneRows.length;
-  /** v52 (7 Nov): the rules switched off for every agent, and the one way back for each */
-  const offRows = switchedOffRules(currentUser?.mutedTaskRules, currentUser?.todoPrefs?.switchedOffAt);
   const turnOn = async (rule: string) => {
     const before = currentUser?.mutedTaskRules ?? [];
     await updateUserProfile({ mutedTaskRules: before.filter((k) => k !== rule) });
@@ -376,39 +232,13 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     flash(`${RULE_OFF_WORDS[rule] ?? RULE_TITLE[rule] ?? "Those tasks"} are back on.`, async () => { await updateUserProfile({ mutedTaskRules: before }); });
   };
   const bringBack = async (a: SetAsideItem) => {
-    const r = a.restore;
-    if ("rule" in r) {
-      const before = currentUser?.mutedTaskRules ?? [];
-      await updateUserProfile({ mutedTaskRules: before.filter((k) => k !== r.rule) });
-      flash(`${RULE_TITLE[r.rule] ?? "That reminder"}: back on.`, async () => { await updateUserProfile({ mutedTaskRules: before }); });
-      return;
-    }
-    await upsertTaskFlag(r.flag, r.patch);
-    setTab("todo");
-    flash(`“${asideTitle(a)}” is back in your tray.`);
+    const w = await core.bringBackWrite(a);
+    if (w.toTodo) setTab("todo");
+    flash(w.msg, w.undo);
   };
 
   /* ── the batch row on the desk (v51.1): one query at a time ── */
-  const bRemaining = useMemo(() => (sel?.kind === "batch" ? (sel.batch ?? []).filter((m) => !bSaved.has(m.queryId)) : []), [sel, bSaved]);
-  const bCur = useMemo(() => bRemaining.find((m) => !bSkip.has(m.queryId)) ?? bRemaining[0] ?? null, [bRemaining, bSkip]);
-  const deskT: WsTask | null = useMemo(() => {
-    if (!sel || sel.kind !== "batch" || !bCur) return sel;
-    const a = agents.find((x) => x.id === bCur.agentId);
-    const first = (a?.name ?? "").trim().split(/\s+/)[0] || (a?.agency ?? "").trim() || "The agent";
-    return { ...sel, query: queries.find((q) => q.id === bCur.queryId), agent: a, first, agentName: (a?.name ?? "").trim() || (a?.agency ?? "").trim(), agency: (a?.agency ?? "").trim(), batch: bRemaining };
-  }, [sel, bCur, bRemaining, agents, queries]);
-  /* saved down to one: the batch becomes that query's own row, and the desk follows it */
-  useEffect(() => {
-    if (selKey !== "materials-batch" || all.some((x) => x.key === selKey)) return;
-    const one = all.find((x) => x.item.card.taskType === "materials_unrecorded" || x.item.card.taskType === "materials_unrecorded_bulk");
-    if (one) { setSelKey(one.key); setBSaved(new Set()); setBSkip(new Set()); }
-  }, [all, selKey]);
-  const skipOne = () => {
-    if (!bCur) return;
-    const others = bRemaining.filter((m) => m.queryId !== bCur.queryId && !bSkip.has(m.queryId));
-    setBSkip(others.length ? new Set([...bSkip, bCur.queryId]) : new Set([bCur.queryId]));
-    setA({}); setQi(0);
-  };
+  const skipOne = () => { if (batch.skipOne()) { setA({}); setQi(0); } };
 
   /* ── the card preview's rows: the Query Centre's own, stamped the same way (v52 Part D) ── */
   const quietWeeks = quietWeeksOf(currentUser);
@@ -420,26 +250,8 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   const qLog = useQueryLog(currentUser?.id ?? null, deskT?.query?.id ?? null);
   const linkLog = useQueryLog(currentUser?.id ?? null, deskT?.kind === "own" ? deskT.userTask?.queryId ?? null : null);
   const userFirst = (currentUser?.name ?? "").trim().split(/\s+/)[0] || "";
-  const flow: Flow | null = useMemo(() => {
-    if (!sel || !deskT || sel.kind === "own") return null;
-    const facts = quietFacts(sel);
-    return buildFlow({
-      t: deskT, A, set: (p) => setA((a) => ({ ...a, ...p })), today, uid: currentUser?.id ?? null, userFirst, queries, agents, manuscripts,
-      db: db as never, snoozeFor: (d) => snoozeTask(sel, d), waitCeiling: limitFor(sel).ceiling,
-      said: (m) => flash(m), nudgedOn: facts.nudgedOn, suggestion: sel.kind === "quiet" ? quietSuggestion(facts) : null,
-    }, {
-      openPartial: () => { if (sel.query) openQueryDrawer({ mode: "resp", queryId: sel.query.id, preset: { respType: "partial" } } as never); },
-      openCard: () => { if (sel.agent) openAgentCard(sel.agent.id, { tab: "send" as never, focus: "materials" as never }); },
-      openOther: (() => {
-        const c = sel.item.card;
-        const door = drawerDoorForTask(c.taskType, c.relatedRecordId, (id) => queries.find((x) => x.id === id)?.offerRefQueryId);
-        if (door) return () => openQueryDrawer(door as never);
-        if (sel.agent) return () => openAgentCard(sel.agent!.id);
-        if (sel.query) return () => openQueryPanel(sel.query!.id, "other");
-        return null;
-      })(),
-    });
-  }, [sel, deskT, A, today, currentUser?.id, userFirst, queries, agents, manuscripts, activities, taskFlags]); // eslint-disable-line react-hooks/exhaustive-deps
+  const flow: Flow | null = useMemo(() => core.makeFlow(sel, deskT, A, setA, (m) => flash(m)),
+    [sel, deskT, A, today, currentUser?.id, userFirst, queries, agents, manuscripts, activities, taskFlags]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const qs = flow?.questions ?? [];
   const cur = Math.min(qi, qs.length);
@@ -454,10 +266,9 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
       /* a batch with more to go: a toast with Undo, and the next query opens; the celebration waits for the last */
       if (sel.kind === "batch" && bCur && bRemaining.length > 1) {
         const qid = bCur.queryId;
-        setBSaved((x) => new Set([...x, qid]));
-        setBSkip((x) => { const n = new Set(x); n.delete(qid); return n; });
+        batch.markSaved(qid);
         setA({}); setQi(0);
-        flash(d.msg, d.undo ? async () => { await d.undo!(); setBSaved((x) => { const n = new Set(x); n.delete(qid); return n; }); } : undefined);
+        flash(d.msg, d.undo ? async () => { await d.undo!(); batch.unmarkSaved(qid); } : undefined);
         return;
       }
       setYay({ ...d, nextKey: next });
@@ -472,8 +283,8 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     setBusy(true);
     const next = nextKeyAfter(t);
     try {
-      await updateUserTask(u.id, { done: true, completedAt: new Date().toISOString() });
-      setYay({ head: "Done.", msg: "One less thing on your mind.", nextKey: next, undo: async () => { await restoreUserTask(u); } });
+      const undo = await core.ownDoneWrite(u);
+      setYay({ head: "Done.", msg: "One less thing on your mind.", nextKey: next, undo });
     } catch { flash("Couldn’t save that. Nothing was changed."); } finally { setBusy(false); }
   };
 

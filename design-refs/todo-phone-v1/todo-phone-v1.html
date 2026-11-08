@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>To-do on the phone — v1</title>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --page:#f8f6f2;--card:#fff;--navy:#2a3a52;--navy2:#364a66;--blush:#e8c8bc;--blushw:#f5e6df;
+    --ink:#1f2633;--ink2:#3a3f4a;--muted:#6b6f78;--faint:#9a9ca3;--rule:#e8e2d8;--fill:#ece7de;
+    --sand:#f2ebe0;--slate:#d7e0e8;--stone:#e4e1db;--rust:#8a4a3a;
+    --type:'Special Elite',monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --sh:0 1px 2px rgba(31,38,51,.05),0 6px 18px rgba(31,38,51,.07);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#e9e5de;font-family:var(--sans);color:var(--ink);font-synthesis:none}
+  .intro{max-width:1240px;margin:0 auto;padding:36px 28px 8px}
+  .intro h1{font:400 30px/1.25 var(--type);margin:0 0 8px}
+  .intro p{margin:0 0 6px;font-size:15px;line-height:1.5;color:var(--ink2);max-width:860px}
+  .row{display:flex;gap:34px;justify-content:center;flex-wrap:wrap;padding:24px 20px 10px}
+  .col{width:360px}
+  .cap{font-size:14px;line-height:1.45;color:var(--ink2);margin:14px 4px 0}
+  .cap b{color:var(--ink)}
+  /* neutral phone frame */
+  .phone{width:360px;height:760px;border-radius:44px;background:#11151c;padding:10px;box-shadow:0 20px 50px rgba(0,0,0,.18)}
+  .scr{position:relative;width:100%;height:100%;border-radius:35px;overflow:hidden;background:var(--page)}
+  .status{height:34px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font:600 13px var(--sans);color:#fff}
+  .status i{display:inline-block;width:16px;height:9px;border:1.5px solid #fff;border-radius:3px;margin-left:5px;position:relative}
+  .status i:after{content:"";position:absolute;left:1px;top:1px;bottom:1px;width:9px;background:#fff;border-radius:1px}
+  .scroll{position:absolute;inset:0;overflow-y:auto;scrollbar-width:none}
+  .scroll::-webkit-scrollbar{display:none}
+
+  /* the navy band */
+  .band{background:var(--navy);color:#fff;padding:0 18px 40px;border-radius:0 0 26px 26px}
+  .bandtop{display:flex;align-items:center;gap:10px;padding:6px 0 0}
+  .iconbtn{width:36px;height:36px;border-radius:50%;border:0;background:rgba(255,255,255,.1);color:#fff;display:grid;place-items:center;cursor:pointer}
+  .iconbtn svg{width:18px;height:18px}
+  .chip{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:999px;background:rgba(255,255,255,.12);font-size:13px;color:#fff}
+  .spacer{flex:1}
+  .title{font:400 28px/1.2 var(--type);margin:14px 0 2px}
+  .bnums{display:flex;gap:6px;margin-top:14px}
+  .bnum{flex:1;border:0;border-radius:14px;padding:9px 10px 8px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.78);text-align:left;font:400 13px var(--sans);cursor:pointer}
+  .bnum b{display:block;font:400 24px/1.1 var(--type);color:#fff;margin-bottom:2px}
+  .bnum.on{background:#fff;color:var(--navy)}
+  .bnum.on b{color:var(--navy)}
+  .sheet{position:relative;margin-top:-24px;padding:0 14px 110px}
+
+  /* Start here */
+  .start{display:flex;align-items:center;gap:12px;background:var(--blushw);border-radius:18px;padding:12px 14px;box-shadow:var(--sh);cursor:pointer}
+  .ph{flex:none;border-radius:12px;background:repeating-linear-gradient(45deg,#efdcd3 0 6px,#f5e6df 6px 12px);display:grid;place-items:center;font-size:10px;color:#9b7a6d;text-align:center;line-height:1.2}
+  .start .ph{width:48px;height:56px}
+  .start .t{flex:1;min-width:0}
+  .start small{display:block;font-size:13px;color:#5a3027;font-weight:600}
+  .start b{display:block;font:400 19px/1.2 var(--type);color:#000;margin:2px 0}
+  .start span{font-size:13px;color:#5a3027}
+  .start .arr{font-size:20px;color:#5a3027}
+
+  /* groups */
+  .grp{margin-top:14px;border-radius:16px;overflow:hidden;background:var(--card);box-shadow:var(--sh)}
+  .gh{position:sticky;top:0;display:flex;align-items:center;gap:8px;padding:11px 14px;font:400 16px var(--type);border:0;width:100%;text-align:left;cursor:pointer}
+  .gh .n{font:600 13px var(--sans);opacity:.7}
+  .gh .cv{margin-left:auto;font-size:13px;transition:transform .25s}
+  .grp.shut .cv{transform:rotate(-90deg)}
+  .grp.shut .rows{display:none}
+  .g-wait .gh{background:var(--navy2);color:#fff}
+  .g-nudge .gh{background:var(--slate);color:var(--ink)}
+  .g-quiet .gh{background:linear-gradient(90deg,var(--stone),#fff);color:var(--ink)}
+  .g-hk .gh{background:#e4ebf1;color:var(--ink)}
+  .r{position:relative;overflow:hidden}
+  .r .later{position:absolute;inset:0 0 0 auto;width:92px;background:var(--navy);color:#fff;display:grid;place-items:center;font:600 13px var(--sans)}
+  .rin{position:relative;display:flex;align-items:center;gap:12px;padding:12px 14px;background:#fff;transition:transform .3s cubic-bezier(.22,1,.36,1);cursor:pointer}
+  .r + .r .rin{box-shadow:inset 0 1px 0 var(--rule)}
+  .disc{flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;box-shadow:inset 0 0 0 1px var(--rule);background:#fff}
+  .disc svg{width:20px;height:20px}
+  .rt{flex:1;min-width:0}
+  .rt b{display:block;font-size:15.5px;font-weight:600;line-height:1.25}
+  .rt i{display:block;font-size:13px;color:var(--muted);font-style:italic;margin-top:1px}
+  .due{text-align:right;font-size:12.5px;color:var(--muted);line-height:1.2;white-space:nowrap}
+  .due b{display:block;font:400 17px var(--type);color:var(--ink)}
+  .due.late,.due.late b{color:var(--rust)}
+  .hint{font-size:12.5px;color:var(--muted);text-align:center;margin:14px 0 0}
+
+  /* floating tab bar */
+  .tabs{position:absolute;left:14px;right:14px;bottom:14px;height:62px;border-radius:22px;background:rgba(255,255,255,.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 6px 24px rgba(31,38,51,.14);display:flex;align-items:center;justify-content:space-around;font-size:11px;color:var(--muted)}
+  .tabs div{display:flex;flex-direction:column;align-items:center;gap:3px}
+  .tabs svg{width:21px;height:21px}
+
+  /* the task screen */
+  .tband{background:var(--navy);color:#fff;padding:0 18px 18px;border-radius:0 0 26px 26px}
+  .tnav{display:flex;align-items:center;gap:8px;padding-top:6px}
+  .tnav .pos{font-size:13px;color:rgba(255,255,255,.75);margin-left:auto;margin-right:4px}
+  .ttitle{font:400 23px/1.2 var(--type);margin:12px 0 2px}
+  .tsub{font-size:14px;color:rgba(255,255,255,.78);font-style:italic}
+  .mini{margin-top:14px;background:#fff;color:var(--ink);border-radius:16px;overflow:hidden;cursor:pointer;border:0;width:100%;text-align:left;padding:0;display:block}
+  .minih{display:flex;justify-content:space-between;align-items:center;padding:7px 12px;background:var(--navy2);color:#fff;font-size:12.5px}
+  .minib{display:flex;align-items:center;gap:10px;padding:10px 12px}
+  .minib .t{flex:1;min-width:0}
+  .minib b{display:block;font-size:14.5px}
+  .minib span{font-size:12.5px;color:var(--muted)}
+  .slots{display:flex;gap:6px;padding:0 12px 10px;flex-wrap:wrap}
+  .slot{height:24px;padding:0 9px;border-radius:999px;font-size:12px;display:inline-flex;align-items:center;background:var(--fill);color:var(--muted)}
+  .slot.done{background:var(--slate);color:var(--ink)}
+  .peek{display:block;text-align:center;font-size:12px;color:var(--muted);padding:0 0 8px}
+  .tsheet{padding:16px 16px 140px}
+  .hawk{display:flex;gap:10px;align-items:flex-start;margin-bottom:16px}
+  .hawk .ph{width:40px;height:44px;border-radius:10px}
+  .bub{flex:1;background:var(--blushw);border-radius:4px 16px 16px 16px;padding:10px 12px;font-size:14.5px;line-height:1.4;color:#000}
+  .answered{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+  .ans{height:28px;padding:0 11px;border-radius:999px;background:#fff;box-shadow:inset 0 0 0 1px var(--rule);font-size:13px;display:inline-flex;align-items:center;gap:5px}
+  .q{font:400 22px/1.25 var(--type);margin:0 0 4px}
+  .qh{font-size:14px;color:var(--muted);margin:0 0 14px;font-style:italic}
+  .opts{background:#fff;border-radius:16px;box-shadow:var(--sh);overflow:hidden}
+  .opt{display:flex;align-items:center;gap:12px;padding:14px;cursor:pointer;user-select:none}
+  .opt + .opt{box-shadow:inset 0 1px 0 var(--rule)}
+  .box{flex:none;width:24px;height:24px;border-radius:7px;box-shadow:inset 0 0 0 1.8px #b9b1a5;display:grid;place-items:center;color:#fff}
+  .opts.one .box{border-radius:50%}
+  .opt.on .box{background:var(--navy);box-shadow:none}
+  .box svg{width:14px;height:14px;opacity:0}
+  .opt.on .box svg{opacity:1}
+  .opt b{display:block;font-size:15.5px;font-weight:600}
+  .opt small{display:block;font-size:13px;color:var(--muted)}
+  .foot{position:absolute;left:0;right:0;bottom:0;padding:12px 16px 26px;background:linear-gradient(rgba(248,246,242,0),var(--page) 22%);display:flex;align-items:center;gap:8px}
+  .ghost{width:46px;height:46px;border-radius:50%;border:0;background:#fff;box-shadow:inset 0 0 0 1px var(--rule);display:grid;place-items:center;color:var(--ink2);cursor:pointer}
+  .ghost svg{width:19px;height:19px}
+  .of{margin-left:auto;font-size:13px;color:var(--muted);font-style:italic}
+  .pill{height:48px;padding:0 24px;border-radius:999px;border:0;background:var(--navy);color:#fff;font:600 15.5px var(--sans);cursor:pointer}
+  .pill:disabled{background:#c9ccd3;cursor:default}
+
+  /* the card sheet */
+  .dim{position:absolute;inset:0;background:rgba(31,38,51,.42)}
+  .csheet{position:absolute;left:0;right:0;bottom:0;max-height:calc(100% - 70px);background:var(--page);border-radius:24px 24px 0 0;overflow-y:auto;padding:0 12px 22px;box-shadow:0 -10px 30px rgba(31,38,51,.16);animation:up .32s cubic-bezier(.22,1,.36,1)}
+  @keyframes up{from{transform:translateY(40px);opacity:.6}to{transform:none;opacity:1}}
+  .grab{width:38px;height:5px;border-radius:3px;background:#cfc8bc;margin:8px auto 10px}
+  .qc{background:#fff;border-radius:18px;box-shadow:var(--sh);overflow:hidden}
+  .chead{background:var(--navy);color:#fff;padding:11px 16px;display:flex;justify-content:space-between;align-items:center;font-size:13px}
+  .chead b{font:400 15px var(--type)}
+  .cbody{padding:14px 16px 0}
+  .cag{display:flex;gap:12px;align-items:center}
+  .ini{flex:none;width:38px;height:38px;border-radius:50%;background:var(--fill);display:grid;place-items:center;font-size:12.5px;color:var(--ink2)}
+  .cag .who{flex:1;min-width:0}
+  .cag b{display:block;font-size:15.5px;line-height:1.25}
+  .cag .who span{display:block;font-size:13px;color:var(--muted)}
+  .stat{flex:none;height:26px;padding:0 10px;border-radius:999px;background:var(--slate);font-size:12.5px;display:inline-flex;align-items:center}
+  .book{margin-top:12px;background:var(--sand);border-radius:12px;padding:10px 12px}
+  .book b{font:400 16px/1.25 var(--type);display:block}
+  .book span{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
+  .thread{margin:14px 16px 0;padding:14px 0 16px;border-top:1px solid var(--rule);display:flex;flex-direction:column;gap:8px}
+  .bubb{max-width:76%;padding:9px 13px;border-radius:16px;font-size:14px;line-height:1.3}
+  .bubb small{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+  .me{align-self:flex-end;background:var(--page);box-shadow:inset 0 0 0 1px var(--rule);border-bottom-right-radius:5px}
+  .them{align-self:flex-start;background:var(--slate);border-bottom-left-radius:5px}
+  .later-l{font-size:12px;color:var(--muted);margin:2px 4px -2px}
+  .later-l.l{align-self:flex-start}.later-l.r{align-self:flex-end}
+  .draft{align-self:flex-end;background:#fff;border:1.5px dashed #b9b1a5;color:var(--muted)}
+  .cfoot{padding:12px 16px 14px;background:var(--blushw);font-size:14px;line-height:1.4;color:#000}
+  .cfoot b{font-weight:600}
+  .notes{max-width:1240px;margin:20px auto 50px;padding:0 28px;display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px}
+  .note{background:#fff;border-radius:16px;padding:16px 18px;box-shadow:var(--sh)}
+  .note h3{font:400 18px var(--type);margin:0 0 8px}
+  .note ul{margin:0;padding-left:18px;font-size:14px;line-height:1.5;color:var(--ink2)}
+  .note li{margin-bottom:4px}
+</style>
+</head>
+<body>
+<div class="intro">
+  <h1>The To-do list on a phone</h1>
+  <p>This brings the desktop To-do (v52) to the phone using what's already been picked for the phone: the navy band, white cards, the floating tab bar, one question per screen, and the query card as a pull-up sheet. The tray becomes the list, the desk becomes a full-screen task, and the preview on the right becomes the card that builds in the band.</p>
+  <p>Everything on the three screens can be tapped. Tick the options, go back and forth with Next, tap the card in the band, and collapse a group.</p>
+</div>
+
+<div class="row">
+  <!-- 1 · the list -->
+  <div class="col">
+    <div class="phone"><div class="scr">
+      <div class="scroll">
+        <div class="band">
+          <div class="status"><span>9:41</span><span>●●●● <i></i></span></div>
+          <div class="bandtop">
+            <button class="iconbtn" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5l-7 7 7 7"/></svg></button>
+            <span class="chip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5c3-1 6-1 8 1 2-2 5-2 8-1v14c-3-1-6-1-8 1-2-2-5-2-8-1z"/><path d="M12 6v14"/></svg>Murphy's Day Out</span>
+            <span class="spacer"></span>
+            <button class="iconbtn" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4-4"/></svg></button>
+            <button class="iconbtn" aria-label="Add a task"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>
+          </div>
+          <div class="title">Your to-do list</div>
+          <div class="bnums" role="tablist">
+            <button class="bnum on"><b>39</b>to do · 4 late</button>
+            <button class="bnum"><b>0</b>snoozed</button>
+            <button class="bnum"><b>1</b>done this week</button>
+          </div>
+        </div>
+        <div class="sheet">
+          <div class="start" onclick="go(2)">
+            <div class="ph">quill</div>
+            <div class="t"><small>Start here</small><b>Send Jonathan your full</b><span>Asked for on 2 Apr · the oldest request</span></div>
+            <div class="arr">→</div>
+          </div>
+
+          <div class="grp g-wait">
+            <button class="gh" onclick="tog(this)">Agents are waiting <span class="n">2</span><span class="cv">▾</span></button>
+            <div class="rows">
+              <div class="r"><div class="later">Later</div><div class="rin" onclick="go(2)">
+                <span class="disc"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="#1f2633" stroke-width="1.8" stroke-dasharray="3 2.2"/><circle cx="12" cy="12" r="4.2" fill="#1f2633"/></svg></span>
+                <span class="rt"><b>Send Jonathan your full</b><i>The Marsh Agency</i></span>
+                <span class="due">asked<b>2 Apr</b></span></div></div>
+              <div class="r"><div class="later">Later</div><div class="rin swipe">
+                <span class="disc"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="#1f2633" stroke-width="1.8" stroke-dasharray="3 2.2"/><path d="M12 7.8a4.2 4.2 0 010 8.4z" fill="#1f2633"/></svg></span>
+                <span class="rt"><b>Send Daniel your partial</b><i>Inkwell &amp; Stone</i></span>
+                <span class="due">asked<b>9 Apr</b></span></div></div>
+            </div>
+          </div>
+
+          <div class="grp g-nudge">
+            <button class="gh" onclick="tog(this)">Nudges <span class="n">1</span><span class="cv">▾</span></button>
+            <div class="rows">
+              <div class="r"><div class="later">Later</div><div class="rin">
+                <span class="disc"><svg viewBox="0 0 24 24" fill="none" stroke="#1f2633" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><path d="M12 8v5M12 16v.5"/></svg></span>
+                <span class="rt"><b>Nudge Eleanor</b><i>Greenfield Literary</i></span>
+                <span class="due late"><b>78</b>days late</span></div></div>
+            </div>
+          </div>
+
+          <div class="grp g-quiet">
+            <button class="gh" onclick="tog(this)">Gone quiet <span class="n">2</span><span class="cv">▾</span></button>
+            <div class="rows">
+              <div class="r"><div class="later">Later</div><div class="rin">
+                <span class="disc"><svg viewBox="0 0 24 24" fill="none" stroke="#1f2633" stroke-width="1.8"><circle cx="12" cy="12" r="8"/></svg></span>
+                <span class="rt"><b>Eleanor's gone quiet</b><i>Greenfield Literary</i></span>
+                <span class="due"><b>968</b>days in</span></div></div>
+              <div class="r"><div class="later">Later</div><div class="rin">
+                <span class="disc"><svg viewBox="0 0 24 24" fill="none" stroke="#1f2633" stroke-width="1.8"><circle cx="12" cy="12" r="8"/></svg></span>
+                <span class="rt"><b>Aisha's gone quiet</b><i>The Lantern Agency</i></span>
+                <span class="due"><b>948</b>days in</span></div></div>
+            </div>
+          </div>
+
+          <div class="grp g-hk shut">
+            <button class="gh" onclick="tog(this)">Housekeeping <span class="n">3</span><span class="cv">▾</span></button>
+            <div class="rows">
+              <div class="r"><div class="rin">
+                <span class="disc"><svg viewBox="0 0 24 24" fill="none" stroke="#1f2633" stroke-width="1.8"><rect x="6" y="4" width="12" height="16" rx="2"/><path d="M9 9h6M9 13h6"/></svg></span>
+                <span class="rt"><b>Fill in what you sent</b><i>63 queries · Quick fill</i></span></div></div>
+            </div>
+          </div>
+          <p class="hint">Swipe a task left for Later.</p>
+        </div>
+      </div>
+      <div class="tabs">
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 11l8-6 8 6v8H4z"/></svg>Home</div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Queries</div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1-4 4-6 7-6s6 2 7 6"/></svg>Agents</div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="5" y="4" width="14" height="16" rx="2"/><path d="M9 4v16"/></svg>Packages</div>
+      </div>
+    </div></div>
+    <p class="cap"><b>1 · The list.</b> The desktop's tray, as a phone page opened from Home's "See all" and the menu. The band's numbers are the To do / Snoozed / Done switch, as the Queries band numbers are its filters. The groups are the desktop's own, in its colours, collapsible and sticky.</p>
+  </div>
+
+  <!-- 2 · the task -->
+  <div class="col">
+    <div class="phone"><div class="scr" id="task">
+      <div class="scroll">
+        <div class="tband">
+          <div class="status"><span>9:41</span><span>●●●● <i></i></span></div>
+          <div class="tnav">
+            <button class="iconbtn" aria-label="Close">✕</button>
+            <span class="pos">1 of 39</span>
+            <button class="iconbtn" aria-label="Previous task"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 15l6-6 6 6"/></svg></button>
+            <button class="iconbtn" aria-label="Next task"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
+          </div>
+          <div class="ttitle">Send Jonathan your full</div>
+          <div class="tsub">Jonathan Marsh · The Marsh Agency</div>
+          <button class="mini" onclick="openCard(true)">
+            <div class="minih"><span>Full requested</span><span>Day 949</span></div>
+            <div class="minib">
+              <span class="disc"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="#1f2633" stroke-width="1.8" stroke-dasharray="3 2.2"/><circle cx="12" cy="12" r="4.2" fill="#1f2633"/></svg></span>
+              <span class="t"><b>Jonathan Marsh</b><span>Murphy's Day Out</span></span>
+            </div>
+            <div class="slots"><span class="slot" id="s1">What went</span><span class="slot" id="s2">When</span><span class="slot" id="s3">How</span></div>
+            <span class="peek">Tap to see the whole card</span>
+          </button>
+        </div>
+        <div class="tsheet">
+          <div class="hawk"><div class="ph">hawk</div><div class="bub">Jonathan asked for your full manuscript. Once it's gone, log it here and I'll keep an eye out for his reply.</div></div>
+          <div class="answered" id="answered"></div>
+          <div id="qa"></div>
+        </div>
+      </div>
+      <div class="foot">
+        <button class="ghost" aria-label="Later"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="13" r="7"/><path d="M12 9.5V13l2.5 1.5M9 3h6"/></svg></button>
+        <button class="ghost" aria-label="Dismiss"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><path d="M6.5 17.5l11-11"/></svg></button>
+        <span class="of" id="of">1 of 3</span>
+        <button class="pill" id="next" onclick="step(1)">Next →</button>
+      </div>
+      <div id="cardlayer" style="display:none">
+        <div class="dim" onclick="openCard(false)"></div>
+        <div class="csheet">
+          <div class="grab"></div>
+          <div class="qc">
+            <div class="chead"><b>Materials requested</b><span>Day 949</span></div>
+            <div class="cbody">
+              <div class="cag"><span class="disc"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="#1f2633" stroke-width="1.8" stroke-dasharray="3 2.2"/><circle cx="12" cy="12" r="4.2" fill="#1f2633"/></svg></span><span class="who"><b>Jonathan Marsh</b><span>The Marsh Agency</span></span></div>
+              <div class="book"><b>Murphy's Day Out</b><span>Young adult · Thriller · 50,000 words</span></div>
+            </div>
+            <div class="thread">
+              <div class="bubb me">Query sent<small>2 Apr 2024 · by email</small></div>
+              <div class="later-l l">Same day</div>
+              <div class="bubb them">Asked for the full<small>2 Apr 2024</small></div>
+              <div class="later-l r">Today</div>
+              <div class="bubb draft" id="draft">Full manuscript<small>Not sent yet</small></div>
+            </div>
+            <div class="cfoot"><b>Your move.</b> Jonathan's waiting on your full.</div>
+          </div>
+        </div>
+      </div>
+    </div></div>
+    <p class="cap"><b>2 · The task.</b> The desk, full screen. The task's title and agent sit in the band, with the query card building as you answer, like the logging flow. The hawk's line is small. You get one question per screen, with answers kept as chips, and the footer holds Later, Dismiss and one primary button. The arrows move to the next task without going back to the list.</p>
+  </div>
+
+  <!-- 3 · the card -->
+  <div class="col">
+    <div class="phone"><div class="scr">
+      <div class="tband" style="padding-bottom:24px">
+        <div class="status"><span>9:41</span><span>●●●● <i></i></span></div>
+        <div class="ttitle">Send Jonathan your full</div>
+        <div class="tsub">Jonathan Marsh · The Marsh Agency</div>
+      </div>
+      <div class="tsheet"><p class="q">How did you send it?</p></div>
+      <div class="dim"></div>
+      <div class="csheet">
+          <div class="grab"></div>
+          <div class="qc">
+            <div class="chead"><b>Materials requested</b><span>Day 949</span></div>
+            <div class="cbody">
+              <div class="cag"><span class="disc"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="#1f2633" stroke-width="1.8" stroke-dasharray="3 2.2"/><circle cx="12" cy="12" r="4.2" fill="#1f2633"/></svg></span><span class="who"><b>Jonathan Marsh</b><span>The Marsh Agency</span></span></div>
+              <div class="book"><b>Murphy's Day Out</b><span>Young adult · Thriller · 50,000 words</span></div>
+            </div>
+            <div class="thread">
+              <div class="bubb me">Query sent<small>2 Apr 2024 · by email</small></div>
+              <div class="later-l l">Same day</div>
+              <div class="bubb them">Asked for the full<small>2 Apr 2024</small></div>
+              <div class="later-l r">Today</div>
+              <div class="bubb draft">Query letter, synopsis, full manuscript<small>Logs when you press Log it</small></div>
+            </div>
+            <div class="cfoot"><b>Your move.</b> Jonathan's waiting on your full.</div>
+          </div>
+        </div>
+    </div></div>
+    <p class="cap"><b>3 · The card.</b> The desktop's right-hand preview becomes a pull-up sheet. It's the same live Query Centre card the phone's query sheet already uses, with the dashed bubble showing what the task is about to log. Swipe it down to go back to the question.</p>
+  </div>
+</div>
+
+<div class="notes">
+  <div class="note"><h3>What changes from the phone To-do on dev</h3>
+    <ul>
+      <li>The groups by when (Overdue, Today, This week…) become the desktop's groups by action.</li>
+      <li>Up next becomes Start here, the same task the desktop picks.</li>
+      <li>The week strip goes, now that the desktop has retired its calendar.</li>
+      <li>Tapping a task opens the desk's own questions (one per screen), not the Query Centre drawer's.</li>
+    </ul></div>
+  <div class="note"><h3>What stays as it is</h3>
+    <ul>
+      <li>Home keeps its short list of what's due, with "See all" opening this page.</li>
+      <li>Packages keeps the fourth tab.</li>
+      <li>Swipe for Later uses the existing snooze sheet, with Undo.</li>
+      <li>The navy snackbar after Log it, the Corkboard, and Housekeeping's Quick fill.</li>
+    </ul></div>
+</div>
+
+<script>
+const check='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5 9-10"/></svg>';
+const Q=[
+  {q:"What went with it?",h:"Tick everything you sent.",multi:true,slot:"s1",
+   o:[["Query letter",""],["Synopsis",""],["Full manuscript","What Jonathan asked for"]]},
+  {q:"When did it go?",h:"Pick a day.",slot:"s2",o:[["Today","7 Nov"],["Yesterday","6 Nov"],["Earlier","Pick from the month"]]},
+  {q:"How did you send it?",h:"So you know where to look for his reply.",slot:"s3",o:[["By email",""],["Through his form",""],["Another way",""]]}
+];
+let i=0;const A=[[],[],[]];
+function render(){
+  const s=Q[i];
+  document.getElementById('qa').innerHTML='<p class="q">'+s.q+'</p><p class="qh">'+s.h+'</p><div class="opts'+(s.multi?'':' one')+'">'+
+    s.o.map((o,k)=>'<div class="opt'+(A[i].includes(k)?' on':'')+'" onclick="pick('+k+')"><span class="box">'+check+'</span><span><b>'+o[0]+'</b>'+(o[1]?'<small>'+o[1]+'</small>':'')+'</span></div>').join('')+'</div>';
+  document.getElementById('answered').innerHTML=Q.slice(0,i).map((x,k)=>'<span class="ans" onclick="jump('+k+')">✓ '+A[k].map(n=>x.o[n][0]).join(', ')+'</span>').join('');
+  document.getElementById('of').textContent=(i+1)+' of 3';
+  const nb=document.getElementById('next');nb.disabled=!A[i].length;nb.textContent=i===2?'Log it':'Next →';
+  Q.forEach((x,k)=>{const el=document.getElementById(x.slot);el.classList.toggle('done',!!A[k].length&&k<i+ (i===2&&A[2].length?1:0));el.textContent=A[k].length&&k<i?x.o[A[k][0]][0]+(A[k].length>1?' +'+(A[k].length-1):''):['What went','When','How'][k];});
+}
+function pick(k){const s=Q[i];if(s.multi){A[i]=A[i].includes(k)?A[i].filter(x=>x!==k):[...A[i],k]}else{A[i]=[k]}render()}
+function step(d){if(i===2){const nb=document.getElementById('next');nb.textContent='Logged ✓';nb.disabled=true;return}i=Math.max(0,Math.min(2,i+d));render()}
+function jump(k){i=k;render()}
+function openCard(on){document.getElementById('cardlayer').style.display=on?'block':'none'}
+function tog(b){b.parentElement.classList.toggle('shut')}
+function go(){document.getElementById('task').scrollIntoView({behavior:'smooth',block:'center'})}
+// show the swipe on the second row once, so the gesture reads
+setTimeout(()=>{const r=document.querySelector('.swipe');r.style.transform='translateX(-92px)';setTimeout(()=>r.style.transform='',1400)},900);
+render();
+</script>
+</body>
+</html>

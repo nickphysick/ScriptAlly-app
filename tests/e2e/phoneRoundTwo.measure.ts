@@ -110,8 +110,9 @@ test.describe("PR2 phone round two", () => {
     test.setTimeout(300_000);
     await phone(page, "/dashboard");
     const bar = await page.evaluate(() => [...document.querySelectorAll('[data-pa="tabbar"] > button')].map((b) => (b as HTMLElement).dataset.tab ?? ((b as HTMLElement).dataset.pa === "plus" ? "+" : "?")));
-    await go(page, "/todo");
-    const tally = await page.evaluate(() => Number(document.querySelector('[data-pa="tally-earlier"]')?.textContent ?? "NaN") + Number(document.querySelector('[data-pa="tally-today"]')?.textContent ?? "NaN"));
+    /* To-do on the phone v1 (7 Nov): the To-do band's tallies are retired; Home's To-do card counts the same overdue +
+       today items (see phoneAppV2Shell's re-point) */
+    const tally = await page.evaluate(() => { const c = document.querySelector<HTMLElement>('[data-pa="home-todo"]'); return c ? Number(c.dataset.count) : document.querySelector('[data-pa="home-todo-none"]') ? 0 : NaN; });
     await go(page, "/queries");
     const badge = await page.evaluate(() => { const b = document.querySelector('[data-tab="home"] [data-pa="tab-badge"]'); return b ? Number(b.textContent) : 0; });
     const todoTabs = await page.locator('[data-tab="todo"]').count();
@@ -265,6 +266,7 @@ test.describe("PR2 phone round two", () => {
   /* R6 — To-do */
   test("R6 To-do: one Up next card, no verb on any row, a tick opens the task's door and completes nothing", async ({ page }) => {
     test.setTimeout(300_000);
+    test.skip(true, "RETIRED by To-do on the phone v1 (7 Nov): Up next and the tick's drawer door are gone. Successors: TDP1 L1, L5–L7, L10 (tests/e2e/todoPhoneV1.measure.ts).");
     await phone(page, "/todo");
     await go(page, "/todo");
     const up = await page.locator('[data-pa="todo-upnext"]').evaluateAll((els) => els.map((e) => ({ key: (e as HTMLElement).dataset.key, bucket: (e as HTMLElement).dataset.bucket })));
