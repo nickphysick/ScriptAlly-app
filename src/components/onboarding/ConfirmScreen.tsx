@@ -52,7 +52,9 @@ export const ConfirmScreen: React.FC<{
   onChange: () => void;
   onBack: () => void;
   onRead: () => void;
-}> = ({ fileName, fileSize, onChange, onBack, onRead }) => {
+  /** Replaces the lead line, e.g. "Your import is already being read." (lib/aiRefusal). */
+  note?: string | null;
+}> = ({ fileName, fileSize, onChange, onBack, onRead, note }) => {
   const lead = confirmFileLead(fileName);
   const size = fileSizeLabel(fileSize);
   return (
@@ -70,7 +72,7 @@ export const ConfirmScreen: React.FC<{
             <button type="button" className="sf-link sf-link--quiet" data-act="change" onClick={onChange}>{CONFIRM_CHANGE}</button>
           </div>
           <p className="sf-lede sf-lede--confirm" data-sf="confirm-lead">
-            {lead.name ? <>{lead.before}<strong>{lead.name}</strong>{lead.after}</> : <>{lead.before}</>}
+            {note ? note : lead.name ? <>{lead.before}<strong>{lead.name}</strong>{lead.after}</> : <>{lead.before}</>}
           </p>
           <StepFoot left={<BackLink onClick={onBack} />}>
             <button type="button" className="sf-btn" data-act="read" onClick={onRead}>{CONFIRM_PRIMARY}</button>
