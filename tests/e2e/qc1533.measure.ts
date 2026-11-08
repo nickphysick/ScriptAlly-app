@@ -87,3 +87,126 @@ test.describe("v153.3 badge zoom", () => {
     await page.screenshot({ path: `${DIR}/badge-4x-${vp.width}.png`, clip: { x: n.x - 14, y: n.y - 14, width: 64, height: 64 } });
   });
 });
+
+/*   T1  the paperclip tab: centred on the seal (0 ± 1px), 16px from the longer line, 34 tall; Enter opens it, a click
+ *       on it does not open the card; the pop-up above the facts and the next slip, never clipped; it opens upwards
+ *       with under 200px below; hovering does not darken it. Slips near the top, middle and bottom of the viewport. */
+for (const vp of SIZES) {
+  test(`v153.3 T1 paperclip tab · ${vp.width}`, async ({ page }) => {
+    const L = new Ledger(`T1-${vp.width}`);
+    await openQc(page, vp);
+    const geo = await page.evaluate((sel) => [...document.querySelectorAll<HTMLElement>(`${sel} [data-qc153='slip']`)].slice(0, 40).map((s) => {
+      const t = s.querySelector<HTMLElement>("[data-qc1533='tab']");
+      if (!t) return null;
+      const r = (e: Element) => e.getBoundingClientRect();
+      const seal = r(s.querySelector(".qc153-seal")!), tb = r(t), nm = r(s.querySelector("[data-qc153='name']")!), ag = r(s.querySelector("[data-qc153='agency']")!);
+      const nmText = (() => { const rg = document.createRange(); rg.selectNodeContents(s.querySelector("[data-qc153='name']")!); return rg.getBoundingClientRect().right; })();
+      const agText = (() => { const rg = document.createRange(); rg.selectNodeContents(s.querySelector("[data-qc153='agency']")!); return rg.getBoundingClientRect().right; })();
+      const cs = getComputedStyle(t);
+      return { id: s.dataset.id, h: tb.height, dy: (tb.top + tb.height / 2) - (seal.top + seal.height / 2), gap: tb.left - Math.max(nm.right, ag.right), gapInk: tb.left - Math.max(nmText, agText),
+        bg: cs.backgroundColor, img: cs.backgroundImage, color: cs.color, label: t.getAttribute("aria-label"), n: t.textContent, tone: s.dataset.tone };
+    }).filter(Boolean), PAGE);
+    L.check("population: tabs on screen", geo.length >= 8, `${geo.length}`);
+    const tones = new Set(geo.map((g) => g!.tone));
+    L.check("more than one stage's tab measured", tones.size >= 2, [...tones].join(","));
+    const ACC: Record<string, string> = { sand: "rgb(224, 210, 187)", rose: "rgb(221, 185, 177)", blue: "rgb(188, 203, 220)", heather: "rgb(212, 183, 194)" };
+    const REST: Record<string, string> = { sand: "rgb(123, 108, 90)", rose: "rgb(124, 101, 96)", blue: "rgb(84, 105, 128)", heather: "rgb(129, 98, 116)" };
+    for (const g of geo.slice(0, 14)) {
+      L.check(`${g!.id} tab 34 tall`, Math.abs(g!.h - 34) < 0.5, `${g!.h}`);
+      L.check(`${g!.id} centred on the seal`, Math.abs(g!.dy) <= 1, `${g!.dy.toFixed(2)}px`);
+      L.check(`${g!.id} 16px from the longer line`, Math.abs(g!.gap - 16) <= 1, `box ${g!.gap.toFixed(1)} · ink ${g!.gapInk.toFixed(1)}`);
+      L.check(`${g!.id} ${g!.tone} accent and resting ink`, g!.bg === ACC[g!.tone!] && g!.color === REST[g!.tone!], `${g!.bg} · ${g!.color}`);
+      L.check(`${g!.id} named "N materials"`, g!.label === `${g!.n} material${g!.n === "1" ? "" : "s"}`, `${g!.label}`);
+    }
+    writeFileSync(`${DIR}/tabs-${vp.width}.json`, JSON.stringify(geo, null, 1));
+
+    /* hover does not darken: the fill and the ink stay; it lifts 1px */
+    const first = page.locator(`${PAGE} [data-qc1533='tab']`).first();
+    await first.scrollIntoViewIfNeeded();
+    const seal = (e: Element) => e.closest("[data-qc153='slip']")!.querySelector(".qc153-seal")!.getBoundingClientRect().top;
+    const rest = await first.evaluate((e) => ({ c: getComputedStyle(e).color, b: getComputedStyle(e).backgroundColor, y: e.getBoundingClientRect().top - e.closest("[data-qc153='slip']")!.querySelector(".qc153-seal")!.getBoundingClientRect().top }));
+    void seal;
+    await first.hover(); await page.waitForTimeout(250);
+    const hov = await first.evaluate((e) => ({ c: getComputedStyle(e).color, b: getComputedStyle(e).backgroundColor, y: e.getBoundingClientRect().top - e.closest("[data-qc153='slip']")!.querySelector(".qc153-seal")!.getBoundingClientRect().top, sw: getComputedStyle(e.querySelector("svg")!).strokeWidth, ts: getComputedStyle(e.querySelector("i")!).getPropertyValue("-webkit-text-stroke-width"), sh: getComputedStyle(e).boxShadow }));
+    L.check("hover keeps the fill and the ink (no darker)", hov.c === rest.c && hov.b === rest.b, `${rest.c} → ${hov.c} · ${rest.b} → ${hov.b}`);
+    L.check("hover lifts the tab 1px (against its own slip, which lifts too)", Math.abs(rest.y - hov.y - 1) < 0.3, `${(rest.y - hov.y).toFixed(2)}`);
+    L.check("hover: icon stroke 1.8, number stroke .25", hov.sw === "1.8px" && hov.ts === "0.25px", `${hov.sw} · ${hov.ts}`);
+    L.check("hover deepens the shadow", hov.sh.includes("0px 8px 16px -8px"), hov.sh);
+    await page.mouse.move(2, 2); await page.waitForTimeout(200);
+
+    /* three slips: near the top, the middle and the bottom of the viewport */
+    const pick = async (where: "top" | "mid" | "bottom") => page.evaluate(([sel, w, h]) => {
+      const tabs = [...document.querySelectorAll<HTMLElement>(`${sel} [data-qc1533='tab']`)];
+            // scroll the first tab with a slip after it so that it sits at the target
+      const sc = (() => { let e: HTMLElement | null = tabs[0].parentElement; while (e && !(e.scrollHeight > e.clientHeight + 4 && /auto|scroll/.test(getComputedStyle(e).overflowY))) e = e.parentElement; return e ?? document.scrollingElement as HTMLElement; })();
+      const pickT = tabs[Math.min(tabs.length - 3, w === "top" ? 8 : w === "mid" ? 12 : 16)];
+      /* the bar pins to the scroller's top once it scrolls: "near the top" is just under it */
+      const pinned = sc.getBoundingClientRect().top + (document.querySelector<HTMLElement>(`${sel} [data-qc153='bar']`)?.offsetHeight ?? 0);
+      const target = w === "top" ? pinned + 40 : w === "mid" ? h / 2 : h - 70;
+      sc.scrollTo({ top: sc.scrollTop + pickT.getBoundingClientRect().top - target, behavior: "instant" as ScrollBehavior });
+      return { id: pickT.closest<HTMLElement>("[data-qc153='slip']")!.dataset.id!, info: `scroller ${sc.className} top ${sc.scrollTop} max ${sc.scrollHeight - sc.clientHeight} · tab now ${pickT.getBoundingClientRect().top} · ${tabs.length} tabs` };
+    }, [PAGE, where, vp.height] as const);
+    for (const where of ["top", "mid", "bottom"] as const) {
+      const { id, info } = await pick(where);
+      console.log(`pick ${where}: ${info}`);
+      await page.waitForTimeout(300);
+      const tab = page.locator(`${PAGE} [data-qc153='slip'][data-id='${id}'] [data-qc1533='tab']`);
+      const own = await tab.evaluate((e) => { const r = e.getBoundingClientRect(); const at = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return { x: r.left + r.width / 2, y: r.top + r.height / 2, owner: at && e.contains(at) ? "tab" : (at as HTMLElement)?.className?.toString() ?? "none" }; });
+      console.log(`${where}: the tab's centre is owned by ${own.owner}`);
+      await page.mouse.move(own.x, own.y); await page.waitForTimeout(300);
+      const pop = page.locator(`${PAGE} [data-qc153='slip'][data-id='${id}'] [data-qc1533='pop']`);
+      await expect(pop).toBeVisible({ timeout: 4000 });
+      const m = await page.evaluate(([sel, sid]) => {
+        const slip = document.querySelector<HTMLElement>(`${sel} [data-qc153='slip'][data-id='${sid}']`)!;
+        const tb = slip.querySelector<HTMLElement>("[data-qc1533='tab']")!.getBoundingClientRect();
+        const pp = slip.querySelector<HTMLElement>("[data-qc1533='pop']")!;
+        const pr = pp.getBoundingClientRect();
+        // what owns the pop-up's pixels: sample a grid inside it
+        let owned = 0, total = 0;
+        for (let x = pr.left + 6; x < pr.right - 6; x += (pr.width - 12) / 6) for (let y = pr.top + 6; y < pr.bottom - 6; y += (pr.height - 12) / 5) {
+          total++; const e = document.elementFromPoint(x, y); if (e && pp.contains(e)) owned++;
+        }
+        // clipped by an ancestor?
+        let clip: string | null = null;
+        for (let e = pp.parentElement; e && e !== document.body; e = e.parentElement) {
+          const o = getComputedStyle(e).overflow; if (/hidden|clip|auto|scroll/.test(o)) { const r = e.getBoundingClientRect(); if (pr.left < r.left - 0.5 || pr.right > r.right + 0.5 || pr.top < r.top - 0.5 || pr.bottom > r.bottom + 0.5) { clip = `${e.className} (${o})`; break; } }
+        }
+        const groups = [...pp.querySelectorAll<HTMLElement>("[data-qc1533='group']")].map((g) => g.querySelector(".qc1533-pgh")!.textContent);
+        return { up: pp.hasAttribute("data-up"), below: innerHeight - tb.bottom, popTop: pr.top, popBottom: pr.bottom, tabTop: tb.top, tabBottom: tb.bottom, leftDelta: pr.left - tb.left, owned, total, clip, onScreen: pr.top >= 0 && pr.bottom <= innerHeight, groups, z: getComputedStyle(slip).zIndex, color: getComputedStyle(pp).color };
+      }, [PAGE, id] as const);
+      L.check(`${where}: the tab sits ${where === "top" ? "near the top" : where === "mid" ? "mid-screen" : "near the foot"}`, where === "top" ? m.tabTop < vp.height * 0.35 : where === "mid" ? Math.abs(m.tabTop - vp.height / 2) < vp.height * 0.2 : m.below < 200, `${m.tabTop.toFixed(0)} of ${vp.height}`);
+      L.check(`${where}: the pop-up is wholly on screen`, m.onScreen, `${m.popTop.toFixed(0)}–${m.popBottom.toFixed(0)} of ${vp.height}`);
+      L.check(`${where}: it opens ${m.below < 200 ? "upwards" : "below"} (room below ${m.below.toFixed(0)})`, m.up === m.below < 200 && (m.up ? m.popBottom <= m.tabTop - 7 : m.popTop >= m.tabBottom + 7), `up ${m.up}`);
+      L.check(`${where}: left-aligned to the tab`, Math.abs(m.leftDelta) < 0.6, `${m.leftDelta.toFixed(2)}`);
+      L.check(`${where}: nothing paints over it (facts, the next slip)`, m.owned === m.total, `${m.owned}/${m.total}`);
+      L.check(`${where}: no ancestor clips it`, m.clip === null, String(m.clip));
+      L.check(`${where}: the slip is raised while it is open`, m.z === "40", m.z);
+      L.check(`${where}: its text is ink, not the accent`, m.color === "rgb(28, 19, 15)", m.color);
+      L.check(`${where}: groups in order`, m.groups.length > 0 && m.groups[0] !== null, m.groups.join(" | "));
+      const sb = (await page.locator(`${PAGE} [data-qc153='slip'][data-id='${id}']`).boundingBox())!;
+      const pb = (await pop.boundingBox())!;
+      const y0 = Math.max(0, Math.min(sb.y, pb.y) - 20), y1 = Math.min(vp.height, Math.max(sb.y + sb.height, pb.y + pb.height) + 20);
+      await page.screenshot({ path: `${DIR}/pop-${where}-${vp.width}.png`, clip: { x: sb.x - 20, y: y0, width: Math.min(sb.width + 40, 900), height: y1 - y0 } });
+      await page.mouse.move(2, 2); await page.waitForTimeout(250);
+    }
+
+    /* keyboard: focus, Enter opens, Escape closes; a click on the tab never opens the card */
+    const k = page.locator(`${PAGE} [data-qc1533='tab']`).nth(1);
+    await k.scrollIntoViewIfNeeded();
+    await k.focus();
+    const focused = await k.evaluate((e) => document.activeElement === e);
+    L.check("the tab takes focus", focused, `${focused}`);
+    await page.keyboard.press("Escape"); await page.waitForTimeout(150);
+    await page.keyboard.press("Enter"); await page.waitForTimeout(200);
+    L.check("Enter opens the pop-up", await k.getAttribute("aria-expanded") === "true", `${await k.getAttribute("aria-expanded")}`);
+    await page.keyboard.press("Escape"); await page.waitForTimeout(200);
+    L.check("Escape closes it", await k.getAttribute("aria-expanded") === "false", `${await k.getAttribute("aria-expanded")}`);
+    await page.keyboard.press(" "); await page.waitForTimeout(200);
+    L.check("Space opens it", await k.getAttribute("aria-expanded") === "true", `${await k.getAttribute("aria-expanded")}`);
+    await page.keyboard.press("Escape"); await page.waitForTimeout(150);
+    await k.click(); await page.waitForTimeout(700);
+    const panel = await page.locator("[data-qp='panel']:visible, .spanel:visible").count();
+    L.check("a click on the tab does not open the card", panel === 0, `${panel} panels`);
+    L.done(80);
+  });
+}

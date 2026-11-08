@@ -49,18 +49,27 @@ describe("the slip", () => {
     expect(h).not.toContain('data-k="sent"');
     expect(h).not.toContain(">Sent with<");
   });
-  it("the materials strip: the package at its right, and a dashed chip for what was asked", () => {
+  it("v153.3 — the strip is gone; a paperclip tab beside the name counts the materials, a real button", () => {
     const r = { ...row(QueryStatus.PARTIAL_REQUESTED, "you"), query: { id: "q1", materialsWanted: ["Synopsis"], materialsRequestedType: "pages", materialsRequestedQuantity: 50 } } as unknown as QcRow;
     const h = html(r);
-    expect(h).toContain('data-qc1531="materials"');
-    expect(h).toMatch(/data-qc1531="mat"[^>]*>.*Synopsis/);
-    expect(h).toMatch(/data-asked=""[^>]*>.*First 50 pages<em>asked<\/em>/);
-    expect(h).toContain("Sent with Spring round");
+    expect(h).not.toContain('data-qc1531="materials"');
+    expect(h).not.toContain(">Sent with ");
+    const tab = h.match(/<button[^>]*data-qc1533="tab"[^>]*>[\s\S]*?<\/button>/)?.[0] ?? "";
+    expect(tab).toContain('aria-label="2 materials"');
+    expect(tab).toContain('aria-expanded="false"');
+    expect(tab).not.toContain("tabindex=\"-1\"");
+    expect(tab).toContain("<i>2</i>");
+    // the tab sits with the name and agency, after them
+    expect(h.indexOf('data-qc153="agency"')).toBeLessThan(h.indexOf('data-qc1533="tab"'));
+    // the stage's accent: a partial is dusty rose
+    expect(tab).toContain("--acc:#ddb9b1");
+    // the pop-up only when open
+    expect(h).not.toContain('data-qc1533="pop"');
   });
-  it("no material data and no package: no strip", () => {
+  it("no material data and no package: no tab", () => {
     const h = renderToStaticMarkup(
       <QcSlip153 row={row(QueryStatus.QUERIED, "agent")} nowMs={NOW} selected={false} packageName={null} act={null} onOpen={() => {}} onAct={() => {}} />,
     );
-    expect(h).not.toContain('data-qc1531="materials"');
+    expect(h).not.toContain('data-qc1533="tab"');
   });
 });

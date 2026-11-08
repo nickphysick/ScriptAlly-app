@@ -105,7 +105,7 @@
   .qc153-rail .qc153-rbd { background: #fff; box-shadow: inset 0 -2px 0 #2a3a52; }
 }
 
-/* ══ phase 3 · the slip: compact header, their policy, the materials strip ═══════════════════════════════════
+/* ══ phase 3 · the slip: compact header, their policy (the materials strip left in v153.3) ═══════════════════════════════════
    ⚠️ THIS SHEET IS BUNDLED BEFORE qcv153.css (the header imports it first), so every override here is scoped under the
    page root (`.qc151.qc153`, 0-2-0 and up) and wins on specificity, never on load order. */
 @media (min-width: 768px) {
@@ -129,32 +129,8 @@
     .qc151.qc153 .qc153-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
 
-  /* the materials strip */
-  .qc1531-mats {
-    display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 14px 14px 68px; padding: 9px 12px;
-    border-radius: 12px; background: #fbf9f5;
-  }
-  .qc151 .qc1531-msl { margin-right: 4px; font: 400 12.5px/1.45 var(--sp-serif) !important; color: #8a8076; }
-  .qc151 .qc1531-mc {
-    box-sizing: border-box; display: inline-flex; align-items: center; gap: 7px; height: 30px; padding: 0 11px 0 8px;
-    border-radius: 9px; background: #fff; box-shadow: 0 1px 2px rgba(28, 19, 15, 0.1);
-    font: 400 13.5px/1.45 var(--sp-serif) !important; color: #1c130f; white-space: nowrap;
-  }
-  /* asked and not yet sent: a dashed chip, navy, with "asked" after the name */
-  .qc151 .qc1531-mc.is-ask { background: transparent; box-shadow: none; border: 1.2px dashed rgba(42, 58, 82, 0.55); color: #2a3a52; }
-  .qc151 .qc1531-mc em { font: normal 600 11.5px/1.45 var(--sp-serif) !important; color: #2a3a52; }
-  /* the page glyph: a folded corner and two ruled lines */
-  .qc1531-pg {
-    flex: none; display: block; width: 13px; height: 16px; border-radius: 1px 4px 1px 1px;
-    background: linear-gradient(#c9bfb2, #c9bfb2) 3px 6px / 7px 1.2px no-repeat, linear-gradient(#c9bfb2, #c9bfb2) 3px 9px / 5px 1.2px no-repeat, #fff;
-    box-shadow: inset 0 0 0 1.2px #a99e91;
-  }
-  .qc1531-mc.is-ask .qc1531-pg { box-shadow: inset 0 0 0 1.2px #2a3a52; background: linear-gradient(rgba(42, 58, 82, 0.4), rgba(42, 58, 82, 0.4)) 3px 6px / 7px 1.2px no-repeat, linear-gradient(rgba(42, 58, 82, 0.4), rgba(42, 58, 82, 0.4)) 3px 9px / 5px 1.2px no-repeat, transparent; }
-  .qc151 .qc1531-mpk {
-    min-width: 0; max-width: 100%; margin-left: auto; overflow: hidden; text-overflow: ellipsis;
-    font: italic 400 13px/1.45 var(--sp-serif) !important; color: #5b4f47; white-space: nowrap;
-  }
 }
+
 
 /* ══ v153.2 · the open ring (design-refs/query-centre-v153-2.html) ════════════════════════════════════════════
    No card, no navy bar, no artwork: the ring and its legend sit on the page's ground, as the armchair hawk does. */
@@ -183,4 +159,57 @@
 /* ══ v153.2 · the slip's header back to two lines: the status word beside the track, not above it ═══════════════ */
 @media (min-width: 768px) {
   .qc151.qc153 .qc153-st { flex-direction: row; align-items: center; gap: 14px; }
+}
+
+/* ══ v153.3 · the paperclip tab (design-refs/query-centre-v153-3.html) ═══════════════════════════════════════════
+   Beside the name and agency, vertically centred on them (and so on the seal), 16px from the longer line. Glass over
+   the stage's deeper accent; the ink 82% over white at rest. Its pop-up opens below, left-aligned; upwards with under
+   200px below. ⚠️ The slip's inner frame clips (framedSlip.css), so on these slips it does not, and the tinted header
+   carries the frame's top corners itself; a slip with its pop-up open is raised above the next one. */
+@media (min-width: 768px) {
+  .qc151.qc153 .qc153-slip > .sa-slip-in { overflow: visible; }
+  .qc151.qc153 .qc153-top { position: relative; border-radius: 13px 13px 0 0; }
+  .qc151.qc153 .qc153-slip.has-pop { z-index: 40; }
+  .qc151.qc153 .qc153-slip.has-pop .qc153-top { z-index: 3; }
+  .qc1533-wr { display: flex; align-items: center; min-width: 0; }
+  .qc1533-wr > .qc153-who { flex: 0 1 auto; min-width: 0; }
+  .qc1533-tw { position: relative; flex: none; display: inline-flex; margin-left: 16px; }
+  .qc151 .qc1533-clip {
+    all: unset; box-sizing: border-box; display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 13px 0 10px;
+    border-radius: 10px; cursor: pointer; color: var(--acc-rest);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.62) 0%, rgba(255, 255, 255, 0.18) 48%, rgba(255, 255, 255, 0) 52%), var(--acc);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7), inset 0 -1px 0 rgba(28, 19, 15, 0.08), 0 1px 2px rgba(28, 19, 15, 0.12), 0 4px 10px -6px rgba(28, 19, 15, 0.35);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .qc1533-clip svg { display: block; flex: none; width: 18px; height: 18px; stroke-width: 1.5; transition: stroke-width 0.15s; }
+  .qc151 .qc1533-clip i { display: block; font: normal 400 16.5px/1 var(--sp-type) !important; color: inherit; transition: -webkit-text-stroke 0.15s; }
+  .qc151 .qc1533-clip:hover, .qc151 .qc1533-clip:focus, .qc151 .qc1533-clip.is-open {
+    transform: translateY(-1px);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.85), inset 0 -1px 0 rgba(28, 19, 15, 0.1), 0 2px 4px rgba(28, 19, 15, 0.16), 0 8px 16px -8px rgba(28, 19, 15, 0.4);
+  }
+  .qc151 .qc1533-clip:hover i, .qc151 .qc1533-clip:focus i, .qc151 .qc1533-clip.is-open i { -webkit-text-stroke: 0.25px currentColor; }
+  .qc1533-clip:hover svg, .qc1533-clip:focus svg, .qc1533-clip.is-open svg { stroke-width: 1.8; }
+  .qc151 .qc1533-clip:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+
+  .qc151 .qc1533-pop {
+    position: absolute; left: 0; top: calc(100% + 8px); z-index: 50; display: block; box-sizing: border-box; min-width: 270px;
+    padding: 12px 14px; border-radius: 12px; background: #fff; color: #1c130f; text-align: left; white-space: normal; cursor: default;
+    box-shadow: 0 12px 30px -10px rgba(28, 19, 15, 0.35), 0 0 0 1px #e3d5c9;
+  }
+  .qc151 .qc1533-pop.is-up { top: auto; bottom: calc(100% + 8px); }
+  .qc151 .qc1533-pop > b { display: block; margin: 0 0 6px; font: 400 14px/1.2 var(--sp-type) !important; color: #1c130f; }
+  .qc1533-pg { display: block; padding: 8px 0; }
+  .qc1533-pg:first-of-type { padding-top: 2px; }
+  .qc1533-pg + .qc1533-pg { border-top: 1px solid #f1ebe2; }
+  .qc1533-pg:last-child { padding-bottom: 0; }
+  .qc151 .qc1533-pgh { display: block; margin: 0 0 6px; font: italic 400 12.5px/1.35 var(--sp-serif) !important; color: #5b4f47; }
+  .qc1533-mxr { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+  .qc151 .qc1533-mc {
+    box-sizing: border-box; display: inline-flex; align-items: center; gap: 4px; height: 20px; padding: 0 7px 0 5px; border-radius: 6px;
+    background: #fff; box-shadow: 0 1px 1.5px rgba(28, 19, 15, 0.12); font: 400 12px/12px var(--sp-serif) !important; color: #1c130f; white-space: nowrap;
+  }
+  .qc151 .qc1533-mc.is-ask { background: transparent; box-shadow: none; border: 1px dashed rgba(42, 58, 82, 0.6); color: #2a3a52; }
+  .qc1533-sh { flex: none; display: block; width: 8px; height: 10px; border-radius: 1px 2.5px 1px 1px; background: #fff; box-shadow: inset 0 0 0 1px #a99e91; }
+  .qc151 .qc1533-mpk { margin-left: 2px; font: italic 400 12px/1.3 var(--sp-serif) !important; color: #5b4f47; }
+  @media (prefers-reduced-motion: reduce) { .qc1533-clip, .qc1533-clip svg, .qc1533-clip i { transition: none; } }
 }
