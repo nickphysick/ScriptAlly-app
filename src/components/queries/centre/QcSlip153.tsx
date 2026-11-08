@@ -103,9 +103,10 @@ export const QcSlip153: React.FC<QcSlip153Props> = ({ row: r, nowMs, selected, p
                 ? <button type="button" tabIndex={-1} className="qc153-btn" data-qc153="cta-btn" data-mode={cta.mode} onClick={(e) => { e.stopPropagation(); onAct(r.id, cta.mode); }}>{cta.label} →</button>
                 : <button type="button" tabIndex={-1} className="qc153-btn qc153-btn--ghost" data-qc153="cta-open" onClick={(e) => { e.stopPropagation(); open(); }}>Open the card →</button>}
             </span>
+            {/* v153.2 — the status word beside the track, to its right, on one line */}
             <span className="qc153-st">
-              <span className="qc153-wd" data-qc153="word">{word}</span>
               <Track153 t={t} />
+              <span className="qc153-wd" data-qc153="word">{word}</span>
             </span>
           </span>
         </div>
@@ -120,7 +121,7 @@ export const QcSlip153: React.FC<QcSlip153Props> = ({ row: r, nowMs, selected, p
           </div>
           <div className={`qc153-fact${nx.hot ? " is-hot" : ""}`} data-qc153="fact" data-k="next" data-hot={nx.hot ? "" : undefined}>
             <span className="qc153-fl"><i className="qc153-fi" aria-hidden="true">{FACT_ICON.next}</i>Next</span>
-            <b>{nx.value}</b>
+            <b>{nx.value}</b>{nx.line ? <em data-qc1532="next-line">{nx.line}</em> : null}
             {nx.bar != null ? <u className="qc153-win" data-qc153="window" aria-hidden="true"><i style={{ width: `${Math.round(nx.bar * 100)}%` }} /></u> : null}
           </div>
           <div className="qc153-fact qc1531-pol" data-qc153="fact" data-k="policy">

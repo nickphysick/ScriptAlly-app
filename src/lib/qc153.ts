@@ -107,7 +107,7 @@ export function nextWords(n: NextNum): string {
   if (n.kind === "text") return n.text;
   return `${n.n} ${n.label[0]} ${n.label[1]}`;
 }
-export interface NextFact { value: string; hot: boolean; bar: number | null }
+export interface NextFact { value: string; hot: boolean; bar: number | null; line: string | null }
 /**
  * The Next box: hot (the `#f6eee8` fill and the navy dot) when it is the writer's move or past its date; a
  * reply-window bar for Watch and wait (with the agent, inside the window), the share of the window gone.
@@ -121,7 +121,28 @@ export function nextFact(r: QcRow, nowMs: number): NextFact {
   if (!hot && waiting && r.expectedMs != null && r.stageStartMs != null && r.expectedMs > r.stageStartMs) {
     bar = Math.min(1, Math.max(0, (nowMs - r.stageStartMs) / (r.expectedMs - r.stageStartMs)));
   }
-  return { value: nextWords(n), hot, bar };
+  return { value: nextWords(n), hot, bar, line: nextLine(r, nowMs) };
+}
+
+/**
+ * v153.2 — the Next box's second line, the ref's four (design-refs/query-centre-v153-2.html): an offer says "answer the
+ * offer"; your move says when it was asked; with the agent it says the reply date, or "time for a nudge" once that has
+ * passed. Gone quiet and closed say nothing more (the value already does). The reply date is the one `nextNum` counts
+ * to, so the two lines cannot disagree. It was never built in v153, which drew the value alone.
+ */
+export function nextLine(r: QcRow, nowMs: number): string | null {
+  if (isClosedRow(r) || r.court === "closed") return null;
+  if (r.court === "offer") return "answer the offer";
+  if (r.court === "you" || r.withYou) {
+    if (r.stageStartMs == null) return null;
+    const d = ago(r.stageStartMs, nowMs);
+    return d === 0 ? "asked today" : `asked ${d} ${d === 1 ? "day" : "days"} ago`;
+  }
+  const st = stateOf(r);
+  if (st === "quiet") return null;
+  const due = st && r.court === "agent" ? (r as { replyMs?: number | null }).replyMs ?? r.expectedMs : r.expectedMs;
+  if (due == null) return null;
+  return sod(due) < sod(nowMs) ? "time for a nudge" : `reply by ${shortDate(due, nowMs)}`;
 }
 
 /* ── group headings and folds (List view) ────────────────────────────────────────────────────────────────────── */

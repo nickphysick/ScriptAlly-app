@@ -2,8 +2,12 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Query Centre v153.1 (design-refs/query-centre-v153-1.html) — THE STAGE RING CARD, "Where they are": a navy header
- * bar over the ring (five buckets, the post pile in the middle) and its legend.
+ * Query Centre v153.1 (design-refs/query-centre-v153-1.html) — THE STAGE RING, "Where they are": the ring of five
+ * buckets and its legend.
+ *
+ * v153.2 (design-refs/query-centre-v153-2.html): OPEN. No card, no navy bar and no artwork; the ring and the legend sit
+ * on the page's own ground. The middle is a soft disc holding the number still in play; the legend has a heading,
+ * "Where they are" over a 2px navy rule, with "M sent" (or "Nothing sent yet") at its right.
  *
  * ⚠️ THE RING IS THE RAIL'S STAGE FILTER. A segment or a legend row toggles `toggleRing`, which writes the same
  *    `stages` field the rail's "Where it stands" rows write, so the rail shows it on and the list narrows.
@@ -13,16 +17,17 @@
 import React, { useRef, useState } from "react";
 import type { Qc138Filters } from "../../../lib/qc138";
 import {
-  RING_BUCKETS, RING_DISC, RING_GEO, RING_HATCH, RING_TRACK, ringArcs, ringInPlay, ringOn, ringShare, ringTotal, toggleRing,
+  RING_BUCKETS, RING_GEO, RING_HATCH, RING_TRACK, ringArcs, ringInPlay, ringOn, ringShare, ringTotal, toggleRing,
   type RingCounts, type RingKey,
 } from "../../../lib/qc1531";
 
-export const POST_PILE = "/images/qc/qc-post-pile.webp?v=1";
+/** v153.2 — the middle disc: the ground softened behind the number */
+const MID_DISC = "rgba(255,255,255,.55)";
 const VIEW = 210;
 const SIZE = 214;
 
 export interface QcStageRingProps {
-  /** null while loading: the track and the pile, no figures */
+  /** null while loading: the track, no figures */
   counts: RingCounts | null;
   filters: Qc138Filters;
   onFilters: (f: Qc138Filters) => void;
@@ -45,14 +50,11 @@ export const QcStageRing1531: React.FC<QcStageRingProps> = ({ counts, filters, o
   const toggle = (k: RingKey) => onFilters(toggleRing(filters, k));
   const n = (k: RingKey) => (counts ? counts[k] : 0);
   const hvBucket = hv ? RING_BUCKETS.find((b) => b.key === hv)! : null;
-  const head = !counts ? " " : total === 0 ? "Nothing sent yet" : `${ringInPlay(counts)} still in play · ${total} sent`;
+  const sent = !counts ? " " : total === 0 ? "Nothing sent yet" : `${total} sent`;
+  const inPlay = counts ? ringInPlay(counts) : null;
 
   return (
     <section className="qc1531-ring" ref={card} aria-label="Where they are" data-qc1531="ring-card">
-      <header className="qc1531-rh">
-        <h2>Where they are</h2>
-        <small data-qc1531="ring-sum">{head}</small>
-      </header>
       <div className={`qc1531-rb${hv ? " is-hv" : ""}`}>
         <div className="qc1531-rsvg" data-qc1531="ring">
           <svg viewBox={`0 0 ${VIEW} ${VIEW}`} width={SIZE} height={SIZE} aria-hidden="true" focusable="false">
@@ -61,13 +63,8 @@ export const QcStageRing1531: React.FC<QcStageRingProps> = ({ counts, filters, o
                 <rect width="7" height="7" fill={RING_HATCH.ground} />
                 <line x1="0" y1="0" x2="0" y2="7" stroke={RING_HATCH.stripe} strokeWidth="2.5" />
               </pattern>
-              <linearGradient id="qc1531-pf" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stopColor="#fff" stopOpacity="0" />
-                <stop offset=".14" stopColor="#fff" stopOpacity="1" />
-              </linearGradient>
-              <mask id="qc1531-pm"><rect x="28" y="18" width="154" height="155" fill="url(#qc1531-pf)" /></mask>
             </defs>
-            <circle cx={RING_GEO.c} cy={RING_GEO.c} r={RING_GEO.disc} fill={RING_DISC} />
+            <circle cx={RING_GEO.c} cy={RING_GEO.c} r={RING_GEO.disc} fill={MID_DISC} />
             {!arcs.length ? (
               <circle cx={RING_GEO.c} cy={RING_GEO.c} r={RING_GEO.r} fill="none" stroke={RING_TRACK} strokeWidth={RING_GEO.w} data-qc1531="track" />
             ) : null}
@@ -81,9 +78,7 @@ export const QcStageRing1531: React.FC<QcStageRingProps> = ({ counts, filters, o
                 ? <circle key={a.key} className={cls} data-qc1531="seg" data-k={a.key} cx={RING_GEO.c} cy={RING_GEO.c} r={RING_GEO.r} fill="none" stroke={stroke} strokeWidth={RING_GEO.w} {...ev} />
                 : <path key={a.key} className={cls} data-qc1531="seg" data-k={a.key} d={a.d} fill="none" stroke={stroke} strokeWidth={RING_GEO.w} {...ev} />;
             })}
-            {/* the pile after the segments, so it sits on the ring; masked so the cut-off leg fades rather than ends in an edge */}
-            <image className="qc1531-pile" href={POST_PILE} x="28" y="18" width="154" height="155" mask="url(#qc1531-pm)" data-qc1531="pile" />
-            {/* the counts over the pile, so a number at the ring's side is never under its overhang */}
+            {/* the counts on the segments */}
             {arcs.map((a) => {
               if (!a.label) return null;
               const b = RING_BUCKETS.find((x) => x.key === a.key)!;
@@ -92,7 +87,16 @@ export const QcStageRing1531: React.FC<QcStageRingProps> = ({ counts, filters, o
                   x={a.label.x} y={a.label.y} textAnchor="middle" fill={b.ink}>{n(a.key)}</text>
               );
             })}
+            {/* the middle: the number still in play */}
+            <text className="qc1531-midn" data-qc1531="mid" x="105" y="112" textAnchor="middle">{inPlay ?? ""}</text>
+            <text className="qc1531-midl" x="105" y="134" textAnchor="middle">still in play</text>
           </svg>
+        </div>
+        <div className="qc1531-lgw">
+        <div className="qc1531-lgh" data-qc1531="lg-head">
+          <h2>Where they are</h2>
+          <small data-qc1531="ring-sum">{sent}</small>
+          {inPlay != null ? <span className="sr-only">, {inPlay} still in play</span> : null}
         </div>
         <ul className="qc1531-lg" data-qc1531="legend">
           {RING_BUCKETS.map((b) => {
@@ -114,6 +118,7 @@ export const QcStageRing1531: React.FC<QcStageRingProps> = ({ counts, filters, o
             );
           })}
         </ul>
+        </div>
       </div>
       {hvBucket && counts && at ? (
         <div className={`qc1531-tip${at.flip ? " is-flip" : ""}`} role="presentation" data-qc1531="tip" style={{ left: `${at.x}px`, top: `${at.y}px` }}>

@@ -56,3 +56,29 @@ describe("Last heard names the agent's move", () => {
     expect(heardFact({ history: h }, 9000).line).toBe("revise & resubmit");
   });
 });
+
+/* v153.2 — the Next box's second line (the ref's: design-refs/query-centre-v153-2.html) */
+import { nextFact } from "./qc153";
+import type { QcRow } from "./qcSummary";
+describe("the Next box's second line", () => {
+  const DAY = 86_400_000;
+  const NOW = new Date(2026, 10, 8, 12).getTime();
+  const row = (status: QueryStatus, court: string, more: Partial<QcRow> = {}) => ({
+    id: "q", status, court, withYou: court === "you", stageStartMs: NOW - 25 * DAY, expectedMs: null, pastExpected: false,
+    furthest: "query", history: hist(QueryStatus.QUERIED), query: {}, ...more,
+  }) as unknown as QcRow;
+  it("an offer: answer the offer", () => {
+    expect(nextFact(row(QueryStatus.OFFER, "offer"), NOW).line).toBe("answer the offer");
+  });
+  it("a partial requested: asked N days ago, from the day it was asked", () => {
+    expect(nextFact(row(QueryStatus.PARTIAL_REQUESTED, "you"), NOW).line).toBe("asked 25 days ago");
+    expect(nextFact(row(QueryStatus.FULL_REQUESTED, "you", { stageStartMs: NOW }), NOW).line).toBe("asked today");
+  });
+  it("with the agent: reply by the date, or time for a nudge once it has passed", () => {
+    expect(nextFact(row(QueryStatus.QUERIED, "agent", { expectedMs: NOW + 19 * DAY }), NOW).line).toMatch(/^reply by \d{1,2} \w{3}/);
+    expect(nextFact(row(QueryStatus.QUERIED, "agent", { expectedMs: NOW - 23 * DAY, pastExpected: true }), NOW).line).toBe("time for a nudge");
+  });
+  it("closed: no second line", () => {
+    expect(nextFact(row(QueryStatus.REJECTED, "closed"), NOW).line).toBeNull();
+  });
+});
