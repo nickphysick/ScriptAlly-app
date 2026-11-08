@@ -33,9 +33,8 @@ export interface RingBucket {
 
 /** the hatch drawn for "Passed or closed": 45° stripes on a pale ground */
 export const RING_HATCH = { stripe: "#d8d1c7", ground: "#f1eee9" } as const;
-/** the empty track, and the cream disc in the middle */
+/** the empty track */
 export const RING_TRACK = "#f1eee9";
-export const RING_DISC = "#f4eee5";
 
 /** ⚠️ IN THIS ORDER, clockwise from 12 o'clock. Every status lands in exactly one (locked in qc1531.test.ts). */
 export const RING_BUCKETS: readonly RingBucket[] = [

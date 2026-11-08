@@ -154,3 +154,22 @@
     font: italic 400 13px/1.45 var(--sp-serif) !important; color: #5b4f47; white-space: nowrap;
   }
 }
+
+/* ══ v153.2 · the open ring (design-refs/query-centre-v153-2.html) ════════════════════════════════════════════
+   No card, no navy bar, no artwork: the ring and its legend sit on the page's ground, as the armchair hawk does. */
+@media (min-width: 768px) {
+  .qc1531-ring { background: none; border: 0; border-radius: 0; box-shadow: none; }
+  .qc1531-rb { grid-template-columns: 214px minmax(0, 1fr); gap: 20px; padding: 0; }
+  /* the middle: the number still in play over "still in play" */
+  .qc1531-midn { font: 600 46px var(--font-serif); fill: var(--ink); pointer-events: none; }
+  .qc1531-midl { font: italic 400 12.5px var(--sp-serif); fill: #7a6f66; pointer-events: none; }
+  /* the legend's heading: the filter rail's header treatment, a 2px navy rule under it */
+  .qc1531-lgw { min-width: 0; }
+  .qc1531-lgh { display: flex; align-items: baseline; gap: 12px; padding: 0 4px 8px; margin-bottom: 6px; border-bottom: 2px solid var(--navy); }
+  .qc151 .qc1531-lgh h2 { margin: 0; font: 400 19px/1.2 var(--sp-type) !important; color: var(--ink) !important; letter-spacing: 0; }
+  .qc151 .qc1531-lgh small { margin-left: auto; font: italic 400 13px/1.2 var(--sp-serif) !important; color: var(--mut); white-space: nowrap; }
+  /* the rows: tighter, finer hairlines, a soft white fill when hovered or linked */
+  .qc1531-lg li + li { border-top: 1px solid rgba(28, 19, 15, 0.08); }
+  .qc151 .qc1531-lg button { padding: 6px 4px; }
+  .qc151 .qc1531-lg button.is-on, .qc151 .qc1531-lg button.is-pick { background: rgba(255, 255, 255, 0.55); }
+}
