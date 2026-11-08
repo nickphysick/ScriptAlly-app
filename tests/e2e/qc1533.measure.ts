@@ -299,3 +299,42 @@ for (const vp of SIZES) {
     L.done(16);
   });
 }
+
+/*   S1  Settings → Preferences carries the Queries card; the picker shows the stored value, a change is stored and
+ *       read back after a reload, and the header no longer carries the control. The account's value is put back. */
+test("v153.3 S1 the quiet window in Settings", async ({ page }) => {
+  const L = new Ledger("S1");
+  await openRoute(page, "/account/preferences", { width: 1440, height: 900 });
+  const sel = page.locator("#account-quiet-weeks");
+  await sel.waitFor({ timeout: 30_000 });
+  const card = page.locator("#acct-h-queries").locator("xpath=ancestor::section[1] | ancestor::div[contains(@class,'sc-card')][1]").first();
+  const text = await page.locator("main, .acct-page").first().textContent() ?? "";
+  L.check("the card is headed Queries", (await page.locator("#acct-h-queries").textContent())?.trim() === "Queries", `${await page.locator("#acct-h-queries").textContent()}`);
+  L.check("the label", text.includes("Treat a query as gone quiet after"), "label");
+  const help = page.locator(".acct-quiet-help");
+  L.check("the helper, muted italic", (await help.textContent()) === "Queries with no reply after this long move to Gone quiet." && (await help.evaluate((e) => getComputedStyle(e).fontStyle)) === "italic", `${await help.textContent()}`);
+  const opts = await sel.locator("option").allTextContents();
+  L.check("the five choices", JSON.stringify(opts) === JSON.stringify(["2 weeks", "3 weeks", "4 weeks", "6 weeks", "8 weeks"]), opts.join(","));
+  const was = await sel.inputValue();
+  const other = was === "6" ? "3" : "6";
+  await sel.selectOption(other); await page.waitForTimeout(1200);
+  await page.reload(); await sel.waitFor({ timeout: 30_000 });
+  L.check("a change is stored and read back", (await sel.inputValue()) === other, `${was} → ${await sel.inputValue()}`);
+  const cb = await card.boundingBox().catch(() => null);
+  await page.screenshot({ path: `${DIR}/settings-1440.png`, ...(cb ? { clip: { x: cb.x - 20, y: Math.max(0, cb.y - 20), width: cb.width + 40, height: cb.height + 40 } } : {}) });
+  await sel.selectOption(was); await page.waitForTimeout(1200);
+  await page.reload(); await sel.waitFor({ timeout: 30_000 });
+  L.check("the account's value is put back", (await sel.inputValue()) === was, `${await sel.inputValue()}`);
+  await openRoute(page, "/queries", { width: 1440, height: 900 });
+  await ready(page);
+  L.check("the header carries no quiet control", (await page.locator(`${PAGE} [data-qc1531='header'] [data-qc152='quiet-setting']`).count()) === 0, "none");
+  const acts = await page.locator(`${PAGE} .qc1531-acts > *`).allTextContents();
+  L.check("the action row is the two buttons", JSON.stringify(acts.map((t) => t.trim())) === JSON.stringify(["+ Log a query", "Record a response"]), acts.join(" | "));
+  L.done(8);
+});
+
+/* the page top, for the report */
+for (const vp of SIZES) test(`v153.3 page top · ${vp.width}`, async ({ page }) => {
+  await openQc(page, vp);
+  await page.screenshot({ path: `${DIR}/page-top-${vp.width}.png` });
+});

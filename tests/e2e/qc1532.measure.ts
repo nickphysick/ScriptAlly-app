@@ -144,6 +144,6 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1920, height: 1080 }] a
     await el.scrollIntoViewIfNeeded(); await el.hover(); await page.waitForTimeout(300);
     const b = (await el.boundingBox())!;
     await page.screenshot({ path: `${DIR}/slip-tom-${vp.width}.png`, clip: { x: b.x - 20, y: b.y - 20, width: b.width + 40, height: b.height + 50 } });
-    L.done(17);
+    L.done(15); /* v153.3: Q1's pop-over checks left with the control (now one absence check) */
   });
 }

@@ -203,9 +203,8 @@ for (const vp of SIZES) {
     const withMats = s.filter((x) => x.mats);
     const asked = s.filter((x) => x.mats?.some((m) => m.ask));
     console.log(`strips: ${withMats.length}/${s.length}; with an asked chip: ${asked.length}; with a package: ${s.filter((x) => x.pkg).length}`);
-    L.check("S2 some slips carry a materials strip", withMats.length > 0, `${withMats.length}`);
-    L.check("S2 an asked chip is dashed, the others are not", asked.length > 0 && asked.every((x) => x.mats!.every((m) => (m.ask ? m.border === "dashed" : m.border !== "dashed"))), JSON.stringify(asked[0]?.mats));
-    L.check("S2 the package reads 'Sent with …'", s.filter((x) => x.pkg).every((x) => /^Sent with \S/.test(x.pkg!)), [...new Set(s.map((x) => x.pkg))].slice(0, 4).join(" | "));
+    /* S2 RETIRED by v153.3: the materials strip is gone; the paperclip tab that replaces it is qc1533 T1 */
+    L.check("S2 (v153.3) no slip carries a materials strip", withMats.length === 0, `${withMats.length}`);
     /* screens: a hovered slip, and a slip with a dashed chip */
     const first = page.locator(`${PAGE} [data-qc153="slip"]`).first();
     await first.hover(); await page.waitForTimeout(300);
@@ -217,7 +216,7 @@ for (const vp of SIZES) {
       const b2 = (await el.boundingBox())!;
       await page.screenshot({ path: `${DIR}/slip-asked-${vp.width}.png`, clip: { x: b2.x - 20, y: b2.y - 20, width: b2.width + 40, height: b2.height + 50 } });
     }
-    L.done(11);
+    L.done(9); /* v153.3: S2's three strip checks are one absence check now */
   });
 }
 
