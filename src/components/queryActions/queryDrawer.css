@@ -74,7 +74,9 @@
 .qad-change { font: 400 8px var(--qad-mono); letter-spacing: .1em; color: var(--qad-ink45); cursor: pointer; background: none; border: 0; padding: 0; }
 
 /* ===== body, stepper, sections ===== */
-.qad-body { flex: 1; overflow: auto; background: #fff; padding: 0 24px 30px; }
+/* workspace width v2 (8 Nov): actions follow the content — the body hugs (grows to its content, shrinks and scrolls when
+   taller), so the footer sits directly under short content and pins to the foot of tall content. */
+.qad-body { flex: 0 1 auto; min-height: 0; overflow: auto; background: #fff; padding: 0 24px 30px; }
 .qad-stepper { position: sticky; top: 0; z-index: 5; background: #fff; display: flex; align-items: flex-start; padding: 16px 18px 12px; border-bottom: 1px solid var(--qad-hair); margin: 0 -24px; }
 .qad-stepper-sm { display: none; }
 .qad-stp { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: none; width: 64px; text-align: center; cursor: pointer; background: none; border: 0; padding: 0; font: inherit; color: inherit; }

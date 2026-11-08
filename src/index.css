@@ -311,6 +311,9 @@
   /* ⚠️ THE WORKING AREA'S CAP, READ BY THE DASHBOARD AND BY QUERY CENTRE. It was a literal in
      oneScreen.css; two pages agreeing by hand is two pages that agree until one is edited. */
   --work-max: 1660px;
+  /* Workspace width v2 (8 Nov): the ONE gutter of the workspace column, read with `--work-max` by the content column,
+     the masthead and the folded bar (workspacePageGrid.css) and by every workspace page outside that grid. */
+  --work-gutter: 32px;
   /**
    * THE TIMELINE'S RHYTHM (six fixes §6) — the marker's size and the ONE gap between events.
    *

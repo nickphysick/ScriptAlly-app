@@ -19,8 +19,9 @@
    `.d58-page` (v58's); the sheet's padding is the ref's 28px 32px around content capped at 1360px. */
 .d58[data-mode="d2"] { height: auto; }
 .d58[data-mode="d2"] .d58-page {
-  flex: none; box-sizing: border-box; width: 100%; max-width: calc(1360px + 64px); margin-inline: auto;
-  padding: 28px 32px 60px; font-family: var(--d58-serif); color: var(--d2-ink);
+  flex: none; box-sizing: border-box; width: 100%; max-width: var(--work-max); margin-inline: auto;
+  /* workspace width v2 (8 Nov): the workspace column — `--work-max` with `--work-gutter` inside it (index.css) */
+  padding: 28px var(--work-gutter) 60px; font-family: var(--d58-serif); color: var(--d2-ink);
 }
 .d58.d2 :is(p, span, div, button, small, b, time, li, em, label) { font-family: inherit; }
 

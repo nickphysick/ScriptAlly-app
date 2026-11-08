@@ -153,14 +153,21 @@ for (const vp of SIZES) {
 }
 
 /* ══ L2 header ══════════════════════════════════════════════════════════════════════════════════════════════════ */
-test("L2 · the header: title, stats, + Add a task; no priority line", async ({ page }) => {
+/* RE-POINTED (workspace width v2, 8 Nov): the navy card is gone. The header is one light row: the book's name (one
+   book) or "To-do list", a late pill (absent at 0), a to-do pill, + Add a task. "Cleared this week" left the header;
+   the Done tab and its intro still say it (L14). */
+test("L2 · the header: title, pills, + Add a task; no priority line", async ({ page }) => {
   await open(page, SIZES[1]);
   await mutate(page, "L2"); await mutate(page, "L3");
   const hd = page.locator(`${PG} [data-tws="header"]`);
-  await expect(hd.locator("h1")).toHaveText("Your to-do list");
-  const stats = ((await hd.locator('[data-tws="stats"]').textContent()) ?? "").replace(/\s+/g, " ").trim();
-  note(`L2${MUT ? `-${MUT}` : ""}`, { stats, text: await hd.textContent() });
-  expect(stats).toMatch(/(^|· )\d+ to do · \d+ late · \d+ cleared this week$/);
+  const title = ((await hd.locator("h1").textContent()) ?? "").trim();
+  const todo = ((await hd.locator('[data-tws="todo-pill"]').textContent()) ?? "").replace(/\s+/g, " ").trim();
+  const late = await hd.locator('[data-tws="late-pill"]').count() ? ((await hd.locator('[data-tws="late-pill"]').textContent()) ?? "").replace(/\s+/g, " ").trim() : null;
+  note(`L2${MUT ? `-${MUT}` : ""}`, { title, todo, late, text: await hd.textContent() });
+  expect(title.length, "the title row names the page or the book").toBeGreaterThan(0);
+  expect(todo).toMatch(/^\d+ to do$/);
+  if (late !== null) expect(late).toMatch(/^● [1-9]\d* late$/);
+  expect(await hd.textContent(), "the header no longer says how many were cleared").not.toMatch(/cleared/);
   await expect(hd.getByRole("button", { name: "+ Add a task" })).toBeVisible();
   const bad = await hd.evaluate((h) => [...h.querySelectorAll("*")].filter((e) => /highest priority|Start here/.test(e.textContent ?? "")).length);
   expect(bad, "nothing in the header says “highest priority” or “Start here”").toBe(0);
@@ -497,7 +504,7 @@ async function emuPut(path: string, o: Record<string, unknown>) {
 }
 const emuDel = (path: string) => fetch(`${EMU}/${path}`, { method: "DELETE", headers: OWNER });
 
-test("L14 · one count: the header and the Done tab both say how many were cleared this week, and nothing older shows", async ({ page }) => {
+test("L14 · one count: the Done tab and its intro both say how many were cleared this week, and nothing older shows", async ({ page }) => {
   test.setTimeout(120_000);
   await open(page, SIZES[1]);
   const uid = await page.evaluate(() => {
@@ -514,7 +521,6 @@ test("L14 · one count: the header and the Done tab both say how many were clear
   expect(a2, "two agents on the account").toBeTruthy();
   const now = Date.now();
   const paths = { done: `users/${uid}/tasks/td52-l14-done`, mine: `users/${uid}/taskFlags/td52-l14-this`, old: `users/${uid}/taskFlags/td52-l14-last` };
-  const hd = page.locator(`${PG} [data-tws="header"] [data-tws="stats"]`);
   const tabBtn = page.locator(`${PG} .tws-seg button`, { hasText: "Done" });
   const nOf = async (l: Locator) => Number(((await l.textContent()) ?? "").match(/(\d+) cleared this week|Done\s*(\d+)/)?.slice(1).find(Boolean) ?? NaN);
   try {
@@ -526,14 +532,14 @@ test("L14 · one count: the header and the Done tab both say how many were clear
     const list = page.locator(`${PG} [data-tws-done]`);
     await expect(page.locator(`${PG} [data-tws-done="task:td52-l14-done"]`)).toHaveCount(1, { timeout: 15_000 });
     await expect(page.locator(`${PG} [data-tws-done="flag-td52-l14-this"]`)).toHaveCount(1);
-    const header = await nOf(hd), tab = await nOf(tabBtn), rows = await list.count();
+    const tab = await nOf(tabBtn), rows = await list.count();
     const lastShown = await page.locator(`${PG} [data-tws-done="flag-td52-l14-last"]`).count();
     const intro = ((await page.locator(`${PG} .tws-note`).first().textContent()) ?? "").replace(/\s+/g, " ").trim();
-    note(`L14${MUT ? `-${MUT}` : ""}`, { header, tab, rows, lastShown, intro });
+    note(`L14${MUT ? `-${MUT}` : ""}`, { tab, rows, lastShown, intro });
     expect(lastShown, "last week's dismissal is not shown").toBe(0);
     expect(tab, "the Done tab's count is the rows it shows").toBe(rows);
-    expect(header, "the header says the same number as the Done tab").toBe(tab);
-    expect(intro).toBe(`${header} cleared this week. Anything you dismissed is here too, in case you change your mind.`);
+    /* workspace width v2: the header no longer states this count; the tab and its intro are the two that must agree */
+    expect(intro).toBe(`${tab} cleared this week. Anything you dismissed is here too, in case you change your mind.`);
     expect(rows, "with only the fixtures this week, the count is 2 (the harness snapshot holds nothing cleared this week)").toBe(2);
   } finally {
     await Promise.all(Object.values(paths).map(emuDel));

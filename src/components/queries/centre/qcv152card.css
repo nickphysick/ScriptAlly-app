@@ -80,7 +80,7 @@
 .qc152 .qc152-tabs button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 3px; }
 
 /* the tab body is the only thing that scrolls */
-.qc152 .qc152-in > .qc152-body { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.qc152 .qc152-in > .qc152-body { flex: 0 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; }
 
 /* §2.3 the thread */
 .qc152 .qc152-th { display: flex; flex-direction: column; padding: 6px 18px 14px; }
@@ -246,3 +246,7 @@
   .qc152 .qc152-th, .qc152 .qc152-th * { animation: none !important; }
   .qc152 .qc152-fx { transition: none; }
 }
+
+/* workspace width v2 (8 Nov): while reading, the card is as tall as its content, up to the height it always had, so the
+   footer follows the thread. A journey stepping inside keeps the full height (above): its shell is sized by the slot. */
+.spanel.qsp.qsp:not([data-step]):has(> .spanel-own > [data-qc152]) { height: auto; max-height: var(--qc152-h); }

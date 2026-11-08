@@ -643,13 +643,13 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     <div ref={rootRef} className="tws-root" data-tws="root">
       <WorkspacePageGrid className="tws-wpg" scrollLabel="To-do list" masthead={null}>
         <div className="tws" data-tws="page">
+          {/* Workspace width v2 (8 Nov): the slim title row — no card, no eyebrow. The book's name when the account has
+              one book (tasks span every book, so naming one over all of them would be false), else "To-do list"; the
+              late pill (hidden at 0) and the to-do pill read the same figures the old subline did. */}
           <header className="tws-hd" data-tws="header">
-            <div className="tws-ht">
-              <h1 className="tws-ttl" data-page-title>Your to-do list</h1>
-              <p className="tws-stats" data-tws="stats">
-                {statBook ? <>{statBook} · </> : null}<b>{seq.length}</b> to do · <b>{lateN}</b> late · <b>{clearedN}</b> cleared this week
-              </p>
-            </div>
+            <h1 className="tws-ttl" data-page-title>{statBook ?? "To-do list"}</h1>
+            {lateN ? <span className="tws-pl" data-k="late" data-tws="late-pill"><i aria-hidden="true">●</i> {lateN} late</span> : null}
+            <span className="tws-pl" data-tws="todo-pill">{seq.length} to do</span>
             <span className="tws-sp" />
             <button type="button" className="tws-addb" onClick={() => { setYay(null); setAdding(true); }}>+ Add a task</button>
           </header>

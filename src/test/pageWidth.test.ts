@@ -48,7 +48,7 @@ function widthDecls(body: string): string[] {
   for (const d of body.split(";")) if (d.includes("--hsheet-w") && !hits.includes(d.trim())) hits.push(d.trim());
   /* a horizontal padding on a page root replaces the shared gutter, unless it is the gutter itself */
   const PAD = /(?:^|;|\s)(padding|padding-inline|padding-left|padding-right)\s*:\s*([^;]*)/g;
-  while ((m = PAD.exec(body))) if (!m[2].includes("var(--page-gutter)")) hits.push(`${m[1]}: ${m[2].trim()}`);
+  while ((m = PAD.exec(body))) if (!m[2].includes("var(--work-gutter)")) hits.push(`${m[1]}: ${m[2].trim()}`);
   return hits;
 }
 
@@ -63,9 +63,11 @@ const ROOTS: { file: string; sel: RegExp }[] = [
   { file: "src/components/todo/ws/todoWs.css", sel: /^\.tws$/ },
 ];
 /** Roots that sit straight in the scroller and must not override the shared rule anywhere in the tree. */
-const SCROLLER_ROOTS = ["qcv-group", "rsp-page", "a17-page", "clv-group", "dv1-page", "vv2", "cpv-page", "tws", "cb2-page"];
-/** §0.3's flagged pages, which keep their own widths: Submission packages, Dashboard, Manuscripts, Settings, Help, Plans. */
-const ALLOWED = ["p6", "p41", "msv12-root", "ms21", "ms27", "d58", "acct-page", "hc", "sv2-focuscol"];
+const SCROLLER_ROOTS = ["qcv-group", "rsp-page", "a17-page", "clv-group", "dv1-page", "vv2", "cpv-page", "tws", "cb2-page", "ms27"];
+/** Workspace width v2 (8 Nov): Manuscripts (`ms27`) and the Dashboard joined the column. Still on the list: Submission
+ *  packages (it keeps a right-hand clearance for its fixed corner hawk), the older Manuscripts roots, and the reading
+ *  pages (Settings, Help, Plans). */
+const ALLOWED = ["p6", "p41", "msv12-root", "ms21", "d58", "acct-page", "hc", "sv2-focuscol"];
 
 function cssFiles(dir: string): string[] {
   return readdirSync(dir).flatMap((n) => {
@@ -75,14 +77,21 @@ function cssFiles(dir: string): string[] {
 }
 
 describe("PW1 W5 — one column, stated once", () => {
-  it("the shared rule reads the two tokens, 1256 and 40", () => {
+  /* RE-POINTED (workspace width v2, 8 Nov): the column is `--work-max` (1660) with `--work-gutter` (32) inside it, both
+     stated once at :root in index.css. The law is page width v1's — one column, the gutter inside the cap, read by the
+     three rules and never restated; 1256 / 40 survive only as the reading column (`--read-cap` / `--read-gutter`). */
+  it("the shared rule reads the two workspace tokens, 1660 and 32", () => {
+    const root = read("src/index.css");
+    expect(root).toMatch(/--work-max:\s*1660px;/);
+    expect(root).toMatch(/--work-gutter:\s*32px;/);
     const css = read("src/components/shell/workspacePageGrid.css");
-    expect(css).toMatch(/:root\s*\{[^}]*--page-cap:\s*1256px;[^}]*--page-gutter:\s*40px;/);
+    expect(css).toMatch(/:root\s*\{[^}]*--read-cap:\s*1256px;[^}]*--read-gutter:\s*40px;/);
+    expect(css, "a second definition of the workspace tokens").not.toMatch(/--work-(max|gutter)\s*:/);
     const shared = rules(css).filter((r) => /^\.wpg-scroll > \*$|^\.wpg-toolband > \.wpg-tools$|\.wpg-chrome > \.wpg-mast/.test(r.sel));
     expect(shared.length).toBe(3);
     for (const r of shared) {
-      expect(r.body, r.sel).toContain("max-width: calc(var(--page-cap) + var(--page-gutter) * 2)");
-      expect(r.body, r.sel).toContain("padding-inline: var(--page-gutter)");
+      expect(r.body, r.sel).toContain("max-width: var(--work-max)");
+      expect(r.body, r.sel).toContain("padding-inline: var(--work-gutter)");
     }
     expect(css).not.toMatch(/max-width:\s*1360px|3\.2vw/);
   });
@@ -112,6 +121,6 @@ describe("PW1 W5 — one column, stated once", () => {
   });
 
   it("the flagged pages are the only ones on the allow-list", () => {
-    expect(ALLOWED).toEqual(["p6", "p41", "msv12-root", "ms21", "ms27", "d58", "acct-page", "hc", "sv2-focuscol"]);
+    expect(ALLOWED).toEqual(["p6", "p41", "msv12-root", "ms21", "d58", "acct-page", "hc", "sv2-focuscol"]);
   });
 });

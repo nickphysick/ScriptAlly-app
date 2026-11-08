@@ -38,14 +38,16 @@
 
 /* the card: AgentPaperCard, framed, filling the height — white, padding 10, radius 22, the frame inside it */
 .cl262-card {
-  box-sizing: border-box; height: 100%; display: flex; flex-direction: column; padding: 10px; border-radius: 22px; background: #fff;
+  box-sizing: border-box; height: auto; max-height: 100%; display: flex; flex-direction: column; padding: 10px; border-radius: 22px; background: #fff;
   box-shadow: 0 0 0 1px rgba(28, 19, 15, .08), 0 40px 70px -30px rgba(28, 19, 15, .55), 0 12px 24px -16px rgba(28, 19, 15, .35);
 }
 .cl262-card > .cl262-frame, .cl262-card.apc > .apc-frame {
-  position: relative; flex: 1 1 auto; min-height: 0; box-sizing: border-box; display: flex; flex-direction: column;
+  position: relative; flex: 0 1 auto; min-height: 0; box-sizing: border-box; display: flex; flex-direction: column;
   border: 1px solid #a5837b; border-radius: 13px; overflow: hidden; background: #fff;
 }
-.cl262-frame > .cl262-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+/* workspace width v2 (8 Nov): actions follow the content — the body hugs (grows to its content, shrinks and scrolls when
+   taller), so the footer sits directly under short content and pins to the foot of tall content. */
+.cl262-frame > .cl262-scroll { flex: 0 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
 /* the editor the card hands over to (until Part C) straightens it too */
 .cl262-lean:has([data-cl24="agent-card"][data-editing]) { transform: rotate(0deg); }
 

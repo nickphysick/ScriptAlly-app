@@ -29,13 +29,16 @@
   .pk39-wpg > .wpg-scroll > .p6.p41:not(.p6-new) {
     box-sizing: border-box;
     width: 100%;
-    max-width: 1288px;
+    /* workspace width v2 (8 Nov): the workspace column (index.css `--work-max` / `--work-gutter`); the old 1288 cap is
+       gone. ⚠️ THE RIGHT SIDE KEEPS ITS CLEARANCE FOR THE FIXED CORNER HAWK (Pk41Hawk, bottom-right of the sheet): the
+       150 it always had, now stated as the gutter plus the hawk's own 118, so nothing in the flow runs under him. */
+    max-width: var(--work-max);
     margin: 0 auto;
-    padding: 30px 150px 96px 40px;
+    padding: 30px calc(var(--work-gutter) + 118px) 96px var(--work-gutter);
   }
 }
 @media (min-width: 768px) and (max-width: 1400px) {
-  .pk39-wpg > .wpg-scroll > .p6.p41:not(.p6-new) { padding-left: 36px; }
+  /* (workspace width v2: the ≤1400 36px left inset is retired — the workspace gutter is one value) */
 }
 
 /* ══ B · THE FOUNDING WRITER STRIP (ref option D, `.k4-fbf`; screens 01, 13) ═════════════════════════════════════════
@@ -50,7 +53,7 @@
   }
   .p41-fb .p41-fb-in {
     box-sizing: border-box; display: flex; align-items: center; gap: 14px; min-height: 56px;
-    max-width: 1288px; margin: 0 auto; padding: 8px 40px;
+    max-width: var(--work-max); margin: 0 auto; padding: 8px var(--work-gutter);
   }
   .p41-fb .p41-fb-img { flex: none; width: 30px; height: auto; margin: -6px 0 -8px; filter: drop-shadow(0 3px 4px rgba(28, 19, 15, 0.18)); }
   .p41-fb .p41-fb-tag {

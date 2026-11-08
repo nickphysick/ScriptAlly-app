@@ -45,7 +45,13 @@
 /* 28 under the panel. ⚠️ THE GAP UNDER A HEADER IS THE GRID'S ALONE (its spacer's height): the page
    sets the grid's own token and adds no margin of its own, which would simply add to it. Two classes,
    because `.wpg` declares the token on this same element. */
-.impg.impg-wpg { --wpg-chrome-gap: 28px; }
+.impg.impg-wpg {
+  --wpg-chrome-gap: 28px;
+  /* workspace width v2: Import is a READING page (step by step), so it keeps the narrow column it had — the read
+     pair, never the workspace's 1660 / 32 (workspacePageGrid.css :root). */
+  --work-max: calc(var(--read-cap) + 2 * var(--read-gutter));
+  --work-gutter: var(--read-gutter);
+}
 
 /* Below 1080 of window the tiles stack. A container query on the tiles' own column: the sidebar
    collapses, so the window's width says nothing about the column's. 755px is the column at a

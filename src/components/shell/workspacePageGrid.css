@@ -50,8 +50,8 @@
    * content inside whatever container the page already uses, so it cannot drift from the work at any
    * viewport — there is no second number to keep in step, and no escape to get wrong.
    */
-  /* the masthead's own gutter — one value, every page, overridden by nothing */
-  --mast-gutter: 35px;
+  /* ⚠️ `--mast-gutter` IS RETIRED (workspace width v2): the masthead, the folded bar and the content all read
+     `--work-gutter` (index.css) — one gutter for the three. */
   /* ⚠️ `--mast-wash-top` / `--mast-wash-bottom` ARE DELETED. The masthead's parchment band went
      when one format replaced the two; the tokens outlived it by five phases, declared and read by
      nothing, which is a knob the next reader goes looking for a use for. Swept for READS, not
@@ -476,9 +476,15 @@
  * `clamp(28px, 3.2vw, 52px)`, which was 41 at a 1280 window and 48 at 1512; `--page-cap` keeps the 1256 that clamp
  * gave past the cap (1360 − 2 × 52). Pages with their own width are listed in tests/e2e/pageWidth.measure.ts.
  */
+/**
+ * ⚠️ SUPERSEDED BY WORKSPACE WIDTH v2 (8 Nov): every WORKSPACE page now takes `--work-max` (1660) with `--work-gutter`
+ * (32) inside it — both stated once at :root in index.css and read, never restated, by the three rules below. The
+ * 1256/40 column survives only as the READING column for the step-by-step pages that mount this grid (Import), which
+ * set `--work-max` / `--work-gutter` from these two on their own root, so they measure exactly as before.
+ */
 :root {
-  --page-cap: 1256px;
-  --page-gutter: 40px;
+  --read-cap: 1256px;
+  --read-gutter: 40px;
 }
 .wpg-scroll > * {
   /**
@@ -536,8 +542,8 @@
    * the sidebar collapsed.
    */
   box-sizing: border-box;
-  max-width: calc(var(--page-cap) + var(--page-gutter) * 2);
-  padding-inline: var(--page-gutter);
+  max-width: var(--work-max);
+  padding-inline: var(--work-gutter);
   margin-inline: auto;
 }
 /**
@@ -802,8 +808,8 @@
   /* §2 — the toolband's inner takes the same column, so a page's controls line up with its content */
   box-sizing: border-box;
   width: 100%;
-  max-width: calc(var(--page-cap) + var(--page-gutter) * 2);
-  padding-inline: var(--page-gutter);
+  max-width: var(--work-max);
+  padding-inline: var(--work-gutter);
   margin-inline: auto;
 }
 /* ⚠️ ONE SUBJECT NOW — the masthead lives inside the slab, and `.wpg-scroll > .wpg-mast` is kept
@@ -830,8 +836,8 @@
    */
   box-sizing: border-box;
   width: 100%;
-  max-width: calc(var(--page-cap) + var(--page-gutter) * 2);
-  padding-inline: var(--page-gutter);
+  max-width: var(--work-max);
+  padding-inline: var(--work-gutter);
   margin-inline: auto;
 }
 .wpg-mast {
@@ -986,7 +992,10 @@
 .wpg-barin {
   width: 100%;
   margin-inline: auto;
-  max-width: min(var(--work-max), calc(100% - 2 * var(--mast-gutter)));
+  /* workspace width v2: the content column's two tokens, so this edge IS the content's */
+  box-sizing: border-box;
+  max-width: var(--work-max);
+  padding-inline: var(--work-gutter);
   display: flex;
   align-items: center;
   gap: 11px;
@@ -1126,14 +1135,17 @@
  * card grids to keep in step the first time the treatment moved.
  */
 .qc-cards {
-  padding: 22px var(--mast-gutter) 40px;
+  padding-block: 22px 40px;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 15px;
   /* the same measure the masthead takes, so the cards begin under the title at every width */
   width: 100%;
   margin-inline: auto;
-  max-width: min(var(--work-max), calc(100% - 2 * var(--mast-gutter)));
+  /* workspace width v2: the content column's two tokens, so this edge IS the content's */
+  box-sizing: border-box;
+  max-width: var(--work-max);
+  padding-inline: var(--work-gutter);
   box-sizing: border-box;
 }
 .qc-card {

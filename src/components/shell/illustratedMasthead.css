@@ -66,7 +66,7 @@
  * makes one declaration correct on both the gradient and the mask.
  */
 .wpg.pkgw-wpg {
-  --illo-gutter: max(var(--mast-gutter), (100% - var(--work-max)) / 2);
+  --illo-gutter: calc(max(0px, (100% - var(--work-max)) / 2) + var(--work-gutter)); /* workspace width v2: the column's inset, from its two tokens */
   /* Rule 1 · the reveal opens 60px past the last glyph and is fully open 430px later */
   --illo-reveal-a: calc(var(--illo-gutter) + var(--illo-text-right) + 60px);
   --illo-reveal-b: calc(var(--illo-reveal-a) + 490px);
