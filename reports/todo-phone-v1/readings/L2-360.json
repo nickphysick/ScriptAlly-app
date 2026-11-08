@@ -1,0 +1,32 @@
+{
+ "desk": {
+  "todo": 103,
+  "late": 29,
+  "cleared": 0,
+  "start": "Answering Tom’s offer from Ellery & Finch",
+  "groups": [
+   "Agents are waiting",
+   "Nudges",
+   "Gone quiet",
+   "Housekeeping",
+   "Your tasks"
+  ]
+ },
+ "phone": {
+  "todo": {
+   "n": 103,
+   "on": true,
+   "text": "103to do · 29 late"
+  },
+  "snoozed": {
+   "n": 0,
+   "on": false,
+   "text": "0snoozed"
+  },
+  "done": {
+   "n": 0,
+   "on": false,
+   "text": "0done this week"
+  }
+ }
+}

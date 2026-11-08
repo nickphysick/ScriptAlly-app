@@ -1,0 +1,119 @@
+{
+ "send": {
+  "desk": [
+   "mats",
+   "ver",
+   "date"
+  ],
+  "phone": [
+   "mats",
+   "ver",
+   "date"
+  ],
+  "held": true,
+  "pill": [
+   true,
+   true,
+   true
+  ]
+ },
+ "offer": {
+  "desk": [
+   "ans",
+   "withdraw",
+   "date"
+  ],
+  "phone": [
+   "ans",
+   "withdraw",
+   "date"
+  ],
+  "held": true,
+  "pill": [
+   true,
+   true,
+   true
+  ]
+ },
+ "rr": {
+  "desk": [
+   "mats",
+   "ver",
+   "date"
+  ],
+  "phone": [
+   "mats",
+   "ver",
+   "date"
+  ],
+  "held": true,
+  "pill": [
+   true,
+   true,
+   true
+  ]
+ },
+ "nudge": {
+  "desk": [
+   "sent",
+   "date"
+  ],
+  "phone": [
+   "sent",
+   "date"
+  ],
+  "held": true,
+  "pill": [
+   true,
+   true
+  ]
+ },
+ "quiet": {
+  "desk": [
+   "act",
+   "sent",
+   "date"
+  ],
+  "phone": [
+   "act",
+   "sent",
+   "date"
+  ],
+  "held": true,
+  "pill": [
+   true,
+   true,
+   true
+  ]
+ },
+ "batch": {
+  "desk": [
+   "mats"
+  ],
+  "phone": [
+   "mats"
+  ],
+  "held": true,
+  "pill": [
+   true
+  ]
+ },
+ "fix": {
+  "desk": [
+   "wk"
+  ],
+  "phone": [
+   "wk"
+  ],
+  "held": true,
+  "pill": [
+   true
+  ]
+ },
+ "own": {
+  "desk": [],
+  "phone": [],
+  "held": true,
+  "pill": []
+ }
+}
